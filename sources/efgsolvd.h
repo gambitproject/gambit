@@ -4,14 +4,46 @@
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
 // $Id$
-#define SD_CANCEL			-1
-#define SD_SOLVE			1
-#define	SD_ALGORITHM 	2
-#define SD_INSPECT 		3
-
 #include "nfgsolvd.h"
 
-class EfgSolveParamsDialog: public NfgAlgorithmList
+class EfgSolveSettings
+{
+protected:
+	Bool use_nfg,normal,subgames;
+	int algorithm;
+	char *defaults_file;
+	int result;
+public:
+	EfgSolveSettings(void)
+	{
+	result=SD_SAVE;
+	defaults_file="gambit.ini";
+	wxGetResource(SOLN_SECT,"Use-Nfg",&use_nfg,defaults_file);
+	char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
+	wxGetResource(SOLN_SECT,alg_sect,&algorithm,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Nfg",&normal,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Mark-Subgames",&subgames,defaults_file);
+	}
+	~EfgSolveSettings()
+	{
+	if (result!=SD_CANCEL)
+	{
+		wxWriteResource(SOLN_SECT,"Use-Nfg",use_nfg,defaults_file);
+		char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
+		wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Nfg",normal,defaults_file);
+	}
+	}
+	bool UseNF(void)
+	{	return use_nfg;	}
+	EfgSolutionT GetEfgAlgorithm(void)
+	{assert(!UseNF() && "Wrong type: use Nfg");return algorithm;}
+	NfgSolutionT GetNfgAlgorithm(void)
+	{assert(UseNF() && "Wrong type: use Efg");return algorithm;}
+  bool MarkSubgames(void) {return subgames;}
+};
+
+class EfgSolveParamsDialog: public NfgAlgorithmList, public EfgSolveSettings
 {
 private:
 	wxDialogBox *d;
@@ -19,57 +51,39 @@ private:
 	wxRadioBox *efg_algorithm_box;
 	wxRadioBox *nfg_algorithm_box;
 	wxCheckBox *normal_box,*use_nfg_box;
-	int result,algorithm,normal;
 	gBlock<int> solns;
-	enum {useEFG,useNFG} use;
 	// Event Handlers: low level
 	static void use_nfg_func(wxCheckBox &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnUseNF(ob.GetValue());}
-	static void solve_button_func(wxButton &ob,wxEvent &)
-	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SOLVE);}
-	static void inspect_button_func(wxButton &ob,wxEvent &)
-	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_INSPECT);}
+	static void params_button_func(wxButton &ob,wxEvent &)
+	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_PARAMS);}
+	static void save_button_func(wxButton &ob,wxEvent &)
+	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SAVE);}
 	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
 	static void algorithm_box_func(wxRadioBox &ob,wxEvent &)
-	{((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
+	{/*((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);*/}
 	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SOLVE_HELP);}
 	// Event handlers: high level
 	void OnEvent(int event)
 	{
-	algorithm=(use==useEFG) ? efg_algorithm_box->GetSelection() : nfg_algorithm_box->GetSelection();
-	algorithm+=(use==useEFG) ? 0 : EFG_NUM_SOLUTIONS;
-	if (event!=SD_ALGORITHM)	// one of the buttons
-	{
-		result=event;
-		normal=normal_box->GetValue();
-		d->Show(FALSE);
+	algorithm=(use_nfg) ? nfg_algorithm_box->GetSelection() : efg_algorithm_box->GetSelection();
+	result=event;
+	normal=normal_box->GetValue();
+	d->Show(FALSE);
 	}
-	else	// new efg_algorithm selected
-		inspect_button->Enable(solns.Contains(algorithm));
-	}
-	void OnUseNF(Bool u)
+	void OnUseNF(Bool usenf)
 	{
-	if (u)
-	{
-		nfg_algorithm_box->wxWindow::Enable(TRUE);
-		efg_algorithm_box->wxWindow::Enable(FALSE);
-		use=useNFG;
-	}
-	else
-	{
-		nfg_algorithm_box->wxWindow::Enable(FALSE);
-		efg_algorithm_box->wxWindow::Enable(TRUE);
-		use=useEFG;
-	}
+	nfg_algorithm_box->wxWindow::Enable(usenf);
+	efg_algorithm_box->wxWindow::Enable(!usenf);
+	use_nfg=usenf;
 	}
 
 public:
 	EfgSolveParamsDialog(const gBlock<int> &got_solns,int have_nfg,int num_players,wxWindow *parent=0):
 				solns(got_solns)
 	{
-		use=useEFG;
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 
 		char *efg_algorithm_list[EFG_NUM_SOLUTIONS];
@@ -82,7 +96,6 @@ public:
 
 		nfg_algorithm_box=MakeNfgAlgorithmList(num_players,d,(wxFunction)algorithm_box_func);
 		nfg_algorithm_box->SetClientData((char *)this);
-		nfg_algorithm_box->wxWindow::Enable(FALSE);
 		d->NewLine();
 
 		normal_box=new wxCheckBox(d,0,"Normal Form");
@@ -90,28 +103,34 @@ public:
 		use_nfg_box=new wxCheckBox(d,(wxFunction)use_nfg_func,"Use NF");
 		use_nfg_box->SetClientData((char *)this);
 		d->NewLine();
-		solve_button=new wxButton(d,(wxFunction)solve_button_func,"Solve");
+		solve_button=new wxButton(d,(wxFunction)params_button_func,"Params");
 		solve_button->SetClientData((char *)this);
-		inspect_button=new wxButton(d,(wxFunction)inspect_button_func,"Look");
+		inspect_button=new wxButton(d,(wxFunction)save_button_func,"Save");
 		inspect_button->SetClientData((char *)this);
 		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		(void)new wxButton(d,(wxFunction)help_button_func,"?");
-		if (num_players!=2)
+		if (num_players!=2) // disable algorithms that can not work w/ this game
 		{
 			efg_algorithm_box->Enable(EFG_LCP_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_LCP_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_LP_SOLUTION,FALSE);
+			nfg_algorithm_box->Enable(NFG_ENUMMIXED_SOLUTION,FALSE);
 		}
-		OnEvent(SD_ALGORITHM);
+		// set the defaults
+		nfg_algorithm_box->wxWindow::Enable(use_nfg);
+		efg_algorithm_box->wxWindow::Enable(!use_nfg);
+		((use_nfg) ? nfg_algorithm_box : efg_algorithm_box)->SetSelection(algorithm);
+		use_nfg_box->SetValue(use_nfg);
+
+		//OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);
 	}
-	~EfgSolveParamsDialog(void)
-	{delete d;}
-	// If we use the EF, it just returns the alg #, otherwise, it returns the alg#
-	// +EFG_NUM_SOLUTIONS
-	bool UseNF(void) {return use==useNFG;}
-	EfgSolutionT GetEfgAlgorithm(void) {assert(!UseNF() && "Wrong type: use Nfg");return algorithm;}
-	NfgSolutionT GetNfgAlgorithm(void) {assert(UseNF() && "Wrong type: use Efg");return algorithm-EFG_NUM_SOLUTIONS;}
+	// Destructor
+	~EfgSolveParamsDialog(void)	{delete d;}
+	// Data access
 	int GetResult(void) {return result;}
 };
+
 

@@ -37,6 +37,11 @@
 // call wxMenuBar *tmp_bar=MakeMenuBar();
 // add your menus, call SetMenuBar(tmp_bar);
 
+// Toolbar:
+// Basic toolbar functionality is provided for.  A wxToolBar *toolbar member
+// can be assigned to to add a toolbar to the canvas.  The OnSize function will
+// take this into consideration and allocate some space for it.
+
 // The physical dimentions of each data cell can be controlled by the
 // user.  Each column can have a different width and all rows have the
 // same height.  The size can be measured in either screen pixels or be
@@ -52,7 +57,7 @@
 // are declared virtual for easy overiding.  Note that you can overide
 // OnMenuCommand, OnCharNew (this receives events from the active canvas),
 // OnSize, OnOk, OnCancel, OnDoubleClick (Ctrl-Click in X), and some others.
- 
+
 // Note: on some platforms (msw,motif?), after any item on the panel has been
 // accessed, the keyboard focus switches to the panel.  This can cause
 // undesirable behavior (i.e. can not enter data, arrow keys do not work). It
@@ -85,7 +90,6 @@
 #define	DEFAULT_ROW_HEIGHT	30
 #define	DEFAULT_COL_WIDTH		6
 #define MIN_BUTTON_SPACE		60
-#define MIN_MENU_SPACE                  550
 #define	ROW_LABEL_WIDTH			30
 #define	COL_LABEL_HEIGHT		30
 #define	COL_WIDTH_UNIT			10
@@ -422,7 +426,7 @@ public:
 // Feature control constants: the low byte is used by the panel/buttons,
 // and the high byte is used by the menubar/menus
 #include "sprconst.h"
-
+class wxToolBar;
 class SpreadSheet3D: public wxFrame
 {
 friend gOutput &operator<<(gOutput &op,const SpreadSheet3D &s);
@@ -450,6 +454,7 @@ private:
 	static void spread_options_func(wxButton &ob,wxEvent &ev);
 	static void spread_help_func(wxButton &ob,wxEvent &ev);
 protected:
+	wxToolBar	*toolbar;
 	wxPanel *Panel(void) {return panel;}
 	wxMenuBar *MenuBar(void) {return menubar;}
 	virtual wxMenuBar *MakeMenuBar(long menus);

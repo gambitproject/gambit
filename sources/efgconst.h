@@ -13,6 +13,11 @@
 #define	FILE_CLOSE							1050
 #define	FILE_LOG								1055
 
+#define BUILD_NODE							900
+#define BUILD_ACTIONS						910
+#define	BUILD_INFOSET						920
+#define	BUILD_TREE							930
+
 #define NODE_OUTCOME_OUTCOME		1100
 #define NODE_OUTCOME_DIALOG			1101
 #define NODE_INSERT_PLYRNUM     1102
@@ -49,6 +54,7 @@
 #define SUBGAME_COLLAPSEONE				1356
 #define SUBGAME_COLLAPSEALL				1358
 #define SUBGAME_EXPANDONE					1360
+#define	SUBGAME_EXPANDBRANCH			1361 
 #define SUBGAME_EXPANDALL					1362
 #define SUBGAME_TOGGLE						1364
 #define SUBGAME_SET							1366
@@ -66,6 +72,12 @@
 #define SOLVE_SOLVE_NORMAL			1504
 #define SOLVE_FEATURES					1505
 #define SOLVE_SUPPORTS					1510
+#define	SOLVE_SETTINGS					1520		// settings submenu
+#define	SOLVE_ALGORITHM					1522
+#define	SOLVE_DOMINANCE					1524
+#define	SOLVE_SUBGAMES					1526
+#define	SOLVE_STANDARD					1540		// standard submenu
+#define	SOLVE_S_ALLNASH					1541
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601

@@ -1,18 +1,22 @@
 // File: nfgconst.h -- defines various constants for NormShow menu events
-// @(#)nfgconst.h	1.1 7/4/95
+// $Id$
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
 // must make sure it none of the menus are a power of two
 #define NFG_SOLVE_SOLVE_MENU				100
 #define NFG_SOLVE_INSPECT_MENU			101
-#define NFG_SOLVE_PAYOFF_MENU				102 // this is not a real menu=DoubleClick
 #define	NFG_SOLVE_REMOVE_MENU				103
 #define NFG_SOLVE_COMPRESS_MENU			104
 #define NFG_SOLVE_SUPPORTS_MENU			105
+#define NFG_SOLVE_FEATURES_MENU			110
+#define NFG_SOLVE_ALGORITHM_MENU		120
+#define NFG_SOLVE_DOMINANCE_MENU		130
+#define NFG_SOLVE_SETTINGS_MENU			135
+#define	NFG_SOLVE_S_ALLNASH_MENU		140
+#define	NFG_SOLVE_STANDARD_MENU			145
 
 #define NFG_DISPLAY_COLORS					200
-#define NFG_DISPLAY_OPTIONS					201
 #define NFG_DISPLAY_ACCELS					202
 
 #define NFG_LABEL_GAME							300
@@ -21,6 +25,8 @@
 
 #define NFG_FILE_SAVE								250
 
+#define	NFG_ACCL_PAYOFF       			400		// these are not real menus, just accels
+#define NFG_ACCL_NEXT_PAYOFF				410
 // Help system
 #define NFG_GUI_HELP							"Normal Form GUI"
 #define NFG_FEATURES_HELP					"Normal Form Features"

@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
+#ifdef wx_msw
+#include "wx_bbar.h"
+#else
+#include "wx_tbar.h"
+#endif
 #pragma		hdr_stop
 #include	"general.h"
 #include 	"wxmisc.h"
@@ -19,7 +24,7 @@ wxPen		*s_white_pen;
 wxBrush	*s_white_brush;
 wxBrush *s_hilight_brush;
 
-gOutput &operator<<(gOutput &op,const SpreadSheet3D &s) {return op;}
+gOutput &operator<<(gOutput &op,const SpreadSheet3D &) {return op;}
 gOutput &operator<<(gOutput &op,const SpreadSheet &s) {s.Dump(op); return op;}
 gOutput &operator<<(gOutput &op,const SpreadDataCell &c) {op<<c.value; return op;}
 
@@ -100,8 +105,7 @@ delete options_dialog;delete col_str;
 parent->Redraw();
 }
 
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheetDrawSettings::spread_options_lfont_func(wxButton	&ob,wxEvent &ev)
+void	SpreadSheetDrawSettings::spread_options_lfont_func(wxButton &ob,wxEvent &)
 {
 SpreadSheetDrawSettings  *draw_settings=(SpreadSheetDrawSettings *)ob.GetClientData();
 FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetLabelFont());
@@ -110,8 +114,8 @@ if (f->Completed()==wxOK)
 delete f;
 }
 
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheetDrawSettings::spread_options_dfont_func(wxButton	&ob,wxEvent &ev)
+
+void	SpreadSheetDrawSettings::spread_options_dfont_func(wxButton &ob,wxEvent &)
 {
 SpreadSheetDrawSettings *draw_settings=(SpreadSheetDrawSettings *)ob.GetClientData();
 FontDialogBox *f=new FontDialogBox(NULL,draw_settings->GetDataFont());
@@ -852,6 +856,7 @@ draw_settings=(drs) ? drs : new SpreadSheetDrawSettings(this,cols);
 draw_settings->SetParent(this);
 data_settings=(dts) ? dts : new SpreadSheetDataSettings;
 // Initialize local variables
+toolbar=0;
 completed=wxRUNNING;
 editable=TRUE;
 levels=_levels;
@@ -942,27 +947,26 @@ switch (id)
 	default: wxMessageBox("Unknown"); break;
 }
 }
-#pragma argsused		// turn off the _w,_h not used message
-void SpreadSheet3D::OnSize(int _w,int _h)
+
+
+void SpreadSheet3D::OnSize(int ,int )
 {
 int w,h;
+int toolbar_height=(toolbar) ? 40 : 0;
 GetClientSize(&w, &h);
+if (toolbar) toolbar->SetSize(0,0,w,toolbar_height);
 if (panel) panel->SetSize(0,h-DrawSettings()->PanelSize(),w,DrawSettings()->PanelSize());
 //for (int i=1;i<=data.Length();i++) data[i].CheckSize();
 for (int i=1;i<=levels;i++)
 {
-	data[i].SetSize(0,0,w,h-DrawSettings()->PanelSize());
+	data[i].SetSize(0,toolbar_height,w,h-DrawSettings()->PanelSize()-toolbar_height);
 	data[i].CheckSize();
 }
 }
 
 // Callback functions
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_ok_func(wxButton	&ob,wxEvent &ev)
-{
-	SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
-	parent->OnOk();
-}
+void	SpreadSheet3D::spread_ok_func(wxButton	&ob,wxEvent &)
+{((SpreadSheet3D *)ob.GetClientData())->OnOk();}
 void SpreadSheet3D::OnOk(void)
 {
 	SetCompleted(wxOK);
@@ -994,20 +998,20 @@ if (od.Completed()==wxOK)
 }
 }
 
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_print_func(wxButton	&ob,wxEvent &ev)
+
+void	SpreadSheet3D::spread_print_func(wxButton	&ob,wxEvent &)
 {((SpreadSheet3D *)ob.GetClientData())->OnPrint();}
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_cancel_func(wxButton	&ob,wxEvent &ev)
-{((SpreadSheet3D *)ob.GetClientData())->OnCancel();}
-#pragma argsused		// turn off the ev not used message
-void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &ev)
+
+void	SpreadSheet3D::spread_cancel_func(wxButton	&ob,wxEvent &)
+{((SpreadSheet3D *)ob.GetClientData())->OnCancel();}  
+
+void SpreadSheet3D::spread_slider_func(wxSlider &ob,wxCommandEvent &)
 {((SpreadSheet3D *)ob.GetClientData())->SetLevel(ob.GetValue());}
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_help_func(wxButton	&ob,wxEvent &ev)
+
+void	SpreadSheet3D::spread_help_func(wxButton	&ob,wxEvent &)
 {((SpreadSheet3D *)ob.GetClientData())->OnHelp();}
-#pragma argsused		// turn off the ev not used message
-void	SpreadSheet3D::spread_change_func(wxButton	&ob,wxEvent &ev)
+
+void	SpreadSheet3D::spread_change_func(wxButton	&ob,wxEvent &)
 {
 SpreadSheet3D *parent=(SpreadSheet3D *)ob.GetClientData();
 // Create the Grow/Shrink dialog box
@@ -1128,19 +1132,18 @@ if (draw_settings->ColLabels())
 void SpreadSheet3D::Resize(void)
 {
 int w,h,w1=0,h1=0;
+int toolbar_height=(toolbar) ? 40 : 0;
+
 data[cur_level].GetSize(&w,&h);
 if (panel)
 {
 	Panel()->Fit();Panel()->GetSize(&w1,&h1);
 	w=gmax(w,w1);
-	#ifdef wx_xview
-	w=gmax(w,MIN_MENU_SPACE); // need this to fit a menu under xview
-	#endif
 	h1=gmax(h1,MIN_BUTTON_SPACE);
-	Panel()->SetSize(0,h,w,h1);
+	Panel()->SetSize(0,h+toolbar_height,w,h1);
 }
 DrawSettings()->SetPanelSize(h1);
-SetClientSize(w,h+h1);
+SetClientSize(w,h+h1+toolbar_height);
 }
 
 

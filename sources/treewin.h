@@ -88,6 +88,7 @@ public:
 	virtual void UpdateCursor(const NodeEntry *entry);
 };
 
+class OutcomeDialog;
 class BaseTreeWindow: public TreeRender
 {
 friend class ExtensivePrintout;
@@ -95,14 +96,12 @@ public:
 typedef struct SUBGAMEENTRY {
 					const Node *root;
 					bool expanded;
-					int  subgame_y;
-					SUBGAMEENTRY(void):root(0),expanded(true),subgame_y(-1) { }
-					SUBGAMEENTRY(const Node *r,bool e=true):root(r),expanded(e),
-																									subgame_y(-1) { }
+					SUBGAMEENTRY(void):root(0),expanded(true) { }
+					SUBGAMEENTRY(const Node *r,bool e=true):root(r),expanded(e) { }
 					SUBGAMEENTRY(const SUBGAMEENTRY &s):root(s.root),
-														expanded(s.expanded),subgame_y(s.subgame_y) { }
+														expanded(s.expanded) { }
 					SUBGAMEENTRY &operator=(const SUBGAMEENTRY &s)
-						{root=s.root;expanded=s.expanded;subgame_y=s.subgame_y; return (*this);}
+						{root=s.root;expanded=s.expanded;return (*this);}
 					// need these to make a list
 					int operator==(const SUBGAMEENTRY &s) {return (s.root==root);}
 					int operator!=(const SUBGAMEENTRY &s) {return (s.root!=root);}
@@ -141,6 +140,7 @@ protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
 	Bool		outcomes_changed;
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
+	OutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
 public:
 	virtual double 	ProbAsDouble(const Node *n,int action) const =0;
 	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
@@ -187,9 +187,10 @@ public:
 	void subgame_collapse_one(void);
 	void subgame_collapse_all(void);
 	void subgame_expand_one(void);
+  void subgame_expand_branch(void);
 	void subgame_expand_all(void);
 	void subgame_toggle(void);
-   void subgame_set(void);
+	void subgame_set(void);
 
 	void edit_outcome(void);
 	void display_legends(void);
@@ -220,7 +221,7 @@ public:
 };
 
 template <class T> class ExtensiveShow;
-
+class OutcomeDialog;
 template <class T>
 class TreeWindow : public BaseTreeWindow
 {
@@ -231,7 +232,8 @@ class TreeWindow : public BaseTreeWindow
 	// used or implemented.  Perhaps later...
 	TreeWindow(const TreeWindow<T> &);
 	void operator=(const TreeWindow<T> &);
-
+	OutcomeDialog *CreateOutcomeWindow(const gString &);
+  void					 CheckOutcomeWindow(OutcomeDialog *,int );
 public:
 	double 	ProbAsDouble(const Node *n,int action) const ;
 	gString	OutcomeAsString(const Node *n) const;

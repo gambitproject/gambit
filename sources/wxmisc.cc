@@ -1,3 +1,6 @@
+// File: wxmisc.cc -- a few general purpose functions that rely on and enhance
+// wxwin.
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
@@ -54,12 +57,16 @@ char *file_name=path_list.FindValidPath((char *)name);
 return  (file_name) ? copystring(file_name) : 0;
 }
 
-// OutputFile
+// OutputFile: takes the input filename, strips it of the path and extension and
+// appends a ".pxi" extension.
 char *wxOutputFile(const char *name)
 {
-char	t_outfile[250];
-wxGetTempFileName(name,t_outfile);
-return copystring(FileNameFromPath(t_outfile));
+static char	t_outfile[250];
+strcpy(t_outfile,FileNameFromPath((char *)name)); // strip the path
+char *period=strchr(t_outfile,'.'); // strip the extension
+if (period) t_outfile[period-t_outfile]='\0';
+strcat(t_outfile,".pxi"); // add a ".pxi" extension
+return t_outfile;
 }
 
 // Help system functions.

@@ -18,20 +18,44 @@
 
 template <class T> T gmin(const T &a, const T &b)
 {
-  if (a < b)   return a;   else return b;
+	if (a < b)   return a;   else return b;
 }
 
 template <class T> T gmax(const T &a, const T &b)
 {
-  if (a > b)   return a;   else return b;
+	if (a > b)   return a;   else return b;
 }
 
-//#ifndef hpux
+//--------------------------------------------------------------------------
+//                     Template function instantiations
+//--------------------------------------------------------------------------
+
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE int gmin(const int &a, const int &b);
+TEMPLATE float gmin(const float &a, const float &b);
+TEMPLATE double gmin(const double &a, const double &b);
+TEMPLATE gRational gmin(const gRational &a, const gRational &b);
+
+TEMPLATE int gmax(const int &a, const int &b);
+TEMPLATE float gmax(const float &a, const float &b);
+TEMPLATE double gmax(const double &a, const double &b);
+TEMPLATE gRational gmax(const gRational &a, const gRational &b);
+
+#pragma -Jgx
+
+#ifndef hpux
 double abs(double a)
 {
   if (a >= 0.0)   return a;   else return -a;
 }
-//#endif   //# hpux
+#endif   //# hpux
 
 //
 // Nasty little hack to make Borland C happy
@@ -118,11 +142,13 @@ gString ToString(const gRational &r, bool approx)
 				return ToString(r,false);	// exact will do just fine.
 			// these are nasty, huge numbers.  Make num be precision digits long,
 			// and hope den will follow
-			double order=pow(10.0,ceil(log(num)));
+			double order=pow(10.0,ceil(log(gmin(num,den))));
 			double prec=pow(10.0,(double)precision);
 			den/=order;	// make a double 0-1
 			num/=order;
-			gRational R((int)(num*prec),(int)(den*prec)); // reduces automatically
+			den*=prec;
+			num*=prec;
+			gRational R((int)num,(int)den); // reduces automatically
 			strncpy(gconvert_buffer, Itoa(R.numerator()),
 	      GCONVERT_BUFFER_LENGTH / 2 - 1);
       strcat(gconvert_buffer, "/");
@@ -199,28 +225,6 @@ return d;
 double ToDouble(const gString &s)
 { return strtod(s, NULL); }
 
-
-//--------------------------------------------------------------------------
-//                     Template function instantiations
-//--------------------------------------------------------------------------
-
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE int gmin(const int &a, const int &b);
-TEMPLATE float gmin(const float &a, const float &b);
-TEMPLATE double gmin(const double &a, const double &b);
-TEMPLATE gRational gmin(const gRational &a, const gRational &b);
-
-TEMPLATE int gmax(const int &a, const int &b);
-TEMPLATE float gmax(const float &a, const float &b);
-TEMPLATE double gmax(const double &a, const double &b);
-TEMPLATE gRational gmax(const gRational &a, const gRational &b);
 
 
 

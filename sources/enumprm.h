@@ -4,47 +4,52 @@
 
 #include "algdlgs.h"
 
-class EnumSolveParamsDialog : public OutputParamsDialog
+class EnumParamsSettings:public OutputParamsSettings
 {
-private:
+protected:
 	int stopAfter;
 	void SaveDefaults(void);
 public:
-	EnumSolveParamsDialog(wxWindow *parent=0);
-	~EnumSolveParamsDialog(void);
+	EnumParamsSettings(void);
+	~EnumParamsSettings() {SaveDefaults();}
 	void GetParams(EnumParams &P);
 };
 
+class EnumSolveParamsDialog : public OutputParamsDialog,public EnumParamsSettings
+{
+public:
+	EnumSolveParamsDialog(wxWindow *parent=0);
+};
+
 #ifdef ENUM_PRM_INST  // instantiate only once
+EnumParamsSettings::EnumParamsSettings(void)
+{
+wxGetResource(PARAMS_SECTION,"Enum-StopAfter",&stopAfter,defaults_file);
+}
+void EnumParamsSettings::SaveDefaults(void)
+{
+wxWriteResource(PARAMS_SECTION,"Enum-StopAfter",stopAfter,defaults_file);
+}
+
+void EnumParamsSettings::GetParams(EnumParams &P)
+{
+P.stopAfter=stopAfter;
+// Output stuff
+P.trace=TraceLevel();P.tracefile=OutFile();
+}
+
+
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Enum Params",parent,ENUMMIXED_HELP)
 
 {
-stopAfter=0;
-wxGetResource(PARAMS_SECTION,"Enum-StopAfter",&stopAfter,defaults_file);
-
-Form()->Add(wxMakeFormShort("# Equilibria",&stopAfter));
-Form()->Add(wxMakeFormNewLine());
+Add(wxMakeFormShort("# Equilibria",&stopAfter));
+Add(wxMakeFormNewLine());
 
 // Now add the basic stuff
 MakeOutputFields();
 Go();
 }
 
-void EnumSolveParamsDialog::SaveDefaults(void)
-{
-if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Enum-StopAfter",stopAfter,defaults_file);
-}
-
-EnumSolveParamsDialog::~EnumSolveParamsDialog(void)
-{SaveDefaults();}
-
-void EnumSolveParamsDialog::GetParams(EnumParams &P)
-{
-P.stopAfter=stopAfter;
-// Output stuff
-P.trace=TraceLevel();P.tracefile=OutFile();
-}
 #endif
 #endif

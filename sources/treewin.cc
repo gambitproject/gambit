@@ -27,7 +27,7 @@ template <class T>
 TreeWindow<T>::TreeWindow(const TreeWindow<T> &t):BaseTreeWindow(t),ef(t.ef)
 {assert(0);}
 template <class T>
-void TreeWindow<T>::operator=(const TreeWindow<T> &t)
+void TreeWindow<T>::operator=(const TreeWindow<T> &)
 {assert(0);}
 
 
@@ -84,47 +84,85 @@ else
 // If the dialog does not exist, create it.  If it exists and save_num==0,
 // delete it.  If out_name!="", find the outcome # and set the current row.
 // If out_name=="" and save_num>0, update that outcome, if save_num<0, delete
-// that outcome.
+// that outcome.  Note that more than one open EFG can have an outcomes window
+// open.  Thus we need to store each outcome window together with its EFG.
 #include "outcomed.h"
-Outcome *EfgGetOutcome(const BaseEfg &ef,const gString &n)
+template<class T>
+OutcomeDialog *TreeWindow<T>::CreateOutcomeWindow(const gString &out_name)
 {
-for (int i=1;i<=ef.NumOutcomes();i++)
-	if (ef.OutcomeList()[i]->GetName()==n) return ef.OutcomeList()[i];
-return 0;
+int i,j;
+// Check if there are any players to build outcomes for
+int num_players=ef.NumPlayers();
+if (num_players<1)
+	{wxMessageBox("No players exist, can not build an outcome","Error",wxOK | wxCENTRE,frame);return 0;}
+int rows=(ef.NumOutcomes()) ? ef.NumOutcomes() : 1;
+int cols=num_players;
+
+// figure out the # of this outcome
+int out=1;
+if (out_name!="")
+	for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
+// create the dialog
+OutcomeDialog *outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
+outcome_dialog->SetCurRow(out);
+for (i=1;i<=num_players;i++)
+	outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
+for (i=1;i<=ef.NumOutcomes();i++)
+{
+	OutcomeVector<T> *tmp=(OutcomeVector<T> *)(ef.OutcomeList()[i]);
+	for (j=1;j<=num_players;j++)
+		outcome_dialog->SetCell(i,j,ToString((*tmp)[j]));
+	outcome_dialog->SetCell(i,cols+1,tmp->GetName());
+}
+outcome_dialog->Redraw();
+outcome_dialog->Show(TRUE);
+return outcome_dialog;
 }
 
-template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,int save_num)
+template<class T>
+void TreeWindow<T>::CheckOutcomeWindow(OutcomeDialog *outcome_dialog,int out)
 {
-int i,j,out=1;
-static OutcomeDialog *outcome_dialog=0;
-static gBlock<gString> old_names;
 int num_players=ef.NumPlayers();
-if (!outcome_dialog)	// creating a new one
+T payoff;
+OutcomeVector<T> *tmp;
+// if a new row was created, append an entry to old_names.
+if (out>ef.NumOutcomes())
 {
-	// Check if there are any players to build outcomes for
-	if (num_players<1)
-		{wxMessageBox("No players exist, can not build an outcome","Error",wxOK | wxCENTRE,frame);return;}
-	int rows=(ef.NumOutcomes()) ? ef.NumOutcomes() : 1;
-	int cols=num_players;
-	// figure out the # of this outcome
-	if (out_name!=gString())
-		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
-	// create the dialog
-	outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
-	if (out>0) outcome_dialog->SetCurRow(out);
-	for (i=1;i<=num_players;i++)
-		outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
-	old_names=gBlock<gString>(ef.NumOutcomes());
-	for (i=1;i<=ef.NumOutcomes();i++)
+	tmp=ef.NewOutcome();
+	tmp->SetName("Outcome "+ToString(ef.NumOutcomes()));
+}
+else
+	tmp=(OutcomeVector<T> *)ef.OutcomeList()[out];
+assert(tmp);
+// check if the values have changed
+for (int j=1;j<=num_players;j++)
+{
+	FromString(outcome_dialog->GetCell(out,j),payoff);
+	if ((*tmp)[j]!=payoff)
+		{(*tmp)[j]=payoff;outcomes_changed=TRUE;}
+}
+// check if the name has changed
+gString new_name=outcome_dialog->GetCell(out,num_players+1);
+if (new_name!=tmp->GetName())
+	if (new_name!="")
 	{
-		OutcomeVector<T> *tmp=(OutcomeVector<T> *)(ef.OutcomeList()[i]);
-		for (j=1;j<=num_players;j++)
-			outcome_dialog->SetCell(i,j,ToString((*tmp)[j]));
-		outcome_dialog->SetCell(i,cols+1,tmp->GetName());
-		old_names[i]=tmp->GetName();
+		tmp->SetName(new_name);
+		OnPaint();
 	}
-	outcome_dialog->Redraw();
-	outcome_dialog->Show(TRUE);
+	else
+	{
+		outcome_dialog->SetCell(out,num_players+1,tmp->GetName());
+		outcome_dialog->OnPaint();
+	}
+if (outcomes_changed) OnPaint();
+}
+
+template<class T>
+void TreeWindow<T>::tree_outcomes(const gString out_name,int save_num)
+{
+if (!outcome_dialog) // no window for this efg
+{
+	outcome_dialog=CreateOutcomeWindow(out_name);
 	return;
 }
 else	// either going to a new one by clicking on an outcome, closing, or saving
@@ -132,58 +170,29 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 	if (out_name!="")	// setting a new row
 	{
 		// figure out the # of this outcome
-		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
-		outcome_dialog->SetCurRow(out);return;
+		for (int i=1;i<=ef.NumOutcomes();i++)
+			if ((ef.OutcomeList()[i])->GetName()==out_name)
+				{outcome_dialog->SetCurRow(i);return;}
+		return;
 	}
 	else	// this is an OK, save, or delete action
 	{
 		if (save_num>0)	// save action
-		{
-			T payoff;
-			OutcomeVector<T> *tmp;
-			// if a new row was created, append an entry to old_names.
-			if (save_num>old_names.Length())
-			{
-				gString new_name="Outcome "+ToString(ef.NumOutcomes()+1);
-				old_names+=new_name;
-				tmp=ef.NewOutcome();
-				tmp->SetName(new_name);
-			}
-			else
-				tmp=(OutcomeVector<T> *)EfgGetOutcome(ef,old_names[save_num]);
-			assert(tmp);
-			// check if the values have changed
-			for (j=1;j<=num_players;j++)
-			{
-				FromString(outcome_dialog->GetCell(save_num,j),payoff);
-				if ((*tmp)[j]!=payoff)
-					{(*tmp)[j]=payoff;outcomes_changed=TRUE;}
-			}
-			// check if the name has changed
-			if (outcome_dialog->GetCell(save_num,j)!=old_names[save_num])
-				if (outcome_dialog->GetCell(save_num,j)!="")
-					tmp->SetName(outcome_dialog->GetCell(save_num,j));
-				else
-				{
-					outcome_dialog->SetCell(save_num,num_players+1,old_names[save_num]);
-					outcome_dialog->OnPaint();
-				}
-			if (outcomes_changed) OnPaint();
-		}
+			CheckOutcomeWindow(outcome_dialog,save_num);
 		if (save_num==0)	// OK action
 		{
+			CheckOutcomeWindow(outcome_dialog,outcome_dialog->CurRow());
 			delete outcome_dialog;
 			outcome_dialog=0;
 		}
 		if (save_num<0)	// delete action
 		{
 			int del_num=-save_num;
-			if (del_num<=old_names.Length()) // not the last, blank row
+			if (del_num<=ef.NumOutcomes()) // not the last, blank row
 			{
-				Outcome *tmp=EfgGetOutcome(ef,old_names[del_num]);
+				Outcome *tmp=ef.OutcomeList()[del_num];;
 				assert(tmp);
 				ef.DeleteOutcome(tmp);
-				old_names.Remove(del_num);
 				outcomes_changed=TRUE;
 				outcome_dialog->DelRow(del_num);
 				outcome_dialog->Resize();
@@ -249,12 +258,22 @@ for (int d=0;d<=num_d;d++)
 #ifdef __GNUG__
 	#define TEMPLATE template
 #elif defined __BORLANDC__
+	class gList<Node *>;
+	class gList<BehavProfile<double> >;
+	class gListIter<BehavProfile<double> >;
+	class gNode<BehavProfile<double> >;
+	class gList<BehavProfile<gRational> >;
+	class gListIter<BehavProfile<gRational> >;
+	class gNode<BehavProfile<gRational> >;
 	#pragma option -Jgd
 	#define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
+//TEMPLATE class gList<OutcomeWindowS>;
 TEMPLATE class TreeWindow<double> ;
 
 #ifdef GRATIONAL
 	TEMPLATE class TreeWindow<gRational> ;
 #endif
+#include "glist.imp"
+#pragma -Jgx
 

@@ -14,17 +14,17 @@ private:
 	wxStringList *support_list;
 	Bool root_reachable;
 // Low level event handlers
-	static void cur_func(wxChoice &ob,wxEvent &ev)
+	static void cur_func(wxChoice &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
-	static void disp_func(wxChoice &ob,wxEvent &ev)
+	static void disp_func(wxChoice &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
-	static void new_sup_func(wxButton &ob,wxEvent &ev)
+	static void new_sup_func(wxButton &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
-	static void change_sup_func(wxButton &ob,wxEvent &ev)
+	static void change_sup_func(wxButton &ob,wxEvent &)
 	{((BaseExtensiveShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
-	static void help_func(wxButton &ob,wxEvent &ev)
+	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SUPPORTS_HELP);}
-	static void close_func(wxButton &ob,wxEvent &ev)
+	static void close_func(wxButton &ob,wxEvent &)
 	{((BaseExtensiveShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
 // High level event handlers
 	void OnNewSupport(void)
@@ -62,7 +62,7 @@ private:
 public:
 	EFSupportInspectDialog(const gList<EFSupport *> &sups_,int cur_sup,
 											int disp_sup,BaseExtensiveShow *bes_,wxWindow *parent=0)
-		: wxDialogBox(parent,"Supports"),sups(sups_),bes(bes_)
+		: wxDialogBox(parent,"Supports"),bes(bes_),sups(sups_)
 	{
 	wxForm *f=new wxForm(0);
 	SetLabelPosition(wxVERTICAL);

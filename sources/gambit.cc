@@ -1,10 +1,11 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// @(#)gambit.cc	1.24 12/26/95
+// $Id$
 //
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 #include "wx.h"
 #ifdef wx_msw
 #include "wx_bbar.h"
@@ -32,7 +33,8 @@ signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 wxMessageBox("A floating point error has occured!\nThe results returned may be invalid");
 }
 
-
+char *wxStrLwr(char *s)
+{for (int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
 
 class GambitToolBar:	// no reason to have yet another .h file for just this
 #ifdef wx_msw
@@ -153,7 +155,7 @@ gambit_frame->CreateStatusLine();
 new GambitToolBar(gambit_frame);
 
 // Set up the help system
-wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.922\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
+wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.9\n\nDeveloped by Richard D. McKelvey (rdm@hss.caltech.edu)\nMain Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\nFront End: Eugene Grayver (egrayver@hss.caltech.edu)\nCalifornia Institute of Technology, 1995.\nFunding provided by the National Science Foundation");
 
 gambit_frame->Show(TRUE);
 // Set up the error handling functions:
@@ -191,9 +193,7 @@ s=copystring(s);
 if (strcmp(s,"")!=0)
 {     
 	char *filename=copystring(FileNameFromPath(s));
-#ifdef wx_msw
-	filename=strlwr(filename); // ignore case
-#endif
+	filename=wxStrLwr(filename); // ignore case
 #ifndef EFG_ONLY
 	if (strstr(filename,".nfg"))		// This must be a normal form
 		{NfgGUI(0,s,0,this);return;}
@@ -226,7 +226,7 @@ void GambitFrame::OnMenuCommand(int id)
 #endif
 		case GAMBIT_HELP_ABOUT:	wxHelpAbout(); break;
 		case GAMBIT_HELP_CONTENTS: wxHelpContents(GAMBIT_GUI_HELP);	break;
-		default: assert(0); break;
+		default: wxMessageBox("Error: Unknown Menu Selection"); break;
 	}
 }
 #ifdef wx_x

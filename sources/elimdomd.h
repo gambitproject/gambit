@@ -1,6 +1,16 @@
 // File: elimdomd.h -- declarations for classes dealing with inspection and
 // creation of dominated strategy supports
-// @(#)elimdomd.h	1.7 11/7/95
+// $Id$
+
+#define SUPPORT_OPEN		0
+#define SUPPORT_CLOSE		1
+#define SUPPORT_CHANGE	2
+
+#define DOM_WEAK				0
+#define	DOM_STRONG			1
+
+#define		SOLN_SECT			"Soln-Defaults"
+
 class ElimDomParamsDialog // Can not use MyDialogBox due to wxMULTIPLE
 {
 private:
@@ -65,8 +75,61 @@ public:
 	gArray<int> Players(void) {return players;}
 	bool FindAll(void) {return all;}
 	bool Compress(void) {return compress;}
-	bool DomStrong(void) {return dom_type;}
+	bool DomStrong(void) {return dom_type==DOM_STRONG;}
 	int  Completed(void) {return completed;}
+};
+
+class DominanceSettings
+{
+protected:
+	Bool use_elimdom,all;
+	int	dom_type;
+	char *defaults_file;
+public:
+	DominanceSettings(void)
+	{
+	defaults_file="gambit.ini";
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-All",&all,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Type",&dom_type,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-ElimDom-Use",&use_elimdom,defaults_file);
+	}
+	~DominanceSettings()
+	{
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+	}
+	bool UseElimDom(void) const {return use_elimdom;}
+	bool FindAll(void) const {return all;}
+	bool DomStrong(void) const {return dom_type==DOM_STRONG;}
+};
+
+
+
+
+class DominanceSettingsDialog: public MyDialogBox,public DominanceSettings
+{
+private:
+char *dom_type_str;
+wxStringList *dom_type_list;
+public:
+	DominanceSettingsDialog(wxWindow *parent):MyDialogBox(parent,"Dominance Defaults")
+	{
+	Add(wxMakeFormBool("ElimDom before solve",&use_elimdom));
+	Add(wxMakeFormNewLine());
+	Add(wxMakeFormBool("Find All",&all));
+	Add(wxMakeFormNewLine());
+	dom_type_list=new wxStringList("Weak","Strong",0);
+	dom_type_str=new char[20];
+	strcpy(dom_type_str,(char *)dom_type_list->Nth(dom_type)->Data());
+	Add(wxMakeFormString("Dom Type",&dom_type_str,wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(dom_type_list), 0)));
+	Go();
+	}
+	~DominanceSettingsDialog()
+	{
+	dom_type=wxListFindString(dom_type_list,dom_type_str);
+	}
 };
 
 class SupportInspectDialog:public wxDialogBox
@@ -85,9 +148,9 @@ private:
 	{((SupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
 	static void new_sup_func(wxButton &ob,wxEvent &)
 	{((SupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
-	static void change_sup_func(wxButton &ob,wxEvent &ev)
+	static void change_sup_func(wxButton &ob,wxEvent &)
 	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CHANGE);}
-	static void help_func(wxButton &ob,wxEvent &)
+	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
 	{((BaseNormShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
@@ -102,7 +165,13 @@ private:
 		cur_item->SetSize(-1,-1,-1,-1);
 	}
 	}
-	void OnCur(int cur_sup);
+	void OnCur(int cur_sup)
+  {
+	cur_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
+	disp_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
+	disp_item->SetSelection(cur_sup-1);
+	}
+
 	void OnDisp(int disp_sup)
 	{disp_dim->SetValue(array_to_string(sups[disp_sup]->SupportDimensions()));}
 
@@ -155,19 +224,11 @@ public:
 	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)bns);
 	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bns);
-  Fit();
+	Fit();
 	Show(TRUE);
 	}
 	// Data Access members
 	int 	CurSup(void) {return cur_item->GetSelection()+1;}
 	int 	DispSup(void) {return disp_item->GetSelection()+1;}
 };
-
-
-void SupportInspectDialog::OnCur(int cur_sup)
-{
-cur_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
-disp_dim->SetValue(array_to_string(sups[cur_sup]->SupportDimensions()));
-disp_item->SetSelection(cur_sup-1);
-}
 

@@ -7,9 +7,10 @@
 // $Id$
 
 #define SD_CANCEL			-1
-#define SD_SOLVE			1
-#define	SD_ALGORITHM 	2
-#define SD_INSPECT 		3
+#define SD_PARAMS			1
+#define	SD_SAVE			 	2
+
+#define		SOLN_SECT			"Soln-Defaults"
 
 //#ifndef NFG_SOLVE_HELP	// if this is included in efgsolvd.h, we do not need it
 //#define NFG_SOLVE_HELP	""
@@ -50,27 +51,60 @@ public:
 	}
 };
 
-class NfgSolveParamsDialog: public NfgAlgorithmList
+class NfgSolveSettings
+{
+protected:
+	int algorithm;
+	int result;
+	Bool extensive;
+public:
+	NfgSolveSettings(void)
+	{
+	result=SD_SAVE;
+	char *defaults_file="gambit.ini";
+	wxGetResource(SOLN_SECT,"Nfg-Algorithm",&algorithm,defaults_file);
+	wxGetResource(SOLN_SECT,"Nfg-Efg",&extensive,defaults_file);
+	}
+	~NfgSolveSettings()
+	{
+	if (result!=SD_CANCEL)
+	{
+		char *defaults_file="gambit.ini";
+		wxWriteResource(SOLN_SECT,"Nfg-Algorithm",algorithm,defaults_file);
+		wxWriteResource(SOLN_SECT,"Nfg-Efg",extensive,defaults_file);
+	}
+	}
+	NfgSolutionT GetAlgorithm(void) {return algorithm;}
+	Bool GetExtensive(void) {return extensive;}
+};
+
+class NfgSolveParamsDialog: public NfgAlgorithmList, public NfgSolveSettings
 {
 private:
 	wxDialogBox *d;
 	wxRadioBox *nfg_algorithm_box;
 	wxCheckBox *extensive_box;
 	wxButton *inspect_button;
-	NfgSolutionT algorithm;
-	int result,extensive;
 	gList<int> solns;
 // Static event handlers
-	static void solve_button_func(wxButton &ob,wxEvent &)
-	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SOLVE);}
-	static void inspect_button_func(wxButton &ob,wxEvent &)
-	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_INSPECT);}
+	static void params_button_func(wxButton &ob,wxEvent &)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_PARAMS);}
+	static void save_button_func(wxButton &ob,wxEvent &)
+	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_SAVE);}
 	static void cancel_button_func(wxButton &ob,wxEvent &)
 	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_CANCEL);}
 	static void help_button_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SOLVE_HELP);}
 	static void nfg_algorithm_box_func(wxRadioBox &ob,wxEvent &)
-	{((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);}
+	{/*((NfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);*/}
+	// Event handlers: high level
+	void OnEvent(int event)
+	{
+	result=event;
+	algorithm=nfg_algorithm_box->GetSelection();
+	extensive=extensive_box->GetValue();
+	d->Show(FALSE);
+	}
 
 public:
 // Constructor
@@ -79,39 +113,24 @@ public:
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 		nfg_algorithm_box=MakeNfgAlgorithmList(num_players,d,(wxFunction)nfg_algorithm_box_func);
 		nfg_algorithm_box->SetClientData((char *)this);
+		nfg_algorithm_box->SetSelection(algorithm);
 		d->NewLine();
 		extensive_box=new wxCheckBox(d,0,"Extensive Form");
 		extensive_box->Enable(have_efg);
+		extensive_box->SetValue(extensive && have_efg);
 		d->NewLine();
-		wxButton *solve_button=new wxButton(d,(wxFunction)solve_button_func,"Solve");
+		wxButton *solve_button=new wxButton(d,(wxFunction)params_button_func,"Params");
 		solve_button->SetClientData((char *)this);
-		inspect_button=new wxButton(d,(wxFunction)inspect_button_func,"Look");
+		inspect_button=new wxButton(d,(wxFunction)save_button_func,"Save");
 		inspect_button->SetClientData((char *)this);
 		wxButton *cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		new wxButton(d,(wxFunction)help_button_func,"?");
-		OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);
 	}
 	~NfgSolveParamsDialog(void) {delete d;}
-// Main event handler
-	void OnEvent(int event)
-	{
-	if (event!=SD_ALGORITHM)	// one of the buttons
-	{
-		result=event;algorithm=nfg_algorithm_box->GetSelection();
-		extensive=extensive_box->GetValue();
-		d->Show(FALSE);
-	}
-	else	// new algorithm selected
-	{
-		inspect_button->Enable(solns.Contains(nfg_algorithm_box->GetSelection()));
-	}
-	}
 	// Data access
-	NfgSolutionT GetAlgorithm(void) {return algorithm;}
 	int GetResult(void) {return result;}
-	int GetExtensive(void) {return extensive;}
 };
 

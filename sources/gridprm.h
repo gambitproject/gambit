@@ -1,31 +1,71 @@
+// $Id$
+
 #ifndef GRIDPRM_H
 #define GRIDPRM_H
 #include "algdlgs.h"
 
 template <class T>
-class GridSolveParamsDialog : public PxiParamsDialog
+class GridParamsSettings:public virtual PxiParamsSettings
 {
-private:
+protected:
 	float minLam, maxLam, delLam, delp, tol;
 	void SaveDefaults(void);
 public:
-	GridSolveParamsDialog(wxWindow *parent);
-	~GridSolveParamsDialog(void);
+	GridParamsSettings(const char *fn);
+	~GridParamsSettings();
 	void GetParams(GridParams<T> &P);
 };
 
-//******************************** Constructor/main ************************
+
 template <class T>
-GridSolveParamsDialog<T>::GridSolveParamsDialog(wxWindow *parent)
-				:PxiParamsDialog("grid","Grid Params",parent,GOBIT_HELP)
+class GridSolveParamsDialog : public PxiParamsDialog,public GridParamsSettings<T>
 {
-minLam=0.01;maxLam=3.0;delLam=.1;delp=.01;tol=.01;
+public:
+	GridSolveParamsDialog(wxWindow *parent,const gString filename);
+//	~GridSolveParamsDialog(void);
+};
+#ifdef GRID_PRM_INST    // instantiate only once
+//******************************** Constructor ************************
+template <class T>
+GridParamsSettings<T>::GridParamsSettings(const char *fn)
+											:PxiParamsSettings("grid",fn)
+{
 wxGetResource(PARAMS_SECTION,"Grid-minLam",&minLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-maxLam",&maxLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-delLam",&delLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-delp",&delp,defaults_file);
 wxGetResource(PARAMS_SECTION,"Grid-tol",&tol,defaults_file);
+}
 
+template <class T>
+void GridParamsSettings<T>::SaveDefaults(void)
+{
+wxWriteResource(PARAMS_SECTION,"Grid-minLam",minLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-maxLam",maxLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-delLam",delLam,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-delp",delp,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Grid-tol",tol,defaults_file);
+}
+
+template <class T>
+GridParamsSettings<T>::~GridParamsSettings(void)
+{SaveDefaults();}
+
+template <class T>
+void GridParamsSettings<T>::GetParams(GridParams<T> &P)
+{
+P.minLam=minLam;P.maxLam=maxLam;P.delLam=delLam;P.tol=tol;P.delp=delp;
+// Pxi stuff
+P.powLam=PxiType();P.pxifile=PxiFile();
+// Output stuff
+P.trace=TraceLevel();P.tracefile=OutFile();
+}
+
+template <class T>
+GridSolveParamsDialog<T>::GridSolveParamsDialog(wxWindow *parent,const gString filename)
+				:PxiParamsDialog("grid","Grid Params",filename,parent,GOBIT_HELP),
+				 GridParamsSettings<T>(filename),PxiParamsSettings("grid",filename)
+{
 Form()->Add(wxMakeFormFloat("minLam",&minLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("maxLam",&maxLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("delLam",&delLam,wxFORM_DEFAULT,0,0,wxVERTICAL,100));
@@ -39,30 +79,6 @@ MakeOutputFields();
 Go();
 }
 
-template <class T>
-void GridSolveParamsDialog<T>::SaveDefaults(void)
-{
-if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Grid-minLam",minLam,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Grid-maxLam",maxLam,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Grid-delLam",delLam,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Grid-delp",delp,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Grid-tol",tol,defaults_file);
-}
-
-template <class T>
-GridSolveParamsDialog<T>::~GridSolveParamsDialog(void)
-{SaveDefaults();}
-
-template <class T>
-void GridSolveParamsDialog<T>::GetParams(GridParams<T> &P)
-{
-P.minLam=minLam;P.maxLam=maxLam;P.delLam=delLam;P.tol=tol;P.delp=delp;
-// Pxi stuff
-P.powLam=PxiType();P.pxifile=PxiFile();
-// Output stuff
-P.trace=TraceLevel();P.tracefile=OutFile();
-}
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -72,8 +88,12 @@ P.trace=TraceLevel();P.tracefile=OutFile();
 #endif   // __GNUG__, __BORLANDC__
 TEMPLATE class GridSolveParamsDialog<double> ;
 TEMPLATE class GridSolveParamsDialog<gRational> ;
+TEMPLATE class GridParamsSettings<double>;
+TEMPLATE class GridParamsSettings<gRational>;
 #ifdef __BORLANDC__
 #pragma -Jgx
 #endif
 
 #endif
+
+#endif // GRID_PRM_INST

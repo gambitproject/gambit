@@ -1,11 +1,11 @@
 // File: efgaccl.h -- gives names to various Extensive form GUI options
-// @(#)efgaccl.h	1.7 12/24/95
+// $Id$
 
 #ifndef EFGACCL_H
 #define EFGACCL_H
 
 #include "accels.h"
-#define 	NUM_EFG_EVENTS	41
+#define 	NUM_EFG_EVENTS	42
 AccelEvent efg_events[NUM_EFG_EVENTS]=
 {
 AccelEvent("AddNode",NODE_ADD),
@@ -46,7 +46,8 @@ AccelEvent("Unmark Node Subgame",SUBGAME_CLEARONE),
 AccelEvent("Collapse All Subgames",SUBGAME_COLLAPSEALL),
 AccelEvent("Collapse Node Subgame",SUBGAME_COLLAPSEONE),
 AccelEvent("Expand All Subgames",SUBGAME_EXPANDALL),
-AccelEvent("Expand Node Subgame",SUBGAME_EXPANDONE),
+AccelEvent("Expand Subgame Level",SUBGAME_EXPANDONE),
+AccelEvent("Expand Subgame Branch",SUBGAME_EXPANDBRANCH),
 AccelEvent("Toggle Subgame",SUBGAME_TOGGLE),
 AccelEvent("Mark Subgame",SUBGAME_SET)
 };
