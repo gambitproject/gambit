@@ -4,15 +4,6 @@
 //# $Id$
 //#
 
-#ifdef __GNUG__
-// this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
-//#pragma implementation
-#elif defined(__BORLANDC__)
-#pragma option -Jgd
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
 #include "gmatrix.h"
 
 
@@ -356,9 +347,9 @@ gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 template <class T> gVector<T>
 operator*(const gVector<T> &v, const gMatrix<T> &M)
 {
-  assert( CheckColumn(v) );
-  gVector<T> tmp(mincol, maxcol);
-  RMultiply(v,tmp);
+  assert( M.CheckColumn(v) );
+  gVector<T> tmp(M.mincol, M.maxcol);
+  M.RMultiply(v,tmp);
   return tmp;
 }
 
@@ -785,7 +776,7 @@ gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
     {
       T* srcrow= data[ rowV[i] ];
       T* dstrow= m.data[i];
-      for(j=1; j<=cols; j++)
+		for(j=1; j<=cols; j++)
 	dstrow[j]= srcrow[ colV[j] ];
     }
   return m;
@@ -811,7 +802,7 @@ gMatrix<T>::Invert(void) const
 	  if( abs > max )
 	    max= abs;
 	}
-      assert( max!= 0 );
+		assert( max!= (T) 0 );
       T scale= (T)1/max;
       for(j=mincol; j<=maxcol; j++)
 	{

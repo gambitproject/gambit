@@ -137,4 +137,8 @@ template <class T> class gBlock    {
 template <class T> gOutput &operator<<(gOutput &, const gBlock<T> &);
 
 
+#ifdef __BORLANDC__
+#include "gblock.imp"
+#endif   // __BORLANDC_
+
 #endif    //# GBLOCK_H

@@ -7,14 +7,6 @@
 #ifndef GNARRAY_H
 #define GNARRAY_H
 
-#ifdef __GNUG__
-#pragma interface
-#elif defined __BORLANDC__
-#pragma option -Jgx
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
 #include <assert.h>
 #include "gambitio.h"
 #include "gvector.h"
@@ -27,7 +19,7 @@ template <class T> class gNArray   {
   protected:
     long storage_size;
     T *storage;
-    gVector<int> dim;
+	 gVector<int> dim;
 
     void DumpFrom(gOutput &, int, gVector<int> &) const;
     void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
@@ -44,12 +36,12 @@ template <class T> class gNArray   {
     T &operator[](const gVector<int> &);
 
     const T &operator[](long l) const;
-    T &operator[](long l);
+	 T &operator[](long l);
 
     const gVector<int> &Dimensionality(void) const;
 
     void Input(gInput &, const gVector<int> &, int);
-    void Output(gOutput &) const;
+	 void Output(gOutput &) const;
 };
 
 #ifdef UNUSED
@@ -61,12 +53,12 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
     gIndexedNArray(void);
     gIndexedNArray(const gVector<int> &d);
     gIndexedNArray(const gIndexedNArray<T> &);
-    ~gIndexedNArray();
+	 ~gIndexedNArray();
 
-    gIndexedNArray<T> &operator=(const gIndexedNArray<T> &);
+	 gIndexedNArray<T> &operator=(const gIndexedNArray<T> &);
 
     T operator[](const gVector<int> &) const;
-    T &operator[](const gVector<int> &);
+	 T &operator[](const gVector<int> &);
     
     const gVector<int> &Dimensionality(void) const   { return dim; }
 
@@ -76,6 +68,10 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
       { gNArray<T>::Output(f); }
 };
 #endif   // UNUSED
+
+#ifdef __BORLANDC__
+#include "gnarray.imp"
+#endif   // __BORLANDC__
 
 #endif    // GNARRAY_H
 

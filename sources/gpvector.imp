@@ -17,7 +17,7 @@ template <class T> int gPVector<T>::sum(const gTuple<int> &V) const
   return total;
 }
 
-template <class T> int gPVector<T>::setindex(void)
+template <class T> void gPVector<T>::setindex(void)
 {
   int index = First();
   for(int i = svlen.First(); i <= svlen.Last(); i++)  {

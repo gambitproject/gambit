@@ -12,7 +12,7 @@
 template <class T> class gPVector : public gVector<T> {
  private:
   int sum(const gTuple<int> &V) const;
-  int setindex(void);
+  void setindex(void);
 
  protected:
   gTuple<T *> svptr;
@@ -68,7 +68,11 @@ template <class T> class gPVector : public gVector<T> {
 
 template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
 
+#ifdef __BORLANDC__
+#include "gpvector.imp"
+#endif   // __BORLANDC__
 
 #endif   //# GPVECTOR_H
+
 
 

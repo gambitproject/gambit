@@ -7,15 +7,6 @@
 #ifndef GVECTOR_H
 #define GVECTOR_H
 
-#ifdef __GNUC__
-// this pragma is not necessary with g++ 2.6.3 /2 -fno-implicit-templates
-//#pragma interface
-#elif defined(__BORLANDC__)
-#pragma option -Jgx
-#else
-#error Unsupported compiler type.
-#endif   // __GNUC__, __BORLANDC__
-
 #include <assert.h>
 #include "basic.h"
 #include "gtuple.h"
@@ -110,6 +101,10 @@ template <class T>
 gOutput& operator<<(gOutput &to, const gVector<T> &);
 
 
+#ifdef __BORLANDC__
+#define inline
+#endif   // __BORLANDC__
+
 //------------------------------------------------------------------------
 // inline ctors
 //------------------------------------------------------------------------
@@ -144,12 +139,10 @@ template <class T> inline int gVector<T>::First(void) const
 { return min; }
 template <class T> inline int gVector<T>::Last(void) const
 { return max; }
-template <class T> inline int gVector<T>::Length(void) const
-{ return max-min+1; }
 
 template <class T> inline T& gVector<T>::operator[] (int n) {
     assert(Check(n));
-    return data[n];
+	 return data[n];
   }
 
 template <class T> inline const T& gVector<T>::operator[] (int n) const {
@@ -193,6 +186,11 @@ template <class T> inline void gVector<T>::AllocateData(void)
 
 template <class T> inline void gVector<T>::DeleteData(void)
 { Delete(data); }
+
+#ifdef __BORLANDC__
+#undef inline
+#include "gvector.imp"
+#endif   // __BORLANDC__
 
 
 #endif   //# GVECTOR_H

@@ -162,7 +162,7 @@ template <class T> void gBlock<T>::Dump(gOutput &f) const
 {
   f << "gBlock " << this << " contents\n";
   for (int i = 0; i < length; i++)
-    f << i + 1 << ": " << data[i] << '\n';
+    f << (i + 1) << ": " << data[i] << '\n';
 }
 
 //

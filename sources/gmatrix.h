@@ -7,15 +7,6 @@
 #ifndef GMATRIX_H
 #define GMATRIX_H
 
-#ifdef __GNUG__
-// this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
-//#pragma interface
-#elif defined(__BORLANDC__)
-#pragma option -Jgx
-#else
-#error Unsupported compiler type
-#endif   // __GNUG__, __BORLANDC__
-
 #include "gambitio.h"
 #include "gvector.h"
 #include "gblock.h"
@@ -180,6 +171,10 @@ template <class T>
 inline const int& gMatrix<T>::MaxCol(void) const { return maxcol; }
 template <class T>
 inline int gMatrix<T>::NumColumns(void) const { return maxcol-mincol+1; }
+
+#ifdef __BORLANDC__
+#include "gmatrix.imp"
+#endif   // __BORLANDC__
 
 
 #endif     // GMATRIX_H

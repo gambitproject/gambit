@@ -297,6 +297,10 @@ template <class K, class T> class gUnordMap : public gBaseMap<K, T>  {
     T Remove(const K &key);
 };
 
+#ifdef __BORLANDC__
+#include "gmap.imp"
+#endif   // __BORLANDC__
+
 
 #endif   // GMAP_H
 

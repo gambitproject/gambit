@@ -48,6 +48,10 @@ template <class T> class gStack   {
     void Flush(void);       // empty the stack in one fell swoop
 };
 
+#ifdef __BORLANDC__
+#include "gstack.imp"
+#endif   // __BORLANDC__
+
 
 #endif    // GSTACK_H
 

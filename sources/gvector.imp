@@ -4,18 +4,12 @@
 //# $Id$
 //#
 
-#ifdef __GNUC__
-// this pragma is not necessary with g++ 2.6.3 /2 -fno-implicit-templates
-//#pragma implementation
-#elif defined(__BORLANDC__)
-#pragma option -Jgx
-#else
-#error Unsupported compiler type.
-#endif   // __GNUC__, __BORLANDC__
-
-
 #include "gvector.h"
 
+template <class T> int gVector<T>::Length(void) const
+{
+  return max - min + 1;
+}
 
 //------------------------------------------------------------------------
 //	gVector: internal functions
@@ -187,10 +181,11 @@ gVector<T>::operator==(T c) const
 //	gVector: other operators
 //------------------------------------------------------------------------
 
-template <class T> inline gVector<T>& gVector<T>::operator=(const gVector<T>& V) {
-    assert(Check(V));
-    DeleteData();
-    CopyData(V);
+template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V) {
+	 assert(Check(V));
+	 DeleteData();
+	 CopyData(V);
+    return *this;
   }
 
 
