@@ -16,6 +16,7 @@
 #include "ggrstack.h"
 #include "gsm.h"
 #include "gsminstr.h"
+#include "gsmfunc.h"
 
 %}
 
@@ -24,15 +25,18 @@
 %define MEMBERS   \
   int index; \
   gString input_text; \
-  bool bval; \
+  bool bval, triv, semi; \
   gInteger ival; \
   double dval; \
   gRational rval; \
-  gString tval, formal;  \
-  gList<Instruction *> program; \
+  gString tval, formal, funcname;  \
+  gList<Instruction *> program, *function; \
+  gList<gString> formals, types; \
+  gList<bool> refs; \
   gGrowableStack<gString> formalstack; \
   gGrowableStack<int> labels, listlen; \
   gGrowableStack<char> matching; \
+  gGrowableStack<gInput *> inputs; \
   GSM gsm; \
   bool quit; \
   \
@@ -40,12 +44,14 @@
   void ungetchar(char c); \
   \
   void emit(Instruction *); \
+  void DefineFunction(void); \
+  int ProgLength(void); \
   \
   int Parse(void); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : index(0), gsm(256), formalstack(4), labels(4), \
-                               listlen(4), matching(4), quit(false)
+%define CONSTRUCTOR_INIT     : gsm(256), formalstack(4), labels(4), \
+                               listlen(4), matching(4), quit(false), function(0)
 
 %token LOR
 %token LAND
@@ -87,6 +93,8 @@
 %token WHILE
 %token FOR
 %token QUIT
+%token DEFFUNC
+%token INCLUDE
 
 %token BOOLEAN
 %token INTEGER
@@ -95,53 +103,131 @@
 %token TEXT
 %token NAME
 
+%token CRLF
+%token EOC
+
 %%
 
-program:      statements   { emit(new Display); }
-       |      error   { while (yylex() != EOF);  return 0; }
 
-statements:   statement
-          |   statements SEMI statement
+program:      EOC   { return 1; }
+       |      statements EOC 
+              { if (!triv || !semi) emit(new Display); emit(new Pop); return 0; }
+       |      error EOC   { return 1; }
+       |      error CRLF  { return 1; }
 
-statement:
-         |    expression
-         |    conditional
-         |    whileloop
-         |    forloop
-         |    QUIT     { quit = true; emit(new Quit); }
+statements:   statement 
+          |   statements sep statement
+          |   funcdecl
 
-conditional:  IF LBRACK expression COMMA 
+sep:          SEMI    { semi = true;  emit(new Pop); }
+   |          CRLFs    { semi = false; 
+                        if (!triv)  { emit(new Display); emit(new Pop); } }
+   |          SEMI CRLFs  { semi = true;  emit(new Pop); }
+
+funcdecl:     DEFFUNC LBRACK NAME
+              { funcname = tval; function = new gList<Instruction *>; }
+              LBRACK formallist RBRACK COMMA statements
+              RBRACK   { DefineFunction(); } 
+		
+formallist:
+          |   formalparams
+
+formalparams: formalparam
+            | formalparams COMMA formalparam
+
+formalparam:  NAME { formals.Append(tval); } binding 
+              NAME { types.Append(tval); } 
+
+binding:      RARROW    { refs.Append(false); }
+       |      DBLARROW  { refs.Append(true); }
+
+statement:    { triv = true; }
+              expression { triv = false; }
+         |    conditional { triv = false; }
+         |    whileloop { triv = false; }
+         |    forloop   { triv = false; }
+         |    include 
+         |    QUIT     { triv = false; quit = true; emit(new Quit); }
+
+include:      INCLUDE LBRACK TEXT RBRACK
+              { inputs.Push(new gFileInput(tval));
+		if (!inputs.Peek()->IsValid())   {
+		  delete inputs.Pop();
+		  YYERROR;
+		}
+	      }
+
+conditional:  IF LBRACK CRLFopt expression CRLFopt COMMA 
               { emit(new NOT); emit(0);
-                labels.Push(program.Length()); } statements 
+                labels.Push(ProgLength()); } statements 
               { emit(0);
-		program[labels.Pop()] = new IfGoto(program.Length() + 1);
-		labels.Push(program.Length());
+		if (function)
+		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		else
+		  program[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		labels.Push(ProgLength());
 	      }
               alternative RBRACK
               { emit(new NOP);
-		program[labels.Pop()] = new Goto(program.Length());
+		if (function)
+		  (*function)[labels.Pop()] = new Goto(ProgLength());
+		else
+		  program[labels.Pop()] = new Goto(ProgLength());
               } 
 
 alternative:   
            |  COMMA statements
 
-whileloop:    WHILE LBRACK { labels.Push(program.Length() + 1); }
+CRLFopt:    | CRLFs
+
+CRLFs:     CRLF | CRLFs CRLF
+
+whileloop:    WHILE LBRACK CRLFopt { labels.Push(ProgLength() + 1); }
               expression { emit(new NOT); emit(0);
-			   labels.Push(program.Length()); }
-              COMMA statements RBRACK 
-              { program[labels.Pop()] = new IfGoto(program.Length() + 2);
+			   labels.Push(ProgLength()); }
+              CRLFopt COMMA statements RBRACK 
+              { if (!triv && !semi)   emit(new Display);
+                if (function)
+		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 2);
+		else
+		  program[labels.Pop()] = new IfGoto(ProgLength() + 2);
 		emit(new Goto(labels.Pop()));
 		emit(new NOP);
 	      }
 
-forloop:      FOR LBRACK exprlist COMMA  { labels.Push(program.Length() + 1); }
-              expression COMMA   { emit(new NOT);  emit(0);
-				   labels.Push(program.Length()); }
-              exprlist COMMA statements RBRACK
-                   { program[labels.Pop()] = new IfGoto(program.Length() + 2);
-		     emit(new Goto(labels.Pop()));
-		     emit(new NOP);
-		   }
+forloop:      FOR LBRACK CRLFopt exprlist CRLFopt COMMA CRLFopt 
+              { labels.Push(ProgLength() + 1); }
+              expression CRLFopt COMMA CRLFopt
+              {  index = labels.Pop();   // index is loc of begin of guard eval
+                 emit(new NOT);
+                 // slot for guard-false jump
+                 emit(0); labels.Push(ProgLength());
+                 // push location of increment 
+                 labels.Push(ProgLength() + 2);
+                 // slot for guard-true jump
+                 emit(0); labels.Push(ProgLength()); labels.Push(index);
+              }
+              exprlist CRLFopt COMMA
+              { // emit jump to beginning of guard eval
+                emit(new Goto(labels.Pop())); 
+                // link guard-true jump
+                if (function)
+                  (*function)[labels.Pop()] = new Goto(ProgLength() + 1);
+		else
+		  program[labels.Pop()] = new Goto(ProgLength() + 1);
+                semi = false;
+              }
+              statements RBRACK
+              { 
+                if (!triv && !semi)  emit(new Display);
+                // emit jump to beginning of increment step
+                emit(new Goto(labels.Pop()));
+		// link guard-false branch to end of code
+                if (function)
+		  (*function)[labels.Pop()] = new IfGoto(ProgLength() + 1);
+		else
+		  program[labels.Pop()] = new IfGoto(ProgLength() + 1);
+	      }
 
 exprlist:     expression  { emit(new Pop); }
         |     exprlist SEMI expression  { emit(new Pop); }
@@ -240,14 +326,23 @@ char GCLCompiler::nextchar(void)
 {
   char c;
 
-  gin >> c;
+  while (inputs.Depth() && inputs.Peek()->eof())
+    delete inputs.Pop();
+
+  if (inputs.Depth() == 0)
+    gin >> c;
+  else
+    *inputs.Peek() >> c;
 
   return c;
 }
 
 void GCLCompiler::ungetchar(char c)
 {
-  gin.unget(c);
+  if (inputs.Depth() == 0)
+    gin.unget(c);
+  else
+    inputs.Peek()->unget(c);
 }
 
 void GCLCompiler::yyerror(char *s)
@@ -271,7 +366,8 @@ I_dont_believe_Im_doing_this:
     if (c == '/')  {
       if ((d = nextchar()) == '/')  {
 	while ((d = nextchar()) != CR);
-	return EOF;
+	gout << "return CRLF\n";
+	return CRLF;
       }
       else if (d == '*')  {
 	int done = 0;
@@ -325,6 +421,8 @@ I_dont_believe_Im_doing_this:
     else if (s == "While")  return WHILE;
     else if (s == "For")    return FOR;
     else if (s == "Quit")   return QUIT;
+    else if (s == "NewFunction")   return DEFFUNC;
+    else if (s == "Include")   return INCLUDE;
     else  { tval = s; return NAME; }
   }
 
@@ -385,15 +483,14 @@ I_dont_believe_Im_doing_this:
     case '%':   return PERCENT;
     case '=':   return EQU;
     case '#':   return HASH;
-    case '[':   c = nextchar();
+    case '[':   matching.Push('[');
+                c = nextchar();
                 if (c == '[')   {
-		  matching.Push('[');
 		  matching.Push('[');
 		  return DBLLBRACK;
 		}
                 else   {
 		  ungetchar(c);
-		  matching.Push('[');
 		  return LBRACK;
 		}
     case ']':   if (matching.Depth() > 0 && matching.Peek() == '[')
@@ -424,29 +521,67 @@ I_dont_believe_Im_doing_this:
                 if (c == '|')  return LOR;
                 else   { ungetchar(c);  return '|'; }
     case CR:    if (matching.Depth())
-                  goto I_dont_believe_Im_doing_this;
-                return EOF;
+                  return CRLF;
+    case EOF:   return EOC;
     default:    return c;
   }
 }
 
 int GCLCompiler::Parse(void)
 {
-  matching.Flush();
-  if (!yyparse())  {
-    Execute();
-    return 0;
+  int command = 1;
+
+  while (!quit && (inputs.Depth() > 0 || !gin.eof()))  {
+    gout << "GCL" << command << ": ";
+    matching.Flush();
+    if (!yyparse())  {
+      Execute();
+//      gsm.Dump();
+      command++;
+    }
+    else 
+      while (program.Length() > 0)   delete program.Remove(1);
   }
-  else  {
-    while (program.Length() > 0)   delete program.Remove(1);
-    return 1;
-  }
+  return 1;
 }
 
 
 void GCLCompiler::emit(Instruction *op)
 {
-  program.Append(op);
+  if (function)
+    function->Append(op);
+  else
+    program.Append(op);
+}
+
+int GCLCompiler::ProgLength(void)
+{
+  return (function) ? function->Length() : program.Length();
+}
+
+void GCLCompiler::DefineFunction(void)
+{
+  FuncDescObj *func = new FuncDescObj(funcname);
+  func->SetFuncInfo(function, formals.Length());
+  function->Dump(gout);
+
+  for (int i = 1; i <= formals.Length(); i++)   {
+    PortionType type = TextToPortionType(types[i]);
+
+    if (type != porERROR)   {
+      if (refs[i])
+	func->SetParamInfo(function, i - 1, formals[i], type,
+			   NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+      else
+	func->SetParamInfo(function, i - 1, formals[i], type);
+    }
+    else
+      break;
+  }
+
+  gsm.AddFunction(func);
+  formals.Flush();   types.Flush();  refs.Flush();
+  function = 0;
 }
 
 void GCLCompiler::Execute(void)
@@ -476,3 +611,12 @@ TEMPLATE class gGrowableStack<int>;
 
 TEMPLATE class gStack<char>;
 TEMPLATE class gGrowableStack<char>;
+
+TEMPLATE class gStack<gInput *>;
+TEMPLATE class gGrowableStack<gInput *>;
+
+#include "glist.imp"
+
+TEMPLATE class gList<bool>;
+TEMPLATE class gNode<bool>;
+
