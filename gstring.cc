@@ -1,7 +1,7 @@
 //
 // FILE: gstring.cc -- Implementation of String class
 //
-// @(#)gstring.cc	1.4 6/30/94
+// $Id$
 //
 
 #include <stdlib.h>
@@ -27,9 +27,16 @@ gString::gString(char c)
 
 gString::gString(const char *s)
 {
-  storage = new char[strlen(s) + 1];
-  assert(storage != 0);
-  strcpy(storage, s);
+  if (s != 0)   {
+    storage = new char[strlen(s) + 1];
+    assert(storage != 0);
+    strcpy(storage, s);
+  }
+  else  {
+    storage = new char[1];
+    assert(storage != 0);
+    storage[0] = '\0';
+  }
 }
 
 gString::gString(const gString &s)
@@ -50,9 +57,16 @@ gString::gString(int len)
 void gString::operator=(const char *s)
 {
   delete [] storage;
-  storage = new char[strlen(s) + 1];
-  assert(storage != 0);
-  strcpy(storage, s);
+  if (s != 0)   {
+    storage = new char[strlen(s) + 1];
+    assert(storage != 0);
+    strcpy(storage, s);
+  }
+  else  {
+    storage = new char[1];
+    assert(storage != 0);
+    storage[0] = '\0';
+  }
 }
 
 void gString::operator+=(char c)
