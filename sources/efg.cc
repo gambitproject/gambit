@@ -511,7 +511,7 @@ void BaseEfg::UnmarkSubtree(Node *n)
 
 void BaseEfg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
 {
-  int i,j,k,l,m;
+  int i,j,k,m;
   bool flag;
   gBlock<Node*> OldMembers;
   Node *n;
