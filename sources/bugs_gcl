@@ -200,6 +200,57 @@ EXCEPTION: Bad index in gArray
 GCL4:= << Quit
 
 
+//-----------------------------
+
+Bug C28:  Infinite loop in LcpSolve[nfg]
+
+The following hangs the GCL:
+
+  GCL1:= << k:=10;
+  GCL2:= << n:=Randomize[NewNfg[{k,k},True],seed->142];
+  GCL3:= << LcpSolve[n]
+
+
+//-----------------------------
+
+Bug C29:  Memory leak?  
+
+On koo, the script from the cron job, ~rdm/gambit/test/qretest.gcl
+leads to the following
+
+  35 koo:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << Include["eqre.gcl"]
+  True
+  Include["eqre.gcl"]
+  Include["eqreml.gcl"]
+  Include["loglike.gcl"]
+  GCL2:= << EQre["bhg3"]
+
+On mill, a similar problem with a different script:
+
+  44 mill:/home/mill/rdm/exper/pldark newgcl
+  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << Include["bad.gcl"]
+  True
+  EXCEPTION: Memory exhausted in call to new
+
+The script is basically a maximum likelihood grid search.  It never
+goes into any game or algorithm code.  The parameter that sets the
+stepsize for one of the dimensions is "gridDel".  If I set it to .01,
+then the program works fine.  If I set it to .005, I get the above
+message.  If I set it to .002, then I get a segfault:
+
+  46 mill:/home/mill/rdm/exper/pldark newgcl
+  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << Include["bad.gcl"]
+  True
+  Segmentation fault
+
+
 //---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
