@@ -1018,8 +1018,12 @@ static Portion *GSM_SaveEfg(Portion **param)
 static Portion *GSM_WriteSfg(Portion **param)
 {
   gOutput &out = ((OutputPortion*) param[0])->Value();
-  EFSupport *efs = ((EfSupportPortion*) param[1])->Value();
-  const Sfg& sfg(*efs);
+  const Efg *efg = ((EfgPortion*) param[1])->Value();
+  if (!IsPerfectRecall(*efg)) 
+    throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
+
+  EFSupport efs(*efg);
+  const Sfg& sfg(efs);
   sfg.Dump(out);
   return param[0]->ValCopy();
 }
@@ -1047,8 +1051,12 @@ void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index
 
 static Portion *GSM_Sfg(Portion **param)
 {
-  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
-  const Sfg& sfg(*efs);
+  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  if (!IsPerfectRecall(*efg)) 
+    throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
+
+  EFSupport efs(*efg);
+  const Sfg& sfg(efs);
 
   ListPortion *por = new ListPortion;
   gIndexOdometer index(sfg.NumSequences());
@@ -1060,11 +1068,14 @@ static Portion *GSM_Sfg(Portion **param)
 
 static Portion *GSM_SfgStrats(Portion **param)
 {
-  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  if (!IsPerfectRecall(*efg)) 
+    throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
   int p = pl->GetNumber();
-  const Sfg& sfg(*efs);
-  
+  EFSupport efs(*efg);
+  const Sfg& sfg(efs);
+
   ListPortion *por = new ListPortion;
   for (int i=1;i<=sfg.NumSequences(p);i++) {
     gList<const Action *> h((sfg.GetSequence(p,i))->History());
@@ -1078,10 +1089,13 @@ static Portion *GSM_SfgStrats(Portion **param)
 
 static Portion *GSM_SfgConstraints(Portion **param)
 {
-  EFSupport *efs = ((EfSupportPortion*) param[0])->Value();
+  const Efg *efg = ((EfgPortion*) param[0])->Value();
+  if (!IsPerfectRecall(*efg)) 
+    throw gclRuntimeError("Sequence form not defined for game of imperfect recall");
   EFPlayer *pl = ((EfPlayerPortion*) param[1])->Value();
   int p = pl->GetNumber();
-  const Sfg& sfg(*efs);
+  EFSupport efs(*efg);
+  const Sfg& sfg(efs);
 
   gRectArray<gNumber> A(sfg.Constraints(p));
 
@@ -1449,21 +1463,21 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, gclSignature(GSM_WriteSfg, porOUTPUT, 2, 0 , funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("output", porOUTPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction("SequenceForm", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Sfg, PortionSpec(porNUMBER, NLIST), 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   gsm->AddFunction(FuncObj);
   FuncObj = new gclFunction("SequenceFormStrats", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SfgStrats, PortionSpec(porACTION, 2), 2));
-  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("player", porEFPLAYER));
   gsm->AddFunction(FuncObj);
   FuncObj = new gclFunction("SequenceFormConstraints", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_SfgConstraints, PortionSpec(porNUMBER, 2), 2));
-  FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
+  FuncObj->SetParamInfo(0, 0, gclParameter("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("player", porEFPLAYER));
   gsm->AddFunction(FuncObj);
   /*
