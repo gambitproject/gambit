@@ -3367,6 +3367,7 @@ appreciate getting feedback on this.
   Print
   Read 
 # Read 
+  ReadText
   SaveEfg 
   SaveNfg 
 # SetIntegerFormat 
@@ -6444,7 +6445,24 @@ first character is a \verb+{+, then the exposed data consists of all
 the characters up until the next matching \verb+}+.  Otherwise, the
 exposed data consists of all characters until the next whitespace.
 \item [Short form:] \verb+input >> x+
-\item [See also:] \verb+Input+, \verb+IsEof+, \verb+Write+.
+\item [See also:] \verb+Input+, \verb+IsEof+, \verb+\ReadText+, 
+\verb+Write+.
+\ed
+
+\item\lex{ReadText}
+\protect \large \begin{verbatim}
+ReadText[input<->INPUT, {x<->}, until->TEXT] =: INPUT
+ReadText[input<->INPUT, {x<->}, n->NUMBER] =: INPUT
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = BOOLEAN, NUMBER, TEXT} 
+\bd 
+Reads data of type \verb+TEXT+ from the input stream and assigns it to
+\verb+x+.  The first signature reads from \verb+input+ until the
+string \verb+until+ is reached.  For example, setting
+\verb+until->"\n"+ will read a line of text frin \verb+input+.  The
+second signature reads \verb+n+ characters from \verb+input+.  
+\item [See also:] \verb+Input+, \verb+IsEof+, \verb+Read+, \verb+Write+.
 \ed
 
 \item\lex{RealizProbs}
