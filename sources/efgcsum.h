@@ -61,6 +61,25 @@ public:
   void GetSolutions(gList<BehavSolution<T> > &) const;
 };
 
+
+#include "subsolve.h"
+
+template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
+  private:
+    long npivots;
+    CSSeqFormParams params;
+
+    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int AlgorithmID() const { return id_USER; }    
+
+  public:
+    CSSeqFormBySubgame(const Efg<T> &E, const CSSeqFormParams &, int max = 0);
+    virtual ~CSSeqFormBySubgame();
+
+    long NumPivots(void) const  { return npivots; }
+};
+
+
 #endif    // EFGCSUM_H
 
 

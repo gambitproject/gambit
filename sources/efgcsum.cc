@@ -27,6 +27,14 @@ class CSSeqFormModule<gRational>;
 #endif   // __GNUG__, __BORLANDC__
 
 
+#ifdef __GNUG__
+template class CSSeqFormBySubgame<double>;
+template class CSSeqFormBySubgame<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class CSSeqFormBySubgame<double>;
+class CSSeqFormBySubgame<gRational>;
+#endif   // __GNUG__, __BORLANDC__
 
 
 
