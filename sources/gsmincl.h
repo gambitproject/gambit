@@ -23,6 +23,7 @@ class gOutput;
 
 #define  porBOOL               ( 0x00000001 )
 #define  porPRECISION          ( 0x00000002 )
+#define  porINTEGER            ( 0x00000004 )
 #define  porNUMBER             ( 0x00000008 )
 #define  porTEXT               ( 0x00000010 )
 

@@ -9,7 +9,7 @@
 
 bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 )
 {
-  if( t1 == t2 )
+  if (t1 == t2)
     return true;
   else if((t1.Type & t2.Type) && ((t1.ListDepth>0) == (t2.ListDepth>0)))
     return true;
@@ -35,12 +35,13 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 25
+#define NUM_PortionSpecs 26
 #define NUM_CompositePortionSpecs 2
 
 PortionSpecTextType _PortionSpecText[] =
 {
   { porBOOL,               "BOOLEAN" },
+  { porINTEGER,            "INTEGER" }, 
   { porNUMBER,             "NUMBER" },
   { porTEXT,               "TEXT" },
 
