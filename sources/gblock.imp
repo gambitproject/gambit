@@ -114,7 +114,7 @@ template <class T> int gBlock<T>::Contains(const T &t) const
 { return Find(t); }
 
 template <class T> void gBlock<T>::Flush(void)
-{ maxdex = mindex - 1;  delete [] (data + mindex);  data = 0; }
+{ maxdex = mindex - 1;  if (data)  delete [] (data + mindex);  data = 0; }
 
 //
 // Uses the Dump function to output the gBlock.  Uses the << operator
