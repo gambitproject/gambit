@@ -1271,7 +1271,8 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
   {
     if( param[ i ] != 0 && param[ i ]->Type() != porREFERENCE )
     {
-      _VarDefine( func_info.ParamInfo[ i ].Name, param[ i ]->RefCopy() );
+      _VarDefine( func_info.ParamInfo[ i ].Name, param[ i ] );
+      param[ i ] = param[ i ]->RefCopy();
     }
   }
 
