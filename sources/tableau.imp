@@ -194,19 +194,16 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
   if(totdenom<=0) throw BadDenom();
-  //  assert(totdenom>0);
   
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
     if(x.denominator() != 1) throw BadDenom();
-    //    assert(x.denominator() == 1);
     Coeff[i] = x.numerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) 
     for (int j = MinCol();j<=MaxCol();j++) {
       gRational x = A(i,j)*(gRational)totdenom;
       if(x.denominator() != 1) throw BadDenom();
-      //      assert(x.denominator() == 1);
       Tabdat(i,j) = x.numerator();
     }
   for (int i = b.First();i<=b.Last();i++) 
@@ -227,19 +224,16 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
   if(totdenom<=0) throw BadDenom();
-  //  assert(totdenom>0);
   
   for (int i = b.First();i<=b.Last();i++) {
     gRational x = b[i]*(gRational)totdenom;
     if(x.denominator() != 1) throw BadDenom();
-    //    assert(x.denominator() == 1);
     Coeff[i] = x.numerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) {
     for (int j = MinCol();j<=A.MaxCol();j++) {
       gRational x = A(i,j)*(gRational)totdenom;
       if(x.denominator() != 1) throw BadDenom();
-      //      assert(x.denominator() == 1);
       Tabdat(i,j) = x.numerator();
     }
     for (int j = A.MaxCol()+1;j<=MaxCol();j++)
@@ -280,7 +274,6 @@ int Tableau<gRational>::remap(int col_index) const
   int i = nonbasic.First(); 
   while(i <= nonbasic.Last() && nonbasic[i] !=col_index) { i++;}
   if(i > nonbasic.Last()) throw BadDim();
-  // assert(i <= nonbasic.Last());
   return i;
 }
 
@@ -314,8 +307,6 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   // gout << " inlabel: " << in_col;
   if(!RowIndex(outrow) || !ValidIndex(in_col)) 
     throw BadPivot();
-  //  assert( RowIndex(outrow) );
-  // assert( ValidIndex(in_col) );
   int outlabel = Label(outrow);
 
   // gout << "\noutrow:" << outrow;
@@ -437,7 +428,6 @@ void Tableau<gRational>::Refactor()
   //gout << "\ndenom: " << denom << " totdenom: " << totdenom;
   totdenom = lcm(find_lcd(*A),find_lcd(*b));
   if(totdenom<=0) throw BadDenom();
-  // assert(totdenom>0);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
 
   int i,j;
@@ -462,11 +452,9 @@ void Tableau<gRational>::Refactor()
 
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();i++) {
     if(Coeffnew[i].denominator() != 1) throw BadDenom();
-    //    assert(Coeffnew[i].denominator() == 1);
     Coeff[i] = Coeffnew[i].numerator();
     for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();j++) {
       if(Tabnew(i,j).denominator() != 1) throw BadDenom();
-      //      assert(Tabnew(i,j).denominator() == 1);
       Tabdat(i,j) = Tabnew(i,j).numerator();
     }
   }

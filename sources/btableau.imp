@@ -269,7 +269,6 @@ template <class T>
 T TableauInterface<T>::Epsilon(int i) const
 {
   if(i!=1 && i!=2) throw BadDim();
-  //  assert(i==1 || i==2);
   if(i==1) return eps1;
   return eps2;
 }

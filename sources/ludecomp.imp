@@ -71,7 +71,7 @@ template <class T> LUdecomp<T>::~LUdecomp()
 { 
   if ( parent != NULL )
     ((LUdecomp<T> &) *parent).copycount--;
-  assert ( copycount == 0 );
+  if(copycount != 0) throw BadCount();
 }
 
 
@@ -109,7 +109,7 @@ template <class T>
 void LUdecomp<T>::update( int col, int matcol )
 {
 
-  assert( copycount == 0 );
+  if( copycount != 0 ) throw BadCount();
   int m = basis.Last() - basis.First() + 1;
 
   iterations++;
@@ -119,7 +119,7 @@ void LUdecomp<T>::update( int col, int matcol )
   else {
     tab.GetColumn( matcol, scratch1); 
     solve( scratch1, scratch1 );
-    assert ( scratch1[col] != (T) 0 );
+    if ( scratch1[col] == (T) 0 ) throw BadPivot();
     E.Append( EtaMatrix<T>( col, scratch1 ) );
     
     total_operations += iterations * m + 2 * m * m;    
@@ -151,8 +151,8 @@ template <class T>
 void LUdecomp<T>::solveT( const gVector<T> &c, gVector<T> &y ) const  
 {
 
-  assert ( c.First() == y.First() && c.Last() == y.Last() );
-  assert ( c.First() == basis.First() && c.Last() == basis.Last());
+  if ( c.First() != y.First() || c.Last() != y.Last() ) throw BadDim();
+  if ( c.First() != basis.First() || c.Last() != basis.Last()) throw BadDim();
 
   y = c;
   if ( basis.IsIdent() != true ) {
@@ -170,8 +170,8 @@ template <class T>
 void LUdecomp<T>::solve( const gVector<T> &a, gVector<T> &d ) const
 {
 
-  assert ( a.First() == d.First() && a.Last() == d.Last() );
-  assert ( a.First() == basis.First() && a.Last() == basis.Last());
+  if ( a.First() != d.First() || a.Last() != d.Last() ) throw BadDim();
+  if ( a.First() != basis.First() || a.Last() != basis.Last()) throw BadDim();
   
   d = a;
   if ( basis.IsIdent() != true ) {
@@ -241,7 +241,7 @@ void LUdecomp<T>::FactorBasis()
 template<class T>
 void LUdecomp<T>::GaussElem(gMatrix<T> &B, int row, int col)
 {
-  assert( B(row, col) != (T) 0);
+  if( B(row, col) == (T) 0) throw BadPivot();
 
   int i,j;
 
@@ -291,7 +291,7 @@ void LUdecomp<T>::VectorEtaSolve( const gVector<T> &v,
 
   int i, j;
 
-  assert ( v.First() == y.First() && v.Last() == y.Last() );
+  if ( v.First() != y.First() || v.Last() != y.Last() ) throw BadDim();
 
   for ( i = v.First(); i <= v.Last(); i++ ) {
     y[i] = v[i];
@@ -333,8 +333,9 @@ void LUdecomp<T>::EtaVectorSolve( const gVector<T> &v,
   int i;
   T temp;
 
-  assert ( v.First() == d.First() && v.Last() == d.Last() );
-  assert ( eta.etadata[eta.col] != (T)0 ); // or we would have a singular matrix
+  if ( v.First() != d.First() || v.Last() != d.Last() ) throw BadDim();
+  if ( eta.etadata[eta.col] == (T)0 )
+    throw BadPivot(); // or we would have a singular matrix
   
   temp = v[eta.col] / eta.etadata[eta.col];
 
@@ -362,7 +363,7 @@ template<class T>
 void LUdecomp<T>::yLP_mult( const gVector<T> &y, int j, gVector<T> &ans ) const
 {
     
-  assert ( ans.First() == y.First() && ans.Last() == y.Last() );
+  if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw BadDim();
   T temp;
   int i, k, l;
   
@@ -398,7 +399,7 @@ template<class T>
 void LUdecomp<T>::LPd_mult( gVector<T> &d, int j, gVector<T> &ans ) const
 {
   
-  assert ( d.First() == ans.First() && d.Last() == ans.Last() );
+  if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw BadDim();
 
   T temp;
 
@@ -446,6 +447,27 @@ bool LUdecomp<T>::RefactorCheck()
   return tmp;
 }
   
+template <class T> LUdecomp<T>::BadCount::~BadCount()
+{ }
 
+template <class T> gText LUdecomp<T>::BadCount::Description(void) const
+{
+  return "Bad Reference count in LUdecomp";
+}
 
+template <class T> LUdecomp<T>::BadDim::~BadDim()
+{ }
+
+template <class T> gText LUdecomp<T>::BadDim::Description(void) const
+{
+  return "Bad Dimension in LUdecomp";
+}
+
+template <class T> LUdecomp<T>::BadPivot::~BadPivot()
+{ }
+
+template <class T> gText LUdecomp<T>::BadPivot::Description(void) const
+{
+  return "Bad Pivot in LUdecomp";
+}
 

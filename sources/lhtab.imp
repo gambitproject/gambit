@@ -102,7 +102,6 @@ template <class T> LHTableau<T>::~LHTableau(void)
 template <class T>
 LHTableau<T>& LHTableau<T>::operator=(const LHTableau<T> &orig)
 {
-//  assert( A==orig.A );
   if(this!= &orig) {
     T1 = orig.T1;
     T2 = orig.T2;
@@ -168,7 +167,6 @@ template <class T>
 void LHTableau<T>::Pivot(int outrow,int inlabel)
 {
   if(!RowIndex(outrow) ) throw BadPivot();
-  //  assert( RowIndex(outrow) );
   if(T1.RowIndex(outrow)) T1.Pivot(outrow,inlabel);
   if(T2.RowIndex(outrow)) T2.Pivot(outrow,inlabel);
 }

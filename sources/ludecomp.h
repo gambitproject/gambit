@@ -63,6 +63,21 @@ private:
   int copycount;
 
 public:
+  class BadDim : public gException  {
+  public:
+    virtual ~BadDim();
+    gText Description(void) const;
+  };
+  class BadPivot : public gException  {
+  public:
+    virtual ~BadPivot();
+    gText Description(void) const;
+  };
+  class BadCount : public gException  {
+  public:
+    virtual ~BadCount();
+    gText Description(void) const;
+  };
 
   // ------------------------
   // Constructors, Destructor

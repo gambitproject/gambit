@@ -78,7 +78,6 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
       return Find(0);
   */
     if(BestSet.Length() <= 0) throw BadExitIndex();
-    // assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns,
@@ -90,7 +89,6 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   //* gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
     if(c > MaxRow()) throw BadExitIndex();
-    //    assert(c <= MaxRow());
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -103,7 +101,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 //*      if (ratio > tempmax)  tempmax = ratio;
       if (ratio < tempmax)  tempmax = ratio;
     }
-//    assert(tempmax > (T 2)*eps1);
+//    if (tempmax <= (T 2)*eps1) throw BadExitIndex();
     
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
@@ -113,13 +111,12 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 	BestSet.Remove(i);
     }
 //    else  {
-//      assert(Member(FindColumn(c)));
+//      if(!Member(FindColumn(c))) throw BadExitIndex();
 //      if (BestSet.Contains(c_row)) return c_row;
 //    }
     c++;
   }
   if(BestSet.Length() <= 0) throw BadExitIndex();
-  // assert(BestSet.Length() > 0);
   return BestSet[1];
 }
 
@@ -152,7 +149,6 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
      && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
     return Find(0);
   if(BestSet.Length() <= 0) throw BadExitIndex();
-  //  assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns, 
@@ -163,8 +159,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   // gout << "\nLength = " <<  BestSet.Length();
   //   gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
+    // this is where ITEM 001 is failing
     if(c > MaxRow()) throw BadExitIndex();
-    // assert(c <= MaxRow());  // this is the assertion failing in ITEM 0001
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -176,7 +172,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax)  tempmax = ratio;
     }
-//    assert(tempmax > (T 2)*eps1);
+//    if(tempmax <= (T 2)*eps1) throw BadExitIndex();
     
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
@@ -185,13 +181,12 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 	BestSet.Remove(i);
     }
 //    else  {
-//      assert(Member(FindColumn(c)));
+//      if(!Member(FindColumn(c))) throw BadExitIndex();
 //      if (BestSet.Contains(c_row)) return c_row;
 //    }
     c++;
   }
   if(BestSet.Length() <= 0) throw BadExitIndex();
-  //  assert(BestSet.Length() > 0);
   return BestSet[1];
 }
 
@@ -208,7 +203,7 @@ template <class T> int LTableau<T>::SF_LCPPath(int dup, gStatus &status)
     Pivot(dup,0);
   else {
     enter = -SF_PivotIn(dup);
-    assert(enter!=0);
+    if(enter==0) throw BadPivot();
   }      
 */
       // Central loop - pivot until another CBFS is found

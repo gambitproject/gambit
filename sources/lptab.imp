@@ -59,9 +59,7 @@ void LPTableau<gRational>::SetCost(const gVector<gRational>& c)
     return;
   }
   if(c.First()!=cost.First()) throw BadDim();
-  //  assert(c.First()==cost.First());
   if(c.Last()!=(cost.Last()+unitcost.Length())) throw BadDim();
-  //  assert(c.Last()==(cost.Last()+unitcost.Length()));
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i]*(gRational)Tableau<gRational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -85,9 +83,7 @@ void LPTableau<double>::SetCost(const gVector<double>& c)
     return;
   }
   if(c.First()!=cost.First()) throw BadDim();
-  //  assert(c.First()==cost.First());
   if(c.Last()!=(cost.Last()+unitcost.Length())) throw BadDim();
-  //  assert(c.Last()==(cost.Last()+unitcost.Length()));
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -107,8 +103,6 @@ void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
     throw BadDim();
   if(unitcost.First()!=uc.First() || unitcost.Last()!=uc.Last()) 
     throw BadDim();
-  // assert(cost.First()==c.First() && cost.Last()==c.Last());
-  // assert(unitcost.First()==uc.First() && unitcost.Last()==uc.Last());
   int i;
   for(i=cost.First();i<=cost.Last();i++) cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i]=uc[i];
@@ -185,8 +179,9 @@ template <class T>
 void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 				      gVector<T> &relcost) const
 {
-  assert(A->CheckColumn(relunitcost));
-  assert(A->CheckRow(relcost));
+
+  if(!A->CheckColumn(relunitcost)) throw BadDim();
+  if(!A->CheckRow(relcost)) throw BadDim();
   
   relunitcost= unitcost - dual;
   relcost= cost - dual*A;  // pre multiplication not defined?  
