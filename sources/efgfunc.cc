@@ -908,6 +908,15 @@ Portion *GSM_Infosets(Portion **param)
   return por;
 }
 
+Portion *GSM_IsConstSumEfg(Portion **param)
+{
+  BaseEfg &E = *((EfgPortion*) param[0])->Value();
+  return new BoolValPortion(E.IsConstSum());
+}
+
+// This function currently lives in with the normal form stuff...
+extern Portion *GSM_IsConstSumNfg(Portion **);
+
 Portion *GSM_IsPredecessor(Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
@@ -2211,6 +2220,15 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Infosets");
   FuncObj->SetFuncInfo(GSM_Infosets, 1);
   FuncObj->SetParamInfo(GSM_Infosets, 0, "player", porPLAYER_EFG);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("IsConstSum");
+  FuncObj->SetFuncInfo(GSM_IsConstSumEfg, 1);
+  FuncObj->SetParamInfo(GSM_IsConstSumEfg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(GSM_IsConstSumNfg, 1);
+  FuncObj->SetParamInfo(GSM_IsConstSumNfg, 0, "nfg", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsPredecessor");

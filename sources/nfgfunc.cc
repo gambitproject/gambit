@@ -89,6 +89,12 @@ Portion *GSM_CentroidNFSupport(Portion **param)
   return por;
 }
 
+Portion *GSM_IsConstSumNfg(Portion **param)
+{
+  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
+  return new BoolValPortion(N.IsConstSum());
+}
+
 Portion *GSM_NumPlayersNfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion*) param[0])->Value();
@@ -1624,9 +1630,33 @@ Portion *GSM_SetComponent_MixedRational(Portion **param)
 }
 
 
+Portion *GSM_IsNash_MixedFloat(Portion **param)
+{
+  MixedProfile<double> *P = 
+    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash());
+}
 
+Portion *GSM_IsNash_MixedRational(Portion **param)
+{
+  MixedProfile<gRational> *P = 
+    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new BoolValPortion(P->IsNash());
+}
 
+Portion *GSM_LiapValue_MixedFloat(Portion **param)
+{
+  MixedProfile<double> *P = 
+    (MixedProfile<double>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new FloatValPortion(P->LiapValue());
+}
 
+Portion *GSM_LiapValue_MixedRational(Portion **param)
+{
+  MixedProfile<gRational> *P = 
+    (MixedProfile<gRational>*) ( (MixedPortion*) param[ 0 ] )->Value();
+  return new RationalValPortion(P->LiapValue());
+}
 
 
 
@@ -2029,6 +2059,28 @@ void Init_nfgfunc(GSM *gsm)
 
   gsm->AddFunction( FuncObj );
 
+  //----------------------- IsNash ------------------------//
+
+  FuncObj = new FuncDescObj("IsNash");
+  FuncObj->SetFuncInfo(GSM_IsNash_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_IsNash_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_IsNash_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("LiapValue");
+  FuncObj->SetFuncInfo(GSM_LiapValue_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_MixedFloat, 0, "strategy",
+			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  
+  FuncObj->SetFuncInfo(GSM_LiapValue_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_LiapValue_MixedRational, 0, "strategy",
+			porMIXED_RATIONAL, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
 
 
   //----------------------- List --------------------------//

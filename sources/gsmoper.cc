@@ -2116,13 +2116,25 @@ Portion* GSM_Read_Undefined( Portion** param )
   return result;
 }
 
+//
+// Don't know where this really belongs, but this seems like a good
+// a place as any, at least for now.
+//
 
+Portion *GSM_Version(Portion **)
+{
+  return new FloatValPortion(GCL_VERSION);
+}
 
 
 void Init_gsmoper( GSM* gsm )
 {
   FuncDescObj* FuncObj;
 
+
+  FuncObj = new FuncDescObj("Version");
+  FuncObj->SetFuncInfo(GSM_Version, 0, NO_PREDEFINED_PARAMS, NON_LISTABLE);
+  gsm->AddFunction(FuncObj);
 
   //---------------------- Assign ------------------------
   FuncObj = new FuncDescObj( (gString) "Assign" );
