@@ -1597,7 +1597,7 @@ void Init_algfunc(GSM *gsm)
   //-------------------------- EnumPureSolve ------------------------//
 
   FuncObj = new FuncDescObj("EnumPureSolve");
-  FuncObj->SetFuncInfo(GSM_EnumPureEfgFloat, 4);
+  FuncObj->SetFuncInfo(GSM_EnumPureEfgFloat, 6);
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 1, "asNfg", porBOOL,
@@ -1611,7 +1611,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_EnumPureEfgFloat, 5, "tracelevel", porINTEGER,
 			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_EnumPureEfgRational, 4);
+  FuncObj->SetFuncInfo(GSM_EnumPureEfgRational, 6);
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_EnumPureEfgRational, 1, "asNfg", porBOOL,
