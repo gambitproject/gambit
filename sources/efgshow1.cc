@@ -735,26 +735,32 @@ void EfgShow::GameChanged(void)
 }
 
 
-// File name stuff
+//
+// These functions act weird on some platforms (e.g., HP, and Win95 under
+// Borland C).  So, there's a couple different versions to make the best
+// of things
+//
+
 void EfgShow::SetFileName(void)
 {
-    // Title the window
-#ifndef _HPUX_SOURCE // for some strange reason SetTitle crashes on hp
-    SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
+#ifdef __BORLANDC__
+  SetTitle("[" + filename + "] " + ef.GetTitle());
+#else if !defined(_HPUX_SOURCE)
+  SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
 #endif
 }
 
-
-void EfgShow::SetFileName(const gText &s)
+void EfgShow::SetFileName(const gText &p_name)
 {
-    if (s != "") 
-        filename = s;
-    else 
-        filename = "untitled.efg";
+  if (p_name != "")
+    filename = p_name;
+  else
+    filename = "untitled.efg";
 
-    // Title the window
-#ifndef _HPUX_SOURCE // for some strange reason SetTitle crashes on hp
-    SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
+#ifdef __BORLANDC__
+  SetTitle("[" + filename + "] " + ef.GetTitle());
+#else if !defined(_HPUX_SOURCE)
+  SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
 #endif
 }
 
