@@ -85,7 +85,7 @@ class TreeWindow : public BaseTreeWindow, public wxCanvas
 	public:
 		// Constructor
 		TreeWindow(ExtForm<T> *p,ExtensiveShow<T> *frame,int subgame=1,
-							int x=-1,int y=-1,int w=-1,int h=-1,int style=wxRETAINED);
+							int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
 		// Destructor
 		~TreeWindow();
 		// Windows event handlers

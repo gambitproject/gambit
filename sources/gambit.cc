@@ -17,7 +17,7 @@ GambitFrame   *gambit_frame = NULL;
 wxHelpInstance *help_instance = NULL;
 wxList 		my_children;
 wxCursor *arrow_cursor;
-#ifdef __AIX
+#ifdef _AIX
 extern wxApp *wxTheApp=1;
 #endif
 GambitApp gambitApp;
