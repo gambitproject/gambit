@@ -17,6 +17,8 @@ class Infoset;
 template <class T> class BehavNode;
 class Nfg;
 template <class T> class MixedProfile;
+template <class T> class gPVector;
+template <class T> class gRectArray;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
 friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
@@ -25,8 +27,10 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     const Efg *E;
     BehavNode<T> *root;
     gArray<BehavNode<T> *> nodes;
-
     EFSupport support;
+    gPVector<T> *chanceprobs;
+    gRectArray<T> *payoffs;
+
 
     void Payoff(Node *n, T prob, int pl, T &value) const;
     void NodeValues(BehavNode<T> *n, int pl, gArray<T> &valarray,

@@ -1,7 +1,7 @@
 //
 // FILE: mixed.h -- Mixed strategy profile classes
 //
-// $Id$
+// @(#)mixed.h	2.4 19 Jul 1997
 //
 
 #ifndef MIXED_H
@@ -13,12 +13,14 @@
 #include "gpvector.h"
 
 class Nfg;
+template <class T> class gRectArray;
 
 template <class T> class MixedProfile : public gPVector<T>  {
 
   private:
     const Nfg *N;
     NFSupport support;
+    gRectArray<T> *payoffs;
 
     // Private Payoff functions
 

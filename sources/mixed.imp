@@ -17,28 +17,45 @@
 //---------------------------------------------------------------------------
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF)
-  : gPVector<T>(NF.NumStrats()), N(&NF), support(NF)
+  : gPVector<T>(NF.NumStrats()), N(&NF), support(NF),
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
 {
   Centroid();
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
 						 const NFSupport &s)
-  : gPVector<T>(s.NumStrats()), N(&NF), support(s)
+  : gPVector<T>(s.NumStrats()), N(&NF), support(s),
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
 {
   Centroid();
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg &NF,
 						 const gPVector<T> &profile)
-  : gPVector<T>(profile), N(&NF), support(NF)
-{ }
+  : gPVector<T>(profile), N(&NF), support(NF),
+    payoffs(new gRectArray<T>(NF.NumOutcomes(), NF.NumPlayers()))
+{
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+    for (int pl = 1; pl <= N->NumPlayers(); pl++)
+      (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
+}
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
-  : gPVector<T>(p), N(p.N), support(p.support)
+  : gPVector<T>(p), N(p.N), support(p.support),
+    payoffs(new gRectArray<T>(*p.payoffs))
 { }
 
-template <class T> MixedProfile<T>::~MixedProfile()   { }
+template <class T> MixedProfile<T>::~MixedProfile()
+{
+  delete payoffs;
+}
 
 template <class T>
 MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
@@ -214,7 +231,7 @@ T MixedProfile<T>::PPayoff(int pl, int index, int i) const
 
   if (i > N->NumPlayers())  {
     if (N->GetOutcome(index))
-      return N->Payoff(N->GetOutcome(index), pl);
+      return (*payoffs)(N->GetOutcome(index)->GetNumber(), pl);
     else
       return (T) 0;
   }
@@ -242,7 +259,7 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
   else if (cur_pl > N->NumPlayers())  {
     if (N->GetOutcome(index))
       value += prob *
-      (T) N->Payoff(N->GetOutcome(index), pl);
+      (*payoffs)(N->GetOutcome(index)->GetNumber(), pl);
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
@@ -268,7 +285,7 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
   else if (cur_pl > N->NumPlayers())  {
     if (N->GetOutcome(index))
       value += prob *
-      (T) N->Payoff(N->GetOutcome(index), pl);
+      (*payoffs)(N->GetOutcome(index)->GetNumber(), pl);
   }
   else   {
     for (int j = 1; j <= support.NumStrats(cur_pl); j++ ) {
@@ -295,7 +312,7 @@ void MixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
       s = support.Strategies(const_pl)[j];
       if (N->GetOutcome(index + s->index))
 	     value[j] += prob *
-        (T) N->Payoff(N->GetOutcome(index + s->index), pl);
+        (*payoffs)(N->GetOutcome(index + s->index)->GetNumber(), pl);
     }
   }
   else   {
