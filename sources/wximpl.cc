@@ -10,10 +10,6 @@ class wxChoice;
 TEMPLATE class gArray<wxChoice *>;
 class wxCheckBox;
 TEMPLATE class gArray<wxCheckBox *>;
-#include "glist.imp"
-class wxFrame;
-TEMPLATE class gList<wxFrame *>;
-TEMPLATE class gNode<wxFrame *>;
 
 
 
