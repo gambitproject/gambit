@@ -399,6 +399,7 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
       else
 	p_file << "0 ";
     }
+    p_file << "\n";
   }
   else {
     gbtNfgSupport support(*this);
