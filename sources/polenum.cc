@@ -33,7 +33,15 @@ private:
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
-  gPoly<gDouble> Equation(int i, int strat1, int strat2) const;
+  gPoly<gDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
+  gPolyList<gDouble>   IndifferenceEquations()                 const;
+  gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
+  gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
+  gList<gVector<gDouble> > 
+               NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
+					const gRectangle<gDouble> &Cube,
+					gWatch &timer,
+					gStatus &p_status);
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
@@ -47,6 +55,12 @@ public:
   PolEnumParams &Parameters(void);
 
   const gList<MixedSolution> &GetSolutions(void) const;
+  gVector<gDouble> SolVarsFromMixedProfile(const MixedProfile<gNumber> &) 
+                                                                     const;
+
+  const int PolishKnownRoot(gVector<gDouble> &) const;
+
+  MixedSolution ReturnPolishedSolution(const gVector<gDouble> &) const;
 
   bool IsSingular() const;
 };
@@ -67,19 +81,19 @@ PolEnumModule::PolEnumModule(const NFSupport &S, const PolEnumParams &p)
 
 int PolEnumModule::PolEnum(gStatus &p_status)
 {
-  int i,j;
-
   gWatch watch;
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities();
 
+  /*
   // equations for equality of strat j to strat j+1
   for( i=1;i<=NF.NumPlayers();i++) 
     for(j=1;j<support.NumStrats(i);j++) 
-      equations+=Equation(i,j,j+1);
+      equations+=IndifferenceEquation(i,j,j+1);
 
   for( i=1;i<=NF.NumPlayers();i++)
     if(support.NumStrats(i)>2) 
       equations+=Prob(i,support.NumStrats(i));
+  */
 
   // set up the rectangle of search
   gVector<gDouble> bottoms(num_vars), tops(num_vars);
@@ -92,41 +106,19 @@ int PolEnumModule::PolEnum(gStatus &p_status)
   gWatch timer;
   timer.Start();
 
-  
-  QuikSolv<gDouble> quickie(equations, p_status);
-  //  p_status.SetProgress(0);
+  gList<gVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+								   Cube,
+								   timer,
+								   p_status);
 
-  if (params.trace>0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n" 
-      << quickie.UnderlyingEquations() ;
-  }  
-
-  try {
-    if (quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
-      if (params.trace>0) {
-	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-			    << num_vars << " :\n" << quickie.RootList();
-      }
-    }
-    else
-      if (params.trace>0) {
-	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
-			    << " could not be resolved by FindRoots.\n";
-      }
-  }
-  catch (gSignalBreak &) { }
-  catch (gSquareMatrix<gDouble>::MatrixSingular) {
-    is_singular = true;
-  }
   timer.Stop();
   if(params.trace>0) {
     (*params.tracefile)  << "The QuikSolv computation of roots took " 
       << (int)timer.Elapsed() << " seconds.\n\n";
   }
-  int index = SaveSolutions(quickie.RootList());
+  int index = SaveSolutions(solutionlist);
   time = watch.Elapsed();
   return index;	 
-
 }
 
 int PolEnumModule::SaveSolutions(const gList<gVector<gDouble> > &list)
@@ -216,7 +208,7 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
 }
 
 gPoly<gDouble> 
-PolEnumModule::Equation(int i, int strat1, int strat2) const
+PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   StrategyProfile profile(NF);
 
@@ -242,6 +234,75 @@ PolEnumModule::Equation(int i, int strat1, int strat2) const
     A.NextContingency();
   } while (B.NextContingency());
   return equation;
+}
+
+
+gPolyList<gDouble>   PolEnumModule::IndifferenceEquations()  const
+{
+  gPolyList<gDouble> equations(&Space,&Lex);
+
+  for(int pl=1;pl<=NF.NumPlayers();pl++) 
+    for(int j=1;j<support.NumStrats(pl);j++) 
+      equations+=IndifferenceEquation(pl,j,j+1);
+
+  return equations;
+}
+ 
+gPolyList<gDouble> PolEnumModule::LastActionProbPositiveInequalities() const
+{
+  gPolyList<gDouble> equations(&Space,&Lex);
+
+  for(int pl=1;pl<=NF.NumPlayers();pl++)
+    if(support.NumStrats(pl)>2) 
+      equations+=Prob(pl,support.NumStrats(pl));
+
+  return equations;
+}
+
+gPolyList<gDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
+{
+  gPolyList<gDouble> equations(&Space,&Lex);
+  
+  equations += IndifferenceEquations();
+  equations += LastActionProbPositiveInequalities();
+
+  return equations;
+}
+
+
+gList<gVector<gDouble> > 
+PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
+					      const gRectangle<gDouble> &Cube,
+					      gWatch &timer,
+					      gStatus &p_status)
+{  
+  QuikSolv<gDouble> quickie(equations, p_status);
+  //  p_status.SetProgress(0);
+
+  if (params.trace>0) {
+    (*params.tracefile) << "\nThe equilibrium equations are \n" 
+      << quickie.UnderlyingEquations() ;
+  }  
+
+  try {
+    if (quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
+      if (params.trace>0) {
+	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
+			    << num_vars << " :\n" << quickie.RootList();
+      }
+    }
+    else
+      if (params.trace>0) {
+	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
+			    << " could not be resolved by FindRoots.\n";
+      }
+  }
+  catch (gSignalBreak &) { }
+  catch (gSquareMatrix<gDouble>::MatrixSingular) {
+    is_singular = true;
+  }
+
+  return quickie.RootList();
 }
 
 bool PolEnumModule::IsSingular() const
@@ -273,4 +334,128 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
   return 1;
 }
 
+
+//---------------------------------------------------------------------------
+//                        Polish Equilibrum for Nfg
+//---------------------------------------------------------------------------
+
+MixedSolution PolishEquilibrium(const NFSupport &support, 
+				const MixedSolution &sol, 
+				bool &is_singular)
+{
+  PolEnumParams params;
+  PolEnumModule module(support, params);
+  gVector<gDouble> vec = module.SolVarsFromMixedProfile(*(sol.Profile()));
+
+  /* //DEBUG
+  gPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
+  MixedProfile<gNumber> newsol = module.SequenceForm().ToMixed(xx);
+
+  gout << "sol.Profile = " << *(sol.Profile()) << "\n";
+  gout << "vec  = " << vec << "\n";
+  gout << "xx   = " << xx << "\n";
+  gout << "newsol   = " << newsol << "\n";
+
+    exit(0);
+  if ( newsol != *(sol.Profile()) ) {
+    gout << "Failure of reversibility in PolishEquilibrium.\n";
+    exit(0);
+  }
+  */
+
+  //DEBUG
+  //  gout << "Prior to Polishing vec is " << vec << ".\n";
+
+  module.PolishKnownRoot(vec);
+
+  //DEBUG
+  //  gout << "After Polishing vec is " << vec << ".\n";
+
+  return module.ReturnPolishedSolution(vec);
+}
+
+
+gVector<gDouble> 
+PolEnumModule::SolVarsFromMixedProfile(const MixedProfile<gNumber> &sol) const
+{
+  int numvars(0);
+
+  for (int pl = 1; pl <= NF.NumPlayers(); pl++) 
+    numvars += support.NumStrats(pl) - 1;
+
+  gVector<gDouble> answer(numvars);
+  int count(0);
+
+  for (int pl = 1; pl <= NF.NumPlayers(); pl++) 
+    for (int j = 1; j < support.NumStrats(pl); j++) {
+      count ++;
+      answer[count] = (gDouble)sol(pl,j);
+    }
+
+  return answer;
+}
+
+#include "gnullstatus.h"
+
+const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
+{
+  //DEBUG
+  //  gout << "Prior to Polishing point is " << point << ".\n";
+
+  if (point.Length() > 0) {
+    
+    gWatch watch;
+    
+    // equations for equality of strat j to strat j+1
+    gPolyList<gDouble> equations(&Space,&Lex);
+    equations += IndifferenceEquations();
+
+    //DEBUG
+    //    gout << "We are about to construct quickie with Dmnsn() = "
+    //  << Space->Dmnsn() << " and equations = \n"
+    //	 << equations << "\n";
+    
+    // start QuikSolv
+    gNullStatus gstatus;
+    QuikSolv<gDouble> quickie(equations, gstatus);
+    
+    //DEBUG
+    //    gout << "We constructed quickie.\n";
+    
+    try { 
+      point = quickie.NewtonPolishedRoot(point);
+    }
+    catch (gSignalBreak &) { }
+    catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+      return 0;
+    }
+
+    //DEBUG
+    //    gout << "After Polishing point = " << point << ".\n";
+
+  }
+
+  return 1;	 
+}
+
+MixedSolution 
+PolEnumModule::ReturnPolishedSolution(const gVector<gDouble> &root) const
+{
+  MixedProfile<double> profile(support);
+
+  int j;
+  int kk=0;
+  for(int pl=1;pl<=NF.NumPlayers();pl++) {
+    double sum=0;
+    for(j=1;j<support.NumStrats(pl);j++) {
+      profile(pl,j) = (root[j+kk]).ToDouble();
+      sum+=profile(pl,j);
+    }
+    profile(pl,j) = (double)1.0 - sum;
+    kk+=(support.NumStrats(pl)-1);
+  }
+       
+  MixedSolution sol(profile, algorithmNfg_POLISH_NASH);
+  return sol;
+}
 

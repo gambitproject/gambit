@@ -23,6 +23,9 @@ int PolEnum(const NFSupport &, const PolEnumParams &,
 	    gList<MixedSolution> &, gStatus &,
 	    long &nevals, double &time, bool &is_singular);
 
+MixedSolution PolishEquilibrium(const NFSupport &, const MixedSolution &, 
+				bool &is_singular);
+
 #endif    // POLENUM_H
 
 
