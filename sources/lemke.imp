@@ -204,7 +204,7 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
       else
 	profile(2, j) = (T) 0;
 
-    int index = solutions.Append(MixedSolution(profile, NfgAlg_LEMKE));
+    int index = solutions.Append(MixedSolution(profile, algorithmNfg_LCP));
     solutions[index].SetIsNash(triTRUE);
     solutions[index].SetIsPerfect(triTRUE);
     solutions[index].SetEpsilon(epsilon);

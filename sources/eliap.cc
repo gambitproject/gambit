@@ -114,7 +114,7 @@ static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 		        double value, double epsilon)
 {
-  int i = solutions.Append(BehavSolution(profile, EfgAlg_LIAP));
+  int i = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
   solutions[i].SetLiap(value);
   solutions[i].SetEpsilon(epsilon);
   if (IsPerfectRecall(profile.Game())) {

@@ -9,40 +9,38 @@
 gText NameEfgAlgType(EfgAlgType p_algorithm)
 {
   switch (p_algorithm) {
-  case EfgAlg_USER:
+  case algorithmEfg_USER:
     return "User"; 
-  case EfgAlg_QRE:
-    return "Qre"; 
-  case EfgAlg_LIAP: 
-    return "Liap"; 
-  case EfgAlg_PURENASH: 
-    return "PureNash"; 
-  case EfgAlg_SEQFORM: 
-    return "SeqForm"; 
-  case EfgAlg_LEMKESUB: 
-    return "LCP(Lemke*)"; 
-  case EfgAlg_SIMPDIVSUB:
-    return "SimpDiv*"; 
-  case EfgAlg_ZSUMSUB: //
-    return "LP(ZSum*)"; 
-  case EfgAlg_PURENASHSUB:
-    return "PureNash*"; 
-  case EfgAlg_SEQFORMSUB:
-    return "LCP(Seq*)"; 
-  case EfgAlg_ELIAPSUB:
-    return "EFLiap*"; 
-  case EfgAlg_NLIAPSUB:
-    return "NFLiap*"; 
-  case EfgAlg_ENUMSUB:
-    return "Enum*"; 
-  case EfgAlg_CSSEQFORM:
-    return "CSSeqForm";
-  case EfgAlg_POLENSUB:
-    return "PolEnum*"; 
-  case EfgAlg_POLENUM:
-    return "PolEnum"; 
-  default:
-    return "ERROR" ;
+  case algorithmEfg_ENUMPURE_EFG:
+    return "EnumPure[EFG]";
+  case algorithmEfg_ENUMPURE_NFG:
+    return "EnumPure[NFG]";
+  case algorithmEfg_ENUMMIXED_NFG:
+    return "EnumMixed[NFG]";
+  case algorithmEfg_LCP_EFG:
+    return "Lcp[EFG]";
+  case algorithmEfg_LCP_NFG:
+    return "Lcp[NFG]";
+  case algorithmEfg_LP_EFG:
+    return "Lp[EFG]";
+  case algorithmEfg_LP_NFG:
+    return "Lp[NFG]";
+  case algorithmEfg_LIAP_EFG:
+    return "Liap[EFG]";
+  case algorithmEfg_LIAP_NFG:
+    return "Liap[NFG]";
+  case algorithmEfg_SIMPDIV_NFG:
+    return "Simpdiv[NFG]";
+  case algorithmEfg_POLENUM_EFG:
+    return "PolEnum[EFG]";
+  case algorithmEfg_POLENUM_NFG:
+    return "PolEnum[NFG]";
+  case algorithmEfg_QRE_EFG:
+    return "Qre[EFG]";
+  case algorithmEfg_QRE_NFG:
+    return "Qre[NFG]";
+  case algorithmEfg_QREALL_NFG:
+    return "QreAll[NFG]";
   }
 }
 
@@ -347,7 +345,7 @@ const gNumber &BehavSolution::LiapValue(void) const
 
 void BehavSolution::Invalidate(void) const
 {
-  m_creator = EfgAlg_USER;
+  m_creator = algorithmEfg_USER;
   m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;

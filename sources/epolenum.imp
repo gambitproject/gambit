@@ -179,7 +179,7 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
     if(params.trace > 1) 
       (*params.tracefile) << "\nk: " << k << " x: " << x;
 
-    BehavSolution sol(SF.ToBehav(x), EfgAlg_POLENUM);
+    BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
     if(ExtendsToNash(sol)) {
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);

@@ -16,7 +16,7 @@ private:
   gStatus &m_status;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMPURE_NFG; }    
   
 public:
   efgEnumPureNfgSolve(const EFSupport &, int p_stopAfter, gStatus &);

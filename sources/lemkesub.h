@@ -16,7 +16,7 @@ private:
   LemkeParams params;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_LEMKESUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_NFG; }    
 
 public:
   efgLcpNfgSolve(const EFSupport &, const LemkeParams &, int max = 0);

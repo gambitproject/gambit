@@ -17,7 +17,7 @@ private:
   PolEnumParams params;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_POLENSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_NFG; }
 
 public:
   efgPolEnumNfgSolve(const EFSupport &, const PolEnumParams &, int max = 0);

@@ -34,7 +34,7 @@ private:
   BehavProfile<gNumber> start;
     
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_ELIAPSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LIAP_EFG; }    
 
 public:
   efgLiapSolve(const Efg &, const EFLiapParams &,

@@ -61,7 +61,7 @@ public:
 
 
 #define     MSOLN_SHOW_SECT "Mixed-Soln-Show"
-#define     NUM_MCREATORS       9
+#define     NUM_MCREATORS       10
 
 #define     MSORT_BY_ID         1       // this order must correspond to that in GUI dialogs
 #define     MSORT_BY_CREATOR    2

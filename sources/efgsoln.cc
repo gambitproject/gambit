@@ -793,20 +793,20 @@ void EfgSolnShow::UpdateValues(void)
         if (features[BSOLN_ISSEQ])
             SetCell(cur_pos, FeaturePos(BSOLN_ISSEQ), Name(cur.IsSequential()));
 
-        if (features[BSOLN_GLAMBDA])
-        {
-            if (cur.Creator() == EfgAlg_QRE)
-                SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.QreLambda()));
-            else
-                SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), "---------");
+        if (features[BSOLN_GLAMBDA]) {
+	  if (cur.Creator() == algorithmEfg_QRE_EFG ||
+	      cur.Creator() == algorithmEfg_QRE_NFG)
+	    SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), ToText(cur.QreLambda()));
+	  else
+	    SetCell(cur_pos, FeaturePos(BSOLN_GLAMBDA), "---------");
         }
 
-        if (features[BSOLN_GVALUE])
-        {
-            if (cur.Creator() == EfgAlg_QRE)
-                SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.QreValue()));
-            else
-                SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), "---------");
+        if (features[BSOLN_GVALUE]) {
+	  if (cur.Creator() == algorithmEfg_QRE_EFG ||
+	      cur.Creator() == algorithmEfg_QRE_NFG)
+	    SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), ToText(cur.QreValue()));
+	  else
+	    SetCell(cur_pos, FeaturePos(BSOLN_GVALUE), "---------");
         }
 
         if (features[BSOLN_LVALUE])

@@ -1185,7 +1185,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
 
   for (int i = 1; i <= nfg_solns.Length(); i++) {
     MixedToBehav(*N, nfg_solns[i], m_efg, startb);
-    solutions.Append(BehavSolution(startb, EfgAlg_QRE));
+    solutions.Append(BehavSolution(startb, algorithmEfg_QRE_NFG));
   }
 
   delete N;

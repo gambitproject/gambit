@@ -1,5 +1,5 @@
 //
-// FILE: mixedsol.cc -- Mixed strategy solution classes
+// FILE: mixedsol.cc -- Mixed strategy solution classe
 //
 // $Id$
 //
@@ -10,30 +10,26 @@
 gText NameNfgAlgType(NfgAlgType p_algorithm)
 {
   switch (p_algorithm) {
-  case NfgAlg_USER:
+  case algorithmNfg_USER:
     return "User"; 
-  case NfgAlg_QRE: // QreSolve
-    return "Qre"; 
-  case NfgAlg_LIAP: // LiapSolve
-    return "Liap"; 
-  case NfgAlg_LEMKE: // LcpSolve
-    return "LCP(Lemke)"; 
-  case NfgAlg_ZSUM: // LpSolve
-    return "LP(ZSum)"; 
-  case NfgAlg_ENUM: // EnumMixedSolve
-    return "Enum"; 
-  case NfgAlg_QREGRID: // QreGridSOlve
-    return "QreGrid"; 
-  case NfgAlg_SIMPDIV:  // SimpDivSolve
-    return "SimpDiv"; 
-  case NfgAlg_PURENASH: // EnumPureSolve
-    return "PureNash"; 
-  case NfgAlg_SEQFORM: // LcpSolve
-    return "LCP(Seq)"; 
-  case NfgAlg_POLENUM: // PolEnumSolve
-    return "PolEnum"; 
-  default:
-    return "ERROR" ;
+  case algorithmNfg_ENUMPURE:
+    return "EnumPure";
+  case algorithmNfg_ENUMMIXED:
+    return "EnumMixed";
+  case algorithmNfg_LCP:
+    return "Lcp";
+  case algorithmNfg_LP:
+    return "Lp";
+  case algorithmNfg_LIAP:
+    return "Liap";
+  case algorithmNfg_SIMPDIV:
+    return "Simpdiv";
+  case algorithmNfg_POLENUM:
+    return "PolEnum";
+  case algorithmNfg_QRE:
+    return "Qre";
+  case algorithmNfg_QREALL:
+    return "QreAll";
   }
 }
 
@@ -285,7 +281,7 @@ const gNumber &MixedSolution::LiapValue(void) const
 
 void MixedSolution::Invalidate(void) const
 {
-  m_creator = NfgAlg_USER;
+  m_creator = algorithmNfg_USER;
   m_isNash = triUNKNOWN;
   m_isProper = triUNKNOWN;
   m_qreLambda = -1;

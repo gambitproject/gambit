@@ -15,19 +15,12 @@
 #include "nfplayer.h"
 #include "nfg.h"
 
-typedef enum 
-{
-  NfgAlg_USER,
-  NfgAlg_QRE,
-  NfgAlg_LIAP,
-  NfgAlg_LEMKE,
-  NfgAlg_ZSUM,
-  NfgAlg_ENUM,
-  NfgAlg_QREGRID,
-  NfgAlg_SIMPDIV,
-  NfgAlg_PURENASH,
-  NfgAlg_SEQFORM,
-  NfgAlg_POLENUM
+typedef enum {
+  algorithmNfg_USER,
+  algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
+  algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
+  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
+  algorithmNfg_QRE, algorithmNfg_QREALL
 } NfgAlgType;
 
 gText NameNfgAlgType(NfgAlgType i);
@@ -50,9 +43,10 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  MixedSolution(const MixedProfile<double> &, NfgAlgType = NfgAlg_USER);
-  MixedSolution(const MixedProfile<gRational> &, NfgAlgType = NfgAlg_USER);
-  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType = NfgAlg_USER);
+  MixedSolution(const MixedProfile<double> &, NfgAlgType = algorithmNfg_USER);
+  MixedSolution(const MixedProfile<gRational> &,
+		NfgAlgType = algorithmNfg_USER);
+  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType = algorithmNfg_USER);
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 

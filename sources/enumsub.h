@@ -16,7 +16,7 @@ private:
   EnumParams params;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMMIXED_NFG; }    
 
 public:
   EnumBySubgame(const EFSupport &, const EnumParams &, int max = 0);

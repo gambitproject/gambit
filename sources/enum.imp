@@ -148,7 +148,7 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
     profile(2,k)/=sum;
     } 
   
-    index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
+    index = solutions.Append(MixedSolution(profile, algorithmNfg_ENUMMIXED));
     solutions[index].SetEpsilon(eps);
     solutions[index].SetIsNash(triTRUE);
   }
@@ -310,7 +310,7 @@ template <class T> int EnumModule<T>::Enum(void)
     if(params.trace>=2) 
       (*params.tracefile) << "\n" << i2 << " " << i1;
 
-    index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
+    index = solutions.Append(MixedSolution(profile, algorithmNfg_ENUMMIXED));
     solutions[index].SetEpsilon(eps);
     solutions[index].SetIsNash(triTRUE);
     

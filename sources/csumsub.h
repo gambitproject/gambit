@@ -16,7 +16,7 @@ private:
   ZSumParams params;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_ZSUMSUB; }    
+  EfgAlgType AlgorithmID() const { return algorithmEfg_LP_NFG; }    
 
 public:
   efgLpNfgSolve(const EFSupport &, const ZSumParams &, int max = 0);

@@ -220,7 +220,7 @@ void Qre(const Nfg &N, NFQreParams &params,
     
     if (params.fullGraph) 
     {
-      i = solutions.Append(MixedSolution(p, NfgAlg_QRE));      
+      i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
       solutions[i].SetQre(Lambda, value);
     }
 
@@ -231,7 +231,7 @@ void Qre(const Nfg &N, NFQreParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution(p, NfgAlg_QRE));
+    i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
     solutions[i].SetQre(Lambda, value);
   }
 
@@ -415,7 +415,7 @@ void KQre(const Nfg &N, NFQreParams &params,
       }
       
       if (params.fullGraph) {
-	i = solutions.Append(MixedSolution(p, NfgAlg_QRE));      
+	i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
 	solutions[i].SetQre(K, value);
       }
       K_old=K;                              // keep last good solution
@@ -429,7 +429,7 @@ void KQre(const Nfg &N, NFQreParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution(p, NfgAlg_QRE));
+    i = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
     solutions[i].SetQre(K_old, value);
   }
 

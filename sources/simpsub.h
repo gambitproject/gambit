@@ -16,7 +16,7 @@ private:
   SimpdivParams params;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_SIMPDIVSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_SIMPDIV_NFG; }    
 
 public:
   efgSimpDivNfgSolve(const EFSupport &, const SimpdivParams &, int max = 0);

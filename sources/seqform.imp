@@ -134,7 +134,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
     GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
     //  gout << "\nprofile = " << profile << "\n";
     solutions.Flush();
-    solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM));
+    solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG));
   }
 
   //* gout << "\n";  
@@ -237,7 +237,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	// gout << "\nsol = " << sol;
 	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
 	if(newsol) {
-	  solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM)); 
+	  solutions.Append(BehavSolution(profile, algorithmEfg_LCP_EFG)); 
 	  // gout << "\nprofile = " << profile;
 	}
       }

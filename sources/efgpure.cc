@@ -70,7 +70,8 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 				 Infosets()[iset])->GetNumber()) = 1;
       }
 
-      index = p_solutions.Append(BehavSolution(temp, EfgAlg_PURENASH));
+      index = p_solutions.Append(BehavSolution(temp, 
+					       algorithmEfg_ENUMPURE_EFG));
       p_solutions[index].SetIsNash((isPerfectRecall) ? triTRUE : triUNKNOWN);
     }
     contNumber++;

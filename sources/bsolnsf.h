@@ -1,5 +1,8 @@
-// File: bsolnsf.h -- Behav Solution Sorter and Filter
+//
+// FILE: bsolnsf.h -- Behavior solution sorter and filter
+//
 // $Id$
+//
 
 #ifndef BSOLNSF_H
 #define BSOLNSF_H
@@ -59,7 +62,7 @@ public:
 };
 
 #define     BSOLN_SHOW_SECT "Behav-Soln-Show"
-#define     NUM_BCREATORS       10
+#define     NUM_BCREATORS       16
 
 #define     BSORT_BY_ID         1       // this order must correspond to that in GUI dialogs
 #define     BSORT_BY_CREATOR    2

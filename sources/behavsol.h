@@ -1,12 +1,11 @@
 //
-// FILE: behavsol.h -- Behav strategy solution classes
+// FILE: behavsol.h -- Behavior strategy solution class
 //
 // $Id$
 //
 
 #ifndef BEHAVSOL_H
 #define BEHAVSOL_H
-
 
 #include "gmisc.h"
 #include "behav.h"
@@ -15,24 +14,17 @@
 #include "gnumber.h"
 #include "efg.h"
 
-typedef enum 
-{
-  EfgAlg_USER,
-  EfgAlg_LIAP,
-  EfgAlg_QRE,
-  EfgAlg_PURENASH,
-  EfgAlg_SEQFORM,
-  EfgAlg_LEMKESUB,
-  EfgAlg_SIMPDIVSUB,
-  EfgAlg_ZSUMSUB,
-  EfgAlg_PURENASHSUB,
-  EfgAlg_SEQFORMSUB,
-  EfgAlg_NLIAPSUB,
-  EfgAlg_ELIAPSUB,
-  EfgAlg_ENUMSUB,
-  EfgAlg_CSSEQFORM,
-  EfgAlg_POLENSUB,
-  EfgAlg_POLENUM,
+typedef enum {
+  algorithmEfg_USER,
+  algorithmEfg_ENUMPURE_EFG, algorithmEfg_ENUMPURE_NFG,
+  algorithmEfg_ENUMMIXED_NFG,
+  algorithmEfg_LCP_EFG, algorithmEfg_LCP_NFG,
+  algorithmEfg_LP_EFG, algorithmEfg_LP_NFG,
+  algorithmEfg_LIAP_EFG, algorithmEfg_LIAP_NFG,
+  algorithmEfg_SIMPDIV_NFG,
+  algorithmEfg_POLENUM_EFG, algorithmEfg_POLENUM_NFG,
+  algorithmEfg_QRE_EFG, algorithmEfg_QRE_NFG,
+  algorithmEfg_QREALL_NFG
 } EfgAlgType;
 
 gText NameEfgAlgType(EfgAlgType i);
@@ -54,9 +46,10 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavSolution(const BehavProfile<double> &, EfgAlgType = EfgAlg_USER);
-  BehavSolution(const BehavProfile<gRational> &, EfgAlgType = EfgAlg_USER);
-  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType = EfgAlg_USER);
+  BehavSolution(const BehavProfile<double> &, EfgAlgType = algorithmEfg_USER);
+  BehavSolution(const BehavProfile<gRational> &,
+		EfgAlgType = algorithmEfg_USER);
+  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType = algorithmEfg_USER);
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 

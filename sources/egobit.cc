@@ -160,7 +160,7 @@ static void AddSolution(gList<BehavSolution> &solutions,
 			double lambda,
 			double value)
 {
-  int i = solutions.Append(BehavSolution(profile, EfgAlg_QRE));
+  int i = solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
   solutions[i].SetQre(lambda, value);
   solutions[i].SetEpsilon(0.0001);
   if(solutions[i].IsNash() == triTRUE) {
@@ -465,7 +465,7 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
       }
       
       if (params.fullGraph) {
-	i = solutions.Append(BehavSolution(p, EfgAlg_QRE));      
+	i = solutions.Append(BehavSolution(p, algorithmEfg_QRE_EFG));      
 	solutions[i].SetQre(K, value);
       }
       K_old=K;                              // keep last good solution
@@ -477,11 +477,10 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
     step++;
   }
   
-  if (!params.fullGraph)
-    {
-      i = solutions.Append(BehavSolution(p, EfgAlg_QRE));
-      solutions[i].SetQre(K_old, value);
-    }
+  if (!params.fullGraph) {
+    i = solutions.Append(BehavSolution(p, algorithmEfg_QRE_EFG));
+    solutions[i].SetQre(K_old, value);
+  }
   
   nevals = F.NumEvals();
   nits = 0;

@@ -143,7 +143,7 @@ PolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
       profile(i,j) = (double)1.0 - sum;
       kk+=(support.NumStrats(i)-1);
     }
-    index = solutions.Append(MixedSolution(profile, NfgAlg_POLENUM));
+    index = solutions.Append(MixedSolution(profile, algorithmNfg_POLENUM));
     solutions[index].SetEpsilon(0);
     solutions[index].SetIsNash(triTRUE);
   }

@@ -1,6 +1,8 @@
-// File: bsolnsf.cc -- Actual code to implement sorting and filtering of
-// behav solutions
+//
+// FILE: bsolnsf.cc -- Implements sorting and filtering of behavior solutions
+//
 // $Id$
+//
 
 #include "bsolnsf.h"
 
@@ -12,15 +14,26 @@
 // corresponding ids Note that the indexing should start from 1, not 0
 char *BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS+1] =
 {
-    "Error", "Qre", "ELiap", "NLiap", "SeqForm", "PureNash", "Lemke",
-    "SimpDiv", "Enum", "ZSum", "User"
+  "Error", "User",
+  "EnumPure[EFG]", "EnumPure[NFG]", "EnumMixed[NFG]",
+  "Lcp[EFG]", "Lcp[NFG]", "Lp[EFG]", "Lp[NFG]",
+  "Liap[EFG]", "Liap[NFG]", "Simpdiv[NFG]",
+  "PolEnum[EFG]", "PolEnum[NFG]",
+  "Qre[EFG]", "Qre[NFG]", "QreAll[NFG]"
 };
 
 EfgAlgType BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS+1] =
 {
-    EfgAlg_USER, EfgAlg_QRE, EfgAlg_ELIAPSUB, EfgAlg_NLIAPSUB, 
-    EfgAlg_SEQFORMSUB, EfgAlg_PURENASHSUB, EfgAlg_LEMKESUB,
-    EfgAlg_SIMPDIVSUB, EfgAlg_ENUMSUB, EfgAlg_ZSUMSUB, EfgAlg_USER
+  algorithmEfg_USER, algorithmEfg_USER,
+  algorithmEfg_ENUMPURE_EFG, algorithmEfg_ENUMPURE_NFG,
+  algorithmEfg_ENUMMIXED_NFG,
+  algorithmEfg_LCP_EFG, algorithmEfg_LCP_NFG,
+  algorithmEfg_LP_EFG, algorithmEfg_LP_NFG,
+  algorithmEfg_LIAP_EFG, algorithmEfg_LIAP_NFG,
+  algorithmEfg_SIMPDIV_NFG,
+  algorithmEfg_POLENUM_EFG, algorithmEfg_POLENUM_NFG,
+  algorithmEfg_QRE_EFG, algorithmEfg_QRE_NFG,
+  algorithmEfg_QREALL_NFG
 };
 
 char *BSolnSortFilterOptions::filter_tri_str[3+1] = 

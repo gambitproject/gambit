@@ -230,7 +230,8 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 static Portion *GSM_QreLambda_Behav(Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if(bs->Creator() != EfgAlg_QRE)
+  if (bs->Creator() != algorithmEfg_QRE_EFG &&
+      bs->Creator() != algorithmEfg_QRE_NFG)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreLambda());
 }
@@ -238,7 +239,7 @@ static Portion *GSM_QreLambda_Behav(Portion** param)
 static Portion *GSM_QreLambda_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if(bs->Creator() != NfgAlg_QRE)
+  if (bs->Creator() != algorithmNfg_QRE)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreLambda());
 }
@@ -250,7 +251,8 @@ static Portion *GSM_QreLambda_Mixed(Portion** param)
 static Portion *GSM_QreValue_Behav(Portion** param)
 {
   BehavSolution *bs = ((BehavPortion*) param[0])->Value();
-  if(bs->Creator() != EfgAlg_QRE)
+  if (bs->Creator() != algorithmEfg_QRE_EFG &&
+      bs->Creator() != algorithmEfg_QRE_NFG)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreValue());
 }
@@ -258,7 +260,7 @@ static Portion *GSM_QreValue_Behav(Portion** param)
 static Portion *GSM_QreValue_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if(bs->Creator() != NfgAlg_QRE)
+  if (bs->Creator() != algorithmNfg_QRE)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreValue());
 }

@@ -601,20 +601,18 @@ void NfgSolnShow::UpdateValues(void)
         if (features[MSOLN_ISPROP])
             SetCell(cur_pos, FeaturePos(MSOLN_ISPROP), Name(cur_vector.IsProper()));
 
-        if (features[MSOLN_GLAMBDA])
-        {
-            if (cur_vector.Creator() == NfgAlg_QRE)
-                SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.QreLambda()));
-            else
-                SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), "---------");
+        if (features[MSOLN_GLAMBDA]) {
+	  if (cur_vector.Creator() == algorithmNfg_QRE)
+	    SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), ToText(cur_vector.QreLambda()));
+	  else
+	    SetCell(cur_pos, FeaturePos(MSOLN_GLAMBDA), "---------");
         }
 
-        if (features[MSOLN_GVALUE])
-        {
-            if (cur_vector.Creator() == NfgAlg_QRE)
-                SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.QreValue()));
-            else
-                SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), "---------");
+        if (features[MSOLN_GVALUE]) {
+	  if (cur_vector.Creator() == algorithmNfg_QRE)
+	    SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), ToText(cur_vector.QreValue()));
+	  else
+	    SetCell(cur_pos, FeaturePos(MSOLN_GVALUE), "---------");
         }
 
         if (features[MSOLN_LVALUE])

@@ -1,6 +1,8 @@
-// File: msolnsf.cc -- Actual code to implement sorting and filtering of
-// mixed solutions
+//
+// FILE: msolnsf.cc -- Implements sorting and filtering of mixed solutions
+//
 // $Id$
+//
 
 #include "msolnsf.h"
 
@@ -13,15 +15,19 @@
 
 char *MSolnSortFilterOptions::filter_cr_str[NUM_MCREATORS+1] =
 {
-    "Error", "PureNash", "Lemke", "Liap", "QreGrid", "Qre",
-    "Simpdiv", "Enum", "ZSum", "User"
+  "Error", "User",
+  "EnumPure", "EnumMixed", "Lcp", "Lp", "Liap", "Simpdiv", "PolEnum",
+  "Qre", "QreAll"
 };
 
 
 NfgAlgType MSolnSortFilterOptions::filter_cr_id[NUM_MCREATORS+1] =
 {
-    NfgAlg_USER, NfgAlg_PURENASH, NfgAlg_LEMKE, NfgAlg_LIAP, NfgAlg_QREGRID, 
-    NfgAlg_QRE, NfgAlg_SIMPDIV, NfgAlg_ENUM, NfgAlg_ZSUM, NfgAlg_USER
+  algorithmNfg_USER, algorithmNfg_USER,
+  algorithmNfg_ENUMPURE, algorithmNfg_ENUMMIXED,
+  algorithmNfg_LCP, algorithmNfg_LP, algorithmNfg_LIAP,
+  algorithmNfg_SIMPDIV, algorithmNfg_POLENUM,
+  algorithmNfg_QRE, algorithmNfg_QREALL
 };
 
 char *MSolnSortFilterOptions::filter_tri_str[3+1] = { "E", "Yes", "No", "DK" };

@@ -32,7 +32,7 @@ private:
 
   void SolveSubgame(const Efg &, const EFSupport &,
 		    gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LP_EFG; }    
 
 public:
   efgLpSolve(const EFSupport &, const CSSeqFormParams &, int max = 0);

@@ -30,7 +30,7 @@ private:
   gArray<gNumber> values;
 
   void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
-  EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
 
 public:
   efgLcpSolve(const EFSupport &, const SeqFormParams &, int max = 0);
