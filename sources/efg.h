@@ -42,21 +42,27 @@ class ExtForm    {
     Node LeaveInfoset(const Node &n);
     Node MergeInfoset(const Node &from, const Node &into);
     void LabelInfoset(const Node &n, const gString &label)
-      { nodes.SetInfosetName(n[1], n[2], label); }
+      { if (!nodes.IsMember(n)) return;
+	nodes.SetInfosetName(n[1], n[2], label); }
     void LabelInfoset(int pl, int iset, const gString &label)
       { nodes.SetInfosetName(pl, iset, label); }
 //#old code      { players.SetInfosetName(n[1], n[0], n[2], label); }
     gString GetInfosetName(const Node &n)
-      { return nodes.GetInfosetName(n[1], n[2]); }
+      { if (!nodes.IsMember(n)) return "Not defined";
+	return nodes.GetInfosetName(n[1], n[2]); }
 
     void AppendAction(int pl, int iset)
       { nodes.AppendAction(pl, iset); }
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
     void LabelAction(const Node &n, int act, const gString &label)
-      { nodes.SetActionName(n[1], n[2], act, label); }
+      { if (!nodes.IsMember(n)) return;
+	nodes.SetActionName(n[1], n[2], act, label); }
     void LabelAction(int pl, int iset, int act, const gString &label)
       { nodes.SetActionName(pl, iset, act, label); }
+    gString GetActionLabel(const Node &n, int act)
+      { if (!nodes.IsMember(n)) return "Not defined";
+	nodes.GetActionName(n.GetPlayer(), n.GetInfoset(), act); }
     gTuple<gNumber> GetActionProbs(const Node &n) const;
     gNumber GetActionProb(const Node &n, int br) const;
     void SetActionProbs(const Node &n, const gTuple<gNumber> &probs);
@@ -86,23 +92,32 @@ class ExtForm    {
     Node RootNode(void) const
       { return nodes.RootNode(); }
     Node GetParent(const Node &n) const
-      { return nodes.GetParent(n); }
+      { if (!nodes.IsMember(n)) return Node();
+	return nodes.GetParent(n); }
     int NumChildren(const Node &n) const
-      { return nodes.NumChildren(n); }
+      { if (!nodes.IsMember(n)) return 0;
+	return nodes.NumChildren(n); }
     Node GetChildNumber(const Node &n, int number) const
-      { return nodes.GetChildNumber(n, number); }
+      { if (!nodes.IsMember(n)) return Node();
+	return nodes.GetChildNumber(n, number); }
     gBlock<Node> GetChildren(const Node &n) const
-      { return nodes.GetChildren(n); }
+      { if (!nodes.IsMember(n)) return gBlock<Node>();
+	return nodes.GetChildren(n); }
     Node GetPriorSibling(const Node &n) const
-      { return nodes.GetPriorSibling(n); }
+      { if (!nodes.IsMember(n)) return Node();
+	return nodes.GetPriorSibling(n); }
     Node GetNextSibling(const Node &n) const
-      { return nodes.GetNextSibling(n); }
+      { if (!nodes.IsMember(n)) return Node();
+	return nodes.GetNextSibling(n); }
     int HasSuccessorGame(const Node &n) const
-      { return nodes.HasSuccessorGame(n); }
+      { if (!nodes.IsMember(n)) return 0;
+	return nodes.HasSuccessorGame(n); }
     int IsSuccessor(const Node &n, const Node &from) const
-      { return nodes.IsPredecessor(from, n); }
+      { if (!nodes.IsMember(n) && nodes.IsMember(from)) return 0;
+	return nodes.IsPredecessor(from, n); }
     int IsPredecessor(const Node &n, const Node &of) const
-      { return nodes.IsPredecessor(n, of); }
+      { if (!nodes.IsMember(n) && nodes.IsMember(of)) return 0;
+	return nodes.IsPredecessor(n, of); }
 
 	//# GENERAL INFORMATION
     int NumNodes(void) const
@@ -117,9 +132,11 @@ class ExtForm    {
       { return nodes.NumInfosets(pl); }
 
     gString GetNodeLabel(const Node &n) const
-      { return nodes.GetNodeName(n); }
+      { if (!nodes.IsMember(n)) return "Not defined";
+	return nodes.GetNodeName(n); }
     int GetOutcome(const Node &n) const
-      { return nodes.GetOutcome(n); }
+      { if (!nodes.IsMember(n)) return 0;
+	return nodes.GetOutcome(n); }
 
     void AddPlayer(int);
     int CreateInfoset(int, int, int);
