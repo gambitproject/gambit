@@ -1081,83 +1081,147 @@ dialogInfosets::dialogInfosets(Efg &p_efg, wxFrame *p_parent)
   : wxDialogBox(p_parent, "Infoset Information", TRUE), m_efg(p_efg),
     m_gameChanged(false), m_prevInfoset(0)
 {
-  SetLabelPosition(wxVERTICAL);
-  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",
-			       wxSINGLE, 11, 3, 104, 125, 0, NULL, 0);
-  m_playerItem->wxEvtHandler::SetClientData((char *) this);
-  m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset, "Infoset",
-				wxSINGLE, 130, 4, 100, 125, 0, NULL, 0);
-  m_infosetItem->wxEvtHandler::SetClientData((char *) this);
-  m_infosetNameItem = new wxText(this, 0, "Infoset Name", "",
-				 251, 12, 174, 58, 0);
-  m_actionsItem = new wxText(this, 0, "Actions", "", 330, 76, 80, 54,
-			     wxTE_READONLY);
-  m_membersItem = new wxText(this, 0, "Members", "", 253, 77, 51, 53,
-			     wxTE_READONLY);
+  SetAutoLayout(TRUE);
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "Ok",
-				    100, 162, -1, -1, 0);
+  SetLabelPosition(wxVERTICAL);
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
+
+  m_infosetItem = new wxListBox(this, 0, "Infoset");
+  m_infosetItem->wxEvtHandler::SetClientData((char *) this);
+
+  NewLine();
+
+  m_actionsItem = new wxText(this, 0, "Actions", "", -1, -1, -1, -1,
+			     wxTE_READONLY);
+  m_actionsItem->SetConstraints(new wxLayoutConstraints());
+  m_actionsItem->GetConstraints()->top.SameAs(m_infosetItem, wxTop);
+  m_actionsItem->GetConstraints()->left.SameAs(m_infosetItem, wxRight, 10);
+  m_actionsItem->GetConstraints()->height.AsIs();
+  m_actionsItem->GetConstraints()->width.PercentOf(m_playerItem, wxWidth, 30);
+
+  m_membersItem = new wxText(this, 0, "Members", "", -1, -1, -1, -1,
+			     wxTE_READONLY);
+  m_membersItem->SetConstraints(new wxLayoutConstraints());
+  m_membersItem->GetConstraints()->top.SameAs(m_actionsItem, wxBottom, 10);
+  m_membersItem->GetConstraints()->left.SameAs(m_actionsItem, wxLeft);
+  m_membersItem->GetConstraints()->height.AsIs();
+  m_membersItem->GetConstraints()->width.SameAs(m_actionsItem, wxWidth);
+
+  m_playerItem->SetConstraints(new wxLayoutConstraints());
+  m_playerItem->GetConstraints()->top.AsIs();
+  m_playerItem->GetConstraints()->left.AsIs();
+  m_playerItem->GetConstraints()->bottom.SameAs(m_membersItem, wxBottom);
+  m_playerItem->GetConstraints()->width.AsIs();
+
+  m_infosetItem->SetConstraints(new wxLayoutConstraints());
+  m_infosetItem->GetConstraints()->top.SameAs(m_playerItem, wxTop);
+  m_infosetItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
+  m_infosetItem->GetConstraints()->bottom.SameAs(m_membersItem, wxBottom);
+  m_infosetItem->GetConstraints()->width.AsIs();
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "OK");
   okButton->SetClientData((char *) this);
-  wxButton *newButton = new wxButton(this, (wxFunction) CallbackNew, "New",
-				     150, 162, -1, -1, 0);
+
+  wxButton *newButton = new wxButton(this, (wxFunction) CallbackNew, "New");
   newButton->SetClientData((char *) this);
+
+  NewLine();
+  
+  m_editButton = new wxButton(this, (wxFunction) CallbackEdit, "Edit...");
+  m_editButton->SetClientData((char *) this);
+
   m_removeButton = new wxButton(this, (wxFunction) CallbackRemove,
-				"Remove", 210, 162, -1, -1, 0);
+				"Remove");
   m_removeButton->SetClientData((char *) this);
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help",
-				      290, 162, -1, -1, 0);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help");
   helpButton->SetClientData((char *) this);
 
+  m_editButton->SetConstraints(new wxLayoutConstraints);
+  m_editButton->GetConstraints()->top.SameAs(newButton, wxTop);
+  m_editButton->GetConstraints()->right.SameAs(newButton, wxLeft, 10);
+  m_editButton->GetConstraints()->height.AsIs();
+  m_editButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+
+  newButton->SetConstraints(new wxLayoutConstraints);
+  newButton->GetConstraints()->top.SameAs(m_infosetItem, wxBottom, 10);
+  newButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  newButton->GetConstraints()->height.AsIs();
+  newButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+
+  m_removeButton->SetConstraints(new wxLayoutConstraints);
+  m_removeButton->GetConstraints()->centreY.SameAs(newButton, wxCentreY);
+  m_removeButton->GetConstraints()->left.SameAs(newButton, wxRight, 10);
+  m_removeButton->GetConstraints()->height.AsIs();
+  m_removeButton->GetConstraints()->width.AsIs();
+
+  okButton->SetConstraints(new wxLayoutConstraints);
+  okButton->GetConstraints()->top.SameAs(newButton, wxBottom, 10);
+  okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  okButton->GetConstraints()->height.AsIs();
+  okButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+
+  helpButton->SetConstraints(new wxLayoutConstraints);
+  helpButton->GetConstraints()->top.SameAs(newButton, wxBottom, 10);
+  helpButton->GetConstraints()->left.SameAs(okButton, wxRight, 10);
+  helpButton->GetConstraints()->height.AsIs();
+  helpButton->GetConstraints()->width.SameAs(m_removeButton, wxWidth);
+
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    if (m_efg.Players()[pl]->GetName() != "")
-      m_playerItem->Append(m_efg.Players()[pl]->GetName());
-    else
-      m_playerItem->Append("Player " + ToText(pl));
+    m_playerItem->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
   }
 
   OnPlayer(0);
-  Fit(); 
+  Layout();
+  Fit();
   Show(TRUE);
 }
 
 void dialogInfosets::OnPlayer(int p_number)
 {
-  if (m_efg.NumPlayers() == 0) {
-    if (m_playerItem->Number() == 0)
-      m_playerItem->Append("None");
-    return;
-  }
-
   m_playerItem->SetSelection(p_number);
   EFPlayer *player = m_efg.Players()[p_number+1];
   m_infosetItem->Clear();
-  for (int iset = 1; iset <= player->NumInfosets(); iset++)
-    m_infosetItem->Append(ToText(iset));
-  OnInfoset(0);
+  if (player->NumInfosets() > 0)  {
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)
+      m_infosetItem->Append(ToText(iset) + ": " + player->Infosets()[iset]->GetName());
+    m_infosetItem->SetSelection(0);
+    m_infosetItem->Enable(TRUE);
+    m_editButton->Enable(TRUE);
+    OnInfoset();
+  }
+  else {
+    m_infosetItem->Append("(None)");
+    m_infosetItem->Enable(FALSE);
+    m_editButton->Enable(FALSE);
+    m_removeButton->Enable(FALSE);
+  }
 }
 
-void dialogInfosets::OnInfoset(int p_number)
+void dialogInfosets::OnInfoset(void)
 {
-  if (m_prevInfoset)
-    if (strcmp(m_prevInfoset->GetName(),m_infosetNameItem->GetValue())!=0) {
-      m_prevInfoset->SetName(m_infosetNameItem->GetValue());
-      m_gameChanged = true;
-    }
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection() + 1];
+  Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection() + 1];
 
-  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
-  if (player->NumInfosets() == 0) { // can have players w/ no infosets
-    if (m_infosetItem->Number() == 0)
-      m_infosetItem->Append("None");
-    return;
-  }
-
-  m_infosetItem->SetSelection(p_number);
-  Infoset *infoset = player->Infosets()[p_number+1];
-  m_infosetNameItem->SetValue(infoset->GetName());
   m_actionsItem->SetValue(ToText(infoset->NumActions()));
   m_membersItem->SetValue(ToText(infoset->NumMembers()));
-  m_prevInfoset = infoset;
+
   m_removeButton->Enable(infoset->NumMembers() == 0);
+}
+
+void dialogInfosets::OnEdit(void)
+{
+  int selection = m_infosetItem->GetSelection();
+  gText defaultName = (m_efg.Players()[m_playerItem->GetSelection()+1]->
+                       Infosets()[selection+1])->GetName();
+
+  char *newName = wxGetTextFromUser("Name", "Enter Name", defaultName, this);
+  if (newName) {
+	 m_efg.Players()[m_playerItem->GetSelection()+1]->
+      Infosets()[selection+1]->SetName(newName);
+	 m_infosetItem->SetString(selection, ToText(selection + 1) + ": " + newName);
+  }
 }
 
 void dialogInfosets::NewInfoset(void)
@@ -1180,7 +1244,14 @@ void dialogInfosets::NewInfoset(void)
     s_numActions = numActions;
     m_efg.CreateInfoset(player, numActions);
     m_gameChanged = true;
-    m_infosetItem->Append(ToText(player->NumInfosets()));
+    if (player->NumInfosets() == 1)  {
+      m_infosetItem->Clear();
+    }
+    m_infosetItem->Append(ToText(player->NumInfosets()) + ": ");
+    m_infosetItem->SetSelection(player->NumInfosets() - 1);
+    m_removeButton->Enable(TRUE);
+    m_editButton->Enable(TRUE);
+    m_infosetItem->Enable(TRUE);
   }
 }
 
@@ -1194,13 +1265,14 @@ void dialogInfosets::RemoveInfoset(void)
 
 void dialogInfosets::OnOk(void)
 {
+/*
   EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
   Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection()+1];
   if (strcmp(infoset->GetName(),m_infosetNameItem->GetValue())!=0) {
     infoset->SetName(m_infosetNameItem->GetValue());
     m_gameChanged = true;
   }
-
+ */
   Show(FALSE);
 }
 
@@ -1211,7 +1283,9 @@ Bool dialogInfosets::OnClose(void)
 }
 
 void dialogInfosets::OnHelp(void)
-{wxHelpContents("");}
+{
+  wxHelpContents("Tree Menu");
+}
 
 
 void dialogInfosets::CallbackPlayer(wxListBox &p_object,
@@ -1221,11 +1295,18 @@ void dialogInfosets::CallbackPlayer(wxListBox &p_object,
     OnPlayer(p_event.commandInt);
 }
 
-void dialogInfosets::CallbackInfoset(wxListBox &p_object, 
-				     wxCommandEvent &p_event)
+void dialogInfosets::CallbackInfoset(wxListBox &p_object,
+				    wxCommandEvent &)
 {
   ((dialogInfosets *) p_object.wxEvtHandler::GetClientData())->
-    OnInfoset(p_event.commandInt);
+    OnInfoset();
+}
+
+void dialogInfosets::CallbackEdit(wxButton &p_object,
+				     wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.wxEvtHandler::GetClientData())->
+    OnEdit();
 }
 
 void dialogInfosets::CallbackNew(wxButton &p_object, wxCommandEvent &)

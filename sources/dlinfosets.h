@@ -15,12 +15,14 @@ private:
 
   wxListBox *m_playerItem, *m_infosetItem;
   wxText *m_infosetNameItem, *m_actionsItem, *m_membersItem;
-  wxButton *m_removeButton;
+  wxButton *m_removeButton, *m_editButton;
 	
   static void CallbackPlayer(wxListBox &, wxCommandEvent &);
   static void CallbackInfoset(wxListBox &, wxCommandEvent &);
+  static void CallbackEdit(wxButton &, wxCommandEvent &);
   static void CallbackNew(wxButton &, wxCommandEvent &);
   static void CallbackRemove(wxButton &, wxCommandEvent &);
+
   static void CallbackOk(wxButton &, wxCommandEvent &);
   static void CallbackHelp(wxButton &, wxCommandEvent &);
 
@@ -29,7 +31,8 @@ private:
   void OnHelp(void);
 
   void OnPlayer(int);
-  void OnInfoset(int);
+  void OnInfoset(void);
+  void OnEdit(void);
 
   void NewInfoset(void);
   void RemoveInfoset(void);
