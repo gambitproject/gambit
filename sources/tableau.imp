@@ -8,8 +8,10 @@
 #include "normal.h"
 #include "normiter.h"
 
-
-// Basis method definitions
+    // Ted -- To prevent multiple definitions
+    //  perhaps this should go elsewhere
+#ifndef EPSILON_TAB
+#define EPSILON_TAB
 
     // These are the values recommended by Murtagh (1981) for 15 digit 
     // accuracy in LP problems 
@@ -21,6 +23,8 @@ void Epsilon_Tab(double &v, int i)
 }
 
 void Epsilon_Tab(gRational &v, int i) { v = (gRational)0;}
+
+#endif // EPSILON_TAB
 
 template <class T> 
 Basis<T>::Basis(const gMatrix<T> &A)
