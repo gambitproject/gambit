@@ -751,6 +751,17 @@ bool FullEfg::IsPredecessor(const Node *n, const Node *of) const
   return (n == of);
 }
 
+gArray<int> FullEfg::PathToNode(const Node *p_node) const
+{
+  gBlock<int> ret;
+  const Node *n = p_node;
+  while (n->GetParent()) {
+    ret.Insert(p_node->GetAction()->GetNumber(), 1);
+    n = n->GetParent();
+  }
+  return ret;
+}
+
 void FullEfg::DescendantNodes(const Node* n, 
 			      const EFSupport& supp,
 			      gList<const Node*>& current) const

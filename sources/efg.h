@@ -59,6 +59,7 @@ public:
   virtual Node *RootNode(void) const = 0;
   virtual bool IsSuccessor(const Node *n, const Node *from) const = 0;
   virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
+  virtual gArray<int> PathToNode(const Node *) const = 0;
   virtual const gArray<Node *> &Children(const Node *n) const = 0;
   virtual int  NumChildren(const Node *n) const = 0;
   virtual gList<const Node*> TerminalNodes(void) const = 0;  
@@ -176,6 +177,7 @@ public:
   Node *RootNode(void) const;
   bool IsSuccessor(const Node *n, const Node *from) const;
   bool IsPredecessor(const Node *n, const Node *of) const;
+  gArray<int> PathToNode(const Node *) const;
   //    const Node* Consequence(const Node&, Action&) const;
   gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
   gList<const Node*> NonterminalDescendants(const Node&, 
