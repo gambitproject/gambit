@@ -200,16 +200,17 @@ LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
   return (T)2.0*x;
 };
 
-//template <class T>  
-//T LiapModule<T>::LiapValue(const gPVector<T> &p) const
-//{
-//}
-
+#ifdef __GNUG__
 template class LiapModule<double>;
+template class LiapModule<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class LiapModule<double>;
+class LiapModule<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
 
 int LiapSolver::Liap(void)
-//int LiapModule::Liap(int number, int plev, gOutput &out, gOutput &err,
-//		   int &nevals, int &nits)
 {
   BaseLiap *T;
   gOutput *outfile = &gout, *errfile = &gerr;
@@ -230,19 +231,18 @@ int LiapSolver::Liap(void)
       T = new LiapModule<double>((NormalForm<double> &) nf, 
 				 *outfile, *errfile, params);
       break;
-/*
     case RATIONAL:  
-      T = new LiapModule<Rational>((NFRep<Rational> &) *data, out, err, plev);
+      T = new LiapModule<gRational>((NormalForm<gRational> &) nf,
+				    *outfile, *errfile, params);
       break; 
-*/
   }
 //  gout << "\nLiapSolver::Liap() Loc 3";
 
   T->Liap(params.nequilib);
 //  gout << "\nLiapSolver::Liap() Loc 4";
   time = watch.Elapsed();
-  nits=T->Nits();
-  nevals= T->Nevals();
+  nits = T->Nits();
+  nevals = T->Nevals();
 
   if (params.outfile != "")
     delete outfile;
