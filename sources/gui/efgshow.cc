@@ -71,13 +71,187 @@
 
 
 //=====================================================================
-//                 Implementation of class gbtEfgFrame
+//                 Implementation of command classes
 //=====================================================================
 
-const int idTREEWINDOW = 999;
-const int idNODEWINDOW = 998;
-const int idTOOLWINDOW = 997;
-const int idINFONOTEBOOK = 995;
+
+//---------------------------------------------------------------------
+//                    class gbtCmdDeleteTree
+//---------------------------------------------------------------------
+
+//
+// Delete the subtree rooted at a node
+//
+class gbtCmdDeleteTree : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+
+public:
+  gbtCmdDeleteTree(gbtEfgNode p_node)
+    : m_node(p_node) { }
+  virtual ~gbtCmdDeleteTree() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)  
+{
+  m_node.DeleteTree();
+  p_doc->GetEfg().DeleteEmptyInfosets();
+}
+
+//---------------------------------------------------------------------
+//                    class gbtCmdDeleteMove
+//---------------------------------------------------------------------
+
+//
+// Deletes a node, keeping a subtree rooted at one child
+//
+class gbtCmdDeleteMove : public gbtGameCommand {
+private:
+  gbtEfgNode m_keep;
+
+public:
+  gbtCmdDeleteMove(gbtEfgNode p_keep)
+    : m_keep(p_keep) { }
+  virtual ~gbtCmdDeleteMove() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)  
+{
+  m_keep.GetParent().DeleteMove(m_keep);
+  p_doc->GetEfg().DeleteEmptyInfosets();
+  p_doc->SetCursor(m_keep);
+}
+
+//---------------------------------------------------------------------
+//                        class gbtCmdReveal
+//---------------------------------------------------------------------
+
+//
+// Reveal the actions at an information set to a player
+//
+class gbtCmdReveal : public gbtGameCommand {
+private:
+  gbtEfgInfoset m_infoset;
+  gbtEfgPlayer m_player;
+
+public:
+  gbtCmdReveal(gbtEfgInfoset p_infoset, gbtEfgPlayer p_player)
+    : m_infoset(p_infoset), m_player(p_player) { }
+  virtual ~gbtCmdReveal() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdReveal::Do(gbtGameDocument *p_doc)  
+{
+  m_infoset.Reveal(m_player);
+}
+
+//---------------------------------------------------------------------
+//                    class gbtCmdLeaveInfoset
+//---------------------------------------------------------------------
+
+//
+// Cause a node to become a member of its own information set
+//
+class gbtCmdLeaveInfoset : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+
+public:
+  gbtCmdLeaveInfoset(gbtEfgNode p_node)
+    : m_node(p_node) { }
+  virtual ~gbtCmdLeaveInfoset() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdLeaveInfoset::Do(gbtGameDocument *p_doc)  
+{
+  m_node.LeaveInfoset();
+}
+
+//---------------------------------------------------------------------
+//                    class gbtCmdJoinInfoset
+//---------------------------------------------------------------------
+
+//
+// Cause a node to join an information set
+//
+class gbtCmdJoinInfoset : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+  gbtEfgInfoset m_infoset;
+
+public:
+  gbtCmdJoinInfoset(gbtEfgNode p_node, gbtEfgInfoset p_infoset)
+    : m_node(p_node), m_infoset(p_infoset) { }
+  virtual ~gbtCmdJoinInfoset() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)  
+{
+  m_node.JoinInfoset(m_infoset);
+  p_doc->GetEfg().DeleteEmptyInfosets();
+}
+
+//---------------------------------------------------------------------
+//                    class gbtCmdMarkSubgame
+//---------------------------------------------------------------------
+
+//
+// Marks or unmarks a node as a marked subgame.
+//
+class gbtCmdMarkSubgame : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+  bool m_mark; 
+
+public:
+  gbtCmdMarkSubgame(gbtEfgNode p_node, bool p_mark)
+    : m_node(p_node), m_mark(p_mark) { }
+  virtual ~gbtCmdMarkSubgame() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdMarkSubgame::Do(gbtGameDocument *p_doc)  
+{
+  if (m_mark) {
+    p_doc->GetEfg().MarkSubgame(m_node);
+  }
+  else {
+    p_doc->GetEfg().UnmarkSubgame(m_node);
+  }
+}
+
+//=====================================================================
+//                 Implementation of class gbtEfgFrame
+//=====================================================================
 
 BEGIN_EVENT_TABLE(gbtEfgFrame, wxFrame)
   EVT_MENU(wxID_NEW, gbtEfgFrame::OnFileNew)
@@ -718,15 +892,11 @@ void gbtEfgFrame::OnEditDelete(wxCommandEvent &)
 
     if (dialog.ShowModal() == wxID_OK) {
       if (dialog.DeleteTree()) {
-	m_doc->GetCursor().DeleteTree();
+	m_doc->Submit(new gbtCmdDeleteTree(m_doc->GetCursor()));
       }
       else {
-	gbtEfgNode keep = dialog.KeepNode();
-	m_doc->GetCursor().DeleteMove(keep);
-	m_doc->SetCursor(keep);
+	m_doc->Submit(new gbtCmdDeleteMove(dialog.KeepNode()));
       }
-      m_doc->GetEfg().DeleteEmptyInfosets();
-      m_doc->OnTreeChanged(true, true);
     }
   }
   catch (gbtException &ex) {
@@ -741,11 +911,10 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-	if (dialog.IsPlayerSelected(pl)) {
-	  m_doc->GetCursor().GetInfoset().Reveal(m_doc->GetEfg().GetPlayer(pl));
-	}
+	gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
+	m_doc->Submit(new gbtCmdReveal(m_doc->GetCursor().GetInfoset(),
+				       player));
       }
-      m_doc->OnTreeChanged(true, true);
     }
     catch (gbtException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -756,12 +925,11 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
 void gbtEfgFrame::OnEditToggleSubgame(wxCommandEvent &)
 {
   if (m_doc->GetCursor().GetSubgameRoot() == m_doc->GetCursor()) {
-    m_doc->GetEfg().UnmarkSubgame(m_doc->GetCursor());
+    m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(), false));
   }
   else {
-    m_doc->GetEfg().MarkSubgame(m_doc->GetCursor());
+    m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(), true));
   }
-  m_doc->UpdateViews();
 }
 
 void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
@@ -769,9 +937,8 @@ void gbtEfgFrame::OnEditMarkSubgameTree(wxCommandEvent &)
   gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
-    m_doc->GetEfg().MarkSubgame(subgames[i]);
+    m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], true));
   }
-  m_doc->UpdateViews();
 }
 
 void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
@@ -779,9 +946,8 @@ void gbtEfgFrame::OnEditUnmarkSubgameTree(wxCommandEvent &)
   gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
-    m_doc->GetEfg().UnmarkSubgame(subgames[i]);
+    m_doc->Submit(new gbtCmdMarkSubgame(subgames[i], false));
   }
-  m_doc->UpdateViews();
 }
 
 void gbtEfgFrame::OnEditNode(wxCommandEvent &)
@@ -790,33 +956,29 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetCursor().SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {
-      m_doc->GetCursor().SetOutcome(m_doc->GetEfg().GetOutcome(dialog.GetOutcome()));
+      gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(dialog.GetOutcome());
+      m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), outcome));
     }
     else {
-      m_doc->GetCursor().SetOutcome(0);
+      m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), 0));
     }
 
     if (m_doc->GetCursor().IsSubgameRoot() &&
 	!m_doc->GetCursor().GetParent().IsNull()) {
-      if (dialog.MarkedSubgame()) {
-	m_doc->GetEfg().MarkSubgame(m_doc->GetCursor());
-      }
-      else {
-	m_doc->GetEfg().UnmarkSubgame(m_doc->GetCursor());
-      }
+      m_doc->Submit(new gbtCmdMarkSubgame(m_doc->GetCursor(),
+					  dialog.MarkedSubgame()));
     }
 
     if (m_doc->GetCursor().NumChildren() > 0 &&
 	dialog.GetInfoset() != m_doc->GetCursor().GetInfoset()) {
       if (dialog.GetInfoset() == 0) {
-	m_doc->GetCursor().LeaveInfoset();
+	m_doc->Submit(new gbtCmdLeaveInfoset(m_doc->GetCursor()));
       }
       else {
-	m_doc->GetCursor().JoinInfoset(dialog.GetInfoset());
+	m_doc->Submit(new gbtCmdJoinInfoset(m_doc->GetCursor(),
+					    dialog.GetInfoset()));
       }
-      m_doc->OnTreeChanged(true, true);
     }
-    m_doc->UpdateViews(this);
   }
 }
 
@@ -826,51 +988,7 @@ void gbtEfgFrame::OnEditMove(wxCommandEvent &)
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
-    infoset.SetLabel(gbtText(dialog.GetInfosetName().mb_str()));
-    
-    if (!infoset.IsChanceInfoset() && 
-	dialog.GetPlayer() != infoset.GetPlayer().GetId()) {
-      infoset.SetPlayer(m_doc->GetEfg().GetPlayer(dialog.GetPlayer()));
-    }
-
-    for (int act = 1; act <= infoset.NumActions(); act++) {
-      if (!dialog.GetActions().Find(infoset.GetAction(act))) {
-	infoset.GetAction(act).DeleteAction();
-	act--;
-      }
-    }
-
-    int insertAt = 1;
-    for (int act = 1; act <= dialog.NumActions(); act++) {
-      gbtEfgAction action = dialog.GetActions()[act];
-      if (!action.IsNull()) {
-	action.SetLabel(dialog.GetActionName(act));
-	if (infoset.IsChanceInfoset()) {
-	  m_doc->GetEfg().SetChanceProb(infoset, action.GetId(),
-				      dialog.GetActionProb(act));
-	}
-	insertAt = dialog.GetActions()[act].GetId() + 1;
-      }
-      else if (insertAt > infoset.NumActions()) {
-	gbtEfgAction newAction = m_doc->GetEfg().InsertAction(infoset);
-	insertAt++;
-	newAction.SetLabel(dialog.GetActionName(act));
-	if (infoset.IsChanceInfoset()) {
-	  m_doc->GetEfg().SetChanceProb(infoset, newAction.GetId(), 
-				      dialog.GetActionProb(act));
-	}
-      }
-      else {
-	gbtEfgAction newAction =
-	  m_doc->GetEfg().InsertAction(infoset, infoset.GetAction(insertAt++));
-	newAction.SetLabel(dialog.GetActionName(act));
-	if (infoset.IsChanceInfoset()) {
-	  m_doc->GetEfg().SetChanceProb(infoset, newAction.GetId(), 
-				      dialog.GetActionProb(act));
-	}
-      }
-    }
-    m_doc->OnTreeChanged(true, true);
+    m_doc->Submit(dialog.GetCommand());
   }
 }
 

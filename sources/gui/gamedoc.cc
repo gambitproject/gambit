@@ -99,39 +99,6 @@ gbtGameDocument::~gbtGameDocument()
   }
 }
 
-void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
-				    bool p_infosetsChanged)
-{
-  if (p_infosetsChanged) {
-    while (m_efgSupports.Length()) { 
-      delete m_efgSupports.Remove(1);
-    }
-
-    m_curEfgSupport = new gbtEfgSupport(*m_efg);
-    m_efgSupports.Append(m_curEfgSupport);
-    m_curEfgSupport->SetLabel("Full Support");
-  }
-
-  if (p_infosetsChanged || p_nodesChanged) {
-    // It would be nice to relax this, but be conservative for now
-    m_copyNode = 0;
-    m_cutNode = 0;
-    m_modified = true;
-
-    while (m_nfgSupports.Length()) {
-      delete m_nfgSupports.Remove(1);
-    }
-    
-    m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg());
-    m_curNfgSupport->SetLabel("Full Support");
-    m_nfgSupports.Append(m_curNfgSupport);
-
-    m_contingency = gbtArray<int>(m_efg->NumPlayers());
-    for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
-  }
-  UpdateViews();
-}
-
 void gbtGameDocument::SetCursor(gbtEfgNode p_node)
 {
   m_cursor = p_node;

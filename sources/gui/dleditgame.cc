@@ -265,7 +265,6 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
       }
       efg.GetPlayer(pl).SetLabel(m_players[pl]);
     }
-    p_doc->OnTreeChanged(true, true);
   }
   else {
     gbtNfgGame nfg = p_doc->GetNfg();

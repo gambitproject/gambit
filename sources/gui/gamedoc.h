@@ -89,7 +89,6 @@ public:
   // Management of commands
   void Submit(gbtGameCommand *);
   void UpdateViews(gbtGameView * = 0);
-  void OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged);
 
   // Extensive-form related state information
   gbtEfgGame GetEfg(void) const { return *m_efg; }

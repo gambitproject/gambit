@@ -27,6 +27,8 @@
 #ifndef DLEDITMOVE_H
 #define DLEDITMOVE_H
 
+#include "gamedoc.h"
+
 class dialogEditMove : public wxDialog {
 private:
   gbtEfgInfoset m_infoset;
@@ -59,6 +61,8 @@ public:
   const gbtBlock<gbtEfgAction> &GetActions(void) const { return m_actions; }
   gbtText GetActionName(int p_act) const { return m_actionNames[p_act]; }
   gbtNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
+
+  gbtGameCommand *GetCommand(void) const;
 
   DECLARE_EVENT_TABLE()
 };

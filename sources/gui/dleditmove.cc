@@ -316,3 +316,92 @@ void dialogEditMove::OnOK(wxCommandEvent &p_event)
   // Go on with usual processing
   p_event.Skip();
 }
+
+//========================================================================
+//                     Command class for editing move
+//========================================================================
+
+class gbtCmdEditMove : public gbtGameCommand {
+private:
+  gbtEfgInfoset m_infoset;
+  gbtText m_infosetLabel;
+  int m_infosetPlayer;
+  gbtBlock<gbtEfgAction> m_actions;
+  gbtBlock<gbtText> m_actionLabels;
+  gbtBlock<gbtNumber> m_actionProbs;
+
+public:
+  gbtCmdEditMove(gbtEfgInfoset p_infoset, const gbtText &p_infosetLabel,
+		 int p_infosetPlayer,
+		 const gbtBlock<gbtEfgAction> &p_actions,
+		 const gbtBlock<gbtText> &p_actionLabels,
+		 const gbtBlock<gbtNumber> &p_actionProbs)
+    : m_infoset(p_infoset), m_infosetLabel(p_infosetLabel), 
+      m_infosetPlayer(p_infosetPlayer),
+      m_actions(p_actions), m_actionLabels(p_actionLabels),
+      m_actionProbs(p_actionProbs)  { }
+  virtual ~gbtCmdEditMove() { }
+
+  void Do(gbtGameDocument *); 
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
+{
+  m_infoset.SetLabel(m_infosetLabel);
+    
+  if (!m_infoset.IsChanceInfoset() && 
+      m_infosetPlayer != m_infoset.GetPlayer().GetId()) {
+    m_infoset.SetPlayer(p_doc->GetEfg().GetPlayer(m_infosetPlayer));
+  }
+
+  for (int act = 1; act <= m_infoset.NumActions(); act++) {
+    if (!m_actions.Find(m_infoset.GetAction(act))) {
+      m_infoset.GetAction(act).DeleteAction();
+      act--;
+    }
+  }
+
+  int insertAt = 1;
+  for (int act = 1; act <= m_actions.Length(); act++) {
+    gbtEfgAction action = m_actions[act];
+    if (!action.IsNull()) {
+      action.SetLabel(m_actionLabels[act]);
+      if (m_infoset.IsChanceInfoset()) {
+	p_doc->GetEfg().SetChanceProb(m_infoset, action.GetId(),
+				      m_actionProbs[act]);
+      }
+      insertAt = m_actions[act].GetId() + 1;
+    }
+    else if (insertAt > m_infoset.NumActions()) {
+      gbtEfgAction newAction = p_doc->GetEfg().InsertAction(m_infoset);
+      insertAt++;
+      newAction.SetLabel(m_actionLabels[act]);
+      if (m_infoset.IsChanceInfoset()) {
+	p_doc->GetEfg().SetChanceProb(m_infoset, newAction.GetId(), 
+				      m_actionProbs[act]);
+      }
+    }
+    else {
+      gbtEfgAction newAction =
+	p_doc->GetEfg().InsertAction(m_infoset,
+				     m_infoset.GetAction(insertAt++));
+      newAction.SetLabel(m_actionLabels[act]);
+      if (m_infoset.IsChanceInfoset()) {
+	p_doc->GetEfg().SetChanceProb(m_infoset, newAction.GetId(), 
+				      m_actionProbs[act]);
+      }
+    }
+  }
+}
+
+
+gbtGameCommand *dialogEditMove::GetCommand(void) const
+{
+  return new gbtCmdEditMove(m_infoset,
+			    (const char *) m_infosetName->GetValue().mb_str(),
+			    m_player->GetSelection() + 1,
+			    m_actions, m_actionNames, m_actionProbs);
+}
