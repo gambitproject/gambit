@@ -164,7 +164,7 @@ private:
     Infoset *hilight_infoset;       // Hilight infoset from the solution disp
     Infoset *hilight_infoset1;      // Hilight infoset by pressing control
     TreeRender *zoom_window;
-    wxMenu    *build_menu;          // a popup menu, equivalent to top level build
+    wxMenu    *edit_menu;           // a popup menu, equivalent to top level edit
 
     class NodeDragger;              // Class to take care of tree copy/move by
     NodeDragger *node_drag;         // drag and dropping nodes.

@@ -421,19 +421,19 @@ void NfgShow::SetLabels(int what)
         char *label = new char[256];
 
         strcpy(label, nf.GetTitle());
-        MyDialogBox *nfg_label_dialog = 
-            new MyDialogBox(spread, "Label Game", NFG_LABEL_HELP);
-        nfg_label_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+        MyDialogBox *nfg_edit_dialog = 
+            new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
+        nfg_edit_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
             new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
-        nfg_label_dialog->Go();
+        nfg_edit_dialog->Go();
 
-        if (nfg_label_dialog->Completed() == wxOK)
+        if (nfg_edit_dialog->Completed() == wxOK)
         {
             nf.SetTitle(label);
             SetFileName(Filename()); // updates the title
         }
 
-        delete nfg_label_dialog;
+        delete nfg_edit_dialog;
         delete [] label;
     }
 
@@ -485,7 +485,7 @@ void NfgShow::SetLabels(int what)
 
     if (what == 2) // label players
     {
-        MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_LABEL_HELP);
+        MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
         char **player_labels = new char *[num_players+1];
         int i;
 
@@ -863,17 +863,17 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
     file_menu->Append(OUTPUT_MENU,   "Out&put",  "Output to any device");
     file_menu->Append(CLOSE_MENU,    "&Close",   "Exit");
 
-    wxMenu *label_menu = new wxMenu;
-    label_menu->Append(NFG_LABEL_GAME,     "&Game",    "Label the entire game");
-    label_menu->Append(NFG_LABEL_STRATS,   "&Strats",  "Label player strategies");
-    label_menu->Append(NFG_LABEL_PLAYERS,  "&Players", "Label players");
+    wxMenu *edit_menu = new wxMenu;
+    edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
+    edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
+    edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
+    edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  "Set/Edit outcomes");
 
     wxMenu *supports_menu = new wxMenu;
     supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
     supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Supports", "Change support");
 
     wxMenu *solve_menu = new wxMenu;
-    solve_menu->Append(NFG_SOLVE_OUTCOMES_MENU,  "&Outcomes",    "Set/Edit outcomes");
     solve_menu->Append(NFG_SOLVE_SOLVE_MENU,     "&Solve",       "Solution modules");
     solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...", "Standard solutions", TRUE);
 
@@ -901,7 +901,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 
     wxMenuBar *tmp_menubar = new wxMenuBar;
     tmp_menubar->Append(file_menu,     "&File");
-    tmp_menubar->Append(label_menu,    "&Label");
+    tmp_menubar->Append(edit_menu,     "&Edit");
     tmp_menubar->Append(supports_menu, "S&upports");
     tmp_menubar->Append(solve_menu,    "&Solve");
     tmp_menubar->Append(inspect_menu,  "&Inspect");
@@ -1113,10 +1113,6 @@ void NormalSpread::OnMenuCommand(int id)
 {
     switch (id)
     {
-    case NFG_SOLVE_OUTCOMES_MENU: 
-        parent->ChangeOutcomes(CREATE_DIALOG);
-        break;
-
     case NFG_PREFS_OUTCOMES_MENU: 
         parent->OutcomeOptions();
         break;
@@ -1165,16 +1161,20 @@ void NormalSpread::OnMenuCommand(int id)
         parent->ShowGameInfo();
         break;
 
-    case NFG_LABEL_GAME: 
+    case NFG_EDIT_GAME: 
         parent->SetLabels(0);
         break;
 
-    case NFG_LABEL_STRATS: 
+    case NFG_EDIT_STRATS: 
         parent->SetLabels(1);
         break;
 
-    case NFG_LABEL_PLAYERS: 
+    case NFG_EDIT_PLAYERS: 
         parent->SetLabels(2);
+        break;
+
+    case NFG_EDIT_OUTCOMES: 
+        parent->ChangeOutcomes(CREATE_DIALOG);
         break;
 
     case NFG_FILE_SAVE:
@@ -1272,7 +1272,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(NFG_FILE_SAVE, ToolbarSaveBitmap);
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
     AddSeparator();
-    AddTool(NFG_SOLVE_OUTCOMES_MENU, ToolbarPayoffBitmap);
+    AddTool(NFG_EDIT_OUTCOMES, ToolbarPayoffBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_SOLVE_MENU, ToolbarSolveBitmap);
     AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);

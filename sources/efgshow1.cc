@@ -58,7 +58,7 @@ void EfgShow::MakeMenus(void)
   file_menu->Append(FILE_OUTPUT, "&Output",  "Print or copy the game");
   file_menu->Append(FILE_CLOSE,  "&Close",   "Close this window");
 
-  wxMenu *build_menu = new wxMenu;
+  wxMenu *edit_menu = new wxMenu;
   wxMenu *node_menu  = new wxMenu;
   node_menu->Append(NODE_ADD,       "&Add",       "Add a node");
   node_menu->Append(NODE_DELETE,    "&Delete",    "Remove cursor node");
@@ -90,11 +90,11 @@ void EfgShow::MakeMenus(void)
   tree_menu->Append(TREE_LABEL,     "&Label",    "Set the game label");
   tree_menu->Append(TREE_PLAYERS,   "&Players",  "Edit/View players");
   tree_menu->Append(TREE_INFOSETS,  "&Infosets", "Edit/View infosets");
-  build_menu->Append(BUILD_NODE,    "&Node",     node_menu,    "Edit the node");
-  build_menu->Append(BUILD_ACTIONS, "&Actions",  action_menu,  "Edit actions");
-  build_menu->Append(BUILD_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
-  build_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
-  build_menu->Append(BUILD_TREE,    "&Tree",     tree_menu,    "Edit the tree");
+  edit_menu->Append(EDIT_NODE,    "&Node",     node_menu,    "Edit the node");
+  edit_menu->Append(EDIT_ACTIONS, "&Actions",  action_menu,  "Edit actions");
+  edit_menu->Append(EDIT_INFOSET, "&Infoset",  infoset_menu, "Edit infosets");
+  edit_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
+  edit_menu->Append(EDIT_TREE,    "&Tree",     tree_menu,    "Edit the tree");
 
   wxMenu *subgame_menu = new wxMenu;
   subgame_menu->Append(SUBGAME_SOLVE,        "Mark &All",       "Scan tree for subgames");
@@ -117,50 +117,50 @@ void EfgShow::MakeMenus(void)
   wxMenu *solveCustomMenu = new wxMenu;
   wxMenu *solveCustomEfgMenu = new wxMenu;
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_ENUMPURE, "EnumPure",
-			     "Enumerate pure strategy equilibria");
+                 "Enumerate pure strategy equilibria");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LCP, "LCP",
-			     "Solve by linear complementarity program");
+                 "Solve by linear complementarity program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LP, "LP",
-			     "Solve by linear program");
+                 "Solve by linear program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
-			     "Liapunov function minimization");
+                 "Liapunov function minimization");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_GOBIT, "Gobit",
-			     "Compute quantal response equilibria");
+                 "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
-			  solveCustomEfgMenu,
-			  "Solve using extensive form based algorithms");
+              solveCustomEfgMenu,
+              "Solve using extensive form based algorithms");
 
   wxMenu *solveCustomNfgMenu = new wxMenu;
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMPURE, "EnumPure",
-			     "Enumerate pure strategy equilibria");
+                 "Enumerate pure strategy equilibria");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMMIXED, "EnumMixed",
-			     "Enumerate all equilibria");
+                 "Enumerate all equilibria");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LCP, "LCP",
-			     "Solve by linear complementarity program");
+                 "Solve by linear complementarity program");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LP, "LP",
-			     "Solve by linear program");
+                 "Solve by linear program");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_LIAP, "Liapunov",
-			     "Liapunov function minimization");
+                 "Liapunov function minimization");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_SIMPDIV, "Simpdiv",
-			     "Simplicial subdivision");
+                 "Simplicial subdivision");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBIT, "Gobit",
-			     "Compute quantal response equilibria");
+                 "Compute quantal response equilibria");
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_GOBITGRID, "GobitGrid",
-			     "Compute quantal response equilibria");
+                 "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_NFG, "Normal form",
-			  solveCustomNfgMenu,
-			  "Solve using normal form based algorithms");
+              solveCustomNfgMenu,
+              "Solve using normal form based algorithms");
 
   solve_menu->Append(SOLVE_CUSTOM, "Custom", solveCustomMenu,
-		     "Select a specific algorithm");
+             "Select a specific algorithm");
 
   wxMenu *solveNfgMenu = new wxMenu;
   solveNfgMenu->Append(SOLVE_NFG_REDUCED, "Reduced",
-		       "Generate reduced normal form");
+               "Generate reduced normal form");
   solveNfgMenu->Append(SOLVE_NFG_AGENT, "Agent",
-		       "Generate agent normal form");
+               "Generate agent normal form");
   solve_menu->Append(SOLVE_NFG, "Normal form", solveNfgMenu,
-		     "Create a normal form representation of this game");
+             "Create a normal form representation of this game");
   solve_menu->AppendSeparator();
   solve_menu->Append(SOLVE_DOMINANCE, "&Dominance", "Set ElimDom options");
   solve_menu->Append(SOLVE_SUBGAMES,  "&Subgames",  "Set subgames options");
@@ -170,7 +170,7 @@ void EfgShow::MakeMenus(void)
   inspect_menu->Append(INSPECT_FEATURES,   "In&fo",      "Advanced solution features");
   inspect_menu->AppendSeparator();
   inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
-		       "Information about this game");
+               "Information about this game");
   
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
@@ -192,7 +192,7 @@ void EfgShow::MakeMenus(void)
 
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(file_menu,     "&File");
-  menu_bar->Append(build_menu,    "&Build");
+  menu_bar->Append(edit_menu,     "&Edit");
   menu_bar->Append(subgame_menu,  "Sub&games");
   menu_bar->Append(supports_menu, "S&upports");
   menu_bar->Append(solve_menu,    "&Solve");
@@ -528,7 +528,7 @@ void EfgShow::OnMenuCommand(int id)
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
     if (id != FILE_QUIT && id != FILE_CLOSE && id != TREE_OUTCOMES &&
-	id != SUPPORTS_SUPPORTS) {
+    id != SUPPORTS_SUPPORTS) {
       tw->OnPaint();
       tw->SetFocus();
     }

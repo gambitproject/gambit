@@ -17,16 +17,16 @@
 #define NFG_SOLVE_S_ALLNASH_MENU        140
 #define NFG_SOLVE_STANDARD_MENU         145
 #define NFG_SOLVE_GAMEINFO_MENU         155
-#define NFG_SOLVE_OUTCOMES_MENU         160
 
 #define NFG_PREFS_OUTCOMES_MENU         350
 
 #define NFG_DISPLAY_COLORS              200
 #define NFG_DISPLAY_ACCELS              202
 
-#define NFG_LABEL_GAME                  300
-#define NFG_LABEL_STRATS                301
-#define NFG_LABEL_PLAYERS               302
+#define NFG_EDIT_GAME                   300
+#define NFG_EDIT_STRATS                 301
+#define NFG_EDIT_PLAYERS                302
+#define NFG_EDIT_OUTCOMES               303
 
 #define NFG_FILE_SAVE                   250
 
@@ -42,7 +42,7 @@
 #define NFG_ELIMDOM_INSPECT_HELP        "Elimdom Solutions Inspect"
 #define NFG_SOLVE_INSPECT_HELP          "Elimdom Solutions"
 #define NFG_SOLVE_INSPECT_OPTIONS_HELP  "Normal Form Inspect Options"
-#define NFG_LABEL_HELP                  "Normal Form Labels"
+#define NFG_EDIT_HELP                   "Normal Form Edit"
 #define NFG_SUPPORTS_HELP               "Examining NF Supports"
 #define NFG_MAKE_SUPPORT_HELP           "Creating NF Supports"
 #define NFG_STANDARD_HELP               "NFG Standard Solutions"

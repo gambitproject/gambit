@@ -1327,7 +1327,7 @@ TreeWindow::~TreeWindow(void)
 
 void TreeWindow::MakeMenus(void)
 {
-    build_menu = new wxMenu(NULL, (wxFunction)OnPopup);
+    edit_menu = new wxMenu(NULL, (wxFunction)OnPopup);
     wxMenu *node_menu = new wxMenu;
     node_menu->Append(NODE_ADD, "&Add", "Add a node");
     node_menu->Append(NODE_DELETE, "&Delete", "Remove cursor node");
@@ -1360,12 +1360,12 @@ void TreeWindow::MakeMenus(void)
     tree_menu->Append(TREE_PLAYERS, "&Players", "Edit/View player names");
     tree_menu->Append(TREE_INFOSETS, "&Infosets", "Edit/View infosets");
     
-    build_menu->Append(BUILD_NODE, "&Node", node_menu, "Edit the node");
-    build_menu->Append(BUILD_ACTIONS, "&Actions", action_menu, "Edit actions");
-    build_menu->Append(BUILD_INFOSET, "&Infoset", infoset_menu, "Edit infosets");
-    build_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
-    build_menu->Append(BUILD_TREE, "&Tree", tree_menu, "Edit the tree");
-    build_menu->SetClientData((char *)frame); // call back to parent later
+    edit_menu->Append(EDIT_NODE, "&Node", node_menu, "Edit the node");
+    edit_menu->Append(EDIT_ACTIONS, "&Actions", action_menu, "Edit actions");
+    edit_menu->Append(EDIT_INFOSET, "&Infoset", infoset_menu, "Edit infosets");
+    edit_menu->Append(TREE_OUTCOMES, "&Outcomes", "Edit/View the payoffs");
+    edit_menu->Append(EDIT_TREE, "&Tree", tree_menu, "Edit the tree");
+    edit_menu->SetClientData((char *)frame); // call back to parent later
 }
 
 
@@ -1599,7 +1599,7 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
         SetFocus(); // click on the canvas to restore keyboard focus
     }
     
-    // Right click implements a popup menu (build), legend display
+    // Right click implements a popup menu (edit), legend display
     if (ev.RightDown()) ProcessRClick(ev);
     
     // Right double click implements legend modification
@@ -2265,7 +2265,7 @@ void TreeWindow::ProcessRClick(wxMouseEvent &ev)
     // If we got here, the click was NOT on top of a text label, do the menu
     int x_start, y_start;
     ViewStart(&x_start, &y_start);
-    PopupMenu(build_menu, GetDC()->LogicalToDeviceX(x-x_start*PIXELS_PER_SCROLL),
+    PopupMenu(edit_menu, GetDC()->LogicalToDeviceX(x-x_start*PIXELS_PER_SCROLL),
               GetDC()->LogicalToDeviceY(y-y_start*PIXELS_PER_SCROLL));
 
 #undef  DONT_USE_LEGENDS_SRC

@@ -13,10 +13,10 @@
 #define FILE_CLOSE                          1050
 #define FILE_LOG                            1055
 
-#define BUILD_NODE                          900
-#define BUILD_ACTIONS                       910
-#define BUILD_INFOSET                       920
-#define BUILD_TREE                          930
+#define EDIT_NODE                           900
+#define EDIT_ACTIONS                        910
+#define EDIT_INFOSET                        920
+#define EDIT_TREE                           930
 
 #define NODE_OUTCOME_OUTCOME                1100
 #define NODE_OUTCOME_DIALOG                 1101
