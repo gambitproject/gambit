@@ -61,6 +61,8 @@ template <class T> class gList  {
     int Insert(const T &, int);
     virtual T Remove(int);
 
+    void RemoveRedundancies();
+
     int Find(const T &) const;
     bool Contains(const T &t) const;
     int Length(void) const;

@@ -276,6 +276,18 @@ template <class T> T gList<T>::Remove(int num)
   return ret;
 }
 
+template <class T> void gList<T>::RemoveRedundancies()
+{
+  int i = 1; int j = 2;		
+  while (i < Length()) {
+    if ((*this)[i] == (*this)[j])
+      Remove(j);
+    else 
+      j++;
+    if (j > Length()) { i++; j = i+1; }
+  }
+}
+
 template <class T> int gList<T>::Find(const T &t) const
 {
   if (length == 0)  return 0;
