@@ -1,10 +1,10 @@
 //
-// FILE: nfgdbl.cc -- Instantiation of double-precision normal forms
+// FILE: nfginst.cc -- Instantiation of normal form template classes
 //
-// $Id$
+// 
 //
 
-#include "nfg.imp"
+#include "mixed.imp"
 
 template class MixedProfile<double>;
 template gOutput &operator<<(gOutput &, const MixedProfile<double> &);

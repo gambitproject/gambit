@@ -346,32 +346,9 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
 }
 
 
-
 // Not really how these should be handled; but it works for now, and
 // we can deal with housekeeping later
 
 #include "nfgiter.imp"
 #include "nfgciter.imp"
-
-#include "garray.imp"
-#include "gblock.imp"
-#include "glist.imp"
-
-template class gArray<NFStrategySet *>;
-template class gArray<Strategy *>;
-template class gArray<NFOutcome *>;
-
-template class gArray<NFPlayer *>;
-template class gBlock<Strategy *>;
-
-template class gArray<NFOutcome *>;
-template class gBlock<NFOutcome *>;
-
-#include "nfg.imp"
-template class MixedProfile<gNumber>;
-template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
-
-#include "mixedsol.imp"
-
-template class gList<MixedSolution>;
 

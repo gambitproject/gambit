@@ -13,6 +13,7 @@
 #include "gstream.h"
 #include "gtext.h"
 #include "gnumber.h"
+#include "efg.h"
 
 typedef enum 
 {

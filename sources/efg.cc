@@ -4,52 +4,8 @@
 //  $Id$
 //
 
-class Node;
-class EFPlayer;
-class Infoset;
-class Action;
-class EFOutcome;
 #include "garray.h"
 #include "rational.h"
-#include "garray.imp"
-#include "gblock.imp"
-
-template class gArray<EFPlayer *>;
-template class gBlock<EFPlayer *>;
-
-template class gArray<Infoset *>;
-template class gBlock<Infoset *>;
-
-template class gArray<Node *>;
-template class gBlock<Node *>;
-
-template class gArray<Action *>;
-template class gBlock<Action *>;
-
-template class gArray<gArray<Action *> *>;
-
-template class gArray<EFOutcome *>;
-template class gBlock<EFOutcome *>;
-
-template class gArray<gBlock<bool> >;
-template class gBlock<gBlock<bool> >;
-
-
-class EFActionSet;
-class EFActionArray;
-
-template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
-template class gArray<EFActionSet *>;
-template class gArray<EFActionArray *>;
-//template class gArray<gBlock <Action *> *>;
-//template class gArray<gArray <Action *> *>;
-#include "glist.imp"
-
-template class gList<Node *>;
-template class gList<const Node *>;
-template gOutput &operator<<(gOutput &, const gList<const Node *> &);
-template class gList<Infoset *>;
-
 
 #ifdef __GNUG__
 #pragma implementation "outcome.h"
@@ -1477,16 +1433,4 @@ void Efg::Payoff(const gArray<gArray<int> *> &profile,
 
 #include "efgiter.imp"
 #include "efgciter.imp"
-
-#include "efg.imp"
-template class BehavNode<gNumber>;
-template class BehavProfile<gNumber>;
-template class PureBehavProfile<gNumber>;
-template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
-
-template class gArray<BehavNode<gNumber> *>;
-
-#include "behavsol.imp"
-
-template class gList<BehavSolution>;
 

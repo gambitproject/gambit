@@ -13,6 +13,7 @@
 #include "gtext.h"
 #include "gnumber.h"
 #include "nfplayer.h"
+#include "nfg.h"
 
 typedef enum 
 {

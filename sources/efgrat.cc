@@ -5,7 +5,7 @@
 //
 
 #include "rational.h"
-#include "efg.imp"
+#include "behav.imp"
 
 template class BehavNode<gRational>;
 template class BehavProfile<gRational>;

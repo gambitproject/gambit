@@ -32,6 +32,5 @@ template gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
 
 template class gList<EFOutcome *>;
 template class gList<gArray<EFOutcome *> >;
-template class gList<BehavProfile<gNumber> >;
 
 

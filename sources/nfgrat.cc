@@ -5,7 +5,7 @@
 //
 
 #include "rational.h"
-#include "nfg.imp"
+#include "mixed.imp"
 
 template class MixedProfile<gRational>;
 template gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);

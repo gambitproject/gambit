@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "efg.imp"
+#include "behav.imp"
 
 template class BehavNode<double>;
 template class BehavProfile<double>;
