@@ -29,8 +29,23 @@ int gcl_main( int argc, char* argv[] );
 // See WinEdit.cpp for the implementation of this class
 //
 
+#include <new.h>
+
+#include "gtext.h"
+#include "glist.h"
+#include "gsm.h"
+#include "gstack.h"
+#include "gcompile.h"
+#include "gcmdline.h"
+#include "gpreproc.h"
+
 class CWinEditApp : public CWinApp
 {
+
+private:
+   GCLCompiler C;
+   gPreprocessor P;
+
 public:
 	CWinEditApp();
 
@@ -40,7 +55,8 @@ public:
 	public:
 	virtual BOOL InitInstance();
   virtual BOOL SaveAllModified();
-	virtual int Run();
+  virtual BOOL OnIdle(LONG lcount);
+//	virtual int Run();
 	//}}AFX_VIRTUAL
 
    void ProcessMessages( void );

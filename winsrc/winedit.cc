@@ -32,11 +32,88 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CWinEditApp construction
 
+extern void gclNewHandler(void);
+extern gCmdLineInput &gcmdline;
+extern GSM* _gsm;
+extern char* _SourceDir;
+extern char* _ExePath;
+
 CWinEditApp::CWinEditApp()
+: C(), P(&gcmdline, "Include[\"gclini.gcl\"]")
 {
 	// TODO: add construction code here,
 	// Place all significant initialization in InitInstance
+
+
+  set_new_handler(gclNewHandler);
+  int argc;
+  char** argv;
+  WinGetArgs( &argc, &argv );
+  try {
+    _ExePath = new char[strlen(argv[0]) + 2];
+    // Apparently, Win95 surrounds the program name with explicit quotes;
+    // if this occurs, special case code
+    if (argv[0][0] == '"') {
+      strncpy(_ExePath, argv[0] + 1, strlen(argv[0]) - 2);
+    }
+    else {
+      strcpy(_ExePath, argv[0]);
+    }
+    const char SLASH = '\\';
+
+    char *c = strrchr( _ExePath, SLASH );
+
+    _SourceDir = new char[256];
+    if (c != NULL)  {
+      int len = strlen(_ExePath) - strlen(c);
+      if (len >= 256)  len = 255;
+      strncpy(_SourceDir, _ExePath, len);
+    }
+    else   {
+      strcpy(_SourceDir, "");
+    }
+    _gsm = new GSM;
+  }
+  catch (gException &w)  {
+    gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
+    return;
+  }
+
 }
+
+BOOL CWinEditApp::OnIdle(LONG lcount)
+{
+  if(CWinApp::OnIdle(lcount)) return TRUE;
+  try {
+//    while (!P.eof()) {
+    if (!P.eof()) {
+      gText line = P.GetLine();
+      gText fileName = P.GetFileName();
+      int lineNumber = P.GetLineNumber();
+      gText rawLine = P.GetRawLine();
+      BeginWaitCursor();
+      C.Parse(line, fileName, lineNumber, rawLine );
+      EndWaitCursor();
+    }
+  //    delete[] _SourceDir;
+  //    delete _gsm;
+  }
+
+  catch (gclQuitOccurred &E) {
+    EndWaitCursor();
+//    CWinApp::HideApplication();
+//    CWinApp::CloseAllDocuments(TRUE);
+    exit( ExitInstance() );
+    return E.Value();
+  }
+  // The last line of defense for exceptions:
+  catch (gException &w)  {
+    gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
+    return 1;
+  }
+  return 1;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 // The one and only CWinEditApp object
@@ -62,7 +139,7 @@ BOOL CWinEditApp::InitInstance()
 	// Change the registry key under which our settings are stored.
 	// You should modify this string to be something appropriate
 	// such as the name of your company or organization.
-	SetRegistryKey(_T("Local AppWizard-Generated Applications"));
+	SetRegistryKey(_T("Gambit Project: Gambit Command Language"));
 
 	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
@@ -150,14 +227,56 @@ void CWinEditApp::OnAppAbout()
 /////////////////////////////////////////////////////////////////////////////
 // CWinEditApp commands
 
+#include "gstream.h"
+
+/*
+int CWinEditApp::Run()
+{
+	// TODO: Add your specialized code here and/or call the base class
 
 
+  int argc;
+  char** argv;
+  WinGetArgs( &argc, &argv );
+  return gcl_main( argc, argv );
+}
+*/
 
+void CWinEditApp::ProcessMessages( void )
+{
+  ASSERT_VALID(this);
 
+/*
+	// for tracking the idle time state
+	BOOL bIdle = TRUE;
+	LONG lIdleCount = 0;
 
+  // phase1: check to see if we can do idle work
+	while (bIdle &&
+		!::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE))
+	{
+		// call OnIdle while in bIdle state
+		if (!OnIdle(lIdleCount++))
+			bIdle = FALSE; // assume "no idle" state
+	}
+*/
+	// phase2: pump messages while available
+	do
+	{
+		// pump message, but quit on WM_QUIT
+		if (!PumpMessage())
+			exit( ExitInstance() );
+			// reset "no idle" state after pumping "normal" message
+/*
+		if (IsIdleMessage(&m_msgCur))
+		{
+			bIdle = TRUE;
+			lIdleCount = 0;
+		}
+*/
+	} while (::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE));
 
-
-
+}
 
 void WinGetArgs(int *argc,char ***argv) // taken from the wx_win code
 {
@@ -197,50 +316,4 @@ void WinGetArgs(int *argc,char ***argv) // taken from the wx_win code
 }
 
 
-#include "gstream.h"
-
-int CWinEditApp::Run()
-{
-	// TODO: Add your specialized code here and/or call the base class
-
-
-  int argc;
-  char** argv;
-  WinGetArgs( &argc, &argv );
-  return gcl_main( argc, argv );
-}
-
-
-void CWinEditApp::ProcessMessages( void )
-{
-  ASSERT_VALID(this);
-
-	// for tracking the idle time state
-	BOOL bIdle = TRUE;
-	LONG lIdleCount = 0;
-
-  // phase1: check to see if we can do idle work
-	while (bIdle &&
-		!::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE))
-	{
-		// call OnIdle while in bIdle state
-		if (!OnIdle(lIdleCount++))
-			bIdle = FALSE; // assume "no idle" state
-	}
-
-	// phase2: pump messages while available
-	do
-	{
-		// pump message, but quit on WM_QUIT
-		if (!PumpMessage())
-			exit( ExitInstance() );
-			// reset "no idle" state after pumping "normal" message
-		if (IsIdleMessage(&m_msgCur))
-		{
-			bIdle = TRUE;
-			lIdleCount = 0;
-		}
-	} while (::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE));
-
-}
 

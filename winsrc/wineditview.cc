@@ -37,6 +37,10 @@ END_MESSAGE_MAP()
 CWinEditView::CWinEditView()
   : m_CaretPos( 0 )
 {
+  CEdit& edit = GetEditCtrl();
+//  FILE * out=fopen("junk.out","w");
+//  fprintf(out,"CWinEditView(), Limit Text: %d", edit.GetLimitText());
+//  fclose(out);
 	// TODO: add construction code here
 
 }
@@ -158,8 +162,10 @@ void CWinEditView::OnInitialUpdate()
 
 }
 
+
 char CWinEditView::GetChar( void )
 {
+  EndWaitCursor();
   char ch = 0;
   while( m_Buffer.IsEmpty() )
   {
@@ -178,6 +184,7 @@ char CWinEditView::GetChar( void )
   return ch;
 }
 
+
 void CWinEditView::PutChar(char ch)
 {
   // CEditView::OnChar(ch, 1, 0);
@@ -189,7 +196,7 @@ void CWinEditView::PutChar(char ch)
   {
     s[0] = '\r';
     s[1] = '\n';
-    m_CaretPos = GetWindowTextLength();
+    m_CaretPos = GetBufferLength();
     edit.SetSel( m_CaretPos, m_CaretPos + strlen( s ) );
     edit.ReplaceSel( s );
     m_CaretPos += strlen( s );
@@ -199,7 +206,7 @@ void CWinEditView::PutChar(char ch)
     int lineindex = edit.LineIndex();
     edit.SetSel( lineindex, -1 );
     edit.Clear();
-    m_CaretPos = GetWindowTextLength();
+    m_CaretPos = GetBufferLength();
   }
   else if( s[0] == '\a' )
   {
@@ -221,8 +228,14 @@ void CWinEditView::PutChar(char ch)
 void CWinEditView::PutString(const char* str)
 {
   // CEditView::OnChar(ch, 1, 0);
-
   CEdit& edit = GetEditCtrl();
+  if(m_CaretPos + strlen(str) > 10000) {
+//    ((CWinEditApp*) AfxGetApp())->ProcessMessages();
+    int len = (1000 > strlen(str)) ? 1000 : strlen(str);
+    edit.SetSel(0,len,true);
+    edit.Clear();
+    m_CaretPos-=len;
+  }
   if( !strstr(str, "\r") &&
       !strstr(str, "\n") &&
       !strstr(str, "\a") &&
@@ -259,7 +272,7 @@ void CWinEditView::OnEditPaste()
   if( !OpenClipboard() )
     return;
 
-  HANDLE hData = GetClipboardData( CF_TEXT ); 
+  HANDLE hData = GetClipboardData( CF_TEXT );
   if( hData )
   {
     char* s = (char*) GlobalLock( hData );
@@ -270,7 +283,7 @@ void CWinEditView::OnEditPaste()
   ::CloseClipboard();
 }
 
-void CWinEditView::OnContextMenu(CWnd* pWnd, CPoint point) 
+void CWinEditView::OnContextMenu(CWnd* pWnd, CPoint point)
 {
 	// TODO: Add your message handler code here
 	int nStart = 0;
