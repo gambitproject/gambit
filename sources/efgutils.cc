@@ -1,5 +1,5 @@
 // 
-//  FILE efgutils.cc -- useful global functions for the extensive form
+// FILE: efgutils.cc -- useful global functions for the extensive form
 //
 // $Id$
 //
@@ -27,6 +27,13 @@ void NTNDoChild (Node *n, gList <Node *> &list)
   if (n->NumChildren() != 0) list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
     NTNDoChild ( n->GetChild(i), list);
+}
+
+void SRDoChild(Node *n, gList<Node *> &list)
+{
+  for (int i = 1; i <= n->NumChildren(); i++)
+    SRDoChild(n->GetChild(i), list);
+  if (n->GetSubgameRoot() == n)  list.Append(n);
 }
 
 // Public Functions
@@ -61,6 +68,12 @@ void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list)
 {
   list.Flush();
   NTNDoChild(befg.RootNode(), list);
+}
+
+void SubgameRoots(const BaseEfg &efg, gList<Node *> &list)
+{
+  list.Flush();
+  SRDoChild(efg.RootNode(), list);
 }
 
 int NumNodes (const BaseEfg &befg)

@@ -72,6 +72,7 @@ protected:
 // These are used in identification of subgames
     void MarkTree(Node *, Node *);
     bool CheckTree(Node *, Node *);
+    void MarkSubgame(Node *, Node *);
 
   public:
        //# DESTRUCTOR
@@ -131,6 +132,8 @@ protected:
     // This function put in to facilitate error-detection in MixedToBehav[]
     friend BaseNfg* AssociatedNfg( BaseEfg* E );
 
+    // Find all subgames in the subtree rooted at 'n'
+    void FindSubgames(Node *n);
     bool Decompose(Node *);
 };
 

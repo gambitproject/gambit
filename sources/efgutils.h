@@ -1,5 +1,5 @@
 //
-//  File: efgutils.h -- Declaration of useful global functions for the 
+// FILE: efgutils.h -- Declaration of useful global functions for the 
 //                      extensive form
 //
 // $Id$
@@ -31,6 +31,9 @@ int CountNodes (Node *n);
 
 // returns the action leading up to the node
 Action* LastAction( Node* node );
+
+// returns the list of nodes which are the roots of subgames
+void SubgameRoots(const BaseEfg &efg, gList<Node *> &list);
 
 
 #endif // EFGUTILS_H

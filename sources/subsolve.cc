@@ -8,40 +8,6 @@
 #include "efgutils.h"
 #include "subgame.h"
 
-void BaseEfg::MarkTree(Node *n, Node *base)
-{
-  n->ptr = base;
-  for (int i = 1; i <= n->NumChildren(); i++)
-    MarkTree(n->GetChild(i), base);
-}
-
-bool BaseEfg::CheckTree(Node *n, Node *base)
-{
-  int i;
-
-  if (n->NumChildren() == 0)   return true;
-
-  for (i = 1; i <= n->NumChildren(); i++)
-    if (!CheckTree(n->GetChild(i), base))  return false;
-
-  if (n->GetPlayer()->IsChance())   return true;
-
-  for (i = 1; i <= n->GetInfoset()->NumMembers(); i++)
-    if (n->GetInfoset()->GetMember(i)->ptr != base)
-      return false;
-
-  return true;
-}
-
-bool BaseEfg::Decompose(Node *n)
-{
-  if (n->NumChildren() == 0 || n->GetPlayer()->IsChance())  
-    return false;
-
-  MarkTree(n, n);
-  return CheckTree(n, n);
-}
-
 template <class T>
 void SubgameSolver<T>::FindSubgames(Node *n)
 {
@@ -50,7 +16,8 @@ void SubgameSolver<T>::FindSubgames(Node *n)
   for (i = 1; i <= n->NumChildren(); i++)
     FindSubgames(n->GetChild(i));
   
-  if (!n->GetParent() || efg.Decompose(n))  {
+//  if (!n->GetParent() || efg.Decompose(n))  {
+  if (n->GetSubgameRoot() == n)  {
     Efg<double> foo(efg, n);
 
     BehavProfile<double> bp(foo);
@@ -134,6 +101,7 @@ template <class T> SubgameSolver<T>::~SubgameSolver()
 template <class T> 
 const BehavProfile<T> &SubgameSolver<T>::Solve(void)
 {
+  efg.FindSubgames(efg.RootNode());
   FindSubgames(efg.RootNode());
 
   return solution;

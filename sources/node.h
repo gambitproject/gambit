@@ -27,10 +27,10 @@ class Node    {
     Node *parent;
     Outcome *outcome;
     gBlock<Node *> children;
-    Node *whichbranch, *ptr;
+    Node *whichbranch, *ptr, *gameroot;
 
     Node(BaseEfg *e, Node *p)
-      : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0)   { }
+      : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0), gameroot(0)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
 
@@ -49,6 +49,7 @@ class Node    {
 
     Node *GetChild(int i) const    { return children[i]; }
     Node *GetParent(void) const    { return parent; }
+    Node *GetSubgameRoot(void) const  { return gameroot; }
     Node *NextSibling(void) const  
       { if (!parent)   return 0;
 	if (parent->children.Find((Node * const) this) == parent->children.Length())

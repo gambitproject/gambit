@@ -1,7 +1,7 @@
 //#
 //# FILE: efg.cc -- Implementation of extensive form data type
 //#
-//# @(#)efg.cc	1.78 06 Sep 1995
+//# $Id$
 //#
 
 class Node;
@@ -691,6 +691,67 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
   DeleteLexicon();
   return s;
 }
+
+//---------------------------------------------------------------------
+//                     Subgame-related functions
+//---------------------------------------------------------------------
+
+void BaseEfg::MarkTree(Node *n, Node *base)
+{
+  n->ptr = base;
+  for (int i = 1; i <= n->NumChildren(); i++)
+    MarkTree(n->GetChild(i), base);
+}
+
+bool BaseEfg::CheckTree(Node *n, Node *base)
+{
+  int i;
+
+  if (n->NumChildren() == 0)   return true;
+
+  for (i = 1; i <= n->NumChildren(); i++)
+    if (!CheckTree(n->GetChild(i), base))  return false;
+
+  if (n->GetPlayer()->IsChance())   return true;
+
+  for (i = 1; i <= n->GetInfoset()->NumMembers(); i++)
+    if (n->GetInfoset()->GetMember(i)->ptr != base)
+      return false;
+
+  return true;
+}
+
+bool BaseEfg::Decompose(Node *n)
+{
+  if (n->NumChildren() == 0 || n->GetPlayer()->IsChance())  
+    return false;
+
+  MarkTree(n, n);
+  return CheckTree(n, n);
+}
+
+void BaseEfg::MarkSubgame(Node *n, Node *base)
+{
+  if (n->gameroot == n)  return;
+  n->gameroot = base;
+  for (int i = 1; i <= n->NumChildren(); i++)
+    MarkSubgame(n->GetChild(i), base);
+}
+
+void BaseEfg::FindSubgames(Node *n)
+{
+  if (n->NumChildren() == 0)   return;
+
+  for (int i = 1; i <= n->NumChildren(); i++)
+    FindSubgames(n->GetChild(i));
+  
+  if (Decompose(n)) {
+    n->gameroot = 0;
+    MarkSubgame(n, n);
+  }
+}
+
+
 
 //========================================================================
 
