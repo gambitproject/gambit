@@ -12,6 +12,7 @@
 #endif   // __GNUG__
 
 #include "normal.h"
+#include "rational.h"
 
 class LemkeParams     {
   public:
