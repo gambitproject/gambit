@@ -14,7 +14,7 @@
 #include "gmisc.h" 
 #include "gstream.h"  
 #include "gtext.h"
-#include "hash.h"
+#include "ghash.h"
 #include "guiobj.h"
 
 
