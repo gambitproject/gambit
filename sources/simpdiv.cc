@@ -24,7 +24,6 @@
 #include "rational.h"
 #include "gmatrix.h"
 #include "gpvector.h"
-#include "solution.h"
 #include "gwatch.h"
 #include "simpdiv.h"
 
