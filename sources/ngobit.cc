@@ -45,12 +45,12 @@ public:
 	      const GobitParams &params)
     :  SolutionModule(ofile,efile,params.plev), rep(N), Lambda(0),
   p(rep.Dimensionality()), params(params),
-  maxits(500), gBC2FunctMin<T>(N.ProfileLength()){ }
+  maxits(500), gBC2FunctMin<T>(N.ProfileLength()){ constrained=1;}
   virtual ~GobitModule() {}
   
   T GobitDerivValue(int i1, int j1, const gPVector<T> &p) const;
-  T GobitValue(void) const;
-  void get_grad(const gPVector<T> &p, gVector<T> &dp);
+//  T GobitValue(void) const;
+//  void get_grad(const gPVector<T> &p, gVector<T> &dp);
   
   T Value(const gVector<T> &x);
   int Deriv(const gVector<T> &p, gVector<T> &d);
@@ -92,25 +92,31 @@ T GobitModule<T>::Value(const gVector<T> &v)
   assert(v.Length()==p.Length());
   
   p = v;
-  return GobitValue();
+  int i,j;
+  T val,psum,z;
+  
+  val=(T)(0);
+//  gout << "\nGobitValue(): p = " << p;
+  for(i=1;i<=rep.NumPlayers();i++) {
+//    psum=p(i,1);
+    for(j=2;j<=rep.NumStrats(i);j++) {
+      z=log(p(i,1))-log(p(i,j))
+	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
+      val+=(z*z);
+//      if(p(i,j)<(double)0.0)v+=(p(i,j)*p(i,j));
+//      psum+=p(i,j);
+    }
+//    z=(T)(1)-psum;
+//    val+=(z*z);
+  }
+  return val;
+//  return GobitValue();
 };
 
 template <class T> int GobitModule<T>::
 Deriv(const gVector<T> &v, gVector<T> &d)
 {
   p=v;
-  get_grad(p,d);
-//  for(i=1;i<=rep.ProfileLength();i++)x[i]=dp[i];
-//  gout << "\n in Deriv()";
-//  gout << "\n p = " << p;
-//  gout << "\n d = " << d;
-  
-  return 1;
-};
-
-template <class T> void GobitModule<T>::
-get_grad(const gPVector<T> &p, gVector<T> &dp)
-{
   int i1,j1,ii;
   T avg;
   
@@ -119,46 +125,40 @@ get_grad(const gPVector<T> &p, gVector<T> &dp)
   for(i1=1,ii=1;i1<=rep.NumPlayers();i1++) {
     avg=(T)(0);
     for(j1=1;j1<=rep.NumStrats(i1);j1++) {
-      dp[ii]=GobitDerivValue(i1,j1,p);
-      avg+=dp[ii];
+      d[ii]=GobitDerivValue(i1,j1,p);
+      avg+=d[ii];
       ii++;
     }
     avg/=(T)rep.NumStrats(i1);
     
     ii-=rep.NumStrats(i1);
     for(j1=1;j1<=rep.NumStrats(i1);j1++) {
-      dp[ii]-=avg;
+      d[ii]-=avg;
       ii++;
     }
   }
-}
+//  get_grad(p,d);
+//  for(i=1;i<=rep.ProfileLength();i++)x[i]=dp[i];
+//  gout << "\n in Deriv()";
+//  gout << "\n p = " << p;
+//  gout << "\n d = " << d;
+  
+  return 1;
+};
+
+//template <class T> void GobitModule<T>::
+//get_grad(const gPVector<T> &p, gVector<T> &dp)
+//{
+//}
 
 
 #define BIG1 ((T) 100)
 #define BIG2 ((T) 100)
 
-template <class T> T GobitModule<T>::
-GobitValue(void) const
-{
-  int i,j;
-  T v,psum,z;
-  
-  v=(T)(0);
-//  gout << "\nGobitValue(): p = " << p;
-  for(i=1;i<=rep.NumPlayers();i++) {
-//    psum=p(i,1);
-    for(j=2;j<=rep.NumStrats(i);j++) {
-      z=log(p(i,1))-log(p(i,j))
-	- Lambda*(rep.Payoff(i,i,1,p)-rep.Payoff(i,i,j,p));
-      v+=(z*z);
-//      if(p(i,j)<(double)0.0)v+=(p(i,j)*p(i,j));
-//      psum+=p(i,j);
-    }
-//    z=(T)(1)-psum;
-//    v+=(z*z);
-  }
-  return v;
-}
+//template <class T> T GobitModule<T>::
+//GobitValue(void) const
+//{
+//}
 
 template <class T> T GobitModule<T>::
 GobitDerivValue(int i1, int j1, const gPVector<T> &p) const
