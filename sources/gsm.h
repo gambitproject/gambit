@@ -10,7 +10,7 @@
 
 
 #include "gambitio.h"
-
+#include "gstring.h"
 //#include "gsmincl.h"
 //#include "gsmfunc.h"
 
