@@ -12,6 +12,11 @@
 #include "gtext.h"
 
 template <class T>
+gList<T>::BadIndex::BadIndex(int line, char *file)
+  : gException(line, file)
+{ }
+
+template <class T>
 gText gList<T>::BadIndex::Description(void) const
 { return "Bad index in gList"; }
 
@@ -67,7 +72,7 @@ template <class T> gList<T>::~gList()
 template <class T> int gList<T>::InsertAt(const T &t, int num)
 {
 #ifdef USE_EXCEPTIONS
-  if (num < 1 || num > length + 1)   throw BadIndex();
+  if (num < 1 || num > length + 1)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert( num >= 1 && num <= length + 1 );
 #endif   // USE_EXCEPTIONS
@@ -153,7 +158,7 @@ template <class T> bool gList<T>::operator!=(const gList<T> &b) const
 template <class T> const T &gList<T>::operator[](int num) const
 {
 #ifdef USE_EXCEPTIONS
-  if (num < 1 || num > length)    throw BadIndex();
+  if (num < 1 || num > length)    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(num >= 1 && num <= length);
 #endif   // USE_EXCEPTIONS
@@ -173,7 +178,7 @@ template <class T> const T &gList<T>::operator[](int num) const
 template <class T> T &gList<T>::operator[](int num)
 {
 #ifdef USE_EXCEPTIONS
-  if (num < 1 || num > length)   throw BadIndex();
+  if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert(num >= 1 && num <= length);
 #endif   // USE_EXCEPTIONS
@@ -266,7 +271,7 @@ template <class T> int gList<T>::Insert(const T &t, int n)
 template <class T> T gList<T>::Remove(int num)
 {
 #ifdef USE_EXCEPTIONS
-  if (num < 1 || num > length)   throw BadIndex();
+  if (num < 1 || num > length)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert(num >= 1 && num <= length);
 #endif   // USE_EXCEPTIONS

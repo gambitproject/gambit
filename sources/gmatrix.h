@@ -16,6 +16,8 @@ template <class T> class gMatrix : public gRectArray<T>  {
 #ifdef USE_EXCEPTIONS
     class DivideByZero : public gException  {
       public:
+        DivideByZero(int, char *);
+
         virtual ~DivideByZero()   { }
         gText Description(void) const;
     };

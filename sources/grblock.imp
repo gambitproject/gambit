@@ -45,7 +45,7 @@ gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
 #ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
 {
-  if (v.First() != mincol || v.Last() != maxcol)   throw BadIndex();
+  if (v.First() != mincol || v.Last() != maxcol)   throw BadIndex(__LINE__, __FILE__);
   maxrow++;
   
   T *p = 0, **pp = 0;
@@ -99,7 +99,7 @@ template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
 template <class T> void gRectBlock<T>::RemoveRow(int row)
 {
 #ifdef USE_EXCEPTIONS
-  if (minrow > row || row > maxrow)   throw BadIndex();
+  if (minrow > row || row > maxrow)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert( minrow <= row && row <= maxrow);
 #endif   // USE_EXCEPTIONS
@@ -128,7 +128,7 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
 #ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
 {
-  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim();
+  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim(__LINE__, __FILE__);
 
   maxcol++;
   
@@ -180,7 +180,7 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
   // note: RemoveColumn does not reallocate memory --
   // it shrinks the rows in place.
 #ifdef USE_EXCEPTIONS
-  if (mincol > col || col > maxcol)   throw BadIndex();
+  if (mincol > col || col > maxcol)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert (mincol <= col && col <= maxcol);
 #endif   // USE_EXCEPTIONS
@@ -196,8 +196,8 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
 #ifdef USE_EXCEPTIONS
 template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 {
-  if (v.First() != mincol || v.Last() != maxcol)   throw BadDim();
-  if (minrow > row || row > maxrow + 1)   throw BadIndex();
+  if (v.First() != mincol || v.Last() != maxcol)   throw BadDim(__LINE__, __FILE__);
+  if (minrow > row || row > maxrow + 1)   throw BadIndex(__LINE__, __FILE__);
 
   if (row == maxrow + 1)  {
     AddRow(v);
@@ -268,8 +268,8 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 template <class T>
 void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
 {
-  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim();
-  if (mincol > col || col > maxcol + 1)   throw BadIndex();
+  if (v.First() != minrow || v.Last() != maxrow)   throw BadDim(__LINE__, __FILE__);
+  if (mincol > col || col > maxcol + 1)   throw BadIndex(__LINE__, __FILE__);
 
   if (col == maxcol + 1) {
     AddColumn(v);

@@ -34,6 +34,8 @@ template <class T> class gList  {
 #ifdef USE_EXCEPTIONS
     class BadIndex : public gException   {
       public:
+        BadIndex(int, char *);
+
         virtual ~BadIndex()   { }
         gText Description(void) const;
     };

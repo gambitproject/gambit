@@ -24,8 +24,8 @@ template <class T> gSortList<T>::~gSortList()
 template <class T> void gSortList<T>::Swap(int a, int b)
 {
 #ifdef USE_EXCEPTIONS
-  if (a < 1 || a > length)   throw BadIndex();
-  if (b < 1 || b > length)   throw BadIndex();
+  if (a < 1 || a > length)   throw BadIndex(__LINE__, __FILE__);
+  if (b < 1 || b > length)   throw BadIndex(__LINE__, __FILE__);
 #else
   assert(a >= 1 && a <= length);
   assert(b >= 1 && b <= length);

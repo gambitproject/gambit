@@ -21,12 +21,15 @@ template <class T> class gRectArray    {
 #ifdef USE_EXCEPTIONS
     class BadIndex : public gException  { 
       public:
+        BadIndex(int, char *);
+
         virtual ~BadIndex()  { }
         gText Description(void) const;
     };
 
     class BadDim : public gException  {
       public:
+        BadDim(int, char *);
         virtual ~BadDim()   { }
 	gText Description(void) const;
     };
