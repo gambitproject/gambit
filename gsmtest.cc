@@ -55,8 +55,7 @@ int main( void )
   gin >> cont;
 
 
-
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -2019,12 +2018,35 @@ int main( void )
   machine->Dump();
 #endif // CRASHTEST
 
+
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 #endif
 
 
+
+  machine->InitCallFunction( "VarTest" );
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "VarTestChange" );
+  machine->Push( (double) 123 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
+  machine->InitCallFunction( "VarTest" );
+  machine->CallFunction();
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+*/
 
   gList< Instruction* >* prog;
   FuncDescObj* func;
@@ -2050,10 +2072,29 @@ int main( void )
   machine->AddFunction( func );
 
   prog = new gList< Instruction* >;
+  prog->Append( new Push<gString>( "x" ) );
   prog->Append( new PushRef( "x" ) );
-  prog->Append( new Push<double>( 20 ) );
+  prog->Append( new Push<double>( 10 ) );
   prog->Append( new Assign );
   prog->Append( new Dump );
+  prog->Append( new PushRef( "x" ) );
+  prog->Append( new Dump );
+  prog->Append( new Push<gString>( "::x" ) );
+  prog->Append( new PushRef( "::x" ) );
+  prog->Append( new Dump );
+  prog->Append( new InitCallFunction( "Assign" ) );
+  prog->Append( new PushRef( "::x" ) );
+  prog->Append( new Bind );
+  prog->Append( new Push<double>( 11 ) );
+  prog->Append( new Bind );
+  prog->Append( new CallFunction );
+  prog->Append( new Dump );
+  prog->Append( new PushRef( "::x" ) );
+  prog->Append( new Dump );
+  prog->Append( new Push<gString>( "::::x" ) );
+  prog->Append( new PushRef( "::::x" ) );
+  prog->Append( new Dump );
+
 
   func = new FuncDescObj( "TestUsr3" );
   func->SetFuncInfo( prog, 0 );
@@ -2082,20 +2123,25 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
+  gout << "Global x:\n";
   machine->PushRef( "x" );
-  machine->Push( (double) 12 );
+  machine->Push( (double) 1 );
   machine->Assign();
   machine->Dump();
 
   machine->PushRef( "x" );
   machine->Dump();
   
+  gout << "Function x:\n";
   machine->InitCallFunction( "TestUsr3" );
   machine->CallFunction();
   machine->Dump();
 
+  gout << "Global x:\n";
   machine->PushRef( "x" );
   machine->Dump();
+  gout << "Done\n";
 
   machine->Push( (double) 1 );
   machine->Push( (double) 2 );

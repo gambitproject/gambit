@@ -190,6 +190,70 @@ bool GSM::PushList( const int num_of_elements )
 
 
 
+//--------------------------------------------------------------------
+//        Stack access related functions
+//--------------------------------------------------------------------
+
+
+
+bool GSM::_VarIsDefined( const gString& var_name ) const
+{
+  bool result;
+  RefHashTable* ref_table;
+
+  assert( var_name != "::" );
+  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
+  {
+    ref_table = _RefTableStack->Pop();
+    result = _VarIsDefined( var_name.right( var_name.length()-2 ) );
+    _RefTableStack->Push( ref_table );
+  }
+  else
+  {
+    result = _RefTableStack->Peek()->IsDefined( var_name );
+  }
+  return result;
+}
+
+
+void GSM::_VarDefine( const gString& var_name, Portion* p )
+{
+  RefHashTable* ref_table;
+
+  assert( var_name != "::" );
+  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
+  {
+    ref_table = _RefTableStack->Pop();
+    _VarDefine( var_name.right( var_name.length()-2 ), p );
+    _RefTableStack->Push( ref_table );
+  }
+  else
+  {
+    _RefTableStack->Peek()->Define( var_name, p );
+  }
+}
+
+
+Portion* GSM::_VarValue( const gString& var_name ) const
+{
+  Portion* result;
+  RefHashTable* ref_table;
+
+  assert( var_name != "::" );
+  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
+  {
+    ref_table = _RefTableStack->Pop();
+    result = _VarValue( var_name.right( var_name.length()-2 ) );
+    _RefTableStack->Push( ref_table );
+  }
+  else
+  {
+    result = (*_RefTableStack->Peek())( var_name );
+  }
+  return result;
+}
+
+
 //---------------------------------------------------------------------
 //     Reference related functions: PushRef(), Assign(), UnAssign()
 //---------------------------------------------------------------------
@@ -235,8 +299,7 @@ bool GSM::Assign( void )
       {
 	p2_copy = p2->Copy();
       }
-      _RefTableStack->Peek()->
-	Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
+      _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
       delete p1;
     }
 
@@ -333,6 +396,7 @@ bool GSM::Assign( void )
 
 
 
+#if 0
 bool GSM::UnAssign( void )
 {
   Portion*  p1;
@@ -354,7 +418,7 @@ bool GSM::UnAssign( void )
     p1_subvalue = ( (Reference_Portion*) p1 )->SubValue();
     if( p1_subvalue == "" )
     {
-      if( _RefTableStack->Peek()->IsDefined( ref ) )
+      if( _VarIsDefined( ref ) )
       {
 	_RefTableStack->Peek()->Remove( ref );
       }
@@ -406,7 +470,7 @@ bool GSM::UnAssign( void )
   }
   return result;
 }
-
+#endif
 
 
 
@@ -436,15 +500,18 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
   gString&  ref = p->Value();
   gString&  subvalue = p->SubValue();
 
-  if( _RefTableStack->Peek()->IsDefined( ref ) )
+  Reference_Portion*  new_ref;
+  RefHashTable*  ref_table;
+
+  if( _VarIsDefined( ref ) )
   {
     if( subvalue == "" )
     {
-      result = (*_RefTableStack->Peek())( ref )->Copy();
+      result = _VarValue( ref )->Copy();
     }
     else
     {
-      primary_ref = (*_RefTableStack->Peek())( ref );
+      primary_ref = _VarValue( ref );
       switch( primary_ref->Type() )
       {
       case porNFG_DOUBLE:
@@ -491,9 +558,12 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
   Portion*  result = 0;
   gString&  ref = p->Value();
 
-  if( _RefTableStack->Peek()->IsDefined( ref ) )
+  Reference_Portion*  new_ref;
+  RefHashTable*  ref_table;
+
+  if( _VarIsDefined( ref ) )
   {
-    result = (*_RefTableStack->Peek())( ref );
+    result = _VarValue( ref );
   }
   else
   {
@@ -710,9 +780,8 @@ bool GSM::Subscript ( void )
   {
     refp = p1;
 
-    if( _RefTableStack->Peek()->
-       IsDefined( ( (Reference_Portion*) refp )->Value() ) )
-      p1 = (*_RefTableStack->Peek())( ( (Reference_Portion*) refp )->Value() );
+    if( _VarIsDefined( ( (Reference_Portion*) refp )->Value() ) )
+      p1 = _VarValue( ( (Reference_Portion*) refp )->Value() );
     else
       p1 = 0;
 
@@ -1021,13 +1090,13 @@ bool GSM::CallFunction( void )
       {
 	if( refp->SubValue() == "" )
 	{
-	  _RefTableStack->Peek()->Define( refp->Value(), param[ index ] );
+	  _VarDefine( refp->Value(), param[ index ] );
 	}
 	else // ( refp->SubValue != "" )
 	{
-	  if( _RefTableStack->Peek()->IsDefined( refp->Value() ) )
+	  if( _VarIsDefined( refp->Value() ) )
 	  {
-	    p = ( *_RefTableStack->Peek() )( refp->Value() );
+	    p = _VarValue( refp->Value() );
 	    switch( p->Type() )
 	    {
 	    case porNFG_DOUBLE:
@@ -1054,7 +1123,7 @@ bool GSM::CallFunction( void )
 	    }
 	    delete param[ index ];
 	  }
-	  else // ( !_RefTableStack->Peek()->IsDefined( refp->Value() ) )
+	  else // ( !_VarIsDefined( refp->Value() ) )
 	  {
 	    _ErrorMessage( _StdErr, 29 );
 	    delete param[ index ];
@@ -1498,7 +1567,6 @@ TEMPLATE class gGrowableStack< RefHashTable* >;
 
 gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
 { return s << funcname; }
-
 
 
 

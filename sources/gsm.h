@@ -42,15 +42,19 @@ private:
   gGrowableStack< RefHashTable* >* _RefTableStack;
   FunctionHashTable*               _FuncTable;
 
-  Portion* _ResolveRef            ( Reference_Portion* p );
+  Portion* _ResolveRef             ( Reference_Portion* p );
   Portion* _ResolveRefWithoutError ( Reference_Portion* p );
-  Portion* _ResolvePrimaryRefOnly ( Reference_Portion* p );
+  Portion* _ResolvePrimaryRefOnly  ( Reference_Portion* p );
 
   bool _UnaryOperation  ( OperationMode mode );
   bool _BinaryOperation ( OperationMode mode );
 
   void _BindCheck ( void ) const;
   bool _BindCheck ( const gString& param_name ) const;
+
+  bool     _VarIsDefined ( const gString& var_name ) const;
+  void     _VarDefine    ( const gString& var_name, Portion* p );
+  Portion* _VarValue     ( const gString& var_name ) const;
 
   static void _ErrorMessage
     (
@@ -82,7 +86,7 @@ public:
   bool Push ( const gRational& data );
   bool Push ( const gString&   data );
 
-  /* These are commented out because the don't seem to be necessary */
+  /* These are commented out because they don't seem to be necessary */
 #if 0
   bool Push ( Outcome* data );
   bool Push ( Player*  data );
@@ -97,7 +101,10 @@ public:
 
   bool PushRef  ( const gString& ref, const gString& subref = "" );
   bool Assign   ( void );
+
+#if 0
   bool UnAssign ( void );
+#endif
 
   bool Add      ( void );
   bool Subtract ( void );

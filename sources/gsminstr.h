@@ -167,6 +167,7 @@ class Assign : public Instruction
 };
 
 
+#if 0
 class UnAssign : public Instruction
 {
  public:
@@ -174,6 +175,8 @@ class UnAssign : public Instruction
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
 };
+#endif
+
 
 class Subscript : public Instruction
 {
