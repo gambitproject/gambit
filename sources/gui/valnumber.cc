@@ -104,16 +104,19 @@ bool gNumberValidator::Validate(wxWindow *p_parent)
   wxString value(control->GetValue());
 
   if (!IsNumeric(value)) {
-    wxMessageBox("Invalid numeric value '" + value + "' for " +
-		 m_validatorWindow->GetName(), "Error",
-		 wxOK | wxICON_EXCLAMATION, p_parent);
+    wxMessageBox(wxString("The value ") + value + " in " +
+		 m_validatorWindow->GetName() + " is not a valid number.",
+		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
   }
 
   if ((m_hasMin && ToNumber(value.c_str()) < m_minValue) ||
       (m_hasMax && ToNumber(value.c_str()) > m_maxValue)) {
-    wxMessageBox("Value out of range for " + m_validatorWindow->GetName(),
+    wxMessageBox(wxString("The value ") + value + " in " +
+		 m_validatorWindow->GetName() + " is out of the range [" +
+		 wxString((char *) ToText(m_minValue)) + ", " + 
+		 wxString((char *) ToText(m_maxValue)) + "].",
 		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;

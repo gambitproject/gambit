@@ -88,16 +88,19 @@ bool gIntegerValidator::Validate(wxWindow *p_parent)
   wxString value(control->GetValue());
 
   if (!IsInteger(value)) {
-    wxMessageBox("Invalid integer value '" + value + "' for " +
-		 m_validatorWindow->GetName(), "Error",
-		 wxOK | wxICON_EXCLAMATION, p_parent);
+    wxMessageBox(wxString("The value ") + value + " in " +
+		 m_validatorWindow->GetName() + " is not a valid integer.",
+		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
   }
 
   if ((m_hasMin && atoi(value.c_str()) < m_minValue) ||
       (m_hasMax && atoi(value.c_str()) > m_maxValue)) {
-    wxMessageBox("Value out of range for " + m_validatorWindow->GetName(),
+    wxMessageBox(wxString("The value ") + value + " in " +
+		 m_validatorWindow->GetName() + " is out of the range [" +
+		 wxString::Format("%d", m_minValue) + ", " +
+		 wxString::Format("%d", m_maxValue) + "].",
 		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
