@@ -17,15 +17,10 @@ static const char *SOLN_SECT = "Soln-Defaults";
 //                dialogNfgSolveStandard: Member functions
 //========================================================================
 
-#define NFG_STANDARD_HELP "Normal Form Standard Solutions"
-
 dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
 					       wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Standard Solution", TRUE), m_nfg(p_nfg)
+  : guiAutoDialog(p_parent, "Standard Solution"), m_nfg(p_nfg)
 {
-  wxLayoutConstraints *constraints;
-  SetAutoLayout(TRUE);
-
   gText defaultsFile(gambitApp.ResourceFile());
   int standardType = 0, standardNum = 0, precision = 0;
   wxGetResource(SOLN_SECT, "Nfg-Standard-Type", &standardType,
@@ -41,6 +36,11 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
 				  typeChoices, 0, wxVERTICAL);
   m_standardType->SetClientData((char *) this);
   m_standardType->SetSelection(standardType);
+  m_standardType->SetConstraints(new wxLayoutConstraints);
+  m_standardType->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_standardType->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_standardType->GetConstraints()->width.AsIs();
+  m_standardType->GetConstraints()->height.AsIs();
 
   char *numChoices[] = { "One", "Two", "All" };
   m_standardNum = new wxRadioBox(this, (wxFunction) CallbackChanged,
@@ -48,63 +48,53 @@ dialogNfgSolveStandard::dialogNfgSolveStandard(const Nfg &p_nfg,
 				 3, numChoices, 0, wxVERTICAL);
   m_standardNum->SetClientData((char *) this);
   m_standardNum->SetSelection(standardNum);
+  m_standardNum->SetConstraints(new wxLayoutConstraints);
+  m_standardNum->GetConstraints()->left.SameAs(m_standardType, wxRight, 10);
+  m_standardNum->GetConstraints()->top.SameAs(m_standardType, wxTop);
+  m_standardNum->GetConstraints()->width.AsIs();
+  m_standardNum->GetConstraints()->height.AsIs();
 
   char *precisionChoices[] = { "Float", "Rational" };
   m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
 			       2, precisionChoices, 0, wxVERTICAL);
   m_precision->SetSelection(precision);
+  m_precision->SetConstraints(new wxLayoutConstraints);
+  m_precision->GetConstraints()->left.SameAs(m_standardNum, wxRight, 10);
+  m_precision->GetConstraints()->top.SameAs(m_standardType, wxTop);
+  m_precision->GetConstraints()->width.AsIs();
+  m_precision->GetConstraints()->height.AsIs();
   
-  NewLine();
-
   m_description = new wxText(this, 0, "Using algorithm");
   m_description->Enable(FALSE);
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.SameAs(this, wxCentreX);
-  constraints->width.PercentOf(this, wxWidth, 95);
-  constraints->height.Absolute(-1);
-  constraints->top.SameAs(m_standardNum, wxBottom, 5);
-  m_description->SetConstraints(constraints);
+  m_description->SetConstraints(new wxLayoutConstraints);
+  m_description->GetConstraints()->left.SameAs(m_standardType, wxLeft);
+  m_description->GetConstraints()->right.SameAs(m_precision, wxRight);
+  m_description->GetConstraints()->height.AsIs();
+  m_description->GetConstraints()->top.SameAs(m_standardNum, wxBottom, 5);
 
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 25);
-  constraints->bottom.SameAs(this, wxBottom, 5);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  okButton->SetConstraints(constraints);
+  m_okButton->GetConstraints()->top.SameAs(m_description, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
 
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 50);
-  constraints->bottom.SameAs(okButton, wxBottom);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  cancelButton->SetConstraints(constraints);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(m_description, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
 
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-					"Help");
-  helpButton->SetClientData((char *) this);
-  constraints = new wxLayoutConstraints;
-  constraints->centreX.PercentOf(this, wxWidth, 75);
-  constraints->bottom.SameAs(okButton, wxBottom);
-  constraints->width.PercentOf(this, wxWidth, 20);
-  constraints->height.PercentOf(this, wxHeight, 20);
-  helpButton->SetConstraints(constraints);
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
 
   OnChanged();
 
-  Fit();
-  Show(TRUE);
+  Go();
 }
 
 dialogNfgSolveStandard::~dialogNfgSolveStandard()
 {
-  if (m_completed == wxOK) {
+  if (Completed() == wxOK) {
     gText defaultsFile(gambitApp.ResourceFile());
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Type",
 		    m_standardType->GetSelection(), defaultsFile);
@@ -113,30 +103,6 @@ dialogNfgSolveStandard::~dialogNfgSolveStandard()
     wxWriteResource(SOLN_SECT, "Nfg-Standard-Precision",
 		    m_precision->GetSelection(), defaultsFile);
   }
-}
-
-void dialogNfgSolveStandard::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogNfgSolveStandard::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogNfgSolveStandard::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogNfgSolveStandard::OnHelp(void)
-{
-  wxHelpContents("NFG Standard Solutions");
 }
 
 void dialogNfgSolveStandard::OnChanged(void)

@@ -16,34 +16,23 @@ typedef enum {
   nfgSTANDARD_ONE = 0, nfgSTANDARD_TWO = 1, nfgSTANDARD_ALL = 2
 } nfgStandardNum;
 
-class dialogNfgSolveStandard : public wxDialogBox {
+class dialogNfgSolveStandard : public guiAutoDialog {
 private:
-  int m_completed;
   wxRadioBox *m_standardType, *m_standardNum, *m_precision;
   wxText *m_description;
   const Nfg &m_nfg;
 
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((dialogNfgSolveStandard *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((dialogNfgSolveStandard *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &p_object, wxEvent &)
-    { ((dialogNfgSolveStandard *) p_object.GetClientData())->OnHelp(); }
   static void CallbackChanged(wxRadioBox &p_object, wxEvent &)
     { ((dialogNfgSolveStandard *) p_object.GetClientData())->OnChanged(); }
 
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-  void OnHelp(void);
-  
   void OnChanged(void);
+
+  const char *HelpString(void) const { return "NFG Standard Solutions"; }
 
 public:
   dialogNfgSolveStandard(const Nfg &p_nfg, wxWindow *p_parent);
   virtual ~dialogNfgSolveStandard();
 
-  int Completed(void) const { return m_completed; }
   nfgStandardType Type(void) const;
   nfgStandardNum Number(void) const;
   gPrecision Precision(void) const
