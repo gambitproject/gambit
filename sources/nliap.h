@@ -12,7 +12,7 @@
 #include "glist.h"
 #include "mixed.h"
 
-template <class T> class NFLiapParams : public LiapParams<T>  {
+class NFLiapParams : public LiapParams  {
   public:
     NFLiapParams(void);
 };
@@ -27,7 +27,7 @@ template <class T> class NFLiapModule : public LiapModule<T>  {
     void AddSolution(const LiapFunc<T> *const);
 
   public:
-    NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p, MixedProfile<T> &s); 
+    NFLiapModule(const Nfg<T> &N, NFLiapParams &p, MixedProfile<T> &s); 
     virtual ~NFLiapModule();
     const gList<MixedProfile<T> > &GetSolutions(void) const;
 };

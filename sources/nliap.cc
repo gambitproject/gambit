@@ -12,10 +12,10 @@
 #include "gfunct.h"
 
 //-------------------------------------------------------------------------
-//                     NFLiapParams<T>: Member functions
+//                     NFLiapParams: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> NFLiapParams<T>::NFLiapParams(void)
+NFLiapParams::NFLiapParams(void)
 { }
 
 //-------------------------------------------------------------------------
@@ -37,7 +37,7 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
     T LiapDerivValue(int i, int j, const MixedProfile<T> &p) const;
 
   public:
-    NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P, 
+    NFLiapFunc(const Nfg<T> &NF, const LiapParams &P, 
 	       const MixedProfile<T> &s); 
     virtual ~NFLiapFunc();
 
@@ -56,7 +56,7 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 //------------------------------------------------------------------------
 
 template <class T>
-NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &,
+NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams &,
 			  const MixedProfile<T>& s)
   : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0),
     N(NF), p(s), pp(s)
@@ -216,7 +216,7 @@ template <class T> int NFLiapFunc<T>::Hess(const gVector<T> &, gMatrix<T> &)
 //------------------------------------------------------------------------
 
 template <class T>
-NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams<T> &p,
+NFLiapModule<T>::NFLiapModule(const Nfg<T> &N, NFLiapParams &p,
 			      MixedProfile<T> &s)
   : LiapModule<T>(p), N(N), S(s)
 { }
@@ -232,7 +232,7 @@ const gList<MixedProfile<T> > &NFLiapModule<T>::GetSolutions(void) const
 
 template <class T> LiapFunc<T> *NFLiapModule<T>::CreateFunc(void)
 {
-//  return new NFLiapFunc<T>(nf, (NFLiapParams<T> &) params);
+//  return new NFLiapFunc<T>(nf, (NFLiapParams&) params);
   return new NFLiapFunc<T>(N, params, S);
 }
 
@@ -250,7 +250,6 @@ void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class NFLiapParams<double>;
 TEMPLATE class NFLiapModule<double>;
 TEMPLATE class NFLiapFunc<double>;
 

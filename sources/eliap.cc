@@ -1,7 +1,7 @@
 //#
 //# FILE: eliap.cc -- Extensive Form Liapunov module
 //#
-//# $Id$
+//# @(#)eliap.cc	1.20 12/19/95
 //#
 
 #define MAXIT 10
@@ -22,7 +22,7 @@
 //                     EFLiapParams<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T> EFLiapParams<T>::EFLiapParams(void)
+EFLiapParams::EFLiapParams(void)
 { }
 
 //-------------------------------------------------------------------------
@@ -31,18 +31,18 @@ template <class T> EFLiapParams<T>::EFLiapParams(void)
 
 template <class T>
 class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
-  private:
-    long niters, nevals;
-    const Efg<T> &E;
-    BehavProfile<T> p, pp;
-    gDPVector<T> cpay;
+	private:
+		long niters, nevals;
+		const Efg<T> &E;
+		BehavProfile<T> p, pp;
+		gDPVector<T> cpay;
     gMatrix<T> xi;
 
     T Value(const gVector<T> &x);
 
   public:
-    EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P); 
-    EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &P,
+    EFLiapFunc(const Efg<T> &EF, const LiapParams &P); 
+    EFLiapFunc(const Efg<T> &EF, const LiapParams &P,
 	     const BehavProfile<T> &s); 
     virtual ~EFLiapFunc();
 
@@ -61,7 +61,7 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 //----------------------------------------------------------------------
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &)
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF, false), cpay(EF.Dimensionality()),
     xi(p.Length(), p.Length())
@@ -70,7 +70,7 @@ EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &)
 }
 
 template <class T>
-EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams<T> &,
+EFLiapFunc<T>::EFLiapFunc(const Efg<T> &EF, const LiapParams &,
 			  const BehavProfile<T> &start)
   : gBFunctMin<T>(EF.ProfileLength()), niters(0), nevals(0), E(EF),
     p(EF, false), pp(EF,false), cpay(EF.Dimensionality()),
@@ -188,7 +188,7 @@ template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 //------------------------------------------------------------------------
 
 template <class T>
-EFLiapModule<T>::EFLiapModule(const Efg<T> &E, EFLiapParams<T> &p,
+EFLiapModule<T>::EFLiapModule(const Efg<T> &E, EFLiapParams &p,
 			      BehavProfile<T> &s)
   : LiapModule<T>(p), E(E), start(s)
 { }
@@ -204,9 +204,7 @@ const gList<BehavProfile<T> > &EFLiapModule<T>::GetSolutions(void) const
 
 template <class T> LiapFunc<T> *EFLiapModule<T>::CreateFunc(void)
 {
-  if(E.ProfileLength(true)) 
-    return new EFLiapFunc<T>(E, params, start);
-  return 0;
+  return new EFLiapFunc<T>(E, params, start);
 }
 
 template <class T>
@@ -222,7 +220,6 @@ void EFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class EFLiapParams<double>;
 TEMPLATE class EFLiapModule<double>;
 TEMPLATE class EFLiapFunc<double>;
 
