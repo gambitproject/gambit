@@ -42,6 +42,7 @@ public:
 
   virtual int NumPlayers(void) const = 0;
   virtual const gArray<EFPlayer *> &Players(void) const = 0; 
+  virtual EFPlayer *GetChance(void) const = 0;
 
   virtual int ProfileLength(void) const = 0;
   virtual int TotalNumInfosets(void) const = 0;

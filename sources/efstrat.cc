@@ -732,13 +732,14 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n,
 void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
   for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = (pl == 0) ? Game().GetChance() : Game().Players()[pl]; 
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
-    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       is_players_infoset_active += true;
 
       gList<bool> is_infosets_node_active;
-      for (int n = 1; n <= Game().Players()[pl]->Infosets()[iset]->NumMembers(); n++)
+      for (int n = 1; n <= player->Infosets()[iset]->NumMembers(); n++)
 	is_infosets_node_active += true;
       is_players_node_active += is_infosets_node_active;
     }
@@ -750,15 +751,15 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
 void EFSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
   for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
+    EFPlayer *player = (pl == 0) ? Game().GetChance() : Game().Players()[pl];
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
 
-    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
-
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       is_players_infoset_active += false;
 
       gList<bool> is_infosets_node_active;
-      for (int n = 1; n <= Game().Players()[pl]->Infosets()[iset]->NumMembers()
+      for (int n = 1; n <= player->Infosets()[iset]->NumMembers()
 ; n++)
 	is_infosets_node_active += false;
       is_players_node_active += is_infosets_node_active;
@@ -976,6 +977,7 @@ void EFSupportWithActiveInfo::Dump(gOutput& s) const
   s << "\n";
 
   for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
+  
     if (pl == 0)
       s << " Chance:  ";
     else 
