@@ -43,7 +43,7 @@ public:
   EnumModule(const Nfg<T> &N, const EnumParams &p, const NFSupport &s); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1);
+  void SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1);
   
   long NumPivots(void) const;
   double Time(void) const;

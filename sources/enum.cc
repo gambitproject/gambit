@@ -10,8 +10,10 @@
 
 #include "enum.h"
 
-template <class T> gMatrix<T> Make_A(const Nfg<T> &, const NFSupport &);
-template <class T> gVector<T> Make_b(const Nfg<T> &, const NFSupport &);
+template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &);
+template <class T> gVector<T> Make_b1(const Nfg<T> &, const NFSupport &);
+template <class T> gMatrix<T> Make_A2(const Nfg<T> &, const NFSupport &);
+template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &);
 
 //---------------------------------------------------------------------------
 //                        EnumParams: member functions
@@ -44,9 +46,12 @@ template <class T> int EnumModule<T>::Enum(void)
   for(i=1;i<=target.Length();i++)
     target[i]=i;
   
-  gMatrix<T> A(Make_A(NF, support));
-  gVector<T> b(Make_b(NF, support));
-  LTableau<T> tableau(A,b);
+  gMatrix<T> A1(Make_A1(NF, support));
+  gVector<T> b1(Make_b1(NF, support));
+  gMatrix<T> A2(Make_A2(NF, support));
+  gVector<T> b2(Make_b2(NF, support));
+  LHTableau<T> tableau(A1,A2,b1,b2);
+//  LHTableau<T> tableau(NF,support);
 //  gout << "\n in Enum()";
 //  tableau.Dump(gout);
   
@@ -73,13 +78,13 @@ template <class T> int EnumModule<T>::Enum(void)
 
 
 template <class T>
-void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
+void EnumModule<T>::SubSolve(int pr, int pcl, LHTableau<T> &B1,
 			     gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
-  LTableau<T> B2(B1);
-  B2.NumPivots()=0;
+  LHTableau<T> B2(B1);
+//  B2.NumPivots()=0;
 
   // construct new target basis
   gBlock<int> targ2(targ1);  
@@ -89,7 +94,6 @@ void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
   
 //  gout << "\n targ = ";
 //  targ2.Dump(gout);
-  
   
   /* pivot to target */
   int flag = 1;
@@ -101,7 +105,7 @@ void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
       ii = targ2[i];
       if(ii<=rows)ii=-ii;
       if(!B2.Member(ii)) {
-//	gout << " i,ii : " << i << ii;
+//	gout << " i,ii : " << i << " " << ii;
 	j=rows+1;
 	jj = targ2[j];
 	if(jj<=rows)jj=-jj;
@@ -110,7 +114,7 @@ void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
 	  jj = targ2[j];
 	  if(jj<=rows)jj=-jj;
 	}
-//	gout << " j,jj : " << j << jj;
+//	gout << " j,jj : " << j << " " << jj;
 	if(j<=rows+cols) {
 	  // note: may want to pivot for 1 and 2 separately to pick 
 	  // up additional possible feasible solutions.  
@@ -124,7 +128,7 @@ void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
       }
     }
   }
-//  gout << "\n";
+//  gout << "\nB2: ";
 //  B2.Dump(gout);
   
   npivots+=B2.NumPivots();
@@ -141,7 +145,7 @@ void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
       printf("%3d", targ2[i]);
     if(flag) {
       printf("  Infeasible");
-//      B2.Dump(gout); 
+      B2.Dump(*params.tracefile); 
     }
     if(j) {
       printf("  Nash equilib");    
