@@ -171,8 +171,14 @@ template <class T> void MixedSolution<T>::Invalidate()
 template <class T> T& MixedSolution<T>::operator[](int i)
 { Invalidate(); return MixedProfile<T>::operator[](i); }
 
+template <class T> const T& MixedSolution<T>::operator[](int i) const
+{ return MixedProfile<T>::operator[](i); }
+
 template <class T> T& MixedSolution<T>::operator()(int a, int b)
 { Invalidate(); return MixedProfile<T>::operator()(a, b); }
+
+template <class T> const T& MixedSolution<T>::operator()(int a, int b) const
+{ return MixedProfile<T>::operator()(a, b); }
 
 template <class T> 
 gPVector<T>& MixedSolution<T>::operator=(const gPVector<T>& v)

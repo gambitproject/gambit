@@ -210,10 +210,16 @@ template <class T> void BehavSolution<T>::Invalidate()
 template <class T> T& BehavSolution<T>::operator[](int i)
 { Invalidate(); return BehavProfile<T>::operator[](i); }
 
+template <class T> const T& BehavSolution<T>::operator[](int i) const
+{ return BehavProfile<T>::operator[](i); }
+
 template <class T> T& BehavSolution<T>::operator()(int a, int b, int c)
 { Invalidate(); return BehavProfile<T>::operator()(a, b, c); }
 
-template <class T> 
+template <class T> const T& BehavSolution<T>::operator()(int a, int b, int c) const
+{ return BehavProfile<T>::operator()(a, b, c); }
+
+template <class T>
 gDPVector<T>& BehavSolution<T>::operator=(const gDPVector<T>& v)
 { Invalidate(); return gDPVector<T>::operator=(v); }
 

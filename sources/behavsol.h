@@ -57,9 +57,11 @@ public:
 
   void Invalidate();
 
-  T& operator[](int);
-  T& operator()(int, int, int);
-  gDPVector<T>& operator=(const gDPVector<T>&);
+	T& operator[](int);
+	const T& operator[](int) const;
+	T& operator()(int, int, int);
+	const T& operator()(int, int, int) const;
+	gDPVector<T>& operator=(const gDPVector<T>&);
   gDPVector<T>& operator=(const gPVector<T>&);
   gDPVector<T>& operator=(const gVector<T>&);
   gDPVector<T>& operator=(T);
