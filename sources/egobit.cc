@@ -1,7 +1,7 @@
 //#
 //# FILE: egobit.cc -- Implementation of extensive form Gobit algorithm
 //#
-//# $Id$
+//# @(#)egobit.cc	1.32 10/1/95
 //#
 
 #include <math.h>
@@ -80,7 +80,7 @@ EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
       for (int act = 1; act < s->NumActions(); act++)  {
 	pp(pl, iset, act) = start(pl, iset, act);
       }
-    }
+	 }
   }
 }
 
@@ -91,22 +91,22 @@ template <class T> void EFGobitFunc<T>::Init(void)
   xi.MakeIdent();
   scratch = new gVector<T> **[E.NumPlayers()] -1;
   for(int i=1;i<=E.NumPlayers();i++) {
-    int nisets = (E.PlayerList()[i])->NumInfosets();
-    scratch[i] = new gVector<T> *[nisets];  // -1 ?
-    for(int j=1;j<=nisets;j++) {
-      scratch[i][j] = new gVector<T>(pp.GetEFSupport().NumActions(i,j));
-    }
+	 int nisets = (E.PlayerList()[i])->NumInfosets();
+	 scratch[i] = new gVector<T> *[nisets+1] -1 ;
+	 for(int j=1;j<=nisets;j++) {
+		scratch[i][j] = new gVector<T>(pp.GetEFSupport().NumActions(i,j));
+	 }
   }
 }
 
 template <class T> EFGobitFunc<T>::~EFGobitFunc()
-{ 
+{
   for(int i=1;i<=E.NumPlayers();i++) {
-    int nisets = (E.PlayerList()[i])->NumInfosets();
-    for(int j=1;j<=nisets;j++) {
-      delete scratch[i][j];
-    }
-    delete scratch[i];
+	 int nisets = (E.PlayerList()[i])->NumInfosets();
+	 for(int j=1;j<=nisets;j++) {
+		delete scratch[i][j];
+	 }
+	 delete [] (scratch[i]+1);
   }
   delete [] (scratch + 1);
 }
