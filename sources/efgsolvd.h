@@ -41,6 +41,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	subg=TRUE;
 	}
 	// One Nash for n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
@@ -65,7 +66,6 @@ protected:
 	stopAfter=2;max_solns=2;
 	use_elimdom=true;all=true;dom_type=DOM_STRONG;
 	subg=FALSE;
-	Warn("Not guaranteed to find all solutions for 'Two Nash n-person'\n");
 	wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
 	}
 	// All Nash 2 person
@@ -93,6 +93,7 @@ protected:
 	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	subg=TRUE;
 	}
 	// One Subgame Pefect for n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
