@@ -138,7 +138,8 @@ extern bool Powell(gPVector<double> &p,
 		   gFunction<double> &func,
 		   double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel);
+		   gOutput &tracefile, int tracelevel,
+		   gStatus &status = gstatus);
 
 
 bool Liap(const Efg<double> &E, EFLiapParams &params,
@@ -163,10 +164,11 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
     InitMatrix(xi, p.Lengths());
 
     if (found = Powell(p, xi, F, value, iter,
-		       params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		       *params.tracefile, params.trace)) 
+		       params.maxits1, params.tol1, params.maxitsN, 
+		       params.tolN,*params.tracefile, params.trace, 
+		       params.status)) 
       AddSolution(solutions, p, value);
-    
+    if(params.status.Get()) params.status.Reset();
   }
 
   nevals = F.NumEvals();

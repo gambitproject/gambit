@@ -171,7 +171,8 @@ static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
 extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel);
+		   gOutput &tracefile, int tracelevel, 
+		   gStatus &status = gstatus);
 
 
 

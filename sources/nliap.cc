@@ -155,7 +155,9 @@ static void PickRandomProfile(MixedProfile<double> &p)
 extern bool DFP(gPVector<double> &p,
 		gC2Function<double> &func,
 		double &fret, int &iter,
-		int maxits1, double tol1, int maxitsN, double tolN);
+		int maxits1, double tol1, int maxitsN, double tolN,
+		gOutput &tracefile, int tracelevel,
+		gStatus &status = gstatus);
 
 
 bool Liap(const Nfg<double> &N, NFLiapParams &params,
@@ -178,7 +180,8 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
     if (i > 1)   PickRandomProfile(p);
 
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
-		    params.maxitsN, params.tolN))  {
+		    params.maxitsN, params.tolN, *params.tracefile,
+		    params.trace, params.status))  {
       bool add = false;
       if ((!params.status.Get()) 
 //	  || (params.status.Get() && p.IsNash())
@@ -193,6 +196,7 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 	}
       }   
     }
+    if(params.status.Get()) params.status.Reset(); 
   }
 
   nevals = F.NumEvals();

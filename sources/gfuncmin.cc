@@ -8,6 +8,7 @@
 #include <math.h>
 
 #include "gfunc.h"
+#include "gstatus.h"
 
 #include "gvector.h"
 
@@ -327,7 +328,9 @@ void Project(gVector<double> &x,
 bool DFP(gPVector<double> &p,
 	 gC2Function<double> &func,
 	 double &fret, int &iter,
-         int maxits1, double tol1, int maxitsN, double tolN)
+         int maxits1, double tol1, int maxitsN, double tolN,
+	 gOutput &tracefile, int tracelevel,
+	 gStatus &status = gstatus)
 {
   int i, j, its;
   int n = p.Length();
@@ -336,26 +339,35 @@ bool DFP(gPVector<double> &p,
   gVector<double> xi(n), g(n), dg(n), hdg(n);
 
   fp = func.Value(p);
+  double startVal = fp;
   func.Deriv(p, g);
   xi = -g;
   
+  if (tracelevel > 2)  
+    tracefile << "Initializing DFP, location = " << p
+              << "  value = " << fret << "\n\n";
+
   for (i = 1; i <= n; i++) {
     for (j = 1; j <= n; j++)  hessin(i, j) = 0.0;
     hessin(i, i) = 1.0;
   }
   
-  for (its = 1; its <= maxitsN; its++)  {
+  for (its = 1; its <= maxitsN && !status.Get(); its++)  {
     iter = its;
+    if (tracelevel > 2)
+      tracefile << "DFP iteration " << iter << '\n';
 
     Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, gnull);
     
-    if (fret <= tolN || fret >= fp || its >= maxitsN)  {
+    if (fret <= tolN || fret >= fp || its >= maxitsN || status.Get())  {
       if (fret <= tolN)  return true;
       else               return false;
     }
 
     fp = fret;
+    if(startVal>tolN)
+      status.SetProgress((double)(startVal-fp)/(double)(startVal-tolN));
     dg = g;
     fret = func.Value(p);
     func.Deriv(p, g);
@@ -384,6 +396,13 @@ bool DFP(gPVector<double> &p,
 	hessin(i, j) += (fac * (xi[i] * xi[j])) - (fad * (hdg[i] * hdg[j])) +
                  	(fae * (dg[i] * dg[j]));
     xi = -(hessin * g);
+
+    if (tracelevel > 2)   {
+      tracefile << "Hessian:\n\n";
+      tracefile << ((gRectArray<double> &)xi) << '\n';
+
+      tracefile << "location = " << p << " value = " << fret << "\n\n";
+    }
   }
 
   gout << "Too many iterations in DFP";
@@ -399,27 +418,33 @@ bool Powell(gPVector<double> &p,
 	    gFunction<double> &func,
 	    double &fret, int &iter,
 	    int maxits1, double tol1, int maxitsN, double tolN,
-	    gOutput &tracefile, int tracelevel)
+	    gOutput &tracefile, int tracelevel,
+	    gStatus &status = gstatus)
 {
   int ibig,n;
   double t,fptt,fp,del;
+  double startVal;
   
   n=p.Length();
   gVector<double> pt(n);
   gVector<double> ptt(n);
   gVector<double> xit(n);
   fret=func.Value(p);
+  startVal = fret;
 
-  if (tracelevel > 0)  
+  if (tracelevel > 2)  
     tracefile << "Initializing Powell, location = " << p
               << "  value = " << fret << "\n\n";
 
   pt=p;
-  for (iter=1;;iter++) {
-    if (tracelevel > 0)
+  for (iter=1;!status.Get();iter++) {
+    if (tracelevel > 2)
       tracefile << "Powell iteration " << iter << '\n';
 
     fp=fret;
+    if(startVal>tolN)
+      status.SetProgress((double)(startVal-fp)/(double)(startVal-tolN));
+
     ibig=0;
     del=0.0;
     int index = 1;
@@ -437,10 +462,11 @@ bool Powell(gPVector<double> &p,
       }
     }
     
+    if(status.Get()) return false;
     if (fret <= tolN) return true;
 
     if (iter == maxitsN)   {
-      if (tracelevel > 0)  {
+      if (tracelevel > 2)  {
 	tracefile << "location = " << p << " value = " << fret << "\n\n";
 	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
       }
@@ -462,7 +488,7 @@ bool Powell(gPVector<double> &p,
       }
     }
     
-    if (tracelevel > 0)   {
+    if (tracelevel > 2)   {
       tracefile << "Approximate Hessian:\n\n";
       tracefile << ((gRectArray<double> &)xi) << '\n';
 
@@ -471,3 +497,7 @@ bool Powell(gPVector<double> &p,
   }
   return false;
 }
+
+
+
+

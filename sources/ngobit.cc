@@ -158,8 +158,9 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg<double> &N,
 
 extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		double &fret, int &iter,
-	        int maxits1, double tol1, int maxitsN, double tolN);
-
+	        int maxits1, double tol1, int maxitsN, double tolN,
+		gOutput &tracefile, int tracelevel,
+		gStatus &status = gstatus);
 
 
 void Gobit(const Nfg<double> &N, NFGobitParams &params,
@@ -192,7 +193,8 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
 
     F.SetLambda(Lambda);
     DFP(p, F, value, iter,
-        params.maxits1, params.tol1, params.maxitsN, params.tolN);
+        params.maxits1, params.tol1, params.maxitsN, params.tolN,
+	*params.tracefile,params.trace);
 
     // tracefile stuff goes in here... omitted for now
     
