@@ -274,6 +274,15 @@ static Portion *GSM_Exp(Portion **param)
     (exp((double) ((NumberPortion *) param[0])->Value()));
 }
 
+//---------
+// Float
+//---------
+
+static Portion *GSM_Float(Portion **param)
+{
+  return new NumberPortion((double) ((NumberPortion *) param[0])->Value());
+}
+
 //------------
 // Greater
 //------------
@@ -1013,6 +1022,16 @@ static Portion* GSM_Randomize(Portion** param)
   return new NumberPortion(x);
 }
 
+//-----------
+// Rational
+//-----------
+
+static Portion *GSM_Rational(Portion **param)
+{
+  return new NumberPortion
+    (((NumberPortion *) param[0])->Value().operator gRational());
+}
+
 //--------
 // Read
 //--------
@@ -1698,6 +1717,7 @@ void Init_gsmoper(GSM* gsm)
 	GSM_Equal_NfSupport },
       { "Equal[x->MIXED*, y->MIXED*] =: BOOLEAN", GSM_Equal_Mixed },
       { "Exp[x->NUMBER] =: NUMBER", GSM_Exp },
+      { "Float[x->NUMBER] =: NUMBER", GSM_Float },
       { "Greater[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_Greater_Number },
       { "Greater[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Greater_Text },
       { "GreaterEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_GreaterEqual_Number },
@@ -1746,6 +1766,7 @@ void Init_gsmoper(GSM* gsm)
       { "Plus[x->MIXED, y->MIXED] =: MIXED", GSM_Plus_Mixed },
       { "Plus[x->BEHAV, y->BEHAV] =: BEHAV", GSM_Plus_Behav },
       { "Power[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Power },
+      { "Rational[x->NUMBER] =: NUMBER", GSM_Rational },
       { "Times[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Times_Number },
       { "Times[x->NUMBER, y->MIXED] =: MIXED", GSM_Times_Mixed },
       { "Times[x->NUMBER, y->BEHAV] =: BEHAV", GSM_Times_Behav },
