@@ -1164,6 +1164,61 @@ static Portion* GSM_Read_Text(Portion** param)
   return p;
 }
 
+static Portion* GSM_ReadText_Number(Portion** param)
+{
+  char c = ' ';
+  gText t;
+  gInput& input = ((InputPortion*) param[0])->Value();
+  int n = ((NumberPortion *) param[2])->Value();
+
+  long old_pos = input.getpos();
+
+  while (t.Length()<n) {
+    input.get(c);
+    if (input.eof()) {
+      input.setpos(old_pos);
+      throw gclRuntimeError("End of file reached");
+    }
+    t += c;
+  }
+
+  ((TextPortion*) param[1])->SetValue(t);
+ 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
+}
+
+static Portion* GSM_ReadText_Text(Portion** param)
+{
+  char c = ' ';
+  gText t;
+  gInput& input = ((InputPortion*) param[0])->Value();
+  gText x = ((TextPortion *) param[2])->Value();
+  int n = x.Length();
+
+  long old_pos = input.getpos();
+
+  while (t.Right(n)!=x) {
+    input.get(c);
+    if (input.eof()) {
+      input.setpos(old_pos);
+      throw gclRuntimeError("End of file reached");
+    }
+    t += c;
+  }
+
+  ((TextPortion*) param[1])->SetValue(t);
+ 
+  // swap the first parameter with the return value, so things like
+  //   Input["..."] >> x >> y  would work
+  Portion* p = param[0];
+  param[0] = p->RefCopy();
+  return p;
+}
+
 static Portion* GSM_Read_List(Portion** param, PortionSpec spec,
 			      Portion* (*func) (Portion**), bool ListFormat)
 {
@@ -2043,7 +2098,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(3, 1, gclParameter("x", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYREF));
   
-  
   FuncObj->SetFuncInfo(4, gclSignature(GSM_Read_Text,
 				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, gclParameter("input", porINPUT,
@@ -2064,6 +2118,25 @@ void Init_gsmoper(GSM* gsm)
 					   REQUIRED, BYREF));
   FuncObj->SetParamInfo(6, 1, gclParameter("x", porUNDEFINED, 
 					   REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("ReadText", 2);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ReadText_Text,
+				       porINPUT, 3, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, gclParameter("x", porTEXT,
+					    new TextPortion(""), BYREF));
+  FuncObj->SetParamInfo(0, 2, gclParameter("until", porTEXT,
+					    REQUIRED));
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_ReadText_Number,
+				       porINPUT, 3, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(1, 0, gclParameter("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, gclParameter("x", porTEXT,
+					    new TextPortion(""), BYREF));
+  FuncObj->SetParamInfo(1, 2, gclParameter("n", porNUMBER,
+					    REQUIRED));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction("IsEof", 1);
