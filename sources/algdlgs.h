@@ -46,7 +46,7 @@ private:
 protected:
   bool m_usesNfg, m_subgames;
   int m_completed;
-  wxGroupBox *m_dominanceGroup, *m_subgamesGroup, *m_traceGroup;
+  wxGroupBox *m_dominanceGroup, *m_subgamesGroup, *m_algorithmGroup, *m_traceGroup;
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
   wxCheckBox *m_markSubgames, *m_selectSolutions;
 

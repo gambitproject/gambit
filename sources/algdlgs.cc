@@ -39,7 +39,9 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 				 wxWindow *p_parent,
 				 const char */*help_str*/)
   : wxDialogBox(p_parent, p_label, TRUE),
-    m_usesNfg(p_usesNfg), m_depthChoice(0), m_typeChoice(0),
+    m_usesNfg(p_usesNfg),
+    m_dominanceGroup(0), m_subgamesGroup(0), m_algorithmGroup(0),
+    m_traceGroup(0), m_depthChoice(0), m_typeChoice(0),
     m_methodChoice(0), m_markSubgames(0),
     m_stopAfter(0), m_findAll(0), m_precision(0)
 { }
@@ -283,7 +285,12 @@ void dialogAlgorithm::TraceFields(void)
   m_traceLevel->SetConstraints(constraints);
 
   constraints = new wxLayoutConstraints;
-  constraints->top.AsIs();
+  if (m_algorithmGroup) {
+    constraints->top.SameAs(m_algorithmGroup, wxBottom, 15);
+  }
+  else {
+    constraints->top.AsIs();
+  }
   constraints->left.SameAs(m_dominanceGroup, wxLeft);
   constraints->bottom.SameAs(m_traceLevel, wxBottom, -10);
   constraints->right.SameAs(m_traceDest, wxRight, -10);
@@ -320,6 +327,7 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 
   Layout();
   Fit();
+
 }
 
 void dialogAlgorithm::StopAfterField(void)
@@ -332,7 +340,7 @@ void dialogAlgorithm::StopAfterField(void)
 
   m_stopAfter = new wxIntegerItem(this, "Stop after",
 				  (stopAfter > 0) ? stopAfter : 1,
-				  -1, -1, 100, -1);
+				  -1, -1, -1, -1);
 
   if (stopAfter == 0) {
     m_findAll->SetValue(true);
@@ -488,10 +496,31 @@ dialogEnumPure::~dialogEnumPure()
 
 void dialogEnumPure::AlgorithmFields(void)
 {
-  (void) new wxMessage(this, "Algorithm parameters:");
-  NewLine();
+  m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
   StopAfterField();
-  NewLine();
+
+  m_algorithmGroup->SetConstraints(new wxLayoutConstraints);
+  if (m_subgames) {
+    m_algorithmGroup->GetConstraints()->top.SameAs(m_subgamesGroup, wxBottom, 15);
+  }
+  else {
+    m_algorithmGroup->GetConstraints()->top.SameAs(m_dominanceGroup, wxBottom, 15);
+  }
+  m_algorithmGroup->GetConstraints()->left.SameAs(m_subgamesGroup, wxLeft);
+  m_algorithmGroup->GetConstraints()->right.SameAs(m_stopAfter, wxRight, -10);
+  m_algorithmGroup->GetConstraints()->bottom.SameAs(m_stopAfter, wxBottom, -10);
+
+  m_findAll->SetConstraints(new wxLayoutConstraints);
+  m_findAll->GetConstraints()->centreY.SameAs(m_stopAfter, wxCentreY);
+  m_findAll->GetConstraints()->left.SameAs(m_algorithmGroup, wxLeft, 10);
+  m_findAll->GetConstraints()->width.AsIs();
+  m_findAll->GetConstraints()->height.AsIs();
+  
+  m_stopAfter->SetConstraints(new wxLayoutConstraints);
+  m_stopAfter->GetConstraints()->top.SameAs(m_algorithmGroup, wxTop, 20);
+  m_stopAfter->GetConstraints()->left.SameAs(m_findAll, wxRight, 10);
+  m_stopAfter->GetConstraints()->width.AsIs();
+  m_stopAfter->GetConstraints()->height.AsIs();
 }
 
 int dialogEnumPure::StopAfter(void) const
