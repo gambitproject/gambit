@@ -840,8 +840,14 @@ int GCLCompiler::Execute(void)
     Portion *result = gsm.Execute(exprtree);
     if (result)  delete result;
   }
+  catch (gclQuitOccurred &) {
+    throw;
+  }
   catch (gclRuntimeError &E) {
     gout << "ERROR: " << E.Description() << '\n';
+  }
+  catch (gException &E) {
+    gout << "EXCEPTION: " << E.Description() << '\n';
   }
 
   return rcSUCCESS;
