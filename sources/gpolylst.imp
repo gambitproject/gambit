@@ -221,12 +221,12 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
       for (ii = 1; ii < no_polys; ii++) 
 	if (ii != ell) 
 	  if ( uncomputed.Contains(index_pair(ii,ell)) ||
-	       computed.Contains(index_pair(ii,ell)) )
+	         computed.Contains(index_pair(ii,ell)) )
 	    if (uncomputed.Contains(index_pair(ii,no_polys)))  {
 	      exp_vect lpp_i        = List[ii]->  LeadingPowerProduct(order);
 	      exp_vect lpp_ell      = List[ell]->LeadingPowerProduct(order);
 	      exp_vect lpp_no_polys = List[no_polys]->
-		LeadingPowerProduct(order);
+		                                 LeadingPowerProduct(order);
 	      if ( lpp_ell.Divides(lpp_i.LCM(lpp_no_polys)) )
 		uncomputed.Remove[spot];
 	    }
@@ -463,12 +463,6 @@ gList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
   }
   return newlist;
 }
-
-template <class T> const gSpace* gPolyList<T>::AmbientSpace() const { return Space; }
-template <class T> const term_order* gPolyList<T>::TermOrder()  const { return Order; }
-template <class T> const int gPolyList<T>::Length() const { return List.Length(); }
-template <class T> const int gPolyList<T>::Dmnsn() const { return Space->Dmnsn(); }
-
 
 //----------------------------------
 //           Printing
