@@ -358,7 +358,7 @@ ITEM 0016:  No progress display or status checking for PolEnum algorithms
 
 DATE:     9/8/1999 by TLT (was Bug D21, point 1, in bugs_gui)
 AFFECTS:  GCL, GUI; all platforms
-STATUS:   OPEN
+STATUS:   CLOSED by RDM 12/12/99
 SEVERITY: CRUCIAL
 DETAILS:
 
