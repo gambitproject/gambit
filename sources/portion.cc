@@ -1435,9 +1435,20 @@ bool ListPortion::TypeCheck( Portion* item )
   {
     result = true;
   }
+  else if( ( _DataType & porMIXED && item->Type() & porMIXED ) ||
+	  ( _DataType & porBEHAV && item->Type() & porBEHAV ) ||
+	  ( _DataType & porNFG && item->Type() & porNFG ) ||
+	  ( _DataType & porEFG && item->Type() & porEFG ) )
+    result = true;
   else if( item->Type() == porLIST )
   {
-    if( ( (ListPortion*) item )->_DataType == _DataType )
+    PortionType& NewType = ( (ListPortion*) item )->_DataType;
+    if( NewType == _DataType )
+      result = true;
+    else if( ( _DataType & porMIXED && NewType & porMIXED ) ||
+	    ( _DataType & porBEHAV && NewType & porBEHAV ) ||
+	    ( _DataType & porNFG && NewType & porNFG ) ||
+	    ( _DataType & porEFG && NewType & porEFG ) )
       result = true;
   }
   return result;

@@ -3017,8 +3017,6 @@ int main( void )
 
 
 
-
-
   prog = new gList< Instruction* >;
   prog->Append( new PushRef( "a" ) );
   prog->Append( new Push<long>( 1 ) );
@@ -3053,6 +3051,176 @@ int main( void )
   machine->Dump();
   
 
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "sx" );
+  machine->Push( "Testing Testing 123" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "sx" );
+  machine->Push( (long) 5 );
+  machine->Subscript();
+  machine->Dump();
+
+  machine->PushRef( "sx" );
+  machine->Push( (long) 5 );
+  machine->Subscript();
+  machine->Push( "H" );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "sx" );
+  machine->Dump();
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->PushRef( "lix" );
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
+  machine->Push( (long) 4 );
+  machine->Push( (long) 5 );
+  machine->PushList( 5 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "lix" );
+  machine->Push( (long) 3 );
+  machine->Subscript();
+  machine->Push( (long) 13 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "lix" );
+  machine->Dump();
+
+
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Assign();
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+
+
+
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
+  machine->Push( (long) 4 );
+  machine->PushList( 4 );
+  machine->Dump();
+
+  machine->Push( (long) 1 );
+  machine->Push( (long) 2 );
+  machine->Push( (long) 3 );
+  machine->Push( (long) 4 );
+  machine->Push( (double) 5 );
+  machine->PushList( 5 );
+  machine->Dump();
+
+
+
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+  machine->PushRef( "lE" );
+
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02rat.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02rat.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->PushList( 3 );
+  machine->Assign();
+  machine->Dump();
+
+  
+  machine->PushRef( "lE" );
+  machine->Push( (long) 2 );
+  machine->Subscript();
+  machine->Dump();
+
+#if 0  
+  machine->PushRef( "lE" );
+  machine->Push( (long) 2 );
+  machine->Subscript();
+
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e02rat.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->Assign();
+  machine->Dump();
+#endif // 0
+
+  machine->PushRef( "lE" );
+  machine->Push( (long) 2 );
+  machine->Subscript();
+  machine->Dump();
+  
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
