@@ -21,6 +21,9 @@ const int NODE_TOKEN_BOX = 1;
 const int NODE_TOKEN_CIRCLE = 2;
 const int NODE_TOKEN_DIAMOND = 3;
 
+const int SUBGAME_HIDDEN = 0;
+const int SUBGAME_ARC = 1;
+
 const int SHOWISET_NONE = 0;
 const int SHOWISET_SAME = 1;
 const int SHOWISET_ALL = 2;

@@ -67,43 +67,13 @@ inline void DrawCircle(wxDC &dc, int x, int y, int r, const wxColour &color)
 }
 
 
-void DrawLargeSubgameIcon(wxDC &dc, const NodeEntry &entry, int nl)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
-  dc.SetBrush(*wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
-  wxPoint points[3];
-  int x0 = (entry.x + nl +
-	    entry.nums * INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE);
-  int y0 = entry.y;
-  points[0].x = x0;
-  points[0].y = y0;
-  points[1].x = x0 + SUBGAME_LARGE_ICON_SIZE;
-  points[1].y = y0 - SUBGAME_LARGE_ICON_SIZE/2;
-  points[2].x = x0 + SUBGAME_LARGE_ICON_SIZE;
-  points[2].y = y0 + SUBGAME_LARGE_ICON_SIZE/2;
-  dc.DrawPolygon(3, points);
-}
-
-void DrawSmallSubgameIcon(wxDC &dc, const NodeEntry &entry)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen("INDIAN RED", 2, wxSOLID));
-  dc.SetBrush(*wxTheBrushList->FindOrCreateBrush("RED", wxSOLID));
-  wxPoint points[3];
-  points[0].x = entry.x;
-  points[0].y = entry.y;
-  points[1].x = entry.x+SUBGAME_SMALL_ICON_SIZE;
-  points[1].y = entry.y-SUBGAME_SMALL_ICON_SIZE/2;
-  points[2].x = entry.x+SUBGAME_SMALL_ICON_SIZE;
-  points[2].y = entry.y+SUBGAME_SMALL_ICON_SIZE/2;
-  dc.DrawPolygon(3, points);
-}
-
 //-----------------------------------------------------------------------
 //                   class NodeEntry: Member functions
 //-----------------------------------------------------------------------
 
 NodeEntry::NodeEntry(Node *p_node)
-  : m_node(p_node), m_selected(false), m_cursor(false), m_size(20),
+  : m_node(p_node), m_selected(false), m_cursor(false),
+    m_subgameRoot(false), m_subgameMarked(false), m_size(20),
     m_token(NODE_TOKEN_CIRCLE),
     m_sublevel(0), nums(0), in_sup(true)
 { }
@@ -160,6 +130,15 @@ void NodeEntry::Draw(wxDC &p_dc) const
   p_dc.GetTextExtent(m_nodeRightLabel, &textWidth, &textHeight);
   p_dc.DrawText(m_nodeRightLabel,
 		GetX() + GetSize() + 10, y - textHeight/2);
+
+  if (m_subgameRoot) {
+    p_dc.SetPen(*((m_subgameMarked) ? wxBLACK_PEN : wxGREY_PEN));
+    p_dc.DrawLine(GetX() - GetSize() / 2, y,
+		  GetX() + 2 * GetSize(), y + 2 * GetSize());
+    p_dc.DrawLine(GetX() - GetSize() / 2, y,
+		  GetX() + 2 * GetSize(), y - 2 * GetSize());
+  }
+
 }
 
 void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
@@ -692,6 +671,11 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   
   entry->expanded = subgame_entry.expanded;
   entry->SetSize(draw_settings.NodeSize());
+  if (draw_settings.SubgameStyle() == SUBGAME_ARC &&
+      n->GetSubgameRoot() == n) {
+    entry->SetSubgameRoot(true);
+    entry->SetSubgameMarked(true);
+  }
   maxlev = gmax(level, maxlev);
   maxy = gmax(entry->y, maxy);
   miny = gmin(entry->y, miny);

@@ -1,13 +1,14 @@
 //
-// FILE: efglayout.h -- Declaration of extensive form layout
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to tree layout representation
 //
 
 #ifndef EFGLAYOUT_H
 #define EFGLAYOUT_H
-
-#include "wx/wx.h"
 
 #include "base/base.h"
 #include "treedraw.h"
@@ -19,6 +20,7 @@ private:
   Node *m_node;       // the corresponding node in the game
   bool m_selected;    // true if node is selected
   bool m_cursor;      // true if node is 'cursor'
+  bool m_subgameRoot, m_subgameMarked;
   int m_size;         // horizontal size of the node
   int m_token;        // token to draw for node
 
@@ -45,9 +47,16 @@ public:
   Node *GetNode(void) const { return m_node; }
 
   bool IsCursor(void) const { return m_cursor; }
-  bool IsSelected(void) const { return m_selected; }
   void SetCursor(bool p_cursor);
+
+  bool IsSelected(void) const { return m_selected; }
   void SetSelected(bool p_selected) { m_selected = p_selected; }
+
+  bool IsSubgameRoot(void) const { return m_subgameRoot; }
+  void SetSubgameRoot(bool p_root) { m_subgameRoot = p_root; }
+  
+  bool IsSubgameMarked(void) const { return m_subgameMarked; }
+  void SetSubgameMarked(bool p_marked) { m_subgameMarked = p_marked; }
 
   void SetSize(int p_size) { m_size = p_size; }
   int GetSize(void) const { return m_size; }
