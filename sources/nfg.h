@@ -51,6 +51,7 @@ friend class Lexicon;
 friend void SetEfg(Nfg *, const Efg *);
 #endif   // NFG_ONLY
 protected:
+  mutable bool m_dirty;
   gText title, comment;
   gArray<int> dimensions;
 
@@ -82,6 +83,8 @@ public:
 
   void SetComment(const gText &);
   const gText &GetComment(void) const;
+
+  bool IsDirty(void) const { return m_dirty; }
 
   void WriteNfgFile(gOutput &, int) const;
 

@@ -214,8 +214,8 @@ int Efg::_NumObj = 0;
 #endif // MEMCHECK
 
 Efg::Efg(void)
-  : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
-    afg(0), lexicon(0)
+  : sortisets(true), m_dirty(false), title("UNTITLED"), 
+    chance(new EFPlayer(this, 0)), afg(0), lexicon(0)
 {
   root = new Node(this, 0);
 #ifdef MEMCHECK
@@ -225,7 +225,7 @@ Efg::Efg(void)
 }
 
 Efg::Efg(const Efg &E, Node *n /* = 0 */)
-  : sortisets(false), title(E.title), comment(E.comment),
+  : sortisets(false), m_dirty(false), title(E.title), comment(E.comment),
     players(E.players.Length()), outcomes(E.outcomes.Length()),
     chance(new EFPlayer(this, 0)),
     afg(0), lexicon(0)
@@ -463,13 +463,19 @@ void Efg::CopySubtree(Node *n, Node *m)
 //------------------------------------------------------------------------
 
 void Efg::SetTitle(const gText &s)
-{ title = s; }
+{
+  title = s; 
+  m_dirty = true;
+}
 
 const gText &Efg::GetTitle(void) const
 { return title; }
 
 void Efg::SetComment(const gText &s)
-{ comment = s; }
+{
+  comment = s;
+  m_dirty = true;
+}
 
 const gText &Efg::GetComment(void) const
 { return comment; }
@@ -563,6 +569,7 @@ void Efg::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
 
     WriteEfgFile(p_file, root);
     p_file.SetPrec(oldPrecision);
+    m_dirty = false;
   }
   catch (...) {
     p_file.SetPrec(oldPrecision);
@@ -580,6 +587,8 @@ int Efg::NumPlayers(void) const
 
 EFPlayer *Efg::NewPlayer(void)
 {
+  m_dirty = true;
+
   EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
   players.Append(ret);
 
@@ -615,12 +624,14 @@ int Efg::NumOutcomes(void) const
 
 EFOutcome *Efg::NewOutcome(void)
 {
+  m_dirty = true;
   NewOutcome(outcomes.Length() + 1);
   return outcomes[outcomes.Length()];
 }
 
 void Efg::DeleteOutcome(EFOutcome *outc)
 {
+  m_dirty = true;
   root->DeleteOutcome(outc);
   outcomes.Remove(outcomes.Find(outc));
   delete outc;
@@ -629,6 +640,7 @@ void Efg::DeleteOutcome(EFOutcome *outc)
 
 void Efg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
 {
+  m_dirty = true;
   outc->payoffs[pl] = value;
 }
 
@@ -789,6 +801,7 @@ gList<Infoset*> Efg::DescendantInfosets(const Node& n,
 
 EFOutcome *Efg::NewOutcome(int index)
 {
+  m_dirty = true;
   outcomes.Append(new EFOutcome(this, index));
   return outcomes[outcomes.Length()];
 } 
@@ -806,6 +819,8 @@ Infoset *Efg::AppendNode(Node *n, EFPlayer *p, int count)
 {
   if (!n || !p || count == 0)
     throw Exception();
+
+  m_dirty = true;
 
   if (n->children.Length() == 0)   {
     n->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
@@ -828,6 +843,7 @@ Infoset *Efg::AppendNode(Node *n, Infoset *s)
     return 0;
 
   if (n->children.Length() == 0)   {
+    m_dirty = true;
     n->infoset = s;
     s->members.Append(n);
     for (int i = 1; i <= s->actions.Length(); i++)
@@ -848,7 +864,8 @@ Node *Efg::DeleteNode(Node *n, Node *keep)
   if (n->gameroot == n)
     MarkSubgame(keep, keep);
 
-// turn infoset sorting off during tree deletion -- problems will occur
+  m_dirty = true;
+  // turn infoset sorting off during tree deletion -- problems will occur
   sortisets = false;
 
   n->children.Remove(n->children.Find(keep));
@@ -872,6 +889,8 @@ Node *Efg::DeleteNode(Node *n, Node *keep)
 Infoset *Efg::InsertNode(Node *n, EFPlayer *p, int count)
 {
   if (!n || !p || count <= 0)  throw Exception();
+
+  m_dirty = true;
 
   Node *m = new Node(this, n->parent);
   m->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
@@ -898,6 +917,8 @@ Infoset *Efg::InsertNode(Node *n, Infoset *s)
   if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
     return 0;
   
+  m_dirty = true;
+
   Node *m = new Node(this, n->parent);
   m->infoset = s;
   s->members.Append(m);
@@ -919,6 +940,7 @@ Infoset *Efg::InsertNode(Node *n, Infoset *s)
 Infoset *Efg::CreateInfoset(EFPlayer *p, int br)
 {
   if (!p || p->Game() != this)  throw Exception();
+  m_dirty = true;
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
@@ -933,6 +955,8 @@ Infoset *Efg::JoinInfoset(Infoset *s, Node *n)
   if (!n->infoset)   return 0; 
   if (n->infoset == s)   return s;
   if (s->actions.Length() != n->children.Length())  return n->infoset;
+
+  m_dirty = true;
 
   Infoset *t = n->infoset;
 
@@ -954,6 +978,8 @@ Infoset *Efg::LeaveInfoset(Node *n)
 
   Infoset *s = n->infoset;
   if (s->members.Length() == 1)   return s;
+
+  m_dirty = true;
 
   EFPlayer *p = s->player;
   s->members.Remove(s->members.Find(n));
@@ -977,6 +1003,8 @@ Infoset *Efg::SplitInfoset(Node *n)
 
   Infoset *s = n->infoset;
   if (s->members.Length() == 1)   return s;
+
+  m_dirty = true;
 
   EFPlayer *p = s->player;
   Infoset *ns = CreateInfoset(p->infosets.Length() + 1, p,
@@ -1006,6 +1034,8 @@ Infoset *Efg::MergeInfoset(Infoset *to, Infoset *from)
   if (to->members[1]->gameroot != from->members[1]->gameroot) 
     return from;
 
+  m_dirty = true;
+
   to->members += from->members;
   for (int i = 1; i <= from->members.Length(); i++)
     from->members[i]->infoset = to;
@@ -1023,6 +1053,7 @@ bool Efg::DeleteEmptyInfoset(Infoset *s)
 
   if (s->NumMembers() > 0)   return false;
 
+  m_dirty = true;
   s->player->infosets.Remove(s->player->infosets.Find(s));
   delete s;
 
@@ -1035,6 +1066,7 @@ Infoset *Efg::SwitchPlayer(Infoset *s, EFPlayer *p)
   
   if (s->player == p)   return s;
 
+  m_dirty = true;
   s->player->infosets.Remove(s->player->infosets.Find(s));
   s->player = p;
   p->infosets.Append(s);
@@ -1086,6 +1118,7 @@ void Efg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
   if(where->actions.Length()<=1)return;
   UnmarkSubtree(root);  // start with a clean tree
   
+  m_dirty = true;
   for(i=1;i<=where->actions.Length();i++) {
     for(j=1;j<=where->members.Length();j++) 
       MarkSubtree(where->members[j]->children[i]);
@@ -1119,13 +1152,16 @@ Node *Efg::CopyTree(Node *src, Node *dest)
   if (src->gameroot != dest->gameroot)  return src;
 
   if (src->children.Length())  {
+    m_dirty = true;
+
     AppendNode(dest, src->infoset);
     for (int i = 1; i <= src->children.Length(); i++)
       CopySubtree(src->children[i], dest->children[i], dest);
+
+    DeleteLexicon();
+    SortInfosets();
   }
 
-  DeleteLexicon();
-  SortInfosets();
   return dest;
 }
 
@@ -1136,6 +1172,7 @@ Node *Efg::MoveTree(Node *src, Node *dest)
     return src;
   if (src->gameroot != dest->gameroot)  return src;
 
+  m_dirty = true;
   Node *parent = src->parent;    // cannot be null, saves us some problems
 
   parent->children[parent->children.Find(src)] = dest;
@@ -1155,6 +1192,8 @@ Node *Efg::MoveTree(Node *src, Node *dest)
 Node *Efg::DeleteTree(Node *n)
 {
   if (!n)  throw Exception();
+
+  m_dirty = true;
 
   while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
@@ -1176,6 +1215,8 @@ Node *Efg::DeleteTree(Node *n)
 const Action *Efg::InsertAction(Infoset *s)
 {
   if (!s)  throw Exception();
+
+  m_dirty = true;
   const Action *action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(new Node(this, s->members[i]));
@@ -1186,6 +1227,9 @@ const Action *Efg::InsertAction(Infoset *s)
 const Action *Efg::InsertAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
+
+  m_dirty = true;
+
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
@@ -1201,6 +1245,8 @@ const Action *Efg::InsertAction(Infoset *s, const Action *a)
 Infoset *Efg::DeleteAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
+
+  m_dirty = true;
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
@@ -1216,8 +1262,10 @@ Infoset *Efg::DeleteAction(Infoset *s, const Action *a)
 
 void Efg::SetChanceProb(Infoset *infoset, int act, const gNumber &value)
 {
-  if (infoset->IsChanceInfoset())
+  if (infoset->IsChanceInfoset()) {
+    m_dirty = true;
     ((ChanceInfoset *) infoset)->SetActionProb(act, value);
+  }
 }
 
 gNumber Efg::GetChanceProb(Infoset *infoset, int act) const

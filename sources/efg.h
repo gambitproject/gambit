@@ -40,6 +40,7 @@ friend class Nfg;
 
 protected:
     bool sortisets;
+    mutable bool m_dirty;
     gText title, comment;
     gBlock<EFPlayer *> players;
     gBlock<EFOutcome *> outcomes;
@@ -111,7 +112,8 @@ protected:
     void WriteEfgFile(gOutput &p_file, int p_nDecimals) const;
 
        //# DATA ACCESS -- GENERAL INFORMATION
-    bool    IsConstSum(void)      const; 
+    bool IsConstSum(void) const; 
+    bool IsDirty(void) const { return m_dirty; }
     gNumber MinPayoff(int pl = 0) const;
     gNumber MaxPayoff(int pl = 0) const;
 

@@ -44,8 +44,8 @@ int Nfg::Product(const gArray<int> &dim)
 }
   
 Nfg::Nfg(const gArray<int> &dim)
-  : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    efg(0)
+  : m_dirty(false), dimensions(dim), players(dim.Length()),
+    results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -60,7 +60,8 @@ Nfg::Nfg(const gArray<int> &dim)
 }
 
 Nfg::Nfg(const Nfg &b)
-  : title(b.title), comment(b.comment), dimensions(b.dimensions),
+  : m_dirty(false), title(b.title), comment(b.comment), 
+    dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
     results(b.results.Length()), efg(0)
 {
@@ -182,6 +183,7 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
     p_file << '\n';
     p_file.SetPrec(oldDecimals);
+    m_dirty = false;
   }
   catch (...) {
     p_file.SetPrec(oldDecimals);
@@ -191,6 +193,7 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
 NFOutcome *Nfg::NewOutcome(void)
 {
+  m_dirty = true;
   NFOutcome *outcome = new NFOutcome(outcomes.Length() + 1, this);
   outcomes.Append(outcome);
   return outcome;
@@ -198,6 +201,7 @@ NFOutcome *Nfg::NewOutcome(void)
 
 void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
+  m_dirty = true;
   delete outcomes.Remove(outcome->GetNumber());
 
   for (int outc = 1; outc <= outcomes.Length(); outc++)
@@ -210,13 +214,19 @@ const gArray<Strategy *> &Nfg::Strategies(int p) const
 }
 
 void Nfg::SetTitle(const gText &s) 
-{ title = s; }
+{
+  title = s; 
+  m_dirty = true;
+}
 
 const gText &Nfg::GetTitle(void) const 
 { return title; }
 
 void Nfg::SetComment(const gText &s)
-{ comment = s; }
+{
+  comment = s; 
+  m_dirty = true;
+}
 
 const gText &Nfg::GetComment(void) const
 { return comment; }
@@ -252,6 +262,7 @@ void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->m_index;
   results[index] = outcome;
+  m_dirty = true;
   BreakLink();
 }
 
@@ -259,6 +270,7 @@ void Nfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
 void Nfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
 {
   results[p.index + 1] = outcome;
+  m_dirty = true;
   BreakLink();
 }
 
@@ -277,7 +289,10 @@ NFOutcome *Nfg::GetOutcome(const StrategyProfile &p) const
 
 void Nfg::SetPayoff(NFOutcome *outcome, int pl, const gNumber &value)
 {
-  if (outcome)   outcome->payoffs[pl] = value;
+  if (outcome) {
+    outcome->payoffs[pl] = value;
+    m_dirty = true;
+  }
 }
 
 gNumber Nfg::Payoff(NFOutcome *outcome, int pl) const
