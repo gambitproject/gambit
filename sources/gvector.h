@@ -68,6 +68,9 @@ template <class T> class gVector : public gArray<T>   {
     bool operator==(T c) const;
     bool operator!=(T c) const;
 
+        // square of length
+    T NormSquared() const;
+
         // check vector for identical boundaries
     bool Check(const gVector<T> &v) const;
 };

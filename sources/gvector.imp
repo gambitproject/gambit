@@ -205,6 +205,14 @@ template <class T> bool gVector<T>::operator==(T c) const
   return true;
 }
 
+template <class T> T gVector<T>::NormSquared() const
+{
+  T answer = (T)0;
+  for (int i = 1; i <= Length(); i++)
+    answer += (*this)[i] * (*this)[i];
+  return answer;
+}
+
 
 
 template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
