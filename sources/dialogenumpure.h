@@ -16,8 +16,7 @@ private:
   gText HelpTopic(void) const { return "EnumPure"; }
 
 public:
-  dialogEnumPure(wxWindow *p_parent = 0, bool p_subgames = false,
-		 bool p_vianfg = false);
+  dialogEnumPure(wxWindow *p_parent, bool p_subgames, bool p_vianfg);
   virtual ~dialogEnumPure();
 
   int StopAfter(void) const;

@@ -181,6 +181,8 @@ void guiNfgGrid::OnChar(wxKeyEvent &p_event)
 {
   int row = GetCursorRow(), col = GetCursorColumn();
 
+  wxMessageBox((char *) ToText(p_event.KeyCode()));
+
   switch (p_event.KeyCode()) {
   case WXK_HOME:
     SetGridCursor(0, 0);

@@ -29,10 +29,12 @@ private:
   void OnDraw(wxDC &);
 
   void OnLeftClick(wxMouseEvent &);
+  void OnLeftUp(wxMouseEvent &);
   void OnDoubleLeftClick(wxMouseEvent &);
   void OnMouseMotion(wxMouseEvent &);
 
   TreeObject *HitTest(int p_x, int p_y) const;
+  void ComputeScrollbars(void);
 
 public:
   guiEfgTree(guiEfgView *p_parent, wxWindow *p_window, Efg &p_efg);

@@ -17,25 +17,27 @@ class guiNfgView {
 private:
   guiNfgGrid *m_grid;
   guiNfgInfoPanel *m_infoPanel;
-  guiNfgFrame *m_parent;
 
   Nfg *m_nfg;
   int m_currentSupport;
   gList<NFSupport *> m_supports;
 
 public:
-  guiNfgView(guiNfgFrame *p_parent, Nfg *p_nfg,
+  guiNfgView(Nfg *p_nfg,
 	     wxSplitterWindow *p_solutionSplitter,
 	     wxSplitterWindow *p_infoSplitter);
 
   Nfg *GetNfg(void) const { return m_nfg; }
-  guiNfgGrid *GridWindow(void) const { return m_grid; }
+  wxWindow *GridWindow(void) const;
+  wxWindow *InfoPanel(void) const;
+  void ShowWindows(bool);
 
   void SetPlayers(int p_rowPlayer, int p_colPlayer);
   void SetProfile(const gArray<int> &p_profile);
   void SetOutcome(NFOutcome *);
   void SetPayoffs(void);
   void SetSolution(const MixedSolution &);
+  void SetShowProbs(bool);
 
   int RowPlayer(void) const;
   int ColPlayer(void) const;

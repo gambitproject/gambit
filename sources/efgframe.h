@@ -10,18 +10,27 @@
 #include "gameview.h"
 
 class guiEfgView;
+class guiNfgView;
 class guiEfgSolutions;
 
 class guiEfgFrame : public gambitGameView {
 private:
   guiEfgView *m_efgView;
+  guiNfgView *m_nfgView;
   guiEfgSolutions *m_solutionView;
   int m_currentSupport;
   Node *m_copyNode;
   EFOutcome *m_copyOutcome;
 
+  void OnFileSave(wxCommandEvent &);
+
   void OnViewSolutions(wxCommandEvent &);
 
+  void OnEditCopy(wxCommandEvent &);
+  void OnEditPaste(wxCommandEvent &);
+
+  void OnSolveEfgNfg(wxCommandEvent &);
+  void OnSolveCustomNfgEnumPure(wxCommandEvent &);
   void OnSolveCustomNfgEnumMixed(wxCommandEvent &);
 
 public:
@@ -32,11 +41,7 @@ public:
   void OnActivate(wxActivateEvent& event);
 
   void OnSolveEfgStandard(wxCommandEvent &);
-  void OnSolveEfgCustom(wxCommandEvent &);
-  void OnSolveEfgNfg(wxCommandEvent &);
 
-  void OnEditCopyEfg(wxCommandEvent &);
-  void OnEditPasteEfg(wxCommandEvent &);
   void OnEditDeleteEfg(wxCommandEvent &);
   void OnEditLabel(wxCommandEvent &);
   void OnEditPlayers(wxCommandEvent &);

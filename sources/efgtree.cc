@@ -381,6 +381,7 @@ void BranchEntry::OnSelected(bool p_selected)
 
 BEGIN_EVENT_TABLE(guiEfgTree, wxScrolledWindow)
   EVT_LEFT_DOWN(OnLeftClick)
+  EVT_LEFT_UP(OnLeftUp)
   EVT_LEFT_DCLICK(OnDoubleLeftClick)
   EVT_MOTION(OnMouseMotion)
 END_EVENT_TABLE()
@@ -396,7 +397,6 @@ guiEfgTree::guiEfgTree(guiEfgView *p_parent, wxWindow *p_window,
   LayoutTree();
   SetBackgroundColour(wxColour("WHITE"));
   Show(TRUE);
-  SetScrollbars(m_maxX / 15, m_maxY / 15, 20, 20);
 }
 
 guiEfgTree::~guiEfgTree()
@@ -480,6 +480,14 @@ void guiEfgTree::LayoutTree(void)
   int ycoord = TOP_MARGIN;
 
   LayoutSubtree(m_efg.RootNode(), 0, m_maxX, m_maxY, m_minY, ycoord);
+  ComputeScrollbars();
+}
+
+void guiEfgTree::ComputeScrollbars(void)
+{
+  SetScrollbars(20, 20, 
+		(m_maxX + m_settings->NodeLength() + 50) * m_zoomFactor / 20 + 1,
+		m_maxY * m_zoomFactor / 20 + 1);
 }
 
 TreeObject *guiEfgTree::HitTest(int p_x, int p_y) const
@@ -525,6 +533,22 @@ void guiEfgTree::OnLeftClick(wxMouseEvent &p_event)
   }
 }
 
+void guiEfgTree::OnLeftUp(wxMouseEvent &p_event)
+{
+  TreeObject *object = HitTest(p_event.GetX(), p_event.GetY());
+  if (object && object->Type() == treeNODE) {
+    NodeEntry *nodeEntry = (NodeEntry *) object;
+    if (nodeEntry != m_selection && 
+	m_selection->Type() == treeNODE &&
+	nodeEntry->GetNode()->NumChildren() == 0) {
+      m_parent->GetEfg()->CopyTree(((NodeEntry *) m_selection)->GetNode(),
+				   nodeEntry->GetNode());
+      OnTreeChanged();
+      return;
+    }
+  }
+}
+
 void guiEfgTree::OnDoubleLeftClick(wxMouseEvent &p_event)
 {
   if (HitTest(p_event.GetX(), p_event.GetY())) {
@@ -535,6 +559,7 @@ void guiEfgTree::OnDoubleLeftClick(wxMouseEvent &p_event)
 
 void guiEfgTree::OnMouseMotion(wxMouseEvent &p_event)
 {
+  /*
   if (p_event.Dragging()) {
     int scrollX, scrollY;
     ViewStart(&scrollX, &scrollY);
@@ -554,6 +579,7 @@ void guiEfgTree::OnMouseMotion(wxMouseEvent &p_event)
     }
     dc.DrawLine(m_startX, m_startY, m_curX, m_curY);
   }
+  */
 }
 
 Node *guiEfgTree::SelectedNode(void) const
@@ -598,6 +624,7 @@ void guiEfgTree::OnTreeChanged(void)
 void guiEfgTree::SetZoom(double p_zoomFactor)
 {
   m_zoomFactor = p_zoomFactor;
+  ComputeScrollbars();
   OnDraw();
 }
 

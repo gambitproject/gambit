@@ -86,7 +86,7 @@ guiNfgFrame::guiNfgFrame(wxMDIParentFrame *p_parent, Nfg *p_nfg,
   : gambitGameView(p_parent, p_nfg, p_position, p_size),
     m_solutionView(0)
 {
-  m_nfgView = new guiNfgView(this, p_nfg, m_solutionSplitter, m_infoSplitter);
+  m_nfgView = new guiNfgView(p_nfg, m_solutionSplitter, m_infoSplitter);
   m_solutionView = new guiNfgSolutions(this, m_solutionSplitter, *p_nfg);
   m_solutionView->Show(FALSE);
 
@@ -275,14 +275,14 @@ void guiNfgFrame::OnViewSolutions(wxCommandEvent &)
     m_solutionSplitter->Unsplit();
     GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, FALSE);
     m_solutionView->Show(FALSE);
-    m_nfgView->GridWindow()->SetShowProbs(false);
+    m_nfgView->SetShowProbs(false);
   }
   else {
     m_solutionSplitter->SplitHorizontally(m_nfgView->GridWindow(),
 					  m_solutionView);
     m_solutionView->Show(TRUE);
     GetMenuBar()->Check(NFG_VIEW_SOLUTIONS, TRUE);
-    m_nfgView->GridWindow()->SetShowProbs(true);
+    m_nfgView->SetShowProbs(true);
   }
 }
 
@@ -291,10 +291,10 @@ void guiNfgFrame::SetSolution(const MixedSolution &p_solution)
   m_nfgView->SetSolution(p_solution);
 }
 
-guiNfgView::guiNfgView(guiNfgFrame *p_parent, Nfg *p_nfg,
+guiNfgView::guiNfgView(Nfg *p_nfg,
 		       wxSplitterWindow *p_solutionSplitter,
 		       wxSplitterWindow *p_infoSplitter)
-  : m_parent(p_parent), m_nfg(p_nfg), m_currentSupport(1)
+  : m_nfg(p_nfg), m_currentSupport(1)
 {
   m_supports.Append(new NFSupport(*p_nfg));
   m_supports[1]->SetName("Full support");
@@ -302,10 +302,24 @@ guiNfgView::guiNfgView(guiNfgFrame *p_parent, Nfg *p_nfg,
   m_grid = new guiNfgGrid(this, p_solutionSplitter, *p_nfg);
   m_infoPanel = new guiNfgInfoPanel(this, p_infoSplitter, *p_nfg);
 
-  p_infoSplitter->SplitVertically(m_infoPanel,
-				  p_solutionSplitter, 300);
-  p_solutionSplitter->Initialize(m_grid);
+  if (p_infoSplitter->IsSplit()) {
+    p_infoSplitter->ReplaceWindow(p_infoSplitter->GetWindow1(),
+				  m_infoPanel);
+  }
+  else {
+    p_infoSplitter->SplitVertically(m_infoPanel,
+				    p_solutionSplitter, 300);
+  }
 
+  if (p_solutionSplitter->GetWindow1()) {
+    p_solutionSplitter->ReplaceWindow(p_solutionSplitter->GetWindow1(),
+				      m_grid);
+  }
+  else {
+    p_solutionSplitter->Initialize(m_grid);
+  }
+
+  m_infoPanel->Show(TRUE);
   m_grid->Show(TRUE);
 
   m_infoPanel->SetProfile(m_grid->GetProfile());
@@ -313,6 +327,19 @@ guiNfgView::guiNfgView(guiNfgFrame *p_parent, Nfg *p_nfg,
   m_grid->SetEditable(FALSE);
   m_grid->Refresh();
 }
+
+wxWindow *guiNfgView::GridWindow(void) const
+{ return m_grid; }
+
+wxWindow *guiNfgView::InfoPanel(void) const
+{ return m_infoPanel; }
+
+void guiNfgView::ShowWindows(bool p_show)
+{
+  m_infoPanel->Show(p_show);
+  m_grid->Show(p_show);
+}
+		 
 
 void guiNfgView::AddSupport(NFSupport *p_support)
 {
@@ -324,6 +351,11 @@ void guiNfgView::SetCurrentSupport(int p_index)
 {
   m_infoPanel->SetSupport(m_supports[p_index]);
   m_grid->SetSupport(m_supports[p_index]);
+}
+
+void guiNfgView::SetShowProbs(bool p_show)
+{
+  m_grid->SetShowProbs(p_show);
 }
 
 void guiNfgFrame::OnSupportsNfgUndominated(wxCommandEvent &)

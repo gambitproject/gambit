@@ -18,7 +18,7 @@ private:
   gArray<int> m_profile;
   bool m_showProbs;
   const MixedSolution *m_solution;
-  
+
 public:
   guiNfgGrid(guiNfgView *m_parent, wxWindow *p_window, Nfg &p_nfg);
   virtual ~guiNfgGrid();
