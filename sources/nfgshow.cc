@@ -793,9 +793,29 @@ void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
   cols = cur_sup->NumStrats(pl2);
 
   int features = spread->HaveDom() + spread->HaveProbs() + spread->HaveVal();
-  spread->SetDimensions(rows + features, cols + features, 1);
+  //  spread->SetDimensions(rows + features, cols + features, 1);
 
-  // Must set dimensionality in case it changed due to elim dom
+  if (rows + features != spread->GetRows()) {
+    while (rows + features > spread->GetRows()) {
+      spread->AddRow(1);
+    }
+    while (rows + features < spread->GetRows()) {
+      spread->DelRow(1);
+    }
+  }
+
+  if (cols + features != spread->GetCols()) {
+    int colWidth = spread->DrawSettings()->GetColWidthRaw(1);
+    while (cols + features > spread->GetCols()) {
+      spread->AddCol(1);
+      spread->DrawSettings()->SetColWidth(colWidth, 1);
+    }
+    while (cols + features < spread->GetCols()) {
+      spread->DelCol(1);
+    }
+  }
+
+  // Must reset this if support changes
   spread->SetDimensionality(cur_sup);
 
   if (spread->HaveProbs()) 
@@ -1920,24 +1940,19 @@ void NormalSpread::RemoveValDisp(void)
 }
 
 
-void NormalSpread::SetDimensionality(const NFSupport *sup)
+void NormalSpread::SetDimensionality(const NFSupport *p_support)
 {
-    gArray<int> dim = sup->NumStrats();
-    assert(dim.Length() == dimensionality.Length());
+  gArray<int> dim = p_support->NumStrats();
 
-    for (int i = 1; i <= dim.Length(); i++)
-    {
-        if (dimensionality[i] != dim[i]) // dimensionality changed
-        {
-            strat_profile[i]->Clear();
+  for (int i = 1; i <= dim.Length(); i++) {
+    strat_profile[i]->Clear();
 
-            for (int j = 1; j <= dim[i]; j++)
-                strat_profile[i]->Append(sup->Strategies(i)[j]->Name());
+    for (int j = 1; j <= dim[i]; j++)
+      strat_profile[i]->Append(p_support->Strategies(i)[j]->Name());
 
-            strat_profile[i]->SetSelection(0);
-            dimensionality[i] = dim[i];
-        }
-    }
+    strat_profile[i]->SetSelection(0);
+    dimensionality[i] = dim[i];
+  }
 }
 
 
