@@ -25,9 +25,9 @@ gInput *input_stream;
 
 int efg_set_input(const gString &s)
 {
-  input_stream = new gInput((const char *) s);
+  input_stream = new gFileInput((const char *) s);
 
-  if (*input_stream == gInput((FILE *)0))  {
+  if (!input_stream->IsValid())  {
     delete input_stream;
     return 0;
   }
