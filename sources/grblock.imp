@@ -35,7 +35,8 @@ template <class T> gRectBlock<T>::~gRectBlock()
 template <class T>
 gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
 {
- gRectArray<T>::operator=(a);
+  gRectArray<T>::operator=(a);
+  return *this;
 }
 
 //------------------------------------------------------------------------
