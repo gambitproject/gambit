@@ -16,7 +16,24 @@
 
 template <class T> int BuildReducedNormal(const ExtForm<T> &,
 					  NormalForm<T> *&);
+template <class T>
+void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
+		  const ExtForm<T> &E, gDPVector<T> &bp);
+
 #include "gwatch.h"
+#include "mixed.h"
+
+Portion *GSM_BehavFloat(Portion **param)
+{
+  MixedProfile<double> &mp = ((MixedPortion<double> *) param[0])->Value();
+  ExtForm<double> &E = ((EfgPortion<double> *) param[1])->Value();
+  NormalForm<double> &N = *mp.BelongsTo(); 
+
+  BehavProfile<double> *bp = new BehavProfile<double>(E);
+  MixedToBehav(N, (gPVector<double> &) mp, E, (gDPVector<double> &) *bp);
+
+  return new BehavValPortion<double>(*bp);
+}
 
 Portion *GSM_Nfg(Portion **param)
 {
@@ -219,6 +236,12 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetIntegerOptions, 0, "alg", porTEXT);
   FuncObj->SetParamInfo(GSM_SetIntegerOptions, 1, "param", porTEXT);
   FuncObj->SetParamInfo(GSM_SetIntegerOptions, 2, "value", porINTEGER);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Behav");
+  FuncObj->SetFuncInfo(GSM_BehavFloat, 2);
+  FuncObj->SetParamInfo(GSM_BehavFloat, 0, "mixed", porMIXED_FLOAT);
+  FuncObj->SetParamInfo(GSM_BehavFloat, 1, "efg", porEFG_FLOAT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
