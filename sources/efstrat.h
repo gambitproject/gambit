@@ -42,6 +42,7 @@ public:
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
   int Find(Action *) const;
+  bool IsActive(Action *) const;
 
   // Find the active actions at an infoset
   const gArray<Action *> &Actions(int pl, int iset) const;
@@ -72,6 +73,10 @@ public:
   const gList<const Infoset *> ReachableInfosets(const Node *) const;
   const gList<const Infoset *> ReachableInfosets(const Node *,
 						 const Action *) const;
+  bool AlwaysReaches(const Infoset *) const;
+  bool AlwaysReachesFrom(const Infoset *, const Node *) const;
+  bool MayReach(const Node *) const;
+  bool MayReach(const Infoset *) const;
 
   void Dump(gOutput& s) const;
 };

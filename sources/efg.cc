@@ -16,6 +16,7 @@
 
 #include "efg.h"
 #include "efgutils.h"
+#include "gsm.h"
 
 
 //----------------------------------------------------------------------
@@ -162,6 +163,18 @@ Node *Node::PriorSibling(void) const
   else
     return parent->children[parent->children.Find((Node * const)this) - 1];
 
+}
+
+Action *Node::GetAction() const
+{
+  if (this == Game()->RootNode()) 
+    throw gclRuntimeError("GetAction() called on RootNode().\n");
+  
+  gArray<Action *> actions = GetParent()->GetInfoset()->Actions();
+  for (int i = 1; i <= actions.Length(); i++)
+    if (this == GetParent()->GetChild(actions[i]))
+      return actions[i];
+  throw gclRuntimeError("No action found in Node::GetAction().\n");
 }
 
 void Node::DeleteOutcome(EFOutcome *outc)

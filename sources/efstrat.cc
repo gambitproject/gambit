@@ -355,6 +355,20 @@ int EFSupport::Find(Action *a) const
   return sets[pl]->Find(a);
 }
 
+bool EFSupport::IsActive(Action *a) const
+{
+  if (a->BelongsTo()->Game() != befg)   
+    return false;
+
+  int pl = a->BelongsTo()->GetPlayer()->GetNumber();
+
+  int act = sets[pl]->Find(a);
+  if (act == 0) 
+    return false;
+  else
+    return true;
+}
+
 bool EFSupport::IsValid(void) const
 {
   if (sets.Length() != befg->NumPlayers())   return false;
@@ -463,6 +477,52 @@ EFSupport::ReachableInfosets(const Node *n, const Action *a) const
   answer.RemoveRedundancies();
   return answer;
 }
+
+bool EFSupport::AlwaysReaches(const Infoset *i) const
+{
+  return AlwaysReachesFrom(i,RootNode());
+}
+
+bool EFSupport::AlwaysReachesFrom(const Infoset *i, const Node *n) const
+{
+  if (n->IsTerminal()) return false;
+  else
+    if (n->GetInfoset() == i) return true;
+    else {
+      gArray<Action *> actions = Actions(n->GetInfoset());
+      for (int j = 1; j <= actions.Length(); j++)
+	if (!AlwaysReachesFrom(i,n->GetChild(actions[j]))) 
+	  return false;
+    }
+  return true;
+}
+
+bool EFSupport::MayReach(const Infoset *i) const
+{
+  gArray<Node *> members = i->Members();
+  for (int j = 1; j <= members.Length(); j++)
+    if (MayReach(members[j]))
+      return true;
+  return false;
+}
+
+bool EFSupport::MayReach(const Node *n) const
+{
+  if (n == RootNode())
+    return true;
+  else {
+    gArray<Action *> actions = Actions(n->GetParent()->GetInfoset());
+    Action * last = NULL;
+    for (int i = 1; i <= actions.Length() && last == NULL; i++)
+      if (n->GetParent()->GetChild(actions[i]) == n)
+	last = actions[i];
+    if (!IsActive(last))
+      return false;
+    else 
+      return MayReach(n->GetParent());
+  }
+}
+
 
 void EFSupport::Dump(gOutput& s) const
 {
