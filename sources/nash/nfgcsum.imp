@@ -1,211 +1,118 @@
 //
-// FILE: nfgcsum.imp -- Constant Sum Game Solution Module
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of algorithm to compute mixed strategy equilibria
+// of constant sum normal form games via linear programming
 //
-
-#include "base/base.h"
-#include "math/gpvector.h"
-
-#include "game/nfg.h"
-#include "game/nfgiter.h"
 
 #include "nfgcsum.h"
-#include "numerical/lpsolve.h"
-
-template <class T> class ZSumModule  {
-private:
-  const Nfg &NF;
-  const ZSumParams &params;
-  const NFSupport &support;
-  gMatrix<T> *A;
-  gVector<T> *b, *c;
-  T minpay, eps;
-  long npivots;
-  double time;
-  gList<BFS<T> > List;
-
-public:
-  ZSumModule(const NFSupport &, const ZSumParams &p);
-  virtual ~ZSumModule();
-
-  bool IsConstSum();
-  
-  int ZSum(gStatus &, int dup = 0);
-
-  void Make_Abc();
-  
-  int Add_BFS( /*const*/ LPSolve<T> &B);
-  long NumPivots(void) const;
-  double Time(void) const;
-  
-  void GetSolutions(gList<MixedSolution > &) const;
-};
+#include "game/nfgiter.h"
 
 //-------------------------------------------------------------------------
-//                    ZSumModule<T>: Member functions
+//                      nfgLp<T>: Member functions
 //-------------------------------------------------------------------------
 
-template <class T>
-ZSumModule<T>::ZSumModule(const NFSupport &S, const ZSumParams &p)
-  : NF(S.Game()), params(p), support(S), A(0), b(0), c(0), npivots(0)
+template <class T> nfgLp<T>::nfgLp(void)
 { }
 
-template <class T> ZSumModule<T>::~ZSumModule()
-{ if(A) delete A; if(b) delete b; if(c) delete c;}
-
-template <class T> bool ZSumModule<T>::IsConstSum()
-{ 
-  return ::IsConstSum(NF);
-}
-
-template <class T> void ZSumModule<T>::Make_Abc()
+template <class T> 
+gList<MixedSolution> nfgLp<T>::Solve(const NFSupport &p_support,
+				     gStatus &p_status)
 {
+  BFS<T> cbfs((T) 0);
+  
+  if (p_support.Game().NumPlayers() != 2 || !IsConstSum(p_support.Game())) {
+    return gList<MixedSolution>();
+  }
+  
+  gList<BFS<T> > bfsList;
+  
   int i,j,m,k;
   
-  m = support.NumStrats(1);
-  k = support.NumStrats(2);
-  A = new gMatrix<T>(1,k+1,1,m+1);
-  b = new gVector<T>(1,k+1);
-  c = new gVector<T>(1,m+1);
-  NfgIter iter(support);
+  m = p_support.NumStrats(1);
+  k = p_support.NumStrats(2);
+  gMatrix<T> A(1,k+1,1,m+1);
+  gVector<T> b(1,k+1);
+  gVector<T> c(1,m+1);
+  NfgIter iter(p_support);
 
-  minpay = MinPayoff(NF) - gNumber(1);
+  T minpay = MinPayoff(p_support.Game()) - gNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {
-      (*A)(i, j) = gNumber(minpay) - NF.Payoff(iter.GetOutcome(), 1);
+      A(i, j) = gNumber(minpay) - p_support.Game().Payoff(iter.GetOutcome(), 1);
       iter.Next(1);
     }
-    (*A)(i,m+1) = (T)1;
+    A(i,m+1) = (T)1;
     iter.Next(2);
   }
-  for (j = 1;j<=m;j++) (*A)(k+1,j)= (T)1;
-  (*A)(k+1,m+1) = (T)0;
+  for (j = 1;j<=m;j++)  {
+    A(k+1,j)= (T)1;
+  }
+  A(k+1,m+1) = (T)0;
 
-  (*b) = (T)0;
-  (*b)[k+1] = (T)1;
-  (*c) = (T)0;
-  (*c)[m+1] = (T)1;
-//  gout << "\nA = \n";
-//  A->Dump(gout);
-//  gout << "\nb = ";
-//  b->Dump(gout);
-//  gout << "\nc = ";
-//  c->Dump(gout);
+  b = (T)0;
+  b[k+1] = (T)1;
+  c = (T)0;
+  c[m+1] = (T)1;
+
+  LPSolve<T> LP(A,b,c,1,p_status);
+
+  if (!LP.IsAborted()) {
+    Add_BFS(p_support, LP, bfsList); 
+  }
+
+  gList<MixedSolution> solutions;
+  GetSolutions(p_support, bfsList, solutions, LP.Epsilon());
+  return solutions;
 }
 
-template <class T> int ZSumModule<T>::ZSum(gStatus &p_status, int /*dup*/)
+template <class T> int nfgLp<T>::Add_BFS(const NFSupport &p_support,
+					 /*const*/ LPSolve<T> &lp,
+					 gList<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
-  
-  if (NF.NumPlayers() != 2)   return 0;
-  if(!IsConstSum()) return 0;;
-  gWatch watch;
-  
-  List.Flush();
-  
-  Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,1,p_status);
-  eps = LP.Epsilon();
 
-
-  if(!LP.IsAborted())
-    Add_BFS(LP); 
-  
-  npivots = LP.NumPivots();
-  time = watch.Elapsed();
-  return List.Length();
-}
-
-template <class T> int ZSumModule<T>::Add_BFS( /*const*/ LPSolve<T> &lp)
-{
-  BFS<T> cbfs((T) 0);
-  //  T value;
-
-  if (params.stopAfter ==1)
-  {
-    lp.OptBFS(cbfs);
-    //    value=cbfs(NF.NumStrats(1)+1)+minpay;
-    cbfs.Remove(NF.NumStrats(1)+1);
-    cbfs.Remove(-NF.NumStrats(2)-1);
-  //  cbfs.Dump(gout);
-  //  gout << "\nvalue =" << value << "\n\n";
-    if (List.Contains(cbfs))  return 0;
-  //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
-  //  (*params.tracefile)  << "\nB = ";
-  //  B.Dump(*params.tracefile);
-  //  (*params.tracefile)  << "\ncbfs = ";
-  //  cbfs.Dump(*params.tracefile );
-    List.Append(cbfs);
-  }
-  else if (params.stopAfter == 0)
-  {
-    const gList<BFS <T> > bList = lp.GetAll();
-    
-    for (int k = 1; k <= bList.Length(); k++)
-    {
-      cbfs = bList[k];
-      //      value=cbfs(NF.NumStrats(1)+1)+minpay;
-      cbfs.Remove(NF.NumStrats(1)+1);
-      cbfs.Remove(-NF.NumStrats(2)-1);
-      if (List.Contains(cbfs))  return 0;
-      List.Append(cbfs);
-    }
-  }
-  else
-  {
-    const gList<BFS <T> > bList = lp.GetAll();
-    
-    for (int k = 1; k <= bList.Length() && k <= params.stopAfter ; k++)
-    {
-      cbfs = bList[k];
-      //      value=cbfs(NF.NumStrats(1)+1)+minpay;
-      cbfs.Remove(NF.NumStrats(1)+1);
-      cbfs.Remove(-NF.NumStrats(2)-1);
-      if (List.Contains(cbfs))  return 0;
-      List.Append(cbfs);
-    }
-  }
-  
-  
+  // LPSolve<T>::GetAll() does not currently work correctly; for now,
+  // LpSolve is restricted to returning only one equilibrium
+  lp.OptBFS(cbfs);
+  cbfs.Remove(p_support.Game().NumStrats(1)+1);
+  cbfs.Remove(-p_support.Game().NumStrats(2)-1);
+  if (p_list.Contains(cbfs))  return 0;
+  p_list.Append(cbfs);
   return 1;
 }
 
 template <class T>
-void ZSumModule<T>::GetSolutions(gList<MixedSolution > &solutions) const
+void nfgLp<T>::GetSolutions(const NFSupport &p_support,
+			    const gList<BFS<T> > &p_list,
+			    gList<MixedSolution > &solutions,
+			    const T &p_epsilon) const
 {
   int index;
-  int n1=support.NumStrats(1);
-  int n2=support.NumStrats(2);
+  int n1 = p_support.NumStrats(1);
+  int n2=p_support.NumStrats(2);
   solutions.Flush();
 
-  for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(support);
+  for (int i = 1; i <= p_list.Length(); i++)    {
+    MixedProfile<T> profile(p_support);
     int j;
     for (j = 1; j <= n1; j++) 
-      if (List[i].IsDefined(j))   
-	profile(1, j) = List[i](j);
+      if (p_list[i].IsDefined(j))   
+	profile(1, j) = p_list[i](j);
       else  profile(1, j) = (T) 0;
 
     for (j = 1; j <= n2; j++)
-      if (List[i].IsDefined(-j))
-	profile(2, j) = List[i](-j);
+      if (p_list[i].IsDefined(-j))
+	profile(2, j) = p_list[i](-j);
       else
 	profile(2, j) = (T) 0;
 
     index = solutions.Append(MixedSolution(profile, algorithmNfg_LP));
-    solutions[index].SetEpsilon(eps);
+    solutions[index].SetEpsilon(p_epsilon);
   }
-}
-
-template <class T> long ZSumModule<T>::NumPivots(void) const
-{
-  return npivots;
-}
-
-template <class T> double ZSumModule<T>::Time(void) const
-{
-  return time;
 }
 

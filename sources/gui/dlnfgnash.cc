@@ -17,6 +17,7 @@
 #include "nash/nfgpure.h"
 #include "nash/enum.h"
 #include "nash/lemke.h"
+#include "nash/nfgcsum.h"
 #include "nash/nliap.h"
 #include "nash/nfgalleq.h"
 #include "nash/nfgqre.h"
@@ -301,6 +302,88 @@ nfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
 			    0 : m_stopAfter->GetValue());
     algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
 			   m_maxDepth->GetValue() : 0);
+    return algorithm;
+  }
+}
+
+//========================================================================
+//                         class panelNfgLp
+//========================================================================
+
+class panelNfgLp : public panelNfgNashAlgorithm {
+private:
+  wxRadioBox *m_precision;
+  wxCheckBox *m_findAll;
+  wxSpinCtrl *m_stopAfter;
+
+  // Private event handlers
+  void OnFindAll(wxCommandEvent &);
+
+public:
+  panelNfgLp(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(panelNfgLp, panelNfgNashAlgorithm)
+  EVT_CHECKBOX(idCHECKBOX_FINDALL, panelNfgLp::OnFindAll)
+END_EVENT_TABLE()
+
+panelNfgLp::panelNfgLp(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString precisionChoices[] = { "Floating point", "Rational" };
+  m_precision = new wxRadioBox(this, -1, "Precision",
+			       wxDefaultPosition, wxDefaultSize,
+			       2, precisionChoices, 1, wxRA_SPECIFY_ROWS);
+  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+
+  // The "find all" feature of LpSolve currently does not work;
+  // therefore, the controls are disabled in this version
+  wxStaticBox *stopAfterBox = new wxStaticBox(this, wxID_STATIC,
+					      "Number to find");
+  wxStaticBoxSizer *stopAfterSizer = new wxStaticBoxSizer(stopAfterBox,
+							  wxHORIZONTAL);
+  m_findAll = new wxCheckBox(this, idCHECKBOX_FINDALL, "Find all");
+  m_findAll->SetValue(false);
+  m_findAll->Enable(false);
+  stopAfterSizer->Add(m_findAll, 0, wxALL | wxCENTER, 5);
+  stopAfterSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop after"),
+		      0, wxALL | wxCENTER, 5);
+  m_stopAfter = new wxSpinCtrl(this, -1, "1",
+			       wxDefaultPosition, wxDefaultSize,
+			       wxSP_ARROW_KEYS, 1, 10000);
+  m_stopAfter->Enable(false);
+  stopAfterSizer->Add(m_stopAfter, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(stopAfterSizer, 0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+void panelNfgLp::OnFindAll(wxCommandEvent &)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
+
+nfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
+{
+  if (m_precision->GetSelection() == 0) {
+    nfgLp<double> *algorithm = new nfgLp<double>;
+    return algorithm;
+  }
+  else {
+    nfgLp<gRational> *algorithm = new nfgLp<gRational>;
     return algorithm;
   }
 }
@@ -696,7 +779,8 @@ void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
     m_algorithms.Define(id, new panelNfgLcp(this));
 
     if (IsConstSum(p_nfg)) {
-      m_algorithmTree->AppendItem(custom, "LpSolve");
+      id = m_algorithmTree->AppendItem(custom, "LpSolve");
+      m_algorithms.Define(id, new panelNfgLp(this));
     }
   }
 

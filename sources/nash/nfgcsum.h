@@ -1,24 +1,34 @@
 //
-// FILE: nfgcsum.h -- Interface to Constant Sum Game Solution Solver
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface of algorithm to compute mixed strategy equilibria
+// of constant sum normal form games via linear programming
 //
 
 #ifndef NFGCSUM_H
 #define NFGCSUM_H
 
-#include "base/base.h"
-#include "game/nfg.h"
-#include "algutils.h"
-#include "mixedsol.h"
+#include "nfgalgorithm.h"
+#include "numerical/lpsolve.h"
 
-class ZSumParams : public AlgParams    {
+template <class T> class nfgLp : public nfgNashAlgorithm {
+private:
+  int Add_BFS(const NFSupport &, /*const*/ LPSolve<T> &B,
+	      gList<BFS<T> > &);
+  void GetSolutions(const NFSupport &, const gList<BFS<T> > &,
+		    gList<MixedSolution > &,
+		    const T &) const;
+
 public:
-  ZSumParams(void);
-};
+  nfgLp(void);
+  virtual ~nfgLp() { }
 
-int ZSum(const NFSupport &, const ZSumParams &,
-	 gList<MixedSolution> &, gStatus &, int &npivots, double &time);
+  gText GetAlgorithm(void) const { return "Lp"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
 
 #endif    // NFGCSUM_H
 
