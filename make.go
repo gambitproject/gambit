@@ -100,9 +100,9 @@ EGUI_OBJECTS = extshow.o treewin.o btreewn.o btreewn1.o treedraw.o \
 NGUI_SOURCES = normshow.cc bnormshw.cc normsoln.cc msolnsf.cc
 NGUI_OBJECTS = normshow.o bnormshw.o normsoln.o msolnsf.o
 # Gui stuff used in both the normal and extensive forms
-BGUI_SOURCES = wxmisc.cc wximpl.cc gambdraw.cc wxio.cc spread.cc spreadim.cc \
+BGUI_SOURCES = wxmisc.cc gambdraw.cc wxio.cc spread.cc spreadim.cc \
               gambit.cc accels.cc algdlgs.cc wxstatus.cc efgnfgi.cc 
-BGUI_OBJECTS = wxmisc.o wximpl.o gambdraw.o wxio.o spread.o spreadim.o \
+BGUI_OBJECTS = wxmisc.o gambdraw.o wxio.o spread.o spreadim.o \
               gambit.o accels.o algdlgs.o wxstatus.o efgnfgi.o 
 
 # All the code used in the GCL target
