@@ -84,9 +84,12 @@ template class gBlock<Infoset *>;
 template class gArray<Node *>;
 template class gBlock<Node *>;
 
+template class gArray<Action const *>;
+template class gBlock<Action const *>;
 template class gArray<Action *>;
 template class gBlock<Action *>;
 
+template class gArray<gArray<Action const *> *>;
 template class gArray<gArray<Action *> *>;
 
 template class gArray<EFOutcome *>;

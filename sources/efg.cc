@@ -154,13 +154,14 @@ Node::~Node()
   for (int i = children.Length(); i; delete children[i--]);
 }
 
+
 int Node::NumberInInfoset(void) const
 {
   for (int i = 1; i <= GetInfoset()->NumMembers(); i++)
     if (GetInfoset()->GetMember(i) == this)
       return i;
   //  This could be speeded up by adding a member to Node to keep track of this
-  throw gclRuntimeError("NumberInInfoset() failed.\n");
+  throw Efg::Exception();
 }
 
 
