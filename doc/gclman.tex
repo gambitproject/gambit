@@ -4194,10 +4194,10 @@ the stopwatch was running.
 \item\lex{ElimDom}
 \protect \large \begin{verbatim}
 ElimDom[support->NFSUPPORT, {strong->False}, 
-        {mixed->False}, {time<->0.000000}, 
+        {mixed->False}, {precision->Rational}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 ElimDom[support->EFSUPPORT, {strong->False}, 
-        {mixed->False}, {time<->0.000000}, 
+        {mixed->False}, {precision->Rational}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
@@ -4215,7 +4215,11 @@ are eliminated.  If this is specified \verb+True+, elimination is based
 on strict dominance.
 \item [mixed:] By default, elimination is done in pure strategies or
 actions.  If this is specified \verb+True+, elimination is done by
-examining mixtures over other strategies or actions.
+examining mixtures over other strategies or actions.  Note that mixed 
+elimination is only implemented for normal form games.  
+\item [precision:] Default precision is Rational.  Note that the precision
+parameter is only applicable for mixed domination.  Pure strategy
+domination always uses Rational precision.
 \item [time:] Returns the time consumed by the elimination process.
 \item [traceFile:] A file containing a log of more detailed information
 on the elimination process.  By default, no logging is done.
@@ -7538,18 +7542,18 @@ Runs a child process to display the game \verb+n+ in the Gambit GUI.
 \item\lex{ElimAllDom}
 \protect \large \begin{verbatim}
 ElimAllDom[s->NFSUPPORT, {strong->False}, {mixed->False}, 
-           {time<->0.000000}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: NFSUPPORT 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 ElimAllDom[s->EFSUPPORT, {strong->False}, {mixed->False}, 
-           {time<->0.000000}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: EFSUPPORT 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
 Successively eliminates dominated strategies in \verb+s+. See
 \verb+ElimDom+ for description of parameters.  
 \begin{verbatim}
-  While[s!=(ss:=ElimDom[s,strong,mixed,time,traceFile,traceLevel]),
+  While[s!=(ss:=ElimDom[s,strong,mixed,precision,time,traceFile,traceLevel]),
     s:=ss
   ];
   s;
@@ -7559,38 +7563,38 @@ Successively eliminates dominated strategies in \verb+s+. See
 \item\lex{ElimAllDom}
 \protect \large \begin{verbatim}
 ElimAllDom[nfg->NFG, {strong->False}, {mixed->False}, 
-           {time<->0.000000}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: NFSUPPORT 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
 Successively eliminates dominated strategies in \verb+nfg+.  See
 \verb+ElimDom+ for description of parameters.  
 \begin{verbatim}
-  ElimAllDom[Support[nfg],strong,mixed,time,traceFile,traceLevel];
+  ElimAllDom[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
 \item\lex{ElimAllDom}
 \protect \large \begin{verbatim}
 ElimAllDom[efg->EFG, {strong->False}, {mixed->False}, 
-           {time<->0.000000}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: EFSUPPORT 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
 Successively eliminates dominated strategies in \verb+nfg+. See
 \verb+ElimDom+ for description of parameters.  
 \begin{verbatim}
-  ElimAllDom[Support[efg],strong,mixed,time,traceFile,traceLevel];
+  ElimAllDom[Support[efg],strong,mixed,precision,time,traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
 \item\lex{ElimDom}
 \protect \large \begin{verbatim}
 ElimDom[nfg->NFG, {strong->False}, {mixed->False}, 
-        {time<->0.000000}, {traceFile<->(Output)}, 
-        {traceLevel->0}] =: NFSUPPORT 
+        {precision->Rational}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7598,15 +7602,15 @@ A version of \verb+ElimDom+ that takes a normal form game instead
 of a support.  See the built-in function, \verb+ElimDom+ for a
 description of the parameters.
 \begin{verbatim}
-  ElimDom[Support[nfg],strong,mixed,time,traceFile,traceLevel]
+  ElimDom[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel]
 \end{verbatim} 
 \ed
 
 \item\lex{ElimDom}
 \protect \large \begin{verbatim}
 ElimDom[efg->EFG, {strong->False}, {mixed->False}, 
-        {time<->0.000000}, {traceFile<->(Output)}, 
-        {traceLevel->0}] =: EFSUPPORT 
+        {precision->Rational}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7614,7 +7618,7 @@ A version of \verb+ElimDom+ that takes an extensive form game instead
 of a support.  See the built-in function, \verb+ElimDom+ for a
 description of the parameters.
 \begin{verbatim}
-  ElimDom[Support[efg],strong,mixed,time,traceFile,traceLevel]
+  ElimDom[Support[efg],strong,mixed,precision,time,traceFile,traceLevel]
 \end{verbatim} 
 \ed
 
