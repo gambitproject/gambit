@@ -2570,50 +2570,67 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 
   type_found = true;
 
-  if(p1->Spec().Type==porBOOL)   
+  if(p1->Spec().Type & porBOOL)   
     b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
-  else if(p1->Spec().Type==porINTEGER)   
+  else if(p1->Spec().Type & porINTEGER)   
     b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
-  else if(p1->Spec().Type==porFLOAT)
+  else if(p1->Spec().Type & porFLOAT)
     b = (((FloatPortion*) p1)->Value() == ((FloatPortion*) p2)->Value());
-  else if(p1->Spec().Type==porRATIONAL)
+  else if(p1->Spec().Type & porRATIONAL)
     b = (((RationalPortion*) p1)->Value()==((RationalPortion*) p2)->Value());
-  else if(p1->Spec().Type==porTEXT)
+  else if(p1->Spec().Type & porTEXT)
       b = (((TextPortion*) p1)->Value() == ((TextPortion*) p2)->Value());
   
-  else if(p1->Spec().Type==porNODE)
+  else if(p1->Spec().Type & porNODE)
     b = (((NodePortion*) p1)->Value() == ((NodePortion*) p2)->Value());
-  else if(p1->Spec().Type==porACTION)
+  else if(p1->Spec().Type & porACTION)
       b = (((ActionPortion*) p1)->Value() == ((ActionPortion*) p2)->Value());
-  else if(p1->Spec().Type==porINFOSET)
+  else if(p1->Spec().Type & porINFOSET)
     b = (((InfosetPortion*) p1)->Value() == ((InfosetPortion*) p2)->Value());
-  else if(p1->Spec().Type==porOUTCOME)
+  else if(p1->Spec().Type & porOUTCOME)
     b = (((OutcomePortion*) p1)->Value() == ((OutcomePortion*) p2)->Value());
-  else if(p1->Spec().Type==porNFPLAYER)
+  else if(p1->Spec().Type & porNFPLAYER)
     b = (((NfPlayerPortion*) p1)->Value() == ((NfPlayerPortion*) p2)->Value());
-  else if(p1->Spec().Type==porSTRATEGY)
+  else if(p1->Spec().Type & porEFPLAYER)
+    b = (((EfPlayerPortion*) p1)->Value() == ((EfPlayerPortion*) p2)->Value());
+  else if(p1->Spec().Type & porSTRATEGY)
     b = (((StrategyPortion*) p1)->Value() == ((StrategyPortion*) p2)->Value());
-  else if(p1->Spec().Type==porNFSUPPORT)
+  else if(p1->Spec().Type & porNFSUPPORT)
     b = (*(((NfSupportPortion*) p1)->Value()) ==
 	 *(((NfSupportPortion*) p2)->Value()));
-  else if(p1->Spec().Type==porEFSUPPORT)
+  else if(p1->Spec().Type & porEFSUPPORT)
     b = (*(((EfSupportPortion*) p1)->Value()) ==
 	 *(((EfSupportPortion*) p2)->Value()));
   
-  else if(p1->Spec().Type==porMIXED_FLOAT)
+  else if(p1->Spec().Type & porMIXED_FLOAT)
     b = ((*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) == 
 	 (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value())));
-  else if(p1->Spec().Type==porMIXED_RATIONAL)
+  else if(p1->Spec().Type & porMIXED_RATIONAL)
     b = ((*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) == 
 	 (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value())));
-  else if(p1->Spec().Type==porBEHAV_FLOAT)
+  else if(p1->Spec().Type & porBEHAV_FLOAT)
     b = ((*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) == 
 	 (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value())));
-  else if(p1->Spec().Type==porBEHAV_RATIONAL)
+  else if(p1->Spec().Type & porBEHAV_RATIONAL)
     b = ((*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) == 
 	 (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value())));
+
+  else if(p1->Spec().Type & porNFG)
+    b = false;
+  else if(p1->Spec().Type & porEFG)
+    b = false;
+  else if(p1->Spec().Type & porINPUT)
+    b = false;
+  else if(p1->Spec().Type & porOUTPUT)
+    b = false;
+  else if(p1->Spec().Type & porNULL)
+    b = false;
+
   else
+  {
     type_found = false;
+    assert( 0 );
+  }
   return b;
 }
 
