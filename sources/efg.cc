@@ -16,6 +16,7 @@
 #include "efg.h"
 #include "efgutils.h"
 #include "fullefgoutcome.h"
+#include "efstrat.h"
 
 //========================================================================
 //             class efgOutcome: Generic outcome handle class

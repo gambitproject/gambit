@@ -10,6 +10,7 @@
 #include "base/base.h"
 
 #include "efg.h"
+#include "efstrat.h"
 
 class EfgIter;
 

@@ -6,6 +6,7 @@
 
 #include "base/base.h"
 #include "efg.h"
+#include "efstrat.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"

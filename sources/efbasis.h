@@ -8,7 +8,9 @@
 #define EFBASIS_H
 
 #include "base/base.h"
+#include "math/gdpvect.h"
 #include "efg.h"
+#include "efstrat.h"
 
 class EFNodeSet;
 

@@ -95,7 +95,10 @@ protected:
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
   void Payoff(Node *, T, int, T &) const;
-  T Payoff(FullEfg::Outcome *, int pl) const;
+  // The first parameter of the next function is really 
+  // FullEfg::Outcome * ; this hack is for BCC 5.5 to be happy
+  // with it for now.
+  T Payoff(void *, int pl) const;
   
   void ComputeSolutionDataPass2(const Node *node);
   void ComputeSolutionDataPass1(const Node *node);

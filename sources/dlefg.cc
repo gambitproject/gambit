@@ -15,6 +15,8 @@
 #include "efgconst.h"
 
 #include "efg.h"
+#include "efstrat.h"
+
 #include "dlefgplayer.h"
 #include "dlmoveadd.h"
 #include "dlnodedelete.h"

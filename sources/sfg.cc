@@ -10,6 +10,7 @@
 #include "gnarray.imp"
 #include "base/grarray.imp"
 #include "base/glist.imp"
+#include "behav.h"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators

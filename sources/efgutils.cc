@@ -5,6 +5,7 @@
 //
 
 #include "efgutils.h"
+#include "efstrat.h"
 
 // recursive functions
 

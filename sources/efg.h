@@ -148,6 +148,9 @@ friend class EfgFileReader;
 friend class EfgFile;
 friend class Nfg;
 friend class Node;
+friend class BehavProfile<double>;
+friend class BehavProfile<gRational>;
+friend class BehavProfile<gNumber>;
 
 protected:
   class Outcome; 
@@ -343,7 +346,7 @@ public:
   void UnregisterClient(EfgClient *);
 };
 
-#include "behav.h"
+//#include "behav.h"
 
 #include "efplayer.h"
 #include "infoset.h"

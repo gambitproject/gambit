@@ -6,6 +6,7 @@
 
 #include "efg.h"
 #include "efplayer.h"
+#include "efstrat.h"
 
 #include "base/glist.imp"
 
