@@ -377,7 +377,11 @@ void NfgOutcomeDialogC::CheckOutcome(int outc_num)
     {
         PayoffPos(outc_num, j, &prow, &pcol);
         gNumber payoff;
-        FromText(GetCell(prow, pcol), payoff);
+        // Get text value and remove color prefix if any.
+        gText numstr = GetCell(prow, pcol);
+        int lastbrace = numstr.LastOccur('}');
+        numstr = numstr.Right(numstr.Length() - lastbrace);
+        FromText(numstr, payoff);
 
         if (nf.Payoff(tmp, j) != payoff)
         {

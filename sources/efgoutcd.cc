@@ -342,7 +342,7 @@ void EfgOutcomeDialogC::CheckOutcome(int outc_num)
     bool outcomes_changed = false;
     EFOutcome *tmp;
 
-    // if a new outcome has created, append it to the list of outcomes
+    // if a new outcome has been created, append it to the list of outcomes
     if (outc_num > ef.NumOutcomes())
     {
         tmp = ef.NewOutcome();
@@ -362,7 +362,11 @@ void EfgOutcomeDialogC::CheckOutcome(int outc_num)
     {
         PayoffPos(outc_num, j, &prow, &pcol);
         gNumber payoff;
-        FromText(GetCell(prow, pcol), payoff);
+        // Get text value and remove color prefix if any.
+        gText numstr = GetCell(prow, pcol);
+        int lastbrace = numstr.LastOccur('}');
+        numstr = numstr.Right(numstr.Length() - lastbrace);
+        FromText(numstr, payoff);
 
         if (ef.Payoff(tmp, j) != payoff)
         {
