@@ -24,11 +24,7 @@
 #include "simpdiv.h"
 
 SimpdivParams::SimpdivParams(void) 
-  : number(1), plev(0), ndivs(20), leash(0), output(gnull)
-{ }
-
-SimpdivParams::SimpdivParams(gOutput &f)
-  : number(1), plev(0), ndivs(20), leash(0), output(f)
+  : number(1), plev(0), ndivs(20), leash(0), output(&gnull)
 { }
 
 //-------------------------------------------------------------------------
@@ -81,14 +77,14 @@ template <class T> T SimpdivModule<T>::simplex(void)
   labels(ibar,2)=h;
 //  if(nits>=MAXIT)goto end;
   if(params.plev>=4) {
-    params.output << "\n Step 1, j = " << j << " h= " << h; 
-    params.output << " maxz = " << maxz; 
+    *params.output << "\n Step 1, j = " << j << " h= " << h; 
+    *params.output << " maxz = " << maxz; 
   }
   
  case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
-      if(params.plev>=4) params.output << " Case 1a "; 
+      if(params.plev>=4) *params.output << " Case 1a "; 
       for(hh=1,tot=0;hh<=nstrats[j];hh++)
 	if(TT(j,hh)==1 || U(j,hh)==1)tot++;
       if(tot==nstrats[j]-1)goto end;
@@ -100,7 +96,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1b */
   else if(TT(j,h))
     {
-      if(params.plev>=4) params.output << " Case 1b "; 
+      if(params.plev>=4) *params.output << " Case 1b "; 
       i=1;
       while(labels(i,1)!=j || labels(i,2)!=h || i==ibar) i++;
       goto step3;
@@ -108,7 +104,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case1c */
   else if(U(j,h))
     {
-      if(params.plev>=4) params.output << " Case 1c "; 
+      if(params.plev>=4) *params.output << " Case 1c "; 
       k=h;
       while(U(j,k)){k++;if(k>nstrats[j])k=1;}
       if(TT(j,k)==0)i=t+1;
@@ -120,7 +116,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
     }
   
  step2:;
-  if(params.plev>=4) params.output << "  Step 2 "; 
+  if(params.plev>=4) *params.output << "  Step 2 "; 
   getY(y,i);
   pi.RotateDown(i,t+1);
   pi(i,1)=j;
@@ -134,7 +130,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   goto step1;
   
  step3:;
-  if(params.plev>=4) params.output << "  Step 3 "; 
+  if(params.plev>=4) *params.output << "  Step 3 "; 
   if(i==t+1)ii=t;
   else ii=i;
   j=pi(ii,1);
@@ -149,7 +145,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   
       /* case3a */
   if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.plev>=4) params.output << " Case 3a "; 
+    if(params.plev>=4) *params.output << " Case 3a "; 
     for(hh=1,tot=0;hh<=nstrats[j];hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
     if(tot==nstrats[j]-1) {
@@ -166,12 +162,12 @@ template <class T> T SimpdivModule<T>::simplex(void)
       /* case3b */
   else if(i>=2 && i<=t &&
 	  (y(j,k)<=(T)(0) || (v(j,k)-y(j,k))>=((T)(leash))*d)) {
-    if(params.plev>=4) params.output << " Case 3b "; 
+    if(params.plev>=4) *params.output << " Case 3b "; 
     goto step4;
   }
       /* case3c */
   else if(i==t+1 && ab(j,kk)==(T)(0)) {
-    if(params.plev>=4) params.output << " Case 3c "; 
+    if(params.plev>=4) *params.output << " Case 3c "; 
     if(y(j,h)<=(T)(0) || (v(j,h)-y(j,h))>=((T)(leash))*d)goto step4;
     else {
       k=0;
@@ -200,7 +196,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
     }
   goto step1;
  step4:;
-  if(params.plev>=4) params.output << "  Step 4 "; 
+  if(params.plev>=4) *params.output << "  Step 4 "; 
   getY(y,1);
   j=pi(i-1,1);
   h=pi(i-1,2);
@@ -214,7 +210,7 @@ template <class T> T SimpdivModule<T>::simplex(void)
   i=ii;
   goto step3;
  step5:;
-  if(params.plev>=4) params.output << "  Step 5 "; 
+  if(params.plev>=4) *params.output << "  Step 5 "; 
   k=kk;
 
   labels.RotateDown(1,t+1);
@@ -241,10 +237,10 @@ template <class T> T SimpdivModule<T>::simplex(void)
   maxz=bestz;
   nevals+=nits;
   if(params.plev >= 2) { 
-    params.output << "\ngrid = " << d << " maxz = " << maxz;
+    *params.output << "\ngrid = " << d << " maxz = " << maxz;
     if(params.plev>= 3) {
-      params.output << " j = " << j << " h = " << h;  
-      params.output << " nits = " <<nits;
+      *params.output << " j = " << j << " h = " << h;  
+      *params.output << " nits = " <<nits;
     }
   } 
   for(i=1;i<=nplayers;i++)
@@ -406,15 +402,15 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
   mingrid=(T)(2);
   for(i=1;i<=params.ndivs;i++)mingrid=mingrid*(T)(2);
   mingrid = ((T)(1))/mingrid;
-//  params.output << "\nleash = " << leash << " ndivs = " << ndivs;
-//  params.output << " mingrid = " << mingrid;
+//  *params.output << "\nleash = " << leash << " ndivs = " << ndivs;
+//  *params.output << " mingrid = " << mingrid;
   
   nplayers=rep.NumPlayers();
   
   y = (T)(0);
-//  params.output << "\nnplayers =" << nplayers;
-//  params.output << "\nnstrats = " << nstrats;
-//  params.output << "\ny = " << y;
+//  *params.output << "\nnplayers =" << nplayers;
+//  *params.output << "\nnstrats = " << nstrats;
+//  *params.output << "\ny = " << y;
   
   solns.Flush();
   for(soln=0;soln<params.number;soln++)
@@ -423,7 +419,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
       d=(T) 1.0 / (T) k;
       for(i=1;i<=nplayers;i++)
 	{
-//	  params.output << "\n i = " << i;
+//	  *params.output << "\n i = " << i;
 	  y(i,1)=(T)(1);
 	  for(j=1;j<=nstrats[i];j++)
 	    if(j>1)y(i,j)=(T)(0);
@@ -441,8 +437,8 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
 //	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
 	  if(maxz<(T)(TOL))qf=1;
 	}
-      params.output << "\nSimpDiv solution # " << soln+1 << " : " << y;
-      params.output << " maxz = " << maxz; 
+      *params.output << "\nSimpDiv solution # " << soln+1 << " : " << y;
+      *params.output << " maxz = " << maxz; 
       solns.Append(y);
     }
 }

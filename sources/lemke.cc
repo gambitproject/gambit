@@ -20,7 +20,7 @@
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(void) 
-  : dup_strat(0), plev(0), nequilib(0), outfile(&gnull)
+  : dup_strat(0), plev(0), nequilib(0), output(&gnull)
 { }
 
 //---------------------------------------------------------------------------
@@ -435,14 +435,14 @@ LemkeSolver<T>::LemkeSolver(const NormalForm<T> &N, const LemkeParams &p)
 
 template <class T> int LemkeSolver<T>::Lemke(void)
 {
-  if (nf.NumPlayers() != 2 || !params.outfile)   return 0;
+  if (nf.NumPlayers() != 2 || !params.output)   return 0;
 
   if (params.dup_strat < 0 ||
       params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))   return 0;
   
   gWatch watch;
 
-  LemkeTableau<T> LT(nf, *params.outfile, params.plev);
+  LemkeTableau<T> LT(nf, *params.output, params.plev);
   LT.Lemke(params.dup_strat);
 
   time = watch.Elapsed();

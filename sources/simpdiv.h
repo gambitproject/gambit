@@ -14,10 +14,9 @@
 class SimpdivParams     {
   public:
     int plev, number, ndivs, leash;
-    gOutput &output;
+    gOutput *output;
     
     SimpdivParams(void);
-    SimpdivParams(gOutput &);
 };
 
 template <class T> class SimpdivModule  {

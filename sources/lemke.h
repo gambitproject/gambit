@@ -14,7 +14,7 @@
 class LemkeParams     {
   public:
     int dup_strat, plev, nequilib, maxdepth;
-    gOutput *outfile;
+    gOutput *output;
     
     LemkeParams(void);
 };
