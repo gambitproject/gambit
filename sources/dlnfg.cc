@@ -257,13 +257,10 @@ dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
 				  251, 12, 174, 58, 0);
 
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "Ok",
-				    13, 162, -1, -1, 0);
+				    160, 162, -1, -1, 0);
   okButton->SetClientData((char *) this);
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel", 71, 163, -1, -1, 0);
-  cancelButton->SetClientData((char *) this);
   wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help",
-				      342, 164, -1, -1, 0);
+				      220, 162, -1, -1, 0);
   helpButton->SetClientData((char *) this);
 
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
@@ -312,19 +309,11 @@ void dialogStrategies::OnOk(void)
     m_gameChanged = true;
   }
 
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogStrategies::OnCancel(void)
-{
-  m_completed = wxCANCEL;
   Show(FALSE);
 }
 
 Bool dialogStrategies::OnClose(void)
 {
-  m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
 }
@@ -350,11 +339,6 @@ void dialogStrategies::CallbackStrategy(wxListBox &p_object,
 void dialogStrategies::CallbackOk(wxButton &p_object, wxCommandEvent &)
 {
   ((dialogStrategies *) p_object.GetClientData())->OnOk();
-}
-
-void dialogStrategies::CallbackCancel(wxButton &p_object, wxCommandEvent &)
-{
-  ((dialogStrategies *) p_object.GetClientData())->OnCancel();
 }
 
 void dialogStrategies::CallbackHelp(wxButton &p_object, wxCommandEvent &)
