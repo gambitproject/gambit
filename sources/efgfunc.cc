@@ -1,7 +1,7 @@
 //
 // FILE: efgfunc.cc -- Extensive form editing builtins
 //
-// @(#)efgfunc.cc	2.28 02/11/98
+// $Id$
 //
 
 
@@ -30,6 +30,26 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 
 extern GSM *_gsm;
+
+//------------
+// ActionNumber
+//------------
+
+static Portion *GSM_ActionNumber(Portion **param)
+{
+  Action *a = ((ActionPortion *) param[0])->Value();
+  EFSupport *support = ((EfSupportPortion *) param[1])->Value();
+
+  return new IntPortion(support->Find(a));
+}
+
+static Portion *GSM_BasisActionNumber(Portion **param)
+{
+  Action *a = ((ActionPortion *) param[0])->Value();
+  EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
+
+  return new IntPortion(basis->EFSupport::Find(a));
+}
 
 //-------------
 // Actions
@@ -92,6 +112,14 @@ static Portion *GSM_AddBasisAction(Portion **param)
 //-------------
 // Nodes
 //-------------
+
+static Portion *GSM_BasisNodeNumber(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
+
+  return new IntPortion(basis->Find(n));
+}
 
 static Portion *GSM_BasisNodes(Portion **param)
 {
@@ -1096,6 +1124,10 @@ void Init_efgfunc(GSM *gsm)
  	GSM_Actions },
       { "Actions[infoset->INFOSET*, basis->EFBASIS] =: LIST(ACTION)",
  	GSM_BasisActions },
+      { "ActionNumber[action->ACTION, sup->EFSUPPORT] =: INTEGER", 
+	GSM_ActionNumber },
+      { "ActionNumber[action->ACTION, basis->EFBASIS] =: INTEGER", 
+	GSM_BasisActionNumber },
       { "AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT",
 	GSM_AddAction },
       { "AddAction[basis->EFBASIS, action->ACTION] =: EFBASIS",
@@ -1158,6 +1190,8 @@ void Init_efgfunc(GSM *gsm)
       { "Nodes[efg->EFG] =: LIST(NODE)", GSM_Nodes },
       { "Nodes[infoset->INFOSET*, basis->EFBASIS] =: LIST(NODE)",
  	GSM_BasisNodes },
+      { "NodeNumber[node->NODE, basis->EFBASIS] =: INTEGER", 
+	GSM_BasisNodeNumber },
       { "NthChild[node->NODE, n->INTEGER] =: NODE", GSM_NthChild },
       { "Outcome[node->NODE*] =: EFOUTCOME", GSM_Outcome },
       { "Outcomes[efg->EFG] =: LIST(EFOUTCOME)", GSM_Outcomes },
