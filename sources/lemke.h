@@ -18,7 +18,7 @@
 class LemkeParams     {
   public:
     int dup_strat, trace, stopAfter, maxdepth;
-    gOutput *output;
+    gOutput *tracefile;
     gStatus &status;
     
     LemkeParams(gStatus &status_=gstatus);

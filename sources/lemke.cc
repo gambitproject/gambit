@@ -23,7 +23,7 @@ template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &);
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(gStatus &status_) 
-  : dup_strat(0), trace(0), stopAfter(0), output(&gnull), status(status_)
+  : dup_strat(0), trace(0), stopAfter(0), tracefile(&gnull), status(status_)
 { }
 
 //---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   BFS<T> cbfs((T) 0);
   int i;
 
-  if (NF.NumPlayers() != 2 || !params.output)   return 0;
+  if (NF.NumPlayers() != 2 || !params.tracefile)   return 0;
 
   gWatch watch;
 
@@ -62,13 +62,13 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
   }
   if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
-      List[i].Dump(*params.output);
-      (*params.output) << "\n";
+      List[i].Dump(*params.tracefile);
+      (*params.tracefile) << "\n";
     }
     
   }
 //  if(params.trace >= 1)
-//    (*params.output) << "\nN Pivots = " << npivots << "\n";
+//    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
   
   AddSolutions();
   time = watch.Elapsed();
@@ -90,11 +90,11 @@ template <class T> int LemkeModule<T>::Add_BFS(LHTableau<T> &B)
   cbfs = B.GetBFS();
   if (List.Contains(cbfs))  return 0;
   if(params.trace >=2) {
-    (*params.output) << "\nFound CBFS";
-    (*params.output)  << "\nB = ";
-    B.Dump(*params.output);
-    (*params.output)  << "\ncbfs = ";
-    cbfs.Dump(*params.output );
+    (*params.tracefile) << "\nFound CBFS";
+    (*params.tracefile)  << "\nB = ";
+    B.Dump(*params.tracefile);
+    (*params.tracefile)  << "\ncbfs = ";
+    cbfs.Dump(*params.tracefile );
   }
   List.Append(cbfs);
   return 1;

@@ -803,7 +803,7 @@ Portion *GSM_LemkeNfgFloat(Portion **param)
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   
-  LP.output = &((OutputPortion *) param[4])->Value();
+  LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
 
   NFSupport S(N);
@@ -826,7 +826,7 @@ Portion *GSM_LemkeNfgRational(Portion **param)
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
 
-  LP.output = &((OutputPortion *) param[4])->Value();
+  LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
 
   NFSupport S(N);
@@ -851,7 +851,7 @@ Portion *GSM_LemkeNfgSupport(Portion **param)
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
 
-  LP.output = &((OutputPortion *) param[4])->Value();
+  LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
 
   switch( N->Type() )
@@ -896,7 +896,7 @@ Portion *GSM_LcpSolveEfgFloat(Portion **param)
     LemkeParams LP;
     LP.stopAfter = ((IntPortion *) param[2])->Value();
 
-    LP.output = &((OutputPortion *) param[5])->Value();
+    LP.tracefile = &((OutputPortion *) param[5])->Value();
     LP.trace = ((IntPortion *) param[6])->Value();
 
     LemkeBySubgame<double> LM(E, LP);
@@ -942,7 +942,7 @@ Portion *GSM_LcpSolveEfgRational(Portion **param)
     LemkeParams LP;
     LP.stopAfter = ((IntPortion *) param[2])->Value();
 
-    LP.output = &((OutputPortion *) param[5])->Value();
+    LP.tracefile = &((OutputPortion *) param[5])->Value();
     LP.trace = ((IntPortion *) param[6])->Value();
 
     LemkeBySubgame<gRational> LM(E, LP);
