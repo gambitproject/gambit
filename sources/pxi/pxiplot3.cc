@@ -33,22 +33,8 @@ const double F2OR3 = 1.1547005;  // 2/sqrt(3)
 const double F1OR3 = 0.5773503;  // 1/sqrt(3)
 
 
-//***************************** PLOT LABELS ********************************
-void PxiPlot3::PlotLabels(wxDC &dc, int ch,int cw)
-{
-  dc.SetTextForeground(*wxBLACK);
-  //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(m_drawSettings.GetLabelFont());
-  for (int i=1;i<=labels.Length();i++) {
-    wxCoord tw,th;
-    dc.GetTextExtent(labels[i].label,&tw,&th);
-    dc.DrawText(labels[i].label,(int) (labels[i].x*cw-tw/2),
-		(int) (labels[i].y*ch-th/2));
-  }
-}
-
 //*********************************** CALC X 3 *****************************
-double PxiPlot3::CalcX_3(double p1,double p2,int x0, int y0, int cw,int ch, const PlotInfo &thisplot)
+double PxiPlot3::CalcX_3(double p1,double p2,int x0, int y0, int cw,int ch)
 {
   const double PXI_3_HEIGHT = cw*TAN60/2;
   double xx= x0+cw;
@@ -70,7 +56,7 @@ double PxiPlot3::CalcY_3(double p1,int x0, int y0, int cw,int ch)
 // Draws a little # or a cirlce corresponding to the point # in the experimental
 // data overlay
 
-void PxiPlot3::DrawExpPoint_3(wxDC &dc, const PlotInfo &thisplot,
+void PxiPlot3::DrawExpPoint_3(wxDC &dc, 
 			      double p_lambda, int iset, int st1, int st2,
 			      int x0, int y0, int cw, int ch)
 {
@@ -81,15 +67,15 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc, const PlotInfo &thisplot,
 			 x0, y0, cw, ch);
       double x = CalcX_3(m_expData.GetDataPoint(points[i], iset, st1),
 			 m_expData.GetDataPoint(points[i], iset, st2),
-			 x0, y0, ch, cw, thisplot);
-      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
-	int ts = m_drawSettings.GetTokenSize();
+			 x0, y0, ch, cw);
+      if (m_overlayProp.m_token) {
+	int ts = m_overlayProp.m_tokenSize;
 	dc.SetBrush(m_drawSettings.GetDataBrush());
 	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
       }
       else {
 	wxString tmp = wxString::Format("%d", points[i]);
-	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetFont(m_overlayProp.m_font);
 	dc.SetTextForeground(*wxBLACK);
 	wxCoord tw,th;
 	dc.GetTextExtent(tmp,&tw,&th);
@@ -103,7 +89,7 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc, const PlotInfo &thisplot,
 /**************************** PLOT DATA 3 *********************************/
 // Note Top->Left, Bottom->Right
 
-void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int cw,int ch, 
+void PxiPlot3::PlotData_3(wxDC& dc, int x0, int y0, int cw,int ch, 
 			     const FileHeader &f_header, int level)
 {
   double x,y;
@@ -117,8 +103,7 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
   EquTracker equs;                // init the EquTracker class
   
   if (true) {
-    wxString title;
-    title.Printf("Plot %d",thisplot.GetPlotNumber());
+    wxString title = wxString::Format("Plot %d", m_page);
     wxCoord tw,th;
     dc.GetTextExtent(title,&tw,&th);
     dc.DrawText(title, x0+cw/2-tw/2, y0-ch-th);
@@ -140,18 +125,18 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
       int st1=0,st2=0;	// which two strategies to plot
       int i=1;
       while (!st1) {
-	if (thisplot.GetStrategyShow(m_page, i)) {
+	if (IsStrategyShown(m_page, i)) {
 	  st1=i;
 	}
 	i++;
       }
       while (!st2) {
-	if (thisplot.GetStrategyShow(m_page, i)) {
+	if (IsStrategyShown(m_page, i)) {
 	  st2=i;
 	}
 	i++;
       }
-      x=CalcX_3(probs[m_page][st1],probs[m_page][st2],x0,y0,cw,ch,thisplot);
+      x=CalcX_3(probs[m_page][st1],probs[m_page][st2],x0,y0,cw,ch);
       y=CalcY_3(probs[m_page][st1],x0,y0,cw,ch);
 
 #ifdef NOT_PORTED_YET
@@ -168,7 +153,7 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
 #endif  
       // if there is an experimental data point for this cur_e, plot it
       //     if (exp_data) {
-	DrawExpPoint_3(dc,thisplot,probs.Lambda(),iset,st1,st2,x0,y0,cw,ch);
+	DrawExpPoint_3(dc,probs.Lambda(),iset,st1,st2,x0,y0,cw,ch);
 	//      }
     }
   }
@@ -182,7 +167,7 @@ void PxiPlot3::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
 // two triangles, corresponding to num_plots = 0,1 respectively.  Note that the
 // axis scaling is not currently used.
 
-void PxiPlot3::PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
+void PxiPlot3::PlotAxis_3(wxDC& dc, int x0, int y0, int cw,int ch,
 			  wxString label[])
 {
   const double PXI_3_HEIGHT = cw*TAN60/2;
@@ -192,7 +177,8 @@ void PxiPlot3::PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
 	      (int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT));  // left side
   dc.DrawLine(x0+cw,     y0,
 	      (int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT));  // right side
-  if (thisplot.ShowAxis()) { 		// now draw the bisectors
+
+  if (m_probAxisProp.m_display.m_shown) {
     dc.DrawLine(x0,          y0,
 		(int) (x0+cw*3/4), (int) (y0-PXI_3_HEIGHT/2));
     dc.DrawLine(x0+cw,     y0,
@@ -200,7 +186,10 @@ void PxiPlot3::PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
     dc.DrawLine((int) (x0+cw/2), (int) (y0-PXI_3_HEIGHT),
 		(int) (x0+cw/2),   y0);
   }
+
+#ifdef NOT_PORTED_YET
   if (thisplot.ShowSquare()) {
+#endif  // NOT_PORTED_YET
     wxCoord tw,th;
     dc.GetTextExtent(label[2],&tw,&th);
     dc.DrawText(label[2],
@@ -211,23 +200,25 @@ void PxiPlot3::PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
     dc.GetTextExtent(label[1],&tw,&th);
     dc.DrawText(label[1],
 		x0+cw,        y0);
+#ifdef NOT_PORTED_YET
   }
+#endif  // NOT_PORTED_YET
 }
 
-void PxiPlot3::DoPlot(wxDC& dc, const PlotInfo &thisplot,
+void PxiPlot3::DoPlot(wxDC& dc,
 		      int x0, int y0, int cw,int ch, int level)
 {
   wxString labels[] = {"", "", ""};
   int st1=0,st2=0,st3=0;  // which two strategies to plot
   int j=1;
   while (!st1) {
-    if (thisplot.GetStrategyShow(m_page,j)) {
+    if (IsStrategyShown(m_page, j)) {
       st1=j;
     }
     j++;
   }
   while (!st2) {
-    if (thisplot.GetStrategyShow(m_page,j)) {
+    if (IsStrategyShown(m_page, j)) {
       st2=j;
     }
     j++;
@@ -239,8 +230,8 @@ void PxiPlot3::DoPlot(wxDC& dc, const PlotInfo &thisplot,
   labels[2].Printf("%d",st3);
 
   dc.SetPen(*wxBLACK_PEN);
-  PlotAxis_3(dc,thisplot,x0,y0,cw,ch,labels);
-  PlotData_3(dc,thisplot,x0,y0,cw,ch, m_header, 1);
+  PlotAxis_3(dc,x0,y0,cw,ch,labels);
+  PlotData_3(dc,x0,y0,cw,ch, m_header, 1);
 }
 
 void PxiPlot3::OnEvent(wxMouseEvent &ev)

@@ -13,6 +13,11 @@
 #include "pxi.h"
 #include "pxiconf.h"
 
+class PxiAxisDisplayProperties {
+public:
+  bool m_shown, m_ticks, m_numbers;
+};
+
 class PxiAxisScaleProperties {
 public:
   wxString m_minimum, m_maximum;
@@ -42,6 +47,7 @@ public:
   wxFont m_font;
   wxColour m_color;
   PxiAxisScaleProperties m_scale;
+  PxiAxisDisplayProperties m_display;
 };
 
 class PxiTitleProperties {
@@ -56,6 +62,14 @@ public:
   bool m_showLegend;
   wxFont m_font;
   wxColour m_color;
+};
+
+class PxiOverlayProperties {
+public:
+  bool m_token;   // use token or data point # for overlays
+  bool m_lines;   // connect overlay points?
+  int m_tokenSize;   // size of token
+  wxFont m_font;
 };
 
 class PxiPlot : public wxScrolledWindow {
@@ -87,6 +101,7 @@ protected:
   PxiAxisProperties m_lambdaAxisProp, m_probAxisProp;
   PxiTitleProperties m_titleProp;
   PxiLegendProperties m_legendProp;
+  PxiOverlayProperties m_overlayProp;
 
   int Width(void) const 
     {if(m_landscape) return m_height; return m_width;}
@@ -99,7 +114,7 @@ protected:
   double GetScale(void) const {return m_scale;} 
   void SetScale(double x);
 
-  virtual void DoPlot(wxDC& dc,const PlotInfo &thisplot,
+  virtual void DoPlot(wxDC& dc,
 		      int x0, int y0, int cw,int ch, int level=1) = 0;
   void PlotLabels(wxDC &dc,int ch,int cw);
 
@@ -127,6 +142,8 @@ public:
   PxiAxisProperties &GetProbAxisProperties(void) { return m_probAxisProp; }
   PxiTitleProperties &GetTitleProperties(void) { return m_titleProp; }
   PxiLegendProperties &GetLegendProperties(void) { return m_legendProp; }
+
+  bool IsStrategyShown(int iset, int st) const { return (iset == m_page); }
 
   DECLARE_EVENT_TABLE()
 };

@@ -16,17 +16,12 @@
 #include "dlgpxi.h"
 
 PxiDrawSettings::PxiDrawSettings(const FileHeader &p_header, int p_index)
-  : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
-    clear_brush("BLACK",wxTRANSPARENT),
-    exp_data_brush("BLACK",wxSOLID), overlay_symbol(OVERLAY_NUMBER),
-    overlay_lines(FALSE), overlay_token_size(DEF_TOKEN_SIZE), 
+  : clear_brush("BLACK",wxTRANSPARENT),
+    exp_data_brush("BLACK",wxSOLID),
     color_mode(COLOR_PROB),
-    connect_dots(FALSE), restart_overlay_colors(TRUE), 
-    l_start(p_header.EStart()), l_stop(p_header.EStop()),
-    l_step(p_header.EStep())
-{
-  thisplot.Init(p_header, p_index);
-}
+    connect_dots(FALSE), restart_overlay_colors(TRUE)
+{ }
+
 
 // Plot3 mode is now more flexible: it works great (by default) on 2d player
 // games, each player having 3 strategies.  It has now been extended to work
@@ -118,7 +113,6 @@ private:
   void OnOverlay(wxCommandEvent &);
   void OnPlot(wxCommandEvent &);
   void OnPlotMode(wxCommandEvent &);
-  PlotInfo & ThisPlot(void);
 
   void Run(void);
 public:
@@ -145,7 +139,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
   //  int num_plots = 1;
   
   m_plotItem = new wxListBox(this, idSETTINGS_WHICH_PLOT_LISTBOX);
-  for (int i = 1; i <= draw_settings.GetNumPlots(); i++) {
+  for (int i = 1; i <= 1; i++) {
     tmp.Printf("Plot %d", i);
     m_plotItem->Append(tmp);
   }
@@ -279,13 +273,9 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 dialogDrawSettings::~dialogDrawSettings()
 { }
 
-PlotInfo & dialogDrawSettings::ThisPlot(void)
-{
-  return draw_settings.GetPlotInfo();
-}
-
 void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
 {
+#ifdef NOT_PORTED_YET
   wxString tmp;
   const PlotInfo &thisplot(ThisPlot());
 
@@ -297,9 +287,9 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
   bool mark = true;
   whichiset = 0;
 
-  m_isetItem->SetSelection(thisplot.GetPlotNumber()-1, true);
+  //  m_isetItem->SetSelection(thisplot.GetPlotNumber()-1, true);
   if (mark) {
-    whichiset = thisplot.GetPlotNumber()-1; 
+    //    whichiset = thisplot.GetPlotNumber()-1; 
     mark = false;
   }
 
@@ -317,6 +307,7 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
       if(thisplot.GetStrategyShow(whichiset, act))
 	m_actionItem->SetSelection(act - 1, true);
   }
+#endif  // NOT_PORTED_YET
 }  
 
 void dialogDrawSettings::OnPlotMode(wxCommandEvent &)
@@ -338,11 +329,12 @@ void dialogDrawSettings::OnPlotMode(wxCommandEvent &)
 
 void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
 {
+#ifdef NOT_PORTED_YET
   PlotInfo &thisplot(ThisPlot());
   bool flag = false;
   wxString tmp;
 
-  whichiset = thisplot.GetPlotNumber();
+  //  whichiset = thisplot.GetPlotNumber();
   
   if(flag) {
     m_actionItem->Clear();
@@ -358,14 +350,17 @@ void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
     wxCommandEvent event;
     OnAction(event);
   }
+#endif // NOT_PORTED_YET
 }
 
 void dialogDrawSettings::OnAction(wxCommandEvent &)
 { 
+#ifdef NOT_PORTED_YET
   PlotInfo &thisplot(ThisPlot());
 
   for (int act = 1; act <= thisplot.GetNumStrats(whichiset); act++) 
     thisplot.SetStrategyShow(whichiset, act, m_actionItem->Selected(act-1));
+#endif  // NOT_PORTED_YET
 }
 
 void dialogDrawSettings::OnOverlay(wxCommandEvent &)
@@ -382,7 +377,7 @@ void dialogDrawSettings::OnFont(wxCommandEvent &)
 
 void dialogDrawSettings::OnPlot(wxCommandEvent &)
 { 
-  dialogPlotOptions dialog(this, ThisPlot());
+  //  dialogPlotOptions dialog(this, ThisPlot());
 }
 
 void dialogDrawSettings::Run()
@@ -416,8 +411,3 @@ void PxiDrawSettings::SetOptions(wxWindow *parent)
   dialogDrawSettings dialog(parent, *this);
 }
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
-template class gArray<PlotInfo>;
-template class gBlock<PlotInfo>;

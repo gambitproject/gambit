@@ -20,25 +20,6 @@
 
 // ----------------------------------------------------------------------
 //
-//     dialogPlotOptions
-//
-// ----------------------------------------------------------------------
-
-class dialogPlotOptions : public guiAutoDialog {
-private:
-  PlotInfo &thisplot;       // information about plot
-  wxCheckBox m_axis, m_labels, m_ticks, m_nums, m_square;
-
-  const char *HelpString(void) const { return "Plot Options"; }
-  
-  void Run(void);
-public:
-  dialogPlotOptions(wxWindow *, PlotInfo &);
-  virtual ~dialogPlotOptions();
-};
-
-// ----------------------------------------------------------------------
-//
 //     dialogOverlayOptions
 //
 // ----------------------------------------------------------------------

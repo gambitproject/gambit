@@ -28,7 +28,7 @@ void PxiPlot::PlotLabels(wxDC &dc, int ch,int cw)
 {
   dc.SetTextForeground(*wxBLACK);
   //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(m_drawSettings.GetLabelFont());
+  dc.SetFont(m_legendProp.m_font);
   for (int i=1;i<=labels.Length();i++) {
     wxCoord tw,th;
     dc.GetTextExtent(labels[i].label,&tw,&th);
@@ -45,7 +45,7 @@ void PxiPlot::PlotLabels(wxDC &dc, int ch,int cw)
 #define		NUM_TOKENS		7
 void PxiPlot::DrawToken(wxDC &dc, int x, int y, int st)
 {
-  int ts=m_drawSettings.GetTokenSize();	// token dimensions are 2ts x 2ts
+  int ts = m_overlayProp.m_tokenSize;
   if (m_drawSettings.GetColorMode()==COLOR_PROB) {
     dc.SetPen(*wxBLACK_PEN);
     dc.SetBrush(*wxBLACK_BRUSH);
@@ -146,14 +146,13 @@ void PxiPlot::Update(wxDC& dc,int device)
   dc.SetPen(*wxBLACK_PEN);
   dc.SetBrush(m_drawSettings.GetClearBrush());
   
-  const PlotInfo &thisplot(m_drawSettings.GetPlotInfo());
   dc.SetPen(*wxBLACK_PEN);
 
   // used for square aspect ratio that fits in window
   const int XOFF = 30;
   //  int side=gmin(cw-2*XOFF, ch-2*XOFF);	
 
-  DoPlot(dc,thisplot,XOFF,ch-XOFF,cw-2*XOFF, ch-2*XOFF, 1);
+  DoPlot(dc, XOFF, ch-XOFF, cw-2*XOFF, ch-2*XOFF, 1);
   wxEndBusyCursor();
 }
 
@@ -192,6 +191,9 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
   m_lambdaAxisProp.m_scale.m_divisions = 10;
   m_lambdaAxisProp.m_scale.m_useLog = true;
   m_lambdaAxisProp.m_scale.m_canUseLog = true;
+  m_lambdaAxisProp.m_display.m_shown = true;
+  m_lambdaAxisProp.m_display.m_ticks = true;
+  m_lambdaAxisProp.m_display.m_numbers = true;
 
   m_probAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
   m_probAxisProp.m_color = *wxBLUE;
@@ -200,6 +202,9 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
   m_probAxisProp.m_scale.m_divisions = 10;
   m_probAxisProp.m_scale.m_useLog = false;
   m_probAxisProp.m_scale.m_canUseLog = false;
+  m_probAxisProp.m_display.m_shown = true;
+  m_probAxisProp.m_display.m_ticks = true;
+  m_probAxisProp.m_display.m_numbers = true;
 
   m_titleProp.m_title = wxString::Format("Plot %d", p_page);
   m_titleProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
@@ -208,6 +213,11 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
   m_legendProp.m_showLegend = true;
   m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
   m_legendProp.m_color = *wxBLUE;
+  
+  m_overlayProp.m_token = false;
+  m_overlayProp.m_lines = false;
+  m_overlayProp.m_tokenSize = 4;
+  m_overlayProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
 
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);

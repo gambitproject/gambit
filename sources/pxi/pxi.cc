@@ -233,56 +233,6 @@ void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
 }
 
 
-PlotInfo::PlotInfo(void) 
-  : showAxis(true), showTicks(true), showNums(true), 
-    showLabels(true), showSquare(true)
-{ } 
-
-PlotInfo::~PlotInfo(void) 
-{ }
-
-void PlotInfo::Init(const FileHeader &header, int plot_number) 
-{
-  int num_infosets = header.NumInfosets();
-  number = plot_number;
-  strategies=gBlock< show_actions >(num_infosets);
-  for (int i=1;i<=num_infosets;i++) {
-    strategies[i]=show_actions(header.NumStrategies(i));
-    for (int j=1;j<=header.NumStrategies(i);j++) 
-      strategies[i][j]=true;
-  }
-  //  float l_start = header.EStart(); 
-  //float l_stop = header.EStop(); 
-  //float l_step = header.EStep();
-}
-
-PlotInfo &PlotInfo::operator=(const PlotInfo &p)
-{
-  if(this != &p) {
-    showAxis = p.showAxis;
-    showTicks = p.showTicks;
-    showNums = p.showNums;
-    showLabels = p.showLabels;
-    showSquare = p.showSquare;
-    number = p.number;    
-    strategies = p.strategies;
-    for(int i = 1; i<=strategies.Length(); i++) {
-      strategies[i] = p.strategies[i];
-    }
-  }
-
-  return *this;
-}
-
-bool PlotInfo::operator==(const PlotInfo &p)
-{
-  assert(0);  //needed for gBlock<T>, but lets see if it's ever used
-  //      if isets != p.isets return false;
-  //      if strategies != p.strategies return false;
-  return false;
-}
-
-
 PxiPrintout::PxiPrintout(PxiPlot &c, char *title)
   : wxPrintout(title), canvas(c)
 { }
@@ -560,8 +510,6 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/grarray.imp"
 #include "base/glist.imp"
 
-template class gArray<PlotInfo>;
-
 template class gArray<FileHeader>;
 template class gBlock<FileHeader>;
 
@@ -586,9 +534,6 @@ gOutput &operator<<(gOutput &p_file, const gBlock<double> &)
 { return p_file; }
 
 gOutput &operator<<(gOutput &p_file, const gBlock<int> &)
-{ return p_file; }
-
-gOutput &operator<<(gOutput &p_file, const PlotInfo &)
 { return p_file; }
 
 template class gRectArray<gBlock<double> >;

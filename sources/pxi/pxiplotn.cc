@@ -30,7 +30,7 @@ static char *equ_colors[NUM_COLORS+1] = {
   "BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MAGENTA","ORANGE",
   "PURPLE","PALE GREEN","BROWN","BLACK"}; // not pretty
 
-void PxiPlotN::PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
+void PxiPlotN::PlotAxis_X(wxDC& dc, int x0, int y0, int cw,int ch,
 			  const PxiAxisProperties &p_horizProps, 
 			  const PxiAxisProperties &p_vertProps,
 			  float log_step)
@@ -45,11 +45,11 @@ void PxiPlotN::PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
   double yStart = p_vertProps.m_scale.GetMinimum();
   double yEnd = p_vertProps.m_scale.GetMaximum();
   
-  if (thisplot.ShowAxis()) {
-    dc.DrawLine(x0,   y0,
-		x0,   y0-ch);
-    dc.DrawLine(x0,   y0,
-		x0+cw,y0);
+  if (p_horizProps.m_display.m_shown) {
+    dc.DrawLine(x0, y0, x0 + cw, y0);
+  }
+  if (p_vertProps.m_display.m_shown) {
+    dc.DrawLine(x0, y0, x0, y0-ch);
   }
 
   int xgrid = cw / p_horizProps.m_scale.m_divisions; 
@@ -57,16 +57,17 @@ void PxiPlotN::PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
 
   if (!p_horizProps.m_scale.m_useLog)  {   // arithmetic scale
     for (i1=0; i1 <= p_horizProps.m_scale.m_divisions; i1++) {
-      if (thisplot.ShowTicks())
-      dc.DrawLine(x0+i1*xgrid,      y0-GRID_H, 
-		  x0+i1*xgrid,      y0+GRID_H);
-      if (thisplot.ShowNums()) {
-	tempf=xStart+fabs((xStart-xEnd)/p_horizProps.m_scale.m_divisions)*i1;
-	sprintf(axis_label_str,"% 3.2f",tempf);
-	wxCoord tw,th;
-	dc.GetTextExtent(axis_label_str,&tw,&th);
-	dc.DrawText(axis_label_str,
-		    x0+i1*xgrid-tw/2, y0+GRID_H);
+      if (p_horizProps.m_display.m_ticks) {
+	dc.DrawLine(x0+i1*xgrid,      y0-GRID_H, 
+		    x0+i1*xgrid,      y0+GRID_H);
+	if (p_horizProps.m_display.m_numbers) {
+	  tempf=xStart+fabs((xStart-xEnd)/p_horizProps.m_scale.m_divisions)*i1;
+	  sprintf(axis_label_str,"% 3.2f",tempf);
+	  wxCoord tw,th;
+	  dc.GetTextExtent(axis_label_str,&tw,&th);
+	  dc.DrawText(axis_label_str,
+		      x0+i1*xgrid-tw/2, y0+GRID_H);
+	}
       }
     }
   }
@@ -91,10 +92,11 @@ void PxiPlotN::PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
       k=x_per_grid*(i1);
       p=xStart*pow(log_step,k);
       sprintf(axis_label_str,"% 3.2f",p);
-      if (thisplot.ShowTicks())
+      if (p_horizProps.m_display.m_ticks) {
 	dc.DrawLine(x0+i1*xgrid,    y0-GRID_H,
 		    x0+i1*xgrid,    y0+GRID_H);
-      if (thisplot.ShowNums()) {
+      }
+      if (p_horizProps.m_display.m_numbers) {
 	wxCoord tw,th;
 	dc.GetTextExtent(axis_label_str,&tw,&th);
 	dc.DrawText(axis_label_str,
@@ -104,23 +106,24 @@ void PxiPlotN::PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, in
 #endif
   }
   for (i1 = 0; i1 <= p_vertProps.m_scale.m_divisions; i1++) {
-    if (thisplot.ShowTicks())
+    if (p_vertProps.m_display.m_ticks) {
       dc.DrawLine(x0-GRID_H,  y0-ch+i1*ygrid,
 		  x0+GRID_H,  y0-ch+i1*ygrid);
-      if (thisplot.ShowNums()) {
-	tempf=yEnd-fabs((yStart-yEnd)/p_vertProps.m_scale.m_divisions)*i1;
-	sprintf(axis_label_str,"%3.2f",tempf);
-	wxCoord tw,th;
-	dc.GetTextExtent(axis_label_str,&tw,&th);
-	dc.DrawText(axis_label_str,
-		    x0-GRID_H-tw,  y0-ch+i1*ygrid-th/2);
-      }
+    }
+    if (p_vertProps.m_display.m_numbers) {
+      tempf=yEnd-fabs((yStart-yEnd)/p_vertProps.m_scale.m_divisions)*i1;
+      sprintf(axis_label_str,"%3.2f",tempf);
+      wxCoord tw,th;
+      dc.GetTextExtent(axis_label_str,&tw,&th);
+      dc.DrawText(axis_label_str,
+		  x0-GRID_H-tw,  y0-ch+i1*ygrid-th/2);
+    }
   }
 }
 
 
 /******************************** CALC Y X************************************/
-double PxiPlotN::CalcY_X(double y,int y0,int ch, const PlotInfo &thisplot)
+double PxiPlotN::CalcY_X(double y,int y0,int ch)
 {
   y = gmax(y, m_probAxisProp.m_scale.GetMinimum());
   y = gmin(y, m_probAxisProp.m_scale.GetMaximum());
@@ -133,10 +136,11 @@ double PxiPlotN::CalcY_X(double y,int y0,int ch, const PlotInfo &thisplot)
 
 /******************************** CALC X X************************************/
 
-double PxiPlotN::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
+double PxiPlotN::CalcX_X(double x,int x0, int cw)
 {
   double min = m_lambdaAxisProp.m_scale.GetMinimum();
   double max = m_lambdaAxisProp.m_scale.GetMaximum();
+  double del = 1.05;    // FIXME: formerly read from file; make configurable
 
   if (!m_lambdaAxisProp.m_scale.m_useLog) {
     x -= min;         // set MinX to correspond to 0
@@ -144,8 +148,8 @@ double PxiPlotN::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
     x = x0 + x*cw;    // scale to screen size
   }
   else {
-    double max_t = (log(max/min)/log(m_drawSettings.GetDelL()));
-    double t=log(x/min)/log(m_drawSettings.GetDelL());
+    double max_t = log(max/min) / log(del);
+    double t = log(x/min) / log(del);
     x=x0+(t/max_t)*cw; // scale to screen size
   }
   return x;
@@ -154,7 +158,7 @@ double PxiPlotN::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 
 // Draws a little # or a token corresponding to the point # in the experimental
 // data overlay
-void PxiPlotN::DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot,
+void PxiPlotN::DrawExpPoint_X(wxDC &dc, 
 			      double p_lambda, int iset, int st,
 			      int x0, int y0, int cw, int ch)
 {
@@ -162,25 +166,25 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot,
     gBlock<int> points(m_expData.FitPoints(p_lambda)); 
     for (int i = 1; i <= points.Length(); i++) {
       double y = CalcY_X(m_expData.GetDataPoint(points[i], iset, st),
-			 y0, ch, thisplot);
-      double x = CalcX_X(m_expData.MLELambda(points[i]), x0, cw, thisplot);
+			 y0, ch);
+      double x = CalcX_X(m_expData.MLELambda(points[i]), x0, cw);
       dc.SetBrush(m_drawSettings.GetDataBrush());
-      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+      if (m_overlayProp.m_token) {
 	DrawToken(dc, (int) x, (int) y, st);
       }
       else {
 	wxString tmp = wxString::Format("%d", points[i]);
-	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetFont(m_overlayProp.m_font);
 	dc.SetTextForeground(*wxBLACK);
 	wxCoord tw,th;
 	dc.GetTextExtent(tmp,&tw,&th);
 	dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
 	//      dc.DrawText(tmp,x-3,y-6);
       }
-      if (m_drawSettings.GetOverlayLines() && st!=1) {
+      if (m_overlayProp.m_lines && st!=1) {
 	dc.SetBrush(*wxBLACK_BRUSH);
 	int y1 = (int) CalcY_X(m_expData.GetDataPoint(points[i], iset, st-1),
-			       y0, ch, thisplot);
+			       y0, ch);
 	dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
       }
     }
@@ -188,7 +192,7 @@ void PxiPlotN::DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot,
   catch (...) { }
 }
 
-void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, 
+void PxiPlotN::PlotData_X(wxDC& dc, int x0, int y0, 
 			   int cw,int ch,const FileHeader &f_header,int level)
   /* This function plots n-dimensional data on a rectangular grid.  The x-axis
    * are error value
@@ -214,7 +218,7 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
       int lev = 0;
 
       for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
-	if (thisplot.GetStrategyShow(m_page, st)) {
+	if (IsStrategyShown(m_page, st)) {
 	  wxString key = wxString::Format("Strategy %d", st);
 	  dc.SetFont(m_legendProp.m_font);
 	  dc.SetTextForeground(m_legendProp.m_color);
@@ -237,7 +241,7 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
     //---------------------------if cur_e is in active range ------------
     if (probs.Lambda() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
 	probs.Lambda() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
-      x=CalcX_X(probs.Lambda(),x0,cw,thisplot);
+      x = CalcX_X(probs.Lambda(),x0,cw);
       // plot the infosets that are selected for the top graph
       // if we have experimental data, get it
 #ifdef NOT_PORTED_YET
@@ -252,8 +256,8 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
       
       for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
 	// plot the data point
-	y = CalcY_X(probs[m_page][st],y0, ch,thisplot);
-	if (thisplot.GetStrategyShow(m_page,st)) {
+	y = CalcY_X(probs[m_page][st],y0, ch);
+	if (IsStrategyShown(m_page, st))  {
 	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
 	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
 #ifdef NOT_PORTED_YET
@@ -270,7 +274,7 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
 #endif  
 	  // if there is an experimental data point for this cur_e, plot it
 	  //	  if (exp_data) {
-	  DrawExpPoint_X(dc,thisplot,probs.Lambda(),m_page,st,x0,y0,ch,cw);
+	  DrawExpPoint_X(dc,probs.Lambda(),m_page,st,x0,y0,ch,cw);
 	  //	  }
 	}
       }
@@ -280,14 +284,14 @@ void PxiPlotN::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
   if (!m_drawSettings.RestartOverlayColors()) color_start+=max_equ;
 }
 
-void PxiPlotN::DoPlot(wxDC& dc, const PlotInfo &thisplot,
+void PxiPlotN::DoPlot(wxDC& dc,
 		      int x0, int y0, int cw,int ch, int level)
   // This function plots n-dimensional data on a rectangular grid.  The x-axis
   //  are error value
 {
-  PlotAxis_X(dc,thisplot,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp,
+  PlotAxis_X(dc,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp,
 	     m_header.EStep());
-  PlotData_X(dc,thisplot,x0,y0,cw,ch, m_header, 1);
+  PlotData_X(dc,x0,y0,cw,ch, m_header, 1);
 }
 
 void PxiPlotN::OnEvent(wxMouseEvent &ev)

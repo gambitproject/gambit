@@ -18,6 +18,54 @@
 #include "gui/valnumber.h"
 
 //=========================================================================
+//                   class DisplayPanel implementation
+//=========================================================================
+
+class DisplayPanel : public wxPanel {
+private:
+  wxCheckBox *m_shown, *m_ticks, *m_numbers;
+
+public:
+  DisplayPanel(wxWindow *p_parent, const PxiAxisDisplayProperties &p_prop);
+
+  PxiAxisDisplayProperties GetProperties(void) const;
+};
+
+DisplayPanel::DisplayPanel(wxWindow *p_parent,
+			   const PxiAxisDisplayProperties &p_prop)
+  : wxPanel(p_parent, -1)
+{
+  wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
+
+  m_shown = new wxCheckBox(this, -1, "Show axis");
+  m_shown->SetValue(p_prop.m_shown);
+  sizer->Add(m_shown, 0, wxALL, 5);
+  
+  m_ticks = new wxCheckBox(this, -1, "Show tickmarks");
+  m_ticks->SetValue(p_prop.m_ticks);
+  sizer->Add(m_ticks, 0, wxALL, 5);
+
+  m_numbers = new wxCheckBox(this, -1, "Show scale");
+  m_numbers->SetValue(p_prop.m_numbers);
+  sizer->Add(m_numbers, 0, wxALL, 5);
+
+  SetAutoLayout(true);
+  SetSizer(sizer);
+  sizer->Fit(this);
+  sizer->SetSizeHints(this);
+  Layout();
+}
+
+PxiAxisDisplayProperties DisplayPanel::GetProperties(void) const
+{
+  PxiAxisDisplayProperties props;
+  props.m_shown = m_shown->GetValue();
+  props.m_ticks = m_ticks->GetValue();
+  props.m_numbers = m_numbers->GetValue();
+  return props;
+}
+
+//=========================================================================
 //                    class ScalePanel implementation
 //=========================================================================
 
@@ -40,6 +88,7 @@ ScalePanel::ScalePanel(wxWindow *p_parent,
   : wxPanel(p_parent, -1)
 {
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
+
 
   gridSizer->Add(new wxStaticText(this, wxID_STATIC, "Minimum value:"),
 		 0, wxALL, 5);
@@ -169,6 +218,8 @@ dialogFormatAxis::dialogFormatAxis(wxWindow *p_parent,
 {
   m_notebook = new wxNotebook(this, idFORMAT_NOTEBOOK,
 			      wxDefaultPosition, wxSize(300, 300));
+  m_displayPanel = new DisplayPanel(m_notebook, p_props.m_display);
+  m_notebook->AddPage(m_displayPanel, "Display");
   m_scalePanel = new ScalePanel(m_notebook, p_props.m_scale);
   m_notebook->AddPage(m_scalePanel, "Scale");
   m_fontPanel = new FontPanel(m_notebook, p_props.m_font);
@@ -198,6 +249,7 @@ dialogFormatAxis::dialogFormatAxis(wxWindow *p_parent,
 PxiAxisProperties dialogFormatAxis::GetProperties(void) const
 {
   PxiAxisProperties props;
+  props.m_display = m_displayPanel->GetProperties();
   props.m_scale = m_scalePanel->GetProperties();
   props.m_color = m_colorPanel->GetColor();
   props.m_font = m_fontPanel->GetFont();
@@ -207,7 +259,7 @@ PxiAxisProperties dialogFormatAxis::GetProperties(void) const
 void dialogFormatAxis::OnOK(wxCommandEvent &)
 {
   if (!m_scalePanel->Validate()) {
-    m_notebook->SetSelection(0);
+    m_notebook->SetSelection(1);
     return;
   }
 
@@ -216,7 +268,7 @@ void dialogFormatAxis::OnOK(wxCommandEvent &)
 
 void dialogFormatAxis::OnNotebookPageChanging(wxNotebookEvent &p_event)
 {
-  if (m_notebook->GetSelection() == 0) {
+  if (m_notebook->GetSelection() == 1) {
     if (!m_scalePanel->Validate()) {
       p_event.Veto();
     }

@@ -15,6 +15,7 @@
 class dialogFormatAxis : public wxDialog {
 private:
   wxNotebook *m_notebook;
+  class DisplayPanel *m_displayPanel;
   class ScalePanel *m_scalePanel;
   class FontPanel *m_fontPanel;
   class ColorPanel *m_colorPanel;

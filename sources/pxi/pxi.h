@@ -129,48 +129,6 @@ public:
   void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo);
 };
 
-class PlotInfo
-{
-private:
-  bool showAxis, showTicks, showNums, showLabels, showSquare;
-  int number;                         // plot number
-
-  // Bool instead of bool needeed here for template ambiguity in gBlock for BC
-  typedef gBlock<bool> show_actions;
-  friend gOutput &operator<<(gOutput &op,const show_actions &p);
-  friend gOutput &operator<<(gOutput &op,const PlotInfo &p);
-  gBlock< show_actions > strategies;  // strategies to plot for each infoset
-
-public:
-  PlotInfo(void);
-  ~PlotInfo(void);
-
-  PlotInfo &operator=(const PlotInfo &p);       
-  bool operator==(const PlotInfo &p);       
-  bool operator!=(const PlotInfo &p) {return !(*this == p);}  
-
-  void Init(const FileHeader &, int num);
-
-  bool GetStrategyShow(int j, int k) const {return strategies[j][k];}
-  int GetNumStrats(int j) const {return strategies[j].Length();}
-  int GetNumIsets(void) const { return 1; }
-  int GetPlotNumber(void) const {return number;}
-  void SetPlotNumber(int i) {number=i;}
-
-  bool ShowAxis(void) const {return showAxis;}
-  bool ShowTicks(void) const {return showTicks;}
-  bool ShowNums(void) const {return showNums;}
-  bool ShowLabels(void) const {return showLabels;}
-  bool ShowSquare(void) const {return showSquare;}
-
-  void SetStrategyShow(int j, int k, bool flag) {strategies[j][k]=flag;}
-  void SetShowAxis(bool flag) {showAxis = flag;}
-  void SetShowTicks(bool flag) {showTicks = flag;}
-  void SetShowNums(bool flag) {showNums = flag;}
-  void SetShowLabels(bool flag) {showLabels = flag;}
-  void SetShowSquare(bool flag) {showSquare = flag;}
-};
-
 class PxiFrame : public wxFrame {
   friend class PxiChild;
 private:

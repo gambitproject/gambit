@@ -29,21 +29,7 @@ static char *equ_colors[NUM_COLORS+1] =
 {"BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MAGENTA","ORANGE",
  "PURPLE","PALE GREEN","BROWN","BLACK"}; // not pretty
 
-//***************************** PLOT LABELS ********************************
-void PxiPlot2::PlotLabels(wxDC &dc, int ch,int cw)
-{
-  dc.SetTextForeground(*wxBLACK);
-  //dc.SetBackgroundMode(wxTRANSPARENT);
-  dc.SetFont(m_drawSettings.GetLabelFont());
-  for (int i=1;i<=labels.Length();i++) {
-    wxCoord tw,th;
-    dc.GetTextExtent(labels[i].label,&tw,&th);
-    dc.DrawText(labels[i].label,(int) (labels[i].x*cw-tw/2),
-		(int) (labels[i].y*ch-th/2));
-  }
-}
-
-void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, 
+void PxiPlot2::DrawExpPoint_2(wxDC &dc, 
 			      double p_lambda,
 			      int pl1,int st1,int pl2,int st2,
 			      int x0, int y0, int cw, int ch)
@@ -54,14 +40,14 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot,
       double x = x0 + m_expData.GetDataPoint(points[i], pl1, st1) * cw;
       double y = y0 - m_expData.GetDataPoint(points[i], pl2, st2) * ch;
     
-      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
-	int ts = m_drawSettings.GetTokenSize();
+      if (m_overlayProp.m_token)  {
+	int ts = m_overlayProp.m_tokenSize;
 	dc.SetBrush(m_drawSettings.GetDataBrush());
 	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
       }
       else {
 	wxString tmp = wxString::Format("%d", points[i]);
-	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetFont(m_overlayProp.m_font);
 	dc.SetTextForeground(*wxBLACK);
 	wxCoord tw,th;
 	dc.GetTextExtent(tmp,&tw,&th);
@@ -73,8 +59,8 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot,
   catch (...) { }
 }
 
-void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int cw,int ch,
-			     const FileHeader &f_header,int level)
+void PxiPlot2::PlotData_2(wxDC& dc, int x0, int y0, int cw,int ch,
+			  const FileHeader &f_header,int level)
 {
   double x,y;
   //  int iset;
@@ -90,8 +76,9 @@ void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
   int pl1=0,st1=0,pl2=0,st2=0;
   for (int j=1;j<=f_header.NumInfosets();j++)
     for (int i=1;i<=f_header.NumStrategies(j);i++)
-      if (thisplot.GetStrategyShow(j,i))
+      if (IsStrategyShown(j, i)) {
 	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
+      }
 
   for (int i = 1; i <= f_header.GetData().Length(); i++) {
     DataLine probs = *f_header.GetData()[i];
@@ -121,7 +108,7 @@ void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
       dc.DrawPoint((int) x, (int) y);
       // if there is an experimental data point for this cur_e, plot it
       //      if (exp_data) {
-	DrawExpPoint_2(dc,thisplot,probs.Lambda(),pl1,st1,pl2,st2, x0,y0,cw,ch);
+	DrawExpPoint_2(dc,probs.Lambda(),pl1,st1,pl2,st2, x0,y0,cw,ch);
 	//    }
     }
   }
@@ -129,7 +116,7 @@ void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int 
   PlotLabels(dc,ch,cw);
 }
 
-void PxiPlot2::PlotAxis_2(wxDC& dc, const PlotInfo &thisplot, 
+void PxiPlot2::PlotAxis_2(wxDC& dc,
 			  int x0, int y0, int cw,int ch)
 {
 #ifdef NOT_PORTED_YET
@@ -196,11 +183,10 @@ void PxiPlot2::PlotAxis_2(wxDC& dc, const PlotInfo &thisplot,
 #endif // NOT_PORTED_YET
 }
 
-void PxiPlot2::DoPlot(wxDC& dc, const PlotInfo &thisplot,
-			 int x0, int y0, int cw,int ch, int level)
+void PxiPlot2::DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level)
 {
-  PlotAxis_2(dc,thisplot,x0,y0,cw,ch);
-  PlotData_2(dc,thisplot,x0,y0,cw,ch, m_header, 1);
+  PlotAxis_2(dc, x0, y0, cw, ch);
+  PlotData_2(dc, x0, y0, cw, ch, m_header, 1);
 }
 
 void PxiPlot2::OnEvent(wxMouseEvent &ev)

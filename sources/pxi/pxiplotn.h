@@ -18,23 +18,21 @@ class PxiPlotN : public PxiPlot {
 friend class PxiChild;
 private:
   // Implementing virtual functions
-  void DoPlot(wxDC& dc,const PlotInfo &thisplot,
+  void DoPlot(wxDC& dc,
 	      int x0, int y0, int cw,int ch, int level=1);
-  void PlotData_X(wxDC& dc, const PlotInfo &thisplot, 
+  void PlotData_X(wxDC& dc,
 		  int x0, int y0, int cw,int ch,
 		  const FileHeader &f_header, int level);
-  void DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot, 
+  void DrawExpPoint_X(wxDC &dc,
 		      double cur_e,int iset,int st,
 		      int x0, int y0, int ch,int cw);
-  void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
+  void PlotAxis_X(wxDC& dc, int x0, int y0, int cw,int ch,
 		  const PxiAxisProperties &p_horizProps, 
 		  const PxiAxisProperties &p_vertProps,
 		  float log_step);
 
-  void PlotLabels(wxDC &dc,int ch,int cw);
-
-  double CalcY_X(double y,int x0, int ch, const PlotInfo &thisplot);
-  double CalcX_X(double x,int y0, int cw, const PlotInfo &thisplot);
+  double CalcY_X(double y,int x0, int ch);
+  double CalcX_X(double x,int y0, int cw);
   
   // Event handlers
   void OnEvent(wxMouseEvent &);

@@ -12,91 +12,6 @@
 
 // ----------------------------------------------------------------------
 //
-//     dialogPlotOptions
-//
-// ----------------------------------------------------------------------
-
-dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PlotInfo &plot)
-  : guiAutoDialog(p_parent, "Plot Options"),  thisplot(plot),
-    m_axis(this, -1, "Draw Axis"), m_labels(this, -1, "Draw Labels"), 
-    m_ticks(this, -1, "Draw Ticks"), m_nums(this, -1, "Draw Nums"), 
-    m_square(this, -1, "Square Axis")
-{
-  //  int type = thisplot.GetPlotMode();
-  int type = PXI_PLOT_X;
-
-  m_axis.SetValue(thisplot.ShowAxis());
-  m_labels.SetValue(thisplot.ShowLabels());
-  m_ticks.SetValue(thisplot.ShowTicks());
-  m_nums.SetValue(thisplot.ShowNums());
-  m_square.SetValue(thisplot.ShowSquare());
-
-  switch (type) {
-  case PXI_PLOT_3: 
-    m_ticks.Enable(false);
-    m_square.Enable(false);
-    m_nums.Enable(false);
-    break;
-  case PXI_PLOT_X: 
-    m_labels.Enable(false);
-    m_square.Enable(false);
-    break;
-  case PXI_PLOT_2: 
-    m_labels.Enable(false);
-    break;
-  }
-
-  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(&m_axis, 0, wxALL, 5);
-  topSizer->Add(&m_labels, 0, wxALL, 5);
-  topSizer->Add(&m_nums, 0, wxALL, 5);
-  topSizer->Add(&m_ticks, 0, wxALL, 5);
-  topSizer->Add(&m_square, 0, wxALL, 5);
-
-  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetAutoLayout(TRUE);
-  SetSizer(allSizer); 
-  allSizer->Fit(this);
-  allSizer->SetSizeHints(this); 
-  Layout();
-  Run();
-}
-
-dialogPlotOptions::~dialogPlotOptions()
-{ }
-
-
-void dialogPlotOptions::Run()
-{
-  if (ShowModal() == wxID_OK) {
-    /*    
-    switch (thisplot.GetPlotMode()) {
-    case PXI_PLOT_3: 
-      thisplot.SetShowAxis(m_axis.GetValue());
-      thisplot.SetShowLabels(m_labels.GetValue());
-      break;
-    case PXI_PLOT_X: 
-    */
-      thisplot.SetShowAxis(m_axis.GetValue());
-      thisplot.SetShowTicks(m_ticks.GetValue());
-      thisplot.SetShowNums(m_nums.GetValue());
-      /*  break;
-    case PXI_PLOT_2: 
-      thisplot.SetShowAxis(m_axis.GetValue());
-      thisplot.SetShowTicks(m_ticks.GetValue());
-      thisplot.SetShowNums(m_nums.GetValue());
-      thisplot.SetShowSquare(m_square.GetValue());
-      break;
-    }
-      */
-  }
-}
-
-// ----------------------------------------------------------------------
-//
 //     dialogOverlayOptions
 //
 // ----------------------------------------------------------------------
@@ -105,6 +20,7 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
 					   PxiDrawSettings &s)
   : guiAutoDialog(p_parent, "Overlay Options"), draw_settings(s)
 {
+#ifdef NOT_PORTED_YET
   wxString tokenChoices[] = { "Numbers", "Tokens"};
   m_token = new wxRadioBox(this, -1, "Draw Axis", wxDefaultPosition, 
 #ifdef __WXMOTIF__ // bug in wxmotif
@@ -124,16 +40,17 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
 			wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS
 #endif
 			);
-
+#ifdef NOT_PORTED_YET
   // set initial values
   m_token->SetSelection(0);
-  if(s.GetOverlaySym()==OVERLAY_TOKEN)
+  if (s.GetOverlaySym()==OVERLAY_TOKEN)
     m_token->SetSelection(1);
   
   m_connect->SetValue(false);
   if(s.GetOverlayLines())
     m_connect->SetValue(true);
-  
+
+#endif  
   //  m_size.SetValue(s.GetTokenSize());
   
   wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
@@ -148,6 +65,7 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
   allSizer->SetSizeHints(this); 
   Layout();
   Run();
+#endif  // NOT_PORTED_YET
 }
 
 dialogOverlayOptions::~dialogOverlayOptions()
@@ -156,12 +74,14 @@ dialogOverlayOptions::~dialogOverlayOptions()
 
 void dialogOverlayOptions::Run()
 {
+#ifdef NOT_PORTED_YET
   if (ShowModal() == wxID_OK) {
     draw_settings.SetOverlayLines(m_connect->GetValue());
     draw_settings.SetOverlaySym((m_token->GetSelection()==0) ? OVERLAY_NUMBER : OVERLAY_TOKEN);
     if(draw_settings.GetOverlaySym()==OVERLAY_TOKEN)
       draw_settings.SetTokenSize( m_size->GetValue());
   }
+#endif  // NOT_PORTED_YET
 }
 
 
