@@ -583,10 +583,12 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
 PortionSpec ToSpec(gText &str, int num /* =0 */)
 {
   /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
-  if (str == "NUMBER")
-    return PortionSpec(porNUMBER, num);
-  else if (str == "BOOLEAN") 
+  if (str == "BOOLEAN") 
     return PortionSpec(porBOOL, num); 
+  else if (str == "INTEGER")
+    return PortionSpec(porINTEGER, num);
+  else if (str == "NUMBER")
+    return PortionSpec(porNUMBER, num);
   else if (str == "TEXT")
     return PortionSpec(porTEXT, num);
   else if (str == "EFG")
@@ -627,10 +629,12 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     return PortionSpec(porOUTPUT, num);
 
 
-  else if (str == "NUMBER*")
-    return PortionSpec(porNUMBER, num, porNULLSPEC);
   else if (str == "BOOLEAN*")
     return PortionSpec(porBOOL, num, porNULLSPEC);
+  else if (str == "INTEGER*")
+    return PortionSpec(porINTEGER, num, porNULLSPEC);
+  else if (str == "NUMBER*")
+    return PortionSpec(porNUMBER, num, porNULLSPEC);
   else if (str == "TEXT*")
     return PortionSpec(porTEXT, num, porNULLSPEC);
   else if (str == "EFG*")

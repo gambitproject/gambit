@@ -350,6 +350,21 @@ Portion* GSM_Input(Portion** param)
   }
 }
 
+//-----------------
+// IntegerDivide
+//-----------------
+
+static Portion *GSM_IntegerDivide(Portion** param)
+{
+  if (((NumberPortion *) param[1])->Value() != (gNumber) 0) {
+    gRational x = ((NumberPortion *) param[0])->Value().operator gRational();
+    gRational y = ((NumberPortion *) param[1])->Value().operator gRational();
+    return new NumberPortion(x.numerator() / y.numerator());
+  }
+  else
+    return new NullPortion(porNUMBER);
+}
+
 //---------
 // IsNull
 //---------
@@ -635,9 +650,11 @@ static Portion *GSM_Minus_Behav(Portion** param)
 
 static Portion *GSM_Modulus(Portion** param)
 {
-  if (((NumberPortion*) param[1])->Value() != gNumber(0))
-    return new NumberPortion((long) ((NumberPortion*) param[0])->Value() %
-			  (long) ((NumberPortion*) param[1])->Value());
+  if (((NumberPortion *) param[1])->Value() != (gNumber) 0) {
+    gRational x = ((NumberPortion *) param[0])->Value().operator gRational();
+    gRational y = ((NumberPortion *) param[1])->Value().operator gRational();
+    return new NumberPortion(x.numerator() % y.numerator());
+  }
   else
     return new NullPortion(porNUMBER);
 }
@@ -1768,6 +1785,8 @@ void Init_gsmoper(GSM* gsm)
       { "Greater[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Greater_Text },
       { "GreaterEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_GreaterEqual_Number },
       { "GreaterEqual[x->TEXT, y->TEXT] =: BOOLEAN", GSM_GreaterEqual_Text },
+      { "IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER", 
+	GSM_IntegerDivide },
       { "Less[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_Less_Number },
       { "Less[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Less_Text },
       { "LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_LessEqual_Number },
@@ -1776,7 +1795,7 @@ void Init_gsmoper(GSM* gsm)
       { "Minus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Minus_Number },
       { "Minus[x->MIXED, y->MIXED] =: MIXED", GSM_Minus_Mixed },
       { "Minus[x->BEHAV, y->BEHAV] =: BEHAV", GSM_Minus_Behav },
-      { "Modulus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Modulus },
+      { "Modulus[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Modulus },
       { "Negate[x->NUMBER] =: NUMBER", GSM_Negate },
       { "Not[x->BOOLEAN] =: BOOLEAN", GSM_Not },
       { "NotEqual[x->BOOLEAN*, y->BOOLEAN*] =: BOOLEAN", GSM_NotEqual_Boolean },

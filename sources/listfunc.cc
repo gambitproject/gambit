@@ -701,13 +701,13 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Index", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Index, 
-				       PortionSpec(porNUMBER, 1), 2, 0,
+				       PortionSpec(porINTEGER, 1), 2, 0,
 				       funcNONLISTABLE ));
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, gclParameter("x", porANYTYPE));
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Index, 
-				       PortionSpec(porNUMBER, 1), 2, 0,
+				       PortionSpec(porINTEGER, 1), 2, 0,
 				       funcNONLISTABLE ));
   FuncObj->SetParamInfo(1, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
@@ -756,7 +756,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE, NLIST),
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, gclParameter("n", porNUMBER));
+  FuncObj->SetParamInfo(0, 1, gclParameter("n", porINTEGER));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Remove", 1);
@@ -770,7 +770,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NthChar", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_NthChar, porTEXT, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("text", porTEXT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("n", porNUMBER));
+  FuncObj->SetParamInfo(0, 1, gclParameter("n", porINTEGER));
   gsm->AddFunction(FuncObj);
 
 
@@ -919,7 +919,7 @@ void Init_listfunc(GSM *gsm)
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", 
                               PortionSpec(porANYTYPE, NLIST, porNULLSPEC )));
-  FuncObj->SetParamInfo(0, 1, gclParameter("levels", porNUMBER,
+  FuncObj->SetParamInfo(0, 1, gclParameter("levels", porINTEGER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 

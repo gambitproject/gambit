@@ -1189,7 +1189,7 @@ void Init_efgfunc(GSM *gsm)
  	GSM_BasisNodes },
       { "NodeNumber[node->NODE, basis->EFBASIS] =: NUMBER", 
 	GSM_BasisNodeNumber },
-      { "NthChild[node->NODE, n->NUMBER] =: NODE", GSM_NthChild },
+      { "NthChild[node->NODE, n->INTEGER] =: NODE", GSM_NthChild },
       { "Outcome[node->NODE*] =: EFOUTCOME", GSM_Outcome },
       { "Outcomes[efg->EFG] =: LIST(EFOUTCOME)", GSM_Outcomes },
       { "Parent[node->NODE*] =: NODE", GSM_Parent },

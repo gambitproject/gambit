@@ -503,7 +503,7 @@ void Init_nfgfunc(GSM *gsm)
       { "Name[x->NFPLAYER*] =: TEXT", GSM_Name_NfgElements },
       { "Name[x->STRATEGY*] =: TEXT", GSM_Name_NfgElements },
       { "Name[x->NFOUTCOME*] =: TEXT", GSM_Name_NfgElements },
-      { "NewNfg[dim->LIST(NUMBER)] =: NFG", GSM_NewNfg },
+      { "NewNfg[dim->LIST(INTEGER)] =: NFG", GSM_NewNfg },
       { "NewOutcome[nfg->NFG] =: NFOUTCOME", GSM_NewOutcome },
       { "Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME", GSM_Outcome },
       { "Outcomes[nfg->NFG] =: LIST(NFOUTCOME)", GSM_Outcomes },
