@@ -10,8 +10,26 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class gArray<double>;
+class gArray<gRational>;
+
+template <class T> class gList;
+class gList<gString>;
+class gList<gRational>;
+template <class T> class gNode;
+class gNode<gString>;
+class gNode<gRational>;
+template <class T> class gListIter;
+class gListIter<gString>;
+class gListIter<gRational>;
+
 
 class Nfg<gRational>;
+template <class T> class NfgIter;
+class NfgIter<gRational>;
+template <class T> class ContIter;
+class ContIter<gRational>;
+
 
 #define TEMPLATE
 #pragma option -Jgd

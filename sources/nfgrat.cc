@@ -10,8 +10,25 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class gArray<double>;
+class gArray<gRational>;
+class NFStrategySet;
+class gArray<NFStrategySet *>;
 
 class Nfg<double>;
+template <class T> class gList;
+class gList<gString>;
+class gList<gRational>;
+template <class T> class gNode;
+class gNode<gString>;
+class gNode<gRational>;
+template <class T> class gListIter;
+class gListIter<gString>;
+class gListIter<gRational>;
+template <class T> class NfgIter;
+class NfgIter<double>;
+template <class T> class ContIter;
+class ContIter<double>;
 
 #define TEMPLATE
 #pragma option -Jgd
@@ -42,3 +59,5 @@ TEMPLATE class gArray<gRational *>;
 
 TEMPLATE class gList<MixedProfile<gRational> >;
 TEMPLATE class gNode<MixedProfile<gRational> >;
+
+
