@@ -1,7 +1,7 @@
 //
 // FILE: string.h -- Definition of String class
 //
-// $Id$
+// @(#)gstring.h	1.3 6/28/94
 //
 
 #ifndef GSTRING_H
@@ -38,6 +38,7 @@ class gString   {
     gString dncase(void) const;
     void insert(char c, int n);
     void remove(int n);
+    int lastOccur(char c);
 
 	// ASSIGNMENTS
     void operator=(const char *s);

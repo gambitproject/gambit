@@ -1,7 +1,7 @@
 //
 // FILE: gstring.cc -- Implementation of String class
 //
-// $Id$
+// @(#)gstring.cc	1.4 6/30/94
 //
 
 #include <stdlib.h>
@@ -151,6 +151,16 @@ void gString::remove(int n)
     delete [] storage;
     storage = temp;
 }
+
+int gString::lastOccur(char c)
+{
+  int result = -1;
+
+  for (int i = 0; i < strlen(storage); i++)
+    { if (storage[i] == c) {result = i;}; }
+  return (result + 1);
+}
+
 
 input& operator>>(input &from, gString &s)
 {
