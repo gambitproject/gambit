@@ -55,8 +55,6 @@ private:
   Portion* _INPUT;
   Portion* _NULL;
 
-
-  gStack< gStack< Portion* >* >* _StackStack;
   gStack< RefHashTable* >*       _RefTableStack;
   gStack< gText >*             _FuncNameStack;
   RefHashTable                   _GlobalRefTable;

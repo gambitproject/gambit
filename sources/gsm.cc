@@ -93,8 +93,6 @@ GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
   // global function default variables initialization
   // these should be done before InitFunctions() is called
 
-  _StackStack    = new gStack< gStack< Portion* >* >(1);
-  _StackStack->Push(new gStack< Portion* >(gmax(size, 0)));
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
   _FuncNameStack = new gStack< gText >;
@@ -115,10 +113,6 @@ GSM::~GSM()
   while (_RefTableStack->Depth()) 
     delete _RefTableStack->Pop();
   delete _RefTableStack;
-
-  while (_StackStack->Depth())
-    delete _StackStack->Pop();
-  delete _StackStack;
 
   delete _FuncNameStack;
 }
@@ -566,7 +560,6 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
   Portion *result, *result_copy;
 
   _RefTableStack->Push(new RefHashTable);
-  _StackStack->Push(new gStack< Portion* >);
   _FuncNameStack->Push( funcname );
 
   for (int i = 0; i < func_info.NumParams; i++) {
@@ -597,13 +590,11 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 	}
       }
     
-      delete _StackStack->Pop();
       delete _RefTableStack->Pop();
       _FuncNameStack->Pop();
     }
   }
   catch (...) {
-    delete _StackStack->Pop();
     delete _RefTableStack->Pop();
     _FuncNameStack->Pop();
     throw;
