@@ -212,13 +212,15 @@ static Portion* GSM_Sort(Portion** param,
   
   Portion* *a=new Portion* [n+1];
   Portion* *b=new Portion* [n+1];
+  unsigned long* c=new unsigned long[n+1];
   unsigned long i, j, inc;
   Portion* va; 
-  Portion* vb; 
+  unsigned long vc;
   bool no_sub_lists = true;
 
   for(i=1; i<=n; i++)
   {
+    c[i] = i;
     a[i] = ((ListPortion*) param[0])->Remove(1);
     if(a[i]->Spec().ListDepth > 0)
       no_sub_lists = false;
@@ -232,7 +234,7 @@ static Portion* GSM_Sort(Portion** param,
 
   if(no_sub_lists)
   {
-    // sort via Shell's method, adopted from 
+    // sort via Shell's method, adapted from 
     // _Numerical_Recipes_in_C_, 2nd Edition, p. 332
     inc = 1;
     do {
@@ -243,16 +245,19 @@ static Portion* GSM_Sort(Portion** param,
       inc /= 3;
       for(i=inc+1; i<=n; i++) {
 	va = a[i];
-	vb = b[i];
+	vc = c[i];
 	j=i;
-	while(compfunc(a[j-inc], va)) {
+	// RDM 9/24/00: changed test to maintain original ordering  
+	// under equality
+	while(compfunc(a[j-inc], va) 
+	      || (!compfunc(va,a[j-inc]) && (c[j-inc] > vc))) {
 	  a[j] = a[j-inc];
-	  b[j] = b[j-inc];
+	  c[j] = c[j-inc];
 	  j -= inc;
 	  if(j <= inc) break;
 	}
 	a[j] = va;
-	b[j] = vb;
+	c[j] = vc;
       }
     } while(inc > 1);
   }
@@ -261,11 +266,12 @@ static Portion* GSM_Sort(Portion** param,
   {
     ((ListPortion*) param[0])->Append(a[i]);
     if(altsort)
-      ((ListPortion*) param[1])->Append(b[i]);      
+      ((ListPortion*) param[1])->Append(b[c[i]]);      
   }
 
   delete[] a;
   delete[] b;
+  delete[] c;
 
   if(no_sub_lists)
   {
@@ -279,13 +285,12 @@ static Portion* GSM_Sort(Portion** param,
 }
 
 
+#ifdef UNUSED
 static bool GSM_Compare_Integer(Portion* p1, Portion* p2)
 { return ((NumberPortion*) p1)->Value() > ((NumberPortion*) p2)->Value(); }
 
-#ifdef UNUSED
 static Portion* GSM_Sort_Integer(GSM &, Portion** param)
 { return GSM_Sort(param, GSM_Compare_Integer); }
-#endif  // UNUSED
 
 static Portion* GSM_Sort_By_Integer(GSM &, Portion** param)
 {
@@ -294,6 +299,7 @@ static Portion* GSM_Sort_By_Integer(GSM &, Portion** param)
   p[1] = param[0];
   return GSM_Sort(p, GSM_Compare_Integer, true);
 }
+#endif  // UNUSED
 
 bool GSM_Compare_Number(Portion* p1, Portion* p2)
 { return ((NumberPortion*) p1)->Value() > ((NumberPortion*) p2)->Value(); }
@@ -875,7 +881,7 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   //------------------ Sort -----------------------
-  FuncObj = new gclFunction(*gsm, "Sort", 5);
+  FuncObj = new gclFunction(*gsm, "Sort", 4);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Sort_Number,
 				       PortionSpec(porNUMBER, 1), 1));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", PortionSpec(porNUMBER,1)));
@@ -883,18 +889,19 @@ void Init_listfunc(GSM *gsm)
 				       PortionSpec(porTEXT, 1), 1));
   FuncObj->SetParamInfo(1, 0, gclParameter("x", PortionSpec(porTEXT,1)));
 
-  FuncObj->SetFuncInfo(2, gclSignature(GSM_Sort_By_Integer,
+  /*  FuncObj->SetFuncInfo(2, gclSignature(GSM_Sort_By_Integer,
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(2, 0, gclParameter("x", PortionSpec(porANYTYPE,1)));
   FuncObj->SetParamInfo(2, 1, gclParameter("by", PortionSpec(porNUMBER,1)));
-  FuncObj->SetFuncInfo(3, gclSignature(GSM_Sort_By_Number,
+  */
+  FuncObj->SetFuncInfo(2, gclSignature(GSM_Sort_By_Number,
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(2, 0, gclParameter("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(2, 1, gclParameter("by", PortionSpec(porNUMBER,1)));
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_Sort_By_Text,
 				       PortionSpec(porANYTYPE, 1), 2));
   FuncObj->SetParamInfo(3, 0, gclParameter("x", PortionSpec(porANYTYPE,1)));
-  FuncObj->SetParamInfo(3, 1, gclParameter("by", PortionSpec(porNUMBER,1)));
-  FuncObj->SetFuncInfo(4, gclSignature(GSM_Sort_By_Text,
-				       PortionSpec(porANYTYPE, 1), 2));
-  FuncObj->SetParamInfo(4, 0, gclParameter("x", PortionSpec(porANYTYPE,1)));
-  FuncObj->SetParamInfo(4, 1, gclParameter("by", PortionSpec(porTEXT,1)));
+  FuncObj->SetParamInfo(3, 1, gclParameter("by", PortionSpec(porTEXT,1)));
   gsm->AddFunction(FuncObj);
 
 
