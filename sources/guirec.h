@@ -22,15 +22,21 @@ extern GuiRecorder gui_recorder;
 
 #define GUI_RECORDING gui_recorder.IsRecording()
 
+// Write a line of the form: "object, command" to the log file without 
+// a newline at the end.
 #define GUI_RECORD(X) \
 if (gui_recorder.IsRecording()) { gui_recorder.writeToFile(GuiLogName, X); }
 
+// Append a string to the last line in the log file; don't add a newline at the end.
 #define GUI_RECORD_A(X) \
 if (gui_recorder.IsRecording()) { gui_recorder.writeArgsToFile(X); }
 
+// Write a line of the form: "object, command" to the log file with
+// a newline at the end.
 #define GUI_RECORD_N(X) \
 if (gui_recorder.IsRecording()) { gui_recorder.writeToFile_newline(GuiLogName, X); }
 
+// Append a string to the last line in the log file; add a newline at the end.
 #define GUI_RECORD_AN(X) \
 if (gui_recorder.IsRecording()) { gui_recorder.writeArgsToFile_newline(X); }
 
