@@ -26,7 +26,7 @@ gcl:
 	rm gcl_$(HOST).zip
 src:
 	@echo Updating source code on ftp server
-	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
+	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.yy \
 		Makefile ../bisondos/* ./bin32/dummy ./bitmaps/* ./wx_fake/* \
 		make.go make.site* 
 	ftp_put gambsrc.zip
