@@ -2535,7 +2535,7 @@ struct PortionTypeTextType
 };  
 
 
-#define NumPortionTypes 35
+#define NumPortionTypes 37
 
 PortionTypeTextType _PortionTypeText[] =
 {
@@ -2560,6 +2560,8 @@ PortionTypeTextType _PortionTypeText[] =
   { porOUTCOME_RATIONAL, "OUTCOME(RATIONAL)" },
   { porPLAYER_NFG,       "PLAYER(NFG)" },
   { porPLAYER_EFG,       "PLAYER(EFG)" },
+  { porNF_SUPPORT,       "SUPPORT(NFG)" },
+  { porEF_SUPPORT,       "SUPPORT(EFG)" },
   { porINFOSET,          "INFOSET" },
   { porNODE,             "NODE" },
   { porACTION,           "ACTION" },

@@ -708,6 +708,57 @@ Portion *GSM_Actions(Portion **param)
 }
 
 
+//----------------------- AddAction -----------------------//
+
+Portion* GSM_AddAction( Portion** param )
+{  
+  int pl;
+  int iset;
+  bool result = false;
+  EFSupport *support = ((EfSupportPortion *) param[0])->Value();
+  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[2])->Value();
+
+  for( pl = 1; pl <= support->NumPlayers(); pl++ )
+    for( iset = 1; iset <= support->NumInfosets( pl ); iset++ )
+      if( support->GetPlayer( pl ).InfosetList()[ iset ] == infoset )
+      {
+	support->AddAction( pl, iset, action );
+	result = true;
+	break;
+      }
+
+  if( !result )
+    return new ErrorPortion( "Infoset not found in the given Support");
+  else
+    return param[0]->RefCopy();
+}
+
+
+//------------------------ RemoveAction ----------------------------//
+
+Portion* GSM_RemoveAction( Portion** param )
+{  
+  int pl;
+  int iset;
+  bool result = false;
+  EFSupport *support = ((EfSupportPortion *) param[0])->Value();
+  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
+  Action *action = ((ActionPortion *) param[2])->Value();
+
+  for( pl = 1; pl <= support->NumPlayers(); pl++ )
+    for( iset = 1; iset <= support->NumInfosets( pl ); iset++ )
+      if( support->GetPlayer( pl ).InfosetList()[ iset ] == infoset )
+      {
+	result = support->RemoveAction( pl, iset, action );
+	break;
+      }
+
+  if( !result )
+    return new ErrorPortion( "Action not in the given Support and Infoset");
+  else
+    return param[0]->RefCopy();
+}
 
 //----------------------- Centroid ----------------------//
 
@@ -968,11 +1019,31 @@ Portion *GSM_NthChild(Portion **param)
   return por;
 }
 
+
+//---------------------- NumActions --------------------------//
+
 Portion *GSM_NumActions(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   return new IntValPortion(s->NumActions());
 }
+
+Portion *GSM_NumActions_EFSupport(Portion **param)
+{
+  int result = 0;
+  int pl;
+  int iset;
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  EFSupport *S = ((EfSupportPortion *) param[1])->Value();
+  for( pl = 1; pl <= S->NumPlayers() && result == 0; pl++ )
+    for( iset = 1; iset <= S->NumInfosets( pl ) && result == 0; iset++ )
+      if( S->GetPlayer( pl ).InfosetList()[ iset ] == s )
+	result = S->NumActions( pl, iset );
+      
+  return new IntValPortion( result );
+}
+
+
 
 Portion *GSM_NumChildren(Portion **param)
 {
@@ -1343,6 +1414,176 @@ Portion *GSM_Behav_EfgRational(Portion **param)
 }
 
 
+Portion *GSM_Behav_EFSupport(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+  Portion* por = 0;
+
+
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+
+  // This is incredibly redundent; must find a way to reuse the code
+  // from the previous two functions.
+  if (S->BelongsTo().Type() == DOUBLE && param[1]->Type() & porFLOAT )
+  {
+    // The code here is completely copied from GSM_Behav_EfgFloat
+
+    Efg<double> &E = * (Efg<double>*) &S->BelongsTo();
+    BehavProfile<double> *P = new BehavProfile<double>(E);
+
+    if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
+    {
+      delete P;
+      return new ErrorPortion( "Mismatching number of players" );
+    }
+    
+    for( i = 1; i <= E.NumPlayers(); i++ )
+    {
+      p1 = ( (ListPortion*) param[1] )->Subscript( i );
+      if( p1->Type() != porLIST )
+      {
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      if( ( (ListPortion*) p1 )->Length() != E.PlayerList()[i]->NumInfosets() )
+      {
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching number of infosets" );
+      }
+      
+      for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+      {
+	p2 = ( (ListPortion*) p1 )->Subscript( j );
+	if( p2->Type() != porLIST )
+	{
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching dimensionality" );
+	}
+	if( ( (ListPortion*) p2 )->Length() !=
+	   E.PlayerList()[i]->InfosetList()[j]->NumActions() )
+	{
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching number of actions" );
+	}
+	
+	for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+	{
+	  p3 = ( (ListPortion*) p2 )->Subscript( k );
+	  if( p3->Type() != porFLOAT )
+	  {
+	    delete p3;
+	    delete p2;
+	    delete p1;
+	    delete P;
+	    return new ErrorPortion( "Mismatching dimensionality" );
+	  }
+	  
+	  (*P)( i, j, k ) = ( (FloatPortion*) p3 )->Value();
+	  
+	  delete p3;
+	}
+	delete p2;
+      }
+      delete p1;
+    }
+    por = new BehavValPortion(P);
+
+
+  }
+  else if (S->BelongsTo().Type()== RATIONAL && param[1]->Type() & porRATIONAL )
+  {
+    // The code here is entirely copied from GSM_Behav_EfgRational()
+
+    Efg<gRational> &E = * (Efg<gRational>*) &S->BelongsTo();
+    BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+    
+    if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
+    {
+      delete P;
+      return new ErrorPortion( "Mismatching number of players" );
+    }
+    
+    for( i = 1; i <= E.NumPlayers(); i++ )
+    {
+      p1 = ( (ListPortion*) param[1] )->Subscript( i );
+      if( p1->Type() != porLIST )
+      {
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      if( ( (ListPortion*) p1 )->Length() != E.PlayerList()[i]->NumInfosets() )
+      {
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching number of infosets" );
+      }
+      
+      for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+      {
+	p2 = ( (ListPortion*) p1 )->Subscript( j );
+	if( p2->Type() != porLIST )
+	{
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching dimensionality" );
+	}
+	if( ( (ListPortion*) p2 )->Length() !=
+	   E.PlayerList()[i]->InfosetList()[j]->NumActions() )
+	{
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching number of actions" );
+	}
+	
+	for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+	{
+	  p3 = ( (ListPortion*) p2 )->Subscript( k );
+	  if( p3->Type() != porRATIONAL )
+	  {
+	    delete p3;
+	    delete p2;
+	    delete p1;
+	    delete P;
+	    return new ErrorPortion( "Mismatching dimensionality" );
+	  }
+	  
+	  (*P)( i, j, k ) = ( (RationalPortion*) p3 )->Value();
+	  
+	  delete p3;
+	}
+	delete p2;
+      }
+      delete p1;
+    }
+
+    por = new BehavValPortion(P);
+  }
+
+  if( por == 0 )
+    por = new ErrorPortion( "Mismatching EFG and list type" );
+  else
+  {
+    por->SetOwner(param[0]->Owner());
+    por->AddDependency();
+  }
+  return por;
+}
+
+
 //---------------------- SetComponent -------------------//
 
 
@@ -1700,6 +1941,20 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Actions, 0, "infoset", porINFOSET);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("AddAction");
+  FuncObj->SetFuncInfo(GSM_AddAction, 3);
+  FuncObj->SetParamInfo(GSM_AddAction, 0, "support", porEF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_AddAction, 1, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_AddAction, 2, "action", porACTION);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RemoveAction");
+  FuncObj->SetFuncInfo(GSM_RemoveAction, 3);
+  FuncObj->SetParamInfo(GSM_RemoveAction, 0, "support", porEF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_RemoveAction, 1, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_RemoveAction, 2, "action", porACTION);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("Centroid");
   FuncObj->SetFuncInfo(GSM_CentroidEfgFloat, 1);
   FuncObj->SetParamInfo(GSM_CentroidEfgFloat, 0, "efg", porEFG_FLOAT,
@@ -1868,6 +2123,9 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("NumActions");
   FuncObj->SetFuncInfo(GSM_NumActions, 1);
   FuncObj->SetParamInfo(GSM_NumActions, 0, "infoset", porINFOSET);
+  FuncObj->SetFuncInfo(GSM_NumActions_EFSupport, 2);
+  FuncObj->SetParamInfo(GSM_NumActions_EFSupport, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_NumActions_EFSupport, 1, "support", porEF_SUPPORT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumChildren");
@@ -1980,6 +2238,13 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
 			1, "list", porLIST | porRATIONAL );
+
+  FuncObj->SetFuncInfo( GSM_Behav_EFSupport, 2 );
+  FuncObj->SetParamInfo( GSM_Behav_EFSupport, 0, "support", porEF_SUPPORT,
+			NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( GSM_Behav_EFSupport, 
+			1, "list", porLIST | porFLOAT | porRATIONAL );
+
   gsm->AddFunction(FuncObj);
 
   //--------------------- SetComponent -------------------//
