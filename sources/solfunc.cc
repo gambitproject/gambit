@@ -42,11 +42,11 @@ static Portion *GSM_ActionProb(Portion **param)
   EFPlayer* player = infoset->GetPlayer();
   
   if (player->IsChance())
-    return new NumberPortion(infoset->Game()->
-			       GetChanceProb(infoset, action->GetNumber()));
+    //    return new NumberPortion(infoset->Game()->GetChanceProb(infoset, action->GetNumber()));
+    return new NumberPortion(profile->ActionProb(action));
   else if (profile->Support().Find(action))
     //    return new NumberPortion((*profile)(action));
-    return new NumberPortion((*profile)[action]);
+    return new NumberPortion(profile->ActionProb(action));
   else
     return new NumberPortion(0.0);
 }
@@ -93,7 +93,7 @@ static Portion *GSM_Belief(Portion **param)
   Node* n = ((NodePortion*) param[1])->Value();
   Efg *e = ((FullEfg *) param[1]->Game());
   Infoset *s = n->GetInfoset();
-  if (s->IsChanceInfoset() || e->NumChildren(n) == 0)
+  if(!s)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bp->BeliefProb(n));
 }
@@ -196,10 +196,27 @@ static Portion *GSM_InfosetProb(Portion **param)
 
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
-  if (s->IsChanceInfoset())
-    throw gclRuntimeError("Not implemented for chance infosets");
+  //  if (s->IsChanceInfoset())
+  //    throw gclRuntimeError("Not implemented for chance infosets");
 
   return new NumberPortion(bp->IsetProb(s));
+}
+
+//----------------
+// InfosetValue
+//----------------
+
+static Portion *GSM_InfosetValue(Portion **param)
+{
+  if( param[1]->Spec().Type == porNULL )
+    return new NullPortion( porNUMBER );
+
+  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
+  Infoset* s = ((InfosetPortion*) param[1])->Value();
+  if (s->IsChanceInfoset())
+    return new NullPortion( porNUMBER );
+
+  return new NumberPortion(bp->IsetValue(s));
 }
 
 //---------
@@ -592,15 +609,10 @@ void Init_solfunc(GSM *gsm)
       { "Accuracy[profile->MIXED] =: NUMBER", GSM_Accuracy_Mixed },
       { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
  	GSM_ActionProb },
-      //      { "ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
-      //	GSM_ActionProbs },
       { "ActionValue[profile->BEHAV, action->ACTION] =: NUMBER",
 	GSM_ActionValue },
-      //      { "ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
-      //	GSM_ActionValues },
       { "Behav[support->EFSUPPORT] =: BEHAV", GSM_Behav },
       { "Belief[profile->BEHAV, node->NODE] =: NUMBER", GSM_Belief },
-      //      { "Beliefs[profile->BEHAV] =: LIST(NUMBER)", GSM_Beliefs },
       { "Game[profile->MIXED] =: NFG", GSM_Game_Mixed },
       { "Game[profile->BEHAV] =: EFG", GSM_Game_EfgTypes },
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
@@ -614,8 +626,8 @@ void Init_solfunc(GSM *gsm)
       { "QreValue[profile->BEHAV] =: NUMBER", GSM_QreValue_Behav },
       { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetProb },
-      //      { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
-      //	GSM_InfosetProbs },
+      { "InfosetValue[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
+	GSM_InfosetValue },
       { "IsNash[profile->BEHAV] =: BOOLEAN", GSM_IsNash_Behav },
       { "IsANFNash[profile->BEHAV] =: BOOLEAN", GSM_IsANFNash_Behav },
       { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
@@ -627,16 +639,11 @@ void Init_solfunc(GSM *gsm)
       { "Mixed[support->NFSUPPORT] =: MIXED", GSM_Mixed },
       { "NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER",
 	GSM_NodeValue },
-      //      { "NodeValues[profile->BEHAV, player->EFPLAYER] =: LIST(NUMBER)",
-      //	GSM_NodeValues },
       { "RealizProb[profile->BEHAV, node->NODE] =: NUMBER", GSM_RealizProb },
-      //      { "RealizProbs[profile->BEHAV] =: LIST(NUMBER)", GSM_RealizProbs },
       { "Regret[profile->BEHAV, action->ACTION] =: NUMBER",
 	GSM_Regret_Behav },
       { "Regret[profile->MIXED, strategy->STRATEGY] =: NUMBER",
 	GSM_Regret_Mixed },
-      //      { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
-      //	GSM_Regrets_Behav },
       { "NfgRegrets[profile->BEHAV] =: LIST(NUMBER)", 
 	GSM_NfgRegrets_Behav },
       { "Regrets[profile->MIXED] =: LIST(LIST(NUMBER))", GSM_Regrets_Mixed },

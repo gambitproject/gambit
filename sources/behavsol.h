@@ -166,8 +166,6 @@ public:
   const gNumber &QreLambda(void) const { if(!IsValid()) Invalidate(); return m_qreLambda; }
   const gNumber &QreValue(void) const { if(!IsValid()) Invalidate(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
-  //  const gDPVector<gNumber> &Beliefs(void) const;
-  //  const gDPVector<gNumber> &Regret(void) const;
   const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
   const gNumber MaxRegret(void) const;
   const gNumber MaxRNFRegret(void) const;
@@ -179,14 +177,12 @@ public:
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
   void SetLiap(const gNumber &p_liapValue) { m_liapValue = p_liapValue; }
 	 
-  // Force the invalidation of cached quantities
+  // Force the invalidation of cached data
   void Invalidate(void) const;
   bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
 
   // COMPUTATION OF INTERESTING QUANTITIES
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
-  void CondPayoff(gDPVector<gNumber> &value, gPVector<gNumber> &probs) const
-    { m_profile->CondPayoff(value, probs); }
   
   // DATA ACCESS
   gNumber RealizProb(const Node *node) const
@@ -197,6 +193,8 @@ public:
     { return m_profile->GetNodeValue(node); }
   gNumber IsetProb(const Infoset *iset) const
     { return m_profile->GetIsetProb(iset); }
+  gNumber IsetValue(const Infoset *iset) const
+    { return m_profile->GetIsetValue(iset); }
   gNumber ActionProb(const Action *act) const
     { return m_profile->GetActionProb(act); }
   gNumber ActionValue(const Action *act) const
