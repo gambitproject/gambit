@@ -22,7 +22,7 @@ private:
 	wxTextWindow	*f;
 	gWxIOType			__type;
 	char					line_buffer[100];
-  int						ok;
+  bool						ok;
 	gWxInput(const gFileInput &);
 	gWxInput &operator=(const gFileInput &);
 public:
@@ -33,7 +33,7 @@ public:
 	wxFrame *frame=new wxFrame(0,"gWxInput",0,0,200,200);
 	f=new wxTextWindow(frame,-1,-1,-1,-1,wxNATIVE_IMPL);
   frame->Show(TRUE);
-	ok=(f) ? 1: 0;
+	ok=(f) ? true:false;
 	}
 
 	gWxInput(const char *in)
@@ -42,7 +42,7 @@ public:
 	wxFrame *frame=new wxFrame(NULL,(char *)in,0,0,200,200);
 	f=new wxTextWindow(frame,-1,-1,-1,-1,wxNATIVE_IMPL);
 	frame->Show(TRUE);
-	ok=(f) ? 1: 0;
+	ok=(f) ? true:false;
 	}
 
 //
@@ -79,12 +79,12 @@ public:
 //
 		int get(char &c)	{return 1;}
 		void unget(char c) {;}
-		int eof(void) const {return 0;};
+		bool eof(void) const {return 0;};
 
 //
 // Returns nonzero if the end-of-file marker has been reached.
 //
-		int IsValid(void) const	{return ok;}
+		bool IsValid(void) const	{return ok;}
 		void seekp(long pos) const {;}
 };
 
@@ -100,7 +100,7 @@ class gWxOutput: public gOutput
 	wxTextWindow	*f;
 	gWxIOType			__type;
 	char					buffer[100];
-  int 					ok;
+  bool					ok;
 //
 // The copy constructor and assignment operator are declared private to
 // override the default meanings of these functions.  They are never
@@ -120,7 +120,7 @@ class gWxOutput: public gOutput
 		wxFrame *frame=new wxFrame(NULL,"gWxOutput",0,0,200,200);
 		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
 		frame->Show(TRUE);
-		ok=(f) ? 1: 0;
+		ok=(f) ? true:false;
 		}
 //
 // Initialize the instance to point to the stream with a certain filename.
@@ -133,7 +133,7 @@ class gWxOutput: public gOutput
 		wxFrame *frame=new wxFrame(NULL,(char *)out,0,0,200,200);
 		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
 		frame->Show(TRUE);
-		ok=(f) ? 1: 0;
+		ok=(f) ? true:false;
 		}
 //
 // Close the window pointed to, if any.
@@ -160,7 +160,7 @@ class gWxOutput: public gOutput
 		gOutput& operator<<(const void *x)
 			{ assert(f);  sprintf(buffer, "%p", x); (*f)<<buffer; return *this; }
 
-		int IsValid(void) const {return ok;}
+		bool IsValid(void) const {return ok;}
 
 };
 

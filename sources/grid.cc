@@ -81,7 +81,7 @@ for (int i=1;i<=st1;i++)
 int num_columns=st1+st2+2;
 *params.pxifile<<num_columns<<' '<<(num_columns-1)<<' '<<num_columns<<' ';
 for (i=1;i<=st1;i++) *params.pxifile<<i<<' ';
-for (i=1;i<=st2;i++) *params.pxifile<<st1+i<<' ';
+for (i=1;i<=st2;i++) *params.pxifile<<(st1+i)<<' ';
 *params.pxifile<<'\n';
 *params.pxifile<<"Data:\n";
 }
@@ -167,9 +167,9 @@ OutputHeader();
 ProbVect<T> *pv=new ProbVect<T>(st1,(int)((T)1.0/params.delp+(T)0.5));
 int num_steps;
 if (params.type)
-	num_steps=(params.maxLam-params.minLam)/params.delLam;
+	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
 else
-	num_steps=log(params.maxLam/params.minLam)/log(params.delLam);
+	num_steps=(int)log(params.maxLam/params.minLam)/log(params.delLam);
 T l=params.minLam;
 for (int step=1;step<num_steps;step++)
 {

@@ -48,7 +48,7 @@ return (char *)gvts;
 //wx_color_list is used.  If WX_COLOR_LIST_LENGTH<=color<2*WX_COLOR_LIST_LENGTH,
 //a color equal to color%WX_COLOR_LIST_LENGTH is used from the
 //wx_hilight_color_list
-inline void DrawLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
+inline void DrawLine(wxDC &dc,double x_s,double y_s,double x_e,double y_e,int color=0)
 {
 if (color>-1 && color<WX_COLOR_LIST_LENGTH)
 	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],2,wxSOLID));
@@ -69,7 +69,7 @@ dc.DrawRectangle(x_s,y_s,w,h);
 inline void DrawThinLine(wxDC &dc,int x_s,int y_s,int x_e,int y_e,int color=0)
 {
 if (color>-1)
-	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],.5,wxSOLID));
+	dc.SetPen(wxThePenList->FindOrCreatePen((char *)wx_color_list[color],1,wxSOLID));
 dc.DrawLine(x_s,y_s,x_e,y_e);
 }
 //Draw Circle. A quick and dirty way of easily drawing a circle w/ set color
@@ -781,9 +781,9 @@ if (iterator)
 	NodeEntry *entry=GetNodeEntry(iterator->Cursor());
 	// check if in the visible x-dimention
 	xs=entry->x;
-	xe=(entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom();
+	xe=(int)(entry->x+draw_settings.NodeLength()/2)*draw_settings.Zoom();
 	if (xs<x_start*PIXELS_PER_SCROLL || xe > x_start*PIXELS_PER_SCROLL+width)
-		x_start=(entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1);
+		x_start=(int)(entry->x*draw_settings.Zoom()/(PIXELS_PER_SCROLL*draw_settings.Zoom())-1);
 	if (x_start<0) x_start=0;
 	// check if in the visible y-dimention
 	ys=entry->y;
