@@ -168,6 +168,34 @@ for a listing of functions by category.
 &bifremovestrategy;
 &bifreveal;
 &bifrootnode;
+&bifsaveefg;
+&bifsavenfg;
+&bifsequenceform;
+&bifsequenceformconstraints;
+&bifsequenceformstrats;
+&bifsetactionprob;
+&bifsetactionprobs;
+&bifsetchanceprobs;
+&bifsetcomment;
+&bifsetenv;
+&bifsetname;
+&bifsetoutcome;
+&bifsetpayoff;
+&bifsetstrategyprob;
+&bifsetstrategyprobs;
+&bifshell;
+&bifsimpdivsolve;
+&bifsort;
+&bifstartwatch;
+&bifstopwatch;
+&bifstrategies;
+&bifstrategynumber;
+&bifstrategyprob;
+&bifstrategyprobs;
+&bifstrategyvalue;
+&bifstrategyvalues;
+&bifsubgames;
+&bifsupport;
 
 </sect1>
 

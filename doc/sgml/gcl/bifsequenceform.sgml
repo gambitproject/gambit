@@ -1,0 +1,52 @@
+<refentry id="bif.SequenceForm" xreflabel="SequenceForm">
+
+<refmeta>
+<indexterm>
+<primary>SequenceForm</primary>
+</indexterm>
+
+<refentrytitle>SequenceForm</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SequenceForm</refname>
+<refpurpose>
+Returns the sequence form of an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SequenceForm[efg->EFG] =: NLIST(NUMBER)
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SequenceForm</function> 
+returns the sequence form of an extensive form game <parameter>efg</parameter>, where
+the sequence form is as defined in Koller, Megiddo and von Stengel
+<citation><xref linkend="KolMegSte94"></citation>.
+The sequence form is returned as a nested list,
+with the indices in the reverse order from the numbers of the players.
+Thus, if there are three players, the (i,j,k)th element is a
+vector of payoffs for player 3's ith sequence, player
+2's jth sequence, and player 1's kth
+sequence.  The components of the payoff vectors are in the same order
+as the player numbers.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SequenceFormStrats">,
+<xref linkend="bif.SequenceFormConstraints">,
+<xref linkend="bif.WriteSequenceForm">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.SetEnv" xreflabel="SetEnv">
+
+<refmeta>
+<indexterm>
+<primary>SetEnv</primary>
+</indexterm>
+
+<refentrytitle>SetEnv</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetEnv</refname>
+<refpurpose>
+Sets an environment variable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetEnv[name->TEXT, value->TEXT] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetEnv</function> 
+sets the environment variable <parameter>name</parameteR> to the value
+<parameter>value</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.GetEnv">,
+<xref linkend="bif.UnSetEnv">.
+</para>
+</refsect1>
+
+</refentry>
+
+

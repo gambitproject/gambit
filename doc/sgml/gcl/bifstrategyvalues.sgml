@@ -1,0 +1,47 @@
+<refentry id="bif.StrategyValues" xreflabel="StrategyValues">
+
+<refmeta>
+<indexterm>
+<primary>StrategyValues</primary>
+</indexterm>
+
+<refentrytitle>StrategyValues</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StrategyValues</refname>
+<refpurpose>
+Returns the payoff to playing a strategy against a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StrategyValues[profile->MIXED] =: LIST(LIST(NUMBER)) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StrategyValues</function>
+returns a list of expected payoffs of each strategy (to the player
+who chooses that strategy).  The (i,j)th entry is
+the expected payoff to player i of
+strategy j, where the index numbers correspond to the output of
+<function>Players</function> and
+<function>Strategies</function>, respectively.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.StrategyProb">,
+<xref linkend="bif.StrategyValue">.
+</para>
+</refsect1>
+
+</refentry>
+
+

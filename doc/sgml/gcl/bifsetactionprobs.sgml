@@ -1,0 +1,51 @@
+<refentry id="bif.SetActionProbs" xreflabel="SetActionProbs">
+
+<refmeta>
+<indexterm>
+<primary>SetActionProbs</primary>
+</indexterm>
+
+<refentrytitle>SetActionProbs</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetActionProbs</refname>
+<refpurpose>
+Sets the probabilities actions are played at an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetActionProbs[profile<->BEHAV, infoset->INFOSET, 
+               value->LIST(NUMBER)] =: BEHAV 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetActionProbs</function> 
+sets the components of <parameter>profile</parameter> for
+information set <parameter>infoset</parameter> to be equal to 
+<parameter>values</parameter>.
+Returns <parameter>profile</parameter>. 
+It is an error if <parameter>profile</parameter> and <parameter>infoset</parameter>
+are not from the same extensive form game, or if the length of
+<parameter>value</parameter> is not the same as the number of actions in 
+<parameter>profile</parameter>'s
+support at <parameter>infoset</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionProb">,
+<xref linkend="bif.SetActionProbs">.
+</para>
+</refsect1>
+
+</refentry>
+
+

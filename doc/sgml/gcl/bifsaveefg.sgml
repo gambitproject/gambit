@@ -1,0 +1,44 @@
+<refentry id="bif.SaveEfg" xreflabel="SaveEfg">
+
+<refmeta>
+<indexterm>
+<primary>SaveEfg</primary>
+</indexterm>
+
+<refentrytitle>SaveEfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SaveEfg</refname>
+<refpurpose>
+Writes an extensive form game to a file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SaveEfg[efg->EFG, file->TEXT] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SaveEfg</function> 
+writes <parameter>efg</parameter> to an external savefile
+<parameter>file</parameter>.  It is an error
+if <parameter>file</parameter> cannot be opened for writing.
+Returns <parameter>efg</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.LoadEfg">.
+</para>
+</refsect1>
+
+</refentry>
+
+

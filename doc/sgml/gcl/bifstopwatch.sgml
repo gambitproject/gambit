@@ -1,0 +1,45 @@
+<refentry id="bif.StopWatch" xreflabel="StopWatch">
+
+<refmeta>
+<indexterm>
+<primary>StopWatch</primary>
+</indexterm>
+
+<refentrytitle>StopWatch</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StopWatch</refname>
+<refpurpose>
+Starts the system stopwatch
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StopWatch[] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StopWatch</function>
+stops the system stopwatch.  If the stopwatch was not
+running, this function has no effect.  Returns the amount of time
+on the stopwatch.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ElapsedTime">,
+<xref linkend="bif.IsWatchRunning">,
+<xref linkend="bif.StartWatch">.
+</para>
+</refsect1>
+
+</refentry>
+
+

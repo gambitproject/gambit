@@ -1,0 +1,44 @@
+<refentry id="bif.StrategyProb" xreflabel="StrategyProb">
+
+<refmeta>
+<indexterm>
+<primary>StrategyProb</primary>
+</indexterm>
+
+<refentrytitle>StrategyProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StrategyProb</refname>
+<refpurpose>
+Returns the index of a strategy in a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StrategyProb[profile->MIXED, strategy->STRATEGY] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StrategyProb</function>
+returns the probability that <parameter>strategy</parameter> is chosen when all
+players are following <parameter>profile</parameter>.  It is an error if <parameter>profile</parameter>
+and <parameter>strategy</parameter> are not from the same normal form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetStrategyProb">,
+<xref linkend="bif.SetStrategyProbs">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,58 @@
+<refentry id="bif.SetOutcome" xreflabel="SetOutcome">
+
+<refmeta>
+<indexterm>
+<primary>SetOutcome</primary>
+</indexterm>
+
+<refentrytitle>SetOutcome</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetOutcome</refname>
+<refpurpose>
+Sets the outcome at a node or contingency
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetOutcome[node->NODE, outcome->EFOUTCOME*] =: EFOUTCOME 
+SetOutcome[profile->LIST(STRATEGY), outcome->NFOUTCOME] =: NFOUTCOME 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first version of <function>SetOutcome</function> 
+attaches <parameter>outcome</parameter> to <parameter>node</parameter>.
+Returns the outcome attached.
+Note that nonterminal nodes may have outcomes attached; the interpretation
+is that nonterminal outcomes represent incremental payoffs.  
+It is an error if <parameter>node</parameter> and <parameter>outcome</parameter>
+are not from the same
+extensive form game.
+</para>
+
+<para>
+The second version of <function>SetOutcome</function>
+attaches <parameter>outcome</parameter> to the cell in the normal form game
+determined by the pure strategy profile defined by <parameter>profile</parameter>.
+Returns the outcome attached.  It is an error if <parameter>profile</parameter> and
+<parameter>outcome</parameter> are not from the same normal form game. Also,
+<parameter>profile</parameter> must be a list of strategies consisting of one strategy
+for each player in the game.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Outcome">.
+</para>
+</refsect1>
+
+</refentry>
+
+

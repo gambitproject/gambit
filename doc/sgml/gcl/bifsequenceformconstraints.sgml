@@ -1,0 +1,47 @@
+<refentry id="bif.SequenceFormConstraints" xreflabel="SequenceFormConstraints">
+
+<refmeta>
+<indexterm>
+<primary>SequenceFormConstraints</primary>
+</indexterm>
+
+<refentrytitle>SequenceFormConstraints</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SequenceFormConstraints</refname>
+<refpurpose>
+Returns the strategy constraints for a player in a sequence form
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SequenceFormConstraints[efg->EFG, 
+                        player->EFPLAYER] =: LIST(LIST(NUMBER))
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SequenceFormConstraints</function> 
+returns the matrix of constraints on the strategies for
+<parameter>player</parameter> in the sequence form game for <parameter>efg</parameter>.  Each row
+represents a separate constraint, and each column represents the
+corresponding sequence for that player.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SequenceForm">,
+<xref linkend="bif.SequenceFormStrats">,
+<xref linkend="bif.WriteSequenceForm">.
+</para>
+</refsect1>
+
+</refentry>
+
+

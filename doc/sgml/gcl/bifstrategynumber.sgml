@@ -1,0 +1,44 @@
+<refentry id="bif.StrategyNumber" xreflabel="StrategyNumber">
+
+<refmeta>
+<indexterm>
+<primary>StrategyNumber</primary>
+</indexterm>
+
+<refentrytitle>StrategyNumber</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StrategyNumber</refname>
+<refpurpose>
+Returns the index of a strategy in a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StrategyNumber</function>
+returns the number assigned to <parameter>strategy</parameter> in the support
+<parameter>sup</parameter>.  Strategies  for each player are numbered from 1 to
+the number of strategies for the player.  If a strategy is not in
+the corresponding support, it is assigned a number of 0.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Strategies">.
+</para>
+</refsect1>
+
+</refentry>
+
+

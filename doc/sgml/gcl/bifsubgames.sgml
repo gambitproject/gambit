@@ -1,0 +1,45 @@
+<refentry id="bif.Subgames" xreflabel="Subgames">
+
+<refmeta>
+<indexterm>
+<primary>Subgames</primary>
+</indexterm>
+
+<refentrytitle>Subgames</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Subgames</refname>
+<refpurpose>
+Returns the list of subgame roots in an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Subgames[efg->EFG] =: LIST(NODE) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Subgames</function>
+returns the list of nodes which are roots of subgames in <parameter>efg</parameter>.
+The ordering of the list is such that
+all children of a node are listed before the node.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MarkSubgame">,
+<xref linkend="bif.MarkedSubgame">,
+<xref linkend="bif.UnMarkSubgame">.
+</para>
+</refsect1>
+
+</refentry>
+
+

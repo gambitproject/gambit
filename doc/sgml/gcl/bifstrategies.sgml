@@ -1,0 +1,42 @@
+<refentry id="bif.Strategies" xreflabel="Strategies">
+
+<refmeta>
+<indexterm>
+<primary>Strategies</primary>
+</indexterm>
+
+<refentrytitle>Strategies</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Strategies</refname>
+<refpurpose>
+Returns the list of strategies belonging to a player
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Strategies</function>
+returns the list of strategies from which <parameter>player</parameter> may choose
+in <parameter>support</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Player">.
+</para>
+</refsect1>
+
+</refentry>
+
+

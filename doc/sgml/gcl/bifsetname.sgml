@@ -1,0 +1,52 @@
+<refentry id="bif.SetName" xreflabel="SetName">
+
+<refmeta>
+<indexterm>
+<primary>SetName</primary>
+</indexterm>
+
+<refentrytitle>SetName</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetName</refname>
+<refpurpose>
+Sets the text label of an object
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetName[x->ACTION, name->TEXT] =: ACTION
+SetName[x->EFG, name->TEXT] =: EFG
+SetName[x->EFOUTCOME, name->TEXT] =: EFOUTCOME
+SetName[x->EFPLAYER, name->TEXT] =: EFPLAYER
+SetName[x->INFOSET, name->TEXT] =: INFOSET
+SetName[x->NFG, name->TEXT] =: NFG
+SetName[x->NFOUTCOME, name->TEXT] =: NFOUTCOME
+SetName[x->NFPLAYER, name->TEXT] =: NFPLAYER
+SetName[x->NODE, name->TEXT] =: NODE
+SetName[x->STRATEGY, name->TEXT] =: STRATEGY
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetName</function> 
+sets the text label of <parameter>x</parameter> to
+<parameter>name</parameter>.
+Returns <parameter>x</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Name">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,56 @@
+<refentry id="bif.Support" xreflabel="Support">
+
+<refmeta>
+<indexterm>
+<primary>Support</primary>
+</indexterm>
+
+<refentrytitle>Support</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Support</refname>
+<refpurpose>
+Returns the support of a game or profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Support[efg->EFG] =: EFSUPPORT 
+Support[nfg->NFG] =: NFSUPPORT 
+Support[profile->BEHAV] =: EFSUPPORT 
+Support[profile->MIXED] =: NFSUPPORT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first two versions of <function>Support</function>
+return the support of the game <parameter>efg</parameter> or
+<parameter>nfg</parameter>, containing all actions or strategies,
+respectively, in the game.
+</para>
+
+<para>
+The third and fourth versions of <function>Support</function>
+return the support on which <parameter>profile</parameter> is defined.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddAction">,
+<xref linkend="bif.AddStrategy">,
+<xref linkend="bif.Behav">,
+<xref linkend="bif.Mixed">,
+<xref linkend="bif.RemoveAction">,
+<xref linkend="bif.RemoveStrategy">.
+</para>
+</refsect1>
+
+</refentry>
+
+

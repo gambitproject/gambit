@@ -1,0 +1,46 @@
+<refentry id="bif.SetActionProb" xreflabel="SetActionProb">
+
+<refmeta>
+<indexterm>
+<primary>SetActionProb</primary>
+</indexterm>
+
+<refentrytitle>SetActionProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetActionProb</refname>
+<refpurpose>
+Sets the probability an action is played in a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetActionProb[profile<->BEHAV, action->ACTION, value->NUMBER] =: BEHAV 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetActionProb</function> 
+sets the component of <parameter>profile</parameter> for
+<parameter>action</parameter> to be equal to <parameter>value</parameter>,
+and returns <parameter>profile</parameter>.  It is an error if 
+<parameter>profile</parameter> and <parameter>action</parameter>
+are not from the same extensive form game. 
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionProb">,
+<xref linkend="bif.SetActionProbs">.
+</para>
+</refsect1>
+
+</refentry>
+
+

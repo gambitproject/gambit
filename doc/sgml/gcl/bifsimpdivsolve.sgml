@@ -1,0 +1,84 @@
+<refentry id="bif.SimpDivSolve" xreflabel="SimpDivSolve">
+
+<refmeta>
+<indexterm>
+<primary>SimpDivSolve</primary>
+</indexterm>
+
+<refentrytitle>SimpDivSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SimpDivSolve</refname>
+<refpurpose>
+Compute Nash equilibria via simplicial subdivision
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SimpDivSolve[support->NFSUPPORT, {stopAfter->1}, 
+             {nRestarts->1}, {leashLength->0}, 
+             {precision->Float}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+SimpDivSolve[support->EFSUPPORT, {asNfg->False}, 
+             {stopAfter->1}, {nRestarts->1}, {leashLength->0}, 
+             {precision->Float}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SimpDivSolve</function>
+computes a Nash equilibrium for a game using a simplicial subdivision
+algorithm. 
+The behavior of the algorithm may be modified by several optional
+parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, this is <literal>False</literal>.
+If it is specified to be
+<literal>True</literal>, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.  Note that currently simplicial
+subdivision is only implemented on the normal form, so this parameter
+must always be specified and <literal>True</literal>.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Maximum number of equilibria to find. 
+Default is 1.  
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>nRestarts</parameter>: Number of restarts.  At each restart the mesh of the
+triangulation is halved. 
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>leashLength</parameter>: Sets the leash length. Default is 0, which results in no
+constraint, or no leash.  Note that if this parameter is set to a value
+different from 0, the algorithm is no longer guaranteed to converge.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+
+

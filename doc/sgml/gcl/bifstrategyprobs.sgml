@@ -1,0 +1,45 @@
+<refentry id="bif.StrategyProbs" xreflabel="StrategyProbs">
+
+<refmeta>
+<indexterm>
+<primary>StrategyProbs</primary>
+</indexterm>
+
+<refentrytitle>StrategyProbs</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StrategyProbs</refname>
+<refpurpose>
+Returns the list of strategy probabilities for a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StrategyProbs[profile->MIXED] =: LIST(LIST(NUMBER)) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StrategyProbs</function>
+returns a nested list of the probabilities for each strategy under
+<parameter>profile</parameter>.
+The (i,j)th entry is the probability of player
+i adopting strategy j.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetStrategyProbs">,
+<xref linkend="bif.StrategyProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

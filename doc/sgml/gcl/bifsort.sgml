@@ -1,0 +1,45 @@
+<refentry id="bif.Sort" xreflabel="Sort">
+
+<refmeta>
+<indexterm>
+<primary>Sort</primary>
+</indexterm>
+
+<refentrytitle>Sort</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Sort</refname>
+<refpurpose>
+Sorts a list 
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Sort[x->LIST(NUMBER)] =: LIST(NUMBER)
+Sort[x->LIST(TEXT)] =: LIST(TEXT)
+Sort[x->LIST(T), by->LIST(NUMBER)] =: LIST(T)
+Sort[x->LIST(T), by->LIST(TEXT)] =: LIST(T)
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first two version of <function>Sort</function>
+Returns a list consisting of the elements of <parameter>x</parameter> sorted in
+increasing order.
+</para>
+
+<para>
+The third and fourth versions of <function>Sort</function>
+return a list consisting of the elements of <parameter>list</parameter>, sorted
+according to the ordering of the elements of <parameter>by</parameter>.  It is an
+error if <parameter>list</parameter> and <parameter>by</parameter> do not have the same dimension.
+</para>
+</refsect1>
+
+</refentry>
+
+

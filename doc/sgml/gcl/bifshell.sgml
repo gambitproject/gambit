@@ -1,0 +1,43 @@
+<refentry id="bif.Shell" xreflabel="Shell">
+
+<refmeta>
+<indexterm>
+<primary>Shell</primary>
+</indexterm>
+
+<refentrytitle>Shell</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Shell</refname>
+<refpurpose>
+Runs a child process
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Shell[{command->""}, {spawn->True}] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Shell</function>
+runs a child process.  The text string to be executed by the shell
+is given in <parameter>command</parameter>, and <parameter>spawn</parameter>
+specifies whether to run in the foreground or background.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Platform">.
+</para>
+</refsect1>
+
+</refentry>
+
+

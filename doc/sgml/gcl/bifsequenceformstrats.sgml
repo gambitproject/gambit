@@ -1,0 +1,48 @@
+<refentry id="bif.SequenceFormStrats" xreflabel="SequenceFormStrats">
+
+<refmeta>
+<indexterm>
+<primary>SequenceFormStrats</primary>
+</indexterm>
+
+<refentrytitle>SequenceFormStrats</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SequenceFormStrats</refname>
+<refpurpose>
+Returns the sequence form strategies of a player
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SequenceFormStrats[efg->EFG, 
+                   player->EFPLAYER] =: LIST(LIST(ACTION))
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SequenceFormStrats</function> 
+returns the sequence form strategies (or sequences) for
+<parameter>player</parameter> for the sequence form game for 
+<parameter>efg</parameter>. Each
+sequence form strategy is represented by a row in the matrix, which is
+a list of actions for that player corresponding to the sequence.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SequenceForm">,
+<xref linkend="bif.SequenceFormConstraints">,
+<xref linkend="bif.WriteSequenceForm">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.SetChanceProbs" xreflabel="SetChanceProbs">
+
+<refmeta>
+<indexterm>
+<primary>SetChanceProbs</primary>
+</indexterm>
+
+<refentrytitle>SetChanceProbs</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetChanceProbs</refname>
+<refpurpose>
+Sets the probabilities chance actions are played at an information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetChanceProbs[infoset->INFOSET, probs->LIST(NUMBER)] =: INFOSET 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetChanceProbs</function> 
+sets the action probabilities for 
+<parameter>infoset</parameter> to the values given in <parameter>probs</parameter>.  Returns <parameter>infoset</parameter>.
+An error occurs if <parameter>infoset</parameter> does not belong to the chance player.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ChanceProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

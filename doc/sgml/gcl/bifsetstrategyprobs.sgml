@@ -1,0 +1,49 @@
+<refentry id="bif.SetStrategyProbs" xreflabel="SetStrategyProbs">
+
+<refmeta>
+<indexterm>
+<primary>SetStrategyProbs</primary>
+</indexterm>
+
+<refentrytitle>SetStrategyProbs</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetStrategyProbs</refname>
+<refpurpose>
+Sets the probabilities for a player in a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetStrategyProbs[profile<->MIXED, player->NFPLAYER, 
+                 value->LIST(NUMBER)] =: MIXED 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetStrategyProbs</function>
+sets the components of <parameter>profile</parameter> for 
+<parameter>player</parameter> to be equal
+to <parameter>value</parameter>.
+It is an error if <parameter>profile</parameter> and <parameter>player</parameter>
+are not from the same normal form game, or if the length of <parameter>value</parameter>
+is not the same as the number of strategies for <parameter>player</parameter> in the
+support of <parameter>profile</parameter>.  Returns <parameter>profile</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetStrategyProb">,
+<xref linkend="bif.StrategyProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,44 @@
+<refentry id="bif.SaveNfg" xreflabel="SaveNfg">
+
+<refmeta>
+<indexterm>
+<primary>SaveNfg</primary>
+</indexterm>
+
+<refentrytitle>SaveNfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SaveNfg</refname>
+<refpurpose>
+Writes a normal form game to a file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SaveNfg[efg->NFG, file->TEXT] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SaveNfg</function> 
+writes <parameter>nfg</parameter> to an external savefile
+<parameter>file</parameter>.  It is an error
+if <parameter>file</parameter> cannot be opened for writing.
+Returns <parameter>nfg</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.LoadNfg">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.SetPayoff" xreflabel="SetPayoff">
+
+<refmeta>
+<indexterm>
+<primary>SetPayoff</primary>
+</indexterm>
+
+<refentrytitle>SetPayoff</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>SetPayoff</refname>
+<refpurpose>
+Sets the payoff to a player of an outcome
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+SetPayoff[outcome->EFOUTCOME, player->EFPLAYER,
+          payoff->NUMBER] =: EFOUTCOME 
+SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, 
+          payoff->NUMBER] =: NFOUTCOME 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>SetPayoff</function>
+sets the payoff of <parameter>outcome</parameter> for <parameter>player</parameter> to <parameter>payoff</parameter>.
+It is an error if <parameter>outcome</parameter> and <parameter>player</parameter> are not from the same game.
+Returns <parameter>outcome</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Payoff">.
+</para>
+</refsect1>
+
+</refentry>
+
+

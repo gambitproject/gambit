@@ -1,0 +1,48 @@
+<refentry id="bif.StrategyValue" xreflabel="StrategyValue">
+
+<refmeta>
+<indexterm>
+<primary>StrategyValue</primary>
+</indexterm>
+
+<refentrytitle>StrategyValue</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>StrategyValue</refname>
+<refpurpose>
+Returns the payoff to playing a strategy against a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+StrategyValue[profile->MIXED, strategy->STRATEGY] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>StrategyValue</function>
+returns the expected payoff to a player (who is in control of the
+strategy set including <parameter>strategy</parameter>) of choosing 
+<parameter>strategy</parameter> when
+all players are following <parameter>profile</parameter>.  It is an error if
+<parameter>profile</parameter> and <parameter>strategy</parameter>
+are not from the same normal form
+game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.StrategyProb">,
+<xref linkend="bif.StrategyValues">.
+</para>
+</refsect1>
+
+</refentry>
+
+
