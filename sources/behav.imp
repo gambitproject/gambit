@@ -806,7 +806,9 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
   gList<const EFSupport> answer;
 
   gArray<int> active_act_no(isetlist.Length());
-  active_act_no = 0;
+
+  for (int k = 1; k <= active_act_no.Length(); k++)
+    active_act_no[k] = 0;
  
   EFSupport new_supp(big_supp);
 
@@ -814,6 +816,7 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
     for (int j = 1; j < isetlist[i]->NumActions(); j++)
       new_supp.RemoveAction(isetlist[i]->GetAction(j));
     new_supp.AddAction(isetlist[i]->GetAction(1));
+
     active_act_no[i] = 1;
     for (int k = 1; k < i; k++)
       if (isetlist[k]->Precedes(isetlist[i]->GetMember(1)))
@@ -826,7 +829,6 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
 
   int iset_cursor = isetlist.Length();
   while (iset_cursor > 0) {
-
     if ( active_act_no[iset_cursor] == 0 || 
 	 active_act_no[iset_cursor] == isetlist[iset_cursor]->NumActions() )
       iset_cursor--;
@@ -842,6 +844,10 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
 	int h = 1;
 	bool active = true;
 	while (active && h < k) {
+
+	  //DEBUG
+	  gout << "Entering while(active && h < k) ...\n";
+
 	  if (isetlist[h]->Precedes(isetlist[k]->GetMember(1)))
 	    if (active_act_no[h] == 0 || 
 		!isetlist[h]->GetAction(active_act_no[h])->
@@ -853,6 +859,7 @@ BehavProfile<T>::DeviationSupports(const EFSupport & big_supp,
 		active_act_no[k] = 0;
 	      }
 	    }
+	  h++;
 	}
 	if (active){
 	  new_supp.AddAction(isetlist[k]->GetAction(1));
