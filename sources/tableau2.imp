@@ -268,7 +268,7 @@ void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do x = V * b
-  x = GetInverse() * b *  (gRational)denom*(gRational)sign(denom*totdenom);
+  x = (GetInverse() * b * (gRational)sign(denom*totdenom))/gRational(denom);
   //** gout << "\nTableau<gRational>::Solve(), x: " << x;
 }
 
@@ -278,7 +278,7 @@ void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> 
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do y = c * V
-  y = (c * GetInverse()) *  (gRational)denom * (gRational)sign(denom*totdenom);
+  y = ((c * GetInverse()) * (gRational)sign(denom*totdenom))/gRational(denom);
   //** gout << "\nTableau<gRational>::SolveT(), y: " << y;
   //   gout << "\nc: " << c;
   //** gout << "\ndenom: " << denom << " totdenom: " << totdenom;;
