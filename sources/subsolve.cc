@@ -348,6 +348,9 @@ template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class gArray<unsigned char>;
+class gArray<BFS<double> >;
+class gArray<BFS<gRational> >;
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
