@@ -404,7 +404,16 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   m_environment = new wxGSM(this, *m_cancelButton,
 			    gin, *m_outputStream, *m_outputStream);
   wxCommandLine cmdline(20);
-  gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
+
+  gText initString = "Include[\"gclini.gcl\"]\n";
+  for (int i = 1; i < wxGetApp().argc; i++) {
+    initString += "Include[\"";
+    initString += wxGetApp().argv[i];
+    initString += "\"]\n";
+  }
+
+  gPreprocessor preproc(*m_environment, &cmdline, initString);
+
   wxBusyCursor cursor;
   try {
     while (!preproc.eof()) {
