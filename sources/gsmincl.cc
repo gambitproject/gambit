@@ -118,7 +118,7 @@ PortionSpec TextToPortionSpec(const gString& text)
 {
   int i;
   gString t = text;
-  PortionSpec result = porUNDEFINED;
+  PortionSpec result = porERROR;
 
   while(t.left(5) == "LIST(")
   {
