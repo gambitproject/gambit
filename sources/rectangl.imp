@@ -162,6 +162,15 @@ template<class T> const gVector<T> gRectangle<T>::SideLengths() const
   return answer;
 }
 
+template<class T> const T gRectangle<T>::MaximalSideLength() const
+{
+  T answer((T)0);
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (HeightInCoord(i) > answer) 
+      answer = HeightInCoord(i);
+  return answer;
+}
+
 template<class T> bool gRectangle<T>::Contains(const gVector<T>& point) const 
 { 
   assert (point.Length() == Dmnsn());

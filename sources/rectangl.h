@@ -48,6 +48,7 @@ public:
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
     const gRectangle<T>      Orthant(const gArray<int>&)        const;
     const gVector<T>         SideLengths()                      const;
+    const T                  MaximalSideLength()                const;
     bool                     Contains(const gVector<T> &)       const;
     bool                     Contains(const gRectangle<T> &)    const;
     const T                  Volume()                           const;
