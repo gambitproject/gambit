@@ -250,7 +250,20 @@ Infoset *BaseExtForm::AppendNode(Node *n, Infoset *s)
   
 Node *BaseExtForm::DeleteNode(Node *n, Node *keep)
 {
-  return n;
+  assert(n && keep);
+
+  if (keep->parent != n)   return n;
+
+  n->children.Remove(n->children.Find(keep));
+  DeleteTree(n);
+  keep->parent = n->parent;
+  if (n->parent)
+    n->parent->children[n->parent->children.Find(n)] = keep;
+  else
+    root = keep;
+  delete n;
+
+  return keep;
 }
 
 Infoset *BaseExtForm::InsertNode(Node *n, Player *p, int count)
@@ -403,6 +416,24 @@ Node *BaseExtForm::MoveTree(Node *src, Node *dest)
 
 Node *BaseExtForm::DeleteTree(Node *n)
 {
+  assert(n);
+
+  while (n->NumChildren() > 0)   {
+    DeleteTree(n->children[1]);
+    delete n->children.Remove(1);
+  }
+  
+  if (n->infoset)  {
+    n->infoset->members.Remove(n->infoset->members.Find(n));
+    if (n->infoset->members.Length() == 0)
+      delete n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset));
+    for (int j = 1; j <= n->infoset->player->infosets.Length(); j++)
+      n->infoset->player->infosets[j]->number = j;
+  }
+
+  n->outcome = 0;
+  n->name = "";
+
   return n;
 }
 
@@ -430,6 +461,15 @@ Infoset *BaseExtForm::InsertAction(Infoset *s, Action *a)
 
 Infoset *BaseExtForm::DeleteAction(Infoset *s, Action *a)
 {
+  assert(a && s);
+  for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
+       where++);
+  if (where > s->actions.Length())   return s;
+  delete s->actions.Remove(where);
+  for (int i = 1; i <= s->members.Length(); i++)   {
+    DeleteTree(s->members[i]->children[where]);
+    delete s->members[i]->children.Remove(where);
+  }
   return s;
 }
 

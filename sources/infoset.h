@@ -74,6 +74,8 @@ class Infoset   {
 	return 0;
       }
 
+    const gArray<Action *> &GetActionList(void) const  { return actions; }
+
     int NumActions(void) const   { return actions.Length(); }
 
 // This function exists only to facilitate the current version of efg2nfg
