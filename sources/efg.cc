@@ -485,7 +485,10 @@ void Efg::WriteEfgFile(gOutput &f, Node *n) const
 	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)
-	f << n->outcome->payoffs[pl] << ' ';
+	{
+	  gPoly<gNumber> t=n->outcome->payoffs[pl];
+	  f << t << ' ';
+	}
       f << "}\n";
     }
     else
