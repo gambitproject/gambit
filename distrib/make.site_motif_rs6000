@@ -1,0 +1,12 @@
+# Setup the information needed for the gui compilation using MOTIF on RS6000
+# Edit the following where appropriate
+# WxWin information
+WXDIR = /home/gostek/gambit/wxwin
+
+WXGUI = -Dwx_motif
+GUISUFFIX = _motif
+
+# XWindows information
+XINCDIR=-I/usr/local/X11/include/X11
+XLIB=-L/usr/lpp/X11/lib/R5/Motif1.2 -L/usr/lpp/X11/lib/R5
+XLIB = -lXm -lXt -lX11 -lm  -lg++

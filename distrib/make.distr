@@ -1,0 +1,44 @@
+# Makefile to create distribution time items.
+# $Id$
+# edit these!
+WXDIR=/home/gostek/gambit/wxwin
+GUI=none
+
+all:
+	@echo Specify a target: gcll, gui, src.
+	@echo If specifying gui, make sure to add GUI=ol/motif
+gui:
+	@echo Updating gambit_$(GUI)_$(HOST) on ftp server
+	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
+	-strip gui_$(GUI)_$(HOST)
+	cp $(WXDIR)/utils/wxhelp2/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
+	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp ./manual/* \
+		./efg/*.efg ./nfg/*.nfg gambit.ini gui-init
+	ftp_put gambit_$(GUI)_$(HOST).zip
+	rm gambit_$(GUI)_$(HOST).zip
+gcl:	
+	@echo Updating gcl_$(HOST) on ftp server
+	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST) GET=$(GET)
+	-strip gcl_$(HOST)
+	zip gcl_$(HOST) gcl_$(HOST) *.gcl ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
+	ftp_put gcl_$(HOST).zip
+	rm gcl_$(HOST).zip
+src:
+	@echo Updating source code on ftp server
+	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.yy \
+		Makefile ../bisondos/* ./bin32/dummy ./bitmaps/* ./wx_fake/* \
+		make.go make.site* 
+	ftp_put gambsrc.zip
+	rm gambsrc.zip
+wxwin:
+	@echo Updating libwx_$(GUI)_$(HOST) on ftp server 
+	-rm -f wx_$(GUI)_$(HOST).zip
+	cd $(WXDIR) ; \
+	zip $(HOME)/distrib/wx_$(GUI)_$(HOST) ./include/base/* ./include/x/* \
+		./lib/libwx_$(GUI)_$(HOST).a
+	ftp_put wx_$(GUI)_$(HOST).zip
+	rm -f wx_$(GUI)_$(HOST).zip
+
+
+
+
