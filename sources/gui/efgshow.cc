@@ -1565,17 +1565,18 @@ void EfgShow::OnSashDrag(wxSashEvent &p_event)
   switch (p_event.GetId()) {
   case idNODEWINDOW:
     m_treeWindow->SetSize(p_event.GetDragRect().width,
-			  m_treeWindow->GetRect().y,
+			  m_treeWindow->wxWindowBase::GetRect().y,
 			  clientWidth - p_event.GetDragRect().width,
-			  m_treeWindow->GetRect().height);
+			  m_treeWindow->wxWindowBase::GetRect().height);
     m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
 			      m_nodeSashWindow->GetRect().y,
 			      p_event.GetDragRect().width,
 			      m_nodeSashWindow->GetRect().height);
     break;
   case idSOLUTIONWINDOW:
-    m_treeWindow->SetSize(m_treeWindow->GetRect().x, m_treeWindow->GetRect().y,
-			  m_treeWindow->GetRect().width,
+    m_treeWindow->SetSize(m_treeWindow->wxWindowBase::GetRect().x,
+			  m_treeWindow->wxWindowBase::GetRect().y,
+			  m_treeWindow->wxWindowBase::GetRect().width,
 			  clientHeight - p_event.GetDragRect().height);
     m_nodeSashWindow->SetSize(m_nodeSashWindow->GetRect().x,
 			      m_nodeSashWindow->GetRect().y,
