@@ -90,8 +90,11 @@ template <class T> int EnumModule<T>::Enum(void)
   VertEnum<T> poly2(A2,b2,params.status);
   params.status.SetProgress(-(double)1);
 
-  v1=poly1.VertexList().Last();
-  v2=poly2.VertexList().Last();
+  BFS_List verts1,verts2;
+  verts1 = poly1.VertexList();
+  verts2 = poly2.VertexList();
+  v1=verts1.Last();
+  v2=verts2.Last();
 
 //  gout << "\n v1 = " << v1 << ", v2 = " << v2 << "\n";
 
@@ -102,7 +105,8 @@ template <class T> int EnumModule<T>::Enum(void)
 
   for(i=2;i<=v2 && !params.status.Get();i++) {
     params.status.SetProgress((double)(i-2)/(double)v2);
-    bfs1 = poly2.VertexList()[i];
+//    gout << "\nProgress = " << (double)(i-2)/(double)v2;
+    bfs1 = verts2[i];
     sum = (T)0;
     for(k=1;k<=n1;k++) {
       profile(1,k) = (T)0;
@@ -116,7 +120,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	profile(1,k)/=sum;
     }
     for(j=2;j<=v1;j++) {
-      bfs2 = poly1.VertexList()[j];
+      bfs2 = verts1[j];
 
       // check if solution is nash 
       // need only check complementarity, since it is feasible
