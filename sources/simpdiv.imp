@@ -46,7 +46,8 @@ template <class T> SimpdivModule<T>::~SimpdivModule()
 
 template <class T> T SimpdivModule<T>::simplex(void)
 {
-  int i, j, k, h, jj, hh,ii, kk,tot;
+  int i = 0;
+  int j, k, h, jj, hh,ii, kk,tot;
   T maxz;
 
 // Label step0 not currently used, hence commented
@@ -363,6 +364,7 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
   for(i=1;i<=N.NumPlayers();i++) {
     payoff=(T)(0);
     maxval=((T)(-1000000));
+    jj=0;
     for(j=1;j<=support.NumStrats(i);j++) {
       pay=yy.Payoff(i,i,j);
       payoff+=(yy(i,j)*pay);
@@ -371,6 +373,7 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
 	jj=j;
       }
     }
+    assert(jj>0);
     if((maxval-payoff)>maxz) {
       maxz=maxval-payoff;
       ylabel[1]=i;

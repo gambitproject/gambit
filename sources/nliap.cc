@@ -171,7 +171,7 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 
   double value;
   int iter;
-  bool found;
+  bool found = false;
 
   solutions.Flush();
 

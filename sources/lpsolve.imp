@@ -243,8 +243,9 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 
 template <class T> void LPSolve<T>::Solve(int phase)
 {
-  int i, out,in,outlab,xlab;
-  outlab = 0;
+  int i, in,xlab;
+  int outlab = 0;
+  int out = 0;
   gVector<T> a(neqns);
   double npiv;
   
