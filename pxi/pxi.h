@@ -265,24 +265,32 @@ private:
   Bool	stopped;
   double cur_e;
   bool painting;
-  //  int whichpage, maxpage, plots_per_page;
-  void PlotData_X(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
-  void PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int level);
-  void PlotData_2(wxDC& dc,int ch,int cw,const FileHeader &f_header);
+
+  void DoPlot_X(wxDC& dc,float minx, float maxx, float miny, float maxy, 
+		int x0, int y0, int cw,int ch, int whichplot, int level=1);
+  void DoPlot_2(wxDC& dc,float minx, float maxx, float miny, float maxy, 
+		int x0, int y0, int cw,int ch, int whichplot, int level=1);
+  void DoPlot_3(wxDC& dc,float minx, float maxx, float miny, float maxy, 
+		int x0, int y0, int cw,int ch, int whichplot, int level=1);
+  void PlotData_X(wxDC& dc,int x0, int y0, int cw,int ch,
+		  const FileHeader &f_header,int whichplot, int level);
+  void PlotData_3(wxDC& dc,int x0, int y0, int cw,int ch,
+		    const FileHeader &f_header,int whichplot, int level);
+  void PlotData_2(wxDC& dc,int x0, int y0, int cw,int ch,
+		    const FileHeader &f_header, int whichplot, int level=1);
   void PlotLabels(wxDC &dc,int ch,int cw);
+  void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int x0, int y0, int ch,int cw);
+
+  double CalcY_X(double y,int x0, int ch);
+  double CalcX_X(double x,int y0, int cw);
   
-  void DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,
-		      int ch,int cw,int plot);
-  double CalcY_X(double y,int ch,int plot);
-  double CalcX_X(double x,int cw);
-  
-  void DrawExpPoint_3(wxDC &dc,double cur_e,int iset,
-		      int st1,int st2,int ch,int cw,int plot);
-  double CalcY_3(double p1,int ch,int cw);
-  double CalcX_3(double p1,double p2,int ch,int cw,int plot);
+  void DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,
+			int x0, int y0, int cw,int ch);
+  double CalcY_3(double p1,int x0, int y0, int ch,int cw);
+  double CalcX_3(double p1,double p2,int x0, int y0, int ch,int cw);
   
   void DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,
-		      int pl2,int st2,int side);
+		      int pl2,int st2,int x0, int y0, int cw, int ch);
   
   void DrawToken(wxDC &dc,double x,double y,int st);
 public:
