@@ -194,7 +194,7 @@ void Portion::SetGame(void* game, bool efg)
 #endif
       if(_gsm->GameRefCount(_Game) == 0)   {
 	  if (!_GameIsEfg)   {
-	    if (((NfgPayoffs *) _Game)->Type() == DOUBLE)
+	    if (((NFPayoffs *) _Game)->Type() == DOUBLE)
 	      delete (Nfg<double> *) _Game;
 	    else
 	      delete (Nfg<gRational> *) _Game;
@@ -926,7 +926,7 @@ void NfOutcomePortion::Output(gOutput& s) const
   
   s << "(NFOutcome) " << *_Value;
   if (*_Value)
-    s << " \"" << (*_Value)->GetName() << "\"\n";
+    s << " \"" << (*_Value)->GetName() << "\"";
 }
 
 gString NfOutcomePortion::OutputString( void ) const
@@ -1038,10 +1038,10 @@ Portion* NfSupportPortion::RefCopy(void) const
 }
 
 
-NfgPayoffs *NfSupportPortion::PayoffTable(void) const
+NFPayoffs *NfSupportPortion::PayoffTable(void) const
 { return paytable; }
 
-NfSupportValPortion::NfSupportValPortion(NFSupport* value, NfgPayoffs *pay)
+NfSupportValPortion::NfSupportValPortion(NFSupport* value, NFPayoffs *pay)
 {
   _Value = new NFSupport*(value);
   paytable = pay;
@@ -1056,7 +1056,7 @@ bool NfSupportValPortion::IsReference(void) const
 { return false; }
 
 
-NfSupportRefPortion::NfSupportRefPortion(NFSupport*& value, NfgPayoffs *pay)
+NfSupportRefPortion::NfSupportRefPortion(NFSupport*& value, NFPayoffs *pay)
 {
   _Value = &value; 
   paytable = pay;
