@@ -22,7 +22,7 @@ if it does not, whether Newton's method leads to a root, and if it does,
 whether the Taylor's series information at the root precludes the existence
 of another root.  If the roots in the rectangle are not resolved by
 these queries, the rectangle is subdivided into 2^d subrectangles, and
-the process is repeated on each.  This continues untilit has been shown
+the process is repeated on each.  This continues until it has been shown
 that all roots have been found, or a predetermined searach depth is reached.
 The bound on depth is necessary because the procedure will not terminate
 if there are singular roots.
@@ -54,7 +54,8 @@ template <class T> class QuikSolv {
 					      gVector<int>&)       const;
    bool PolyHasNoRootsIn(const gRectangle<T>&, const gTree<gPoly<T> >&) const;
    bool SystemHasNoRootsIn(const gRectangle<T>& r, 
-			    const gList<gTree<gPoly<T> > >&)       const;
+			   const gList<gTree<gPoly<T> > >&,
+			         gArray<int>&)       const;
 
   // Ask whether Newton's method leads to a root without leaving the rectangle
    gVector<gDouble>      VectorTogDouble(gVector<T>&)              const;

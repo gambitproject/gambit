@@ -140,11 +140,19 @@ QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<T>& r,
 
 template<class T> 
 bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<T>& r,
-				      const gList<gTree<gPoly<T> > >& list) 
-  const
+				     const gList<gTree<gPoly<T> > >& list,
+				           gArray<int>& precedence)        const
 {
   for (int i = 1; i <= Dmnsn(); i++)
-    if (PolyHasNoRootsIn(r,list[i])) return true; 
+    if (PolyHasNoRootsIn(r,list[precedence[i]])) { 
+      if (i != 1) { // We have found a new "most likely to never vanish"
+	int tmp = precedence[i];
+	for (int j = 1; j <= i-1; j++) 
+	  precedence[i - j + 1] = precedence[i - j];
+	precedence[1] = tmp;
+      }
+      return true; 
+    }
   return false;
 }
 
@@ -439,13 +447,16 @@ QuikSolv<T>::FindRoots(const gRectangle<T>& r,
 
   gList<gTree<gPoly<T> > > list = ListOfPartialTrees();
 
+  gArray<int>              precedence(Dmnsn());  // Orders search for nonvanishing poly
+  for (int i = 1; i <= Dmnsn(); i++) precedence[i] = i;
+
   for (int d = 1; d <= depth; d++) {
     for (int j = 1; j <= CurrentList.Length(); j++ ) {
 
       bool remove = false;
       gVector<T> point = CurrentList[j].Center();
 
-      if ( SystemHasNoRootsIn(CurrentList[j],list) ) 
+      if ( SystemHasNoRootsIn(CurrentList[j],list, precedence) ) 
 	remove = true; 
 
       else if ( NewtonRootIsOnlyInRct(CurrentList[j],point) ) {
