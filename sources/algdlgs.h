@@ -26,6 +26,8 @@ private:
     { ((dialogAlgorithm *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackHelp(wxButton &p_object, wxEvent &)
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnHelp(); }
 
   static void CallbackDepth(wxRadioBox &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnDepth(); }
@@ -38,6 +40,7 @@ private:
   void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
+  void OnHelp(void);
 
   void OnDepth(void);
   void OnAll(void);
@@ -66,7 +69,7 @@ protected:
   void PrecisionField(void);
 
   virtual void AlgorithmFields(void) { }
-
+  virtual gText HelpTopic(void) const  { return "Solutions of Games"; }
   void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);
 
   void Go(void) { Fit(); Show(TRUE); }

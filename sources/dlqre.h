@@ -15,6 +15,8 @@ private:
   wxIntegerItem *m_tol1, *m_tolN, *m_maxits1, *m_maxitsN;
   wxRadioBox *m_startOption;
 
+  gText HelpTopic(void) const  { return "Qre"; }
+  
   void AlgorithmFields(void);
 
 public:

@@ -107,6 +107,11 @@ Bool dialogAlgorithm::OnClose(void)
   return FALSE;
 }
 
+void dialogAlgorithm::OnHelp(void)
+{
+  wxHelpContents(HelpTopic());
+}
+
 void dialogAlgorithm::OnDepth(void)
 {
   m_typeChoice->Enable(m_depthChoice->GetSelection() > 0);
@@ -310,24 +315,35 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
-  okButton->SetConstraints(new wxLayoutConstraints);
-  okButton->GetConstraints()->left.SameAs(m_traceGroup, wxLeft);
-  okButton->GetConstraints()->top.SameAs(m_traceGroup, wxBottom, 10);
-  okButton->GetConstraints()->height.AsIs();
-  okButton->GetConstraints()->width.AsIs();
 
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
+
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
+					"Help");
+  helpButton->SetClientData((char *) this);
+
+  okButton->SetConstraints(new wxLayoutConstraints);
+  okButton->GetConstraints()->right.SameAs(cancelButton, wxLeft, 10);
+  okButton->GetConstraints()->top.SameAs(m_traceGroup, wxBottom, 10);
+  okButton->GetConstraints()->height.AsIs();
+  okButton->GetConstraints()->width.AsIs();
+
   cancelButton->SetConstraints(new wxLayoutConstraints);
-  cancelButton->GetConstraints()->left.SameAs(okButton, wxRight, 10);
+  cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
   cancelButton->GetConstraints()->top.SameAs(okButton, wxTop);
   cancelButton->GetConstraints()->height.AsIs();
   cancelButton->GetConstraints()->width.AsIs();
 
+  helpButton->SetConstraints(new wxLayoutConstraints);
+  helpButton->GetConstraints()->left.SameAs(cancelButton, wxRight, 10);
+  helpButton->GetConstraints()->top.SameAs(okButton, wxTop);
+  helpButton->GetConstraints()->height.AsIs();
+  helpButton->GetConstraints()->width.AsIs();
+
   Layout();
   Fit();
-
 }
 
 void dialogAlgorithm::StopAfterField(void)
@@ -340,7 +356,7 @@ void dialogAlgorithm::StopAfterField(void)
 
   m_stopAfter = new wxIntegerItem(this, "Stop after",
 				  (stopAfter > 0) ? stopAfter : 1,
-				  -1, -1, -1, -1);
+				  1, 1, -1, -1);
 
   if (stopAfter == 0) {
     m_findAll->SetValue(true);
@@ -497,6 +513,7 @@ dialogEnumPure::~dialogEnumPure()
 void dialogEnumPure::AlgorithmFields(void)
 {
   m_algorithmGroup = new wxGroupBox(this, "Algorithm parameters");
+  NewLine();
   StopAfterField();
 
   m_algorithmGroup->SetConstraints(new wxLayoutConstraints);

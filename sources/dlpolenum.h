@@ -11,6 +11,7 @@
 
 class dialogPolEnum : public dialogAlgorithm {
 private:
+  gText HelpTopic(void) const { return "PolEnum"; }
   void AlgorithmFields(void);
 
 public:

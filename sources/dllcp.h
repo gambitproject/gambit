@@ -13,6 +13,8 @@ class dialogLcp : public dialogAlgorithm {
 private:
   void AlgorithmFields(void);
 
+  gText HelpTopic(void) const { return "Lcp"; }
+
 public:
   dialogLcp(wxWindow *p_parent = 0,
 	    bool p_subgames = false, bool p_vianfg = false);

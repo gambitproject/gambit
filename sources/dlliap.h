@@ -15,6 +15,8 @@ private:
   wxIntegerItem *m_maxits1D, *m_maxitsND, *m_nTries;
   wxRadioBox *m_startOption;
 
+  gText HelpTopic(void) const { return "Liap"; }
+
   void AlgorithmFields(void);
 
 public:
