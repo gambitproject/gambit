@@ -202,6 +202,12 @@ NFOutcome *Nfg::NewOutcome(void)
 void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
   m_dirty = true;
+
+  for (int i = 1; i <= outcomes.Length(); i++) {
+    if (results[i] == outcome)
+      results[i] = 0;
+  }
+
   delete outcomes.Remove(outcome->GetNumber());
 
   for (int outc = 1; outc <= outcomes.Length(); outc++)
