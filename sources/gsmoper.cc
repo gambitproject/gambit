@@ -619,9 +619,36 @@ Portion* GSM_NOT( Portion** param )
 
 
 
+//-----------------------------------------------------------------
+//    NewStream function - possibly belong somewhere else
+//-----------------------------------------------------------------
+
+
+Portion* GSM_NewStream( Portion** param )
+{
+  Portion* result = 0;
+  
+  assert( param[ 0 ]->Type() == porSTRING );
+
+  result = new Stream_Portion( ( (gString_Portion*) param[ 0 ] )->Value() );
+  
+  return result;
+}
+
+
+
+
+
+
+
+
+
 void Init_gsmoper( GSM* gsm )
 {
   FuncDescObj* FuncObj;
+
+
+  /*---------------------- Assign ------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "Assign" );
   FuncObj->SetFuncInfo( GSM_Assign, 2 );
@@ -998,4 +1025,17 @@ void Init_gsmoper( GSM* gsm )
 			porBOOL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
+
+
+  
+  /*-------------------- NewStream -------------------------*/
+
+  FuncObj = new FuncDescObj( (gString) "NewStream" );
+  FuncObj->SetFuncInfo( GSM_NewStream, 1 );
+  FuncObj->SetParamInfo( GSM_NewStream, 0, "file",
+			porSTRING, NO_DEFAULT_VALUE );
+  gsm->AddFunction( FuncObj );
+
 }
+
+
