@@ -1095,6 +1095,8 @@ bool guiefgPolEnumNfg::SolveSetup(void)
 // PolEnum on efg
 //------------------
 
+#include "efgalleq.h"
+
 guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support, 
 				   EfgShowInterface *p_parent)
   : guiEfgSolution(p_support, p_parent)
@@ -1102,7 +1104,23 @@ guiefgPolEnumEfg::guiefgPolEnumEfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 {
-  return gList<BehavSolution>();
+  wxStatus status(m_parent->Frame(), "PolEnumSolve Progress");
+  EfgPolEnumParams params(status);
+  //  params.stopAfter = m_stopAfter;
+  //  params.precision = m_precision;
+  params.trace = m_traceLevel;
+  params.tracefile = m_traceFile;
+
+  long nevals;
+  double time;
+  gList<BehavSolution> solutions;
+  gList<const EFSupport> singular_supports;
+
+  try {
+    AllEFNashSolve(m_support, params, solutions, nevals, time, singular_supports);
+  }
+  catch (gSignalBreak &) { }
+  return solutions;
 }
 
 bool guiefgPolEnumEfg::SolveSetup(void)
@@ -1113,8 +1131,13 @@ bool guiefgPolEnumEfg::SolveSetup(void)
     m_eliminate = dialog.Eliminate();
     m_eliminateAll = dialog.EliminateAll();
     m_eliminateWeak = dialog.EliminateWeak();
-    m_eliminateMixed = dialog.EliminateMixed();
     m_markSubgames = dialog.MarkSubgames();
+
+    //    m_stopAfter = dialog.StopAfter();
+    //    m_precision = dialog.Precision();
+
+    m_traceFile = dialog.TraceFile();
+    m_traceLevel = dialog.TraceLevel();
     return true;
   }
   else

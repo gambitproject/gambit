@@ -868,8 +868,6 @@ void EfgShow::MakeMenus(void)
 			     "Liapunov function minimization");
   solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
 			     "Enumeration by systems of polynomials");
-  // FIXME: This item currently disabled since algorithm not implemented yet
-  solveCustomEfgMenu->Enable(efgmenuSOLVE_CUSTOM_EFG_POLENUM, FALSE);
   solveCustomEfgMenu->Append(efgmenuSOLVE_CUSTOM_EFG_QRE, "QRE",
 			     "Compute quantal response equilibria");
   solveCustomMenu->Append(efgmenuSOLVE_CUSTOM_EFG, "Extensive form",

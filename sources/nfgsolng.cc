@@ -468,7 +468,7 @@ bool guinfgSimpdiv::SolveSetup(void)
 //----------
 
 #include "dlpolenum.h"
-#include "polenum.h"
+#include "nfgalleq.h"
 
 guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
 			     NfgShowInterface *p_parent)
@@ -485,10 +485,11 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
 
   long nevals;
   double time;
-  bool isSingular;
   gList<MixedSolution> solutions;
+  gList<const NFSupport> singular_supports;
+
   try {
-    PolEnum(m_support, params, solutions, nevals, time, isSingular);
+    AllNashSolve(m_support, params, solutions, nevals, time, singular_supports);
   }
   catch (gSignalBreak &) { }
   return solutions;
