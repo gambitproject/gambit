@@ -1,3 +1,42 @@
+<sect1 id="api.gcl">
+<title>GCL language description</title>
+
+<warning>
+<para>
+Beginning with version 0.97.1.0 of Gambit, the Gambit Command Language
+is officially deprecated.  For backwards compatibility, the GCL will
+continue to be provided for the next few minor releases, but it will
+be less actively tested and supported.  Users are encouraged to write
+all new scripts using the new Python API, or directly using the C++
+API.  Users interested in accessing Gambit in another language supported
+by the SWIG tools should contact the Gambit development team to see if
+this can be made possible.
+</para>
+</warning>
+
+<para>
+This section is an introduction to the Gambit Command Language (GCL).
+The GCL provides a
+method of directing the operation of Gambit that is analagous to that
+of a high level general purpose programming language.
+</para>
+<para>
+The purpose of the GCL is to provide a simple, but powerful and
+flexible language by which one can perform complicated or repetitive
+operations and procedures on games in extensive or normal form.  The
+language has facilities for building and editing an extensive or
+normal form game, converting back and forth between the extensive and
+normal form representations, and solving the resulting games for
+various equilibria of interest.  Standard arithmetic, logic, text and
+input-output operations are provided, as well as vectorizable
+functions which support many vector and matrix operations.  Flow
+control statements allow for repetitive operations (such as
+investigating games as one changes various parameters) or conditional
+operations.  Thus the GCL is also suitable for certain types of
+econometric analysis of games.
+</para>
+
+
 <sect2>
 <title>Introduction to the command language</title>
 
@@ -86,8 +125,8 @@ these data types represent.
 </para>
 
 <para>
-Despite the large number of specialized data types, the GCL uses {\it
-implicit typing}.  Implicit typing means that you never have to
+Despite the large number of specialized data types, the GCL uses
+implicit typing.  Implicit typing means that you never have to
 explicitly declare what the data type of a variable is before you use
 it.  Variables can thus be easily created in an interactive mode to
 refer to any object that is a valid data type, and to save
@@ -130,12 +169,12 @@ and accessible via online help)
 <listitem>
 <para>
 Listability:
-Many objects of interest in game theory are {\it sets} (the set of
+Many objects of interest in game theory are sets (the set of
 players, of information sets for a player, of actions for an
 information set, etc.)  All objects in the GCL (including lists) can
 be put in lists.  Further, when a GCL function (with a few exceptions
 noted in the Function reference section) is called with a list for
-one of its arguments, the function is run ``listably''.  This means
+one of its arguments, the function is run &quot;listably&quot;.  This means
 that the function is executed for each element of the list and
 generates a list (or nested list) of the corresponding dimension as
 output.  This makes it quite easy to generate objects of game
@@ -151,7 +190,8 @@ repetitive operations usually performed by flow control statements.
 <sect2>
 <title>Data types</title>
 <para>
-The built-in data types for the GCL are given in Table 1.  The Table is
+The built-in data types for the GCL are given in the following table.
+The table is
 divided into four sections. The data types in the first section are
 standard data types that are supported in many languages.  The data
 types in the next two sections are more specialized data types that
@@ -338,8 +378,9 @@ numbers of rational precision, whose denominator is one.
 Since the GCL uses implicit data typing, the data type of a numeric
 constant must be identifiable by the way it is written.  Hence, when
 you write a numeric constant, keep the following in mind.  Floating
-point constants must include exactly one \verb+.+ in them.  Rational
-constants must have at most one \verb+/+ in them, and integer
+point constants must include exactly one <literal>.</literal>
+in them.  Rational
+constants must have at most one <literal>.</literal> in them, and integer
 constants must have neither of the above. Thus, to represent the
 number <literal>2</literal> as a floating point <type>NUMBER</type>, you would write
 <literal>2.</literal>, and to represent it as a rational <type>NUMBER</type>, you would
@@ -358,7 +399,7 @@ however it is not required.  To specify a <type>TEXT</type> constant,
 surround the text with double-quote characters (<literal>"</literal>).  Constants
 may span more than one input line.  Also, line feeds can be explicitly
 included in text constants using the C-style notation of
-\verb+\n+. 
+<literal>\n</literal>. 
 </para>
 </sect3>
 
@@ -367,20 +408,21 @@ included in text constants using the C-style notation of
 <para>
 The <type>INPUT</type> type is a reference to an input stream, generally a
 file on disk.  Its principal use is to read in external data.  The
-constant, \texttt{StdIn}, is used to refer to the standard input stream
+constant <literal>StdIn</literal>,
+is used to refer to the standard input stream
 (generally the console).  New <type>INPUT</type> streams are created with
-the function \texttt{Input}, documented in the Function Reference
-section.
+the function <function>Input</function>.
 </para>
 
 <para>
 The <type>OUTPUT</type> type is a reference to an output stream, generally a
 file on disk.  Its principal use is as a logging file for writing
 formatted output from an extended command language job.  The
-constants \texttt{StdOut} and \texttt{NullOut} refer to the standard
+constants <literal>StdOut</literal> and <literal>NullOut</literal>
+refer to the standard
 output stream (generally the console) and the null output stream (the
 garbage can), respectively.  New <type>OUTPUT</type> streams are created with the 
-function \verb+Output+, documented in the Function Reference section.
+function <function>Output</function>.
 </para>
 </sect3>
 
@@ -440,7 +482,8 @@ discussion of them is deferred until later.
 <title>Lists</title>
 <para>
 The <type>LIST(T)</type> data type can be used to represent lists of any
-data type <type>T</type> (including \verb+T=LIST(R)+, where \verb+R+ is any
+data type <type>T</type> (including <type>T=LIST(R)</type>,
+where <type>R</type> is any
 data type).  Lists are represented in GCL statements by including
 objects of a given data type in curly braces and separated by commas.
 For example, the following is how to represent a list containing the
@@ -450,7 +493,7 @@ The data type <type>T</type> of a list is determined by the data type of its
 first element.  All other elements of the list must be of the same
 type as the first element.  The only exception to this rule is that
 subsequent elements can be listed to a different depth than the first
-element.  For example if \verb+T+ is a basic data type, then then the
+element.  For example if <type>T</type> is a basic data type, then then the
 second and subsequent elements of a <type>LIST(T)</type> can be of type
 <type>LIST(T)</type> or <type>LIST(LIST(T))</type>, etc.  Similarly, the second
 and subsequent elements of a <type>LIST(LIST(T))</type> can be of type
@@ -636,7 +679,7 @@ of constants follow:
 <para>
 You typically don't think of a constant as a function, but it is.  It
 is a function with no arguments, whose name is the constant itself.
-You can ``execute'' a constant by simply typing its name.  When you do
+You can &quot;execute&quot; a constant by simply typing its name.  When you do
 so, it returns a value, corresponding to the object that the constant
 represents.  
 </para>
@@ -685,7 +728,7 @@ GCL1:= << Assign["x",1]
 </programlisting>
 The <function>Assign</function> function also has an infix operator form, written
 <literal>:=</literal>.  In this form, the quotes are not needed around the variable
-name, and the function is not ``listable'' (see the section on Lists,
+name, and the function is not &quot;listable&quot; (see the section on Lists,
 later in this chapter).  So, equivalently, and more compactly,
 <programlisting>
 GCL1:= << x := 1
@@ -704,10 +747,10 @@ y:="3"
 </programlisting>
 The first call creates a new variable <literal>y</literal> of type 
 <type>NUMBER</type>, with value of <literal>2</literal>.
-The second modifies \verb+y+ to
+The second modifies <varname>y</varname> to
 have value <literal>3</literal>.  Since the new assignment does not change the
-type of \verb+y+, this command is fine.  The third statement attempts
-to change the data type of \verb+y+.  This statement will result in an
+type of <varname>y</varname>, this command is fine.  The third statement attempts
+to change the data type of <varname>y</varname>.  This statement will result in an
 error, since <function>Assign</function> cannot be used to change the type of a
 variable.  To change the data type of a variable, it must first be
 deleted, and then reassigned.  
@@ -725,7 +768,7 @@ is no longer defined.  A subsequent call of <function>Assign</function>
 may redefine
 the variable to be of any type.  <function>UnAssign</function> has a short form of
 <literal>:=</literal> followed immediately by a linefeed or semicolon.  Hence, if
-\verb+y+ is a variable of type <type>BOOLEAN</type> you can change it to
+<varname>y</varname> is a variable of type <type>BOOLEAN</type> you can change it to
 <type>NUMBER</type> with value <literal>3.0</literal> in two steps as follows:
 <programlisting>
 y:=
@@ -743,13 +786,14 @@ function (unless it is passed by reference), and a variable defined in
 a function will not be visible from outside the function.  Secondly,
 variables defined inside a function are deallocated when control
 leaves the function.  Thus, when a function is called a second time,
-variables defined within that function will not ``remember'' the
+variables defined within that function will not &quot;remember&quot; the
 values they were assigned in the last call to the function.  
 </para>
 
 <para>
 To modify the default scope and visibility of variables, the GCL uses
-the prefix <literal>$</literal> in a variable name to represent a ``static''
+the prefix <literal>$</literal> in a variable name to represent a 
+&quot;static&quot;
 variable and the prefix <literal>$$</literal> to represent
 a global variable.  A static variable
 is only visible in the function in which it is defined, but remains
@@ -815,8 +859,9 @@ Plus[x->1, y->2]
 </programlisting>
 
 This calls the function named <function>Plus</function>, 
-with parameter \verb+x+ set
-to the value 1 and \verb+y+ set to the value 2.  Since <function>Plus</function> is
+with parameter <parameter>x</parameter> set
+to the value 1 and <parameter>y</parameter> set to the value 2.
+Since <function>Plus</function> is
 the function for addition of two integers, the value returned would
 be, as you might expect, 3.
 </para>
@@ -827,13 +872,13 @@ the function reference as
 <programlisting>
 Plus[x->NUMBER, y->NUMBER] =: NUMBER
 </programlisting>
-This listing of a function is called its {\it prototype}.  
-It contains the function's name, its list of parameters, and its return
-value.  In this case, the function <function>Plus</function> takes two
-parameters, the
-first named \verb+x+ and taking a value of type <type>NUMBER</type> and the
-second named \verb+y+ and taking a value of type <type>NUMBER</type>, and
-returns a value of type <type>NUMBER</type>.
+This listing of a function is called its prototype.  It contains the
+function's name, its list of parameters, and its return value.  In
+this case, the function <function>Plus</function> takes two
+parameters, the first named <parameter>x</parameter> and taking a
+value of type <type>NUMBER</type> and the second named
+<parameter>y</parameter> and taking a value of type
+<type>NUMBER</type>, and returns a value of type <type>NUMBER</type>.
 </para>
 
 <para>
@@ -850,7 +895,7 @@ and achieve the same effect.
 Explicitly specifying the formal names for parameters all the time
 will prove tedious and can hinder readability.  For these reasons, it is
 also legal to specify parameters without their associated formal names.
-These are called passing {\it anonymous} parameters.  Our addition
+These are called passing &quot;anonymous&quot; parameters.  Our addition
 example could thus also be written
 <programlisting>
 Plus[1, 2]
@@ -862,7 +907,8 @@ When used without specifying the formal names, however, function
 calls are restricted to specifying parameters in exactly the same
 order as listed in the function prototype.  In our example, the GCL
 interpreter would have no way of distinguishing whether we meant 1 to
-be the value of \verb+x+ or the value of \verb+y+, and vice versa.
+be the value of <parameter>x</parameter> or the value of 
+<parameter>y</parameter>, and vice versa.
 While in the case of addition we may flip the values of the parameters
 without having an effect on the result, in general this is not the
 case.
@@ -871,19 +917,29 @@ case.
 <para>
 It is permitted to mix the two styles of parameter specification,
 subject to the following rules:
-
-\begin{itemize}
-\item All anonymous parameters must be specified before any named
-parameters
-\item No parameters may be omitted in the anonymous parameter list.
-If $k$ parameters are specified anonymously, they must match
-one-for-one the first $k$ parameters in the function's prototype.
-\item Once a named parameter has been specified, all succeeding
+<itemizedlist>
+<listitem>
+<para>
+All anonymous parameters must be specified before any named
+parameters.
+</para>
+</listitem>
+<listitem>
+<para>
+No parameters may be omitted in the anonymous parameter list.
+If k parameters are specified anonymously, they must match
+one-for-one the first k parameters in the function's prototype.
+</para>
+</listitem>
+<listitem>
+<para>
+Once a named parameter has been specified, all succeeding
 parameters must be named, even if the first named parameter appeared
 in the same place in the parameter list as it does in the prototype.
-\end{itemize}
-
-\noindent Therefore, it would be legal to write
+</para>
+</listitem>
+</itemizedlist>
+Therefore, it would be legal to write
 <programlisting>
 Plus[1, y->2]
 </programlisting>
@@ -898,15 +954,15 @@ is illegal since it violates the third condition.
 To be more precise, the function <function>Plus</function> comes in several different
 variations listed in the function reference:
 
-\begin{verbatim}
+<programlisting>
 Plus[x->NUMBER, y->NUMBER] =: NUMBER
 Plus[x->TEXT, y->TEXT] =: TEXT
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV 
-\end{verbatim}
-This is an example of function {\it overloading}.  This
+</programlisting>
+This is an example of function &quot;overloading&quot;.  This
 means that one function name may have several possible parameter
-lists, sometimes called {\it signatures}.  The GCL interpreter is
+lists, sometimes called &quot;signatures&quot;.  The GCL interpreter is
 capable of determining which version of the function to use by
 analyzing the names and types of the parameters used.
 </para>
@@ -938,11 +994,11 @@ subject to the above rules on parameter specification.
 </para>
 
 <para>
-All parameters so far have been passed by {\it value}, that is, a copy
+All parameters so far have been passed by &quot;value&quot; that is, a copy
 of the value of the parameter is given to the function to which it is
 passed.  These parameters may not be modified by the function.  It is
-also possible to have parameters to a function passed by {\it
-reference}.  This means that the function does not receive a copy of
+also possible to have parameters to a function passed by 
+&quot;reference&quot;.  This means that the function does not receive a copy of
 the value, but rather the memory location of the value itself.  Thus,
 the function may modify the value of a parameter passed by reference.
 </para>
@@ -961,10 +1017,10 @@ In the case where functions have parameters which are subtypes,
 it is preferred to match to the subtype over the parent type.  For example,
 suppose the following two signatures have been defined:
 
-\begin{verbatim}
+<programlisting>
 Foo[x->INTEGER] =: INTEGER
 Foo[x->NUMBER] =: NUMBER
-\end{verbatim}
+</programlisting>
 
 Then, a call of <literal>Foo[3]</literal> resolves to the first signature (since the
 value passed is an integer), and <literal>Foo[3.5]</literal>
@@ -1010,54 +1066,31 @@ call
 Abs[42]
 </programlisting>
 
-\noindent an assignment \verb+n := 42+ is implicitly performed before
+an assignment <literal>n := 42</literal> is implicitly performed before
 the body of the function is executed.
 </para>
 
 <para>
-It is also possible to pass variables by ``reference'' to a
+It is also possible to pass variables by &quot;reference&quot; to a
 user-defined function in the same way as a predefined function.  In
-this case, the function's ``local'' variable is stored in the same
+this case, the function's &quot;local&quot; variable is stored in the same
 physical location in the computer, and modifying the value locally
 also takes effect on the variable passed to the function.  For
-example, it might be useful instead to define \verb+Abs+ as:
+example, it might be useful instead to define <function>Abs</function> as:
 <programlisting>
 NewFunction[Abs[n<->NUMBER],
 		 If[n > 0, n, If[n < 0, n := -n, 0]]]
 </programlisting>
 in which case the function would still return the absolute
-value of \verb+n+, but also modify the variable passed to \verb+n+ to
-be the absolute value of the input \verb+n+.  So,
+value of <parameter>n</parameter>, but also modify the variable passed to
+<parameter>n</parameter> to
+be the absolute value of the input <parameter>n</parameter>.  So,
 <programlisting>
 q := -37;
 Abs[q]
 </programlisting>
-would result in the variable \verb+q+ containing the value
+would result in the variable <varname>q</varname> containing the value
 37 at the conclusion of execution.
-</para>
-
-<para>
-Each function has its own ``scope'', or set of variables.  Within a
-function body, the only variables which are visible are those which
-are declared in the parameter list of the function (this is \verb+n+
-in the <function>Abs</function> example above), and those which are created during
-the function's execution.  That is, no ``global'' or outside variables
-may be accessed directly by the function.  For example, if the user
-typed in the following:
-<programlisting>
-i := 4;
-NewFunction[FooFunc[x->NUMBER], x * i]
-</programlisting>
-later execution of the <function>FooFunc</function> would yield an
-``undefined variable i'' error message, since \verb+i+ is never
-defined within the function.  If instead <function>FooFunc</function> had been
-defined as follows:
-<programlisting>
-NewFunction[FooFunc[x->NUMBER], i := 13, x * i]
-</programlisting>
-<function>FooFunc</function> would always return 13 times the value of the
-parameter \verb+x+, since the value of \verb+i+ inside <function>FooFunc</function> is always 13, regardless of the value of \verb+i+ outside of the
-function.
 </para>
 
 </sect3>
@@ -1066,7 +1099,7 @@ function.
 <title>Aliases for function calls</title>
 <para>
 There are several functions which are so commonly used that special
-``short forms'' are defined for them.  We already saw one example with
+&quot;short forms&quot; are defined for them.  We already saw one example with
 the function <function>Assign</function>, which has the short form
 <literal>:=</literal>.  Most
 functions with short forms are the standard arithmetic and logic
@@ -1076,15 +1109,15 @@ more familiarly be written
 <programlisting>
 1 + 2
 </programlisting>
-which expression is converted to the ``long form'' function
+which expression is converted to the &quot;long form&quot; function
 call by the interpreter.  Note that formal names may not be specified
-in a ``short form'' call, and the order of parameters is therefore
+in a &quot;short form&quot; call, and the order of parameters is therefore
 significant.
 </para>
 
 <para>
-Here is a list of the functions thus abbreviated, and their ``short
-form'' equivalents:
+Here is a list of the functions thus abbreviated, and their &quot;short
+form&quot; equivalents:
 
 <table>
 <title>Operators in GCL</title>
@@ -1218,9 +1251,11 @@ arguments).
 
 <para>
 When short form forms are used, then ambiguity can arise in the
-intended order of evaluation.  For example, the statement \verb & a + b * c& , 
-could be meant as \verb+Plus[a,Times[b,c]]+ or as
-\verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
+intended order of evaluation.  For example, the statement 
+<literal>a + b * c</literal>, 
+could be meant as <literal>Plus[a,Times[b,c]]</literal> or as
+<literal>Times[Plus[a,b],c]</literal>. 
+In order to resolve such ambiguities, all
 functions that have a short form representation are given an order of
 precedence.  When a statement is parsed by the GCL, it is first
 scanned from left to right, replacing each short form expression at
@@ -1255,12 +1290,12 @@ The order of precedence for built-in functions is as follows:
 </tbody>
 </tgroup>
 </table>
-Thus, the statement \verb & a + b * c& would become 
+Thus, the expression <literal>a + b * c</literal> would become 
 <programlisting>
 Plus[a,b*c]
 Plus[a,Times[b,c]]
 </programlisting>
-On the other hand, the statement \verb&( a + b ) * c& would become 
+On the other hand, the expression <literal>(a + b) * c</literal> would become 
 <programlisting>
 Parentheses[a+b]*c
 Parentheses[Plus[a,b]]*c
@@ -1281,16 +1316,16 @@ Times[Plus[a,b],c]
 <title>Getting and suppressing console output</title>
 <para>
 The GCL will only print output at the console if you explicity ask for
-it with the built-in function <function>Print</function>.  This function has the
-prototype
+it with the built-in function <function>Print</function>.  This
+function has the prototype
 <programlisting>
 Print[x->T] =: T
 </programlisting>
-for any data type <type>T</type>, and has
-the short form <literal>&lt;&lt; x</literal>.
-You may have noticed that the GCL prompt
-concludes with a <literal>&lt;&lt;</literal>.  In fact, this is not part of the prompt,
-but rather is a ``pre-typed'' part of your GCL command.  
+for any data type <type>T</type>, and has the short form
+<literal>&lt;&lt; x</literal>.  You may have noticed that the GCL
+prompt concludes with a <literal>&lt;&lt;</literal>.  In fact, this is
+not part of the prompt, but rather is a &quot;pre-typed&quot; part of your GCL
+command.
 </para>
 
 <para>
@@ -1336,9 +1371,10 @@ contain lists in the same fashion as for any other data type:
 <programlisting>
 list:={1,{2,3},4}
 </programlisting>
-The built in function \verb+List[x,n]+ can be used to
-create a list of length \verb+n+ all of whose elements have the value
-\verb+x+.  For numeric data types, a third parameter for 
+The built in function <function>List[x,n]</function> can be used to
+create a list of length <parameter>n</parameter>
+all of whose elements have the value
+<parameter>x</parameter>.  For numeric data types, a third parameter for 
 <function>List</function>
 allows each successive entry to be incremented.
 <programlisting>
@@ -1352,19 +1388,25 @@ GCL3:= << List[0/1, 5, 1/4]
 { 0, 1/4, 1/2, 3/4, 1 }
 </programlisting>
 Lists of any data type can be created with <function>List</function>.  So if
-\verb+n+ is a normal form game, then \verb+List[n,5]+ is a list of five
-copies of \verb+n+.
+<parameter>n</parameter> is a normal form game, 
+then <function>List[n,5]</function> is a list of five
+copies of <parameter>n</parameter>.
 </para>
 
 <para>
 The function <function>NthElement</function> can be used
-to get \verb+n+th element of the list, \verb+list+.  This function has
+to get <parameter>n</parameter>th element of the list,
+<parameter>list</parameter>.  This function has
 two short forms, <literal>list[[n]]</literal> and <literal>list_n</literal>.
 Since the
-function returns the \verb+n+th element of the list, it can be used
-recursively to get the elements of nested lists.  So \verb+list_i_j+
-returns the \verb+j+th element of the \verb+i+th element of
-\verb+list+.  Also, since \verb+list+ is passed by reference, the
+function returns the <parameter>n</parameter>th element of the list,
+it can be used
+recursively to get the elements of nested lists.  So
+<function>list_i_j</function>
+returns the <parameter>j</parameter>th element of the 
+<parameter>i</parameter>th element of
+<parameter>list</parameter>.  Also, since <parameter>list</parameter>
+is passed by reference, the
 function can be used to modify the corresponding element of a list.
 Thus, you can constuct your own 3-by-3 identity matrix as
 follows:
@@ -1385,7 +1427,7 @@ GCL3:= << list
 <sect2>
 <title>Listability of functions</title>
 <para>
-Almost all of the functions in the GCL are ``listable''.  This means
+Almost all of the functions in the GCL are &quot;listable&quot;.  This means
 that if there is a version of the function which takes a type <type>T</type>
 as the data type for a parameter, then it can be called with
 <type>LIST(T)</type> as well.  This results in the function generating a
@@ -1396,20 +1438,27 @@ Foo[x->T,y->S] =: R
 </programlisting>
 where <type>T</type>, <type>S</type>, and <type>R</type>
 represent arbitrary data types.
-Then if \verb+a+ is a <type>LIST(T)</type>, and \verb+b+ is of type
-<type>S</type>, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
-<type>LIST(R)</type>, where the length of \verb+c+ is equal to the length of
-\verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.
+Then if <varname>a</varname> is a <type>LIST(T)</type>, and 
+<varname>b</varname> is of type
+<type>S</type>, then <literal>c := Foo[a,b]</literal> generates 
+<varname>c</varname> of type
+<type>LIST(R)</type>, where the length of <varname>c</varname>
+is equal to the length of
+<varname>a</varname>, and where <literal>c[[i]] = Foo[a[[i]],b]</literal>.
 </para>
 
 <para>
-If <function>Foo[]</function> is called with both \verb+a+ and \verb+b+ being lists
+If <function>Foo</function> is called with both 
+<varname>a</varname> and <varname>b</varname> being lists
 of the correct data type, then the GCL checks whether the length of
-\verb+a+ and \verb+b+ is the same.  If not, it generates a
+<varname>a</varname> and <varname>b</varname> is the same. 
+If not, it generates a
 dimensionality error. If they are of the same dimension, then 
-\verb+c := Foo[a,b]+ generates \verb+c+ of type <type>LIST(R)</type>, where the
-length of \verb+c+ is equal to the length of \verb+a+, and where
-\verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
+<literal>c := Foo[a,b]</literal> generates 
+<varname>c</varname> of type <type>LIST(R)</type>, where the
+length of <varname>c</varname> is equal to the length of <varname>a</varname>,
+and where
+<literal>c[[i]] = Foo[a[[i]],b[[i]]]</literal>.
 </para>
 
 <para>
@@ -1424,12 +1473,15 @@ Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
 
 <para>
 The same rules apply recursively using these function prototypes as
-well.  So if \verb+a+ is of type <type>LIST(LIST(T))</type>, and \verb+b+ is
-of type \verb+S+, the command \verb+c := Foo[a, b]+ results in a
-listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
-type <type>LIST(LIST(R))</type>, where \verb+c[[i]] = +
-\verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
-\verb+Foo[a[[i]][[j]],b]+.
+well.  So if <varname>a</varname> is of type <type>LIST(LIST(T))</type>, 
+and <varname>b</varname> is
+of type <type>S</type>, the expression <literal>c := Foo[a, b]</literal>
+results in a
+listable call to <literal>Foo[x->LIST(T), y->S]</literal>.
+Thus, <varname>c</varname> is of
+type <type>LIST(LIST(R))</type>, where 
+<literal>c[[i]] = Foo[a[[i]],b]</literal>.
+Hence, <literal>c[[i]][[j]] = Foo[a[[i]][[j]],b]</literal>.
 </para>
 
 <para>
@@ -1497,7 +1549,8 @@ GCL1:= << Help["help"]
 </programlisting>
 returns the function prototype for <function>Help</function>.
 Note that <function>Help</function>
-has two optional <type>BOOLEAN</type> parameters, \verb+udf+ and \verb+bif+.
+has two optional <type>BOOLEAN</type> parameters, 
+<parameter>udf</parameter> and <parameter>bif</parameter>.
 By default, both user defined functions and built-in functions are
 included in the search.  To exclude one or the other of these, set the
 corresponding parameter to <literal>False</literal>.
@@ -1507,20 +1560,19 @@ corresponding parameter to <literal>False</literal>.
 The required text parameter for <function>Help</function> can also contain the
 regular-expression style wildcards <literal>*</literal> and <literal>?</literal>.  In this
 case, if there is not an exact match, a list of function names
-matching \verb+x+ is returned.  For example, The command 
+matching <parameter>x</parameter> is returned.  For example, The command 
 <programlisting>
 GCL1:= << Help["*efg"]
 { CompressEfg, LoadEfg, NewEfg, SaveEfg }
 </programlisting>
-returns a list of all function names ending with ``efg''
-</para>
-
-<para>
+returns a list of all function names ending with &quot;efg&quot;
 Note that the function <function>Help</function> is listable (see section on
-listability), so that we can do \verb+Help[Help["*efg"]]+ to get a
+listability), so that we can do <literal>Help[Help["*efg"]]</literal>
+to get a
 list of function prototypes for all functions whose names end with
-\verb+efg+.  Similarly, \verb+Help["*"]+ gives a list of all function
-names in the GCL, and {\tt Help[Help["*"]]} gives a list of all
+&quot;efg&quot;.  Similarly, <literal>Help["*"]</literal>
+gives a list of all function
+names in the GCL, and <literal>Help[Help["*"]]</literal> gives a list of all
 function prototypes in the GCL.
 </para>
 
@@ -1533,6 +1585,600 @@ the function and its parameters is returned.
 </para>
 
 </sect2>
+
+<sect2>
+<title>Advanced topics</title>
+
+<para></para>
+
+<sect3>
+<title>Including files</title>
+
+<para>
+The function <function>Include[file->TEXT]</function> is used to
+insert the contents of the file given into the input stream, as if
+they had been typed directly by the user.  This can be particularly
+useful in conjunction with user defined functions, in that a library
+of useful functions can be constructed and included into the program
+asily.
+</para>
+
+<para>
+<function>Include</function> may only appear at the &quot;top level&quot; of
+the program.  That is to say, it cannot be used inside a loop,
+function declaration, or expression.  However, files may be nested
+arbitrarily deep using <function>Include</function>,
+so you can include a file which
+in turn includes other files.
+</para>
+
+<para>
+When a file is included, the GCL looks for a file with that name in
+the following locations, in order.  
+<orderedlist>
+<listitem>
+<para>The current directory;</para>
+</listitem>
+<listitem>
+<para>The directory specified by the <varname>HOME</varname> environment 
+variable, if any;</para>
+</listitem>
+<listitem>
+<para>The directory specified by the <varname>GCLLIB</varname>
+environment variable, if any;</para>
+</listitem>
+<listitem>
+<para>The directory where the executable is located.</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+This search order applies also to the <filename>gclini.gcl</filename>
+file that is
+loaded whenever the GCL is started.  Hence, you can keep a standard
+version of a file that is frequently included in the same directory as
+the GCL executable, and then modify it for use on a particular project
+by keeping a modified copy of it in the directory associated with that
+project.  
+</para>
+
+<para>
+It is good practice to have included files identify themselves when
+they are included. This can be done by using the
+<function>GetPath</function> function, which returns the full
+pathname of the file from which the command is executed.  For example,
+if the following line is placed as the first line in an included file
+(say with filename <filename>path/myfile.gcl</filename>)
+<programlisting>
+StdOut << "Include[\""&amp;GetPath[]&amp;"\"]\n"
+</programlisting>
+(Note that the standard escape sequences <literal>\"</literal> and 
+<literal>\n</literal> are
+used within a text string to represent a quotation mark and a carriage
+return, respectively.)  Then when the file is included, it will identify
+itself by writing the following message to the standard output stream:
+<programlisting>
+Include["path/myfile.gcl"]
+</programlisting>
+</para>
+</sect3>
+
+
+<sect3>
+<title>Flow control structures</title>
+
+<para>
+The GCL contains three functions which allow flow control within a
+program.  These functions are &quot;special&quot; in that their parameters are
+evaluated in a special way (since their parameters are expressions and
+sequences of statements); they also have no &quot;formal&quot; names for their
+parameters.
+</para>
+
+<sect4>
+<title>Conditional execution with <function>If</function></title>
+
+<para>
+The function <function>If</function> allows execution of a sequence of statements
+only under certain conditions.  The syntax of the function is
+<programlisting>
+If[boolean-expression, statement-list {, statement-list}]
+</programlisting>
+The function is interpreted as follows: If the
+<parameter>boolean-expression</parameter> evaluates to <literal>True</literal>,
+then the first
+list of statements is executed.  If it evaluates to <literal>False</literal> and
+the second (optional) list of statements is present, that list is
+executed; if it is not present, the <function>If</function> expression evaluates to <literal>False</literal>.
+For example, the statement
+<programlisting>
+If[i = 2, j := 1, j := 2]
+</programlisting>
+sets <varname>j</varname> to <literal>1</literal> if the value of 
+<varname>i</varname> is
+<literal>2</literal>, and sets <varname>j</varname> to <literal>2</literal>
+if the value of <varname>i</varname> is
+not <literal>2</literal>.  It would also be perfectly legitimate to write
+<programlisting>
+If[i = 2, j := 1]
+</programlisting>
+in which case <varname>j</varname> would be set to
+<literal>1</literal> if <varname>i</varname> is equal to
+<literal>2</literal>, but if <varname>i</varname> were not
+<literal>2</literal>, the expression evaluates to
+<literal>False</literal>.
+</para>
+
+<para>
+This last example brings up an important note about conditional
+execution.  Expressions which appear in the branch of an
+<function>If</function> expression which is not taken are treated as
+if they did not exist.  So, were this the first mention of
+<varname>j</varname> in
+this scope, the last example would leave <varname>j</varname> defined only if
+<varname>i</varname> was equal to <literal>2</literal>.
+However, <varname>j</varname> would
+<emphasis>not</emphasis> be defined otherwise.  It is therefore
+necessary to be careful in constructing <function>If</function>
+expressions which result in the definition of new variables.
+</para>
+
+</sect4>
+
+<sect4>
+<title>Repetitive execution with <function>While</function></title>
+
+<para>
+Often in writing programs it is necessary to execute a block of
+statements repeatedly, usually with different values for variables.
+To this end the GCL provides a special function <function>While</function> as a
+generalized looping construct.  The syntax of the function is
+<programlisting>
+While[boolean-expression, statement-list]
+</programlisting>
+The function is interpreted as follows: while
+<parameter>boolean-expression</parameter> evalutes to <literal>True</literal>, execute the
+statements in <parameter>statement-list</parameter>.  Note that the evaluation of the
+boolean takes place at the beginning of the execution of a block, so
+it is only important whether the value is <literal>True</literal> or
+<literal>False</literal>
+at the beginning of the block, and not at some point in the middle.
+</para>
+
+<para>
+This simple loop creates a list of the first ten perfect squares: 
+<programlisting>
+i := 1;
+list := { };
+While[i <= 10, list := list & { i^2 }; i := i + 1;]
+</programlisting>
+</para>
+
+<para>
+As with <function>If</function>,
+be wary of declaring a variable implicitly inside a
+loop.  A variable is declared only when the corresponding statement is
+executed; so, if the <parameter>boolean-expression</parameter> 
+is <literal>False</literal> the
+first time it is evaluated, the body of the loop never executes, and
+no variables which appear in the loop are considered to be defined.
+</para>
+
+</sect4>
+
+<sect4>
+<title>Indexed looping with <function>For</function></title>
+
+<para>
+The function <function>For</function> is a specialized looping
+construct, useful mostly in cases where some index variable is used to
+iterate a list or some sequence.  The general syntax for
+<function>For</function> is
+<programlisting>
+For[statement-list, boolean-expression, statement-list, statement-list]
+</programlisting>
+The call is interpreted as follows:
+<orderedlist>
+<listitem>
+<para>
+Execute the statements in the first <parameter>statement-list</parameter>
+(initialization);
+</para>
+</listitem>
+<listitem>
+<para>
+Evaluate the <parameter>boolean-expression</parameter> (or guard);
+</para>
+</listitem>
+<listitem>
+<para>
+If the <parameter>boolean-expression</parameter> is <literal>False</literal>,
+terminate the
+loop and continue with the first statement after the loop.  If it is
+<literal>True</literal>, execute the third 
+<parameter>statement-list</parameter>, which is the body of the loop;
+</para>
+</listitem>
+<listitem>
+<para>
+Execute the second <parameter>statement-list</parameter>, which is usually
+used to increment a counter, and return to the evaluation of the guard
+in step 2.
+</para>
+</listitem>
+</orderedlist>
+</para>
+
+<para>
+Returning to the example in the <function>While</function> section, here is another
+way of writing the loop to create a list of the first ten squares:
+<programlisting>
+For[i:=1; list:={}, i<=10, i:=i+1, list:=list&{i^2}]
+</programlisting>
+The two methods are completely equivalent, but it is often
+more convenient to use the structure afforded by the <function>For</function>
+function.
+</para>
+</sect4>
+
+</sect3>
+
+<sect3>
+<title>Input and output</title>
+
+<para>
+Data can be read from an input stream by the <function>Read</function>
+function.
+So if <varname>in</varname> is an input stream 
+(i. e., of type <type>INPUT</type>) then
+a successful call of <literal>Read[in,x]</literal>
+will read the exposed data (see
+function reference for definition of &quot;exposed data&quot;) from the input
+stream, <varname>in</varname>, assign <varname>x</varname>
+to have that type and value, and
+position the file pointer at the end of the exposed data, to be ready
+for the next call of <function>Read</function>. 
+<literal>Read[in,x]</literal> has the short
+form <literal>in &gt;&gt; x</literal>. 
+Since the return value of <literal>Read[in,x]</literal> is
+<varname>in</varname>, these calls can be chained.  In other words,
+<programlisting>
+in >> x >> y
+</programlisting>
+is equivalent to 
+<programlisting>
+Read[in,x]
+Read[in,y]
+</programlisting>
+</para>
+
+<para>
+In the expression <literal>Read[in,x]</literal>,
+if <varname>x</varname> is undefined, then its
+data type is determined from the exposed data in the input stream.  On
+the other hand if <varname>x</varname> is previously defined, then the
+<function>Read</function> function will expect to find the corresponding data type
+in the input stream, and a file read error will be generated if the
+exposed data is of the wrong data type.  If <varname>x</varname> is previously
+defined to be a <type>LIST(T)</type>, then <literal>Read[in,x]</literal> will
+successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.  Thus, if the file <filename>file.dat</filename> contains
+the following data
+<programlisting>
+25 1/3 "This is a text string!" False 3.14159 
+{{1, 0},{0, 1}}
+1 2 3 4 5
+</programlisting>
+then the following GCL code
+<programlisting>
+in:=Input["file.dat"]
+x:=List[0,5]
+in >> i >> r >> t >> b >> f >> l >> x
+</programlisting>
+opens an input stream, consisting of the contents of <filename>file.dat</filename>, and
+then reads data from the input stream into the corresponding
+variables.  After the last expression is evaluated,
+<itemizedlist>
+<listitem>
+<para>
+<varname>i</varname> is a <type>NUMBER</type> with value <literal>25</literal>,
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>r</varname> is a <type>NUMBER</type> with value <literal>1/3</literal>, 
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>t</varname> is a <type>TEXT</type> with value
+<literal>"This is a text string!"</literal>, 
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>b</varname> is a <type>BOOLEAN</type> with value 
+<literal>False</literal>, 
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>f</varname> is a <type>NUMBER</type> with value
+<literal>3.14159</literal>, 
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>l</varname> is a <type>LIST(LIST(NUMBER))</type>
+with value <literal>{{1,0},{0,1}}</literal>, and 
+</para>
+</listitem>
+<listitem>
+<para>
+<varname>x</varname> is a <type>LIST(NUMBER)</type> with value
+<literal>{1,2,3,4,5}</literal>.  
+</para>
+</listitem>
+</itemizedlist>
+</para> 
+
+<para>
+Data can be written to an output stream by the use of the
+<function>Write</function> function.  Thus, the following program
+<programlisting>
+out:=Output["file.out"]
+x:=0/1;y:={0.0,0.0}
+Write[out,x]
+Write[out,y]
+</programlisting>
+creates an output stream, <varname>out</varname>, and then writes out a
+<type>NUMBER</type>, followed by a list of two <type>NUMBER</type>s.
+<literal>Write[out,x]</literal> has the short form 
+<literal>out &lt;&lt; x</literal>.  Since the
+return value of <function>Write</function> is <varname>out</varname>,
+these calls can be
+chained.  So the two lines writing out <varname>x</varname> and 
+<varname>y</varname> in the
+above example could be written instead
+<programlisting>
+out << x << y
+</programlisting>
+</para>
+
+<para>
+The <function>Format</function> and <function>ListFormat</function> functions
+can be used to
+control the formatting of data written to an output stream.  Note that
+the <function>Read</function> and <function>Write</function> functions are not listable.
+</para>
+
+<para>
+The <function>Read</function> and <function>Write</function>
+ functions can only be used with
+certain data types (see function documentation).  Reading and writing
+of <type>EFG</type> and <type>NFG</type> from external files can be done with the
+<function>LoadEfg</function>, <function>SaveEfg</function>,
+<function>LoadNfg</function> and <function>SaveNfg</function> functions.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Null values</title>
+
+<para>
+Certain function calls in the GCL result in either invalid or
+undetermined values for the required data type. Examples would be
+asking for the first child node of a terminal node, or the parent of
+the root node, or an outcome attached to a node with no outcome.
+Similar problems arise in the algorithmic and computational parts of
+the code.  Here, for example, algorithms that do not compute
+sequential equilibria do not return belief probabilities for unreached
+information sets.  Other algorithms may action probabilities for off
+the equilibrium path information sets undetermined.  
+</para>
+
+<para>
+Under certain situations such as the above, when no valid value is
+available for return, instead of returning an error, the GCL will
+a Null value for the given type.  Returning a Null value instead of
+terminating execuation with an error message is frequently desirable
+in a setting where functions are being called listably, as it allows
+for computation of elements of the list that have valid entries
+without aborting the GCL because some elements have invalid entries.  
+</para>
+
+<para>
+The situations in which Null values are returned are described in the
+function reference section of the manual.  Most functions in the GCL,
+when encountering a Null value as a parameter, will abort with an
+error message.  Whether a function will accept Null values as valid
+values for an argument is indicated in the function prototype with an
+asterisk (<literal>*</literal>) after the relevant parameter.  For example, the
+function prototype for <function>IsNull</function> is
+<programlisting>
+IsNull[x->T*]=:BOOLEAN
+  for any data type, T
+</programlisting>
+Here, the <literal>*</literal> indicates that this function accepts Null values
+for its argument.  If a built-in function accepts Null values for an
+argument, it is documented in the function reference section what the
+behavior of the function is when encountering a Null value.  
+</para>
+
+<para>
+Note that user defined functions  will accept Null values for
+arguments also, if the relevant parameter is designated with a
+<literal>*</literal>, as above. 
+</para>
+</sect3>
+
+<sect3>
+<title>System information</title>
+
+<para>
+There are several commands in the GCL that allow you to get
+information from or run processes on the host system.  
+</para>
+
+<para>
+A series of functions, <function>StartWatch</function>,
+<function>StopWatch</function>, and
+<function>ElapsedTime</function>, provide information on the amount of cpu time
+used by the GCL, and can be used to time computation.  
+Another series of functions, <function>GetEnv</function>,
+<function>SetEnv</function>,
+<function>UnSetEnv</function>, <function>Platform</function>,
+allow you to set and check
+environment variables, or check the operating system that the GCL is
+running on.
+A third series of functions, <function>ExePath</function>,
+<function>GetPath</function>, and <function>GambitExe</function> 
+(included in <filename>stdudfs.gcl</filename>),
+provide path and filenames to files being used
+by or related to the GCL.
+Finally, the <function>Shell</function>
+command allows you to run a child process from
+the GCL.  
+</para>
+
+<para>
+The above system functions are also used in the user defined function
+<function>Display</function>,
+which allows you to start a child process that launches
+up the Gambit graphical interface and loads an extensive or normal
+form game. If <varname>game</varname> is a variable of type <type>NFG</type> or
+<type>EFG</type>, then the call <function>Display[game]</function>
+will load the 
+<varname>game</varname> in the graphical interface.
+<footnote>
+<para>The user defined functions
+<function>GambitExe</function> and <function>Display</function> assume that you used the default
+directories and filenames when you installed Gambit.  If you deviated
+from the standard installation, you may have to edit these functions
+before they work correctly.
+</para>
+</footnote>
+</para>
+
+</sect3>
+
+<sect3>
+<title>Variables pointing to deleted objects</title>
+
+<para>
+In the GCL, you
+can create variables to represent objects which may be deleted or
+invalidated subsequently as side effects of some functions. For example, suppose
+you define a variable to represent an element (node, information set,
+outcome, etc.) of an extensive form game.  You may subsequently delete
+the part of the tree that contains that element.  The object that the
+variable originally referred to is no longer valid.  
+In this case, the variable is automatically unassigned.
+</para>
+
+<para>
+In the following example, a game is loaded, and the variable <varname>n</varname>
+is defined to be the first child of the first child of the root node.
+Now the part of the tree after the first branch is deleted, the
+variable <varname>n</varname> is now undefined:
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= r:=RootNode[e]
+GCL3:= n:=r#1#1
+GCL4:= DeleteTree[r#1]
+GCL5:= << n
+ERROR: Print[]: Undefined reference "n" passed for parameter #1
+</programlisting>
+Since the node is no longer present in the tree, the variable
+<varname>n</varname> which
+refers to it has been unassigned.  A similar situation occurs here, where
+elements of a list are deleted via <function>DeleteTree</function>:
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= t:=TerminalNodes[e]
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << t
+ERROR: Print[]: Undefined reference "t" passed for parameter #1
+</programlisting>
+In this case, a variable <varname>t</varname> is defined to refer to
+the list of terminal nodes.  The function
+<function>DeleteTree</function> deletes some of the terminal nodes.
+Even though some of the nodes in the list <varname>t</varname>
+are still valid, if
+any element of a list is deleted, the entire list is unassigned.
+</para>
+
+<para>
+Similar situations arise with mixed and behavior strategies if the
+underlying game to which they refer change in a way to invalidate the
+solutions.  In the following example, a solution to the game 
+<varname>e</varname>
+is saved as a variable <varname>b</varname> of type <type>BEHAV</type>:  
+<programlisting>
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << b:=EnumMixedSolve[e,asNfg->True]_1
+(Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << b
+ERROR: Print[]: Undefined reference "b" passed for parameter #1
+</programlisting>
+The game is subsequently edited, making the profile no longer valid
+for the changed game; therefore, the variable containing it is
+automatically unassigned.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Errors</title>
+
+<para>
+Sometimes, programs contain errors.  The interpreter is able to detect
+errors which violate rules of the language, and reports information
+about the error so the user can correct it.  There are two main
+classes of errors which may arise in GCL programs: parse errors and
+run time errors.
+</para>
+
+<para>
+A parse error occurs when the GCL interpreter cannot determine the
+meaning of a statement, because it does not conform to the grammatical
+rules of the language.  This most frequently occurs when braces,
+brackets, or quotation marks fail to match up or when punctuation is
+missing.  When it encounters a parse error, the GCL interpreter will
+display an error message giving the filename and line number of the
+error and the point at which it determined an error it occurred.
+</para>
+
+<para>
+A run time error occurs when a statement which obeys the grammatical
+rules of the language violates another rule of the language during its
+execution.  Examples of this type of error include attempting to use a
+variable name which is not defined, and using a value of one type
+where another type was expected.  Also, builtin functions may generate
+this type of error on invalid inputs.  A run time error will result in
+termination of the GCL at the point where the error occurs, with a
+message indicating the type of error encountered.
+</para>
+
+</sect3>
+
+</sect2>
+
+
+
+
+
+
+</sect1>
+
+
+
+
+
 
 
 

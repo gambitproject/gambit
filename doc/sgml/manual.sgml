@@ -60,36 +60,7 @@
 </para>
 
 &apigame;
-
-<sect1 id="api.gcl">
-<title>GCL language description</title>
-
-<para>
-This section is an introduction to the Gambit Command Language (GCL).
-The GCL provides a
-method of directing the operation of Gambit that is analagous to that
-of a high level general purpose programming language.
-</para>
-<para>
-The purpose of the GCL is to provide a simple, but powerful and
-flexible language by which one can perform complicated or repetitive
-operations and procedures on games in extensive or normal form.  The
-language has facilities for building and editing an extensive or
-normal form game, converting back and forth between the extensive and
-normal form representations, and solving the resulting games for
-various equilibria of interest.  Standard arithmetic, logic, text and
-input-output operations are provided, as well as vectorizable
-functions which support many vector and matrix operations.  Flow
-control statements allow for repetitive operations (such as
-investigating games as one changes various parameters) or conditional
-operations.  Thus the GCL is also suitable for certain types of
-econometric analysis of games.
-</para>
-
-&gclbasic;
-&gcladv;
-
-</sect1>
+&apigcl;
 
 </chapter>
 
