@@ -102,17 +102,13 @@ TEMPLATE class gList< int >;
 TEMPLATE class gNode< gOutput* >;
 TEMPLATE class gList< gOutput* >;
 
-TEMPLATE class gNode< NormalForm<double>* >;
-TEMPLATE class gList< NormalForm<double>* >;
 
-TEMPLATE class gNode< NormalForm<gRational>* >;
-TEMPLATE class gList< NormalForm<gRational>* >;
 
-TEMPLATE class gNode< ExtForm<double>* >;
-TEMPLATE class gList< ExtForm<double>* >;
+TEMPLATE class gNode< BaseNormalForm* >;
+TEMPLATE class gList< BaseNormalForm* >;
 
-TEMPLATE class gNode< ExtForm<gRational>* >;
-TEMPLATE class gList< ExtForm<gRational>* >;
+TEMPLATE class gNode< BaseExtForm* >;
+TEMPLATE class gList< BaseExtForm* >;
 
 TEMPLATE class gList< Portion* >;
 TEMPLATE class gNode< Portion* >;
@@ -138,17 +134,13 @@ TEMPLATE class gNode< gList< Instruction* >* >;
 TEMPLATE class HashTable< gOutput*, int >;
 TEMPLATE class RefCountHashTable< gOutput* >;
 
-TEMPLATE class HashTable< NormalForm<double>*, int >;
-TEMPLATE class RefCountHashTable< NormalForm<double>* >;
 
-TEMPLATE class HashTable< NormalForm<gRational>*, int >;
-TEMPLATE class RefCountHashTable< NormalForm<gRational>* >;
 
-TEMPLATE class HashTable< ExtForm<double>*, int >;
-TEMPLATE class RefCountHashTable< ExtForm<double>* >;
+TEMPLATE class HashTable< BaseNormalForm*, int >;
+TEMPLATE class RefCountHashTable< BaseNormalForm* >;
 
-TEMPLATE class HashTable< ExtForm<gRational>*, int >;
-TEMPLATE class RefCountHashTable< ExtForm<gRational>* >;
+TEMPLATE class HashTable< BaseExtForm*, int >;
+TEMPLATE class RefCountHashTable< BaseExtForm* >;
 
 TEMPLATE class HashTable< gList< Instruction* >*, int >;
 TEMPLATE class RefCountHashTable< gList< Instruction* >* >;

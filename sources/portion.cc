@@ -809,24 +809,23 @@ Portion* List_Portion::GetSubscript( int index ) const
 //                            Nfg type
 //---------------------------------------------------------------------
 
+
+
 #ifdef MEMCHECK
-int Nfg_Portion<double>::_NumObj = 0;
-int Nfg_Portion<gRational>::_NumObj = 0;
+int BaseNfg_Portion::_NumObj = 0;
 #endif // MEMCHECK
 
-RefCountHashTable< NormalForm<double>* > Nfg_Portion<double>::_RefCountTable;
-RefCountHashTable< NormalForm<gRational>* > Nfg_Portion<gRational>::_RefCountTable;
+RefCountHashTable< BaseNormalForm* > BaseNfg_Portion::_RefCountTable;
 
-template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
+BaseNfg_Portion::BaseNfg_Portion( BaseNormalForm& value )
 {
-  _RefTable = new RefHashTable;
   _Value = &value;
   if( !_RefCountTable.IsDefined( _Value ) )
   {
     _RefCountTable.Define( _Value, 1 );
 #ifdef MEMCHECK
     _NumObj++;
-    gout << ">>> NormalForm Ctor - count: " << _NumObj << "\n";
+    gout << ">>> BaseNormalForm Ctor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
   }
   else
@@ -835,7 +834,7 @@ template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
   }
 }
 
-template <class T> Nfg_Portion<T>::~Nfg_Portion()
+BaseNfg_Portion::~BaseNfg_Portion()
 {
   assert( _RefCountTable.IsDefined( _Value ) );
   assert( _RefCountTable( _Value ) > 0 );
@@ -846,18 +845,41 @@ template <class T> Nfg_Portion<T>::~Nfg_Portion()
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;
-    gout << ">>> NormalForm Dtor - count: " << _NumObj << "\n";
+    gout << ">>> BaseNormalForm Dtor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
   }
-  delete _RefTable;
 }
 
 
-template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
+BaseNormalForm& BaseNfg_Portion::Value( void )
 { return *_Value; }
 
-template <class T> PortionType Nfg_Portion<T>::Type( void ) const
+PortionType BaseNfg_Portion::Type( void ) const
 { return porNFG; }
+
+void BaseNfg_Portion::Output( gOutput& s ) const
+{ s << "BaseNormalForm[ "; _Value->GetTitle(); s << ']'; }
+
+
+
+
+
+
+
+
+
+
+
+
+template <class T> Nfg_Portion<T>::Nfg_Portion( NormalForm<T>& value )
+:BaseNfg_Portion( value )
+{ }
+
+template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
+{ return (NormalForm<T>&) *_Value; }
+
+template <class T> PortionType Nfg_Portion<T>::Type( void ) const
+{ return porERROR; }
 
 template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
 { 
@@ -866,13 +888,12 @@ template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
 
   if( new_data )
   {
-    new_value = new 
-      NormalForm<T>( *_Value );
-    p = new Nfg_Portion<T>( *new_value );
+    new_value = new NormalForm<T>( (NormalForm<T>&) *_Value );
+    p = new Nfg_Portion<T>( (NormalForm<T>&) *new_value );
   }
   else
   {
-    p = new Nfg_Portion<T>( *_Value ); 
+    p = new Nfg_Portion<T>( (NormalForm<T>&) *_Value ); 
   }
   return p;
 }
@@ -887,24 +908,23 @@ template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 //                            Efg type
 //---------------------------------------------------------------------
 
+
+
 #ifdef MEMCHECK
-int Efg_Portion<double>::_NumObj = 0;
-int Efg_Portion<gRational>::_NumObj = 0;
+int BaseEfg_Portion::_NumObj = 0;
 #endif // MEMCHECK
 
-RefCountHashTable< ExtForm<double>* > Efg_Portion<double>::_RefCountTable;
-RefCountHashTable< ExtForm<gRational>* > Efg_Portion<gRational>::_RefCountTable;
+RefCountHashTable< BaseExtForm* > BaseEfg_Portion::_RefCountTable;
 
-template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
+BaseEfg_Portion::BaseEfg_Portion( BaseExtForm& value )
 {
-  _RefTable = new RefHashTable;
   _Value = &value;
   if( !_RefCountTable.IsDefined( _Value ) )
   {
     _RefCountTable.Define( _Value, 1 );
 #ifdef MEMCHECK
     _NumObj++;
-    gout << ">>> ExtForm Ctor - count: " << _NumObj << "\n";
+    gout << ">>> BaseExtForm Ctor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
   }
   else
@@ -913,7 +933,7 @@ template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
   }
 }
 
-template <class T> Efg_Portion<T>::~Efg_Portion()
+BaseEfg_Portion::~BaseEfg_Portion()
 {
   assert( _RefCountTable.IsDefined( _Value ) );
   assert( _RefCountTable( _Value ) > 0 );
@@ -924,18 +944,41 @@ template <class T> Efg_Portion<T>::~Efg_Portion()
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;
-    gout << ">>> ExtForm Dtor - count: " << _NumObj << "\n";
+    gout << ">>> BaseExtForm Dtor - count: " << _NumObj << "\n";
 #endif // MEMCHECK
   }
-  delete _RefTable;
 }
 
 
-template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
+BaseExtForm& BaseEfg_Portion::Value( void )
 { return *_Value; }
 
-template <class T> PortionType Efg_Portion<T>::Type( void ) const
+PortionType BaseEfg_Portion::Type( void ) const
 { return porEFG; }
+
+void BaseEfg_Portion::Output( gOutput& s ) const
+{ s << "BaseExtForm[ "; _Value->GetTitle(); s << ']'; }
+
+
+
+
+
+
+
+
+
+
+
+
+template <class T> Efg_Portion<T>::Efg_Portion( ExtForm<T>& value )
+:BaseEfg_Portion( value )
+{ }
+
+template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
+{ return (ExtForm<T>&) *_Value; }
+
+template <class T> PortionType Efg_Portion<T>::Type( void ) const
+{ return porERROR; }
 
 template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 { 
@@ -944,12 +987,12 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
   if( new_data )
   {
-    new_value = new ExtForm<T>( *_Value );
-    p = new Efg_Portion<T>( *new_value );
+    new_value = new ExtForm<T>( (ExtForm<T>&) *_Value );
+    p = new Efg_Portion<T>( (ExtForm<T>&) *new_value );
   }
   else
   {
-    p = new Efg_Portion<T>( *_Value );
+    p = new Efg_Portion<T>( (ExtForm<T>&) *_Value ); 
   }
   return p;
 }
@@ -957,6 +1000,7 @@ template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
 { s << "ExtForm[ "; _Value->GetTitle(); s << ']'; }
+
 
 
 

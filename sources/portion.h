@@ -231,17 +231,32 @@ template <class T> class Behav_Portion : public Portion
 
 
 
-template <class T> class Nfg_Portion : public Portion
-{
- private:
-  static int _NumObj;
-  static RefCountHashTable< NormalForm<T>* > _RefCountTable;
-  NormalForm<T>* _Value;
-  RefHashTable*  _RefTable;
 
- public:
+
+class BaseNfg_Portion : public Portion
+{
+private:
+  static int _NumObj;
+  static RefCountHashTable< BaseNormalForm* > _RefCountTable;
+
+protected:
+  BaseNormalForm* _Value;
+
+public:
+  BaseNfg_Portion( BaseNormalForm& value );
+  ~BaseNfg_Portion();
+
+  BaseNormalForm&     Value          ( void );
+  virtual Portion*    Copy           ( bool new_data ) const = 0;
+  virtual PortionType Type           ( void ) const;
+  virtual void        Output         ( gOutput& s ) const;
+};
+
+
+template <class T> class Nfg_Portion : public BaseNfg_Portion
+{
+public:
   Nfg_Portion( NormalForm<T>& value );
-  ~Nfg_Portion();
 
   NormalForm<T>& Value          ( void );
   Portion*       Copy           ( bool new_data ) const;
@@ -255,23 +270,51 @@ template <class T> class Nfg_Portion : public Portion
 
 
 
-template <class T> class Efg_Portion : public Portion
-{
- private:
-  static int _NumObj;
-  static RefCountHashTable< ExtForm<T>* > _RefCountTable;
-  ExtForm<T>*    _Value;
-  RefHashTable*  _RefTable;
 
- public:
+class BaseEfg_Portion : public Portion
+{
+private:
+  static int _NumObj;
+  static RefCountHashTable< BaseExtForm* > _RefCountTable;
+
+protected:
+  BaseExtForm* _Value;
+
+public:
+  BaseEfg_Portion( BaseExtForm& value );
+  ~BaseEfg_Portion();
+
+  BaseExtForm&        Value          ( void );
+  virtual Portion*    Copy           ( bool new_data ) const = 0;
+  virtual PortionType Type           ( void ) const;
+  virtual void        Output         ( gOutput& s ) const;
+};
+
+
+template <class T> class Efg_Portion : public BaseEfg_Portion
+{
+public:
   Efg_Portion( ExtForm<T>& value );
-  ~Efg_Portion();
 
   ExtForm<T>&    Value          ( void );
   Portion*       Copy           ( bool new_data ) const;
   PortionType    Type           ( void ) const;
   void           Output         ( gOutput& s ) const;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
