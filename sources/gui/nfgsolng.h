@@ -27,22 +27,6 @@ public:
   virtual bool SolveSetup(void) = 0;
 };
 
-class guinfgEnumMixed : public guiNfgSolution  {
-private:
-  int m_stopAfter;
-  gPrecision m_precision;
-
-public:
-  guinfgEnumMixed(NfgShow *);
-  guinfgEnumMixed(NfgShow *,
-		  int p_stopAfter, gPrecision p_precision,
-		  bool p_eliminateWeak);
-  virtual ~guinfgEnumMixed()   { }
-
-  virtual gList<MixedSolution> Solve(const NFSupport &);
-  virtual bool SolveSetup(void);
-};
-
 class guinfgLp : public guiNfgSolution   {
 private:
   int m_stopAfter;

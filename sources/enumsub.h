@@ -20,7 +20,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMMIXED_NFG; }    
 
 public:
-  EnumBySubgame(const EFSupport &, const EnumParams &, int max = 0);
+  EnumBySubgame(const EnumParams &, int max = 0);
   virtual ~EnumBySubgame();
 
   int NumPivots(void) const   { return npivots; }

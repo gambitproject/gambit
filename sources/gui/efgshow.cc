@@ -64,6 +64,7 @@
 #include "dlqre.h"
 #include "efgqre.h"
 #include "algenumpure.h"
+#include "algenummixed.h"
 
 #include "behavedit.h"
 
@@ -176,7 +177,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMPURE,
 	   EfgShow::OnToolsEquilibriumCustomNfgEnumPure)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED, 
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgEnumMixed)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LP, 
@@ -2049,6 +2050,7 @@ void EfgShow::OnToolsSupportReachable(wxCommandEvent &)
 
 void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 {
+#ifdef COMMENTED_OUT
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
   if (m_efg.NumPlayerInfosets() == 0)  return;
@@ -2195,6 +2197,7 @@ void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
     GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
     AdjustSizes();
   }
+#endif  // COMMENTED_OUT
 }
 
 void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
@@ -2256,9 +2259,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     solver = new guiefgQreEfg(this);
     break;
 
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED:
-    solver = new guiefgEnumMixedNfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP: 
     solver = new guiefgLcpNfg(this);
     break;
@@ -2339,6 +2339,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (EnumPureNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgEnumMixed(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (EnumMixedNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

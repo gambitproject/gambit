@@ -21,7 +21,6 @@
 
 #include "nfgconst.h"
 
-#include "dlenummixed.h"
 #include "dllp.h"
 #include "dllcp.h"
 #include "dlliap.h"
@@ -356,36 +355,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   }
 }
 
-
-//=======================================================================
-//                   dialogEnumMixed: Member functions
-//=======================================================================
-
-dialogEnumMixed::dialogEnumMixed(wxWindow *p_parent, bool p_subgames)
-  : dialogAlgorithm("EnumMixedSolve Parameters", true, p_parent)
-{
-  MakeCommonFields(true, p_subgames, true);
-}
-
-dialogEnumMixed::~dialogEnumMixed()
-{ }
-
-void dialogEnumMixed::AlgorithmFields(void)
-{
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  StopAfterField();
-  PrecisionField();
-}
-
-int dialogEnumMixed::StopAfter(void) const
-{
-  if (m_findAll->GetValue())
-    return 0;
-  else
-    return ToNumber(m_stopAfter->GetValue().c_str());
-}
 
 //=======================================================================
 //                        dialogLp: Member functions

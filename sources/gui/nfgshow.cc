@@ -1068,6 +1068,7 @@ void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
 
 void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 { 
+#ifdef COMMENTED_OUT
   dialogNfgSolveStandard dialog(this, m_nfg);
   
   if (dialog.ShowModal() != wxID_OK)
@@ -1169,6 +1170,7 @@ void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
   }  
 
   UpdateMenus();
+#endif  // COMMENTED_OUT
 }
 
 void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
@@ -1178,9 +1180,6 @@ void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiNfgSolution *solver;
 
   switch (id) {
-  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED:
-    solver = new guinfgEnumMixed(this);
-    break;
   case NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP:      
     solver = new guinfgLcp(this);
     break;
