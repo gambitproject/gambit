@@ -15,18 +15,6 @@ class NewInstr;
 template <class T> class gList;
 template <class T> class gNode;
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-class gList<NewInstr *>;
-class gNode<NewInstr *>;
-class gList<int>;
-class gNode<int>;
-class gList<gString>;
-class gNode<gString>;
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
 #include "portion.h"
 #include "gsmfunc.h"
@@ -34,33 +22,33 @@ class gNode<gString>;
 
 #include "glist.imp"
 
-//TEMPLATE class gList< gString >;
-//TEMPLATE class gNode< gString >;
-//TEMPLATE class gList< int >;
-//TEMPLATE class gNode< int >;
-//TEMPLATE class gList< NewInstr* >;
-//TEMPLATE class gNode< NewInstr* >;
+//template class gList< gString >;
+//template class gNode< gString >;
+//template class gList< int >;
+//template class gNode< int >;
+//template class gList< NewInstr* >;
+//template class gNode< NewInstr* >;
 
-TEMPLATE class gList< void* >;
-TEMPLATE class gNode< void* >;
+template class gList< void* >;
+template class gNode< void* >;
 
-TEMPLATE class gList< Portion* >;
-TEMPLATE class gNode< Portion* >;
+template class gList< Portion* >;
+template class gNode< Portion* >;
 
-TEMPLATE class gList< FuncDescObj* >;
-TEMPLATE class gNode< FuncDescObj* >;
+template class gList< FuncDescObj* >;
+template class gNode< FuncDescObj* >;
 
-TEMPLATE class gList< gList< NewInstr* >* >;
-TEMPLATE class gNode< gList< NewInstr* >* >;
+template class gList< gList< NewInstr* >* >;
+template class gNode< gList< NewInstr* >* >;
 
 
 
 #include "hash.imp"
 
-TEMPLATE class HashTable< gString, Portion* >;
-TEMPLATE class HashTable< gString, FuncDescObj* >;
-TEMPLATE class HashTable< gList< NewInstr* >*, int >;
-TEMPLATE class HashTable< void*, int >;
+template class HashTable< gString, Portion* >;
+template class HashTable< gString, FuncDescObj* >;
+template class HashTable< gList< NewInstr* >*, int >;
+template class HashTable< void*, int >;
 
 
 
@@ -125,6 +113,6 @@ template <class T> RefCountHashTable<T>::~RefCountHashTable()
 
 
 
-TEMPLATE class RefCountHashTable< gList< NewInstr* >* >;
-TEMPLATE class RefCountHashTable< void* >;
+template class RefCountHashTable< gList< NewInstr* >* >;
+template class RefCountHashTable< void* >;
 

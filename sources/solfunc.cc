@@ -298,7 +298,7 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
 
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  if (S->BelongsTo().Type() == DOUBLE && param[1]->Spec().Type & porFLOAT)
+  if (S->BelongsTo().Type() == gDOUBLE && param[1]->Spec().Type & porFLOAT)
   {
     Efg<double> &E = * (Efg<double>*) &S->BelongsTo();
     BehavSolution<double> *P = new BehavSolution<double>(E);
@@ -366,7 +366,7 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
 
 
   }
-  else if (S->BelongsTo().Type()== RATIONAL && param[1]->Spec().Type & porRATIONAL)
+  else if (S->BelongsTo().Type()== gRATIONAL && param[1]->Spec().Type & porRATIONAL)
   {
     // The code here is entirely copied from GSM_Behav_EfgRational()
 
@@ -503,7 +503,7 @@ static Portion *GSM_Centroid_EFSupport(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  if (S->BelongsTo().Type() == DOUBLE)
+  if (S->BelongsTo().Type() == gDOUBLE)
     return new BehavPortion<double>(new BehavSolution<double>((Efg<double> &) S->BelongsTo(), *S));
   else
     return new BehavPortion<gRational>(new BehavSolution<gRational>((Efg<gRational> &) S->BelongsTo(), *S));
@@ -514,7 +514,7 @@ static Portion *GSM_Centroid_NFSupport(Portion **param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   NFPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
 
-  if (N->Type() == DOUBLE)
+  if (N->Type() == gDOUBLE)
     return new MixedPortion<double>(new MixedSolution<double>((Nfg<double> &) *N, *S));
   else
     return new MixedPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) *N, *S));
@@ -539,7 +539,7 @@ static Portion *GSM_Game_NfSupport(Portion **param)
 {
   NFPayoffs *N = ((NfSupportPortion *) param[0])->Value()->BelongsTo().PayoffTable();
 
-  if (N->Type() == DOUBLE)
+  if (N->Type() == gDOUBLE)
     return new NfgValPortion<double>((Nfg<double> *) N);
   else
     return new NfgValPortion<gRational>((Nfg<gRational> *) N);
@@ -918,11 +918,11 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
 
   switch (N->Type())
   {
-  case DOUBLE:
+  case gDOUBLE:
     Pd = new MixedSolution<double>((Nfg<double> &) *N, *S);
     datatype = porFLOAT;
     break;
-  case RATIONAL:
+  case gRATIONAL:
     Pr = new MixedSolution<gRational>((Nfg<gRational> &) *N, *S);
     datatype = porRATIONAL;
     break;

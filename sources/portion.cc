@@ -17,19 +17,9 @@
 
 
 class Portion;
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "garray.imp"
 #include "gblock.imp"
-
-#ifdef __BORLANDC__
-#pragma option -Jgx
-#endif
 
 #include "portion.h"
 #include "gsmhash.h"
@@ -613,9 +603,9 @@ PortionSpec EfOutcomePortion::Spec(void) const
 { 
   switch( SubType() )
   {
-  case DOUBLE:
+  case gDOUBLE:
     return PortionSpec(porEFOUTCOME_FLOAT);
-  case RATIONAL:
+  case gRATIONAL:
     return PortionSpec(porEFOUTCOME_RATIONAL);
   default:
     assert(0);
@@ -891,9 +881,9 @@ PortionSpec NfSupportPortion::Spec(void) const
 {
   switch( SubType() )
   {
-  case DOUBLE:
+  case gDOUBLE:
     return PortionSpec(porNFSUPPORT_FLOAT);
-  case RATIONAL:
+  case gRATIONAL:
     return PortionSpec(porNFSUPPORT_RATIONAL);
   default:
     assert(0);
@@ -981,9 +971,9 @@ PortionSpec EfSupportPortion::Spec(void) const
 {
   switch( SubType() )
   {
-  case DOUBLE:
+  case gDOUBLE:
     return PortionSpec(porEFSUPPORT_FLOAT);
-  case RATIONAL:
+  case gRATIONAL:
     return PortionSpec(porEFSUPPORT_RATIONAL);
   default:
     assert(0);
@@ -1125,9 +1115,9 @@ PortionSpec InfosetPortion::Spec(void) const
 {
   switch( SubType() )
   {
-  case DOUBLE:
+  case gDOUBLE:
     return PortionSpec(porINFOSET_FLOAT);
-  case RATIONAL:
+  case gRATIONAL:
     return PortionSpec(porINFOSET_RATIONAL);
   default:
     assert(0);
@@ -1341,7 +1331,7 @@ PortionSpec MixedPortion<double>::Spec(void) const
 DataType MixedPortion<double>::SubType( void ) const
 {
   assert( Value() );
-  return DOUBLE;
+  return gDOUBLE;
 }
 
 void MixedPortion<double>::Output(gOutput& s) const
@@ -1419,7 +1409,7 @@ PortionSpec MixedPortion<gRational>::Spec(void) const
 DataType MixedPortion<gRational>::SubType( void ) const
 {
   assert( Value() );
-  return RATIONAL;
+  return gRATIONAL;
 }
 
 void MixedPortion<gRational>::Output(gOutput& s) const
@@ -1500,7 +1490,7 @@ PortionSpec BehavPortion<double>::Spec(void) const
 DataType BehavPortion<double>::SubType( void ) const
 {
   assert( Value() );
-  return DOUBLE;
+  return gDOUBLE;
 }
 
 void BehavPortion<double>::Output(gOutput& s) const
@@ -1574,7 +1564,7 @@ PortionSpec BehavPortion<gRational>::Spec(void) const
 DataType BehavPortion<gRational>::SubType( void ) const
 {
   assert( Value() );
-  return RATIONAL;
+  return gRATIONAL;
 }
 
 void BehavPortion<gRational>::Output(gOutput& s) const
@@ -1642,7 +1632,7 @@ PortionSpec NfgPortion<double>::Spec(void) const
 DataType NfgPortion<double>::SubType(void) const
 {
   assert(Value());
-  return DOUBLE;
+  return gDOUBLE;
 }
 
 
@@ -1725,7 +1715,7 @@ PortionSpec NfgPortion<gRational>::Spec(void) const
 DataType NfgPortion<gRational>::SubType(void) const
 {
   assert(Value());
-  return RATIONAL;
+  return gRATIONAL;
 }
 
 
@@ -1812,9 +1802,9 @@ PortionSpec EfgPortion::Spec(void) const
   assert((*_Value) != 0);
   switch((*_Value)->Type())
   {
-  case DOUBLE:
+  case gDOUBLE:
     return PortionSpec(porEFG_FLOAT);
-  case RATIONAL:
+  case gRATIONAL:
     return PortionSpec(porEFG_RATIONAL);
   default:
     assert(0);
@@ -2644,22 +2634,16 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 
 
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class MixedPortion<double>;
-TEMPLATE class MixedPortion<gRational>;
+template class MixedPortion<double>;
+template class MixedPortion<gRational>;
 
-TEMPLATE class NfgPortion<double>;
-TEMPLATE class NfgValPortion<double>;
-TEMPLATE class NfgRefPortion<double>;
-TEMPLATE class NfgPortion<gRational>;
-TEMPLATE class NfgValPortion<gRational>;
-TEMPLATE class NfgRefPortion<gRational>;
+template class NfgPortion<double>;
+template class NfgValPortion<double>;
+template class NfgRefPortion<double>;
+template class NfgPortion<gRational>;
+template class NfgValPortion<gRational>;
+template class NfgRefPortion<gRational>;
 
-TEMPLATE class BehavPortion<double>;
-TEMPLATE class BehavPortion<gRational>;
+template class BehavPortion<double>;
+template class BehavPortion<gRational>;

@@ -161,7 +161,7 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   EP.trace = ((IntPortion *) param[5])->Value();
   
   switch(N->Type())   {
-  case DOUBLE:
+  case gDOUBLE:
     {
       EnumModule<double> EM(* (Nfg<double>*) N, EP, *S);
       EM.Enum();
@@ -170,7 +170,7 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
       por = new Mixed_ListPortion<double>(EM.GetSolutions());
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       EnumModule<gRational> EM(* (Nfg<gRational>*) N, EP, *S);
       EM.Enum();
@@ -207,7 +207,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   Portion *por;
 
   switch (E.Type())  {
-    case DOUBLE:
+    case gDOUBLE:
     {
       EnumBySubgame<double> EM((const Efg<double> &) E, support, EP);
   
@@ -220,7 +220,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
       por = new Behav_ListPortion<double>(solns);
       break;
     }
-    case RATIONAL:
+    case gRATIONAL:
     {
       EnumBySubgame<gRational> EM((const Efg<gRational> &) E, support, EP);
   
@@ -257,14 +257,14 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   switch(N->Type())
   {
-  case DOUBLE:
+  case gDOUBLE:
     {
       gList<MixedSolution<double> > solns;
       FindPureNash(* (Nfg<double>*) N, *S, solns);
       por = new Mixed_ListPortion<double>(solns);
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       gList<MixedSolution<gRational> > solns;
       FindPureNash(* (Nfg<gRational>*) N, *S, solns);
@@ -291,7 +291,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
   Portion *por;
   
   switch (E.Type())  {
-    case DOUBLE:
+    case gDOUBLE:
     {
       gList<BehavSolution<double> > solns;
 
@@ -311,7 +311,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
       por = new Behav_ListPortion<double>(solns);
       break;
     }
-    case RATIONAL:
+    case gRATIONAL:
     {
       gList<BehavSolution<gRational> > solns;
 
@@ -370,7 +370,7 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
   
   switch(N->Type())  {
-    case DOUBLE:  {
+    case gDOUBLE:  {
 	GridSolveModule GM(* (Nfg<double>*) N, GP, S);
 	GM.GridSolve();
 	// ((IntPortion *) param[10])->Value() = GM.NumEvals();
@@ -380,7 +380,7 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 	if (GP.pxifile != &gnull)  delete GP.pxifile;
       }
       break;
-    case RATIONAL:
+    case gRATIONAL:
       return new ErrorPortion("The rational version of GobitGridSolve is not implemented");
       break;
     default:
@@ -497,7 +497,7 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
   LP.trace = ((IntPortion *) param[5])->Value();
   
   switch(N->Type())  {
-  case DOUBLE:
+  case gDOUBLE:
     {
       LemkeModule<double> LS(* (Nfg<double>*) N, LP, S);
       LS.Lemke();
@@ -506,7 +506,7 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
       por = new Mixed_ListPortion<double>(LS.GetSolutions());
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       LemkeModule<gRational> LS(* (Nfg<gRational>*) N, LP, S);
       LS.Lemke();
@@ -576,7 +576,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
   switch(S.BelongsTo().Type())
   {
-  case DOUBLE:
+  case gDOUBLE:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
       Efg<double>* E = (Efg<double>*) &S.BelongsTo();
@@ -592,7 +592,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
       ((FloatPortion *) param[4])->Value() = SM.Time();
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
       Efg<gRational>* E = (Efg<gRational>*) &S.BelongsTo();
@@ -733,7 +733,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   ZP.trace = ((IntPortion *) param[4])->Value();
 
   switch(N->Type())  {
-  case DOUBLE:
+  case gDOUBLE:
     {
       if (((Nfg<double> *) N)->NumPlayers() > 2 ||
 	  !IsConstSum((Nfg<double> &) *N))
@@ -747,7 +747,7 @@ static Portion *GSM_Lp_Nfg(Portion **param)
       ZM.GetSolutions(solns);  por = new Mixed_ListPortion<double>(solns);
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       if (((Nfg<gRational> *) N)->NumPlayers() > 2 ||
 	  !IsConstSum((Nfg<gRational> &) *N))
@@ -839,7 +839,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
   Portion *por;
   
   switch (E.Type())  {
-    case DOUBLE:
+    case gDOUBLE:
     {
       gList<BehavSolution<double> > solns;
   
@@ -877,7 +877,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
       por = new Behav_ListPortion<double>(solns);
       break;
     }
-    case RATIONAL:
+    case gRATIONAL:
     {
       gList<BehavSolution<gRational> > solns;
   
@@ -1020,7 +1020,7 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
 
   switch(N->Type())
   {
-  case DOUBLE:
+  case gDOUBLE:
     {
       SimpdivModule<double> SM(* (Nfg<double>*) N, SP, S);
       SM.Simpdiv();
@@ -1029,7 +1029,7 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
       por = new Mixed_ListPortion<double>(SM.GetSolutions());
     }
     break;
-  case RATIONAL:
+  case gRATIONAL:
     {
       SimpdivModule<gRational> SM(* (Nfg<gRational>*) N, SP, S);
       SM.Simpdiv();
@@ -1067,7 +1067,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
   Portion *por;
   
   switch (E.Type())  {
-    case DOUBLE:
+    case gDOUBLE:
     {
       SimpdivBySubgame<double> SM((const Efg<double> &) E, support, SP);
       SM.Solve();
@@ -1078,7 +1078,7 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
       por = new Behav_ListPortion<double>(SM.GetSolutions());
       break;
     }
-    case RATIONAL:
+    case gRATIONAL:
     {
       SimpdivBySubgame<gRational> SM((const Efg<gRational> &) E, support, SP);
       SM.Solve();

@@ -65,7 +65,7 @@ gOutput &gGCLStatus::operator<<(int)
 gOutput &gGCLStatus::operator<<(unsigned int)
 {/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(bool)
-{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
+{/*sprintf(tmp_str, "%c",(x) ? 'T' : 'F');gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(long)
 {/*sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;*/return *this;}
 gOutput &gGCLStatus::operator<<(char)

@@ -644,7 +644,7 @@ public:
 //---------------------------------------------------------------------
 //                           Mixed class
 //---------------------------------------------------------------------
-
+#include "mixed.h"
 template <class T> class MixedPortion : public Portion  {
 protected:
   MixedProfile<T> ** _Value;
@@ -675,7 +675,7 @@ public:
 //---------------------------------------------------------------------
 //                            Behav class
 //---------------------------------------------------------------------
-
+#include "behav.h"
 template <class T> class BehavPortion : public Portion  {
 protected:
   BehavProfile<T> ** _Value;

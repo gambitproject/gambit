@@ -102,10 +102,10 @@ static Portion *GSM_ChanceProb(Portion **param)
   BaseEfg *efg = infoset->BelongsTo();
 
   switch (efg->Type())   {
-    case DOUBLE:
+    case gDOUBLE:
       return new FloatPortion(((Efg<double> *) efg)->GetChanceProb(infoset, action->GetNumber()));
       break;
-    case RATIONAL:
+    case gRATIONAL:
       return new FloatPortion(((Efg<gRational> *) efg)->GetChanceProb(infoset, action->GetNumber()));
       break;
     default:
@@ -139,7 +139,7 @@ static Portion *GSM_CompressEfg(Portion **param)
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   const BaseEfg &E = S->BelongsTo();
   
-  if (E.Type() == DOUBLE)
+  if (E.Type() == gDOUBLE)
     return new EfgValPortion(CompressEfg((const Efg<double> &) E, *S));
   else
     return new EfgValPortion(CompressEfg((const Efg<gRational> &) E, *S));
@@ -459,7 +459,7 @@ static Portion *GSM_LoadEfg(Portion **param)
     if (!valid)   return new ErrorPortion("Not a valid .efg file");
     
     switch (type)   {
-      case DOUBLE:  {
+      case gDOUBLE:  {
 	Efg<double> *E = 0;
 	ReadEfgFile((gInput &) f, E);
 
@@ -468,7 +468,7 @@ static Portion *GSM_LoadEfg(Portion **param)
 	else
 	  return new ErrorPortion("Not a valid .efg file");
       }
-      case RATIONAL:   {
+      case gRATIONAL:   {
 	Efg<gRational> *E = 0;
 	ReadEfgFile((gInput &) f, E);
 	
@@ -755,9 +755,9 @@ static Portion *GSM_Outcome(Portion **param)
   if (!n->GetOutcome())
     switch(n->BelongsTo()->Type())
     {
-    case DOUBLE:
+    case gDOUBLE:
       return new NullPortion(porEFOUTCOME_FLOAT);
-    case RATIONAL:
+    case gRATIONAL:
       return new NullPortion(porEFOUTCOME_RATIONAL);
     default:
       assert(0);
@@ -992,7 +992,7 @@ static Portion *GSM_SaveEfg(Portion **param)
   if (!f.IsValid())
     return new ErrorPortion("Cannot open file for writing");
 
-  if (E->Type() == DOUBLE)
+  if (E->Type() == gDOUBLE)
     ((Efg<double> *) E)->WriteEfgFile(f);
   else
     ((Efg<gRational> *) E)->WriteEfgFile(f);
@@ -1014,8 +1014,8 @@ static Portion *GSM_SetChanceProbs(Portion **param)
     return new ErrorPortion
       ("Information set does not belong to chance player");
   
-  if ((efg->Type() == DOUBLE && p->Spec().Type != porFLOAT) ||
-      (efg->Type() == RATIONAL && p->Spec().Type != porRATIONAL))
+  if ((efg->Type() == gDOUBLE && p->Spec().Type != porFLOAT) ||
+      (efg->Type() == gRATIONAL && p->Spec().Type != porRATIONAL))
     return new ErrorPortion("Probability list does not match game type");
   if (p->Length() != s->NumActions())  
     return new ErrorPortion("Wrong number of probabilities");
@@ -1620,7 +1620,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porEFOUTCOME_FLOAT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porFLOAT));
- 
+
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_Rational, porEFOUTCOME, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porEFOUTCOME_RATIONAL));

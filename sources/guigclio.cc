@@ -8,15 +8,22 @@
 
 gOutput &GuiGclIo::operator<<(int x)
 {
-	
-	int c=printf( "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
+
+  int c=printf( "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
   return *this;
 }
 
 gOutput &GuiGclIo::operator<<(unsigned int x)
 {
-  
+
   int c=printf( "%*d", Width,  x);valid=(c==1) ? 1 : 0;
+  return *this;
+}
+
+gOutput &GuiGclIo::operator<<(bool x)
+{
+
+  int c=printf( "%c",(x) ? 'T' : 'F');  valid = (c == 1) ? 1 : 0;
   return *this;
 }
 

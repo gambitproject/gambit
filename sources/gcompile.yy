@@ -30,23 +30,17 @@
 
 #include "gstack.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__
 
-TEMPLATE class gStack<gString>;
-TEMPLATE class gStack<int>;
-TEMPLATE class gStack<char>;
-TEMPLATE class gStack<gInput *>;
-TEMPLATE class gStack<unsigned int>;
+template class gStack<gString>;
+template class gStack<int>;
+template class gStack<char>;
+template class gStack<gInput *>;
+template class gStack<unsigned int>;
 
 #include "glist.imp"
 
-TEMPLATE class gList<bool>;
-TEMPLATE class gNode<bool>;
+template class gList<bool>;
+template class gNode<bool>;
 
 extern GSM* _gsm;  // defined at the end of gsm.cc
 gStack<gString> GCL_InputFileNames(4);
@@ -535,7 +529,7 @@ void GCLCompiler::ungetchar(char c)
       funcbody.remove( funcbody.length() - 1 );
 }
 
-typedef struct tokens  { long tok; char *name; };
+typedef struct tokens  { long tok; char *name; } TOKENS_T;
 
 void GCLCompiler::yyerror(char *s)
 {

@@ -53,7 +53,7 @@ static Portion *GSM_CompressNfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   
-  if (((NfSupportPortion *) param[0])->SubType() == DOUBLE)   {
+  if (((NfSupportPortion *) param[0])->SubType() == gDOUBLE)   {
     Nfg<double> *N = (Nfg<double> *) ((NfSupportPortion *) param[0])->PayoffTable();
     return new NfgValPortion<double>(CompressNfg(*N, *S));
   }
@@ -109,7 +109,7 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   NFSupport *T;
   Portion *por;
 
-  if (((NfSupportPortion *) param[0])->SubType() == DOUBLE)   {
+  if (((NfSupportPortion *) param[0])->SubType() == gDOUBLE)   {
     Nfg<double> *N = (Nfg<double> *) ((NfSupportPortion *) param[0])->PayoffTable();
     if (mixed) 
       T = ComputeMixedDominated(*N, *S, strong, players,
@@ -164,7 +164,7 @@ static Portion *GSM_Game_NfPlayer(Portion **param)
 {
   NFPayoffs *N = ((NfPlayerPortion *) param[0])->Value()->BelongsTo().PayoffTable();
 
-  if (N->Type() == DOUBLE)
+  if (N->Type() == gDOUBLE)
     return new NfgValPortion<double>((Nfg<double> *) N);
   else
     return new NfgValPortion<gRational>((Nfg<gRational> *) N);
@@ -175,7 +175,7 @@ static Portion *GSM_Game_Strategy(Portion **param)
 {
   NFPayoffs *N = ((StrategyPortion *) param[0])->Value()->nfp->BelongsTo().PayoffTable();
 
-  if (N->Type() == DOUBLE)
+  if (N->Type() == gDOUBLE)
     return new NfgValPortion<double>((Nfg<double> *) N);
   else
     return new NfgValPortion<gRational>((Nfg<gRational> *) N);

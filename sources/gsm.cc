@@ -13,33 +13,26 @@ template <class T> class gStack;
 //-----------------------------------------------------------------------
 //                       Template instantiations
 //-----------------------------------------------------------------------
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
 #include "gstack.imp"
 
-TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gStack< Portion* >* >;
-TEMPLATE class gStack< CallFuncObj* >;
-TEMPLATE class gStack< RefHashTable* >;
+template class gStack< Portion* >;
+template class gStack< gStack< Portion* >* >;
+template class gStack< CallFuncObj* >;
+template class gStack< RefHashTable* >;
 
 #include "garray.imp"
 #include "gslist.imp"
 class NewInstr;
-TEMPLATE class gArray<NewInstr*>;
+template class gArray<NewInstr*>;
 class FuncDescObj;
-TEMPLATE class gSortList<FuncDescObj*>;
-TEMPLATE class gListSorter<FuncDescObj*>;
+template class gSortList<FuncDescObj*>;
+template class gListSorter<FuncDescObj*>;
 #include "gstring.h"
-TEMPLATE class gSortList<gString>;
-TEMPLATE class gListSorter<gString>;
+template class gSortList<gString>;
+template class gListSorter<gString>;
 
 
-#pragma option -Jgx
 
 #include "gsm.h"
 
@@ -2501,11 +2494,11 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 	{
 	  switch( ((BaseEfg*) game)->Type() )
 	  {
-	  case DOUBLE:
-	    ((BehavSolution<double>*) ((BehavPortion<double> *) 
+	  case gDOUBLE:
+	    ((BehavSolution<double>*) ((BehavPortion<double> *)
 				       varslist[i])->Value())->Invalidate();
 	    break;
-	  case RATIONAL:
+	  case gRATIONAL:
 	    ((BehavSolution<gRational>*) ((BehavPortion<gRational> *) 
 					  varslist[i])->Value())->Invalidate();
 	    break;

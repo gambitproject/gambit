@@ -1,4 +1,4 @@
-
+// $Id$
 
 #include <assert.h>
 #include <ctype.h>
@@ -6,13 +6,10 @@
 #ifdef __GNUG__
 
 #include <unistd.h>
-#define TEMPLATE template
 
 #elif defined __BORLANDC__
 
 #include "winio.h"
-#pragma option -Jgd
-#define TEMPLATE
 
 #endif   // __GNUG__, __BORLANDC__
 
@@ -136,7 +133,7 @@ void gCmdLineInput::GetCmdExec( void )
 	sprintf( buf, "GCL%d:= << ", m_NumInvoke );
       else
 	sprintf( buf, "GCL%d:=; GCL%d:= << ",
-		m_NumInvoke - m_HistoryDepth, 
+		m_NumInvoke - m_HistoryDepth,
 		m_NumInvoke );
     }
     else
@@ -581,4 +578,4 @@ gCmdLineInput& gcmdline( _gcmdline );
 
 #include "gstack.imp"
 
-TEMPLATE class gStack< bool >;
+template class gStack< bool >;
