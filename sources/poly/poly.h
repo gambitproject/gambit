@@ -52,7 +52,7 @@ public:
   polynomial(const int=-1);
   polynomial(const polynomial<T> &);
   polynomial(const gbtList<T> &);
-  polynomial(const gVector<T> &);
+  polynomial(const gbtVector<T> &);
   polynomial(const T&, const int&);
   ~polynomial();
 
@@ -77,9 +77,9 @@ public:
 
   // manipulation
   void                   ToMonic()                                         ;
-//  polynomial<gDouble>    Togdouble()                                  const;
+//  polynomial<gbtDouble>    Togdouble()                                  const;
 
-  polynomial<gDouble>         TogDouble()                       const;
+  polynomial<gbtDouble>         TogDouble()                       const;
 
   // information
   bool                   IsZero()                                     const;
@@ -120,14 +120,14 @@ and the RHS will be positive whenever
 class complexpoly {
 
 private:
-  gbtList<gComplex> coeflist; 
+  gbtList<gbtComplex> coeflist; 
 
 public: 
     // constructors and destructor
   complexpoly(const int=-1);
   complexpoly(const complexpoly &);
-  complexpoly(const gbtList<gComplex> &);
-  complexpoly(const gComplex&, const int&);
+  complexpoly(const gbtList<gbtComplex> &);
+  complexpoly(const gbtComplex&, const int&);
   ~complexpoly();
 
     // unary operators
@@ -138,7 +138,7 @@ public:
   complexpoly&  operator =  (const complexpoly& y);
   bool                    operator == (const complexpoly& y) const;
   bool                    operator != (const complexpoly& y) const;
-  const gComplex&         operator [] (const int index)      const;
+  const gbtComplex&         operator [] (const int index)      const;
   complexpoly             operator +  (const complexpoly& y) const;
   complexpoly             operator -  (const complexpoly& y) const;
   complexpoly             operator *  (const complexpoly& y) const;
@@ -154,12 +154,12 @@ public:
 
   // information
   bool                   IsZero()                                     const;
-  gComplex               EvaluationAt(const gComplex& arg)            const;  
+  gbtComplex               EvaluationAt(const gbtComplex& arg)            const;  
   int                    Degree()                                     const;
-  gComplex               LeadingCoefficient()                         const;
+  gbtComplex               LeadingCoefficient()                         const;
   complexpoly            GcdWith(const complexpoly&)                  const;
   bool                   IsQuadratfrei()                              const;
-  gbtList<gComplex>        Roots()                                      const;
+  gbtList<gbtComplex>        Roots()                                      const;
   
   // output
 friend gbtOutput&        operator << (gbtOutput& output, const complexpoly& x);

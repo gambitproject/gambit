@@ -184,7 +184,7 @@ public:
   gbtText GetInfosetValue(const gbtEfgNode &) const;
   gbtText GetActionValue(const gbtEfgNode &, int act) const;
   gbtText GetActionProb(const gbtEfgNode &, int act) const;
-  gNumber ActionProb(const gbtEfgNode &, int br) const;
+  gbtNumber ActionProb(const gbtEfgNode &, int br) const;
 
   // NORMAL FORM STATE
   gbtNfgGame GetNfg(void) const;

@@ -40,14 +40,14 @@ private:
   gbtList<BFS<T> > List;
   gbtList<gbtEfgInfoset> isets1, isets2;
 
-  void FillTableau(const gbtEfgSupport &, gMatrix<T> &, const gbtEfgNode &, T,
+  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtEfgNode &, T,
 		   int, int, int, int);
   int Add_BFS(const LTableau<T> &tab);
   int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
-		int depth, gMatrix<T> &, gbtList<BehavSolution> &, gbtStatus &);
+		int depth, gbtMatrix<T> &, gbtList<BehavSolution> &, gbtStatus &);
   
   void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
-		  gDPVector<T> &, const gVector<T> &, 
+		  gbtDPVector<T> &, const gbtVector<T> &, 
 		  const gbtEfgNode &n, int,int);
 
 public:

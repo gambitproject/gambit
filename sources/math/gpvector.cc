@@ -28,12 +28,12 @@
 #include "gpvector.imp"
 #include "gnumber.h"
 
-template class gPVector<int>;
-template class gPVector<double>;
-template class gPVector<gRational>;
-template class gPVector<gNumber>;
+template class gbtPVector<int>;
+template class gbtPVector<double>;
+template class gbtPVector<gbtRational>;
+template class gbtPVector<gbtNumber>;
 
-template gbtOutput & operator<< (gbtOutput&, const gPVector<int>&);
-template gbtOutput & operator<< (gbtOutput&, const gPVector<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gPVector<gRational>&);
-template gbtOutput & operator<< (gbtOutput&, const gPVector<gNumber>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtPVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtPVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtPVector<gbtRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtPVector<gbtNumber>&);

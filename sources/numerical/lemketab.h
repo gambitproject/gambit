@@ -45,7 +45,7 @@ public:
     virtual ~BadExitIndex();
     gbtText Description(void) const;
   };
-  LTableau(const gMatrix<T> &A, const gVector<T> &b);
+  LTableau(const gbtMatrix<T> &A, const gbtVector<T> &b);
   LTableau(Tableau<T> &);
   virtual ~LTableau();
 

@@ -120,7 +120,7 @@ Gen_node PelView::CreateRing(const int numvar) const
   return a1;
 }
 
-polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p, 
+polynomial1 PelView::GamPolyToPelPoly(const gPoly<gbtDouble> &p, 
 				      const int n, 
 				      const Pring ring) const
 {
@@ -198,7 +198,7 @@ polynomial1 PelView::GamPolyToPelPoly(const gPoly<gDouble> &p,
 }  
 
 Gen_node 
-PelView::CreatePelicanVersionOfSystem(const gPolyList<gDouble> &input, 
+PelView::CreatePelicanVersionOfSystem(const gPolyList<gbtDouble> &input, 
 				      const Pring ring) const
 {
   Gen_node a;
@@ -460,10 +460,10 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 // Solve doesn't seem to exist at this point, yet this is very ambiguous.  
 }
 
-gbtList<gVector<gComplex> > 
+gbtList<gbtVector<gbtComplex> > 
 PelView::GambitRootsFromPelRoots(const Gen_node g) const
 {
-  gbtList<gVector<gComplex> > alist;
+  gbtList<gbtVector<gbtComplex> > alist;
 
   node ptr;
   ptr = Gen_to_Dvector_list(Gen_lval(copy_Gen_node(g)));
@@ -477,7 +477,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
     int numbervar;
     numbervar= (int)(DVlength(P)-3)/2;  
     
-    gVector<gComplex> vector(1, numbervar);
+    gbtVector<gbtComplex> vector(1, numbervar);
 
     int j = 1;
     for(i=3; i<DVlength(P);i++) {
@@ -485,7 +485,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
 	double re,im;
 	re = DVref(P,i-1);
 	im = DVref(P,i);
-	gComplex complexsol(re, im);
+	gbtComplex complexsol(re, im);
 
 	vector[j] = complexsol; 
 	j+=1;	  
@@ -498,7 +498,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   return alist;
 }
 
-void PelView::DisplayComplexRootList(const gbtList<gVector<gComplex> > 
+void PelView::DisplayComplexRootList(const gbtList<gbtVector<gbtComplex> > 
 				                       &complexroots) const
 {
 #ifdef UNUSED
@@ -522,10 +522,10 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-gbtList<gVector<gDouble> > 
-PelView::RealRoots(const gbtList<gVector<gComplex> > &clist) const
+gbtList<gbtVector<gbtDouble> > 
+PelView::RealRoots(const gbtList<gbtVector<gbtComplex> > &clist) const
 {
-  gbtList<gVector<gDouble> > answer;
+  gbtList<gbtVector<gbtDouble> > answer;
 
   for (int i = 1; i <= clist.Length(); i++) {
 
@@ -535,9 +535,9 @@ PelView::RealRoots(const gbtList<gVector<gComplex> > &clist) const
 	is_real = false;
 
     if (is_real) {
-      gVector<gDouble> next(Dmnsn());
+      gbtVector<gbtDouble> next(Dmnsn());
       for (int j = 1; j <= Dmnsn(); j++) 
-	next[j] = (gDouble)clist[i][j].RealPart();
+	next[j] = (gbtDouble)clist[i][j].RealPart();
       answer += next;
     }
 
@@ -560,7 +560,7 @@ bool PelView::CheckSolutions(const Gen_node g) const
   return 1;
 }
 
-PelView::PelView(const gPolyList<gDouble> &mylist):input(mylist)
+PelView::PelView(const gPolyList<gbtDouble> &mylist):input(mylist)
 {
   InitializePelicanMemory();
   
@@ -717,12 +717,12 @@ bool PelView::operator !=(const PelView &rhs) const
   return !(*this == rhs);
 }
 
-gbtList<gVector<gComplex> > PelView::ComplexRoots() const
+gbtList<gbtVector<gbtComplex> > PelView::ComplexRoots() const
 {
   return complexroots;
 }
 
-gbtList<gVector<gDouble> > PelView::RealRoots() const
+gbtList<gbtVector<gbtDouble> > PelView::RealRoots() const
 {
   return realroots;
 }
@@ -768,11 +768,11 @@ int old_main()
   gbtText gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
   gbtText gz = " 3 + n3 + n4";
   gbtText gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
-  gPoly<gDouble> px(&Space,gx,&Lex);
-  gPoly<gDouble> py(&Space,gy,&Lex); 
-  gPoly<gDouble> pz(&Space,gz,&Lex);
-  gPoly<gDouble> pu(&Space,gu,&Lex);
-  gPolyList<gDouble> mylist(&Space, &ReverseDegLex);
+  gPoly<gbtDouble> px(&Space,gx,&Lex);
+  gPoly<gbtDouble> py(&Space,gy,&Lex); 
+  gPoly<gbtDouble> pz(&Space,gz,&Lex);
+  gPoly<gbtDouble> pu(&Space,gu,&Lex);
+  gPolyList<gbtDouble> mylist(&Space, &ReverseDegLex);
   mylist += px;
   mylist += py;
   mylist += pz;
@@ -793,10 +793,10 @@ int old_main()
   gbtText newgx = " 2 + n2 ";
   gbtText newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
   gbtText newgz = " 3 + n3";
-  gPoly<gDouble> newpx(&NewSpace,newgx,&NewLex);
-  gPoly<gDouble> newpy(&NewSpace,newgy,&NewLex); 
-  gPoly<gDouble> newpz(&NewSpace,newgz,&NewLex);
-  gPolyList<gDouble> mynewlist(&NewSpace, &NewReverseDegLex);
+  gPoly<gbtDouble> newpx(&NewSpace,newgx,&NewLex);
+  gPoly<gbtDouble> newpy(&NewSpace,newgy,&NewLex); 
+  gPoly<gbtDouble> newpz(&NewSpace,newgz,&NewLex);
+  gPolyList<gbtDouble> mynewlist(&NewSpace, &NewReverseDegLex);
   mynewlist += newpx;
   mynewlist += newpy;
   mynewlist += newpz;

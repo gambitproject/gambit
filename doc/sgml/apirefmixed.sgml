@@ -76,7 +76,7 @@ The empty string is returned if the profile object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber MixedSolution::GetLiapValue(void) const
+gbtNumber MixedSolution::GetLiapValue(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -106,7 +106,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
+gbtNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
 </synopsis>
 </para>
 </formalpara>
@@ -136,7 +136,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber MixedSolution::GetStrategyProb(gbtNfgStrategy p_strategy) const
+gbtNumber MixedSolution::GetStrategyProb(gbtNfgStrategy p_strategy) const
 </synopsis>
 </para>
 </formalpara>
@@ -167,7 +167,7 @@ if the probability specified in the profile is rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber MixedSolution::GetStrategyValue(gbtNfgStrategy) const
+gbtNumber MixedSolution::GetStrategyValue(gbtNfgStrategy) const
 </synopsis>
 </para>
 </formalpara>
@@ -332,7 +332,7 @@ void MixedSolution::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void MixedSolution::SetStrategyProb(gbtNfgStrategy, gNumber)
+void MixedSolution::SetStrategyProb(gbtNfgStrategy, gbtNumber)
 </synopsis>
 </para>
 </formalpara>

@@ -41,9 +41,9 @@ protected:
   // This is scratch stuff for consistency computation.
   // FIXME: These shouldn't be members!!
   mutable EFBasis *bigbasis;
-  mutable gMatrix<double> *A;
-  mutable gVector<double> *b,*c;
-  mutable gDPVector<int> *actIndex, *nodeIndex;
+  mutable gbtMatrix<double> *A;
+  mutable gbtVector<double> *b,*c;
+  mutable gbtDPVector<int> *actIndex, *nodeIndex;
   mutable int num_eqs, num_ineqs, num_act_vars,num_node_vars;
 
   void MakeIndices(void) const;
@@ -55,7 +55,7 @@ protected:
   void AddEquation4(int, const gbtEfgNode &, const gbtEfgNode &) const;
   int Col(const gbtEfgAction &) const;
   int Col(const gbtEfgNode &) const;
-  void GetConsistencySolution(const gVector<double> &x) const;
+  void GetConsistencySolution(const gbtVector<double> &x) const;
   
 public:
   EFBasis(const gbtEfgGame &);
@@ -68,7 +68,7 @@ public:
 
   int NumNodes(int pl, int iset) const;
   int NumNodes(const gbtEfgInfoset &) const;
-  gPVector<int> NumNodes(void) const;
+  gbtPVector<int> NumNodes(void) const;
 
   bool RemoveNode(const gbtEfgNode &);
   void AddNode(const gbtEfgNode &);

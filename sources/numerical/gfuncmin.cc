@@ -43,7 +43,7 @@
 //========================================================================
 
 static void
-AlphaXPlusY(double alpha, const gVector<double> &x, gVector<double> &y)
+AlphaXPlusY(double alpha, const gbtVector<double> &x, gbtVector<double> &y)
 {
   for (int i = 1; i <= y.Length(); i++) {
     y[i] += alpha * x[i];
@@ -54,8 +54,8 @@ AlphaXPlusY(double alpha, const gVector<double> &x, gVector<double> &y)
 // multimin/directional_minimize.c in GSL.
 
 static void
-TakeStep(const gVector<double> &x, const gVector<double> &p,
-	 double step, double lambda, gVector<double> &x1, gVector<double> &dx)
+TakeStep(const gbtVector<double> &x, const gbtVector<double> &p,
+	 double step, double lambda, gbtVector<double> &x1, gbtVector<double> &dx)
 {
   dx = 0.0;
   AlphaXPlusY(-step * lambda, p, dx);
@@ -65,13 +65,13 @@ TakeStep(const gVector<double> &x, const gVector<double> &p,
 
 static void 
 IntermediatePoint(const gC1Function<double> &fdf,
-		  const gVector<double> &x, const gVector<double> &p,
+		  const gbtVector<double> &x, const gbtVector<double> &p,
 		  double lambda, 
 		  double pg,
 		  double stepa, double stepc,
 		  double fa, double fc,
-		  gVector<double> &x1, gVector<double> &dx,
-		  gVector<double> &gradient,
+		  gbtVector<double> &x1, gbtVector<double> &dx,
+		  gbtVector<double> &gradient,
 		  double &step, double &f)
 {
   double stepb, fb;
@@ -103,12 +103,12 @@ trial:
 
 static void
 Minimize(const gC1Function<double> &fdf,
-	 const gVector<double> &x, const gVector<double> &p,
+	 const gbtVector<double> &x, const gbtVector<double> &p,
 	 double lambda,
 	 double stepa, double stepb, double stepc,
 	 double fa, double fb, double fc, double tol,
-	 gVector<double> &x1, gVector<double> &dx1, 
-	 gVector<double> &x2, gVector<double> &dx2, gVector<double> &gradient,
+	 gbtVector<double> &x1, gbtVector<double> &dx1, 
+	 gbtVector<double> &x2, gbtVector<double> &dx2, gbtVector<double> &gradient,
 	 double &step, double &f, double &gnorm)
 {
   /* Starting at (x0, f0) move along the direction p to find a minimum
@@ -251,8 +251,8 @@ gConjugatePR::gConjugatePR(int n)
 { }
 
 void gConjugatePR::Set(const gC1Function<double> &fdf,
-		       const gVector<double> &x, double &f,
-		       gVector<double> &gradient, double step_size,
+		       const gbtVector<double> &x, double &f,
+		       gbtVector<double> &gradient, double step_size,
 		       double p_tol)
 {
   iter = 0;
@@ -278,8 +278,8 @@ void gConjugatePR::Restart(void)
 }
 
 bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
-			   gVector<double> &x, double &f,
-			   gVector<double> &gradient, gVector<double> &dx)
+			   gbtVector<double> &x, double &f,
+			   gbtVector<double> &gradient, gbtVector<double> &dx)
 {
   double fa = f, fb, fc;
   double dir;
@@ -384,5 +384,3 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
 
   return true;
 }
-
-

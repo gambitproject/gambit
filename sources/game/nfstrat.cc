@@ -104,7 +104,7 @@ gbtNfgOutcome StrategyProfile::GetOutcome(void) const
   return m_nfg.rep->m_results[index + 1];
 }
 
-gNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
+gbtNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     return m_nfg.rep->m_results[index + 1]->m_payoffs[p_player.GetId()];
@@ -115,7 +115,7 @@ gNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
       // Casting away const -- sloppy
       behav[pl] = (gbtArray<int> *) profile[pl].GetBehavior();
     }
-    gVector<gNumber> payoff(m_nfg.NumPlayers());
+    gbtVector<gbtNumber> payoff(m_nfg.NumPlayers());
     gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);
     return payoff[p_player.GetId()];
   }

@@ -34,14 +34,14 @@
 
 class MixedSolution   {
 protected:
-  MixedProfile<gNumber> m_profile;
-  gPrecision m_precision;
+  MixedProfile<gbtNumber> m_profile;
+  gbtPrecision m_precision;
   mutable gbtNfgSupport m_support;
   mutable gbtText m_creator;
   mutable gFact<gbtTriState> m_Nash, m_Perfect, m_Proper;
-  mutable gFact<gNumber> m_liapValue;
-  mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
-  gbtArray<gNumber> m_payoff;
+  mutable gFact<gbtNumber> m_liapValue;
+  mutable gbtNumber m_epsilon, m_qreLambda, m_qreValue;
+  gbtArray<gbtNumber> m_payoff;
   gbtText m_name;
   mutable long m_revision;
   
@@ -54,8 +54,8 @@ protected:
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
   MixedSolution(const MixedProfile<double> &, const gbtText & = "User");
-  MixedSolution(const MixedProfile<gRational> &, const gbtText & = "User");
-  MixedSolution(const MixedProfile<gNumber> &, const gbtText & = "User");
+  MixedSolution(const MixedProfile<gbtRational> &, const gbtText & = "User");
+  MixedSolution(const MixedProfile<gbtNumber> &, const gbtText & = "User");
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 
@@ -66,19 +66,19 @@ public:
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  void SetStrategyProb(gbtNfgStrategy, const gNumber &);
-  const gNumber &operator()(gbtNfgStrategy) const;
-  const gNumber &GetStrategyProb(const gbtNfgStrategy &p_strategy) const
+  void SetStrategyProb(gbtNfgStrategy, const gbtNumber &);
+  const gbtNumber &operator()(gbtNfgStrategy) const;
+  const gbtNumber &GetStrategyProb(const gbtNfgStrategy &p_strategy) const
     { return (*this)(p_strategy); }
 
   MixedSolution &operator+=(const MixedSolution &);
   MixedSolution &operator-=(const MixedSolution &);
-  MixedSolution &operator*=(const gNumber &);
+  MixedSolution &operator*=(const gbtNumber &);
 
   // GENERAL DATA ACCESS
   gbtNfgGame GetGame(void) const { return m_profile.GetGame(); }
-  gPrecision Precision(void) const { return m_precision; }
-  const MixedProfile<gNumber> *Profile(void) const { return &m_profile; }
+  gbtPrecision Precision(void) const { return m_precision; }
+  const MixedProfile<gbtNumber> *Profile(void) const { return &m_profile; }
 
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
@@ -91,13 +91,13 @@ public:
   const gbtTriState &IsNash(void) const;
   const gbtTriState &IsPerfect(void) const;
   const gbtTriState &IsProper(void) const;
-  const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
-  const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
-  const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
-  const gNumber &GetLiapValue(void) const;
+  const gbtNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
+  const gbtNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
+  const gbtNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
+  const gbtNumber &GetLiapValue(void) const;
 
-  void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
-  void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
+  void SetEpsilon(const gbtNumber &p_epsilon) { m_epsilon = p_epsilon; }
+  void SetQre(const gbtNumber &p_qreLambda, const gbtNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
   
   // Force the invalidation of cached quantities
@@ -108,12 +108,12 @@ public:
 
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
-  gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
+  gbtNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
   const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
-  gNumber GetPayoff(gbtNfgPlayer) const;
-  gNumber GetStrategyValue(gbtNfgStrategy) const;
+  gbtNumber GetPayoff(gbtNfgPlayer) const;
+  gbtNumber GetStrategyValue(gbtNfgStrategy) const;
 
   // OUTPUT
   void Dump(gbtOutput &) const;

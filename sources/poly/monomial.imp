@@ -151,7 +151,7 @@ template<class T> T gMono<T>::Evaluate(const gbtArray<T>& vals) const
   return answer;
 }
 
-template<class T> T gMono<T>::Evaluate(const gVector<T>& vals) const 
+template<class T> T gMono<T>::Evaluate(const gbtVector<T>& vals) const 
 { 
   T answer = Coef();
 

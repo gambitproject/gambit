@@ -47,7 +47,7 @@
 
 inline double sqr(double x) { return x*x; }
 
-static void Givens(gMatrix<double> &b, gMatrix<double> &q,
+static void Givens(gbtMatrix<double> &b, gbtMatrix<double> &q,
 		   double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
@@ -82,7 +82,7 @@ static void Givens(gMatrix<double> &b, gMatrix<double> &q,
   c2 = 0.0;
 }
 
-static void QRDecomp(gMatrix<double> &b, gMatrix<double> &q)
+static void QRDecomp(gbtMatrix<double> &b, gbtMatrix<double> &q)
 {
   q.MakeIdent();
   for (int m = 1; m <= b.NumColumns(); m++) {
@@ -92,8 +92,8 @@ static void QRDecomp(gMatrix<double> &b, gMatrix<double> &q)
   }
 }
 
-static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
-		       gVector<double> &u, gVector<double> &y,
+static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
+		       gbtVector<double> &u, gbtVector<double> &y,
 		       double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
@@ -115,8 +115,8 @@ static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const gbtEfgSupport &p_support, const gVector<double> &p_point,
-		   gVector<double> &p_lhs)
+static void QreLHS(const gbtEfgSupport &p_support, const gbtVector<double> &p_point,
+		   gbtVector<double> &p_lhs)
 {
   BehavProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
@@ -148,8 +148,8 @@ static void QreLHS(const gbtEfgSupport &p_support, const gVector<double> &p_poin
 }
 
 static void QreJacobian(const gbtEfgSupport &p_support,
-			const gVector<double> &p_point,
-			gMatrix<double> &p_matrix)
+			const gbtVector<double> &p_point,
+			gbtMatrix<double> &p_matrix)
 {
   gbtEfgGame efg = p_support.GetGame();
   BehavProfile<double> profile(p_support);
@@ -236,16 +236,16 @@ static void TracePath(const BehavProfile<double> &p_start,
   double h = .03;                  // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  gVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
+  gbtVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gVector<double> t(p_start.Length() + 1);
-  gVector<double> y(p_start.Length());
+  gbtVector<double> t(p_start.Length() + 1);
+  gbtVector<double> y(p_start.Length());
 
-  gMatrix<double> b(p_start.Length() + 1, p_start.Length());
-  gSquareMatrix<double> q(p_start.Length() + 1);
+  gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
+  gbtSquareMatrix<double> q(p_start.Length() + 1);
   QreJacobian(p_start.Support(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
@@ -417,7 +417,7 @@ static void TracePath(const BehavProfile<double> &p_start,
     p_solutions.Append(BehavSolution(foo, "Qre[EFG]"));
     p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
     
-    gVector<double> newT(t);
+    gbtVector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
     if (t * newT < 0.0) {
       // Bifurcation detected; for now, just "jump over" and continue,

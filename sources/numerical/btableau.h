@@ -82,18 +82,18 @@ public:
 
 template <class T> class TableauInterface : public BaseTableau<T>{
 protected:
-  const gMatrix<T> *A;  // should this be private?
-  const gVector<T> *b;  // should this be private?
+  const gbtMatrix<T> *A;  // should this be private?
+  const gbtVector<T> *b;  // should this be private?
   Basis basis; 
-  gVector<T> solution;  // current solution vector. should this be private?
+  gbtVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
   gbtBlock<int> artificial;  // artificial variables
 
 public:
-  TableauInterface(const gMatrix<T> &A, const gVector<T> &b); 
-  TableauInterface(const gMatrix<T> &A, const gbtBlock<int> &art, 
-		   const gVector<T> &b); 
+  TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b); 
+  TableauInterface(const gbtMatrix<T> &A, const gbtBlock<int> &art, 
+		   const gbtVector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
 
@@ -107,8 +107,8 @@ public:
   int MaxCol() const;
 
   Basis & GetBasis(void);
-  const gMatrix<T> & Get_A(void) const;
-  const gVector<T> & Get_b(void) const;
+  const gbtMatrix<T> & Get_A(void) const;
+  const gbtVector<T> & Get_b(void) const;
   
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
@@ -121,8 +121,8 @@ public:
   void UnMark(int label);   // unmarks label
   bool IsBlocked(int label) const;   // returns true if label is blocked
   
-  virtual void BasisVector(gVector<T> &x) const = 0; // solve M x = (*b)
-  void GetColumn( int , gVector<T> &) const;  // raw column
+  virtual void BasisVector(gbtVector<T> &x) const = 0; // solve M x = (*b)
+  void GetColumn( int , gbtVector<T> &) const;  // raw column
   void GetBasis( Basis & ) const; // return Basis for current Tableau
 
   BFS<T> GetBFS1(void) const; 
@@ -132,9 +132,9 @@ public:
 
   virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
-  virtual void SolveColumn(int, gVector<T> &) = 0;  // column in new basis 
-  virtual void Solve(const gVector<T> &b, gVector<T> &x) = 0;  // solve M x = b
-  virtual void SolveT(const gVector<T> &c, gVector<T> &y) = 0;  // solve y M = c
+  virtual void SolveColumn(int, gbtVector<T> &) = 0;  // column in new basis 
+  virtual void Solve(const gbtVector<T> &b, gbtVector<T> &x) = 0;  // solve M x = b
+  virtual void SolveT(const gbtVector<T> &c, gbtVector<T> &y) = 0;  // solve y M = c
 
   virtual void Refactor() = 0;
   virtual void SetRefactor(int) = 0;

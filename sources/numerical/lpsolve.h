@@ -54,24 +54,24 @@ private:
   LPTableau<T> tab;
   gbtArray<bool> *UB, *LB;
   gbtArray<T> *ub, *lb;
-  gVector<T> *xx, *cost; 
-  gVector<T> y, x, d;
+  gbtVector<T> *xx, *cost; 
+  gbtVector<T> y, x, d;
   gbtStatus &status;
 
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
-  LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
+  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
 	  int nequals, gbtStatus &);   // nequals = number of equalities (last nequals rows)
-//  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
-//	  const gVector<T> &C,  const gVector<int> &sense, 
-//	  const gVector<int> &LB,  const gVector<T> &lb, 
-//	  const gVector<int> &UB, const gVector<T> &ub);
+//  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, 
+//	  const gbtVector<T> &C,  const gbtVector<int> &sense, 
+//	  const gbtVector<int> &LB,  const gbtVector<T> &lb, 
+//	  const gbtVector<int> &UB, const gbtVector<T> &ub);
   ~LPSolve();
   
   T OptimumCost(void) const;
-  const gVector<T> &OptimumVector(void) const;
+  const gbtVector<T> &OptimumVector(void) const;
   const gbtList< BFS<T> > &GetAll(void);
   const LPTableau<T> &GetTableau();
   

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// wxValidator specialization to gNumber
+// wxValidator specialization to gbtNumber
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -38,15 +38,15 @@ class gNumberValidator : public wxValidator {
 protected:
   wxString *m_stringValue;
   bool m_hasMin, m_hasMax;
-  gNumber m_minValue, m_maxValue;
+  gbtNumber m_minValue, m_maxValue;
   
   // Event handlers
   void OnChar(wxKeyEvent &);
 
 public:
   gNumberValidator(wxString *);
-  gNumberValidator(wxString *, const gNumber &);
-  gNumberValidator(wxString *, const gNumber &, const gNumber &);
+  gNumberValidator(wxString *, const gbtNumber &);
+  gNumberValidator(wxString *, const gbtNumber &, const gbtNumber &);
   gNumberValidator(const gNumberValidator &);
   virtual ~gNumberValidator() { }
 

@@ -38,9 +38,9 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
   int i;
   gbtEfgGame efg = p_support.GetGame();
   
-  gbtList<BehavProfile<gNumber> > thissolns;
+  gbtList<BehavProfile<gbtNumber> > thissolns;
   thissolns.Append(*solution);
-  ((gVector<gNumber> &) thissolns[1]).operator=(gNumber(0));
+  ((gbtVector<gbtNumber> &) thissolns[1]).operator=(gbtNumber(0));
   
   gbtList<gbtEfgNode> subroots;
   ChildSubgames(efg, n, subroots);
@@ -61,13 +61,13 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
     
     assert(subvalues.Length() == subsolns.Length());
     
-    gbtList<BehavProfile<gNumber> > newsolns;
+    gbtList<BehavProfile<gbtNumber> > newsolns;
     gbtList<gbtArray<gbtEfgOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length(); soln++) {
       for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
-	BehavProfile<gNumber> bp(thissolns[soln]);
-	BehavProfile<gNumber> tmp(*subsolns[subsoln].Profile());
+	BehavProfile<gbtNumber> bp(thissolns[soln]);
+	BehavProfile<gbtNumber> tmp(*subsolns[subsoln].Profile());
 	for (int j = 1; j <= bp.Length(); j++) {
 	  bp[j] += tmp[j];
 	}
@@ -153,8 +153,8 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	}
 
 	for (int soln = 1; soln <= nfgSolutions.Length(); soln++) {
-	  MixedProfile<gNumber> profile(*nfgSolutions[soln].Profile());
-	  sol.Append(BehavProfile<gNumber>(profile));
+	  MixedProfile<gbtNumber> profile(*nfgSolutions[soln].Profile());
+	  sol.Append(BehavProfile<gbtNumber>(profile));
 	}
       }
     }
@@ -212,7 +212,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	solns[j].SetCreator(m_nfgAlgorithm->GetAlgorithm());
       }
 
-      gVector<gNumber> subval(foo.NumPlayers());
+      gbtVector<gbtNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (!n.GetOutcome().IsNull())  {
@@ -262,8 +262,8 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
   solutions.Flush();
   gbtList<gbtEfgOutcome> values;
 
-  solution = new BehavProfile<gNumber>(p_support);
-  ((gVector<gNumber> &) *solution).operator=(gNumber(0));
+  solution = new BehavProfile<gbtNumber>(p_support);
+  ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));
 
   gbtEfgGame efg = p_support.GetGame().Copy();
   infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg.NumPlayers());

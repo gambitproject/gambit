@@ -35,7 +35,7 @@ template <class T> class LPTableau;
 
 
 // ---------------------------------------------------------------------------
-// We have different implementations of Tableau for double and gRational, 
+// We have different implementations of Tableau for double and gbtRational, 
 // but with the same interface
 // ---------------------------------------------------------------------------
 
@@ -47,13 +47,13 @@ template<>
 class Tableau<double> : public TableauInterface<double>{
 private:
   LUdecomp<double> B;     // LU decomposition
-  gVector<double> tmpcol; // temporary column vector, to avoid allocation
+  gbtVector<double> tmpcol; // temporary column vector, to avoid allocation
 
 public:
       // constructors and destructors
-  Tableau(const gMatrix<double> &A, const gVector<double> &b); 
-  Tableau(const gMatrix<double> &A, const gbtBlock<int> &art, 
-	  const gVector<double> &b); 
+  Tableau(const gbtMatrix<double> &A, const gbtVector<double> &b); 
+  Tableau(const gbtMatrix<double> &A, const gbtBlock<int> &art, 
+	  const gbtVector<double> &b); 
   Tableau(const Tableau<double>&);
   virtual ~Tableau();
   
@@ -62,17 +62,17 @@ public:
   // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
-  void BasisVector(gVector<double> &x) const; // solve M x = (*b)
-  void SolveColumn(int, gVector<double> &);  // column in new basis 
-  void Solve(const gVector<double> &b, gVector<double> &x);  // solve M x = b
-  void SolveT(const gVector<double> &c, gVector<double> &y);  // solve y M = c
+  void BasisVector(gbtVector<double> &x) const; // solve M x = (*b)
+  void SolveColumn(int, gbtVector<double> &);  // column in new basis 
+  void Solve(const gbtVector<double> &b, gbtVector<double> &x);  // solve M x = b
+  void SolveT(const gbtVector<double> &c, gbtVector<double> &y);  // solve y M = c
   
   // raw Tableau functions
 
   void Refactor();
   void SetRefactor(int);
 
-  void SetConst(const gVector<double> &bnew);
+  void SetConst(const gbtVector<double> &bnew);
   void SetBasis( const Basis &); // set new Tableau
   
   bool IsFeasible();
@@ -80,23 +80,23 @@ public:
 };
 
 // 
-// Tableau<gRational> 
+// Tableau<gbtRational> 
 //  
 
 template<>
-class Tableau<gRational> : public TableauInterface<gRational>{
+class Tableau<gbtRational> : public TableauInterface<gbtRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
-  gMatrix<gRational> GetInverse();
+  gbtMatrix<gbtRational> GetInverse();
 
-  gMatrix<gInteger> Tabdat;  // This caries the full tableau
-  gVector<gInteger> Coeff;   // and coeffieient vector
-  gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
-  gInteger denom;  // This is the denominator for the simplex
+  gbtMatrix<gbtInteger> Tabdat;  // This caries the full tableau
+  gbtVector<gbtInteger> Coeff;   // and coeffieient vector
+  gbtInteger totdenom;  // This carries the denominator for Q data or 1 for Z
+  gbtInteger denom;  // This is the denominator for the simplex
 
-  gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
+  gbtVector<gbtRational> tmpcol; // temporary column vector, to avoid allocation
 
-  void MySolveColumn(int, gVector<gRational> &);  // column in new basis 
+  void MySolveColumn(int, gbtVector<gbtRational> &);  // column in new basis 
 
 protected:
   gbtBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
@@ -108,41 +108,41 @@ public:
     gbtText Description(void) const;
   };
       // constructors and destructors
-  Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b); 
-  Tableau(const gMatrix<gRational> &A, const gbtBlock<int> &art, 
-	  const gVector<gRational> &b); 
-  Tableau(const Tableau<gRational>&);
+  Tableau(const gbtMatrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
+  Tableau(const gbtMatrix<gbtRational> &A, const gbtBlock<int> &art, 
+	  const gbtVector<gbtRational> &b); 
+  Tableau(const Tableau<gbtRational>&);
   virtual ~Tableau();
   
-  Tableau<gRational>& operator=(const Tableau<gRational>&);
+  Tableau<gbtRational>& operator=(const Tableau<gbtRational>&);
   
   // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
-  void SolveColumn(int, gVector<gRational> &);  // column in new basis 
-  void GetColumn(int, gVector<gRational> &) const;  // column in new basis 
+  void SolveColumn(int, gbtVector<gbtRational> &);  // column in new basis 
+  void GetColumn(int, gbtVector<gbtRational> &) const;  // column in new basis 
   
   // raw Tableau functions
 
   void Refactor();
   void SetRefactor(int);
 
-  void SetConst(const gVector<gRational> &bnew);
+  void SetConst(const gbtVector<gbtRational> &bnew);
   void SetBasis( const Basis &); // set new Tableau
-  void Solve(const gVector<gRational> &b, gVector<gRational> &x);  // solve M x = b
-  void SolveT(const gVector<gRational> &c, gVector<gRational> &y);  // solve y M = c
+  void Solve(const gbtVector<gbtRational> &b, gbtVector<gbtRational> &x);  // solve M x = b
+  void SolveT(const gbtVector<gbtRational> &c, gbtVector<gbtRational> &y);  // solve y M = c
   
   bool IsFeasible();
   bool IsLexMin();
   void BigDump(gbtOutput &);
-  void BasisVector(gVector<gRational> &out) const;
-  gInteger TotDenom() const;
+  void BasisVector(gbtVector<gbtRational> &out) const;
+  gbtInteger TotDenom() const;
 };
 
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #include "math/rational.h"
 gbtOutput &operator<<(gbtOutput &, const Tableau<double> &);
-gbtOutput &operator<<(gbtOutput &, const Tableau<gRational> &);
+gbtOutput &operator<<(gbtOutput &, const Tableau<gbtRational> &);
 #elif defined __BORLANDC__
 template <class T> gbtOutput &operator<<(gbtOutput &, const Tableau<T> &);
 #endif   // __GNUG__, __BORLANDC__

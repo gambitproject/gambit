@@ -74,8 +74,8 @@ private:
   friend class EfgFile;
   friend class gbtNfgGame;
   friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
+  friend class BehavProfile<gbtRational>;
+  friend class BehavProfile<gbtNumber>;
   friend void SetEfg(gbtNfgGame, gbtEfgGame);
 
 protected:
@@ -92,13 +92,13 @@ protected:
 
   void WriteEfg(gbtOutput &, gbt_efg_node_rep *) const;
 
-  void Payoff(gbt_efg_node_rep *n, gNumber,
-	      const gPVector<int> &, gVector<gNumber> &) const;
-  void Payoff(gbt_efg_node_rep *n, gNumber,
-	      const gbtArray<gbtArray<int> *> &, gbtArray<gNumber> &) const;
+  void Payoff(gbt_efg_node_rep *n, gbtNumber,
+	      const gbtPVector<int> &, gbtVector<gbtNumber> &) const;
+  void Payoff(gbt_efg_node_rep *n, gbtNumber,
+	      const gbtArray<gbtArray<int> *> &, gbtArray<gbtNumber> &) const;
   
-  void InfosetProbs(gbt_efg_node_rep *n, gNumber,
-		    const gPVector<int> &, gPVector<gNumber> &) const;
+  void InfosetProbs(gbt_efg_node_rep *n, gbtNumber,
+		    const gbtPVector<int> &, gbtPVector<gbtNumber> &) const;
     
 
 public:
@@ -130,8 +130,8 @@ public:
   bool IsPerfectRecall(void) const;
   bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const;
   long RevisionNumber(void) const;
-  gNumber MinPayoff(int pl = 0) const;
-  gNumber MaxPayoff(int pl = 0) const;
+  gbtNumber MinPayoff(int pl = 0) const;
+  gbtNumber MaxPayoff(int pl = 0) const;
   
   gbtEfgNode GetRoot(void) const;
 
@@ -158,7 +158,7 @@ public:
   gbtEfgAction InsertAction(gbtEfgInfoset);
   gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
 
-  void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
+  void SetChanceProb(gbtEfgInfoset, int, const gbtNumber &);
 
   void MarkSubgames(void);
   bool MarkSubgame(gbtEfgNode);
@@ -170,16 +170,16 @@ public:
 
   gbtArray<int>   NumInfosets(void) const;  // Does not include chance infosets
   int           NumPlayerInfosets(void) const;
-  gPVector<int> NumActions(void) const;
+  gbtPVector<int> NumActions(void) const;
   int           NumPlayerActions(void) const;
-  gPVector<int> NumMembers(void) const;
+  gbtPVector<int> NumMembers(void) const;
   
   // COMPUTING VALUES OF PROFILES
-  void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
+  void Payoff(const gbtPVector<int> &profile, gbtVector<gbtNumber> &payoff) const;
   void Payoff(const gbtArray<gbtArray<int> *> &profile,
-	      gbtArray<gNumber> &payoff) const;
+	      gbtArray<gbtNumber> &payoff) const;
 
-  void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
+  void InfosetProbs(const gbtPVector<int> &profile, gbtPVector<gbtNumber> &prob) const;
     
   gbtNfgGame GetReducedNfg(void) const;
   bool HasReducedNfg(void) const;
@@ -200,7 +200,7 @@ template <class T> class PureBehavProfile   {
     // This aims at efficiency, but leads to a problem described in behav.imp
 
     void Payoff(const gbtEfgNode &n, const T, gbtArray<T> &) const;
-    void InfosetProbs(const gbtEfgNode &n, T, gPVector<T> &) const;
+    void InfosetProbs(const gbtEfgNode &n, T, gbtPVector<T> &) const;
 
   public:
     PureBehavProfile(const gbtEfgGame &);
@@ -224,7 +224,7 @@ template <class T> class PureBehavProfile   {
     const T Payoff(const gbtEfgNode &, const int &pl) const;
   //    T    Payoff(const int &pl) const;
     void Payoff(gbtArray<T> &payoff) const;
-    void InfosetProbs(gPVector<T> &prob) const;
+    void InfosetProbs(gbtPVector<T> &prob) const;
     gbtEfgGame GetGame(void) const   { return m_efg; }
 };
 

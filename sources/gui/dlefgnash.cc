@@ -1021,7 +1021,7 @@ gbtEfgNashAlgorithm *panelEfgEnumMixed::GetAlgorithm(void) const
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    gbtNfgNashEnumMixed<gRational> *subAlgorithm = new gbtNfgNashEnumMixed<gRational>;
+    gbtNfgNashEnumMixed<gbtRational> *subAlgorithm = new gbtNfgNashEnumMixed<gbtRational>;
     subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 			       0 : m_stopAfter->GetValue());
     algorithm->SetAlgorithm(subAlgorithm);
@@ -1160,7 +1160,7 @@ gbtEfgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(subAlgorithm);
     }
     else {
-      gbtEfgNashLcp<gRational> *subAlgorithm = new gbtEfgNashLcp<gRational>;
+      gbtEfgNashLcp<gbtRational> *subAlgorithm = new gbtEfgNashLcp<gbtRational>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1178,7 +1178,7 @@ gbtEfgNashAlgorithm *panelEfgLcp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(subAlgorithm);
     }
     else {
-      gbtNfgNashLcp<gRational> *subAlgorithm = new gbtNfgNashLcp<gRational>;
+      gbtNfgNashLcp<gbtRational> *subAlgorithm = new gbtNfgNashLcp<gbtRational>;
       subAlgorithm->SetStopAfter((m_findAll->GetValue()) ?
 				 0 : m_stopAfter->GetValue());
       subAlgorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -1282,7 +1282,7 @@ gbtEfgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(new gbtEfgNashLp<double>);
     }
     else {
-      algorithm->SetAlgorithm(new gbtEfgNashLp<gRational>);
+      algorithm->SetAlgorithm(new gbtEfgNashLp<gbtRational>);
     }
   }
   else {
@@ -1290,7 +1290,7 @@ gbtEfgNashAlgorithm *panelEfgLp::GetAlgorithm(void) const
       algorithm->SetAlgorithm(new gbtNfgNashLp<double>);
     }
     else {
-      algorithm->SetAlgorithm(new gbtNfgNashLp<gRational>);
+      algorithm->SetAlgorithm(new gbtNfgNashLp<gbtRational>);
     }
   }
   return algorithm;
@@ -1668,7 +1668,7 @@ gbtEfgNashAlgorithm *panelEfgSimpdiv::GetAlgorithm(void) const
     algorithm->SetAlgorithm(subAlgorithm);
   }
   else {
-    gbtNfgNashSimpdiv<gRational> *subAlgorithm = new gbtNfgNashSimpdiv<gRational>;
+    gbtNfgNashSimpdiv<gbtRational> *subAlgorithm = new gbtNfgNashSimpdiv<gbtRational>;
     subAlgorithm->SetLeashLength((m_useLeash->GetValue()) ?
 				 m_leashLength->GetValue() : 0);
     subAlgorithm->SetNumRestarts(m_numRestarts->GetValue());

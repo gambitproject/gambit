@@ -28,30 +28,30 @@
 #include "gnumber.h"
 #include "complex.h"
 
-template class gVector<int>;
-template class gVector<long>;
-template class gVector<double>;
-template class gVector<gInteger>;
-template class gVector<gRational>;
-template class gVector<gComplex>;
-template class gVector<gNumber>;
+template class gbtVector<int>;
+template class gbtVector<long>;
+template class gbtVector<double>;
+template class gbtVector<gbtInteger>;
+template class gbtVector<gbtRational>;
+template class gbtVector<gbtComplex>;
+template class gbtVector<gbtNumber>;
 
-template gbtOutput & operator<< (gbtOutput&, const gVector<int>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<long>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<gInteger>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<gRational>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<gComplex>&);
-template gbtOutput & operator<< (gbtOutput&, const gVector<gNumber>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<long>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtInteger>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtComplex>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtNumber>&);
 
-template gVector<gDouble> TogDouble(const gVector<gRational>&);
-template gVector<gDouble> TogDouble(const gVector<double>&);
-template gVector<gDouble> TogDouble(const gVector<gDouble>&);
+template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtRational>&);
+template gbtVector<gbtDouble> TogDouble(const gbtVector<double>&);
+template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtDouble>&);
 
 #include "base/glist.imp"
 
-template class gbtList<gVector<double> >;
-template class gbtList<gVector<gRational> >;
-template class gbtList<gVector<gComplex> >;
+template class gbtList<gbtVector<double> >;
+template class gbtList<gbtVector<gbtRational> >;
+template class gbtList<gbtVector<gbtComplex> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gVector<gRational> >&);
+			       const gbtList<gbtVector<gbtRational> >&);

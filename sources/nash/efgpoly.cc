@@ -39,13 +39,13 @@ EfgPolEnumParams::EfgPolEnumParams(void)
 //                    EfgPolEnum: nontemplate functions
 //---------------------------------------------------------------------------
 
-template class EfgPolEnumModule<gDouble>;
+template class EfgPolEnumModule<gbtDouble>;
 
 int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
 	       gbtList<BehavSolution> &solutions, gbtStatus &p_status,
 	       long &nevals, double &time, bool &is_singular)
 {
-  EfgPolEnumModule<gDouble> module(support, params);
+  EfgPolEnumModule<gbtDouble> module(support, params);
   module.EfgPolEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
@@ -60,8 +60,8 @@ BehavSolution PolishEquilibrium(const gbtEfgSupport &support,
 				bool &is_singular)
 {
   EfgPolEnumParams params;
-  EfgPolEnumModule<gDouble> module(support, params);
-  gVector<gDouble> vec = module.SolVarsFromBehavProfile(*(sol.Profile()));
+  EfgPolEnumModule<gbtDouble> module(support, params);
+  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(*(sol.Profile()));
   module.PolishKnownRoot(vec);
   return module.ReturnPolishedSolution(vec);
 }

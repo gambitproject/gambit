@@ -160,7 +160,7 @@ gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
   }
 }
 
-gNumber gbtEfgAction::GetChanceProb(void) const
+gbtNumber gbtEfgAction::GetChanceProb(void) const
 {
   if (rep) {
     return rep->m_infoset->m_chanceProbs[rep->m_id];
@@ -219,7 +219,7 @@ gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbt_efg_player_rep *p_player,
   for (int act = 1; act <= p_br; act++) {
     m_actions[act] = new gbt_efg_action_rep(this, act);
     if (p_player->m_id == 0) {
-      m_chanceProbs[act] = gRational(1, p_br);
+      m_chanceProbs[act] = gbtRational(1, p_br);
     }
   }
 }
@@ -482,12 +482,12 @@ gbtEfgAction gbtEfgInfoset::InsertAction(int where)
   return action;
 }
 
-void gbtEfgInfoset::SetChanceProb(int p_action, const gNumber &p_value)
+void gbtEfgInfoset::SetChanceProb(int p_action, const gbtNumber &p_value)
 {
   rep->m_chanceProbs[p_action] = p_value;
 }
 
-gNumber gbtEfgInfoset::GetChanceProb(int p_action) const
+gbtNumber gbtEfgInfoset::GetChanceProb(int p_action) const
 {
   if (rep) {
     return rep->m_chanceProbs[p_action];

@@ -38,13 +38,13 @@ private:
   gbtEfgGame m_efg;
   const gbtEfgSupport &efsupp;
   gbtArray<SFSequenceSet *> *sequences;
-  gNArray<gbtArray<gNumber> *> *SF;  // sequence form
-  gbtArray<gbtRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
+  gNArray<gbtArray<gbtNumber> *> *SF;  // sequence form
+  gbtArray<gbtRectArray<gbtNumber> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
-  gPVector<int> isetFlag,isetRow;
+  gbtPVector<int> isetFlag,isetRow;
   gbtArray<gbtList<gbtEfgInfoset> > infosets;
 
-  void MakeSequenceForm(const gbtEfgNode &, gNumber,gbtArray<int>, 
+  void MakeSequenceForm(const gbtEfgNode &, gbtNumber,gbtArray<int>, 
 			gbtArray<gbtEfgInfoset>, gbtArray<Sequence *>);
   void GetSequenceDims(const gbtEfgNode &);
 
@@ -59,16 +59,16 @@ public:
   int NumPlayerInfosets() const;
   inline int NumPlayers() const { return m_efg.NumPlayers(); }
   
-  inline gbtArray<gNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
-  gNumber Payoff(const gbtArray<int> & index,int pl) const;
+  inline gbtArray<gbtNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
+  gbtNumber Payoff(const gbtArray<int> & index,int pl) const;
 
-  gbtRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
+  gbtRectArray<gbtNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   gbtEfgInfoset GetInfoset(int pl, int sequence) const;
   gbtEfgAction GetAction(int pl, int sequence) const;
   gbtEfgGame GetEfg(void) const { return m_efg; }
-  BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
+  BehavProfile<gbtNumber> ToBehav(const gbtPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   
   void Dump(gbtOutput &) const;

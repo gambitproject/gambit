@@ -106,13 +106,13 @@ int EfgIter::Set(int pl, int iset, int act)
   return 1;
 }
 
-gNumber EfgIter::Payoff(int pl) const
+gbtNumber EfgIter::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-void EfgIter::Payoff(gVector<gNumber> &payoff) const
+void EfgIter::Payoff(gbtVector<gbtNumber> &payoff) const
 {
   _profile.Payoff(payoff);
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++)
@@ -256,7 +256,7 @@ int EfgContIter::NextContingency(void)
   }
 }
 
-gNumber EfgContIter::Payoff(int pl) const
+gbtNumber EfgContIter::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
@@ -385,13 +385,13 @@ int EfgConditionalContIter::NextContingency(void)
   }
 }
 
-gNumber EfgConditionalContIter::Payoff(int pl) const
+gbtNumber EfgConditionalContIter::Payoff(int pl) const
 {
   _profile.Payoff(_payoff);
   return _payoff[pl];
 }
 
-gNumber EfgConditionalContIter::Payoff(const gbtEfgNode &n, int pl) const
+gbtNumber EfgConditionalContIter::Payoff(const gbtEfgNode &n, int pl) const
 {
   return _profile.Payoff(n,pl);
 }

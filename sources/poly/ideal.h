@@ -81,7 +81,7 @@ template <class T> class gIdeal {
                 // This returns a monomial basis of the ring of polynomial
                 // functions on the variety V(I), where I is the given ideal.
                 // It fails if the variety is not zero dimensional.
-          bool              IsRoot(const gVector<T>&) const;
+          bool              IsRoot(const gbtVector<T>&) const;
 
    bool ZeroDimensional()    const;
    bool IsEntireRing()       const;

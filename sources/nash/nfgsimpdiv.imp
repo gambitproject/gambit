@@ -62,10 +62,10 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
 {
   gbtArray<int> ylabel(2);
   gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
-  gPVector<int> U(y.Support().NumStrats()), TT(y.Support().NumStrats());
-  gPVector<T> ab(y.Support().NumStrats());
-  gPVector<T> besty(y.Support().NumStrats());
-  gPVector<T> v(y);
+  gbtPVector<int> U(y.Support().NumStrats()), TT(y.Support().NumStrats());
+  gbtPVector<T> ab(y.Support().NumStrats());
+  gbtPVector<T> besty(y.Support().NumStrats());
+  gbtPVector<T> v(y);
 
   int i = 0;
   int j, k, h, jj, hh,ii, kk,tot;
@@ -247,8 +247,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
 
 template <class T> void gbtNfgNashSimpdiv<T>::update(gbtRectArray<int> &pi,
 					      gbtRectArray<int> &labels,
-					      gPVector<T> &ab,
-					      const gPVector<int> &U,
+					      gbtPVector<T> &ab,
+					      const gbtPVector<int> &U,
 					      int j, int i)
 {
   int jj, hh, k,f;
@@ -293,10 +293,10 @@ template <class T> void gbtNfgNashSimpdiv<T>::update(gbtRectArray<int> &pi,
 }
 
 template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
-					    gPVector<T> &v, 
-					    const gPVector<int> &U,
-					    const gPVector<int> &TT,
-					    const gPVector<T> &ab,
+					    gbtPVector<T> &v, 
+					    const gbtPVector<int> &U,
+					    const gbtPVector<int> &TT,
+					    const gbtPVector<T> &ab,
 					    const gbtRectArray<int> &pi,
 					    int k)
 {
@@ -322,7 +322,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
 
 template <class T> void gbtNfgNashSimpdiv<T>::getnexty(MixedProfile<T> &x,
 						const gbtRectArray<int> &pi, 
-						const gPVector<int> &U,
+						const gbtPVector<int> &U,
 						int i)
 {
   int j,h,hh;
@@ -336,7 +336,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getnexty(MixedProfile<T> &x,
 }
 
 template <class T> int gbtNfgNashSimpdiv<T>::get_b(int j, int h, int nstrats,
-					    const gPVector<int> &U)
+					    const gbtPVector<int> &U)
 {
   int hh;
   
@@ -350,7 +350,7 @@ template <class T> int gbtNfgNashSimpdiv<T>::get_b(int j, int h, int nstrats,
 }
 
 template <class T> int gbtNfgNashSimpdiv<T>::get_c(int j, int h, int nstrats,
-					    const gPVector<int> &U)
+					    const gbtPVector<int> &U)
 {
   int hh;
   
@@ -362,7 +362,7 @@ template <class T> int gbtNfgNashSimpdiv<T>::get_c(int j, int h, int nstrats,
 
 template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
 					     gbtArray<int> &ylabel,
-					     gPVector<T> &besty)
+					     gbtPVector<T> &besty)
 {
   int i,j,jj;
   T maxz,payoff,maxval;
@@ -427,7 +427,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
   mingrid = ((T)(1))/mingrid;
   
   MixedProfile<T> y(p_support);
-  ((gVector<T> &) y).operator=((T) 0);
+  ((gbtVector<T> &) y).operator=((T) 0);
 
   // In principle, this algorithm can be started from any point
   // in the simplex.  Currently, it starts at a predefined point;

@@ -33,24 +33,24 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A1(const gbtNfgGame &N,
+template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &N,
 				      const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gMatrix<T> A1(1,n1,n1+1,n1+n2);
+  gbtMatrix<T> A1(1,n1,n1+1,n1+n2);
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N) - gNumber(1);
+  min = MinPayoff(N) - gbtNumber(1);
   T max = MaxPayoff(N);
   T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = iter.GetPayoff(N.GetPlayer(1)) - gNumber(min);
+      A1(i, n1 + j) = iter.GetPayoff(N.GetPlayer(1)) - gbtNumber(min);
       A1(i, n1 + j) *= fac;
       iter.Next(2);
     }
@@ -59,24 +59,24 @@ template <class T> gMatrix<T> Make_A1(const gbtNfgGame &N,
   return A1;
 }
 
-template <class T> gMatrix<T> Make_A2(const gbtNfgGame &N,
+template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &N,
 				      const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gMatrix<T> A2(n1+1,n1+n2,1,n1);
+  gbtMatrix<T> A2(n1+1,n1+n2,1,n1);
   NfgIter iter(S); 
   T min; 
 
-  min = MinPayoff(N) - gNumber(1);
+  min = MinPayoff(N) - gbtNumber(1);
   T max = MaxPayoff(N);
   T fac = ((T)1)/(max - min);
 
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = iter.GetPayoff(N.GetPlayer(2)) - gNumber(min);
+      A2(n1 + j, i) = iter.GetPayoff(N.GetPlayer(2)) - gbtNumber(min);
       A2(n1 + j, i) *= fac;
       iter.Next(2);
     }
@@ -85,25 +85,25 @@ template <class T> gMatrix<T> Make_A2(const gbtNfgGame &N,
   return A2;
 }
 
-template <class T> gVector<T> Make_b1(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b1(const gbtNfgGame &,
 				      const gbtNfgSupport &S,
 				      const T &)
 {
   int n1 = S.NumStrats(1);
-  gVector<T> b1(1,n1);
+  gbtVector<T> b1(1,n1);
 
   for (int i = 1; i <= n1; i++) 
     b1[i]=-(T)1;
   return b1;
 }
 
-template <class T> gVector<T> Make_b2(const gbtNfgGame &,
+template <class T> gbtVector<T> Make_b2(const gbtNfgGame &,
 				      const gbtNfgSupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
-  gVector<T> b2(n1+1,n1+n2);
+  gbtVector<T> b2(n1+1,n1+n2);
 
   for (i = n1+1; i <= n1+n2; i++) 
     b2[i]=-(T)1;
@@ -111,8 +111,8 @@ template <class T> gVector<T> Make_b2(const gbtNfgGame &,
 }
 
 template <class T>
-LHTableau<T>::LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
-			const gVector<T> &b1, const gVector<T> &b2)
+LHTableau<T>::LHTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
+			const gbtVector<T> &b1, const gbtVector<T> &b2)
   : T1(A1,b1), T2(A2,b2), 
 //    tmpcol(b1.First(),b2.Last()), 
     tmp1(b1.First(),b1.Last()),tmp2(b2.First(),b2.Last()),

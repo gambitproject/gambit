@@ -71,10 +71,10 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
 
   ntot = ns1+ns2+ni1+ni2;
 
-  gMatrix<T> A(1,ntot,0,ntot);
-  gVector<T> b(1,ntot);
+  gbtMatrix<T> A(1,ntot,0,ntot);
+  gbtVector<T> b(1,ntot);
 
-  maxpay = p_support.GetGame().MaxPayoff() + gNumber(1);
+  maxpay = p_support.GetGame().MaxPayoff() + gbtNumber(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -99,7 +99,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   eps = tab.Epsilon();
   
   BehavProfile<T> profile(p_support);
-  gVector<T> sol(tab.MinRow(),tab.MaxRow());
+  gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
   gbtList<BehavSolution> solutions;
 
@@ -123,7 +123,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
 template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs((T) 0);
-  gVector<T> v(tableau.MinRow(), tableau.MaxRow());
+  gbtVector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
   for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
@@ -146,7 +146,7 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 template <class T> int 
 gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 			    int j, LTableau<T> &B, int depth,
-			    gMatrix<T> &A, gbtList<BehavSolution> &p_solutions,
+			    gbtMatrix<T> &A, gbtList<BehavSolution> &p_solutions,
 			    gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
@@ -157,7 +157,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
   T p1,p2,aa;
   T small_num = (T)1/(T)1000;
 
-  gVector<T> sol(B.MinRow(),B.MaxRow());
+  gbtVector<T> sol(B.MinRow(),B.MaxRow());
   BehavProfile<T> profile(p_support);
 
   newsol =0;
@@ -214,22 +214,22 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 }
 
 template <class T>
-void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gMatrix<T> &A,
+void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> &A,
 				   const gbtEfgNode &n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
   int snew;
   if (!n.GetOutcome().IsNull()) {
-    A(s1,ns1+s2) = gNumber(A(s1,ns1+s2)) +
-      gNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(1)) - gNumber(maxpay));
-    A(ns1+s2,s1) = gNumber(A(ns1+s2,s1)) +
-      gNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(2)) - gNumber(maxpay));
+    A(s1,ns1+s2) = gbtNumber(A(s1,ns1+s2)) +
+      gbtNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(1)) - gbtNumber(maxpay));
+    A(ns1+s2,s1) = gbtNumber(A(ns1+s2,s1)) +
+      gbtNumber(prob) * (n.GetOutcome().GetPayoff(p_support.GetGame().GetPlayer(2)) - gbtNumber(maxpay));
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer().IsChance()) {
       for (int i = 1; i <= n.NumChildren(); i++) {
 	FillTableau(p_support, A, n.GetChild(i),
-		    gNumber(prob) * n.GetInfoset().GetChanceProb(i),
+		    gbtNumber(prob) * n.GetInfoset().GetChanceProb(i),
 		    s1,s2,i1,i2);
       }
     }
@@ -270,7 +270,7 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gMatrix<T> &A
 template <class T>
 void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 				  const LTableau<T> &tab, 
-				  gDPVector<T> &v, const gVector<T> &sol,
+				  gbtDPVector<T> &v, const gbtVector<T> &sol,
 				  const gbtEfgNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;

@@ -34,7 +34,7 @@
 //
 void QreJacobian(const gbtNfgGame &p_nfg,
 		 const MixedProfile<double> &p_profile,
-		 const double &p_nu, gMatrix<double> &p_matrix);
+		 const double &p_nu, gbtMatrix<double> &p_matrix);
 
 class gbtNfgNashLogit : public gbtNfgNashAlgorithm {
 private:

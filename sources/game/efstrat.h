@@ -56,7 +56,7 @@ public:
 
   int NumActions(int pl, int iset) const;
   int NumActions(const gbtEfgInfoset &) const;
-  gPVector<int> NumActions(void) const;
+  gbtPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one

@@ -29,7 +29,7 @@
 
 #include "base/base.h"
 
-template <class T> class gMatrix;
+template <class T> class gbtMatrix;
 
 /** 
  * General purpose vector representation and calculation class.
@@ -38,8 +38,8 @@ template <class T> class gMatrix;
  * type, the operators binary +, binary -, binary *, /, ==, and = must
  * be defined for the type.
  */
-template <class T> class gVector : public gbtArray<T>   {
-  friend class gMatrix<T>;
+template <class T> class gbtVector : public gbtArray<T>   {
+  friend class gbtMatrix<T>;
 public:
   class BadDim : public gbtException  {
   public:
@@ -48,34 +48,34 @@ public:
   };
 
   /** Create a vector of length len, starting at 1 */
-  gVector(unsigned int len = 0);
+  gbtVector(unsigned int len = 0);
   /** Create a vector indexed from low to high */
-  gVector(int low, int high);
+  gbtVector(int low, int high);
   /** Copy constructor */
-  gVector(const gVector<T>& V);
+  gbtVector(const gbtVector<T>& V);
   /** Destructor */
-  virtual ~gVector();
+  virtual ~gbtVector();
   
   /** Assignment operator: requires vectors to be of same length */
-  gVector<T>& operator=(const gVector<T>& V);
+  gbtVector<T>& operator=(const gbtVector<T>& V);
   /** Assigns the value c to all components of the vector */
-  gVector<T>& operator=(T c);
+  gbtVector<T>& operator=(T c);
   
-  gVector<T> operator+(const gVector<T>& V) const;
-  gVector<T>& operator+=(const gVector<T>& V);
+  gbtVector<T> operator+(const gbtVector<T>& V) const;
+  gbtVector<T>& operator+=(const gbtVector<T>& V);
   
-  gVector<T> operator-(void);
-  gVector<T> operator-(const gVector<T>& V) const;
-  gVector<T>& operator-=(const gVector<T>& V);
+  gbtVector<T> operator-(void);
+  gbtVector<T> operator-(const gbtVector<T>& V) const;
+  gbtVector<T>& operator-=(const gbtVector<T>& V);
   
-  gVector<T> operator*(T c) const;
-  gVector<T>& operator*=(T c);
-  T operator*(const gVector<T>& V) const;
+  gbtVector<T> operator*(T c) const;
+  gbtVector<T>& operator*=(T c);
+  T operator*(const gbtVector<T>& V) const;
   
-  gVector<T> operator/(T c) const;
+  gbtVector<T> operator/(T c) const;
   
-  bool operator==(const gVector<T>& V) const;
-  bool operator!=(const gVector<T>& V) const;
+  bool operator==(const gbtVector<T>& V) const;
+  bool operator!=(const gbtVector<T>& V) const;
   
   /** Tests if all components of the vector are equal to a constant c */
   bool operator==(T c) const;
@@ -85,15 +85,15 @@ public:
   T NormSquared() const;
   
   // check vector for identical boundaries
-  bool Check(const gVector<T> &v) const;
+  bool Check(const gbtVector<T> &v) const;
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, const gVector<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtVector<T> &);
 #endif
 
 #include "math/double.h"
 
-template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
+template <class T> gbtVector<gbtDouble> TogDouble(const gbtVector<T>&);
 
 #endif   //# GVECTOR_H

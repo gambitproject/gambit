@@ -40,8 +40,8 @@ template <class T> class gNArray   {
     T *storage;
     gbtArray<int> dim;
 
-    void DumpFrom(gbtOutput &, int, gVector<int> &) const;
-//    void ReadFrom(gbtInput &, const gVector<int> &, gVector<int> &, int);
+    void DumpFrom(gbtOutput &, int, gbtVector<int> &) const;
+//    void ReadFrom(gbtInput &, const gbtVector<int> &, gbtVector<int> &, int);
 
   public:
     gNArray(void);
@@ -52,8 +52,8 @@ template <class T> class gNArray   {
     gNArray<T> &operator=(const gNArray<T> &);
 
     /* not used for now
-    T operator[](const gVector<int> &) const;
-    T &operator[](const gVector<int> &);
+    T operator[](const gbtVector<int> &) const;
+    T &operator[](const gbtVector<int> &);
     */
 
     T operator[](const gbtArray<int> &) const;
@@ -64,7 +64,7 @@ template <class T> class gNArray   {
 
     const gbtArray<int> &Dimensionality(void) const;
 
-//    void Input(gbtInput &, const gVector<int> &, int);
+//    void Input(gbtInput &, const gbtVector<int> &, int);
     void Output(gbtOutput &) const;
 };
 
@@ -75,18 +75,18 @@ template <class T> class gIndexedNArray : private gNArray<T>   {
     
   public:
     gIndexedNArray(void);
-    gIndexedNArray(const gVector<int> &d);
+    gIndexedNArray(const gbtVector<int> &d);
     gIndexedNArray(const gIndexedNArray<T> &);
 	 ~gIndexedNArray();
 
 	 gIndexedNArray<T> &operator=(const gIndexedNArray<T> &);
 
-    T operator[](const gVector<int> &) const;
-	 T &operator[](const gVector<int> &);
+    T operator[](const gbtVector<int> &) const;
+	 T &operator[](const gbtVector<int> &);
     
-    const gVector<int> &Dimensionality(void) const   { return dim; }
+    const gbtVector<int> &Dimensionality(void) const   { return dim; }
 
-    void Input(gbtInput &f, const gVector<int> &v, int i)
+    void Input(gbtInput &f, const gbtVector<int> &v, int i)
       { gNArray<T>::Input(f, v, i); }
     void Output(gbtOutput &f) const
       { gNArray<T>::Output(f); }

@@ -163,10 +163,10 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
   for (int i = 1; i <= dim.Length(); i++) {
     dim[i] = p_efg.GetPlayer(i).NumInfosets();
   }
-  gPVector<int> profile(dim);
-  ((gVector<int> &) profile).operator=(1);
+  gbtPVector<int> profile(dim);
+  ((gbtVector<int> &) profile).operator=(1);
 
-  gVector<gNumber> payoff(p_efg.NumPlayers());
+  gbtVector<gbtNumber> payoff(p_efg.NumPlayers());
   
   while (1)  {
     p_efg.Payoff(profile, payoff);

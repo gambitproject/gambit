@@ -29,7 +29,7 @@
 
 #include "math/gvector.h"
 
-template <class T> class gPVector : public gVector<T> {
+template <class T> class gbtPVector : public gbtVector<T> {
  private:
   int sum(const gbtArray<int> &V) const;
   void setindex(void);
@@ -38,17 +38,17 @@ template <class T> class gPVector : public gVector<T> {
   T **svptr;
   gbtArray<int> svlen;
 
-  int Check(const gPVector<T> &v) const;
+  int Check(const gbtPVector<T> &v) const;
 
  public:
 
   // constructors
 
-  gPVector(void);
-  gPVector(const gbtArray<int> &sig);
-  gPVector(const gVector<T> &val, const gbtArray<int> &sig);
-  gPVector(const gPVector<T> &v);
-  virtual ~gPVector();
+  gbtPVector(void);
+  gbtPVector(const gbtArray<int> &sig);
+  gbtPVector(const gbtVector<T> &val, const gbtArray<int> &sig);
+  gbtPVector(const gbtPVector<T> &v);
+  virtual ~gbtPVector();
 
 
   // element access operators
@@ -56,29 +56,29 @@ template <class T> class gPVector : public gVector<T> {
   const T& operator()(int a, int b) const;
 
   // extract a subvector
-  gVector<T> GetRow(int row) const;
-  void GetRow(int row, gVector<T> &v) const;
-  void SetRow(int row, const gVector<T> &v);
-  void CopyRow(int row, const gPVector<T> &v);
+  gbtVector<T> GetRow(int row) const;
+  void GetRow(int row, gbtVector<T> &v) const;
+  void SetRow(int row, const gbtVector<T> &v);
+  void CopyRow(int row, const gbtPVector<T> &v);
 
   // more operators
 
-  gPVector<T>& operator=(const gPVector<T> &v);
-  gPVector<T>& operator=(const gVector<T> &v);
-  gPVector<T>& operator=(T c);
+  gbtPVector<T>& operator=(const gbtPVector<T> &v);
+  gbtPVector<T>& operator=(const gbtVector<T> &v);
+  gbtPVector<T>& operator=(T c);
 
-  gPVector<T> operator+(const gPVector<T> &v) const;
-  gPVector<T>& operator+=(const gPVector<T> &v);
-  gPVector<T> operator-(void) const;
-  gPVector<T> operator-(const gPVector<T> &v) const;
-  gPVector<T>& operator-=(const gPVector<T> &v);
-  T operator*(const gPVector<T> &v) const;
-  gPVector<T> operator*(const T &c) const;
-  gPVector<T>& operator*=(const T c);
-  gPVector<T> operator/(T c);
+  gbtPVector<T> operator+(const gbtPVector<T> &v) const;
+  gbtPVector<T>& operator+=(const gbtPVector<T> &v);
+  gbtPVector<T> operator-(void) const;
+  gbtPVector<T> operator-(const gbtPVector<T> &v) const;
+  gbtPVector<T>& operator-=(const gbtPVector<T> &v);
+  T operator*(const gbtPVector<T> &v) const;
+  gbtPVector<T> operator*(const T &c) const;
+  gbtPVector<T>& operator*=(const T c);
+  gbtPVector<T> operator/(T c);
 
-  bool operator==(const gPVector<T> &v) const;
-  bool operator!=(const gPVector<T> &v) const;
+  bool operator==(const gbtPVector<T> &v) const;
+  bool operator!=(const gbtPVector<T> &v) const;
 
   // parameter access functions
   const gbtArray<int>& Lengths(void) const;
@@ -87,7 +87,7 @@ template <class T> class gPVector : public gVector<T> {
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gPVector<T> &v);
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtPVector<T> &v);
 #endif
 
 #endif   //# GPVECTOR_H

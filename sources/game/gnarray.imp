@@ -81,7 +81,7 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
 }
 
 /*
-template <class T> T gNArray<T>::operator[](const gVector<int> &v) const
+template <class T> T gNArray<T>::operator[](const gbtVector<int> &v) const
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i,location,offset;
@@ -95,7 +95,7 @@ template <class T> T gNArray<T>::operator[](const gVector<int> &v) const
   return storage[location];
 }
 
-template <class T> T &gNArray<T>::operator[](const gVector<int> &v)
+template <class T> T &gNArray<T>::operator[](const gbtVector<int> &v)
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
   int i, location, offset;
@@ -144,14 +144,14 @@ template <class T> void gNArray<T>::Output(gbtOutput &f) const
     for (int i = dim.Length(); i > 0; f << i-- << ' ');
     f << '\n';
     
-    gVector<int> v(1, dim.Length());
+    gbtVector<int> v(1, dim.Length());
     DumpFrom(f, 1, v);
     f << '\n';
   }
 }
 
 template <class T> 
-void gNArray<T>::DumpFrom(gbtOutput &f, int offset, gVector<int> &v) const
+void gNArray<T>::DumpFrom(gbtOutput &f, int offset, gbtVector<int> &v) const
 {
   for (int i = 1; i <= dim[offset]; i++)   {
     v[offset] = i;
@@ -164,16 +164,16 @@ void gNArray<T>::DumpFrom(gbtOutput &f, int offset, gVector<int> &v) const
 
 /*
 template <class T> 
-void gNArray<T>::Input(gbtInput &f, const gVector<int> &norder, int i)
+void gNArray<T>::Input(gbtInput &f, const gbtVector<int> &norder, int i)
 {
-  gVector<int> strat(1, i);
+  gbtVector<int> strat(1, i);
   ReadFrom(f, norder, strat, i);
 }
 
 
 template <class T> 
-void gNArray<T>::ReadFrom(gbtInput &f, const gVector<int> &norder,
-			  gVector<int> &strat, int i)
+void gNArray<T>::ReadFrom(gbtInput &f, const gbtVector<int> &norder,
+			  gbtVector<int> &strat, int i)
 {
   for (int j = 1; j <= dim[norder[i]]; j++)   {
     strat[norder[i]] = j;
@@ -213,7 +213,7 @@ template <class T> gIndexedNArray<T>::gIndexedNArray(void)
 }
 
 template <class T> 
-gIndexedNArray<T>::gIndexedNArray(const gVector<int> &d)
+gIndexedNArray<T>::gIndexedNArray(const gbtVector<int> &d)
   : gNArray<T>(d)
 {
   long offset = 1;
@@ -255,7 +255,7 @@ gIndexedNArray<T> &gIndexedNArray<T>::operator=(const gIndexedNArray<T> &a)
 }
 
 template <class T>
-T gIndexedNArray<T>::operator=(const gVector<int> &v) const
+T gIndexedNArray<T>::operator=(const gbtVector<int> &v) const
 {
   long location = 0;
   
@@ -270,7 +270,7 @@ T gIndexedNArray<T>::operator=(const gVector<int> &v) const
 }
 
 template <class T>
-T &gIndexedNArray<T>::operator=(const gVector<int> &v)
+T &gIndexedNArray<T>::operator=(const gbtVector<int> &v)
 {
   long location = 0;
 

@@ -29,16 +29,4 @@
 #include "math/rational.h"
 
 template class gbtEfgNashLcp<double>;
-template class gbtEfgNashLcp<gRational>;
-
-
-
-
-
-
-
-
-
-
-
-
+template class gbtEfgNashLcp<gbtRational>;

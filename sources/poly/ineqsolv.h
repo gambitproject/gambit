@@ -64,17 +64,17 @@ template <class T> class IneqSolv {
         T                            Epsilon;
   //        bool                         HasBeenSolved;
   //        gbtTriState                    HasASolution;
-  //        gVector<T>                   Sample;
+  //        gbtVector<T>                   Sample;
   gbtStatus &m_status;
 
   // Routines Doing the Actual Work
 
-  bool IsASolution(const gVector<T>&)                              const;
+  bool IsASolution(const gbtVector<T>&)                              const;
 
   bool SystemHasNoSolutionIn(const gRectangle<T>& r, gbtArray<int>&) const;
 
   const bool ASolutionExistsRecursion(const gRectangle<T>&, 
-				            gVector<T>&,
+				            gbtVector<T>&,
 				            gbtArray<int>&)          const;
 
  public:
@@ -100,7 +100,7 @@ template <class T> class IneqSolv {
      { return Epsilon; }
 
   // The function that does everything
-  const bool ASolutionExists(const gRectangle<T>&, gVector<T>& sample);
+  const bool ASolutionExists(const gRectangle<T>&, gbtVector<T>& sample);
 
   void Output(gbtOutput &) const;
 };  

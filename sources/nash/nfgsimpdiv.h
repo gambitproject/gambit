@@ -37,16 +37,16 @@ private:
   T pay,d,maxz,bestz,mingrid;
 
   T Simplex(MixedProfile<T> &);
-  T getlabel(MixedProfile<T> &yy, gbtArray<int> &, gPVector<T> &);
-  void update(gbtRectArray<int> &, gbtRectArray<int> &, gPVector<T> &,
-	      const gPVector<int> &, int j, int i);
-  void getY(MixedProfile<T> &x, gPVector<T> &, 
-	    const gPVector<int> &, const gPVector<int> &, 
-	    const gPVector<T> &, const gbtRectArray<int> &, int k);
+  T getlabel(MixedProfile<T> &yy, gbtArray<int> &, gbtPVector<T> &);
+  void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<T> &,
+	      const gbtPVector<int> &, int j, int i);
+  void getY(MixedProfile<T> &x, gbtPVector<T> &, 
+	    const gbtPVector<int> &, const gbtPVector<int> &, 
+	    const gbtPVector<T> &, const gbtRectArray<int> &, int k);
   void getnexty(MixedProfile<T> &x, const gbtRectArray<int> &,
-		const gPVector<int> &, int i);
-  int get_c(int j, int h, int nstrats, const gPVector<int> &);
-  int get_b(int j, int h, int nstrats, const gPVector<int> &);
+		const gbtPVector<int> &, int i);
+  int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
+  int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
   
 public:
   gbtNfgNashSimpdiv(void);

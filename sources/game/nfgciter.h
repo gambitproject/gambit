@@ -69,7 +69,7 @@ public:
   gbtNfgOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
   void SetOutcome(gbtNfgOutcome p_outcome) { m_profile.SetOutcome(p_outcome); }
 
-  gNumber GetPayoff(const gbtNfgPlayer &p_player) const 
+  gbtNumber GetPayoff(const gbtNfgPlayer &p_player) const 
     { return m_profile.GetPayoff(p_player); }
 };
 

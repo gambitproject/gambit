@@ -27,23 +27,20 @@
 #include "lhtab.imp"
 
 template class LHTableau<double>;
-template class LHTableau<gRational>;
-template gMatrix<double> Make_A1(const gbtNfgGame &,
+template class LHTableau<gbtRational>;
+template gbtMatrix<double> Make_A1(const gbtNfgGame &,
 				 const gbtNfgSupport &, const double &);
-template gMatrix<gRational> Make_A1(const gbtNfgGame &,
-				    const gbtNfgSupport &, const gRational &);
-template gVector<double> Make_b1(const gbtNfgGame &,
+template gbtMatrix<gbtRational> Make_A1(const gbtNfgGame &,
+				    const gbtNfgSupport &, const gbtRational &);
+template gbtVector<double> Make_b1(const gbtNfgGame &,
 				 const gbtNfgSupport &, const double &);
-template gVector<gRational> Make_b1(const gbtNfgGame &,
-				    const gbtNfgSupport &, const gRational &);
-template gMatrix<double> Make_A2(const gbtNfgGame &,
+template gbtVector<gbtRational> Make_b1(const gbtNfgGame &,
+				    const gbtNfgSupport &, const gbtRational &);
+template gbtMatrix<double> Make_A2(const gbtNfgGame &,
 				 const gbtNfgSupport &, const double &);
-template gMatrix<gRational> Make_A2(const gbtNfgGame &,
-				    const gbtNfgSupport &, const gRational &);
-template gVector<double> Make_b2(const gbtNfgGame &,
+template gbtMatrix<gbtRational> Make_A2(const gbtNfgGame &,
+				    const gbtNfgSupport &, const gbtRational &);
+template gbtVector<double> Make_b2(const gbtNfgGame &,
 				 const gbtNfgSupport &, const double &);
-template gVector<gRational> Make_b2(const gbtNfgGame &,
-				    const gbtNfgSupport &, const gRational &);
-
-
-
+template gbtVector<gbtRational> Make_b2(const gbtNfgGame &,
+				    const gbtNfgSupport &, const gbtRational &);

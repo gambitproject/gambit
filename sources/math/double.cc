@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of gDouble: double with generous ==
+// Implementation of gbtDouble: double with generous ==
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -42,34 +42,34 @@
 #include "base/glist.imp"
 
 //--------------------------------------------------------------------------
-//                              class: gDouble
+//                              class: gbtDouble
 //--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 //                       constructors and a destructor
 //--------------------------------------------------------------------------
 
-gDouble::gDouble() 
+gbtDouble::gbtDouble() 
 : dbl(0)
 {}
 
-gDouble::gDouble(const double& x)
+gbtDouble::gbtDouble(const double& x)
 : dbl(x)
 {}
 
-gDouble::gDouble(const gDouble& y) 
+gbtDouble::gbtDouble(const gbtDouble& y) 
 : dbl(y.dbl)
 {}
 
-gDouble::gDouble(const int& n)
+gbtDouble::gbtDouble(const int& n)
 : dbl(n)
 {}
 
-gDouble::gDouble(const long& n) 
+gbtDouble::gbtDouble(const long& n) 
 : dbl(n)
 {}
 
-gDouble::~gDouble() 
+gbtDouble::~gbtDouble() 
 {}
 
 //--------------------------------------------------------------------------
@@ -80,12 +80,12 @@ gDouble::~gDouble()
 //                               operators
 //--------------------------------------------------------------------------
 
-double gDouble::ToDouble() const
+double gbtDouble::ToDouble() const
 {
   return dbl;
 }
 
-gDouble& gDouble::operator =  (const gDouble& y)
+gbtDouble& gbtDouble::operator =  (const gbtDouble& y)
 {
   if (this == &y) return *this;
 
@@ -93,7 +93,7 @@ gDouble& gDouble::operator =  (const gDouble& y)
   return *this;
 }
 
-bool gDouble::operator == (const gDouble& y) const
+bool gbtDouble::operator == (const gbtDouble& y) const
 {
   const double epsilon = 0.000000001;  // This, and entire routine, are malleable
 
@@ -112,84 +112,84 @@ bool gDouble::operator == (const gDouble& y) const
   }
 }
 
-bool gDouble::operator != (const gDouble& y) const
+bool gbtDouble::operator != (const gbtDouble& y) const
 {
   return !(*this == y);
 }
 
-bool gDouble::operator <  (const gDouble& y) const
+bool gbtDouble::operator <  (const gbtDouble& y) const
 {
   if (*this == y || dbl > y.dbl) return false; else return true;
 }
 
-bool gDouble::operator <= (const gDouble& y) const
+bool gbtDouble::operator <= (const gbtDouble& y) const
 {
   if (*this == y || dbl < y.dbl) return true; else return false;
 }
 
-bool gDouble::operator >  (const gDouble& y) const
+bool gbtDouble::operator >  (const gbtDouble& y) const
 {
   if (*this == y || dbl < y.dbl) return false; else return true;
 }
 
-bool gDouble::operator >= (const gDouble& y) const
+bool gbtDouble::operator >= (const gbtDouble& y) const
 {
   if (*this == y || dbl > y.dbl) return true; else return false;
 }
 
-void gDouble::operator += (const gDouble& y)
+void gbtDouble::operator += (const gbtDouble& y)
 {
-  *this = gDouble(dbl + y.dbl);
+  *this = gbtDouble(dbl + y.dbl);
 }
 
-void gDouble::operator -= (const gDouble& y) 
+void gbtDouble::operator -= (const gbtDouble& y) 
 {
-  *this = gDouble(dbl - y.dbl);
+  *this = gbtDouble(dbl - y.dbl);
 }
 
-void gDouble::operator *= (const gDouble& y) 
+void gbtDouble::operator *= (const gbtDouble& y) 
 {
-  *this = gDouble(dbl*y.dbl);
+  *this = gbtDouble(dbl*y.dbl);
 }
 
-void gDouble::operator /= (const gDouble& y) 
+void gbtDouble::operator /= (const gbtDouble& y) 
 {
-  if (y == (gDouble)0) error("Attempt to divide by 0.");
-  *this = gDouble(dbl/y.dbl);
+  if (y == (gbtDouble)0) error("Attempt to divide by 0.");
+  *this = gbtDouble(dbl/y.dbl);
 }
 
-gDouble gDouble::operator + (const gDouble& y) const
+gbtDouble gbtDouble::operator + (const gbtDouble& y) const
 {
-  return gDouble(dbl + y.dbl);
+  return gbtDouble(dbl + y.dbl);
 }
 
-gDouble gDouble::operator - (const gDouble& y) const
+gbtDouble gbtDouble::operator - (const gbtDouble& y) const
 {
-  return gDouble(dbl - y.dbl);
+  return gbtDouble(dbl - y.dbl);
 }
 
-gDouble gDouble::operator * (const gDouble& y) const
+gbtDouble gbtDouble::operator * (const gbtDouble& y) const
 {
-  return gDouble(dbl*y.dbl);
+  return gbtDouble(dbl*y.dbl);
 }
 
-gDouble gDouble::operator / (const gDouble& y) const
+gbtDouble gbtDouble::operator / (const gbtDouble& y) const
 {
-  return gDouble(dbl/y.dbl);
+  return gbtDouble(dbl/y.dbl);
 }
 
-gDouble gDouble::operator - () const
+gbtDouble gbtDouble::operator - () const
 {
-  return gDouble(-dbl);
+  return gbtDouble(-dbl);
 }
 
 //--------------------------------------------------------------------------
 //                                  errors
 //--------------------------------------------------------------------------
 
-void gDouble::error(const char* msg) const
+void gbtDouble::error(const char* msg) const
 {
-  //  gerr << "gDouble class error: " << msg << '\n';
+  //  gerr << "gbtDouble class error: " << msg << '\n';
   assert(0);
 }
 
@@ -197,13 +197,13 @@ void gDouble::error(const char* msg) const
 //                            input/output
 //--------------------------------------------------------------------------
 
-gbtOutput& operator << (gbtOutput& s, const gDouble& y)
+gbtOutput& operator << (gbtOutput& s, const gbtDouble& y)
 {
   s << y.dbl;
   return s;
 }
 
-gbtInput &operator>>(gbtInput &f, gDouble &y)
+gbtInput &operator>>(gbtInput &f, gbtDouble &y)
 {
   f >> y.dbl;
   return f;
@@ -212,48 +212,48 @@ gbtInput &operator>>(gbtInput &f, gDouble &y)
 
 // FUNCTIONS OUTSIDE THE CLASS
 
-int sign(const gDouble& x)
+int sign(const gbtDouble& x)
 {
- if      (x == (gDouble)0) return 0;
- else if (x >  (gDouble)0) return 1;
+ if      (x == (gbtDouble)0) return 0;
+ else if (x >  (gbtDouble)0) return 1;
  else                     return -1;
 }
 
-gDouble fabs(const gDouble& x) 
+gbtDouble fabs(const gbtDouble& x) 
 {
-  return gDouble(fabs(x.dbl));
+  return gbtDouble(fabs(x.dbl));
 }
 
-gDouble abs(const gDouble& x) 
+gbtDouble abs(const gbtDouble& x) 
 {
-  return gDouble(fabs(x.dbl));
+  return gbtDouble(fabs(x.dbl));
 }
 
-gDouble sqr(const gDouble& x)
+gbtDouble sqr(const gbtDouble& x)
 {
-  return gDouble(x.dbl * x.dbl);
+  return gbtDouble(x.dbl * x.dbl);
 }
 
-gDouble sqrt(const gDouble& x)
+gbtDouble sqrt(const gbtDouble& x)
 {
-  return gDouble(sqrt(x.dbl));
+  return gbtDouble(sqrt(x.dbl));
 }
 
-gDouble pow(const gDouble& x, const long y)
+gbtDouble pow(const gbtDouble& x, const long y)
 {
-  return gDouble(pow(x.dbl, (double)y));
+  return gbtDouble(pow(x.dbl, (double)y));
 }
 
-gDouble pow(const gDouble& x, const gDouble& y)
+gbtDouble pow(const gbtDouble& x, const gbtDouble& y)
 {
-  return gDouble(pow(x.dbl, y.dbl));
+  return gbtDouble(pow(x.dbl, y.dbl));
 }
 
 #define MYGCONVERT_BUFFER_LENGTH     64
 char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 int myprecision = 2;
 
-gbtText ToText(gDouble d)
+gbtText ToText(gbtDouble d)
 {
   sprintf(mygconvert_buffer, "%.*f", myprecision, d.ToDouble());
   return gbtText(mygconvert_buffer);
@@ -261,17 +261,17 @@ gbtText ToText(gDouble d)
 
 // conversions from strings to numbers
 
-gDouble TOgDouble(const gbtText &s)
+gbtDouble TOgDouble(const gbtText &s)
 { 
   double d = strtod(s, NULL);
-  gDouble answer(d);
+  gbtDouble answer(d);
   return answer; 
 }
 
-template class gbtList<gDouble>;
-template class gVector<gDouble>;
-template class gbtArray<gDouble>;
-template class gbtBlock<gDouble>;
-template class gbtRectArray<gDouble>;
-template class gMatrix<gDouble>;
-template gbtOutput & operator<< (gbtOutput&, const gVector<gDouble>&);
+template class gbtList<gbtDouble>;
+template class gbtVector<gbtDouble>;
+template class gbtArray<gbtDouble>;
+template class gbtBlock<gbtDouble>;
+template class gbtRectArray<gbtDouble>;
+template class gbtMatrix<gbtDouble>;
+template gbtOutput & operator<< (gbtOutput&, const gbtVector<gbtDouble>&);

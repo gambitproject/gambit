@@ -28,11 +28,11 @@
 #include "math/double.h"
 #include "base/grarray.imp"
 
-template class IneqSolv<gRational>;
-template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gRational> &y);
+template class IneqSolv<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gbtRational> &y);
 
 //template class IneqSolv<double>;
 //template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<double> &y);
 
-template class IneqSolv<gDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gDouble> &y);
+template class IneqSolv<gbtDouble>;
+template gbtOutput &operator<<(gbtOutput &f, const IneqSolv<gbtDouble> &y);

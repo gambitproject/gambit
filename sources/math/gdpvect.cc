@@ -29,10 +29,10 @@
 #include "math/gnumber.h"
 
 
-template class gDPVector<double>;
-template class gDPVector<gRational>;
-template class gDPVector<gNumber>;
+template class gbtDPVector<double>;
+template class gbtDPVector<gbtRational>;
+template class gbtDPVector<gbtNumber>;
 
-template gbtOutput & operator<< (gbtOutput&, const gDPVector<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gDPVector<gRational>&);
-template gbtOutput & operator<< (gbtOutput&, const gDPVector<gNumber>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<gbtRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<gbtNumber>&);

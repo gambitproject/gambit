@@ -48,7 +48,7 @@ public:
     // constructors
     gRectangle(const gRectangle<T>&);
     gRectangle(const gbtList<gInterval<T> >&);
-    gRectangle(const gVector<T>, const gVector<T>);
+    gRectangle(const gbtVector<T>, const gbtVector<T>);
     ~gRectangle();
 
     // operators
@@ -58,8 +58,8 @@ public:
 
     // information
     const int                Dmnsn()                            const;
-    gVector<T>         LowerBound()                       const;
-    gVector<T>         UpperBound()                       const;
+    gbtVector<T>         LowerBound()                       const;
+    gbtVector<T>         UpperBound()                       const;
     const T                  LowerBoundOfCoord(const int&)      const;
     const T                  UpperBoundOfCoord(const int&)      const;
     const T                  HeightInCoord(const int&)          const;
@@ -67,14 +67,14 @@ public:
     const gRectangle<T>      SameCenterDoubleSideLengths()      const;
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
     const gRectangle<T>      Orthant(const gbtArray<int>&)        const;
-    const gVector<T>         SideLengths()                      const;
+    const gbtVector<T>         SideLengths()                      const;
     const T                  MaximalSideLength()                const;
-    bool                     Contains(const gVector<T> &)       const;
+    bool                     Contains(const gbtVector<T> &)       const;
     bool                     Contains(const gRectangle<T> &)    const;
     const T                  Volume()                           const;
-    const gVector<T>         Center()                           const;
+    const gbtVector<T>         Center()                           const;
     const gRectangle<T>      BoundingRectangle()                const;
-    const gbtList<gVector<T> > VertexList()                       const;
+    const gbtList<gbtVector<T> > VertexList()                       const;
     const int                NumberOfCellsInSubdivision()       const;
     const gRectangle<T>      SubdivisionCell(const int&)        const;
     const T                  DiameterSquared()                  const;
@@ -89,6 +89,6 @@ template <class T> gbtOutput &operator<<(gbtOutput &, const gRectangle<T> &);
   // Conversion:
   //-------------
 
-template <class T> gRectangle<gDouble> TogDouble(const gRectangle<T>&);
+template <class T> gRectangle<gbtDouble> TogDouble(const gRectangle<T>&);
 
 #endif // RECTANGL_H

@@ -35,14 +35,14 @@
 
 class BehavSolution {
 protected:
-  BehavProfile<gNumber> *m_profile;
-  gPrecision m_precision;
+  BehavProfile<gbtNumber> *m_profile;
+  gbtPrecision m_precision;
   mutable gbtEfgSupport m_support;
   mutable gbtText m_creator;
   mutable gFact<gbtTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
-  mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
-  mutable gFact<gNumber> m_liapValue;
-  mutable gFact<gPVector<gNumber> > m_rnfRegret;
+  mutable gbtNumber m_epsilon, m_qreLambda, m_qreValue;
+  mutable gFact<gbtNumber> m_liapValue;
+  mutable gFact<gbtPVector<gbtNumber> > m_rnfRegret;
   gbtText m_label;
   mutable long m_revision;
 
@@ -51,15 +51,15 @@ protected:
   gbtTriState GetANFNash(void) const;
   gbtTriState GetSubgamePerfect(void) const;
   gbtTriState GetSequential(void) const;
-  gPVector<gNumber> GetRNFRegret(void) const;
+  gbtPVector<gbtNumber> GetRNFRegret(void) const;
 
   void LevelPrecision(void);
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavSolution(const BehavProfile<double> &, const gbtText & = "User");
-  BehavSolution(const BehavProfile<gRational> &, const gbtText & = "User");
-  BehavSolution(const BehavProfile<gNumber> &, const gbtText & = "User");
+  BehavSolution(const BehavProfile<gbtRational> &, const gbtText & = "User");
+  BehavSolution(const BehavProfile<gbtNumber> &, const gbtText & = "User");
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
@@ -71,23 +71,23 @@ public:
   bool operator!=(const BehavSolution &p_solution) const
     { return !(*this == p_solution); }
 
-  void SetActionProb(const gbtEfgAction &, const gNumber &);
-  void Set(int, int, int, const gNumber &);
-  const gNumber &operator()(const gbtEfgAction &) const;
-  const gNumber &GetActionProb(const gbtEfgAction &p_action) const
+  void SetActionProb(const gbtEfgAction &, const gbtNumber &);
+  void Set(int, int, int, const gbtNumber &);
+  const gbtNumber &operator()(const gbtEfgAction &) const;
+  const gbtNumber &GetActionProb(const gbtEfgAction &p_action) const
     { return (*this)(p_action); }
 
-  gNumber operator[](const gbtEfgAction &) const;
-  gNumber &operator[](const gbtEfgAction &);
+  gbtNumber operator[](const gbtEfgAction &) const;
+  gbtNumber &operator[](const gbtEfgAction &);
 
   BehavSolution &operator+=(const BehavSolution &);
   BehavSolution &operator-=(const BehavSolution &);
-  BehavSolution &operator*=(const gNumber &);
+  BehavSolution &operator*=(const gbtNumber &);
 
   // GENERAL DATA ACCESS
   gbtEfgGame GetGame(void) const { return m_profile->GetGame(); }
-  const BehavProfile<gNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
-  gPrecision Precision(void) const { return m_precision; }
+  const BehavProfile<gbtNumber> *Profile(void) const { CheckIsValid(); return m_profile; }
+  gbtPrecision Precision(void) const { return m_precision; }
 
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
@@ -102,17 +102,17 @@ public:
   const gbtTriState &IsANFNash(void) const;
   const gbtTriState &IsSubgamePerfect(void) const;
   const gbtTriState &IsSequential(void) const;
-  const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
-  const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
-  const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
-  const gNumber &GetLiapValue(void) const;
-  const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
-  const gNumber MaxRegret(void) const;
-  const gNumber MaxRNFRegret(void) const;
+  const gbtNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
+  const gbtNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
+  const gbtNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
+  const gbtNumber &GetLiapValue(void) const;
+  const gbtPVector<gbtNumber> &ReducedNormalFormRegret(void) const;
+  const gbtNumber MaxRegret(void) const;
+  const gbtNumber MaxRNFRegret(void) const;
 
   void SetCreator(const gbtText &p_creator) { m_creator = p_creator; }
-  void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
-  void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
+  void SetEpsilon(const gbtNumber &p_epsilon) { m_epsilon = p_epsilon; }
+  void SetQre(const gbtNumber &p_qreLambda, const gbtNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
 	 
   // Force the invalidation of cached data
@@ -122,27 +122,27 @@ public:
 
   // COMPUTATION OF INTERESTING QUANTITIES
   // Obsolescent version
-  gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
+  gbtNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
 
-  gNumber GetPayoff(const gbtEfgPlayer &p_player) const
+  gbtNumber GetPayoff(const gbtEfgPlayer &p_player) const
     { return m_profile->Payoff(p_player.GetId()); }
   
   // DATA ACCESS
-  gNumber GetRealizProb(const gbtEfgNode &node) const
+  gbtNumber GetRealizProb(const gbtEfgNode &node) const
     { return m_profile->GetRealizProb(node); }
-  gNumber GetBelief(const gbtEfgNode &node) const
+  gbtNumber GetBelief(const gbtEfgNode &node) const
     { return m_profile->GetBeliefProb(node); }
-  gNumber GetNodeValue(const gbtEfgNode &p_node,
+  gbtNumber GetNodeValue(const gbtEfgNode &p_node,
 		       const gbtEfgPlayer &p_player) const;
-  gVector<gNumber> NodeValue(const gbtEfgNode &node) const
+  gbtVector<gbtNumber> NodeValue(const gbtEfgNode &node) const
     { return m_profile->GetNodeValue(node); }
-  gNumber GetInfosetProb(const gbtEfgInfoset &iset) const
+  gbtNumber GetInfosetProb(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetProb(iset); }
-  gNumber GetInfosetValue(const gbtEfgInfoset &iset) const
+  gbtNumber GetInfosetValue(const gbtEfgInfoset &iset) const
     { return m_profile->GetIsetValue(iset); }
-  gNumber GetActionValue(const gbtEfgAction &act) const
+  gbtNumber GetActionValue(const gbtEfgAction &act) const
     { return m_profile->GetActionValue(act); }
-  gNumber GetRegret(const gbtEfgAction &act) const
+  gbtNumber GetRegret(const gbtEfgAction &act) const
     { return m_profile->GetRegret(act); }
 
   // OUTPUT

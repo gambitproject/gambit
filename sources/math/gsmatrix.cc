@@ -28,10 +28,10 @@
 #include "rational.h"
 #include "double.h"
 
-template class gSquareMatrix<double>;
-template class gSquareMatrix<gDouble>;
-template class gSquareMatrix<gRational>;
+template class gbtSquareMatrix<double>;
+template class gbtSquareMatrix<gbtDouble>;
+template class gbtSquareMatrix<gbtRational>;
 
-template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<gDouble>&);
-template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<gRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<gbtDouble>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtSquareMatrix<gbtRational>&);

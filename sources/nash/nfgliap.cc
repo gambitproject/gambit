@@ -37,8 +37,8 @@ private:
   gbtNfgGame m_nfg;
   mutable MixedProfile<double> _p;
 
-  double Value(const gVector<double> &) const;
-  bool Gradient(const gVector<double> &, gVector<double> &) const;
+  double Value(const gbtVector<double> &) const;
+  bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
   double LiapDerivValue(int, int, const MixedProfile<double> &) const;
     
@@ -94,7 +94,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 // component parallel to the plane.)  Also imposes binding nonnegativity
 // constraints as appropriate.
 //
-static void Project(gVector<double> &grad, const gVector<double> &x,
+static void Project(gbtVector<double> &grad, const gbtVector<double> &x,
 		    const gbtArray<int> &lengths)
 {
   int index = 1;
@@ -124,9 +124,9 @@ static void Project(gVector<double> &grad, const gVector<double> &x,
   }
 }
 
-bool NFLiapFunc::Gradient(const gVector<double> &v, gVector<double> &d) const
+bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) const
 {
-  ((gVector<double> &) _p).operator=(v);
+  ((gbtVector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
   for (i1 = 1, ii = 1; i1 <= m_nfg.NumPlayers(); i1++) {
@@ -140,17 +140,17 @@ bool NFLiapFunc::Gradient(const gVector<double> &v, gVector<double> &d) const
   return true;
 }
   
-double NFLiapFunc::Value(const gVector<double> &v) const
+double NFLiapFunc::Value(const gbtVector<double> &v) const
 {
   static const double BIG1 = 100.0;
   static const double BIG2 = 100.0;
 
   _nevals++;
 
-  ((gVector<double> &) _p).operator=(v);
+  ((gbtVector<double> &) _p).operator=(v);
   
   MixedProfile<double> tmp(_p);
-  gPVector<double> payoff(_p);
+  gbtPVector<double> payoff(_p);
 
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
@@ -245,7 +245,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
       gConjugatePR minimizer(p.Length());
-      gVector<double> gradient(p.Length()), dx(p.Length());
+      gbtVector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p, fval, gradient, .01, .0001);
 

@@ -29,5 +29,4 @@
 #include "math/rational.h"
 
 template class gbtNfgNashLp<double>;
-template class gbtNfgNashLp<gRational>;
-
+template class gbtNfgNashLp<gbtRational>;

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// wxValidator specialization to gNumber
+// wxValidator specialization to gbtNumber
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -81,14 +81,14 @@ gNumberValidator::gNumberValidator(wxString *p_value)
 { }
 
 gNumberValidator::gNumberValidator(wxString *p_value,
-				   const gNumber &p_minValue)
+				   const gbtNumber &p_minValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(false),
     m_minValue(p_minValue)
 { }
 
 gNumberValidator::gNumberValidator(wxString *p_value,
-				   const gNumber &p_minValue,
-				   const gNumber &p_maxValue)
+				   const gbtNumber &p_minValue,
+				   const gbtNumber &p_maxValue)
   : m_stringValue(p_value), m_hasMin(true), m_hasMax(true),
     m_minValue(p_minValue), m_maxValue(p_maxValue)
 { }

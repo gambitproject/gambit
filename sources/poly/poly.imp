@@ -55,7 +55,7 @@ polynomial<T>::polynomial(const gbtList<T>& coefficientlist)
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gVector<T>& coefficientvector) 
+polynomial<T>::polynomial(const gbtVector<T>& coefficientvector) 
 : coeflist()
 { 
   for (int i = 1; i <= coefficientvector.Length(); i++)
@@ -249,13 +249,13 @@ template <class T>  void polynomial<T>::ToMonic()
 }
 
 template<class T>  
-polynomial<gDouble>  polynomial<T>::TogDouble() const
+polynomial<gbtDouble>  polynomial<T>::TogDouble() const
 {
-  gbtList<gDouble> newcoefs;
+  gbtList<gbtDouble> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
-    newcoefs += (gDouble)coeflist[i];
+    newcoefs += (gbtDouble)coeflist[i];
   }
-  return polynomial<gDouble>(newcoefs);
+  return polynomial<gbtDouble>(newcoefs);
 }
 
 //--------------------------------------------------------------------------
@@ -544,17 +544,17 @@ complexpoly::complexpoly(const complexpoly& x)
 { 
 }
 
-complexpoly::complexpoly(const gComplex& coeff, const int& deg) 
+complexpoly::complexpoly(const gbtComplex& coeff, const int& deg) 
 { 
-  if (coeff != (gComplex)0) {
+  if (coeff != (gbtComplex)0) {
     for (int i = 0; i < deg; i++)
-      coeflist += (gComplex)0;
+      coeflist += (gbtComplex)0;
     coeflist += coeff;
   }
 }
 
  
-complexpoly::complexpoly(const gbtList<gComplex>& coefficientlist) 
+complexpoly::complexpoly(const gbtList<gbtComplex>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
@@ -597,7 +597,7 @@ bool complexpoly::operator!= (const complexpoly& y) const
   return !(*this == y); 
 }
 
-const gComplex& complexpoly::operator[](const int index) const
+const gbtComplex& complexpoly::operator[](const int index) const
 { 
   return coeflist[index+1];
 }
@@ -614,13 +614,13 @@ complexpoly complexpoly::operator+(const complexpoly& y) const
 
   complexpoly sum;
   for (int i = 0; i <= max_degree; i++) {
-    sum.coeflist += (gComplex)0;
+    sum.coeflist += (gbtComplex)0;
     if (i <=   Degree()) sum.coeflist[i+1] +=   coeflist[i+1];
     if (i <= y.Degree()) sum.coeflist[i+1] += y.coeflist[i+1];
   }
 
   while ( (sum.coeflist.Length() >= 1) && 
-          (sum.coeflist[sum.coeflist.Length()] == (gComplex)0) )
+          (sum.coeflist[sum.coeflist.Length()] == (gbtComplex)0) )
     sum.coeflist.Remove(sum.coeflist.Length());
 
   return sum;
@@ -640,7 +640,7 @@ complexpoly complexpoly::operator*(const complexpoly &y) const
 
   complexpoly product;
   for (int t = 0; t <= tot_degree; t++) 
-    product.coeflist += (gComplex)0;
+    product.coeflist += (gbtComplex)0;
   for (int i = 0; i <= Degree(); i++)
     for (int j = 0; j <= y.Degree(); j++) 
       product.coeflist[i+j+1] += (*this)[i] * y[j];
@@ -715,7 +715,7 @@ complexpoly complexpoly::Derivative() const
 
   complexpoly derivative; 
   for (int i = 1; i <= Degree(); i++)
-    derivative.coeflist += (gComplex)i * coeflist[i+1];
+    derivative.coeflist += (gbtComplex)i * coeflist[i+1];
 
   return derivative;
 }
@@ -728,7 +728,7 @@ void complexpoly::ToMonic()
 {
   assert (!IsZero());
 
-  gComplex lc = LeadingCoefficient();
+  gbtComplex lc = LeadingCoefficient();
   for (int i = 1; i <= coeflist.Length(); i++)
     coeflist[i] /= lc;
 }
@@ -744,12 +744,12 @@ bool complexpoly::IsZero() const
   else                        return false;
 }
 
-gComplex complexpoly::EvaluationAt(const gComplex& arg) const
+gbtComplex complexpoly::EvaluationAt(const gbtComplex& arg) const
 {
-  gComplex answer;
+  gbtComplex answer;
 
   for (int i = 0; i <= Degree(); i++) {
-    gComplex monom_val = (gComplex)1;
+    gbtComplex monom_val = (gbtComplex)1;
     for (int j = 1; j <= i; j++) monom_val *= arg;
     answer += coeflist[i+1] * monom_val;
   }
@@ -762,9 +762,9 @@ int complexpoly::Degree() const
   return coeflist.Length() - 1;
 }
 
-gComplex complexpoly::LeadingCoefficient() const
+gbtComplex complexpoly::LeadingCoefficient() const
 {
-  if (Degree() < 0) return (gComplex)0;
+  if (Degree() < 0) return (gbtComplex)0;
   else              return coeflist[Degree() + 1];
 }
 
@@ -799,27 +799,27 @@ bool complexpoly::IsQuadratfrei() const
 }
 
 
-gbtList<gComplex> complexpoly::Roots() const 
+gbtList<gbtComplex> complexpoly::Roots() const 
 {
   assert (!IsZero());
 
-  gbtList<gComplex> answer;
+  gbtList<gbtComplex> answer;
 
   if (Degree() == 0) 
     return answer;
 
   complexpoly deriv(Derivative());
 
-  gComplex guess(1.3,0.314159);
+  gbtComplex guess(1.3,0.314159);
 
   while (fabs(EvaluationAt(guess)) > 0.00001) {
-    gComplex diff = EvaluationAt(guess)/deriv.EvaluationAt(guess);
+    gbtComplex diff = EvaluationAt(guess)/deriv.EvaluationAt(guess);
     int count = 0;
     bool done = false;
     while (!done) {
 	if ( count < 10 &&
 	    fabs(EvaluationAt(guess - diff)) >= fabs(EvaluationAt(guess)) ) {
-	  diff /= gComplex(4.0,0.0);
+	  diff /= gbtComplex(4.0,0.0);
 	  count++;
 	}
 	else done = true;
@@ -834,9 +834,9 @@ gbtList<gComplex> complexpoly::Roots() const
 
   answer += guess;
 
-  gbtList<gComplex> lin_form_coeffs;
+  gbtList<gbtComplex> lin_form_coeffs;
   lin_form_coeffs += guess;
-  lin_form_coeffs += gComplex(-1.0,0.0);
+  lin_form_coeffs += gbtComplex(-1.0,0.0);
   complexpoly linear_form(lin_form_coeffs);
   complexpoly quotient = *this/linear_form;
   answer += quotient.Roots();
@@ -858,7 +858,7 @@ gbtOutput& operator << (gbtOutput& output, const complexpoly& x)
   if (x.Degree() < 0) output << "0";
   else {
     for (int t = 0; t <= x.Degree(); t++)
-      if (x.coeflist[t+1] != (gComplex)0) { 
+      if (x.coeflist[t+1] != (gbtComplex)0) { 
 	output << x.coeflist[t+1]; 
 	if (t >= 1) output << "x";
 	if (t >= 2) output << "^" << t;

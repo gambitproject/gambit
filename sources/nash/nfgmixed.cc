@@ -28,15 +28,4 @@
 #include "nfgmixed.imp"
 
 template class gbtNfgNashEnumMixed<double>;
-template class gbtNfgNashEnumMixed<gRational>;
-
-
-
-
-
-
-
-
-
-
-
+template class gbtNfgNashEnumMixed<gbtRational>;

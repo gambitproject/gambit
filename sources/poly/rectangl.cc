@@ -29,23 +29,23 @@
 #include "math/double.h"
 #include "rectangl.imp"
 
-template class gRectangle<gRational>;
-template class gbtList< gRectangle<gRational> >;
+template class gRectangle<gbtRational>;
+template class gbtList< gRectangle<gbtRational> >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gRectangle<gRational>& x);
+template gbtOutput& operator << (gbtOutput& output, const gRectangle<gbtRational>& x);
 #endif  // __BCC55__
-template gRectangle<gDouble> TogDouble(const gRectangle<gRational>&);
+template gRectangle<gbtDouble> TogDouble(const gRectangle<gbtRational>&);
 
 template class gRectangle<double>;
 template class gbtList< gRectangle<double> >;
 #ifndef __BCC55__
 template gbtOutput& operator << (gbtOutput& output, const gRectangle<double>& x);
 #endif  // __BCC55__
-template gRectangle<gDouble> TogDouble(const gRectangle<double>&);
+template gRectangle<gbtDouble> TogDouble(const gRectangle<double>&);
 
-template class gRectangle<gDouble>;
-template class gbtList< gRectangle<gDouble> >;
+template class gRectangle<gbtDouble>;
+template class gbtList< gRectangle<gbtDouble> >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gRectangle<gDouble>& x);
+template gbtOutput& operator << (gbtOutput& output, const gRectangle<gbtDouble>& x);
 #endif // __BCC55__
-template gRectangle<gDouble> TogDouble(const gRectangle<gDouble>&);
+template gRectangle<gbtDouble> TogDouble(const gRectangle<gbtDouble>&);

@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of gMatrix method functions
+// Implementation of gbtMatrix method functions
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -27,46 +27,46 @@
 #include "base/base.h"
 #include "gmatrix.h"
 
-template <class T> gbtText gMatrix<T>::DivideByZero::Description(void) const
+template <class T> gbtText gbtMatrix<T>::DivideByZero::Description(void) const
 {
-  return "Divide by zero attempted in gMatrix";
+  return "Divide by zero attempted in gbtMatrix";
 }
 
 
 //-------------------------------------------------------------------------
-//       gMatrix<T>: Constructors, destructors, constructive operators
+//       gbtMatrix<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> gMatrix<T>::gMatrix(void)
+template <class T> gbtMatrix<T>::gbtMatrix(void)
 { }
 
-template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols)
+template <class T> gbtMatrix<T>::gbtMatrix(unsigned int rows, unsigned int cols)
   : gbtRectArray<T>(rows, cols)
 { }
 
-template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols,
+template <class T> gbtMatrix<T>::gbtMatrix(unsigned int rows, unsigned int cols,
 				       int minrows)
   : gbtRectArray<T>(minrows, minrows + rows - 1, 1, cols)
 { }
 
-template <class T> gMatrix<T>::gMatrix(int rl, int rh, int cl, int ch)
+template <class T> gbtMatrix<T>::gbtMatrix(int rl, int rh, int cl, int ch)
   : gbtRectArray<T>(rl, rh, cl, ch)
 { }
 
-template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
+template <class T> gbtMatrix<T>::gbtMatrix(const gbtMatrix<T> &M)
   : gbtRectArray<T>(M)
 { }
  
-template <class T> gMatrix<T>::~gMatrix()
+template <class T> gbtMatrix<T>::~gbtMatrix()
 { }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator=(const gbtMatrix<T> &M)
 {
   gbtRectArray<T>::operator=(M);
   return *this;
 }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator=(const T &c)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator=(const T &c)
 {
   for (int i = minrow; i <= maxrow; i++) 
     for (int j = mincol; j <= maxcol; j++) 
@@ -74,9 +74,9 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const T &c)
   return *this;
 }
 
-template <class T> gMatrix<T> gMatrix<T>::operator-(void)
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator-(void)
 {
-  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  gbtMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)
     for (int j = mincol; j <= maxcol; j++)
       tmp(i,j)= -(*this)(i,j);
@@ -85,14 +85,14 @@ template <class T> gMatrix<T> gMatrix<T>::operator-(void)
 
 
 //-------------------------------------------------------------------------
-//                     gMatrix<T>: Additive operators
+//                     gbtMatrix<T>: Additive operators
 //-------------------------------------------------------------------------
 
-template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator+(const gbtMatrix<T> &M) const
 {
   if (!CheckBounds(M))   throw BadDim();
 
-  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  gbtMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)  {
     T *src1 = data[i] + mincol;
     T *src2 = M.data[i] + mincol;
@@ -105,11 +105,11 @@ template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
   return tmp;
 }
 
-template <class T> gMatrix<T> gMatrix<T>::operator-(const gMatrix<T> &M) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator-(const gbtMatrix<T> &M) const
 {
   if (!CheckBounds(M))  throw BadDim();
 
-  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  gbtMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)   {
     T *src1 = data[i] + mincol;
     T *src2 = M.data[i] + mincol;
@@ -122,7 +122,7 @@ template <class T> gMatrix<T> gMatrix<T>::operator-(const gMatrix<T> &M) const
   return tmp;
 }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator+=(const gMatrix<T> &M)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator+=(const gbtMatrix<T> &M)
 {
   if (!CheckBounds(M))   throw BadDim();
 
@@ -136,7 +136,7 @@ template <class T> gMatrix<T> &gMatrix<T>::operator+=(const gMatrix<T> &M)
   return (*this);
 }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator-=(const gMatrix<T> &M)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator-=(const gbtMatrix<T> &M)
 {
   if (!CheckBounds(M))  throw BadDim();
 
@@ -152,11 +152,11 @@ template <class T> gMatrix<T> &gMatrix<T>::operator-=(const gMatrix<T> &M)
 }
 
 //-------------------------------------------------------------------------
-//                  gMatrix<T>: Multiplicative operators
+//                  gbtMatrix<T>: Multiplicative operators
 //-------------------------------------------------------------------------
 
 template <class T>
-void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
+void gbtMatrix<T>::CMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
 {
   if (!CheckRow(in) || !CheckColumn(out))   throw BadDim();
 
@@ -172,13 +172,13 @@ void gMatrix<T>::CMultiply(const gVector<T> &in, gVector<T> &out) const
   }
 }
 
-template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator*(const gbtMatrix<T> &M) const
 {
   if (mincol != M.minrow || maxcol != M.maxrow)   throw BadDim();
 
-  gMatrix<T> tmp(minrow, maxrow, M.mincol, M.maxcol);
-  gVector<T> column(M.minrow, M.maxrow);
-  gVector<T> result(minrow, maxrow);
+  gbtMatrix<T> tmp(minrow, maxrow, M.mincol, M.maxcol);
+  gbtVector<T> column(M.minrow, M.maxrow);
+  gbtVector<T> result(minrow, maxrow);
   for (int j = M.mincol; j <= M.maxcol; j++)  {
     M.GetColumn(j, column);
     CMultiply(column, result);
@@ -187,17 +187,17 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const gMatrix<T> &M) const
   return tmp;
 }
 
-template <class T> gVector<T> gMatrix<T>::operator*(const gVector<T> &v) const
+template <class T> gbtVector<T> gbtMatrix<T>::operator*(const gbtVector<T> &v) const
 {
   if (!CheckRow(v))  throw BadDim();
 
-  gVector<T> tmp(minrow, maxrow);
+  gbtVector<T> tmp(minrow, maxrow);
   CMultiply(v, tmp);
   return tmp;
 }
 
 template <class T>
-void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
+void gbtMatrix<T>::RMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
 {
   if (!CheckColumn(in) || !CheckRow(out))   throw BadDim();
 
@@ -215,20 +215,20 @@ void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 }
 
 // transposed (row) vector*matrix multiplication operator
-// a friend function of gMatrix
+// a friend function of gbtMatrix
 template <class T>
-gVector<T> operator*(const gVector<T> &v, const gMatrix<T> &M)
+gbtVector<T> operator*(const gbtVector<T> &v, const gbtMatrix<T> &M)
 {
   if (!M.CheckColumn(v))   throw gbtRectArray<T>::BadDim();
 
-  gVector<T> tmp(M.MinCol(), M.MaxCol());
+  gbtVector<T> tmp(M.MinCol(), M.MaxCol());
   M.RMultiply(v, tmp);
   return tmp;
 }
 
-template <class T> gMatrix<T> gMatrix<T>::operator*(const T &s) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator*(const T &s) const
 {
-  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  gbtMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)  {
     T *src = data[i] + mincol;
     T *dst = tmp.data[i] + mincol;
@@ -241,13 +241,13 @@ template <class T> gMatrix<T> gMatrix<T>::operator*(const T &s) const
 }
 
 // in-place multiplication by square matrix
-template <class T> gMatrix<T> &gMatrix<T>::operator*=(const gMatrix<T> &M)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator*=(const gbtMatrix<T> &M)
 {
   if (mincol != M.minrow || maxcol != M.maxrow)  throw BadDim();
   if (M.minrow != M.mincol || M.maxrow != M.maxcol)  throw BadDim();
 
-  gVector<T> row(mincol, maxcol);
-  gVector<T> result(mincol, maxcol);
+  gbtVector<T> row(mincol, maxcol);
+  gbtVector<T> result(mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)  {
     GetRow(i, row);
     M.RMultiply(row, result);
@@ -256,7 +256,7 @@ template <class T> gMatrix<T> &gMatrix<T>::operator*=(const gMatrix<T> &M)
   return (*this);
 }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator*=(const T &s)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator*=(const T &s)
 {
   for (int i = minrow; i <= maxrow; i++)   {
     T *dst = data[i] + mincol;
@@ -268,11 +268,11 @@ template <class T> gMatrix<T> &gMatrix<T>::operator*=(const T &s)
   return (*this);
 }
 
-template <class T> gMatrix<T> gMatrix<T>::operator/(const T &s) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator/(const T &s) const
 {
   if (s == (T) 0)   throw DivideByZero();
 
-  gMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
+  gbtMatrix<T> tmp(minrow, maxrow, mincol, maxcol);
   for (int i = minrow; i <= maxrow; i++)   {
     T *src = data[i] + mincol;
     T *dst = tmp.data[i] + mincol;
@@ -284,7 +284,7 @@ template <class T> gMatrix<T> gMatrix<T>::operator/(const T &s) const
   return tmp;
 }
 
-template <class T> gMatrix<T> &gMatrix<T>::operator/=(const T &s)
+template <class T> gbtMatrix<T> &gbtMatrix<T>::operator/=(const T &s)
 {
   if (s == (T) 0)   throw DivideByZero();
 
@@ -299,12 +299,12 @@ template <class T> gMatrix<T> &gMatrix<T>::operator/=(const T &s)
 }
 
 //-------------------------------------------------------------------------
-//                  gMatrix<T>: Kronecker Product
+//                  gbtMatrix<T>: Kronecker Product
 //-------------------------------------------------------------------------
 
-template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
+template <class T> gbtMatrix<T> gbtMatrix<T>::operator&(const gbtMatrix<T> &M) const
 {
-  gMatrix<T> tmp(1, (maxrow - minrow + 1)*(M.maxrow - M.minrow + 1), 
+  gbtMatrix<T> tmp(1, (maxrow - minrow + 1)*(M.maxrow - M.minrow + 1), 
 		 1, (maxcol - mincol + 1)*(M.maxcol - M.mincol + 1));
  
   for (int i = 0; i <= maxrow - minrow; i++)
@@ -319,12 +319,12 @@ template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
 }
 
 //-------------------------------------------------------------------------
-//                         gMatrix<T>: Transpose
+//                         gbtMatrix<T>: Transpose
 //-------------------------------------------------------------------------
 
-template <class T> gMatrix<T> gMatrix<T>::Transpose() const
+template <class T> gbtMatrix<T> gbtMatrix<T>::Transpose() const
 {
-  gMatrix<T> tmp(mincol, maxcol, minrow, maxrow);
+  gbtMatrix<T> tmp(mincol, maxcol, minrow, maxrow);
  
   for (int i = minrow; i <= maxrow; i++)
     for (int j = mincol; j <= maxcol; j++)
@@ -334,10 +334,10 @@ template <class T> gMatrix<T> gMatrix<T>::Transpose() const
 }
 
 //-------------------------------------------------------------------------
-//                    gMatrix<T>: Comparison operators
+//                    gbtMatrix<T>: Comparison operators
 //-------------------------------------------------------------------------
 
-template <class T> bool gMatrix<T>::operator==(const gMatrix<T> &M) const
+template <class T> bool gbtMatrix<T>::operator==(const gbtMatrix<T> &M) const
 {
   if (!CheckBounds(M))  throw BadDim();
 
@@ -353,10 +353,10 @@ template <class T> bool gMatrix<T>::operator==(const gMatrix<T> &M) const
   return true;
 }
 
-template <class T> bool gMatrix<T>::operator!=(const gMatrix<T> &M) const
+template <class T> bool gbtMatrix<T>::operator!=(const gbtMatrix<T> &M) const
 { return !(*this == M); }
 
-template <class T> bool gMatrix<T>::operator==(const T &s) const
+template <class T> bool gbtMatrix<T>::operator==(const T &s) const
 {
   for (int i = minrow; i <= maxrow; i++)   {
     T *src = data[i] + mincol;
@@ -368,22 +368,22 @@ template <class T> bool gMatrix<T>::operator==(const T &s) const
   return true;
 }
 
-template <class T> bool gMatrix<T>::operator!=(const T &s) const
+template <class T> bool gbtMatrix<T>::operator!=(const T &s) const
 { return !(*this == s);  }
 
 // Information
 
-template <class T> gVector<T> gMatrix<T>::Row(const int& i) const
+template <class T> gbtVector<T> gbtMatrix<T>::Row(const int& i) const
 {
-  gVector<T> answer(mincol, maxcol);
+  gbtVector<T> answer(mincol, maxcol);
   for (int j = mincol; j <= maxcol; j++)
     answer[j] = (*this)(i,j);
   return answer;
 }
 
-template <class T> gVector<T> gMatrix<T>::Column(const int& j) const
+template <class T> gbtVector<T> gbtMatrix<T>::Column(const int& j) const
 {
-  gVector<T> answer(minrow, maxrow);
+  gbtVector<T> answer(minrow, maxrow);
   for (int i = minrow; i <= maxrow; i++)
     answer[i] = (*this)(i,j);
   return answer;
@@ -392,7 +392,7 @@ template <class T> gVector<T> gMatrix<T>::Column(const int& j) const
 
 // more complex functions
 
-template <class T> void gMatrix<T>::MakeIdent(void)
+template <class T> void gbtMatrix<T>::MakeIdent(void)
 {
   for (int i = minrow; i <= maxrow; i++) 
     for (int j = mincol; j <= maxcol; j++) {
@@ -402,13 +402,13 @@ template <class T> void gMatrix<T>::MakeIdent(void)
 }
 
 #ifdef UNUSED
-template<class T> gMatrix<T>
-gMatrix<T>::ExternalPivot(int row, int col) const
+template<class T> gbtMatrix<T>
+gbtMatrix<T>::ExternalPivot(int row, int col) const
 {
   assert( CheckRow(row) && CheckColumn(col) );
   assert( data[row][col]!=(T)0 );
 
-  gMatrix<T> m(minrow,maxrow,mincol,maxcol);
+  gbtMatrix<T> m(minrow,maxrow,mincol,maxcol);
 
   T mult= (T)1/data[row][col];
   for(int j=mincol; j<=maxcol; j++)
@@ -439,7 +439,7 @@ gMatrix<T>::ExternalPivot(int row, int col) const
 }
 #endif    // UNUSED
 
-template<class T> void gMatrix<T>::Pivot(int row, int col)
+template<class T> void gbtMatrix<T>::Pivot(int row, int col)
 {
   if (!CheckRow(row) || !CheckColumn(col))  throw BadIndex();
   if (data[row][col] == (T) 0)  throw DivideByZero();
@@ -465,7 +465,7 @@ template<class T> void gMatrix<T>::Pivot(int row, int col)
     }
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gMatrix<T> &M)
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtMatrix<T> &M)
 {
   M.Dump(to); return to;
 }

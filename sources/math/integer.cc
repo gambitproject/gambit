@@ -51,40 +51,40 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 // and should not be deleted by an Integer destructor.
 #define STATIC_IntRep(rep) ((rep)->sz==0)
 
-IntRep*  Ialloc(IntRep*, const unsigned short *, int, int, int);
-IntRep*  Icalloc(IntRep*, int);
-IntRep*  Icopy_ulong(IntRep*, unsigned long);
-IntRep*  Icopy_long(IntRep*, long);
-IntRep*  Icopy(IntRep*, const IntRep*);
-IntRep*  Iresize(IntRep*, int);
-IntRep*  add(const IntRep*, int, const IntRep*, int, IntRep*);
-IntRep*  add(const IntRep*, int, long, IntRep*);
-IntRep*  multiply(const IntRep*, const IntRep*, IntRep*);
-IntRep*  multiply(const IntRep*, long, IntRep*);
-IntRep*  power(const IntRep*, long, IntRep*);
-IntRep*  div(const IntRep*, const IntRep*, IntRep*);
-IntRep*  mod(const IntRep*, const IntRep*, IntRep*);
-IntRep*  div(const IntRep*, long, IntRep*);
-IntRep*  mod(const IntRep*, long, IntRep*);
-IntRep*  Compl(const IntRep*, IntRep*);
-IntRep*  abs(const IntRep*, IntRep*);
-IntRep*  negate(const IntRep*, IntRep*);
-IntRep*  pow(const IntRep*, long);
-IntRep*  gcd(const IntRep*, const IntRep* y);
-int      compare(const IntRep*, const IntRep*);
-int      compare(const IntRep*, long);
-int      ucompare(const IntRep*, const IntRep*);
-int      ucompare(const IntRep*, long);
-gbtText Itoa(const IntRep* x, int base = 10, int width = 0);
-gbtText cvtItoa(const IntRep* x, gbtText fmt, int& fmtlen, int base,
+gbt_integer_rep*  Ialloc(gbt_integer_rep*, const unsigned short *, int, int, int);
+gbt_integer_rep*  Icalloc(gbt_integer_rep*, int);
+gbt_integer_rep*  Icopy_ulong(gbt_integer_rep*, unsigned long);
+gbt_integer_rep*  Icopy_long(gbt_integer_rep*, long);
+gbt_integer_rep*  Icopy(gbt_integer_rep*, const gbt_integer_rep*);
+gbt_integer_rep*  Iresize(gbt_integer_rep*, int);
+gbt_integer_rep*  add(const gbt_integer_rep*, int, const gbt_integer_rep*, int, gbt_integer_rep*);
+gbt_integer_rep*  add(const gbt_integer_rep*, int, long, gbt_integer_rep*);
+gbt_integer_rep*  multiply(const gbt_integer_rep*, const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  multiply(const gbt_integer_rep*, long, gbt_integer_rep*);
+gbt_integer_rep*  power(const gbt_integer_rep*, long, gbt_integer_rep*);
+gbt_integer_rep*  div(const gbt_integer_rep*, const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  mod(const gbt_integer_rep*, const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  div(const gbt_integer_rep*, long, gbt_integer_rep*);
+gbt_integer_rep*  mod(const gbt_integer_rep*, long, gbt_integer_rep*);
+gbt_integer_rep*  Compl(const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  abs(const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  negate(const gbt_integer_rep*, gbt_integer_rep*);
+gbt_integer_rep*  pow(const gbt_integer_rep*, long);
+gbt_integer_rep*  gcd(const gbt_integer_rep*, const gbt_integer_rep* y);
+int      compare(const gbt_integer_rep*, const gbt_integer_rep*);
+int      compare(const gbt_integer_rep*, long);
+int      ucompare(const gbt_integer_rep*, const gbt_integer_rep*);
+int      ucompare(const gbt_integer_rep*, long);
+gbtText Itoa(const gbt_integer_rep* x, int base = 10, int width = 0);
+gbtText cvtItoa(const gbt_integer_rep* x, gbtText fmt, int& fmtlen, int base,
 	      int showbase, int width, int align_right, 
 	      char fillchar, char Xcase, int showpos);
-IntRep*  atoIntRep(const char* s, int base = 10);
-long     Itolong(const IntRep*);
-double   Itodouble(const IntRep*);
-int      Iislong(const IntRep*);
-int      Iisdouble(const IntRep*);
-long     lg(const IntRep*);
+gbt_integer_rep*  atoIntRep(const char* s, int base = 10);
+long     Itolong(const gbt_integer_rep*);
+double   Itodouble(const gbt_integer_rep*);
+int      Iislong(const gbt_integer_rep*);
+int      Iisdouble(const gbt_integer_rep*);
+long     lg(const gbt_integer_rep*);
 
 long lg(unsigned long x)
 {
@@ -124,7 +124,7 @@ long lg(unsigned long x)
 #define CHAR_PER_LONG   ((unsigned)sizeof(long))
 
 /*
-  minimum and maximum sizes for an IntRep
+  minimum and maximum sizes for an gbt_integer_rep
 */
 
 #define MINIntRep_SIZE   16
@@ -134,9 +134,9 @@ long lg(unsigned long x)
 #define MALLOC_MIN_OVERHEAD 4
 #endif
 
-IntRep _ZeroRep = {1, 0, 1, {0}};
-IntRep _OneRep = {1, 0, 1, {1}};
-IntRep _MinusOneRep = {1, 0, 0, {1}};
+gbt_integer_rep _ZeroRep = {1, 0, 1, {0}};
+gbt_integer_rep _OneRep = {1, 0, 1, {1}};
+gbt_integer_rep _MinusOneRep = {1, 0, 0, {1}};
 
 
 // utilities to extract and transfer bits
@@ -182,7 +182,7 @@ inline static int calc_len(int len1, int len2, int pad)
 
 // ensure len & sgn are correct
 
-static void Icheck(IntRep* rep)
+static void Icheck(gbt_integer_rep* rep)
 {
   int l = rep->len;
   const unsigned short* p = &(rep->s[l]);
@@ -193,7 +193,7 @@ static void Icheck(IntRep* rep)
 
 // zero out the end of a rep
 
-static void Iclear_from(IntRep* rep, int p)
+static void Iclear_from(gbt_integer_rep* rep, int p)
 {
   unsigned short* cp = &(rep->s[p]);
   const unsigned short* cf = &(rep->s[rep->len]);
@@ -209,33 +209,33 @@ void scpy(const unsigned short* src, unsigned short* dest,int nb)
 
 // make sure an argument is valid
 
-static inline void nonnil(const IntRep* rep)
+static inline void nonnil(const gbt_integer_rep* rep)
 {
   assert(rep != 0);
 }
 
 // allocate a new Irep. Pad to something close to a power of two.
 
-static IntRep* Inew(int newlen)
+static gbt_integer_rep* Inew(int newlen)
 {
-  unsigned int siz = sizeof(IntRep) + newlen * sizeof(short) + 
+  unsigned int siz = sizeof(gbt_integer_rep) + newlen * sizeof(short) + 
     MALLOC_MIN_OVERHEAD;
   unsigned int allocsiz = MINIntRep_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
   assert((unsigned long) allocsiz < MAXIntRep_SIZE * sizeof(short));
     
-  IntRep* rep = (IntRep *) new char[allocsiz];
-  rep->sz = (allocsiz - sizeof(IntRep) + sizeof(short)) / sizeof(short);
+  gbt_integer_rep* rep = (gbt_integer_rep *) new char[allocsiz];
+  rep->sz = (allocsiz - sizeof(gbt_integer_rep) + sizeof(short)) / sizeof(short);
   return rep;
 }
 
 // allocate: use the bits in src if non-null, clear the rest
 
-IntRep* Ialloc(IntRep* old, const unsigned short* src, int srclen, int newsgn,
+gbt_integer_rep* Ialloc(gbt_integer_rep* old, const unsigned short* src, int srclen, int newsgn,
               int newlen)
 {
-  IntRep* rep;
+  gbt_integer_rep* rep;
   if (old == 0 || newlen > old->sz)
     rep = Inew(newlen);
   else
@@ -253,9 +253,9 @@ IntRep* Ialloc(IntRep* old, const unsigned short* src, int srclen, int newsgn,
 
 // allocate and clear
 
-IntRep* Icalloc(IntRep* old, int newlen)
+gbt_integer_rep* Icalloc(gbt_integer_rep* old, int newlen)
 {
-  IntRep* rep;
+  gbt_integer_rep* rep;
   if (old == 0 || newlen > old->sz)
   {
     if (old != 0 && !STATIC_IntRep(old)) delete old;
@@ -273,9 +273,9 @@ IntRep* Icalloc(IntRep* old, int newlen)
 
 // reallocate
 
-IntRep* Iresize(IntRep* old, int newlen)
+gbt_integer_rep* Iresize(gbt_integer_rep* old, int newlen)
 {
-  IntRep* rep;
+  gbt_integer_rep* rep;
   unsigned short oldlen;
   if (old == 0)
   {
@@ -306,10 +306,10 @@ IntRep* Iresize(IntRep* old, int newlen)
 
 // same, for straight copy
 
-IntRep* Icopy(IntRep* old, const IntRep* src)
+gbt_integer_rep* Icopy(gbt_integer_rep* old, const gbt_integer_rep* src)
 {
   if (old == src) return old; 
-  IntRep* rep;
+  gbt_integer_rep* rep;
   if (src == 0)
   {
     if (old == 0)
@@ -344,15 +344,15 @@ IntRep* Icopy(IntRep* old, const IntRep* src)
 
 // allocate & copy space for a long
 
-IntRep* Icopy_long(IntRep* old, long x)
+gbt_integer_rep* Icopy_long(gbt_integer_rep* old, long x)
 {
   int newsgn = (x >= 0);
-  IntRep* rep = Icopy_ulong(old, newsgn ? x : -x);
+  gbt_integer_rep* rep = Icopy_ulong(old, newsgn ? x : -x);
   rep->sgn = newsgn;
   return rep;
 }
 
-IntRep* Icopy_ulong(IntRep* old, unsigned long x)
+gbt_integer_rep* Icopy_ulong(gbt_integer_rep* old, unsigned long x)
 {
   unsigned short src[SHORT_PER_LONG];
   
@@ -363,7 +363,7 @@ IntRep* Icopy_ulong(IntRep* old, unsigned long x)
     x = down(x);
   }
 
-  IntRep* rep;
+  gbt_integer_rep* rep;
   if (old == 0 || srclen > old->sz)
   {
     if (old != 0 && !STATIC_IntRep(old)) delete old;
@@ -382,7 +382,7 @@ IntRep* Icopy_ulong(IntRep* old, unsigned long x)
 
 // special case for zero -- it's worth it!
 
-IntRep* Icopy_zero(IntRep* old)
+gbt_integer_rep* Icopy_zero(gbt_integer_rep* old)
 {
   if (old == 0 || STATIC_IntRep(old))
     return &_ZeroRep;
@@ -395,7 +395,7 @@ IntRep* Icopy_zero(IntRep* old)
 
 // special case for 1 or -1
 
-IntRep* Icopy_one(IntRep* old, int newsgn)
+gbt_integer_rep* Icopy_one(gbt_integer_rep* old, int newsgn)
 {
   if (old == 0 || 1 > old->sz)
   {
@@ -413,7 +413,7 @@ IntRep* Icopy_one(IntRep* old, int newsgn)
 // convert to a legal two's complement long if possible
 // if too big, return most negative/positive value
 
-long Itolong(const IntRep* rep)
+long Itolong(const gbt_integer_rep* rep)
 { 
   if ((unsigned)(rep->len) > (unsigned)(SHORT_PER_LONG))
     return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
@@ -456,7 +456,7 @@ long Itolong(const IntRep* rep)
 // test whether op long() will work.
 // careful about asymmetry between LONG_MIN & LONG_MAX
 
-int Iislong(const IntRep* rep)
+int Iislong(const gbt_integer_rep* rep)
 {
   unsigned int l = rep->len;
   if (l < SHORT_PER_LONG)
@@ -478,7 +478,7 @@ int Iislong(const IntRep* rep)
 
 // convert to a double 
 
-double Itodouble(const IntRep* rep)
+double Itodouble(const gbt_integer_rep* rep)
 { 
   double d = 0.0;
   double bound = DBL_MAX / 2.0;
@@ -505,7 +505,7 @@ double Itodouble(const IntRep* rep)
 // have to actually try it in order to find out
 // since otherwise might trigger fp exception
 
-int Iisdouble(const IntRep* rep)
+int Iisdouble(const gbt_integer_rep* rep)
 {
   double d = 0.0;
   double bound = DBL_MAX / 2.0;
@@ -527,7 +527,7 @@ int Iisdouble(const IntRep* rep)
 
 // comparison functions
   
-int compare(const IntRep* x, const IntRep* y)
+int compare(const gbt_integer_rep* x, const gbt_integer_rep* y)
 {
   int diff  = x->sgn - y->sgn;
   if (diff == 0)
@@ -541,7 +541,7 @@ int compare(const IntRep* x, const IntRep* y)
   return diff;
 }
 
-int ucompare(const IntRep* x, const IntRep* y)
+int ucompare(const gbt_integer_rep* x, const gbt_integer_rep* y)
 {
   int diff = x->len - y->len;
   if (diff == 0)
@@ -554,7 +554,7 @@ int ucompare(const IntRep* x, const IntRep* y)
   return diff;
 }
 
-int compare(const IntRep* x, long  y)
+int compare(const gbt_integer_rep* x, long  y)
 {
   int xl = x->len;
   int xsgn = x->sgn;
@@ -595,7 +595,7 @@ int compare(const IntRep* x, long  y)
   }
 }
 
-int ucompare(const IntRep* x, long  y)
+int ucompare(const gbt_integer_rep* x, long  y)
 {
   int xl = x->len;
   if (y == 0)
@@ -625,8 +625,8 @@ int ucompare(const IntRep* x, long  y)
 
 // arithmetic functions
 
-IntRep* add(const IntRep* x, int negatex, 
-            const IntRep* y, int negatey, IntRep* r)
+gbt_integer_rep* add(const gbt_integer_rep* x, int negatex, 
+            const gbt_integer_rep* y, int negatey, gbt_integer_rep* r)
 {
   nonnil(x);
   nonnil(y);
@@ -744,7 +744,7 @@ IntRep* add(const IntRep* x, int negatex,
 }
 
 
-IntRep* add(const IntRep* x, int negatex, long y, IntRep* r)
+gbt_integer_rep* add(const gbt_integer_rep* x, int negatex, long y, gbt_integer_rep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -853,7 +853,7 @@ IntRep* add(const IntRep* x, int negatex, long y, IntRep* r)
 }
 
 
-IntRep* multiply(const IntRep* x, const IntRep* y, IntRep* r)
+gbt_integer_rep* multiply(const gbt_integer_rep* x, const gbt_integer_rep* y, gbt_integer_rep* r)
 {
   nonnil(x);
   nonnil(y);
@@ -1005,7 +1005,7 @@ IntRep* multiply(const IntRep* x, const IntRep* y, IntRep* r)
 }
 
 
-IntRep* multiply(const IntRep* x, long y, IntRep* r)
+gbt_integer_rep* multiply(const gbt_integer_rep* x, long y, gbt_integer_rep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -1213,13 +1213,13 @@ static int unscale(const unsigned short* x, int xl, unsigned short y,
 }
 
 
-IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
+gbt_integer_rep* div(const gbt_integer_rep* x, const gbt_integer_rep* y, gbt_integer_rep* q)
 {
   nonnil(x);
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1239,8 +1239,8 @@ IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
   }
   else
   {
-    IntRep* yy = 0;
-    IntRep* r  = 0;
+    gbt_integer_rep* yy = 0;
+    gbt_integer_rep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q)
     {
@@ -1249,7 +1249,7 @@ IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
     }
     else
     {
-      yy = (IntRep*)y;
+      yy = (gbt_integer_rep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1267,11 +1267,11 @@ IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
   return q;
 }
 
-IntRep* div(const IntRep* x, long y, IntRep* q)
+gbt_integer_rep* div(const gbt_integer_rep* x, long y, gbt_integer_rep* q)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1307,7 +1307,7 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
   }
   else
   {
-    IntRep* r  = 0;
+    gbt_integer_rep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1336,18 +1336,18 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
 }
 
 
-void divide(const gInteger &Ix, long y, gInteger &Iq, long &rem)
+void divide(const gbtInteger &Ix, long y, gbtInteger &Iq, long &rem)
 {
 #if USE_GNU_MP
-  gInteger Iy(y), Irem;
+  gbtInteger Iy(y), Irem;
   mpz_tdiv_qr(Iq.m_value, Irem.m_value, Ix.m_value, Iy.m_value);
   rem = Irem.as_long();
 #else
-  const IntRep* x = Ix.rep;
+  const gbt_integer_rep* x = Ix.rep;
   nonnil(x);
-  IntRep* q = Iq.rep;
+  gbt_integer_rep* q = Iq.rep;
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1387,7 +1387,7 @@ void divide(const gInteger &Ix, long y, gInteger &Iq, long &rem)
   }
   else
   {
-    IntRep* r  = 0;
+    gbt_integer_rep* r  = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
@@ -1429,22 +1429,22 @@ void divide(const gInteger &Ix, long y, gInteger &Iq, long &rem)
 }
 
 
-void divide(const gInteger &Ix, const gInteger &Iy, gInteger &Iq, gInteger &Ir)
+void divide(const gbtInteger &Ix, const gbtInteger &Iy, gbtInteger &Iq, gbtInteger &Ir)
 {
 #if USE_GNU_MP
   mpz_tdiv_qr(Iq.m_value, Ir.m_value, Ix.m_value, Iy.m_value);
 #else
-  const IntRep* x = Ix.rep;
+  const gbt_integer_rep* x = Ix.rep;
   nonnil(x);
-  const IntRep* y = Iy.rep;
+  const gbt_integer_rep* y = Iy.rep;
   nonnil(y);
-  IntRep* q = Iq.rep;
-  IntRep* r = Ir.rep;
+  gbt_integer_rep* q = Iq.rep;
+  gbt_integer_rep* r = Ir.rep;
 
   int xl = x->len;
   int yl = y->len;
   /* if (yl == 0)
-    (*lib_error_handler)("gInteger", "attempted division by zero");
+    (*lib_error_handler)("gbtInteger", "attempted division by zero");
   */
   assert(yl != 0);
 
@@ -1474,7 +1474,7 @@ void divide(const gInteger &Ix, const gInteger &Iy, gInteger &Iq, gInteger &Ir)
   }
   else
   {
-    IntRep* yy = 0;
+    gbt_integer_rep* yy = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r)
     {
@@ -1483,7 +1483,7 @@ void divide(const gInteger &Ix, const gInteger &Iy, gInteger &Iq, gInteger &Ir)
     }
     else
     {
-      yy = (IntRep*)y;
+      yy = (gbt_integer_rep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1508,13 +1508,13 @@ void divide(const gInteger &Ix, const gInteger &Iy, gInteger &Iq, gInteger &Ir)
 #endif // USE_GNU_MP
 }
 
-IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
+gbt_integer_rep* mod(const gbt_integer_rep* x, const gbt_integer_rep* y, gbt_integer_rep* r)
 {
   nonnil(x);
   nonnil(y);
   int xl = x->len;
   int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
+  // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
   assert(yl != 0);
 
   int comp = ucompare(x, y);
@@ -1533,7 +1533,7 @@ IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
   }
   else
   {
-    IntRep* yy = 0;
+    gbt_integer_rep* yy = 0;
 	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r)
     {
@@ -1542,7 +1542,7 @@ IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
     }
     else
     {
-      yy = (IntRep*)y;
+      yy = (gbt_integer_rep*)y;
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1561,11 +1561,11 @@ IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
   return r;
 }
 
-IntRep* mod(const IntRep* x, long y, IntRep* r)
+gbt_integer_rep* mod(const gbt_integer_rep* x, long y, gbt_integer_rep* r)
 {
   nonnil(x);
   int xl = x->len;
-  // if (y == 0) (*lib_error_handler)("gInteger", "attempted division by zero");
+  // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
   assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
@@ -1627,7 +1627,7 @@ IntRep* mod(const IntRep* x, long y, IntRep* r)
   return r;
 }
 
-IntRep*  Compl(const IntRep* src, IntRep* r)
+gbt_integer_rep*  Compl(const gbt_integer_rep* src, gbt_integer_rep* r)
 {
   nonnil(src);
   r = Icopy(r, src);
@@ -1651,7 +1651,7 @@ IntRep*  Compl(const IntRep* src, IntRep* r)
   return r;
 }
 
-IntRep* lshift(const IntRep* x, long y, IntRep* r)
+gbt_integer_rep* lshift(const gbt_integer_rep* x, long y, gbt_integer_rep* r)
 {
   nonnil(x);
   int xl = x->len;
@@ -1725,7 +1725,7 @@ IntRep* lshift(const IntRep* x, long y, IntRep* r)
   return r;
 }
 
-IntRep* lshift(const IntRep* x, const IntRep* yy, int negatey, IntRep* r)
+gbt_integer_rep* lshift(const gbt_integer_rep* x, const gbt_integer_rep* yy, int negatey, gbt_integer_rep* r)
 {
   long y = Itolong(yy);
   if (negatey)
@@ -1737,7 +1737,7 @@ IntRep* lshift(const IntRep* x, const IntRep* yy, int negatey, IntRep* r)
 // A  version of knuth's algorithm B / ex. 4.5.3.34
 // A better version that doesn't bother shifting all of `t' forthcoming
 
-IntRep* gcd(const IntRep* x, const IntRep* y)
+gbt_integer_rep* gcd(const gbt_integer_rep* x, const gbt_integer_rep* y)
 {
   nonnil(x);
   nonnil(y);
@@ -1749,8 +1749,8 @@ IntRep* gcd(const IntRep* x, const IntRep* y)
   else if (ul == 0)
     return Ialloc(0, y->s, vl, I_POSITIVE, vl);
 
-  IntRep* u = Ialloc(0, x->s, ul, I_POSITIVE, ul);
-  IntRep* v = Ialloc(0, y->s, vl, I_POSITIVE, vl);
+  gbt_integer_rep* u = Ialloc(0, x->s, ul, I_POSITIVE, ul);
+  gbt_integer_rep* v = Ialloc(0, y->s, vl, I_POSITIVE, vl);
 
 // find shift so that both not even
 
@@ -1783,7 +1783,7 @@ IntRep* gcd(const IntRep* x, const IntRep* y)
     v = lshift(v, -k, v);
   }
 
-  IntRep* t;
+  gbt_integer_rep* t;
   if (u->s[0] & 01)
     t = Ialloc(0, v->s, v->len, !v->sgn, v->len);
   else
@@ -1833,7 +1833,7 @@ IntRep* gcd(const IntRep* x, const IntRep* y)
 
 
 
-long lg(const IntRep* x)
+long lg(const gbt_integer_rep* x)
 {
   nonnil(x);
   int xl = x->len;
@@ -1851,7 +1851,7 @@ long lg(const IntRep* x)
   return l;
 }
   
-IntRep* power(const IntRep* x, long y, IntRep* r)
+gbt_integer_rep* power(const gbt_integer_rep* x, long y, gbt_integer_rep* r)
 {
   nonnil(x);
   int sgn;
@@ -1871,7 +1871,7 @@ IntRep* power(const IntRep* x, long y, IntRep* r)
   else
   {
 	 int maxsize = (int) (((lg(x) + 1) * y) / I_SHIFT + 2);     // pre-allocate space
-    IntRep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
+    gbt_integer_rep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
     r = Icopy_one(r, I_POSITIVE);
@@ -1891,7 +1891,7 @@ IntRep* power(const IntRep* x, long y, IntRep* r)
   return r;
 }
 
-IntRep* abs(const IntRep* src, IntRep* dest)
+gbt_integer_rep* abs(const gbt_integer_rep* src, gbt_integer_rep* dest)
 {
   nonnil(src);
   if (src != dest)
@@ -1900,7 +1900,7 @@ IntRep* abs(const IntRep* src, IntRep* dest)
   return dest;
 }
 
-IntRep* negate(const IntRep* src, IntRep* dest)
+gbt_integer_rep* negate(const gbt_integer_rep* src, gbt_integer_rep* dest)
 {
   nonnil(src);
   if (src != dest)
@@ -1910,10 +1910,10 @@ IntRep* negate(const IntRep* src, IntRep* dest)
   return dest;
 }
 
-IntRep* atoIntRep(const char* s, int base)
+gbt_integer_rep* atoIntRep(const char* s, int base)
 {
   int sl = strlen(s);
-  IntRep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
+  gbt_integer_rep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != 0)
   {
     char sgn;
@@ -1947,7 +1947,7 @@ IntRep* atoIntRep(const char* s, int base)
   return r;
 }
 
-gbtText Itoa(const IntRep *x, int base, int width)
+gbtText Itoa(const gbt_integer_rep *x, int base, int width)
 {
   int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   gbtText fmtbase;
@@ -1957,7 +1957,7 @@ gbtText Itoa(const IntRep *x, int base, int width)
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
-gbtText cvtItoa(const IntRep *x, gbtText fmt, int& fmtlen, int base, int showbase,
+gbtText cvtItoa(const gbt_integer_rep *x, gbtText fmt, int& fmtlen, int base, int showbase,
               int width, int align_right, char fillchar, char Xcase, 
               int showpos)
 {
@@ -1969,7 +1969,7 @@ gbtText cvtItoa(const IntRep *x, gbtText fmt, int& fmtlen, int base, int showbas
     *--s = '0';
   else
   {
-    IntRep* z = Icopy(0, x);
+    gbt_integer_rep* z = Icopy(0, x);
 
     // split division by base into two parts: 
     // first divide by biggest power of base that fits in an unsigned short,
@@ -2049,7 +2049,7 @@ gbtText cvtItoa(const IntRep *x, gbtText fmt, int& fmtlen, int base, int showbas
   }
 }
 
-gbtInput &operator>>(gbtInput& s, gInteger& y)
+gbtInput &operator>>(gbtInput& s, gbtInteger& y)
 {
   char sgn = 0;
   char ch;
@@ -2089,10 +2089,10 @@ gbtInput &operator>>(gbtInput& s, gInteger& y)
 #endif  // !USE_GNU_MP
 
 //------------------------------------------------------------------------
-//                    gInteger: Private member functions
+//                    gbtInteger: Private member functions
 //------------------------------------------------------------------------
 
-bool gInteger::OK(void) const
+bool gbtInteger::OK(void) const
 {
 #if USE_GNU_MP
   return true;
@@ -2114,65 +2114,65 @@ bool gInteger::OK(void) const
 #endif // USE_GNU_MP
 }
 
-void gInteger::error(const char *) const
+void gbtInteger::error(const char *) const
 { }
 
 //------------------------------------------------------------------------
-//                          gInteger: Lifecycle
+//                          gbtInteger: Lifecycle
 //------------------------------------------------------------------------
 
 #if USE_GNU_MP
-gInteger::gInteger(void)
+gbtInteger::gbtInteger(void)
 { mpz_init_set_ui(m_value, 0); }
 #else
-gInteger::gInteger(void) 
+gbtInteger::gbtInteger(void) 
   : rep(&_ZeroRep)
 { }
 #endif // !USE_GNU_MP
 
 #if USE_GNU_MP
-gInteger::gInteger(int y)
+gbtInteger::gbtInteger(int y)
 { mpz_init_set_ui(m_value, y); }
 #else
-gInteger::gInteger(int y) 
+gbtInteger::gbtInteger(int y) 
   : rep(Icopy_long(0, (long) y)) 
 { }
 #endif // !USE_GNU_MP
 
 #if USE_GNU_MP
-gInteger::gInteger(long y)
+gbtInteger::gbtInteger(long y)
 { mpz_init_set_si(m_value, y); }
 #else
-gInteger::gInteger(long y) 
+gbtInteger::gbtInteger(long y) 
   : rep(Icopy_long(0, y)) 
 { }
 #endif // !USE_GNU_MP
 
 #if USE_GNU_MP
-gInteger::gInteger(unsigned long y)
+gbtInteger::gbtInteger(unsigned long y)
 { mpz_init_set_ui(m_value, y); }
 #else
-gInteger::gInteger(unsigned long y) 
+gbtInteger::gbtInteger(unsigned long y) 
   : rep(Icopy_ulong(0, y)) 
 { }
 #endif // !USE_GNU_MP
 
 #if !USE_GNU_MP
-gInteger::gInteger(IntRep *r) 
+gbtInteger::gbtInteger(gbt_integer_rep *r) 
   : rep(r)
 { }
 #endif // !USE_GNU_MP
 
 #if USE_GNU_MP
-gInteger::gInteger(const gInteger &y)
+gbtInteger::gbtInteger(const gbtInteger &y)
 { mpz_init_set(m_value, y.m_value); }
 #else
-gInteger::gInteger(const gInteger &y) 
+gbtInteger::gbtInteger(const gbtInteger &y) 
   : rep(Icopy(0, y.rep)) 
 { }
 #endif // !USE_GNU_MP
 
-gInteger::~gInteger() 
+gbtInteger::~gbtInteger() 
 { 
 #if USE_GNU_MP
   mpz_clear(m_value);
@@ -2183,7 +2183,7 @@ gInteger::~gInteger()
 #endif // !USE_GNU_MP
 }
 
-gInteger &gInteger::operator=(const gInteger &y)
+gbtInteger &gbtInteger::operator=(const gbtInteger &y)
 {
 #if USE_GNU_MP
   if (this != &y) {
@@ -2195,7 +2195,7 @@ gInteger &gInteger::operator=(const gInteger &y)
   return *this;
 }
 
-gInteger &gInteger::operator=(long y)
+gbtInteger &gbtInteger::operator=(long y)
 {
 #if USE_GNU_MP
   mpz_set_si(m_value, y);
@@ -2206,160 +2206,160 @@ gInteger &gInteger::operator=(long y)
 }
 
 //------------------------------------------------------------------------
-//                   gInteger: Comparison operators
+//                   gbtInteger: Comparison operators
 //------------------------------------------------------------------------
 
-bool operator==(const gInteger &x, const gInteger &y)
+bool operator==(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) == 0); 
 }
 
-bool operator==(const gInteger &x, long y)
+bool operator==(const gbtInteger &x, long y)
 {
   return (compare(x, y) == 0); 
 }
 
-bool operator!=(const gInteger &x, const gInteger &y)
+bool operator!=(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) != 0); 
 }
 
-bool operator!=(const gInteger &x, long y)
+bool operator!=(const gbtInteger &x, long y)
 {
   return (compare(x, y) != 0); 
 }
 
-bool operator<(const gInteger &x, const gInteger &y)
+bool operator<(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) < 0); 
 }
 
-bool operator<(const gInteger &x, long y)
+bool operator<(const gbtInteger &x, long y)
 {
   return (compare(x, y) < 0); 
 }
 
-bool operator<=(const gInteger &x, const gInteger &y)
+bool operator<=(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) <= 0); 
 }
 
-bool operator<=(const gInteger &x, long y)
+bool operator<=(const gbtInteger &x, long y)
 {
   return (compare(x, y) <= 0); 
 }
 
-bool operator>(const gInteger &x, const gInteger &y)
+bool operator>(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) > 0); 
 }
 
-bool operator>(const gInteger &x, long y)
+bool operator>(const gbtInteger &x, long y)
 {
   return (compare(x, y) > 0); 
 }
 
-bool operator>=(const gInteger &x, const gInteger &y)
+bool operator>=(const gbtInteger &x, const gbtInteger &y)
 {
   return (compare(x, y) >= 0); 
 }
 
-bool operator>=(const gInteger &x, long y)
+bool operator>=(const gbtInteger &x, long y)
 {
   return (compare(x, y) >= 0); 
 }
 
 //------------------------------------------------------------------------
-//                   gInteger: Arithmetic operators
+//                   gbtInteger: Arithmetic operators
 //------------------------------------------------------------------------
 
-gInteger operator+(const gInteger &x, const gInteger &y)
+gbtInteger operator+(const gbtInteger &x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   add(x, y, r);
   return r;
 }
 
-gInteger operator+(const gInteger &x, long y)
+gbtInteger operator+(const gbtInteger &x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   add(x, y, r);
   return r;
 }
 
-gInteger operator+(long x, const gInteger &y)
+gbtInteger operator+(long x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   add(x, y, r);
   return r;
 }
 
-gInteger operator-(const gInteger &x, const gInteger &y)
+gbtInteger operator-(const gbtInteger &x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   sub(x, y, r);
   return r;
 }
 
-gInteger operator-(const gInteger &x, long y)
+gbtInteger operator-(const gbtInteger &x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   sub(x, y, r);
   return r;
 }
 
-gInteger operator-(long x, const gInteger &y)
+gbtInteger operator-(long x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   sub(x, y, r);
   return r;
 }
 
-gInteger operator*(const gInteger &x, const gInteger &y)
+gbtInteger operator*(const gbtInteger &x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   mul(x, y, r);
   return r;
 }
 
-gInteger operator*(const gInteger &x, long y)
+gbtInteger operator*(const gbtInteger &x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   mul(x, y, r);
   return r;
 }
 
-gInteger operator*(long x, const gInteger &y)
+gbtInteger operator*(long x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   mul(x, y, r);
   return r;
 }
 
-gInteger operator/(const gInteger &x, const gInteger &y)
+gbtInteger operator/(const gbtInteger &x, const gbtInteger &y)
 {
-  gInteger r;
+  gbtInteger r;
   div(x, y, r);
   return r;
 }
 
-gInteger operator/(const gInteger &x, long y)
+gbtInteger operator/(const gbtInteger &x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   div(x, y, r);
   return r;
 }
 
-gInteger operator%(const gInteger &x, const gInteger &y) 
+gbtInteger operator%(const gbtInteger &x, const gbtInteger &y) 
 {
-  gInteger r;
+  gbtInteger r;
   mod(x, y, r);
   return r;
 }
 
-gInteger operator%(const gInteger &x, long y)
+gbtInteger operator%(const gbtInteger &x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   mod(x, y, r);
   return r;
 }
@@ -2367,7 +2367,7 @@ gInteger operator%(const gInteger &x, long y)
 
 // procedural versions
 
-int compare(const gInteger &x, const gInteger &y)
+int compare(const gbtInteger &x, const gbtInteger &y)
 {
 #if USE_GNU_MP
   return mpz_cmp(x.m_value, y.m_value);
@@ -2376,7 +2376,7 @@ int compare(const gInteger &x, const gInteger &y)
 #endif // USE_GNU_MP
 }
 
-int compare(const gInteger &x, long y)
+int compare(const gbtInteger &x, long y)
 {
 #if USE_GNU_MP
   return mpz_cmp_si(x.m_value, y);
@@ -2385,7 +2385,7 @@ int compare(const gInteger &x, long y)
 #endif // USE_GNU_MP
 }
 
-int compare(long x, const gInteger &y)
+int compare(long x, const gbtInteger &y)
 {
 #if USE_GNU_MP
   return mpz_cmp_si(y.m_value, x);
@@ -2394,7 +2394,7 @@ int compare(long x, const gInteger &y)
 #endif // USE_GNU_MP
 }
 
-void add(const gInteger &x, const gInteger &y, gInteger &dest)
+void add(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_add(dest.m_value, x.m_value, y.m_value);
@@ -2403,7 +2403,7 @@ void add(const gInteger &x, const gInteger &y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void sub(const gInteger &x, const gInteger &y, gInteger &dest)
+void sub(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_sub(dest.m_value, x.m_value, y.m_value);
@@ -2412,7 +2412,7 @@ void sub(const gInteger &x, const gInteger &y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void mul(const gInteger &x, const gInteger &y, gInteger &dest)
+void mul(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_mul(dest.m_value, x.m_value, y.m_value);
@@ -2421,7 +2421,7 @@ void mul(const gInteger &x, const gInteger &y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void div(const gInteger &x, const gInteger &y, gInteger &dest)
+void div(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_tdiv_q(dest.m_value, x.m_value, y.m_value);
@@ -2430,7 +2430,7 @@ void div(const gInteger &x, const gInteger &y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void mod(const gInteger &x, const gInteger &y, gInteger &dest)
+void mod(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_tdiv_r(dest.m_value, x.m_value, y.m_value);
@@ -2439,17 +2439,17 @@ void mod(const gInteger &x, const gInteger &y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void pow(const gInteger &x, const gInteger &y, gInteger &dest)
+void pow(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
 #if USE_GNU_MP
-  gInteger one(1);
+  gbtInteger one(1);
   mpz_powm(dest.m_value, x.m_value, y.m_value, one.m_value);
 #else
   dest.rep = power(x.rep, Itolong(y.rep), dest.rep); // not incorrect
 #endif // USE_GNU_MP
 }
 
-void add(const gInteger &x, long y, gInteger &dest)
+void add(const gbtInteger &x, long y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   if (y >= 0) {
@@ -2463,7 +2463,7 @@ void add(const gInteger &x, long y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void sub(const gInteger &x, long y, gInteger &dest)
+void sub(const gbtInteger &x, long y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   if (y >= 0) {
@@ -2477,7 +2477,7 @@ void sub(const gInteger &x, long y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void mul(const gInteger &x, long y, gInteger &dest)
+void mul(const gbtInteger &x, long y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_mul_si(dest.m_value, x.m_value, y);
@@ -2486,7 +2486,7 @@ void mul(const gInteger &x, long y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void div(const gInteger &x, long y, gInteger &dest)
+void div(const gbtInteger &x, long y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   if (y > 0) {
@@ -2501,7 +2501,7 @@ void div(const gInteger &x, long y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void mod(const gInteger& x, long y, gInteger& dest)
+void mod(const gbtInteger& x, long y, gbtInteger& dest)
 {
 #if USE_GNU_MP
   if (y > 0) {
@@ -2516,7 +2516,7 @@ void mod(const gInteger& x, long y, gInteger& dest)
 #endif // USE_GNU_MP
 }
 
-void pow(const gInteger &x, long y, gInteger &dest)
+void pow(const gbtInteger &x, long y, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_pow_ui(dest.m_value, x.m_value, y);
@@ -2525,7 +2525,7 @@ void pow(const gInteger &x, long y, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void abs(const gInteger &x, gInteger &dest)
+void abs(const gbtInteger &x, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_abs(dest.m_value, x.m_value);
@@ -2534,7 +2534,7 @@ void abs(const gInteger &x, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void negate(const gInteger &x, gInteger &dest)
+void negate(const gbtInteger &x, gbtInteger &dest)
 {
 #if USE_GNU_MP
   mpz_neg(dest.m_value, x.m_value);
@@ -2543,91 +2543,91 @@ void negate(const gInteger &x, gInteger &dest)
 #endif // USE_GNU_MP
 }
 
-void add(long x, const gInteger &y, gInteger &dest)
+void add(long x, const gbtInteger &y, gbtInteger &dest)
 {
   add(y, x, dest);
 }
 
-void sub(long x, const gInteger& y, gInteger& dest)
+void sub(long x, const gbtInteger& y, gbtInteger& dest)
 {
   sub(y, x, dest);
 }
 
-void mul(long x, const gInteger& y, gInteger& dest)
+void mul(long x, const gbtInteger& y, gbtInteger& dest)
 {
   mul(y, x, dest);
 }
 
-void  gInteger::operator += (const gInteger& y)
+void  gbtInteger::operator += (const gbtInteger& y)
 {
   add(*this, y, *this);
 }
 
-void  gInteger::operator += (long y)
+void  gbtInteger::operator += (long y)
 {
   add(*this, y, *this);
 }
 
-void gInteger::operator ++ ()
+void gbtInteger::operator ++ ()
 {
   add(*this, 1, *this);
 }
 
 
-void  gInteger::operator -= (const gInteger& y)
+void  gbtInteger::operator -= (const gbtInteger& y)
 {
   sub(*this, y, *this);
 }
 
-void  gInteger::operator -= (long y)
+void  gbtInteger::operator -= (long y)
 {
   sub(*this, y, *this);
 }
 
-void gInteger::operator -- ()
+void gbtInteger::operator -- ()
 {
   add(*this, -1, *this);
 }
 
-void gInteger::operator *= (const gInteger& y)
+void gbtInteger::operator *= (const gbtInteger& y)
 {
   mul(*this, y, *this);
 }
 
-void gInteger::operator *= (long y)
+void gbtInteger::operator *= (long y)
 {
   mul(*this, y, *this);
 }
 
-void gInteger::operator /= (const gInteger& y)
+void gbtInteger::operator /= (const gbtInteger& y)
 {
   div(*this, y, *this);
 }
 
-void gInteger::operator /= (long y)
+void gbtInteger::operator /= (long y)
 {
   div(*this, y, *this);
 }
 
 #if !USE_GNU_MP
-void gInteger::operator<<=(const gInteger &y)
+void gbtInteger::operator<<=(const gbtInteger &y)
 {
   lshift(*this, y, *this);
 }
 #endif // !USE_GNU_MP
 
-void gInteger::abs()
+void gbtInteger::abs()
 {
   ::abs(*this, *this);
 }
 
-void gInteger::negate()
+void gbtInteger::negate()
 {
   ::negate(*this, *this);
 }
 
 
-int sign(const gInteger &x)
+int sign(const gbtInteger &x)
 {
 #if USE_GNU_MP
   return mpz_sgn(x.m_value);
@@ -2636,7 +2636,7 @@ int sign(const gInteger &x)
 #endif // USE_GNU_MP
 }
 
-bool even(const gInteger &y)
+bool even(const gbtInteger &y)
 {
 #if USE_GNU_MP
   return mpz_even_p(y.m_value);
@@ -2645,7 +2645,7 @@ bool even(const gInteger &y)
 #endif // USE_GNU_MP
 }
 
-bool odd(const gInteger &y)
+bool odd(const gbtInteger &y)
 {
 #if USE_GNU_MP
   return mpz_odd_p(y.m_value);
@@ -2654,7 +2654,7 @@ bool odd(const gInteger &y)
 #endif // USE_GNU_MP
 }
 
-gbtText Itoa(const gInteger &y, int base, int width)
+gbtText Itoa(const gbtInteger &y, int base, int width)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, base) + 2];
@@ -2665,83 +2665,83 @@ gbtText Itoa(const gInteger &y, int base, int width)
 #endif // USE_GNU_MP
 }
 
-gInteger sqr(const gInteger& x) 
+gbtInteger sqr(const gbtInteger& x) 
 {
-  gInteger r;
+  gbtInteger r;
   mul(x, x, r);
   return r;
 }
 
-gInteger pow(const gInteger& x, long y)
+gbtInteger pow(const gbtInteger& x, long y)
 {
-  gInteger r;
+  gbtInteger r;
   pow(x, y, r);
   return r;
 }
 
-gInteger Ipow(long x, long y)
+gbtInteger Ipow(long x, long y)
 {
-  gInteger r(x);
+  gbtInteger r(x);
   pow(r, y, r);
   return r;
 }
 
-gInteger pow(const gInteger& x, const gInteger& y) 
+gbtInteger pow(const gbtInteger& x, const gbtInteger& y) 
 {
-  gInteger r;
+  gbtInteger r;
   pow(x, y, r);
   return r;
 }
 
-gInteger abs(const gInteger& x) 
+gbtInteger abs(const gbtInteger& x) 
 {
-  gInteger r;
+  gbtInteger r;
   abs(x, r);
   return r;
 }
 
-gInteger operator - (const gInteger& x)
+gbtInteger operator - (const gbtInteger& x)
 {
-  gInteger r;
+  gbtInteger r;
   negate(x, r);
   return r;
 }
 
-gInteger atoI(const char *s, int base) 
+gbtInteger atoI(const char *s, int base) 
 {
 #if USE_GNU_MP
-  gInteger r;
+  gbtInteger r;
   mpz_init(r.m_value);
   mpz_set_str(r.m_value, s, base);
   return r;
 #else
-  gInteger r;
+  gbtInteger r;
   r.rep = atoIntRep(s, base);
   return r;
 #endif // USE_GNU_MP
 }
 
-gInteger gcd(const gInteger &x, const gInteger &y)
+gbtInteger gcd(const gbtInteger &x, const gbtInteger &y)
 {
 #if USE_GNU_MP
-  gInteger r;
+  gbtInteger r;
   mpz_gcd(r.m_value, x.m_value, y.m_value);
   return r;
 #else
-  gInteger r;
+  gbtInteger r;
   r.rep = gcd(x.rep, y.rep);
   return r;
 #endif // USE_GNU_MP
 }
 
-gInteger lcm(const gInteger& x, const gInteger& y)
+gbtInteger lcm(const gbtInteger& x, const gbtInteger& y)
 {
 #if USE_GNU_MP
-  gInteger r;
+  gbtInteger r;
   mpz_lcm(r.m_value, x.m_value, y.m_value);
   return r;
 #else
-  gInteger r, g;
+  gbtInteger r, g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
   else 
@@ -2752,35 +2752,35 @@ gInteger lcm(const gInteger& x, const gInteger& y)
 #endif // !USE_GNU_MP
 }
 
-void gInteger::operator%=(const gInteger& y)
+void gbtInteger::operator%=(const gbtInteger& y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-void gInteger::operator%=(long y)
+void gbtInteger::operator%=(long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-gbtText ToText(const gInteger &i)
+gbtText ToText(const gbtInteger &i)
 {
   return gbtText(Itoa(i));
 }
 
 #if !USE_GNU_MP
-int ucompare(const gInteger &x, const gInteger &y)
+int ucompare(const gbtInteger &x, const gbtInteger &y)
 {
   return ucompare(x.rep, y.rep);
 }
 
-void lshift(const gInteger &x, const gInteger &y, gInteger &dest)
+void lshift(const gbtInteger &x, const gbtInteger &y, gbtInteger &dest)
 {
   dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
 }
 
-double ratio(const gInteger &num, const gInteger &den)
+double ratio(const gbtInteger &num, const gbtInteger &den)
 {
-  gInteger q, r;
+  gbtInteger q, r;
   divide(num, den, q, r);
   double d1 = Itodouble(q.rep);
  
@@ -2824,7 +2824,7 @@ double ratio(const gInteger &num, const gInteger &den)
 }
 #endif // !USE_GNU_MP
 
-bool gInteger::fits_in_long(void) const 
+bool gbtInteger::fits_in_long(void) const 
 {
 #if USE_GNU_MP
   return mpz_fits_slong_p(m_value);
@@ -2833,7 +2833,7 @@ bool gInteger::fits_in_long(void) const
 #endif // USE_GNU_MP
 }
 
-long gInteger::as_long(void) const
+long gbtInteger::as_long(void) const
 {
 #if USE_GNU_MP
   return mpz_get_si(m_value);
@@ -2842,7 +2842,7 @@ long gInteger::as_long(void) const
 #endif // USE_GNU_MP
 }
 
-gbtOutput &operator<<(gbtOutput &s, const gInteger &y)
+gbtOutput &operator<<(gbtOutput &s, const gbtInteger &y)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, 10) + 2];

@@ -36,8 +36,8 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
 
   if (strong)  {
     do  {
-      gNumber ap = A.GetPayoff(s.GetPlayer());
-      gNumber bp = B.GetPayoff(s.GetPlayer());
+      gbtNumber ap = A.GetPayoff(s.GetPlayer());
+      gbtNumber bp = B.GetPayoff(s.GetPlayer());
 
       if (ap <= bp)  {
 	return false;
@@ -51,8 +51,8 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
   bool equal = true;
   
   do   {
-    gNumber ap = A.GetPayoff(s.GetPlayer());
-    gNumber bp = B.GetPayoff(s.GetPlayer());
+    gbtNumber ap = A.GetPayoff(s.GetPlayer());
+    gbtNumber bp = B.GetPayoff(s.GetPlayer());
 
     if (ap < bp)   { 
       return false;

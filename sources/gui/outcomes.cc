@@ -55,7 +55,7 @@ void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
     gbtEfgOutcome outcome = p_doc->GetEfg().NewOutcome();
     outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= p_doc->GetEfg().NumPlayers(); pl++) {
-      outcome.SetPayoff(p_doc->GetEfg().GetPlayer(pl), gNumber(0));
+      outcome.SetPayoff(p_doc->GetEfg().GetPlayer(pl), gbtNumber(0));
     }
   }
   else {
@@ -63,7 +63,7 @@ void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
     gbtNfgOutcome outcome = p_doc->GetNfg().NewOutcome();
     outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
-      outcome.SetPayoff(p_doc->GetNfg().GetPlayer(pl), gNumber(0));
+      outcome.SetPayoff(p_doc->GetNfg().GetPlayer(pl), gbtNumber(0));
     }
   }
 }

@@ -60,14 +60,14 @@ template <class T> T gmax(const gbtArray<T> &p_array)
 template int gmin(const int &a, const int &b);
 template float gmin(const float &a, const float &b);
 template double gmin(const double &a, const double &b);
-template gRational gmin(const gRational &a, const gRational &b);
-template gDouble gmin(const gDouble &a, const gDouble &b);
+template gbtRational gmin(const gbtRational &a, const gbtRational &b);
+template gbtDouble gmin(const gbtDouble &a, const gbtDouble &b);
 
 template int gmax(const int &a, const int &b);
 template float gmax(const float &a, const float &b);
 template double gmax(const double &a, const double &b);
-template gRational gmax(const gRational &a, const gRational &b);
-template gDouble gmax(const gDouble &a, const gDouble &b);
+template gbtRational gmax(const gbtRational &a, const gbtRational &b);
+template gbtDouble gmax(const gbtDouble &a, const gbtDouble &b);
 
 template int gmax(const gbtArray<int> &);
 
@@ -78,9 +78,9 @@ double abs(double a)
 }
 #endif   //# hpux
 
-gNumber abs(const gNumber &a)
+gbtNumber abs(const gbtNumber &a)
 {
-  if (a > gNumber(0))  return a;  else return -a;
+  if (a > gbtNumber(0))  return a;  else return -a;
 }
 
 //
@@ -99,7 +99,7 @@ int sign(const double &a)
 // standard form xxx.xxxx or a/b form.
 double FromText(const gbtText &f,double &d)
 {
-  gRational R;
+  gbtRational R;
   FromText(f, R);
   d = (double) R;
   return d;

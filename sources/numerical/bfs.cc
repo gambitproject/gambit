@@ -65,19 +65,19 @@ template <class T> gbtOutput &operator<<(gbtOutput &f, const BFS<T> &b)
 
 
 template class BFS<double>;
-template class BFS<gRational>;
+template class BFS<gbtRational>;
 
 template gbtOutput &operator<<(gbtOutput &, const BFS<double> &);
-template gbtOutput &operator<<(gbtOutput &, const BFS<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const BFS<gbtRational> &);
 
 template class gbtArray<BFS<double> >;
-template class gbtArray<BFS<gRational> >;
+template class gbtArray<BFS<gbtRational> >;
 template class gbtBlock<BFS<double> >;
-template class gbtBlock<BFS<gRational> >;
+template class gbtBlock<BFS<gbtRational> >;
 template class gbtList<BFS<double> >;
-template class gbtList<BFS<gRational> >;
+template class gbtList<BFS<gbtRational> >;
 
 template class gbtBaseMap<int, double>;
 template class gbtOrdMap<int, double>;
-template class gbtBaseMap<int, gRational>;
-template class gbtOrdMap<int, gRational>;
+template class gbtBaseMap<int, gbtRational>;
+template class gbtOrdMap<int, gbtRational>;

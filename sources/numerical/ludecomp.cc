@@ -36,10 +36,10 @@ template class LUdecomp< double >;
 template gbtOutput& operator<<( gbtOutput&, const EtaMatrix< double > &); 
 #endif  // __BCC55__
 
-template class EtaMatrix< gRational >;
-template class gbtList< EtaMatrix< gRational > >;
-template class LUdecomp< gRational >;
+template class EtaMatrix< gbtRational >;
+template class gbtList< EtaMatrix< gbtRational > >;
+template class LUdecomp< gbtRational >;
 
 #ifndef __BCC55__
-template gbtOutput& operator<<( gbtOutput&, const EtaMatrix< gRational > &); 
+template gbtOutput& operator<<( gbtOutput&, const EtaMatrix< gbtRational > &); 
 #endif  // __BCC55__

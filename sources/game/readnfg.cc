@@ -165,8 +165,8 @@ private:
 
   gbtNfgParserSymbol m_lastSymbol;
   double m_lastDouble;
-  gInteger m_lastInteger;
-  gRational m_lastRational;
+  gbtInteger m_lastInteger;
+  gbtRational m_lastRational;
   gbtText m_lastText;
 
 public:
@@ -174,8 +174,8 @@ public:
 
   gbtNfgParserSymbol GetNextSymbol(void);
   gbtNfgParserSymbol GetCurrentSymbol(void) const { return m_lastSymbol; }
-  const gInteger &GetLastInteger(void) const { return m_lastInteger; }
-  const gRational &GetLastRational(void) const { return m_lastRational; }
+  const gbtInteger &GetLastInteger(void) const { return m_lastInteger; }
+  const gbtRational &GetLastRational(void) const { return m_lastRational; }
   double GetLastDouble(void) const { return m_lastDouble; }
   gbtText GetLastText(void) const { return m_lastText; }
 };  
@@ -413,7 +413,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
   }
 
   while (p_parser.GetCurrentSymbol() == symLBRACE) {
-    gbtArray<gNumber> payoffs(p_nfg.NumPlayers());
+    gbtArray<gbtNumber> payoffs(p_nfg.NumPlayers());
     int pl = 1;
 
     if (p_parser.GetNextSymbol() != symTEXT) {
@@ -484,7 +484,7 @@ static void ParseOutcomeBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
 }
 
 static void SetPayoff(gbtNfgGame p_nfg,
-		      int p_cont, int p_pl, const gNumber &p_value)
+		      int p_cont, int p_pl, const gbtNumber &p_value)
 {
   if (p_pl == 1)  {
     p_nfg.SetOutcomeIndex(p_cont, p_nfg.NewOutcome());

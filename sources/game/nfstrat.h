@@ -59,15 +59,15 @@ public:
   void SetOutcome(const gbtNfgOutcome &);
   gbtNfgOutcome GetOutcome(void) const;
 
-  gNumber GetPayoff(const gbtNfgPlayer &) const;
+  gbtNumber GetPayoff(const gbtNfgPlayer &) const;
 };
 
 class gbtNfgSupport {
 protected:
   gbtNfgGame m_nfg;
-  // This really could be a gPVector<bool> probably, but we'll keep
+  // This really could be a gbtPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
-  gPVector<int> m_strategies;
+  gbtPVector<int> m_strategies;
   gbtText m_label;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
@@ -115,7 +115,7 @@ public:
 
   gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
 			    gbtOutput &tracefile, gbtStatus &status) const;
-  gbtNfgSupport MixedUndominated(bool strong, gPrecision precision,
+  gbtNfgSupport MixedUndominated(bool strong, gbtPrecision precision,
 				 const gbtArray<int> &players,
 				 gbtOutput &, gbtStatus &status) const;
 

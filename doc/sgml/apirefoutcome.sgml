@@ -79,8 +79,8 @@ The empty string is returned if the outcome object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber gbtEfgOutcome::GetPayoff(gbtEfgPlayer) const
-gNumber gbtNfgOutcome::GetPayoff(gbtNfgPlayer) const
+gbtNumber gbtEfgOutcome::GetPayoff(gbtEfgPlayer) const
+gbtNumber gbtNfgOutcome::GetPayoff(gbtNfgPlayer) const
 </synopsis>
 </para>
 </formalpara>
@@ -134,8 +134,8 @@ void gbtNfgOutcome::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgOutcome::SetPayoff(gbtEfgPlayer, gNumber)
-void gbtNfgOutcome::SetPayoff(gbtNfgPlayer, gNumber)
+void gbtEfgOutcome::SetPayoff(gbtEfgPlayer, gbtNumber)
+void gbtNfgOutcome::SetPayoff(gbtNfgPlayer, gbtNumber)
 </synopsis>
 </para>
 </formalpara>

@@ -35,22 +35,22 @@
 
 #include "nfdommix.imp"
 
-gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
+gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gbtPrecision precision,
 				      const gbtArray<int> &players,
 				      gbtOutput &tracefile,
 				      gbtStatus &status) const
 {
   gbtNfgSupport newS(*this);
   
-  if (precision == precRATIONAL) {
+  if (precision == GBT_PREC_RATIONAL) {
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
       ComputeMixedDominated(*this, newS, pl, strong,
-			    (gRational)0, tracefile, status);
+			    (gbtRational)0, tracefile, status);
     }
   }
-  else if (precision == precDOUBLE) {
+  else if (precision == GBT_PREC_DOUBLE) {
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
@@ -64,21 +64,21 @@ gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
 }
 
 bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
-		      bool strong, gPrecision precision,
+		      bool strong, gbtPrecision precision,
 		      gbtOutput &tracefile)
 {
   bool ret = false;
-  if (precision == precRATIONAL) {
-    ret = IsMixedDominated(S, str, strong, (gRational)0, tracefile);
+  if (precision == GBT_PREC_RATIONAL) {
+    ret = IsMixedDominated(S, str, strong, (gbtRational)0, tracefile);
   }
-  else if (precision == precDOUBLE) { 
+  else if (precision == GBT_PREC_DOUBLE) { 
     ret = IsMixedDominated(S, str, strong, (double)0, tracefile);
   }
   return ret;
 }
 
-bool IsMixedDominated(const MixedProfile<gNumber> &sol,
-		 bool strong, gPrecision precision, gbtOutput &tracefile)
+bool IsMixedDominated(const MixedProfile<gbtNumber> &sol,
+		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
   int n = (sol.GetGame()).NumPlayers();
@@ -91,18 +91,18 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol,
   return ret;
 }
 
-bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
-		 bool strong, gPrecision precision, gbtOutput &tracefile)
+bool IsMixedDominated(const MixedProfile<gbtNumber> &sol, int pl,
+		 bool strong, gbtPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
 
-  if(precision == precRATIONAL) {
-    MixedProfile<gRational> p(sol.Support());
+  if(precision == GBT_PREC_RATIONAL) {
+    MixedProfile<gbtRational> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
-  else if (precision == precDOUBLE) {
+  else if (precision == GBT_PREC_DOUBLE) {
     MixedProfile<double> p(sol.Support());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
@@ -118,20 +118,20 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
 #ifndef __BCC55__
 template bool 
 ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
-		      gRational junk, gbtOutput &tracefile, gbtStatus &status);
+		      gbtRational junk, gbtOutput &tracefile, gbtStatus &status);
 template bool 
 ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
 		      double junk, gbtOutput &tracefile, gbtStatus &status);
 
 template bool
 IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
-		 bool strong, gRational junk, gbtOutput &tracefile);
+		 bool strong, gbtRational junk, gbtOutput &tracefile);
 template bool
 IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		 bool strong, double junk, gbtOutput &tracefile);
 
 template bool 
-IsMixedDominated(const MixedProfile<gRational> &pr, int pl,
+IsMixedDominated(const MixedProfile<gbtRational> &pr, int pl,
 		 bool strong, gbtOutput &tracefile);
 
 template bool 

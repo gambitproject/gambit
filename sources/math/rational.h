@@ -66,12 +66,12 @@
 class gbtInput;
 class gbtOutput;
 
-class gRational {
+class gbtRational {
 protected:
 #if USE_GNU_MP
   mpq_t m_value;
 #else
-  gInteger num, den;
+  gbtInteger num, den;
 #endif  // USE_GNU_MP
 
 #if !USE_GNU_MP
@@ -83,67 +83,67 @@ protected:
 
 public:
   // LIFECYCLE
-  gRational(void);
-  gRational(double);
-  gRational(const gInteger &);
-  gRational(const gInteger &n, const gInteger &d);
-  gRational(const gRational &);
-  ~gRational();
+  gbtRational(void);
+  gbtRational(double);
+  gbtRational(const gbtInteger &);
+  gbtRational(const gbtInteger &n, const gbtInteger &d);
+  gbtRational(const gbtRational &);
+  ~gbtRational();
 
-  gRational &operator=(const gRational& y);
+  gbtRational &operator=(const gbtRational& y);
   
   // COMPARISON OPERATORS
-  friend int operator==(const gRational &x, const gRational &y);
-  friend int operator!=(const gRational &x, const gRational &y);
-  friend int operator<(const gRational &x, const gRational &y);
-  friend int operator<=(const gRational &x, const gRational &y);
-  friend int operator>(const gRational &x, const gRational &y);
-  friend int operator>=(const gRational &x, const gRational &y);
+  friend int operator==(const gbtRational &x, const gbtRational &y);
+  friend int operator!=(const gbtRational &x, const gbtRational &y);
+  friend int operator<(const gbtRational &x, const gbtRational &y);
+  friend int operator<=(const gbtRational &x, const gbtRational &y);
+  friend int operator>(const gbtRational &x, const gbtRational &y);
+  friend int operator>=(const gbtRational &x, const gbtRational &y);
 
   // ARITHMETIC OPERATORS
-  friend gRational operator+(const gRational& x, const gRational& y);
-  friend gRational operator-(const gRational& x, const gRational& y);
-  friend gRational operator*(const gRational& x, const gRational& y);
-  friend gRational operator/(const gRational& x, const gRational& y);
+  friend gbtRational operator+(const gbtRational& x, const gbtRational& y);
+  friend gbtRational operator-(const gbtRational& x, const gbtRational& y);
+  friend gbtRational operator*(const gbtRational& x, const gbtRational& y);
+  friend gbtRational operator/(const gbtRational& x, const gbtRational& y);
 
-  void operator+=(const gRational& y);
-  void operator-=(const gRational& y);
-  void operator*=(const gRational& y);
-  void operator/=(const gRational& y);
+  void operator+=(const gbtRational& y);
+  void operator-=(const gbtRational& y);
+  void operator*=(const gbtRational& y);
+  void operator/=(const gbtRational& y);
 
-  friend gRational operator-(const gRational& x);
+  friend gbtRational operator-(const gbtRational& x);
 
   // PROCEDURAL VERSIONS OF OPERATORS
-  friend int compare(const gRational &x, const gRational &y);
-  friend void add(const gRational &x, const gRational &y, gRational &dest);
-  friend void sub(const gRational &x, const gRational &y, gRational &dest);
-  friend void mul(const gRational &x, const gRational &y, gRational &dest);
-  friend void div(const gRational &x, const gRational &y, gRational &dest);
+  friend int compare(const gbtRational &x, const gbtRational &y);
+  friend void add(const gbtRational &x, const gbtRational &y, gbtRational &dest);
+  friend void sub(const gbtRational &x, const gbtRational &y, gbtRational &dest);
+  friend void mul(const gbtRational &x, const gbtRational &y, gbtRational &dest);
+  friend void div(const gbtRational &x, const gbtRational &y, gbtRational &dest);
 
   // OTHER MATHEMATICAL OPERATIONS
   void negate(void);   // x = -x
   void invert(void);   // x = 1/x
 
-  friend int sign(const gRational& x);             // -1, 0, or +1
-  friend gRational abs(const gRational& x);              // absolute value
-  friend gRational sqr(const gRational& x);              // square
-  friend gRational pow(const gRational& x, long y);
-  friend gRational pow(const gRational& x, const gInteger& y);
+  friend int sign(const gbtRational& x);             // -1, 0, or +1
+  friend gbtRational abs(const gbtRational& x);              // absolute value
+  friend gbtRational sqr(const gbtRational& x);              // square
+  friend gbtRational pow(const gbtRational& x, long y);
+  friend gbtRational pow(const gbtRational& x, const gbtInteger& y);
 
   // DATA ACCESS
-  gInteger GetNumerator(void) const;
-  gInteger GetDenominator(void) const;
+  gbtInteger GetNumerator(void) const;
+  gbtInteger GetDenominator(void) const;
 
   // CONVERSIONS
   operator double() const;
-  friend gbtText ToText(const gRational &);
-  friend gRational FromText(const gbtText &, gRational &);
+  friend gbtText ToText(const gbtRational &);
+  friend gbtRational FromText(const gbtText &, gbtRational &);
 
   // INPUT AND OUTPUT
-  friend gbtInput &operator>>(gbtInput& s, gRational& y);
-  friend gbtOutput &operator<<(gbtOutput& s, const gRational& y);
+  friend gbtInput &operator>>(gbtInput& s, gbtRational& y);
+  friend gbtOutput &operator<<(gbtOutput& s, const gbtRational& y);
 };
 
-void gEpsilon(gRational &v, int i = 8);
+void gEpsilon(gbtRational &v, int i = 8);
 
 #endif  // RATIONAL_H

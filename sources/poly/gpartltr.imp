@@ -67,7 +67,7 @@ template<class T> TreeOfPartials<T>::~TreeOfPartials()
 
 template <class T> 
 T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord, 
-					      const gVector<T>& p) const
+					      const gbtVector<T>& p) const
 {
   if (RootPoly().Degree() <= 0) return (T)0;
   else {
@@ -83,9 +83,9 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord,
 }
 
 template <class T>
-gVector<T> TreeOfPartials<T>::VectorOfPartials(const gVector<T>& point) const
+gbtVector<T> TreeOfPartials<T>::VectorOfPartials(const gbtVector<T>& point) const
 {
-  gVector<T> answer(Dmnsn());
+  gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++)
     answer[i] = ValueOfPartialOfRootPoly(i,point);
   return answer;
@@ -94,9 +94,9 @@ gVector<T> TreeOfPartials<T>::VectorOfPartials(const gVector<T>& point) const
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 					     const gbtTreeNode<gPoly<T> >* n,
-					     const gVector<T>& p,
-					     const gVector<T>& halvesoflengths,
-					     gVector<int>& wrtos) const
+					     const gbtVector<T>& p,
+					     const gbtVector<T>& halvesoflengths,
+					     gbtVector<int>& wrtos) const
 {
   T answer = (T)0;
 
@@ -132,9 +132,9 @@ template <class T> T
 TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
 					     const gbtTreeNode<gPoly<T> >* n1,
 					     const gbtTreeNode<gPoly<T> >* n2,
-					     const gVector<T>& p,
-					     const gVector<T>& halvesoflengths,
-					     gVector<int>& wrtos) const
+					     const gbtVector<T>& p,
+					     const gbtVector<T>& halvesoflengths,
+					     gbtVector<int>& wrtos) const
 {
   T answer = (T)0;
 
@@ -221,11 +221,11 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
 
 
 template <class T> T
-TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
-						  const gVector<T>& 
+TreeOfPartials<T>::MaximalNonconstantContribution(const gbtVector<T>& p,
+						  const gbtVector<T>& 
 						     halvesoflengths) const
 {
-  gVector<int> WithRespectTos(p.Length());
+  gbtVector<int> WithRespectTos(p.Length());
   for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
 
   return MaximalNonconstantContributionRECURSIVE(RootNode(),
@@ -236,11 +236,11 @@ TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
 
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
-						const gVector<T>& p,
-						const gVector<T>& 
+						const gbtVector<T>& p,
+						const gbtVector<T>& 
 						   halvesoflengths) const
 {
-  gVector<int> WithRespectTos(p.Length());
+  gbtVector<int> WithRespectTos(p.Length());
   for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
 
   return MaximalNonconstantDifferenceRECURSIVE(other.RootNode(),
@@ -252,13 +252,13 @@ TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T>& other,
 
 
 template <class T>
-T TreeOfPartials<T>::EvaluateRootPoly(const gVector<T>& point) const 
+T TreeOfPartials<T>::EvaluateRootPoly(const gbtVector<T>& point) const 
 {
   return RootNode()->GetData().Evaluate(point); 
 }
 
 template <class T>
-T TreeOfPartials<T>::ValueOfRootPoly(const gVector<T>& point) const 
+T TreeOfPartials<T>::ValueOfRootPoly(const gbtVector<T>& point) const 
 { 
   return RootPoly().Evaluate(point); 
 }
@@ -277,12 +277,12 @@ TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T>& r) const
   if (this->RootNode()->GetData().IsMultiaffine())
     return MultiaffinePolyHasNoRootsIn(r);
   else {
-    gVector<T> center = r.Center();
+    gbtVector<T> center = r.Center();
     
     T constant = this->RootNode()->GetData().Evaluate(center);
     if (constant < (T)0) constant = - constant;
     
-    gVector<T> HalvesOfSideLengths = r.SideLengths();
+    gbtVector<T> HalvesOfSideLengths = r.SideLengths();
     for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (T)2;
     
     T max = 
@@ -315,7 +315,7 @@ TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
   gbtIndexOdometer topbottoms(zeros,ones);
   
   while (topbottoms.Turn()) {
-    gVector<T> point(Dmnsn());
+    gbtVector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++)
       if (topbottoms[i] == 0)
 	point[i] = r.LowerBoundOfCoord(i);
@@ -335,7 +335,7 @@ TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
 					        const gRectangle<T>& r) const
 { 
   if (Dmnsn() == 0) {
-    gVector<T> point(Dmnsn());
+    gbtVector<T> point(Dmnsn());
     if (this->RootNode()->GetData().Evaluate(point) >= (T)0)
       return false;
     else
@@ -352,7 +352,7 @@ TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
   gbtIndexOdometer topbottoms(zeros,ones);
   
   while (topbottoms.Turn()) {
-    gVector<T> point(Dmnsn());
+    gbtVector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++)
       if (topbottoms[i] == 0)
 	point[i] = r.LowerBoundOfCoord(i);
@@ -371,13 +371,13 @@ TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
   if (this->RootNode()->GetData().IsMultiaffine())
     return MultiaffinePolyEverywhereNegativeIn(r);
   else {
-    gVector<T> center = r.Center();
+    gbtVector<T> center = r.Center();
 
     T constant = 
       this->RootNode()->GetData().Evaluate(center);
     if (constant >= (T)0) return false;
     
-    gVector<T> HalvesOfSideLengths = r.SideLengths();
+    gbtVector<T> HalvesOfSideLengths = r.SideLengths();
     for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (T)2;
     
     T max = this->MaximalNonconstantContribution(center, HalvesOfSideLengths);
@@ -441,9 +441,9 @@ ListOfPartialTrees<T>::operator !=(const ListOfPartialTrees<T>& rhs) const
 }
 
 template <class T> 
-gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
+gbtMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p) const
 {
-  gMatrix<T> answer(Length(),Dmnsn());
+  gbtMatrix<T> answer(Length(),Dmnsn());
   int i;
   for (i = 1; i <= Length(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -452,11 +452,11 @@ gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
   return answer;
 }
 
-template <class T> gMatrix<T> 
-ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p,
+template <class T> gbtMatrix<T> 
+ListOfPartialTrees<T>::DerivativeMatrix(const gbtVector<T>& p,
 					const int& NoEquations) const
 {
-  gMatrix<T> answer(NoEquations,Dmnsn());
+  gbtMatrix<T> answer(NoEquations,Dmnsn());
   int i;
   for (i = 1; i <= NoEquations; i++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -465,11 +465,11 @@ ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p,
   return answer;
 }
 
-template <class T> gSquareMatrix<T> 
-ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
+template <class T> gbtSquareMatrix<T> 
+ListOfPartialTrees<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 {
   assert (Length() >= Dmnsn());
-  gSquareMatrix<T> answer(Dmnsn());
+  gbtSquareMatrix<T> answer(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -478,11 +478,11 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
   return answer;
 }
 
-template <class T> gVector<T> 
-ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point,
+template <class T> gbtVector<T> 
+ListOfPartialTrees<T>::ValuesOfRootPolys(const gbtVector<T>& point,
 					 const int& NoEquations) const
 {
-  gVector<T> answer(NoEquations);
+  gbtVector<T> answer(NoEquations);
   for (int i = 1; i <= NoEquations; i++)
     answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
 
@@ -492,8 +492,8 @@ ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point,
 template <class T> T  
 ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
 						    const int& j,
-						    const gVector<T>& point, 
-				  const gVector<T>& halvesoflengths)    const
+						    const gbtVector<T>& point, 
+				  const gbtVector<T>& halvesoflengths)    const
 {
   return PartialTreeList[i].MaximalNonconstantDifference(PartialTreeList[j],
 							 point,

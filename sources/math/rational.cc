@@ -38,21 +38,21 @@
 #include "math/rational.h"
 
 //------------------------------------------------------------------------
-//                 gRational: Private member functions
+//                 gbtRational: Private member functions
 //------------------------------------------------------------------------
 
-void gRational::error(const char* msg) const
+void gbtRational::error(const char* msg) const
 {
-  //  gerr << "gRational class error: " << msg << '\n';
+  //  gerr << "gbtRational class error: " << msg << '\n';
   assert(0);
 }
 
 #if !USE_GNU_MP
-static const gInteger _Int_One(1);
+static const gbtInteger _Int_One(1);
 #endif  // !USE_GNU_MP
 
 #if !USE_GNU_MP
-void gRational::normalize(void)
+void gbtRational::normalize(void)
 {
   int s = sign(den);
   if (s == 0)
@@ -62,7 +62,7 @@ void gRational::normalize(void)
     num.negate();
   }
 
-  gInteger g = gcd(num, den);
+  gbtInteger g = gcd(num, den);
   if (ucompare(g, _Int_One) != 0) {
     num /= g;
     den /= g;
@@ -71,21 +71,21 @@ void gRational::normalize(void)
 #endif  // !USE_GNU_MP
 
 //------------------------------------------------------------------------
-//                      gRational: Constructors
+//                      gbtRational: Constructors
 //------------------------------------------------------------------------
 
 #if USE_GNU_MP
-gRational::gRational(void)
+gbtRational::gbtRational(void)
 {
   mpq_init(m_value);
 }
 #else
-gRational::gRational(void) 
+gbtRational::gbtRational(void) 
   : num(&_ZeroRep), den(&_OneRep) 
 { }
 #endif  // USE_GNU_MP
 
-gRational::gRational(double x)
+gbtRational::gbtRational(double x)
 {
 #if USE_GNU_MP
   mpq_init(m_value);
@@ -131,26 +131,26 @@ gRational::gRational(double x)
 }
 
 #if USE_GNU_MP
-gRational::gRational(const gInteger &n)
+gbtRational::gbtRational(const gbtInteger &n)
 {
   mpq_init(m_value);
   mpq_set_str(m_value, ToText(n), 10);
 }
 #else
-gRational::gRational(const gInteger &n) 
+gbtRational::gbtRational(const gbtInteger &n) 
   : num(n), den(&_OneRep) 
 { }
 #endif  // USE_GNU_MP
 
 #if USE_GNU_MP
-gRational::gRational(const gInteger &n, const gInteger &d) 
+gbtRational::gbtRational(const gbtInteger &n, const gbtInteger &d) 
 {
   mpq_init(m_value);
   mpq_set_str(m_value, ToText(n) + "/" + ToText(d), 10);
   mpq_canonicalize(m_value);
 }
 #else
-gRational::gRational(const gInteger &n, const gInteger &d) 
+gbtRational::gbtRational(const gbtInteger &n, const gbtInteger &d) 
   : num(n), den(d)
 {
   normalize();
@@ -158,25 +158,25 @@ gRational::gRational(const gInteger &n, const gInteger &d)
 #endif  // USE_GNU_MP
 
 #if USE_GNU_MP
-gRational::gRational(const gRational &y)
+gbtRational::gbtRational(const gbtRational &y)
 {
   mpq_init(m_value);
   mpq_set(m_value, y.m_value);
 }
 #else
-gRational::gRational(const gRational &y) 
+gbtRational::gbtRational(const gbtRational &y) 
   : num(y.num), den(y.den)
 { }
 #endif  // USE_GNU_MP
 
-gRational::~gRational() 
+gbtRational::~gbtRational() 
 {
 #if USE_GNU_MP
   mpq_clear(m_value);
 #endif  // USE_GNU_MP
 }
 
-gRational &gRational::operator=(const gRational &y)
+gbtRational &gbtRational::operator=(const gbtRational &y)
 {
 #if USE_GNU_MP
   if (this != &y) {
@@ -190,10 +190,10 @@ gRational &gRational::operator=(const gRational &y)
 }
 
 //------------------------------------------------------------------------
-//                         gRational: Data access 
+//                         gbtRational: Data access 
 //------------------------------------------------------------------------
 
-int sign(const gRational &x)
+int sign(const gbtRational &x)
 {
 #if USE_GNU_MP
   return mpq_sgn(x.m_value);
@@ -202,10 +202,10 @@ int sign(const gRational &x)
 #endif  // USE_GNU_MP
 }
 
-gInteger gRational::GetNumerator(void) const 
+gbtInteger gbtRational::GetNumerator(void) const 
 {
 #if USE_GNU_MP
-  gInteger r;
+  gbtInteger r;
   mpq_get_num(r.m_value, m_value);
   return r;
 #else
@@ -213,10 +213,10 @@ gInteger gRational::GetNumerator(void) const
 #endif  // USE_GNU_MP
 }
 
-gInteger gRational::GetDenominator(void) const 
+gbtInteger gbtRational::GetDenominator(void) const 
 {
 #if USE_GNU_MP
-  gInteger r;
+  gbtInteger r;
   mpq_get_den(r.m_value, m_value);
   return r;
 #else
@@ -224,7 +224,7 @@ gInteger gRational::GetDenominator(void) const
 #endif  // USE_GNU_MP
 }
 
-gRational::operator double() const 
+gbtRational::operator double() const 
 {
 #if USE_GNU_MP
   return mpq_get_d(m_value);
@@ -233,14 +233,14 @@ gRational::operator double() const
 #endif  // USE_GNU_MP
 }
 
-void gEpsilon(gRational &v, int /*i*/)
-{ v = (gRational)0; }
+void gEpsilon(gbtRational &v, int /*i*/)
+{ v = (gbtRational)0; }
 
 //------------------------------------------------------------------------
-//              gRational: Procedural versions of operators
+//              gbtRational: Procedural versions of operators
 //------------------------------------------------------------------------
 
-void add(const gRational &x, const gRational &y, gRational &r)
+void add(const gbtRational &x, const gbtRational &y, gbtRational &r)
 {
 #if USE_GNU_MP
   mpq_add(r.m_value, x.m_value, y.m_value);
@@ -252,7 +252,7 @@ void add(const gRational &x, const gRational &y, gRational &r)
     mul(x.den, y.den, r.den);
   }
   else {
-    gInteger tmp;
+    gbtInteger tmp;
     mul(x.den, y.num, tmp);
     mul(x.num, y.den, r.num);
     add(r.num, tmp, r.num);
@@ -262,7 +262,7 @@ void add(const gRational &x, const gRational &y, gRational &r)
 #endif  // USE_GNU_MP
 }
 
-void sub(const gRational &x, const gRational &y, gRational &r)
+void sub(const gbtRational &x, const gbtRational &y, gbtRational &r)
 {
 #if USE_GNU_MP
   mpq_sub(r.m_value, x.m_value, y.m_value);
@@ -274,7 +274,7 @@ void sub(const gRational &x, const gRational &y, gRational &r)
     mul(x.den, y.den, r.den);
   }
   else {
-    gInteger tmp;
+    gbtInteger tmp;
     mul(x.den, y.num, tmp);
     mul(x.num, y.den, r.num);
     sub(r.num, tmp, r.num);
@@ -284,7 +284,7 @@ void sub(const gRational &x, const gRational &y, gRational &r)
 #endif  // USE_GNU_MP
 }
 
-void mul(const gRational &x, const gRational &y, gRational &r)
+void mul(const gbtRational &x, const gbtRational &y, gbtRational &r)
 {
 #if USE_GNU_MP
   mpq_mul(r.m_value, x.m_value, y.m_value);
@@ -295,7 +295,7 @@ void mul(const gRational &x, const gRational &y, gRational &r)
 #endif  // USE_GNU_MP
 }
 
-void div(const gRational &x, const gRational &y, gRational &r)
+void div(const gbtRational &x, const gbtRational &y, gbtRational &r)
 {
 #if USE_GNU_MP
   mpq_div(r.m_value, x.m_value, y.m_value);
@@ -305,7 +305,7 @@ void div(const gRational &x, const gRational &y, gRational &r)
     mul(x.den, y.num, r.den);
   }
   else {
-    gInteger tmp;
+    gbtInteger tmp;
     mul(x.num, y.den, tmp);
     mul(y.num, x.den, r.den);
     r.num = tmp;
@@ -314,7 +314,7 @@ void div(const gRational &x, const gRational &y, gRational &r)
 #endif  // USE_GNU_MP
 }
 
-int compare(const gRational &x, const gRational &y)
+int compare(const gbtRational &x, const gbtRational &y)
 {
 #if USE_GNU_MP
   return mpq_cmp(x.m_value, y.m_value);
@@ -329,7 +329,7 @@ int compare(const gRational &x, const gRational &y)
 #endif  // USE_GNU_MP
 }
 
-void gRational::negate(void)
+void gbtRational::negate(void)
 {
 #if USE_GNU_MP
   mpq_neg(m_value, m_value);
@@ -339,59 +339,59 @@ void gRational::negate(void)
 }
 
 //------------------------------------------------------------------------
-//                   gRational: Arithmetic operators
+//                   gbtRational: Arithmetic operators
 //------------------------------------------------------------------------
 
-gRational operator+(const gRational &x, const gRational &y) 
+gbtRational operator+(const gbtRational &x, const gbtRational &y) 
 {
-  gRational r; add(x, y, r); return r;
+  gbtRational r; add(x, y, r); return r;
 }
 
-gRational operator-(const gRational &x, const gRational &y)
+gbtRational operator-(const gbtRational &x, const gbtRational &y)
 {
-  gRational r; sub(x, y, r); return r;
+  gbtRational r; sub(x, y, r); return r;
 }
 
-gRational operator-(const gRational &x) 
+gbtRational operator-(const gbtRational &x) 
 {
-  gRational r(x); r.negate();  return r;
+  gbtRational r(x); r.negate();  return r;
 }
 
-gRational operator*(const gRational &x, const gRational &y)
+gbtRational operator*(const gbtRational &x, const gbtRational &y)
 {
-  gRational r; mul(x, y, r); return r;
+  gbtRational r; mul(x, y, r); return r;
 }
 
-gRational operator/(const gRational &x, const gRational &y)
+gbtRational operator/(const gbtRational &x, const gbtRational &y)
 {
-  gRational r; div(x, y, r); return r;
+  gbtRational r; div(x, y, r); return r;
 }
 
-void gRational::operator+=(const gRational &y) 
+void gbtRational::operator+=(const gbtRational &y) 
 {
   add(*this, y, *this);
 }
 
-void gRational::operator-=(const gRational &y) 
+void gbtRational::operator-=(const gbtRational &y) 
 {
   sub(*this, y, *this);
 }
 
-void gRational::operator*=(const gRational &y) 
+void gbtRational::operator*=(const gbtRational &y) 
 {
   mul(*this, y, *this);
 }
 
-void gRational::operator/=(const gRational &y) 
+void gbtRational::operator/=(const gbtRational &y) 
 {
   div(*this, y, *this);
 }
 
 //------------------------------------------------------------------------
-//                  gRational: Comparison operators
+//                  gbtRational: Comparison operators
 //------------------------------------------------------------------------
 
-int operator==(const gRational &x, const gRational &y)
+int operator==(const gbtRational &x, const gbtRational &y)
 {
 #if USE_GNU_MP
   return mpq_equal(x.m_value, y.m_value);
@@ -400,7 +400,7 @@ int operator==(const gRational &x, const gRational &y)
 #endif  // USE_GNU_MP
 }
 
-int operator!=(const gRational &x, const gRational &y)
+int operator!=(const gbtRational &x, const gbtRational &y)
 {
 #if USE_GNU_MP
   return !mpq_equal(x.m_value, y.m_value);
@@ -409,36 +409,36 @@ int operator!=(const gRational &x, const gRational &y)
 #endif  // USE_GNU_MP
 }
 
-int operator<(const gRational &x, const gRational &y)
+int operator<(const gbtRational &x, const gbtRational &y)
 {
   return (compare(x, y) < 0); 
 }
 
-int operator<=(const gRational& x, const gRational& y)
+int operator<=(const gbtRational& x, const gbtRational& y)
 {
   return (compare(x, y) <= 0); 
 }
 
-int operator>(const gRational& x, const gRational& y)
+int operator>(const gbtRational& x, const gbtRational& y)
 {
   return (compare(x, y) > 0); 
 }
 
-int operator>=(const gRational& x, const gRational& y)
+int operator>=(const gbtRational& x, const gbtRational& y)
 {
   return (compare(x, y) >= 0); 
 }
 
 //------------------------------------------------------------------------
-//                    gRational: Other operations
+//                    gbtRational: Other operations
 //------------------------------------------------------------------------
 
-void gRational::invert(void)
+void gbtRational::invert(void)
 {
 #if USE_GNU_MP
   mpq_inv(m_value, m_value);
 #else
-  gInteger tmp = num;  
+  gbtInteger tmp = num;  
   num = den;  
   den = tmp;  
   int s = sign(den);
@@ -452,33 +452,33 @@ void gRational::invert(void)
 #endif  // USE_GNU_MP
 }
 
-gRational pow(const gRational &x, const gInteger &y)
+gbtRational pow(const gbtRational &x, const gbtInteger &y)
 {
   long yy = y.as_long();
   return pow(x, yy);
 }               
 
-gRational abs(const gRational &x) 
+gbtRational abs(const gbtRational &x) 
 {
 #if USE_GNU_MP
-  gRational r;
+  gbtRational r;
   mpq_abs(r.m_value, x.m_value);
   return r;
 #else
-  gRational r(x);
+  gbtRational r(x);
   if (sign(r.num) < 0) r.negate();
   return r;
 #endif  // USE_GNU_MP
 }
 
-gRational sqr(const gRational &x)
+gbtRational sqr(const gbtRational &x)
 {
 #if USE_GNU_MP
-  gRational r;
+  gbtRational r;
   mpq_mul(r.m_value, x.m_value, x.m_value);
   return r;
 #else
-  gRational r;
+  gbtRational r;
   mul(x.num, x.num, r.num);
   mul(x.den, x.den, r.den);
   r.normalize();
@@ -486,11 +486,11 @@ gRational sqr(const gRational &x)
 #endif   // USE_GNU_MP
 }
 
-gRational pow(const gRational& x, long y)
+gbtRational pow(const gbtRational& x, long y)
 {
 #if USE_GNU_MP
   if (y >= 0) {
-    gRational r = 1;
+    gbtRational r = 1;
     for (long i = 1; i <= y; i++) {
       r *= r;
     }
@@ -498,7 +498,7 @@ gRational pow(const gRational& x, long y)
   }
   else {
     y = -y;
-    gRational r = 1;
+    gbtRational r = 1;
     for (long i = 1; i <= y; i++) {
       r *= r;
     }
@@ -506,7 +506,7 @@ gRational pow(const gRational& x, long y)
     return r;
   }
 #else
-  gRational r;
+  gbtRational r;
   if (y >= 0) {
     pow(x.num, y, r.num);
     pow(x.den, y, r.den);
@@ -525,20 +525,20 @@ gRational pow(const gRational& x, long y)
 }
 
 //------------------------------------------------------------------------
-//                    gRational: Input and output
+//                    gbtRational: Input and output
 //------------------------------------------------------------------------
 
-gbtOutput &operator<<(gbtOutput &s, const gRational &y)
+gbtOutput &operator<<(gbtOutput &s, const gbtRational &y)
 {
   s << ToText(y);
   return s;
 }
 
-gbtInput &operator>>(gbtInput &f, gRational &y)
+gbtInput &operator>>(gbtInput &f, gbtRational &y)
 {
   char ch = ' ';
   int sign = 1;
-  gInteger num = 0, denom = 1;
+  gbtInteger num = 0, denom = 1;
 
   while (isspace(ch))    f >> ch;
   
@@ -575,11 +575,11 @@ gbtInput &operator>>(gbtInput &f, gRational &y)
 
   f.unget(ch);
 
-  y = gRational(sign * num, denom);
+  y = gbtRational(sign * num, denom);
   return f;
 }
 
-gbtText ToText(const gRational &r)
+gbtText ToText(const gbtRational &r)
 {
 #if USE_GNU_MP
   // This buffer size recommended by documentation in GMP
@@ -592,7 +592,7 @@ gbtText ToText(const gRational &r)
   char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
 
   strncpy(gconvert_buffer, Itoa(r.GetNumerator()), GCONVERT_BUFFER_LENGTH);
-  if (r.GetDenominator() != gInteger(1)) {
+  if (r.GetDenominator() != gbtInteger(1)) {
     strcat(gconvert_buffer, "/");
     strncat(gconvert_buffer, Itoa(r.GetDenominator()), GCONVERT_BUFFER_LENGTH);
   }
@@ -601,7 +601,7 @@ gbtText ToText(const gRational &r)
 #endif  // USE_GNU_MP
 }
 
-gRational FromText(const gbtText &f, gRational &y)
+gbtRational FromText(const gbtText &f, gbtRational &y)
 {
 #if USE_GNU_MP
   mpq_set_str(y.m_value, (char *) f, 10);
@@ -611,7 +611,7 @@ gRational FromText(const gbtText &f, gRational &y)
   char ch = ' ';
   int sign = 1;
   unsigned int index = 0, length = f.Length();
-  gInteger num = 0, denom = 1;
+  gbtInteger num = 0, denom = 1;
 
   while (isspace(ch) && index<=length) {
     ch = f[index++];
@@ -649,9 +649,9 @@ gRational FromText(const gbtText &f, gRational &y)
   }
 
   if (denom != 0)
-    y = gRational(sign * num, denom);
+    y = gbtRational(sign * num, denom);
   else
-    y = gRational(sign * num);
+    y = gbtRational(sign * num);
   return y;
 #endif  // USE_GNU_MP
 }

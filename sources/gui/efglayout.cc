@@ -47,7 +47,7 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 {
   gbtEfgOutcome outcome = p_node.GetOutcome();
   if (!outcome.IsNull()) {
-    const gbtArray<gNumber> &payoffs = outcome.GetPayoff();
+    const gbtArray<gbtNumber> &payoffs = outcome.GetPayoff();
     wxString tmp = wxT("(");
 
     for (int pl = payoffs.First(); pl <= payoffs.Last(); pl++) {
@@ -190,7 +190,7 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= gNumber(0)) {
+    if (m_actionProb >= gbtNumber(0)) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart +
@@ -262,7 +262,7 @@ void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     p_dc.DrawLine(xStart + m_branchLength, yEnd, xEnd, yEnd);
     
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= gNumber(0)) {
+    if (m_actionProb >= gbtNumber(0)) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
       p_dc.DrawLine(xStart, yStart, 
 		    xStart + 

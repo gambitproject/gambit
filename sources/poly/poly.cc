@@ -28,9 +28,9 @@
 #include "math/double.h"
 #include "math/gnumber.h"
 
-template class polynomial<gRational>;
+template class polynomial<gbtRational>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gRational>& x);
+			       const polynomial<gbtRational>& x);
 
 template class polynomial<int>;
 template gbtOutput& operator << (gbtOutput& output,
@@ -40,18 +40,18 @@ template class polynomial<double>;
 template gbtOutput& operator << (gbtOutput& output, 
 			       const polynomial<double>& x);
 
-template class polynomial<gDouble>;
+template class polynomial<gbtDouble>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gDouble>& x);
+			       const polynomial<gbtDouble>& x);
 
-template class polynomial<gNumber>;
+template class polynomial<gbtNumber>;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const polynomial<gNumber>& x);
+			       const polynomial<gbtNumber>& x);
 
 #include "base/glist.imp"
-template class gbtList< polynomial<gRational> >;
+template class gbtList< polynomial<gbtRational> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<polynomial<gRational> >&);
+			       const gbtList<polynomial<gbtRational> >&);
 
 template class gbtList< polynomial<int> >;
 
@@ -59,8 +59,8 @@ template class gbtList< polynomial<double> >;
 template gbtOutput& operator << (gbtOutput& output, 
 			       const gbtList<polynomial<double> >&);
 
-template class gbtList< polynomial<gDouble> >;
+template class gbtList< polynomial<gbtDouble> >;
 
-template class gbtList< polynomial<gNumber> >;
+template class gbtList< polynomial<gbtNumber> >;
 template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<polynomial<gNumber> >&);
+			       const gbtList<polynomial<gbtNumber> >&);

@@ -28,26 +28,26 @@
 #include "rational.h"
 #include "gnumber.h"
 
-template class gMatrix<double>;
-template class gMatrix<gRational>;
-template class gMatrix<gInteger>;
-template class gMatrix<int>;
-template class gMatrix<gNumber>;
+template class gbtMatrix<double>;
+template class gbtMatrix<gbtRational>;
+template class gbtMatrix<gbtInteger>;
+template class gbtMatrix<int>;
+template class gbtMatrix<gbtNumber>;
 
-template gVector<double> operator*(const gVector<double> &,
-				   const gMatrix<double> &);
-template gVector<gRational> operator*(const gVector<gRational> &,
-				      const gMatrix<gRational> &);
-template gVector<gInteger> operator*(const gVector<gInteger> &,
-				     const gMatrix<gInteger> &);
-template gVector<int> operator*(const gVector<int> &,
-				const gMatrix<int> &);
-template gVector<gNumber> operator*(const gVector<gNumber> &,
-				    const gMatrix<gNumber> &);
+template gbtVector<double> operator*(const gbtVector<double> &,
+				   const gbtMatrix<double> &);
+template gbtVector<gbtRational> operator*(const gbtVector<gbtRational> &,
+				      const gbtMatrix<gbtRational> &);
+template gbtVector<gbtInteger> operator*(const gbtVector<gbtInteger> &,
+				     const gbtMatrix<gbtInteger> &);
+template gbtVector<int> operator*(const gbtVector<int> &,
+				const gbtMatrix<int> &);
+template gbtVector<gbtNumber> operator*(const gbtVector<gbtNumber> &,
+				    const gbtMatrix<gbtNumber> &);
 
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<gRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<gInteger> &);
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<gDouble> &);
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gMatrix<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtInteger> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtDouble> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtNumber> &);

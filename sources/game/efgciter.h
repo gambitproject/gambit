@@ -49,11 +49,11 @@ class EfgContIter    {
     int _frozen_pl, _frozen_iset;
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gNumber> _profile;
-    gPVector<int> _current;
+    PureBehavProfile<gbtNumber> _profile;
+    gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
-    mutable gVector<gNumber> _payoff;
+    mutable gbtVector<gbtNumber> _payoff;
 
   public:
     EfgContIter(const gbtEfgSupport &);
@@ -69,12 +69,12 @@ class EfgContIter    {
     void Set(const gbtEfgAction &);
     int Next(int pl, int iset);
   
-    const PureBehavProfile<gNumber> &GetProfile(void) const   
+    const PureBehavProfile<gbtNumber> &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);
   
-    gNumber Payoff(int pl) const;
+    gbtNumber Payoff(int pl) const;
   
     void Dump(gbtOutput &) const;
 };
@@ -87,11 +87,11 @@ class EfgConditionalContIter    {
   private:
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gNumber> _profile;
-    gPVector<int> _current;
+    PureBehavProfile<gbtNumber> _profile;
+    gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
-    mutable gVector<gNumber> _payoff;
+    mutable gbtVector<gbtNumber> _payoff;
 
   public:
     EfgConditionalContIter(const gbtEfgSupport &);
@@ -104,13 +104,13 @@ class EfgConditionalContIter    {
     void Set(const gbtEfgAction &);
     int Next(int pl, int iset); 
   
-    const PureBehavProfile<gNumber> &GetProfile(void) const   
+    const PureBehavProfile<gbtNumber> &GetProfile(void) const   
       { return _profile; }
 
     int NextContingency(void);   // Needs rewriting
   
-    gNumber Payoff(int pl) const;
-    gNumber Payoff(const gbtEfgNode &, int pl) const;
+    gbtNumber Payoff(int pl) const;
+    gbtNumber Payoff(const gbtEfgNode &, int pl) const;
   
     void Dump(gbtOutput &) const;
 };

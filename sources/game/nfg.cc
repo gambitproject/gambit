@@ -307,7 +307,7 @@ void gbtNfgGame::BreakLink(void)
 bool gbtNfgGame::IsConstSum(void) const
 {
   int pl, index;
-  gNumber cvalue = (gNumber) 0;
+  gbtNumber cvalue = (gbtNumber) 0;
 
   if (NumOutcomes() == 0)  return true;
 
@@ -316,7 +316,7 @@ bool gbtNfgGame::IsConstSum(void) const
   }
 
   for (index = 2; index <= NumOutcomes(); index++)  {
-    gNumber thisvalue = (gNumber) 0;
+    gbtNumber thisvalue = (gbtNumber) 0;
 
     for (pl = 1; pl <= NumPlayers(); pl++) {
       thisvalue += GetOutcome(index).GetPayoff(GetPlayer(pl));

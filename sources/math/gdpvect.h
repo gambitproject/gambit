@@ -29,46 +29,46 @@
 
 #include "math/gpvector.h"
 
-template <class T> class gDPVector : public gPVector<T>  {
+template <class T> class gbtDPVector : public gbtPVector<T>  {
   private:
-    int sum(int part, const gPVector<int> &v) const;
+    int sum(int part, const gbtPVector<int> &v) const;
     void setindex(void);
 
-    bool Check(const gDPVector<T> &) const;
+    bool Check(const gbtDPVector<T> &) const;
 
   protected:
     T ***dvptr;
     gbtArray<int> dvlen, dvidx;
 
   public:
-    gDPVector(void);
-    gDPVector(const gPVector<int> &sig);
-    gDPVector(const gVector<T> &val, const gPVector<int> &sig);
-    gDPVector(const gDPVector<T> &v);
-    virtual ~gDPVector();
+    gbtDPVector(void);
+    gbtDPVector(const gbtPVector<int> &sig);
+    gbtDPVector(const gbtVector<T> &val, const gbtPVector<int> &sig);
+    gbtDPVector(const gbtDPVector<T> &v);
+    virtual ~gbtDPVector();
 
     T &operator()(int a, int b, int c);
     const T &operator()(int a, int b, int c) const;
 
 	// extract a subvector
-    void CopySubRow(int row, int col,  const gDPVector<T> &v);
+    void CopySubRow(int row, int col,  const gbtDPVector<T> &v);
 
-    gDPVector<T> &operator=(const gDPVector<T> &v);
-    gDPVector<T> &operator=(const gPVector<T> &v);
-    gDPVector<T> &operator=(const gVector<T> &v);
-    gDPVector<T> &operator=(T c);
+    gbtDPVector<T> &operator=(const gbtDPVector<T> &v);
+    gbtDPVector<T> &operator=(const gbtPVector<T> &v);
+    gbtDPVector<T> &operator=(const gbtVector<T> &v);
+    gbtDPVector<T> &operator=(T c);
 
-    gDPVector<T> operator+(const gDPVector<T> &v) const;
-    gDPVector<T> &operator+=(const gDPVector<T> &v);
-    gDPVector<T> operator-(void) const;
-    gDPVector<T> operator-(const gDPVector<T> &v) const;
-    gDPVector<T> &operator-=(const gDPVector<T> &v);
-    T operator*(const gDPVector<T> &v) const;
-    gDPVector<T> &operator*=(const T &c);
-    gDPVector<T> operator/(const T &c) const;
+    gbtDPVector<T> operator+(const gbtDPVector<T> &v) const;
+    gbtDPVector<T> &operator+=(const gbtDPVector<T> &v);
+    gbtDPVector<T> operator-(void) const;
+    gbtDPVector<T> operator-(const gbtDPVector<T> &v) const;
+    gbtDPVector<T> &operator-=(const gbtDPVector<T> &v);
+    T operator*(const gbtDPVector<T> &v) const;
+    gbtDPVector<T> &operator*=(const T &c);
+    gbtDPVector<T> operator/(const T &c) const;
     
-    bool operator==(const gDPVector<T> &v) const;
-    bool operator!=(const gDPVector<T> &v) const;
+    bool operator==(const gbtDPVector<T> &v) const;
+    bool operator!=(const gbtDPVector<T> &v) const;
 
     const gbtArray<int> &DPLengths(void) const;
 
@@ -76,7 +76,7 @@ template <class T> class gDPVector : public gPVector<T>  {
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gDPVector<T>&v);
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtDPVector<T>&v);
 #endif
 
 #endif   // GDPVECTOR_H

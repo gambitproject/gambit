@@ -252,8 +252,8 @@ void QreNfgGrid::OutputResult(gbtOutput &p_file,
   p_file << '\n';
 }
 
-double QreNfgGrid::Distance(const gVector<gNumber> &a,
-			    const gVector<double> &b) const
+double QreNfgGrid::Distance(const gbtVector<gbtNumber> &a,
+			    const gbtVector<double> &b) const
 {
   double dist = 0.0;
   for (int i = 1; i <= a.Length(); i++) {
@@ -264,8 +264,8 @@ double QreNfgGrid::Distance(const gVector<gNumber> &a,
   return dist;
 }
 
-double QreNfgGrid::Distance(const gVector<double> &a,
-			    const gVector<double> &b) const
+double QreNfgGrid::Distance(const gbtVector<double> &a,
+			    const gbtVector<double> &b) const
 {
   double dist = 0.0;
   for (int i = 1; i <= a.Length(); i++) {
@@ -277,11 +277,11 @@ double QreNfgGrid::Distance(const gVector<double> &a,
 }
 
 
-gVector<double> QreNfgGrid::UpdateFunc(const MixedProfile<double> &p_profile,
+gbtVector<double> QreNfgGrid::UpdateFunc(const MixedProfile<double> &p_profile,
 				       int p_player, double p_lambda) const
 {
-  gVector<double> r(p_profile.Support().NumStrats(p_player));
-  gVector<double> tmp(p_profile.Support().NumStrats(p_player));
+  gbtVector<double> r(p_profile.Support().NumStrats(p_player));
+  gbtVector<double> tmp(p_profile.Support().NumStrats(p_player));
   double denom = 0.0;
   for (int st = 1; st <= r.Length(); st++) {
     double p = p_profile.Payoff(p_player, p_profile.Support().GetStrategy(p_player, st));
@@ -320,11 +320,11 @@ bool QreNfgGrid::CheckEqu(MixedProfile<double> &p_profile,
 // Use Newton's method to attempt to "polish" the profile to be close
 // to an LQRE.
 //
-static void Jacobian(gVector<double> &p_vector, 
-		     gSquareMatrix<double> &p_matrix,
+static void Jacobian(gbtVector<double> &p_vector, 
+		     gbtSquareMatrix<double> &p_matrix,
 		     const MixedProfile<double> &p_profile, double p_lambda)
 {
-  gPVector<double> logitterms(p_profile.Lengths());
+  gbtPVector<double> logitterms(p_profile.Lengths());
   for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
       logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, p_profile.Support().GetStrategy(pl, st)));
@@ -372,7 +372,7 @@ static void Jacobian(gVector<double> &p_vector,
   }
 }
 
-static double Norm(const gVector<double> &p_vector)
+static double Norm(const gbtVector<double> &p_vector)
 {
   double norm = 0.0;
 
@@ -385,14 +385,14 @@ static double Norm(const gVector<double> &p_vector)
 
 static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
 {
-  gVector<double> f(p_profile.Length());
-  gSquareMatrix<double> J(p_profile.Length());
+  gbtVector<double> f(p_profile.Length());
+  gbtSquareMatrix<double> J(p_profile.Length());
 
   for (int iter = 1; iter <= 100; iter++) {
     try {
       Jacobian(f, J, p_profile, p_lambda);
 
-      gVector<double> step = J.Inverse() * f;
+      gbtVector<double> step = J.Inverse() * f;
       for (int i = 1; i <= p_profile.Length(); i++) {
 	p_profile[i] -= step[i];
       }
@@ -406,7 +406,7 @@ static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
 	return true;
       }
     }
-    catch (gSquareMatrix<double>::MatrixSingular &) {
+    catch (gbtSquareMatrix<double>::MatrixSingular &) {
       // check to see if maybe by dumb luck we have a solution
       for (int i = 1; i <= f.Length(); i++) {
 	if (f[i] > .0001) {

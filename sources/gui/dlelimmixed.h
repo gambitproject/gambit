@@ -46,8 +46,8 @@ public:
   bool Iterative(void) const { return (m_domDepthBox->GetSelection() == 1); }
   bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
   bool DomMixed(void) const { return (m_domMethodBox->GetSelection() == 1); }
-  gPrecision Precision(void) const
-    { return (m_domPrecisionBox->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
+  gbtPrecision Precision(void) const
+    { return (m_domPrecisionBox->GetSelection() == 0) ? GBT_PREC_DOUBLE : GBT_PREC_RATIONAL; }
 
   DECLARE_EVENT_TABLE()
 };

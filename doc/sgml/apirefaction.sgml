@@ -38,7 +38,7 @@ set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gNumber gbtEfgAction::GetChanceProb(void) const
+gbtNumber gbtEfgAction::GetChanceProb(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -104,7 +104,7 @@ The empty string is returned if the action object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgAction::SetChanceProb(gNumber)
+void gbtEfgAction::SetChanceProb(gbtNumber)
 </synopsis>
 </para>
 </formalpara>

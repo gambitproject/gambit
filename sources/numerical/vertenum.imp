@@ -27,7 +27,7 @@
 #include "vertenum.h"
 
 template <class T>
-VertEnum<T>::VertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
+VertEnum<T>::VertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b, 
 		      gbtStatus &status_)
   : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
     c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0), status(status_) 
@@ -54,7 +54,7 @@ VertEnum<T>::VertEnum(LPTableau<T> &tab, gbtStatus &status_)
   // Is this stuff right?
   btemp = -(T)1;
 
-  gVector<T> uc(tab.MinRow(),tab.MaxRow());
+  gbtVector<T> uc(tab.MinRow(),tab.MaxRow());
   c = (T)1;
   uc = (T)1;
   
@@ -202,10 +202,10 @@ template <class T> const gbtList<BFS<T> > &VertEnum<T>::DualVertexList() const
   return DualList;
 }
 
-template <class T> void VertEnum<T>::Vertices(gbtList<gVector<T> > &verts) const
+template <class T> void VertEnum<T>::Vertices(gbtList<gbtVector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
-    gVector<T> vert(A.NumColumns());
+    gbtVector<T> vert(A.NumColumns());
     vert = (T)0;
     for(int j=1;j<=vert.Length();j++) 
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
@@ -229,8 +229,8 @@ template <class T> void VertEnum<T>::Dump(gbtOutput &to) const
 
 
 template <class T>
-DoubleVertEnum<T>::DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
-				  const gMatrix<T> &_A2, const gVector<T> &_b2,
+DoubleVertEnum<T>::DoubleVertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b, 
+				  const gbtMatrix<T> &_A2, const gbtVector<T> &_b2,
 		      gbtStatus &status_)
   : mult_opt(0), depth(0), A(_A), A2(_A2), b(_b), b2(_b2), 
     btemp(_b), c(_A.MinCol(),_A.MaxCol()), npivots(0), 
@@ -306,7 +306,7 @@ EnumerateComplementaryFace(LPTableau<T> &tab, Tableau<T> &tab2)
   //  tab.Dump(gout);
   // gout << "\ntab2:";
   // tab2.Dump(gout);
-  gVector<T> x(tab.MinRow(),tab.MaxRow());
+  gbtVector<T> x(tab.MinRow(),tab.MaxRow());
   tab.BasisVector(x);
   for(i=tab.MinRow();i<=tab.MaxRow();i++)
     if(x[i]>tab.Epsilon(2)) tab2.Mark(tab.Label(i));
@@ -403,13 +403,13 @@ template <class T> const gbtList<BFS<T> > &DoubleVertEnum<T>::VertexList2() cons
 }
 
 template <class T> void DoubleVertEnum<T>::
-Vertices(gbtList<gVector<T> > &verts, gbtList<gVector<T> > &verts2) const
+Vertices(gbtList<gbtVector<T> > &verts, gbtList<gbtVector<T> > &verts2) const
 { 
   if(List.Length() != List2.Length()) throw BadDim();
   //  assert(List.Length() == List2.Length());
   for(int i=1;i<=List.Length();i++) {
-    gVector<T> vert(A.NumColumns());
-    gVector<T> vert2(A2.NumColumns());
+    gbtVector<T> vert(A.NumColumns());
+    gbtVector<T> vert2(A2.NumColumns());
     vert = (T)0;
     int j = 0;
     for( j=1;j<=vert.Length();j++)

@@ -837,7 +837,7 @@ gbtEfgSupport gbtEfgGame::NewSupport(void) const
 bool gbtEfgGame::IsConstSum(void) const
 {
   int pl, index;
-  gNumber cvalue = (gNumber) 0;
+  gbtNumber cvalue = (gbtNumber) 0;
 
   if (rep->outcomes.Last() == 0)  return true;
 
@@ -845,7 +845,7 @@ bool gbtEfgGame::IsConstSum(void) const
     cvalue += rep->outcomes[1]->m_payoffs[pl];
 
   for (index = 2; index <= rep->outcomes.Last(); index++)  {
-    gNumber thisvalue(0);
+    gbtNumber thisvalue(0);
 
     for (pl = 1; pl <= rep->players.Length(); pl++)
       thisvalue += rep->outcomes[index]->m_payoffs[pl];
@@ -918,10 +918,10 @@ bool gbtEfgGame::IsPerfectRecall(gbtEfgInfoset &s1, gbtEfgInfoset &s2) const
   return true;
 }
 
-gNumber gbtEfgGame::MinPayoff(int pl) const
+gbtNumber gbtEfgGame::MinPayoff(int pl) const
 {
   int index, p, p1, p2;
-  gNumber minpay;
+  gbtNumber minpay;
 
   if (NumOutcomes() == 0)  return 0;
 
@@ -938,10 +938,10 @@ gNumber gbtEfgGame::MinPayoff(int pl) const
   return minpay;
 }
 
-gNumber gbtEfgGame::MaxPayoff(int pl) const
+gbtNumber gbtEfgGame::MaxPayoff(int pl) const
 {
   int index, p, p1, p2;
-  gNumber maxpay;
+  gbtNumber maxpay;
 
   if (NumOutcomes() == 0)  return 0;
 
@@ -1107,7 +1107,7 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
 }
 
 void gbtEfgGame::SetChanceProb(gbtEfgInfoset infoset,
-			    int act, const gNumber &value)
+			    int act, const gbtNumber &value)
 {
   if (infoset.IsChanceInfoset()) {
     rep->m_revision++;
@@ -1204,14 +1204,14 @@ int gbtEfgGame::TotalNumInfosets(void) const
   return NumPlayerInfosets() + rep->chance->m_infosets.Length();
 }
 
-gPVector<int> gbtEfgGame::NumActions(void) const
+gbtPVector<int> gbtEfgGame::NumActions(void) const
 {
   gbtArray<int> foo(rep->players.Length());
   for (int i = 1; i <= rep->players.Length(); i++) {
     foo[i] = rep->players[i]->m_infosets.Length();
   }
 
-  gPVector<int> bar(foo);
+  gbtPVector<int> bar(foo);
   for (int i = 1; i <= rep->players.Length(); i++) {
     for (int j = 1; j <= rep->players[i]->m_infosets.Length(); j++) {
       bar(i, j) = rep->players[i]->m_infosets[j]->m_actions.Length();
@@ -1225,13 +1225,13 @@ int gbtEfgGame::NumPlayerActions(void) const
 {
   int answer = 0;
 
-  gPVector<int> nums_actions = NumActions();
+  gbtPVector<int> nums_actions = NumActions();
   for (int i = 1; i <= NumPlayers(); i++)
     answer += nums_actions[i];
   return answer;
 }
 
-gPVector<int> gbtEfgGame::NumMembers(void) const
+gbtPVector<int> gbtEfgGame::NumMembers(void) const
 {
   gbtArray<int> foo(rep->players.Length());
 
@@ -1239,7 +1239,7 @@ gPVector<int> gbtEfgGame::NumMembers(void) const
     foo[i] = rep->players[i]->m_infosets.Length();
   }
 
-  gPVector<int> bar(foo);
+  gbtPVector<int> bar(foo);
   for (int i = 1; i <= rep->players.Length(); i++) {
     for (int j = 1; j <= rep->players[i]->m_infosets.Length(); j++) {
       bar(i, j) = rep->players[i]->m_infosets[j]->m_members.Length();
@@ -1253,9 +1253,9 @@ gPVector<int> gbtEfgGame::NumMembers(void) const
 //                       Efg: Payoff computation
 //------------------------------------------------------------------------
 
-void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
-		     const gPVector<int> &profile,
-		     gVector<gNumber> &payoff) const
+void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gbtNumber prob,
+		     const gbtPVector<int> &profile,
+		     gbtVector<gbtNumber> &payoff) const
 {
   if (n->m_outcome)  {
     for (int i = 1; i <= rep->players.Length(); i++)
@@ -1276,9 +1276,9 @@ void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
   }
 }
 
-void gbtEfgGame::InfosetProbs(gbt_efg_node_rep *n, gNumber prob,
-			   const gPVector<int> &profile,
-			   gPVector<gNumber> &probs) const
+void gbtEfgGame::InfosetProbs(gbt_efg_node_rep *n, gbtNumber prob,
+			   const gbtPVector<int> &profile,
+			   gbtPVector<gbtNumber> &probs) const
 {
   if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
     for (int i = 1; i <= n->m_children.Length(); i++) {
@@ -1295,22 +1295,22 @@ void gbtEfgGame::InfosetProbs(gbt_efg_node_rep *n, gNumber prob,
   }
 }
 
-void gbtEfgGame::Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const
+void gbtEfgGame::Payoff(const gbtPVector<int> &profile, gbtVector<gbtNumber> &payoff) const
 {
-  ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
+  ((gbtVector<gbtNumber> &) payoff).operator=((gbtNumber) 0);
   Payoff(rep->root, 1, profile, payoff);
 }
 
-void gbtEfgGame::InfosetProbs(const gPVector<int> &profile,
-			  gPVector<gNumber> &probs) const
+void gbtEfgGame::InfosetProbs(const gbtPVector<int> &profile,
+			  gbtPVector<gbtNumber> &probs) const
 {
-  ((gVector<gNumber> &) probs).operator=((gNumber) 0);
+  ((gbtVector<gbtNumber> &) probs).operator=((gbtNumber) 0);
   InfosetProbs(rep->root, 1, profile, probs);
 }
 
-void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
+void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gbtNumber prob,
 		     const gbtArray<gbtArray<int> *> &profile,
-		     gbtArray<gNumber> &payoff) const
+		     gbtArray<gbtNumber> &payoff) const
 {
   if (n->m_outcome)   {
     for (int i = 1; i <= rep->players.Length(); i++)
@@ -1331,7 +1331,7 @@ void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
 }
 
 void gbtEfgGame::Payoff(const gbtArray<gbtArray<int> *> &profile,
-		 gbtArray<gNumber> &payoff) const
+		 gbtArray<gbtNumber> &payoff) const
 {
   for (int i = 1; i <= payoff.Length(); i++)
     payoff[i] = 0;

@@ -68,9 +68,9 @@ private:
   gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
 
   // The following is used to construct the translate of *this.
-  gPoly<T> TranslateOfMono(const gMono<T>&, const gVector<T>&) const;
+  gPoly<T> TranslateOfMono(const gMono<T>&, const gbtVector<T>&) const;
   gPoly<T> MonoInNewCoordinates(const gMono<T>&, 
-				const gSquareMatrix<T>&)       const;
+				const gbtSquareMatrix<T>&)       const;
 
 
   //-----------------------------------------------
@@ -165,8 +165,8 @@ public:
   gbtList<exp_vect>    ExponentVectors()                     const;
   gbtList<gMono<T> >   MonomialList()                        const;
 
-  gPoly<T>           TranslateOfPoly(const gVector<T>&)    const;
-  gPoly<T>   PolyInNewCoordinates(const gSquareMatrix<T>&) const;
+  gPoly<T>           TranslateOfPoly(const gbtVector<T>&)    const;
+  gPoly<T>   PolyInNewCoordinates(const gbtSquareMatrix<T>&) const;
   T                  MaximalValueOfNonlinearPart(const T&) const;
 
   //--------------------
@@ -199,8 +199,8 @@ template <class T> gbtOutput &operator<< (gbtOutput &f, const gPoly<T> &y);
   // Conversion:
   //-------------
 
-template <class T> gPoly<gDouble> TogDouble(const gPoly<T>&);
-template <class T> gPoly<gDouble> NormalizationOfPoly(const gPoly<T>&);
+template <class T> gPoly<gbtDouble> TogDouble(const gPoly<T>&);
+template <class T> gPoly<gbtDouble> NormalizationOfPoly(const gPoly<T>&);
 
 // global multiply by scalar operators
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);

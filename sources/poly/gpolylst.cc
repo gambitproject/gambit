@@ -35,35 +35,35 @@
 //template class gPolyList<int>;
 //template gbtOutput &operator<<(gbtOutput &f, const gPolyList<int> &y);
 
-template class gPolyList<gRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gRational> &y);
+template class gPolyList<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gbtRational> &y);
 
 //template class gPolyList<double>;
 //template gbtOutput &operator<<(gbtOutput &f, const gPolyList<double> &y);
 
-template class gPolyList<gDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gDouble> &y);
+template class gPolyList<gbtDouble>;
+template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gbtDouble> &y);
 
 template class gbtList<gbtIndexPair>;
 
 /*
 #include "objcount.imp"
 
-template class Counted<gPolyList<gDouble> >;
-int Counted<gPolyList<gDouble> >::numObjects = 0;
+template class Counted<gPolyList<gbtDouble> >;
+int Counted<gPolyList<gbtDouble> >::numObjects = 0;
 
 template class Counted<gPolyList<double> >;
 int Counted<gPolyList<double> >::numObjects = 0;
 
-template class Counted<gPolyList<gRational> >;
-int Counted<gPolyList<gRational> >::numObjects = 0;
+template class Counted<gPolyList<gbtRational> >;
+int Counted<gPolyList<gbtRational> >::numObjects = 0;
 */
 
-template class gbtRectArray<gPoly<gDouble>*>;
-template class gbtArray<gPoly<gDouble>*>;
+template class gbtRectArray<gPoly<gbtDouble>*>;
+template class gbtArray<gPoly<gbtDouble>*>;
 
-template class gbtRectArray<gPoly<gRational>*>;
-//template class gbtArray<gPoly<gRational>*>;
+template class gbtRectArray<gPoly<gbtRational>*>;
+//template class gbtArray<gPoly<gbtRational>*>;
 
 //template class gbtRectArray<gPoly<double>*>;
 //template class gbtArray<gPoly<double>*>;

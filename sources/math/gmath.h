@@ -37,7 +37,7 @@ template <class T> T gmax(const gbtArray<T> &);
 
 double abs(double a);
 inline double abs(long double a) { return abs((double) a); }
-gNumber abs(const gNumber &);
+gbtNumber abs(const gbtNumber &);
 
 int sign(const double &a);
 

@@ -28,7 +28,7 @@
 #include "math/rational.h"
 
 template class VertEnum<double>;
-template class VertEnum<gRational>;
+template class VertEnum<gbtRational>;
 
 template class DoubleVertEnum<double>;
-template class DoubleVertEnum<gRational>;
+template class DoubleVertEnum<gbtRational>;

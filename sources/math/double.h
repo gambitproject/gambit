@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of class gDouble: double with tolerant ==
+// Declaration of class gbtDouble: double with tolerant ==
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -26,7 +26,7 @@
 
 /*
 
-   The class  gDouble  is just like double except that operator == will 
+   The class  gbtDouble  is just like double except that operator == will 
 return true when the two numbers are `close.'  (See the definition of 
 operator == in double.cc for details.)  The guiding philosophy here is
 that in floating point calculations that begin with integers or rationals,
@@ -46,70 +46,70 @@ is different from zero.
 #include "base/gstream.h"
 // #include "objcount.h"
 
-class gDouble
-// : private Counted<gDouble>
+class gbtDouble
+// : private Counted<gbtDouble>
 {
 protected:
   double dbl;
 
 public:
 // Constructors, and the destructor
-  gDouble();
-  gDouble(const double&);
-  gDouble(const gDouble&);
-  gDouble(const int& n);
-  gDouble(const long& n);
+  gbtDouble();
+  gbtDouble(const double&);
+  gbtDouble(const gbtDouble&);
+  gbtDouble(const int& n);
+  gbtDouble(const long& n);
   
-  ~gDouble();
+  ~gbtDouble();
 
 // Conversion
   double ToDouble() const;
 
 // Operators
-  gDouble&   operator =  (const gDouble& y);
+  gbtDouble&   operator =  (const gbtDouble& y);
 
-  bool       operator == (const gDouble& y) const;
-  bool       operator != (const gDouble& y) const;
-  bool       operator <  (const gDouble& y) const;
-  bool       operator <= (const gDouble& y) const;
-  bool       operator >  (const gDouble& y) const;
-  bool       operator >= (const gDouble& y) const;
+  bool       operator == (const gbtDouble& y) const;
+  bool       operator != (const gbtDouble& y) const;
+  bool       operator <  (const gbtDouble& y) const;
+  bool       operator <= (const gbtDouble& y) const;
+  bool       operator >  (const gbtDouble& y) const;
+  bool       operator >= (const gbtDouble& y) const;
 
-  gDouble    operator +  (const gDouble& y) const;
-  gDouble    operator -  (const gDouble& y) const;
-  gDouble    operator *  (const gDouble& y) const;
-  gDouble    operator /  (const gDouble& y) const;
+  gbtDouble    operator +  (const gbtDouble& y) const;
+  gbtDouble    operator -  (const gbtDouble& y) const;
+  gbtDouble    operator *  (const gbtDouble& y) const;
+  gbtDouble    operator /  (const gbtDouble& y) const;
 
-  gDouble    operator -  ()                 const;
+  gbtDouble    operator -  ()                 const;
 
-  void       operator += (const gDouble& y);
-  void       operator -= (const gDouble& y);
-  void       operator *= (const gDouble& y);
-  void       operator /= (const gDouble& y);
+  void       operator += (const gbtDouble& y);
+  void       operator -= (const gbtDouble& y);
+  void       operator *= (const gbtDouble& y);
+  void       operator /= (const gbtDouble& y);
 
 // error reporting and object counting
   void    error(const char* msg) const;
-//  inline  int static Count() { return Counted<gDouble>::objCount(); }
+//  inline  int static Count() { return Counted<gbtDouble>::objCount(); }
 
 // printing
-  friend gbtInput&    operator >> (gbtInput& s, gDouble& y);
-  friend gbtOutput&   operator << (gbtOutput& s, const gDouble& y);
+  friend gbtInput&    operator >> (gbtInput& s, gbtDouble& y);
+  friend gbtOutput&   operator << (gbtOutput& s, const gbtDouble& y);
 
 // friends outside the class
-  friend int      sign(const gDouble& x);             // -1, 0, or +1
-  friend gDouble  fabs(const gDouble& x);              
-  friend gDouble  abs(const gDouble& x);              
-  friend gDouble  sqr(const gDouble& x);              
-  friend gDouble  sqrt(const gDouble& x);              
-  friend gDouble  pow(const gDouble& x, const long y);
-  friend gDouble  pow(const gDouble& x, const gDouble& y);
+  friend int      sign(const gbtDouble& x);             // -1, 0, or +1
+  friend gbtDouble  fabs(const gbtDouble& x);              
+  friend gbtDouble  abs(const gbtDouble& x);              
+  friend gbtDouble  sqr(const gbtDouble& x);              
+  friend gbtDouble  sqrt(const gbtDouble& x);              
+  friend gbtDouble  pow(const gbtDouble& x, const long y);
+  friend gbtDouble  pow(const gbtDouble& x, const gbtDouble& y);
 };
 
 // The following are facilities that are required of all arithmetic types.
 // For other types they are given in gmisc.h
 
 class gbtText;
-gbtText         ToText(gDouble);
-gDouble         TOgDouble(const gbtText &);
+gbtText         ToText(gbtDouble);
+gbtDouble         TOgDouble(const gbtText &);
 
 #endif

@@ -41,8 +41,8 @@ template<class T> gRectangle<T>::gRectangle(const gbtList< gInterval<T> >& given
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const gVector<T> lower_bd, 
-                                            const gVector<T> upper_bd) 
+template<class T> gRectangle<T>::gRectangle(const gbtVector<T> lower_bd, 
+                                            const gbtVector<T> upper_bd) 
 : sides()
 { 
   assert (lower_bd.Check(upper_bd));
@@ -94,16 +94,16 @@ template<class T> const int gRectangle<T>::Dmnsn() const
   return sides.Length();
 }
 
-template <class T> gVector<T> gRectangle<T>::LowerBound(void) const
+template <class T> gbtVector<T> gRectangle<T>::LowerBound(void) const
 { 
-  gVector<T> answer(Dmnsn());
+  gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
 
-template <class T> gVector<T> gRectangle<T>::UpperBound(void) const
+template <class T> gbtVector<T> gRectangle<T>::UpperBound(void) const
 { 
-  gVector<T> answer(Dmnsn());
+  gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
   return answer;
 }
@@ -174,9 +174,9 @@ gRectangle<T>::Orthant(const gbtArray<int>& top_or_bot) const
   return gRectangle<T>(new_sides);
 }
 
-template<class T> const gVector<T> gRectangle<T>::SideLengths() const 
+template<class T> const gbtVector<T> gRectangle<T>::SideLengths() const 
 { 
-  gVector<T> answer(Dmnsn());
+  gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) 
     answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
   return answer;
@@ -191,7 +191,7 @@ template<class T> const T gRectangle<T>::MaximalSideLength() const
   return answer;
 }
 
-template<class T> bool gRectangle<T>::Contains(const gVector<T>& point) const 
+template<class T> bool gRectangle<T>::Contains(const gbtVector<T>& point) const 
 { 
   assert (point.Length() == Dmnsn());
 
@@ -219,9 +219,9 @@ template<class T> const T gRectangle<T>::Volume() const
   return answer;
 }
 
-template<class T> const gVector<T> gRectangle<T>::Center() const 
+template<class T> const gbtVector<T> gRectangle<T>::Center() const 
 { 
-  gVector<T> answer(Dmnsn());
+  gbtVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) 
     answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
 		                     / ((T)2);
@@ -233,16 +233,16 @@ template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const
   return *this;
 }
 
-template<class T> const gbtList<gVector<T> > gRectangle<T>::VertexList() const 
+template<class T> const gbtList<gbtVector<T> > gRectangle<T>::VertexList() const 
 { 
-  gbtList<gVector<T> > answer;
+  gbtList<gbtVector<T> > answer;
 
   gbtArray<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
   gbtIndexOdometer ListOfTopBottoms(ListOfTwos);
 
   while (ListOfTopBottoms.Turn()) {
-    gVector<T> next(Dmnsn());
+    gbtVector<T> next(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++)
       if (ListOfTopBottoms[i] == 1)
 	next[i] = LowerBoundOfCoord(i);
@@ -292,13 +292,13 @@ const T gRectangle<T>::DiameterSquared() const
 //----------------------------------
 
 template<class T>  
-gRectangle<gDouble>  TogDouble(const gRectangle<T>& given) 
+gRectangle<gbtDouble>  TogDouble(const gRectangle<T>& given) 
 {
-  gbtList<gInterval<gDouble> > cartesian_factors;
+  gbtList<gInterval<gbtDouble> > cartesian_factors;
   for (int i = 1; i <= given.Dmnsn(); i++) 
-    cartesian_factors += gInterval<gDouble>((gDouble)given.LowerBound()[i],
-					    (gDouble)given.UpperBound()[i]);
-  return gRectangle<gDouble>(cartesian_factors);
+    cartesian_factors += gInterval<gbtDouble>((gbtDouble)given.LowerBound()[i],
+					    (gbtDouble)given.UpperBound()[i]);
+  return gRectangle<gbtDouble>(cartesian_factors);
 }
 
 //--------------------------------------------------------------------------

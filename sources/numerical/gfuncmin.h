@@ -38,14 +38,14 @@ public:
   virtual ~gFunctionMinimizer() { }
 
   virtual void Set(const gC1Function<double> &fdf,
-		   const gVector<double> &x, double &f,
-		   gVector<double> &gradient, double step_size,
+		   const gbtVector<double> &x, double &f,
+		   gbtVector<double> &gradient, double step_size,
 		   double p_tol) = 0;
   virtual void Restart(void) = 0;
 
   virtual bool Iterate(const gC1Function<double> &fdf,
-		       gVector<double> &x, double &f,
-		       gVector<double> &gradient, gVector<double> &dx) = 0;
+		       gbtVector<double> &x, double &f,
+		       gbtVector<double> &gradient, gbtVector<double> &dx) = 0;
 };
 
 //
@@ -57,27 +57,27 @@ private:
   double step;
   double max_step;
   double tol;
-  gVector<double> x1;
-  gVector<double> dx1;
-  gVector<double> x2;
+  gbtVector<double> x1;
+  gbtVector<double> dx1;
+  gbtVector<double> x2;
   double pnorm;
-  gVector<double> p;
+  gbtVector<double> p;
   double g0norm;
-  gVector<double> g0;
+  gbtVector<double> g0;
 
 public:
   gConjugatePR(int n);
   virtual ~gConjugatePR() { }
 
   void Set(const gC1Function<double> &fdf,
-	   const gVector<double> &x, double &f,
-	   gVector<double> &gradient, double step_size,
+	   const gbtVector<double> &x, double &f,
+	   gbtVector<double> &gradient, double step_size,
 	   double p_tol);
   void Restart(void);
 
   bool Iterate(const gC1Function<double> &fdf,
-	       gVector<double> &x, double &f,
-	       gVector<double> &gradient, gVector<double> &dx);
+	       gbtVector<double> &x, double &f,
+	       gbtVector<double> &gradient, gbtVector<double> &dx);
 };
 
 class gFuncMinException { };

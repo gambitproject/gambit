@@ -169,7 +169,7 @@ void LUdecomp<T>::refactor( )
 }
 
 template <class T>
-void LUdecomp<T>::solveT( const gVector<T> &c, gVector<T> &y ) const  
+void LUdecomp<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) const  
 {
 
   if ( c.First() != y.First() || c.Last() != y.Last() ) throw BadDim();
@@ -188,7 +188,7 @@ void LUdecomp<T>::solveT( const gVector<T> &c, gVector<T> &y ) const
 }
 
 template <class T>
-void LUdecomp<T>::solve( const gVector<T> &a, gVector<T> &d ) const
+void LUdecomp<T>::solve( const gbtVector<T> &a, gbtVector<T> &d ) const
 {
 
   if ( a.First() != d.First() || a.Last() != d.Last() ) throw BadDim();
@@ -223,7 +223,7 @@ void LUdecomp<T>::FactorBasis()
   int i, j, piv;
   T pivVal;
 
-  gMatrix<T> B(basis.First(), basis.Last(), 
+  gbtMatrix<T> B(basis.First(), basis.Last(), 
 	       basis.First(), basis.Last());
 
   for( i = basis.First(); i <= basis.Last(); i++ ) {
@@ -260,7 +260,7 @@ void LUdecomp<T>::FactorBasis()
 }
 
 template<class T>
-void LUdecomp<T>::GaussElem(gMatrix<T> &B, int row, int col)
+void LUdecomp<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
 {
   if( B(row, col) == (T) 0) throw BadPivot();
 
@@ -283,7 +283,7 @@ void LUdecomp<T>::GaussElem(gMatrix<T> &B, int row, int col)
 
 
 template<class T>
-void LUdecomp<T>::BTransE( gVector<T> &y ) const
+void LUdecomp<T>::BTransE( gbtVector<T> &y ) const
 {
 
   int i;
@@ -294,7 +294,7 @@ void LUdecomp<T>::BTransE( gVector<T> &y ) const
 }
   
 template<class T>
-void LUdecomp<T>::FTransU( gVector<T> &y ) const
+void LUdecomp<T>::FTransU( gbtVector<T> &y ) const
 {
 
   int i;
@@ -305,9 +305,9 @@ void LUdecomp<T>::FTransU( gVector<T> &y ) const
 }
 
 template<class T>
-void LUdecomp<T>::VectorEtaSolve( const gVector<T> &v,  
+void LUdecomp<T>::VectorEtaSolve( const gbtVector<T> &v,  
 				 const EtaMatrix<T>  &eta, 
-				 gVector<T> &y ) const
+				 gbtVector<T> &y ) const
 {
 
   int i, j;
@@ -325,7 +325,7 @@ void LUdecomp<T>::VectorEtaSolve( const gVector<T> &v,
 }
 
 template<class T>
-void LUdecomp<T>::FTransE( gVector<T> &y ) const
+void LUdecomp<T>::FTransE( gbtVector<T> &y ) const
 {
 
   int i;
@@ -336,7 +336,7 @@ void LUdecomp<T>::FTransE( gVector<T> &y ) const
 }
   
 template<class T>
-void LUdecomp<T>::BTransU( gVector<T> &y ) const
+void LUdecomp<T>::BTransU( gbtVector<T> &y ) const
 {
 
   int i;
@@ -347,9 +347,9 @@ void LUdecomp<T>::BTransU( gVector<T> &y ) const
 }
 
 template<class T>
-void LUdecomp<T>::EtaVectorSolve( const gVector<T> &v,  
+void LUdecomp<T>::EtaVectorSolve( const gbtVector<T> &v,  
 				 const EtaMatrix<T>  &eta, 
-				 gVector<T> &d ) const
+				 gbtVector<T> &d ) const
 {
   int i;
   T temp;
@@ -369,7 +369,7 @@ void LUdecomp<T>::EtaVectorSolve( const gVector<T> &v,
 }
 
 template<class T>
-void LUdecomp<T>::yLP_Trans( gVector<T> &y ) const
+void LUdecomp<T>::yLP_Trans( gbtVector<T> &y ) const
 {
   int j;
   
@@ -381,7 +381,7 @@ void LUdecomp<T>::yLP_Trans( gVector<T> &y ) const
 
 
 template<class T>
-void LUdecomp<T>::yLP_mult( const gVector<T> &y, int j, gVector<T> &ans ) const
+void LUdecomp<T>::yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &ans ) const
 {
     
   if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw BadDim();
@@ -407,7 +407,7 @@ void LUdecomp<T>::yLP_mult( const gVector<T> &y, int j, gVector<T> &ans ) const
 }
 
 template<class T>
-void LUdecomp<T>::LPd_Trans( gVector<T> &d ) const
+void LUdecomp<T>::LPd_Trans( gbtVector<T> &d ) const
 {
   int j;
   for (j = 1; j <= L.Length(); j++) {
@@ -417,7 +417,7 @@ void LUdecomp<T>::LPd_Trans( gVector<T> &d ) const
 }
 
 template<class T>
-void LUdecomp<T>::LPd_mult( gVector<T> &d, int j, gVector<T> &ans ) const
+void LUdecomp<T>::LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &ans ) const
 {
   
   if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw BadDim();

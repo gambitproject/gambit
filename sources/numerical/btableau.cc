@@ -30,9 +30,7 @@
 #include "btableau.imp"
 
 template class BaseTableau<double>;
-template class BaseTableau<gRational>;
+template class BaseTableau<gbtRational>;
 
 template class TableauInterface<double>;
-template class TableauInterface<gRational>;
-
-
+template class TableauInterface<gbtRational>;

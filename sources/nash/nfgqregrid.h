@@ -39,7 +39,7 @@ private:
   bool m_fullGraph;
 
   // Auxiliary functions
-  gVector<double> UpdateFunc(const MixedProfile<double> &, int, double) const;
+  gbtVector<double> UpdateFunc(const MixedProfile<double> &, int, double) const;
   bool CheckEqu(MixedProfile<double> &, double, int, double) const;
 
   void OutputHeader(const gbtNfgSupport &, gbtOutput &) const;
@@ -48,11 +48,11 @@ private:
 
 protected:
   // could use norms other then the simple one
-  virtual double Distance(const gVector<gNumber> &,
-			  const gVector<double> &) const;
+  virtual double Distance(const gbtVector<gbtNumber> &,
+			  const gbtVector<double> &) const;
 
-  virtual double Distance(const gVector<double> &,
-			  const gVector<double> &) const;
+  virtual double Distance(const gbtVector<double> &,
+			  const gbtVector<double> &) const;
 
 public:
   // LIFECYCLE

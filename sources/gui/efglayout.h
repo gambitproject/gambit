@@ -52,7 +52,7 @@ private:
 
   int m_level;        // depth of the node in tree
   int m_sublevel;     // # of the infoset line on this level
-  gNumber m_actionProb;  // probability incoming action is taken
+  gbtNumber m_actionProb;  // probability incoming action is taken
 
   wxString m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
   wxString m_branchAboveLabel, m_branchBelowLabel;
@@ -157,8 +157,8 @@ public:
   const wxFont &GetBranchBelowFont(void) const { return m_branchBelowFont; }
   void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
 
-  const gNumber &GetActionProb(void) const { return m_actionProb; }
-  void SetActionProb(const gNumber &p_prob) { m_actionProb = p_prob; }
+  const gbtNumber &GetActionProb(void) const { return m_actionProb; }
+  void SetActionProb(const gbtNumber &p_prob) { m_actionProb = p_prob; }
 
   bool NodeHitTest(int p_x, int p_y) const;
 

@@ -807,7 +807,7 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
 
 template<class T> gPoly<T> 
 gPoly<T>::TranslateOfMono(const gMono<T>& m, 
-				      const gVector<T>& new_origin) const
+				      const gbtVector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());
 
@@ -826,7 +826,7 @@ gPoly<T>::TranslateOfMono(const gMono<T>& m,
 }
 
 template<class T> gPoly<T> 
-gPoly<T>::TranslateOfPoly(const gVector<T>& new_origin) const
+gPoly<T>::TranslateOfPoly(const gbtVector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
   for (int i = 1; i <= this->MonomialList().Length(); i++) 
@@ -837,7 +837,7 @@ gPoly<T>::TranslateOfPoly(const gVector<T>& new_origin) const
 
 template<class T> gPoly<T>  
 gPoly<T>::MonoInNewCoordinates(const gMono<T>& m, 
-					    const gSquareMatrix<T>& M) const
+					    const gbtSquareMatrix<T>& M) const
 {
   assert(M.NumRows() == Dmnsn());
 
@@ -860,7 +860,7 @@ gPoly<T>::MonoInNewCoordinates(const gMono<T>& m,
 }
 
 template<class T> 
-gPoly<T> gPoly<T>::PolyInNewCoordinates(const gSquareMatrix<T>& M) const
+gPoly<T> gPoly<T>::PolyInNewCoordinates(const gbtSquareMatrix<T>& M) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
   for (int i = 1; i <= MonomialList().Length(); i++) 
@@ -962,13 +962,13 @@ template <class T> gbtText &operator<<(gbtText &p_text, const gPoly<T> &p_poly)
 //----------------------------------
 
 template<class T>  
-gPoly<gDouble>  TogDouble(const gPoly<T>& given) 
+gPoly<gbtDouble>  TogDouble(const gPoly<T>& given) 
 {
-  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gPoly<gbtDouble>   answer(given.GetSpace(),given.GetOrder());
   gbtList<gMono<T> > list = given.MonomialList();
   for (int i =1; i <= list.Length(); i++) {
-    gDouble nextcoef = (gDouble)list[i].Coef();
-    gPoly<gDouble> next(given.GetSpace(),
+    gbtDouble nextcoef = (gbtDouble)list[i].Coef();
+    gPoly<gbtDouble> next(given.GetSpace(),
 			list[i].ExpV(),
 			nextcoef,
 			given.GetOrder());
@@ -979,20 +979,20 @@ gPoly<gDouble>  TogDouble(const gPoly<T>& given)
 }
 
 template<class T>  
-gPoly<gDouble>  NormalizationOfPoly(const gPoly<T>& given) 
+gPoly<gbtDouble>  NormalizationOfPoly(const gPoly<T>& given) 
 {
   gbtList<gMono<T> > list = given.MonomialList();
-  gDouble maxcoeff = (gDouble)0;
+  gbtDouble maxcoeff = (gbtDouble)0;
   for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = gmax(maxcoeff,abs((gDouble)list[i].Coef()));
+    maxcoeff = gmax(maxcoeff,abs((gbtDouble)list[i].Coef()));
   }
 
   if (maxcoeff < 0.000000001) return TogDouble(given);
 
-  gPoly<gDouble>   answer(given.GetSpace(),given.GetOrder());
+  gPoly<gbtDouble>   answer(given.GetSpace(),given.GetOrder());
   for (int i =1; i <= list.Length(); i++) {
-    gDouble nextcoef = (gDouble)list[i].Coef()/maxcoeff;
-    gPoly<gDouble> next(given.GetSpace(),
+    gbtDouble nextcoef = (gbtDouble)list[i].Coef()/maxcoeff;
+    gPoly<gbtDouble> next(given.GetSpace(),
 			list[i].ExpV(),
 			nextcoef,
 			given.GetOrder());

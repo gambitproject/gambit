@@ -71,12 +71,12 @@ sense that the polynomial is required to be nonnegative.
 template <class T> class QuikSolv {
  private:
   const gPolyList<T>                 System;
-  const gPolyList<gDouble>           gDoubleSystem;
+  const gPolyList<gbtDouble>           gDoubleSystem;
   const int                          NoEquations;
   const int                          NoInequalities;
-  const ListOfPartialTrees<gDouble>  TreesOfPartials;
+  const ListOfPartialTrees<gbtDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
-        gbtList<gVector<gDouble> >     Roots;
+        gbtList<gbtVector<gbtDouble> >     Roots;
   const bool                         isMultiaffine;
   const gbtRectArray<bool>             Equation_i_uses_var_j;
   gbtStatus &m_status;
@@ -87,56 +87,56 @@ template <class T> class QuikSolv {
 
   // Get Roots Using Pelican
 
-  bool AllRealRootsFromPelican(const gPolyList<gDouble> &, 
-			             gbtList<gVector<gDouble> > &)         const;
+  bool AllRealRootsFromPelican(const gPolyList<gbtDouble> &, 
+			             gbtList<gbtVector<gbtDouble> > &)         const;
   bool PelicanRoots(const gRectangle<T> &, 
-		          gbtList<gVector<gDouble> > &)                    const;
+		          gbtList<gbtVector<gbtDouble> > &)                    const;
 
   // Check whether roots are impossible
 
-   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gbtArray<int>&)   const;
+   bool SystemHasNoRootsIn(const gRectangle<gbtDouble>& r, gbtArray<int>&)   const;
 
 
   // Ask whether Newton's method leads to a root 
 
-   bool NewtonRootInRectangle(  const gRectangle<gDouble>&, 
-			              gVector<gDouble>&) const;
-   bool NewtonRootNearRectangle(const gRectangle<gDouble>&, 
-			              gVector<gDouble>&) const;
+   bool NewtonRootInRectangle(  const gRectangle<gbtDouble>&, 
+			              gbtVector<gbtDouble>&) const;
+   bool NewtonRootNearRectangle(const gRectangle<gbtDouble>&, 
+			              gbtVector<gbtDouble>&) const;
 
 
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
 
-   gDouble MaxDistanceFromPointToVertexAfterTransformation(
-				      const gRectangle<gDouble>&,
-				      const gVector<gDouble>&,
-				      const gSquareMatrix<gDouble>&)     const;
+   gbtDouble MaxDistanceFromPointToVertexAfterTransformation(
+				      const gRectangle<gbtDouble>&,
+				      const gbtVector<gbtDouble>&,
+				      const gbtSquareMatrix<gbtDouble>&)     const;
 
-   bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
-			  const gVector<gDouble>&,
-			  const gSquareMatrix<gDouble>&)                 const;
+   bool HasNoOtherRootsIn(const gRectangle<gbtDouble>&,
+			  const gbtVector<gbtDouble>&,
+			  const gbtSquareMatrix<gbtDouble>&)                 const;
 
 
   // Combine the last two steps into a single query
 
-   bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, 
-			            gVector<gDouble>&) const;
+   bool NewtonRootIsOnlyInRct(const gRectangle<gbtDouble>&, 
+			            gbtVector<gbtDouble>&) const;
 
 
   // Recursive parts of recursive methods
 
-  void               FindRootsRecursion(      gbtList<gVector<gDouble> >*,
-					const gRectangle<gDouble>&, 
+  void               FindRootsRecursion(      gbtList<gbtVector<gbtDouble> >*,
+					const gRectangle<gbtDouble>&, 
 					const int&,
 					      gbtArray<int>&,
 					      int&,
 					const int&,
 					      int*)                  const;
 
-  const bool         ARootExistsRecursion(const gRectangle<gDouble>&, 
-					        gVector<gDouble>&,
-					  const gRectangle<gDouble>&, 
+  const bool         ARootExistsRecursion(const gRectangle<gbtDouble>&, 
+					        gbtVector<gbtDouble>&,
+					  const gRectangle<gbtDouble>&, 
 					        gbtArray<int>&)        const;
 
  public:
@@ -166,15 +166,15 @@ template <class T> class QuikSolv {
      { return System; }
    inline const bool                     WasSolved()                 const
      { return HasBeenSolved; }
-   inline const gbtList<gVector<gDouble> > RootList()                  const
+   inline const gbtList<gbtVector<gbtDouble> > RootList()                  const
      { return Roots; }
    inline const bool                     IsMultiaffine()             const
      { return isMultiaffine; }
 
   // Refines the accuracy of roots obtained from other algorithms
-  gVector<gDouble> NewtonPolishOnce(const gVector<gDouble> &)        const;
-  gVector<gDouble> SlowNewtonPolishOnce(const gVector<gDouble> &)    const;
-  gVector<gDouble> NewtonPolishedRoot(const gVector<gDouble> &)      const;
+  gbtVector<gbtDouble> NewtonPolishOnce(const gbtVector<gbtDouble> &)        const;
+  gbtVector<gbtDouble> SlowNewtonPolishOnce(const gbtVector<gbtDouble> &)    const;
+  gbtVector<gbtDouble> NewtonPolishedRoot(const gbtVector<gbtDouble> &)      const;
 
   // Checks for complex singular roots
    bool     MightHaveSingularRoots()                                 const;
@@ -184,7 +184,7 @@ template <class T> class QuikSolv {
 				       const int&,
 				       const int&);
    bool     FindRoots  (const gRectangle<T>&, const int&);
-   bool     ARootExists (const gRectangle<T>&, gVector<gDouble>&)    const;
+   bool     ARootExists (const gRectangle<T>&, gbtVector<gbtDouble>&)    const;
   
    void Output(gbtOutput &) const;
 };  

@@ -212,7 +212,7 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
 {
   // Do this to avoid problems with p_efg and p_support being incompatible
   // after deletions
-  gDPVector<int> support(p_support.NumActions());
+  gbtDPVector<int> support(p_support.NumActions());
   support = 0;
   for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = p_efg.GetPlayer(pl);
@@ -247,7 +247,7 @@ RandomEfg(gbtEfgGame & efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++) {
     for (int j = 1; j <= efg.NumOutcomes(); j++) {
-      efg.GetOutcome(j).SetPayoff(efg.GetPlayer(i), gNumber(Uniform()));
+      efg.GetOutcome(j).SetPayoff(efg.GetPlayer(i), gbtNumber(Uniform()));
     }
   }
 }

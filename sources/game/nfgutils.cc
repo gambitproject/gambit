@@ -72,12 +72,12 @@ gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
   return N;
 }
 
-gNumber MinPayoff(const gbtNfgGame &nfg, int player)
+gbtNumber MinPayoff(const gbtNfgGame &nfg, int player)
 {
   int index, p, p1, p2;
-  gNumber minpay;
+  gbtNumber minpay;
   
-  if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
+  if (nfg.NumOutcomes() == 0)  return (gbtNumber) 0;
 
   if (player)
     p1 = p2 = player;
@@ -95,12 +95,12 @@ gNumber MinPayoff(const gbtNfgGame &nfg, int player)
   return minpay;
 }
 
-gNumber MaxPayoff(const gbtNfgGame &nfg, int player)
+gbtNumber MaxPayoff(const gbtNfgGame &nfg, int player)
 {
   int index, p, p1, p2;
-  gNumber maxpay;
+  gbtNumber maxpay;
 
-  if (nfg.NumOutcomes() == 0)  return (gNumber) 0;
+  if (nfg.NumOutcomes() == 0)  return (gbtNumber) 0;
 
   if (player)
     p1 = p2 = player;
@@ -122,8 +122,5 @@ void RandomNfg(gbtNfgGame nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)
-      nfg.GetOutcome(outc).SetPayoff(nfg.GetPlayer(pl), gNumber(Uniform()));
-}  
-
-
-
+      nfg.GetOutcome(outc).SetPayoff(nfg.GetPlayer(pl), gbtNumber(Uniform()));
+}

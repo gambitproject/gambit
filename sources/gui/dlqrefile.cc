@@ -76,7 +76,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
     m_qreList->InsertItem(i - 1, 
 			  wxString::Format(wxT("%s"),
 					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gPVector<gNumber> &profile = *p_profiles[i].Profile();
+    const gbtPVector<gbtNumber> &profile = *p_profiles[i].Profile();
     for (int j = 1; j <= profile.Length(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
@@ -149,7 +149,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
     m_qreList->InsertItem(i - 1, 
 			  wxString::Format(wxT("%s"),
 					   (char *) ToText(p_profiles[i].QreLambda())));
-    const gPVector<gNumber> &profile = p_profiles[i].Profile()->GetPVector();
+    const gbtPVector<gbtNumber> &profile = p_profiles[i].Profile()->GetPVector();
     for (int j = 1; j <= profile.Length(); j++) {
       m_qreList->SetItem(i - 1, j, 
 			 wxString::Format(wxT("%s"),
@@ -224,7 +224,7 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_mixedProfiles.Length(); i++) {
-	  const MixedProfile<gNumber> &profile = *m_mixedProfiles[i].Profile();
+	  const MixedProfile<gbtNumber> &profile = *m_mixedProfiles[i].Profile();
 	  file << ((double) m_mixedProfiles[i].QreLambda()) << " 0.000000 ";
 	  
 	  for (int j = 1; j <= profile.Length(); j++) {
@@ -263,7 +263,7 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 	file << "Data:\n";
 
 	for (int i = 1; i <= m_behavProfiles.Length(); i++) {
-	  const BehavProfile<gNumber> &profile = *m_behavProfiles[i].Profile();
+	  const BehavProfile<gbtNumber> &profile = *m_behavProfiles[i].Profile();
 	  file << ((double) m_behavProfiles[i].QreLambda()) << " 0.000000 ";
 	  
 	  for (int j = 1; j <= profile.Length(); j++) {

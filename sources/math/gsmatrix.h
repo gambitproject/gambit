@@ -29,7 +29,7 @@
 
 #include "gmatrix.h"
 
-template <class T> class gSquareMatrix : public gMatrix<T>   {
+template <class T> class gbtSquareMatrix : public gbtMatrix<T>   {
 public:
   class MatrixSingular : public gbtException {
   public:
@@ -37,18 +37,18 @@ public:
     gbtText Description(void) const;
   };
 
-  gSquareMatrix(void);
-  gSquareMatrix(int size);
-  gSquareMatrix(const gMatrix<T> &);
-  gSquareMatrix(const gSquareMatrix<T> &);
-  virtual ~gSquareMatrix();
+  gbtSquareMatrix(void);
+  gbtSquareMatrix(int size);
+  gbtSquareMatrix(const gbtMatrix<T> &);
+  gbtSquareMatrix(const gbtSquareMatrix<T> &);
+  virtual ~gbtSquareMatrix();
 
-  gSquareMatrix<T> &operator=(const gSquareMatrix<T> &);
+  gbtSquareMatrix<T> &operator=(const gbtSquareMatrix<T> &);
 
-  gSquareMatrix<T> Inverse(void) const;
+  gbtSquareMatrix<T> Inverse(void) const;
   T Determinant(void) const;
 };
 
-template <class T> gbtOutput& operator<<(gbtOutput &to, const gSquareMatrix<T> &M);
+template <class T> gbtOutput& operator<<(gbtOutput &to, const gbtSquareMatrix<T> &M);
 
 #endif    // GSMATRIX_H

@@ -35,21 +35,21 @@
 #include "math/gsmatrix.h"
 
 template <class T> 
-LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
+LinearCombination<T>::LinearCombination(const gbtMatrix<T> &M)
 : scrambled(M), weights(M.NumRows()), last_row_is_spanned(true)
 { 
   int K = scrambled.NumRows() - 1;
 
   int i,j;
-  gMatrix<T> B(K,K);           // Initialize the matrix recording the
+  gbtMatrix<T> B(K,K);           // Initialize the matrix recording the
   for (i = 1; i <= K; i++) // effect of all row operations.
     for (j = 1; j <= K; j++)
       if (i == j) B(i,j) = 1;
       else        B(i,j) = 0;
 
-  gVector<int> PivotRow(K);
+  gbtVector<int> PivotRow(K);
   for (i = 1; i <= K; i++) PivotRow[i] = i;
-  gVector<int> PivotColumn(K);
+  gbtVector<int> PivotColumn(K);
 
   int c = 1;
   for (i = 1; i <= K-1; i++) { // Each iteration is a
@@ -61,7 +61,7 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
       else { c++; i1 = i; }
     if (c > M.NumColumns()) {
       //      gout << "First NumRows() rows not linearly independent in "
-      //	<< "LinearCombination(gMatrix<T> M).\n";
+      //	<< "LinearCombination(gbtMatrix<T> M).\n";
       exit(1);
     }
 
@@ -91,7 +91,7 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
 	   scrambled(PivotRow[K],PivotColumn[K]) == (T)0 ) PivotColumn[K]++;
     if (PivotColumn[K] > M.NumColumns()) {
       //      gout << "First NumRows()-1 rows not linearly independent in "
-      //	<< "LinearCombination(gMatrix<T> M).\n";
+      //	<< "LinearCombination(gbtMatrix<T> M).\n";
       // gout << "At the time of failure, scrambled is \n"
       //	<< scrambled << "\n";
       exit(1);
@@ -106,7 +106,7 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
     }
   }
 
-  gVector<T> xBinverse(K);
+  gbtVector<T> xBinverse(K);
   for (int i3 = 1; i3 <= K; i3++) { // Each i3 is a row operation on last row.
     T factor = scrambled(K+1,PivotColumn[i3])
                             /
@@ -114,7 +114,7 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
     xBinverse[PivotRow[i3]] = factor;
     AddMultipleOfRowiToRowj(PivotRow[i3],K+1,-factor);
   }
-  gVector<T> x(xBinverse * B);
+  gbtVector<T> x(xBinverse * B);
 
   for (j = 1; j <= M.NumColumns(); j++)
     if (scrambled(K+1,j) != (T)0) last_row_is_spanned = false;
@@ -180,7 +180,7 @@ template <class T> bool LinearCombination<T>::LastRowIsSpanned() const
   return last_row_is_spanned;
 }
 
-template <class T> gVector<T> LinearCombination<T>::LinearDependence() const
+template <class T> gbtVector<T> LinearCombination<T>::LinearDependence() const
 {
   return weights;
 }
@@ -193,7 +193,7 @@ template <class T>
 void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
 						   const int& j,
 						   const T& scalar,
-						   gMatrix<T>& B)
+						   gbtMatrix<T>& B)
 {
   for (int k = 1; k <= B.NumColumns(); k++)
     B(j,k) += scalar * B(i,k);

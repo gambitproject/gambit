@@ -61,8 +61,8 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     B.Set(b);
 
     do  {
-      gRational ap = A.Payoff(pl);  
-      gRational bp = B.Payoff(pl);
+      gbtRational ap = A.Payoff(pl);  
+      gbtRational bp = B.Payoff(pl);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
@@ -93,8 +93,8 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
       B.Set(b);
       
       do  {
-	gRational ap = A.Payoff(nodelist[n],pl);  
-	gRational bp = B.Payoff(nodelist[n],pl);
+	gbtRational ap = A.Payoff(nodelist[n],pl);  
+	gbtRational bp = B.Payoff(nodelist[n],pl);
 	
 	if (strong)
 	  { if (ap <= bp)  return false; }

@@ -28,4 +28,4 @@
 #include "math/rational.h"
 
 template class gbtNfgNashLcp<double>;
-template class gbtNfgNashLcp<gRational>;
+template class gbtNfgNashLcp<gbtRational>;

@@ -33,7 +33,7 @@
 #include "base/gstream.h"
 #include <math.h>
 
-class gComplex
+class gbtComplex
 {
 protected:
   double re;
@@ -41,53 +41,53 @@ protected:
 
 public:
 // Constructors, and the destructor
-  gComplex();
-  gComplex(const double&, const double&);
-  gComplex(const gComplex&);
-  gComplex(const int& n);
-  gComplex(const long& n);
+  gbtComplex();
+  gbtComplex(const double&, const double&);
+  gbtComplex(const gbtComplex&);
+  gbtComplex(const int& n);
+  gbtComplex(const long& n);
   
-  ~gComplex();
+  ~gbtComplex();
 
 // Operators
   double      RealPart()                      const;
   double      ImaginaryPart()                 const;
 
-  gComplex&   operator =  (const gComplex& y);
+  gbtComplex&   operator =  (const gbtComplex& y);
 
-  bool        operator == (const gComplex& y) const;
-  bool        operator != (const gComplex& y) const;
+  bool        operator == (const gbtComplex& y) const;
+  bool        operator != (const gbtComplex& y) const;
 
-  gComplex    operator +  (const gComplex& y) const;
-  gComplex    operator -  (const gComplex& y) const;
-  gComplex    operator *  (const gComplex& y) const;
-  gComplex    operator /  (const gComplex& y) const;
+  gbtComplex    operator +  (const gbtComplex& y) const;
+  gbtComplex    operator -  (const gbtComplex& y) const;
+  gbtComplex    operator *  (const gbtComplex& y) const;
+  gbtComplex    operator /  (const gbtComplex& y) const;
 
-  gComplex    operator -  ()                 const;
+  gbtComplex    operator -  ()                 const;
 
-  void       operator += (const gComplex& y);
-  void       operator -= (const gComplex& y);
-  void       operator *= (const gComplex& y);
-  void       operator /= (const gComplex& y);
+  void       operator += (const gbtComplex& y);
+  void       operator -= (const gbtComplex& y);
+  void       operator *= (const gbtComplex& y);
+  void       operator /= (const gbtComplex& y);
 
 // error reporting
   void    error(const char* msg) const;
 
 // printing
-  friend gbtInput&    operator >> (gbtInput& s, gComplex& y);
-  friend gbtOutput&   operator << (gbtOutput& s, const gComplex& y);
+  friend gbtInput&    operator >> (gbtInput& s, gbtComplex& y);
+  friend gbtOutput&   operator << (gbtOutput& s, const gbtComplex& y);
 
 // friends outside the class
-  friend double    fabs(const gComplex& x);              
-  friend gComplex  sqr(const gComplex& x);              
-  friend gComplex  pow(const gComplex& x, const long y);
+  friend double    fabs(const gbtComplex& x);              
+  friend gbtComplex  sqr(const gbtComplex& x);              
+  friend gbtComplex  pow(const gbtComplex& x, const long y);
 };
 
 // The following are facilities that are required of all arithmetic types.
 // For other types they are given in gmisc.h
 
 class gString;
-gString         ToString(gComplex);
-gComplex        TOgComplex(const gString &);
+gString         ToString(gbtComplex);
+gbtComplex        TOgComplex(const gString &);
 
 #endif

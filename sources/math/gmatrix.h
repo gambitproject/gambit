@@ -30,7 +30,7 @@
 #include "base/grarray.h"
 #include "gvector.h"
 
-template <class T> class gMatrix : public gbtRectArray<T>  {
+template <class T> class gbtMatrix : public gbtRectArray<T>  {
   public:
     class DivideByZero : public gbtException  {
       public:
@@ -39,59 +39,59 @@ template <class T> class gMatrix : public gbtRectArray<T>  {
     };
 
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-    gMatrix(void);
-    gMatrix(unsigned int rows, unsigned int cols);
-    gMatrix(unsigned int rows, unsigned int cols, int minrows);
-    gMatrix(int rl, int rh, int cl, int ch);
-    gMatrix(const gMatrix<T> &);
-    virtual ~gMatrix();
+    gbtMatrix(void);
+    gbtMatrix(unsigned int rows, unsigned int cols);
+    gbtMatrix(unsigned int rows, unsigned int cols, int minrows);
+    gbtMatrix(int rl, int rh, int cl, int ch);
+    gbtMatrix(const gbtMatrix<T> &);
+    virtual ~gbtMatrix();
 
-    gMatrix<T> &operator=(const gMatrix<T> &);
-    gMatrix<T> &operator=(const T &);
-    gMatrix<T> operator-(void);
+    gbtMatrix<T> &operator=(const gbtMatrix<T> &);
+    gbtMatrix<T> &operator=(const T &);
+    gbtMatrix<T> operator-(void);
 
        // ADDITIVE OPERATORS
-    gMatrix<T> operator+(const gMatrix<T> &) const;
-    gMatrix<T> operator-(const gMatrix<T> &) const;
-    gMatrix<T> &operator+=(const gMatrix<T> &);
-    gMatrix<T> &operator-=(const gMatrix<T> &);
+    gbtMatrix<T> operator+(const gbtMatrix<T> &) const;
+    gbtMatrix<T> operator-(const gbtMatrix<T> &) const;
+    gbtMatrix<T> &operator+=(const gbtMatrix<T> &);
+    gbtMatrix<T> &operator-=(const gbtMatrix<T> &);
 
 
        // MULTIPLICATIVE OPERATORS
        // "in-place" column multiply
-    void CMultiply(const gVector<T> &, gVector<T> &) const;
+    void CMultiply(const gbtVector<T> &, gbtVector<T> &) const;
        // "in-place" row (transposed) multiply
-    void RMultiply(const gVector<T> &, gVector<T> &) const;
-    gMatrix<T> operator*(const gMatrix<T> &) const;
-    gVector<T> operator*(const gVector<T> &) const;
-    gMatrix<T> operator*(const T &) const;
-    gMatrix<T> &operator*=(const gMatrix<T> &);
-    gMatrix<T> &operator*=(const T &);
+    void RMultiply(const gbtVector<T> &, gbtVector<T> &) const;
+    gbtMatrix<T> operator*(const gbtMatrix<T> &) const;
+    gbtVector<T> operator*(const gbtVector<T> &) const;
+    gbtMatrix<T> operator*(const T &) const;
+    gbtMatrix<T> &operator*=(const gbtMatrix<T> &);
+    gbtMatrix<T> &operator*=(const T &);
 
-    gMatrix<T> operator/(const T &) const;
-    gMatrix<T> &operator/=(const T &);
+    gbtMatrix<T> operator/(const T &) const;
+    gbtMatrix<T> &operator/=(const T &);
 
        // KRONECKER PRODUCT
-    gMatrix<T> operator&(const gMatrix<T> &) const;
+    gbtMatrix<T> operator&(const gbtMatrix<T> &) const;
 
       // TRANSPOSE
-    gMatrix<T>       Transpose()         const;
+    gbtMatrix<T>       Transpose()         const;
 
        // COMPARISON OPERATORS
-    bool operator==(const gMatrix<T> &) const;
-    bool operator!=(const gMatrix<T> &) const;
+    bool operator==(const gbtMatrix<T> &) const;
+    bool operator!=(const gbtMatrix<T> &) const;
     bool operator==(const T &) const;
     bool operator!=(const T &) const;
 
        // INFORMATION
-    gVector<T> Row   (const int&) const;
-    gVector<T> Column(const int&) const;
+    gbtVector<T> Row   (const int&) const;
+    gbtVector<T> Column(const int&) const;
 
   void MakeIdent(void);  // set matrix to identity matrix
   void Pivot(int, int);
 };
 
-template <class T> gVector<T> operator*(const gVector<T> &, const gMatrix<T> &);
-template <class T> gbtOutput &operator<<(gbtOutput &, const gMatrix<T> &);
+template <class T> gbtVector<T> operator*(const gbtVector<T> &, const gbtMatrix<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtMatrix<T> &);
 
 #endif     // GMATRIX_H

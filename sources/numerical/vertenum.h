@@ -54,12 +54,12 @@ private:
   int n;  // N is the number of columns, which is the # of dimensions.
   int k;  // K is the number of inequalities given.
     // Removed const on A and b (Geoff)
-  const gMatrix<T> &A;   
-  const gVector<T> &b;
-  gVector<T> btemp,c;
+  const gbtMatrix<T> &A;   
+  const gbtVector<T> &b;
+  gbtVector<T> btemp,c;
   gbtList<BFS<T> > List;
   gbtList<BFS<T> > DualList;
-  gbtList<gVector<T> > Verts;
+  gbtList<gbtVector<T> > Verts;
   long npivots,nodes;
   gbtStatus &status;
   gbtList<long> visits,branches;
@@ -76,13 +76,13 @@ public:
     gbtText Description(void) const;
   };
 
-  VertEnum(const gMatrix<T> &, const gVector<T> &, gbtStatus &);
+  VertEnum(const gbtMatrix<T> &, const gbtVector<T> &, gbtStatus &);
   VertEnum(LPTableau<T> &, gbtStatus &);
   virtual ~VertEnum();
 
   const gbtList<BFS<T> > &VertexList() const;
   const gbtList<BFS<T> > &DualVertexList() const;
-  void Vertices(gbtList<gVector<T> > &verts) const;
+  void Vertices(gbtList<gbtVector<T> > &verts) const;
   long NumPivots() const;
   void Dump(gbtOutput &) const;
 };
@@ -96,11 +96,11 @@ private:
   int n;  // N is the number of columns, which is the # of dimensions.
   int k;  // K is the number of inequalities given.
     // Removed const on A and b (Geoff)
-  const gMatrix<T> &A, &A2;   
-  const gVector<T> &b, &b2;
-  gVector<T> btemp,c;
+  const gbtMatrix<T> &A, &A2;   
+  const gbtVector<T> &b, &b2;
+  gbtVector<T> btemp,c;
   gbtList<BFS<T> > List, List2;
-  gbtList<gVector<T> > Verts;
+  gbtList<gbtVector<T> > Verts;
   long npivots,nodes;
   gbtStatus &status;
   gbtList<long> visits,branches;
@@ -117,13 +117,13 @@ public:
     virtual ~BadDim();
     gbtText Description(void) const;
   };
-  DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
-		 const gMatrix<T> &_A2, const gVector<T> &_b2, 
+  DoubleVertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b,
+		 const gbtMatrix<T> &_A2, const gbtVector<T> &_b2, 
 		 gbtStatus &);
   ~DoubleVertEnum();
   const gbtList<BFS<T> > &VertexList() const;
   const gbtList<BFS<T> > &VertexList2() const;
-  void Vertices(gbtList<gVector<T> > &verts, gbtList<gVector<T> > &verts2) const;
+  void Vertices(gbtList<gbtVector<T> > &verts, gbtList<gbtVector<T> > &verts2) const;
   long NumPivots() const;
   void Dump(gbtOutput &) const;
 };

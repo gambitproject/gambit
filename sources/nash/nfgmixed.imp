@@ -42,7 +42,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 					    gbtStatus &p_status)
 {
   gbtNfgGame nfg = p_support.GetGame();
-  gbtList<gVector<T> > key1, key2;  
+  gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   if (nfg.NumPlayers() != 2) {
@@ -53,18 +53,18 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 
   NfgIter iter(p_support); 
 
-  T min = MinPayoff(nfg) - gNumber(1);
+  T min = MinPayoff(nfg) - gbtNumber(1);
   T max = MaxPayoff(nfg);
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2
-  gMatrix<T> A1(1, p_support.NumStrats(1), 1, p_support.NumStrats(2));
-  gMatrix<T> A2(1, p_support.NumStrats(2), 1, p_support.NumStrats(1));
+  gbtMatrix<T> A1(1, p_support.NumStrats(1), 1, p_support.NumStrats(2));
+  gbtMatrix<T> A2(1, p_support.NumStrats(2), 1, p_support.NumStrats(1));
 
   for (int i = 1; i <= p_support.NumStrats(1); i++) {
     for (int j = 1; j <= p_support.NumStrats(2); j++) {
-      A1(i, j) = iter.GetPayoff(nfg.GetPlayer(1)) - gNumber(min);
-      A2(j, i) = iter.GetPayoff(nfg.GetPlayer(2)) - gNumber(min);
+      A1(i, j) = iter.GetPayoff(nfg.GetPlayer(1)) - gbtNumber(min);
+      A2(j, i) = iter.GetPayoff(nfg.GetPlayer(2)) - gbtNumber(min);
       A1(i, j) *= fac;
       A2(j, i) *= fac;
       iter.Next(2);
@@ -73,7 +73,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
   }
 
   // Construct vectors b1, b2
-  gVector<T> b1(1, p_support.NumStrats(1)), b2(1, p_support.NumStrats(2));
+  gbtVector<T> b1(1, p_support.NumStrats(1)), b2(1, p_support.NumStrats(2));
   b1 = (T) -1;
   b2 = (T) -1;
 

@@ -99,8 +99,8 @@ template <class T> gbtText gFact<T>::Unknown::Description(void) const
   return "Unknown information in gFact";
 }
 
-template class gFact<gNumber>;
+template class gFact<gbtNumber>;
 template class gFact<gbtTriState>;
 
 #include "math/gpvector.h"
-template class gFact<gPVector<gNumber> >;
+template class gFact<gbtPVector<gbtNumber> >;

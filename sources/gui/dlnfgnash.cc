@@ -710,7 +710,7 @@ gbtNfgNashAlgorithm *panelNfgEnumMixed::GetAlgorithm(void) const
     return algorithm;
   }
   else {
-    gbtNfgNashEnumMixed<gRational> *algorithm = new gbtNfgNashEnumMixed<gRational>;
+    gbtNfgNashEnumMixed<gbtRational> *algorithm = new gbtNfgNashEnumMixed<gbtRational>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     return algorithm;
@@ -839,7 +839,7 @@ gbtNfgNashAlgorithm *panelNfgLcp::GetAlgorithm(void) const
     return algorithm;
   }
   else {
-    gbtNfgNashLcp<gRational> *algorithm = new gbtNfgNashLcp<gRational>;
+    gbtNfgNashLcp<gbtRational> *algorithm = new gbtNfgNashLcp<gbtRational>;
     algorithm->SetStopAfter((m_findAll->GetValue()) ?
 			    0 : m_stopAfter->GetValue());
     algorithm->SetMaxDepth((m_limitDepth->GetValue()) ?
@@ -932,7 +932,7 @@ gbtNfgNashAlgorithm *panelNfgLp::GetAlgorithm(void) const
     return algorithm;
   }
   else {
-    gbtNfgNashLp<gRational> *algorithm = new gbtNfgNashLp<gRational>;
+    gbtNfgNashLp<gbtRational> *algorithm = new gbtNfgNashLp<gbtRational>;
     return algorithm;
   }
 }
@@ -1263,7 +1263,7 @@ gbtNfgNashAlgorithm *panelNfgSimpdiv::GetAlgorithm(void) const
     return algorithm;
   }
   else {
-    gbtNfgNashSimpdiv<gRational> *algorithm = new gbtNfgNashSimpdiv<gRational>;
+    gbtNfgNashSimpdiv<gbtRational> *algorithm = new gbtNfgNashSimpdiv<gbtRational>;
     algorithm->SetLeashLength((m_useLeash->GetValue()) ?
 			      m_leashLength->GetValue() : 0);
     algorithm->SetNumRestarts(m_numRestarts->GetValue());

@@ -36,7 +36,7 @@ private:
   wxListBox *m_actionList;
   wxButton *m_addBeforeButton, *m_addAfterButton, *m_deleteButton;
   gbtBlock<gbtText> m_actionNames;
-  gbtBlock<gNumber> m_actionProbs;
+  gbtBlock<gbtNumber> m_actionProbs;
   gbtBlock<gbtEfgAction> m_actions;
   int m_lastSelection;
 
@@ -58,7 +58,7 @@ public:
   int NumActions(void) const { return m_actions.Length(); }
   const gbtBlock<gbtEfgAction> &GetActions(void) const { return m_actions; }
   gbtText GetActionName(int p_act) const { return m_actionNames[p_act]; }
-  gNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
+  gbtNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
 
   DECLARE_EVENT_TABLE()
 };

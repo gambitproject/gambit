@@ -85,8 +85,8 @@ template <class T> class gPolyList
    gPolyList<T>&  ToSortedReducedGrobner(const term_order &);
 
   // New Coordinate Systems
-   gPolyList<T> TranslateOfSystem(const gVector<T>&)            const;
-   gPolyList<T> SystemInNewCoordinates(const gSquareMatrix<T>&) const;
+   gPolyList<T> TranslateOfSystem(const gbtVector<T>&)            const;
+   gPolyList<T> SystemInNewCoordinates(const gbtSquareMatrix<T>&) const;
 
   // Truncations
    gPolyList<T> InteriorSegment(int, int)                       const;
@@ -98,18 +98,18 @@ template <class T> class gPolyList
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
    gbtList<gPoly<T> >         UnderlyingbtList()                          const;
-   const gVector<T>         Evaluate(const gVector<T>&)               const;
-   const bool               IsRoot(const gVector<T>&)                 const;
+   const gbtVector<T>         Evaluate(const gbtVector<T>&)               const;
+   const bool               IsRoot(const gbtVector<T>&)                 const;
    const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
-   const gMatrix<T>         DerivativeMatrix(const gVector<T>&)       const;
-   const gSquareMatrix<T>   SquareDerivativeMatrix(const gVector<T>&) const;
+   const gbtMatrix<T>         DerivativeMatrix(const gbtVector<T>&)       const;
+   const gbtSquareMatrix<T>   SquareDerivativeMatrix(const gbtVector<T>&) const;
 
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 
    // Conversion
-   gbtList<gPoly<gDouble> > ListTogDouble()  const;
-   gbtList<gPoly<gDouble> > NormalizedList() const;
+   gbtList<gPoly<gbtDouble> > ListTogDouble()  const;
+   gbtList<gPoly<gbtDouble> > NormalizedList() const;
 };  
 
 template <class T> gbtOutput &operator<<(gbtOutput &, const gPolyList<T> &);

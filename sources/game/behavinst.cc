@@ -30,14 +30,14 @@
 class ChanceInfoset;
 
 template<>
-gNumber BehavProfile<gNumber>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtNumber BehavProfile<gbtNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
 }
 
 template<>
-gRational BehavProfile<gRational>::Payoff(const gbtEfgOutcome &p_outcome,
+gbtRational BehavProfile<gbtRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
   return p_outcome.GetPayoff(m_efg.GetPlayer(pl));
@@ -54,20 +54,20 @@ template class BehavAssessment<double>;
 template gbtOutput &operator<<(gbtOutput &, const BehavProfile<double> &);
 template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<double> &);
 
-template class BehavProfile<gRational>;
-template class BehavAssessment<gRational>;
-template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gRational> &);
-template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gRational> &);
+template class BehavProfile<gbtRational>;
+template class BehavAssessment<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gbtRational> &);
 
-template class BehavProfile<gNumber>;
-template class BehavAssessment<gNumber>;
-template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gNumber> &);
-template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gNumber> &);
+template class BehavProfile<gbtNumber>;
+template class BehavAssessment<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gbtNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gbtNumber> &);
 
-template class PureBehavProfile<gNumber>;
+template class PureBehavProfile<gbtNumber>;
 
 #include "base/glist.imp"
 
 template class gbtList<BehavProfile<double> >;
-template class gbtList<BehavProfile<gRational> >;
-template class gbtList<BehavProfile<gNumber> >;
+template class gbtList<BehavProfile<gbtRational> >;
+template class gbtList<BehavProfile<gbtNumber> >;

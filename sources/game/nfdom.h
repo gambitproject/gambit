@@ -35,13 +35,13 @@
 #include "mixed.h"
 
 bool IsMixedDominated(const gbtNfgSupport &, gbtNfgStrategy,
-		      bool strong, gPrecision precision,
+		      bool strong, gbtPrecision precision,
 		      gbtOutput &tracefile);
 
-bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
-		      bool strong, gPrecision precision, gbtOutput &tracefile);
+bool IsMixedDominated(const MixedProfile<gbtNumber> &sol, int pl,
+		      bool strong, gbtPrecision precision, gbtOutput &tracefile);
 
-bool IsMixedDominated(const MixedProfile<gNumber> &sol,
-		      bool strong, gPrecision precision, gbtOutput &tracefile);
+bool IsMixedDominated(const MixedProfile<gbtNumber> &sol,
+		      bool strong, gbtPrecision precision, gbtOutput &tracefile);
 
 #endif    // NFDOM_H

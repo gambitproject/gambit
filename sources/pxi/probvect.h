@@ -1,6 +1,6 @@
 //***************************************************************************
 //* File: probvect.h.  Header file for probvect.c.
-//* The ProbVect class is based in part on the gVector class.  ProbVect is
+//* The ProbVect class is based in part on the gbtVector class.  ProbVect is
 //* designed to allow the user to solve problems pertaining to normal form
 //* games using the grid search method.  The class is initialized with the
 //* size of the normal form matrix (NxN) and the number of steps desired per

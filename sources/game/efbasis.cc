@@ -358,14 +358,14 @@ bool EFBasis::IsValid(void) const
   return true;
 }
 
-gPVector<int> EFBasis::NumNodes(void) const
+gbtPVector<int> EFBasis::NumNodes(void) const
 {
   gbtArray<int> foo(m_efg.NumPlayers());
   int i;
   for (i = 1; i <= m_efg.NumPlayers(); i++)
     foo[i] = nodes[i]->GetPlayer().NumInfosets();
 
-  gPVector<int> bar(foo);
+  gbtPVector<int> bar(foo);
   for (i = 1; i <= m_efg.NumPlayers(); i++)
     for (int j = 1; j <= nodes[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumNodes(i,j);
@@ -409,8 +409,8 @@ void EFBasis::AddNode(const gbtEfgNode &n)
 bool EFBasis::IsConsistent(void) const
 {
   bigbasis = new EFBasis(m_efg);
-  nodeIndex = new gDPVector<int>(bigbasis->NumNodes());
-  actIndex = new gDPVector<int>(bigbasis->NumActions());
+  nodeIndex = new gbtDPVector<int>(bigbasis->NumNodes());
+  actIndex = new gbtDPVector<int>(bigbasis->NumActions());
   MakeIndices();
   // gout << "\nactIndex:  " << (*actIndex);
   // gout << "\nnodeIndex: " << (*nodeIndex);
@@ -424,9 +424,9 @@ bool EFBasis::IsConsistent(void) const
   // gout << " num_node_vars: " << num_node_vars;
   // gout << " num_vars: " << num_vars;
 
-  A = new gMatrix<double>(1,num_eqs+num_ineqs,1,num_vars);
-  b = new gVector<double>(1,num_eqs+num_ineqs);
-  c = new gVector<double>(1,num_vars);
+  A = new gbtMatrix<double>(1,num_eqs+num_ineqs,1,num_vars);
+  b = new gbtVector<double>(1,num_eqs+num_ineqs);
+  c = new gbtVector<double>(1,num_vars);
   (*A) = 0.0; (*b) = 0.0; (*c)= 0.0;
 
   MakeAb();
@@ -609,10 +609,10 @@ void EFBasis::AddEquation4(int row, const gbtEfgNode &n1,
   (*b)[row] = -1.0;
 }
 
-void EFBasis::GetConsistencySolution(const gVector<double> &x) const
+void EFBasis::GetConsistencySolution(const gbtVector<double> &x) const
 {
-  gDPVector<int> nodes(bigbasis->NumNodes());
-  gDPVector<int> acts(bigbasis->NumActions());
+  gbtDPVector<int> nodes(bigbasis->NumNodes());
+  gbtDPVector<int> acts(bigbasis->NumActions());
   nodes = 0;
   acts = 0;
   int i,j,k;
@@ -666,7 +666,7 @@ gbtOutput& operator<<(gbtOutput&s, const EFBasis& e)
 
 template class gbtArray<EFNodeSet *>;
 template class gbtArray<EFNodeArrays *>;
-template class gDPVector<int>;
+template class gbtDPVector<int>;
 #ifndef __BCC55__
-template gbtOutput & operator<< (gbtOutput&, const gDPVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<int>&);
 #endif  // __BCC55__

@@ -60,8 +60,8 @@ long ran1(long* idum);
 // Converting between strings and other datatypes
 //
 
-class gInteger;
-class gRational;
+class gbtInteger;
+class gbtRational;
 
 void ToTextWidth(int); // Set # of decimal places for floating point
 int  ToTextWidth(void); // Get the current value of the above

@@ -48,18 +48,18 @@ public:
   int m_number;
   gbtText m_name;
   gbtBlock<gbtText> m_actions;
-  gbtBlock<gNumber> m_probs;
+  gbtBlock<gbtNumber> m_probs;
 
   InfosetData(void)
     : m_number(0), m_name("") { }
   void AddAction(const gbtText &p_action) { m_actions.Append(p_action); }
-  void AddProb(const gNumber &p_prob) { m_probs.Append(p_prob); }
+  void AddProb(const gbtNumber &p_prob) { m_probs.Append(p_prob); }
 };
 
 class OutcomeData {
 public:
   gbtText m_name;
-  gbtBlock<gNumber> m_payoffs;
+  gbtBlock<gbtNumber> m_payoffs;
   
   OutcomeData(const gbtText &p_name) : m_name(p_name) { }
 };
@@ -286,8 +286,8 @@ private:
 
   SymbolSet m_lastSymbol;
   double m_lastDouble;
-  gInteger m_lastInteger;
-  gRational m_lastRational;
+  gbtInteger m_lastInteger;
+  gbtRational m_lastRational;
   gbtText m_lastText;
 
 public:
@@ -295,8 +295,8 @@ public:
 
   SymbolSet GetNextSymbol(void);
   SymbolSet GetCurrentSymbol(void) const { return m_lastSymbol; }
-  const gInteger &GetLastInteger(void) const { return m_lastInteger; }
-  const gRational &GetLastRational(void) const { return m_lastRational; }
+  const gbtInteger &GetLastInteger(void) const { return m_lastInteger; }
+  const gbtRational &GetLastRational(void) const { return m_lastRational; }
   double GetLastDouble(void) const { return m_lastDouble; }
   gbtText GetLastText(void) const { return m_lastText; }
 };  

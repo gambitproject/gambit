@@ -26,5 +26,5 @@
 
 #include "gsolver.imp"
 
-template class gSolver<gRational>;
-template class gSolver<gDouble>;
+template class gSolver<gbtRational>;
+template class gSolver<gbtDouble>;

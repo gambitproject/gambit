@@ -455,14 +455,14 @@ bool gbtEfgSupport::HasActiveActionsAtAllInfosets(void) const
   return true;
 }
 
-gPVector<int> gbtEfgSupport::NumActions(void) const
+gbtPVector<int> gbtEfgSupport::NumActions(void) const
 {
   gbtArray<int> foo(m_efg.NumPlayers());
   int i;
   for (i = 1; i <= m_efg.NumPlayers(); i++)
     foo[i] = m_players[i]->GetPlayer().NumInfosets();
 
-  gPVector<int> bar(foo);
+  gbtPVector<int> bar(foo);
   for (i = 1; i <= m_efg.NumPlayers(); i++)
     for (int j = 1; j <= m_players[i]->GetPlayer().NumInfosets(); j++)
       bar(i, j) = NumActions(i,j);
@@ -1056,6 +1056,6 @@ template class gbtList<const gbtEfgSupportWithActiveInfo>;
 #include "math/gpvector.imp"
 #include "math/gdpvect.imp"
 
-template class gVector<bool>;
-template class gPVector<bool>;
-template class gDPVector<bool>;
+template class gbtVector<bool>;
+template class gbtPVector<bool>;
+template class gbtDPVector<bool>;

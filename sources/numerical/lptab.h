@@ -35,7 +35,7 @@
 
 template <class T> class LPTableau : public Tableau<T> {
 private:
-  gVector<T> dual;
+  gbtVector<T> dual;
   gbtBlock<T> unitcost;
   gbtBlock<T> cost;
   gbtBlock<bool> UB,LB;  // does col have upper/lower bound?
@@ -53,22 +53,22 @@ public:
     virtual ~BadPivot();
     gbtText Description(void) const;
   };
-  LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
-  LPTableau(const gMatrix<T> &A, const gbtBlock<int> &art, const gVector<T> &b); 
+  LPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b); 
+  LPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, const gbtVector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
   LPTableau<T>& operator=(const LPTableau<T>&);
   
       // cost information
-  void SetCost(const gVector<T>& ); // unit column cost := 0
-  void SetCost(const gVector<T>&, const gVector<T>& );
-  gVector<T> GetCost() const;
-  gVector<T> GetUnitCost() const;
+  void SetCost(const gbtVector<T>& ); // unit column cost := 0
+  void SetCost(const gbtVector<T>&, const gbtVector<T>& );
+  gbtVector<T> GetCost() const;
+  gbtVector<T> GetUnitCost() const;
   T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(gVector<T> &, gVector<T> &); 
-  void DualVector(gVector<T> &) const; // column vector
+  void RelativeCostVector(gbtVector<T> &, gbtVector<T> &); 
+  void DualVector(gbtVector<T> &) const; // column vector
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
@@ -82,11 +82,11 @@ public:
   int LastLabel( void );
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gbtBlock<T>&rowv, gVector<T> &colv) const;
+  void BasisSelect(const gbtBlock<T>&rowv, gbtVector<T> &colv) const;
 
   // as above, but unit column elements nonzero
   void BasisSelect(const gbtBlock<T>&unitv, const gbtBlock<T>&rowv,
-		   gVector<T>&colv) const; 
+		   gbtVector<T>&colv) const; 
 
   void BigDump(gbtOutput &);
 };

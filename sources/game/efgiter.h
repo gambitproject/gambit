@@ -35,9 +35,9 @@ class EfgIter    {
   private:
     gbtEfgGame m_efg;
     gbtEfgSupport _support;
-    PureBehavProfile<gNumber> _profile;
-    gPVector<int> _current;
-    mutable gVector<gNumber> _payoff;
+    PureBehavProfile<gbtNumber> _profile;
+    gbtPVector<int> _current;
+    mutable gbtVector<gbtNumber> _payoff;
 
   public:
     EfgIter(gbtEfgGame);
@@ -52,8 +52,8 @@ class EfgIter    {
     int Next(int p, int iset);
     int Set(int p, int iset, int act);
   
-    gNumber Payoff(int p) const;
-    void Payoff(gVector<gNumber> &) const;
+    gbtNumber Payoff(int p) const;
+    void Payoff(gbtVector<gbtNumber> &) const;
 
     const gbtEfgSupport &Support(void) const;
 

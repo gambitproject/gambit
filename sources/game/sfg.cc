@@ -63,20 +63,20 @@ Sfg::Sfg(const gbtEfgSupport &S)
 
   gbtIndexOdometer index(seq);
 
-  SF = new gNArray<gbtArray<gNumber> *>(seq);
+  SF = new gNArray<gbtArray<gbtNumber> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new gbtArray<gNumber>(m_efg.NumPlayers());
+    (*SF)[index.CurrentIndices()] = new gbtArray<gbtNumber>(m_efg.NumPlayers());
     for(i=1;i<=m_efg.NumPlayers();i++)
-      (*(*SF)[index.CurrentIndices()])[i]=(gNumber)0;
+      (*(*SF)[index.CurrentIndices()])[i]=(gbtNumber)0;
   } 
 
-  E = new gbtArray<gbtRectArray<gNumber> *> (m_efg.NumPlayers());
+  E = new gbtArray<gbtRectArray<gbtNumber> *> (m_efg.NumPlayers());
   for(i=1;i<=m_efg.NumPlayers();i++) {
-    (*E)[i] = new gbtRectArray<gNumber>(infosets[i].Length()+1,seq[i]);
+    (*E)[i] = new gbtRectArray<gbtNumber>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
-	(*(*E)[i])(j,k)=(gNumber)0;
-    (*(*E)[i])(1,1)=(gNumber)1;
+	(*(*E)[i])(j,k)=(gbtNumber)0;
+    (*(*E)[i])(1,1)=(gbtNumber)1;
   } 
 
   sequences = new gbtArray<SFSequenceSet *>(m_efg.NumPlayers());
@@ -88,7 +88,7 @@ Sfg::Sfg(const gbtEfgSupport &S)
   for(i=1;i<=m_efg.NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
-  MakeSequenceForm(m_efg.GetRoot(),(gNumber)1,one,zero,parent);
+  MakeSequenceForm(m_efg.GetRoot(),(gbtNumber)1,one,zero,parent);
 }
 
 Sfg::~Sfg()
@@ -111,7 +111,7 @@ Sfg::~Sfg()
 }
 
 void 
-Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gbtArray<int>seq, 
+Sfg::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>seq, 
 		      gbtArray<gbtEfgInfoset> iset, gbtArray<Sequence *> parent) 
 { 
   int i,pl;
@@ -136,7 +136,7 @@ Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gbtArray<int>seq,
 	if(isetRow(pl,i)) 
 	  snew[pl]+=efsupp.NumActions(pl,i);
 
-      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gNumber)1;
+      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gbtNumber)1;
       Sequence *myparent(parent[pl]);
 
       bool flag = false;
@@ -156,7 +156,7 @@ Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gbtArray<int>seq,
 	    
 	  }
 
-	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(gNumber)1;
+	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(gbtNumber)1;
 	  MakeSequenceForm(n.GetChild(i),prob,snew,iset,parent);
 	}
       }
@@ -254,15 +254,15 @@ gbtEfgAction Sfg::GetAction(int pl, int j) const
   return (*sequences)[pl]->Find(j)->GetAction();
 }
 
-BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
+BehavProfile<gbtNumber> Sfg::ToBehav(const gbtPVector<double> &x) const
 {
-  BehavProfile<gNumber> b(efsupp);
+  BehavProfile<gbtNumber> b(efsupp);
 
-  b = (gNumber) 0;
+  b = (gbtNumber) 0;
 
   Sequence *sij;
   const Sequence *parent;
-  gNumber value;
+  gbtNumber value;
 
   int i,j;
   for(i=1;i<=m_efg.NumPlayers();i++)
@@ -275,25 +275,25 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
       // gout << sij->GetInfoset()->GetNumber() << " " << sij->GetAction()->GetNumber();
 
       if(x(i, parent->GetNumber())>(double)0)
-	value = (gNumber)(x(i,sn)/x(i,parent->GetNumber()));
+	value = (gbtNumber)(x(i,sn)/x(i,parent->GetNumber()));
       else
-	value = (gNumber)0;
+	value = (gbtNumber)0;
 
       b(i,sij->GetInfoset().GetId(),efsupp.GetIndex(sij->GetAction()))= value;
     }
   return b;
 }
 
-gNumber Sfg::Payoff(const gbtArray<int> & index,int pl) const 
+gbtNumber Sfg::Payoff(const gbtArray<int> & index,int pl) const 
 {
   return Payoffs(index)[pl];
 }
 
 
-template class gNArray<gbtArray<gNumber> *>;
-template class gbtArray<gbtRectArray<gNumber> *>;
+template class gNArray<gbtArray<gbtNumber> *>;
+template class gbtArray<gbtRectArray<gbtNumber> *>;
 #ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtNumber> &);
 #endif // __BCC55__
 template class gbtArray<gbtList<gbtEfgInfoset> >;
 template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtList<gbtEfgInfoset> > &);

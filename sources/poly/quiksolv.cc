@@ -30,11 +30,11 @@
 
 template class gbtRectArray<bool>;
 
-template class QuikSolv<gRational>;
-template gbtOutput &operator<<(gbtOutput &f, const QuikSolv<gRational> &y);
+template class QuikSolv<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &f, const QuikSolv<gbtRational> &y);
 
 //template class QuikSolv<double>;
 //template gbtOutput &operator<<(gbtOutput &f, const QuikSolv<double> &y);
 
-template class QuikSolv<gDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const QuikSolv<gDouble> &y);
+template class QuikSolv<gbtDouble>;
+template gbtOutput &operator<<(gbtOutput &f, const QuikSolv<gbtDouble> &y);

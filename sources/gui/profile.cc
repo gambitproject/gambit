@@ -269,7 +269,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 							   m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
-	const gPVector<gNumber> &profile = behav->Profile()->GetPVector();
+	const gbtPVector<gbtNumber> &profile = behav->Profile()->GetPVector();
 	wxString ret = wxT("("); 
 	for (int i = 1; i <= profile.Lengths()[p_col - offset]; i++) {
 	  if (i > 1) {
@@ -290,7 +290,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	      gbtEfgInfoset infoset = player.GetInfoset(iset);
 	      wxString ret;
 	      for (int act = 1; act <= infoset.NumActions(); act++) {
-		if ((*behav)(infoset.GetAction(act)) > gNumber(0)) {
+		if ((*behav)(infoset.GetAction(act)) > gbtNumber(0)) {
 		  if (ret != wxT("")) {
 		    ret += wxT("+");
 		  }
@@ -339,7 +339,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
 	for (int st = 1; st <= player.NumStrategies(); st++) {
 	  gbtNfgStrategy strategy = player.GetStrategy(st);
-	  if ((*mixed)(strategy) > gNumber(0)) {
+	  if ((*mixed)(strategy) > gbtNumber(0)) {
 	    if (ret != wxT("")) {
 	      ret += wxT("+");
 	    }

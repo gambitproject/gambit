@@ -46,7 +46,7 @@ struct gbt_nfg_outcome_rep {
   gbt_nfg_game_rep *m_nfg;
   bool m_deleted;
   gbtText m_label;
-  gbtBlock<gNumber> m_payoffs;
+  gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
   int m_refCount;
 

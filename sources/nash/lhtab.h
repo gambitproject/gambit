@@ -33,12 +33,12 @@
 template <class T> class LHTableau : public BaseTableau<T>{
 protected:
   LTableau<T> T1,T2;
-  gVector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
-  gVector<T> solution;
+  gbtVector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
+  gbtVector<T> solution;
 public:
       // constructors and destructors
-  LHTableau(const gMatrix<T> &A1, const gMatrix<T> &A2, 
-	    const gVector<T> &b1, const gVector<T> &b2); 
+  LHTableau(const gbtMatrix<T> &A1, const gbtMatrix<T> &A2, 
+	    const gbtVector<T> &b1, const gbtVector<T> &b2); 
   LHTableau(const LHTableau<T>&);
   virtual ~LHTableau();
   

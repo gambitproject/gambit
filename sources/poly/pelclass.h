@@ -38,10 +38,10 @@
 
 class PelView {
  private:
-  gPolyList<gDouble>        input;
+  gPolyList<gbtDouble>        input;
 
-  gbtList<gVector<gComplex> > complexroots;
-  gbtList<gVector<gDouble> >  realroots;
+  gbtList<gbtVector<gbtComplex> > complexroots;
+  gbtList<gbtVector<gbtDouble> >  realroots;
   int                       mixedvolume;
   bool                      solutionsarecorrect;
 
@@ -52,10 +52,10 @@ class PelView {
   void        Initialize_Idf_T_Gen_node(const Gen_node &node, 
 					const char * label)             const;
   Gen_node    CreateRing(const int numvar)                              const;
-  polynomial1 GamPolyToPelPoly(const gPoly<gDouble> &p, 
+  polynomial1 GamPolyToPelPoly(const gPoly<gbtDouble> &p, 
 			       const int n, 
 			       const Pring ring)                        const;
-  Gen_node    CreatePelicanVersionOfSystem(const gPolyList<gDouble> &input,
+  Gen_node    CreatePelicanVersionOfSystem(const gPolyList<gbtDouble> &input,
 					   const Pring ring)            const;
   int         GutsOfGetMixedVolume(      node A, 
 		   	                 node norms, 
@@ -78,13 +78,13 @@ class PelView {
 				      const Gen_node &Qtrig,
 				      const Gen_node &pel_system)            ;
 
-  gbtList<gVector<gComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
-  void        DisplayComplexRootList(const gbtList<gVector<gComplex> > &) const;
-  gbtList<gVector<gDouble> > RealRoots(const gbtList<gVector<gComplex> > &) const;
+  gbtList<gbtVector<gbtComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
+  void        DisplayComplexRootList(const gbtList<gbtVector<gbtComplex> > &) const;
+  gbtList<gbtVector<gbtDouble> > RealRoots(const gbtList<gbtVector<gbtComplex> > &) const;
   bool        CheckSolutions(const Gen_node g)                          const;
 
  public:
-  PelView(const gPolyList<gDouble> &mylist);
+  PelView(const gPolyList<gbtDouble> &mylist);
   PelView(const PelView &);
   ~PelView();
 
@@ -93,8 +93,8 @@ class PelView {
   bool     operator != (const PelView &) const;
 
   int                       Dmnsn()           const;
-  gbtList<gVector<gComplex> > ComplexRoots()    const;
-  gbtList<gVector<gDouble> >  RealRoots()       const;
+  gbtList<gbtVector<gbtComplex> > ComplexRoots()    const;
+  gbtList<gbtVector<gbtDouble> >  RealRoots()       const;
   int                       MixedVolume()     const;
   int                       NumComplexRoots() const;
   bool                      FoundAllRoots()   const;

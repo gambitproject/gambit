@@ -34,7 +34,7 @@
 
 class gbtNfgGame;
 template <class T> class MixedProfile;
-template <class T> class gPVector;
+template <class T> class gbtPVector;
 template <class T> class gbtRectArray;
 
 //
@@ -48,22 +48,22 @@ template <class T> class gbtRectArray;
 //  the game payoffs or probabilities may change.  
 // 
 
-template <class T> class BehavProfile : private gDPVector<T>  {
+template <class T> class BehavProfile : private gbtDPVector<T>  {
 protected:
   gbtEfgGame m_efg;
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
   // structures for storing cached data: nodes
-  mutable gVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
-  mutable gMatrix<T> m_nodeValues;
+  mutable gbtVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
+  mutable gbtMatrix<T> m_nodeValues;
 
   // structures for storing cached data: information sets
-  mutable gPVector<T> m_infosetValues;
+  mutable gbtPVector<T> m_infosetValues;
 
   // structures for storing cached data: actions
-  mutable gDPVector<T> m_actionValues;   // aka conditional payoffs
-  mutable gDPVector<T> m_gripe;
+  mutable gbtDPVector<T> m_actionValues;   // aka conditional payoffs
+  mutable gbtDPVector<T> m_gripe;
 
   void InitPayoffs(void) const;
   void InitProfile(void);
@@ -80,7 +80,7 @@ protected:
   const T &BeliefProb(const gbtEfgNode &node) const;
   T &BeliefProb(const gbtEfgNode &node);
   
-  gVector<T> NodeValues(const gbtEfgNode &node) const
+  gbtVector<T> NodeValues(const gbtEfgNode &node) const
     { return m_nodeValues.Row(node.GetId()); }
   const T &NodeValue(const gbtEfgNode &node, int pl) const
     { return m_nodeValues(node.GetId(), pl); }
@@ -136,8 +136,8 @@ public:
   // OPERATOR OVERLOADING
 
   BehavProfile<T> &operator=(const BehavProfile<T> &);
-  inline BehavProfile<T> &operator=(const gVector<T> &p)
-    { Invalidate(); gVector<T>::operator=(p); return *this;}
+  inline BehavProfile<T> &operator=(const gbtVector<T> &p)
+    { Invalidate(); gbtVector<T>::operator=(p); return *this;}
 
   bool operator==(const BehavProfile<T> &) const;
   bool operator!=(const BehavProfile<T> &x) const
@@ -155,7 +155,7 @@ public:
   
   const T &GetRealizProb(const gbtEfgNode &node);
   const T &GetBeliefProb(const gbtEfgNode &node);
-  gVector<T> GetNodeValue(const gbtEfgNode &node);
+  gbtVector<T> GetNodeValue(const gbtEfgNode &node);
   T GetIsetProb(const gbtEfgInfoset &iset);
   const T &GetIsetValue(const gbtEfgInfoset &iset);
   T GetActionProb(const gbtEfgAction &act) const;
@@ -165,9 +165,9 @@ public:
   // COMPUTATION OF INTERESTING QUANTITIES
 
   T Payoff(int p_player) const;
-  gDPVector<T> Beliefs(void);
+  gbtDPVector<T> Beliefs(void);
   T LiapValue(bool p_penalty = true);
-  T QreValue(const gVector<T> &lambda, bool &);
+  T QreValue(const gbtVector<T> &lambda, bool &);
   T MaxRegret(void);
 
   T DiffActionValue(const gbtEfgAction &action, 
@@ -179,45 +179,45 @@ public:
 
   void Dump(gbtOutput &) const;
 
-  // IMPLEMENTATION OF gDPVector OPERATIONS
+  // IMPLEMENTATION OF gbtDPVector OPERATIONS
   // These are reimplemented here to correctly handle invalidation
   // of cached information.
   const T &operator()(int a, int b, int c) const
-    { return gDPVector<T>::operator()(a, b, c); }
+    { return gbtDPVector<T>::operator()(a, b, c); }
   T &operator()(int a, int b, int c) 
-    { Invalidate();  return gDPVector<T>::operator()(a, b, c); }
+    { Invalidate();  return gbtDPVector<T>::operator()(a, b, c); }
   const T &operator[](int a) const
     { return gbtArray<T>::operator[](a); }
   T &operator[](int a)
     { Invalidate();  return gbtArray<T>::operator[](a); }
 
   BehavProfile<T> &operator=(const T &x)  
-    { Invalidate();  gDPVector<T>::operator=(x);  return *this; }
+    { Invalidate();  gbtDPVector<T>::operator=(x);  return *this; }
 
-  bool operator==(const gDPVector<T> &x) const
-    { return gDPVector<T>::operator==(x); }
-  bool operator!=(const gDPVector<T> &x) const
-    { return gDPVector<T>::operator!=(x); }
+  bool operator==(const gbtDPVector<T> &x) const
+    { return gbtDPVector<T>::operator==(x); }
+  bool operator!=(const gbtDPVector<T> &x) const
+    { return gbtDPVector<T>::operator!=(x); }
 
   BehavProfile<T> &operator+=(const BehavProfile<T> &x)
-    { Invalidate();  gDPVector<T>::operator+=(x);  return *this; }
-  BehavProfile<T> &operator+=(const gDPVector<T> &x)
-    { Invalidate();  gDPVector<T>::operator+=(x);  return *this; }
+    { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
+  BehavProfile<T> &operator+=(const gbtDPVector<T> &x)
+    { Invalidate();  gbtDPVector<T>::operator+=(x);  return *this; }
   BehavProfile<T> &operator-=(const BehavProfile<T> &x)
-    { Invalidate();  gDPVector<T>::operator-=(x);  return *this; }
+    { Invalidate();  gbtDPVector<T>::operator-=(x);  return *this; }
   BehavProfile<T> &operator*=(const T &x)
-    { Invalidate();  gDPVector<T>::operator*=(x);  return *this; }
+    { Invalidate();  gbtDPVector<T>::operator*=(x);  return *this; }
 
   int Length(void) const
     { return gbtArray<T>::Length(); }
   const gbtArray<int> &Lengths(void) const
-    { return gPVector<T>::Lengths(); }
+    { return gbtPVector<T>::Lengths(); }
   int First(void) const { return gbtArray<T>::First(); }
   int Last(void) const { return gbtArray<T>::Last(); }
 
-  const gPVector<T> &GetPVector(void) const { return *this; }
-  const gDPVector<T> &GetDPVector(void) const { return *this; }
-  gDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
+  const gbtPVector<T> &GetPVector(void) const { return *this; }
+  const gbtDPVector<T> &GetDPVector(void) const { return *this; }
+  gbtDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
 };
 
 
@@ -229,11 +229,11 @@ public:
 
 template <class T> class BehavAssessment : public BehavProfile<T> {
 protected:
-  gDPVector<T> m_beliefs;
+  gbtDPVector<T> m_beliefs;
   
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
   void CondPayoff(const gbtEfgNode &, T,
-		  gPVector<T> &, gDPVector<T> &) const;
+		  gbtPVector<T> &, gbtDPVector<T> &) const;
   
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
@@ -248,10 +248,10 @@ public:
   bool IsAssessment(void) const { return true; }
   
   // ACCESS AND MANIPULATION OF BELIEFS
-  gDPVector<T> Beliefs(void) const;
-  gDPVector<T> &Beliefs(void);
+  gbtDPVector<T> Beliefs(void) const;
+  gbtDPVector<T> &Beliefs(void);
   
-  void CondPayoff(gDPVector<T> &p_payoff, gPVector<T> &p_probs) const;
+  void CondPayoff(gbtDPVector<T> &p_payoff, gbtPVector<T> &p_probs) const;
   
   // OUTPUT
   void Dump(gbtOutput &) const;

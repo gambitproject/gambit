@@ -63,10 +63,10 @@ public:
   gbtText GetLabel(void) const;
   void SetLabel(const gbtText &);
 
-  gbtArray<gNumber> GetPayoff(void) const;
-  gNumber GetPayoff(const gbtEfgPlayer &) const;
+  gbtArray<gbtNumber> GetPayoff(void) const;
+  gbtNumber GetPayoff(const gbtEfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
-  void SetPayoff(const gbtEfgPlayer &, const gNumber &);
+  void SetPayoff(const gbtEfgPlayer &, const gbtNumber &);
 
   void DeleteOutcome(void);
 };
@@ -102,10 +102,10 @@ public:
   gbtText GetLabel(void) const;
   void SetLabel(const gbtText &);
   
-  gbtArray<gNumber> GetPayoff(void) const;
-  gNumber GetPayoff(const gbtNfgPlayer &) const;
+  gbtArray<gbtNumber> GetPayoff(void) const;
+  gbtNumber GetPayoff(const gbtNfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
-  void SetPayoff(const gbtNfgPlayer &, const gNumber &);
+  void SetPayoff(const gbtNfgPlayer &, const gbtNumber &);
 
   void DeleteOutcome(void);
 };

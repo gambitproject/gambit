@@ -29,13 +29,13 @@
 #include "math/rational.h"
 
 template<>
-gNumber MixedProfile<gNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
+gbtNumber MixedProfile<gbtNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
   return o.GetPayoff(m_nfg.GetPlayer(pl));
 }
 
 template<>
-gRational MixedProfile<gRational>::Payoff(const gbtNfgOutcome &o, int pl) const
+gbtRational MixedProfile<gbtRational>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
   return o.GetPayoff(m_nfg.GetPlayer(pl));
 }
@@ -49,23 +49,23 @@ double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 template class MixedProfile<double>;
 template gbtOutput &operator<<(gbtOutput &, const MixedProfile<double> &);
 
-template class MixedProfile<gRational>;
-template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gRational> &);
+template class MixedProfile<gbtRational>;
+template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gbtRational> &);
 
-template class MixedProfile<gNumber>;
-template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gNumber> &);
+template class MixedProfile<gbtNumber>;
+template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gbtNumber> &);
 
 
 #include "base/glist.imp"
 
 template class gbtList<MixedProfile<double> >;
-template class gbtList<MixedProfile<gRational> >;
-template class gbtList<MixedProfile<gNumber> >;
+template class gbtList<MixedProfile<gbtRational> >;
+template class gbtList<MixedProfile<gbtNumber> >;
 
 #include "base/grblock.imp"
 
 template class gbtRectBlock<double>;
-template class gbtRectBlock<gRational>;
+template class gbtRectBlock<gbtRational>;
 
 #include "base/garray.imp"
 #include "base/gblock.imp"

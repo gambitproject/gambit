@@ -39,7 +39,7 @@ public:
 
 class PolEnumModule  {
 private:
-  gDouble eps;
+  gbtDouble eps;
   gbtNfgGame m_nfg;
   const gbtNfgSupport &support;
   PolEnumParams params;
@@ -51,24 +51,24 @@ private:
   gbtList<MixedSolution> solutions;
   bool is_singular;
 
-  bool EqZero(gDouble x) const;
+  bool EqZero(gbtDouble x) const;
   
   // p_i_j as a gPoly, with last prob in terms of previous probs
-  gPoly<gDouble> Prob(int i,int j) const;
+  gPoly<gbtDouble> Prob(int i,int j) const;
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.  
-  gPoly<gDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
-  gPolyList<gDouble>   IndifferenceEquations()                 const;
-  gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
-  gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
-  gbtList<gVector<gDouble> > 
-               NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
-					const gRectangle<gDouble> &Cube,
+  gPoly<gbtDouble> IndifferenceEquation(int i, int strat1, int strat2) const;
+  gPolyList<gbtDouble>   IndifferenceEquations()                 const;
+  gPolyList<gbtDouble>   LastActionProbPositiveInequalities()    const;
+  gPolyList<gbtDouble>   NashOnSupportEquationsAndInequalities() const;
+  gbtList<gbtVector<gbtDouble> > 
+               NashOnSupportSolnVectors(const gPolyList<gbtDouble> &equations,
+					const gRectangle<gbtDouble> &Cube,
 					gbtStopWatch &timer,
 					gbtStatus &p_status);
 
-  int SaveSolutions(const gbtList<gVector<gDouble> > &list);
+  int SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list);
 public:
   PolEnumModule(const gbtNfgSupport &, const PolEnumParams &p);
   
@@ -80,12 +80,12 @@ public:
   PolEnumParams &Parameters(void);
 
   const gbtList<MixedSolution> &GetSolutions(void) const;
-  gVector<gDouble> SolVarsFromMixedProfile(const MixedProfile<gNumber> &) 
+  gbtVector<gbtDouble> SolVarsFromMixedProfile(const MixedProfile<gbtNumber> &) 
                                                                      const;
 
-  const int PolishKnownRoot(gVector<gDouble> &) const;
+  const int PolishKnownRoot(gbtVector<gbtDouble> &) const;
 
-  MixedSolution ReturnPolishedSolution(const gVector<gDouble> &) const;
+  MixedSolution ReturnPolishedSolution(const gbtVector<gbtDouble> &) const;
 
   bool IsSingular() const;
 };
@@ -107,7 +107,7 @@ PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
 int PolEnumModule::PolEnum(gbtStatus &p_status)
 {
   gbtStopWatch watch;
-  gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities();
+  gPolyList<gbtDouble> equations = NashOnSupportEquationsAndInequalities();
 
   /*
   // equations for equality of strat j to strat j+1
@@ -121,17 +121,17 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
   */
 
   // set up the rectangle of search
-  gVector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
+  gbtVector<gbtDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gbtDouble)0;
+  tops = (gbtDouble)1;
  
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  gRectangle<gbtDouble> Cube(bottoms, tops); 
 
   // start QuikSolv
   gbtStopWatch timer;
   timer.Start();
 
-  gbtList<gVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  gbtList<gbtVector<gbtDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube,
 								   timer,
 								   p_status);
@@ -142,7 +142,7 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
   return index;	 
 }
 
-int PolEnumModule::SaveSolutions(const gbtList<gVector<gDouble> > &list)
+int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list)
 {
   MixedProfile<double> profile(support);
   int i,j,k,kk,index=0;
@@ -160,14 +160,14 @@ int PolEnumModule::SaveSolutions(const gbtList<gVector<gDouble> > &list)
       kk+=(support.NumStrats(i)-1);
     }
     index = solutions.Append(MixedSolution(profile, "PolEnum[m_nfgG]"));
-    gNumber eps = (gNumber)0.0;
+    gbtNumber eps = (gbtNumber)0.0;
     gEpsilon(eps);
     solutions[index].SetEpsilon(eps);
   }
   return index;
 }
 
-bool PolEnumModule::EqZero(gDouble x) const
+bool PolEnumModule::EqZero(gbtDouble x) const
 {
   if(x <= eps && x >= -eps) return 1;
   return 0;
@@ -193,10 +193,10 @@ const gbtList<MixedSolution> &PolEnumModule::GetSolutions(void) const
   return solutions;
 }
 
-gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
+gPoly<gbtDouble> PolEnumModule::Prob(int p, int strat) const
 {
-  gPoly<gDouble> equation(&Space,&Lex);
-  gVector<int> exps(num_vars);
+  gPoly<gbtDouble> equation(&Space,&Lex);
+  gbtVector<int> exps(num_vars);
   int i,j,kk = 0;
   
   for(i=1;i<p;i++) 
@@ -206,8 +206,8 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
     exps=0;
     exps[strat+kk]=1;
     exp_vect const_exp(&Space,exps);
-    gMono<gDouble> const_term((gDouble)1,const_exp);
-    gPoly<gDouble> new_term(&Space,const_term,&Lex);
+    gMono<gbtDouble> const_term((gbtDouble)1,const_exp);
+    gPoly<gbtDouble> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   else {
@@ -215,20 +215,20 @@ gPoly<gDouble> PolEnumModule::Prob(int p, int strat) const
       exps=0;
       exps[j+kk]=1;
       exp_vect exponent(&Space,exps);
-      gMono<gDouble> term((gDouble)(-1),exponent);
-      gPoly<gDouble> new_term(&Space,term,&Lex);
+      gMono<gbtDouble> term((gbtDouble)(-1),exponent);
+      gPoly<gbtDouble> new_term(&Space,term,&Lex);
       equation+=new_term;
     }
     exps=0;
     exp_vect const_exp(&Space,exps);
-    gMono<gDouble> const_term((gDouble)1,const_exp);
-    gPoly<gDouble> new_term(&Space,const_term,&Lex);
+    gMono<gbtDouble> const_term((gbtDouble)1,const_exp);
+    gPoly<gbtDouble> new_term(&Space,const_term,&Lex);
     equation+=new_term;
   }
   return equation;
 }
 
-gPoly<gDouble> 
+gPoly<gbtDouble> 
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   StrategyProfile profile(m_nfg);
@@ -236,15 +236,15 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
   gbtNfgContIterator A(support), B(support);
   A.Freeze(support.GetStrategy(i, strat1));
   B.Freeze(support.GetStrategy(i, strat2));
-  gPoly<gDouble> equation(&Space,&Lex);
+  gPoly<gbtDouble> equation(&Space,&Lex);
   do {
-    gPoly<gDouble> term(&Space,(gDouble)1,&Lex);
+    gPoly<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
     profile = A.GetProfile();
     int k;
     for(k=1;k<=m_nfg.NumPlayers();k++) 
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(profile[k]));
-    gDouble coeff,ap,bp;
+    gbtDouble coeff,ap,bp;
     ap = (double) A.GetPayoff(m_nfg.GetPlayer(i));
     bp = (double) B.GetPayoff(m_nfg.GetPlayer(i));
     coeff = ap - bp;
@@ -256,9 +256,9 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 }
 
 
-gPolyList<gDouble>   PolEnumModule::IndifferenceEquations()  const
+gPolyList<gbtDouble>   PolEnumModule::IndifferenceEquations()  const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<gbtDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=m_nfg.NumPlayers();pl++) 
     for(int j=1;j<support.NumStrats(pl);j++) 
@@ -267,9 +267,9 @@ gPolyList<gDouble>   PolEnumModule::IndifferenceEquations()  const
   return equations;
 }
  
-gPolyList<gDouble> PolEnumModule::LastActionProbPositiveInequalities() const
+gPolyList<gbtDouble> PolEnumModule::LastActionProbPositiveInequalities() const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<gbtDouble> equations(&Space,&Lex);
 
   for(int pl=1;pl<=m_nfg.NumPlayers();pl++)
     if(support.NumStrats(pl)>2) 
@@ -278,9 +278,9 @@ gPolyList<gDouble> PolEnumModule::LastActionProbPositiveInequalities() const
   return equations;
 }
 
-gPolyList<gDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
+gPolyList<gbtDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 {
-  gPolyList<gDouble> equations(&Space,&Lex);
+  gPolyList<gbtDouble> equations(&Space,&Lex);
   
   equations += IndifferenceEquations();
   equations += LastActionProbPositiveInequalities();
@@ -289,20 +289,20 @@ gPolyList<gDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 }
 
 
-gbtList<gVector<gDouble> > 
-PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
-					      const gRectangle<gDouble> &Cube,
+gbtList<gbtVector<gbtDouble> > 
+PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gbtDouble> &equations,
+					      const gRectangle<gbtDouble> &Cube,
 					      gbtStopWatch &timer,
 					      gbtStatus &p_status)
 {  
-  QuikSolv<gDouble> quickie(equations, p_status);
+  QuikSolv<gbtDouble> quickie(equations, p_status);
   //  p_status.SetProgress(0);
 
   try {
     quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter);
   }
   catch (gbtSignalBreak &) { }
-  catch (gSquareMatrix<gDouble>::MatrixSingular) {
+  catch (gbtSquareMatrix<gbtDouble>::MatrixSingular) {
     is_singular = true;
   }
 
@@ -350,11 +350,11 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 {
   PolEnumParams params;
   PolEnumModule module(support, params);
-  gVector<gDouble> vec = module.SolVarsFromMixedProfile(*(sol.Profile()));
+  gbtVector<gbtDouble> vec = module.SolVarsFromMixedProfile(*(sol.Profile()));
 
   /* //DEBUG
-  gPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
-  MixedProfile<gNumber> newsol = module.SequenceForm().ToMixed(xx);
+  gbtPVector<double> xx = module.SeqFormProbsFromSolVars(vec);
+  MixedProfile<gbtNumber> newsol = module.SequenceForm().ToMixed(xx);
 
   gout << "sol.Profile = " << *(sol.Profile()) << "\n";
   gout << "vec  = " << vec << "\n";
@@ -380,27 +380,27 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 }
 
 
-gVector<gDouble> 
-PolEnumModule::SolVarsFromMixedProfile(const MixedProfile<gNumber> &sol) const
+gbtVector<gbtDouble> 
+PolEnumModule::SolVarsFromMixedProfile(const MixedProfile<gbtNumber> &sol) const
 {
   int numvars(0);
 
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) 
     numvars += support.NumStrats(pl) - 1;
 
-  gVector<gDouble> answer(numvars);
+  gbtVector<gbtDouble> answer(numvars);
   int count(0);
 
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) 
     for (int j = 1; j < support.NumStrats(pl); j++) {
       count ++;
-      answer[count] = (gDouble)sol(pl,j);
+      answer[count] = (gbtDouble)sol(pl,j);
     }
 
   return answer;
 }
 
-const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
+const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
 {
   //DEBUG
   //  gout << "Prior to Polishing point is " << point << ".\n";
@@ -410,7 +410,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
     gbtStopWatch watch;
     
     // equations for equality of strat j to strat j+1
-    gPolyList<gDouble> equations(&Space,&Lex);
+    gPolyList<gbtDouble> equations(&Space,&Lex);
     equations += IndifferenceEquations();
 
     //DEBUG
@@ -420,7 +420,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
     
     // start QuikSolv
     gbtNullStatus gstatus;
-    QuikSolv<gDouble> quickie(equations, gstatus);
+    QuikSolv<gbtDouble> quickie(equations, gstatus);
     
     //DEBUG
     //    gout << "We constructed quickie.\n";
@@ -429,7 +429,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
       point = quickie.NewtonPolishedRoot(point);
     }
     catch (gbtSignalBreak &) { }
-    catch (gSquareMatrix<gDouble>::MatrixSingular &) {
+    catch (gbtSquareMatrix<gbtDouble>::MatrixSingular &) {
       return 0;
     }
 
@@ -442,7 +442,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
 }
 
 MixedSolution 
-PolEnumModule::ReturnPolishedSolution(const gVector<gDouble> &root) const
+PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 {
   MixedProfile<double> profile(support);
 

@@ -702,7 +702,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 	gNullOutput gnull;
 	if (dialog.DomMixed()) {
 	  newSupport = support.MixedUndominated(dialog.DomStrong(),
-						precRATIONAL,
+						GBT_PREC_RATIONAL,
 						dialog.Players(),
 						gnull, status);
 	}
@@ -895,7 +895,7 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = MixedProfile<gNumber>(gbtNfgSupport(m_doc->GetNfg()));
+  MixedSolution profile = MixedProfile<gbtNumber>(gbtNfgSupport(m_doc->GetNfg()));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {

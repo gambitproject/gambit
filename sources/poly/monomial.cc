@@ -37,18 +37,18 @@ template gbtOutput& operator << (gbtOutput& output, const gMono<int>& x);
 template class gMono<double>;
 template gbtOutput& operator << (gbtOutput& output, const gMono<double>& x);
 
-template class gMono<gRational>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gRational>& x);
+template class gMono<gbtRational>;
+template gbtOutput& operator << (gbtOutput& output, const gMono<gbtRational>& x);
 
-template class gMono<gNumber>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gNumber>& x);
+template class gMono<gbtNumber>;
+template gbtOutput& operator << (gbtOutput& output, const gMono<gbtNumber>& x);
 
-template class gMono<gDouble>;
-template gbtOutput& operator << (gbtOutput& output, const gMono<gDouble>& x);
+template class gMono<gbtDouble>;
+template gbtOutput& operator << (gbtOutput& output, const gMono<gbtDouble>& x);
 
 template class gbtList< gMono<int> >;
 template class gbtList< gMono<double> >;
-template class gbtList< gMono<gRational> >;
-template class gbtList< gMono<gNumber> >;
+template class gbtList< gMono<gbtRational> >;
+template class gbtList< gMono<gbtNumber> >;
 
-template class gbtList< gMono<gDouble> >;
+template class gbtList< gMono<gbtDouble> >;

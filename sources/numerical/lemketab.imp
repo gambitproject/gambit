@@ -30,8 +30,8 @@
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> LTableau<T>::LTableau(const gMatrix<T> &A, 
-					 const gVector<T> &b)
+template <class T> LTableau<T>::LTableau(const gbtMatrix<T> &A, 
+					 const gbtVector<T> &b)
   : Tableau<T>(A,b)
 { } 
 
@@ -79,8 +79,8 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   gbtBlock<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  gVector<T> incol(MinRow(), MaxRow());
-  gVector<T> col(MinRow(), MaxRow());
+  gbtVector<T> incol(MinRow(), MaxRow());
+  gbtVector<T> col(MinRow(), MaxRow());
   
   SolveColumn(inlabel,incol);
   //* gout << "\nincol = " << incol;
@@ -154,8 +154,8 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
   gbtBlock<int> BestSet;
   int i, c;
   T ratio, tempmax;
-  gVector<T> incol(MinRow(), MaxRow());
-  gVector<T> col(MinRow(), MaxRow());
+  gbtVector<T> incol(MinRow(), MaxRow());
+  gbtVector<T> col(MinRow(), MaxRow());
   
   SolveColumn(inlabel,incol);
   //   gout << "\nincol = " << incol;

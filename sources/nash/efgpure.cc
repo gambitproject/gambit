@@ -38,7 +38,7 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
   gbtList<BehavSolution> solutions;
 
   EfgContIter citer(p_support);
-  gPVector<gNumber> probs(p_support.GetGame().NumInfosets());
+  gbtPVector<gbtNumber> probs(p_support.GetGame().NumInfosets());
 
   int ncont = 1;
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
@@ -59,11 +59,11 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
     EfgIter eiter(citer);
 
     for (int pl = 1; flag && pl <= p_support.GetGame().NumPlayers(); pl++)  {
-      gNumber current = citer.Payoff(pl);
+      gbtNumber current = citer.Payoff(pl);
       for (int iset = 1;
 	   flag && iset <= p_support.GetGame().GetPlayer(pl).NumInfosets();
 	   iset++)  {
-      	if (probs(pl, iset) == gNumber(0))   continue;
+      	if (probs(pl, iset) == gbtNumber(0))   continue;
        	for (int act = 1; act <= p_support.NumActions(pl, iset); act++)  {
 	  eiter.Next(pl, iset);
 	  if (eiter.Payoff(pl) > current)  {
@@ -75,10 +75,10 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
     }
 
     if (flag)  {
-      BehavProfile<gNumber> temp(gbtEfgSupport(p_support.GetGame()));
+      BehavProfile<gbtNumber> temp(gbtEfgSupport(p_support.GetGame()));
       // zero out all the entries, since any equilibria are pure
-      ((gVector<gNumber> &) temp).operator=(gNumber(0));
-      const PureBehavProfile<gNumber> &profile = citer.GetProfile();
+      ((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
+      const PureBehavProfile<gbtNumber> &profile = citer.GetProfile();
       for (gbtEfgPlayerIterator player(p_support.GetGame());
 	   !player.End(); player++) {
 	for (gbtEfgInfosetIterator infoset(*player);

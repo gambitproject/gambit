@@ -111,8 +111,8 @@ gbtEfgAction PureBehavProfile<T>::GetAction(const gbtEfgInfoset &infoset) const
 /* - The following is an attempt to eliminate all the extra work of
 computing a vector of payoffs when only one agent's payoff is of
 interest.  It runs into a problem that I don't know how to solve,
-namely that compilation leads to a request for a cast from gNumber to
-gRational. amm-8.98
+namely that compilation leads to a request for a cast from gbtNumber to
+gbtRational. amm-8.98
 
 template <class T>
 void PureBehavProfile<T>::IndPayoff(const Node *n, 
@@ -172,7 +172,7 @@ void PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const T prob,
 
 template <class T>
 void PureBehavProfile<T>::InfosetProbs(const gbtEfgNode &n,
-				       T prob, gPVector<T> &probs) const
+				       T prob, gbtPVector<T> &probs) const
 {
   if (!n.GetInfoset().IsNull() && n.GetPlayer().IsChance()) {
     for (int i = 1; i <= n.NumChildren(); i++) {
@@ -195,9 +195,9 @@ void PureBehavProfile<T>::Payoff(gbtArray<T> &payoff) const
 }
 
 template <class T>
-void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
+void PureBehavProfile<T>::InfosetProbs(gbtPVector<T> &probs) const
 {
-  ((gVector<T> &) probs).operator=((T) 0);
+  ((gbtVector<T> &) probs).operator=((T) 0);
   InfosetProbs(m_efg.GetRoot(), (T) 1, probs);
 }
 
@@ -219,7 +219,7 @@ const T PureBehavProfile<T>::Payoff(const gbtEfgOutcome &p_outcome,
 
 template <class T>
 BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
-  : gDPVector<T>(p_profile), m_efg(p_profile.m_efg),
+  : gbtDPVector<T>(p_profile), m_efg(p_profile.m_efg),
     m_support(p_profile.m_support),
     m_cached_data(false),
     m_realizProbs(p_profile.m_realizProbs), m_beliefs(p_profile.m_beliefs),
@@ -233,7 +233,7 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
 }
 
 template <class T> BehavProfile<T>::BehavProfile(const gbtEfgSupport &p_support) 
-  : gDPVector<T>(p_support.NumActions()), 
+  : gbtDPVector<T>(p_support.NumActions()), 
     m_efg(p_support.GetGame()),
     m_support(p_support),
     m_cached_data(false),
@@ -253,7 +253,7 @@ template <class T> BehavProfile<T>::BehavProfile(const gbtEfgSupport &p_support)
 
 template <class T>
 BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
-  : gDPVector<T>(p_profile.GetGame().AssociatedEfg().NumActions()), 
+  : gbtDPVector<T>(p_profile.GetGame().AssociatedEfg().NumActions()), 
     m_efg(p_profile.GetGame().AssociatedEfg()),
     m_support(m_efg),  
     m_cached_data(false),
@@ -272,11 +272,11 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
   InitProfile();
 
   if (m_efg.AssociatedAfg() == p_profile.GetGame())   {
-    ((gVector<T> &) *this).operator=((gVector<T> &) p_profile);
+    ((gbtVector<T> &) *this).operator=((gbtVector<T> &) p_profile);
     return;
   }
 
-  ((gVector<T> &) *this).operator=((T)0); 
+  ((gbtVector<T> &) *this).operator=((T)0); 
 
   gbtEfgNode n = m_efg.GetRoot();
   const gbtNfgSupport &support = p_profile.Support();
@@ -314,8 +314,8 @@ BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p_profile)
   if (this != &p_profile && m_efg == p_profile.m_efg)   {
     Invalidate();
     // note that a dimensionality change will trigger an exception
-    // in the gDPVector assignment operator
-    gDPVector<T>::operator=(p_profile);
+    // in the gbtDPVector assignment operator
+    gbtDPVector<T>::operator=(p_profile);
     m_support = p_profile.m_support;
   }
   return *this;
@@ -325,7 +325,7 @@ template <class T>
 bool BehavProfile<T>::operator==(const BehavProfile<T> &p_profile) const
 {
   return (m_efg == p_profile.m_efg &&
-	  (gDPVector<T> &) *this == (gDPVector<T> &) p_profile);
+	  (gbtDPVector<T> &) *this == (gbtDPVector<T> &) p_profile);
 }
 
 //-------------------------------------------------------------------------
@@ -465,7 +465,7 @@ const T &BehavProfile<T>::GetBeliefProb(const gbtEfgNode &node)
 }
 
 template <class T>
-gVector<T> BehavProfile<T>::GetNodeValue(const gbtEfgNode &node)
+gbtVector<T> BehavProfile<T>::GetNodeValue(const gbtEfgNode &node)
 { 
   ComputeSolutionData();
   return NodeValues(node);
@@ -664,7 +664,7 @@ void BehavProfile<T>::ComputeSolutionDataPass2(const gbtEfgNode &node)
     for (int child = 1; child <= node.NumChildren(); child++)  {
       ComputeSolutionDataPass2(node.GetChild(child));
 
-      //      gVector<T> s = NodeValue(children[child]);
+      //      gbtVector<T> s = NodeValue(children[child]);
 
       gbtEfgAction act = node.GetChild(child).GetPriorAction();
 
@@ -792,10 +792,10 @@ void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
 	
 }
 
-template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void)
+template <class T> gbtDPVector<T> BehavProfile<T>::Beliefs(void)
 {
   ComputeSolutionData();
-  gDPVector<T> bprobs(m_efg.NumMembers());
+  gbtDPVector<T> bprobs(m_efg.NumMembers());
   bprobs = (T) 0;
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
@@ -855,12 +855,12 @@ template <class T> T BehavProfile<T>::LiapValue(bool p_penalty)
   return result;
 }
 
-template <class T> T BehavProfile<T>::QreValue(const gVector<T> &lambda, bool &_domain_err)
+template <class T> T BehavProfile<T>::QreValue(const gbtVector<T> &lambda, bool &_domain_err)
 {
   static const T PENALTY = (T)10000;
   T BigNum = (T)500;
   
-  //  gDPVector<T> _cpay(m_support.NumActions());
+  //  gbtDPVector<T> _cpay(m_support.NumActions());
 
   T val = (T)0, prob, psum, z,factor;
 
@@ -923,7 +923,7 @@ T BehavProfile<T>::MaxRegret(void)
 
 template <class T> void BehavProfile<T>::Dump(gbtOutput &p_file) const
 {
-  gDPVector<T>::Dump(p_file);
+  gbtDPVector<T>::Dump(p_file);
 }
 
 
@@ -987,10 +987,10 @@ BehavAssessment<T>::operator=(const BehavAssessment<T> &p_assess)
 //        BehavAssessment<T>: Access and manipulation of beliefs
 //------------------------------------------------------------------------
 
-template <class T> gDPVector<T> BehavAssessment<T>::Beliefs(void) const
+template <class T> gbtDPVector<T> BehavAssessment<T>::Beliefs(void) const
 { return m_beliefs; }
 
-template <class T> gDPVector<T> &BehavAssessment<T>::Beliefs(void)
+template <class T> gbtDPVector<T> &BehavAssessment<T>::Beliefs(void)
 { return m_beliefs; }
 
 //----------------
@@ -1000,8 +1000,8 @@ template <class T> gDPVector<T> &BehavAssessment<T>::Beliefs(void)
 template <class T>
 void BehavAssessment<T>::CondPayoff(const gbtEfgNode &p_node,
 				    T p_prob,
-				    gPVector<T> &p_probs,
-				    gDPVector<T> &p_payoff) const
+				    gbtPVector<T> &p_probs,
+				    gbtDPVector<T> &p_payoff) const
 {
   int npl =
     (!p_node.GetInfoset().IsNull()) ? p_node.GetPlayer().GetId() : -1;
@@ -1020,7 +1020,7 @@ void BehavAssessment<T>::CondPayoff(const gbtEfgNode &p_node,
 			m_nodeValues.Row(p_node.GetId()));
   }
   
-  gVector<T> tmp(m_efg.NumPlayers());
+  gbtVector<T> tmp(m_efg.NumPlayers());
   tmp = (T) 0;
   
   if (nc == 0)   return;
@@ -1073,11 +1073,11 @@ void BehavAssessment<T>::CondPayoff(const gbtEfgNode &p_node,
 
 
 template <class T>
-void BehavAssessment<T>::CondPayoff(gDPVector<T> &p_payoff,
-				    gPVector<T> &p_probs) const
+void BehavAssessment<T>::CondPayoff(gbtDPVector<T> &p_payoff,
+				    gbtPVector<T> &p_probs) const
 {
-  ((gVector<T> &) p_payoff).operator=((T) 0);
-  ((gVector<T> &) p_probs).operator=((T) 0);
+  ((gbtVector<T> &) p_payoff).operator=((T) 0);
+  ((gbtVector<T> &) p_probs).operator=((T) 0);
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     m_nodeValues(1, pl) = (T) 0;

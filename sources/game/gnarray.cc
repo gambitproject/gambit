@@ -28,10 +28,4 @@
 #include "math/rational.h"
 
 template class gNArray<double>;
-template class gNArray<gRational>;
-
-
-
-
-
-
+template class gNArray<gbtRational>;

@@ -38,51 +38,51 @@
 #include "math/complex.h"
 
 //--------------------------------------------------------------------------
-//                              class: gComplex
+//                              class: gbtComplex
 //--------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------
 //                       constructors and a destructor
 //--------------------------------------------------------------------------
 
-gComplex::gComplex() 
+gbtComplex::gbtComplex() 
 : re(0), im(0)
 {}
 
-gComplex::gComplex(const double& x, const double& y)
+gbtComplex::gbtComplex(const double& x, const double& y)
 : re(x), im(y)
 {}
 
-gComplex::gComplex(const gComplex& y) 
+gbtComplex::gbtComplex(const gbtComplex& y) 
 : re(y.re), im(y.im)
 {}
 
-gComplex::gComplex(const int& n)
+gbtComplex::gbtComplex(const int& n)
 : re(n), im(0)
 {}
 
-gComplex::gComplex(const long& n) 
+gbtComplex::gbtComplex(const long& n) 
 : re(n), im(0)
 {}
 
-gComplex::~gComplex() 
+gbtComplex::~gbtComplex() 
 {}
 
 //--------------------------------------------------------------------------
 //                               operators
 //--------------------------------------------------------------------------
 
-double gComplex::RealPart() const
+double gbtComplex::RealPart() const
 {
   return re;
 }
 
-double gComplex::ImaginaryPart() const
+double gbtComplex::ImaginaryPart() const
 {
   return im;
 }
 
-gComplex& gComplex::operator =  (const gComplex& y)
+gbtComplex& gbtComplex::operator =  (const gbtComplex& y)
 {
   if (this == &y) return *this;
 
@@ -91,73 +91,73 @@ gComplex& gComplex::operator =  (const gComplex& y)
   return *this;
 }
 
-bool gComplex::operator == (const gComplex& y) const
+bool gbtComplex::operator == (const gbtComplex& y) const
 {
   if (re == y.re && im == y.im) return true;
   else                          return false;
 }
 
-bool gComplex::operator != (const gComplex& y) const
+bool gbtComplex::operator != (const gbtComplex& y) const
 {
   return !(*this == y);
 }
 
-void gComplex::operator += (const gComplex& y)
+void gbtComplex::operator += (const gbtComplex& y)
 {
-  *this = gComplex(re + y.re,im + y.im);
+  *this = gbtComplex(re + y.re,im + y.im);
 }
 
-void gComplex::operator -= (const gComplex& y) 
+void gbtComplex::operator -= (const gbtComplex& y) 
 {
-  *this = gComplex(re - y.re,im - y.im);
+  *this = gbtComplex(re - y.re,im - y.im);
 }
 
-void gComplex::operator *= (const gComplex& y) 
+void gbtComplex::operator *= (const gbtComplex& y) 
 {
-  *this = gComplex(re*y.re - im*y.im,re*y.im + im*y.re);
+  *this = gbtComplex(re*y.re - im*y.im,re*y.im + im*y.re);
 }
 
-void gComplex::operator /= (const gComplex& y) 
+void gbtComplex::operator /= (const gbtComplex& y) 
 {
-  if (y == (gComplex)0) error("Attempt to divide by 0.");
-  *this = gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
+  if (y == (gbtComplex)0) error("Attempt to divide by 0.");
+  *this = gbtComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
 		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
 
-gComplex gComplex::operator + (const gComplex& y) const
+gbtComplex gbtComplex::operator + (const gbtComplex& y) const
 {
-  return gComplex(re + y.re,im + y.im);
+  return gbtComplex(re + y.re,im + y.im);
 }
 
-gComplex gComplex::operator - (const gComplex& y) const
+gbtComplex gbtComplex::operator - (const gbtComplex& y) const
 {
-  return gComplex(re - y.re,im - y.im);
+  return gbtComplex(re - y.re,im - y.im);
 }
 
-gComplex gComplex::operator * (const gComplex& y) const
+gbtComplex gbtComplex::operator * (const gbtComplex& y) const
 {
-  return gComplex(re*y.re - im*y.im,re*y.im + im*y.re);
+  return gbtComplex(re*y.re - im*y.im,re*y.im + im*y.re);
 }
 
-gComplex gComplex::operator / (const gComplex& y) const
+gbtComplex gbtComplex::operator / (const gbtComplex& y) const
 {
-  if (y == (gComplex)0) error("Attempt to divide by 0.");
-  return gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
+  if (y == (gbtComplex)0) error("Attempt to divide by 0.");
+  return gbtComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
 		  (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
 }
 
-gComplex gComplex::operator - () const
+gbtComplex gbtComplex::operator - () const
 {
-  return gComplex(-re,-im);
+  return gbtComplex(-re,-im);
 }
 
 //--------------------------------------------------------------------------
 //                                  errors
 //--------------------------------------------------------------------------
 
-void gComplex::error(const char* msg) const
+void gbtComplex::error(const char* msg) const
 {
-  //  gerr << "gComplex class error: " << msg << '\n';
+  //  gerr << "gbtComplex class error: " << msg << '\n';
   assert(0);
 }
 
@@ -165,7 +165,7 @@ void gComplex::error(const char* msg) const
 //                            input/output
 //--------------------------------------------------------------------------
 
-gbtOutput& operator << (gbtOutput& s, const gComplex& y)
+gbtOutput& operator << (gbtOutput& s, const gbtComplex& y)
 {
   s << y.re;
   if (y.im >= 0.0) {
@@ -175,7 +175,7 @@ gbtOutput& operator << (gbtOutput& s, const gComplex& y)
   return s;
 }
 
-gbtInput &operator>>(gbtInput &f, gComplex &y)
+gbtInput &operator>>(gbtInput &f, gbtComplex &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -206,30 +206,30 @@ gbtInput &operator>>(gbtInput &f, gComplex &y)
 
 // FUNCTIONS OUTSIDE THE CLASS
 
-double   fabs(const gComplex& x) 
+double   fabs(const gbtComplex& x) 
 {
   return sqrt(x.re*x.re + x.im*x.im);
 }
 
-gComplex sqr(const gComplex& x)
+gbtComplex sqr(const gbtComplex& x)
 {
   return x*x;
 }
 
-gComplex pow(const gComplex& x, const long y)
+gbtComplex pow(const gbtComplex& x, const long y)
 {
   if (y < 0) { 
-    assert (x != (gComplex)0);
-    gComplex x1((gComplex)1/x); 
+    assert (x != (gbtComplex)0);
+    gbtComplex x1((gbtComplex)1/x); 
     return pow(x1,-y);
   } 
   else if (y == 0) 
-    return gComplex(1);
+    return gbtComplex(1);
   else if (y == 1)
     return x;
   else {
-    gComplex sqrt_of_answer = pow(x,y/2);
-    gComplex answer = sqrt_of_answer * sqrt_of_answer;
+    gbtComplex sqrt_of_answer = pow(x,y/2);
+    gbtComplex answer = sqrt_of_answer * sqrt_of_answer;
     if (y % 2 == 1) answer *= x;
     return answer;
   }
@@ -239,9 +239,9 @@ gComplex pow(const gComplex& x, const long y)
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
 
-gbtText ToText(const gComplex /* d */)
+gbtText ToText(const gbtComplex /* d */)
 {
-  //  gout << "\nError: ToText(gComplex) must be defined for compilation,";
+  //  gout << "\nError: ToText(gbtComplex) must be defined for compilation,";
   // gout << " but is not functional.\n";
   exit(0);
   return "";
@@ -249,15 +249,15 @@ gbtText ToText(const gComplex /* d */)
 
 // conversions from strings to numbers
 
-gComplex TOgComplex(const gbtText & /* s */)
+gbtComplex TOgComplex(const gbtText & /* s */)
 { 
   //  gout << "\nError: TOgComplex must be defined for compilation,";
   // gout << " but is not functional.\n";
   exit(0);
-  return gComplex(0, 0);
+  return gbtComplex(0, 0);
 }
 
 #include "base/glist.imp"
 
-template class gbtList<gComplex>;
-template gbtOutput& operator << (gbtOutput& output, const gbtList<gComplex>&);
+template class gbtList<gbtComplex>;
+template gbtOutput& operator << (gbtOutput& output, const gbtList<gbtComplex>&);

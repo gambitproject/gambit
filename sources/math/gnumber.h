@@ -32,13 +32,13 @@
 
 class gbtOutput;
 
-typedef enum { precDOUBLE, precRATIONAL } gPrecision;
+typedef enum { GBT_PREC_DOUBLE, GBT_PREC_RATIONAL } gbtPrecision;
 
-class gNumber  {
+class gbtNumber  {
 protected:
-  gPrecision rep;
+  gbtPrecision rep;
   union {
-    gRational *rval;
+    gbtRational *rval;
     double dval;
   };
 
@@ -50,57 +50,57 @@ public:
   };
 
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  gNumber(void);
-  gNumber(float);
-  gNumber(double);
-  gNumber(int n);
-  gNumber(long n);
-  gNumber(const gInteger &y);
-  gNumber(const gRational &y);
-  gNumber(const gNumber &y);
-  ~gNumber();
+  gbtNumber(void);
+  gbtNumber(float);
+  gbtNumber(double);
+  gbtNumber(int n);
+  gbtNumber(long n);
+  gbtNumber(const gbtInteger &y);
+  gbtNumber(const gbtRational &y);
+  gbtNumber(const gbtNumber &y);
+  ~gbtNumber();
 
-  gNumber &operator=(const gNumber &y);
+  gbtNumber &operator=(const gbtNumber &y);
 
   // OPERATOR OVERLOADING
-  friend bool operator==(const gNumber &x, const gNumber &y);
-  friend bool operator!=(const gNumber &x, const gNumber &y);
-  friend bool operator< (const gNumber &x, const gNumber &y);
-  friend bool operator<=(const gNumber &x, const gNumber &y);
-  friend bool operator> (const gNumber &x, const gNumber &y);
-  friend bool operator>=(const gNumber &x, const gNumber &y);
+  friend bool operator==(const gbtNumber &x, const gbtNumber &y);
+  friend bool operator!=(const gbtNumber &x, const gbtNumber &y);
+  friend bool operator< (const gbtNumber &x, const gbtNumber &y);
+  friend bool operator<=(const gbtNumber &x, const gbtNumber &y);
+  friend bool operator> (const gbtNumber &x, const gbtNumber &y);
+  friend bool operator>=(const gbtNumber &x, const gbtNumber &y);
 
-  friend gNumber operator+(const gNumber &x, const gNumber &y);
-  friend gNumber operator-(const gNumber &x, const gNumber &y);
-  friend gNumber operator*(const gNumber &x, const gNumber &y);
-  friend gNumber operator/(const gNumber &x, const gNumber &y);
-  friend gNumber operator-(const gNumber &x);
+  friend gbtNumber operator+(const gbtNumber &x, const gbtNumber &y);
+  friend gbtNumber operator-(const gbtNumber &x, const gbtNumber &y);
+  friend gbtNumber operator*(const gbtNumber &x, const gbtNumber &y);
+  friend gbtNumber operator/(const gbtNumber &x, const gbtNumber &y);
+  friend gbtNumber operator-(const gbtNumber &x);
 
-  gNumber &operator+=(const gNumber &y);
-  gNumber &operator-=(const gNumber &y);
-  gNumber &operator*=(const gNumber &y);
-  gNumber &operator/=(const gNumber &y);
+  gbtNumber &operator+=(const gbtNumber &y);
+  gbtNumber &operator-=(const gbtNumber &y);
+  gbtNumber &operator*=(const gbtNumber &y);
+  gbtNumber &operator/=(const gbtNumber &y);
 
-  friend gbtOutput &operator<<(gbtOutput &s, const gNumber &y);
-  friend gbtInput &operator>>(gbtInput &s, gNumber &y);
+  friend gbtOutput &operator<<(gbtOutput &s, const gbtNumber &y);
+  friend gbtInput &operator>>(gbtInput &s, gbtNumber &y);
 
   // MISCELLANEOUS MATHEMATICAL FUNCTIONS
-  friend gNumber pow(const gNumber&,long);
+  friend gbtNumber pow(const gbtNumber&,long);
 
   // PRECISION-RELATED FUNCTIONS AND CASTS
   operator double() const;
-  operator gRational() const;
-  gPrecision Precision(void) const { return rep; }
+  operator gbtRational() const;
+  gbtPrecision Precision(void) const { return rep; }
   bool IsInteger(void) const;
 };
 
-gbtOutput &operator<<(gbtOutput &, const gNumber &);
+gbtOutput &operator<<(gbtOutput &, const gbtNumber &);
 
-gbtText ToText(const gNumber &);
-gbtText ToText(const gNumber &p_number, int p_precision);
-gNumber	FromText(const gbtText &, gNumber &);
-gNumber ToNumber(const gbtText &);    
+gbtText ToText(const gbtNumber &);
+gbtText ToText(const gbtNumber &p_number, int p_precision);
+gbtNumber	FromText(const gbtText &, gbtNumber &);
+gbtNumber ToNumber(const gbtText &);    
 
-void gEpsilon(gNumber &v, int i=8);
+void gEpsilon(gbtNumber &v, int i=8);
 
 #endif  // GNUMBER_H

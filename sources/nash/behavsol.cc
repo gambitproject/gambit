@@ -36,10 +36,10 @@
 class SubgamePerfectChecker : public gbtEfgNashSubgames  {
 private:
   int subgame_number;
-  gNumber eps;
+  gbtNumber eps;
   gbtTriState isSubgamePerfect;
-  gPVector<int> infoset_subgames;
-  BehavProfile<gNumber> start;
+  gbtPVector<int> infoset_subgames;
+  BehavProfile<gbtNumber> start;
   gbtList<gbtEfgNode> oldroots;
   
   void SolveSubgame(const gbtEfgGame &, const gbtEfgSupport &,
@@ -47,8 +47,8 @@ private:
   
 public:
   SubgamePerfectChecker(const gbtEfgGame &,
-			const BehavProfile<gNumber> &,
-			const gNumber & epsilon);
+			const BehavProfile<gbtNumber> &,
+			const gbtNumber & epsilon);
   virtual ~SubgamePerfectChecker();
   gbtTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
@@ -59,8 +59,8 @@ public:
 
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
-    m_precision(precDOUBLE),
+  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+    m_precision(GBT_PREC_DOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
@@ -78,17 +78,17 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 	    p_profile((*player).GetId(), (*infoset).GetId(), index);
 	else
 	  (*m_profile)((*player).GetId(), (*infoset).GetId(), act) =
-	    gNumber(0.0);
+	    gbtNumber(0.0);
       }
     }
   }
 }
 
 
-BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
+BehavSolution::BehavSolution(const BehavProfile<gbtRational> &p_profile,
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
-    m_precision(precRATIONAL), 
+  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+    m_precision(GBT_PREC_RATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
@@ -104,16 +104,16 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
-	  (*m_profile)(pl, iset, act) = gNumber(0);
+	  (*m_profile)(pl, iset, act) = gbtNumber(0);
       }
     }
   }
 }
 
-BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
+BehavSolution::BehavSolution(const BehavProfile<gbtNumber> &p_profile, 
 			     const gbtText &p_creator)
-  : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
-    m_precision(precRATIONAL),
+  : m_profile(new BehavProfile<gbtNumber>(gbtEfgSupport(p_profile.GetGame()))),
+    m_precision(GBT_PREC_RATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_ANFNash(), m_Nash(), m_SubgamePerfect(), m_Sequential(), 
     m_qreLambda(-1), m_qreValue(-1), m_liapValue(), m_rnfRegret(), 
@@ -128,7 +128,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
 	if (index > 0)
 	  (*m_profile)(pl, iset, act) = p_profile(pl, iset, index);
 	else
-	  (*m_profile)(pl, iset, act) = gNumber(0);
+	  (*m_profile)(pl, iset, act) = gbtNumber(0);
       }
     }
   }
@@ -136,14 +136,14 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
 
   m_epsilon = 0;
   if((*m_profile).Length()>0) 
-    if ((*m_profile)[1].Precision() == precDOUBLE)
+    if ((*m_profile)[1].Precision() == GBT_PREC_DOUBLE)
       m_epsilon = 0.0;
 
   gEpsilon(m_epsilon);
 }
 
 BehavSolution::BehavSolution(const BehavSolution &p_solution)
-  : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
+  : m_profile(new BehavProfile<gbtNumber>(*p_solution.m_profile)),
     m_precision(p_solution.m_precision), 
     m_support(p_solution.m_support), m_creator(p_solution.m_creator),
     m_ANFNash(p_solution.m_ANFNash),
@@ -168,7 +168,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 {
   if (this != &p_solution)   {
     delete m_profile;
-    m_profile = new BehavProfile<gNumber>(*p_solution.m_profile);
+    m_profile = new BehavProfile<gbtNumber>(*p_solution.m_profile);
     m_precision = p_solution.m_precision;
     m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
@@ -266,7 +266,7 @@ gbtTriState BehavSolution::GetSubgamePerfect(void) const
   else {
     // for complete profiles, use subgame perfect checker.  
     if (IsComplete()) {
-      BehavProfile<gNumber> p(*m_profile);
+      BehavProfile<gbtNumber> p(*m_profile);
       SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
       gbtNullStatus status;
       checker.Solve(p.Support(), status);
@@ -306,7 +306,7 @@ gbtTriState BehavSolution::GetSequential(void) const
       // check if game is perfect info
       // this should be in efg.h
       bool flag = true;
-      gPVector<int> v((GetGame()).NumMembers());
+      gbtPVector<int> v((GetGame()).NumMembers());
       for(int i=v.First();flag == true && i<=v.Last();i++)
 	if(v[i]>1) flag = false;
       if(flag==true) return triTRUE;
@@ -320,7 +320,7 @@ gbtTriState BehavSolution::GetSequential(void) const
 //
 // This function no longer inlined to satisfy a Borland C++ warning
 //
-gNumber BehavSolution::GetNodeValue(const gbtEfgNode &p_node,
+gbtNumber BehavSolution::GetNodeValue(const gbtEfgNode &p_node,
 				    const gbtEfgPlayer &p_player) const
 { 
   return m_profile->GetNodeValue(p_node)[p_player.GetId()];
@@ -328,22 +328,22 @@ gNumber BehavSolution::GetNodeValue(const gbtEfgNode &p_node,
 
 void BehavSolution::LevelPrecision(void)
 {
-  m_precision = precRATIONAL;
-  for (int pl = 1; m_precision == precRATIONAL && pl <= GetGame().NumPlayers();
+  m_precision = GBT_PREC_RATIONAL;
+  for (int pl = 1; m_precision == GBT_PREC_RATIONAL && pl <= GetGame().NumPlayers();
        pl++) {
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
-    for (int iset = 1; (m_precision == precRATIONAL && 
+    for (int iset = 1; (m_precision == GBT_PREC_RATIONAL && 
 			iset <= player.NumInfosets()); iset++) {
       gbtEfgInfoset infoset = player.GetInfoset(iset);
-      for (int act = 1; (m_precision == precRATIONAL && 
+      for (int act = 1; (m_precision == GBT_PREC_RATIONAL && 
 			 act <= infoset.NumActions()); act++) {
-	if ((*m_profile)(pl, iset, act).Precision() == precDOUBLE)
-	  m_precision = precDOUBLE;
+	if ((*m_profile)(pl, iset, act).Precision() == GBT_PREC_DOUBLE)
+	  m_precision = GBT_PREC_DOUBLE;
       }
     }
   }
 
-  if (m_precision == precDOUBLE) {
+  if (m_precision == GBT_PREC_DOUBLE) {
     for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
       gbtEfgPlayer player = GetGame().GetPlayer(pl);
       for (int iset = 1; iset <= player.NumInfosets(); iset++) {
@@ -362,12 +362,12 @@ void BehavSolution::LevelPrecision(void)
 
 bool BehavSolution::Equals(const BehavProfile<double> &p_profile) const
 {  
-  gNumber eps(m_epsilon);
+  gbtNumber eps(m_epsilon);
   gEpsilon(eps, 4);  // this should be a function of m_epsilon
 
   int i = p_profile.First();
   while (i <= p_profile.Length()) {
-    if (abs((*m_profile)[i] - (gNumber) p_profile[i]) > eps) 
+    if (abs((*m_profile)[i] - (gbtNumber) p_profile[i]) > eps) 
       break;
     i++;
   }
@@ -378,7 +378,7 @@ bool BehavSolution::operator==(const BehavSolution &p_solution) const
 { return (*m_profile == *p_solution.m_profile); }
 
 void BehavSolution::SetActionProb(const gbtEfgAction &p_action,
-				  const gNumber &p_prob)
+				  const gbtNumber &p_prob)
 {
   Invalidate();
 
@@ -390,7 +390,7 @@ void BehavSolution::SetActionProb(const gbtEfgAction &p_action,
 }
 
 void BehavSolution::Set(int p_player, int p_infoset, int p_action,
-			const gNumber &p_prob)
+			const gbtNumber &p_prob)
 {
   Invalidate();
 
@@ -399,7 +399,7 @@ void BehavSolution::Set(int p_player, int p_infoset, int p_action,
     LevelPrecision();
 }
 
-const gNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
+const gbtNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
 {
   gbtEfgInfoset infoset = p_action.GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
@@ -407,12 +407,12 @@ const gNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
 		      p_action.GetId());
 }
 
-gNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
+gbtNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
 {
   return m_profile->GetActionProb(p_action);
 }
 
-gNumber &BehavSolution::operator[](const gbtEfgAction &p_action)
+gbtNumber &BehavSolution::operator[](const gbtEfgAction &p_action)
 {
   return (*m_profile)(p_action.GetInfoset().GetPlayer().GetId(),
 		      p_action.GetInfoset().GetId(),
@@ -423,8 +423,8 @@ BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
 {
   Invalidate(); 
   *m_profile += *p_solution.m_profile;
-  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
-    m_precision = precDOUBLE;
+  if (m_precision == GBT_PREC_RATIONAL && p_solution.m_precision == GBT_PREC_DOUBLE)
+    m_precision = GBT_PREC_DOUBLE;
   return *this;
 }
 
@@ -432,17 +432,17 @@ BehavSolution &BehavSolution::operator-=(const BehavSolution &p_solution)
 {
   Invalidate();
   *m_profile -= *p_solution.m_profile;
-  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
-    m_precision = precDOUBLE;
+  if (m_precision == GBT_PREC_RATIONAL && p_solution.m_precision == GBT_PREC_DOUBLE)
+    m_precision = GBT_PREC_DOUBLE;
   return *this;
 }
 
-BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
+BehavSolution &BehavSolution::operator*=(const gbtNumber &p_constant)
 { 
   Invalidate();
   *m_profile *= p_constant;
-  if (m_precision == precRATIONAL && p_constant.Precision() == precDOUBLE)
-    m_precision = precDOUBLE;
+  if (m_precision == GBT_PREC_RATIONAL && p_constant.Precision() == GBT_PREC_DOUBLE)
+    m_precision = GBT_PREC_DOUBLE;
   return *this;
 }
 
@@ -452,7 +452,7 @@ BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
 
 bool BehavSolution::IsComplete(void) const
 { 
-  gNumber sum;
+  gbtNumber sum;
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     gbtEfgPlayer player = GetGame().GetPlayer(pl);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) { 
@@ -509,7 +509,7 @@ const gbtTriState &BehavSolution::IsSequential(void) const
   return m_Sequential.Answer();
 }
 
-const gNumber &BehavSolution::GetLiapValue(void) const
+const gbtNumber &BehavSolution::GetLiapValue(void) const
 { 
   CheckIsValid();
   if(!m_liapValue.Checked())
@@ -541,29 +541,29 @@ void BehavSolution::Invalidate(void) const
 //-----------------------------------------
 
 
-gPVector<gNumber> BehavSolution::GetRNFRegret(void) const 
+gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const 
 {
   gbtEfgGame efg = GetGame();
   gbtNfgGame nfg = efg.GetReducedNfg();
   
-  gPVector<gNumber> regret(nfg.NumStrats());
+  gbtPVector<gbtNumber> regret(nfg.NumStrats());
   
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-    gNumber pay = Payoff(pl);
+    gbtNumber pay = Payoff(pl);
     gbtNfgPlayer player = nfg.GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      BehavProfile<gNumber> scratch(*m_profile);
+      BehavProfile<gbtNumber> scratch(*m_profile);
       const gbtArray<int> *const actions = player.GetStrategy(st).GetBehavior();
       for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
 	for (int k = 1; k <= scratch.Support().NumActions(pl,j); k++) {
-	  scratch(pl, j, k) = (gNumber) 0;
+	  scratch(pl, j, k) = (gbtNumber) 0;
 	}
 	if (a > 0) {
-	  scratch(pl, j, a) = (gNumber) 1;
+	  scratch(pl, j, a) = (gbtNumber) 1;
 	}
       }
-      gNumber pay2 = scratch.Payoff(pl);
+      gbtNumber pay2 = scratch.Payoff(pl);
       // use pay - pay instead of zero to get correct precision
       regret(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
     }
@@ -572,7 +572,7 @@ gPVector<gNumber> BehavSolution::GetRNFRegret(void) const
 }
 
 
-const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
+const gbtPVector<gbtNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
   CheckIsValid();
   if(!m_rnfRegret.Checked()) 
@@ -580,15 +580,15 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
   return m_rnfRegret.Answer();
 }
 
-const gNumber BehavSolution::MaxRegret(void) const
+const gbtNumber BehavSolution::MaxRegret(void) const
 {
   return m_profile->MaxRegret();
 }
 
-const gNumber BehavSolution::MaxRNFRegret(void) const
+const gbtNumber BehavSolution::MaxRNFRegret(void) const
 {
-  gNumber ret = 0;
-  const gVector<gNumber> & regret = (gVector<gNumber>)ReducedNormalFormRegret();
+  gbtNumber ret = 0;
+  const gbtVector<gbtNumber> & regret = (gbtVector<gbtNumber>)ReducedNormalFormRegret();
   for(int i=regret.First();i<=regret.Last();i++)
     if(regret[i]>=ret)ret = regret[i];
 
@@ -625,8 +625,8 @@ gbtOutput &operator<<(gbtOutput &p_file, const BehavSolution &p_solution)
 }
 
 SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
-					     const BehavProfile<gNumber> &s,
-					     const gNumber & epsilon)
+					     const BehavProfile<gbtNumber> &s,
+					     const gbtNumber & epsilon)
   : subgame_number(0), eps(epsilon),  
     isSubgamePerfect(triTRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
 {
@@ -658,7 +658,7 @@ void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
 					 gbtList<BehavSolution> &solns,
 					 gbtStatus &p_status)
 {
-  BehavProfile<gNumber> bp(sup);
+  BehavProfile<gbtNumber> bp(sup);
   
   subgame_number++;
   

@@ -29,9 +29,9 @@
 
 
 template class LPSolve<double>;
-template class LPSolve<gRational>;
+template class LPSolve<gbtRational>;
 
 #ifndef __BCC55__
-template gbtBlock<int> Artificials(const gVector<double> &);
-template gbtBlock<int> Artificials(const gVector<gRational> &);
+template gbtBlock<int> Artificials(const gbtVector<double> &);
+template gbtBlock<int> Artificials(const gbtVector<gbtRational> &);
 #endif  // __BCC55__

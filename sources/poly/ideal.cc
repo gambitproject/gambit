@@ -30,12 +30,12 @@
 //template class gBasis<int>;
 //template gbtOutput &operator<<(gbtOutput &f, const gBasis<int> &y);
 
-template class gIdeal<gRational>;
-//template class gBasis<gRational>;
-//template gbtOutput &operator<<(gbtOutput &f, const gBasis<gRational> &y);
+template class gIdeal<gbtRational>;
+//template class gBasis<gbtRational>;
+//template gbtOutput &operator<<(gbtOutput &f, const gBasis<gbtRational> &y);
 
 //template class gIdeal<double>;
 //template class gBasis<double>;
 //template gbtOutput &operator<<(gbtOutput &f, const gBasis<double> &y);
 
-template class gIdeal<gDouble>;
+template class gIdeal<gbtDouble>;

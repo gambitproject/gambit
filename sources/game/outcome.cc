@@ -167,33 +167,33 @@ void gbtEfgOutcome::SetLabel(const gbtText &p_label)
   }
 }
 
-gbtArray<gNumber> gbtEfgOutcome::GetPayoff(void) const
+gbtArray<gbtNumber> gbtEfgOutcome::GetPayoff(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
   }
   else if (!rep) {
-    return gbtArray<gNumber>();
+    return gbtArray<gbtNumber>();
   }
   else {
     return rep->m_payoffs;
   }
 }
 
-gNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
+gbtNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
   }
   else if (!rep || p_player.IsNull()) {
-    return gNumber(0);
+    return gbtNumber(0);
   }
 
   return rep->m_payoffs[p_player.GetId()];
 }
 
 void gbtEfgOutcome::SetPayoff(const gbtEfgPlayer &p_player,
-			      const gNumber &p_value)
+			      const gbtNumber &p_value)
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -352,7 +352,7 @@ void gbtNfgOutcome::SetLabel(const gbtText &p_label)
   }
 }
 
-gNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
+gbtNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -365,7 +365,7 @@ gNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
   }
 }
 
-gbtArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
+gbtArray<gbtNumber> gbtNfgOutcome::GetPayoff(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -374,7 +374,7 @@ gbtArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
     return rep->m_payoffs;
   }
   else {
-    return gbtArray<gNumber>();
+    return gbtArray<gbtNumber>();
   }
 }
 
@@ -392,7 +392,7 @@ double gbtNfgOutcome::GetPayoffDouble(int p_player) const
 }
 
 void gbtNfgOutcome::SetPayoff(const gbtNfgPlayer &p_player,
-			      const gNumber &p_value)
+			      const gbtNumber &p_value)
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();

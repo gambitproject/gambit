@@ -51,7 +51,7 @@ struct gbt_efg_outcome_rep {
   gbt_efg_game_rep *m_efg;
   bool m_deleted;
   gbtText m_label;
-  gbtBlock<gNumber> m_payoffs;
+  gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
   int m_refCount;
 
@@ -87,7 +87,7 @@ struct gbt_efg_infoset_rep {
   gbtText m_label;
   int m_refCount;
   gbtBlock<gbt_efg_action_rep *> m_actions;
-  gbtBlock<gNumber> m_chanceProbs;
+  gbtBlock<gbtNumber> m_chanceProbs;
   gbtBlock<gbt_efg_node_rep *> m_members;
   int m_flag, m_whichbranch;
 

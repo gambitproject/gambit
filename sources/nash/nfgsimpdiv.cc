@@ -25,5 +25,4 @@
 #include "nfgsimpdiv.imp"
 
 template class gbtNfgNashSimpdiv<double>;
-template class gbtNfgNashSimpdiv<gRational>;
-
+template class gbtNfgNashSimpdiv<gbtRational>;

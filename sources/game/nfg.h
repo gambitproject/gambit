@@ -47,8 +47,8 @@ friend class Lexicon;
 friend class NfgFileReader;
 friend class StrategyProfile;
 friend class MixedProfile<double>;
-friend class MixedProfile<gRational>;
-friend class MixedProfile<gNumber>;
+friend class MixedProfile<gbtRational>;
+friend class MixedProfile<gbtNumber>;
 friend void SetEfg(gbtNfgGame, gbtEfgGame);
 protected:
   gbt_nfg_game_rep *rep;
@@ -105,8 +105,8 @@ public:
 
     // defined in nfgutils.cc
   friend void RandomNfg(gbtNfgGame);
-  friend gNumber MinPayoff(const gbtNfgGame &, int pl = 0);
-  friend gNumber MaxPayoff(const gbtNfgGame &, int pl = 0);
+  friend gbtNumber MinPayoff(const gbtNfgGame &, int pl = 0);
+  friend gbtNumber MaxPayoff(const gbtNfgGame &, int pl = 0);
 
   gbtEfgGame AssociatedEfg(void) const;
   bool HasAssociatedEfg(void) const;

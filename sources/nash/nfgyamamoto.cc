@@ -27,7 +27,7 @@
 #include "nfgyamamoto.h"
 #include "math/gsmatrix.h"
 
-static int NumMembers(const gMatrix<int> &p_partition, int p_index)
+static int NumMembers(const gbtMatrix<int> &p_partition, int p_index)
 {
   int count = 0;
   
@@ -40,7 +40,7 @@ static int NumMembers(const gMatrix<int> &p_partition, int p_index)
   return count;
 }
 
-static int FirstMember(const gMatrix<int> &p_partition, int p_index)
+static int FirstMember(const gbtMatrix<int> &p_partition, int p_index)
 {
   for (int col = 1; col <= p_partition.NumColumns(); col++) {
     if (p_partition(p_index, col) > 0) {
@@ -53,7 +53,7 @@ static int FirstMember(const gMatrix<int> &p_partition, int p_index)
 }
 
 static double Payoff(const MixedProfile<double> &p_profile, int p_player,
-		     const gMatrix<int> &p_partition, int p_index)
+		     const gbtMatrix<int> &p_partition, int p_index)
 {
   for (int st = 1; st <= p_profile.Support().NumStrats(p_player); st++) {
     if (p_partition(p_index, st) > 0) {
@@ -66,10 +66,10 @@ static double Payoff(const MixedProfile<double> &p_profile, int p_player,
 }
 
 
-static gMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
+static gbtMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
 				   int p_player)
 {
-  gVector<double> payoffs(p_profile.Support().NumStrats(p_player));
+  gbtVector<double> payoffs(p_profile.Support().NumStrats(p_player));
   gbtArray<int> strategies(p_profile.Support().NumStrats(p_player));
   p_profile.Payoff(p_player, p_player, payoffs);
 
@@ -98,7 +98,7 @@ static gMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
     }
   } while (changed);
 
-  gMatrix<int> partition(strategies.Length(), strategies.Length());
+  gbtMatrix<int> partition(strategies.Length(), strategies.Length());
   for (int row = 1; row <= partition.NumRows(); row++) {
     for (int col = 1; col <= partition.NumColumns(); col++) {
       partition(row, col) = 0;
@@ -115,8 +115,8 @@ static gMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
 
 static void YamamotoJacobian(const MixedProfile<double> &p_profile,
 			     double p_lambda,
-			     const gbtList<gMatrix<int> > &p_partition,
-			     gMatrix<double> &p_matrix)
+			     const gbtList<gbtMatrix<int> > &p_partition,
+			     gbtMatrix<double> &p_matrix)
 {
   int rowno = 0;
   p_matrix = 0.0;
@@ -191,14 +191,14 @@ static void YamamotoJacobian(const MixedProfile<double> &p_profile,
 }
 		      
 static void YamamotoComputeStep(const MixedProfile<double> &p_profile,
-				const gMatrix<double> &p_matrix,
-				gPVector<double> &p_delta, double &p_lambdainc,
+				const gbtMatrix<double> &p_matrix,
+				gbtPVector<double> &p_delta, double &p_lambdainc,
 				double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
   int rowno = 0; 
 
-  gSquareMatrix<double> M(p_matrix.NumRows());
+  gbtSquareMatrix<double> M(p_matrix.NumRows());
 
   for (int row = 1; row <= M.NumRows(); row++) {
     for (int col = 1; col <= M.NumColumns(); col++) {
@@ -242,7 +242,7 @@ static void YamamotoComputeStep(const MixedProfile<double> &p_profile,
 
 static gbtList<int> SortProbs(const MixedProfile<double> &p_profile,
 			    int p_player,
-			    const gMatrix<int> &p_partition,
+			    const gbtMatrix<int> &p_partition,
 			    int p_index)
 {
   gbtList<int> strategies;
@@ -297,8 +297,8 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
   MixedProfile<double> profile(p_support);
   double lambda = 1.0;
   double initialsign = -1.0; 
-  gbtList<gMatrix<int> > partitions;
-  gMatrix<double> H(p_support.GetGame().ProfileLength(),
+  gbtList<gbtMatrix<int> > partitions;
+  gbtMatrix<double> H(p_support.GetGame().ProfileLength(),
 		    p_support.GetGame().ProfileLength() + 1);
 
   for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
@@ -315,7 +315,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
     }
     YamamotoJacobian(profile, lambda, partitions, H);
       
-    gPVector<double> delta(profile);
+    gbtPVector<double> delta(profile);
     double lambdainc;
 
     YamamotoComputeStep(profile, H, delta, lambdainc, initialsign, .000001);
@@ -389,4 +389,4 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 
 #include "base/glist.imp"
 
-template class gbtList<gMatrix<int> >;
+template class gbtList<gbtMatrix<int> >;

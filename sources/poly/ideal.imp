@@ -173,7 +173,7 @@ template<class T> gbtList<exp_vect> gIdeal<T>::MonomialBasis() const
   return answer;
 }
   
-template<class T> bool gIdeal<T>::IsRoot(const gVector<T>& v) const
+template<class T> bool gIdeal<T>::IsRoot(const gbtVector<T>& v) const
 {
   for (int i = 1; i <= basis.Length(); i++)
     if (basis[i].Evaluate(v) != (T)0) return false;

@@ -47,16 +47,16 @@ private:
 
    T MaximalNonconstantContributionRECURSIVE(
 				const gbtTreeNode<gPoly<T> >*,
-		      	        const gVector<T>&,
-			        const gVector<T>&,
-		       	              gVector<int>&)           const;
+		      	        const gbtVector<T>&,
+			        const gbtVector<T>&,
+		       	              gbtVector<int>&)           const;
 
    T MaximalNonconstantDifferenceRECURSIVE(
 				const gbtTreeNode<gPoly<T> >*,
 				const gbtTreeNode<gPoly<T> >*,
-		      	        const gVector<T>&,
-			        const gVector<T>&,
-		       	              gVector<int>&)           const;
+		      	        const gbtVector<T>&,
+			        const gbtVector<T>&,
+		       	              gbtVector<int>&)           const;
 
 public:
    TreeOfPartials(const gPoly<T> &);  
@@ -69,22 +69,22 @@ public:
      { return !(*this == rhs); }
    inline int Dmnsn()                                    const 
      { return RootNode()->GetData().Dmnsn(); }
-   T EvaluateRootPoly(const gVector<T>& point)    const; 
+   T EvaluateRootPoly(const gbtVector<T>& point)    const; 
 
 
-   T MaximalNonconstantContribution(const gVector<T>&, 
-				    const gVector<T>&)         const;
+   T MaximalNonconstantContribution(const gbtVector<T>&, 
+				    const gbtVector<T>&)         const;
    T MaximalNonconstantDifference(const TreeOfPartials<T>&,
-				  const gVector<T>&, 
-				  const gVector<T>&)           const;
+				  const gbtVector<T>&, 
+				  const gbtVector<T>&)           const;
 
    inline gbtTreeNode<gPoly<T> >* RootNode()                     const 
      { return PartialTree.RootNode(); }
    inline gPoly<T> RootPoly()                                  const 
      { return RootNode()->GetData(); }
-   T ValueOfRootPoly(const gVector<T>& point)           const;
-   T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
-   gVector<T> VectorOfPartials(const gVector<T>&)              const;
+   T ValueOfRootPoly(const gbtVector<T>& point)           const;
+   T ValueOfPartialOfRootPoly(const int&, const gbtVector<T>&)   const;
+   gbtVector<T> VectorOfPartials(const gbtVector<T>&)              const;
    bool      PolyHasNoRootsIn(const gRectangle<T>&)            const;
    bool MultiaffinePolyHasNoRootsIn(const gRectangle<T>&)      const;
    bool PolyEverywhereNegativeIn(const gRectangle<T>&)         const;
@@ -123,14 +123,14 @@ public:
     { return PartialTreeList.Length(); }
   inline int Dmnsn()                                              const
     { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
-  gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
-  gMatrix<T> DerivativeMatrix(const gVector<T>&, const int&)      const; 
-  gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
-  gVector<T> ValuesOfRootPolys(const gVector<T>&, const int&)     const;
+  gbtMatrix<T> DerivativeMatrix(const gbtVector<T>&)                  const; 
+  gbtMatrix<T> DerivativeMatrix(const gbtVector<T>&, const int&)      const; 
+  gbtSquareMatrix<T> SquareDerivativeMatrix(const gbtVector<T>&)      const; 
+  gbtVector<T> ValuesOfRootPolys(const gbtVector<T>&, const int&)     const;
    T         MaximalNonconstantDifference(const int&,
 					  const int&,
-					  const gVector<T>&, 
-					  const gVector<T>&)      const;
+					  const gbtVector<T>&, 
+					  const gbtVector<T>&)      const;
 
    //friend gbtOutput& operator << (gbtOutput& output, const ListOfPartialTrees<T>& x);
 };

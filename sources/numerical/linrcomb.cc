@@ -29,13 +29,13 @@
 #include "math/gmatrix.imp"
 #include "math/double.h"
 
-template gVector<gDouble> operator* (const gVector<gDouble>&,
-			  	     const gMatrix<gDouble>&);
+template gbtVector<gbtDouble> operator* (const gbtVector<gbtDouble>&,
+			  	     const gbtMatrix<gbtDouble>&);
 
 template class LinearCombination<double>;
-template class LinearCombination<gDouble>;
-template class LinearCombination<gRational>;
+template class LinearCombination<gbtDouble>;
+template class LinearCombination<gbtRational>;
 
 template gbtOutput & operator<< (gbtOutput&, const LinearCombination<double>&);
-template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gDouble>&);
-template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gRational>&);
+template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gbtDouble>&);
+template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gbtRational>&);

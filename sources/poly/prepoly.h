@@ -101,13 +101,13 @@ class exp_vect {
 
 private:
   const gSpace* Space;
-  gVector<int> components;
+  gbtVector<int> components;
 
 public:
   exp_vect(const gSpace*);
   exp_vect(const gSpace*, const int&, const int&);   // x_i^j
   exp_vect(const gSpace*, int*);
-  exp_vect(const gSpace*, gVector<int>);
+  exp_vect(const gSpace*, gbtVector<int>);
   exp_vect(const gSpace*, gbtArray<int>);
   exp_vect(const exp_vect*);
   exp_vect(const exp_vect&);

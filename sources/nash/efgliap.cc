@@ -34,8 +34,8 @@ private:
   gbtEfgGame m_efg;
   mutable BehavProfile<double> _p;
 
-  double Value(const gVector<double> &x) const;
-  bool Gradient(const gVector<double> &, gVector<double> &) const;
+  double Value(const gbtVector<double> &x) const;
+  bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
 public:
   EFLiapFunc(const gbtEfgGame &, const BehavProfile<double> &);
@@ -54,10 +54,10 @@ EFLiapFunc::~EFLiapFunc()
 { }
 
 
-double EFLiapFunc::Value(const gVector<double> &v) const
+double EFLiapFunc::Value(const gbtVector<double> &v) const
 {
   _nevals++;
-  ((gVector<double> &) _p).operator=(v);
+  ((gbtVector<double> &) _p).operator=(v);
     //_p = v;
   // Don't impose penalties in Lyapunov function; avoid this as
   // we go out of the feasible set in numerically computing the
@@ -72,7 +72,7 @@ double EFLiapFunc::Value(const gVector<double> &v) const
 // component parallel to the plane.)  Also imposes binding nonnegativity
 // constraints as appropriate.
 //
-static void Project(gVector<double> &grad, const gVector<double> &x,
+static void Project(gbtVector<double> &grad, const gbtVector<double> &x,
 		    const gbtArray<int> &lengths)
 {
   int index = 1;
@@ -102,12 +102,12 @@ static void Project(gVector<double> &grad, const gVector<double> &x,
   }
 }
 
-bool EFLiapFunc::Gradient(const gVector<double> &x,
-			  gVector<double> &grad) const
+bool EFLiapFunc::Gradient(const gbtVector<double> &x,
+			  gbtVector<double> &grad) const
 {
   const double DELTA = .00001;
 
-  ((gVector<double> &) _p).operator=(x);
+  ((gbtVector<double> &) _p).operator=(x);
   for (int i = 1; i <= x.Length(); i++) {
     _p[i] += DELTA;
     double value = Value(_p.GetDPVector());
@@ -170,7 +170,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
     }
   }
 
-  gMatrix<double> xi(p.Length(), p.Length());
+  gbtMatrix<double> xi(p.Length(), p.Length());
 
   gbtList<BehavSolution> solutions;
   
@@ -184,7 +184,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
       gConjugatePR minimizer(p.Length());
-      gVector<double> gradient(p.Length()), dx(p.Length());
+      gbtVector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
 

@@ -43,8 +43,8 @@ independent.
 
 template <class T> class LinearCombination  {
   private:
-    gMatrix<T> scrambled;
-    gVector<T> weights;
+    gbtMatrix<T> scrambled;
+    gbtVector<T> weights;
     bool       last_row_is_spanned;
 
     void AddMultipleOfRowiToRowj(const int& i, 
@@ -53,14 +53,14 @@ template <class T> class LinearCombination  {
     void AddMultipleOfRowiToRowj(const int& i, 
 				 const int& j, 
 				 const T& scalar,
-				 gMatrix<T>& B);
+				 gbtMatrix<T>& B);
 
   // This function is left unimplemented to avoid copying
     LinearCombination<T>& operator=(const LinearCombination<T> &);
   
   public:
        // Constructors, Destructor, Constructive Operators
-    LinearCombination(const gMatrix<T> &);
+    LinearCombination(const gbtMatrix<T> &);
     LinearCombination(const LinearCombination<T> &);
 
     virtual ~LinearCombination();
@@ -72,7 +72,7 @@ template <class T> class LinearCombination  {
 
        // Information
     bool       LastRowIsSpanned() const;
-    gVector<T> LinearDependence() const;
+    gbtVector<T> LinearDependence() const;
  
     void Output(gbtOutput &) const;
 };

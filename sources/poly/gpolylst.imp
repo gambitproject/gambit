@@ -388,7 +388,7 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 //------------------------------------------
 
 template<class T> gPolyList<T> 
-gPolyList<T>::TranslateOfSystem(const gVector<T>& new_origin) const
+gPolyList<T>::TranslateOfSystem(const gbtVector<T>& new_origin) const
 {
   gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
@@ -400,7 +400,7 @@ gPolyList<T>::TranslateOfSystem(const gVector<T>& new_origin) const
 }
 
 template<class T> gPolyList<T> 
-gPolyList<T>::SystemInNewCoordinates(const gSquareMatrix<T>& M) const
+gPolyList<T>::SystemInNewCoordinates(const gbtSquareMatrix<T>& M) const
 {
   gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
@@ -445,9 +445,9 @@ template <class T> const bool gPolyList<T>::IsMultiaffine() const
 }
   
 template<class T> 
-const gVector<T> gPolyList<T>::Evaluate(const gVector<T>& v) const
+const gbtVector<T> gPolyList<T>::Evaluate(const gbtVector<T>& v) const
 {
-  gVector<T> answer(Length());
+  gbtVector<T> answer(Length());
   int ii;
   for (ii = 1; ii <= List.Length(); ii++)
     answer[ii] = List[ii]->Evaluate(v);
@@ -455,7 +455,7 @@ const gVector<T> gPolyList<T>::Evaluate(const gVector<T>& v) const
   return answer;
 }
   
-template<class T> const bool gPolyList<T>::IsRoot(const gVector<T>& v) const
+template<class T> const bool gPolyList<T>::IsRoot(const gbtVector<T>& v) const
 {
   for (int ii = 1; ii <= List.Length(); ii++) 
     if (List[ii]->Evaluate(v) != (T)0) 
@@ -498,9 +498,9 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 }
   
 template<class T> 
-const gMatrix<T> gPolyList<T>::DerivativeMatrix(const gVector<T>& p) const
+const gbtMatrix<T> gPolyList<T>::DerivativeMatrix(const gbtVector<T>& p) const
 {
-  gMatrix<T> answer(Length(),Dmnsn());
+  gbtMatrix<T> answer(Length(),Dmnsn());
   gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
@@ -510,12 +510,12 @@ const gMatrix<T> gPolyList<T>::DerivativeMatrix(const gVector<T>& p) const
   return answer;
 }
   
-template<class T> const gSquareMatrix<T> 
-gPolyList<T>::SquareDerivativeMatrix(const gVector<T>& p) const
+template<class T> const gbtSquareMatrix<T> 
+gPolyList<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 {
   assert (Length() == Dmnsn());
 
-  gSquareMatrix<T> answer(Length());
+  gbtSquareMatrix<T> answer(Length());
   gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
@@ -530,23 +530,23 @@ gPolyList<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 //----------------------------------
 
 template<class T> 
-gbtList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
+gbtList<gPoly<gbtDouble> > gPolyList<T>::ListTogDouble() const
 {
-  gbtList<gPoly<gDouble> > newlist;
+  gbtList<gPoly<gbtDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist += gPoly<gDouble>(TogDouble(*List[ii]));
+    newlist += gPoly<gbtDouble>(TogDouble(*List[ii]));
   }
   return newlist;
 }
 
 template<class T> 
-gbtList<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
+gbtList<gPoly<gbtDouble> > gPolyList<T>::NormalizedList() const
 {
-  gbtList<gPoly<gDouble> > newlist;
+  gbtList<gPoly<gbtDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist += gPoly<gDouble>(NormalizationOfPoly(*List[ii]));
+    newlist += gPoly<gbtDouble>(NormalizationOfPoly(*List[ii]));
   }
   return newlist;
 }

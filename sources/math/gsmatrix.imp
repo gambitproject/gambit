@@ -29,52 +29,52 @@
 #include "gmath.h"   // for abs(double)
 
 //-----------------------------------------------------------------------------
-//     gSquareMatrix<T>: Constructors, destructor, constructive operators
+//     gbtSquareMatrix<T>: Constructors, destructor, constructive operators
 //-----------------------------------------------------------------------------
 
-template <class T> gSquareMatrix<T>::gSquareMatrix(void)   { }
+template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(void)   { }
 
-template <class T> gSquareMatrix<T>::gSquareMatrix(int size)
-  : gMatrix<T>(size, size)
+template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(int size)
+  : gbtMatrix<T>(size, size)
 { }
 
-template <class T> gSquareMatrix<T>::gSquareMatrix(const gMatrix<T> &M)
-  : gMatrix<T>(M)
+template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(const gbtMatrix<T> &M)
+  : gbtMatrix<T>(M)
 { assert ( M.NumRows() == M.NumColumns() ); }
 
-template <class T> gSquareMatrix<T>::gSquareMatrix(const gSquareMatrix<T> &M)
-  : gMatrix<T>(M)
+template <class T> gbtSquareMatrix<T>::gbtSquareMatrix(const gbtSquareMatrix<T> &M)
+  : gbtMatrix<T>(M)
 { }
 
-template <class T> gSquareMatrix<T>::~gSquareMatrix()   { }
+template <class T> gbtSquareMatrix<T>::~gbtSquareMatrix()   { }
 
 template <class T>
-gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
+gbtSquareMatrix<T> &gbtSquareMatrix<T>::operator=(const gbtSquareMatrix<T> &M)
 {
-  gMatrix<T>::operator=(M);
+  gbtMatrix<T>::operator=(M);
   return *this;
 }
 
 //-----------------------------------------------------------------------------
-//                gSquareMatrix<T>: Public member functions
+//                gbtSquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
 
-template <class T> gSquareMatrix<T>::MatrixSingular::~MatrixSingular() { }
+template <class T> gbtSquareMatrix<T>::MatrixSingular::~MatrixSingular() { }
 
 template <class T>
-gbtText gSquareMatrix<T>::MatrixSingular::Description(void) const
+gbtText gbtSquareMatrix<T>::MatrixSingular::Description(void) const
 {
   return "Attempted to invert a singular matrix";
 }
 
-template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
+template <class T> gbtSquareMatrix<T> gbtSquareMatrix<T>::Inverse(void) const
 {
   if (mincol != minrow || maxcol != maxrow) {
     throw gbtRectArray<T>::BadDim();
   }
 
-  gSquareMatrix<T> copy(*this);
-  gSquareMatrix<T> inv(maxrow);
+  gbtSquareMatrix<T> copy(*this);
+  gbtSquareMatrix<T> inv(maxrow);
 
   // initialize inverse matrix and prescale row vectors
   for (int i = minrow; i <= maxrow; i++)   {
@@ -145,10 +145,10 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
   return inv;
 }
 
-template <class T> T gSquareMatrix<T>::Determinant(void) const
+template <class T> T gbtSquareMatrix<T>::Determinant(void) const
 {
   T factor = (T) 1;
-  gSquareMatrix<T> M(*this);
+  gbtSquareMatrix<T> M(*this);
   
   for (int row = minrow; row <= maxrow; row++)  {
 
@@ -186,7 +186,7 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
   return det;
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gSquareMatrix<T> &M)
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtSquareMatrix<T> &M)
 {
-  to << (gMatrix<T>)M; return to;
+  to << (gbtMatrix<T>)M; return to;
 }

@@ -80,23 +80,23 @@ static gbtList<gbtEfgInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<gbtDouble> 
 ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
 			 const gSpace &BehavStratSpace, 
 			 const term_order &Lex,
 			 const gbtEfgSupport &big_supp,
 			 const gbtList<gbtList<int> > &var_index) 
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) 
     for (gbtEfgInfosetIterator infoset(p_solution.GetGame().GetPlayer(pl)); 
 	 !infoset.End(); infoset++) {
       if (!big_supp.HasActiveActionAt(*infoset)) {
 	int index_base = var_index[pl][(*infoset).GetId()];
-	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	gPoly<gbtDouble> factor(&BehavStratSpace, (gbtDouble)1.0, &Lex);
 	for (int k = 1; k < (*infoset).NumActions(); k++)
-	  factor -= gPoly<gDouble>(&BehavStratSpace, index_base + k, 1, &Lex);
+	  factor -= gPoly<gbtDouble>(&BehavStratSpace, index_base + k, 1, &Lex);
 	answer += factor;
       }
     }
@@ -175,7 +175,7 @@ DeviationSupports(const gbtEfgSupport & big_supp,
 
 static bool 
 NashNodeProbabilityPoly(const BehavSolution &p_solution,
-			gPoly<gDouble> & node_prob,
+			gPoly<gbtDouble> & node_prob,
 			const gSpace &BehavStratSpace, 
 			const term_order &Lex,
 			const gbtEfgSupport &dsupp,
@@ -190,7 +190,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gDouble) last_action.GetChanceProb();
+      node_prob *= (gbtDouble) last_action.GetChanceProb();
     else 
       if (dsupp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == iset) {
@@ -203,7 +203,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	    if (last_action.GetInfoset().GetPlayer() !=
 		act.GetInfoset().GetPlayer() ||
 		!act.Precedes(tempnode) )
-	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (gbtDouble) p_solution.GetActionProb(last_action);
 	  }
 	  else {
 	    return false;
@@ -214,13 +214,13 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	  var_index[last_infoset.GetPlayer().GetId()][last_infoset.GetId()];
 	if (last_action.GetId() < last_infoset.NumActions()) {
 	  int varno = initial_var_no + last_action.GetId();
-	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	  node_prob *= gPoly<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {
-	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  gPoly<gbtDouble> factor(&BehavStratSpace, (gbtDouble)1.0, &Lex);
 	  int k;
 	  for (k = 1; k < last_infoset.NumActions(); k++)
-	    factor -= gPoly<gDouble>(&BehavStratSpace,
+	    factor -= gPoly<gbtDouble>(&BehavStratSpace,
 				     initial_var_no + k, 1, &Lex);
 	  node_prob *= factor;
 	}
@@ -230,7 +230,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
   return true;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<gbtDouble> 
 NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			    const gSpace &BehavStratSpace, 
 			    const term_order &Lex,
@@ -238,7 +238,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			    const gbtEfgSupport &big_supp,
 			    const gbtList<gbtList<int> > &var_index) 
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtEfgNode> terminal_nodes;
   TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
@@ -264,10 +264,10 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 	    // payoff resulting from the profile and deviation to 
 	    // the strategy for pl specified by dsupp[k]
 
-	      gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	      gPoly<gbtDouble> next_poly(&BehavStratSpace, &Lex);
 
 	      for (int n = 1; n <= terminal_nodes.Length(); n++) {
-		gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+		gPoly<gbtDouble> node_prob(&BehavStratSpace, (gbtDouble)1.0, &Lex);
 		if (NashNodeProbabilityPoly(p_solution, node_prob,
 					    BehavStratSpace,
 					    Lex,
@@ -278,11 +278,11 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					    *infoset,
 					    (*infoset).GetAction(j))) {
 		  node_prob *= 
-		    (gDouble) terminal_nodes[n].GetOutcome().GetPayoff(player);
+		    (gbtDouble) terminal_nodes[n].GetOutcome().GetPayoff(player);
 		  next_poly += node_prob;
 		}
 	      }
-	      answer += -next_poly + (gDouble) p_solution.Payoff(pl);
+	      answer += -next_poly + (gbtDouble) p_solution.Payoff(pl);
 	    }
 	  }
       }
@@ -291,7 +291,7 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<gbtDouble> 
 ExtendsToNashIneqs(const BehavSolution &p_solution,
 		   const gSpace &BehavStratSpace, 
 		   const term_order &Lex,
@@ -299,7 +299,7 @@ ExtendsToNashIneqs(const BehavSolution &p_solution,
 		   const gbtEfgSupport &big_supp,
 		   const gbtList<gbtList<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<gbtDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
 				     Lex, 
 				     big_supp, 
@@ -350,21 +350,21 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
 
   num_vars = BehavStratSpace.Dmnsn();
 
-  gPolyList<gDouble> inequalities = ExtendsToNashIneqs(p_solution,
+  gPolyList<gbtDouble> inequalities = ExtendsToNashIneqs(p_solution,
 						       BehavStratSpace,
 						       Lex,
 						       little_supp,
 						       big_supp,
 						       var_index);
   // set up the rectangle of search
-  gVector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  gbtVector<gbtDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gbtDouble)0;
+  tops = (gbtDouble)1;
+  gRectangle<gbtDouble> Cube(bottoms, tops); 
 
   // Set up the test and do it
-  IneqSolv<gDouble> extension_tester(inequalities,m_status);
-  gVector<gDouble> sample(num_vars);
+  IneqSolv<gbtDouble> extension_tester(inequalities,m_status);
+  gbtVector<gbtDouble> sample(num_vars);
   bool answer = extension_tester.ASolutionExists(Cube,sample); 
   
   //  assert (answer == m_profile->ExtendsToNash(little_supp, big_supp, m_status));
@@ -378,7 +378,7 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
 //=========================================================================
 
 static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
-				   gPoly<gDouble> & node_prob,
+				   gPoly<gbtDouble> & node_prob,
 				   const gSpace &BehavStratSpace, 
 				   const term_order &Lex,
 				   const gbtEfgSupport &big_supp,
@@ -393,7 +393,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gDouble) last_action.GetChanceProb();
+      node_prob *= (gbtDouble) last_action.GetChanceProb();
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == p_solution.GetGame().GetPlayer(pl).GetInfoset(i)) {
@@ -402,7 +402,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 	}
 	else
 	  if (big_supp.Contains(last_action))
-	    node_prob *= (gDouble) p_solution.GetActionProb(last_action);
+	    node_prob *= (gbtDouble) p_solution.GetActionProb(last_action);
 	  else 
 	    return false;
       }
@@ -411,13 +411,13 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 	  var_index[last_infoset.GetPlayer().GetId()][last_infoset.GetId()];
 	if (last_action.GetId() < last_infoset.NumActions()) {
 	  int varno = initial_var_no + last_action.GetId();
-	  node_prob *= gPoly<gDouble>(&BehavStratSpace, varno, 1, &Lex);
+	  node_prob *= gPoly<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {
-	  gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
+	  gPoly<gbtDouble> factor(&BehavStratSpace, (gbtDouble)1.0, &Lex);
 	  int k;
 	  for (k = 1; k < last_infoset.NumActions(); k++)
-	    factor -= gPoly<gDouble>(&BehavStratSpace,
+	    factor -= gPoly<gbtDouble>(&BehavStratSpace,
 				     initial_var_no + k, 1, &Lex);
 	  node_prob *= factor;
 	}
@@ -427,7 +427,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
   return true;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<gbtDouble> 
 ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			   const gSpace &BehavStratSpace, 
 			   const term_order &Lex,
@@ -435,7 +435,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			   const gbtEfgSupport &big_supp,
 			   const gbtList<gbtList<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtEfgNode> terminal_nodes;
   TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
@@ -451,10 +451,10 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 	    // This will be the utility difference between the
 	    // payoff resulting from the profile and deviation to 
 	    // action j
-	    gPoly<gDouble> next_poly(&BehavStratSpace, &Lex);
+	    gPoly<gbtDouble> next_poly(&BehavStratSpace, &Lex);
 
 	    for (int n = 1; n <= terminal_nodes.Length(); n++) {
-	      gPoly<gDouble> node_prob(&BehavStratSpace, (gDouble)1.0, &Lex);
+	      gPoly<gbtDouble> node_prob(&BehavStratSpace, (gbtDouble)1.0, &Lex);
 	      if (ANFNodeProbabilityPoly(p_solution, node_prob,
 					 BehavStratSpace,
 					 Lex,
@@ -464,18 +464,18 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 					 (*player).GetId(),
 					 (*infoset).GetId(), j)) {
 		node_prob *= 
-		  (gDouble) terminal_nodes[n].GetOutcome().GetPayoff(*player);
+		  (gbtDouble) terminal_nodes[n].GetOutcome().GetPayoff(*player);
 		next_poly += node_prob;
 	      }
 	    }
-	    answer += -next_poly + (gDouble) p_solution.Payoff((*player).GetId());
+	    answer += -next_poly + (gbtDouble) p_solution.Payoff((*player).GetId());
 	  }
     }
   }
   return answer;
 }
 
-static gPolyList<gDouble> 
+static gPolyList<gbtDouble> 
 ExtendsToANFNashIneqs(const BehavSolution &p_solution,
 		      const gSpace &BehavStratSpace, 
 		      const term_order &Lex,
@@ -483,7 +483,7 @@ ExtendsToANFNashIneqs(const BehavSolution &p_solution,
 		      const gbtEfgSupport &big_supp,
 		      const gbtList<gbtList<int> > &var_index)
 {
-  gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
+  gPolyList<gbtDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
 				     Lex, 
 				     big_supp, 
@@ -530,7 +530,7 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
   term_order Lex(&BehavStratSpace, ptr);
 
   num_vars = BehavStratSpace.Dmnsn();
-  gPolyList<gDouble> inequalities = ExtendsToANFNashIneqs(p_solution,
+  gPolyList<gbtDouble> inequalities = ExtendsToANFNashIneqs(p_solution,
 							  BehavStratSpace,
 							  Lex,
 							  little_supp,
@@ -538,14 +538,14 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
 							  var_index);
 
   // set up the rectangle of search
-  gVector<gDouble> bottoms(num_vars), tops(num_vars);
-  bottoms = (gDouble)0;
-  tops = (gDouble)1;
-  gRectangle<gDouble> Cube(bottoms, tops); 
+  gbtVector<gbtDouble> bottoms(num_vars), tops(num_vars);
+  bottoms = (gbtDouble)0;
+  tops = (gbtDouble)1;
+  gRectangle<gbtDouble> Cube(bottoms, tops); 
 
   // Set up the test and do it
-  IneqSolv<gDouble> extension_tester(inequalities, p_status);
-  gVector<gDouble> sample(num_vars);
+  IneqSolv<gbtDouble> extension_tester(inequalities, p_status);
+  gbtVector<gbtDouble> sample(num_vars);
 
   // Temporarily, we check the old set up vs. the new
   bool ANFanswer = extension_tester.ASolutionExists(Cube,sample); 

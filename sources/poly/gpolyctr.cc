@@ -68,7 +68,7 @@ gPolyArray<T> &gPolyArray<T>::operator=(const gPolyArray<T> &a)
   if (this != &a) {
     // We only reallocate if necessary.  This should be somewhat faster
     // if many objects are of the same length.  Furthermore, it is
-    // _essential_ for the correctness of the gPVector and gDPVector
+    // _essential_ for the correctness of the gbtPVector and gbtDPVector
     // assignment operator, since it assumes the value of data does
     // not change.
     if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {
@@ -216,10 +216,10 @@ template <class T> void gbtBlock<T>::Flush(void)
 
 #include "math/gnumber.h"
 
-template class gPolyArray<gNumber>;
-template class gPolyBlock<gNumber>;
+template class gPolyArray<gbtNumber>;
+template class gPolyBlock<gbtNumber>;
 
 
 #include "base/glist.imp"
 
-template class gbtList<gPoly<gNumber> >;
+template class gbtList<gPoly<gbtNumber> >;

@@ -35,7 +35,7 @@
 template <class T> class gbtRectArray;
 template <class T> class BehavProfile;
 
-template <class T> class MixedProfile : public gPVector<T>  {
+template <class T> class MixedProfile : public gbtPVector<T>  {
   private:
     gbtNfgGame m_nfg;
     gbtNfgSupport support;
@@ -48,7 +48,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     void PPayoff(int pl, int const_pl1, int const_st1, int const_pl2, 
 		int const_st2, int cur_pl, long index, T prob, T &value) const;
     void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
-		gVector<T> &value) const;
+		gbtVector<T> &value) const;
     void InitPayoffs(void) const;
     T Payoff(const gbtNfgOutcome &o, int pl) const;
 
@@ -63,14 +63,14 @@ template <class T> class MixedProfile : public gPVector<T>  {
     gbtNfgGame GetGame(void) const  { return m_nfg; }
 
     T LiapValue(void) const;
-    void Regret(gPVector<T> &value) const;
+    void Regret(gbtPVector<T> &value) const;
     T MaxRegret(void) const;
     void Centroid(void);
 
     T Payoff(int pl) const;
     T Payoff(int pl, gbtNfgStrategy) const;
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
-    void Payoff(int pl, int const_pl, gVector<T> &payoff) const;
+    void Payoff(int pl, int const_pl, gbtVector<T> &payoff) const;
 
     bool operator==(const MixedProfile<T> &) const;
 
