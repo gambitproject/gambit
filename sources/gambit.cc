@@ -16,8 +16,8 @@
 #include "wxio.h"
 #include "gambit.h"
 #include "wxmisc.h"
-#include "normgui.h"
-#include "extgui.h"
+#include "nfggui.h"
+#include "efggui.h"
 #include <signal.h>
 #include <math.h>
 
@@ -265,7 +265,7 @@ if (strcmp(s,"")!=0)
 #endif
 #ifndef NFG_ONLY
 	if (strstr(filename,".efg"))		// This must be an extensive form
-		{ExtensiveFormGUI(0,s,0,this);return;}
+		{EfgGUI(0,s,0,this);return;}
 #endif
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 }
@@ -286,7 +286,7 @@ void GambitFrame::OnMenuCommand(int id)
 		case FILE_NEW_NFG: NfgGUI(0,gString(),0,this);	break;
 #endif
 #ifndef NFG_ONLY
-		case FILE_NEW_EFG: ExtensiveFormGUI(0,gString(),0,this); break;
+		case FILE_NEW_EFG: EfgGUI(0,gString(),0,this); break;
 #endif
 		case GAMBIT_HELP_ABOUT:	wxHelpAbout(); break;
 		case GAMBIT_HELP_CONTENTS: wxHelpContents(GAMBIT_GUI_HELP);	break;
