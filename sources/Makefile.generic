@@ -4,9 +4,9 @@
 # $Id$
 # 
 # Makes both gui and gcl targets on multiple platforms, and 
-# automatically updates dependencies (no need to do make depend).
+# automatically updates dependencies.
 #
-# Rename or symlinkk this makefile to 'Makefile', and then use 'make gui'
+# Rename or symlink this makefile to 'Makefile', and then use 'make gui'
 # to make the gui, and 'make gcl' to make the gcl.
 #
 # Executable are named gcl_$(SYSNAME) and gui_$(GUI)_$(SYSNAME), 
@@ -28,7 +28,7 @@
 # define compiler and flags
 
 CC = g++
-CFLAGS = -Wall -D__NO_MATH_INLINES $(DEFINES) \
+CFLAGS = -Wall $(DEFINES) \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
 OBJECT_SUFFIX = .o
  
@@ -65,14 +65,14 @@ vpath %.o  $(OBJDIR)
 #   WXLIB    = any wx libraries used
 
 ifeq ($(GUI), gtk)
-WXDIR = /users/gambit/wxGTK
+WXDIR = /home/gambit/wxGTK
 WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/wx -D__WXGTK__
+WXINCDIR = -I$(WXDIR)/include -D__WXGTK__
 WXLIB = -lwx_gtk
 else # motif
-WXDIR = /users/gambit/wxwin
+WXDIR = /home/gambit/wxwin
 WXLIBDIR = -L$(WXDIR)/lib
-WXINCDIR = -I$(WXDIR)/wx -D__WXMOTIF__
+WXINCDIR = -I$(WXDIR)/include -D__WXMOTIF__
 WXLIB = -lwx_motif
 endif
 
@@ -132,11 +132,11 @@ gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
 
 gcl:	
 ifndef SYSNAME
-	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a SYSNAME e.g. linux, solaris, hp
 	@exit 1
 endif
-	make gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
+	$(MAKE) gcl_$(SYSNAME) SYSNAME=$(SYSNAME)
 
 gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
@@ -145,16 +145,16 @@ gui_$(GUI)_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 
 gui:
 ifndef SYSNAME
-	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a SYSNAME e.g. linux, solaris, hp
 	@exit 1
 endif
 ifndef GUI
-	@echo usage: make SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo usage: $(MAKE) SYSNAME=\<sysname\> GUI=\<gui\>
 	@echo Must specify a GUI e.g. gtk, motif
 	@exit 1
 endif
-	make gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
+	$(MAKE) gui_$(GUI)_$(SYSNAME) GUI=$(GUI) SYSNAME=$(SYSNAME)
 
 readefg.cc:  readefg.yy
 	bison++ -d -h readefg.h -o readefg.cc readefg.yy
