@@ -1203,25 +1203,6 @@ PortionType Nfg_Portion<gRational>::Type( void ) const
 { return porNFG_RATIONAL; }
 
 
-
-
-#include "extform.imp"
-
-TEMPLATE class TypedNode<double>;
-TEMPLATE class TypedNode<gRational>;
-TEMPLATE class OutcomeVector<double>;
-TEMPLATE class OutcomeVector<gRational>;
-TEMPLATE class ChanceInfoset<double>;
-TEMPLATE class ChanceInfoset<gRational>;
-TEMPLATE class BehavProfile<double>;
-TEMPLATE class BehavProfile<gRational>;
-
-TEMPLATE class ExtForm<double>;
-DataType ExtForm<double>::Type( void ) const { return DOUBLE; }
-TEMPLATE class ExtForm<gRational>;
-DataType ExtForm<gRational>::Type( void ) const { return RATIONAL; }
-
-
 TEMPLATE class Efg_Portion<double>;
 PortionType Efg_Portion<double>::Type( void ) const
 { return porEFG_DOUBLE; }
