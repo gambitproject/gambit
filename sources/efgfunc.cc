@@ -671,7 +671,8 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("CopyDefaultEfg");
   FuncObj->SetFuncInfo(GSM_CopyDefaultEfg, 1);
-  FuncObj->SetParamInfo(GSM_CopyDefaultEfg, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_CopyDefaultEfg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
 //-----------------------------------------------------------
@@ -772,7 +773,8 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNameAction, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameEfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameEfg, 0, "x", porEFG);
+  FuncObj->SetParamInfo(GSM_SetNameEfg, 0, "x", porEFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SetNameEfg, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameInfoset, 2);
@@ -780,7 +782,8 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SetNameInfoset, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameNfg, 2);
-  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG);
+  FuncObj->SetParamInfo(GSM_SetNameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SetNameNfg, 1, "name", porTEXT);
 
   FuncObj->SetFuncInfo(GSM_SetNameNode, 2);
@@ -865,13 +868,15 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_NameAction, 0, "x", porACTION);
 
   FuncObj->SetFuncInfo(GSM_NameEfg, 1);
-  FuncObj->SetParamInfo(GSM_NameEfg, 0, "x", porEFG); 
+  FuncObj->SetParamInfo(GSM_NameEfg, 0, "x", porEFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE ); 
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
   FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porEF_PLAYER);
 
   FuncObj->SetFuncInfo(GSM_NameNfg, 1);
-  FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG);
+  FuncObj->SetParamInfo(GSM_NameNfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
 
   FuncObj->SetFuncInfo(GSM_NameNode, 1);
   FuncObj->SetParamInfo(GSM_NameNode, 0, "x", porNODE);

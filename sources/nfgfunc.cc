@@ -246,21 +246,21 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimDom, 1);
   FuncObj->SetParamInfo(GSM_ElimDom, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_NFG );
+			PASS_BY_REFERENCE, DEFAULT_NFG );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Enum");
   FuncObj->SetFuncInfo(GSM_Enum, 1);
   FuncObj->SetParamInfo(GSM_Enum, 0, "nfg", 
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_NFG );
+			PASS_BY_REFERENCE, DEFAULT_NFG );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitNfg");
   FuncObj->SetFuncInfo(GSM_GobitNfg, 8);
   FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_NFG );
+			PASS_BY_REFERENCE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
 			new OutputRefPortion(gnull));
   FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
@@ -281,7 +281,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_Lemke, 4);
   FuncObj->SetParamInfo(GSM_Lemke, 0, "nfg",
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_VALUE, DEFAULT_NFG );
+			PASS_BY_REFERENCE, DEFAULT_NFG );
   FuncObj->SetParamInfo(GSM_Lemke, 1, "stopAfter", 
 			porINTEGER, new IntValPortion(0));
   FuncObj->SetParamInfo(GSM_Lemke, 2, "nPivots", 
@@ -294,23 +294,27 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("LiapNfg");
   FuncObj->SetFuncInfo(GSM_LiapNfg, 1);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "N", porNFG_FLOAT);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "N", porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
 /*
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayers, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayers, 0, "N", porNFG_FLOAT);
+  FuncObj->SetParamInfo(GSM_NumPlayers, 0, "N", porNFG_FLOAT, 
+                        NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
   */
   FuncObj = new FuncDescObj("PureNash");
   FuncObj->SetFuncInfo(GSM_PureNash, 1);
-  FuncObj->SetParamInfo(GSM_PureNash, 0, "N", porNFG_FLOAT);
+  FuncObj->SetParamInfo(GSM_PureNash, 0, "N", porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Simpdiv");
   FuncObj->SetFuncInfo(GSM_Simpdiv, 1);
-  FuncObj->SetParamInfo(GSM_Simpdiv, 0, "N", porNFG_FLOAT);
+  FuncObj->SetParamInfo(GSM_Simpdiv, 0, "N", porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewNfg");
@@ -330,7 +334,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("WriteNfg");
   FuncObj->SetFuncInfo(GSM_WriteNfg, 3);
   FuncObj->SetParamInfo(GSM_WriteNfg, 0, "output", porOUTPUT);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
   FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER,
 		        new IntValPortion(1));
   gsm->AddFunction(FuncObj);
@@ -348,7 +353,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("CopyDefaultNfg");
   FuncObj->SetFuncInfo(GSM_CopyDefaultNfg, 1);
-  FuncObj->SetParamInfo(GSM_CopyDefaultNfg, 0, "nfg", porNFG);
+  FuncObj->SetParamInfo(GSM_CopyDefaultNfg, 0, "nfg", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
 }
