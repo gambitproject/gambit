@@ -1013,13 +1013,13 @@ void Init_algfunc(GSM *gsm)
 					    porMIXED ));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextPortion("")));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("minK", porNUMBER,
 					    new NumberPortion(0.001)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("maxLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("maxK", porNUMBER,
 					    new NumberPortion(500.0)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("delLam", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("delK", porNUMBER,
 					    new NumberPortion(0.02)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porINTEGER,
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("powK", porINTEGER,
 					    new IntPortion(1)));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("fullGraph", porBOOL,
 					    new BoolPortion(false)));
