@@ -1315,9 +1315,7 @@ Portion* ListPortion::ValCopy( void ) const
 { return new ListValPortion( *_Value ); }
 
 Portion* ListPortion::RefCopy( void ) const
-{ 
-  return new ListRefPortion( *_Value ); 
-}
+{ return new ListRefPortion( *_Value ); }
 
 void ListPortion::AssignFrom( Portion* p )
 {
@@ -1396,23 +1394,7 @@ bool ListValPortion::IsReference( void ) const
 
 
 ListRefPortion::ListRefPortion( gBlock< Portion* >& value )
-{
-  _Value = &value; 
-
-/*
-  int i;
-  int length;
-  int result;
-
-  _Value = new gBlock< Portion* >; 
-
-  for( i = 1, length = value.Length(); i <= length; i++ )
-  {
-    result = Insert( value[ i ]->RefCopy(), i );
-    assert( result != 0 );
-  }
-*/
-}
+{ _Value = &value; }
 
 ListRefPortion::~ListRefPortion()
 { }

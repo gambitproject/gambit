@@ -20,7 +20,7 @@
 
 
 #define CRASHTEST
-// #define INTERACTIVE
+#define INTERACTIVE
 
 
 int main( void )
@@ -3280,6 +3280,55 @@ int main( void )
   machine->PushRef( "lx1" );
   machine->Dump();
 
+
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "NewEfg" );
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
+  machine->Pop();
+
+  machine->InitCallFunction( "NewPlayer" );
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Output();
+  machine->Pop();
+
+  machine->InitCallFunction( "Players" );
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Output();
+  machine->Pop();
+  
+  machine->InitCallFunction( "Players" );
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Push( (long) 1 );
+  machine->Subscript();
+  machine->Output();
+  machine->Pop();
+
+  machine->PushRef( "p" );
+  machine->InitCallFunction( "Players" );
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Push( (long) 1 );
+  machine->Subscript();
+  machine->Output();
+  machine->Pop();
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
