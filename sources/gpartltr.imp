@@ -330,6 +330,16 @@ ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point,
   return answer;
 }
 
+template <class T> T  
+ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
+						    const int& j,
+						    const gVector<T>& point, 
+				  const gVector<T>& halvesoflengths)    const
+{
+  return PartialTreeList[i].MaximalNonconstantDifference(PartialTreeList[j],
+							 point,
+							 halvesoflengths);
+}
 
 template <class T> gOutput& operator << (gOutput& output, 
 					 const ListOfPartialTrees<T>& /* x */)

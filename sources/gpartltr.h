@@ -107,6 +107,10 @@ public:
   gMatrix<T> DerivativeMatrix(const gVector<T>&, const int&)      const; 
   gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
   gVector<T> ValuesOfRootPolys(const gVector<T>&, const int&)     const;
+   T         MaximalNonconstantDifference(const int&,
+					  const int&,
+					  const gVector<T>&, 
+					  const gVector<T>&)      const;
 
 friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
 };
