@@ -90,23 +90,23 @@ AGCL_OBJECTS = gsmutils.o gsm.o gsmfunc.o gsmoper.o gsmhash.o \
 	       system.o gcmdline.o
 
 # Gui stuff for the extensive form
-EGUI_SOURCES = extshow.cc treewin.cc btreewn.cc btreewn1.cc treedraw.cc \
-               twflash.cc extsoln.cc btreewni.cc bextshow.cc efgoutcd.cc \
-		efgsolng.cc bsolnsf.cc
+EGUI_SOURCES = efgshow.cc efgshow1.cc treewin.cc treewin1.cc treedraw.cc \
+               twflash.cc efgsoln.cc efgoutcd.cc efgsolng.cc bsolnsf.cc
 		
-EGUI_OBJECTS = extshow.o treewin.o btreewn.o btreewn1.o treedraw.o \
-               twflash.o extsoln.o btreewni.o bextshow.o efgoutcd.o \
-		efgsolng.o bsolnsf.o 
+EGUI_OBJECTS = efgshow.o efgshow1.o treewin.o treewin1.o treedraw.o \
+               twflash.o efgsoln.o efgoutcd.o efgsolng.o bsolnsf.o 
 
 # Gui stuff for the normal form
-NGUI_SOURCES = normshow.cc bnormshw.cc normsoln.cc msolnsf.cc nfgoutcd.cc
-NGUI_OBJECTS = normshow.o bnormshw.o normsoln.o msolnsf.o nfgoutcd.o
+NGUI_SOURCES = nfgshow.cc nfgshow1.cc nfgsoln.cc msolnsf.cc nfgoutcd.cc
+NGUI_OBJECTS = nfgshow.o nfgshow1.o nfgsoln.o msolnsf.o nfgoutcd.o
 
 # Gui stuff used in both the normal and extensive forms
 BGUI_SOURCES = wxmisc.cc gambdraw.cc wxio.cc spread.cc spreadim.cc \
-              gambit.cc accels.cc algdlgs.cc wxstatus.cc efgnfgi.cc 
+               gambit.cc accels.cc algdlgs.cc wxstatus.cc efgnfgi.cc \
+               paramsd.cc 
 BGUI_OBJECTS = wxmisc.o gambdraw.o wxio.o spread.o spreadim.o \
-              gambit.o accels.o algdlgs.o wxstatus.o efgnfgi.o 
+               gambit.o accels.o algdlgs.o wxstatus.o efgnfgi.o \
+               paramsd.o 
 
 # All the code used in the GCL target
 GCL_SOURCES = $(GLIB_SOURCES) $(GAME_SOURCES) $(EALG_SOURCES) $(NALG_SOURCES)\
