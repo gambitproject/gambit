@@ -390,7 +390,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Name");
   FuncObj->SetFuncInfo(GSM_NameEfg, 1);
-  FuncObj->SetParamInfo(GSM_NameEfg, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_NameEfg, 0, "efg", porEFG, _DefaultEfgShadow);
 
   FuncObj->SetFuncInfo(GSM_NamePlayer, 1);
   FuncObj->SetParamInfo(GSM_NamePlayer, 0, "x", porPLAYER);
@@ -438,12 +438,13 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NumOutcomes");
   FuncObj->SetFuncInfo(GSM_NumOutcomes, 1);
-  FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_NumOutcomes, 0, "efg", porEFG, _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NumPlayers");
   FuncObj->SetFuncInfo(GSM_NumPlayersEfg, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_NumPlayersEfg, 0, "efg", porEFG,
+			_DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Outcome");
@@ -453,7 +454,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Outcomes");
   FuncObj->SetFuncInfo(GSM_Outcomes, 1);
-  FuncObj->SetParamInfo(GSM_Outcomes, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_Outcomes, 0, "efg", porEFG, _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("OutcomeVector");
@@ -468,7 +469,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Players");
   FuncObj->SetFuncInfo(GSM_Players, 1);
-  FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_Players, 0, "efg", porEFG, _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("PriorSibling");
@@ -483,13 +484,14 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("RootNode");
   FuncObj->SetFuncInfo(GSM_RootNode, 1);
-  FuncObj->SetParamInfo(GSM_RootNode, 0, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_RootNode, 0, "efg", porEFG,
+		        _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteEfg");
   FuncObj->SetFuncInfo(GSM_WriteEfg, 2);
   FuncObj->SetParamInfo(GSM_WriteEfg, 0, "output", porOUTPUT);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "efg", porEFG);
+  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "efg", porEFG, _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 }
 

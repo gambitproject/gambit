@@ -67,8 +67,15 @@ Portion *GSM_LiapEfg(Portion **param)
   ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
 
   EFLiapParams<double> LP;
+
+  LP.nequilib = ((numerical_Portion<gInteger> *) param[1])->Value().as_long();
+  LP.ntries = ((numerical_Portion<gInteger> *) param[2])->Value().as_long();
+ 
   EFLiapModule<double> LM(E, LP);
   LM.Liap(1);
+
+  ((numerical_Portion<gInteger> *) param[4])->Value() = LM.NumEvals();
+  ((numerical_Portion<double> *) param[5])->Value() = LM.Time();
 
   return new Behav_List_Portion<double>(&E, LM.GetSolutions());
 }
@@ -144,6 +151,7 @@ Portion *GSM_SetIntegerOptions(Portion **param)
     return 0;
 }
 
+extern Portion *_DefaultEfgShadow;
   
 void Init_algfunc(GSM *gsm)
 {
@@ -151,7 +159,8 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("GobitEfg");
   FuncObj->SetFuncInfo(GSM_GobitEfg, 8);
-  FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_DOUBLE,
+		        _DefaultEfgShadow);
   FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porOUTPUT,
 			new Output_Portion(gnull));
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "time", porDOUBLE,
@@ -169,16 +178,29 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapEfg");
-  FuncObj->SetFuncInfo(GSM_LiapEfg, 1);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 0, "E", porEFG_DOUBLE);
+  FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_DOUBLE,
+		        _DefaultEfgShadow);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 1, "stopAfter", porINTEGER,
+		        new numerical_Portion<gInteger>(1));
+  FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nTries", porINTEGER,
+		        new numerical_Portion<gInteger>(10));
+  FuncObj->SetParamInfo(GSM_LiapEfg, 3, "start", porLIST | porDOUBLE,
+			new List_Portion);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 4, "nEvals", porINTEGER,
+			new numerical_Portion<gInteger>(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 5, "time", porDOUBLE,
+			new numerical_Portion<double>(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Sequence");
   FuncObj->SetFuncInfo(GSM_SequenceD, 1);
-  FuncObj->SetParamInfo(GSM_SequenceD, 0, "E", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_SequenceD, 0, "efg", porEFG_DOUBLE,
+		        _DefaultEfgShadow);
 
   FuncObj->SetFuncInfo(GSM_SequenceR, 1);
-  FuncObj->SetParamInfo(GSM_SequenceR, 0, "E", porEFG_RATIONAL);
+  FuncObj->SetParamInfo(GSM_SequenceR, 0, "efg", porEFG_RATIONAL,
+		        _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOptions");
@@ -195,7 +217,8 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("EfgToNfg");
   FuncObj->SetFuncInfo(GSM_EfgToNfg, 1);
-  FuncObj->SetParamInfo(GSM_EfgToNfg, 0, "E", porEFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_EfgToNfg, 0, "efg", porEFG_DOUBLE,
+		        _DefaultEfgShadow);
   gsm->AddFunction(FuncObj);
 
 }

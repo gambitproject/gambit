@@ -52,15 +52,6 @@ Portion* GSM_CopyDefaultNfg( Portion** param )
 //----------------------------------------------------------------------
 
 
-Portion *GSM_DisplayNfg(Portion **param)
-{
-  NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
-
-  N->DisplayNfg(gout);
-  return new Nfg_Portion<double>(*N);
-}
-
-
 Portion *GSM_ElimDom(Portion **param)
 {
   NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
@@ -209,24 +200,22 @@ void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("DisplayNfg");
-  FuncObj->SetFuncInfo(GSM_DisplayNfg, 1);
-  FuncObj->SetParamInfo(GSM_DisplayNfg, 0, "N", porNFG);
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimDom, 1);
-  FuncObj->SetParamInfo(GSM_ElimDom, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_ElimDom, 0, "nfg", porNFG_DOUBLE,
+			_DefaultNfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Enum");
   FuncObj->SetFuncInfo(GSM_Enum, 1);
-  FuncObj->SetParamInfo(GSM_Enum, 0, "N", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_Enum, 0, "nfg", porNFG_DOUBLE,
+		        _DefaultNfgShadow);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitNfg");
   FuncObj->SetFuncInfo(GSM_GobitNfg, 8);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", porNFG_DOUBLE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", porNFG_DOUBLE,
+		        _DefaultNfgShadow);
   FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
 			new Output_Portion(gnull));
   FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porDOUBLE,
@@ -245,14 +234,16 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Lemke");
   FuncObj->SetFuncInfo(GSM_Lemke, 4);
-  FuncObj->SetParamInfo(GSM_Lemke, 0, "N", porNFG_DOUBLE);
-  FuncObj->SetParamInfo(GSM_Lemke, 1, "nequilib", 
+  FuncObj->SetParamInfo(GSM_Lemke, 0, "nfg", porNFG_DOUBLE,
+		        _DefaultNfgShadow);
+  FuncObj->SetParamInfo(GSM_Lemke, 1, "stopAfter", 
 			porINTEGER, new numerical_Portion<gInteger>(0));
-  FuncObj->SetParamInfo(GSM_Lemke, 2, "time", 
+  FuncObj->SetParamInfo(GSM_Lemke, 2, "nPivots", 
+			porINTEGER, new numerical_Portion<gInteger>(0),
+		        PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Lemke, 3, "time", 
 			porDOUBLE, new numerical_Portion<double>(0),
 			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Lemke, 3, "npivots", 
-			porINTEGER, new numerical_Portion<gInteger>(0));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapNfg");
