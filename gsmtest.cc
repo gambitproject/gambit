@@ -69,7 +69,6 @@ int main( void )
   gin >> cont;
 
 
-/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -2628,7 +2627,6 @@ int main( void )
 
 
 
-
   machine->InitCallFunction( "DefaultEfg" );
   machine->CallFunction();
   machine->Dump();
@@ -2683,6 +2681,7 @@ int main( void )
   machine->InitCallFunction( "DefaultEfg" );
   machine->CallFunction();
   machine->Dump();
+
 
 
 
@@ -3530,7 +3529,24 @@ int main( void )
   machine->PushRef( "p" );
   machine->Dump();
 
-*/
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+  machine->InitCallFunction( "Test" );
+  machine->PushRef( "x1" );
+  machine->BindVal( "x1" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x1" );
+  machine->Dump();
+
+
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;

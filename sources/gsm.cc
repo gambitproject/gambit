@@ -357,9 +357,8 @@ Portion* GSM::_VarRemove( const gString& var_name )
   }
   else
   {
-    result = _VarValue( var_name )->ValCopy();
     _RefCountTable->Remove( _VarValue( var_name ) );
-    _RefTableStack->Peek()->Remove( var_name );
+    result = _RefTableStack->Peek()->Remove( var_name );
   }
   return result;
 }
@@ -594,16 +593,19 @@ Portion* GSM::_ResolveRef( Portion* p )
     {
       result = p;
     }
-    else if( _VarValue( ref )->Owner() != 0 && 
-	    !_RefCountTable->IsDefined( _VarValue( ref )->Owner() ) )
-    {
-      delete _VarRemove( ref );
-      result = p;
-    }
     else
     {
-      result = _VarValue( ref )->RefCopy();
-      delete p;
+      if( _VarValue( ref )->Owner() != 0 && 
+	 !_RefCountTable->IsDefined( _VarValue( ref )->Owner() ) )
+      {
+        delete _VarRemove( ref );
+	result = p;
+      }
+      else
+      {
+	result = _VarValue( ref )->RefCopy();
+	delete p;
+      }
     }
   }
   else
@@ -1395,7 +1397,7 @@ void GSM::Output( void )
 
   if( _Depth() == 0 )
   {
-//    _StdOut << "\n";
+    // _StdOut << "\n";
   }
   else
   {
@@ -1524,7 +1526,7 @@ void GSM::_ErrorMessage
     s << "  Program abnormally terminated.\n";
     break;
   case 35:
-    s << "  Attempted to create a list of mixed types.\n";
+    s << "  Attempted to create a list of mixed types or owners.\n";
     break;
   case 36:
     s << "  Subscript out of range\n";

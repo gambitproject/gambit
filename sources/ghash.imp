@@ -116,12 +116,12 @@ template <class K, class T> void HashTable<K, T>::Define( K key, T value )
 }
 
 
-template <class K, class T> void HashTable<K, T>::Remove( K key )
+template <class K, class T> T HashTable<K, T>::Remove( K key )
 {
   int i;
   int position;
   K   removed_key;
-  T   removed_value;
+  T   removed_value = 0;
 
   position = IsDefined( key );
   if( position != 0 )
@@ -129,9 +129,10 @@ template <class K, class T> void HashTable<K, T>::Remove( K key )
     i = ValidatedHash( key );
     removed_key = key_bucket[ i ].Remove( position );
     removed_value = value_bucket[ i ].Remove( position );
-    DeleteAction( removed_value );
+    // DeleteAction( removed_value );
     assert( key == removed_key );
   }
+  return removed_value;
 }
 
   

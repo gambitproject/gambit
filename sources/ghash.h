@@ -44,7 +44,7 @@ template <class K, class T> class HashTable
 
   int  IsDefined  ( K key ) const;
   void Define     ( K key, T value );
-  void Remove     ( K key );
+  T    Remove     ( K key );
   T    operator() ( K key ) const;
   T&   operator() ( K key );
 

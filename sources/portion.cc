@@ -207,7 +207,7 @@ Portion* IntPortion::ValCopy( void ) const
 Portion* IntPortion::RefCopy( void ) const
 { 
   Portion* p = new IntRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -271,7 +271,7 @@ Portion* FloatPortion::ValCopy( void ) const
 Portion* FloatPortion::RefCopy( void ) const
 {
   Portion* p = new FloatRefPortion( *_Value );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -337,7 +337,7 @@ Portion* RationalPortion::ValCopy( void ) const
 Portion* RationalPortion::RefCopy( void ) const
 { 
   Portion* p = new RationalRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -403,7 +403,7 @@ Portion* TextPortion::ValCopy( void ) const
 Portion* TextPortion::RefCopy( void ) const
 { 
   Portion* p = new TextRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -472,7 +472,7 @@ Portion* BoolPortion::ValCopy( void ) const
 Portion* BoolPortion::RefCopy( void ) const
 { 
   Portion* p = new BoolRefPortion( *_Value );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -556,7 +556,8 @@ Portion* OutcomePortion::ValCopy( void ) const
 Portion* OutcomePortion::RefCopy( void ) const
 { 
   Portion* p = new OutcomeRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOwner( _Owner );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -564,6 +565,7 @@ void OutcomePortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (OutcomePortion*) p )->_Value );
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool OutcomePortion::operator == ( Portion *p ) const
@@ -630,7 +632,7 @@ Portion* EfPlayerPortion::RefCopy( void ) const
 {
   Portion* p = new EfPlayerRefPortion( *_Value ); 
   p->SetOwner( _Owner );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -638,6 +640,7 @@ void EfPlayerPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (EfPlayerPortion*) p )->_Value );
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool EfPlayerPortion::operator == ( Portion *p ) const
@@ -703,7 +706,7 @@ Portion* InfosetPortion::RefCopy( void ) const
 {
   Portion* p = new InfosetRefPortion( *_Value ); 
   p->SetOwner( _Owner );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -711,6 +714,7 @@ void InfosetPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (InfosetPortion*) p )->_Value );
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool InfosetPortion::operator == ( Portion *p ) const
@@ -776,7 +780,7 @@ Portion* NodePortion::RefCopy( void ) const
 {
   Portion* p = new NodeRefPortion( *_Value ); 
   p->SetOwner( _Owner );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -784,6 +788,7 @@ void NodePortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (NodePortion*) p )->_Value );
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool NodePortion::operator == ( Portion *p ) const
@@ -851,7 +856,7 @@ Portion* ActionPortion::RefCopy( void ) const
 {
   Portion* p = new ActionRefPortion( *_Value ); 
   p->SetOwner( _Owner );
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -859,6 +864,7 @@ void ActionPortion::AssignFrom( Portion* p )
 {
   assert( p->Type() == Type() );
   *_Value = *( ( (ActionPortion*) p )->_Value );
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool ActionPortion::operator == ( Portion *p ) const
@@ -930,7 +936,7 @@ template <class T> Portion* MixedPortion<T>::ValCopy( void ) const
 template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
 {
   Portion* p = new MixedRefPortion<T>( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1030,7 +1036,7 @@ template <class T> Portion* BehavPortion<T>::ValCopy( void ) const
 template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
 {
   Portion* p = new BehavRefPortion<T>( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1144,7 +1150,7 @@ template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
 template <class T> Portion* NfgPortion<T>::RefCopy( void ) const
 { 
   Portion* p = new NfgRefPortion<T>( * (NormalForm<T>*) _Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1242,7 +1248,7 @@ template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
 template <class T> Portion* EfgPortion<T>::RefCopy( void ) const
 { 
   Portion* p = new EfgRefPortion<T>( * (ExtForm<T>*) _Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1321,7 +1327,7 @@ Portion* OutputPortion::ValCopy( void ) const
 Portion* OutputPortion::RefCopy( void ) const
 { 
   Portion* p = new OutputRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1400,7 +1406,7 @@ Portion* InputPortion::ValCopy( void ) const
 Portion* InputPortion::RefCopy( void ) const
 { 
   Portion* p = new InputRefPortion( *_Value ); 
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1486,7 +1492,7 @@ Portion* ListPortion::RefCopy( void ) const
 { 
   Portion* p = new ListRefPortion( *_Value ); 
   ( (ListPortion*) p )->_DataType = _DataType;
-  p->SetOriginal( this );
+  p->SetOriginal( Original() );
   return p;
 }
 
@@ -1507,6 +1513,7 @@ void ListPortion::AssignFrom( Portion* p )
     result = Insert( value[ i ]->ValCopy(), i );
     assert( result != 0 );
   }
+  Original()->SetOwner( p->Original()->Owner() );
 }
 
 bool ListPortion::operator == ( Portion *p ) const
@@ -1676,6 +1683,7 @@ int ListPortion::Insert( Portion* item, int index )
       else
 	_DataType = item->Type();
       result = _Value->Insert( item, index );
+      _Owner = item->Original()->Owner();
     }
     else
     {
@@ -1685,7 +1693,12 @@ int ListPortion::Insert( Portion* item, int index )
   else  // inserting into an existing list
   {
     if( TypeCheck( item ) )
-      result = _Value->Insert( item, index );
+    {
+      if( _Owner == item->Original()->Owner() )
+	result = _Value->Insert( item, index );
+      else
+	delete item;
+    }
     else
       delete item;
   }
