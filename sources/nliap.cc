@@ -7,43 +7,66 @@
 #define MAXIT 10
 #define TOL (T)(.00000001)
 
-#ifdef __GNUG__
-#pragma implementation "liap.h"
-#endif   // __GNUG__
-
 #include <stdlib.h>
-#include <limits.h>
 #include "gambitio.h"
 #include "normal.h"
 #include "normiter.h"
 #include "rational.h"
 #include "gpvector.h"
-#include "solution.h"
 #include "gfunct.h"
 #include "gwatch.h"
+#include "grandom.h"
 #include "liap.h"
 
-LiapParams::LiapParams(void) : nequilib(1), plev(0),tolDFP(1.0e-10)
+//-------------------------------------------------------------------------
+//                     LiapParams<T>: Member functions
+//-------------------------------------------------------------------------
+
+template <class T> LiapParams<T>::LiapParams(void)
+  : nequilib(1), plev(0), tolDFP((T) 1.0e-10)
 { }
 
+#ifdef __GNUG__
+template class LiapParams<double>;
+template class LiapParams<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class LiapParams<double>;
+class LiapParams<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
+
+
+//-------------------------------------------------------------------------
+//                       BaseLiap: Class definition
+//-------------------------------------------------------------------------
+
 class BaseLiap {
-public:
-  virtual int Liap(int) = 0;  
-  virtual int Nevals(void) = 0;
-  virtual int Nits(void) = 0;
-  virtual ~BaseLiap() {}
+  public:
+    virtual int Nevals(void) = 0;
+    virtual int Nits(void) = 0;
+    virtual ~BaseLiap();
 };
 
-template <class T> class LiapModule 
-: public gBC2FunctMin<T>, public BaseLiap, public SolutionModule {
+BaseLiap::~BaseLiap()
+{ }
+
+//-------------------------------------------------------------------------
+//                    LiapModule<T>: Class definition
+//-------------------------------------------------------------------------
+
+template <class T> class LiapModule : public gBC2FunctMin<T>, public BaseLiap {
 private:
   const NormalForm<T> &rep;
   gPVector<T> p;
-  LiapParams params;
+  LiapParams<T> params;
+  gOutput &output, &errors;
+  int printlevel;
+
 public:
   LiapModule(const NormalForm<T> &N,gOutput &ofile,gOutput &efile,
-	     const LiapParams &params) 
-    :  SolutionModule(ofile,efile,params.plev),rep(N),
+	     const LiapParams<T> &params) 
+    : rep(N), output(ofile), errors(efile), printlevel(params.plev),
   p(rep.Dimensionality()), params(params),
   gBC2FunctMin<T>(N.ProfileLength()){ SetPlev(params.plev);}
   virtual ~LiapModule() {}
@@ -51,7 +74,7 @@ public:
   T Value(const gVector<T> &x);
   int Deriv(const gVector<T> &p, gVector<T> &d);
   int Hess(const gVector<T> &p, gMatrix<T> &d) {return 1;}
-  int Liap(int) ;
+  int Liap(int, gList<gPVector<T> > &);
 
   int Liap(gPVector<T> &p);
   T LiapDerivValue(int i1,int j1,const gPVector<T> &p) const;
@@ -62,54 +85,65 @@ public:
 
 
 
-template <class T> int LiapModule<T>::Liap(int number)
+template <class T> int LiapModule<T>::Liap(int number,
+					   gList<gPVector<T> > &sol)
 {
-  int n=0;
+  sol.Flush();
+
+  int n = 0;
   T tmp,sum;
-//  gPVector<T> p(rep.Centroid());
   gPVector<T> pp(rep.Dimensionality());
-  for(int i=1;i<=rep.NumPlayers();i++)
-    for(int j= 1;j<= rep.NumStrats(i);j++)
-      pp(i,j)=((T)(1)/(T)(rep.NumStrats(i)));
+  rep.Centroid(pp);
 
-  n+=(Liap(pp));
-  gout << " n = " << n;
-
-  int it = 0;
-  while(n<number && it < MAXIT) {
-    it++;
-    for(int i=1;i<=rep.NumPlayers();i++) {
-      sum = (T)(0);
-      for(int j=1;j<rep.NumStrats(i);j++) {
-	tmp=(T)(2);
-	while (tmp + sum > ((T)(1)) ) tmp = (T)((T)rand()/(T)INT_MAX);
-	pp(i,j)=tmp;
-	sum+= tmp;
-      }
-      pp(i,j)=(T)(1)-sum;
-    }
-    n+=(Liap(pp));
+  if (Liap(pp))  {
+    n++;
+    sol.Append(pp);
   }
+
+  if (plev > 0)
+    gout << " n = " << n;
+  
+  for (int it = 0; n < number && it < MAXIT; it++)  {
+    for (int i = 1; i <= rep.NumPlayers(); i++)  {
+      sum = (T) 0;
+      for (int j = 1; j < rep.NumStrats(i); j++)  {
+	do
+	  tmp = (T) Uniform();
+	while (tmp + sum > (T) 1);
+	pp(i,j) = tmp;
+	sum += tmp;
+      }
+      pp(i,j) = (T) 1 - sum;
+    }
+    if (Liap(pp))   {
+      n++;
+      sol.Append(pp);
+    }
+  }
+
+  if (plev > 0)
+    gout << '\n';
+
   return n;
 };
 
 template <class T> int LiapModule<T>::Liap(gPVector<T> &p)
 {
-  if(plev>=3) gout << "\np= " << p;
-  T val = (T)0;
-  int iter=0;
-  DFP(p,(T)(params.tolDFP),iter,val);
+  if (plev >= 3)
+    gout << "\np= " << p;
+  T val = (T) 0;
+  int iter = 0;
+  DFP(p, params.tolDFP, iter, val);
 //  val = MinPowell(p);
-  gout << "\np= " << p << " f = " << val;
-  if(val < (T) ( (T)(1) / (T)(100000) ) ) return 1;
-  return 0;
+  if (plev > 0)
+    gout << "\np= " << p << " f = " << val;
+  return (val < (T) ((T) 1 / (T) 100000));
 };
 
 #define BIG1 ((T) 100)
 #define BIG2 ((T) 100)
 
-template <class T> inline 
-T LiapModule<T>::Value(const gVector<T> &x)
+template <class T> T LiapModule<T>::Value(const gVector<T> &x)
 {
   assert(x.Length()==p.Length());
 
@@ -122,7 +156,7 @@ T LiapModule<T>::Value(const gVector<T> &x)
 
   result= (T) 0;
   for(i=1;i<=rep.NumPlayers();i++) {
-    tmp.SetRow(i,payoff.GetRow(i));
+    tmp.CopyRow(i, payoff);
     avg=sum= (T) 0;
 	// then for each strategy for that player set it to 1 and evaluate
     for(j = 1; j <= rep.NumStrats(i); j++) {
@@ -137,7 +171,7 @@ T LiapModule<T>::Value(const gVector<T> &x)
       result += BIG1*x*x;         // add penalty for neg probabilities
       tmp(i,j) = (T) 0;
     }
-    tmp.SetRow(i,p.GetRow(i));
+    tmp.CopyRow(i, p);
     for(j=1;j<=rep.NumStrats(i);j++) {
       x=payoff(i,j)-avg;
       x = (x > 0 ? x : 0);
@@ -152,8 +186,7 @@ T LiapModule<T>::Value(const gVector<T> &x)
   
 };
 
-template <class T> inline int LiapModule<T>::
-Deriv(const gVector<T> &v, gVector<T> &d)
+template <class T> int LiapModule<T>::Deriv(const gVector<T> &v, gVector<T> &d)
 {
   p=v;
   int i1,j1,ii;
@@ -210,12 +243,45 @@ class LiapModule<gRational>;
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 
-int LiapSolver::Liap(void)
+//------------------------------------------------------------------------
+//                     LiapSolver<T>: Member functions
+//------------------------------------------------------------------------
+
+template <class T> LiapSolver<T>::LiapSolver(const NormalForm<T> &N,
+					     const LiapParams<T> &p)
+  : nf(N), params(p), nevals(0), nits(0)
+{ }
+
+template <class T> int LiapSolver<T>::NumEvals(void) const
 {
-  BaseLiap *T;
+  return nevals;
+}
+
+template <class T> int LiapSolver<T>::NumIters(void) const
+{
+  return nits;
+}
+
+template <class T> gRational LiapSolver<T>::Time(void) const
+{
+  return time;
+}
+
+template <class T> LiapParams<T> &LiapSolver<T>::Parameters(void)
+{
+  return params;
+}
+
+template <class T>
+const gList<gPVector<T> > &LiapSolver<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
+template <class T> int LiapSolver<T>::Liap(void)
+{
   gOutput *outfile = &gout, *errfile = &gerr;
 
-//  gout << "\nLiapSolver::Liap() Loc 1";
   if (params.outfile != "")
     outfile = new gFileOutput((char *) params.outfile);
   if (params.errfile != "" && params.errfile != params.outfile)
@@ -223,38 +289,36 @@ int LiapSolver::Liap(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
 
-//  gout << "\nLiapSolver::Liap() Loc 2";
-
   gWatch watch;
-  switch (nf.Type())   {
-    case DOUBLE:   
-      T = new LiapModule<double>((NormalForm<double> &) nf, 
-				 *outfile, *errfile, params);
-      break;
-    case RATIONAL:  
-      T = new LiapModule<gRational>((NormalForm<gRational> &) nf,
-				    *outfile, *errfile, params);
-      break; 
-  }
-//  gout << "\nLiapSolver::Liap() Loc 3";
+  LiapModule<T> LT(nf, *outfile, *errfile, params);
 
-  T->Liap(params.nequilib);
-//  gout << "\nLiapSolver::Liap() Loc 4";
+  LT.Liap(params.nequilib, solutions);
   time = watch.Elapsed();
-  nits = T->Nits();
-  nevals = T->Nevals();
+  nits = LT.Nits();
+  nevals = LT.Nevals();
+  
 
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
     delete errfile;
 
-  delete T;
   return 1;
-
 }
 
-#if 0
+
+#ifdef __GNUG__
+template class LiapSolver<double>;
+template class LiapSolver<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class LiapSolver<double>;
+class LiapSolver<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
+
+
+#ifdef UNUSED
 
 double funct(double *p)
 {

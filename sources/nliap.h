@@ -7,41 +7,38 @@
 #ifndef LIAP_H
 #define LIAP_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "normal.h"
-#include "gnumber.h"
+#include "glist.h"
 
-class LiapParams     {
+template <class T> class LiapParams     {
   public:
     int plev, ntries, nequilib, maxitsDFP, maxitsBrent;
-    gRational tolDFP, tolBrent;
+    T tolDFP, tolBrent;
     gString outfile, errfile;
     
     LiapParams(void);
 };
 
-class LiapSolver  {
+template <class T> class LiapSolver  {
   private:
-    const BaseNormalForm &nf;
-    LiapParams params;
+    const NormalForm<T> &nf;
+    LiapParams<T> params;
     int nevals,nits;
     gRational time;
+    gList<gPVector<T> > solutions;
 
   public:
-    LiapSolver(const BaseNormalForm &N, const LiapParams &p) 
-      : nf(N), params(p),nevals(0),nits(0)   { }
-    ~LiapSolver()   { }
+    LiapSolver(const NormalForm<T> &N, const LiapParams<T> &p); 
 
     int Liap(void);
     
-    int NumEvals(void) const    { return nevals; }
-    int NumIters(void) const    { return nits; }
-    gRational Time(void) const   { return time; }
+    int NumEvals(void) const;
+    int NumIters(void) const;
+    gRational Time(void) const;
 
-    LiapParams &Parameters(void)   { return params; }
+    LiapParams<T> &Parameters(void);
+
+    const gList<gPVector<T> > &GetSolutions(void) const;
 };
 
 
