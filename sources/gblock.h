@@ -74,6 +74,24 @@ template <class T> class gBlock    {
 //-grp
 
 //
+// Append an element to a gBlock.  Operator overloaded for ease of use.
+//+grp
+    gBlock<T> operator+(const T &e) const
+      { gBlock<T> result(*this); result.Append(e); return result; }
+    gBlock<T>& operator+=(const T &e)
+      { Append(e); return *this; }
+//-grp
+
+//
+// Concatenate two gBlocks.  + puts the result in a separate gBlock,
+// while += puts it in the first argument.
+//+grp
+    gBlock<T> operator+(const gBlock<T>& b) const;
+    gBlock<T> operator+=(const gBlock<T>& b)
+      { *this = *this + b; return *this; }
+//-grp
+
+//
 // Append a new element to the block, and return the index at which the
 // element can be found.  Note that this index is guaranteed to be the
 // last (highest) index in the block.
@@ -120,7 +138,7 @@ template <class T> class gBlock    {
 #define INLINE
 #else
 #error Unsupported compiler type
-#endif   // __GNUG__, __BORLANDC__
+#endif   //# __GNUG__, __BORLANDC__
 
 template <class T> INLINE gBlock<T>::gBlock(const gBlock<T> &b)
  : length(b.length)
@@ -154,7 +172,7 @@ template <class T> INLINE gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
 template <class T> INLINE int gBlock<T>::operator==(const gBlock<T> &b) const
 {
   if (length != b.length) return 0;
-  for (int i = 0; i < length; i++) 
+  for (int i = 1; i < length; i++) 
     if (data[i] != b.data[i]) return 0;
   return 1;
 }
@@ -167,7 +185,7 @@ template <class T> inline const T &gBlock<T>::operator[](int n) const
          << " length " << length << '\n';
     exit(0);
   }
-#endif   // NDEBUG
+#endif   //# NDEBUG
   return data[--n];
 }
 
@@ -179,8 +197,17 @@ template <class T> inline T &gBlock<T>::operator[](int n)
          << " length " << length << '\n';
     exit(0);
   }
-#endif   // NDEBUG  
+#endif   //# NDEBUG  
   return data[--n];
+}
+
+template <class T> INLINE 
+  gBlock<T> gBlock<T>::operator+(const gBlock<T>& b) const
+{
+  gBlock<T> result(*this);
+  for (int i = 1; i <= b.length; i++)
+    result.Append(b[i]);
+  return result;
 }
 
 template <class T> INLINE int gBlock<T>::InsertAt(const T &t, int n)
@@ -215,7 +242,7 @@ template <class T> INLINE T gBlock<T>::Remove(int n)
          << " length " << length << '\n';
     exit(0);
   }
-#endif   // NDEBUG
+#endif   //# NDEBUG
 
   T ret(data[--n]);
   T *new_data = (--length) ? new T[length] : 0;
@@ -242,10 +269,14 @@ template <class T> INLINE void gBlock<T>::Dump(gOutput &f) const
     f << i + 1 << ": " << data[i] << '\n';
 }
 
+//
+// Uses the Dump function to output the gBlock.  Uses the << operator
+// overload to use output streams, gout.
+//
 template <class T> inline gOutput &operator<<(gOutput &f, const gBlock<T> &b)
 {
   b.Dump(f);   return f;
 }
 
 
-#endif    // GBLOCK_H
+#endif    //# GBLOCK_H
