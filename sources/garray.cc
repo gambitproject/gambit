@@ -29,6 +29,9 @@ TEMPLATE class gArray<gArray<int> >;
 TEMPLATE class gArray<gArray<int> *>;
 TEMPLATE class gArray<gArray<double> >;
 
+TEMPLATE bool operator==(const gArray<int> &, const gArray<int> &);
+TEMPLATE bool operator!=(const gArray<int> &, const gArray<int> &);
+
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<bool> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<int> &);
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<long> &);

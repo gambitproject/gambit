@@ -12,6 +12,7 @@
 #include "gambitio.h"
 
 template <class T> class gArray  {
+  friend bool operator==(const gArray<T> &, const gArray<T> &);
   protected:
     int min, max;
     T *data;
@@ -63,6 +64,9 @@ template <class T> class gArray  {
 //
     virtual void Dump(gOutput &) const;
 };
+
+template <class T> bool operator==(const gArray<T> &, const gArray<T> &);
+template <class T> bool operator!=(const gArray<T> &, const gArray<T> &);
 
 template <class T> gOutput &operator<<(gOutput &, const gArray<T> &);
 
