@@ -7,8 +7,8 @@
 #ifndef GMAP_H
 #define GMAP_H
 
+#include <assert.h>
 #include "basic.h"
-#include "ghandle.h"
 
 // What is the difference between a gMap and a gSet?
 // Essentially that a gMap allows arbitrary (integer) numbering, while a gSet
@@ -18,25 +18,48 @@ template <class T> class gMap  {
   private:
     int length;
     int *numbers;
-    gHandle<T> *contents;
+    T *contents;
 
   public:
+	// CONSTRUCTORS AND DESTRUCTOR
+	// initialize an empty gMap
     gMap(void) : length(0), contents(0), numbers(0)   { }
+	// copy constructor
     gMap(const gMap<T> &);
+	// clean up after a gMap
+    ~gMap()   { delete [] contents;  delete [] numbers; }
 
+	// OPERATOR OVERLOADING
+	// assignment operator
+    gMap<T> &operator=(const gMap<T> &);
+	// returns the element with index number 'index'
+    T operator[](uint index) const;
+	// determines the equality of two gMaps
+    int operator==(const gMap<T> &) const;
+    int operator!=(const gMap<T> &) const;
+
+	// ADDING AND DELETING ELEMENTS
+	// add a new element to the map, at the lowest available index
+	//  returns the index at which the element is stored
+    int Append(const T &new_member);
+	// add a new element to the map at a specified index
+    void Insert(const T &new_member, uint as_number);
+	// remove element number 'number' from the map
+	//  returns the element which was removed
+    T Remove(uint number);
+	// remove element from the map
+    void Remove(const T &p);
+
+	// GENERAL INFORMATION
+	// returns the number of elements in the map
     uint Length(void) const   { return length; }
-    void Insert(gHandle<T>& new_member, uint as_number);
-    gHandle<T> Remove(uint number);
-    void Remove(gHandle<T>& p);
-
-    uint ElNumber(gHandle<T>& p) const;
+	// returns the number corresponding to an element in the map
+	//   or zero if the element is not a member
+    uint ElNumber(const T &p) const;
+	// returns nonzero if the number is in use
     int Contains(int number) const;
-
-    gHandle<T> operator[](uint index) const;
-
-    void Dump(void) const;
-
-    ~gMap()    { delete [] contents;  delete [] numbers; }
+	// returns nonzero if the element is in the map
+    int Contains(const T &p) const  { return ElNumber(p); }
 };
 
 
@@ -48,11 +71,10 @@ template <class T> class gMap  {
 #error Unsupported compiler type
 #endif   // __GNUC__, __BORLANDC__
 
-template <class T> INLINE gMap<T>::gMap(const gMap<T> &m)
+template <class T> INLINE gMap<T>::gMap(const gMap<T> &m) : length(m.length)
 {
-  length = m.length;
   numbers = new int[length];
-  contents = new gHandle<T>[length];
+  contents = new T[length];
   
   for (uint i = 0; i < length; i++)   {
     numbers[i] = m.numbers[i];
@@ -60,36 +82,53 @@ template <class T> INLINE gMap<T>::gMap(const gMap<T> &m)
   }
 }
 
-template <class T> INLINE void gMap<T>::Dump(void) const
+template <class T> INLINE gMap<T> &gMap<T>::operator=(const gMap<T> &m)
 {
-  for (uint i = 0; i < length; i++)
-    printf("%d: %p\n", numbers[i], contents[i].ptr());
-  printf("\n");
+  if (this != &m)   {
+    delete [] numbers;
+    delete [] contents;
+
+    length = m.length;
+    numbers = new int[length];
+    contents = new T[length];
+    
+    for (uint i = 0; i < length; i++)   {
+      numbers[i] = m.numbers[i];
+      contents[i] = m.contents[i];
+    }
+  }
+  return *this;
 }
 
-template <class T> INLINE uint gMap<T>::ElNumber(gHandle<T> &p) const
+template <class T> inline T gMap<T>::operator[](uint index) const
 {
-  for (uint i = 0; i < length; i++)
-    if (contents[i] == p)  return numbers[i];
-  return 0;
+  return contents[Contains(index) - 1];
 }
 
-template <class T> INLINE int gMap<T>::Contains(int number) const
+template <class T> INLINE int gMap<T>::operator==(const gMap<T> &m) const
 {
-  for (uint i = 0; i < length; i++)
-    if (numbers[i] == number)  return i + 1;
-  return 0;
+  if (length != m.length)   return 0;
+
+  for (int i = 0; i < length; i++)
+    if (numbers[i] != m.numbers[i] || contents[i] != m.contents[i]) return 0;
+
+  return 1;
+}
+
+template <class T> inline int gMap<T>::operator!=(const gMap<T> &m) const
+{
+  return !(*this == m);
 }
 
 template <class T>
-INLINE void gMap<T>::Insert(gHandle<T> &new_member, uint as_number)
+INLINE void gMap<T>::Insert(const T &new_member, uint as_number)
 {
   if (Contains(as_number))  {
     contents[Contains(as_number) - 1] = new_member;
     return;
   }
 
-  gHandle<T> *new_contents = new gHandle<T>[++length];
+  T *new_contents = new T[++length];
   int *new_numbers = new int[length];
 
   if (length == 1)   {
@@ -120,11 +159,18 @@ INLINE void gMap<T>::Insert(gHandle<T> &new_member, uint as_number)
   numbers = new_numbers;
 }
 
-template <class T> INLINE gHandle<T> gMap<T>::Remove(uint number)
+template <class T> INLINE int gMap<T>::Append(const T &new_member)
 {
-  if (!Contains(number))   return gHandle<T>(0);
+  for (uint i = 1; numbers[i] == i; i++);
+  Insert(new_member, i);
+  return i;
+}
 
-  gHandle<T> return_value = contents[Contains(number) - 1];
+template <class T> INLINE T gMap<T>::Remove(uint number)
+{
+  assert(Contains(number));
+
+  T return_value = contents[Contains(number) - 1];
 
   if (length == 1)  {
     delete [] contents;
@@ -135,7 +181,7 @@ template <class T> INLINE gHandle<T> gMap<T>::Remove(uint number)
     return return_value;
   }
 
-  gHandle<T> *new_contents = new gHandle<T>[--length];
+  T *new_contents = new T[--length];
   int *new_numbers = new int[length];
 
   for (uint i = 0; numbers[i] < number; i++)   {
@@ -157,18 +203,23 @@ template <class T> INLINE gHandle<T> gMap<T>::Remove(uint number)
   return return_value;
 }
 
-template <class T> INLINE void gMap<T>::Remove(gHandle<T> &p)
+template <class T> inline void gMap<T>::Remove(const T &p)
 {
   Remove(ElNumber(p));
 }
 
-
-template <class T> INLINE gHandle<T> gMap<T>::operator[](uint index) const
+template <class T> INLINE uint gMap<T>::ElNumber(const T &p) const
 {
-  if (Contains(index))
-    return contents[Contains(index) - 1];
-  else
-    return gHandle<T>(0);
+  for (uint i = 0; i < length; i++)
+    if (contents[i] == p)  return numbers[i];
+  return 0;
+}
+
+template <class T> INLINE int gMap<T>::Contains(int number) const
+{
+  for (uint i = 0; i < length; i++)
+    if (numbers[i] == number)  return i + 1;
+  return 0;
 }
 
 
