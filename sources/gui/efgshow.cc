@@ -129,7 +129,6 @@ void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)
 {
   m_node.DeleteMove();
   p_doc->GetEfg().DeleteEmptyInfosets();
-  p_doc->SetCursor(m_node);
 }
 
 //---------------------------------------------------------------------
