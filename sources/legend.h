@@ -80,16 +80,6 @@ l_struct branch_below_src[] =
     {"",               LEGEND_END}
 };
 
-
-l_struct node_terminal_src[] = 
-{
-    {"Nothing",        NODE_TERMINAL_NOTHING},
-    {"Outcome",        NODE_TERMINAL_OUTCOME},
-    {"Name",           NODE_TERMINAL_NAME},
-    {"",               LEGEND_END}
-};
-
-
 l_struct node_right_src[] = 
 {
     {"Nothing",        NODE_RIGHT_NOTHING},

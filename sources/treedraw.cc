@@ -1,7 +1,8 @@
-// File: treedraw.cc --
-// Contains the configuration class for the extensive form.
-
+//
+// FILE: treedraw.cc -- Display configuration class for the extensive form
+//
 // $Id$
+//
 
 #include "wx.h"
 #include "wx_form.h"
@@ -21,7 +22,6 @@ TreeDrawSettings::TreeDrawSettings(void)
     node_right_font = NULL;
     branch_above_font  = NULL;
     branch_below_font  = NULL;
-    node_terminal_font = NULL;
 
     LoadOptions(INIFILE);
 }
@@ -102,11 +102,6 @@ void TreeDrawSettings::draw_params_legends_func(wxButton &ob, wxCommandEvent &)
                               dpls->draw_settings->BranchBelowFont());
         break;
 
-    case NODE_TERMINAL_LEGEND: 
-        f = new FontDialogBox((wxWindow *)ob.GetParent(), 
-                              dpls->draw_settings->NodeTerminalFont());
-        break;
-
     case NODE_RIGHT_LEGEND: 
         f = new FontDialogBox((wxWindow *)ob.GetParent(), 
                               dpls->draw_settings->NodeRightFont());
@@ -134,10 +129,6 @@ void TreeDrawSettings::draw_params_legends_func(wxButton &ob, wxCommandEvent &)
             dpls->draw_settings->SetBranchBelowFont(the_font);
             break;
 
-        case NODE_TERMINAL_LEGEND: 
-            dpls->draw_settings->SetNodeTerminalFont(the_font);
-            break;
-
         case NODE_RIGHT_LEGEND: 
             dpls->draw_settings->SetNodeRightFont(the_font);
             break;
@@ -156,19 +147,16 @@ void TreeDrawSettings::SetLegends(void)
     wxStringList  *node_below_list    = new wxStringList;
     wxStringList  *branch_above_list  = new wxStringList;
     wxStringList  *branch_below_list  = new wxStringList;
-    wxStringList  *node_terminal_list = new wxStringList;
     wxStringList  *node_right_list    = new wxStringList;
     char          *node_above_str     = new char[20];
     char          *node_below_str     = new char[20];
     char          *branch_above_str   = new char[20];
     char          *branch_below_str   = new char[20];
-    char          *node_terminal_str  = new char[20];
     char          *node_right_str     = new char[20];
     int            node_above_num;
     int            node_below_num;
     int            branch_above_num;
     int            branch_below_num;
-    int            node_terminal_num;
     int            node_right_num;
     wxFont         fixed_font(12, wxMODERN, wxNORMAL, wxNORMAL);
 
@@ -202,13 +190,6 @@ void TreeDrawSettings::SetLegends(void)
     }
 
     i = 0;
-    while (node_terminal_src[i].l_id != -1)
-    {
-        node_terminal_list->Add(node_terminal_src[i].l_name);
-        i++;
-    }
-
-    i = 0;
     while (node_right_src[i].l_id != -1)
     {
         node_right_list->Add(node_right_src[i].l_name);
@@ -220,8 +201,7 @@ void TreeDrawSettings::SetLegends(void)
     strcpy(node_below_str,    node_below_src[LabelNodeBelow()].l_name);
     strcpy(branch_above_str,  branch_above_src[LabelBranchAbove()].l_name);
     strcpy(branch_below_str,  branch_below_src[LabelBranchBelow()].l_name);
-    strcpy(node_terminal_str, node_terminal_src[LabelNodeTerminal()].l_name);
-    strcpy(node_right_str,    node_right_src[LabelNodeTerminal()].l_name);
+    strcpy(node_right_str,    node_right_src[LabelNodeRight()].l_name);
 
     // Create the dialog box.
     MyDialogBox *display_legend_dialog = new MyDialogBox(NULL, "Display Legends");
@@ -257,14 +237,6 @@ void TreeDrawSettings::SetLegends(void)
         display_legend_dialog->Add(wxMakeFormButton("Font", 
             (wxFunction)draw_params_legends_func));
     display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormString("At terminal", 
-        &node_terminal_str, wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(node_terminal_list), 0)));
-    wxFormItem *node_terminal_button = 
-        display_legend_dialog->Add(wxMakeFormButton("Font", 
-            (wxFunction)draw_params_legends_func));
-    display_legend_dialog->Add(wxMakeFormNewLine());
     display_legend_dialog->Add(wxMakeFormString("At right", &node_right_str, 
         wxFORM_CHOICE, new wxList(wxMakeConstraintStrings(node_right_list), 0)));
     wxFormItem *node_right_button = 
@@ -282,8 +254,6 @@ void TreeDrawSettings::SetLegends(void)
     branch_above_button->PanelItem->SetClientData((char *)&dpls3);
     draw_params_legend_struct dpls4 = { BRANCH_BELOW_LEGEND, this };
     branch_below_button->PanelItem->SetClientData((char *)&dpls4);
-    draw_params_legend_struct dpls5 = { NODE_TERMINAL_LEGEND, this };
-    node_terminal_button->PanelItem->SetClientData((char *)&dpls5);
     draw_params_legend_struct dpls6 = { NODE_RIGHT_LEGEND, this };
     node_right_button->PanelItem->SetClientData((char *)&dpls6);
 
@@ -297,14 +267,12 @@ void TreeDrawSettings::SetLegends(void)
         node_below_num    = wxListFindString(node_below_list,    node_below_str);
         branch_above_num  = wxListFindString(branch_above_list,  branch_above_str);
         branch_below_num  = wxListFindString(branch_below_list,  branch_below_str);
-        node_terminal_num = wxListFindString(node_terminal_list, node_terminal_str);
         node_right_num    = wxListFindString(node_right_list,    node_right_str);
 
         SetLabelNodeAbove(node_above_src[node_above_num].l_id);
         SetLabelNodeBelow(node_below_src[node_below_num].l_id);
         SetLabelBranchAbove(branch_above_src[branch_above_num].l_id);
         SetLabelBranchBelow(branch_below_src[branch_below_num].l_id);
-        SetLabelNodeTerminal(node_terminal_src[node_terminal_num].l_id);
         SetLabelNodeRight(node_right_src[node_right_num].l_id);
     }
 
@@ -313,7 +281,6 @@ void TreeDrawSettings::SetLegends(void)
     delete [] node_below_str;
     delete [] branch_above_str;
     delete [] branch_below_str;
-    delete [] node_terminal_str;
     delete [] node_right_str;
     delete display_legend_dialog;
 }
@@ -348,11 +315,6 @@ void TreeDrawSettings::SetLegends(int what)
     case BRANCH_BELOW_LEGEND: 
         legend_src = branch_below_src;
         legend_id = branch_below_label;
-        break;
-
-    case NODE_TERMINAL_LEGEND: 
-        legend_src = node_terminal_src;
-        legend_id = node_terminal_label;
         break;
 
     case NODE_RIGHT_LEGEND: 
@@ -406,10 +368,6 @@ void TreeDrawSettings::SetLegends(int what)
             SetLabelBranchBelow(legend_id);
             break;
 
-        case NODE_TERMINAL_LEGEND: 
-            SetLabelNodeTerminal(legend_id);
-            break;
-
         case NODE_RIGHT_LEGEND: 
             SetLabelNodeRight(legend_id);
             break;
@@ -443,7 +401,6 @@ void TreeDrawSettings::SaveOptions(char *s)
     wxWriteResource("Gambit", "Node-Right-Label", node_right_label, file_name);
     wxWriteResource("Gambit", "Branch-Above-Label",  branch_above_label,  file_name);
     wxWriteResource("Gambit", "Branch-Below-Label",  branch_below_label,  file_name);
-    wxWriteResource("Gambit", "Node-Terminal-Label", node_terminal_label, file_name);
     wxWriteResource("Gambit", "Flashing-Cursor",  flashing_cursor,      file_name);
     wxWriteResource("Gambit", "Color-Outcomes",   color_coded_outcomes, file_name);
     wxWriteResource("Gambit", "Root-Reachable",   root_reachable,       file_name);
@@ -458,8 +415,6 @@ void TreeDrawSettings::SaveOptions(char *s)
                     wxFontToString(branch_above_font), file_name);
     wxWriteResource("Gambit", "Branch-Below-Font", 
                     wxFontToString(branch_below_font), file_name);
-    wxWriteResource("Gambit", "Node-Terminal-Font", 
-                    wxFontToString(node_terminal_font), file_name);
     wxWriteResource("Gambit", "Node-Right-Font", 
                     wxFontToString(node_right_font), file_name);
 
@@ -484,7 +439,6 @@ void TreeDrawSettings::LoadOptions(char *file_name)
     wxGetResource("Gambit", "Node-Below-Label",    &node_below_label,     file_name);
     wxGetResource("Gambit", "Branch-Above-Label",  &branch_above_label,   file_name);
     wxGetResource("Gambit", "Branch-Below-Label",  &branch_below_label,   file_name);
-    wxGetResource("Gambit", "Node-Terminal-Label", &node_terminal_label,  file_name);
     wxGetResource("Gambit", "Node-Right-Label",    &node_right_label,     file_name);
     wxGetResource("Gambit", "Flashing-Cursor",     &flashing_cursor,      file_name);
     wxGetResource("Gambit", "Color-Outcomes",      &color_coded_outcomes, file_name);
@@ -501,8 +455,6 @@ void TreeDrawSettings::LoadOptions(char *file_name)
     SetBranchAboveFont(wxStringToFont(l_tempstr));
     wxGetResource("Gambit", "Branch-Below-Font", &l_tempstr, file_name);
     SetBranchBelowFont(wxStringToFont(l_tempstr));
-    wxGetResource("Gambit", "Node-Terminal-Font", &l_tempstr, file_name);
-    SetNodeTerminalFont(wxStringToFont(l_tempstr));
     wxGetResource("Gambit", "Node-Right-Font", &l_tempstr, file_name);
     SetNodeRightFont(wxStringToFont(l_tempstr));
     GambitDrawSettings::LoadOptions(file_name);

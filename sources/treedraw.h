@@ -1,6 +1,8 @@
-// File: treedraw.h -- contains the definition of the configuration class
-// for the extensive form
+//
+// FILE: treedraw.h -- Display configuration class for the extensive form
+//
 // $Id$
+//
 
 #ifndef TREEDRAW_H
 #define TREEDRAW_H
@@ -9,8 +11,7 @@
 #include "treecons.h"
 #include "gambdraw.h"
 
-class TreeDrawSettings: public GambitDrawSettings
-{
+class TreeDrawSettings : public GambitDrawSettings {
 private:
     // These are user-definable.
     // Size info for different elements of the tree.
@@ -26,14 +27,14 @@ private:
     // Labeling info
     int show_infosets;
     int node_above_label, node_below_label, branch_above_label,
-        branch_below_label, node_terminal_label, node_right_label;
+        branch_below_label, node_right_label;
     Bool color_coded_outcomes;
     int     num_prec;
 
     // Fonts for labels. Note, the system does not make a copy. 
     // DO NOT delete the font!
     wxFont *node_above_font, *node_below_font, *node_right_font,
-        *branch_above_font, *branch_below_font, *node_terminal_font;
+        *branch_above_font, *branch_below_font;
 
     // Cursor stuff.
     Bool    flashing_cursor;
@@ -101,8 +102,6 @@ public:
     int     LabelBranchAbove(void) const  { return branch_above_label;  }
     void    SetLabelBranchBelow(int l)    { branch_below_label = l;     }
     int     LabelBranchBelow(void) const  { return branch_below_label;  }
-    void    SetLabelNodeTerminal(int l)   { node_terminal_label = l;    }
-    int     LabelNodeTerminal(void) const { return node_terminal_label; }
 
     // Control the fonts.
     void    SetNodeAboveFont(wxFont *f)
@@ -120,9 +119,6 @@ public:
     void    SetBranchBelowFont(wxFont *f)
     { /*if (branch_below_font) delete branch_below_font; */ branch_below_font = f; }
     wxFont  *BranchBelowFont(void) const { return branch_below_font; }
-    void    SetNodeTerminalFont(wxFont *f)
-    { /*if (node_terminal_font) delete node_terminal_font; */ node_terminal_font = f; }
-    wxFont  *NodeTerminalFont(void) const { return node_terminal_font; }
 
     // Control the cursor style [flashing or non-flashing].
     void    SetFlashingCursor(Bool f)  { flashing_cursor = f;    }
