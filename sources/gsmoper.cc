@@ -890,11 +890,24 @@ Portion* GSM_Write_numerical( Portion** param )
 
 Portion* GSM_Write_gString( Portion** param )
 {
+  int i = 0;
+
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
+  gString text = ( (TextPortion*) param[ 1 ] )->Value();
+
+  for( i = 0; i < text.length(); i++ )
+  {
+    if( text[ i ] == '\\' && text[ i + 1 ] == 'n' )
+    {
+      text.remove( i );
+      text[ i ] = '\n';
+    }
+  }
+ 
   if( ( (BoolPortion*) param[ 2 ] )->Value() )
-    s << param[ 1 ];
+    s << '\"' << text << '\"';
   else
-    s << ( (TextPortion*) param[ 1 ] )->Value();
+    s << text;
   return new OutputRefPortion( s );
 }
 
