@@ -34,6 +34,7 @@ class Node    {
     EFOutcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
+    void *solution;
 
     Node(FullEfg *e, Node *p);
     ~Node();

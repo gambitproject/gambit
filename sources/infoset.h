@@ -23,14 +23,16 @@ class Action   {
   friend class FullEfg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
+  friend class BehavProfile<gNumber>;
   friend class Infoset;
   private:
     int number;
     gText name;
     Infoset *owner;
+    void *solution;
 
     Action(int br, const gText &n, Infoset *s)
-      : number(br), name(n), owner(s)   { }
+      : number(br), name(n), owner(s), solution(0)   { }
     ~Action()   { }
 
   public:
@@ -58,6 +60,7 @@ class Infoset   {
     gBlock<Action *> actions;
     gBlock<Node *> members;
     int flag, whichbranch;
+    void *solution;
     
     Infoset(FullEfg *e, int n, EFPlayer *p, int br);
     virtual ~Infoset();  

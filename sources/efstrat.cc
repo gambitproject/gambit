@@ -118,7 +118,7 @@ public:
   const Action *GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int Find(Action *) const;
+  int Find(const Action *) const;
   int Find(int, Action *) const;
 
   // Number of Actions in a particular infoset
@@ -247,9 +247,9 @@ EFPlayer &EFActionSet::GetPlayer(void) const
   return (*efp);
 }
 
-int EFActionSet::Find(Action *a) const
+int EFActionSet::Find(const Action *a) const
 {
-  return (infosets[a->BelongsTo()->GetNumber()]->acts.Find(a));
+  return (infosets[a->BelongsTo()->GetNumber()]->acts.Find((Action *)a));
 }
 
 int EFActionSet::Find(int p_infoset, Action *a) const
@@ -368,7 +368,7 @@ gList<Action *> EFSupport::ListOfActions(const Infoset *i) const
   return answer;
 }
 
-int EFSupport::Find(Action *a) const
+int EFSupport::Find(const Action *a) const
 {
   if (a->BelongsTo()->Game() != m_efg)  assert(0);
 

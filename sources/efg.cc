@@ -60,7 +60,8 @@ bool Infoset::Precedes(const Node * n) const
 }
 
 Infoset::Infoset(FullEfg *e, int n, EFPlayer *p, int br)
-  : E(e), number(n), player(p), actions(br), flag(0) 
+  : E(e), number(n), player(p), actions(br), flag(0), 
+    solution(0) 
 {
   while (br)   {
     actions[br] = new Action(br, "", this);
@@ -154,7 +155,7 @@ void ChanceInfoset::PrintActions(gOutput &f) const
 
 Node::Node(FullEfg *e, Node *p)
   : mark(false), number(0), E(e), infoset(0), parent(p), outcome(0),
-    gameroot((p) ? p->gameroot : this)
+    gameroot((p) ? p->gameroot : this), solution(0)
 { }
 
 Node::~Node()

@@ -141,6 +141,8 @@ public:
   void Set(Action *, const gNumber &);
   void Set(int, int, int, const gNumber &);
   const gNumber &operator()(Action *) const;
+  const gNumber &operator[](Action *) const;
+  gNumber &operator[](Action *);
 
   BehavSolution &operator+=(const BehavSolution &);
   BehavSolution &operator-=(const BehavSolution &);
@@ -193,7 +195,11 @@ public:
   gArray<gNumber> NodeRealizProbs(void) const
     { return m_profile->NodeRealizProbs(); }
   const gNumber &GetValue(Infoset *s, int act) const
-    { return m_profile->GetValue(s, act); }
+    { return m_profile->GetValue(s->GetAction(act)); }
+  // the above is OK since BehavSolution has full support.  Otherwise, 
+  //     { return m_profile->GetValue(m_profile->Support().Actions(s)[act]); }
+  const gNumber &GetValue(Action *act) const
+    { return m_profile->GetValue(act); }
 
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO NASH, ANF NASH
   bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;

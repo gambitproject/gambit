@@ -16,30 +16,82 @@
 #include "ineqsolv.h"
 
 class Infoset;
-template <class T> class BehavNode;
+//template <class T> class BehavNode;
 class Nfg;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
 template <class T> class gRectArray;
 class BehavSolution;
 
+//------------------------------------------------------------------------
+//      Declaration of BehavNode<T>
+//------------------------------------------------------------------------
+
+template <class T> class BehavNode {
+public:
+  Node *node;
+  T nval, bval;
+  gVector<T> scratch;
+  gArray<BehavNode<T> *> children;
+
+  T realizProb, belief;
+  gVector<T> nodeValue, condPayoff;
+
+  BehavNode(Node *n, int pl);
+  ~BehavNode();
+
+  void ClearNodeProbs(void);
+};
+
+template <class T> class BehavAction {
+public:
+  Action *action;
+  T *probability;
+  T condPayoff;
+
+  BehavAction(Action *act, int pl);
+  ~BehavAction();
+};
+
+template <class T> class BehavInfoset {
+public:
+  Infoset *iset;
+  gArray<BehavAction<T> *> actions;
+
+  BehavInfoset(const EFSupport &s, Infoset *i, int pl);
+  ~BehavInfoset();
+};
+
 template <class T> class BehavProfile : public gDPVector<T>  {
 protected:
   const Efg *m_efg;
   BehavNode<T> *m_root;
-  gArray<BehavNode<T> *> m_nodes;
   EFSupport m_support;
+  gArray<BehavInfoset<T> *> m_isets;
   
-  // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
+  // functions for installing the BehavProfile in Efg 
+  // Installation sets back-pointers in EFG to point to relevant 
+  // stuff in BehavProfile
+
+  void InstallMe(void) const;  
+  void InstallMe(BehavNode<T> *) const; 
   void InitPayoffs(void) const;
+  void InitProfile(void);
+
+  // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
   void Payoff(Node *, T, int, T &) const;
   void NodeValues(BehavNode<T> *, int, gArray<T> &, int &) const;
-  void CondPayoff(BehavNode<T> *, T, gPVector<T> &, gDPVector<T> &) const;
+  T NodeValue(Node *, int) const;
+  void CondPayoff(Node *, T, gPVector<T> &, gDPVector<T> &) const;
   void NodeRealizProbs(BehavNode<T> *, T, int &, gArray<T> &) const;
   void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
   const T Payoff(const EFOutcome *o, int pl) const;
   const T ChanceProb(const Infoset *iset, int act) const;
   
+
+  void NodeRealizProbs(Node *node, T prob) const;
+
+
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
   
   gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
@@ -112,6 +164,12 @@ protected:
 					const gList<gList<int> > &) const;
   
 public:
+  class BadStuff : public gException  {
+  public:
+    virtual ~BadStuff();
+    gText Description(void) const;
+  };
+
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavProfile(const EFSupport &);
   BehavProfile(const BehavProfile<T> &);
@@ -128,7 +186,6 @@ public:
   
   virtual bool IsAssessment(void) const { return false; }
   
-  const T &GetValue(Infoset *, int) const;
   const T &GetValue(const Action *)       const; 
   
   T LiapValue(void) const;
@@ -137,6 +194,14 @@ public:
   
   // OPERATOR OVERLOADING
   bool operator==(const BehavProfile<T> &) const;
+
+  const T &ActionProb(Action *) const;
+  T &ActionProb(Action *);
+
+  //  const T &operator()(Action *) const;
+  //  T &operator()(Action *);
+  //  T &operator()(int a, int b, int c);
+  //  const T &operator()(int a, int b, int c) const;
   
   void Dump(gOutput &) const;
   
@@ -150,10 +215,15 @@ public:
   gArray<T> NodeValues(int p_player) const;
   gArray<T> NodeRealizProbs(void) const;
   
-  virtual void CondPayoff(gDPVector<T> &p_payoff, gPVector<T> &p_probs) const;
+  virtual void CondPayoff(gDPVector<T> &, gPVector<T> &) const;
   virtual gDPVector<T> Beliefs(void) const;
   
   void Centroid(void) const;
+
+  void NodeRealizProb(void) const;
+  bool IsInstalled(void) const;  
+
+
 };
 
 

@@ -45,7 +45,8 @@ static Portion *GSM_ActionProb(Portion **param)
     return new NumberPortion(infoset->Game()->
 			       GetChanceProb(infoset, action->GetNumber()));
   else if (profile->Support().Find(action))
-    return new NumberPortion((*profile)(action));
+    //    return new NumberPortion((*profile)(action));
+    return new NumberPortion((*profile)[action]);
   else
     return new NumberPortion(0.0);
 }
@@ -595,7 +596,8 @@ static Portion *GSM_SetActionProb(Portion **param)
   Action *action = ((ActionPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
   
-  P->Set(action, value);
+  //  P->Set(action, value);
+  (*P)[action] = value;
   ((BehavPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }

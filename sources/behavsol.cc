@@ -273,19 +273,22 @@ void BehavSolution::CheckIsNash(void) const
     // and if it wasn't settled in that call, ...
     if (m_checkedNash == false) { 
       // use reduced normal form regrets for complete profiles
+
       if(IsComplete()) 
 	m_isNash = (MaxRNFRegret() <= m_epsilon) ? triTRUE:triFALSE;
-      // else let Andy figure it out
+      //  else let Andy figure it out
       // Is perfect recall needed here, Andy?
-      else if (IsPerfectRecall(m_profile->Game())) { 
-	gStatus &m_status = gstatus;
-	// not sure MaxGripe does the right thing here
-	m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
-		    ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
-      }
+      else 
+	
+	if (IsPerfectRecall(m_profile->Game())) { 
+	  gStatus &m_status = gstatus;
+	  // not sure MaxGripe does the right thing here
+	  m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
+		      ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
+	}
     }
     m_checkedNash = true;
-
+    
     // Done.  Now mark other obvious inferences 
 
     if (m_isNash == triFALSE) {
@@ -434,6 +437,16 @@ const gNumber &BehavSolution::operator()(Action *p_action) const
   EFPlayer *player = infoset->GetPlayer();
   return (*m_profile)(player->GetNumber(), infoset->GetNumber(),
 		      p_action->GetNumber());
+}
+
+const gNumber &BehavSolution::operator[](Action *p_action) const
+{
+  return m_profile->ActionProb(p_action);
+}
+
+gNumber &BehavSolution::operator[](Action *p_action)
+{
+  return m_profile->ActionProb(p_action);
 }
 
 BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
@@ -608,13 +621,16 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
       gNumber pay = Payoff(pl);
       for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
 	BehavProfile<gNumber> scratch(*this);
+	//	gout << "\ninstalled 1:  " << scratch.IsInstalled() << " scratch: " << scratch;
 	const gArray<int> *const actions = L.strategies[pl][st];
 	for(int j = 1;j<=(*actions).Length();j++) {
 	  int a = (*actions)[j];
-	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
+	  //	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
+	  for (int k = 1;k<=scratch.Support().NumActions(pl,j);k++)
 	    scratch(pl,j,k) = (gNumber)0;
 	  if(a>0)scratch(pl,j,a) = (gNumber)1;
 	}
+	//	gout << "\ninstalled 2:  " << scratch.IsInstalled() << " scratch: " << scratch;
 	gNumber pay2 = scratch.Payoff(pl);
 	// use pay - pay instead of zero to get correct precision
 	(*m_rnf_regret)(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
