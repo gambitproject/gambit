@@ -2550,7 +2550,8 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
 	  ( spec.Type & porEFPLAYER ) ||
 	  ( spec.Type & porINFOSET ) ||
 	  ( spec.Type & porNODE ) ||
-	  ( spec.Type & porACTION ) );
+	  ( spec.Type & porACTION ) ||
+	  ( spec.Type & porOUTCOME ) );
   
   for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
     for(j=1; j<=vars[i].Length(); j++)
