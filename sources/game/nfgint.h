@@ -76,7 +76,7 @@ struct gbt_nfg_infoset_rep {
   gbtBlock<gbt_nfg_strategy_rep *> m_actions;
 
   gbt_nfg_infoset_rep(gbt_nfg_player_rep *, int id, int br);
-  ~gbt_nfg_infoset_rep();
+  ~gbt_nfg_infoset_rep() { }
 };
 
 struct gbt_nfg_player_rep {
