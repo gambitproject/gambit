@@ -154,7 +154,7 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-void MixedSolution::SetIsNash(void) const
+void MixedSolution::CheckIsNash(void) const
 {
   if (m_isNash == triUNKNOWN) {
     if(IsComplete())
@@ -276,7 +276,7 @@ bool MixedSolution::IsComplete(void) const
 
 gTriState MixedSolution::IsNash(void) const
 {
-  SetIsNash();
+  CheckIsNash();
   return m_isNash;
 }
 
@@ -295,7 +295,7 @@ gTriState MixedSolution::IsPerfect(void) const
 
 gTriState MixedSolution::IsProper(void) const
 {
-  SetIsNash();
+  CheckIsNash();
   return m_isProper;
 }
 
@@ -340,12 +340,14 @@ void MixedSolution::Dump(gOutput &p_file) const
 void MixedSolution::DumpInfo(gOutput &p_file) const
 {
   p_file << " Creator:"; DisplayNfgAlgType(p_file, m_creator);
-  p_file << " IsNash:" << m_isNash;
-  p_file << " IsPerfect:" << m_isPerfect;
-  p_file << " IsProper:" << m_isProper;
-  p_file << " QreLambda:" << m_qreLambda;
-  p_file << " QreValue:" << m_qreValue;
-  p_file << " LiapValue:" << m_liapValue;
+  p_file << " IsNash:" << IsNash();
+  p_file << " IsPerfect:" << IsPerfect();
+  p_file << " IsProper:" << IsProper();
+  p_file << " LiapValue:" << LiapValue();
+  if(m_creator == algorithmNfg_QRE || m_creator == algorithmNfg_QREALL) {
+    p_file << " QreLambda:" << m_qreLambda;
+    p_file << " QreValue:" << m_qreValue;
+  }
 }
 
 gOutput &operator<<(gOutput &p_file, const MixedSolution &p_solution)
