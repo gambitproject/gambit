@@ -22,6 +22,9 @@
 #include "nfg.h"
 #include "efg.h"
 
+#include "system.h"
+
+
 extern GSM* _gsm;
 
 
@@ -2515,6 +2518,30 @@ Portion* GSM_Clear(Portion**)
 
 
 
+Portion* GSM_Shell( Portion** param )
+{
+  gString str = ((TextPortion*) param[0])->Value();
+  bool spawn = ((BoolPortion*) param[1])->Value();
+
+  int result = -1;
+  if( !spawn )
+  {
+    if( str.length() > 0 )
+      result = System::Shell( str );
+    else
+      result = System::Shell( 0 );
+  }
+  else
+  {
+    if( str.length() > 0 )
+      result = System::Spawn( str );
+    else
+      result = System::Spawn( 0 );
+  }
+
+  return new IntValPortion( result );
+}
+
 
 
 
@@ -3369,6 +3396,16 @@ void Init_gsmoper(GSM* gsm)
 				       PortionSpec(porANYTYPE, 0, true),
 				       1, 0, LISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
+  gsm->AddFunction(FuncObj);
+
+
+
+  FuncObj = new FuncDescObj("Shell", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Shell, porINTEGER, 2 ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("command", porTEXT,
+					    new TextValPortion("")));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("spawn", porBOOL, 
+					    new BoolValPortion(true)));
   gsm->AddFunction(FuncObj);
 
 }

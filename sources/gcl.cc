@@ -68,9 +68,16 @@ return 1;	// we did not really fix anything, but want no more warnings
 }
 
 GSM* _gsm;
+char* _SourceDir = NULL;
 
-int main(int ,char **)
+int main( int /*argc*/, char* argv[] )
 {
+  char* c = NULL;
+  c = strrchr( argv[0], '\\' );
+  if( c != NULL && *(c+1) != NULL )
+    strcpy( _SourceDir, c+1 );
+    
+  
   // Set up the error handling functions:
   signal(SIGFPE, (fptr)SigFPEHandler);
   

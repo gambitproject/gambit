@@ -22,6 +22,9 @@
 #include "gsmfunc.h"
 #include "portion.h"
 
+#include "system.h"
+
+
 #include "gstack.imp"
 
 #ifdef __GNUG__
@@ -78,7 +81,8 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   int ProgLength(void); \
   \
   int Parse(void); \
-  void Execute(void);
+  void Execute(void); \
+  void LoadInputs( void ); 
 
 %define CONSTRUCTOR_INIT     : function(0), formalstack(4), \
                                labels(4), \
@@ -86,14 +90,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
                                filenames(4), lines(4), \
                                gsm(*_gsm), quit(false)
 
-%define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1); \
-                               inputs.Push(new gFileInput("gclini.gcl")); \
-			       if (!inputs.Peek()->IsValid())  \
-		                 delete inputs.Pop();  \
-			       else  {  \
-                                 filenames.Push("gclini.gcl"); \
-		                 lines.Push(1); \
-	                       }
+%define CONSTRUCTOR_CODE       LoadInputs();
 
 %token LOR
 %token LAND
@@ -946,3 +943,67 @@ void GCLCompiler::Execute(void)
 }
 
 
+void GCLCompiler::LoadInputs( void )
+{
+  filenames.Push("stdin");
+  lines.Push(1);
+
+  const char INI_FILE[] = "gclini.gcl";
+#ifdef __GNUG__
+  const char SLASH = '/';
+  const char SOURCE[] = "/usr/local/lib/gambit";
+#elif defined __BORLANDC__
+  const char SLASH = '\\';
+  extern char* _SourceDir;
+  const char* SOURCE = _SourceDir;
+#endif   // __GNUG__
+
+  gString IniFileName;
+
+
+  assert( inputs.Depth() == 0 );
+  IniFileName = (gString) INI_FILE;
+  inputs.Push( new gFileInput( IniFileName ) );
+  if (!inputs.Peek()->IsValid())
+    delete inputs.Pop();
+  else  
+    filenames.Push( IniFileName );
+
+
+
+  if( (inputs.Depth() == 0) && (System::GetEnv( "HOME" ) != NULL) )
+  {
+    IniFileName = (gString) System::GetEnv( "HOME" ) + SLASH + INI_FILE;
+    inputs.Push( new gFileInput( IniFileName ) );
+    if (!inputs.Peek()->IsValid())
+      delete inputs.Pop();
+    else  
+      filenames.Push( IniFileName );
+  }
+
+  if( (inputs.Depth() == 0) && (System::GetEnv( "GCLLIB" ) != NULL) )
+  {
+    IniFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + INI_FILE;
+    inputs.Push( new gFileInput( IniFileName ) );
+    if (!inputs.Peek()->IsValid())
+      delete inputs.Pop();
+    else  
+      filenames.Push( IniFileName );
+  }
+
+  if( (inputs.Depth() == 0) && (SOURCE != NULL) )
+  {
+    IniFileName = (gString) SOURCE + SLASH + INI_FILE;
+    inputs.Push( new gFileInput( IniFileName ) );
+    if (!inputs.Peek()->IsValid())
+      delete inputs.Pop();
+    else  
+      filenames.Push( IniFileName );
+  }
+
+
+  if( inputs.Depth() > 0 )
+    lines.Push(1);
+  else
+    gerr << "GCL Warning: " << INI_FILE << " not found.\n";
+}
