@@ -61,15 +61,9 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-
 #define FILE_NEW                            1000
 #define FILE_NEW_NFG                        1001
 #define FILE_NEW_EFG                        1002
-#define FILE_OPEN                           1003
-#define FILE_QUIT                           1004
-
-#define GAMBIT_HELP_CONTENTS                1700
-#define GAMBIT_HELP_ABOUT                   1701
 
 #define GAMBIT_GUI_HELP "GAMBIT GUI"
 

@@ -192,11 +192,11 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   CreateStatusBar();
 
   wxAcceleratorEntry entries[5];
-  entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
+  entries[0].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
   entries[1].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
   entries[2].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
-  entries[3].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
-  entries[4].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
+  entries[3].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
+  entries[4].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
   wxAcceleratorTable accel(5, entries);
   SetAcceleratorTable(accel);
 
@@ -496,7 +496,7 @@ void EfgShow::MakeMenus(void)
   fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
 		      "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
-  fileMenu->Append(FILE_OPEN, "&Open\tCtrl-O", "Open a saved game");
+  fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();
   fileMenu->Append(efgmenuFILE_SAVE, "&Save\tCtrl-S", "Save this game");
@@ -507,7 +507,7 @@ void EfgShow::MakeMenus(void)
 		   "View a preview of the game printout");
   fileMenu->Append(efgmenuFILE_PRINT, "&Print\tCtrl-P", "Print this game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(FILE_QUIT, "&Quit\tCtrl-X", "Quit Gambit");
+  fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *nodeMenu  = new wxMenu;
@@ -721,9 +721,8 @@ void EfgShow::MakeMenus(void)
   prefs_menu->Append(efgmenuPREFS_LOAD, "&Load");
   
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1",
-		    "Table of contents");
-  help_menu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
+  help_menu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  help_menu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menu_bar = new wxMenuBar(wxMB_DOCKABLE);
   menu_bar->Append(fileMenu, "&File");
@@ -748,26 +747,30 @@ void EfgShow::MakeMenus(void)
 
 void EfgShow::MakeToolbar(void)
 {
-  wxToolBar *toolBar = CreateToolBar(wxTB_FLAT | wxTB_DOCKABLE |
+  wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE |
 				     wxTB_HORIZONTAL);
   toolBar->SetMargins(4, 4);
 
-  toolBar->AddTool(FILE_NEW_EFG, wxBITMAP(new), wxNullBitmap, false,
+  toolBar->AddTool(wxID_NEW, wxBITMAP(new), wxNullBitmap, false,
 		   -1, -1, 0, "New game", "Create a new game");
-  toolBar->AddTool(FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
+  toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open file", "Open a saved game");
   toolBar->AddTool(efgmenuFILE_SAVE, wxBITMAP(save), wxNullBitmap, false,
 		   -1, -1, 0, "Save game", "Save this game");
   toolBar->AddSeparator();
+
   toolBar->AddTool(efgmenuFILE_PRINT_PREVIEW, wxBITMAP(preview), wxNullBitmap,
 		   false, -1, -1, 0, "Print Preview",
 		   "View a preview of the game printout");
   toolBar->AddTool(efgmenuFILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
 		   -1, -1, 0, "Print", "Print this game");
   toolBar->AddSeparator();
-  toolBar->AddTool(GAMBIT_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+
+  toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
+
   toolBar->Realize();
+  toolBar->SetRows(1);
 }
 
 // if who == 2, hilight in the tree display

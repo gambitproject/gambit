@@ -164,13 +164,13 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   newMenu->Append(FILE_NEW_EFG, "&Extensive",
 		  "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", newMenu, "Create a new game");
-  fileMenu->Append(FILE_OPEN, "&Open\tCtrl-O", "Open a saved game");
+  fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(FILE_QUIT, "&Quit\tCtrl-X", "Quit Gambit");
+  fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1", "Table of contents");
-  helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
+  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
   
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
@@ -178,9 +178,9 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   SetMenuBar(menuBar);
 
   wxAcceleratorEntry entries[3];
-  entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
-  entries[1].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
-  entries[2].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
+  entries[0].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
+  entries[1].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
+  entries[2].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
   wxAcceleratorTable accel(3, entries);
   SetAcceleratorTable(accel);
 
@@ -205,20 +205,20 @@ GambitFrame::~GambitFrame()
 
 void GambitFrame::MakeToolbar(void)
 {
-  wxToolBar *toolBar = CreateToolBar(wxTB_FLAT | wxTB_DOCKABLE |
+  wxToolBar *toolBar = CreateToolBar(wxNO_BORDER | wxTB_FLAT | wxTB_DOCKABLE |
 				     wxTB_HORIZONTAL);
-
   toolBar->SetMargins(4, 4);
 
-  toolBar->AddTool(FILE_NEW_EFG, wxBITMAP(new), wxNullBitmap, false,
-		   -1, -1, 0, "New game");
-  toolBar->AddTool(FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
-		   -1, -1, 0, "Open file");
+  toolBar->AddTool(wxID_NEW, wxBITMAP(new), wxNullBitmap, false,
+		   -1, -1, 0, "New game", "Create a new game");
+  toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
+		   -1, -1, 0, "Open file", "Open a saved game");
   toolBar->AddSeparator();
-  toolBar->AddTool(GAMBIT_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
-		   -1, -1, 0, "Help");
+  toolBar->AddTool(wxID_HELP, wxBITMAP(help), wxNullBitmap, false,
+		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();
+  toolBar->SetRows(1);
 }
 
 //--------------------------------------------------------------------
@@ -226,13 +226,14 @@ void GambitFrame::MakeToolbar(void)
 //--------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
+  EVT_MENU(wxID_NEW, GambitFrame::OnNewEfg)
   EVT_MENU(FILE_NEW_EFG, GambitFrame::OnNewEfg)
   EVT_MENU(FILE_NEW_NFG, GambitFrame::OnNewNfg)
-  EVT_MENU(FILE_OPEN, GambitFrame::OnLoad)
-  EVT_MENU(FILE_QUIT, wxWindow::Close)
+  EVT_MENU(wxID_OPEN, GambitFrame::OnLoad)
+  EVT_MENU(wxID_EXIT, wxWindow::Close)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
-  EVT_MENU(GAMBIT_HELP_CONTENTS, GambitFrame::OnHelpContents)
-  EVT_MENU(GAMBIT_HELP_ABOUT, GambitFrame::OnHelpAbout)
+  EVT_MENU(wxID_HELP_CONTENTS, GambitFrame::OnHelpContents)
+  EVT_MENU(wxID_ABOUT, GambitFrame::OnHelpAbout)
   EVT_CLOSE(GambitFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
