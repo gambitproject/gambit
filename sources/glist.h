@@ -67,7 +67,7 @@ template <class T> class gList    {
 // Constructs the a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
-		gList(int len = 0) : length(len)  { head=NULL; if (len) for (int i=1;i<=len;i++) Append(T());}
+		gList(int len = 0)  { head=NULL; length=0; if (len) for (int i=1;i<=len;i++) Append(T());}
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
@@ -192,7 +192,7 @@ template <class T> INLINE gList<T>::gList(const gList<T> &b)
 		head=new gNode<T>(n1->Data(),NULL,NULL);
 		n1=n1->Next();
 		gNode<T> *n=First();
-		while (n1->Next())
+		while (n1)
 		{
 			n->SetNext(new gNode<T>(n1->Data(),n,NULL));
 			n=n->Next();n1=n1->Next();
@@ -212,7 +212,7 @@ template <class T> INLINE gList<T> &gList<T>::operator=(const gList<T> &b)
 			head=new gNode<T>(n1->Data(),NULL,NULL);
 			n1=n1->Next();
 			gNode<T> *n=First();
-			while (n1->Next())
+			while (n1)
 			{
 				n->SetNext(new gNode<T>(n1->Data(),n,NULL));
 				n=n->Next();n1=n1->Next();
@@ -263,14 +263,17 @@ template <class T> INLINE int gList<T>::InsertAt(const T &t, int num)
 	gNode<T> *n=First();
 	if (n)
 	{
-		for (int i = 0; i < num-1 ; i++) n=n->Next();
+		for (int i = 1; i < num-1 ; i++) n=n->Next();
 		gNode<T> *temp=new gNode<T>(t,n,n->Next());
 		n->SetNext(temp);
 //		n->Next()->SetPrev(temp);
 		length++;
 	}
 	else
+	{
 		head=new gNode<T>(t,NULL,NULL);
+		length++;
+	}
 	return num;
 }
 
@@ -293,6 +296,7 @@ template <class T> INLINE T gList<T>::Remove(int num)
 	n->Next()->SetPrev(n->Prev());
 	T ret=n->Data();
 	delete n;
+	length--;
 	return ret;
 }
 
