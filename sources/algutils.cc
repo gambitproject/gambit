@@ -33,48 +33,61 @@ void FuncMinParams::SetAccuracy(const gNumber &p_accuracy)
 
 //#include "algutils.imp"
 
-//
-// gFact Member functions
-//
+//------------------------------------------------------------------------
+//                      class gFact<T>: Member functions
+//------------------------------------------------------------------------
 
-template <class T> gFact<T>::gFact() 
-  : answer(0)
+template <class T> gFact<T>::gFact(void) 
+  : m_answer(0)
 { }
 
-template <class T> gFact<T>::gFact(const gFact<T> &f) 
-  : answer(0)
+template <class T> gFact<T>::gFact(const gFact<T> &p_fact) 
+  : m_answer(0)
 { 
-  if(f.Checked()) Set(f.Answer());
+  if (p_fact.Checked()) {
+    Set(p_fact.Answer());
+  }
 }
 
-template <class T> gFact<T>::~gFact(void) 
+template <class T> gFact<T>::~gFact() 
 { 
-  if(answer) delete answer;
+  if (m_answer)  {
+    delete m_answer;
+  }
 }
 
 
-template <class T> gFact<T> &gFact<T>::operator=(const gFact<T> &b)
+template <class T> gFact<T> &gFact<T>::operator=(const gFact<T> &p_fact)
 { 
-  if (this != &b) {
-    if(b.Checked()) 
-      Set(b.Answer());
+  if (this != &p_fact) {
+    if (m_answer) {
+      delete m_answer;
+      m_answer = 0;
+    }
+
+    if (p_fact.Checked()) { 
+      Set(p_fact.Answer());
+    }
   } 
   return *this;
 }
 
 template <class T> const T &gFact<T>::Answer(void) const
 {
-  if(!answer) 
+  if (!m_answer) { 
     throw Unknown();
-  return *answer;
+  }
+  return *m_answer;
 }
 
-template <class T> void gFact<T>::Set(T state)
+template <class T> void gFact<T>::Set(const T &p_state)
 {
-  if(answer && *answer!=state ) 
+  if (m_answer && *m_answer != p_state) { 
     throw Contradiction();
-  if(!answer) 
-    answer = new T(state);
+  }
+  if (!m_answer) { 
+    m_answer = new T(p_state);
+  }
 }
 
 template <class T> gFact<T>::Contradiction::~Contradiction()

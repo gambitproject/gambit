@@ -50,7 +50,8 @@ public:
 
 template <class T> class gFact {
 private:
-  mutable T *answer;
+  mutable T *m_answer;
+
 public:
   class Contradiction : public gException  {
   public:
@@ -63,16 +64,16 @@ public:
     gText Description(void) const;   
   };
   
-  gFact();
+  gFact(void);
   gFact(const gFact<T> &);
-  virtual ~gFact(void);
+  virtual ~gFact();
   
   gFact &operator=(const gFact<T> &);
   
   const T &Answer(void) const;
-  const bool Checked(void) const {return answer;}
-  void Invalidate(void) {delete answer;}
-  void Set(T state);
+  bool Checked(void) const { return m_answer; }
+  void Invalidate(void) { if (m_answer)  { delete m_answer; m_answer = 0; } }
+  void Set(const T &state);
 };
 
 // Following is an intitial, more complicated implementation of the above
