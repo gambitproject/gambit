@@ -302,6 +302,14 @@ template<class T> bool
 TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
 					        const gRectangle<T>& r) const
 { 
+  if (Dmnsn() == 0) {
+    gVector<T> point(Dmnsn());
+    if (this->RootNode()->GetData().Evaluate(point) >= (T)0)
+      return false;
+    else
+      return true;
+  }
+
   gArray<int> zeros(Dmnsn());
   gArray<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
