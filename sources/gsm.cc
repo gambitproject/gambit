@@ -705,6 +705,8 @@ bool GSM::Negate( void )
 bool GSM::Power( void )
 { return _BinaryOperation( "Power" ); }
 
+bool GSM::Concat ( void )
+{ return _BinaryOperation( "Concat" ); }
 
 
 bool GSM::IntegerDivide ( void )
