@@ -586,6 +586,7 @@ Portion* OutcomePortion::ValCopy( void ) const
 { 
   Portion* p = new OutcomeValPortion( *_Value ); 
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -604,6 +605,7 @@ void OutcomePortion::AssignFrom( Portion* p )
   RemoveDependency();
   *_Value = *( ( (OutcomePortion*) p )->_Value );
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -749,6 +751,7 @@ Portion* InfosetPortion::ValCopy( void ) const
 { 
   Portion* p = new InfosetValPortion( *_Value );
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -767,6 +770,7 @@ void InfosetPortion::AssignFrom( Portion* p )
   RemoveDependency();
   *_Value = *( ( (InfosetPortion*) p )->_Value );
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -829,6 +833,7 @@ Portion* NodePortion::ValCopy( void ) const
 {
   Portion* p = new NodeValPortion( *_Value ); 
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -847,6 +852,7 @@ void NodePortion::AssignFrom( Portion* p )
   RemoveDependency();
   *_Value = *( ( (NodePortion*) p )->_Value );
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -911,6 +917,7 @@ Portion* ActionPortion::ValCopy( void ) const
 {
   Portion* p = new ActionValPortion( *_Value ); 
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -929,6 +936,7 @@ void ActionPortion::AssignFrom( Portion* p )
   RemoveDependency();
   *_Value = *( ( (ActionPortion*) p )->_Value );
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -1031,6 +1039,7 @@ Portion* MixedPortion::ValCopy( void ) const
     assert( 0 );
   }
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -1066,6 +1075,7 @@ void MixedPortion::AssignFrom( Portion* p )
   }
 
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -1169,6 +1179,7 @@ Portion* BehavPortion::ValCopy( void ) const
     assert( 0 );
   }
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -1204,6 +1215,7 @@ void BehavPortion::AssignFrom( Portion* p )
   }
 
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -1328,8 +1340,6 @@ void NfgPortion::AssignFrom( Portion* p )
   default:
     assert( 0 );
   }
-
-  SetOwner( p->Owner() );
 }
 
 bool NfgPortion::operator == ( Portion *p ) const
@@ -1479,8 +1489,6 @@ void EfgPortion::AssignFrom( Portion* p )
   default:
     assert( 0 );
   }
-
-  SetOwner( p->Owner() );
 }
 
 bool EfgPortion::operator == ( Portion *p ) const
