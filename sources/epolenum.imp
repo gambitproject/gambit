@@ -121,6 +121,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
       if(act_num==support.NumActions(i,SF.InfosetNumber(i,j)) && act_num>1) 
 	equations+=Prob(i,j);
     }
+
   // set up the rectangle of search
   gVector<T> bottoms(num_vars), tops(num_vars);
   bottoms = (T)0;
