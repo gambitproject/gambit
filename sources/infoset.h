@@ -19,6 +19,7 @@
 class Node;
 
 template <class T> class ChanceInfoset;
+template <class T> class Lexicon;
 
 class Action   {
   friend class BaseEfg;
@@ -53,7 +54,8 @@ class Infoset   {
   friend class Efg<gRational>;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
-  friend class Lexicon;
+  friend class Lexicon<double>;
+  friend class Lexicon<gRational>;
 
   protected:
     bool valid;

@@ -188,8 +188,7 @@ int BaseEfg::_NumObj = 0;
 #endif // MEMCHECK
 
 BaseEfg::BaseEfg(void)
-  : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0)),
-    lexicon(0)
+  : sortisets(true), title("UNTITLED"), chance(new EFPlayer(this, 0))
 {
 #ifdef MEMCHECK
   _NumObj++;
@@ -199,8 +198,7 @@ BaseEfg::BaseEfg(void)
 
 BaseEfg::BaseEfg(const BaseEfg &E)
   : sortisets(false), title(E.title),
-    players(E.players.Length()), chance(new EFPlayer(this, 0)),
-    lexicon(0)
+    players(E.players.Length()), chance(new EFPlayer(this, 0))
 {
   for (int i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
@@ -224,7 +222,6 @@ BaseEfg::~BaseEfg()
 {
   delete root;
   delete chance;
-  DeleteLexicon();
   int i;
 
   for (i = 1; i <= players.Length(); delete players[i++]);

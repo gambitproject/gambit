@@ -15,13 +15,16 @@
 #pragma interface
 #endif   // __GNUG__
 
+template <class T> class Lexicon;
+
 class Node    {
   friend class BaseEfg;
   friend class Efg<double>;
   friend class Efg<gRational>;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
-  friend class Lexicon;
+  friend class Lexicon<double>;
+  friend class Lexicon<gRational>;
   
   protected:
     bool valid, mark;

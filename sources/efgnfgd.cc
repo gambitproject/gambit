@@ -13,6 +13,21 @@
 #endif   // __GNUG__, __BORLANDC__
 #include "efgnfg.imp"
 
+// The gratuitious casts are put in to convince g++ 2.7.2 to compile
+// this function
+Nfg<double> *AssociatedNfg(Efg<double> *E)
+{
+  if ((Lexicon<double> *) E->lexicon)
+    return ((Lexicon<double> *) E->lexicon)->N;
+  else
+    return 0;
+}
+
+Nfg<double> *AssociatedAfg(Efg<double> *E)
+{
+  return E->afg;
+}
+
 TEMPLATE void ClearNodeProbs(TypedNode<double> *);
 
 TEMPLATE void MixedToBehav(const Nfg<double> &,const MixedProfile<double> &,
@@ -30,4 +45,7 @@ TEMPLATE void BehaviorStrat(const Efg<double> &E, BehavProfile<double> &bp, int 
 TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &, const EFSupport &);
 
 TEMPLATE Nfg<double> *MakeAfg(Efg<double> &);
+
+TEMPLATE void SetEfg(Nfg<double> *, Efg<double> *);
+TEMPLATE class Lexicon<double>;
 

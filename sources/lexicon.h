@@ -10,17 +10,17 @@
 
 typedef gArray<int> Correspondence;
 
-class Lexicon   {
+template <class T> class Lexicon   {
   public:
-    BaseNfg *N;
+    Nfg<T> *N;
     gArray<gList<Correspondence *> > strategies;
 
-    Lexicon(const BaseEfg &);
+    Lexicon(const Efg<T> &);
     ~Lexicon();
 
     void MakeStrategy(EFPlayer *p);
     void MakeReducedStrats(const EFSupport &, EFPlayer *, Node *, Node *);
-    void MakeLink(BaseEfg *, BaseNfg *);
+    void MakeLink(Efg<T> *, Nfg<T> *);
 };
 
 

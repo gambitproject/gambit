@@ -19,7 +19,6 @@ class EFPlayer;
 class Infoset;
 class Node;
 class Action;
-class Lexicon;
 class BaseNfg;
 class EFSupport;
 
@@ -39,8 +38,6 @@ protected:
     gBlock<Outcome *> outcomes;
     Node *root;
     EFPlayer *chance;
-    Lexicon *lexicon;
-    BaseNfg *afg;
 
     gBlock<Node *> dead_nodes;
     gBlock<Infoset *> dead_infosets;
@@ -74,7 +71,7 @@ protected:
     virtual Outcome *CreateOutcomeByIndex(int index) = 0;
     void Reindex(void);
     
-    void DeleteLexicon(void);
+    virtual void DeleteLexicon(void) = 0;
 
 // These are used in identification of subgames
     void MarkTree(Node *, Node *);
@@ -139,10 +136,6 @@ protected:
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
-    // This function put in to facilitate error-detection in MixedToBehav[]
-    friend BaseNfg *AssociatedNfg(BaseEfg *E);
-    friend BaseNfg *AssociatedAfg(BaseEfg *E);
-
     // Unmarks all subgames in the subtree rooted at n
     void UnmarkSubgames(Node *n);
     bool IsLegalSubgame(Node *n);
@@ -167,9 +160,15 @@ template <class T> class Efg;
 template <class T> class BehavProfile;
 template <class T> class Nfg;
 template <class T> class MixedProfile;
+template <class T> class Lexicon;
 
 template <class T> class Efg : public BaseEfg   {
+  friend class BaseNfg;
+  friend class Nfg<T>;
   private:
+    Lexicon<T> *lexicon;
+    Nfg<T> *afg;
+
     Efg<T> &operator=(const Efg<T> &);
 
     void Payoff(Node *n, T, const gPVector<int> &, gVector<T> &) const;
@@ -183,6 +182,9 @@ template <class T> class Efg : public BaseEfg   {
 
     // this is for use with the copy constructor
     void CopySubtree(Node *, Node *);
+
+    void DeleteLexicon(void);
+
 
   public:
 	//# CONSTRUCTORS AND DESTRUCTOR
@@ -218,6 +220,10 @@ template <class T> class Efg : public BaseEfg   {
     
     // defined in efgutils.cc
     friend void RandomEfg(Efg<T> &);
+
+    // This function put in to facilitate error-detection in MixedToBehav[]
+    friend Nfg<T> *AssociatedNfg(Efg<T> *E);
+    friend Nfg<T> *AssociatedAfg(Efg<T> *E);
 };
 
 #include "efplayer.h"
