@@ -200,64 +200,55 @@ Portion *gclFunctionCall::Evaluate(void)
   if (!_gsm._FuncTable->IsDefined(name))  
     throw gclRuntimeError("Undefined function " + name);
 
-  CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name),
-				      _gsm._StdOut, _gsm._StdErr);
+  CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name));
   
-  int undefined = 0;
-  int i;
-  for (i = 1; i <= params->req->NumParams(); i++)   {
-    Portion *val = (*params->req)[i]->Evaluate();
-    if (val->Spec().Type == porREFERENCE)   {
-      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
-	call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
-      else  {
-	undefined = i;
-	break;
+  try {
+    for (int i = 1; i <= params->req->NumParams(); i++)   {
+      Portion *val = (*params->req)[i]->Evaluate();
+      if (val->Spec().Type == porREFERENCE)   {
+	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
+	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
+	else  {
+	  throw gclRuntimeError("Parameter #" + ToText(i) +
+				" undefined in call to " + name);
+	}
       }
+      else  
+	call->SetCurrParam(val, AUTO_VAL_OR_REF);
     }
-    else  
-      call->SetCurrParam(val, AUTO_VAL_OR_REF);
-  }
   
-  for (i = 1; i <= params->opt->NumParams(); i++)  {
-    call->SetCurrParamIndex(params->opt->FormalName(i));
-    Portion *val = (*params->opt)[i]->Evaluate();
-    if (val->Spec().Type == porREFERENCE)   {
-      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
-	call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
-      else  {
-	undefined = i;
-	break;
+    for (int i = 1; i <= params->opt->NumParams(); i++)  {
+      call->SetCurrParamIndex(params->opt->FormalName(i));
+      Portion *val = (*params->opt)[i]->Evaluate();
+      if (val->Spec().Type == porREFERENCE)   {
+	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
+	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
+	else  {
+	  throw gclRuntimeError("Parameter \"" + params->opt->FormalName(i) +
+				"\" undefined in call to " + name);
+	}
       }
+      else  
+	call->SetCurrParam(val);
     }
-    else  
-      call->SetCurrParam(val);
-  }
     
-  Portion *ret;
-
-  if (undefined == 0)  {
     Portion **param = new Portion *[call->NumParams()];
-    ret = call->CallFunction(&_gsm, param);
-    
+    Portion *ret = call->CallFunction(&_gsm, param);
+      
     for (int index = 0; index < call->NumParams(); index++)   {
       ReferencePortion *refp = call->GetParamRef(index);
-
-      assert((refp == 0) == (param[index] == 0));
-
       if (refp != 0)  {
 	_gsm.VarDefine(refp->Value(), param[index]);
 	delete refp;
       }
     }
-  }
-  else 
-    throw gclRuntimeError("Parameter " + ToText(undefined) +
-                           " undefined in call to " + name);
-    
-  delete call;
 
-  return ret;
+    return ret;
+  }
+  catch (...) {
+    delete call;
+    throw;
+  }
 }
 
 

@@ -960,9 +960,7 @@ void FuncDescObj::Dump(gOutput& f, int i) const
 
 void FuncDescObj::Dump(gOutput& f) const
 {
-  int i;
-  for(i = 0; i < _NumFuncs; i++)
-    Dump(f, i);
+  for (int i = 0; i < _NumFuncs; Dump(f, i++));
 }
 
 
@@ -974,48 +972,47 @@ void FuncDescObj::Dump(gOutput& f) const
 //---------------------------------------------------------------------
 
 
-CallFuncObj::CallFuncObj(FuncDescObj* func, gOutput& s_out, gOutput& s_err)
-  : FuncDescObj(*func), _StdOut(s_out), _StdErr(s_err), m_funcIndex(-1),
-    m_numParams(0), m_numParamsDefined(0), _ErrorOccurred(false)
+CallFuncObj::CallFuncObj(FuncDescObj *p_function)
+  : FuncDescObj(*p_function),
+    m_funcIndex(-1), m_numParams(0), m_numParamsDefined(0)
 {
   for (int f_index = 0; f_index < _NumFuncs; f_index++)  {
     if (m_numParams < _FuncInfo[f_index].NumParams)
       m_numParams = _FuncInfo[f_index].NumParams;
   }
 
-  _Param = new Portion*[m_numParams];
-  _RunTimeParamInfo = new RunTimeParamInfoType[m_numParams];
-  _FuncMatch = new bool[_NumFuncs];
-  _CurrParamIndex = 0;
+  m_params = new Portion*[m_numParams];
+  m_runTimeParamInfo = new RunTimeParamInfoType[m_numParams];
+  m_funcMatch = new bool[_NumFuncs];
+  m_currParamIndex = 0;
 
   for (int f_index = 0; f_index < _NumFuncs; f_index++)
-    _FuncMatch[f_index] = true;
+    m_funcMatch[f_index] = true;
   for (int index = 0; index < m_numParams; index++)  {
-    _Param[index] = REQUIRED;
-    _RunTimeParamInfo[index].Ref = 0;
-    _RunTimeParamInfo[index].Defined = false;
-    _RunTimeParamInfo[index].AutoValOrRef = false;
+    m_params[index] = REQUIRED;
+    m_runTimeParamInfo[index].Ref = 0;
+    m_runTimeParamInfo[index].Defined = false;
+    m_runTimeParamInfo[index].AutoValOrRef = false;
   }
 }
 
 
 CallFuncObj::~CallFuncObj()
 {
-  //  if (_ErrorOccurred)
   for (int index = 0; index < m_numParams; index++)  { 
-    delete _RunTimeParamInfo[index].Ref;
-    delete _Param[index];
+    delete m_runTimeParamInfo[index].Ref;
+    delete m_params[index];
   }
-  delete[] _FuncMatch;
-  delete[] _RunTimeParamInfo;
-  delete[] _Param;
+  delete[] m_funcMatch;
+  delete[] m_runTimeParamInfo;
+  delete[] m_params;
 }
 
 //--------------------------
 // List-related functions
 //--------------------------
 
-bool CallFuncObj::_ListDimMatch(ListPortion* p1, ListPortion* p2)
+static bool ListDimMatch(ListPortion* p1, ListPortion* p2)
 {
   if (p1->Length() != p2->Length())
     return false;
@@ -1024,7 +1021,7 @@ bool CallFuncObj::_ListDimMatch(ListPortion* p1, ListPortion* p2)
       Portion *s1 = (*p1)[i];
       Portion *s2 = (*p2)[i];
       if (s1->Spec().ListDepth > 0 && s2->Spec().ListDepth > 0) {
-	if (!_ListDimMatch((ListPortion*) s1, (ListPortion*) s2))
+	if (!ListDimMatch((ListPortion*) s1, (ListPortion*) s2))
 	  return false;
       }
     }
@@ -1033,7 +1030,7 @@ bool CallFuncObj::_ListDimMatch(ListPortion* p1, ListPortion* p2)
 }
 
 
-bool CallFuncObj::_ListNestedCheck(Portion* p, const gclParameter& info)
+static bool ListNestedCheck(Portion* p, const gclParameter& info)
 {
   if (p == 0 && info.Spec.Type == porUNDEFINED)
     return false;
@@ -1051,7 +1048,7 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
   if (_FuncInfo[m_funcIndex].Flag & funcGAMEMATCH) {
     void *game = NULL; 
     for (int index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
-      if (param[index] != 0 && _RunTimeParamInfo[index].Defined) {
+      if (param[index] != 0 && m_runTimeParamInfo[index].Defined) {
 	if (param[index]->Game()) {
 	  if (game == NULL)
 	    game = param[index]->Game();
@@ -1084,7 +1081,7 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
   // mark down the listed parameters
   for (int i = 0; i < NumParams; i++) {
     Listed[i] =
-      _ListNestedCheck(ParamIn[i], _FuncInfo[m_funcIndex].ParamInfo[i]);
+      ListNestedCheck(ParamIn[i], _FuncInfo[m_funcIndex].ParamInfo[i]);
     if (Listed[i])
       Source = (ListPortion*) ParamIn[i];
   }
@@ -1095,8 +1092,8 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
       if (Listed[i] && Listed[j]) {
 	if (ParamIn[i]->Spec().ListDepth > 0 && 
 	    ParamIn[j]->Spec().ListDepth > 0)
-	  if (!_ListDimMatch((ListPortion *) ParamIn[i],
-			     (ListPortion *) ParamIn[j])) {
+	  if (!ListDimMatch((ListPortion *) ParamIn[i],
+			    (ListPortion *) ParamIn[j])) {
 	    delete [] Listed;
 	    throw gclRuntimeError("Mismatched dimensionalities");
 	  }
@@ -1119,7 +1116,7 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 	CurrParam[j] = ParamIn[j]; 
       else {
 	CurrParam[j] = (*(ListPortion*) ParamIn[j])[i];
-	if (_ListNestedCheck(CurrParam[j], 
+	if (ListNestedCheck(CurrParam[j], 
 			     _FuncInfo[m_funcIndex].ParamInfo[j]))
 	  recurse = true;
       }
@@ -1151,9 +1148,8 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 	  result = CallNormalFunction(gsm, CurrParam);
 	}
 	catch (gclRuntimeError &E) {
-	  _StdErr << _FuncName << "[]: ";
-	  _StdErr << E.Description() << "\n";
-	  throw gclRuntimeError("Error occurred at element #" +
+	  throw gclRuntimeError(_FuncName + "[]: " + E.Description() + 
+				"\nError occurred at element #" +
 				ToText(p->Length() + 1) +
 				" during listed function call to " +
 				_FuncName);
@@ -1191,8 +1187,8 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 }
 
 
-bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
-			     bool Listable, bool return_type_check)
+static bool TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
+		      bool Listable, bool return_type_check = false)
 {
   PortionSpec CalledSpec;
 
@@ -1237,7 +1233,7 @@ bool CallFuncObj::SetCurrParamIndex(const gText& param_name)
   for (int f_index = 0; 
        f_index < _NumFuncs && result != PARAM_AMBIGUOUS;
        f_index++) {
-    if (_FuncMatch[f_index])   {
+    if (m_funcMatch[f_index])   {
       bool name_match_found = false;
       for (int index = 0; index < _FuncInfo[f_index].NumParams; index++) {
 	if (_FuncInfo[f_index].ParamInfo[index].Name == param_name) {
@@ -1258,7 +1254,7 @@ bool CallFuncObj::SetCurrParamIndex(const gText& param_name)
       }
 
       if (!name_match_found)
-	_FuncMatch[f_index] = false;
+	m_funcMatch[f_index] = false;
     }
   }
   
@@ -1268,25 +1264,22 @@ bool CallFuncObj::SetCurrParamIndex(const gText& param_name)
       m_funcIndex = TempFuncIndex;
     }
     else if (m_funcIndex != TempFuncIndex) {
-      _ErrorMessage(_StdErr, 2, 0, _FuncName);
       m_funcIndex = -1;
-      _ErrorOccurred = true;
-      return false;
+      throw gclRuntimeError(_FuncName +
+			    "[] called with conflicting parameters");
     }
   }
 
   if (result == PARAM_NOT_FOUND)  {
-    _ErrorOccurred = true;
-    _ErrorMessage(_StdErr, 23, 0, _FuncName, param_name);
-    return false;
+    throw gclRuntimeError("Parameter \"" + param_name +
+			  "\" is not defined for " + _FuncName + "[]"); 
   }
   else if (result == PARAM_AMBIGUOUS) {
-    _ErrorOccurred = true;
-    _ErrorMessage(_StdErr, 24, 0, _FuncName, param_name);
-    return false;
+    throw gclRuntimeError("Parameter \"" + param_name + 
+			  "\" is ambiguous in " + _FuncName + "[]");
   }
   else {
-    _CurrParamIndex = result;
+    m_currParamIndex = result;
     return true;
   }
 }
@@ -1299,144 +1292,101 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
   int funcs_matched;
   int last_match;
 
-
-  // An error had already occurred with the current function call
-  if(_ErrorOccurred)
-  {
-    delete param;
-    return true;
-  }
-
   // Parameter index out of bounds
-  if(_CurrParamIndex >= m_numParams)
-  {
-    _ErrorMessage(_StdErr, 4, 0, _FuncName);
+  if (m_currParamIndex >= m_numParams)  {
     delete param;
-    _ErrorOccurred = true;
-    return false;
+    throw gclRuntimeError(_FuncName + "[] called with too many parameters");
   }
 
-  // Repeated parameter defition
-  if(_RunTimeParamInfo[_CurrParamIndex].Defined)
-  {
-    _ErrorMessage(_StdErr, 3, _CurrParamIndex + 1, _FuncName, 
-		  _ParamName(_CurrParamIndex));
-    delete param;
-    _ErrorOccurred = true;
-    return false;
+  // Repeated parameter definition
+  if (m_runTimeParamInfo[m_currParamIndex].Defined)   {
+    throw gclRuntimeError(_FuncName + "[] called with parameter #" +
+			  ToText(m_currParamIndex) + " multiply defined");
   }
 
   // Passed an undefined variable
-  if(param != 0 && param->Spec().Type == porREFERENCE)
-  {
+  if (param != 0 && param->Spec().Type == porREFERENCE)  {
 
     // check whether undefined variables are allowed
     AllowUndefinedRef = false;
-    for(f_index = 0; f_index < _NumFuncs; f_index++)
-    {
-      if(_CurrParamIndex < _FuncInfo[f_index].NumParams)
-      {
-	if((_FuncInfo[f_index].ParamInfo[_CurrParamIndex].PassByReference &&
-	    _FuncInfo[f_index].ParamInfo[_CurrParamIndex].DefaultValue != 0)|| 
+    for (f_index = 0; f_index < _NumFuncs; f_index++) {
+      if (m_currParamIndex < _FuncInfo[f_index].NumParams)  {
+	if((_FuncInfo[f_index].ParamInfo[m_currParamIndex].PassByReference &&
+	    _FuncInfo[f_index].ParamInfo[m_currParamIndex].DefaultValue != 0)|| 
 	   _FuncInfo[f_index].UserDefined ||
-	   _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Spec.Type == porUNDEFINED)
+	   _FuncInfo[f_index].ParamInfo[m_currParamIndex].Spec.Type == porUNDEFINED)
 	  AllowUndefinedRef = true;
 	else
-	  _FuncMatch[f_index] = false;
+	  m_funcMatch[f_index] = false;
       }
     }
 
-    if(AllowUndefinedRef)
-    {
+    if (AllowUndefinedRef) {
       ref_param = (ReferencePortion*) param;
       param = 0;
     }
-    else
-    {
-      _ErrorMessage(_StdErr, 25, _CurrParamIndex + 1, _FuncName, 
-		    _ParamName(_CurrParamIndex),
-		    ((ReferencePortion*) param)->Value());
-      delete param;
-      _ErrorOccurred = true;
-      return false;
+    else  {
+      throw gclRuntimeError(_FuncName + "[]: Undefined reference \"" +
+			    ((ReferencePortion *) param)->Value() +
+			    "\" passed for parameter #" +
+			    ToText(m_currParamIndex + 1)); 
     }
   }
 
-  
-
   funcs_matched = 0;
   last_match = 0;
-  for(f_index = 0; f_index < _NumFuncs; f_index++)
-  {
-    if(_FuncMatch[f_index])
-    {
+  for (f_index = 0; f_index < _NumFuncs; f_index++) {
+    if (m_funcMatch[f_index]) {
       last_match = f_index;
       funcs_matched++;
     }
   }
-  if(funcs_matched == 1)
+  if (funcs_matched == 1)
     m_funcIndex = last_match;
 
-
-  if(param != 0)
-  {
-    if(m_funcIndex == -1)
-    {
+  if (param != 0) {
+    if (m_funcIndex == -1) {
       // Attempt on-the-fly function matching
-      for(f_index = 0; f_index < _NumFuncs; f_index++)
-      {
-	if(_CurrParamIndex < _FuncInfo[f_index].NumParams)
-	{
-	  if(!_TypeMatch
-	     (param, 
-	      _FuncInfo[f_index].ParamInfo[_CurrParamIndex].Spec,
-	      (_FuncInfo[f_index].Flag & funcLISTABLE) ))
-	  {
-	    _FuncMatch[f_index] = false;
+      for (f_index = 0; f_index < _NumFuncs; f_index++) {
+	if (m_currParamIndex < _FuncInfo[f_index].NumParams) {
+	  if (!TypeMatch(param, 
+			 _FuncInfo[f_index].ParamInfo[m_currParamIndex].Spec,
+			 (_FuncInfo[f_index].Flag & funcLISTABLE))) {
+	    m_funcMatch[f_index] = false;
 	  }
 	}
-	else
-	{
-	  _FuncMatch[f_index] = false;
+	else {
+	  m_funcMatch[f_index] = false;
 	}
       }
     }
-    else // (m_funcIndex != -1)
-    {
-      if(_CurrParamIndex < _FuncInfo[m_funcIndex].NumParams)
-      {
-	if(!_TypeMatch
-	   (param, 
-	    _FuncInfo[m_funcIndex].ParamInfo[_CurrParamIndex].Spec,
-	    (_FuncInfo[m_funcIndex].Flag & funcLISTABLE) ))
-	{
-	  _ErrorMessage(_StdErr, 26, _CurrParamIndex + 1, _FuncName,
-			_FuncInfo[m_funcIndex].ParamInfo[_CurrParamIndex].Name,
-			PortionSpecToText(_FuncInfo[m_funcIndex].
-					  ParamInfo[_CurrParamIndex].Spec),
-			PortionSpecToText(param->Spec()));
-	  _ErrorOccurred = true;
-	  delete param;
-	  return false;
+    else { // (m_funcIndex != -1)
+      if (m_currParamIndex < _FuncInfo[m_funcIndex].NumParams) {
+	if (!TypeMatch(param, 
+		       _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Spec,
+		       (_FuncInfo[m_funcIndex].Flag & funcLISTABLE))) {
+	  throw gclRuntimeError(_FuncName + "[]: Type mismatch on parameter #"+
+				ToText(m_currParamIndex + 1) + ", \"" +
+				_FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Name +
+				"\"; expected " +
+				PortionSpecToText(_FuncInfo[m_funcIndex].
+					  ParamInfo[m_currParamIndex].Spec) +
+				", got " +
+				PortionSpecToText(param->Spec()));
 	}
       }
-      else
-      {
-	_ErrorMessage(_StdErr, 4, 0, _FuncName);
-	_ErrorOccurred = true;
-	delete param;
-	return false;
+      else {
+	throw gclRuntimeError(_FuncName + "[] called with too many parameters");
       }
     }
   }
-  assert(_Param[_CurrParamIndex] == 0);
-  _Param[_CurrParamIndex] = param;
-  _RunTimeParamInfo[_CurrParamIndex].Defined = true;
-  _RunTimeParamInfo[_CurrParamIndex].AutoValOrRef = auto_val_or_ref;
-  _RunTimeParamInfo[_CurrParamIndex].Ref = ref_param;
-  _CurrParamIndex++;
-  m_numParamsDefined++;
 
+  m_params[m_currParamIndex] = param;
+  m_runTimeParamInfo[m_currParamIndex].Defined = true;
+  m_runTimeParamInfo[m_currParamIndex].AutoValOrRef = auto_val_or_ref;
+  m_runTimeParamInfo[m_currParamIndex].Ref = ref_param;
+  m_currParamIndex++;
+  m_numParamsDefined++;
 
   return true;
 }
@@ -1444,7 +1394,7 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
 
 ReferencePortion* CallFuncObj::GetParamRef(int index) const
 {
-  return _RunTimeParamInfo[index].Ref;
+  return m_runTimeParamInfo[index].Ref;
 }
 
 
@@ -1460,7 +1410,7 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
   if (m_funcIndex == -1) {
     int param_upper_bound = 0;
     for (int index = 0; index < m_numParams; index++) {
-      if (_Param[index] != 0 || _RunTimeParamInfo[index].Ref != 0)
+      if (m_params[index] != 0 || m_runTimeParamInfo[index].Ref != 0)
 	param_upper_bound = index;
     }
     
@@ -1470,20 +1420,20 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
       if (param_upper_bound >= _FuncInfo[f_index].NumParams)
 	match_ok = false;
 
-      if (!_FuncMatch[f_index])
+      if (!m_funcMatch[f_index])
 	match_ok = false;
 
       for (int index = 0; index < _FuncInfo[f_index].NumParams; index++)   {
-	if (_Param[index] != 0) {
+	if (m_params[index] != 0) {
 	  // parameter is defined
-	  if(!_TypeMatch(_Param[index],
+	  if (!TypeMatch(m_params[index],
 			 _FuncInfo[f_index].ParamInfo[index].Spec,
 			 (_FuncInfo[f_index].Flag & funcLISTABLE)))
 	    match_ok = false;
 	}
 	else {
 	  // parameter is undefined
-	  if (_RunTimeParamInfo[index].Ref != 0) {
+	  if (m_runTimeParamInfo[index].Ref != 0) {
 	    // specified undefined variable
 	    if(!_FuncInfo[f_index].ParamInfo[index].PassByReference)
 	      match_ok = false;
@@ -1510,10 +1460,10 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
   
   if (m_funcIndex != -1)  {
     for (int index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
-      if (_Param[index] != 0) {
-	if (!_TypeMatch(_Param[index], 
-			_FuncInfo[m_funcIndex].ParamInfo[index].Spec,
-			(_FuncInfo[m_funcIndex].Flag & funcLISTABLE)))
+      if (m_params[index] != 0) {
+	if (!TypeMatch(m_params[index], 
+		       _FuncInfo[m_funcIndex].ParamInfo[index].Spec,
+		       (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)))
 	  throw gclRuntimeError(_FuncName + "[] parameter #" +
 				ToText(index + 1) + ", \"" +
 				_FuncInfo[m_funcIndex].ParamInfo[index].Name +
@@ -1535,9 +1485,9 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
   // matching stage is done.  Now to weed out some particular errors:
 
   for (index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
-    if (!_RunTimeParamInfo[index].Defined)  {
+    if (!m_runTimeParamInfo[index].Defined)  {
       if(_FuncInfo[m_funcIndex].ParamInfo[index].DefaultValue != 0) {
-	_Param[index] = 
+	m_params[index] = 
 	  _FuncInfo[m_funcIndex].ParamInfo[index].DefaultValue->ValCopy();
       }
       else {
@@ -1548,23 +1498,23 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 
       }
     }
-    else { // (_RunTimeParamInfo[index].Defined)
-      if (_Param[index] == 0) {
+    else { // (m_runTimeParamInfo[index].Defined)
+      if (m_params[index] == 0) {
 	if(_FuncInfo[m_funcIndex].ParamInfo[index].DefaultValue == 0) {
 	  if(_FuncInfo[m_funcIndex].UserDefined) {
 	    // default values for undefined variables
 	    switch(_FuncInfo[m_funcIndex].ParamInfo[index].Spec.Type) {
 	    case porBOOL:
-	      _Param[index] = new BoolPortion(triFALSE);
-	      _RunTimeParamInfo[index].Defined = true;
+	      m_params[index] = new BoolPortion(triFALSE);
+	      m_runTimeParamInfo[index].Defined = true;
 	      break;
 	    case porNUMBER:
-	      _Param[index] = new NumberPortion(0);
-	      _RunTimeParamInfo[index].Defined = true;
+	      m_params[index] = new NumberPortion(0);
+	      m_runTimeParamInfo[index].Defined = true;
 	      break;
 	    case porTEXT:
-	      _Param[index] = new TextPortion("");
-	      _RunTimeParamInfo[index].Defined = true;
+	      m_params[index] = new TextPortion("");
+	      m_runTimeParamInfo[index].Defined = true;
 	      break;
 	    default:
 	      throw gclRuntimeError(_FuncName + "[] required parameter #" +
@@ -1587,14 +1537,14 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 				_FuncInfo[m_funcIndex].ParamInfo[index].Name +
 				"\", undefined");
 	}
-	else if (_RunTimeParamInfo[index].Ref == 0) {
+	else if (m_runTimeParamInfo[index].Ref == 0) {
 	  throw gclRuntimeError(_FuncName + "[] undefined parameter #" +
 				ToText(index + 1) + ", \"" +
 				_FuncInfo[m_funcIndex].ParamInfo[index].Name +
 				"\", passed by value");
 	}
-	else if (_RunTimeParamInfo[index].Ref != 0) {
-	  _Param[index] = 
+	else if (m_runTimeParamInfo[index].Ref != 0) {
+	  m_params[index] = 
 	    _FuncInfo[m_funcIndex].ParamInfo[index].DefaultValue->ValCopy();
 	}
       }
@@ -1606,13 +1556,13 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
   //        when a reference parameter is passed by value
 
   for (index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
-    if (_Param[index] != 0 &&
-	_RunTimeParamInfo[index].Defined) {
+    if (m_params[index] != 0 &&
+	m_runTimeParamInfo[index].Defined) {
       if (!_FuncInfo[m_funcIndex].ParamInfo[index].PassByReference &&
-	  _Param[index]->IsReference())	{
-	if (_RunTimeParamInfo[index].AutoValOrRef)  {
-	  Portion *old = _Param[index];
-	  _Param[index] = old->ValCopy();
+	  m_params[index]->IsReference())	{
+	if (m_runTimeParamInfo[index].AutoValOrRef)  {
+	  Portion *old = m_params[index];
+	  m_params[index] = old->ValCopy();
 	  delete old;
 	}
 	else {
@@ -1635,8 +1585,8 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
   bool null_call = false;
 
   for (int i = 0; i < _FuncInfo[m_funcIndex].NumParams; i++) {
-    if (_Param[i])
-      if(_Param[i]->Spec().Null && 
+    if (m_params[i])
+      if(m_params[i]->Spec().Null && 
 	 !_FuncInfo[m_funcIndex].ParamInfo[i].Spec.Null)	{
 	null_call = true;
 	break;
@@ -1646,7 +1596,7 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
   bool list_op = false;
 
   for (int i = 0; i < _FuncInfo[m_funcIndex].NumParams; i++)
-    if (_ListNestedCheck(_Param[i], _FuncInfo[m_funcIndex].ParamInfo[i])) {
+    if (ListNestedCheck(m_params[i], _FuncInfo[m_funcIndex].ParamInfo[i])) {
       list_op = true;
       break;
     }
@@ -1657,18 +1607,18 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 
   if (!list_op || !(_FuncInfo[m_funcIndex].Flag & funcLISTABLE)) {
       // normal func call
-    result = CallNormalFunction( gsm, _Param );
+    result = CallNormalFunction( gsm, m_params );
   }
   else { // listed function call
-    result = CallListFunction(gsm, _Param);
+    result = CallListFunction(gsm, m_params);
   }
 
   if (result == 0) {
     for (index = 0; index < m_numParams; index++)    {
-      delete _Param[index];
-      _Param[index] = 0;
-      delete _RunTimeParamInfo[index].Ref;
-      _RunTimeParamInfo[index].Ref = 0;
+      delete m_params[index];
+      m_params[index] = 0;
+      delete m_runTimeParamInfo[index].Ref;
+      m_runTimeParamInfo[index].Ref = 0;
     }
     throw gclRuntimeError("A general error occurred while executing " +
 			  _FuncName + "[]");
@@ -1681,15 +1631,15 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
     ((ListPortion*) result)->
       SetDataType(_FuncInfo[m_funcIndex].ReturnSpec.Type);      
   }
-  else if (!_TypeMatch(result, _FuncInfo[m_funcIndex].ReturnSpec, 
-		       list_op && (_FuncInfo[m_funcIndex].Flag & funcLISTABLE),
-		       true)) {
+  else if (!TypeMatch(result, _FuncInfo[m_funcIndex].ReturnSpec, 
+		      list_op && (_FuncInfo[m_funcIndex].Flag & funcLISTABLE),
+		      true)) {
     delete result;
     for (index = 0; index < m_numParams; index++)    {
-      delete _Param[index];
-      _Param[index] = 0;
-      delete _RunTimeParamInfo[index].Ref;
-      _RunTimeParamInfo[index].Ref = 0;
+      delete m_params[index];
+      m_params[index] = 0;
+      delete m_runTimeParamInfo[index].Ref;
+      m_runTimeParamInfo[index].Ref = 0;
     }
     throw gclRuntimeError("Function " + _FuncName +
 			  "[] return type does not match declaration;\n" +
@@ -1700,17 +1650,17 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 
   for (index = 0; index < m_numParams; index++) {
     if (!_FuncInfo[m_funcIndex].ParamInfo[index].PassByReference) {
-      delete _RunTimeParamInfo[index].Ref;
-      _RunTimeParamInfo[index].Ref = 0;
+      delete m_runTimeParamInfo[index].Ref;
+      m_runTimeParamInfo[index].Ref = 0;
     }
-    if (_RunTimeParamInfo[index].Ref == 0) {
-      delete _Param[index];
-      _Param[index] = 0;
+    if (m_runTimeParamInfo[index].Ref == 0) {
+      delete m_params[index];
+      m_params[index] = 0;
     }
   }
 
   for (index = 0; index < m_numParams; index++)  {
-    param[index] = _Param[index];
+    param[index] = m_params[index];
   }    
 
   return result;
@@ -1720,13 +1670,13 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 
 
 
-gText CallFuncObj::_ParamName(const int index) const
+gText CallFuncObj::ParamName(const int index) const
 {
   gText param_name;
   int f_index;
 
-  if(m_funcIndex != -1 && _CurrParamIndex < _FuncInfo[m_funcIndex].NumParams)
-    return _FuncInfo[m_funcIndex].ParamInfo[_CurrParamIndex].Name;
+  if (m_funcIndex != -1 && m_currParamIndex < _FuncInfo[m_funcIndex].NumParams)
+    return _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Name;
   
   // check whether all index'th parameters have the same name
   param_name = "";
@@ -1758,120 +1708,11 @@ gText CallFuncObj::_ParamName(const int index) const
 
 void CallFuncObj::Dump(gOutput& f) const
 {
-  if(m_funcIndex < 0)
+  if (m_funcIndex < 0)
     f << FuncName() << "[]\n";
   else
     FuncDescObj::Dump(f, m_funcIndex);
 }
 
 
-
-void CallFuncObj::_ErrorMessage
-(
- gOutput& s,
- const int error_num, 
- const long& num1,
- const gText& str1,
- const gText& str2,
- const gText& str3,
- const gText& str4
-)
-{
-#if 0
-  s << "CallFuncObj Error " << error_num << " : \n";
-#endif // 0
-
-  s << "GCL: ";
-  
-  switch(error_num)
-  {
-  case 2:
-    s << str1 << "[] called with conflicting parameters\n";
-    break;
-  case 3:
-    s << str1 << "[] called with parameter #" << num1;
-    if(str2 != "") s << ", \"" << str2 << "\",";
-    s << " multiply defined\n";
-    break;
-  case 4:
-    s << str1 << "[] called with too many parameters\n";
-    break;
-  case 5:
-    s << str1 << "[] called with ambiguous parameter(s)\n";
-    break;
-  case 6:
-    s << str1 << "[] parameter #" << num1 << ", \"" << str2;
-    s << "\", undefined\n";
-    break;
-  case 7:
-    s << str1 << "[] parameter #" << num1 << ", \"" << str2;
-    s << "\", type mismatch\n";
-    break;
-  case 8:
-    s << "No matching parameter specifications found for " + str1 + "[]\n";
-    break;
-  case 9:
-    s << str1 << "[] required parameter #" << num1 << ", \"" << str2;
-    s << "\", missing\n";
-    break;
-  case 10:
-    s << str1 << "[] value parameter #" << num1 <<  ", \"" << str2;
-    s << "\", undefined\n";
-    break;
-  case 11:
-    s << str1 << "[] undefined parameter #" << num1 << ", \"" << str2;
-    s << "\", passed by value\n";
-    break;
-  case 12:
-    s << str1 << "[] value parameter #" << num1 << ", \"" << str2;
-    s << "\", passed by reference\n";
-    break;
-  case 13:
-    s << str1 << "[] reference parameter #" << num1 << ", \"" << str2;
-    s << "\", passed by value\n";
-    break;
-  case 20:
-    s << "A general error occurred while executing " << str1 << "[]\n";
-    break;
-  case 23:
-    s << "Parameter \"" << str2 << "\" is not defined for " << str1 << "[]\n";
-    break;
-  case 24:
-    s << "Parameter \"" << str2 << "\" is ambiguous in "<< str1 << "[]\n";
-    break;
-  case 25:
-    s << str1 << "[]: Undefined reference \"" << str3;
-    s << "\" passed for parameter #" << num1;
-    if(str2 != "") s << ", \"" + str2 + "\"";
-    s << "\n";
-    break;
-  case 26:
-    s << str1 << "[]: Type mismatch on parameter #" << num1 << ", \"";
-    s << str2 << "\"; expected " << str3 << ", got " << str4 << "\n";
-    break;
-  case 27:
-    s << "Error occurred at element #" << num1;
-    s << " during listed function call to " << str1 << "[]\n";
-    break;
-  case 28:
-    s << "Function " << str1 << "[] return type does not match declaration;\n";
-    s << "Expected " << str2 << ", got " << str3 << "\n";
-    break;
-  case 29:
-    s << "Function " << str1 << "[] parameters do not belong to same game\n";
-    s << "Error at parameter #" << num1 << '\n';
-    break;
-  case 30:
-    s << "Function " << str1 << "[] parameters do not have the same subtype\n";
-    s << "Error at parameter #" << num1 << '\n';
-    break;
-  case 31:
-    s << "Function " << str1 << "[] called with a list of mixed types\n";
-    s << "Error at parameter #" << num1 << '\n';
-    break;
-  default:
-    s << "General Error #" << error_num << '\n';
-    break;
-  }
-}
 

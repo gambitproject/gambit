@@ -145,61 +145,38 @@ public:
 
 
 
-class CallFuncObj : public FuncDescObj
-{
- private:
-  struct RunTimeParamInfoType
-  {
-    ReferencePortion* Ref;
-    bool              Defined;
-    bool              AutoValOrRef;
+class CallFuncObj : public FuncDescObj {
+private:
+  struct RunTimeParamInfoType {
+    ReferencePortion *Ref;
+    bool Defined, AutoValOrRef;
   };
 
-  gOutput &_StdOut, &_StdErr;
-
   int m_funcIndex, m_numParams, m_numParamsDefined;
-  Portion**             _Param;
-  RunTimeParamInfoType* _RunTimeParamInfo;
-  bool*                 _FuncMatch;
-  int                   _CurrParamIndex;
-  bool                  _ErrorOccurred;
+  Portion **m_params;
+  RunTimeParamInfoType *m_runTimeParamInfo;
+  bool *m_funcMatch;
+  int m_currParamIndex;
 
-  gText _ParamName( const int index ) const;
+  // PRIVATE AUXILIARY MEMBER FUNCTIONS
+  gText ParamName(int index) const;
 
-  static bool _TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
-			 bool Listable, bool return_type_check = false);
-
-  static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
-  static bool _ListNestedCheck( Portion* p, const gclParameter &info );
-
-  static void _ErrorMessage
-    (
-     gOutput& s,
-     const int error_num, 
-     const long& num1 = 0,
-     const gText& str1 = "",
-     const gText& str2 = "",
-     const gText& str3 = "",
-     const gText& str4 = ""
-     );
-
-  void ComputeFuncIndex(GSM *gsm, Portion **param);
-  Portion *CallNormalFunction(GSM *gsm, Portion **param);
-  Portion *CallListFunction(GSM *gsm, Portion **ParamIn);
+  void ComputeFuncIndex(GSM *, Portion **);
+  Portion *CallNormalFunction(GSM *, Portion **);
+  Portion *CallListFunction(GSM *, Portion **);
 
  public:
-  CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err );
+  CallFuncObj(FuncDescObj *);
   ~CallFuncObj();
 
   int NumParams(void) const { return m_numParams; }
-  bool SetCurrParamIndex(const gText &param_name);
-  bool SetCurrParam(Portion *param, bool auto_val_or_ref = false);
+  bool SetCurrParamIndex(const gText &);
+  bool SetCurrParam(Portion *, bool = false);
 
-  ReferencePortion* GetParamRef (int index) const;
+  ReferencePortion *GetParamRef(int p_index) const;
+  Portion *CallFunction(GSM *, Portion **);
 
-  Portion *CallFunction(GSM *gsm, Portion **param);
-
-  void Dump(gOutput& f) const;
+  void Dump(gOutput &) const;
 };
 
 PortionSpec ToSpec(gText &str, int num = 0);
