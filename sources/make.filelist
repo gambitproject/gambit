@@ -12,14 +12,15 @@ GLIB_OBJECTS = $(GLIB_SOURCES:.cc=.o)
 GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
                 poly.cc complex.cc quiksolv.cc gpartltr.cc gsolver.cc \
                 odometer.cc rectangl.cc gtree.cc ideal.cc gpolylst.cc \
-                linrcomb.cc sfstrat.cc sfg.cc 
+                linrcomb.cc 
 
 GPOLY_OBJECTS = $(GPOLY_OBJECTS:.cc=.o)
 
 
 GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfginst.cc nfgutils.cc \
                efg.cc efginst.cc readefg.cc efgnfg.cc efgnfgd.cc \
-               efgnfgr.cc efgutils.cc efstrat.cc mixedsol.cc behavsol.cc
+               efgnfgr.cc efgutils.cc efstrat.cc mixedsol.cc behavsol.cc \
+               sfstrat.cc sfg.cc
 
 GAME_OBJECTS = $(GAME_SOURCES:.cc=.o)
 
@@ -35,9 +36,9 @@ ENALG_SOURCES = csumsub.cc psnesub.cc enumsub.cc simpsub.cc liapsub.cc \
 ENALG_OBJECTS = $(ENALG_SOURCES:.cc=.o)
 
 NALG_SOURCES = bfs.cc lemke.cc nliap.cc ngobit.cc enum.cc simpdiv.cc \
-               tableau.cc ludecomp.cc nfgpure.cc lhtab.cc lemketab.cc grid.cc \
+               tableau1.cc ludecomp.cc nfgpure.cc lhtab.cc lemketab.cc grid.cc \
                nfgcsum.cc lpsolve.cc nfdom.cc nfdommix.cc vertenum.cc \
-               polenum.cc clique.cc
+               polenum.cc clique.cc basis.cc
 
 NALG_OBJECTS = $(NALG_SOURCES:.cc=.o)
 
