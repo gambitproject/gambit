@@ -331,32 +331,6 @@ static Portion *GSM_DeleteTree(Portion **param)
 
 
 //--------------
-// ElimDom
-//--------------
-
-static Portion *GSM_ElimDom_Efg(Portion **param)
-{
-  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  bool conditional = ((BoolPortion *) param[2])->Value();
-  gWatch watch;
-
-  gBlock<int> players(S->Game().NumPlayers());
-  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  EFSupport *T = S->Undominated(strong, conditional, players,
-				((OutputPortion *) param[4])->Value(),
-				gstatus);
-
-  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
-  
-  Portion *por = (T) ? new EfSupportPortion(T) : new EfSupportPortion(new EFSupport(*S));
-
-  return por;
-}
-
-
-//--------------
 // IsDominated
 //--------------
 
@@ -1269,11 +1243,36 @@ static Portion *GSM_Basis(Portion **param)
   return por;
 }
 
+//--------------
+// UnDominated
+//--------------
+
+static Portion *GSM_UnDominated(Portion **param)
+{
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  bool conditional = ((BoolPortion *) param[2])->Value();
+  gWatch watch;
+
+  gBlock<int> players(S->Game().NumPlayers());
+  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  EFSupport *T = S->Undominated(strong, conditional, players,
+				((OutputPortion *) param[4])->Value(),
+				gstatus);
+
+  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
+  
+  Portion *por = (T) ? new EfSupportPortion(T) : new EfSupportPortion(new EFSupport(*S));
+
+  return por;
+}
+
 //-----------------
-// UnmarkSubgame
+// UnMarkSubgame
 //-----------------
 
-static Portion *GSM_UnmarkSubgame(Portion **param)
+static Portion *GSM_UnMarkSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
@@ -1399,7 +1398,7 @@ void Init_efgfunc(GSM *gsm)
       { "Subgames[efg->EFG] =: LIST(NODE)", GSM_Subgames },
       { "Support[efg->EFG] =: EFSUPPORT", GSM_Support },
       { "Basis[efg->EFG] =: EFBASIS", GSM_Basis },
-      { "UnmarkSubgame[node->NODE] =: NODE", GSM_UnmarkSubgame },
+      { "UnMarkSubgame[node->NODE] =: NODE", GSM_UnMarkSubgame },
       { "PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT)", GSM_PossibleNashSupports },
       { 0, 0 }
     };
@@ -1409,9 +1408,8 @@ void Init_efgfunc(GSM *gsm)
     gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 
-  // Adding ElimDom
-  FuncObj = new gclFunction("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
+  FuncObj = new gclFunction("UnDominated", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_UnDominated, porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
@@ -1426,7 +1424,6 @@ void Init_efgfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  // Adding IsDominated
   FuncObj = new gclFunction("IsDominated", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDominated_Efg, porBOOLEAN, 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("action", porACTION));

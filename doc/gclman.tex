@@ -2555,8 +2555,8 @@ hence can be run on any support of the game.
 The command \verb+Support[g]+\tindex{Support} returns the full support
 of the normal or extensive form game \verb+g+.  The full support is
 the support in which no strategies (or actions) have been eliminated.
-The function \tindex{ElimDom} can be used to find the dominated
-strategies or strategies in a support of a game.  \tindex{ElimDom}
+The function \tindex{UnDominated} can be used to find the dominated
+strategies or strategies in a support of a game.  \tindex{UnDominated}
 returns a support containing the undominated strategies for each
 player (or actions for each information set, in the case of extensive
 for games).  By default weak domination is used, and only domination
@@ -2571,7 +2571,7 @@ and reduced normal form of the poker example of the previous chapter.
 
 \begin{verbatim}
 GCL1:= e:=LoadEfg["poker.efg"]
-GCL2:= efsupp:=ElimDom[e]
+GCL2:= efsupp:=UnDominated[e]
 GCL3:= << Name[Actions[e]]
 { { { Raise, Fold }, { Raise, Fold } },
   { { Meet, Pass } } }
@@ -2579,7 +2579,7 @@ GCL4:= << Name[Actions[efsupp]]
 { { { Raise }, { Raise, Fold } },
   { { Meet, Pass } } }
 GCL5:= n:=Nfg[e];
-GCL6:= nfsupp:=ElimDom[n];
+GCL6:= nfsupp:=UnDominated[n];
 GCL7:= << Name[Strategies[n]]
 { { 11, 12, 21, 22 },
   { 1, 2 } }
@@ -2589,19 +2589,19 @@ GCL8:= << Name[Strategies[nfsupp]]
 \end{verbatim}
 
 In the above example, for the extensive form game, the action with
-name "Fold" is dominated, and eliminated by \verb+ElimDom+.
+name "Fold" is dominated, and eliminated by \verb+UnDominated+.
 Correspondingly, in the reduced normal form game, the strategies in
 which the first player takes the second action at the first
 information set is eliminated.  
 
-A user defined function \tindex{ElimAllDom} can be used to iteratively
-eliminate dominated strategies in a game, until no further dominance
-elimination is possible.  This function returns the final support.  So
-the commands
+A user defined function \tindex{IterativelyUnDominated} can be used to
+iteratively eliminate dominated strategies in a game, until no further
+dominance elimination is possible.  This function returns the final
+support.  So the commands
 
 \begin{verbatim}
 n:=LoadNfg["mygame.nfg"];
-s:=ElimAllDom[n,strong->True,mixed->True];
+s:=IterativelyUnDominated[n,strong->True,mixed->True];
 \end{verbatim}
 
 \noindent
@@ -2638,11 +2638,11 @@ When you first construct a game, the only subgame that is marked is
 the root node of the tree.  This node always represents a valid
 subgame, and it is not possible to unmark the root node.  If
 \verb+node+ is the root of a valid non-trivial subgame, then the
-built-in functions \tindex{MarkSubgame} and \tindex{UnmarkSubgame} can be
+built-in functions \tindex{MarkSubgame} and \tindex{UnMarkSubgame} can be
 used to mark and unmark the specific subgames starting at that node.
 \tindex{MarkedSubgame} can be used to check if the subgame is marked.
 The user defined functions \tindex{MarkSubgames} and
-\tindex{UnmarkSubgames} can be used to mark and unmark all valid
+\tindex{UnMarkSubgames} can be used to mark and unmark all valid
 subgames in the game.  \tindex{MarkedSubgames} returns a lsit of root
 nodes of all currently marked subgames.
 
@@ -2923,7 +2923,7 @@ UDFs.
 \begin{center}
 \begin{tabular}{|l|l|p{2cm}|l|l|}
 \hline
-Type & ElimDom & Game Type & Algorithm & Notes \\
+Type & UnDominated & Game Type & Algorithm & Notes \\
 \hline
 OneNash & Weak & 2-person const sum & Lp & \\ \cline{3-5}
         &      & 2-person general  sum & Lcp& \\ \cline{3-5}
@@ -2993,13 +2993,13 @@ the settings that are used for these UDFs.
 \begin{center}
 \begin{tabular}{|l|l|l|p{2cm}|l|l|}
 \hline
-Type & Subgames & ElimDom & Game Type & Algorithm & Notes\\
+Type & Subgames & UnDominated & Game Type & Algorithm & Notes\\
 \hline
 OneNash & Mark & Weak &  2-person const sum & EF/Lp &\\ \cline{4-6}
         &      &      &  2-person general sum & EF/Lcp &\\ \cline{4-6}
         &      &      &  n-person             & NF/SimpDiv &\\
 \hline
-AllNash &  Unmark & Strong &  2-person       & NF/EnumMixed &\\ \cline{4-6}
+AllNash &  UnMark & Strong &  2-person       & NF/EnumMixed &\\ \cline{4-6}
         &         &        &  n-person       & NF/Liap &Not guaranteed\\
 \hline
 \hline
@@ -3011,7 +3011,7 @@ AllSubgamePerfect &  Mark & Strong &  2-person    & NF/EnumMixed &\\ \cline{4-6}
                   &       &        &  n-person    & NF/Liap &Not guaranteed\\
 \hline
 \hline
-OneSequential &  Unmark & None &  2 or n-person   & EF/Qre &\\ \cline{4-6}
+OneSequential &  UnMark & None &  2 or n-person   & EF/Qre &\\ \cline{4-6}
 \hline
 AllSequential &         &       &  2 or n-person   & EF/Liap &Not guaranteed\\
 \hline
@@ -3037,8 +3037,8 @@ Function Reference section of the manual (or via the
 \verb+Manual["AllNash"]+ command) will reveal the details:
 
 \begin{verbatim}
-ms:=MarkedSubgames[e];UnmarkSubgames[e];
-s:=ElimAllDom[Nfg[e],strong->True];
+ms:=MarkedSubgames[e];UnMarkSubgames[e];
+s:=IterativelyUnDominated[Nfg[e],strong->True];
 If[NumPlayers[e] = 2, 
   m:=EnumMixedSolve[s,0,precision],
   << InfiniteLoopWarning[stopAfter,nTries];
@@ -3532,8 +3532,8 @@ appreciate getting feedback on this.
 # MarkSubgames 
   MarkSubgame 
   Subgames 
-# UnmarkSubgames 
-  UnmarkSubgame 
+# UnMarkSubgames 
+  UnMarkSubgame 
 \end{verbatim}
 \end{multicols}
 
@@ -3546,10 +3546,8 @@ appreciate getting feedback on this.
   AddAction
   AddStrategy
   Basis
-# ElimAllDom 
-  ElimDom 
-# ElimDom 
   IsDominated
+# IterativelyUnDominated
 # NthElement
   PossibleNashSupports
   RemoveAction
@@ -3557,6 +3555,8 @@ appreciate getting feedback on this.
   Strategies 
 # Strategies 
   Support 
+  UnDominated
+# UnDominated
 \end{verbatim}
 \end{multicols}
 
@@ -4243,43 +4243,6 @@ is not running, returns the time elapsed during the last period during which
 the stopwatch was running.
 \item
 [See also:] \verb+IsWatchRunning+, \verb+StartWatch+, \verb+StopWatch+.
-\ed
-
-\item\lex{ElimDom}
-\protect \large \begin{verbatim}
-ElimDom[support->NFSUPPORT, {strong->False}, 
-        {mixed->False}, {precision->Rational}, {time<->0.000000}, 
-        {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-ElimDom[support->EFSUPPORT, {strong->False}, {time<->0.000000}, 
-        {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd
-Finds dominated strategies, or actions, as appropriate, in a 
-\verb+support+.  The returned support contains only the undominated
-strategies or actions; if this support is identical to the input support,
-no strategies or actions were found to be dominated.  The following
-optional parameters may be specified to modify the behavior of
-the elimination:
-
-\bd
-\item [strong:] By default, all weakly dominated strategies or actions
-are eliminated.  If this is specified \verb+True+, elimination is based
-on strict dominance.
-\item [mixed:] By default, elimination is done in pure strategies or
-actions.  If this is specified \verb+True+, elimination is done by
-examining mixtures over other strategies or actions.  Note that mixed 
-elimination is only implemented for normal form games.  
-\item [precision:] Default precision is Rational.  Note that the precision
-parameter is only applicable for mixed domination.  Pure strategy
-domination always uses Rational precision.
-\item [time:] Returns the time consumed by the elimination process.
-\item [traceFile:] A file containing a log of more detailed information
-on the elimination process.  By default, no logging is done.
-\item [traceLevel:] An integer specifying the level of detail in logging.
-Higher integers correspond to more detail; zero corresponds to no output
-at all.
-\ed
 \ed
 
 \item\lex{EnumMixedSolve}
@@ -5512,7 +5475,7 @@ Mark \verb+node+ as being the root of a subgame for use in later computation.
 Only nodes which are roots of subgames may be marked.  Returns \verb+True+
 if \verb+node+ was marked as a subgame (i.e., if it is the root of a subgame).
 \item [See also:] \verb+MarkedSubgame+, \verb+Subgames+,
-\verb+UnmarkSubgame+.
+\verb+UnMarkSubgame+.
 \ed
 
 
@@ -5523,7 +5486,7 @@ MarkedSubgame[node->NODE] =: BOOLEAN
 
 \bd
 Returns \verb+True+ if \verb+node+ is currently marked as a subgame. 
-\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
+\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnMarkSubgame+.
 \ed
 
 
@@ -7096,7 +7059,7 @@ Returns the list of nodes which are roots of subgames in \verb+efg+.
 The ordering of the list is such that
 all children of a node are listed before the node.
 \item [See also:] \verb+MarkSubgame+, \verb+MarkedSubgames+, 
-\verb+UnmarkSubgame+.
+\verb+UnMarkSubgame+.
 \ed
 
 \item\lex{Support}
@@ -7181,7 +7144,7 @@ is not rectangular.
 
 %--U--
 
-\item\lex{Unassign}
+\item\lex{UnAssign}
 \protect \large \begin{verbatim}
 UnAssign[name->TEXT] =: BOOLEAN
 \end{verbatim}\normalsize
@@ -7196,13 +7159,50 @@ required, and the function is not listable.
 \item [See also:] \verb+Assign+, \verb+Clear+.
 \ed
 
-\item\lex{UnmarkSubgame}
+\item\lex{UnDominated}
 \protect \large \begin{verbatim}
-UnmarkSubgame[node->NODE] =: NODE 
+UnDominated[support->NFSUPPORT, {strong->False}, 
+            {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+UnDominated[support->EFSUPPORT, {strong->False}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd
-Unmark \verb+node+ as being the root of a subgame for use in later
+Finds dominated strategies, or actions, as appropriate, in a 
+\verb+support+.  The returned support contains only the UnDominated
+strategies or actions; if this support is identical to the input support,
+no strategies or actions were found to be dominated.  The following
+optional parameters may be specified to modify the behavior of
+the elimination:
+
+\bd
+\item [strong:] By default, all weakly dominated strategies or actions
+are eliminated.  If this is specified \verb+True+, elimination is based
+on strict dominance.
+\item [mixed:] By default, elimination is done in pure strategies or
+actions.  If this is specified \verb+True+, elimination is done by
+examining mixtures over other strategies or actions.  Note that mixed 
+elimination is only implemented for normal form games.  
+\item [precision:] Default precision is Rational.  Note that the precision
+parameter is only applicable for mixed domination.  Pure strategy
+domination always uses Rational precision.
+\item [time:] Returns the time consumed by the elimination process.
+\item [traceFile:] A file containing a log of more detailed information
+on the elimination process.  By default, no logging is done.
+\item [traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to no output
+at all.
+\ed
+\ed
+
+\item\lex{UnMarkSubgame}
+\protect \large \begin{verbatim}
+UnMarkSubgame[node->NODE] =: NODE 
+\end{verbatim}\normalsize
+
+\bd
+UnMark \verb+node+ as being the root of a subgame for use in later
 computation.  If \verb+node+ is not marked as a subgame root, or if
 \verb+node+ is the root node, this function has no effect.  Returns
 the \verb+node+.
@@ -7412,8 +7412,8 @@ Searches for all Nash equilibria of the extensive form game
 \verb+e+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  ms:=MarkedSubgames[e];UnmarkSubgames[e];
-  s:=ElimAllDom[Nfg[e],strong->True];
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  s:=IterativelyUnDominated[Nfg[e],strong->True];
   If[NumPlayers[e] = 2, 
     m:=EnumMixedSolve[s,0,precision],
     << InfiniteLoopWarning[stopAfter,nTries];
@@ -7434,7 +7434,7 @@ Searches for all Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  s:=ElimAllDom[n,strong->True];
+  s:=IterativelyUnDominated[n,strong->True];
   If[NumPlayers[n] = 2, 
     EnumMixedSolve[s,0,precision],
     << InfiniteLoopWarning[stopAfter,nTries];
@@ -7473,7 +7473,7 @@ Searches for all Perfect Nash equilibria of the normal form game
 
 \begin{verbatim}
    If[NumPlayers[n] = 2, 
-    s:=ElimAllDom[n,mixed->True];
+    s:=IterativelyUnDominated[n,mixed->True];
     m:=EnumMixedSolve[s,0,precision];
     Filter[m,IsPerfect[m]],
     << " Not implemented for n-person games";
@@ -7492,7 +7492,7 @@ Searches for all sequential Nash equilibria of the extensive form
 game \verb+e+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-  ms:=MarkedSubgames[e];UnmarkSubgames[e];
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
   << InfiniteLoopWarning[stopAfter,nTries];
   b:=LiapSolve[e,stopAfter->stopAfter,nTries->nTries];
   MarkSubgames[ms];b
@@ -7700,101 +7700,6 @@ Runs a child process to display the game \verb+n+ in the Gambit GUI.
 \ed
 
 %--E--
-
-\item\lex{ElimAllDom}
-\protect \large \begin{verbatim}
-ElimAllDom[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-Successively eliminates dominated strategies in \verb+s+. See
-\verb+ElimDom+ for description of parameters.  
-\begin{verbatim}
-  While[s!=(ss:=ElimDom[s,strong,time,traceFile,traceLevel]),
-    s:=ss
-  ];
-  s;
-\end{verbatim} 
-\ed
-
-\item\lex{ElimAllDom}
-\protect \large \begin{verbatim}
-ElimAllDom[s->NFSUPPORT, {strong->False}, {mixed->False}, 
-           {precision->Rational}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-Successively eliminates dominated strategies in \verb+s+. See
-\verb+ElimDom+ for description of parameters.  
-\begin{verbatim}
-  While[s!=(ss:=ElimDom[s,strong,mixed,precision,time,traceFile,traceLevel]),
-    s:=ss
-  ];
-  s;
-\end{verbatim} 
-\ed
-
-\item\lex{ElimAllDom}
-\protect \large \begin{verbatim}
-ElimAllDom[nfg->NFG, {strong->False}, {mixed->False}, 
-           {precision->Rational}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-Successively eliminates dominated strategies in \verb+nfg+.  See
-\verb+ElimDom+ for description of parameters.  
-\begin{verbatim}
-  ElimAllDom[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
-\end{verbatim} 
-\ed
-
-\item\lex{ElimAllDom}
-\protect \large \begin{verbatim}
-ElimAllDom[efg->EFG, {strong->False}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-Successively eliminates dominated strategies in \verb+nfg+. See
-\verb+ElimDom+ for description of parameters.  
-\begin{verbatim}
-  ElimAllDom[Support[efg],strong,time,traceFile,traceLevel];
-\end{verbatim} 
-\ed
-
-\item\lex{ElimDom}
-\protect \large \begin{verbatim}
-ElimDom[nfg->NFG, {strong->False}, {mixed->False}, 
-        {precision->Rational}, {time<->0.000000}, 
-        {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-A version of \verb+ElimDom+ that takes a normal form game instead
-of a support.  See the built-in function, \verb+ElimDom+ for a
-description of the parameters.
-\begin{verbatim}
-  ElimDom[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel]
-\end{verbatim} 
-\ed
-
-\item\lex{ElimDom}
-\protect \large \begin{verbatim}
-ElimDom[efg->EFG, {strong->False}, {time<->0.000000}, 
-        {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
-\end{verbatim}\normalsize
-
-\bd 
-A version of \verb+ElimDom+ that takes an extensive form game instead
-of a support.  See the built-in function, \verb+ElimDom+ for a
-description of the parameters.
-\begin{verbatim}
-  ElimDom[Support[efg],strong,time,traceFile,traceLevel]
-\end{verbatim} 
-\ed
 
 \item\lex{EnumMixedSolve}
 \protect \large \begin{verbatim}
@@ -8054,6 +7959,70 @@ false.
 \end{verbatim} 
 \ed
 
+\item\lex{IterativelyUnDominated}
+\protect \large \begin{verbatim}
+IterativelyUnDominated[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
+                       {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+Successively eliminates dominated strategies in \verb+s+. See
+\verb+UnDominated+ for description of parameters.  
+\begin{verbatim}
+  While[s!=(ss:=UnDominated[s,strong,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+\end{verbatim} 
+\ed
+
+\item\lex{IterativelyUnDominated}
+\protect \large \begin{verbatim}
+IterativelyUnDominated[s->NFSUPPORT, {strong->False}, {mixed->False}, 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+Successively eliminates dominated strategies in \verb+s+. See
+\verb+UnDominated+ for description of parameters.  
+\begin{verbatim}
+  While[s!=(ss:=UnDominated[s,strong,mixed,precision,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+\end{verbatim} 
+\ed
+
+\item\lex{IterativelyUnDominated}
+\protect \large \begin{verbatim}
+IterativelyUnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+Successively eliminates dominated strategies in \verb+nfg+.  See
+\verb+UnDominated+ for description of parameters.  
+\begin{verbatim}
+  IterativelyUnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
+\end{verbatim} 
+\ed
+
+\item\lex{IterativelyUnDominated}
+\protect \large \begin{verbatim}
+IterativelyUnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+Successively eliminates dominated strategies in \verb+nfg+. See
+\verb+UnDominated+ for description of parameters.  
+\begin{verbatim}
+  IterativelyUnDominated[Support[efg],strong,time,traceFile,traceLevel];
+\end{verbatim} 
+\ed
+
 %--J--
 
 %--K--
@@ -8231,7 +8200,7 @@ subgames unmarked.  Returns a list of \verb+BOOLEAN+, indicating if
 the corresponding node was successfully marked (i. e., was a valid
 subgame root).
 \begin{verbatim}
-  UnmarkSubgames[Game[n_1]];MarkSubgame[n]
+  UnMarkSubgames[Game[n_1]];MarkSubgame[n]
 \end{verbatim} 
 \ed
 
@@ -8659,7 +8628,7 @@ Finds one Nash equilibrium of the normal form game \verb+n+.
 Returns a singleton list containing the equilibrium found.
 
 \begin{verbatim}
-  s:=ElimAllDom[n];
+  s:=IterativelyUnDominated[n];
   If[NumPlayers[n] = 2,
     If[IsConstSum[n],LpSolve[s,1,precision],LcpSolve[s,1,precision]],
     SimpDivSolve[s,stopAfter->1,nRestarts->16,precision->precision]
@@ -8678,7 +8647,7 @@ Finds one Perfect Nash equilibrium of the normal form game
 
 \begin{verbatim}
   If[NumPlayers[n] = 2, 
-    s:=ElimAllDom[n];
+    s:=IterativelyUnDominated[n];
     LcpSolve[s,1,precision],
     << " Not implemented for n-person games";
     List[Centroid[Support[n]],0] // return empty set of mixed
@@ -8696,7 +8665,7 @@ Finds one sequential Nash equilibrium of the extensive form game
 \verb+e+.  Returns a singleton list containing the equilibrium found.
 
 \begin{verbatim}
-  ms:=MarkedSubgames[e];UnmarkSubgames[e];
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
   b:=QreSolve[e,fullGraph->False];
   If[!IsSequential[b_1],
     << " Warning: Algorithm did not converge, returning last value"
@@ -9220,15 +9189,46 @@ The terminal nodes of the game tree of the extensive form game \verb+efg+.
 
 %--U--
 
-\item\lex{UnmarkSubgames}
+\item\lex{UnDominated}
 \protect \large \begin{verbatim}
-UnmarkSubgames[efg->EFG] =: LIST(NODE)
+UnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
+            {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+A version of \verb+UnDominated+ that takes a normal form game instead
+of a support.  See the built-in function, \verb+UnDominated+ for a
+description of the parameters.
+\begin{verbatim}
+  UnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel]
+\end{verbatim} 
+\ed
+
+\item\lex{UnDominated}
+\protect \large \begin{verbatim}
+UnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}\normalsize
+
+\bd 
+A version of \verb+UnDominated+ that takes an extensive form game instead
+of a support.  See the built-in function, \verb+UnDominated+ for a
+description of the parameters.
+\begin{verbatim}
+  UnDominated[Support[efg],strong,time,traceFile,traceLevel]
+\end{verbatim} 
+\ed
+
+\item\lex{UnMarkSubgames}
+\protect \large \begin{verbatim}
+UnMarkSubgames[efg->EFG] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \bd 
 Unmarks all subgames in \verb+efg+.
 \begin{verbatim}
-  UnmarkSubgame[Nodes[efg]];
+  UnMarkSubgame[Nodes[efg]];
   MarkedSubgames[efg]
 \end{verbatim} 
 \ed

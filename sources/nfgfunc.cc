@@ -11,6 +11,7 @@
 
 #include "nfg.h"
 #include "nfplayer.h"
+#include "nfdom.h"
 
 #include "glist.h"
 #include "mixed.h"
@@ -84,42 +85,6 @@ static Portion *GSM_DeleteOutcome(Portion **param)
   outc->Game()->DeleteOutcome(outc);
 
   return new BoolPortion(true);
-}
-
-#include "nfdom.h"
-
-//-------------
-// ElimDom
-//-------------
-
-static Portion *GSM_ElimDom_Nfg(Portion **param)
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  bool mixed = ((BoolPortion *) param[2])->Value();
-  gPrecision prec = ((PrecisionPortion *) param[3])->Value();
-
-  gWatch watch;
-  gBlock<int> players(S->Game().NumPlayers());
-  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport *T;
-  Portion *por;
-
-  if (mixed)
-    T = S->MixedUndominated(strong, prec, players,
-			    ((OutputPortion *) param[5])->Value(), gstatus);
-  else   {
-    T = S->Undominated(strong, players,
-		       ((OutputPortion *) param[5])->Value(), gstatus);
-  }
-
-  por = ((T) ? new NfSupportPortion(T) :
-	 new NfSupportPortion(new NFSupport(*S)));
-
-  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
-  
-  return por;
 }
 
 //-------------
@@ -559,6 +524,40 @@ static Portion *GSM_Support(Portion **param)
   return new NfSupportPortion(new NFSupport(N));
 }
 
+//-------------
+// UnDominated
+//-------------
+
+static Portion *GSM_UnDominated(Portion **param)
+{
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  bool strong = ((BoolPortion *) param[1])->Value();
+  bool mixed = ((BoolPortion *) param[2])->Value();
+  gPrecision prec = ((PrecisionPortion *) param[3])->Value();
+
+  gWatch watch;
+  gBlock<int> players(S->Game().NumPlayers());
+  for (int i = 1; i <= players.Length(); i++)   players[i] = i;
+
+  NFSupport *T;
+  Portion *por;
+
+  if (mixed)
+    T = S->MixedUndominated(strong, prec, players,
+			    ((OutputPortion *) param[5])->Value(), gstatus);
+  else   {
+    T = S->Undominated(strong, players,
+		       ((OutputPortion *) param[5])->Value(), gstatus);
+  }
+
+  por = ((T) ? new NfSupportPortion(T) :
+	 new NfSupportPortion(new NFSupport(*S)));
+
+  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
+  
+  return por;
+}
+
 
 void Init_nfgfunc(GSM *gsm)
 {
@@ -616,8 +615,8 @@ void Init_nfgfunc(GSM *gsm)
     gsm->AddFunction(new gclFunction(ftable[i].sig, ftable[i].func,
 				     funcLISTABLE | funcGAMEMATCH));
 
-  FuncObj = new gclFunction("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Nfg,
+  FuncObj = new gclFunction("UnDominated", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_UnDominated,
 				       porNFSUPPORT, 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
