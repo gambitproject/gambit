@@ -118,7 +118,7 @@ T NFRep<T>::LiapValue(const MixedProfile<T> &p) const
     for(j = 1; j <= NumStrats(i); j++) {
       tmp[i][j]= (T) 1;
       x=p[i][j];
-      payoff[j] = (*this)(i,tmp);
+      payoff[j] = Payoff(i,tmp);
 //      gout << "\np[" << i << "][" << j << "] = " << payoff[j];
 //      gout << "\ntmp = " << tmp;
       avg+=x*payoff[j];
