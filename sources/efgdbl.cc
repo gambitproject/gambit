@@ -41,10 +41,16 @@ DataType Efg<double>::Type(void) const    { return DOUBLE; }
 TEMPLATE class TypedNode<double>;
 TEMPLATE class ChanceInfoset<double>;
 TEMPLATE class OutcomeVector<double>;
+
 TEMPLATE class BehavProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
-//TEMPLATE bool operator==(const gArray<double> &, const gArray<double> &);
-//TEMPLATE bool operator!=(const gArray<double> &, const gArray<double> &);
+
+#include "behavsol.imp"
+
+unsigned long BehavSolution<double>::MaxId=1;
+TEMPLATE class BehavSolution<double>;
+TEMPLATE gOutput &operator<<(gOutput &, const BehavSolution<double> &);
+
 
 #include "efgiter.imp"
 
@@ -64,10 +70,9 @@ TEMPLATE int ReadEfgFile(gInput &, Efg<double> *&);
 TEMPLATE class gList<BehavProfile<double> >;
 TEMPLATE class gNode<BehavProfile<double> >;
 
-#include "behavsol.h"
-
 TEMPLATE class gList<BehavSolution<double> >;
 TEMPLATE class gNode<BehavSolution<double> >;
+
 
 
 

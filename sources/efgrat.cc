@@ -43,8 +43,14 @@ TEMPLATE class ChanceInfoset<gRational>;
 TEMPLATE class OutcomeVector<gRational>;
 TEMPLATE class BehavProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
-//TEMPLATE bool operator==(const gArray<gRational> &, const gArray<gRational> &);
-//TEMPLATE bool operator!=(const gArray<gRational> &, const gArray<gRational> &);
+
+#include "behavsol.imp"
+
+unsigned long BehavSolution<gRational>::MaxId=1;
+TEMPLATE class BehavSolution<gRational>;
+
+TEMPLATE gOutput &operator<<(gOutput &, const BehavSolution<gRational> &);
+
 
 #include "efgiter.imp"
 
@@ -64,7 +70,7 @@ TEMPLATE int ReadEfgFile(gInput &, Efg<gRational> *&);
 TEMPLATE class gList<BehavProfile<gRational> >;
 TEMPLATE class gNode<BehavProfile<gRational> >;
 
-#include "behavsol.h"
-
 TEMPLATE class gList<BehavSolution<gRational> >;
 TEMPLATE class gNode<BehavSolution<gRational> >;
+
+
