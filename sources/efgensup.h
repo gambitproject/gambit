@@ -75,6 +75,8 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 				            ActionCursorForSupport *c,
 					    gList<const EFSupport> *list,
 				      const gStatus &status);
+
+gList<const EFSupport> SortSupportsBySize(gList<const EFSupport> &);
   
 gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 					       gStatus &status);

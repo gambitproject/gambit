@@ -204,6 +204,8 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 				            gList<const EFSupport> *list,
 				      const gStatus &status)
 { 
+  status.Get();
+
   bool abort = false;
   bool add_support = true;
 
@@ -275,6 +277,50 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
     } while (c_copy.GoToNext()) ;
   }
 }
+
+gList<const EFSupport> SortSupportsBySize(gList<const EFSupport> &list) 
+{
+  gArray<int> sizes(list.Length());
+  for (int i = 1; i <= list.Length(); i++)
+    sizes[i] = list[i].NumDegreesOfFreedom();
+
+  gArray<int> listproxy(list.Length());
+  for (int i = 1; i <= list.Length(); i++)
+    listproxy[i] = i;
+
+  int maxsize(0);
+  for (int i = 1; i <= list.Length(); i++)
+    if (sizes[i] > maxsize)
+      maxsize = sizes[i];
+
+  int cursor(1);
+
+  for (int j = 0; j < maxsize; j++) {
+    int scanner(list.Length());
+    while (cursor < scanner)
+      if (sizes[scanner] != j)
+	scanner--;
+      else {
+	while (sizes[cursor] == j)
+	  cursor++;
+	if (cursor < scanner) {
+	  int tempindex = listproxy[cursor];
+	  listproxy[cursor] = listproxy[scanner];
+	  listproxy[scanner] = tempindex;
+	  int tempsize = sizes[cursor];
+	  sizes[cursor] = sizes[scanner];
+	  sizes[scanner] = tempsize;
+	  cursor++;
+	}
+      }
+  }
+
+  gList<const EFSupport> answer;
+  for (int i = 1; i <= list.Length(); i++)
+    answer += list[listproxy[i]];
+
+  return answer;
+}
   
 gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
 					       gStatus &status)
@@ -323,8 +369,8 @@ gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
     if (remove)
       answer.Remove(i);
   }
-    
-  return answer;
+
+  return SortSupportsBySize(answer);
 }
 
 //----------------------------------------------------
