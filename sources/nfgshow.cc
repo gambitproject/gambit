@@ -1457,7 +1457,153 @@ void NfgShow::EditAccelerators(void)
     WriteAccelerators(accelerators, "NfgAccelerators");
 }
 
+#define ENTRIES_PER_ROW 5
 
+class NFChangePayoffs : public MyDialogBox {
+private:
+  const gArray<int> &profile;
+  Nfg &nf;
+
+  wxText *m_outcomeNameItem;
+  wxText **payoff_items;
+
+public:
+  NFChangePayoffs(Nfg &nf, const gArray<int> &profile, wxWindow *parent);
+  gArray<gNumber> Payoffs(void);
+};
+
+NFChangePayoffs::NFChangePayoffs(Nfg &nf_, const gArray<int> &profile_,
+				 wxWindow *parent)
+  : MyDialogBox(parent, "Change Payoffs"), profile(profile_), nf(nf_)
+{
+  Add(wxMakeFormMessage("Change payoffs for profile:"));
+  gText profile_str = "(";
+
+  for (int pl = 1; pl <= profile.Length(); pl++) {
+    if (nf.Strategies(pl)[profile[pl]]->Name() != "")
+      profile_str += nf.Strategies(pl)[profile[pl]]->Name();
+    else
+      profile_str += ToText(profile[pl]);
+
+    if (pl == profile.Length())
+      profile_str += ")";
+    else
+      profile_str += ",";
+  }
+
+  Add(wxMakeFormMessage(profile_str));
+  Add(wxMakeFormNewLine());
+
+  NFOutcome *outc = nf.GetOutcome(profile);
+
+  if (outc) {
+    Add(wxMakeFormMessage("Outcome:")); 
+    if (outc->GetName() != "")
+      Add(wxMakeFormMessage(outc->GetName()));
+    else
+      Add(wxMakeFormMessage("Outcome " + ToText(outc->GetNumber())));
+  }
+  else
+    Add(wxMakeFormMessage("Defining new outcome: Outcome " +
+			  ToText(nf.NumOutcomes() + 1)));
+
+  Add(wxMakeFormNewLine());
+
+  // Payoff items
+  char **new_payoffs = new char *[profile.Length()+1];
+  wxFormItem **payoff_fitems = new wxFormItem *[profile.Length()+1];
+  payoff_items = new wxText *[profile.Length()+1];
+
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    new_payoffs[i] = new char[40];
+    payoff_fitems[i] = Add(wxMakeFormString("", &(new_payoffs[i]), wxFORM_TEXT, 0, 0, 0, 160));
+
+    if (i % ENTRIES_PER_ROW == 0)
+      Add(wxMakeFormNewLine());
+  }
+
+  AssociatePanel();
+
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    payoff_items[i] = (wxText *)payoff_fitems[i]->GetPanelItem();
+    gNumber payoff = 0;
+    if (outc)
+      payoff = nf.Payoff(outc, i);
+    payoff_items[i]->SetValue(ToText(payoff));
+  }
+
+  Go1();
+
+  for (int i = 1; i <= profile.Length(); i++) 
+    delete [] new_payoffs[i];
+
+  delete [] new_payoffs;
+}
+
+
+gArray<gNumber> NFChangePayoffs::Payoffs(void)
+{
+  gArray<gNumber> payoffs(nf.NumPlayers());
+
+  for (int i = 1; i <= nf.NumPlayers(); i++)
+    FromText(payoff_items[i]->GetValue(), payoffs[i]);
+
+  return payoffs;
+}
+
+void NfgShow::ChangePayoffs(int st1, int st2, bool next)
+{
+  if (st1 > rows || st2 > cols)
+    return;
+
+  if (next) { 
+    // facilitates quickly editing the nf -> automatically moves to next cell
+    if (st2 < cols) {
+      st2++;
+    }
+    else {
+      if (st1 < rows) {
+	st1++;
+	st2 = 1;
+      }
+      else {
+	st1 = 1;
+	st2 = 1;
+      }
+    }
+
+    spread->SetCurRow(st1);
+    spread->SetCurCol(st2);
+  }
+
+  gArray<int> profile(spread->GetProfile());
+  profile[pl1] = st1;
+  profile[pl2] = st2;
+  nf_iter.Set(pl1, st1);
+  nf_iter.Set(pl2, st2);
+
+  NFChangePayoffs *payoffs_dialog = new NFChangePayoffs(nf, profile, spread);
+
+  if (payoffs_dialog->Completed() == wxOK) {
+    NFOutcome *outc = nf.GetOutcome(profile);
+    gArray<gNumber> payoffs(payoffs_dialog->Payoffs());
+
+    if (!outc) {
+      outc = nf.NewOutcome();
+      nf.SetOutcome(profile, outc);
+      outc->SetName("Outcome " + ToText(nf.NumOutcomes()));
+    }
+
+    for (int i = 1; i <= nf.NumPlayers(); i++)
+      nf.SetPayoff(outc, i, payoffs[i]);
+
+    UpdateVals();
+    RemoveSolutions();
+    InterfaceDied();
+  }
+  
+  delete payoffs_dialog;
+}
 
 template class SolutionList<MixedSolution>;
 

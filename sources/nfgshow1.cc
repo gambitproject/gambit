@@ -575,6 +575,14 @@ void NormalSpread::OnMenuCommand(int id)
       parent->Save();
       break;
 
+    case NFG_ACCL_PAYOFF:
+      parent->ChangePayoffs(CurRow(), CurCol(), false);
+      break;
+
+    case NFG_ACCL_NEXT_PAYOFF:
+      parent->ChangePayoffs(CurRow(), CurCol(), true);
+      break;
+
     default: 
       SpreadSheet3D::OnMenuCommand(id);
       break;

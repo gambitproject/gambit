@@ -238,10 +238,8 @@ public:
     { GetMenuBar()->Enable(inspect_item, enable); }
 
   // Callback for double clicking on a cell.
-  void OnDoubleClick(int /*row*/, int /*col*/, int, const gText &) 
-    { 
-        parent->ChangeOutcomes(CREATE_DIALOG); 
-    }
+  void OnDoubleClick(int row, int col, int, const gText &) 
+    { parent->ChangePayoffs(row, col); }
 
   // Callback for moving the selected cell.  Currently this updates the pl1, pl2 choice boxes
   void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/ = SpreadMoveJump)
