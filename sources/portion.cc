@@ -90,7 +90,7 @@ Portion* Error_Portion::Copy( void ) const
 { return new Error_Portion; }
 
 void Error_Portion::Output( gOutput& s ) const
-{ s << " Error\n"; }
+{ s << " Error"; }
 
 
 //-----------------------------------------------------------------------
@@ -203,21 +203,7 @@ template <class T>
 
 template <class T> void numerical_Portion<T>::Output( gOutput& s ) const
 {
-  switch( Type() )
-  {
-  case porDOUBLE:
-    s << " (double) ";
-    break;
-  case porINTEGER:
-    s << " (gInteger) ";
-    break;
-  case porRATIONAL:
-    s << " (gRational) ";
-    break;
-  default:
-    s << " (unknown numerical) ";
-  }
-  s << _Value << "\n";
+  s << " " << _Value;
 }
 
 
@@ -288,11 +274,11 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
 
 void bool_Portion::Output( gOutput& s ) const
 {
-  s << " (bool) ";
+  s << "(bool) ";
   if( _Value == true )
-    s << "true\n";
+    s << "true";
   else
-    s << "false\n";
+    s << "false";
 }
 
 
@@ -367,7 +353,7 @@ bool gString_Portion::Operation( Portion* p, OperationMode mode )
 
 void gString_Portion::Output( gOutput& s ) const
 {
-  s << " (gString) " << _Value << "\n";
+  s << " \"" << _Value << "\"";
 }
 
 
@@ -406,7 +392,7 @@ Portion* Reference_Portion::Copy( void ) const
 
 void Reference_Portion::Output( gOutput& s ) const
 {
-  s << " (Reference) " << _Value << ", " << _SubValue << "\n";
+  s << "(Reference) \"" << _Value << "\", \"" << _SubValue << "\"";
 }
 
 
@@ -502,16 +488,17 @@ bool List_Portion::Operation( Portion* p, OperationMode mode )
 void List_Portion::Output( gOutput& s ) const
 {
   int i;
-  int length;
+  int length = _Value.Length();
 
-  s << " (List)\n"; 
-  s << "  {\n";
-  for( i = 1, length = _Value.Length(); i <= length; i++ )
+  if( length >= 1 )
   {
-    s << "    list item " << i << " : ";
-    _Value[i]->Output( s );
+    gout << " {" << _Value[ 1 ];
   }
-  s << "  }\n";
+  for( i = 2; i <= length; i++ )
+  {
+    gout << "," << _Value[ i ];
+  }
+  s << " }";
 }
 
 
@@ -524,7 +511,7 @@ int List_Portion::Append( Portion* item )
 
 int List_Portion::Insert( Portion* item, int index )
 {
-  int result;
+  int result = 0;
   int type_match;
 
   if( item->Type() == porREFERENCE )
@@ -574,6 +561,24 @@ void List_Portion::Flush( void )
 }
 
 
+Portion* List_Portion::Subscript( Portion* p ) const
+{
+  long i;
+  Portion* result;
+
+  if( p->Type() == porINTEGER )
+  {
+    i = (int) ( (numerical_Portion<gInteger>*) p )->Value().as_long();
+    result = _Value[ i ]->Copy();
+  }
+  else
+  {
+    gerr << "List_Portion Error: a non-Integer subscript specified\n";
+    result = new Error_Portion;
+  }
+  delete p;
+  return result;
+}
 
 //---------------------------------------------------------------------
 //                            Nfg type
@@ -641,7 +646,7 @@ bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 
 
 void Nfg_Portion::Output( gOutput& s ) const
-{ s << " (Nfg) " << _Value->value << "\n"; }
+{ s << "(Nfg) " << _Value->value; }
 
 
 
@@ -740,6 +745,14 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
 //----------------------------------------------------------------------
 //                         class instantiations
 //----------------------------------------------------------------------
+
+
+
+gOutput& operator << ( gOutput& s, Portion* p )
+{
+  p->Output( s );
+  return s;
+}
 
 
 

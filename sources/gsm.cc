@@ -423,10 +423,19 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
 //                       binary operations
 //------------------------------------------------------------------------
 
+
+// Main dispatcher of built-in binary operations
+
+// operations are dispatched to the appropriate Portion classes,
+// except in cases where the return type is differen from parameter
+// #1, in which case the operation implementation would be placed here
+// labeled as SPECIAL CASE HANDLING
+
 bool GSM::_BinaryOperation( OperationMode mode )
 {
   Portion*   p2;
   Portion*   p1;
+  Portion*   p;
   bool       result = true;
 
 #ifndef NDEBUG
@@ -448,6 +457,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   if( p1->Type() == p2->Type() )
   {
+    // SPECIAL CASE HANDLING - gInteger divisions that produce gRational types
     if( mode == opDIVIDE && p1->Type() == porINTEGER )
     {
       Portion* np1;
@@ -462,7 +472,10 @@ bool GSM::_BinaryOperation( OperationMode mode )
       p2 = np2;
     }
 
+    // Main operations dispatcher
     result = p1->Operation( p2, mode );
+
+    // SPECIAL CASE HANDLING - Boolean operators
     if(
        mode == opEQUAL_TO ||
        mode == opNOT_EQUAL_TO ||
@@ -476,14 +489,34 @@ bool GSM::_BinaryOperation( OperationMode mode )
       p1 = new bool_Portion( result );
       result = true;
     }
+
     _Stack->Push( p1 );
   }
+
   else // ( p1->Type() != p2->Type() )
   {
-    gerr << "GSM Error: attempted operating on different types\n";
-    gerr << "           Type of Operand 1: " << p1->Type() << "\n";
-    gerr << "           Type of Operand 2: " << p2->Type() << "\n";
-    result = false;
+
+    // SPECIAL CASE HANDLING - Subscript operator for Lists
+    if( p1->Type() == porLIST && mode == opSUBSCRIPT )
+    {
+      p = ( (List_Portion*) p1 )->Subscript( p2 );
+      delete p1;
+      p1 = p;
+      if( p1 == 0 )
+	result = false;
+    }
+    else
+    {
+      gerr << "GSM Error: attempted operating on different types\n";
+      gerr << "           Type of Operand 1: " << p1->Type() << "\n";
+      gerr << "           Type of Operand 2: " << p2->Type() << "\n";
+      delete p1;
+      delete p2;
+      p1 = new Error_Portion;
+      result = false;
+    }
+
+    _Stack->Push( p1 );
   }
 
   return result;
@@ -507,7 +540,7 @@ bool GSM::_UnaryOperation( OperationMode mode )
     
     if( p1->Type() == porREFERENCE )
       p1 = _ResolveRef( (Reference_Portion*) p1 );
-    
+
     p1->Operation( 0, mode );
     _Stack->Push( p1 );
   }
@@ -578,6 +611,9 @@ bool GSM::OR ( void )
 bool GSM::NOT ( void )
 { return _UnaryOperation( opLOGICAL_NOT ); }
 
+
+bool GSM::Subscript ( void )
+{ return _BinaryOperation( opSUBSCRIPT ); }
 
 
 
@@ -887,6 +923,7 @@ void GSM::Output( void )
       p = _ResolveRef( (Reference_Portion*) p );
     }
     p->Output( gout );
+    gout << "\n";
     delete p;
   }
 }

@@ -27,7 +27,8 @@ typedef enum
   opINTEGER_DIVIDE, opMODULUS,
   opEQUAL_TO, opNOT_EQUAL_TO, opGREATER_THAN, opLESS_THAN,
   opGREATER_THAN_OR_EQUAL_TO, opLESS_THAN_OR_EQUAL_TO,
-  opLOGICAL_AND, opLOGICAL_OR, opLOGICAL_NOT
+  opLOGICAL_AND, opLOGICAL_OR, opLOGICAL_NOT,
+  opSUBSCRIPT
 } OperationMode;
 
 
@@ -187,6 +188,8 @@ class List_Portion : public Portion
   Portion* Remove     ( int index );
   int      Length     ( void ) const;
   void     Flush      ( void );
+
+  Portion* Subscript ( Portion* p ) const;
 };
 
 
@@ -219,6 +222,7 @@ class Nfg_Portion : public Portion
 
 void PrintPortionTypeSpec( gOutput& s, PortionType type );
 
+gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H

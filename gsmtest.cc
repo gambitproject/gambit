@@ -32,7 +32,7 @@ int main( void )
   gList< Instruction* > program;
 
 
-
+/*
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -1039,7 +1039,21 @@ int main( void )
   program.Append( new CallFunction );
   program.Append( new Dump );
   machine->Execute( program );
+*/
 
+  machine->PushRef( "x" );
+  for( i = 0; i < 10; i++ )
+  {
+    machine->Push( (gInteger) i );
+  }
+  machine->PushList( 10 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 3 );
+  machine->Subscript();
+  machine->Dump();
 
 
   gout << "Deleting machine\n";

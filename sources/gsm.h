@@ -88,7 +88,8 @@ class GSM
   bool AND ( void );
   bool OR  ( void );
   bool NOT ( void );
-
+  
+  bool Subscript ( void );
 
   
   void AddFunction( FuncDescObj* func );
