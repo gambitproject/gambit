@@ -1624,63 +1624,64 @@ void dialogEfgNash::LoadAlgorithms(const efgGame &p_efg)
   wxTreeItemId root = m_algorithmTree->AddRoot("Algorithms");
   wxTreeItemId standard = m_algorithmTree->AppendItem(root,
 						      "Standard algorithms");
-
+  // This is added to silence some BC warnings
+  panelEfgNashAlgorithm *panel;
   id = m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
-  m_algorithms.Define(id, new panelEfgOneNash(this));
+  m_algorithms.Define(id, panel = new panelEfgOneNash(this));
 
   id = m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
-  m_algorithms.Define(id, new panelEfgTwoNash(this));
+  m_algorithms.Define(id, panel = new panelEfgTwoNash(this));
 
   id = m_algorithmTree->AppendItem(standard, "All Nash equilibria");
-  m_algorithms.Define(id, new panelEfgAllNash(this));
+  m_algorithms.Define(id, panel = new panelEfgAllNash(this));
 
   id = m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
-  m_algorithms.Define(id, new panelEfgOnePerfect(this));
+  m_algorithms.Define(id, panel = new panelEfgOnePerfect(this));
 
   id = m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
-  m_algorithms.Define(id, new panelEfgTwoPerfect(this));
+  m_algorithms.Define(id, panel = new panelEfgTwoPerfect(this));
 
   id = m_algorithmTree->AppendItem(standard, "All perfect equilibria");
-  m_algorithms.Define(id, new panelEfgAllPerfect(this));
+  m_algorithms.Define(id, panel = new panelEfgAllPerfect(this));
 
   id = m_algorithmTree->AppendItem(standard, "One sequential equilibrium");
-  m_algorithms.Define(id, new panelEfgOneSequential(this));
+  m_algorithms.Define(id, panel = new panelEfgOneSequential(this));
 
   id = m_algorithmTree->AppendItem(standard, "Two sequential equilibria");
-  m_algorithms.Define(id, new panelEfgTwoSequential(this));
+  m_algorithms.Define(id, panel = new panelEfgTwoSequential(this));
 
   id = m_algorithmTree->AppendItem(standard, "All sequential equilibria");
-  m_algorithms.Define(id, new panelEfgAllSequential(this));
+  m_algorithms.Define(id, panel = new panelEfgAllSequential(this));
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
 
   id = m_algorithmTree->AppendItem(custom, "EnumPure");
-  m_algorithms.Define(id, new panelEfgEnumPure(this));
+  m_algorithms.Define(id, panel = new panelEfgEnumPure(this));
 
   if (p_efg.NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(custom, "EnumMixed");
-    m_algorithms.Define(id, new panelEfgEnumMixed(this));
+    m_algorithms.Define(id, panel = new panelEfgEnumMixed(this));
 
     id = m_algorithmTree->AppendItem(custom, "LcpSolve");
-    m_algorithms.Define(id, new panelEfgLcp(this));
+    m_algorithms.Define(id, panel = new panelEfgLcp(this));
 
     if (p_efg.IsConstSum()) {
       id = m_algorithmTree->AppendItem(custom, "LpSolve");
-      m_algorithms.Define(id, new panelEfgLp(this));
+      m_algorithms.Define(id, panel = new panelEfgLp(this));
     }
   }
 
   id = m_algorithmTree->AppendItem(custom, "LiapSolve");
-  m_algorithms.Define(id, new panelEfgLiap(this));
+  m_algorithms.Define(id, panel = new panelEfgLiap(this));
 
   id = m_algorithmTree->AppendItem(custom, "PolEnumSolve");
-  m_algorithms.Define(id, new panelEfgPolEnum(this));
+  m_algorithms.Define(id, panel = new panelEfgPolEnum(this));
 
   id = m_algorithmTree->AppendItem(custom, "QreSolve");
-  m_algorithms.Define(id, new panelEfgQre(this));
+  m_algorithms.Define(id, panel = new panelEfgQre(this));
 
   id = m_algorithmTree->AppendItem(custom, "SimpdivSolve");
-  m_algorithms.Define(id, new panelEfgSimpdiv(this));
+  m_algorithms.Define(id, panel = new panelEfgSimpdiv(this));
 
   m_algorithmTree->Expand(standard);
   m_algorithmTree->Expand(custom);
