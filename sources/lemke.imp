@@ -14,10 +14,12 @@
 
 template <class T> gMatrix<T> Make_A1(const Nfg &, const NFSupport &, 
 				      const T &);
-template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &, const T &);
+template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &, 
+				      const T &);
 template <class T> gMatrix<T> Make_A2(const Nfg &, const NFSupport &,
 				      const T &);
-template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &, const T &);
+template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &,
+				      const T &);
 
 
 template <class T> class LemkeModule  {
@@ -71,32 +73,36 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
 
   List.Flush();
 
-  gMatrix<T> A1 = Make_A1(NF, support, (T) 0);
-  gVector<T> b1 = Make_b1(NF, support, (T) 0);
-  gMatrix<T> A2 = Make_A2(NF, support, (T) 0);
-  gVector<T> b2 = Make_b2(NF, support, (T) 0);
-  LHTableau<T> B(A1,A2,b1,b2);
-  epsilon = B.Epsilon();
-  if ( params.stopAfter!=1 || dup==0)
-    All_Lemke(0,B,npivots);
-  else  {
-    B.LemkePath(dup);
-    Add_BFS(B);
-  }
-  if (params.trace >= 2)  {
-    for (i = 1; i <= List.Length(); i++)   {
-      List[i].Dump(*params.tracefile);
-      (*params.tracefile) << "\n";
+  try {
+    gMatrix<T> A1 = Make_A1(NF, support, (T) 0);
+    gVector<T> b1 = Make_b1(NF, support, (T) 0);
+    gMatrix<T> A2 = Make_A2(NF, support, (T) 0);
+    gVector<T> b2 = Make_b2(NF, support, (T) 0);
+    LHTableau<T> B(A1,A2,b1,b2);
+    epsilon = B.Epsilon();
+    if ( params.stopAfter!=1 || dup==0)
+      All_Lemke(0,B,npivots);
+    else  {
+      B.LemkePath(dup);
+      Add_BFS(B);
     }
-    
-  }
-//  if(params.trace >= 1)
-//    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
+    if (params.trace >= 2)  {
+      for (i = 1; i <= List.Length(); i++)   {
+	List[i].Dump(*params.tracefile);
+	(*params.tracefile) << "\n";
+      }
+    }
 
-  if(params.status.Get()) params.status.Reset();
-  AddSolutions();
-  time = watch.Elapsed();
-  return List.Length();
+    AddSolutions();
+    time = watch.Elapsed();
+    return List.Length();
+  }
+  catch (gSignalBreak &e) {
+    // for now, we won't give *any* solutions -- but we should list
+    // any solutions found!
+    return 0;
+  }
+  // any other exceptions will propagate out.
 }
 
 template <class T> int LemkeModule<T>::Add_BFS(LHTableau<T> &B)
@@ -135,9 +141,10 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
   if(!Add_BFS(B)) return 1;
   
   for (i = B.MinCol(); 
-       i <= B.MaxCol()  && !params.status.Get() &&
+       i <= B.MaxCol() &&
        (params.stopAfter==0 || (List.Length()-1) < params.stopAfter);
-       i++)
+       i++) {
+    params.status.Get();
     if (i != j)  {
       len=List.Length()-1;
       p1=(double)len/(double)(len+1);
@@ -153,6 +160,7 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
 //      delete Bcopy;
 
     }
+  }
   return 1;
 }
 
@@ -196,20 +204,10 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
       else
 	profile(2, j) = (T) 0;
 
-    int index;
-    bool add = false;
-    if((params.status.Get() !=1) 
-//       || (params.status.Get() ==1 && profile.IsNash())
-     )
-      add = true;
-    if(add) {
-      index = solutions.Append(MixedSolution(profile, NfgAlg_LEMKE));
-      if(params.status.Get() != 1) {
-	solutions[index].SetIsNash(triTRUE);
-	solutions[index].SetIsPerfect(triTRUE);
-	solutions[index].SetEpsilon(epsilon);
-      }
-    }
+    int index = solutions.Append(MixedSolution(profile, NfgAlg_LEMKE));
+    solutions[index].SetIsNash(triTRUE);
+    solutions[index].SetIsPerfect(triTRUE);
+    solutions[index].SetEpsilon(epsilon);
   }
 }
 
