@@ -1666,72 +1666,6 @@ Portion* GSM_IsList( Portion** p )
   return new BoolPortion( p[0]->Spec().ListDepth > 0 );
 }
 
-
-
-
-Portion* GSM_SaveGlobalVar( Portion** param )
-{
-  const gText &varname = ((TextPortion*) param[0])->Value();
-  _gsm->GlobalVarDefine( varname, 
-			 param[1]->ValCopy() );
-  return _gsm->GlobalVarValue( varname )->RefCopy();
-}
-
-Portion* GSM_LoadGlobalVar( Portion** param )
-{
-  const gText &varname = ((TextPortion*) param[0])->Value();
-  if( _gsm->GlobalVarIsDefined( varname ) )
-    return _gsm->GlobalVarValue( varname )->RefCopy();
-  else
-    throw gclRuntimeError( "Variable not found" );
-}
-
-Portion* GSM_ExistsGlobalVar( Portion** param )
-{
-  const gText &varname = ((TextPortion*) param[0])->Value();
-  if( _gsm->GlobalVarIsDefined( varname ) )
-    return new BoolPortion( true );
-  else
-    return new BoolPortion( false );
-}
-
-
-Portion* GSM_SaveLocalVar( Portion** param )
-{
-  gText varname =
-    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
-  _gsm->GlobalVarDefine( varname, 
-			 param[1]->ValCopy() );
-  return _gsm->GlobalVarValue( varname )->RefCopy();
-}
-
-Portion* GSM_LoadLocalVar( Portion** param )
-{
-  gText varname =
-    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
-  if( _gsm->GlobalVarIsDefined( varname ) )
-    return _gsm->GlobalVarValue( varname )->RefCopy();
-  else
-    throw gclRuntimeError( "Variable not found" );
-}
-
-
-Portion* GSM_ExistsLocalVar( Portion** param )
-{
-  gText varname =
-    _gsm->UserFuncName() + gText((char) 1) + ((TextPortion*) param[0])->Value();
-  if( _gsm->GlobalVarIsDefined( varname ) )
-    return new BoolPortion( true );
-
-  else
-    return new BoolPortion( false ); 
-}
-
-
-
-
-
-
 void Init_gsmoper(GSM* gsm)
 {
   FuncDescObj* FuncObj;
@@ -2174,65 +2108,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(1, 0, gclParameter("list", 
 					    PortionSpec(porANYTYPE,NLIST)));
   gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("SaveGlobalVar", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_SaveGlobalVar, porANYTYPE, 2,
-				       NO_PREDEFINED_PARAMS,
-				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  FuncObj->SetParamInfo(0, 1, gclParameter("var", porANYTYPE) );
-
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_SaveGlobalVar, 
-				       PortionSpec(porANYTYPE, NLIST), 2,
-				       NO_PREDEFINED_PARAMS,
-				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(1, 0, gclParameter("name", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, gclParameter("var", 
-					    PortionSpec(porANYTYPE, NLIST)) );
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("LoadGlobalVar", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_LoadGlobalVar, porANYTYPE, 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ExistsGlobalVar", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ExistsGlobalVar, porBOOLEAN, 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("SaveLocalVar", 2);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_SaveLocalVar, porANYTYPE, 2,
-				       NO_PREDEFINED_PARAMS,
-				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  FuncObj->SetParamInfo(0, 1, gclParameter("var", porANYTYPE) );
-
-  FuncObj->SetFuncInfo(1, gclSignature(GSM_SaveLocalVar, 
-				       PortionSpec(porANYTYPE, NLIST), 2,
-				       NO_PREDEFINED_PARAMS,
-				       funcNONLISTABLE ));
-  FuncObj->SetParamInfo(1, 0, gclParameter("name", porTEXT) );
-  FuncObj->SetParamInfo(1, 1, gclParameter("var", 
-					    PortionSpec(porANYTYPE, NLIST)) );
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("LoadLocalVar", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_LoadLocalVar, porANYTYPE, 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ExistsLocalVar", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ExistsLocalVar, porBOOLEAN, 1));
-  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT) );
-  gsm->AddFunction(FuncObj);
-
-
 }
 
 
