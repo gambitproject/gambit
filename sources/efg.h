@@ -191,6 +191,8 @@ template <class T> class Efg : public BaseEfg   {
 	//# DATA ACCESS -- GENERAL INFORMATION
     DataType Type(void) const;
     bool IsConstSum(void) const;
+    void MinPayoff(gArray<T> &payoff) const;
+    void MaxPayoff(gArray<T> &payoff) const;
 
         //# DATA ACCESS -- OUTCOMES
     OutcomeVector<T> *NewOutcome(void);
