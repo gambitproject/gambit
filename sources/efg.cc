@@ -77,15 +77,16 @@ Node ExtForm::DeleteNode(const Node &n, int keep)
   if (nodes.IsTerminal(n))    return n;
 
   Node foo(n), ret;
-
-  for (int i = 1; i < keep; i++)
+  
+  for (int i = 1; i < keep; i++) {
     foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 1)));
-  while (nodes.NumChildren(foo) > 1)
+  }
+  while (nodes.NumChildren(foo) > 1) {
     foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 2)));
+  }
   nodes.DeleteInternalNode(foo, ret);
 //#old code  if (nodes.DeleteInternalNode(foo, ret)) 
 //#old code    players.RemoveInfoset(foo[1], efg_no, foo[2]);
-
   return ret;
 }
 
@@ -139,12 +140,7 @@ Node ExtForm::MergeInfoset(const Node &from, const Node &into)
   if (from[1] == into[1] && from[2] == into[2])
     return from;
 
-  Node ret(nodes.MoveNodes(from, into));
-
-  nodes.RemoveInfoset(from[1], from[2]);
-//#old code  players.RemoveInfoset(from[1], from[0], from[2]);
-
-  return ret;
+  return nodes.MoveNodes(from, into);
 }
 
 void ExtForm::InsertAction(const Node &n, int where, int number)

@@ -113,10 +113,10 @@ class ExtForm    {
       { if (!nodes.IsMember(n)) return 0;
 	return nodes.HasSuccessorGame(n); }
     int IsSuccessor(const Node &n, const Node &from) const
-      { if (!nodes.IsMember(n) && nodes.IsMember(from)) return 0;
+      { if (!nodes.IsMember(n) || !nodes.IsMember(from)) return 0;
 	return nodes.IsPredecessor(from, n); }
     int IsPredecessor(const Node &n, const Node &of) const
-      { if (!nodes.IsMember(n) && nodes.IsMember(of)) return 0;
+      { if (!nodes.IsMember(n) || !nodes.IsMember(of)) return 0;
 	return nodes.IsPredecessor(n, of); }
 
 	//# GENERAL INFORMATION
