@@ -1,5 +1,5 @@
 //
-// FILE: extshow.cc -- type dependent extensive form gui stuff
+// FILE: efgshow.cc -- type dependent extensive form gui stuff
 //
 //  $Id$
 //
