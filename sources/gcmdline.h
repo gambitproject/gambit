@@ -53,7 +53,7 @@ private:
 
 private:
   gCmdLineInput( const gCmdLineInput& );
-  operator = ( const gCmdLineInput& );
+  gInput & operator = ( const gCmdLineInput& ); // RDM:  Is this needed?
 
   enum EscapeCode
   {

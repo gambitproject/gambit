@@ -38,13 +38,11 @@ template class gArray<NFOutcome *>;
 template class gArray<NFPlayer *>;
 template class gBlock<Strategy *>;
 
-template class gArray<NFOutcome *>;
 template class gBlock<NFOutcome *>;
 
 template class gList<MixedSolution>;
 template class gList<Strategy *>;
 
 template class gList<const NFSupport>;
-template class gList<NFSupport const>;
 
 

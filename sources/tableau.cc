@@ -9,7 +9,5 @@
 #include "gmatrix.imp"
 #include "grarray.imp"
 
-template class Tableau<double>;
-template class Tableau<gRational>;
 
 

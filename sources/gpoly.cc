@@ -166,10 +166,6 @@ template class gList<gPoly<gRational> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<gRational> >&);
 
-template class gList<gPoly<gRational> >;
-template gOutput& operator << (gOutput& output, 
-			       const gList<gPoly<gRational> >&);
-
 template class gList<gPoly<double> >;
 template gOutput& operator << (gOutput& output, 
 			       const gList<gPoly<double> >&);
