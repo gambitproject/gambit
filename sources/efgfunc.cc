@@ -29,16 +29,6 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 
 //-------------
-// ActionNumber
-//-------------
-
-Portion* GSM_ActionNumber(Portion** param)
-{
-  return new IntValPortion(((ActionPortion*) param[0])->Value()->GetNumber());
-}
-
-
-//-------------
 // Actions
 //-------------
 
@@ -46,19 +36,9 @@ Portion *GSM_Actions(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
-  int i;
 
-  Portion* por;
-  if(!sup)
-    por = ArrayToList(s->GetActionList());
-  else
-  {
-    por = new ListValPortion();
-    for(i=1; i<=s->GetActionList().Length(); i++)
-      if(sup->Find(s->GetActionList()[i]))
-	((ListPortion*) por)->
-	  Append(new ActionValPortion(s->GetActionList()[i]));
-  }
+  Portion *por = ArrayToList(sup->ActionList(s->GetPlayer()->GetNumber(),
+					     s->GetNumber()));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -70,32 +50,17 @@ Portion *GSM_Actions(Portion **param)
 Portion *GSM_AddAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
-  Action *action = ((ActionPortion *) param[2])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
 
-  if (&support->BelongsTo() != infoset->BelongsTo())
-    return new ErrorPortion("Support and infoset must be from same game");
-  if (action->BelongsTo() != infoset)
-    return new ErrorPortion("Action must belong to infoset");
+  if (&support->BelongsTo() != action->BelongsTo()->BelongsTo())
+    return new ErrorPortion("Support and action must be from same game");
+
+  Infoset *infoset = action->BelongsTo();
 
   support->AddAction(infoset->GetPlayer()->GetNumber(),
 		     infoset->GetNumber(), action);
 
   return param[0]->RefCopy();
-}
-
-//------------------
-// AppendAction
-//------------------
-
-Portion *GSM_AppendAction(Portion **param)
-{
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  s->BelongsTo()->AppendAction(s);
-
-  Portion* por = new ActionValPortion(s->GetActionList()[s->NumActions()]);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
 }
 
 //------------------
@@ -148,30 +113,30 @@ Portion *GSM_Chance(Portion **param)
 }
 
 //----------------
-// ChanceProbs
+// ChanceProb
 //----------------
 
-Portion *GSM_ChanceProbs(Portion **param)
+Portion *GSM_ChanceProb(Portion **param)
 {
   Portion* por;
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  if (!s->GetPlayer()->IsChance()) 
-    return new ErrorPortion
-      ("Only chance information sets have action probabilities");
+  Action *action = ((ActionPortion *) param[0])->Value();
+  Infoset *infoset = action->BelongsTo();
+  if (!infoset->GetPlayer()->IsChance()) 
+    return new NullPortion
+      ((infoset->BelongsTo()->Type() == DOUBLE) ? porFLOAT : porRATIONAL);
 
-  switch (s->BelongsTo()->Type())   {
+  switch (infoset->BelongsTo()->Type())   {
     case DOUBLE:
-      por = ArrayToList((gArray<double> &) ((ChanceInfoset<double> *) s)->GetActionProbs());
+      por = new FloatValPortion(((ChanceInfoset<double> *) infoset)->GetActionProb(action->GetNumber()));
       break;
     case RATIONAL:
-      por = ArrayToList((gArray<gRational> &) ((ChanceInfoset<gRational> *) s)->GetActionProbs());
+      por = new RationalValPortion(((ChanceInfoset<gRational> *) infoset)->GetActionProb(action->GetNumber()));
       break;
     default:
       assert(0);
       return 0;
   }
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -188,6 +153,23 @@ Portion *GSM_Children(Portion **param)
     ((ListPortion*) por)->Append(new NodeValPortion(n->GetChild(child)));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
+}
+
+//---------------
+// CompressEfg
+//---------------
+
+template <class T> Efg<T> *CompressEfg(const Efg<T> &, const EFSupport &);
+
+Portion *GSM_CompressEfg(Portion **param)
+{
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  const BaseEfg &E = S->BelongsTo();
+  
+  if (E.Type() == DOUBLE)
+    return new EfgValPortion(CompressEfg((const Efg<double> &) E, *S));
+  else
+    return new EfgValPortion(CompressEfg((const Efg<gRational> &) E, *S));
 }
 
 //---------------
@@ -213,13 +195,28 @@ Portion *GSM_CopyTree(Portion **param)
 
 Portion *GSM_DeleteAction(Portion **param)
 {
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  Action *a = ((ActionPortion *) param[1])->Value();
-  s->BelongsTo()->DeleteAction(s, a);
+  Action *action = ((ActionPortion *) param[0])->Value();
+  Infoset *infoset = action->BelongsTo();
 
-  Portion* por = new InfosetValPortion(s);
+  if (infoset->NumActions() == 1)
+    return new ErrorPortion("Cannot delete the only action at an infoset.");
+
+  infoset->BelongsTo()->DeleteAction(infoset, action);
+
+  Portion* por = new InfosetValPortion(infoset);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
+}
+
+//----------------------
+// DeleteEmptyInfoset
+//----------------------
+
+Portion *GSM_DeleteEmptyInfoset(Portion **param)
+{
+  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+
+  return new BoolValPortion(infoset->BelongsTo()->DeleteEmptyInfoset(infoset));
 }
 
 //----------------
@@ -287,81 +284,28 @@ extern EFSupport *ComputeDominated(EFSupport &S, bool strong,
 				   gStatus &status);
 
 //--------------
-// ElimAllDom
-//--------------
-
-Portion *GSM_ElimAllDom_EfSupport(Portion **param)
-{
-  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  EFSupport* new_T = S;
-  EFSupport* old_T = S;
-  while(new_T)
-  {
-    old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value(), gstatus);
-  }
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = new EfSupportValPortion(old_T);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-
-Portion *GSM_ElimAllDom_Efg(Portion **param)
-{
-  EFSupport *S = new EFSupport(* ((EfgPortion *) param[0])->Value());
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  EFSupport* new_T = S;
-  EFSupport* old_T = S;
-  while(new_T)
-  {
-    old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value(), gstatus);
-  }
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = new EfSupportValPortion(old_T);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//--------------
 // ElimDom
 //--------------
 
-Portion *GSM_ElimDom_EfSupport(Portion **param)
+Portion *GSM_ElimDom_Efg(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
-  
+  bool mixed = ((BoolPortion *) param[2])->Value();
+
+  if (mixed)
+    return new ErrorPortion("Elimination by mixed strategies not implemented");
+
   gWatch watch;
   gBlock<int> players(S->BelongsTo().NumPlayers());
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
   EFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value(),
+				  ((OutputPortion *) param[4])->Value(),
 				  gstatus);
 
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  ((FloatPortion *) param[3])->Value() = watch.Elapsed();
   
   Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
 
@@ -369,28 +313,6 @@ Portion *GSM_ElimDom_EfSupport(Portion **param)
   return por;
 }
 
-
-Portion *GSM_ElimDom_Efg(Portion **param)
-{
-  EFSupport *S = new EFSupport(* ((EfgPortion *) param[0])->Value());
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  EFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value(),
-				  gstatus);
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new EfSupportValPortion(T) : new EfSupportValPortion(new EFSupport(*S));
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
 
 //------------
 // Float
@@ -407,16 +329,6 @@ Portion *GSM_FloatEfg(Portion **param)
     return new EfgValPortion(E);
   else
     return new ErrorPortion("Conversion failed.");
-}
-
-//----------------
-// HasOutcome
-//----------------
-
-Portion *GSM_HasOutcome(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  return new BoolValPortion(n->GetOutcome() != 0);
 }
 
 //-------------
@@ -470,10 +382,16 @@ Portion *GSM_Infosets(Portion **param)
 Portion *GSM_InsertAction(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
-  Action *a = ((ActionPortion *) param[1])->Value();
-  s->BelongsTo()->InsertAction(s, a);
+  Portion *por = new ActionValPortion(s->BelongsTo()->InsertAction(s));
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
 
-  Portion* por = new InfosetValPortion(s);
+Portion *GSM_InsertActionAt(Portion **param)
+{
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  Action *a = ((ActionPortion *) param[1])->Value();
+  Portion *por = new ActionValPortion(s->BelongsTo()->InsertAction(s, a));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -517,16 +435,6 @@ Portion *GSM_IsPredecessor(Portion **param)
   return new BoolValPortion(n1->BelongsTo()->IsPredecessor(n1, n2));
 }
 
-//--------------
-// IsRoot
-//--------------
-
-Portion *GSM_IsRoot(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  return new BoolValPortion(n->GetParent() == 0);
-}
-
 //---------------
 // IsSuccessor
 //---------------
@@ -536,54 +444,6 @@ Portion *GSM_IsSuccessor(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
   return new BoolValPortion(n1->BelongsTo()->IsSuccessor(n1, n2));
-}
-
-//--------------
-// JoinInfoset
-//--------------
-
-Portion *GSM_JoinInfoset(Portion **param)
-{
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  Node *n = ((NodePortion *) param[1])->Value();
-  
-  if (s->BelongsTo() != n->BelongsTo())
-    return new ErrorPortion("Information set and node from different games");
-  s->BelongsTo()->JoinInfoset(s, n);
-  
-  Portion* por = new InfosetValPortion(s);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//--------------
-// LastAction
-//--------------
-
-Portion *GSM_LastAction(Portion** param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  Action* a = LastAction(n);
-  if(a == 0)
-    return new NullPortion(porACTION);
-  //return new ErrorPortion("called on a root node");
-
-  Portion* por = new ActionValPortion(a);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//---------------
-// LeaveInfoset
-//---------------
-
-Portion *GSM_LeaveInfoset(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-
-  Portion* por = new InfosetValPortion(n->BelongsTo()->LeaveInfoset(n));
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
 }
 
 //-----------
@@ -667,18 +527,6 @@ Portion *GSM_MarkSubgames_Node(Portion **param)
   return por;
 }
 
-
-
-//---------------
-// IsLegalSubgame
-//---------------
-
-Portion *GSM_IsLegalSubgame_Node(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  return new BoolValPortion(n->BelongsTo()->IsLegalSubgame(n));
-}
-
 //-------------------
 // IsPerfectRecall
 //-------------------
@@ -732,6 +580,24 @@ Portion *GSM_MergeInfosets(Portion **param)
   return por;
 }
 
+//----------------
+// MoveToInfoset
+//----------------
+
+Portion *GSM_MoveToInfoset(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Infoset *s = ((InfosetPortion *) param[1])->Value();
+  
+  if (s->BelongsTo() != n->BelongsTo())
+    return new ErrorPortion("Information set and node from different games");
+  s->BelongsTo()->JoinInfoset(s, n);
+  
+  Portion* por = new InfosetValPortion(s);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
 //-------------
 // MoveTree
 //-------------
@@ -766,16 +632,12 @@ Portion *GSM_Name_EfgElements(Portion **param)
       return new TextValPortion(((OutcomePortion *) param[0])->Value()->GetName());
     case porPLAYER_EFG:
       return new TextValPortion(((EfPlayerPortion *) param[0])->Value()->GetName());
+    case porEFG:
+      return new TextValPortion(((EfgPortion *) param[0])->Value()->GetTitle());
     default:
       assert(0);
       return 0;
   }
-}
-
-Portion *GSM_Name_Efg(Portion **param)
-{
-  BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  return new TextValPortion(E.GetTitle());
 }
 
 
@@ -808,12 +670,14 @@ Portion *GSM_NewEfg(Portion **param)
 // NewInfoset
 //--------------
 
-// The version specifying just the number of actions
-Portion *GSM_NewInfoset1(Portion **param)
+Portion *GSM_NewInfoset(Portion **param)
 {
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
   int n = ((IntPortion *) param[1])->Value();
   gString name = ((TextPortion *) param[2])->Value();
+
+  if (n <= 0)
+    return new ErrorPortion("Information sets must have at least one action");
 
   Infoset *s = p->BelongsTo()->CreateInfoset(p, n);
   s->SetName(name);
@@ -823,25 +687,6 @@ Portion *GSM_NewInfoset1(Portion **param)
   return por;
 }
  
-// The version specifying a list of names for actions
-Portion *GSM_NewInfoset2(Portion **param)
-{
-  EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
-  ListPortion *actions = (ListPortion *) param[1];
-  gString name = ((TextPortion *) param[2])->Value();
-
-  if (actions->Length() == 0)
-    return new ErrorPortion("Must have at least one action");
-  Infoset *s = p->BelongsTo()->CreateInfoset(p, actions->Length());
-  s->SetName(name);
-  for (int i = 1; i <= actions->Length(); i++)
-    s->SetActionName(i, ((TextPortion *) (*actions)[i])->Value());
-
-  Portion* por = new InfosetValPortion(s);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
 //--------------
 // NewOutcome
 //--------------
@@ -880,18 +725,6 @@ Portion *GSM_NewPlayer(Portion **param)
   return por;
 }
 
-//--------------
-// NewSupport
-//--------------
-
-Portion *GSM_NewSupport_Efg(Portion **param)
-{
-  BaseEfg &E = * ((EfgPortion *) param[0])->Value();
-  Portion *por = new EfSupportValPortion(new EFSupport(E));
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
 //----------------
 // NextSibling
 //----------------
@@ -908,37 +741,6 @@ Portion *GSM_NextSibling(Portion **param)
   return por;
 }
 
-//-----------
-// Nodes
-//-----------
-
-Portion *GSM_Nodes(Portion **param)
-{
-  BaseEfg& E = *((EfgPortion *) param[0])->Value();
-  gList<Node *> list;
-  Nodes(E, list);
-
-  Portion *por = ArrayToList(list);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//--------------------
-// NonterminalNodes
-//--------------------
-
-Portion* GSM_NonterminalNodes(Portion** param)
-{
-  BaseEfg& E = *((EfgPortion *) param[0])->Value();
-  gList<Node *> list;
-  NonTerminalNodes(E, list);
-
-  Portion *por = ArrayToList(list);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;  
-}
-
-
 //---------------
 // NthChild
 //---------------
@@ -954,83 +756,6 @@ Portion *GSM_NthChild(Portion **param)
   Portion* por = new NodeValPortion(n->GetChild(child));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
-}
-
-//---------------
-// NumActions
-//---------------
-
-Portion *GSM_NumActions(Portion **param)
-{
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  return new IntValPortion(s->NumActions());
-}
-
-Portion *GSM_NumActions_EFSupport(Portion **param)
-{
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  EFSupport *S = ((EfSupportPortion *) param[1])->Value();
-  return new IntValPortion(S->NumActions(s->GetPlayer()->GetNumber(),
-					 s->GetNumber()));
-}
-
-//---------------
-// NumChildren
-//---------------
-
-Portion *GSM_NumChildren(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  return new IntValPortion(n->NumChildren());
-}
-
-//---------------
-// NumInfosets
-//---------------
-
-Portion *GSM_NumInfosets(Portion **param)
-{
-  EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
-  return new IntValPortion(p->NumInfosets());
-}
-
-//--------------
-// NumMembers
-//--------------
-
-Portion *GSM_NumMembers(Portion **param)
-{
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  return new IntValPortion(s->NumMembers());
-}
-
-//------------
-// NumNodes
-//------------
-
-Portion* GSM_NumNodes(Portion ** param)
-{
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  return new IntValPortion(NumNodes(E));  
-}
-//--------------
-// NumOutcomes
-//--------------
-
-Portion *GSM_NumOutcomes(Portion **param)
-{
-  BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  return new IntValPortion(E.NumOutcomes());
-}
-
-//--------------
-// NumPlayers
-//--------------
-
-Portion *GSM_NumPlayers_Efg(Portion **param)
-{
-  BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  return new IntValPortion(E.NumPlayers());
 }
 
 //------------
@@ -1094,9 +819,9 @@ Portion *GSM_Payoff_Float(Portion **param)
 {
   OutcomeVector<double> *c = 
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
- 
-  Portion* por = ArrayToList((gArray<double> &) *c);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+
+  Portion* por = new FloatValPortion((*c)[player->GetNumber()]);
   return por;
 }
 
@@ -1104,9 +829,9 @@ Portion *GSM_Payoff_Rational(Portion **param)
 {
   OutcomeVector<gRational> *c = 
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
-  
-  Portion* por = ArrayToList((gArray<gRational> &) *c);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+
+  Portion* por = new RationalValPortion((*c)[player->GetNumber()]);
   return por;
 }
 
@@ -1114,22 +839,11 @@ Portion *GSM_Payoff_Rational(Portion **param)
 // Player
 //----------
 
-Portion *GSM_Player_Infoset(Portion **param)
+Portion *GSM_Player(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
   Portion* por = new EfPlayerValPortion(s->GetPlayer());
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-Portion *GSM_Player_Node(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-  if (!n->GetPlayer())
-    return new ErrorPortion("Node is a terminal node");
-
-  Portion* por = new EfPlayerValPortion(n->GetPlayer());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -1143,6 +857,23 @@ Portion *GSM_Players_Efg(Portion **param)
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
   Portion* por = ArrayToList(E.PlayerList());
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+//--------------
+// PriorAction
+//--------------
+
+Portion *GSM_PriorAction(Portion** param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+  Action* a = LastAction(n);
+  if(a == 0)
+    return new NullPortion(porACTION);
+  //return new ErrorPortion("called on a root node");
+
+  Portion* por = new ActionValPortion(a);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -1228,13 +959,11 @@ Portion *GSM_Rational_Efg(Portion **param)
 Portion *GSM_RemoveAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  Infoset *infoset = ((InfosetPortion *) param[1])->Value();
-  Action *action = ((ActionPortion *) param[2])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
+  Infoset *infoset = action->BelongsTo();
 
   if (&support->BelongsTo() != infoset->BelongsTo())
-    return new ErrorPortion("Support and infoset must be from same game");
-  if (action->BelongsTo() != infoset)
-    return new ErrorPortion("Action must belong to infoset");
+    return new ErrorPortion("Support and action must be from same game");
 
   support->RemoveAction(infoset->GetPlayer()->GetNumber(),
 			infoset->GetNumber(), action);
@@ -1357,6 +1086,9 @@ Portion *GSM_SetName_EfgElements(Portion **param)
     case porPLAYER_EFG:
       ((EfPlayerPortion *) param[0])->Value()->SetName(name);
       break;
+    case porEFG:
+      ((EfgPortion *) param[0])->Value()->SetTitle(name);
+      break;
     default:
       assert(0);
   }
@@ -1364,11 +1096,6 @@ Portion *GSM_SetName_EfgElements(Portion **param)
   return param[0]->ValCopy();
 }
 
-Portion *GSM_SetName_Efg(Portion **param)
-{
-  ((EfgPortion *) param[0])->Value()->SetTitle(((TextPortion *) param[1])->Value());
-  return param[0]->RefCopy();
-}
 
 //----------------
 // SetPayoff
@@ -1378,13 +1105,10 @@ Portion *GSM_SetPayoff_Float(Portion **param)
 {
   OutcomeVector<double> *c = 
     (OutcomeVector<double> *) ((OutcomePortion *) param[0])->Value();
-  ListPortion *p = (ListPortion *) param[1];
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  double value = ((FloatPortion *) param[2])->Value();
 
-  if (c->Length() != p->Length())
-    return new ErrorPortion("Wrong number of entries in payoff vector");
-
-  for (int i = 1; i <= c->Length(); i++)
-    (*c)[i] = ((FloatPortion *) (*p)[i])->Value();
+  (*c)[player->GetNumber()] = value;
 
   Portion* por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -1395,13 +1119,10 @@ Portion *GSM_SetPayoff_Rational(Portion **param)
 {
   OutcomeVector<gRational> *c = 
     (OutcomeVector<gRational> *) ((OutcomePortion *) param[0])->Value();
-  ListPortion *p = (ListPortion *) param[1];
+  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
+  gRational value = ((RationalPortion *) param[2])->Value();
 
-  if (c->Length() != p->Length()) 
-    return new ErrorPortion("Wrong number of entries in payoff vector");
-
-  for (int i = 1; i <= c->Length(); i++)
-    (*c)[i] = ((RationalPortion *) (*p)[i])->Value();
+  (*c)[player->GetNumber()] = value;
 
   Portion* por = new OutcomeValPortion(c);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -1423,21 +1144,17 @@ Portion *GSM_SubgameRoots(Portion **param)
   return por;  
 }  
 
-//-----------------
-// TerminalNodes
-//-----------------
+//--------------
+// Support
+//--------------
 
-Portion *GSM_TerminalNodes(Portion **param)
+Portion *GSM_Support_Efg(Portion **param)
 {
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  gList<Node *> list;
-  TerminalNodes(E, list);
-
-  Portion *por = ArrayToList(list);
+  BaseEfg &E = * ((EfgPortion *) param[0])->Value();
+  Portion *por = new EfSupportValPortion(new EFSupport(E));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;  
+  return por;
 }
-
 
 //-----------------
 // UnmarkSubgames
@@ -1492,33 +1209,20 @@ void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("ActionNumber", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionNumber, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("action", porACTION));
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("Actions", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Actions, 
 				       PortionSpec(porACTION, 1), 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porEF_SUPPORT, 
-					    new EfSupportValPortion(0)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porEF_SUPPORT)); 
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("AddAction", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddAction, 
-				       porEF_SUPPORT, 3));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("action", porACTION));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("AppendAction", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AppendAction, 
-				       porACTION, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+				       porEF_SUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
 
 
@@ -1540,15 +1244,15 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Chance", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Chance, porPLAYER_EFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("ChanceProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ChanceProbs, 
+  FuncObj = new FuncDescObj("ChanceProb", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ChanceProb, 
 				       PortionSpec(porFLOAT | porRATIONAL, 1),
 				       1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
 
 
@@ -1556,6 +1260,13 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Children, 
 				       PortionSpec(porNODE, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("CompressEfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressEfg,
+				       porEFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
   gsm->AddFunction(FuncObj);
 
 
@@ -1567,11 +1278,14 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("DeleteAction", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteAction, porACTION, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteAction, porINFOSET, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("DeleteEmptyInfoset", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteEmptyInfoset, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("DeleteNode", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteNode, porNODE, 2));
@@ -1598,64 +1312,20 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-
-  FuncObj = new FuncDescObj("ElimAllDom", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimAllDom_EfSupport, 
-				       porEF_SUPPORT, 5));
+  FuncObj = new FuncDescObj("ElimDom", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_Efg, 
+				       porEF_SUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
 					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimAllDom_Efg, 
-				       porEF_SUPPORT, 5));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("mixed", porBOOL,
 					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porFLOAT,
 					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputRefPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("ElimDom", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_EfSupport, 
-				       porEF_SUPPORT, 5));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimDom_Efg, 
-				       porEF_SUPPORT, 5));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
 
@@ -1663,17 +1333,9 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Float", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_FloatEfg, porEFG_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
-  
-  
-  FuncObj = new FuncDescObj("HasOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_HasOutcome, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-  
   
   FuncObj = new FuncDescObj("Infoset", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Infoset_Node, porINFOSET, 1));
@@ -1691,10 +1353,13 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("InsertAction", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InsertAction, porACTION, 2));
+  FuncObj = new FuncDescObj("InsertAction", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InsertAction, porACTION, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("at", porACTION));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_InsertActionAt, porACTION, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("at", porACTION));
   gsm->AddFunction(FuncObj);
 
 
@@ -1707,19 +1372,12 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("IsConstSum", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSumEfg, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
   
-  FuncObj = new FuncDescObj("IsLegalSubgame", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsLegalSubgame_Node, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("IsPerfectRecall", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsPerfectRecall, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsPredecessor", 1);
@@ -1729,37 +1387,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsRoot", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsRoot, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-
   FuncObj = new FuncDescObj("IsSuccessor", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsSuccessor, porBOOL, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("from", porNODE));
   gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("JoinInfoset", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_JoinInfoset, porNODE, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("LastAction", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LastAction, porACTION, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("LeaveInfoset", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LeaveInfoset, porINFOSET, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
 
   FuncObj = new FuncDescObj("LoadEfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadEfg, porEFG, 1));
@@ -1798,6 +1430,12 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
+  FuncObj = new FuncDescObj("MoveToInfoset", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MoveToInfoset, porNODE, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("MoveTree", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MoveTree, porNODE, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("from", porNODE));
@@ -1805,14 +1443,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Name", 2);
+  FuncObj = new FuncDescObj("Name", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_EfgElements, porTEXT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porACTION | porINFOSET | 
 					    porNODE | porOUTCOME | 
-					    porPLAYER_EFG));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Name_Efg, porTEXT, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porEFG, REQUIRED, BYREF));
+					    porPLAYER_EFG | porEFG));
   gsm->AddFunction(FuncObj);
 
 
@@ -1824,27 +1459,18 @@ void Init_efgfunc(GSM *gsm)
 					    new ListValPortion));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("NewInfoset", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInfoset1, porINFOSET, 3));
+  FuncObj = new FuncDescObj("NewInfoset", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInfoset, porINFOSET, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_EFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("actions", porINTEGER));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("name", porTEXT,
-					    new TextValPortion("")));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewInfoset2, porINFOSET, 3));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("player", porPLAYER_EFG));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("actions", 
-					    PortionSpec(porTEXT,1)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("name", porTEXT,
 					    new TextValPortion("")));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NewOutcome", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutcome, porOUTCOME, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT,
 					    new TextValPortion("")));
   gsm->AddFunction(FuncObj);
@@ -1852,16 +1478,9 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("NewPlayer", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewPlayer, porPLAYER_EFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT,
 					    new TextValPortion("")));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Support", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewSupport_Efg, porEF_SUPPORT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
@@ -1871,74 +1490,10 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Nodes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Nodes, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, 
-					    REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("NonterminalNodes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NonterminalNodes, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, 
-					    REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-
-
   FuncObj = new FuncDescObj("NthChild", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NthChild, porNODE, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("n", 
-					    porINTEGER));
-  gsm->AddFunction(FuncObj);
-  
-  
-  FuncObj = new FuncDescObj("NumActions", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumActions, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NumActions_EFSupport, 
-				       porINTEGER, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("support", porEF_SUPPORT));
-  gsm->AddFunction(FuncObj);
-  
-  
-  FuncObj = new FuncDescObj("NumChildren", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumChildren, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-  
-  FuncObj = new FuncDescObj("NumInfosets", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumInfosets, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", 
-					    porPLAYER_EFG));
-  gsm->AddFunction(FuncObj);
-  
-  
-  FuncObj = new FuncDescObj("NumMembers", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumMembers, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("NumNodes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumNodes, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj); 
-  
-  
-  FuncObj = new FuncDescObj("NumOutcomes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumOutcomes, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,  REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-  
-  
-  FuncObj = new FuncDescObj("NumPlayers", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumPlayers_Efg, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("n", porINTEGER));
   gsm->AddFunction(FuncObj);
   
   
@@ -1951,7 +1506,7 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Outcomes", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Outcomes, 
 				       PortionSpec(porOUTCOME, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
   
   
@@ -1962,63 +1517,36 @@ void Init_efgfunc(GSM *gsm)
   
   
   FuncObj = new FuncDescObj("Payoff", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Float, 
-				       PortionSpec(porFLOAT, 1), 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Float, porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME_FLOAT));
-  
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_EFG));
+
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_Rational, 
-				       PortionSpec(porRATIONAL, 1), 1));
+				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porOUTCOME_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_EFG));
   gsm->AddFunction(FuncObj);
   
-  
-  
-  FuncObj = new FuncDescObj("Player", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Player_Infoset, porPLAYER_EFG, 1));
+  FuncObj = new FuncDescObj("Player", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Player, porPLAYER_EFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("infoset", porINFOSET));
-  
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Player_Node, porPLAYER_EFG, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
-  
   
   FuncObj = new FuncDescObj("Players", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Players_Efg, 
 				       PortionSpec(porPLAYER_EFG, 1), 1));  
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
   
-  
+  FuncObj = new FuncDescObj("PriorAction", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_PriorAction, porACTION, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("PriorSibling", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_PriorSibling, porNODE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("RandomEfg", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomEfg_Float, porEFG_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porEFG_FLOAT, 
-					    REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomEfg_Rational, 
-				       porEFG_RATIONAL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomEfg_SeedFloat, 
-				       porEFG_FLOAT, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porEFG_FLOAT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
-
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomEfg_SeedRational, 
-				       porEFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porEFG_RATIONAL,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
-  gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("Randomize", 4);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomEfg_Float, porEFG_FLOAT, 1));
@@ -2043,23 +1571,17 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
 
-
-
-
   FuncObj = new FuncDescObj("Rational", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Rational_Efg, porEFG_RATIONAL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT));
   gsm->AddFunction(FuncObj);
-
 
   FuncObj = new FuncDescObj("RemoveAction", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveAction, porEF_SUPPORT, 3));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("action", porACTION));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveAction, porEF_SUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
-
 
   FuncObj = new FuncDescObj("Reveal", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Reveal, porINFOSET, 2));
@@ -2068,21 +1590,16 @@ void Init_efgfunc(GSM *gsm)
 					    PortionSpec(porPLAYER_EFG,1)));
   gsm->AddFunction(FuncObj);
 
-
   FuncObj = new FuncDescObj("RootNode", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RootNode, porNODE, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
   
-
   FuncObj = new FuncDescObj("SaveEfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveEfg, porEFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, 
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
-
 
   FuncObj = new FuncDescObj("SetChanceProbs", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetChanceProbs, porINFOSET, 2));
@@ -2092,35 +1609,28 @@ void Init_efgfunc(GSM *gsm)
 							porRATIONAL,1)));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("SetName", 2);
+  FuncObj = new FuncDescObj("SetName", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetName_EfgElements, 
 				       porACTION | porINFOSET | porNODE | 
-				       porOUTCOME | porPLAYER_EFG, 2));
+				       porOUTCOME | porPLAYER_EFG |
+				       porEFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porACTION | porINFOSET | 
 					    porNODE | porOUTCOME | 
-					    porPLAYER_EFG));
+					    porPLAYER_EFG | porEFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetName_Efg, porEFG, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porEFG, REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("name", porTEXT));
-
   gsm->AddFunction(FuncObj);
 
-
-
   FuncObj = new FuncDescObj("SetPayoff", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porOUTCOME, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Float, porOUTCOME, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("payoff", 
-					    PortionSpec(porFLOAT,1)));
-
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_EFG));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porFLOAT));
+ 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetPayoff_Rational, 
-				       porOUTCOME, 2));
+				       porOUTCOME, 3));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("outcome", porOUTCOME_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("payoff", 
-					    PortionSpec(porRATIONAL,1)));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_EFG));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("payoff", porRATIONAL));
   gsm->AddFunction(FuncObj);
 
 
@@ -2131,12 +1641,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("TerminalNodes", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_TerminalNodes,
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj = new FuncDescObj("Support", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Efg, porEF_SUPPORT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
-  
+
 
   FuncObj = new FuncDescObj("UnmarkSubgames", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnmarkSubgames_Efg, 
