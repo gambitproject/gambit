@@ -560,7 +560,7 @@ if (old_max_soln!=solns.Length())
 	if (NSD.GetExtensive())// Now, transfer the NEW solutions to extensive form if requested
 		for (int i=old_max_soln+1;i<=solns.Length();i++) SolutionToExtensive(solns[i]);
 	if (!spread->HaveProbs()) {spread->MakeProbDisp();spread->Redraw();}
-	ChangeSolution(solns.VisLength());
+	ChangeSolution(solns.VisibleLength());
 	spread->EnableInspect(TRUE);
 	if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }

@@ -37,17 +37,19 @@ public:
 };
 
 // Implement sorting and filtering
-class BSolnSorterFilter:public gListSorter<BehavSolution>,
-												public gListFilter<BehavSolution>
-{
+class BSolnSorterFilter : public gListSorter<BehavSolution>,
+                          public gListFilter<BehavSolution>   {
 private:
-	BSolnSortFilterOptions &options;
+  BSolnSortFilterOptions &options;
+
 protected:
-	// Overload the comparison functions
-	bool Passes(const BehavSolution &a) const;
-	CompareResult Compare(const BehavSolution &a,const BehavSolution &b) const;
+  // Overload the comparison functions
+  bool Passes(const BehavSolution &a) const;
+  bool LessThan(const BehavSolution &a, const BehavSolution &b) const;
+
 public:
-	BSolnSorterFilter(gSortList<BehavSolution> &solns,BSolnSortFilterOptions &options_);
+  BSolnSorterFilter(gSortList<BehavSolution> &solns,
+		    BSolnSortFilterOptions &options_);
 };
 
 #define		BSOLN_SHOW_SECT	"Behav-Soln-Show"

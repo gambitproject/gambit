@@ -1,112 +1,160 @@
 //
-// FILE: gslist.imp -- code to implement a sortable gList and classes to
-// Sort/Filter it.
+// FILE: gslist.imp -- Classes to sort/filter lists
 //
 // $Id$
 //
 
 #include "gslist.h"
 #include <assert.h>
-// gSortList member functions
 
-template <class T>
-gSortList<T>::gSortList(void):gList<T>(),vis_length(-1)
+//--------------------------------------------------------------------
+//                   gSortList<T>: Member functions
+//--------------------------------------------------------------------
+
+template <class T> gSortList<T>::gSortList(void) : vis_length(0)
 { }
 
-template <class T>
-gSortList<T>::gSortList(const gList<T> &l):gList<T>(l),vis_length(l.Length())
+template <class T> gSortList<T>::gSortList(const gList<T> &l)
+  : gList<T>(l), vis_length(l.Length())
 { }
 
-template <class T>
-void gSortList<T>::Swap(int a,int b)
-{
-assert(a >= 1 && a <= length);assert(b >= 1 && b <= length);
-if (a==b) return;
-
-gNode *na,*nb;
-int i;
-for (i = 1, na = head; i < a; i++, na = na->next);
-for (i = 1, nb = head; i < b; i++, nb = nb->next);
-
-gNode /* nb1=*nb, */ na1=*na;
-
-if (na->next==nb || nb->next==na) // adjacent
-{
-	if (nb->next==na) {gNode *t=nb;nb=na;na=t;}
-	na->next=nb->next;na->prev=nb;
-	nb->next=na;nb->prev=na1.prev;
-	if (nb->prev) nb->prev->next=nb; else head=nb;
-	if (na->next) na->next->prev=na; else tail=na;
-}
-else
-{
-	na->next=nb->next;na->prev=nb->prev;
-	if (na->next) na->next->prev=na; else tail=na;
-	if (na->prev) na->prev->next=na; else head=na;
-	nb->prev=na1.prev;nb->next=na1.next;
-	if (nb->next) nb->next->prev=nb; else tail=nb;
-	if (nb->prev) nb->prev->next=nb; else head=nb;
-}
-
-CurrIndex = 1;
-CurrNode = head;
-}
-
-template <class T>
-int gSortList<T>::VisLength(void) const
-{if (vis_length!=-1) return vis_length; else return Length();}
-
-template <class T>
-T gSortList<T>::Remove(int a)
-{
-if (a<=VisLength()) vis_length--;
-return gList<T>::Remove(a);
-}
-// gListSorter member functions
-
-template <class T>
-gListSorter<T>::gListSorter(gSortList<T> &list_):list(list_)
+template <class T> gSortList<T>::~gSortList()
 { }
 
-template <class T>
-void gListSorter<T>::Sort(void)
+template <class T> void gSortList<T>::Swap(int a, int b)
+{
+#ifdef USE_EXCEPTIONS
+  if (a < 1 || a > length)   throw BadIndex();
+  if (b < 1 || b > length)   throw BadIndex();
+#else
+  assert(a >= 1 && a <= length);
+  assert(b >= 1 && b <= length);
+#endif   // USE_EXCEPTIONS
+
+  if (a == b)   return;
+
+  gNode *na, *nb;
+  int i;
+  for (i = 1, na = head; i < a; i++, na = na->next);
+  for (i = 1, nb = head; i < b; i++, nb = nb->next);
+  
+  gNode na1 = *na;
+
+  if (na->next==nb || nb->next==na)   {  // adjacent
+    if (nb->next==na)  {
+      gNode *t = nb;
+      nb = na;
+      na = t;
+    }
+    na->next = nb->next;
+    na->prev = nb;
+    nb->next = na;
+    nb->prev = na1.prev;
+    if (nb->prev)
+      nb->prev->next = nb;
+    else
+      head=nb;
+    if (na->next)
+      na->next->prev = na;
+    else
+      tail = na;
+  }
+  else  {
+    na->next = nb->next;
+    na->prev = nb->prev;
+    if (na->next)
+      na->next->prev = na;
+    else 
+      tail = na;
+    if (na->prev) 
+      na->prev->next = na;
+    else
+      head = na;
+    nb->prev = na1.prev;
+    nb->next = na1.next;
+    if (nb->next)
+      nb->next->prev = nb;
+    else 
+      tail = nb;
+    if (nb->prev)
+      nb->prev->next = nb;
+    else
+      head = nb;
+  }
+
+  CurrIndex = 1;
+  CurrNode = head;
+}
+
+template <class T> int gSortList<T>::VisibleLength(void) const
+{
+  return vis_length;
+}
+
+template <class T> T gSortList<T>::Remove(int a)
+{
+  if (a <= vis_length)  vis_length--;
+  
+#ifdef USE_EXCEPTIONS
+  try  {
+    return gList<T>::Remove(a);
+  }
+  catch (...)  {
+    if (a <= vis_length - 1)  vis_length++;
+    throw;
+  }
+#else
+  return gList<T>::Remove(a);
+#endif   // USE_EXCEPTIONS
+}
+
+
+//--------------------------------------------------------------------
+//                  gListSorter<T>: Member functions
+//--------------------------------------------------------------------
+
+template <class T> gListSorter<T>::gListSorter(gSortList<T> &l) : list(l)
+{ }
+
+template <class T> gListSorter<T>::~gListSorter()  
+{ }
+
+template <class T> void gListSorter<T>::Sort(void)
 {
 // this uses a bubble sort algorithm
-int changed;
-do
-{
-	changed=0;
-	for (int i=1;i<=list.VisLength()-1;i++)
-		if (Compare(list[i],list[i+1])==LessThan)
-		{
-			list.Swap(i,i+1);
-			changed=1;
-		}
-} while(changed);
+  bool changed = false;
+  do   {
+    for (int i = 1; i <= list.VisibleLength() - 1; i++)
+      if (LessThan(list[i], list[i+1]))   {
+	list.Swap(i, i+1);
+	changed = true;
+      }
+  } while (changed);
 }
 
 
-// gListFilter member functions
+//--------------------------------------------------------------------
+//                  gListFilter<T>: Member functions
+//--------------------------------------------------------------------
 
-template <class T>
-gListFilter<T>::gListFilter(gSortList<T> &list_):list(list_)
+template <class T> gListFilter<T>::gListFilter(gSortList<T> &l) : list(l)
 { }
 
-template <class T>
-void gListFilter<T>::Filter(void)
+template <class T> gListFilter<T>::~gListFilter()  { }
+
+template <class T> void gListFilter<T>::Filter(void)
 {
-list.vis_length=list.Length();
-int nodes_rejected=0,i=1;
-while (nodes_rejected+i<=list.Length())
-{
-if (!Passes(list[i]))
-{
-	list.Swap(i,list.VisLength());
-	list.vis_length--;
-	nodes_rejected++;
-}
-else
-	i++;
-}
+  list.vis_length = list.Length();
+  int nodes_rejected = 0, i = 1;
+  
+  while (nodes_rejected + i <= list.Length())  {
+    if (!Passes(list[i]))  {
+      list.Swap(i, list.VisibleLength());
+      list.vis_length--;
+      nodes_rejected++;
+    }
+    else
+      i++;
+  }
 }
 

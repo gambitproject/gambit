@@ -82,14 +82,9 @@ int& GSM::GameRefCount(void* game)
 class gFuncListSorter : public gListSorter<FuncDescObj*>
 {
 protected:
-  CompareResult Compare(FuncDescObj* const& a, FuncDescObj* const& b) const
+  bool LessThan(FuncDescObj* const& a, FuncDescObj* const& b) const
   {
-    if((a->FuncName()) < (b->FuncName()))
-      return GreaterThan;
-    else if((a->FuncName()) > (b->FuncName()))
-      return LessThan;
-    else
-      return Equal;
+    return (a->FuncName() > b->FuncName());
   }
 public:
   gFuncListSorter(gSortList<FuncDescObj*>& list)
@@ -100,14 +95,9 @@ public:
 class gTextListSorter : public gListSorter<gText>
 {
 protected:
-  CompareResult Compare(gText const& a, gText const& b) const
+  bool LessThan(gText const& a, gText const& b) const
   {
-    if(a < b)
-      return GreaterThan;
-    else if(a > b)
-      return LessThan;
-    else
-      return Equal;
+    return (a > b);
   }
 public:
   gTextListSorter(gSortList<gText>& list)

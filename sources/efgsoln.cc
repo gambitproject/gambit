@@ -775,10 +775,10 @@ int old_num_sol=num_solutions;  // current state
 const BehavSolution *cur_solnp=0;
 if (cur_soln) cur_solnp=&solns[cur_soln];
 //BSolnSorterFilter SF(solns,sf_options);
-int new_num_sol=solns.VisLength();	// new state
+int new_num_sol=solns.VisibleLength();	// new state
 int i,j;
 int new_soln=0;									// try to find the new pos of cur_soln
-for (i=1;i<=solns.VisLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
+for (i=1;i<=solns.VisibleLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
 if (old_num_sol>new_num_sol)
 	for (i=old_num_sol;i>new_num_sol;i--)
 		for (j=1;j<=num_isets;j++)
@@ -787,7 +787,7 @@ if (old_num_sol<new_num_sol)
 	for (i=old_num_sol+1;i<=new_num_sol;i++)
 		for (j=1;j<=num_isets;j++)
 			AddRow();
-num_solutions=solns.VisLength();
+num_solutions=solns.VisibleLength();
 UpdateValues();
 // make sure we do not try to access non-displayed solutions
 if (cur_soln>num_solutions) cur_soln=0;

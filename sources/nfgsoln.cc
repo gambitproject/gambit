@@ -503,8 +503,8 @@ if (cur_soln) cur_solnp=&solns[cur_soln];
 //MSolnSorterFilter SF(solns,sf_options);
 int i,j;
 int new_soln=0;									// try to find the new pos of cur_soln
-for (i=1;i<=solns.VisLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
-int new_num_sol=solns.VisLength();
+for (i=1;i<=solns.VisibleLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
+int new_num_sol=solns.VisibleLength();
 if (old_num_sol>new_num_sol)
 	for (i=old_num_sol;i>new_num_sol;i--)
 		for (j=1;j<=num_players;j++)
@@ -513,10 +513,10 @@ if (old_num_sol<new_num_sol)
 	for (i=old_num_sol+1;i<=new_num_sol;i++)
 		for (j=1;j<=num_players;j++)
 			AddRow();
-num_solutions=solns.VisLength();
+num_solutions=solns.VisibleLength();
 UpdateValues();
 // make sure we do not try to access non-displayed solutions
-if (cur_soln>solns.VisLength()) cur_soln=0;
+if (cur_soln>solns.VisibleLength()) cur_soln=0;
 UpdateSoln(new_soln,-1);
 SetCurRow(SolnPos(new_soln));SetCurCol(1);
 if (old_num_sol!=new_num_sol) Redraw();

@@ -85,69 +85,29 @@ return true;
 
 // Sorting function
 
-CompareResult MSolnSorterFilter::Compare(const MixedSolution &a,const MixedSolution &b) const
+bool MSolnSorterFilter::LessThan(const MixedSolution &a,
+                                 const MixedSolution &b) const
 {
-switch (options.SortBy())
-{
-case MSORT_BY_ID:
-			if (a.Id()>b.Id()) return GreaterThan;
-      if (a.Id()<b.Id()) return LessThan;
-			return Equal;
-case MSORT_BY_CREATOR:
-			if (NameNfgAlgType(a.Creator())>NameNfgAlgType(b.Creator())) return GreaterThan;
-			if (NameNfgAlgType(a.Creator())<NameNfgAlgType(b.Creator())) return LessThan;
-			return Equal;
-case MSORT_BY_NASH:
-			if (a.IsNash()==b.IsNash())
-				return Equal;
-			else
-				if (a.IsNash()>b.IsNash())
-					return GreaterThan;
-				else
-					return LessThan;
-case MSORT_BY_PERFECT:
-			if (a.IsPerfect()==b.IsPerfect())
-				return Equal;
-			else
-				if (a.IsPerfect()>b.IsPerfect())
-					return GreaterThan;
-				else
-					return LessThan;
-case MSORT_BY_PROPER:
-			if (a.IsProper()==b.IsProper())
-				return Equal;
-			else
-				if (a.IsProper()>b.IsProper())
-					return GreaterThan;
-				else
-					return LessThan;
-case MSORT_BY_GVALUE:
-			if (a.GobitValue()==b.GobitValue())
-				return Equal;
-			else
-				if (a.GobitValue()>b.GobitValue())
-					return GreaterThan;
-				else
-					return LessThan;
-case MSORT_BY_GLAMBDA:
-			if (a.GobitLambda()==b.GobitLambda())
-				return Equal;
-			else
-				if (a.GobitLambda()>b.GobitLambda())
-					return GreaterThan;
-				else
-					return LessThan;
-case MSORT_BY_LVALUE:
-			if (a.LiapValue()==b.LiapValue())
-				return Equal;
-			else
-				if (a.LiapValue()>b.LiapValue())
-					return GreaterThan;
-				else
-					return LessThan;
-default: assert(0 && "Unknown sort criterion");
-}
-return Equal;
+  switch (options.SortBy())  {
+  case MSORT_BY_ID:
+    return (a.Id() < b.Id());
+  case MSORT_BY_CREATOR:
+    return (NameNfgAlgType(a.Creator()) < NameNfgAlgType(b.Creator()));
+  case MSORT_BY_NASH:
+    return (a.IsNash() < b.IsNash());
+  case MSORT_BY_PERFECT:
+    return (a.IsPerfect() < b.IsPerfect());
+  case MSORT_BY_PROPER:
+    return (a.IsProper() < b.IsProper());
+  case MSORT_BY_GVALUE:
+    return (a.GobitValue() < b.GobitValue());
+  case MSORT_BY_GLAMBDA:
+    return (a.GobitLambda() < b.GobitLambda());
+  case MSORT_BY_LVALUE:
+    return (a.LiapValue() < b.LiapValue());
+  default: assert(0 && "Unknown sort criterion");
+  }
+  return false;
 }
 
 #include "gnumber.h"

@@ -216,7 +216,7 @@ else	// solving by creating a NF, solving, and then projecting solutions back
 		case NFG_LP_SOLUTION:       solns+=EfgZSumG(ef,*cur_sup,this).Solve(); break;
 		default:                    assert(0 && "Unknown NFG algorithm");break;
 	}
-ChangeSolution(solns.VisLength());
+ChangeSolution(solns.VisibleLength());
 Enable(TRUE);
 if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }
@@ -296,7 +296,7 @@ assert(Interface());	// we better have someone to get a solution from!
 solns.Append(s);
 if (set)
 {
-	cur_soln=solns.VisLength();
+	cur_soln=solns.VisibleLength();
 	tw->OnPaint();
 }
 }

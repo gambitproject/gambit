@@ -45,7 +45,7 @@ private:
 protected:
 	// Overload the comparison functions
 	bool Passes(const MixedSolution &a) const;
-	CompareResult Compare(const MixedSolution &a,const MixedSolution &b) const;
+	bool LessThan(const MixedSolution &a,const MixedSolution &b) const;
 public:
 	MSolnSorterFilter(gSortList<MixedSolution> &solns,MSolnSortFilterOptions &options_);
 };
