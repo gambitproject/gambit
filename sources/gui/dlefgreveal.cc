@@ -51,11 +51,11 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 			 wxHORIZONTAL);
 
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(wxVERTICAL,
-						   (m_efg.NumPlayers() <= 2) ?
+						   (m_efg->NumPlayers() <= 2) ?
 						   2 : 3);
-  m_players = new wxCheckBox *[m_efg.NumPlayers()];
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    gbtEfgPlayer player = m_efg.GetPlayer(pl);
+  m_players = new wxCheckBox *[m_efg->NumPlayers()];
+  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
+    gbtEfgPlayer player = m_efg->GetPlayer(pl);
     if (player->GetLabel() != "") {
       m_players[pl-1] = new wxCheckBox(this, -1,
 				       wxString::Format(wxT("%s"),

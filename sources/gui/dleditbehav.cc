@@ -71,15 +71,15 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 					  (char *) p_profile.GetLabel()));
 
   for (int pl = 1; ; pl++) {
-    if (p_profile.GetGame().GetPlayer(pl)->NumInfosets() > 0) {
-      m_lastInfoset = p_profile.GetGame().GetPlayer(pl)->GetInfoset(1);
+    if (p_profile.GetGame()->GetPlayer(pl)->NumInfosets() > 0) {
+      m_lastInfoset = p_profile.GetGame()->GetPlayer(pl)->GetInfoset(1);
       break;
     }
   }
   wxTreeItemId firstID;
 
-  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_profile.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_profile.GetGame()->GetPlayer(pl);
     wxTreeItemId id;
     if (player->GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
@@ -237,8 +237,8 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
   if (infoset.IsNull()) {
     for (int pl = 1; ; pl++) {
-      if (m_profile.GetGame().GetPlayer(pl)->NumInfosets() > 0) {
-	m_lastInfoset = m_profile.GetGame().GetPlayer(pl)->GetInfoset(1);
+      if (m_profile.GetGame()->GetPlayer(pl)->NumInfosets() > 0) {
+	m_lastInfoset = m_profile.GetGame()->GetPlayer(pl)->GetInfoset(1);
 	break;
       }
     }

@@ -43,17 +43,18 @@ class gbtEfgActionBase;
 class gbtEfgInfosetBase;
 class gbtEfgNodeBase;
 class gbtEfgPlayerBase;
-struct gbt_efg_game_rep;
+class gbtEfgGameBase;
+class gbtNfgGameBase;
 
 class gbtEfgOutcomeBase : public gbtEfgOutcomeRep {
 public:
   int m_id;
-  gbt_efg_game_rep *m_efg;
+  gbtEfgGameBase *m_efg;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
 
-  gbtEfgOutcomeBase(gbt_efg_game_rep *, int);
+  gbtEfgOutcomeBase(gbtEfgGameBase *, int);
 
   int GetId(void) const { return m_id; }
   gbtText GetLabel(void) const { return m_label; }
@@ -94,15 +95,15 @@ public:
 class gbtEfgPlayerBase : public gbtEfgPlayerRep {
 public:
   int m_id;
-  gbt_efg_game_rep *m_efg;
+  gbtEfgGameBase *m_efg;
   gbtText m_label;
   gbtBlock<gbtEfgInfosetBase *> m_infosets;
   gbtBlock<gbtEfgStrategyBase *> m_strategies;
 
-  gbtEfgPlayerBase(gbt_efg_game_rep *, int);
+  gbtEfgPlayerBase(gbtEfgGameBase *, int);
   ~gbtEfgPlayerBase();
 
-  gbtEfgGame GetGame(void) const { return m_efg; }
+  gbtEfgGame GetGame(void) const;
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   int GetId(void) const { return m_id; }
@@ -192,7 +193,7 @@ public:
 class gbtEfgNodeBase : public gbtEfgNodeRep {
 public:
   int m_id;
-  gbt_efg_game_rep *m_efg;
+  gbtEfgGameBase *m_efg;
   bool m_deleted;
   gbtText m_label;
   int m_refCount;
@@ -204,7 +205,7 @@ public:
   gbtBlock<gbtEfgNodeBase *> m_children;
   mutable gbtEfgNodeBase *m_whichbranch, *m_ptr, *m_gameroot;
 
-  gbtEfgNodeBase(gbt_efg_game_rep *, gbtEfgNodeBase *);
+  gbtEfgNodeBase(gbtEfgGameBase *, gbtEfgNodeBase *);
   virtual ~gbtEfgNodeBase();
 
   gbtText GetLabel(void) const { return m_label; }
@@ -250,9 +251,8 @@ public:
   void MarkSubtree(bool p_mark);
 };
 
-struct gbt_efg_game_rep {
-  int m_refCount;
-
+class gbtEfgGameBase : public gbtEfgGameRep {
+public:
   bool sortisets;
   mutable long m_revision;
   mutable long m_outcome_revision;
@@ -261,10 +261,30 @@ struct gbt_efg_game_rep {
   gbtBlock<gbtEfgOutcomeBase *> outcomes;
   gbtEfgNodeBase *root;
   gbtEfgPlayerBase *chance;
-  gbt_nfg_game_rep *m_reducedNfg;
+  mutable gbtNfgGameBase *m_reducedNfg;
 
-  gbt_efg_game_rep(void);
-  ~gbt_efg_game_rep();
+  gbtEfgGameBase(void);
+  ~gbtEfgGameBase();
+
+  // this is for use with the copy constructor
+  void CopySubtree(gbtEfgGameBase *,
+		   gbtEfgNodeBase *, gbtEfgNodeBase *);
+
+  void CopySubtree(gbtEfgNodeBase *, gbtEfgNodeBase *,
+		   gbtEfgNodeBase *);
+
+  gbtEfgOutcome NewOutcome(int index);
+
+  void WriteEfg(gbtOutput &, gbtEfgNodeBase *) const;
+
+  void Payoff(gbtEfgNodeBase *n, gbtNumber,
+	      const gbtPVector<int> &, gbtVector<gbtNumber> &) const;
+  void Payoff(gbtEfgNodeBase *n, gbtNumber,
+	      const gbtArray<gbtArray<int> > &, gbtArray<gbtNumber> &) const;
+  
+  void InfosetProbs(gbtEfgNodeBase *n, gbtNumber,
+		    const gbtPVector<int> &, gbtPVector<gbtNumber> &) const;
+    
 
   void SortInfosets(void);
   void NumberNodes(gbtEfgNodeBase *, int &);
@@ -291,6 +311,82 @@ struct gbt_efg_game_rep {
   void MarkTree(const gbtEfgNodeBase *, const gbtEfgNodeBase *);
   bool CheckTree(const gbtEfgNodeBase *, const gbtEfgNodeBase *);
   void MarkSubgame(gbtEfgNodeBase *, gbtEfgNodeBase *);
+
+  // Formerly the copy constructor
+  gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const;
+  
+  // TITLE ACCESS AND MANIPULATION
+  void SetLabel(const gbtText &s);
+  gbtText GetLabel(void) const;
+  
+  void SetComment(const gbtText &);
+  gbtText GetComment(void) const;
+
+  // WRITING DATA FILES
+  void WriteEfg(gbtOutput &p_file) const;
+
+  // DATA ACCESS -- GENERAL INFORMATION
+  bool IsConstSum(void) const; 
+  bool IsPerfectRecall(void) const;
+  bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const;
+  long RevisionNumber(void) const;
+  gbtNumber MinPayoff(int pl) const;
+  gbtNumber MaxPayoff(int pl) const;
+ 
+  // DATA ACCESS -- NODES
+  int NumNodes(void) const;
+  gbtEfgNode GetRoot(void) const;
+
+  // DATA ACCESS -- PLAYERS
+  int NumPlayers(void) const;
+  gbtEfgPlayer GetChance(void) const;
+  gbtEfgPlayer NewPlayer(void);
+  gbtEfgPlayer GetPlayer(int index) const;
+
+  // DATA ACCESS -- OUTCOMES
+  int NumOutcomes(void) const;
+  gbtEfgOutcome GetOutcome(int p_id) const;
+  gbtEfgOutcome NewOutcome(void);
+
+  // DATA ACCESS -- SUPPORTS
+  gbtEfgSupport NewSupport(void) const;
+
+  // EDITING OPERATIONS
+  void DeleteEmptyInfosets(void);
+
+  gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
+  gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
+
+  gbtEfgAction InsertAction(gbtEfgInfoset);
+  gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
+
+  void SetChanceProb(gbtEfgInfoset, int, const gbtNumber &);
+
+  void MarkSubgames(void);
+  bool MarkSubgame(gbtEfgNode);
+  void UnmarkSubgame(gbtEfgNode);
+  void UnmarkSubgames(gbtEfgNode);
+
+  int ProfileLength(void) const;
+  int TotalNumInfosets(void) const;
+
+  gbtArray<int> NumInfosets(void) const;  // Does not include chance infosets
+  int NumPlayerInfosets(void) const;
+  gbtPVector<int> NumActions(void) const;
+  int NumPlayerActions(void) const;
+  gbtPVector<int> NumMembers(void) const;
+  
+  // COMPUTING VALUES OF PROFILES
+  void Payoff(const gbtPVector<int> &profile,
+		      gbtVector<gbtNumber> &payoff) const;
+  void Payoff(const gbtArray<gbtArray<int> > &profile,
+		      gbtArray<gbtNumber> &payoff) const;
+
+  void InfosetProbs(const gbtPVector<int> &profile,
+			    gbtPVector<gbtNumber> &prob) const;
+   
+  gbtNfgGame GetReducedNfg(void) const;
+
 };
 
 #endif  // EFGINT_H

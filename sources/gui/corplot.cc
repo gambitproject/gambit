@@ -87,7 +87,7 @@ gbtCorBranchMixed::gbtCorBranchMixed(void)
 gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame().ProfileLength());
+  m_shown = gbtArray<bool>(m_data[1].GetGame()->ProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -117,8 +117,8 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
 {
   int index = 1;
 
-  for (int pl = 1; pl <= m_data[1].GetGame().NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_data[1].GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= m_data[1].GetGame()->NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_data[1].GetGame()->GetPlayer(pl);
 
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_dim) {
@@ -145,7 +145,7 @@ gbtCorBranchBehav::gbtCorBranchBehav(void)
 gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
   : m_data(p_data)
 {
-  m_shown = gbtArray<bool>(m_data[1].GetGame().ProfileLength());
+  m_shown = gbtArray<bool>(m_data[1].GetGame()->ProfileLength());
   for (int i = 1; i <= m_shown.Length(); m_shown[i++] = true);
 }
 
@@ -663,8 +663,8 @@ void gbtNfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
 
     int index = 1;
 
-    for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
-      gbtNfgPlayer player = m_support.GetGame().GetPlayer(pl);
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
+      gbtNfgPlayer player = m_support.GetGame()->GetPlayer(pl);
 
       for (int st = 1; st <= player->NumStrategies(); st++) {
 	GetCorrespondence()->ShowDimension(index++, 

@@ -33,20 +33,20 @@ template<>
 gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 template<>
 double gbtBehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 
 #if GBT_WITH_MP_FLOAT
@@ -54,7 +54,7 @@ template<>
 gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtEfgOutcome &p_outcome,
 					       int pl) const
 {
-  return p_outcome->GetPayoff(m_efg.GetPlayer(pl));
+  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
 }
 #endif // GBT_WITH_MP_FLOAT
 

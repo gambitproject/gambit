@@ -645,13 +645,13 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       p_node->SetOutcome(p_treeData.GetOutcome((*p_nodeData)->m_outcome));
     }
     else {
-      gbtEfgOutcome outcome = p_efg.NewOutcome();
+      gbtEfgOutcome outcome = p_efg->NewOutcome();
       outcome->SetLabel((*p_nodeData)->m_outcomeData->m_name);
       p_treeData.m_outcomes.Append(new DefinedOutcomeData((*p_nodeData)->m_outcome,
 							  outcome));
       p_node->SetOutcome(outcome);
-      for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
-	outcome->SetPayoff(p_efg.GetPlayer(pl),
+      for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
+	outcome->SetPayoff(p_efg->GetPlayer(pl),
 			   (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }
     }
@@ -667,7 +667,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     }
     else {
       gbtEfgInfoset infoset = 
-	p_efg.GetPlayer((*p_nodeData)->m_player)->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
+	p_efg->GetPlayer((*p_nodeData)->m_player)->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
       p_node->InsertMove(infoset);
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -693,13 +693,13 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
     }
     else {
       gbtEfgInfoset infoset =
-	p_efg.GetChance()->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
+	p_efg->GetChance()->NewInfoset((*p_nodeData)->m_infosetData->m_actions.Length());
       p_node->InsertMove(infoset);
       infoset->SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	infoset->GetAction(act)->SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
-	p_efg.SetChanceProb(infoset, act, 
-			    (*p_nodeData)->m_infosetData->m_probs[act]);
+	p_efg->SetChanceProb(infoset, act, 
+			     (*p_nodeData)->m_infosetData->m_probs[act]);
       }
     }
 
@@ -719,14 +719,14 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
 
 static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 {
-  p_efg.SetLabel(p_treeData.m_title);
-  p_efg.SetComment(p_treeData.m_comment);
+  p_efg->SetLabel(p_treeData.m_title);
+  p_efg->SetComment(p_treeData.m_comment);
   for (PlayerData *player = p_treeData.m_firstPlayer; player;
        player = player->m_next) {
-    p_efg.NewPlayer()->SetLabel(player->m_name);
+    p_efg->NewPlayer()->SetLabel(player->m_name);
   }
   NodeData *node = p_treeData.m_firstNode;
-  BuildSubtree(p_efg, p_efg.GetRoot(), p_treeData, &node);
+  BuildSubtree(p_efg, p_efg->GetRoot(), p_treeData, &node);
 }
 
 

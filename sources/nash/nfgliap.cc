@@ -65,7 +65,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
   double x, x1, psum;
   
   x = 0.0;
-  for (i = 1; i <= m_nfg.NumPlayers(); i++)  {
+  for (i = 1; i <= m_nfg->NumPlayers(); i++)  {
     psum = 0.0;
     for (j = 1; j <= p.Support().NumStrats(i); j++)  {
       psum += p(i,j);
@@ -129,7 +129,7 @@ bool NFLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) cons
   ((gbtVector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
-  for (i1 = 1, ii = 1; i1 <= m_nfg.NumPlayers(); i1++) {
+  for (i1 = 1, ii = 1; i1 <= m_nfg->NumPlayers(); i1++) {
     for (j1 = 1; j1 <= _p.Support().NumStrats(i1); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
@@ -155,7 +155,7 @@ double NFLiapFunc::Value(const gbtVector<double> &v) const
   double x, result = 0.0, avg, sum;
   payoff = 0.0;
   
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
     tmp.CopyRow(i, payoff);
     avg = sum = 0.0;
 
@@ -191,7 +191,7 @@ static void PickRandomProfile(gbtMixedProfile<double> &p)
 {
   double sum, tmp;
 
-  for (int pl = 1; pl <= p.GetGame().NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= p.GetGame()->NumPlayers(); pl++)  {
     sum = 0.0;
     int st;
     

@@ -41,12 +41,12 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
     m_showOutcomes(false), m_showProfiles(false),
     m_showEfgSupports(false), m_showEfgNavigate(false),
     m_showNfg(false), m_showNfgSupports(false),
-    m_efg(new gbtEfgGame(p_efg)), 
+    m_efg(p_efg), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_efgSupports(this),
     m_nfg(0),
     m_rowPlayer(1), m_colPlayer(2),
-    m_contingency(p_efg.NumPlayers()),
+    m_contingency(p_efg->NumPlayers()),
     m_nfgSupports(this),
     m_curProfile(0)
 {
@@ -66,9 +66,9 @@ gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
     m_efg(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_efgSupports(this),
-    m_nfg(new gbtNfgGame(p_nfg)),
+    m_nfg(p_nfg),
     m_rowPlayer(1), m_colPlayer(2),
-    m_contingency(p_nfg.NumPlayers()),
+    m_contingency(p_nfg->NumPlayers()),
     m_nfgSupports(this),
     m_curProfile(0)
 {
@@ -76,14 +76,7 @@ gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
 }
 
 gbtGameDocument::~gbtGameDocument()
-{
-  if (m_efg) {
-    delete m_efg;
-  }
-  if (m_nfg) {
-    delete m_nfg;
-  }
-}
+{ }
 
 void gbtGameDocument::SetCursor(gbtEfgNode p_node)
 {
@@ -340,11 +333,11 @@ gbtNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) co
 
 gbtNfgGame gbtGameDocument::GetNfg(void) const
 {
-  if (m_efg) {
+  if (!m_efg.IsNull()) {
     return m_efg->GetReducedNfg();
   }
   else {
-    return *m_nfg;
+    return m_nfg;
   }
 }
 
@@ -378,7 +371,7 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
     m_mixedProfiles.Append(p_profile);
   }
 
-  if (m_efg) {
+  if (!m_efg.IsNull()) {
     m_behavProfiles.Append(gbtBehavProfile<gbtNumber>(*p_profile.Profile()));
   }
 
@@ -500,8 +493,8 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
     m_curProfile = 0;
 
     // Make sure the contingency points to a non-bogus profile
-    m_contingency = gbtArray<int>(GetNfg().NumPlayers());
-    for (int pl = 1; pl <= GetNfg().NumPlayers(); m_contingency[pl++] = 1);
+    m_contingency = gbtArray<int>(GetNfg()->NumPlayers());
+    for (int pl = 1; pl <= GetNfg()->NumPlayers(); m_contingency[pl++] = 1);
 
     m_modified = true;
   }

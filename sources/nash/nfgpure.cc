@@ -39,7 +39,7 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
   gbtNfgContIterator citer(p_support);
 
   int ncont = 1;
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
     ncont *= p_support.NumStrats(pl);
   }
 
@@ -52,11 +52,11 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
       bool flag = true;
       gbtNfgIterator niter(citer);
     
-      for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
-	gbtNumber current = citer.GetPayoff(nfg.GetPlayer(pl));
+      for (int pl = 1; flag && pl <= nfg->NumPlayers(); pl++)  {
+	gbtNumber current = citer.GetPayoff(nfg->GetPlayer(pl));
 	for (int i = 1; i <= p_support.NumStrats(pl); i++)  {
 	  niter.Next(pl);
-	  if (niter.GetPayoff(nfg.GetPlayer(pl)) > current)  {
+	  if (niter.GetPayoff(nfg->GetPlayer(pl)) > current)  {
 	    flag = false;
 	    break;
 	  }
@@ -67,7 +67,7 @@ gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 	gbtMixedProfile<gbtNumber> temp(p_support.GetGame());
 	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
 	MixedSolution soln(temp, "EnumPure[NFG]");
-	for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+	for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
 	  soln.SetStrategyProb(citer.GetProfile().GetStrategy(pl), 1);
 	}
 	solutions.Append(soln);

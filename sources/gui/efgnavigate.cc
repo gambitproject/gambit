@@ -202,11 +202,11 @@ void gbtEfgNavigateFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Node View: [%s] %s"), 
 				m_doc->GetFilename().c_str(), 
-				(char *) m_doc->GetNfg().GetLabel()));
+				(char *) m_doc->GetNfg()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Node View: %s"),
-				(char *) m_doc->GetNfg().GetLabel()));
+				(char *) m_doc->GetNfg()->GetLabel()));
     }
   }
   Show(m_doc->ShowEfgNavigate());

@@ -42,150 +42,159 @@ template <class T> class gbtPureBehavProfile;
 #include "player.h"
 #include "node.h"
 
-struct gbt_efg_game_rep;
+class gbtEfgGameBase;
 class gbtEfgNodeBase;
 
 //
 // Exception classes for the various bad stuff that can happen
 //
-class gbtEfgbtException : public gbtException {
+class gbtEfgException : public gbtException {
 public:
-  virtual ~gbtEfgbtException() { }
+  virtual ~gbtEfgException() { }
   gbtText Description(void) const    { return "Error in gbtEfgGame"; }
 };
 
-class gbtEfgNullObject : public gbtEfgbtException {
+class gbtEfgNullObject : public gbtEfgException {
 public:
   virtual ~gbtEfgNullObject() { }
 };
 
-class gbtEfgGameMismatch : public gbtEfgbtException {
+class gbtEfgGameMismatch : public gbtEfgException {
 public:
   virtual ~gbtEfgGameMismatch() { }
 };
 
-class gbtEfgNonterminalNode : public gbtEfgbtException {
+class gbtEfgNonterminalNode : public gbtEfgException {
 public:
   virtual ~gbtEfgNonterminalNode() { }
 };
 
-class gbtEfgGame : public gbtGame {
-private:
-  friend class EfgFileReader;
-  friend class EfgFile;
-  friend class gbtNfgGame;
-  friend class gbtBehavProfile<double>;
-  friend class gbtBehavProfile<gbtRational>;
-  friend class gbtBehavProfile<gbtNumber>;
-  friend void SetEfg(gbtNfgGame, gbtEfgGame);
-
-protected:
-  struct gbt_efg_game_rep *rep;
-  
-  // this is for use with the copy constructor
-  void CopySubtree(gbt_efg_game_rep *,
-		   gbtEfgNodeBase *, gbtEfgNodeBase *);
-
-  void CopySubtree(gbtEfgNodeBase *, gbtEfgNodeBase *,
-		   gbtEfgNodeBase *);
-
-  gbtEfgOutcome NewOutcome(int index);
-
-  void WriteEfg(gbtOutput &, gbtEfgNodeBase *) const;
-
-  void Payoff(gbtEfgNodeBase *n, gbtNumber,
-	      const gbtPVector<int> &, gbtVector<gbtNumber> &) const;
-  void Payoff(gbtEfgNodeBase *n, gbtNumber,
-	      const gbtArray<gbtArray<int> > &, gbtArray<gbtNumber> &) const;
-  
-  void InfosetProbs(gbtEfgNodeBase *n, gbtNumber,
-		    const gbtPVector<int> &, gbtPVector<gbtNumber> &) const;
-    
-
+class gbtEfgGameRep : public gbtGameObject {
+friend class EfgFileReader;
+friend class EfgFile;
+friend class gbtNfgGame;
+friend class gbtBehavProfile<double>;
+friend class gbtBehavProfile<gbtRational>;
+friend class gbtBehavProfile<gbtNumber>;
+friend class gbtEfgGame;
+friend void SetEfg(gbtNfgGame, gbtEfgGame);
 public:
-  gbtEfgGame(void);
-  gbtEfgGame(const gbtEfgGame &);
-  gbtEfgGame(gbt_efg_game_rep *);
-  ~gbtEfgGame();
-
-  gbtEfgGame &operator=(const gbtEfgGame &);
-
-  bool operator==(const gbtEfgGame &) const;
-  bool operator!=(const gbtEfgGame &) const;
-
   // Formerly the copy constructor
-  gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const;
+  virtual gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const = 0;
   
   // TITLE ACCESS AND MANIPULATION
-  void SetLabel(const gbtText &s);
-  gbtText GetLabel(void) const;
+  virtual void SetLabel(const gbtText &s) = 0;
+  virtual gbtText GetLabel(void) const = 0;
   
-  void SetComment(const gbtText &);
-  gbtText GetComment(void) const;
+  virtual void SetComment(const gbtText &) = 0;
+  virtual gbtText GetComment(void) const = 0;
 
   // WRITING DATA FILES
-  void WriteEfg(gbtOutput &p_file) const;
+  virtual void WriteEfg(gbtOutput &p_file) const = 0;
 
   // DATA ACCESS -- GENERAL INFORMATION
-  bool IsConstSum(void) const; 
-  bool IsPerfectRecall(void) const;
-  bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const;
-  long RevisionNumber(void) const;
-  gbtNumber MinPayoff(int pl = 0) const;
-  gbtNumber MaxPayoff(int pl = 0) const;
+  virtual bool IsConstSum(void) const = 0; 
+  virtual bool IsPerfectRecall(void) const = 0;
+  virtual bool IsPerfectRecall(gbtEfgInfoset &, gbtEfgInfoset &) const = 0;
+  virtual long RevisionNumber(void) const = 0;
+  virtual gbtNumber MinPayoff(int pl = 0) const = 0;
+  virtual gbtNumber MaxPayoff(int pl = 0) const = 0;
  
   // DATA ACCESS -- NODES
-  int NumNodes(void) const;
-  gbtEfgNode GetRoot(void) const;
+  virtual int NumNodes(void) const = 0;
+  virtual gbtEfgNode GetRoot(void) const = 0;
 
   // DATA ACCESS -- PLAYERS
-  int NumPlayers(void) const;
-  gbtEfgPlayer GetChance(void) const;
-  gbtEfgPlayer NewPlayer(void);
-  gbtEfgPlayer GetPlayer(int index) const;
+  virtual int NumPlayers(void) const = 0;
+  virtual gbtEfgPlayer GetChance(void) const = 0;
+  virtual gbtEfgPlayer NewPlayer(void) = 0;
+  virtual gbtEfgPlayer GetPlayer(int index) const = 0;
 
   // DATA ACCESS -- OUTCOMES
-  int NumOutcomes(void) const;
-  gbtEfgOutcome GetOutcome(int p_id) const;
-  gbtEfgOutcome NewOutcome(void);
+  virtual int NumOutcomes(void) const = 0;
+  virtual gbtEfgOutcome GetOutcome(int p_id) const = 0;
+  virtual gbtEfgOutcome NewOutcome(void) = 0;
 
   // DATA ACCESS -- SUPPORTS
-  gbtEfgSupport NewSupport(void) const;
+  virtual gbtEfgSupport NewSupport(void) const = 0;
 
   // EDITING OPERATIONS
-  void DeleteEmptyInfosets(void);
+  virtual void DeleteEmptyInfosets(void) = 0;
 
-  gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
-  gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest);
+  virtual gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest) = 0;
+  virtual gbtEfgNode MoveTree(gbtEfgNode src, gbtEfgNode dest) = 0;
 
-  gbtEfgAction InsertAction(gbtEfgInfoset);
-  gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
+  virtual gbtEfgAction InsertAction(gbtEfgInfoset) = 0;
+  virtual gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at) = 0;
 
-  void SetChanceProb(gbtEfgInfoset, int, const gbtNumber &);
+  virtual void SetChanceProb(gbtEfgInfoset, int, const gbtNumber &) = 0;
 
-  void MarkSubgames(void);
-  bool MarkSubgame(gbtEfgNode);
-  void UnmarkSubgame(gbtEfgNode);
-  void UnmarkSubgames(gbtEfgNode);
+  virtual void MarkSubgames(void) = 0;
+  virtual bool MarkSubgame(gbtEfgNode) = 0;
+  virtual void UnmarkSubgame(gbtEfgNode) = 0;
+  virtual void UnmarkSubgames(gbtEfgNode) = 0;
 
-  int ProfileLength(void) const;
-  int TotalNumInfosets(void) const;
+  virtual int ProfileLength(void) const = 0;
+  virtual int TotalNumInfosets(void) const = 0;
 
-  gbtArray<int>   NumInfosets(void) const;  // Does not include chance infosets
-  int           NumPlayerInfosets(void) const;
-  gbtPVector<int> NumActions(void) const;
-  int           NumPlayerActions(void) const;
-  gbtPVector<int> NumMembers(void) const;
+  virtual gbtArray<int> NumInfosets(void) const = 0;  // Does not include chance infosets
+  virtual int NumPlayerInfosets(void) const = 0;
+  virtual gbtPVector<int> NumActions(void) const = 0;
+  virtual int NumPlayerActions(void) const = 0;
+  virtual gbtPVector<int> NumMembers(void) const = 0;
   
   // COMPUTING VALUES OF PROFILES
-  void Payoff(const gbtPVector<int> &profile, gbtVector<gbtNumber> &payoff) const;
-  void Payoff(const gbtArray<gbtArray<int> > &profile,
-	      gbtArray<gbtNumber> &payoff) const;
+  virtual void Payoff(const gbtPVector<int> &profile,
+		      gbtVector<gbtNumber> &payoff) const = 0;
+  virtual void Payoff(const gbtArray<gbtArray<int> > &profile,
+		      gbtArray<gbtNumber> &payoff) const = 0;
 
-  void InfosetProbs(const gbtPVector<int> &profile, gbtPVector<gbtNumber> &prob) const;
-    
-  gbtNfgGame GetReducedNfg(void) const;
+  virtual void InfosetProbs(const gbtPVector<int> &profile,
+			    gbtPVector<gbtNumber> &prob) const = 0;
+   
+  virtual gbtNfgGame GetReducedNfg(void) const = 0;
 };
+
+
+class gbtEfgNullGame { };
+
+class gbtEfgGame {
+private:
+  gbtEfgGameRep *m_rep;
+
+public:
+  gbtEfgGame(void) : m_rep(0) { }
+  gbtEfgGame(gbtEfgGameRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgGame(const gbtEfgGame &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+
+  gbtEfgGame &operator=(const gbtEfgGame &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtEfgGame &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtEfgGame &p_player) const
+  { return (m_rep != p_player.m_rep); }
+
+  gbtEfgGameRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  const gbtEfgGameRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullGame(); return m_rep; }
+  
+  gbtEfgGameRep *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
+};
+
 
 gbtEfgGame NewEfg(void);
 

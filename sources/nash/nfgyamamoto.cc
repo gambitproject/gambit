@@ -121,7 +121,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
   int rowno = 0;
   p_matrix = 0.0;
 
-  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     int strats = 0;
     for (int part = 1; part <= p_partition[pl].NumRows(); part++) {
       if (NumMembers(p_partition[pl], part) > 0) {
@@ -129,7 +129,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	rowno++;
 
 	int colno = 0;
-	for (int pl2 = 1; pl2 <= p_profile.GetGame().NumPlayers(); pl2++) {
+	for (int pl2 = 1; pl2 <= p_profile.GetGame()->NumPlayers(); pl2++) {
 	  for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
 	    colno++;
 	    if (pl != pl2) {
@@ -172,7 +172,7 @@ static void YamamotoJacobian(const gbtMixedProfile<double> &p_profile,
 	    rowno++;
 
 	    int colno = 0;
-	    for (int pl2 = 1; pl2 <= p_profile.GetGame().NumPlayers(); pl2++) {
+	    for (int pl2 = 1; pl2 <= p_profile.GetGame()->NumPlayers(); pl2++) {
 	      for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
 		colno++;
 		if (pl == pl2) {
@@ -206,7 +206,7 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
     }
   }
 
-  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
       rowno++;
       p_delta(pl, st) = sign * M.Determinant();   
@@ -224,14 +224,14 @@ static void YamamotoComputeStep(const gbtMixedProfile<double> &p_profile,
   p_lambdainc = sign * M.Determinant();
 
   double norm = 0.0;
-  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
       norm += p_delta(pl, st) * p_delta(pl, st);
     }
   }
   norm += p_lambdainc * p_lambdainc; 
   
-  for (int pl = 1; pl <= p_profile.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
       p_delta(pl, st) /= sqrt(norm / p_stepsize);
     }
@@ -298,10 +298,10 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
   double lambda = 1.0;
   double initialsign = -1.0; 
   gbtList<gbtMatrix<int> > partitions;
-  gbtMatrix<double> H(p_support.GetGame().ProfileLength(),
-		    p_support.GetGame().ProfileLength() + 1);
+  gbtMatrix<double> H(p_support.GetGame()->ProfileLength(),
+		    p_support.GetGame()->ProfileLength() + 1);
 
-  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
     partitions.Append(RankStrategies(profile, pl));
   }
 
@@ -325,7 +325,7 @@ gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 
     //    gout << lambda << ' ' << profile << '\n';
     // Check for inequalities
-    for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
       int strats = 0;
       for (int part = 1; part < p_support.NumStrats(pl); part++) {
 	if (NumMembers(partitions[pl], part) > 0 &&

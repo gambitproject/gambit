@@ -118,7 +118,7 @@ public:
   // Force the invalidation of cached data
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
-  bool IsValid(void) const {return (m_revision == GetGame().RevisionNumber());}
+  bool IsValid(void) const {return (m_revision == GetGame()->RevisionNumber());}
 
   // COMPUTATION OF INTERESTING QUANTITIES
   // Obsolescent version

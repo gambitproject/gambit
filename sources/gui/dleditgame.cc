@@ -59,12 +59,12 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   if (m_doc->HasEfg()) {
     m_title = new wxTextCtrl(this, -1, 
 			     wxString::Format(wxT("%s"),
-					      (const char *) m_doc->GetEfg().GetLabel()));
+					      (const char *) m_doc->GetEfg()->GetLabel()));
   }
   else {
     m_title = new wxTextCtrl(this, -1, 
 			     wxString::Format(wxT("%s"),
-					      (const char *) m_doc->GetNfg().GetLabel()));
+					      (const char *) m_doc->GetNfg()->GetLabel()));
   }
 
   titleSizer->Add(m_title, 1, wxALL | wxCENTER | wxEXPAND, 5);
@@ -87,27 +87,27 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   if (m_doc->HasEfg()) {
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Number of players: %d"),
-						     m_doc->GetEfg().NumPlayers())),
+						     m_doc->GetEfg()->NumPlayers())),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Constant-sum game: %s"),
-						     (m_doc->GetEfg().IsConstSum()) ?
+						     (m_doc->GetEfg()->IsConstSum()) ?
 						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Perfect recall: %s"),
-						     (m_doc->GetEfg().IsPerfectRecall()) ?
+						     (m_doc->GetEfg()->IsPerfectRecall()) ?
 						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
   }
   else {
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Number of players: %d"),
-						     m_doc->GetNfg().NumPlayers())),
+						     m_doc->GetNfg()->NumPlayers())),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
 				    wxString::Format(_("Constant-sum game: %s"),
-						     (m_doc->GetNfg().IsConstSum()) ?
+						     (m_doc->GetNfg()->IsConstSum()) ?
 						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
   }
@@ -118,10 +118,10 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 							   wxVERTICAL);
   m_players = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 150));
   if (m_doc->HasEfg()) {
-    m_players->CreateGrid(m_doc->GetEfg().NumPlayers(), 1);
+    m_players->CreateGrid(m_doc->GetEfg()->NumPlayers(), 1);
   }
   else {
-    m_players->CreateGrid(m_doc->GetNfg().NumPlayers(), 1);
+    m_players->CreateGrid(m_doc->GetNfg()->NumPlayers(), 1);
   }
   m_players->DisableDragRowSize();
   m_players->DisableDragColSize();
@@ -133,10 +133,10 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   m_players->SetLabelValue(wxHORIZONTAL, _("Name"), 0);
 
   if (m_doc->HasEfg()) {
-    for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
       m_players->SetCellValue(pl - 1, 0, 
 			      wxString::Format(wxT("%s"),
-					       (char *) m_doc->GetEfg().GetPlayer(pl)->GetLabel()));
+					       (char *) m_doc->GetEfg()->GetPlayer(pl)->GetLabel()));
       if ((pl - 1) % 2 == 0) {
 	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
       }
@@ -146,10 +146,10 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
     }
   }
   else {
-    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
       m_players->SetCellValue(pl - 1, 0, 
 			      wxString::Format(wxT("%s"),
-					       (char *) m_doc->GetNfg().GetPlayer(pl)->GetLabel()));
+					       (char *) m_doc->GetNfg()->GetPlayer(pl)->GetLabel()));
       if ((pl - 1) % 2 == 0) {
 	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
       }
@@ -176,14 +176,14 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   if (m_doc->HasEfg()) {
     m_comment = new wxTextCtrl(this, -1, 
 			       wxString::Format(wxT("%s"),
-						(const char *) m_doc->GetEfg().GetComment()),
+						(const char *) m_doc->GetEfg()->GetComment()),
 			       wxDefaultPosition, wxSize(100, 100),
 			       wxTE_MULTILINE);
   }
   else {
     m_comment = new wxTextCtrl(this, -1, 
 			       wxString::Format(wxT("%s"),
-						(const char *) m_doc->GetNfg().GetComment()),
+						(const char *) m_doc->GetNfg()->GetComment()),
 			       wxDefaultPosition, wxSize(100, 100),
 			       wxTE_MULTILINE);
   }
@@ -257,21 +257,21 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
 {
   if (p_doc->HasEfg()) {
     gbtEfgGame efg = p_doc->GetEfg();
-    efg.SetLabel(m_title);
-    efg.SetComment(m_comment);
+    efg->SetLabel(m_title);
+    efg->SetComment(m_comment);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      if (pl > efg.NumPlayers()) {
-	efg.NewPlayer();
+      if (pl > efg->NumPlayers()) {
+	efg->NewPlayer();
       }
-      efg.GetPlayer(pl)->SetLabel(m_players[pl]);
+      efg->GetPlayer(pl)->SetLabel(m_players[pl]);
     }
   }
   else {
     gbtNfgGame nfg = p_doc->GetNfg();
-    nfg.SetLabel(m_title);
-    nfg.SetComment(m_comment);
+    nfg->SetLabel(m_title);
+    nfg->SetComment(m_comment);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      nfg.GetPlayer(pl)->SetLabel(m_players[pl]);
+      nfg->GetPlayer(pl)->SetLabel(m_players[pl]);
     }
   }
 }

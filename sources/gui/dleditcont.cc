@@ -43,8 +43,8 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   SetAutoLayout(true);
 
   gbtNfgContingency profile(p_nfg);
-  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    profile.SetStrategy(p_nfg.GetPlayer(pl)->GetStrategy(p_cont[pl]));
+  for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
+    profile.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(p_cont[pl]));
   }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -53,7 +53,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Contingency")),
 			 wxVERTICAL);
   for (int pl = 1; pl <= p_cont.Length(); pl++) {
-    gbtNfgPlayer player = p_nfg.GetPlayer(pl);
+    gbtNfgPlayer player = p_nfg->GetPlayer(pl);
     wxString text;
     if (player->GetLabel() != "") {
       text += wxString::Format(wxT("%s: "), (const char *) player->GetLabel());
@@ -81,18 +81,18 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   m_outcome = new wxChoice(this, -1);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  for (int outc = 1; outc <= p_nfg.NumOutcomes(); outc++) {
-    gbtNfgOutcome outcome = p_nfg.GetOutcome(outc);
+  for (int outc = 1; outc <= p_nfg->NumOutcomes(); outc++) {
+    gbtNfgOutcome outcome = p_nfg->GetOutcome(outc);
     gbtText item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(outcome->GetPayoff(p_nfg.GetPlayer(1))) + ", " +
-	     ToText(outcome->GetPayoff(p_nfg.GetPlayer(2))));
-    if (p_nfg.NumPlayers() > 2) {
-      item += ", " + ToText(outcome->GetPayoff(p_nfg.GetPlayer(3)));
-      if (p_nfg.NumPlayers() > 3) {
+    item += (" (" + ToText(outcome->GetPayoff(p_nfg->GetPlayer(1))) + ", " +
+	     ToText(outcome->GetPayoff(p_nfg->GetPlayer(2))));
+    if (p_nfg->NumPlayers() > 2) {
+      item += ", " + ToText(outcome->GetPayoff(p_nfg->GetPlayer(3)));
+      if (p_nfg->NumPlayers() > 3) {
 	item += ",...)";
       }
       else {

@@ -84,7 +84,7 @@ void
 Nodes(const gbtEfgGame & befg, gbtList < gbtEfgNode > &list)
 {
   list.Flush();
-  NDoChild(befg, befg.GetRoot(), list);
+  NDoChild(befg, befg->GetRoot(), list);
 }
 
 void
@@ -111,14 +111,14 @@ void
 MarkedSubgameRoots(const gbtEfgGame & efg, gbtList < gbtEfgNode > &list)
 {
   list.Flush();
-  MSRDoChild(efg, efg.GetRoot(), list);
+  MSRDoChild(efg, efg->GetRoot(), list);
 }
 
 void
 LegalSubgameRoots(const gbtEfgGame & efg, gbtList < gbtEfgNode > &list)
 {
   list.Flush();
-  LSRDoChild(efg, efg.GetRoot(), list);
+  LSRDoChild(efg, efg->GetRoot(), list);
 }
 
 void
@@ -171,21 +171,21 @@ ChildSubgames(const gbtEfgGame & efg, const gbtEfgNode &n,
 int
 NumNodes(const gbtEfgGame & befg)
 {
-  return (CountNodes(befg, befg.GetRoot()));
+  return (CountNodes(befg, befg->GetRoot()));
 }
 
 gbtEfgGame
 CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
 {
-  gbtEfgGame newefg = efg.Copy();
+  gbtEfgGame newefg = efg->Copy();
 
-  for (int pl = 1; pl <= newefg.NumPlayers(); pl++) {
-    gbtEfgPlayer player = newefg.GetPlayer(pl);
+  for (int pl = 1; pl <= newefg->NumPlayers(); pl++) {
+    gbtEfgPlayer player = newefg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--) {
         gbtEfgAction oldact =
-          efg.GetPlayer(pl)->GetInfoset(iset)->GetAction(act);
+          efg->GetPlayer(pl)->GetInfoset(iset)->GetAction(act);
         if (!S.Contains(oldact)) {
           infoset->GetAction(act)->DeleteAction();
         }
@@ -202,8 +202,8 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
   // after deletions
   gbtDPVector<int> support(p_support.NumActions());
   support = 0;
-  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_efg.GetPlayer(pl);
+  for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
@@ -214,8 +214,8 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
     }
   }
 
-  for (int pl = 1; pl <= p_efg.NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_efg.GetPlayer(pl);
+  for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset->NumActions(); act >= 1; act--) {

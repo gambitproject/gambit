@@ -38,17 +38,17 @@
 
 
 gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
-  : m_efg(S.GetTree()), efsupp(S), seq(m_efg.NumPlayers()),
+  : m_efg(S.GetTree()), efsupp(S), seq(m_efg->NumPlayers()),
     isetFlag(S.NumInfosets()),
-    isetRow(S.NumInfosets()), infosets(m_efg.NumPlayers())
+    isetRow(S.NumInfosets()), infosets(m_efg->NumPlayers())
 { 
   int i;
-  gbtArray<gbtEfgInfoset> zero(m_efg.NumPlayers());
-  gbtArray<int> one(m_efg.NumPlayers());
+  gbtArray<gbtEfgInfoset> zero(m_efg->NumPlayers());
+  gbtArray<int> one(m_efg->NumPlayers());
 
   gbtEfgSupport support(m_efg);
 
-  for(i=1;i<=m_efg.NumPlayers();i++) {
+  for(i=1;i<=m_efg->NumPlayers();i++) {
     seq[i]=1;
     zero[i]=0;
     one[i]=1;
@@ -57,7 +57,7 @@ gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
   isetFlag = 0;
   isetRow = 0;
 
-  GetSequenceDims(m_efg.GetRoot());
+  GetSequenceDims(m_efg->GetRoot());
 
   isetFlag = 0;
 
@@ -65,13 +65,13 @@ gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
 
   SF = new gbtNDArray<gbtArray<gbtNumber> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new gbtArray<gbtNumber>(m_efg.NumPlayers());
-    for(i=1;i<=m_efg.NumPlayers();i++)
+    (*SF)[index.CurrentIndices()] = new gbtArray<gbtNumber>(m_efg->NumPlayers());
+    for(i=1;i<=m_efg->NumPlayers();i++)
       (*(*SF)[index.CurrentIndices()])[i]=(gbtNumber)0;
   } 
 
-  E = new gbtArray<gbtRectArray<gbtNumber> *> (m_efg.NumPlayers());
-  for(i=1;i<=m_efg.NumPlayers();i++) {
+  E = new gbtArray<gbtRectArray<gbtNumber> *> (m_efg->NumPlayers());
+  for(i=1;i<=m_efg->NumPlayers();i++) {
     (*E)[i] = new gbtRectArray<gbtNumber>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
@@ -79,16 +79,16 @@ gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
     (*(*E)[i])(1,1)=(gbtNumber)1;
   } 
 
-  sequences = new gbtArray<gbtSfgSequenceSet *>(m_efg.NumPlayers());
-  for (i=1;i<=m_efg.NumPlayers();i++) {
-    (*sequences)[i] = new gbtSfgSequenceSet( m_efg.GetPlayer(i) );
+  sequences = new gbtArray<gbtSfgSequenceSet *>(m_efg->NumPlayers());
+  for (i=1;i<=m_efg->NumPlayers();i++) {
+    (*sequences)[i] = new gbtSfgSequenceSet( m_efg->GetPlayer(i) );
   }
 
-  gbtArray<gbtSfgSequence *> parent(m_efg.NumPlayers());
-  for(i=1;i<=m_efg.NumPlayers();i++)
+  gbtArray<gbtSfgSequence *> parent(m_efg->NumPlayers());
+  for(i=1;i<=m_efg->NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
-  MakeSequenceForm(m_efg.GetRoot(),(gbtNumber)1,one,zero,parent);
+  MakeSequenceForm(m_efg->GetRoot(),(gbtNumber)1,one,zero,parent);
 }
 
 gbtSfgGame::~gbtSfgGame()
@@ -101,11 +101,11 @@ gbtSfgGame::~gbtSfgGame()
 
   int i;
 
-  for(i=1;i<=m_efg.NumPlayers();i++)
+  for(i=1;i<=m_efg->NumPlayers();i++)
     delete (*E)[i];
   delete E;
 
-  for(i=1;i<=m_efg.NumPlayers();i++)
+  for(i=1;i<=m_efg->NumPlayers();i++)
     delete (*sequences)[i];
   delete sequences;
 }
@@ -118,7 +118,7 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
 
   if (!n->GetOutcome().IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff(m_efg.GetPlayer(pl));
+      (*(*SF)[seq])[pl] += prob * n->GetOutcome()->GetPayoff(m_efg->GetPlayer(pl));
   }
   if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer()->IsChance()) {
@@ -209,7 +209,7 @@ void gbtSfgGame::Dump(gbtOutput& out) const
   } 
   
   out << "\nConstraint matrices: \n";
-  for(int i=1;i<=m_efg.NumPlayers();i++) 
+  for(int i=1;i<=m_efg->NumPlayers();i++) 
     out << "\nPlayer " << i << ":\n " << (*(*E)[i]);
 }
 
@@ -265,7 +265,7 @@ gbtBehavProfile<gbtNumber> gbtSfgGame::ToBehav(const gbtPVector<double> &x) cons
   gbtNumber value;
 
   int i,j;
-  for(i=1;i<=m_efg.NumPlayers();i++)
+  for(i=1;i<=m_efg->NumPlayers();i++)
     for(j=2;j<=seq[i];j++) {
       sij = ((*sequences)[i]->GetSFSequenceSet())[j];
       int sn = sij->GetNumber();

@@ -127,7 +127,7 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
   rect.x += x;
 
   wxStringTokenizer tok(text, wxT(","));
-  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
     p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
     wxString payoff = tok.GetNextToken();
     p_grid.DrawTextRectangle(p_dc, payoff, rect);
@@ -135,7 +135,7 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
     rect.x += x;
     
     p_dc.SetTextForeground(*wxBLACK);
-    if (pl < m_doc->GetNfg().NumPlayers()) {
+    if (pl < m_doc->GetNfg()->NumPlayers()) {
       p_grid.DrawTextRectangle(p_dc, wxT(","), rect);
       p_dc.GetTextExtent(wxT(")"), &x, &y);
       rect.x += x;
@@ -369,7 +369,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
       wxString ret = wxT("");
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format(wxT("%s"),
-				(char *) ToText(profile.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
+				(char *) ToText(profile.GetPayoff(m_doc->GetNfg()->GetPlayer(pl)),
 						m_doc->GetPreferences().NumDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxT(",");
@@ -516,7 +516,7 @@ wxGridCellAttr *gbtNfgGridTable::GetAttr(int row, int col,
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
-    if (m_doc->GetNfg().NumPlayers() == 2) {
+    if (m_doc->GetNfg()->NumPlayers() == 2) {
       attr->SetRenderer(new gbtSchellingRenderer(m_doc));
     }
     else {

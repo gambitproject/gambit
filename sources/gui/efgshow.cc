@@ -100,7 +100,7 @@ public:
 void gbtCmdDeleteTree::Do(gbtGameDocument *p_doc)  
 {
   m_node->DeleteTree();
-  p_doc->GetEfg().DeleteEmptyInfosets();
+  p_doc->GetEfg()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -128,7 +128,7 @@ public:
 void gbtCmdDeleteMove::Do(gbtGameDocument *p_doc)  
 {
   m_node->DeleteMove();
-  p_doc->GetEfg().DeleteEmptyInfosets();
+  p_doc->GetEfg()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -212,7 +212,7 @@ public:
 void gbtCmdJoinInfoset::Do(gbtGameDocument *p_doc)  
 {
   m_node->JoinInfoset(m_infoset);
-  p_doc->GetEfg().DeleteEmptyInfosets();
+  p_doc->GetEfg()->DeleteEmptyInfosets();
 }
 
 //---------------------------------------------------------------------
@@ -241,10 +241,10 @@ public:
 void gbtCmdMarkSubgame::Do(gbtGameDocument *p_doc)  
 {
   if (m_mark) {
-    p_doc->GetEfg().MarkSubgame(m_node);
+    p_doc->GetEfg()->MarkSubgame(m_node);
   }
   else {
-    p_doc->GetEfg().UnmarkSubgame(m_node);
+    p_doc->GetEfg()->UnmarkSubgame(m_node);
   }
 }
 
@@ -464,11 +464,11 @@ void gbtEfgFrame::OnUpdate(gbtGameView *)
   if (m_doc->GetFilename() != wxT("")) {
     SetTitle(wxString::Format(_("Gambit - [%s] %s"), 
 			      m_doc->GetFilename().c_str(), 
-			      (char *) m_doc->GetEfg().GetLabel()));
+			      (char *) m_doc->GetEfg()->GetLabel()));
   }
   else {
     SetTitle(wxString::Format(_("Gambit - %s"), 
-			      (char *) m_doc->GetEfg().GetLabel()));
+			      (char *) m_doc->GetEfg()->GetLabel()));
   }
 }
 
@@ -694,7 +694,7 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
     gbtFileOutput file(m_doc->GetFilename().mb_str());
     gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), 
 				 m_doc->GetEfgSupportList().GetCurrent());
-    efg.WriteEfg(file);
+    efg->WriteEfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gbtFileOutput::OpenFailed &) {
@@ -707,7 +707,7 @@ void gbtEfgFrame::OnFileSave(wxCommandEvent &p_event)
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gbtEfgbtException &) {
+  catch (gbtEfgException &) {
     wxMessageBox(_("Internal exception in extensive form"), _("Error"),
 		 wxOK, this);
   }
@@ -728,10 +728,10 @@ void gbtEfgFrame::OnFilePrintPreview(wxCommandEvent &)
   wxPrintPreview *preview = 
     new wxPrintPreview(new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
-							(char *) m_doc->GetEfg().GetLabel())),
+							(char *) m_doc->GetEfg()->GetLabel())),
 		       new gbtEfgPrintout(m_treeWindow,
 				       wxString::Format(wxT("%s"),
-							(char *) m_doc->GetEfg().GetLabel())),
+							(char *) m_doc->GetEfg()->GetLabel())),
 		       &data);
 
   if (!preview->Ok()) {
@@ -753,7 +753,7 @@ void gbtEfgFrame::OnFilePrint(wxCommandEvent &)
   wxPrinter printer(&data);
   gbtEfgPrintout printout(m_treeWindow, 
 		       wxString::Format(wxT("%s"),
-					(char *) m_doc->GetEfg().GetLabel()));
+					(char *) m_doc->GetEfg()->GetLabel()));
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
@@ -960,8 +960,8 @@ void gbtEfgFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-	gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
+      for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
+	gbtEfgPlayer player = m_doc->GetEfg()->GetPlayer(pl);
 	m_doc->Submit(new gbtCmdReveal(m_doc->GetCursor()->GetInfoset(),
 				       player));
       }
@@ -1006,7 +1006,7 @@ void gbtEfgFrame::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->GetCursor()->SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {
-      gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(dialog.GetOutcome());
+      gbtEfgOutcome outcome = m_doc->GetEfg()->GetOutcome(dialog.GetOutcome());
       m_doc->Submit(new gbtCmdSetOutcome(m_doc->GetCursor(), outcome));
     }
     else {
@@ -1229,9 +1229,9 @@ void gbtEfgFrame::OnFormatDisplayDecimals(wxCommandEvent &)
 
 void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 {
-  gbtArray<gbtText> playerNames(m_doc->GetEfg().NumPlayers());
+  gbtArray<gbtText> playerNames(m_doc->GetEfg()->NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_doc->GetEfg().GetPlayer(pl)->GetLabel();
+    playerNames[pl] = m_doc->GetEfg()->GetPlayer(pl)->GetLabel();
   }
   dialogElimBehav dialog(this, playerNames);
 

@@ -86,18 +86,18 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
     
-    gbtEfgGame foo = p_support.GetTree().Copy(n);
+    gbtEfgGame foo = p_support.GetTree()->Copy(n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo.GetRoot()->SetOutcome(0);
+    foo->GetRoot()->SetOutcome(0);
 
     gbtList<gbtEfgNode> nodes;
     Nodes(p_support.GetTree(), n, nodes);
     
     gbtEfgSupport subsupport(foo);
     // here, we build the support for the subgame
-    for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
-      gbtEfgPlayer p = foo.GetPlayer(pl);
+    for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
+      gbtEfgPlayer p = foo->GetPlayer(pl);
       int index;
 
       for (index = 1; index <= nodes.Length() &&
@@ -139,7 +139,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       else if (m_nfgAlgorithm) {
 	CompressEfgInPlace(foo, subsupport);
 	subsupport = gbtEfgSupport(foo);
-	gbtNfgGame nfg = foo.GetReducedNfg();
+	gbtNfgGame nfg = foo->GetReducedNfg();
 	gbtNfgSupport support(nfg);
 
 	gbtList<MixedSolution> nfgSolutions;
@@ -171,8 +171,8 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
       int ii = solns.Append(thissolns[soln]);
       solns[ii].SetEpsilon(sol[solno].Epsilon());
       
-      for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
-	gbtEfgPlayer p = foo.GetPlayer(pl);
+      for (int pl = 1; pl <= foo->NumPlayers(); pl++)  {
+	gbtEfgPlayer p = foo->GetPlayer(pl);
 	int index;
 
 	for (index = 1; index <= nodes.Length() &&
@@ -211,15 +211,15 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	solns[j].SetCreator(m_nfgAlgorithm->GetAlgorithm());
       }
 
-      gbtVector<gbtNumber> subval(foo.NumPlayers());
-      for (i = 1; i <= foo.NumPlayers(); i++)  {
+      gbtVector<gbtNumber> subval(foo->NumPlayers());
+      for (i = 1; i <= foo->NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (!n->GetOutcome().IsNull())  {
 	  subval[i] += n->GetOutcome()->GetPayoff(p_support.GetPlayer(i));
         }
       }
 
-      gbtEfgOutcome ov = p_support.GetTree().NewOutcome();
+      gbtEfgOutcome ov = p_support.GetTree()->NewOutcome();
       for (i = 1; i <= p_support.NumPlayers(); i++) {
 	ov->SetPayoff(p_support.GetPlayer(i), subval[i]);
       }
@@ -262,38 +262,38 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
   solution = new gbtBehavProfile<gbtNumber>(p_support);
   ((gbtVector<gbtNumber> &) *solution).operator=(gbtNumber(0));
 
-  gbtEfgGame efg = p_support.GetTree().Copy();
-  infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg.NumPlayers());
+  gbtEfgGame efg = p_support.GetTree()->Copy();
+  infosets = gbtArray<gbtArray<gbtEfgInfoset> *>(efg->NumPlayers());
 
-  for (int i = 1; i <= efg.NumPlayers(); i++) {
-    infosets[i] = new gbtArray<gbtEfgInfoset>(efg.GetPlayer(i)->NumInfosets());
-    for (int j = 1; j <= efg.GetPlayer(i)->NumInfosets(); j++) {
-      (*infosets[i])[j] = efg.GetPlayer(i)->GetInfoset(j);
+  for (int i = 1; i <= efg->NumPlayers(); i++) {
+    infosets[i] = new gbtArray<gbtEfgInfoset>(efg->GetPlayer(i)->NumInfosets());
+    for (int j = 1; j <= efg->GetPlayer(i)->NumInfosets(); j++) {
+      (*infosets[i])[j] = efg->GetPlayer(i)->GetInfoset(j);
     }
   }
 
   gbtEfgSupport support(efg);
 
-  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {
     gbtEfgPlayer player = p_support.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) { 
 	if (!p_support.Contains(infoset->GetAction(act))) {
-	  support.RemoveAction(efg.GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
+	  support.RemoveAction(efg->GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
 	}
       }
     }
   }
 
-  m_isPerfectRecall = efg.IsPerfectRecall();
+  m_isPerfectRecall = efg->IsPerfectRecall();
 
   try {
-    FindSubgames(support, p_status, efg.GetRoot(), solutions, values);
+    FindSubgames(support, p_status, efg->GetRoot(), solutions, values);
   }
   catch (gbtSignalBreak &) { }
 
-  for (int i = 1; i <= efg.NumPlayers(); i++) {
+  for (int i = 1; i <= efg->NumPlayers(); i++) {
     delete infosets[i];
   }
 

@@ -35,8 +35,8 @@
 // a game tree.
 //
 
-gbtEfgNodeBase::gbtEfgNodeBase(gbt_efg_game_rep *p_efg,
-				   gbtEfgNodeBase *p_parent)
+gbtEfgNodeBase::gbtEfgNodeBase(gbtEfgGameBase *p_efg,
+			       gbtEfgNodeBase *p_parent)
   : m_id(0), m_efg(p_efg), m_deleted(false), m_refCount(0),
     m_mark(false), m_infoset(0), m_parent(p_parent), m_outcome(0),
     m_whichbranch(0), m_ptr(0),
@@ -264,7 +264,7 @@ void gbtEfgNodeBase::DeleteMove(void)
   // FIXME: Unmarking all subgames to be conservative.
   // Is this necessary?  (Or, more likely, will be moot once subgame
   // implementation is improved!)
-  gbtEfgGame(m_efg).UnmarkSubgames(gbtEfgNode(this));
+  gbtEfgGame(m_efg)->UnmarkSubgames(gbtEfgNode(this));
   m_efg->DeleteMove(this);
 }
 

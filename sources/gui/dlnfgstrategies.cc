@@ -58,8 +58,8 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Players:")),
 		   0, wxALL | wxCENTER, 5);
   m_playerList = new wxListBox(this, GBT_PLAYER_LIST);
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_nfg.GetPlayer(pl);
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+    gbtNfgPlayer player = m_nfg->GetPlayer(pl);
     m_playerList->Append(wxString::Format(wxT("%s"),
 					  (char *) (ToText(pl) + ": " +
 						    player->GetLabel())));
@@ -72,7 +72,7 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
   playerSizer->Add(m_playerList, 0, wxALL, 5);
   editSizer->Add(playerSizer, 0, wxALL, 5);
 
-  gbtNfgPlayer firstPlayer = m_nfg.GetPlayer(1);
+  gbtNfgPlayer firstPlayer = m_nfg->GetPlayer(1);
   m_editGrid = new wxGrid(this, GBT_EDIT_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_editGrid->CreateGrid(firstPlayer->NumStrategies(), 1);
@@ -118,13 +118,13 @@ void dialogStrategies::OnSelChanged(wxCommandEvent &p_event)
     m_editGrid->HideCellEditControl();
   }
 
-  gbtNfgPlayer oldPlayer = m_nfg.GetPlayer(m_selection);
+  gbtNfgPlayer oldPlayer = m_nfg->GetPlayer(m_selection);
 
   for (int st = 1; st <= oldPlayer->NumStrategies(); st++) {
     m_strategyNames[m_selection][st] = gbtText(m_editGrid->GetCellValue(st - 1, 0).mb_str());
   }
 
-  gbtNfgPlayer player = m_nfg.GetPlayer(p_event.GetSelection() + 1);
+  gbtNfgPlayer player = m_nfg->GetPlayer(p_event.GetSelection() + 1);
 
   if (oldPlayer->NumStrategies() > player->NumStrategies()) {
     m_editGrid->DeleteRows(0,
@@ -161,7 +161,7 @@ void dialogStrategies::OnOK(wxCommandEvent &p_event)
     m_editGrid->HideCellEditControl();
   }
 
-  gbtNfgPlayer player = m_nfg.GetPlayer(m_selection);
+  gbtNfgPlayer player = m_nfg->GetPlayer(m_selection);
 
   for (int st = 1; st <= player->NumStrategies(); st++) {
     m_strategyNames[m_selection][st] = (char *) m_editGrid->GetCellValue(st - 1, 0).mb_str();
@@ -188,8 +188,8 @@ public:
 
 void gbtCmdEditStrategies::Do(gbtGameDocument *p_doc)
 {
-  for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
-    gbtNfgPlayer player = p_doc->GetNfg().GetPlayer(pl);
+  for (int pl = 1; pl <= p_doc->GetNfg()->NumPlayers(); pl++) {
+    gbtNfgPlayer player = p_doc->GetNfg()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       player->GetStrategy(st)->SetLabel(m_strategies[pl][st]);
     }

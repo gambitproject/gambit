@@ -81,10 +81,10 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset->GetGame().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
       m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 					(char *) 
-					p_infoset->GetGame().GetPlayer(pl)->GetLabel()));
+					p_infoset->GetGame()->GetPlayer(pl)->GetLabel()));
     } 
     m_player->SetSelection(p_infoset->GetPlayer()->GetId() - 1);
   }
@@ -354,7 +354,7 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
     
   if (!m_infoset->IsChanceInfoset() && 
       m_infosetPlayer != m_infoset->GetPlayer()->GetId()) {
-    m_infoset->SetPlayer(p_doc->GetEfg().GetPlayer(m_infosetPlayer));
+    m_infoset->SetPlayer(p_doc->GetEfg()->GetPlayer(m_infosetPlayer));
   }
 
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
@@ -370,27 +370,27 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
     if (!action.IsNull()) {
       action->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, action->GetId(),
+	p_doc->GetEfg()->SetChanceProb(m_infoset, action->GetId(),
 				      m_actionProbs[act]);
       }
       insertAt = m_actions[act]->GetId() + 1;
     }
     else if (insertAt > m_infoset->NumActions()) {
-      gbtEfgAction newAction = p_doc->GetEfg().InsertAction(m_infoset);
+      gbtEfgAction newAction = p_doc->GetEfg()->InsertAction(m_infoset);
       insertAt++;
       newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
+	p_doc->GetEfg()->SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
     }
     else {
       gbtEfgAction newAction =
-	p_doc->GetEfg().InsertAction(m_infoset,
+	p_doc->GetEfg()->InsertAction(m_infoset,
 				     m_infoset->GetAction(insertAt++));
       newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset->IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
+	p_doc->GetEfg()->SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
     }

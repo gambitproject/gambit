@@ -72,7 +72,7 @@ void gbtCmdSetCursor::Do(gbtGameDocument *p_doc)
 
 void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
 {
-  p_doc->GetEfg().MoveTree(m_src, m_dest);
+  p_doc->GetEfg()->MoveTree(m_src, m_dest);
 }
 
 //=======================================================================
@@ -81,7 +81,7 @@ void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)
 
 void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
 {
-  p_doc->GetEfg().CopyTree(m_src, m_dest);
+  p_doc->GetEfg()->CopyTree(m_src, m_dest);
 }
 
 //=======================================================================
@@ -305,7 +305,7 @@ void gbtTreeView::OnDraw(wxDC &dc)
 {
   if (!m_doc->GetCursor().IsNull()) {
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
-      m_doc->SetCursor(m_doc->GetEfg().GetRoot());
+      m_doc->SetCursor(m_doc->GetEfg()->GetRoot());
     }
   }
     

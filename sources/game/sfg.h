@@ -57,7 +57,7 @@ public:
   inline gbtArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const { return m_efg.NumPlayers(); }
+  inline int NumPlayers() const { return m_efg->NumPlayers(); }
   
   inline gbtArray<gbtNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
   gbtNumber Payoff(const gbtArray<int> & index,int pl) const;

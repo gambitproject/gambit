@@ -273,10 +273,10 @@ bool gbtEfgNodeSet::IsValid(void) const
 //--------------------------------------------------
 
 gbtEfgBasis::gbtEfgBasis(const gbtEfgGame &p_efg) 
-  : gbtEfgSupport(p_efg), nodes(p_efg.NumPlayers())
+  : gbtEfgSupport(p_efg), nodes(p_efg->NumPlayers())
 {
   for (int i = 1; i <= nodes.Length(); i++) {
-    nodes[i] = new gbtEfgNodeSet(p_efg.GetPlayer(i));
+    nodes[i] = new gbtEfgNodeSet(p_efg->GetPlayer(i));
   }
 }
 
@@ -351,7 +351,7 @@ int gbtEfgBasis::Find(const gbtEfgNode &n) const
 bool gbtEfgBasis::IsValid(void) const
 {
   if(!(*this).gbtEfgSupport::HasActiveActionsAtAllInfosets()) return false;
-  if (nodes.Length() != m_efg.NumPlayers())   return false;
+  if (nodes.Length() != m_efg->NumPlayers())   return false;
   for (int i = 1; i <= nodes.Length(); i++)
     if (!nodes[i]->IsValid())  return false;
 
@@ -360,13 +360,13 @@ bool gbtEfgBasis::IsValid(void) const
 
 gbtPVector<int> gbtEfgBasis::NumNodes(void) const
 {
-  gbtArray<int> foo(m_efg.NumPlayers());
+  gbtArray<int> foo(m_efg->NumPlayers());
   int i;
-  for (i = 1; i <= m_efg.NumPlayers(); i++)
+  for (i = 1; i <= m_efg->NumPlayers(); i++)
     foo[i] = nodes[i]->GetPlayer()->NumInfosets();
 
   gbtPVector<int> bar(foo);
-  for (i = 1; i <= m_efg.NumPlayers(); i++)
+  for (i = 1; i <= m_efg->NumPlayers(); i++)
     for (int j = 1; j <= nodes[i]->GetPlayer()->NumInfosets(); j++)
       bar(i, j) = NumNodes(i,j);
 
@@ -383,11 +383,11 @@ bool gbtEfgBasis::RemoveNode(const gbtEfgNode &n)
 
 bool gbtEfgBasis::IsReachable(gbtEfgNode n) const
 {
-  if (n == m_efg.GetRoot()) {
+  if (n == m_efg->GetRoot()) {
     return true;
   }
 
-  while (n != m_efg.GetRoot()) {
+  while (n != m_efg->GetRoot()) {
     if (!n->GetParent()->GetInfoset()->IsChanceInfoset()) {
       if (!gbtEfgSupport::Contains(n->GetPriorAction())) {
 	return false;
@@ -465,8 +465,8 @@ void gbtEfgBasis::MakeIndices(void) const
   int i,j;
   int ind = 1;
 
-  for(i=1;i<=m_efg.NumPlayers();i++)
-    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg->NumPlayers();i++)
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
       int k = 1;
       for (gbtActionIterator action(*bigbasis, i, j);
 	   !action.End(); action++, k++)  {
@@ -479,8 +479,8 @@ void gbtEfgBasis::MakeIndices(void) const
       }
     }
   num_act_vars=ind-1;
-  for(i=1;i<=m_efg.NumPlayers();i++)
-    for(j=1;j<=(m_efg.NumInfosets())[i];j++) 
+  for(i=1;i<=m_efg->NumPlayers();i++)
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) 
       for(int k=1;k<=bigbasis->NumNodes(i,j);k++) {
 	if(IsReachable(bigbasis->Nodes(i,j)[k]))
 	  (*nodeIndex)(i,j,k)=0;
@@ -497,8 +497,8 @@ void gbtEfgBasis::MakeRowIndices(void) const
 
   num_eqs = 0;
   num_ineqs = 0;
-  for(i=1;i<=m_efg.NumPlayers();i++)
-    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg->NumPlayers();i++)
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
       for(k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  num_ineqs++;
@@ -526,8 +526,8 @@ void gbtEfgBasis::MakeAb(void) const
   int eq = num_ineqs+1;
   int ineq = 1;
 
-  for(i=1;i<=m_efg.NumPlayers();i++)
-    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg->NumPlayers();i++)
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
       for (k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  AddEquation1(ineq++,bigbasis->GetAction(i,j,k));
@@ -577,11 +577,11 @@ void gbtEfgBasis::AddEquation2(int row, gbtEfgNode n) const
 {
   if(Col(n))
     (*A)(row,Col(n)) = 1.0;
-  if(n!=m_efg.GetRoot()) {
+  if(n!=m_efg->GetRoot()) {
     gbtEfgAction act = n->GetPriorAction();
     if(Col(act))
       (*A)(row,Col(act)) = -1.0;
-    while(n->GetParent() != m_efg.GetRoot()) {
+    while(n->GetParent() != m_efg->GetRoot()) {
       n = n->GetParent();
       act = n->GetPriorAction();
       if(Col(act))
@@ -616,8 +616,8 @@ void gbtEfgBasis::GetConsistencySolution(const gbtVector<double> &x) const
   nodes = 0;
   acts = 0;
   int i,j,k;
-  for(i=1;i<=m_efg.NumPlayers();i++)
-    for(j=1;j<=(m_efg.NumInfosets())[i];j++) {
+  for(i=1;i<=m_efg->NumPlayers();i++)
+    for(j=1;j<=(m_efg->NumInfosets())[i];j++) {
       for(k=1;k<=bigbasis->NumActions(i,j);k++)
 	if((*actIndex)(i,j,k))
 	  acts(i,j,k) = (int)x[(*actIndex)(i,j,k)];
@@ -640,7 +640,7 @@ void gbtEfgBasis::Dump(gbtOutput& s) const
   (*this).gbtEfgSupport::Dump(s);
   s << "\nNodes:   ";
   s << "{ ";
-  numplayers = m_efg.NumPlayers();
+  numplayers = m_efg->NumPlayers();
   for (i = 1; i <= numplayers; i++)  {
     gbtEfgPlayer player = nodes[i]->GetPlayer();
     s << '"' << player->GetLabel() << "\" { ";

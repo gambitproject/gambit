@@ -72,9 +72,9 @@ bool gbtApplication::OnInit(void)
   }
   else {
     gbtEfgGame efg = NewEfg();
-    efg.NewPlayer()->SetLabel("Player 1");
-    efg.NewPlayer()->SetLabel("Player 2");
-    efg.SetLabel("Untitled Extensive Form Game");
+    efg->NewPlayer()->SetLabel("Player 1");
+    efg->NewPlayer()->SetLabel("Player 2");
+    efg->SetLabel("Untitled Extensive Form Game");
     (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
   }
 
@@ -97,26 +97,26 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.CreateEfg()) {
       gbtEfgGame efg = NewEfg();
-      efg.SetLabel("Untitled Extensive Form Game");
+      efg->SetLabel("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-	efg.NewPlayer()->SetLabel(gbtText("Player") + ToText(pl));
+	efg->NewPlayer()->SetLabel(gbtText("Player") + ToText(pl));
       }
       (void) new gbtEfgFrame(new gbtGameDocument(efg), 0);
     }
     else {
-      gbtNfgGame nfg(dialog.NumStrategies());
-      nfg.SetLabel("Untitled Normal Form Game");
-      for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-	nfg.GetPlayer(pl)->SetLabel(gbtText("Player") + ToText(pl));
+      gbtNfgGame nfg = NewNfg(dialog.NumStrategies());
+      nfg->SetLabel("Untitled Normal Form Game");
+      for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+	nfg->GetPlayer(pl)->SetLabel(gbtText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
 	gbtNfgSupport support(nfg);
 	gbtNfgContIterator iter(support);
 	iter.First();
 	do {
-	  gbtNfgOutcome outcome = nfg.NewOutcome();
-	  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-	    outcome->SetPayoff(nfg.GetPlayer(pl), 0);
+	  gbtNfgOutcome outcome = nfg->NewOutcome();
+	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
+	    outcome->SetPayoff(nfg->GetPlayer(pl), 0);
 	    outcome->SetLabel(outcome->GetLabel() +
 			      ToText(iter.GetProfile().GetStrategy(pl)->GetId()));
 	  }

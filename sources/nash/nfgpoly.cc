@@ -95,8 +95,8 @@ public:
 
 PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
   : m_nfg(S.GetGame()), support(S), params(p), 
-    Space(support.ProfileLength()-m_nfg.NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.ProfileLength()-m_nfg.NumPlayers()), 
+    Space(support.ProfileLength()-m_nfg->NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.ProfileLength()-m_nfg->NumPlayers()), 
     count(0), nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);
@@ -109,11 +109,11 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
 
   /*
   // equations for equality of strat j to strat j+1
-  for( i=1;i<=m_nfg.NumPlayers();i++) 
+  for( i=1;i<=m_nfg->NumPlayers();i++) 
     for(j=1;j<support.NumStrats(i);j++) 
       equations+=IndifferenceEquation(i,j,j+1);
 
-  for( i=1;i<=m_nfg.NumPlayers();i++)
+  for( i=1;i<=m_nfg->NumPlayers();i++)
     if(support.NumStrats(i)>2) 
       equations+=Prob(i,support.NumStrats(i));
   */
@@ -142,7 +142,7 @@ int PolEnumModule::SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list)
 
   for(k=1;k<=list.Length();k++) {
     kk=0;
-    for(i=1;i<=m_nfg.NumPlayers();i++) {
+    for(i=1;i<=m_nfg->NumPlayers();i++) {
       sum=0;
       for(j=1;j<support.NumStrats(i);j++) {
 	profile(i,j) = (list[k][j+kk]).ToDouble();
@@ -233,12 +233,12 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
     gbtPolyMulti<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
     profile = A.GetProfile();
     int k;
-    for(k=1;k<=m_nfg.NumPlayers();k++) 
+    for(k=1;k<=m_nfg->NumPlayers();k++) 
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(profile.GetStrategy(k)));
     gbtDouble coeff,ap,bp;
-    ap = (double) A.GetPayoff(m_nfg.GetPlayer(i));
-    bp = (double) B.GetPayoff(m_nfg.GetPlayer(i));
+    ap = (double) A.GetPayoff(m_nfg->GetPlayer(i));
+    bp = (double) B.GetPayoff(m_nfg->GetPlayer(i));
     coeff = ap - bp;
     term*=coeff;
     equation+=term;
@@ -252,7 +252,7 @@ gbtPolyMultiList<gbtDouble>   PolEnumModule::IndifferenceEquations()  const
 {
   gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
 
-  for(int pl=1;pl<=m_nfg.NumPlayers();pl++) 
+  for(int pl=1;pl<=m_nfg->NumPlayers();pl++) 
     for(int j=1;j<support.NumStrats(pl);j++) 
       equations+=IndifferenceEquation(pl,j,j+1);
 
@@ -263,7 +263,7 @@ gbtPolyMultiList<gbtDouble> PolEnumModule::LastActionProbPositiveInequalities() 
 {
   gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
 
-  for(int pl=1;pl<=m_nfg.NumPlayers();pl++)
+  for(int pl=1;pl<=m_nfg->NumPlayers();pl++)
     if(support.NumStrats(pl)>2) 
       equations+=Prob(pl,support.NumStrats(pl));
 
@@ -376,13 +376,13 @@ PolEnumModule::SolVarsFromMixedProfile(const gbtMixedProfile<gbtNumber> &sol) co
 {
   int numvars(0);
 
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) 
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) 
     numvars += support.NumStrats(pl) - 1;
 
   gbtVector<gbtDouble> answer(numvars);
   int count(0);
 
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) 
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) 
     for (int j = 1; j < support.NumStrats(pl); j++) {
       count ++;
       answer[count] = (gbtDouble)sol(pl,j);
@@ -436,7 +436,7 @@ PolEnumModule::ReturnPolishedSolution(const gbtVector<gbtDouble> &root) const
 
   int j;
   int kk=0;
-  for(int pl=1;pl<=m_nfg.NumPlayers();pl++) {
+  for(int pl=1;pl<=m_nfg->NumPlayers();pl++) {
     double sum=0;
     for(j=1;j<support.NumStrats(pl);j++) {
       profile(pl,j) = (root[j+kk]).ToDouble();

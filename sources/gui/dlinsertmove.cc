@@ -55,14 +55,14 @@ void gbtCmdInsertMove::Do(gbtGameDocument *p_doc)
   gbtEfgPlayer player;
 
   if (m_playerNumber == 0) {
-    player = p_doc->GetEfg().GetChance();
+    player = p_doc->GetEfg()->GetChance();
   }
-  else if (m_playerNumber <= p_doc->GetEfg().NumPlayers()) {
-    player = p_doc->GetEfg().GetPlayer(m_playerNumber);
+  else if (m_playerNumber <= p_doc->GetEfg()->NumPlayers()) {
+    player = p_doc->GetEfg()->GetPlayer(m_playerNumber);
   }
   else {
-    gbtEfgPlayer player = p_doc->GetEfg().NewPlayer();
-    player->SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
+    gbtEfgPlayer player = p_doc->GetEfg()->NewPlayer();
+    player->SetLabel("Player " + ToText(p_doc->GetEfg()->NumPlayers()));
   }
 
   p_doc->GetCursor()->InsertMove(player->NewInfoset(m_actions));
@@ -93,14 +93,14 @@ void gbtCmdInsertMoveInfoset::Do(gbtGameDocument *p_doc)
   gbtEfgPlayer player;
 
   if (m_playerNumber == 0) {
-    player = p_doc->GetEfg().GetChance();
+    player = p_doc->GetEfg()->GetChance();
   }
-  else if (m_playerNumber <= p_doc->GetEfg().NumPlayers()) {
-    player = p_doc->GetEfg().GetPlayer(m_playerNumber);
+  else if (m_playerNumber <= p_doc->GetEfg()->NumPlayers()) {
+    player = p_doc->GetEfg()->GetPlayer(m_playerNumber);
   }
   else {
-    gbtEfgPlayer player = p_doc->GetEfg().NewPlayer();
-    player->SetLabel("Player " + ToText(p_doc->GetEfg().NumPlayers()));
+    gbtEfgPlayer player = p_doc->GetEfg()->NewPlayer();
+    player->SetLabel("Player " + ToText(p_doc->GetEfg()->NumPlayers()));
   }
 
   p_doc->GetCursor()->InsertMove(player->GetInfoset(m_infosetNumber));
@@ -124,17 +124,17 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent,
 {
   m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);
   m_playerItem->Append(_("Chance"));
-  for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetEfg()->NumPlayers(); pl++) {
     m_playerItem->Append(wxString::Format(wxT("%s"),
 					  (char *)
-					  (ToText(pl) + ": " + m_doc->GetEfg().GetPlayer(pl)->GetLabel())));
+					  (ToText(pl) + ": " + m_doc->GetEfg()->GetPlayer(pl)->GetLabel())));
   }
   m_playerItem->Append(_("New Player"));
   m_playerItem->SetSelection(1);
 
   m_infosetItem = new wxListBox(this, idMOVE_INFOSET_LISTBOX);
   m_infosetItem->Append(_("New"));
-  gbtEfgPlayer player = p_doc->GetEfg().GetPlayer(1);
+  gbtEfgPlayer player = p_doc->GetEfg()->GetPlayer(1);
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
     m_infosetItem->Append(wxString::Format(wxT("%s"),
 					   (char *) (ToText(iset) + ": " +
@@ -190,9 +190,9 @@ void dialogInsertMove::OnPlayer(wxCommandEvent &)
 
   gbtEfgPlayer player;
   if (playerNumber == 0)
-    player = m_doc->GetEfg().GetChance();
-  else if (playerNumber <= m_doc->GetEfg().NumPlayers())
-    player = m_doc->GetEfg().GetPlayer(playerNumber);
+    player = m_doc->GetEfg()->GetChance();
+  else if (playerNumber <= m_doc->GetEfg()->NumPlayers())
+    player = m_doc->GetEfg()->GetPlayer(playerNumber);
 
   m_infosetItem->Clear();
   m_infosetItem->Append(_("New"));
@@ -216,9 +216,9 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
     int playerNumber = m_playerItem->GetSelection();
     gbtEfgInfoset infoset;
     if (playerNumber == 0)
-      infoset = m_doc->GetEfg().GetChance()->GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg()->GetChance()->GetInfoset(infosetNumber);
     else
-      infoset = m_doc->GetEfg().GetPlayer(playerNumber)->GetInfoset(infosetNumber);
+      infoset = m_doc->GetEfg()->GetPlayer(playerNumber)->GetInfoset(infosetNumber);
     m_actions->Enable(false);
     m_actions->SetValue(infoset->NumActions());
   }

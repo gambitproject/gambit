@@ -39,12 +39,12 @@ MixedSolution::MixedSolution(const gbtMixedProfile<double> &p_profile,
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame().RevisionNumber())
+    m_revision(p_profile.GetGame()->RevisionNumber())
 {
   gEpsilon(m_epsilon);
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-    for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    for (int st = 1; st <= GetGame()->NumStrats(pl); st++) {
+      int index = p_profile.Support().GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -59,12 +59,12 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtRational> &p_profile,
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame().RevisionNumber())
+    m_revision(p_profile.GetGame()->RevisionNumber())
 {
   gEpsilon(m_epsilon);
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-    for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    for (int st = 1; st <= GetGame()->NumStrats(pl); st++) {
+      int index = p_profile.Support().GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -79,11 +79,11 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtNumber> &p_profile,
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame().RevisionNumber())
+    m_revision(p_profile.GetGame()->RevisionNumber())
 {
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-    for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    for (int st = 1; st <= GetGame()->NumStrats(pl); st++) {
+      int index = p_profile.Support().GetIndex(GetGame()->GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -110,12 +110,12 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtMPFloat> &p_profile,
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
-    m_revision(p_profile.GetGame().RevisionNumber())
+    m_revision(p_profile.GetGame()->RevisionNumber())
 {
   gEpsilon(m_epsilon);
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-    for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl).GetStrategy(st));
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+    for (int st = 1; st <= GetGame()->NumStrats(pl); st++) {
+      int index = p_profile.Support().GetIndex(GetGame()->GetPlayer(pl).GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = (double) p_profile(pl, index);
       else
@@ -187,7 +187,7 @@ gbtTriState MixedSolution::GetPerfect(void) const
     if (IsMixedDominated(m_profile,false,m_precision,gnull)) {
       return GBT_TRISTATE_FALSE;
     }
-    else if (GetGame().NumPlayers()==2) {
+    else if (GetGame()->NumPlayers()==2) {
       return GBT_TRISTATE_TRUE;
     }
   }
@@ -203,9 +203,9 @@ void MixedSolution::LevelPrecision(void)
 {
   m_precision = GBT_PREC_RATIONAL;
   m_epsilon = 0;
-  for (int pl = 1; m_precision == GBT_PREC_RATIONAL && pl <= GetGame().NumPlayers();
+  for (int pl = 1; m_precision == GBT_PREC_RATIONAL && pl <= GetGame()->NumPlayers();
        pl++) {
-    gbtNfgPlayer player = GetGame().GetPlayer(pl);
+    gbtNfgPlayer player = GetGame()->GetPlayer(pl);
     for (int st = 1; (m_precision == GBT_PREC_RATIONAL && 
 		      st <= player->NumStrategies()); st++) {
       if (m_profile(pl, st).Precision() == GBT_PREC_DOUBLE) {
@@ -217,8 +217,8 @@ void MixedSolution::LevelPrecision(void)
   }
 
   if (m_precision == GBT_PREC_DOUBLE) {
-    for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-      gbtNfgPlayer player = GetGame().GetPlayer(pl);
+    for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
+      gbtNfgPlayer player = GetGame()->GetPlayer(pl);
       for (int st = 1; st <= player->NumStrategies(); st++) 
 	m_profile(pl, st) = (double) m_profile(pl, st);
     }
@@ -296,9 +296,9 @@ MixedSolution &MixedSolution::operator*=(const gbtNumber &p_constant)
 
 bool MixedSolution::IsComplete(void) const
 { 
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
     gbtNumber sum = -1;
-    for (int st = 1; st <= GetGame().NumStrats(pl); st++) 
+    for (int st = 1; st <= GetGame()->NumStrats(pl); st++) 
       sum += m_profile(pl, st);
     if (sum > m_epsilon || sum < -m_epsilon) 
       return false;
@@ -355,7 +355,7 @@ void MixedSolution::Invalidate(void) const
   m_liapValue.Invalidate();
   m_qreLambda = -1;
   m_qreValue = -1;
-  m_revision = GetGame().RevisionNumber();
+  m_revision = GetGame()->RevisionNumber();
 }
 
 //---------------------

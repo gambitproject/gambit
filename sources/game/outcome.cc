@@ -42,7 +42,7 @@
 //            class gbtEfgOutcomeBase: Member functions
 //----------------------------------------------------------------------
 
-gbtEfgOutcomeBase::gbtEfgOutcomeBase(gbt_efg_game_rep *p_efg, int p_id)
+gbtEfgOutcomeBase::gbtEfgOutcomeBase(gbtEfgGameBase *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg),
     m_payoffs(p_efg->players.Length()),
     m_doublePayoffs(p_efg->players.Length())
@@ -67,7 +67,7 @@ gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgOutcomeBase &)
 //                 gbtNfgOutcomeBase: Member functions
 //----------------------------------------------------------------------
 
-gbtNfgOutcomeBase::gbtNfgOutcomeBase(gbt_nfg_game_rep *p_nfg, int p_id)
+gbtNfgOutcomeBase::gbtNfgOutcomeBase(gbtNfgGameBase *p_nfg, int p_id)
   : m_id(p_id), m_nfg(p_nfg),
     m_payoffs(p_nfg->m_players.Length()),
     m_doublePayoffs(p_nfg->m_players.Length())

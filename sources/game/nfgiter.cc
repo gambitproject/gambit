@@ -35,14 +35,14 @@
 
 gbtNfgIterator::gbtNfgIterator(gbtNfgGame p_nfg)
   : support(p_nfg),
-    m_nfg(p_nfg), current_strat(p_nfg.NumPlayers()), profile(p_nfg)
+    m_nfg(p_nfg), current_strat(p_nfg->NumPlayers()), profile(p_nfg)
 {
   First();
 }
 
 gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &s) 
   : support(s), m_nfg(s.GetGame()),
-    current_strat(m_nfg.NumPlayers()), profile(m_nfg)
+    current_strat(m_nfg->NumPlayers()), profile(m_nfg)
 {
   First();
 }
@@ -77,7 +77,7 @@ gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 
 void gbtNfgIterator::First(void)
 {
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++)  {
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
     gbtNfgAction s = support.GetStrategy(i, 1);
     profile.SetStrategy(s);
     current_strat[i] = 1;
@@ -101,7 +101,7 @@ int gbtNfgIterator::Next(int p)
 
 int gbtNfgIterator::Set(int p, int s)
 {
-  if (p <= 0 || p > m_nfg.NumPlayers() ||
+  if (p <= 0 || p > m_nfg->NumPlayers() ||
       s <= 0 || s > support.NumStrats(p))
     return 0;
   
@@ -111,14 +111,14 @@ int gbtNfgIterator::Set(int p, int s)
 
 void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
     t[i] = profile.GetStrategy(i)->GetId();
   }
 }
 
 void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++){
+  for (int i = 1; i <= m_nfg->NumPlayers(); i++){
     profile.SetStrategy(support.GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
@@ -141,8 +141,8 @@ void gbtNfgIterator::SetOutcome(gbtNfgOutcome outcome)
 
 gbtNfgContIterator::gbtNfgContIterator(const gbtNfgSupport &p_support)
   : m_support(p_support), 
-    m_current(m_support.GetGame().NumPlayers()),
-    m_nfg(m_support.GetGame()), m_profile(m_nfg), m_thawed(m_nfg.NumPlayers())
+    m_current(m_support.GetGame()->NumPlayers()),
+    m_nfg(m_support.GetGame()), m_profile(m_nfg), m_thawed(m_nfg->NumPlayers())
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
     m_thawed[i] = i;

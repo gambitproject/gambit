@@ -369,11 +369,11 @@ void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetEfg().GetLabel()));
+				(char *) m_doc->GetEfg()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Supports: %s"),
-				(char *) m_doc->GetEfg().GetLabel()));
+				(char *) m_doc->GetEfg()->GetLabel()));
     }
   }
   Show(m_doc->ShowEfgSupports());

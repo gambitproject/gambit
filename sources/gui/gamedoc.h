@@ -54,12 +54,12 @@ private:
   void RemoveView(gbtGameView *);
 
   // Extensive-form related state information
-  gbtEfgGame *m_efg;
+  gbtEfgGame m_efg;
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
   gbtEfgSupportList m_efgSupports;
 
   // Normal-form related state information
-  gbtNfgGame *m_nfg;
+  gbtNfgGame m_nfg;
   int m_rowPlayer, m_colPlayer;
   gbtArray<int> m_contingency;
   gbtNfgSupportList m_nfgSupports;
@@ -90,8 +90,8 @@ public:
   void UpdateViews(gbtGameView * = 0);
 
   // Extensive-form related state information
-  gbtEfgGame GetEfg(void) const { return *m_efg; }
-  bool HasEfg(void) const { return (m_efg != 0); }
+  gbtEfgGame GetEfg(void) const { return m_efg; }
+  bool HasEfg(void) const { return (!m_efg.IsNull()); }
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }

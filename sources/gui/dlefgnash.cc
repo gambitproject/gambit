@@ -85,7 +85,7 @@ gbtList<BehavSolution> gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
 					      players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
 
     if (p_support.NumPlayers() == 2) {
       if (p_support.IsConstSum()) {
@@ -187,7 +187,7 @@ gbtList<BehavSolution> gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().UnmarkSubgames(p_support.GetRoot());
+    p_support.GetTree()->UnmarkSubgames(p_support.GetRoot());
 
     if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -286,7 +286,7 @@ gbtList<BehavSolution> gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().UnmarkSubgames(p_support.GetRoot());
+    p_support.GetTree()->UnmarkSubgames(p_support.GetRoot());
 
     if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -374,7 +374,7 @@ gbtList<BehavSolution> gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_suppor
 					      players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
 
     if (p_support.NumPlayers() == 2) {
       if (p_support.IsConstSum()) {
@@ -475,7 +475,7 @@ gbtList<BehavSolution> gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_suppor
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
 
     if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -573,7 +573,7 @@ gbtList<BehavSolution> gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_suppor
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
 
     if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
@@ -713,7 +713,7 @@ gbtList<BehavSolution> gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_sup
 					     gbtStatus &p_status)
 {
   try {
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(2);
@@ -781,7 +781,7 @@ gbtList<BehavSolution> gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_sup
 					     gbtStatus &p_status)
 {
   try {
-    p_support.GetTree().MarkSubgames();
+    p_support.GetTree()->MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(0);
@@ -1773,14 +1773,14 @@ int dialogEfgNash::LoadAlgorithms(const gbtEfgGame &p_efg)
   id = m_algorithmTree->AppendItem(custom, wxT("EnumPureSolve"));
   m_algorithms.Define(id, panel = new gbtPanelEfgEnumPure(this));
 
-  if (p_efg.NumPlayers() == 2) {
+  if (p_efg->NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(custom, wxT("EnumMixedSolve"));
     m_algorithms.Define(id, panel = new gbtPanelEfgEnumMixed(this));
 
     id = m_algorithmTree->AppendItem(custom, wxT("LcpSolve"));
     m_algorithms.Define(id, panel = new gbtPanelEfgLcp(this));
 
-    if (p_efg.IsConstSum()) {
+    if (p_efg->IsConstSum()) {
       id = m_algorithmTree->AppendItem(custom, wxT("LpSolve"));
       m_algorithms.Define(id, panel = new gbtPanelEfgLp(this));
     }

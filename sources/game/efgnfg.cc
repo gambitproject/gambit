@@ -37,7 +37,7 @@
 #include "efgint.h"
 #include "nfgint.h"
 
-static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayerBase *p_player)
+static void MakeStrategy(gbtNfgGameBase *p_nfg, gbtEfgPlayerBase *p_player)
 {
   gbtArray<int> behav(p_player->NumInfosets());
   gbtText label = "";
@@ -64,7 +64,7 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayerBase *p_player)
   player->m_infosets[1]->m_actions.Append(action);
 }
 
-static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
+static void MakeReducedStrats(gbtNfgGameBase *p_nfg,
 			      gbtEfgPlayerBase *p,
 			      gbtEfgNodeBase *n,
 			      gbtEfgNodeBase *nn)
@@ -124,24 +124,24 @@ static void MakeReducedStrats(gbt_nfg_game_rep *p_nfg,
   }
 }
 
-gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
+gbtNfgGame gbtEfgGameBase::GetReducedNfg(void) const
 {
-  if (rep->m_reducedNfg) {
-    return rep->m_reducedNfg;
+  if (m_reducedNfg) {
+    return m_reducedNfg;
   }
   
-  gbt_nfg_game_rep *nfg = new gbt_nfg_game_rep(rep);
-  nfg->m_label = rep->m_label;
+  gbtNfgGameBase *nfg = new gbtNfgGameBase(const_cast<gbtEfgGameBase *>(this));
+  nfg->m_label = m_label;
   nfg->m_dimensions = gbtArray<int>(NumPlayers());
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    while (rep->players[pl]->m_strategies.Length() > 0) {
-      delete rep->players[pl]->m_strategies.Remove(1);
+    while (players[pl]->m_strategies.Length() > 0) {
+      delete players[pl]->m_strategies.Remove(1);
     }
     nfg->m_players.Append(new gbtNfgPlayerBase(nfg, pl, 0));
-    nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
-    MakeReducedStrats(nfg, rep->players[pl], rep->root, NULL);
+    nfg->m_players[pl]->m_label = players[pl]->m_label;
+    MakeReducedStrats(nfg, players[pl], root, NULL);
     nfg->m_dimensions[pl] = nfg->m_players[pl]->m_infosets[1]->m_actions.Length();
   }
-  return (rep->m_reducedNfg = nfg);
+  return (m_reducedNfg = nfg);
 }
 

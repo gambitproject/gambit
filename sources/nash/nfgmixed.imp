@@ -45,7 +45,7 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
-  if (nfg.NumPlayers() != 2) {
+  if (nfg->NumPlayers() != 2) {
     return gbtList<MixedSolution>();
   }
   
@@ -63,8 +63,8 @@ gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_supp
 
   for (int i = 1; i <= p_support.NumStrats(1); i++) {
     for (int j = 1; j <= p_support.NumStrats(2); j++) {
-      A1(i, j) = iter.GetPayoff(nfg.GetPlayer(1)) - gbtNumber(min);
-      A2(j, i) = iter.GetPayoff(nfg.GetPlayer(2)) - gbtNumber(min);
+      A1(i, j) = iter.GetPayoff(nfg->GetPlayer(1)) - gbtNumber(min);
+      A2(j, i) = iter.GetPayoff(nfg->GetPlayer(2)) - gbtNumber(min);
       A1(i, j) *= fac;
       A2(j, i) *= fac;
       iter.Next(2);

@@ -59,8 +59,8 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   if (p_node->NumChildren() > 0) {
     m_infoset->Append(_("New information set"));
     int selection = 0;
-    for (int pl = 1; pl <= p_node->GetGame().NumPlayers(); pl++) {
-      for (gbtEfgInfosetIterator infoset(p_node->GetGame().GetPlayer(pl));
+    for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
+      for (gbtEfgInfosetIterator infoset(p_node->GetGame()->GetPlayer(pl));
 	   !infoset.End(); infoset++) {
 	if (!(*infoset)->IsChanceInfoset() &&
 	    (*infoset)->NumActions() == p_node->NumChildren()) {
@@ -107,18 +107,18 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
   gbtEfgGame efg = p_node->GetGame();
-  for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    gbtEfgOutcome outcome = efg.GetOutcome(outc);
+  for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
+    gbtEfgOutcome outcome = efg->GetOutcome(outc);
     gbtText item = ToText(outc) + ": " + outcome->GetLabel();
     if (item == "") {
       item = gbtText("Outcome") + ToText(outc);
     }
 
-    item += (" (" + ToText(outcome->GetPayoff(efg.GetPlayer(1))) + ", " +
-	     ToText(outcome->GetPayoff(efg.GetPlayer(2))));
-    if (efg.NumPlayers() > 2) {
-      item += ", " + ToText(outcome->GetPayoff(efg.GetPlayer(3)));
-      if (efg.NumPlayers() > 3) {
+    item += (" (" + ToText(outcome->GetPayoff(efg->GetPlayer(1))) + ", " +
+	     ToText(outcome->GetPayoff(efg->GetPlayer(2))));
+    if (efg->NumPlayers() > 2) {
+      item += ", " + ToText(outcome->GetPayoff(efg->GetPlayer(3)));
+      if (efg->NumPlayers() > 3) {
 	item += ",...)";
       }
       else {

@@ -49,7 +49,7 @@ gbtEfgStrategyBase::GetAction(const gbtEfgInfoset &p_infoset) const
 //           class gbtEfgPlayerBase: Member functions
 //----------------------------------------------------------------------
 
-gbtEfgPlayerBase::gbtEfgPlayerBase(gbt_efg_game_rep *p_efg, int p_id)
+gbtEfgPlayerBase::gbtEfgPlayerBase(gbtEfgGameBase *p_efg, int p_id)
   : m_id(p_id), m_efg(p_efg)
 { }
 
@@ -65,10 +65,13 @@ gbtEfgPlayerBase::~gbtEfgPlayerBase()
   */
 }
 
+gbtEfgGame gbtEfgPlayerBase::GetGame(void) const
+{ return m_efg; }
+
 gbtEfgInfoset gbtEfgPlayerBase::NewInfoset(int p_actions)
 {
   if (p_actions <= 0) {
-    throw gbtEfgbtException();
+    throw gbtEfgException();
   }
   return m_efg->NewInfoset(this, this->m_infosets.Length() + 1, p_actions);
 }
@@ -91,7 +94,7 @@ gbtEfgPlayerIterator::gbtEfgPlayerIterator(const gbtEfgGame &p_efg)
 { }
 
 gbtEfgPlayer gbtEfgPlayerIterator::operator*(void) const
-{ return m_efg.GetPlayer(m_index); }
+{ return m_efg->GetPlayer(m_index); }
 
 gbtEfgPlayerIterator &gbtEfgPlayerIterator::operator++(int)
 { m_index++; return *this; }
@@ -100,7 +103,7 @@ bool gbtEfgPlayerIterator::Begin(void)
 { m_index = 1; return true; }
 
 bool gbtEfgPlayerIterator::End(void) const
-{ return m_index > m_efg.NumPlayers(); }
+{ return m_index > m_efg->NumPlayers(); }
 
 //----------------------------------------------------------------------
 //           gbtEfgInfosetIterator: Member function definitions
@@ -127,10 +130,11 @@ bool gbtEfgInfosetIterator::End(void) const
 //                 gbtNfgPlayerBase: Declaration
 //----------------------------------------------------------------------
 
-gbtNfgPlayerBase::gbtNfgPlayerBase(gbt_nfg_game_rep *p_nfg,
+gbtNfgPlayerBase::gbtNfgPlayerBase(gbtNfgGameBase *p_nfg,
 				   int p_id, int p_strats)
   : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_refCount(0)
 {
   m_infosets.Append(new gbt_nfg_infoset_rep(this, 1, p_strats));
 }
 
+gbtNfgGame gbtNfgPlayerBase::GetGame(void) const { return m_nfg; }

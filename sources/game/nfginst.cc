@@ -32,14 +32,14 @@ template<>
 gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtNfgOutcome &o, 
 					     int pl) const
 { 
-  return o->GetPayoff(m_nfg.GetPlayer(pl));
+  return o->GetPayoff(m_nfg->GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtNfgOutcome &o, 
 						 int pl) const
 { 
-  return o->GetPayoff(m_nfg.GetPlayer(pl));
+  return o->GetPayoff(m_nfg->GetPlayer(pl));
 }
 
 template<>

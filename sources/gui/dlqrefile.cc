@@ -59,7 +59,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 
   int maxColumn = 0;
   const gbtNfgSupport &support = p_profiles[1].Support();
-  for (int pl = 1; pl <= support.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= support.NumStrats(pl); st++) {
       m_qreList->InsertColumn(++maxColumn,
 			      wxString::Format(wxT("%d:%d"), pl, st));
@@ -181,8 +181,8 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 
       if (m_mixedProfiles.Length() > 0) {
 	file << "Dimensionality:\n";
-	file << m_mixedProfiles[1].GetGame().NumPlayers() << ' ';
-	for (int pl = 1; pl <= m_mixedProfiles[1].GetGame().NumPlayers(); pl++) {
+	file << m_mixedProfiles[1].GetGame()->NumPlayers() << ' ';
+	for (int pl = 1; pl <= m_mixedProfiles[1].GetGame()->NumPlayers(); pl++) {
 	  file << m_mixedProfiles[1].Support().NumStrats(pl) << ' ';
 	}
 	file << "\n";
@@ -217,9 +217,9 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
       else {
 	// Export behavior profiles
 	file << "Dimensionality:\n";
-	file << m_behavProfiles[1].GetGame().NumPlayers() << ' ';
-	for (int pl = 1; pl <= m_behavProfiles[1].GetGame().NumPlayers(); pl++) {
-	  gbtEfgPlayer player = m_behavProfiles[1].GetGame().GetPlayer(pl);
+	file << m_behavProfiles[1].GetGame()->NumPlayers() << ' ';
+	for (int pl = 1; pl <= m_behavProfiles[1].GetGame()->NumPlayers(); pl++) {
+	  gbtEfgPlayer player = m_behavProfiles[1].GetGame()->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	    file << m_behavProfiles[1].Support().NumActions(pl, iset) << ' ';
 	  }

@@ -65,7 +65,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashOneNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -76,8 +76,8 @@ gbtList<MixedSolution> gbtNfgNashOneNash::Solve(const gbtNfgSupport &p_support,
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
-    if (p_support.GetGame().NumPlayers() == 2) {
-      if (p_support.GetGame().IsConstSum()) {
+    if (p_support.GetGame()->NumPlayers() == 2) {
+      if (p_support.GetGame()->IsConstSum()) {
 	gbtNfgNashLp<double> algorithm;
 	return algorithm.Solve(support, p_status);
       }
@@ -153,7 +153,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashTwoNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -175,7 +175,7 @@ gbtList<MixedSolution> gbtNfgNashTwoNash::Solve(const gbtNfgSupport &p_support,
       }
     }
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.GetGame()->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(2);
       return algorithm.Solve(support, p_status);
@@ -247,7 +247,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashAllNash::Solve(const gbtNfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -269,7 +269,7 @@ gbtList<MixedSolution> gbtNfgNashAllNash::Solve(const gbtNfgSupport &p_support,
       }
     }
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.GetGame()->NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> algorithm;
       algorithm.SetStopAfter(0);
       return algorithm.Solve(support, p_status);
@@ -340,7 +340,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashOnePerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -415,7 +415,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashTwoPerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -490,7 +490,7 @@ public:
 gbtList<MixedSolution> gbtNfgNashAllPerfect::Solve(const gbtNfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame()->NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -1377,7 +1377,7 @@ int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
   id = m_algorithmTree->AppendItem(standard, _("All Nash equilibria"));
   m_algorithms.Define(id, panel = new gbtPanelNfgAllNash(this));
 
-  if (p_nfg.NumPlayers() == 2) {
+  if (p_nfg->NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(standard, _("One perfect equilibrium"));
     m_algorithms.Define(id, panel = new gbtPanelNfgOnePerfect(this));
 
@@ -1395,14 +1395,14 @@ int dialogNfgNash::LoadAlgorithms(const gbtNfgGame &p_nfg)
   id = m_algorithmTree->AppendItem(custom, wxT("EnumPureSolve"));
   m_algorithms.Define(id, panel = new gbtPanelNfgEnumPure(this));
 
-  if (p_nfg.NumPlayers() == 2) {
+  if (p_nfg->NumPlayers() == 2) {
     id = m_algorithmTree->AppendItem(custom, wxT("EnumMixedSolve"));
     m_algorithms.Define(id, panel = new gbtPanelNfgEnumMixed(this));
 
     id = m_algorithmTree->AppendItem(custom, wxT("LcpSolve"));
     m_algorithms.Define(id, panel = new gbtPanelNfgLcp(this));
 
-    if (p_nfg.IsConstSum()) {
+    if (p_nfg->IsConstSum()) {
       id = m_algorithmTree->AppendItem(custom, wxT("LpSolve"));
       m_algorithms.Define(id, panel = new gbtPanelNfgLp(this));
     }

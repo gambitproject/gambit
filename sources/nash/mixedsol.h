@@ -106,7 +106,7 @@ public:
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
-  bool IsValid(void) const {return (m_revision == GetGame().RevisionNumber());}
+  bool IsValid(void) const {return (m_revision == GetGame()->RevisionNumber());}
   MixedSolution PolishEq() const;
 
   // FUNCTIONS FOR COMPATIBILITY WITH GUI

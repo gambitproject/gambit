@@ -40,17 +40,18 @@ class gbtNfgPlayerBase;
 struct gbt_nfg_infoset_rep;
 class gbtNfgActionBase;
 class gbtEfgStrategyBase;
-struct gbt_efg_game_rep;
+class gbtEfgGameBase;
+class gbtNfgGameBase;
 
 class gbtNfgOutcomeBase : public gbtNfgOutcomeRep {
 public:
   int m_id;
-  gbt_nfg_game_rep *m_nfg;
+  gbtNfgGameBase *m_nfg;
   gbtText m_label;
   gbtBlock<gbtNumber> m_payoffs;
   gbtBlock<double> m_doublePayoffs;
 
-  gbtNfgOutcomeBase(gbt_nfg_game_rep *, int);
+  gbtNfgOutcomeBase(gbtNfgGameBase *, int);
 
   int GetId(void) const { return m_id; }
   gbtText GetLabel(void) const { return m_label; }
@@ -107,16 +108,16 @@ public:
 class gbtNfgPlayerBase : public gbtNfgPlayerRep {
 public:
   int m_id;
-  gbt_nfg_game_rep *m_nfg;
+  gbtNfgGameBase *m_nfg;
   bool m_deleted;
   gbtText m_label;
   gbtBlock<gbt_nfg_infoset_rep *> m_infosets;
   int m_refCount;
 
-  gbtNfgPlayerBase(gbt_nfg_game_rep *, int, int);
+  gbtNfgPlayerBase(gbtNfgGameBase *, int, int);
   ~gbtNfgPlayerBase() { }
 
-  gbtNfgGame GetGame(void) const { return m_nfg; }
+  gbtNfgGame GetGame(void) const;
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   int GetId(void) const { return m_id; }
@@ -133,11 +134,10 @@ public:
   { return m_infosets[1]->m_actions[p_index]; }
 };
 
-struct gbt_nfg_game_rep {
-  int m_refCount;
-
+class gbtNfgGameBase : public gbtNfgGameRep {
+public:
   long m_revision;
-  long m_outcomeRevision;
+  mutable long m_outcomeRevision;
   gbtText m_label, m_comment;
   gbtArray<int> m_dimensions;
 
@@ -145,11 +145,50 @@ struct gbt_nfg_game_rep {
   gbtBlock<gbtNfgOutcomeBase *> m_outcomes;
 
   gbtArray<gbtNfgOutcomeBase *> m_results;
-  gbt_efg_game_rep *m_efg;
+  gbtEfgGameBase *m_efg;
 
-  gbt_nfg_game_rep(gbt_efg_game_rep *);
-  gbt_nfg_game_rep(const gbtArray<int> &);
-  ~gbt_nfg_game_rep();
+  gbtNfgGameBase(gbtEfgGameBase *);
+  gbtNfgGameBase(const gbtArray<int> &);
+  ~gbtNfgGameBase();
+
+  void IndexStrategies(void);
+  void BreakLink(void);
+
+  // GENERAL DATA ACCESS AND MANIPULATION  
+  void SetLabel(const gbtText &s);
+  gbtText GetLabel(void) const;
+
+  void SetComment(const gbtText &);
+  gbtText GetComment(void) const;
+
+  bool IsConstSum(void) const;
+  long RevisionNumber(void) const;
+
+  void WriteNfg(gbtOutput &p_file) const;
+
+  // PLAYERS AND STRATEGIES
+  int NumPlayers(void) const;
+  gbtNfgPlayer GetPlayer(int i) const;
+
+  int NumStrats(int pl) const;
+  const gbtArray<int> &NumStrats(void) const; 
+  int ProfileLength(void) const;
+
+  // OUTCOMES
+  gbtNfgOutcome NewOutcome(void);
+  gbtNfgOutcome GetOutcome(int p_id) const;
+  int NumOutcomes(void) const;
+
+  void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
+  gbtNfgOutcome GetOutcomeIndex(int index) const;
+
+  void InitPayoffs(void) const;
+
+  // SUPPORTS
+  gbtNfgSupport NewSupport(void) const;
+
+  gbtEfgGame AssociatedEfg(void) const;
+  bool HasAssociatedEfg(void) const;
 
   void DeleteOutcome(gbtNfgOutcomeBase *);
 };

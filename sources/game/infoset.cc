@@ -57,7 +57,7 @@ gbtEfgActionBase::gbtEfgActionBase(gbtEfgInfosetBase *p_infoset,
 
 bool gbtEfgActionBase::Precedes(gbtEfgNode n) const
 {
-  while (n != n->GetGame().GetRoot()) {
+  while (n != n->GetGame()->GetRoot()) {
     if (n->GetPriorAction().Get() == this) {
       return true;
     }
@@ -170,7 +170,7 @@ gbtEfgPlayer gbtEfgInfosetBase::GetPlayer(void) const
 void gbtEfgInfosetBase::SetPlayer(gbtEfgPlayer p_player)
 {
   if (GetPlayer()->IsChance() || p_player->IsChance()) {
-    throw gbtEfgbtException();
+    throw gbtEfgException();
   }
   
   if (GetPlayer() == p_player) {

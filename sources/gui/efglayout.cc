@@ -691,12 +691,12 @@ void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
   }
 
   int miny = 0, maxy = 0, ycoord = c_topMargin;
-  LayoutSubtree(m_doc->GetEfg().GetRoot(), p_support, maxy, miny, ycoord);
+  LayoutSubtree(m_doc->GetEfg()->GetRoot(), p_support, maxy, miny, ycoord);
 
   const gbtPreferences &prefs = m_doc->GetPreferences();
   if (prefs.InfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
     // FIXME! This causes lines to disappear... sometimes.
-    FillInfosetTable(m_doc->GetEfg().GetRoot(), p_support);
+    FillInfosetTable(m_doc->GetEfg()->GetRoot(), p_support);
     UpdateTableInfosets();
   }
 
@@ -732,7 +732,7 @@ void gbtEfgLayout::BuildNodeList(const gbtEfgSupport &p_support)
   }
 
   m_maxLevel = 0;
-  BuildNodeList(m_doc->GetEfg().GetRoot(), p_support, 0, 0);
+  BuildNodeList(m_doc->GetEfg()->GetRoot(), p_support, 0, 0);
 }
 
 

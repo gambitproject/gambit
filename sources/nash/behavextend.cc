@@ -89,8 +89,8 @@ ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
 {
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
-  for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) 
-    for (gbtEfgInfosetIterator infoset(p_solution.GetGame().GetPlayer(pl)); 
+  for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) 
+    for (gbtEfgInfosetIterator infoset(p_solution.GetGame()->GetPlayer(pl)); 
 	 !infoset.End(); infoset++) {
       if (!big_supp.HasActiveActionAt(*infoset)) {
 	int index_base = var_index[pl][(*infoset)->GetId()];
@@ -185,7 +185,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const gbtEfgInfoset &iset,
 			const gbtEfgAction &act)
 {
-  while (tempnode != p_solution.GetGame().GetRoot()) {
+  while (tempnode != p_solution.GetGame()->GetRoot()) {
     gbtEfgAction last_action = tempnode->GetPriorAction();
     gbtEfgInfoset last_infoset = last_action->GetInfoset();
     
@@ -241,10 +241,10 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtEfgNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution.GetGame()->GetRoot(), terminal_nodes);
 
-  for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_solution.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_solution.GetGame()->GetPlayer(pl);
     for (gbtEfgInfosetIterator infoset(player); !infoset.End(); infoset++) {
       if (little_supp.MayReach(*infoset)) {
 	for (int j = 1; j <= (*infoset)->NumActions(); j++)
@@ -388,7 +388,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const int &i,
 				   const int &j)
 {
-  while (tempnode != p_solution.GetGame().GetRoot()) {
+  while (tempnode != p_solution.GetGame()->GetRoot()) {
     gbtEfgAction last_action = tempnode->GetPriorAction();
     gbtEfgInfoset last_infoset = last_action->GetInfoset();
     
@@ -396,7 +396,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
       node_prob *= (gbtDouble) last_action->GetChanceProb();
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
-	if (last_infoset == p_solution.GetGame().GetPlayer(pl)->GetInfoset(i)) {
+	if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
 	  if (j != last_action->GetId()) 
 	    return false;
 	}
@@ -438,7 +438,7 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
   gbtPolyMultiList<gbtDouble> answer(&BehavStratSpace, &Lex);
 
   gbtList<gbtEfgNode> terminal_nodes;
-  TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
+  TerminalNodes(p_solution.GetGame()->GetRoot(), terminal_nodes);
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame());
        !player.End(); player++) { 

@@ -49,7 +49,7 @@ gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
-  if (p_support.GetGame().NumPlayers() != 2) {
+  if (p_support.GetGame()->NumPlayers() != 2) {
     return gbtList<MixedSolution>();
   }
 

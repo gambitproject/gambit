@@ -39,80 +39,99 @@ class gbtEfgSupport;
 class gbtNfgSupport;
 template <class T> class gbtMixedProfile;
 
-struct gbt_nfg_game_rep;
 
-class gbtNfgGame : public gbtGame {
-friend class Lexicon;
+class gbtNfgGameRep : public gbtGameObject {
+friend class gbtNfgGame;
 friend class NfgFileReader;
 friend class gbtNfgContingency;
 friend class gbtMixedProfile<double>;
 friend class gbtMixedProfile<gbtRational>;
 friend class gbtMixedProfile<gbtNumber>;
 #if GBT_WITH_MP_FLOAT
- friend class gbtMixedProfile<gbtMPFloat>;
+friend class gbtMixedProfile<gbtMPFloat>;
 #endif // GBT_WITH_MP_FLOAT
 friend void SetEfg(gbtNfgGame, gbtEfgGame);
-protected:
-  gbt_nfg_game_rep *rep;
-
-  // PRIVATE AUXILIARY MEMBER FUNCTIONS
-  void IndexStrategies(void);
-
-  void BreakLink(void);
 
 public:
-  // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  gbtNfgGame(const gbtArray<int> &dim);
-  gbtNfgGame(const gbtNfgGame &);
-  gbtNfgGame(gbt_nfg_game_rep *);
-  ~gbtNfgGame();
-    
-  gbtNfgGame &operator=(const gbtNfgGame &);
-
-  bool operator==(const gbtNfgGame &) const;
-  bool operator!=(const gbtNfgGame &) const;
-
   // GENERAL DATA ACCESS AND MANIPULATION  
-  void SetLabel(const gbtText &s);
-  gbtText GetLabel(void) const;
+  virtual void SetLabel(const gbtText &s) = 0;
+  virtual gbtText GetLabel(void) const = 0;
 
-  void SetComment(const gbtText &);
-  gbtText GetComment(void) const;
+  virtual void SetComment(const gbtText &) = 0;
+  virtual gbtText GetComment(void) const = 0;
 
-  bool IsConstSum(void) const;
-  long RevisionNumber(void) const;
+  virtual bool IsConstSum(void) const = 0;
+  virtual long RevisionNumber(void) const = 0;
 
-  void WriteNfg(gbtOutput &p_file) const;
+  virtual void WriteNfg(gbtOutput &p_file) const = 0;
 
   // PLAYERS AND STRATEGIES
-  int NumPlayers(void) const;
-  gbtNfgPlayer GetPlayer(int i) const;
+  virtual int NumPlayers(void) const = 0;
+  virtual gbtNfgPlayer GetPlayer(int i) const =0;
 
-  int NumStrats(int pl) const;
-  const gbtArray<int> &NumStrats(void) const; 
-  int ProfileLength(void) const;
+  virtual int NumStrats(int pl) const = 0;
+  virtual const gbtArray<int> &NumStrats(void) const = 0; 
+  virtual int ProfileLength(void) const = 0;
 
   // OUTCOMES
-  gbtNfgOutcome NewOutcome(void);
-  gbtNfgOutcome GetOutcome(int p_id) const;
-  int NumOutcomes(void) const;
+  virtual gbtNfgOutcome NewOutcome(void) = 0;
+  virtual gbtNfgOutcome GetOutcome(int p_id) const = 0;
+  virtual int NumOutcomes(void) const = 0;
 
-  void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
-  gbtNfgOutcome GetOutcomeIndex(int index) const;
+  virtual void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome) = 0;
+  virtual gbtNfgOutcome GetOutcomeIndex(int index) const = 0;
 
-  void InitPayoffs(void) const;
+  virtual void InitPayoffs(void) const = 0;
 
   // SUPPORTS
-  gbtNfgSupport NewSupport(void) const;
+  virtual gbtNfgSupport NewSupport(void) const = 0;
 
-    // defined in nfgutils.cc
-  friend void RandomNfg(gbtNfgGame);
-  friend gbtNumber MinPayoff(const gbtNfgGame &, int pl = 0);
-  friend gbtNumber MaxPayoff(const gbtNfgGame &, int pl = 0);
-
-  gbtEfgGame AssociatedEfg(void) const;
-  bool HasAssociatedEfg(void) const;
+  virtual gbtEfgGame AssociatedEfg(void) const = 0;
+  virtual bool HasAssociatedEfg(void) const = 0;
 };
+
+class gbtNfgNullGame { };
+
+class gbtNfgGame {
+private:
+  gbtNfgGameRep *m_rep;
+
+public:
+  gbtNfgGame(void) : m_rep(0) { }
+  gbtNfgGame(gbtNfgGameRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgGame(const gbtNfgGame &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+
+  gbtNfgGame &operator=(const gbtNfgGame &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtNfgGame &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtNfgGame &p_player) const
+  { return (m_rep != p_player.m_rep); }
+
+  gbtNfgGameRep *operator->(void) 
+  { if (!m_rep) throw gbtNfgNullGame(); return m_rep; }
+  const gbtNfgGameRep *operator->(void) const 
+  { if (!m_rep) throw gbtNfgNullGame(); return m_rep; }
+  
+  gbtNfgGameRep *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
+};
+
+gbtNumber MinPayoff(const gbtNfgGame &, int = 0);
+gbtNumber MaxPayoff(const gbtNfgGame &, int = 0);
+gbtNfgGame NewNfg(const gbtArray<int> &);
 
 // Exception thrown by ReadNfg if not valid .nfg file
 class gbtNfgParserError { };

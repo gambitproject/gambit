@@ -40,7 +40,7 @@ gbtNfgNavigate::gbtNfgNavigate(gbtGameDocument *p_doc, wxWindow *p_parent)
     gbtGameView(p_doc)
 {
   gbtNfgGame nfg = m_doc->GetNfg();
-  CreateGrid(nfg.NumPlayers(), 6);
+  CreateGrid(nfg->NumPlayers(), 6);
   SetEditable(false);
   SetLabelSize(wxVERTICAL, 0);
   EnableGridLines(false);
@@ -68,16 +68,16 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
   SetColLabelValue(4, wxT(""));
   SetColLabelValue(5, wxT(""));
 
-  if (GetNumberRows() < m_doc->GetNfg().NumPlayers()) {
-    AppendRows(m_doc->GetNfg().NumPlayers() - GetNumberRows());
+  if (GetNumberRows() < m_doc->GetNfg()->NumPlayers()) {
+    AppendRows(m_doc->GetNfg()->NumPlayers() - GetNumberRows());
   }
-  else if (GetNumberRows() > m_doc->GetNfg().NumPlayers()) {
-    DeleteRows(0, GetNumberRows() - m_doc->GetNfg().NumPlayers());
+  else if (GetNumberRows() > m_doc->GetNfg()->NumPlayers()) {
+    DeleteRows(0, GetNumberRows() - m_doc->GetNfg()->NumPlayers());
   }
 
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
 
-  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetNfg()->NumPlayers(); pl++) {
     for (int col = 0; col < GetNumberCols(); col++) {
       SetCellTextColour(pl - 1, col, 
 			m_doc->GetPreferences().PlayerColor(pl));
@@ -95,7 +95,7 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
 
     SetCellValue(pl - 1, 1, 
 		 wxString::Format(wxT("%s"),
-				  (char *) m_doc->GetNfg().GetPlayer(pl)->GetLabel()));
+				  (char *) m_doc->GetNfg()->GetPlayer(pl)->GetLabel()));
     SetCellValue(pl - 1, 2, 
 		 wxString::Format(wxT("%s"), 
 				  (char *) ToText(m_doc->GetContingency()[pl])));
@@ -117,7 +117,7 @@ void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
   int player = p_event.GetRow() + 1;
 
   if (p_event.GetCol() == 0) {
-    if (m_doc->GetNfg().NumPlayers() == 2) {
+    if (m_doc->GetNfg()->NumPlayers() == 2) {
       // Just implement a toggle
       m_doc->SetRowPlayer(3 - m_doc->GetRowPlayer());
     }

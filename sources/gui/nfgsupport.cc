@@ -128,8 +128,8 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
 {
   DeleteAllItems();
   AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
-  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtNfgPlayer player = p_support.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
+    gbtNfgPlayer player = p_support.GetGame()->GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
@@ -363,11 +363,11 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != wxT("")) {
       SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
 				(const char *) m_doc->GetFilename().mb_str(), 
-				(char *) m_doc->GetNfg().GetLabel()));
+				(char *) m_doc->GetNfg()->GetLabel()));
     }
     else {
       SetTitle(wxString::Format(_("Gambit - Supports: %s"),
-				(char *) m_doc->GetNfg().GetLabel()));
+				(char *) m_doc->GetNfg()->GetLabel()));
     }
   }
   Show(m_doc->ShowNfgSupports());
