@@ -357,8 +357,13 @@ template <class T> void Efg<T>::CondPayoff(const BehavProfile<T> &profile,
   for (int i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
       for (int k = 1; k <= players[i]->infosets[j]->actions.Length(); k++)
-	// Note that bad things happen if probs(i, j, k) == 0
-	payoff(i, j, k) /= probs(i, j);
+	// This will protect against divides by zero.
+	// It will leave unreached infoset values at zero, which
+	// is probably not in general what we want.
+	// CondPayoff() was designed for use with Gobit in which case
+	// this doesn't happen. (?)   -- Ted
+	if (probs(i, j) != (T) 0.0)
+	  payoff(i, j, k) /= probs(i, j);
 }
 
 template <class T> 
@@ -407,10 +412,8 @@ template <class T> gArray<T> Efg<T>::Beliefs( const BehavProfile<T> &bp )
   gDPVector<T> payoff(Dimensionality());
   gPVector<T> probs(Dimensionality().Lengths());
   CondPayoff( bp, payoff, probs);
-  probs.Dump(gout);  gout << '\n';
   int index = 1;
   Beliefs ( root, (T) 1.0, bp, index, BProbs, probs);
-  BProbs.Dump(gout);  gout << '\n';
   return BProbs;
 }
 
@@ -423,11 +426,9 @@ void Efg<T>::Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
   T cumprob((T) 0), newprob((T) 0);
   int i, nc = n->children.Length();
 
-  gout << prob << '\n';
-
   if (pl == 0 || pl == -1)
     BProbs[index] = (T) 1.0;
-  else
+  else if (gpv(pl, iset) != (T) 0.0)
     BProbs[index] = prob / gpv(pl, iset);
   
   for (i = 1; i < nc; i++) {
