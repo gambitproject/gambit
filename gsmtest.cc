@@ -84,19 +84,40 @@ int main( void )
   machine->PushRef( z );
   machine->Dump();
   
+
   gout << "Assigning x = (double)7\n";
-  machine->Assign( x, (double)7 );
+  machine->PushRef( x );
+  machine->Push( (double)7 );
+  machine->Assign();
   gout << "Assigning y = (double)11\n";
-  machine->Assign( y, (double)11 );
+  machine->PushRef( y );
+  machine->Push( (double)11 );
+  machine->Assign();
   gout << "Assigning z = (double)13\n";
-  machine->Assign( z, (double)13 );
+  machine->PushRef( z );
+  machine->Push( (double)13 );
+  machine->Assign();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  machine->Dump();
+
+  gout << "Assigning x = (double)17\n";
+  machine->PushRef( x );
+  machine->Push( (double)17 );
+  machine->Assign();
+  gout << "Assigning y = (double)21\n";
+  machine->PushRef( y );
+  machine->Push( (double)21 );
+  machine->Assign();
+  gout << "Assigning z = (double)23\n";
+  machine->PushRef( z );
+  machine->Push( (double)23 );
+  machine->Assign();
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
-  machine->PushRef( x );
-  machine->PushRef( y );
-  machine->PushRef( z );
   machine->Negate();
   machine->Subtract();
   machine->Multiply();
@@ -105,6 +126,7 @@ int main( void )
   machine->Add();
   machine->Dump();
 
+/*
   gout << "Assigning x = (gInteger)5\n";
   machine->Assign( x, (gInteger)5 );
   gout << "Assigning y = (gInteger)7\n";
@@ -142,11 +164,12 @@ int main( void )
   machine->Divide();
   machine->Add();
   machine->Dump();
+*/
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+/*
   gout << "Testing PushVal()\n";
   machine->UnAssign( x );
   machine->UnAssign( y );
@@ -174,7 +197,7 @@ int main( void )
 
   gout << "Attempt to do additional (illegal) PushVals\n";
   machine->PushVal( (gRational)13 );
-
+*/
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -215,6 +238,37 @@ int main( void )
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
+
+  gout << "Testing relational operators:\n";
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  machine->Dump();
+
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+
+  gout << "EqualTo()              : " << machine->EqualTo() << "\n";
+  gout << "NotEqualTo()           : " << machine->NotEqualTo() << "\n";
+  gout << "GreaterThan()          : " << machine->GreaterThan() << "\n";
+  gout << "LessThan()             : " << machine->LessThan() << "\n";
+  gout << "GreaterThanOrEqualTo() : " << machine->GreaterThanOrEqualTo() << "\n";
+  gout << "LessThanOrEqualTo()    : " << machine->LessThanOrEqualTo() << "\n";
+
+  
+  gout << "\n";
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  machine->Dump();
+
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+
+  gout << "EqualTo()              : " << machine->EqualTo() << "\n";
+  gout << "NotEqualTo()           : " << machine->NotEqualTo() << "\n";
+  gout << "GreaterThan()          : " << machine->GreaterThan() << "\n";
+  gout << "LessThan()             : " << machine->LessThan() << "\n";
+  gout << "GreaterThanOrEqualTo() : " << machine->GreaterThanOrEqualTo() << "\n";
+  gout << "LessThanOrEqualTo()    : " << machine->LessThanOrEqualTo() << "\n";
 
 
   delete machine;

@@ -4,6 +4,11 @@
 //
 
 
+
+#ifndef PORTION_H
+#define PORTION_H
+
+
 #include "rational.h"
 #include "gstring.h"
 #include "gambitio.h"
@@ -101,4 +106,4 @@ class Reference_Portion : public Portion
 
 
 
-
+#endif // PORTION_H

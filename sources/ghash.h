@@ -25,9 +25,6 @@ template <class K, class T> class HashTable
   //This function should be called in the constructor of the decendents
   //because the constructor cannot call virtual function NumBuckets()
   void Init( void );
-  //This function should be called in the destructor of the decendents
-  //because the destructor cannot call virtual function DeleteAction()
-  void Flush( void );
 
  public:
   HashTable();
@@ -37,6 +34,11 @@ template <class K, class T> class HashTable
   void Remove( K key );
   T operator()( K key ) const;
   T& operator()( K key );
+
+  //This function should be called in the destructor of the decendents
+  //because the destructor cannot call virtual function DeleteAction()
+  void Flush( void );
+
 };
 
 

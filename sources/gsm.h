@@ -24,7 +24,7 @@ class GSM
 {
  private:
   gStack<Portion *> *stack;
-  gStack<gString> *RefStack;
+  // gStack<gString> *RefStack;
   RefHashTable *RefTable;
 
   typedef enum 
@@ -56,6 +56,14 @@ class GSM
   Portion *resolve_ref( Reference_Portion *p );
 
 
+  void Assign( const gString ref, const bool      data );
+  void Assign( const gString ref, const double    data );
+  void Assign( const gString ref, const gInteger  data );
+  void Assign( const gString ref, const gRational data );
+  void Assign( const gString ref, const gString   data );
+
+
+
 
  public:
   GSM( int size );
@@ -70,20 +78,20 @@ class GSM
   void Push( const gRational data );
   void Push( const gString   data );
 
-  void PushRef( const gString   data );
+  void PushRef( const gString data );
 
+  void Assign( void );
+
+  void UnAssign( const gString ref );
+
+/*
   void PushVal( const bool      data );
   void PushVal( const double    data );
   void PushVal( const gInteger  data );
   void PushVal( const gRational data );
   void PushVal( const gString   data );
+*/
 
-  void Assign( const gString ref, const bool     data );
-  void Assign( const gString ref, const double    data );
-  void Assign( const gString ref, const gInteger  data );
-  void Assign( const gString ref, const gRational data );
-  void Assign( const gString ref, const gString   data );
-  void UnAssign( const gString ref );
 
 
   void Add      ( void );
@@ -124,6 +132,8 @@ class GSM
 
   void Output( void );
   void Dump( void );
+
+  void Flush( void );
 
 };
 

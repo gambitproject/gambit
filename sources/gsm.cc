@@ -8,8 +8,10 @@
 #include <assert.h>
 #include <stdio.h>
 
-
+#include "portion.imp"
 #include "hash.imp"
+
+
 
 
 class RefHashTable : public HashTable<gString, Portion *>
@@ -25,116 +27,23 @@ class RefHashTable : public HashTable<gString, Portion *>
 
 
 
-//--------------------------------------------------------------------
-// implementation of Portion base and descendent classes
-//--------------------------------------------------------------------
-
-Portion::Portion( void )
-{
-  type = porERROR;
-}
-
-PortionType Portion::Type( void ) const
-{
-  return type;
-}
-
-//------------------------- bool type ------------------------------
-bool_Portion::bool_Portion( const bool new_value )
-     : value( new_value )
-{
-  type = porBOOL;
-}
-
-bool bool_Portion::Value( void ) const
-{ return value; }
-bool& bool_Portion::Value( void )
-{ return value; }
-
-
-//------------------------- double type ------------------------------
-double_Portion::double_Portion( const double new_value )
-     : value( new_value )
-{
-  type = porDOUBLE;
-}
-
-double double_Portion::Value( void ) const
-{ return value; }
-double& double_Portion::Value( void )
-{ return value; }
-
-
-//------------------------- gInteger type ------------------------------
-gInteger_Portion::gInteger_Portion( const gInteger new_value )
-     : value( new_value )
-{
-  type = porINTEGER;
-}
-
-gInteger gInteger_Portion::Value( void ) const
-{ return value; }
-gInteger& gInteger_Portion::Value( void )
-{ return value; }
-
-
-//------------------------- gRational type ------------------------------
-gRational_Portion::gRational_Portion( const gRational new_value )
-     : value( new_value )
-{
-  type = porRATIONAL;
-}
-
-gRational gRational_Portion::Value( void ) const
-{ return value; }
-gRational& gRational_Portion::Value( void )
-{ return value; }
-
-
-//------------------------- Reference type ------------------------------
-gString_Portion::gString_Portion( const gString new_value )
-     : value( new_value )
-{
-  type = porSTRING;
-}
-
-gString gString_Portion::Value( void ) const
-{ return value; }
-gString& gString_Portion::Value( void )
-{ return value; }
-
-
-//------------------------- Reference type ------------------------------
-Reference_Portion::Reference_Portion( const gString new_value )
-     : value( new_value )
-{
-  type = porREFERENCE;
-}
-
-gString Reference_Portion::Value( void ) const
-{ return value; }
-gString& Reference_Portion::Value( void )
-{ return value; }
-
-
-
-
 
 //--------------------------------------------------------------------
-// implementation of GSM (stach machine)
+// implementation of GSM (stack machine)
 //--------------------------------------------------------------------
 
 GSM::GSM( int size )
 {
   assert( size > 0 );
   stack = new gStack<Portion *>( size );
-  RefStack = new gStack<gString>( size );
+  // RefStack = new gStack<gString>( size );
   RefTable = new RefHashTable;
   assert( stack != 0 );
 }
 
 GSM::~GSM()
 {
+  Flush();
   delete RefTable;
   delete stack;
 }
@@ -151,9 +60,63 @@ int GSM::MaxDepth( void ) const
 }
 
 
+
+
 //-------------------------------------------------------
   //  Assign & UnAssign functions 
 //-------------------------------------------------------
+
+
+void GSM::Assign( void )
+{
+  int result = 0;
+  Portion *p2, *p1;
+  if( stack->Depth() > 1 )
+  {
+    p2 = stack->Pop();
+    p1 = stack->Pop();
+
+    if( ( p2->Type() != porREFERENCE ) && ( p1->Type() == porREFERENCE ) )
+    {
+      switch( p2->Type() )
+      {
+      case porBOOL:
+	Assign( ( (Reference_Portion *)p1 )->Value(), ( (bool_Portion *)p2 )->Value() );
+	break;
+      case porDOUBLE:
+	Assign( ( (Reference_Portion *)p1 )->Value(), ( (double_Portion *)p2 )->Value() );
+	break;
+      case porINTEGER:
+	Assign( ( (Reference_Portion *)p1 )->Value(), ( (gInteger_Portion *)p2 )->Value() );
+	break;
+      case porRATIONAL:
+	Assign( ( (Reference_Portion *)p1 )->Value(), ( (gRational_Portion *)p2 )->Value() );
+	break;
+      case porSTRING:
+	Assign( ( (Reference_Portion *)p1 )->Value(), ( (gString_Portion *)p2 )->Value() );
+	break;
+      }
+      stack->Push( p2 );
+      delete p1;
+    }
+    else
+    {
+      if( p2->Type() == porREFERENCE )
+      {
+	gerr << "** GSM Error: no value found to assign to a reference\n";
+      } 
+      if ( p1->Type() != porREFERENCE )
+      {
+	gerr << "** GSM Error: no reference found to be assigned\n";
+      }
+      assert(0);
+    }
+  }
+}
+
+
+
+
 void GSM::Assign( const gString ref, const bool data )
 {
   Portion *data_portion;
@@ -247,7 +210,6 @@ void GSM::Assign( const gString ref, const gString data )
 
 
 
-
 void GSM::UnAssign( const gString ref )
 {
   if( RefTable->IsDefined( ref ) )
@@ -255,7 +217,6 @@ void GSM::UnAssign( const gString ref )
     RefTable->Remove( ref );
   }
 }
-
 
 
 
@@ -296,7 +257,6 @@ void GSM::Push( const gString data )
   Portion *p;
   p = new gString_Portion( data );
   stack->Push( p );
-  RefStack->Push( data );
 }
 
 void GSM::PushRef( const gString data )
@@ -304,7 +264,6 @@ void GSM::PushRef( const gString data )
   Portion *p;
   p = new Reference_Portion( data );
   stack->Push( p );
-  RefStack->Push( data );
 }
 
 
@@ -314,6 +273,7 @@ void GSM::PushRef( const gString data )
   // PushVal() functions
 //------------------------------------------------------------------
 
+/*
 void GSM::PushVal( const bool data )
 {
   gString ref;
@@ -394,7 +354,7 @@ void GSM::PushVal( const gString data )
     gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
 }
 
-
+*/
 
 
 
@@ -913,6 +873,7 @@ void GSM::Output( void )
   default:
     gerr << "** GSM Error: unknown type found in stack\n";
   }
+  delete p;
 }
 
 
@@ -928,3 +889,17 @@ void GSM::Dump( void )
   assert( stack->Depth() == 0 );
 }
 
+
+void GSM::Flush( void )
+{
+  int i;
+  Portion *p;
+
+  for( i = stack->Depth() - 1; i >= 0; i-- )
+  {
+    p = stack->Pop();
+    delete p;
+  }
+  RefTable->Flush();
+  assert( stack->Depth() == 0 );
+}
