@@ -344,7 +344,7 @@ bool EfgFileReader::CheckActionProbs(Infoset *s,
 bool EfgFileReader::CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
 {
   for (int i = 1; i <= p.Length(); i++)
-    if (E->Payoff(c, i) != p[i])   return false;
+    if (E->Payoff(c, E->Players()[i]) != p[i])   return false;
   return true;
 }
 

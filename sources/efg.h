@@ -73,7 +73,8 @@ public:
   virtual gNumber MaxPayoff(int pl = 0) const = 0;
   virtual bool IsConstSum(void) const = 0;
   virtual void InitPayoffs(void) const = 0;
-  virtual gNumber Payoff(const EFOutcome *, int pl) const = 0;
+  virtual gNumber Payoff(const EFOutcome *, const EFPlayer *) const = 0;
+  virtual gNumber Payoff(const Node *, const EFPlayer *) const = 0;
   virtual gArray<gNumber> Payoff(const EFOutcome *) const = 0;
   virtual void Payoff(const gPVector<int> &profile,
 		      gVector<gNumber> &payoff) const = 0;
@@ -235,7 +236,8 @@ public:
   gArray<gNumber> GetChanceProbs(Infoset *) const;
 
   void SetPayoff(EFOutcome *, int pl, const gNumber &value);
-  gNumber Payoff(const EFOutcome *, int pl) const;
+  gNumber Payoff(const EFOutcome *, const EFPlayer *) const;
+  gNumber Payoff(const Node *, const EFPlayer *) const;
   gArray<gNumber> Payoff(const EFOutcome *) const;
 
   void InitPayoffs(void) const;

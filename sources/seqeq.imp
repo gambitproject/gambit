@@ -418,7 +418,7 @@ Payoff(Node *n, EFPlayer *p) const
   gPoly<T> value(Space,Lex);
   
   if (n->GetOutcome()) {
-    gPoly<T> term(Space,(double)EF.Payoff(n->GetOutcome(), p->GetNumber()),Lex);
+    gPoly<T> term(Space,(double)EF.Payoff(n, p),Lex);
     value+=term;
   }
 

@@ -222,7 +222,7 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
   int i,snew;
   if(n->GetOutcome()) {
     (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
-       gNumber(prob) * EF.Payoff(n->GetOutcome(), 1) - gNumber(minpay);
+       gNumber(prob) * EF.Payoff(n, EF.Players()[1]) - gNumber(minpay);
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {

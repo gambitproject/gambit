@@ -651,9 +651,15 @@ void FullEfg::SetPayoff(EFOutcome *outc, int pl, const gNumber &value)
   }
 }
 
-gNumber FullEfg::Payoff(const EFOutcome *outc, int pl) const
+gNumber FullEfg::Payoff(const EFOutcome *p_outcome,
+			const EFPlayer *p_player) const
 {
-  return (outc) ? outc->payoffs[pl] : gNumber(0); 
+  return (p_outcome) ? p_outcome->payoffs[p_player->number] : gNumber(0); 
+}
+
+gNumber FullEfg::Payoff(const Node *p_node, const EFPlayer *p_player) const
+{
+  return (p_node->outcome) ? p_node->outcome->payoffs[p_player->number] : gNumber(0);
 }
 
 gArray<gNumber> FullEfg::Payoff(const EFOutcome *outc) const

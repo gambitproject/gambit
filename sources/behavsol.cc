@@ -755,7 +755,8 @@ BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 					 terminal_nodes[n],
 					 pl,i,j)) {
 		node_prob *= 
-		  (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		  (gDouble)Game().Payoff(terminal_nodes[n],
+					 Game().Players()[pl]);
 		next_poly += node_prob;
 	      }
 	    }
@@ -1141,7 +1142,8 @@ BehavSolution::NashExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
 					    isets_for_pl[i],
 					    acts_for_iset[j])) {
 		  node_prob *= 
-		    (gDouble)Game().Payoff(terminal_nodes[n]->GetOutcome(),pl);
+		    (gDouble)Game().Payoff(terminal_nodes[n],
+					   Game().Players()[pl]);
 		  next_poly += node_prob;
 		}
 	      }

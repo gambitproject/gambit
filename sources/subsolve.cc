@@ -183,7 +183,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (n->GetOutcome())  {
-	  subval[i] += efg.Payoff(n->GetOutcome(), i);
+	  subval[i] += efg.Payoff(n, efg.Players()[i]);
         }
       }
 

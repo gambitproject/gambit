@@ -802,7 +802,7 @@ static Portion *GSM_Payoff(Portion **param)
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
   Efg *efg = player->Game();
 
-  return new NumberPortion(efg->Payoff(c, player->GetNumber()));
+  return new NumberPortion(efg->Payoff(c, player));
 }
 
 //----------
