@@ -39,7 +39,6 @@
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
-#include "dlefgsave.h"
 #include "dlmoveadd.h"
 #include "dlnodedelete.h"
 #include "dlefgplayer.h"
@@ -73,11 +72,12 @@ const int idSOLUTIONWINDOW = 996;
 const int idINFONOTEBOOK = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
-  EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
-  EVT_MENU(efgmenuFILE_PAGE_SETUP, EfgShow::OnFilePageSetup)
-  EVT_MENU(efgmenuFILE_PRINT_PREVIEW, EfgShow::OnFilePrintPreview)
-  EVT_MENU(efgmenuFILE_PRINT, EfgShow::OnFilePrint)
-  EVT_MENU(efgmenuFILE_CLOSE, EfgShow::Close)
+  EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
+  EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
+  EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
+  EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
+  EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
+  EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
   EVT_MENU(efgmenuEDIT_NODE_DELETE, EfgShow::OnEditNodeDelete)
   EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
@@ -207,8 +207,8 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   wxAcceleratorEntry entries[8];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
-  entries[2].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
-  entries[3].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
+  entries[2].Set(wxACCEL_CTRL, (int) 'S', wxID_SAVE);
+  entries[3].Set(wxACCEL_CTRL, (int) 'P', wxID_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
   entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
   entries[6].Set(wxACCEL_NORMAL, (int) '+', efgmenuPREFS_ZOOMIN);
@@ -485,15 +485,16 @@ void EfgShow::MakeMenus(void)
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
   fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
-  fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();
-  fileMenu->Append(efgmenuFILE_SAVE, "&Save\tCtrl-S", "Save this game");
+  fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
+  fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
   fileMenu->AppendSeparator();
-  fileMenu->Append(efgmenuFILE_PAGE_SETUP, "Page Se&tup",
+  fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
-  fileMenu->Append(efgmenuFILE_PRINT_PREVIEW, "Print Pre&view",
+  fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
 		   "View a preview of the game printout");
-  fileMenu->Append(efgmenuFILE_PRINT, "&Print\tCtrl-P", "Print this game");
+  fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
 
@@ -773,14 +774,14 @@ void EfgShow::MakeToolbar(void)
 		   -1, -1, 0, "New game", "Create a new game");
   toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open file", "Open a saved game");
-  toolBar->AddTool(efgmenuFILE_SAVE, wxBITMAP(save), wxNullBitmap, false,
+  toolBar->AddTool(wxID_SAVE, wxBITMAP(save), wxNullBitmap, false,
 		   -1, -1, 0, "Save game", "Save this game");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(efgmenuFILE_PRINT_PREVIEW, wxBITMAP(preview), wxNullBitmap,
+  toolBar->AddTool(wxID_PREVIEW, wxBITMAP(preview), wxNullBitmap,
 		   false, -1, -1, 0, "Print Preview",
 		   "View a preview of the game printout");
-  toolBar->AddTool(efgmenuFILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
+  toolBar->AddTool(wxID_PRINT, wxBITMAP(print), wxNullBitmap, false,
 		   -1, -1, 0, "Print", "Print this game");
   toolBar->AddSeparator();
 
@@ -835,44 +836,46 @@ gText EfgShow::UniqueSupportName(void) const
   }
 }
 
-void EfgShow::OnFileSave(wxCommandEvent &)
+void EfgShow::OnFileSave(wxCommandEvent &p_event)
 {
-  static int s_nDecimals = 6;
-  dialogEfgSave dialog(Filename(), m_efg.GetTitle(), s_nDecimals, this);
+  if (p_event.GetId() == wxID_SAVEAS || m_filename == "") {
+    wxFileDialog dialog(this, "Choose file", wxPathOnly(m_filename),
+			wxFileNameFromPath(m_filename), "*.efg",
+			wxSAVE | wxOVERWRITE_PROMPT);
 
-  if (dialog.ShowModal() == wxID_OK) {
-    if (wxFileExists((char *) dialog.Filename())) {
-      if (wxMessageBox((char *) ("File " + dialog.Filename() +
-				 " exists.  Overwrite?"),
-		       "Confirm", wxOK | wxCANCEL) != wxOK) {
-	return;
-      }
+    switch (dialog.ShowModal()) {
+    case wxID_OK:
+      SetFilename(dialog.GetPath());
+      break;
+    case wxID_CANCEL:
+    default:
+      return;
     }
+  }
 
-    m_efg.SetTitle(dialog.Label());
-
-    FullEfg *efg = 0;
-    try {
-      gFileOutput file(dialog.Filename());
-      efg = CompressEfg(m_efg, *GetSupport());
-      efg->WriteEfgFile(file, s_nDecimals);
-      delete efg;
-      SetFilename(dialog.Filename());
-    }
-    catch (gFileOutput::OpenFailed &) {
-      wxMessageBox((char *) ("Could not open " + dialog.Filename() + " for writing."),
-		   "Error", wxOK);
-      if (efg)  delete efg;
-    }
-    catch (gFileOutput::WriteFailed &) {
-      wxMessageBox((char *) ("Write error occurred in saving " + dialog.Filename()),
-		   "Error", wxOK);
-      if (efg)  delete efg;
-    }
-    catch (Efg::Game::Exception &) {
-      wxMessageBox("Internal exception in extensive form", "Error", wxOK);
-      if (efg)  delete efg;
-    }
+  FullEfg *efg = 0;
+  try {
+    gFileOutput file(m_filename);
+    efg = CompressEfg(m_efg, *GetSupport());
+    efg->WriteEfgFile(file, 6);
+    delete efg;
+  }
+  catch (gFileOutput::OpenFailed &) {
+    wxMessageBox(wxString::Format("Could not open %s for writing.",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+    if (efg)  delete efg;
+  }
+  catch (gFileOutput::WriteFailed &) {
+    wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+    if (efg)  delete efg;
+  }
+  catch (Efg::Game::Exception &) {
+    wxMessageBox("Internal exception in extensive form", "Error",
+		 wxOK, this);
+    if (efg)  delete efg;
   }
 }
 
@@ -2410,16 +2413,17 @@ void EfgShow::AdjustSizes(void)
   }
 }
 
-void EfgShow::SetFilename(const gText &p_name)
+void EfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
   if (m_filename != "") {
-    SetTitle((char *) ("[" + m_filename + "] " + m_efg.GetTitle()));
+    SetTitle(wxString::Format("[%s] %s ", m_filename.c_str(), 
+			      (char *) m_efg.GetTitle()));
   }
   else {
     SetTitle((char *) m_efg.GetTitle());
   }
-  m_parent->SetFilename(this, p_name);
+  m_parent->SetFilename(this, p_name.c_str());
 }
 
 EFSupport *EfgShow::GetSupport(void)

@@ -16,7 +16,6 @@
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
-#include "dlnfgsave.h"
 #include "dlnfgplayers.h"
 #include "dlstrategies.h"
 #include "dlnfgeditsupport.h"
@@ -361,70 +360,3 @@ void dialogNfgEditSupport::OnStrategy(wxCommandEvent &)
 gText dialogNfgEditSupport::Name(void) const
 { return m_nameItem->GetValue().c_str(); }
 
-//=========================================================================
-//                     dialogNfgSave: Member functions
-//=========================================================================
-
-BEGIN_EVENT_TABLE(dialogNfgSave, wxDialog)
-  EVT_BUTTON(idNFG_BROWSE_BUTTON, dialogNfgSave::OnBrowse)
-END_EVENT_TABLE()
-
-dialogNfgSave::dialogNfgSave(const gText &p_name,
-			     const gText &p_label, int p_decimals,
-			     wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Save File")
-{
-  wxBoxSizer *filenameSizer = new wxBoxSizer(wxHORIZONTAL);
-  filenameSizer->Add(new wxStaticText(this, -1, "File"), 0,
-		     wxCENTER | wxALL, 5);
-  m_fileName = new wxTextCtrl(this, -1, (char *) p_name);
-  filenameSizer->Add(m_fileName, 1, wxEXPAND | wxALL, 5);
-  wxButton *browseButton = new wxButton(this, idNFG_BROWSE_BUTTON, "Browse...");
-  filenameSizer->Add(browseButton, 0, wxALL, 5);
-
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, -1, "Label"), 0,
-		  wxCENTER | wxALL, 5);  
-  m_treeLabel = new wxTextCtrl(this, -1, (char *) p_label);
-  labelSizer->Add(m_treeLabel, 1, wxEXPAND | wxALL, 5);
-
-  wxBoxSizer *decimalsSizer = new wxBoxSizer(wxHORIZONTAL);
-  decimalsSizer->Add(new wxStaticText(this, -1, "Decimal places"),
-		     0, wxALL, 5);
-  m_numDecimals = new wxSlider(this, -1, p_decimals, 0, 25,
-			       wxDefaultPosition, wxDefaultSize,
-			       wxSL_HORIZONTAL | wxSL_LABELS);
-  decimalsSizer->Add(m_numDecimals, 1, wxEXPAND | wxALL, 5);
- 
-  m_helpButton->Enable(false);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(filenameSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(labelSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(decimalsSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-
-  SetAutoLayout(TRUE);
-  SetSizer(topSizer); 
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
-  Layout();
-}
-
-void dialogNfgSave::OnBrowse(wxCommandEvent &)
-{
-  const char *file = wxFileSelector("Save data file", 
-				    gPathOnly(m_fileName->GetValue()),
-				    gFileNameFromPath(m_fileName->GetValue()),
-				    ".nfg", "*.nfg");
-
-  if (file) {
-    m_fileName->SetValue(file);
-  }
-}
-
-gText dialogNfgSave::Filename(void) const
-{ return m_fileName->GetValue().c_str(); }
-
-gText dialogNfgSave::Label(void) const
-{ return m_treeLabel->GetValue().c_str(); }

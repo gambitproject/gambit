@@ -147,7 +147,7 @@ bool GambitApp::OnInit(void)
   }
 
   // Set current directory.
-  wxGetApp().SetCurrentDir(gText(wxGetWorkingDirectory()));
+  wxGetApp().SetCurrentDir(wxGetWorkingDirectory());
 
   return true;
 }
@@ -283,10 +283,10 @@ void GambitFrame::MakeToolbar(void)
 //--------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
-  EVT_MENU(wxID_NEW, GambitFrame::OnNew)
-  EVT_MENU(wxID_OPEN, GambitFrame::OnLoad)
+  EVT_MENU(wxID_NEW, GambitFrame::OnFileNew)
+  EVT_MENU(wxID_OPEN, GambitFrame::OnFileOpen)
   EVT_MENU(wxID_EXIT, wxWindow::Close)
-  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnFileMRUFile)
   EVT_MENU(menuOPTIONS, GambitFrame::OnOptions)
   EVT_MENU(wxID_HELP_CONTENTS, GambitFrame::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, GambitFrame::OnHelpIndex)
@@ -512,7 +512,7 @@ gText EfgPlayersPage::GetName(int p_player) const
   return m_nameGrid->GetCellValue(p_player - 1, 0).c_str();
 }
 
-void GambitFrame::OnNew(wxCommandEvent &)
+void GambitFrame::OnFileNew(wxCommandEvent &)
 {
   wxWizard *wizard = wxWizard::Create(this, -1, "Creating a new game");
   EfgPlayersPage *efgPage = new EfgPlayersPage(wizard);
@@ -551,22 +551,20 @@ void GambitFrame::OnNew(wxCommandEvent &)
   wizard->Destroy();
 }
 
-void GambitFrame::OnLoad(wxCommandEvent &)
+void GambitFrame::OnFileOpen(wxCommandEvent &)
 {
-  gText filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
-				  NULL, NULL, "*.?fg").c_str();
-  if (filename == "") {
-    return;
+  wxFileDialog dialog(this, "Choose file", "", "", "*.?fg");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    wxGetApp().SetCurrentDir(wxPathOnly(dialog.GetPath()));
+
+    LoadFile(dialog.GetPath());
   }
-
-  wxGetApp().SetCurrentDir(gPathOnly(filename));
-
-  LoadFile(filename);
 }
 
-void GambitFrame::OnMRUFile(wxCommandEvent &p_event)
+void GambitFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
-  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
+  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1));
 }
 
 void GambitFrame::OnOptions(wxCommandEvent &)
@@ -592,25 +590,16 @@ void GambitFrame::OnHelpIndex(wxCommandEvent &)
   wxGetApp().HelpController().DisplayContents();
 }
 
-void GambitFrame::LoadFile(const gText &p_filename)
+void GambitFrame::LoadFile(const wxString &p_filename)
 {    
-  gText filename(gFileNameFromPath(p_filename));
-  filename = filename.Dncase();
+  try {
+    gFileInput infile(p_filename);
+    Nfg *nfg = 0;
 
-  if (strstr((const char *) filename, ".nfg")) {
-    // This must be a normal form.
-    try {
-      gFileInput infile(p_filename);
-      Nfg *nfg = 0;
+    ReadNfgFile(infile, nfg);
 
-      ReadNfgFile(infile, nfg);
-
-      if (!nfg) {
-	wxMessageBox((char *) (p_filename + " is not a valid .nfg file"));
-      }
-      else {
-	m_fileHistory.AddFileToHistory((char *) p_filename);
-      }
+    if (nfg) {
+      m_fileHistory.AddFileToHistory(p_filename);
       NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFilename(p_filename);
       AddGame(nfg, nfgShow);
@@ -620,40 +609,40 @@ void GambitFrame::LoadFile(const gText &p_filename)
       m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
       return;
     }
-    catch (gFileInput::OpenFailed &) {
-      wxMessageBox((char *) ("Could not open " + p_filename + " for reading"));
-      return;
-    }
   }
-  else if (strstr((const char *) filename, ".efg")) {
-    // This must be an extensive form.
-    try {
-      gFileInput infile(p_filename);
-      FullEfg *efg = ReadEfgFile(infile);
+  catch (gFileInput::OpenFailed &) {
+    wxMessageBox(wxString::Format("Could not open '%s' for reading",
+				  p_filename.c_str()),
+		 "Error", wxOK, this);
+    return;
+  }
+
+  try {
+    gFileInput infile(p_filename);
+    FullEfg *efg = ReadEfgFile(infile);
                 
-      if (!efg) {
-	wxMessageBox((char *) (filename + " is not a valid .efg file"));
-      }
-      else {
-	m_fileHistory.AddFileToHistory((char *) p_filename);
-      }
+    if (!efg) {
+      wxMessageBox(wxString::Format("'%s' is not in a recognized format.",
+				    p_filename.c_str()),
+		   "Error", wxOK, this);
+      return;
+    }
 
-      EfgShow *efgShow = new EfgShow(*efg, this);
-      efgShow->SetFilename(filename);
-      AddGame(efg, efgShow);
-      SetFilename(efgShow, p_filename);
-      SetActiveWindow(efgShow);
-      m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
-      m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
-      return;
-    }
-    catch (gFileInput::OpenFailed &) { 
-      wxMessageBox((char *) ("Could not open " + filename + " for reading"));
-      return;
-    }
+    m_fileHistory.AddFileToHistory(p_filename);
+    EfgShow *efgShow = new EfgShow(*efg, this);
+    efgShow->SetFilename(p_filename);
+    AddGame(efg, efgShow);
+    SetFilename(efgShow, p_filename);
+    SetActiveWindow(efgShow);
+    m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
+    m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
   }
-
-  wxMessageBox("Unknown file type");
+  catch (gFileInput::OpenFailed &) { 
+    wxMessageBox(wxString::Format("Could not open '%s' for reading",
+				  p_filename.c_str()),
+		 "Error", wxOK, this);
+    return;
+  }
 }
 
 void GambitFrame::OnCloseWindow(wxCloseEvent &)
@@ -800,7 +789,7 @@ NfgShow *GambitFrame::GetWindow(const Nfg *p_nfg)
   return 0;
 }
 
-void GambitFrame::SetFilename(EfgShow *p_efgShow, const gText &p_file)
+void GambitFrame::SetFilename(EfgShow *p_efgShow, const wxString &p_file)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efgShow == p_efgShow) {
@@ -811,7 +800,7 @@ void GambitFrame::SetFilename(EfgShow *p_efgShow, const gText &p_file)
   }
 }
 
-void GambitFrame::SetFilename(NfgShow *p_nfgShow, const gText &p_file)
+void GambitFrame::SetFilename(NfgShow *p_nfgShow, const wxString &p_file)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_nfgShow == p_nfgShow) {

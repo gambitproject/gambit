@@ -579,7 +579,7 @@ gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
 
 bool guinfgQre::SolveSetup(void)
 {
-  dialogQre dialog(m_parent, m_parent->Filename(), true);
+  dialogQre dialog(m_parent, m_parent->Filename().c_str(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -652,7 +652,7 @@ gList<MixedSolution> guinfgQreAll::Solve(const NFSupport &p_support)
 
 bool guinfgQreAll::SolveSetup(void)
 {
-  dialogQreGrid dialog(m_parent, m_parent->Filename());
+  dialogQreGrid dialog(m_parent, m_parent->Filename().c_str());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();

@@ -39,7 +39,6 @@
 #include "dlnfgeditsupport.h"
 #include "dlnfgplayers.h"
 #include "dlstrategies.h"
-#include "dlnfgsave.h"
 
 #include "dlelim.h"
 #include "dlsupportselect.h"
@@ -51,11 +50,12 @@ const int idSOLUTIONWINDOW = 3002;
 //----------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
-  EVT_MENU(NFG_FILE_SAVE, NfgShow::OnFileSave)
-  EVT_MENU(NFG_FILE_PAGE_SETUP, NfgShow::OnFilePageSetup)
-  EVT_MENU(NFG_FILE_PRINT_PREVIEW, NfgShow::OnFilePrintPreview)
-  EVT_MENU(NFG_FILE_PRINT, NfgShow::OnFilePrint)
-  EVT_MENU(NFG_FILE_CLOSE, NfgShow::Close)
+  EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
+  EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
+  EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
+  EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
+  EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
+  EVT_MENU(wxID_CLOSE, NfgShow::Close)
   EVT_MENU(NFG_EDIT_LABEL, NfgShow::OnEditLabel)
   EVT_MENU(NFG_EDIT_PLAYERS, NfgShow::OnEditPlayers)
   EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
@@ -127,8 +127,8 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
   wxAcceleratorEntry entries[6];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
-  entries[2].Set(wxACCEL_CTRL, (int) 'S', NFG_FILE_SAVE);
-  entries[3].Set(wxACCEL_CTRL, (int) 'P', NFG_FILE_PRINT);
+  entries[2].Set(wxACCEL_CTRL, (int) 'S', wxID_SAVE);
+  entries[3].Set(wxACCEL_CTRL, (int) 'P', wxID_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
   entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
   wxAcceleratorTable accel(6, entries);
@@ -170,15 +170,16 @@ void NfgShow::MakeMenus(void)
   wxMenu *fileMenu = new wxMenu;
   fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
   fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
-  fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();
-  fileMenu->Append(NFG_FILE_SAVE, "&Save\tCtrl-S", "Save this game");
+  fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
+  fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
   fileMenu->AppendSeparator();
-  fileMenu->Append(NFG_FILE_PAGE_SETUP, "Page Se&tup",
+  fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
-  fileMenu->Append(NFG_FILE_PRINT_PREVIEW, "Print Pre&view",
+  fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
 		   "View a preview of the game printout");
-  fileMenu->Append(NFG_FILE_PRINT, "&Print\tCtrl-P", "Print this game");
+  fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
   
@@ -316,14 +317,14 @@ void NfgShow::MakeToolbar(void)
 		   -1, -1, 0, "New game", "Create a new game");
   toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open file", "Open a saved game");
-  toolBar->AddTool(NFG_FILE_SAVE, wxBITMAP(save), wxNullBitmap, false,
+  toolBar->AddTool(wxID_SAVE, wxBITMAP(save), wxNullBitmap, false,
 		   -1, -1, 0, "Save game", "Save this game");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(NFG_FILE_PRINT_PREVIEW, wxBITMAP(preview), wxNullBitmap,
+  toolBar->AddTool(wxID_PREVIEW, wxBITMAP(preview), wxNullBitmap,
 		   false, -1, -1, 0, "Print Preview",
 		   "View a preview of the game printout");
-  toolBar->AddTool(NFG_FILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
+  toolBar->AddTool(wxID_PRINT, wxBITMAP(print), wxNullBitmap, false,
 		   -1, -1, 0, "Print", "Print this game");
   toolBar->AddSeparator();
 
@@ -458,43 +459,45 @@ void NfgShow::OnActivate(wxActivateEvent &p_event)
 //                 class NfgShow: Menu event handlers
 //----------------------------------------------------------------------
 
-void NfgShow::OnFileSave(wxCommandEvent &)
+void NfgShow::OnFileSave(wxCommandEvent &p_event)
 {
-  static int s_nDecimals = 6;
-  dialogNfgSave dialog(Filename(), m_nfg.GetTitle(), s_nDecimals, this);
+  if (p_event.GetId() == wxID_SAVEAS || m_filename == "") {
+    wxFileDialog dialog(this, "Choose file", wxPathOnly(m_filename),
+			wxFileNameFromPath(m_filename), "*.nfg",
+			wxSAVE | wxOVERWRITE_PROMPT);
 
-  if (dialog.ShowModal() == wxID_OK) {
-    if (wxFileExists((char *) dialog.Filename())) {
-      if (wxMessageBox((char *) ("File " + dialog.Filename() + " exists.  Overwrite?"),
-		       "Confirm", wxOK | wxCANCEL) != wxOK) {
-	return;
-      }
+    switch (dialog.ShowModal()) {
+    case wxID_OK:
+      SetFilename(dialog.GetPath());
+      break;
+    case wxID_CANCEL:
+    default:
+      return;
     }
+  }
 
-    m_nfg.SetTitle(dialog.Label());
-
-    Nfg *nfg = 0;
-    try {
-      gFileOutput file(dialog.Filename());
-      nfg = CompressNfg(m_nfg, *m_currentSupport);
-      nfg->WriteNfgFile(file, s_nDecimals);
-      delete nfg;
-      SetFilename(dialog.Filename());
-    }
-    catch (gFileOutput::OpenFailed &) {
-      wxMessageBox((char *) ("Could not open " + dialog.Filename() + " for writing."),
-		   "Error", wxOK);
-      if (nfg)  delete nfg;
-    }
-    catch (gFileOutput::WriteFailed &) {
-      wxMessageBox((char *) ("Write error occurred in saving " + dialog.Filename()),
-		   "Error", wxOK);
-      if (nfg)  delete nfg;
-    }
-    catch (gException &) {
-      wxMessageBox("Internal exception in Gambit", "Error", wxOK);
-      if (nfg)  delete nfg;
-    }
+  Nfg *nfg = 0;
+  try {
+    gFileOutput file(m_filename.c_str());
+    nfg = CompressNfg(m_nfg, *m_currentSupport);
+    nfg->WriteNfgFile(file, 6);
+    delete nfg;
+  }
+  catch (gFileOutput::OpenFailed &) {
+    wxMessageBox(wxString::Format("Could not open %s for writing.",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+    if (nfg)  delete nfg;
+  }
+  catch (gFileOutput::WriteFailed &) {
+    wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
+				  m_filename.c_str()),
+		 "Error", wxOK, this);
+    if (nfg)  delete nfg;
+  }
+  catch (gException &) {
+    wxMessageBox("Internal exception in Gambit", "Error", wxOK, this);
+    if (nfg)  delete nfg;
   }
 }
 
@@ -1268,16 +1271,17 @@ void NfgShow::OnSolutionSelected(wxListEvent &p_event)
   m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
 }
  
-void NfgShow::SetFilename(const gText &p_name)
+void NfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
   if (m_filename != "") {
-    SetTitle((char *) ("[" + m_filename + "] " + m_nfg.GetTitle()));
+    SetTitle(wxString::Format("[%s] %s ", m_filename.c_str(), 
+			      (char *) m_nfg.GetTitle()));
   }
   else {
     SetTitle((char *) m_nfg.GetTitle());
   }
-  m_parent->SetFilename(this, p_name);
+  m_parent->SetFilename(this, p_name.c_str());
 }
 
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)

@@ -1,17 +1,14 @@
 //
-// FILE: nfgconst.h -- defines various constants for NfgShow menu events
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of menu constants for normal form window
 //
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
-
-#define NFG_FILE_SAVE                   250
-#define NFG_FILE_PAGE_SETUP             251
-#define NFG_FILE_PRINT_PREVIEW          252
-#define NFG_FILE_PRINT                  253
-#define NFG_FILE_CLOSE                  254
 
 #define NFG_EDIT_LABEL                  300
 #define NFG_EDIT_STRATS                 301

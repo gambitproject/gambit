@@ -428,21 +428,3 @@ void gGetTextExtent(wxDC &dc, const gText &s0, float *x, float *y)
     dc.SetFont(*old_font);
   }
 }
-
-gText gFileNameFromPath(const char *path)
-{
-  gText filename(path);
-  if(strstr(path,"/") || strstr(path,"\\"))
-    filename = FileNameFromPath((char *)path);
-  return filename;
-}
-
-gText gPathOnly(const char *name)
-{
-  gText path;
-  if(strstr(name,"/") || strstr(name,"\\"))
-    path = wxPathOnly((char *)name);
-  return path;
-}
-
-

@@ -22,7 +22,7 @@ extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
 
 class GambitApp : public wxApp {
 private:
-  gText m_currentDir; /* Current position in directory tree. */
+  wxString m_currentDir; /* Current position in directory tree. */
   wxHtmlHelpController m_help;
   UserPreferences m_prefs;
 
@@ -31,8 +31,8 @@ private:
 public:
   virtual ~GambitApp() { }
   
-  const gText &CurrentDir(void)  { return m_currentDir; }
-  void SetCurrentDir(const gText &p_dir)  { m_currentDir = p_dir; }
+  const wxString &CurrentDir(void)  { return m_currentDir; }
+  void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
 
   wxHtmlHelpController &HelpController(void) { return m_help; }
 
@@ -60,9 +60,9 @@ private:
   gBlock<Game *> m_gameList;
 
   // Menu event handlers
-  void OnNew(wxCommandEvent &);
-  void OnLoad(wxCommandEvent &);
-  void OnMRUFile(wxCommandEvent &);
+  void OnFileNew(wxCommandEvent &);
+  void OnFileOpen(wxCommandEvent &);
+  void OnFileMRUFile(wxCommandEvent &);
 
   void OnOptions(wxCommandEvent &);
 
@@ -83,15 +83,15 @@ public:
 	      const wxPoint &p_position, const wxSize &p_size);
   virtual ~GambitFrame();
 
-  void LoadFile(const gText &);
+  void LoadFile(const wxString &);
 
   void AddGame(Efg::Game *, EfgShow *);
   void AddGame(Nfg *, NfgShow *);
   void AddGame(Efg::Game *, Nfg *, NfgShow *);
   void RemoveGame(Efg::Game *);
   void RemoveGame(Nfg *);
-  void SetFilename(EfgShow *, const gText &);
-  void SetFilename(NfgShow *, const gText &);
+  void SetFilename(EfgShow *, const wxString &);
+  void SetFilename(NfgShow *, const wxString &);
 
   EfgShow *GetWindow(const Efg::Game *);
   NfgShow *GetWindow(const Nfg *);

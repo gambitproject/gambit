@@ -37,7 +37,7 @@ private:
   EFSupport *m_currentSupport;
 
   EfgProfileList *m_solutionTable;
-  gText m_filename;
+  wxString m_filename;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
@@ -214,8 +214,8 @@ public:
   void OnOutcomesEdited(void);
 
   // File name
-  void SetFilename(const gText &s);
-  const gText &Filename(void) const { return m_filename; }
+  void SetFilename(const wxString &s);
+  const wxString &Filename(void) const { return m_filename; }
 
   Node *Cursor(void) const;
 

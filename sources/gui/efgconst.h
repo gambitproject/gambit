@@ -9,12 +9,6 @@
 #define EFGCONST_H
 
 typedef enum {
-  efgmenuFILE_SAVE = 1020, 
-  efgmenuFILE_PAGE_SETUP = 1030,
-  efgmenuFILE_PRINT_PREVIEW = 1040,
-  efgmenuFILE_PRINT = 1045,
-  efgmenuFILE_CLOSE = 1050,
-
   efgmenuEDIT_NODE = 900,
   efgmenuEDIT_NODE_ADD = 1105,
   efgmenuEDIT_NODE_DELETE = 1108,

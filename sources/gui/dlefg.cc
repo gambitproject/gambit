@@ -27,7 +27,6 @@
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
 #include "dlefgeditsupport.h"
-#include "dlefgsave.h"
 #include "dlefgplayers.h"
 #include "dlinfosets.h"
 #include "dlsubgames.h"
@@ -1041,75 +1040,6 @@ void dialogEfgEditSupport::OnAction(wxCommandEvent &)
 
 gText dialogEfgEditSupport::Name(void) const
 { return m_nameItem->GetValue().c_str(); }
-
-//=========================================================================
-//                     dialogEfgSave: Member functions
-//=========================================================================
-
-BEGIN_EVENT_TABLE(dialogEfgSave, wxDialog)
-  EVT_BUTTON(idEFG_BROWSE_BUTTON, dialogEfgSave::OnBrowse)
-END_EVENT_TABLE()
-
-dialogEfgSave::dialogEfgSave(const gText &p_name,
-			     const gText &p_label, int p_decimals,
-			     wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Save File")
-{
-  wxBoxSizer *filenameSizer = new wxBoxSizer(wxHORIZONTAL);
-  filenameSizer->Add(new wxStaticText(this, -1, "File"), 0,
-		     wxCENTER | wxALL, 5);
-  m_fileName = new wxTextCtrl(this, -1, (char *) p_name);
-  filenameSizer->Add(m_fileName, 1, wxEXPAND | wxALL, 5);
-  wxButton *browseButton = new wxButton(this, idEFG_BROWSE_BUTTON, "Browse...");
-  filenameSizer->Add(browseButton, 0, wxALL, 5);
-
-  wxBoxSizer *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, -1, "Label"), 0,
-		  wxCENTER | wxALL, 5);  
-  m_treeLabel = new wxTextCtrl(this, -1, (char *) p_label);
-  labelSizer->Add(m_treeLabel, 1, wxEXPAND | wxALL, 5);
-
-  wxBoxSizer *decimalsSizer = new wxBoxSizer(wxHORIZONTAL);
-  decimalsSizer->Add(new wxStaticText(this, -1, "Decimal places"),
-		     0, wxALL, 5);
-  m_numDecimals = new wxSlider(this, -1, p_decimals, 0, 25,
-			       wxDefaultPosition, wxDefaultSize,
-			       wxSL_HORIZONTAL | wxSL_LABELS);
-  decimalsSizer->Add(m_numDecimals, 1, wxEXPAND | wxALL, 5);
- 
-  m_helpButton->Enable(false);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(filenameSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(labelSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(decimalsSizer, 1, wxEXPAND | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-
-  SetAutoLayout(TRUE);
-  SetSizer(topSizer); 
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
-  Layout();
-}
-
-void dialogEfgSave::OnBrowse(wxCommandEvent &)
-{
-  const char *file = wxFileSelector("Save data file", 
-				    gPathOnly(m_fileName->GetValue()),
-				    gFileNameFromPath(m_fileName->GetValue()),
-				    ".efg", "*.efg");
-
-  if (file) {
-    m_fileName->SetValue(file);
-  }
-}
-
-gText dialogEfgSave::Filename(void) const
-{ return m_fileName->GetValue().c_str(); }
-
-gText dialogEfgSave::Label(void) const
-{ return m_treeLabel->GetValue().c_str(); }
-
 
 //=====================================================================
 //                  dialogSubgames: Member functions

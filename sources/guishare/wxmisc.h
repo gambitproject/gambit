@@ -79,14 +79,6 @@ public:
 // from the gambit_color_list.  Also allows sup/superscripts
 void gDrawText(wxDC &dc, const gText &s, float x, float y);
 
-// Returns the file name from a path.  The function FileNameFromPath()
-// crashes when there is no path
-gText gFileNameFromPath(const char *path);
-
-// Returns the path only from a path name.  The function wxPathOnly()
-// crashes when there is no path
-gText gPathOnly(const char *name);
-
 // in efgsolvd.cc, nfgsolvd.cc
 const int idTYPE_RADIOBOX = 501;
 const int idNUM_RADIOBOX = 502;

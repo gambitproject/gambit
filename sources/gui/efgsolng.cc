@@ -1238,7 +1238,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(const EFSupport &p_support) const
 
 bool guiefgQreNfg::SolveSetup(void)
 {
-  dialogQre dialog(m_parent, m_parent->Filename(), true);
+  dialogQre dialog(m_parent, m_parent->Filename().c_str(), true);
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1331,7 +1331,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(const EFSupport &p_support) const
 
 bool guiefgQreEfg::SolveSetup(void)
 { 
-  dialogQre dialog(m_parent, m_parent->Filename()); 
+  dialogQre dialog(m_parent, m_parent->Filename().c_str()); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
@@ -1418,7 +1418,7 @@ gList<BehavSolution> guiefgQreAllNfg::Solve(const EFSupport &p_support) const
 
 bool guiefgQreAllNfg::SolveSetup(void)
 {
-  dialogQreGrid dialog(m_parent, m_parent->Filename()); 
+  dialogQreGrid dialog(m_parent, m_parent->Filename().c_str()); 
 
   if (dialog.ShowModal() == wxID_OK) {
     m_eliminate = dialog.Eliminate();
