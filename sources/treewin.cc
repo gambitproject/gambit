@@ -1899,7 +1899,7 @@ void TreeWindow::infoset_label(void)
 void TreeWindow::infoset_switch_player(void)
 {
   try {
-    dialogEfgSelectPlayer dialog(ef, this);
+    dialogEfgSelectPlayer dialog(ef, false, this);
         
     if (dialog.Completed() == wxOK) {
       if (dialog.GetPlayer() != Cursor()->GetInfoset()->GetPlayer()) {

@@ -1,7 +1,7 @@
 //
 // FILE: dlefgplayer.h -- (Extensive form) player selection dialog
 //
-//
+// $Id$
 //
 
 #ifndef DLEFGPLAYER_H
@@ -9,8 +9,9 @@
 
 class dialogEfgSelectPlayer : public wxDialogBox {
 private:
-  Efg &m_efg;
-  int m_playerSelected, m_completed;
+  const Efg &m_efg;
+  bool m_chance;
+  int m_completed;
   wxListBox *m_playerNameList;
 
   static void CallbackOK(wxButton &p_object, wxEvent &)
@@ -25,7 +26,7 @@ private:
   Bool OnClose(void);
 
 public:
-  dialogEfgSelectPlayer(Efg &, wxWindow * = 0);
+  dialogEfgSelectPlayer(const Efg &, bool p_chance = true, wxWindow * = 0);
   virtual ~dialogEfgSelectPlayer();
 
   int Completed(void) const { return m_completed; }

@@ -1,7 +1,7 @@
 //
 // FILE: treedrag.cc -- Implementation of dragging classes
 //
-//
+// $Id$
 //
 
 #include "wx.h"
@@ -231,7 +231,7 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
 	  ef.InsertAction(iset, iset->Actions()[br]);
       }
       else {
-	dialogEfgSelectPlayer dialog(ef, parent->GetParent());
+	dialogEfgSelectPlayer dialog(ef, true, parent->GetParent());
 	if (dialog.Completed() == wxOK) {
 	  EFPlayer *player = dialog.GetPlayer();
 	  if (player) ef.AppendNode(start_node, player, 1);

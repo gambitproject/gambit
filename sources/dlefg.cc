@@ -1,7 +1,7 @@
 //
 // FILE: dlefg.cc -- Extensive form-related dialog implementations
 //
-//
+// $Id$
 //
 
 #include "wx.h"
@@ -26,11 +26,14 @@
 //                  dialogEfgSelectPlayer: Member functions
 //=========================================================================
 
-dialogEfgSelectPlayer::dialogEfgSelectPlayer(Efg &p_efg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Player", TRUE), m_efg(p_efg)
+dialogEfgSelectPlayer::dialogEfgSelectPlayer(const Efg &p_efg, bool p_chance, 
+					     wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select Player", TRUE),
+    m_efg(p_efg), m_chance(p_chance)
 {
   m_playerNameList = new wxListBox(this, 0, "Player");
-  m_playerNameList->Append("Chance");
+  if (m_chance)
+    m_playerNameList->Append("Chance");
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     const gText &name = m_efg.Players()[pl]->GetName();
@@ -61,7 +64,6 @@ dialogEfgSelectPlayer::~dialogEfgSelectPlayer()
 
 void dialogEfgSelectPlayer::OnOK(void)
 {
-  m_playerSelected = m_playerNameList->GetSelection();
   m_completed = wxOK;
   Show(FALSE);
 }
@@ -81,10 +83,15 @@ Bool dialogEfgSelectPlayer::OnClose(void)
 
 EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
 {
-  if (m_playerSelected == 0)
-    return m_efg.GetChance();
+  int playerSelected = m_playerNameList->GetSelection();
+  if (m_chance) {
+    if (playerSelected == 0)
+      return m_efg.GetChance();
+    else
+      return m_efg.Players()[playerSelected];
+  }
   else
-    return m_efg.Players()[m_playerSelected];
+    return m_efg.Players()[playerSelected + 1];
 }
 
 //=========================================================================
