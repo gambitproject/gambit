@@ -31,34 +31,6 @@ public:
   bool MarkSubgames(void) const { return m_markSubgames; }
 };
 
-//------------
-// EnumPure
-//------------
-
-class guiefgEnumPureEfg : public guiEfgSolution {
-private:
-  int m_stopAfter;
-
-public:
-  guiefgEnumPureEfg(EfgShow *);
-  virtual ~guiefgEnumPureEfg()  { }
-
-  virtual gList<BehavSolution> Solve(const EFSupport &) const;
-  virtual bool SolveSetup(void);
-};
-
-class guiefgEnumPureNfg : public guiEfgSolution {
-private:
-  int m_stopAfter;
-
-public:
-  guiefgEnumPureNfg(EfgShow *);
-  virtual ~guiefgEnumPureNfg()  { }
-
-  virtual gList<BehavSolution> Solve(const EFSupport &) const;
-  virtual bool SolveSetup(void);
-};
-
 //-------------
 // EnumMixed
 //-------------

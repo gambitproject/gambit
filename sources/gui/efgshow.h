@@ -154,6 +154,8 @@ private:
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
   void OnToolsEquilibriumCustom(wxCommandEvent &);
+  void OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &);
+  void OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumQre(wxCommandEvent &);
 
   void OnToolsNormalReduced(wxCommandEvent &);
@@ -197,7 +199,7 @@ public:
   void OnSelectedMoved(const Node *n);
 
   // Solution interface to the algorithms
-  void PickSolutions(const Efg::Game &, Node *, gList<BehavSolution> &);
+  void PickSolutions(const Efg::Game &, gList<BehavSolution> &);
 
   // Solution interface to normal form
   void AddProfile(const BehavSolution &, bool map);

@@ -69,7 +69,7 @@ void guiSubgameSolver::BaseSelectSolutions(int p_subgame, const Efg::Game &p_efg
     return;
 
   if (p_solutions.Length() > 0 && p_efg.NumPlayerInfosets() > 0)
-    m_parent->PickSolutions(p_efg, m_subgameRoots[p_subgame], p_solutions);
+    m_parent->PickSolutions(p_efg, p_solutions);
 }
 
 #include "efdom.h"
@@ -535,136 +535,6 @@ bool guiefgLcpNfg::SolveSetup(void)
     return false;
 }
 
-
-//========================================================================
-//                            EnumPureSolve
-//========================================================================
-
-#include "psnesub.h"
-#include "dlenumpure.h"
-
-//---------------------
-// EnumPure on nfg
-//---------------------
-
-class guiSubgameEnumPureNfg : public efgEnumPureNfgSolve,
-			      public guiSubgameViaNfg {
-protected:
-  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
-		       gList<BehavSolution> &p_solutions)
-    { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewNormal(const Nfg &p_nfg, NFSupport &p_support)
-    { BaseViewNormal(p_nfg, p_support); }
-
-public:
-  guiSubgameEnumPureNfg(const Efg::Game &p_efg, const EFSupport &p_support,
-			bool p_eliminate, bool p_iterative, bool p_strong,
-			bool p_mixed, int p_stopAfter, gStatus &p_status,
-			EfgShow *p_parent = 0)
-    : efgEnumPureNfgSolve(p_support, p_stopAfter),
-      guiSubgameViaNfg(p_parent, p_efg,
-		       p_eliminate, p_iterative, p_strong, p_mixed)
-    { }
-  virtual ~guiSubgameEnumPureNfg() { }
-};
-
-guiefgEnumPureNfg::guiefgEnumPureNfg(EfgShow *p_parent)
-  : guiEfgSolution(p_parent)
-{ }
-
-gList<BehavSolution> guiefgEnumPureNfg::Solve(const EFSupport &p_support) const
-{
-  wxStatus status(m_parent, "EnumPureSolve Progress");
-
-  try {
-    return guiSubgameEnumPureNfg(p_support.GetGame(),
-				 p_support, m_eliminate, m_eliminateAll,
-				 !m_eliminateWeak, m_eliminateMixed,
-				 m_stopAfter,
-				 status, m_parent).Solve(p_support, status);
-  }
-  catch (gSignalBreak &) {
-    return gList<BehavSolution>();
-  }
-}
-
-bool guiefgEnumPureNfg::SolveSetup(void)
-{
-  dialogEnumPure dialog(m_parent, true, true); 
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_eliminate = dialog.Eliminate();
-    m_eliminateAll = dialog.EliminateAll();
-    m_eliminateWeak = dialog.EliminateWeak();
-    m_eliminateMixed = dialog.EliminateMixed();
-    m_markSubgames = dialog.MarkSubgames();
-    m_stopAfter = dialog.StopAfter();
-    return true;
-  }
-  else
-    return false;
-}
-
-
-//---------------------
-// EnumPure on efg
-//---------------------
-
-#include "efgpure.h"
-
-class guiEnumPureEfgSubgame : public efgEnumPure, public guiSubgameViaEfg {
-protected:
-  void SelectSolutions(int p_subgame, const Efg::Game &p_efg,
-		       gList<BehavSolution> &p_solutions)
-    { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
-  void ViewSubgame(int p_subgame, const Efg::Game &p_efg, EFSupport &p_support)
-    { BaseViewSubgame(p_subgame, p_efg, p_support); }
-
-public:
-  guiEnumPureEfgSubgame(const Efg::Game &p_efg, const EFSupport &p_support,
-			int p_stopAfter, 
-			bool p_eliminate, bool p_iterative, bool p_strong,
-			gStatus &p_status, EfgShow *p_parent = 0)
-    : efgEnumPure(p_stopAfter),
-      guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
-    { }
-  virtual ~guiEnumPureEfgSubgame() { }
-};
-
-guiefgEnumPureEfg::guiefgEnumPureEfg(EfgShow *p_parent)
-  : guiEfgSolution(p_parent)
-{ }
-
-gList<BehavSolution> guiefgEnumPureEfg::Solve(const EFSupport &p_support) const
-{
-  wxStatus status(m_parent, "EnumPureSolve Progress");
-
-  try {
-    return guiEnumPureEfgSubgame(p_support.GetGame(), p_support, m_stopAfter,
-				 m_eliminate, m_eliminateAll, !m_eliminateWeak,
-				 status, m_parent).Solve(p_support, status);
-  }
-  catch (gSignalBreak &) {
-    return gList<BehavSolution>();
-  }
-}
-
-bool guiefgEnumPureEfg::SolveSetup(void)
-{
-  dialogEnumPure dialog(m_parent, true);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_eliminate = dialog.Eliminate();
-    m_eliminateAll = dialog.EliminateAll();
-    m_eliminateWeak = dialog.EliminateWeak();
-    m_markSubgames = dialog.MarkSubgames();
-
-    m_stopAfter = dialog.StopAfter();
-    return true;
-  }
-  else
-    return false;
-}
 
 //========================================================================
 //                          EnumMixedSolve

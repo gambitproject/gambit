@@ -95,49 +95,6 @@ NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
 //                     Derived classes, by algorithm
 //=========================================================================
 
-//-----------
-// EnumPure
-//-----------
-
-#include "nfgpure.h"
-#include "dlenumpure.h"
-
-guinfgEnumPure::guinfgEnumPure(NfgShow *p_parent)
-  : guiNfgSolution(p_parent)
-{ }
-
-gList<MixedSolution> guinfgEnumPure::Solve(const NFSupport &p_support)
-{
-  wxStatus status(m_parent, "EnumPureSolve Progress");
-
-  gList<MixedSolution> solutions;
-
-  try {
-    nfgEnumPure solver;
-    solver.SetStopAfter(m_stopAfter);
-    solver.Solve(p_support, status, solutions);
-  }
-  catch (gSignalBreak &) { }
-  return solutions;
-}
-
-bool guinfgEnumPure::SolveSetup(void)
-{
-  dialogEnumPure dialog(m_parent, false, true);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_eliminate = dialog.Eliminate();
-    m_eliminateAll = dialog.EliminateAll();
-    m_eliminateWeak = dialog.EliminateWeak();
-    m_eliminateMixed = dialog.EliminateMixed();
-
-    m_stopAfter = dialog.StopAfter();
-    return true;
-  }
-  else
-    return false;
-}
-
 //------------
 // EnumMixed
 //------------

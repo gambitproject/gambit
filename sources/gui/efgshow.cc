@@ -63,6 +63,7 @@
 
 #include "dlqre.h"
 #include "efgqre.h"
+#include "algenumpure.h"
 
 #include "behavedit.h"
 
@@ -161,7 +162,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_STANDARD, 
 	   EfgShow::OnToolsEquilibriumStandard)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE, 
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomEfgEnumPure)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP,
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LP,
@@ -173,7 +174,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_QRE,
 	   EfgShow::OnToolsEquilibriumQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMPURE,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgEnumPure)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED, 
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LCP,
@@ -455,7 +456,7 @@ gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
 }
 
 
-void EfgShow::PickSolutions(const Efg::Game &p_efg, Node *p_rootnode,
+void EfgShow::PickSolutions(const Efg::Game &p_efg, 
 			    gList<BehavSolution> &p_solns)
 {
 #ifdef NOT_PORTED_YET
@@ -2200,6 +2201,27 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
 {
   int algorithm = p_event.GetId();
 
+  if (algorithm == efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE) {
+    gList<BehavSolution> solutions;
+    if (EnumPureEfg(this, *m_currentSupport, solutions)) {
+      for (int soln = 1; soln <= solutions.Length(); soln++) {
+	AddProfile(solutions[soln], true);
+      }
+
+      ChangeProfile(m_profileTable->Length());
+      UpdateMenus();
+      if (!m_solutionSashWindow->IsShown())  {
+	m_profileTable->Show(true);
+	m_solutionSashWindow->Show(true);
+	GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+	AdjustSizes();
+      }
+    }
+    return;
+  }
+
+
+
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
   if (m_efg.NumPlayerInfosets() == 0)  return;
@@ -2218,9 +2240,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiEfgSolution *solver = 0;
 
   switch (algorithm) {
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_ENUMPURE:
-    solver = new guiefgEnumPureEfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LCP:
     solver = new guiefgLcpEfg(this);
     break;
@@ -2237,9 +2256,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     solver = new guiefgQreEfg(this);
     break;
 
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMPURE: 
-    solver = new guiefgEnumPureNfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMMIXED:
     solver = new guiefgEnumMixedNfg(this);
     break;
@@ -2297,6 +2313,44 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     m_solutionSashWindow->Show(true);
     GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
     AdjustSizes();
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (EnumPureEfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgEnumPure(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (EnumPureNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
   }
 }
 

@@ -44,6 +44,7 @@
 #include "dlnfgplayers.h"
 #include "dlstrategies.h"
 
+#include "algenumpure.h"
 #include "dlqre.h"
 #include "nfgqre.h"
 
@@ -103,6 +104,8 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 	   NfgShow::OnToolsSupportSelectPrevious)
   EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_NEXT, NfgShow::OnToolsSupportSelectNext)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_STANDARD, NfgShow::OnToolsEquilibriumStandard)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
+	   NfgShow::OnToolsEquilibriumCustomEnumPure)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
 	   NfgShow::OnToolsEquilibriumCustomQre)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_YAMAMOTO,
@@ -1175,9 +1178,6 @@ void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiNfgSolution *solver;
 
   switch (id) {
-  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE:
-    solver = new guinfgEnumPure(this);
-    break;
   case NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED:
     solver = new guinfgEnumMixed(this);
     break;
@@ -1236,6 +1236,24 @@ void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
     
   delete solver;
   UpdateMenus();
+}
+
+void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
+{
+  gList<MixedSolution> solutions;
+  if (EnumPureNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
+    ChangeSolution(m_solutionTable->Length());
+
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+    }
+
+    UpdateMenus();
+  }
 }
 
 void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
