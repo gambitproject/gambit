@@ -457,10 +457,15 @@ dialogNfgSave::dialogNfgSave(const gText &p_name,
 
 void dialogNfgSave::OnBrowse(void)
 {
+#ifdef wx_motif
+  char *file = wxGetTextFromUser("Save data file", "Save data file",
+				 m_fileName->GetValue());
+#else
   char *file = wxFileSelector("Save data file", 
 			      gPathOnly(m_fileName->GetValue()),
 			      gFileNameFromPath(m_fileName->GetValue()),
 			      ".nfg", "*.nfg");
+#endif  // wx_motif
 
   if (file) {
     m_fileName->SetValue(file);

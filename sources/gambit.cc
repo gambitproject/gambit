@@ -382,9 +382,13 @@ void GambitFrame::LoadFile(const gText &p_filename)
   if (p_filename == "") {
     Enable(FALSE); // Don't allow anything while the dialog is up.
 
+#ifdef wx_motif
+    gText s = wxGetTextFromUser("Load data file", "Load data file",
+				gambitApp.CurrentDir());
+#else
     gText s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
 			     NULL, NULL, "*.?fg");
-
+#endif // wx_motif
     Enable(TRUE);
 
     if (s == "")

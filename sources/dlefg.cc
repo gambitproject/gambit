@@ -1021,11 +1021,15 @@ dialogEfgSave::dialogEfgSave(const gText &p_name,
 
 void dialogEfgSave::OnBrowse(void)
 {
+#ifdef wx_motif
+  char *file = wxGetTextFromUser("Save data file", "Save data file",
+				 m_fileName->GetValue());
+#else
   char *file = wxFileSelector("Save data file", 
 			      gPathOnly(m_fileName->GetValue()),
 			      gFileNameFromPath(m_fileName->GetValue()),
 			      ".efg", "*.efg");
-
+#endif  // wx_motif
   if (file) {
     m_fileName->SetValue(file);
   }
