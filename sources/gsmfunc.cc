@@ -64,7 +64,7 @@ void Init_userfunc( GSM* gsm )
 		     porVALUE, NO_DEFAULT_VALUE,
 		     PASS_BY_REFERENCE );
   func->SetParamInfo( prog, 1, "y", 
-		     porVALUE );
+				 porVALUE );
   gsm->AddFunction( func );
 
 }
@@ -97,7 +97,7 @@ ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
 
 ParamInfoType::ParamInfoType
 ( 
- const gString& name, 
+ const gString& name,
  const PortionType& type,
  Portion* default_value, 
  const bool pass_by_ref
@@ -163,7 +163,7 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
       _FuncInfo[ f_index ].ParamInfo[ index ] = 
 	func._FuncInfo[ f_index ].ParamInfo[ index ];
 
-      if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 )
+			if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue != 0 )
       {
 	_FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue = 
 	  _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue->ValCopy();
@@ -196,7 +196,7 @@ FuncDescObj::~FuncDescObj()
     if( _FuncInfo[ f_index ].UserDefined )
     {
       assert( _RefCountTable.IsDefined( _FuncInfo[ f_index ].FuncInstr ) );
-      assert( _RefCountTable( _FuncInfo[ f_index ].FuncInstr ) > 0 );
+			assert( _RefCountTable( _FuncInfo[ f_index ].FuncInstr ) > 0 );
       _RefCountTable( _FuncInfo[ f_index ].FuncInstr )--;
       if( _RefCountTable( _FuncInfo[ f_index ].FuncInstr ) == 0 )
       {
@@ -229,7 +229,7 @@ void FuncDescObj::SetFuncInfo
 
   for( i = 0; i < _NumFuncs; i++ )
   {
-    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
+		if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
@@ -262,7 +262,7 @@ void FuncDescObj::SetFuncInfo
     {
       f_index = i;
       break;
-    }
+		}
   }
 
   _SetFuncInfo( f_index, num_params );
@@ -660,15 +660,15 @@ int CallFuncObj::NumParams( void ) const
 
 bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
 {
-  bool        result = false;
+	bool        result = false;
   PortionType CalledType;
   PortionType ExpectedListType;
 
-  assert( p != 0 );
+	assert( p != 0 );
 
-  CalledType = p->Type();
+	CalledType = p->Type();
 
-  if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
+	if( (ExpectedType != porVALUE) && (ExpectedType & porLIST) )
   {
     if( CalledType == porLIST )
     {
@@ -680,15 +680,16 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionType ExpectedType ) const
       {
 	CalledType = ( (ListPortion*) p )->DataType();
 	ExpectedListType = ExpectedType & ~porLIST;
-	result = CalledType & ExpectedListType;
-      }
-    }
-  }
-  else // normal type checking
-  {
-    result = CalledType & ExpectedType;
-  }
-  return result;
+	if (CalledType & ExpectedType) result=true; else result=false;
+			}
+		}
+	}
+	else // normal type checking
+	{
+		if (CalledType & ExpectedType) result=true; else result=false;
+		long id=CalledType&ExpectedType;
+	}
+	return result;
 }
 
 
@@ -935,73 +936,73 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
 
 
-  // Attempt to identify the function being called out of all the
-  // overloaded versions.
+	// Attempt to identify the function being called out of all the
+	// overloaded versions.
 
-  if( _FuncIndex == -1 && _NumFuncs == 1 )
-    _FuncIndex = 0;
+	if( _FuncIndex == -1 && _NumFuncs == 1 )
+		_FuncIndex = 0;
 
-  if( _FuncIndex == -1 )
-  {
-    param_upper_bound = 0;
-    for( index = 0; index < _NumParams; index++ )
-    {
-      if( _Param[ index ] != 0 || _RunTimeParamInfo[ index ].Ref != 0 )
+	if( _FuncIndex == -1 )
+	{
+		param_upper_bound = 0;
+		for( index = 0; index < _NumParams; index++ )
+		{
+			if( _Param[ index ] != 0 || _RunTimeParamInfo[ index ].Ref != 0 )
 	param_upper_bound = index;
-    }
+		}
 
-    param_sets_matched = 0;
-    for( f_index = 0; f_index < _NumFuncs; f_index++ )
-    {
-      match_ok = true;
-      if( param_upper_bound >= _FuncInfo[ f_index ].NumParams )
+		param_sets_matched = 0;
+		for( f_index = 0; f_index < _NumFuncs; f_index++ )
+		{
+			match_ok = true;
+			if( param_upper_bound >= _FuncInfo[ f_index ].NumParams )
 	match_ok = false;
 
-      for( index = 0; 
-	  index < _FuncInfo[ f_index ].NumParams; 
-	  index++ )
-      {
+			for( index = 0;
+		index < _FuncInfo[ f_index ].NumParams;
+		index++ )
+			{
 	if( _Param[ index ] != 0 )
 	{
-	  // parameter is defined
-	  if( !_TypeMatch( _Param[ index ], 
-			  _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
-	    match_ok = false;
+		// parameter is defined
+		if( !_TypeMatch( _Param[ index ],
+				_FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
+			match_ok = false;
 	}
 	else
 	{
-	  // parameter is undefined
-	  if( _RunTimeParamInfo[ index ].Ref != 0 )
-	  {
-	    // specified undefined variable
-	    if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
-	      match_ok = false;
-	  }
+		// parameter is undefined
+		if( _RunTimeParamInfo[ index ].Ref != 0 )
+		{
+			// specified undefined variable
+			if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+				match_ok = false;
+		}
 
-	  if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
-	    match_ok = false;
+		if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
+			match_ok = false;
 	}
-      }
+			}
 
-      if( match_ok )
-      {
+			if( match_ok )
+			{
 	curr_f_index = f_index;
 	param_sets_matched++;
-      }
-    }
+			}
+		}
 
-    if( param_sets_matched == 1 )
-    {
-      _FuncIndex = curr_f_index;
-    }
-    else 
-    {
-      if( param_sets_matched > 1 )
+		if( param_sets_matched == 1 )
+		{
+			_FuncIndex = curr_f_index;
+		}
+		else
+		{
+			if( param_sets_matched > 1 )
 	_ErrorMessage( _StdErr, 5, 0, _FuncName );
-      else
+			else
 	_ErrorMessage( _StdErr, 8, 0, _FuncName );
-      _ErrorOccurred = true;
-    }
+			_ErrorOccurred = true;
+		}
   }
 
   
@@ -1279,8 +1280,8 @@ void CallFuncObj::_ErrorMessage
     s << "\", type mismatch\n";
     break;
   case 8:
-    s << "No matching parameter specifications found for " + str1 + "[]\n";
-    break;
+		s << "No matching parameter specifications found for " + str1 + "[]\n";
+		break;
   case 9:
     s << str1 << "[] required parameter #" << num1 << ", \"" << str2;
     s << "\", missing\n";
