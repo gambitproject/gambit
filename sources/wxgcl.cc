@@ -412,6 +412,8 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
     initString += "\"]\n";
   }
 
+  Show(true);
+
   gPreprocessor preproc(*m_environment, &cmdline, initString);
 
   wxBusyCursor cursor;
