@@ -196,25 +196,30 @@ void NfgSolveStandardDialog::StandardSettings(void)
   // One Perfect n person
   if (standard_type == STANDARD_PERFECT && 
       standard_num == STANDARD_ONE && nf.NumPlayers() != 2) {
-    Warn("One Perfect not implemented for n person games\n"
-	 "Using current settings\n");
+    algorithm = NFG_SIMPDIV_SOLUTION;
+    stopAfter = 1;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_WEAK;
   }
 
   // Two Perfect 2 person
-  if (standard_type == STANDARD_PERFECT && 
-      standard_num == STANDARD_TWO && nf.NumPlayers() == 2) {
+  if (standard_type == STANDARD_PERFECT
+      && standard_num == STANDARD_TWO
+      && nf.NumPlayers() == 2) {
     algorithm = (IsConstSum(nf)) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
     stopAfter = 2;
     dom_type = DOM_WEAK;
     all = TRUE;
     use_elimdom = TRUE;
+    Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
   }
 
   // Two Perfect n person
-  if (standard_type == STANDARD_PERFECT && 
-      standard_num == STANDARD_TWO && nf.NumPlayers() != 2) {
-    Warn("Two Perfect not implemented for n person games\n"
-	 "Using current settings\n");
+  if (standard_type == STANDARD_PERFECT
+      && standard_num == STANDARD_TWO
+      && nf.NumPlayers() != 2) {
+    throw guiBadStandardSolve("Two Perfect not implemented for n person games");
   }
 
   // All Perfect 2 person
@@ -232,8 +237,7 @@ void NfgSolveStandardDialog::StandardSettings(void)
   // All Perfect n person
   if (standard_type == STANDARD_PERFECT && 
       standard_num == STANDARD_ALL && nf.NumPlayers() != 2) {
-    Warn("All Perfect not implemented for n person games\n"
-	 "Using current settings\n");
+    throw guiBadStandardSolve("All Perfect not implemented for n-person games");
   }
 
   // -------- now write the new settings to file

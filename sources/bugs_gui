@@ -110,6 +110,11 @@ Bug D11: Scrolling problems
 For both EFGs and NFGs, using the arrow keys to scroll doesn't affect the
 scrollbar position and doesn't redraw the entire screen.
 
+COMMENT (magyar 1/8/99): I don't experience this problem in the Windows
+version at all, *except* when using the increase-magnification feature.
+The cursor is not always visible on the screen immediately following a
+zoom operation (but will become so after a move with the arrow keys)
+
 //------------------------------
 
 Bug D15:  Won't accept file name abbreviations
@@ -158,26 +163,22 @@ cursor, but this may be harder to achieve.
 
 Bug D19: Problems with Standard Solution output.  
 
-There are numerous problems with the GUI Standard Solutions output:
- 
-  All Sequential finds none on coord3.efg
+(magyar 1/8/98): I've removed the earlier list of problems for this
+bug since they have been rectified.  However, what still needs done
+is to make sure each combination is implemented correctly, and that
+the implementation squares with the UDF's provided with the GCL.
+For example, finding sequential equilibria in the extensive form
+seems to be implemented by liap on the normal form, where it seems
+to me it should be done on the *extensive* form.
 
-  AllNash finds none on 2x2x2.efg
+>Note:
+>  Rational precision should be greyed out in standard solution settings
+>  where not appropriate
 
-  AllNash crashes the GUI on 2x2x2.nfg  (fixed, RDM 12/27/98)
-
-  TwoNash only finds one on 2x2x2.nfg also on winkels.nfg
-
-  One Perfect Rational finds 3 on 2x2x2.nfg
-
-  All perfect only finds one on 2x2x2.nfg
-
-  Two Sequential finds only one on coord3.efg (after previously 
-  solving for solutions and deleting them).
-
-Note:
-  Rational precision should be greyed out in standard solution settings
-  where not appropriate
+This probably isn't going to be feasible.  In order to do so, we'd
+have to be able to change whether that box is enabled/disabled based
+upon the current values of the other boxes, which doesn't seem to be
+possible (at least the way it is implemented currently).
 
 //------------------------------
 
@@ -195,6 +196,9 @@ Bug D21: Problems with progress displays
 
   Convert Caro2-efg to nfg, and run All Nash.  Hit Cancel on 
   progress display -- causes crash.
+
+COMMENT (magyar 1/8/98): I was unable to reproduce this second problem
+in Win95.
 
 //------------------------------
 

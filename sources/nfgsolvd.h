@@ -83,4 +83,18 @@ public:
   virtual ~NfgSolveStandardDialog();
 };
 
+
+class guiBadStandardSolve : public gException {
+private:
+  gText m_description;
+
+public:
+  guiBadStandardSolve(const gText &p_description)
+    : m_description(p_description) { }
+  virtual ~guiBadStandardSolve() { }
+
+  gText Description(void) const { return m_description; }
+};
+  
+
 #endif // NFGSOLVD_H

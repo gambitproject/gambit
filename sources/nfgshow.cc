@@ -602,9 +602,16 @@ void NfgShow::Solve(int id)
 
 void NfgShow::SolveStandard(void)
 { 
-  NfgSolveStandardDialog *NSSD = new NfgSolveStandardDialog(nf, (wxWindow *) spread);
-  if (NSSD->Completed() != wxOK)  return;
-  delete NSSD;
+
+  try {
+    NfgSolveStandardDialog *NSSD = new NfgSolveStandardDialog(nf, (wxWindow *) spread);
+    if (NSSD->Completed() != wxOK)  return;
+    delete NSSD;
+  }
+  catch (guiBadStandardSolve &E) {
+    wxMessageBox((char *) E.Description(), "Standard Solution");
+    return;
+  }
 
   NfgSolveSettings NSD(nf);
 
