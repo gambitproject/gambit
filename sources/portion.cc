@@ -1343,7 +1343,7 @@ void MixedPortion::AssignFrom( Portion* p )
 
   delete *_Value;
 
-  if( !( (MixedPortion*) p )->Value()->Type() )
+  if( !( (MixedPortion*) p )->Value() )
   {
     *_Value = 0;
   }
@@ -1511,7 +1511,7 @@ void BehavPortion::AssignFrom( Portion* p )
 
   delete *_Value;
 
-  if( !( (BehavPortion*) p )->Value()->Type() )
+  if( !( (BehavPortion*) p )->Value() )
   {
     *_Value = 0;
   }
