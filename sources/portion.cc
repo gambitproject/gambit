@@ -288,12 +288,12 @@ PortionSpec PrecisionPortion::Spec(void) const
 void PrecisionPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << ((*_Value == precDOUBLE) ? "Machine" : "Rational");
+  s << ((*_Value == precDOUBLE) ? "Float" : "Rational");
 }
 
 gText PrecisionPortion::OutputString(void) const
 {
-  return (*_Value == precDOUBLE) ? "Machine" : "Rational";
+  return (*_Value == precDOUBLE) ? "Float" : "Rational";
 }
 
 Portion* PrecisionPortion::ValCopy(void) const

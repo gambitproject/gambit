@@ -48,7 +48,7 @@ OutputParamsSettings::OutputParamsSettings(void)
   		   defaults_file);
   trace_list = wxStringListInts(4);
   m_precisionList = new wxStringList;
-  m_precisionList->Add("Machine");
+  m_precisionList->Add("Float");
   m_precisionList->Add("Rational");
   outfile = 0;
   errfile = 0;
