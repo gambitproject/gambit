@@ -112,7 +112,7 @@ void BaseExtForm::WriteEfgFile(gOutput &f, Node *n) const
 
 void BaseExtForm::WriteEfgFile(gOutput &f) const
 {
-  f << "EFG " << ((Type() == DOUBLE) ? 'D' : 'R');
+  f << "EFG 1 " << ((Type() == DOUBLE) ? 'D' : 'R');
   f << " \"" << title << "\" { ";
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << players[i]->name << "\" ";

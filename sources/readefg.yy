@@ -46,7 +46,9 @@
 
 efgfile:    header { path.Push(E->RootNode()); } body
 
-header:     'E' 'F' 'G' type NAME { E->SetTitle(last_name); } playerlist
+header:     'E' 'F' 'G' version type NAME { E->SetTitle(last_name); } playerlist
+
+version:    NUMBER   { if (last_rational > (gRational) 1)  YYERROR; }
 
 type:       TYPEFLOAT { if (!E)  E = new ExtForm<double>;
                         else if (E->Type() != DOUBLE)   YYERROR;
