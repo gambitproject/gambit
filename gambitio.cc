@@ -112,6 +112,12 @@ int gFileInput::eof(void) const
   return feof(f);
 }
 
+void gFileInput::seekp(long pos) const
+{
+  assert(f);
+  fseek(f, pos, 0);
+}
+
 int gFileInput::IsValid(void) const
 {
   return (f != 0);

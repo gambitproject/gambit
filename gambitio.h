@@ -33,6 +33,7 @@ class gInput  {
     virtual int get(char &c) = 0;
     virtual void unget(char c) = 0;
     virtual int eof(void) const = 0;
+    virtual void seekp(long x) const = 0;
 
     virtual int IsValid(void) const = 0;
 };
@@ -64,6 +65,7 @@ class gFileInput : public gInput  {
     int get(char &c);
     void unget(char c);
     int eof(void) const;
+    void seekp(long x) const;
 
     int IsValid(void) const;
 };

@@ -1,7 +1,22 @@
+//#
+//# FILE: equdata.cc
+//#
+//# $Id$
+//#
+
 #include "equdata.h"
 #include "equdflt.h"
 
-void FindStringInFile(gInput &in,const char *s);
+// Find String In File -- uses a file pointer to find a string in the file.
+// This is useful for quickly getting to the section of the file you need
+void FindStringInFile(gInput &in,const char *s)
+{
+  char fsif_str[200];
+  do  {
+    in >> fsif_str;
+  } while (strcmp(fsif_str,s) != 0 && !in.eof() && in.IsValid());
+  assert(!in.eof() && in.IsValid());
+}
 
 //***********************CONSTRUCTORS FOR FILE HEADER***********************
 FileHeader::FileHeader(const char *in_filename,Bool want_matrix)
