@@ -616,6 +616,23 @@ Portion *gclFunctionDef::Evaluate(void)
   return new BoolPortion(true);
 }
 
+//-----------------
+// DeleteFunction
+//-----------------
+
+gclDeleteFunction::gclDeleteFunction(gclFunction *p_function)
+  : func(p_function)
+{ }
+
+gclDeleteFunction::~gclDeleteFunction()
+{ }
+
+Portion *gclDeleteFunction::Evaluate(void)
+{
+  _gsm.DeleteFunction(func);
+  return new BoolPortion(true);
+}
+
 
 
 

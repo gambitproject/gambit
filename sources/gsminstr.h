@@ -6,11 +6,8 @@
 // $Id$
 //
 
-
-
 #ifndef GSMINSTR_H
 #define GSMINSTR_H
-
 
 #include "gtext.h"
 #include "gmisc.h"
@@ -171,6 +168,17 @@ class gclFunctionDef : public gclExpression  {
     virtual ~gclFunctionDef();
 
     Portion *Evaluate(void);
+};
+
+class gclDeleteFunction : public gclExpression  {
+private:
+  gclFunction *func;
+
+public:
+  gclDeleteFunction(gclFunction *f);
+  virtual ~gclDeleteFunction();
+
+  Portion *Evaluate(void);
 };
 
 class gclConstExpr : public gclExpression    {
