@@ -3545,6 +3545,7 @@ appreciate getting feedback on this.
 # ElimAllDom 
   ElimDom 
 # ElimDom 
+  IsDominated
 # NthElement
   PossibleNashSupports
   RemoveAction
@@ -3812,6 +3813,48 @@ The optional parameter \verb+time+, if specified, returns the amount
 of time consumed by the conversion.
 
 \item [See also:] \verb+Nfg+.
+\ed
+
+\item\lex{AllNashSolve}
+\protect \large \begin{verbatim}
+AllNashSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, {nEvals<->0}, 
+              {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+              {singularsupps<->{  }}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd
+Solves for all totally mixed equilibrium on the support.  
+\verb+support+.  
+
+This algorithm iterates through all supports, and uses PolEnumSolve to
+find the full support equilibria on each support.  The following
+optional parameters may be used to modify the behavior of the
+algorithm: 
+\bd
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[precision:] Determines the precision of the computation. Default is
+floating point precision (\verb+Float+). 
+\item
+[nEvals:] Returns the number of function evaluations done by the
+algorithm.
+\item
+[time:] Returns the time elapsed during the execution
+of the algorithm.
+\item
+[traceFile:] A file containing a log of more detailed information on the
+execution of the algorithm.  By default, no logging is done.
+\item
+[traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to no output
+at all.
+\item
+[singularsupps:] Returns a list of the supports which have singular solutions.  
+\ed
+
+\item [See also:] \verb+PolEnumSolve+, \verb+PossibleNashSupports+
 \ed
 
 \item\lex{And} 
@@ -4936,6 +4979,43 @@ IsDefined[x->T] =: BOOLEAN
 \bd
 Returns \verb+True+ if \verb+x+ has been defined.  Useful for testing
 the existence of static variables.
+\ed
+
+\item\lex{IsDominated}
+\protect \large \begin{verbatim}
+IsDominated[strategy->STRATEGY, support->NFSUPPORT, {strong->False}, 
+            {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: BOOLEAN
+IsDominated[action->ACTION, support->EFSUPPORT, {strong->False}, 
+            {conditional->False}, {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: BOOLEAN 
+\end{verbatim}\normalsize
+
+\bd 
+Determines if the \verb+strategy+ or \verb+action+ is dominated in
+\verb+support+.  The following optional parameters may be specified to
+modify the behavior of the elimination:
+
+\bd
+\item [strong:] By default, determines if the strategy or action is
+weakly dominated.  By specifying \verb+True+, strong dominance is
+used.
+\item [mixed:] By default, only checks for domination by pure
+strategies or actions.  Specified \verb+True+, to check for domination
+by mixtures over other strategies.  Note that mixed domination is only
+implemented for normal form games (i.e, for the first function
+prototype above).
+\item [conditional:] If this is true, checks for conditional domination (only applicable to extensive form games (i. e., for the second function prototype above).
+\item [precision:] Default precision is Rational.  Note that the precision
+parameter is only applicable for mixed domination.  Pure strategy
+domination always uses Rational precision.
+\item [time:] Returns the time consumed by the computation.
+\item [traceFile:] A file containing a log of more detailed information
+on the elimination process.  By default, no logging is done.
+\item [traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to no output
+at all.
+\ed
 \ed
 
 \item\lex{IsEof}
@@ -6116,7 +6196,7 @@ execution of the algorithm.  By default, no logging is done.
 Higher integers correspond to more detail; zero corresponds to no output
 at all.
 \ed
-\item [See also:] \verb+EnumNashSupports+.
+\item [See also:] \verb+PossibleNashSupports+, \verb+AllNashSolve+.
 \ed
 
 \item\lex{PossibleNashSupports}
