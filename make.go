@@ -56,11 +56,11 @@ GLIB_OBJECTS = gmisc.o gambitio.o garray.o gblock.o gstring.o integer.o \
 
 GAME_SOURCES = readnfg.cc readefg.cc nfg.cc nfgdbl.cc nfgrat.cc nfgutils.cc \
 		efg.cc efgdbl.cc efgrat.cc nfstrat.cc efgnfgr.cc efgutils.cc \
-		efstrat.cc efgnfgd.cc efdom.cc
+		efstrat.cc efgnfgd.cc efdom.cc efgnfg.cc
 
 GAME_OBJECTS = readnfg.o readefg.o nfg.o nfgdbl.o nfgrat.o nfgutils.o \
 		efg.o efgdbl.o efgrat.o nfstrat.o efgnfgr.o efgutils.o \
-		efstrat.o efgnfgd.o efdom.o 
+		efstrat.o efgnfgd.o efdom.o efgnfg.o
 
 EALG_SOURCES =  egobit.cc eliap.cc seqform.cc efgcsum.cc \
 		psnesub.cc efgpure.cc lemkesub.cc liapsub.cc simpsub.cc \
