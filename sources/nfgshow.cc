@@ -90,12 +90,14 @@ void NfgShow::UpdateVals(void)
     if (spread->HaveDom()) { 
       int dom_pos = 1+spread->HaveProbs();
       Strategy *strategy = cur_sup->Strategies(pl1)[i];
-      bool dominated = cur_sup->IsDominated(strategy, false);
-      if (dominated) { 
-	spread->SetCell(i, cols+dom_pos, "Y");
+      if (cur_sup->IsDominated(strategy, true)) {
+	spread->SetCell(i, cols+dom_pos, "S");
+      }
+      else if (cur_sup->IsDominated(strategy, false)){
+	spread->SetCell(i, cols+dom_pos, "W");
       }
       else {
-	spread->SetCell(i, cols+dom_pos, "N");
+        spread->SetCell(i, cols+dom_pos, "N");
       }
     }
 
