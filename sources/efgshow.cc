@@ -536,58 +536,44 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
     if (!n || !cur_soln) return "N/A";
     
     const BehavSolution &cur = solns[cur_soln];
-    int n_index = all_nodes.Find((Node *const)n);
     
     switch (what)
     {
     case tRealizProb:           // terminal ok
-        return ToText(cur.NodeRealizProbs()[n_index],
-		      tw->NumDecimals());
+        return ToText(cur.RealizProb(n), tw->NumDecimals());
     case tBeliefProb: // terminal ok
     {
         if (!n->GetPlayer()) return "N/A";
         if (n->GetPlayer()->IsChance()) return "N/A";
-        // Figure out what member # this node is in its iset
-        int memb_num;
-        for (memb_num = 1; n->GetInfoset()->Members()[memb_num] != n; memb_num++) ;
-        
-        return ToText((((BehavSolution &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
-                                                         n->GetInfoset()->GetNumber(), memb_num), tw->NumDecimals());
+        return ToText(cur.BeliefProb(n), tw->NumDecimals());
     }
     case tNodeValue:  // terminal ok
     {
         gText tmp = "(";
         for (i = 1; i <= ef.NumPlayers(); i++)
-            tmp += ToText(cur.NodeValues(i)[n_index], tw->NumDecimals())+((i == ef.NumPlayers()) ? ")" : ",");
+            tmp += ToText(cur.NodeValue(n)[i], tw->NumDecimals())+((i == ef.NumPlayers()) ? ")" : ",");
         return tmp;
     }
     case tIsetProb: // terminal not ok
     {
         if (!n->GetPlayer()) return "N/A";
         if (n->GetPlayer()->IsChance()) return "N/A";
-        gDPVector<gNumber> value(ef.NumActions());
-        gPVector<gNumber> probs(ef.NumInfosets());
-        cur.CondPayoff(value, probs);
-        return ToText(probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()), tw->NumDecimals());
+        return ToText(cur.IsetProb(n->GetInfoset()), tw->NumDecimals());
     }
     case tBranchVal: // terminal not ok
     {
         if (!n->GetPlayer()) return "N/A";
         if (n->GetPlayer()->IsChance()) return "N/A";
-        gDPVector<gNumber> value(ef.NumActions());
-        gPVector<gNumber> probs(ef.NumInfosets());
-        cur.CondPayoff(value, probs);
-        if (probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()) > gNumber(0))
-            return ToText(value(n->GetPlayer()->GetNumber(),
-                                n->GetInfoset()->GetNumber(), br),
-			  tw->NumDecimals());
+        if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
+	    return ToText(cur.ActionValue(n->GetInfoset()->Actions()[br]),tw->NumDecimals());
+
         else        // this is due to a bug in the value computation
             return "N/A";
     }
     case tBranchProb:   // terminal not ok
         if (!n->GetPlayer()) return "N/A";
         // For chance node prob, see first line of this function
-        return ToText(cur.GetValue(n->GetInfoset(), br), tw->NumDecimals());
+	return ToText(cur.ActionProb(n->GetInfoset()->Actions()[br]),tw->NumDecimals());
     case tIsetValue:    // terminal not ok, not implemented
         return "N.I.";
     default:
@@ -608,7 +594,7 @@ gNumber EfgShow::ActionProb(const Node *n, int br)
     if (n->GetPlayer()->IsChance())
       return ef.GetChanceProb(n->GetInfoset(), br);
   if (cur_soln && n->GetInfoset())
-    return solns[cur_soln].GetValue(n->GetInfoset(), br);
+    return solns[cur_soln].ActionProb(n->GetInfoset()->Actions()[br]);
   return -1;
 }
 

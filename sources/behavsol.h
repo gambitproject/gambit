@@ -41,7 +41,6 @@ protected:
   mutable bool m_checkedANFNash,  m_checkedNash;
   mutable bool m_checkedSubgamePerfect, m_checkedSequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
-  mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   mutable gPVector<gNumber> *m_rnf_regret;
   unsigned int m_id;
   mutable long m_revision;
@@ -167,8 +166,8 @@ public:
   const gNumber &QreLambda(void) const { if(!IsValid()) Invalidate(); return m_qreLambda; }
   const gNumber &QreValue(void) const { if(!IsValid()) Invalidate(); return m_qreValue; }
   const gNumber &LiapValue(void) const;
-  const gDPVector<gNumber> &Beliefs(void) const;
-  const gDPVector<gNumber> &Regret(void) const;
+  //  const gDPVector<gNumber> &Beliefs(void) const;
+  //  const gDPVector<gNumber> &Regret(void) const;
   const gPVector<gNumber> &ReducedNormalFormRegret(void) const;
   const gNumber MaxRegret(void) const;
   const gNumber MaxRNFRegret(void) const;
@@ -184,23 +183,12 @@ public:
   void Invalidate(void) const;
   bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
 
-
-
   // COMPUTATION OF INTERESTING QUANTITIES
   gNumber Payoff(int pl) const   { return m_profile->Payoff(pl); }
   void CondPayoff(gDPVector<gNumber> &value, gPVector<gNumber> &probs) const
     { m_profile->CondPayoff(value, probs); }
-  gArray<gNumber> NodeValues(int pl) const
-    { return m_profile->NodeValues(pl); }
-  gArray<gNumber> NodeRealizProbs(void) const
-    { return m_profile->NodeRealizProbs(); }
-  const gNumber &GetValue(Infoset *s, int act) const
-    { return m_profile->GetValue(s->GetAction(act)); }
-  // the above is OK since BehavSolution has full support.  Otherwise, 
-  //     { return m_profile->GetValue(m_profile->Support().Actions(s)[act]); }
-  const gNumber &GetValue(Action *act) const
-    { return m_profile->GetValue(act); }
-
+  
+  // DATA ACCESS
   gNumber RealizProb(const Node *node) const
     { return m_profile->GetRealizProb(node); }
   gNumber BeliefProb(const Node *node) const
@@ -213,7 +201,8 @@ public:
     { return m_profile->GetActionProb(act); }
   gNumber ActionValue(const Action *act) const
     { return m_profile->GetActionValue(act); }
-
+  gNumber Regret(const Action *act) const
+    { return m_profile->GetRegret(act); }
 
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO NASH, ANF NASH
   bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;

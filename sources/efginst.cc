@@ -26,21 +26,6 @@ const double BehavProfile<double>::Payoff(const EFOutcome *o, int pl) const
   return o->double_payoffs[pl];
 }
 
-const gNumber PureBehavProfile<gNumber>::Payoff(const EFOutcome *o, const int &pl) const
-{
-  if (o)
-    return o->payoffs[pl];
-  else
-    return (gNumber) 0;
-}
-
-const gNumber PureBehavProfile<gNumber>
-::ChanceProb(const Infoset *iset , const int &act) const
-{
-  ChanceInfoset *t = (ChanceInfoset *) iset;
-  return t->probs[act];
-}
-
 template class BehavProfile<double>;
 template class BehavAssessment<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
@@ -55,42 +40,6 @@ template class BehavProfile<gNumber>;
 template class BehavAssessment<gNumber>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
-
-/*
-template class PureBehavProfile<double>;
-
-void PureBehavProfile<gRational>::Payoff(const Node *n, const gRational prob, 
-					 gArray<gRational> &payoff) const
-{
-  if (n->GetOutcome())
-    for (int pl = 1; pl <= E->NumPlayers(); pl++)
-      payoff[pl] += prob * Payoff(n->GetOutcome(), pl);
-  
-  if (n->GetInfoset() && n->GetPlayer()->IsChance())
-    for (int i = 1; i <= n->NumChildren(); i++)
-      Payoff(n->GetChild(i),
-	     prob * E->GetChanceProb(n->GetInfoset(), i).operator gRational(), payoff);
-  else if (n->GetInfoset())
-    Payoff(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
-	   prob, payoff);
-}
-
-void PureBehavProfile<gRational>::InfosetProbs(Node *n, gRational prob,
-					       gPVector<gRational> &probs) const
-{
-  if (n->GetInfoset() && n->GetPlayer()->IsChance())
-    for (int i = 1; i <= n->NumChildren(); i++)
-      InfosetProbs(n->GetChild(i),
-		   prob * E->GetChanceProb(n->GetInfoset(), i).operator gRational(), probs);
-  else if (n->GetInfoset())  {
-    probs(n->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()) += prob;
-    InfosetProbs(n->GetChild((*profile[n->GetPlayer()->GetNumber()])[n->GetInfoset()->GetNumber()]->GetNumber()),
-		 prob, probs);
-  }
-}
-
-template class PureBehavProfile<gRational>;
-*/
 
 template class PureBehavProfile<gNumber>;
 

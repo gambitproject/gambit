@@ -58,15 +58,14 @@ protected:
 
   const T &ActionValue(const Action * act) const;
   const T &ActionProb(const Action *) const;
+  const T &Regret(const Action * act) const;
   T &ActionValue(const Action * act);
   T &ActionProb(const Action *);
+  T &Regret(const Action *);
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
   void Payoff(Node *, T, int, T &) const;
-  void NodeValues(BehavNode *, int, gArray<T> &, int &) const;
   void CondPayoff(Node *, T, gPVector<T> &, gDPVector<T> &) const;
-  void NodeRealizProbs(BehavNode *, T, int &, gArray<T> &) const;
-  void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
   const T Payoff(const EFOutcome *o, int pl) const;
   const T &ChanceProb(const Action *act) const;
   
@@ -74,8 +73,6 @@ protected:
   void ComputeSolutionDataPass1(const Node *node);
   void ComputeSolutionData(void);
 
-  void NodeRealizProbs(Node *node, T prob) const;
-  
   void BehaviorStrat(const Efg &, int, BehavNode *);
   void RealizationProbs(const MixedProfile<T> &, const Efg &,
 			int pl, const gArray<int> *const, BehavNode *);
@@ -111,7 +108,6 @@ protected:
   
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
   
-  // void BehavProfile<T>::DeviationInfosetsRECURSION(gList<const Infoset *> &,
   void DeviationInfosetsRECURSION(gList<const Infoset *> &,
 				  const EFSupport & big_supp,
 				  const EFPlayer *pl,
@@ -206,11 +202,8 @@ public:
   
   virtual bool IsAssessment(void) const { return false; }
   
-  const T &GetValue(const Action *)       const; 
-  
   T LiapValue(void) const;
-  void Gripe(gDPVector<T> &value) const;
-  T MaxGripe(void) const;
+  T MaxRegret(void);
   
   // OPERATOR OVERLOADING
   bool operator==(const BehavProfile<T> &) const;
@@ -222,12 +215,8 @@ public:
   const T &GetIsetValue(const Infoset *iset);
   const T &GetActionProb(const Action *act) const;
   const T &GetActionValue(const Action *act);
+  const T &GetRegret(const Action *act);
 
-  //  const T &operator()(Action *) const;
-  //  T &operator()(Action *);
-  //  T &operator()(int a, int b, int c);
-  //  const T &operator()(int a, int b, int c) const;
-  
   void Dump(gOutput &) const;
   
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH, NASH
@@ -237,15 +226,11 @@ public:
   // COMPUTATION OF INTERESTING QUANTITIES
   T Payoff(int p_player) const;
   
-  gArray<T> NodeValues(int p_player) const;
-  gArray<T> NodeRealizProbs(void) const;
-  
   virtual void CondPayoff(gDPVector<T> &, gPVector<T> &) const;
-  virtual gDPVector<T> Beliefs(void) const;
+  gDPVector<T> Beliefs(void);
   
   void Centroid(void) const;
 
-  void NodeRealizProb(void) const;
   bool IsInstalled(void) const;  
   void Invalidate(void) const {m_cached_data=false;}
 };

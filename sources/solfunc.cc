@@ -51,34 +51,6 @@ static Portion *GSM_ActionProb(Portion **param)
     return new NumberPortion(0.0);
 }
 
-//----------------
-// ActionProbs
-//----------------
-
-static Portion *GSM_ActionProbs(Portion **param)
-{
-  const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  const Efg &efg = profile->Game();
-
-  ListPortion *por = new ListPortion;
-  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
-    EFPlayer *player = efg.Players()[pl];
-    ListPortion *p1 = new ListPortion;
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->Infosets()[iset];
-      ListPortion *p2 = new ListPortion;
-      for (int act = 1; act <= infoset->NumActions(); act++) 
-	p2->Append(new NumberPortion((*profile)(infoset->Actions()[act])));
-      p1->Append(p2);
-    }
-    por->Append(p1);
-  }
-
-  return por;
-}
-
-
-
 //------------------
 // ActionValue
 //------------------
@@ -100,50 +72,6 @@ static Portion *GSM_ActionValue(Portion **param)
   else
     return new NullPortion(porNUMBER);
 }
-
-
-//-----------------
-// ActionValues
-//-----------------
-
-static Portion *GSM_ActionValues(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-
-  const EFSupport &support = bp->Support(); 
-  Efg *E = &bp->Game();
-  ListPortion *por = new ListPortion; 
-  
-  gDPVector<gNumber> values(E->NumActions());
-  gPVector<gNumber> probs(E->NumInfosets());
-
-  bp->CondPayoff(values, probs);
-  
-  for (int pl = 1; pl <= E->NumPlayers(); pl++)  {
-    EFPlayer *player = E->Players()[pl];
-    ListPortion *p1 = new ListPortion;
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->Infosets()[iset];
-      ListPortion *p2 = new ListPortion;
- 
-      gVector<double> ret(infoset->NumActions());
-      for (int act = 1; act <= infoset->NumActions(); act++)  {
-	if (support.Find(infoset->Actions()[act]) &&
-	    probs(pl, iset) > gNumber(0.0))
-	  p2->Append(new NumberPortion(values(pl, iset,
-		      support.Find(infoset->Actions()[act]))));
-	else
-	  p2->Append(new NullPortion(porNUMBER));
-      }
-      p1->Append(p2);
-    }
-    por->Append(p1);
-  }
-
-  return por;
-}
-
-
 
 //--------------
 // Behav
@@ -169,18 +97,6 @@ static Portion *GSM_Belief(Portion **param)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bp->BeliefProb(n));
 }
-
-
-//-------------
-// Beliefs
-//-------------
-
-static Portion *GSM_Beliefs(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  return gDPVectorToList(bp->Beliefs());
-}
-
 
 //-------
 // Game
@@ -286,31 +202,6 @@ static Portion *GSM_InfosetProb(Portion **param)
   return new NumberPortion(bp->IsetProb(s));
 }
 
-
-//----------------
-// InfosetProbs
-//----------------
-
-static Portion *GSM_InfosetProbs(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-
-  Efg *E = &bp->Game();
-
-  gDPVector<gNumber> values(E->NumActions());
-  gPVector<gNumber> probs(E->NumInfosets());
-
-  bp->CondPayoff(values, probs);
-
-  ListPortion *ret = new ListPortion;
-
-  for (int i = 1; i <= E->NumPlayers(); i++)
-    ret->Append(ArrayToList(probs.GetRow(i)));
-
-  return ret;
-}
-
-
 //---------
 // IsNash
 //---------
@@ -407,7 +298,6 @@ Portion* GSM_Mixed(Portion** param)
   return new MixedPortion(new MixedSolution(MixedProfile<gNumber>(*S)));
 }
 
-
 //----------------
 // NodeValue
 //----------------
@@ -419,19 +309,6 @@ static Portion *GSM_NodeValue(Portion **param)
   Node* n = ((NodePortion*) param[2])->Value();
 
   return new NumberPortion(bp->NodeValue(n)[p->GetNumber()]);
-}
-
-
-//----------------
-// NodeValues
-//----------------
-
-static Portion *GSM_NodeValues(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
-
-  return ArrayToList(bp->NodeValues(p->GetNumber()));
 }
 
 //----------------
@@ -446,17 +323,6 @@ static Portion *GSM_RealizProb(Portion **param)
   return new NumberPortion(bp->RealizProb(n)); 
 }  
 
-//----------------
-// RealizProbs
-//----------------
-
-static Portion *GSM_RealizProbs(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  
-  return ArrayToList(bp->NodeRealizProbs());
-}  
-  
 //-----------
 // Regret
 //-----------
@@ -479,14 +345,11 @@ static Portion *GSM_Regret_Behav(Portion **param)
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
 
   const Action* a = ((ActionPortion*) param[1])->Value();
-  Infoset* s = a->BelongsTo();
-  EFPlayer* p = s->GetPlayer();
 
-  if (s->IsChanceInfoset())
+  if (a->BelongsTo()->IsChanceInfoset())
     return new NullPortion(porNUMBER);
   
-  return new NumberPortion(P->Regret()(p->GetNumber(), s->GetNumber(),
-					 a->GetNumber()));
+  return new NumberPortion(P->Regret(a));
 }
 
 //------------
@@ -513,13 +376,6 @@ static Portion *GSM_Regrets_Mixed(Portion **param)
   }
 
   return por;
-}
-
-
-static Portion *GSM_Regrets_Behav(Portion **param)
-{
-  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
-  return gDPVectorToList(bp->Regret());
 }
 
 static Portion *GSM_NfgRegrets_Behav(Portion **param)
@@ -736,15 +592,15 @@ void Init_solfunc(GSM *gsm)
       { "Accuracy[profile->MIXED] =: NUMBER", GSM_Accuracy_Mixed },
       { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
  	GSM_ActionProb },
-      { "ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
-	GSM_ActionProbs },
+      //      { "ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
+      //	GSM_ActionProbs },
       { "ActionValue[profile->BEHAV, action->ACTION] =: NUMBER",
 	GSM_ActionValue },
-      { "ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
-	GSM_ActionValues },
+      //      { "ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
+      //	GSM_ActionValues },
       { "Behav[support->EFSUPPORT] =: BEHAV", GSM_Behav },
       { "Belief[profile->BEHAV, node->NODE] =: NUMBER", GSM_Belief },
-      { "Beliefs[profile->BEHAV] =: LIST(NUMBER)", GSM_Beliefs },
+      //      { "Beliefs[profile->BEHAV] =: LIST(NUMBER)", GSM_Beliefs },
       { "Game[profile->MIXED] =: NFG", GSM_Game_Mixed },
       { "Game[profile->BEHAV] =: EFG", GSM_Game_EfgTypes },
       { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
@@ -758,8 +614,8 @@ void Init_solfunc(GSM *gsm)
       { "QreValue[profile->BEHAV] =: NUMBER", GSM_QreValue_Behav },
       { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetProb },
-      { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
-	GSM_InfosetProbs },
+      //      { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
+      //	GSM_InfosetProbs },
       { "IsNash[profile->BEHAV] =: BOOLEAN", GSM_IsNash_Behav },
       { "IsANFNash[profile->BEHAV] =: BOOLEAN", GSM_IsANFNash_Behav },
       { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
@@ -771,16 +627,16 @@ void Init_solfunc(GSM *gsm)
       { "Mixed[support->NFSUPPORT] =: MIXED", GSM_Mixed },
       { "NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER",
 	GSM_NodeValue },
-      { "NodeValues[profile->BEHAV, player->EFPLAYER] =: LIST(NUMBER)",
-	GSM_NodeValues },
+      //      { "NodeValues[profile->BEHAV, player->EFPLAYER] =: LIST(NUMBER)",
+      //	GSM_NodeValues },
       { "RealizProb[profile->BEHAV, node->NODE] =: NUMBER", GSM_RealizProb },
-      { "RealizProbs[profile->BEHAV] =: LIST(NUMBER)", GSM_RealizProbs },
+      //      { "RealizProbs[profile->BEHAV] =: LIST(NUMBER)", GSM_RealizProbs },
       { "Regret[profile->BEHAV, action->ACTION] =: NUMBER",
 	GSM_Regret_Behav },
       { "Regret[profile->MIXED, strategy->STRATEGY] =: NUMBER",
 	GSM_Regret_Mixed },
-      { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
-	GSM_Regrets_Behav },
+      //      { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
+      //	GSM_Regrets_Behav },
       { "NfgRegrets[profile->BEHAV] =: LIST(NUMBER)", 
 	GSM_NfgRegrets_Behav },
       { "Regrets[profile->MIXED] =: LIST(LIST(NUMBER))", GSM_Regrets_Mixed },

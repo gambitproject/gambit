@@ -89,7 +89,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_liapValue(-1), m_rnf_regret(0), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -119,7 +119,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_liapValue(-1), m_rnf_regret(0), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   gEpsilon(m_epsilon);
@@ -148,7 +148,7 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_checkedANFNash(false), m_checkedNash(false),
     m_checkedSubgamePerfect(false), m_checkedSequential(false), 
     m_qreLambda(-1), m_qreValue(-1),
-    m_liapValue(-1), m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_liapValue(-1), m_rnf_regret(0), 
     m_id(0), m_revision(p_profile.Game().RevisionNumber())
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -190,15 +190,9 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
-    m_beliefs(0), m_regret(0), m_rnf_regret(0), 
+    m_rnf_regret(0), 
     m_id(0), m_revision(p_solution.m_revision)
 {
-  if (p_solution.m_beliefs) {
-    m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
-  }
-  if (p_solution.m_regret) {
-    m_regret = new gDPVector<gNumber>(*p_solution.m_regret);   
-  }
   if (p_solution.m_rnf_regret) {
     m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);   
   }
@@ -207,8 +201,6 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
 BehavSolution::~BehavSolution() 
 { 
   delete m_profile;
-  if (m_beliefs) delete m_beliefs;
-  if (m_regret)  delete m_regret;
   if (m_rnf_regret)  delete m_rnf_regret;
 }
 
@@ -234,18 +226,6 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_liapValue = p_solution.m_liapValue;
     m_id = p_solution.m_id;
     m_revision = p_solution.m_revision;
-    if (m_beliefs)   delete m_beliefs;
-    if (p_solution.m_beliefs)
-      m_beliefs = new gDPVector<gNumber>(*p_solution.m_beliefs);
-    else
-      m_beliefs = 0;
-    if (m_regret)   delete m_regret;
-    if (p_solution.m_regret) {
-      m_regret = new gDPVector<gNumber>(*p_solution.m_regret);
-    }
-    else {
-      m_regret = 0;
-    }
     if (m_rnf_regret)   delete m_rnf_regret;
     if (p_solution.m_rnf_regret) {
       m_rnf_regret = new gPVector<gNumber>(*p_solution.m_rnf_regret);
@@ -282,8 +262,8 @@ void BehavSolution::CheckIsNash(void) const
 	
 	if (IsPerfectRecall(m_profile->Game())) { 
 	  gStatus &m_status = gstatus;
-	  // not sure MaxGripe does the right thing here
-	  m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
+	  // not sure MaxRegret does the right thing here
+	  m_isNash = (m_profile->MaxRegret() <= m_epsilon  &&
 		      ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
 	}
     }
@@ -567,15 +547,6 @@ void BehavSolution::Invalidate(void) const
   m_qreValue = -1;
   m_liapValue = -1;
 
-  if (m_beliefs) { 
-    delete m_beliefs;
-    m_beliefs = 0;
-  }
-  
-  if (m_regret)  {
-    delete m_regret;
-    m_regret = 0;
-  }
   if (m_rnf_regret)  {
     delete m_rnf_regret;
     m_rnf_regret = 0;
@@ -586,26 +557,6 @@ void BehavSolution::Invalidate(void) const
 //-----------------------------------------
 // Computation of interesting quantities
 //-----------------------------------------
-
-const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
-{ 
-  if(!IsValid()) Invalidate();
-  if (!m_beliefs) 
-    m_beliefs = new gDPVector<gNumber>(m_profile->Beliefs());
-
-  return *m_beliefs; 
-}
-
-const gDPVector<gNumber> &BehavSolution::Regret(void) const
-{
-  if(!IsValid()) Invalidate();
-  if (!m_regret)  {
-    m_regret = new gDPVector<gNumber>(Game().NumActions());
-    m_profile->Gripe(*m_regret);
-  }
-
-  return *m_regret;
-}
 
 const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
@@ -648,11 +599,7 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 
 const gNumber BehavSolution::MaxRegret(void) const
 {
-  Regret();
-  gNumber ret = 0;
-  for(int i=m_regret->First();i<=m_regret->Last();i++)
-    if((*m_regret)[i]>=ret)ret = (*m_regret)[i];
-  return ret;
+  return m_profile->MaxRegret();
 }
 
 const gNumber BehavSolution::MaxRNFRegret(void) const
@@ -720,7 +667,7 @@ bool BehavSolution::ANFNodeProbabilityPoly(gPoly<gDouble> & node_prob,
 	}
 	else
 	  if (big_supp.ActionIsActive((Action *)last_action))
-	    node_prob *= (gDouble)Profile()->GetValue(last_action);
+	    node_prob *= (gDouble)Profile()->ActionProb(last_action);
 	  else 
 	    return false;
       }
@@ -1096,7 +1043,7 @@ BehavSolution::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
 	    if ( last_action->BelongsTo()->GetPlayer() !=
 		         act->BelongsTo()->GetPlayer()     ||
 		 !act->Precedes(tempnode) )
-	    node_prob *= (gDouble)m_profile->GetValue(last_action);
+	    node_prob *= (gDouble)m_profile->ActionProb(last_action);
 	  }
 	  else {
 	    return false;
@@ -1231,8 +1178,6 @@ void BehavSolution::DumpInfo(gOutput &p_file) const
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;
   }
-  if (m_beliefs)
-    p_file << " Beliefs:" << *m_beliefs;
 }
 
 gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
