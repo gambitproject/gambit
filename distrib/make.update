@@ -30,7 +30,7 @@
 #MACHINE_sun4      = dosh.hum.caltech.edu
 #MACHINE_rs6000    = billandal.hum.caltech.edu
 #MACHINE_HPUX      = jilt.hum.caltech.edu
-MACHINE_SunOS_5_6 = minimax.caltech.edu
+MACHINE_SunOS_5_6 = koo.caltech.edu
 MACHINE_Linux     = mill.caltech.edu
 MACHINE_latex     = mill.caltech.edu
 
