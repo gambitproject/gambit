@@ -63,13 +63,6 @@ template <class T> class QuikSolv {
 
   // Check whether roots are impossible
 
-   bool MultiaffinePolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)
-                                                                         const;
-   bool PolyHasNoRootsIn(const gRectangle<gDouble>&, const int&)         const;
-   bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
-				 const int&)                             const;
-   bool MultiaffinePolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
-					    const int&)                  const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
 
 
@@ -84,24 +77,11 @@ template <class T> class QuikSolv {
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
 
-   gPoly<gDouble> TranslateOfMono(const gMono<gDouble>&, 
-				  const gVector<gDouble>&)               const;
-   gPoly<gDouble> TranslateOfPoly(const gPoly<gDouble>&, 
-				  const gVector<gDouble>&)               const;
-   gPolyList<gDouble> TranslateOfSystem(const gPolyList<gDouble>&,
-				  const gVector<gDouble>&)               const;
-   gPoly<gDouble> MonoInNewCoordinates(const gMono<gDouble>&, 
-				 const gSquareMatrix<gDouble>&)          const;
-   gPoly<gDouble> PolyInNewCoordinates(const gPoly<gDouble>&, 
-				 const gSquareMatrix<gDouble>&)          const;
-   gPolyList<gDouble> SystemInNewCoordinates(const gPolyList<gDouble>&,
-				       const gSquareMatrix<gDouble>&)    const;
    gDouble MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>&,
 				      const gVector<gDouble>&,
 				      const gSquareMatrix<gDouble>&)     const;
-   gDouble MaximalContributionOfHigherOrderTerms(const gPoly<gDouble>&,
-						 const gDouble&)         const;
+
    bool HasNoOtherRootsIn(const gRectangle<gDouble>&,
 			  const gVector<gDouble>&,
 			  const gSquareMatrix<gDouble>&)                 const;

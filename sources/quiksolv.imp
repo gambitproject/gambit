@@ -81,128 +81,16 @@ template <class T> gRectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 // Is a root impossible?
 //---------------------------
 
-template<class T> bool
-QuikSolv<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<gDouble>& r, 
-					 const int &index) const
-{
-  int sign;
-  if (TreesOfPartials[index].RootNode()->GetData().Evaluate(r.Center()) > 0)
-    sign = 1;
-  else
-    sign = -1;
-  
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
-  for (int j = 1; j <= Dmnsn(); j++) {
-    zeros[j] = 0; 
-    if (Equation_i_uses_var_j(index,j)) ones[j] = 1; 
-    else                                ones[j] = 0;
-  }
-  gIndexOdometer topbottoms(zeros,ones);
-  
-  while (topbottoms.Turn()) {
-    gVector<gDouble> point(Dmnsn());
-    for (int i = 1; i <= Dmnsn(); i++)
-      if (topbottoms[i] == 0)
-	point[i] = r.LowerBoundOfCoord(i);
-      else
-	point[i] = r.UpperBoundOfCoord(i);
-    if ((gDouble)sign * TreesOfPartials[index].RootNode()->GetData().
-	                                              Evaluate(point) <=  0)
-      return false;
-  }
-  
-  return true;
-}
-
-template<class T> bool
-QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, 
-			      const int &index) const
-{
-  if (IsMultiaffine())
-    return MultiaffinePolyHasNoRootsIn(r,index);
-  else {
-    gVector<gDouble> center = r.Center();
-    
-    gDouble constant = 
-      TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
-    if (constant < (gDouble)0) constant = - constant;
-    
-    gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
-    
-    gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
-						     center,
-						     HalvesOfSideLengths);
-  
-    if (max >= constant) 
-      return false;
-    else 
-      return true;
-  }
-}
-
-template<class T> bool
-QuikSolv<T>::MultiaffinePolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
-						 const int &index) const
-{ 
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
-  for (int j = 1; j <= Dmnsn(); j++) {
-    zeros[j] = 0; 
-    if (Equation_i_uses_var_j(index,j)) ones[j] = 1; 
-    else                                ones[j] = 0;
-  }
-  gIndexOdometer topbottoms(zeros,ones);
-  
-  while (topbottoms.Turn()) {
-    gVector<gDouble> point(Dmnsn());
-    for (int i = 1; i <= Dmnsn(); i++)
-      if (topbottoms[i] == 0)
-	point[i] = r.LowerBoundOfCoord(i);
-      else
-	point[i] = r.UpperBoundOfCoord(i);
-    if (TreesOfPartials[index].RootNode()->GetData().Evaluate(point) >=  0)
-      return false;
-  }
-  
-  return true;
-}
-
-template<class T> bool
-QuikSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
-				      const int &index) const
-{
-  if (IsMultiaffine())
-    return MultiaffinePolyEverywhereNegativeIn(r,index);
-  else {
-    gVector<gDouble> center = r.Center();
-
-    gDouble constant = 
-      TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
-    if (constant >= (gDouble)0) return false;
-    
-    gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
-    
-    gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
-							center,
-							HalvesOfSideLengths);
-
-    if (max + constant >= 0) return false;
-    else                     return true;
-  }
-}
-
 template<class T> 
 bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
 				     gArray<int>& precedence)        const
 {
-  for (int i = 1; i <= System.Length(); i++)
+  for (int i = 1; i <= System.Length(); i++) {
+
     if ( (precedence[i] <= NoEquations && 
-	                      PolyHasNoRootsIn(r, precedence[i])) ||
+	              TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
          (precedence[i] >  NoEquations && 
-	                      PolyEverywhereNegativeIn(r, precedence[i])) ) { 
+	   TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r)) ) {
       if (i != 1) { // We have found a new "most likely to never vanish"
 	int tmp = precedence[i];
 	for (int j = 1; j <= i-1; j++) 
@@ -211,6 +99,7 @@ bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
       }
       return true; 
     }
+  }
   return false;
 }
 
@@ -305,95 +194,6 @@ bool QuikSolv<T>::NewtonRootNearRectangle(const gRectangle<gDouble>& r,
 // Is the Newton root the only root?
 //------------------------------------
 
-template<class T> 
-gPoly<gDouble> QuikSolv<T>::TranslateOfMono(const gMono<gDouble>& m, 
-				      const gVector<gDouble>& new_origin) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), (gDouble)1, TermOrder());
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (m.ExpV()[i] > 0) {
-      gPoly<gDouble> lt(AmbientSpace(), i, 1, TermOrder());
-      lt += gPoly<gDouble>(AmbientSpace(), new_origin[i], TermOrder());
-      for (int j = 1; j <= m.ExpV()[i]; j++)
-	answer *= lt;
-    }
-  }
-
-  answer *= m.Coef();
-
-  return answer;
-}
-
-template<class T> 
-gPoly<gDouble>  QuikSolv<T>::TranslateOfPoly(const gPoly<gDouble>& p, 
-				       const gVector<gDouble>& new_origin) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), TermOrder());
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    answer += TranslateOfMono(p.MonomialList()[i],new_origin);
-  return answer;
-}
-
-
-template<class T> 
-gPolyList<gDouble>  QuikSolv<T>::TranslateOfSystem(const gPolyList<gDouble>& old,
-					     const gVector<gDouble>& new_origin) 
-const
-{
-  gList<gPoly<gDouble> > new_polys;
-  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-    new_polys += gPoly<gDouble>( TranslateOfPoly(old[i],new_origin) );
-  return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-}
-
-
-template<class T> 
-gPoly<gDouble>  QuikSolv<T>::MonoInNewCoordinates(const gMono<gDouble>& m, 
-					    const gSquareMatrix<gDouble>& M) const
-{
-  assert(M.NumRows() == Dmnsn());
-
-  gPoly<gDouble> answer(AmbientSpace(), (gDouble)1, TermOrder());
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (m.ExpV()[i] > 0) {
-      gPoly<gDouble> linearform(AmbientSpace(), (gDouble)0, TermOrder());
-      for (int j = 1; j <= Dmnsn(); j++) {
-	exp_vect exps(AmbientSpace(), j, 1);
-	linearform += gPoly<gDouble>(AmbientSpace(), exps, M(i,j), TermOrder());
-      }
-      for (int k = 1; k <= m.ExpV()[i]; k++) answer *= linearform;
-    }
-  }
-
-  answer *= m.Coef();
-
-  return answer;
-}
-
-template<class T> 
-gPoly<gDouble> QuikSolv<T>::PolyInNewCoordinates(const gPoly<gDouble>& p, 
-					   const gSquareMatrix<gDouble>& M) const
-{
-  gPoly<gDouble> answer(AmbientSpace(), TermOrder());
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    answer += MonoInNewCoordinates(p.MonomialList()[i],M);
-  return answer;
-}
-
-
-template<class T> gPolyList<gDouble> 
-QuikSolv<T>::SystemInNewCoordinates(const gPolyList<gDouble>& old,
-				    const gSquareMatrix<gDouble>& M) const
-{
-  gList<gPoly<gDouble> > new_polys;
-  for (int i = 1; i <= UnderlyingEquations().Length(); i++)
-    new_polys += gPoly<gDouble>( PolyInNewCoordinates(old[i],M) );
-  return gPolyList<gDouble>(AmbientSpace(),TermOrder(),new_polys);
-}
-
-
 template<class T>
    gDouble QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>& r,
@@ -425,35 +225,21 @@ template<class T>
 }
 
 template<class T>
-gDouble QuikSolv<T>::MaximalContributionOfHigherOrderTerms(
-						 const gPoly<gDouble>& p,
-						 const gDouble& radius)  const
-{
-  gDouble maxcon = (gDouble)0;
-  for (int i = 1; i <= p.MonomialList().Length(); i++) 
-    if (p.MonomialList()[i].TotalDegree() > 1) 
-      maxcon += p.MonomialList()[i].Coef() * 
-	            pow(radius,p.MonomialList()[i].TotalDegree());
-
-  return maxcon;
-}
-
-
-template<class T>
 bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
 			  const gVector<gDouble>& p,
 			  const gSquareMatrix<gDouble>& M)  const
 {
   assert (NoEquations == System.Dmnsn());
 
-  gPolyList<gDouble> system1 = TranslateOfSystem(gDoubleSystem, p);
-  gPolyList<gDouble> system2 = SystemInNewCoordinates(system1,M);
+  gPolyList<gDouble> system1 = gDoubleSystem.TranslateOfSystem(p);
+
+  gPolyList<gDouble> system2 = system1.SystemInNewCoordinates(M);
 
   gDouble radius = MaxDistanceFromPointToVertexAfterTransformation(r,p,M);
 
   gDouble max = (gDouble)0;
-  for (int i = 1; i <= Dmnsn(); i++)
-    max += MaximalContributionOfHigherOrderTerms(system2[i],radius);
+  for (int i = 1; i <= Dmnsn(); i++) 
+    max += system2[i].MaximalValueOfNonlinearPart(radius);
 
   if (max >= radius) return false;
   else               return true;
