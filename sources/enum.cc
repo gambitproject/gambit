@@ -11,7 +11,7 @@
 //---------------------------------------------------------------------------
 
 EnumParams::EnumParams(gStatus &status_)
-  : trace(0), stopAfter(0), precision(precDOUBLE),
+  : trace(0), stopAfter(0), cliques(false), precision(precDOUBLE),
     tracefile(&gnull), status(status_)
 { }
 
@@ -25,6 +25,7 @@ int Enum(const NFSupport &support, const EnumParams &params,
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
+    if(params.cliques) module.GetCliques();
   }
   else if (params.precision == precRATIONAL)  {
     EnumModule<gRational> module(support, params);
@@ -33,8 +34,8 @@ int Enum(const NFSupport &support, const EnumParams &params,
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
+    if(params.cliques) module.GetCliques();
   }
-
   return 1;
 }
 

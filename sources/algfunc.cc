@@ -128,6 +128,7 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   params.precision = ((PrecisionPortion *) param[2])->Value();
   params.tracefile = &((OutputPortion *) param[5])->Value();
   params.trace = ((NumberPortion *) param[6])->Value();
+  params.cliques = ((BoolPortion *) param[7])->Value();
   
   gList<MixedSolution> solutions;
   double time;
@@ -153,6 +154,7 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
   params.precision = ((PrecisionPortion *) param[3])->Value();
   params.tracefile = &((OutputPortion *) param[6])->Value();
   params.trace = ((NumberPortion *) param[7])->Value();
+  params.cliques = ((BoolPortion *) param[8])->Value();
 
   double time;
   long npivots;
@@ -1000,7 +1002,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("EnumMixedSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_EnumMixed_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
+				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porNUMBER,
 					    new NumberPortion(0)));
@@ -1016,8 +1018,11 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
 
+  FuncObj->SetParamInfo(0, 7, gclParameter("cliques", porBOOL,
+					    new BoolPortion(false)));
+
   FuncObj->SetFuncInfo(1, gclSignature(GSM_EnumMixed_Efg, 
-				       PortionSpec(porBEHAV, 1), 8));
+				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOL,
 					    new BoolPortion(false)));
@@ -1034,6 +1039,9 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(1, 8, gclParameter("cliques", porBOOL,
+					    new BoolPortion(false)));
+
   gsm->AddFunction(FuncObj);
 
 

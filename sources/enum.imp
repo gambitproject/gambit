@@ -9,6 +9,7 @@
 #include "nfgiter.h"
 
 #include "enum.h"
+#include "clique.h"
 
 template <class T> class EnumModule  {
 private:
@@ -16,10 +17,18 @@ private:
   const Nfg &NF;
   const NFSupport &support;
   EnumParams params;
-  int rows,cols,level;
+  int rows,cols,level,v1,v2;
   long count,npivots;
   double time;
   gList<MixedSolution> solutions;
+  gList<int> node1, node2;   // IDs of each component of the extreme equilibria
+
+  // note:  The keys give the mixed strategy associated with each node.  
+  //        The keys should also keep track of the basis
+  //        As things stand now, two different bases could lead to the same key
+  //        BAD!
+
+  gList<gVector<T> > key1, key2;  
 
   bool EqZero(T x) const;
   
@@ -35,6 +44,7 @@ public:
   EnumParams &Parameters(void);
 
   const gList<MixedSolution> &GetSolutions(void) const;
+  void GetCliques() const;
 };
 
 //-------------------------------------------------------------------------
@@ -167,7 +177,7 @@ template <class T> int EnumModule<T>::Enum(void)
   T min;
 
   if (NF.NumPlayers() != 2)   return 0;  
-  int n1, n2, v1,v2,i,j,k;
+  int n1, n2,i,j,k;
 
   gWatch watch;
 
@@ -240,9 +250,14 @@ template <class T> int EnumModule<T>::Enum(void)
   T sum;
   bool nash;
 
+  gArray<int> vert1id(v1);
+  gArray<int> vert2id(v2);
+  for(i=1;i<=vert1id.Length();i++) vert1id[i]=0;
+  for(i=1;i<=vert2id.Length();i++) vert2id[i]=0;
+
   i=0;
 
-  int i1,i2;
+  int i1,i2,id1=0,id2=0;
   (*params.tracefile) << "\n" << v2 << " " << v1 << "\n";
   for( i2=2; 
        i2<=v2 &&  !params.status.Get()
@@ -271,8 +286,6 @@ template <class T> int EnumModule<T>::Enum(void)
 	    nash=0;
 
       if(nash) {
-	// gout << "\ni2,i1: " << i2 << " " << i1;
-	(*params.tracefile) << "\n" << i2 << " " << i1;
 	sum = (T)0;
 	for(k=1;k<=n1;k++) {
 	  profile(1,k) = (T)0;
@@ -305,10 +318,20 @@ template <class T> int EnumModule<T>::Enum(void)
 	  add = true;
 	if(add)
 	{
+	  // gout << "\ni2,i1: " << i2 << " " << i1;
+	  (*params.tracefile) << "\n" << i2 << " " << i1;
+
 	  index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
 	  if(params.status.Get() != 1) {
 	    solutions[index].SetEpsilon(eps);
 	    solutions[index].SetIsNash(triTRUE);
+
+	    // note:  this is not really sufficient information -- we should also
+	    //        keep the basis
+	  if(vert1id[i1]==0){id1++;vert1id[i1]=id1;key2.Append(profile.GetRow(2));}
+	  if(vert2id[i2]==0){id2++;vert2id[i2]=id2;key1.Append(profile.GetRow(1));}
+	  node1.Append(vert2id[i2]);
+	  node2.Append(vert1id[i1]);
 	  }
 	}
       }
@@ -357,5 +380,28 @@ template <class T>
 const gList<MixedSolution> &EnumModule<T>::GetSolutions(void) const
 {
   return solutions;
+}
+
+template <class T> void EnumModule<T>::GetCliques() const
+{
+  int i,n = node1.Length();
+  assert (node2.Length() == n);
+
+  gArray<edge> edgelist(n);
+
+  gout << "\nKey:\nPlayer 1:";
+  for(i=1;i<=key1.Length();i++) {
+    gout << "\n" << i << ": " << key1[i];
+  }
+  gout << "\nPlayer 2:";
+  for(i=1;i<=key2.Length();i++)
+    gout << "\n" << i << ": " << key2[i];
+  gout << "\nExtreme equilibria:";
+  for(int i=1;i<=n;i++) {
+    edgelist[i].node1 = node1[i];
+    edgelist[i].node2 = node2[i];
+    gout << "\n" << node1[i] << " " << node2[i];
+  }
+  EnumCliques clique(edgelist,v2+1,v1+1);
 }
 

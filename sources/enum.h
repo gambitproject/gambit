@@ -24,6 +24,7 @@
 class EnumParams     {
 public:
   int trace, stopAfter;
+  bool cliques;
   Precision precision;
   gOutput *tracefile;
   gStatus &status;
