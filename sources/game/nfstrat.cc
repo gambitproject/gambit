@@ -134,8 +134,6 @@ gbtNfgSupport::gbtNfgSupport(const gbtNfgGame &p_nfg)
 { 
   // Initially, all strategies are contained in the support
   m_strategies = 1;
-  gStandardOutput gout;
-  gout << m_strategies << '\n';
 }
 
 gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &p_support)
