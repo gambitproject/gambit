@@ -2,7 +2,7 @@
 
 bin_PROGRAMS = gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/sources
+AM_CPPFLAGS = $(WX_CXXFLAGS) -I$(top_srcdir)/sources
 
 gambit_SOURCES = \
 	corplot.cc \
