@@ -11,6 +11,10 @@ gRectArray<gNumber> *paytable;
 bool Dominates(const Nfg &n,
 	       const NFSupport &S, int pl, int a, int b, bool strong)
 {
+  //DEBUG - temporary work around of apparent bug below
+  return Dominates(S,n.GetPlayer(pl)->GetStrategy(a),
+		   n.GetPlayer(pl)->GetStrategy(b),strong);
+
   int asuppnum = S.Find(n.GetPlayer(pl)->GetStrategy(a));
   int bsuppnum = S.Find(n.GetPlayer(pl)->GetStrategy(b));
 
@@ -58,6 +62,54 @@ bool Dominates(const Nfg &n,
 
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 	       const gStatus &status)
+{
+  const Nfg* n = S.GamePtr();
+
+  NfgContIter A(S), B(S);
+
+  A.Freeze(s->Player());
+  A.Set(s);
+  B.Freeze(s->Player());
+  B.Set(t);  
+
+  if (strong)  {
+    do  {
+
+      //DEBUG
+      if (!A.GetOutcome() || !B.GetOutcome())
+	{ gout << "Weirdness!!\n"; exit(0); }
+
+      gNumber ap = (A.GetOutcome()) ? 
+      n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
+      gNumber bp = (B.GetOutcome()) ? 
+      n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
+
+      if (ap <= bp)  return false;
+      A.NextContingency();
+    } while (B.NextContingency());
+	
+    return true;
+  }
+
+  bool equal = true;
+  
+  do   {
+    gNumber ap = (A.GetOutcome()) ? 
+    n->Payoff(A.GetOutcome(), s->Player()) : gNumber(0);
+    gNumber bp = (B.GetOutcome()) ? 
+    n->Payoff(B.GetOutcome(), s->Player()) : gNumber(0);
+
+    if (ap < bp)   return false;
+    else if (ap > bp)  equal = false;
+    A.NextContingency();
+  } while (B.NextContingency());
+
+  return (!equal);
+}
+
+
+
+bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong)
 {
   const Nfg* n = S.GamePtr();
 

@@ -17,6 +17,8 @@ bool Dominates(const Nfg &,
 bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong,
 	       const gStatus &status);
 
+bool Dominates(const NFSupport &S, Strategy *s, Strategy *t, bool strong);
+
 bool IsDominated(const NFSupport &S, Strategy *s, bool strong, 
 		 const gStatus &status);
 
