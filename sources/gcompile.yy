@@ -174,55 +174,79 @@ expression:      constant
 	  |      expression ASSIGN
               { $$ = new gclUnAssignment($1); }
           |      WRITE expression   %prec UWRITE
-              { $$ = new gclFunctionCall("Print", $2); } 
+              { $$ = new gclFunctionCall("Print", $2,
+					 current_line, current_file); } 
           |      expression HASH expression
-              { $$ = new gclFunctionCall("NthChild", $1, $3); }
+              { $$ = new gclFunctionCall("NthChild", $1, $3,
+					 current_line, current_file); }
           |      expression UNDERSCORE expression
-              { $$ = new gclFunctionCall("NthElement", $1, $3); }
+              { $$ = new gclFunctionCall("NthElement", $1, $3,
+					 current_line, current_file); }
           |      expression PLUS expression
-              { $$ = new gclFunctionCall("Plus", $1, $3); }
+              { $$ = new gclFunctionCall("Plus", $1, $3,
+					 current_line, current_file); }
           |      expression MINUS expression
-              { $$ = new gclFunctionCall("Minus", $1, $3); }
+              { $$ = new gclFunctionCall("Minus", $1, $3,
+					 current_line, current_file); }
           |      expression AMPER expression  
-              { $$ = new gclFunctionCall("Concat", $1, $3); }
+              { $$ = new gclFunctionCall("Concat", $1, $3,
+					 current_line, current_file); }
           |      PLUS expression    %prec UMINUS
               { $$ = $2; }
           |      MINUS expression   %prec UMINUS
-              { $$ = new gclFunctionCall("Negate", $2); }
+              { $$ = new gclFunctionCall("Negate", $2,
+					 current_line, current_file); }
           |      expression STAR expression
-              { $$ = new gclFunctionCall("Times", $1, $3); }
+              { $$ = new gclFunctionCall("Times", $1, $3,
+					 current_line, current_file); }
           |      expression SLASH expression
-              { $$ = new gclFunctionCall("Divide", $1, $3); }
+              { $$ = new gclFunctionCall("Divide", $1, $3,
+					 current_line, current_file); }
           |      expression PERCENT expression
-              { $$ = new gclFunctionCall("Modulus", $1, $3); }
+              { $$ = new gclFunctionCall("Modulus", $1, $3,
+					 current_line, current_file); }
           |      expression DIV expression
-              { $$ = new gclFunctionCall("IntegerDivide", $1, $3); }
+              { $$ = new gclFunctionCall("IntegerDivide", $1, $3,
+					 current_line, current_file); }
           |      expression DOT expression
-              { $$ = new gclFunctionCall("Dot", $1, $3); }
+              { $$ = new gclFunctionCall("Dot", $1, $3,
+					 current_line, current_file); }
           |      expression CARET expression
-              { $$ = new gclFunctionCall("Power", $1, $3); }
+              { $$ = new gclFunctionCall("Power", $1, $3,
+					 current_line, current_file); }
           |      expression EQU expression
-              { $$ = new gclFunctionCall("Equal", $1, $3); }
+              { $$ = new gclFunctionCall("Equal", $1, $3,
+					 current_line, current_file); }
           |      expression NEQ expression
-              { $$ = new gclFunctionCall("NotEqual", $1, $3); }
+              { $$ = new gclFunctionCall("NotEqual", $1, $3,
+					 current_line, current_file); }
           |      expression LTN expression
-              { $$ = new gclFunctionCall("Less", $1, $3); }
+              { $$ = new gclFunctionCall("Less", $1, $3,
+					 current_line, current_file); }
           |      expression LEQ expression
-              { $$ = new gclFunctionCall("LessEqual", $1, $3); }
+              { $$ = new gclFunctionCall("LessEqual", $1, $3,
+					 current_line, current_file); }
           |      expression GTN expression
-              { $$ = new gclFunctionCall("Greater", $1, $3); }
+              { $$ = new gclFunctionCall("Greater", $1, $3,
+					 current_line, current_file); }
           |      expression GEQ expression
-              { $$ = new gclFunctionCall("GreaterEqual", $1, $3); }
+              { $$ = new gclFunctionCall("GreaterEqual", $1, $3,
+					 current_line, current_file); }
           |      LNOT expression
-              { $$ = new gclFunctionCall("Not", $2); }
+              { $$ = new gclFunctionCall("Not", $2,
+					 current_line, current_file); }
           |      expression LAND expression
-              { $$ = new gclFunctionCall("And", $1, $3); }
+              { $$ = new gclFunctionCall("And", $1, $3,
+					 current_line, current_file); }
           |      expression LOR expression
-              { $$ = new gclFunctionCall("Or", $1, $3); }
+              { $$ = new gclFunctionCall("Or", $1, $3,
+					 current_line, current_file); }
 	  |      expression WRITE expression
-              { $$ = new gclFunctionCall("Write", $1, $3); }
+              { $$ = new gclFunctionCall("Write", $1, $3,
+					 current_line, current_file); }
           |      expression READ expression
-              { $$ = new gclFunctionCall("Read", $1, $3); }
+              { $$ = new gclFunctionCall("Read", $1, $3,
+					 current_line, current_file); }
           ;
 
 function:        IF LBRACK expression COMMA expression COMMA
@@ -243,7 +267,8 @@ function:        IF LBRACK expression COMMA expression COMMA
                   { record_funcbody = false; in_funcdecl = false;
                     $$ = DefineFunction($7); }
         |        NAME LBRACK  { funcnames.Push(tval); } parameterlist RBRACK
-              { $$ = new gclFunctionCall(funcnames.Pop(), $4); }
+              { $$ = new gclFunctionCall(funcnames.Pop(), $4,
+					 current_line, current_file); }
 
 parameterlist:     { $$ = new gclParameterList; }
              |     reqparameterlist  { $$ = new gclParameterList($1); }
@@ -807,11 +832,18 @@ bool GCLCompiler::DeleteFunction(void)
   return false;
 }
 
+#include "gsm.h"
 
 int GCLCompiler::Execute(void)
 {
-  Portion *result = gsm.Execute(exprtree);
-  if (result)  delete result;
+  try  {
+    Portion *result = gsm.Execute(exprtree);
+    if (result)  delete result;
+  }
+  catch (gclRuntimeError &E) {
+    gout << "ERROR: " << E.Description() << '\n';
+  }
+
   return rcSUCCESS;
 }
 

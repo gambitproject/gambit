@@ -1,7 +1,5 @@
 //
-// FILE: gsminstr.cc -- implementation of Instruction classes for GSM's
-//                      instruction queue subsystem
-//                      companion to GSM
+// FILE: gsminstr.cc -- implementation of GCL expression classes
 //
 //  $Id$
 //
@@ -16,6 +14,19 @@
 #include "gsmhash.h"
 
 extern GSM &_gsm;
+
+//-------------
+// Base class
+//-------------
+
+gclExpression::gclExpression(void)
+  : m_line(0), m_file("Unknown")
+{ }
+
+gclExpression::gclExpression(int p_line, const gText &p_file)
+  : m_line(p_line), m_file(p_file)
+{ }
+
 
 //---------
 // Quit
@@ -161,26 +172,35 @@ gclParameterList::~gclParameterList()
 // FunctionCall
 //----------------
 
-gclFunctionCall::gclFunctionCall(const gText &s)
-  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
+gclFunctionCall::gclFunctionCall(const gText &p_name,
+				 int p_line, const gText &p_file)
+  : gclExpression(p_line, p_file),
+    name(p_name), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 { }
 
-gclFunctionCall::gclFunctionCall(const gText &s, gclExpression *op)
-  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
+gclFunctionCall::gclFunctionCall(const gText &p_name, gclExpression *p_op,
+				 int p_line, const gText &p_file)
+  : gclExpression(p_line, p_file),
+    name(p_name), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
-  params->req->Append(op);
+  params->req->Append(p_op);
 }
 
-gclFunctionCall::gclFunctionCall(const gText &s,
-				 gclExpression *op1, gclExpression *op2)
-  : name(s), params(new gclParameterList), funcptr(0), type(porANYTYPE)
+gclFunctionCall::gclFunctionCall(const gText &p_name,
+				 gclExpression *p_op1, gclExpression *p_op2,
+				 int p_line, const gText &p_file)
+  : gclExpression(p_line, p_file),
+    name(p_name), params(new gclParameterList), funcptr(0), type(porANYTYPE)
 {
-  params->req->Append(op1);
-  params->req->Append(op2);
+  params->req->Append(p_op1);
+  params->req->Append(p_op2);
 }
 
-gclFunctionCall::gclFunctionCall(const gText &s, gclParameterList *p)
-  : name(s), params(p), funcptr(0), type(porANYTYPE)
+gclFunctionCall::gclFunctionCall(const gText &p_name,
+				 gclParameterList *p_params,
+				 int p_line, const gText &p_file)
+  : gclExpression(p_line, p_file),
+    name(p_name), params(p_params), funcptr(0), type(porANYTYPE)
 { }
 
 gclFunctionCall::~gclFunctionCall()
@@ -200,7 +220,8 @@ Portion *gclFunctionCall::Evaluate(void)
   if (!_gsm._FuncTable->IsDefined(name))  
     throw gclRuntimeError("Undefined function " + name);
 
-  CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name));
+  CallFuncObj *call = new CallFuncObj((*_gsm._FuncTable)(name), 
+				      m_line, m_file);
   
   try {
     for (int i = 1; i <= params->req->NumParams(); i++)   {

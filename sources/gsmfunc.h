@@ -152,6 +152,8 @@ private:
     bool Defined, AutoValOrRef;
   };
 
+  int m_line;
+  gText m_file;
   int m_funcIndex, m_numParams, m_numParamsDefined;
   Portion **m_params;
   RunTimeParamInfoType *m_runTimeParamInfo;
@@ -166,7 +168,7 @@ private:
   Portion *CallListFunction(GSM *, Portion **);
 
  public:
-  CallFuncObj(FuncDescObj *);
+  CallFuncObj(FuncDescObj *, int, const gText &);
   ~CallFuncObj();
 
   int NumParams(void) const { return m_numParams; }

@@ -972,8 +972,9 @@ void FuncDescObj::Dump(gOutput& f) const
 //---------------------------------------------------------------------
 
 
-CallFuncObj::CallFuncObj(FuncDescObj *p_function)
-  : FuncDescObj(*p_function),
+CallFuncObj::CallFuncObj(FuncDescObj *p_function,
+			 int p_line, const gText &p_file)
+  : FuncDescObj(*p_function), m_line(p_line), m_file(p_file),
     m_funcIndex(-1), m_numParams(0), m_numParamsDefined(0)
 {
   for (int f_index = 0; f_index < _NumFuncs; f_index++)  {
@@ -1062,12 +1063,19 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
     }   
   }
 
-  if (!_FuncInfo[m_funcIndex].UserDefined)
-    return _FuncInfo[m_funcIndex].FuncPtr(param);
-  else 
-    return gsm->ExecuteUserFunc(*(_FuncInfo[m_funcIndex].FuncInstr), 
-				_FuncInfo[m_funcIndex], param,
-				FuncName() + gText((char) (m_funcIndex+1)));
+  try {
+    if (!_FuncInfo[m_funcIndex].UserDefined)
+      return _FuncInfo[m_funcIndex].FuncPtr(param);
+    else 
+      return gsm->ExecuteUserFunc(*(_FuncInfo[m_funcIndex].FuncInstr), 
+				  _FuncInfo[m_funcIndex], param,
+				  FuncName() + gText((char) (m_funcIndex+1)));
+  }
+  catch (...) {
+    gout << "In function " << _FuncName << "[], in file \"" << m_file;
+    gout << "\" at line " << ToText(m_line) << ":\n";
+    throw;
+  }
 }
 
 Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)

@@ -528,20 +528,7 @@ bool GSM::DeleteFunction(FuncDescObj* func)
 
 Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
 {
-  Portion *p = 0;
-
-  try {
-    p = expr->Evaluate();
-  }
-  catch (gclQuitOccurred &e) {
-    throw;
-  }
-  catch (gException &w)  {
-    gout << "GCL EXCEPTION: " << w.Description() <<  "; Caught in gsm.cc, GSM::Execute()\n";
-    return 0;
-  }
-
-  return p;
+  return expr->Evaluate();
 }
 
 

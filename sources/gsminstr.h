@@ -16,12 +16,18 @@
 #include "gmisc.h"
 #include "portion.h"
 
-class gclExpression     {
-  public:
-    virtual ~gclExpression()  { }
-    
-    virtual PortionSpec Type(void) const   { return porANYTYPE; }
-    virtual Portion *Evaluate(void) = 0;
+class gclExpression  {
+protected:
+  int m_line;
+  gText m_file;
+
+public:
+  gclExpression(void);
+  gclExpression(int, const gText &);
+  virtual ~gclExpression()  { }
+  
+  virtual PortionSpec Type(void) const   { return porANYTYPE; }
+  virtual Portion *Evaluate(void) = 0;
 };
 
 
@@ -111,11 +117,13 @@ class gclFunctionCall : public gclExpression   {
     PortionSpec type;    
 
   public:
-    gclFunctionCall(const gText &name);
-    gclFunctionCall(const gText &name, gclExpression *op);
+    gclFunctionCall(const gText &name, int, const gText &);
+    gclFunctionCall(const gText &name, gclExpression *op, int, const gText &);
     gclFunctionCall(const gText &name,
-                    gclExpression *op1, gclExpression *op2);
-    gclFunctionCall(const gText &name, gclParameterList *params);
+                    gclExpression *op1, gclExpression *op2,
+		    int, const gText &);
+    gclFunctionCall(const gText &name, gclParameterList *params, 
+		    int, const gText &);
     virtual ~gclFunctionCall();
 
     PortionSpec Type(void) const;
