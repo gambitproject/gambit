@@ -407,17 +407,20 @@ void GambitFrame::LoadFile(char *s)
                 return;
 
             // Save the current directory.
-            gambitApp.SetCurrentDir(gPathOnly(s));
+            // WARNING: since wxFileSelector returns the address of
+            // a global buffer in wxxt, we have to copy s to a new
+            // location.  This is probably also a memory leak.
+            char *new_s = copystring(s);
+	    gText path(gPathOnly(s));
+            gambitApp.SetCurrentDir(path);
+	    s = new_s;
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
-
-            s = copystring(s);
         }
     }
     
     if (strcmp(s, "") != 0)
     {
-
       gText filename(gFileNameFromPath(s));
       filename = filename.Dncase();
 
@@ -436,7 +439,7 @@ void GambitFrame::LoadFile(char *s)
             return;
         }
 #endif
-        
+
         wxMessageBox("Unknown file type");  // If we got here, there is something wrong.
     }
     // RDM:  I don't think the following should be here.  
