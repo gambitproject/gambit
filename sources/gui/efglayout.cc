@@ -12,7 +12,6 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "guishare/wxmisc.h"
 #include "math/gmath.h"
 
 #include "game/efg.h"

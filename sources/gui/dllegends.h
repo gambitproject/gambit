@@ -12,12 +12,10 @@
 
 #include "treedraw.h"
 
-class dialogLegends : public guiAutoDialog {
+class dialogLegends : public wxDialog {
 private:
   wxRadioBox *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
   wxRadioBox *m_branchAbove, *m_branchBelow;
-
-  const char *HelpString(void) const { return "Legends Dialog"; }
 
 public:
   dialogLegends(wxWindow *, const TreeDrawSettings &);

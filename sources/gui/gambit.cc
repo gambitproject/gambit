@@ -20,7 +20,6 @@
 #include "game/nfstrat.h"
 #include "game/nfgciter.h"
 #include "gambit.h"
-#include "guishare/wxmisc.h"
 #include "guishare/dlabout.h"
 #include "splash.h"
 #include "dlnewgame.h"

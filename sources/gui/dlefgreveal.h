@@ -1,24 +1,26 @@
 //
-// FILE: dlefgreveal.h -- Selection of players for Edit->Infoset->Reveal
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Dialog for revealing actions to players
 //
 
 #ifndef DLEFGREVEAL_H
 #define DLEFGREVEAL_H
 
-class dialogInfosetReveal : public guiAutoDialog {
+class dialogInfosetReveal : public wxDialog {
 private:
   const efgGame &m_efg;
-
-  wxListBox *m_playerNameList;
-
-  const char *HelpString(void) const { return "Edit Menu (efg)"; }
+  wxCheckBox **m_players;
 
 public:
-  dialogInfosetReveal(const efgGame &, wxWindow *);
-  virtual ~dialogInfosetReveal() { } 
+  // Lifecycle
+  dialogInfosetReveal(wxWindow *, const efgGame &);
+  virtual ~dialogInfosetReveal();
 
+  // Data access (only valid when ShowModal() returns with wxID_OK)
   gArray<EFPlayer *> GetPlayers(void) const;
 };
 

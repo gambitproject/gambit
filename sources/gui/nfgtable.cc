@@ -584,6 +584,13 @@ void NfgTable::RefreshTable(void)
       m_grid->SetCellValue("", row, col);
     }
   }
+
+  for (int row = 0; row < m_grid->GetRows(); row++) {
+    m_grid->SetRowLabelValue(row, "");
+  }
+  for (int col = 0; col < m_grid->GetCols(); col++) {
+    m_grid->SetColLabelValue(col, "");
+  }
 }
 
 //-----------------------------------------------------------------------

@@ -13,7 +13,6 @@
 #endif  // WX_PRECOMP
 #include "wx/dcps.h"
 #include "wx/dragimag.h"
-#include "guishare/wxmisc.h"
 
 #include "base/gmisc.h"
 #include "math/gmath.h"

@@ -14,8 +14,6 @@
 #endif  // WX_PRECOMP
 #include "wx/colordlg.h"
 
-#include "guishare/wxmisc.h"
-
 #include "gambit.h"
 #include "userprefs.h"
 

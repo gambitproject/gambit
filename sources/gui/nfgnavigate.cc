@@ -13,6 +13,10 @@
 #endif // WX_PRECOMP
 #include "nfgnavigate.h"
 
+const int idSTRATEGY_CHOICE = 2001;
+const int idROWPLAYER_CHOICE = 2002;
+const int idCOLPLAYER_CHOICE = 2003;
+
 BEGIN_EVENT_TABLE(NfgNavigateWindow, wxPanel)
   EVT_CHOICE(idSTRATEGY_CHOICE, NfgNavigateWindow::OnStrategyChange)
   EVT_CHOICE(idROWPLAYER_CHOICE, NfgNavigateWindow::OnRowPlayerChange)

@@ -12,7 +12,6 @@
 
 #include "wx/dragimag.h"
 #include "efglayout.h"
-#include "guishare/wxmisc.h"
 
 class EfgShow;
 

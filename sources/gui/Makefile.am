@@ -12,15 +12,16 @@ gambit_SOURCES = \
 	dleditmixed.cc \
 	dleditmove.cc \
 	dleditnode.cc \
-	dlefg.cc \
+	dlefgdelete.cc \
 	dlefgnash.cc \
+	dlefgreveal.cc \
 	dlelimbehav.cc \
 	dlelimmixed.cc \
 	dlinsertmove.cc \
 	dlnewgame.cc \
-	dlnfg.cc \
 	dlnfgnash.cc \
 	dlnfgproperties.cc \
+	dlnfgstrategies.cc \
 	efglayout.cc \
 	efgnavigate.cc \
 	efgoutcome.cc \

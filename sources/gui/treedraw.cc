@@ -14,7 +14,6 @@
 #include "wx/notebook.h"
 #include "wx/spinctrl.h"
 
-#include "guishare/wxmisc.h"
 #include "gambit.h"
 #include "treedraw.h"
 
@@ -424,7 +423,7 @@ void dialogLayout::GetSettings(TreeDrawSettings &p_settings)
 
 dialogLegends::dialogLegends(wxWindow *p_parent,
 			     const TreeDrawSettings &p_options)	
-  : guiAutoDialog(p_parent, "Legends")
+  : wxDialog(p_parent, -1, "Legends")
 {
   wxStaticBoxSizer *nodeGroup = 
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Node Labeling"),
@@ -477,12 +476,18 @@ dialogLegends::dialogLegends(wxWindow *p_parent,
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(nodeGroup, 0, wxCENTER | wxALL, 5);
   topSizer->Add(branchGroup, 0, wxCENTER | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTER | wxALL, 5);
+
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-
   Layout();
 }
 

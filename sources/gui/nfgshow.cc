@@ -14,9 +14,9 @@
 #include "wx/notebook.h"
 #include "wx/grid.h"
 #include "wx/fontdlg.h"
-#include "wx/wizard.h"
-
+#include "guishare/dlspinctrl.h"
 #include "guishare/wxstatus.h"
+
 #include "nfgshow.h"
 #include "nfgtable.h"
 #include "nfgprint.h"
@@ -34,7 +34,7 @@
 
 #include "gambit.h"
 #include "efgshow.h"
-#include "dlstrategies.h"
+#include "dlnfgstrategies.h"
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
 #include "dleditmixed.h"
@@ -556,11 +556,16 @@ void NfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 
 void NfgShow::OnEditStrategies(wxCommandEvent &)
 {
-  dialogStrategies dialog(m_nfg, this);
-  dialog.ShowModal();
+  dialogStrategies dialog(this, m_nfg);
 
-  if (dialog.GameChanged()) {
-    m_table->Refresh();
+  if (dialog.ShowModal() == wxID_OK) {
+    for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+      NFPlayer *player = m_nfg.Players()[pl];
+      for (int st = 1; st <= player->NumStrats(); st++) {
+	player->Strategies()[st]->SetName(dialog.GetStrategyName(pl, st));
+      }
+    }
+    m_table->RefreshTable();
   }
 }
 
@@ -711,7 +716,7 @@ void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 
 void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
 {
-  guiSliderDialog dialog(this, "Column width", 0, 100, 20);
+  dialogSpinCtrl dialog(this, "Column width", 0, 100, 20);
 
   if (dialog.ShowModal() == wxID_OK) {
     //    for (int i = 1; i <= m_currentSupport->NumStrats(m_); i++) {
@@ -722,8 +727,7 @@ void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
 
 void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
-  guiSliderDialog dialog(this, "Decimal places", 0, 25,
-			 m_table->GetDecimals());
+  dialogSpinCtrl dialog(this, "Decimal places", 0, 25, m_table->GetDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_table->SetDecimals(dialog.GetValue());

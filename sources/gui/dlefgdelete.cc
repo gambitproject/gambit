@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of dialogs for extensive form window
+// Dialog for deleting moves/subtrees from extensive form
 //
 
 #include "wx/wxprec.h"
@@ -12,16 +12,8 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 
-#include "guishare/wxmisc.h"
-
-#include "efgconst.h"
-
 #include "game/efg.h"
-#include "game/efstrat.h"
-
 #include "dlefgdelete.h"
-#include "dlefgreveal.h"
-
 
 //=========================================================================
 //                   dialogEfgDelete: Member functions
@@ -81,49 +73,4 @@ void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
   m_branchList->Enable(m_deleteTree->GetSelection() == 1);
 }
 
-//=========================================================================
-//                  dialogInfosetReveal: Member functions
-//=========================================================================
-
-dialogInfosetReveal::dialogInfosetReveal(const efgGame &p_efg, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Reveal to Players"), m_efg(p_efg)
-{
-#ifdef __WXGTK__
-  // the wxGTK multiple-selection listbox is flaky (2.1.11)
-  m_playerNameList = new wxListBox(this, -1, wxDefaultPosition,
-				   wxDefaultSize, 0, 0, wxLB_EXTENDED);
-#else
-  m_playerNameList = new wxListBox(this, -1, wxDefaultPosition,
-				   wxDefaultSize, 0, 0, wxLB_MULTIPLE);
-#endif // __WXGTK__
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerNameList->Append((char *) (ToText(pl) + ": " + 
-			     m_efg.Players()[pl]->GetName()));
-    m_playerNameList->SetSelection(pl - 1, TRUE);
-  }
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1, "Players:"), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_playerNameList, 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
-{
-  gBlock<EFPlayer *> players;
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    if (m_playerNameList->Selected(pl - 1))
-      players.Append(m_efg.Players()[pl]);
-  }
-
-  return players;
-}
 

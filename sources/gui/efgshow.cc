@@ -14,7 +14,7 @@
 #include "wx/notebook.h"
 #include "wx/fontdlg.h"
 #include "wx/printdlg.h"
-#include "guishare/wxmisc.h"
+#include "guishare/dlspinctrl.h"
 #include "guishare/wxstatus.h"
 
 #include "math/gmath.h"
@@ -875,7 +875,7 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
 
 void EfgShow::OnEditReveal(wxCommandEvent &)
 {
-  dialogInfosetReveal dialog(m_efg, this);
+  dialogInfosetReveal dialog(this, m_efg);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
@@ -1228,8 +1228,8 @@ void EfgShow::OnFormatDisplayLayout(wxCommandEvent &)
 
 void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
-  guiSliderDialog dialog(this, "Decimal places", 0, 25,
-			 m_treeWindow->DrawSettings().NumDecimals());
+  dialogSpinCtrl dialog(this, "Decimal places", 0, 25,
+			m_treeWindow->DrawSettings().NumDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
     m_treeWindow->DrawSettings().SetNumDecimals(dialog.GetValue());
