@@ -27,11 +27,14 @@ extern void Init_gclmath( GSM* );
 extern void Init_gsmoper( GSM* );
 extern void Init_nfgfunc( GSM* );
 extern void Init_efgfunc( GSM* );
+extern void Init_listfunc(GSM *);
 
 void GSM::InitFunctions( void )
 {
   Init_gclmath( this );
   Init_gsmoper( this );
+
+  Init_listfunc(this);
 
   Init_nfgfunc( this );
   Init_efgfunc( this );
