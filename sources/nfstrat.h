@@ -61,6 +61,9 @@ public:
   const Nfg *GamePtr(void) const { return bnfg; }
   
   const gBlock<Strategy *> &Strategies(int pl) const;
+  inline Strategy *GetStrategy(int pl, int i) const
+    { return Strategies(pl)[i]; }
+  int GetNumber(const Strategy *s) const;
 
   int NumStrats(int pl) const;
   inline int NumStrats(const NFPlayer* p) const 

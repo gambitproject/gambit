@@ -231,6 +231,17 @@ const gBlock<Strategy *> &NFSupport::Strategies(int pl) const
   return (sups[pl]->Strategies());
 }
 
+int NFSupport::GetNumber(const Strategy *s) const
+{
+  int pl = s->Player()->GetNumber();
+  gBlock<Strategy *> strats = Strategies(pl);
+  for (int i = 1; i <= strats.Length(); i++)
+    if (strats[i] == s)
+      return i;
+  gout << "Looking for the number of a strategy not in the support.\n";
+  exit(0);
+}
+
 int NFSupport::NumStrats(int pl) const
 {
   return sups[pl]->NumStrats();
