@@ -1454,6 +1454,9 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     param[ index ] = _Param[ index ];
   }    
 
+  if( result == 0 )
+    result = new ErrorPortion;
+
   return result;
 }
 
