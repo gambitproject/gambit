@@ -112,24 +112,7 @@ information and plans.
 
 &apirefbehav;
 
-<sect1 id="apiref.mixed">
-<title>Mixed strategy profiles</title>
-
-<para>
-</para>
-
-&bifcreator;
-&bifgame;
-&bifisnash;
-&bifisperfect;
-&bifliapvalue;
-&bifmixed;
-&bifpayoff;
-&bifsetname;
-&bifsetstrategyprob;
-&bifsetstrategyprobs;
-
-</sect1>
+&apirefmixed;
 
 <sect1>
 <title>GCL-specific functions</title>
