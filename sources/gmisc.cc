@@ -440,9 +440,10 @@ int index_pair::operator [] (const int& index) const
   else            return second;
 }
  
-gOutput& operator << (gOutput& output, const index_pair& x)
+gOutput &operator<<(gOutput &p_output, const index_pair &p_indexPair)
 {
-  gout << "(" << x.first << "," << x.second << ")"; return output;
+  p_output << "(" << p_indexPair.first << "," << p_indexPair.second << ")";
+  return p_output;
 }
 
 //--------------------Exceptions Related Stuff---------------------
