@@ -2135,7 +2135,7 @@ void Init_gsmoper(GSM* gsm)
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(1, 1, gclParameter("x", porTEXT,
 					    new TextPortion(""), BYREF));
-  FuncObj->SetParamInfo(1, 2, gclParameter("n", porNUMBER,
+  FuncObj->SetParamInfo(1, 2, gclParameter("n", porINTEGER,
 					    REQUIRED));
   gsm->AddFunction(FuncObj);
 
