@@ -79,6 +79,7 @@ gIndexOdometer& gIndexOdometer::operator=(const gIndexOdometer & rhs)
     MaxIndices = rhs.MaxIndices;
     CurIndices = rhs.CurIndices;
   }
+  return *this;
 }
 
   
