@@ -387,7 +387,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
     gWatch watch;
     
     gList<BehavSolution> solutions;
-    Gobit(E, EP, start, solutions,
+    KGobit(E, EP, start, solutions,
 	  ((IntPortion *) param[12])->Value(),
 	  ((IntPortion *) param[13])->Value());
     
