@@ -83,7 +83,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
   // gout << "\nnum_vars, TotNumSequences, TotNumInfosets, NumPlayers: " << num_vars << " " << SF.TotalNumSequences() << " " << SF.TotalNumInfosets() << " " << SF.NumPlayers();
 
   Space = new gSpace(num_vars);
-  Lex = new term_order(Space,&lex);
+  Lex = new term_order(Space, lex);
 }
 
 template <class T>
@@ -159,7 +159,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
 }
 
 template <class T> bool 
-EfgPolEnumModule<T>::ExtendsToNash(BehavSolution &bs)
+EfgPolEnumModule<T>::ExtendsToNash(BehavSolution &/*bs*/)
 {
   return true;
 }

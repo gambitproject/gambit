@@ -56,7 +56,7 @@ template <class T>
 PolEnumModule<T>::PolEnumModule(const NFSupport &S, const PolEnumParams &p)
   : NF(S.Game()), support(S), params(p), 
     Space(support.TotalNumStrats()-NF.NumPlayers()), 
-    Lex(&Space, &lex), num_vars(support.TotalNumStrats()-NF.NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.TotalNumStrats()-NF.NumPlayers()), 
     count(0), nevals(0)
 { 
 //  gEpsilon(eps,12);

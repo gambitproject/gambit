@@ -74,7 +74,7 @@ template <class T> class gPolyList
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
-   const gList<gPoly<T> >   UnderlyingList()                          const;
+   gList<gPoly<T> >   UnderlyingList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;
    const gRectArray<gPoly<T>*> DerivativeMatrix()                     const;

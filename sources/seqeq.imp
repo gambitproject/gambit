@@ -117,7 +117,7 @@ SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
     Space->SetVariableName(i,"z"+ToText(i));
 
 
-  Lex = new term_order(Space, &lex);
+  Lex = new term_order(Space, lex);
 
 //  gEpsilon(eps,12);
 }
@@ -178,7 +178,7 @@ SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport
     Space->SetVariableName(i,"z"+ToText(i));
 
 
-  Lex = new term_order(Space, &lex);
+  Lex = new term_order(Space, lex);
 
 //  gEpsilon(eps,12);
 }

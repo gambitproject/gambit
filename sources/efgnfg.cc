@@ -90,7 +90,7 @@ void Lexicon::MakeReducedStrats(const EFSupport &S,
     }
   }
   else if (nn)  {
-    for (m = NULL; ; nn = nn->parent->ptr->whichbranch)  {
+    for (; ; nn = nn->parent->ptr->whichbranch)  {
       m = nn->NextSibling();
       if (m || nn->parent->ptr == NULL)   break;
     }

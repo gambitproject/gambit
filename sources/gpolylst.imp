@@ -389,7 +389,7 @@ gPolyList<T>::SystemInNewCoordinates(const gSquareMatrix<T>& M) const
 //           Information
 //----------------------------------
 
-template <class T> const gList<gPoly<T> > gPolyList<T>::UnderlyingList() const
+template <class T> gList<gPoly<T> > gPolyList<T>::UnderlyingList(void) const
 {
   gList<gPoly<T> > NewList;
   int ii;
@@ -419,8 +419,7 @@ const gVector<T> gPolyList<T>::Evaluate(const gVector<T>& v) const
   
 template<class T> const bool gPolyList<T>::IsRoot(const gVector<T>& v) const
 {
-  int ii;
-  for (ii = 1; ii <= List.Length(); ii++) 
+  for (int ii = 1; ii <= List.Length(); ii++) 
     if (List[ii]->Evaluate(v) != (T)0) 
       return false;
   return true;

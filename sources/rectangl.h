@@ -38,8 +38,8 @@ public:
 
     // information
     const int                Dmnsn()                            const;
-    const gVector<T>         LowerBound()                       const;
-    const gVector<T>         UpperBound()                       const;
+    gVector<T>         LowerBound()                       const;
+    gVector<T>         UpperBound()                       const;
     const T                  LowerBoundOfCoord(const int&)      const;
     const T                  UpperBoundOfCoord(const int&)      const;
     const T                  HeightInCoord(const int&)          const;

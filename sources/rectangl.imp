@@ -75,14 +75,14 @@ template<class T> const int gRectangle<T>::Dmnsn() const
   return sides.Length();
 }
 
-template<class T> const gVector<T> gRectangle<T>::LowerBound() const 
+template <class T> gVector<T> gRectangle<T>::LowerBound(void) const
 { 
   gVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
 
-template<class T> const gVector<T> gRectangle<T>::UpperBound() const 
+template <class T> gVector<T> gRectangle<T>::UpperBound(void) const
 { 
   gVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();

@@ -88,7 +88,6 @@ template <class T> T MixedProfile<T>::LiapValue(void) const
   T x, result((T) 0), avg, sum;
   payoff = (T) 0;
 
-  result = (T) 0;
   for(int i = 1; i <= N->NumPlayers(); i++) {
     tmp.CopyRow(i, payoff);
     avg = sum = (T) 0;
