@@ -791,6 +791,7 @@ void EfgShow::MakeMenus(void)
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(efgmenuVIEW_PROFILES, "&Profiles",
 		   "Display/hide profiles window", true);
+  viewMenu->Check(efgmenuVIEW_PROFILES, false);
   viewMenu->AppendSeparator();
   viewMenu->Append(efgmenuVIEW_NAVIGATION, "&Navigation",
 		   "Display navigation window", true);
@@ -1575,6 +1576,7 @@ void EfgShow::OnViewCursor(wxCommandEvent &)
     m_navigateWindow->Show(true);
     GetMenuBar()->Check(efgmenuVIEW_NAVIGATION, true);
     GetMenuBar()->Check(efgmenuVIEW_OUTCOMES, false);
+    GetMenuBar()->Check(efgmenuVIEW_SUPPORTS, false);
   }
   else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
@@ -1596,6 +1598,7 @@ void EfgShow::OnViewOutcomes(wxCommandEvent &)
     m_navigateWindow->Show(true);
     GetMenuBar()->Check(efgmenuVIEW_OUTCOMES, true);
     GetMenuBar()->Check(efgmenuVIEW_NAVIGATION, false);
+    GetMenuBar()->Check(efgmenuVIEW_SUPPORTS, false);
   }
   else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
@@ -2524,6 +2527,10 @@ void EfgShow::OnProfilesDelete(wxCommandEvent &)
 
 void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 {
+  if (!m_nodeSashWindow->IsShown()) {
+    return;
+  }
+
   GetMenuBar()->Check(efgmenuVIEW_OUTCOMES, false);
   GetMenuBar()->Check(efgmenuVIEW_NAVIGATION, false);
   GetMenuBar()->Check(efgmenuVIEW_SUPPORTS, false);

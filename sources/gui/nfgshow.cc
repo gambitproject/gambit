@@ -43,6 +43,7 @@
 #include "dlstrategies.h"
 
 #include "algenumpure.h"
+#include "algenummixed.h"
 #include "alglcp.h"
 #include "algliap.h"
 #include "alglp.h"
@@ -109,6 +110,8 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_STANDARD, NfgShow::OnToolsEquilibriumStandard)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
 	   NfgShow::OnToolsEquilibriumCustomEnumPure)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED,
+	   NfgShow::OnToolsEquilibriumCustomEnumMixed)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP,
 	   NfgShow::OnToolsEquilibriumCustomLcp)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LIAP,
@@ -347,6 +350,7 @@ void NfgShow::MakeMenus(void)
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(NFG_VIEW_PROFILES, "&Profiles",
 		   "Display/hide profiles window", true);
+  viewMenu->Check(NFG_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
   viewMenu->Append(NFG_VIEW_NAVIGATION, "&Navigation",
 		   "Display navigation window", true);
@@ -354,6 +358,9 @@ void NfgShow::MakeMenus(void)
   viewMenu->Append(NFG_VIEW_OUTCOMES, "&Outcomes", 
 		   "Display and edit outcomes", true);
   viewMenu->Check(NFG_VIEW_OUTCOMES, false);
+  viewMenu->Append(NFG_VIEW_SUPPORTS, "&Supports",
+		   "Display and edit supports", true);
+  viewMenu->Check(NFG_VIEW_SUPPORTS, false);
   viewMenu->AppendSeparator();
   viewMenu->Append(NFG_VIEW_DOMINANCE, "&Dominance",
 		   "Display dominance information", TRUE);
@@ -1186,6 +1193,24 @@ void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
 {
   gList<MixedSolution> solutions;
   if (EnumPureNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
+    ChangeSolution(m_solutionTable->Length());
+
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+    }
+
+    UpdateMenus();
+  }
+}
+
+void NfgShow::OnToolsEquilibriumCustomEnumMixed(wxCommandEvent &)
+{
+  gList<MixedSolution> solutions;
+  if (EnumMixedNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddSolution(solutions[soln], true);
     }

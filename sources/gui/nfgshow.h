@@ -105,6 +105,7 @@ private:
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
   void OnToolsEquilibriumCustomEnumPure(wxCommandEvent &);
+  void OnToolsEquilibriumCustomEnumMixed(wxCommandEvent &);
   void OnToolsEquilibriumCustomLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomLiap(wxCommandEvent &);
   void OnToolsEquilibriumCustomLp(wxCommandEvent &);
