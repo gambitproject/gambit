@@ -3,6 +3,13 @@ AC_INIT(sources/game/efg.h)
 AM_INIT_AUTOMAKE(gambit, 0.97.1.0)
 dnl AM_CONFIG_HEADER(config.h)
 
+dnl User-specified options
+AC_ARG_WITH(gmp,
+[  --with-gmp                Use GNU mp for multiple-precision math ],
+  AC_DEFINE(USE_GNU_MP, 1)
+  GMP_LIBS="-lgmp")
+AC_SUBST(GMP_LIBS)
+
 dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
@@ -52,7 +59,7 @@ dnl in search path
 WX_CXXFLAGS=`echo $WX_CXXFLAGS | sed 's/-I\/usr\/local\/include//g'`
 AC_SUBST(WX_CXXFLAGS)
 
-LDFLAGS="${LDFLAGS} ${WX_LIBS}"
+LDFLAGS="${LDFLAGS} ${WX_LIBS} ${GMP_LIBS}"
 
 GUI_LIBS="${WX_LIBS}"
 AC_SUBST(GUI_LIBS)
