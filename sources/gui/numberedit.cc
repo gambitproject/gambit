@@ -63,17 +63,15 @@ void NumberEditor::Reset()
   DoReset(GetString());
 }
 
-void NumberEditor::StartingKey(wxKeyEvent& event)
+void NumberEditor::StartingKey(wxKeyEvent &event)
 {
   int keycode = (int)event.KeyCode();
-  if ( isdigit(keycode) ||
-       keycode == '+' || keycode == '-' || keycode == '.' ) {
-    wxGridCellTextEditor::StartingKey(event);
-
-    // skip Skip() below
+  if (isdigit(keycode) ||
+      keycode == '+' || keycode == '-' || keycode == '.') {
+    Text()->SetValue(wxString::Format("%c", keycode));
+    Text()->SetInsertionPointEnd();
     return;
   }
-
   event.Skip();
 }
 
@@ -89,7 +87,7 @@ bool NumberEditor::IsAcceptedKey(wxKeyEvent& event)
 {
   if (wxGridCellEditor::IsAcceptedKey(event)) {
     int keycode = event.GetKeyCode();
-    switch ( keycode ) {
+    switch (keycode) {
     case WXK_NUMPAD0:
     case WXK_NUMPAD1:
     case WXK_NUMPAD2:
@@ -110,8 +108,9 @@ bool NumberEditor::IsAcceptedKey(wxKeyEvent& event)
 
     default:
       if ((keycode < 128) &&
-	  (isdigit(keycode) || tolower(keycode) == '/') )
+	  (isdigit(keycode) || keycode == '/' || keycode == '.')) {
 	return true;
+      }
     }
   }
 

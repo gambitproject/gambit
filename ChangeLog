@@ -1,3 +1,24 @@
+2002-10-01  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* gui/numberedit.cc: By default, first key overwrites contents;
+	accept '.' as first key
+
+	* gui/dleditbehav.cc, gui/dleditmixed.cc: General fixup of feel for
+	editing; use NumberEditor in grid.
+
+2002-09-30  Ted Turocy  <arbiter@econ.tamu.edu>
+
+	* This begins work on 0.97.0.3
+
+	* nash/behavsol.cc: Fixups for some of the property-computing
+	logic; earlier version was causing a conflict in gFact.
+
+	* gui/newgame.(cc,h): Bug fix for crash when no player was selected
+	in the player list, and the number of strategies was changed.
+
+	* gui/?fgoutcome.cc: Bug fix: make sure to add line to grid prior
+	to setting cell editor when creating new outcome via pressing Enter
+
 2002-09-24  Ted Turocy  <arbiter@econ.tamu.edu>
 
 	* gui/?fgprofile.cc, gui/?fgoutcome.cc: Changed context menu items to
@@ -70,3 +91,4 @@
 	* gui/gambit.cc: Uncommented code to load files off command line;
 	extended to load any number of files, not just one.
 
+>>>>>>> 1.1.2.10

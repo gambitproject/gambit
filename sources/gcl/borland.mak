@@ -11,7 +11,7 @@
 
 !include ..\makedef.bcc
 
-EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.0.1\"
+EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__ -DVERSION=\"0.97.1.0\"
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libgcl_a_SOURCES = \

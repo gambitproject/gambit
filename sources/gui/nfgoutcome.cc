@@ -136,9 +136,11 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
     m_parent->Game().SetLabel(outcome, outcomeName);
     for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
       m_parent->Game().SetPayoff(outcome, pl, gNumber(0));
-      SetCellEditor(GetRows() - 1, pl, new NumberEditor);
     }
     AppendRows();
+    for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
+      SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+    }
     m_parent->OnOutcomesEdited();
     UpdateValues();
     SetGridCursor(GetRows() - 1, 0);

@@ -233,7 +233,9 @@ gTriState BehavSolution::GetNash(void) const
 		  algorithm.ExtendsToNash(*this,Support(),Support(),status)) 
 	  ? triTRUE:triFALSE;
       }
-      answer = triUNKNOWN;
+      else {
+	answer = triUNKNOWN;
+      }
     }
   }
   // Done.  Now mark other obvious inferences 
@@ -261,7 +263,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
     answer = m_SubgamePerfect.Answer();
   else {
     // for complete profiles, use subgame perfect checker.  
-    if(IsComplete()) {
+    if (IsComplete()) {
       BehavProfile<gNumber> p(*m_profile);
       SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
       gNullStatus status;
@@ -270,19 +272,21 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
     }
     // else, for now, we require complete profiles for subgame perfection.  
     // but we may want to turn over to Andy here. 
-    else 
-      answer = triFALSE;
+    else {
+      answer = triUNKNOWN;
+    }
   }
   // Done.  Now mark other obvious inferences 
   
-  if(answer) {
+  if (answer == triTRUE) {
     m_Nash.Set(triTRUE);
     m_ANFNash.Set(triTRUE);
   }
-  if(!answer) {
+  else if (answer == triFALSE) {
     m_Sequential.Set(triFALSE);
-    if(!decomposes) 
+    if (!decomposes) {
       m_Nash.Set(triFALSE);
+    }
   }
   return answer;
 }
@@ -462,8 +466,9 @@ bool BehavSolution::IsComplete(void) const
 const gTriState &BehavSolution::IsNash(void) const
 {
   CheckIsValid();
-  if(!m_Nash.Checked())
+  if (!m_Nash.Checked()) {
     m_Nash.Set(GetNash());
+  }
   return m_Nash.Answer();
 }
 

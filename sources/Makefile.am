@@ -2,5 +2,5 @@
 
 SUBDIRS = base math numerical game pelican poly nash gcl bitmaps gui wxgcl
 
-EXTRA_DIST = borland.mak gambit32.cfg makedef.bcc
+EXTRA_DIST = borland.mak gambit32.cfg
 

@@ -3,7 +3,7 @@ efg_icn    ICON ..\bitmaps\efg.ico
 nfg_icn    ICON ..\bitmaps\nfg.ico
 
 rcinclude wx\msw\wx.rc
-rcinclude wx\html\msw\wxhtml.rc
+
 
 SCISSORCUR	CURSOR	 ..\bitmaps\scissor.cur
 OUTCOMECUR	CURSOR	 ..\bitmaps\outcome.cur

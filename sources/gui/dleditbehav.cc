@@ -30,6 +30,7 @@
 #endif  // WX_PRECOMP
 #include "nash/behavsol.h"
 #include "dleditbehav.h"
+#include "numberedit.h"
 
 //-------------------------------------------------------------------------
 //                 class dialogEditBehav: Member functions
@@ -37,33 +38,6 @@
 
 const int idINFOSET_TREE = 2001;
 const int idPROB_GRID = 2002;
-
-class ProbGrid : public wxGrid {
-private:
-  // Event handlers
-  void OnKeyDown(wxKeyEvent &);
-
-public:
-  ProbGrid(wxWindow *p_parent)
-    : wxGrid(p_parent, idPROB_GRID, wxPoint(5, 5), wxSize(200, 200)) { }
-  virtual ~ProbGrid() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(ProbGrid, wxGrid)
-  EVT_KEY_DOWN(ProbGrid::OnKeyDown)
-END_EVENT_TABLE()
-
-void ProbGrid::OnKeyDown(wxKeyEvent &p_event)
-{
-  // This is here only to keep the program from crashing under MSW
-  if (!IsCellEditControlEnabled()) {
-    EnableCellEditControl();
-    ShowCellEditControl();
-  }
-}
-
 
 BEGIN_EVENT_TABLE(dialogEditBehav, wxDialog)
   EVT_TREE_ITEM_COLLAPSING(idINFOSET_TREE, dialogEditBehav::OnItemCollapsing)
@@ -85,11 +59,11 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 		 0, wxALL, 5);
   m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetName());
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(nameSizer, 1, wxALL | wxEXPAND, 5);
+  topSizer->Add(nameSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_infosetTree = new wxTreeCtrl(this, idINFOSET_TREE,
-				 wxPoint(5, 5), wxSize(200, 200));
+				 wxDefaultPosition, wxSize(200, 200));
   m_infosetTree->AddRoot((char *) p_profile.GetName());
 
   m_lastInfoset = p_profile.GetGame().Infosets()[1];
@@ -106,6 +80,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
 				     wxString::Format("Player %d", pl));
     }
+    m_infosetTree->SetItemBold(id, true);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       wxTreeItemId isetID;
@@ -125,9 +100,10 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     m_infosetTree->Expand(id);
   }
   m_infosetTree->Expand(m_infosetTree->GetRootItem());
-  editSizer->Add(m_infosetTree, 0, wxALL, 5);
+  editSizer->Add(m_infosetTree, 1, wxALL | wxEXPAND, 5);
 
-  m_probGrid = new ProbGrid(this);
+  m_probGrid = new wxGrid(this, idPROB_GRID,
+			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(m_lastInfoset->NumActions(), 1);
   m_probGrid->SetLabelValue(wxHORIZONTAL, "Probability", 0);
   m_probGrid->SetDefaultCellAlignment(wxRIGHT, wxCENTER);
@@ -137,11 +113,13 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 			      act - 1);
     m_probGrid->SetCellValue((char *) ToText(p_profile(m_lastInfoset->Actions()[act])),
 			     act - 1, 0);
+    m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
   }
-  m_probGrid->UpdateDimensions();
-  m_probGrid->Refresh();
+  m_probGrid->SetMargins(0, 0);
+  m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
+			     m_probGrid->GetColSize(0), 200));
   editSizer->Add(m_probGrid, 0, wxALL, 5);
-  topSizer->Add(editSizer, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(editSizer, 1, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
@@ -155,6 +133,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   // selection event, and the grid must be set up properly before
   // that happens
   m_infosetTree->SelectItem(firstID);
+  m_probGrid->AdjustScrollbars();
 
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -212,6 +191,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 				act - 1);
       m_probGrid->SetCellValue((char *) ToText(m_profile(m_lastInfoset->Actions()[act])),
 			       act - 1, 0);
+      m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
     }
   }
   else {

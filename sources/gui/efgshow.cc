@@ -1456,7 +1456,17 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
       
       UpdateMenus();
     }
-    catch (...) { }
+    catch (gException &ex) {
+      wxMessageDialog msgDialog(this, (char *) ex.Description(),
+				"Gambit exception", wxOK);
+      msgDialog.ShowModal();
+    }
+    catch (...) {
+      wxMessageDialog msgDialog(this,
+				"An internal exception occurred while solving",
+				"Gambit exception", wxOK);
+      msgDialog.ShowModal();
+    }
 
     delete algorithm;
   }

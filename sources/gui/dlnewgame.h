@@ -33,6 +33,7 @@ private:
   wxSpinCtrl *m_numPlayers, *m_numStrategies;
   wxListBox *m_strategyList;
   gBlock<int> m_strategies;
+  int m_lastPlayer;
   wxCheckBox *m_createOutcomes;
 
   // Event handlers

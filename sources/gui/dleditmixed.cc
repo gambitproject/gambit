@@ -30,6 +30,7 @@
 #endif  // WX_PRECOMP
 #include "nash/mixedsol.h"
 #include "dleditmixed.h"
+#include "numberedit.h"
 
 //-------------------------------------------------------------------------
 //                class dialogEditMixed: Member functions
@@ -69,7 +70,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 
   gbtNfgPlayer firstPlayer = m_profile.Game().GetPlayer(1);
   m_probGrid = new wxGrid(this, idPROB_GRID,
-			  wxDefaultPosition, wxSize(200, 200));
+			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
   m_probGrid->SetLabelValue(wxHORIZONTAL, "Probability", 0);
   for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
@@ -78,9 +79,11 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
 			      st - 1);
     m_probGrid->SetCellValue((char *) ToText(p_profile(firstPlayer.GetStrategy(st))),
 			     st - 1, 0);
+    m_probGrid->SetCellEditor(st - 1, 0, new NumberEditor);
   }
-  m_probGrid->UpdateDimensions();
-  m_probGrid->Refresh();
+  m_probGrid->SetMargins(0, 0);
+  m_probGrid->SetSize(wxSize(m_probGrid->GetRowLabelSize() + 
+			     m_probGrid->GetColSize(0), 200));
   editSizer->Add(m_probGrid, 0, wxALL, 5);
   topSizer->Add(editSizer, 0, wxEXPAND | wxALL, 5);
 
@@ -133,6 +136,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 			      st - 1);
     m_probGrid->SetCellValue((char *) ToText(m_profile(player.GetStrategy(st))),
 			     st - 1, 0);
+    m_probGrid->SetCellEditor(st - 1, 0, new NumberEditor);
   }
 
   m_selection = p_event.GetSelection() + 1;

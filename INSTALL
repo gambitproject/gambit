@@ -27,14 +27,18 @@ user account, you might do
 The graphical interface would then be in /home/mylogin/gambit/bin/gambit,
 and so forth.  (Obviously, you can omit the 'su' in this case.)
 
-Gambit requires wxWindows 2.3.2 to build.  If it isn't installed in
-a standard place (e.g., /usr or /usr/local), you'll need to tell
-configure where to find it with the --with-wx-prefix=PREFIX option, for
-example:
+Gambit requires wxWindows 2.3.2 or higher to build.  However, we recommend
+building with wxWindows 2.3.3, since it improves a number of things with
+regard to using the grids for editing.  This primarily affects the outcomes
+window and profile editing dialogs.
+
+If wxWindows it isn't installed in a standard place (e.g., /usr or
+/usr/local), you'll need to tell configure where to find it with the
+--with-wx-prefix=PREFIX option, for example:
 
 ./configure --with-wx-prefix=/home/mylogin/wx
 
-Technically, wxWindows 2.3.2 is "unstable"; however, the features used
+Technically, wxWindows 2.3.x is "unstable"; however, the features used
 by Gambit seem to be stable enough to justify its use.  A new microversion
 of Gambit will be released when wxWindows goes to 2.4.x (stable).
 
@@ -49,9 +53,11 @@ Building Gambit on Windows:
 
 The Gambit distribution provides makefiles for Borland C++ 5.5.1.
 These are in borland.mak in the sources directory and its subdirectories.
-To build Gambit, you'll need to modify the file sources/makedef.bcc to
+To build Gambit, you'll need to create a file sources/makedef.bcc to
 point to your wxWindows installation and your Borland compiler installation.
-The default contents of this file are:
+For example, if you have wxWindows built in C:\WX2 and the compiler in
+C:\BORLAND\BCC55, and you have the Gambit sources unpacked in C:\GAMBIT,
+you would create a file C:\GAMBIT\SOURCES\MAKEDEF.BCC with the contents
 
 WXDIR = C:\WX2
 BCCDIR = C:\BORLAND\BCC55

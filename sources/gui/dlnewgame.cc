@@ -47,7 +47,7 @@ BEGIN_EVENT_TABLE(dialogNewGame, wxDialog)
 END_EVENT_TABLE()
 
 dialogNewGame::dialogNewGame(wxWindow *p_parent)
-  : wxDialog(p_parent, -1, "Create a new game")
+  : wxDialog(p_parent, -1, "Create a new game"), m_lastPlayer(0)
 {
   SetAutoLayout(true);
 
@@ -80,6 +80,7 @@ dialogNewGame::dialogNewGame(wxWindow *p_parent)
   m_strategies.Append(2);
   m_strategies.Append(2);
   m_strategyList->Enable(false);
+  m_strategyList->SetSelection(0);
   nfgSizer->Add(m_strategyList, 1, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *strategiesSizer = new wxBoxSizer(wxVERTICAL);
@@ -119,6 +120,7 @@ dialogNewGame::dialogNewGame(wxWindow *p_parent)
 void dialogNewGame::OnGameType(wxCommandEvent &)
 {
   m_strategyList->Enable(m_gameType->GetSelection() == 1);
+  m_strategyList->SetSelection(m_lastPlayer, true);
   m_numStrategies->Enable(m_gameType->GetSelection() == 1);
   m_createOutcomes->Enable(m_gameType->GetSelection() == 1);
 }
@@ -140,15 +142,19 @@ void dialogNewGame::OnNumPlayers(wxSpinEvent &)
 
 void dialogNewGame::OnStrategy(wxCommandEvent &)
 {
-  m_numStrategies->SetValue(m_strategies[m_strategyList->GetSelection() + 1]);
+  m_lastPlayer = m_strategyList->GetSelection();
+  m_numStrategies->SetValue(m_strategies[m_lastPlayer + 1]);
 }
 
 void dialogNewGame::OnNumStrategies(wxSpinEvent &)
 {
   int numStrategies = m_numStrategies->GetValue();
-  int player = m_strategyList->GetSelection() + 1;
-  m_strategyList->SetString(m_strategyList->GetSelection(),
+  m_strategyList->SetString(m_lastPlayer,
 			    wxString::Format("Player%d: %d strategies",
-					     player, numStrategies));
-  m_strategies[player] = numStrategies;
+					     m_lastPlayer+1, numStrategies));
+  m_strategyList->SetSelection(m_lastPlayer, true);
+  m_strategies[m_lastPlayer+1] = numStrategies;
 }
+
+
+
