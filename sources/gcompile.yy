@@ -1,7 +1,6 @@
-
 %{
 //#
-//# FILE: gcompile.y -- yaccer/compiler for the GCL
+//# FILE: gcompile.yy -- yaccer/compiler for the GCL
 //#
 //# This parser/compiler is dedicated to the memory of
 //# Jan L. A. van de Snepscheut, who wrote a program after which
@@ -34,9 +33,11 @@
   gInteger ival; \
   double dval; \
   gString tval, formal, funcname, paramtype;  \
+  Portion* por; \
   gList<Instruction *> program, *function; \
   gList<gString> formals, types; \
   gList<bool> refs; \
+  gList<Portion*> portions; \
   gGrowableStack<gString> formalstack; \
   gGrowableStack<int> labels, listlen; \
   gGrowableStack<char> matching; \
@@ -57,7 +58,8 @@
   int Parse(void); \
   void Execute(void);
 
-%define CONSTRUCTOR_INIT     : function(0), formalstack(4), labels(4), \
+%define CONSTRUCTOR_INIT     : por(0), function(0), formalstack(4), \
+                               labels(4), \
                                listlen(4), matching(4), \
                                filenames(4), lines(4), \
                                gsm(256), quit(false)
@@ -160,9 +162,16 @@ formalparams: formalparam
             | formalparams CRLFopt COMMA CRLFopt formalparam
 
 formalparam:  NAME { formals.Append(tval); } binding 
-              { paramtype = ""; } typename { types.Append(paramtype); } 
+              { paramtype = ""; } typename 
+              { types.Append(paramtype); portions.Append(NO_DEFAULT_VALUE); } 
+            | LBRACE NAME { formals.Append(tval); } binding
+              { paramtype = ""; types.Append(paramtype); }
+              E9 { portions.Append(por); por = 0; } 
+              RBRACE
 
 typename:     NAME { paramtype += tval; } optparen
+        |     gINPUT { paramtype += "INPUT"; }
+        |     gOUTPUT { paramtype += "OUTPUT"; }
 
 optparen:
         |     LPAREN { paramtype += '('; }  typename
@@ -331,17 +340,27 @@ E7:           E8
                  { emit(new Subscript); }
   ;
 
-E8:           BOOLEAN       { emit(new Push<bool>(bval)); }
-  |           INTEGER       { emit(new Push<long>(ival.as_long())); }
-  |           FLOAT         { emit(new Push<double>(dval)); }
-  |           TEXT          { emit(new Push<gString>(tval)); }
-  |           gINPUT        { emit(new PushInput(gin)); }
-  |           gOUTPUT       { emit(new PushOutput(gout)); }
-  |           gNULL         { emit(new PushOutput(gnull)); }
+E8:           E9            { delete por; }
   |           LPAREN expression RPAREN
   |           NAME          { emit(new PushRef(tval)); }
   |           function      { emit(new CallFunction()); }
   |           list          { emit(new PushList(listlen.Pop())); }
+  ;
+
+E9:           BOOLEAN  { emit(new Push<bool>(bval));
+                         por = new BoolValPortion(bval); }
+  |           INTEGER  { emit(new Push<long>(ival.as_long()));
+                         por = new IntValPortion(ival.as_long()); }
+  |           FLOAT    { emit(new Push<double>(dval));
+                         por = new FloatValPortion(dval); }
+  |           TEXT     { emit(new Push<gString>(tval));
+                         por = new TextValPortion(tval); }
+  |           gINPUT   { emit(new PushInput(gin));
+                         por = new InputRefPortion(gin); }
+  |           gOUTPUT  { emit(new PushOutput(gout));
+                         por = new OutputRefPortion(gout); }
+  |           gNULL    { emit(new PushOutput(gnull));
+                         por = new OutputRefPortion(gnull); }
   ;
 
 function:     NAME LBRACK { emit(new InitCallFunction(tval)); } arglist RBRACK
@@ -716,6 +735,7 @@ void GCLCompiler::RecoverFromError(void)
     formals.Flush();
     types.Flush();
     refs.Flush();
+    portions.Flush();
   }
   labels.Flush();
   listlen.Flush();
@@ -741,10 +761,10 @@ bool GCLCompiler::DefineFunction(void)
     if (type != porERROR)   {
       if (refs[i])
 	func->SetParamInfo(function, i - 1, formals[i], type,
-			   NO_DEFAULT_VALUE, PASS_BY_REFERENCE, listdepth);
+			   portions[i], PASS_BY_REFERENCE, listdepth);
       else
 	func->SetParamInfo(function, i - 1, formals[i], type,
-			   NO_DEFAULT_VALUE, PASS_BY_VALUE, listdepth);
+			   portions[i], PASS_BY_VALUE, listdepth);
     }
     else   {
       error = true;
@@ -754,7 +774,10 @@ bool GCLCompiler::DefineFunction(void)
   }
 
   if (!error)  gsm.AddFunction(func);
-  formals.Flush();   types.Flush();  refs.Flush();
+  formals.Flush();
+  types.Flush();
+  refs.Flush();
+  portions.Flush();
   function = 0;
   return !error;
 }
