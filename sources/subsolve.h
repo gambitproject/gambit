@@ -9,7 +9,7 @@
 
 #include "efg.h"
 #include "nfg.h"
-
+class NFSupport;
 template <class T> class SubgameSolver   {
   private:
     int max_solns, subgame_number;

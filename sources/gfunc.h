@@ -7,7 +7,7 @@
 
 #ifndef GFUNC_H
 #define GFUNC_H
-
+#include "gmisc.h"
 template <class T> class gVector;
 template <class T> class gMatrix;
 
