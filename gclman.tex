@@ -1,4 +1,5 @@
-\documentstyle[widetext]{article}
+\documentstyle[widetext,gambit]{article}
+\renewcommand{\baselinestretch}{.9}
 \newcommand{\bd}{\begin{description}}
 \newcommand{\ed}{\end{description}}
 \begin{document}
@@ -166,27 +167,27 @@ AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 
 \bd
 \item
-- Description:  Appends the number of branches specified to the
+[Description:] Appends the number of branches specified to the
 indicated terminal node and places the node in a new information set
 for the given player.
 \item
-- Return value: Returns the node to which new branches have been appended.
+[Return value:] Returns the node to which new branches have been appended.
 \item
-- Required parameters:
-
+[Required parameters:]\hfil\null
+\par
 \bd
 \item
-*  n:  The terminal node to which branches are to be added.
+[* n:] The terminal node to which branches are to be added.
 \item
-*  pl:  The player whose information set the node will now belong to.
+[* pl:] The player whose information set the node will now belong to.
 If the player specified is not already defined in the game, the player
 is created automatically. 
 \item
-*  br:  The number of branches to be appended to the node.
+[* br:] The number of branches to be appended to the node.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -196,23 +197,23 @@ AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 
 \bd
 \item
-- Description:  Attaches the indicated outcome to the specified node.
+[Description:] Attaches the indicated outcome to the specified node.
 \item
-- Return value:  Returns the node to which the outcome is attached.
+[Return value:] Returns the node to which the outcome is attached.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node to which the outcome is to be attached.  Note that the
+[* n:] The node to which the outcome is to be attached.  Note that the
 node need not be terminal in order to have an outcome attached.
 \item
-*  outc:  The number of the outcome to be attached.  If no outcome
+[* outc:] The number of the outcome to be attached.  If no outcome
 with the indicated number exists, no action is taken.  
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -225,19 +226,20 @@ For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
 \bd
 \item
-- Description:  Finds the first element of the specified list of type T.
+[Description:] Finds the first element of the specified list of type T.
 \item
-- Return value:  Returns a value of type T which is the first element
+[Return value:] Returns a value of type T which is the first element
 of the list.
-\item - Required parameters:
+\item 
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-* l:  The list of type T on which the procedure is to be performed.
+[*l:] The list of type T on which the procedure is to be performed.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -250,18 +252,19 @@ For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
 \bd
 \item
-- Description:  Deletes the first element of the specified list of type T.
-\item -	Return value:  A list of type T which is the specified list minus its
+[Description:] Deletes the first element of the specified list of type T.
+\item 
+[Return value:] A list of type T which is the specified list minus its
 first element.
 \item   
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  l:  The list of type T on which the procedure is to be performed.
+[* l:] The list of type T on which the procedure is to be performed.
 \ed
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -274,22 +277,23 @@ For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
 \bd
 \item
-- Description:  Concatenates the two lists, placing the second list given
+[Description:] Concatenates the two lists, placing the second list given
 at the end of the first list.  Note the two lists must be of the same type.
-\item -Return value:  Returns a new list (of the same type), which is a 
+\item 
+[Return value:] Returns a new list (of the same type), which is a 
 combination of the two given lists.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  l1:  The list of type T which is to be placed in front of the second list.
+[* l1:] The list of type T which is to be placed in front of the second list.
 \item 
-* l2:  The list of type T which is to be placed at the end of the first list.
+[*l2:] The list of type T which is to be placed at the end of the first list.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -301,22 +305,22 @@ For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
 
 \bd
 \item
-- Description:  Finds whether the specified value of type T is
+[Description:] Finds whether the specified value of type T is
 contained in the indicated list of type T.
 \item 
--Return value:  True when the specified value is contained in the list.
+[Return value:] True when the specified value is contained in the list.
 \item
--Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item	
-*  e:  The value of type T to be searched for.
+[* e:] The value of type T to be searched for.
 \item
-*  l:  The list of type T which is to be searched in.
+[* l:] The list of type T which is to be searched in.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -327,22 +331,22 @@ CopyTree[n->NODE, to->NODE] =: NODE
 
 \bd
 \item
-- Description:  Copies the subtree rooted at the specified node to the
+[Description:] Copies the subtree rooted at the specified node to the
 indicated node.
 \item
-- Return value:  XXXX.
+[Return value:] XXXX.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item	
-*  n:  The node at which the subtree to be copied is rooted.
+[* n:] The node at which the subtree to be copied is rooted.
 \item
-*  to:  The node to which the subtree is to be copied.
+[* to:] The node to which the subtree is to be copied.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -352,23 +356,23 @@ CrunchNfg[N->NFG] =: NFG
 
 \bd
 \item
-- Description:  Creates a new problem in normal form for which the 
+[Description:] Creates a new problem in normal form for which the 
 strategies are those of the smallest strategy set of the specified
 normal form problem and which contains only those payoff elements 
 corresponding to those strategies.
 \item
-- Return value:  Returns the new normal form problem.
+[Return value:] Returns the new normal form problem.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  N:  The problem in normal form from which the new normal form
+[* N:] The problem in normal form from which the new normal form
 problem is to be created.
 \ed
 
 \item  
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -378,21 +382,21 @@ DeleteAction[n->NODE, br->INTEGER] =: NODE
 
 \bd
 \item
-- Description:  Deletes the indicated action number from the information
+[Description:] Deletes the indicated action number from the information
 set containing the specified node.
 \item
-- Return value:  The given node.
-- Required parameters:
+[Return value:] The given node.
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node belonging to the information set from which the action
+[* n:] The node belonging to the information set from which the action
 is to be deleted.
-\item *  br:  The number of the branch to be deleted.
+\item [* br:] The number of the branch to be deleted.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -402,24 +406,24 @@ DeleteNode[n->NODE, keep->INTEGER] =: NODE
 
 \bd
 \item   
-- Description:  Deletes the indicated node from the tree.  The specified
+[Description:] Deletes the indicated node from the tree.  The specified
 child of the deleted node is kept and replaces the node in its spot in
 the tree.  The subtrees associated with all other children of the
 deleted node are deleted.
 \item
-- Return value:  The node which replaces the deleted node.
+[Return value:] The node which replaces the deleted node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node to be deleted.
+[* n:] The node to be deleted.
 \item
-*  keep:  The child of the deleted node which is to be kept.
+[* keep:] The child of the deleted node which is to be kept.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -429,20 +433,20 @@ DeleteTree[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Deletes the subtree rooted at the specified node.
+[Description:] Deletes the subtree rooted at the specified node.
 This node then becomes a terminal node.
 \item
-- Return value:  The indicated node which is now a terminal node.
+[Return value:] The indicated node which is now a terminal node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item  
-*  n:  The node where the subtree to be deleted is rooted.
+[* n:] The node where the subtree to be deleted is rooted.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -452,20 +456,20 @@ DetachOutcome[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Sets the outcome attached to the specified node to the 
+[Description:] Sets the outcome attached to the specified node to the 
 null outcome.
 \item   
-- Return value:  The indicated node.
+[Return value:] The indicated node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item	
-*  n:  The node whose outcome is to be detached.
+[* n:] The node whose outcome is to be detached.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -475,20 +479,20 @@ DisplayEfg[E->EFG]
 
 \bd
 \item
-- Description:  Prints the game tree of the specified extensive form
+[Description:] Prints the game tree of the specified extensive form
 problem in outline form.
 \item
-- Return value:  None.
+[Return value:] None.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form which is to be displayed.
+[* E:] The problem in extensive form which is to be displayed.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -498,25 +502,25 @@ DisplayNfg[N->NFG, {sset->INTEGER}]
 
 \bd
 \item
-- Description:  Prints the specified normal form problem as a list of
+[Description:] Prints the specified normal form problem as a list of
 contingencies and corresponding payoff vectors.  Uses the last
 strategy set unless otherwise specified.
 \item
-- Return value:  None.
+[Return value:] None.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd	
 \item
-*  N:  The problem in normal form which is to be displayed.
+[* N:] The problem in normal form which is to be displayed.
 \ed
 
 \item
-- Optional parameters:	
+[Optional parameters:]\hfil\null	
 
 \bd
 \item
-*  SSET:  The number of the strategy set of the specified normal form
+[* SSET:] The number of the strategy set of the specified normal form
 problem which is to be used in displaying the problem.  If not
 specified, the last (smallest) strategy set is used.
 \ed
@@ -529,24 +533,24 @@ EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
 
 \bd
 \item
-- Description:  Converts a problem in extensive form to the same problem
+[Description:] Converts a problem in extensive form to the same problem
 in the corresponding agent normal form.
 \item
-- Return value:  The new agent normal form game.  
+[Return value:] The new agent normal form game.  
 \item 
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form to be converted to agent normal form.
+[* E:] The problem in extensive form to be converted to agent normal form.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -557,24 +561,24 @@ EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
 
 \bd
 \item
-- Description:  Converts a problem in extensive form to the same problem
+[Description:] Converts a problem in extensive form to the same problem
 as a reduced normal form game.
 \item
-- Return value:  The new normal form game.  
+[Return value:] The new normal form game.  
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The problem in extensive form to be converted to normal form.
+[* E:] The problem in extensive form to be converted to normal form.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -586,16 +590,16 @@ ElapsedTime[] =: RATIONAL
 
 \bd
 \item
-- Description:  Calculates the time transpired since the last time 
+[Description:] Calculates the time transpired since the last time 
 StartWatch[] was used if the system stopwatch is currently running.
 Otherwise, calculates the time elapsed between the last StartWatch[] -
 StopWatch[] match.
 \item
-- Return value:  Returns the time value given by the system stopwatch
+[Return value:] Returns the time value given by the system stopwatch
 \item
-- Required parameters:  None.
+[Required parameters:]  None.
 \item   
--Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -607,42 +611,42 @@ ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
 
 \bd
 \item
-- Description:  Performs iterated (unless otherwise specified) deletion 
+[Description:] Performs iterated (unless otherwise specified) deletion 
 of dominated strategies for the list of players specified.  
 \item  
-- Return value:  The number of the new strategy set.  The original full
+[Return value:] The number of the new strategy set.  The original full
 strategy set is numbered 1.  Each iteration creates a new strategy set
 with an integer value one greater than that of the previous strategy 
 set.  Therefore, if no dominated strategies are found, the return value
 is equal to 1.
 \item
-- Required paremeters:
+[Required paremeters:]
 	
 \bd
 \item
-*  N:  The problem in normal form for which dominated strategies are
+[* N:] The problem in normal form for which dominated strategies are
 to be eliminated.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  pl:  Specifies the list of players for which the procedure is to
+[* pl:] Specifies the list of players for which the procedure is to
 be performed.  If unspecified, it defaults to all players. 
 \item
-*  strong:  Determines the type of dominance used.  The default value
+[* strong:] Determines the type of dominance used.  The default value
 is False, which signifies that weak dominance is used.  If `strong` 
 is specified to be True, strong dominance is used.  
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \item
-*  output:  Redirects the output of the procedure to a specified 
+[* output:] Redirects the output of the procedure to a specified 
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, it directs output to the screen.
 \item
-*  NIT:  The number of iterations to be performed by the procedure.
+[* NIT:] The number of iterations to be performed by the procedure.
 If not specified, it has a default value of zero which means 
 that all dominated strategies are iteratively deleted.
 \ed
@@ -657,24 +661,24 @@ Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
 
 \bd
 \item
-- Description:  Determines whether or not all the elements of the two
+[Description:] Determines whether or not all the elements of the two
 lists are equal.
 \item
-- Return value:  Returns True only if all the elements of the two lists
+[Return value:] Returns True only if all the elements of the two lists
 are equal.
 \item
-- Required parameters:  
+[Required parameters:]\hfil\null 
 	
 \bd
 \item
-*  l1:  The first list of type T which is to be compared for equality.
+[* l1:] The first list of type T which is to be compared for equality.
 \item
-*  l2:  The second list of type T which is to be compared for 
+[* l2:] The second list of type T which is to be compared for 
 equality.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 
 \ed
 
@@ -685,22 +689,22 @@ GetActionName[n->NODE, br->INTEGER] =: TEXT
 
 \bd
 \item
-- Description:  Finds the name assigned to the action corresponding to 
+[Description:] Finds the name assigned to the action corresponding to 
 the indicated branch of the specified node.
 \item   
-- Return value:  The name of the action.
+[Return value:] The name of the action.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node at which the action to be found exists.
+[* n:] The node at which the action to be found exists.
 \item
-*  br:  The branch which corresponds to the action to be found.
+[* br:] The branch which corresponds to the action to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -710,21 +714,21 @@ GetActionProbs[n->NODE] =: LIST(RATIONAL)
 
 \bd
 \item
-- Description:  Finds the vector of probabilities for the actions at the
+[Description:] Finds the vector of probabilities for the actions at the
 specified node.  This is only meaninful for nodes in information sets 
 belonging to the player representing chance (player 0).
 \item
-- Return value:  Returns the vector of action probabilities for the node.
+[Return value:] Returns the vector of action probabilities for the node.
 \item
-- Required parameters: 
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node for which the action probabilities are to be found.
+[* n:] The node for which the action probabilities are to be found.
 \ed
 
 \item
--Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -734,30 +738,30 @@ GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
 
 \bd
 \item
-- Description:  Determines the number of strategies which dominate the
+[Description:] Determines the number of strategies which dominate the
 specified strategy for the indicated player in the given problem in 
 normal form.
 \item
-- Return value:  Returns the number of strategies which dominate the
+[Return value:] Returns the number of strategies which dominate the
 specified strategy.  If the strategy is undominated, returns a value
 of zero.  
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form in which the specified strategy of
+[* N:] The problem in normal form in which the specified strategy of
 the indicated player is to be tested for domination.
 \item
-*  pl:  The number corresponding to the player for whom the specified
+[* pl:] The number corresponding to the player for whom the specified
 strategy is to be tested for domination.
 \item
-*  st:  The number corresponding to the strategy belonging to the 
+[* st:] The number corresponding to the strategy belonging to the 
 indicated player which is to be tested for domination.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -767,20 +771,20 @@ GetInfosetName[n->NODE] =: TEXT
 
 \bd
 \item
-- Description:  Finds the name of the information set to which the 
+[Description:] Finds the name of the information set to which the 
 specified node belongs.
 \item
-- Return value:  The name of the information set.
+[Return value:] The name of the information set.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node which belongs to the information set to be found.
+[* n:] The node which belongs to the information set to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -790,20 +794,20 @@ GetNextSibling[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Finds the next sibling of the specified node.
+[Description:] Finds the next sibling of the specified node.
 \item
-- Return value:  The node which is the next sibling of the specified 
+[Return value:] The node which is the next sibling of the specified 
 node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node for which the next sibling is to be found.
+[* n:] The node for which the next sibling is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -813,26 +817,26 @@ GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
 
 \bd
 \item
--Description:  Finds the vector of payoffs to the players for the 
+[Description:] Finds the vector of payoffs to the players for the 
 outcome with the indicated number in the specified problem in extensive
 form.
 \item
-- Return value:  The vector of payoffs corresponding to the specified 
+[Return value:] The vector of payoffs corresponding to the specified 
 outcome.  If the outcome is not defined, the procedure returns the 
 empty list.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form for which the outcome is to be found.
+[* E:] The problem in extensive form for which the outcome is to be found.
 \item
-*  outc:  The number assigned to the outcome for which the payoff 
+[* outc:] The number assigned to the outcome for which the payoff 
 vector will be returned.
 \ed
 
 \item
-- Optional paramteters:  None.
+[Optional paramteters:] None.
 \ed
 
 \item
@@ -843,26 +847,26 @@ GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
 \bd
 
 \item
-- Description:  Finds the name of the specified outcome in the indicated
+[Description:] Finds the name of the specified outcome in the indicated
 problem in extensive form.  If the outcome is not defined, an error is
 given.
 \item
-- Return value:  The name assigned to the indicated outcome.  By default,
+[Return value:] The name assigned to the indicated outcome.  By default,
 the name of an outcome is the empty string.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item	  
-*  E:  The problem in extensive form for which the outcome name is to
+[* E:] The problem in extensive form for which the outcome name is to
 be found.
 \item
-*  outc:  The number corresponding to the outcome for which the name 
+[* outc:] The number corresponding to the outcome for which the name 
 will be returned.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -872,26 +876,26 @@ GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
 
 \bd
 \item
-- Description:  Finds the name of the indicated player in the given 
+[Description:] Finds the name of the indicated player in the given 
 problem in extensive form.
 \item
-- Return value:  The name assigned to the indicated player.  If the 
+[Return value:] The name assigned to the indicated player.  If the 
 indicated player has not been assigned a name or does not exist, the
 procedure returns the empty string.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item  
-*  E:  The problem in extensive form for which the player name is to
+[* E:] The problem in extensive form for which the player name is to
 be found.
 \item
-*  pl:  The number assigned to the player whose name will be 
+[* pl:] The number assigned to the player whose name will be 
 returned.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -901,19 +905,19 @@ GetPriorSibling[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Finds the prior sibling of the specified node.
+[Description:] Finds the prior sibling of the specified node.
 \item
-- Return value:  The node which is the prior sibling of the specified node.
+[Return value:] The node which is the prior sibling of the specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node for which the prior sibling is to be found.
+[* n:] The node for which the prior sibling is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -923,28 +927,28 @@ GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
 
 \bd
 \item
-- Description:  Finds the name assigned to the specified strategy of
+[Description:] Finds the name assigned to the specified strategy of
 the indicated player of the given problem in normal form.
 \item
-- Return value:  Returns the name found.  If a name has not been assigned
+[Return value:] Returns the name found.  If a name has not been assigned
 to the strategy, the empty string is returned.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form in which the name assigned to the
+[* N:] The problem in normal form in which the name assigned to the
 specified strategy of the indicated player is to be found.
 \item
-*  pl:  The number corresponding to the player for which the name of
+[* pl:] The number corresponding to the player for which the name of
 the indicated strategy is to be found.
 \item
-*  st:  The number corresponding to the strategy of the indicated 
+[* st:] The number corresponding to the strategy of the indicated 
 player for which the name is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -954,20 +958,20 @@ GetTitle[E->EFG] =: TEXT
 
 \bd
 \item
-- Description:  Finds the title of the indicated problem in extensive form.
+[Description:] Finds the title of the indicated problem in extensive form.
 \item
-- Return value:  The title of the indicated extensive form problem.  If
+[Return value:] The title of the indicated extensive form problem.  If
 the title has not been assigned, the empty string is returned.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form whose title is to be found.
+[* E:] The problem in extensive form whose title is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -981,31 +985,31 @@ Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
 
 \bd
 \item
-- Description:  Computes the Gobit solution for the specified problem in
+[Description:] Computes the Gobit solution for the specified problem in
 either extensive or normal form.  
 \item
-- Return value:  XXXX.
+[Return value:] XXXX.
 \item 
-- Required parameters:  Exactly one of the following
+[Required parameters:]\hfil\null Exactly one of the following
 
 \bd
 \item
-*  N:  The problem in normal form for which the Gobit solution is to
+[* N:] The problem in normal form for which the Gobit solution is to
 be found.
 \item	
-*  E:  The problem in extensive form for which the Gobit solution 
+[* E:] The problem in extensive form for which the Gobit solution 
 is to be found.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  nequilib:  Sets the number of equilibria to find.  Has a default 
+[* nequilib:] Sets the number of equilibria to find.  Has a default 
 value of 1.  
 \item
-*  type:   Type of incrementing 
+[* type:]  Type of incrementing 
 	
 \bd
 \item
@@ -1015,31 +1019,31 @@ value of 1.
 \ed
 
 \item
-*  maxitsOpt:  Sets the masimum number of iterations to the 
+[* maxitsOpt:] Sets the masimum number of iterations to the 
 n-dimensional optimization routine.  Default is 200.
 \item
-*  maxitsBrent:  Sets the maximum number of iterations in
+[* maxitsBrent:] Sets the maximum number of iterations in
 the 1-dimensional line search.  Default is 100.
 \item
-*  tolOpt:  Sets the tolerance for the n-dimensional
+[* tolOpt:] Sets the tolerance for the n-dimensional
 optimization routine.  Default is 1.0e-10.
 \item
-*  tolBrent:  Sets the tolerance for the 1-dimensional line
+[* tolBrent:] Sets the tolerance for the 1-dimensional line
 search.  Default is 2.0e-10.
 \item
-*  minLam:  Sets the minimum value of Lambda.  Has a default value of 0.01.
+[* minLam:] Sets the minimum value of Lambda.  Has a default value of 0.01.
 \item
-*  maxLam:  Sets the maximum value of Lambda.  Has a default value of 30.
+[* maxLam:] Sets the maximum value of Lambda.  Has a default value of 30.
 \item
-*  delLam:  Specifies the rate at which the value of Lambda changes. Has a default value of 1.01.
+[* delLam:] Specifies the rate at which the value of Lambda changes. Has a default value of 1.01.
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \item
-*  output:  Can be used to redirect the output of this procedure to a
+[* output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-*  pxifile: Can be used to generate an output file
+[* pxifile:]Can be used to generate an output file
 compatible for input to pxi
 \ed
 \ed
@@ -1054,45 +1058,45 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 
 \bd
 \item
-- Description:  XXXX .
+[Description:] XXXX .
 \item
-- Return value:  XXXX .
+[Return value:] XXXX .
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item  
-*  N:  The problem in normal form which is to be operated on.
+[* N:] The problem in normal form which is to be operated on.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item	
- *  plev:  XXXX .
+ [* plev:] XXXX .
 \item
-*  output:  Can be used to redirect the output of this procedure to a
+[* output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-*  errors:  XXXX .
+[* errors:] XXXX .
 \item
-*  minLam:  Sets the minimum value of Lambda.  Has a default value of
+[* minLam:] Sets the minimum value of Lambda.  Has a default value of
 XXXX .
 \item
-*  maxLam:  Sets the maximum value of Lambda.  Has a default value of XXXX .
+[* maxLam:] Sets the maximum value of Lambda.  Has a default value of XXXX .
 \item
-*  delLam:  Specifies the rate at which the value of Lambda changes.
+[* delLam:] Specifies the rate at which the value of Lambda changes.
 Has a default value of XXXX .
 \item
-*  type:  XXXX .
+[* type:] XXXX .
 \item
-*  delp:  XXXX .
+[* delp:] XXXX .
 \item
-*  tol:  XXXX .
+[* tol:] XXXX .
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -1103,25 +1107,25 @@ InsertAction[n->NODE, as->1, br->3] =: NODE
 
 \bd
 \item
-- Description:  Inserts the indicated number of actions into the 
+[Description:] Inserts the indicated number of actions into the 
 information set containing the specified node.
 \item
-- Return value:  Returns the specified node.
+[Return value:] Returns the specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node which belongs to the information set which is to have
+[* n:] The node which belongs to the information set which is to have
 actions inserted into it.
 \item
-*  as:  The number which will correspond to the first inserted action.
+[* as:] The number which will correspond to the first inserted action.
 \item
-*  br:  The number of actions to be inserted at the specified node.
+[* br:] The number of actions to be inserted at the specified node.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1131,29 +1135,29 @@ InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 
 \bd
 \item
-- Description:  Inserts a new node belonging to the indicated player at 
+[Description:] Inserts a new node belonging to the indicated player at 
 the location of the specified node and moves that node to the end of 
 the first branch of the new node.
 \item
-- Return value:  Returns the specified node.
+[Return value:] Returns the specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The location where the new node is to be inserted.  The node
+[* n:] The location where the new node is to be inserted.  The node
 currently at this location is then moved to the end of the first
 branch of the new node.
 \item
-*  pl:  The number corresponding to the player to which the new node
+[* pl:] The number corresponding to the player to which the new node
 will belong.  If the player specified is not already defined in	the
 game, the player is created automatically.
 \item
-*  br:  The number of branches which the new node will have.
+[* br:] The number of branches which the new node will have.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1163,30 +1167,30 @@ IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
 
 \bd
 \item
-- Description:  Determines if the strategy corresponding to the specified
+[Description:] Determines if the strategy corresponding to the specified
 number for the indicated player is dominated by another strategy in the
 given problem in normal form.  Uses only strategies in the first 
 strategy set.
 \item
-- Return value:  Returns True only if the specified strategy for the 
+[Return value:] Returns True only if the specified strategy for the 
 given player is dominated.  Returns false otherwise.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form in which the specified strategy of
+[* N:] The problem in normal form in which the specified strategy of
 the indicated player is to be tested for domination.
 \item
-*  pl:  The number corresponding to the player for whom the specified
+[* pl:] The number corresponding to the player for whom the specified
 strategy is to be tested for domination.
 \item
-*  st:  The number corresponding to the strategy belonging to the 
+[* st:] The number corresponding to the strategy belonging to the 
 indicated player which is to be tested for domination.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1196,25 +1200,25 @@ IsPredecessor[n->NODE, of->NODE] =: BOOLEAN
 
 \bd
 \item
-- Description:  Finds whether or not the first node indicated is a 
+[Description:] Finds whether or not the first node indicated is a 
 predecessor of the second node given.
 \item
-- Return value:  Returns True only if the first node indicated is a
+[Return value:] Returns True only if the first node indicated is a
 predecessor of the second node given.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node which, when it is the predecessor of the other node,
+[* n:] The node which, when it is the predecessor of the other node,
 will result in the return value being True.
 \item
-*  of:  The node which, when it is preceeded by the other node, will
+[* of:] The node which, when it is preceeded by the other node, will
 result in the return value being True.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1224,24 +1228,24 @@ IsSuccessor[n->NODE, from->NODE] =: NODE
 
 \bd
 \item
-- Description:  Finds whether or not the first node indicated is a 
+[Description:] Finds whether or not the first node indicated is a 
 successor of the second node given.
 \item
-- Return value:  Returns True only if the first node indicated is a successor of the second node given.
+[Return value:] Returns True only if the first node indicated is a successor of the second node given.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node which, when it is a successor of the other node, will
+[* n:] The node which, when it is a successor of the other node, will
 result in the return value being True.
 \item
-*  of:  The node which, when it is succeeded by the other node, will
+[* of:] The node which, when it is succeeded by the other node, will
 result in the return value being True.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1251,15 +1255,15 @@ IsWatchRunning[] =: BOOLEAN
 
 \bd
 \item
-- Description:  Finds whether or not the system stopwatch is currently
+[Description:] Finds whether or not the system stopwatch is currently
 running.
 \item
-- Return value:  True only if the system stopwatch is currently running.
+[Return value:] True only if the system stopwatch is currently running.
 Returns False otherwise.
 \item
-- Required parameters:  None.
+[Required parameters:] None.
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1269,26 +1273,26 @@ JoinInfoset[n->NODE, to->NODE] =: NODE
 
 \bd
 \item
-- Description:  Removes the first node specified from the information set
+[Description:] Removes the first node specified from the information set
 to which it currently belongs and places it in the information set to
 which the second node given belongs.
 \item
-- Return value:  XXXX .
+[Return value:] XXXX .
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	  
 \bd
 \item
-*  n:  The node which is to be removed from its current information
+[* n:] The node which is to be removed from its current information
 set and placed in the information set belonging to the second
 node given.
 \item
-*  to:  The node belonging to the information set to which the first
+[* to:] The node belonging to the information set to which the first
 node specified will be transfered.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1298,22 +1302,22 @@ LeaveInfoset[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Removes the specified node from the information set to
+[Description:] Removes the specified node from the information set to
 which it currently belongs and creates and places it in a new singleton
 information set belonging to the same player.
 \item
-- Return value:  The specified node.
+[Return value:] The specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	  
 \bd
 \item
-*  n:  The node which is to be removed from the information which it
+[* n:] The node which is to be removed from the information which it
 currently belongs to.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1323,29 +1327,29 @@ Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
 
 \bd
 \item
-- Description:  Searches for one solution of the specified normal form 
+[Description:] Searches for one solution of the specified normal form 
 game specified using the Lemke-Howson algorithm.  
 \item
-- Return value:  The list of solutions found.
+[Return value:] The list of solutions found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form for which the solution is to be 
+[* N:] The problem in normal form for which the solution is to be 
 searched.
 \ed
 
 \item
-- Optional parameters: 
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  nequilib:  Specifies the number of equilibria to find.  If not
+[* nequilib:] Specifies the number of equilibria to find.  If not
 given the default value is zero, which means that all 
 equilibria are to be found.
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -1357,20 +1361,20 @@ Length[l->LIST(T)] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of elements in the specified list of 
+[Description:] Finds the number of elements in the specified list of 
 type T.
 \item
-- Return value:  The number of elements found in the list.
+[Return value:] The number of elements found in the list.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  l:  The list of type T for which the number of elements is to be found.
+[* l:] The list of type T for which the number of elements is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1383,46 +1387,46 @@ Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 
 \bd
 \item
-- Description:  Searches for equilibria of the specified problem in 
+[Description:] Searches for equilibria of the specified problem in 
 normal form using the Liapunov algorithm.
 \item
-- Return value:  Returns the list of solutions found.
+[Return value:] Returns the list of solutions found.
 \item
-- Required parameters
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form for which the Liapunov solution is 
+[* N:] The problem in normal form for which the Liapunov solution is 
 to be found.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  plev: XXXX .
+[* plev:]XXXX .
 \item
-*  output:  Can be used to redirect the output of this procedure to a
+[* output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-*  errors:  XXXX .
+[* errors:] XXXX .
 \item
-*  ntries:  XXXX .
+[* ntries:] XXXX .
 \item
-*  nequilib:  Sets the number of equilibria to find.  Has a default 
+[* nequilib:] Sets the number of equilibria to find.  Has a default 
 value of XXXX . 
 \item
-*  maxitsOpt:  XXXX.
+[* maxitsOpt:] XXXX.
 \item
-*  maxitsBrent:  XXXX .
+[* maxitsBrent:] XXXX .
 \item
-*  tolOpt:  XXXX . 
+[* tolOpt:] XXXX . 
 \item
-*  tolBrent:  XXXX .
+[* tolBrent:] XXXX .
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -1433,25 +1437,25 @@ MergeInfosets[n->NODE, to->NODE] =: NODE
 
 \bd
 \item
-- Description:  Moves all the nodes contained in the information set 
+[Description:] Moves all the nodes contained in the information set 
 which contains the node first specified to the information to which the
 second node indicated belongs.
 \item
-- Return value:  XXXX .
+[Return value:] XXXX .
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node which belongs to the information set whose nodes are
+[* n:] The node which belongs to the information set whose nodes are
 to be moved to the second information set.
 \item
-*  to:  The node which belongs to the information set to which all
+[* to:] The node which belongs to the information set to which all
 the nodes from the first information set are to be moved.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1462,24 +1466,24 @@ MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
 
 \bd
 \item
-- Description:  Projects a specified mixed profile to a behavioral 
+[Description:] Projects a specified mixed profile to a behavioral 
 profile on the given extensive form problem.
 \item
-- Return value:  Returns the behavioral profile.
+[Return value:] Returns the behavioral profile.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form of which the behavioral profile
+[* E:] The problem in extensive form of which the behavioral profile
 is to be a subvariable.
 \item
-*  mp:  The mixed profile which is to be projected to a behavioral
+[* mp:] The mixed profile which is to be projected to a behavioral
 profile.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1489,24 +1493,24 @@ MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
 
 \bd
 \item
-- Description:  Projects a specified vector of mixed profiles to a vector
+[Description:] Projects a specified vector of mixed profiles to a vector
 of behavioral profiles on the given extensive form problem.
 \item
-- Return value:  Returns the vector of behavioral profiles.
+[Return value:] Returns the vector of behavioral profiles.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form of which the vector of 
+[* E:] The problem in extensive form of which the vector of 
 behavioral profiles is to be a subvariable.
 \item
-*  mp:  The vector of mixed profiles which is to be projected to a 
+[* mp:] The vector of mixed profiles which is to be projected to a 
 vector of behavioral profiles.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1516,22 +1520,22 @@ MoveTree[n->NODE, to->NODE] =: NODE
 
 \bd
 \item
-- Description:  Moves the subtree rooted at the first node specified to
+[Description:] Moves the subtree rooted at the first node specified to
 the second given node.
 \item
-- Return value:  XXXX .
+[Return value:] XXXX .
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	  
 \bd
 \item
-*  n:  The node at which the subtree to be moved is currently rooted.
+[* n:] The node at which the subtree to be moved is currently rooted.
 \item
-*  to:  The node to which the subtree is to be moved.
+[* to:] The node to which the subtree is to be moved.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1541,18 +1545,19 @@ NameOf[n->NODE] =: TEXT
 
 \bd
 \item
-- Description:  Returns the name of the specified node.
+[Description:] Returns the name of the specified node.
 \item
-- Return value:  The name of the specified node.
-\item- Required parameters:
+[Return value:] The name of the specified node.
+\item
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node for which the name will be returned.
+[* n:] The node for which the name will be returned.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1562,17 +1567,17 @@ NewEfg[{type->DATATYPE}] =: EFG
 
 \bd
 \item
-- Description:  Allocates and returns a new extensive form game.
+[Description:] Allocates and returns a new extensive form game.
 \item
- Return value:  The newly allocated problem in extensive form.
+ Return value:] The newly allocated problem in extensive form.
 \item
-- Required parameters:  None.
+[Required parameters:] None.
 \item
-- Optional parameters: 
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  type:  Specifies the type (Float or Rational) of the new extensive
+[* type:] Specifies the type (Float or Rational) of the new extensive
 form problem.
 \ed
 \ed
@@ -1584,7 +1589,7 @@ NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 
 \bd
 \item
-- Description:  Creates and assigns a number to a new outcome within the
+[Description:] Creates and assigns a number to a new outcome within the
 specified problem in extensive form.  Note that outcomes are 
 sequentially numbered, so that if an outcome with the number n exists,
 then outcomes with the numbers 1 . . n-1 necessarily also exist.
@@ -1592,27 +1597,27 @@ Therefore, this procedure creates not only the outcome with the
 specified number, but all other outcomes necessary to satisfy this 
 condition.
 \item
-- Return value:  The number of the newly created outcome.  The optional 
+[Return value:] The number of the newly created outcome.  The optional 
 parameter 'outc' allows the user to specify the number given to the new
 outcome created.  If 'outc' is not specified, the new outcome is 
 assigned the lowest positive number for which no outcome is defined.  
 If the number specified by 'outc' already exists as an outcome, no 
 action is taken and the procedure returns a value of zero.
 \item
--Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form for which a new outcome is to
+[* E:] The problem in extensive form for which a new outcome is to
 be created.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  outc:  Allows the user to specify the number given to the new 
+[* outc:] Allows the user to specify the number given to the new 
 outcome created.  If not specified, the new outcome is assigned the 
 lowest positive number for which no otcome is defined.  If the number
 specified already exists as an outcome, no action is taken and the 
@@ -1627,24 +1632,25 @@ NthChild[n->NODE, child->INTEGER] =: NODE
 
 \bd
 \item
-- Description:  Finds the node which is the indicated child of the 
-specified node.  The expression:  NthChild[n->node, child->i] is 
+[Description:] Finds the node which is the indicated child of the 
+specified node.  The expression: NthChild[n->node, child->i] is 
 equivalent to:  node\#i.
 \item
-- Return value:  Returns the node which is the indicated child of the
+[Return value:] Returns the node which is the indicated child of the
 specified node.
-\item- Required parameters:
+\item
+[Required parameters:]\hfil\null
 	  
 \bd
 \item
-*  n:  The node for which the indicated child is to be found.
+[* n:] The node for which the indicated child is to be found.
 \item
-*  child:  The number corresponding to the child of the specified 
+[* child:] The number corresponding to the child of the specified 
 node which is to be found.
 \ed
 
 \item 
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1654,19 +1660,19 @@ NumChildren[n->NODE] := INTEGER
 
 \bd
 \item
-- Description:  Finds the number of children of the specified node.
+[Description:] Finds the number of children of the specified node.
 \item
-- Return value:  Returns the number of children of the specified node.
+[Return value:] Returns the number of children of the specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node whose children are to be counted.
+[* n:] The node whose children are to be counted.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1676,25 +1682,25 @@ NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of information sets belonging to the
+[Description:] Finds the number of information sets belonging to the
 specified player in the given problem in extensive form.
 \item
-- Return value:  Returns the number of information sets belonging to
+[Return value:] Returns the number of information sets belonging to
 the specified player.  If the indicated player is not defined in the 
 game, the return value is equal to zero.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form in which the information sets
+[* E:] The problem in extensive form in which the information sets
 for the specified player are to be counted.	  
 \item
-*  pl:  The number corresponding to the player for which the number 
+[* pl:] The number corresponding to the player for which the number 
 of information sets are to be counted.
 \ed
 \item
- - Optional parameters:  None.
+ [Optional parameters:] None.
 \ed
 
 \item
@@ -1704,21 +1710,21 @@ NumNodes[E->EFG] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of nodes (including terminal nodes) in 
+[Description:] Finds the number of nodes (including terminal nodes) in 
 the specified problem in extensive form.
 \item
-- Return value:  Returns the number of nodes found.
+[Return value:] Returns the number of nodes found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form in which the number of nodes are
+[* E:] The problem in extensive form in which the number of nodes are
 to be counted.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1728,22 +1734,21 @@ NumOutcomes[E->EFG] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of outcomes in the specified problem in
+[Description:] Finds the number of outcomes in the specified problem in
 extensive form.
 \item
-- Return value:  Returns the number of outcomes found.
+[Return value:] Returns the number of outcomes found.
 \item
-- Required parameters:
-	  
+[Required parameters:]\hfil\null	  
 
 \bd
 \item
-*  E:  The problem in extensive form in which the number of outcomes
+[* E:] The problem in extensive form in which the number of outcomes
 is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1753,21 +1758,21 @@ NumOutcomes[N->NFG] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of outcomes in the specified problem in
+[Description:] Finds the number of outcomes in the specified problem in
 normal form.
 \item
-- Return value:  Returns the number of outcomes found.
+[Return value:] Returns the number of outcomes found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  N:  The problem in normal form in which the number of outcomes is
+[* N:] The problem in normal form in which the number of outcomes is
 to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \begin{verbatim}
@@ -1776,20 +1781,20 @@ NumPlayers[E->EFG] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the number of players in the specified problem in
+[Description:] Finds the number of players in the specified problem in
 extensive form.
 \item
-- Return value:  Returns the number of players found.
+[Return value:] Returns the number of players found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
-\item*  E:  The problem in extensive form in which the number of players
+\item[* E:] The problem in extensive form in which the number of players
 is to be found.
 \ed
 
 \item   
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1800,29 +1805,29 @@ NumStrats[N->NFG, pl->INTEGER, {sset->INTEGER}] =: INTEGER
 \bd
 
 \item
-- Description:  Finds the number of strategies for the specified player 
+[Description:] Finds the number of strategies for the specified player 
 in the given problem in normal form.
 \item
-- Return value:  Returns the number of strategies found.
+[Return value:] Returns the number of strategies found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The normal form problem in which the number of strategies for
+[* N:] The normal form problem in which the number of strategies for
 the specified player is to be found.
 \item
-*  pl:  The number corresponding to the player in the given problem 
+[* pl:] The number corresponding to the player in the given problem 
 in normal form for whom the number of strategies is to be
 found.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item  
-*  sset:  The number of the strategy set in which strategies for the
+[* sset:] The number of the strategy set in which strategies for the
 specified player will be counted.  If not given the last (smallest) 
 strategy set is used.
 
@@ -1838,22 +1843,22 @@ OutcomeOf[n->NODE] =: INTEGER
 \bd
 
 \item
-- Description:  Finds the number of the outcome associated with the 
+[Description:] Finds the number of the outcome associated with the 
 specified node.
 \item
-- Return value:  Returns the number corresponding to the outcome attached
+[Return value:] Returns the number corresponding to the outcome attached
 to the specified node.  If the node does not have an outcome attached,
 a value of zero is returned.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node for which the attached outcome is to be found.
+[* n:] The node for which the attached outcome is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1864,20 +1869,20 @@ ParentOf[n->NODE] =: NODE
 
 \bd
 \item
-- Description:  Finds the node which is the parent of the specified node.
+[Description:] Finds the node which is the parent of the specified node.
 \item
-- Return value:  Returns the node which is the parent of the specified
+[Return value:] Returns the node which is the parent of the specified
 node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node for which the parent is to be found.
+[* n:] The node for which the parent is to be found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1887,21 +1892,21 @@ PlayerOf[n->NODE] =: INTEGER
 
 \bd
 \item
-- Description:  Finds the player who makes the decision at the specified
+[Description:] Finds the player who makes the decision at the specified
 node.
 \item
-- Return value:  Returns the number corresponding to the player found.
+[Return value:] Returns the number corresponding to the player found.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  n:  The node for which the player making the decision is to be
+[* n:] The node for which the player making the decision is to be
 found.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1912,31 +1917,31 @@ PureNash[N->NFG, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 
 \bd
 \item
-- Description:  Finds the weak pure strategy Nash equilibria in the 
+[Description:] Finds the weak pure strategy Nash equilibria in the 
 specified normal form game.  
-- Return value:  The number of equilibria found.  The optional parameter 
+[Return value:] The number of equilibria found.  The optional parameter 
 'num' allows the user to set the maximum number of Nash equilibria to 
 find and has a default value of 1.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  N:  The problem in normal form for which the weak pure strategy
+[* N:] The problem in normal form for which the weak pure strategy
 Nash equilibria are to be found.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item
-*  num:  Allows the user to set the maximum number of Nash equilibria
+[* num:] Allows the user to set the maximum number of Nash equilibria
 to find.  Has a default value of 1.
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \item
-*  output:  Can be used to redirect the output of this procedure to a
+[* output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, output is directed to the screen.  
 
@@ -1952,13 +1957,13 @@ Quit
 \bd
 
 \item
-- Description:  Exits the command language.
+[Description:] Exits the command language.
 \item
-- Return value:  None.
+[Return value:] None.
 \item
-- Required parameters:  None.
+[Required parameters:] None.
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1969,27 +1974,27 @@ RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, {type->DATATYPE}] =: NFG
 
 \bd
 \item
-- Description:  Constructs a random new problem in normal form with the 
+[Description:] Constructs a random new problem in normal form with the 
 specified dimensionality
 \item
-- Return value:  Returns the new problem in normal form.
+[Return value:] Returns the new problem in normal form.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  dim:  The desired dimensionality of the new problem.
+[* dim:] The desired dimensionality of the new problem.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item
-*  seed:  Reseeds the random number generator with the given integer.
+[* seed:] Reseeds the random number generator with the given integer.
 \item
 
-*  type:  Specifies the type (Float or Rational) of the new normal 
+[* type:] Specifies the type (Float or Rational) of the new normal 
 form problem.
 \ed
 \ed
@@ -2001,23 +2006,23 @@ ReadEfgFile[file->TEXT] =: EFG
 
 \bd
 \item
-- Description:  Creates a new problem whose contents are the extensive 
+[Description:] Creates a new problem whose contents are the extensive 
 form game stored in the specified file.
 \item
-- Return value:  The problem in extensive form read from the file.
+[Return value:] The problem in extensive form read from the file.
 \item
 
-- Required parameters:
+[Required parameters:
 
 \bd
 \item
-*  file:  Specifies the file from which the extensive form game is to
+[* file:] Specifies the file from which the extensive form game is to
 be read.  If the file specified does not exist, an error 
 message is returned.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2027,28 +2032,28 @@ ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NFG
 
 \bd
 \item
-- escription:  Creates a new problem whose contents are the normal form
+[Description:] Creates a new problem whose contents are the normal form
 game stored in the specified file.  The file is read as a floating-
 point normal form unless otherwise specified by the user.
 \item
-- Return value:  The problem in normal form read from the file.
+[Return value:] The problem in normal form read from the file.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  file:  Specifies the file from which the normal form game is to be
+[* file:] Specifies the file from which the normal form game is to be
 read.  If the file specified does not exist, an error message
 is returned.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 
 \bd
 \item
-*  type:  Indicates whether the file is to be read as a floating-
+[* type:] Indicates whether the file is to be read as a floating-
 point normal form or as a rational normal form.  If not given,
 the default value is floating-point.
 \ed
@@ -2062,7 +2067,7 @@ RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
 
 \bd
 \item
-- Description:  Removes the specified outcome from the given problem in
+[Description:] Removes the specified outcome from the given problem in
 extensive form.  All nodes with the specified outcome attached are 
 reset to having no outcome attached.  If the outcome does not exist in
 the given problem, no action is taken.  The outcomes remaining in the 
@@ -2071,16 +2076,16 @@ given to the outcome which previously had the next highest number, the
 number previously corresponding to this outcome is assigned to the
 outcome which previously had the next highest number, and so on.  
 \item  
-- Return value:  Returns the modified extensive form problem.
+[Return value:] Returns the modified extensive form problem.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The problem in extensive form from which the specified outcome
+[* E:] The problem in extensive form from which the specified outcome
 is to be removed.
 \item
-*  outc:  The number corresponding to the outcome which is to be 
+[* outc:] The number corresponding to the outcome which is to be 
 removed from the given problem.  If no outcome with that number
 exists in the problem, no action is taken.
 \ed
@@ -2093,26 +2098,26 @@ RootNode[E->EFG, {game->INTEGER}] =: NODE
 
 \bd
 \item
-- Description:  Finds the root node of specified game in the given 
+[Description:] Finds the root node of specified game in the given 
 problem in extensive form.  If a game is not specified, the first game 
 is used by default.
 \item
-- Return value:  Returns the root node of the game.
+[Return value:] Returns the root node of the game.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The problem in extensive form in which the root node is to be
+[* E:] The problem in extensive form in which the root node is to be
 found.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 
 \bd
 \item
-*  game:  Specifies the game of which the root node is to be found.
+[* game:] Specifies the game of which the root node is to be found.
 If not given, the first game is used by default.
 \ed
 \ed
@@ -2125,22 +2130,22 @@ Run[TEXT]
 
 \bd
 \item
-- Description:  Includes the commands in the specified file as commands 
+[Description:] Includes the commands in the specified file as commands 
 in the running GCL program.  The program treats the command as if it 
 were replaced by the contents of the file.
 \item
-- Return value:  None.
+[Return value:] None.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  TEXT:  Any expression which evaluates to a text string which is a
+[* TEXT:] Any expression which evaluates to a text string which is a
 valid filename.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2151,25 +2156,25 @@ SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
 
 \bd
 \item
-- Description:  Sets the name of the specified branch number of the 
+[Description:] Sets the name of the specified branch number of the 
 indicated node to the name given.
 \item
-- Return value:  Returns the node specified.
+[Return value:] Returns the node specified.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node at which the desired action occurs.
+[* n:] The node at which the desired action occurs.
 \item
-*  br:  The number of the branch or action ocurring at the given node
+[* br:] The number of the branch or action ocurring at the given node
 which is to be assigned a name.
 \item
-*  name:  The name which is to be assigned to the given action.
+[* name:] The name which is to be assigned to the given action.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 
 \ed
 
@@ -2181,25 +2186,25 @@ SetActionProbs[n->NODE, probs->LIST(RATIONAL)] =: NODE
 
 \bd
 \item
-- Description:  Sets the action probabilities to the specified values 
+[Description:] Sets the action probabilities to the specified values 
 for the given node.  This is only meaninful for nodes in information
 sets belonging to the player representing chance (player 0).
 \item
-- Return value:  Returns the node specified.
+[Return value:] Returns the node specified.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node at which the actions will be assigned the specified
+[* n:] The node at which the actions will be assigned the specified
 probabilities.
 \item
-*  probs:  The vector of values which represent the probabilites 
+[* probs:] The vector of values which represent the probabilites 
 which will be assigned to the actions at the indicated node.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2210,23 +2215,23 @@ SetInfosetName[n->NODE, name->TEXT] =: NODE
 
 \bd
 \item
-- Description:  Assigns the given name given to the information set to 
+[Description:] Assigns the given name given to the information set to 
 which the indicated node belongs.
 \item
-- Return value:  Returns the node specified.
+[Return value:] Returns the node specified.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  A node belonging to the information set which is to be 
+[* n:] A node belonging to the information set which is to be 
 assigned a name.
 \item
-*  name:  The name which is to be assigned to the given information set.
+[* name:] The name which is to be assigned to the given information set.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2237,21 +2242,21 @@ SetNodeName[n->NODE, name->TEXT] =: NODE
 
 \bd
 \item
-- Description:  Assigns the given name to the specified node.
+[Description:] Assigns the given name to the specified node.
 \item
-- Return value:  Returns the specified node.
+[Return value:] Returns the specified node.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  n:  The node which is to have a name assigned.
+[* n:] The node which is to have a name assigned.
 \item
-*  name:  The name which is to be assigned to the specified node.
+[* name:] The name which is to be assigned to the specified node.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2261,30 +2266,30 @@ SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
    
 \bd
 \item
-- Description:  Sets the value of the indicated outcome in the given 
+[Description:] Sets the value of the indicated outcome in the given 
 problem in extensive form, to the values in the specified vector.
 \item
-- Return value:  Returns the modified problem in extensive form. 
+[Return value:] Returns the modified problem in extensive form. 
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The extensive form problem in which the given outcome is to be
+[* E:] The extensive form problem in which the given outcome is to be
 assigned values.
 \item
 
-*  outc:  The number corresponding to the outcome which is to be 
+[* outc:] The number corresponding to the outcome which is to be 
 assigned values.  If no outcome with the given number exists,
 then it is created.
 \item
-*  value:  The vector of payoffs (as a list of rationals) which are 
+[* value:] The vector of payoffs (as a list of rationals) which are 
 to be assigned to the outcome.  The length of `value` must 
 match the number of players defined in the problem.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2295,26 +2300,26 @@ SetOutcome[E->EFG, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EFG
 
 \bd
 \item
-- Description:  Sets the payoff to the player specified for the indicated
+[Description:] Sets the payoff to the player specified for the indicated
 outcome in the given problem in extensive form to the given value.
 \item
-- Return value:  Returns the modified problem in extensive form.
+[Return value:] Returns the modified problem in extensive form.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The extensive form problem in which the given outcome is to be
+[* E:] The extensive form problem in which the given outcome is to be
 assigned a value for the specified player.
 \item
-*  outc:  The number corresponding to the outcome which is to be 
+[* outc:] The number corresponding to the outcome which is to be 
 assigned a value for the specified player.  If no outcome with
 the given number exists, no action is performed.
 \item
-*  pl:  The player for which the payoff of the given outcome is to be
+[* pl:] The player for which the payoff of the given outcome is to be
 set.
 \item
-*  value:  The value (as a rational) which is to be assigned to the 
+[* value:] The value (as a rational) which is to be assigned to the 
 given outcome for the specified player.
 \ed
 \ed
@@ -2327,26 +2332,26 @@ SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
 
 \bd
 \item
-- Description:  Assigns to the outcome with the specified number the 
+[Description:] Assigns to the outcome with the specified number the 
 given title.
 \item
-- Return value:  Returns the modified problem in extensive form.
+[Return value:] Returns the modified problem in extensive form.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The problem in extensive form in which the indicated outcome 
+[* E:] The problem in extensive form in which the indicated outcome 
 is to be assigned the given title.
 \item
-*  outc:  The number corresponding to the outcome which is to be 
+[* outc:] The number corresponding to the outcome which is to be 
 assigned a title.
 \item
-*  name:  The name which is to be assigned to the indicated outcome.
+[* name:] The name which is to be assigned to the indicated outcome.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2357,25 +2362,25 @@ SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
 
 \bd
 \item
-- Description:  Assigns to the player with the specified number the given
+[Description:] Assigns to the player with the specified number the given
 name.
 \item
-- Return value:  Returns the modified problem in extensive form.
+[Return value:] Returns the modified problem in extensive form.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form in which the indicated player is
+[* E:] The problem in extensive form in which the indicated player is
 to be assigned a name.
 \item
-*  pl:  The number corresponding to the player which is to be 
+[* pl:] The number corresponding to the player which is to be 
 assigned a name.
 \item
-*  name:  The name which is to be assigned to the specified player.
+[* name:] The name which is to be assigned to the specified player.
 \ed
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2386,27 +2391,27 @@ SetStratName[N->NFG, pl->INTEGER, st->INTEGER, name->TEXT] =: NFG
 
 \bd
 \item
-- Description:  Assigns the given name to the specified strategy of the
+[Description:] Assigns the given name to the specified strategy of the
 indicated player in the given problem in normal form.
 \item
-- Return value:  Returns the modified normal form problem.
+[Return value:] Returns the modified normal form problem.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  N:  The problem in normal form in which the given name is to be
+[* N:] The problem in normal form in which the given name is to be
 assigned to the specified strategy of the indicated player.
 \item
-*  pl:  The number corresponding to the player for which the 
+[* pl:] The number corresponding to the player for which the 
 indicated strategy is to be assigned the given name.
 \item
-*  st:  The number corresponding to the strategy of the indicated 
+[* st:] The number corresponding to the strategy of the indicated 
 player to which the given name is to be assigned.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 
 \ed
 
@@ -2418,23 +2423,23 @@ SetTitle[E->EFG, title->TEXT] =: EFG
 
 \bd
 \item
-- Description:  Assigns the specified title to the given problem in 
+[Description:] Assigns the specified title to the given problem in 
 extensive form.
 \item
-- Return value:  Returns the modified problem in extensive form.
+[Return value:] Returns the modified problem in extensive form.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 	
 \bd
 \item
-*  E:  The problem in extensive form which is to be assigned a title.
+[* E:] The problem in extensive form which is to be assigned a title.
 \item
-*  title:  The title which is to be assigned to the given problem in 
+[* title:] The title which is to be assigned to the given problem in 
 extensive form.
 \ed
 
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2446,39 +2451,39 @@ SimpDiv[N->NFG, {plev->INTEGER}, {output->text}, {errors->TEXT},
 
 \bd
 \item
-- Description:  XXXX .
+[Description:] XXXX .
 \item
-- Return value:  XXXX .
+[Return value:] XXXX .
 \item
-- Required parameters
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form on which the operation will be performed.
+[* N:] The problem in normal form on which the operation will be performed.
 \ed
 
 \item
-- Optional parameters:
+[Optional parameters:]\hfil\null
 	
 \bd
 \item
-*  plev: XXXX .
+[* plev:]XXXX .
 \item
-*  output:  Can be used to redirect the output of this procedure to a
+[* output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns 
 output off.  By default, output is directed to the screen.
 \item
-*  errors:  XXXX .
+[* errors:] XXXX .
 \item
-*  number:  XXXX .
+[* number:] XXXX .
 \item 
-*  ndivs:  XXXX .
+[* ndivs:] XXXX .
 \item
-*  leash:  XXXX .
+[* leash:] XXXX .
 \item
-*  nevals:  XXXX .
+[* nevals:] XXXX .
 \item
-*  time:  Returns the elapsed time for the operation.
+[* time:] Returns the elapsed time for the operation.
 \ed
 \ed
 
@@ -2490,13 +2495,13 @@ StartWatch[] =: INTEGER
 
 \bd
 \item
-- Description:  Starts the system stopwatch.  
+[Description:] Starts the system stopwatch.  
 \item
-- Return value:  The return value is uninteresting.
+[Return value:] The return value is uninteresting.
 \item
-- Required parameters:  None.
+[Required parameters:] None.
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2506,13 +2511,13 @@ StopWatch[] =: INTEGER
 
 \bd
 \item
-- Description:  Stops the system stopwatch.  
+[Description:] Stops the system stopwatch.  
 \item
-- Return value:  The return value is uninteresting.
+[Return value:] The return value is uninteresting.
 \item
-- Required parameters:  None.
+[Required parameters:] None.
 \item
-- Optional parameters:  None.
+[Optional parameters:] None.
 \ed
 
 \item
@@ -2523,22 +2528,22 @@ WriteEfgFile[E->EFG, file->TEXT] =: EFG
 
 \bd
 \item
-- Description:  Writes the given extensive form problem to the specified 
+[Description:] Writes the given extensive form problem to the specified 
 file.  Indicates in the file the type of the file(Float or Rational) 
 immediately following the title string.  If the type is Float, the file
 contains floating point numbers and if the type is Rational, the file
 contains rational numbers.  
 \item
-- Return value:  Returns the same extensive form problem.
+[Return value:] Returns the same extensive form problem.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  E:  The problem in extensive form which is to be written to the
+[* E:] The problem in extensive form which is to be written to the
 indicated file.
 \item
-*  file:  The name of the file to which the extensive form problem is
+[* file:] The name of the file to which the extensive form problem is
 to be written.
 \ed
 \ed
@@ -2551,20 +2556,20 @@ WriteNfgFile[N->NFG, file->TEXT] =: NFG
 
 \bd
 \item
-- Description:  Writes the given normal form problem to the specified 
+[Description:] Writes the given normal form problem to the specified 
 file.  
 \item
-- Return value:  Returns the same normal form problem.
+[Return value:] Returns the same normal form problem.
 \item
-- Required parameters:
+[Required parameters:]\hfil\null
 
 \bd
 \item
-*  N:  The problem in normal form which is to be written to the
+[* N:] The problem in normal form which is to be written to the
 indicated file.
 
 \item
-*  file:  The name of the file to which the normal form problem is
+[*file:] The name of the file to which the normal form problem is
 to be written.
 \ed
 \ed
