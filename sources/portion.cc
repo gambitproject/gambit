@@ -1607,46 +1607,50 @@ bool InputPortion::IsReference(void) const
 
 #include "glist.h"
 
+ListPortion::listrep::listrep(void)
+  : value(new gList<Portion *>), _ContainsListsOnly(true),
+    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1), nref(1)
+{ }
+
+ListPortion::listrep::~listrep()
+{ 
+  for (int i = 1; i <= value->Length(); delete (*value)[i++]);
+  delete value;
+}
+
 ListPortion::ListPortion(void)
-  : _Value(new gList<Portion *>), _ref(false), _ContainsListsOnly(true),
-    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
+  : rep(new listrep), _ref(false)
 { }
 
 ListPortion::ListPortion(const gList<Portion *> &value)
-  : _Value(new gList<Portion *>), _ref(false), _ContainsListsOnly(true),
-    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
+  : rep(new listrep), _ref(false)
 { 
   for (int i = 1, length = value.Length(); i <= length; i++) 
     Insert(value[i]->ValCopy(), i);
 }
 
-ListPortion::ListPortion(gList<Portion *> &value, bool ref)
-  : _Value(&value), _ref(ref), _ContainsListsOnly(true),
-    _DataType(porUNDEFINED), _IsNull(false), _ListDepth(1)
-{ _Value = &value; }
+ListPortion::ListPortion(const ListPortion *p, bool ref)
+  : rep(p->rep), _ref(ref)
+{
+  rep->nref++;
+}
 
 
 ListPortion::~ListPortion()
 {
-  if (!_ref)  {
-    Flush();
-    delete _Value;
-  }
+  if (--rep->nref == 0)  delete rep;
 }
 
 
 bool ListPortion::BelongsToGame( void* game ) const
 {
-  int i;
-  for(i=1; i<=_Value->Length(); i++)
-    if( (*_Value)[i]->Spec().ListDepth == 0 )
-    {
-      if( (*_Value)[i]->Game() == game )
+  for (int i = 1; i <= rep->value->Length(); i++)
+    if ((*rep->value)[i]->Spec().ListDepth == 0)  {
+      if ((*rep->value)[i]->Game() == game)
 	return true;
     }
-    else
-    {
-      if( ((ListPortion*) (*_Value)[i])->BelongsToGame( game ) )
+    else  {
+      if (((ListPortion*) (*rep->value)[i])->BelongsToGame(game))
 	return true;
     }
   return false;
@@ -1656,41 +1660,32 @@ bool ListPortion::BelongsToGame( void* game ) const
 
 bool ListPortion::MatchGameData( void* game, void* data ) const
 {
-  int i;
-  for(i=1; i<=_Value->Length(); i++)
-  {
-    PortionSpec spec = (*_Value)[i]->Spec();
-    if( (*_Value)[i]->Spec().ListDepth == 0 )
-    {
-      if( spec.Type & porEFSUPPORT )
-      {
-	if( ((EfSupportPortion*) (*_Value)[i])->Value() == data )
+  for (int i = 1; i <= rep->value->Length(); i++)  {
+    PortionSpec spec = (*rep->value)[i]->Spec();
+    if ((*rep->value)[i]->Spec().ListDepth == 0)  {
+      if (spec.Type & porEFSUPPORT)  {
+	if (((EfSupportPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
-      if( spec.Type & porEFPLAYER )
-      {
-	if( ((EfPlayerPortion*) (*_Value)[i])->Value() == data )
+      if (spec.Type & porEFPLAYER)  {
+	if (((EfPlayerPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
-      if( spec.Type & porINFOSET )
-      {
-	if( ((InfosetPortion*) (*_Value)[i])->Value() == data )
+      if (spec.Type & porINFOSET)  {
+	if (((InfosetPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
-      if( spec.Type & porNODE )
-      {
-	if( ((NodePortion*) (*_Value)[i])->Value() == data )
+      if (spec.Type & porNODE)  {
+	if (((NodePortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
-      if( spec.Type & porACTION )
-      {
-	if( ((ActionPortion*) (*_Value)[i])->Value() == data )
+      if (spec.Type & porACTION)  {
+	if (((ActionPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
     }
-    else
-    {
-      if( ((ListPortion*) (*_Value)[i])->MatchGameData( game, data ) )
+    else  {
+      if (((ListPortion*) (*rep->value)[i])->MatchGameData(game, data))
 	return true;
     }
   }
@@ -1700,7 +1695,7 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
 
 
 const gList<Portion *> &ListPortion::Value(void) const
-{ return *_Value; }
+{ return *rep->value; }
 
 
 
@@ -1709,21 +1704,21 @@ PortionSpec ListPortion::Spec(void) const
   if (IsReference())
     return Original()->Spec();
   else
-    return PortionSpec(_DataType, _ListDepth, _IsNull); 
+    return PortionSpec(rep->_DataType, rep->_ListDepth, rep->_IsNull); 
 }
 
 Portion* ListPortion::ValCopy(void) const
 { 
-  ListPortion* p = new ListPortion(*_Value); 
-  if(p->_DataType == porUNDEFINED)
-    p->_DataType = _DataType;
+  ListPortion* p = new ListPortion(*rep->value);
+  if(p->rep->_DataType == porUNDEFINED)
+    p->rep->_DataType = rep->_DataType;
   return p;
 }
 
 Portion* ListPortion::RefCopy(void) const
 { 
-  ListPortion* p = new ListPortion(*_Value, true); 
-  ((ListPortion*) p)->_DataType = _DataType;
+  ListPortion* p = new ListPortion(this, true); 
+  p->rep->_DataType = rep->_DataType;
   p->SetOriginal(Original());
   return p;
 }
@@ -1734,12 +1729,12 @@ void ListPortion::AssignFrom(Portion* p)
   int i;
   int length;
   int result;
-  gList< Portion* >& value = *(((ListPortion*) p)->_Value);
+  gList <Portion *>& value = *(((ListPortion*) p)->rep->value);
 
   assert(p->Spec() == Spec());
-  assert(PortionSpecMatch(((ListPortion*) p)->_DataType, _DataType) || 
-	 _DataType == porUNDEFINED || 
-	 ((ListPortion*) p)->_DataType == porUNDEFINED);
+  assert(PortionSpecMatch(((ListPortion*) p)->rep->_DataType, rep->_DataType)
+	 || rep->_DataType == porUNDEFINED || 
+	 ((ListPortion*) p)->rep->_DataType == porUNDEFINED);
 
 
   Flush();
@@ -1749,8 +1744,8 @@ void ListPortion::AssignFrom(Portion* p)
     result = Insert(value[i]->ValCopy(), i);
     assert(result != 0);
   }
-  if(_DataType == porUNDEFINED)
-    _DataType = ((ListPortion*) p)->_DataType;
+  if (rep->_DataType == porUNDEFINED)
+    rep->_DataType = ((ListPortion*) p)->rep->_DataType;
 
 }
 
@@ -1758,19 +1753,19 @@ bool ListPortion::operator == (Portion* p) const
 {
   bool result = true;
   int i;
-  int length = _Value->Length();
+  int length = rep->value->Length();
   Portion* p1;
   Portion* p2;
   bool type_found;
 
   if(p->Spec() == Spec())
   {
-    if(_Value->Length() == ((ListPortion*) p)->_Value->Length())
+    if(rep->value->Length() == ((ListPortion*) p)->rep->value->Length())
     {
       for(i = 1; i <= length; i++)
       {
-	p1 = (*_Value)[i];
-	p2 = (*(((ListPortion*) p)->_Value))[i];
+	p1 = (*rep->value)[i];
+	p2 = (*(((ListPortion*) p)->rep->value))[i];
 	if(p1->Spec() == p2->Spec())
 	{
 	  if(p1->Spec().ListDepth > 0)
@@ -1795,14 +1790,14 @@ bool ListPortion::operator == (Portion* p) const
 
 bool ListPortion::ContainsListsOnly(void) const
 {
-  if(_Value->Length() == 0)
+  if (rep->value->Length() == 0)
     return false;
   else
-    return _ContainsListsOnly;
+    return rep->_ContainsListsOnly;
 }
 
 void ListPortion::SetDataType(unsigned long type)
-{ _DataType = type; }
+{ rep->_DataType = type; }
 
 void ListPortion::Output(gOutput& s) const
 { Output(s, 0); }
@@ -1812,7 +1807,7 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   Portion::Output(s);
   int i;
   int c;
-  int length = _Value->Length();
+  int length = rep->value->Length();
   
   if(_WriteListBraces) 
     s << '{';
@@ -1840,10 +1835,10 @@ void ListPortion::Output(gOutput& s, long ListLF) const
 	  s << ' ';
       if(_WriteListLF <= ListLF)
 	s << ' ';
-      if((*_Value)[i]->Spec().ListDepth == 0)
-	s << (*_Value)[i];
+      if((*rep->value)[i]->Spec().ListDepth == 0)
+	s << (*rep->value)[i];
       else
-	((ListPortion*) (*_Value)[i])->Output(s, ListLF + 1);
+	((ListPortion*) (*rep->value)[i])->Output(s, ListLF + 1);
     }
   }
   else
@@ -1851,7 +1846,7 @@ void ListPortion::Output(gOutput& s, long ListLF) const
     if(_WriteListLF > ListLF) 
       for(c = 0; c < (ListLF+1) * _WriteListIndent-1; c++)
 	s << ' ';
-    s << " (" << PortionSpecToText(_DataType) << ')';
+    s << " (" << PortionSpecToText(rep->_DataType) << ')';
   }
 
   s << ' ';
@@ -1878,7 +1873,7 @@ gString ListPortion::OutputString( void ) const
 
 
 int ListPortion::Append(Portion* item)
-{ return Insert(item, _Value->Length() + 1); }
+{ return Insert(item, rep->value->Length() + 1); }
 
 
 int ListPortion::Insert(Portion* item, int index)
@@ -1886,15 +1881,6 @@ int ListPortion::Insert(Portion* item, int index)
   int result = 0;
   PortionSpec item_type;
 
-#ifndef NDEBUG
-  if(item->Spec().Type == porREFERENCE)
-  {
-    gerr << "Portion Error:\n";
-    gerr << "  Attempted to insert a ReferencePortion into\n";
-    gerr << "  a ListPortion\n";
-  }
-  assert(item->Spec().Type != porREFERENCE);
-#endif
 
 
   item_type = item->Spec();
@@ -1902,38 +1888,38 @@ int ListPortion::Insert(Portion* item, int index)
   {
     if(item_type.Type == porNULL)
       item_type = ((NullPortion*) item)->DataType();
-    _ContainsListsOnly = false;
+    rep->_ContainsListsOnly = false;
   }
 
 
-  if(_DataType == porUNDEFINED) // inserting into an empty list
+  if(rep->_DataType == porUNDEFINED) // inserting into an empty list
   {
-    _DataType = item_type.Type;
-    ((ListPortion*) Original())->_DataType = _DataType;
-    result = _Value->Insert(item, index);
+    rep->_DataType = item_type.Type;
+    ((ListPortion*) Original())->rep->_DataType = rep->_DataType;
+    result = rep->value->Insert(item, index);
   }
   else  // inserting into an existing list
   {
-    if(PortionSpecMatch(item_type.Type, _DataType))
+    if(PortionSpecMatch(item_type.Type, rep->_DataType))
     {
-      result = _Value->Insert(item, index);
+      result = rep->value->Insert(item, index);
     }
     else if(item_type.Type == porUNDEFINED) // inserting an empty list
     {
-      result = _Value->Insert(item, index);
+      result = rep->value->Insert(item, index);
       assert(item->Spec().ListDepth > 0);
-      ((ListPortion*) item)->_DataType = _DataType;
+      ((ListPortion*) item)->rep->_DataType = rep->_DataType;
     }
     else if(item_type.Type == porERROR)
-      result = _Value->Insert(item, index);
+      result = rep->value->Insert(item, index);
     else
       delete item;
   }
 
   if( result > 0 )
   {
-    if( item->Spec().ListDepth + 1 > _ListDepth )
-      _ListDepth = item->Spec().ListDepth + 1;
+    if( item->Spec().ListDepth + 1 > rep->_ListDepth )
+      rep->_ListDepth = item->Spec().ListDepth + 1;
   }
 
   return result;
@@ -1943,13 +1929,13 @@ int ListPortion::Insert(Portion* item, int index)
 bool ListPortion::Contains(Portion* p2) const
 {
   int i;
-  int length = _Value->Length();
+  int length = rep->value->Length();
   bool type_found;
   Portion* p1;
 
   for(i = 1; i <= length; i++)
   {
-    p1 = (*_Value)[i];
+    p1 = (*rep->value)[i];
     if(PortionEqual(p1, p2, type_found))
       return true;
 
@@ -1975,20 +1961,19 @@ bool ListPortion::Contains(Portion* p2) const
 Portion* ListPortion::Remove(int index)
 { 
   Portion* result = 0;
-  if(index >= 1 && index <= _Value->Length())
-    result = _Value->Remove(index);
+  if(index >= 1 && index <= rep->value->Length())
+    result = rep->value->Remove(index);
 
-  _ContainsListsOnly = true;
-  _ListDepth = 1;
-  if(_Value->Length() > 0)
+  rep->_ContainsListsOnly = true;
+  rep->_ListDepth = 1;
+  if(rep->value->Length() > 0)
   {
-    int i = 0;
-    for( i = 1; i <= _Value->Length(); ++i )
+    for (int i = 1; i <= rep->value->Length(); ++i )
     {
-      if( (*_Value)[i]->Spec().ListDepth == 0 )
-	_ContainsListsOnly = false;
-      if( (*_Value)[i]->Spec().ListDepth >= _ListDepth )
-	_ListDepth = (*_Value)[i]->Spec().ListDepth + 1;
+      if( (*rep->value)[i]->Spec().ListDepth == 0 )
+	rep->_ContainsListsOnly = false;
+      if( (*rep->value)[i]->Spec().ListDepth >= rep->_ListDepth )
+	rep->_ListDepth = (*rep->value)[i]->Spec().ListDepth + 1;
     }
   }
 
@@ -1996,26 +1981,26 @@ Portion* ListPortion::Remove(int index)
 }
 
 int ListPortion::Length(void) const
-{ return _Value->Length(); }
+{ return rep->value->Length(); }
 
 
 void ListPortion::Flush(void)
 {
   int i, length;
-  for(i = 1, length = _Value->Length(); i <= length; i++)
+  for(i = 1, length = rep->value->Length(); i <= length; i++)
   {
     delete Remove(1);
   }
-  assert(_Value->Length() == 0);
+  assert(rep->value->Length() == 0);
 }
 
 
 Portion* ListPortion::operator[](int index) const
 {
-  if(index >= 1 && index <= _Value->Length())
+  if(index >= 1 && index <= rep->value->Length())
   {
-    assert((*_Value)[index] != 0);
-    return (*_Value)[index];
+    assert((*rep->value)[index] != 0);
+    return (*rep->value)[index];
   }
   else
     return 0;
@@ -2026,14 +2011,14 @@ Portion* ListPortion::operator[](int index) const
 Portion* ListPortion::SubscriptCopy(int index) const
 {
   Portion* p;
-  if(index >= 1 && index <= _Value->Length())
+  if(index >= 1 && index <= rep->value->Length())
   {
-    assert((*_Value)[index] != 0);
+    assert((*rep->value)[index] != 0);
 
     if(IsReference())
-      p = (*_Value)[index]->RefCopy();
+      p = (*rep->value)[index]->RefCopy();
     else
-      p = (*_Value)[index]->ValCopy();
+      p = (*rep->value)[index]->ValCopy();
       
     return p;
   }

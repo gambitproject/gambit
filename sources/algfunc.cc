@@ -40,7 +40,7 @@ class Mixed_ListPortion : public ListPortion   {
 
 Mixed_ListPortion::Mixed_ListPortion(const gList<MixedSolution> &list)
 {
-  _DataType = porMIXED;
+  rep->_DataType = porMIXED;
   for (int i = 1; i <= list.Length(); i++)
     Append(new MixedPortion(new MixedSolution(list[i])));
 }
@@ -53,7 +53,7 @@ class Behav_ListPortion : public ListPortion   {
 
 Behav_ListPortion::Behav_ListPortion(const gList<BehavSolution> &list)
 {
-  _DataType = porBEHAV;
+  rep->_DataType = porBEHAV;
   for (int i = 1; i <= list.Length(); i++)
     Append(new BehavPortion(new BehavSolution(list[i])));
 }

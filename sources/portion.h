@@ -852,16 +852,24 @@ template <class T> class gList;
 
 class ListPortion : public Portion  {
 protected:
-  gList< Portion* >* _Value;
+  struct listrep  {
+    gList<Portion *> *value;
+    bool _ContainsListsOnly;
+    unsigned long _DataType;
+    bool _IsNull;
+    int _ListDepth;
+
+    int nref;
+
+    listrep(void);
+    listrep(gList<Portion *> *value);
+    ~listrep();
+  };
+  
+  struct listrep *rep;
   bool _ref;
 
-  bool _ContainsListsOnly;
-  unsigned long _DataType;
-
-  bool _IsNull;
-  int _ListDepth;
-
-  ListPortion(gList<Portion *> &value, bool);
+  ListPortion(const ListPortion *, bool);
 
 public:
   ListPortion(void);
