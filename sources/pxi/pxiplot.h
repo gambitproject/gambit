@@ -82,7 +82,7 @@ public:
   } label_struct;
 
 protected:
-  const FileHeader &m_header;
+  const PxiFile &m_header;
   gBlock<label_struct> labels;          // labels for generic text
   const ExpData &m_expData;             // reference to experimental data
   bool m_landscape;                     // landscap mode if true
@@ -113,14 +113,14 @@ protected:
 
 public:
   PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
-	  const wxSize &p_size, const FileHeader &, int p_page,
+	  const wxSize &p_size, const PxiFile &, int p_page,
 	  const ExpData &p_expData);
   virtual ~PxiPlot();
 
   void Render(void);
   void Update(wxDC &dc, int device);
 
-  const FileHeader &Header(void) { return m_header; }
+  const PxiFile &Header(void) { return m_header; }
 
   // Interface to property classes
   PxiAxisProperties &GetLambdaAxisProperties(void) { return m_lambdaAxisProp; }

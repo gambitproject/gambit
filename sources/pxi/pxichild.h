@@ -16,7 +16,7 @@
 class PxiChild : public wxFrame {
 private:
   PxiFrame *m_parent;
-  FileHeader m_fileHeader;
+  PxiFile m_fileHeader;
   wxNotebook *m_plotBook;
 
   wxString m_expDatafile;

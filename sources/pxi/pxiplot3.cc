@@ -91,7 +91,7 @@ void PxiPlot3::DrawExpPoint_3(wxDC &dc,
 // Note Top->Left, Bottom->Right
 
 void PxiPlot3::PlotData_3(wxDC& dc, int x0, int y0, int cw,int ch, 
-			     const FileHeader &f_header, int level)
+			  const PxiFile &f_header, int level)
 {
   double x,y;
   int iset;
@@ -271,7 +271,7 @@ END_EVENT_TABLE()
 
 PxiPlot3::PxiPlot3(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const FileHeader &p_header, int p_page,
+		   const PxiFile &p_header, int p_page,
 		   const ExpData &p_expData)
   : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }

@@ -509,9 +509,6 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/grblock.imp"
 #include "base/glist.imp"
 
-template class gArray<FileHeader>;
-template class gBlock<FileHeader>;
-
 template class gArray<PxiPlot::LABELSTRUCT>;
 template class gBlock<PxiPlot::LABELSTRUCT>;
 

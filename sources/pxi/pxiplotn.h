@@ -21,7 +21,7 @@ private:
 	      int x0, int y0, int cw,int ch, int level=1);
   void PlotData(wxDC& dc,
 		int x0, int y0, int cw,int ch,
-		const FileHeader &f_header);
+		const PxiFile &f_header);
   void DrawExpPoint(wxDC &dc,
 		    double cur_e,int iset,int st,
 		    int x0, int y0, int ch,int cw);
@@ -38,7 +38,7 @@ private:
 
 public:
   PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
-	   const wxSize &p_size, const FileHeader &, int p_page,
+	   const wxSize &p_size, const PxiFile &, int p_page,
 	   const ExpData &p_expData);
   virtual ~PxiPlotN();
 

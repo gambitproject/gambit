@@ -302,16 +302,12 @@ void PxiChild::OnViewDetail(wxCommandEvent &)
   message += "\n";
   */
 
-  message += wxString::Format("Error (lambda) step: %4.4f\n",
-			      m_fileHeader.EStep());
-  message += wxString::Format("Error (lambda) start: %4.4f\n",
-			      m_fileHeader.EStart());
-  message += wxString::Format("Error (lambda) stop: %4.4f\n",
-			      m_fileHeader.EStop());
-  message += wxString::Format("Minimum data value: %4.4f\n",
-			      m_fileHeader.DataMin());
-  message += wxString::Format("Maximum data value: %4.4f\n",
-			      m_fileHeader.DataMax());
+  message += wxString::Format("Lambda step size: %4.4f\n",
+			      m_fileHeader.DelLambda());
+  message += wxString::Format("Smallest lambda: %4.4f\n",
+			      m_fileHeader.MinLambda());
+  message += wxString::Format("Largest lambda: %4.4f\n",
+			      m_fileHeader.MaxLambda());
   /*
   message += wxString::Format("Data type: %s\n",
 			      (m_fileHeader.DataType() == DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");

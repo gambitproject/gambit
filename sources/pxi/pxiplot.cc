@@ -24,7 +24,7 @@
 
 PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
 		 const wxSize &p_size,
-		 const FileHeader &p_header, int p_page,
+		 const PxiFile &p_header, int p_page,
 		 const ExpData &p_expData)
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
     m_header(p_header), m_expData(p_expData),

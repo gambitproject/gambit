@@ -20,7 +20,7 @@ private:
   void DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level=1);
   void PlotData_3(wxDC& dc,
 		  int x0, int y0, int cw,int ch,
-		  const FileHeader &f_header, int level=1);
+		  const PxiFile &f_header, int level=1);
   void DrawExpPoint_3(wxDC &dc,
 		      double cur_e,int iset,int st1,int st2,
 		      int x0, int y0, int cw,int ch);
@@ -35,7 +35,7 @@ private:
 
 public:
   PxiPlot3(wxWindow *p_parent, const wxPoint &p_position,
-	   const wxSize &p_size, const FileHeader &, int p_page,
+	   const wxSize &p_size, const PxiFile &, int p_page,
 	   const ExpData &p_expData);
   virtual ~PxiPlot3();
 

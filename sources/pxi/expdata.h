@@ -73,7 +73,7 @@ public:
   void SetDataPoint(int i, int iset, int act, int value);
 
   // COMPUTING ESTIMATES
-  void ComputeMLEs(FileHeader &, gOutput &p_likeFile);
+  void ComputeMLEs(PxiFile &, gOutput &p_likeFile);
 
   // ACCESSING ESTIMATES
   bool HaveMLEs(void) const { return m_haveMLEs; }

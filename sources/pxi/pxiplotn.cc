@@ -177,7 +177,7 @@ void PxiPlotN::DrawExpPoint(wxDC &dc,
 }
 
 void PxiPlotN::PlotData(wxDC& dc, int x0, int y0, 
-			int cw, int ch, const FileHeader &f_header)
+			int cw, int ch, const PxiFile &f_header)
   /* This function plots n-dimensional data on a rectangular grid.  The x-axis
    * are error value
    */
@@ -284,7 +284,7 @@ END_EVENT_TABLE()
 
 PxiPlotN::PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const FileHeader &p_header, int p_page,
+		   const PxiFile &p_header, int p_page,
 		   const ExpData &p_expData)
   : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }

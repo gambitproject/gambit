@@ -40,52 +40,46 @@ public:
 inline gOutput &operator<<(gOutput &p_file, const DataLine &)
 { return p_file; }
 
-const int DATA_TYPE_ARITH = 0;
-const int DATA_TYPE_LOG = 1;
-
-class FileHeader {
-friend gOutput &operator<<(gOutput &op,const FileHeader &f);
+class PxiFile {
 private:
-  int num_infosets;
-  gBlock<int> strategies;
-  double e_step,e_start,e_stop;
-  double data_max,data_min;
-  int data_type;
-  double merror,q_step;	// optional
-  int num_columns;
-  int e_column,delta_column;
-  gBlock< gBlock<int> > prob_cols;            // [iset][strategy]
-  //  NormalMatrix *matrix;	// optional
+  gBlock<int> m_numStrats;
+  double m_minLambda, m_maxLambda, m_delLambda;
+  int m_powLambda;
+  double m_error, m_qStep;
+  int m_numColumns, m_lambdaColumn, m_deltaColumn;
+
+  gBlock< gBlock<int> > m_columns;
   gList<DataLine *> m_data;
 
 public:
-  FileHeader(void);
-  ~FileHeader();
+  PxiFile(void);
+  ~PxiFile();
 
-  void ReadFile(gInput &in);
+  void ReadFile(gInput &);
+  void WriteFile(gOutput &) const;
 
-  // Comparison operators
-  int operator==(const FileHeader &H)
-    {return (strategies==H.strategies && num_infosets==H.num_infosets);}
-  int operator!=(const FileHeader &H)
-    {return !(*this==H);}
-  // Data access functions
-  int NumColumns(void) const {return num_columns;}
-  int NumInfosets(void) const {return num_infosets;}
-  int NumStrategies(int i) const {return strategies[i];}
-  gBlock<int> NumStrategies(void) const {return strategies;}
-  int Col(int iset,int st) const {return prob_cols[iset][st];}
-  int ECol(void) const {return e_column;}
-  int DeltaCol(void) const {return delta_column;}
-  int DataType(void) const {return data_type;}
-  double MError(void) const {return merror;}
-  double QStep(void) const {return q_step;}
-  // Note that e_step is stored as e_step-1 if log plots are used. i.e. step of .1 is 1.1
-  double EStep(void) const {return (data_type) ? 1+e_step : e_step;}
-  double EStart(void) const {return e_start;}
-  double EStop(void) const {return e_stop;}
-  double DataMax(void) const {return data_max;}
-  double DataMin(void) const {return data_min;}
+  // DATA ACCESS: GAME INFORMATION
+  int NumInfosets(void) const { return m_numStrats.Length(); }
+  int NumStrategies(int i) const { return m_numStrats[i]; }
+  const gArray<int> &NumStrategies(void) const { return m_numStrats; }
+
+  // DATA ACCESS: FILE STRUCTURE INFORMATION
+  int NumColumns(void) const { return m_numColumns; }
+  int Column(int iset, int st) const { return m_columns[iset][st];}
+  int LambdaColumn(void) const { return m_lambdaColumn; }
+  int DeltaColumn(void) const { return m_deltaColumn; }
+
+  // DATA ACCESS: ALGORITHM INFORMATION
+  double MinLambda(void) const { return m_minLambda; }
+  double MaxLambda(void) const { return m_maxLambda; }
+  // Note that m_delLambda is stored as m_delLambda-1 if log plots are used.
+  // i.e. step of .1 is 1.1
+  double DelLambda(void) const 
+    { return (m_powLambda) ? 1.0 + m_delLambda : m_delLambda; }
+  int PowLambda(void) const { return m_powLambda; }
+
+  double MError(void) const { return m_error;}
+  double QStep(void) const { return m_qStep;}
 
   const gList<DataLine *> &GetData(void) const { return m_data; }
 };

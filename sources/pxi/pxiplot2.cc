@@ -61,7 +61,7 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc,
 }
 
 void PxiPlot2::PlotData_2(wxDC& dc, int x0, int y0, int cw,int ch,
-			  const FileHeader &f_header,int level)
+			  const PxiFile &f_header,int level)
 {
   double x,y;
   //  int iset;
@@ -224,7 +224,7 @@ END_EVENT_TABLE()
 
 PxiPlot2::PxiPlot2(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const FileHeader &p_header, int p_page,
+		   const PxiFile &p_header, int p_page,
 		   const ExpData &p_expData)
   : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
 { }

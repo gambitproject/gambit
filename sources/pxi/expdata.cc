@@ -181,7 +181,7 @@ void ExpData::SetDataPoint(int i, int iset, int act, int value)
 //                Fitting data to QRE correspondence
 //-----------------------------------------------------------------------
 
-void ExpData::ComputeMLEs(FileHeader &p_qreFile, gOutput &p_likeFile)
+void ExpData::ComputeMLEs(PxiFile &p_qreFile, gOutput &p_likeFile)
 {
   double likeMax = -1000, likeMin = 1000;
   
@@ -219,13 +219,13 @@ void ExpData::ComputeMLEs(FileHeader &p_qreFile, gOutput &p_likeFile)
 
   // Save likelihood settings (must do now since like_min/max were not available til now)
   p_likeFile << "Settings:\n";
-  p_likeFile << p_qreFile.EStart() << '\n';
-  p_likeFile << p_qreFile.EStop() << '\n';
-  double e_step = (p_qreFile.DataType() == DATA_TYPE_ARITH) ? p_qreFile.EStep() : p_qreFile.EStep() - 1;
-  p_likeFile << e_step << '\n';
+  p_likeFile << p_qreFile.MinLambda() << '\n';
+  p_likeFile << p_qreFile.MaxLambda() << '\n';
+  p_likeFile << ((p_qreFile.PowLambda()) ? 
+		 (p_qreFile.DelLambda()-1.0) : p_qreFile.DelLambda()) << '\n';
   p_likeFile << likeMin << '\n';
   p_likeFile << likeMax << '\n';
-  p_likeFile << p_qreFile.DataType() << '\n';
+  p_likeFile << p_qreFile.PowLambda() << '\n';
 
   m_haveMLEs = true;
 }
