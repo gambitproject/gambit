@@ -18,7 +18,7 @@ EfgContIter::EfgContIter(const EFSupport &s)
     _num_active_infosets[pl] = 0;
     gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
-      active_for_pl[iset] = true;
+      active_for_pl[iset] = s.MayReach(_efg->GetInfosetByIndex(pl,iset));
       _num_active_infosets[pl]++;
     }
     _is_active += active_for_pl;
@@ -59,8 +59,9 @@ void EfgContIter::First(void)
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
       if (pl != _frozen_pl && iset != _frozen_iset)   {
-	      _current(pl, iset) = 1;
-      	_profile.Set(_support.Actions(pl, iset)[1]);
+	_current(pl, iset) = 1;
+	if (_is_active[pl][iset])      
+	  _profile.Set(_support.Actions(pl, iset)[1]);
       }
   }
 }
@@ -71,6 +72,14 @@ void EfgContIter::Set(int pl, int iset, int act)
 
   _current(pl, iset) = act;
   _profile.Set(_support.Actions(pl, iset)[act]);
+}
+
+
+void EfgContIter::Set(const Action *a) 
+{
+  if (a->BelongsTo()->GetPlayer()->GetNumber() != _frozen_pl ||
+      a->BelongsTo()->GetNumber() != _frozen_iset) return;
+  _profile.Set(a);
 }
 
 int EfgContIter::Next(int pl, int iset)
@@ -196,7 +205,8 @@ void EfgConditionalContIter::First(void)
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
       _current(pl, iset) = 1;
-      _profile.Set(_support.Actions(pl, iset)[1]);
+      if (_is_active[pl][iset])
+	_profile.Set(_support.Actions(pl, iset)[1]);
     }
   }
 }
@@ -205,6 +215,11 @@ void EfgConditionalContIter::Set(int pl, int iset, int act)
 {
   _current(pl, iset) = act;
   _profile.Set(_support.Actions(pl, iset)[act]);
+}
+
+void EfgConditionalContIter::Set(const Action *a) 
+{
+  _profile.Set(a);
 }
 
 int EfgConditionalContIter::Next(int pl, int iset)
