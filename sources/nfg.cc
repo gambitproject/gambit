@@ -1,16 +1,12 @@
-//#
-//# FILE: nfg.cc -- Implementation of normal form member functions
-//#              -- and Implementation of NFPlayer member functions
-//#
-//# $Id$
-//#
+//
+// FILE: nfg.cc -- Implementation of normal form member functions
+//              -- and Implementation of NFPlayer member functions
+//
+// $Id$
+//
 
 #include <assert.h>
-#include <limits.h>
 #include "nfg.h"
-#include "nfg.imp"
-#include "nfgiter.h"
-#include "rational.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
 
