@@ -18,7 +18,7 @@
 #include "efgshow.h"
 #include "treedrag.h"
 
-#include "nodeaddd.h"
+#include "dlmoveadd.h"
 #include "infosetd.h"
 #include "dlefgsave.h"
 #include "dlnodedelete.h"
@@ -1567,30 +1567,22 @@ void TreeWindow::node_add(void)
     last_ef = &ef;
   }
     
-  NodeAddDialog node_add_dialog(ef, player, infoset, branches, pframe);
+  dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
 
-  if (node_add_dialog.Completed() == wxOK)  {
+  if (dialog.Completed() == wxOK)  {
     nodes_changed = TRUE;
-    NodeAddMode mode = node_add_dialog.GetAddMode();
-    player = node_add_dialog.GetPlayer();
-    infoset = node_add_dialog.GetInfoset();
-    branches = node_add_dialog.GetBranches();
-    Bool set_names = FALSE;
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
 
     try {
       if (mode == NodeAddNew) {
 	ef.AppendNode(Cursor(), player, branches);
-	set_names = node_add_dialog.SetNames();
       }
       else
 	ef.AppendNode(Cursor(), infoset);
 
-      if (set_names) {
-	node_label();
-	infoset_label();
-      }
-
-      // take care of probs for chance nodes.
       if (player == ef.GetChance())
 	action_probs();
     }
@@ -1616,29 +1608,23 @@ void TreeWindow::node_insert(void)
     last_ef = &ef;
   }
     
-  NodeAddDialog node_add_dialog(ef, player, infoset, branches, pframe);
+  dialogMoveAdd dialog(ef, player, infoset, branches, pframe);
 
-  if (node_add_dialog.Completed() == wxOK)  {
+  if (dialog.Completed() == wxOK)  {
     nodes_changed = TRUE;
-    NodeAddMode mode = node_add_dialog.GetAddMode();
-    player = node_add_dialog.GetPlayer();
-    infoset = node_add_dialog.GetInfoset();
-    branches = node_add_dialog.GetBranches();
-    Bool set_names = FALSE;
+    NodeAddMode mode = dialog.GetAddMode();
+    player = dialog.GetPlayer();
+    infoset = dialog.GetInfoset();
+    branches = dialog.GetActions();
 
     try {
       if (mode == NodeAddNew) {
 	ef.InsertNode(Cursor(), player, branches);
-	set_names = node_add_dialog.SetNames();
       }
       else
 	ef.InsertNode(Cursor(), infoset);
 
       SetCursorPosition(Cursor()->GetParent());
-      if (set_names) {
-	node_label();
-	infoset_label();
-      }
 
       // take care of probs for chance nodes.
       if (player == ef.GetChance())
@@ -1674,77 +1660,14 @@ void TreeWindow::node_delete(void)
 //                       NODE-LABEL MENU HANDLER
 //***********************************************************************
 
-class efgNodeLabelDialog : public wxDialogBox {
-private:
-  int m_completed;
-  wxText *m_label;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((efgNodeLabelDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((efgNodeLabelDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  efgNodeLabelDialog(Node *, wxWindow *);
-  virtual ~efgNodeLabelDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  gText Label(void) const { return m_label->GetValue(); }
-};
-
-efgNodeLabelDialog::efgNodeLabelDialog(Node *p_node, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Label Node", TRUE)
-{
-  m_label = new wxText(this, 0, "Label");
-  m_label->SetValue(p_node->GetName());
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void efgNodeLabelDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void efgNodeLabelDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool efgNodeLabelDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
 void TreeWindow::node_label(void)
 {
-  try {
-    efgNodeLabelDialog dialog(Cursor(), this);
+  Node *node = Cursor();
+  char *label = wxGetTextFromUser("New label for node", "Label Node",
+				  node->GetName());
 
-    if (dialog.Completed() == wxOK) {
-      Cursor()->SetName(dialog.Label());
-    }
-  }
-  catch (gException &E) {
-    guiExceptionDialog(E.Description(), pframe);
-  }
+  if (label)
+    node->SetName(label);
 }
 
 //***********************************************************************
@@ -2109,42 +2032,11 @@ void TreeWindow::infoset_join(void)
 
 void TreeWindow::infoset_label(void)
 {
-  char *label = 0;
-  MyDialogBox *label_dialog = 0;
-    
-  try {
-    label = new char[MAX_LABEL_LENGTH];
-    Bool label_actions = TRUE;
-    if (Cursor()->GetInfoset()->GetName() != "")
-      strcpy(label, Cursor()->GetInfoset()->GetName());
-    else
-      strcpy(label, "Infoset"+ToText(Cursor()->GetPlayer()->NumInfosets()));
-    
-    label_dialog = new MyDialogBox(pframe, "Label Infoset", EFG_INFOSET_HELP);
-    label_dialog->Add(wxMakeFormString(
-       "Label", &label, wxFORM_DEFAULT,
-       new wxList(wxMakeConstraintFunction(StringConstraint), 0)));
-    label_dialog->Add(wxMakeFormNewLine());
-    label_dialog->Add(wxMakeFormBool("Label Actions", &label_actions));
-    label_dialog->Go();
-
-    if (label_dialog->Completed() == wxOK) {
-      Cursor()->GetInfoset()->SetName(label);
-      if (label_actions) action_label();
-    }
-    
-    delete label_dialog;
-    delete [] label;
-  }
-  catch (gException &E) {
-    if (label_dialog)   
-      delete label_dialog;
-
-    if (label)    
-      delete [] label;
- 
-    guiExceptionDialog(E.Description(), pframe);
-  }
+  Infoset *infoset = Cursor()->GetInfoset();
+  char *label = wxGetTextFromUser("New label for information set ",
+				  "Label Infoset", infoset->GetName());
+  if (label)
+    infoset->SetName(label);
 }
 
 

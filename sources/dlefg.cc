@@ -11,6 +11,7 @@
 
 #include "efg.h"
 #include "dlefgplayer.h"
+#include "dlmoveadd.h"
 #include "dlnodedelete.h"
 #include "dlefgsave.h"
 
@@ -81,6 +82,163 @@ EFPlayer *dialogEfgSelectPlayer::GetPlayer(void)
   else
     return m_efg.Players()[m_playerSelected];
 }
+
+//=========================================================================
+//                     dialogMoveAdd: Member functions
+//=========================================================================
+
+dialogMoveAdd::dialogMoveAdd(Efg &p_efg, EFPlayer *p_player,
+			     Infoset *p_infoset, int p_branches,
+			     wxFrame *p_frame)
+  : wxDialogBox(p_frame, "Add Move", TRUE),
+    m_efg(p_efg), m_branches(p_branches)
+{
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
+  m_playerItem->Append("Chance");
+  m_playerItem->SetClientData(0, (char *) this);
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_playerItem->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
+  }
+  m_playerItem->Append("New Player");
+  if (p_player)
+    m_playerItem->SetSelection(p_player->GetNumber());
+  else
+    m_playerItem->SetSelection(0);
+
+  m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset,
+				"Infoset");
+  m_infosetItem->Append("New");
+  m_infosetItem->SetClientData(0, (char *) this);
+  if (p_player) {
+    for (int iset = 1; iset <= p_player->NumInfosets(); iset++) {
+      m_infosetItem->Append(ToText(iset) + ": " +
+			    p_player->Infosets()[iset]->GetName());
+    }
+  }
+
+  if (p_infoset)
+    m_infosetItem->SetSelection(p_infoset->GetNumber());
+  else
+    m_infosetItem->SetSelection(0);
+
+  NewLine();
+ 
+  m_actionItem = new wxText(this, 0, "Actions");
+  m_actionItem->SetValue(ToText(p_branches));
+  m_actionItem->Enable(m_infosetItem->GetSelection() == 0);
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+dialogMoveAdd::~dialogMoveAdd(void)
+{ }
+
+void dialogMoveAdd::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogMoveAdd::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+void dialogMoveAdd::OnPlayer(void)
+{
+  int playerNumber = m_playerItem->GetSelection();
+  EFPlayer *player = 0;
+  if (playerNumber == 0)
+    player = m_efg.GetChance();
+  else if (playerNumber <= m_efg.NumPlayers())
+    player = m_efg.Players()[playerNumber];
+
+  m_infosetItem->Clear();
+  m_infosetItem->Append("New");
+  m_infosetItem->SetClientData(0, (char *) this);
+  if (player) {
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      m_infosetItem->Append(ToText(iset) + ": " +
+			    player->Infosets()[iset]->GetName());
+    }
+  }
+  m_infosetItem->SetSelection(0);
+  m_actionItem->SetValue(ToText(2));
+  m_actionItem->Enable(TRUE);
+}
+
+void dialogMoveAdd::OnInfoset(void)
+{
+  int infosetNumber = m_infosetItem->GetSelection();
+  if (infosetNumber > 0) {
+    int playerNumber = m_playerItem->GetSelection();
+    Infoset *infoset;
+    if (playerNumber == 0)
+      infoset = m_efg.GetChance()->Infosets()[infosetNumber];
+    else
+      infoset = m_efg.Players()[playerNumber]->Infosets()[infosetNumber];
+    m_actionItem->Enable(FALSE);
+    m_actionItem->SetValue(ToText(infoset->NumActions()));
+  }
+  else {
+    m_actionItem->Enable(TRUE);
+    m_actionItem->SetValue(ToText(2));
+  }
+}
+
+Bool dialogMoveAdd::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+NodeAddMode dialogMoveAdd::GetAddMode(void) const
+{
+  return (m_infosetItem->GetSelection() == 0) ? NodeAddNew : NodeAddIset;
+}
+
+EFPlayer *dialogMoveAdd::GetPlayer(void) const
+{
+  int playerNumber = m_playerItem->GetSelection();
+
+  if (playerNumber == 0)
+    return m_efg.GetChance();
+  else if (playerNumber <= m_efg.NumPlayers())
+    return m_efg.Players()[playerNumber];
+  else
+    return 0;
+}
+
+Infoset *dialogMoveAdd::GetInfoset(void) const
+{
+  EFPlayer *player = GetPlayer();
+  int infosetNumber = m_infosetItem->GetSelection();
+
+  if (player && infosetNumber > 0)
+    return player->Infosets()[infosetNumber];
+  else
+    return 0;
+}
+
+int dialogMoveAdd::GetActions(void) const
+{
+  Infoset *infoset = GetInfoset();
+  if (infoset)
+    return infoset->NumActions();
+  else
+    return (int) ToDouble(m_actionItem->GetValue());
+}
+
 
 //=========================================================================
 //                   dialogNodeDelete: Member functions
