@@ -7,6 +7,7 @@
 #include "gstring.h"
 #include "rational.h"
 #include "ggrstack.h"
+#include "glist.h"
 #include "extform.h"
 #include "player.h"
 #include "infoset.h"
