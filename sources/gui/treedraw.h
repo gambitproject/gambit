@@ -21,6 +21,12 @@ const int NODE_TOKEN_BOX = 1;
 const int NODE_TOKEN_CIRCLE = 2;
 const int NODE_TOKEN_DIAMOND = 3;
 
+const int BRANCH_STYLE_LINE = 0;
+const int BRNACH_STYLE_FORKTINE = 1;
+
+const int BRANCH_LABEL_HORIZONTAL = 0;
+const int BRANCH_LABEL_ROTATED = 1;
+
 const int SUBGAME_HIDDEN = 0;
 const int SUBGAME_ARC = 1;
 

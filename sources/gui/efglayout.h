@@ -24,11 +24,18 @@ private:
   int m_size;         // horizontal size of the node
   int m_token;        // token to draw for node
 
+  int m_branchStyle;  // lines or fork-tine
+  int m_branchLabel;  // horizontal or rotated
+  int m_branchLength; // length of branch (exclusive of tine, if present)
+
   int m_level;        // depth of the node in tree
   int m_sublevel;     // # of the infoset line on this level
+  gNumber m_actionProb;  // probability incoming action is taken
 
   wxString m_nodeAboveLabel, m_nodeBelowLabel, m_nodeRightLabel;
   wxString m_branchAboveLabel, m_branchBelowLabel;
+
+  wxFont m_branchAboveFont, m_branchBelowFont;
 
 public:
   int x, y;
@@ -58,16 +65,26 @@ public:
   bool IsSubgameMarked(void) const { return m_subgameMarked; }
   void SetSubgameMarked(bool p_marked) { m_subgameMarked = p_marked; }
 
-  void SetSize(int p_size) { m_size = p_size; }
   int GetSize(void) const { return m_size; }
+  void SetSize(int p_size) { m_size = p_size; }
 
-  void SetToken(int p_token) { m_token = p_token; }
   int GetToken(void) const { return m_token; }
+  void SetToken(int p_token) { m_token = p_token; }
 
-  void SetLevel(int p_level) { m_level = p_level; }
+  int GetBranchStyle(void) const { return m_branchStyle; }
+  void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
+
+  int GetBranchLabelStyle(void) const { return m_branchLabel; }
+  void SetBranchLabelStyle(int p_style) { m_branchLabel = p_style; }
+
+  int GetBranchLength(void) const { return m_branchLength; }
+  void SetBranchLength(int p_length) { m_branchLength = p_length; }
+
   int GetLevel(void) const { return m_level; }
-  void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
+  void SetLevel(int p_level) { m_level = p_level; }
+
   int GetSublevel(void) const { return m_sublevel; }
+  void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
 
   const wxString &GetNodeAboveLabel(void) const { return m_nodeAboveLabel; }
   void SetNodeAboveLabel(const wxString &p_label)
@@ -90,6 +107,12 @@ public:
     { return m_branchBelowLabel; }
   void SetBranchBelowLabel(const wxString &p_label)
     { m_branchBelowLabel = p_label; }
+
+  const wxFont &GetBranchAboveFont(void) const { return m_branchAboveFont; }
+  void SetBranchAboveFont(const wxFont &p_font) { m_branchAboveFont = p_font; }
+
+  const wxFont &GetBranchBelowFont(void) const { return m_branchBelowFont; }
+  void SetBranchBelowFont(const wxFont &p_font) { m_branchBelowFont = p_font; }
 
   int GetX(void) const;
 

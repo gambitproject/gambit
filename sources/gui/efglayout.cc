@@ -75,7 +75,9 @@ NodeEntry::NodeEntry(Node *p_node)
   : m_node(p_node), m_selected(false), m_cursor(false),
     m_subgameRoot(false), m_subgameMarked(false), m_size(20),
     m_token(NODE_TOKEN_CIRCLE),
-    m_sublevel(0), nums(0), in_sup(true)
+    m_branchStyle(BRANCH_STYLE_LINE), m_branchLabel(BRANCH_LABEL_HORIZONTAL),
+    m_branchLength(0),
+    m_sublevel(0), m_actionProb(0), nums(0), in_sup(true)
 { }
 
 void NodeEntry::SetCursor(bool p_cursor)
@@ -92,7 +94,9 @@ void NodeEntry::SetCursor(bool p_cursor)
 //
 void NodeEntry::Draw(wxDC &p_dc) const
 {
-  DrawIncomingBranch(p_dc);
+  if (m_node->GetParent() && in_sup) {
+    DrawIncomingBranch(p_dc);
+  }
 
   p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (IsSelected()) ? 4 : 2,
 					     wxSOLID));
@@ -143,53 +147,103 @@ void NodeEntry::Draw(wxDC &p_dc) const
 
 void NodeEntry::DrawIncomingBranch(wxDC &p_dc) const
 {
-  if (m_node->GetParent() && in_sup) {
-    int xStart = parent->GetX() + parent->GetSize();
-    int xEnd = GetX();
-    int yStart = parent->y;
-    int yEnd = y;
+  int xStart = parent->GetX() + parent->GetSize();
+  int xEnd = GetX();
+  int yStart = parent->y;
+  int yEnd = y;
 
-    p_dc.SetPen(*wxThePenList->FindOrCreatePen(parent->color, 2, wxSOLID)); 
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(parent->color, 2, wxSOLID)); 
+  if (m_branchStyle == BRANCH_STYLE_LINE) {
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
-#ifdef UNUSED
-      // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
-    double prob = m_parent->Parent()->ActionProb(entry.n,  child_entry.child_number);
-    if (prob > 0) {
-      ::DrawLine(dc, xs, ys, (xs + m_parent->DrawSettings().ForkLength() * prob), 
-		 (ys + (ye - ys) * prob), *wxBLACK);
-    }
-#endif  // UNUSED
-    
+
+    // Draw in the highlight indicating action probabilities
+    p_dc.SetPen(*wxBLACK_PEN);
+    p_dc.DrawLine(xStart, yStart, 
+		  xStart +
+		  (int) ((double) (xEnd - xStart) * (double) m_actionProb),
+		  yStart +
+		  (int) ((double) (xEnd - xStart) * (double) m_actionProb));
+
     int textWidth, textHeight;
+    p_dc.SetFont(m_branchAboveFont);
     p_dc.GetTextExtent(m_branchAboveLabel, &textWidth, &textHeight);
-    if (yStart != yEnd) {
-      // this is a sloping branch
-      p_dc.DrawText(m_branchAboveLabel,
-		    (xStart + xEnd - textWidth) / 2,
-		    (yStart + yEnd) / 2 - textHeight);
-      p_dc.DrawRotatedText(m_branchAboveLabel,
-			   (xStart + xEnd - textWidth) / 2,
-			   (yStart + yEnd) / 2 - textHeight, 
-			   -atan((double) (yEnd - yStart) /
-				 (double) (xEnd - xStart)) * 180.0 / 3.14159);
+
+    // The angle of the branch
+    double theta = -atan((double) (yEnd - yStart) / (double) (xEnd - xStart));
+    // The "centerpoint" of the branch
+    int xbar = (xStart + xEnd) / 2;
+    int ybar = (yStart + yEnd) / 2;
+
+    if (m_branchLabel == BRANCH_LABEL_HORIZONTAL) {
+      if (yStart >= yEnd) {
+	p_dc.DrawText(m_branchAboveLabel, xbar - textWidth / 2, 
+		      ybar - textHeight + 
+		      textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
+      }
+      else {
+	p_dc.DrawText(m_branchAboveLabel, xbar - textWidth / 2, 
+		      ybar - textHeight - 
+		      textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
+      }
     }
     else {
-      // this is a flat branch
-      p_dc.DrawText(m_branchAboveLabel,
-		    (xStart + xEnd - textWidth) / 2, y - textHeight - 7);
+      // Draw the text rotated appropriately
+      p_dc.DrawRotatedText(m_branchAboveLabel,
+			   (int) ((double) xbar -
+				  (double) textHeight * sin(theta) -
+				  (double) textWidth * cos(theta) / 2.0),
+			   (int) ((double) ybar - 
+				  (double) textHeight * cos(theta) +
+				  (double) textWidth * sin(theta) / 2.0),
+			   theta * 180.0 / 3.14159);
     }
 
+    p_dc.SetFont(m_branchBelowFont);
     p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
-    if (yStart != yEnd) {
-      // this is a sloping branch
-      p_dc.DrawText(m_branchBelowLabel,
-		    (xStart + xEnd - textWidth) / 2,
-		    (yStart + yEnd) / 2);
+
+    if (m_branchLabel == BRANCH_LABEL_HORIZONTAL) {
+      if (yStart >= yEnd) {
+	p_dc.DrawText(m_branchBelowLabel, xbar - textWidth / 2,
+		      ybar - textWidth/2 * (yEnd - yStart) / (xEnd - xStart));
+      }
+      else {
+	p_dc.DrawText(m_branchBelowLabel, xbar - textWidth / 2,
+		      ybar + textWidth/2 * (yEnd - yStart) / (xEnd - xStart));
+      }
     }
-    else if (yStart == yEnd) {
-      p_dc.DrawText(m_branchBelowLabel,
-		    (xStart + xEnd - textWidth) / 2, y + 7);
+    else {
+      // Draw the text rotated appropriately
+      p_dc.DrawRotatedText(m_branchBelowLabel,
+			   (int) ((double) xbar -
+				  (double) textWidth * cos(theta) / 2.0),
+			   (int) ((double) ybar +
+				  (double) textWidth * sin(theta) / 2.0),
+			   theta * 180.0 / 3.14159);
     }
+  }
+  else {
+    // Old style fork-tine 
+    p_dc.DrawLine(xStart, yStart, xStart + m_branchLength, yEnd);
+    p_dc.DrawLine(xStart + m_branchLength, yEnd, xEnd, yEnd);
+    
+    // Draw in the highlight indicating action probabilities
+    p_dc.SetPen(*wxBLACK_PEN);
+    p_dc.DrawLine(xStart, yStart, 
+		  xStart + 
+		  (int) ((double) m_branchLength * (double) m_actionProb),
+		  yStart + 
+		  (int) ((double) (yEnd - yStart) * (double) m_actionProb));
+
+    int textWidth, textHeight;
+    p_dc.SetFont(m_branchAboveFont);
+    p_dc.GetTextExtent(m_branchAboveLabel, &textWidth, &textHeight);
+    p_dc.DrawText(m_branchAboveLabel,
+		  xStart + m_branchLength + 3, yEnd - textHeight - 3);
+    
+    p_dc.SetFont(m_branchBelowFont);
+    p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
+    p_dc.DrawText(m_branchBelowLabel,
+		  xStart + m_branchLength + 3, yEnd + 3);
   }
 }
 
@@ -654,8 +708,15 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     
   entry->infoset.y = -1;
   entry->infoset.x = -1;
-  entry->x = c_leftMargin + level * (draw_settings.NodeSize() +
-				     draw_settings.BranchLength());
+  if (draw_settings.BranchStyle() == BRANCH_STYLE_LINE) {
+    entry->x = c_leftMargin + level * (draw_settings.NodeSize() +
+				       draw_settings.BranchLength());
+  }
+  else {
+    entry->x = c_leftMargin + level * (draw_settings.NodeSize() +
+				       draw_settings.BranchLength() +
+				       draw_settings.TineLength());
+  }
   if (n->GetPlayer() && n->GetPlayer()->IsChance()) {
     entry->color = wxGetApp().GetPreferences().GetChanceColor();
     entry->SetToken(draw_settings.ChanceToken());
@@ -671,6 +732,12 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   
   entry->expanded = subgame_entry.expanded;
   entry->SetSize(draw_settings.NodeSize());
+  entry->SetBranchStyle(draw_settings.BranchStyle());
+  if (draw_settings.BranchStyle() == BRANCH_STYLE_LINE) {
+    entry->SetBranchLabelStyle(draw_settings.BranchLabels());
+  }
+  entry->SetBranchLength(draw_settings.BranchLength());
+
   if (draw_settings.SubgameStyle() == SUBGAME_ARC &&
       n->GetSubgameRoot() == n) {
     entry->SetSubgameRoot(true);
@@ -851,6 +918,7 @@ void efgTreeLayout::Layout(const EFSupport &p_support)
 
 void efgTreeLayout::GenerateLabels(void)
 {
+  const TreeDrawSettings &settings = m_parent->DrawSettings();
   for (int i = 1; i <= m_nodeList.Length(); i++) {
     NodeEntry *entry = m_nodeList[i];
     entry->SetNodeAboveLabel(CreateNodeAboveLabel(entry));
@@ -858,7 +926,9 @@ void efgTreeLayout::GenerateLabels(void)
     entry->SetNodeRightLabel(CreateNodeRightLabel(entry));
     if (entry->child_number > 0) {
       entry->SetBranchAboveLabel(CreateBranchAboveLabel(entry));
+      entry->SetBranchAboveFont(settings.BranchAboveFont());
       entry->SetBranchBelowLabel(CreateBranchBelowLabel(entry));
+      entry->SetBranchBelowFont(settings.BranchBelowFont());
     }
   }
 }
