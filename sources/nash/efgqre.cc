@@ -205,7 +205,12 @@ static void QreJacobian(const EFSupport &p_support,
 		}
 	      }
 	      else {   // infoset1 != infoset2
-		p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.Actions(pl1, iset1)[act1], p_support.Actions(pl2, iset2)[act2]) - profile.DiffActionValue(p_support.Actions(pl1, iset1)[1], p_support.Actions(pl2, iset2)[act2]));
+		if (profile.GetIsetProb(infoset1) < 1.0e-10) {
+		  p_matrix(colno, rowno) = 0;
+		}
+		else {
+		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile.DiffActionValue(p_support.Actions(pl1, iset1)[act1], p_support.Actions(pl2, iset2)[act2]) - profile.DiffActionValue(p_support.Actions(pl1, iset1)[1], p_support.Actions(pl2, iset2)[act2]));
+		}
 	      }
 	    }
 	  }
@@ -246,6 +251,39 @@ static void TracePath(const BehavProfile<double> &p_start,
   q.GetRow(q.NumRows(), t);
   
   int niters = 0;
+
+  for (int i = 1; i < x.Length(); i++) {
+    if (x[i] < 1.0e-10) {
+      // Drop this strategy from the support, then recursively call
+      // to continue tracing
+      EFSupport newSupport(p_start.Support());
+      int index = 1;
+      for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
+	EFPlayer *player = newSupport.GetGame().Players()[pl];
+	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	  for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
+	    if (index++ == i) {
+	      newSupport.RemoveAction(newSupport.Actions(pl, iset)[act]);
+	    }
+	  }
+	}
+      }
+      
+      BehavProfile<double> newProfile(newSupport);
+      for (int j = 1; j <= newProfile.Length(); j++) {
+	if (j < i) {
+	  newProfile[j] = x[j];
+	}
+	else if (j >= i) {
+	  newProfile[j] = x[j+1];
+	}
+      }
+
+      TracePath(newProfile, x[x.Length()], p_maxLambda, p_omega,
+		p_status, p_solutions);
+      return;
+    }
+  }
 
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     if (niters++ % 25 == 0) {
