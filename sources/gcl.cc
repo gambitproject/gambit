@@ -53,7 +53,7 @@ int _RTLENTRY _matherr (struct exception *e)
   /*
 #else
 #ifdef __linux__ // kludge to make it compile.  Seems linux does not support.
-  struct exception {int type;char *name;double arg1,arg2,retval; }; 
+  struct exception {int type;char *name;double arg1,arg2,retval; };
 #define LN_MINDOUBLE 1e-20
 #define SING 0
 #endif
@@ -100,6 +100,27 @@ GSM* _gsm;
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
+#ifdef __BORLANDC__
+#include "stdafx.h"
+#include "mainfrm.h"
+#include "wineditdoc.h"
+#include "wineditview.h"
+#endif // __BORLANDC__
+
+void BeginWaitCursor()
+{
+#ifdef __BORLANDC__
+((CMainFrame*) AfxGetMainWnd())->BeginWaitCursor();
+#endif // __BORLANDC__
+}
+
+void EndWaitCursor()
+{
+#ifdef __BORLANDC__
+((CMainFrame*) AfxGetMainWnd())->EndWaitCursor();
+#endif // __BORLANDC__
+}
+
 
 #ifdef __BORLANDC__
 int gcl_main( int /*argc*/, char* argv[] )
@@ -123,16 +144,16 @@ int main( int /*argc*/, char* argv[] )
     }
 #else
     strcpy(_ExePath, argv[0]);
-#endif  // __BORLANDC__    
+#endif  // __BORLANDC__
 #ifdef __GNUG__
     const char SLASH = '/';
 #elif defined __BORLANDC__
     const char SLASH = '\\';
 #endif   // __GNUG__
-    
-    
+
+
     char *c = strrchr( _ExePath, SLASH );
-    
+
     _SourceDir = new char[256];
     if (c != NULL)  {
       int len = strlen(_ExePath) - strlen(c);
@@ -142,13 +163,13 @@ int main( int /*argc*/, char* argv[] )
     else   {
       strcpy(_SourceDir, "");
     }
-    
+
     // Set up the error handling functions:
 #ifndef __BORLANDC__
     signal(SIGFPE, (fptr) SigFPEHandler);
-    
+
     signal(SIGTSTP, SIG_IGN);
-    
+
     signal(SIGSEGV, (fptr) SigSegFaultHandler);
     signal(SIGABRT, (fptr) SigSegFaultHandler);
     signal(SIGBUS,  (fptr) SigSegFaultHandler);
@@ -160,10 +181,10 @@ int main( int /*argc*/, char* argv[] )
     // install it here as well.
     extern void gGCLStatusHandler(int);
     signal(SIGINT, gGCLStatusHandler);
-#endif  
-    
+#endif
+
     _gsm = new GSM;
-    
+
     GCLCompiler C;
     gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
     while (!P.eof()) {
@@ -171,13 +192,15 @@ int main( int /*argc*/, char* argv[] )
       gText fileName = P.GetFileName();
       int lineNumber = P.GetLineNumber();
       gText rawLine = P.GetRawLine();
+      BeginWaitCursor();  // for BC
       C.Parse(line, fileName, lineNumber, rawLine );
+      EndWaitCursor();  // for BC
     }
-    
+
     delete[] _SourceDir;
     delete _gsm;
-    
-    
+
+
     // this is normally done in destructor for gCmdLineInput,
     //   in gcmdline.cc, but apparently the destructors for
     //   global static objects are not called, hence this
@@ -187,7 +210,7 @@ int main( int /*argc*/, char* argv[] )
   // AIX has some problem with exception handling
 #ifndef _AIX
   catch (gclQuitOccurred &E) {
-    gCmdLineInput::RestoreTermAttr(); 
+    gCmdLineInput::RestoreTermAttr();
     return E.Value();
   }
   // The last line of defense for exceptions:
@@ -201,7 +224,7 @@ int main( int /*argc*/, char* argv[] )
     return 0;
   }
 #endif // _AIX
-  
+
   return 0;
 }
 

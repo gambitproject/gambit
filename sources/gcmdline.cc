@@ -18,6 +18,7 @@
 
 char WinGetChar( void )
 {
+//  ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->EndWaitCursor();
   return ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->GetChar();
 }
 
