@@ -12,8 +12,8 @@
 
 //
 // This class implements a LP solver.  Its constructor takes as input a
-// LP problem of the form minimize Cx subject to Ax>=B, x>=0, and computes
-// the optimum values of x and Cx.  These can be accessed using the
+// LP problem of the form maximize c x subject to A x<=b, x >= 0, and computes
+// the optimum values of x and c x.  These can be accessed using the
 // member functions provided.
 //
 // All computation is done in the class constructor; when the constructor
@@ -22,7 +22,7 @@
 
 template <class T> class LPSolve {
 private:
-  int  well_formed, feasible, bounded,flag,nvars,neqs;
+  int  well_formed, feasible, bounded,flag,nvars,neqns;
   T total_cost,eps1,eps2,eps3;
   BFS<T> opt_bfs,dual_bfs;
   const gMatrix<T> &A;   // needed?
@@ -36,7 +36,7 @@ private:
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
-	  int neq = 0);   // neq = number of equalies (last neq rows)
+	  int nequals = 0);   // nequals = number of equalies (last nequals rows)
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
 	  const gVector<T> &C,  const gVector<int> &sense, 
 	  const gVector<int> &LB,  const gVector<T> &lb, 

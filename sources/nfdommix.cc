@@ -129,7 +129,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       gout << B << '\n';
       gout << C << '\n';
 
-      LPSolve<T> Tab(A, B, C, 0);
+      LPSolve<T> Tab(A, B, C, 1);
       gout << Tab.IsWellFormed() << '\n';
       gout << "\nPlayer = " << pl << " Strat = "<< k;
       gout << " F = " << Tab.IsFeasible();
