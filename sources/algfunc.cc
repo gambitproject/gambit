@@ -390,11 +390,16 @@ Portion *GSM_RealizProbsRational(Portion **param)
 }
   
   
+extern Portion *GSM_GobitNfg(Portion **param);
+extern Portion *GSM_LiapNfg(Portion **param);
+extern Portion *GSM_LemkeNfgFloat(Portion **param);
+extern Portion *GSM_LemkeNfgRational(Portion **param);
+
 void Init_algfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("GobitEfg");
+  FuncObj = new FuncDescObj("GobitSolve");
   FuncObj->SetFuncInfo(GSM_GobitEfg, 11);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
@@ -418,9 +423,35 @@ void Init_algfunc(GSM *gsm)
 		        new IntValPortion(1));
   FuncObj->SetParamInfo(GSM_GobitEfg, 10, "start", porBEHAV_FLOAT,
 			new BehavValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_GobitNfg, 11);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
+			porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
+			new OutputRefPortion(gnull));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
+			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "nIters", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "fullGraph", porBOOL,
+			new BoolValPortion(false));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "minLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_minLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "maxLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_maxLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 8, "delLam", porFLOAT,
+			new FloatRefPortion(Gobit_default_delLam));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 9, "powLam", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_GobitNfg, 10, "start", porMIXED_FLOAT,
+			new MixedValPortion(0));
+
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("LiapEfg");
+  FuncObj = new FuncDescObj("LiapSolve");
   FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE );
@@ -434,9 +465,23 @@ void Init_algfunc(GSM *gsm)
 		        new IntValPortion(10));
   FuncObj->SetParamInfo(GSM_LiapEfg, 5, "start", porBEHAV_FLOAT,
 			new BehavValPortion(0));
+
+  FuncObj->SetFuncInfo(GSM_LiapNfg, 6);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 1, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 2, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapNfg, 3, "stopAfter", porINTEGER,
+			new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_LiapNfg, 4, "nTries", porINTEGER,
+			new IntValPortion(10));
+  FuncObj->SetParamInfo(GSM_LiapNfg, 5, "start", porMIXED_FLOAT,
+			new MixedValPortion(0));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("LemkeEfg");
+  FuncObj = new FuncDescObj("LCPSolve");
   FuncObj->SetFuncInfo(GSM_LemkeEfgFloat, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 0, "efg", porEFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -447,7 +492,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LemkeEfgFloat, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   
-
   FuncObj->SetFuncInfo(GSM_LemkeEfgRational, 4);
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -457,6 +501,32 @@ void Init_algfunc(GSM *gsm)
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 0, "nfg",
+			porNFG_FLOAT, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 1, "stopAfter", 
+			porINTEGER, new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 2, "nPivots", 
+			porINTEGER, new IntValPortion(0),
+		        PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 3, "time", 
+			porFLOAT, new FloatValPortion(0),
+			PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LemkeNfgRational, 4);
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 0, "nfg",
+			porNFG_RATIONAL, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 1, "stopAfter", 
+			porINTEGER, new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 2, "nPivots", 
+			porINTEGER, new IntValPortion(0),
+		        PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 3, "time", 
+			porFLOAT, new FloatValPortion(0),
+			PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOptions");

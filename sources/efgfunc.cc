@@ -847,9 +847,11 @@ Portion *GSM_PriorSibling(Portion **param)
   return por;
 }
 
-Portion *GSM_ReadEfg(Portion **param)
+Portion *GSM_LoadEfg(Portion **param)
 {
-  gInput &f = ((InputPortion *) param[0])->Value();
+  gString file = ((TextPortion *) param[0])->Value();
+  
+  gFileInput f(file);
 
   if (f.IsValid())   {
     DataType type;
@@ -896,17 +898,18 @@ Portion *GSM_RootNode(Portion **param)
   return por;
 }
 
-Portion *GSM_WriteEfg(Portion **param)
+Portion *GSM_SaveEfg(Portion **param)
 {
-  Portion* result;
-  gOutput &f = ((OutputPortion *) param[0])->Value();
-  BaseEfg *E = ((EfgPortion*) param[1])->Value();
-  
+  BaseEfg *E = ((EfgPortion *) param[0])->Value();
+  gString text = ((TextPortion *) param[1])->Value();
+  gFileOutput f(text);
+
+  if (!f.IsValid())
+    return new ErrorPortion("Cannot open file for writing\n");
+
   E->WriteEfgFile(f);
 
-  result = param[ 0 ];
-  param[ 0 ] = 0;
-  return result;
+  return param[0]->RefCopy();
 }
 
 void Init_efgfunc(GSM *gsm)
@@ -1300,9 +1303,9 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_PriorSibling, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("ReadEfg");
-  FuncObj->SetFuncInfo(GSM_ReadEfg, 1);
-  FuncObj->SetParamInfo(GSM_ReadEfg, 0, "file", porINPUT);
+  FuncObj = new FuncDescObj("LoadEfg");
+  FuncObj->SetFuncInfo(GSM_LoadEfg, 1);
+  FuncObj->SetParamInfo(GSM_LoadEfg, 0, "file", porTEXT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RootNode");
@@ -1311,11 +1314,11 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("WriteEfg");
-  FuncObj->SetFuncInfo(GSM_WriteEfg, 2);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 0, "output", porOUTPUT);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "efg", porEFG, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj = new FuncDescObj("SaveEfg");
+  FuncObj->SetFuncInfo(GSM_SaveEfg, 2);
+  FuncObj->SetParamInfo(GSM_SaveEfg, 0, "efg", porEFG, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SaveEfg, 1, "file", porTEXT);
   gsm->AddFunction(FuncObj);
 }
 

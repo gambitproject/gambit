@@ -520,9 +520,11 @@ Portion *GSM_PureNashRational(Portion **param)
   return por;
 }
  
-Portion *GSM_ReadNfg(Portion **param)
+Portion *GSM_LoadNfg(Portion **param)
 {
-  gInput &f = ((InputPortion *) param[0])->Value();
+  gString file = ((TextPortion *) param[0])->Value();
+
+  gFileInput f(file);
 
   if (f.IsValid())   {
     DataType type;
@@ -560,7 +562,7 @@ Portion *GSM_ReadNfg(Portion **param)
 
 }
 
-Portion *GSM_CrunchNfg(Portion **param)
+Portion *GSM_CompressNfg(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   Nfg<double> *M = new Nfg<double>(N);
@@ -626,10 +628,15 @@ Portion *GSM_NewSupport(Portion **param)
   return p;
 }
 
-Portion *GSM_WriteNfg(Portion **param)
+Portion *GSM_SaveNfg(Portion **param)
 {
-  gOutput &f = ((OutputPortion *) param[0])->Value();
+  gString file = ((TextPortion *) param[1])->Value();
   BaseNfg &N = * ((NfgPortion*) param[1])->Value();
+
+  gFileOutput f(file);
+
+  if (!f.IsValid())
+    return new ErrorPortion("Unable to open file for output\n");
 
   N.WriteNfgFile(f);
   return new OutputRefPortion(f);
@@ -642,7 +649,7 @@ void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("ConstSum");
+  FuncObj = new FuncDescObj("LPSolve");
   FuncObj->SetFuncInfo(GSM_ConstSumFloat, 3);
   FuncObj->SetParamInfo(GSM_ConstSumFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -669,7 +676,7 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Enum");
+  FuncObj = new FuncDescObj("EnumMixedSolve");
   FuncObj->SetFuncInfo(GSM_EnumFloat, 4);
   FuncObj->SetParamInfo(GSM_EnumFloat, 0, "nfg", 
 			porNFG_FLOAT, NO_DEFAULT_VALUE,
@@ -693,34 +700,7 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("GobitNfg");
-  FuncObj->SetFuncInfo(GSM_GobitNfg, 11);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 0, "nfg", 
-			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_GobitNfg, 1, "pxifile", porOUTPUT,
-			new OutputRefPortion(gnull));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 2, "time", porFLOAT,
-			new FloatValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 3, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 4, "nIters", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_GobitNfg, 5, "fullGraph", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 6, "minLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_minLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 7, "maxLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_maxLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 8, "delLam", porFLOAT,
-			new FloatRefPortion(Gobit_default_delLam));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 9, "powLam", porINTEGER,
-			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_GobitNfg, 10, "start", porMIXED_FLOAT,
-			new MixedValPortion(0));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("GridSolve");
+  FuncObj = new FuncDescObj("LqreGridSolve");
   FuncObj->SetFuncInfo(GSM_GridSolveFloat, 10);
   FuncObj->SetParamInfo(GSM_GridSolveFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -766,51 +746,7 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("LemkeNfg");
-  FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);
-  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 0, "nfg",
-			porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 1, "stopAfter", 
-			porINTEGER, new IntValPortion(0));
-  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 2, "nPivots", 
-			porINTEGER, new IntValPortion(0),
-		        PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeNfgFloat, 3, "time", 
-			porFLOAT, new FloatValPortion(0),
-			PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_LemkeNfgRational, 4);
-  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 0, "nfg",
-			porNFG_RATIONAL, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 1, "stopAfter", 
-			porINTEGER, new IntValPortion(0));
-  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 2, "nPivots", 
-			porINTEGER, new IntValPortion(0),
-		        PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LemkeNfgRational, 3, "time", 
-			porFLOAT, new FloatValPortion(0),
-			PASS_BY_REFERENCE);
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("LiapNfg");
-  FuncObj->SetFuncInfo(GSM_LiapNfg, 6);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 0, "nfg", porNFG_FLOAT, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 1, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 2, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapNfg, 3, "stopAfter", porINTEGER,
-			new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapNfg, 4, "nTries", porINTEGER,
-			new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapNfg, 5, "start", porMIXED_FLOAT,
-			new MixedValPortion(0));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("PureNash");
+  FuncObj = new FuncDescObj("EnumPureSolve");
   FuncObj->SetFuncInfo(GSM_PureNashFloat, 3);
   FuncObj->SetParamInfo(GSM_PureNashFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -828,7 +764,7 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("SimpDiv");
+  FuncObj = new FuncDescObj("SimpDivSolve");
   FuncObj->SetFuncInfo(GSM_SimpdivFloat, 6);
   FuncObj->SetParamInfo(GSM_SimpdivFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -858,9 +794,9 @@ void Init_nfgfunc(GSM *gsm)
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("CrunchNfg");
-  FuncObj->SetFuncInfo(GSM_CrunchNfg, 1);
-  FuncObj->SetParamInfo(GSM_CrunchNfg, 0, "nfg", porNFG_FLOAT,
+  FuncObj = new FuncDescObj("CompressNfg");
+  FuncObj->SetFuncInfo(GSM_CompressNfg, 1);
+  FuncObj->SetParamInfo(GSM_CompressNfg, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -916,16 +852,16 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_Strategies, 0, "player", porPLAYER_NFG);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("ReadNfg");
-  FuncObj->SetFuncInfo(GSM_ReadNfg, 1);
-  FuncObj->SetParamInfo(GSM_ReadNfg, 0, "file",	porINPUT);
+  FuncObj = new FuncDescObj("LoadNfg");
+  FuncObj->SetFuncInfo(GSM_LoadNfg, 1);
+  FuncObj->SetParamInfo(GSM_LoadNfg, 0, "file", porTEXT);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("WriteNfg");
-  FuncObj->SetFuncInfo(GSM_WriteNfg, 2);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 0, "output", porOUTPUT);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
+  FuncObj = new FuncDescObj("SaveNfg");
+  FuncObj->SetFuncInfo(GSM_SaveNfg, 2);
+  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, NO_DEFAULT_VALUE,
+			PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SaveNfg, 1, "file", porTEXT);
   gsm->AddFunction(FuncObj);
 
 }
