@@ -13,13 +13,12 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A(const Nfg<T> &N)
+template <class T> gMatrix<T> Make_A(const Nfg<T> &N, const NFSupport &S)
 {
   int n1, n2, i,j;
-  n1=N.NumStrats(1);
-  n2=N.NumStrats(2);
+  n1=S.NumStrats(1);
+  n2=S.NumStrats(2);
   gMatrix<T> A(1,n1+n2,1,n1+n2);
-  NFSupport S(N);
   NfgIter<T> iter(&S); 
   T min = (T) 0, x; 
   
@@ -56,11 +55,11 @@ template <class T> gMatrix<T> Make_A(const Nfg<T> &N)
   return A;
 }
 
-template <class T> gVector<T> Make_b(const Nfg<T> &N)
+template <class T> gVector<T> Make_b(const Nfg<T> &N, const NFSupport &S)
 {
   int n1, n2, i;
-  n1=N.NumStrats(1);
-  n2=N.NumStrats(2);
+  n1=S.NumStrats(1);
+  n2=S.NumStrats(2);
   gVector<T> b(1,n1+n2);
 
   for (i = 1; i <= n1 + n2; i++) 
@@ -69,8 +68,8 @@ template <class T> gVector<T> Make_b(const Nfg<T> &N)
   return b;
 }
 
-template <class T> LHTableau<T>::LHTableau(const Nfg<T> &N) 
-  : LTableau<T>(Make_A(N),Make_b(N))
+template <class T> LHTableau<T>::LHTableau(const Nfg<T> &N, const NFSupport &S) 
+  : LTableau<T>(Make_A(N, S),Make_b(N, S))
 { 
 //  Refactor(); 
 }
@@ -88,18 +87,18 @@ template <class T> LHTableau<T>::~LHTableau(void)
 #ifdef __GNUG__
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template class gMatrix<double> Make_A(const Nfg<double> &);
-template class gMatrix<gRational> Make_A(const Nfg<gRational> &);
-template class gVector<double> Make_b(const Nfg<double> &);
-template class gVector<gRational> Make_b(const Nfg<gRational> &);
+template class gMatrix<double> Make_A(const Nfg<double> &, const NFSupport &);
+template class gMatrix<gRational> Make_A(const Nfg<gRational> &, const NFSupport &);
+template class gVector<double> Make_b(const Nfg<double> &, const NFSupport &);
+template class gVector<gRational> Make_b(const Nfg<gRational> &, const NFSupport &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
 class LHTableau<double>;
 class LHTableau<gRational>;
-class gMatrix<double> Make_A(const Nfg<double> &);
-class gMatrix<gRational> Make_A(const Nfg<gRational> &);
-class gVector<double> Make_b(const Nfg<double> &);
-class gVector<gRational> Make_b(const Nfg<gRational> &);
+class gMatrix<double> Make_A(const Nfg<double> &, const NFSupport &);
+class gMatrix<gRational> Make_A(const Nfg<gRational> &, const NFSupport &);
+class gVector<double> Make_b(const Nfg<double> &, const NFSupport &);
+class gVector<gRational> Make_b(const Nfg<gRational> &, const NFSupport &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__
 

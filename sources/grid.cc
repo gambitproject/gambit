@@ -41,10 +41,12 @@ int GridParams<T>::Ok(void) const
 }
 
 template <class T>
-GridSolveModule<T>::GridSolveModule(const Nfg<T> &r,
-				    const GridParams<T> &param)
-  : nf(r), p(r.NumStrats(1)), x(r.NumStrats(1)), q_calc(r.NumStrats(2)),
-    y(r.NumStrats(2)), params(param), matrix(r.NumStrats(1), r.NumStrats(2))
+GridSolveModule<T>::GridSolveModule(const Nfg<T> &n,
+				    const GridParams<T> &param,
+				    const NFSupport &s)
+  : nf(n), support(s), p(s.NumStrats(1)), x(s.NumStrats(1)),
+    q_calc(s.NumStrats(2)),
+    y(s.NumStrats(2)), params(param), matrix(s.NumStrats(1), s.NumStrats(2))
 { }
 
 template <class T>
@@ -55,7 +57,7 @@ GridSolveModule<T>::~GridSolveModule(void)
 template <class T>
 void GridSolveModule<T>::OutputHeader(gOutput &out)
 {
-int st1=nf.NumStrats(1),st2=nf.NumStrats(2);
+int st1=support.NumStrats(1),st2=support.NumStrats(2);
 out<<"Dimensionality:\n";
 out<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
 
@@ -101,7 +103,7 @@ T denom;					// denominator of function
 bool ok;         	// was a solution found?
 T dist;   				// metric function--distance from the equ
 int i, j;
-int st1=nf.NumStrats(1),st2=nf.NumStrats(2);
+int st1=support.NumStrats(1),st2=support.NumStrats(2);
 /*---------------------make X's---------------------*/
 x=(T)0;			// zero out the entire x-vector
 for (i=1;i<=st1;i++)
@@ -152,9 +154,8 @@ int i,j;
 if (!params.Ok()) { *params.tracefile << "Param Error\n"; return 0; }
 
 params.status<<"Grid Solve algorithm\n";
-NFSupport S(nf);
-NfgIter<T> iter(&S);
-int	st1=nf.NumStrats(1),st2=nf.NumStrats(2);
+NfgIter<T> iter(&support);
+int	st1=support.NumStrats(1),st2=support.NumStrats(2);
 // Build a game matrix--this speeds things up enormously
 
 for (i=1;i<=st1;i++)

@@ -30,12 +30,15 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 //-------------------------------------------------------------------------
 
 template <class T> SimpdivModule<T>::SimpdivModule(const Nfg<T> &n,
-						   const SimpdivParams &p)
-  : N(n), params(p), nevals(0), nits(0), nstrats(n.Dimensionality()),
-    ylabel(2), labels(n.ProfileLength(), 2), pi(n.ProfileLength(), 2),
-    U(n.Dimensionality()), TT(n.Dimensionality()),
-    ab(n.Dimensionality()), besty(n.Dimensionality()), v(n.Dimensionality()),
-    y(n)
+						   const SimpdivParams &p,
+						   const NFSupport &s)
+  : N(n), params(p), support(s), 
+    y(n, s),
+    nevals(0), nits(0), nstrats(s.SupportDimensions()),
+    ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
+    U(s.SupportDimensions()), TT(s.SupportDimensions()),
+    ab(s.SupportDimensions()), besty(s.SupportDimensions()),
+    v(s.SupportDimensions())
 { }
 
 template <class T> SimpdivModule<T>::~SimpdivModule()
@@ -281,7 +284,7 @@ template <class T> void SimpdivModule<T>::update(int j, int i)
     jj=pi(t,1);
     hh=pi(t,2);
     if(jj==j) {
-			k=get_c(jj,hh);
+      k=get_c(jj,hh);
       while(f) {
 	if(k==hh)f=0;
 	ab(j,k)= ab(j,k)-((T)(1));
@@ -365,7 +368,7 @@ template <class T> T SimpdivModule<T>::getlabel(MixedProfile<T> &yy)
   for(i=1;i<=N.NumPlayers();i++) {
     payoff=(T)(0);
     maxval=((T)(-1000000));
-    for(j=1;j<=N.NumStrats(i);j++) {
+    for(j=1;j<=support.NumStrats(i);j++) {
       pay=yy.Payoff(i,i,j);
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
@@ -441,7 +444,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 	}
       *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
       *params.tracefile << " maxz = " << maxz; 
-      solutions.Append(MixedProfile<T>(N, y));
+      solutions.Append(MixedProfile<T>(y));
    }
   if(params.status.Get()) params.status.Reset();
 

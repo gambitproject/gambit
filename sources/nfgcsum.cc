@@ -27,8 +27,9 @@ ZSumParams::ZSumParams(void)
 //-------------------------------------------------------------------------
 
 template <class T>
-ZSumModule<T>::ZSumModule(const Nfg<T> &N, const ZSumParams &p)
-  : NF(N), params(p), A(0), b(0), c(0), npivots(0)
+ZSumModule<T>::ZSumModule(const Nfg<T> &N, const ZSumParams &p,
+			  const NFSupport &S)
+  : NF(N), params(p), support(S), A(0), b(0), c(0), npivots(0)
 { }
 
 template <class T> ZSumModule<T>::~ZSumModule()
@@ -45,13 +46,12 @@ template <class T> void ZSumModule<T>::Make_Abc()
   int i,j,m,k;
   T pay;
   
-  m = NF.NumStrats(1);
-  k = NF.NumStrats(2);
+  m = support.NumStrats(1);
+  k = support.NumStrats(2);
   A = new gMatrix<T>(1,k+1,1,m+1);
   b = new gVector<T>(1,k+1);
   c = new gVector<T>(1,m+1);
-  NFSupport S(NF);
-  NfgIter<T> iter(&S);
+  NfgIter<T> iter(&support);
 
       // Ted -- this should be in the normal form.  
   minpay = (T)0;
@@ -133,12 +133,12 @@ template <class T> int ZSumModule<T>::Add_BFS(const LPSolve<T> &lp)
 template <class T>
 void ZSumModule<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
 {
-  int n1=NF.NumStrats(1);
-  int n2=NF.NumStrats(2);
+  int n1=support.NumStrats(1);
+  int n2=support.NumStrats(2);
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF);
+    MixedProfile<T> profile(NF, support);
     for (int j = 1; j <= n1; j++) 
       if (List[i].IsDefined(j))   
 	profile(1, j) = List[i](j);
@@ -184,7 +184,8 @@ int ZSum(const Nfg<T> &N, const ZSumParams &p,
 	  gList<MixedProfile<T> > &solutions,
 	  long &npivots, gRational &time)
 {
-  ZSumModule<T> LM(N, p);
+  NFSupport S(N);
+  ZSumModule<T> LM(N, p, S);
   int result = LM.ZSum();
 
   npivots = LM.NumPivots();

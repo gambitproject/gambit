@@ -10,8 +10,8 @@
 
 #include "enum.h"
 
-template <class T> gMatrix<T> Make_A(const Nfg<T> &);
-template <class T> gVector<T> Make_b(const Nfg<T> &);
+template <class T> gMatrix<T> Make_A(const Nfg<T> &, const NFSupport &);
+template <class T> gVector<T> Make_b(const Nfg<T> &, const NFSupport &);
 
 //---------------------------------------------------------------------------
 //                        EnumParams: member functions
@@ -26,8 +26,9 @@ tracefile(&gnull),status(status_)
 //-------------------------------------------------------------------------
 
 template <class T>
-EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p)
-  : NF(N), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
+EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
+			  const NFSupport &S)
+  : NF(N), support(S), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
     level(0), count(0), npivots(0)
 { }
 
@@ -42,8 +43,8 @@ template <class T> int EnumModule<T>::Enum(void)
   for(int i=1;i<=target.Length();i++)
     target[i]=i;
   
-  gMatrix<T> A(Make_A(NF));
-  gVector<T> b(Make_b(NF));
+  gMatrix<T> A(Make_A(NF, support));
+  gVector<T> b(Make_b(NF, support));
   LTableau<T> tableau(A,b);
 //  gout << "\n in Enum()";
 //  tableau.Dump(gout);
@@ -70,8 +71,9 @@ template <class T> int EnumModule<T>::Enum(void)
 }
 
 
-template <class T> void EnumModule<T>
-::SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1)
+template <class T>
+void EnumModule<T>::SubSolve(int pr, int pcl, LTableau<T> &B1,
+			     gBlock<int> &targ1)
 {
   int i,j,ii,jj,pc;
   count++;
@@ -177,7 +179,7 @@ gList<MixedProfile<T> > &EnumModule<T>::GetSolutions(void)
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF);
+    MixedProfile<T> profile(NF, support);
     T sum = (T) 0;
 
     for (int j = 1; j <= rows; j++)
@@ -230,7 +232,8 @@ int Enum(const Nfg<T> &N, const EnumParams &p,
 	  gList<gPVector<T> > &solutions,
 	  long &npivots, gRational &time)
 {
-  EnumModule<T> LM(N, p);
+  NFSupport S(N);
+  EnumModule<T> LM(N, p, S);
   int result = LM.Enum();
 
   npivots = LM.NumPivots();

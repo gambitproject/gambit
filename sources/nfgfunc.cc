@@ -135,7 +135,9 @@ Portion *GSM_ConstSumFloat(Portion **param)
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
 
   ZSumParams ZP;
-  ZSumModule<double> ZM(N, ZP);
+
+  NFSupport S(N);
+  ZSumModule<double> ZM(N, ZP, S);
   ZM.ZSum();
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
@@ -155,7 +157,9 @@ Portion *GSM_ConstSumRational(Portion **param)
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
 
   ZSumParams ZP;
-  ZSumModule<gRational> ZM(N, ZP);
+  
+  NFSupport S(N);
+  ZSumModule<gRational> ZM(N, ZP, S);
   ZM.ZSum();
 
   ((IntPortion *) param[1])->Value() = ZM.NumPivots();
@@ -180,7 +184,8 @@ Portion *GSM_EnumFloat(Portion **param)
 
   EP.stopAfter = ((IntPortion *) param[1])->Value();
   
-  EnumModule<double> EM(N, EP);
+  NFSupport S(N);
+  EnumModule<double> EM(N, EP, S);
   EM.Enum();
 
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
@@ -200,7 +205,8 @@ Portion *GSM_EnumRational(Portion **param)
 
   EP.stopAfter = ((IntPortion *) param[1])->Value();
   
-  EnumModule<gRational> EM(N, EP);
+  NFSupport S(N);
+  EnumModule<gRational> EM(N, EP, S);
   EM.Enum();
 
   ((IntPortion *) param[2])->Value() = EM.NumPivots();
@@ -258,7 +264,8 @@ Portion *GSM_GridSolveFloat(Portion **param)
   GP.delp = ((FloatPortion *) param[6])->Value();
   GP.tol = ((FloatPortion *) param[7])->Value();
 
-  GridSolveModule<double> GM(N, GP);
+  NFSupport S(N);
+  GridSolveModule<double> GM(N, GP, S);
   GM.GridSolve();
 
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
@@ -285,7 +292,8 @@ Portion *GSM_GridSolveRational(Portion **param)
   GP.delp = ((RationalPortion *) param[6])->Value();
   GP.tol = ((RationalPortion *) param[7])->Value();
 
-  GridSolveModule<gRational> GM(N, GP);
+  NFSupport S(N);
+  GridSolveModule<gRational> GM(N, GP, S);
   GM.GridSolve();
 
 //  ((IntPortion *) param[8])->Value() = GM.NumEvals();
@@ -308,7 +316,8 @@ Portion *GSM_LemkeNfgFloat(Portion **param)
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
   
-  LemkeModule<double> LS(N, LP);
+  NFSupport S(N);
+  LemkeModule<double> LS(N, LP, S);
   LS.Lemke();
 
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
@@ -326,8 +335,9 @@ Portion *GSM_LemkeNfgRational(Portion **param)
 
   LemkeParams LP;
   LP.stopAfter = ((IntPortion *) param[1])->Value();
-  
-  LemkeModule<gRational> LS(N, LP);
+
+  NFSupport S(N);
+  LemkeModule<gRational> LS(N, LP, S);
   LS.Lemke();
 
   ((IntPortion *) param[2])->Value() = LS.NumPivots();
@@ -375,7 +385,8 @@ Portion *GSM_SimpdivFloat(Portion **param)
   SP.nRestarts = ((IntPortion *) param[2])->Value();
   SP.leashLength = ((IntPortion *) param[3])->Value();
 
-  SimpdivModule<double> SM(N, SP);
+  NFSupport S(N);
+  SimpdivModule<double> SM(N, SP, S);
   SM.Simpdiv();
 
   ((IntPortion *) param[4])->Value() = SM.NumEvals();
@@ -396,7 +407,8 @@ Portion *GSM_SimpdivRational(Portion **param)
   SP.nRestarts = ((IntPortion *) param[2])->Value();
   SP.leashLength = ((IntPortion *) param[3])->Value();
 
-  SimpdivModule<gRational> SM(N, SP);
+  NFSupport S(N);
+  SimpdivModule<gRational> SM(N, SP, S);
   SM.Simpdiv();
 
   ((IntPortion *) param[4])->Value() = SM.NumEvals();

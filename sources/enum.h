@@ -30,6 +30,7 @@ template <class T> class EnumModule  {
 private:
   BFS_List List;
   const Nfg<T> &NF;
+  const NFSupport &support;
   EnumParams params;
   int rows,cols,level;
   long count,npivots;
@@ -39,7 +40,7 @@ private:
 //  void AddSolution(const gPVector<T> &s);
   
 public:
-  EnumModule(const Nfg<T> &N, const EnumParams &p); 
+  EnumModule(const Nfg<T> &N, const EnumParams &p, const NFSupport &s); 
   
   int Enum(void);
   void SubSolve(int pr, int pcl, LTableau<T> &B1, gBlock<int> &targ1);

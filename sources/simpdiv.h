@@ -26,7 +26,9 @@ template <class T> class SimpdivModule  {
   private:
     const Nfg<T> &N;
     const SimpdivParams &params;
+    const NFSupport &support;
 
+    MixedProfile<T> y;
     long leash;
     int t, nplayers, ibar, nevals, nits;
     T pay,d,maxz,bestz,mingrid;
@@ -36,7 +38,6 @@ template <class T> class SimpdivModule  {
     gRectArray<int> labels,pi;
     gPVector<int> U,TT;
     gPVector<T> ab,besty,v;
-    MixedProfile<T> y;
 
     gList<MixedProfile<T> > solutions;
 
@@ -49,7 +50,7 @@ template <class T> class SimpdivModule  {
     int get_b(int j, int h);
   
   public:
-    SimpdivModule(const Nfg<T> &N, const SimpdivParams &);
+    SimpdivModule(const Nfg<T> &N, const SimpdivParams &, const NFSupport &);
     virtual ~SimpdivModule();
 
     int NumEvals(void) const  { return nevals; }
