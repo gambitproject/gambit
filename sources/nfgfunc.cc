@@ -170,11 +170,11 @@ static Portion *GSM_LoadNfg(Portion **param)
   try { 
     gFileInput f(file);
     if (!ReadNfgFile(f, nfg))
-      throw gclRuntimeError("Not a valid .nfg file");
+      throw gclRuntimeError(file + "is not a valid .nfg file");
     return new NfgPortion(nfg);
   }
   catch (gFileInput::OpenFailed &)  {
-    throw gclRuntimeError("Unable to open file for reading");
+    throw gclRuntimeError("Unable to open file " + file + " for reading");
   }
 }
 
@@ -359,7 +359,7 @@ static Portion *GSM_SaveNfg(Portion **param)
     N->WriteNfgFile(f);
   }
   catch (gFileOutput::OpenFailed &)  {
-    throw gclRuntimeError("Unable to open file for output");
+    throw gclRuntimeError("Unable to open file " + file + " for output");
   }
 
   return param[0]->ValCopy();

@@ -512,7 +512,7 @@ static Portion *GSM_LoadEfg(Portion **param)
 {
   gText file = ((TextPortion *) param[0])->Value();
   
-  try{
+  try  {
     gFileInput f(file);
     Efg *E = 0;
     ReadEfgFile((gInput &) f, E);
@@ -520,10 +520,10 @@ static Portion *GSM_LoadEfg(Portion **param)
     if (E)
       return new EfgPortion(E);
     else
-      throw gclRuntimeError("Not a valid .efg file");
+      throw gclRuntimeError(file + " is not a valid .efg file");
   }
   catch (gFileInput::OpenFailed &)  {
-    throw gclRuntimeError("Unable to open file for reading");
+    throw gclRuntimeError("Unable to open file " + file + " for reading");
   }
 }
 
@@ -964,7 +964,7 @@ static Portion *GSM_SaveEfg(Portion **param)
     E->WriteEfgFile(f);
   }
   catch (gFileOutput::OpenFailed &)  {
-    throw gclRuntimeError("Cannot open file for writing");
+    throw gclRuntimeError("Cannot open file " + text + " for writing");
   }
 
   return param[0]->ValCopy();
