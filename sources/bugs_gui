@@ -84,16 +84,6 @@ should deal with the first problem too (games with no proper subgames.)
 But I will have to look at the code to see what this actually does. 
 Perhaps it is not implemented correctly. 
 
-
-//------------------------------
-
-Bug D9: Need color coding of payoffs in outcome window
-
-The outcome editing window should color-code the payoffs for
-each player in the same way that they're displayed in the nfg 
-and efg displays.
-
-
 //------------------------------
 
 Bug D10: Drag and drop of outcomes don't always work in NFG
@@ -144,7 +134,6 @@ long time to bring up the outcome window, and find the outcome
 associated with a given location in the EF/NF game.  We should
 have "in place" editing, where you can edit the outcome right on the
 normal or extensive form dislpay.
-
 
 -------------  older bugs that still remain ---------------
 

@@ -318,7 +318,10 @@ void EfgOutcomeDialogC::UpdateValues(void)
         {
             PayoffPos(i, j, &row, &col);
             hilight = false;
-            payoff = ToText(ef.Payoff(tmp, j));
+            // Make the color of the text the same as the corresponding
+            // colors in the EFG display.
+            payoff = ("\\C{"+ToText(tw->DrawSettings().GetPlayerColor(j))+"}");
+            payoff += ToText(ef.Payoff(tmp, j));
             SetCell(row, col, payoff);
             HiLighted(row, col, 0, hilight);
         }
@@ -326,6 +329,10 @@ void EfgOutcomeDialogC::UpdateValues(void)
         NamePos(i, &row, &col);
         SetCell(row, col, tmp->GetName());
     }
+
+    // Make sure that the color display parameter matches that 
+    // in the NFG spreadsheet.
+    DrawSettings()->SetGText(tw->DrawSettings().ColorCodedOutcomes());
 }
 
 
