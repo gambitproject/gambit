@@ -1034,6 +1034,7 @@ template <class T> Portion* Efg_Portion<T>::Copy( void ) const
   Portion* p;
   p = new Efg_Portion<T>( *_Value );
   p->Temporary() = true;
+  return p;
 }
 
 
