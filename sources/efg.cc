@@ -204,8 +204,27 @@ void BaseEfg::SortInfosets(void)
 
     int i, isets = 0;
 
+    // First, move all empty infosets to the back of the list so
+    // we don't "lose" them
+    int foo = players[pl]->infosets.Length();
+    i = 1;
+    while (i < foo)   {
+      if (players[pl]->infosets[i]->members.Length() == 0)  {
+	Infoset *bar = players[pl]->infosets[i];
+	players[pl]->infosets[i] = players[pl]->infosets[foo];
+	players[pl]->infosets[foo--] = bar;
+      }
+      else
+	i++;
+    }
+
+    // This will give empty infosets their proper number; the nonempty
+    // ones will be renumbered by the next loop
     for (i = 1; i <= players[pl]->infosets.Length(); i++)
-      players[pl]->infosets[i]->number = 0;
+      if (players[pl]->infosets[i]->members.Length() == 0)
+	players[pl]->infosets[i]->number = i;
+      else
+	players[pl]->infosets[i]->number = 0;
   
     for (i = 1; i <= nodes.Length(); i++)  {
       Node *n = nodes[i];
@@ -215,7 +234,9 @@ void BaseEfg::SortInfosets(void)
       }
     }  
 
-    assert(isets == players[pl]->infosets.Length());
+    assert(isets == players[pl]->infosets.Length() ||
+	   players[pl]->infosets[isets + 1]->members.Length() == 0);
+//    assert(isets == players[pl]->infosets.Length());
   }
 }
   
