@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// $Id$
+// @(#)gpoly.imp	1.10 03 Jun 1997
 //
 
 #include "gpoly.h"
@@ -94,18 +94,18 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
   gArray<int> PowArray(Space->Dmnsn());
   TheString = Hold + " +";
 
-  GetChar();
+  charc = TheString[charnum];
 
   while (charnum <= TheString.length() && contflag){
     switch (charc) {
     case '+' :
     case ' ':
       charnum++;
-      GetChar();
+      charc = TheString[charnum];
       break;
     case '-':
       charnum++;
-      GetChar();
+      charc = TheString[charnum];
       nega = -nega;
       break;
     case 0:  //Null termination of string
@@ -239,7 +239,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
   val = String_Coeff(nega);
   
   while (charc != '+' && charc != '-') {
-    if (charc == ' ') { charnum ++; GetChar(); }
+    if (charc == ' ') { charnum ++; charc = TheString[charnum]; }
     else String_VarAndPow(PowArray);
   }
 
@@ -252,13 +252,13 @@ template <class T> int gPoly<T>::String_GetPow(void)
   gString Pow = "";
   while (charc == ' '){
     charnum++;
-    GetChar();
+    charc = TheString[charnum];
   }
 
   while (charc >= '0' && charc <= '9'){
     Pow += charc;
     charnum++;
-    GetChar();
+    charc = TheString[charnum];
   }
   return (atoi(Pow.stradr()));
 }
@@ -270,9 +270,13 @@ template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
   while (charc != '^' && charc != ' '){
     VarName += charc;
     charnum++;
-    GetChar();
+    charc = TheString[charnum];
   }
-  if (charc == '^') { charnum++; GetChar(); pow = String_GetPow(); }
+  if (charc == '^') { 
+    charnum++; 
+    charc = TheString[charnum]; 
+    pow = String_GetPow(); 
+  }
   else pow = 1;
   for(varname = 1;varname <= Dmnsn() &&  
       VarName != (Space->VariableWithNumber(varname))->Name;
@@ -280,17 +284,85 @@ template <class T> void gPoly<T>::String_VarAndPow(gArray<int> &PowArray)
   if (varname <= Dmnsn()) PowArray[varname] = pow;
 }
 
-template <class T> void gPoly<T>::GetChar(void)
-{
-  charc = TheString[charnum];
-}
+// bool function to check the string in &Hold
 
-/*
+template <class T> bool gPoly<T>::Check_String(const gString &Hold){
+ int charnum=0;
+ int boolflag=0;
+// state variables
+ int statenumber=0;
+ int statevar=0;
+ int statesign=1;
+//values of the state variables 
+ enum number {nonumberbef, numberbef};
+ enum var {novarbef, varbef};
+ enum sign {nosignbef, signbef}; 
+ gString TheString = Hold;
+ char charc=TheString[charnum];
+//movement along the string with a switch case
+ while (charnum < TheString.length()){
+  switch (charc){
+   case '0':
+   case '1':
+   case '2':
+   case '3':
+   case '4':
+   case '5':
+   case '6':
+   case '7':
+   case '8':
+   case '9':
+    statenumber=numberbef;
+    statesign=nosignbef;
+    break;
+   case 'n':
+    if (statenumber==0 && statesign==0) boolflag++;
+    if (charnum==(TheString.length()-1)) boolflag++;
+    statenumber=number(0);
+    statevar=varbef;
+    statesign=nosignbef;
+    break;
+   case '^':
+    if (statenumber==0) boolflag++;
+    if (statevar==0) boolflag++;
+    if (charnum==(TheString.length()-1)) boolflag++;
+    statenumber=nonumberbef;
+    statevar=novarbef;
+    statesign=nosignbef;
+    break;
+   case '/':
+   case '.':
+    if (statenumber==0) boolflag++;
+    if (charnum==(TheString.length()-1)) boolflag++;
+    statenumber=nonumberbef;
+    statesign=nosignbef;
+    break;
+   case '+':
+   case '-':
+    if (statenumber==0 && charnum!=0) boolflag++;
+    if (charnum==(TheString.length()-1)) boolflag++;
+    statenumber=nonumberbef;
+    statevar=novarbef;
+    statesign=signbef;
+    break;
+   case ' ':
+    break;  
+   default:
+    boolflag++; 
+    break;
+   }    
+ charnum++;
+ charc=TheString[charnum];
+ }
+// return values
+ if (boolflag==0) return true;
+ else return false;
+}
+ 
 template <class T> void gPoly<T>::GetChar(void)
 {
   charc = TheString[charnum];
 }
-*/
 
 //----------------------------------
 //           Information
@@ -416,7 +488,7 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
   }
 
   return  polynomial<T>(coefs);
-}
+} 
 
 #endif   // MINI_POLY
 
@@ -532,7 +604,7 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 	}
     }
   return result;
-}
+} 
 
 #ifndef MINI_POLY
 
@@ -542,16 +614,10 @@ gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
   gPoly<T> answer(Space,(T)0,Order);
 
   for (int i = 1; i <= Terms.Length(); i++) 
-    {
     answer += gPoly<T>(Space,
 	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
-	       ((T) Terms[i].Coef())* ((T) pow(val,(long int)Terms[i].ExpV()[varnumber])), 
+	       Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
 		       Order);
-
-//DEBUG
-//gout << "answer is now " << answer << ".\n";
-  }
-
   return answer;
 }
 
@@ -585,7 +651,7 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
   }
 
   return (newPoly);
-}
+} 
 
 #endif   // MINI_POLY
 
