@@ -6,11 +6,11 @@
 // gSortList member functions
 
 template <class T>
-void gSortList<T>::gSortList(void):gList<T>(),vis_length(-1)
+gSortList<T>::gSortList(void):gList<T>(),vis_length(-1)
 { }
 
 template <class T>
-void gSortList<T>::gSortList(const gList<T> &l):gList<T>(l),vis_length(l.Length())
+gSortList<T>::gSortList(const gList<T> &l):gList<T>(l),vis_length(l.Length())
 { }
 
 template <class T>
