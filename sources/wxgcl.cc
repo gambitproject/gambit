@@ -13,8 +13,8 @@
 #include "wx/image.h"   // for wxInitAllImageHandlers
 
 #include "wxgcl.h"
-#include "wxstatus.h"
-#include "dlabout.h"
+#include "gui/wxstatus.h"
+#include "gui/dlabout.h"
 
 #include "math/math.h"
 #include "gsm.h"
