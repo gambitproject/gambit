@@ -8,6 +8,39 @@
 #include "glistit.h"
 
 
+template <class T>
+gOutput& operator<<(gOutput &out, LUupdate<T> u)
+{ return out; /*<<u.alpha<<u.rowp;*/ }
+
+template <class T>
+LUupdate<T>::LUupdate()
+{ assert( 0 ); } // required for list class; currently, shouldn't be called
+
+template <class T>
+LUupdate<T>::LUupdate(int lo,int hi): rowp(lo,hi), alpha(lo,hi)
+{ }
+
+template <class T>
+LUupdate<T>::~LUupdate()
+{ }
+
+
+template <class T>
+int LUupdate<T>::operator==(const LUupdate<T> u) const
+{ return rowp==u.rowp && alpha==u.alpha; }
+
+template <class T>
+int LUupdate<T>::operator!=(const LUupdate<T> u) const
+{ return rowp!=u.rowp || alpha!=u.alpha; }
+
+template <class T>
+int LUupdate<T>::First()
+{ return alpha.First(); }
+
+template <class T>
+int LUupdate<T>::Last()
+{ return alpha.Last(); }
+
 // LUdecomp class methods
 // constructors, destructor
 
@@ -127,7 +160,7 @@ void LUdecomp<T>::identity()
   for(int i=mat.MinRow(); i<=mat.MaxRow(); i++)
     {
       for(int j=mat.MinCol(); j<=mat.MaxCol(); j++)
-	mat(i,j)= (i==j)? (T)1 : (T)0;
+		if (i==j)	mat(i,j)=(T)1; else mat(i,j)=(T)0;
     }
 }
 
@@ -444,7 +477,7 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
 	  updatev.rowp[k]= 0;
 	}
 
-      assert( mat(k,k) != 0 ); // must be nonsingular
+			assert( mat(k,k) != (T)0 ); // must be nonsingular
       alpha= mat(k+1,k)/mat(k,k);
       updatev.alpha[k]= alpha;
       for(int i=max; i>k; i--)

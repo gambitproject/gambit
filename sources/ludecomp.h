@@ -32,38 +32,6 @@ template <class T> class LUupdate {
   int Last();
 }; // end class updatelist
 
-template <class T>
-gOutput& operator<<(gOutput &out, LUupdate<T> u)
-{ return out<<u.alpha<<u.rowp; }
-
-template <class T>
-LUupdate<T>::LUupdate()
-{ assert( 0 ); } // required for list class; currently, shouldn't be called
-
-template <class T>
-LUupdate<T>::LUupdate(int lo,int hi): rowp(lo,hi), alpha(lo,hi)
-{ }
-
-template <class T>
-LUupdate<T>::~LUupdate()
-{ }
-
-
-template <class T>
-int LUupdate<T>::operator==(const LUupdate<T> u) const
-{ return rowp==u.rowp && alpha==u.alpha; }
-
-template <class T>
-int LUupdate<T>::operator!=(const LUupdate<T> u) const
-{ return rowp!=u.rowp || alpha!=u.alpha; }
-
-template <class T>
-int LUupdate<T>::First()
-{ return alpha.First(); }
-
-template <class T>
-int LUupdate<T>::Last()
-{ return alpha.Last(); }
 
 
 
@@ -113,10 +81,10 @@ template <class T> class LUdecomp {
 
 }; // end class LUdecomp
 
-
+/*
 #ifdef __BORLANDC__
 #include "ludecomp.imp"
 #endif   // __BORLANDC__
-
+*/
 
 #endif     // LUDECOMP_H
