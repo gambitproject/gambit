@@ -5,11 +5,13 @@
 //
 
 /*
-   When the cartesian product of ordered sets in ordered 
+   When the cartesian product of ordered sets is ordered 
 lexicographically, there is a relation between such a relation,
 and the numerical indexing derived from the lexicographical
 ordering, that is similar to an odometer.  Here the least
-significant idex is the first ("leftmost").
+significant index is the first ("leftmost").
+
+   The second class provides a utility for cycling through the integers 1..n.
 */
 
 #ifndef ODOMETER_H
@@ -56,6 +58,42 @@ class gIndexOdometer {
   gIndexOdometer  AfterExcisionOf(int&) const;
 
 friend gOutput& operator << (gOutput& output, const gIndexOdometer& x);
+};  
+
+
+// *****************************
+//      class gPermutationOdometer
+// *****************************
+
+class gPermutationOdometer {
+ private:
+  const int   n;
+  gArray<int> CurIndices;
+  int         CurSign;
+   
+ public:
+   gPermutationOdometer(const int&);  
+   gPermutationOdometer(const gPermutationOdometer &);
+
+   ~gPermutationOdometer();                 // Deletes all pointees
+
+   // Operators
+   gPermutationOdometer& operator= (const gPermutationOdometer &);
+
+   bool       operator==(const gPermutationOdometer &) const;
+   bool       operator!=(const gPermutationOdometer &) const;
+
+   int        operator[](const int)         const;
+
+  // Manipulate
+  bool        Turn();
+
+   // Information
+  int             NoIndices()           const;
+  gArray<int>     CurrentIndices()      const;
+  int             CurrentSign()         const;
+
+friend gOutput& operator << (gOutput& output, const gPermutationOdometer& x);
 };  
 
 #endif ODOMETER_H
