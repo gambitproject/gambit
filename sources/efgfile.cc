@@ -83,124 +83,21 @@ void initialize(void)
 
 //
 // Reading in a .dt1 file into the old structures
-// (taken with only slight modifications from v0.14.2
 //
 
-int readstring(FILE * file, char *ss, int size)
+extern int yyparse(void);
+extern void dt1_set_input(FILE *), dt1_close_input(void);
+
+int read_dt1_file(FILE *f)
 {
-  int cc, jj;
+  int errorNo;
 
-  while (getc(file) != '"');
-  for (jj = 0; (cc = getc(file)) != '"'; jj++)
-    string[jj] = (char) cc;
-  string[jj] = (char) '\0';
-
-  strncpy(ss, string, size);
-  return jj;
+  dt1_set_input(f);
+  errorNo = yyparse();
+  if (!errorNo) return 0;
+  dt1_close_input();
+  return 1;
 }
-
-void read_dt1_file(FILE * file)
-{
-  int a, b, c, d, e, g, h, i, j;
-  struct node *nn;
-  struct iset *ii;
-  struct game *vv;
-  struct plyr *pp;
-  struct outc *oo;
-  char buffer[80];
-  double x;
-
-  while (getc(file) != '"');
-  while (getc(file) != '"');
-
-  fgets(buffer, 80, file);
-  fgets(buffer, 80, file);
-  fgets(buffer, 80, file);
-  sscanf(buffer, "%d%d%d%d%d",
-	 &a, &b, &c, &d, &e);
-
-  for (i = 1; i < a; i++)
-    newgame();
-  for (i = 1; i < b; i++)  
-    newnode(NULLnode);
-  for (i = 0; i < c; i++)
-    newiset(NULLnode, NULLplyr, 0);
-  for (i = 0; i < d; i++)
-    newplayer();
-  for (i = 0; i < e; i++)
-    newoutcome();
-
-  fgets(buffer, 80, file);
-  for (i = 0; i < whichpblm->ngames; i++) {
-    fscanf(file, "%d%d", &a, &b);
-
-    vv = findgame(a);
-    vv->rootnode = findnode(b);
-
-    readstring(file, whichpblm->title, 80);
-  }
-
-  fgets(buffer, 80, file);
-  fgets(buffer, 80, file);
-  for (i = 0; i < whichpblm->nnodes; i++) {
-    fscanf(file, "%d%d%d%d%d%d%d%d%lf",
-	   &a, &b, &c, &d, &e, &g, &h, &j, &x);
-
-    nn = findnode(a);
-    nn->parent = findnode(b);
-    nn->firstbranch = findnode(c);
-    nn->nextbranch = findnode(d);
-    nn->infoset = findiset(e);
-    nn->nextmember = findnode(g);
-    nn->nextgame = findgame(h);
-    nn->outcome = findoutcome(j);
-    nn->probability = x;
-
-    readstring(file, nn->branchname, NAMESIZE);
-    readstring(file, nn->nodename, NAMESIZE);
-    fgets(buffer, 80, file);
-  }
-
-  fgets(buffer, 80, file);
-  for (i = 0; i < whichpblm->nisets; i++) {
-    fscanf(file, "%d%d%d%d%d",
-	   &a, &b, &c, &d, &e);
-
-    ii = findiset(a);
-    ii->nextplyriset = findiset(b);
-    ii->firstmember = findnode(c);
-    ii->playr = findplyr(d);
-
-    ii->branches = e;
-
-    readstring(file, ii->isetname, NAMESIZE);
-    fgets(buffer, 80, file);
-  }
-
-  fgets(buffer, 80, file);
-  for (i = 0; i < whichpblm->nplayers; i++) {
-    fscanf(file, "%d%d", &a, &b);
-
-    pp = findplyr(a);
-    pp->firstiset = findiset(b);
-
-    readstring(file, pp->plyrname, NAMESIZE);
-    fgets(buffer, 80, file);
-  }
-
-  fgets(buffer, 80, file);
-  for (oo = whichpblm->firstoutcome->nextoutcome; oo != NULLoutc; oo = oo->nextoutcome) {
-    fscanf(file, "%d", &a);
-    for (j = 1; j <= whichpblm->nplayers; j++) 
-      fscanf(file, "%f", &(oo->component[j]));
-    readstring(file, oo->outname, NAMESIZE);
-    if (strcmp(oo->outname, "") == 0)
-      sprintf(oo->outname, "#%d", oo->outnumber);
-    fgets(buffer, 80, file);      /* to get rid of the line... */
-  }
-
-}
-
 
 
 //
@@ -459,8 +356,13 @@ void write_efg_file(FILE *f)
 
 void dt1toefg(FILE *in, FILE *out)
 {
+  int errorYes;
+  
   initialize();
-  read_dt1_file(in);
+  errorYes = read_dt1_file(in);
+  if (errorYes) 
+    {printf("Input file formatted incorrectly.  Operation aborted.\n");  
+     exit(1);}
   split_subgame_roots();
   write_efg_file(out);
   cleanup();
