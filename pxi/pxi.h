@@ -206,7 +206,9 @@ public:
   void SetAxisFont(const wxFont &f) {axis_font=f;}
   void SetLabelFont(const wxFont &f) {label_font=f;}
   void SetOverlayFont(const wxFont &f) {overlay_font=f;}
+  const wxFont &GetLabelFont(void) {return axis_font;}
   const wxFont &GetAxisFont(void) {return axis_font;}
+  const wxFont &GetOverlayFont(void) {return axis_font;}
   const wxBrush &GetDataBrush(void) {return exp_data_brush;}
   const wxBrush &GetClearBrush(void) {return clear_brush;}
   const wxColour &GetAxisTextColor(void) {return axis_text_color;}
@@ -267,6 +269,7 @@ public:
   void OnEvent(wxMouseEvent &ev);
   void ShowDetail(void);
   void StopIt(void);
+  void Refresh(void) { wxPaintEvent paint; OnPaint(paint); }
 
   PxiDrawSettings *DrawSettings(void) {return draw_settings;}
   void NewExpData(ExpDataParams &P);

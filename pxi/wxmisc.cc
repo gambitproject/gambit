@@ -247,11 +247,9 @@ wxOutputDialogBox::wxOutputDialogBox(wxStringList *p_extraMedia,
   
   m_fitBox = new wxCheckBox(this, 0, "Fit to page");
   
-#ifndef __WXMSW__ // Printer, Clipboard, and MetaFiles are not yet supp'ed
-  m_mediaBox->Enable(0, false);
+#ifndef __WXMSW__ // Clipboard, and MetaFiles are not yet supp'ed
   m_mediaBox->Enable(2, false);
   m_mediaBox->Enable(3, false);
-  m_fitBox->Enable(false);
 #endif  // __WXMSW__
 
   wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);

@@ -531,9 +531,9 @@ dialogOverlayOptions::dialogOverlayOptions(wxWindow *p_parent,
 			   );
   m_connect = new wxCheckBox(this, -1, "Connect Points"); 
   m_size = new wxSlider(this, -1, 4,2,10, wxDefaultPosition, 
-#ifdef __WXMOTIF__ // bug in wxmotif
+#if defined(__WXMOTIF__) // bug in wxmotif
 			wxSize(200,25),wxSL_HORIZONTAL | wxSL_LABELS
-#elseifdef __WXGTK__ // bug in wxgtk
+#elif defined(__WXGTK__) // bug in wxgtk
 			wxSize(300,50), wxSL_HORIZONTAL | wxSL_LABELS
 #else
 			wxDefaultSize, wxSL_HORIZONTAL | wxSL_LABELS

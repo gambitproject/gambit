@@ -344,30 +344,35 @@ void PxiChild::OnPrefsColors(wxCommandEvent &)
 void PxiChild::OnPrefsFontLabel(wxCommandEvent &)
 {
   wxFontData data;
+  data.SetInitialFont(canvas->draw_settings->GetLabelFont());  
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
+    canvas->Refresh();
   }
 }
 
 void PxiChild::OnPrefsFontAxis(wxCommandEvent &)
 {
   wxFontData data;
+  data.SetInitialFont(canvas->draw_settings->GetAxisFont());  
   wxFontDialog dialog(this, &data);
-  
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
+    canvas->Refresh();
   }
 }
 
 void PxiChild::OnPrefsFontOverlay(wxCommandEvent &)
 {
   wxFontData data;
+  data.SetInitialFont(canvas->draw_settings->GetOverlayFont());  
   wxFontDialog dialog(this, &data);
   
   if (dialog.ShowModal() == wxID_OK) {
     canvas->draw_settings->SetOverlayFont(dialog.GetFontData().GetChosenFont());
+    canvas->Refresh();
   }
 }
 
@@ -385,7 +390,7 @@ void PxiChild::OnDisplayOptions(wxCommandEvent &)
 {
   canvas->DrawSettings()->SetOptions(this);
   wxClientDC dc(this);
-  this->canvas->Update(dc,PXI_UPDATE_SCREEN);
+  canvas->Update(dc,PXI_UPDATE_SCREEN);
 }
 
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
@@ -498,8 +503,7 @@ void PxiCanvas::StopIt(void)
     //	if (!updating)
     {
       draw_settings->ResetSetStop();
-      wxPaintEvent event;
-      OnPaint(event);
+      Refresh();
     }
   }
 }
@@ -547,8 +551,7 @@ void PxiCanvas::OnEvent(wxMouseEvent &ev)
       tmp_label.y=labels[clicked_on].y;
       labels[clicked_on]=tmp_label;
     }
-    wxPaintEvent event;
-    OnPaint(event);
+    Refresh();
   }
 }
 
@@ -568,7 +571,7 @@ PxiCanvas::PxiCanvas(wxFrame *frame, const wxPoint &p_position,
   Show(true);
 }
 
-#ifdef wx_msw
+#ifdef __WXMSW__
 void PxiChild::print(wxOutputOption fit, bool preview)
 {
   wxPrinterDC dc(NULL, NULL, NULL);  // Defaults to EPS under UNIX,
@@ -583,12 +586,12 @@ void PxiChild::print(wxOutputOption fit, bool preview)
   this->canvas->Update(*(this->canvas->GetDC()),PXI_UPDATE_SCREEN);
 }
 #else
-void PxiChild::print(wxOutputOption /*fit*/, bool preview)
+void PxiChild::print(wxOutputOption fit, bool preview)
 {
   if (!preview)
-    wxMessageBox("Printing not supported under X");
+    wxMessageBox("Print preview not supported under X");
   else
-    wxMessageBox("Print Preview is not supported under X");
+    print_eps(fit);
 }
 #endif
 
@@ -598,7 +601,7 @@ void PxiChild::print_eps(wxOutputOption fit)
 {
 #ifdef __WXMSW__
 #else
-  wxPostScriptDC dc("junk.pxi",true, this);
+  wxPostScriptDC dc("junk.ps",true, this);
   if (dc.Ok()) {
     dc.StartDoc("Pxi printout");
     dc.StartPage();

@@ -458,6 +458,8 @@ void PxiCanvas::Update(wxDC& dc,int device)
     PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures());
     for (int i=1;i<=headers.Length();i++) PlotData_3(dc,ch,cw,headers[i],i);
   }
+  if (device==PXI_UPDATE_SCREEN)
+    Refresh();
   wxEndBusyCursor();
 }
 
