@@ -1724,10 +1724,6 @@ void Init_gsmoper(GSM* gsm)
 {
   FuncDescObj* FuncObj;
 
-  FuncObj = new FuncDescObj("Version", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Version, porNUMBER, 0));
-  gsm->AddFunction(FuncObj);
-
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_And },
       { "Concat[x->TEXT, y->TEXT] =: TEXT", GSM_Concat_Text },
@@ -1813,6 +1809,7 @@ void Init_gsmoper(GSM* gsm)
 	GSM_NotEqual_NfSupport },
       { "NotEqual[x->MIXED, y->MIXED] =: BOOLEAN", GSM_NotEqual_Mixed },
       { "Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_Or },
+      { "Parentheses[x->ANYTYPE] =: ANYTYPE", GSM_Parentheses },
       { "Plus[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Plus_Integer },
       { "Plus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Plus_Number },
       { "Plus[x->MIXED, y->MIXED] =: MIXED", GSM_Plus_Mixed },
@@ -1822,16 +1819,12 @@ void Init_gsmoper(GSM* gsm)
       { "Times[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Times_Number },
       { "Times[x->NUMBER, y->MIXED] =: MIXED", GSM_Times_Mixed },
       { "Times[x->NUMBER, y->BEHAV] =: BEHAV", GSM_Times_Behav },
+      { "Version[] =: NUMBER", GSM_Version },
       { 0, 0 }
     };
 
   for (int i = 0; ftable[i].sig != 0; i++)
     gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func));
-
-  FuncObj = new FuncDescObj("Parentheses", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Parentheses, porANYTYPE, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
-  gsm->AddFunction(FuncObj);
 
   //-------------------- NewStream -------------------------
 
