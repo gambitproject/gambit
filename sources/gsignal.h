@@ -1,13 +1,19 @@
-//#
-//# FILE: gsignal.h -- Declaration of abstract signal-handling class
-//#
-//# $Id$
-//#
+//
+// FILE: gsignal.h -- Declaration of abstract signal-handling class
+//
+// $Id$
+//
 
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef GSIGNAL_H
+#define GSIGNAL_H
 
 #include "gmisc.h"
+#include "gtext.h"
+
+class gSignalBreak : public gException {
+ public:
+  gText Description(void) const { return "User interrupt occurred."; }
+};
 
 class gSignal   {
   public:
@@ -18,4 +24,4 @@ class gSignal   {
 
 extern gSignal &gbreak;
 
-#endif   // SIGNAL_H
+#endif   // GSIGNAL_H

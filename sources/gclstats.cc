@@ -7,109 +7,70 @@
 #include "gstatus.h"
 #include <signal.h>
 
-char tmp_str[200];
-class gGCLStatus : public gStatus
-{
+class gGCLStatus : public gStatus  {
+friend void gGCLStatusHandler(int);
 private:
-	// gSignal Stuff
-	bool sig;
-	friend void gGCLStatusHandler(int);
-	// gProgress stuff
-	int Width,Prec;
-	char Represent;
+  bool m_sig;
+  int m_width, m_prec;
+  char m_represent;
+
 public:
-	// Constructor
-	gGCLStatus(void) : sig(false),Width(0),Prec(6),Represent('f')
-	{
-	#ifndef __BORLANDC__
-	signal(SIGINT, gGCLStatusHandler);
-	#endif
-	}
-	// Destructor
-	~gGCLStatus(void)
-	{
-	#ifndef __BORLANDC__
-	signal(SIGINT, SIG_DFL);
-	#endif
-	}
-	// functions for gProgress::gOutput
-	int GetWidth(void) {return Width;}
-	gOutput &SetWidth(int w) {Width=w;return *this;}
-	int GetPrec(void) {return Prec;}
-	gOutput &SetPrec(int p) {Prec=p;return *this;}
-	gOutput &SetExpMode(void) {Represent='e';return *this;}
-	gOutput &SetFloatMode(void){Represent='f';return *this;}
-	char GetRepMode(void){return Represent;}
+  // CONSTRUCTOR, DESTRUCTOR
+  gGCLStatus(void); 
+  ~gGCLStatus();
 
-	gOutput &operator<<(int x);
-	gOutput &operator<<(unsigned int x);
-	gOutput &operator<<(bool x);
-	gOutput &operator<<(long x);
-	gOutput &operator<<(char x);
-	gOutput &operator<<(double x);
-	gOutput &operator<<(float x);
-	gOutput &operator<<(const char *x);
-	gOutput &operator<<(const void *x);
-	bool IsValid(void) const {return true;}
-	// functions for gProgress
-	void	SetProgress(double) {/*gout<<(int)(p*100)<<"% Done\n";*/}
-	// functions for gSignal
-	bool Get(void) const {return sig;}
-	void Reset(void) {sig=false;}
+  // OUTPUT DISPLAY FORMATS
+  int GetWidth(void) { return m_width; }
+  gOutput &SetWidth(int w) { m_width = w; return *this; }
+  int GetPrec(void) { return m_prec; }
+  gOutput &SetPrec(int p) { m_prec = p; return *this; }
+  gOutput &SetExpMode(void) { m_represent = 'e'; return *this; }
+  gOutput &SetFloatMode(void) { m_represent = 'f'; return *this; }
+  char GetRepMode(void) { return m_represent; } 
 
+  // OUTPUT OPERATORS
+  gOutput &operator<<(int) { return *this; }
+  gOutput &operator<<(unsigned int) { return *this; }
+  gOutput &operator<<(bool) { return *this; }
+  gOutput &operator<<(long) { return *this; }
+  gOutput &operator<<(char) { return *this; }
+  gOutput &operator<<(double) { return *this; }
+  gOutput &operator<<(float) { return *this; }
+  gOutput &operator<<(const char *) { return *this; }
+  gOutput &operator<<(const void *) { return *this; }
+  bool IsValid(void) const { return true; }
+
+  void SetProgress(double) { }
+  bool Get(void) const 
+    { if (m_sig) throw gSignalBreak(); return m_sig; }
+  void Reset(void) { m_sig = false; }
 };
 
-//****************************** gGclProgress stuff ********************
-gOutput &gGCLStatus::operator<<(int)
-{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(unsigned int)
-{/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(bool)
-{/*sprintf(tmp_str, "%c",(x) ? 'T' : 'F');gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(long)
-{/*sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(char)
-{/*sprintf(tmp_str, "%c", x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(double)
-  {/*
-	switch (Represent) {
-	case 'f':
-		sprintf(tmp_str, "%*.*lf", Width, Prec, x);
-		gout<<tmp_str;
-		break;
-	case 'e':
-		sprintf(tmp_str, "%*.*le", Width, Prec, x);
-		gout<<tmp_str;
-	      }*/
-return *this;
+gGCLStatus::gGCLStatus(void)
+  : m_sig(false), m_width(0), m_prec(6), m_represent('f')
+{
+#ifndef __BORLANDC__
+  signal(SIGINT, gGCLStatusHandler);
+#endif
 }
-gOutput &gGCLStatus::operator<<(float)
-  {/*
-	switch (Represent) {
-	case 'f':
-		sprintf(tmp_str, "%*.*lf", Width, Prec, x);
-		gout<<tmp_str;
-		break;
-	case 'e':
-		sprintf(tmp_str, "%*.*le", Width, Prec, x);
-		gout<<tmp_str;
-	      }*/
-return *this;
+
+gGCLStatus::~gGCLStatus()
+{
+#ifndef __BORLANDC__
+  signal(SIGINT, SIG_DFL);
+#endif
 }
-gOutput &gGCLStatus::operator<<(const char *)
-{/*sprintf(tmp_str, "%s", x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(const void *)
-{/*sprintf(tmp_str, "%p", x);gout<<tmp_str;*/return *this;}
+
 
 gGCLStatus _gstatus;
-gStatus &gstatus=_gstatus;
+gStatus &gstatus = _gstatus;
 
-// ***************************** gGclSignal Stuff
+
 void gGCLStatusHandler(int)
 {
-	_gstatus.sig = true;
+  _gstatus.m_sig = true;
 // This is here because some systems (Solaris) reset the signal handler to
 // default when using signal().
-	signal(SIGINT, gGCLStatusHandler);
+  signal(SIGINT, gGCLStatusHandler);
 }
 
