@@ -59,8 +59,6 @@ private:
   // Private functions
   void MakeMenus(void);
 
-  void UpdateContingencyProb(const gArray<int> &profile);
-
   gText UniqueSupportName(void) const;
 
   void AdjustSizes(void);
@@ -130,7 +128,6 @@ public:
   int NumSupports(void) const { return supports.Length(); }
   
   void OutcomePayoffs(int st1, int st2, bool next = false);
-  void UpdateSoln(void);
   void UpdateProfile(gArray<int> &profile);
   void SetStrategy(int p_player, int p_strategy);
   void SetPlayers(int p_rowPlayer, int p_colPlayer);
@@ -141,6 +138,7 @@ public:
   void ChangeSolution(int sol);
 
   int CurrentSolution(void) const { return cur_soln; }
+  const gList<MixedSolution> &Solutions(void) const;
 
   // Project solutions to EF.
   void SolutionToExtensive(const MixedSolution &mp, bool set = false);

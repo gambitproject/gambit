@@ -53,6 +53,7 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
   }
 
   AdjustScrollbars();
+  OnChangeLabels();
   OnChangeValues();
 }
 
@@ -93,11 +94,23 @@ void NfgTable::OnChangeLabels(void)
 		  i - 1);
   }
 
+  if (features.prob) {
+    SetLabelValue(wxHORIZONTAL, "Prob", support->NumStrats(colPlayer));
+    SetLabelValue(wxVERTICAL, "Prob", support->NumStrats(rowPlayer));
+  }
+
   if (features.dom) {
     SetLabelValue(wxHORIZONTAL, "Domin",
 		  support->NumStrats(colPlayer) + features.prob);
     SetLabelValue(wxVERTICAL, "Domin",
 		  support->NumStrats(rowPlayer) + features.prob);
+  }
+
+  if (features.val) {
+    SetLabelValue(wxHORIZONTAL, "Value", support->NumStrats(colPlayer) + 
+		  features.prob + features.dom);
+    SetLabelValue(wxVERTICAL, "Value", support->NumStrats(rowPlayer) +
+		  features.prob + features.dom);
   }
 }
 
@@ -105,6 +118,10 @@ void NfgTable::OnChangeValues(void)
 {
   const Nfg &nfg = m_parent->Game();
   const NFSupport &support = *m_parent->CurrentSupport();
+  int rowPlayer = m_parent->GetRowPlayer();
+  int colPlayer = m_parent->GetColPlayer();
+
+  ClearGrid();
 
   NfgIter iterator(support);
   iterator.Set(m_parent->GetProfile());
@@ -169,6 +186,78 @@ void NfgTable::OnChangeValues(void)
       }
     }
   }
+
+  if (m_parent->CurrentSolution() == 0) {
+    return;
+  }
+
+  MixedSolution soln = m_parent->Solutions()[m_parent->CurrentSolution()];
+  gNumber t_max;
+  gArray<int> profile(nfg.NumPlayers());
+
+  // Figure out the index in the current support,
+  // then map it onto the full support
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
+    profile[pl] = 1;
+    t_max = soln(nfg.Players()[pl]->Strategies()[1]);
+
+    for (int st1 = 1; st1 <= support.NumStrats(pl); st1++) {
+      if (soln(support.Strategies(pl)[st1]) > t_max) {
+	profile[pl] = st1;
+	t_max = soln(support.Strategies(pl)[st1]);
+      }
+    }
+  }
+
+  if (HaveProbs()) {
+    gNumber cont_prob(1);
+
+    for (int i = 1; i <= nfg.NumPlayers(); i++) {
+      if (i != rowPlayer && i != colPlayer) {
+	NFPlayer *player = nfg.Players()[i];
+	cont_prob *= soln(player->Strategies()[profile[i]]);
+      }
+    }
+
+    SetCellValue((char *) ToText(cont_prob, GetDecimals()),
+		 support.NumStrats(rowPlayer),
+		 support.NumStrats(colPlayer));
+  }
+
+  // Set the profile boxes to correct values if this is a pure equ
+  SetProfile(profile);
+
+  // Hilight the cells w/ nonzero prob
+  gNumber eps;
+  gEpsilon(eps, GetDecimals());
+ 
+  if (HaveProbs()) {
+    for (int i = 1; i <= support.NumStrats(rowPlayer); i++)
+      SetCellValue((char *) ToText(soln(support.Strategies(rowPlayer)[i]),
+				   GetDecimals()),
+		   i-1, support.NumStrats(colPlayer));
+
+    for (int i = 1; i <= support.NumStrats(colPlayer); i++)
+      SetCellValue((char *) ToText(soln(support.Strategies(colPlayer)[i]),
+				   GetDecimals()),
+		   support.NumStrats(rowPlayer), i-1);
+  }
+
+  if (HaveVal()) {
+    for (int i = 1; i <= support.NumStrats(rowPlayer); i++) {
+      SetCellValue((char *) ToText(soln.Payoff(nfg.Players()[rowPlayer],
+					       support.Strategies(rowPlayer)[i]),
+					   GetDecimals()),
+			   i-1, support.NumStrats(colPlayer)+HaveProbs()+HaveDom());
+    }
+    
+    for (int j = 1; j <= support.NumStrats(colPlayer); j++) {
+      SetCellValue((char *) ToText(soln.Payoff(nfg.Players()[colPlayer],
+					       support.Strategies(colPlayer)[j]),
+				   GetDecimals()),
+		   support.NumStrats(rowPlayer)+HaveProbs()+HaveDom(), j-1);
+    }
+  }
 }
 
 
@@ -182,30 +271,26 @@ void NfgTable::OnChangeValues(void)
 
 void NfgTable::MakeProbDisp(void)
 {
-  int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) + 1;
-  int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) + 1;
-
   if (!features.prob) {
-    AppendRows();
-    AppendCols();
+    InsertRows();
+    InsertCols();
+    features.prob = 1;
+    AdjustScrollbars();
+    OnChangeLabels();
+    OnChangeValues();
   }
-
-  // Note: this insures that Prob is always the FIRST extra after the
-  // regular data, and Domin is AFTER the prob.
-  SetLabelValue(wxVERTICAL, "Prob", row-1);
-  SetLabelValue(wxHORIZONTAL, "Prob", col-1);
-  features.prob = 1;
 }
 
 
 void NfgTable::RemoveProbDisp(void)
 {
   if (features.prob) {
-    int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) + 1;
-    int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) + 1;
-    DeleteRows(row);
-    DeleteCols(col);
+    DeleteRows();
+    DeleteCols();
     features.prob = 0;
+    AdjustScrollbars();
+    OnChangeLabels();
+    OnChangeValues();
   }
 }
 
@@ -213,12 +298,10 @@ void NfgTable::MakeDomDisp(void)
 {
   if (!features.dom) {
     features.dom = 1;
-    SetEditable(true);
     AppendRows();
     AppendCols();
-    UpdateDimensions();
     AdjustScrollbars();
-    SetEditable(false);
+    OnChangeLabels();
     OnChangeValues();
   }
 }
@@ -228,44 +311,36 @@ void NfgTable::RemoveDomDisp(void)
 {
   if (features.dom) {
     features.dom = 0;
-    SetEditable(true);
     DeleteRows();
     DeleteCols();
-    UpdateDimensions();
     AdjustScrollbars();
-    SetEditable(false);
+    OnChangeLabels();
     OnChangeValues();
   }
 }
 
 void NfgTable::MakeValDisp(void)
 {
-  int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) +
-    features.prob + features.dom + 1;
-  int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) +
-    features.prob + features.dom + 1;
-
   if (!features.val) {
-    InsertRows(row);
-    InsertCols(col);
+    InsertRows();
+    InsertCols();
+    features.val = 1;
+    AdjustScrollbars();
+    OnChangeLabels();
+    OnChangeValues();
   }
-  
-  SetLabelValue(wxVERTICAL, "Value", row-1);
-  SetLabelValue(wxHORIZONTAL, "Value", col-1);
-  features.val = 1;
 }
 
 
 void NfgTable::RemoveValDisp(void)
 {
   if (features.val) {
-    int row = m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()) +
-      features.prob + features.dom + 1;
-    int col = m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()) +
-      features.prob + features.dom + 1;
-    DeleteRows(row);
-    DeleteCols(col);
+    DeleteRows();
+    DeleteCols();
     features.val = 0;
+    AdjustScrollbars();
+    OnChangeLabels();
+    OnChangeValues();
   }
 }
 
@@ -276,4 +351,5 @@ void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
     m_parent->OutcomePayoffs(p_event.GetRow()+1, p_event.GetCol()+1); 
   }
 }
+
 

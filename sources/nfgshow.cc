@@ -347,7 +347,7 @@ void NfgShow::MakeMenus(void)
   tmp_menubar->Append(prefsMenu,    "&Prefs");
   tmp_menubar->Append(help_menu,     "&Help");
 
-  viewMenu->Check(NFG_VIEW_OUTCOMES, getNormalDrawSettings().OutcomeValues());
+  viewMenu->Check(NFG_VIEW_OUTCOMES, !getNormalDrawSettings().OutcomeValues());
   
   SetMenuBar(tmp_menubar);
 }
@@ -363,106 +363,9 @@ void NfgShow::SetStrategy(int p_player, int p_strategy)
   m_table->SetStrategy(p_player, p_strategy);
 }
 
-void NfgShow::UpdateSoln(void)
-{
-  if (!cur_soln || !m_table->HaveProbs())  return;
-
-  // The profile is obvious for pure strategy: just set the display strat
-  // to the nonzero solution strategy.  However, for mixed equs, we set
-  // the display strategy to the highest soluton strat.  (Note that
-  // MixedSolution.Pure() is not yet implemented :( Add support for
-  // displaying solutions created for supports other than m_currentSupport
-
-  MixedSolution soln = (*m_solutionTable)[cur_soln];
-  gNumber t_max;
-  gArray<int> profile(m_nfg.NumPlayers());
-
-  // Figure out the index in the current support,
-  // then map it onto the full support
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    profile[pl] = 1;
-    t_max = soln(m_nfg.Players()[pl]->Strategies()[1]);
-
-    for (int st1 = 1; st1 <= m_currentSupport->NumStrats(pl); st1++) {
-      if (soln(m_currentSupport->Strategies(pl)[st1]) > t_max) {
-	profile[pl] = st1;
-	t_max = soln(m_currentSupport->Strategies(pl)[st1]);
-      }
-    }
-  }
-
-  UpdateProfile(profile);
-
-  // Set the profile boxes to correct values if this is a pure equ
-  m_table->SetProfile(profile);
-  m_panel->SetProfile(profile);
-
-  // Hilight the cells w/ nonzero prob
-  gNumber eps;
-  gEpsilon(eps, GetDecimals());
- 
-  if (m_table->HaveProbs()) {
-    // Print out the probability in the next column/row
-    for (int i = 1; i <= m_currentSupport->NumStrats(m_rowPlayer); i++)
-      m_table->SetCellValue((char *) ToText(soln(m_currentSupport->Strategies(m_rowPlayer)[i]),
-					   GetDecimals()),
-			   i-1, m_currentSupport->NumStrats(m_colPlayer));
-
-    for (int i = 1; i <= m_currentSupport->NumStrats(m_colPlayer); i++)
-      m_table->SetCellValue((char *) ToText(soln(m_currentSupport->Strategies(m_colPlayer)[i]),
-					   GetDecimals()),
-			   m_currentSupport->NumStrats(m_rowPlayer), i-1);
-  }
-
-  if (m_table->HaveVal()) {
-    // Print out the probability in the last column/row
-    for (int i = 1; i <= m_currentSupport->NumStrats(m_rowPlayer); i++) {
-      m_table->SetCellValue((char *) ToText(soln.Payoff(m_nfg.Players()[m_rowPlayer],
-						       m_currentSupport->Strategies(m_rowPlayer)[i]),
-					   GetDecimals()),
-			   i-1, m_currentSupport->NumStrats(m_colPlayer)+m_table->HaveProbs()+m_table->HaveDom());
-    }
-    
-    for (int j = 1; j <= m_currentSupport->NumStrats(m_colPlayer); j++) {
-      m_table->SetCellValue((char *) ToText(soln.Payoff(m_nfg.Players()[m_colPlayer],
-						       m_currentSupport->Strategies(m_colPlayer)[j]),
-					   GetDecimals()),
-			   m_currentSupport->NumStrats(m_rowPlayer)+m_table->HaveProbs()+m_table->HaveDom(), j-1);
-    }
-  }
-}
-
-
-
-void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
-{
-  if (!cur_soln || !m_table->HaveProbs()) 
-    return;
-
-  // The value in the maximum row&col cell corresponds to prob of being
-  // at this contingency = Product(Prob(strat_here), all players except m_rowPlayer, m_colPlayer)
-  const MixedSolution &soln = (*m_solutionTable)[cur_soln];
-
-  gNumber cont_prob(1);
-
-  for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
-    if (i != m_rowPlayer && i != m_colPlayer) {
-      NFPlayer *player = m_nfg.Players()[i];
-      cont_prob *= soln(player->Strategies()[profile[i]]);
-    }
-  }
-
-  m_table->SetCellValue((char *) ToText(cont_prob, GetDecimals()),
-			m_currentSupport->NumStrats(m_rowPlayer),
-			m_currentSupport->NumStrats(m_colPlayer));
-}
-
-
-
 void NfgShow::UpdateProfile(gArray<int> &profile)
 {
-  UpdateContingencyProb(profile);
-  m_table->OnChangeValues();
+  //  m_table->OnChangeValues();
 }
 
 gText NfgShow::UniqueSupportName(void) const
@@ -524,9 +427,7 @@ void NfgShow::ChangeSolution(int sol)
 {
   cur_soln = sol;
     
-  if (cur_soln) {
-    UpdateSoln();
-  }
+  m_table->OnChangeValues();
   if (m_solutionTable) {
     m_solutionTable->UpdateValues();
   }
@@ -535,7 +436,7 @@ void NfgShow::ChangeSolution(int sol)
 void NfgShow::OnSolutionSelected(wxListEvent &p_event)
 {
   cur_soln = p_event.m_itemIndex + 1;
-  UpdateSoln();
+  m_table->OnChangeValues();
 }
  
 void NfgShow::SetFileName(const gText &s)
@@ -588,7 +489,7 @@ void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
   SetStrategy(m_colPlayer, 1);
   m_table->OnChangeLabels();
   m_panel->SetSupport(*m_currentSupport);
-  UpdateSoln();
+  m_table->OnChangeValues();
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
@@ -809,7 +710,7 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
       m_table->MakeDomDisp();
     }
 
-    UpdateSoln();
+    m_table->OnChangeValues();
   }
 }
 
@@ -1138,7 +1039,6 @@ void NfgShow::OnViewProbabilities(wxCommandEvent &)
     GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
   }
   m_table->OnChangeValues();
-  UpdateSoln();
 }
 
 void NfgShow::OnViewValues(wxCommandEvent &)
@@ -1152,7 +1052,6 @@ void NfgShow::OnViewValues(wxCommandEvent &)
     GetMenuBar()->Check(NFG_VIEW_VALUES, true);
   }
   m_table->OnChangeValues();
-  UpdateSoln();
 }
 
 void NfgShow::OnViewOutcomes(wxCommandEvent &)
@@ -1417,6 +1316,11 @@ int NfgShow::CheckAccelerators(wxKeyEvent &ev)
 #endif  // NOT_PORTED_YET
 
   return id;
+}
+
+const gList<MixedSolution> &NfgShow::Solutions(void) const
+{
+  return *m_solutionTable;
 }
 
 template class SolutionList<MixedSolution>;
