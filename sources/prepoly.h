@@ -54,18 +54,18 @@ public:
   // operators
   gSpace&         operator=(const gSpace & rhs);
 
-  Variable*       operator[](int i)              const;
+  Variable*       operator[](int)              const;
   bool            operator==(const gSpace & rhs) const;
   bool            operator!=(const gSpace & rhs) const;
   
   // information
   int             Dmnsn(void)              const;
   Variable*       VariableWithNumber(int)  const;
-  const gString&  GetVariableName(int i)   const;
+  const gString&  GetVariableName(int)     const;
   gSpace          WithVariableAppended()   const;
 
   // manipulation
-  void            SetVariableName(int i, const gString &);
+  void            SetVariableName(int, const gString &);
   void            CreateVariables (int nvars = 1);
 
   void            Dump(gOutput &) const;  // Debugging output

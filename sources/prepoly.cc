@@ -463,12 +463,13 @@ void  exp_vect::SetExp(int varno, int pow)
 //--------------------------
 
 
-gOutput& operator<<(gOutput&, const exp_vect& vect)
+gOutput& operator<<(gOutput &f, const exp_vect& vect)
 {
-  gout << "(";
+  f << "(";
   for (int i = 1; i < vect.Dmnsn(); i++)
-    gout << vect[i] << ",";
-  gout << vect[vect.Dmnsn()] << ")";
+    f << vect[i] << ",";
+  f << vect[vect.Dmnsn()] << ")";
+  return f; 
 }
 
 

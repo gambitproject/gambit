@@ -1,10 +1,11 @@
-//#
-//# File: gpoly.h  --  Declaration of gPoly data type
-//# @(#)gpoly.h	1.6 12/12/95
-//#
+//
+// FILE: gpoly.h  --  Declaration of gPoly data type
+// 
+// $Id$
+//
 
-#ifndef GPOLY1_H
-#define GPOLY1_H
+#ifndef GPOLY_H
+#define GPOLY_H
 
 #include "monomial.h"
 
@@ -15,8 +16,6 @@
 //  to the type T for the gString SOP input form and a procedure to convert 
 //  the coefficient into a gString for the SOP output form.  
 
-
-// template <class T> class gPoly; 
 
 
 // *******************
@@ -46,7 +45,7 @@ private:
 			 const gList<gMono<T> >&)          const;
   gList<gMono<T> > Mult(const gList<gMono<T> >&, 
 			const gList<gMono<T> >&)           const;
-  gPoly<T>        DivideByPolynomial(const gPoly<T> den) const; 
+  gPoly<T>        DivideByPolynomial(const gPoly<T> &den) const; 
 
 
   //-----------------------------------------------
@@ -55,26 +54,17 @@ private:
 
   // gString input parser functions
   void      String_Term(T          nega);
-  int       String_Coeff(int       nega);
-  long      String_Coeff(long      nega);
-  double    String_Coeff(double    nega);
-  gRational String_Coeff(gRational nega);
+  T         String_Coeff(T       nega);
   int       String_GetPow(void);
   void      String_VarAndPow(gArray<int> &PowArray);
   void      GetChar();
-
-  // different instantiations of the GetCoefToString
-  gString GetCoefToString(int       val) const;
-  gString GetCoefToString(long      val) const;
-  gString GetCoefToString(double    val) const;
-  gString GetCoefToString(gRational val) const;  
 
   //----------------------
   //   private friends
   //----------------------
 
-  friend gPoly<T> operator*(const gPoly<T> poly, const T val);
-  friend gPoly<T> operator*(const T val, const gPoly<T> poly);
+  friend gPoly<T> operator*(const gPoly<T> &poly, const T val);
+  friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
 
 public:
 
@@ -118,8 +108,8 @@ public:
   gPoly<T>  operator /  (const T val)       const;// division by a constant
   gPoly<T>  operator /  (const gPoly<T> &) const;// division by a polynomial
 
-  bool       operator == (gPoly<T> &p)      const;
-  bool       operator != (gPoly<T> &p)      const;
+  bool       operator == (const gPoly<T> &p)      const;
+  bool       operator != (const gPoly<T> &p)      const;
 
   //-------------
   // Information:
@@ -164,11 +154,11 @@ public:
 
 
 // global multiply by scalar operators
-template <class T> gPoly<T> operator*(const T val, const gPoly<T> poly);
-template <class T> gPoly<T> operator*(const gPoly<T> poly, const T val);
+template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
+template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 
 
-#endif //# gPoly_H
+#endif //# GPOLY_H
 
 
 

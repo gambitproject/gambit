@@ -1,7 +1,8 @@
-//# FILE: gpoly.imp  -- Implementation of gPoly data type
-//#
-//# @(#)gpoly.imp	1.9 1/23/96
-//#
+//
+// FILE: gpoly.imp  -- Implementation of gPoly data type
+//
+// $Id$
+//
 
 #include "gpoly.h"
 
@@ -118,18 +119,18 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
   }
 
   gList<gMono<T> > newTerms;
-  for (int i = 1; i <= Terms.Length(); i++) {
+  for (int j = 1; j <= Terms.Length(); j++) {
     int low = 0; int high = newTerms.Length() + 1;
     while (low +1 < high) {
       int test = low + (high - low)/2;
       if (1 <= test && test <= newTerms.Length()) 
-	assert (Terms[i].ExpV() != newTerms[test].ExpV());
-      if ( Order->Less(Terms[i].ExpV(),newTerms[test].ExpV()) )
+	assert (Terms[j].ExpV() != newTerms[test].ExpV());
+      if ( Order->Less(Terms[j].ExpV(),newTerms[test].ExpV()) )
 	high = test;
       else
 	low = test;
     }
-    newTerms.Insert(Terms[i],high);
+    newTerms.Insert(Terms[j],high);
   }
   Terms = newTerms;
 
@@ -139,7 +140,7 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
 template<class T> gPoly<T> gPoly<T>::operator-() const
 {
   gPoly<T> neg(*this);
-  for (int i = 1; i <= Terms.Length(); i++)  neg.Terms[i] = -Terms[i];
+  for (int j = 1; j <= Terms.Length(); j++)  neg.Terms[j] = -Terms[j];
   return neg;
 }
 
@@ -193,7 +194,7 @@ gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
   return DivideByPolynomial(den);
 }
 
-template<class T> bool gPoly<T>::operator==(gPoly<T> &p) const
+template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 {
   assert(Space == p.Space && Order == p.Order);
 
@@ -203,7 +204,7 @@ template<class T> bool gPoly<T>::operator==(gPoly<T> &p) const
   return (Terms == p.Terms);
 }
 
-template<class T> bool gPoly<T>::operator!=(gPoly<T> &p) const
+template<class T> bool gPoly<T>::operator!=(const gPoly<T> &p) const
 {
   return !(*this == p);
 }
@@ -217,8 +218,8 @@ template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
 
 template<class T> void gPoly<T>::operator*=(const T& val)
 { 
-  for (int i = 1; i <= Terms.Length(); i++)
-    Terms[i] *= val;
+  for (int j = 1; j <= Terms.Length(); j++)
+    Terms[j] *= val;
 }
 
 
@@ -239,59 +240,6 @@ template <class T> void gPoly<T>::String_Term(T nega)
   }
 
   Terms += gMono<T>(val, exp_vect(Space,PowArray));
-}
-
-//  **  Different String_Coeff procedure for Different Instantiations **
-//  **  So that the parser will interpret the coefficients correctly  **
-
-template <class T> int gPoly<T>::String_Coeff(int nega)
-{
-  gString Coeff = "";
-  while (charc >= '0' && charc <= '9'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * atoi(Coeff.stradr()));  
-}
-
-template <class T> long gPoly<T>::String_Coeff(long nega)
-{
-  gString Coeff = "";
-  while (charc >= '0' && charc <= '9'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * atol(Coeff.stradr()));  
-}
-
-template <class T> double gPoly<T>::String_Coeff(double nega)
-{
-  double doub;
-  gString Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * FromString(Coeff,doub));  
-}
-
-template <class T> gRational gPoly<T>::String_Coeff(gRational nega)
-{
-  gRational rat;
-  gString Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * FromString(Coeff,rat));  
 }
 
 template <class T> int gPoly<T>::String_GetPow(void)
@@ -346,18 +294,18 @@ template <class T> const term_order* gPoly<T>::GetOrder(void) const
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
 {
   int max = 0;
-  for (int i = 1; i <= Terms.Length(); i++) 
-    if (max < Terms[i].ExpV()[var_no]) 
-      max = Terms[i].ExpV()[var_no];
+  for (int j = 1; j <= Terms.Length(); j++) 
+    if (max < Terms[j].ExpV()[var_no]) 
+      max = Terms[j].ExpV()[var_no];
   return max;
 }
 
 template <class T> int gPoly<T>::Degree() const
 {
   int max = 0;
-  for (int i = 1; i <= Terms.Length(); i++)
-    if (Terms[i].TotalDegree() > max)  
-      max = Terms[i].TotalDegree();
+  for (int j = 1; j <= Terms.Length(); j++)
+    if (Terms[j].TotalDegree() > max)  
+      max = Terms[j].TotalDegree();
   return max;
 }
 
@@ -368,9 +316,9 @@ template <class T> T gPoly<T>::GetCoef(const gArray<int> &Powers) const
 
 template <class T> T gPoly<T>::GetCoef(const exp_vect &Powers) const
 {
-  for (int i = 1; i <= Terms.Length(); i++)
-    if (Terms[i].ExpV() == Powers)
-      return Terms[i].Coef();
+  for (int j = 1; j <= Terms.Length(); j++)
+    if (Terms[j].ExpV() == Powers)
+      return Terms[j].Coef();
   return (T)0;
 }
 
@@ -385,16 +333,16 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 {
   T answer=0;
-  for (int i = 1; i <= Terms.Length(); i++)
-    answer += Terms[i].Evaluate(values);
+  for (int j = 1; j <= Terms.Length(); j++)
+    answer += Terms[j].Evaluate(values);
   return answer;
 }
 
 template <class T> gList<exp_vect> gPoly<T>::ExponentVectors() const
 {
   gList<exp_vect> result;
-  for (int i = 1; i <= Terms.Length(); i++)
-    result += exp_vect(Terms[i].ExpV());
+  for (int j = 1; j <= Terms.Length(); j++)
+    result += exp_vect(Terms[j].ExpV());
   return result;
 }
 
@@ -403,32 +351,6 @@ template <class T> int gPoly<T>::No_Monomials() const
   gout << "Eliminate old code in No_monomials, if successful.\n";
 
   return Terms.Length();
-}
-
-// ** different GetCoefToString for each instantiation **
-
-template <class T> gString gPoly<T>::GetCoefToString( int val ) const
-{
-  gString Coeff = ToString(val);
-  return (Coeff);
-}
-
-template <class T> gString gPoly<T>::GetCoefToString( long val ) const
-{
-  gString Coeff = ToString(val);
-  return (Coeff);
-}
-
-template <class T> gString gPoly<T>::GetCoefToString( double val ) const
-{
-  gString Coeff = ToString(val);
-  return (Coeff);
-}
-
-template <class T> gString gPoly<T>::GetCoefToString( gRational val ) const
-{
-  gString Coeff = ToString(val, false);
-  return (Coeff);
 }
 
 template <class T> int gPoly<T>::Dmnsn() const
@@ -472,7 +394,8 @@ gList< gMono<T> > gPoly<T>::Mult(const gList<gMono<T> >& One,
 
   if (One.Length() == 0 || Two.Length() == 0) return answer;
 
-  for (int i = 1; i <= One.Length(); i++)
+  int i;
+  for (i = 1; i <= One.Length(); i++)
     for (int j = 1; j <= Two.Length(); j++) 
       {
 	gMono<T> next = One[i] * Two[j];
@@ -511,7 +434,7 @@ gList< gMono<T> > gPoly<T>::Mult(const gList<gMono<T> >& One,
 }
 
 template<class T> 
-gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> den) const
+gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 {
   gPoly<T> zero(Space,(T)0,Order);
 
@@ -565,7 +488,7 @@ gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 
 template <class T>
 exp_vect gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
-						const exp_vect& expv)
+					       const exp_vect& /*expv*/)
 {
   gout << "You have just tested OrderMaxMonomialDivisibleBy.\n";
 
@@ -581,11 +504,12 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
 {
   gPoly<T> newPoly(*this); 
 
-  for (int i = 1; i <= newPoly.Terms.Length(); i++)
+  int i;
+  for (i = 1; i <= newPoly.Terms.Length(); i++)
     newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef()
                            * (T)newPoly.Terms[i].ExpV()[varnumber],
 	  newPoly.Terms[i].ExpV().AfterDecrementingExpOfVariable(varnumber));
-  int i = 1;
+
   while (i <= newPoly.Terms.Length()) {
     if (newPoly.Terms[i].Coef() == (T)0) newPoly.Terms.Remove(i);
     else i++;
@@ -603,10 +527,10 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
   int degree = DegreeOfVar(varnumber);
 
   newPoly.Terms = gList<gMono<T> >();
-  for (int i = 1; i <= Terms.Length(); i++) {
-    if (Terms[i].ExpV()[varnumber] == degree)
-      newPoly.Terms += gMono<T>(Terms[i].Coef(),
-	      Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
+  for (int j = 1; j <= Terms.Length(); j++) {
+    if (Terms[j].ExpV()[varnumber] == degree)
+      newPoly.Terms += gMono<T>(Terms[j].Coef(),
+	      Terms[j].ExpV().AfterZeroingOutExpOfVariable(varnumber));
   }
 
   return (newPoly);
@@ -626,9 +550,9 @@ exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
     return Terms[Terms.Length()].ExpV();
   else {
     int max = 1;
-    for (int i = 2; i <= Terms.Length(); i++) {
-      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
-	max = i;
+    for (int j = 2; j <= Terms.Length(); j++) {
+      if ( order.Less(Terms[max].ExpV(),Terms[j].ExpV()) )
+	max = j;
     }
     return Terms[max].ExpV();
   }
@@ -642,9 +566,9 @@ T gPoly<T>::LeadingCoefficient(const term_order & order) const
     return Terms[Terms.Length()].Coef();
   else {
     int max = 1;
-    for (int i = 2; i <= Terms.Length(); i++)
-      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
-	max = i;
+    for (int j = 2; j <= Terms.Length(); j++)
+      if ( order.Less(Terms[max].ExpV(),Terms[j].ExpV()) )
+	max = j;
     return Terms[max].Coef();
   }
 }
@@ -657,9 +581,9 @@ gPoly<T> gPoly<T>::LeadingTerm(const term_order & order) const
     return gPoly<T>(Space,Terms[Terms.Length()],Order);
   else {
     int max = 1;
-    for (int i = 2; i <= Terms.Length(); i++)
-      if ( order.Less(Terms[max].ExpV(),Terms[i].ExpV()) )
-	max = i;
+    for (int j = 2; j <= Terms.Length(); j++)
+      if ( order.Less(Terms[max].ExpV(),Terms[j].ExpV()) )
+	max = j;
     return gPoly<T>(Space,Terms[max],Order);
   }
 }
@@ -715,14 +639,14 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
 //    Global Operators
 //---------------------------
 
-template<class T> gPoly<T> operator*(const T val, const gPoly<T> poly)
+template<class T> gPoly<T> operator*(const T val, const gPoly<T> &poly)
 {
   gPoly<T> prod(poly);
   prod *= val;
   return prod;
 }
 
-template<class T> gPoly<T> operator*(const gPoly<T> poly, const T val)
+template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
 {
   return val * poly;
 }
@@ -732,22 +656,22 @@ template <class T> gOutput& operator<<(gOutput &f, const gPoly<T> &p)
   gString s;
   if (p.Terms.Length() == 0) s += "0";
   else {
-    for (int i = 1; i <= p.Terms.Length(); i++)
+    for (int j = 1; j <= p.Terms.Length(); j++)
       {
-	if (p.Terms[i].Coef() < (T)0) s += "- ";
-	else if (i > 1) s += "+ ";
+	if (p.Terms[j].Coef() < (T)0) s += "- ";
+	else if (j > 1) s += "+ ";
 	
-	if ( (p.Terms[i].Coef() != (T)1 && -p.Terms[i].Coef() != (T)1) ||
-	    p.Terms[i].IsConstant() )
-	  if (p.Terms[i].Coef() < (T)0) 
-	    s += p.GetCoefToString(-p.Terms[i].Coef());
+	if ( (p.Terms[j].Coef() != (T)1 && -p.Terms[j].Coef() != (T)1) ||
+	    p.Terms[j].IsConstant() )
+	  if (p.Terms[j].Coef() < (T)0) 
+	    s += ToString(-p.Terms[j].Coef());
 	  else                        
-	    s += p.GetCoefToString( p.Terms[i].Coef());
+	    s += ToString( p.Terms[j].Coef());
 	
-	for (int j = 1; j <= p.Space->Dmnsn(); j++) {
-	  int exp = p.Terms[i].ExpV() [j];
+	for (int k = 1; k <= p.Space->Dmnsn(); k++) {
+	  int exp = p.Terms[j].ExpV() [k];
 	  if (exp > 0) {
-	    s += (*p.Space)[j]->Name;
+	    s += (*p.Space)[k]->Name;
 	    if (exp != 1) {
 	      s += '^';
 	      s += ToString(exp);
@@ -755,7 +679,7 @@ template <class T> gOutput& operator<<(gOutput &f, const gPoly<T> &p)
 	  }
 	}
 	
-	if (i < p.Terms.Length()) s += " ";
+	if (j < p.Terms.Length()) s += " ";
       }
   }
   if (s == "") s = " 0";
