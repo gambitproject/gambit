@@ -34,7 +34,8 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
     _ErrorMessage( _StdErr, 1, size );
 #endif // NDEBUG
   
-  _Stack         = new gGrowableStack< Portion* >( size );
+  _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
+  _StackStack->Push( new gGrowableStack< Portion* >( size ) );
   _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
   _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
@@ -52,19 +53,21 @@ GSM::~GSM()
   delete _RefTableStack->Pop();
   delete _RefTableStack;
   delete _CallFuncStack;
-  delete _Stack;
+  assert( _StackStack->Depth() == 1 );
+  delete _StackStack->Pop();
+  delete _StackStack;
 }
 
 
 int GSM::Depth( void ) const
 {
-  return _Stack->Depth();
+  return _StackStack->Peek()->Depth();
 }
 
 
 int GSM::MaxDepth( void ) const
 {
-  return _Stack->MaxDepth();
+  return _StackStack->Peek()->MaxDepth();
 }
 
 
@@ -75,35 +78,35 @@ int GSM::MaxDepth( void ) const
 
 bool GSM::Push( const bool& data )
 {
-  _Stack->Push( new bool_Portion( data ) );
+  _StackStack->Peek()->Push( new bool_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( const double& data )
 {
-  _Stack->Push( new numerical_Portion<double>( data ) );
+  _StackStack->Peek()->Push( new numerical_Portion<double>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gInteger& data )
 {
-  _Stack->Push( new numerical_Portion<gInteger>( data ) );
+  _StackStack->Peek()->Push( new numerical_Portion<gInteger>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gRational& data )
 {
-  _Stack->Push( new numerical_Portion<gRational>( data ) );
+  _StackStack->Peek()->Push( new numerical_Portion<gRational>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gString& data )
 {
-  _Stack->Push( new gString_Portion( data ) );
+  _StackStack->Peek()->Push( new gString_Portion( data ) );
   return true;
 }
 
@@ -112,7 +115,7 @@ bool GSM::PushStream( const gString& data )
 {
   gOutput* g;
   g = new gFileOutput( data );
-  _Stack->Push( new Stream_Portion( *g ) );
+  _StackStack->Peek()->Push( new Stream_Portion( *g ) );
   return true;
 }
 
@@ -129,14 +132,14 @@ bool GSM::PushList( const int num_of_elements )
   if( num_of_elements < 0 )
     _ErrorMessage( _StdErr, 2, num_of_elements );
 
-  if( num_of_elements > _Stack->Depth() )
-    _ErrorMessage( _StdErr, 3, num_of_elements, _Stack->Depth() );
+  if( num_of_elements > _StackStack->Peek()->Depth() )
+    _ErrorMessage( _StdErr, 3, num_of_elements, _StackStack->Peek()->Depth() );
 #endif // NDEBUG
 
   list = new List_Portion;
   for( i = 1; i <= num_of_elements; i++ )
   {
-    p = _Stack->Pop();
+    p = _StackStack->Peek()->Pop();
     p = _ResolveRef( p );
 
     insert_result = list->Insert( p, 1 );
@@ -146,7 +149,7 @@ bool GSM::PushList( const int num_of_elements )
       result = false;
     }
   }
-  _Stack->Push( list );
+  _StackStack->Peek()->Push( list );
 
   return result;
 }
@@ -233,7 +236,7 @@ Portion* GSM::_VarValue( const gString& var_name ) const
 
 bool GSM::PushRef( const gString& ref )
 {
-  _Stack->Push( new Reference_Portion( ref ) );
+  _StackStack->Peek()->Push( new Reference_Portion( ref ) );
   return true;
 }
 
@@ -248,12 +251,12 @@ bool GSM::Assign( void )
   bool      result = true;
 
 #ifndef NDEBUG
-  if( _Stack->Depth() < 2 )
+  if( _StackStack->Peek()->Depth() < 2 )
     _ErrorMessage( _StdErr, 4 );
 #endif // NDEBUG
 
-  p2 = _Stack->Pop();
-  p1 = _Stack->Pop();
+  p2 = _StackStack->Peek()->Pop();
+  p1 = _StackStack->Peek()->Pop();
 
   if ( p1->Type() == porREFERENCE )
   {
@@ -268,7 +271,7 @@ bool GSM::Assign( void )
     }
     result = _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
     delete p1;
-    _Stack->Push( p2 );
+    _StackStack->Peek()->Push( p2 );
   }
 
   else // ( p1->Type() != porREFERENCE )
@@ -289,7 +292,7 @@ bool GSM::Assign( void )
       }
 
       delete p1;
-      _Stack->Push( p2->Copy() );
+      _StackStack->Peek()->Push( p2->Copy() );
       result = true;
     }
     else
@@ -297,7 +300,7 @@ bool GSM::Assign( void )
       _ErrorMessage( _StdErr, 7 );
       delete p1;
       delete p2;
-      _Stack->Push( new Error_Portion );
+      _StackStack->Peek()->Push( new Error_Portion );
       result = false;
     }
   }
@@ -369,12 +372,12 @@ bool GSM::_BinaryOperation( OperationMode mode )
   Portion*   result = 0;
 
 #ifndef NDEBUG
-  if( _Stack->Depth() < 2 )
+  if( _StackStack->Peek()->Depth() < 2 )
     _ErrorMessage( _StdErr, 16 );
 #endif // NDEBUG
   
-  p2 = _Stack->Pop();
-  p1 = _Stack->Pop();
+  p2 = _StackStack->Peek()->Pop();
+  p1 = _StackStack->Peek()->Pop();
   
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
@@ -420,7 +423,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   if( result == 0 )
   {
-    _Stack->Push( p1 );
+    _StackStack->Peek()->Push( p1 );
     return true;
   }
   else
@@ -431,7 +434,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
     delete result;
     delete p1;
     p1 = new Error_Portion;
-    _Stack->Push( p1 );
+    _StackStack->Peek()->Push( p1 );
     return false;
   }
 }
@@ -448,13 +451,13 @@ bool GSM::_UnaryOperation( OperationMode mode )
   Portion*  p1;
   Portion*  result = 0;
 
-  if( _Stack->Depth() >= 1 )
+  if( _StackStack->Peek()->Depth() >= 1 )
   {
-    p1 = _Stack->Pop();
+    p1 = _StackStack->Peek()->Pop();
     p1 = _ResolveRef( p1 );
 
     result = p1->Operation( 0, mode );
-    _Stack->Push( p1 );
+    _StackStack->Peek()->Push( p1 );
   }
   else
   {
@@ -548,9 +551,9 @@ bool GSM::Subscript ( void )
   int      subscript;
   bool     result = true;
 
-  assert( _Stack->Depth() >= 2 );
-  p2 = _Stack->Pop();
-  p1 = _Stack->Pop();
+  assert( _StackStack->Peek()->Depth() >= 2 );
+  p2 = _StackStack->Peek()->Pop();
+  p1 = _StackStack->Peek()->Pop();
 
   if( p1->Type() == porREFERENCE )
   {
@@ -596,7 +599,7 @@ bool GSM::Subscript ( void )
     if( p1->Type() != porLIST )
       delete p1;
     delete p2;
-    _Stack->Push( new Error_Portion );
+    _StackStack->Peek()->Push( new Error_Portion );
     result = false;
     return result;
   }
@@ -619,13 +622,13 @@ bool GSM::Subscript ( void )
     {
       shadow = element->Copy();
       shadow->ShadowOf() = element;
-      _Stack->Push( shadow );
+      _StackStack->Peek()->Push( shadow );
     }
     else
     {
       element->Output( _StdErr );
       delete element;
-      _Stack->Push( new Error_Portion );
+      _StackStack->Peek()->Push( new Error_Portion );
     }
   }
   else if( p1->Type() == porSTRING )
@@ -636,13 +639,13 @@ bool GSM::Subscript ( void )
       new_string = old_string[ subscript - 1 ];
       delete p1;
       p1 = new gString_Portion( new_string );
-      _Stack->Push( p1 );
+      _StackStack->Peek()->Push( p1 );
     }
     else
     {
       _ErrorMessage( _StdErr, 36 );
       delete p1;
-      _Stack->Push( new Error_Portion );
+      _StackStack->Peek()->Push( new Error_Portion );
       result = false;
     }
   }
@@ -650,7 +653,7 @@ bool GSM::Subscript ( void )
   {
     _ErrorMessage( _StdErr, 20 );
     delete p1;
-    _Stack->Push( new Error_Portion );
+    _StackStack->Peek()->Push( new Error_Portion );
     result = false;
   }
   
@@ -669,9 +672,9 @@ bool GSM::Child ( void )
   int      subscript;
   bool     result = true;
 
-  assert( _Stack->Depth() >= 2 );
-  p2 = _Stack->Pop();
-  p1 = _Stack->Pop();
+  assert( _StackStack->Peek()->Depth() >= 2 );
+  p2 = _StackStack->Peek()->Pop();
+  p1 = _StackStack->Peek()->Pop();
 
   p2 = _ResolveRef( p2 );
   p1 = _ResolveRef( p1 );
@@ -687,12 +690,12 @@ bool GSM::Child ( void )
       {
 	new_node = old_node->GetChild( subscript );
 	p1 = new Node_Portion( new_node );
-	_Stack->Push( p1 );
+	_StackStack->Peek()->Push( p1 );
       }
       else
       {
 	_ErrorMessage( _StdErr, 40, old_node->NumChildren() );
-	_Stack->Push( new Error_Portion );
+	_StackStack->Peek()->Push( new Error_Portion );
 	result = false;
       }
     }
@@ -700,7 +703,7 @@ bool GSM::Child ( void )
     {
       _ErrorMessage( _StdErr, 38 );
       delete p1;
-      _Stack->Push( new Error_Portion );
+      _StackStack->Peek()->Push( new Error_Portion );
       result = false;
     }
   }
@@ -708,7 +711,7 @@ bool GSM::Child ( void )
   {
     _ErrorMessage( _StdErr, 39 );
     delete p1;
-    _Stack->Push( new Error_Portion );
+    _StackStack->Peek()->Push( new Error_Portion );
     result = false;
   }
 
@@ -734,7 +737,7 @@ void GSM::_BindCheck( void ) const
   if( _CallFuncStack->Depth() <= 0 )
     _ErrorMessage( _StdErr, 21 );
 
-  if( _Stack->Depth() <= 0 )
+  if( _StackStack->Peek()->Depth() <= 0 )
     _ErrorMessage( _StdErr, 22 );
 }
 #endif // NDEBUG
@@ -807,7 +810,7 @@ bool GSM::BindVal( void )
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
-  param = _Stack->Pop();
+  param = _StackStack->Peek()->Pop();
   
   param = _ResolveRef( param );
 
@@ -831,7 +834,7 @@ bool GSM::BindRef( void )
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
-  param = _Stack->Pop();
+  param = _StackStack->Peek()->Pop();
   
   if( param->Type() == porREFERENCE )
   {
@@ -852,7 +855,7 @@ bool GSM::BindRef( void )
     if( param->ShadowOf() == 0 )
     {
       _CallFuncStack->Push( func );
-      _Stack->Push( param );
+      _StackStack->Peek()->Push( param );
       result = BindVal();
       return result;
     }
@@ -946,7 +949,7 @@ bool GSM::CallFunction( void )
     result = false;
   }
 
-  _Stack->Push( return_value );
+  _StackStack->Peek()->Push( return_value );
 
 
   for( index = 0; index < num_params; index++ )
@@ -1025,11 +1028,6 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
   int             program_length  = program.Length();
 
 
-  if( user_func )
-  {
-    _RefTableStack->Push( new RefHashTable );
-  }
-
   while( ( program_counter <= program_length ) && ( !done ) )
   {
     instruction = program[ program_counter ];
@@ -1042,7 +1040,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
       break;
 
     case iIF_GOTO:
-      p = _Stack->Pop();
+      p = _StackStack->Peek()->Pop();
       if( p->Type() == porBOOL )
       {
 	if( ( (bool_Portion*) p )->Value() )
@@ -1060,7 +1058,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
       else
       {
 	_ErrorMessage( _StdErr, 32 );
-	_Stack->Push( p );
+	_StackStack->Peek()->Push( p );
 	program_counter++;
 	instr_success = false;
       }
@@ -1086,21 +1084,69 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
     }
   }
 
-  if( user_func )
-  {
-    delete _RefTableStack->Pop();
-  }
-  else
+  if( !user_func )
   {
     while( program.Length() > 0 )
     {
-      instruction = program.Remove( 1 );
-      delete instruction;
+      delete program.Remove( 1 );
     }
   }
 
   return result;
 }
+
+
+
+
+
+Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program )
+{
+  GSM_ReturnCode rc_result;
+  Portion* result;
+
+  _RefTableStack->Push( new RefHashTable );
+  _StackStack->Push( new gGrowableStack< Portion* > );
+
+  rc_result = Execute( program, true );
+
+  switch( rc_result )
+  {
+  case rcSUCCESS:
+    switch( _StackStack->Peek()->Depth() )
+    {
+    case 1:
+      result = _StackStack->Peek()->Pop();
+      break;
+    case 0:
+      result = new Error_Portion( (gString)
+				 "User-defined function Error:\n" +
+				 "  No return value\n" );
+      break;
+    default:
+      result = new Error_Portion( (gString)
+				 "User-defined function Error:\n" +
+				 "  Too many values left on stack;\n" +
+				 "  return value ambiguous\n" );
+    }
+    break;
+  case rcFAIL:
+    result = 0;
+    break;
+  case rcQUIT:
+    result = new Error_Portion( (gString)
+			       "User-defined function Error:\n" +
+			       "  Interruption by user\n" );
+    break;
+  }
+
+  Flush();
+  delete _StackStack->Pop();
+  delete _RefTableStack->Pop();
+
+  return result;
+}
+
+
 
 
 //----------------------------------------------------------------------------
@@ -1112,15 +1158,15 @@ void GSM::Output( void )
 {
   Portion*  p;
 
-  assert( _Stack->Depth() >= 0 );
+  assert( _StackStack->Peek()->Depth() >= 0 );
 
-  if( _Stack->Depth() == 0 )
+  if( _StackStack->Peek()->Depth() == 0 )
   {
     _StdOut << "Stack : NULL\n";
   }
   else
   {
-    p = _Stack->Pop();
+    p = _StackStack->Peek()->Pop();
     p = _ResolveRef( p );
 
     p->Output( _StdOut );
@@ -1134,15 +1180,15 @@ void GSM::Dump( void )
 {
   int  i;
 
-  assert( _Stack->Depth() >= 0 );
+  assert( _StackStack->Peek()->Depth() >= 0 );
 
-  if( _Stack->Depth() == 0 )
+  if( _StackStack->Peek()->Depth() == 0 )
   {
     _StdOut << "Stack : NULL\n";
   }
   else
   {
-    for( i = _Stack->Depth() - 1; i >= 0; i-- )
+    for( i = _StackStack->Peek()->Depth() - 1; i >= 0; i-- )
     {
       _StdOut << "Stack element " << i << " : ";
       Output();
@@ -1150,7 +1196,7 @@ void GSM::Dump( void )
   }
   _StdOut << "\n";
   
-  assert( _Stack->Depth() == 0 );
+  assert( _StackStack->Peek()->Depth() == 0 );
 }
 
 
@@ -1159,9 +1205,9 @@ bool GSM::Pop( void )
   Portion* p;
   bool result = false;
 
-  if( _Stack->Depth() > 0 )
+  if( _StackStack->Peek()->Depth() > 0 )
   {
-    p = _Stack->Pop();
+    p = _StackStack->Peek()->Pop();
     delete p;
     result = true;
   }
@@ -1179,14 +1225,14 @@ void GSM::Flush( void )
   Portion*  p;
   bool result;
 
-  assert( _Stack->Depth() >= 0 );
-  for( i = _Stack->Depth() - 1; i >= 0; i-- )
+  assert( _StackStack->Peek()->Depth() >= 0 );
+  for( i = _StackStack->Peek()->Depth() - 1; i >= 0; i-- )
   {
     result = Pop();
     assert( result == true );
   }
 
-  assert( _Stack->Depth() == 0 );
+  assert( _StackStack->Peek()->Depth() == 0 );
 }
 
 
@@ -1410,13 +1456,14 @@ void GSM::_ErrorMessage
 #include "gstack.imp"
 
 TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< gGrowableStack< Portion* >* >;
 TEMPLATE class gStack< CallFuncObj* >;
 TEMPLATE class gStack< RefHashTable* >;
-
 
 #include "ggrstack.imp"
 
 TEMPLATE class gGrowableStack< Portion* >;
+TEMPLATE class gGrowableStack< gGrowableStack< Portion* >* >;
 TEMPLATE class gGrowableStack< CallFuncObj* >;
 TEMPLATE class gGrowableStack< RefHashTable* >;
 

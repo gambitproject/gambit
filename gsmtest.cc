@@ -38,6 +38,9 @@ int main( void )
   gString y = "y";
   gString z = "z";
   GSM *machine;
+  gList< Instruction* >* prog;
+  FuncDescObj* func;
+
 
   gOutput* sout = new gFileOutput( "sout" );
   gOutput* serr = new gFileOutput( "serr" );
@@ -1984,9 +1987,6 @@ int main( void )
 
 
 
-  gList< Instruction* >* prog;
-  FuncDescObj* func;
-
   prog = new gList< Instruction* >;
   prog->Append( new Push<double>( 1 ) );
   prog->Append( new Push<double>( 2 ) );
@@ -2449,6 +2449,28 @@ int main( void )
   machine->PushRef( "a" );
   machine->Dump();
 
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Dump );
+
+  func = new FuncDescObj( "TestDump" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+
+  machine->Push( (gInteger) 1 );
+  machine->InitCallFunction( "TestDump" );
+  machine->CallFunction();
+  machine->Dump();
+
+
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 
@@ -2462,3 +2484,4 @@ int main( void )
 
   return 0;
 }
+

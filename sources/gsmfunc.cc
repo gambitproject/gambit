@@ -789,16 +789,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     if( !_FuncInfo[ _FuncIndex ].UserDefined )
       result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
     else
-    {
-      return_code = gsm->Execute( *(_FuncInfo[_FuncIndex].FuncInstr), true );
-      if( return_code == rcSUCCESS )
-	result = new bool_Portion( true );
-      else
-      {
-	result = 0;
-	_ErrorOccurred = true;
-      }
-    }
+      result = gsm->ExecuteUserFunc( *(_FuncInfo[_FuncIndex].FuncInstr) );
 
     if( result == 0 )
       _ErrorOccurred = true;

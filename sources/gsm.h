@@ -30,17 +30,16 @@ template <class T> class gList;
 template <class T> class gGrowableStack;
 
 
-
 class GSM
 {
 private:
   gOutput&                         _StdOut;
   gOutput&                         _StdErr;
   
-  gGrowableStack< Portion* >*      _Stack;
-  gGrowableStack< CallFuncObj* >*  _CallFuncStack;
-  gGrowableStack< RefHashTable* >* _RefTableStack;
-  FunctionHashTable*               _FuncTable;
+  gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
+  gGrowableStack< CallFuncObj* >*                _CallFuncStack;
+  gGrowableStack< RefHashTable* >*               _RefTableStack;
+  FunctionHashTable*                             _FuncTable;
 
   Portion* _ResolveRef             ( Portion* p );
   Portion* _ResolveRefWithoutError ( Reference_Portion* p );
@@ -129,6 +128,7 @@ public:
 
   GSM_ReturnCode Execute( gList<Instruction*>& program, 
 			 bool user_func = false );
+  Portion* ExecuteUserFunc( gList<Instruction*>& program );
   
   void Output ( void );
   void Dump   ( void );
