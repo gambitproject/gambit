@@ -45,7 +45,6 @@ friend class gbtNfgIterator;
 private:
   gbtNfgSupport m_support;
   gbtArray<int> m_current;
-  gbtGame m_nfg;
   gbtNfgContingency m_profile;
   gbtBlock<int> m_frozen, m_thawed;
   
@@ -66,7 +65,6 @@ public:
   int NextContingency(void);
   
   gbtGameOutcome GetOutcome(void) const { return m_profile->GetOutcome(); }
-
 
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return m_profile->GetPayoff(p_player); }

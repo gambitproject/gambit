@@ -1312,8 +1312,10 @@ static int Product(const gbtArray<int> &p_dim)
 //----------------------------------------------------
 
 gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
-  : m_revision(0), m_outcomeRevision(-1), m_label("UNTITLED"),
-    players(p_dim.Length()), m_results(Product(p_dim))
+  : sortisets(false), m_revision(0), m_outcomeRevision(-1),
+    m_label("UNTITLED"),
+    players(p_dim.Length()), m_results(Product(p_dim)),
+    root(0), chance(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new gbtGamePlayerBase(this, pl);
@@ -1321,6 +1323,10 @@ gbtGameBase::gbtGameBase(const gbtArray<int> &p_dim)
     players[pl]->m_infosets.Append(new gbtGameInfosetBase(players[pl], 1, p_dim[pl]));
     for (int st = 1; st <= p_dim[pl]; st++) {
       players[pl]->m_infosets[1]->m_actions[st]->m_label = ToText(st);
+      gbtArray<int> actions(1);
+      actions[1] = st;
+      players[pl]->m_strategies.Append(new gbtGameStrategyBase(st, players[pl],
+							       actions));
     }
   }
   IndexStrategies();

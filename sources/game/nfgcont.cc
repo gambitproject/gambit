@@ -32,11 +32,11 @@
 //                  gbtNfgContingencyTree member functions
 //-------------------------------------------------------------------------
 
-gbtNfgContingencyTree::gbtNfgContingencyTree(const gbtGame &p_nfg)
+gbtNfgContingencyTree::gbtNfgContingencyTree(gbtGameBase *p_nfg)
   : m_nfg(p_nfg), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+    m_profile[pl] = m_nfg->players[pl]->GetStrategy(1);
   }
 }
 
@@ -65,13 +65,12 @@ gbtGameOutcome gbtNfgContingencyTree::GetOutcome(void) const
 
 gbtNumber gbtNfgContingencyTree::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  gbtGameBase *rep = dynamic_cast<gbtGameBase *>(m_nfg.Get());
   gbtArray<gbtArray<int> > behav(m_nfg->NumPlayers());
   for (int pl = 1; pl <= behav.Length(); pl++) {
     behav[pl] = m_profile[pl]->GetBehavior();
   }
   gbtVector<gbtNumber> payoff(m_nfg->NumPlayers());
-  rep->Payoff(behav, payoff);
+  m_nfg->Payoff(behav, payoff);
   return payoff[p_player->GetId()];
 }
 
@@ -80,11 +79,11 @@ gbtNumber gbtNfgContingencyTree::GetPayoff(const gbtGamePlayer &p_player) const
 //                gbtNfgContingencyTable member functions
 //-------------------------------------------------------------------------
 
-gbtNfgContingencyTable::gbtNfgContingencyTable(const gbtGame &p_nfg)
+gbtNfgContingencyTable::gbtNfgContingencyTable(gbtGameBase *p_nfg)
   : m_nfg(p_nfg), m_index(0L), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
-    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+    m_profile[pl] = m_nfg->players[pl]->GetStrategy(1);
     m_index += m_profile[pl]->GetIndex();
   }
 }
@@ -106,18 +105,17 @@ void gbtNfgContingencyTable::SetStrategy(gbtGameStrategy p_strategy)
 
 void gbtNfgContingencyTable::SetOutcome(const gbtGameOutcome &p_outcome) const
 {
-  dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_results[m_index + 1] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
-  dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_revision++;
+  m_nfg->m_results[m_index + 1] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
+  m_nfg->m_revision++;
 }
 
 gbtGameOutcome gbtNfgContingencyTable::GetOutcome(void) const
 {
-  return dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_results[m_index + 1];
+  return m_nfg->m_results[m_index + 1];
 }
 
 gbtNumber gbtNfgContingencyTable::GetPayoff(const gbtGamePlayer &p_player) const
 {
-  gbtGameBase *rep = dynamic_cast<gbtGameBase *>(m_nfg.Get());
-  return rep->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
+  return m_nfg->m_results[m_index + 1]->m_payoffs[p_player->GetId()];
 }
 

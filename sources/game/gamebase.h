@@ -408,11 +408,11 @@ public:
 
 class gbtNfgContingencyTree : public gbtNfgContingencyRep {
 private:
-  gbtGame m_nfg; 
+  gbtGameBase *m_nfg;
   gbtArray<gbtGameStrategy> m_profile;
   
 public:
-  gbtNfgContingencyTree(const gbtGame &);
+  gbtNfgContingencyTree(gbtGameBase *);
   virtual ~gbtNfgContingencyTree() { }
   
   virtual gbtNfgContingencyRep *Copy(void) const;
@@ -429,12 +429,12 @@ public:
 
 class gbtNfgContingencyTable : public gbtNfgContingencyRep {
 private:
-  gbtGame m_nfg; 
+  gbtGameBase *m_nfg; 
   long m_index;
   gbtArray<gbtGameStrategy> m_profile;
   
 public:
-  gbtNfgContingencyTable(const gbtGame &);
+  gbtNfgContingencyTable(gbtGameBase *);
   virtual ~gbtNfgContingencyTable() { }
   
   virtual gbtNfgContingencyRep *Copy(void) const;

@@ -110,7 +110,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
 	nfg->GetPlayer(pl)->SetLabel(gbtText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
-	gbtNfgSupport support(nfg->NewNfgSupport());
+	gbtNfgSupport support = nfg->NewNfgSupport();
 	gbtNfgContIterator iter(support);
 	iter.First();
 	do {

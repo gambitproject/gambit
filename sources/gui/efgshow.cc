@@ -369,7 +369,7 @@ gbtEfgFrame::gbtEfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
     gbtGameView(p_doc),
     m_treeWindow(0)
 {
-  SetSizeHints(300, 300);
+  SetSizeHints(600, 400);
 
   // Give the frame an icon
 #ifdef __WXMSW__

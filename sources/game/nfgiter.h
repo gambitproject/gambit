@@ -40,8 +40,7 @@ class gbtNfgContIterator;
 
 class gbtNfgIterator    {
 private:
-  gbtNfgSupport support;
-  gbtGame m_nfg;
+  gbtNfgSupport m_support;
   gbtArray<int> current_strat;
   gbtNfgContingency profile;
 
@@ -66,7 +65,7 @@ public:
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
     { return profile->GetPayoff(p_player); }
 
-  const gbtNfgSupport &Support(void) const { return support; }
+  const gbtNfgSupport &GetSupport(void) const { return m_support; }
 };
 
 #endif   // NFGITER_H

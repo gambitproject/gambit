@@ -33,28 +33,28 @@
 //--------------------------------------------------------------------------
 
 gbtNfgIterator::gbtNfgIterator(gbtGame p_nfg)
-  : support(p_nfg->NewNfgSupport()),
-    m_nfg(p_nfg), current_strat(p_nfg->NumPlayers()), 
-    profile(support->NewContingency())
+  : m_support(p_nfg->NewNfgSupport()),
+    current_strat(m_support->NumPlayers()), 
+    profile(m_support->NewContingency())
 {
   First();
 }
 
-gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &s) 
-  : support(s), m_nfg(s->GetGame()),
-    current_strat(m_nfg->NumPlayers()),
-    profile(support->NewContingency())
+gbtNfgIterator::gbtNfgIterator(const gbtNfgSupport &p_support) 
+  : m_support(p_support),
+    current_strat(m_support->NumPlayers()),
+    profile(m_support->NewContingency())
 {
   First();
 }
 
 gbtNfgIterator::gbtNfgIterator(const gbtNfgIterator &it)
-  : support(it.support), m_nfg(it.m_nfg), current_strat(it.current_strat), 
+  : m_support(it.m_support), current_strat(it.current_strat), 
     profile(it.profile)
 { }
 
 gbtNfgIterator::gbtNfgIterator(const gbtNfgContIterator &p_iterator)
-  : support(p_iterator.m_support), m_nfg(p_iterator.m_nfg), 
+  : m_support(p_iterator.m_support),
     current_strat(p_iterator.m_current), profile(p_iterator.m_profile)
 { }
 
@@ -64,10 +64,9 @@ gbtNfgIterator::~gbtNfgIterator()
 gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 {
   if (this != &it)  {
-    m_nfg = it.m_nfg;
     profile = it.profile;
     current_strat = it.current_strat;
-    support = it.support;
+    m_support = it.m_support;
   }
   return *this;
 }
@@ -78,8 +77,8 @@ gbtNfgIterator &gbtNfgIterator::operator=(const gbtNfgIterator &it)
 
 void gbtNfgIterator::First(void)
 {
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++)  {
-    gbtGameStrategy s = support->GetStrategy(i, 1);
+  for (int i = 1; i <= m_support->NumPlayers(); i++)  {
+    gbtGameStrategy s = m_support->GetStrategy(i, 1);
     profile->SetStrategy(s);
     current_strat[i] = 1;
   }
@@ -87,13 +86,13 @@ void gbtNfgIterator::First(void)
 
 int gbtNfgIterator::Next(int p)
 {
-  if (current_strat[p] < support->GetPlayer(p)->NumStrategies())  {
-    gbtGameStrategy s = support->GetStrategy(p, ++(current_strat[p]));
+  if (current_strat[p] < m_support->GetPlayer(p)->NumStrategies())  {
+    gbtGameStrategy s = m_support->GetStrategy(p, ++(current_strat[p]));
     profile->SetStrategy(s);
     return 1;
   }
   else {
-    gbtGameStrategy s = support->GetStrategy(p, 1);
+    gbtGameStrategy s = m_support->GetStrategy(p, 1);
     profile->SetStrategy(s);
     current_strat[p] = 1;
     return 0;
@@ -102,25 +101,25 @@ int gbtNfgIterator::Next(int p)
 
 int gbtNfgIterator::Set(int p, int s)
 {
-  if (p <= 0 || p > m_nfg->NumPlayers() ||
-      s <= 0 || s > support->GetPlayer(p)->NumStrategies())
+  if (p <= 0 || p > m_support->NumPlayers() ||
+      s <= 0 || s > m_support->GetPlayer(p)->NumStrategies())
     return 0;
   
-  profile->SetStrategy(support->GetStrategy(p, s));
+  profile->SetStrategy(m_support->GetStrategy(p, s));
   return 1;
 }
 
 void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
-    t[i] = profile->GetStrategy(support->GetPlayer(i))->GetId();
+  for (int i = 1; i <= m_support->NumPlayers(); i++) {
+    t[i] = profile->GetStrategy(m_support->GetPlayer(i))->GetId();
   }
 }
 
 void gbtNfgIterator::Set(const gbtArray<int> &t)
 {
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++){
-    profile->SetStrategy(support->GetStrategy(i, t[i]));
+  for (int i = 1; i <= m_support->NumPlayers(); i++){
+    profile->SetStrategy(m_support->GetStrategy(i, t[i]));
     current_strat[i] = t[i];
   } 
 }
@@ -137,9 +136,9 @@ gbtGameOutcome gbtNfgIterator::GetOutcome(void) const
 
 gbtNfgContIterator::gbtNfgContIterator(const gbtNfgSupport &p_support)
   : m_support(p_support), 
-    m_current(m_support->GetGame()->NumPlayers()),
-    m_nfg(m_support->GetGame()), m_profile(m_nfg->NewContingency()),
-    m_thawed(m_nfg->NumPlayers())
+    m_current(m_support->NumPlayers()),
+    m_profile(m_support->NewContingency()),
+    m_thawed(m_support->NumPlayers())
 {
   for (int i = 1; i <= m_thawed.Length(); i++) {
     m_thawed[i] = i;

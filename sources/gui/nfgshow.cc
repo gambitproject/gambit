@@ -24,13 +24,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
-#include "wx/notebook.h"
-#include "wx/grid.h"
-#include "wx/fontdlg.h"
+#include <wx/notebook.h>
+#include <wx/grid.h>
+#include <wx/fontdlg.h>
 #include "dlspinctrl.h"
 #include "wxstatus.h"
 
@@ -173,6 +173,8 @@ gbtNfgFrame::gbtNfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
     gbtGameView(p_doc),
     m_table(0)
 {
+  SetSizeHints(600, 400);
+
 #ifdef __WXMSW__
   SetIcon(wxIcon("nfg_icn"));
 #else
@@ -201,13 +203,19 @@ gbtNfgFrame::gbtNfgFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
 
   (void) new gbtNfgSupportFrame(m_doc, this);
 
+  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
+  m_nav = new gbtNfgNavigate(m_doc, this);
+  topSizer->Add(m_nav, 1, wxALL, 0);
   m_table = new gbtNfgTable(m_doc, this);
   m_table->SetFocus();
+  topSizer->Add(m_table, 1, wxALL | wxEXPAND, 0);
 
-  m_nav = new gbtNfgNavigate(m_doc, this);
-  // Dummy in a size event to get layout correct
-  wxSizeEvent foo;
-  OnSize(foo);
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  m_doc->SetShowNfg(true);
   Show(true);
 
   m_doc->UpdateViews();
@@ -1009,7 +1017,7 @@ void gbtNfgFrame::OnCloseWindow(wxCloseEvent &p_event)
 
 void gbtNfgFrame::OnSetFocus(wxFocusEvent &)
 {
-  m_table->SetFocus();
+  //  m_table->SetFocus();
 }
 
 void gbtNfgFrame::OnSize(wxSizeEvent &)
