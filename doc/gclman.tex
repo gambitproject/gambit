@@ -4414,8 +4414,8 @@ written.  The default is True.
 
 \item\lex{Format}
 \protect \large \begin{verbatim}
-Format[x->MIXED, {info<->False}, {names<->True}] =: MIXED
-Format[x->BEHAV, {info<->False}, {names<->True}] =: BEHAV
+Format[x->MIXED, {info<->False}, {names<->False}] =: MIXED
+Format[x->BEHAV, {info<->False}, {names<->False}] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd
@@ -4514,14 +4514,18 @@ written.
 
 \item\lex{GetFormat}
 \protect \large \begin{verbatim}
-GetFormat[x->MIXED, {info<->1}] =: MIXED
-GetFormat[x->BEHAV, {info<->1}] =: BEHAV
+GetFormat[x->MIXED, {info<->False},{names<->False}] =: MIXED
+GetFormat[x->BEHAV, {info<->False},{names<->False}] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd Gets the current formatting style for output of solution types on
 output streams.  
 \bd
-\item [info:] The amount of information to be displayed.  
+\item [info:] Displays all information known about solution if true. If false, just displays strategy or action probabilities.  
+\item [names:] If \verb+True+, the profiles are printed in a sparse format,
+with only positive-probability strategy or action profiles displayed, tagged
+by their strategy or action labels.  If \verb+False+, the whole vector
+(including zeroes) is printed, without any labels.
 \ed
 \item [See also:] \verb+Format+.
 \ed
@@ -7581,7 +7585,7 @@ True
 
 \item\lex{GetSolutionFormat}
 \protect \large \begin{verbatim}
-GetSolutionFormat[{info<->False}, {names<->True}] =: BOOLEAN 
+GetSolutionFormat[{info<->False}, {names<->False}] =: BOOLEAN 
 \end{verbatim} \normalsize
 
 \bd
@@ -8664,7 +8668,7 @@ profile
 
 \item\lex{SetSolutionFormat}
 \protect \large \begin{verbatim}
-SetSolutionFormat[{info->False}, {names->True}] =: BOOLEAN 
+SetSolutionFormat[{info->False}, {names->False}] =: BOOLEAN 
 \end{verbatim}\normalsize
 
 \bd Sets the formatting style for output of solution types on output
