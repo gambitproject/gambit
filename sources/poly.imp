@@ -501,7 +501,8 @@ template <class T> void polynomial<T>::Output(gOutput &output) const
   }
 }
 
-template <class T> gOutput &operator<<(gOutput &p_file, polynomial<T> &p_poly)
+template <class T> gOutput &operator<<(gOutput &p_file,
+				       const polynomial<T> &p_poly)
 {
   p_poly.Output(p_file);
   return p_file;

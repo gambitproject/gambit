@@ -1,7 +1,7 @@
 //
 // FILE: epolenum.cc  Extensive form version of polynomial enumeration
 //
-// $id$
+// $Id$
 //
 
 #include "epolenum.imp"
@@ -14,7 +14,7 @@ EfgPolEnumParams::EfgPolEnumParams(void)
 { }
 
 #include "double.h"
-
+/*
 TEMPLATE_SPECIALIZATION()
 gPoly<gDouble> EfgPolEnumModule<gDouble>::Payoff(int pl) const
 {
@@ -36,7 +36,7 @@ gPoly<gDouble> EfgPolEnumModule<gDouble>::Payoff(int pl) const
     (*params.tracefile) << "\nPayoff( " << pl << "): " << equation;
   return equation;
 }
-
+*/
 template class EfgPolEnumModule<gDouble>;
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
