@@ -1110,8 +1110,8 @@ being evaluated is a constant function (i. e., a function with no
 arguments).
 
 When short form forms are used, then ambiguity can arise in the
-intended order of evaluation.  For example, the statement \verb&a + b
-* c&, could be meant as \verb+Plus[a,Times[b,c]]+ or as
+intended order of evaluation.  For example, the statement \verb&a + b * c&, 
+could be meant as \verb+Plus[a,Times[b,c]]+ or as
 \verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
 functions that have a short form representation are given an order of
 precedence.  When a statement is parsed by the GCL, it is first
@@ -1274,8 +1274,8 @@ Then if \verb+a+ is a \verb+LIST(T)+, and \verb+b+ is of type
 If \verb+Foo[]+ is called with both \verb+a+ and \verb+b+ being lists
 of the correct data type, then the GCL checks whether the length of
 \verb+a+ and \verb+b+ is the same.  If not, it generates a
-dimensionality error. If they are of the same dimension, then \verb+c
-:= Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
+dimensionality error. If they are of the same dimension, then 
+\verb+c := Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
 length of \verb+c+ is equal to the length of \verb+a+, and where
 \verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
 
@@ -1716,7 +1716,7 @@ up the Gambit GUI to view a graphics display of an extensive or normal
 form game. If \verb+game+ is a variable of type \verb+NFG+ or
 \verb+EFG+, then the command \verb+Display[game]+ will display the
 \verb+game+ in the GUI.\footnote{The user defined functions
-\verb+GambitExe+ and \verb+Display+ assume that you used the default
+{\tt GambitExe} and {\tt Display} assume that you used the default
 directories and filenames when you installed Gambit.  If you deviated
 from the standard installation, you may have to edit these UDFs
 before they work correctly.}
@@ -3817,55 +3817,6 @@ The optional parameter \verb+time+, if specified, returns the amount
 of time consumed by the conversion.
 
 \item [See also:] \verb+Nfg+.
-\ed
-
-\item\lex{AllNashSolve}
-\protect \large \begin{verbatim}
-AllNashSolve[support->NFSUPPORT, {stopAfter->0}, {nEvals<->0}, 
-             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
-             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
-AllNashSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
-             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
-             {traceLevel->0}, {singularSupps<->{  }}, 
-             {recurse->True}] =: LIST(BEHAV),
-\end{verbatim}\normalsize
-
-\bd
-Solves for all totally mixed equilibrium on the support.  
-\verb+support+.  
-
-This algorithm iterates through all supports, and uses PolEnumSolve to
-find the full support equilibria on each support.  The following
-optional parameters may be used to modify the behavior of the
-algorithm: 
-\bd
-\item
-[stopAfter:] By default, all equilibria are found.  This parameter may
-be used to specify a maximum number of equilibria to be found.
-\item
-[precision:] Determines the precision of the computation. Default is
-floating point precision (\verb+Float+). 
-\item
-[nEvals:] Returns the number of function evaluations done by the
-algorithm.
-\item
-[time:] Returns the time elapsed during the execution
-of the algorithm.
-\item
-[traceFile:] A file containing a log of more detailed information on the
-execution of the algorithm.  By default, no logging is done.
-\item
-[traceLevel:] An integer specifying the level of detail in logging.
-Higher integers correspond to more detail; zero corresponds to no output
-at all.
-\item
-[singularSupps:] Returns a list of the supports which have singular solutions. 
-\item
-[recurse:] Recurses to find totally mixed equilibria on all
-subsupports of \verb+support+.
-\ed
-
-\item [See also:] \verb+PolEnumSolve+, \verb+PossibleNashSupports+
 \ed
 
 \item\lex{And} 
@@ -6111,48 +6062,54 @@ Returns the concatenation of the text strings \verb+x+ and \verb+y+.
 \item [Short form:] \verb%x + y%
 \ed
 
-\item\lex{PolEnumSolve} 
+\item\lex{PolEnumSolve}
 \protect \large \begin{verbatim}
-PolEnumSolve[support->NFSUPPORT, {stopAfter->0}, {precision->Float}, 
-             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
-             {traceLevel->0}] =: LIST(MIXED) 
+PolEnumSolve[support->NFSUPPORT, {stopAfter->0}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
 PolEnumSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
-             {precision->Float}, {nEvals<->0}, {time<->0.000000}, 
-             {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
-\end{verbatim} \normalsize
-\bd 
-%\marginpar{give better  description and cite}
-Solves for all totally mixed equilibrium on the support.  
-\verb+support+.  
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}, {singularSupps<->{  }}, 
+             {recurse->True}] =: LIST(BEHAV)
+\end{verbatim}\normalsize
 
-The algorithm starts with a cube containing the space of possible
-solutions and proceeds recursively.  The recursion step begins with a
-subcube.  The subcube is discarded if the cube is irrelevant in the
-sense of lying outside the space of possible solutions.  Otherwise a
-modified Newton's method is used to search for a solution in the
-subcube.  In the event that such a solution is found, Taylor's series
-information at the solution is used to inquire whether the solution is
-necessarily the unique solution in the subcube.  If Newton's method
-leaves the subcube before finding a solution, Taylor's series
-information at the center is used to inquire whether we can be sure
-that the subcube contains no solutions.  If neither of these
-procedures resolves the issue, the subcube is subdivided and this
-recursion is performed on each smaller subcube.  {\it Singular
-solutions may cause a fatal error.}
+\bd 
+
+Solves for all totally mixed Nash equilibrium on \verb+support+.  If
+\verb+recurse+ is \verb+True+, the algorithm iterates through all
+sub-supports of \verb+support+ to find the full support equilibria on
+each sub-support.  Supports with singular solutions are reported in
+\verb+singularSupps+.  These supports are skipped by the algorithm
+when determined to have singular solutions.
+
+On each sub-support, the algorithm starts with a cube containing the
+space of possible solutions and proceeds recursively.  The recursion
+step begins with a subcube.  The subcube is discarded if the cube is
+irrelevant in the sense of lying outside the space of possible
+solutions.  Otherwise a modified Newton's method is used to search for
+a solution in the subcube.  In the event that such a solution is
+found, Taylor's series information at the solution is used to inquire
+whether the solution is necessarily the unique solution in the
+subcube.  If Newton's method leaves the subcube before finding a
+solution, Taylor's series information at the center is used to inquire
+whether we can be sure that the subcube contains no solutions.  If
+neither of these procedures resolves the issue, the subcube is
+subdivided and this recursion is performed on each smaller subcube.
+Supports with singular solutions 
+
 
 The following optional parameters may be used to modify the behavior
 of the algorithm:
 \bd
 \item
-[asNfg:] By default, this is \verb+False+.  If it is specified to be
-\verb+True+, the extensive form game is solved by recursively converting
-its marked subgames into normal form, solving, and reconstructing the
-solution as a behavior profile.  {\it Note that currently this algorithm
-is only supported on the normal form, so this parameter
-must always be specified and {\tt True}.} 
-\item
 [stopAfter:] By default, all equilibria are found.  This parameter may
 be used to specify a maximum number of equilibria to be found.
+\item
+[asNfg:] Only applicable to the extensive form version.  By default,
+this is \verb+False+.  If it is specified to be \verb+True+, the
+extensive form game is solved by recursively converting its marked
+subgames into normal form, solving, and reconstructing the solution as
+a behavior profile.
 \item
 [precision:] Determines the precision of the computation. Default is
 floating point precision (\verb+Float+). 
@@ -6169,8 +6126,14 @@ execution of the algorithm.  By default, no logging is done.
 [traceLevel:] An integer specifying the level of detail in logging.
 Higher integers correspond to more detail; zero corresponds to no output
 at all.
+\item
+[singularSupps:] Returns a list of the supports which have singular solutions. 
+\item
+[recurse:] Recurses to find totally mixed equilibria on all
+subsupports of \verb+support+.
 \ed
-\item [See also:] \verb+PossibleNashSupports+, \verb+AllNashSolve+.
+
+\item [See also:] \verb+PossibleNashSupports+
 \ed
 
 \item\lex{PossibleNashSupports}
@@ -7443,24 +7406,6 @@ Searches for all Nash equilibria of the normal form game
 \end{verbatim} 
 \ed
 
-\item\lex{AllNashSolve}
-\protect \large \begin{verbatim}
-AllNashSolve[nfg->NFG, {stopAfter->0}, {nEvals<->0}, {time<->0.000000}, 
-             {traceFile<->(Output)}, {traceLevel->0}, 
-             {singularsupps<->{  }}, {recurse->True}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\bd 
-Version of \verb+AllNashSolve+ that takes a game rather than a support
-as an argument.  Searches for all Nash equilibria of an n person game
-\verb+nfg+.  Returns a list containing the equilibria found.
-
-\begin{verbatim}
-  AllNashSolve[Support[nfg],stopAfter,nEvals,time,traceFile,
-    traceLevel,singularsupps,recurse];
-\end{verbatim} 
-\ed
-
 \item\lex{AllPerfect}
 \protect \large \begin{verbatim}
 AllPerfect[n->NFG, {stopAfter->0}, {nTries->0}, 
@@ -7472,7 +7417,7 @@ Searches for all Perfect Nash equilibria of the normal form game
 \verb+n+.  Returns a list containing the equilibria found.
 
 \begin{verbatim}
-   If[NumPlayers[n] = 2, 
+  If[NumPlayers[n] = 2, 
     s:=IterativeUnDominated[n,mixed->True];
     m:=EnumMixedSolve[s,0,precision];
     Filter[m,IsPerfect[m]],
@@ -8788,6 +8733,42 @@ The player number of player \verb+p+.
 \end{verbatim} 
 \ed
 
+\item\lex{PolEnumSolve}
+\protect \large \begin{verbatim}
+PolEnumSolve[efg->EFG, {asNfg->False}, {stopAfter->0}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Version of \verb+PolEnumSolve+ that takes a game rather than a support
+as an argument.  Searches for all Nash equilibria of an n person game
+\verb+efg+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+  PolEnumSolve[Support[efg],asNfg,stopAfter,nEvals,time,traceFile,
+    traceLevel,singularSupps,recurse];
+\end{verbatim} 
+\ed
+
+\item\lex{PolEnumSolve}
+\protect \large \begin{verbatim}
+PolEnumSolve[nfg->NFG, {stopAfter->0}, {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Version of \verb+PolEnumSolve+ that takes a game rather than a support
+as an argument.  Searches for all Nash equilibria of an n person game
+\verb+nfg+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+  PolEnumSolve[Support[nfg],stopAfter,nEvals,time,traceFile,
+    traceLevel,singularSupps,recurse];
+\end{verbatim} 
+\ed
+
 \item\lex{Prepend}
 \protect \large \begin{verbatim}
 Prepend[x->ANYTYPE, l->LIST(ANYTYPE)] =: LIST(ANYTYPE) 
@@ -9892,7 +9873,67 @@ NewFunction[LamHiLo[list->LIST(NUMBER),lam->LIST(NUMBER),range->NUMBER,llmaxind-
 \end{document}
 
 
+\item\lex{PolEnumSolve} 
+\protect \large \begin{verbatim}
+PolEnumSolve[support->NFSUPPORT, {stopAfter->0}, {precision->Float}, 
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+PolEnumSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
+             {precision->Float}, {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim} \normalsize
+\bd 
+%\marginpar{give better  description and cite}
+Solves for all totally mixed equilibrium on the support.  
+\verb+support+.  
 
+The algorithm starts with a cube containing the space of possible
+solutions and proceeds recursively.  The recursion step begins with a
+subcube.  The subcube is discarded if the cube is irrelevant in the
+sense of lying outside the space of possible solutions.  Otherwise a
+modified Newton's method is used to search for a solution in the
+subcube.  In the event that such a solution is found, Taylor's series
+information at the solution is used to inquire whether the solution is
+necessarily the unique solution in the subcube.  If Newton's method
+leaves the subcube before finding a solution, Taylor's series
+information at the center is used to inquire whether we can be sure
+that the subcube contains no solutions.  If neither of these
+procedures resolves the issue, the subcube is subdivided and this
+recursion is performed on each smaller subcube.  {\it Singular
+solutions may cause a fatal error.}
+
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+\bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.} 
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[precision:] Determines the precision of the computation. Default is
+floating point precision (\verb+Float+). 
+\item
+[nEvals:] Returns the number of function evaluations done by the
+algorithm.
+\item
+[time:] Returns the time elapsed during the execution
+of the algorithm.
+\item
+[traceFile:] A file containing a log of more detailed information on the
+execution of the algorithm.  By default, no logging is done.
+\item
+[traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to no output
+at all.
+\ed
+\item [See also:] \verb+PossibleNashSupports+.
+\ed
 
 
 
