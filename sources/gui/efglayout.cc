@@ -13,10 +13,10 @@
 
 #include "efg.h"
 
-#include "legendc.h"
 #include "twflash.h"
 #include "treewin.h"
 #include "efgshow.h"
+#include "legend.h"
 
 int INFOSET_SPACING = 10;
 int SUBGAME_LARGE_ICON_SIZE = 20;

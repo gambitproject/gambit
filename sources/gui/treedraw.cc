@@ -12,7 +12,6 @@
 #include "guishare/wxmisc.h"
 #include "gambit.h"
 #include "treedraw.h"
-#include "legend.h"
 
 #include "dllayout.h"
 #include "dllegends.h"

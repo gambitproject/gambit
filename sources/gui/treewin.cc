@@ -15,12 +15,10 @@
 #include "base/gmisc.h"
 #include "math/math.h"
 #include "efg.h"
-#include "legendc.h"
 #include "treewin.h"
 #include "twflash.h"
 #include "efgshow.h"
 #include "treedrag.h"
-#include "legend.h"
 
 #include "efgutils.h"
 #include "base/glist.imp"
