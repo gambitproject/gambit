@@ -54,7 +54,8 @@ public:
   virtual int NumPlayerActions(void) const = 0;
   virtual int NumChanceActions(void) const = 0;
   virtual gPVector<int> NumMembers(void) const = 0;
-
+  virtual gBlock<Infoset *> Infosets(void) const = 0;
+  
   virtual gNumber GetChanceProb(Infoset *, int) const = 0;
   virtual gNumber GetChanceProb(const Action *) const = 0;
 
