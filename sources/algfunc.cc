@@ -488,40 +488,36 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
 Portion* GSM_Lcp_ListNumber(Portion** param)
 {
-  Precision precision = ((PrecisionPortion *) param[2])->Value();
-  if(precision==precDOUBLE)
-    {
-      gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
-      gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
+  if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
+    gMatrix<double> *a = ListToMatrix_Float((ListPortion*) param[0]);
+    gVector<double> *b = ListToVector_Float((ListPortion*) param[1]);
 
-      LTableau<double>* tab = new LTableau<double>(*a, *b);
-      tab->LemkePath(0);
-      gVector<double> vector;
-      tab->BasisVector(vector);
-      Portion* result = ArrayToList(vector);
-      delete tab;
-      delete a;
-      delete b;
+    LTableau<double> *tab = new LTableau<double>(*a, *b);
+    tab->LemkePath(0);
+    gVector<double> vector;
+    tab->BasisVector(vector);
+    Portion *result = ArrayToList(vector);
+    delete tab;
+    delete a;
+    delete b;
       
-      return result;
-    }
-  else if(precision==precRATIONAL)
-    {
-      gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
-      gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
+    return result;
+  }
+  else {  // precision == precRATIONAL
+    gMatrix<gRational> *a = ListToMatrix_Rational((ListPortion*) param[0]);
+    gVector<gRational> *b = ListToVector_Rational((ListPortion*) param[1]);
       
-      LTableau<gRational>* tab = new LTableau<gRational>(*a, *b);
-      tab->LemkePath(0);
-      gVector<gRational> vector;
-      tab->BasisVector(vector);
-      Portion* result = ArrayToList(vector);
-      delete tab;
-      delete a;
-      delete b;
+    LTableau<gRational> *tab = new LTableau<gRational>(*a, *b);
+    tab->LemkePath(0);
+    gVector<gRational> vector;
+    tab->BasisVector(vector);
+    Portion *result = ArrayToList(vector);
+    delete tab;
+    delete a;
+    delete b;
       
-      return result;
-    }
-
+    return result;
+  }
 }
 
 //-------------
