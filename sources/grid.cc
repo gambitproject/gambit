@@ -58,19 +58,21 @@ template <class T>
 void GridSolveModule<T>::OutputHeader(gOutput &out)
 {
 int st1=support.NumStrats(1),st2=support.NumStrats(2);
+int i;
+
 out<<"Dimensionality:\n";
 out<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
-
-out<<"Game:\n";
-out<<"3 2 1\n";
-int i;
-for (i=1;i<=st1;i++)
+if (st1==st2)
 {
-	for (int j=1;j<=st2;j++)
+	out<<"Game:\n";
+	out<<"3 2 1\n";
+	for (i=1;i<=st1;i++)
+	{
+		for (int j=1;j<=st2;j++)
 		out<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
-	out<<'\n';
+		out<<'\n';
+	}
 }
-
 out<<"Settings:\n";
 out<<params.minLam<<'\n'<<params.maxLam<<'\n'<<params.delLam<<'\n';
 out<<0<<'\n'<<1<<'\n'<<params.powLam<<'\n';
@@ -133,7 +135,7 @@ for (i=1;i<=st2;i++) q_calc[i]=((T)exp(l*y[i])) / denom;
 			 * 1.0 or 0.0                                       */
 
 ok=true;dist=(T)0;
-for (i = 1; i <= st1; i++)
+for (i = 1; i <= st2; i++)
 {
 	dist += abs(q[i]-q_calc[i]);
 	if (abs(q[i]-q_calc[i])>=params.tol) ok=false;
@@ -172,7 +174,7 @@ gWatch timer;timer.Start();
 OutputHeader(*params.pxifile);
 if (params.trace>0) OutputHeader(*params.tracefile);
 // Create the ProbVector to give us all sets of probability values
-ProbVect<T> *pv=new ProbVect<T>(st1,(int)((T)1.0/params.delp+(T)0.5));
+ProbVect<T> *pv=new ProbVect<T>(st2,(int)((T)1.0/params.delp+(T)0.5));
 int num_steps;
 if (params.powLam==0)
 	num_steps=(int)((params.maxLam-params.minLam)/params.delLam);
