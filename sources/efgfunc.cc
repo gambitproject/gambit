@@ -87,6 +87,17 @@ Portion *GSM_WriteEfg(Portion **param)
     return 0;
 }
 
+template <class T> int BuildReducedNormal(const ExtForm<T> &,
+					  NormalForm<T> *&);
+
+Portion *GSM_EfgToNfg(Portion **param)
+{
+  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  NormalForm<double> *N = 0;
+  BuildReducedNormal(E, N);
+  return new Nfg_Portion<double>(*N);
+}
+
 //
 // A few temporary functions for modifying game parameters.  Don't document!
 // :-)
@@ -160,6 +171,11 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("LiapEfg");
   FuncObj->SetFuncInfo(GSM_LiapEfg, 1);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("EfgToNfg");
+  FuncObj->SetFuncInfo(GSM_EfgToNfg, 1);
+  FuncObj->SetParamInfo(GSM_EfgToNfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOutcome");
