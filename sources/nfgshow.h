@@ -9,6 +9,7 @@
 
 #include "wx.h"
 #include "wxmisc.h"
+#include "wx_split.h"
 
 #include "spread.h"
 #include "nfgdraw.h"
@@ -54,6 +55,9 @@ private:
   gList<NFSupport *> supports;
   MixedSolutionList solns;
 
+  wxFrame *m_frame;
+  wxSplitterWindow *m_splitter;
+
   struct StartingPoints {
     MixedSolutionList profiles;
     int last;
@@ -63,7 +67,7 @@ private:
   int cur_soln;
 
   NFSupport *cur_sup;
-  wxFrame     *pframe;
+
   NormalSpread    *spread;
   int pl1, pl2;
   int rows, cols;
@@ -167,7 +171,7 @@ public:
   int  CheckAccelerators(wxKeyEvent &ev);
 
   // Access to the actual window
-  wxFrame *Frame(void) { return pframe; }
+  wxFrame *Frame(void) { return m_frame; }
 
   // Access to the draw settings.
   const NormalDrawSettings& getNormalDrawSettings() { return draw_settings; }

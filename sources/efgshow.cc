@@ -52,7 +52,7 @@ public:
 
 guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #ifdef wx_msw
-  : wxButtonBar(p_frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30),
+  : wxButtonBar(p_frame, 0, 0, -1, -1, 0, wxVERTICAL, 1),
 #else
   : wxToolBar(p_frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30),
 #endif  // wx_msw
@@ -106,6 +106,7 @@ guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
   AddTool(efgmenuPREFS_DISPLAY, ToolbarOptionsBitmap);
   AddSeparator();
   AddTool(efgmenuHELP_CONTENTS, ToolbarHelpBitmap);
+  CreateTools();
   Layout();
 }
 

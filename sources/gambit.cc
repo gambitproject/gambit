@@ -121,7 +121,7 @@ public:
 
 GambitToolBar::GambitToolBar(wxFrame *frame):
 #ifdef wx_msw
-    wxButtonBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
+    wxButtonBar(frame, 0, 0, -1, -1, 0, wxVERTICAL, 1)
 #else
     wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
 #endif
@@ -143,14 +143,18 @@ GambitToolBar::GambitToolBar(wxFrame *frame):
 #ifdef wx_msw
     SetDefaultSize(33, 30);
 #endif
-    
+
+#ifndef wx_msw    
     GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
+#endif
     AddTool(FILE_LOAD, ToolbarOpenBitmap);
     AddSeparator();
     AddTool(FILE_NEW_EFG, ToolbarEfgBitmap);
     AddTool(FILE_NEW_NFG, ToolbarNfgBitmap);
     AddSeparator();
     AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap);
+
+    CreateTools();
     Layout();
 }
 

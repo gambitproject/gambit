@@ -26,9 +26,8 @@
 //                 NfgShow: Constructor and destructor
 //======================================================================
 
-NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
-  : EfgNfgInterface(gNFG, efg), nf(N), nf_iter(N), pframe(pframe_)
-
+NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *p_frame)
+  : EfgNfgInterface(gNFG, efg), nf(N), nf_iter(N), m_frame(p_frame)
 {
   pl1 = 1;
   pl2 = 2;        // use the defaults
@@ -37,7 +36,7 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   cur_sup->SetName("Full Support");
   supports.Append(cur_sup);
   
-  spread = new NormalSpread(cur_sup, pl1, pl2, this, pframe);
+  spread = new NormalSpread(cur_sup, pl1, pl2, this, m_frame);
 
   soln_show      = 0;  // no solution inspect window yet.
   SetPlayers(pl1, pl2, true);
@@ -248,7 +247,7 @@ extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 Bool NfgShow::Save(void)
 {
   static int s_nDecimals = 6;
-  dialogNfgSave dialog(Filename(), nf.GetTitle(), s_nDecimals, pframe);
+  dialogNfgSave dialog(Filename(), nf.GetTitle(), s_nDecimals, m_frame);
 
   if (dialog.Completed() == wxOK) {
     if (wxFileExists(dialog.Filename())) {
@@ -958,7 +957,7 @@ void NfgShow::OutcomeDetach(void)
 
 void NfgShow::OutcomeNew(void)
 {
-  dialogNfgPayoffs dialog(nf, 0, pframe);
+  dialogNfgPayoffs dialog(nf, 0, m_frame);
 
   if (dialog.Completed() == wxOK) {
     NFOutcome *outc = nf.NewOutcome();
@@ -1221,7 +1220,7 @@ void NfgShow::EditLabel(void)
 
 void NfgShow::SetStrategyLabels(void)
 {
-  dialogStrategies dialog(nf, pframe);
+  dialogStrategies dialog(nf, m_frame);
 
   if (dialog.GameChanged()) {
     spread->SetStrategyLabels(cur_sup);
@@ -1461,8 +1460,8 @@ public:
 // the MakeMenuBar function.  Thus, no features are selected in the main
 // SpreadSheet3D constructor, except for the panel.
 
-NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p, wxFrame *pframe) 
-    : SpreadSheet3D(sup->NumStrats(_pl1), sup->NumStrats(_pl2), 1, 3, "", pframe, ANY_BUTTON),
+NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p, wxFrame *p_frame) 
+    : SpreadSheet3D(sup->NumStrats(_pl1), sup->NumStrats(_pl2), 1, 3, "", p_frame, ANY_BUTTON),
       strat_profile(sup->Game().NumPlayers()), 
       parent(p), pl1(_pl1), pl2(_pl2),
       dimensionality(sup->NumStrats())
@@ -2160,7 +2159,7 @@ void NormalSpread::OnOptionsChanged(unsigned int options)
 
 NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
 #ifdef wx_msw
-    wxButtonBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
+    wxButtonBar(frame, 0, 0, -1, -1, 0, wxVERTICAL, 1)
 #else
     wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
 #endif
@@ -2198,6 +2197,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(OPTIONS_MENU, ToolbarOptionsBitmap);
     AddSeparator();
     AddTool(HELP_MENU_CONTENTS, ToolbarHelpBitmap);
+    CreateTools();
     Layout();
 }
 
