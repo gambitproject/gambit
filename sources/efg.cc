@@ -245,8 +245,10 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
     ChanceInfoset *s = new ChanceInfoset(this, i, chance,
 					       t->NumActions());
     s->name = t->GetName();
-    for (int act = 1; act <= s->probs.Length(); act++)
+    for (int act = 1; act <= s->probs.Length(); act++) {
+      s->probs[act] = t->probs[act];
       s->actions[act]->name = t->actions[act]->name;
+    }
     chance->infosets.Append(s);
   }
 
