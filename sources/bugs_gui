@@ -1,30 +1,89 @@
 GUI Bugs:
 
+//------------------------------
+
 Bug D3: Bugs in Outcome interface
 
 When filling in payoffs for outcomes in the extensive form outcome
 display on Linux, there is no echoing of keystrokes.  So you can't
 tell what you are entering.  Also, when entering outcome names, stray
-numbers are prefixed to the name, and you can't get rid of
-them. Finally,the outcome window does not stay on top when you attach
-outcomes to the game.
+numbers are sometimes prefixed to the name (this happens for capital
+letters), and you can't get rid of them.  Finally,the outcome window
+does not stay on top when you attach outcomes to the game.
 
 For the normal form, there are two outcome windows, one accessed by
-Solve->Outcomes, and the other by double click (ctrl click on Linux).
-Why are there two different interfaces. We should improve the editing
+Solve->Outcomes, and the other by double click (Ctrl click on Linux).
+Why are there two different interfaces?  We should improve the editing
 capabilities in the first interface, and ditch the other.  Note that
 right now, the editing on the normal form outcomes (in the first
 interface) suffers from the same problems as in extensive form.  
 
-Finally, in the normal form outcome window, I was unable to switch the
-setting to the long format using the Solve
-Outcomes->Opt->Long/CompactFormat setting.
+In the normal form outcome window, I was unable to switch the setting
+to the long format using the Solve->Outcomes->Opt->Long/CompactFormat
+setting.
+
+//------------------------------
+
+Bug D4:  Cannot get GUI Help on Unix systems
+
+When you hit Help->Contents menu item, it says 
+
+  66 mill:/home/mill/rdm/gambit wxhelp: command not found
+  wxWindows: could not execute 'wxhelp'
+  wxhelp: command not found
+
+at the unix prompt, then hangs for 45 seconds until it displays a
+window saying that the help file cannot be found.
+
+//------------------------------
+
+Bug D5: Loading and saving files
+
+When you load a file (efg or nfg) in the GUI, it should
+remember the directory you got it from, and next time you try and load
+a file, start the file load menu in that directory, rather than
+starting in the same location as it started the first time.  
+
+When saving a file in the GUI, it should remember the current
+name of the file, and use the same name when saving the file.  Also,
+it should give you a message when you save and there is already a file
+with the same name. 
+
+//------------------------------
+
+Bug D6: This is not really a bug, just a re-organization and re-naming
+of menu entries.  
+
+The top level menu in the normal form (NF) and Extensive Form (EF) GUI
+should be similar to each other (except for the "Subgame" entry in the
+EF GUI, which has no counterpart in the NF GUI).  To this end, we
+should change the "Build" entry in the EF GUI to be "Edit", we should
+change the "Label" entry in the NF GUI to be "Edit", and then we
+should move the Solve->Outcomes entry to Edit->Outcomes in the NF GUI.
+
+//------------------------------
+
+Bug D7:  Conflict with Netscape
+
+When running the GUI, if netscape is already running, you get the
+follwoing message, (or something like it, depending on the machine): 
+
+   X Error of failed request:  BadDrawable (invalid Pixmap or Window parameter)
+   Major opcode of failed request:  55 (X_CreateGC)
+   Resource id in failed request:  0x0
+   Serial number of failed request:  379
+   Current serial number in output stream:  391
+
+We should either fix this, or deliver a more informative error messsage
 
 
+-------------  older bugs that still remain ---------------
 
--------------  older bugs that still need to be checked out ---------------
+//------------------------------
 
-GUI Bug 4: Changing payoffs to a normal form game. 
+GUI Bug 4: Changing payoffs to a normal form game.   
+
+RDM: This bug seems to be fixed (9/3/98) testing on Linux:
 
 On Fri, 16 May 1997, Richard McKelvey wrote:
 
@@ -64,7 +123,11 @@ NFG 1 D "" { "1" "2" }
 1.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000 0.000000 1.000000 0.000000 0.000000 1.000000 
 
 
-GUI Bugs 5.1 - 5.7: Assorted minor bugs. 
+//------------------------------
+
+GUI Bug 5.1
+
+RDM: Seems to be fixed (testing on Linux 9/3/98)
 
 On Thu, 27 Mar 1997, Karatsobanis John wrote:
 
@@ -74,41 +137,95 @@ On Thu, 27 Mar 1997, Karatsobanis John wrote:
 > 1. When I've tried to delete a solution there was a message error: 
 > "Assert : num>=1&&num<=length
 > in file : GLIST.IMP,line=147"
+
+
+//------------------------------
+
+GUI Bug 5.2
+
 > 2. Why the solution list window does not vanish from the upper right
 > close button?
+
+RDM: Problem still exists (9/3/98).  Also, the Label->Strats dialog
+box (and perhaps others as well) can not be gotten rid of in any way,
+even after the main Gambit window has been dismissed (on Linux).
+
+//------------------------------
+
+GUI Bug 5.3
+
+RDM: fixed in checked in versions of file 9/3/98
+
 > 3. The examples Cs.efg and holdout.efg furnish the following message
 > error
 > "Readfaild::check the file" when one tries to open them.
+
+//------------------------------
+
+GUI Bug 5.4,  Scrolling problems
+
 > 4. When the main window for the tree design is not maximized the
 > vertical and the horizontal bars are getting out of the screen.
+
+RDM: Problem still exists 9/3/98.  Here are furhter details:
+
+Scrolling is not correct: Eg(this is all on Linux): Load caro2.efg.
+Hit +magnify button twice.  Move cursor R,R,D,R,R.  Notice how screen
+does not always display cursor.  Now hit L,L,L,L, and try to get back
+to the root node.  Again cursor moves off the screen, and the bottom
+scroll bar does not help to move the window to display the cursor.
+
+Also, the scroll bars require a complete redraw before the next scroll
+bar hit is recorded. Load a big game like bayes2a.efg, andthen hit the
+right scroll bar three times insuccession to try and scroll the screen
+down.  It redraws the screen three times instead of halting the redraw
+when the second and third hits to the scroll bar are made.  Also,
+dragging the scroll bar does not work.  This makes it very time
+consuming to move around a large gaem.
+
+
+//------------------------------
+
+GUI Bug 5.5
+
+RDM: Ted fixed these, 9/3/98
+
 > 5. When I've tried to solve a game without assigning any output I had
 > the following message error:
 > "Assert:support.lsValid() 
 > in file EFG.CC,line=1058"
 > The same message when outputs are assigned but the number of players is
 > 1.
+
+//------------------------------
+
+GUI Bug 5.6
+
 > 6. In the edit behav Solution window the ? button seems to do nothing.
-> 7. In the magnifie mode the lines representing information sets are
+
+RDM: 9/3/98 On Linux, it gives the same problem as above, "wxWindows: could
+not execute wxhelp"
+
+//------------------------------
+
+GUI Bug 5.7
+
+> 7. In the magnify mode the lines representing information sets are
 > broken or lost on trees with big verical dimension ( due to many
 > branches emanating from a single node). Also in this case horizontal
 > gray lines appear and payoffs seems like double-stroked.
-> 
-> Thanks for hospitality
-> Karatsobanis John 
-> e-mail : glenn@gen.auth.gr
-> 
 
-Bugs 6.1 - 6.2
+RDM: 9/3/98 This is still a problem.  Look at Bayes2a, try and
+remember what the game is supposed to look like (or bring up two
+copies, one for comparison). Then hit +Magnify three times.  Now move
+around the tree with the cursor, and eventually you will see this.
 
-On Tue, 6 May 1997, Paul L Niemann wrote:
 
-> Hello,
-> 
-> First I want to let you know what a great tool I have found Gambit to be.
->  Thanks.
-> 
-> A couple of bugs that have crept up in my use of the software:
-> 
+//------------------------------
+
+GUI Bug 6.1
+
+RDM: Now fixed (Same bug as above)
 
 1.
 > When I accidently hit the "start solution algorithm" button without any
@@ -122,47 +239,25 @@ On Tue, 6 May 1997, Paul L Niemann wrote:
 > terminal node.
 > 
 
+//------------------------------
+
+GUI Bug 6.2
+
 2.
 > I also ran into some difficulties in saving some games.  I think I have
 > narrowed the problem down to games with quotation marks (" ") in either the
 > Node Label or the Action Label.  The game (in extensive form) would save
 > without any indication of an error, but when I tried to open the file
 > later I would get the following messages:
-> 
-> Message Window reading:  ReadFailed::Check the file
-> A Default Output window would also open that read:  parse error
-> 
-> Note: both of these errors occurred when working on the extensive form of
-> the game.
-> 
-> I hope that this information helps you out.  If you need more
-> information, please let me know at:
-> 
-> plniemann@juno.com
 
-GUI Bugs 7.0-7.7
+RDM: The seems to be partially fixed (9/3/98). Now you can save the
+games, but not reload them. The problem seems to be quotes in the
+labels.
 
-On Fri, 27 Feb 1998, Martin J. Osborne wrote:
+//------------------------------
 
-> 
-> Thanks for a terrific program!!  (If Richard McKelvey or Andy McLennan is
-> reading this message, Hi!)
-> 
-> Gambit has just told me that "An internal error occured in GAMBIT.
-> Please contact ..."  The error is:
-> 	Assert:c<=MaxRow()
-> 	in file LEMKETAB.CC, line=78
-> 
-> I'm using GAMBIT to try to get a handle on a strategic game in which each
-> of the two players has a continuum of actions.  I'm looking at discrete
-> approximations, and naturally am working with a large number of actions
-> for each player, to better approximate the game.  Gambit appears to have
-> some problems with these large games.  In addition, there appear to be
-> some problems for Gambit in Windows 95.  I'm taking the liberty of listing
-> the errors (or what seem to be errors) I've noticed here; if you would
-> prefer that I enter a bug report on you web site I can do that next week,
-> in which case ignore the following.
-> 
+GUI Bug 7.1
+
 > I'm using version 0.94 on a Windows 95 Pentium 133.
 > 
 > Bugs(?):
@@ -173,49 +268,90 @@ On Fri, 27 Feb 1998, Martin J. Osborne wrote:
 > key, the associated cell may go off the screen, and there is no way of
 > telling where it is (assuming the matrix is large enough that the
 > names of the actions are off the screen).
+
+RDM: Still a problem.  This may be related to similar problems in EF
+GUI (See above GUI Bugs 5.4 and 5.7)
+
+//------------------------------
+
+GUI Bug 7.2
+
+RDM: Fixed: Ted just added this. 
+
 > 
 > 2. The cursor doesn't change to an egg timer while Gambit is working.
-> 
+
+
+//------------------------------
+
+GUI Bug 7.3
+
 > 3. The screen is not rewritten when a program that wrote over the previous
 > screen is closed and Gambit is busy solving a game.  That is, one opens
 > Gambit, starts it off looking for equilibria, then opens another program
 > that displays on top of the Gambit screen; when one closes that program,
 > the Gambit screen is just blank (so that, in particular, one cannot cancel
 > the solution process in progress).
+
+RDM: Still a problem (9/3/98)
+
+//------------------------------
+
+GUI Bug 7.4
+
+RDM: Seems fixed to me (9/3/98, on Linux)
+
 > 
 > 4. The alt keys don't always drop down the menus.  (Alt-F -> File, for
 > example.)
-> 
+
+RDM.  On Linux, Now the first level menus seem to be controlled by the
+Alt-letter key, but then the subsequent ones just require the letters.
+That seems fine to me.
+
+
+//------------------------------
+
+GUI Bug 7.5
+
 > 5. The button at the top right of the screen (to minimize etc.) don't
 > always work.
-> 
+
+RDM: Still a problem -- eg on solution display window (Hit Inspect ->
+solution after solving a game, and then try and get rid of it with the
+close button -- top right button on Linux)
+
+//------------------------------
+
+GUI Bug 7.6
+
 > 6. If one loads a game from a directory other than Gambit, the program can
 > no longer find the Help files.
-> 
+
+
+//------------------------------
+
+GUI Bug 7.6
+
 > 7. Gambit seems to be seriously incompatible with Adobe Illustrator, but
 > it's hard to know whose fault that is.
-> 
-> -------------
-> 
-> I've had limited success so far solving large games (100 actions per
-> player or more), but it's not clear whether that's because I haven't
-> waited long enough.  For a 216 action game, 12 hours or so on a Pentium
-> 133 didn't get to a solution using LCP.
-> 
+
+RDM: Let's not worry about this one, except to give a general warning
+in he documentation that there may be conflicts with other programs.
+
+//------------------------------
+
+GUI Bug 7.7
+
 > I'm interested mainly in symmetric equilibria of these large (symmetric)
 > games.  As far as I can see there is no way of restricting the search to
 > such equilibria.  Am I right?
-> 
-> . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-> Martin J. Osborne                      voice: (905) 525-9140 ext. 23814
-> Department of Economics                             fax: (905) 521-8232
-> McMaster University
-> Hamilton, Ontario, Canada L8S 4M4
-> 
->         Osborne@McMaster.ca
->         http://www.socsci.mcmaster.ca/~econ/faculty/osborne
 
-On Tue, 3 Mar 1998, Martin J. Osborne wrote:
+RDM: Move this one to "enhancements for the future" section.  
+
+//------------------------------
+
+GUI Bug 7.8
 
 > 
 > Hi Richard.  I attach the game that led to the Gambit error.  The crash
@@ -233,168 +369,139 @@ On Tue, 3 Mar 1998, Martin J. Osborne wrote:
 > is that I have committed a formatting error, though for some other
 > parameters I don't get the error.  (If indeed the error is my fault,
 > sorry!!).]
-> 
-> Thanks!
-> Martin
-> 
-> . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-> Martin J. Osborne                      voice: (905) 525-9140 ext. 23814
-> Department of Economics                             fax: (905) 521-8232
-> McMaster University
-> Hamilton, Ontario, Canada L8S 4M4
-> 
->         Osborne@McMaster.ca
->         http://www.socsci.mcmaster.ca/~econ/faculty/osborne
-> 
+>
+ 
+RDM: This error also occurs in the GCL. I am going to move it to that
+list, where it will be easier to track down:
 
-File on hss in ~rdm/osborne.nfg
+  222 mill:/home/mill/rdm/gambit/test !n
+  newgcl
+  Include["gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= << n:=LoadNfg["../nfg/osborne.nfg"]
+  (Nfg) "4 actions; minimal action 0.00; maximal action 0.50"
+  GCL2:= << LcpSolve[n]
+  gcl_mill: lemketab.cc:166: int LTableau<double>::ExitIndex(int): Assertion `c <= MaxRow()' failed.
+  A segmentation fault has occurred
 
-GUI Bug 8.1-8.2: Transient bugs
 
-On Wed, 24 Jun 1998, Richard McKelvey wrote:
+//------------------------------
 
-> On Fri, 19 Jun 1998, Bernhard von Stengel wrote:
-> 
-> > Two GUI questions:
-> > 
-> > If I click on File in the first GUI menu, I get "ERROR: unknown menu
-> > selection" - a bug I guess even though not serious.
-> 
-> I was not able to reproduce this.  I am assumintg this is under XView?  
-> 
-> > 
-> > Also, I used to see a folder where I can click and open, but that folder
-> > icon is gone.  What happened?
-> 
-> Your subsequent message indicates this is a transient problem of some
-> sort.  Let me know if there is any pattern to when it occurs.  
+GUI Bug 8.1-8.2: XView, Transient bugs
 
+On Fri, 19 Jun 1998, Bernhard von Stengel wrote:
+
+> Two GUI questions:
+> 
+> If I click on File in the first GUI menu, I get "ERROR: unknown menu
+> selection" - a bug I guess even though not serious.
+
+I was not able to reproduce this.  I am assumintg this is under XView?  
+
+> 
+> Also, I used to see a folder where I can click and open, but that folder
+> icon is gone.  What happened?
+
+Your subsequent message indicates this is a transient problem of some
+sort.  Let me know if there is any pattern to when it occurs.  
+
+RDM: This looks like system stuff at his end to me.  We can't check it
+out until we compile an XView version of new code.
+
+//------------------------------
 
 GUI Bug 9:  Bad postscript files.  
 
-On Wed, 24 Jun 1998, Richard McKelvey wrote:
+On Tue, 23 Jun 1998, Bernhard von Stengel wrote:
 
-> On Tue, 23 Jun 1998, Bernhard von Stengel wrote:
-> 
-> > Hi,
-> > 
-> > more apparent bugs. This time:  buggy generation of PS-Files.
-> > This may be a bug in the wxwin package.
-> > 
-> 
-> Yes, I think so.  Other people have also reported these kinds of problems.
-> I don't know of any good solution.  I will put this on the list of
-> things to be looked at this summer.  But if is a wxwin bug, as we
-> suspect, there may be little that can be done until there is a new
-> version of wxwin.  
-> 
-> > 1.
-> > When I generate large games, display fails altogether since
-> > the scaling doesn't work.  I only see the initial part of a very
-> > large tree.
-> > 
-> > 2.
-> > In some cases, parts of the tree are also DELETED when the PS
-> > file is generated.  I presume this is due to faulty memory management,
-> > but it can also be a GAMBIT bug.  It occasionally happened for smaller
-> > games, but then it disappeared when the file was reloaded, so I could
-> > reproduce it only for the large extensive form game.
-> > To document this, I enclose by separate mail
-> > 
-> > a. The (level 8) generated tree which looks complete as a file.
-> > 
-> > b. The PS file generated from the GUI interface.
-> > 
-> >    In order to look at the PS file, I found a method to print it easily
-> >    on an ordinary printer.  Namely, I enclose in this mail a latex
-> >    file that assumes that the GUI-generated file is stored as
-> > 
-> >    efg.eps
-> > 
-> >    in the same directory.  Running it through latex, it then generates a
-> >    single page where the game tree fits on a letter-size page, filling it
-> >    maximally. The .dvi file has to be converted to .ps with  dvips,
-> >    of course.  I found LATEX the easiest way to do this.
-> > 
-> > Regards, Bernhard
-> > 
-> > 
-> > %
-> > %  displays "efg.eps" in maximum size
-> > %
-> > \documentstyle[epsf]{article}
-> > \topmargin-3.2cm
-> > \textheight27.1cm
-> > \textwidth20cm
-> > \oddsidemargin-2cm
-> > \begin{document}
-> > \thispagestyle{empty}
-> > \noindent
-> > \epsfxsize19.9cm
-> > \epsfysize27.0cm
-> > \epsfbox{efg.eps}
-> > \end{document}
-> > 
-> > 
+Hi,
 
-GUI Bugs 10.2-10.4;  Problem under XView
+more apparent bugs. This time:  buggy generation of PS-Files.
+This may be a bug in the wxwin package.
+
+1.
+When I generate large games, display fails altogether since
+the scaling doesn't work.  I only see the initial part of a very
+large tree.
+
+2.
+In some cases, parts of the tree are also DELETED when the PS
+file is generated.  I presume this is due to faulty memory management,
+but it can also be a GAMBIT bug.  It occasionally happened for smaller
+games, but then it disappeared when the file was reloaded, so I could
+reproduce it only for the large extensive form game.
+To document this, I enclose by separate mail
+
+a. The (level 8) generated tree which looks complete as a file.
+
+b. The PS file generated from the GUI interface.
+
+   In order to look at the PS file, I found a method to print it easily
+   on an ordinary printer.  Namely, I enclose in this mail a latex
+   file that assumes that the GUI-generated file is stored as
+
+   efg.eps
+
+   in the same directory.  Running it through latex, it then generates a
+   single page where the game tree fits on a letter-size page, filling it
+   maximally. The .dvi file has to be converted to .ps with  dvips,
+   of course.  I found LATEX the easiest way to do this.
+
+Regards, Bernhard
+
+
+%
+%  displays "efg.eps" in maximum size
+%
+\documentstyle[epsf]{article}
+\topmargin-3.2cm
+\textheight27.1cm
+\textwidth20cm
+\oddsidemargin-2cm
+\begin{document}
+\thispagestyle{empty}
+\noindent
+\epsfxsize19.9cm
+\epsfysize27.0cm
+\epsfbox{efg.eps}
+\end{document}
+
+
+//------------------------------
+
+GUI Bug 10.2:  Problem under XView
 
 (This point replied to On Mon, 22 Jun 1998, Richard McKelvey wrote:)
 
-> > 2) Below is a game that I can't see unless I take the POSTSCRIPT detour
-> >    (it's the game generated with level 2)
-> >    I have a hunch the  xview  stuff on our machine is uncompatible.
-> >    Can't see any help files either.  Perhaps due to  
-> >    XView warning: Cannot load font '-*-times-bold-r-normal-*-*-160-*-*-*-*-*-*' (Font package)
-> >    etc.?
-> > 
-> > EFG 2 R "UNTITLED" { "P1" "P2" }
-> > 
-> > p "" 1 1 "" { "L" "R" } 0
-> > p "" 2 1 "" { "L" "R" } 0
-> > t "" 1 "" { 43 65 }
-> > t "" 2 "" { 47 69 }
-> > p "" 2 1 "" { "L" "R" } 0
-> > t "" 3 "" { 6 94 }
-> > t "" 4 "" { 69 69 }
+> 2) Below is a game that I can't see unless I take the POSTSCRIPT detour
+>    (it's the game generated with level 2)
+>    I have a hunch the  xview  stuff on our machine is uncompatible.
+>    Can't see any help files either.  Perhaps due to  
+>    XView warning: Cannot load font '-*-times-bold-r-normal-*-*-160-*-*-*-*-*-*' (Font package)
+>    etc.?
 > 
-> This is a Gambit BUG.  Or at least, I get the same problem running under
-> xview. It appears to be that the scroll is not working correctly under
-> XView. You can view the game in the zoom window (in prefs menu), but that
-> only shows the part near the cursor.  
+> EFG 2 R "UNTITLED" { "P1" "P2" }
 > 
-> Perhaps this is a problem in wxwin support of xview, as there is no
-> problem viewing the game under the motif version or the Windows version of
-> the GUI.
-> 
-> I will add it to our list of bugs.  
-> 
-> 
-> > 3) Suggestion:  for the POSTSCRIPT detour I'm prompted
-> >    
-> >    "Output Media"
-> >    Printer    PS File
-> >    Clipboard  Meta File
-> >    PrintPreview
-> > 
-> >    where the last choice "PS File" is overwritten with "Printer".
-> >    Can't you keep it, just as in the next menu "Print to File" is kept?
-> 
-> I was unable to reproduce this (under xview?)
-> 
-> > 
-> > 
-> > 4) Another Suggestion:
-> >    For frequent previewing after generating a game with GCL,
-> >    the file must be reopened.  In ghostview, xdvi, xv, and other viewers,
-> >    typing a single  Q  on the keyboard in the window terminates the
-> >    program.  Reopening then is much easier than when going through
-> >    the mouse menues. Couldn't the  Q  option be used here too
-> >    (unless the game was modified, of course?).  Might mean substantial
-> >    additional work, I suppose.
-> 
-> Thanks for suggestion.  I will look into it. 
-> 
+> p "" 1 1 "" { "L" "R" } 0
+> p "" 2 1 "" { "L" "R" } 0
+> t "" 1 "" { 43 65 }
+> t "" 2 "" { 47 69 }
+> p "" 2 1 "" { "L" "R" } 0
+> t "" 3 "" { 6 94 }
+> t "" 4 "" { 69 69 }
+
+This is a Gambit BUG.  Or at least, I get the same problem running under
+xview. It appears to be that the scroll is not working correctly under
+XView. You can view the game in the zoom window (in prefs menu), but that
+only shows the part near the cursor.  
+
+Perhaps this is a problem in wxwin support of xview, as there is no
+problem viewing the game under the motif version or the Windows version of
+the GUI.
+
+RDM: I reproduced this under version .94 on Xview.  we need to compile
+the new code under Xview to see if this still exists.
+
 
 
 
