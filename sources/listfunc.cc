@@ -161,11 +161,13 @@ Portion* GSM_List( Portion** param )
 {
   ListPortion* p;
   int i;
+  assert( p->Type() != porERROR );
 
   if( ((IntPortion*) param[1])->Value() < 0 )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  p->SetDataType( param[0]->Type() );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( param[0]->ValCopy() );
   return p;
@@ -180,6 +182,9 @@ Portion* GSM_List_Integer( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  gout << "b: " << PortionTypeToText( p->DataType() ) << "\n";
+  p->SetDataType( param[0]->Type() );
+  gout << "a: " << PortionTypeToText( p->DataType() ) << "\n";
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new IntValPortion( ((IntPortion*) param[0])->Value()+ 
 				 (i-1)*((IntPortion*) param[2])->Value() ));
@@ -195,6 +200,7 @@ Portion* GSM_List_Float( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  p->SetDataType( param[0]->Type() );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new FloatValPortion( ((FloatPortion*) param[0])->Value()+ 
 				   (i-1)*((FloatPortion*) param[2])->Value()));
@@ -210,6 +216,7 @@ Portion* GSM_List_Rational( Portion** param )
     return new ErrorPortion( "Invalid list length" );
 
   p = new ListValPortion();
+  p->SetDataType( param[0]->Type() );
   for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
     p->Append( new RationalValPortion( ((RationalPortion*) param[0])->Value()+ 
 				      (i-1)*

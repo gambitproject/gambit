@@ -2236,15 +2236,17 @@ PortionType ListPortion::Type( void ) const
 
 Portion* ListPortion::ValCopy( void ) const
 { 
-  Portion* p =new ListValPortion( *_Value ); 
+  ListPortion* p =new ListValPortion( *_Value ); 
   // p->SetOwner( Owner() );
+  if( p->DataType() == porUNDEFINED )
+    p->SetDataType( _DataType );
   p->AddDependency();
   return p;
 }
 
 Portion* ListPortion::RefCopy( void ) const
 { 
-  Portion* p = new ListRefPortion( *_Value ); 
+  ListPortion* p = new ListRefPortion( *_Value ); 
   ( (ListPortion*) p )->_DataType = _DataType;
   p->SetOriginal( Original() );
   // p->SetOwner( Owner() );
@@ -2273,6 +2275,8 @@ void ListPortion::AssignFrom( Portion* p )
     result = Insert( value[ i ]->ValCopy(), i );
     assert( result != 0 );
   }
+  if( _DataType == porUNDEFINED )
+    _DataType = ( (ListPortion*) p )->_DataType;
 
   // SetOwner( p->Owner() );
 
@@ -2432,26 +2436,26 @@ int ListPortion::Insert( Portion* item, int index )
     _ContainsListsOnly = false;
   }
 
-  if( _Value->Length() == 0 )  // creating a new list
+
+  if( _DataType == porUNDEFINED )
   {
-    if( PortionTypeMatch( item_type, _DataType ) || 
-       _DataType == porUNDEFINED )
-    {
-      _DataType = item_type;
-      result = _Value->Insert( item, index );
+    if( _Value->Length() == 0 )
       _Owner = item->Original()->Owner();
-    }
-    else
-    {
-      delete item;
-    }
+    _DataType = item_type;
+    result = _Value->Insert( item, index );
   }
   else  // inserting into an existing list
   {
     if( PortionTypeMatch( item_type, _DataType ) )
+    {
+      if( _Value->Length() == 0 )
+	_Owner = item->Original()->Owner();
       result = _Value->Insert( item, index );
+    }
     else if( item_type == porUNDEFINED )
     {
+      if( _Value->Length() == 0 )
+	_Owner = item->Original()->Owner();
       result = _Value->Insert( item, index );
       assert( item->Type() == porLIST );
       ((ListPortion*) item)->SetDataType( _DataType );

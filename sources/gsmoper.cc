@@ -59,8 +59,9 @@ Portion* GSM_Assign( Portion** param )
 	result = 
 	  new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
     }
-    else if( ( (ListPortion*) param[ 0 ] )->DataType() ==
-	    ( (ListPortion*) param[ 1 ] )->DataType() )
+    else if((((ListPortion*) param[ 0 ] )->DataType() ==
+	     ((ListPortion*) param[ 1 ] )->DataType() ) ||
+	    ((ListPortion*) param[ 0 ] )->DataType() == porUNDEFINED )
     {
       if( !( ((ListPortion*)param[0])->DataType() & (porINPUT|porOUTPUT) ) )
       {
