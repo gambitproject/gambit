@@ -113,7 +113,7 @@ template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
-						 StrategySet &s)
+						 Support &s)
 : BaseMixedProfile(NF, false, s), Nf(&NF), gPVector<T>(NF.dimensions)
 {
   NF.Centroid(*this);

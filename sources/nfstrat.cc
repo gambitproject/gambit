@@ -84,31 +84,31 @@ void StrategyProfile::Set(int p, Strategy *const s)
 }
 
 //-----------------------------------------------
-// Support: Constructors, Destructors, Operators
+// StrategySet: Constructors, Destructors, Operators
 //-----------------------------------------------
 
-Support::Support()
+StrategySet::StrategySet()
 {
   nfp = NULL;
 }
 
-Support::Support(const NFPlayer &p)
+StrategySet::StrategySet(const NFPlayer &p)
   : strategies(p.strategies.Length()) {
   nfp = &p; 
   for (int i = 1; i <= p.strategies.Length(); i++) 
     strategies[i] = (p.strategies)[i];
 } 
 
-Support::Support(const Support &s)
+StrategySet::StrategySet(const StrategySet &s)
 : strategies(s.strategies)
 {
   nfp = s.nfp;
 }
 
-Support::~Support()
+StrategySet::~StrategySet()
 { }
 
-Support &Support::operator=(const Support &s)
+StrategySet &StrategySet::operator=(const StrategySet &s)
 {
   if (this != &s) {
     nfp = s.nfp;
@@ -119,30 +119,30 @@ Support &Support::operator=(const Support &s)
 
 
 //------------------------------------------
-// Support: Member functions 
+// StrategySet: Member functions 
 //------------------------------------------
 
-// Append a strategies to the support
-void Support::AddStrategy(Strategy *s) 
+// Append a strategies to the StrategySet
+void StrategySet::AddStrategy(Strategy *s) 
 { 
   strategies.Append(s); 
 }
 
 // Insert a strategy to a particular place in the gBlock;
-void Support::AddStrategy(Strategy *s, int i) 
+void StrategySet::AddStrategy(Strategy *s, int i) 
 { 
   strategies.Insert(s,i); 
 }
 
 // Remove a strategy at int i, returns the removed strategy pointer
-Strategy* Support::RemoveStrategy(int i) 
+Strategy* StrategySet::RemoveStrategy(int i) 
 { 
   return (strategies.Remove(i)); 
 }
 
 // Removes a strategy pointer. Returns true if the strategy was successfully
 // removed, false otherwise.
-bool Support::RemoveStrategy( Strategy *s ) 
+bool StrategySet::RemoveStrategy( Strategy *s ) 
 { 
   int t; 
   t = strategies.Find(s); 
@@ -151,38 +151,38 @@ bool Support::RemoveStrategy( Strategy *s )
 } 
 
 // Get a Strategy
-Strategy *Support::GetStrategy(int num) const
+Strategy *StrategySet::GetStrategy(int num) const
 {
   return strategies[num];
 }
 
-// Number of Strategies in a support
-int Support::NumStrats(void)
+// Number of Strategies in a StrategySet
+int StrategySet::NumStrats(void)
 {
   return (strategies.Length());
 }
 
 //-----------------------------------------------
-// StrategySet: Ctors, Dtor, Operators
+// Support: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-StrategySet::StrategySet(const BaseNfg &N) : sups(N.NumPlayers())
+Support::Support(const BaseNfg &N) : sups(N.NumPlayers())
 { 
   for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new Support(*(N.PlayerList()[i]));
+    sups[i] = new StrategySet(*(N.PlayerList()[i]));
 }
 
-StrategySet::StrategySet(const StrategySet &s)
+Support::Support(const Support &s)
 : name(s.name), sups(s.sups)
 { }
 
-StrategySet::~StrategySet()
+Support::~Support()
 { 
   for (int i = 1; i <= sups.Length(); i++)
     delete sups[i];
 }
 
-StrategySet &StrategySet::operator=(const StrategySet &s)
+Support &Support::operator=(const Support &s)
 {
   if (this != &s) {
     name = s.name; 
@@ -192,10 +192,10 @@ StrategySet &StrategySet::operator=(const StrategySet &s)
 }
 
 //------------------------
-// StrategySet: Members
+// Support: Members
 //------------------------
 
-Strategy *StrategySet::GetStrategy(int pl, int num) const
+Strategy *Support::GetStrategy(int pl, int num) const
 {
   return (sups[pl]->GetStrategy(num));
 }

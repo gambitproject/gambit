@@ -53,7 +53,7 @@ class Strategy;
 template <class T> class NfgIter;
 template <class T> class CIter;
 
-class Support {
+class StrategySet {
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
   friend class CIter<double>;
@@ -68,21 +68,21 @@ public:
   // Constructors, Destructor, operators
   //
 
-  Support();
+  StrategySet();
 
-  Support(const Support &s); 
+  StrategySet(const StrategySet &s); 
   
-  Support(const NFPlayer &p);
+  StrategySet(const NFPlayer &p);
   
-  Support &operator=(const Support &s); 
+  StrategySet &operator=(const StrategySet &s); 
   
-  virtual ~Support();
+  virtual ~StrategySet();
 
   //
   // Member Functions
   //
 
-  // Append a strategies to the support
+  // Append a strategies to the StrategySet
   void AddStrategy(Strategy *s);
 
   // Insert a strategy to a particular place in the gBlock;
@@ -98,7 +98,7 @@ public:
   // Get a Strategy
   Strategy* GetStrategy(int num) const;
 
-  // Number of Strategies in the support
+  // Number of Strategies in the StrategySet
   int NumStrats(void);
 
 
@@ -106,7 +106,7 @@ public:
 
 class BaseNfg;
 
-class StrategySet {
+class Support {
 
   friend class NfgIter<double>;
   friend class NfgIter<gRational>;
@@ -115,7 +115,7 @@ class StrategySet {
 
 protected:
   gString name;
-  gArray <Support *> sups;
+  gArray <StrategySet *> sups;
   
 public:
 
@@ -123,13 +123,13 @@ public:
   // Constructors, Destructors, operators
   //
 
-  StrategySet(const BaseNfg &);
-  StrategySet(const StrategySet &s); 
-  virtual ~StrategySet();
-  StrategySet &operator=(const StrategySet &s);
+  Support(const BaseNfg &);
+  Support(const Support &s); 
+  virtual ~Support();
+  Support &operator=(const Support &s);
   
-  void SetSupport(int pl, Support *s)   { sups[pl] = s; }
-  Support *GetSupport(int pl)     { return sups[pl]; }
+  void SetStrategySet(int pl, StrategySet *s)   { sups[pl] = s; }
+  StrategySet *GetStrategySet(int pl)     { return sups[pl]; }
 
   //---------
   // Members

@@ -161,7 +161,7 @@ const gArray<Strategy *> &NFPlayer::StrategyList(void) const
 //template class gArray<Strategy *>;
 //template class gBlock<Strategy *>;
 //template class gArray<NFPlayer *>;
-//template class gArray<Support *>;
+//template class gArray<StrategySet *>;
 
 //---------------------------------------------------------------------------
 //                    BaseMixedProfile member functions
@@ -171,7 +171,7 @@ BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc)
 : N(&NF), truncated(trunc), stratset(NF)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc,
-				   StrategySet &s)
+				   Support &s)
 : N(&NF), truncated(trunc), stratset(s)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseMixedProfile &p)
@@ -202,7 +202,7 @@ DataType BaseMixedProfile::Type(void) const
 #include "garray.imp"
 #include "gblock.imp"
 
-TEMPLATE class gArray<Support *>;
+TEMPLATE class gArray<StrategySet *>;
 TEMPLATE class gArray<Strategy *>;
 TEMPLATE class gArray<NFPlayer *>;
 TEMPLATE class gBlock<Strategy *>;
