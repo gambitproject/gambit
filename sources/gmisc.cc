@@ -1,7 +1,7 @@
 //
 // FILE: gmisc.cc -- Miscellaneous generally-useful functions
 //
-// @(#)gmisc.cc	2.7 01/18/98
+// $Id$
 //
 
 #include "gmisc.h"
@@ -179,9 +179,9 @@ gString ToString(double d)
 gString ToString(const gNumber &n)
 {
   if (n.GetPrecision() == precDOUBLE)
-    return ToString(n.ToDouble());
+    return ToString((double) n);
   else
-    return ToString(n.TogRational());
+    return ToString((gRational) n);
 }
 
 
