@@ -5,7 +5,7 @@
 //
 
 #include "tableau.h"
-#include "tableau2.imp"
+#include "tableau3.imp"
 
 // ---------------------------------------------------------------------------
 //                BaseTableau method definitions
