@@ -354,7 +354,7 @@ gList<MixedSolution> guinfgLiap::Solve(void)
   wxStatus status(m_parent->Frame(), "Liap Algorithm");
   NFLiapParams params(status);
   params.stopAfter = m_stopAfter;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -532,7 +532,7 @@ gList<MixedSolution> guinfgQre::Solve(void)
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;

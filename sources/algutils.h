@@ -10,9 +10,11 @@
 #include "gnumber.h"
 
 class AlgParams   {
+protected:
+  gNumber m_accuracy;
+
 public:
   int trace, stopAfter;
-  gNumber accuracy;
   gPrecision precision;
 
   gOutput *tracefile;
@@ -20,6 +22,9 @@ public:
   
   AlgParams(gStatus & = gstatus);
   virtual ~AlgParams();
+
+  const gNumber &Accuracy(void) const { return m_accuracy; }
+  virtual void SetAccuracy(const gNumber &);
 };
 
 class FuncMinParams : public AlgParams {
@@ -30,7 +35,7 @@ public:
   FuncMinParams(gStatus & = gstatus);
   virtual ~FuncMinParams();
 
-  void SetFuncMinParams(gNumber acc);
+  void SetAccuracy(const gNumber &);
 };
 
 #endif // ALGUTILS_H

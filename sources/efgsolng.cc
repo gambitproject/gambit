@@ -252,7 +252,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
 
   EFLiapParams params(status);
   params.stopAfter = m_stopAfter;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -329,7 +329,7 @@ gList<BehavSolution> guiefgLiapNfg::Solve(void) const
 
   NFLiapParams params(status);
   params.stopAfter = m_stopAfter;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.nTries = m_nTries;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -1148,7 +1148,7 @@ gList<BehavSolution> guiefgQreNfg::Solve(void) const
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
@@ -1253,7 +1253,7 @@ gList<BehavSolution> guiefgQreEfg::Solve(void) const
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
-  params.SetFuncMinParams(m_accuracy);
+  params.SetAccuracy(m_accuracy);
   params.powLam = m_powLam;
   params.pxifile = m_pxiFile;
   params.trace = m_traceLevel;
