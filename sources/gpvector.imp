@@ -20,7 +20,7 @@ template <class T> int gPVector<T>::sum(const gTuple<int> &V) const
 template <class T> void gPVector<T>::setindex(void)
 {
   int index = First();
-  for(int i = svlen.First(); i <= svlen.Last(); i++)  {
+  for(int i = 1; i <= svlen.Length(); i++)  {
     svptr[i] = data + index - 1;
     index += svlen[i];
   }
@@ -37,36 +37,43 @@ template <class T> int gPVector<T>::Check(const gPVector<T> &v) const
 //     gPVector<T>: Constructors, destructor, and constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> gPVector<T>::gPVector(void)
-  : gVector<T>(), svptr(), svlen()
+template <class T> gPVector<T>::gPVector(void) : svptr(0)
 { }
 
 template <class T> gPVector<T>::gPVector(const gTuple<int> &sig)
-  : gVector<T>(sum(sig)), svptr(sig.First(),sig.Last()), svlen(sig)
+  : gVector<T>(sum(sig)), svlen(sig)
 {
+  svptr = new T *[sig.Last() - sig.First() + 1];
+  svptr -= 1;    // align things correctly
   setindex();
 }
 
 template <class T> gPVector<T>::gPVector(const gVector<T> &val,
 					 const gTuple<int> &sig)
-  : gVector<T>(val), svptr(sig.First(),sig.Last()), svlen(sig)
+  : gVector<T>(val), svlen(sig)
 {
-  assert( sum(svlen)==val.Length() );
+  assert(sum(svlen) == val.Length());
+  svptr = new T *[sig.Last() - sig.First() + 1];
+  svptr -= 1;
   setindex();
 }
 
 template <class T> gPVector<T>::gPVector(const gPVector<T> &v)
-  : gVector<T>(v), svptr(v.svlen.First(),v.svlen.Last()), svlen(v.svlen)
+  : gVector<T>(v), svlen(v.svlen)
 {
+  svptr = new T *[v.svlen.Last() - v.svlen.First() + 1];
+  svptr -= 1;
   setindex();
 }
 
 template <class T> gPVector<T>::~gPVector()
-{ }
+{
+  if (svptr)   delete [] (svptr + 1);
+}
 
 template <class T> gPVector<T>& gPVector<T>::operator=(const gPVector<T> &v)
 {
-  assert( svlen==v.svlen );
+  assert(svlen == v.svlen);
   gVector<T>::operator=(v);
   return (*this);
 }

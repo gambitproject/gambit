@@ -15,7 +15,7 @@ template <class T> class gPVector : public gVector<T> {
   void setindex(void);
 
  protected:
-  gTuple<T *> svptr;
+  T **svptr;
   gTuple<int> svlen;
 
   int Check(const gPVector<T> &v) const;
