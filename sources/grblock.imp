@@ -16,23 +16,19 @@ template <class T> gRectBlock<T>::gRectBlock(void)   { }
 
 template <class T> gRectBlock<T>::gRectBlock(int nrows, int ncols)
      : gRectArray<T>(nrows, ncols)
-{
-}
+{ }
 
 template <class T> 
 gRectBlock<T>::gRectBlock(int minr, int maxr, int minc, int maxc)
      : gRectArray<T>(minr, maxr, minc, maxc)
-{
-}
+{ }
 
 template <class T> gRectBlock<T>::gRectBlock(const gRectBlock<T> &r)
      : gRectArray<T>(r)
-{
-}
+{ }
 
 template <class T> gRectBlock<T>::~gRectBlock()
-{
-}
+{ }
 
 template <class T>
 gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
@@ -45,10 +41,9 @@ gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
 //             The members
 //------------------------------------------------------------------------
 
-template <class T> void 
-gRectBlock<T>::AddRow(const gArray<T> &v)
+template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
 {
-  assert( v.First() == minrow && v.Last() == maxrow);
+  assert(v.First() == mincol && v.Last() == maxcol);
   maxrow++;
 
   T* p = new T[maxcol - mincol + 1];
@@ -69,8 +64,7 @@ gRectBlock<T>::AddRow(const gArray<T> &v)
   data= newidx;
 }
 
-template <class T> void
-gRectBlock<T>::RemoveRow(int row)
+template <class T> void gRectBlock<T>::RemoveRow(int row)
 {
   assert( minrow <= row && row <= maxrow);
   maxrow--;
@@ -88,28 +82,25 @@ gRectBlock<T>::RemoveRow(int row)
   data= newidx;
 }
 
-template<class T> void
-gRectBlock<T>::AddColumn(const gArray<T> &v)
+template <class T> void gRectBlock<T>::AddColumn(const gArray<T> &v)
 {
-  assert( v.First() == minrow && v.Last() == maxrow);
+  assert(v.First() == minrow && v.Last() == maxrow);
   maxcol++;
-  for(int i=minrow; i<=maxrow; i++)
-    {
-      T* p = new T[maxcol - mincol + 1];
-      assert(p);
-      T* newrow= p - mincol;
+  for (int i = minrow; i <= maxrow; i++)    {
+    T* p = new T[maxcol - mincol + 1];
+    assert(p);
+    T* newrow= p - mincol;
 
-      T* oldrow= data[i];
-      for(int j=mincol; j<=maxcol; j++)
-	newrow[j]= oldrow[j];
-      newrow[maxcol]= v[i];
-      delete [] (oldrow + mincol);
-      data[i]= newrow;
-    }
+    T* oldrow = data[i];
+    for (int j = mincol; j < maxcol; j++)
+      newrow[j] = oldrow[j];
+    newrow[maxcol] = v[i];
+    delete [] (oldrow + mincol);
+    data[i] = newrow;
+  }
 }
 
-template<class T> void
-gRectBlock<T>::RemoveColumn(int col)
+template<class T> void gRectBlock<T>::RemoveColumn(int col)
 {
   // note: RemoveColumn does not reallocate memory --
   // it shrinks the rows in place.
@@ -123,8 +114,7 @@ gRectBlock<T>::RemoveColumn(int col)
     }
 }
 
-template<class T> void
-gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
+template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 {
   assert( v.First() == minrow && v.Last() == maxrow);
   assert( minrow <= row && row <= maxrow);
@@ -150,8 +140,8 @@ gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
   data = newidx;
 }
 
-template<class T> void
-gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
+template <class T>
+void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
 {
   assert (v.First() == minrow && v.Last() == maxrow);
   assert (mincol <= col && col <= maxcol);
