@@ -643,12 +643,40 @@ Infoset *BaseEfg::LeaveInfoset(Node *n)
 			     n->children.Length());
   n->infoset->name = s->name;
   n->infoset->members.Append(n);
-  for (int i = 1; i <= s->actions.Length(); i++)
+	for (int i = 1; i <= s->actions.Length(); i++)
     n->infoset->actions[i]->name = s->actions[i]->name;
 
   DeleteLexicon();
   SortInfosets();
   return n->infoset;
+}
+
+Infoset *BaseEfg::SplitInfoset(Node *n)
+{
+	assert(n);
+
+	if (!n->infoset)   return 0;
+
+	Infoset *s = n->infoset;
+	if (s->members.Length() == 1)   return s;
+
+	EFPlayer *p = s->player;
+	n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
+					 n->children.Length());
+	n->infoset->name = s->name;
+	int i;
+	for (i=s->members.Find(n);i<=s->members.Length();i++)
+	{
+		Node *nn=s->members.Remove(i);
+		n->infoset->members.Append(nn);
+		nn->infoset=n->infoset;
+	}
+	for (i = 1; i <= s->actions.Length(); i++)
+		n->infoset->actions[i]->name = s->actions[i]->name;
+
+	DeleteLexicon();
+	SortInfosets();
+	return n->infoset;
 }
 
 Infoset *BaseEfg::MergeInfoset(Infoset *to, Infoset *from)

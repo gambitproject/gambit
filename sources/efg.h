@@ -121,6 +121,7 @@ protected:
     virtual Infoset *CreateInfoset(EFPlayer *pl, int br) = 0;
     Infoset *JoinInfoset(Infoset *s, Node *n);
     Infoset *LeaveInfoset(Node *n);
+    Infoset *SplitInfoset(Node *n);
     Infoset *MergeInfoset(Infoset *to, Infoset *from);
 
     Infoset *SwitchPlayer(Infoset *s, EFPlayer *p);
