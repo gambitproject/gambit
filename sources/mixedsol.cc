@@ -27,8 +27,6 @@ gText NameNfgAlgType(NfgAlgType p_algorithm)
     return "Simpdiv";
   case algorithmNfg_POLENUM:
     return "PolEnum";
-  case algorithmNfg_ALLNASHSOLVE:
-    return "AllNashSolve";
   case algorithmNfg_QRE:
     return "Qre";
   case algorithmNfg_QREALL:
