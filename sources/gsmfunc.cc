@@ -550,6 +550,9 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     ch=s[index++];
   ch=s[index++];  // ch should now hold first letter of the first name
 
+  if (ch == ']') // If there are no parameters
+    done = true;
+
   while (!done)  // ch should always be at beginning of next name here
   {
   
