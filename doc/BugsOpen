@@ -782,29 +782,9 @@ ITEM 0037:  Short form for NthChar[] not enabled
 
 DATE:     9/24/1999 by RDM
 AFFECTS:  GCL
-STATUS:   OPEN
+STATUS:   CLOSED 10/11/1999 by TLT
 SEVERITY: CRUCIAL
 DETAILS:
-
-Documentation claims x_n is short form for NthChar[x,n].  However, 
-
-  GCL1:= << x:="12345"
-  12345
-  GCL2:= << x_2
-  ERROR: NthElement[] called with ambiguous parameter(s)
-  GCL3:= << Help["nthelement"]
-  { NthElement[list<->NLIST(ANYTYPE), n->INTEGER] =: ANYTYPE,
-    NthElement[s<->NFSUPPORT, n->NUMBER] =: LIST(STRATEGY), 
-    NthElement[s<->EFSUPPORT, n->NUMBER] =: LIST(ACTION) }
-
-Evidently, x_n is only recognized as short form for NthElement.  The
-error message claims ambiguity.  However, the ambiguity is *resolved*
-by adding another signature:
-
-  GCL4:= << NewFunction[NthElement[x->TEXT,n->NUMBER]=:TEXT,NthChar[x,n];];
-  True
-  GCL5:= << x_2                                                            
-  2
 
 ---------------
 
