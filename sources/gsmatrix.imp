@@ -43,13 +43,11 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
   assert(mincol == minrow && maxcol == maxrow);
   gSquareMatrix<T> copy(*this);
   gSquareMatrix<T> inv(maxrow);
-  int i = 0;
-  int j = 0;
 
   // initialize inverse matrix and prescale row vectors
-  for ( i = minrow; i <= maxrow; i++)   {
+  for (int i = minrow; i <= maxrow; i++)   {
     T max= (T) 0;
-    for ( j = mincol; j <= maxcol; j++)  {
+    for (int j = mincol; j <= maxcol; j++)  {
       T abs = copy.data[i][j];
       if (abs < (T) 0)
 	abs = -abs;
@@ -58,7 +56,7 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
     }
     assert (max != (T) 0);
     T scale = (T) 1 / max;
-    for ( j = mincol; j <= maxcol; j++)  {
+    for (int j = mincol; j <= maxcol; j++)  {
       copy.data[i][j] *= scale;
       if (i == j)
 	inv.data[i][j] = scale;
@@ -67,13 +65,13 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
     }
   }
 
-  for ( i = mincol; i <= maxcol; i++)  {
+  for (int i = mincol; i <= maxcol; i++)  {
     // find pivot row
     T max = copy.data[i][i];
     if (max < (T) 0)
       max = -max;
     int row = i;
-    for ( j = i + 1; j <= maxrow; j++)  {
+    for (int j = i + 1; j <= maxrow; j++)  {
       T abs = copy.data[j][i];
       if (abs < (T) 0)
 	abs = -abs;
@@ -111,9 +109,8 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
 {
   T factor = (T) 1;
   gSquareMatrix<T> M(*this);
-  int row = 0;
 
-  for ( row = minrow; row <= maxrow; row++)  {
+  for (int row = minrow; row <= maxrow; row++)  {
 
     // first, we need to check that the value on the diagonal is nonzero
     // if not, we swap rows to bring this about
@@ -143,7 +140,7 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
 
   // finally we multiply the diagonal elements
   T det = (T) 1;
-  for ( row = minrow; row <= maxrow; row++)    det *= M.data[row][row];
+  for (int row = minrow; row <= maxrow; row++)    det *= M.data[row][row];
   return det;
 }
 

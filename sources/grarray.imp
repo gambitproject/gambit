@@ -213,13 +213,12 @@ template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 {
   if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
 
-  T temp;
   for (int i = minrow; i <= maxrow; i++)  {
     T *row = data[i];
-    temp = row[hi];
+    T temp = row[hi];
     for (int j = hi; j > lo; j--)
       row[j] = row[j - 1];
-    row[lo] = row[hi];
+    row[lo] = temp;
   }
 }
 
