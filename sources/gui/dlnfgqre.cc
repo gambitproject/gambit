@@ -15,11 +15,9 @@
 #include "dlnfgqre.h"
 
 const int idRADIOBOX_SOLVEUSING = 2000;
-const int idCHECKBOX_MULTIGRID = 2001;
 
 BEGIN_EVENT_TABLE(dialogNfgQre, wxDialog)
   EVT_RADIOBOX(idRADIOBOX_SOLVEUSING, dialogNfgQre::OnSolveUsing)
-  EVT_CHECKBOX(idCHECKBOX_MULTIGRID, dialogNfgQre::OnMultiGrid)
 END_EVENT_TABLE()
 
 dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const NFSupport &p_support)
@@ -97,11 +95,6 @@ dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const NFSupport &p_support)
 					 "Settings for fine grid");
   wxStaticBoxSizer *fineSizer = new wxStaticBoxSizer(fineBox, wxVERTICAL);
 
-  m_multiGrid = new wxCheckBox(this, idCHECKBOX_MULTIGRID, "Use fine grid");
-  m_multiGrid->SetValue(true);
-  m_multiGrid->Enable(false);
-  fineSizer->Add(m_multiGrid, 0, wxALL | wxCENTER, 5);
-
   wxBoxSizer *fineGridSizer = new wxBoxSizer(wxHORIZONTAL);
   fineGridSizer->Add(new wxStaticText(this, wxID_STATIC, "Grid size"),
 		     0, wxALL | wxCENTER, 5);
@@ -142,15 +135,9 @@ void dialogNfgQre::OnSolveUsing(wxCommandEvent &)
   m_startLambda->Enable(m_solveUsing->GetSelection() == 1);
   m_stopLambda->Enable(m_solveUsing->GetSelection() == 1);
   m_stepLambda->Enable(m_solveUsing->GetSelection() == 1);
-  m_multiGrid->Enable(m_solveUsing->GetSelection() == 1);
   m_del1->Enable(m_solveUsing->GetSelection() == 1);
   m_tol1->Enable(m_solveUsing->GetSelection() == 1);
-  m_del2->Enable(m_solveUsing->GetSelection() == 1 && m_multiGrid->GetValue());
-  m_tol2->Enable(m_solveUsing->GetSelection() == 1 && m_multiGrid->GetValue());
+  m_del2->Enable(m_solveUsing->GetSelection() == 1);
+  m_tol2->Enable(m_solveUsing->GetSelection() == 1);
 }
 
-void dialogNfgQre::OnMultiGrid(wxCommandEvent &)
-{
-  m_del2->Enable(m_multiGrid->GetValue());
-  m_tol2->Enable(m_multiGrid->GetValue());
-}
