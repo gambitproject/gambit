@@ -1,7 +1,7 @@
 %
 % FILE: gclman.tex -- source for GCL manual
 %
-% @(#)gclman.tex	1.39 12 Apr 1995
+% $Id$
 %
 \documentstyle[widetext,chicagob]{article}
 \renewcommand{\baselinestretch}{.9}
@@ -231,6 +231,8 @@ varname := statement
 
 \subsection{User defined functions}
 
+[This is very tentative.  I have problems with some aspects of this. -- TED]
+
 \subsubsection{Creating functions}
 A user defined function can be created using the function
 \verb+NewFunction+, which has the following format.
@@ -305,7 +307,7 @@ INTEGER & Evaluates to an integer of arbitrary size \\
 
 RATIONAL & Evaluates to a rational number of arbitrary precision\\ 
 
-FLOAT 	& Evaluates to a floating point number (Not fully implemented yet)\\
+FLOAT 	& Evaluates to a floating point number\\
 
 TEXT	& String of arbitrary length enclosed in quotation marks\\ 
 
@@ -383,7 +385,8 @@ once. If it evaluates to TRUE, the series of commands are performed.
 Each command must be followed by a semi-colon or carriage return.  If
 the BOOLEAN evaluates to FALSE, none of the commands are performed.\\
 If [BOOLEAN, & \\
-\{series of commands\}], & Evaluates the BOOLEAN expression
+\{series of commands\}, & \\
+\{series of commands\}] & Evaluates the BOOLEAN expression
 once. If it evaluates to TRUE, the first series of commands are
 performed.  Each command must be followed by a semi- colon or carriage
 return.  If the BOOLEAN evaluates to FALSE, the second series of
@@ -405,29 +408,32 @@ required parameter or return value of the procedure.
 The symbol {\tt "=:"} to the right of a procedure specifies the type
 of the return value (if any exists) produced by the procedure.
 
-Paremeters enclosed in brackets {\tt "{ }"} represent optional
+Paremeters enclosed in brackets {\tt "\{ \}"} represent optional
 parameters which are not necessary for the procedure to function.
 
 \begin{itemize}
+
+%--A--
+
 \item 
 \protect \large \begin{verbatim}
-And[x1->BOOLEAN, x2->BOOLEAN] =: BOOLEAN
+And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
   
 \bd
 \item
-[Short form:] \verb+x1 && x2+
+[Short form:] \verb+x && y+
 \item
 [Description:] Logical And.
 \item
-[Return value:] Returns the minimum of $x1$ and $x2.$  
+[Return value:] Returns the minimum of $x$ and $y$.  
 \item
 [Required parameters:]\hfil\null
 \bd
 \item
-[x1:] First argument.  
+[x:] First argument.  
 \item
-[x2:] Second argument
+[y:] Second argument
 \ed
 \item
 [Optional parameters:] None.
@@ -466,10 +472,9 @@ is created automatically.
 
 \item 
 \protect \large \begin{verbatim}
-Assign[name->TEXT, expression->statement] =: INTEGER
+Assign[x<->T, y->T] =: T
 \end{verbatim} \normalsize
-
-where \verb+statement+ is a function with any return type.  
+for all types {\tt T}.
 \bd
 \item
 [Short form:] \verb+name := expression+
@@ -478,7 +483,7 @@ where \verb+statement+ is a function with any return type.
 given by \verb+name+ and return data type the same as that of
 \verb+expression+
 \item
-[Return value:] Returns 1 on success, 0 on failure.  
+[Return value:] Returns the value assigned.
 \item
 [Required parameters:]\hfil\null
 \bd
@@ -518,13 +523,16 @@ the indicated number exists, no action is taken.
 [Optional parameters:] None.
 \ed
 
-\item
+%--B--
 
+%--C--
+
+\item
 \protect \large \begin{verbatim}
 Car[l->LIST(T)] =: T
 \end{verbatim}\normalsize
 
-For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For all types T.
 
 \bd
 \item
@@ -551,7 +559,7 @@ of the list.
 Cdr[l->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
-For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For all types T.
 
 \bd
 \item
@@ -567,38 +575,6 @@ first element.
 \item
 [l:] The list of type T on which the procedure is to be performed.
 \ed
-\item
-[Optional parameters:] None.
-\ed
-
-\item
-
-\protect \large \begin{verbatim}
-Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
-\end{verbatim}\normalsize
-
-For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
-
-\bd
-\item
-[Description:] Concatenates the two lists, placing the second list
-given at the end of the first list.  Note the two lists must be of the
-same type.
-\item 
-[Return value:] Returns a new list (of the same type), which is a
-combination of the two given lists.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[l1:] The list of type T which is to be placed in front of the second
-list.
-\item 
-[l2:] The list of type T which is to be placed at the end of the first
-list.
-\ed
-
 \item
 [Optional parameters:] None.
 \ed
@@ -642,7 +618,7 @@ CopyTree[n->NODE, to->NODE] =: NODE
 [Description:] Copies the subtree rooted at the specified node to the
 indicated node.
 \item
-[Return value:] XXXX.
+[Return value:] Returns the destination node $to$.
 \item
 [Required parameters:]\hfil\null
 
@@ -682,6 +658,8 @@ is to be created.
 \item  
 [Optional parameters:] None.
 \ed
+
+%--D--
 
 \item
 \protect \large \begin{verbatim}
@@ -833,6 +811,57 @@ specified, the last (smallest) strategy set is used.
 \ed
 \ed
 
+\item 
+\protect \large \begin{verbatim}
+Divide[x->T, y->T] =: T
+\end{verbatim} \normalsize
+
+For T = FLOAT, RATIONAL  
+\bd
+\item
+[Short form:] \verb%x / y%
+\item
+[Description:] Divides $y$ into $x$.
+\item
+[Return value:] Returns the value of $x / y$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] First argument.  
+\item
+[y:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+Divide[x->INTEGER, y->INTEGER] =: INTEGER
+\end{verbatim} \normalsize
+
+\bd
+\item
+[Short form:] \verb%x DIV y%
+\item
+[Description:] Divides $y$ into $x$, truncating the result.
+\item
+[Return value:] Returns the value of $x DIV y$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] First argument.  
+\item
+[y:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+%--E--
+
 \item
 \protect \large \begin{verbatim}
 EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
@@ -961,26 +990,26 @@ dominated strategies are iteratively deleted.
 
 \item
 \protect \large \begin{verbatim}
-Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
+Equal[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
-	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For all types T.
 
 \bd
 \item
-[Description:] Determines whether or not all the elements of the two
-lists are equal.
+[Short form:] \verb+x = y+.
 \item
-[Return value:] Returns True only if all the elements of the two lists
-are equal.
+[Description:] Equality check for two objects.
+\item
+[Return value:] Returns the value of $x = y$.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[l1:] The first list of type T which is to be compared for equality.
+[x:] First argument.
 \item
-[l2:] The second list of type T which is to be compared for equality.
+[y:] Second argument.
 \ed
 
 \item
@@ -988,7 +1017,9 @@ are equal.
 
 \ed
 
+%--F--
 
+%--G--
 
 \item
 \protect \large \begin{verbatim}
@@ -1309,7 +1340,7 @@ $$
 $$ 
 where $\underline\lambda,$ $\bar\lambda,$ $\delta,$ and $a$ are
 parameters described below. In the computation for the first value of
-$\lambda_0$, the algorithm begins it's search for a solution at the
+$\lambda_0$, the algorithm begins its search for a solution at the
 starting point determined by the parameter ''start.''  At each
 successive value of $\lambda_t,$ the algorithm begins it's search at
 the point found in step $t - 1$
@@ -1376,6 +1407,61 @@ By default, output is directed to the screen.
 [pxifile:] Can be used to generate an output file compatible for input
 to pxi, a program for graphical viewing and display of the output.  
 \ed
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GreaterEqual[x->T, y->T] =: BOOLEAN
+\end{verbatim}\normalsize
+
+For T = INTEGER, FLOAT, RATIONAL, or TEXT.
+
+\bd
+\item
+[Short form:] \verb+x >= y+
+\item
+[Description:] Yields $true$ if $x$ is greater than or equal to $y$
+\item
+[Return value:] Returns the value of $x \geq y$.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[x:] First argument
+\item
+[y:] Second argument
+\ed
+
+\item
+[Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+GreaterThan[x->T, y->T] =: BOOLEAN
+\end{verbatim}\normalsize
+
+For T = INTEGER, FLOAT, RATIONAL, or TEXT.
+
+\bd
+\item
+[Short form:] \verb+x > y+
+\item
+[Description:] Yields $true$ if $x$ is greater than $y$
+\item
+[Return value:] Returns the value of $x > y$.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[x:] First argument
+\item
+[y:] Second argument
+\ed
+\item
+[Optional parameters:] None.
 \ed
 
 \item
@@ -1451,6 +1537,10 @@ Default is 0, resulting in $a = 1,$ or !geometric incrementing.
 [time:] Returns the elapsed time for the operation.
 \ed
 \ed
+
+%--H--
+
+%--I--
 
 \item 
 \protect \large \begin{verbatim}
@@ -1540,7 +1630,7 @@ game, the player is created automatically.
 
 \item
 \protect \large \begin{verbatim}
-IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
+IsDominated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
@@ -1645,6 +1735,8 @@ running.  Returns False otherwise.
 [Optional parameters:] None.
 \ed
 
+%--J--
+
 \item
 \protect \large \begin{verbatim}
 JoinInfoset[n->NODE, to->NODE] =: NODE
@@ -1656,7 +1748,7 @@ JoinInfoset[n->NODE, to->NODE] =: NODE
 set to which it currently belongs and places it in the information set
 to which the second node given belongs.
 \item
-[Return value:] XXXX .
+[Return value:] Returns the node $n$.
 \item
 [Required parameters:]\hfil\null
 	  
@@ -1672,6 +1764,10 @@ node specified will be transfered.
 \item
 [Optional parameters:] None.
 \ed
+
+%--K--
+
+%--L--
 
 \item
 \protect \large \begin{verbatim}
@@ -1735,7 +1831,7 @@ found.
 \protect \large \begin{verbatim}
 Length[l->LIST(T)] =: INTEGER
 \end{verbatim}\normalsize
-	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
+For all types T.
 
 \bd
 \item
@@ -1752,6 +1848,61 @@ type T.
 found.
 \ed
 
+\item
+[Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+LessEqual[x->T, y->T] =: BOOLEAN
+\end{verbatim}\normalsize
+
+For T = INTEGER, FLOAT, RATIONAL, or TEXT.
+
+\bd
+\item
+[Short form:] \verb+x <= y+
+\item
+[Description:] Yields $true$ if $x$ is less than or equal to $y$
+\item
+[Return value:] Returns the value of $x \leq y$.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[x:] First argument
+\item
+[y:] Second argument
+\ed
+
+\item
+[Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+LessThan[x->T, y->T] =: BOOLEAN
+\end{verbatim}\normalsize
+
+For T = INTEGER, FLOAT, RATIONAL, or TEXT.
+
+\bd
+\item
+[Short form:] \verb+x < y+
+\item
+[Description:] Yields $true$ if $x$ is less than $y$
+\item
+[Return value:] Returns the value of $x < y$.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[x:] First argument
+\item
+[y:] Second argument
+\ed
 \item
 [Optional parameters:] None.
 \ed
@@ -1834,6 +1985,8 @@ Default is 2.0e-10.
 \ed
 \ed
 
+%--M--
+
 \item
 \protect \large \begin{verbatim}
 MergeInfosets[n->NODE, to->NODE] =: NODE
@@ -1845,7 +1998,7 @@ MergeInfosets[n->NODE, to->NODE] =: NODE
 which contains the node first specified to the information to which
 the second node indicated belongs.
 \item
-[Return value:] XXXX .
+[Return value:] Returns the node $n$.
 \item
 [Required parameters:]\hfil\null
 
@@ -1858,6 +2011,31 @@ be moved to the second information set.
 nodes from the first information set are to be moved.
 \ed
 
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+Minus[x->T, y->T] =: T
+\end{verbatim} \normalsize
+
+For T = INTEGER, FLOAT, RATIONAL  
+\bd
+\item
+[Short form:] \verb%x - y%
+\item
+[Description:] Subtracts $y$ from $x$.
+\item
+[Return value:] Returns the value of $x - y$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] First argument.  
+\item
+[y:] Second argument
+\ed
 \item
 [Optional parameters:] None.
 \ed
@@ -1926,7 +2104,7 @@ MoveTree[n->NODE, to->NODE] =: NODE
 [Description:] Moves the subtree rooted at the first node specified to
 the second given node.
 \item
-[Return value:] XXXX .
+[Return value:] Returns the destination node $to$.
 \item
 [Required parameters:]\hfil\null
 	  
@@ -1940,6 +2118,8 @@ the second given node.
 \item
 [Optional parameters:] None.
 \ed
+
+%--N--
 
 \item
 \protect \large \begin{verbatim}
@@ -2059,6 +2239,57 @@ positive number for which no otcome is defined.  If the number
 specified already exists as an outcome, no action is taken and the
 procedure returns a value of zero.
 \ed
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Not[x->BOOLEAN] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Short form:] \verb+NOT x+
+\item
+[Description:] Logical negation.
+\item
+[Return value:] Returns the boolean opposite of $x$.  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] The value to be negated.
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+NotEqual[x->T, y->T] =: BOOLEAN
+\end{verbatim}\normalsize
+
+For all types T.
+
+\bd
+\item
+[Short form:] \verb+x != y+.
+\item
+[Description:] Inequality check for two objects.
+\item
+[Return value:] Returns the value of $x != y$.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[x:] First argument.
+\item
+[y:] Second argument.
+\ed
+
+\item
+[Optional parameters:] None.
+
 \ed
 
 \item
@@ -2211,6 +2442,7 @@ be found.
 [Optional parameters:] None.
 \ed
 
+\item
 \protect \large \begin{verbatim}
 NumPlayers[E->EFG] =: INTEGER
 \end{verbatim} \normalsize
@@ -2270,25 +2502,27 @@ strategy set is used.
 \ed
 \ed
 
+%--O--
+
 \item 
 \protect \large \begin{verbatim}
-Or[x1->BOOLEAN, x2->BOOLEAN] =: BOOLEAN
+Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
   
 \bd
 \item
-[Short form:] \verb+x1 || x2+
+[Short form:] \verb+x || y+
 \item
 [Description:] Logical Or.
 \item
-[Return value:] Returns the maximum of $x1$ and $x2.$  
+[Return value:] Returns the maximum of $x$ and $y$.  
 \item
 [Required parameters:]\hfil\null
 \bd
 \item
-[x1:] First argument.  
+[x:] First argument.  
 \item
-[x2:] Second argument
+[y:] Second argument
 \ed
 \item
 [Optional parameters:] None.
@@ -2324,6 +2558,8 @@ attached, a value of zero is returned.
 \ed
 
 \item
+
+%--P--
 
 \protect \large \begin{verbatim}
 ParentOf[n->NODE] =: NODE
@@ -2373,23 +2609,48 @@ specified node.
 
 \item 
 \protect \large \begin{verbatim}
-Plus[x1->RATIONAL, x2->RATIONAL] =: RATIONAL
+Plus[x->T, y->T] =: T
 \end{verbatim} \normalsize
-  
+
+For T = INTEGER, FLOAT, RATIONAL  
 \bd
 \item
-[Short form:] \verb%x1 + x2%
+[Short form:] \verb%x + y%
 \item
-[Description:] Adds $x1$ and $x2$.
+[Description:] Adds $x$ and $y$.
 \item
-[Return value:] Returns the value of $x1 + x2$  
+[Return value:] Returns the value of $x + y$  
 \item
 [Required parameters:]\hfil\null
 \bd
 \item
-[x1:] First argument.  
+[x:] First argument.  
 \item
-[x2:] Second argument
+[y:] Second argument
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+\item 
+\protect \large \begin{verbatim}
+Plus[x->TEXT, y->TEXT] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+\item
+[Short form:] \verb%x + y%
+\item
+[Description:] Concatenates $x$ and $y$.
+\item
+[Return value:] Returns a TEXT object consisting of $x$ followed by $y$  
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] First argument.  
+\item
+[y:] Second argument
 \ed
 \item
 [Optional parameters:] None.
@@ -2436,6 +2697,8 @@ By default, output is directed to the screen.
 
 \item
 
+%--Q--
+
 \protect \large \begin{verbatim}
 Quit
 \end{verbatim}\normalsize
@@ -2451,6 +2714,8 @@ Quit
 \item
 [Optional parameters:] None.
 \ed
+
+%--R--
 
 \item
 
@@ -2634,6 +2899,8 @@ valid filename.
 \item
 [Optional parameters:] None.
 \ed
+
+%--S--
 
 \item
 
@@ -3047,31 +3314,37 @@ StopWatch[] =: INTEGER
 [Optional parameters:] None.
 \ed
 
-\item
+%--T--
 
 \item 
 \protect \large \begin{verbatim}
-Times[x1->RATIONAL, x2->RATIONAL] =: RATIONAL
+Times[x->T, y->T] =: T
 \end{verbatim} \normalsize
   
 \bd
 \item
-[Short form:] \verb+x1 * x2+
+[Short form:] \verb+x * y+
 \item
-[Description:] Multiplies $x1$ and $x2$.
+[Description:] Multiplies $x$ and $y$.
 \item
-[Return value:] Returns the value of $x1 * x2$  
+[Return value:] Returns the value of $x * y$  
 \item
 [Required parameters:]\hfil\null
 \bd
 \item
-[x1:] First argument.  
+[x:] First argument.  
 \item
-[x2:] Second argument
+[y:] Second argument
 \ed
 \item
 [Optional parameters:] None.
 \ed
+
+%--U--
+
+%--V--
+
+%--W--
 
 \item 
 \protect \large \begin{verbatim}
@@ -3100,7 +3373,7 @@ It either returns 1 or never terminates.)
 [else:] Statement list to be evaluated if antecedent is false. 
 \ed
 
-
+\item
 
 \protect \large \begin{verbatim}
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
@@ -3153,6 +3426,13 @@ indicated file.
 to be written.
 \ed
 \ed
+
+%--X--
+
+%--Y--
+
+%--Z--
+
 \end{itemize}
 \bibliographystyle{chicagob}
 \addcontentsline{toc}{chapter}{Bibliography}
