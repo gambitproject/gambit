@@ -35,6 +35,8 @@ template <class T> class EfgIter    {
     void Payoff(gVector<T> &) const;
 
     const EFSupport &GetEFSupport(void) const;
+
+    void Dump(gOutput &) const;
 };
 
 #endif   // EFGITER_H

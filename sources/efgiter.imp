@@ -98,4 +98,8 @@ template <class T> void EfgIter<T>::Payoff(gVector<T> &payoff) const
   _efg->Payoff(_efgidx, payoff);
 }
 
+template <class T> void EfgIter<T>::Dump(gOutput &f) const
+{
+  _efgidx.Dump(f);
+}
 
