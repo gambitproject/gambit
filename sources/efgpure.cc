@@ -14,8 +14,10 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE int FindPureNash(const Efg<double> &, gList<BehavSolution<double> > &);
-TEMPLATE int FindPureNash(const Efg<gRational> &,gList<BehavSolution<gRational> > &);
+TEMPLATE int FindPureNash(const Efg<double> &, const EFSupport &,
+			  gList<BehavSolution<double> > &);
+TEMPLATE int FindPureNash(const Efg<gRational> &, const EFSupport &,
+			  gList<BehavSolution<gRational> > &);
 
 
 #ifdef __GNUG__

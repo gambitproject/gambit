@@ -248,12 +248,12 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 //-----------------------------------
 
 template <class T>
-int CSSeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
-				      gList<BehavSolution<T> > &solns)
+int CSSeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
+					gList<BehavSolution<T> > &solns)
 {
-  BehavProfile<T> bp(E);
+  BehavProfile<T> bp(sup);
 
-  CSSeqFormModule<T> M(E, params, bp.GetEFSupport());
+  CSSeqFormModule<T> M(E, params, sup);
   
   M.CSSeqForm();
 
@@ -264,10 +264,10 @@ int CSSeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-CSSeqFormBySubgame<T>::CSSeqFormBySubgame(const Efg<T> &E,
+CSSeqFormBySubgame<T>::CSSeqFormBySubgame(const Efg<T> &E, const EFSupport &S,
 					  const CSSeqFormParams &p,
 					  int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
+  : SubgameSolver<T>(E, S, max), npivots(0), params(p)
 { }
 
 template <class T> CSSeqFormBySubgame<T>::~CSSeqFormBySubgame()   { }

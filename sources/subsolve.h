@@ -1,8 +1,8 @@
-//#
-//# FILE: subsolve.h -- Interface to generic subgame solver
-//#
-//# $Id$
-//#
+//
+// FILE: subsolve.h -- Interface to generic subgame solver
+//
+// $Id$
+//
 
 #ifndef SUBSOLVE_H
 #define SUBSOLVE_H
@@ -17,6 +17,7 @@ template <class T> class SubgameSolver   {
     int max_solns, subgame_number;
     double time;
     Efg<T> efg;
+    EFSupport support;
     BehavProfile<T> solution;
     gList<BehavSolution<T> > solutions;
 
@@ -26,7 +27,8 @@ template <class T> class SubgameSolver   {
 		      gList<Outcome *> &);
 
   protected:
-    virtual int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &) = 0;
+    virtual int SolveSubgame(const Efg<T> &, const EFSupport &,
+			     gList<BehavSolution<T> > &) = 0;
     // changed to return int = status.Get()
 
     virtual void ViewSubgame(int, const Efg<T> &);
@@ -36,7 +38,7 @@ template <class T> class SubgameSolver   {
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
-    SubgameSolver(const Efg<T> &E, int maxsol = 0);
+    SubgameSolver(const Efg<T> &E, const EFSupport &, int maxsol = 0);
     virtual ~SubgameSolver();
     
     void Solve(void);

@@ -69,11 +69,13 @@ template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
     long npivots;
     CSSeqFormParams params;
 
-    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, const EFSupport &,
+		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:
-    CSSeqFormBySubgame(const Efg<T> &E, const CSSeqFormParams &, int max = 0);
+    CSSeqFormBySubgame(const Efg<T> &E, const EFSupport &,
+		       const CSSeqFormParams &, int max = 0);
     virtual ~CSSeqFormBySubgame();
 
     long NumPivots(void) const  { return npivots; }

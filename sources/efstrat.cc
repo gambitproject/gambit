@@ -234,6 +234,11 @@ int EFSupport::Find(Action *a) const
   return sets[pl]->Find(a);
 }
 
+int EFSupport::Find(int pl, int iset, int act) const
+{
+  return sets[pl]->Find(befg->PlayerList()[pl]->InfosetList()[iset]->GetActionList()[act]);
+}
+
 bool EFSupport::IsValid(void) const
 {
   if (sets.Length() == 0)   return false;

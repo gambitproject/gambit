@@ -218,7 +218,7 @@ Portion *GSM_EnumMixed_EfgFloat(Portion **param)
   EP.tracefile = &((OutputPortion *) param[5])->Value();
   EP.trace = ((IntPortion *) param[6])->Value();
   
-  EnumBySubgame<double> EM(E, EP);
+  EnumBySubgame<double> EM(E, EFSupport(E), EP);
   
   EM.Solve();
   gList<BehavSolution<double> > solns(EM.GetSolutions());
@@ -244,7 +244,7 @@ Portion *GSM_EnumMixed_EfgRational(Portion **param)
   EP.tracefile = &((OutputPortion *) param[5])->Value();
   EP.trace = ((IntPortion *) param[6])->Value();
 
-  EnumBySubgame<gRational> EM(E, EP);
+  EnumBySubgame<gRational> EM(E, EFSupport(E), EP);
   
   EM.Solve();
 
@@ -307,13 +307,13 @@ Portion *GSM_EnumPure_EfgFloat(Portion **param)
   gList<BehavSolution<double> > solns;
 
   if (((BoolPortion *) param[1])->Value())   {
-    PureNashBySubgame<double> M(E);
+    PureNashBySubgame<double> M(E, EFSupport(E));
     M.Solve();
     solns = M.GetSolutions();
     ((FloatPortion *) param[3])->Value() = M.Time();
   }
   else  {
-    EfgPSNEBySubgame<double> M(E);
+    EfgPSNEBySubgame<double> M(E, EFSupport(E));
     M.Solve();
     solns = M.GetSolutions();
     ((FloatPortion *) param[3])->Value() = M.Time();
@@ -330,13 +330,13 @@ Portion *GSM_EnumPure_EfgRational(Portion **param)
   gList<BehavSolution<gRational> > solns;
   
   if (((BoolPortion *) param[1])->Value())  {
-    PureNashBySubgame<gRational> M(E);
+    PureNashBySubgame<gRational> M(E, EFSupport(E));
     M.Solve();
     solns = M.GetSolutions();
     ((FloatPortion *) param[3])->Value() = M.Time();
   }
   else  {
-    EfgPSNEBySubgame<gRational> M(E);
+    EfgPSNEBySubgame<gRational> M(E, EFSupport(E));
     M.Solve();
     solns = M.GetSolutions();
     ((FloatPortion *) param[3])->Value() = M.Time();
@@ -820,7 +820,7 @@ Portion *GSM_Lp_EfgFloat(Portion **param)
     ZP.tracefile = &((OutputPortion *) param[4])->Value();
     ZP.trace = ((IntPortion *) param[5])->Value();
 
-    ZSumBySubgame<double> ZM(E, ZP);
+    ZSumBySubgame<double> ZM(E, EFSupport(E), ZP);
 
     ZM.Solve();
 
@@ -835,7 +835,7 @@ Portion *GSM_Lp_EfgFloat(Portion **param)
     ZP.tracefile = &((OutputPortion *) param[4])->Value();
     ZP.trace = ((IntPortion *) param[5])->Value();
 
-    CSSeqFormBySubgame<double> ZM(E, ZP);
+    CSSeqFormBySubgame<double> ZM(E, EFSupport(E), ZP);
 
     ZM.Solve();
 
@@ -865,7 +865,7 @@ Portion *GSM_Lp_EfgRational(Portion **param)
     ZP.tracefile = &((OutputPortion *) param[4])->Value();
     ZP.trace = ((IntPortion *) param[5])->Value();
 
-    ZSumBySubgame<gRational> ZM(E, ZP);
+    ZSumBySubgame<gRational> ZM(E, EFSupport(E), ZP);
 
     ZM.Solve();
 
@@ -880,7 +880,7 @@ Portion *GSM_Lp_EfgRational(Portion **param)
     ZP.tracefile = &((OutputPortion *) param[4])->Value();
     ZP.trace = ((IntPortion *) param[5])->Value();
 
-    CSSeqFormBySubgame<gRational> ZM(E, ZP);
+    CSSeqFormBySubgame<gRational> ZM(E, EFSupport(E), ZP);
 
     ZM.Solve();
 
@@ -1109,7 +1109,7 @@ Portion *GSM_Simpdiv_EfgFloat(Portion **param)
   SP.tracefile = &((OutputPortion *) param[7])->Value();
   SP.trace = ((IntPortion *) param[8])->Value();
 
-  SimpdivBySubgame<double> SM(E, SP);
+  SimpdivBySubgame<double> SM(E, EFSupport(E), SP);
   SM.Solve();
 
   gList<BehavSolution<double> > solns(SM.GetSolutions());
@@ -1137,7 +1137,7 @@ Portion *GSM_Simpdiv_EfgRational(Portion **param)
   SP.tracefile = &((OutputPortion *) param[7])->Value();
   SP.trace = ((IntPortion *) param[8])->Value();
 
-  SimpdivBySubgame<gRational> SM(E, SP);
+  SimpdivBySubgame<gRational> SM(E, EFSupport(E), SP);
 
   SM.Solve();
 

@@ -13,12 +13,11 @@
 
 #include "efgpure.h"
 
-template <class T> int FindPureNash(const Efg<T> &efg,
+template <class T> int FindPureNash(const Efg<T> &efg, const EFSupport &sup,
 				    gList<BehavSolution<T> > &eqs)
 {
   int index;
-  EFSupport S(efg);
-  EfgContIter<T> citer(S);
+  EfgContIter<T> citer(sup);
 
   do  {
     int flag = 1;
@@ -66,17 +65,18 @@ template <class T> int FindPureNash(const Efg<T> &efg,
 //-----------------------------------
 
 template <class T>
-int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E,
+int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E, const EFSupport &sup,
 				      gList<BehavSolution<T> > &solns)
 {
-  FindPureNash(E, solns);
+  FindPureNash(E, sup, solns);
 
   return 0;
 }
 
 template <class T>
-EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg<T> &E, int max)
-  : SubgameSolver<T>(E, max)
+EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg<T> &E, const EFSupport &S,
+				      int max)
+  : SubgameSolver<T>(E, S, max)
 { }
 
 template <class T> EfgPSNEBySubgame<T>::~EfgPSNEBySubgame()   { }

@@ -15,15 +15,18 @@ template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
     int nevals;
     SimpdivParams params;
 
-    int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
+    int SolveSubgame(const Efg<T> &, const EFSupport &, 
+		     gList<BehavSolution<T> > &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SIMPDIVSUB; }    
 
   public:
-    SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &, int max = 0);
+    SimpdivBySubgame(const Efg<T> &E, const EFSupport &,
+		     const SimpdivParams &, int max = 0);
     virtual ~SimpdivBySubgame();
 
     int NumEvals(void) const    { return nevals; }
 };
 
 
-#endif   // SUBNSIMP_H
+#endif   // SIMPSUB_H
+

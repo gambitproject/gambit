@@ -122,6 +122,7 @@ public:
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
   int Find(Action *) const;
+  int Find(int pl, int iset, int act) const;
 
   const gArray<Action *> &ActionList(int pl, int iset) const
     { return sets[pl]->ActionList(iset); }

@@ -329,9 +329,9 @@ int SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p,
-				      int max)
-  : SubgameSolver<T>(E, max), npivots(0), params(p)
+SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const EFSupport &S,
+				      const SeqFormParams &p, int max)
+  : SubgameSolver<T>(E, S, max), npivots(0), params(p)
 { }
 
 template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }

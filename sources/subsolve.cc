@@ -43,6 +43,31 @@ gOutput &operator<<(gOutput &, const gArray<gRational> &);
 
 #include "subsolve.imp"
 
+// Project the actions in the support 'from' in the subgame rooted at
+// 'n' to the support 'to' (assumed to belong to that subgame)
+
+void Project(const EFSupport &from, EFSupport &to, Node *n)
+{
+  const BaseEfg &E = from.BelongsTo();
+  
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    int isetno = 1;
+    for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
+      Infoset *infoset = E.PlayerList()[pl]->InfosetList()[iset];
+      if (E.IsPredecessor(n, infoset->GetMemberList()[1]))  {
+	Infoset *newiset = to.BelongsTo().PlayerList()[pl]->InfosetList()[isetno];
+	for (int act = 1; act <= infoset->NumActions(); act++)  {
+	  if (!from.Find(infoset->GetActionList()[act]))
+	    to.RemoveAction(pl, isetno, newiset->GetActionList()[act]);
+	} 
+	isetno++;
+      }
+      assert(isetno == to.BelongsTo().PlayerList()[pl]->NumInfosets());
+    }
+  }
+}
+  
+
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -52,6 +77,7 @@ class gArray<unsigned char>;
 
 class gNode<gArray<int> >;
 class gList<gArray<int> >;
+
 
 bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
 {

@@ -72,7 +72,8 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
-    SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &, int max = 0);
+    SeqFormBySubgame(const Efg<T> &E, const EFSupport &,
+                     const SeqFormParams &, int max = 0);
     virtual ~SeqFormBySubgame();
 
     int NumPivots(void) const  { return npivots; }

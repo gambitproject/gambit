@@ -19,7 +19,8 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
     EfgAlgType AlgorithmID() const { return EfgAlg_LEMKESUB; }    
 
   public:
-    LemkeBySubgame(const Efg<T> &E, const LemkeParams &, int max = 0);
+    LemkeBySubgame(const Efg<T> &E, const EFSupport &,
+		   const LemkeParams &, int max = 0);
     virtual ~LemkeBySubgame();
 
     int NumPivots(void) const   { return npivots; }
