@@ -196,7 +196,6 @@ gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
   return DivideByPolynomial(den);
 }
 
-
 template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
 { 
   assert(Space == p.Space);
@@ -792,6 +791,81 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
   return L1*(*this) - L2*arg2;
 }
 
+template<class T> gPoly<T> 
+gPoly<T>::TranslateOfMono(const gMono<T>& m, 
+				      const gVector<T>& new_origin) const
+{
+  gPoly<T> answer(GetSpace(), (T)1, GetOrder());
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (m.ExpV()[i] > 0) {
+      gPoly<T> lt(GetSpace(), i, 1, GetOrder());
+      lt += gPoly<T>(GetSpace(), new_origin[i], GetOrder());
+      for (int j = 1; j <= m.ExpV()[i]; j++)
+	answer *= lt;
+    }
+  }
+
+  answer *= m.Coef();
+
+  return answer;
+}
+
+template<class T> gPoly<T> 
+gPoly<T>::TranslateOfPoly(const gVector<T>& new_origin) const
+{
+  gPoly<T> answer(GetSpace(), GetOrder());
+  for (int i = 1; i <= this->MonomialList().Length(); i++) 
+    answer += TranslateOfMono(this->MonomialList()[i],new_origin);
+  return answer;
+}
+
+
+template<class T> gPoly<T>  
+gPoly<T>::MonoInNewCoordinates(const gMono<T>& m, 
+					    const gSquareMatrix<T>& M) const
+{
+  assert(M.NumRows() == Dmnsn());
+
+  gPoly<T> answer(GetSpace(), (T)1, GetOrder());
+
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (m.ExpV()[i] > 0) {
+      gPoly<T> linearform(GetSpace(), (T)0, GetOrder());
+      for (int j = 1; j <= Dmnsn(); j++) {
+	exp_vect exps(GetSpace(), j, 1);
+	linearform += gPoly<T>(GetSpace(), exps, M(i,j), GetOrder());
+      }
+      for (int k = 1; k <= m.ExpV()[i]; k++) answer *= linearform;
+    }
+  }
+
+  answer *= m.Coef();
+
+  return answer;
+}
+
+template<class T> 
+gPoly<T> gPoly<T>::PolyInNewCoordinates(const gSquareMatrix<T>& M) const
+{
+  gPoly<T> answer(GetSpace(), GetOrder());
+  for (int i = 1; i <= MonomialList().Length(); i++) 
+    answer += MonoInNewCoordinates(MonomialList()[i],M);
+  return answer;
+}
+
+template<class T>
+T gPoly<T>::MaximalValueOfNonlinearPart(const T& radius)  const
+{
+  T maxcon = (T)0;
+  for (int i = 1; i <= MonomialList().Length(); i++) 
+    if (MonomialList()[i].TotalDegree() > 1) 
+      maxcon += MonomialList()[i].Coef() * 
+	            pow(radius,(long)MonomialList()[i].TotalDegree());
+
+  return maxcon;
+}
+
 #endif   // MINI_POLY
 
 
@@ -883,8 +957,4 @@ template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
   f << s;
   return f;
 }
-
-  
-
-
 

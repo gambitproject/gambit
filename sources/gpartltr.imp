@@ -239,6 +239,116 @@ template <class T> gOutput& operator << (gOutput& output,
   exit(0);
 }
 
+template <class T> bool
+TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T>& r) const
+{
+  if (this->RootNode()->GetData().IsMultiaffine())
+    return MultiaffinePolyHasNoRootsIn(r);
+  else {
+    gVector<T> center = r.Center();
+    
+    T constant = this->RootNode()->GetData().Evaluate(center);
+    if (constant < (T)0) constant = - constant;
+    
+    gVector<T> HalvesOfSideLengths = r.SideLengths();
+    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (T)2;
+    
+    T max = 
+      this->MaximalNonconstantContribution(center, HalvesOfSideLengths);
+  
+    if (max >= constant) 
+      return false;
+    else 
+      return true;
+  }
+}
+
+template <class T> bool 
+TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
+{
+  int sign;
+  if (this->RootNode()->GetData().Evaluate(r.Center()) > (T)0)
+    sign = 1;
+  else
+    sign = -1;
+  
+  gArray<int> zeros(Dmnsn());
+  gArray<int> ones(Dmnsn());
+  for (int j = 1; j <= Dmnsn(); j++) {
+    zeros[j] = 0; 
+    if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1;
+    //Equation_i_uses_var_j(index,j)) ones[j] = 1; 
+    else                                ones[j] = 0;
+  }
+  gIndexOdometer topbottoms(zeros,ones);
+  
+  while (topbottoms.Turn()) {
+    gVector<T> point(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (topbottoms[i] == 0)
+	point[i] = r.LowerBoundOfCoord(i);
+      else
+	point[i] = r.UpperBoundOfCoord(i);
+    if ((T)sign * this->RootNode()->GetData().Evaluate(point) <=  (T)0)
+      return false;
+  }
+  
+  return true;
+}
+
+
+
+template<class T> bool
+TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
+					        const gRectangle<T>& r) const
+{ 
+  gArray<int> zeros(Dmnsn());
+  gArray<int> ones(Dmnsn());
+  for (int j = 1; j <= Dmnsn(); j++) {
+    zeros[j] = 0; 
+    if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1; 
+    else                                                ones[j] = 0;
+  }
+  gIndexOdometer topbottoms(zeros,ones);
+  
+  while (topbottoms.Turn()) {
+    gVector<T> point(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (topbottoms[i] == 0)
+	point[i] = r.LowerBoundOfCoord(i);
+      else
+	point[i] = r.UpperBoundOfCoord(i);
+    if (this->RootNode()->GetData().Evaluate(point) >= (T)0)
+      return false;
+  }
+  
+  return true;
+}
+
+template<class T> bool
+TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
+{
+  if (this->RootNode()->GetData().IsMultiaffine())
+    return MultiaffinePolyEverywhereNegativeIn(r);
+  else {
+    gVector<T> center = r.Center();
+
+    T constant = 
+      this->RootNode()->GetData().Evaluate(center);
+    if (constant >= (T)0) return false;
+    
+    gVector<T> HalvesOfSideLengths = r.SideLengths();
+    for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (T)2;
+    
+    T max = this->MaximalNonconstantContribution(center, HalvesOfSideLengths);
+
+    if (max + constant >= (T)0) return false;
+    else                     return true;
+  }
+}
+
+
+
 
 //---------------------------------------------------------------
 //                    class: ListOfPartialTrees

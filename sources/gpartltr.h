@@ -9,7 +9,7 @@
 
 //#include "gsolver.h"
 //#include "odometer.h"
-//#include "rectangl.h"
+#include "rectangl.h"
 #include "gtree.h"
 #include "gpoly.h"
 #include "gpolylst.h"
@@ -22,7 +22,8 @@ template <class T> class TreeOfPartials {
 private:
   gTree<gPoly<T> > PartialTree;
 
-// Recursive Construction
+  /// Recursive Constructions and Computations ///
+
    void TreeOfPartialsRECURSIVE(gTree<gPoly<T> >&,
 				gTreeNode<gPoly<T> >*)         const;
 
@@ -68,6 +69,10 @@ public:
      { return RootPoly().Evaluate(point); }
    T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
    gVector<T> VectorOfPartials(const gVector<T>&)              const;
+   bool      PolyHasNoRootsIn(const gRectangle<T>&)            const;
+   bool MultiaffinePolyHasNoRootsIn(const gRectangle<T>&)      const;
+   bool PolyEverywhereNegativeIn(const gRectangle<T>&)         const;
+   bool MultiaffinePolyEverywhereNegativeIn(const gRectangle<T>&) const;
 
 friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
 };
@@ -115,6 +120,5 @@ public:
 
 friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
 };
-
 
 #endif // GPARTLTR_H

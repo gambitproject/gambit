@@ -11,6 +11,7 @@
 
 #ifndef MINI_POLY
 #include "poly.h"
+#include "gsmatrix.h"
 #endif
 
 // These classes are used to store and mathematically manipulate polynomials.
@@ -51,7 +52,12 @@ private:
 			 const gList<gMono<T> >&)          const;
   gList<gMono<T> > Mult(const gList<gMono<T> >&, 
 			const gList<gMono<T> >&)           const;
-  gPoly<T>        DivideByPolynomial(const gPoly<T> &den) const; 
+  gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
+
+  // The following is used to construct the translate of *this.
+  gPoly<T> TranslateOfMono(const gMono<T>&, const gVector<T>&) const;
+  gPoly<T> MonoInNewCoordinates(const gMono<T>&, 
+				const gSquareMatrix<T>&)       const;
 
 
   //-----------------------------------------------
@@ -148,11 +154,15 @@ public:
   T                   Evaluate(const gArray<T> &values)    const;
 
 #ifndef MINI_POLY
-  gPoly<T>           EvaluateOneVar(int varnumber, T val) const;
-  gPoly<T>           PartialDerivative(int varnumber)     const;
-  int                No_Monomials()                       const;
-  gList<exp_vect>    ExponentVectors()                    const;
-  gList<gMono<T> >   MonomialList()                       const;
+  gPoly<T>           EvaluateOneVar(int varnumber, T val)  const;
+  gPoly<T>           PartialDerivative(int varnumber)      const;
+  int                No_Monomials()                        const;
+  gList<exp_vect>    ExponentVectors()                     const;
+  gList<gMono<T> >   MonomialList()                        const;
+
+  gPoly<T>           TranslateOfPoly(const gVector<T>&)    const;
+  gPoly<T>   PolyInNewCoordinates(const gSquareMatrix<T>&) const;
+  T                  MaximalValueOfNonlinearPart(const T&) const;
 
   //--------------------
   // Term Order Concepts
@@ -195,6 +205,7 @@ template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 template <class T> gText ToText(const gPoly<T> &p);
 
 template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
+
 
 
 #endif //# GPOLY_H

@@ -5,9 +5,8 @@
 // @(#)gpartltr.cc	1.1 1/7/98
 //
 
-#include "gpartltr.imp"
-//#include "double.h"
 #include "glist.imp"
+#include "gpartltr.imp"
 
 template class TreeOfPartials<gDouble>;
 template gOutput &operator<<(gOutput &f, const TreeOfPartials<gDouble> &y);
