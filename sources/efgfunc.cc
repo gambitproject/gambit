@@ -644,11 +644,12 @@ Portion *GSM_PlayerNode(Portion **param)
 
 Portion *GSM_Players(Portion **param)
 {
-  Portion* result;
+  Portion* p;
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
-  result = ArrayToList(E.PlayerList());
-  result->SetOwner( param[ 0 ]->Original() );
-  return result;
+  p = ArrayToList(E.PlayerList());
+  p->SetOwner( param[ 0 ]->Original() );
+  p->AddDependency();
+  return p;
 }
 
 Portion *GSM_PriorSibling(Portion **param)

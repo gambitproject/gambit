@@ -567,8 +567,16 @@ Portion* GSM::_ResolveRef( Portion* p )
     }
     else
     {
-      result = _VarValue( ref )->RefCopy();
-      delete p;
+      if( _VarValue( ref )->IsValid() )
+      {
+	result = _VarValue( ref )->RefCopy();
+	delete p;
+      }
+      else
+      {
+	delete _VarRemove( ref );
+	result = p;
+      }
     }
   }
   else
@@ -1346,10 +1354,6 @@ void GSM::Output( void )
     p->Output( _StdOut );
     if( p->Type() == porREFERENCE )
       _StdOut << " (undefined)";
-    /*
-    if( p->Original() != 0 )
-      gout << " " << (void*) p->Original()->Owner();
-    */
     _StdOut << "\n";
     
     _Push( p );
@@ -1469,7 +1473,7 @@ void GSM::_ErrorMessage
     s << "  Program abnormally terminated.\n";
     break;
   case 35:
-    s << "  Attempted to create a list of mixed types or owners.\n";
+    s << "  Attempted to create a list of mixed types.\n";
     break;
   case 36:
     s << "  Subscript out of range\n";

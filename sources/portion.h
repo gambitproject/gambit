@@ -20,6 +20,8 @@
 #include "normal.h"
 #include "efg.h"
 
+#include "glist.h"
+
 
 
 //---------------------------------------------------------------------
@@ -32,12 +34,21 @@ private:
   static int _NumObj;
 
 protected:
+  bool _IsValid;
   Portion* _Owner;
   Portion* _Original;
+
   Portion( void );
+
 
 public:
   virtual ~Portion();
+
+  void AddDependency( void );
+  void RemoveDependency( void );
+
+  bool IsValid( void ) const;
+  void SetInvalid( void );
 
   virtual void SetOwner( Portion* p );
   Portion* Owner( void ) const;
@@ -636,6 +647,7 @@ class NfgPortion : public Portion
 {
 protected:
   BaseNormalForm** _Value;
+  gList< Portion* >* _Dependent;
   NfgPortion( void );
 
 public:
@@ -648,6 +660,9 @@ public:
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );
   bool operator == ( Portion* p ) const;
+
+  void AddDependent( Portion* p );
+  void RemoveDependent( Portion* p );
 };
 
 
@@ -680,6 +695,7 @@ class EfgPortion : public Portion
 {
 protected:
   BaseEfg** _Value;
+  gList< Portion* >* _Dependent;
   EfgPortion( void );
 
 public:
@@ -692,6 +708,9 @@ public:
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );
   bool operator == ( Portion* p ) const;
+
+  void AddDependent( Portion* p );
+  void RemoveDependent( Portion* p );
 };
 
 
@@ -834,7 +853,7 @@ public:
   int      Length     ( void ) const;
   void     Flush      ( void );
 
-  Portion* Subscript( int index ) const;
+  Portion* Subscript( int index );
 };
 
 class ListValPortion : public ListPortion
