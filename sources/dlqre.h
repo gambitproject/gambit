@@ -12,7 +12,7 @@
 class dialogQre : public dialogPxi {
 private:
   wxNumberItem *m_minLam, *m_maxLam, *m_delLam;
-  wxIntegerItem *m_tol1, *m_tolN, *m_maxits1, *m_maxitsN;
+  wxIntegerItem *m_tol1D, *m_tolND, *m_maxits1D, *m_maxitsND;
   wxRadioBox *m_startOption;
 
   gText HelpTopic(void) const  { return "Qre"; }
@@ -30,13 +30,13 @@ public:
   double DelLam(void) const
     { return m_delLam->GetNumber(); }
   int Tol1D(void) const
-    { return m_tol1->GetInteger(); }
+    { return m_tol1D->GetInteger(); }
   int TolND(void) const
-    { return m_tolN->GetInteger(); }
+    { return m_tolND->GetInteger(); }
   int Maxits1D(void) const
-    { return m_maxits1->GetInteger(); }
+    { return m_maxits1D->GetInteger(); }
   int MaxitsND(void) const
-    { return m_maxitsN->GetInteger(); }
+    { return m_maxitsND->GetInteger(); }
 
   int StartOption(void) const
     { return m_startOption->GetSelection(); }
