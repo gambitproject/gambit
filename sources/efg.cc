@@ -48,6 +48,17 @@ bool Action::Precedes(const Node * n) const
 //                 Infoset: Member function definitions
 //----------------------------------------------------------------------
 
+bool Infoset::Precedes(const Node * n) const
+{
+  while ( n != n->Game()->RootNode() ) {
+    if ( n->GetInfoset() == this )
+      return true;
+    else
+      n = n->GetParent();
+  }
+  return false;
+}
+
 Infoset::Infoset(Efg *e, int n, EFPlayer *p, int br)
   : E(e), number(n), player(p), actions(br), flag(0) 
 {

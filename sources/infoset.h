@@ -92,6 +92,8 @@ class Infoset   {
     int NumMembers(void) const   { return members.Length(); }
 
     int GetNumber(void) const    { return number; }
+
+    bool Precedes(const Node *) const;
 };
 
 
