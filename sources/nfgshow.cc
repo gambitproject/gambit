@@ -14,6 +14,7 @@
 #include "nfgtable.h"
 #include "nfgsoln.h"
 #include "nfgprofile.h"
+#include "mixededit.h"
 #include "nfgconst.h"
 
 #include "efg.h"
@@ -174,7 +175,9 @@ END_EVENT_TABLE()
 NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
-    m_nfg(p_nfg), m_solutionTable(0), m_solutionSashWindow(0),
+    m_nfg(p_nfg),
+    m_panel(0), m_toolbar(0), m_table(0), m_solutionTable(0),
+    m_panelSashWindow(0), m_solutionSashWindow(0),
     m_rowPlayer(1), m_colPlayer(2)
 {
 #ifdef __WXMSW__
@@ -1171,28 +1174,55 @@ void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
   MixedSolution profile = MixedProfile<gNumber>(NFSupport(m_nfg));
 
-  m_solutionTable->Append(profile);
-  ChangeSolution(m_solutionTable->Length());
+  dialogMixedEditor dialog(this, profile);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_solutionTable->Append(dialog.GetProfile());
+    ChangeSolution(m_solutionTable->Length());
+  }
 }
 
 void NfgShow::OnProfilesClone(wxCommandEvent &)
 {
-
+  MixedSolution profile((*m_solutionTable)[cur_soln]);
+  
+  dialogMixedEditor dialog(this, profile);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_solutionTable->Append(dialog.GetProfile());
+    ChangeSolution(m_solutionTable->Length());
+  }
 }
 
 void NfgShow::OnProfilesRename(wxCommandEvent &)
 {
+  if (cur_soln > 0) {
+    wxTextEntryDialog dialog(this, "Enter new name for profile",
+			     "Rename profile",
+			     (char *) (*m_solutionTable)[cur_soln].GetName());
 
+    if (dialog.ShowModal() == wxID_OK) {
+      (*m_solutionTable)[cur_soln].SetName(dialog.GetValue().c_str());
+      m_solutionTable->UpdateValues();
+    }
+  }
 }
 
 void NfgShow::OnProfilesEdit(wxCommandEvent &)
 {
+  if (cur_soln > 0) {
+    dialogMixedEditor dialog(this, (*m_solutionTable)[cur_soln]);
 
+    if (dialog.ShowModal() == wxID_OK) {
+      (*m_solutionTable)[cur_soln] = dialog.GetProfile();
+      ChangeSolution(cur_soln);
+    }
+  }
 }
 
 void NfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-
+  m_solutionTable->Remove(cur_soln);
+  cur_soln = (m_solutionTable->Length() > 0) ? 1 : 0;
+  ChangeSolution(cur_soln);
 }
 
 void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
@@ -1311,7 +1341,7 @@ void NfgShow::AdjustSizes(void)
     m_solutionSashWindow->SetSize(0, height - solnHeight, width, solnHeight);
     height -= solnHeight;
   }
-  if (m_panel) {
+  if (m_panelSashWindow) {
     m_panelSashWindow->SetSize(0, 40, 200, height - 40);
   }
   if (m_table) {
