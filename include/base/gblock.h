@@ -8,7 +8,7 @@
 #define GBLOCK_H
 
 #include <stdlib.h>
-#include "garray.h"
+#include "base/garray.h"
 
 template <class T> class gBlock : public gArray<T>   {
   private:

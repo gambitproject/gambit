@@ -4,8 +4,7 @@
 // $Id$
 //
 
-#include "gdpvect.h"
-#include <assert.h>
+#include "math/gdpvect.h"
 
 //--------------------------------------------------------------------------
 //          gDPVector<T>: Private and protected member functions

@@ -7,7 +7,7 @@
 #ifndef GDPVECT_H
 #define GDPVECT_H
 
-#include "gpvector.h"
+#include "math/gpvector.h"
 
 template <class T> class gDPVector : public gPVector<T>  {
   private:

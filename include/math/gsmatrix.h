@@ -7,7 +7,7 @@
 #ifndef GSMATRIX_H
 #define GSMATRIX_H
 
-#include "gmatrix.h"
+#include "math/gmatrix.h"
 
 template <class T> class gSquareMatrix : public gMatrix<T>   {
 public:

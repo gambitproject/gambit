@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "gvector.h"
+#include "math/gvector.h"
 #include "base/base.h"
 
 template <class T> gText gVector<T>::BadDim::Description(void) const

@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "gpvector.h"
+#include "math/gpvector.h"
 
 //-------------------------------------------------------------------------
 //          gPVector<T>: Private and protected member functions

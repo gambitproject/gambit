@@ -8,7 +8,7 @@
 #define GSTREAM_H
 
 #include <stdio.h>
-#include "gmisc.h"
+#include "base/gmisc.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -175,7 +175,7 @@ class gStandardOutput : public gOutput  {
     gOutput &operator<<(const void *x);
 };
 
-#include "gtext.h"
+#include "base/gtext.h"
 
 class gFileOutput : public gOutput  {
   private:

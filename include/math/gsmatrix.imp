@@ -4,7 +4,7 @@
 //  $Id$
 //
 
-#include "gsmatrix.h"
+#include "math/gsmatrix.h"
 #include "base/base.h"
 
 //-----------------------------------------------------------------------------

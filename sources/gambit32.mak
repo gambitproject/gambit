@@ -13,7 +13,7 @@ BCCDIR = C:\BC5
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -v 
+EXTRACPPFLAGS = -v -I..\include
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 !include make.filelist
@@ -49,7 +49,7 @@ gambit:	$(ALLGUI_OBJECTS) gambit.res
 c0w32.obj $(ALLGUI_OBJECTS)
 gambit
 nul
-$(GUILIBS)
+$(GUILIBS) base\gambit_base math\gambit_math
 
 gambit.res
 !
@@ -62,7 +62,7 @@ gcl:   $(TTYGCL_OBJECTS)
 c0x32.obj $(TTYGCL_OBJECTS)
 gcl
 nul
-cw32mti import32
+cw32mti import32 base\gambit_base math\gambit_math
 !
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
@@ -70,7 +70,7 @@ wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
 c0w32.obj $(WXGCL_OBJECTS) 
 wxgcl
 nul
-$(GUILIBS)
+$(GUILIBS) base\gambit_base math\gambit_math
 
 wxgcl.res
 !

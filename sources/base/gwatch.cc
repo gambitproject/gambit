@@ -12,8 +12,6 @@
 #include <sys/times.h>
 #include <limits.h>
 
-#include "base/gwatch.h"
-
 #ifndef CLK_TCK
 // This is correct for SunOS; Solaris has CLK_TCK predefined.  Other
 // systems might have problems with this.
@@ -27,6 +25,8 @@ extern "C" long _sysconf(int);
 #ifdef __BORLANDC__
 #include <sys\timeb.h>
 #endif    // __BORLANDC__
+
+#include "base/gwatch.h"
 
 
 gWatch::gWatch(bool run /* = true */)
