@@ -1452,9 +1452,10 @@ void CallFuncObj::ComputeFuncIndex(void)
 	matchlevel = matchNONE;
 
       if (!m_funcMatch[f_index])
-	matchlevel = matchNONE;
+      	matchlevel = matchNONE;
 
-      for (int index = 0; index < _FuncInfo[f_index].NumParams; index++)   {
+      for (int index = 0; (index < _FuncInfo[f_index].NumParams
+                           && matchlevel != matchNONE); index++)   {
 	if (m_params[index] != 0) {
 	  // parameter is defined
 	  gclMatchLevel parammatch = 
@@ -1522,7 +1523,7 @@ void CallFuncObj::ComputeFuncIndex(void)
       }
     }
 
-    if (exact_matches == 1) 
+    if (exact_matches == 1)
       m_funcIndex = exact_index;
     else if (exact_matches > 1 ||
 	     (exact_matches == 0 && supertype_matches > 1))
@@ -1536,7 +1537,7 @@ void CallFuncObj::ComputeFuncIndex(void)
   if (m_funcIndex != -1)  {
     for (int index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
       if (m_params[index] != 0) {
-	if (TypeMatch(m_params[index], 
+	if (TypeMatch(m_params[index],
 		      _FuncInfo[m_funcIndex].ParamInfo[index].Spec,
 		      (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)) == matchNONE)
 	  throw gclRuntimeError(_FuncName + "[] parameter #" +
@@ -1546,7 +1547,7 @@ void CallFuncObj::ComputeFuncIndex(void)
       }
     }
   }
-}  
+}
 
 
 Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
@@ -1661,7 +1662,7 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
 
   for (int i = 0; i < _FuncInfo[m_funcIndex].NumParams; i++) {
     if (m_params[i])
-      if(m_params[i]->Spec().Null && 
+      if(m_params[i]->Spec().Null &&
 	 !_FuncInfo[m_funcIndex].ParamInfo[i].Spec.Null)	{
 	null_call = true;
 	break;
