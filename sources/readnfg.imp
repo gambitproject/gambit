@@ -34,7 +34,8 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
 
   gArray<int> dim(dims.Length());
   ncont = 1;
-  for (int i = 1; i <= dim.Length(); i++)  {
+  int i;
+  for (i = 1; i <= dim.Length(); i++)  {
     dim[i] = (int) dims[i];
     ncont *= dim[i];
     if (dim[i] <= 0)   return false;
@@ -62,7 +63,7 @@ template <class T> int NfgFile<T>::Parse(void)
   infile.seekp(0);
   static char *prologue = { "NFG 1 " };
   char c;
-  for (int i = 0; i < strlen(prologue); i++)  {
+  for (unsigned int i = 0; i < strlen(prologue); i++)  {
     infile.get(c);
     if (c != prologue[i])  return 1;
   }

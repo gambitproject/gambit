@@ -63,7 +63,7 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &P,
+NFGobitFunc<T>::NFGobitFunc(const Nfg<T> &NF, const GobitParams<T> &,
 			    const MixedProfile<T> &s)
   : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0), 
     p(s), pp(s), N(NF)
@@ -128,7 +128,8 @@ int NFGobitFunc<T>::Deriv(const gVector<T> &v, gVector<T> &d)
   for (int pl = 1, index = 1; pl <= N.NumPlayers(); pl++)  {
     avg = (T) 0;
     int nstrats = pp.GetNFSupport().GetStrategy(pl).Length();
-    for (int st = 1; st <= nstrats;
+    int st;
+    for (st = 1; st <= nstrats;
 	 avg += (d[index++] = GobitDerivValue(pl, st++, p)));
     avg /= (T) nstrats;
     for (st = 1, index -= nstrats; st <= nstrats; st++, d[index++] -= avg);

@@ -92,7 +92,8 @@ template <class T> gRectArray<T>::~gRectArray()
 template <class T>
 gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 {
-  for (int i = minrow; i <= maxrow; i++)
+  int i;
+  for (i = minrow; i <= maxrow; i++)
     if (data[i])  delete [] (data[i] + mincol);
   if (data)  delete [] (data + minrow);
 

@@ -686,7 +686,8 @@ Infoset *BaseEfg::AppendAction(Infoset *s)
 Infoset *BaseEfg::InsertAction(Infoset *s, Action *a)
 {
   assert(a && s);
-  for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
+  int where;
+  for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return s;
   s->InsertAction(where);
@@ -700,7 +701,8 @@ Infoset *BaseEfg::InsertAction(Infoset *s, Action *a)
 Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
 {
   assert(a && s);
-  for (int where = 1; where <= s->actions.Length() && s->actions[where] != a;
+  int where;
+  for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return s;
   s->RemoveAction(where);

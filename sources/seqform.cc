@@ -95,7 +95,7 @@ template <class T> SeqFormModule<T>::~SeqFormModule()
 //
 
 
-template <class T> int SeqFormModule<T>::Lemke(int dup)
+template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
 {
   BFS<T> cbfs((T) 0);
   int i;
@@ -354,7 +354,7 @@ class SeqFormModule<gRational>;
 
 template <class T>
 int SeqForm(const Efg<T> &E, const SeqFormParams &p,
-	  gList<BehavProfile<T> > &solutions,
+	  gList<BehavProfile<T> > &/*solutions*/,
 	  long &npivots, double &time)
 { 
   EFSupport S(E);

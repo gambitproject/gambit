@@ -95,7 +95,8 @@ bool EFActionSet::operator==(const EFActionSet &s)
    if (infosets.Length() != s.infosets.Length() ||
        efp != s.efp) return (false);
    else {
-     for (int i = 1; i <= infosets.Length() && 
+     int i;
+     for (i = 1; i <= infosets.Length() && 
 	  *(infosets[i]) == *(s.infosets[i]);  i++);
      if ( i > infosets.Length()) return (true);
      else return(false);
@@ -182,7 +183,8 @@ int EFActionSet::IsActionInActionSet( int iset, Action *a)
 // Returns the number of the action in the original support
 int EFActionSet::OriNumber ( int iset, Action *a)
 {
-  for (int i = 1; i <= infosets[iset]->ori.Length() && 
+  int i;
+  for (i = 1; i <= infosets[iset]->ori.Length() && 
        (infosets[iset]->ori)[i] != a; i++);
   if (i > infosets[iset]->ori.Length()) return 0;
   else return i;
@@ -241,7 +243,8 @@ bool EFSupport::operator==(const EFSupport &s)
 {
   if (sets.Length() != s.sets.Length()) return (false);
   else {
-    for (int i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
+    int i;
+    for (i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
     if (i > sets.Length()) return (true);
     else return (false);
   }
@@ -305,7 +308,8 @@ void EFSupport::ValidSupport(void)
 gPVector<int> EFSupport::Dimensionality(bool trunc) const
 {
   gArray<int> foo(befg->NumPlayers());
-  for (int i = 1; i <= befg->NumPlayers(); i++)
+  int i;
+  for (i = 1; i <= befg->NumPlayers(); i++)
     foo[i] = NumInfosets(i);
 
   gPVector<int> bar(foo);
@@ -328,7 +332,7 @@ bool EFSupport::RemoveAction( int i, int j, Action *s)
 
 void EFSupport::AddAction( int i, int j, Action *s)
 {
-  sets[i]->AddAction(i,s);
+  sets[i]->AddAction(j,s);
 }
 
 void EFSupport::AddAction( int i, int j, Action *s, int k)

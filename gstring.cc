@@ -133,20 +133,20 @@ gString gString::mid(int len, int where) const
 gString gString::upcase(void) const
 {
   gString tmp = *this;
-  for (int i = 0; i < strlen(storage); i++)    tmp.storage[i] = toupper(tmp.storage[i]);
+  for (unsigned int i = 0; i < strlen(storage); i++)    tmp.storage[i] = toupper(tmp.storage[i]);
   return tmp;
 }
 
 gString gString::dncase(void) const
 {
   gString tmp = *this;
-  for (int i = 0; i < strlen(storage); i++)    tmp.storage[i] = tolower(tmp.storage[i]);
+  for (unsigned int i = 0; i < strlen(storage); i++)    tmp.storage[i] = tolower(tmp.storage[i]);
   return tmp;
 }
 
-void gString::insert(char c, int n)
+void gString::insert(char c, unsigned int n)
 {
-    if (n < 0 || n > strlen(storage)) return;    // out of bounds
+    if (n > strlen(storage)) return;    // out of bounds
     char *temp = new char[strlen(storage)+2];
     assert(temp);
 
@@ -158,9 +158,9 @@ void gString::insert(char c, int n)
     storage = temp;
 }
 
-void gString::remove(int n)
+void gString::remove(unsigned int n)
 {
-    if (n < 0 || n > strlen(storage)-1) return;
+    if (n > strlen(storage)-1) return;
     char *temp = new char[strlen(storage)];
 
     assert(temp);
@@ -176,7 +176,7 @@ int gString::lastOccur(char c)
 {
   int result = -1;
 
-  for (int i = 0; i < strlen(storage); i++)
+  for (unsigned int i = 0; i < strlen(storage); i++)
     { if (storage[i] == c) {result = i;}; }
   return (result + 1);
 }

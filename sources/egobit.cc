@@ -65,7 +65,7 @@ public:
 //-------------------------------------------------------------------------
 
 template <class T>
-EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &P,
+EFGobitFunc<T>::EFGobitFunc(const Efg<T> &EF, const GobitParams<T> &,
 			    const BehavProfile<T> &start)
   :gBFunctMin<T>(EF.ProfileLength(true)), niters(0), nevals(0), 
    probs(EF.Dimensionality().Lengths()),
@@ -132,13 +132,14 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
       psum = (T) 0;
       
       Infoset *s = player->InfosetList()[iset];
-      for (int act = 1; act <= s->NumActions(); act++)  {
+      int act;
+      for (act = 1; act <= s->NumActions(); act++)  {
 	z = Lambda * cpay(pl, iset, act);
 	z = exp(z);
 	psum += z;
 	cpay(pl, iset, act) = z;
       }
-      
+
       for (act = 1; act < s->NumActions(); act++)  {
 	z = p(pl, iset, act);
 	prob += z;
@@ -261,7 +262,8 @@ void EFGobitModule<T>::AddSolution(const GobitFunc<T> *const F)
   for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
     for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
       T accum = (T) 0;
-      for (int act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); act++)  {
+      int act;
+      for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); act++)  {
 	bar(pl, iset, act) = foo(pl, iset, act);
 	accum += foo(pl, iset, act);
       }

@@ -13,7 +13,8 @@
 
 template <class T> int gPVector<T>::sum(const gArray<int> &V) const
 {
-  for (int i = V.First(), total = 0; i <= V.Last(); total += V[i++]);
+  int total = 0;
+  for (int i = V.First(); i <= V.Last(); total += V[i++]);
   return total;
 }
 

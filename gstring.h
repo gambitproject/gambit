@@ -40,8 +40,8 @@ class gString   {
     gString mid(int len, int where) const;
     gString upcase(void) const;
     gString dncase(void) const;
-    void insert(char c, int n);
-    void remove(int n);
+    void insert(char c, unsigned int n);
+    void remove(unsigned int n);
     int lastOccur(char c);
 
 	// ASSIGNMENTS

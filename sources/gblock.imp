@@ -67,7 +67,8 @@ template <class T> int gBlock<T>::InsertAt(const T &t, int n)
   assert(mindex <=n && n <=maxdex+1);
   T *new_data = new T[++maxdex-mindex+1] - mindex;
 
-  for (int i = mindex; i <= n - 1; i++)       new_data[i] = data[i];
+  int i;
+  for (i = mindex; i <= n - 1; i++)       new_data[i] = data[i];
   new_data[i++] = t;
   for (; i <= maxdex; i++)       new_data[i] = data[i - 1];
 
@@ -95,7 +96,8 @@ template <class T> T gBlock<T>::Remove(int n)
 
   T *new_data = (--maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
 
-  for (int i = mindex; i < n; i++)      new_data[i] = data[i];
+  int i;
+  for (i = mindex; i < n; i++)      new_data[i] = data[i];
   for (; i <= maxdex; i++)         new_data[i] = data[i + 1];
 
   delete [] (data + mindex);
@@ -106,7 +108,8 @@ template <class T> T gBlock<T>::Remove(int n)
 
 template <class T> int gBlock<T>::Find(const T &t) const
 {
-  for (int i = mindex; i <= maxdex && data[i] != t; i++);
+  int i;
+  for (i = mindex; i <= maxdex && data[i] != t; i++);
   return (i <= maxdex) ? i : 0;
 } 
 

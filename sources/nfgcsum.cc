@@ -90,7 +90,7 @@ template <class T> void ZSumModule<T>::Make_Abc()
 //  c->Dump(gout);
 }
 
-template <class T> int ZSumModule<T>::ZSum(int dup)
+template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
 {
   BFS<T> cbfs((T) 0);
   
@@ -139,7 +139,8 @@ void ZSumModule<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
 
   for (int i = 1; i <= List.Length(); i++)    {
     MixedProfile<T> profile(NF, support);
-    for (int j = 1; j <= n1; j++) 
+    int j;
+    for (j = 1; j <= n1; j++) 
       if (List[i].IsDefined(j))   
 	profile(1, j) = List[i](j);
       else  profile(1, j) = (T) 0;

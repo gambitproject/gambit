@@ -90,11 +90,14 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
   NFStrategySet *SS = S.GetNFStrategySet(pl);
 
   gArray<int> set(SS->NumStrats());
-  for (int i = 1; i <= set.Length(); i++)
+  int i;
+  for (i = 1; i <= set.Length(); i++)
     set[i] = i;
 
-  for (int min = 0, dis = SS->NumStrats() - 1; min <= dis; )  {
-    for (int pp = 0;
+  int min, dis;
+  for (min = 0, dis = SS->NumStrats() - 1; min <= dis; )  {
+    int pp;
+    for (pp = 0;
 	 pp < min && !Dominates(S, pl, set[pp+1], set[dis+1], strong);
 	 pp++);
     if (pp < min)

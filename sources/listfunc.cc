@@ -133,24 +133,24 @@ Portion *GSM_RationalRational(Portion **param)
 
 gWatch _gcl_watch(0);
 
-Portion *GSM_StartWatch(Portion **param)
+Portion *GSM_StartWatch(Portion **)
 {
   _gcl_watch.Start();
   return new FloatValPortion(0.0);
 }
 
-Portion *GSM_StopWatch(Portion **param)
+Portion *GSM_StopWatch(Portion **)
 {
   _gcl_watch.Stop();
   return new FloatValPortion(_gcl_watch.Elapsed());
 }
 
-Portion *GSM_ElapsedTime(Portion **param)
+Portion *GSM_ElapsedTime(Portion **)
 {
   return new FloatValPortion(_gcl_watch.Elapsed());
 }
 
-Portion *GSM_IsWatchRunning(Portion **param)
+Portion *GSM_IsWatchRunning(Portion **)
 {
   return new BoolValPortion(_gcl_watch.IsRunning());
 }

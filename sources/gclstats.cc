@@ -41,7 +41,7 @@ public:
 	gOutput &operator<<(const void *x);
 	bool IsValid(void) const {return true;}
 	// functions for gProgress
-	void	SetProgress(double p) {/*gout<<(int)(p*100)<<"% Done\n";*/}
+	void	SetProgress(double) {/*gout<<(int)(p*100)<<"% Done\n";*/}
 	// functions for gSignal
 	bool Get(void) const {return sig;}
 	void Reset(void) {sig=false;}
@@ -49,15 +49,15 @@ public:
 };
 
 //****************************** gGclProgress stuff ********************
-gOutput &gGCLStatus::operator<<(int x)
+gOutput &gGCLStatus::operator<<(int)
 {/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(unsigned int x)
+gOutput &gGCLStatus::operator<<(unsigned int)
 {/*sprintf(tmp_str, "%*d", Width,  x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(long x)
+gOutput &gGCLStatus::operator<<(long)
 {/*sprintf(tmp_str, "%*ld", Width, x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(char x)
+gOutput &gGCLStatus::operator<<(char)
 {/*sprintf(tmp_str, "%c", x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(double x)
+gOutput &gGCLStatus::operator<<(double)
   {/*
 	switch (Represent) {
 	case 'f':
@@ -70,7 +70,7 @@ gOutput &gGCLStatus::operator<<(double x)
 	      }*/
 return *this;
 }
-gOutput &gGCLStatus::operator<<(float x)
+gOutput &gGCLStatus::operator<<(float)
   {/*
 	switch (Represent) {
 	case 'f':
@@ -83,9 +83,9 @@ gOutput &gGCLStatus::operator<<(float x)
 	      }*/
 return *this;
 }
-gOutput &gGCLStatus::operator<<(const char *x)
+gOutput &gGCLStatus::operator<<(const char *)
 {/*sprintf(tmp_str, "%s", x);gout<<tmp_str;*/return *this;}
-gOutput &gGCLStatus::operator<<(const void *x)
+gOutput &gGCLStatus::operator<<(const void *)
 {/*sprintf(tmp_str, "%p", x);gout<<tmp_str;*/return *this;}
 
 gGCLStatus _gstatus;

@@ -36,7 +36,7 @@ template <class T> int BFS<T>::operator!=(const BFS<T> &M) const
   return !(*this == M);
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &M)
+template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &)
 {
   return f;
 }

@@ -23,7 +23,6 @@
 // Each Init() function should take the argument "this" so each instance
 // of GSM can add those functions to their memory.
 
-extern void Init_gclmath( GSM* );
 extern void Init_gsmoper( GSM* );
 extern void Init_nfgfunc( GSM* );
 extern void Init_efgfunc( GSM* );
@@ -34,7 +33,6 @@ void Init_userfunc( GSM* );
 
 void GSM::InitFunctions( void )
 {
-  Init_gclmath( this );
   Init_gsmoper( this );
 
   Init_listfunc(this);

@@ -277,7 +277,7 @@ void EfgFileType(gInput &f, bool &valid, DataType &type)
   f.seekp(0);
   static char *prologue = { "EFG 2 " };
   char c;
-  for (int i = 0; i < strlen(prologue); i++)  {
+  for (unsigned int i = 0; i < strlen(prologue); i++)  {
     f.get(c);
     if (c != prologue[i])   {
       valid = false;

@@ -53,7 +53,7 @@ int& Instruction::LineNumber( void )
 
 Opcode NOP::Type( void ) const
 { return iNOP; }
-bool NOP::Execute( GSM& gsm ) const
+bool NOP::Execute( GSM& ) const
 { return true; }
 void NOP::Output( gOutput& s ) const
 { s << "NOP"; }
@@ -64,7 +64,7 @@ void NOP::Output( gOutput& s ) const
 
 Opcode Quit::Type( void ) const
 { return iQUIT; }
-bool Quit::Execute( GSM& gsm ) const
+bool Quit::Execute( GSM& ) const
 { return true; }
 void Quit::Output( gOutput& s ) const
 { s << "Quit"; }
@@ -84,7 +84,7 @@ int IfGoto::WhereTo( void ) const
 { return _InstructionIndex; }
 Opcode IfGoto::Type( void ) const
 { return iIF_GOTO; }
-bool IfGoto::Execute( GSM& gsm ) const
+bool IfGoto::Execute( GSM& ) const
 { return true; }
 void IfGoto::Output( gOutput& s ) const
 { s << "IfGoto( " << _InstructionIndex << " )"; }
@@ -97,7 +97,7 @@ int Goto::WhereTo( void ) const
 { return _InstructionIndex; }
 Opcode Goto::Type( void ) const
 { return iGOTO; }
-bool Goto::Execute( GSM& gsm ) const
+bool Goto::Execute( GSM&) const
 { return true; }
 void Goto::Output( gOutput& s ) const
 { s << "Goto( " << _InstructionIndex << " )"; }

@@ -17,7 +17,7 @@ void Epsilon_T(double &v, int i)
   if(i==3)v=(double)1.0e-6;
 }
 
-void Epsilon_T(gRational &v, int i) { v = (gRational)0;}
+void Epsilon_T(gRational &v, int) { v = (gRational)0;}
 
 template <class T> 
 Basis<T>::Basis(const gMatrix<T> &A)

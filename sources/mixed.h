@@ -1,7 +1,7 @@
 //#
 //# FILE: mixed.h -- Mixed strategy profile classes
 //#
-//# @(#)newmixed.h	1.4 23 Aug 1995
+//# $Id$
 //#
 
 #ifndef MIXED_H
@@ -76,6 +76,7 @@ template <class T> class MixedProfile
     T Payoff(int pl, int player1, int strat1, int player2, int strat2) const;
     void Payoff(int pl, int const_pl, gVector<T> &payoff) const;
 
+    bool operator==(const MixedProfile<T> &) const;
     
 };
 #ifndef __BORLANDC__

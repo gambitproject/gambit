@@ -61,7 +61,8 @@ StrategyProfile &StrategyProfile::operator=(const StrategyProfile &p)
 
 int StrategyProfile::IsValid(void) const
 {
-  for (int i = profile.Length(); i > 0 && profile[i] != 0; i--);
+  int i;
+  for (i = profile.Length(); i > 0 && profile[i] != 0; i--);
   return i;
 }
 
@@ -124,7 +125,8 @@ NFStrategySet &NFStrategySet::operator=(const NFStrategySet &s)
 bool NFStrategySet::operator==(const NFStrategySet &s)
 {
   if ( strategies.Length() != s.strategies.Length()) return (false);
-  for (int i = 1; i <= strategies. Length() 
+  int i;
+  for (i = 1; i <= strategies. Length() 
        && strategies[i] == s.strategies[i]; i++);
   if (i > strategies.Length()) return (true);
   else return (false);
@@ -225,7 +227,8 @@ NFSupport &NFSupport::operator=(const NFSupport &s)
 bool NFSupport::operator==(const NFSupport &s) const
 {
   assert(sups.Length() == s.sups.Length());
-  for (int i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
+  int i;
+  for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
   if (i > sups.Length()) return (true);
   else return (false);
 }

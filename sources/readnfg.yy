@@ -96,7 +96,7 @@ payoff:       NUMBER
 
 %%
 
-void NfgFileReader::yyerror(char *s)    { }
+void NfgFileReader::yyerror(char *)    { }
 
 int NfgFileReader::yylex(void)
 {
@@ -162,7 +162,7 @@ void NfgFileType(gInput &f, bool &valid, DataType &type)
   f.seekp(0);
   static char *prologue = { "NFG 1 " };
   char c;
-  for (int i = 0; i < strlen(prologue); i++)   {
+  for (unsigned int i = 0; i < strlen(prologue); i++)   {
     f.get(c);
     if (c != prologue[i])   {
       valid = false;

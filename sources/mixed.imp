@@ -216,6 +216,12 @@ void MixedProfile<T>::Payoff( int pl, int player1, gVector<T> &value) const
   PPayoff(pl, player1, 1, 0, (T) 1.0, value);
 }
 
+template <class T>
+bool MixedProfile<T>::operator==(const MixedProfile<T> &mp) const
+{
+  return (N == mp.N && (const gPVector<T> &) *this == (const gPVector<T> &) mp);
+}
+
 template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &p)
 { p.Dump(f);  return f; }
 

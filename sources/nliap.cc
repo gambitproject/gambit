@@ -56,7 +56,7 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 //------------------------------------------------------------------------
 
 template <class T>
-NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &P,
+NFLiapFunc<T>::NFLiapFunc(const Nfg<T> &NF, const LiapParams<T> &,
 			  const MixedProfile<T>& s)
   : gBC2FunctMin<T>(s.Length()), niters(0), nevals(0),
     N(NF), p(s), pp(s)
@@ -104,7 +104,8 @@ template <class T> void NFLiapFunc<T>::Randomize(void)
 
   for (int i = 1; i <= N.NumPlayers(); i++)  {
     sum = (T) 0;
-    for (int j = 1; j < pp.GetNFSupport().NumStrats(i); j++)  {
+    int j;
+    for (j = 1; j < pp.GetNFSupport().NumStrats(i); j++)  {
       do
 	tmp = (T) Uniform();
       while (tmp + sum > (T) 1);
@@ -133,7 +134,8 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
     tmp.CopyRow(i, payoff);
     avg = sum = (T) 0;
 	// then for each strategy for that player set it to 1 and evaluate
-    for (int j = 1; j <= p.GetNFSupport().NumStrats(i); j++) {
+    int j;
+    for (j = 1; j <= p.GetNFSupport().NumStrats(i); j++) {
       tmp(i, j) = (T) 1;
       x = p(i, j);
       payoff(i, j) = tmp.Payoff(i);

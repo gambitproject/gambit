@@ -177,7 +177,7 @@ static IntRep* Inew(int newlen)
   unsigned int allocsiz = MINIntRep_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  assert((long) allocsiz < MAXIntRep_SIZE * sizeof(short));
+  assert((unsigned long) allocsiz < MAXIntRep_SIZE * sizeof(short));
     
   IntRep* rep = (IntRep *) new char[allocsiz];
   rep->sz = (allocsiz - sizeof(IntRep) + sizeof(short)) / sizeof(short);
@@ -1899,12 +1899,12 @@ IntRep* gcd(const IntRep* x, const IntRep* y)
 
   long k = 0;
   int l = (ul <= vl)? ul : vl;
-  int cont = 1;
-  for (int i = 0;  i < l && cont; ++i)
+  int cont = 1, i;
+  for (i = 0;  i < l && cont; ++i)
   {
     unsigned long a =  (i < ul)? u->s[i] : 0;
     unsigned long b =  (i < vl)? v->s[i] : 0;
-    for (int j = 0; j < I_SHIFT; ++j)
+    for (unsigned int j = 0; j < I_SHIFT; ++j)
     {
       if ((a | b) & 1)
       {
@@ -1940,7 +1940,7 @@ IntRep* gcd(const IntRep* x, const IntRep* y)
     for (i = 0; i < tl && cont; ++i)
     {
       unsigned long a = t->s[i];
-      for (int j = 0; j < I_SHIFT; ++j)
+      for (unsigned int j = 0; j < I_SHIFT; ++j)
       {
         if (a & 1)
         {

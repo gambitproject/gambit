@@ -31,7 +31,7 @@ template <class T> EfgFile<T>::~EfgFile()
 
 template <class T> Outcome *EfgFile<T>::NewOutcome(void)
 {
-  return ((Efg<T> &) *E).NewOutcome();
+  return ((Efg<T> *) E)->NewOutcome();
 }
 
 template <class T> void EfgFile<T>::SetOutcome(Outcome *c,
@@ -69,7 +69,7 @@ template <class T> int EfgFile<T>::Parse(void)
   infile.seekp(0);
   static char *prologue = { "EFG 2 " };
   char c;
-  for (int i = 0; i < strlen(prologue); i++)   {
+  for (unsigned int i = 0; i < strlen(prologue); i++)   {
     infile.get(c);
     if (c != prologue[i])   return 1;
   }

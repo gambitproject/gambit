@@ -63,7 +63,8 @@ out<<2<<' '<<nf.NumStrats(1)<<' '<<nf.NumStrats(2)<<'\n';
 
 out<<"Game:\n";
 out<<"3 2 1\n";
-for (int i=1;i<=st1;i++)
+int i;
+for (i=1;i<=st1;i++)
 {
 	for (int j=1;j<=st2;j++)
 		out<<matrix(i,j).row<<' '<<matrix(i,j).col<<' ';
@@ -223,6 +224,6 @@ TEMPLATE class gArray<PayoffClass<double> >;
 TEMPLATE class gArray<PayoffClass<gRational> >;
 
 
-gOutput &operator<<(gOutput &o, const PayoffClass<double> &p) {return o;}
-gOutput &operator<<(gOutput &o, const PayoffClass<gRational> &p) {return o;}
+gOutput &operator<<(gOutput &o, const PayoffClass<double> &) {return o;}
+gOutput &operator<<(gOutput &o, const PayoffClass<gRational> &) {return o;}
 

@@ -112,7 +112,8 @@ void BaseNfg::IndexStrategies(void)
   long offset = 1L;
 
   for (int i = 1; i <= NumPlayers(); i++)  {
-    for (int j = 1; j <= NumStrats(i); j++)  {
+    int j;
+    for (j = 1; j <= NumStrats(i); j++)  {
       Strategy *s = (players[i])->strategies[j];
       s->number = j;
       s->index = (j - 1) * offset;

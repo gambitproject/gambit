@@ -77,6 +77,8 @@ template <class T> class BehavProfile
     gArray<T> Beliefs(void);
     void Centroid(void) const;
 
+    bool operator==(const BehavProfile<T> &) const;
+    
 
 };
 #ifndef __BORLANDC__

@@ -52,7 +52,7 @@ void Nodes (const BaseEfg &befg, gList <Node *> &list)
   NDoChild(befg.RootNode(), list); 
 }
 
-void Nodes (const BaseEfg &befg, Node *n, gList <Node *> &list)
+void Nodes (const BaseEfg &, Node *n, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(n, list);

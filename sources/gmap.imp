@@ -112,7 +112,8 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
   T *new_values = new T[length + 1];
   
   if (length > 0)   {
-    for (int i = 0; i < entry; i++)   {
+    int i;
+    for (i = 0; i < entry; i++)   {
       new_keys[i] = keys[i];
       new_values[i] = values[i];
     }
@@ -155,7 +156,8 @@ template <class K, class T> T gBaseMap<K, T>::Delete(int where)
   K *new_keys = new K[length - 1];
   T *new_values = new T[length - 1];
 
-  for (int i = 0; i < where; i++)   {
+  int i;
+  for (i = 0; i < where; i++)   {
     new_keys[i] = keys[i];
     new_values[i] = values[i];
   }

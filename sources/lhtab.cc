@@ -13,7 +13,7 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A(const Nfg<T> &N, const NFSupport &S)
+template <class T> gMatrix<T> Make_A(const Nfg<T> &, const NFSupport &S)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
@@ -55,7 +55,7 @@ template <class T> gMatrix<T> Make_A(const Nfg<T> &N, const NFSupport &S)
   return A;
 }
 
-template <class T> gVector<T> Make_b(const Nfg<T> &N, const NFSupport &S)
+template <class T> gVector<T> Make_b(const Nfg<T> &, const NFSupport &S)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);

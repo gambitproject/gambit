@@ -9,7 +9,7 @@
 
 
 template <class T>
-gOutput& operator<<(gOutput &out, LUupdate<T> u)
+gOutput& operator<<(gOutput &out, LUupdate<T> /*u*/)
 { return out; /*<<u.alpha<<u.rowp;*/ }
 
 template <class T>
@@ -461,7 +461,8 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
 			assert( mat(k,k) != (T)0 ); // must be nonsingular
       alpha= mat(k+1,k)/mat(k,k);
       updatev.alpha[k]= alpha;
-      for(int i=max; i>k; i--)
+      int i;
+      for(i=max; i>k; i--)
 	mat(k+1,i)-= alpha*mat(k,i);
 
       // switch L column with temp

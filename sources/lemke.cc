@@ -73,8 +73,9 @@ LemkeTableau<T>::LemkeTableau(const Nfg<T> &NF, const NFSupport &S,
   NfgIter<T> iter(&S);
   T min = (T) 0, x;
   int n1 = S.NumStrats(1), n2 = S.NumStrats(2);
+  int i;
 
-  for (int i = 1; i <= n1 + n2; i++)  {
+  for (i = 1; i <= n1 + n2; i++)  {
     Col_Labels[i] = i;
     Row_Labels[i] = -i;
   }
@@ -364,8 +365,9 @@ void LemkeTableau<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
   for (int i = 1; i <= List.Length(); i++)    {
     MixedProfile<T> profile(N, support);
     T sum = (T) 0;
+    int j;
 
-    for (int j = 1; j <= support.NumStrats(1); j++)
+    for (j = 1; j <= support.NumStrats(1); j++)
       if (List[i].IsDefined(j))   sum += List[i](j);
 
     if (sum == (T) 0)  continue;

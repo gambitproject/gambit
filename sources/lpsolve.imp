@@ -15,7 +15,7 @@ void Epsilon(double &v, int i)
   if(i==3)v=(double)1.0e-6;
 }
 
-void Epsilon(gRational &v, int i) { v=(gRational)0;}
+void Epsilon(gRational &v, int) { v=(gRational)0;}
 
 template <class T>
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
@@ -136,10 +136,10 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 
 
 template <class T> LPSolve<T>::
-LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
-	const gVector<T> &C,  const gVector<int> &sense, 
-	const gVector<int> &LB,  const gVector<T> &lb, 
-	const gVector<int> &UB, const gVector<T> &ub)
+LPSolve(const gMatrix<T> &A, const gVector<T> &/*B*/, 
+	const gVector<T> &/*C*/,  const gVector<int> &/*sense*/, 
+	const gVector<int> &/*LB*/,  const gVector<T> &/*lb*/, 
+	const gVector<int> &/*UB*/, const gVector<T> &/*ub*/)
   : well_formed(1), feasible(1), bounded(1),  
     nvars(c.Length()),neqs(b.Length()),
     opt_bfs((T)0),  dual_bfs((T)0),  A(A), b(b), c(c), tab(0), 
@@ -257,7 +257,7 @@ template <class T> int LPSolve<T>::Enter()
   return in;
 }
 
-template <class T> int LPSolve<T>::Exit(int in)
+template <class T> int LPSolve<T>::Exit(int /*in*/)
 {
   int j,out,lab,col;
   T t, tmin;

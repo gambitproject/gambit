@@ -260,7 +260,8 @@ template <class T> int Efg<T>::ProfileLength(bool trunc) const
 template <class T> gPVector<int> Efg<T>::Dimensionality(bool trunc) const
 {
   gArray<int> foo(players.Length());
-  for (int i = 1; i <= players.Length(); i++)
+  int i;
+  for (i = 1; i <= players.Length(); i++)
     foo[i] = players[i]->infosets.Length();
 
   gPVector<int> bar(foo);
@@ -318,7 +319,7 @@ template <class T> bool BehavProfile<T>::IsPure(void) const
   return false;
 }
 
-template <class T> bool BehavProfile<T>::IsPure(int pl) const
+template <class T> bool BehavProfile<T>::IsPure(int) const
 {
   // currently not implemented
   assert(0);
@@ -329,6 +330,12 @@ template <class T>
 const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
 {
   return (*this)(s->GetPlayer()->GetNumber(), s->GetNumber(), act);
+}
+
+template <class T>
+bool BehavProfile<T>::operator==(const BehavProfile<T> &bp) const
+{
+  return (E == bp.E && (gDPVector<T> &) *this == (gDPVector<T> &) bp);
 }
 
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p)
@@ -351,12 +358,13 @@ void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
   if (n->children.Length())
     if (IsTruncated())   {
       T p = (T) 0.0;
-      for (int i = 1, npl = n->infoset->player->number,
+      int i, npl, iset;
+      for (i = 1, npl = n->infoset->player->number,
 	   iset = n->infoset->number; i < n->children.Length(); i++)  {
 	if ( npl == 0 || 
-			behavsupport.IsActionInSupport(npl,iset,n->infoset->actions[i]) ) {
+	     behavsupport.IsActionInSupport(npl,iset,n->infoset->actions[i]) ) {
 	  if (npl != 0)
-			anum = behavsupport.OriNumber(npl,iset,n->infoset->actions[i]);
+	    anum = behavsupport.OriNumber(npl,iset,n->infoset->actions[i]);
 	  p += ((npl) ? (*this)(npl, iset, anum) :
 		((ChanceInfoset<T> *) n->infoset)->probs[i]);
 	  Payoff(n->children[i],
@@ -405,7 +413,8 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
 
   if (n->outcome)
     *((TypedNode<T> *) n)->scratch += (OutcomeVector<T> &) *n->outcome;
-  for (int i = 1, nc = n->children.Length(); i <= nc; i++)
+  int i, nc;
+  for (i = 1, nc = n->children.Length(); i <= nc; i++)
     *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
   
   T cumprob((T) 0), newprob((T) 0);
@@ -625,8 +634,9 @@ void BehavProfile<T>::NodeValues(Node *n, T prob, int pl,
   if (n->children.Length())
     if (IsTruncated())   {
       T p = (T) 0.0;
-      
-      for (int i = 1, npl = n->infoset->player->number,
+
+      int i, npl, iset;
+      for (i = 1, npl = n->infoset->player->number,
 	   iset = n->infoset->number; i < n->children.Length(); i++)  {
 	if ( npl == 0 ||
 			behavsupport.IsActionInSupport(npl, iset, n->infoset->actions[i])){
@@ -693,7 +703,8 @@ template <class T> void BehavProfile<T>::Centroid(void) const
   for (int i = 1; i <= dvlen.Length(); i++)
     for (int j = 1; j <= dvlen[i]; j++)  {
       center = ((T) 1 / (T) behavsupport.NumActions(i,j));
-      for (int k = 1; k < svlen[dvidx[i] + j - 1]; k++)
+      int k;
+      for (k = 1; k < svlen[dvidx[i] + j - 1]; k++)
 	if (behavsupport.IsActionInSupport(i,j,behavsupport.GetPlayer(i).infosets[j]->actions[k]))
 	dvptr[i][j][k] = center;
 	else dvptr[i][j][k] = 0;

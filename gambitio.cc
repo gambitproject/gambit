@@ -187,13 +187,13 @@ gInput &gNullInput::operator>>(char *x)
   return *this;
 }
 
-int gNullInput::get(char &c)   { return 0; }
+int gNullInput::get(char &)   { return 0; }
 
-void gNullInput::unget(char c)  { }
+void gNullInput::unget(char)  { }
 
 bool gNullInput::eof(void) const   { return true; }
 
-void gNullInput::seekp(long x) const   { }
+void gNullInput::seekp(long) const   { }
 
 bool gNullInput::IsValid(void) const   { return true; }
 
@@ -326,7 +326,7 @@ gOutput &gFileOutput::operator<<(char x)
 
 gOutput &gFileOutput::operator<<(double x)
 {
-  int c;
+  int c = 0;
 
   assert(f);
   switch (Represent) { 
@@ -388,11 +388,11 @@ gNullOutput::~gNullOutput()   { }
 
 int gNullOutput::GetWidth(void) { return true; }
 
-gOutput &gNullOutput::SetWidth(int w) { return *this; }
+gOutput &gNullOutput::SetWidth(int) { return *this; }
 
 int gNullOutput::GetPrec(void) { return true; }
 
-gOutput &gNullOutput::SetPrec(int p) { return *this; }
+gOutput &gNullOutput::SetPrec(int) { return *this; }
 
 gOutput &gNullOutput::SetExpMode(void) { return *this; }
 

@@ -40,7 +40,8 @@ template <class T> int EnumModule<T>::Enum(void)
   gWatch watch;
   
   gBlock<int> target(rows+cols);
-  for(int i=1;i<=target.Length();i++)
+  int i;
+  for(i=1;i<=target.Length();i++)
     target[i]=i;
   
   gMatrix<T> A(Make_A(NF, support));
@@ -182,7 +183,8 @@ gList<MixedProfile<T> > &EnumModule<T>::GetSolutions(void)
     MixedProfile<T> profile(NF, support);
     T sum = (T) 0;
 
-    for (int j = 1; j <= rows; j++)
+    int j;
+    for (j = 1; j <= rows; j++)
       if (List[i].IsDefined(j))   sum += List[i](j);
 
     if (sum == (T) 0)  continue;
@@ -229,7 +231,7 @@ class EnumModule<gRational>;
 
 template <class T>
 int Enum(const Nfg<T> &N, const EnumParams &p,
-	  gList<gPVector<T> > &solutions,
+	  gList<gPVector<T> > &/*solutions*/,
 	  long &npivots, gRational &time)
 {
   NFSupport S(N);
