@@ -1,60 +1,68 @@
-//#
-//# FILE: hash.h -- declaration of HashTable
-//#
-//# $Id$
-//#
+//
+// FILE: ghash.h -- declaration of HashTable
+//
+// $Id$
+//
 
-
-
-#ifndef HASH_H
-#define HASH_H
-
+#ifndef GHASH_H
+#define GHASH_H
 
 #include "glist.h"
 
+template <class K, class T> class HashTable {
+private:
+  int m_numBuckets;
+  gList<K> *m_keyBucket;
+  gList<T> *m_valueBucket;
 
+  int ValidatedHash(const K &) const;
+  virtual int Hash(const K &) const = 0;
 
-template <class K, class T> class HashTable
-{
- private:
-  enum { FAIL = 0, SUCCESS = 1 };
+  // The derived classes need to define this function to do clean ups when
+  // a T type member is being removed.
+  virtual void DeleteAction(T) = 0;
 
-  gList<K>* key_bucket;
-  gList<T>* value_bucket;
-  int       num_of_buckets;
-  T         illegal_value;
+  // these two are here for copy protection
+  HashTable(const HashTable<K, T> &);
+  HashTable<K, T> &operator=(const HashTable<K, T> &);
 
-  int         ValidatedHash ( K key )        const;
-  virtual int Hash          ( const K& key ) const = 0;
+protected:
+  // CONSTRUCTOR
+  HashTable(unsigned int);
 
-  //The derived classes need to define this function to do clean ups when
-  //a T type member is being removed.
-  virtual void DeleteAction( T value ) = 0;
+public:
+  class BadKey : public gException {
+  public:
+    virtual ~BadKey() { }
+    gText Description(void) const { return "Bad key passed to HashTable"; }
+  };
 
+  class InternalError : public gException {
+  private:
+    gText m_message;
+    
+  public:
+    InternalError(const gText &p_message) : m_message(p_message) { }
+    virtual ~InternalError() { }
+    gText Description(void) const { return m_message; }
+  };
 
- protected:
-  //This function needs to be called in the constructor of decendents classes
-  void Init( void );
-
-
- public:
-  HashTable();
+  // DESTRUCTOR
   virtual ~HashTable();
 
-  virtual int NumBuckets    ( void )         const = 0;
-  int  IsDefined  ( K key ) const;
-  void Define     ( K key, T value );
-  T    Remove     ( K key );
-  void Remove     ( T value );
-  T    operator() ( K key ) const;
-  T&   operator() ( K key );
-  const gList<K>* Key() const;
-  const gList<T>* Value() const;
+  int NumBuckets(void) const { return m_numBuckets; }
+  int IsDefined(K) const;
+  void Define(K, T);
+  T Remove(K);
+  void Remove(T);
+  T operator()(K) const;
+  T &operator()(K);
+  const gList<K> *Key(void) const { return m_keyBucket; }
+  const gList<T> *Value(void) const { return m_valueBucket; }
 
-  //This function should be called in the destructor of decendents classes
-  void Flush( void );
-
+  // This function should be called in the destructor of decendents classes
+  void Flush(void);
 };
 
 
-#endif  // HASH_H
+#endif  // GHASH_H

@@ -4,134 +4,87 @@
 // $Id$
 //
 
-
 #include "gstream.h"
 #include "glist.h"
-#include "hash.h"
+#include "ghash.h"
 
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Constructor, Destructor
+//-------------------------------------------------------------------------
 
-template <class K, class T> HashTable<K, T>::HashTable()
+template <class K, class T> HashTable<K, T>::HashTable(uint p_numBuckets)
+  : m_numBuckets(p_numBuckets)
 {
-  num_of_buckets = 0;
-}
-
-
-template <class K, class T> void HashTable<K, T>::Init( void )
-{
-  if( num_of_buckets == 0 )
-  {
-    if( NumBuckets() > 0 )
-    {
-      num_of_buckets = NumBuckets();
-      key_bucket = new gList<K> [ num_of_buckets ];
-      value_bucket = new gList<T> [ num_of_buckets ];
-    }
-    else
-    {
-      gerr << "HashTable Error: NumBuckets() returned an illegal number\n";
-      assert(0);
-    }
+  if (m_numBuckets <= 0)
+    assert(0);
+  else {
+    m_keyBucket = new gList<K>[m_numBuckets];
+    m_valueBucket = new gList<T>[m_numBuckets];
   }
 }
-
-
-template <class K, class T> void HashTable<K, T>::Flush( void )
-{
-  int i;
-  K   removed_key;
-  T   removed_value;
-
-  for( i = 0; i < num_of_buckets; i++ )
-  {
-    while( key_bucket[ i ].Length() > 0 )
-    {
-      removed_key = key_bucket[ i ].Remove( 1 );
-      removed_value = value_bucket[ i ].Remove( 1 );
-      DeleteAction( removed_value );
-    }
-  }
-}
-
 
 template <class K, class T> HashTable<K, T>::~HashTable()
 {
-  int i;
-
-  for( i = 0; i < num_of_buckets; i++ )
-  {
-    if( key_bucket[ i ].Length() > 0 )
-    {
-      gerr << "HashTable Error: decendent class dtor did not call Flush()\n";
-      assert(0);
-    }
-  }
-
-  delete[] key_bucket;
-  delete[] value_bucket;
+  delete [] m_keyBucket;
+  delete [] m_valueBucket;
 }
 
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Private member functions
+//-------------------------------------------------------------------------
 
-template <class K, class T> int HashTable<K, T>::ValidatedHash( K key ) const
+template <class K, class T>
+int HashTable<K, T>::ValidatedHash(const K &p_key) const
 {
-  int i = Hash( key );
+  int i = Hash(p_key);
 
-  if( ( i < 0 ) || ( i >= num_of_buckets ) )
-  {
-    gerr << "HashTable Error: Hash() generated an illegal index\n";
-    if( ( num_of_buckets == 0 ) && ( NumBuckets() > 0 ) )
-    {
-      gerr << "HashTable Error: decendent class ctor did not call Init()\n";
-    }    
-    assert(0);
-  }  
+  if ((i < 0) || (i >= m_numBuckets))
+    throw InternalError("Bad hash bucket number");
   return i;
 }
 
+//-------------------------------------------------------------------------
+//              HashTable<K, T>: Public member functions
+//-------------------------------------------------------------------------
 
-template <class K, class T> int HashTable<K, T>::IsDefined( K key ) const
+template <class K, class T> void HashTable<K, T>::Flush(void)
 {
-  int i = ValidatedHash( key );
-  return key_bucket[ i ].Find( key );
+  for (int i = 0; i < m_numBuckets; i++) {
+    while (m_keyBucket[i].Length() > 0) {
+      m_keyBucket[i].Remove(1);
+      DeleteAction(m_valueBucket[i].Remove(1));
+    }
+  }
 }
 
-
-template <class K, class T> void HashTable<K, T>::Define( K key, T value )
+template <class K, class T> int HashTable<K, T>::IsDefined(K p_key) const
 {
-  int i;
-  int position;
+  return m_keyBucket[ValidatedHash(p_key)].Find(p_key);
+}
 
-  i = ValidatedHash( key );
-  position = IsDefined( key );  // ok because IsDefined returns the position
-                                // of the key in the list if it is found
-  if( position == 0 )           // == 0 means not previously defined
-  {
-    key_bucket[ i ].Append( key );
-    value_bucket[ i ].Append( value );
+template <class K, class T> void HashTable<K, T>::Define(K p_key, T p_value)
+{
+  int bucket = ValidatedHash(p_key);
+  if (!IsDefined(p_key)) {
+    m_keyBucket[bucket].Append(p_key);
+    m_valueBucket[bucket].Append(p_value);
+  }
+  else {
+    DeleteAction(operator()(p_key));
+    (*this)(p_key) = p_value;
+  }
+}
+
+template <class K, class T> T HashTable<K, T>::Remove(K p_key)
+{
+  int position = IsDefined(p_key);
+  if (position != 0) {
+    int bucket = ValidatedHash(p_key);
+    m_keyBucket[bucket].Remove(position);
+    return m_valueBucket[bucket].Remove(position);
   }
   else
-  {
-    DeleteAction( operator()( key ) );
-    operator()( key ) = value;
-  }
-}
-
-
-template <class K, class T> T HashTable<K, T>::Remove( K key )
-{
-  int i;
-  int position;
-  K   removed_key;
-  T   removed_value = 0;
-
-  position = IsDefined( key );
-  if( position != 0 )
-  {
-    i = ValidatedHash( key );
-    removed_key = key_bucket[ i ].Remove( position );
-    removed_value = value_bucket[ i ].Remove( position );
-    assert( key == removed_key );
-  }
-  return removed_value;
+    throw BadKey();
 }
 
 
@@ -139,12 +92,12 @@ template <class K, class T> void HashTable<K, T>::Remove( T value )
 {
   int i = 0;
   int j = 0;
-  for( i = 0; i < num_of_buckets; i++ )
-    for( j = 1; j <= key_bucket[i].Length(); j++ )
+  for( i = 0; i < m_numBuckets; i++ )
+    for( j = 1; j <= m_keyBucket[i].Length(); j++ )
     {
-      if( operator()( key_bucket[i][j] ) == value )
+      if( operator()( m_keyBucket[i][j] ) == value )
       {
-	T removed_value = Remove( key_bucket[i][j] );
+	T removed_value = Remove( m_keyBucket[i][j] );
 	assert( removed_value == value );
 	DeleteAction( removed_value );
 	break;
@@ -163,13 +116,10 @@ template <class K, class T> T HashTable<K, T>::operator()( K key ) const
   if( position != 0 )
   {
     i = ValidatedHash( key );
-    return_value = (value_bucket[ i ])[position];    
+    return_value = (m_valueBucket[ i ])[position];    
   }
-  else
-  {
-    gerr << "HashTable Error: querying the value of an undefined key\n";
-    gerr << "                 The return value should be ignored.\n";
-    return_value = illegal_value;
+  else {
+    throw BadKey();
   }
   return return_value;
 }
@@ -184,21 +134,9 @@ template <class K, class T> T& HashTable<K, T>::operator()( K key )
   if( position != 0 )
   {
     i = ValidatedHash( key );
-    return (value_bucket[ i ])[position];    
+    return (m_valueBucket[ i ])[position];    
   }
-  else
-  {
-    gerr << "HashTable Error: modifying the value of an undefined key\n";
-    return illegal_value;
+  else {
+    throw BadKey();
   }
-}
-
-template <class K, class T> const gList<K>* HashTable<K, T>::Key() const
-{
-  return key_bucket;
-}
-
-template <class K, class T> const gList<T>* HashTable<K, T>::Value() const
-{
-  return value_bucket;
 }

@@ -1,74 +1,50 @@
-//#
-//# FILE: gsmhash.h -- definitions of descendent HashTables used by
-//#                    GSM and its accompanying modules
-//#                    companion to GSM
-//#
-//# $Id$
-//#
-
-
+//
+// FILE: gsmhash.h -- definitions of descendent HashTables used by
+//                    GSM and its accompanying modules
+//                    companion to GSM
+//
+// $Id$
+//
 
 #ifndef GSMHASH_H
 #define GSMHASH_H
 
-
-
-#include "hash.h"
-
-
+#include "ghash.h"
 
 class Portion;
 class FuncDescObj;
 class gText;
 
 
-class RefHashTable : public HashTable<gText, Portion*>
-{
- private:
+class RefHashTable : public HashTable<gText, Portion*> {
+private:
   int Hash( const gText& ref ) const;
-  void DeleteAction( Portion* value );
+  void DeleteAction(Portion* value );
   
- public:
+public:
   RefHashTable();
-  ~RefHashTable();
-
-  int NumBuckets( void ) const;
+  virtual ~RefHashTable();
 };
 
-
-
-class FunctionHashTable : public HashTable<gText, FuncDescObj*>
-{
- private:
+class FunctionHashTable : public HashTable<gText, FuncDescObj*> {
+private:
   int Hash( const gText& funcname ) const;
   void DeleteAction( FuncDescObj* func );
 
- public:
+public:
   FunctionHashTable();
-  ~FunctionHashTable();
+  virtual ~FunctionHashTable();
 
-  int NumBuckets() const;
 };
 
-
-
-
-template <class T> class RefCountHashTable : public HashTable<T, int>
-{
+template <class T> class RefCountHashTable : public HashTable<T, int> {
  private:
   int Hash( const T& ptr ) const;
   void DeleteAction( int value );
   
- public:
+public:
   RefCountHashTable();
-  ~RefCountHashTable();
-
-  int NumBuckets( void ) const;
+  virtual ~RefCountHashTable();
 };
-
-
-
-
-
 
 #endif // GSMHASH_H

@@ -24,7 +24,7 @@ template class gList< void* >;
 template class gList< Portion* >;
 template class gList< FuncDescObj* >;
 
-#include "hash.imp"
+#include "ghash.imp"
 
 template class HashTable< gText, Portion* >;
 template class HashTable< gText, FuncDescObj* >;
@@ -35,25 +35,20 @@ template class HashTable< void*, int >;
 
 #include "gsmhash.h"
 
-int RefHashTable::NumBuckets( void ) const
-{ return 26; }
-
 int RefHashTable::Hash( const gText& ref ) const
 { return (int)( ref[0] % 26 ); }
 
 void RefHashTable::DeleteAction( Portion* value )
 { delete value; }
 
-RefHashTable::RefHashTable()
-{ Init(); }
+RefHashTable::RefHashTable(void)
+  : HashTable<gText, Portion *>(26)
+{ }
 
 RefHashTable::~RefHashTable()
 { Flush(); }
 
 
-
-int FunctionHashTable::NumBuckets() const
-{ return 26; }
 
 int FunctionHashTable::Hash( const gText& funcname ) const 
 { return (int)( funcname[0] ) % 26; }
@@ -62,7 +57,8 @@ void FunctionHashTable::DeleteAction( FuncDescObj* func )
 { delete func; }
 
 FunctionHashTable::FunctionHashTable() 
-{ Init(); }
+  : HashTable<gText, FuncDescObj *>(26)
+{ }
 
 FunctionHashTable::~FunctionHashTable() 
 { Flush(); }  
@@ -71,17 +67,15 @@ FunctionHashTable::~FunctionHashTable()
 
 
 
-template <class T> int RefCountHashTable<T>::NumBuckets( void ) const 
-{ return 10; }
-
 template <class T> int RefCountHashTable<T>::Hash( const T& ptr ) const 
 { return ( (unsigned int) ptr / 4 ) % 10; }
 
 template <class T> void RefCountHashTable<T>::DeleteAction( int /*value*/ ) 
 { }
 
-template <class T> RefCountHashTable<T>::RefCountHashTable() 
-{ Init(); }
+template <class T> RefCountHashTable<T>::RefCountHashTable()
+  : HashTable<T, int>(10) 
+{ }
 
 template <class T> RefCountHashTable<T>::~RefCountHashTable()
 { Flush(); }
