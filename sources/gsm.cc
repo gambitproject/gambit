@@ -1141,11 +1141,6 @@ bool GSM::CallFunction( void )
 
   _Push( return_value );
   
-  gout << "here!\n";
-  gout << (void*) return_value << "\n";
-  gout << PortionTypeToText( return_value->Type() ) << "\n";
-  gout << return_value << "\n";
-  gout << "here!\n";
 
   for( index = 0; index < num_params; index++ )
   {
