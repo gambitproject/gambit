@@ -14,12 +14,11 @@
 class Outcome    {
   private:
     gString name;
-    gMap<double *> values;
+    gSparseSet<double> values;
 
   public:
-    Outcome(void)   { }
+    Outcome(void) : values(0.0)  { }
     Outcome(const Outcome &);
-    ~Outcome();
 
     Outcome &operator=(const Outcome &);
     void SetOutcomeName(const gString &s)  {name = s;}
