@@ -36,6 +36,9 @@ gambit:
 	if [ ! -d ../bin ]; then mkdir ../bin; fi 
 	if [ ! -d ../misc ]; then mkdir ../misc; fi 
 
+	@# Make sure gui-init and gambit_setup are executable.
+	chmod +x ./gui-init ./gambit_setup
+
 	@echo
 	@echo ------------------------
 	@echo Making gcl...
