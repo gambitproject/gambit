@@ -13,7 +13,6 @@
 #include "gstatus.h"
 #include "tableau.h"
 #include "lpsolve.h"
-#include "gstatus.h"
 #include "mixed.h"
 #include "mixedsol.h"
 
