@@ -52,7 +52,7 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
     }
     assert (max != (T) 0);
     T scale = (T) 1 / max;
-    for (j = mincol; j <= maxcol; j++)  {
+    for (int j = mincol; j <= maxcol; j++)  {
       copy.data[i][j] *= scale;
       if (i == j)
 	inv.data[i][j] = scale;
@@ -61,7 +61,7 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
     }
   }
   
-  for (i = mincol; i <= maxcol; i++)  {
+  for (int i = mincol; i <= maxcol; i++)  {
     // find pivot row
     T max = copy.data[i][i];
     if (max < (T) 0)
@@ -87,10 +87,10 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Invert(void) const
     }
 
     // reduce other rows
-    for (j = minrow; j <= maxrow; j++)  {
+    for (int j = minrow; j <= maxrow; j++)  {
       if (j != i)  {
 	T mult = copy.data[j][i];
-	for (k = mincol; k <= maxcol; k++)  {
+	for (int k = mincol; k <= maxcol; k++)  {
 	  copy.data[j][k] -= copy.data[i][k] * mult;
 	  inv.data[j][k] -= inv.data[i][k] * mult;
 	}
@@ -135,9 +135,12 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
 
   // finally we multiply the diagonal elements
   T det = (T) 1;
-  for (row = minrow; row <= maxrow; row++)    det *= M.data[row][row];
+  for (int row = minrow; row <= maxrow; row++)    det *= M.data[row][row];
   return det;
 }
 
-
+template <class T> gOutput &operator<<(gOutput &to, const gSquareMatrix<T> &M)
+{
+  to << (gMatrix<T>)M; return to;
+}
 

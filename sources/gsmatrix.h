@@ -22,4 +22,6 @@ template <class T> class gSquareMatrix : public gMatrix<T>   {
     T Determinant(void) const;
 };
 
+template <class T> gOutput& operator<<(gOutput &to, const gSquareMatrix<T> &M);
+
 #endif    // GSMATRIX_H
