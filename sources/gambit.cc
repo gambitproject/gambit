@@ -335,49 +335,47 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 //                       FILE-LOAD MENU HANDLER
 //********************************************************************
 
-void GambitFrame::LoadFile(char *s)
+void GambitFrame::LoadFile(const gText &p_filename)
 {    
-  if (!s) {
+  gText new_s(p_filename);
+
+  if (p_filename == "") {
     Enable(FALSE); // Don't allow anything while the dialog is up.
 
-    s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
-		       NULL, NULL, "*.?fg");
+    gText s = wxFileSelector("Load data file", gambitApp.CurrentDir(),
+			     NULL, NULL, "*.?fg");
 
     Enable(TRUE);
 
-    if (!s)
+    if (s == "")
       return;
 
     // Save the current directory.
     // WARNING: since wxFileSelector returns the address of
     // a global buffer in wxxt, we have to copy s to a new
     // location.  This is probably also a memory leak.
-    char *new_s = copystring(s);
+    new_s = s;
     gText path(gPathOnly(s));
     gambitApp.SetCurrentDir(path);
-    s = new_s;
   }
   
-  if (strcmp(s, "") != 0) {
-    gText filename(gFileNameFromPath(s));
+  if (strcmp(new_s, "") != 0) {
+    gText filename(gFileNameFromPath(new_s));
     filename = filename.Dncase();
 
     if (strstr((const char *) filename, ".nfg")) {
       // This must be a normal form.
-      NfgGUI(0, s, 0, this);
+      NfgGUI(0, new_s, 0, this);
       return;
     }
     else if (strstr((const char *) filename, ".efg")) {
       // This must be an extensive form.
-      EfgGUI(0, s, 0, this);
+      EfgGUI(0, new_s, 0, this);
       return;
     }
     
     wxMessageBox("Unknown file type");
   }
-
-  // RDM:  I don't think the following should be here.  
-  //    delete [] s;
 }
 
 
@@ -392,7 +390,7 @@ void GambitFrame::OnMenuCommand(int id)
     Close();
     break;
   case FILE_LOAD:
-    LoadFile();
+    LoadFile("");
     break;
   case wxID_FILE1:
   case wxID_FILE2:

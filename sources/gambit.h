@@ -45,7 +45,7 @@ public:
   GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h, int type);
   Bool OnClose(void);
   void OnMenuCommand(int id);
-  void LoadFile(char *s = 0);
+  void LoadFile(const gText &);
 };
 
 
