@@ -147,8 +147,8 @@ AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
    -	Required parameters:
 	  *  n:  The terminal node to which branches are to be added.
 	  *  pl:  The player whose information set the node will now belong to.
-	     If the player specified is not already defined in the game, the 
-	     player is created automatically. 
+		If the player specified is not already defined in the game, the
+		player is created automatically. 
 	  *  br:  The number of branches to be appended to the node.
    -	Optional parameters:  None.
 
@@ -160,10 +160,10 @@ AttachOutcome[n->NODE, outc->INTEGER] =: NODE
    -	Return value:  Returns the node to which the outcome is attached.
    -	Required parameters:
 	  *  n:  The node to which the outcome is to be attached.  Note that
-	     the node need not be terminal in order to have an outcome 
-	     attached.
+		the node need not be terminal in order to have an outcome 
+		attached.
 	  *  outc:  The number of the outcome to be attached.  If no outcome 
-	     with the indicated number exists, no action is taken.  
+		with the indicated number exists, no action is taken.  
    -	Optional parameters:  None.
 
 ----------
@@ -228,7 +228,7 @@ DeleteAction[n->NODE, br->INTEGER] =: NODE
    -	Return value:  The given node.
    -	Required parameters:
 	  *  n:  The node belonging to the information set from which the 
-	     action is to be deleted.
+		action is to be deleted.
 	  *  br:  The number of the branch to be deleted.
    -	Optional parameters:  None.
 
@@ -306,17 +306,17 @@ ElimDom[N->NORFORM, {pl->INTLIST}, {strong->BOOLEAN}, {time<->RATIONAL},
 	is equal to 1.
    -	Required paremeters:
 	  *  N:  The problem in normal form for which dominated strategies are
-	     to be eliminated.
+		to be eliminated.
    -	Optional parameters:
 	  *  pl:  Specifies the list of players for which the procedure is to
-	     be performed.  If unspecified, it defaults to all players. 
+		be performed.  If unspecified, it defaults to all players. 
  	  *  strong:  Determines the type of dominance used.  The default value
-	     is False, which signifies that weak dominance is used.  If 
-	     `strong` is specified to be True, strong dominance is used.  
+		is False, which signifies that weak dominance is used.  If 
+		`strong` is specified to be True, strong dominance is used.  
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Redirects the output of the procedure to a specified 
-	     file.  Directing output to ``/dev/null'' under Unix turns output
-	     off.  By default, it directs output to the screen.
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, it directs output to the screen.
 
 ----------
 
@@ -327,7 +327,7 @@ EfgToNfg[E->EXTFORM, {time<->RATIONAL}] =: NORFORM
    -	Return value:  The new normal form game.  
    -	Required parameters:
 	  *  E:  The problem in extensive form to be converted to extensive 
-	     form.
+		form.
    -	Optional parameters:
 	  *  time:  Returns the elapsed time for the operation.
 
@@ -341,6 +341,18 @@ GetActionName[n->NODE, br->INTEGER] =: TEXT
    -	Required parameters:
 	  *  n:  The node at which the action to be found exists.
 	  *  br:  The branch which corresponds to the action to be found.
+   -	Optional parameters:  None.
+
+----------
+
+GetActionProbs[n->NODE] =: RATLIST
+
+   -	Description:  Finds the vector of probabilities for the actions at the
+	specified node.  This is only meaninful for nodes in information sets 
+	belonging to the player representing chance (player 0).
+   -	Return value:  Returns the vector of action probabilities for the node.
+   -	Required parameters: 
+	  *  n:  The node for which the action probabilities are to be found.
    -	Optional parameters:  None.
 
 ----------
@@ -377,9 +389,9 @@ GetOutcome[E->EXTFORM, outc->INTEGER] =: RATLIST
 	empty list.
    -	Required parameters:
 	  *  E:  The problem in extensive form for which the outcome is to be
-	     found.
+		found.
 	  *  outc:  The number assigned to the outcome for which the payoff 
-	     vector will be returned.
+		vector will be returned.
    -	Optional paramteters:  None.
 
 ---------
@@ -393,9 +405,9 @@ GetOutcomeName[E->EXTFORM, outc->INTEGER] =: TEXT
 	the name of an outcome is the empty string.
    -	Required parameters:
 	  *  E:  The problem in extensive form for which the outcome name is to
-	     be found.
+		be found.
 	  *  outc:  The number assigned to the outcome whose name will be 
-	     returned.
+		returned.
    -	Optional parameters:  None.
 
 ----------
@@ -409,9 +421,9 @@ GetPlayerName[E->EXTFORM, pl->INTEGER] =: TEXT
 	procedure returns the empty string.
    -	Required parameters:
 	  *  E:  The problem in extensive form for which the player name is to
-	     be found.
+		be found.
 	  *  pl:  The number assigned to the player whose name will be 
-	     returned.
+		returned.
    -	Optional parameters:  None.
 
 ----------
@@ -449,26 +461,26 @@ Gobit[N->NORFORM, {nequilib->INTEGER}, {type->INTEGER},
    -	Return value:  XXXX.
    -	Required parameters
 	  *  N:  The problem in normal form for which the Gobit solution is to
-	     be found.
+		be found.
    -	Optional parameters:
 	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
-	     value of 1.  
+		value of 1.  
 	  *  type:   XXXX.  
 	  *  maxitsDFP:  XXXX.
 	  *  maxitsBrent:  Sets the maximum number of iterations in Brent and 
-	     has a default value of XXXX.  
+		has a default value of XXXX.  
 	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
-	     0.01.
+		0.01.
 	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
-	     30.
+		30.
 	  *  delLam:  Specifies the rate at which the value of Lambda changes.
-	     Has a default value of 1.01.
+		Has a default value of 1.01.
 	  *  tolDFP:  XXXX .  Has a default value of 1.0E-10.  
 	  *  tolBrent:  XXXX .
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Can be used to redirect the output of this procedure to a
-	     file.  Directing output to ``/dev/null'' under Unix turns output 
-	     off.  By default, output is directed to the screen.
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, output is directed to the screen.
 
 ----------
 
@@ -480,7 +492,7 @@ HasOutcome[E->EXTFORM, outc->INTEGER] =: BOOLEAN
 	number in the specified problem.  Returns False otherwise.
    -	Required parameters:
 	  *  E:  The problem in extensive form which is to be searched for the
-	     outcome.
+		outcome.
 	  *  outc:  The number of the outcome which is to be searched for.
    -	Optional parameters:  None.
 
@@ -504,7 +516,7 @@ Lemke[N->NORFORM] =: NORFORM
    -	Return value:  The same problem in normal form.	
    -	Required parameters:
 	  *  N:  The problem in normal form for which the solution is to be 
-	     searched.
+		searched.
    -	Optional parameters:  None.
 
 ----------
@@ -530,9 +542,9 @@ MergeInfosets[n->NODE, to->NODE] =: NODE
    -	Return value:  XXXX .
    -	Required parameters:
 	  *  n:  The node which belongs to the information set whose nodes are
-	     to be moved to the second information set.
+		to be moved to the second information set.
 	  *  to:  The node which belongs to the information set to which all
-	     the nodes from the first information set are to be moved.
+		the nodes from the first information set are to be moved.
    -	Optional parameters:  None.
 
 ----------
@@ -578,14 +590,14 @@ PureNash[N->NORFORM, {num->INTEGER}, {time<->RATIONAL}, {output->TEXT}]
 	find and has a default value of 1.
    -	Required parameters:
 	  *  N:  The problem in normal form for which the weak pure strategy
-	     Nash equilibria are to be found.
+		Nash equilibria are to be found.
    -	Optional parameters:
 	  *  num:  Allows the user to set the maximum number of Nash equilibria
-	     to find.  Has a default value of 1.
+		to find.  Has a default value of 1.
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Can be used to redirect the output of this procedure to a
-	     file.  Directing output to ``/dev/null'' under Unix turns output 
-	     off.  By default, output is directed to the screen.  
+		file.  Directing output to ``/dev/null'' under Unix turns 
+		output off.  By default, output is directed to the screen.  
 
 ----------
 
@@ -600,123 +612,239 @@ Quit
 
 RandomNfg[dim->INTLIST, {seed->INTEGER}] =: NORFORM
 
-	Constructs a new problem in normal form of the specified
-dimensionality.  If a value is specified for the optional parameter 'seed',
-the random number generator is reseeded with the given integer.
+   -	Description:  Constructs a random new problem in normal form with the 
+	specified dimensionality.
+   -	Return value:  Returns the new problem in normal form.
+   -	Required parameters:
+	  *  dim:  The desired dimensionality of the new problem.
+   -	Optional parameters:
+	  *  seed:  Reseeds the random number generator with the given integer.
 
 ----------
 
 ReadEfgFile[file->TEXT] =: EXTFORM
 
-	Creates a new problem whose contents are the extensive form game
-stored in the given file.
+   -	Description:  Creates a new problem whose contents are the extensive 
+	form game stored in the specified file.
+   -	Return value:  The problem in extensive form read from the file.
+   -	Required parameters:
+	  *  file:  Specifies the file from which the extensive form game is to
+		be read.  If the file specified does not exist, an error 
+		message is returned.
+   -	Optional parameters:  None.
 
 ----------
 
 ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NORFORM
 
-	Creates a new problem whose contents are the normal form game stored
-in the given file.  The file is read as a floating-point normal form unless
-otherwise specified by the user.
+   -	Description:  Creates a new problem whose contents are the normal form
+	game stored in the specified file.  The file is read as a floating-
+	point normal form unless otherwise specified by the user.
+   -	Return value:  The problem in normal form read from the file.
+   -	Required parameters:
+	  *  file:  Specifies the file from which the normal form game is to be
+		read.  If the file specified does not exist, an error message
+		is returned.
+   -	Optional parameters:
+	  *  type:  Indicates whether the file is to be read as a floating-
+		point normal form or as a rational normal form.  If not given,
+		the default value is floating-point.
 
 ----------
 
 RootNode[E->EXTFORM, {game->INTEGER}] =: NODE
 
-	Returns, as a variable of type NODE, the root node of game number 
-`game` in the specified problem.  If 'game' is not specified, the first game is
-used by default.
+   -	Description:  Finds the root node of specified game in the given 
+	problem in extensive form.  If a game is not specified, the first game 
+	is used by default.
+   -	Return value:  Returns the root node of the game.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the root node is to be
+		found.
+   -	Optional parameters:
+	  *  game:  Specifies the game of which the root node is to be found.
+		If not given, the first game is used by default.
 
 ----------
 
 Run[TEXT]
 
-	Includes the commands in the file specified by the string TEXT as
-commands in the running GCL program.  TEXT may be any legal expression
-evaluating to type TEXT.  The program treats the command as if it were
-replaced by the contents of the file.
+   -	Description:  Includes the commands in the specified file as commands 
+	in the running GCL program.  The program treats the command as if it 
+	were replaced by the contents of the file.
+   -	Return value:  XXXX .
+   -	Required parameters:
+	  *  TEXT:  Any expression which evaluates to a text string which is a
+		valid filename.
+   -	Optional parameters:  None.
 
 ----------
 
 SetActionName[n->NODE, br->INTEGER, name->TEXT] =: NODE
 
-	Sets the name of the branch number specified by 'br' of the indicated 
-node to the name given.
+   -	Description:  Sets the name of the specified branch number of the 
+	indicated node to the name given.
+   -	Return value:  Returns the node specified.
+   -	Required parameters:
+	  *  n:  The node at which the desired action occurs.
+	  *  br:  The number of the branch or action ocurring at the given node
+		which is to be assigned a name.
+	  *  name:  The name which is to be assigned to the given action.
+   -	Optional parameters:  None.
+
+----------
+
+SetActionProbs[n->NODE, probs->RATLIST] =: NODE
+
+   -	Description:  Sets the action probabilities to the specified values 
+	for the given node.  This is only meaninful for nodes in information
+	sets belonging to the player representing chance (player 0).
+   -	Return value:  Returns the node specified.
+   -	Required parameters:
+	  *  n:  The node at which the actions will be assigned the specified
+		probabilities.
+	  *  probs:  The vector of values which represent the probabilites 
+		which will be assigned to the actions at the indicated node.
+   -	Optional parameters:  None.
 
 ----------
 
 SetInfosetName[n->NODE, name->TEXT] =: NODE
 
-	Assigns the name given by 'name' to the information set to which the 
-node indicated by 'n' belongs.
+   -	Description:  Assigns the given name given to the information set to 
+	which the indicated node belongs.
+   -	Return value:  Returns the node specified.
+   -	Required parameters:
+	  *  n:  A node belonging to the information set which is to be 
+		assigned a name.
+	  *  name:  The name which is to be assigned to the given information
+		set.
+   -	Optional parameters:  None.
 
 ----------
 
 SetOutcome[E->EXTFORM, outc->INTEGER, value->INTLIST] =: EXTFORM
 SetOutcome[E->EXTFORM, outc->INTEGER, value->RATLIST] =: EXTFORM
 
-	Sets the value of the outcome indicated by `outc` in the give problem 
-in extensive form, to the vector specified by the parameter 'value'.  The 
-length of `value` must match the number of players defined in the problem.  If
-no outcome with the given number exists, then it is created.  Returns the 
-modified problem in extensive form.
+   -	Description:  Sets the value of the indicated outcome in the give 
+	problem in extensive form, to the values in the specified vector.
+   -	Return value:  Returns the modified problem in extensive form. 
+   -	Required parameters:
+	  *  E:  The extensive form problem in which the given outcome is to be
+		assigned values.
+	  *  outc:  The number corresponding to the outcome which is to be 
+		assigned values.  If no outcome with the given number exists,
+		then it is created.
+	  *  value:  The vector of payoffs (either as a list of rationals or of
+		integers) which are to be assigned to the outcome.  The length
+		of `value` must match the number of players defined in the 
+		problem.
+   -	Optional parameters:  None.
 
 
 SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->INTEGER] =: EXTFORM
 SetOutcome[E->EXTFORM, outc->INTEGER, pl->INTEGER, value->RATIONAL] =: EXTFORM
 
-	Sets the payoff to the player indicated by 'pl' of the outcome whose 
-number is indicated by `outc` in the given problem in extensive form to the
-given value.  If no outcome with the given number exists, no action is 
-performed. 
+   -	Description:  Sets the payoff to the player specified for the indicated
+	outcome in the given problem in extensive form to the given value.
+   -	Return value:  Returns the modified problem in extensive form.
+   -	Required parameters:
+	  *  E:  The extensive form problem in which the given outcome is to be
+		assigned a value for the specified player.
+	  *  outc:  The number corresponding to the outcome which is to be 
+		assigned a value for the specified player.  If no outcome with
+		 the given number exists, no action is performed.
+	  *  pl:  The player for which the payoff of the given outcome is to be
+		set.
+	  *  value:  The value (either as an integer or rational) which is to
+		be assigned to the given outcome for the specified player.
 
 ----------
 
 SetOutcomeName[E->EXTFORM, outc->INTEGER, name->TEXT] =: EXTFORM
 
-	Assigns the outcome with the specified number the title given by 
-'name'.  Returns the original extensive form problem with the outcome name 
-assigned.
+   -	Description:  Assigns to the outcome with the specified number the 
+	given title.
+   -	Return value:  Returns the modified problem in extensive form.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the indicated outcome 
+		is to be assigned the given title.
+	  *  outc:  The number corresponding to the outcome which is to be 
+		assigned a title.
+	  *  name:  The name which is to be assigned to the indicated outcome.
+   -	Optional parameters:  None.
 
 ----------
 
 SetPlayerName[E->EXTFORM, pl->INTEGER, name->TEXT] =: EXTFORM
 
-	Assigns the player with the specified number the namer given by 'name'.
-Returns the original extensive form problem with the player name assigned.
+   -	Description:  Assigns to the player with the specified number the given
+	name.
+   -	Return value:  Returns the modified problem in extensive form.
+   -	Required parameters:
+	  *  E:  The problem in extensive form in which the indicated player is
+		to be assigned a name.
+	  *  pl:  The number corresponding to the player which is to be 
+		assigned a name.
+	  *  name:  The name which is to be assigned to the specified player.
+   -	Optional parameters:  None.
 
 ----------
 
 SetTitle[E->EXTFORM, title->TEXT] =: EXTFORM
 
-	Assigns the title specified by `title` to the problem in extensive form
-given by 'E'.  Returns the problem with the title assigned.
+   -	Description:  Assigns the specified title to the given problem in 
+	extensive form.
+   -	Return value:  Returns the modified problem in extensive form.
+   -	Required parameters:
+	  *  E:  The problem in extensive form which is to be assigned a title.
+	  *  title:  The title which is to be assigned to the given problem in 
+		extensive form.
+  -	Optional parameters:  None.
 
 ----------
 
 StartWatch[] =: INTEGER
 
-	Starts the system stopwatch.  The return value is uninteresting.
+   -	Description:  Starts the system stopwatch.  
+   -	Return value:  The return value is uninteresting.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
 StopWatch[] =: INTEGER
 
-	Stops the system stopwatch.  The return value is uninteresting.
+   -	Description:  Stops the system stopwatch.  
+   -	Return value:  The return value is uninteresting.
+   -	Required parameters:  None.
+   -	Optional parameters:  None.
 
 ----------
 
 WriteEfgFile[E->EXTFORM, file->TEXT] =: EXTFORM
 
-	Writes the given extensive form to the specified file.  Returns the
-same extensive form.
+   -	Description:  Writes the given extensive form problem to the specified 
+	file.  
+   -	Return value:  Returns the same extensive form problem.
+   -	Required parameters:
+	  *  E:  The problem in extensive form which is to be written to the
+		indicated file.
+	  *  file:  The name of the file to which the extensive form problem is
+		to be written.
 
 ----------
 
 WriteNfgFile[N->NORFORM, file->TEXT] =: NORFORM
 
-	Writes the given normal form to the specified file.  Returns the
-same normal form.
+   -	Description:  Writes the given normal form problem to the specified 
+	file.  
+   -	Return value:  Returns the same normal form problem.
+   -	Required parameters:
+	  *  N:  The problem in normal form which is to be written to the
+		indicated file.
+	  *  file:  The name of the file to which the normal form problem is
+		to be written.
 
 ----------
 
