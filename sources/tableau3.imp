@@ -80,7 +80,10 @@ int Tableau<gRational>::CanPivot(int outlabel, int col)
 void Tableau<gRational>::Pivot(int outrow, int in_col)
 {
   int i;
-
+  //int outlabel = Label(outrow);
+  //gout << "\noutrow:" << outrow;
+  //gout << " outlabel: " << outlabel;
+  //gout << " inlabel: " << in_col;
   // This is the Pivot Column, calculated here
   gVector<gRational> Lambda((*A).MinRow(),(*A).MaxRow());
   gVector<gRational> LambdaPrime((*A).MinRow(),(*A).MaxRow());
@@ -119,9 +122,9 @@ void Tableau<gRational>::Pivot(int outrow, int in_col)
   InvDat= (TempMatrix*InvDat)/Det;
   Det = LambdaPrime[outrow];
 
-  gout << "\nDet: \n" << Det << '\n';
+  //gout << "\nDet: \n" << Det << '\n';
   //gout << "\nLambda: \n" << Lambda << '\n';
-  gout << "\nInvDat: \n" << InvDat << '\n'; 
+  //gout << "\nInvDat: \n" << InvDat << '\n'; 
 
   // Update solution
   solution=(InvDat*(*b))/Det;
@@ -156,8 +159,6 @@ void Tableau<gRational>::SolveColumn(int in_col, gVector<gRational> &out)
 
 }
 
-// Generic code I don't really need, but someone downstream does
-
 void Tableau<gRational>::Refactor()
 { 
   gRational old_denom = totdenom;
@@ -172,6 +173,7 @@ void Tableau<gRational>::SetRefactor(int)
 void Tableau<gRational>::SetConst(const gVector<gRational> &bnew)
 {
   b=&bnew;
+  Refactor();
   //** this will have to be changed -- Need to start over and re-solve
   //** current basis with bnew.  Here is where vertenum probably screws up (RDM)
   // B.solve(*b, solution);
@@ -194,6 +196,7 @@ void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do x = V * b
   // B.solve(b,x);
+  x=(InvDat*b)/Det;
 }
 
  // solve y M = c
@@ -203,6 +206,7 @@ void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> 
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
   //** then do y = b * V
   // B.solveT(c,y);
+  y=(c*InvDat)/Det;
 }
 
 bool Tableau<gRational>::IsFeasible()
