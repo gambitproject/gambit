@@ -131,7 +131,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       SelectSolutions(subgame_number, foo, sol);
     }
     catch (gSignalBreak &) {
-      gout << sol << '\n';
       interrupted = true;
     }
     
@@ -206,7 +205,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     }
 
     if (interrupted) {
-      gout << solns << '\n';
       throw gSignalBreak();
     }
   }
