@@ -7,11 +7,11 @@
 #ifndef EFGPROFILE_H
 #define EFGPROFILE_H
 
-#include "wx/listctrl.h"
+#include "wx/grid.h"
 #include "efgshow.h"
 #include "behavfilter.h"
 
-class EfgProfileList : public wxListCtrl, public gList<BehavSolution> {
+class EfgProfileList : public wxGrid, public gList<BehavSolution> {
 private:
   EfgShow *m_parent;
   wxMenu *m_menu;
@@ -25,8 +25,14 @@ protected:
 
   // Event handlers
   void OnSortFilter(wxCommandEvent &);
-  void OnRightClick(wxMouseEvent &);
-  void OnColumnClick(wxListEvent &);
+  void OnSelectCell(wxGridEvent &);
+  void OnLeftClick(wxGridEvent &);
+  void OnRightClick(wxGridEvent &);
+  void OnColumnClick(wxGridEvent &);
+  void OnColumnDoubleClick(wxGridEvent &);
+  
+  // Overriding this to turn off cell highlight
+  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
 
 public:
   EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent);

@@ -14,15 +14,17 @@
 //                  class EfgProfileList: Member functions
 //-------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(EfgProfileList, wxListCtrl)
+BEGIN_EVENT_TABLE(EfgProfileList, wxGrid)
   EVT_MENU(efgmenuPROFILES_FILTER, EfgProfileList::OnSortFilter)
-  EVT_RIGHT_DOWN(EfgProfileList::OnRightClick)
-  EVT_LIST_COL_CLICK(idEFG_SOLUTION_LIST, EfgProfileList::OnColumnClick)
+  EVT_GRID_CELL_LEFT_CLICK(EfgProfileList::OnLeftClick)
+  EVT_GRID_CELL_RIGHT_CLICK(EfgProfileList::OnRightClick)
+  EVT_GRID_LABEL_LEFT_CLICK(EfgProfileList::OnColumnClick)
+  EVT_GRID_LABEL_LEFT_DCLICK(EfgProfileList::OnColumnDoubleClick)
 END_EVENT_TABLE()
 
 EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
-  : wxListCtrl(p_parent, idEFG_SOLUTION_LIST, wxDefaultPosition,
-	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
+  : wxGrid(p_parent, idEFG_SOLUTION_LIST, wxDefaultPosition,
+	   wxDefaultSize),
     m_parent(p_efgShow)
 {
   m_menu = new wxMenu("Solutions");
@@ -34,14 +36,28 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
   m_menu->Append(efgmenuPROFILES_EDIT, "Edit", "Edit this profile");
   m_menu->Append(efgmenuPROFILES_DELETE, "Delete", "Delete this profile");
 
-  InsertColumn(0, "Name");
-  InsertColumn(1, "Creator");
-  InsertColumn(2, "Nash");
-  InsertColumn(3, "Perfect");
-  InsertColumn(4, "Sequential");
-  InsertColumn(5, "Liap Value");
-  InsertColumn(6, "Qre Lambda");
-  InsertColumn(7, "Qre Value");
+  CreateGrid(0, 8);
+  SetLabelValue(wxHORIZONTAL, "Name", 0);
+  SetLabelValue(wxHORIZONTAL, "Creator", 1);
+  SetLabelValue(wxHORIZONTAL, "Nash", 2);
+  SetLabelValue(wxHORIZONTAL, "Perfect", 3);
+  SetLabelValue(wxHORIZONTAL, "Sequential", 4);
+  SetLabelValue(wxHORIZONTAL, "Liap Value", 5);
+  SetLabelValue(wxHORIZONTAL, "Qre Lambda", 6);
+  SetLabelValue(wxHORIZONTAL, "Qre Value", 7);
+
+  EnableGridLines(false);
+  SetLabelSize(wxVERTICAL, 0);
+  SetDefaultCellAlignment(wxCENTER, wxCENTER);
+  DisableDragRowSize();
+  SetColLabelAlignment(wxCENTER, wxCENTER);
+  SetEditable(false);
+
+  wxScreenDC dc;
+  dc.SetFont(GetLabelFont());
+  wxCoord w, h, descent;
+  dc.GetTextExtent("Sequential", &w, &h, &descent);
+  SetLabelSize(wxHORIZONTAL, (h + descent) * 1.25);
 
   UpdateValues();
 }
@@ -51,41 +67,60 @@ EfgProfileList::~EfgProfileList()
 
 void EfgProfileList::UpdateValues(void)
 {
-  DeleteAllItems();
-  for (int i = 1; i <= Length(); i++) {
+  DeleteRows(0, GetRows());
+  if (!m_options.FilterNash()[1] || !m_options.FilterNash()[2] ||
+      !m_options.FilterNash()[3]) {
+    SetCellTextColour(*wxGREEN, -1, 2);
+  }
+  else {
+    SetCellTextColour(*wxBLACK, -1, 2);
+  }
+
+  for (int i = 1; i <= m_displayOrder.Length(); i++) {
     const BehavSolution &solution = (*this)[m_displayOrder[i]];
-    InsertItem(i - 1, (char *) solution.GetName());
-    SetItem(i - 1, 1, (char *) ToText(solution.Creator()));
-    SetItem(i - 1, 2, (char *) ToText(solution.IsNash()));
-    SetItem(i - 1, 3, (char *) ToText(solution.IsSubgamePerfect()));
-    SetItem(i - 1, 4, (char *) ToText(solution.IsSequential()));
-    SetItem(i - 1, 5, (char *) ToText(solution.LiapValue()));
+    AppendRows();
+    SetCellValue(i - 1, 0, (char *) solution.GetName());
+    SetCellValue(i - 1, 1, (char *) ToText(solution.Creator()));
+    SetCellValue(i - 1, 2, (char *) ToText(solution.IsNash()));
+    SetCellValue(i - 1, 3, (char *) ToText(solution.IsSubgamePerfect()));
+    SetCellValue(i - 1, 4, (char *) ToText(solution.IsSequential()));
+    SetCellValue(i - 1, 5, (char *) ToText(solution.LiapValue()));
     if (solution.Creator() == algorithmEfg_QRE_EFG ||
 	solution.Creator() == algorithmEfg_QRE_NFG) {
-      SetItem(i - 1, 6, (char *) ToText(solution.QreLambda()));
-      SetItem(i - 1, 7, (char *) ToText(solution.QreValue()));
+      SetCellValue(i - 1, 6, (char *) ToText(solution.QreLambda()));
+      SetCellValue(i - 1, 7, (char *) ToText(solution.QreValue()));
     }
     else {
-      SetItem(i - 1, 6, "N/A");
-      SetItem(i - 1, 7, "N/A");
+      SetCellValue(i - 1, 6, "N/A");
+      SetCellValue(i - 1, 7, "N/A");
+    }
+    if (m_options.SortBy() != BSORT_NONE) {
+      SetCellBackgroundColour(i - 1, m_options.SortBy() - 1, *wxCYAN);
     }
   }
 
-  if (Length() > 0) {
-    wxListItem item;
-    item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_parent->CurrentSolution() - 1;
-    item.m_state = wxLIST_STATE_SELECTED;
-    item.m_stateMask = wxLIST_STATE_SELECTED;
-    SetItem(item);
+  for (int i = 1; i <= m_displayOrder.Length(); i++) {
+    if (m_displayOrder[i] == m_parent->CurrentSolution()) {
+      for (int j = 0; j < GetCols(); j++) {
+	SetCellTextColour(i - 1, j, *wxRED);
+      }
+    }
   }
 }
 
 void EfgProfileList::Resort(void)
 {
-  m_displayOrder = gBlock<int>(Length());
-  for (int i = 1; i <= m_displayOrder.Length(); i++) {
-    m_displayOrder[i] = i;
+  m_displayOrder = gBlock<int>(0);
+  for (int i = 1; i <= Length(); i++) {
+    bool passes = true;
+    const BehavSolution &sol = (*this)[i];
+    passes = (passes &&
+	      ((sol.IsNash() == triTRUE && m_options.FilterNash()[1]) ||
+	       (sol.IsNash() == triFALSE && m_options.FilterNash()[2]) ||
+	       (sol.IsNash() == triUNKNOWN && m_options.FilterNash()[3])));
+    if (passes) {
+      m_displayOrder.Append(i);
+    }
   }
 
   bool changed;
@@ -94,9 +129,26 @@ void EfgProfileList::Resort(void)
     changed = false;
     
     for (int i = 1; i <= m_displayOrder.Length() - 1; i++) {
-      if (m_options.SortBy() == BSORT_BY_NASH &&
-	  ((*this)[m_displayOrder[i]].IsNash() <
-	   (*this)[m_displayOrder[i+1]].IsNash())) {
+      bool outoforder = false;
+      const BehavSolution &sol1 = (*this)[m_displayOrder[i]];
+      const BehavSolution &sol2 = (*this)[m_displayOrder[i+1]];
+      outoforder |= (m_options.SortBy() == BSORT_BY_NAME &&
+		     (sol1.GetName() > sol2.GetName()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_CREATOR &&
+		     (ToText(sol1.Creator()) > ToText(sol2.Creator())));
+      outoforder |= (m_options.SortBy() == BSORT_BY_NASH &&
+		     (sol1.IsNash() < sol2.IsNash()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_PERFECT &&
+		     (sol1.IsSubgamePerfect() < sol2.IsSubgamePerfect()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_SEQ &&
+		     (sol1.IsSequential() < sol2.IsSequential()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_LVALUE &&
+		     (sol1.LiapValue() > sol2.LiapValue()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_GLAMBDA &&
+		     (sol1.QreLambda() > sol2.QreLambda()));
+      outoforder |= (m_options.SortBy() == BSORT_BY_GVALUE &&
+		     (sol1.QreValue() > sol2.QreValue()));
+      if (outoforder) {
 	int foo = m_displayOrder[i];
 	m_displayOrder[i] = m_displayOrder[i+1];
 	m_displayOrder[i+1] = foo;
@@ -130,74 +182,44 @@ int EfgProfileList::Append(const BehavSolution &p_solution)
   return Length();
 }
 
-void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
+void EfgProfileList::OnLeftClick(wxGridEvent &p_event)
+{
+  m_parent->ChangeSolution(m_displayOrder[p_event.GetRow() + 1]);
+  p_event.Veto();
+}
+
+void EfgProfileList::OnRightClick(wxGridEvent &p_event)
 {
   m_menu->Enable(efgmenuPROFILES_CLONE, m_parent->CurrentSolution() > 0);
   m_menu->Enable(efgmenuPROFILES_RENAME, m_parent->CurrentSolution() > 0);
   m_menu->Enable(efgmenuPROFILES_EDIT, m_parent->CurrentSolution() > 0);
   m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentSolution() > 0);
-  PopupMenu(m_menu, p_event.m_x, p_event.m_y);
+  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 
 void EfgProfileList::OnSortFilter(wxCommandEvent &)
 {
-#ifdef UNUSED
   dialogBehavFilter dialog(this, m_options);
 
   if (dialog.ShowModal() == wxID_OK) {
     dialog.Update(m_options);
-
-    if (VisibleLength() > 0) {
-      BehavSolution &currentSolution = (*this)[m_parent->CurrentSolution()];
-      m_options.Filter(*this);
-      m_options.Sort(*this);
-      UpdateValues();
-      if (this->Find(currentSolution) <= VisibleLength()) {
-	m_parent->ChangeSolution(this->Find(currentSolution));
-      }
-      else {
-	m_parent->ChangeSolution(1);
-      }
-    }
-    else {
-      m_options.Filter(*this);
-      m_options.Sort(*this);
-      UpdateValues();
-      m_parent->ChangeSolution((VisibleLength() > 0) ? 1 : 0);
-    }
+    Resort();
+    UpdateValues();
   }
-#endif  // UNUSED
 }
 
-void EfgProfileList::OnColumnClick(wxListEvent &p_event)
+void EfgProfileList::OnColumnClick(wxGridEvent &p_event)
 {
-  switch (p_event.m_col) {
-  case 0:
-    m_options.SortBy() = BSORT_BY_NAME;
-    break;
-  case 1:
-    m_options.SortBy() = BSORT_BY_CREATOR;
-    break;
-  case 2:
-    m_options.SortBy() = BSORT_BY_NASH;
-    break;
-  case 3:
-    m_options.SortBy() = BSORT_BY_PERFECT;
-    break;
-  case 4:
-    m_options.SortBy() = BSORT_BY_SEQ;
-    break;
-  case 5:
-    m_options.SortBy() = BSORT_BY_LVALUE;
-    break;
-  case 6:
-    m_options.SortBy() = BSORT_BY_GLAMBDA;
-    break;
-  case 7:
-    m_options.SortBy() = BSORT_BY_GVALUE;
-    break;
-  default:
-    break;
+  p_event.Veto();
+}
+
+void EfgProfileList::OnColumnDoubleClick(wxGridEvent &p_event)
+{
+  if (p_event.GetCol() + 1 == m_options.SortBy()) {
+    m_options.SortBy() = BSORT_NONE;
+  }
+  else {
+    m_options.SortBy() = p_event.GetCol() + 1;
   }
 
   Resort();

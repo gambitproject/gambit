@@ -31,7 +31,7 @@ BehavListFilter::BehavListFilter(void)
   : m_filterCreator(NUM_BCREATORS), m_filterNash(3), 
     m_filterPerfect(3), m_filterSequential(3)
 {
-  m_sortBy = BSORT_BY_NAME;
+  m_sortBy = BSORT_NONE;
 
   for (int i = 1; i <= NUM_BCREATORS; i++) {
     m_filterCreator[i] = true;
@@ -145,14 +145,6 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
   : wxDialog(p_parent, -1, "Sorting and Filtering Options",
 	     wxDefaultPosition, wxDefaultSize)
 {
-  wxString sortByChoices[] =
-  { "Id", "Creator", "Nash", "Perfect", "Sequential",
-    "QreValue", "QreLambda", "LiapValue" };
-
-  m_sortBy = new wxRadioBox(this, -1, "Sort By",
-			    wxDefaultPosition, wxDefaultSize,
-			    8, sortByChoices, 2);
-
   wxBoxSizer *filterCreatorSizer = new wxBoxSizer(wxVERTICAL);
   filterCreatorSizer->Add(new wxStaticText(this, -1, "Creator"), 0, wxALL, 5);
   
@@ -202,8 +194,6 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
   filterSizer->Add(filterPerfectSizer, 0, wxALL, 5);
   filterSizer->Add(filterSequentialSizer, 0, wxALL, 5);
 
-  m_sortBy->SetSelection(p_filter.SortBy()-1);
-
   for (int i = 0; i < NUM_BCREATORS; i++) {
     m_filterCreator->SetSelection(i, p_filter.FilterCreator()[i+1]);
   }
@@ -225,7 +215,6 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
   buttonSizer->Add(helpButton, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_sortBy, 0, wxCENTER, 5);
   topSizer->Add(filterSizer, 0, wxCENTER, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER, 5);
 
@@ -237,8 +226,6 @@ dialogBehavFilter::dialogBehavFilter(wxWindow *p_parent,
 
 void dialogBehavFilter::Update(BehavListFilter &p_filter)
 {
-  p_filter.SortBy() = m_sortBy->GetSelection()+1;
-
   for (int i = 1; i <= NUM_BCREATORS; i++) {
     p_filter.FilterCreator()[i] = m_filterCreator->Selected(i-1);
   }

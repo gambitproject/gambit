@@ -64,8 +64,6 @@ private:
   void OnSashDrag(wxSashEvent &);
   void OnActivate(wxActivateEvent &);
 
-  void OnSolutionSelected(wxListEvent &);
-
   void OnSetZoom(wxCommandEvent &);
 
   // Menu event handlers
@@ -180,7 +178,7 @@ public:
   void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
 
   // Solution interface to normal form
-  void AddSolution(const BehavProfile<gNumber> &, bool map);
+  void AddSolution(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
 
   gNumber ActionProb(const Node *n, int br);

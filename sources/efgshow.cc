@@ -168,7 +168,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
   EVT_ACTIVATE(EfgShow::OnActivate)
-  EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -280,19 +279,6 @@ void EfgShow::OnSelectedMoved(const Node *n)
   UpdateMenus();
 }
 
-//*******************************************************************
-//                          SOLUTION ROUTINES                       *
-//*******************************************************************
-
-void EfgShow::OnSolutionSelected(wxListEvent &p_event)
-{
-  cur_soln = p_event.m_itemIndex + 1;
-  m_treeWindow->Refresh();
-  if (m_cursorWindow) {
-    m_cursorWindow->Set(m_treeWindow->Cursor());
-  }
-}
-
 void EfgShow::ChangeSolution(int sol)
 {
   cur_soln = sol;
@@ -372,7 +358,7 @@ void EfgShow::OnProfilesDelete(wxCommandEvent &)
 //                     ACTUAL SOLUTION FUNCTIONS
 //************************************************************************
 
-void EfgShow::AddSolution(const BehavProfile<gNumber> &p_profile, bool p_map)
+void EfgShow::AddSolution(const BehavSolution &p_profile, bool p_map)
 {
   m_solutionTable->Append(p_profile);
 

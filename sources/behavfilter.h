@@ -46,12 +46,11 @@ typedef enum {
   BSORT_NONE = 0,
   BSORT_BY_NAME = 1, BSORT_BY_CREATOR = 2,
   BSORT_BY_NASH = 3, BSORT_BY_PERFECT = 4,
-  BSORT_BY_SEQ = 5, BSORT_BY_GVALUE = 6,
-  BSORT_BY_GLAMBDA = 7, BSORT_BY_LVALUE = 8 } BehavSortType;
+  BSORT_BY_SEQ = 5, BSORT_BY_LVALUE = 6,
+  BSORT_BY_GLAMBDA = 7, BSORT_BY_GVALUE = 8 } BehavSortType;
 
 class dialogBehavFilter : public wxDialog {
 private:
-  wxRadioBox *m_sortBy;
   wxListBox *m_filterCreator;
   wxListBox *m_filterNash, *m_filterPerfect, *m_filterSequential;
 
