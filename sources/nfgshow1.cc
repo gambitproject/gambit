@@ -486,93 +486,97 @@ void NormalSpread::OnPrint(void)
 
 
 //****************************WINDOW EVENT HANDLERS************************
-// OnMenuCommand
 
 void NormalSpread::OnMenuCommand(int id)
 {
-  switch (id) {
-  case NFG_PREFS_OUTCOMES_MENU: 
-    parent->OutcomeOptions();
-    break;
+  try {
+    switch (id) {
+    case NFG_PREFS_OUTCOMES_MENU: 
+      parent->OutcomeOptions();
+      break;
 
-  case NFG_SOLVE_CUSTOM_ENUMPURE:
-  case NFG_SOLVE_CUSTOM_ENUMMIXED:
-  case NFG_SOLVE_CUSTOM_LCP:
-  case NFG_SOLVE_CUSTOM_LP:
-  case NFG_SOLVE_CUSTOM_LIAP:
-  case NFG_SOLVE_CUSTOM_SIMPDIV:
-  case NFG_SOLVE_CUSTOM_QRE:
-  case NFG_SOLVE_CUSTOM_QREGRID:
-    parent->Solve(id);
-    break;
+    case NFG_SOLVE_CUSTOM_ENUMPURE:
+    case NFG_SOLVE_CUSTOM_ENUMMIXED:
+    case NFG_SOLVE_CUSTOM_LCP:
+    case NFG_SOLVE_CUSTOM_LP:
+    case NFG_SOLVE_CUSTOM_LIAP:
+    case NFG_SOLVE_CUSTOM_SIMPDIV:
+    case NFG_SOLVE_CUSTOM_QRE:
+    case NFG_SOLVE_CUSTOM_QREGRID:
+      parent->Solve(id);
+      break;
 
-  case NFG_DISPLAY_COLORS: 
-    parent->SetColors();
-    break;
+    case NFG_DISPLAY_COLORS: 
+      parent->SetColors();
+      break;
 
-  case NFG_DISPLAY_ACCELS: 
-    parent->EditAccelerators();
-    break;
+    case NFG_DISPLAY_ACCELS: 
+      parent->EditAccelerators();
+      break;
 
-  case NFG_SOLVE_FEATURES_MENU: 
-    parent->SetOptions();
-    break;
+    case NFG_SOLVE_FEATURES_MENU: 
+      parent->SetOptions();
+      break;
 
-  case NFG_SOLVE_INSPECT_MENU: 
-    parent->InspectSolutions(CREATE_DIALOG);
-    break;
+    case NFG_SOLVE_INSPECT_MENU: 
+      parent->InspectSolutions(CREATE_DIALOG);
+      break;
 
-  case NFG_SOLVE_COMPRESS_MENU: 
-    parent->SolveElimDom();
-    break;
+    case NFG_SOLVE_COMPRESS_MENU: 
+      parent->SolveElimDom();
+      break;
 
-  case NFG_SOLVE_SUPPORTS_MENU: 
-    parent->ChangeSupport(CREATE_DIALOG);
-    break;
+    case NFG_SOLVE_SUPPORTS_MENU: 
+      parent->ChangeSupport(CREATE_DIALOG);
+      break;
+      
+    case NFG_SOLVE_STANDARD_MENU: 
+      parent->SolveStandard();
+      break;
 
-  case NFG_SOLVE_STANDARD_MENU: 
-    parent->SolveStandard();
-    break;
+    case NFG_SOLVE_DOMINANCE_MENU: 
+      parent->DominanceSetup();
+      break;
 
-  case NFG_SOLVE_DOMINANCE_MENU: 
-    parent->DominanceSetup();
-    break;
+    case NFG_SOLVE_GAMEINFO_MENU: 
+      parent->ShowGameInfo();
+      break;
 
-  case NFG_SOLVE_GAMEINFO_MENU: 
-    parent->ShowGameInfo();
-    break;
+    case NFG_EDIT_GAME: 
+      parent->SetLabels(0);
+      break;
 
-  case NFG_EDIT_GAME: 
-    parent->SetLabels(0);
-    break;
+    case NFG_EDIT_STRATS: 
+      parent->SetLabels(1);
+      break;
 
-  case NFG_EDIT_STRATS: 
-    parent->SetLabels(1);
-    break;
+    case NFG_EDIT_PLAYERS: 
+      parent->SetLabels(2);
+      break;
 
-  case NFG_EDIT_PLAYERS: 
-    parent->SetLabels(2);
-    break;
+    case NFG_EDIT_OUTCOMES: 
+      parent->ChangeOutcomes(CREATE_DIALOG);
+      break;
 
-  case NFG_EDIT_OUTCOMES: 
-    parent->ChangeOutcomes(CREATE_DIALOG);
-    break;
+    case NFG_FILE_SAVE:
+      parent->Save();
+      break;
 
-  case NFG_FILE_SAVE:
-    parent->Save();
-    break;
+    case NFG_ACCL_PAYOFF: 
+      parent->ChangePayoffs(CurRow(), CurCol());
+      break;
 
-  case  NFG_ACCL_PAYOFF: 
-    parent->ChangePayoffs(CurRow(), CurCol());
-    break;
+    case NFG_ACCL_NEXT_PAYOFF: 
+      parent->ChangePayoffs(CurRow(), CurCol(), true);
+      break;
 
-  case NFG_ACCL_NEXT_PAYOFF: 
-    parent->ChangePayoffs(CurRow(), CurCol(), true);
-    break;
-
-  default: 
-    SpreadSheet3D::OnMenuCommand(id);
-    break;
+    default: 
+      SpreadSheet3D::OnMenuCommand(id);
+      break;
+    }
+  }
+  catch (gException &E) {
+    guiExceptionDialog(E.Description(), this);
   }
 }
 
@@ -605,12 +609,6 @@ void NormalSpread::OnOptionsChanged(unsigned int options)
         Repaint();
     }
 }
-
-// OnSolve
-//void NormalSpread::OnSolve(void)
-//{
-//  parent->OnSolve();
-//}
 
 
 //****************************************************************************

@@ -238,178 +238,137 @@ void EfgShow::OnSize(int , int )
 
 void EfgShow::OnMenuCommand(int id)
 {
-    switch (id)
-    {
-        // Node menus
+  try {
+    switch (id) {
     case NODE_ADD:
-        tw->node_add();
-        break;
-
+      tw->node_add();
+      break;
     case NODE_DELETE:
-        tw->node_delete();
-        break;
-
+      tw->node_delete();
+      break;
     case NODE_INSERT:
-        tw->node_add();
-        break;
-
+      tw->node_add();
+      break;
     case NODE_LABEL:
-        tw->node_label();
-        break;
-
+      tw->node_label();
+      break;
     case NODE_SET_MARK:
-        tw->node_set_mark();
-        break;
-
+      tw->node_set_mark();
+      break;
     case NODE_GOTO_MARK:
-        tw->node_goto_mark();
-        break;
+      tw->node_goto_mark();
+      break;
 
-        // Branch menu
     case ACTION_DELETE:
-        tw->action_delete();
-        break;
-
+      tw->action_delete();
+      break;
     case ACTION_INSERT:
-        tw->action_insert();
-        break;
-
+      tw->action_insert();
+      break;
     case ACTION_LABEL:
-        tw->action_label();
-        break;
-
+      tw->action_label();
+      break;
     case ACTION_PROBS:
-        tw->action_probs();
-        break;
+      tw->action_probs();
+      break;
 
-        // Tree menu
     case TREE_DELETE:
-        tw->tree_delete();
-        break;
-
+      tw->tree_delete();
+      break;
     case TREE_COPY:
-        tw->tree_copy();
-        break;
-
+      tw->tree_copy();
+      break;
     case TREE_MOVE:
-        tw->tree_move();
-        break;
-
+      tw->tree_move();
+      break;
     case TREE_LABEL:
-        tw->tree_label();
-        SetFileName();
-        break;
-
+      tw->tree_label();
+      SetFileName();
+      break;
     case TREE_OUTCOMES: 
-        ChangeOutcomes(CREATE_DIALOG);
-        break;
-
+      ChangeOutcomes(CREATE_DIALOG);
+      break;
     case TREE_PLAYERS:
-        tw->tree_players();
-        break;
-
+      tw->tree_players();
+      break;
     case TREE_INFOSETS:
-        tw->tree_infosets();
-        break;
+      tw->tree_infosets();
+      break;
 
-        // Infoset menu
     case INFOSET_MERGE:
-        tw->infoset_merge();
-        break;
-
+      tw->infoset_merge();
+      break;
     case INFOSET_BREAK:
-        tw->infoset_break();
-        break;
-
+      tw->infoset_break();
+      break;
     case INFOSET_SPLIT:
-        tw->infoset_split();
-        break;
-
+      tw->infoset_split();
+      break;
     case INFOSET_JOIN:
-        tw->infoset_join();
-        break;
-
+      tw->infoset_join();
+      break;
     case INFOSET_LABEL:
-        tw->infoset_label();
-        break;
-
+      tw->infoset_label();
+      break;
     case INFOSET_SWITCH_PLAYER:
-        tw->infoset_switch_player();
-        break;
-
+      tw->infoset_switch_player();
+      break;
     case INFOSET_REVEAL:
-        tw->infoset_reveal();
-        break;
+      tw->infoset_reveal();
+      break;
 
-        // File menu
     case FILE_OUTPUT:
-        tw->output();
-        break;
-
+      tw->output();
+      break;
     case FILE_SAVE:
-        tw->file_save();
-        break;
-
+      tw->file_save();
+      break;
     case FILE_CLOSE:
-        GUI_RECORD("FILE:CLOSE");
-        Close();
-        break;
+      GUI_RECORD("FILE:CLOSE");
+      Close();
+      break;
 
-        // Inspect menu
     case INSPECT_FEATURES:
-        SetOptions();
-        break;
-
-        // Supports menu
+      SetOptions();
+      break;
     case SUPPORTS_SUPPORTS: 
-        ChangeSupport(CREATE_DIALOG);
-        break;
-
+      ChangeSupport(CREATE_DIALOG);
+      break;
     case SUPPORTS_ELIMDOM: 
-        SolveElimDom();
-        break;
+      SolveElimDom();
+      break;
 
-        // Subgames menu
     case SUBGAME_SOLVE:
-        tw->subgame_solve();
-        break;
-
+      tw->subgame_solve();
+      break;
     case SUBGAME_CLEARALL:
-        tw->subgame_clear_all();
-        break;
-
+      tw->subgame_clear_all();
+      break;
     case SUBGAME_CLEARONE:
-        tw->subgame_clear_one();
-        break;
-
+      tw->subgame_clear_one();
+      break;
     case SUBGAME_COLLAPSEALL:
-        tw->subgame_collapse_all();
-        break;
-
+      tw->subgame_collapse_all();
+      break;
     case SUBGAME_COLLAPSEONE:
-        tw->subgame_collapse_one();
-        break;
-
+      tw->subgame_collapse_one();
+      break;
     case SUBGAME_EXPANDALL:
-        tw->subgame_expand_all();
-        break;
-
+      tw->subgame_expand_all();
+      break;
     case SUBGAME_EXPANDBRANCH:
-        tw->subgame_expand_branch();
-        break;
-
+      tw->subgame_expand_branch();
+      break;
     case SUBGAME_EXPANDONE:
-        tw->subgame_expand_one();
-        break;
-
+      tw->subgame_expand_one();
+      break;
     case SUBGAME_SET:
-        tw->subgame_set();
-        break;
+      tw->subgame_set();
+      break;
 
-        // Solve menu
     case INSPECT_SOLUTIONS: 
-        InspectSolutions(CREATE_DIALOG);
-        break;
+      InspectSolutions(CREATE_DIALOG);
+      break;
     case INSPECT_GAMEINFO: 
       ShowGameInfo();
       break;
@@ -430,94 +389,79 @@ void EfgShow::OnMenuCommand(int id)
       GUI_RECORD("SOLVE:SOLVE");
       Solve(id);
       break;
-
     case SOLVE_NFG_REDUCED: 
       SolveNormalReduced();
       break;
     case SOLVE_NFG_AGENT:
       SolveNormalAgent();
       break;
-
     case SOLVE_STANDARD:
       SolveStandard();
       break;
 
-        // Display menu
 #define ZOOM_DELTA  .2
-
     case DISPLAY_SET_ZOOM:
-        tw->display_set_zoom();
-        break;
-
+      tw->display_set_zoom();
+      break;
     case DISPLAY_ZOOM_WIN:
-        GetMenuBar()->Check(zoom_win_item, tw->display_zoom_win());
-        break;
-
+      GetMenuBar()->Check(zoom_win_item, tw->display_zoom_win());
+      break;
     case DISPLAY_INC_ZOOM:
-        tw->display_set_zoom(tw->display_get_zoom()+ZOOM_DELTA);
-        break;
-
+      tw->display_set_zoom(tw->display_get_zoom()+ZOOM_DELTA);
+      break;
     case DISPLAY_DEC_ZOOM:
-        tw->display_set_zoom(tw->display_get_zoom()-ZOOM_DELTA);
-        break;
-
+      tw->display_set_zoom(tw->display_get_zoom()-ZOOM_DELTA);
+      break;
     case DISPLAY_LEGENDS:
-        tw->display_legends();
-        break;
-
+      tw->display_legends();
+      break;
     case DISPLAY_SET_OPTIONS:
-        tw->display_options();
-        break;
-
+      tw->display_options();
+      break;
     case DISPLAY_COLORS:
-        tw->display_colors();
-        break;
-
+      tw->display_colors();
+      break;
     case DISPLAY_SAVE_DEFAULT:
-        tw->display_save_options();
-        break;
-
+      tw->display_save_options();
+      break;
     case DISPLAY_LOAD_DEFAULT:
-        tw->display_load_options();
-        break;
-
+      tw->display_load_options();
+      break;
     case DISPLAY_SAVE_CUSTOM:
-        tw->display_save_options(FALSE);
-        break;
-
+      tw->display_save_options(FALSE);
+      break;
     case DISPLAY_LOAD_CUSTOM:
-        tw->display_load_options(FALSE);
-        break;
-
+      tw->display_load_options(FALSE);
+      break;
     case DISPLAY_REDRAW: 
-        /* redraws automatically after switch */ 
-        break;
-
+      /* redraws automatically after switch */ 
+      break;
     case DISPLAY_ACCELS:
-        EditAccelerators(accelerators, MakeEventNames());
-        WriteAccelerators(accelerators, "EfgAccelerators");
-        break;
+      EditAccelerators(accelerators, MakeEventNames());
+      WriteAccelerators(accelerators, "EfgAccelerators");
+      break;
 
-        // Help menu
     case GAMBIT_HELP_ABOUT:
-        wxHelpAbout();
-        break;
-
+      wxHelpAbout();
+      break;
     case GAMBIT_HELP_CONTENTS:
-        wxHelpContents(EFG_GUI_HELP);
-        break;
-
+      wxHelpContents(EFG_GUI_HELP);
+      break;
     default:
-        parent->OnMenuCommand(id);
-        break;
+      parent->OnMenuCommand(id);
+      break;
     }
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != FILE_QUIT && id != FILE_CLOSE && id != TREE_OUTCOMES &&
-    id != SUPPORTS_SUPPORTS) {
+    if (id != FILE_QUIT && id != FILE_CLOSE && id != TREE_OUTCOMES
+	&& id != SUPPORTS_SUPPORTS) {
       tw->OnPaint();
       tw->SetFocus();
     }
+  }
+  catch (gException &E) {
+    guiExceptionDialog(E.Description(), this);
+  }
 }
 
 
@@ -769,12 +713,6 @@ void EfgShow::GameChanged(void)
 }
 
 
-//
-// These functions act weird on some platforms (e.g., HP, and Win95 under
-// Borland C).  So, there's a couple different versions to make the best
-// of things
-//
-
 void EfgShow::SetFileName(void)
 {
   SetTitle("[" + filename + "] " + ef.GetTitle());
@@ -824,111 +762,104 @@ const EFSupport *EfgShow::GetSupport(int which)
 
 
 #include "efggui.h"
-//***************************************************************************
-//                EXTENSIVE FORM GUI
-//***************************************************************************
 
-EfgGUI::EfgGUI(Efg *ef, const gText infile_name, 
-               EfgNfgInterface *inter, wxFrame *parent)
+//-------------------------------------------------------------------------
+//                        EfgGUI: Member functions
+//-------------------------------------------------------------------------
+
+EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
+               EfgNfgInterface *p_interface, wxFrame *p_parent)
 {
-    if (!ef)    // must create a new extensive form from scratch or file
-    {
-        if (infile_name == gText()) // from scratch
-        {
-            gArray<gText> names;
+  if (!p_efg) {
+    // must create a new extensive form from scratch or file
+    if (p_filename == "") {  // from scratch
+      gArray<gText> names;
 
-            if (GetEFParams(names, parent))
-            {
-                ef = new Efg;
-                for (int i = 1; i <= names.Length(); i++)   
-                    ef->NewPlayer()->SetName(names[i]);
-            }
-        }
-        else                        // from data file
-        {
-            try 
-            { 
-                gFileInput infile(infile_name);
-                ReadEfgFile(infile, ef);
+      if (GetEfgParams(names, p_parent)) {
+	p_efg = new Efg;
+	for (int i = 1; i <= names.Length(); i++)   
+	  p_efg->NewPlayer()->SetName(names[i]);
+      }
+    }
+    else {
+      // from data file
+      try {
+	gFileInput infile(p_filename);
+	ReadEfgFile(infile, p_efg);
                 
-                if (!ef) 
-                    wxMessageBox("ReadFailed::Check the file");
-            }
-            catch(gFileInput::OpenFailed &) 
-            {
-                wxMessageBox("ReadFailed::Check the file");
-                return;
-            }
-        }
+	if (!p_efg) 
+	  wxMessageBox(p_filename + " is not a valid .efg file");
+      }
+      catch (gFileInput::OpenFailed &) { 
+	wxMessageBox("Could not open " + p_filename + " for reading");
+	return;
+      }
     }
+  }
 
-    EfgShow *ef_show = 0;
+  EfgShow *efgShow = 0;
 
-    if (ef)
-    {
-        ef_show = new EfgShow(*ef, inter, 1, parent);
-    }
+  if (p_efg) {
+    efgShow = new EfgShow(*p_efg, p_interface, 1, p_parent);
+  }
 
-    if (ef_show) 
-        ef_show->SetFileName(infile_name);
+  if (efgShow) 
+    efgShow->SetFileName(p_filename);
 }
 
 
 #define MAX_PLAYERS           100
-#define MAX_STRATEGIES        100
 #define NUM_PLAYERS_PER_LINE    8
 
-int EfgGUI::GetEFParams(gArray<gText> &names, wxFrame *parent)
+int EfgGUI::GetEfgParams(gArray<gText> &names, wxFrame *parent)
 {
-    int num_players = 2;
+  static int num_players = 2;
 
-    // Get the number of players first
-    MyDialogBox *make_ef_p = 
-        new MyDialogBox(parent, "Extensive Form Parameters");
-    make_ef_p->Form()->Add(wxMakeFormShort("How many players", 
-                                           &num_players, wxFORM_TEXT,
-                                           new wxList(wxMakeConstraintRange(1, MAX_PLAYERS), 0), 
-                                           NULL, 0, 220));
-    make_ef_p->Go();
-    int ok = make_ef_p->Completed();
-    delete make_ef_p;
+  // Get the number of players first
+  MyDialogBox *make_ef_p = new MyDialogBox(parent,
+					   "Extensive Form Parameters");
+  make_ef_p->Form()->Add(wxMakeFormShort("How many players", 
+					 &num_players, wxFORM_TEXT,
+					 new wxList(wxMakeConstraintRange(1, MAX_PLAYERS), 0), 
+					 NULL, 0, 220));
+  make_ef_p->Go();
+  int ok = make_ef_p->Completed();
+  delete make_ef_p;
 
-    if (ok != wxOK || num_players < 1) 
-        return 0;
+  if (ok != wxOK || num_players < 1) 
+    return 0;
 
-    // Now get player names
-    MyDialogBox *make_ef_names = new MyDialogBox(parent, "Player Names");
-    names = gArray<gText>(num_players);
-    char **names_str = new char*[num_players+1];
+  // Now get player names
+  MyDialogBox *make_ef_names = new MyDialogBox(parent, "Player Names");
+  names = gArray<gText>(num_players);
+  char **names_str = new char*[num_players+1];
 
-    for (int i = 1; i <= num_players; i++)
-    {
-        names_str[i] = new char[20];
-        strcpy(names_str[i], "Player"+ToText(i));
-        make_ef_names->Add(wxMakeFormString(ToText(i), 
-                                            &names_str[i], wxFORM_TEXT,
-                                            NULL, NULL, 0, 140));
+  for (int i = 1; i <= num_players; i++) {
+    names_str[i] = new char[20];
+    strcpy(names_str[i], "Player"+ToText(i));
+    make_ef_names->Add(wxMakeFormString(ToText(i), 
+					&names_str[i], wxFORM_TEXT,
+					NULL, NULL, 0, 140));
 
-        if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
-            make_ef_names->Add(wxMakeFormNewLine());
-    }
+    if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
+      make_ef_names->Add(wxMakeFormNewLine());
+  }
 
-    make_ef_names->Go();
-    ok = make_ef_names->Completed();
-    delete make_ef_names;
+  make_ef_names->Go();
+  ok = make_ef_names->Completed();
+  delete make_ef_names;
 
-    if (ok != wxOK) 
-        return 0;
+  if (ok != wxOK) 
+    return 0;
 
-    for (int i = 1; i <= num_players; i++)
-    {
-        names[i] = names_str[i];
-        delete [] names_str[i];
-    }
+  for (int i = 1; i <= num_players; i++) {
+    names[i] = names_str[i];
+    delete [] names_str[i];
+  }
 
-    delete [] names_str;
-
-    return 1;
+  delete [] names_str;
+  
+  return 1;
 }
 
 
