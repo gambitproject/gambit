@@ -28,8 +28,8 @@ gambit_SOURCES = \
 	dlinsertmove.cc \
 	dlnewgame.cc \
 	dlnfg.cc \
+	dlnfgnash.cc \
 	dlnfgproperties.cc \
-	dlnfgstandard.cc \
 	efglayout.cc \
 	efgnavigate.cc \
 	efgoutcome.cc \

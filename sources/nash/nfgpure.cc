@@ -58,6 +58,8 @@ gList<MixedSolution> nfgEnumPure::Solve(const NFSupport &p_support,
     contNumber++;
   }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
 	    citer.NextContingency());
+
+  return solutions;
 }
 
 

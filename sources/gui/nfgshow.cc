@@ -1,7 +1,10 @@
 //
-// FILE: nfgshow.cc -- Implementation of NfgShow class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of normal form display class
 //
 
 #include "wx/wxprec.h"
@@ -34,19 +37,9 @@
 #include "dlstrategies.h"
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
-#include "dlnfgstandard.h"
 #include "dleditmixed.h"
-#include "algenumpure.h"
-#include "algenummixed.h"
-#include "alglcp.h"
-#include "algliap.h"
-#include "alglp.h"
-#include "algpolenum.h"
-#include "algqre.h"
-#include "algqregrid.h"
-#include "algsimpdiv.h"
-
 #include "dlelimmixed.h"
+#include "dlnfgnash.h"
 
 //=====================================================================
 //                 Implementation of class NfgShow
@@ -86,25 +79,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_FORMAT_SAVE, NfgShow::OnFormatSave)
   EVT_MENU(NFG_FORMAT_LOAD, NfgShow::OnFormatLoad)
   EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_STANDARD, NfgShow::OnToolsEquilibriumStandard)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
-	   NfgShow::OnToolsEquilibriumCustomEnumPure)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED,
-	   NfgShow::OnToolsEquilibriumCustomEnumMixed)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP,
-	   NfgShow::OnToolsEquilibriumCustomLcp)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LIAP,
-	   NfgShow::OnToolsEquilibriumCustomLiap)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP,
-	   NfgShow::OnToolsEquilibriumCustomLp)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM,
-	   NfgShow::OnToolsEquilibriumCustomPolEnum)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
-	   NfgShow::OnToolsEquilibriumCustomQre)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
-	   NfgShow::OnToolsEquilibriumCustomQreGrid)
-  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV,
-	   NfgShow::OnToolsEquilibriumCustomSimpdiv)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
@@ -400,35 +375,8 @@ void NfgShow::MakeMenus(void)
   wxMenu *toolsMenu = new wxMenu;
   toolsMenu->Append(NFG_TOOLS_DOMINANCE, "&Dominance",
 		       "Find undominated strategies");
-
-  wxMenu *solveMenu = new wxMenu;
-  solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_STANDARD,  "S&tandard...",
-		    "Standard solutions");
-  
-  wxMenu *solveCustomMenu = new wxMenu;
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE, "EnumPure",
-			  "Enumerate pure strategy equilibria");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED, "EnumMixed",
-			  "Enumerate mixed strategy equilibria");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP, "LCP",
-			  "Solve via linear complementarity program");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP, "LP",
-			  "Solve via linear program");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LIAP, "Liapunov",
-			  "Minimization of liapunov function");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV, "Simpdiv",
-			  "Solve via simplicial subdivision");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM, "PolEnum",
-			  "Enumeration by systems of polynomials");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE, "QRE",
-			  "Compute quantal response equilibrium");
-  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID, "QREGrid",
-			  "Compute quantal response equilibrium");
-
-  solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM, "Custom", solveCustomMenu,
-		    "Solve with a particular algorithm");
-  toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium", solveMenu,
-		    "Compute (Nash) equilibria");
+  toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium",
+		    "Compute Nash equilibria (and refinements)");
   
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
@@ -486,13 +434,6 @@ void NfgShow::UpdateMenus(void)
 {
   wxMenuBar *menu = GetMenuBar();
   gArray<int> profile(GetContingency());
-
-  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED, 
-	       m_nfg.NumPlayers() == 2);
-  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP,
-	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
-  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
-
   menu->Enable(NFG_VIEW_PROBABILITIES, m_profiles.Length() > 0);
   menu->Enable(NFG_VIEW_VALUES, m_profiles.Length() > 0);
 }
@@ -898,332 +839,43 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 //          NfgShow: Menu handlers - Tools->Equilibrium menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
+void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 { 
-  dialogNfgSolveStandard dialog(this, m_nfg);
-  
+  dialogNfgNash dialog(this, *m_currentSupport);
+
   if (dialog.ShowModal() == wxID_OK) {
+    nfgNashAlgorithm *algorithm = dialog.GetAlgorithm();
 
+    if (!algorithm) {
+      return;
+    }
 
-  }
+    try {
+      wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
+      gList<MixedSolution> solutions;
+      solutions = algorithm->Solve(*m_currentSupport, status);
 
-}
-
-#ifdef UNUSED
-
-  int old_max_soln = m_profiles.Length();  // used for extensive update
-
-  guiNfgSolution *solver = 0;
-
-  switch (dialog.Number()) {
-  case nfgSTANDARD_ONE:
-    if (dialog.Type() == nfgSTANDARD_NASH) {
-      if (m_nfg.NumPlayers() == 2) {
-	if (IsConstSum(m_nfg))
-	  solver = new guinfgLp(this, 1, dialog.Precision(), true);
-	else
-	  solver = new guinfgLcp(this, 1, dialog.Precision(), true);
+      for (int soln = 1; soln <= solutions.Length(); soln++) {
+	AddProfile(solutions[soln], true);
       }
-      else
-	solver = new guinfgSimpdiv(this, 1, dialog.Precision(), true);
-    }
-    else {  // nfgSTANDARD_PERFECT
-      if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(this, 1, dialog.Precision(), true);
+      ChangeProfile(m_profiles.Length());
+   
+      if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+	m_table->ToggleProbs();
+	GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
       }
-      else {
-	wxMessageBox("One-Perfect only implemented for 2-player games",
-		     "Standard Solution");
-	return;
+      if (!m_solutionSashWindow->IsShown()) {
+	m_profileTable->Show(true);
+	m_solutionSashWindow->Show(true);
+	GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
+	AdjustSizes();
       }
+      
+      UpdateMenus();
     }
-    break;
+    catch (...) { }
 
-  case nfgSTANDARD_TWO:
-    if (dialog.Type() == nfgSTANDARD_NASH) {
-      if (m_nfg.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(this, 2, dialog.Precision(), false);
-      else
-	solver = new guinfgLiap(this, 2, 10, false);
-    }
-    else {  // nfgSTANDARD_PERFECT
-      if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(this, 2, dialog.Precision(), true);
-	wxMessageBox("Not guaranteed to find 2 solutions", "Warning");
-      }
-      else {
-	wxMessageBox("Two-Perfect not implemented", "Standard Solution");
-	return;
-      }
-    }
-    break;
-
-  case nfgSTANDARD_ALL:
-    if (dialog.Type() == nfgSTANDARD_NASH) {
-      if (m_nfg.NumPlayers() == 2)
-	solver = new guinfgEnumMixed(this, 0, dialog.Precision(), false);
-      else {
-	solver = new guinfgPolEnum(this, 0, false);
-      }
-    }
-    else {  // nfgSTANDARD_PERFECT
-      if (m_nfg.NumPlayers() == 2) {
-	solver = new guinfgEnumMixed(this, 0, dialog.Precision(), true);
-	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-      }
-      else {
-	wxMessageBox("All-Perfect only implemented for 2-player games",
-		     "Standard Solution");
-	return;
-      }
-    }
-    break;
-  }
-
-  wxBeginBusyCursor();
-
-  try {
-    NFSupport support = solver->Eliminate(*m_currentSupport);
-    gList<MixedSolution> solutions = solver->Solve(support);
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddSolution(solutions[soln], true);
-    }
-    wxEndBusyCursor();
-  }
-  catch (gException &E) {
-    guiExceptionDialog(E.Description(), this);
-    wxEndBusyCursor();
-  }
-    
-  delete solver;
-
-  if (old_max_soln != m_profiles.Length()) {
-    if (!m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-
-    ChangeProfile(m_profiles.Length());
-  }  
-
-  UpdateMenus();
-}
-
-#endif  // UNUSED
-
-void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (EnumPureNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomEnumMixed(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (EnumMixedNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomLcp(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (LcpNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomLiap(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (LiapNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomLp(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (LpNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomPolEnum(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (PolEnumNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (QreNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomQreGrid(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (QreGridNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
-  }
-}
-
-void NfgShow::OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &)
-{
-  gList<MixedSolution> solutions;
-  if (SimpdivNfg(this, *m_currentSupport, solutions)) {
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddProfile(solutions[soln], true);
-    }
-    ChangeProfile(m_profiles.Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-    if (!m_solutionSashWindow->IsShown()) {
-      m_profileTable->Show(true);
-      m_solutionSashWindow->Show(true);
-      GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-      AdjustSizes();
-    }
-
-    UpdateMenus();
+    delete algorithm;
   }
 }
 

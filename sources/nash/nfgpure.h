@@ -25,6 +25,7 @@ public:
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
+  gText GetAlgorithm(void) const { return "EnumPure"; }
   gList<MixedSolution> Solve(const NFSupport &, gStatus &);
 };
 

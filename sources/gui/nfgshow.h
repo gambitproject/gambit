@@ -92,17 +92,7 @@ private:
   void OnFormatLoad(wxCommandEvent &);
 
   void OnToolsDominance(wxCommandEvent &);
-
-  void OnToolsEquilibriumStandard(wxCommandEvent &);
-  void OnToolsEquilibriumCustomEnumPure(wxCommandEvent &);
-  void OnToolsEquilibriumCustomEnumMixed(wxCommandEvent &);
-  void OnToolsEquilibriumCustomLcp(wxCommandEvent &);
-  void OnToolsEquilibriumCustomLiap(wxCommandEvent &);
-  void OnToolsEquilibriumCustomLp(wxCommandEvent &);
-  void OnToolsEquilibriumCustomPolEnum(wxCommandEvent &);
-  void OnToolsEquilibriumCustomQre(wxCommandEvent &);
-  void OnToolsEquilibriumCustomQreGrid(wxCommandEvent &);
-  void OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &);
+  void OnToolsEquilibrium(wxCommandEvent &);
 
   void OnHelpContents(wxCommandEvent &);
   void OnHelpIndex(wxCommandEvent &);
