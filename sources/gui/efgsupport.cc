@@ -32,6 +32,64 @@
 
 const int idACTIONTREE = 8003;
 
+//===========================================================================
+//                    class gbtEfgSetSupportCommand
+//===========================================================================
+
+gbtEfgSetSupportCommand::gbtEfgSetSupportCommand(gbtGameDocument *p_game,
+						 int p_index)
+  : gbtGameCommand(false, "Set support"),
+    m_game(p_game), m_index(p_index)
+{ }
+
+bool gbtEfgSetSupportCommand::Do(void)
+{
+  m_game->m_currentEfgSupport = m_game->m_efgSupports[m_index];
+  m_game->UpdateAllViews();
+  return false;
+}
+
+//===========================================================================
+//                 class gbtEfgDuplicateSupportCommand
+//===========================================================================
+
+gbtEfgDuplicateSupportCommand::
+gbtEfgDuplicateSupportCommand(gbtGameDocument *p_game, int p_index)
+  : gbtGameCommand(false, "Duplicate support"),
+    m_game(p_game), m_index(p_index)
+{ }
+
+bool gbtEfgDuplicateSupportCommand::Do(void)
+{
+  EFSupport *newSupport = new EFSupport(*m_game->m_currentEfgSupport);
+  //  newSupport->SetName(m_game->UniqueSupportName());
+  m_game->m_efgSupports.Append(newSupport);
+  m_game->m_currentEfgSupport = newSupport;
+  m_game->UpdateAllViews();
+  return false;
+}
+
+//===========================================================================
+//                  class gbtEfgDeleteSupportCommand
+//===========================================================================
+
+gbtEfgDeleteSupportCommand::gbtEfgDeleteSupportCommand(gbtGameDocument *p_game)
+  : gbtGameCommand(false, "Delete support"),
+    m_game(p_game)
+{ }
+
+bool gbtEfgDeleteSupportCommand::Do(void)
+{
+  delete m_game->m_efgSupports.Remove(m_game->m_efgSupports.Find(m_game->m_currentEfgSupport));
+  m_game->m_currentEfgSupport = m_game->m_efgSupports[1];
+  m_game->UpdateAllViews();
+  return false;
+}
+
+//===========================================================================
+//                       class widgetActionTree
+//===========================================================================
+
 class widgetActionTree : public wxTreeCtrl {
 private:
   EfgSupportWindow *m_parent;
@@ -103,8 +161,10 @@ BEGIN_EVENT_TABLE(EfgSupportWindow, wxPanel)
   EVT_TREE_ITEM_COLLAPSING(idACTIONTREE, EfgSupportWindow::OnTreeItemCollapse)
 END_EVENT_TABLE()
 
-EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
+EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_game,
+				   EfgShow *p_efgShow, wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+    gbtGameView(p_game),
     m_parent(p_efgShow), m_map((Action *) 0)
 {
   SetAutoLayout(true);
@@ -117,7 +177,6 @@ EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
 			      wxDefaultPosition, wxSize(30, 30));
   m_actionTree = new widgetActionTree(this);
-  UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
@@ -137,27 +196,27 @@ EfgSupportWindow::EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   Show(true);
 }
 
-void EfgSupportWindow::UpdateValues(void)
+void EfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 
-  const gList<EFSupport *> &supports = m_parent->Supports();
+  const gList<EFSupport *> &supports = m_game->m_efgSupports;
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)
 			  (ToText(i) + ": " + supports[i]->GetName()));
   }
 
-  int supportIndex = supports.Find(m_parent->GetSupport());
+  int supportIndex = supports.Find(m_game->GetEfgSupport());
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_parent->GetSupport()->GetName());
-  for (int pl = 1; pl <= m_parent->Game()->NumPlayers(); pl++) {
-    EFPlayer *player = m_parent->Game()->Players()[pl];
+  m_actionTree->AddRoot((char *) m_game->GetEfgSupport()->GetName());
+  for (int pl = 1; pl <= m_game->m_efg->NumPlayers(); pl++) {
+    EFPlayer *player = m_game->m_efg->Players()[pl];
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
 					       (char *) player->GetName());
@@ -170,7 +229,7 @@ void EfgSupportWindow::UpdateValues(void)
 	Action *action = infoset->Actions()[act];
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
 						      (char *) action->GetName());
-	if (m_parent->GetSupport()->Contains(action)) {
+	if (m_game->GetEfgSupport()->Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -189,18 +248,23 @@ void EfgSupportWindow::UpdateValues(void)
 
 void EfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_parent->SetSupportNumber(p_event.GetSelection() + 1);
+  gbtEfgSetSupportCommand *command =
+    new gbtEfgSetSupportCommand(m_game, p_event.GetSelection() + 1);
+  m_game->Submit(command);
 }
 
 void EfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_parent->SetSupportNumber(m_supportList->GetSelection());
+  gbtEfgSetSupportCommand *command =
+    new gbtEfgSetSupportCommand(m_game, m_supportList->GetSelection());
+  m_game->Submit(command);
 }
 
 void EfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_parent->SetSupportNumber(m_supportList->GetSelection() + 2);
-
+  gbtEfgSetSupportCommand *command =
+    new gbtEfgSetSupportCommand(m_game, m_supportList->GetSelection() + 2);
+  m_game->Submit(command);
 }
 
 void EfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
@@ -217,17 +281,15 @@ void EfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     return;
   }
 
-  if (m_parent->GetSupport()->Contains(action) &&
-      m_parent->GetSupport()->NumActions(action->BelongsTo()) > 1) {
-    m_parent->GetSupport()->RemoveAction(action);
+  if (m_game->GetEfgSupport()->Contains(action) &&
+      m_game->GetEfgSupport()->NumActions(action->BelongsTo()) > 1) {
+    m_game->GetEfgSupport()->RemoveAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }
   else {
-    m_parent->GetSupport()->AddAction(action);
+    m_game->GetEfgSupport()->AddAction(action);
     m_actionTree->SetItemTextColour(p_id, *wxBLACK);
   }
-
-  m_parent->SetSupportNumber(m_supportList->GetSelection() + 1);
 }
 
 

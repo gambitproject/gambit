@@ -51,6 +51,7 @@ gambit_SOURCES = \
 	efgshow.cc \
 	efgsupport.cc \
 	gambit.cc \
+	gamedoc.cc \
 	nfgnavigate.cc \
 	nfgoutcome.cc \
 	nfgprofile.cc \

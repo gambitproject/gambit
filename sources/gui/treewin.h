@@ -29,14 +29,12 @@
 
 #include "wx/dragimag.h"
 #include "efglayout.h"
+#include "gamedoc.h"
 
-class EfgShow;
-
-class TreeWindow : public wxScrolledWindow {
+class TreeWindow : public wxScrolledWindow, public gbtGameView {
 friend class EfgPrintout;
 friend class EfgShow;
 private:
-  efgGame &m_efg;
   EfgShow *m_parent;
   efgTreeLayout m_layout;
   TreeDrawSettings m_drawSettings;
@@ -64,9 +62,11 @@ private:
   void OnRightClick(wxMouseEvent &);
   void OnLeftDoubleClick(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
+
+  virtual void OnUpdate(gbtGameView *);
     
 public:
-  TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent);
+  TreeWindow(gbtGameDocument *p_game, EfgShow *p_efgShow, wxWindow *p_parent);
   virtual ~TreeWindow();
     
   EfgShow *Parent(void) const { return m_parent; }

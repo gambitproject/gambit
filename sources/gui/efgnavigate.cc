@@ -30,9 +30,10 @@
 #endif  // WX_PRECOMP
 #include "efgnavigate.h"
 
-EfgNavigateWindow::EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent)
+EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_game,
+				     wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    m_parent(p_efgShow)
+    gbtGameView(p_game)
 {
   CreateGrid(10, 1);
   SetEditable(false);
@@ -55,11 +56,11 @@ EfgNavigateWindow::EfgNavigateWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   Show(true);
 }
 
-void EfgNavigateWindow::Set(const Node *p_cursor) 
+void EfgNavigateWindow::OnUpdate(gbtGameView *)
 {
-  m_cursor = p_cursor;
+  Node *cursor = m_game->m_cursor;
   
-  if (!m_cursor) { // no data available
+  if (!cursor) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
       SetCellValue("", i, 0);
     }
@@ -68,37 +69,37 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) m_cursor->GetName(), 0, 0);
-    SetCellValue((char *) m_parent->GetRealizProb(m_cursor), 1, 0);
-    SetCellValue((char *) m_parent->GetNodeValue(m_cursor), 2, 0);
+    SetCellValue((char *) cursor->GetName(), 0, 0);
+    SetCellValue((char *) m_game->GetRealizProb(cursor), 1, 0);
+    SetCellValue((char *) m_game->GetNodeValue(cursor), 2, 0);
 
     gText tmpstr;
   
-    if (!m_cursor->GetPlayer()) {
+    if (!cursor->GetPlayer()) {
       tmpstr = "TERMINAL";
     }
     else {
-      if (m_cursor->GetPlayer()->IsChance())
+      if (cursor->GetPlayer()->IsChance())
 	tmpstr = "CHANCE";
       else
-	tmpstr = ("(" + ToText(m_cursor->GetPlayer()->GetNumber()) + "," +
-		  ToText(m_cursor->GetInfoset()->GetNumber()) + ")");
+	tmpstr = ("(" + ToText(cursor->GetPlayer()->GetNumber()) + "," +
+		  ToText(cursor->GetInfoset()->GetNumber()) + ")");
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_parent->GetInfosetProb(m_cursor), 4, 0);
-    SetCellValue((char *) m_parent->GetBeliefProb(m_cursor), 5, 0);
-    SetCellValue((char *) m_parent->GetInfosetValue(m_cursor), 6, 0);
+    SetCellValue((char *) m_game->GetInfosetProb(cursor), 4, 0);
+    SetCellValue((char *) m_game->GetBeliefProb(cursor), 5, 0);
+    SetCellValue((char *) m_game->GetInfosetValue(cursor), 6, 0);
 	
-    Node *p = m_cursor->GetParent();
+    Node *p = cursor->GetParent();
 
     if (p) {
       int branch = 0;
-      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
+      for (branch = 1; p->GetChild(branch) != cursor; branch++);
 
-      SetCellValue((char *) m_cursor->GetAction()->GetName(), 7, 0);
-      SetCellValue((char *) m_parent->GetActionProb(p, branch), 8, 0);
-      SetCellValue((char *) m_parent->GetActionValue(p, branch), 9, 0);
+      SetCellValue((char *) cursor->GetAction()->GetName(), 7, 0);
+      SetCellValue((char *) m_game->GetActionProb(p, branch), 8, 0);
+      SetCellValue((char *) m_game->GetActionValue(p, branch), 9, 0);
     }
     else {
       SetCellValue("N/A (root)", 7, 0);

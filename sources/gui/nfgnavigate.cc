@@ -40,8 +40,9 @@ BEGIN_EVENT_TABLE(NfgNavigateWindow, wxPanel)
   EVT_CHOICE(idCOLPLAYER_CHOICE, NfgNavigateWindow::OnColPlayerChange)
 END_EVENT_TABLE()
 
-NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
-  : wxPanel(p_parent, -1), 
+NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_game,
+				     NfgShow *p_nfgShow, wxWindow *p_parent)
+  : wxPanel(p_parent, -1), gbtGameView(p_game),
     m_parent(p_nfgShow), m_rowPlayer(1), m_colPlayer(2),
     m_support(p_nfgShow->Game())
 {

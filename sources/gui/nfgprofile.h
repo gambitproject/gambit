@@ -30,7 +30,7 @@
 #include "wx/listctrl.h"
 #include "nfgshow.h"
 
-class NfgProfileList : public wxListCtrl {
+class NfgProfileList : public wxListCtrl, public gbtGameView {
 private:
   NfgShow *m_parent;
   wxMenu *m_menu;
@@ -40,7 +40,8 @@ private:
   void OnColumnClick(wxListEvent &);
 
 public:
-  NfgProfileList(NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgProfileList(gbtGameDocument *p_game,
+		 NfgShow *p_nfgShow, wxWindow *p_parent);
   virtual ~NfgProfileList();
 
   void UpdateValues(void);

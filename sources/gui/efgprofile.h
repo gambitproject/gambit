@@ -30,20 +30,19 @@
 #include "wx/listctrl.h"
 #include "efgshow.h"
 
-class EfgProfileList : public wxListCtrl {
+class EfgProfileList : public wxListCtrl, public gbtGameView {
 private:
-  EfgShow *m_parent;
   wxMenu *m_menu;
 
   // Event handlers
   void OnRightClick(wxMouseEvent &);
   void OnColumnClick(wxListEvent &);
   
-public:
-  EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent);
-  virtual ~EfgProfileList();
+  virtual void OnUpdate(gbtGameView *);
 
-  void UpdateValues(void);
+public:
+  EfgProfileList(gbtGameDocument *p_game, wxWindow *p_parent);
+  virtual ~EfgProfileList();
 
   wxString GetReport(void) const;
 

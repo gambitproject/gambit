@@ -31,7 +31,45 @@
 #include "efgshow.h"
 #include "base/gmap.h"
 
-class EfgSupportWindow : public wxPanel {
+class gbtEfgSetSupportCommand : public gbtGameCommand {
+private:
+  gbtGameDocument *m_game;
+  int m_index;
+
+public:
+  gbtEfgSetSupportCommand(gbtGameDocument *p_game, int m_index);
+  virtual ~gbtEfgSetSupportCommand() { }
+
+  bool Do(void);
+  bool Undo(void) { return false; }
+};
+
+class gbtEfgDuplicateSupportCommand : public gbtGameCommand {
+private:
+  gbtGameDocument *m_game;
+  int m_index;
+
+public:
+  gbtEfgDuplicateSupportCommand(gbtGameDocument *p_game, int m_index);
+  virtual ~gbtEfgDuplicateSupportCommand() { }
+
+  bool Do(void);
+  bool Undo(void) { return false; }
+};
+
+class gbtEfgDeleteSupportCommand : public gbtGameCommand {
+private:
+  gbtGameDocument *m_game;
+
+public:
+  gbtEfgDeleteSupportCommand(gbtGameDocument *p_game);
+  virtual ~gbtEfgDeleteSupportCommand() { }
+
+  bool Do(void);
+  bool Undo(void) { return false; }
+};
+
+class EfgSupportWindow : public wxPanel, public gbtGameView {
 private:
   EfgShow *m_parent;
   wxChoice *m_supportList;
@@ -48,11 +86,12 @@ private:
 
   void OnRightClick(wxMouseEvent &);
 
-public:
-  EfgSupportWindow(EfgShow *p_efgShow, wxWindow *p_parent);
-  virtual ~EfgSupportWindow() { }
+  virtual void OnUpdate(gbtGameView *);
 
-  void UpdateValues(void);
+public:
+  EfgSupportWindow(gbtGameDocument *p_game,
+		   EfgShow *p_efgShow, wxWindow *p_parent);
+  virtual ~EfgSupportWindow() { }
 
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);
@@ -61,3 +100,14 @@ public:
 };
 
 #endif  // EFGSUPPORT_H
+
+
+
+
+
+
+
+
+
+
+

@@ -26,7 +26,7 @@
 
 #include "nfgshow.h"
 
-class NfgNavigateWindow : public wxPanel {
+class NfgNavigateWindow : public wxPanel, public gbtGameView {
 private:
   NfgShow *m_parent;
   wxStaticText **m_playerNames;
@@ -40,7 +40,8 @@ private:
   void OnColPlayerChange(wxCommandEvent &);
 
 public:
-  NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent);
+  NfgNavigateWindow(gbtGameDocument *p_game,
+		    NfgShow *p_nfgShow, wxWindow *p_parent);
   virtual ~NfgNavigateWindow();
   
   void SetProfile(const gArray<int> &profile);

@@ -44,20 +44,11 @@ class TreeWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame {
+class EfgShow : public wxFrame, public gbtGameView {
 private:
-  efgGame &m_efg;
   TreeWindow *m_treeWindow;
-  Node *m_cursor, *m_copyNode, *m_cutNode;
-
-  int m_currentProfile;
-  gList<BehavSolution> m_profiles;
-
-  EFSupport *m_currentSupport;
-  gList<EFSupport *> m_supports;
 
   EfgProfileList *m_profileTable;
-  wxString m_filename;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
@@ -149,7 +140,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(efgGame &p_efg, wxWindow *p_parent);
+  EfgShow(gbtGameDocument *p_game, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
@@ -157,42 +148,12 @@ public:
   void RemoveProfile(int);
   void RemoveProfiles(void);
   void ChangeProfile(int);
-  int CurrentProfile(void) const { return m_currentProfile; }
-  const BehavSolution &GetCurrentProfile(void) const;
-  const gList<BehavSolution> &Profiles(void) const { return m_profiles; }
   gText UniqueProfileName(void) const;
-
-  // SUPPORT ACCESS AND MANIPULATION
-  EFSupport *GetSupport(void);
-  const gList<EFSupport *> &Supports(void) const { return m_supports; }
-  void SetSupportNumber(int p_number);
-  gText UniqueSupportName(void) const;
-  void OnSupportsEdited(void);
-
-  gText GetRealizProb(const Node *) const;
-  gText GetBeliefProb(const Node *) const;
-  gText GetNodeValue(const Node *) const;
-  gText GetInfosetProb(const Node *) const;
-  gText GetInfosetValue(const Node *) const;
-  gText GetActionValue(const Node *, int act) const;
-  gText GetActionProb(const Node *, int act) const;
-  gNumber ActionProb(const Node *n, int br) const;
-
-  efgGame *Game(void) { return &m_efg; }
 
   void UpdateMenus(void);
   int NumDecimals(void) const;
 
   void OnOutcomesEdited(void);
-  gText UniqueOutcomeName(void) const;
-
-  void SetFilename(const wxString &s);
-  const wxString &Filename(void) const { return m_filename; }
-
-  void SetCursor(Node *m_node);
-  Node *Cursor(void) const { return m_cursor; }
-  Node *CopyNode(void) const { return m_copyNode; }
-  Node *CutNode(void) const { return m_cutNode; }
 
   void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);

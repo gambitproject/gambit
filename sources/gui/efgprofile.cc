@@ -38,10 +38,10 @@ BEGIN_EVENT_TABLE(EfgProfileList, wxListCtrl)
   EVT_RIGHT_DOWN(EfgProfileList::OnRightClick)
 END_EVENT_TABLE()
 
-EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
+EfgProfileList::EfgProfileList(gbtGameDocument *p_game, wxWindow *p_parent)
   : wxListCtrl(p_parent, idEFG_SOLUTION_LIST, wxDefaultPosition,
 	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
-    m_parent(p_efgShow)
+    gbtGameView(p_game)
 {
   m_menu = new wxMenu("Profiles");
   m_menu->Append(efgmenuPROFILES_NEW, "New profile", "Create a new profile");
@@ -53,13 +53,12 @@ EfgProfileList::EfgProfileList(EfgShow *p_efgShow, wxWindow *p_parent)
 		 "View and edit properties of this profile");
   m_menu->Append(efgmenuPROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
-  UpdateValues();
 }
 
 EfgProfileList::~EfgProfileList()
 { }
 
-void EfgProfileList::UpdateValues(void)
+void EfgProfileList::OnUpdate(gbtGameView *)
 {
   ClearAll();
   InsertColumn(0, "Name");
@@ -70,7 +69,7 @@ void EfgProfileList::UpdateValues(void)
   InsertColumn(5, "Liap Value");
   InsertColumn(6, "Qre Lambda");
 
-  const efgGame &efg = *m_parent->Game();
+  const efgGame &efg = *m_game->m_efg;
   int maxColumn = 6;
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
@@ -84,8 +83,8 @@ void EfgProfileList::UpdateValues(void)
     }
   }
 
-  for (int i = 1; i <= m_parent->Profiles().Length(); i++) {
-    const BehavSolution &profile = m_parent->Profiles()[i];
+  for (int i = 1; i <= m_game->m_behavProfiles.Length(); i++) {
+    const BehavSolution &profile = m_game->m_behavProfiles[i];
     InsertItem(i - 1, (char *) profile.GetName());
     SetItem(i - 1, 1, (char *) profile.Creator());
     SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
@@ -112,10 +111,10 @@ void EfgProfileList::UpdateValues(void)
     }
   }    
 
-  if (m_parent->Profiles().Length() > 0) {
+  if (m_game->m_behavProfiles.Length() > 0) {
     wxListItem item;
     item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_parent->CurrentProfile() - 1;
+    item.m_itemId = m_game->m_currentProfile - 1;
     item.m_state = wxLIST_STATE_SELECTED;
     item.m_stateMask = wxLIST_STATE_SELECTED;
     SetItem(item);
@@ -124,22 +123,22 @@ void EfgProfileList::UpdateValues(void)
 
 void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(efgmenuPROFILES_DUPLICATE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_DELETE, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_PROPERTIES, m_parent->CurrentProfile() > 0);
-  m_menu->Enable(efgmenuPROFILES_REPORT, m_parent->CurrentProfile() > 0);
+  m_menu->Enable(efgmenuPROFILES_DUPLICATE, m_game->m_currentProfile > 0);
+  m_menu->Enable(efgmenuPROFILES_DELETE, m_game->m_currentProfile > 0);
+  m_menu->Enable(efgmenuPROFILES_PROPERTIES, m_game->m_currentProfile > 0);
+  m_menu->Enable(efgmenuPROFILES_REPORT, m_game->m_currentProfile > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 
 wxString EfgProfileList::GetReport(void) const
 {
   wxString report;
-  const gList<BehavSolution> &profiles = m_parent->Profiles();
-  const efgGame &efg = *m_parent->Game();
+  const gList<BehavSolution> &profiles = m_game->m_behavProfiles;
+  const efgGame &efg = *m_game->m_efg;
 
   report += wxString::Format("Behavior strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) efg.GetTitle(),
-			     m_parent->Filename().c_str());
+			     (const char *) m_game->m_filename);
 
   report += wxString::Format("Number of profiles: %d\n", profiles.Length());
 
