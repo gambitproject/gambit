@@ -1,5 +1,6 @@
 // File: bsolnsf.cc -- Actual code to implement sorting and filtering of
 // behav solutions
+// $Id$
 
 #include "bsolnsf.h"
 #include "gsmincl.h"
@@ -7,25 +8,26 @@
 												BEHAV SOLUTION SORTER FILTER OPTIONS
 ****************************************************************************/
 
-#define		BSOLN_SHOW_SECT	"Behav-Soln-Show"
-#define		NUM_BCREATORS		6
-
-#define		ESORT_BY_NONE			1		// this order must correspond to that in GUI dialogs
-#define		ESORT_BY_CREATOR	2
-#define		ESORT_BY_NASH			3
-#define		ESORT_BY_PERFECT	4
-#define		ESORT_BY_SEQ			5
-#define		ESORT_BY_GVALUE		6
-#define		ESORT_BY_GLAMBDA	7
-#define		ESORT_BY_LVALUE		8
+#define		BSORT_BY_NONE			1		// this order must correspond to that in GUI dialogs
+#define		BSORT_BY_CREATOR	2
+#define		BSORT_BY_NASH			3
+#define		BSORT_BY_PERFECT	4
+#define		BSORT_BY_SEQ			5
+#define		BSORT_BY_GVALUE		6
+#define		BSORT_BY_GLAMBDA	7
+#define		BSORT_BY_LVALUE		8
 
 // All possible algorithms that could create a behav solution and their corresponding ids
-char *BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS] =
-				{ "Gobit", "Lemke", "Liap", "SeqForm", "GridSolve", "PureNash" };
-int BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS] =
-				{id_GOBIT,id_LEMKE,id_LIAP,id_SEQFORM,id_GOBITGRID,id_PURENASH};
-char *BSolnSortFilterOptions::filter_tri_str[3] = { "Yes", "No", "DK" };
-int		BSolnSortFilterOptions::filter_tri_id[3] = { T_YES,T_NO,T_DONTKNOW};
+// Note that the indexing should start from 1, not 0
+char *BSolnSortFilterOptions::filter_cr_str[NUM_BCREATORS+1] =
+				{ "Error","Gobit","ELiap","NLiap","SeqForm","PureNash","Lemke",
+					"GobitGrid","SimpDiv","Enum","ZSum","User" };
+int BSolnSortFilterOptions::filter_cr_id[NUM_BCREATORS+1] =
+				{-1,id_GOBIT,id_ELIAPSUB,id_NLIAPSUB,id_SEQFORMSUB,id_PURENASHSUB,
+				id_LEMKESUB,id_GOBITGRID,
+				id_SIMPDIVSUB,id_ENUMSUB,id_ZSUMSUB,id_USER};
+char *BSolnSortFilterOptions::filter_tri_str[3+1] = {"E", "Yes", "No", "DK" };
+int		BSolnSortFilterOptions::filter_tri_id[3+1] = {-1, T_YES,T_NO,T_DONTKNOW};
 // Constructor
 BSolnSortFilterOptions::BSolnSortFilterOptions(void):filter_cr(NUM_BCREATORS),
 												filter_nash(3),filter_perfect(3),filter_seq(3)
@@ -78,15 +80,15 @@ bool BSolnSorterFilter<T>::Passes(const BehavSolution<T> &a) const
 {
 int i;
 for (i=1;i<=NUM_BCREATORS;i++)
-	if (options.filter_cr_id[i]==a.Creator() && options.FilterCr()[i]==false)
+	if (options.filter_cr_id[i]==a.Creator() && !options.FilterCr()[i])
 		return false;
 for (i=1;i<=3;i++)
 {
-	if (options.filter_tri_id[i]==a.IsNash() && options.FilterNash()[i]==false)
+	if (options.filter_tri_id[i]==a.IsNash() && !options.FilterNash()[i])
 		return false;
-	if (options.filter_tri_id[i]==a.IsSubgamePerfect() && options.FilterPerfect()[i]==false)
+	if (options.filter_tri_id[i]==a.IsSubgamePerfect() && !options.FilterPerfect()[i])
 		return false;
-	if (options.filter_tri_id[i]==a.IsSequential() && options.FilterSeq()[i]==false)
+	if (options.filter_tri_id[i]==a.IsSequential() && !options.FilterSeq()[i])
 		return false;
 }
 return true;
@@ -98,13 +100,13 @@ CompareResult BSolnSorterFilter<T>::Compare(const BehavSolution<T> &a,const Beha
 {
 switch (options.SortBy())
 {
-case ESORT_BY_NONE:
+case BSORT_BY_NONE:
 			return Equal;
-case ESORT_BY_CREATOR:
+case BSORT_BY_CREATOR:
 			if (a.Creator()>b.Creator()) return GreaterThan;
 			if (a.Creator()<b.Creator()) return LessThan;
 			return Equal;
-case ESORT_BY_NASH:
+case BSORT_BY_NASH:
 			if (a.IsNash()==b.IsNash())
 				return Equal;
 			else
@@ -112,7 +114,7 @@ case ESORT_BY_NASH:
 					return GreaterThan;
 				else
 					return LessThan;
-case ESORT_BY_PERFECT:
+case BSORT_BY_PERFECT:
 			if (a.IsSubgamePerfect()==b.IsSubgamePerfect())
 				return Equal;
 			else
@@ -120,7 +122,7 @@ case ESORT_BY_PERFECT:
 					return GreaterThan;
 				else
 					return LessThan;
-case ESORT_BY_SEQ:
+case BSORT_BY_SEQ:
 			if (a.IsSequential()==b.IsSequential())
 				return Equal;
 			else
@@ -128,7 +130,7 @@ case ESORT_BY_SEQ:
 					return GreaterThan;
 				else
 					return LessThan;
-case ESORT_BY_GVALUE:
+case BSORT_BY_GVALUE:
 			if (a.GobitValue()==b.GobitValue())
 				return Equal;
 			else
@@ -136,7 +138,7 @@ case ESORT_BY_GVALUE:
 					return GreaterThan;
 				else
 					return LessThan;
-case ESORT_BY_GLAMBDA:
+case BSORT_BY_GLAMBDA:
 			if (a.GobitLambda()==b.GobitLambda())
 				return Equal;
 			else
@@ -144,7 +146,7 @@ case ESORT_BY_GLAMBDA:
 					return GreaterThan;
 				else
 					return LessThan;
-case ESORT_BY_LVALUE:
+case BSORT_BY_LVALUE:
 			if (a.LiapValue()==b.LiapValue())
 				return Equal;
 			else

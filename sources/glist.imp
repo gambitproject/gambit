@@ -1,31 +1,13 @@
 //#
 //# FILE: glist.imp -- Implementation of a generic array container class
 //#
-//# @(#)glist.imp	1.6 12/19/95
+//# $Id$
 //#
 
 #include "glist.h"
 #include "glistit.h"
 
 #include <assert.h>
-
-//--------------------------------------------------------------------------
-//                        gNode<T>: Class definition
-//--------------------------------------------------------------------------
-
-template <class T> class gNode   {
-  friend class gList<T>;
-  friend class gListIter<T>;
-  private:
-    T data;
-    gNode<T> *prev, *next;
-
-  public:
-    // Constructors
-    gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next);
-    gNode(const gNode<T> &n);
-    ~gNode();
-};
 
 //--------------------------------------------------------------------------
 //                 gNode<T>: Member function implementations
@@ -57,7 +39,7 @@ template <class T> gList<T>::gList(const gList<T> &b)
   if (length)   
   {
     gNode<T> *n = b.head;
-    head = new gNode<T>(n->data, 0, 0);
+		head = new gNode<T>(n->data, 0, 0);
     n = n->next;
     tail = head;
     while (n)  
@@ -87,7 +69,7 @@ template <class T> int gList<T>::InsertAt(const T &t, int num)
   assert( num >= 1 && num <= length + 1 );
 
   if (!length)  
-  {
+	{
     head = tail = new gNode<T>(t, 0, 0);
     length = 1;
     CurrIndex = 1;
@@ -117,7 +99,7 @@ template <class T> int gList<T>::InsertAt(const T &t, int num)
     assert( CurrIndex >= 1 && CurrIndex <= length );
     if( num < CurrIndex )
       for (i = CurrIndex, n = CurrNode; i > num; i--, n = n->prev);
-    else
+		else
       for (i = CurrIndex, n = CurrNode; i < num; i++, n = n->next);
     n = new gNode<T>(t, n->prev, n);
     CurrNode = n->prev->next = n->next->prev = n;

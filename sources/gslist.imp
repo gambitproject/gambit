@@ -1,8 +1,8 @@
-// File: gslist.imp -- actual functions declared in gslist.h
+// File: gslist.imp -- code to implement a sortable gList and classes to
+// Sort/Filter it.
 // $Id$
 #include "gslist.h"
 #include <assert.h>
-
 // gSortList member functions
 
 template <class T>

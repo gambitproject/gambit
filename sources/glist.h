@@ -9,8 +9,22 @@
 
 #include "gambitio.h"
 
-template <class T> class gNode;
-template <class T> class gListIter;
+template <class T> class gList;
+template <class T> class gSortList;
+
+template <class T> class gNode   {
+	friend class gList<T>;
+	friend class gSortList<T>;
+		private:
+		T data;
+		gNode<T> *prev, *next;
+
+	public:
+		// Constructors
+		gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next);
+		gNode(const gNode<T> &n);
+		~gNode();
+};
 
 //
 // <category lib=glib sect=Containers>
@@ -25,13 +39,12 @@ template <class T> class gListIter;
 //
 //
 template <class T> class gList  {
-  friend class gListIter<T>;
-  private:
-    int length;
-    gNode<T> *head, *tail;
+	protected:
+		int length;
+		gNode<T> *head, *tail;
 
-    int CurrIndex;
-    gNode<T> *CurrNode;
+		int CurrIndex;
+		gNode<T> *CurrNode;
 
 //
 // Insert the given element at the specified location.  Does not do any
@@ -39,13 +52,13 @@ template <class T> class gList  {
 // determined the proper location.  Returns the location at which the new
 // element was placed.
 //
-    int InsertAt(const T &t, int where);
+		int InsertAt(const T &t, int where);
 
-  public:
+	public:
 //
 // Constructs the empty list
 //
-    gList(void);
+		gList(void);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
@@ -101,7 +114,7 @@ template <class T> class gList  {
 // element can be found.  Note that this index is guaranteed to be the
 // last (highest) index in the block.
 //
-    int Append(const T &);
+		int Append(const T &);
 //
 // Insert a new element into the list at a given index.  If the index is
 // less than 1, the element is inserted at index 1; if the index is greater
@@ -119,7 +132,7 @@ template <class T> class gList  {
 // Return the index at which a given element resides in the block, or zero
 // if the element is not found.
 //
-    int Find(const T &) const;
+		int Find(const T &) const;
 //
 // Return true (nonzero) if the element is currently residing in the block.
 //

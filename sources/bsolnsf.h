@@ -51,6 +51,6 @@ public:
 };
 
 #define		BSOLN_SHOW_SECT	"Behav-Soln-Show"
-#define		NUM_BCREATORS		6
+#define		NUM_BCREATORS		11
 
 #endif
