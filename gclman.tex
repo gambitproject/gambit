@@ -64,11 +64,18 @@ A variable can be of the following types:
 	NODE		A node (may only be a subvariable of an extensive form
 			problem)
 	DATATYPE	Defines precision (constants:  Float or Rational)
-	MIXED	Profile of mixed strategies.  Can only be a subvariable
-			of a normal form.
+	MIXED		Profile of mixed strategies.  Can only be a subvariable
+			of a normal form problem.  That is, if n is a problem 
+			in normal form, a variable of type MIXED can only be
+			assigned to a subvariable of the form n.x.
+	BEHAV		Profile of behavioral strategies.  Can only be a 
+			subvariable of an extensive form problem.  That is, if 
+			e is a problem in extensive form, a variable of type 
+			BEHAV can only be assigned to a subvariable of the form
+			e.x.
 
-Additionally, variables of type BOOLEAN, INTEGER, MIXED, RATIONAL, and TEXT 
-can be contained in lists of arbitrary length.  Variables of type LIST are 
+Additionally, variables of type BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, and 
+TEXT can be contained in lists of arbitrary length.  Variables of type LIST are
 defined similarly to the above variables, except that the expression to the 
 right of the ":=" symbol contains a vector of variables of the same type 
 enclosed in brackets and separated by commas.  For example:
@@ -81,9 +88,9 @@ a list is defined as:
 	LIST(BOOLEAN)[[i]]	which evaluates to a single variable of type 
 				BOOLEAN.
 
-In the same manner, list variables of type LIST(INTEGER), LIST(MIXED), 
-LIST(RATIONAL), and LIST(TEXT) can be created and accessed for variables of 
-type INTEGER, MIXED, RATIONAL, and TEXT, respectively.
+In the same manner, list variables of type LIST(BEHAV), LIST(INTEGER), 
+LIST(MIXED), LIST(RATIONAL), and LIST(TEXT) can be created and accessed for 
+variables of type BEHAV, INTEGER, MIXED, RATIONAL, and TEXT, respectively.
 
 
 Flow Control
@@ -555,7 +562,7 @@ GetTitle[E->EFG] =: TEXT
 ----------
 
 Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
-	{maxitsDFP->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
+	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, {output->TEXT}] =: INTEGER
 
@@ -569,7 +576,7 @@ Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
 		value of 1.  
 	  *  type:   XXXX.  
-	  *  maxitsDFP:  XXXX.
+	  *  maxitsOpt:  XXXX.
 	  *  maxitsBrent:  Sets the maximum number of iterations in Brent and 
 		has a default value of XXXX.  
 	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
@@ -578,7 +585,7 @@ Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 		30.
 	  *  delLam:  Specifies the rate at which the value of Lambda changes.
 		Has a default value of 1.01.
-	  *  tolDFP:  XXXX .  Has a default value of 1.0E-10.  
+	  *  tolOpt:  Specifies optimization tolerance.
 	  *  tolBrent:  XXXX .
 	  *  time:  Returns the elapsed time for the operation.
 	  *  output:  Can be used to redirect the output of this procedure to a
@@ -589,7 +596,8 @@ Gobit[N->NFG, {nequilib->INTEGER}, {type->INTEGER},
 
 GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL}, 
-	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}] =: INTEGER
+	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}, {time<->RATIONAL}]
+	 =: INTEGER
 
    -	Description:  XXXX .
    -	Return value:  XXXX .
@@ -610,6 +618,7 @@ GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	  *  type:  XXXX .
 	  *  delp:  XXXX .
 	  *  tol:  XXXX .
+	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
@@ -735,7 +744,7 @@ LeaveInfoset[n->NODE] =: NODE
 
 ----------
 
-Lemke[N->NFG, {nequilib->INTEGER}] =: LIST(MIXED)
+Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
 
    -	Descprition:  Searches for one solution of the specified normal form 
 	game specified using the Lemke-Howson algorithm.  
@@ -747,6 +756,7 @@ Lemke[N->NFG, {nequilib->INTEGER}] =: LIST(MIXED)
 	  *  nequilib:  Specifies the number of equilibria to find.  If not
 		given the default value is zero, which means that all 
 		equilibria are to be found.
+	  *  time:  Returns the elapsed time for the operation.
 
 ----------
 
@@ -805,6 +815,34 @@ MergeInfosets[n->NODE, to->NODE] =: NODE
 		the nodes from the first information set are to be moved.
    -	Optional parameters:  None.
 
+---------
+
+MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
+
+   -	Description:  Projects a specified mixed profile to a behavioral 
+	profile on the given extensive form problem.
+   -	Return value:  Returns the behavioral profile.
+   -	Required parameters:
+	  *  E:  The problem in extensive form of which the behavioral profile
+		is to be a subvariable.
+	  *  mp:  The mixed profile which is to be projected to a behavioral
+		profile.
+   -	Optional parameters:  None.
+
+---------
+
+MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
+
+   -	Description:  Projects a specified vector of mixed profiles to a vector
+	of behavioral profiles on the given extensive form problem.
+   -	Return value:  Returns the vector of behavioral profiles.
+   -	Required parameters:
+	  *  E:  The problem in extensive form of which the vector of 
+		behavioral profiles is to be a subvariable.
+	  *  mp:  The vector of mixed profiles which is to be projected to a 
+		vector of behavioral profiles.
+   -	Optional parameters:  None.
+
 ----------
 
 MoveTree[n->NODE, to->NODE] =: NODE
@@ -829,19 +867,25 @@ NameOf[n->NODE] =: TEXT
 
 ----------
 
-NewEfg[] =: EFG
+NewEfg[{type->DATATYPE}] =: EFG
 
    -	Description:  Allocates and returns a new extensive form game.
    -	Return value:  The newly allocated problem in extensive form.
    -	Required parameters:  None.
-   -	Optional parameters:  None.
+   -	Optional parameters: 
+	  *  type:  Specifies the type of the new extensive form problem.
 
 ----------
 
 NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 
    -	Description:  Creates and assigns a number to a new outcome within the
-	specified problem in extensive form.  
+	specified problem in extensive form.  Note that outcomes are 
+	sequentially numbered, so that if an outcome with the number n exists,
+	then outcomes with the numbers 1 . . n-1 necessarily also exist.
+	Therefore, this procedure creates not only the outcome with the 
+	specified number, but all other outcomes necessary to satisfy this 
+	condition.
    -	Return value:  The number of the newly created outcome.  The optional 
 	parameter 'outc' allows the user to specify the number given to the new
 	outcome created.  If 'outc' is not specified, the new outcome is 
@@ -1032,7 +1076,7 @@ Quit
 
 ----------
 
-RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}] =: NFG
+RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}, {type->DATATYPE}] =: NFG
 
    -	Description:  Constructs a random new problem in normal form with the 
 	specified dimensionality.
@@ -1041,6 +1085,7 @@ RandomNfg[dim->LIST(INTEGER), {seed->INTEGER}] =: NFG
 	  *  dim:  The desired dimensionality of the new problem.
    -	Optional parameters:
 	  *  seed:  Reseeds the random number generator with the given integer.
+	  *  type:  Specifies the type of the new normal form problem.
 
 ----------
 
@@ -1317,7 +1362,10 @@ StopWatch[] =: INTEGER
 WriteEfgFile[E->EFG, file->TEXT] =: EFG
 
    -	Description:  Writes the given extensive form problem to the specified 
-	file.  
+	file.  Indicates in the file the type of the file(FOAT or RATIONAL) 
+	immediately following the title string.  If the type is FLOAT, the file
+	contains floating point numbers and if the type is RATIONAL, the file
+	contains rational numbers.  
    -	Return value:  Returns the same extensive form problem.
    -	Required parameters:
 	  *  E:  The problem in extensive form which is to be written to the
