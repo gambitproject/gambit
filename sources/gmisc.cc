@@ -190,16 +190,6 @@ gString ToString(const gInteger &i)
   return gString(Itoa(i));
 }
 
-#include "gpoly.h"
-gString &operator<<(gString &, const gPoly<gNumber> &);
-
-gString ToString(const gPoly<gNumber> &p)
-{
-  gString t;
-  t << p;
-  return t;
-}
-
 // Note: when converting a double to a gRational, the num & den often turn out
 // to be VERY large numbers due to an inherent imprecision of floating point.
 // I.e. 0.50 can become 50001/100000.  This may cause serious display problems.

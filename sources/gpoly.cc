@@ -140,6 +140,13 @@ gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
   else return (nega * gNumber(FromString(Coeff, num)));  
 }
 
+gString ToString(const gPoly<gNumber> &p)
+{
+  gString t;
+  t << p;
+  return t;
+}
+
 
 #include "glist.imp"
 #include "garray.imp"

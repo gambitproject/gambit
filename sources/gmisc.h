@@ -69,9 +69,6 @@ gString ToString(double);
 gString ToString(const gInteger &);
 gString ToString(const gRational &, bool approx = true);
 gString ToString(const gNumber &);
-template <class T> class gPoly;
-gString ToString(const gPoly<gNumber> &);
-
 
 double		FromString(const gString &s,double &d);
 gRational	FromString(const gString &s,gRational &r);

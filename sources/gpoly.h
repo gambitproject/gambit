@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// @(#)gpoly.h	1.8 03 Jun 1997
+// $Id$
 //
 
 #ifndef GPOLY_H
@@ -190,6 +190,7 @@ template <class T>  gPoly<gDouble>         TogDouble(const gPoly<T>&);
 template <class T> gPoly<T> operator*(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 
+template <class T> gString ToString(const gPoly<T> &p);
 
 #endif //# GPOLY_H
 
