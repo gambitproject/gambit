@@ -72,17 +72,7 @@ information and plans.
 
 &apirefnash;
 
-<sect1 id="apiref.qre">
-<title>Computing quantal response equilibria</title>
-
-<para>
-</para>
-
-&bifqregridsolve;
-&bifqrelambda;
-&bifqresolve;
-
-</sect1>
+&apirefqre;
 
 &apirefbehav;
 
