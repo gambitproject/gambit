@@ -165,6 +165,7 @@ private:
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);
+  void OnProfilesRename(wxCommandEvent &);
   void OnProfilesEdit(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
 

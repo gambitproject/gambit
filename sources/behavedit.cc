@@ -15,6 +15,33 @@
 const int idINFOSET_TREE = 2001;
 const int idPROB_GRID = 2002;
 
+class ProbGrid : public wxGrid {
+private:
+  // Event handlers
+  void OnKeyDown(wxKeyEvent &);
+
+public:
+  ProbGrid(wxWindow *p_parent)
+    : wxGrid(p_parent, idPROB_GRID, wxPoint(5, 5), wxSize(200, 200)) { }
+  virtual ~ProbGrid() { }
+
+  DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(ProbGrid, wxGrid)
+  EVT_KEY_DOWN(ProbGrid::OnKeyDown)
+END_EVENT_TABLE()
+
+void ProbGrid::OnKeyDown(wxKeyEvent &p_event)
+{
+  // This is here only to keep the program from crashing under MSW
+  if (!IsCellEditControlEnabled()) {
+    EnableCellEditControl();
+    ShowCellEditControl();
+  }
+}
+
+
 BEGIN_EVENT_TABLE(dialogBehavEditor, wxDialog)
   EVT_TREE_ITEM_COLLAPSING(idINFOSET_TREE, dialogBehavEditor::OnItemCollapsing)
   EVT_TREE_SEL_CHANGING(idINFOSET_TREE, dialogBehavEditor::OnSelChanging)
@@ -59,10 +86,9 @@ dialogBehavEditor::dialogBehavEditor(wxWindow *p_parent,
   // This seems to cause a crash...
   // m_infosetTree->SelectItem(firstID);
 
-  m_probGrid = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 200));
+  m_probGrid = new ProbGrid(this);
   m_probGrid->CreateGrid(firstInfoset->NumActions(), 1);
-  m_probGrid->SetLabelSize(wxHORIZONTAL, 0);
-  m_probGrid->SetEditInPlace(true);
+  m_probGrid->SetLabelValue(wxHORIZONTAL, "Probability", 0);
   for (int act = 1; act <= firstInfoset->NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      (char *) firstInfoset->Actions()[act]->GetName(),
@@ -70,6 +96,8 @@ dialogBehavEditor::dialogBehavEditor(wxWindow *p_parent,
     m_probGrid->SetCellValue((char *) ToText(p_profile(firstInfoset->Actions()[act])),
 			     act - 1, 0);
   }
+  m_probGrid->UpdateDimensions();
+  m_probGrid->Refresh();
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   editSizer->Add(m_infosetTree, 0, wxALL, 5);
@@ -128,7 +156,8 @@ void dialogBehavEditor::OnSelChanged(wxTreeEvent &p_event)
   }
 
   for (int act = 1; act <= oldInfoset->NumActions(); act++) {
-    m_profile[oldInfoset->Actions()[act]] = ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str());
+    m_profile.Set(oldInfoset->Actions()[act],
+		  ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
   }
 
   Infoset *infoset = m_map.Lookup(p_event.GetItem());
@@ -167,8 +196,8 @@ void dialogBehavEditor::OnOK(wxCommandEvent &p_event)
   }
 
   for (int act = 1; act <= infoset->NumActions(); act++) {
-    m_profile[infoset->Actions()[act]] =
-      ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str());
+    m_profile.Set(infoset->Actions()[act],
+		  ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
   }
 
   p_event.Skip();

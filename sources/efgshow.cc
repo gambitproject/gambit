@@ -251,6 +251,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuHELP_CONTENTS, EfgShow::OnHelpContents)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
   EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
+  EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
   EVT_MENU(efgmenuPROFILES_EDIT, EfgShow::OnProfilesEdit)
   EVT_LIST_ITEM_ACTIVATED(idEFG_SOLUTION_LIST, EfgShow::OnProfilesEdit)
   EVT_MENU(efgmenuPROFILES_DELETE, EfgShow::OnProfilesDelete)
@@ -404,7 +405,20 @@ void EfgShow::OnProfilesClone(wxCommandEvent &)
     m_solutionTable->Append(dialog.GetProfile());
     ChangeSolution(m_solutionTable->Length());
   }
+}
 
+void EfgShow::OnProfilesRename(wxCommandEvent &)
+{
+  if (cur_soln > 0) {
+    wxTextEntryDialog dialog(this, "Enter new name for profile",
+			     "Rename profile",
+			     (char *) (*m_solutionTable)[cur_soln].GetName());
+
+    if (dialog.ShowModal() == wxID_OK) {
+      (*m_solutionTable)[cur_soln].SetName(dialog.GetValue().c_str());
+      m_solutionTable->UpdateValues();
+    }
+  }
 }
 
 void EfgShow::OnProfilesEdit(wxCommandEvent &)
