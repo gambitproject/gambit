@@ -1302,7 +1302,7 @@ Portion *GSM_LpSolveEfgRational(Portion **param)
 
 //----------------------- EnumPureSolve --------------------------//
 
-#include "purenash.h"
+#include "nfgpure.h"
 
 Portion *GSM_PureNashFloat(Portion **param)
 {

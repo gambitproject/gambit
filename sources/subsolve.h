@@ -118,7 +118,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
 };
 
 
-#include "purenash.h"
+#include "nfgpure.h"
 
 template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
   private:
