@@ -1,8 +1,15 @@
 //#
-//# FILE: enum.h -- Interface to Enum solution module
+//# FILE: enum.h -- Interface to Nash Enum solution module
 //#
 //# $Id$
 //#
+
+//
+// Enum implements the procedure described in 
+// Mangasarian, O. L., "Equilibrium points of bimatrix games", 
+// SIAM 12 (1964): 778-780 for finding all extreme points of 
+// the Nash equilibrium components of a two person game. 
+// 
 
 #ifndef ENUM_H
 #define ENUM_H
@@ -12,6 +19,7 @@
 #include "gstatus.h"
 #include "lhtab.h"
 #include "mixed.h"
+#include "vertenum.h"
 
 class EnumParams     {
 public:
@@ -28,7 +36,7 @@ public:
 
 template <class T> class EnumModule  {
 private:
-  BFS_List List;
+  T eps;
   const Nfg<T> &NF;
   const NFSupport &support;
   EnumParams params;
@@ -36,14 +44,14 @@ private:
   long count,npivots;
   double time;
   gList<MixedProfile<T> > solutions;
-  
+
+  bool EqZero(T x) const;
 //  void AddSolution(const gPVector<T> &s);
   
 public:
   EnumModule(const Nfg<T> &N, const EnumParams &p, const NFSupport &s); 
   
   int Enum(void);
-  void SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1);
   
   long NumPivots(void) const;
   double Time(void) const;

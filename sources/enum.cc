@@ -1,5 +1,5 @@
 //#
-//# FILE: enum.cc -- Enum module
+//# FILE: enum.cc -- Nash Enum module
 //#
 //# $Id$
 //#
@@ -10,10 +10,8 @@
 
 #include "enum.h"
 
-template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &);
-template <class T> gVector<T> Make_b1(const Nfg<T> &, const NFSupport &);
-template <class T> gMatrix<T> Make_A2(const Nfg<T> &, const NFSupport &);
-template <class T> gVector<T> Make_b2(const Nfg<T> &, const NFSupport &);
+void Epsilon_T(double &v, int i);
+void Epsilon_T(gRational &v, int i);
 
 //---------------------------------------------------------------------------
 //                        EnumParams: member functions
@@ -32,136 +30,141 @@ EnumModule<T>::EnumModule(const Nfg<T> &N, const EnumParams &p,
 			  const NFSupport &S)
   : NF(N), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
     level(0), count(0), npivots(0)
-{ }
+{ 
+  Epsilon_T(eps,2);
+}
 
 
 template <class T> int EnumModule<T>::Enum(void)
 {
   if (NF.NumPlayers() != 2)   return 0;  
-  
+  int n1, n2, v1,v2,i,j,k;
+
   gWatch watch;
-  
-  gBlock<int> target(rows+cols);
-  int i;
-  for(i=1;i<=target.Length();i++)
-    target[i]=i;
-  
-  gMatrix<T> A1(Make_A1(NF, support));
-  gVector<T> b1(Make_b1(NF, support));
-  gMatrix<T> A2(Make_A2(NF, support));
-  gVector<T> b2(Make_b2(NF, support));
-  LHTableau<T> tableau(A1,A2,b1,b2);
-//  LHTableau<T> tableau(NF,support);
-//  gout << "\n in Enum()";
-//  tableau.Dump(gout);
-  
-  for(i=rows+1; i<=rows+cols && !params.status.Get();i++ ) {
-    if(params.stopAfter==0 || List.Length()<params.stopAfter) 
-      SubSolve(rows,i,tableau,target);
-    params.status.SetProgress((double)(i-rows-1)/(double)cols);
+
+  n1=support.NumStrats(1);
+  n2=support.NumStrats(2);
+  NfgIter<T> iter(&support); 
+
+  gMatrix<T> A1(1,n1,1,n2);
+  gMatrix<T> A2(1,n2,1,n1);
+  gVector<T> b1(1,n1);
+  gVector<T> b2(1,n2);
+
+   // compute minimum payoff  
+
+  T min = (T) 1, x; 
+  for (i=1; i<=n1; i++)   {
+    for (j=1; j<=n2; j++)  {
+      x = iter.Payoff(1);
+      if (x < min)   min = x;
+      x = iter.Payoff(2);
+      if (x < min)   min = x;
+      iter.Next(2);
+    }
+    iter.Next(1);
   }
-  
-  if(params.status.Get()) {
-    (*params.tracefile) << "\n User Break \n";
-    params.status.Reset();
+  min-=(T)1;
+
+   // construct A1,A2,b1,b2  
+
+  for (i=1; i<=n1; i++)  {
+    A1(i, n2) = - (T)1;
+    A2(n2, i) = (T)1;
+    for (j=1; j<=n2; j++)  {
+      A1(i, j) = iter.Payoff(1) - min;
+      A2(j, i) = iter.Payoff(2) - min;
+      iter.Next(2);
+    }
+    iter.Next(1);
   }
 
-  if(params.trace>=2) {
-    for(i=1;i<=List.Length();i++) {
-      (*params.tracefile) << "\n";
-      List[i].Dump(*params.tracefile);
+  b1 = -(T)1;
+  b2 = -(T)1;
+
+  // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
+
+  VertEnum<T> poly1(A1,b1);
+  VertEnum<T> poly2(A2,b2);
+
+  v1=poly1.VertexList().Last();
+  v2=poly2.VertexList().Last();
+
+  BFS<T> bfs1,bfs2;
+  MixedProfile<T> profile(NF,support);
+  T sum;
+  bool nash;
+
+  for(i=2;i<=v2;i++) {
+    bfs1 = poly2.VertexList()[i];
+    sum = (T)0;
+    for(k=1;k<=n1;k++) {
+      profile(1,k) = (T)0;
+      if(bfs1.IsDefined(k)) {
+	profile(1,k) =-bfs1(k);
+	sum+=profile(1,k);
+      }
+    } 
+    for(k=1;k<=n1;k++) {
+      if(bfs1.IsDefined(k)) 
+	profile(1,k)/=sum;
+    }
+    for(j=2;j<=v1;j++) {
+      bfs2 = poly1.VertexList()[j];
+
+      // check if solution is nash 
+      // need only check complementarity, since it is feasible
+
+      nash=1;
+      for(k=1;k<=n1;k++)
+	if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
+	  if(!EqZero(bfs1(k)*bfs2(-k)))
+	    nash=0;
+      for(k=1;k<=n2;k++)
+	if(bfs2.IsDefined(k) && bfs1.IsDefined(-k))
+	  if(!EqZero(bfs2(k)*bfs1(-k)))
+	    nash=0;
+
+      if(nash) {
+	sum = (T)0;
+	for(k=1;k<=n2;k++) {
+	  profile(2,k) = (T)0;
+	  if(bfs2.IsDefined(k)) {
+	    profile(2,k) =-bfs2(k);
+	    sum+=profile(2,k);
+	  }
+	} 
+	for(k=1;k<=n2;k++) {
+	  if(bfs2.IsDefined(k)) 
+	    profile(2,k)/=sum;
+	} 
+//	gout << "\nprofile " << i << ", " << j << " " << profile << ":";
+//	for(k=1;k<=n1;k++) {
+//	  if(bfs1.IsDefined(k)) gout << " " << k;
+//	  if(bfs2.IsDefined(-k)) gout << " " << -k;
+//	}
+//	gout << ";";
+//	for(k=1;k<=n2;k++) {
+//	  if(bfs2.IsDefined(k)) gout << " " << n1+k;
+//	  if(bfs1.IsDefined(-k)) gout << " " << -n1-k;
+//	}
+//	gout << " Nash";
+	solutions.Append(profile);
+      }
     }
   }
+//  gout << "\n";
+  npivots = poly1.NumPivots()+poly2.NumPivots();
+
   time = watch.Elapsed();
   return 1;
 }
 
 
-template <class T>
-void EnumModule<T>::SubSolve(int pr, int pcl, LHTableau<T> &B1,
-			     gBlock<int> &targ1)
+template <class T> bool EnumModule<T>::EqZero(T x) const
 {
-  int i,j,ii,jj,pc;
-  count++;
-  LHTableau<T> B2(B1);
-//  B2.NumPivots()=0;
-
-  // construct new target basis
-  gBlock<int> targ2(targ1);  
-  pc = targ1.Find(pcl);
-  targ2[pc] = targ2[pr];
-  targ2[pr] = pcl;
-  
-//  gout << "\n targ = ";
-//  targ2.Dump(gout);
-  
-  /* pivot to target */
-  int flag = 1;
-  int piv = 1;
-  while(piv && flag) {
-    piv=0;
-    flag=0;
-    for(i=1;i<=rows;i++) {
-      ii = targ2[i];
-      if(ii<=rows)ii=-ii;
-      if(!B2.Member(ii)) {
-//	gout << " i,ii : " << i << " " << ii;
-	j=rows+1;
-	jj = targ2[j];
-	if(jj<=rows)jj=-jj;
-	while(j<=rows+cols && !B2.Member(jj)) {
-	  j++;
-	  jj = targ2[j];
-	  if(jj<=rows)jj=-jj;
-	}
-//	gout << " j,jj : " << j << " " << jj;
-	if(j<=rows+cols) {
-	  // note: may want to pivot for 1 and 2 separately to pick 
-	  // up additional possible feasible solutions.  
-	  if(B2.CanPivot(jj,ii) && B2.CanPivot(-ii,-jj))  {
-//	    gout << " jj,ii, : " << i << j << ii << jj;
-	    B2.CompPivot(jj,ii);
-	    piv=1;
-	  }
-	  else flag=1;
-	}
-      }
-    }
-  }
-//  gout << "\nB2: ";
-//  B2.Dump(gout);
-  
-  npivots+=B2.NumPivots();
-  j=0;
-  if(B2.IsNash()) {
-    List.Append(B2.GetBFS());
-    j=1;
-  }
-  
-  if(params.trace>=3) {
-    printf("\nPass# %3ld, Depth =%3d, Target = ",
-	   count, rows-pr+1);
-    for(i=1;i<=rows;i++)
-      printf("%3d", targ2[i]);
-    if(flag) {
-      printf("  Infeasible");
-      B2.Dump(*params.tracefile); 
-    }
-    if(j) {
-      printf("  Nash equilib");    
-      B2.Dump(*params.tracefile); 
-    }
-  }
-  
-  if(flag) B2=B1;
-  
-  if(pr>1) {
-    for(i=targ2[pr-1]+1;i<targ2[pr] && !params.status.Get();i++)
-      if(params.stopAfter==0 || List.Length()<params.stopAfter) {
-	SubSolve(pr-1,i,B2,targ2);
-      }
-  }
-}
+  if(x <= eps && x >= -eps) return 1;
+}     
 
 template <class T> long EnumModule<T>::NumPivots(void) const
 {
@@ -181,38 +184,6 @@ template <class T> EnumParams &EnumModule<T>::Parameters(void)
 template <class T>
 gList<MixedProfile<T> > &EnumModule<T>::GetSolutions(void)
 {
-  solutions.Flush();
-
-  for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> profile(NF, support);
-    T sum = (T) 0;
-
-    int j;
-    for (j = 1; j <= rows; j++)
-      if (List[i].IsDefined(j))   sum += List[i](j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= rows; j++) 
-      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
-      else  profile(1, j) = (T) 0;
-
-    sum = (T) 0;
-
-    for (j = 1; j <= cols; j++)
-      if (List[i].IsDefined(rows + j))  
-	sum += List[i](rows + j);
-
-    if (sum == (T) 0)  continue;
-
-    for (j = 1; j <= cols; j++)
-      if (List[i].IsDefined(rows + j))
-	profile(2, j) = List[i](rows + j) / sum;
-      else
-	profile(2, j) = (T) 0;
-
-    solutions.Append(profile);
-  }
   return solutions;
 }
 
