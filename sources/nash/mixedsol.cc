@@ -44,7 +44,7 @@ MixedSolution::MixedSolution(const gbtMixedProfile<double> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl).GetStrategy(st));
+      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -64,7 +64,7 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtRational> &p_profile,
   gEpsilon(m_epsilon);
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl).GetStrategy(st));
+      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -83,7 +83,7 @@ MixedSolution::MixedSolution(const gbtMixedProfile<gbtNumber> &p_profile,
 {
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= GetGame().NumStrats(pl); st++) {
-      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl).GetStrategy(st));
+      int index = p_profile.Support().GetIndex(GetGame().GetPlayer(pl)->GetStrategy(st));
       if (index > 0)
 	m_profile(pl, st) = p_profile(pl, index);
       else
@@ -207,7 +207,7 @@ void MixedSolution::LevelPrecision(void)
        pl++) {
     gbtNfgPlayer player = GetGame().GetPlayer(pl);
     for (int st = 1; (m_precision == GBT_PREC_RATIONAL && 
-		      st <= player.NumStrategies()); st++) {
+		      st <= player->NumStrategies()); st++) {
       if (m_profile(pl, st).Precision() == GBT_PREC_DOUBLE) {
 	m_precision = GBT_PREC_DOUBLE;
 	m_epsilon = 0.0;
@@ -219,7 +219,7 @@ void MixedSolution::LevelPrecision(void)
   if (m_precision == GBT_PREC_DOUBLE) {
     for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
       gbtNfgPlayer player = GetGame().GetPlayer(pl);
-      for (int st = 1; st <= player.NumStrategies(); st++) 
+      for (int st = 1; st <= player->NumStrategies(); st++) 
 	m_profile(pl, st) = (double) m_profile(pl, st);
     }
   }
@@ -250,7 +250,7 @@ void MixedSolution::SetStrategyProb(gbtNfgAction p_strategy,
 				    const gbtNumber &p_value)
 { 
   Invalidate();
-  m_profile(p_strategy.GetPlayer().GetId(), p_strategy.GetId()) = p_value;
+  m_profile(p_strategy.GetPlayer()->GetId(), p_strategy.GetId()) = p_value;
   if (p_value.Precision() != m_precision) {
     LevelPrecision();
   }
@@ -259,7 +259,7 @@ void MixedSolution::SetStrategyProb(gbtNfgAction p_strategy,
 const gbtNumber &MixedSolution::operator()(gbtNfgAction p_strategy) const
 {
   gbtNfgPlayer player = p_strategy.GetPlayer();
-  return m_profile(player.GetId(), p_strategy.GetId()); 
+  return m_profile(player->GetId(), p_strategy.GetId()); 
 }
 
 MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
@@ -364,12 +364,12 @@ void MixedSolution::Invalidate(void) const
 
 gbtNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
 {
-  return m_profile.Payoff(p_player.GetId());
+  return m_profile.Payoff(p_player->GetId());
 }
 
 gbtNumber MixedSolution::GetStrategyValue(gbtNfgAction p_strategy) const
 {
-  return m_profile.Payoff(p_strategy.GetPlayer().GetId(), p_strategy); 
+  return m_profile.Payoff(p_strategy.GetPlayer()->GetId(), p_strategy); 
 }
 
 

@@ -95,39 +95,70 @@ public:
   bool IsNull(void) const { return (m_rep == 0); }
 };
 
-struct gbt_nfg_player_rep;
+//------------------------------------------------------------------------
+
+struct gbtNfgPlayerBase;
 class gbtNfgGame;
+class gbtNfgInfoset;
 class gbtNfgAction;
 
-class gbtNfgPlayer : public gbtGamePlayer {
+class gbtNfgPlayerRep : public gbtGameObject {
+friend class gbtNfgPlayer;
 friend class gbtNfgGame;
-friend class gbtNfgOutcome;
-protected:
-  struct gbt_nfg_player_rep *rep;
+friend class gbtNfgInfoset;
+public:
+  virtual gbtNfgGame GetGame(void) const = 0;
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
+
+  virtual bool IsChance(void) const = 0;
+
+  virtual int NumInfosets(void) const = 0;
+  //  virtual gbtNfgInfoset NewInfoset(int p_actions) = 0;
+  // virtual gbtNfgInfoset GetInfoset(int p_index) const = 0;
+
+  virtual int NumStrategies(void) const = 0;
+  virtual gbtNfgAction GetStrategy(int) const = 0;
+};
+
+class gbtNfgNullPlayer { };
+
+class gbtNfgPlayer {
+private:
+  gbtNfgPlayerRep *m_rep;
 
 public:
-  gbtNfgPlayer(void);
-  gbtNfgPlayer(gbt_nfg_player_rep *);
-  gbtNfgPlayer(const gbtNfgPlayer &);
-  ~gbtNfgPlayer();
+  gbtNfgPlayer(void) : m_rep(0) { }
+  gbtNfgPlayer(gbtNfgPlayerRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgPlayer(const gbtNfgPlayer &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgPlayer() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtNfgPlayer &operator=(const gbtNfgPlayer &);
+  gbtNfgPlayer &operator=(const gbtNfgPlayer &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
 
-  bool operator==(const gbtNfgPlayer &) const;
-  bool operator!=(const gbtNfgPlayer &) const;
+  bool operator==(const gbtNfgPlayer &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtNfgPlayer &p_player) const
+  { return (m_rep != p_player.m_rep); }
 
-  bool IsNull(void) const;
-  bool IsDeleted(void) const;
+  gbtNfgPlayerRep *operator->(void) 
+  { if (!m_rep) throw gbtNfgNullPlayer(); return m_rep; }
+  const gbtNfgPlayerRep *operator->(void) const 
+  { if (!m_rep) throw gbtNfgNullPlayer(); return m_rep; }
+  
+  gbtNfgPlayerRep *Get(void) const { return m_rep; }
 
-  gbtNfgGame GetGame(void) const;
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
-  int GetId(void) const;
-
-  int NumInfosets(void) const { return 1; }
-
-  int NumStrategies(void) const;
-  gbtNfgAction GetStrategy(int) const;
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 #endif  // PLAYER_H

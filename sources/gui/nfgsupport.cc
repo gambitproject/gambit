@@ -133,10 +133,10 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
-						  (char *) player.GetLabel()));
+						  (char *) player->GetLabel()));
     
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      gbtNfgAction strategy = player.GetStrategy(st);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      gbtNfgAction strategy = player->GetStrategy(st);
 
       wxTreeItemId stratID = AppendItem(id, 
 					wxString::Format(wxT("%s"),

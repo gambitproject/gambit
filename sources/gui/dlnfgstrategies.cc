@@ -62,10 +62,10 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
     gbtNfgPlayer player = m_nfg.GetPlayer(pl);
     m_playerList->Append(wxString::Format(wxT("%s"),
 					  (char *) (ToText(pl) + ": " +
-						    player.GetLabel())));
-    m_strategyNames.Append(gbtArray<gbtText>(player.NumStrategies()));
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      m_strategyNames[pl][st] = player.GetStrategy(st).GetLabel();
+						    player->GetLabel())));
+    m_strategyNames.Append(gbtArray<gbtText>(player->NumStrategies()));
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      m_strategyNames[pl][st] = player->GetStrategy(st).GetLabel();
     }
   }
   m_playerList->SetSelection(0);
@@ -75,14 +75,14 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
   gbtNfgPlayer firstPlayer = m_nfg.GetPlayer(1);
   m_editGrid = new wxGrid(this, GBT_EDIT_GRID,
 			  wxDefaultPosition, wxDefaultSize);
-  m_editGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
+  m_editGrid->CreateGrid(firstPlayer->NumStrategies(), 1);
   m_editGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_editGrid->SetLabelValue(wxHORIZONTAL, _("Label"), 0);
-  for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
+  for (int st = 1; st <= firstPlayer->NumStrategies(); st++) {
     m_editGrid->SetLabelValue(wxVERTICAL, wxString::Format(wxT("%d"), st), 
 			      st - 1);
     m_editGrid->SetCellValue(wxString::Format(wxT("%s"),
-					      (char *) firstPlayer.GetStrategy(st).GetLabel()),
+					      (char *) firstPlayer->GetStrategy(st).GetLabel()),
 			     st - 1, 0);
     if (st % 2 == 0) {
       m_editGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
@@ -120,24 +120,24 @@ void dialogStrategies::OnSelChanged(wxCommandEvent &p_event)
 
   gbtNfgPlayer oldPlayer = m_nfg.GetPlayer(m_selection);
 
-  for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
+  for (int st = 1; st <= oldPlayer->NumStrategies(); st++) {
     m_strategyNames[m_selection][st] = gbtText(m_editGrid->GetCellValue(st - 1, 0).mb_str());
   }
 
   gbtNfgPlayer player = m_nfg.GetPlayer(p_event.GetSelection() + 1);
 
-  if (oldPlayer.NumStrategies() > player.NumStrategies()) {
+  if (oldPlayer->NumStrategies() > player->NumStrategies()) {
     m_editGrid->DeleteRows(0,
-			   oldPlayer.NumStrategies() - player.NumStrategies());
+			   oldPlayer->NumStrategies() - player->NumStrategies());
   }
-  else if (oldPlayer.NumStrategies() < player.NumStrategies()) {
+  else if (oldPlayer->NumStrategies() < player->NumStrategies()) {
     m_editGrid->InsertRows(0,
-			   player.NumStrategies() - oldPlayer.NumStrategies());
+			   player->NumStrategies() - oldPlayer->NumStrategies());
   }
 
   m_selection = p_event.GetSelection() + 1;
 
-  for (int st = 1; st <= player.NumStrategies(); st++) {
+  for (int st = 1; st <= player->NumStrategies(); st++) {
     m_editGrid->SetLabelValue(wxVERTICAL, wxString::Format(wxT("%d"), st),
 			      st - 1);
     m_editGrid->SetCellValue(wxString::Format(wxT("%s"),
@@ -163,7 +163,7 @@ void dialogStrategies::OnOK(wxCommandEvent &p_event)
 
   gbtNfgPlayer player = m_nfg.GetPlayer(m_selection);
 
-  for (int st = 1; st <= player.NumStrategies(); st++) {
+  for (int st = 1; st <= player->NumStrategies(); st++) {
     m_strategyNames[m_selection][st] = (char *) m_editGrid->GetCellValue(st - 1, 0).mb_str();
   }
 
@@ -190,8 +190,8 @@ void gbtCmdEditStrategies::Do(gbtGameDocument *p_doc)
 {
   for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
     gbtNfgPlayer player = p_doc->GetNfg().GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      player.GetStrategy(st).SetLabel(m_strategies[pl][st]);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
+      player->GetStrategy(st).SetLabel(m_strategies[pl][st]);
     }
   }
 }

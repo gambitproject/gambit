@@ -323,8 +323,8 @@ gbtList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
     do {
       gbtNfgAction strat = crsr.GetStrategy();
       if (current.Contains(strat)) 
-	for (int j = 1; j <= strat.GetPlayer().NumStrategies(); j++) {
-	  gbtNfgAction other_strat = strat.GetPlayer().GetStrategy(j);
+	for (int j = 1; j <= strat.GetPlayer()->NumStrategies(); j++) {
+	  gbtNfgAction other_strat = strat.GetPlayer()->GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.Contains(other_strat)) {
 	      if (current.Dominates(other_strat,strat,false)) 

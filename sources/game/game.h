@@ -37,6 +37,14 @@ public:
     { return "Game object deleted"; }
 };
 
+class gbtGameUndefinedOperation : public gbtException {
+public:
+  virtual ~gbtGameUndefinedOperation() { }
+
+  gbtText Description(void) const
+    { return "Undefined operation"; } 
+};
+
 //
 // A base class for all game object types, providing interfaces common
 // to all.
@@ -73,16 +81,6 @@ public:
 class gbtGameInfoset : public gbtGameObject {
 public:
   virtual ~gbtGameInfoset() { }
-};
-
-//
-// A player in a game
-//
-class gbtGamePlayer : public gbtGameObject {
-public:
-  virtual ~gbtGamePlayer() { }
-
-  virtual int NumInfosets(void) const = 0;
 };
 
 //

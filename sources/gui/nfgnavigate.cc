@@ -95,7 +95,7 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
 
     SetCellValue(pl - 1, 1, 
 		 wxString::Format(wxT("%s"),
-				  (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel()));
+				  (char *) m_doc->GetNfg().GetPlayer(pl)->GetLabel()));
     SetCellValue(pl - 1, 2, 
 		 wxString::Format(wxT("%s"), 
 				  (char *) ToText(m_doc->GetContingency()[pl])));

@@ -149,7 +149,7 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       m_players->SetCellValue(pl - 1, 0, 
 			      wxString::Format(wxT("%s"),
-					       (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel()));
+					       (char *) m_doc->GetNfg().GetPlayer(pl)->GetLabel()));
       if ((pl - 1) % 2 == 0) {
 	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
       }
@@ -271,7 +271,7 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
     nfg.SetLabel(m_title);
     nfg.SetComment(m_comment);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      nfg.GetPlayer(pl).SetLabel(m_players[pl]);
+      nfg.GetPlayer(pl)->SetLabel(m_players[pl]);
     }
   }
 }

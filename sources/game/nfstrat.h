@@ -106,7 +106,7 @@ public:
   // DATA ACCESS: STRATEGIES
   int NumStrats(int pl) const;
   int NumStrats(const gbtNfgPlayer &p_player) const 
-    { return NumStrats(p_player.GetId()); }
+    { return NumStrats(p_player->GetId()); }
   gbtArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 

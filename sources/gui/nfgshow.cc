@@ -587,7 +587,7 @@ void gbtNfgFrame::OnEditContingency(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     gbtNfgContingency profile(m_doc->GetNfg());
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-      profile.SetStrategy(m_doc->GetNfg().GetPlayer(pl).GetStrategy(m_doc->GetContingency()[pl]));
+      profile.SetStrategy(m_doc->GetNfg().GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl]));
     }
 
     if (dialog.GetOutcome() == 0) { 
@@ -733,7 +733,7 @@ void gbtNfgFrame::OnToolsDominance(wxCommandEvent &)
 {
   gbtArray<gbtText> playerNames(m_doc->GetNfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_doc->GetNfg().GetPlayer(pl).GetLabel();
+    playerNames[pl] = m_doc->GetNfg().GetPlayer(pl)->GetLabel();
   }
   dialogElimMixed dialog(this, playerNames);
 

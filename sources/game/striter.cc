@@ -95,10 +95,10 @@ bool gbtStrategyIterator::IsLast(void) const
 
 bool gbtStrategyIterator::IsSubsequentTo(gbtNfgAction p_strategy) const
 {
-  if (pl > p_strategy.GetPlayer().GetId()) {
+  if (pl > p_strategy.GetPlayer()->GetId()) {
     return true; 
   }
-  else if (pl < p_strategy.GetPlayer().GetId()) {
+  else if (pl < p_strategy.GetPlayer()->GetId()) {
     return false;
   }
   else {

@@ -168,7 +168,7 @@ void gbtNfgContIterator::First(void)
 
 void gbtNfgContIterator::Freeze(gbtNfgAction p_strategy)
 {
-  int player = p_strategy.GetPlayer().GetId();
+  int player = p_strategy.GetPlayer()->GetId();
   if (!m_frozen.Contains(player)) {
     m_frozen.Append(player);
     m_thawed.Remove(m_thawed.Find(player));
@@ -181,7 +181,7 @@ void gbtNfgContIterator::Freeze(gbtNfgAction p_strategy)
 
 void gbtNfgContIterator::Thaw(gbtNfgPlayer p_player)
 {
-  int pl = p_player.GetId();
+  int pl = p_player->GetId();
   if (m_thawed.Contains(pl)) {
     return;
   }
@@ -194,7 +194,7 @@ void gbtNfgContIterator::Thaw(gbtNfgPlayer p_player)
 
 int gbtNfgContIterator::Next(gbtNfgPlayer p_player)
 {
-  int p = p_player.GetId();
+  int p = p_player->GetId();
   if (!m_thawed.Contains(p)) {
     return 0;
   }

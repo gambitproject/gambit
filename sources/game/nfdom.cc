@@ -67,9 +67,9 @@ bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
 
 bool gbtNfgSupport::IsDominated(gbtNfgAction s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s.GetPlayer().GetId()); i++) {
+  for (int i = 1; i <= NumStrats(s.GetPlayer()->GetId()); i++) {
     if (i != s.GetId()) {
-      if (Dominates(GetStrategy(s.GetPlayer().GetId(), i), s, strong)) {
+      if (Dominates(GetStrategy(s.GetPlayer()->GetId(), i), s, strong)) {
 	return true;
       }
     }

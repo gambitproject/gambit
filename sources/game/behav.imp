@@ -289,7 +289,7 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtMixedProfile<T> &p_profile)
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       if (p_profile(pl, st) > (T) 0)  {
-	const gbtArray<int> *const actions = nfg.GetPlayer(pl).GetStrategy(st).GetBehavior();
+	const gbtArray<int> *const actions = nfg.GetPlayer(pl)->GetStrategy(st).GetBehavior();
 
 	m_bvals[n.GetId()] = p_profile(pl, st);
 

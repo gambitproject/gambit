@@ -67,7 +67,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   for (int pl = 1; pl <= m_profile.GetGame().NumPlayers(); pl++) {
     m_playerList->Append(wxString::Format(wxT("%s"),
 					  (char *) (ToText(pl) + ": " +
-						    m_profile.GetGame().GetPlayer(pl).GetLabel())));
+						    m_profile.GetGame().GetPlayer(pl)->GetLabel())));
   }
   m_playerList->SetSelection(0);
   editSizer->Add(m_playerList, 0, wxALL, 5);
@@ -75,17 +75,17 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   gbtNfgPlayer firstPlayer = m_profile.GetGame().GetPlayer(1);
   m_probGrid = new wxGrid(this, idPROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
-  m_probGrid->CreateGrid(firstPlayer.NumStrategies(), 1);
+  m_probGrid->CreateGrid(firstPlayer->NumStrategies(), 1);
   m_probGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_probGrid->SetDefaultEditor(new gbtNumberEditor);
   m_probGrid->SetLabelValue(wxHORIZONTAL, _("Probability"), 0);
-  for (int st = 1; st <= firstPlayer.NumStrategies(); st++) {
+  for (int st = 1; st <= firstPlayer->NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) firstPlayer.GetStrategy(st).GetLabel()),
+					       (char *) firstPlayer->GetStrategy(st).GetLabel()),
 			      st - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
-					      (char *) ToText(p_profile(firstPlayer.GetStrategy(st)))),
+					      (char *) ToText(p_profile(firstPlayer->GetStrategy(st)))),
 			     st - 1, 0);
     if (st % 2 == 0) {
       m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
@@ -127,29 +127,29 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 
   gbtNfgPlayer oldPlayer = m_profile.GetGame().GetPlayer(m_selection);
 
-  for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
-    m_profile.SetStrategyProb(oldPlayer.GetStrategy(st),
+  for (int st = 1; st <= oldPlayer->NumStrategies(); st++) {
+    m_profile.SetStrategyProb(oldPlayer->GetStrategy(st),
 			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 
   gbtNfgPlayer player = m_profile.GetGame().GetPlayer(p_event.GetSelection() + 1);
 
-  if (oldPlayer.NumStrategies() > player.NumStrategies()) {
+  if (oldPlayer->NumStrategies() > player->NumStrategies()) {
     m_probGrid->DeleteRows(0,
-			   oldPlayer.NumStrategies() - player.NumStrategies());
+			   oldPlayer->NumStrategies() - player->NumStrategies());
   }
-  else if (oldPlayer.NumStrategies() < player.NumStrategies()) {
+  else if (oldPlayer->NumStrategies() < player->NumStrategies()) {
     m_probGrid->InsertRows(0,
-			   player.NumStrategies() - oldPlayer.NumStrategies());
+			   player->NumStrategies() - oldPlayer->NumStrategies());
   }
 
-  for (int st = 1; st <= player.NumStrategies(); st++) {
+  for (int st = 1; st <= player->NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) player.GetStrategy(st).GetLabel()),
+					       (char *) player->GetStrategy(st).GetLabel()),
 			      st - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
-					      (char *) ToText(m_profile(player.GetStrategy(st)))),
+					      (char *) ToText(m_profile(player->GetStrategy(st)))),
 			     st - 1, 0);
     if (st % 2 == 0) {
       m_probGrid->SetCellBackgroundColour(st - 1, 0, wxColour(200, 200, 200));
@@ -171,8 +171,8 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
 
   gbtNfgPlayer player = m_profile.GetGame().GetPlayer(m_selection);
 
-  for (int st = 1; st <= player.NumStrategies(); st++) {
-    m_profile.SetStrategyProb(player.GetStrategy(st),
+  for (int st = 1; st <= player->NumStrategies(); st++) {
+    m_profile.SetStrategyProb(player->GetStrategy(st),
 			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 

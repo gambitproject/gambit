@@ -220,8 +220,8 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgAction str,
 		      bool strong, T /*junk*/,
 		      gbtOutput &tracefile)
 {
-  int pl = str.GetPlayer().GetId();
-  gbtNfgGame nfg = str.GetPlayer().GetGame();
+  int pl = str.GetPlayer()->GetId();
+  gbtNfgGame nfg = str.GetPlayer()->GetGame();
   int whichstrat = str.GetId();
   int strats = S.NumStrats(pl);
 

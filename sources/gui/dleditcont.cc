@@ -44,7 +44,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 
   gbtNfgContingency profile(p_nfg);
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    profile.SetStrategy(p_nfg.GetPlayer(pl).GetStrategy(p_cont[pl]));
+    profile.SetStrategy(p_nfg.GetPlayer(pl)->GetStrategy(p_cont[pl]));
   }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -55,16 +55,16 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   for (int pl = 1; pl <= p_cont.Length(); pl++) {
     gbtNfgPlayer player = p_nfg.GetPlayer(pl);
     wxString text;
-    if (player.GetLabel() != "") {
-      text += wxString::Format(wxT("%s: "), (const char *) player.GetLabel());
+    if (player->GetLabel() != "") {
+      text += wxString::Format(wxT("%s: "), (const char *) player->GetLabel());
     }
     else {
       text += wxString::Format(wxT("Player %d: "), pl);
     }
 
-    if (player.GetStrategy(p_cont[pl]).GetLabel() != "") {
+    if (player->GetStrategy(p_cont[pl]).GetLabel() != "") {
       text += wxString::Format(wxT("%s"),
-			       (const char *) player.GetStrategy(p_cont[pl]).GetLabel());
+			       (const char *) player->GetStrategy(p_cont[pl]).GetLabel());
     }
     else {
       text += wxString::Format(wxT("Strategy %d"), p_cont[pl]);

@@ -165,7 +165,7 @@ gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgAction &)
   return p_stream;
 }
 
-gbt_nfg_infoset_rep::gbt_nfg_infoset_rep(gbt_nfg_player_rep *p_player,
+gbt_nfg_infoset_rep::gbt_nfg_infoset_rep(gbtNfgPlayerBase *p_player,
 					 int p_id, int p_br)
   : m_id(p_id), m_player(p_player), m_deleted(false),
     m_refCount(0), m_actions(p_br)
@@ -233,7 +233,7 @@ gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
   : rep(new gbt_nfg_game_rep(dim))
 {
   for (int pl = 1; pl <= rep->m_players.Length(); pl++)  {
-    rep->m_players[pl] = new gbt_nfg_player_rep(rep, pl, dim[pl]);
+    rep->m_players[pl] = new gbtNfgPlayerBase(rep, pl, dim[pl]);
     rep->m_players[pl]->m_label = ToText(pl);
     for (int st = 1; st <= dim[pl]; st++) {
       rep->m_players[pl]->m_infosets[1]->m_actions[st]->m_label = ToText(st);
@@ -359,7 +359,7 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
   p_file << " \"" << EscapeQuotes(GetLabel()) << "\" { ";
 
   for (int i = 1; i <= NumPlayers(); i++) {
-    p_file << '"' << EscapeQuotes(GetPlayer(i).GetLabel()) << "\" ";
+    p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
   }
 
   p_file << "}\n\n{ ";
@@ -367,8 +367,8 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
   for (int i = 1; i <= NumPlayers(); i++)   {
     gbtNfgPlayer player = GetPlayer(i);
     p_file << "{ ";
-    for (int j = 1; j <= player.NumStrategies(); j++)
-      p_file << '"' << EscapeQuotes(player.GetStrategy(j).GetLabel()) << "\" ";
+    for (int j = 1; j <= player->NumStrategies(); j++)
+      p_file << '"' << EscapeQuotes(player->GetStrategy(j).GetLabel()) << "\" ";
     p_file << "}\n";
   }
   

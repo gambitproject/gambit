@@ -107,7 +107,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
       gbtNfgGame nfg(dialog.NumStrategies());
       nfg.SetLabel("Untitled Normal Form Game");
       for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-	nfg.GetPlayer(pl).SetLabel(gbtText("Player") + ToText(pl));
+	nfg.GetPlayer(pl)->SetLabel(gbtText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
 	gbtNfgSupport support(nfg);

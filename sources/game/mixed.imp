@@ -121,7 +121,7 @@ template <class T> void gbtMixedProfile<T>::Regret(gbtPVector<T> &value) const
   for (i = 1; i <= m_nfg.NumPlayers(); i++) {
     pay = Payoff(i);
     for (j = 1; j <= m_nfg.NumStrats(i); j++) {
-      x = Payoff(i, m_nfg.GetPlayer(i).GetStrategy(j));
+      x = Payoff(i, m_nfg.GetPlayer(i)->GetStrategy(j));
       if(x > pay)
 	value(i, j) = x - pay;
       // use pay - pay instead of zero for correct precision
@@ -157,15 +157,15 @@ gbtMixedProfile<T>::Payoff(int pl, gbtNfgAction strategy) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     T value = (T) 0;
-    PPayoff(pl, strategy.GetPlayer().GetId(), strategy.GetId(), 1,
+    PPayoff(pl, strategy.GetPlayer()->GetId(), strategy.GetId(), 1,
 	    strategy.GetIndex() + 1, (T) 1, value);
     return value;
   }
   else {
     gbtMixedProfile<T> foo(*this);
-    for (int st = 1; st <= support.NumStrats(strategy.GetPlayer().GetId());
-	 foo(strategy.GetPlayer().GetId(), st++) = 0);
-    foo(strategy.GetPlayer().GetId(), support.GetIndex(strategy)) = 1;
+    for (int st = 1; st <= support.NumStrats(strategy.GetPlayer()->GetId());
+	 foo(strategy.GetPlayer()->GetId(), st++) = 0);
+    foo(strategy.GetPlayer()->GetId(), support.GetIndex(strategy)) = 1;
     return gbtBehavProfile<T>(foo).Payoff(pl);
   }
 }
@@ -336,9 +336,9 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
   gbtEfgGame efg = p_profile.GetGame();
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)  {
     gbtNfgPlayer player = m_nfg.GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++)  {
+    for (int st = 1; st <= player->NumStrategies(); st++)  {
       T prob = (T) 1;
-      const gbtArray<int> *const behav = player.GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const behav = player->GetStrategy(st).GetBehavior();
 
       for (int iset = 1; iset <= efg.GetPlayer(pl)->NumInfosets(); iset++) {
 	if ((*behav)[iset] > 0)

@@ -90,13 +90,13 @@ template class gbtRectBlock<gbtRational>;
 template class gbtArray<gbt_nfg_strategy_rep *>;
 template class gbtArray<gbtNfgOutcomeBase *>;
 template class gbtArray<gbt_nfg_infoset_rep *>;
-template class gbtArray<gbt_nfg_player_rep *>;
+template class gbtArray<gbtNfgPlayerBase *>;
 template class gbtArray<gbtNfgAction>;
 
 template class gbtBlock<gbt_nfg_strategy_rep *>;
 template class gbtBlock<gbtNfgOutcomeBase *>;
 template class gbtBlock<gbt_nfg_infoset_rep *>;
-template class gbtBlock<gbt_nfg_player_rep *>;
+template class gbtBlock<gbtNfgPlayerBase *>;
 template class gbtBlock<gbtNfgAction>;
 
 template class gbtList<gbtNfgAction>;

@@ -120,9 +120,9 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
   for (int pl = 1; pl <= m_data[1].GetGame().NumPlayers(); pl++) {
     gbtNfgPlayer player = m_data[1].GetGame().GetPlayer(pl);
 
-    for (int st = 1; st <= player.NumStrategies(); st++) {
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_dim) {
-	return player.GetLabel() + ":" + player.GetStrategy(st).GetLabel();
+	return player->GetLabel() + ":" + player->GetStrategy(st).GetLabel();
       }
     }
   }
@@ -666,9 +666,9 @@ void gbtNfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
     for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
       gbtNfgPlayer player = m_support.GetGame().GetPlayer(pl);
 
-      for (int st = 1; st <= player.NumStrategies(); st++) {
+      for (int st = 1; st <= player->NumStrategies(); st++) {
 	GetCorrespondence()->ShowDimension(index++, 
-					   m_support.Contains(player.GetStrategy(st)));
+					   m_support.Contains(player->GetStrategy(st)));
       }
     }
 

@@ -130,7 +130,7 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
   else {
     gbtNfgContingency profile(p_doc->GetNfg());
     for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
-      profile.SetStrategy(p_doc->GetNfg().GetPlayer(pl).GetStrategy(p_doc->GetContingency()[pl]));
+      profile.SetStrategy(p_doc->GetNfg().GetPlayer(pl)->GetStrategy(p_doc->GetContingency()[pl]));
     }
     if (m_id > 0) {
       profile.SetOutcome(p_doc->GetNfg().GetOutcome(m_id));
@@ -344,10 +344,10 @@ void gbtOutcomeWindow::OnUpdate(void)
     }
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-      if (nfg.GetPlayer(pl).GetLabel() != "") {
+      if (nfg.GetPlayer(pl)->GetLabel() != "") {
 	SetLabelValue(wxHORIZONTAL,
 		      wxString::Format(wxT("%s"),
-				       (char *) nfg.GetPlayer(pl).GetLabel()),
+				       (char *) nfg.GetPlayer(pl)->GetLabel()),
 		      pl);
       }
       else {

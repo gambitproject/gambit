@@ -207,17 +207,17 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
       for (int pl = 1, col = GetInfoColumns() + GetBehavColumns();
 	   pl <= m_doc->GetNfg().NumPlayers(); pl++) {
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
-	for (int st = 1; st <= player.NumStrategies(); col++, st++) {
+	for (int st = 1; st <= player->NumStrategies(); col++, st++) {
 	  if (col == p_col) {
 	    return wxString::Format(wxT("%s:%s"),
-				    (char *) player.GetLabel(),
-				    (char *) player.GetStrategy(st).GetLabel());
+				    (char *) player->GetLabel(),
+				    (char *) player->GetStrategy(st).GetLabel());
 	  }
 	}
       }
     }
     else {
-      return wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1).GetLabel());
+      return wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1)->GetLabel());
     }
   }
 
@@ -345,8 +345,8 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
 	wxString ret = wxT("("); 
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
-	for (int st = 1; st <= player.NumStrategies(); st++) {
-	  gbtNfgAction strategy = player.GetStrategy(st);
+	for (int st = 1; st <= player->NumStrategies(); st++) {
+	  gbtNfgAction strategy = player->GetStrategy(st);
 	  if (st > 1) {
 	    ret += wxT(",");
 	  }
@@ -358,8 +358,8 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	wxString ret;
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
-	for (int st = 1; st <= player.NumStrategies(); st++) {
-	  gbtNfgAction strategy = player.GetStrategy(st);
+	for (int st = 1; st <= player->NumStrategies(); st++) {
+	  gbtNfgAction strategy = player->GetStrategy(st);
 	  if ((*mixed)(strategy) > gbtNumber(0)) {
 	    if (ret != wxT("")) {
 	      ret += wxT("+");
@@ -368,7 +368,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 				    (char *) ToText((*mixed)(strategy),
 						    m_doc->GetPreferences().NumDecimals()));
 	    if (strategy.GetLabel() != "") {
-	      ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) player.GetStrategy(st).GetLabel()) + wxT("]");
+	      ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) player->GetStrategy(st).GetLabel()) + wxT("]");
 	    }
 	    else {
 	      ret += wxString::Format(wxT("*[#%d]"), st);
@@ -442,7 +442,7 @@ gbtProfileTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
   else {
     if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
       int firstCol = GetInfoColumns() + GetBehavColumns();
-      int lastCol = firstCol - 1 + m_doc->GetNfg().GetPlayer(1).NumStrategies();
+      int lastCol = firstCol - 1 + m_doc->GetNfg().GetPlayer(1)->NumStrategies();
       for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
 	if (col >= firstCol && col <= lastCol) {
 	  attr->SetTextColour(m_doc->GetPreferences().PlayerColor(pl));
@@ -452,7 +452,7 @@ gbtProfileTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
 	  break;
 	}
 	firstCol = lastCol + 1;
-	lastCol += m_doc->GetNfg().GetPlayer(pl+1).NumStrategies();
+	lastCol += m_doc->GetNfg().GetPlayer(pl+1)->NumStrategies();
       }
     }
     else {
@@ -673,11 +673,11 @@ wxString gbtProfileGrid::GetReport(void) const
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
       gbtNfgPlayer player = nfg.GetPlayer(pl);
-      report += wxString::Format(wxT("%s\n"), (const char *) player.GetLabel());
+      report += wxString::Format(wxT("%s\n"), (const char *) player->GetLabel());
 
-      for (int st = 1; st <= player.NumStrategies(); st++) {
+      for (int st = 1; st <= player->NumStrategies(); st++) {
 	report += wxString::Format(wxT("%2d: %-6s"), st,
-				   (const char *) player.GetStrategy(st).GetLabel());
+				   (const char *) player->GetStrategy(st).GetLabel());
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format(wxT("%-15s "), 

@@ -551,9 +551,9 @@ gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gbtNumber pay = Payoff(pl);
     gbtNfgPlayer player = nfg.GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++) {
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       gbtBehavProfile<gbtNumber> scratch(*m_profile);
-      const gbtArray<int> *const actions = player.GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const actions = player->GetStrategy(st).GetBehavior();
       for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
 	for (int k = 1; k <= scratch.Support().NumActions(pl,j); k++) {

@@ -36,7 +36,7 @@
 //
 // Forward declarations
 //
-struct gbt_nfg_player_rep;
+struct gbtNfgPlayerBase;
 struct gbt_nfg_infoset_rep;
 struct gbt_nfg_strategy_rep;
 struct gbt_efg_game_rep;
@@ -57,11 +57,11 @@ public:
 
   gbtArray<gbtNumber> GetPayoff(void) const { return m_payoffs; }
   gbtNumber GetPayoff(const gbtNfgPlayer &p_player) const
-  { return m_payoffs[p_player.GetId()]; }
+  { return m_payoffs[p_player->GetId()]; }
   double GetPayoffDouble(int p_playerId) const 
   { return m_doublePayoffs[p_playerId]; }
   void SetPayoff(const gbtNfgPlayer &p_player, const gbtNumber &p_value)
-  { m_payoffs[p_player.GetId()] = p_value; m_doublePayoffs[p_player.GetId()] = p_value; } 
+  { m_payoffs[p_player->GetId()] = p_value; m_doublePayoffs[p_player->GetId()] = p_value; } 
 
   void DeleteOutcome(void);
 };
@@ -81,17 +81,18 @@ struct gbt_nfg_strategy_rep {
 
 struct gbt_nfg_infoset_rep {
   int m_id;
-  gbt_nfg_player_rep *m_player;
+  gbtNfgPlayerBase *m_player;
   bool m_deleted;
   gbtText m_label;
   int m_refCount;
   gbtBlock<gbt_nfg_strategy_rep *> m_actions;
 
-  gbt_nfg_infoset_rep(gbt_nfg_player_rep *, int id, int br);
+  gbt_nfg_infoset_rep(gbtNfgPlayerBase *, int id, int br);
   ~gbt_nfg_infoset_rep() { }
 };
 
-struct gbt_nfg_player_rep {
+class gbtNfgPlayerBase : public gbtNfgPlayerRep {
+public:
   int m_id;
   gbt_nfg_game_rep *m_nfg;
   bool m_deleted;
@@ -99,7 +100,24 @@ struct gbt_nfg_player_rep {
   gbtBlock<gbt_nfg_infoset_rep *> m_infosets;
   int m_refCount;
 
-  gbt_nfg_player_rep(gbt_nfg_game_rep *, int, int);
+  gbtNfgPlayerBase(gbt_nfg_game_rep *, int, int);
+  ~gbtNfgPlayerBase() { }
+
+  gbtNfgGame GetGame(void) const { return m_nfg; }
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return m_id; }
+
+  bool IsChance(void) const { return false; }
+
+  int NumInfosets(void) const { return 1; }
+  //  gbtNfgInfoset NewInfoset(int p_actions) 
+  // { throw gbtGameUndefinedOperation(); }
+  // gbtNfgInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
+
+  int NumStrategies(void) const { return m_infosets[1]->m_actions.Length(); }
+  gbtNfgAction GetStrategy(int p_index) const
+  { return m_infosets[1]->m_actions[p_index]; }
 };
 
 struct gbt_nfg_game_rep {
@@ -110,7 +128,7 @@ struct gbt_nfg_game_rep {
   gbtText m_label, m_comment;
   gbtArray<int> m_dimensions;
 
-  gbtBlock<gbt_nfg_player_rep *> m_players;
+  gbtBlock<gbtNfgPlayerBase *> m_players;
   gbtBlock<gbtNfgOutcomeBase *> m_outcomes;
 
   gbtArray<gbtNfgOutcomeBase *> m_results;

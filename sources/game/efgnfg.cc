@@ -54,7 +54,7 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
     }
   }
 
-  gbt_nfg_player_rep *player = p_nfg->m_players[p_player->GetId()];
+  gbtNfgPlayerBase *player = p_nfg->m_players[p_player->GetId()];
   gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
   strategy->m_behav = behav;
   strategy->m_label = label;
@@ -131,7 +131,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
   nfg->m_label = rep->m_label;
   nfg->m_dimensions = gbtArray<int>(NumPlayers());
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
+    nfg->m_players.Append(new gbtNfgPlayerBase(nfg, pl, 0));
     nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
     MakeReducedStrats(nfg, rep->players[pl], rep->root, NULL);
     nfg->m_dimensions[pl] = nfg->m_players[pl]->m_infosets[1]->m_actions.Length();
@@ -150,7 +150,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
     for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)  {
       gbtEfgInfoset s = p_efg.GetPlayer(epl)->GetInfoset(iset);
       for (int act = 1; act <= s.NumActions(); act++)  {
-	afg.GetPlayer(npl).GetStrategy(act).SetLabel(ToText(act));
+	afg.GetPlayer(npl)->GetStrategy(act).SetLabel(ToText(act));
       }
     }
   }
