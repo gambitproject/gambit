@@ -741,7 +741,7 @@ void NfgShow::InspectSolutions(int what)
 #include "elimdomd.h"
 #include "nfgsolng.h"
 
-void NfgShow::Solve(void)
+void NfgShow::Solve(int id)
 {
   NfgSolveSettings NSD(nf);
 
@@ -758,44 +758,45 @@ void NfgShow::Solve(void)
 
   wxBeginBusyCursor();
 
+  NfgSolutionG *solver;
+
+  switch (id) {
+  case NFG_SOLVE_CUSTOM_ENUMPURE:
+    solver = new NfgEnumPureG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_ENUMMIXED:
+    solver = new NfgEnumG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_LCP:      
+    solver = new NfgLemkeG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_LP:       
+    solver = new NfgZSumG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_LIAP:
+    solver = new NfgLiapG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_SIMPDIV:
+    solver = new NfgSimpdivG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_GOBIT:
+    solver = new NfgGobitG(nf, *cur_sup, this);
+    break;
+  case NFG_SOLVE_CUSTOM_GOBITGRID:
+    solver = new NfgGobitAllG(nf, *cur_sup, this);
+    break;
+  default:
+    // shouldn't happen.  we'll ignore silently
+    return;
+  }
+
+  wxBeginBusyCursor();
+
+  bool go = solver->SolveSetup();
+
   try {
-    switch (NSD.GetAlgorithm()) {
-    case NFG_ENUMPURE_SOLUTION: 
-      solns += NfgEnumPureG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_LCP_SOLUTION:      
-      solns += NfgLemkeG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_LIAP_SOLUTION:      
-      solns += NfgLiapG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_GOBITALL_SOLUTION: 
-      solns += NfgGobitAllG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_GOBIT_SOLUTION:     
-      solns += NfgGobitG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_SIMPDIV_SOLUTION:   
-      solns += NfgSimpdivG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_ENUMMIXED_SOLUTION:
-      solns += NfgEnumG(nf, *cur_sup, this).Solve();
-      break;
-
-    case NFG_LP_SOLUTION:       
-      solns += NfgZSumG(nf, *cur_sup, this).Solve();
-      break;
-
-    default:
-      // shouldn't happen.  we'll ignore silently
-      break;
-    }
+    if (go)
+      solns += solver->Solve();
     wxEndBusyCursor();
   }
   catch (gException &E) {
@@ -803,6 +804,10 @@ void NfgShow::Solve(void)
     wxEndBusyCursor();
   }
     
+  delete solver;
+
+  if (!go)  return;
+
   if (old_max_soln != solns.Length()) {
     // Now, transfer the NEW solutions to extensive form if requested
     if (NSD.GetExtensive()) {

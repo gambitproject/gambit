@@ -1,5 +1,8 @@
-// File: nfgconst.h -- defines various constants for NormShow menu events
+//
+// FILE: nfgconst.h -- defines various constants for NormShow menu events
+//
 // $Id$
+//
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
@@ -19,6 +22,16 @@
 #define NFG_SOLVE_GAMEINFO_MENU         155
 
 #define NFG_PREFS_OUTCOMES_MENU         350
+
+#define NFG_SOLVE_CUSTOM                499
+#define NFG_SOLVE_CUSTOM_ENUMPURE       500
+#define NFG_SOLVE_CUSTOM_ENUMMIXED      501
+#define NFG_SOLVE_CUSTOM_LCP            502
+#define NFG_SOLVE_CUSTOM_LP             503
+#define NFG_SOLVE_CUSTOM_LIAP           504
+#define NFG_SOLVE_CUSTOM_SIMPDIV        505
+#define NFG_SOLVE_CUSTOM_GOBIT          506
+#define NFG_SOLVE_CUSTOM_GOBITGRID      507
 
 #define NFG_DISPLAY_COLORS              200
 #define NFG_DISPLAY_ACCELS              202

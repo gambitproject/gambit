@@ -854,65 +854,117 @@ NormalSpread::NormalSpread(const NFSupport *sup, int _pl1, int _pl2, NfgShow *p,
     Show(TRUE);
 }
 
+void NormalSpread::UpdateProfile(void)
+{
+  gArray<int> profile(strat_profile.Length());
+
+  for (int i = 1; i <= strat_profile.Length(); i++)
+    profile[i] = strat_profile[i]->GetSelection()+1;
+
+  parent->UpdateProfile(profile);
+  SetCurRow(profile[pl1]);
+  SetCurCol(profile[pl2]);
+}
+
+void NormalSpread::SetProfile(const gArray<int> &profile)
+{
+  for (int i = 1; i <= strat_profile.Length(); i++) 
+    strat_profile[i]->SetSelection(profile[i]-1);
+
+  SetCurRow(profile[pl1]);
+  SetCurCol(profile[pl2]);
+}
+
+gArray<int> NormalSpread::GetProfile(void)
+{
+  gArray<int> profile(strat_profile.Length());
+  
+  for (int i = 1; i <= strat_profile.Length(); i++)
+    profile[i] = strat_profile[i]->GetSelection()+1;
+
+  return profile;
+}
 
 // Overriding the MakeMenuBar... Note that menus is not used.
 wxMenuBar *NormalSpread::MakeMenuBar(long )
 {
-    wxMenu *file_menu = new wxMenu;
-    file_menu->Append(NFG_FILE_SAVE, "&Save",    "Save the game");
-    file_menu->Append(OUTPUT_MENU,   "Out&put",  "Output to any device");
-    file_menu->Append(CLOSE_MENU,    "&Close",   "Exit");
+  wxMenu *file_menu = new wxMenu;
+  file_menu->Append(NFG_FILE_SAVE, "&Save",    "Save the game");
+  file_menu->Append(OUTPUT_MENU,   "Out&put",  "Output to any device");
+  file_menu->Append(CLOSE_MENU,    "&Close",   "Exit");
+  
+  wxMenu *edit_menu = new wxMenu;
+  edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
+  edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
+  edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
+  edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  "Set/Edit outcomes");
 
-    wxMenu *edit_menu = new wxMenu;
-    edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
-    edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
-    edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
-    edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  "Set/Edit outcomes");
+  wxMenu *supports_menu = new wxMenu;
+  supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
+  supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Supports", "Change support");
 
-    wxMenu *supports_menu = new wxMenu;
-    supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
-    supports_menu->Append(NFG_SOLVE_SUPPORTS_MENU, "&Supports", "Change support");
+  wxMenu *solve_menu = new wxMenu;
+  solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",
+		     "Standard solutions", TRUE);
+  
+  wxMenu *solveCustomMenu = new wxMenu;
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMPURE, "EnumPure",
+			  "Enumerate pure strategy equilibria");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMMIXED, "EnumMixed",
+			  "Enumerate mixed strategy equilibria");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LCP, "LCP",
+			  "Solve via linear complementarity program");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LP, "LP",
+			  "Solve via linear program");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LIAP, "Liapunov",
+			  "Minimization of liapunov function");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_SIMPDIV, "Simpdiv",
+			  "Solve via simplicial subdivision");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_GOBIT, "Gobit",
+			  "Compute quantal response equilibrium");
+  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_GOBITGRID, "GobitGrid",
+			  "Compute quantal response equilibrium");
+  solve_menu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
+		     "Solve with a particular algorithm");
 
-    wxMenu *solve_menu = new wxMenu;
-    solve_menu->Append(NFG_SOLVE_SOLVE_MENU,     "&Solve",       "Solution modules");
-    solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...", "Standard solutions", TRUE);
+  solve_menu->AppendSeparator();
 
-    wxMenu *solve_settings_menu = new wxMenu;
-    solve_settings_menu->Append(NFG_SOLVE_ALGORITHM_MENU, "&Algorithm", 
-                                "Choose current algorithm");
-    solve_settings_menu->Append(NFG_SOLVE_DOMINANCE_MENU, "&Dominance", "ElimDom options");
-    solve_menu->Append(NFG_SOLVE_SETTINGS_MENU,  "&Custom", solve_settings_menu, 
-                       "Control default options");
-    solve_menu->Append(NFG_SOLVE_GAMEINFO_MENU,  "Game&Info", "Display some game info");
+  wxMenu *solve_settings_menu = new wxMenu;
+  solve_settings_menu->Append(NFG_SOLVE_ALGORITHM_MENU, "&Algorithm", 
+			      "Choose current algorithm");
+  solve_settings_menu->Append(NFG_SOLVE_DOMINANCE_MENU, "&Dominance", "ElimDom options");
+  solve_menu->Append(NFG_SOLVE_SETTINGS_MENU,  "&Custom", solve_settings_menu, 
+		     "Control default options");
+  solve_menu->Append(NFG_SOLVE_GAMEINFO_MENU,  "Game&Info", "Display some game info");
+  
+  wxMenu *inspect_menu = new wxMenu;
+  inspect_menu->Append(NFG_SOLVE_INSPECT_MENU,   "&Solutions", "Inspect existing solutions");
+  inspect_menu->Append(NFG_SOLVE_FEATURES_MENU,  "In&fo",      "Advanced solution features");
+  
+  wxMenu *prefs_menu = new wxMenu;
+  prefs_menu->Append(NFG_PREFS_OUTCOMES_MENU, "&Outcomes", "Configure outcome display");
+  prefs_menu->Append(OPTIONS_MENU,            "&Display",  "Configure display options");
+  prefs_menu->Append(NFG_DISPLAY_COLORS,      "Colors",    "Set Player Colors");
+  prefs_menu->Append(NFG_DISPLAY_ACCELS,      "Accels",    "Edit Accelerators");
 
-    wxMenu *inspect_menu = new wxMenu;
-    inspect_menu->Append(NFG_SOLVE_INSPECT_MENU,   "&Solutions", "Inspect existing solutions");
-    inspect_menu->Append(NFG_SOLVE_FEATURES_MENU,  "In&fo",      "Advanced solution features");
+  wxMenu *help_menu = new wxMenu;
+  help_menu->Append(HELP_MENU_ABOUT,    "&About");
+  help_menu->Append(HELP_MENU_CONTENTS, "&Contents");
 
-    wxMenu *prefs_menu = new wxMenu;
-    prefs_menu->Append(NFG_PREFS_OUTCOMES_MENU, "&Outcomes", "Configure outcome display");
-    prefs_menu->Append(OPTIONS_MENU,            "&Display",  "Configure display options");
-    prefs_menu->Append(NFG_DISPLAY_COLORS,      "Colors",    "Set Player Colors");
-    prefs_menu->Append(NFG_DISPLAY_ACCELS,      "Accels",    "Edit Accelerators");
+  wxMenuBar *tmp_menubar = new wxMenuBar;
+  tmp_menubar->Append(file_menu,     "&File");
+  tmp_menubar->Append(edit_menu,     "&Edit");
+  tmp_menubar->Append(supports_menu, "S&upports");
+  tmp_menubar->Append(solve_menu,    "&Solve");
+  tmp_menubar->Append(inspect_menu,  "&Inspect");
+  tmp_menubar->Append(prefs_menu,    "&Prefs");
+  tmp_menubar->Append(help_menu,     "&Help");
+  
+  // Need these to enable/disable them depending on existance of solutions
+  inspect_item = tmp_menubar->FindMenuItem("Solve", "Inspect");
+  tmp_menubar->Enable(inspect_item, FALSE);
 
-    wxMenu *help_menu = new wxMenu;
-    help_menu->Append(HELP_MENU_ABOUT,    "&About");
-    help_menu->Append(HELP_MENU_CONTENTS, "&Contents");
-
-    wxMenuBar *tmp_menubar = new wxMenuBar;
-    tmp_menubar->Append(file_menu,     "&File");
-    tmp_menubar->Append(edit_menu,     "&Edit");
-    tmp_menubar->Append(supports_menu, "S&upports");
-    tmp_menubar->Append(solve_menu,    "&Solve");
-    tmp_menubar->Append(inspect_menu,  "&Inspect");
-    tmp_menubar->Append(prefs_menu,    "&Prefs");
-    tmp_menubar->Append(help_menu,     "&Help");
-
-    // Need these to enable/disable them depending on existance of solutions
-    inspect_item = tmp_menubar->FindMenuItem("Solve", "Inspect");
-    tmp_menubar->Enable(inspect_item, FALSE);
-
-    return tmp_menubar;
+  return tmp_menubar;
 }
 
 
@@ -1111,88 +1163,94 @@ void NormalSpread::OnPrint(void)
 
 void NormalSpread::OnMenuCommand(int id)
 {
-    switch (id)
-    {
-    case NFG_PREFS_OUTCOMES_MENU: 
-        parent->OutcomeOptions();
-        break;
+  switch (id) {
+  case NFG_PREFS_OUTCOMES_MENU: 
+    parent->OutcomeOptions();
+    break;
 
-    case NFG_SOLVE_SOLVE_MENU: 
-        parent->Solve();
-        break;
+  case NFG_SOLVE_CUSTOM_ENUMPURE:
+  case NFG_SOLVE_CUSTOM_ENUMMIXED:
+  case NFG_SOLVE_CUSTOM_LCP:
+  case NFG_SOLVE_CUSTOM_LP:
+  case NFG_SOLVE_CUSTOM_LIAP:
+  case NFG_SOLVE_CUSTOM_SIMPDIV:
+  case NFG_SOLVE_CUSTOM_GOBIT:
+  case NFG_SOLVE_CUSTOM_GOBITGRID:
+    parent->Solve(id);
+    break;
 
-    case NFG_DISPLAY_COLORS: 
-        parent->SetColors();
-        break;
+  case NFG_DISPLAY_COLORS: 
+    parent->SetColors();
+    break;
 
-    case NFG_DISPLAY_ACCELS: 
-        parent->EditAccelerators();
-        break;
+  case NFG_DISPLAY_ACCELS: 
+    parent->EditAccelerators();
+    break;
 
-    case NFG_SOLVE_FEATURES_MENU: 
-        parent->SetOptions();
-        break;
+  case NFG_SOLVE_FEATURES_MENU: 
+    parent->SetOptions();
+    break;
 
-    case NFG_SOLVE_INSPECT_MENU: 
-        parent->InspectSolutions(CREATE_DIALOG);
-        break;
+  case NFG_SOLVE_INSPECT_MENU: 
+    parent->InspectSolutions(CREATE_DIALOG);
+    break;
 
-    case NFG_SOLVE_COMPRESS_MENU: 
-        parent->SolveElimDom();
-        break;
+  case NFG_SOLVE_COMPRESS_MENU: 
+    parent->SolveElimDom();
+    break;
 
-    case NFG_SOLVE_SUPPORTS_MENU: 
-        parent->ChangeSupport(CREATE_DIALOG);
-        break;
+  case NFG_SOLVE_SUPPORTS_MENU: 
+    parent->ChangeSupport(CREATE_DIALOG);
+    break;
 
-    case NFG_SOLVE_ALGORITHM_MENU: 
-        parent->SolveSetup(SOLVE_SETUP_CUSTOM);
-        break;
+  case NFG_SOLVE_ALGORITHM_MENU: 
+    parent->SolveSetup(SOLVE_SETUP_CUSTOM);
+    break;
 
-    case NFG_SOLVE_STANDARD_MENU: 
-        parent->SolveSetup(SOLVE_SETUP_STANDARD);
-        break;
+  case NFG_SOLVE_STANDARD_MENU: 
+    parent->SolveSetup(SOLVE_SETUP_STANDARD);
+    break;
 
-    case NFG_SOLVE_DOMINANCE_MENU: 
-        parent->DominanceSetup();
-        break;
+  case NFG_SOLVE_DOMINANCE_MENU: 
+    parent->DominanceSetup();
+    break;
 
-    case NFG_SOLVE_GAMEINFO_MENU: 
-        parent->ShowGameInfo();
-        break;
+  case NFG_SOLVE_GAMEINFO_MENU: 
+    parent->ShowGameInfo();
+    break;
 
-    case NFG_EDIT_GAME: 
-        parent->SetLabels(0);
-        break;
+  case NFG_EDIT_GAME: 
+    parent->SetLabels(0);
+    break;
 
-    case NFG_EDIT_STRATS: 
-        parent->SetLabels(1);
-        break;
+  case NFG_EDIT_STRATS: 
+    parent->SetLabels(1);
+    break;
 
-    case NFG_EDIT_PLAYERS: 
-        parent->SetLabels(2);
-        break;
+  case NFG_EDIT_PLAYERS: 
+    parent->SetLabels(2);
+    break;
 
-    case NFG_EDIT_OUTCOMES: 
-        parent->ChangeOutcomes(CREATE_DIALOG);
-        break;
+  case NFG_EDIT_OUTCOMES: 
+    parent->ChangeOutcomes(CREATE_DIALOG);
+    break;
 
-    case NFG_FILE_SAVE:
-        parent->Save();
-        break;
+  case NFG_FILE_SAVE:
+    parent->Save();
+    break;
 
-    case  NFG_ACCL_PAYOFF: 
-        parent->ChangePayoffs(CurRow(), CurCol());
-        break;
+  case  NFG_ACCL_PAYOFF: 
+    parent->ChangePayoffs(CurRow(), CurCol());
+    break;
 
-    case NFG_ACCL_NEXT_PAYOFF: 
-        parent->ChangePayoffs(CurRow(), CurCol(), true);
-        break;
+  case NFG_ACCL_NEXT_PAYOFF: 
+    parent->ChangePayoffs(CurRow(), CurCol(), true);
+    break;
 
-    default: 
-        SpreadSheet3D::OnMenuCommand(id);
-        break;
-    }
+  default: 
+    SpreadSheet3D::OnMenuCommand(id);
+    break;
+  }
 }
 
 

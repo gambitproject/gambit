@@ -1,6 +1,6 @@
 //
-// FILE: nfgsolng.cc -- definition of the class dealing with the GUI part of the
-// normal form solutions.
+// FILE: nfgsolng.cc -- definition of the class dealing with the GUI part of
+//                      the normal form solutions.
 //
 // $Id$
 //
@@ -18,54 +18,30 @@
 // sections in the defaults file(s)
 #define     SOLN_SECT               "Soln-Defaults"
 
-/************************** Nfg SOLUTION G ***************************/
-NfgSolutionG::NfgSolutionG(const Nfg &N, const NFSupport &S, NfgShowInterface *parent_)
-    : nf(N), sup(S), parent(parent_)
+//=========================================================================
+//                     NfgSolutionG: Member functions
+//=========================================================================
+
+NfgSolutionG::NfgSolutionG(const Nfg &p_nfg, const NFSupport &p_support,
+			   NfgShowInterface *p_parent)
+  : nf(p_nfg), sup(p_support), parent(p_parent)
 { }
 
-//***************************** NORMAL FORM SOLUTIONS **************
-// SolveLemke
+//=========================================================================
+//                     Derived classes, by algorithm
+//=========================================================================
 
-#include "lemke.h"
-#include "lemkeprm.h"
-
-NfgLemkeG::NfgLemkeG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
-{ }
-
-
-gList<MixedSolution> NfgLemkeG::Solve(void) const
-{
-    if (nf.NumPlayers() != 2)
-    {
-        wxMessageBox("LCP algorithm only works on 2 player games.", "Algorithm Error");
-    }
-
-    wxStatus status(parent->Frame(), "LCP Algorithm");
-    LemkeParamsSettings LPS;
-    LemkeParams P(status);
-    LPS.GetParams(P);
-    int npivots;
-    double time;
-    Lemke(sup, P, (gList<MixedSolution> &)solns, npivots, time);
-    return solns;
-}
-
-
-void NfgLemkeG::SolveSetup(void) const
-{
-    LemkeSolveParamsDialog(parent->Frame());
-}
-
-// Purenash
+//-----------
+// EnumPure
+//-----------
 
 #include "nfgpure.h"
 #include "purenprm.h"
 
-NfgEnumPureG::NfgEnumPureG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
+NfgEnumPureG::NfgEnumPureG(const Nfg &p_nfg, const NFSupport &p_support,
+			   NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
 { }
-
 
 gList<MixedSolution> NfgEnumPureG::Solve(void) const
 {
@@ -75,190 +51,244 @@ gList<MixedSolution> NfgEnumPureG::Solve(void) const
   int stopAfter;
   PNS.GetParams(stopAfter);
   try {
-    FindPureNash(sup, stopAfter, status, (gList<MixedSolution> &)solns);
+    FindPureNash(sup, stopAfter, status, solns);
   }
   catch (gSignalBreak &) { }
   return solns;
 }
 
-
-void NfgEnumPureG::SolveSetup(void) const
+bool NfgEnumPureG::SolveSetup(void) const
 {
-    PureNashSolveParamsDialog PNPD(parent->Frame());
+  PureNashSolveParamsDialog PNPD(parent->Frame());
+  return (PNPD.Completed() == wxOK);
 }
 
-
-#include "grid.h"
-#include "gridprm.h"
-
-NfgGobitAllG::NfgGobitAllG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent):
-    NfgSolutionG(N, sup, parent)
-{ }
-
-
-gList<MixedSolution> NfgGobitAllG::Solve(void) const
-{
-    GridParamsSettings GSPD(parent->Filename());
-    wxStatus *status = new wxStatus(parent->Frame(), "GobitAll Solve");
-    GridParams P(*status);
-    GSPD.GetParams(P);
-    GridSolve(sup, P, (gList<MixedSolution> &)solns);
-    delete status;
-    GSPD.RunPxi();
-    return solns;
-}
-
-
-void NfgGobitAllG::SolveSetup(void) const
-{
-    GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
-}
-
-
-#include "ngobit.h"
-#include "gobitprm.h"
-
-NfgGobitG::NfgGobitG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
-{ }
-
-
-gList<MixedSolution> NfgGobitG::Solve(void) const
-{
-    GobitParamsSettings GSPD(parent->Filename());
-    wxStatus *status = new wxStatus(parent->Frame(), "Gobit Algorithm");
-    NFGobitParams P(*status);
-    GSPD.GetParams(P);
-
-    MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
-
-    long nevals, nits;
-    Gobit(nf, P, start, (gList<MixedSolution> &)solns, nevals, nits);
-
-    delete status;
-    GSPD.RunPxi();
-    return solns;
-}
-
-
-void NfgGobitG::SolveSetup(void) const
-{
-    GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
-}
-
-
-#include "nliap.h"
-#include "liapprm.h"
-
-NfgLiapG::NfgLiapG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent):
-    NfgSolutionG(N, sup, parent)
-{ }
-
-
-gList<MixedSolution> NfgLiapG::Solve(void) const
-{
-    wxStatus status(parent->Frame(), "Liap Algorithm");
-    LiapParamsSettings LPS;
-    NFLiapParams P(status);
-    LPS.GetParams(P);
-    MixedProfile<gNumber> start(parent->CreateStartProfile(LPS.StartOption()));
-    gList<MixedSolution> temp_solns;
-    long nevals, nits;
-    Liap(nf, P, start, (gList<MixedSolution> &)solns, nevals, nits);
-    return solns;
-}
-
-
-void NfgLiapG::SolveSetup(void) const
-{
-    LiapSolveParamsDialog LSPD(parent->Frame());
-}
-
-
-#include "simpdiv.h"
-#include "simpprm.h"
-
-NfgSimpdivG::NfgSimpdivG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
-{ }
-
-
-gList<MixedSolution> NfgSimpdivG::Solve(void) const
-{
-    SimpdivParamsSettings SPS;
-    wxStatus status(parent->Frame(), "Simpdiv Algorithm");
-    SimpdivParams P(status);
-    SPS.GetParams(P);
-    int nevals, niters;
-    double time;
-    Simpdiv(sup, P, (gList<MixedSolution> &)solns, nevals, niters, time);
-    return solns;
-}
-
-
-void NfgSimpdivG::SolveSetup(void) const
-{
-    SimpdivSolveParamsDialog SDPD(parent->Frame());
-}
-
+//------------
+// EnumMixed
+//------------
 
 #include "enum.h"
 #include "enumprm.h"
 
-NfgEnumG::NfgEnumG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
+NfgEnumG::NfgEnumG(const Nfg &p_nfg, const NFSupport &p_support,
+		   NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
 { }
-
 
 gList<MixedSolution> NfgEnumG::Solve(void) const
 {
-    EnumParamsSettings EPS;
-    wxEnumStatus status(parent->Frame());
-    EnumParams P(status);
-    EPS.GetParams(P);
-    long npivots;
-    double time;
-    Enum(sup, P, (gList<MixedSolution> &)solns, npivots, time);
-    return solns;
+  EnumParamsSettings EPS;
+  wxEnumStatus status(parent->Frame());
+  EnumParams P(status);
+  EPS.GetParams(P);
+  long npivots;
+  double time;
+  Enum(sup, P, solns, npivots, time);
+  return solns;
 }
 
-
-void NfgEnumG::SolveSetup(void) const
+bool NfgEnumG::SolveSetup(void) const
 {
-    EnumSolveParamsDialog ESPD(parent->Frame());
+  EnumSolveParamsDialog ESPD(parent->Frame());
+  return (ESPD.Completed() == wxOK);
 }
 
+//------------
+// LcpSolve
+//------------
+
+#include "lemke.h"
+#include "lemkeprm.h"
+
+NfgLemkeG::NfgLemkeG(const Nfg &p_nfg, const NFSupport &p_support,
+		     NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> NfgLemkeG::Solve(void) const
+{
+  if (nf.NumPlayers() != 2) {
+    wxMessageBox("LCP algorithm only works on 2 player games.",
+		 "Algorithm Error");
+    return gList<MixedSolution>();
+  }
+
+  wxStatus status(parent->Frame(), "LCP Algorithm");
+  LemkeParamsSettings LPS;
+  LemkeParams P(status);
+  LPS.GetParams(P);
+  int npivots;
+  double time;
+  Lemke(sup, P, solns, npivots, time);
+  return solns;
+}
+
+bool NfgLemkeG::SolveSetup(void) const
+{
+  LemkeSolveParamsDialog LSPD(parent->Frame());
+  return (LSPD.Completed() == wxOK);
+}
+
+//----------
+// LpSolve
+//----------
 
 #include "nfgcsum.h"
 #include "csumprm.h"
 
-NfgZSumG::NfgZSumG(const Nfg &N, const NFSupport &sup, NfgShowInterface *parent)
-    : NfgSolutionG(N, sup, parent)
+NfgZSumG::NfgZSumG(const Nfg &p_nfg, const NFSupport &p_support,
+		   NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
 { }
-
 
 gList<MixedSolution> NfgZSumG::Solve(void) const
 {
-    if (nf.NumPlayers() > 2 || !IsConstSum(nf))
-    {
-        wxMessageBox("Only valid for two-person zero-sum games");
-        return solns;
-    }
-
-    wxStatus status(parent->Frame(), "LP Algorithm");
-    status << "Progress not implemented\n" << "Cancel button disabled\n";
-    LPParamsSettings LPPS;
-    ZSumParams P;
-    LPPS.GetParams(P);
-    int npivots;
-    double time;
-    ZSum(sup, P, (gList<MixedSolution> &)solns, npivots, time);
+  if (nf.NumPlayers() > 2 || !IsConstSum(nf)) {
+    wxMessageBox("Only valid for two-person zero-sum games");
     return solns;
+  }
+
+  wxStatus status(parent->Frame(), "LP Algorithm");
+  status << "Progress not implemented\n" << "Cancel button disabled\n";
+  LPParamsSettings LPPS;
+  ZSumParams P;
+  LPPS.GetParams(P);
+  int npivots;
+  double time;
+  ZSum(sup, P, solns, npivots, time);
+  return solns;
 }
 
-
-void NfgZSumG::SolveSetup(void) const
+bool NfgZSumG::SolveSetup(void) const
 {
-    LPSolveParamsDialog LPD(parent->Frame());
+  LPSolveParamsDialog LPD(parent->Frame());
+  return (LPD.Completed() == wxOK);
 }
+
+//--------
+// Liap
+//--------
+
+#include "nliap.h"
+#include "liapprm.h"
+
+NfgLiapG::NfgLiapG(const Nfg &p_nfg, const NFSupport &p_support,
+		   NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> NfgLiapG::Solve(void) const
+{
+  wxStatus status(parent->Frame(), "Liap Algorithm");
+  LiapParamsSettings LPS;
+  NFLiapParams P(status);
+  LPS.GetParams(P);
+  MixedProfile<gNumber> start(parent->CreateStartProfile(LPS.StartOption()));
+  long nevals, nits;
+  Liap(nf, P, start, solns, nevals, nits);
+  return solns;
+}
+
+bool NfgLiapG::SolveSetup(void) const
+{
+  LiapSolveParamsDialog LSPD(parent->Frame());
+  return (LSPD.Completed() == wxOK);
+}
+
+//----------
+// Simpdiv
+//----------
+
+#include "simpdiv.h"
+#include "simpprm.h"
+
+NfgSimpdivG::NfgSimpdivG(const Nfg &p_nfg, const NFSupport &p_support,
+			 NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> NfgSimpdivG::Solve(void) const
+{
+  SimpdivParamsSettings SPS;
+  wxStatus status(parent->Frame(), "Simpdiv Algorithm");
+  SimpdivParams P(status);
+  SPS.GetParams(P);
+  int nevals, niters;
+  double time;
+  Simpdiv(sup, P, solns, nevals, niters, time);
+  return solns;
+}
+
+bool NfgSimpdivG::SolveSetup(void) const
+{
+  SimpdivSolveParamsDialog SDPD(parent->Frame());
+  return (SDPD.Completed() == wxOK);
+}
+
+//----------
+// Gobit
+//----------
+
+#include "ngobit.h"
+#include "gobitprm.h"
+
+NfgGobitG::NfgGobitG(const Nfg &p_nfg, const NFSupport &p_support,
+		     NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> NfgGobitG::Solve(void) const
+{
+  GobitParamsSettings GSPD(parent->Filename());
+  wxStatus *status = new wxStatus(parent->Frame(), "Gobit Algorithm");
+  NFGobitParams P(*status);
+  GSPD.GetParams(P);
+
+  MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
+
+  long nevals, nits;
+  Gobit(nf, P, start, solns, nevals, nits);
+
+  delete status;
+  GSPD.RunPxi();
+  return solns;
+}
+
+bool NfgGobitG::SolveSetup(void) const
+{
+  GobitSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+  return (GSPD.Completed() == wxOK);
+}
+
+//-------------
+// GobitGrid
+//-------------
+
+#include "grid.h"
+#include "gridprm.h"
+
+NfgGobitAllG::NfgGobitAllG(const Nfg &p_nfg, const NFSupport &p_support,
+			   NfgShowInterface *p_parent)
+  : NfgSolutionG(p_nfg, p_support, p_parent)
+{ }
+
+gList<MixedSolution> NfgGobitAllG::Solve(void) const
+{
+  GridParamsSettings GSPD(parent->Filename());
+  wxStatus *status = new wxStatus(parent->Frame(), "GobitGrid Solve");
+  GridParams P(*status);
+  GSPD.GetParams(P);
+  GridSolve(sup, P, solns);
+  delete status;
+  GSPD.RunPxi();
+  return solns;
+}
+
+bool NfgGobitAllG::SolveSetup(void) const
+{
+  GridSolveParamsDialog GSPD(parent->Frame(), parent->Filename());
+  return (GSPD.Completed() == wxOK);
+}
+
+
 

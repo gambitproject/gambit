@@ -132,7 +132,7 @@ public:
     void OnOk(void);
 
     // Now come the solution functions
-    void Solve(void);
+    void Solve(int);
     void SolveSetup(int what);
     void InspectSolutions(int what);
     void ClearSolutions(void);
@@ -190,42 +190,16 @@ public:
                  wxFrame *pframe = 0);
 
     // Takes care of updating the player's strategy choice boxes
-    void UpdateProfile(void)
-    {
-        gArray<int> profile(strat_profile.Length());
-
-        for (int i = 1; i <= strat_profile.Length(); i++)
-            profile[i] = strat_profile[i]->GetSelection()+1;
-
-        parent->UpdateProfile(profile);
-        SetCurRow(profile[pl1]);
-        SetCurCol(profile[pl2]);
-    }
+    void UpdateProfile(void);
 
     // Takes care of updating what players are used for row/col
     void UpdatePlayers(void)
     { parent->SetPlayers(row_choice->GetSelection()+1, col_choice->GetSelection()+1); }
 
     // Allows the user to set the entire profile at one time
-    void SetProfile(const gArray<int> &profile)
-    {
-        for (int i = 1; i <= strat_profile.Length(); i++) 
-            strat_profile[i]->SetSelection(profile[i]-1);
-
-        SetCurRow(profile[pl1]);
-        SetCurCol(profile[pl2]);
-    }
-
+    void SetProfile(const gArray<int> &profile);
     // Returns the current profile
-    gArray<int> GetProfile(void)
-    {
-        gArray<int> profile(strat_profile.Length());
-
-        for (int i = 1; i <= strat_profile.Length(); i++)
-            profile[i] = strat_profile[i]->GetSelection()+1;
-
-        return profile;
-    }
+    gArray<int> GetProfile(void);
 
     // Set Dimensionality.  This is needed for elimdom stuff
     void SetDimensionality(const NFSupport *sup);
@@ -309,20 +283,6 @@ public:
     {
         NormalSpread *ns = (NormalSpread *)ob.GetClientData();
         ns->UpdatePlayers();
-        ns->CanvasFocus();
-    }
-
-    static void normal_solve_func(wxButton &ob, wxEvent &)
-    {
-        NormalSpread *ns = (NormalSpread *)ob.GetClientData();
-        ns->parent->Solve();
-        ns->CanvasFocus();
-    }
-
-    static void normal_options_func(wxButton &ob, wxEvent &)
-    {
-        NormalSpread *ns = (NormalSpread *)ob.GetClientData();
-        ns->OnOptions();
         ns->CanvasFocus();
     }
 };

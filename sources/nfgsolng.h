@@ -21,16 +21,17 @@ class NfgShowInterface   {
 };
 
 class NfgSolutionG   {
- protected:
+protected:
   const Nfg &nf;
   const NFSupport &sup;
   NfgShowInterface *parent;
-  gList<MixedSolution> solns;
- public:
+  mutable gList<MixedSolution> solns;
+
+public:
   NfgSolutionG(const Nfg &E,const NFSupport &S,NfgShowInterface *parent);
   virtual ~NfgSolutionG()   { }
   virtual gList<MixedSolution> Solve(void) const = 0;
-  virtual void SolveSetup(void) const = 0;
+  virtual bool SolveSetup(void) const = 0;
 };
 
 // Extensive Form Liap
@@ -39,7 +40,7 @@ class NfgLiapG : public NfgSolutionG   {
   NfgLiapG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgLiapG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgLemkeG : public NfgSolutionG   {
@@ -47,7 +48,7 @@ class NfgLemkeG : public NfgSolutionG   {
   NfgLemkeG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgLemkeG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgEnumPureG : public NfgSolutionG  {
@@ -55,7 +56,7 @@ class NfgEnumPureG : public NfgSolutionG  {
   NfgEnumPureG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgEnumPureG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgGobitAllG : public NfgSolutionG  {
@@ -63,7 +64,7 @@ class NfgGobitAllG : public NfgSolutionG  {
   NfgGobitAllG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgGobitAllG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgGobitG : public NfgSolutionG   {
@@ -71,7 +72,7 @@ class NfgGobitG : public NfgSolutionG   {
   NfgGobitG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgGobitG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgSimpdivG : public NfgSolutionG   {
@@ -79,7 +80,7 @@ class NfgSimpdivG : public NfgSolutionG   {
   NfgSimpdivG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgSimpdivG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgEnumG : public NfgSolutionG  {
@@ -87,7 +88,7 @@ class NfgEnumG : public NfgSolutionG  {
   NfgEnumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgEnumG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
 class NfgZSumG : public NfgSolutionG   {
@@ -95,9 +96,8 @@ class NfgZSumG : public NfgSolutionG   {
   NfgZSumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
   virtual ~NfgZSumG()   { }
   virtual gList<MixedSolution> Solve(void) const;
-  virtual void SolveSetup(void) const;
+  virtual bool SolveSetup(void) const;
 };
 
-
-#endif
+#endif  // NFGSOLNG_H
 
