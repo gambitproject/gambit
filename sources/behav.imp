@@ -57,17 +57,17 @@ ChanceInfoset<T>::ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
 template <class T> void ChanceInfoset<T>::InsertAction(int where)
 { 
   actions.Insert(new Action(where, "", this), where);
+  probs.Insert((T) 0, where);
   for (; where <= actions.Length(); where++)
     actions[where]->number = where;
-  probs.Insert((T) 0, where);
 }
 
 template <class T> void ChanceInfoset<T>::RemoveAction(int which)
 {
   delete actions.Remove(which);
+  probs.Remove(which);
   for (; which <= actions.Length(); which++)
     actions[which]->number = which;
-  probs.Remove(which);
 }
 
 template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
