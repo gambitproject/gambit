@@ -38,7 +38,7 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
   iter.First();
 
   theHtml += wxString::Format("<center><h1>%s<h1></center>\n",
-			      (char *) p_nfg.GetTitle());
+			      (char *) p_nfg.GetLabel());
 
   do {
     StrategyProfile profile(iter.GetProfile());

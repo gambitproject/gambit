@@ -35,7 +35,7 @@
 staticforward void strategy_dealloc(strategyobject *);
 staticforward PyObject *strategy_getattr(strategyobject *, char *);
 staticforward int strategy_compare(strategyobject *, strategyobject *); 
-staticforward int strategy_print(strategyobject *, FILE *, int);
+staticforward PyObject *strategy_str(strategyobject *);
 
 PyTypeObject Strategytype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -47,7 +47,7 @@ PyTypeObject Strategytype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  strategy_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   strategy_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) strategy_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     strategy_compare,      /* tp_compare  "x > y"       */
@@ -61,7 +61,7 @@ PyTypeObject Strategytype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     strategy_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -156,11 +156,11 @@ strategy_compare(strategyobject *obj1, strategyobject *obj2)
   }
 }
 
-static int
-strategy_print(strategyobject *self, FILE *fp, int flags)
+static PyObject *
+strategy_str(strategyobject *self)
 {
-  fprintf(fp, "<{strategy} \"%s\">", (char *) self->m_strategy->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{strategy} \"%s\">",
+			     (char *) self->m_strategy->GetLabel());
 }
 
 /************************************************************************

@@ -178,7 +178,7 @@ static int Product(const gArray<int> &p_dim)
 gbt_nfg_game_rep::gbt_nfg_game_rep(const gArray<int> &p_dim)
   : m_refCount(1),
     m_revision(0), m_outcomeRevision(-1), 
-    m_title("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
+    m_label("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
     m_results(Product(p_dim)), m_efg(0)
 { }
 
@@ -339,7 +339,7 @@ void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
 
   try {
     p_file << "NFG 1 R";
-    p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+    p_file << " \"" << EscapeQuotes(GetLabel()) << "\" { ";
 
     for (int i = 1; i <= NumPlayers(); i++) {
       p_file << '"' << EscapeQuotes(GetPlayer(i).GetLabel()) << "\" ";
@@ -403,14 +403,14 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
   return outcome;
 }
 
-void gbtNfgGame::SetTitle(const gText &s) 
+void gbtNfgGame::SetLabel(const gText &p_label) 
 {
-  rep->m_title = s; 
+  rep->m_label = p_label;
   rep->m_revision++;
 }
 
-const gText &gbtNfgGame::GetTitle(void) const 
-{ return rep->m_title; }
+const gText &gbtNfgGame::GetLabel(void) const 
+{ return rep->m_label; }
 
 void gbtNfgGame::SetComment(const gText &s)
 {

@@ -112,7 +112,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
     }
     else {
       gbtNfgGame nfg(dialog.NumStrategies());
-      nfg.SetTitle("Untitled Normal Form Game");
+      nfg.SetLabel("Untitled Normal Form Game");
       for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
 	nfg.GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
       }

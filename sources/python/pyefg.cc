@@ -35,7 +35,7 @@
 staticforward void efg_dealloc(efgobject *);
 staticforward PyObject *efg_getattr(efgobject *, char *);
 staticforward int efg_compare(efgobject *, efgobject *);
-staticforward int efg_print(efgobject *, FILE *, int); 
+staticforward PyObject *efg_str(efgobject *);
 
 PyTypeObject Efgtype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -47,7 +47,7 @@ PyTypeObject Efgtype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  efg_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   efg_print,         /* tp_print    "print x"     */
+  (printfunc)   0,                 /* tp_print    "print x"     */
   (getattrfunc) efg_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     efg_compare,       /* tp_compare  "x > y"       */
@@ -61,7 +61,7 @@ PyTypeObject Efgtype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     efg_str,          /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -189,7 +189,7 @@ efg_newplayer(efgobject *self, PyObject *args)
   }
 
   efplayerobject *player = newefplayerobject();
-  *player->m_efplayer = self->m_efg->NewPlayer();
+  player->m_efplayer = new gbtEfgPlayer(self->m_efg->NewPlayer());
   return (PyObject *) player;
 }
 
@@ -329,11 +329,11 @@ efg_compare(efgobject *obj1, efgobject *obj2)
   }
 }
 
-static int
-efg_print(efgobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+efg_str(efgobject *self)
 {
-  fprintf(fp, "<{efg} \"%s\">", (char *) self->m_efg->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{efg} \"%s\">",
+			     (char *) self->m_efg->GetLabel());
 }
 
 /************************************************************************
@@ -341,7 +341,7 @@ efg_print(efgobject *self, FILE *fp, int /*flags*/)
  ************************************************************************/
 
 PyObject *
-gbt_new_efg(PyObject *self, PyObject *args)
+gbt_new_efg(PyObject */*self*/, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
     return NULL;

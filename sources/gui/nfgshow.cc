@@ -174,11 +174,11 @@ void NfgShow::OnUpdate(gbtGameView *)
   if (m_doc->GetFilename() != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", 
 			      m_doc->GetFilename().c_str(), 
-			      (char *) m_doc->GetNfg().GetTitle()));
+			      (char *) m_doc->GetNfg().GetLabel()));
   }
   else {
     SetTitle(wxString::Format("Gambit - %s",
-			      (char *) m_doc->GetNfg().GetTitle()));
+			      (char *) m_doc->GetNfg().GetLabel()));
   }
 
   wxMenuBar *menu = GetMenuBar();
@@ -460,11 +460,11 @@ void NfgShow::OnFilePrintPreview(wxCommandEvent &)
     new wxPrintPreview(new NfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(), 
 				       m_doc->GetColPlayer(),
-				       (char *) m_doc->GetNfg().GetTitle()),
+				       (char *) m_doc->GetNfg().GetLabel()),
 		       new NfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(),
 				       m_doc->GetColPlayer(),
-				       (char *) m_doc->GetNfg().GetTitle()),
+				       (char *) m_doc->GetNfg().GetLabel()),
 		       &data);
 
   if (!preview->Ok()) {
@@ -486,7 +486,7 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
   wxPrinter printer(&data);
   NfgPrintout printout(m_doc->GetNfg(),
 		       m_doc->GetRowPlayer(), m_doc->GetColPlayer(),
-		       (char *) m_doc->GetNfg().GetTitle());
+		       (char *) m_doc->GetNfg().GetLabel());
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {

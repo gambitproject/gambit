@@ -1404,7 +1404,7 @@ PortionSpec NfgPortion::Spec(void) const
 void NfgPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(Nfg) \"" << (*m_value).GetTitle() << "\"";
+  s << "(Nfg) \"" << (*m_value).GetLabel() << "\"";
 }
 
 gText NfgPortion::OutputString(void) const

@@ -33,7 +33,7 @@
 gbtNfgGame CompressNfg(const gbtNfgGame &nfg, const gbtNfgSupport &S)
 {
   gbtNfgGame N(S.NumStrats());
-  N.SetTitle(nfg.GetTitle());
+  N.SetLabel(nfg.GetLabel());
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     gbtNfgPlayer player = N.GetPlayer(pl);

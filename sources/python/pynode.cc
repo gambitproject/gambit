@@ -35,7 +35,7 @@
 staticforward void node_dealloc(nodeobject *);
 staticforward PyObject *node_getattr(nodeobject *, char *);
 staticforward int node_compare(nodeobject *, nodeobject *); 
-staticforward int node_print(nodeobject *, FILE *, int);
+staticforward PyObject *node_str(nodeobject *);
 
 PyTypeObject Nodetype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -47,7 +47,7 @@ PyTypeObject Nodetype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  node_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   node_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) node_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     node_compare,      /* tp_compare  "x > y"       */
@@ -61,7 +61,7 @@ PyTypeObject Nodetype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     node_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -353,11 +353,11 @@ node_compare(nodeobject *obj1, nodeobject *obj2)
   }
 }
 
-static int
-node_print(nodeobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+node_str(nodeobject *self)
 {
-  fprintf(fp, "<{node} \"%s\">", (char *) self->m_node->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{node} \"%s\">",
+			     (char *) self->m_node->GetLabel());
 }
 
 /************************************************************************

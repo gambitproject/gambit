@@ -70,8 +70,8 @@ public:
   bool operator!=(const gbtNfgGame &) const;
 
   // GENERAL DATA ACCESS AND MANIPULATION  
-  void SetTitle(const gText &s);
-  const gText &GetTitle(void) const;
+  void SetLabel(const gText &s);
+  const gText &GetLabel(void) const;
 
   void SetComment(const gText &);
   const gText &GetComment(void) const;

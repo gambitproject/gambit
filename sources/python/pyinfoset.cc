@@ -38,7 +38,7 @@
 staticforward void action_dealloc(actionobject *);
 staticforward PyObject *action_getattr(actionobject *, char *);
 staticforward int action_compare(actionobject *, actionobject *); 
-staticforward int action_print(actionobject *, FILE *, int);
+staticforward PyObject *action_str(actionobject *);
 
 PyTypeObject Actiontype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -50,7 +50,7 @@ PyTypeObject Actiontype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  action_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   action_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) action_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     action_compare,      /* tp_compare  "x > y"       */
@@ -64,7 +64,7 @@ PyTypeObject Actiontype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     action_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -187,11 +187,11 @@ action_compare(actionobject *obj1, actionobject *obj2)
   }
 }
 
-static int
-action_print(actionobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+action_str(actionobject *self)
 {
-  fprintf(fp, "<{action} \"%s\">", (char *) self->m_action->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{action} \"%s\">",
+			     (char *) self->m_action->GetLabel());
 }
 
 /*************************************************************************
@@ -201,7 +201,7 @@ action_print(actionobject *self, FILE *fp, int /*flags*/)
 staticforward void infoset_dealloc(infosetobject *);
 staticforward PyObject *infoset_getattr(infosetobject *, char *);
 staticforward int infoset_compare(infosetobject *, infosetobject *); 
-staticforward int infoset_print(infosetobject *, FILE *, int);
+staticforward PyObject *infoset_str(infosetobject *);
 
 PyTypeObject Infosettype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -213,7 +213,7 @@ PyTypeObject Infosettype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  infoset_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   infoset_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) infoset_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     infoset_compare,      /* tp_compare  "x > y"       */
@@ -227,7 +227,7 @@ PyTypeObject Infosettype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     infoset_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -357,11 +357,11 @@ infoset_compare(infosetobject *obj1, infosetobject *obj2)
   }
 }
 
-static int
-infoset_print(infosetobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+infoset_str(infosetobject *self)
 {
-  fprintf(fp, "<{infoset} \"%s\">", (char *) self->m_infoset->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{infoset} \"%s\">",
+			     (char *) self->m_infoset->GetLabel());
 }
 
 /************************************************************************

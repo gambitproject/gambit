@@ -194,7 +194,7 @@ static Portion* GSM_Name(GSM &, Portion **param)
 
   switch (param[0]->Spec().Type) {
   case porNFG:
-    return new TextPortion(AsNfg(param[0]).GetTitle());
+    return new TextPortion(AsNfg(param[0]).GetLabel());
   case porNFPLAYER:
     return new TextPortion(AsNfgPlayer(param[0]).GetLabel());
   case porSTRATEGY:
@@ -400,7 +400,7 @@ static Portion *GSM_SetComment(GSM &, Portion **param)
 
 static Portion *GSM_SetName_Nfg(GSM &, Portion **param)
 {
-  AsNfg(param[0]).SetTitle(AsText(param[1]));
+  AsNfg(param[0]).SetLabel(AsText(param[1]));
   return param[0]->ValCopy();
 }
 

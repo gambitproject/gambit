@@ -38,7 +38,7 @@
 staticforward void efoutcome_dealloc(efoutcomeobject *);
 staticforward PyObject *efoutcome_getattr(efoutcomeobject *, char *);
 staticforward int efoutcome_compare(efoutcomeobject *, efoutcomeobject *); 
-staticforward int efoutcome_print(efoutcomeobject *, FILE *, int);
+staticforward PyObject *efoutcome_str(efoutcomeobject *);
 
 PyTypeObject Efoutcometype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -50,7 +50,7 @@ PyTypeObject Efoutcometype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  efoutcome_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   efoutcome_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) efoutcome_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     efoutcome_compare,   /* tp_compare  "x > y"       */
@@ -64,7 +64,7 @@ PyTypeObject Efoutcometype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     efoutcome_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -211,11 +211,11 @@ efoutcome_compare(efoutcomeobject *obj1, efoutcomeobject *obj2)
   }
 }
 
-static int
-efoutcome_print(efoutcomeobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+efoutcome_str(efoutcomeobject *self)
 {
-  fprintf(fp, "<{efoutcome} \"%s\">", (char *) self->m_efoutcome->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{efoutcome} \"%s\">",
+			     (char *) self->m_efoutcome->GetLabel());
 }
 
 /*************************************************************************
@@ -225,7 +225,7 @@ efoutcome_print(efoutcomeobject *self, FILE *fp, int /*flags*/)
 staticforward void nfoutcome_dealloc(nfoutcomeobject *);
 staticforward PyObject *nfoutcome_getattr(nfoutcomeobject *, char *);
 staticforward int nfoutcome_compare(nfoutcomeobject *, nfoutcomeobject *); 
-staticforward int nfoutcome_print(nfoutcomeobject *, FILE *, int);
+staticforward PyObject *nfoutcome_str(nfoutcomeobject *);
 
 PyTypeObject Nfoutcometype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -237,7 +237,7 @@ PyTypeObject Nfoutcometype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  nfoutcome_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   nfoutcome_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) nfoutcome_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     nfoutcome_compare,      /* tp_compare  "x > y"       */
@@ -251,7 +251,7 @@ PyTypeObject Nfoutcometype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     nfoutcome_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -398,11 +398,11 @@ nfoutcome_compare(nfoutcomeobject *obj1, nfoutcomeobject *obj2)
   }
 }
 
-static int
-nfoutcome_print(nfoutcomeobject *self, FILE *fp, int flags)
+static PyObject *
+nfoutcome_str(nfoutcomeobject *self)
 {
-  fprintf(fp, "<{nfoutcome} \"%s\">", (char *) self->m_nfoutcome->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{nfoutcome} \"%s\">",
+			     (char *) self->m_nfoutcome->GetLabel());
 }
 
 /************************************************************************

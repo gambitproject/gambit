@@ -129,7 +129,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
   }
   
   gbt_nfg_game_rep *nfg = new gbt_nfg_game_rep(rep);
-  nfg->m_title = rep->m_label;
+  nfg->m_label = rep->m_label;
   nfg->m_dimensions = gArray<int>(NumPlayers());
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
@@ -145,7 +145,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
   gbtNfgGame afg(gArray<int>(p_efg.NumActions()));
 
   p_efg.rep->afg = afg;
-  afg.SetTitle(p_efg.GetLabel() + " (Agent Form)");
+  afg.SetLabel(p_efg.GetLabel() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= p_efg.NumPlayers(); epl++)   {
     for (int iset = 1; iset <= p_efg.GetPlayer(epl).NumInfosets(); iset++, npl++)  {

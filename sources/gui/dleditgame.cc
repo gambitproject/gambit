@@ -61,7 +61,7 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   }
   else {
     m_title = new wxTextCtrl(this, -1, 
-			     (const char *) m_doc->GetNfg().GetTitle());
+			     (const char *) m_doc->GetNfg().GetLabel());
   }
 
   titleSizer->Add(m_title, 1, wxALL | wxCENTER | wxEXPAND, 5);
@@ -259,7 +259,7 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
   }
   else {
     gbtNfgGame nfg = p_doc->GetNfg();
-    nfg.SetTitle(m_title);
+    nfg.SetLabel(m_title);
     nfg.SetComment(m_comment);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       nfg.GetPlayer(pl).SetLabel(m_players[pl]);

@@ -34,7 +34,7 @@
 
 staticforward void mixed_dealloc(mixedobject *);
 staticforward PyObject *mixed_getattr(mixedobject *, char *);
-staticforward int mixed_print(mixedobject *, FILE *, int);
+staticforward PyObject *mixed_str(mixedobject *);
 
 PyTypeObject Mixedtype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -46,7 +46,7 @@ PyTypeObject Mixedtype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  mixed_dealloc,     /* tp_dealloc  ref-count==0  */
-  (printfunc)   mixed_print,       /* tp_print    "print x"     */
+  (printfunc)   0,       /* tp_print    "print x"     */
   (getattrfunc) mixed_getattr,     /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     0,                 /* tp_compare  "x > y"       */
@@ -60,7 +60,7 @@ PyTypeObject Mixedtype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     mixed_str,         /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -294,22 +294,11 @@ mixed_getattr(mixedobject *self, char *name)
   return Py_FindMethod(mixed_methods, (PyObject *) self, name);
 }
 
-static int
-mixed_print(mixedobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+mixed_str(mixedobject *self)
 {
-  fprintf(fp, "<{mixed} ");
-
-  for (int pl = 1; pl <= self->m_profile->GetGame().NumPlayers(); pl++)  {
-    fprintf(fp, "{ ");
-    gbtNfgPlayer player = self->m_profile->GetGame().GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      gbtNfgStrategy strategy = player.GetStrategy(st);
-      fprintf(fp, "%s ", (char *) ToText((*self->m_profile)(strategy)));
-    }
-    fprintf(fp, "}");
-  }
-  fprintf(fp, ">");
-  return 0;
+  return PyString_FromFormat("<{mixed} \"%s\">",
+			     (char *) self->m_profile->GetLabel());
 }
 
 void

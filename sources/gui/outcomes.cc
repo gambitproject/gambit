@@ -394,11 +394,11 @@ void gbtOutcomeFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != "") {
       SetTitle(wxString::Format("Gambit - Outcomes: [%s] %s", 
 				m_doc->GetFilename().c_str(), 
-				(char *) m_doc->GetNfg().GetTitle()));
+				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
       SetTitle(wxString::Format("Gambit - Outcomes: %s",
-				(char *) m_doc->GetNfg().GetTitle()));
+				(char *) m_doc->GetNfg().GetLabel()));
     }
   }
   Show(m_doc->ShowOutcomes());

@@ -35,7 +35,7 @@
 staticforward void nfg_dealloc(nfgobject *);
 staticforward PyObject *nfg_getattr(nfgobject *, char *);
 staticforward int nfg_compare(nfgobject *, nfgobject *);
-staticforward int nfg_print(nfgobject *, FILE *, int);
+staticforward PyObject *nfg_str(nfgobject *);
 
 PyTypeObject Nfgtype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -47,7 +47,7 @@ PyTypeObject Nfgtype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  nfg_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   nfg_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) nfg_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     nfg_compare,       /* tp_compare  "x > y"       */
@@ -61,7 +61,7 @@ PyTypeObject Nfgtype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     nfg_str,               /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -86,7 +86,7 @@ nfg_getlabel(nfgobject *self, PyObject *args)
     return NULL;
   }
 
-  return Py_BuildValue("s", (char *) self->m_nfg->GetTitle());
+  return Py_BuildValue("s", (char *) self->m_nfg->GetLabel());
 }
 
 static PyObject *
@@ -176,7 +176,7 @@ nfg_setlabel(nfgobject *self, PyObject *args)
     return NULL;
   }
 
-  self->m_nfg->SetTitle(label);
+  self->m_nfg->SetLabel(label);
   Py_INCREF(Py_None);
   return Py_None;
 }
@@ -264,11 +264,11 @@ nfg_compare(nfgobject *obj1, nfgobject *obj2)
   }
 }
 
-static int
-nfg_print(nfgobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+nfg_str(nfgobject *self)
 {
-  fprintf(fp, "<{nfg} \"%s\">", (char *) self->m_nfg->GetTitle());
-  return 0;
+  return PyString_FromFormat("<{nfg} \"%s\">",
+			     (char *) self->m_nfg->GetLabel());
 }
 
 /************************************************************************

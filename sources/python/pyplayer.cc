@@ -38,7 +38,7 @@
 staticforward void efplayer_dealloc(efplayerobject *);
 staticforward PyObject *efplayer_getattr(efplayerobject *, char *);
 staticforward int efplayer_compare(efplayerobject *, efplayerobject *); 
-staticforward int efplayer_print(efplayerobject *, FILE *, int);
+staticforward PyObject *efplayer_str(efplayerobject *);
 
 PyTypeObject Efplayertype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -50,7 +50,7 @@ PyTypeObject Efplayertype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  efplayer_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   efplayer_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) efplayer_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     efplayer_compare,   /* tp_compare  "x > y"       */
@@ -64,7 +64,7 @@ PyTypeObject Efplayertype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     efplayer_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -230,11 +230,11 @@ efplayer_compare(efplayerobject *obj1, efplayerobject *obj2)
   }
 }
 
-static int
-efplayer_print(efplayerobject *self, FILE *fp, int flags)
+static PyObject *
+efplayer_str(efplayerobject *self)
 {
-  fprintf(fp, "<{efplayer} \"%s\">", (char *) self->m_efplayer->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{efplayer} \"%s\">",
+			     (char *) self->m_efplayer->GetLabel());
 }
 
 /*************************************************************************
@@ -244,7 +244,7 @@ efplayer_print(efplayerobject *self, FILE *fp, int flags)
 staticforward void nfplayer_dealloc(nfplayerobject *);
 staticforward PyObject *nfplayer_getattr(nfplayerobject *, char *);
 staticforward int nfplayer_compare(nfplayerobject *, nfplayerobject *); 
-staticforward int nfplayer_print(nfplayerobject *, FILE *, int);
+staticforward PyObject *nfplayer_str(nfplayerobject *);
 
 PyTypeObject Nfplayertype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -256,7 +256,7 @@ PyTypeObject Nfplayertype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  nfplayer_dealloc,       /* tp_dealloc  ref-count==0  */
-  (printfunc)   nfplayer_print,         /* tp_print    "print x"     */
+  (printfunc)   0,         /* tp_print    "print x"     */
   (getattrfunc) nfplayer_getattr,       /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     nfplayer_compare,      /* tp_compare  "x > y"       */
@@ -270,7 +270,7 @@ PyTypeObject Nfplayertype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     nfplayer_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -406,11 +406,11 @@ nfplayer_compare(nfplayerobject *obj1, nfplayerobject *obj2)
   }
 }
 
-static int
-nfplayer_print(nfplayerobject *self, FILE *fp, int flags)
+static PyObject *
+nfplayer_str(nfplayerobject *self)
 {
-  fprintf(fp, "<{nfplayer} \"%s\">", (char *) self->m_nfplayer->GetLabel());
-  return 0;
+  return PyString_FromFormat("<{nfplayer} \"%s\">",
+			     (char *) self->m_nfplayer->GetLabel());
 }
 
 /************************************************************************

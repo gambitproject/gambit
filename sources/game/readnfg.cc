@@ -525,7 +525,7 @@ static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
     dim[pl] = p_data.NumStrategies(pl);
   }
   gbtNfgGame nfg(dim);
-  nfg.SetTitle(p_data.m_title);
+  nfg.SetLabel(p_data.m_title);
   nfg.SetComment(p_data.m_comment);
   
   for (int pl = 1; pl <= dim.Length(); pl++) {

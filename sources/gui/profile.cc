@@ -596,7 +596,7 @@ wxString gbtProfileGrid::GetReport(void) const
   gbtNfgGame nfg = m_doc->GetNfg();
 
   report += wxString::Format("Mixed strategy profiles on game '%s' [%s]\n\n",
-			     (const char *) nfg.GetTitle(),
+			     (const char *) nfg.GetLabel(),
 			     m_doc->GetFilename().c_str());
 
   report += wxString::Format("Number of profiles: %d\n", profiles.Length());
@@ -834,11 +834,11 @@ void gbtProfileFrame::OnUpdate(gbtGameView *p_sender)
     if (m_doc->GetFilename() != "") {
       SetTitle(wxString::Format("Gambit - Profiles: [%s] %s", 
 				m_doc->GetFilename().c_str(), 
-				(char *) m_doc->GetNfg().GetTitle()));
+				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
       SetTitle(wxString::Format("Gambit - Profiles: %s",
-				(char *) m_doc->GetNfg().GetTitle()));
+				(char *) m_doc->GetNfg().GetLabel()));
     }
   }
   Show(m_doc->ShowProfiles());

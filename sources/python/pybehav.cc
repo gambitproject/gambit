@@ -34,7 +34,7 @@
 
 staticforward void behav_dealloc(behavobject *);
 staticforward PyObject *behav_getattr(behavobject *, char *);
-staticforward int behav_print(behavobject *, FILE *, int);
+staticforward PyObject *behav_str(behavobject *);
 
 PyTypeObject Behavtype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -46,7 +46,7 @@ PyTypeObject Behavtype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  behav_dealloc,     /* tp_dealloc  ref-count==0  */
-  (printfunc)   behav_print,       /* tp_print    "print x"     */
+  (printfunc)   0,       /* tp_print    "print x"     */
   (getattrfunc) behav_getattr,     /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     0,                 /* tp_compare  "x > y"       */
@@ -60,7 +60,7 @@ PyTypeObject Behavtype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     behav_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -404,27 +404,11 @@ behav_getattr(behavobject *self, char *name)
   return Py_FindMethod(behav_methods, (PyObject *) self, name);
 }
 
-static int
-behav_print(behavobject *self, FILE *fp, int /*flags*/)
+static PyObject *
+behav_str(behavobject *self)
 {
-  fprintf(fp, "<{behav} ");
-
-  for (int pl = 1; pl <= self->m_profile->GetGame().NumPlayers(); pl++)  {
-    fprintf(fp, "{ ");
-    gbtEfgPlayer player = self->m_profile->GetGame().GetPlayer(pl);
-    for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      fprintf(fp, "{ ");
-      gbtEfgInfoset infoset = player.GetInfoset(iset);
-      for (int act = 1; act <= infoset.NumActions(); act++) {
-	gbtEfgAction action = infoset.GetAction(act);
-	fprintf(fp, "%s ", (char *) ToText((*self->m_profile)(action)));
-      }
-      fprintf(fp, "}");
-    }
-    fprintf(fp, "}");
-  }
-  fprintf(fp, ">");
-  return 0;
+  return PyString_FromFormat("<{behav} \"%s\">",
+			     (char *) self->m_profile->GetLabel());
 }
 
 void

@@ -82,7 +82,7 @@ struct gbt_nfg_game_rep {
 
   long m_revision;
   long m_outcomeRevision;
-  gText m_title, m_comment;
+  gText m_label, m_comment;
   gArray<int> m_dimensions;
 
   gBlock<gbt_nfg_player_rep *> m_players;

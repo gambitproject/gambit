@@ -35,7 +35,7 @@
 
 staticforward void nfsupport_dealloc(nfsupportobject *);
 staticforward PyObject *nfsupport_getattr(nfsupportobject *, char *);
-staticforward int nfsupport_print(nfsupportobject *, FILE *, int);
+staticforward PyObject *nfsupport_str(nfsupportobject *);
 
 PyTypeObject Nfsupporttype = {      /* main python type-descriptor */
   /* type header */                    /* shared by all instances */
@@ -47,7 +47,7 @@ PyTypeObject Nfsupporttype = {      /* main python type-descriptor */
 
   /* standard methods */
   (destructor)  nfsupport_dealloc,     /* tp_dealloc  ref-count==0  */
-  (printfunc)   nfsupport_print,       /* tp_print    "print x"     */
+  (printfunc)   0,       /* tp_print    "print x"     */
   (getattrfunc) nfsupport_getattr,     /* tp_getattr  "x.attr"      */
   (setattrfunc) 0,                 /* tp_setattr  "x.attr=v"    */
   (cmpfunc)     0,                 /* tp_compare  "x > y"       */
@@ -61,7 +61,7 @@ PyTypeObject Nfsupporttype = {      /* main python type-descriptor */
   /* more methods */
   (hashfunc)     0,                /* tp_hash    "dict[x]" */
   (ternaryfunc)  0,                /* tp_call    "x()"     */
-  (reprfunc)     0,                /* tp_str     "str(x)"  */
+  (reprfunc)     nfsupport_str,                /* tp_str     "str(x)"  */
 };  /* plus others: see Include/object.h */
 
 
@@ -128,11 +128,11 @@ nfsupport_getattr(nfsupportobject *self, char *name)
   return Py_FindMethod(nfsupport_methods, (PyObject *) self, name);
 }
 
-static int
-nfsupport_print(nfsupportobject */*self*/, FILE *fp, int /*flags*/)
+static PyObject *
+nfsupport_str(nfsupportobject *self)
 {
-  fprintf(fp, "<{nfsupport}>");
-  return 0;
+  return PyString_FromFormat("<{nfsupport} \"%s\">",
+			     (char *) self->m_support->GetLabel());
 }
 
 void
