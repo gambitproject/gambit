@@ -12,34 +12,14 @@
 //--------------------------------------------------------------------------
 
 template<class T> gSimplex<T>::gSimplex(const gSimplex<T>& given) 
-: vertices(given.vertices), sides(given.sides)
+: vertices(given.vertices)
 {
 }
-
-/*
-template<class T> gSimplex<T>::gSimplex(const gList< gInterval<T> >& given)
-: vertices(), sides(given)
-{
-}
-*/
 
 template<class T> gSimplex<T>::gSimplex(const gList< gVector<T> >& given)
-: vertices(given), sides()
+: vertices(given)
 {
 }
-
-/*
-template<class T> gSimplex<T>::gSimplex(const gVector<T> lower_bd, 
-                                            const gVector<T> upper_bd) 
-: vertices(), sides()
-{ 
-  assert (lower_bd.Check(upper_bd));
-  for (int i = 1; i <= upper_bd.Length(); i++) {
-    gInterval<T> side(lower_bd[i],upper_bd[i]);
-    sides += side;
-  }
-}
-*/
 
 template<class T> gSimplex<T>::~gSimplex() 
 {
@@ -109,23 +89,22 @@ template<class T> const int gSimplex<T>::NumberOfVertices() const
   return vertices.Length();
 }
 
-/*
 template<class T> const gVector<T> gSimplex<T>::LowerBound() const 
 { 
   gVector<T> answer(AmbientDmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
+  for (int i = 1; i <= AmbientDmnsn(); i++) 
+    answer[i] = LowerBoundOfCoord(i);
   return answer;
 }
-*/
 
-/*
+
 template<class T> const gVector<T> gSimplex<T>::UpperBound() const 
 { 
-  gVector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
+  gVector<T> answer(AmbientDmnsn());
+  for (int i = 1; i <= AmbientDmnsn(); i++) 
+    answer[i] = UpperBoundOfCoord(i);
   return answer;
 }
-*/
 
 template<class T> const T gSimplex<T>::LowerBoundOfCoord(const int& i) const 
 { 
@@ -224,14 +203,25 @@ template<class T> const gVector<T> gSimplex<T>::Center() const
 // "splintering" in which the longest dimension shrinks by only
 // n/(n+1) on each subdivision.
 
-  gArray<T> 
+  gVector<T> weights(NumberOfVertices());
+
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    for (int j = 1; j <= NumberOfVertices(); j++)
+      weights[i] += (Vertex(i) - Vertex(j)).NormSquared();
+  
+  T sum((T)0);
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    sum += weights[i];
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    weights[i] /= sum;
 
   gVector<T> answer(AmbientDmnsn());
-/*
-  for (int i = 1; i <= Dmnsn(); i++) 
-    answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
-		                     / ((T)2);
-*/
+  for (int j = 1; j <= AmbientDmnsn(); j++)
+    answer[j] = (T)0;
+
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    answer += Vertex(i) * weights[i];
+
   return answer;
 }
 
@@ -268,20 +258,24 @@ const int gSimplex<T>::NumberOfCellsInSubdivision() const
 template<class T> 
 const gSimplex<T> gSimplex<T>::SubdivisionCell(const int& index) const 
 { 
-  return *this; // Dummy to allow compilation
-/*
   int tmp = index;
-  gArray<int> updowns(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (tmp % 2 == 1) {
-      updowns[i] = 1; tmp--;
-    }
-    else
-      updowns[i] = 0;
-  tmp /= 2;
+  gArray<int> indices(NumberOfVertices() - 1);
+  for (int i = 2; i <= NumberOfVertices(); i++) {
+    indices[1 + NumberOfVertices() - i] = tmp % i;
+    tmp -= indices[1 + NumberOfVertices() - i];
+    tmp /= i;
   }
-  return Orthant(updowns);
-*/
+ 
+  gList<gVector<T> > new_vertices;
+  gList<gVector<T> > undeleted(VertexList());
+  for (int i = 1; i < NumberOfVertices(); i++) {
+    gSimplex<T> face(undeleted);
+    new_vertices += face.Center();
+    undeleted.Remove(i);
+  }
+  new_vertices += undeleted[1];
+
+  return gSimplex<T>(new_vertices);
 }
 
 //----------------------------------
@@ -298,7 +292,7 @@ gSimplex<gDouble>  TogDouble(const gSimplex<T>& given)
 }
 
 //--------------------------------------------------------------------------
-//                        interval -- printing
+//                        gSimplex -- printing
 //--------------------------------------------------------------------------
 
 template<class T> gOutput& operator << (gOutput& output, 

@@ -23,14 +23,11 @@
 template<class T> class gSimplex {
 private:
     gList<gVector<T> > vertices;
-    gList<gInterval<T> > sides;
 
 public:
     // constructors
     gSimplex(const gSimplex<T>&);
-//    gSimplex(const gList<gInterval<T> >&);
     gSimplex(const gList<gVector<T> >&);
-//    gSimplex(const gVector<T>, const gVector<T>);
     ~gSimplex();
 
     // operators
@@ -41,23 +38,22 @@ public:
     // information
     const int                AmbientDmnsn()                   const;
     const int                NumberOfVertices()               const;
-//    const gVector<T>         LowerBound()                     const;
-//    const gVector<T>         UpperBound()                     const;
+    const gVector<T>         LowerBound()                     const;
+    const gVector<T>         UpperBound()                     const;
     const T                  LowerBoundOfCoord(const int&)    const;
     const T                  UpperBoundOfCoord(const int&)    const;
     const T                  HeightInCoord(const int&)        const;
-    const gSimplex<T>      SameCenterDoubleSideLengths()    const;
-    const gSimplex<T>      Orthant(const gArray<int>&)      const;
-//    const gVector<T>         SideLengths()                    const;
+    const gSimplex<T>        SameCenterDoubleSideLengths()    const;
+    const gSimplex<T>        Orthant(const gArray<int>&)      const;
     bool                     Contains(const gVector<T> &)     const;
-    bool                     Contains(const gSimplex<T> &)  const;
+    bool                     Contains(const gSimplex<T> &)    const;
     const T                  Volume()                         const;
     const gVector<T>         Center()                         const;
     const gRectangle<T>      BoundingRectangle()              const;
     const gList<gVector<T> > VertexList()                     const;
     const gVector<T>         Vertex(const int&)               const;
     const int                NumberOfCellsInSubdivision()     const;
-    const gSimplex<T>      SubdivisionCell(const int&)      const;
+    const gSimplex<T>        SubdivisionCell(const int&)      const;
 
     // output
 friend gOutput& operator << (gOutput& output, const gSimplex<T>& x);
