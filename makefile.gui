@@ -12,10 +12,14 @@ WXDIR = /home/ironbark/gambit/wxwin
 WXINC = $(WXDIR)/include
 WXLIB = $(WXDIR)/lib/libwx$(GUISUFFIX).a
 
-INC = -I$(WXDIR)/include/base -I$(WXDIR)/include/x
+INC = -I$(WXDIR)/include/base -I$(WXDIR)/include/x $(EXTRINCLUDE)
 OBJDIR = objects$(GUISUFFIX)
-
-
+#need this since g++ stream classes are not installed on ironbark!
+EXTRINCLUDE=
+#need this to include the bsd lib for AIX
+EXTRLIB=
+#need this to define the __AIX symbol for AIX
+EXTROPT=
 
 EGUISOURCES=gambit.cc treewin.cc treewin1.cc twflash.cc treedraw.cc 	\
 	   twiniter.cc wxmisc.cc general.cc spread.cc extshow.cc \
@@ -28,8 +32,12 @@ EGUIOBJECTS=$(OBJDIR)/gambit.o $(OBJDIR)/treewin.o  \
 NGUISOURCES=normshow.cc
 NGUIOBJECTS=$(OBJDIR)/normshow.o 
 
-NSOLSOURCES=purenash.cc lemke.cc glpsolve.cc 
-NSOLOBJECTS=$(OBJDIR)/purenash.o $(OBJDIR)/lemke.o $(OBJDIR)/glpsolve.o
+NSOLSOURCES=purenash.cc lemke.cc glpsolve.cc liap.cc 
+NSOLOBJECTS=$(OBJDIR)/purenash.o $(OBJDIR)/lemke.o $(OBJDIR)/glpsolve.o \
+	    $(OBJDIR)/liap.o
+
+ESOLSOURCES=eliap.cc
+ESOLOBJECTS=$(OBJDIR)/eliap.o
 
 GSOURCES=gblock.cc gtuple.cc gvector.cc gpvector.cc gdpvect.cc gnarray.cc \
 	gambitio.cc gwatch.cc grandom.cc gconvert.cc g2dblock.cc gstring.cc \
@@ -51,8 +59,10 @@ OBJECTS = $(OBJDIR)/extform.o $(OBJDIR)/infoset.o \
 	  $(OBJDIR)/integer.o \
 	  $(OBJDIR)/rational.o $(OBJDIR)/efg2nfg.o
 
-ALLOBJECTS=$(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS) $(NSOLOBJECTS)
-ALLSOURCES=$(EGUISOURCES) $(NGUISOURCES) $(GSOURCES) $(SOURCES) $(NSOLSOURCES)
+ALLOBJECTS=$(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS) $(NSOLOBJECTS)\
+	   $(ESOLOBJECTS)
+ALLSOURCES=$(EGUISOURCES) $(NGUISOURCES) $(GSOURCES) $(SOURCES) $(NSOLSOURCES)\
+	   $(ESOLSOURCES)
 
 DEBUG = -ggdb
 WARN = 
@@ -62,21 +72,22 @@ CPPFLAGS = $(XINCLUDE) $(INC) -I$(WXDIR)/dummy $(GUI) $(DEBUG) $(WARN) $(OPT)
 LDFLAGS = $(XLIB) -L$(WXDIR)/lib
 
 $(OBJDIR)/%.o: %.cc
-	$(CC) -c $(CPPFLAGS) -o $@ $<
+	$(CC) -c $(CPPFLAGS) $(EXTROPT) -o $@ $<
 
 all:   $(OBJDIR) $(ALLOBJECTS) gambit$(GUISUFFIX) 
 
 motif:
 	$(MAKE) -f makefile GUI=-Dwx_motif OPT=$(OPT) GUISUFFIX=_motif 	\
 		LDLIBS='-lwx_motif -lXm -lXt -lX11 -lm -lg++' 		\
-		XVIEW_LINK=-D__AIX					\
-		XINCLUDE='-I/usr/include/X11 -I/usr/include/Xm' XLIB=-L/usr/lib/X11
+		EXTROPT=-D__AIX	EXTRLIB=-lbsd				\
+		XINCLUDE='-I/usr/include/X11 -I/usr/include/Xm' 	\
+		XLIB=-L/usr/lib/X11 EXTRINCLUDE=-I/home/ironbark/gambit/wxwin/g++-include
 		
 
 xview:
 	$(MAKE) -f makefile GUI=-Dwx_xview OPT=$(OPT) GUISUFFIX=_ol    	\
 		LDLIBS='-lwx_ol -lxview -lolgx -lX11 -lm -lg++'		\
-		XVIEW_LINK='$(WXDIR)/src/x/objects_ol/sb_scrol_ol.o'	\
+		XVIEW_LINK='$(WXDIR)/src/x/objects_ol/sb_scrol.o'	\
 		XINCLUDE=-I/usr/openwin/include	XLIB=-L/usr/openwin/lib	
 
 
@@ -92,9 +103,9 @@ $(OBJDIR):
 	mkdir $(OBJDIR)
 
 gambit$(GUISUFFIX): 
-	$(CC)  $(LDFLAGS) $(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS)\
+	$(CC)  $(LDFLAGS) $(EXTRLIB) $(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS)\
 	 $(NSOLOBJECTS)	$(LDLIBS) $(XVIEW_LINK)  -o gambit$(GUISUFFIX) 
-#	strip gambit$(GUISUFFIX)
+
 
 
 clean_motif:
