@@ -21,6 +21,7 @@
 
 #include "pxichild.h"
 #include "pxiplotn.h"
+#include "pxiplot2.h"
 
 #include "dleditdata.h"
 #include "dlformataxis.h"
@@ -111,6 +112,16 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 				 wxPoint(0, 0), wxSize(width, height),
 				 m_qreFiles, i, m_expData);
     m_plotBook->AddPage(plot, wxString::Format("Plot %d", i));
+    plot->Render();
+  }
+
+  if (m_qreFiles[1]->NumInfosets() == 2 &&
+      m_qreFiles[1]->NumStrategies(1) == 2 &&
+      m_qreFiles[1]->NumStrategies(2) == 2) {
+    PxiPlot *plot = new PxiPlot2(m_plotBook, wxPoint(0, 0), 
+				 wxSize(width, height), m_qreFiles,
+				 1, m_expData);
+    m_plotBook->AddPage(plot, "Square");
     plot->Render();
   }
 

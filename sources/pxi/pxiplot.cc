@@ -239,8 +239,6 @@ void PxiPlot::Update(wxDC& dc,int device)
   dc.SetFont(font);
   dc.SetTextForeground(m_lambdaAxisProp.m_color);
   dc.SetPen(*wxBLACK_PEN);
-  
-  dc.SetPen(*wxBLACK_PEN);
 
   // used for square aspect ratio that fits in window
   const int XOFF = 30;

@@ -24,11 +24,6 @@
 #include "equtrac.h"
 #include "pxi.h"
 
-#define NUM_COLORS	11
-static char *equ_colors[NUM_COLORS+1] =
-{"BLACK","RED","BLUE","GREEN","CYAN","VIOLET","MAGENTA","ORANGE",
- "PURPLE","PALE GREEN","BROWN","BLACK"}; // not pretty
-
 void PxiPlot2::DrawExpPoint_2(wxDC &dc, 
 			      double p_lambda,
 			      int pl1,int st1,int pl2,int st2,
@@ -61,57 +56,27 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc,
 }
 
 void PxiPlot2::PlotData_2(wxDC& dc, int x0, int y0, int cw,int ch,
-			  const PxiFile &f_header,int level)
+			  const PxiFile &p_file, int level)
 {
-  double x,y;
-  //  int iset;
-  int point_color=1; // color of the pixel, corresponds to equilibrium #
-  static int color_start;		// makes each overlay file be plotted a different color set
-  //  int max_equ=0;
-  //  int new_equ=0;
-  if (level==1) color_start=0;
-  
-  EquTracker equs;		// init the EquTracker class
+  int pl1 = 1, st1 = 1, pl2 = 2, st2 = 1;
 
-  // Figure out what strategies I am plotting.
-  int pl1=0,st1=0,pl2=0,st2=0;
-  for (int j=1;j<=f_header.NumInfosets();j++)
-    for (int i=1;i<=f_header.NumStrategies(j);i++)
-      if (IsStrategyShown(j, i)) {
-	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
-      }
+  for (int i = 1; i <= p_file.GetData().Length(); i++) {
+    DataLine probs = *p_file.GetData()[i];
 
-  for (int i = 1; i <= f_header.GetData().Length(); i++) {
-    DataLine probs = *f_header.GetData()[i];
-
+    /*
     if (probs.Lambda() < m_probAxisProp.m_scale.GetMaximum() && 
 	probs.Lambda() > m_probAxisProp.m_scale.GetMinimum()) {
-#ifdef NOT_PORTED_YET
-      point_color=equs.Check_Equ(probs,&new_equ,prev_point);
-#endif  
-      point_color = 2;
-      dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
+    */
+      dc.SetPen(wxPen(wxColour("BLUE"), 1, wxSOLID));
 
-      x=x0+probs[pl1][st1]*cw;
-      y=y0-probs[pl2][st2]*ch;
-#ifdef NOT_PORTED_YET
-      if (m_drawSettings.ConnectDots() && !new_equ) {
-	double prev_x=x0+(*prev_point)[pl1][st1]*cw;
-	double prev_y=y0-(*prev_point)[pl2][st2]*ch;
-	dc.DrawLine((int) prev_x, (int) prev_y, (int) x, (int) y);
-      }
-      else {
-#endif  // NOT_PORTED_YET
-	dc.DrawPoint((int) x, (int) y);
-#ifdef NOT_PORTED_YET
-      }
-#endif  // NOT_PORTED_YET
+      double x = x0 + probs[pl1][st1] * cw;
+      double y = y0 - probs[pl2][st2] * ch;
       dc.DrawPoint((int) x, (int) y);
       // if there is an experimental data point for this cur_e, plot it
-      //      if (exp_data) {
-	DrawExpPoint_2(dc,probs.Lambda(),pl1,st1,pl2,st2, x0,y0,cw,ch);
-	//    }
+      DrawExpPoint_2(dc,probs.Lambda(),pl1,st1,pl2,st2, x0,y0,cw,ch);
+      /*
     }
+      */
   }
 
   PlotLabels(dc,ch,cw);
@@ -120,68 +85,88 @@ void PxiPlot2::PlotData_2(wxDC& dc, int x0, int y0, int cw,int ch,
 void PxiPlot2::PlotAxis_2(wxDC& dc,
 			  int x0, int y0, int cw,int ch)
 {
-#ifdef NOT_PORTED_YET
   int i1;
   float tempf;
   char axis_label_str[90];
-  int num_plots=0;
-  float x_start = thisplot.GetMinY();
-  float x_end = thisplot.GetMaxY();
-  float y_start = thisplot.GetMinY();
-  float y_end = thisplot.GetMaxY();
+  double xStart = m_probAxisProp.m_scale.GetMinimum();
+  double xEnd = m_probAxisProp.m_scale.GetMaximum();
+  double yStart = m_probAxisProp.m_scale.GetMinimum();
+  double yEnd = m_probAxisProp.m_scale.GetMaximum();
 
   // temporary replacement of old constant; should be made configurable
-  const int XGRIDS = 10;
-  int XGRID = XGRIDS / cw;
+  const int GRID_H = 5;
+  int xgrid = cw / m_probAxisProp.m_scale.m_divisions; 
+  int ygrid = ch / m_probAxisProp.m_scale.m_divisions;
 
-  if (thisplot.ShowAxis()) {
+  if (m_probAxisProp.m_display.m_shown) {
     dc.DrawLine(x0, y0, x0, y0-ch);
-    dc.DrawLine(x0, y0, x0+cw, y0);}
-  if (thisplot.ShowSquare()) {
-    dc.DrawLine(x0+cw, y0-ch, x0, y0-ch);
-    dc.DrawLine(x0+cw, y0-ch, x0+cw, y0);}
-  for (i1=0;i1<=XGRIDS;i1++) {
-    if (thisplot.ShowTicks()) {
-      dc.DrawLine(x0+i1*XGRID, y0-GRID_H, x0+i1*XGRID, y0+GRID_H);
-      if (thisplot.ShowSquare())
-	dc.DrawLine( x0+i1*XGRID, y0-ch-GRID_H, x0+i1*XGRID,  y0-ch+GRID_H);
-    }
-    if (thisplot.ShowNums()) {
-      tempf=x_start+fabs((x_start-x_end)/XGRIDS)*i1;
-      sprintf(axis_label_str,"%2.1f",tempf);
-      wxCoord tw,th;
-      dc.GetTextExtent(axis_label_str,&tw,&th);
-      dc.DrawText(axis_label_str,
-		  x0+i1*XGRID-tw/2, y0+GRID_H);
-      if (thisplot.ShowSquare())
-	dc.DrawText(axis_label_str,
-		    x0+i1*XGRID-tw/2,y0-ch-GRID_H-th);
-    }
+    dc.DrawLine(x0, y0, x0+cw, y0);
   }
-  for (i1=0;i1<=YGRIDS;i1++) {
-    if (thisplot.ShowTicks()) {
-      dc.DrawLine(
-		  x0-GRID_H,   y0-ch+i1*YGRID,
-		  x0+GRID_H,   y0-ch+i1*YGRID);
+
+  /*
+  if (thisplot.ShowSquare()) {
+  */
+  if (true) {
+    dc.DrawLine(x0+cw, y0-ch, x0, y0-ch);
+    dc.DrawLine(x0+cw, y0-ch, x0+cw, y0);
+  }
+
+  for (i1 = 0; i1 <= m_probAxisProp.m_scale.m_divisions; i1++) {
+    if (m_probAxisProp.m_display.m_ticks) {
+      dc.DrawLine(x0+i1*xgrid, y0-GRID_H, x0+i1*xgrid, y0+GRID_H);
+      /*
       if (thisplot.ShowSquare())
-	dc.DrawLine(
-		    x0+cw-GRID_H,  y0-ch+i1*YGRID,
-		    x0+cw+GRID_H,  y0-ch+i1*YGRID);
+      */
+      if (true) {
+	dc.DrawLine(x0+i1*xgrid, y0-ch-GRID_H, x0+i1*xgrid,  y0-ch+GRID_H);
+      }
     }
-    if (thisplot.ShowNums()) {
-      tempf=y_end-fabs((y_start-y_end)/YGRIDS)*i1;
+
+    if (m_probAxisProp.m_display.m_numbers) {
+      tempf = xStart + fabs((xStart - xEnd) / m_probAxisProp.m_scale.m_divisions)*i1;
       sprintf(axis_label_str,"%3.2f",tempf);
       wxCoord tw,th;
       dc.GetTextExtent(axis_label_str,&tw,&th);
       dc.DrawText(axis_label_str,
-		  x0-GRID_H-tw,   y0-ch+i1*YGRID-th/2);
+		  x0+i1*xgrid-tw/2, y0+GRID_H);
+      /*
       if (thisplot.ShowSquare())
+      */
+      if (true) {
 	dc.DrawText(axis_label_str,
-		    x0+cw+GRID_H, y0-ch+i1*YGRID-th/2);
+		    x0+i1*xgrid-tw/2,y0-ch-GRID_H-th);
+      }
     }
   }
+  for (i1 = 0; i1 <= m_probAxisProp.m_scale.m_divisions; i1++) {
+    if (m_probAxisProp.m_display.m_ticks) {
+      dc.DrawLine(x0-GRID_H,   y0-ch+i1*ygrid,
+		  x0+GRID_H,   y0-ch+i1*ygrid);
+      /*
+      if (thisplot.ShowSquare()) 
+      */
+      if (true) {
+	dc.DrawLine(x0+cw-GRID_H,  y0-ch+i1*ygrid,
+		    x0+cw+GRID_H,  y0-ch+i1*ygrid);
+      }
+    }
 
-#endif // NOT_PORTED_YET
+    if (m_probAxisProp.m_display.m_numbers) {
+      tempf=yEnd-fabs((yStart-yEnd)/m_probAxisProp.m_scale.m_divisions)*i1;
+      sprintf(axis_label_str,"%3.2f",tempf);
+      wxCoord tw,th;
+      dc.GetTextExtent(axis_label_str,&tw,&th);
+      dc.DrawText(axis_label_str,
+		  x0-GRID_H-tw,   y0-ch+i1*ygrid-th/2);
+      /*
+      if (thisplot.ShowSquare())
+      */
+      if (true) {
+	dc.DrawText(axis_label_str,
+		    x0+cw+GRID_H, y0-ch+i1*ygrid-th/2);
+      }
+    }
+  }
 }
 
 void PxiPlot2::DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level)
@@ -196,6 +181,7 @@ void PxiPlot2::DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level)
 
 void PxiPlot2::OnEvent(wxMouseEvent &ev)
 {
+#ifdef UNUSED
   if (ev.ShiftDown() && ev.ButtonDown()) {  // use shift mouse click to add a label
     int w,h;
     GetClientSize(&w,&h);
@@ -220,9 +206,10 @@ void PxiPlot2::OnEvent(wxMouseEvent &ev)
     }
     Render();
   }
+#endif  // UNUSED
 }
 
-BEGIN_EVENT_TABLE(PxiPlot2, wxScrolledWindow)
+BEGIN_EVENT_TABLE(PxiPlot2, PxiPlot)
   EVT_MOUSE_EVENTS(PxiPlot2::OnEvent)
 END_EVENT_TABLE()
 
