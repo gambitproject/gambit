@@ -93,7 +93,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);

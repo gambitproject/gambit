@@ -14,6 +14,7 @@
 #include "wx/listctrl.h"
 #include "wx/sashwin.h"
 #include "wx/printdlg.h"
+#include "wx/notebook.h"
 
 #include "base/gmisc.h"
 
@@ -93,8 +94,6 @@ private:
   void OnToolsEquilibrium(wxCommandEvent &);
   void OnToolsQre(wxCommandEvent &);
 
-  void OnHelpContents(wxCommandEvent &);
-  void OnHelpIndex(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
 
   void OnSupportDuplicate(wxCommandEvent &);

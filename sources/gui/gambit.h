@@ -14,7 +14,6 @@
 #include "wx/wx.h"
 #include "wx/config.h"    // for wxConfig
 #include "wx/docview.h"   // for wxFileHistory
-#include "wx/wxhtml.h"    // for wxHtmlHelpController
 #include "wx/listctrl.h"
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
@@ -31,7 +30,6 @@ class Game;
 class GambitApp : public wxApp {
 private:
   wxString m_currentDir; /* Current position in directory tree. */
-  wxHtmlHelpController m_help;
   wxFileHistory m_fileHistory;
 
   gBlock<Game *> m_gameList;
@@ -44,8 +42,6 @@ public:
   
   const wxString &CurrentDir(void)  { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir)  { m_currentDir = p_dir; }
-
-  wxHtmlHelpController &HelpController(void) { return m_help; }
 
   void AddGame(efgGame *, EfgShow *);
   void AddGame(Nfg *, NfgShow *);

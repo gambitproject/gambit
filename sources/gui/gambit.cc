@@ -62,14 +62,6 @@ bool GambitApp::OnInit(void)
     wxYield();
   }
 
-  const long c_defaultFrameWidth = 400;
-  const long c_defaultFrameHeight = 300;
-  long frameWidth, frameHeight;
-  config.Read("/Sizes/MainFrameWidth", &frameWidth,
-	      c_defaultFrameWidth);
-  config.Read("/Sizes/MainFrameHeight", &frameHeight,
-	      c_defaultFrameHeight);
-  
   efgGame *efg = new efgGame;
   efg->NewPlayer()->SetName("Player 1");
   efg->NewPlayer()->SetName("Player 2");
@@ -79,10 +71,7 @@ bool GambitApp::OnInit(void)
   AddGame(efg, efgShow);
 
   // Set up the help system.
-  //  m_help.SetTempDir(".");
   wxInitAllImageHandlers();
-  // m_help.AddBook("help/guiman.hhp");
-  // m_help.AddBook("help/gclman.hhp");
 
   // Process command line arguments, if any.
 #ifdef UNUSED
@@ -172,12 +161,10 @@ void GambitApp::OnFileMRUFile(wxCommandEvent &p_event)
 
 void GambitApp::OnHelpContents(void)
 {
-  //  HelpController().DisplaySection("Main page");
 }
 
 void GambitApp::OnHelpIndex(void)
 {
-  //  HelpController().DisplayContents();
 }
 
 void GambitApp::OnHelpAbout(wxWindow *p_parent)

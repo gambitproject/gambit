@@ -80,7 +80,7 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
   
   SetSizer(topSizer); 

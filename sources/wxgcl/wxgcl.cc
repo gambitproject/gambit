@@ -290,10 +290,7 @@ bool GclApp::OnInit(void)
 				 wxPoint(0, 0), wxSize(640, 480));
 
   // Set up the help system.
-  // Long run feature: use wxConfig to remember where helpfile is stored
   wxInitAllImageHandlers();
-  m_help.SetTempDir(".");
-  m_help.AddBook("../sources/help/gclman.hhp");
 
   frame->Show(true);
   
@@ -540,18 +537,16 @@ void GclFrame::OnPrefsOutputFont(wxCommandEvent &)
 
 void GclFrame::OnHelpContents(wxCommandEvent &)
 {
-  wxGetApp().HelpController().DisplayContents();
 }
 
 void GclFrame::OnHelpIndex(wxCommandEvent &)
 {
-  wxGetApp().HelpController().DisplayIndex();
 }
 
 void GclFrame::OnHelpAbout(wxCommandEvent &)
 {
   dialogAbout dialog(this, "About Gambit...", "Gambit Command Language",
-		     "Version 0.97 (alpha)");
+		     "Version " VERSION);
   dialog.ShowModal();
 }
 

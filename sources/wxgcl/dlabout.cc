@@ -1,7 +1,10 @@
 //
-// FILE: dlabout.cc -- Implementation of "about" dialog
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of "about" dialog
 //
 
 #include "wx/wxprec.h"
@@ -38,12 +41,17 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
   topSizer->Add(new wxStaticText(this, -1, "http://www.wxwindows.org"),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 1999-2001"),
+  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 2002"),
 		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "California Institute of Technology"),
+  topSizer->Add(new wxStaticText(this, -1, "The Gambit Project"),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "Funding provided by the National Science Foundation"),
-		0, wxALL | wxALIGN_CENTER, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, "This program is free software,"),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "distributed under the terms of"),
+		0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "the GNU General Public License"),
+		0, wxALIGN_CENTER, 5);
 
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
   okButton->SetDefault();

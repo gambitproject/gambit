@@ -103,8 +103,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_QRE, EfgShow::OnToolsQre)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
   EVT_MENU(efgmenuTOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
-  EVT_MENU(wxID_HELP_CONTENTS, EfgShow::OnHelpContents)
-  EVT_MENU(wxID_HELP_INDEX, EfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
   EVT_MENU(efgmenuSUPPORT_DUPLICATE, EfgShow::OnSupportDuplicate)
   EVT_MENU(efgmenuSUPPORT_DELETE, EfgShow::OnSupportDelete)
@@ -614,9 +612,6 @@ void EfgShow::MakeMenus(void)
 		     "Set display fonts");
   
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
-  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
-  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
@@ -703,7 +698,7 @@ void EfgShow::MakeToolbar(void)
 		   false, -1, -1, 0, "Zoom out", "Decrease magnification");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+  toolBar->AddTool(wxID_ABOUT, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();
@@ -1429,16 +1424,6 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
 //----------------------------------------------------------------------
 //                 EfgShow: Menu handlers - Help menu
 //----------------------------------------------------------------------
-
-void EfgShow::OnHelpContents(wxCommandEvent &)
-{
-  wxGetApp().OnHelpContents();
-}
-
-void EfgShow::OnHelpIndex(wxCommandEvent &)
-{
-  wxGetApp().OnHelpIndex();
-}
 
 void EfgShow::OnHelpAbout(wxCommandEvent &)
 {

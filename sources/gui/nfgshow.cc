@@ -81,8 +81,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM, NfgShow::OnToolsEquilibrium)
   EVT_MENU(NFG_TOOLS_QRE, NfgShow::OnToolsQre)
-  EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
-  EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
   EVT_MENU(NFG_SUPPORT_DUPLICATE, NfgShow::OnSupportDuplicate)
   EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
@@ -125,14 +123,13 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
 
   MakeMenus();
 
-  wxAcceleratorEntry entries[6];
+  wxAcceleratorEntry entries[5];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
   entries[2].Set(wxACCEL_CTRL, (int) 'S', wxID_SAVE);
   entries[3].Set(wxACCEL_CTRL, (int) 'P', wxID_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
-  entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
-  wxAcceleratorTable accel(6, entries);
+  wxAcceleratorTable accel(5, entries);
   SetAcceleratorTable(accel);
 
   CreateStatusBar();
@@ -377,9 +374,6 @@ void NfgShow::MakeMenus(void)
 		    "Compute quantal response equilibria");
   
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
-  helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
-  helpMenu->AppendSeparator();
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
@@ -421,7 +415,7 @@ void NfgShow::MakeToolbar(void)
 		   -1, -1, 0, "Print", "Print this game");
   toolBar->AddSeparator();
 
-  toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+  toolBar->AddTool(wxID_ABOUT, wxBITMAP(help), wxNullBitmap, false,
 		   -1, -1, 0, "Help", "Table of contents");
 
   toolBar->Realize();
@@ -912,18 +906,8 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                EfgShow: Menu handlers - Help menu
+//                NfgShow: Menu handlers - Help menu
 //----------------------------------------------------------------------
-
-void NfgShow::OnHelpContents(wxCommandEvent &)
-{
-  wxGetApp().OnHelpContents();
-}
-
-void NfgShow::OnHelpIndex(wxCommandEvent &)
-{
-  wxGetApp().OnHelpIndex();
-}
 
 void NfgShow::OnHelpAbout(wxCommandEvent &)
 {

@@ -13,6 +13,7 @@
 #include "wx/listctrl.h"
 #include "wx/sashwin.h"
 #include "wx/printdlg.h"
+#include "wx/notebook.h"
 
 #include "gambit.h"
 #include "efgconst.h"
@@ -106,8 +107,6 @@ private:
   void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);
 
-  void OnHelpContents(wxCommandEvent &);
-  void OnHelpIndex(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
 
   void OnSupportDuplicate(wxCommandEvent &);
