@@ -32,7 +32,7 @@ extern GSM *_gsm;
 // AddStrategy
 //---------------
 
-Portion *GSM_AddStrategy(Portion **param)
+static Portion *GSM_AddStrategy(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
@@ -50,7 +50,7 @@ Portion *GSM_AddStrategy(Portion **param)
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &, const NFSupport &);
 
-Portion *GSM_CompressNfg(Portion **param)
+static Portion *GSM_CompressNfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   const BaseNfg &N = S->BelongsTo();
@@ -74,7 +74,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 // ElimDom
 //-------------
 
-Portion *GSM_ElimDom_Nfg(Portion **param)
+static Portion *GSM_ElimDom_Nfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
@@ -105,7 +105,7 @@ Portion *GSM_ElimDom_Nfg(Portion **param)
 
 extern Nfg<double> *ConvertNfg(const Nfg<gRational> &);
 
-Portion *GSM_Float_Nfg(Portion **param)
+static Portion *GSM_Float_Nfg(Portion **param)
 {
   Nfg<gRational> &orig = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   Nfg<double> *N = ConvertNfg(orig);
@@ -134,7 +134,7 @@ Portion* GSM_Game_NfgElements(Portion** param)
 // IsConstSum
 //--------------
 
-Portion *GSM_IsConstSum_Nfg(Portion **param)
+static Portion *GSM_IsConstSum_Nfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
   return new BoolValPortion(N.IsConstSum());
@@ -144,7 +144,7 @@ Portion *GSM_IsConstSum_Nfg(Portion **param)
 // LoadNfg
 //-----------
 
-Portion *GSM_LoadNfg(Portion **param)
+static Portion *GSM_LoadNfg(Portion **param)
 {
   gString file = ((TextPortion *) param[0])->Value();
 
@@ -222,7 +222,7 @@ Portion* GSM_Name_Nfg_Elements( Portion** param )
 // NewNfg
 //----------
 
-Portion *GSM_NewNfg(Portion **param)
+static Portion *GSM_NewNfg(Portion **param)
 {
   ListPortion *dim = ((ListPortion *) param[0]);
   gArray<int> d(dim->Length());
@@ -460,7 +460,7 @@ Portion* GSM_Payoff_Nfg(Portion** param)
 // Players
 //------------
 
-Portion *GSM_Players_Nfg(Portion **param)
+static Portion *GSM_Players_Nfg(Portion **param)
 {
   BaseNfg &N = *((NfgPortion*) param[0])->Value();
 
@@ -473,7 +473,7 @@ Portion *GSM_Players_Nfg(Portion **param)
 // Randomize
 //-------------
 
-Portion *GSM_Randomize_NfgFloat(Portion **param)
+static Portion *GSM_Randomize_NfgFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   
@@ -481,7 +481,7 @@ Portion *GSM_Randomize_NfgFloat(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_Randomize_NfgRational(Portion **param)
+static Portion *GSM_Randomize_NfgRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   
@@ -489,7 +489,7 @@ Portion *GSM_Randomize_NfgRational(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
+static Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   int seed = ((IntPortion *) param[1])->Value();
@@ -499,7 +499,7 @@ Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_Randomize_NfgSeedRational(Portion **param)
+static Portion *GSM_Randomize_NfgSeedRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   int seed = ((IntPortion *) param[1])->Value();
@@ -515,7 +515,7 @@ Portion *GSM_Randomize_NfgSeedRational(Portion **param)
 
 extern Nfg<gRational> *ConvertNfg(const Nfg<double> &);
 
-Portion *GSM_Rational_Nfg(Portion **param)
+static Portion *GSM_Rational_Nfg(Portion **param)
 {
   Nfg<double> &orig = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   Nfg<gRational> *N = ConvertNfg(orig);
@@ -530,7 +530,7 @@ Portion *GSM_Rational_Nfg(Portion **param)
 // RemoveStrategy
 //------------------
 
-Portion *GSM_RemoveStrategy(Portion **param)
+static Portion *GSM_RemoveStrategy(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
@@ -546,7 +546,7 @@ Portion *GSM_RemoveStrategy(Portion **param)
 // SaveNfg
 //------------
 
-Portion *GSM_SaveNfg(Portion **param)
+static Portion *GSM_SaveNfg(Portion **param)
 {
   BaseNfg* N = ((NfgPortion*) param[0])->Value();
   gString file = ((TextPortion *) param[1])->Value();
@@ -565,7 +565,7 @@ Portion *GSM_SaveNfg(Portion **param)
 // SetName
 //------------
 
-Portion *GSM_SetName_Nfg(Portion **param)
+static Portion *GSM_SetName_Nfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion*) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
@@ -573,7 +573,7 @@ Portion *GSM_SetName_Nfg(Portion **param)
   return param[0]->ValCopy();
 }
 
-Portion *GSM_SetName_NfPlayer(Portion **param)
+static Portion *GSM_SetName_NfPlayer(Portion **param)
 {
   NFPlayer *p = ((NfPlayerPortion *) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
@@ -581,7 +581,7 @@ Portion *GSM_SetName_NfPlayer(Portion **param)
   return param[0]->ValCopy();
 }
 
-Portion *GSM_SetName_Strategy(Portion **param)
+static Portion *GSM_SetName_Strategy(Portion **param)
 {
   Strategy *s = ((StrategyPortion *) param[0])->Value();
   gString name = ((TextPortion *) param[1])->Value();
@@ -641,7 +641,7 @@ Portion* GSM_SetPayoff_Nfg(Portion** param)
 // Strategies
 //--------------
 
-Portion *GSM_Strategies(Portion **param)
+static Portion *GSM_Strategies(Portion **param)
 {
   NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
   NFSupport* s = ((NfSupportPortion*) param[1])->Value();
@@ -655,7 +655,7 @@ Portion *GSM_Strategies(Portion **param)
 // Support
 //--------------
 
-Portion *GSM_Support_Nfg(Portion **param)
+static Portion *GSM_Support_Nfg(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
   Portion *por = new NfSupportValPortion(new NFSupport(N));
@@ -672,7 +672,8 @@ void Init_nfgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("AddStrategy", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNFSUPPORT, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNFSUPPORT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
@@ -763,7 +764,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Payoff", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Nfg, 
-				       porFLOAT | porRATIONAL, 2));
+				       porFLOAT | porRATIONAL, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", 
 					    PortionSpec(porSTRATEGY, 1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
@@ -809,7 +811,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("RemoveStrategy", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
-				       porNFSUPPORT, 2));
+				       porNFSUPPORT, 2,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
@@ -840,7 +843,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("SetPayoff", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_Nfg, 
-				       PortionSpec(porSTRATEGY, 1), 3));
+				       PortionSpec(porSTRATEGY, 1), 3,
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", 
 					    PortionSpec(porSTRATEGY, 1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
@@ -849,7 +853,8 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Strategies", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Strategies, 
-				       PortionSpec(porSTRATEGY, 1), 2));
+				       PortionSpec(porSTRATEGY, 1), 2, 
+				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNFSUPPORT));
   gsm->AddFunction(FuncObj);
