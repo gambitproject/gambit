@@ -1128,6 +1128,17 @@ bool FullEfg::DeleteEmptyInfoset(Infoset *s)
   return true;
 }
 
+void FullEfg::DeleteEmptyInfosets(void)
+{
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    for (int iset = 1; iset <= NumInfosets()[pl]; iset++) {
+      if (DeleteEmptyInfoset(Players()[pl]->Infosets()[iset])) {
+        iset--;
+      }
+    }
+  }
+} 
+
 Infoset *FullEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
 {
   if (!s || !p)  throw Exception();

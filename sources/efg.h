@@ -211,6 +211,7 @@ public:
 
   Infoset *CreateInfoset(EFPlayer *pl, int br);
   bool DeleteEmptyInfoset(Infoset *);
+  void DeleteEmptyInfosets(void);
   Infoset *JoinInfoset(Infoset *s, Node *n);
   Infoset *LeaveInfoset(Node *n);
   Infoset *SplitInfoset(Node *n);

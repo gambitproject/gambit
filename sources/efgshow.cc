@@ -1290,6 +1290,7 @@ void EfgShow::OnEditTreeDelete(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.DeleteTree(Cursor());
+      m_efg.DeleteEmptyInfosets();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);

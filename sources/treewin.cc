@@ -674,6 +674,7 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
   Node *node = m_layout.NodeHitTest(x, y);
   if (node) {
     ef.DeleteTree(node);
+    ef.DeleteEmptyInfosets();
     Refresh();
     return true;
   }
