@@ -97,14 +97,17 @@ options_dialog->Form()->AssociatePanel(options_dialog);
 options_dialog->Go1();
 if (options_dialog->Completed()==wxOK)
 {
+	unsigned int changed=0; // what exactly has changed ...
 	int which_col=wxListFindString(column_list,col_str);
 	if (which_col) SetColWidth(horiz,which_col-1);
 	SetRowHeight(row_height);
 	labels=0;
 	if (labels_row) labels|=S_LABEL_ROW;
 	if (labels_col) labels|=S_LABEL_COL;
-	ToStringPrecision(num_prec);
+	if (ToStringPrecision()!=num_prec)
+		{ToStringPrecision(num_prec);changed|=S_PREC_CHANGED;}
 	if (save) SaveOptions();
+	parent->OnOptionsChanged(changed);
 }
 delete options_dialog;delete col_str;
 parent->Redraw();
@@ -345,7 +348,6 @@ if (ev.LeftDown() || ev.ButtonDClick())
 	if (cell.row>sheet->GetRows()) cell.row=sheet->GetRows();
 	if (cell.col<1) cell.col=1;
 	if (cell.col>sheet->GetCols()) cell.col=sheet->GetCols();
-	top_frame->OnSelectedMoved(cell.row,cell.col,SpreadMoveJump);
 	if (ev.LeftDown() && !ev.ControlDown()) ProcessCursor(0);
 	if (ev.ButtonDClick() || (ev.LeftDown() && ev.ControlDown()))
 		top_frame->OnDoubleClick(cell.row,cell.col,sheet->GetLevel(),sheet->GetValue(cell.row,cell.col));

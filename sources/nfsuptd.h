@@ -1,6 +1,6 @@
 // File: efsuptd.h -- Declarations of dialogs for dealing with NF
 // supports.
-// $Id$
+// @(#)nfsuptd.h	1.1 11/20/96
 #ifndef NFSUPTD_H
 #define NFSUPTD_H
 class BaseNormShow;
@@ -106,7 +106,7 @@ public:
 	disp_item->Callback((wxFunction)disp_func);
 	((wxButton *)newsup_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)rmvsup_fitem->GetPanelItem())->SetClientData((char *)this);
-	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)bns);
+	((wxButton *)cngsup_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)help_fitem->GetPanelItem())->SetClientData((char *)this);
 	((wxButton *)close_fitem->GetPanelItem())->SetClientData((char *)bns);
 	Fit();

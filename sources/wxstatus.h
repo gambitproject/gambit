@@ -16,6 +16,7 @@ protected:
 	static void button_proc(wxButton& but, wxCommandEvent& event);
 public:
 	wxStatus(wxFrame *frame,const char *title="Progress");
+	~wxStatus();
 	// functions for gProgress::gOutput
 	int GetWidth(void) {return Width;}
 	gOutput &SetWidth(int w) {Width=w;return *this;}
@@ -39,7 +40,7 @@ public:
 	virtual void SetProgress(double p);
 	// functions for gSignal
 	virtual void SetSignal(void) {sig=true;}
-	virtual bool Get(void) const {wxYield();return sig;}
+	virtual bool Get(void) const  {wxYield();return sig;}
 	virtual void Reset(void) {sig=false;}
 };
 #endif

@@ -1,5 +1,5 @@
 // File: Spread.h, header file for spread.cc
-// @(#)spread.h	1.21 8/16/96
+// $Id$
 // This file implements a 3-D spreadsheet type dialog box.  It can have
 // unlimited dimensions for both rows/columns and the number of layers.
 // At the moment each cell contains only a gString, but functions for
@@ -146,6 +146,7 @@ class SpreadSheetDrawSettings
 {
 #define	S_LABEL_ROW	1
 #define	S_LABEL_COL	2
+#define S_PREC_CHANGED	1
 private:
 	SpreadSheet3D *parent;
 	int 		row_height,default_col_width;
@@ -486,6 +487,7 @@ public:
 	virtual void OnCancel(void);
 	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
 	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
+  virtual void OnOptionsChanged(unsigned int opts=0) { }
 	virtual void OnPrint(void);
 	virtual void OnHelp(int =0);
 	virtual Bool OnCharNew(wxKeyEvent &) {return FALSE;}

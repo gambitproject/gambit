@@ -1,6 +1,6 @@
 // File: efgsolng.cc -- definition of the class dealing with the GUI part of the
 // extensive form solutions.
-// $Id$
+// @(#)efgsolng.cc	1.10 9/1/96
 
 #include "wx.h"
 #include "wx_form.h"
@@ -614,7 +614,8 @@ wxStatus status(parent->Frame(),"Gobit Algorithm");
 NFGobitParams P(status);
 GSPD.GetParams(&P);
 
-Nfg<T> *N = MakeReducedNfg((Efg<T> &)E);
+EFSupport ES=EFSupport(E);
+Nfg<T> *N = MakeReducedNfg((Efg<T> &)E,ES);
 NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 
@@ -722,7 +723,8 @@ wxStatus status(parent->Frame(),"GobitAll Solve");
 GridParams<T> P(status);
 GSPD.GetParams(P);
 
-Nfg<T> *N = MakeReducedNfg((Efg<T> &)E);
+EFSupport ES=EFSupport(E);
+Nfg<T> *N = MakeReducedNfg((Efg<T> &)E,ES);
 NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 GridSolveModule<T> M(*N,P,*S);

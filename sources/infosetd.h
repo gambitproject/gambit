@@ -1,5 +1,5 @@
 // File: infosetd.h -- Declaration of a class to inspect infosets
-// $Id$
+// @(#)infosetd.h	1.1 11/20/96
 #ifndef INFOSETD_H
 #define INFOSETD_H
 
@@ -13,6 +13,8 @@ private:
 	wxText		*branches_item,*nodes_item;
 	// previous infoset
 	Infoset		*prev_iset;
+	// keep track of changes
+	bool			game_changed;
 	// private functions
 	static	 	void player_func(wxListBox &ob,wxCommandEvent &ev);
 	static		void iset_func(wxListBox &ob,wxCommandEvent &ev);
@@ -34,6 +36,7 @@ private:
 public:
 	// Constructor
 	InfosetDialog(BaseEfg &ef_,wxFrame *parent=0);
+	bool GameChanged(void);
 };
 
 //************************************** CONSTRUCTOR **************************
@@ -71,6 +74,7 @@ for (i=1;i<=ef.NumPlayers();i++)
 }
 Fit();
 prev_iset=0;
+game_changed=false;
 // Init the first entry
 OnPlayer(0);
 Show(TRUE);
@@ -136,6 +140,7 @@ if (new_iset_dialog->Completed()==wxOK)
 	EFPlayer *player=ef.PlayerList()[pl+1];
 	Infoset *iset=ef.CreateInfoset(player,num_branches);
 	iset->SetName(iset_name);
+	game_changed=true;
 	if (pl==player_item->GetSelection()) iset_item->Append(ToString(player->NumInfosets()));
 }
 delete new_iset_dialog;
@@ -149,6 +154,7 @@ Infoset *iset=player->InfosetList()[iset_item->GetSelection()+1];
 if (iset->NumMembers()!=0)
 	{wxMessageBox("This infoset is not empty.\nOnly empty infosets can be delted");return;}
 ef.DeleteEmptyInfoset(iset);
+game_changed=true;
 }
 
 void InfosetDialog::OnOk(void)
@@ -160,6 +166,9 @@ if (strcmp(iset->GetName(),iset_name_item->GetValue())!=0)	// name changed
 
 Show(FALSE);
 }
+
+bool InfosetDialog::GameChanged(void)
+{return game_changed;}
 
 void InfosetDialog::OnCancel(void)
 {Show(FALSE);}

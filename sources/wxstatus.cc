@@ -13,12 +13,19 @@ sig=0;Width=0;Prec=6;Represent='f';
 
 gauge=new wxGauge(this,"",100,20,10,240,50,wxHORIZONTAL);
 // Make a text window
-twin = new wxMultiText(this, (wxFunction)0,"","",0,65,260,100,wxREADONLY);
-wxButton *cancel = new wxButton(this, (wxFunction)&button_proc, "Cancel",100,170,100,30);
+twin = new wxMultiText(this,0,"","",0,65,260,100,wxREADONLY);
+wxButton *cancel = new wxButton(this, (wxFunction)button_proc, "Cancel",100,170,100,30);
 cancel->SetClientData((char *)this);
 
 Show(TRUE);
 }
+
+wxStatus::~wxStatus()
+{
+Enable(FALSE);
+Show(FALSE);
+}
+
 
 void wxStatus::button_proc(wxButton& but, wxCommandEvent& )
 {((wxStatus *)but.GetClientData())->SetSignal();}
@@ -63,8 +70,10 @@ gOutput &wxStatus::operator<<(const char *x)
 gOutput &wxStatus::operator<<(const void *x)
 {sprintf(tmp_str, "%p", x);twin->SetValue(tmp_str);return *this;}
 
+
 void wxStatus::SetProgress(double p)
 {
 gauge->SetValue((int)(p*100.0));
 wxYield();
 }
+

@@ -114,6 +114,7 @@ class TreeDrawSettings:public GambitDrawSettings
 	// Functions to set the various options
 		void	SetOptions(void);
 		void	SetLegends(void);
+    void	SetLegends(int what);
 		void	SaveOptions(char *f=0);
 		void	LoadOptions(char *f);
 	// Functions for internal use by gambit

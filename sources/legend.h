@@ -1,3 +1,10 @@
+// File: legend.h -- defines verbal names of items that can be displayed on
+// an extensive form tree.  If an item is added, the following should be
+// modified: legendc.h, btreewn.cc:ProcessDClick,ProcessRClick,ProcessRDClick,
+// RenderLabels, and possibly treedraw.cc:SetLegends
+// $Id$
+char *legends_src[]={"Above Node","Below Node","Above Branch","Below Branch",
+                     "At Terminal Node","Right of Node"};
 typedef struct {char *l_name;int l_id;} l_struct;
 l_struct node_above_src[]={{"Nothing",			NODE_ABOVE_NOTHING},
 													 {"Node Label",		NODE_ABOVE_LABEL},

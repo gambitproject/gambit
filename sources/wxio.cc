@@ -1,7 +1,7 @@
 //#
 //# FILE: wxio.cc -- Implementation of more complicated I/O functions
 //#
-// @(#)wxio.cc	1.14 8/29/96
+// $Id$
 #include "wx.h"
 #include "wxio.h"
 
@@ -26,7 +26,7 @@ Show(TRUE);
 
 Bool gWxIOFrame::OnClose(void)
 {
-//parent->OnClose();
+parent->OnClose();
 return TRUE;
 }
 //************************************ G WX OUTPUT ****************************

@@ -155,18 +155,18 @@ private:
 	int num_sups;
 	wxListBox *sups_item;
 	int completed;
-	static void all_func(wxCheckBox &ob,wxEvent &ev)
+	static void all_func(wxCheckBox &ob,wxEvent &)
 	{
 	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
 	for (int i=1;i<=parent->num_sups;i++)
 		parent->sups_item->SetSelection(i-1,ob.GetValue());
 	}
-	static void ok_func(wxButton &ob,wxEvent &ev)
+	static void ok_func(wxButton &ob,wxEvent &)
 	{
 	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
 	parent->Show(FALSE);parent->completed=wxOK;
 	}
-	static void cancel_func(wxButton &ob,wxEvent &ev)
+	static void cancel_func(wxButton &ob,wxEvent &)
 	{
 	SupportRemoveDialog *parent=(SupportRemoveDialog *)ob.GetClientData();
 	parent->Show(FALSE);parent->completed=wxCANCEL;

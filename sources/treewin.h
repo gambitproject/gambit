@@ -1,7 +1,7 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h	1.43 8/16/96
+// $Id$
 //
 
 #ifndef TREEWINDOW_H
@@ -136,6 +136,8 @@ private:
 	void 	ProcessCursor(void);
 	void 	ProcessClick(wxMouseEvent &ev);
 	void 	ProcessDClick(wxMouseEvent &ev);
+	void 	ProcessRClick(wxMouseEvent &ev);
+	void 	ProcessRDClick(wxMouseEvent &ev);
 	bool	ProcessShift(wxMouseEvent &ev);
 	NodeEntry *GetNodeEntry(const Node *n);
 	NodeEntry *NextInfoset(const NodeEntry * const e);

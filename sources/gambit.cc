@@ -65,6 +65,9 @@ public:
 #ifdef wx_msw // this handler is defined differently under win/unix
 int _RTLENTRY _matherr (struct exception *e)
 #else
+#ifdef _LINUX
+struct exception {char *name;double arg1,arg2;int type;};
+#endif
 int matherr(struct exception *e)
 #endif
 {

@@ -1,6 +1,6 @@
 // File: treedraw.cc -- contains the configuration class for the extensive
 // form
-// @(#)treedraw.cc	1.17 6/18/96
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #pragma hdrstop
@@ -22,7 +22,6 @@ node_terminal_font=NULL;
 
 LoadOptions(INIFILE);
 }
-
 
 void TreeDrawSettings::SetOptions(void)
 {
@@ -64,13 +63,6 @@ show_infosets=wxListFindString(iset_list,iset_str);
 // SetLegends
 // Selects what get displayed at different points on the tree and in what
 // font it will be displayed
-#define	NAF	10
-#define	NBF	11
-#define	BAF	12
-#define	BBF	13
-#define	NTF	14
-#define NRF	15
-#pragma argsused		// turn off the ev not used message
 void TreeDrawSettings::draw_params_legends_func(wxButton &ob,wxCommandEvent &)
 {
 FontDialogBox *f;
@@ -78,12 +70,12 @@ draw_params_legend_struct *dpls=(draw_params_legend_struct *)ob.GetClientData();
 // The following case makes sure that the currently set font comes up first
 switch (dpls->what_font)
 {
-	case NAF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeAboveFont());break;
-	case NBF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeBelowFont());break;
-	case BAF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchAboveFont());break;
-	case BBF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchBelowFont());break;
-	case NTF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeTerminalFont());break;
-	case NRF: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeRightFont());break;
+	case NODE_ABOVE_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeAboveFont());break;
+	case NODE_BELOW_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeBelowFont());break;
+	case BRANCH_ABOVE_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchAboveFont());break;
+	case BRANCH_BELOW_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->BranchBelowFont());break;
+	case NODE_TERMINAL_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeTerminalFont());break;
+	case NODE_RIGHT_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeRightFont());break;
 }
 
 if (f->Completed())
@@ -91,20 +83,20 @@ if (f->Completed())
 	wxFont *the_font=f->MakeFont();
 	switch (dpls->what_font)
 	{
-		case NAF: dpls->draw_settings->SetNodeAboveFont(the_font);break;
-		case NBF: dpls->draw_settings->SetNodeBelowFont(the_font);break;
-		case BAF: dpls->draw_settings->SetBranchAboveFont(the_font);break;
-		case BBF: dpls->draw_settings->SetBranchBelowFont(the_font);break;
-		case NTF: dpls->draw_settings->SetNodeTerminalFont(the_font);break;
-		case NRF: dpls->draw_settings->SetNodeRightFont(the_font);break;
+		case NODE_ABOVE_LEGEND: dpls->draw_settings->SetNodeAboveFont(the_font);break;
+		case NODE_BELOW_LEGEND: dpls->draw_settings->SetNodeBelowFont(the_font);break;
+		case BRANCH_ABOVE_LEGEND: dpls->draw_settings->SetBranchAboveFont(the_font);break;
+		case BRANCH_BELOW_LEGEND: dpls->draw_settings->SetBranchBelowFont(the_font);break;
+		case NODE_TERMINAL_LEGEND: dpls->draw_settings->SetNodeTerminalFont(the_font);break;
+		case NODE_RIGHT_LEGEND: dpls->draw_settings->SetNodeRightFont(the_font);break;
 	}
 }
 delete f;
 }
 
+#include "legend.h"
 void TreeDrawSettings::SetLegends(void)
 {
-#include "legend.h"
 int i;
 wxStringList 	*node_above_list=new wxStringList;
 wxStringList 	*node_below_list=new wxStringList;
@@ -191,17 +183,17 @@ wxFormItem *node_right_button=display_legend_dialog->Add(wxMakeFormButton("Font"
 
 display_legend_dialog->AssociatePanel();
 // Setup the font buttons
-draw_params_legend_struct dpls1={NAF,this};
+draw_params_legend_struct dpls1={NODE_ABOVE_LEGEND,this};
 node_above_button->PanelItem->SetClientData((char *)&dpls1);
-draw_params_legend_struct dpls2={NBF,this};
+draw_params_legend_struct dpls2={NODE_BELOW_LEGEND,this};
 node_below_button->PanelItem->SetClientData((char *)&dpls2);
-draw_params_legend_struct dpls3={BAF,this};
+draw_params_legend_struct dpls3={BRANCH_ABOVE_LEGEND,this};
 branch_above_button->PanelItem->SetClientData((char *)&dpls3);
-draw_params_legend_struct dpls4={BBF,this};
+draw_params_legend_struct dpls4={BRANCH_BELOW_LEGEND,this};
 branch_below_button->PanelItem->SetClientData((char *)&dpls4);
-draw_params_legend_struct dpls5={NTF,this};
+draw_params_legend_struct dpls5={NODE_TERMINAL_LEGEND,this};
 node_terminal_button->PanelItem->SetClientData((char *)&dpls5);
-draw_params_legend_struct dpls6={NRF,this};
+draw_params_legend_struct dpls6={NODE_RIGHT_LEGEND,this};
 node_right_button->PanelItem->SetClientData((char *)&dpls6);
 // Start the dialog
 display_legend_dialog->Go1();
@@ -230,6 +222,55 @@ delete [] branch_below_str;
 delete [] node_terminal_str;
 delete [] node_right_str;
 delete display_legend_dialog;
+}
+
+void TreeDrawSettings::SetLegends(int what)
+{
+MyDialogBox *d=new MyDialogBox(0,"Display Legend");
+draw_params_legend_struct what_font={what,this};
+l_struct *legend_src=0;
+wxStringList *legend_list=new wxStringList;char *legend_str=new char[30];
+int legend_id;
+switch (what)
+{
+case	NODE_ABOVE_LEGEND: legend_src=node_above_src; legend_id=node_above_label; break;
+case	NODE_BELOW_LEGEND: legend_src=node_below_src; legend_id=node_below_label; break;
+case	BRANCH_ABOVE_LEGEND: legend_src=branch_above_src; legend_id=branch_above_label; break;
+case	BRANCH_BELOW_LEGEND: legend_src=branch_below_src; legend_id=branch_below_label; break;
+case	NODE_TERMINAL_LEGEND: legend_src=node_terminal_src; legend_id=node_terminal_label; break;
+case	NODE_RIGHT_LEGEND: legend_src=node_right_src; legend_id=node_right_label; break;
+default: assert(0 && "Invalid legend");
+}
+int i=0;
+while (legend_src[i].l_id!=-1) legend_list->Add(node_above_src[i++].l_name);
+strcpy(legend_str,legend_src[legend_id].l_name); // set the current value
+d->Add(wxMakeFormMessage("Legend For:"));
+d->Add(wxMakeFormMessage(legends_src[what]));
+d->Add(wxMakeFormNewLine());
+d->Add(wxMakeFormString(0,&legend_str,wxFORM_CHOICE,
+				new wxList(wxMakeConstraintStrings(legend_list),0)));
+wxFormItem *font_button=d->Add(wxMakeFormButton("Font",(wxFunction)draw_params_legends_func));
+d->AssociatePanel();
+// Setup the font buttons
+font_button->GetPanelItem()->SetClientData((char *)&what_font);
+d->Go1();
+if (d->Completed()==wxOK)
+{
+	int legend_num=wxListFindString(legend_list,legend_str);
+	legend_id=legend_src[legend_num].l_id;
+	switch (what)
+	{
+	case	NODE_ABOVE_LEGEND: SetLabelNodeAbove(legend_id); break;
+	case	NODE_BELOW_LEGEND: SetLabelNodeBelow(legend_id); break;
+	case	BRANCH_ABOVE_LEGEND: SetLabelBranchAbove(legend_id); break;
+	case	BRANCH_BELOW_LEGEND: SetLabelBranchBelow(legend_id); break;
+	case	NODE_TERMINAL_LEGEND: SetLabelNodeTerminal(legend_id); break;
+	case	NODE_RIGHT_LEGEND: SetLabelNodeRight(legend_id); break;
+	default: assert(0 && "Invalid legend");
+	}
+}
+delete [] legend_str;
+delete d;
 }
 
 // Save options.  Uses the resource writing capability of wxwin to create
