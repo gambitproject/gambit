@@ -1177,7 +1177,7 @@ T ExtForm<T>::Payoff(int pl, const gDPVector<T> &strategy) const
 {
   T value = (T) 0.0;
 
-  ComputePayoff(RootNode(), 1.0, pl, value, strategy);
+  ComputePayoff(RootNode(), (T) 1.0, pl, value, strategy);
 
   return value;
 }
@@ -1206,6 +1206,69 @@ template <class T> int ExtForm<T>::ProfileLength(void) const
 
   return sum;
 }
+
+
+template <class T> 
+gVector<T> ExtForm<T>::ComputeCondPayoff(Node n, T prob, gVector<T> value,
+					 const gDPVector<T> &profile,
+					 gDPVector<T> &probs,
+					 gDPVector<T> &payoff) const
+{
+  gVector<T> cumvalue(value);
+
+  for (int i = 1; i <= NumChildren(n); i++)  {
+    T newprob;
+    if (n.GetPlayer() == 0)
+      newprob = GetActionProb(n, i);
+    else
+      newprob = profile(n.GetPlayer(), n.GetInfoset(), i);
+
+    gVector<T> newvalue(ComputeCondPayoff(GetChildNumber(n, i),
+					  prob * newprob, value,
+					  profile, probs, payoff));
+    cumvalue += newvalue * newprob;
+
+    if (n.GetPlayer() > 0)   {
+      probs(n.GetPlayer(), n.GetInfoset(), i) += prob;
+      payoff(n.GetPlayer(), n.GetInfoset(), i) += newvalue[n.GetPlayer()] * prob;
+      if (GetOutcome(n))
+	payoff(n.GetPlayer(), n.GetInfoset(), i) += GetOutcomeValues(GetOutcome(n))[n.GetPlayer()] * prob;
+
+    }
+  }
+
+  if (GetOutcome(n))
+    cumvalue += GetOutcomeValues(GetOutcome(n));
+
+  return cumvalue;
+}
+
+template <class T> void ExtForm<T>::CondPayoff(const gDPVector<T> &profile,
+					       gDPVector<T> &payoff)
+{
+  int i, j, k;
+
+  ((gVector<T> &) payoff).operator=((T) 0);
+  gDPVector<T> probs(payoff);
+  
+  gVector<T> value(NumPlayers());
+  value = (T) 0;
+
+  ComputeCondPayoff(RootNode(), (T) 1.0, value, profile, probs, payoff);
+
+  for (i = 1; i <= NumPlayers(); i++) 
+    for (j = 1; j <= NumInfosets(1, i); j++)
+      for (k = 1; k <= NumActions(1, i, j); k++)
+	// Note that this will have consequences if probs(i, j, k) == 0
+	payoff(i, j, k) /= probs(i, j, k);
+
+  probs.Dump(gout);  gout << '\n';
+  payoff.Dump(gout);  gout << '\n';
+				     
+				
+}
+
+
 
 DataType ExtForm<double>::Type(void) const   { return DOUBLE; }
 //DataType ExtForm<gRational>::Type(void) const  { return RATIONAL; }

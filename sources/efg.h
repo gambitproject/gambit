@@ -43,6 +43,10 @@ template <class T> class ExtForm    {
 
     void ComputePayoff(Node n, T prob, int pl, T &value,
 		       const gDPVector<T> &strategy) const;
+    gVector<T> ComputeCondPayoff(Node, T, gVector<T>, const gDPVector<T> &,
+			gDPVector<T> &, gDPVector<T> &) const;
+
+
 //
 // These are being defined privately for now so they are not accidentally
 // used.  They will be implemented later.
@@ -164,6 +168,8 @@ template <class T> class ExtForm    {
     int ProfileLength(void) const;
     gPVector<int> Dimensionality(void) const;
     T Payoff(int pl, const gDPVector<T> &) const;
+    void CondPayoff(const gDPVector<T> &profile,
+		    gDPVector<T> &value) const;
 };
 
 
