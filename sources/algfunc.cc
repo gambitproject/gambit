@@ -381,7 +381,7 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 // QreSolve
 //---------------
 
-#include "ngobit.h"
+#include "nfgqre.h"
 #include "egobit.h"
 
 static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
@@ -391,15 +391,18 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     Nfg &N = start.Game();
 
     NFQreParams NP;
-    if (((TextPortion *) param[1])->Value() != "")
+    if (((TextPortion *) param[1])->Value() != "") {
       NP.pxifile = new gFileOutput(((TextPortion *) param[1])->Value());
-    else
+    }
+    else {
       NP.pxifile = &gnull;
+    }
     NP.minLam = ((NumberPortion *) param[2])->Value();
     NP.maxLam = ((NumberPortion *) param[3])->Value();
     NP.delLam = ((NumberPortion *) param[4])->Value();
     NP.powLam = ((NumberPortion *) param[5])->Value();
     NP.fullGraph = ((BoolPortion *) param[6])->Value();
+    NP.m_method = (((NumberPortion *) param[13])->Value() == gNumber(0)) ? qreOPTIMIZE : qreHOMOTOPY;
 
     NP.SetAccuracy( ((NumberPortion *) param[7])->Value());
 
@@ -1615,7 +1618,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction(*gsm, "QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
-				       PortionSpec(porMIXED | porBEHAV, 1), 13));
+				       PortionSpec(porMIXED | porBEHAV, 1), 14));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
@@ -1643,6 +1646,8 @@ void Init_algfunc(GSM *gsm)
 					     BYREF));
   FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 13, gclParameter("method", porINTEGER,
+					    new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
 

@@ -535,7 +535,7 @@ bool guinfgPolEnum::SolveSetup(void)
 //----------
 
 #include "dlqre.h"
-#include "ngobit.h"
+#include "nfgqre.h"
 
 guinfgQre::guinfgQre(NfgShow *p_parent)
   : guiNfgSolution(p_parent)

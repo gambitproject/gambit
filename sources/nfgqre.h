@@ -1,11 +1,11 @@
 //
-// FILE: ngobit.h -- Interface to normal form Gobit solution module
+// FILE: nfgqre.h -- Interface to computation of QRE correspondence
 //
-// $Id$
+// $id$
 //
 
-#ifndef NGOBIT_H
-#define NGOBIT_H
+#ifndef NQRE_H
+#define NQRE_H
 
 #include "base/base.h"
 #include "algutils.h"
@@ -13,8 +13,13 @@
 #include "nfg.h"
 #include "mixedsol.h"
 
+typedef enum {
+  qreOPTIMIZE = 0, qreHOMOTOPY = 1
+} qreAlgorithmType;  
+
 class NFQreParams : public FuncMinParams {
 public:
+  qreAlgorithmType m_method;
   int powLam;
   double minLam, maxLam, delLam;
   bool fullGraph;
@@ -35,7 +40,7 @@ void KQre(const Nfg &N, NFQreParams &params,
 	    gList<MixedSolution> &solutions, gStatus &,
 	    long &nevals, long &nits);
 
-#endif    // NGOBIT_H
+#endif    // NQRE_H
 
 
 

@@ -1179,7 +1179,7 @@ bool guiefgPolEnumEfg::SolveSetup(void)
 // Qre on nfg
 //---------------------
 
-#include "ngobit.h"
+#include "nfgqre.h"
 
 guiefgQreNfg::guiefgQreNfg(EfgShow *p_parent)
   : guiEfgSolution(p_parent)

@@ -1,19 +1,22 @@
 //
-// FILE: ngobit.cc -- Implementation of gobit on normal form games
+// FILE: nfgqre.cc -- Computation of QRE correspondence for normal forms
 //
-//  $Id$
+// $Id$
 //
 
 #include <math.h>
 
-#include "ngobit.h"
+#include "nfgqre.h"
 
 #include "gfunc.h"
 #include "math/gmatrix.h"
+#include "math/gsmatrix.h"
 #include "gnullstatus.h"
 
+
 NFQreParams::NFQreParams(void)
-  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+  : m_method(qreHOMOTOPY), 
+    powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&gnull)
 { }
 
@@ -22,8 +25,39 @@ NFQreParams::NFQreParams(gOutput &, gOutput &pxi)
     fullGraph(false), pxifile(&pxi)
 { }
 
-// This is the function to be minimized.  It is a non negative real valued 
+
+static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
+			   const NFQreParams &params)
+{
+  pxifile << "Dimensionality:\n";
+  pxifile << N.NumPlayers() << " ";
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)
+    pxifile << N.NumStrats(pl) << " ";
+  pxifile << "\n";
+  N.WriteNfgFile(pxifile, 6);
+
+  pxifile << "Settings:\n" << params.minLam;
+  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
+  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
+  
+  int numcols = N.ProfileLength() + 2;
+
+  pxifile << "DataFormat:\n" << numcols;
+  
+  for (int i = 1; i <= numcols; i++)
+    pxifile << " " << i;
+ 
+  pxifile << "\nData:\n";
+}
+
+//=========================================================================
+//                  QRE version of Liapunov function
+//=========================================================================
+
+// This modification of the Liapunov function is a non-negative-valued
 // C2 function that is zero only on the QRE correspondence.  
+// This is minimized in the optimization approach, and used as a 
+// diagnostic for the homotopy approach.
 
 class NFQreFunc : public gC2Function<double>  {
   private:
@@ -34,8 +68,6 @@ class NFQreFunc : public gC2Function<double>  {
     gVector<double> **_scratch;
     MixedProfile<double> _p;
 
-    double Value(const gVector<double> &);
-    
     double QreDerivValue(int, int, const MixedProfile<double> &);
 
     bool Deriv(const gVector<double> &, gVector<double> &);
@@ -50,6 +82,8 @@ class NFQreFunc : public gC2Function<double>  {
     void SetLambda(const gVector<double> &l)   { _Lambda = l; }
     long NumEvals(void) const  { return _nevals; }
     bool DomainErr(void) const { return _domain_err;}
+
+    double Value(const gVector<double> &);
 };
 
 
@@ -139,31 +173,131 @@ double NFQreFunc::Value(const gVector<double> &v)
   return val;
 }
 
+//=========================================================================
+//             QRE Correspondence Computation via Homotopy
+//=========================================================================
 
-
-static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
-			   const NFQreParams &params)
+void QreHomotopy(const Nfg &p_nfg, NFQreParams &params,
+		 const MixedProfile<gNumber> &start,
+		 gList<MixedSolution> &solutions, gStatus &p_status,
+		 long &nevals, long &nits)
 {
-  pxifile << "Dimensionality:\n";
-  pxifile << N.NumPlayers() << " ";
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)
-    pxifile << N.NumStrats(pl) << " ";
-  pxifile << "\n";
-  N.WriteNfgFile(pxifile, 6);
+  gMatrix<double> H(p_nfg.ProfileLength(), p_nfg.ProfileLength() + 1);
+  MixedProfile<double> profile(start);
+  double lambda = params.minLam;
+  double stepsize = 0.0001;
+  double initialsign = 1.0;
 
-  pxifile << "Settings:\n" << params.minLam;
-  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
-  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
-  
-  int numcols = N.ProfileLength() + 2;
+  solutions.Flush();
 
-  pxifile << "DataFormat:\n" << numcols;
-  
-  for (int i = 1; i <= numcols; i++)
-    pxifile << " " << i;
- 
-  pxifile << "\nData:\n";
+  while (lambda <= params.maxLam) {
+    H = (double) 0;
+
+    int rowno = 0;   // indexes the row number in the Jacobian matrix
+    for (int pl1 = 1; pl1 <= p_nfg.NumPlayers(); pl1++) {
+      for (int st1 = 1; st1 <= p_nfg.NumStrats(pl1); st1++) {
+	rowno++;
+
+	int colno = 0;
+	for (int pl2 = 1; pl2 <= p_nfg.NumPlayers(); pl2++) {
+	  for (int st2 = 1; st2 <= p_nfg.NumStrats(pl2); st2++) {
+	    colno++;
+
+	    if (pl1 == pl2) {
+	      if (st1 == st2) {
+		for (int k = 1; k <= p_nfg.NumStrats(pl1); k++) {
+		  H(rowno, colno) += exp(lambda * profile.Payoff(pl1, pl1, k));
+		}
+	      }
+	      else {
+		H(rowno, colno) = 0.0;
+	      }
+	    } 
+	    else {  // pl1 != pl2
+	      for (int k = 1; k <= p_nfg.NumStrats(pl1); k++) {
+		H(rowno, colno) += lambda * profile.Payoff(pl1, pl1, k, pl2, st2) * exp(lambda * profile.Payoff(pl1, pl1, k));
+	      }
+	      H(rowno, colno) *= profile(pl1, st1);
+	      H(rowno, colno) -= lambda * profile.Payoff(pl1, pl1, st1, pl2, st2) * exp(lambda * profile.Payoff(pl1, pl1, st1));
+	    }
+	  }
+	}
+
+	// Now for the column wrt lambda
+	for (int k = 1; k <= p_nfg.NumStrats(pl1); k++) {
+	  H(rowno, H.NumColumns()) += profile.Payoff(pl1, pl1, k) * exp(lambda * profile.Payoff(pl1, pl1, k));
+	} 
+	H(rowno, H.NumColumns()) *= profile(pl1, st1);
+	H(rowno, H.NumColumns()) -= profile.Payoff(pl1, pl1, st1) * exp(lambda * profile.Payoff(pl1, pl1, st1));
+      }
+    }
+
+    gPVector<double> delta(profile);
+
+    double sign = initialsign;
+    rowno = 0; 
+    for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+      for (int st = 1; st <= p_nfg.NumStrats(pl); st++) {
+	rowno++;
+	gRectBlock<double> X(H.NumRows(), H.NumColumns());
+	((gRectArray<double> &) X) = H; 
+	X.RemoveColumn(rowno);
+	
+	gSquareMatrix<double> M(X.NumRows());
+	((gRectArray<double> &) M) = X;
+	
+	delta(pl, st) = sign * M.Determinant();   
+	sign *= -1.0;
+      }
+    }   
+
+    gRectBlock<double> X(H.NumRows(), H.NumColumns());
+    ((gRectArray<double> &) X) = H; 
+    X.RemoveColumn(X.NumColumns());
+	
+    gSquareMatrix<double> M(X.NumRows());
+    ((gRectArray<double> &) M) = X;
+	
+    double lambdainc = sign * M.Determinant();
+
+    if (lambda == params.minLam && lambdainc < 0.0) {
+      initialsign = -1.0;
+
+      for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+	for (int st = 1; st <= p_nfg.NumStrats(st); st++) {
+	  delta(pl, st) = -delta(pl, st);
+	}
+      }
+
+      lambdainc = -lambdainc;
+    }
+
+    double norm = 0.0;
+    for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+      for (int st = 1; st <= p_nfg.NumStrats(pl); st++) {
+	norm += delta(pl, st) * delta(pl, st);
+      }
+    }
+    norm += lambdainc * lambdainc; 
+
+    for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+      for (int st = 1; st <= p_nfg.NumStrats(pl); st++) {
+	profile(pl, st) += delta(pl, st) / sqrt(norm / stepsize);
+      }
+    }
+
+    lambda += lambdainc / sqrt(norm / stepsize);
+
+    solutions.Append(MixedSolution(profile, algorithmNfg_QRE));
+    NFQreFunc qreValue(p_nfg, MixedProfile<gNumber>(profile));
+    qreValue.SetLambda(lambda);
+    solutions[solutions.Length()].SetQre(lambda, qreValue.Value(profile));
+  }
 }
+
+//=========================================================================
+//            QRE Correspondence Computation via Optimization
+//=========================================================================
 
 // DFP routine from Numerical Recipies (with modifications)
 // p = starting vector
@@ -193,10 +327,10 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 // as a starting point to find a new point on the correspondence.  The Davidon 
 // fletcher Powell method is used for minimization.  
 
-void Qre(const Nfg &N, NFQreParams &params,
-	 const MixedProfile<gNumber> &start,
-	 gList<MixedSolution> &solutions, gStatus &p_status,
-	 long &nevals, long &nits)
+static void QreOptimization(const Nfg &N, NFQreParams &params,
+			    const MixedProfile<gNumber> &start,
+			    gList<MixedSolution> &solutions, gStatus &p_status,
+			    long &nevals, long &nits)
 {
   static const double ALPHA = .00000001;
 
@@ -554,5 +688,16 @@ void KQre(const Nfg &N, NFQreParams &params,
   nits = 0;
 }
 
-
+void Qre(const Nfg &p_nfg, NFQreParams &params,
+	 const MixedProfile<gNumber> &start,
+	 gList<MixedSolution> &solutions, gStatus &p_status,
+	 long &nevals, long &nits)
+{
+  if (params.m_method == qreOPTIMIZE) {
+    QreOptimization(p_nfg, params, start, solutions, p_status, nevals, nits);
+  }
+  else {
+    QreHomotopy(p_nfg, params, start, solutions, p_status, nevals, nits);
+  }
+}
 

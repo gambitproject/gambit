@@ -51,7 +51,7 @@ ENALG_SOURCES = csumsub.cc psnesub.cc enumsub.cc simpsub.cc liapsub.cc \
 ENALG_OBJECTS = $(ENALG_SOURCES:.cc=$(OBJECT_SUFFIX))
 
 NALG_SOURCES = btableau.cc tableau.cc lptab.cc bfs.cc lemke.cc nliap.cc \
-		ngobit.cc enum.cc simpdiv.cc ludecomp.cc nfgpure.cc lhtab.cc \
+		nfgqre.cc enum.cc simpdiv.cc ludecomp.cc nfgpure.cc lhtab.cc \
 		lemketab.cc grid.cc nfgcsum.cc lpsolve.cc nfdom.cc \
 		nfdommix.cc vertenum.cc polenum.cc clique.cc basis.cc \
 		nfgensup.cc nfgalleq.cc homotopy.cc hompack.cc lapack.cc
