@@ -262,6 +262,7 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     AddSolution(solutions, pold, Lambda, value);
 
   if (params.status.Get())    params.status.Reset();
+  if (params.pxifile) delete  params.pxifile;
 
   nevals = F.NumEvals();
   nits = 0;

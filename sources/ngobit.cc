@@ -228,6 +228,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
   }
 
   if (params.status.Get())   params.status.Reset();
+  if (params.pxifile) delete  params.pxifile;
 
   nevals = F.NumEvals();
   nits = 0;
