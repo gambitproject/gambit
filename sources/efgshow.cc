@@ -582,7 +582,7 @@ BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
             delete start_dialog;
         }
         if (starting_points.last)
-            start = starting_points.profiles[starting_points.last];
+            start = BehavProfile<gNumber>(starting_points.profiles[starting_points.last]);
     }
     return start;
 }

@@ -1346,9 +1346,11 @@ void BehavPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Behav) ";
   if (_WriteSolutionInfo > gNumber(1))
-    (*rep->value).Dump(s);
-  else
-    (*rep->value).BehavProfile<gNumber>::Dump(s);
+    rep->value->Dump(s);
+  else {
+    BehavProfile<gNumber> P(*rep->value);
+    P.Dump(s);
+  }
 }
 
 gText BehavPortion::OutputString(void) const

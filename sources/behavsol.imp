@@ -241,7 +241,7 @@ const gNumber& BehavSolution::operator()(int a, int b, int c) const
 BehavSolution& BehavSolution::operator=(const BehavSolution &s)
 {
   if (this != &s)   {
-    BehavProfile<gNumber>::operator=(s);
+    BehavProfile<gNumber>::operator=((const BehavProfile<gNumber> &) s);
     _Creator = s._Creator;
     _IsNash = s._IsNash;
     _IsSubgamePerfect = s._IsSubgamePerfect;

@@ -39,7 +39,7 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 
 
 
-class BehavSolution : public BehavProfile<gNumber>  {
+class BehavSolution : protected BehavProfile<gNumber>  {
 protected:
   EfgAlgType _Creator;
   mutable gTriState _IsNash;
@@ -90,9 +90,31 @@ public:
 	 
   bool Equals(const BehavProfile<double> &s) const;
   bool operator==(const BehavSolution &) const;
+  bool operator!=(const BehavSolution &s) const { return !(*this == s); }
+
+  BehavSolution &operator+=(const BehavSolution &s)
+    { Invalidate(); BehavProfile<gNumber>::operator+=(s); return *this; }
+  BehavSolution &operator-=(const BehavSolution &s)
+    { Invalidate(); BehavProfile<gNumber>::operator-=(s); return *this; }
+  BehavSolution &operator*=(const gNumber &x)
+    { Invalidate(); BehavProfile<gNumber>::operator*=(x); return *this; }
   void Dump(gOutput& f) const;
 
   void Invalidate(void);
+
+  gNumber Payoff(int pl) const
+    { return BehavProfile<gNumber>::Payoff(pl); }
+
+  Efg &Game(void) const   { return BehavProfile<gNumber>::Game(); } 
+
+  void CondPayoff(gDPVector<gNumber> &value, gPVector<gNumber> &probs) const
+    { BehavProfile<gNumber>::CondPayoff(value, probs); }
+  gArray<gNumber> NodeValues(int pl) const
+    { return BehavProfile<gNumber>::NodeValues(pl); }
+  gArray<gNumber> NodeRealizProbs(void) const
+    { return BehavProfile<gNumber>::NodeRealizProbs(); }
+  const gNumber &GetValue(Infoset *s, int act) const
+    { return BehavProfile<gNumber>::GetValue(s, act); }
 
   gNumber& operator[](int);
   const gNumber& operator[](int) const;
@@ -100,6 +122,8 @@ public:
   const gNumber& operator()(int, int, int) const;
 
   BehavSolution& operator=(const BehavSolution &);
+  
+  EFSupport Support(void) const { return EFSupport(Game()); }
 };
 
 gOutput &operator<<(gOutput &f, const BehavSolution &);

@@ -299,7 +299,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
     long nevals, niters;
     gWatch watch;
     gList<BehavSolution> solutions;
-    Gobit(E, EP, start, solutions, nevals, niters);
+    Gobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
     ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
     ((NumberPortion *) param[12])->SetValue(nevals);
@@ -383,7 +383,7 @@ static Portion *GSM_KGobit_Start(Portion **param)
     gWatch watch;
     
     gList<BehavSolution> solutions;
-    KGobit(E, EP, start, solutions, nevals, niters);
+    KGobit(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
     ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
     ((NumberPortion *) param[12])->SetValue(nevals);
@@ -515,7 +515,7 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 
 static Portion *GSM_Liap_Behav(Portion **param)
 {
-  BehavProfile<gNumber> &start = *((BehavPortion *) param[0])->Value();
+  BehavProfile<gNumber> start(*((BehavPortion *) param[0])->Value());
   Efg &E = start.Game();
   
   if (((BoolPortion *) param[1])->Value())   {
@@ -845,7 +845,7 @@ static Portion *GSM_Nfg(Portion **param)
 
 Portion* GSM_Payoff_Behav(Portion** param)
 {
-  BehavProfile<gNumber>* bp = ((BehavPortion*) param[0])->Value();
+  BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
   return new NumberPortion(bp->Payoff(player->GetNumber()));

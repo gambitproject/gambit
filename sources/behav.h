@@ -19,6 +19,7 @@ class Nfg;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
 template <class T> class gRectArray;
+class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
 friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
@@ -44,9 +45,11 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
   public:
     BehavProfile(const EFSupport &);
     BehavProfile(const BehavProfile<T> &);
+    BehavProfile(const BehavSolution &);
     virtual ~BehavProfile();
 
     BehavProfile<T> &operator=(const BehavProfile<T> &);
+    BehavProfile<T> &operator=(const BehavSolution &);
 
     Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
 
@@ -69,7 +72,14 @@ friend void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     
     const EFSupport &Support(void) const   { return support; }
 };
+
+
+
+
 #ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p);
 #endif
 #endif   // BEHAV_H
+
+
+

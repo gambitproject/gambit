@@ -60,8 +60,7 @@ static Portion *GSM_ActionProb(Portion **param)
 static Portion *GSM_ActionProbs(Portion **param)
 {
   const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
-  const EFSupport *support = &profile->Support();
-  const Efg &efg = support->Game();
+  const Efg &efg = profile->Game();
 
   ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
@@ -70,15 +69,10 @@ static Portion *GSM_ActionProbs(Portion **param)
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       Infoset *infoset = player->Infosets()[iset];
       ListPortion *p2 = new ListPortion;
-      for (int act = 1; act <= infoset->NumActions(); act++)   {
-	if (support->Find(infoset->Actions()[act]))
-	  p2->Append(new NumberPortion(
-	   	       (*profile)(player->GetNumber(),
-				  infoset->GetNumber(),
-				  support->Find(infoset->Actions()[act]))));
-	else
-	  p2->Append(new NumberPortion(0.0));
-      }
+      for (int act = 1; act <= infoset->NumActions(); act++) 
+	p2->Append(new NumberPortion((*profile)(player->GetNumber(),
+						infoset->GetNumber(),
+						act)));
       p1->Append(p2);
     }
     por->Append(p1);

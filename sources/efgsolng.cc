@@ -145,7 +145,7 @@ protected:
 public:
     EFLiapBySubgameG(const Efg &E, const EFLiapParams &p,
                      const BehavSolution &s, int max = 0, EfgShowInterface *parent_ = 0)
-        : EFLiapBySubgame(E, p, s, max), BaseBySubgameG(parent_, E)
+        : EFLiapBySubgame(E, p, BehavProfile<gNumber>(s), max), BaseBySubgameG(parent_, E)
     { Solve(); }
 };
 
@@ -183,8 +183,8 @@ protected:
 public:
     NFLiapBySubgameG(const Efg &E, const NFLiapParams &p,
                      const BehavSolution &s, int max = 0, 
-					 EfgShowInterface *parent_ = 0)
-        : NFLiapBySubgame(E, p, s, max), BaseBySubgameG(parent_, E)
+		     EfgShowInterface *parent_ = 0)
+        : NFLiapBySubgame(E, p, BehavProfile<gNumber>(s), max), BaseBySubgameG(parent_, E)
     { Solve(); }
 };
 
