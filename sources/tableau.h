@@ -36,6 +36,8 @@ public:
   int MaxCol(void) const;
   T &Set_A(int r,int c);
   T &Set_b(int r);
+  const T &Get_A(int r,int c) const;
+  const T &Get_b(int r) const;
   void Dump(gOutput &) const;
 };
 

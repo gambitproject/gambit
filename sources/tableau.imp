@@ -56,6 +56,16 @@ template <class T> T &DumbTableau<T>::Set_b(int r)
 return b[r];
 }
 
+template <class T> const T &DumbTableau<T>::Get_A(int r, int c) const
+{
+return A(r,c);
+}
+
+template <class T> const T &DumbTableau<T>::Get_b(int r) const
+{
+return b[r];
+}
+
 
 // Tableau method definitions
 
@@ -198,7 +208,7 @@ int Tableau<T>::MaxRow() const
 
 template <class T>
 bool Tableau<T>::ColIndex(int x) const
-{ return MinRow()<=x && x<=MaxRow(); }
+{ return MinCol()<=x && x<=MaxCol(); }
 
 template <class T>
 int Tableau<T>::MinCol() const 
@@ -464,7 +474,7 @@ template <class T> gOutput &operator<<(gOutput &to, const Tableau<T> &v)
 
 template <class T>
 void Tableau<T>::Dump(gOutput &to) const
-{ basis.Dump(to);solution.Dump(to); }
+{ basis.Dump(to);to << "\n";solution.Dump(to); }
 
 template <class T>
 void DumbTableau<T>::Dump(gOutput &to) const
