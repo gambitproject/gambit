@@ -1,30 +1,35 @@
 //#
-//# FILE: gvector.imp -- Implementation of vector classes
+//# FILE: gvector.imp -- Implementation of vector class
 //#
 //# $Id$
 //#
 
 #include "gvector.h"
+#include <assert.h>
 
 //------------------------------------------------------------------------
-// inline ctors
+//     gVector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
 template <class T> gVector<T>::gVector(int len) : gArray<T>(len) 
 { }
 
 template <class T> gVector<T>::gVector(int low, int high) 
-  : gArray<T>(low,high)
+  : gArray<T>(low, high)
 { }
 
-template <class T> gVector<T>::gVector(const gVector<T>& V) 
+template <class T> gVector<T>::gVector(const gVector<T> &V) 
   : gArray<T>(V) 
 { }
 
+template <class T> gVector<T>::~gVector()   { }
 
-//------------------------------------------------------------------------
-// inline access functions
-//------------------------------------------------------------------------
+template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
+{
+  assert(Check(V));
+  gArray<T>::operator=(V);
+  return *this;
+}
 
 
 //------------------------------------------------------------------------
@@ -41,54 +46,13 @@ template <class T> int gVector<T>::operator!=(T c) const
 //------------------------------------------------------------------------
 // inline internal functions
 //------------------------------------------------------------------------
-
+/*
 template <class T> int gVector<T>::Check(int index) const
 { return( min<=index && index<=max ); }
+*/
 
-template <class T> int gVector<T>::Check(const gVector<T> &v) const
-{ return( v.min==min && v.max==max ); }
-
-template <class T> T* gVector<T>::Allocate(void) {
-    T* p = new T[max-min+1];
-    assert( p != NULL );
-    return p-min;
-  }
-
-template <class T> void gVector<T>::Delete(T* p)
-{ delete[] (p+min); }
-
-template <class T> void gVector<T>::AllocateData(void)
-{ data = Allocate(); }
-
-template <class T> void gVector<T>::DeleteData(void)
-{ Delete(data); }
-
-
-
-//------------------------------------------------------------------------
-//	gVector: internal functions
-//------------------------------------------------------------------------
-
-// many internal functions are inline
-
-template <class T> void gVector<T>::CopyData( const gVector<T> &V ) {
-    min=V.min; max=V.max;
-    AllocateData();
-    for(int i=min; i<=max; i++)
-      (*this)[i]=V[i];
-  }
-
-//------------------------------------------------------------------------
-//	gVector: ctors, dtor
-//------------------------------------------------------------------------
-
-// ctors are inline
-
-template <class T>
-gVector<T>::~gVector()
-{
-  DeleteData();
-}
+template <class T> bool gVector<T>::Check(const gVector<T> &v) const
+{ return( v.min == min && v.max == max ); }
 
 
 //------------------------------------------------------------------------
@@ -189,26 +153,6 @@ gVector<T>::operator/(T c) const
 }
 
 
-template <class T> gVector<T>
-gVector<T>::operator/(const gVector<T>& V) const
-{
-  assert( Check(V) );
-  gVector<T> tmp(min,max);
-  for(int i=min; i<=max; i++)
-    tmp[i]= (*this)[i] / V[i];
-  return tmp;
-}
-
-template <class T> gVector<T>&
-gVector<T>::operator/=(const gVector<T>& V)
-{
-  assert( Check(V) );
-  for(int i=min; i<=max; i++)
-    (*this)[i] /= V[i];
-  return (*this);
-}
-
-
 template <class T> int
 gVector<T>::operator==(const gVector<T>& V) const
 {
@@ -228,48 +172,7 @@ gVector<T>::operator==(T c) const
   return 1;
 }
 
-// != operators are inline functions
 
 
-//------------------------------------------------------------------------
-//	gVector: other operators
-//------------------------------------------------------------------------
-
-template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
-{
-  assert(Check(V));
-  for (int i = min; i <= max; i++)
-    (*this)[i] = V[i];
-
-//	 DeleteData();
-//	 CopyData(V);
-  return *this;
-}
-
-
-//------------------------------------------------------------------------
-//	gVector: access functions
-//------------------------------------------------------------------------
-
-/*
-template <class T> void
-gVector<T>::Dump(gOutput &to) const
-{
-//to<<"vector dump: "<<Length()<<" elements: "<<First()<<".."<<Last()<<"\n";
-  to<<"{ ";
-  for(int i=min; i<=max; i++)
-    to<<(*this)[i]<<" ";
-  to<<"}";
-}
-*/
-
-//------------------------------------------------------------------------
-//	gVector: output operator (gOutput operator<<)
-//------------------------------------------------------------------------
-
-template <class T> gOutput &
-operator<<(gOutput &to, const gVector<T> &V)
-{
-  V.Dump(to); return to;
-}
-
+template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
+{ V.Dump(f);  return f; }
