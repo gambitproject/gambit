@@ -22,10 +22,8 @@ private:
   } features;
 
   // Event handlers
+  void OnLeftClick(wxGridEvent &);
   void OnLeftDoubleClick(wxGridEvent &);
-
-  // Overriding wxGrid member functions
-  void OnSelectCell(int p_row, int p_col);
 
 public:
   NfgTable(NfgShow *);

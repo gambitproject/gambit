@@ -13,6 +13,7 @@
 //======================================================================
 
 BEGIN_EVENT_TABLE(NfgTable, wxGrid)
+  EVT_GRID_CELL_LEFT_CLICK(NfgTable::OnLeftClick)
   EVT_GRID_CELL_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
 END_EVENT_TABLE()
 
@@ -65,14 +66,6 @@ void NfgTable::SetStrategy(int p_player, int p_strategy)
   else if (p_player == m_parent->GetColPlayer()) {
     SetGridCursor(GetCursorRow(), p_strategy - 1);
   }
-}
-
-void NfgTable::OnSelectCell(int p_row, int p_col)
-{
-  if (p_row < m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer()))
-    m_parent->SetStrategy(m_parent->GetRowPlayer(), p_row + 1);
-  if (p_col < m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer()))
-    m_parent->SetStrategy(m_parent->GetColPlayer(), p_col + 1);
 }
 
 void NfgTable::OnChangeLabels(void)
@@ -341,6 +334,18 @@ void NfgTable::RemoveValDisp(void)
     AdjustScrollbars();
     OnChangeLabels();
     OnChangeValues();
+  }
+}
+
+void NfgTable::OnLeftClick(wxGridEvent &p_event)
+{
+  if (p_event.GetRow() < 
+      m_parent->CurrentSupport()->NumStrats(m_parent->GetRowPlayer())) {
+    m_parent->SetStrategy(m_parent->GetRowPlayer(), p_event.GetRow() + 1);
+  }
+  if (p_event.GetCol() <
+      m_parent->CurrentSupport()->NumStrats(m_parent->GetColPlayer())) {
+    m_parent->SetStrategy(m_parent->GetColPlayer(), p_event.GetCol() + 1);
   }
 }
 
