@@ -7,7 +7,7 @@
 #include "lemke.imp"
 
 //---------------------------------------------------------------------------
-//                        LemkeParams: member functions
+//                       LemkeParams: member functions
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(gStatus &s) 
