@@ -299,30 +299,39 @@ Bool dialogNodeDelete::OnClose(void)
 //                   dialogActionLabel: Member functions
 //=========================================================================
 
+int dialogActionLabel::s_actionsPerDialog = 8;
+
 dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
   : wxDialogBox(p_parent, "Label Actions", TRUE), m_infoset(p_infoset),
-    m_lastSelection(0), m_actionNames(p_infoset->NumActions())
+    m_pageNumber(0), m_actionNames(p_infoset->NumActions())
 {
-  SetLabelPosition(wxVERTICAL);
-  m_actionList = new wxListBox(this, (wxFunction) CallbackAction, "Actions");
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    m_actionList->Append(ToText(act) + ": " +
-			 p_infoset->Actions()[act]->GetName());
-    m_actionNames[act] = p_infoset->Actions()[act]->GetName();
-  }
-  m_actionList->wxEvtHandler::SetClientData((char *) this);
-  m_actionList->SetSelection(0);
+  for (int act = 1; act <= m_infoset->NumActions(); act++)
+    m_actionNames[act] = m_infoset->Actions()[act]->GetName();
 
-  m_actionName = new wxText(this, (wxFunction) 0, "Name");
-  m_actionName->SetValue(p_infoset->Actions()[1]->GetName());
-  
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+  m_actionLabels = new wxText *[gmin(m_infoset->NumActions(),
+				     s_actionsPerDialog)];
+  for (int act = 1; act <= gmin(m_infoset->NumActions(), s_actionsPerDialog);
+       act++) {
+    m_actionLabels[act-1] = new wxText(this, 0, ToText(act));
+    m_actionLabels[act-1]->SetValue(m_infoset->Actions()[act]->GetName());
+    NewLine();
+  }
+
+  if (m_infoset->NumActions() >= s_actionsPerDialog) {
+    m_backButton = new wxButton(this, (wxFunction) CallbackBack,
+					"<< Back");
+    m_backButton->SetClientData((char *) this);
+    m_backButton->Enable(FALSE);
+    m_nextButton = new wxButton(this, (wxFunction) CallbackNext,
+					"Next >>");
+    m_nextButton->SetClientData((char *) this);
+  }
+
+  m_okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  m_okButton->SetClientData((char *) this);
+  m_cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
-  cancelButton->SetClientData((char *) this);
+  m_cancelButton->SetClientData((char *) this);
 
   Fit();
   Show(TRUE);
@@ -331,7 +340,11 @@ dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
 void dialogActionLabel::OnOK(void)
 {
   m_completed = wxOK;
-  m_actionNames[m_actionList->GetSelection() + 1] = m_actionName->GetValue();
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
+		  m_infoset->NumActions()); act++, entry++)
+    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
   Show(FALSE);
 }
 
@@ -348,16 +361,63 @@ Bool dialogActionLabel::OnClose(void)
   return FALSE;
 }
 
-void dialogActionLabel::OnAction(int p_action)
+void dialogActionLabel::OnBack(void)
 {
-  if (p_action == m_lastSelection)  return;
-  m_actionList->SetSelection(p_action);
-  m_actionNames[m_lastSelection + 1] = m_actionName->GetValue();
-  m_actionName->SetValue(m_actionNames[p_action + 1]);
-  m_actionList->SetString(m_lastSelection,
-			  ToText(m_lastSelection + 1) + ": " +
-			  m_actionNames[m_lastSelection + 1]);
-  m_lastSelection = p_action;
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < gmin((m_pageNumber + 1) * s_actionsPerDialog,
+		  m_infoset->NumActions()); act++, entry++)
+    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
+
+  m_pageNumber--;
+  entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
+    m_actionLabels[entry]->Show(FALSE);
+    m_actionLabels[entry]->SetValue(m_actionNames[act + 1]);
+    m_actionLabels[entry]->SetLabel(ToText(act + 1));
+  }
+  m_backButton->Show(FALSE);
+  m_nextButton->Show(FALSE);
+  m_okButton->Show(FALSE);
+  m_cancelButton->Show(FALSE);
+  
+  // This gyration ensures the tabbing order remains the same
+  m_cancelButton->Show(TRUE);
+  m_okButton->Show(TRUE);
+  m_nextButton->Show(TRUE);
+  m_backButton->Show(TRUE);
+  for (entry = s_actionsPerDialog - 1; entry >= 0; entry--)
+    m_actionLabels[entry]->Show(TRUE);
+  
+  m_actionLabels[0]->SetFocus();
+  m_backButton->Enable(m_pageNumber > 0);
+  m_nextButton->Enable(TRUE);
+}
+
+void dialogActionLabel::OnNext(void)
+{
+  int entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++)
+    m_actionNames[act + 1] = m_actionLabels[entry]->GetValue();
+
+  m_pageNumber++;
+  entry = 0;
+  for (int act = m_pageNumber * s_actionsPerDialog;
+       act < (m_pageNumber + 1) * s_actionsPerDialog; act++, entry++) {
+    if (act < m_infoset->NumActions()) {
+      m_actionLabels[entry]->SetValue(m_actionNames[act + 1]);
+      m_actionLabels[entry]->SetLabel(ToText(act + 1));
+    }
+    else
+      m_actionLabels[entry]->Show(FALSE);
+  }
+
+  m_actionLabels[0]->SetFocus();
+  m_backButton->Enable(TRUE);
+  m_nextButton->Enable((m_pageNumber + 1) * s_actionsPerDialog <=
+		       m_infoset->NumActions());
 }
 
 //=========================================================================
