@@ -1,0 +1,83 @@
+//
+// FILE: nfgalleq.imp -- Polynomial Nash Enum module
+//
+// $Id$
+//
+
+#include "nfgalleq.h"
+
+template <class T> class NfgAllNashModule  {
+private:
+  const Nfg &NF;
+  const NFSupport &fullsupport;
+  gList<const NFSupport> possiblenashsupports;
+  PolEnumParams params;
+  long count,nevals;
+  double time;
+  gList<MixedSolution> solutions;
+
+public:
+  NfgAllNashModule(const Nfg &, const PolEnumParams &p);
+
+  void NashEnum(void);
+  
+  long NumEvals(void) const;
+  double Time(void) const;
+  PolEnumParams &Parameters(void);
+
+  const gList<MixedSolution> &GetSolutions(void) const;
+};
+
+//-------------------------------------------------------------------------
+//                    NfgAllNashModule<T>: Member functions
+//-------------------------------------------------------------------------
+
+template <class T>
+NfgAllNashModule<T>::NfgAllNashModule(const Nfg &N, const PolEnumParams &p)
+  : NF(N), fullsupport(N), possiblenashsupports(), params(p), 
+    count(0), nevals(0)
+{ 
+  possiblenashsupports += PossibleNashSubsupports(fullsupport,params.status);
+}
+
+
+template <class T> void NfgAllNashModule<T>::NashEnum(void)
+{
+  for (int i = 1; i <= possiblenashsupports.Length(); i++) {
+    long newevals = 0;
+    double newtime = 0.0;
+    gList<MixedSolution> newsolns;
+    PolEnum(possiblenashsupports[i], params, newsolns, newevals, newtime);
+    solutions += newsolns;
+    nevals += newevals;
+    time += newtime;
+  }
+}
+
+template <class T> long NfgAllNashModule<T>::NumEvals(void) const
+{
+  return nevals;
+}
+
+template <class T> double NfgAllNashModule<T>::Time(void) const
+{
+  return time;
+}
+
+template <class T> PolEnumParams &NfgAllNashModule<T>::Parameters(void)
+{
+  return params;
+}
+
+template <class T>
+const gList<MixedSolution> &NfgAllNashModule<T>::GetSolutions(void) const
+{
+  return solutions;
+}
+
+
+
+
+
+
+
