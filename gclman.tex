@@ -98,7 +98,7 @@ command language to an external text file.  For example, at the unix prompt:
 
 The central pardigm of the GCL is that we can think of every legal
 statement as a function call.  The function may return a value, and
-may or may not have some special shorthand format.
+may or may not have some special short form format.
 
 At any point in time, there is a set of ``visible functions.''
 Functions can be either built-in functions, or user created functions.
@@ -223,7 +223,7 @@ data types match, then \verb+varname+ is ``modified:'' \verb+varname+
 is first deleted from the list of visible functions and then
 \verb+Assign+ is executed.  
 
-The Assign function is used so frequently, it has the following shorthand
+The Assign function is used so frequently, it has the following short form
 representation:
 \begin{verbatim}
 varname := statement
@@ -301,7 +301,7 @@ The built-in data types for the GCL are the following:
 \medskip
 
 \begin{tabular}{lp{4in}}
-BOOLEAN & Evaluates to either True ($1$) or False ($0$). \\ 
+BOOLEAN & Evaluates to either True or False. \\ 
 
 INTEGER & Evaluates to an integer of arbitrary size \\ 
 
@@ -375,46 +375,53 @@ is a legal list, since all the elements are of type INTEGER, but
 
 is not, since the second element is a LIST(FLOAT).
 
-\subsection{Numeric types}
+\subsubsection{Boolean}
 
-Four numeric data types are supported: BOOLEAN, INTEGER,
-RATIONAL and FLOAT.  
+The BOOLEAN data type is used for logical operations
 
 \begin{itemize}
 \item
-BOOLEAN:
+Variables:
 
 There are two built-in BOOLEAN variables, \verb+True+  and \verb+False+.  
 
 \bd
 \item
-\verb+True+ returns 1
+\verb+True+ returns ``True.''
 
 \item
-\verb+False+ returns 0
+\verb+False+ returns ``False.''
 \ed
+
+\item
+Operators:
 
 Let \verb+a+ and \verb+b+ be statements evaluating to BOOLEAN. Then  
 
 \bd
 \item
-\verb+And[a,b]+ is logical ``and.''  It returns the minimum of what
-\verb+a+ and \verb+b+ evaluate to.  It has the shorthand \verb+a && b+, or
+\verb+And[a,b]+ is logical ``and.''  It returns \verb+True+ if
+both \verb+a+ and \verb+b+ evaluate to \verb+True+, and otherwise
+returns \verb+False+.  It has the short form \verb+a && b+, or
 \verb+a AND b+. 
 
 \item
-\verb+Or[a,b]+ is logical ``or.''  It returns the maximum of what
-\verb+a+ and \verb+b+ evaluate to.  It has the shorthand \verb+a || b+, 
+\verb+Or[a,b]+ is logical ``or.''  It returns \verb+True+ if
+at least one of \verb+a+ and \verb+b+ evaluate to \verb+True+, and otherwise
+returns \verb+False+. It has the short form \verb+a || b+, 
 or \verb+a OR b+
 
 \item
-\verb+Not[a]+ is logical negation.  It returns 1 if \verb+a+ is 0, and
-0 if \verb+a+ is 1.  It has the shorthand \verb+!a+ or \verb+NOT a+.  
-\ed
+\verb+Not[a]+ is logical negation.  It returns \verb+True+ if \verb+a+
+evaluates to \verb+False+, and \verb+False+ if \verb+a+ is evaluates
+to \verb+True+.  It has the short form \verb+!a+ or \verb+NOT a+.
+\ed 
+\end{itemize}
 
+\subsubsection{Integers}
+\begin{itemize}
 \item
-INTEGER
-
+Variables:  
 There are two built-in INTEGER variables, \verb+Zero+, and \verb+One+.
 
 \bd
@@ -425,23 +432,278 @@ There are two built-in INTEGER variables, \verb+Zero+, and \verb+One+.
 \verb+One+ returns 1
 \ed
 
+\item
+Operators:
 Let \verb+a+ and \verb+b+ be statements evaluating to INTEGER. Then
 
 \bd
 \item
 \verb+Plus[a,b]+ returns the sum of the values returned by
-\verb+a+ and \verb+b+.  It has the shorthand \verb&a + b&.
+\verb+a+ and \verb+b+.  It has the short form \verb&a + b&.  Also,
+any integer $n>1$ can be viewed as short form for \verb+Plus[n-1,1]+  
  
 \item
+\verb+Neg[a]+ returns the integer which when added to \verb+a+ yields
+0.  It has the short form \verb&-a&.  
+ 
+\item
+\verb+Minus[a,b]+ returns the sum of the values returned by
+\verb+a+ and \verb+Neg[b]+.  It has the short form \verb&a - b&.  
+
+\item
 \verb+Times[a,b]+ returns the product of the values returned by
-\verb+a+ and \verb+b+.  It has the shorthand \verb+a * b+.
+\verb+a+ and \verb+b+.  It has the short form \verb+a * b+.
 
 \item
 \verb+Divide[a,b]+ returns the largest integer which, when
-multiplied by \verb+b+ is less than or equal to \verb+a+.  It has
-the shorthand \verb+a DIV b+.
+multiplied by \verb+b+ is less than or equal to \verb+a+.  It has the
+short form \verb+a DIV b+.
+
+\item
+\verb+Modulus[a,b]+ returns the remainder of \verb+a+ divided by
+\verb+b+.  This is the integer which, when added to
+\verb+Times[b,Div[a,b]]+, yields \verb+a+.  It has the short form 
+\verb+a MOD b+.
+\item
+\verb+Power[a,b]+ returns the \verb+a+ raised to the power \verb+b+.  
+It has the short form \verb+a ^ b+.
+
+\ed
+\item
+Relational operators take INTEGER arguments and
+return a BOOLEAN
+\bd
+\item
+\verb+GreaterThan[a,b]+ returns \verb+True+ if \verb+a+$>$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a > b+.
+
+\item
+\verb+LessThan[a,b]+ returns \verb+True+ if \verb+a+$<$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a < b+.
+
+\item
+\verb+GreaterEqual[a,b]+ returns \verb+True+ if \verb+a+$>=$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a >= b+.
+
+\item
+\verb+LessEqual[a,b]+ returns \verb+True+ if \verb+a+$<=$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a <= b+.
+
+\item
+\verb+Equal[a,b]+ returns \verb+True+ if \verb+a+$=$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a = b+.
+
+\item
+\verb+NotEqual[a,b]+ returns \verb+True+ if \verb+a+$!=$\verb+b+, and
+returns \verb+False+ otherwise.  It has the short form \verb+a != b+.
 \ed
 \end{itemize}
+
+\subsubsection{Rationals}
+
+A RATIONAL returns a pair of integers, called the numerator and the
+denominator, where the denominator is
+non-zero.  A statement evaluating to rational is represented in the
+form \verb+a/b+, where \verb+a+ is the numerator, and \verb+b+ is the
+denominator.  
+
+\begin{itemize}
+\item
+Variables:  
+There are two built-in RATIONAL variables, \verb+Zero+, and \verb+One+.
+
+\bd
+\item
+\verb+Zero+ returns \verb+0/1+
+
+\item
+\verb+One+ returns \verb+1/1+
+\ed
+
+\item
+Operators for rationals can all be defined in terms of the operators
+for integers.  Let \verb+a+ and \verb+b+ be statements evaluating to
+RATIONAL. Say \verb+a+ evaluates to \verb+w/x+ and \verb+b+ evaluates
+to \verb+y/z+
+
+\bd
+\item
+\verb+Plus[a,b]+ returns \verb&w * z + y * x / x * z&. It has the
+short form \verb&a + b&.  
+ 
+\item
+\verb+Neg[a]+ returns \verb+-w / x+.  It has the short form \verb&-a&.  
+ 
+\item
+\verb+Minus[a,b]+ returns \verb+w * z - y * x / x * z+.  
+It has the short form \verb&a - b&.  
+
+\item
+\verb+Times[a,b]+ returns \verb+w * y / x * z+.  It has the short form 
+\verb+a * b+.
+
+\item
+\verb+Divide[a,b]+ returns \verb+w * z / x * y+. It is only defined
+when \verb+b+ does not evaluate to \verb+0+.  It has the
+short form \verb+a / b+.
+\item 
+\verb+Power[a,b]+ is defined only when \verb+b+ is an INTEGER.  It 
+returns \verb+w ^ b / x ^ b+.  It has the short form \verb+a ^ b+.
+
+\ed
+\item
+Relational operators for RATIONAL can also be defined in terms of
+relational operators for INTEGER.  
+\bd
+\item
+\verb+GreaterThan[a,b]+ returns \verb+w * z +$>$\verb+ x * y+.
+It has the short form \verb+a > b+.
+
+\item
+\verb+LessThan[a,b]+ returns \verb+w * z +$<$\verb+ x * y+.
+It has the short form \verb+a < b+.
+
+\item
+\verb+GreaterEqual[a,b]+ returns \verb+w * z +$>=$\verb+ x * y+.
+It has the short form \verb+a >= b+.
+
+\item
+\verb+LessEqual[a,b]+ returns \verb+w * z +$<=$\verb+ x * y+.
+It has the short form \verb+a <= b+.
+
+\item
+\verb+Equal[a,b]+ returns \verb+w * z +$=$\verb+ x * y+.
+It has the short form \verb+a = b+.
+
+\item
+\verb+NotEqual[a,b]+ returns \verb+w * z +$!=$\verb+ x * y+.
+It has the short form \verb+a = b+.
+\ed
+\end{itemize}
+
+\subsubsection{Floats}
+
+A FLOAT returns a pair of integers, in the form \verb+a E b+, where
+\verb+a+ is called the mantissa, and \verb+b+ is called the exponent.
+The mantissa and exponent have restricted range, as follows:  
+\verb+| a | < FloatPrecis+, and \verb+| b - Mag[a] | < FloatMag+, where
+\verb+Mag[a]+ is the magnitude of \verb+a+ -- the largest power of ten 
+that is less than or equal to \verb+a+.  
+
+It is perhaps more natural to think of a FLOAT as consisting of the
+RATIONAL mantissa, \verb+a / 10^Mag[a]+, together with an integer
+exponent, \verb+e = | b - Mag[a] |+.  This is the engineering format
+in which floating point numbers are frequently expressed.  In this
+case, the rational mantissa is written in decimal notation, with one
+digit, followed by a decimal point, and followed by the other
+significant digits.
+
+From the point of view of speed, floating point numbers have nice
+characteristics.  Floating point numbers are tailored to fit in a
+fixed amount of storage space.  Hence floating point operations can be
+encoded in hardware, and be done in a few clock cycles, in contrast to
+the software implementation of arithmetic operations for arbitrary
+precision integers or rationals.  
+
+However, from the point of view of accuracy, the FLOAT data type has a
+number of undesirable properties which mean that it should be avoided
+whenever exact answers are required.  Unlike the INTEGER and RATIONAL
+data types, the FLOAT data type does not satisfy the basic axioms of
+an ordered field: The set of floating point numbers is not closed
+under addition or multiplication.  Neither addition or multiplication
+is associative (it is not always the case that
+\verb&(a+b)+c = a+(b+c)& or 
+\verb+(a*b)*c = a*(b*c)+).  Nor does multiplication
+distribute over addition (it is not always true that 
+\verb&a*(b+c) = a*b+a*c&.  Further, not all floating point numbers have
+multiplicative inverses.  This means that we can have such wonderful
+properties as \verb+b*(a/b) != a+ (if \verb+a = 1+ and
+\verb+b = 3+, for example), or \verb&a+b = a& and yet not \verb+ b = 0+.  In
+addition to these problems, the result of a floating poing operation
+can be machine dependent, since \verb+FloatPrecis+ and 
+\verb+FloatMag+ can differ from machine to machine.
+
+\begin{itemize}
+\item
+Variables:  
+There are two built-in FLOAT variables, \verb+Zero+, and \verb+One+.
+
+\bd
+\item
+\verb+Zero+ returns \verb+0 E 1+
+
+\item
+\verb+One+ returns \verb+1 E 1+
+\ed
+
+\item
+Operators for floats can all be defined in terms of the operators for
+integers.  Let \verb+a+ and \verb+b+ be statements
+evaluating to FLOAT. Say \verb+a+ evaluates to \verb+wEx+ and
+\verb+b+ evaluates to \verb+yEz+.  For any integer \verb+i+, let 
+\verb+Insig[i]+ be the number of insignificant digits of \verb+x+.  In
+other words, \verb+Insig[i]+ is the smallest integer such that 
+\verb+| x DIV 10 ^ m | +$<=$\verb+ FloatPrecis+.  In all of the following
+definitions, we write \verb+n = FloatMag+.
+
+\bd
+\item
+\verb+Plus[a,b]+ returns \verb&(x DIV 10^m)E(m-n)&, where 
+\verb&x = a*10^(b+n) + c*10^(d+n)&, 
+and \verb+m = Insig[x]+.  
+It has the short form \verb&a + b&.
+ 
+\item
+\verb+Neg[a]+ returns \verb+-w E x+.  It has the short form \verb&-a&.  
+ 
+\item
+\verb+Minus[a,b]+ returns \verb+Plus[a, -b]+
+It has the short form \verb&a - b&.  
+
+\item
+\verb+Times[a,b]+ returns \verb&(x DIV 10^m)E(m-n)&, where 
+\verb&x = a*10^(b+n) * c*10^(d+n)&, 
+and \verb+m = Insig[x]+.  
+It has the short form \verb&a * b&.
+ 
+\item
+\verb+Divide[a,b]+ returns \verb&(x DIV 10^m)E(m-2*n)&, where 
+\verb&x = a*10^(b+2*n) DIV c*10^(d+n)&, 
+and \verb+m = Insig[x]+.  
+It has the short form \verb&a * b&.
+ 
+\ed
+\item
+Relational operators for FLOAT can also be defined in terms of
+relational operators for INTEGER.  
+\bd
+\item
+\verb+GreaterThan[a,b]+ returns \verb&w*10^(x+n) > y*10^(z+n)&.
+It has the short form \verb+a > b+.
+
+\item 
+\verb+LessThan[a,b]+ returns \verb&w*10^(x+n) < y*10^(z+n)&.
+It has the short form \verb+a < b+.
+
+\item
+\verb+GreaterEqual[a,b]+ returns \verb&w*10^(x+n) >= y*10^(z+n)&.
+It has the short form \verb+a >= b+.
+
+\item 
+\verb+LessEqual[a,b]+ returns \verb&w*10^(x+n) <= y*10^(z+n)&.
+It has the short form \verb+a <= b+.
+
+\item 
+\verb+Equal[a,b]+ returns \verb&w*10^(x+n) = y*10^(z+n)&.
+It has the short form \verb+a = b+.
+
+\item 
+\verb+NotEqual[a,b]+ returns \verb&w*10^(x+n) != y*10^(z+n)&.
+It has the short form \verb+a != b+.
+
+\ed
+\end{itemize}
+
 
 \subsection{Order of precedence}
 
@@ -456,17 +718,17 @@ at that time.  This leads to a recursive structure of evaluation,
 which stops only when an argument being evaluated is a constant
 function (i. e., a function with no arguments).
 
-When shorthand forms are used, then ambiguity can arise in the
+When short form forms are used, then ambiguity can arise in the
 intended order of evaluation.  For example, the statement \verb&a + b * c&,
 could be meant as \verb+Plus[a,Times[b,c]]+ or as
 \verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
-functions that have a shorthand representation are given an order of
+functions that have a short form representation are given an order of
 precedence.  When a statement is parsed by the GCL, it is first
-scanned from left to right, replacing each shorthand expression at the
+scanned from left to right, replacing each short form expression at the
 top level of precedence with its canonical form.  Then it is scanned
-again replacing each shorthand expression at the second level of
-precedence with its canonical form, and so on, until all shorthand
-expression have been eliminated.  
+again replacing each short form expression at the second level of
+precedence with its canonical form, and so on, until all short form
+expressions have been eliminated.  
 
 The order of precedence for built-in functions is as follows:
 \bd
