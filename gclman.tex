@@ -164,7 +164,6 @@ are not necessary for the procedure to function.
 
 \begin{itemize}
 \item
-
 \begin{verbatim}
 AppendNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
 \end{verbatim}
@@ -194,6 +193,7 @@ is created automatically.
 - Optional parameters:  None.
 \ed
 
+\item
 \begin{verbatim}
 AttachOutcome[n->NODE, outc->INTEGER] =: NODE
 \end{verbatim}
@@ -219,7 +219,7 @@ with the indicated number exists, no action is taken.
 - Optional parameters:  None.
 \ed
 
-\end{itemize}
+\item
 
 \begin{verbatim}
 Car[l->LIST(T)] =: T	
@@ -245,6 +245,8 @@ of the list.
 \ed
 
 ----------
+\item
+
 \begin{verbatim}
 Cdr[l->LIST(T)] =: LIST(T)
 \end{verbatim}
@@ -268,6 +270,8 @@ first element.
 \ed
 
 ----------
+
+\item
 
 \begin{verbatim}
 Cons[l1->LIST(T), l2->LIST(T)] =: LIST(T)
@@ -296,6 +300,7 @@ combination of the two given lists.
 \ed
 
 ----------
+\item
 \begin{verbatim}
 Contains[e->T, l->LIST(T)] =: BOOLEAN
 \end{verbatim}
@@ -323,6 +328,8 @@ contained in the indicated list of type T.
 \ed
 
 ----------
+\item
+
 \begin{verbatim}
 CopyTree[n->NODE, to->NODE] =: NODE
 \end{verbatim}
@@ -348,6 +355,7 @@ indicated node.
 \ed
 
 ----------
+\item
 \begin{verbatim}
 CrunchNfg[N->NFG] =: NFG
 \end{verbatim}
@@ -373,7 +381,7 @@ problem is to be created.
 - Optional parameters:  None.
 \ed
 ----------
-
+\item
 \begin{verbatim}
 DeleteAction[n->NODE, br->INTEGER] =: NODE
 \end{verbatim}
@@ -399,6 +407,7 @@ is to be deleted.
 
 ----------
 
+\item
 \begin{verbatim}
 DeleteNode[n->NODE, keep->INTEGER] =: NODE
 \end{verbatim}
@@ -426,7 +435,7 @@ deleted node are deleted.
 \ed
 
 ----------
-
+\item
 \begin{verbatim}
 DeleteTree[n->NODE] =: NODE
 \end{verbatim}
@@ -450,674 +459,1312 @@ This node then becomes a terminal node.
 \ed
 
 ----------
-
-
-
+\item
+\begin{verbatim}
 DetachOutcome[n->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Sets the outcome attached to the specified node to the 
-	null outcome.
-   -	Return value:  The indicated node.
-   -	Required parameters:
-	  *  n:  The node whose outcome is to be detached.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Sets the outcome attached to the specified node to the 
+null outcome.
+\item   
+- Return value:  The indicated node.
+\item
+- Required parameters:
 
+\bd
+\item	
+*  n:  The node whose outcome is to be detached.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 ----------
 
+\item
+\begin{verbatim}
 DisplayEfg[E->EFG]
+\end{verbatim}
 
-   -	Description:  Prints the game tree of the specified extensive form
-	problem in outline form.
-   -	Return value:  None.
-   -	Required parameters:
-	  *  E:  The problem in extensive form which is to be displayed.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Prints the game tree of the specified extensive form
+problem in outline form.
+\item
+- Return value:  None.
+\item
+- Required parameters:
 
+\bd
+\item
+*  E:  The problem in extensive form which is to be displayed.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 ----------
 
+\item
+\begin{verbatim}
 DisplayNfg[N->NFG, {sset->INTEGER}]
+\end{verbatim}
 
-   -	Description:  Prints the specified normal form problem as a list of
-	contingencies and corresponding payoff vectors.  Uses the last strategy
-	set unless otherwise specified.
-   -	Return value:  None.
-   -	Required parameters:
-	  *  N:  The problem in normal form which is to be displayed.
-   -	Optional parameters:
-	  *  SSET:  The number of the strategy set of the specified normal form
-		problem which is to be used in displaying the problem.  If not
-		specified, the last (smallest) strategy set is used.
+\bd
+\item
+- Description:  Prints the specified normal form problem as a list of
+contingencies and corresponding payoff vectors.  Uses the last
+strategy set unless otherwise specified.
+\item
+- Return value:  None.
+\item
+- Required parameters:
 
+\bd	
+\item
+*  N:  The problem in normal form which is to be displayed.
+\ed
+
+\item
+- Optional parameters:
+	
+\bd
+\item
+*  SSET:  The number of the strategy set of the specified normal form
+problem which is to be used in displaying the problem.  If not
+specified, the last (smallest) strategy set is used.
+\ed
+
+\ed
 ----------
 
+\item
+\begin{verbatim}
 EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
+\end{verbatim}
 
-   -	Description:  Converts a problem in extensive form to the same problem
-	in the corresponding agent normal form.
-   -	Return value:  The new agent normal form game.  
-   -	Required parameters:
-	  *  E:  The problem in extensive form to be converted to agent normal
-		form.
-   -	Optional parameters:
-	  *  time:  Returns the elapsed time for the operation.
+\bd
+\item
+- Description:  Converts a problem in extensive form to the same problem
+in the corresponding agent normal form.
+\item
+- Return value:  The new agent normal form game.  
+\item 
+- Required parameters:
 
+\bd
+\item
+*  E:  The problem in extensive form to be converted to agent normal form.
+\ed
+
+\item
+- Optional parameters:
+	
+\bd
+\item
+*  time:  Returns the elapsed time for the operation.
+\ed
+\ed
 ----------
 
+\item
+\begin{verbatim}
 EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
+\end{verbatim}
 
-   -	Description:  Converts a problem in extensive form to the same problem
-	as a reduced normal form game.
-   -	Return value:  The new normal form game.  
-   -	Required parameters:
-	  *  E:  The problem in extensive form to be converted to normal form.
-   -	Optional parameters:
-	  *  time:  Returns the elapsed time for the operation.
+\bd
+\item
+- Description:  Converts a problem in extensive form to the same problem
+as a reduced normal form game.
+\item
+- Return value:  The new normal form game.  
+\item
+- Required parameters:
+	
+\bd
+\item
+*  E:  The problem in extensive form to be converted to normal form.
+\ed
+
+\item
+- Optional parameters:
+	
+\bd
+\item
+*  time:  Returns the elapsed time for the operation.
+\ed
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 ElapsedTime[] =: RATIONAL
+\end{verbatim}
 
-   -	Description:  Calculates the time transpired since the last time
-	StartWatch[] was used if the system stopwatch is currently running.
-	Otherwise, calculates the time elapsed between the last StartWatch[] -
-	StopWatch[] match.
-   -	Return value:  Returns the time value given by the system stopwatch.
-   -	Required parameters:  None.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Calculates the time transpired since the last time
+StartWatch[] was used if the system stopwatch is currently running.
+Otherwise, calculates the time elapsed between the last StartWatch[] -
+StopWatch[] match.
+\item
+- Return value:  Returns the time value given by the system stopwatch
+\item
+- Required parameters:  None.
+\item   
+-Optional parameters:  None.
+\ed
 
 ----------
+\item
+\begin{verbatim}
 
 ElimDom[N->NFG, {pl->LIST(INTEGER)}, {strong->BOOLEAN}, {time<->RATIONAL},
 	{output->TEXT}, {NIT->INTEGER}] =: INTEGER
+\end{verbatim}
 
-   -	Description:  Performs iterated (unless otherwise specified) deletion 
-	of dominated strategies for the list of players specified.  
-   -	Return value:  The number of the new strategy set.  The original full
-	strategy set is numbered 1.  Each iteration creates a new strategy set
-	with an integer value one greater than that of the previous strategy 
-	set.  Therefore, if no dominated strategies are found, the return value
-	is equal to 1.
-   -	Required paremeters:
-	  *  N:  The problem in normal form for which dominated strategies are
-		to be eliminated.
-   -	Optional parameters:
-	  *  pl:  Specifies the list of players for which the procedure is to
-		be performed.  If unspecified, it defaults to all players. 
- 	  *  strong:  Determines the type of dominance used.  The default value
-		is False, which signifies that weak dominance is used.  If 
-		`strong` is specified to be True, strong dominance is used.  
-	  *  time:  Returns the elapsed time for the operation.
-	  *  output:  Redirects the output of the procedure to a specified 
-		file.  Directing output to ``/dev/null'' under Unix turns 
-		output off.  By default, it directs output to the screen.
-	  *  NIT:  The number of iterations to be performed by the procedure.
-		If not specified, it has a default value of zero which means 
-		that all dominated strategies are iteratively deleted.
+\bd
+\item
+- Description:  Performs iterated (unless otherwise specified) deletion 
+of dominated strategies for the list of players specified.  
+\item  
+- Return value:  The number of the new strategy set.  The original full
+strategy set is numbered 1.  Each iteration creates a new strategy set
+with an integer value one greater than that of the previous strategy 
+set.  Therefore, if no dominated strategies are found, the return value
+is equal to 1.
+\item
+- Required paremeters:
+	
+\bd
+\item
+*  N:  The problem in normal form for which dominated strategies are
+to be eliminated.
+\ed
 
+\item
+- Optional parameters:
+
+\bd
+\item
+*  pl:  Specifies the list of players for which the procedure is to
+be performed.  If unspecified, it defaults to all players. 
+\item
+*  strong:  Determines the type of dominance used.  The default value
+is False, which signifies that weak dominance is used.  If `strong` 
+is specified to be True, strong dominance is used.  
+\item
+*  time:  Returns the elapsed time for the operation.
+\item
+*  output:  Redirects the output of the procedure to a specified 
+file.  Directing output to ``/dev/null'' under Unix turns 
+output off.  By default, it directs output to the screen.
+\item
+*  NIT:  The number of iterations to be performed by the procedure.
+If not specified, it has a default value of zero which means 
+that all dominated strategies are iteratively deleted.
+\ed
+\ed
 ----------
 
+\item
+\begin{verbatim}
 Equal[l1->LIST(T), l2->LIST(T)] =: BOOLEAN
+\end{verbatim}
 
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
-   -	Description:  Determines whether or not all the elements of the two
-	lists are equal.
-   -	Return value:  Returns True only if all the elements of the two lists
-	are equal.
-   -	Required parameters:  
-	  *  l1:  The first list of type T which is to be compared for 
-		equality.
-	  *  l2:  The second list of type T which is to be compared for 
-		equality.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Determines whether or not all the elements of the two
+lists are equal.
+\item
+- Return value:  Returns True only if all the elements of the two lists
+are equal.
+\item
+- Required parameters:  
+	
+\bd
+\item
+*  l1:  The first list of type T which is to be compared for equality.
+\item
+*  l2:  The second list of type T which is to be compared for 
+equality.
+\ed
 
+\item
+- Optional parameters:  None.
+
+\ed
 ----------
 
+\item
+\begin{verbatim}
 GetActionName[n->NODE, br->INTEGER] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the name assigned to the action corresponding to 
-	the indicated branch of the specified node.
-   -	Return value:  The name of the action.
-   -	Required parameters:
-	  *  n:  The node at which the action to be found exists.
-	  *  br:  The branch which corresponds to the action to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the name assigned to the action corresponding to 
+the indicated branch of the specified node.
+\item   
+- Return value:  The name of the action.
+\item
+- Required parameters:
+	
+\bd
+\item
+*  n:  The node at which the action to be found exists.
+\item
+*  br:  The branch which corresponds to the action to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetActionProbs[n->NODE] =: LIST(RATIONAL)
+\end{verbatim}
 
-   -	Description:  Finds the vector of probabilities for the actions at the
-	specified node.  This is only meaninful for nodes in information sets 
-	belonging to the player representing chance (player 0).
-   -	Return value:  Returns the vector of action probabilities for the node.
-   -	Required parameters: 
-	  *  n:  The node for which the action probabilities are to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the vector of probabilities for the actions at the
+specified node.  This is only meaninful for nodes in information sets 
+belonging to the player representing chance (player 0).
+\item
+- Return value:  Returns the vector of action probabilities for the node.
+\item
+- Required parameters: 
+	
+\bd
+\item
+*  n:  The node for which the action probabilities are to be found.
+\ed
 
+\item
+-Optional parameters:  None.
+\ed
 ----------
 
+\item
+\begin{verbatim}
 GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
+\end{verbatim}
 
-   -	Description:  Determines the number of strategies which dominate the
-	specified strategy for the indicated player in the given problem in 
-	normal form.
-   -	Return value:  Returns the number of strategies which dominate the
-	specified strategy.  If the strategy is undominated, returns a value of
-	zero.  
-   -	Required parameters:
-	  *  N:  The problem in normal form in which the specified strategy of
-		the indicated player is to be tested for domination.
-	  *  pl:  The number corresponding to the player for whom the specified
-		strategy is to be tested for domination.
-	  *  st:  The number corresponding to the strategy belonging to the 
-		indicated player which is to be tested for domination.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Determines the number of strategies which dominate the
+specified strategy for the indicated player in the given problem in 
+normal form.
+\item
+- Return value:  Returns the number of strategies which dominate the
+specified strategy.  If the strategy is undominated, returns a value
+of zero.  
+\item
+- Required parameters:
+
+\bd
+\item
+*  N:  The problem in normal form in which the specified strategy of
+the indicated player is to be tested for domination.
+\item
+*  pl:  The number corresponding to the player for whom the specified
+strategy is to be tested for domination.
+\item
+*  st:  The number corresponding to the strategy belonging to the 
+indicated player which is to be tested for domination.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetInfosetName[n->NODE] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the name of the information set to which the 
-	specified node belongs.
-   -	Return value:  The name of the information set.
-   -	Required parameters:
-	  *  n:  The node which belongs to the information set to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the name of the information set to which the 
+specified node belongs.
+\item
+- Return value:  The name of the information set.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node which belongs to the information set to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 GetNextSibling[n->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Finds the next sibling of the specified node.
-   -	Return value:  The node which is the next sibling of the specified 
-	node.
-   -	Required parameters:
-	  *  n:  The node for which the next sibling is to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the next sibling of the specified node.
+\item
+- Return value:  The node which is the next sibling of the specified 
+node.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node for which the next sibling is to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
+\end{verbatim}
 
-   -	Description:  Finds the vector of payoffs to the players for the 
-	outcome with the indicated number in the specified problem in extensive
-	form.
-   -	Return value:  The vector of payoffs corresponding to the specified 
-	outcome.  If the outcome is not defined, the procedure returns the 
-	empty list.
-   -	Required parameters:
-	  *  E:  The problem in extensive form for which the outcome is to be
-		found.
-	  *  outc:  The number assigned to the outcome for which the payoff 
-		vector will be returned.
-   -	Optional paramteters:  None.
+\bd
+\item
+-Description:  Finds the vector of payoffs to the players for the 
+outcome with the indicated number in the specified problem in extensive
+form.
+\item
+- Return value:  The vector of payoffs corresponding to the specified 
+outcome.  If the outcome is not defined, the procedure returns the 
+empty list.
+\item
+- Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form for which the outcome is to be found.
+\item
+*  outc:  The number assigned to the outcome for which the payoff 
+vector will be returned.
+\ed
+
+\item
+- Optional paramteters:  None.
+\ed
 
 ---------
-
+\item
+\begin{verbatim}
 GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the name of the specified outcome in the indicated
-	problem in extensive form.  If the outcome is not defined, an error is
-	given.
-   -	Return value:  The name assigned to the indicated outcome.  By default,
-	the name of an outcome is the empty string.
-   -	Required parameters:
-	  *  E:  The problem in extensive form for which the outcome name is to
-		be found.
-	  *  outc:  The number corresponding to the outcome for which the name 
-		will be returned.
-   -	Optional parameters:  None.
+\bd
+
+\item
+- Description:  Finds the name of the specified outcome in the indicated
+problem in extensive form.  If the outcome is not defined, an error is
+given.
+\item
+- Return value:  The name assigned to the indicated outcome.  By default,
+the name of an outcome is the empty string.
+\item
+- Required parameters:
+
+\bd
+\item	  
+*  E:  The problem in extensive form for which the outcome name is to
+be found.
+\item
+*  outc:  The number corresponding to the outcome for which the name 
+will be returned.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the name of the indicated player in the given 
-	problem in extensive form.
-   -	Return value:  The name assigned to the indicated player.  If the 
-	indicated player has not been assigned a name or does not exist, the
-	procedure returns the empty string.
-   -	Required parameters:
-	  *  E:  The problem in extensive form for which the player name is to
-		be found.
-	  *  pl:  The number assigned to the player whose name will be 
-		returned.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the name of the indicated player in the given 
+problem in extensive form.
+\item
+- Return value:  The name assigned to the indicated player.  If the 
+indicated player has not been assigned a name or does not exist, the
+procedure returns the empty string.
+\item
+- Required parameters:
+	
+
+\bd
+\item  
+*  E:  The problem in extensive form for which the player name is to
+be found.
+\item
+*  pl:  The number assigned to the player whose name will be 
+returned.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetPriorSibling[n->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Finds the prior sibling of the specified node.
-   -	Return value:  The node which is the prior sibling of the specified 
-	node.
-   -	Required parameters:
-	  *  n:  The node for which the prior sibling is to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the prior sibling of the specified node.
+\item
+- Return value:  The node which is the prior sibling of the specified node.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node for which the prior sibling is to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the name assigned to the specified strategy of the
-	indicated player of the given problem in normal form.
-   -	Return value:  Returns the name found.  If a name has not been assigned
-	to the strategy, the empty string is returned.
-   -	Required parameters:
-	  *  N:  The problem in normal form in which the name assigned to the 
-		specified strategy of the indicated player is to be found.
-	  *  pl:  The number corresponding to the player for which the name of
-		the indicated strategy is to be found.
-	  *  st:  The number corresponding to the strategy of the indicated 
-		player for which the name is to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the name assigned to the specified strategy of
+the indicated player of the given problem in normal form.
+\item
+- Return value:  Returns the name found.  If a name has not been assigned
+to the strategy, the empty string is returned.
+\item
+- Required parameters:
+
+\bd
+\item
+*  N:  The problem in normal form in which the name assigned to the
+specified strategy of the indicated player is to be found.
+\item
+*  pl:  The number corresponding to the player for which the name of
+the indicated strategy is to be found.
+\item
+*  st:  The number corresponding to the strategy of the indicated 
+player for which the name is to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 GetTitle[E->EFG] =: TEXT
+\end{verbatim}
 
-   -	Description:  Finds the title of the indicated problem in extensive 
-	form.
-   -	Return value:  The title of the indicated extensive form problem.  If
-	the title has not been assigned, the empty string is returned.
-   -	Required parameters:
-	  *  E:  The problem in extensive form whose title is to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the title of the indicated problem in extensive form.
+\item
+- Return value:  The title of the indicated extensive form problem.  If
+the title has not been assigned, the empty string is returned.
+\item
+- Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form whose title is to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 Gobit[N->NFG, E->EFG, {nequilib->INTEGER}, {type->INTEGER},
 	{maxitsOpt->INTEGER}, {maxitsBrent->INTEGER}, {minLam->RATIONAL},
 	{maxLam->RATIONAL}, {delLam->RATIONAL}, {tolDFP->RATIONAL},
 	{tolBrent}->RATIONAL}, {time<->RATIONAL}, 
 	{output->TEXT}, {pxifile->TEXT}] =: INTEGER
+\end{verbatim}
 
-   -	Description:  Computes the Gobit solution for the specified problem in
-	either extensive or normal form.  
-   -	Return value:  XXXX.
-   -	Required parameters:  Exactly one of the following
-	  *  N:  The problem in normal form for which the Gobit solution is to
-		be found.
-	  *  E:  The problem in extensive form for which the Gobit solution 
-		is to be found.
-   -	Optional parameters:
-	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
-		value of 1.  
-	  *  type:   Type of incrementing 
-			0 means Lambda_t = Lambda_{t-1} + delLam
-			1 means Lambda_t = Lambda_{t-1} * delLam
-	  *  maxitsOpt:  Sets the masimum number of iterations to the 
-		n-dimensional optimization routine.  Default is 200.
-	  *  maxitsBrent:  Sets the maximum number of iterations in
-		the 1-dimensional line search.  Default is 100.
-	  *  tolOpt:  Sets the tolerance for the n-dimensional
-		optimization routine.  Default is 1.0e-10.
-	  *  tolBrent:  Sets the tolerance for the 1-dimensional line
-		search.  Default is 2.0e-10.
-	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
-		0.01.
-	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
-		30.
-	  *  delLam:  Specifies the rate at which the value of Lambda changes.
-		Has a default value of 1.01.
-	  *  time:  Returns the elapsed time for the operation.
-	  *  output:  Can be used to redirect the output of this procedure to a
-		file.  Directing output to ``/dev/null'' under Unix turns 
-		output off.  By default, output is directed to the screen.
-	  *  pxifile: Can be used to generate an output file
-		compatible for input to pxi
+\bd
+\item
+- Description:  Computes the Gobit solution for the specified problem in
+either extensive or normal form.  
+\item
+- Return value:  XXXX.
+\item 
+- Required parameters:  Exactly one of the following
+
+\bd
+\item
+*  N:  The problem in normal form for which the Gobit solution is to
+be found.
+\item	
+*  E:  The problem in extensive form for which the Gobit solution 
+is to be found.
+\ed
+
+\item
+- Optional parameters:
+
+\bd
+\item
+*  nequilib:  Sets the number of equilibria to find.  Has a default 
+value of 1.  
+\item
+*  type:   Type of incrementing 
+	
+\bd
+\item
+0 means $Lambda_t = Lambda_{t-1}$ + delLam
+\item 
+1 means $Lambda_t = Lambda_{t-1}$ * delLam
+\ed
+
+\item
+*  maxitsOpt:  Sets the masimum number of iterations to the 
+n-dimensional optimization routine.  Default is 200.
+\item
+*  maxitsBrent:  Sets the maximum number of iterations in
+the 1-dimensional line search.  Default is 100.
+\item
+*  tolOpt:  Sets the tolerance for the n-dimensional
+optimization routine.  Default is 1.0e-10.
+\item
+*  tolBrent:  Sets the tolerance for the 1-dimensional line
+search.  Default is 2.0e-10.
+\item
+*  minLam:  Sets the minimum value of Lambda.  Has a default value of 0.01.
+\item
+*  maxLam:  Sets the maximum value of Lambda.  Has a default value of 30.
+\item
+*  delLam:  Specifies the rate at which the value of Lambda changes. Has a default value of 1.01.
+\item
+*  time:  Returns the elapsed time for the operation.
+\item
+*  output:  Can be used to redirect the output of this procedure to a
+file.  Directing output to ``/dev/null'' under Unix turns output off.
+By default, output is directed to the screen.
+\item
+*  pxifile: Can be used to generate an output file
+compatible for input to pxi
+\ed
+\ed
+
+
 ----------
-
+\item
+\begin{verbatim}
 GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	{minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL}, 
 	{type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL}, {time<->RATIONAL}]
 	 =: INTEGER
+\end{verbatim}
 
-   -	Description:  XXXX .
-   -	Return value:  XXXX .
-   -	Required parameters:
-	  *  N:  The problem in normal form which is to be operated on.
-   -	Optional parameters:
-	  *  plev:  XXXX .
-	  *  output:  Can be used to redirect the output of this procedure to a
-		file.  Directing output to ``/dev/null'' under Unix turns 
-		output off.  By default, output is directed to the screen.
-	  *  errors:  XXXX .
-	  *  minLam:  Sets the minimum value of Lambda.  Has a default value of
-		XXXX .
-	  *  maxLam:  Sets the maximum value of Lambda.  Has a default value of
-		XXXX .
-	  *  delLam:  Specifies the rate at which the value of Lambda changes.
-		Has a default value of XXXX .
-	  *  type:  XXXX .
-	  *  delp:  XXXX .
-	  *  tol:  XXXX .
-	  *  time:  Returns the elapsed time for the operation.
+\bd
+\item
+- Description:  XXXX .
+\item
+- Return value:  XXXX .
+\item
+- Required parameters:
+	
+\bd
+\item  
+*  N:  The problem in normal form which is to be operated on.
+\ed
+
+\item
+- Optional parameters:
+
+\bd
+\item	
+ *  plev:  XXXX .
+\item
+*  output:  Can be used to redirect the output of this procedure to a
+file.  Directing output to ``/dev/null'' under Unix turns output off.
+By default, output is directed to the screen.
+\item
+*  errors:  XXXX .
+\item
+*  minLam:  Sets the minimum value of Lambda.  Has a default value of
+XXXX .
+\item
+*  maxLam:  Sets the maximum value of Lambda.  Has a default value of XXXX .
+\item
+*  delLam:  Specifies the rate at which the value of Lambda changes.
+Has a default value of XXXX .
+\item
+*  type:  XXXX .
+\item
+*  delp:  XXXX .
+\item
+*  tol:  XXXX .
+\item
+*  time:  Returns the elapsed time for the operation.
+\ed
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 InsertAction[n->NODE, as->1, br->3] =: NODE
+\end{verbatim}
 
-   -	Description:  Inserts the indicated number of actions into the 
-	information set containing the specified node.
-   -	Return value:  Returns the specified node.
-   -	Required parameters:
-	  *  n:  The node which belongs to the information set which is to have
-		actions inserted into it.
-	  *  as:  The number which will correspond to the first inserted
-		action.
-	  *  br:  The number of actions to be inserted at the specified node.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Inserts the indicated number of actions into the 
+information set containing the specified node.
+\item
+- Return value:  Returns the specified node.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node which belongs to the information set which is to have
+actions inserted into it.
+\item
+*  as:  The number which will correspond to the first inserted action.
+\item
+*  br:  The number of actions to be inserted at the specified node.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
+
 
 ----------
-
+\item
+\begin{verbatim}
 InsertNode[n->NODE, pl->INTEGER, br->INTEGER] =: NODE
+\end{verbatim}
 
-   -	Description:  Inserts a new node belonging to the indicated player at 
-	the location of the specified node and moves that node to the end of 
-	the first branch of the new node.
-   -	Return value:  Returns the specified node.
-   -	Required parameters:
-	  *  n:  The location where the new node is to be inserted.  The node
-		currently at this location is then moved to the end of the 
-		first branch of the new node.
-	  *  pl:  The number corresponding to the player to which the new node
-		will belong.  If the player specified is not already defined in
-		the game, the player is created automatically.
-	  *  br:  The number of branches which the new node will have.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Inserts a new node belonging to the indicated player at 
+the location of the specified node and moves that node to the end of 
+the first branch of the new node.
+\item
+- Return value:  Returns the specified node.
+\item
+- Required parameters:
 
+\bd
+\item
+*  n:  The location where the new node is to be inserted.  The node
+currently at this location is then moved to the end of the first
+branch of the new node.
+\item
+*  pl:  The number corresponding to the player to which the new node
+will belong.  If the player specified is not already defined in	the
+game, the player is created automatically.
+\item
+*  br:  The number of branches which the new node will have.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 ----------
-
+\item
+\begin{verbatim}
 IsDomitated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
+\end{verbatim}
 
-   -	Description:  Determines if the strategy corresponding to the specified
-	number for the indicated player is dominated by another strategy in the
-	given problem in normal form.  Uses only strategies in the first 
-	strategy set.
-   -	Return value:  Returns True only if the specified strategy for the 
-	given player is dominated.  Returns false otherwise.
-   -	Required parameters:
-	  *  N:  The problem in normal form in which the specified strategy of
-		the indicated player is to be tested for domination.
-	  *  pl:  The number corresponding to the player for whom the specified
-		strategy is to be tested for domination.
-	  *  st:  The number corresponding to the strategy belonging to the 
-		indicated player which is to be tested for domination.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Determines if the strategy corresponding to the specified
+number for the indicated player is dominated by another strategy in the
+given problem in normal form.  Uses only strategies in the first 
+strategy set.
+\item
+- Return value:  Returns True only if the specified strategy for the 
+given player is dominated.  Returns false otherwise.
+\item
+- Required parameters:
+
+\bd
+\item
+*  N:  The problem in normal form in which the specified strategy of
+the indicated player is to be tested for domination.
+\item
+*  pl:  The number corresponding to the player for whom the specified
+strategy is to be tested for domination.
+\item
+*  st:  The number corresponding to the strategy belonging to the 
+indicated player which is to be tested for domination.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 IsPredecessor[n->NODE, of->NODE] =: BOOLEAN
+\end{verbatim}
 
-   -	Description:  Finds whether or not the first node indicated is a 
-	predecessor of the second node given.
-   -	Return value:  Returns True only if the first node indicated is a
-	predecessor of the second node given.
-   -	Required parameters:
-	  *  n:  The node which, when it is the predecessor of the other node,
-		will result in the return value being True.
-	  *  of:  The node which, when it is preceeded by the other node, will
-		result in the return value being True.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds whether or not the first node indicated is a 
+predecessor of the second node given.
+\item
+- Return value:  Returns True only if the first node indicated is a
+predecessor of the second node given.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node which, when it is the predecessor of the other node,
+will result in the return value being True.
+\item
+*  of:  The node which, when it is preceeded by the other node, will
+result in the return value being True.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 IsSuccessor[n->NODE, from->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Finds whether or not the first node indicated is a 
-	successor of the second node given.
-   -	Return value:  Returns True only if the first node indicated is a
-	successor of the second node given.
-   -	Required parameters:
-	  *  n:  The node which, when it is a successor of the other node, will
-		result in the return value being True.
-	  *  of:  The node which, when it is succeeded by the other node, will
-		result in the return value being True.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds whether or not the first node indicated is a 
+successor of the second node given.
+\item
+- Return value:  Returns True only if the first node indicated is a successor of the second node given.
+\item
+- Required parameters:
+	
+\bd
+\item
+*  n:  The node which, when it is a successor of the other node, will
+result in the return value being True.
+\item
+*  of:  The node which, when it is succeeded by the other node, will
+result in the return value being True.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 IsWatchRunning[] =: BOOLEAN
+\end{verbatim}
 
-   -	Description:  Finds whether or not the system stopwatch is currently
-	running.
-   -	Return value:  True only if the system stopwatch is currently running.
-	Returns False otherwise.
-   -	Required parameters:  None.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds whether or not the system stopwatch is currently
+running.
+\item
+- Return value:  True only if the system stopwatch is currently running.
+Returns False otherwise.
+\item
+- Required parameters:  None.
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 JoinInfoset[n->NODE, to->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Removes the first node specified from the information set
-	to which it currently belongs and places it in the information set to
-	which the second node given belongs.
-   -	Return value:  XXXX .
-   -	Required parameters:
-	  *  n:  The node which is to be removed from its current information
-		set and placed in the information set belonging to the second
-		node given.
-	  *  to:  The node belonging to the information set to which the first
-		node specified will be transfered.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Removes the first node specified from the information set
+to which it currently belongs and places it in the information set to
+which the second node given belongs.
+\item
+- Return value:  XXXX .
+\item
+- Required parameters:
+	  
+\bd
+\item
+*  n:  The node which is to be removed from its current information
+set and placed in the information set belonging to the second
+node given.
+\item
+*  to:  The node belonging to the information set to which the first
+node specified will be transfered.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 LeaveInfoset[n->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Removes the specified node from the information set to
-	which it currently belongs and creates and places it in a new singleton
-	information set belonging to the same player.
-   -	Return value:  The specified node.
-   -	Required parameters:
-	  *  n:  The node which is to be removed from the information which it
-		currently belongs to.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Removes the specified node from the information set to
+which it currently belongs and creates and places it in a new singleton
+information set belonging to the same player.
+\item
+- Return value:  The specified node.
+\item
+- Required parameters:
+	  
+\bd
+\item
+*  n:  The node which is to be removed from the information which it
+currently belongs to.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 Lemke[N->NFG, {nequilib->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
+\end{verbatim}
 
-   -	Description:  Searches for one solution of the specified normal form 
-	game specified using the Lemke-Howson algorithm.  
-   -	Return value:  The list of solutions found.
-   -	Required parameters:
-	  *  N:  The problem in normal form for which the solution is to be 
-		searched.
-   -	Optional parameters: 
-	  *  nequilib:  Specifies the number of equilibria to find.  If not
-		given the default value is zero, which means that all 
-		equilibria are to be found.
-	  *  time:  Returns the elapsed time for the operation.
+\bd
+\item
+- Description:  Searches for one solution of the specified normal form 
+game specified using the Lemke-Howson algorithm.  
+\item
+- Return value:  The list of solutions found.
+\item
+- Required parameters:
+
+\bd
+\item
+*  N:  The problem in normal form for which the solution is to be 
+searched.
+\ed
+
+\item
+- Optional parameters: 
+
+\bd
+\item
+*  nequilib:  Specifies the number of equilibria to find.  If not
+given the default value is zero, which means that all 
+equilibria are to be found.
+\item
+*  time:  Returns the elapsed time for the operation.
+\ed
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 Length[l->LIST(T)] =: INTEGER
-
+\end{verbatim}
 	For T = BEHAV, BOOLEAN, INTEGER, MIXED, RATIONAL, or TEXT
 
-   -	Description:  Finds the number of elements in the specified list of 
-	type T.
-   -	Return value:  The number of elements found in the list.
-   -	Required parameters:
-	  *  l:  The list of type T for which the number of elements is to be 
-		found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the number of elements in the specified list of 
+type T.
+\item
+- Return value:  The number of elements found in the list.
+\item
+- Required parameters:
+
+\bd
+\item
+*  l:  The list of type T for which the number of elements is to be found.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
 	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsOpt->RATIONAL},
 	{maxitsBrent->RATIONAL}, {tolOpt->RATIONAL}, {tolBrent->RATIONAL},
 	{time<->RATIONAL}] =: LIST(MIXED)
+\end{verbatim}
 
-   -	Description:  Searches for equilibria of the specified problem in 
-	normal form using the Liapunov algorithm.
-   -	Return value:  Returns the list of solutions found.
-   -	Required parameters
-	  *  N:  The problem in normal form for which the Liapunov solution is 
-		to be found.
-   -	Optional parameters:
-	  *  plev: XXXX .
-	  *  output:  Can be used to redirect the output of this procedure to a
-		file.  Directing output to ``/dev/null'' under Unix turns 
-		output off.  By default, output is directed to the screen.
-	  *  errors:  XXXX .
-	  *  ntries:  XXXX .
-	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
-		value of XXXX . 
-	  *  maxitsOpt:  XXXX.
-	  *  maxitsBrent:  XXXX .
-	  *  tolOpt:  XXXX . 
-	  *  tolBrent:  XXXX .
-	  *  time:  Returns the elapsed time for the operation.
+\bd
+\item
+- Description:  Searches for equilibria of the specified problem in 
+normal form using the Liapunov algorithm.
+\item
+- Return value:  Returns the list of solutions found.
+\item
+- Required parameters
+
+\bd
+\item
+*  N:  The problem in normal form for which the Liapunov solution is 
+to be found.
+\ed
+
+\item
+- Optional parameters:
+
+\bd
+\item
+*  plev: XXXX .
+\item
+*  output:  Can be used to redirect the output of this procedure to a
+file.  Directing output to ``/dev/null'' under Unix turns output off.
+By default, output is directed to the screen.
+\item
+*  errors:  XXXX .
+\item
+*  ntries:  XXXX .
+\item
+*  nequilib:  Sets the number of equilibria to find.  Has a default 
+value of XXXX . 
+\item
+*  maxitsOpt:  XXXX.
+\item
+*  maxitsBrent:  XXXX .
+\item
+*  tolOpt:  XXXX . 
+\item
+*  tolBrent:  XXXX .
+\item
+*  time:  Returns the elapsed time for the operation.
+\ed
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 MergeInfosets[n->NODE, to->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Moves all the nodes contained in the information set 
-	which contains the node first specified to the information to which the
-	second node indicated belongs.
-   -	Return value:  XXXX .
-   -	Required parameters:
-	  *  n:  The node which belongs to the information set whose nodes are
-		to be moved to the second information set.
-	  *  to:  The node which belongs to the information set to which all
-		the nodes from the first information set are to be moved.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Moves all the nodes contained in the information set 
+which contains the node first specified to the information to which the
+second node indicated belongs.
+\item
+- Return value:  XXXX .
+\item
+- Required parameters:
 
+\bd
+\item
+*  n:  The node which belongs to the information set whose nodes are
+to be moved to the second information set.
+\item
+*  to:  The node which belongs to the information set to which all
+the nodes from the first information set are to be moved.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 ---------
+
+\item
+\begin{verbatim}
 
 MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
+\end{verbatim}
 
-   -	Description:  Projects a specified mixed profile to a behavioral 
-	profile on the given extensive form problem.
-   -	Return value:  Returns the behavioral profile.
-   -	Required parameters:
-	  *  E:  The problem in extensive form of which the behavioral profile
-		is to be a subvariable.
-	  *  mp:  The mixed profile which is to be projected to a behavioral
-		profile.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Projects a specified mixed profile to a behavioral 
+profile on the given extensive form problem.
+\item
+- Return value:  Returns the behavioral profile.
+\item
+- Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form of which the behavioral profile
+is to be a subvariable.
+\item
+*  mp:  The mixed profile which is to be projected to a behavioral
+profile.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ---------
-
+\item
+\begin{verbatim}
 MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
+\end{verbatim}
 
-   -	Description:  Projects a specified vector of mixed profiles to a vector
-	of behavioral profiles on the given extensive form problem.
-   -	Return value:  Returns the vector of behavioral profiles.
-   -	Required parameters:
-	  *  E:  The problem in extensive form of which the vector of 
-		behavioral profiles is to be a subvariable.
-	  *  mp:  The vector of mixed profiles which is to be projected to a 
-		vector of behavioral profiles.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Projects a specified vector of mixed profiles to a vector
+of behavioral profiles on the given extensive form problem.
+\item
+- Return value:  Returns the vector of behavioral profiles.
+\item
+- Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form of which the vector of 
+behavioral profiles is to be a subvariable.
+\item
+*  mp:  The vector of mixed profiles which is to be projected to a 
+vector of behavioral profiles.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 MoveTree[n->NODE, to->NODE] =: NODE
+\end{verbatim}
 
-   -	Description:  Moves the subtree rooted at the first node specified to
-	the second given node.
-   -	Return value:  XXXX .
-   -	Required parameters:
-	  *  n:  The node at which the subtree to be moved is currently rooted.
-	  *  to:  The node to which the subtree is to be moved.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Moves the subtree rooted at the first node specified to
+the second given node.
+\item
+- Return value:  XXXX .
+\item
+- Required parameters:
+	  
+\bd
+\item
+*  n:  The node at which the subtree to be moved is currently rooted.
+\item
+*  to:  The node to which the subtree is to be moved.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 NameOf[n->NODE] =: TEXT
+\end{verbatim}
 
-   -	Description:  Returns the name of the specified node.
-   -	Return value:  The name of the specified node.
-   -	Required parameters:
-	   *  n:  The node for which the name will be returned.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Returns the name of the specified node.
+\item
+- Return value:  The name of the specified node.
+\item- Required parameters:
+
+\bd
+\item
+*  n:  The node for which the name will be returned.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 NewEfg[{type->DATATYPE}] =: EFG
+\end{verbatim}
 
-   -	Description:  Allocates and returns a new extensive form game.
-   -	Return value:  The newly allocated problem in extensive form.
-   -	Required parameters:  None.
-   -	Optional parameters: 
-	  *  type:  Specifies the type (Float or Rational) of the new extensive
-		form problem.
+\bd
+\item
+- Description:  Allocates and returns a new extensive form game.
+\item
+ Return value:  The newly allocated problem in extensive form.
+\item
+- Required parameters:  None.
+\item
+- Optional parameters: 
+
+\bd
+\item
+*  type:  Specifies the type (Float or Rational) of the new extensive
+form problem.
+\ed
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
+\end{verbatim
 
-   -	Description:  Creates and assigns a number to a new outcome within the
-	specified problem in extensive form.  Note that outcomes are 
-	sequentially numbered, so that if an outcome with the number n exists,
-	then outcomes with the numbers 1 . . n-1 necessarily also exist.
-	Therefore, this procedure creates not only the outcome with the 
-	specified number, but all other outcomes necessary to satisfy this 
-	condition.
-   -	Return value:  The number of the newly created outcome.  The optional 
-	parameter 'outc' allows the user to specify the number given to the new
-	outcome created.  If 'outc' is not specified, the new outcome is 
-	assigned the lowest positive number for which no outcome is defined.  
-	If the number specified by 'outc' already exists as an outcome, no 
-	action is taken and the procedure returns a value of zero.
-   -	Required parameters:
-	  *  E:  The problem in extensive form for which a new outcome is to
-	     be created.
-   -	Optional parameters:
-	  *  outc:  Allows the user to specify the number given to the new 
-	     outcome created.  If not specified, the new outcome is assigned
-	     the lowest positive number for which no otcome is defined.  If the
-	     number specified already exists as an outcome, no action is taken
-	     and the procedure returns a value of zero.
+\bd
+\item
+- Description:  Creates and assigns a number to a new outcome within the
+specified problem in extensive form.  Note that outcomes are 
+sequentially numbered, so that if an outcome with the number n exists,
+then outcomes with the numbers 1 . . n-1 necessarily also exist.
+Therefore, this procedure creates not only the outcome with the 
+specified number, but all other outcomes necessary to satisfy this 
+condition.
+\item
+- Return value:  The number of the newly created outcome.  The optional 
+parameter 'outc' allows the user to specify the number given to the new
+outcome created.  If 'outc' is not specified, the new outcome is 
+assigned the lowest positive number for which no outcome is defined.  
+If the number specified by 'outc' already exists as an outcome, no 
+action is taken and the procedure returns a value of zero.
+\item
+-Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form for which a new outcome is to
+be created.
+\ed
+
+\item
+- Optional parameters:
+
+\bd
+\item
+*  outc:  Allows the user to specify the number given to the new 
+outcome created.  If not specified, the new outcome is assigned the 
+lowest positive number for which no otcome is defined.  If the number
+specified already exists as an outcome, no action is taken and the 
+procedure returns a value of zero.
+\ed
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 NthChild[n->NODE, child->INTEGER] =: NODE
+\end{verbatim}
 
-   -	Description:  Finds the node which is the indicated child of the 
-	specified node.  The expression:  NthChild[n->node, child->i] is 
-	equivalent to:  node\#i.
-   -	Return value:  Returns the node which is the indicated child of the
-	specified node.
-   -	Required parameters:
-	  *  n:  The node for which the indicated child is to be found.
-	  *  child:  The number corresponding to the child of the specified 
-		node which is to be found.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the node which is the indicated child of the 
+specified node.  The expression:  NthChild[n->node, child->i] is 
+equivalent to:  node\#i.
+\item
+- Return value:  Returns the node which is the indicated child of the
+specified node.
+\item- Required parameters:
+	  
+\bd
+\item
+*  n:  The node for which the indicated child is to be found.
+\item
+*  child:  The number corresponding to the child of the specified 
+node which is to be found.
+\ed
+
+\item 
+- Optional parameters:  None.
+\ed
 
 ----------
 
+\item
+\begin{verbatim}
 NumChildren[n->NODE] := INTEGER
+\end{verbatim}
 
-   -	Description:  Finds the number of children of the specified node.
-   -	Return value:  Returns the number of children of the specified node.
-   -	Required parameters:
-	  *  n:  The node whose children are to be counted.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the number of children of the specified node.
+\item
+- Return value:  Returns the number of children of the specified node.
+\item
+- Required parameters:
+
+\bd
+\item
+*  n:  The node whose children are to be counted.
+\ed
+
+\item
+- Optional parameters:  None.
+\ed
 
 ----------
-
+\item
+\begin{verbatim}
 NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
+\end{verbatim}
 
-   -	Description:  Finds the number of information sets belonging to the
-	specified player in the given problem in extensive form.
-   -	Return value:  Returns the number of information sets belonging to
-	the specified player.  If the indicated player is not defined in the 
-	game, the return value is equal to zero.
-   -	Required parameters:
-	  *  E:  The problem in extensive form in which the information sets
-		for the specified player are to be counted.
-	  *  pl:  The number corresponding to the player for which the number 
-		of information sets are to be counted.
-   -	Optional parameters:  None.
+\bd
+\item
+- Description:  Finds the number of information sets belonging to the
+specified player in the given problem in extensive form.
+\item
+- Return value:  Returns the number of information sets belonging to
+the specified player.  If the indicated player is not defined in the 
+game, the return value is equal to zero.
+\item
+- Required parameters:
+
+\bd
+\item
+*  E:  The problem in extensive form in which the information sets
+for the specified player are to be counted.	  
+\item
+*  pl:  The number corresponding to the player for which the number 
+of information sets are to be counted.
+\ed
+\item
+ - Optional parameters:  None.
+\ed
 
 ----------
 
@@ -1561,6 +2208,7 @@ WriteNfgFile[N->NFG, file->TEXT] =: NFG
 		to be written.
 
 ----------
+\end{itemize}
 \end{document}
 
 
