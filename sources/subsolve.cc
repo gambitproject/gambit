@@ -46,8 +46,11 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
     gList<BehavProfile<T> > newsolns;
     gList<gArray<Outcome *> > newsubrootvalues;
 	
-    for (int soln = 1; soln <= thissolns.Length(); soln++)
-      for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++)  {
+    for (int soln = 1; soln <= thissolns.Length() &&
+	               (max_solns == 0 || newsolns.Length() <= max_solns);
+	 soln++)
+      for (int subsoln = 1; subsoln <= subsolns.Length() &&
+	    (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
 	BehavProfile<T> bp(thissolns[soln]);
 	bp += subsolns[subsoln];
 	newsolns.Append(bp);
@@ -68,8 +71,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 
     Efg<T> foo(efg, n);
 
+    ViewSubgame(foo);
+
     gList<BehavProfile<T> > sol;
     SolveSubgame(foo, sol);
+
+    SelectSolutions(foo, sol);
 
     // put behav profile in "total" solution here...
 
@@ -132,8 +139,42 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
   efg.DeleteTree(n);
 }
 
-template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E)
-  : efg(E), solution(E), infosets(E.NumPlayers())
+// These are dummies... for specific applications, these can be overriden
+// in derived classes to allow interactive access to the solution process
+
+// This is called immediately after the subgame is constructed in the
+// solution process.  Mostly to allow viewing of the subgame, but probably
+// isn't generally useful.
+
+template <class T>
+void SubgameSolver<T>::ViewSubgame(const Efg<T> &)
+{ }
+
+// This is called in the normal-form solution modules after the normal
+// form is constructed.  Note especially that the Nfg is passed
+// non-const, so that strategies may be eliminated as seen fit.
+// There is no restriction that the payoffs or anything else cannot
+// get modified; if the called code does anything "weird", the solutions
+// will of course be bogus.
+
+template <class T>
+void SubgameSolver<T>::ViewNormal(Nfg<T> &)
+{ }
+
+// This is called for each subgame after the solutions have been computed
+// The idea is for the called code to possibly allow for viewing or
+// selection of "interesting" equilibria for further computation during
+// the process.  Again, there is no restriction that one can't
+// muck about with the solution list in "bad" ways using this.
+// Caveat utor!
+
+template <class T>
+void SubgameSolver<T>::SelectSolutions(const Efg<T> &,
+				       gList<BehavProfile<T> > &)
+{ }
+
+template <class T> SubgameSolver<T>::SubgameSolver(const Efg<T> &E, int max)
+  : max_solns(max), efg(E), solution(E), infosets(E.NumPlayers())
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.PlayerList()[i]->InfosetList());
@@ -186,8 +227,8 @@ void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 
 template <class T>
 EFLiapBySubgame<T>::EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &p,
-				    const BehavProfile<T> &s)
-  : SubgameSolver<T>(E), nevals(0), params(p), start(s)
+				    const BehavProfile<T> &s, int max)
+  : SubgameSolver<T>(E, max), nevals(0), params(p), start(s)
 { }
 
 template <class T>  EFLiapBySubgame<T>::~EFLiapBySubgame()   { }
@@ -213,8 +254,9 @@ void SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p)
-  : SubgameSolver<T>(E), npivots(0), params(p)
+SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &p,
+				      int max)
+  : SubgameSolver<T>(E, max), npivots(0), params(p)
 { }
 
 template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
@@ -231,6 +273,8 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				      gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+
+  ViewNormal(*N);
 
   MixedProfile<T> mp(*N);
 
@@ -251,9 +295,8 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
 
 template <class T>
 NFLiapBySubgame<T>::NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &p,
-				    const BehavProfile<T> &s)
-
-  : SubgameSolver<T>(E), nevals(0), params(p), start(s)
+				    const BehavProfile<T> &s, int max)
+  : SubgameSolver<T>(E, max), nevals(0), params(p), start(s)
 { }
 
 template <class T> NFLiapBySubgame<T>::~NFLiapBySubgame()   { }
@@ -268,6 +311,8 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				     gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+
+  ViewNormal(*N);
 
   MixedProfile<T> mp(*N);
 
@@ -287,8 +332,9 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-LemkeBySubgame<T>::LemkeBySubgame(const Efg<T> &E, const LemkeParams &p)
-  : SubgameSolver<T>(E), npivots(0), params(p)
+LemkeBySubgame<T>::LemkeBySubgame(const Efg<T> &E, const LemkeParams &p,
+				  int max)
+  : SubgameSolver<T>(E, max), npivots(0), params(p)
 { }
 
 template <class T> LemkeBySubgame<T>::~LemkeBySubgame()   { }
@@ -303,6 +349,8 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				       gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+
+  ViewNormal(*N);
 
   MixedProfile<T> mp(*N);
 
@@ -322,8 +370,9 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-SimpdivBySubgame<T>::SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &p)
-  : SubgameSolver<T>(E), params(p)
+SimpdivBySubgame<T>::SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &p,
+				      int max)
+  : SubgameSolver<T>(E, max), params(p)
 { }
 
 template <class T> SimpdivBySubgame<T>::~SimpdivBySubgame()   { }
@@ -338,6 +387,8 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				    gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+
+  ViewNormal(*N);
 
   MixedProfile<T> mp(*N);
 
@@ -357,8 +408,8 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-EnumBySubgame<T>::EnumBySubgame(const Efg<T> &E, const EnumParams &p)
-  : SubgameSolver<T>(E), npivots(0),params(p)
+EnumBySubgame<T>::EnumBySubgame(const Efg<T> &E, const EnumParams &p, int max)
+  : SubgameSolver<T>(E, max), npivots(0), params(p)
 { }
 
 template <class T> EnumBySubgame<T>::~EnumBySubgame()   { }
@@ -374,6 +425,8 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
+  ViewNormal(*N);
+
   gList<MixedProfile<T> > sol;
   FindPureNash(*N, sol);
 
@@ -387,8 +440,8 @@ void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-PureNashBySubgame<T>::PureNashBySubgame(const Efg<T> &E)
-  : SubgameSolver<T>(E)
+PureNashBySubgame<T>::PureNashBySubgame(const Efg<T> &E, int max)
+  : SubgameSolver<T>(E, max)
 { }
 
 template <class T> PureNashBySubgame<T>::~PureNashBySubgame()   { }
@@ -403,6 +456,8 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 				    gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
+
+  ViewNormal(*N);
 
   MixedProfile<T> mp(*N);
 
@@ -425,8 +480,9 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 }
 
 template <class T>
-ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p)
-  : SubgameSolver<T>(E), npivots(0), params(p)
+ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p,
+				int max)
+  : SubgameSolver<T>(E, max), npivots(0), params(p)
 { }
 
 template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
