@@ -886,6 +886,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
     else {
       nfgQre algorithm;
       algorithm.SetFullGraph(true);
+      algorithm.SetMaxLambda(10000000);
 
       wxStatus status(this, "QreSolve Progress");
       solutions = algorithm.Solve(*m_currentSupport, status);

@@ -100,9 +100,8 @@ static void QRDecomp(gMatrix<double> &b, gMatrix<double> &q)
   }
 }
 
-#ifdef USE_CORRECTOR
 static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
-		       gVector<double> &u, gVector<double> y,
+		       gVector<double> &u, gVector<double> &y,
 		       double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
@@ -124,10 +123,10 @@ static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const Nfg &p_nfg, const gVector<double> &p_point,
+static void QreLHS(const NFSupport &p_support, const gVector<double> &p_point,
 		   gVector<double> &p_lhs)
 {
-  MixedProfile<double> profile(p_nfg);
+  MixedProfile<double> profile(p_support);
   for (int i = 1; i <= profile.Length(); i++) {
     profile[i] = p_point[i];
   }
@@ -136,25 +135,22 @@ static void QreLHS(const Nfg &p_nfg, const gVector<double> &p_point,
   p_lhs = 0.0;
   int rowno = 0;
 
-  for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
+  for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++) {
     rowno++;
-    for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+    for (int st = 1; st <= p_support.NumStrats(pl); st++) {
       p_lhs[rowno] += profile(pl, st);
     }
     p_lhs[rowno] -= 1.0;
 
-    for (int st = 2; st <= profile.Support().NumStrats(pl); st++) {
-      // Experimental: try fabs() to avoid sign problems, and hope that
-      // jacobian will keep things OK...
-      p_lhs[++rowno] = log(fabs(profile(pl, st) / profile(pl, 1)));
+    for (int st = 2; st <= p_support.NumStrats(pl); st++) {
+      p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
 		       (profile.Payoff(pl, pl, st) -
 			profile.Payoff(pl, pl, 1)));
-      p_lhs[rowno] *= fabs(profile(pl, 1) * profile(pl, st));
+      p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
 }
-#endif  // USE_CORRECTOR
 
 static void QreJacobian(const NFSupport &p_support,
 			const gVector<double> &p_point,
@@ -214,21 +210,54 @@ static void QreJacobian(const NFSupport &p_support,
   }
 }
 
-void TracePath(const MixedProfile<double> &p_start,
-	       double p_startLambda, double p_maxLambda,
-	       gStatus &p_status,
-	       gList<MixedSolution> &p_solutions)
+//
+// TracePath does the real work of tracing a branch of the correspondence
+//
+// Strategy:
+// This is the standard simple PC continuation method outlined in
+// Allgower & Georg, _Numerical Continuation Methods_.
+// The only modification is to deal with the machine limitation
+// in computing the log in the homotopy equations (in QreLHS() above).
+// When the probability for a strategy drops below 10^-10, it is
+// removed from the support, and TracePath() is called recursively from
+// that point.  
+//
+// In a quantal response equilibrium (for finite lambda, at least),
+// no strategy is ever truly played with zero probability, as this method
+// approximates.  However, strictly inferior strategies are played
+// with probability that is exponentially decreasing in lambda.  So,
+// approximating these as zero gives a good approximation to the true
+// equilibrium, at least to floating point precision.  If one is
+// using this method to compute Nash equilibria, this should be harmless;
+// if one is actually interested in the quantal response equilibria,
+// then this should be happening at lambda that are so large that they
+// will not be observed in lab data.
+//
+// The algorithm could be improved to approximate the exponential decay
+// of dropped strategies explicitly, but, again, these probabilities are
+// already going to display as zero on plots or in floating point output
+// with standard precisions, so it isn't a priority.
+//
+// Really, the algorithm should check that omitted strategies remain
+// truly inferior after they drop out; in practice, this is so unlikely
+// to happen that the code should only be rewritten once a reasonable
+// example of a strategy that drops out by this criterion winding up with
+// positive probability.
+//
+
+static void TracePath(const MixedProfile<double> &p_start,
+		      double p_startLambda, double p_maxLambda,
+		      gStatus &p_status,
+		      gList<MixedSolution> &p_solutions)
 {
-#ifdef USE_CORRECTOR
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDecel = 2.0;   // maximal deceleration factor
   const double c_maxDist = 0.4;    // maximal distance to curve
   const double c_maxContr = 0.6;   // maximal contraction rate in corrector
   const double c_eta = 0.1;        // perturbation to avoid cancellation
                                    // in calculating contraction rate
-#endif  // USE_CORRECTOR
-  double h = .1;                   // initial stepsize
-  const double c_hmin = 1.0e-8;    // minimal stepsize
+  double h = .03;                  // initial stepsize
+  const double c_hmin = 1.0e-5;    // minimal stepsize
 
   gVector<double> x(p_start.Length() + 1), u(p_start.Length() + 1);
   for (int i = 1; i <= p_start.Length(); i++) {
@@ -240,7 +269,7 @@ void TracePath(const MixedProfile<double> &p_start,
 
   gMatrix<double> b(p_start.Length() + 1, p_start.Length());
   gSquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.Game(), x, b);
+  QreJacobian(p_start.Support(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -254,32 +283,36 @@ void TracePath(const MixedProfile<double> &p_start,
 			   gText("Lambda = ") + ToText(x[x.Length()]));
     }
 
-#ifdef USE_CORRECTOR
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
       return;
     }
-#endif  // USE_CORRECTOR
 
     // Predictor step
     for (int k = 1; k <= x.Length(); k++) {
       u[k] = x[k] + h * omega * t[k];
+      if (k < x.Length() && u[k] < 0.0) {
+	accept = false;
+	break;
+      }
     }
 
-#ifdef USE_CORRECTOR
+    if (!accept) {
+      h *= 0.5;
+      continue;
+    }
+
     double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-#endif  // USE_CORRECTOR
-    QreJacobian(p_start.Game(), u, b);
+    QreJacobian(p_start.Support(), u, b);
     QRDecomp(b, q);
 
-#ifdef USE_CORRECTOR
     int iter = 1;
     double disto = 0.0;
     while (true) {
       double dist;
 
-      QreLHS(p_nfg, u, y);
+      QreLHS(p_start.Support(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -316,6 +349,10 @@ void TracePath(const MixedProfile<double> &p_start,
 
     if (!accept) {
       h /= c_maxDecel;   // PC not accepted; change stepsize and retry
+      if (fabs(h) <= c_hmin) {
+	return;
+      }
+
       continue;
     }
 
@@ -324,18 +361,42 @@ void TracePath(const MixedProfile<double> &p_start,
       decel = c_maxDecel;
     }
     h = fabs(h / decel);
-#endif   // USE_CORRECTOR
 
     // PC step was successful; update and iterate
-    for (int i = 1; i <= x.Length(); i++) {
-      if (u[i] < 1.0e-25) {
-	x[i] = 1.0e-25;
+    for (int i = 1; i < x.Length(); i++) {
+      if (u[i] < 1.0e-10) {
+	// Drop this strategy from the support, then recursively call
+	// to continue tracing
+	NFSupport newSupport(p_start.Support());
+	int index = 1;
+	for (int pl = 1; pl <= newSupport.Game().NumPlayers(); pl++) {
+	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {
+	    if (index++ == i) {
+	      newSupport.RemoveStrategy(newSupport.GetStrategy(pl, st));
+	    }
+	  }
+	}
+
+	MixedProfile<double> newProfile(newSupport);
+	for (int j = 1; j <= newProfile.Length(); j++) {
+	  if (j < i) {
+	    newProfile[j] = u[j];
+	  }
+	  else if (j >= i) {
+	    newProfile[j] = u[j+1];
+	  }
+	}
+
+	TracePath(newProfile, u[u.Length()], p_maxLambda,
+		  p_status, p_solutions);
+	return;
       }
       else {
 	x[i] = u[i];
       }
     }
-    q.GetRow(q.NumRows(), t);  // new tangent
+
+    x[x.Length()] = u[u.Length()];
 
     MixedProfile<double> foo(p_start);
     for (int i = 1; i <= foo.Length(); i++) {
@@ -343,6 +404,8 @@ void TracePath(const MixedProfile<double> &p_start,
     }
     p_solutions.Append(MixedSolution(foo, algorithmNfg_QRE));
     p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
+
+    q.GetRow(q.NumRows(), t);  // new tangent
   }
 }
 
