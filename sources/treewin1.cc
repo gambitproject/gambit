@@ -159,45 +159,83 @@ void TreeWindow::node_insert(void)
 //                      NODE-DELETE MENU HANDLER
 //***********************************************************************
 
+class efgNodeDeleteDialog : public wxDialogBox {
+private:
+  Node *m_node;
+  int m_completed;
+  wxListBox *m_branchList;
+
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((efgNodeDeleteDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((efgNodeDeleteDialog *) p_object.GetClientData())->OnCancel(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  Bool OnClose(void);
+
+public:
+  efgNodeDeleteDialog(Node *, wxWindow *);
+  virtual ~efgNodeDeleteDialog() { }
+
+  int Completed(void) const { return m_completed; }
+  Node *KeepNode(void) const
+    { return m_node->GetChild(m_branchList->GetSelection() + 1); }
+};
+
+efgNodeDeleteDialog::efgNodeDeleteDialog(Node *p_node, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Select Branch", TRUE), m_node(p_node)
+{
+  m_branchList = new wxListBox(this, 0, "Keep branch");
+  for (int act = 1; act <= p_node->NumChildren(); act++) {
+    m_branchList->Append(ToText(act) + ": " +
+			 p_node->GetInfoset()->Actions()[act]->GetName());
+  }
+  m_branchList->SetSelection(0);
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void efgNodeDeleteDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void efgNodeDeleteDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool efgNodeDeleteDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
 void TreeWindow::node_delete(void)
 {
-  MyDialogBox *branch_num_dialog = 0;
-  char *branch_name = 0;
-  
   try {
-    branch_num_dialog = new MyDialogBox(this, "Keep Branch", EFG_NODE_HELP);
-    wxStringList *branch_list = new wxStringList;
-    branch_name = new char[MAX_LABEL_LENGTH];
-    
-    for (int i = 1; i <= Cursor()->NumChildren(); i++) {
-      gText tmp = Cursor()->GetChild(i)->GetName();
-      if (tmp == "") tmp = ToText(i);
-      branch_list->Add(tmp);
-    }
-        
-    branch_num_dialog->Form()->Add(
-	wxMakeFormString("Branch", 
-                         &branch_name, wxFORM_CHOICE,
-		         new wxList(wxMakeConstraintStrings(branch_list), 0)));
-    branch_num_dialog->Go();
+    efgNodeDeleteDialog dialog(Cursor(), this);
 
-    if (branch_num_dialog->Completed() == wxOK) {
-      int keep_num = wxListFindString(branch_list, branch_name) + 1;
-      Node *keep = Cursor()->GetChild(keep_num);
+    if (dialog.Completed() == wxOK) {
+      Node *keep = dialog.KeepNode();
       nodes_changed = TRUE;
       SetCursorPosition(ef.DeleteNode(Cursor(), keep));
     }
-        
-    delete [] branch_name;
-    delete branch_num_dialog;
   }
   catch (gException &E) {
-    if (branch_name)   
-      delete [] branch_name;
-
-    if (branch_num_dialog)   
-      delete branch_num_dialog;
-
     guiExceptionDialog(E.Description(), pframe);
   }
 }
@@ -206,33 +244,75 @@ void TreeWindow::node_delete(void)
 //                       NODE-LABEL MENU HANDLER
 //***********************************************************************
 
+class efgNodeLabelDialog : public wxDialogBox {
+private:
+  int m_completed;
+  wxText *m_label;
+
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((efgNodeLabelDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((efgNodeLabelDialog *) p_object.GetClientData())->OnCancel(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  Bool OnClose(void);
+
+public:
+  efgNodeLabelDialog(Node *, wxWindow *);
+  virtual ~efgNodeLabelDialog() { }
+
+  int Completed(void) const { return m_completed; }
+  gText Label(void) const { return m_label->GetValue(); }
+};
+
+efgNodeLabelDialog::efgNodeLabelDialog(Node *p_node, wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Label Node", TRUE)
+{
+  m_label = new wxText(this, 0, "Label");
+  m_label->SetValue(p_node->GetName());
+
+  NewLine();
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void efgNodeLabelDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void efgNodeLabelDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool efgNodeLabelDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
 void TreeWindow::node_label(void)
 {
-  char *label = 0;
-  MyDialogBox *label_dialog = 0;
-    
   try {
-    label = new char[MAX_LABEL_LENGTH];
-    strcpy(label, Cursor()->GetName());
-    label_dialog = new MyDialogBox(pframe, "Label Node", EFG_NODE_HELP);
-    wxFormItem *label_item = 
-      wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-		       new wxList(wxMakeConstraintFunction(StringConstraint), 0));
-    label_dialog->Add(label_item);
-    label_dialog->AssociatePanel();
-    ((wxText *) label_item->GetPanelItem())->SetFocus();
-    label_dialog->Go1();
-    if (label_dialog->Completed() == wxOK)
-      Cursor()->SetName(label);
-    delete label_dialog;
-    delete [] label;
+    efgNodeLabelDialog dialog(Cursor(), this);
+
+    if (dialog.Completed() == wxOK) {
+      Cursor()->SetName(dialog.Label());
+    }
   }
   catch (gException &E) {
-    if (label_dialog)   
-      delete label_dialog;
-    if (label)   
-      delete [] label;
-
     guiExceptionDialog(E.Description(), pframe);
   }
 }
@@ -240,12 +320,6 @@ void TreeWindow::node_label(void)
 //***********************************************************************
 //                       NODE-OUTCOME MENU HANDLER
 //***********************************************************************
-
-//
-// Tree-Outcome menu handler
-//
-
-#define ENTRIES_PER_ROW 3
 
 class EFChangePayoffs : public MyDialogBox {
 private:
@@ -272,6 +346,8 @@ EFChangePayoffs::EFChangePayoffs(Efg &p_efg, EFOutcome *p_outcome,
   char *new_name = new char[40];
   wxFormItem *name_fitem = Add(wxMakeFormString("Outcome:", &new_name, wxFORM_TEXT, 0, 0, 0, 160));
   Add(wxMakeFormNewLine());
+
+  const int ENTRIES_PER_ROW = 3;
 
   // Payoff items
   char **new_payoffs = new char *[ef.NumPlayers()+1];
@@ -565,17 +641,8 @@ void TreeWindow::node_goto_mark(void)
 
 void TreeWindow::infoset_merge(void)
 {
-  char *iset_name = wxGetTextFromUser("Merged infoset name");
   try {
-    Infoset *new_iset = ef.MergeInfoset(Cursor()->GetInfoset(),
-					mark_node->GetInfoset());
-    
-    if (iset_name)
-      new_iset->SetName(iset_name);
-    else 
-      new_iset->SetName("Infoset" + 
-			ToText(new_iset->GetPlayer()->NumInfosets()));
-    
+    ef.MergeInfoset(mark_node->GetInfoset(), Cursor()->GetInfoset());
     infosets_changed = TRUE;
   }
   catch (gException &E) {
@@ -590,12 +657,11 @@ void TreeWindow::infoset_merge(void)
 void TreeWindow::infoset_break(void)
 {
   try {
-    char *iset_name = wxGetTextFromUser("New infoset name");
-    Infoset *new_iset = ef.LeaveInfoset(Cursor());
-    if (iset_name)
-      new_iset->SetName(iset_name);
-    else 
-      new_iset->SetName("Infoset"+ToText(new_iset->GetPlayer()->NumInfosets()));
+    char *iset_name = wxGetTextFromUser("New infoset name",
+					"Infoset Name",
+					"Infoset" +
+					ToText(Cursor()->GetPlayer()->NumInfosets()+1));
+    ef.LeaveInfoset(Cursor())->SetName(iset_name);
     infosets_changed = TRUE;
   }
   catch (gException &E) {
