@@ -162,10 +162,11 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
   }
   LevelPrecision();
 
-  if ((*m_profile)[1].Precision() == precDOUBLE)
-    m_epsilon = 0.0;
-  else
-    m_epsilon = 0;
+  m_epsilon = 0;
+  if((*m_profile).Length()>0) 
+    if ((*m_profile)[1].Precision() == precDOUBLE)
+      m_epsilon = 0.0;
+
   gEpsilon(m_epsilon);
 }
 
