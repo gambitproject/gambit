@@ -46,6 +46,8 @@ private:
 public:
   SequentialEquilibModule(const EFBasis &,const EFSupport &, 
 			  const SeqEquilibParams &p);
+  SequentialEquilibModule(const BehavSolution &, const EFBasis &,const EFSupport &, 
+			  const SeqEquilibParams &p);
   virtual ~SequentialEquilibModule();
 
   int SequentialEquilib(void);
@@ -67,6 +69,67 @@ SequentialEquilibModule(const EFBasis &b, const EFSupport &B,
 			const SeqEquilibParams &p)
   : EF(b.Game()), basis(b), support(B), params(p), bigbasis(B.Game())
 { 
+  sigIndex = new gDPVector<int>(bigbasis.NumActions());
+  muIndex = new gDPVector<int>(bigbasis.NumNodes());
+  zetaIndex = new gDPVector<int>(bigbasis.NumActions());
+
+  (*sigIndex) = 0;
+  (*muIndex) = 0;
+  (*zetaIndex) = 0;
+
+  int i,j,k,kk;
+  int var = 1;
+
+  for(i=1;i<=EF.NumPlayers();i++)
+    for(j=1;j<=EF.NumInfosets()[i];j++)
+      for(k=1;k<=bigbasis.NumActions(i,j);k++)
+	if((kk=basis.EFSupport::Find(bigbasis.Actions(i,j)[k]))) 
+	  if(kk!=basis.NumActions(i,j))
+	    (*sigIndex)(i,j,k) = var++;
+  gout << "\nsigIndex: " << (*sigIndex);
+  lastsig = var-1;
+
+  for(i=1;i<=EF.NumPlayers();i++)
+    for(j=1;j<=EF.NumInfosets()[i];j++)
+      for(k=1;k<=bigbasis.NumNodes(i,j);k++)
+	if((kk=basis.Find(bigbasis.Nodes(i,j)[k]))) 
+	  if(kk!=basis.NumNodes(i,j))
+	    (*muIndex)(i,j,k) = var++;
+  gout << "\nmuIndex: " << (*muIndex);
+  lastmu = var-1;
+
+  for(i=1;i<=EF.NumPlayers();i++)
+    for(j=1;j<=EF.NumInfosets()[i];j++)
+      for(k=1;k<=bigbasis.NumActions(i,j);k++)
+	if(support.Find(bigbasis.Actions(i,j)[k])) 
+	  if(!basis.EFSupport::Find(bigbasis.Actions(i,j)[k]))
+	    (*zetaIndex)(i,j,k) = var++;
+  gout << "\nzetaIndex: " << (*zetaIndex);
+  lastzeta = var-1;
+
+  num_vars = var-1;
+  Space = new gSpace(num_vars);
+  for(i=1;i<=lastsig;i++)
+    Space->SetVariableName(i,"s"+ToText(i));
+  for(i=lastsig+1;i<=lastmu;i++)
+    Space->SetVariableName(i,"m"+ToText(i));
+  for(i=lastmu+1;i<=lastzeta;i++)
+    Space->SetVariableName(i,"z"+ToText(i));
+
+
+  Lex = new term_order(Space, &lex);
+
+//  gEpsilon(eps,12);
+}
+
+template <class T>SequentialEquilibModule<T>::
+SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport &B,
+			const SeqEquilibParams &p)
+  : EF(b.Game()), basis(b), support(B), params(p), bigbasis(B.Game())
+{ 
+  gList<Node *> list;
+  Nodes(s.Game(), list);
+
   sigIndex = new gDPVector<int>(bigbasis.NumActions());
   muIndex = new gDPVector<int>(bigbasis.NumNodes());
   zetaIndex = new gDPVector<int>(bigbasis.NumActions());
@@ -398,8 +461,3 @@ Payoff(Action *a) const
 //  gout << "\nreturning: " << value;
   return value;
 }
-
-
-
-
-
