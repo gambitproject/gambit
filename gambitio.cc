@@ -11,6 +11,18 @@
 #include <assert.h>
 #include "gambitio.h"
 
+// In certain cases it is desirable to overload the fscanf/fprintf functions to
+// allow input in GUI/window based enviroments.  This is easily done by linking
+// in a file that redefines these functions and uses vfscanf/vfprintf for all
+// file IO and vsscanf/vsprintf for cin/cout/cerr.  However, this 'trick' can not
+// be implemented for fgetc functions.  To allow for overloading of this function
+// we use gfgetc and overload that function (fgetc by default).  Define
+// GUI_FGETC when compiling this file to use a different function for gfgetc.
+
+int gfgetc(FILE *stream); // must use identical declaration to overload
+#ifndef GUI_FGETC
+#define gfgetc fgetc	// normally, just use the standard fgetc
+#endif
 //--------------------------------------------------------------------------
 //                         gInput member functions
 //--------------------------------------------------------------------------
@@ -83,7 +95,7 @@ gInput &gFileInput::operator>>(char &x)
 {
   assert(f);
 //  int c=fscanf(f, "%c", &x);valid=(c==1) ? 1 : 0;
-  x = fgetc(f);
+  x = gfgetc(f);
   return *this;
 }
 
@@ -111,7 +123,7 @@ gInput &gFileInput::operator>>(char *x)
 int gFileInput::get(char &c)
 {
   assert(f);
-  c = fgetc(f);
+  c = gfgetc(f);
   return (!feof(f));
 }
 
