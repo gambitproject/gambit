@@ -1617,6 +1617,8 @@ int main( void )
 
 
 
+
+
 #ifdef CRASHTEST
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -1627,6 +1629,27 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 #endif // CRASHTEST
+
+
+
+  machine->PushRef( "i" );
+  machine->Push( (gInteger) 3 );
+  machine->Assign();
+
+  machine->PushRef( "x" );
+  machine->Push( (gRational) 1 );
+  machine->Push( (gRational) 2 );
+  machine->Push( (gRational) 3 );
+  machine->Push( (gRational) 4 );
+  machine->Push( (gRational) 5 );
+  machine->PushList( 5 );
+  machine->Assign();
+
+  machine->PushRef( "x" );
+  machine->PushRef( "i" );
+  machine->Subscript();
+  machine->Output();
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;

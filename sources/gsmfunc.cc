@@ -478,88 +478,101 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 {
   int index;
   int f_index;
-  bool param_match;
-  bool any_defined;
+  int curr_f_index;
+  int params_defined;
+  int params_matched;
+  int param_sets_matched;
   Portion* result = 0;
+
+
+
+  if( _FuncIndex == -1 && _NumFuncs == 1 )
+    _FuncIndex = 0;
 
   if( _FuncIndex == -1 )
   {
-    any_defined = false;
-    for( index = 0; index < _NumFuncs; index++ )
+    params_defined = 0;
+    for( index = 0; index < _NumParams; index++ )
     {
       if( _Param[ index ] != 0 )
       {
-	any_defined = true;
-	break;
+	params_defined++;
       }
     }
-    if( any_defined )
+    if( params_defined )
     {
+      param_sets_matched = 0;
       for( f_index = 0; f_index < _NumFuncs; f_index++ )
       {
-	param_match = true;
+	params_matched = 0;
 	for( index = 0; 
 	    index < _FuncInfo[ f_index ].NumParams; 
 	    index++ )
 	{
 	  if( _Param[ index ] != 0 )
 	  {
-	    if( !( _Param[ index ]->Type() & 
-	       _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
-	      param_match = false;
-	  }
-	  else if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
-	  {
-	    param_match = false;
+	    if( _Param[ index ]->Type() & 
+	       _FuncInfo[ f_index ].ParamInfo[ index ].Type )
+	      params_matched++;
 	  }
 	}
-	if( param_match )
+	if( params_matched == params_defined )
 	{
-	  _FuncIndex = f_index;
-	  break;
+	  curr_f_index = f_index;
+	  param_sets_matched++;
 	}
       }
-    }
-    else // ( !any_defined )
-    {
-      if( _NumFuncs == 1 )
+
+      if( param_sets_matched == 1 )
       {
-	_FuncIndex = 0;
+	_FuncIndex = curr_f_index;
       }
-      else
+      if ( param_sets_matched > 1 )
       {
-	gerr << "CallFuncObj Error: no defined parameters; function call\n";
-	gerr << "                   ambiguous for function \"" << _FuncName;
-	gerr << "\"\n";
+	gerr << "CallFuncObj Error: function \"" << _FuncName << "\" called";
+	gerr << " with ambiguous parameters\n";
 	_ErrorOccurred = true;
       }
     }
+    else // ( !params_defined )
+    {
+      gerr << "CallFuncObj Error: no defined parameters; function call\n";
+      gerr << "                   ambiguous for function \"" << _FuncName;
+      gerr << "\"\n";
+      _ErrorOccurred = true;
+    }
   }
-  
-  if( _FuncIndex < 0 || _FuncIndex >= _NumFuncs )
-  {
-    gerr << "CallFuncObj Error: no matching parameter list found for\n";
-    gerr << "                   function \"" + _FuncName + "\"\n";
-    _ErrorOccurred = true;
+ 
+  if( !_ErrorOccurred )
+  { 
+    if( _FuncIndex < 0 || _FuncIndex >= _NumFuncs )
+    {
+      gerr << "CallFuncObj Error: no matching parameter list found for\n";
+      gerr << "                   function \"" + _FuncName + "\"\n";
+      _ErrorOccurred = true;
+    }
   }
   
   if( !_ErrorOccurred )
   {
-    for( index = 0; index < _NumParams; index++ )
+    for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
     {
       if( !_RunTimeParamInfo[ index ].Defined )
       {
 	assert( _Param[ index ] == 0 );
-	_Param[ index ] = 
-	  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
-      }
-      if( ( !_RunTimeParamInfo[ index ].Defined ) && ( _Param[ index ] == 0 ) )
-      {
-	gerr << "GSM Error: required parameter \"" << 
-	  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
-	gerr << "\"" << " not found while executing CallFunction()\n";
-	gerr << "           on function \"" << _FuncName << "\"\n";
-	_ErrorOccurred = true;
+	if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
+	{
+	  _Param[ index ] = 
+	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
+	}
+	else
+	{
+	  gerr << "GSM Error: required parameter \"" << 
+	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
+	  gerr << "\"" << " not found while executing CallFunction()\n";
+	  gerr << "           on function \"" << _FuncName << "\"\n";
+	  _ErrorOccurred = true;
+	}
       }
     }
   }

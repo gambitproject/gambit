@@ -737,6 +737,9 @@ bool GSM::Subscript ( void )
     }
   }
 
+  if( p2->Type() == porREFERENCE )
+    p2 = _ResolveRef( (Reference_Portion*) p2 );
+
   if( p1->Type() == porLIST )
   {
     if( p2->Type() == porINTEGER )
