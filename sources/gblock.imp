@@ -1,16 +1,16 @@
-//#
-//# FILE: gblock.imp -- Implementation of gBlock type
-//#
-//# $Id$
-//#
+//
+// FILE: gblock.imp -- Implementation of gBlock type
+//
+// $Id$
+//
 
 #include <stdlib.h>
 #include <assert.h>
 #include "gblock.h"
 
-template <class T> gBlock<T>::gBlock(int len) : gArray<T>(len)   { }
+template <class T> gBlock<T>::gBlock(unsigned int len) : gArray<T>(len)   { }
 
-template <class T> gBlock<T>::gBlock(int lo, int hi) : gArray<T>(lo,hi)   { }
+template <class T> gBlock<T>::gBlock(int lo, int hi) : gArray<T>(lo, hi)  { }
 
 template <class T> gBlock<T>::gBlock(const gBlock<T> &b) : gArray<T>(b)  { }
 
@@ -22,15 +22,15 @@ template <class T> gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
   return *this;
 }
 
-template <class T> int gBlock<T>::operator==(const gBlock<T> &b) const
+template <class T> bool gBlock<T>::operator==(const gBlock<T> &b) const
 {
-  if (mindex != b.mindex || maxdex != b.maxdex) return 0;
+  if (mindex != b.mindex || maxdex != b.maxdex) return false;
   for (int i = mindex; i <= maxdex; i++) 
-    if (data[i] != b.data[i]) return 0;
-  return 1;
+    if (data[i] != b.data[i]) return false;
+  return true;
 }
 
-template <class T> int gBlock<T>::operator!=(const gBlock<T> &b) const
+template <class T> bool gBlock<T>::operator!=(const gBlock<T> &b) const
 {
   return !(*this == b);
 }
@@ -65,7 +65,12 @@ template <class T> gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
 template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 {
   assert(mindex <=n && n <=maxdex+1);
-  T *new_data = new T[++maxdex-mindex+1] - mindex;
+  T *new_data = new T[++maxdex - mindex + 1] - mindex;
+#ifdef USE_EXCEPTIONS
+  if (!new_data)    throw AllocFail();
+#else
+  assert(new_data)
+#endif   // USE_EXCEPTIONS
 
   int i;
   for (i = mindex; i <= n - 1; i++)       new_data[i] = data[i];
@@ -90,11 +95,20 @@ template <class T> int gBlock<T>::Insert(const T &t, int n)
 
 template <class T> T gBlock<T>::Remove(int n)
 {
+#ifdef USE_EXCEPTIONS
+  if (n < mindex || n > maxdex)    throw BadIndex();
+#else
   assert(n >= mindex && n <= maxdex);
+#endif   // USE_EXCEPTIONS
 
   T ret(data[n]);
-
   T *new_data = (--maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
+
+#ifdef USE_EXCEPTIONS
+  if (!new_data)   throw AllocFail();
+#else
+  assert(new_data);
+#endif   // USE_EXCEPTIONS
 
   int i;
   for (i = mindex; i < n; i++)      new_data[i] = data[i];

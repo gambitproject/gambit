@@ -1,8 +1,8 @@
-//#
-//# FILE: gblock.h -- Implementation of a generic array container class
-//#
-//# $Id$
-//#
+//
+// FILE: gblock.h -- Implementation of a generic array container class
+//
+// $Id$
+//
 
 #ifndef GBLOCK_H
 #define GBLOCK_H
@@ -11,16 +11,6 @@
 #include <assert.h>
 #include "garray.h"
 
-//
-// <category lib=glib sect=Containers>
-//
-// This class is designed as a convenient alternative to using a pointer
-// to a block of objects.  In addition to error checking on the bounds
-// of the block, it also provides members to insert, remove, and append
-// new elements to/from the block.
-//
-// The first index into the block is defined to be 1.
-//
 template <class T> class gBlock : public gArray<T>   {
   private:
 //
@@ -36,7 +26,7 @@ template <class T> class gBlock : public gArray<T>   {
 // Constructs a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
-    gBlock(int len = 0);
+    gBlock(unsigned int len = 0);
 //
 // Constructs a block starting at lo, and going to hi.
 //
@@ -61,8 +51,8 @@ template <class T> class gBlock : public gArray<T>   {
 // Tests for equality of two blocks.  Blocks are equal if they have the
 // same length, and the contents of all components are equal.
 //+grp
-    int operator==(const gBlock<T> &b) const;
-    int operator!=(const gBlock<T> &b) const;
+    bool operator==(const gBlock<T> &b) const;
+    bool operator!=(const gBlock<T> &b) const;
 //-grp
 
 //
@@ -116,4 +106,9 @@ template <class T> class gBlock : public gArray<T>   {
 
 template <class T> gOutput &operator<<(gOutput &, const gBlock<T> &);
 
-#endif    //# GBLOCK_H
+#endif    // GBLOCK_H
+
+
+
+
+
