@@ -1728,122 +1728,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Version, porNUMBER, 0));
   gsm->AddFunction(FuncObj);
 
-  ParamInfoType xy_Int[] =
-  {
-    ParamInfoType("x", porINTEGER),
-    ParamInfoType("y", porINTEGER)
-  };
-
-  ParamInfoType xy_Number[] =
-  {
-    ParamInfoType("x", porNUMBER),
-    ParamInfoType("y", porNUMBER)
-  };
-
-  ParamInfoType xy_Text[] =
-  {
-    ParamInfoType("x", porTEXT),
-    ParamInfoType("y", porTEXT)
-  };
-
-  ParamInfoType xy_Bool[] =
-  {
-    ParamInfoType("x", porBOOL),
-    ParamInfoType("y", porBOOL)
-  };
-
-
-  ParamInfoType xy_NfSupport[] =
-  {
-    ParamInfoType("x", porNFSUPPORT),
-    ParamInfoType("y", porNFSUPPORT)
-  };
-
-  ParamInfoType xy_Mixed[] =
-  {
-    ParamInfoType("x", porMIXED),
-    ParamInfoType("y", porMIXED)
-  };
-
- ParamInfoType xy_EfSupport[] =
-  {
-    ParamInfoType("x", porEFSUPPORT),
-    ParamInfoType("y", porEFSUPPORT)
-  };
-
-  ParamInfoType xy_Behav[] =
-  {
-    ParamInfoType("x", porBEHAV),
-    ParamInfoType("y", porBEHAV)
-  };
-
-  ParamInfoType xy_Efg[] =
-  {
-    ParamInfoType("x", porEFG),
-    ParamInfoType("y", porEFG)
-  };
-
-  ParamInfoType xy_EfPlayer[] =
-  {
-    ParamInfoType("x", porEFPLAYER),
-    ParamInfoType("y", porEFPLAYER)
-  };
-
-  ParamInfoType xy_NfPlayer[] =
-  {
-    ParamInfoType("x", porNFPLAYER),
-    ParamInfoType("y", porNFPLAYER),
-  };
-
-  ParamInfoType xy_Node[] =
-  {
-    ParamInfoType("x", porNODE),
-    ParamInfoType("y", porNODE)
-  };
-
-  ParamInfoType xy_Infoset[] =
-  {
-    ParamInfoType("x", porINFOSET),
-    ParamInfoType("y", porINFOSET)
-  };
-
-  ParamInfoType xy_Outcome[] =
-  {
-    ParamInfoType("x", porEFOUTCOME),
-    ParamInfoType("y", porEFOUTCOME)
-  };
-
-  ParamInfoType xy_Action[] =
-  {
-    ParamInfoType("x", porACTION),
-    ParamInfoType("y", porACTION)
-  };
-
-  ParamInfoType xy_Strategy[] =
-  {
-    ParamInfoType("x", porSTRATEGY),
-    ParamInfoType("y", porSTRATEGY)
-  };
-
-  ParamInfoType xy_Nfg[] =
-  {
-    ParamInfoType("x", porNFG),
-    ParamInfoType("y", porNFG)
-  };
-
-
-
-  ParamInfoType x_Number[] =
-  {
-    ParamInfoType("x", porNUMBER)
-  };
-
-
-  ParamInfoType file_Text[] =
-  {
-    ParamInfoType("file", porTEXT)
-  };
-
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_And },
       { "Concat[x->TEXT, y->TEXT] =: TEXT", GSM_Concat_Text },
@@ -1961,7 +1845,8 @@ void Init_gsmoper(GSM* gsm)
   
   FuncObj = new FuncDescObj("Input", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInputStream, 
-				       porINPUT, 1, file_Text));
+				       porINPUT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
   //------------------- Formatted Output -------------------
