@@ -27,7 +27,7 @@
 
 class NfgSolnShow;
 class NormalSpread;
-class NFSupportInspectDialog;
+class dialogNfgSupportInspect;
 
 template <class T> class SolutionList: public gSortList<T>
 {
@@ -68,7 +68,7 @@ private:
   NFSupport *cur_sup, *disp_sup;
   wxFrame     *pframe;
   NormalSpread    *spread;
-  NFSupportInspectDialog *support_dialog;
+  dialogNfgSupportInspect *support_dialog;
   int pl1, pl2;
   int rows, cols;
   NfgSolnShow *soln_show; // need to keep track of this to kill at the end

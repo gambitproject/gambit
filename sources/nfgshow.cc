@@ -17,6 +17,7 @@
 #include "dlnfgsave.h"
 
 #include "dlelim.h"
+#include "dlnfgsupport.h"
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -942,7 +943,6 @@ void NfgShow::OutcomeLabel(void)
 }
 
 #include "wxstatus.h"
-#include "nfsuptd.h"
 
 int NfgShow::SolveElimDom(void)
 {
@@ -1010,8 +1010,9 @@ void NfgShow::ChangeSupport(int what)
 {
   if (what == CREATE_DIALOG && !support_dialog) {
     int disp = supports.Find(disp_sup), cur = supports.Find(cur_sup);
-    support_dialog = new NFSupportInspectDialog(supports, cur, disp, this, spread);
-    }
+    support_dialog = new dialogNfgSupportInspect(supports, cur, disp,
+						 this, spread);
+  }
   
   if (what == DESTROY_DIALOG && support_dialog) {
     delete support_dialog;
@@ -1019,12 +1020,12 @@ void NfgShow::ChangeSupport(int what)
   }
 
   if (what == UPDATE_DIALOG) {
-    assert(support_dialog);
-    cur_sup = supports[support_dialog->CurSup()];
+    if (!support_dialog)  return;   // just ignore silently
+    cur_sup = supports[support_dialog->Current()];
 
-    if (supports[support_dialog->DispSup()] != disp_sup) {
+    if (supports[support_dialog->Displayed()] != disp_sup) {
       ChangeSolution(0);  // chances are, the current solution will not work.
-      disp_sup = supports[support_dialog->DispSup()];
+      disp_sup = supports[support_dialog->Displayed()];
       SetPlayers(pl1, pl2);
     }
   }
