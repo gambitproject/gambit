@@ -6,7 +6,7 @@
 
 static char tmp_str[200];
 
-wxStatus::wxStatus(wxFrame *frame,const char *title)
+wxStatus::wxStatus(wxFrame *frame,const char *title):
 	wxDialogBox(frame,(char *)title,FALSE,-1,-1,300,250)
 {
 sig=0;Width=0;Prec=6;Represent='f';
