@@ -77,7 +77,14 @@
 #define	SOLVE_DOMINANCE					1524
 #define	SOLVE_SUBGAMES					1526
 #define	SOLVE_STANDARD					1540		// standard submenu
-#define	SOLVE_S_ALLNASH					1541
+#define SOLVE_STANDARD_TYPE			1550
+#define	SOLVE_S_NASH						1551
+#define SOLVE_S_SUBGPERF				1552
+#define	SOLVE_S_SEQUENTIAL			1553
+#define SOLVE_STANDARD_NUM			1560
+#define	SOLVE_SN_ONE						1561
+#define	SOLVE_SN_TWO						1561
+#define	SOLVE_SN_ALL						1561
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601
@@ -100,12 +107,17 @@
 #define	EFG_NODE_HELP				"Node Menu"
 #define EFG_INFOSET_HELP		"Infoset Menu"
 #define EFG_TREE_HELP				"Tree Menu"
-#define EFG_SOLVE_HELP			"Extensive Form Solutions"
 #define EFG_INSPECT_HELP		"Extensive Solutions Inspect"
 #define EFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
 #define EFG_SOLVE_OPTIONS_HELP	"Extensive Form Solution Options"
 #define EFG_MAKE_SUPPORT_HELP "Creating EF Supports"
 #define EFG_SUPPORTS_HELP			"Examining EF Supports"
+#define EFG_STANDARD_HELP			"EFG Standard Solutions"
+#define EFG_CUSTOM_HELP			    "EFG Custom Solutions"
+
+// sections in the defaults file(s)
+#define		SOLN_SECT				"Soln-Defaults"
+
 // Different type-dependent values that need to be displayable in the
 // tree window.  These are accessed through the BaseTreeWindow->
 // TreeWindow->ExtensiveShow.  Also used in NodeInspect window.

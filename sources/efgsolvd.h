@@ -6,15 +6,170 @@
 // $Id$
 #include "nfgsolvd.h"
 
+#define STANDARD_NASH				0
+#define	STANDARD_PERFECT		1
+#define	STANDARD_SEQUENTIAL	2
+#define	STANDARD_ONE				0
+#define	STANDARD_TWO				1
+#define	STANDARD_ALL				2
+
+#define PARAMS_SECTION	"Algorithm Params"		// section in .ini file
+
 class EfgSolveSettings
 {
 protected:
 	Bool use_nfg,normal,subgames,pick_solns,auto_inspect;
 	int algorithm;
+	int standard_type,standard_num;
 	char *defaults_file;
+	Bool	use_standard;
 	int result;
+protected:
+	const BaseEfg &ef;
+	// call this to convert standard settings to actual solution parameters
+	void StandardSettings(void)
+	{
+	int stopAfter,max_solns,dom_type;
+	bool use_elimdom,all,subg;
+	// a separate case for each of the possible alg/num/game combinations
+	// One Nash for 2 person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()==2)
+	{
+	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
+	stopAfter=1;max_solns=1;
+	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	}
+	// One Nash for n person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
+	{
+	use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
+	stopAfter=1;max_solns=1;
+	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	subg=TRUE;
+	}
+	// Two Nash 2 person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_TWO && ef.NumPlayers()==2)
+	{
+	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
+	stopAfter=2;max_solns=2;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	}
+	// Two Nash n person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_TWO && ef.NumPlayers()!=2)
+	{
+	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
+	stopAfter=2;max_solns=2;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	gerr<<"Not guaranteed to find all solutions for 'Two Nash n-person'\n";
+	}
+	// All Nash 2 person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
+	{
+	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
+	stopAfter=0;max_solns=0;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	}
+	// ALL Nash n person
+	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ALL && ef.NumPlayers()!=2)
+	{
+	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
+	stopAfter=0;max_solns=0;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	gerr<<"Not guaranteed to find all solutions for 'All Nash n-person'\n";
+	}
+	// One Subgame Perfect (same as One Nash)
+	// One Subgame Perfect for 2 person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && ef.NumPlayers()==2)
+	{
+	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
+	stopAfter=1;max_solns=1;
+	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	}
+	// One Subgame Pefect for n person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && ef.NumPlayers()!=2)
+	{
+	use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
+	stopAfter=1;max_solns=1;
+	use_elimdom=true;all=true;dom_type=DOM_WEAK;
+	subg=TRUE;
+	}
+	// Two Subgame Perfect 2 person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && ef.NumPlayers()==2)
+	{
+	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
+	stopAfter=2;max_solns=2;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=TRUE;
+	}
+	// Two Subgame Perfect n person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && ef.NumPlayers()!=2)
+	{
+	use_nfg=TRUE;algorithm=NFG_LIAP_SOLUTION;
+	stopAfter=2;max_solns=2;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=TRUE;
+	}
+	// All Subgame Perfect 2 person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && ef.NumPlayers()==2)
+	{
+	use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
+	stopAfter=0;max_solns=0;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=TRUE;
+	}
+	// All Subgame Perfect n person
+	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && ef.NumPlayers()!=2)
+	{
+	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
+	stopAfter=0;max_solns=0;
+	use_elimdom=true;all=true;dom_type=DOM_STRONG;
+	subg=TRUE;
+	gerr<<"Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n";
+	}
+	// One Sequential
+	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ONE)
+	{
+	use_nfg=FALSE;algorithm=EFG_GOBIT_SOLUTION;
+	stopAfter=1;max_solns=1;
+	use_elimdom=false;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	}
+	// Two Sequential
+	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_TWO)
+	{
+	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
+	stopAfter=2;max_solns=2;
+	use_elimdom=false;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	gerr<<"Not guaranteed to find all solutions for 'Two Sequential'\n";
+	}
+	// All Sequential
+	if (standard_type==STANDARD_SEQUENTIAL && standard_num==STANDARD_ALL)
+	{
+	use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
+	stopAfter=0;max_solns=0;
+	use_elimdom=false;all=true;dom_type=DOM_STRONG;
+	subg=FALSE;
+	gerr<<"Not guaranteed to find all solutions for 'All Sequential'\n";
+	}
+
+	// -------- now write the new settings to file
+	wxWriteResource(SOLN_SECT,"Use-Nfg",use_nfg,defaults_file);
+	char *alg_sect=(use_nfg) ? "Nfg-Algorithm" : "Efg-Algorithm";
+	wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
+	wxWriteResource(PARAMS_SECTION,"Stop-After",stopAfter,defaults_file);
+	wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subg,defaults_file);
+}
 public:
-	EfgSolveSettings(void)
+	EfgSolveSettings(const BaseEfg &ef_):ef(ef_)
 	{
 	result=SD_SAVE;
 	defaults_file="gambit.ini";
@@ -24,7 +179,11 @@ public:
 	wxGetResource(SOLN_SECT,"Efg-Nfg",&normal,defaults_file);
 	wxGetResource(SOLN_SECT,"Efg-Mark-Subgames",&subgames,defaults_file);
 	wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_solns,defaults_file);
-	wxGetResource(SOLN_SECT,"Auto-Inspect-Solns",&auto_inspect,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Auto-Inspect-Solns",&auto_inspect,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Use-Standard",&use_standard,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Standard-Type",&standard_type,defaults_file);
+	wxGetResource(SOLN_SECT,"Efg-Standard-Num",&standard_num,defaults_file);
+	if (use_standard) StandardSettings();
 	}
 	~EfgSolveSettings()
 	{
@@ -35,7 +194,10 @@ public:
 		wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
 		wxWriteResource(SOLN_SECT,"Efg-Nfg",normal,defaults_file);
 		wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
-		wxWriteResource(SOLN_SECT,"Auto-Inspect-Solns",auto_inspect,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Auto-Inspect-Solns",auto_inspect,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Use-Standard",use_standard,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Standard-Type",standard_type,defaults_file);
+		wxWriteResource(SOLN_SECT,"Efg-Standard-Num",standard_num,defaults_file);
 	}
 	}
 	bool UseNF(void) const	{	return use_nfg;	}
@@ -45,6 +207,9 @@ public:
 	{assert(UseNF() && "Wrong type: use Efg");return algorithm;}
 	bool MarkSubgames(void) const {return subgames;}
 	bool AutoInspect(void) const {return auto_inspect;}
+	bool UseStandard(void) const {return use_standard;}
+	int  StandardType(void) const {return standard_type;}
+	int  StandardNum(void) const {return standard_num;}
 };
 
 class EfgSolveParamsDialog: public NfgAlgorithmList, public EfgSolveSettings
@@ -68,7 +233,7 @@ private:
 	static void algorithm_box_func(wxRadioBox &ob,wxEvent &)
 	{/*((EfgSolveParamsDialog *)ob.GetClientData())->OnEvent(SD_ALGORITHM);*/}
 	static void help_button_func(wxButton &,wxEvent &)
-	{wxHelpContents(EFG_SOLVE_HELP);}
+	{wxHelpContents(EFG_CUSTOM_HELP);}
 	// Event handlers: high level
 	void OnEvent(int event)
 	{
@@ -77,6 +242,7 @@ private:
 	normal=normal_box->GetValue();
 	pick_solns=pick_solns_box->GetValue();
 	auto_inspect=auto_inspect_box->GetValue();
+	use_standard=FALSE;
 	d->Show(FALSE);
 	}
 	void OnUseNF(Bool usenf)
@@ -87,8 +253,8 @@ private:
 	}
 
 public:
-	EfgSolveParamsDialog(const gBlock<int> &got_solns,int have_nfg,int num_players,wxWindow *parent=0):
-				solns(got_solns)
+	EfgSolveParamsDialog(const BaseEfg &ef,int have_nfg,wxWindow *parent=0)
+									:EfgSolveSettings(ef)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 
@@ -100,7 +266,7 @@ public:
 		efg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
 
-		nfg_algorithm_box=MakeNfgAlgorithmList(num_players,d,(wxFunction)algorithm_box_func);
+		nfg_algorithm_box=MakeNfgAlgorithmList(ef.NumPlayers(),ef.IsConstSum(),d,(wxFunction)algorithm_box_func);
 		nfg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
 
@@ -120,7 +286,7 @@ public:
 		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		(void)new wxButton(d,(wxFunction)help_button_func,"?");
-		if (num_players!=2) // disable algorithms that can not work w/ this game
+		if (ef.NumPlayers()!=2) // disable algorithms that can not work w/ this game
 		{
 			efg_algorithm_box->Enable(EFG_LCP_SOLUTION,FALSE);
 			nfg_algorithm_box->Enable(NFG_LCP_SOLUTION,FALSE);
@@ -135,7 +301,6 @@ public:
 		pick_solns_box->SetValue(pick_solns);
 		auto_inspect_box->SetValue(auto_inspect);
 
-		//OnEvent(SD_ALGORITHM);
 		d->Fit();
 		d->Show(TRUE);
 	}
@@ -145,4 +310,41 @@ public:
 	int GetResult(void) {return result;}
 };
 
+class EfgSolveStandardDialog:public EfgSolveSettings, public MyDialogBox
+{
+private:
+	char *standard_type_str,*standard_num_str;
+	wxStringList *standard_type_list,*standard_num_list;
+public:
+	EfgSolveStandardDialog(const BaseEfg &ef,wxWindow *parent):
+				EfgSolveSettings(ef),MyDialogBox(parent,"Standard Solution",EFG_STANDARD_HELP)
+	{
+	standard_type_list=new wxStringList("Nash","Subgame Perfect","Sequential",0);
+	standard_num_list=new wxStringList("One","Two","All",0);
+	standard_type_str=new char[20];standard_num_str=new char[20];
+	strcpy(standard_type_str,(char *)standard_type_list->Nth(standard_type)->Data());
+	strcpy(standard_num_str,(char *)standard_num_list->Nth(standard_num)->Data());
+	Add(wxMakeFormString("Type",&standard_type_str,wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(standard_type_list), 0)));
+	Add(wxMakeFormString("Type",&standard_num_str,wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(standard_num_list), 0)));
+	Go();
+	}
+	~EfgSolveStandardDialog()
+	{
+	if (Completed()==wxOK)
+	{
+		standard_type=wxListFindString(standard_type_list,standard_type_str);
+		standard_num=wxListFindString(standard_num_list,standard_num_str);
+		use_standard=TRUE;
+		result=SD_SAVE;
+	}
+	else
+		result=SD_CANCEL;
+	delete [] standard_type_str;
+	delete [] standard_num_str;
+	delete standard_type_list;
+	delete standard_num_list;
+	}
+};
 

@@ -49,6 +49,7 @@ private:
 	const gList<NodeEntry *> &node_list;
 	const Infoset * &hilight_infoset;		// Hilight infoset from the solution disp
 	const Node	*&mark_node;							// Used in mark/goto node operations
+  const Node *&subgame_node;
 	const Node	 *&cursor;								// Used to process cursor keys, stores current pos
 	// Private Functions
 	void	RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry);
@@ -59,7 +60,8 @@ protected:
 public:
 	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,
-						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_);
+						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
+						const TreeDrawSettings &draw_settings_);
 	~TreeRender(void);
 	// Windows event handlers
 	void OnPaint(void);
@@ -81,8 +83,8 @@ private:
 public:
 	TreeZoomWindow(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
 						const Infoset * &hilight_infoset_,
-						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_,
-						const NodeEntry *cursor_entry);
+						const Node *&mark_node_,const Node *&cursor,const Node *&subgame_node,
+						const TreeDrawSettings &draw_settings_,const NodeEntry *cursor_entry);
 	virtual void Render(wxDC &dc,int ox=0,int oy=0);
 	// Makes sure the cursor is always in the center of the window
 	virtual void UpdateCursor(const NodeEntry *entry);
@@ -112,6 +114,7 @@ private:
 	EFSupport * &disp_sup;	// we only need to know the displayed sup
 	BaseExtensiveShow	*frame;
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
+  const Node	*subgame_node;		 		// Used to mark the 'picking' subgame root
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
 	gList<SubgameEntry> subgame_list; // Keeps track of collapsed/expanded subgames
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
@@ -220,6 +223,8 @@ public:
 	TreeDrawSettings &DrawSettings(void) {return draw_settings;}
 	// Gives access to the parent to the current cursor node
 	const Node *Cursor(void) const {return cursor;}
+	// Hilight the subgame root for the currently active subgame
+	void	SetSubgamePickNode(const Node *n);
 };
 
 template <class T> class ExtensiveShow;

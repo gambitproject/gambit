@@ -39,7 +39,7 @@
 #define NFG_ELIMDOM_HELP		"Elimination of Dominated Strategies"
 #define NFG_SUPPORTS_HELP		"Examining NF Supports"
 #define NFG_MAKE_SUPPORT_HELP	"Creating NF Supports"
-
+#define NFG_STANDARD_HELP					"NFG Standard Solutions"
 // help names for actual solution algorithms
 #define ENUMPURE_HELP						"EnumPure"
 #define ENUMMIXED_HELP          "EnumMixed"

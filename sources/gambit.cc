@@ -264,6 +264,6 @@ Bool GambitFrame::OnClose()
 	wxFlushResources();
 #endif
 	wxKillHelp();
-	delete wout;delete werr;
+//	delete wout;delete werr;
 	return TRUE;
 }

@@ -49,7 +49,7 @@ public:
 //
 // Close the window pointed to, if any.
 //
-	~gWxInput()   { }
+	~gWxInput()   {f=0; }
 
 // Load a text file into the input window (this is unique to WxInput)
 	void Load(const char *file) {f->LoadFile((char *)file);}
