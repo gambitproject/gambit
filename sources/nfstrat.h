@@ -100,10 +100,10 @@ public:
   Strategy* GetStrategy(int num) const;
 
   // Number of Strategies in the NFStrategySet
-  int NumStrats(void);
+  int NumStrats(void) const;
 
   //  return the entire strategy set in a const gArray
-  const gArray<Strategy *> &GetNFStrategySet(void);
+  const gArray<Strategy *> &GetNFStrategySet(void) const;
 
   // return the NFPlayer of this NFStrategySet
   NFPlayer &GetPlayer(void) const;
@@ -141,12 +141,14 @@ public:
   //---------
 
   void SetNFStrategySet(int pl, NFStrategySet *s);   
-  NFStrategySet *GetNFStrategySet(int pl)     { return sups[pl]; }
+  NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
 
   Strategy *GetStrategy(int pl, int num) const;
   const gArray<Strategy *> &GetStrategy(int pl) const;
+  int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
+
   const BaseNfg &BelongsTo(void) const;
-  const gArray<int> SupportDimensions ( void );
+  const gArray<int> SupportDimensions(void) const;
 };
 
 

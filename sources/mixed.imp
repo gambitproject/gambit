@@ -127,7 +127,7 @@ template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
-						 NFSupport &s)
+						 const NFSupport &s)
 : BaseMixedProfile(s.BelongsTo(), false, s), Nf(&NF), 
 	gPVector<T>(s.SupportDimensions())
 {

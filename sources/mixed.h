@@ -18,7 +18,7 @@ class BaseMixedProfile     {
     bool truncated;
     NFSupport stratset;
     BaseMixedProfile(const BaseNfg &, bool trunc);
-    BaseMixedProfile(const BaseNfg &, bool trunc, NFSupport &s);
+    BaseMixedProfile(const BaseNfg &, bool trunc, const NFSupport &s);
     BaseMixedProfile(const BaseMixedProfile &);
     BaseMixedProfile &operator=(const BaseMixedProfile &);
 
@@ -46,7 +46,7 @@ template <class T> class MixedProfile
 
   public:
     MixedProfile(const Nfg<T> &, bool truncated = false);
-    MixedProfile(const Nfg<T> &, NFSupport &);
+    MixedProfile(const Nfg<T> &, const NFSupport &);
     MixedProfile(const Nfg<T> &, const gPVector<T> &);
     MixedProfile(const MixedProfile<T> &);
     ~MixedProfile();

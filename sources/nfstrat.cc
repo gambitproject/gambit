@@ -172,13 +172,13 @@ Strategy *NFStrategySet::GetStrategy(int num) const
 }
 
 // Number of Strategies in a NFStrategySet
-int NFStrategySet::NumStrats(void)
+int NFStrategySet::NumStrats(void) const
 {
   return (strategies.Length());
 }
 
 // Return the entire strategy set
-const gArray<Strategy *> &NFStrategySet::GetNFStrategySet(void) 
+const gArray<Strategy *> &NFStrategySet::GetNFStrategySet(void) const
 {
   return strategies;
 }
@@ -257,7 +257,7 @@ const BaseNfg &NFSupport::BelongsTo(void) const
   return (*bnfg);
 }
 
-const gArray<int> NFSupport::SupportDimensions (void)
+const gArray<int> NFSupport::SupportDimensions(void) const
 {
   gArray<int> a(sups.Length());
 

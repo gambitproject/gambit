@@ -174,7 +174,7 @@ BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc)
 : N(&NF), truncated(trunc), stratset(NF)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseNfg &NF, bool trunc,
-				   NFSupport &s)
+				   const NFSupport &s)
 : N(&NF), truncated(trunc), stratset(s)   { }
 
 BaseMixedProfile::BaseMixedProfile(const BaseMixedProfile &p)
