@@ -13,8 +13,7 @@ template <class T> class gSquareMatrix : public gMatrix<T>   {
 public:
   class MatrixSingular : public gException {
   public:
-    virtual ~MatrixSingular() { }
-    
+    virtual ~MatrixSingular();
     gText Description(void) const;
   };
 

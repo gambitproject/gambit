@@ -10,7 +10,9 @@
 
 
 template class gSquareMatrix<double>;
-//template class gSquareMatrix<gDouble>;
+#ifdef GDOUBLE
+template class gSquareMatrix<gDouble>;
+#endif  // GDOUBLE
 template class gSquareMatrix<gRational>;
 
 template gOutput & operator<< (gOutput&, const gSquareMatrix<double>&);

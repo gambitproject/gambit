@@ -14,7 +14,6 @@
 #include "gpvector.h"
 #include "grblock.h"
 #include "gnumber.h"
-#include "gpolylst.h"
 
 class EFOutcome;
 class EFPlayer;

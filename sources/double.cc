@@ -14,7 +14,6 @@
 #include "garray.imp"
 #include "grarray.imp"
 #include "gmatrix.imp"
-#include "gsmatrix.imp"
 #include "gblock.imp"
 #include "monomial.imp"
 #include "glist.imp"
@@ -261,7 +260,6 @@ template class gArray<gDouble>;
 template class gBlock<gDouble>;
 template class gRectArray<gDouble>;
 template class gMatrix<gDouble>;
-template class gSquareMatrix<gDouble>;
 template gOutput & operator<< (gOutput&, const gVector<gDouble>&);
 
 #ifndef GDOUBLE

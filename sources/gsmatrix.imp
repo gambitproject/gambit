@@ -38,6 +38,8 @@ gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
 //                gSquareMatrix<T>: Public member functions
 //-----------------------------------------------------------------------------
 
+template <class T> gSquareMatrix<T>::MatrixSingular::~MatrixSingular() { }
+
 template <class T>
 gText gSquareMatrix<T>::MatrixSingular::Description(void) const
 {
