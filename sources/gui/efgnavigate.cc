@@ -52,8 +52,8 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
   // if we got here, the node is valid.
   try {
     SetCellValue((char *) m_cursor->GetName(), 0, 0);
-    SetCellValue((char *) m_parent->AsString(tRealizProb, m_cursor), 1, 0);
-    SetCellValue((char *) m_parent->AsString(tNodeValue, m_cursor), 2, 0);
+    SetCellValue((char *) m_parent->GetRealizProb(m_cursor), 1, 0);
+    SetCellValue((char *) m_parent->GetNodeValue(m_cursor), 2, 0);
 
     gText tmpstr;
   
@@ -69,35 +69,23 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
     }
 	  
     SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_parent->AsString(tIsetProb, m_cursor), 4, 0);
-
-    SetCellValue((char *) m_parent->AsString(tBeliefProb, m_cursor), 5, 0);
-    SetCellValue((char *) m_parent->AsString(tIsetValue, m_cursor), 6, 0);
+    SetCellValue((char *) m_parent->GetInfosetProb(m_cursor), 4, 0);
+    SetCellValue((char *) m_parent->GetBeliefProb(m_cursor), 5, 0);
+    SetCellValue((char *) m_parent->GetInfosetValue(m_cursor), 6, 0);
 	
     Node *p = m_cursor->GetParent();
 
     if (p) {
+      int branch = 0;
+      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
+
       SetCellValue((char *) m_cursor->GetAction()->GetName(), 7, 0);
+      SetCellValue((char *) m_parent->GetActionProb(p, branch), 8, 0);
+      SetCellValue((char *) m_parent->GetActionValue(p, branch), 9, 0);
     }
     else {
       SetCellValue("N/A (root)", 7, 0);
-    }
-
-    if (p) {
-      int branch = 0;
-      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
-      SetCellValue((char *) m_parent->AsString(tBranchProb, p, branch), 8, 0);
-    }
-    else {
       SetCellValue("1", 8, 0);
-    }
-	
-    if (p) {
-      int branch = 0;
-      for (branch = 1; p->GetChild(branch) != m_cursor; branch++);
-      SetCellValue((char *) m_parent->AsString(tBranchVal, p, branch), 9, 0);
-    }
-    else {
       SetCellValue("N/A", 9, 0);
     }
   }	

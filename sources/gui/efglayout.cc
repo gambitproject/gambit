@@ -655,15 +655,15 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
         
   case NODE_ABOVE_REALIZPROB:
-    label = m_parent->AsString(tRealizProb, n);
+    label = m_parent->Parent()->GetRealizProb(n);
     break;
         
   case NODE_ABOVE_BELIEFPROB:
-    label = m_parent->AsString(tBeliefProb, n);
+    label = m_parent->Parent()->GetBeliefProb(n);
     break;
         
   case NODE_ABOVE_VALUE:
-    label = m_parent->AsString(tNodeValue, n);
+    label = m_parent->Parent()->GetNodeValue(n);
     break;
         
   default:
@@ -712,15 +712,15 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
         
   case NODE_BELOW_REALIZPROB:
-    label = m_parent->AsString(tRealizProb, n);
+    label = m_parent->Parent()->GetRealizProb(n);
     break;
         
   case NODE_BELOW_BELIEFPROB:
-    label = m_parent->AsString(tBeliefProb, n);
+    label = m_parent->Parent()->GetBeliefProb(n);
     break;
         
   case NODE_BELOW_VALUE:
-    label = m_parent->AsString(tNodeValue, n);
+    label = m_parent->Parent()->GetNodeValue(n);
     break;
         
   default:
@@ -756,11 +756,11 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
       break;
             
     case BRANCH_ABOVE_PROBS:
-      label = m_parent->AsString(tBranchProb, entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionProb(entry->n, child_entry->child_number);
       break;
       
     case BRANCH_ABOVE_VALUE:
-      label = m_parent->AsString(tBranchVal, entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionValue(entry->n, child_entry->child_number);
       break;
             
     default:
@@ -797,11 +797,11 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
       break;
       
     case BRANCH_BELOW_PROBS:
-      label = m_parent->AsString(tBranchProb, entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionProb(entry->n, child_entry->child_number);
       break;
             
     case BRANCH_BELOW_VALUE:
-      label = m_parent->AsString(tBranchVal, entry->n, child_entry->child_number);
+      label = m_parent->Parent()->GetActionValue(entry->n, child_entry->child_number);
       break;
             
     default:

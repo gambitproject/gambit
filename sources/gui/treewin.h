@@ -19,7 +19,7 @@ class TreeWindow : public wxScrolledWindow {
 friend class EfgPrintout;
 
 private:
-  FullEfg &ef;
+  FullEfg &m_efg;
   EfgShow *m_parent;
   
   Node  *mark_node;                 // Used in mark/goto node operations
@@ -125,7 +125,6 @@ public:
   void FitZoom(void);
 
   // Access to the numeric values from the renderer
-  gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
   gText OutcomeAsString(const Node *n, bool &hilight) const;
 
   DECLARE_EVENT_TABLE()

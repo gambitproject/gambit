@@ -34,7 +34,7 @@ private:
   TreeWindow *m_treeWindow;
   TreeZoomWindow *m_treeZoomWindow;
 
-  int cur_soln;
+  int m_currentProfile;
 
   gList<EFSupport *> m_supports;
   EFSupport *m_currentSupport;
@@ -179,10 +179,20 @@ public:
   EfgShow(FullEfg &p_efg, GambitFrame *p_parent);
   virtual ~EfgShow();
 
-  // Solution routines
+  // PROFILE ACCESS AND MANIPULATION
   void RemoveSolutions(void);
   void ChangeSolution(int soln);
-  int CurrentSolution(void) const { return cur_soln; }
+  int CurrentSolution(void) const { return m_currentProfile; }
+  const BehavSolution &GetCurrentProfile(void) const;
+
+  gText GetRealizProb(const Node *) const;
+  gText GetBeliefProb(const Node *) const;
+  gText GetNodeValue(const Node *) const;
+  gText GetInfosetProb(const Node *) const;
+  gText GetInfosetValue(const Node *) const;
+  gText GetActionValue(const Node *, int act) const;
+  gText GetActionProb(const Node *, int act) const;
+  gNumber ActionProb(const Node *n, int br) const;
 
   void OnSelectedMoved(const Node *n);
 
@@ -193,15 +203,11 @@ public:
   void AddSolution(const BehavSolution &, bool map);
   FullEfg *Game(void) { return &m_efg; }
 
-  gNumber ActionProb(const Node *n, int br);
 
   // Interface for infoset hilighting between the tree and solution display
   void HilightInfoset(int pl, int iset, int who);
 
   gText UniqueSupportName(void) const;
-
-  // Used by TreeWindow
-  virtual gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
 
   // Currently used support
   EFSupport *GetSupport(void);
@@ -209,8 +215,6 @@ public:
   void SetSupportNumber(int p_number);
   void OnSupportsEdited(void);
 
-  TreeWindow *GetTreeWindow(void) const { return m_treeWindow; }
-  
   void UpdateMenus(void);
   int NumDecimals(void) const;
 
@@ -224,14 +228,6 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
-
-
-// Solution constants
-typedef enum {
-  EFG_NO_SOLUTION = -1, EFG_QRE_SOLUTION, EFG_LIAP_SOLUTION,
-  EFG_LCP_SOLUTION, EFG_PURENASH_SOLUTION, EFG_CSUM_SOLUTION,
-  EFG_NUM_SOLUTIONS
-} EfgSolutionT;
 
 #endif // EFGSHOW_H
 

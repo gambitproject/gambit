@@ -134,15 +134,6 @@ typedef enum {
 } guiEfgMenuItems;
 
 
-// Different type-dependent values that need to be displayable in the
-// tree window.
-
-typedef enum {
-  tRealizProb, tIsetProb, tBeliefProb, tNodeValue,
-  tIsetValue, tBranchProb, tBranchVal
-} TypedSolnValues;
-
-
 #endif // EFGCONST_H
 
 

@@ -192,7 +192,7 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     EfgClient(&p_efg),
     m_parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
-    m_treeZoomWindow(0), cur_soln(0),
+    m_treeZoomWindow(0), m_currentProfile(0),
     m_solutionTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
@@ -296,7 +296,7 @@ void EfgShow::OnSelectedMoved(const Node *n)
 
 void EfgShow::ChangeSolution(int sol)
 {
-  cur_soln = sol;
+  m_currentProfile = sol;
   m_treeWindow->Refresh();
   if (m_navigateWindow) {
     m_navigateWindow->Set(m_treeWindow->Cursor());
@@ -309,9 +309,14 @@ void EfgShow::ChangeSolution(int sol)
 
 void EfgShow::RemoveSolutions(void)
 {
-  cur_soln = 0;
+  m_currentProfile = 0;
   m_solutionTable->Flush();
   OnSelectedMoved(0); // update the node inspect window if any
+}
+
+const BehavSolution &EfgShow::GetCurrentProfile(void) const
+{
+  return (*m_solutionTable)[m_currentProfile];
 }
 
 void EfgShow::OnProfilesNew(wxCommandEvent &)
@@ -327,7 +332,7 @@ void EfgShow::OnProfilesNew(wxCommandEvent &)
 
 void EfgShow::OnProfilesClone(wxCommandEvent &)
 {
-  BehavSolution profile((*m_solutionTable)[cur_soln]);
+  BehavSolution profile((*m_solutionTable)[m_currentProfile]);
 
   dialogBehavEditor dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
@@ -338,13 +343,13 @@ void EfgShow::OnProfilesClone(wxCommandEvent &)
 
 void EfgShow::OnProfilesRename(wxCommandEvent &)
 {
-  if (cur_soln > 0) {
+  if (m_currentProfile > 0) {
     wxTextEntryDialog dialog(this, "Enter new name for profile",
 			     "Rename profile",
-			     (char *) (*m_solutionTable)[cur_soln].GetName());
+			     (char *) (*m_solutionTable)[m_currentProfile].GetName());
 
     if (dialog.ShowModal() == wxID_OK) {
-      (*m_solutionTable)[cur_soln].SetName(dialog.GetValue().c_str());
+      (*m_solutionTable)[m_currentProfile].SetName(dialog.GetValue().c_str());
       m_solutionTable->UpdateValues();
     }
   }
@@ -352,21 +357,21 @@ void EfgShow::OnProfilesRename(wxCommandEvent &)
 
 void EfgShow::OnProfilesEdit(wxCommandEvent &)
 {
-  if (cur_soln > 0) {
-    dialogBehavEditor dialog(this, (*m_solutionTable)[cur_soln]);
+  if (m_currentProfile > 0) {
+    dialogBehavEditor dialog(this, (*m_solutionTable)[m_currentProfile]);
 
     if (dialog.ShowModal() == wxID_OK) {
-      (*m_solutionTable)[cur_soln] = dialog.GetProfile();
-      ChangeSolution(cur_soln);
+      (*m_solutionTable)[m_currentProfile] = dialog.GetProfile();
+      ChangeSolution(m_currentProfile);
     }
   }
 }
 
 void EfgShow::OnProfilesDelete(wxCommandEvent &)
 {
-  m_solutionTable->Remove(cur_soln);
-  cur_soln = (m_solutionTable->Length() > 0) ? 1 : 0;
-  ChangeSolution(cur_soln);
+  m_solutionTable->Remove(m_currentProfile);
+  m_currentProfile = (m_solutionTable->Length() > 0) ? 1 : 0;
+  ChangeSolution(m_currentProfile);
 }
 
 //************************************************************************
@@ -385,79 +390,112 @@ void EfgShow::AddSolution(const BehavSolution &p_profile, bool p_map)
   UpdateMenus();
 }
 
-// Solution access for TreeWindow
 
-gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
+gText EfgShow::GetRealizProb(const Node *p_node) const
 {
-  int i;
-  // Special case that does not fit in ANYWHERE: Chance nodes have probs w/out solutions
-  if (what == tBranchProb && n->GetPlayer())
-    if (n->GetPlayer()->IsChance())
-      return ToText(m_efg.GetChanceProb(n->GetInfoset(), br),
-		    m_treeWindow->NumDecimals());
-  
-  if (!n || !cur_soln) return "N/A";
-  
-  const BehavSolution &cur = (*m_solutionTable)[cur_soln];
-  
-  switch (what) 
-    {
-    case tRealizProb:           // terminal ok
-      return ToText(cur.RealizProb(n), m_treeWindow->NumDecimals());
-    case tBeliefProb: // terminal ok
-      {
-	if (!n->GetPlayer()) return "N/A";
-	return ToText(cur.BeliefProb(n), m_treeWindow->NumDecimals());
-      }
-    case tNodeValue:  // terminal ok
-      {
-	gText tmp = "(";
-	for (i = 1; i <= m_efg.NumPlayers(); i++)
-	  tmp += ToText(cur.NodeValue(n)[i], m_treeWindow->NumDecimals())+((i == m_efg.NumPlayers()) ? ")" : ",");
-	return tmp;
-      }
-    case tIsetProb: // terminal not ok
-      {
-	if (!n->GetPlayer()) return "N/A";
-	return ToText(cur.IsetProb(n->GetInfoset()), m_treeWindow->NumDecimals());
-      }
-    case tBranchVal: // terminal not ok
-      {
-	if (!n->GetPlayer()) return "N/A";
-	if (n->GetPlayer()->IsChance()) return "N/A";
-	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
-	  return ToText(cur.ActionValue(n->GetInfoset()->Actions()[br]),m_treeWindow->NumDecimals());
-	else        // this is due to a bug in the value computation
-	  return "N/A";
-      }
-    case tBranchProb:   // terminal not ok
-      if (!n->GetPlayer()) return "N/A";
-      // For chance node prob, see first line of this function
-      return ToText(cur.ActionProb(n->GetInfoset()->Actions()[br]),m_treeWindow->NumDecimals());
-    case tIsetValue:    // terminal not ok, not implemented
-      {
-	if (!n->GetPlayer() || n->GetPlayer()->IsChance()) return "N/A";
-	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
-	  return ToText(cur.IsetValue(n->GetInfoset()), m_treeWindow->NumDecimals());
-	else        // this is due to a bug in the value computation
-	  return "N/A";
-      }
-    default:
-      return "N/A";
-    }
+  if (m_currentProfile == 0 || !p_node) {
+    return "";
+  }
+  return ToText((*m_solutionTable)[m_currentProfile].RealizProb(p_node),
+		NumDecimals());
 }
 
-gNumber EfgShow::ActionProb(const Node *p_node, int p_action)
+gText EfgShow::GetBeliefProb(const Node *p_node) const
+{
+  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
+    return "";
+  }
+  return ToText((*m_solutionTable)[m_currentProfile].BeliefProb(p_node),
+		NumDecimals());
+}
+
+gText EfgShow::GetNodeValue(const Node *p_node) const
+{
+  if (m_currentProfile == 0 || !p_node) {
+    return "";
+  }
+  gText tmp = "(";
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    tmp += ToText((*m_solutionTable)[m_currentProfile].NodeValue(p_node)[pl], 
+		  NumDecimals());
+    if (pl < m_efg.NumPlayers()) {
+      tmp += ",";
+    }
+    else {
+      tmp += ")";
+    }
+  }
+  return tmp;
+}
+
+gText EfgShow::GetInfosetProb(const Node *p_node) const
+{
+  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer()) {
+    return "";
+  }
+  return ToText((*m_solutionTable)[m_currentProfile].IsetProb(p_node->GetInfoset()),
+		NumDecimals());
+}
+
+gText EfgShow::GetInfosetValue(const Node *p_node) const
+{
+  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer() ||
+      p_node->GetPlayer()->IsChance()) {
+    return "";
+  }
+  if (GetCurrentProfile().IsetProb(p_node->GetInfoset()) > gNumber(0)) {
+    return ToText(GetCurrentProfile().IsetValue(p_node->GetInfoset()),
+		  NumDecimals());
+  }
+  else {
+    // this is due to a bug in the value computation
+    return "";
+  }
+}
+
+gText EfgShow::GetActionProb(const Node *p_node, int p_act) const
+{
+  if (m_currentProfile == 0 || !p_node->GetPlayer()) {
+    return "";
+  }
+
+  if (p_node->GetPlayer()->IsChance()) {
+    return ToText(m_efg.GetChanceProb(p_node->GetInfoset(), p_act),
+		  NumDecimals());
+  }
+  return ToText(GetCurrentProfile().ActionProb(p_node->GetInfoset()->Actions()[p_act]),
+		NumDecimals());
+}
+
+gText EfgShow::GetActionValue(const Node *p_node, int p_act) const
+{
+  if (m_currentProfile == 0 || !p_node || !p_node->GetPlayer() ||
+      p_node->GetPlayer()->IsChance()) {
+    return "";
+  }
+
+  if (GetCurrentProfile().IsetProb(p_node->GetInfoset()) > gNumber(0)) {
+    return ToText(GetCurrentProfile().ActionValue(p_node->GetInfoset()->Actions()[p_act]),
+		  NumDecimals());
+  }
+  else  {
+    // this is due to a bug in the value computation
+    return "";
+  }
+}
+
+gNumber EfgShow::ActionProb(const Node *p_node, int p_action) const
 {
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     return m_efg.GetChanceProb(p_node->GetInfoset(), p_action);
   }
 
-  if (cur_soln && p_node->GetInfoset()) {
-    return (*m_solutionTable)[cur_soln](p_node->GetInfoset()->Actions()[p_action]);
+  if (m_currentProfile && p_node->GetInfoset()) {
+    return (*m_solutionTable)[m_currentProfile](p_node->GetInfoset()->Actions()[p_action]);
   }
   return -1;
 }
+
 
 void EfgShow::PickSolutions(const Efg::Game &p_efg, Node *p_rootnode,
 			    gList<BehavSolution> &p_solns)
