@@ -69,6 +69,7 @@ template <class T> class gPolyList
    const term_order*        TermOrder()                               const;
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
+   const bool               IsMultiaffine()                           const;
    const gList<gPoly<T> >   UnderlyingList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;

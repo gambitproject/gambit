@@ -368,6 +368,14 @@ template <class T> const gList<gPoly<T> > gPolyList<T>::UnderlyingList() const
     NewList += *List[ii];
   return NewList;
 }
+
+template <class T> const bool gPolyList<T>::IsMultiaffine() const
+{
+  for (int i = 1; i <= List.Length(); i++)
+    if (!(*List[i]).IsMultiaffine()) 
+      return false;
+  return true;
+}
   
 template<class T> 
 const gVector<T> gPolyList<T>::Evaluate(const gVector<T>& v) const
