@@ -26,6 +26,8 @@ class gList<gString>;
 class gList<gRational>;
 class gList<Node *>;
 class gNode<Node *>;
+class gNode<gString>;
+class gNode<gRational>;
 template <class T> class gArray;
 class EFPlayer;
 class EFOutcome;
