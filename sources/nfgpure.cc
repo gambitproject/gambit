@@ -51,7 +51,7 @@ void FindPureNash(const NFSupport &p_support, int p_stopAfter,
       
       int index = p_solutions.Append(MixedSolution(temp,
 						   algorithmNfg_ENUMPURE));
-      if (p_solutions[index].LiapValue() < p_solutions[index].Epsilon())
+      if (p_solutions[index].LiapValue() <= p_solutions[index].Epsilon())
 	p_solutions[index].SetIsNash(triTRUE);
       else
 	p_solutions[index].SetIsNash(triFALSE);
