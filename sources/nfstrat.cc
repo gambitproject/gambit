@@ -67,7 +67,7 @@ return profile[p];
 void StrategyProfile::Set(int p, const Strategy *const s)
 {
   index += (((s) ? s->Index() : 0L) - ((profile[p]) ? profile[p]->Index() : 0L));
-  profile[p] = s;
+  profile[p] = (Strategy *)s;
 }
 
 class nfgSupportPlayer  {
@@ -141,7 +141,7 @@ bool nfgSupportPlayer::operator==(const nfgSupportPlayer &s)
 //------------------------------------------
 
 // Add a strategy to the nfgSupportPlayer
-void nfgSupportPlayer::AddStrategy(Strategy *s) 
+void nfgSupportPlayer::AddStrategy(Strategy *s)
 { 
   if (nfp == s->Player() && !strategies.Find(s)) {
     int index;
@@ -240,6 +240,7 @@ int NFSupport::GetNumber(const Strategy *s) const
       return i;
   gout << "Looking for the number of a strategy not in the support.\n";
   exit(0);
+  return 0;
 }
 
 int NFSupport::NumStrats(int pl) const
