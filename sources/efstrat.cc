@@ -400,6 +400,8 @@ bool EFSupport::ActionIsActive(Action *a) const
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
 
+  if (pl == 0) return true; // Chance
+
   int act = sets[pl]->Find(a);
   if (act == 0) 
     return false;

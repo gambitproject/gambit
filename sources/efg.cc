@@ -1390,7 +1390,10 @@ gPVector<int> Efg::NumActions(void) const
 
 int Efg::NumNodesInInfoset(const int pl, const int iset) const
 {
- return players[pl]->infosets[iset]->members.Length(); 
+  if (pl == 0) 
+    return GetChance()->infosets[iset]->members.Length();
+  else
+    return players[pl]->infosets[iset]->members.Length(); 
 }
 
 gPVector<int> Efg::NumMembers(void) const
