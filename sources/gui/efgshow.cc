@@ -23,7 +23,7 @@
 #include "game/node.h"
 #include "game/efplayer.h"
 #include "game/efgutils.h"
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 #include "game/nfg.h"
 
 #include "efgconst.h"
@@ -298,7 +298,7 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   }
 
   if (m_efg.AssociatedNfg() && p_map) {
-    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(MixedProfile<gNumber>(p_profile), false);
+    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddProfile(MixedProfile<gNumber>(*p_profile.Profile()), false);
   }
 
   m_profileTable->UpdateValues();
@@ -1863,7 +1863,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
     wxGetApp().AddGame(&m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_profiles.Length(); i++) {
-      nfgShow->AddProfile(MixedProfile<gNumber>(m_profiles[i]), false);
+      nfgShow->AddProfile(MixedProfile<gNumber>(*m_profiles[i].Profile()), false);
     }
   }
   else {

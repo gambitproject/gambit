@@ -10,7 +10,7 @@
 #include "base/base.h"
 #include "nash/algutils.h"
 #include "nash/subsolve.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 class SeqFormParams : public AlgParams {
 public:

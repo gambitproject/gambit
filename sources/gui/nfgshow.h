@@ -17,7 +17,7 @@
 
 #include "game/nfg.h"
 #include "game/nfgiter.h"
-#include "game/mixedsol.h"
+#include "nash/mixedsol.h"
 
 #include "gambit.h"
 #include "nfgconst.h"

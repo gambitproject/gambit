@@ -203,7 +203,7 @@ bool QreNfg(wxWindow *p_parent,
       algorithm.Solve(*N,
 		      (dialog.GeneratePxiFile()) ? *dialog.PxiFile() : gnull,
 		      status, correspondence);
-      p_solutions.Append(BehavSolution(BehavProfile<gNumber>(correspondence[1])));
+      p_solutions.Append(BehavSolution(BehavProfile<gNumber>(*correspondence[1].Profile())));
       delete N;
     }
     catch (gSignalBreak &) { }

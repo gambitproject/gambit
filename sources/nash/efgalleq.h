@@ -11,10 +11,10 @@
 #include "base/gstatus.h"
 #include "game/efg.h"
 #include "game/behav.h"
-#include "game/behavsol.h"
 #include "game/efgensup.h"
-#include "nash/epolenum.h" 
-#include "nash/subsolve.h"
+#include "behavsol.h"
+#include "epolenum.h" 
+#include "subsolve.h"
 
 int AllEFNashSolve(const EFSupport &, const EfgPolEnumParams &, 
 		   gList<BehavSolution> &, gStatus &,

@@ -11,9 +11,9 @@
 #define ALGLP_H
 
 #include "game/efg.h"
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 #include "game/nfg.h"
-#include "game/mixedsol.h"
+#include "nash/mixedsol.h"
 
 bool LpEfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);
 bool LpNfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);

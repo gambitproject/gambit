@@ -6,7 +6,8 @@
 
 #include "math/gmath.h"
 #include "behavsol.h"
-#include "lexicon.h"  // needed for ReducedNormalFormRegrets
+#include "behavextend.h"
+#include "game/lexicon.h"  // needed for ReducedNormalFormRegrets
 
 // we probably want to break this out into another file (rdm)
 
@@ -218,9 +219,11 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 
 gTriState BehavSolution::GetANFNash(void) const
 {
-#ifdef UNUSED
   gNullStatus status;
-  gTriState answer = ((ExtendsToANFNash(Support(), Support(), status)) ?
+  algExtendsToAgentNash algorithm;
+  gTriState answer = ((algorithm.ExtendsToAgentNash(*this,
+						    Support(), Support(),
+						    status)) ?
 		      triTRUE : triFALSE);
   if (answer == triFALSE) {
     m_Nash.Set(triFALSE);
@@ -228,7 +231,6 @@ gTriState BehavSolution::GetANFNash(void) const
     m_Sequential.Set(triFALSE);
   }
   return answer;
-#endif  // UNUSED
   return triUNKNOWN;
 }
 
@@ -250,14 +252,14 @@ gTriState BehavSolution::GetNash(void) const
     else {
       //  else let Andy figure it out
       // Is perfect recall needed here, Andy?
-#ifdef UNUSED
       if (IsPerfectRecall(m_profile->GetGame())) { 
 	// not sure MaxRegret does the right thing here
 	gNullStatus status;
+	algExtendsToNash algorithm;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
-		    ExtendsToNash(Support(),Support(),status)) ? triTRUE:triFALSE;
+		  algorithm.ExtendsToNash(*this,Support(),Support(),status)) 
+	  ? triTRUE:triFALSE;
       }
-#endif  // UNUSED
       answer = triUNKNOWN;
     }
   }
@@ -287,7 +289,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
   else {
     // for complete profiles, use subgame perfect checker.  
     if(IsComplete()) {
-      BehavProfile<gNumber> p(*this);
+      BehavProfile<gNumber> p(*m_profile);
       SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
       gNullStatus status;
       checker.Solve(p.Support(), status);
@@ -426,7 +428,7 @@ const gNumber &BehavSolution::operator()(Action *p_action) const
 
 gNumber BehavSolution::operator[](Action *p_action) const
 {
-  return m_profile->ActionProb(p_action);
+  return m_profile->GetActionProb(p_action);
 }
 
 gNumber &BehavSolution::operator[](Action *p_action)
@@ -539,7 +541,6 @@ void BehavSolution::Invalidate(void) const
   // changes in m_efg.  This only deals with changes in action probs of 
   // m_profile, and changes to outcome payoffs or chance probs of m_efg
   m_profile->Invalidate();
-  m_profile->InitPayoffs(); 
   m_support = EFSupport(m_profile->GetGame());
   m_creator = algorithmEfg_USER;
   m_ANFNash.Invalidate();
@@ -575,7 +576,7 @@ gPVector<gNumber> BehavSolution::GetRNFRegret(void) const
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     gNumber pay = Payoff(pl);
     for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
-      BehavProfile<gNumber> scratch(*this);
+      BehavProfile<gNumber> scratch(*m_profile);
       //	gout << "\ninstalled 1:  " << scratch.IsInstalled() << " scratch: " << scratch;
       const gArray<int> *const actions = L.strategies[pl][st];
       for(int j = 1;j<=(*actions).Length();j++) {
@@ -719,3 +720,5 @@ SubgamePerfectChecker::~SubgamePerfectChecker() {
   (start.GetGame()).MarkSubgames(oldroots);
 }
 
+#include "base/glist.imp"
+template class gList<BehavSolution>;

@@ -21,7 +21,7 @@ void efgEnumPureNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   solver.Solve(support, p_status, solutions);
 
   for (int i = 1; i <= solutions.Length(); i++)  {
-    MixedProfile<gNumber> profile(solutions[i]);
+    MixedProfile<gNumber> profile(*solutions[i].Profile());
     solns.Append(BehavProfile<gNumber>(profile));
   }
 

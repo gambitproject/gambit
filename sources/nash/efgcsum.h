@@ -11,7 +11,7 @@
 #include "algutils.h"
 #include "numerical/tableau.h"
 #include "numerical/lpsolve.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 class CSSeqFormParams : public AlgParams {
 public:

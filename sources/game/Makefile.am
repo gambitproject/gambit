@@ -6,7 +6,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 libgame_a_SOURCES = \
 	behavinst.cc \
-	behavsol.cc \
 	efbasis.cc \
 	efdom.cc \
 	efg.cc \
@@ -16,7 +15,6 @@ libgame_a_SOURCES = \
 	efgnfg.cc \
 	efgutils.cc \
 	efstrat.cc \
-	mixedsol.cc \
 	nfdom.cc \
 	nfdommix.cc \
 	nfg.cc \

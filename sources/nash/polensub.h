@@ -8,7 +8,7 @@
 #define POLENSUB_H
 
 #include "polenum.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 #include "subsolve.h"
 
 class efgPolEnumNfgSolve : public SubgameSolver  {

@@ -10,7 +10,7 @@
 #include "base/base.h"
 #include "game/nfg.h"
 #include "algutils.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 
 class SimpdivParams : public AlgParams {
 public:

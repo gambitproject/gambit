@@ -10,7 +10,7 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "game/efg.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 #include "subsolve.h"
 
 class efgEnumPure : public SubgameSolver  {

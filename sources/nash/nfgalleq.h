@@ -11,7 +11,7 @@
 #include "base/gstatus.h"
 #include "game/nfg.h"
 #include "game/mixed.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 #include "game/nfgensup.h"
 #include "polenum.h" 
 

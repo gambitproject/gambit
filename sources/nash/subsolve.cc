@@ -55,7 +55,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       for (int subsoln = 1; subsoln <= subsolns.Length() &&
 	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
 	BehavProfile<gNumber> bp(thissolns[soln]);
-	BehavProfile<gNumber> tmp(subsolns[subsoln]);
+	BehavProfile<gNumber> tmp(*subsolns[subsoln].Profile());
 	for (int j = 1; j <= bp.Length(); j++)
 	  bp[j] += tmp[j];
 	newsolns.Append(bp);

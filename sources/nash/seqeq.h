@@ -11,7 +11,7 @@
 #include "algutils.h"
 #include "game/efstrat.h"
 #include "game/efbasis.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 class SeqEquilibParams : public AlgParams {
 public:

@@ -9,10 +9,10 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
-#include "mixed.h"
-#include "nfplayer.h"
-#include "nfg.h"
-#include "nash/algutils.h"  // needed for gFact
+#include "game/mixed.h"
+#include "game/nfplayer.h"
+#include "game/nfg.h"
+#include "algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmNfg_USER,

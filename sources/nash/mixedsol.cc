@@ -6,7 +6,7 @@
 
 #include "math/gmath.h"
 #include "mixedsol.h"
-#include "nfdom.h"
+#include "game/nfdom.h"
 #include "nash/polenum.h"   // need to fix this dependency!!!
 
 
@@ -174,7 +174,7 @@ gTriState MixedSolution::GetNash(void) const
 gTriState MixedSolution::GetPerfect(void) const
 {
   if(IsNash())
-    if(IsMixedDominated(*this,false,m_precision,gnull))
+    if(IsMixedDominated(m_profile,false,m_precision,gnull))
       return triFALSE;
     else if(Game().NumPlayers()==2)
       return triTRUE;
@@ -379,3 +379,5 @@ gOutput &operator<<(gOutput &p_file, const MixedSolution &p_solution)
   return p_file;
 }
 
+#include "base/glist.imp"
+template class gList<MixedSolution>;

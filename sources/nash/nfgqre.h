@@ -13,7 +13,7 @@
 #include "base/base.h"
 
 #include "game/nfg.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 
 //
 // A useful function for QRE stability analysis

@@ -12,7 +12,7 @@
 #include "game/efg.h"
 #include "algutils.h"
 #include "game/behav.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 class EfgPolEnumParams : public AlgParams {
 public:

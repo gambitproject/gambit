@@ -18,7 +18,7 @@
 #include "game/nfg.h"
 #include "algutils.h"
 #include "game/mixed.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 #include "numerical/vertenum.h"
 
 class EnumParams : public AlgParams {

@@ -8,7 +8,7 @@
 #define BEHAVFILTER_H
 
 #include "base/base.h"
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 
 class BehavListFilter : public gListSorter<BehavSolution>,
 			public gListFilter<BehavSolution> {

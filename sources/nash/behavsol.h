@@ -9,9 +9,9 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
-#include "behav.h"
-#include "efg.h"
-#include "nash/algutils.h"  // needed for gFact
+#include "game/behav.h"
+#include "game/efg.h"
+#include "algutils.h"  // needed for gFact
 
 typedef enum {
   algorithmEfg_USER,

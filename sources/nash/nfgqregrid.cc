@@ -480,11 +480,13 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
 	    MixedProfile<double> candidate(iter2);
 	    if (Polish(candidate, lambda)) {
 	      bool newsoln = true;
+#ifdef UNUSED
 	      for (int j = 1; j <= cursolns.Length(); j++) {
-		if (Distance(MixedProfile<double>(cursolns[j]), candidate) < .00001) {
+		if (Distance(MixedProfile<double>(*cursolns[j].Profile()), candidate) < .00001) {
 		  newsoln = false;
 		}
 	      }
+#endif  // UNUSED
 
 	      if (newsoln) {
 		OutputResult(p_pxifile, candidate, lambda, 0.0);

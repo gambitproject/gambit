@@ -12,7 +12,7 @@
 
 #include "game/nfg.h"
 #include "game/mixed.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 
 class NFLiapParams : public FuncMinParams  {
 public:

@@ -17,7 +17,6 @@ class Nfg;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
 template <class T> class gRectArray;
-class BehavSolution;
 
 //
 //  BehavProfile<T> implements a behavior profile on an Efg.  
@@ -31,7 +30,6 @@ class BehavSolution;
 // 
 
 template <class T> class BehavProfile : private gDPVector<T>  {
-  friend class BehavSolution;
 protected:
   const Efg::Game *m_efg;
   EFSupport m_support;
@@ -115,7 +113,6 @@ public:
   BehavProfile(const EFSupport &);
   BehavProfile(const BehavProfile<T> &);
   BehavProfile(const MixedProfile<T> &);
-  BehavProfile(const BehavSolution &);
   virtual ~BehavProfile();
   
   // OPERATOR OVERLOADING

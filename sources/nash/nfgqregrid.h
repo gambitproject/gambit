@@ -11,7 +11,7 @@
 #define NFGQREGRID_H
 
 #include "base/base.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 #include "nash/algutils.h"
 
 class QreNfgGrid {

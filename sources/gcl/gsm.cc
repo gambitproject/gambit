@@ -18,8 +18,8 @@ class RefHashTable;
 #include "gsminstr.h"
 
 #include "game/nfg.h"
-#include "game/mixedsol.h"
-#include "game/behavsol.h"
+#include "nash/mixedsol.h"
+#include "nash/behavsol.h"
 
 #include "game/efbasis.h"
 

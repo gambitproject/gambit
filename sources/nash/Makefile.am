@@ -7,6 +7,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/sources
 libnash_a_SOURCES = \
 	algutils.cc \
 	behavextend.cc \
+	behavsol.cc \
 	clique.cc \
 	csumsub.cc \
 	efgalleq.cc \
@@ -21,6 +22,7 @@ libnash_a_SOURCES = \
 	lemkesub.cc \
 	lhtab.cc \
 	liapsub.cc \
+	mixedsol.cc \
 	nfgalleq.cc \
 	nfgcsum.cc \
 	nfgpure.cc \

@@ -10,7 +10,7 @@
 #include "game/efg.h"
 #include "game/efgiter.h"
 #include "game/efgciter.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 static void efgEnumPureSolve(const EFSupport &p_support,
 			     gList<BehavSolution> &p_solutions,

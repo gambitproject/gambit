@@ -10,7 +10,7 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "game/nfg.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 
 class nfgEnumPure {
 private:

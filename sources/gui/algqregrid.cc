@@ -135,7 +135,7 @@ bool QreGridNfg(wxWindow *p_parent,
       gList<MixedSolution> solutions;
       algorithm.Solve(NFSupport(*N), gnull, status, solutions);
       for (int i = 1; i <= solutions.Length(); i++) {
-	p_solutions.Append(BehavSolution(BehavProfile<gNumber>(solutions[i])));
+	p_solutions.Append(BehavSolution(BehavProfile<gNumber>(*solutions[i].Profile())));
       }
       delete N;
     }

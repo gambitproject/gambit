@@ -49,7 +49,7 @@ void efgLiapNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   nevals += this_nevals;
 
   for (int i = 1; i <= subsolns.Length(); i++)  {
-    MixedProfile<gNumber> profile(subsolns[i]);
+    MixedProfile<gNumber> profile(*subsolns[i].Profile());
     solns.Append(BehavProfile<gNumber>(profile));
   }
 

@@ -12,8 +12,8 @@
 
 #include "math/rational.h"
 
-#include "game/mixedsol.h"
-#include "game/behavsol.h"
+#include "nash/mixedsol.h"
+#include "nash/behavsol.h"
 #include "game/nfg.h"
 #include "game/nfplayer.h"
 #include "game/efg.h"
@@ -167,7 +167,7 @@ EfgAlgType NfgAlgType2EfgAlgType(NfgAlgType algtype)
 static Portion *GSM_Behav(GSM &, Portion **param)
 {
   MixedSolution &mp = *((MixedPortion*) param[0])->Value();
-  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(mp));
+  BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(*mp.Profile()));
   BehavSolution *bs = new BehavSolution(*bp);
   bs->SetCreator(NfgAlgType2EfgAlgType(mp.Creator()));
   bs->SetEpsilon(mp.Epsilon());
@@ -371,27 +371,6 @@ static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
   gsm.EndAlgorithmMonitor();
 
   return new Mixed_ListPortion(solutions);
-}
-
-static Portion *GSM_Qre_Dynamics(GSM &p_gsm, Portion **p_param)
-{
-  MixedSolution &start = *((MixedPortion *) p_param[0])->Value();
-  double lambda = ((NumberPortion *) p_param[1])->Value();
-  double tmax = ((NumberPortion *) p_param[2])->Value();
-  gOutput *file = 0;
-  if (((TextPortion *) p_param[3])->Value() != "") {
-    file = new gFileOutput(((TextPortion *) p_param[3])->Value());
-  }
-
-  MixedProfile<double> output = LogitDynamics(MixedProfile<double>(start), 
-					      lambda, tmax,
-					      (file) ? *file : gnull);
-
-  if (file) {
-    delete file;
-  }
-
-  return new MixedPortion(new MixedSolution(output));
 }
 
 //---------------
@@ -734,7 +713,7 @@ Portion* GSM_Lcp_ListNumber(GSM &, Portion** param)
 
 static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 {
-  BehavProfile<gNumber> start(*((BehavPortion *) param[0])->Value());
+  BehavProfile<gNumber> start(*(*((BehavPortion *) param[0])->Value()).Profile());
   Efg::Game &E = start.GetGame();
   const EFSupport &supp = (*((BehavPortion *) param[0])->Value()).Support();
   
@@ -809,7 +788,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 
 static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 {
-  MixedProfile<gNumber> start(*((MixedPortion *) param[0])->Value());
+  MixedProfile<gNumber> start(*(*((MixedPortion *) param[0])->Value()).Profile());
   Nfg &N = start.Game();
 
   NFLiapParams params;
@@ -1224,7 +1203,7 @@ Portion* GSM_Payoff_Behav(GSM &, Portion** param)
 
 Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 {
-  MixedProfile<gNumber> mp(*((MixedPortion*) param[0])->Value());
+  MixedProfile<gNumber> mp(*(*((MixedPortion*) param[0])->Value()).Profile());
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   return new NumberPortion(mp.Payoff(player->GetNumber()));
@@ -1504,15 +1483,6 @@ void Init_algfunc(GSM *gsm)
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
-
-  FuncObj = new gclFunction(*gsm, "LogitDyn", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Dynamics, porMIXED, 4));
-  FuncObj->SetParamInfo(0, 0, gclParameter("start", porMIXED));
-  FuncObj->SetParamInfo(0, 1, gclParameter("lambda", porNUMBER));
-  FuncObj->SetParamInfo(0, 2, gclParameter("tmax", porNUMBER));
-  FuncObj->SetParamInfo(0, 3, gclParameter("output", porTEXT));
-  gsm->AddFunction(FuncObj);
-
 
   FuncObj = new gclFunction(*gsm, "QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 

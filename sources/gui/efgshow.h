@@ -16,7 +16,7 @@
 
 #include "gambit.h"
 #include "efgconst.h"
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 
 class EfgProfileList;
 class EfgNavigateWindow;

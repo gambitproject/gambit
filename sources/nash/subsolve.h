@@ -9,7 +9,7 @@
 
 #include "game/efg.h"
 #include "game/nfg.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 class efgAlgorithm {
 public:

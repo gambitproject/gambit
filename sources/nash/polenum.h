@@ -11,7 +11,7 @@
 #include "game/nfg.h"
 #include "algutils.h"
 #include "game/mixed.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 
 class PolEnumParams : public AlgParams  {
 public:

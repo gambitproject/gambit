@@ -9,7 +9,7 @@
 
 #include "base/base.h"
 #include "game/nfg.h"
-#include "game/mixedsol.h"
+#include "mixedsol.h"
 #include "algutils.h"
 
 class LemkeParams : public AlgParams    {

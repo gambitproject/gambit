@@ -24,7 +24,7 @@ void EnumBySubgame::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   npivots += npiv;
   
   for (int i = 1; i <= solutions.Length(); i++)  {
-    MixedProfile<gNumber> profile(solutions[i]);
+    MixedProfile<gNumber> profile(*solutions[i].Profile());
     solns.Append(BehavProfile<gNumber>(profile));
   }
 

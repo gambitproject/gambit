@@ -52,7 +52,5 @@ template class gList<BehavProfile<double> >;
 template class gList<BehavProfile<gRational> >;
 template class gList<BehavProfile<gNumber> >;
 
-template class gList<BehavSolution>;
-
 
 

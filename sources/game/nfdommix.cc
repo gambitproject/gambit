@@ -66,8 +66,6 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
   return ret;
 }
 
-#include "game/mixedsol.h"
-
 bool IsMixedDominated(const MixedProfile<gNumber> &sol,
 		 bool strong, gPrecision precision, gOutput &tracefile)
 {

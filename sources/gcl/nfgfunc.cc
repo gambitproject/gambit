@@ -109,7 +109,8 @@ static Portion *GSM_IsDominated_Nfg(GSM &, Portion **param)
 
 static Portion *GSM_IsProfileDominated_Nfg(GSM &, Portion **param)
 {
-  MixedProfile<gNumber> pr(*((MixedPortion *) param[0])->Value());
+  MixedSolution soln(*(*((MixedPortion *) param[0])->Value()).Profile());
+  MixedProfile<gNumber> pr(*soln.Profile());
   bool strong = ((BoolPortion *) param[1])->Value();
   /*  bool mixed = ((BoolPortion *) param[2])->Value(); */
   gPrecision prec = (((MixedPortion *) param[0])->Value())->Precision();

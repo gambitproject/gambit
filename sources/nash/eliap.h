@@ -11,7 +11,7 @@
 #include "algutils.h"
 
 #include "game/efg.h"
-#include "game/behavsol.h"
+#include "behavsol.h"
 
 #include "subsolve.h"
 

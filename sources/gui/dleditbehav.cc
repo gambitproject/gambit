@@ -11,7 +11,7 @@
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 #include "dleditbehav.h"
 
 //-------------------------------------------------------------------------

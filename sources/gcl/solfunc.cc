@@ -10,8 +10,8 @@
 
 #include "game/efg.h"
 #include "game/nfg.h"
-#include "game/behavsol.h"
-#include "game/mixedsol.h"
+#include "nash/behavsol.h"
+#include "nash/mixedsol.h"
 
 #include "game/nfplayer.h"
 
@@ -366,7 +366,7 @@ static Portion *GSM_RealizProb(GSM &, Portion **param)
 
 static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
 {
-  MixedProfile<gNumber> P(*((MixedPortion*) param[0])->Value());
+  MixedProfile<gNumber> P(*(*((MixedPortion*) param[0])->Value()).Profile());
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->Player();
   Nfg &n = p->Game();
@@ -395,7 +395,7 @@ static Portion *GSM_Regret_Behav(GSM &, Portion **param)
 
 static Portion *GSM_Regrets_Mixed(GSM &, Portion **param)
 {
-  MixedProfile<gNumber> profile(*((MixedPortion *) param[0])->Value());
+  MixedProfile<gNumber> profile(*(*((MixedPortion *) param[0])->Value()).Profile());
 
   gPVector<gNumber> v(profile.Game().NumStrats());
 

@@ -13,14 +13,12 @@
 
 
 class Nfg;
-class MixedSolution;
 class NFOutcome;
 
 template <class T> class gRectArray;
 template <class T> class BehavProfile;
 
 template <class T> class MixedProfile : public gPVector<T>  {
-
   private:
     const Nfg *N;
     NFSupport support;
@@ -41,7 +39,6 @@ template <class T> class MixedProfile : public gPVector<T>  {
     MixedProfile(const NFSupport &);
     MixedProfile(const MixedProfile<T> &);
     MixedProfile(const BehavProfile<T> &);
-    MixedProfile(const MixedSolution &);
     virtual ~MixedProfile();
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);

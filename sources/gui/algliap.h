@@ -11,9 +11,9 @@
 #define ALGLIAP_H
 
 #include "game/efg.h"
-#include "game/behavsol.h"
+#include "nash/behavsol.h"
 #include "game/nfg.h"
-#include "game/mixedsol.h"
+#include "nash/mixedsol.h"
 
 bool LiapEfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);
 bool LiapNfg(wxWindow *, const EFSupport &, gList<BehavSolution> &);

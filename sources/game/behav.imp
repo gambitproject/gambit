@@ -4,15 +4,11 @@
 // $Id$
 //
 
-#include "efg.h"
-#include "efplayer.h"
-#include "infoset.h"
-#include "node.h"
-#include "efgutils.h"
-#include "fullefgoutcome.h"
-
 #include "math/gvector.h"
-#include "behavsol.h"
+#include "efg.h"
+#include "fullefgoutcome.h"
+#include "efgutils.h"
+#include "behav.h"
 
 #include "nfg.h"
 #include "mixed.h"
@@ -202,32 +198,6 @@ BehavProfile<T>::BehavProfile(const BehavProfile<T> &p_profile)
     m_actionValues(p_profile.m_actionValues),
     m_gripe(p_profile.m_gripe)
 {
-  InitProfile();
-}
-
-template <class T> 
-BehavProfile<T>::BehavProfile(const BehavSolution &p_solution)
-  : gDPVector<T>(p_solution.GetGame().NumActions()), m_efg(&p_solution.GetGame()),
-    m_support(p_solution.GetGame()),
-    m_cached_data(false),
-    m_realizProbs(NumNodes(p_solution.GetGame())),
-    m_beliefs(NumNodes(p_solution.GetGame())),
-    m_nvals(NumNodes(p_solution.GetGame())),
-    m_bvals(NumNodes(p_solution.GetGame())),
-    m_nodeValues(NumNodes(p_solution.GetGame()),
-		 p_solution.GetGame().NumPlayers()),
-    m_infosetValues(p_solution.GetGame().NumInfosets()),
-    m_actionValues(p_solution.GetGame().NumActions()),
-    m_gripe(p_solution.GetGame().NumActions())
-{
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    EFPlayer *player = m_efg->Players()[pl];
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      Infoset *infoset = player->Infosets()[iset];
-      for (int act = 1; act <= infoset->NumActions(); act++)
-	(*this)(pl, iset, act) = p_solution(infoset->Actions()[act]);
-    }
-  } 
   InitProfile();
 }
 
