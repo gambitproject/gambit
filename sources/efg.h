@@ -146,7 +146,7 @@ protected:
 
 #include "behav.h"
 
-template <class T> class Efg;
+template <class T> class EfgFile;
 template <class T> class BehavProfile;
 
 
@@ -163,6 +163,7 @@ template <class T> class Efg : public BaseEfg   {
   friend class BaseNfg;
   friend class Nfg<T>;
 #endif   // EFG_ONLY
+  friend class EfgFile<T>;
   private:
 #ifndef EFG_ONLY
     Lexicon<T> *lexicon;

@@ -37,8 +37,10 @@ template <class T> EFOutcome *EfgFile<T>::NewOutcome(void)
 template <class T> void EfgFile<T>::SetOutcome(EFOutcome *c,
 					       const gList<gRational> &p)
 {
+  int outc;
+  for (outc = 1; E->Outcomes()[outc] != c; outc++);
   for (int i = 1; i <= p.Length(); i++)
-    ((Efg<T> *) E)->SetPayoff(c, i, p[i]);
+    ((Efg<T> *) E)->payoffs(outc, i) = p[i];
 }
 
 template <class T> void EfgFile<T>::SetActionProbs(Infoset *s,
@@ -59,8 +61,10 @@ template <class T> bool EfgFile<T>::CheckActionProbs(Infoset *s,
 template <class T> bool EfgFile<T>::CheckOutcome(EFOutcome *c,
 						 const gList<gRational> &p)
 {
+  int outc;
+  for (outc = 1; E->Outcomes()[outc] != c; outc++);
   for (int i = 1; i <= p.Length(); i++)
-    if (((Efg<T> *) E)->Payoff(c, i) != (T) p[i])   return false;
+    if (((Efg<T> *) E)->payoffs(outc, i) != (T) p[i])   return false;
   return true;
 }
 
