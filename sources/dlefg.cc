@@ -529,7 +529,8 @@ gNumber dialogActionProbs::GetActionProb(int p_action) const
 //                    dialogEfgPayoffs: Member functions
 //=========================================================================
 
-dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, EFOutcome *p_outcome,
+dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, 
+				   const efgOutcome &p_outcome,
 				   wxWindow *p_parent)
   : guiPagedDialog(p_parent, "Change Payoffs", p_efg.NumPlayers()),
     m_outcome(p_outcome), m_efg(p_efg)
@@ -540,10 +541,12 @@ dialogEfgPayoffs::dialogEfgPayoffs(const FullEfg &p_efg, EFOutcome *p_outcome,
   }
 
   m_outcomeName = new wxTextCtrl(this, -1);
-  if (p_outcome)
-    m_outcomeName->SetValue((char *) p_outcome->GetName());
-  else
+  if (!p_outcome.IsNull()) {
+    m_outcomeName->SetValue((char *) m_efg.GetOutcomeName(p_outcome));
+  }
+  else {
     m_outcomeName->SetValue((char *) ("Outcome" + ToText(p_efg.NumOutcomes() + 1)));
+  }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_grid, 0, wxALL, 5);
@@ -861,8 +864,8 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
   m_outcomeList = new wxListBox(this, -1);
   
   for (int outc = 1; outc <= m_efg.NumOutcomes(); outc++) {
-    EFOutcome *outcome = m_efg.Outcomes()[outc];
-    gText item = ToText(outc) + ": " + outcome->GetName();
+    efgOutcome outcome = m_efg.GetOutcome(outc);
+    gText item = ToText(outc) + ": " + m_efg.GetOutcomeName(outcome);
     if (item == "")
       item = "Outcome" + ToText(outc);
 
@@ -894,9 +897,9 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(FullEfg &p_efg,
   Layout();
 }
 
-EFOutcome *dialogEfgOutcomeSelect::GetOutcome(void)
+efgOutcome dialogEfgOutcomeSelect::GetOutcome(void)
 {
-  return m_efg.Outcomes()[m_outcomeList->GetSelection() + 1];
+  return m_efg.GetOutcome(m_outcomeList->GetSelection() + 1);
 }
 
 //=========================================================================

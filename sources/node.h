@@ -30,13 +30,15 @@ class Node    {
     gText name;
     Infoset *infoset;
     Node *parent;
-    EFOutcome *outcome;
+    FullEfg::Outcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
     void *solution;
 
     Node(FullEfg *e, Node *p);
     ~Node();
+
+    void DeleteOutcome(FullEfg::Outcome *outc);
 
   public:
     FullEfg *Game(void) const   { return E; }
@@ -64,9 +66,6 @@ class Node    {
     const gText &GetName(void) const   { return name; }
     void SetName(const gText &s)       { name = s; }
 
-    EFOutcome *GetOutcome(void) const   { return outcome; }
-    void SetOutcome(EFOutcome *outc)    { outcome = outc; }
-    void DeleteOutcome(EFOutcome *outc);
 };
 
 #endif   // NODE_H

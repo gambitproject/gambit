@@ -829,8 +829,9 @@ void efgTreeLayout::RenderLabels(wxDC &dc, const NodeEntry *child_entry,
     break;
             
   case NODE_RIGHT_NAME:
-    if (n->GetOutcome()) 
-      label = n->GetOutcome()->GetName();
+    if (!n->Game()->GetOutcome(n).IsNull()) {
+      label = m_efg.GetOutcomeName(n->Game()->GetOutcome(n));
+    }
     break;
             
   default:

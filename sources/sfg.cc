@@ -93,8 +93,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 { 
   int i,pl;
 
-
-  if(n->GetOutcome()) {
+  if (!EF.GetOutcome(n).IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
       (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.Players()[pl]);
   }

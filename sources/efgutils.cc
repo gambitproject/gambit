@@ -214,8 +214,10 @@ FullEfg *CompressEfg(const FullEfg &efg, const EFSupport &S)
 
 void RandomEfg(FullEfg &efg)
 {
-  for (int i = 1; i <= efg.NumPlayers(); i++)
-    for (int j = 1; j <= efg.NumOutcomes(); j++)
-      efg.SetPayoff(efg.Outcomes()[j], i, gNumber(Uniform()));
+  for (int i = 1; i <= efg.NumPlayers(); i++) {
+    for (int j = 1; j <= efg.NumOutcomes(); j++) {
+      efg.SetPayoff(efg.GetOutcome(j), i, gNumber(Uniform()));
+    }
+  }
 }
 

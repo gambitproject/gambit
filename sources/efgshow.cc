@@ -1121,7 +1121,7 @@ void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
   dialogEfgOutcomeSelect dialog(m_efg, this);
   
   if (dialog.ShowModal() == wxID_OK) {
-    Cursor()->SetOutcome(dialog.GetOutcome());
+    m_efg.SetOutcome(Cursor(), dialog.GetOutcome());
     m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
     UpdateMenus();
@@ -1130,7 +1130,7 @@ void EfgShow::OnEditOutcomesAttach(wxCommandEvent &)
 
 void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
 {
-  Cursor()->SetOutcome(0);
+  m_efg.SetOutcome(Cursor(), m_efg.GetNullOutcome());
   m_treeWindow->OutcomeChange();
   m_treeWindow->Refresh();
   UpdateMenus();
@@ -1138,11 +1138,13 @@ void EfgShow::OnEditOutcomesDetach(wxCommandEvent &)
 
 void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
 {
+  efgOutcome outcome = m_efg.GetOutcome(Cursor());
+
   wxTextEntryDialog dialog(this, "New outcome label", "Label outcome",
-			   (char *) Cursor()->GetOutcome()->GetName());
+			   (char *) m_efg.GetOutcomeName(outcome));
 
   if (dialog.ShowModal() == wxID_OK) {
-    Cursor()->GetOutcome()->SetName(dialog.GetValue().c_str());
+    m_efg.SetOutcomeName(outcome, dialog.GetValue().c_str());
     m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
   }
@@ -1150,21 +1152,21 @@ void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
 
 void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
 {
-  dialogEfgPayoffs dialog(m_efg, Cursor()->GetOutcome(), this);
+  dialogEfgPayoffs dialog(m_efg, m_efg.GetOutcome(Cursor()), this);
 
   if (dialog.ShowModal() == wxID_OK) {
-    EFOutcome *outc = Cursor()->GetOutcome();
+    efgOutcome outcome = m_efg.GetOutcome(Cursor());
     gArray<gNumber> payoffs(dialog.Payoffs());
 
-    if (!outc) {
-      outc = m_efg.NewOutcome();
-      Cursor()->SetOutcome(outc);
+    if (!outcome.IsNull()) {
+      outcome = m_efg.NewOutcome();
+      m_efg.SetOutcome(Cursor(), outcome);
     }
 
     for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-      m_efg.SetPayoff(outc, pl, payoffs[pl]);
+      m_efg.SetPayoff(outcome, pl, payoffs[pl]);
     }
-    outc->SetName(dialog.Name());
+    m_efg.SetOutcomeName(outcome, dialog.Name());
 
     m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
@@ -1174,17 +1176,17 @@ void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
 
 void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
 {
-  dialogEfgPayoffs dialog(m_efg, 0, this);
+  dialogEfgPayoffs dialog(m_efg, m_efg.GetNullOutcome(), this);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      EFOutcome *outc = m_efg.NewOutcome();
+      efgOutcome outcome = m_efg.NewOutcome();
       gArray<gNumber> payoffs(dialog.Payoffs());
 
       for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-	m_efg.SetPayoff(outc, pl, payoffs[pl]);
+	m_efg.SetPayoff(outcome, pl, payoffs[pl]);
       }
-      outc->SetName(dialog.Name());
+      m_efg.SetOutcomeName(outcome, dialog.Name());
       
       m_treeWindow->OutcomeChange();
       m_treeWindow->Refresh();
@@ -2436,9 +2438,9 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		  (cursor->GetOutcome()) ? true : false);
+		  (!m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		  (cursor->GetOutcome()) ? true : false);
+		  (!m_efg.GetOutcome(cursor).IsNull()) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
   

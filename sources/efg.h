@@ -11,8 +11,6 @@
 #include "math/gnumber.h"
 #include "math/gpvector.h"
 
-
-class EFOutcome;
 class EFPlayer;
 class Infoset;
 class Node;
@@ -24,7 +22,45 @@ template <class T> class BehavProfile;
 template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
+class Efg;
+
+//
+// efgOutcome: "handle" class for referencing outcomes
+//
+class efgOutcome {
+friend class Efg;
+private:
+  int m_outcomeID;
+  Efg *m_efg;
+
+  int GetID(void) const { return m_outcomeID; }
+
+protected:
+  efgOutcome(int, Efg *);
+
+public:
+  // Default constructor for use with gArray
+  efgOutcome(void) : m_outcomeID(0), m_efg(0) { }
+  
+  bool operator==(const efgOutcome &p_outcome) const
+    { return (m_outcomeID == p_outcome.m_outcomeID &&
+	      m_efg == p_outcome.m_efg); }
+  bool operator!=(const efgOutcome &p_outcome) const
+    { return !(*this == p_outcome); }
+
+  Efg *Game(void) const { return m_efg; }
+  bool IsNull(void) const { return (m_outcomeID == 0); }
+};
+
+inline gOutput &operator<<(gOutput &p_file, const efgOutcome &)
+{ return p_file; }
+
+
 class Efg {
+protected:
+  int GetOutcomeID(const efgOutcome &p_outcome) const
+    { return p_outcome.GetID(); }
+  
 public:
   class Exception : public gException   {
   public:
@@ -70,13 +106,25 @@ public:
   virtual void UnmarkSubgame(Node *n) = 0;
   virtual void UnmarkSubgames(Node *n) = 0;
 
+  efgOutcome GetNullOutcome(void) const
+    { return efgOutcome(0, const_cast<Efg *>(this)); }
+  virtual efgOutcome GetOutcome(const Node *const) const = 0;
+  virtual void SetOutcome(Node *, const efgOutcome &) = 0
+;
+  virtual void SetOutcomeName(const efgOutcome &, const gText &) = 0;
+  virtual const gText &GetOutcomeName(const efgOutcome &) const = 0;
+
+  virtual void DeleteOutcome(const efgOutcome &) = 0;
+
   virtual gNumber MinPayoff(int pl = 0) const = 0;
   virtual gNumber MaxPayoff(int pl = 0) const = 0;
   virtual bool IsConstSum(void) const = 0;
   virtual void InitPayoffs(void) const = 0;
-  virtual gNumber Payoff(const EFOutcome *, const EFPlayer *) const = 0;
+
+  virtual void SetPayoff(const efgOutcome &, int pl, const gNumber &value) = 0;
+  virtual gNumber Payoff(const efgOutcome &, const EFPlayer *) const = 0;
   virtual gNumber Payoff(const Node *, const EFPlayer *) const = 0;
-  virtual gArray<gNumber> Payoff(const EFOutcome *) const = 0;
+  virtual gArray<gNumber> Payoff(const efgOutcome &) const = 0;
   virtual void Payoff(const gPVector<int> &profile,
 		      gVector<gNumber> &payoff) const = 0;
   virtual void Payoff(const gArray<gArray<int> *> &profile,
@@ -101,13 +149,15 @@ friend class EfgFile;
 friend class Nfg;
 
 protected:
+  class Outcome; 
+
   bool sortisets;
   mutable bool m_dirty;
   mutable long m_revision;
   mutable long m_outcome_revision;
   gText title, comment;
   gBlock<EFPlayer *> players;
-  gBlock<EFOutcome *> outcomes;
+  gBlock<Outcome *> outcomes;
   Node *root;
   EFPlayer *chance;
   mutable Nfg *afg;
@@ -126,7 +176,7 @@ protected:
   
   void DeleteLexicon(void) const;
 
-  EFOutcome *NewOutcome(int index);
+  efgOutcome NewOutcome(int index);
 
   void WriteEfgFile(gOutput &, Node *) const;
 
@@ -200,9 +250,15 @@ public:
 
   // DATA ACCESS -- OUTCOMES
   int NumOutcomes(void) const;
-  const gArray<EFOutcome *> &Outcomes(void) const  { return outcomes; }
-  EFOutcome *NewOutcome(void);
-  void DeleteOutcome(EFOutcome *c);
+  efgOutcome GetOutcome(int index) const;
+  efgOutcome NewOutcome(void);
+  void DeleteOutcome(const efgOutcome &);
+
+  efgOutcome GetOutcome(const Node *const) const;
+  void SetOutcome(Node *, const efgOutcome &);
+
+  void SetOutcomeName(const efgOutcome &, const gText &);
+  const gText &GetOutcomeName(const efgOutcome &) const;
  
   // EDITING OPERATIONS
   Infoset *AppendNode(Node *n, EFPlayer *p, int br);
@@ -236,10 +292,10 @@ public:
   gNumber GetChanceProb(const Action *) const;
   gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-  void SetPayoff(EFOutcome *, int pl, const gNumber &value);
-  gNumber Payoff(const EFOutcome *, const EFPlayer *) const;
+  void SetPayoff(const efgOutcome &, int pl, const gNumber &value);
+  gNumber Payoff(const efgOutcome &, const EFPlayer *) const;
   gNumber Payoff(const Node *, const EFPlayer *) const;
-  gArray<gNumber> Payoff(const EFOutcome *) const;
+  gArray<gNumber> Payoff(const efgOutcome &) const;
 
   void InitPayoffs(void) const;
   
@@ -277,8 +333,8 @@ public:
 // These are auxiliary functions used by the .efg file reader code
   Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
   Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-  EFOutcome *GetOutcomeByIndex(int index) const;
-  EFOutcome *CreateOutcomeByIndex(int index);
+  efgOutcome GetOutcomeByIndex(int index) const;
+  efgOutcome CreateOutcomeByIndex(int index);
   void Reindex(void);
   Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
 
@@ -291,7 +347,6 @@ public:
 #include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
-#include "outcome.h"
 
 FullEfg *ReadEfgFile(gInput &);
 
@@ -322,7 +377,7 @@ template <class T> class PureBehavProfile   {
     // Information
     const Action *GetAction(const Infoset *) const;
     
-    const T Payoff(const EFOutcome *, const int &pl) const;
+    const T Payoff(const efgOutcome &, const int &pl) const;
     const T ChanceProb(const Infoset *, const int &act) const;
     
     const T Payoff(const Node *, const int &pl) const;

@@ -1018,6 +1018,49 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
   }
 }
 
+void GSM::UnAssignEfgOutcome(Efg *game, const efgOutcome &data)
+{
+  gStack< RefHashTable* > tempRefTableStack;
+
+  while (_RefTableStack->Depth() > 0) {
+    const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
+    gList<Portion*> varslist;
+    
+    for (int i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for (int j=1; j<=vars[i].Length(); j++)
+	varslist.Append(vars[i][j]);
+
+    for (int i = 1; i <= varslist.Length(); i++) {
+      if (varslist[i]->Spec().ListDepth == 0) {
+	if (varslist[i]->Game() == game &&
+	    varslist[i]->Spec() == porEFOUTCOME) {
+	  if (((EfOutcomePortion*) varslist[i])->Value() == data) {
+	    _RefTableStack->Peek()->Remove(varslist[i]);
+	  }
+	}
+      }
+#ifdef FIXME
+      // FIXME: need to check lists
+      else  { // varslist[i] is a list
+	if (spec.Type & varslist[i]->Spec().Type) {
+	  if (((ListPortion*) varslist[i])->MatchGameData( game, data ))  {
+	    _RefTableStack->Peek()->Remove( varslist[i] );	
+	  }
+	}
+      }
+#endif FIXME
+    }
+
+    // go through all scopes on the stack; restore later
+    tempRefTableStack.Push( _RefTableStack->Pop() );
+  }
+  
+  while (tempRefTableStack.Depth() > 0) {
+    // restore the original variable stack
+    _RefTableStack->Push(tempRefTableStack.Pop());    
+  }
+}
+
 
 
 void GSM::UnAssignEfgInfoset( Efg* game, Infoset* infoset )

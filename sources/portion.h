@@ -277,23 +277,23 @@ public:
 // EFOutcome
 //-------------
 
-class EFOutcome;
+class efgOutcome;
 
 class EfOutcomePortion : public Portion  {
 protected:
-  EFOutcome** _Value;
-  bool _ref;
+  efgOutcome *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  EfOutcomePortion(EFOutcome *&, bool);
+  EfOutcomePortion(efgOutcome &, bool);
 
 public:
-  EfOutcomePortion(EFOutcome *);
+  EfOutcomePortion(const efgOutcome &);
   virtual ~EfOutcomePortion();
 
-  EFOutcome *Value(void) const;
-  void SetValue(EFOutcome *);
+  efgOutcome Value(void) const;
+  void SetValue(const efgOutcome &);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

@@ -268,7 +268,7 @@ void SeqFormModule<T>::FillTableau(const Node *n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if(n->GetOutcome()) {
+  if (!EF.GetOutcome(n).IsNull()) {
     (*A)(s1,ns1+s2) = gNumber((*A)(s1,ns1+s2)) +
        gNumber(prob) * (EF.Payoff(n, EF.Players()[1]) - gNumber(maxpay));
     (*A)(ns1+s2,s1) = gNumber((*A)(ns1+s2,s1)) +

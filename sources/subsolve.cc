@@ -18,7 +18,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
 				 gStatus &p_status,
 				 Node *n,
 				 gList<BehavSolution> &solns,
-				 gList<EFOutcome *> &values)
+				 gList<efgOutcome> &values)
 {
   int i;
   FullEfg &efg = (FullEfg &) p_support.Game();
@@ -30,12 +30,12 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
   gList<Node *> subroots;
   ChildSubgames(efg, n, subroots);
   
-  gList<gArray<EFOutcome *> > subrootvalues;
-  subrootvalues.Append(gArray<EFOutcome *>(subroots.Length()));
+  gList<gArray<efgOutcome> > subrootvalues;
+  subrootvalues.Append(gArray<efgOutcome>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
     gList<BehavSolution> subsolns;
-    gList<EFOutcome *> subvalues;
+    gList<efgOutcome> subvalues;
     
     FindSubgames(p_support, p_status, subroots[i], subsolns, subvalues);
     
@@ -47,7 +47,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
     assert(subvalues.Length() == subsolns.Length());
     
     gList<BehavProfile<gNumber> > newsolns;
-    gList<gArray<EFOutcome *> > newsubrootvalues;
+    gList<gArray<efgOutcome> > newsubrootvalues;
     
     for (int soln = 1; soln <= thissolns.Length() &&
 	 (max_solns == 0 || newsolns.Length() <= max_solns);
@@ -77,13 +77,14 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
   subgame_number++;
   
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
-    for (i = 1; i <= subroots.Length(); i++)
-      subroots[i]->SetOutcome(subrootvalues[soln][i]);
+    for (i = 1; i <= subroots.Length(); i++) {
+      efg.SetOutcome(subroots[i], subrootvalues[soln][i]);
+    }
     
     FullEfg foo(efg, n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
-    foo.RootNode()->SetOutcome(0);
+    foo.SetOutcome(foo.RootNode(), foo.GetNullOutcome());
 
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
@@ -184,12 +185,12 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
-	if (n->GetOutcome())  {
-	  subval[i] += efg.Payoff(n, efg.Players()[i]);
+	if (!efg.GetOutcome(n).IsNull())  {
+	  subval[i] += efg.Payoff(efg.GetOutcome(n), efg.Players()[i]);
         }
       }
 
-      EFOutcome *ov = efg.NewOutcome();
+      efgOutcome ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++)
 	efg.SetPayoff(ov, i, subval[i]);
  
@@ -246,7 +247,7 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
   solutions.Flush();
   subgame_number = 0;
 
-  gList<EFOutcome *> values;
+  gList<efgOutcome> values;
 
   solution = new BehavProfile<gNumber>(p_support);
   ((gVector<gNumber> &) *solution).operator=(gNumber(0));
@@ -290,17 +291,16 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
 
 template class gArray<gArray<Infoset *> *>;
 
-template bool operator==(const gArray<EFOutcome *> &,
-			 const gArray<EFOutcome *> &);
-template bool operator!=(const gArray<EFOutcome *> &,
-			 const gArray<EFOutcome *> &);
+template bool operator==(const gArray<efgOutcome> &,
+			 const gArray<efgOutcome> &);
+template bool operator!=(const gArray<efgOutcome> &,
+			 const gArray<efgOutcome> &);
 
-template gOutput &operator<<(gOutput &, const gArray<EFOutcome *> &);
-
+template gOutput &operator<<(gOutput &, const gArray<efgOutcome> &);
 
 #include "base/glist.imp"
 
-template class gList<EFOutcome *>;
-template class gList<gArray<EFOutcome *> >;
+template class gArray<efgOutcome>;
+template class gList<gArray<efgOutcome> >;
 
 

@@ -69,15 +69,6 @@ Portion *ArrayToList(const gArray<Infoset *> &A)
 }
 
 TEMPLATE_SPECIALIZATION()
-Portion *ArrayToList(const gArray<EFOutcome *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new EfOutcomePortion(A[i]));
-  return ret;
-}
-
-TEMPLATE_SPECIALIZATION()
 Portion *ArrayToList(const gArray<Node *> &A)
 {
   ListPortion *ret = new ListPortion;

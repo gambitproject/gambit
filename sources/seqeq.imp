@@ -419,7 +419,7 @@ Payoff(Node *n, EFPlayer *p) const
   int iset = (n->GetInfoset()) ? n->GetInfoset()->GetNumber() : 0;
   gPoly<T> value(Space,Lex);
   
-  if (n->GetOutcome()) {
+  if (!EF.GetOutcome(n).IsNull()) {
     gPoly<T> term(Space,(double)EF.Payoff(n, p),Lex);
     value+=term;
   }

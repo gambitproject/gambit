@@ -487,36 +487,38 @@ bool BoolPortion::IsReference(void) const
 
 gPool EfOutcomePortion::pool(sizeof(EfOutcomePortion));
 
-EfOutcomePortion::EfOutcomePortion(EFOutcome *value)
-  : _Value(new EFOutcome *(value)), _ref(false)
+EfOutcomePortion::EfOutcomePortion(const efgOutcome &p_value)
+  : m_value(new efgOutcome(p_value)), m_ref(false)
 {
-  SetGame(value->BelongsTo());
+  SetGame((FullEfg *) p_value.Game());
 }
 
-EfOutcomePortion::EfOutcomePortion(EFOutcome *&value, bool ref)
-  : _Value(&value), _ref(ref)
+EfOutcomePortion::EfOutcomePortion(efgOutcome &p_value, bool p_ref)
+  : m_value(&p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(value->BelongsTo());
+  if (!p_ref) {
+    SetGame((FullEfg *) p_value.Game());
   }
 }
 
 EfOutcomePortion::~EfOutcomePortion()
 {
-  if (!_ref)  delete _Value;
+  if (!m_ref)  {
+    delete m_value;
+  }
 }
 
-EFOutcome *EfOutcomePortion::Value(void) const
-{ return *_Value; }
+efgOutcome EfOutcomePortion::Value(void) const
+{ return *m_value; }
 
-void EfOutcomePortion::SetValue(EFOutcome *value)
+void EfOutcomePortion::SetValue(const efgOutcome &p_value)
 {
-  if (_ref) {
-    ((EfOutcomePortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((EfOutcomePortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(value->BelongsTo());
-    *_Value = value;
+    SetGame((FullEfg *) p_value.Game());
+    *m_value = p_value;
   }
 }
 
@@ -529,9 +531,8 @@ void EfOutcomePortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   
-  s << "(EFOutcome) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\"\n";
+  s << "(EFOutcome) ";
+  s << " \"" << m_value->Game()->GetOutcomeName(*m_value) << "\"\n";
 }
 
 gText EfOutcomePortion::OutputString(void) const
@@ -541,18 +542,18 @@ gText EfOutcomePortion::OutputString(void) const
 
 Portion* EfOutcomePortion::ValCopy(void) const
 { 
-  return new EfOutcomePortion(*_Value);
+  return new EfOutcomePortion(*m_value);
 }
 
 Portion* EfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new EfOutcomePortion(*_Value, true); 
+  Portion* p = new EfOutcomePortion(*m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool EfOutcomePortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 //-----------

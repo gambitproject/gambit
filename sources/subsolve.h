@@ -30,7 +30,7 @@ private:
   gArray<gArray<Infoset *> *> infosets;
 
   void FindSubgames(const EFSupport &, gStatus &, 
-		    Node *, gList<BehavSolution> &, gList<EFOutcome *> &);
+		    Node *, gList<BehavSolution> &, gList<efgOutcome> &);
   
 protected:
   virtual void SolveSubgame(const FullEfg &, const EFSupport &,

@@ -105,8 +105,9 @@ public:
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
 
+  void UnAssignEfgOutcome(Efg *game, const efgOutcome &outcome);
   // Unassigns a SINGLE given element of an Efg
-  void UnAssignEfgElement( Efg* game, PortionSpec spec, void* data );
+  void UnAssignEfgElement(Efg *game, PortionSpec spec, void* data );
 
   // This function will unassign an infoset and all associated actions
   void UnAssignEfgInfoset( Efg* game, Infoset* infoset );

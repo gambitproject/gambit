@@ -30,11 +30,13 @@ template class gArray<gArray<Action const *> *>;
 
 template class gArray<gArray<Action *> *>;
 
-template class gArray<EFOutcome *>;
-template class gBlock<EFOutcome *>;
+template class gArray<FullEfg::Outcome *>;
+template class gBlock<FullEfg::Outcome *>;
 
 template class gArray<gBlock<bool> >;
 template class gBlock<gBlock<bool> >;
+
+template class gList<efgOutcome>;
 
 class EFActionSet;
 class EFActionArray;

@@ -413,9 +413,9 @@ void TreeWindow::UpdateCursor(void)
 
 gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
 {
-  if (n->GetOutcome()) {
-    EFOutcome *tv = n->GetOutcome();
-    const gArray<gNumber> &v = n->Game()->Payoff(tv);
+  efgOutcome outcome = n->Game()->GetOutcome(n);
+  if (!outcome.IsNull()) {
+    const gArray<gNumber> &v = n->Game()->Payoff(outcome);
     gText tmp = "(";
 
     for (int i = v.First(); i <= v.Last(); i++) {
@@ -487,7 +487,7 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
       }
 
       node = m_layout.NodeRightHitTest(x, y);
-      if (node && node->GetOutcome()) {
+      if (node && !node->Game()->GetOutcome(node).IsNull()) {
 	wxPoint hotSpot(p_event.GetPosition().x, p_event.GetPosition().y);
 #ifdef __WXMSW__
 	m_dragImage = new wxDragImage(wxBitmap("PAYOFF_BITMAP"),
@@ -530,7 +530,8 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 	  ef.MoveTree(m_dragSource, node);
 	}
 	else if (m_dragMode == dragOUTCOME) { 
-	  node->SetOutcome(m_dragSource->GetOutcome());
+	  node->Game()->SetOutcome(node,
+				   m_dragSource->Game()->GetOutcome(m_dragSource));
 	}
       }
       catch (gException &ex) {
@@ -676,8 +677,8 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
   }
 
   node = m_layout.NodeRightHitTest(x, y);
-  if (node && node->GetOutcome()) {
-    node->SetOutcome(0);
+  if (node && !node->Game()->GetOutcome(node).IsNull()) {
+    node->Game()->SetOutcome(node, node->Game()->GetNullOutcome());
     outcomes_changed = true;
     Refresh();
     return true;
@@ -904,9 +905,9 @@ void TreeWindow::UpdateMenus(void)
   m_editMenu->Enable(efgmenuEDIT_OUTCOMES_ATTACH,
 		    (ef.NumOutcomes() > 0) ? true : false);
   m_editMenu->Enable(efgmenuEDIT_OUTCOMES_DETACH,
-		    (m_cursor->GetOutcome()) ? true : false);
+		    (!ef.GetOutcome(Cursor()).IsNull()) ? true : false);
   m_editMenu->Enable(efgmenuEDIT_OUTCOMES_LABEL,
-		    (m_cursor->GetOutcome()) ? true : false);
+		    (!ef.GetOutcome(Cursor()).IsNull()) ? true : false);
   m_editMenu->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		    (ef.NumOutcomes() > 0) ? true : false);
 }

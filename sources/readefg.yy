@@ -26,14 +26,14 @@ static gList<gText> actions, players;
 static gList<gNumber> values;
 static EFPlayer *player;
 static Infoset *infoset;
-static EFOutcome *outcome;
+static efgOutcome *outcome = 0;
 static int i;
 static gText iset_name, outc_name;
 
-static void SetOutcome(EFOutcome *, const gList<gNumber> &);
+static void SetOutcome(const efgOutcome &, const gList<gNumber> &);
 static void SetActionProbs(Infoset *, const gList<gNumber> &); 
 static bool CheckActionProbs(Infoset *, const gList<gNumber > &);
-static bool CheckOutcome(EFOutcome *, const gList<gNumber> &);
+static bool CheckOutcome(const efgOutcome &, const gList<gNumber> &);
 static int Parse(void);
 static void CreateEfg(void);
 
@@ -192,29 +192,29 @@ outcome_number:    NUMBER
                    { if (last_number.operator gRational().denominator() != 1)  YYERROR;
 		     last_int = last_number.operator gRational().numerator().as_long();
 		     if (last_int > 0)  
-		       outcome = E->GetOutcomeByIndex(last_int);
+		       *outcome = E->GetOutcomeByIndex(last_int);
 		   }
               ;
 
-outcome_info:      { if (!outcome && last_int != 0)  YYERROR; }
+outcome_info:      { if (outcome->IsNull() && last_int != 0)  YYERROR; }
             |      outcome_name LBRACE 
                    { values.Flush(); } payofflist
                    RBRACE
                    { if (values.Length() != E->NumPlayers())   YYERROR;
-		     if (!outcome)   {
-		       outcome = E->CreateOutcomeByIndex(last_int);
-		       outcome->SetName(outc_name);
-		       SetOutcome(outcome, values);
+		     if (outcome->IsNull())   {
+		       *outcome = E->CreateOutcomeByIndex(last_int);
+		       E->SetOutcomeName(*outcome, outc_name);
+		       SetOutcome(*outcome, values);
 		     }
-		     else if (!CheckOutcome(outcome, values))  YYERROR;
+		     else if (!CheckOutcome(*outcome, values))  YYERROR;
 
-		     path.Peek()->SetOutcome(outcome);
+		     E->SetOutcome(path.Peek(), *outcome);
 		   }
             ;
 
 outcome_name:      NAME
-                   { if (outcome && outcome->GetName() != last_name) YYERROR;
-		     else if (!outcome)   outc_name = last_name; }
+                   { if (!outcome->IsNull() && E->GetOutcomeName(*outcome) != last_name) YYERROR;
+		     else if (outcome->IsNull())   outc_name = last_name; }
 
 payofflist:        payoff
           |        payofflist commaopt payoff
@@ -299,10 +299,11 @@ int efg_yylex(void)
   }
 }
 
-void SetOutcome(EFOutcome *c, const gList<gNumber> &p)
+void SetOutcome(const efgOutcome &p_outcome, const gList<gNumber> &p)
 {
-  for (int i = 1; i <= p.Length(); i++)
-    E->SetPayoff(c, i, p[i]);
+  for (int i = 1; i <= p.Length(); i++) {
+     E->SetPayoff(p_outcome, i, p[i]);
+  }
 }
 
 void SetActionProbs(Infoset *s, const gList<gNumber> &p)
@@ -318,10 +319,11 @@ bool CheckActionProbs(Infoset *s, const gList<gNumber> &p)
   return true;
 }
 
-bool CheckOutcome(EFOutcome *c, const gList<gNumber> &p)
+bool CheckOutcome(const efgOutcome &p_outcome, const gList<gNumber> &p)
 {
-  for (int i = 1; i <= p.Length(); i++)
-    if (E->Payoff(c, E->Players()[i]) != p[i])   return false;
+  for (int i = 1; i <= p.Length(); i++) {
+    if (E->Payoff(p_outcome, E->Players()[i]) != p[i])   return false;
+  }
   return true;
 }
 
@@ -351,6 +353,8 @@ void CreateEfg(void)
   E->SetComment(comment);
   for (int pl = 1; pl <= players.Length(); pl++)
     E->NewPlayer()->SetName(players[pl]);
+
+  outcome = new efgOutcome(E->GetNullOutcome());
 }	
 
 FullEfg *ReadEfgFile(gInput &p_file)
@@ -361,6 +365,10 @@ FullEfg *ReadEfgFile(gInput &p_file)
   if (Parse())  {
     if (E)  {
       delete E;
+    }
+    if (outcome) {
+      delete outcome;
+      outcome = 0;
     }
     return 0;
   }

@@ -8,7 +8,6 @@
 #include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
-#include "outcome.h"
 #include "efgutils.h"
 
 #include "math/gvector.h"
@@ -130,13 +129,14 @@ const T PureBehavProfile<T>::Payoff(const Node *n, const int &pl) const
 }
 
 template <class T>
-void PureBehavProfile<T>::Payoff(const Node *n, 
-				 const T prob, 
-				       gArray<T> &payoff) const
+void PureBehavProfile<T>::Payoff(const Node *n, const T prob, 
+				 gArray<T> &payoff) const
 {
-  if (n->IsTerminal())
-    for (int pl = 1; pl <= E->NumPlayers(); pl++) 
-      payoff[pl] += prob * Payoff(n->GetOutcome(),pl);
+  if (n->IsTerminal()) {
+    for (int pl = 1; pl <= E->NumPlayers(); pl++) {
+      payoff[pl] += prob * Payoff(E->GetOutcome(n), pl);
+    }
+  }
   
   else
     if (n->GetPlayer()->IsChance())	
@@ -176,12 +176,15 @@ void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 }
 
 template <class T>
-const T PureBehavProfile<T>::Payoff(const EFOutcome *o, const int &pl) const
+const T PureBehavProfile<T>::Payoff(const efgOutcome &p_outcome,
+				    const int &pl) const
 {
-  if (o)
-    return o->payoffs[pl];
-  else
+  if (!p_outcome.IsNull()) {
+    return E->Payoff(p_outcome)[pl];
+  }
+  else {
     return (T) 0;
+  }
 }
 
 //------------------------------------------------------------------------
@@ -596,8 +599,9 @@ void BehavProfile<T>::Payoff(Node *node, T prob, int player, T &value) const
 {
   Infoset * iset = node->infoset;
 
-  if (node->outcome) 
-    value += prob * Payoff(node->outcome, player);
+  if (!m_efg->GetOutcome(node).IsNull()) {
+    value += prob * Payoff(m_efg->GetOutcome(node), player);
+  }
 
   if (node->children.Length())  {
     const gArray<Action *> &acts = m_support->Actions(iset);
@@ -623,9 +627,11 @@ void BehavProfile<T>::ComputeSolutionDataPass2(const Node *node)
 {
   gVector<T> &nv = NodeValue(node);
 
-  if (node->outcome) 
-    for(int i=1;i<=nv.Length();i++) 
-      nv[i] += Payoff(node->outcome,i);
+  if (!m_efg->GetOutcome(node).IsNull()) {
+    for (int i=1;i<=nv.Length();i++) { 
+      nv[i] += Payoff(m_efg->GetOutcome(node), i);
+    }
+  }
 
   Infoset * iset = node->infoset;
 
@@ -778,9 +784,11 @@ void BehavProfile<T>::ComputeActionValues(Node *node, T prob)
 {
   gVector<T> &nv = NodeValue(node);
 
-  if (node->outcome) 
-    for(int i=1;i<=nv.Length();i++) 
-      nv[i] += Payoff(node->outcome,i);
+  if (!m_efg->GetOutcome(node).IsNull()) {
+    for (int i=1;i<=nv.Length();i++) {
+      nv[i] += Payoff(m_efg->GetOutcome(node),i);
+    }
+  }
 
   Infoset * iset = node->infoset;
 
@@ -1570,9 +1578,12 @@ void BehavAssessment<T>::CondPayoff(BehavProfile<T>::BehavNode *p_node,
   int iset = 
     (p_node->node->GetInfoset()) ? p_node->node->GetInfoset()->GetNumber() : 0;
   
-  if (p_node->node->GetOutcome()) 
-    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) 
-      p_node->nodeValue[pl] += Payoff(p_node->node->GetOutcome(), pl);
+  efgOutcome outcome = m_efg->GetOutcome(p_node->node);
+  if (!outcome.IsNull()) { 
+    for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) { 
+      p_node->nodeValue[pl] += Payoff(outcome, pl);
+    }
+  }
 
   int nc = p_node->children.Length();
   for (int child = 1; child <= nc; child++)
