@@ -218,7 +218,6 @@ void Portion::SetGame(void* game, bool efg)
   }
 }
 
-
 //---------------------------------------------------------------------
 //                          Error class
 //---------------------------------------------------------------------
@@ -666,8 +665,14 @@ EfOutcomePortion::EfOutcomePortion(void)
 EfOutcomePortion::~EfOutcomePortion()
 { }
 
-EFOutcome*& EfOutcomePortion::Value(void) const
+EFOutcome *EfOutcomePortion::Value(void) const
 { return *_Value; }
+
+void EfOutcomePortion::SetValue(EFOutcome *value)
+{
+  SetGame(value->BelongsTo(), true);
+  *_Value = value;
+}
 
 PortionSpec EfOutcomePortion::Spec(void) const
 { 
@@ -709,21 +714,22 @@ gString EfOutcomePortion::OutputString( void ) const
 Portion* EfOutcomePortion::ValCopy(void) const
 { 
   Portion* p = new EfOutcomeValPortion(*_Value);
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* EfOutcomePortion::RefCopy(void) const
 { 
   Portion* p = new EfOutcomeRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 EfOutcomeValPortion::EfOutcomeValPortion(EFOutcome* value)
-{ _Value = new EFOutcome*(value); }
+{
+  _Value = new EFOutcome*(value);
+  SetGame(value->BelongsTo(), true);
+}
 
 EfOutcomeValPortion::~EfOutcomeValPortion()
 {
@@ -735,7 +741,10 @@ bool EfOutcomeValPortion::IsReference(void) const
 
 
 EfOutcomeRefPortion::EfOutcomeRefPortion(EFOutcome*& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(value->BelongsTo(), true);
+}
 
 EfOutcomeRefPortion::~EfOutcomeRefPortion()
 { }
@@ -759,8 +768,14 @@ NfPlayerPortion::NfPlayerPortion(void)
 NfPlayerPortion::~NfPlayerPortion()
 { }
 
-NFPlayer*& NfPlayerPortion::Value(void) const
+NFPlayer *NfPlayerPortion::Value(void) const
 { return *_Value; }
+
+void NfPlayerPortion::SetValue(NFPlayer *value)
+{
+  SetGame(value->BelongsTo().PayoffTable(), false);
+  *_Value = value;
+}
 
 PortionSpec NfPlayerPortion::Spec(void) const
 { return PortionSpec(porNFPLAYER); }
@@ -781,21 +796,22 @@ gString NfPlayerPortion::OutputString( void ) const
 Portion* NfPlayerPortion::ValCopy(void) const
 {
   Portion* p = new NfPlayerValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfPlayerPortion::RefCopy(void) const
 {
   Portion* p = new NfPlayerRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 NfPlayerValPortion::NfPlayerValPortion(NFPlayer* value)
-{ _Value = new NFPlayer*(value); }
+{
+  _Value = new NFPlayer*(value);
+  SetGame(value->BelongsTo().PayoffTable(), false);
+}
 
 NfPlayerValPortion::~NfPlayerValPortion()
 { 
@@ -807,7 +823,10 @@ bool NfPlayerValPortion::IsReference(void) const
 
 
 NfPlayerRefPortion::NfPlayerRefPortion(NFPlayer*& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame(value->BelongsTo().PayoffTable(), false);
+}
 
 NfPlayerRefPortion::~NfPlayerRefPortion()
 { }
@@ -840,8 +859,14 @@ StrategyPortion::StrategyPortion(void)
 StrategyPortion::~StrategyPortion()
 { }
 
-Strategy*& StrategyPortion::Value(void) const
+Strategy *StrategyPortion::Value(void) const
 { return *_Value; }
+
+void StrategyPortion::SetValue(Strategy *value)
+{
+  SetGame(value->nfp->BelongsTo().PayoffTable(), false);
+  *_Value = value;
+}
 
 PortionSpec StrategyPortion::Spec(void) const
 { return PortionSpec(porSTRATEGY); }
@@ -862,21 +887,22 @@ gString StrategyPortion::OutputString( void ) const
 Portion* StrategyPortion::ValCopy(void) const
 {
   Portion* p = new StrategyValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* StrategyPortion::RefCopy(void) const
 {
   Portion* p = new StrategyRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 StrategyValPortion::StrategyValPortion(Strategy* value)
-{ _Value = new Strategy*(value); }
+{
+  _Value = new Strategy*(value); 
+  SetGame(value->nfp->BelongsTo().PayoffTable(), false);
+}
 
 StrategyValPortion::~StrategyValPortion()
 { 
@@ -888,7 +914,10 @@ bool StrategyValPortion::IsReference(void) const
 
 
 StrategyRefPortion::StrategyRefPortion(Strategy*& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(value->nfp->BelongsTo().PayoffTable(), false);
+}
 
 StrategyRefPortion::~StrategyRefPortion()
 { }
@@ -909,8 +938,14 @@ NfOutcomePortion::NfOutcomePortion(void)
 NfOutcomePortion::~NfOutcomePortion()
 { }
 
-NFOutcome*& NfOutcomePortion::Value(void) const
+NFOutcome *NfOutcomePortion::Value(void) const
 { return *_Value; }
+
+void NfOutcomePortion::SetValue(NFOutcome *value)
+{
+  SetGame(value->BelongsTo()->PayoffTable(), false);
+  *_Value = value;
+}
 
 PortionSpec NfOutcomePortion::Spec(void) const
 { 
@@ -934,21 +969,22 @@ gString NfOutcomePortion::OutputString( void ) const
 Portion* NfOutcomePortion::ValCopy(void) const
 { 
   Portion* p = new NfOutcomeValPortion(*_Value);
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfOutcomePortion::RefCopy(void) const
 { 
   Portion* p = new NfOutcomeRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 NfOutcomeValPortion::NfOutcomeValPortion(NFOutcome* value)
-{ _Value = new NFOutcome*(value); }
+{
+  _Value = new NFOutcome*(value); 
+  SetGame(value->BelongsTo()->PayoffTable(), false);
+}
 
 NfOutcomeValPortion::~NfOutcomeValPortion()
 {
@@ -960,7 +996,10 @@ bool NfOutcomeValPortion::IsReference(void) const
 
 
 NfOutcomeRefPortion::NfOutcomeRefPortion(NFOutcome*& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame(value->BelongsTo()->PayoffTable(), false);
+}
 
 NfOutcomeRefPortion::~NfOutcomeRefPortion()
 { }
@@ -984,8 +1023,15 @@ NfSupportPortion::NfSupportPortion(void)
 NfSupportPortion::~NfSupportPortion()
 { }
 
-NFSupport*& NfSupportPortion::Value(void) const
+NFSupport *NfSupportPortion::Value(void) const
 { return *_Value; }
+
+void NfSupportPortion::SetValue(NFSupport *value)
+{
+  SetGame(value->BelongsTo().PayoffTable(), false);
+//  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec NfSupportPortion::Spec(void) const
 {
@@ -1022,14 +1068,12 @@ gString NfSupportPortion::OutputString( void ) const
 Portion* NfSupportPortion::ValCopy(void) const
 {
   Portion* p = new NfSupportValPortion(*_Value, paytable); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NfSupportPortion::RefCopy(void) const
 {
   Portion* p = new NfSupportRefPortion(*_Value, paytable); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
@@ -1041,6 +1085,7 @@ NFPayoffs *NfSupportPortion::PayoffTable(void) const
 NfSupportValPortion::NfSupportValPortion(NFSupport* value, NFPayoffs *pay)
 {
   _Value = new NFSupport*(value);
+  SetGame(pay, false);
   paytable = pay;
 }
 
@@ -1056,6 +1101,7 @@ bool NfSupportValPortion::IsReference(void) const
 NfSupportRefPortion::NfSupportRefPortion(NFSupport*& value, NFPayoffs *pay)
 {
   _Value = &value; 
+  SetGame(pay, false);
   paytable = pay;
 }
 
@@ -1080,8 +1126,15 @@ EfSupportPortion::EfSupportPortion(void)
 EfSupportPortion::~EfSupportPortion()
 { }
 
-EFSupport*& EfSupportPortion::Value(void) const
+EFSupport *EfSupportPortion::Value(void) const
 { return *_Value; }
+
+void EfSupportPortion::SetValue(EFSupport *value)
+{
+  SetGame((BaseEfg *) &value->BelongsTo(), true);
+//  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec EfSupportPortion::Spec(void) const
 {
@@ -1120,21 +1173,22 @@ gString EfSupportPortion::OutputString( void ) const
 Portion* EfSupportPortion::ValCopy(void) const
 {
   Portion* p = new EfSupportValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* EfSupportPortion::RefCopy(void) const
 {
   Portion* p = new EfSupportRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 EfSupportValPortion::EfSupportValPortion(EFSupport* value)
-{ _Value = new EFSupport*(value); }
+{
+  _Value = new EFSupport*(value);
+  SetGame((BaseEfg *) &value->BelongsTo(), true);
+}
 
 EfSupportValPortion::~EfSupportValPortion()
 { 
@@ -1146,7 +1200,10 @@ bool EfSupportValPortion::IsReference(void) const
 
 
 EfSupportRefPortion::EfSupportRefPortion(EFSupport*& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame((BaseEfg *) &value->BelongsTo(), true);
+}
 
 EfSupportRefPortion::~EfSupportRefPortion()
 { }
@@ -1170,8 +1227,14 @@ EfPlayerPortion::EfPlayerPortion(void)
 EfPlayerPortion::~EfPlayerPortion()
 { }
 
-EFPlayer*& EfPlayerPortion::Value(void) const
+EFPlayer *EfPlayerPortion::Value(void) const
 { return *_Value; }
+
+void EfPlayerPortion::SetValue(EFPlayer *value)
+{
+  SetGame(value->BelongsTo(), true);
+  *_Value = value;
+}
 
 PortionSpec EfPlayerPortion::Spec(void) const
 { return PortionSpec(porEFPLAYER); }
@@ -1192,21 +1255,22 @@ gString EfPlayerPortion::OutputString( void ) const
 Portion* EfPlayerPortion::ValCopy(void) const
 {
   Portion* p = new EfPlayerValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* EfPlayerPortion::RefCopy(void) const
 {
   Portion* p = new EfPlayerRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 EfPlayerValPortion::EfPlayerValPortion(EFPlayer* value)
-{ _Value = new EFPlayer*(value); }
+{
+  _Value = new EFPlayer*(value);
+  SetGame(value->BelongsTo(), true);
+}
 
 EfPlayerValPortion::~EfPlayerValPortion()
 { 
@@ -1218,7 +1282,10 @@ bool EfPlayerValPortion::IsReference(void) const
 
 
 EfPlayerRefPortion::EfPlayerRefPortion(EFPlayer*& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(value->BelongsTo(), true);
+}
 
 EfPlayerRefPortion::~EfPlayerRefPortion()
 { }
@@ -1242,8 +1309,14 @@ InfosetPortion::~InfosetPortion()
 { }
 
 
-Infoset*& InfosetPortion::Value(void) const
+Infoset *InfosetPortion::Value(void) const
 { return *_Value; }
+
+void InfosetPortion::SetValue(Infoset *value)
+{
+  SetGame(value->BelongsTo(), true);
+  *_Value = value;
+}
 
 PortionSpec InfosetPortion::Spec(void) const
 {
@@ -1283,21 +1356,22 @@ gString InfosetPortion::OutputString( void ) const
 Portion* InfosetPortion::ValCopy(void) const
 { 
   Portion* p = new InfosetValPortion(*_Value);
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* InfosetPortion::RefCopy(void) const
 {
   Portion* p = new InfosetRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 InfosetValPortion::InfosetValPortion(Infoset* value)
-{ _Value = new Infoset*(value); }
+{
+  _Value = new Infoset*(value);
+  SetGame(value->BelongsTo(), true);
+}
 
 InfosetValPortion::~InfosetValPortion()
 {
@@ -1309,7 +1383,10 @@ bool InfosetValPortion::IsReference(void) const
 
 
 InfosetRefPortion::InfosetRefPortion(Infoset*& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame(value->BelongsTo(), true);
+}
 
 InfosetRefPortion::~InfosetRefPortion()
 { }
@@ -1332,8 +1409,14 @@ NodePortion::NodePortion(void)
 NodePortion::~NodePortion()
 { }
 
-Node*& NodePortion::Value(void) const
+Node *NodePortion::Value(void) const
 { return *_Value; }
+
+void NodePortion::SetValue(Node *value)
+{
+  SetGame(value->BelongsTo(), true);
+  *_Value = value;
+}
 
 PortionSpec NodePortion::Spec(void) const
 { return PortionSpec(porNODE); }
@@ -1354,21 +1437,22 @@ gString NodePortion::OutputString( void ) const
 Portion* NodePortion::ValCopy(void) const
 {
   Portion* p = new NodeValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* NodePortion::RefCopy(void) const
 {
   Portion* p = new NodeRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 NodeValPortion::NodeValPortion(Node* value)
-{ _Value = new Node*(value); }
+{
+  _Value = new Node*(value);
+  SetGame(value->BelongsTo(), true);
+}
 
 NodeValPortion::~NodeValPortion()
 { 
@@ -1380,7 +1464,10 @@ bool NodeValPortion::IsReference(void) const
 
 
 NodeRefPortion::NodeRefPortion(Node*& value)
-{ _Value = &value; }
+{ 
+  _Value = &value;
+  SetGame(value->BelongsTo(), true);
+}
 
 NodeRefPortion::~NodeRefPortion()
 { }
@@ -1405,8 +1492,14 @@ ActionPortion::ActionPortion(void)
 ActionPortion::~ActionPortion()
 { }
 
-Action*& ActionPortion::Value(void) const
+Action *ActionPortion::Value(void) const
 { return *_Value; }
+
+void ActionPortion::SetValue(Action *value)
+{
+  SetGame(value->BelongsTo()->BelongsTo(), true);
+  *_Value = value;
+}
 
 PortionSpec ActionPortion::Spec(void) const
 { return PortionSpec(porACTION); }
@@ -1427,21 +1520,23 @@ gString ActionPortion::OutputString( void ) const
 Portion* ActionPortion::ValCopy(void) const
 {
   Portion* p = new ActionValPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   return p;
 }
 
 Portion* ActionPortion::RefCopy(void) const
 {
   Portion* p = new ActionRefPortion(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 ActionValPortion::ActionValPortion(Action* value)
-{ _Value = new Action*(value); }
+{
+  _Value = new Action*(value);
+  SetGame(value->BelongsTo()->BelongsTo(), true);
+}
+
 
 ActionValPortion::~ActionValPortion()
 { 
@@ -1453,7 +1548,10 @@ bool ActionValPortion::IsReference(void) const
 
 
 ActionRefPortion::ActionRefPortion(Action*& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(value->BelongsTo()->BelongsTo(), true);
+}
 
 ActionRefPortion::~ActionRefPortion()
 { }
@@ -1479,8 +1577,15 @@ MixedPortion<double>::MixedPortion(void)
 MixedPortion<double>::~MixedPortion()
 { }
 
-MixedProfile<double> *& MixedPortion<double>::Value(void) const
+MixedProfile<double> *MixedPortion<double>::Value(void) const
 { return *_Value; }
+
+void MixedPortion<double>::SetValue(MixedProfile<double> *value)
+{
+  SetGame(&value->BelongsTo(), false);
+  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec MixedPortion<double>::Spec(void) const
 { 
@@ -1519,32 +1624,24 @@ gString MixedPortion<double>::OutputString( void ) const
 
 Portion* MixedPortion<double>::ValCopy(void) const
 { 
-  Portion* p = 0;
-  if(!*_Value)
-  {
-    p = new MixedValPortion<double>(0);
-  }
-  else
-  {
-    p = new MixedValPortion<double>
+  return new MixedValPortion<double>
       (new MixedSolution<double>
        (* (MixedSolution<double>*) (*_Value))); 
-  }
-  p->SetGame(Game(), GameIsEfg());
-  return p;
 }
 
 Portion* MixedPortion<double>::RefCopy(void) const
 { 
   Portion* p = new MixedRefPortion<double>(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 MixedValPortion<double>::MixedValPortion(MixedProfile<double> * value)
-{ _Value = new MixedProfile<double> *(value); }
+{
+  _Value = new MixedProfile<double> *(value);
+  SetGame(&value->BelongsTo(), false);
+}
 
 MixedValPortion<double>::~MixedValPortion()
 { 
@@ -1557,7 +1654,10 @@ bool MixedValPortion<double>::IsReference(void) const
 
 
 MixedRefPortion<double>::MixedRefPortion(MixedProfile<double> *& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(&value->BelongsTo(), false);
+}
 
 MixedRefPortion<double>::~MixedRefPortion()
 { }
@@ -1573,8 +1673,15 @@ MixedPortion<gRational>::MixedPortion(void)
 MixedPortion<gRational>::~MixedPortion()
 { }
 
-MixedProfile<gRational> *& MixedPortion<gRational>::Value(void) const
+MixedProfile<gRational> *MixedPortion<gRational>::Value(void) const
 { return *_Value; }
+
+void MixedPortion<gRational>::SetValue(MixedProfile<gRational> *value)
+{
+  SetGame(&value->BelongsTo(), false);
+  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec MixedPortion<gRational>::Spec(void) const
 { 
@@ -1613,32 +1720,24 @@ gString MixedPortion<gRational>::OutputString( void ) const
 
 Portion* MixedPortion<gRational>::ValCopy(void) const
 { 
-  Portion* p = 0;
-  if(!*_Value)
-  {
-    p = new MixedValPortion<gRational>(0);
-  }
-  else
-  {
-    p = new MixedValPortion<gRational>
+  return new MixedValPortion<gRational>
       (new MixedSolution<gRational>
        (* (MixedSolution<gRational>*) (*_Value))); 
-  }
-  p->SetGame(Game(), GameIsEfg());
-  return p;
 }
 
 Portion* MixedPortion<gRational>::RefCopy(void) const
 { 
   Portion* p = new MixedRefPortion<gRational>(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 MixedValPortion<gRational>::MixedValPortion(MixedProfile<gRational> * value)
-{ _Value = new MixedProfile<gRational> *(value); }
+{
+  _Value = new MixedProfile<gRational> *(value);
+  SetGame(&value->BelongsTo(), false);
+}
 
 MixedValPortion<gRational>::~MixedValPortion()
 { 
@@ -1651,7 +1750,10 @@ bool MixedValPortion<gRational>::IsReference(void) const
 
 
 MixedRefPortion<gRational>::MixedRefPortion(MixedProfile<gRational> *& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(&value->BelongsTo(), false);
+}
 
 MixedRefPortion<gRational>::~MixedRefPortion()
 { }
@@ -1680,8 +1782,15 @@ BehavPortion<double>::BehavPortion(void)
 BehavPortion<double>::~BehavPortion()
 { }
 
-BehavProfile<double> *& BehavPortion<double>::Value(void) const
+BehavProfile<double> *BehavPortion<double>::Value(void) const
 { return *_Value; }
+
+void BehavPortion<double>::SetValue(BehavProfile<double> *value)
+{
+  SetGame(&value->BelongsTo(), true);
+  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec BehavPortion<double>::Spec(void) const
 { 
@@ -1720,32 +1829,24 @@ gString BehavPortion<double>::OutputString( void ) const
 
 Portion* BehavPortion<double>::ValCopy(void) const
 { 
-  Portion* p = 0;
-  if(!*_Value)
-  {
-    p = new BehavValPortion<double>(0);
-  }
-  else
-  {
-    p = new BehavValPortion<double>
+  return new BehavValPortion<double>
       (new BehavSolution<double>
        (* (BehavSolution<double>*) (*_Value))); 
-  }
-  p->SetGame(Game(), GameIsEfg());
-  return p;
 }
 
 Portion* BehavPortion<double>::RefCopy(void) const
 { 
   Portion* p = new BehavRefPortion<double>(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 BehavValPortion<double>::BehavValPortion(BehavProfile<double> * value)
-{ _Value = new BehavProfile<double> *(value); }
+{
+  _Value = new BehavProfile<double> *(value);
+  SetGame(&value->BelongsTo(), true);
+}
 
 BehavValPortion<double>::~BehavValPortion()
 { 
@@ -1758,7 +1859,10 @@ bool BehavValPortion<double>::IsReference(void) const
 
 
 BehavRefPortion<double>::BehavRefPortion(BehavProfile<double> *& value)
-{ _Value = &value; }
+{
+  _Value = &value;
+  SetGame(&value->BelongsTo(), true);
+}
 
 BehavRefPortion<double>::~BehavRefPortion()
 { }
@@ -1774,8 +1878,15 @@ BehavPortion<gRational>::BehavPortion(void)
 BehavPortion<gRational>::~BehavPortion()
 { }
 
-BehavProfile<gRational> *& BehavPortion<gRational>::Value(void) const
+BehavProfile<gRational> *BehavPortion<gRational>::Value(void) const
 { return *_Value; }
+
+void BehavPortion<gRational>::SetValue(BehavProfile<gRational> *value)
+{
+  SetGame(&value->BelongsTo(), true);
+  delete *_Value;
+  *_Value = value;
+}
 
 PortionSpec BehavPortion<gRational>::Spec(void) const
 { 
@@ -1814,32 +1925,24 @@ gString BehavPortion<gRational>::OutputString( void ) const
 
 Portion* BehavPortion<gRational>::ValCopy(void) const
 { 
-  Portion* p = 0;
-  if(!*_Value)
-  {
-    p = new BehavValPortion<gRational>(0);
-  }
-  else
-  {
-    p = new BehavValPortion<gRational>
+  return new BehavValPortion<gRational>
       (new BehavSolution<gRational>
        (* (BehavSolution<gRational>*) (*_Value))); 
-  }
-  p->SetGame(Game(), GameIsEfg());
-  return p;
 }
 
 Portion* BehavPortion<gRational>::RefCopy(void) const
 { 
   Portion* p = new BehavRefPortion<gRational>(*_Value); 
-  p->SetGame(Game(), GameIsEfg());
   p->SetOriginal(Original());
   return p;
 }
 
 
 BehavValPortion<gRational>::BehavValPortion(BehavProfile<gRational> * value)
-{ _Value = new BehavProfile<gRational> *(value); }
+{
+  _Value = new BehavProfile<gRational> *(value);
+  SetGame(&value->BelongsTo(), true);
+}
 
 BehavValPortion<gRational>::~BehavValPortion()
 { 
@@ -1852,7 +1955,10 @@ bool BehavValPortion<gRational>::IsReference(void) const
 
 
 BehavRefPortion<gRational>::BehavRefPortion(BehavProfile<gRational> *& value)
-{ _Value = &value; }
+{
+  _Value = &value; 
+  SetGame(&value->BelongsTo(), true);
+}
 
 BehavRefPortion<gRational>::~BehavRefPortion()
 { }
@@ -1875,8 +1981,14 @@ NfgPortion<double>::NfgPortion(void)
 NfgPortion<double>::~NfgPortion()
 { }
 
-Nfg<double> *& NfgPortion<double>::Value(void) const
+Nfg<double> *NfgPortion<double>::Value(void) const
 { return *_Value; }
+
+void NfgPortion<double>::SetValue(Nfg<double> *value)
+{
+  SetGame(value, false);
+  *_Value = value;
+}
 
 PortionSpec NfgPortion<double>::Spec(void) const
 { 
@@ -1957,8 +2069,14 @@ NfgPortion<gRational>::NfgPortion(void)
 NfgPortion<gRational>::~NfgPortion()
 { }
 
-Nfg<gRational> *& NfgPortion<gRational>::Value(void) const
+Nfg<gRational> *NfgPortion<gRational>::Value(void) const
 { return *_Value; }
+
+void NfgPortion<gRational>::SetValue(Nfg<gRational> *value)
+{
+  SetGame(value, false);
+  *_Value = value;
+} 
 
 PortionSpec NfgPortion<gRational>::Spec(void) const
 { 
@@ -2047,8 +2165,14 @@ EfgPortion::EfgPortion(void)
 EfgPortion::~EfgPortion()
 { }
 
-BaseEfg*& EfgPortion::Value(void) const
+BaseEfg *EfgPortion::Value(void) const
 { return *_Value; }
+
+void EfgPortion::SetValue(BaseEfg *value)
+{
+  SetGame(value, true);
+  *_Value = value;
+}
 
 PortionSpec EfgPortion::Spec(void) const
 { 
@@ -2290,14 +2414,6 @@ ListPortion::ListPortion(void)
 
 ListPortion::~ListPortion()
 { }
-
-
-void ListPortion::SetGame(void* game, bool efg)
-{
-  int i;
-  for(i=1; i<=_Value->Length(); i++)
-    (*_Value)[i]->SetGame(game, efg);
-}
 
 
 bool ListPortion::BelongsToGame( void* game ) const
