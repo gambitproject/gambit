@@ -209,7 +209,10 @@ formalparam:  NAME { formals.Append(tval); } binding
               E9 { portions.Append(por); por = 0; } 
               RBRACE
 
-typename:     NAME { paramtype += tval; } optparen
+typename:     starname
+            | NAME { paramtype += tval; } optparen
+
+starname:     NAME  { paramtype += tval; } STAR { paramtype += '*'; }
 
 optparen:
         |     LPAREN { paramtype += '('; }  typename

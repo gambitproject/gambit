@@ -195,6 +195,7 @@ void Portion::SetGame(void* game, bool efg)
     {
       _gsm->GameRefCount(_Game)--;
       //gout<<"Game "<<_Game<<" ref count-: "<<_gsm->GameRefCount(_Game)<<'\n';
+      /*
       if(_gsm->GameRefCount(_Game) == 0)
       {
 	if(!_GameIsEfg)
@@ -203,6 +204,7 @@ void Portion::SetGame(void* game, bool efg)
 	  delete (BaseEfg*) _Game;
 	_Game = 0;
       }
+      */
     }
     
     _Game = game;
@@ -268,7 +270,7 @@ unsigned long NullPortion::DataType(void) const
 { return _DataType; }
 
 PortionSpec NullPortion::Spec(void) const
-{ return PortionSpec(porNULL); }
+{ return PortionSpec(porNULL, 0, true); }
 
 void NullPortion::Output(gOutput& s) const
 {
@@ -1873,7 +1875,7 @@ gList< Portion* >& ListPortion::Value(void) const
 
 
 PortionSpec ListPortion::Spec(void) const
-{ return PortionSpec(_DataType, _ListDepth()); }
+{ return PortionSpec(_DataType, _ListDepth(), _IsNull()); }
 
 Portion* ListPortion::ValCopy(void) const
 { 
@@ -2002,6 +2004,22 @@ bool ListRefPortion::IsReference(void) const
 
 
 
+bool ListPortion::_IsNull(void) const
+{
+  int i;
+  bool null = false;
+
+  if(Length() > 0)
+  {
+    for(i=1; i<=Length(); i++)
+    {
+      assert(i>=1 && i<=Length());
+      null = null | operator[](i)->Spec().Null;
+    }
+  }
+
+  return null;
+}
 
 int ListPortion::_ListDepth(void) const
 {

@@ -100,18 +100,25 @@ class PortionSpec
 public:
   unsigned long Type;
   unsigned short ListDepth;
+  bool Null;
 
   PortionSpec(const PortionSpec& spec)
-    : Type(spec.Type), ListDepth(spec.ListDepth)
+    : Type(spec.Type), ListDepth(spec.ListDepth), Null(spec.Null)
     {}
-  PortionSpec(unsigned long type = porERROR, signed short listdepth = 0)
-    : Type(type), ListDepth(listdepth)
+  PortionSpec(unsigned long type = porERROR, 
+	      signed short listdepth = 0,
+	      bool null = false)
+    : Type(type), ListDepth(listdepth), Null(null)
     {}
   ~PortionSpec()
   {}
 
   bool operator==(const PortionSpec& spec) const
-  { return Type==spec.Type && ListDepth==spec.ListDepth; }
+  {
+    return (Type==spec.Type && 
+	    ListDepth==spec.ListDepth &&
+	    Null==spec.Null);
+  }
 };
 
 

@@ -820,11 +820,10 @@ Portion *GSM_Lcp_EfSupport(Portion **param)
   case DOUBLE:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
-      const Efg<double>& E = S.BelongsTo();
-	//*(Efg<double>*)((EfgPortion*) param[0]->Owner())->Value();
+      Efg<double>* E = (Efg<double>*) &S.BelongsTo();
       gList<BehavSolution<double> > solns;
       
-      SeqFormModule<double> SM(E, SP, S);
+      SeqFormModule<double> SM(*E, SP, S);
       SM.Lemke();
       
       solns = SM.GetSolutions();
@@ -837,11 +836,10 @@ Portion *GSM_Lcp_EfSupport(Portion **param)
   case RATIONAL:
     {
       // getting E from S.BelongsTo() doesn't work for some reason...
-      const Efg<gRational>& E = S.BelongsTo();
-	//*(Efg<gRational>*)((EfgPortion*) param[0]->Owner())->Value();
+      Efg<gRational>* E = (Efg<gRational>*) &S.BelongsTo();
       gList<BehavSolution<gRational> > solns;
       
-      SeqFormModule<gRational> SM(E, SP, S);
+      SeqFormModule<gRational> SM(*E, SP, S);
       SM.Lemke();
       
       solns = SM.GetSolutions();

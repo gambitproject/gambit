@@ -92,10 +92,14 @@ gString PortionSpecToText(const PortionSpec& spec)
   gString result;
   for(i=0; i<NumPortionSpecs; i++)
     if(spec.Type == _PortionSpecText[i].Type)
+    {
       if(result == "")
 	result = _PortionSpecText[i].Text;
       else
 	result = result + " " + _PortionSpecText[i].Text;
+      if(spec.Null)
+	result = result + '*';
+    }
 
   if(result == "")
     for(i=0; i<NumPortionSpecs-6; i++)
@@ -137,7 +141,12 @@ PortionSpec TextToPortionSpec(const gString& text)
     {
       result.Type = result.Type | _PortionSpecText[i].Type;
       t = t.right(t.length() - strlen(_PortionSpecText[i].Text));
-      if(t.left(1) == " ")
+      if(t.left(1) == '*')
+      {
+	result.Null = true;
+	t.remove(0);
+      }
+      if(t.left(1) == ' ')
 	t.remove(0);
     }
   return result;

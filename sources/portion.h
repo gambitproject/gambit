@@ -996,6 +996,7 @@ protected:
 
   bool _ContainsListsOnly;
   unsigned long _DataType;
+  bool _IsNull(void) const;
   int _ListDepth(void) const;
 
 public:

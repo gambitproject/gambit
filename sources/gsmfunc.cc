@@ -168,7 +168,8 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
 
       bool null_call = false;
       for(j = 0; j < NumParams; j++)
-	if(CurrParam[j]->Spec().Type == porNULL)
+	if(CurrParam[j]->Spec().Null && 
+	   !_FuncInfo[_FuncIndex].ParamInfo[j].Spec.Null)
 	{
 	  null_call = true;
 	  break;
@@ -185,16 +186,7 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
 					_FuncInfo[_FuncIndex], CurrParam);
       else if(null_call)
       {
-	if(_FuncInfo[_FuncIndex].ReturnSpec.ListDepth > 0)
-	{
-	  result = new ListValPortion();
-	  ((ListPortion*) result)->
-	    SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);
-	}
-	else
-	{
-	  result = new NullPortion(_FuncInfo[_FuncIndex].ReturnSpec.Type);
-	}
+	result = new ErrorPortion("Null argument encountered");
       }
       else
 	result = new ErrorPortion("Error in arguments");
@@ -1381,7 +1373,8 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   {
     for(i = 0; i < _FuncInfo[_FuncIndex].NumParams; i++)
       if(_Param[i])
-	if(_Param[i]->Spec().Type == porNULL)
+	if(_Param[i]->Spec().Null && 
+	   !_FuncInfo[_FuncIndex].ParamInfo[i].Spec.Null)
 	{
 	  null_call = true;
 	  break;
@@ -1403,16 +1396,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 
     if(null_call) // if null objects are present in the argument list
     {
-      if(_FuncInfo[_FuncIndex].ReturnSpec.ListDepth > 0)
-      {
-	result = new ListValPortion();
-	((ListPortion*) result)->
-	  SetDataType(_FuncInfo[_FuncIndex].ReturnSpec.Type);
-      }
-      else
-      {
-	result = new NullPortion(_FuncInfo[_FuncIndex].ReturnSpec.Type);
-      }
+      result = new ErrorPortion("Null argument encountered");
     }
     else if(!list_op || !_FuncInfo[_FuncIndex].Listable) // normal func call
     {
