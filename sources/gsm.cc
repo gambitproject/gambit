@@ -124,7 +124,7 @@ bool GSM::PushList( const int num_of_elements )
   bool           result = true;
 
 #ifndef NDEBUG
-  if( num_of_elements <= 0 )
+  if( num_of_elements < 0 )
     _ErrorMessage( _StdErr, 2, num_of_elements );
 
   if( num_of_elements > _Stack->Depth() )
