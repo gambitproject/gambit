@@ -106,7 +106,7 @@ char System::Slash(void)
 
 char *System::Slashify(char *path)
 {
-  for (int i = 0; i < strlen(path); i++)  {
+  for (int i = 0; i < (int) strlen(path); i++)  {
     if (path[i] == '/' || path[i] == '\\')
       path[i] = Slash();
   }

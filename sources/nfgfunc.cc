@@ -119,7 +119,7 @@ static Portion *GSM_IsProfileDominated_Nfg(Portion **param)
 {
   MixedProfile<gNumber> pr(*((MixedPortion *) param[0])->Value());
   bool strong = ((BoolPortion *) param[1])->Value();
-  bool mixed = ((BoolPortion *) param[2])->Value();
+  /*  bool mixed = ((BoolPortion *) param[2])->Value(); */
   gPrecision prec = (((MixedPortion *) param[0])->Value())->Precision();
 
   gWatch watch;

@@ -20,7 +20,6 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 {
   int i;
   Efg &efg = (Efg &) p_support.Game();
-  bool marked = AllSubgamesMarked(efg);
   
   gList<BehavProfile<gNumber> > thissolns;
   thissolns.Append(*solution);
