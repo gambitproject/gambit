@@ -221,7 +221,8 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 
    // gout << "\n--- End LPSolve ---\n";
 
-   GetAll();
+     // Call GetAll for testing purposes
+   // GetAll();
 
 }
 
