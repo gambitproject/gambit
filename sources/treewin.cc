@@ -2766,42 +2766,42 @@ void TreeWindow::file_save(void)
 #endif  // __GNUG__
 
     if (s != "") {
-      // Change description if saving under a different filename
-      if (filename != "untitled.efg" && s != filename) {
+      // Allow to change description 
+      if (filename != "untitled.efg") {
     char *label = 0;
-    MyDialogBox *tree_label_dialog = 0;
+    MyDialogBox *efg_save_dialog = 0;
 
     try {
       label = new char[256];
       strcpy(label, ef.GetTitle());
 
-      tree_label_dialog = new MyDialogBox(pframe, "Label Tree",
-                          EFG_TREE_HELP);
+      efg_save_dialog = new MyDialogBox(pframe, "Label Game",
+			      EFG_TREE_HELP);
       wxFormItem *label_item = 
         wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-                 new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
-                 0, 0, 350);
-      tree_label_dialog->Add(label_item);
-      tree_label_dialog->Add(wxMakeFormNewLine());
+	  new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
+	  0, 0, 350);
+      efg_save_dialog->Add(label_item);
+      efg_save_dialog->Add(wxMakeFormNewLine());
       wxFormItem *decimals_item =
         wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
-                new wxList(wxMakeConstraintRange(0, 25), 0));
-          tree_label_dialog->Add(decimals_item);
-      tree_label_dialog->AssociatePanel();
+          new wxList(wxMakeConstraintRange(0, 25), 0));
+      efg_save_dialog->Add(decimals_item);
+      efg_save_dialog->AssociatePanel();
       ((wxText *)label_item->PanelItem)->SetFocus();
-      tree_label_dialog->Go1();
+      efg_save_dialog->Go1();
     
-      if (tree_label_dialog->Completed() == wxOK)
+      if (efg_save_dialog->Completed() == wxOK)
         ef.SetTitle(label);
     
-      delete tree_label_dialog;
+      delete efg_save_dialog;
       delete [] label;
     }
     catch (gException &E) {
       if (label)
         delete [] label;
-      if (tree_label_dialog)
-        delete tree_label_dialog;
+      if (efg_save_dialog)
+        delete efg_save_dialog;
     
       guiExceptionDialog(E.Description(), pframe);
       return;

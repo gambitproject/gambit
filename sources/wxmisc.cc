@@ -1089,18 +1089,18 @@ gText gGetTextLine(const gText &s0, wxFrame *parent, int x, int y,
     return result_str;
 }
 
-gText gFileNameFromPath(char *path)
+gText gFileNameFromPath(const char *path)
 {
   gText filename(path);
   if(strstr(path,"/") || strstr(path,"\\"))
-    filename = FileNameFromPath(path);
+    filename = FileNameFromPath((char *)path);
   return filename;
 }
 
-gText gPathOnly(char *name)
+gText gPathOnly(const char *name)
 {
   gText path;
   if(strstr(name,"/") || strstr(name,"\\"))
-    path = wxPathOnly(name);
+    path = wxPathOnly((char *)name);
   return path;
 }

@@ -235,36 +235,47 @@ void NfgShow::Save(void)
                (char *)gFileNameFromPath(filename), ".nfg", "*.nfg", 
                wxSAVE | wxOVERWRITE_PROMPT);
 
-  if (s != "") {
-    // Change description if saving under a different filename
-    if (filename != "untitled.nfg" && s != filename) {
-      char *label = new char[256];
+#ifdef __GNUG__
+    // Overwrite protection doesn't work in Unix, so we
+    // have to check explicitly.
 
-      strcpy(label, nf.GetTitle());
-      MyDialogBox *nfg_edit_dialog = 
-    new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
-      nfg_edit_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-                        new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
-      nfg_edit_dialog->Add(wxMakeFormNewLine());
-      nfg_edit_dialog->Add(wxMakeFormShort("Decimals", &s_nDecimals,
-                       wxFORM_DEFAULT,
-                       new wxList(wxMakeConstraintRange(0, 25), 0)));
-      nfg_edit_dialog->Go();
-      
-      if (nfg_edit_dialog->Completed() == wxOK) {
-    nf.SetTitle(label);
-    SetFileName(Filename()); // updates the title
+    if (wxFileExists((char *) s))  {  // Ask for confirmation.
+      if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK | wxCANCEL) 
+      != wxOK) {
+    return;
       }
+    }
+#endif  // __GNUG__
 
-      delete nfg_edit_dialog;
+  if (s != "") {
+    // Allow to change description 
+    if (filename != "untitled.nfg") {
+      char *label = new char[256];
+      
+      strcpy(label, nf.GetTitle());
+      MyDialogBox *nfg_save_dialog = 
+	new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
+      nfg_save_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+	new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
+      nfg_save_dialog->Add(wxMakeFormNewLine());
+      nfg_save_dialog->Add(wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
+	new wxList(wxMakeConstraintRange(0, 25), 0)));
+      nfg_save_dialog->Go();
+      
+      if (nfg_save_dialog->Completed() == wxOK) {
+	nf.SetTitle(label);
+	SetFileName(Filename()); // updates the title
+      }
+      
+      delete nfg_save_dialog;
       delete [] label;
     }
-
+    
     gFileOutput out(s);
-
+    
     // Compress the nfg to the current support
     Nfg *N = CompressNfg(nf, *cur_sup);
-    N->WriteNfgFile(out, 6);
+    N->WriteNfgFile(out, s_nDecimals);
     delete N;
     SetFileName(s);
   }
@@ -1183,19 +1194,19 @@ void NfgShow::SetLabels(int what)
         char *label = new char[256];
 
         strcpy(label, nf.GetTitle());
-        MyDialogBox *nfg_edit_dialog = 
+        MyDialogBox *nfg_label_dialog = 
             new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
-        nfg_edit_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+        nfg_label_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
             new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
-        nfg_edit_dialog->Go();
+        nfg_label_dialog->Go();
 
-        if (nfg_edit_dialog->Completed() == wxOK)
+        if (nfg_label_dialog->Completed() == wxOK)
         {
             nf.SetTitle(label);
             SetFileName(Filename()); // updates the title
         }
 
-        delete nfg_edit_dialog;
+        delete nfg_label_dialog;
         delete [] label;
     }
 
