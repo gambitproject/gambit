@@ -252,7 +252,7 @@ Portion *gclFunctionCall::Evaluate(void)
       }
     }
     else  
-      call.SetCurrParam(val);
+      call.SetCurrParam(val, AUTO_VAL_OR_REF);
   }
     
   Portion **param = 0;
