@@ -256,7 +256,7 @@ gOutput *dialogAlgorithm::TraceFile(void) const
 {
   switch (m_traceDest->GetSelection()) {
   case 0:
-    return 0;
+    return &gnull;
   case 1:
     return new gWxOutput;
   case 2:
@@ -264,10 +264,10 @@ gOutput *dialogAlgorithm::TraceFile(void) const
       return new gFileOutput(m_traceFile->GetValue());
     }
     catch (gFileOutput::OpenFailed &E) {
-      return 0;
+      return &gnull;
     }
   default:
-    return 0;
+    return &gnull;
   }
 }
 

@@ -21,7 +21,7 @@
 guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 			       EfgShowInterface *p_parent)
   : m_efg(p_support.Game()), m_support(p_support), m_parent(p_parent),
-    m_traceFile(0), m_traceLevel(0)
+    m_traceFile(&gnull), m_traceLevel(0)
 { }
 
 //=========================================================================

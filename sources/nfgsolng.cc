@@ -22,7 +22,7 @@
 guiNfgSolution::guiNfgSolution(const NFSupport &p_support,
 			       NfgShowInterface *p_parent)
   : m_nfg(p_support.Game()), m_support(p_support), m_parent(p_parent),
-    m_traceFile(0), m_traceLevel(0)
+    m_traceFile(&gnull), m_traceLevel(0)
 { }
 
 #include "nfstrat.h"
