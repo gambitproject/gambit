@@ -53,9 +53,11 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p)
   maxpay=maxpay+(T)1;
   T prob = (T)1;
 //  A=(T)0;
-  for(i=A->MinRow();i<=A->MaxRow();i++)
+  for(i=A->MinRow();i<=A->MaxRow();i++) {
+    (*b)[i] = (T)0;
     for(j=A->MinCol();j<=A->MaxCol();j++)
       (*A)(i,j) = (T)0;
+  }
 
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
