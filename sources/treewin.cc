@@ -1465,7 +1465,7 @@ Bool TreeWindow::file_save(void)
     Efg *efg = 0;
     try {
       gFileOutput file(dialog.Filename());
-      efg = CompressEfg(ef, *frame->GetSupport(0));
+      efg = CompressEfg(ef, *frame->GetSupport());
       efg->WriteEfgFile(file, s_nDecimals);
       delete efg;
       frame->SetFileName(dialog.Filename());

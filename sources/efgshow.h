@@ -57,11 +57,8 @@ private:
     } starting_points;
     int cur_soln;
 
-    // We can display EF for one support, while working on a different support
-    // disp_sup always corresponds to the support currently displayed.  cur_sup
-    // corresponds to the support that will be operated upon by solution algs.
     gList<EFSupport *> supports;
-    EFSupport *cur_sup, *disp_sup;
+    EFSupport *cur_sup;
     EFSupportInspectDialog *support_dialog;
 
     // all_nodes must at all times refer to the prefix traversal order of the tree.
@@ -150,7 +147,7 @@ public:
     void ShowGameInfo(void);
 
     // Currently used support
-    const EFSupport *GetSupport(int which);
+    const EFSupport *GetSupport(void);
 
   void UpdateMenus(Node *p_cursor, Node *p_markNode);
 

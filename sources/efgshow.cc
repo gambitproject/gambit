@@ -151,7 +151,7 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   ReadAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
     
   // Create the canvas(TreeWindow) on which to draw the tree
-  tw = new TreeWindow(ef, disp_sup, this);
+  tw = new TreeWindow(ef, cur_sup, this);
   // Create the toolbar (must be after the status bar creation)
   toolbar = new guiEfgShowToolBar(this);
   // Create the all_nodes list.
@@ -1320,36 +1320,30 @@ EFSupport *EfgShow::MakeSupport(void)
 // Support Inspect
 void EfgShow::ChangeSupport(int what)
 {
-    if (what == CREATE_DIALOG)
-    {
-        if (!support_dialog)
-        {
-            int disp = supports.Find(disp_sup), cur = supports.Find(cur_sup);
-            support_dialog = new EFSupportInspectDialog(supports, cur, disp, this);
-        }
-        else
-            support_dialog->SetFocus();
+  if (what == CREATE_DIALOG) {
+    if (!support_dialog) {
+      int cur = supports.Find(cur_sup);
+      support_dialog = new EFSupportInspectDialog(supports, cur, cur, this);
     }
+    else
+      support_dialog->SetFocus();
+  }
 
-    if (what == DESTROY_DIALOG && support_dialog)
-    {
-        delete support_dialog;
-        support_dialog = 0;
+  if (what == DESTROY_DIALOG && support_dialog) {
+    delete support_dialog;
+    support_dialog = 0;
+  }
+
+  if (what == SUPPORT_CHANGE) {
+    assert(support_dialog);
+    cur_sup = supports[support_dialog->CurSup()];
+
+    if (supports[support_dialog->CurSup()] != cur_sup ||
+	tw->DrawSettings().RootReachable() != support_dialog->RootReachable()) {
+      tw->DrawSettings().SetRootReachable(support_dialog->RootReachable());
+      tw->SupportChanged();
     }
-
-    if (what == SUPPORT_CHANGE)
-    {
-        assert(support_dialog);
-        cur_sup = supports[support_dialog->CurSup()];
-
-        if (supports[support_dialog->DispSup()] != disp_sup ||
-            tw->DrawSettings().RootReachable() != support_dialog->RootReachable())
-        {
-            disp_sup = supports[support_dialog->DispSup()];
-            tw->DrawSettings().SetRootReachable(support_dialog->RootReachable());
-            tw->SupportChanged();
-        }
-    }
+  }
 }
 
 #include "wxstatus.h"
@@ -1385,12 +1379,11 @@ void EfgShow::SolveElimDom(void)
 	wxMessageBox("Mixed dominance is not implemented for\n"
 		     "Extensive form games");
       }
-  }
-  catch (gSignalBreak &E) { }
-
-    if (dialog.Compress() && disp_sup != sup) {
+    }
+    catch (gSignalBreak &E) { }
+    
+    if (dialog.Compress() && cur_sup != sup) {
       cur_sup = supports[supports.Length()]; // displaying the last created support
-      disp_sup = cur_sup;
       tw->SupportChanged();
     }
   }
@@ -1415,7 +1408,6 @@ void EfgShow::GameChanged(void)
 
     // Create the full support.
     cur_sup = new EFSupport(ef);
-    disp_sup = cur_sup;
     supports.Append(cur_sup);
     RemoveStartProfiles();
 }
@@ -1458,11 +1450,9 @@ void EfgShow::ShowGameInfo(void)
     wxMessageBox(tmp, "Efg Game Info", wxOK, this);
 }
 
-
-// which: 0 - current, 1 - display
-const EFSupport *EfgShow::GetSupport(int which)
+const EFSupport *EfgShow::GetSupport(void)
 {
-    return (which == 0) ? cur_sup : disp_sup;
+  return cur_sup;
 }
 
 
