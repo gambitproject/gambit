@@ -296,7 +296,7 @@ Type name	& Description \\ \hline
 \tindex{NODE}	& a node in an extensive form game \\ 
 \tindex{INFOSET}	& an information set in an extensive form game \\
 \tindex{ACTION}	& an action at an information set \\
-\tindex{OUTCOME}	& an outcome in an extensive form game \\
+\tindex{EFOUTCOME}	& an outcome in an extensive form game \\
 \tindex{EFSUPPORT}	& a support of actions in an extensive form game \\
 \tindex{BEHAV}	& a behavior strategy profile for an extensive form
 game \\ 
@@ -446,7 +446,7 @@ The data type \tindex{EFG} is used to represent an extensive form game.  As
 with normal form games, no other extensive form data type can exist
 independently of the extensive form game to which it belongs.  The
 \tindex{EFPLAYER} represents a player in an extensive form game.  The
-types \tindex{NODE}, \tindex{ACTION}, \tindex{INFOSET}, \tindex{OUTCOME}
+types \tindex{NODE}, \tindex{ACTION}, \tindex{INFOSET}, \tindex{EFOUTCOME}
 represent the corresponding parts of the extensive form representation
 of the game.  A \tindex{EFSUPPORT} represents a support for an extensive
 form game, which is a collection of sets of admissible actions, one
@@ -564,7 +564,7 @@ Parent Type & Qualified types\\
 \tindex{NFG} & \verb+NFG(FLOAT)+, \verb+NFG(RATIONAL)+ \\ 
 \tindex{BEHAV} & \verb+BEHAV(FLOAT)+, \verb+BEHAV(RATIONAL)+ \\ 
 \tindex{MIXED} & \verb+MIXED(FLOAT)+, \verb+MIXED(RATIONAL)+ \\ 
-\tindex{OUTCOME} & \verb+OUTCOME(FLOAT)+, \verb+OUTCOME(RATIONAL)+ \\ 
+\tindex{EFOUTCOME} & \verb+EFOUTCOME(FLOAT)+, \verb+EFOUTCOME(RATIONAL)+ \\ 
 \hline
 \end{tabular}
 \end{center}
@@ -3958,7 +3958,7 @@ from the same extensive form game.
 
 \item\lex{DeleteOutcome}
 \protect \large \begin{verbatim}
-DeleteOutcome[outcome->OUTCOME] =: LIST(NODE)
+DeleteOutcome[outcome->EFOUTCOME] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \bd
@@ -4288,7 +4288,7 @@ Game[profile->MIXED(T)] =: NFG(T)
 Game[player->NFPLAYER] =: NFG(T)
 Game[support->NFSUPPORT] =: NFG(T)
 Game[node->NODE] =: EFG(T)
-Game[outcome->OUTCOME] =: EFG(T)
+Game[outcome->EFOUTCOME] =: EFG(T)
 Game[strategy->STRATEGY] =: NFG(T)
 \end{verbatim} \normalsize
 
@@ -5524,7 +5524,7 @@ Name[x->T] =: TEXT
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = ACTION*, EFG, EFPLAYER*, INFOSET*, NFG, NFPLAYER*,
-NODE*, OUTCOME*, STRATEGY*} 
+NODE*, EFOUTCOME*, STRATEGY*} 
 \bd
 Returns the name of \verb+x+.  The name of a null object is defined
 to be the empty string.
@@ -5616,7 +5616,7 @@ Returns the newly created game.
 
 \item\lex{NewOutcome}
 \protect \large \begin{verbatim} 
-NewOutcome[efg->EFG(T)] =: OUTCOME
+NewOutcome[efg->EFG(T)] =: EFOUTCOME
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL} 
@@ -5825,7 +5825,7 @@ Returns the disjunction of \verb+x+ and \verb+y+.
 
 \item\lex{Outcome}
 \protect \large \begin{verbatim}
-Outcome[node->NODE*] =: OUTCOME
+Outcome[node->NODE*] =: EFOUTCOME
 \end{verbatim}\normalsize
 
 \bd
@@ -5847,7 +5847,7 @@ Returns the outcome associated with the contingency specified by
 
 \item\lex{Outcomes}
 \protect \large \begin{verbatim}
-Outcomes[efg->EFG(T)] =: LIST(OUTCOME)
+Outcomes[efg->EFG(T)] =: LIST(EFOUTCOME)
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -5858,7 +5858,7 @@ Returns the list of outcomes defined on \verb+efg+.
 
 \item\lex{Outcomes}
 \protect \large \begin{verbatim}
-Outcomes[nfg->NFG(T)] =: LIST(OUTCOME)
+Outcomes[nfg->NFG(T)] =: LIST(NFOUTCOME)
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -5908,7 +5908,7 @@ the order of evaluation of expressions.
 
 \item\lex{Payoff}
 \protect \large \begin{verbatim}
-Payoff[outcome->OUTCOME, player->EFPLAYER] =: T
+Payoff[outcome->EFOUTCOME, player->EFPLAYER] =: T
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -6409,7 +6409,7 @@ SetName[x->T, name->TEXT] =: T
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = ACTION, EFG, EFPLAYER, INFOSET, NFG, NFPLAYER,
-NODE, OUTCOME, STRATEGY}
+NODE, EFOUTCOME, STRATEGY}
 \bd
 Sets the name of \verb+x+ to \verb+name+.  Returns \verb+x+.
 \item [See also:] \verb+Name+.
@@ -6438,7 +6438,7 @@ exponential format.
 
 \item\lex{SetOutcome}
 \protect \large \begin{verbatim} 
-SetOutcome[node->NODE, outcome->OUTCOME*] =: OUTCOME
+SetOutcome[node->NODE, outcome->EFOUTCOME*] =: EFOUTCOME
 \end{verbatim}\normalsize
 
 \bd
@@ -6452,7 +6452,7 @@ extensive form game.
 
 \item\lex{SetPayoff}
 \protect \large \begin{verbatim}
-SetPayoff[outcome->OUTCOME, player->EFPLAYER, payoff->T] =: OUTCOME
+SetPayoff[outcome->EFOUTCOME, player->EFPLAYER, payoff->T] =: EFOUTCOME
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -7137,7 +7137,7 @@ If[IsRoot[n],{n},Flatten[{Ancestors[Parent[n]]}&{n}]];
 
 \item\lex{AttachNewOutcome}
 \protect \large \begin{verbatim}
-AttachNewOutcome[n->NODE]=:OUTCOME,
+AttachNewOutcome[n->NODE]=:EFOUTCOME,
 \end{verbatim}\normalsize
 
 \bd 
@@ -7789,7 +7789,7 @@ i;
 
 \item\lex{NewOutcome}
 \protect \large \begin{verbatim}
-NewOutcome[efg->EFG,  name->TEXT] =: OUTCOME
+NewOutcome[efg->EFG,  name->TEXT] =: EFOUTCOME
 \end{verbatim}\normalsize
 
 \bd 
@@ -8093,7 +8093,7 @@ MarkSubgames[ms];b;
 
 \item\lex{Payoffs}
 \protect \large \begin{verbatim}
-Payoffs[outcome->OUTCOME(T)]=:LIST(T)
+Payoffs[outcome->EFOUTCOME(T)]=:LIST(T)
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -8435,7 +8435,7 @@ function ``HoldoutGame[]'' used in the above programs.
 //
 
 NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
-            out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
+            out->LIST(EFOUTCOME), stages->INTEGER, disc->FLOAT],
   // build tree
   i1:=isets[[1]];
   i2:=isets[[2]];
