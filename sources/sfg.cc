@@ -16,19 +16,29 @@
 
 
 Sfg::Sfg(const EFSupport &S)
-  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers())
+  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers()),
+    isetFlag(S.Game().NumInfosets()),isetRow(S.Game().NumInfosets())
 { 
   int i;
   gArray<int> zero(EF.NumPlayers());
   gArray<int> one(EF.NumPlayers());
+
   EFSupport support(EF);
 
   for(i=1;i<=EF.NumPlayers();i++) {
-    seq[i]=support.NumSequences(i);
-    isets[i]=EF.Players()[i]->NumInfosets();
+    seq[i]=1;
+    isets[i]=0;
     zero[i]=0;
     one[i]=1;
   }
+
+  isetFlag = 0;
+  isetRow = 0;
+
+  GetSequenceDims(EF.RootNode());
+
+  isetFlag = 0;
+  // gout << "\nisetRow: " << isetRow;
 
   gIndexOdometer index(seq);
 
@@ -82,6 +92,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 { 
   int i,pl;
 
+
   if(n->GetOutcome()) {
     for(pl = 1;pl<=seq.Length();pl++)
       (*(*SF)[seq])[pl] +=
@@ -95,36 +106,80 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
     }
     else {
       int pl = n->GetPlayer()->GetNumber();
-
       iset[pl]=n->GetInfoset()->GetNumber();
       gArray<int> snew(seq);
       snew[pl]=1;
       for(i=1;i<iset[pl];i++)
-	snew[pl]+=n->GetPlayer()->Infosets()[i]->NumActions();
-    
-      (*(*E)[pl])(iset[pl]+1,seq[pl]) = (gNumber)1;
+	if(isetRow(pl,i)) 
+	  snew[pl]+=efsupp.NumActions(pl,i);
+
+      (*(*E)[pl])(isetRow(pl,iset[pl]),seq[pl]) = (gNumber)1;
       Sequence *myparent(parent[pl]);
+
+      bool flag = false;
+      if(!isetFlag(pl,iset[pl])) {   // on first visit to iset, create new sequences
+	isetFlag(pl,iset[pl])=1;
+	flag =true;
+      }
       for(i=1;i<=n->NumChildren();i++) {
-	snew[pl]+=1;
-	if(n==(n->GetInfoset()->Members())[1]) {
-	  Sequence* child;
-	  child = new Sequence(n->GetPlayer(),(n->GetInfoset()->Actions())[i], 
-			       myparent,snew[pl]);
-	  parent[pl]=child;
-//	  gout << (*child);;
-	  ((*sequences)[pl])->AddSequence(child);
+	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
+	  snew[pl]+=1;
+	  if(flag) {
+	    Sequence* child;
+	    child = new Sequence(n->GetPlayer(),(n->GetInfoset()->Actions())[i], 
+				 myparent,snew[pl]);
+	    parent[pl]=child;
+	    ((*sequences)[pl])->AddSequence(child);
+	    
+	  }
+
+	  (*(*E)[pl])(isetRow(pl,iset[pl]),snew[pl]) = -(gNumber)1;
+	  MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
 	}
-	(*(*E)[pl])(iset[pl]+1,snew[pl]) = -(gNumber)1;
-	MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
       }
     }
     
   }
 }
 
+void Sfg::
+GetSequenceDims(const Node *n) 
+{ 
+  int i;
+
+  if(n->GetInfoset()) {
+    if(n->GetPlayer()->IsChance()) {
+      for(i=1;i<=n->NumChildren();i++)
+	GetSequenceDims(n->GetChild(i));
+    }
+    else {
+      int pl = n->GetPlayer()->GetNumber();
+      int iset = n->GetInfoset()->GetNumber();
+    
+      bool flag = false;
+      if(!isetFlag(pl,iset)) {   // on first visit to iset, create new sequences
+	isets[pl]++;
+	isetFlag(pl,iset)=1;
+	isetRow(pl,iset)=isets[pl]+1;
+	flag =true;
+      }
+      for(i=1;i<=n->NumChildren();i++) {
+	if(efsupp.Find(n->GetInfoset()->Actions()[i])) {
+	  if(flag) {
+	    seq[pl]++;
+	  }
+	  GetSequenceDims(n->GetChild(i));
+	}
+      }
+    }
+  }
+}
+
 void Sfg::Dump(gOutput& out) const
 {
   gIndexOdometer index(seq);
+
+  out << "\nseq: " << seq;
 
   out << "\nSequence Form: \n";
   while (index.Turn()) {
@@ -134,6 +189,22 @@ void Sfg::Dump(gOutput& out) const
   out << "\nConstraint matrices: \n";
   for(int i=1;i<=EF.NumPlayers();i++) 
     out << "\nPlayer " << i << ":\n " << (*(*E)[i]);
+}
+
+int Sfg::TotalNumSequences() const 
+{
+  int tot=0;
+  for(int i=1;i<=seq.Length();i++)
+    tot+=seq[i];
+  return tot;
+}
+
+int Sfg::TotalNumInfosets() const 
+{
+  int tot=0;
+  for(int i=1;i<=isets.Length();i++)
+    tot+=isets[i];
+  return tot;
 }
 
 int Sfg::InfosetNumber(int pl, int j) const 
@@ -150,7 +221,10 @@ int Sfg::ActionNumber(int pl, int j) const
 
 BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 {
-  BehavProfile<gNumber> b(efsupp);
+//  BehavProfile<gNumber> b(efsupp);
+  BehavProfile<gNumber> b(EF);
+
+  b.gDPVector::operator=((gNumber)0);
 
   Sequence *sij;
   const Sequence *parent;
@@ -162,9 +236,16 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
       sij = ((*sequences)[i]->GetSFSequenceSet())[j];
       int sn = sij->GetNumber();
       parent = sij->Parent();
-      assert(x(i, parent->GetNumber())>(double)0);
-      value = (gNumber)(x(i,sn)/x(i,parent->GetNumber()));
-      b(i,sij->GetInfoset()->GetNumber(),sij->GetAction()->GetNumber())= value;
+
+      // gout << "\ni,j,sn,iset,act: " << i << " " << j << " " << sn << " ";
+      // gout << sij->GetInfoset()->GetNumber() << " " << sij->GetAction()->GetNumber();
+
+      if(x(i, parent->GetNumber())>(double)0)
+	value = (gNumber)(x(i,sn)/x(i,parent->GetNumber()));
+      else
+	value = (gNumber)0;
+
+      b(i,sij->GetInfoset()->GetNumber(),efsupp.Find(sij->GetAction()))= value;
     }
   return b;
 }

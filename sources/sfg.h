@@ -22,9 +22,11 @@ private:
   gNArray<gArray<gNumber> *> *SF;  // sequence form
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
   gArray<int> seq,isets;
+  gPVector<int> isetFlag,isetRow;
 
   void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>,
-		      gArray<Sequence *> );
+		      gArray<Sequence *>);
+  void GetSequenceDims(const Node *);
 
 public:
   Sfg(const EFSupport &);
@@ -34,6 +36,9 @@ public:
   inline int NumInfosets(int pl) const {return isets[pl];}
   inline gArray<int> NumSequences() const {return seq;}
   inline gArray<int> NumInfosets() const {return isets;}
+  int TotalNumSequences() const;
+  int TotalNumInfosets() const;
+  inline NumPlayers() const {return EF.NumPlayers();}
   
   inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}
   inline gNumber Payoff(const gArray<int> & index,int pl) const {return Payoffs(index)[pl];}
