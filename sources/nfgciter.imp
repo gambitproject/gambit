@@ -10,13 +10,13 @@
 #include "nfplayer.h"
 
 //-------------------------------------
-// NfgContIter<T>: Constructor, Destructor
+// NfgContIter: Constructor, Destructor
 //-------------------------------------
 
-template <class T> NfgContIter<T>::NfgContIter(const NFSupport &s)
+NfgContIter::NfgContIter(const NFSupport &s)
   : support(s), 
     current_strat(s.BelongsTo().NumPlayers()),
-    N((Nfg<T> *) &s.BelongsTo()), profile(*N),
+    N((BaseNfg *) &s.BelongsTo()), profile(*N),
     thawed(N->NumPlayers())
 {
   for (int i = 1; i <= thawed.Length(); i++)
@@ -24,14 +24,14 @@ template <class T> NfgContIter<T>::NfgContIter(const NFSupport &s)
   First();
 }
 
-template <class T> NfgContIter<T>::~NfgContIter()
+NfgContIter::~NfgContIter()
 { }
 
 //------------------------------
-// NfgContIter<T>: Member Functions
+// NfgContIter: Member Functions
 //------------------------------
 
-template <class T> void NfgContIter<T>::First(void)
+void NfgContIter::First(void)
 {
   for (int i = 1; i <= thawed.Length(); i++){
     profile.Set(thawed[i], support.Strategies(thawed[i])[1]);
@@ -39,7 +39,7 @@ template <class T> void NfgContIter<T>::First(void)
   }	
 }
 
-template <class T> void NfgContIter<T>::Set(int pl, int num)
+void NfgContIter::Set(int pl, int num)
 {
   if (!frozen.Contains(pl))   return;
 
@@ -47,7 +47,7 @@ template <class T> void NfgContIter<T>::Set(int pl, int num)
   current_strat[pl] = num;
 }
 
-template <class T> void NfgContIter<T>::Freeze(const gBlock<int> &freeze)
+void NfgContIter::Freeze(const gBlock<int> &freeze)
 {
   frozen = freeze;
   thawed = gBlock<int>(N->NumPlayers() - freeze.Length());
@@ -56,7 +56,7 @@ template <class T> void NfgContIter<T>::Freeze(const gBlock<int> &freeze)
   First();
 }
 
-template <class T> void NfgContIter<T>::Freeze(int pl)
+void NfgContIter::Freeze(int pl)
 {
   if (frozen.Contains(pl))   return;
   frozen.Append(pl);
@@ -64,7 +64,7 @@ template <class T> void NfgContIter<T>::Freeze(int pl)
   First();
 }
 
-template <class T> void NfgContIter<T>::Thaw(int pl)
+void NfgContIter::Thaw(int pl)
 {
   if (thawed.Contains(pl))   return;
   frozen.Remove(frozen.Find(pl));
@@ -74,7 +74,7 @@ template <class T> void NfgContIter<T>::Thaw(int pl)
   First();
 }
 
-template <class T> int NfgContIter<T>::NextContingency(void)
+int NfgContIter::NextContingency(void)
 {
   int j = thawed.Length();
   if (j == 0) return 0;    	
@@ -95,12 +95,12 @@ template <class T> int NfgContIter<T>::NextContingency(void)
   }
 }
 
-template <class T> long NfgContIter<T>::GetIndex(void) const
+long NfgContIter::GetIndex(void) const
 {
   return profile.GetIndex();
 }
 
-template <class T> gArray<int> NfgContIter<T>::Get(void) const
+gArray<int> NfgContIter::Get(void) const
 {
   gArray<int> current(N->NumPlayers());
   for (int i = 1; i <= current.Length(); i++)
@@ -108,23 +108,23 @@ template <class T> gArray<int> NfgContIter<T>::Get(void) const
   return current;
 }
 
-template <class T> void NfgContIter<T>::Get(gArray<int> &t) const
+void NfgContIter::Get(gArray<int> &t) const
 {
   for (int i = 1; i <= N->NumPlayers(); i++)
     t[i] = profile[i]->number;
 }
 
-template <class T> NFOutcome *NfgContIter<T>::GetOutcome(void) const
+NFOutcome *NfgContIter::GetOutcome(void) const
 {
   return N->GetOutcome(profile);
 }
 
-template <class T> void NfgContIter<T>::SetOutcome(NFOutcome *outcome)
+void NfgContIter::SetOutcome(NFOutcome *outcome)
 {
   N->SetOutcome(profile, outcome);
 }
 
-template <class T> void NfgContIter<T>::Dump(gOutput &f) const
+void NfgContIter::Dump(gOutput &f) const
 {
   f << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++)

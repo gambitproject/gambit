@@ -34,9 +34,9 @@ template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
       N->SetPayoff(outcome, pl, nfg.Payoff(nfg.Outcomes()[outc], pl));
   }
 
-  NfgContIter<T> oiter(S);
+  NfgContIter oiter(S);
   NFSupport newS(*N);
-  NfgContIter<T> niter(newS);
+  NfgContIter niter(newS);
   
   do   {
     niter.SetOutcome(N->Outcomes()[oiter.GetOutcome()->GetNumber()]);

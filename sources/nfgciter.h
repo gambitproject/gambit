@@ -22,12 +22,12 @@ class StrategyProfile;
 // to hold constant.  The iteration is based on an index that goes from 1 to
 // the total number of possible contingencies in increments of 1.
 //
-template <class T> class NfgContIter    {
-friend class NfgIter<T>;
+class NfgContIter    {
+friend class NfgIter;
 private:
   NFSupport support;
   gArray<int> current_strat;
-  Nfg<T> *N;
+  BaseNfg *N;
   StrategyProfile profile;
   gBlock<int> frozen, thawed;
   

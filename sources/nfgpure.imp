@@ -18,11 +18,11 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 {
   int index;
   NFSupport S(N);
-  NfgContIter<T> citer(S);
+  NfgContIter citer(S);
   
   do  {
     int flag = 1;
-    NfgIter<T> niter(citer);
+    NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
       T current = N.Payoff(citer.GetOutcome(), pl);

@@ -16,7 +16,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
 
   switch (N.Type())   {
     case DOUBLE:  {
-      NfgContIter<double> A(S), B(S);
+      NfgContIter A(S), B(S);
 
       A.Freeze(pl);
       A.Set(pl, a);
@@ -48,7 +48,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
     }
 
     case RATIONAL:  {
-      NfgContIter<gRational> A(S), B(S);
+      NfgContIter A(S), B(S);
 
       A.Freeze(pl);
       A.Set(pl, a);

@@ -19,7 +19,7 @@ bool ComputeMixedDominated(const Nfg<T> &nfg,
 			   gStatus &status)
 {
   T eps;
-  NfgContIter<T> s(S);
+  NfgContIter s(S);
   s.Freeze(pl);
   gEpsilon(eps);
   double d1,d2;

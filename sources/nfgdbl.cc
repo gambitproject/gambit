@@ -21,19 +21,12 @@ class gNode<gString>;
 class gNode<gRational>;
 
 class Nfg<gRational>;
-template <class T> class NfgIter;
-class NfgIter<gRational>;
-template <class T> class NfgContIter;
-class NfgContIter<gRational>;
-
 
 #define TEMPLATE
 #pragma option -Jgd
 #endif // __GNUG__, __BORLANDC__
 
 #include "nfg.imp"
-#include "nfgiter.imp"
-#include "nfgciter.imp"
 #include "readnfg.imp"
 #include "mixedsol.imp"
 
@@ -42,9 +35,6 @@ DataType Nfg<double>::Type(void) const { return DOUBLE; }
 
 TEMPLATE class NfgFile<double>;
 TEMPLATE int ReadNfgFile(gInput &, Nfg<double> *&);
-
-TEMPLATE class NfgContIter<double>;
-TEMPLATE class NfgIter<double>;
 
 TEMPLATE class MixedProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<double> &);

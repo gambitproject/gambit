@@ -51,20 +51,11 @@ public:
   void Set(int p, Strategy  *const s);
 };
 
-template <class T> class NfgIter;
-template <class T> class NfgContIter;
-
 
 class BaseNfg;
 class NFStrategySet;
 
 class NFSupport {
-
-  friend class NfgIter<double>;
-  friend class NfgIter<gRational>;
-  friend class NfgContIter<double>;
-  friend class NfgContIter<gRational>;
-
 protected:
   const BaseNfg *bnfg;
   gArray <NFStrategySet *> sups;

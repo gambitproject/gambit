@@ -91,10 +91,6 @@ void StrategyProfile::Set(int p, Strategy *const s)
 }
 
 class NFStrategySet {
-  friend class NfgIter<double>;
-  friend class NfgIter<gRational>;
-  friend class NfgContIter<double>;
-  friend class NfgContIter<gRational>;
 protected:
   NFPlayer *nfp;
   gBlock <Strategy *> strategies;

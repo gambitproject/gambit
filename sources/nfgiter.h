@@ -9,30 +9,31 @@
 
 template <class T> class gArray;
 template <class T> class Nfg;
-template <class T> class ContIter;
+
 class StrategyProfile;
 #include "nfstrat.h"
 class NFSupport;
+class NfgContIter;
 
 //
 // This class is useful for iterating around the normal form.
 //
 
-template <class T> class NfgIter    {
+class NfgIter    {
 private:
   NFSupport support;
-  Nfg<T> *N;
+  BaseNfg *N;
   gArray<int> current_strat;
   StrategyProfile profile;
   
 public:
-  NfgIter(Nfg<T> &);
+  NfgIter(BaseNfg &);
   NfgIter(const NFSupport &s);
-  NfgIter(const NfgIter<T> &);
-  NfgIter(const NfgContIter<T> &);
+  NfgIter(const NfgIter &);
+  NfgIter(const NfgContIter &);
   ~NfgIter();
   
-  NfgIter<T> &operator=(const NfgIter<T> &);
+  NfgIter &operator=(const NfgIter &);
   
   void First(void);
   int Next(int p);

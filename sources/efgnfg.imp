@@ -45,7 +45,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   }
   
   NFSupport S(*L->N);
-  NfgContIter<T> iter(S);
+  NfgContIter iter(S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<int> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {
@@ -225,7 +225,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
     }
   }
 
-  NfgIter<T> iter(*afg);
+  NfgIter iter(*afg);
   int pl = afg->NumPlayers();
 
   gArray<int> dim(E.NumPlayers());

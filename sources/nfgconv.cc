@@ -38,8 +38,8 @@ Nfg<gRational> *ConvertNfg(const Nfg<double> &orig)
   NFSupport S1(orig);
   NFSupport S2(*N);
 
-  NfgContIter<double> C1(S1);
-  NfgContIter<gRational> C2(S2);
+  NfgContIter C1(S1);
+  NfgContIter C2(S2);
   
   do   {
     C2.SetOutcome(N->Outcomes()[C1.GetOutcome()->GetNumber()]);
@@ -79,8 +79,8 @@ Nfg<double> *ConvertNfg(const Nfg<gRational> &orig)
   NFSupport S1(orig);
   NFSupport S2(*N);
 
-  NfgContIter<gRational> C1(S1);
-  NfgContIter<double> C2(S2);
+  NfgContIter C1(S1);
+  NfgContIter C2(S2);
   
   do   {
     C2.SetOutcome(N->Outcomes()[C1.GetOutcome()->GetNumber()]);

@@ -258,6 +258,13 @@ const NFSupport &BaseMixedProfile::Support(void) const
   return support;
 }
 
+// Not really how these should be handled; but it works for now, and
+// we can deal with housekeeping later
+
+#include "nfgiter.imp"
+#include "nfgciter.imp"
+
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
