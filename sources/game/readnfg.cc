@@ -1186,9 +1186,10 @@ bool CreateNfg(const gList<gText> &players,
 
 void SetPayoff(int cont, int pl, const gNumber &value)
 {
-  if (pl == 1)
-    N->SetOutcome(cont, N->NewOutcome());
-  N->SetPayoff(N->GetOutcome(cont), pl, value);
+  if (pl == 1)  {
+    N->SetOutcomeIndex(cont, N->NewOutcome());
+  }
+  N->SetPayoff(N->GetOutcomeIndex(cont), pl, value);
 }
 
 static int ParseNfgFile(void)
