@@ -42,7 +42,15 @@ class gOutput;
 #if USE_GNU_MP
 #include <gmp.h>
 #else
-class IntRep;
+// internal Integer representation
+class IntRep {
+public:
+  unsigned short  len;          // current length
+  unsigned short  sz;           // allocated space (0 means static).
+  short           sgn;          // 1 means >= 0; 0 means < 0 
+  unsigned short  s[1];         // represented as ushort array starting here
+};
+
 extern IntRep _ZeroRep;
 extern IntRep _OneRep;
 extern IntRep _MinusOneRep;

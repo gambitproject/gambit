@@ -47,15 +47,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "math/integer.h"
 
 #if !USE_GNU_MP
-// internal Integer representation
-class IntRep {
-public:
-  unsigned short  len;          // current length
-  unsigned short  sz;           // allocated space (0 means static).
-  short           sgn;          // 1 means >= 0; 0 means < 0 
-  unsigned short  s[1];         // represented as ushort array starting here
-};
-
 // True if REP is staticly (or manually) allocated,
 // and should not be deleted by an Integer destructor.
 #define STATIC_IntRep(rep) ((rep)->sz==0)
@@ -2045,16 +2036,15 @@ gText cvtItoa(const IntRep *x, gText fmt, int& fmtlen, int base, int showbase,
 	 fmtlen = (int) (e - s - 1);
     return s;
   }
-  else
-  {
-    char* p = fmt;
+  else {
+    char *p = (char *) fmt;
 #ifdef UNUSED
-	 int gap = (int) (s - p);
+    int gap = (int) (s - p);
 #endif   // UNUSED
-	 for (char* t = s; *t != 0; ++t, ++p) *p = *t;
+    for (char* t = s; *t != 0; ++t, ++p) *p = *t;
     while (w++ < width) *p++ = fillchar;
     *p = 0;
-	 fmtlen = (int) (p - fmt);
+    fmtlen = (int) (p - (char *) fmt);
     return fmt;
   }
 }
