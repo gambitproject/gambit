@@ -11,13 +11,15 @@
 #include "efgciter.h"
 #include "behavsol.h"
 
+#include "efgpure.h"
+
 template <class T> int FindPureNash(const Efg<T> &efg,
 				    gList<BehavSolution<T> > &eqs)
 {
   int index;
   EFSupport S(efg);
   EfgContIter<T> citer(S);
-  
+
   do  {
     int flag = 1;
     EfgIter<T> eiter(citer);
@@ -36,7 +38,7 @@ template <class T> int FindPureNash(const Efg<T> &efg,
 	}
       }
     }
-    
+
     if (flag)  {
       BehavProfile<T> temp(efg);
       // zero out all the entries, since any equlibria are pure
@@ -67,3 +69,36 @@ template <class T> int FindPureNash(const Efg<T> &efg,
 TEMPLATE int FindPureNash(const Efg<double> &, gList<BehavSolution<double> > &);
 TEMPLATE int FindPureNash(const Efg<gRational> &,gList<BehavSolution<gRational> > &);
 
+
+
+//-----------------------------------
+// Interfacing to solve-by-subgame
+//-----------------------------------
+
+template <class T>
+int EfgPSNEBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				      gList<BehavSolution<T> > &solns)
+{
+  FindPureNash(E, solns);
+
+  return gstatus.Get();
+}
+
+template <class T>
+EfgPSNEBySubgame<T>::EfgPSNEBySubgame(const Efg<T> &E, int max)
+  : SubgameSolver<T>(E, max)
+{ }
+
+template <class T> EfgPSNEBySubgame<T>::~EfgPSNEBySubgame()   { }
+  
+
+
+#ifdef __GNUG__
+template class EfgPSNEBySubgame<double>;
+template class EfgPSNEBySubgame<gRational>;
+#elif defined __BORLANDC__
+#pragma option -Jgd
+class EfgPSNEBySubgame<double>;
+class EfgPSNEBySubgame<gRational>;
+#pragma option -Jgx
+#endif   // __GNUG__, __BORLANDC__
