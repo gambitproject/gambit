@@ -346,8 +346,12 @@ bool GSM::Assign( void )
   Portion* p2;
   Portion* p1;
   bool result = true;
+  gString varname;
+
   p2 = _Pop();
   p1 = _Pop();
+  if(p1->Type() == porREFERENCE)
+    varname = ((ReferencePortion*) p1)->Value();
   p2 = _ResolveRef(p2);
   p1 = _ResolveRef(p1);
   
@@ -376,7 +380,6 @@ bool GSM::Assign( void )
     {
       if(!(p1->Type() & (porINPUT|porOUTPUT))) 
       {
-	//p1->AssignFrom(p2);
 	switch(p1->Type())
 	{
 	case porINTEGER:
@@ -549,6 +552,12 @@ bool GSM::Assign( void )
       result = false;
     }
   }
+  else if(PortionTypeMatch(p1->Type(), p2->Type()))
+  {
+    _VarDefine(varname, p2);
+    delete p1;
+    _Push(p2->RefCopy());
+  }
   else
   {
     _ErrorMessage(_StdErr, 66);
@@ -569,7 +578,7 @@ bool GSM::UnAssign( void )
 #ifndef NDEBUG
   if( _Depth() < 1 )
   {
-    gerr << "  Not enough operands to execute UnAssign()\n";
+    gerr << "  Not enough operands to execute UnAssign[]\n";
   }
   assert( _Depth() >= 1 );
 #endif // NDEBUG
