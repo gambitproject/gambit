@@ -1,7 +1,7 @@
-NFG 1 D "Two person 2 x 2 game with unique mixed equilibrium" { "" "" }
+NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "" "" }
 
 { { "" "" }
 { "" "" }
 }
 
-9.000000 0.000000 0.000000 1.000000 0.000000 1.000000 1.000000 0.000000 
+9 0 0 1 0 1 1 0 
