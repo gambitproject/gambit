@@ -97,7 +97,6 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
   do {
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
-
     if ( sact->StrategyIsActive(this_strategy) ) 
       if ( IsDominated(*sact,this_strategy,strong,status) ) 
 	delete_this_strategy = true;
@@ -158,103 +157,6 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
     } while (c_copy.GoToNext()) ;
   }
 }
-
-/* - Orig
-void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
-					 NFSupport *sact,
-					 StrategyCursorForSupport *c,
-					const bool strong,
-					const bool conditional,
-					 gList<const NFSupport> *list,
-					 const gStatus &status)
-{ 
-  bool abort = false;
-  bool no_deletions = true;
-  bool check_domination = false;
-  if (sact->HasActiveStrategiesAtActiveInfosets()) 
-    check_domination = true;
-  gList<Strategy *> deletion_list;
-  StrategyCursorForSupport scanner(*s);
-
-  // First we collect all the strategies that can be deleted.
-  do {
-    Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
-    bool delete_this_strategy = false;
-
-    if ( sact->StrategyIsActive(this_Strategy) ) 
-      if ( !sact->InfosetIsActive(this_strategy->BelongsTo()) ) 
-	delete_this_strategy = true;  
-      else 
-	if (check_domination) 
-	  if ( IsDominated(*sact,this_strategy,strong,conditional,status) ) 
-	    delete_this_strategy = true;
-	
-    if (delete_this_strategy) {
-      no_deletions = false;
-      if (c->IsSubsequentTo(this_strategy)) 
-	abort = true;
-      else 
-	deletion_list += this_strategy;
-    }
-  } while (!abort && scanner.GoToNext());
-
-  // Now we delete them, recurse, then restore
-  if (!abort && !no_deletions) {
-    gList<Strategy *> actual_deletions;
-    for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
-      actual_deletions += deletion_list[i];
-      gList<Infoset *> deactivated_infosets;
-      
-      sact->RemoveStrategyReturningDeletedInfosets(deletion_list[i],
-						   &deactivated_infosets); 
-	
-      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
-	abort = true;
-    }
-
-    if (!abort)
-      AllUndominatedSubsupportsRECURSIVE(s,
-					 sact,
-					 c,
-					 strong,
-					 conditional,
-					 list,
-					 status);
-    
-    for (int i = 1; i <= actual_deletions.Length(); i++)
-      sact->AddStrategy(actual_deletions[i]);
-  }
-
-  // If there are no deletions, we ask if it is consistent, then recurse.
-  if (!abort && no_deletions) {
-    if (sact->HasActiveStrategiesForAllPlayers())
-      (*list) += *sact;
-    
-    StrategyCursorForSupport c_copy(*c);
-    
-    do {
-      if ( sact->StrategyIsActive((Strategy *)c_copy.GetStrategy()) ) {
-	
-	gList<Infoset *> deactivated_infosets;
-	sact->RemoveStrategyReturningDeletedInfosets(c_copy.GetStrategy(),
-						   &deactivated_infosets); 
-	
-	if (!c_copy.DeletionsViolateActiveCommitments(sact,
-						      &deactivated_infosets))
-	  AllUndominatedSubsupportsRECURSIVE(s,
-					     sact,
-					     &c_copy,
-					     strong,
-					     conditional,
-					     list,
-					     status);
-	sact->AddStrategy(c_copy.GetStrategy());
-	
-      }
-    } while (c_copy.GoToNext()) ;
-  }
-}
-*/
   
 gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
 						 const bool strong,
@@ -276,125 +178,6 @@ gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
   return answer;
 }
 
-/*
-void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
-					    NFSupport *sact,
-				            StrategyCursorForSupport *c,
-				            gList<const NFSupport> *list,
-				      const gStatus &status)
-{ 
-  bool abort = false;
-  bool no_deletions = true;
-  bool check_domination = false;
-  if (sact->HasActiveStrategiesAtActiveInfosets()) 
-    check_domination = true;
-  gList<Strategy *> deletion_list;
-  StrategyCursorForSupport scanner(*s);
-
-  do {
-    Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
-    bool delete_this_strategy = false;
-
-    if ( sact->StrategyIsActive(this_strategy) ) 
-      if ( !sact->InfosetIsActive(this_strategy->BelongsTo()) )
-	delete_this_strategy = true;  
-      else
-	if (check_domination) 
-	  if ( IsDominated(*sact,this_strategy,true,true,status) ||
-	       IsDominated(*sact,this_strategy,true,false,status) ) 
-	    delete_this_strategy = true;
-    if (delete_this_strategy) {
-      no_deletions = false;
-      if (c->IsSubsequentTo(this_strategy)) 
-	abort = true;
-      else 
-	deletion_list += this_strategy;
-    }
-  } while (!abort && scanner.GoToNext());
-  
-  if (!abort) {
-    gList<Strategy *> actual_deletions;
-    for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
-      actual_deletions += deletion_list[i];
-      gList<Infoset *> deactivated_infosets;
-      sact->RemoveStrategyReturningDeletedInfosets(deletion_list[i],
-						   &deactivated_infosets); 
-      if (c->DeletionsViolateActiveCommitments(sact,&deactivated_infosets))
-	abort = true;
-    }
-
-    if (!abort && deletion_list.Length() > 0)
-      PossibleNashSubsupportsRECURSIVE(s,sact,c,list,status);
-    
-    for (int i = 1; i <= actual_deletions.Length(); i++)
-      sact->AddStrategy(actual_deletions[i]);
-  }
-
-  if (!abort && no_deletions) {
-
-    if (sact->HasActiveStrategiesForAllPlayers())
-      (*list) += *sact;
-    
-    StrategyCursorForSupport c_copy(*c);
-    do {
-      if ( sact->StrategyIsActive((Strategy *)c_copy.GetStrategy()) ) {
-	gList<Infoset *> deactivated_infosets;
-	sact->RemoveStrategyReturningDeletedInfosets(c_copy.GetStrategy(),
-						   &deactivated_infosets); 
-	if (!c_copy.DeletionsViolateActiveCommitments(sact,
-						      &deactivated_infosets))
-	  PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
-	sact->AddStrategy(c_copy.GetStrategy());
-      }
-    } while (c_copy.GoToNext()) ;
-  }
-}
-  
-gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
-					       const gStatus &status)
-{
-  gList<const NFSupport> answer;
-  NFSupport sact(S);
-  StrategyCursorForSupport cursor(S);
-
-  PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
-
-  // At this point answer has all consistent subsupports without
-  // any strong dominations.  We now edit the list, removing all
-  // subsupports that exhibit weak dominations, and we also eliminate
-  // subsupports exhibiting domination by currently inactive strategies.
-
-  for (int i = answer.Length(); i >= 1; i--) {
-    NFSupport current(answer[i]);
-    StrategyCursorForSupport crsr(S);
-    bool remove = false;
-    do {
-      const Strategy *act = crsr.GetStrategy();
-      if (current.StrategyIsActive((Strategy *)act)) 
-	for (int j = 1; j <= act->BelongsTo()->NumStrategies(); j++) {
-	  Strategy *other_act = act->BelongsTo()->GetStrategy(j);
-	  if (other_act != act)
-	    if (current.StrategyIsActive(other_act)) {
-	      if (Dominates(current,other_act,act,false,status)) 
-		remove = true;
-	    }
-	    else { 
-	      current.AddStrategy(other_act);
-	      if (current.HasActiveStrategiesForAllPlayers())
-		if (Dominates(current,other_act,act,false,status)) {
-		  remove = true;
-		}
-	      current.RemoveStrategy(other_act);
-	    }
-      }
-    } while (crsr.GoToNext() && !remove);
-    if (remove)
-      answer.Remove(i);
-  }
-    
-  return answer;
-}
-*/
 
 void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 					    NFSupport *sact,
@@ -411,10 +194,10 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
   do {
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
-
     if ( sact->StrategyIsActive(this_strategy) ) 
-	  if ( IsDominated(*sact,this_strategy,true,status) ) 
-	    delete_this_strategy = true;
+      if ( IsDominated(*sact,this_strategy,true,status) ) {
+	delete_this_strategy = true;
+      }
     if (delete_this_strategy) {
       no_deletions = false;
       if (c->IsSubsequentTo(this_strategy)) 
@@ -429,7 +212,7 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions += deletion_list[i];
       sact->RemoveStrategy(deletion_list[i]); 
-    }
+    } 
 
     if (!abort && deletion_list.Length() > 0)
       PossibleNashSubsupportsRECURSIVE(s,sact,c,list,status);
@@ -437,15 +220,14 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
     for (int i = 1; i <= actual_deletions.Length(); i++)
       sact->AddStrategy(actual_deletions[i]);
   }
-
   if (!abort && no_deletions) {
-
     (*list) += *sact;
     
     StrategyCursorForSupport c_copy(*c);
     do {
       Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
-      if ( sact->StrategyIsActive(str_ptr) ) {
+      if ( sact->StrategyIsActive(str_ptr) &&
+	   sact->NumStrats(str_ptr->Player()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
 	sact->AddStrategy(str_ptr);
@@ -594,19 +376,3 @@ StrategyCursorForSupport::IsSubsequentTo(const Strategy *s) const
     else
       return false;
 }
-
-//////////////////////Testing////////////////////
-
-/*
-void AndyTest(const NFSupport &S, gStatus &status)
-{
-  //  bool strong = true;
-  //  bool conditional = true;
-  gList<const NFSupport> list = PossibleNashSubsupports(S,
-							  //strong, 
-							  //conditional, 
-							  status);
-  for (int i = 1; i <= list.Length(); i++)
-    gout << list[i] << "\n";
-} 
-*/
