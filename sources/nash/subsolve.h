@@ -43,7 +43,7 @@ private:
   gArray<gArray<Infoset *> *> infosets;
 
   void FindSubgames(const EFSupport &, gStatus &, 
-		    Node *, gList<BehavSolution> &, gList<efgOutcome *> &);
+		    Node *, gList<BehavSolution> &, gList<gbtEfgOutcome> &);
   
 public:
   SubgameSolver(void) : m_efgAlgorithm(0), m_nfgAlgorithm(0) { }

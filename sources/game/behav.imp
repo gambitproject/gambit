@@ -149,7 +149,7 @@ void PureBehavProfile<T>::Payoff(const Node *n, const T prob,
 {
   if (n->IsTerminal()) {
     for (int pl = 1; pl <= E->NumPlayers(); pl++) {
-      payoff[pl] += prob * Payoff(E->GetOutcome(n), pl);
+      payoff[pl] += prob * E->Payoff(E->GetOutcome(n))[pl];
     }
   }
   
@@ -191,10 +191,10 @@ void PureBehavProfile<T>::InfosetProbs(gPVector<T> &probs) const
 }
 
 template <class T>
-const T PureBehavProfile<T>::Payoff(efgOutcome *p_outcome,
+const T PureBehavProfile<T>::Payoff(const gbtEfgOutcome &p_outcome,
 				    const int &pl) const
 {
-  if (p_outcome) {
+  if (!p_outcome.IsNull()) {
     return E->Payoff(p_outcome)[pl];
   }
   else {
@@ -512,7 +512,7 @@ void BehavProfile<T>::Payoff(Node *node, T prob, int player, T &value) const
   Infoset * iset = node->infoset;
 
   if (node->outcome) {
-    value += prob * Payoff(node->outcome, player);
+    value += prob * Payoff(gbtEfgOutcome(node->outcome), player);
   }
 
   if (node->children.Length())  {

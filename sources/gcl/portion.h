@@ -303,23 +303,23 @@ inline bool AsBool(Portion *portion)
 // EFOutcome
 //-------------
 
-class efgOutcome;
+#include "game/outcome.h"
 
 class EfOutcomePortion : public Portion  {
 protected:
-  efgOutcome **m_value;
+  gbtEfgOutcome *m_value;
   bool m_ref;
 
   static gPool pool;
 
-  EfOutcomePortion(efgOutcome *&, bool);
+  EfOutcomePortion(gbtEfgOutcome *&, bool);
 
 public:
-  EfOutcomePortion(efgOutcome *);
+  EfOutcomePortion(gbtEfgOutcome);
   virtual ~EfOutcomePortion();
 
-  efgOutcome *Value(void) const;
-  void SetValue(efgOutcome *);
+  gbtEfgOutcome Value(void) const;
+  void SetValue(gbtEfgOutcome);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

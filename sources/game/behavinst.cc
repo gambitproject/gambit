@@ -30,23 +30,26 @@
 class ChanceInfoset;
 
 TEMPLATE_SPECIALIZATION()
-gNumber BehavProfile<gNumber>::Payoff(efgOutcome *p_outcome,
+gNumber BehavProfile<gNumber>::Payoff(const gbtEfgOutcome &p_outcome,
 				      int pl) const
 { 
-  return p_outcome->m_payoffs[pl];
+  //  return p_outcome->m_payoffs[pl];
+  return m_efg->Payoff(p_outcome, m_efg->Players()[pl]);
 }
 
 TEMPLATE_SPECIALIZATION()
-gRational BehavProfile<gRational>::Payoff(efgOutcome *p_outcome,
+gRational BehavProfile<gRational>::Payoff(const gbtEfgOutcome &p_outcome,
 					  int pl) const
 { 
-  return p_outcome->m_payoffs[pl];
+  //  return p_outcome->m_payoffs[pl];
+  return m_efg->Payoff(p_outcome, m_efg->Players()[pl]);
 }
 
 TEMPLATE_SPECIALIZATION()
-double BehavProfile<double>::Payoff(efgOutcome *p_outcome, int pl) const
+double BehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->m_doublePayoffs[pl];
+  //  return p_outcome->m_doublePayoffs[pl];
+  return m_efg->Payoff(p_outcome, m_efg->Players()[pl]);
 }
 
 template class BehavProfile<double>;

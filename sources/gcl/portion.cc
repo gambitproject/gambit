@@ -508,14 +508,14 @@ bool BoolPortion::IsReference(void) const
 
 gPool EfOutcomePortion::pool(sizeof(EfOutcomePortion));
 
-EfOutcomePortion::EfOutcomePortion(efgOutcome *p_value)
-  : m_value(new efgOutcome *(p_value)), m_ref(false)
+EfOutcomePortion::EfOutcomePortion(gbtEfgOutcome p_value)
+  : m_value(new gbtEfgOutcome(p_value)), m_ref(false)
 {
-  SetGame((efgGame *) p_value->GetGame());
+  SetGame((efgGame *) p_value.GetGame());
 }
 
-EfOutcomePortion::EfOutcomePortion(efgOutcome *&p_value, bool p_ref)
-  : m_value(&p_value), m_ref(p_ref)
+EfOutcomePortion::EfOutcomePortion(gbtEfgOutcome *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
   if (!p_ref) {
     SetGame((efgGame *) p_value->GetGame());
@@ -529,16 +529,16 @@ EfOutcomePortion::~EfOutcomePortion()
   }
 }
 
-efgOutcome *EfOutcomePortion::Value(void) const
+gbtEfgOutcome EfOutcomePortion::Value(void) const
 { return *m_value; }
 
-void EfOutcomePortion::SetValue(efgOutcome *p_value)
+void EfOutcomePortion::SetValue(gbtEfgOutcome p_value)
 {
   if (m_ref) {
     ((EfOutcomePortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame((efgGame *) p_value->GetGame());
+    SetGame((efgGame *) p_value.GetGame());
     *m_value = p_value;
   }
 }
@@ -553,7 +553,7 @@ void EfOutcomePortion::Output(gOutput& s) const
   Portion::Output(s);
   
   s << "(EFOutcome) ";
-  s << " \"" << (*m_value)->GetGame()->GetOutcomeName(*m_value) << "\"\n";
+  s << " \"" << (*m_value).GetLabel() << "\"\n";
 }
 
 gText EfOutcomePortion::OutputString(void) const
@@ -568,7 +568,7 @@ Portion* EfOutcomePortion::ValCopy(void) const
 
 Portion* EfOutcomePortion::RefCopy(void) const
 { 
-  Portion* p = new EfOutcomePortion(*m_value, true); 
+  Portion* p = new EfOutcomePortion((gbtEfgOutcome *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }

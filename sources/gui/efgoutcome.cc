@@ -105,9 +105,9 @@ void EfgOutcomeWindow::UpdateValues(void)
   }
 
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    efgOutcome *outcome = efg.GetOutcome(outc);
+    gbtEfgOutcome outcome = efg.GetOutcome(outc);
 
-    SetCellValue((char *) efg.GetOutcomeName(outcome), outc - 1, 0);
+    SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
       SetCellValue((char *) ToText(efg.Payoff(outcome, efg.Players()[pl])),
@@ -158,8 +158,8 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 
   if (col == 0) { 
     // Edited cell label
-    m_parent->Game()->SetOutcomeName(m_parent->Game()->GetOutcome(row + 1),
-				     GetCellValue(row, col).c_str());
+    gbtEfgOutcome outcome = m_parent->Game()->GetOutcome(row + 1);
+    m_parent->Game()->SetLabel(outcome, GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
@@ -195,7 +195,8 @@ void EfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_parent->Game()->DeleteOutcome(m_parent->Game()->GetOutcome(GetGridCursorRow() + 1));
+    gbtEfgOutcome outcome = m_parent->Game()->GetOutcome(GetGridCursorRow() + 1);
+    m_parent->Game()->DeleteOutcome(outcome);
     m_parent->OnOutcomesEdited();
   }
 }

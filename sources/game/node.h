@@ -55,14 +55,14 @@ class Node    {
     gText name;
     Infoset *infoset;
     Node *parent;
-    efgOutcome *outcome;
+    gbt_efg_outcome_rep *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
 
     Node(efgGame *e, Node *p);
     ~Node();
 
-    void DeleteOutcome(efgOutcome *outc);
+    void DeleteOutcome(gbt_efg_outcome_rep *outc);
 
   public:
     efgGame *Game(void) const   { return E; }

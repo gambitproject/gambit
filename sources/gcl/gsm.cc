@@ -1039,7 +1039,7 @@ void GSM::UnAssignEfgElement( efgGame *game, PortionSpec spec, void* data )
   }
 }
 
-void GSM::UnAssignEfgOutcome(efgGame *game, const efgOutcome *data)
+void GSM::UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &data)
 {
   gStack< RefHashTable* > tempRefTableStack;
 

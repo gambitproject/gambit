@@ -103,8 +103,8 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, Node *p_node)
   m_outcome->SetSelection(0);
   const efgGame &efg = *p_node->Game();
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
-    efgOutcome *outcome = efg.GetOutcome(outc);
-    gText item = ToText(outc) + ": " + efg.GetOutcomeName(outcome);
+    gbtEfgOutcome outcome = efg.GetOutcome(outc);
+    gText item = ToText(outc) + ": " + outcome.GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);
     }

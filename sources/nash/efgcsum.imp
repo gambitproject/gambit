@@ -161,7 +161,7 @@ void efgLp<T>::FillTableau(const EFSupport &p_support,
 			   int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (n->Game()->GetOutcome(n)) {
+  if (!n->Game()->GetOutcome(n).IsNull()) {
     A(s1,s2) = gNumber(A(s1,s2)) +
       gNumber(prob) * n->Game()->Payoff(n, n->Game()->Players()[1]) - gNumber(minpay);
   }

@@ -111,7 +111,7 @@ protected:
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
 
   void Payoff(Node *, T, int, T &) const;
-  T Payoff(efgOutcome *, int pl) const;
+  T Payoff(const gbtEfgOutcome &, int pl) const;
   
   void ComputeSolutionDataPass2(const Node *node);
   void ComputeSolutionDataPass1(const Node *node);

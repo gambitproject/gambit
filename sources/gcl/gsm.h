@@ -120,7 +120,7 @@ public:
   void InvalidateGameProfile( void* game, bool IsEfg );
   void UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec );  
 
-  void UnAssignEfgOutcome(efgGame *game, const efgOutcome *outcome);
+  void UnAssignEfgOutcome(efgGame *game, const gbtEfgOutcome &outcome);
   // Unassigns a SINGLE given element of an Efg
   void UnAssignEfgElement(efgGame *game, PortionSpec spec, void* data );
 

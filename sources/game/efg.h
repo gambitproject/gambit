@@ -42,7 +42,7 @@ template <class T> class BehavProfile;
 template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
-class efgOutcome;
+#include "outcome.h"
 
 class efgGame {
 private:
@@ -61,7 +61,7 @@ protected:
   mutable long m_outcome_revision;
   gText title, comment;
   gBlock<EFPlayer *> players;
-  gBlock<efgOutcome *> outcomes;
+  gBlock<gbt_efg_outcome_rep *> outcomes;
   Node *root;
   EFPlayer *chance;
   mutable Nfg *afg;
@@ -79,7 +79,7 @@ protected:
   
   void DeleteLexicon(void) const;
 
-  efgOutcome *NewOutcome(int index);
+  gbtEfgOutcome NewOutcome(int index);
 
   void WriteEfgFile(gOutput &, Node *) const;
 
@@ -157,15 +157,13 @@ public:
 
   // DATA ACCESS -- OUTCOMES
   int NumOutcomes(void) const;
-  efgOutcome *GetOutcome(int index) const;
-  efgOutcome *NewOutcome(void);
-  void DeleteOutcome(efgOutcome *);
+  gbtEfgOutcome GetOutcome(int p_id) const;
+  gbtEfgOutcome NewOutcome(void);
+  void DeleteOutcome(gbtEfgOutcome &);
 
-  efgOutcome *GetOutcome(const Node *const) const;
-  void SetOutcome(Node *, efgOutcome *);
-  
-  void SetOutcomeName(efgOutcome *, const gText &);
-  const gText &GetOutcomeName(efgOutcome *) const;
+  gbtEfgOutcome GetOutcome(const Node *const) const;
+  void SetOutcome(Node *, const gbtEfgOutcome &);
+  void SetLabel(gbtEfgOutcome &, const gText &);
  
   // EDITING OPERATIONS
   Infoset *AppendNode(Node *n, EFPlayer *p, int br);
@@ -199,10 +197,10 @@ public:
   gNumber GetChanceProb(const Action *) const;
   gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-  void SetPayoff(efgOutcome *, int pl, const gNumber &value);
-  gNumber Payoff(efgOutcome *, const EFPlayer *) const;
+  void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
+  gNumber Payoff(const gbtEfgOutcome &, const EFPlayer *) const;
   gNumber Payoff(const Node *, const EFPlayer *) const;
-  gArray<gNumber> Payoff(efgOutcome *) const;
+  gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 
   void InitPayoffs(void) const;
   
@@ -241,8 +239,8 @@ public:
   // These are auxiliary functions used by the .efg file reader code
   Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
   Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-  efgOutcome *GetOutcomeByIndex(int index) const;
-  efgOutcome *CreateOutcomeByIndex(int index);
+  gbtEfgOutcome GetOutcomeByIndex(int index) const;
+  gbtEfgOutcome CreateOutcomeByIndex(int index);
   void Reindex(void);
   Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
 };
@@ -252,28 +250,6 @@ public:
 #include "efplayer.h"
 #include "infoset.h"
 #include "node.h"
-
-class efgOutcome   {
-friend class efgGame;
-friend class BehavProfile<double>;
-friend class BehavProfile<gRational>;
-friend class BehavProfile<gNumber>;
-protected:
-  efgGame *m_efg; 
-  int m_number;
-  gText m_name;
-  gBlock<gNumber> m_payoffs;
-  gBlock<gNumber> m_doublePayoffs;
-
-  efgOutcome(efgGame *p_efg, int p_number)
-    : m_efg(p_efg), m_number(p_number), 
-      m_payoffs(p_efg->NumPlayers()), m_doublePayoffs(p_efg->NumPlayers())
-    { }
-  ~efgOutcome()  { }
-
-public:
-  efgGame *GetGame(void) const { return m_efg; }
-};
 
 efgGame *ReadEfgFile(gInput &);
 
@@ -304,7 +280,7 @@ template <class T> class PureBehavProfile   {
     // Information
     const Action *GetAction(const Infoset *) const;
     
-    const T Payoff(efgOutcome *, const int &pl) const;
+    const T Payoff(const gbtEfgOutcome &, const int &pl) const;
     const T ChanceProb(const Infoset *, const int &act) const;
     
     const T Payoff(const Node *, const int &pl) const;

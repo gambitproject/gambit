@@ -359,8 +359,8 @@ void TreeWindow::UpdateCursor(void)
 
 gText TreeWindow::OutcomeAsString(const Node *n) const
 {
-  efgOutcome *outcome = n->Game()->GetOutcome(n);
-  if (outcome) {
+  gbtEfgOutcome outcome = n->Game()->GetOutcome(n);
+  if (!outcome.IsNull()) {
     const gArray<gNumber> &v = n->Game()->Payoff(outcome);
     gText tmp = "(";
 

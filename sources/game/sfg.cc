@@ -108,13 +108,13 @@ Sfg::~Sfg()
   delete sequences;
 }
 
-void Sfg::
-MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq, 
-		 gArray<Infoset *> iset, gArray<Sequence *> parent) 
+void 
+Sfg::MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq, 
+		      gArray<Infoset *> iset, gArray<Sequence *> parent) 
 { 
   int i,pl;
 
-  if (EF.GetOutcome(n)) {
+  if (!EF.GetOutcome(n).IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
       (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.Players()[pl]);
   }
