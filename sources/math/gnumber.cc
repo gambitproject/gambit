@@ -28,7 +28,6 @@
 #pragma implementation
 #endif
 #include <math.h>
-#include <values.h>
 #include <float.h>
 #include <ctype.h>
 #include "base/base.h"

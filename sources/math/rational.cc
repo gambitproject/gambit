@@ -31,7 +31,6 @@
 //
 
 #include <math.h>
-#include <values.h>
 #include <float.h>
 #include <assert.h>
 #include <ctype.h>
