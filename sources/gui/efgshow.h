@@ -27,7 +27,7 @@ class TreeZoomWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame, public EfgClient {
+class EfgShow : public wxFrame {
 private:
   FullEfg &m_efg;
   TreeWindow *m_treeWindow;
@@ -106,6 +106,7 @@ private:
   void OnEditTreeMove(wxCommandEvent &);
   void OnEditTreeInfosets(wxCommandEvent &);
 
+  void OnEditGame(wxCommandEvent &);
   void OnEditProperties(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);

@@ -232,20 +232,40 @@ int dialogMoveAdd::GetActions(void) const
 //                   dialogEfgDelete: Member functions
 //=========================================================================
 
+const int idRADIOBOX_DELETE_TREE = 500;
+
+BEGIN_EVENT_TABLE(dialogEfgDelete, wxDialog)
+  EVT_RADIOBOX(idRADIOBOX_DELETE_TREE, dialogEfgDelete::OnDeleteTree)
+END_EVENT_TABLE()
+
 dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   : wxDialog(p_parent, -1, "Delete..."), m_node(p_node)
 {
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxBoxSizer *choicesSizer = new wxBoxSizer(wxHORIZONTAL);
+  wxString deleteChoices[] = { "Entire subtree", "Selected move" };
+  m_deleteTree = new wxRadioBox(this, idRADIOBOX_DELETE_TREE, "Delete",
+				wxDefaultPosition, wxDefaultSize,
+				2, deleteChoices, 1, wxRA_SPECIFY_COLS);
+  m_deleteTree->SetSelection(0);
+  choicesSizer->Add(m_deleteTree, 0, wxALL | wxCENTER, 5);
+
+  wxBoxSizer *actionSizer = new wxBoxSizer(wxVERTICAL);
+  actionSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
+		   0, wxCENTER | wxALL, 5);
   m_branchList = new wxListBox(this, -1);
   for (int act = 1; act <= m_node->Game()->NumChildren(m_node); act++) {
     m_branchList->Append((char *) (ToText(act) + ": " + 
 				   m_node->GetInfoset()->Actions()[act]->GetName()));
   }
   m_branchList->SetSelection(0);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
-		0, wxCENTER | wxALL, 5);
-  topSizer->Add(m_branchList, 0, wxCENTER | wxALL, 5);
+  m_branchList->Enable(false);
+  actionSizer->Add(m_branchList, 0, wxCENTER | wxALL, 5);
+  choicesSizer->Add(actionSizer, 0, wxALL, 5);
+  topSizer->Add(choicesSizer, 0, wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   wxButton *okButton = new wxButton(this, wxID_OK, "OK");
@@ -255,11 +275,15 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, Node *p_node)
   buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
-  SetAutoLayout(true);
   SetSizer(topSizer); 
   topSizer->Fit(this);
   topSizer->SetSizeHints(this); 
   Layout();
+}
+
+void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
+{
+  m_branchList->Enable(m_deleteTree->GetSelection() == 1);
 }
 
 //=========================================================================

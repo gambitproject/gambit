@@ -119,6 +119,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_TREE_COPY, EfgShow::OnEditTreeCopy)
   EVT_MENU(efgmenuEDIT_TREE_MOVE, EfgShow::OnEditTreeMove)
   EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
+  EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
   EVT_MENU(efgmenuEDIT_PROPERTIES, EfgShow::OnEditProperties)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
   EVT_MENU(efgmenuVIEW_NAVIGATION, EfgShow::OnViewCursor)
@@ -208,7 +209,6 @@ END_EVENT_TABLE()
 
 EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    EfgClient(&p_efg),
     m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), m_currentProfile(0),
     m_profileTable(0), m_solutionSashWindow(0),
@@ -536,10 +536,9 @@ void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
     m_currentSupport->SetName("Full Support");
     OnSupportsEdited();
   }
-  else if (p_nodesChanged) {
+
+  if (p_infosetsChanged || p_nodesChanged) {
     m_treeWindow->RefreshTree();
-    m_treeWindow->RefreshLayout();
-    m_treeWindow->Refresh();
   }
   
   UpdateMenus();
@@ -654,6 +653,9 @@ void EfgShow::MakeMenus(void)
 		   "Edit outcomes and payoffs");
   editMenu->Append(efgmenuEDIT_TREE, "&Tree", treeMenu,
 		   "Edit the tree");
+  editMenu->AppendSeparator();
+  editMenu->Append(efgmenuEDIT_GAME, "&Game",
+		   "Edit properties of the game");
   editMenu->AppendSeparator();
   editMenu->Append(efgmenuEDIT_PROPERTIES, "Pr&operties",
 		   "View and change properties of current selection");
@@ -903,6 +905,8 @@ void EfgShow::UpdateMenus(void)
 		  (m_efg.NumOutcomes() > 0) ? true : false);
   menuBar->Enable(efgmenuEDIT_OUTCOMES_PAYOFFS,
 		  (cursor && !m_efg.GetOutcome(cursor).IsNull()) ? true : false);
+
+  menuBar->Enable(efgmenuEDIT_PROPERTIES, (cursor) ? true : false);
   
   if (m_treeWindow) {
     menuBar->Check(efgmenuTOOLS_SUPPORT_REACHABLE,
@@ -1103,14 +1107,13 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
     if (dialog.ShowModal() == wxID_OK) {
       if (dialog.DeleteTree()) {
 	m_efg.DeleteTree(Cursor());
-	m_efg.DeleteEmptyInfosets();
       }
       else {
 	Node *keep = dialog.KeepNode();
 	m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
       }
-      m_treeWindow->RefreshTree();
-      m_treeWindow->RefreshLayout();
+      m_efg.DeleteEmptyInfosets();
+      OnTreeChanged(true, true);
     }
   }
   catch (gException &ex) {
@@ -1513,7 +1516,7 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
   dialog.ShowModal();
 }
 
-void EfgShow::OnEditProperties(wxCommandEvent &)
+void EfgShow::OnEditGame(wxCommandEvent &)
 {
   dialogEfgProperties dialog(this, m_efg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1529,6 +1532,10 @@ void EfgShow::OnEditProperties(wxCommandEvent &)
       }
     }
   }
+}
+
+void EfgShow::OnEditProperties(wxCommandEvent &)
+{
 }
 
 //----------------------------------------------------------------------

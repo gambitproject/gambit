@@ -51,6 +51,7 @@ typedef enum {
   efgmenuEDIT_TREE_MOVE = 1307,
   efgmenuEDIT_TREE_INFOSETS = 1310,
 
+  efgmenuEDIT_GAME = 1419,
   efgmenuEDIT_PROPERTIES = 1420,
 
   efgmenuVIEW_PROFILES = 1850,

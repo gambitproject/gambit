@@ -43,12 +43,11 @@ END_EVENT_TABLE()
 
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
-    m_efg(*p_efgShow->Game()), m_parent(p_efgShow),
-    m_markNode(0), m_layout(m_efg, this),
+    m_efg(*p_efgShow->Game()), m_parent(p_efgShow), m_layout(m_efg, this),
+    m_zoom(1.0), m_markNode(0), m_cursor(m_efg.RootNode()),
     m_dragImage(0), m_dragSource(0),
     m_infosetDragger(new IsetDragger(this, m_efg)),
-    m_branchDragger(new BranchDragger(this, m_efg)),
-    m_zoom(1.0), m_cursor(m_efg.RootNode())
+    m_branchDragger(new BranchDragger(this, m_efg))
 {
   // Make sure that Chance player has a name
   m_efg.GetChance()->SetName("Chance");
@@ -77,7 +76,7 @@ void TreeWindow::MakeMenus(void)
 		     "View and change node properties");
 
   m_gameMenu = new wxMenu;
-  m_gameMenu->Append(efgmenuEDIT_PROPERTIES, "Properties",
+  m_gameMenu->Append(efgmenuEDIT_GAME, "Properties",
 		     "View and change game properties");
 }
 
@@ -575,19 +574,11 @@ bool TreeWindow::ProcessShift(wxMouseEvent &ev)
   return false;
 }
 
-//
-// SupportChanged -- must be called by parent every time the cur_sup
-// changes.  Note that since it is a reference, it needs not be passed here.
-//
 void TreeWindow::SupportChanged(void)
 {
-  // Check if the cursor is still valid
-  NodeEntry *ne = m_layout.GetNodeEntry(Cursor());
-  if (ne->GetChildNumber() > 0) {
-    if (!m_parent->GetSupport()->Find(Cursor()->GetInfoset()->Actions()[ne->GetChildNumber()]))
-      SetCursorPosition(m_efg.RootNode());
+  if (!m_layout.GetNodeEntry(Cursor())) {
+    SetCursorPosition(0);
   }
-
   RefreshLayout();
   Refresh();
 }
