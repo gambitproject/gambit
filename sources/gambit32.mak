@@ -13,8 +13,8 @@ BCCDIR = C:\BC5
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
 
-EXTRACPPFLAGS = -v- 
-EXTRALINKFLAGS = -Tpe -aa -v- -V4.0 -c
+EXTRACPPFLAGS = -v 
+EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 !include make.filelist
 
@@ -37,7 +37,7 @@ GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
 
 LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
-DEBUG_FLAGS= -v-
+DEBUG_FLAGS= -v
 
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
@@ -56,6 +56,14 @@ gambit.res
 
 gambit.res :      ..\winsrc\res\gambit.rc 
     brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\gambit
+
+gcl:   $(TTYGCL_OBJECTS)
+  ilink32 $(LINKFLAGS) @&&!
+c0x32.obj $(TTYGCL_OBJECTS)
+gcl
+nul
+cw32mti import32
+!
 
 wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
   ilink32 $(LINKFLAGS) @&&!

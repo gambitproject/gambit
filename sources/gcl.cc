@@ -1,7 +1,7 @@
 //
 // FILE: gcl.cc -- top level of the Gambit Command Line
 //
-//  $Id$
+// $Id$
 //
 
 #include <signal.h>
@@ -99,34 +99,7 @@ int matherr(struct exception *e)
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
-#ifdef __BORLANDC__
-#include "stdafx.h"
-#include "mainfrm.h"
-#include "wineditdoc.h"
-#include "wineditview.h"
-#endif // __BORLANDC__
-
-void BeginWaitCursor()
-{
-#ifdef __BORLANDC__
-((CMainFrame*) AfxGetMainWnd())->BeginWaitCursor();
-#endif // __BORLANDC__
-}
-
-void EndWaitCursor()
-{
-#ifdef __BORLANDC__
-((CMainFrame*) AfxGetMainWnd())->EndWaitCursor();
-#endif // __BORLANDC__
-}
-
-
-#ifdef __BORLANDC__
-int gcl_main( int /*argc*/, char* argv[] )
-#else
 int main( int /*argc*/, char* argv[] )
-#endif // __BORLANDC__
-
 {
   set_new_handler(gclNewHandler);
 
@@ -188,9 +161,7 @@ int main( int /*argc*/, char* argv[] )
       gText fileName = P.GetFileName();
       int lineNumber = P.GetLineNumber();
       gText rawLine = P.GetRawLine();
-      BeginWaitCursor();  // for BC
       C.Parse(line, fileName, lineNumber, rawLine );
-      EndWaitCursor();  // for BC
     }
 
     delete[] _SourceDir;
