@@ -39,7 +39,7 @@ PortionSpec gclQuitExpression::Type(void) const
 
 Portion *gclQuitExpression::Evaluate(void)
 {
-  throw gclQuitOccurred();
+  throw gclQuitOccurred(0);
 }
 
 //--------
@@ -407,6 +407,9 @@ gclVarName::~gclVarName()
 
 Portion *gclVarName::Evaluate(void)
 {
+  if (((ReferencePortion *) value)->Value() == "Quit")
+    throw gclQuitOccurred(0);
+
   return value->ValCopy();
 }
 

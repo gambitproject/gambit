@@ -32,9 +32,15 @@ public:
 
 
 class gclQuitOccurred : public gException {
- public:
+private:
+  int m_exitValue;
+
+public:
+  gclQuitOccurred(int p_exitValue) : m_exitValue(p_exitValue) { }
   ~gclQuitOccurred() { }
+
   gText Description(void) const { return "Quit expression executed"; }
+  int Value(void) const { return m_exitValue; }
 };
 
 

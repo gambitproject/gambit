@@ -164,9 +164,9 @@ int main( int /*argc*/, char* argv[] )
 
   // AIX has some problem with exception handling
 #ifndef _AIX
-  catch (gclQuitOccurred &e) {
+  catch (gclQuitOccurred &E) {
     gCmdLineInput::RestoreTermAttr(); 
-    return 0;
+    return E.Value();
   }
   // The last line of defense for exceptions:
   catch (gException &w)  {

@@ -1075,6 +1075,9 @@ Portion *CallFuncObj::CallNormalFunction(GSM *gsm, Portion **param)
 				  _FuncInfo[m_funcIndex], param,
 				  FuncName() + gText((char) (m_funcIndex+1)));
   }
+  catch (gclQuitOccurred &) {
+    throw;
+  }
   catch (...) {
     gout << "In function " << _FuncName << "[], in file \"" << m_file;
     gout << "\" at line " << ToText(m_line) << ":\n";

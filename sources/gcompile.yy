@@ -310,8 +310,9 @@ constant:        BOOLEAN
         |        NAME
           { $$ = new gclVarName(tval); }
         |        list   { $$ = $1; }
-        |        QUIT
+/*        |        QUIT
           { $$ = new gclQuitExpression; }
+*/
         ;
 
 list:            LBRACE RBRACE  { $$ = new gclListConstant; }
@@ -500,7 +501,7 @@ int GCLCompiler::yylex(void)
     else if (s == "If")     return IF;
     else if (s == "While")  return WHILE;
     else if (s == "For")    return FOR;
-    else if (s == "Quit")   return QUIT;
+//    else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
     else if (s == "Machine")   return MACHINEPREC;

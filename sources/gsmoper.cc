@@ -962,6 +962,15 @@ static Portion *GSM_Print(Portion **param)
   return param[0]->ValCopy();
 }
 
+//-------
+// Quit
+//-------
+
+static Portion *GSM_Quit(Portion **param)
+{
+  throw gclQuitOccurred(((NumberPortion *) param[0])->Value());
+}
+
 //------------
 // Randomize
 //------------
@@ -1849,6 +1858,13 @@ void Init_gsmoper(GSM* gsm)
 				       funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("y", porTEXT));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Quit", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Quit, porBOOL, 1, 0,
+				       funcNONLISTABLE));
+  FuncObj->SetParamInfo(0, 0, gclParameter("value", porINTEGER,
+					   new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   //-------------------- Streams -------------------------
