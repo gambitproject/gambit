@@ -867,29 +867,38 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     gList<MixedSolution> solutions;
 
-    if (dialog.UseGridSearch()) {
-      QreNfgGrid algorithm;
-      algorithm.SetFullGraph(true);
-      algorithm.SetMinLambda(dialog.StartLambda());
-      algorithm.SetMaxLambda(dialog.StopLambda());
-      algorithm.SetDelLambda(dialog.StepLambda());
-      algorithm.SetPowLambda(1);
-      algorithm.SetDelP1(dialog.Del1());
-      algorithm.SetDelP2(dialog.Del2());
-      algorithm.SetTol1(dialog.Tol1());
-      algorithm.SetTol2(dialog.Tol2());
+    try {
+      if (dialog.UseGridSearch()) {
+	QreNfgGrid algorithm;
+	algorithm.SetFullGraph(true);
+	algorithm.SetMinLambda(dialog.StartLambda());
+	algorithm.SetMaxLambda(dialog.StopLambda());
+	algorithm.SetDelLambda(dialog.StepLambda());
+	algorithm.SetPowLambda(1);
+	algorithm.SetDelP1(dialog.Del1());
+	algorithm.SetDelP2(dialog.Del2());
+	algorithm.SetTol1(dialog.Tol1());
+	algorithm.SetTol2(dialog.Tol2());
 
-      wxStatus status(this, "QreGridSolve Progress");
-      gNullOutput gnull;
-      algorithm.Solve(*m_currentSupport, gnull, status, solutions);
+	wxStatus status(this, "QreGridSolve Progress");
+	gNullOutput gnull;
+	algorithm.Solve(*m_currentSupport, gnull, status, solutions);
+      }
+      else {
+	nfgQre algorithm;
+	algorithm.SetFullGraph(true);
+	algorithm.SetMaxLambda(10000000);
+
+	wxStatus status(this, "QreSolve Progress");
+	solutions = algorithm.Solve(*m_currentSupport, status);
+      }
     }
-    else {
-      nfgQre algorithm;
-      algorithm.SetFullGraph(true);
-      algorithm.SetMaxLambda(10000000);
-
-      wxStatus status(this, "QreSolve Progress");
-      solutions = algorithm.Solve(*m_currentSupport, status);
+    catch (gSignalBreak &) { }
+    catch (...) {
+      wxMessageDialog message(this,
+			      "An exception occurred in computing equilibria",
+			      "Error", wxID_OK);
+      message.ShowModal();
     }
 
     if (solutions.Length() > 0) {
