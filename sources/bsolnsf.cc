@@ -27,7 +27,7 @@ char *BSolnSortFilterOptions::filter_tri_str[3+1] =
 { "E", "Yes", "No", "DK" };
 
 gTriState BSolnSortFilterOptions::filter_tri_id[3+1] = 
-{ triMAYBE, triTRUE, triFALSE, triMAYBE };
+{ triUNKNOWN, triTRUE, triFALSE, triUNKNOWN };
 
 // Constructor
 BSolnSortFilterOptions::BSolnSortFilterOptions(void)

@@ -26,7 +26,7 @@ NfgAlgType MSolnSortFilterOptions::filter_cr_id[NUM_MCREATORS+1] =
 
 char *MSolnSortFilterOptions::filter_tri_str[3+1] = { "E", "Yes", "No", "DK" };
 
-gTriState MSolnSortFilterOptions::filter_tri_id[3+1] = { triMAYBE, triTRUE, triFALSE, triMAYBE };
+gTriState MSolnSortFilterOptions::filter_tri_id[3+1] = { triUNKNOWN, triTRUE, triFALSE, triUNKNOWN };
 
 
 // Constructor
