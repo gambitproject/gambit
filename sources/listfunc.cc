@@ -354,7 +354,7 @@ Portion *GSM_LengthText(Portion **param)
   return new NumberPortion(((TextPortion *) param[0])->Value().Length());
 }
 
-Portion *GSM_NthChar(Portion **param)
+Portion *GSM_NthElementText(Portion **param)
 {
   gText text(((TextPortion *) param[0])->Value());
   int n = ((NumberPortion *) param[1])->Value();
@@ -783,8 +783,8 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, gclParameter("n", porNUMBER));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("NthChar", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_NthChar, porTEXT, 2));
+  FuncObj = new gclFunction("NthElement", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_NthElementText, porTEXT, 2));
   FuncObj->SetParamInfo(0, 0, gclParameter("text", porTEXT));
   FuncObj->SetParamInfo(0, 1, gclParameter("n", porINTEGER));
   gsm->AddFunction(FuncObj);
