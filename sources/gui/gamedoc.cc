@@ -635,17 +635,19 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
   }
 
   if (p_command->ModifiesGame()) {
-    // Reset the list of extensive form supports
-    while (m_efgSupports.Length()) { 
-      delete m_efgSupports.Remove(1);
-    }
-    m_curEfgSupport = new gbtEfgSupport(*m_efg);
-    m_efgSupports.Append(m_curEfgSupport);
-    m_curEfgSupport->SetLabel("Full Support");
-
-    // Reset the list of computed profiles
-    while (m_behavProfiles.Length()) {
-      m_behavProfiles.Remove(1);
+    if (HasEfg()) {
+      // Reset the list of extensive form supports
+      while (m_efgSupports.Length()) { 
+	delete m_efgSupports.Remove(1);
+      }
+      m_curEfgSupport = new gbtEfgSupport(*m_efg);
+      m_efgSupports.Append(m_curEfgSupport);
+      m_curEfgSupport->SetLabel("Full Support");
+      
+      // Reset the list of computed profiles
+      while (m_behavProfiles.Length()) {
+	m_behavProfiles.Remove(1);
+      }
     }
 
     // Reset the list of normal form supports 
@@ -661,9 +663,11 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
       m_mixedProfiles.Remove(1);
     }
 
+    m_curProfile = 0;
+
     // Make sure the contingency points to a non-bogus profile
     m_contingency = gbtArray<int>(GetNfg().NumPlayers());
-    for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
+    for (int pl = 1; pl <= GetNfg().NumPlayers(); m_contingency[pl++] = 1);
 
     m_modified = true;
   }
