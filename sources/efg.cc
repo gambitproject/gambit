@@ -1,8 +1,8 @@
-//
-// FILE: extform.cc -- Implementation of extensive form data type
-//
-// $Id$
-//
+//#
+//# FILE: extform.cc -- Implementation of extensive form data type
+//#
+//# $Id$
+//#
 
 #include "extform.h"
 
@@ -12,25 +12,25 @@ const int dummy = -1;
 void ExtForm::AddPlayer(int p)
 {
   nodes.AddPlayer(p);
-  players.AddPlayer(p);
+//#old code  players.AddPlayer(p);
 }
 
 int ExtForm::CreateInfoset(int p, int game, int kids)
 {
-  nodes.CreateInfoset(p);
-  return players.CreateInfoset(p, game, kids);
+  return nodes.CreateInfoset(p, kids);
+//#old code  return players.CreateInfoset(p, game, kids);
 }
 
+/*
 ExtForm &ExtForm::operator=(const ExtForm &ef)
 {
   if (this != &ef)  {
     efg_no = ef.efg_no;
     nodes = ef.nodes;
-    players = ef.players;
   }
   return *this;
 }
-
+*/
 
 Node ExtForm::AddNode(const Node &n, int player, int child_count)
 {
@@ -43,8 +43,9 @@ Node ExtForm::AddNode(const Node &n, int player, int child_count)
 
   Node ret(efg_no, player, iset_no, 0);
   
-  if (nodes.MoveNode(n, ret))  
-    players.RemoveInfoset(n[1], n[0], n[2]);
+  nodes.MoveNode(n,ret);
+//#old code  if (nodes.MoveNode(n, ret))  
+//#old code    players.RemoveInfoset(n[1], n[0], n[2]);
   
   for (int i = 1; i <= child_count; i++)   
     nodes.CreateNode(dummy, CreateInfoset(dummy, efg_no, 0), ret);
@@ -80,8 +81,9 @@ Node ExtForm::DeleteNode(const Node &n, int keep)
     foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 1)));
   while (nodes.NumChildren(foo) > 1)
     foo = DeleteTerminalNode(DeleteTree(nodes.GetChildNumber(foo, 2)));
-  if (nodes.DeleteInternalNode(foo, ret)) 
-    players.RemoveInfoset(foo[1], efg_no, foo[2]);
+  nodes.DeleteInternalNode(foo, ret);
+//#old code  if (nodes.DeleteInternalNode(foo, ret)) 
+//#old code    players.RemoveInfoset(foo[1], efg_no, foo[2]);
 
   return ret;
 }
@@ -99,11 +101,14 @@ Node ExtForm::JoinInfoset(const Node &new_node, const Node &to_iset)
 
   Node ret(to_iset);
   
-  if (nodes.MoveNode(new_node, ret))  {
-    players.RemoveInfoset(new_node[1], new_node[0], new_node[2]);
-	// take into account possible infoset renumbering...
-    if (new_node[1] == ret[1] && new_node[2] < ret[2])  ret[2]--;
+  if (nodes.MoveNode(new_node, ret)) {
+	//# take into account possible infoset renumbering...
+    if (new_node[1] == ret[1] && new_node[2] < ret[2]) ret[2]--;
   }
+//#old code  if (nodes.MoveNode(new_node, ret))  {
+//#old code    players.RemoveInfoset(new_node[1], new_node[0], new_node[2]);
+//#old code    if (new_node[1] == ret[1] && new_node[2] < ret[2])  ret[2]--;
+//#old code  }
 
   return ret;
 }
@@ -116,7 +121,7 @@ Node ExtForm::LeaveInfoset(const Node &n)
 
   Node ret(efg_no, n[1], CreateInfoset(n[1], efg_no, nodes.NumChildren(n)), 1);
 
-      // we already know this won't empty the infoset...
+      //# we already know this won't empty the infoset...
   nodes.MoveNode(n, ret);
 
   return ret;
@@ -135,26 +140,26 @@ Node ExtForm::MergeInfoset(const Node &from, const Node &into)
 
   Node ret(nodes.MoveNodes(from, into));
 
-  players.RemoveInfoset(from[1], from[0], from[2]);
+  nodes.RemoveInfoset(from[1], from[2]);
+//#old code  players.RemoveInfoset(from[1], from[0], from[2]);
 
   return ret;
 }
-
 
 void ExtForm::InsertAction(const Node &n, int where, int number)
 {
   if (!nodes.IsMember(n))   return;
   
-  for (int i = 0; i < number; i++)  
-    players.InsertAction(n[1], n[0], n[2], where + i);
+  for (int i = 0; i < number; i++)
+    nodes.InsertAction(n[1], n[2], where + i);
+//#old code  for (int i = 0; i < number; i++)  
+//#old code    players.InsertAction(n[1], n[0], n[2], where + i);
 
-
-      // we have to remember to insert the branch in all members of the iset
+      //# we have to remember to insert the branch in all members of the iset
   for (i = 0; i < number; i++)
     for (int j = 1; j <= nodes.NumNodes(n[1], n[2]); j++)   
       nodes.InsertChild(dummy, CreateInfoset(dummy, efg_no, 0), 
 			Node(efg_no, n[1], n[2], j), where + i);
-
 }
 
 
@@ -162,11 +167,12 @@ Node ExtForm::DeleteAction(const Node &n, int which)
 {
   if (!nodes.IsMember(n))    return Node(efg_no, dummy, 1, 1);
 
-  players.RemoveAction(n[1], n[0], n[2], which);
+  nodes.RemoveAction(n[1], n[2], which);
+//#old code  players.RemoveAction(n[1], n[0], n[2], which);
 
   Node ret(n);
 
-      // remember to remove branch from all members of iset
+      //# remember to remove branch from all members of iset
   for (int i = 1; i <= nodes.NumNodes(ret[1], ret[2]); i++)  
     ret = DeleteTerminalNode(
 	     DeleteTree(nodes.GetChildNumber(Node(efg_no,ret[1],ret[2],i),
@@ -178,21 +184,32 @@ Node ExtForm::DeleteAction(const Node &n, int which)
 gVector<gNumber> ExtForm::GetActionProbs(const Node &n) const
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return gVector<gNumber>(1, 0);
-  return players.GetActionProbs(n[0], n[2]);
+  return nodes.GetActionProbs(n[1], n[2]);
+//#old code  return players.GetActionProbs(n[0], n[2]);
 }
 
 gNumber ExtForm::GetActionProb(const Node &n, int br) const
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return -1.0;
-  return players.GetActionProb(n[0], n[2], br);
+  return nodes.GetActionProb(n[1], n[2], br);
+//#old code  return players.GetActionProb(n[0], n[2], br);
 }
 
 void ExtForm::SetActionProbs(const Node &n, const gVector<gNumber> &probs)
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return;
-  players.SetActionProbs(n[0], n[2], probs);
+  nodes.SetActionProbs(n[1], n[2], probs);
+//#old code  players.SetActionProbs(n[0], n[2], probs);
 }
 
+void ExtForm::SetActionProbs(int pl, int iset, const gVector<gNumber> &probs)
+{
+  Node n;
+  n[0] = efg_no;
+  n[1] = pl + 2;
+  n[2] = iset;
+  SetActionProbs(n, probs);
+}
 
 Node ExtForm::MoveTree(Node src, Node dest)
 {
@@ -218,9 +235,10 @@ Node ExtForm::CopyTree(Node src, Node dest)
 
   Node foo(efg_no, src[1], src[2], 0);
 
-  if (nodes.MoveNode(dest, foo))  
-    players.RemoveInfoset(dest[1], dest[0], dest[2]);
-  
+  nodes.MoveNode(dest, foo);
+//#old code  if (nodes.MoveNode(dest, foo))  
+//#old code    players.RemoveInfoset(dest[1], dest[0], dest[2]);
+
   for (int i = 1; i <= nodes.NumChildren(src); i++)   {
     nodes.CreateNode(dummy, CreateInfoset(dummy, efg_no, 0), foo);
     CopyTree(nodes.GetChildNumber(src, i), nodes.GetChildNumber(foo, i));
@@ -229,13 +247,14 @@ Node ExtForm::CopyTree(Node src, Node dest)
   return src;
 }
 
-// Delete a terminal node, and return the new ID of its parent
+//# Delete a terminal node, and return the new ID of its parent
 Node ExtForm::DeleteTerminalNode(const Node &n)
 {
   Node parent;
 
-  if (nodes.DeleteNode(n, parent))
-    players.RemoveInfoset(n[1], n[0], n[2]);
+  nodes.DeleteNode(n, parent);
+//#old code  if (nodes.DeleteNode(n, parent))
+//#old code    players.RemoveInfoset(n[1], n[0], n[2]);
   return parent;
 }
 
@@ -265,29 +284,31 @@ Node ExtForm::DeleteTree(const Node &n)
 
   Node ret(efg_no, dummy, CreateInfoset(dummy, efg_no, 0), 1);
 
-  if (nodes.MoveNode(foo, ret))
-    players.RemoveInfoset(foo[1], foo[0], foo[2]);
+  nodes.MoveNode(foo, ret);
+//#  if (nodes.MoveNode(foo, ret))
+//#    players.RemoveInfoset(foo[1], foo[0], foo[2]);
 
   return ret;
 }
 
-void ExtForm::WriteToFile(output &f) const
+/*
+void ExtForm::WriteToFile(gOutput &f) const
 {
   f << "{ " << efg_no << " \"" << name << '"' << '\n';
   f << "  {";
-  for (int i = 0; i <= players.NumPlayers(); i++)   {
+  for (int i = 0; i <= nodes.NumPlayers(); i++)   {
     f << ((i == 0) ? " {" : "    {");
-    for (int j = 1; j <= players.NumInfosets(i, efg_no); j++)  {
+    for (int j = 1; j <= nodes.NumInfosets(i, efg_no); j++)  {
       f << ((j == 1) ? " " : "\n      ");
-      f << "{ \"" << players.GetInfosetName(i, efg_no, j) << "\" {";
-      for (int k = 1; k <= players.NumActions(i, efg_no, j); k++)
-	f << " \"" << players.GetActionName(i, efg_no, j, k) << '"';
+      f << "{ \"" << nodes.GetInfosetName(i, efg_no, j) << "\" {";
+      for (int k = 1; k <= nodes.NumActions(i, efg_no, j); k++)
+	f << " \"" << nodes.GetActionName(i, efg_no, j, k) << '"';
       f << " }";
       
       if (i == 0)   { // chance player, print branch probs
 	f << " { ";
-	for (k = 1; k <= players.NumActions(i, efg_no, j); k++)
-	  f << players.GetActionProb(efg_no, j, k) << ' ';
+	for (k = 1; k <= nodes.NumActions(i, efg_no, j); k++)
+	  f << nodes.GetActionProb(efg_no, j, k) << ' ';
 	f << '}';
       }
 
@@ -301,7 +322,9 @@ void ExtForm::WriteToFile(output &f) const
   
   f << "}\n";
 }
+*/
 
+/*
 int ExtForm::yyparse(void)
 {
   for (int i = 1; i <= players.NumPlayers(); i++)
@@ -326,4 +349,4 @@ int ExtForm::yyparse(void)
 
   return 0;
 }
-
+*/

@@ -1,40 +1,38 @@
-//
-// FILE: extform.h -- Declaration of extensive form data type
-//
-// $Id$
-//
+//#
+//# FILE: extform.h -- Declaration of extensive form data type
+//#
+//# $Id$
+//#
 
 #ifndef EXTFORM_H
 #define EXTFORM_H
 
 #include "node.h"
-#include "player.h"
-
 
 class ExtForm    {
   private:
     int efg_no;
     gString name;
     NodeSet nodes;
-    PlayerSet &players;
 
     int CreateInfoset(int, int, int);
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
   public:
-	// CONSTRUCTORS AND DESTRUCTOR
-    ExtForm(int number, PlayerSet &p, int from_file = 0) : 
-      efg_no(number), players(p), nodes(number, from_file)   { }
-    ExtForm(const ExtForm &ef) : nodes(ef.nodes), players(ef.players)  { }
+	//# CONSTRUCTORS AND DESTRUCTOR
+    ExtForm(int number, int numPlayers, int from_file = 0) : 
+    efg_no(number), nodes(numPlayers, from_file)   { }
+//# numPlayers above may need +/- 2
+//#    ExtForm(const ExtForm &ef) : nodes(ef.nodes)   { }
     ~ExtForm()  { }
 
-	// OPERATOR OVERLOADING
-    ExtForm &operator=(const ExtForm &);
+	//# OPERATOR OVERLOADING
+//#    ExtForm &operator=(const ExtForm &);
 
-    int yyparse(void);
+//#    int yyparse(void);
 
-	// HIGH-LEVEL OPERATIONS
+	//# HIGH-LEVEL OPERATIONS
     Node AddNode(const Node &n, int player, int child_count);
     void SetNodeLabel(const Node &n, const gString &s)
       { if (nodes.IsMember(n))  nodes.SetNodeName(n, s); }
@@ -45,14 +43,20 @@ class ExtForm    {
     Node LeaveInfoset(const Node &n);
     Node MergeInfoset(const Node &from, const Node &into);
     void LabelInfoset(const Node &n, const gString &label)
-      { players.SetInfosetName(n[1], n[0], n[2], label); }
+      { nodes.SetInfosetName(n[1], n[2], label); }
+//#old code      { players.SetInfosetName(n[1], n[0], n[2], label); }
+    gString GetInfosetName(const Node &n)
+      { return nodes.GetInfosetName(n[1], n[2]); }
 
+    void AppendAction(int pl, int iset)
+      { nodes.AppendAction(pl, iset); }
     void InsertAction(const Node &n, int where, int number);
     Node DeleteAction(const Node &n, int which);
     void LabelAction(const Node &n, int br, const gString &label)  { }
     gVector<gNumber> GetActionProbs(const Node &n) const;
     gNumber GetActionProb(const Node &n, int br) const;
     void SetActionProbs(const Node &n, const gVector<gNumber> &probs);
+    void SetActionProbs(int pl, int iset, const gVector<gNumber> &probs);
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
@@ -74,7 +78,7 @@ class ExtForm    {
     void SetTreeName(const gString &s)   { name = s; }
     gString GetTreeName(void) const   { return name; }
 
-	// OPERATIONS ON NODES
+	//# OPERATIONS ON NODES
     Node RootNode(void) const
       { return nodes.RootNode(); }
     Node GetParent(const Node &n) const
@@ -83,7 +87,7 @@ class ExtForm    {
       { return nodes.NumChildren(n); }
     Node GetChildNumber(const Node &n, int number) const
       { return nodes.GetChildNumber(n, number); }
-    gSet<Node> GetChildren(const Node &n) const
+    gBlock<Node> GetChildren(const Node &n) const
       { return nodes.GetChildren(n); }
     Node GetPriorSibling(const Node &n) const
       { return nodes.GetPriorSibling(n); }
@@ -96,7 +100,7 @@ class ExtForm    {
     int IsPredecessor(const Node &n, const Node &of) const
       { return nodes.IsPredecessor(n, of); }
 
-	// GENERAL INFORMATION
+	//# GENERAL INFORMATION
     int NumNodes(void) const
       { return nodes.NumNodes(); }
     int NumNodes(int pl) const
@@ -115,10 +119,10 @@ class ExtForm    {
 
     void AddPlayer(int);
 
-	// FILE OPERATIONS
-    void WriteToFile(output &f) const;
+	//# FILE OPERATIONS
+//#    void WriteToFile(gOutput &f) const;
 };
 
 
-#endif   // EXTFORM_H
+#endif   //# EXTFORM_H
 
