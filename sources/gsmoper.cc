@@ -1753,6 +1753,13 @@ Portion* GSM_Date(Portion**)
 }
 
 
+Portion* GSM_IsList( Portion** p )
+{
+  return new BoolPortion( p[0]->Spec().ListDepth > 0 );
+}
+
+
+
 
 void Init_gsmoper(GSM* gsm)
 {
@@ -2246,6 +2253,20 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
 					    new BoolPortion( true ) ) );
   gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("IsList", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsList, porBOOL, 1,
+				       NO_PREDEFINED_PARAMS, 
+				       funcNONLISTABLE ));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE ));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsList, porBOOL, 1, 
+				       NO_PREDEFINED_PARAMS, 
+				       funcNONLISTABLE ));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("list", 
+					    PortionSpec(porANYTYPE,NLIST)));
+  gsm->AddFunction(FuncObj);
+
 
 }
 
