@@ -466,6 +466,10 @@ template <class T>
 int Basis<T>::Label(int i) const
 { return columns.Label(i);}
 
+template <class T>
+int Basis<T>::Find(int i) const
+{ return columns.find(i);}
+
 
 
 

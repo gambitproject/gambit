@@ -136,6 +136,7 @@ template <class T> class Basis {
   bool Member(int i) const;
   bool Member(int i,bool flag) const;
   int Label(int i) const;   // return variable in i'th position of basis
+  int Find(int i) const;  // return basis position of variable i
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int inlabel);
   void Pivot(int outrow, bool inflag,int inlabel);
