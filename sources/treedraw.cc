@@ -17,7 +17,7 @@
 #include "legendc.h"
 
 TreeDrawSettings::TreeDrawSettings(void)
-  : x_origin(0), y_origin(0), 
+  : x_origin(0), y_origin(0), max_x(0), max_y(0),
     node_above_font(NULL), node_below_font(NULL), node_right_font(NULL),
     branch_above_font(NULL), branch_below_font(NULL),
     zoom_factor(1.0)

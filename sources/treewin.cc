@@ -116,7 +116,6 @@ TreeWindow::TreeWindow(FullEfg &ef_, EFSupport * &disp, EfgShow *frame_)
     infosets_changed = TRUE;
     outcomes_changed = FALSE;
     must_recalc = FALSE;
-    log = FALSE;
 
     // Create scrollbars
     //    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 1, 1);
@@ -2525,20 +2524,28 @@ const float ZOOM_MIN = .2;
 
 void TreeWindow::display_zoom_in(void)
 {
-  if (zoom_window) {
-    float zoom = zoom_window->GetZoom();
-    zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
-    zoom_window->SetZoom(zoom);
+  if (!zoom_window) {
+    display_zoom_win();
   }
+
+  float zoom = zoom_window->GetZoom();
+  zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
+  zoom_window->SetZoom(zoom);
+
+  zoom_window->GetParent()->Show(TRUE);
 }
 
 void TreeWindow::display_zoom_out(void)
 {
-  if (zoom_window) {
-    float zoom = zoom_window->GetZoom();
-    zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
-    zoom_window->SetZoom(zoom);
+  if (!zoom_window) {
+    display_zoom_win();
   }
+
+  float zoom = zoom_window->GetZoom();
+  zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
+  zoom_window->SetZoom(zoom);
+  
+  zoom_window->GetParent()->Show(TRUE);
 }
 
 float TreeWindow::display_get_zoom(void)
@@ -2573,8 +2580,30 @@ void TreeWindow::display_zoom_fit(void)
   draw_settings.SetZoom(zoom);
   GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
   pframe->SetClientSize(width, height+50); // +50 to account for the toolbar
+  pframe->SetSizeHints(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT);
   ProcessCursor();
   OnPaint();
+}
+
+void TreeWindow::OnSize(int p_width, int p_height)
+{
+  wxEvtHandler::OnSize(p_width, p_height);
+
+  pframe->GetClientSize(&p_width, &p_height);
+  p_height -= 50;   // for the toolbar
+
+  if (draw_settings.MaxX() == 0 || draw_settings.MaxY() == 0) {
+    return;
+  }
+
+  double zoomx = (double) p_width / (double) draw_settings.MaxX();
+  double zoomy = (double) p_height / (double) draw_settings.MaxY();
+    
+  zoomx = gmin(zoomx, 1.0);
+  zoomy = gmin(zoomy, 1.0);
+  double zoom = gmin(zoomx, zoomy); 
+  draw_settings.SetZoom(zoom);
+  GetDC()->SetUserScale(zoom, zoom);
 }
 
 float TreeWindow::GetZoom(void) const

@@ -699,11 +699,12 @@ void TreeZoomWindow::Render(wxDC &dc)
 
   // coordinates of the middle of the cursor
   int xm = (xs+xe)/2, ym = (ys+ye)/2;
-  int ox = width/2-xm;
-  int oy = height/2-ym;
+  ox = width/2-xm;
+  oy = height/2-ym;
   dc.SetDeviceOrigin(0, 0); // should not be necessary, but its a bug
   Clear();
   dc.SetDeviceOrigin(ox * m_zoom, oy * m_zoom);
+
   TreeRender::Render(dc);
   flasher->Flash();
 }

@@ -104,7 +104,7 @@ private:
   // Real xs,ys,xe,ye: true (untranslated) coordinates of the cursor.  
   // Need this if we repaint due to events other than cursor movement.  
   // See ::Render()
-  int xs, ys, xe, ye;
+  int xs, ys, xe, ye, ox, oy;
   TreeWindow *m_parent;
   float m_zoom;
 
@@ -166,7 +166,6 @@ private:
     Bool      must_recalc;          
 
     Bool      need_clear;           // Do we need to clear the screen?
-    gOutput   *log;                 // Are we saving each action to a file?
     Infoset *hilight_infoset;       // Hilight infoset from the solution disp
     Infoset *hilight_infoset1;      // Hilight infoset by pressing control
     TreeZoomWindow *zoom_window;
@@ -205,6 +204,8 @@ private:
     void  UpdateTableParents(void);
     static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
     void MakeMenus(void);
+
+  void OnSize(int, int);
     
 protected:
     Node *m_cursor;  // Used to process cursor keys, stores current position.

@@ -910,11 +910,6 @@ void EfgShow::MakeMenus(void)
 		       "Information about this game");
   
   wxMenu *prefs_menu = new wxMenu;
-  prefs_menu->Append(efgmenuPREFS_DEC_ZOOM, "Zoom &In",
-		     "Zoom in");
-  prefs_menu->Append(efgmenuPREFS_INC_ZOOM, "Zoom &Out", 
-		     "Zoom out");
-
   wxMenu *prefsDisplayMenu = new wxMenu;
   prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
@@ -1207,9 +1202,11 @@ void EfgShow::OnMenuCommand(int id)
 
     case efgmenuPREFS_INC_ZOOM:
       tw->display_zoom_in();
+      GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, TRUE);
       break;
     case efgmenuPREFS_DEC_ZOOM:
       tw->display_zoom_out();
+      GetMenuBar()->Check(efgmenuINSPECT_ZOOM_WIN, TRUE);
       break;
     case efgmenuPREFS_LEGEND:
       tw->display_legends();
@@ -1269,7 +1266,7 @@ void EfgShow::OnMenuCommand(int id)
     }
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORT_SELECT) {
+    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORT_SELECT)  { 
       tw->OnPaint();
       tw->SetFocus();
     }
