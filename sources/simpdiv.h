@@ -35,6 +35,8 @@ template <class T> class SimpdivModule  {
     gPVector<int> U,TT;
     gPVector<T> ab,y,besty,v;
 
+    gList<gPVector<T> > solutions;
+
     T simplex(void);
     T getlabel(gPVector<T> &yy);
     void update(int j, int i);
@@ -51,7 +53,8 @@ template <class T> class SimpdivModule  {
     int NumIters(void) const  { return nits; }
     double Time(void) const   { return 0.0; }
 
-    int Simpdiv(gList<gPVector<T> > &);
+    int Simpdiv(void);
+    const gList<gPVector<T> > &GetSolutions(void) const  { return solutions; }
 };
 
 

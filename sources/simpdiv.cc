@@ -392,7 +392,7 @@ template <class T> T SimpdivModule<T>::getlabel(gPVector<T> &yy)
 //               SimpdivModule<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
+template <class T> int SimpdivModule<T>::Simpdiv(void)
 {
   int qf,soln,i,j,k,ii;
 
@@ -411,7 +411,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
 //  *params.output << "\nnstrats = " << nstrats;
 //  *params.output << "\ny = " << y;
   
-  solns.Flush();
+  solutions.Flush();
   for(soln=0;soln<params.number && !params.sig.Get();soln++)
     {
       k=1;
@@ -438,7 +438,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(gList<gPVector<T> > &solns)
 	}
       *params.output << "\nSimpDiv solution # " << soln+1 << " : " << y;
       *params.output << " maxz = " << maxz; 
-      solns.Append(y);
+      solutions.Append(y);
     }
   if(params.sig.Get()) params.sig.Reset();
 }
