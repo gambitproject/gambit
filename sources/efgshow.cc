@@ -326,6 +326,9 @@ void EfgShow::Solve(int p_algorithm)
   case SOLVE_CUSTOM_EFG_LIAP:
     solver = new guiEfgSolveLiap(ef, *cur_sup, this);
     break;
+  case SOLVE_CUSTOM_EFG_POLENUM:
+    solver = new guiPolEnumEfg(*cur_sup, this);
+    break;
   case SOLVE_CUSTOM_EFG_QRE:
     solver = new EfgEQreG(ef, *cur_sup, this);
     break;
@@ -347,6 +350,9 @@ void EfgShow::Solve(int p_algorithm)
     break;
   case SOLVE_CUSTOM_NFG_SIMPDIV:
     solver = new EfgSimpdivG(ef, *cur_sup, this);
+    break;
+  case SOLVE_CUSTOM_NFG_POLENUM:
+    solver = new guiPolEnumEfgNfg(*cur_sup, this);
     break;
   case SOLVE_CUSTOM_NFG_QRE:
     solver = new EfgNQreG(ef, *cur_sup, this);
@@ -385,27 +391,23 @@ void EfgShow::Solve(int p_algorithm)
 
 void EfgShow::InspectSolutions(int what)
 {
-    if (what == CREATE_DIALOG)
-    {
-        if (solns.Length() == 0)
-        {
-            wxMessageBox("Solution list currently empty"); 
-            return;
-        }
-
-        if (soln_show)
-        {
-            soln_show->Show(FALSE); 
-            delete soln_show;
-        }
-
-        soln_show = new EfgSolnShow(ef, solns, cur_soln, tw->DrawSettings(), sf_options, this);
+  if (what == CREATE_DIALOG) {
+    if (solns.Length() == 0) {
+      wxMessageBox("Solution list currently empty"); 
+      return;
     }
 
-    if (what == DESTROY_DIALOG && soln_show)
-    {
-        soln_show = 0;
+    if (soln_show) {
+      soln_show->Show(FALSE); 
+      delete soln_show;
     }
+
+    soln_show = new EfgSolnShow(ef, solns, cur_soln, tw->DrawSettings(), sf_options, this);
+  }
+
+  if (what == DESTROY_DIALOG && soln_show) {
+    soln_show = 0;
+  }
 }
 
 

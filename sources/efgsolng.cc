@@ -1065,6 +1065,98 @@ bool EfgSimpdivG::SolveSetup(void) const
 }
 
 //========================================================================
+//                           PolEnumSolve
+//========================================================================
+
+#include "peprm.h"
+#include "polenum.h"
+
+guiPolEnumParamsSettings::guiPolEnumParamsSettings(void)
+{ }
+
+void guiPolEnumParamsSettings::SaveDefaults(void)
+{ }
+
+void guiPolEnumParamsSettings::GetParams(PolEnumParams &p_params)
+{
+  p_params.stopAfter = StopAfter();
+  p_params.trace = TraceLevel();
+  p_params.tracefile = OutFile();
+}
+
+guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
+					       bool p_subgames)
+  : OutputParamsDialog("PolEnumSolve Parameters", p_parent, LP_HELP)
+{
+  MakeCommonFields(true, p_subgames);
+  Add(wxMakeFormNewLine());
+
+  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
+		   ((p_subgames) ? SPS_FIELD : 0));
+  Go();
+}
+
+//------------------
+// PolEnum on nfg
+//------------------
+
+guiPolEnumEfgNfg::guiPolEnumEfgNfg(const EFSupport &p_support, 
+				   EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support.Game(), p_support, p_parent)
+{ }
+
+gList<BehavSolution> guiPolEnumEfgNfg::Solve(void) const
+{
+  return gList<BehavSolution>();
+}
+
+bool guiPolEnumEfgNfg::SolveSetup(void) const
+{
+  guiPolEnumParamsDialog D(parent->Frame(), true); 
+
+  if (D.Completed() == wxOK) {
+    eliminate = D.Eliminate();
+    all = D.EliminateAll();
+    domType = D.DominanceType();
+    domMethod = D.DominanceMethod();
+    markSubgames = D.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
+}
+
+//------------------
+// PolEnum on efg
+//------------------
+
+guiPolEnumEfg::guiPolEnumEfg(const EFSupport &p_support, 
+			     EfgShowInterface *p_parent)
+  : guiEfgSolution(p_support.Game(), p_support, p_parent)
+{ }
+
+gList<BehavSolution> guiPolEnumEfg::Solve(void) const
+{
+  return gList<BehavSolution>();
+}
+
+bool guiPolEnumEfg::SolveSetup(void) const
+{
+  guiPolEnumParamsDialog D(parent->Frame(), true); 
+
+  if (D.Completed() == wxOK) {
+    eliminate = D.Eliminate();
+    all = D.EliminateAll();
+    domType = D.DominanceType();
+    domMethod = D.DominanceMethod();
+    markSubgames = D.MarkSubgames();
+    return true;
+  }
+  else
+    return false;
+}
+
+//========================================================================
 //                               QreSolve
 //========================================================================
 

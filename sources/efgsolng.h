@@ -70,6 +70,9 @@ public:
   virtual bool SolveSetup(void) const;
 };
 
+//-------------------------------------------------------------------------
+//                              LcpSolve
+//-------------------------------------------------------------------------
 
 class EfgSeqFormG : public guiEfgSolution {
 public:
@@ -87,6 +90,10 @@ public:
   virtual bool SolveSetup(void) const;
 };
 
+//-------------------------------------------------------------------------
+//                            EnumPureSolve
+//-------------------------------------------------------------------------
+
 class EfgPureNashG : public guiEfgSolution {
 public:
   EfgPureNashG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
@@ -103,6 +110,10 @@ public:
   virtual bool SolveSetup(void) const;
 };
 
+//-------------------------------------------------------------------------
+//                           EnumMixedSolve
+//-------------------------------------------------------------------------
+
 class EfgEnumG : public guiEfgSolution {
 public:
   EfgEnumG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
@@ -110,6 +121,10 @@ public:
   virtual gList<BehavSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };
+
+//-------------------------------------------------------------------------
+//                             LcpSolve
+//-------------------------------------------------------------------------
 
 class EfgZSumG : public guiEfgSolution {
 public:
@@ -128,6 +143,10 @@ public:
   virtual bool SolveSetup(void) const;
 };
 
+//-------------------------------------------------------------------------
+//                            SimpdivSolve
+//-------------------------------------------------------------------------
+
 class EfgSimpdivG : public guiEfgSolution {
 public:
   EfgSimpdivG(const Efg &E, const EFSupport &sup, EfgShowInterface *parent);
@@ -135,6 +154,30 @@ public:
   virtual gList<BehavSolution> Solve(void) const;
   virtual bool SolveSetup(void) const;
 };
+
+//-------------------------------------------------------------------------
+//                            PolEnumSolve
+//-------------------------------------------------------------------------
+
+class guiPolEnumEfg : public guiEfgSolution {
+public:
+  guiPolEnumEfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiPolEnumEfg() { }
+  virtual gList<BehavSolution> Solve(void) const;
+  virtual bool SolveSetup(void) const;
+};
+
+class guiPolEnumEfgNfg : public guiEfgSolution {
+public:
+  guiPolEnumEfgNfg(const EFSupport &, EfgShowInterface *);
+  virtual ~guiPolEnumEfgNfg() { }
+  virtual gList<BehavSolution> Solve(void) const;
+  virtual bool SolveSetup(void) const;
+};
+
+//-------------------------------------------------------------------------
+//                             QreSolve
+//-------------------------------------------------------------------------
 
 class EfgQreAllG : public guiEfgSolution {
 public:

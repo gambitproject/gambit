@@ -75,6 +75,7 @@
 #define SOLVE_CUSTOM_EFG_LCP                1507
 #define SOLVE_CUSTOM_EFG_LP                 1508
 #define SOLVE_CUSTOM_EFG_LIAP               1509
+#define SOLVE_CUSTOM_EFG_POLENUM            1538
 #define SOLVE_CUSTOM_EFG_QRE              1510
 #define SOLVE_CUSTOM_NFG_ENUMPURE           1511
 #define SOLVE_CUSTOM_NFG_ENUMMIXED          1512
@@ -82,6 +83,7 @@
 #define SOLVE_CUSTOM_NFG_LP                 1514
 #define SOLVE_CUSTOM_NFG_LIAP               1515
 #define SOLVE_CUSTOM_NFG_SIMPDIV            1516
+#define SOLVE_CUSTOM_NFG_POLENUM            1539
 #define SOLVE_CUSTOM_NFG_QRE              1517
 #define SOLVE_CUSTOM_NFG_QREGRID          1518
 
