@@ -479,7 +479,10 @@ bool GSM::Assign(void)
     else
       _Push( new ErrorPortion );
   }
-  else if(p1Spec == p2Spec && p1Spec.Type != porNULL)
+  else if( p1Spec == p2Spec && 
+	   p1Spec.Type != porNULL && 
+	   !(p1Spec.Type & porMIXED) &&
+	   !(p1Spec.Type & porBEHAV) )
   {
     if(p1Spec.ListDepth == 0) // not a list
     {
@@ -547,6 +550,13 @@ bool GSM::Assign(void)
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
 
+
+
+      /* commented out for MIXED and BEHAV so that assignments
+         for these two types will be carried out by unassigning the
+         first argument first.
+         make sure that the if() condition is reflected if this is changed
+         -- gwu
       case porMIXED_FLOAT:
 	(*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
 	  (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
@@ -568,6 +578,9 @@ bool GSM::Assign(void)
 	  (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
 	p1->SetGame(p2->Game(), p2->GameIsEfg());
 	break;
+      */
+
+
 
       case porNFG_FLOAT:
       case porNFG_RATIONAL:
@@ -2594,8 +2607,12 @@ void GSM::UnAssignEfgElement( BaseEfg* game, PortionSpec spec, void* data )
     else // varslist[i] is a list
     {
       if( spec.Type & varslist[i]->Spec().Type )
+      {
 	if( ((ListPortion*) varslist[i])->MatchGameData( game, data ) )
+	{
 	  _RefTableStack->Peek()->Remove( varslist[i] );	
+	}
+      }
     }
   }
 }
@@ -2618,8 +2635,19 @@ void GSM::UnAssignEfgSubTree( BaseEfg* game, Node* node )
   assert( game );
   assert( node );
   int i = 0;
-  for( i = 0; i < node->NumChildren(); i++ )
+  int j = 0;
+  for( i = 1; i <= node->NumChildren(); i++ )
+  {
+    Infoset* infoset = node->GetInfoset();
+    if( infoset != NULL )
+    {
+      const gArray<Action *>& actions = infoset->GetActionList();
+      for( j = actions.First(); j <= actions.Last(); j++ )
+	UnAssignEfgElement( game, porACTION, actions[j] );
+      UnAssignEfgElement( game, porINFOSET, infoset );
+    }
     UnAssignEfgSubTree( game, node->GetChild( i ) );
+  }
   UnAssignEfgElement( game, porNODE, node );
 }
 

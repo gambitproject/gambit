@@ -2561,6 +2561,12 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 
   if(!(p1->Spec() == p2->Spec())) 
     return false;
+  
+
+  if( p1->Spec().ListDepth > 0 )
+    return ((ListPortion*) p1)->operator==( (ListPortion*) p2 );
+
+
 
   type_found = true;
 

@@ -300,10 +300,11 @@ Portion *GSM_DeleteOutcome(Portion **param)
 Portion *GSM_DeleteTree(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  n->BelongsTo()->DeleteTree(n);
 
   _gsm->UnAssignGameElement(n->BelongsTo(), true, porBEHAV | porEFSUPPORT);
   _gsm->UnAssignEfgSubTree(n->BelongsTo(), n);
+
+  n->BelongsTo()->DeleteTree(n);
 
   Portion* por = new NodeValPortion(n);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());

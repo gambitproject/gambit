@@ -23,13 +23,13 @@
 
 Portion* GSM_Index( Portion** param )
 {
+  int i = 0;
   ListPortion* result = new ListValPortion();
   ListPortion& list = *(ListPortion*) param[0];
-  int i = 0;
   bool type_found = false;
   for( i = 1; i <= list.Length(); i++ )
   {
-    if( PortionEqual( list[i], param[1], type_found ) )
+    if( PortionEqual( list[i], param[1], type_found ) ) 
       result->Append( new IntValPortion( i ) );
   }
   return result;
@@ -754,12 +754,19 @@ void Init_listfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Index", 1);
+  FuncObj = new FuncDescObj("Index", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Index, 
-				       PortionSpec(porINTEGER, 1), 2));
+				       PortionSpec(porINTEGER, 1), 2, 0,
+				       funcNONLISTABLE ));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Index, 
+				       PortionSpec(porINTEGER, 1), 2, 0,
+				       funcNONLISTABLE ));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("list", 
+					    PortionSpec(porANYTYPE, NLIST)));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porANYTYPE, 1)));
   gsm->AddFunction(FuncObj);
 
 
@@ -776,18 +783,18 @@ void Init_listfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Contains", 1);
+  FuncObj = new FuncDescObj("Contains", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
 				       0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porANYTYPE));
 
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Contains, porBOOL, 2,
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Contains, porBOOL, 2,
 				       0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("list", 
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("list", 
 					    PortionSpec(porANYTYPE, NLIST)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("x", 
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", 
 					    PortionSpec(porANYTYPE,1)));
   gsm->AddFunction(FuncObj);
 
