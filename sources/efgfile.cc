@@ -252,8 +252,9 @@ void write_infosets(FILE *f, int game)
        p = p->nextplayer)  {
     int flag = 0;
     fprintf(f, "    {");
-    for (struct iset *s = p->firstiset; s != NULLiset; s = s->nextplyriset)  {
-      if (s->firstmember->game == game)  {
+    for (struct iset *s = whichpblm->firstinfoset; s != NULLiset;
+	 s = s->nextiset)  {
+      if (s->playr == p && s->firstmember->game == game)  {
 	if (flag)
 	  fprintf(f, "\n     ");
 	else
