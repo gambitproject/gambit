@@ -10,6 +10,7 @@
 #ifndef EFGSUPPORT_H
 #define EFGSUPPORT_H
 
+#include "wx/treectrl.h"
 #include "efgshow.h"
 #include "base/gmap.h"
 

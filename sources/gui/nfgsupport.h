@@ -10,6 +10,7 @@
 #ifndef NFGSUPPORT_H
 #define NFGSUPPORT_H
 
+#include "wx/treectrl.h"
 #include "nfgshow.h"
 #include "base/gmap.h"
 
