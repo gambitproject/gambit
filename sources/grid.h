@@ -12,16 +12,18 @@
 #endif   // __GNUG__
 
 #include "grarray.h"
+#include "gstatus.h"
 
 template <class T> class GridParams   {
 	public:
 		T minLam, maxLam, delLam, delp, tol;
 		int type, plev;
 		gOutput *outfile, *errfile, *pxifile;
-		void  (*update_func)(double);
+		gStatus	&status;
 
 		GridParams(void);
 		GridParams(const GridParams<T> &p);
+		GridParams(gStatus &st);
 		int Ok(void) const;	// check the validity of the paramters
 };
 

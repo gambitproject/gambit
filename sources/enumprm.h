@@ -1,3 +1,4 @@
+// $Id$
 #ifndef ENUMPRM_H
 #define ENUMPRM_H
 
@@ -19,7 +20,7 @@ EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *parent)
 
 {
 nequilib=0;
-Form()->Add(wxMakeFormShort("# Equilibria",&number));
+Form()->Add(wxMakeFormShort("# Equilibria",&nequilib));
 Form()->Add(wxMakeFormNewLine());
 
 // Now add the basic stuff
