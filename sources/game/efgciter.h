@@ -46,38 +46,33 @@ class gbtEfgIterator;
 //
 class gbtEfgContIterator    {
   friend class gbtEfgIterator;
-  private:
-    int _frozen_pl, _frozen_iset;
-    gbtGame m_efg;
-    gbtEfgSupport _support;
-    gbtEfgContingency _profile;
-    gbtPVector<int> _current;
-    gbtBlock<gbtBlock<bool> > _is_active;
-    gbtBlock<int> _num_active_infosets;
-    mutable gbtVector<gbtNumber> _payoff;
+private:
+  int m_frozenPlayer, m_frozenInfoset;
+  gbtEfgSupport m_support;
+  gbtEfgContingency m_profile;
+  gbtPVector<int> m_current;
+  gbtBlock<gbtBlock<bool> > m_isActive;
+  gbtBlock<int> m_numActiveInfosets;
 
-  public:
-    gbtEfgContIterator(const gbtEfgSupport &);
-    gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
-    ~gbtEfgContIterator();
+public:
+  gbtEfgContIterator(const gbtEfgSupport &);
+  gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
+  ~gbtEfgContIterator();
   
-    void First(void);
+  void First(void);
   
-    void Freeze(int pl, int iset);
+  void Freeze(int pl, int iset);
   
   // These next two only work on frozen infosets
-    void Set(int pl, int iset, int act);
-    void Set(const gbtGameAction &);
-    int Next(int pl, int iset);
+  void Set(int pl, int iset, int act);
+  void Set(const gbtGameAction &);
+  int Next(int pl, int iset);
   
-    const gbtEfgContingency &GetProfile(void) const   
-      { return _profile; }
+  const gbtEfgContingency &GetProfile(void) const { return m_profile; }
 
-    int NextContingency(void);
+  int NextContingency(void);
   
-    gbtNumber Payoff(int pl) const;
-  
-    void Dump(gbtOutput &) const;
+  gbtNumber GetPayoff(int pl) const;
 };
 
 // The following class is like the above, but intended for iteration

@@ -31,33 +31,27 @@
 
 class gbtEfgContIterator;
 
-class gbtEfgIterator    {
-  private:
-    gbtGame m_efg;
-    gbtEfgSupport _support;
-    gbtEfgContingency _profile;
-    gbtPVector<int> _current;
-    mutable gbtVector<gbtNumber> _payoff;
+class gbtEfgIterator {
+private:
+  gbtEfgSupport m_support;
+  gbtPVector<int> m_current;
+  gbtEfgContingency m_profile;
 
-  public:
-    gbtEfgIterator(gbtGame);
-    gbtEfgIterator(const gbtEfgSupport &);
-    gbtEfgIterator(const gbtEfgIterator &);
-    gbtEfgIterator(const gbtEfgContIterator &);
-    ~gbtEfgIterator();
+public:
+  gbtEfgIterator(gbtGame);
+  gbtEfgIterator(const gbtEfgSupport &);
+  gbtEfgIterator(const gbtEfgIterator &);
+  gbtEfgIterator(const gbtEfgContIterator &);
+  ~gbtEfgIterator();
   
-    gbtEfgIterator &operator=(const gbtEfgIterator &);
+  gbtEfgIterator &operator=(const gbtEfgIterator &);
   
-    void First(void);
-    int Next(int p, int iset);
-    int Set(int p, int iset, int act);
+  void First(void);
+  int Next(int p, int iset);
+  int Set(int p, int iset, int act);
   
-    gbtNumber Payoff(int p) const;
-    void Payoff(gbtVector<gbtNumber> &) const;
-
-    const gbtEfgSupport &Support(void) const;
-
-    void Dump(gbtOutput &) const;
+  gbtNumber GetPayoff(int p) const;
+  void GetPayoff(gbtVector<gbtNumber> &) const;
 };
 
 #endif   // EFGITER_H

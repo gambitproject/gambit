@@ -28,31 +28,30 @@
 #include "efgiter.h"
 
 gbtEfgIterator::gbtEfgIterator(gbtGame p_efg)
-  : m_efg(p_efg), _support(p_efg->NewEfgSupport()),
-    _profile(p_efg), _current(m_efg->NumInfosets()),
-    _payoff(m_efg->NumPlayers())
+  : m_support(p_efg->NewEfgSupport()),
+    m_current(m_support->NumInfosets()), m_profile(p_efg)
 {
   First();
 }
 
-gbtEfgIterator::gbtEfgIterator(const gbtEfgSupport &s)
-  : m_efg(s->GetTree()), _support(s),
-    _profile(s->GetTree()), _current(m_efg->NumInfosets()),
-    _payoff(m_efg->NumPlayers())
+gbtEfgIterator::gbtEfgIterator(const gbtEfgSupport &p_support)
+  : m_support(p_support),
+    m_current(m_support->NumInfosets()),
+    m_profile(m_support->GetTree())
 {
   First();
 }
 
-gbtEfgIterator::gbtEfgIterator(const gbtEfgIterator &it)
-  : m_efg(it.m_efg), _support(it._support),
-    _profile(it._profile), _current(it._current),
-    _payoff(m_efg->NumPlayers())
+gbtEfgIterator::gbtEfgIterator(const gbtEfgIterator &p_iter)
+  : m_support(p_iter.m_support),
+    m_current(p_iter.m_current),
+    m_profile(p_iter.m_profile) 
 { }
 
-gbtEfgIterator::gbtEfgIterator(const gbtEfgContIterator &it)
-  : m_efg(it.m_efg), _support(it._support),
-    _profile(it._profile), _current(it._current),
-    _payoff(m_efg->NumPlayers())
+gbtEfgIterator::gbtEfgIterator(const gbtEfgContIterator &p_iter)
+  : m_support(p_iter.m_support),
+    m_current(p_iter.m_current),
+    m_profile(p_iter.m_profile) 
 { }
   
 
@@ -60,11 +59,11 @@ gbtEfgIterator::~gbtEfgIterator()
 { }
 
 
-gbtEfgIterator &gbtEfgIterator::operator=(const gbtEfgIterator &it)
+gbtEfgIterator &gbtEfgIterator::operator=(const gbtEfgIterator &p_iter)
 {
-  if (this != &it && m_efg == it.m_efg)  {
-    _profile = it._profile;
-    _current = it._current;
+  if (this != &p_iter && m_support == p_iter.m_support)  {
+    m_profile = p_iter.m_profile;
+    m_current = p_iter.m_current;
   }
   return *this;
 }
@@ -72,99 +71,93 @@ gbtEfgIterator &gbtEfgIterator::operator=(const gbtEfgIterator &it)
 
 void gbtEfgIterator::First(void)
 {
-  _current = 1;
+  m_current = 1;
 
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      _profile.Set(_support->GetAction(pl, iset, 1));
+  for (int pl = 1; pl <= m_support->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_support->GetPlayer(pl)->NumInfosets(); iset++) {
+      m_profile.Set(m_support->GetAction(pl, iset, 1));
     }
   }
 }
 
 int gbtEfgIterator::Next(int pl, int iset)
 {  
-  if (_current(pl, iset) == _support->NumActions(pl, iset)) {
-    _current(pl, iset) = 1;
-    _profile.Set(_support->GetAction(pl, iset, 1));
+  if (m_current(pl, iset) == m_support->NumActions(pl, iset)) {
+    m_current(pl, iset) = 1;
+    m_profile.Set(m_support->GetAction(pl, iset, 1));
     return 0;
   }
 
-  _current(pl, iset)++;
-  _profile.Set(_support->GetAction(pl, iset, _current(pl, iset)));
+  m_current(pl, iset)++;
+  m_profile.Set(m_support->GetAction(pl, iset, m_current(pl, iset)));
   return 1;
 }
 
 int gbtEfgIterator::Set(int pl, int iset, int act)
 {
-  if (pl <= 0 || pl > m_efg->NumPlayers() ||
-      iset <= 0 || iset > m_efg->GetPlayer(pl)->NumInfosets() ||
-      act <= 0 || act > _support->NumActions(pl, iset))
+  if (pl <= 0 || pl > m_support->NumPlayers() ||
+      iset <= 0 || iset > m_support->GetPlayer(pl)->NumInfosets() ||
+      act <= 0 || act > m_support->NumActions(pl, iset))
     return 0;
 
-  _current(pl, iset) = act;
-  _profile.Set(_support->GetAction(pl, iset, act));
+  m_current(pl, iset) = act;
+  m_profile.Set(m_support->GetAction(pl, iset, act));
   return 1;
 }
 
-gbtNumber gbtEfgIterator::Payoff(int pl) const
+gbtNumber gbtEfgIterator::GetPayoff(int pl) const
 {
-  _profile.Payoff(_payoff);
-  return _payoff[pl];
+  gbtArray<gbtNumber> payoff(m_support->NumPlayers());
+  m_profile.Payoff(payoff);
+  return payoff[pl];
 }
 
-void gbtEfgIterator::Payoff(gbtVector<gbtNumber> &payoff) const
+void gbtEfgIterator::GetPayoff(gbtVector<gbtNumber> &p_payoff) const
 {
-  _profile.Payoff(payoff);
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)
-    payoff[pl] = _payoff[pl];
+  m_profile.Payoff(p_payoff);
 }
 
-void gbtEfgIterator::Dump(gbtOutput &f) const
-{
-  _current.Dump(f);
-}
 
-gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
-  : _frozen_pl(0), _frozen_iset(0),
-    m_efg(s->GetTree()), _support(s),
-    _profile(s->GetTree()), _current(s->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(m_efg->NumPlayers()),
-    _payoff(m_efg->NumPlayers())
+gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &p_support)
+  : m_frozenPlayer(0), m_frozenInfoset(0),
+    m_support(p_support), m_profile(m_support->GetTree()), 
+    m_current(m_support->NumInfosets()),
+    m_numActiveInfosets(m_support->NumPlayers())
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      active_for_pl[iset] = s->MayReach(m_efg->GetPlayer(pl)->GetInfoset(iset));
-      _num_active_infosets[pl]++;
+  for (int pl = 1; pl <= m_support->NumPlayers(); pl++) {
+    m_numActiveInfosets[pl] = 0;
+    gbtGamePlayer player = m_support->GetPlayer(pl);
+    gbtBlock<bool> activeForPlayer(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      activeForPlayer[iset] = m_support->MayReach(player->GetInfoset(iset));
+      m_numActiveInfosets[pl]++;
     }
-    _is_active += active_for_pl;
+    m_isActive += activeForPlayer;
   }
   First();
 }
 
-gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s, 
-			 const gbtList<gbtGameInfoset >&active)
-  : _frozen_pl(0), _frozen_iset(0),
-    m_efg(s->GetTree()), _support(s),
-    _profile(s->GetTree()), _current(s->NumInfosets()),
-    _is_active(),
-    _num_active_infosets(m_efg->NumPlayers()),
-    _payoff(m_efg->NumPlayers())
+gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &p_support, 
+				       const gbtList<gbtGameInfoset> &p_active)
+  : m_frozenPlayer(0), m_frozenInfoset(0),
+    m_support(p_support), m_profile(m_support->GetTree()), 
+    m_current(m_support->NumInfosets()),
+    m_numActiveInfosets(m_support->NumPlayers())
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    _num_active_infosets[pl] = 0;
-    gbtBlock<bool> active_for_pl(m_efg->GetPlayer(pl)->NumInfosets());
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      if ( active.Contains(m_efg->GetPlayer(pl)->GetInfoset(iset)) ) {
-	active_for_pl[iset] = true;
-	_num_active_infosets[pl]++;
+  for (int pl = 1; pl <= m_support->NumPlayers(); pl++) {
+    m_numActiveInfosets[pl] = 0;
+    gbtGamePlayer player = m_support->GetPlayer(pl);
+    gbtBlock<bool> activeForPlayer(player->NumInfosets());
+    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+      if (p_active.Contains(player->GetInfoset(iset))) {
+	activeForPlayer[iset] = true;
+	m_numActiveInfosets[pl]++;
       }
-      else
-	active_for_pl[iset] = false;
+      else {
+	activeForPlayer[iset] = false;
+      }
     }
-    _is_active += active_for_pl;
+    m_isActive += activeForPlayer;
   }
   First();
 }
@@ -175,98 +168,99 @@ gbtEfgContIterator::~gbtEfgContIterator()
 
 void gbtEfgContIterator::First(void)
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= m_efg->GetPlayer(pl)->NumInfosets(); iset++)
-      if (pl != _frozen_pl && iset != _frozen_iset)   {
-	_current(pl, iset) = 1;
-	if (_is_active[pl][iset])      
-	  _profile.Set(_support->GetAction(pl, iset, 1));
+  for (int pl = 1; pl <= m_support->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= m_support->GetPlayer(pl)->NumInfosets();
+	 iset++) {
+      if (pl != m_frozenPlayer && iset != m_frozenInfoset)  {
+	m_current(pl, iset) = 1;
+	if (m_isActive[pl][iset]) {      
+	  m_profile.Set(m_support->GetAction(pl, iset, 1));
+	}
       }
+    }
   }
 }
 
 void gbtEfgContIterator::Set(int pl, int iset, int act)
 {
-  if (pl != _frozen_pl || iset != _frozen_iset)   return;
+  if (pl != m_frozenPlayer || iset != m_frozenInfoset)   return;
 
-  _current(pl, iset) = act;
-  _profile.Set(_support->GetAction(pl, iset, act));
+  m_current(pl, iset) = act;
+  m_profile.Set(m_support->GetAction(pl, iset, act));
 }
 
 
 void gbtEfgContIterator::Set(const gbtGameAction &a)
 {
-  if (a->GetInfoset()->GetPlayer()->GetId() != _frozen_pl ||
-      a->GetInfoset()->GetId() != _frozen_iset) return;
-  _profile.Set(a);
+  if (a->GetInfoset()->GetPlayer()->GetId() != m_frozenPlayer ||
+      a->GetInfoset()->GetId() != m_frozenInfoset) return;
+  m_profile.Set(a);
 }
 
 int gbtEfgContIterator::Next(int pl, int iset)
 {
-  if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
+  if (pl != m_frozenPlayer || iset != m_frozenInfoset)   return 1;
   
-  if (_current(pl, iset) == _support->NumActions(pl, iset)) {
-    _current(pl, iset) = 1;
-    _profile.Set(_support->GetAction(pl, iset, 1));
+  if (m_current(pl, iset) == m_support->NumActions(pl, iset)) {
+    m_current(pl, iset) = 1;
+    m_profile.Set(m_support->GetAction(pl, iset, 1));
     return 0;
   }
 
-  _current(pl, iset)++;
-  _profile.Set(_support->GetAction(pl, iset, _current(pl, iset)));
+  m_current(pl, iset)++;
+  m_profile.Set(m_support->GetAction(pl, iset, m_current(pl, iset)));
   return 1;
 }
   
 
 void gbtEfgContIterator::Freeze(int pl, int iset)
 {
-  _frozen_pl = pl;
-  _frozen_iset = iset;
+  m_frozenPlayer = pl;
+  m_frozenInfoset = iset;
   First();
 }
 
 int gbtEfgContIterator::NextContingency(void)
 {
-  int pl = m_efg->NumPlayers();
-  while (pl > 0 && _num_active_infosets[pl] == 0)
+  int pl = m_support->NumPlayers();
+  while (pl > 0 && m_numActiveInfosets[pl] == 0) {
     --pl;
+  }
   if (pl == 0)   return 0;
-  int iset = m_efg->GetPlayer(pl)->NumInfosets();
+  int iset = m_support->GetPlayer(pl)->NumInfosets();
     
   while (true) {
-    if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
-      if (_current(pl, iset) < _support->NumActions(pl, iset))  {
-	_current(pl, iset) += 1;
-	_profile.Set(_support->GetAction(pl, iset, _current(pl, iset)));
+    if (m_isActive[pl][iset] && (pl != m_frozenPlayer || 
+				 iset != m_frozenInfoset)) {
+      if (m_current(pl, iset) < m_support->NumActions(pl, iset))  {
+	m_current(pl, iset) += 1;
+	m_profile.Set(m_support->GetAction(pl, iset, m_current(pl, iset)));
 	return 1;
       }
       else {
-	_current(pl, iset) = 1;
-	_profile.Set(_support->GetAction(pl, iset, 1));
+	m_current(pl, iset) = 1;
+	m_profile.Set(m_support->GetAction(pl, iset, 1));
       }
+    }
     
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
-      }  while (pl > 0 && _num_active_infosets[pl] == 0);
+      }  while (pl > 0 && m_numActiveInfosets[pl] == 0);
       
       if (pl == 0)   return 0;
-      iset = m_efg->GetPlayer(pl)->NumInfosets();
+      iset = m_support->GetPlayer(pl)->NumInfosets();
     }
   }
 }
 
-gbtNumber gbtEfgContIterator::Payoff(int pl) const
+gbtNumber gbtEfgContIterator::GetPayoff(int pl) const
 {
-  _profile.Payoff(_payoff);
-  return _payoff[pl];
+  gbtArray<gbtNumber> payoff(m_support->NumPlayers());
+  m_profile.Payoff(payoff);
+  return payoff[pl];
 }
-
-void gbtEfgContIterator::Dump(gbtOutput &f) const
-{
-  _current.Dump(f);
-}
-
 
 
 

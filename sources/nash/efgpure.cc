@@ -60,14 +60,14 @@ gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
       gbtEfgIterator eiter(citer);
       
       for (int pl = 1; flag && pl <= p_support->NumPlayers(); pl++)  {
-	gbtNumber current = citer.Payoff(pl);
+	gbtNumber current = citer.GetPayoff(pl);
 	for (int iset = 1;
 	     flag && iset <= p_support->GetPlayer(pl)->NumInfosets();
 	     iset++)  {
 	  if (probs(pl, iset) == gbtNumber(0))   continue;
 	  for (int act = 1; act <= p_support->NumActions(pl, iset); act++)  {
 	    eiter.Next(pl, iset);
-	    if (eiter.Payoff(pl) > current)  {
+	    if (eiter.GetPayoff(pl) > current)  {
 	      flag = false;
 	      break;
 	    }

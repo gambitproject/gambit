@@ -62,8 +62,8 @@ bool gbtEfgSupportBase::Dominates(const gbtGameAction &a, const gbtGameAction &b
     B.Set(b);
 
     do  {
-      gbtRational ap = A.Payoff(pl);  
-      gbtRational bp = B.Payoff(pl);
+      gbtRational ap = A.GetPayoff(pl);  
+      gbtRational bp = B.GetPayoff(pl);
 
       if (strong)
 	{ if (ap <= bp)  return false; }
