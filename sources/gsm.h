@@ -7,17 +7,31 @@
 #ifndef GSM_H
 #define GSM_H
 
-
+#include "rational.h"
 #include "gstack.h"
+#include "gambitio.h"
+
+#include "portion.h"
 
 
-typedef int T;
 
 
 class GSM
 {
  private:
-  gStack<T> *stack;
+  gStack<Portion *> *stack;
+  typedef enum { opERROR, opADD, opSUBTRACT, opMULTIPLY, opDIVIDE 
+		 } OperationMode;
+  void operation( OperationMode mode );
+  void double_operation( double_Portion *p1, 
+			double_Portion *p2,
+			OperationMode mode); 
+  void gInteger_operation( gInteger_Portion *p1, 
+			  gInteger_Portion *p2,
+			  OperationMode mode); 
+  void gRational_operation( gRational_Portion *p1, 
+			   gRational_Portion *p2,
+			   OperationMode mode); 
 
  public:
   GSM( int size );
@@ -26,10 +40,17 @@ class GSM
   int Depth( void ) const;
   int MaxDepth( void ) const;
 
-  void Push( T element );
-  T Pop( void );
-  T Peek( void ) const;
-  T& Peek( void );
+  void Push( const double data );
+  void Push( const gInteger data );
+  void Push( const gRational data );
+
+  void Pop( double &data );
+  void Pop( gInteger &data );
+  void Pop( gRational &data );
+
+  void Peek( double &data );
+  void Peek( gInteger &data );
+  void Peek( gRational &data );
 
   void Add( void );
   void Subtract( void );
