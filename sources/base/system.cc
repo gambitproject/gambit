@@ -1,7 +1,10 @@
 //
-// FILE: system.cc -- Imeplements operating system specofic functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implements operating system specific functions
 //
 
 #include <stdlib.h>
@@ -14,7 +17,7 @@
 #include <windows.h>
 #endif   // __GNUG__, __BORLANDC__
 
-#include "base/gstream.h"
+#include "gstream.h"
 #include "system.h"
 
 const char *System::GetEnv(const char *name)

@@ -1,7 +1,10 @@
 //
-// FILE: gmisc.h -- Miscellaneous generally-useful functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Miscellaneous generally-useful functions
 //
 
 #ifndef GMISC_H

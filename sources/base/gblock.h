@@ -1,14 +1,17 @@
 //
-// FILE: gblock.h -- Implementation of a generic array container class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of a generic array container class
 //
 
 #ifndef GBLOCK_H
 #define GBLOCK_H
 
 #include <stdlib.h>
-#include "base/garray.h"
+#include "garray.h"
 
 template <class T> class gBlock : public gArray<T>   {
   private:

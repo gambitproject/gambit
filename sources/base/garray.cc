@@ -1,11 +1,14 @@
 //
-// FILE: garray.cc -- Instantiations for common gArray classes
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiations for common gArray classes
 //
 
-#include "base/base.h"
-#include "base/garray.imp"
+#include "base.h"
+#include "garray.imp"
 
 template class gArray<bool>;
 template class gArray<int>;

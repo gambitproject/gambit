@@ -1,14 +1,17 @@
 //
-// FILE: gmap.h -- Declaration of Map container types
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+// 
+// DESCRIPTION:
+// Declaration of map container types
 //
 
 #ifndef GMAP_H
 #define GMAP_H
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
+#include "gmisc.h"
+#include "gstream.h"
 
 template <class K, class T> class gBaseMap  {
   protected:

@@ -1,11 +1,14 @@
 //
-// FILE: ghash.imp -- Implementation of hash table member functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of hash table member functions
 //
 
-#include "base/base.h"
-#include "base/ghash.h"
+#include "base.h"
+#include "ghash.h"
 
 //-------------------------------------------------------------------------
 //              HashTable<K, T>: Constructor, Destructor

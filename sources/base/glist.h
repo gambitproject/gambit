@@ -1,14 +1,17 @@
 //
-// FILE: glist.h -- A generic array container class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// A generic (doubly) linked-list container class
 //
 
 #ifndef GLIST_H
 #define GLIST_H
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
+#include "gmisc.h"
+#include "gstream.h"
 
 template <class T> class gList  {
   protected:

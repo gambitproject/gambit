@@ -1,11 +1,14 @@
 //
-// FILE: gtree.imp -- Implementation of a generic treecontainer class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of a generic tree container class
 //
 
 #include <assert.h>
-#include "base/gtree.h"
+#include "gtree.h"
 
 //--------------------------------------------------------------------------
 //                 gTreeNode<T>: Member function implementations

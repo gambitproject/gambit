@@ -1,14 +1,17 @@
 //
-// FILE: grarray.h -- Rectangular array base class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Rectangular array base class
 //
 
 #ifndef GRARRAY_H
 #define GRARRAY_H
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
+#include "gmisc.h"
+#include "gstream.h"
 
 template <class T> class gArray;
 

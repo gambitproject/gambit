@@ -1,7 +1,10 @@
 //
-// File: odometer.cc
-//        -- Implementation of class gIndexOdometer
-// $Id$ 
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of class gIndexOdometer
 //
 
 #include "odometer.h"

@@ -1,7 +1,10 @@
 //
-// FILE: grblock.imp -- Implementation of resizable 2-D rect array class
+// $Source$
+// $Date$
+// $Revision$
 //
-//  $Id$
+// DESCRIPTION:
+// Implementation of resizable 2-D rect array class
 //
 
 #include "base/base.h"

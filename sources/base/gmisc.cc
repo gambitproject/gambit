@@ -1,7 +1,10 @@
 //
-// FILE: gmisc.cc -- Miscellaneous generally-useful functions
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Miscellaneous generally-useful functions
 //
 
 #include <stdio.h>
@@ -10,10 +13,10 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
-#include "base/gtext.h"
-#include "base/garray.h"
+#include "gmisc.h"
+#include "gstream.h"
+#include "gtext.h"
+#include "garray.h"
 
 //--------------------------------------------------------------------------
 //                      Generation of random numbers

@@ -1,15 +1,18 @@
 //
-// FILE: grblock.h -- resizable 2-D array class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of resizable 2-D array class
 //
 
 #ifndef GRBLOCK_H
 #define GRBLOCK_H
 
-#include "base/grarray.h"
+#include "grarray.h"
 
-template <class T> class gRectBlock: public gRectArray<T>  { 
+template <class T> class gRectBlock : public gRectArray<T>  { 
  public:
   gRectBlock(void);
   gRectBlock(unsigned int nrows, unsigned int ncols);

@@ -1,10 +1,13 @@
 //
-// FILE: grarray.imp -- Implementation of base rectangular array class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of base rectangular array class
 //
 
-#include "base/base.h"
+#include "base.h"
 
 template <class T> gText gRectArray<T>::BadDim::Description(void) const
 {

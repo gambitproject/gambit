@@ -1,7 +1,10 @@
 //
-// FILE: gnullstatus.h -- Declaration of a null status object
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of a null status object
 //
 
 #ifndef GNULLSTATUS_H

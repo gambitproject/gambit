@@ -1,10 +1,13 @@
 //
-// FILE: gpool.cc -- Implementation of memory pool
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of memory pool
 //
 
-#include "base/gpool.h"
+#include "gpool.h"
 
 gPool::gPool(unsigned sz)
   : esize((sz < sizeof(gLink *)) ? sizeof(gLink *) : sz), head(0)

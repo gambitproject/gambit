@@ -1,9 +1,11 @@
 //
-// File: gstatus.h -- declaration of an abstract class to combine features
-//                    of gProgress and gSignal. 
-// 
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
 //
+// DESCRIPTION:
+// Declaration of an abstract class combining features of gProgress and gSignal
+// 
 
 #ifndef GSTATUS_H
 #define GSTATUS_H

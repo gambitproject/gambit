@@ -1,7 +1,10 @@
 //
-// FILE: gmap.imp -- Implementation of gMap-related classes
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of map container types
 //
 
 #include <assert.h>

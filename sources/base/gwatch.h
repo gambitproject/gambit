@@ -1,7 +1,10 @@
 //
-// FILE: gwatch.h -- Interface to a general stopwatch class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to a general stopwatch class
 //
 
 #ifndef GWATCH_H

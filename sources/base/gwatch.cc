@@ -1,7 +1,10 @@
 //
-// FILE: gwatch.cc -- Implementation of portable stopwatch class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of portable stopwatch class
 //
 
 #include <stdio.h>
@@ -26,7 +29,7 @@ extern "C" long _sysconf(int);
 #include <sys\timeb.h>
 #endif    // __BORLANDC__
 
-#include "base/gwatch.h"
+#include "gwatch.h"
 
 
 gWatch::gWatch(bool run /* = true */)

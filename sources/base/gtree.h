@@ -1,13 +1,16 @@
 //
-// FILE: gtree.h -- A generic tree container class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$ 
+// DESCRIPTION:
+// A generic tree container class
 //
 
 #ifndef GTREE_H
 #define GTREE_H
 
-#include "base/base.h"
+#include "base.h"
 
 template <class T> class gTree;
 

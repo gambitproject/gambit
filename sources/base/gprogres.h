@@ -1,7 +1,10 @@
 //
-// FILE: gprogress.h -- Declaration of an abstract class to handle progress
-// 			updates
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Declaration of an abstract class to handle progress updates
 //
 
 #ifndef GPROGRES_H

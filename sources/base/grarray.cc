@@ -1,11 +1,14 @@
 //
-// FILE: grarray.cc -- Instantiation of common gRectArray types
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Instantiation of common gRectArray types
 //
 
-#include "base/base.h"
-#include "base/grarray.imp"
+#include "base.h"
+#include "grarray.imp"
 
 template class gRectArray<int>;
 template class gRectArray<double>;

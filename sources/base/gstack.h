@@ -1,7 +1,10 @@
 //
-// FILE: gstack.h -- Definition of gStack container type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION;
+// Definition of gStack container type
 //
 
 #ifndef GSTACK_H

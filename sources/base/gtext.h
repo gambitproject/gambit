@@ -1,7 +1,10 @@
 //
-// FILE: gtext.h -- Definition of gText class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Definition of gText class
 //
 
 #ifndef GTEXT_H
@@ -12,7 +15,7 @@
 #endif    // __GNUG__
 
 #include <string.h>
-#include "base/gmisc.h"
+#include "gmisc.h"
 
 class gInput;
 class gOutput;

@@ -1,7 +1,10 @@
 //
-// FILE: system.h -- Imeplements operating system specific functions
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+// 
+// DESCRIPTION:
+// Implements operating system specific functions
 //
 
 #ifndef SYSTEM_H

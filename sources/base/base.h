@@ -1,34 +1,36 @@
 //
-// FILE: include/base/base.h -- Header file for basic library components
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
-//
+// DESCRIPTION:
+// Top-level include file for base module
 
 #ifndef BASE_H
 #define BASE_H
 
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
-#include "base/gtext.h"
+#include "gmisc.h"
+#include "gstream.h"
+#include "gtext.h"
 
-#include "base/garray.h"
-#include "base/gblock.h"
+#include "garray.h"
+#include "gblock.h"
 
-#include "base/glist.h"
-#include "base/gslist.h"
+#include "glist.h"
+#include "gslist.h"
 
-#include "base/gtree.h"
+#include "gtree.h"
 
-#include "base/grarray.h"
-#include "base/grblock.h"
+#include "grarray.h"
+#include "grblock.h"
 
-#include "base/gstack.h"
+#include "gstack.h"
 
-#include "base/gmap.h"
+#include "gmap.h"
 
-#include "base/gpool.h"
-#include "base/gwatch.h"
+#include "gpool.h"
+#include "gwatch.h"
 
 #endif   // BASE_H
 

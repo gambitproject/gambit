@@ -1,7 +1,10 @@
 //
-// File: odometer.h -- Declaration of gIndexOdometer class //#
-// 
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Declaration of gIndexOdometer class 
 //
 
 /*
@@ -17,7 +20,7 @@ significant index is the first ("leftmost").
 #ifndef ODOMETER_H
 #define ODOMETER_H
 
-#include "base/base.h"
+#include "base.h"
 
 // *****************************
 //      class gIndexOdometer

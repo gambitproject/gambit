@@ -1,14 +1,18 @@
 //
-// FILE: gstream.h -- Input and output streaming facilities
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Input and output streaming facilities
 //
 
 #ifndef GSTREAM_H
 #define GSTREAM_H
 
 #include <stdio.h>
-#include "base/gmisc.h"
+#include "gmisc.h"
+#include "gtext.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -207,8 +211,6 @@ public:
   gOutput &operator<<(const char *x);
   gOutput &operator<<(const void *x);
 };
-
-#include "base/gtext.h"
 
 class gFileOutput : public gOutput  {
   private:

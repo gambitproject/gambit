@@ -1,12 +1,16 @@
 //
-// FILE: gblock.cc -- Provide implementations for commonly-used blocks
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION;
+// Provide instantiations for commonly-used blocks
 //
 
-#include "base/base.h"
-#include "base/garray.imp"
-#include "base/gblock.imp"
+
+#include "base.h"
+#include "garray.imp"
+#include "gblock.imp"
 
 template class gBlock<bool>;
 template class gBlock<int>;

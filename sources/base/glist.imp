@@ -1,10 +1,13 @@
 //
-// FILE: glist.imp -- Implementation of a generic array container class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of a generic (doubly) linked-list container class
 //
 
-#include "base/base.h"
+#include "base.h"
 #include <assert.h>
 
 template <class T>

@@ -1,7 +1,10 @@
 //
-// FILE: gslist.imp -- Classes to sort/filter lists
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Classes to sort/filter lists
 //
 
 #include "base/gslist.h"

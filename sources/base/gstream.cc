@@ -1,14 +1,17 @@
 //
-// FILE: gstream.cc -- Implementation of I/O streaming functions
-//
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+// 
+// DESCRIPTION:
+// Implementation of I/O streaming functions
 //
 
 #ifdef __GNUG__
 #pragma implementation "gstream.h"
 #endif   // __GNUG__
 
-#include "base/base.h"
+#include "base.h"
 
 //--------------------------------------------------------------------------
 //                         gInput member functions

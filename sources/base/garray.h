@@ -1,7 +1,10 @@
 //
-// FILE: garray.h -- A basic bounds-checked array type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// A basic bounds-checked array type
 //
 
 #ifndef GARRAY_H
@@ -9,7 +12,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "base/gstream.h"
+#include "gstream.h"
 
 template <class T> class gArray  {
   protected:

@@ -1,10 +1,13 @@
 //
-// FILE: gstack.imp -- Implementation of stack type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of stack type
 //
 
-#include "base/gstack.h"
+#include "gstack.h"
 
 template <class T> gStack<T>::gStack(int md) : depth(0), max_depth(md)
 {

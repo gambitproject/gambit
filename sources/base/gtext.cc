@@ -1,7 +1,10 @@
 //
-// FILE: gtext.cc -- Implementation of Text class
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of Text class
 //
 
 #ifdef __GNUG__
@@ -10,7 +13,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
-#include "base/base.h"
+#include "base.h"
 
 gText gText::BadIndex::Description(void) const
 { return "Bad index exception in gText"; }

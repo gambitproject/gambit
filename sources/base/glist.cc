@@ -1,11 +1,14 @@
 //
-// FILE: glist.cc -- Provide implementations for commonly-used lists
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Provide instantiations for commonly-used lists
 //
 
-#include "base/base.h"
-#include "base/glist.imp"
+#include "base.h"
+#include "glist.imp"
 
 template class gList<int>;
 template class gList<long>;

@@ -1,13 +1,16 @@
 //
-// FILE: ghash.h -- declaration of HashTable
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Declaration of hash table class
 //
 
 #ifndef GHASH_H
 #define GHASH_H
 
-#include "base/base.h"
+#include "base.h"
 
 template <class K, class T> class HashTable {
 private:

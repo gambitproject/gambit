@@ -1,7 +1,10 @@
 //
-// FILE: gpool.h -- Memory pool
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Class implementing a memory pool
 //
 
 #ifndef GPOOL_H

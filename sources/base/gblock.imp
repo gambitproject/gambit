@@ -1,11 +1,14 @@
 //
-// FILE: gblock.imp -- Implementation of gBlock type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of gBlock type
 //
 
 #include <stdlib.h>
-#include "base/gblock.h"
+#include "gblock.h"
 
 template <class T> gBlock<T>::gBlock(unsigned int len) : gArray<T>(len)   { }
 

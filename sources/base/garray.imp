@@ -1,12 +1,15 @@
 //
-// FILE: garray.imp - Implementation of gArray data type
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Implementation of gArray data type
 //
 
 #include <stdlib.h>
 #include <assert.h>
-#include "base/garray.h"
+#include "garray.h"
 
 
 template <class T> gArray<T>::gArray(unsigned int len) 

@@ -1,13 +1,16 @@
-// 
-// FILE: gslist.h -- Generic list container for sorting and filtering
 //
-// $Id$
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Generic list container for sorting and filtering
 //
 
 #ifndef GSLIST_H
 #define GSLIST_H
 
-#include "base/glist.h"
+#include "glist.h"
 
 template <class T> class gListSorter;
 template <class T> class gListFilter;
