@@ -1,7 +1,7 @@
 //
-// FILE: string.h -- Definition of String class
+// FILE: gstring.h -- Definition of gString class
 //
-// @(#)gstring.h	1.3 6/28/94
+// $Id$
 //
 
 #ifndef GSTRING_H
@@ -89,7 +89,7 @@ inline gString operator+(const char *c, const gString &s)
     return gString(c) + s;
 }
 
-input &operator<<(input &from, gString &);
+input &operator>>(input &from, gString &);
 
 inline output& operator<<(output& to, const gString& A){
   to << A.storage; return to;
