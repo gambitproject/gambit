@@ -22,8 +22,7 @@ void HomQre(const Nfg &nfg, HomQreParams &params,
 	   gList<MixedSolution> &solutions,
 	   long &nevals, long &nits)
 { 
-  NFSupport supp(start.Support());
-  echo_payoffs(supp);
+  echo_payoffs(start.Support());
   
   gHompack<double> hom(start, params);
   solutions = hom.GetSolutions();

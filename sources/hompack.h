@@ -86,6 +86,7 @@ public:
   T qofs(T f0, T fp0, T f1, T fp1, T dels, T s);
   void cleanup(void);
   const gList<MixedSolution> &GetSolutions(void) const;
+  T QreValue(MixedProfile<T> &sol, T lambda);
 };
 
 #endif // HOMPACK_H

@@ -37,9 +37,6 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
   pxifile << "\nData:\n";
 }
 
- // qofs //////////////////////////////////////////////////////////////////
- // The code below is related to the  Hermite cubic predictor
-
 /*
 // Constants // "LIMITD is an upper bound on the number of steps."
   const int limitd = 10000;  //originally = 1000
@@ -91,13 +88,16 @@ gHompack<T>::gHompack(const MixedProfile<gNumber> &s, const HomQreParams &p)
   
   fixpnf(N, Y, flag, 1., 1., .1, .1, true,
   	 A, ssp, jeval_num,arclength,max_lambda,false);
-  printf("Exiting flag: %d\n",flag);
-  printf("Done\n");
+  gout << "Exiting flag: " << flag << "\n";
 } 
 
 template <class T> gHompack<T>::~gHompack(void)
 { } 
 
+
+//
+//  qofs: The code below is related to the  Hermite cubic predictor
+//
 
 template <class T> 
 T gHompack<T>::qofs(T f0, T fp0, T f1, T fp1, T dels, T s)
@@ -349,7 +349,7 @@ void gHompack<T>::fixpnf(
 	     bool poly_switch  // POLY_SWITCH = ?
 	     )
 {
-  MixedProfile<gNumber> sol(supp);
+  MixedProfile<T> sol(supp);
 
   //cout << "Entered fixpnf()." << endl;
   //  void cleanup();
@@ -608,14 +608,14 @@ void gHompack<T>::fixpnf(
 
     if (params.fullGraph) {
       int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
-      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetQre(tlambda, QreValue(sol, tlambda));  // need to compute value here
       solutions[index].SetEpsilon(params.Accuracy());
     }
 
     if(params.pxifile) {
       (*params.pxifile).SetFloatMode();
       *params.pxifile << " " << tlambda;
-      *params.pxifile << " " << total_arclength;
+      *params.pxifile << " " << QreValue(sol, tlambda);
       for(int pl = 1;pl<=nfg.NumPlayers();pl++) 
 	for(int i=1;i<=supp.NumStrats(pl);i++) 
 	  *params.pxifile << " " << sol(pl,i);
@@ -626,7 +626,7 @@ void gHompack<T>::fixpnf(
     // "Check if the step was successful."
     if (flag > 0) {
       int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
-      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetQre(tlambda,QreValue(sol, tlambda));  // need to compute value here
       solutions[index].SetEpsilon(params.Accuracy());
       arclength = total_arclength;
       cleanup();
@@ -645,7 +645,7 @@ void gHompack<T>::fixpnf(
       
       flag = 2;   // Return error 2: Error tolerance too small.
       int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
-      solutions[index].SetQre(tlambda,0);  // need to compute value here
+      solutions[index].SetQre(tlambda,QreValue(sol, tlambda));  // need to compute value here
       solutions[index].SetEpsilon(params.Accuracy());
       return;
     }
@@ -695,7 +695,7 @@ void gHompack<T>::fixpnf(
   flag = 3;           // Return error 3: StepNF has been called 1000 times
   int index = solutions.Append(MixedSolution(sol, algorithmNfg_QRE));      
   T tlambda = 1/(1-Y[1])-1; //Vale Murthy 2/9/00
-  solutions[index].SetQre(tlambda,0);  // need to compute value here
+  solutions[index].SetQre(tlambda,QreValue(sol, tlambda));  // need to compute value here
   solutions[index].SetEpsilon(params.Accuracy());
   return;
 }
@@ -1867,6 +1867,21 @@ template <class T>
 const gList<MixedSolution> &gHompack<T>::GetSolutions(void) const
 {
   return solutions;
+}
+
+template <class T>
+T gHompack<T>::QreValue(MixedProfile<T> &sol, T lambda)
+{
+  double val = 0.0, z;
+
+  for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
+    for (int st = 2; st <= supp.NumStrats(pl); st++) {
+      z = log(sol(pl, 1)) - log(sol(pl, st)) -
+          lambda * (sol.Payoff(pl,pl,1) - sol.Payoff(pl,pl,st));
+      val += z * z;
+    }
+  }
+  return val;
 }
 
 // Instantiations  
