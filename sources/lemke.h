@@ -14,7 +14,7 @@
 class LemkeParams     {
   public:
     int dup_strat, plev, nequilib, maxdepth;
-    gString outfile, errfile;
+    gOutput *outfile;
     
     LemkeParams(void);
 };
@@ -25,9 +25,9 @@ class LemkeParams     {
 template <class T> class LemkeSolver  {
   private:
     const NormalForm<T> &nf;
-    LemkeParams params;
+    const LemkeParams &params;
     int npivots;
-    gRational time;
+    double time;
     gList<gPVector<T> > solutions;
 
   public:
@@ -36,9 +36,7 @@ template <class T> class LemkeSolver  {
     int Lemke(void);
     
     int NumPivots(void) const;
-    gRational Time(void) const;
-
-    LemkeParams &Parameters(void);
+    double Time(void) const;
 
     const gList<gPVector<T> > &GetSolutions(void) const;
 };

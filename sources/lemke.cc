@@ -19,7 +19,8 @@
 //                        LemkeParams: member functions
 //---------------------------------------------------------------------------
 
-LemkeParams::LemkeParams(void) : dup_strat(0), plev(0), nequilib(0)
+LemkeParams::LemkeParams(void) 
+  : dup_strat(0), plev(0), nequilib(0), outfile(&gnull)
 { }
 
 //---------------------------------------------------------------------------
@@ -57,7 +58,7 @@ template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
   private:
     const NormalForm<T> &N;
     int num_strats;
-    gOutput &output, &errors;
+    gOutput &output;
     int printlevel;
     BFS_List List;
    
@@ -68,8 +69,7 @@ template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const NormalForm<T> &, gOutput &ofile, gOutput &efile,
-		 int plev);
+    LemkeTableau(const NormalForm<T> &, gOutput &ofile, int plev);
     virtual ~LemkeTableau();
 
     int Lemke(int);
@@ -82,12 +82,12 @@ template <class T> class LemkeTableau : public gTableau<T>, public BaseLemke  {
 
 template <class T>
 LemkeTableau<T>::LemkeTableau(const NormalForm<T> &NF,
-			      gOutput &ofile, gOutput &efile, int plev)
+			      gOutput &ofile, int plev)
      : gTableau<T>(1, NF.NumStrats(1) + NF.NumStrats(2),
 		   NF.NumStrats(1) + NF.NumStrats(2),
 		   0, NF.NumStrats(1) + NF.NumStrats(2) + 1,
 		   NF.NumStrats(1) + NF.NumStrats(2)),
-		   N(NF), output(ofile), errors(efile), printlevel(plev),
+		   N(NF), output(ofile), printlevel(plev),
 		   num_strats(NF.NumStrats(1) + NF.NumStrats(2))
 {
   NormalIter<T> iter(N);
@@ -435,35 +435,20 @@ LemkeSolver<T>::LemkeSolver(const NormalForm<T> &N, const LemkeParams &p)
 
 template <class T> int LemkeSolver<T>::Lemke(void)
 {
-  if (nf.NumPlayers() != 2)   return 0;
+  if (nf.NumPlayers() != 2 || !params.outfile)   return 0;
 
   if (params.dup_strat < 0 ||
-      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))
-    params.dup_strat = 0;
+      params.dup_strat > nf.NumStrats(1) + nf.NumStrats(2))   return 0;
   
-  gOutput *outfile = &gout, *errfile = &gerr;
-
-  if (params.outfile != "")
-    outfile = new gFileOutput((char *) params.outfile);
-  if (params.errfile != "" && params.errfile != params.outfile)
-    errfile = new gFileOutput((char *) params.errfile);
-  if (params.errfile != "" && params.errfile == params.outfile)
-    errfile = outfile;
- 
   gWatch watch;
 
-  LemkeTableau<T> LT(nf, *outfile, *errfile, params.plev);
+  LemkeTableau<T> LT(nf, *params.outfile, params.plev);
   LT.Lemke(params.dup_strat);
 
-  time = (gRational) watch.Elapsed();
+  time = watch.Elapsed();
   npivots = LT.NumPivots();
 
   LT.GetSolutions(solutions);
-
-  if (params.outfile != "")
-    delete outfile;
-  if (params.errfile != "" && params.errfile != params.outfile)
-    delete errfile;
 
   return 1;
 }
@@ -473,14 +458,9 @@ template <class T> int LemkeSolver<T>::NumPivots(void) const
   return npivots;
 }
 
-template <class T> gRational LemkeSolver<T>::Time(void) const
+template <class T> double LemkeSolver<T>::Time(void) const
 {
   return time;
-}
-
-template <class T> LemkeParams &LemkeSolver<T>::Parameters(void)
-{
-  return params;
 }
 
 template <class T>
