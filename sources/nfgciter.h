@@ -44,7 +44,7 @@ public:
   void Set(int pl, int num);
   int Next(int pl);
   
-  StrategyProfile &Profile(void) const;
+  const StrategyProfile &Profile(void) const;
 
   gArray<int> Get(void) const;
   void Get(gArray<int> &t) const;

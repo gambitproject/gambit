@@ -100,7 +100,7 @@ long NfgContIter::GetIndex(void) const
   return profile.GetIndex();
 }
 
-StrategyProfile &NfgContIter::Profile(void) const
+const StrategyProfile &NfgContIter::Profile(void) const
 {
   return profile;
 }
