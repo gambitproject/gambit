@@ -194,10 +194,12 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
     F.SetLambda(Lambda);
     DFP(p, F, value, iter,
         params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	*params.tracefile,params.trace);
+	*params.tracefile,params.trace-1);
 
-    // tracefile stuff goes in here... omitted for now
-    
+    if (params.trace>0)  {
+      *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
+    } 
+
     if (params.pxifile)   {
       *params.pxifile << "\n" << Lambda << " " << value;
       *params.pxifile << " ";

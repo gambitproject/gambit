@@ -211,18 +211,20 @@ void Gobit(const Efg<double> &E, EFGobitParams &params,
     F.SetLambda(Lambda);
     Powell(p, xi, F, value, iter,
 	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	   *params.tracefile, params.trace);
+	   *params.tracefile, params.trace-1);
     
-    // tracefile stuff omitted for now
+    if (params.trace>0)  {
+      *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
+    } 
 
     if (params.pxifile)  {
-      *params.pxifile << "\n" << Lambda << " " << value;
-      *params.pxifile << " ";
+      *params.pxifile << "\n" << Lambda << " " << value << " ";
       for (int pl = 1; pl <= E.NumPlayers(); pl++)
 	for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets();
 	     iset++)  {
 	  double prob = 0.0;
-	  for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); prob += p(pl, iset, act++))
+	  for (int act = 1; act <= E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); 
+	       prob += p(pl, iset, act++))
 	    *params.pxifile << p(pl, iset, act) << ' ';
 //	  *params.pxifile << (1.0 - prob) << ' ';
 	}

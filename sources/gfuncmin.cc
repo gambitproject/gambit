@@ -246,25 +246,30 @@ double LineMin(double tmin, double tmax,
 	       const gVector<double> &direction,
 	       double &xmin,
 	       int maxitsBrent, double tolBrent,
-	       gOutput &tracefile)
+	       gOutput &tracefile, int tracelevel = 0)
 {
   double a, b, c;
   
-  tracefile << "Searching from " << origin << "\n";
-  tracefile << "   Direction: " << direction << "\n";
+  if(tracelevel > 0) {
+    tracefile << "Searching from " << origin << "\n";
+    tracefile << "   Direction: " << direction << "\n";
+  }
 
   if (!MinBracket(tmin, tmax, func, origin, direction, a, b, c))  {
     xmin = c;
 
-    tracefile << "   Bracketing failed.\n";
-    tracefile << "   step size = " << xmin << "\n\n";
-
+    if(tracelevel > 0) {
+      tracefile << "   Bracketing failed.\n";
+      tracefile << "   step size = " << xmin << "\n\n";
+    }
     return func.Value(origin + direction * c);
   }
 
   double fret = Brent(a, b, c, func, origin, direction, xmin, maxitsBrent, tolBrent);
 
-  tracefile << "   step size = " << xmin << "  value = " << fret << "\n\n";
+  
+  if(tracelevel > 0) 
+    tracefile << "   step size = " << xmin << "  value = " << fret << "\n\n";
 
   return fret;
 }
@@ -275,7 +280,7 @@ void RayMin(gFunction<double> &func,
 	    gVector<double> &v, gVector<double> &xi,
 	    double &fret,
 	    int maxitsBrent, double tolBrent,
-	    gOutput &tracefile)
+	    gOutput &tracefile,int tracelevel = 0)
 {
   static const double BIGNUM = 1.0e20;
 
@@ -296,7 +301,7 @@ void RayMin(gFunction<double> &func,
     }
 
   fret = LineMin(tjmin, tjmax, func, v, xi, xmin, maxitsBrent, tolBrent,
-	         tracefile);
+	         tracefile,tracelevel);
 
   xi *= xmin;
   v += xi;
@@ -343,7 +348,7 @@ bool DFP(gPVector<double> &p,
   func.Deriv(p, g);
   xi = -g;
   
-  if (tracelevel > 2)  
+  if (tracelevel > 0)  
     tracefile << "Initializing DFP, location = " << p
               << "  value = " << fret << "\n\n";
 
@@ -354,11 +359,11 @@ bool DFP(gPVector<double> &p,
   
   for (its = 1; its <= maxitsN && !status.Get(); its++)  {
     iter = its;
-    if (tracelevel > 2)
+    if (tracelevel > 0)
       tracefile << "DFP iteration " << iter << '\n';
 
     Project(xi, p.Lengths());
-    RayMin(func, p, xi, fret, maxits1, tol1, gnull);
+    RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1);
     
     if (fret <= tolN || fret >= fp || its >= maxitsN || status.Get())  {
       if (fret <= tolN)  return true;
@@ -397,7 +402,7 @@ bool DFP(gPVector<double> &p,
                  	(fae * (dg[i] * dg[j]));
     xi = -(hessin * g);
 
-    if (tracelevel > 2)   {
+    if (tracelevel > 0)   {
       tracefile << "Hessian:\n\n";
       tracefile << ((gRectArray<double> &)xi) << '\n';
 
@@ -432,13 +437,13 @@ bool Powell(gPVector<double> &p,
   fret=func.Value(p);
   startVal = fret;
 
-  if (tracelevel > 2)  
+  if (tracelevel > 0)  
     tracefile << "Initializing Powell, location = " << p
               << "  value = " << fret << "\n\n";
 
   pt=p;
   for (iter=1;!status.Get();iter++) {
-    if (tracelevel > 2)
+    if (tracelevel > 0)
       tracefile << "Powell iteration " << iter << '\n';
 
     fp=fret;
@@ -453,7 +458,7 @@ bool Powell(gPVector<double> &p,
 	xi.GetRow(index, xit);
 	fptt=fret;
 
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile,tracelevel-1);
       
 	if (fptt-fret > del) {
 	  del=fptt-fret;
@@ -466,7 +471,7 @@ bool Powell(gPVector<double> &p,
     if (fret <= tolN) return true;
 
     if (iter == maxitsN)   {
-      if (tracelevel > 2)  {
+      if (tracelevel > 0)  {
 	tracefile << "location = " << p << " value = " << fret << "\n\n";
 	tracefile << "Powell failed to converge in " << iter << " iterations\n\n";
       }
@@ -483,12 +488,12 @@ bool Powell(gPVector<double> &p,
       t=2.0*(fp-2.0*fret+fptt)*pow(fp-fret-del,2)-del*pow(fp-fptt,2);
       if (t < 0.0) {
 	Project(xit, p.Lengths());
-	RayMin(func, p, xit, fret, maxits1, tol1, tracefile);
+	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2);
 	xi.SetRow(ibig, xit);
       }
     }
     
-    if (tracelevel > 2)   {
+    if (tracelevel > 1)   {
       tracefile << "Approximate Hessian:\n\n";
       tracefile << ((gRectArray<double> &)xi) << '\n';
 
