@@ -139,7 +139,7 @@ template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 { }
 
 template <class T> MixedProfile<T>::MixedProfile(const MixedProfile<T> &p)
-  : BaseMixedProfile(p), gPVector<T>(p)
+  : BaseMixedProfile(p), gPVector<T>(p), Nf(p.Nf)
 { }
 
 template <class T> MixedProfile<T>::~MixedProfile()   { }
@@ -149,6 +149,7 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
 {
   BaseMixedProfile::operator=(p);
   gPVector<T>::operator=(p);
+  Nf = (p.Nf);
   return *this;
 }
 
