@@ -1,0 +1,59 @@
+//
+// Some user defined functions for maximum likelihood estimation
+// 
+
+// log likelihood of the data for a given solution
+// note that the data must be of type MIXED
+// So if data is LIST(LIST(NUMBER)), then call function by  
+// LogLik[Mixed[n,Float[data]],sol]
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+NewFunction[ LogLike[dat->LIST(LIST(NUMBER)), sol->MIXED], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
+
+NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
+
+// log likelihood of the data for a given solution
+// note that the data must be of type BEHAV
+// So if data is LIST(LIST(LIST(NUMBER))), then call function by  
+// LogLik[Behav[n,Float[data]],sol]
+
+NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+NewFunction[ LogLike[dat->LIST(LIST(LIST(NUMBER))), sol->BEHAV], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+// This function computes confidence intervals for a solution
+// Here list is the list of likelihood values, lam is the list of parameters
+// (assumed to have the same length as list, range is 1/2 of the chi^2 value
+// (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
+// maximum (assumed correct) 
+
+NewFunction[LamHiLo[list->LIST(NUMBER),lam->LIST(NUMBER),range->NUMBER,llmaxind->NUMBER],
+  newlist := list -(list_llmaxind-range);
+  t1:={};
+  t2:={};
+  llsize := Length[lam];
+  For[z:=2, z<=llsize, z:=z+1,
+    If[newlist_z >= 0.0, 
+    t1:=t1&{z}; 
+    t2:=t2&{lam_z};];
+  ];
+  flag := True;
+  t1:=t1-(t1_1 - 1);
+  len:=Length[t1];
+  If[len != t1_len, flag:=False];
+  lhilo:={t2_1,t2_len};
+];
+
