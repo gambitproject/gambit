@@ -49,8 +49,6 @@ public:
 
   virtual gbtGame GetTree(void) const = 0;
 
-  virtual int NumActions(int pl, int iset) const = 0;
-  virtual int NumActions(const gbtGameInfoset &) const = 0;
   virtual gbtPVector<int> NumActions(void) const = 0;
   virtual int NumDegreesOfFreedom(void) const = 0;
 

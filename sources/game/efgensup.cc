@@ -43,7 +43,7 @@ DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
     if (infoset->GetPlayer()->GetId() < cursor.GetPlayerId() ||
 	( infoset->GetPlayer()->GetId() == cursor.GetPlayerId() &&
 	  infoset->GetId() < cursor.GetInfosetId()) )
-      if (S->NumActions(infoset) > 0)
+      if (infoset->NumActions() > 0)
 	return true;
     if (infoset->GetPlayer()->GetId() == cursor.GetPlayerId() &&
 	infoset->GetId() == cursor.GetInfosetId() )

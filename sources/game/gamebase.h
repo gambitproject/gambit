@@ -771,8 +771,6 @@ public:
 
   gbtGame GetTree(void) const { return m_efg; }
 
-  int NumActions(int pl, int iset) const;
-  int NumActions(const gbtGameInfoset &) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one

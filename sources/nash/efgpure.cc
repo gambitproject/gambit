@@ -43,7 +43,7 @@ gbtBehavNashSet gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
   for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
     gbtGamePlayer player = p_support->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      ncont *= p_support->NumActions(pl, iset);
+      ncont *= player->GetInfoset(iset)->NumActions();
     }
   }
 
@@ -64,7 +64,7 @@ gbtBehavNashSet gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 	     flag && iset <= p_support->GetPlayer(pl)->NumInfosets();
 	     iset++)  {
 	  if (probs(pl, iset) == gbtNumber(0))   continue;
-	  for (int act = 1; act <= p_support->NumActions(pl, iset); act++)  {
+	  for (int act = 1; act <= p_support->GetPlayer(pl)->GetInfoset(iset)->NumActions(); act++)  {
 	    eiter.Next(pl, iset);
 	    if (eiter.GetPayoff(pl) > current)  {
 	      flag = false;

@@ -265,7 +265,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
       for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
 	gbtGamePlayer player = newSupport->GetPlayer(pl);
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  for (int act = 1; act <= newSupport->NumActions(pl, iset); act++) {
+	  for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++) {
 	    if (index++ == i) {
 	      newSupport->RemoveAction(newSupport->GetAction(pl, iset, act));
 	    }
@@ -390,7 +390,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
 	  gbtGamePlayer player = newSupport->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    for (int act = 1; act <= newSupport->NumActions(pl, iset); act++) {
+	    for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++) {
 	      if (index++ == i) {
 		newSupport->RemoveAction(newSupport->GetAction(pl, iset, act));
 	      }

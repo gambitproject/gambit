@@ -134,7 +134,7 @@ gbtSfgGame::MakeSequenceForm(const gbtGameNode &n, gbtNumber prob,gbtArray<int>s
       snew[pl]=1;
       for(i=1;i<isetnum;i++)
 	if(isetRow(pl,i)) 
-	  snew[pl]+=m_support->NumActions(pl,i);
+	  snew[pl]+=m_support->GetPlayer(pl)->GetInfoset(i)->NumActions();
 
       (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gbtNumber)1;
       gbtSfgSequence *myparent(parent[pl]);

@@ -308,7 +308,7 @@ void gbtEfgSupportWindow::ToggleAction(wxTreeItemId p_id)
 
   const gbtEfgSupport &support = m_doc->GetEfgSupportList().GetCurrent();
   if (support->Contains(action) &&
-      support->NumActions(action->GetInfoset()) > 1) {
+      action->GetInfoset()->NumActions() > 1) {
     m_doc->Submit(new gbtCmdRemoveAction(action));
   }
   else {

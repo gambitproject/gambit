@@ -156,9 +156,9 @@ template <class T> void gbtBehavProfileBase<T>::SetCentroid(void)
 
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     for (int iset = 1; iset <= GetPlayer(pl)->NumInfosets(); iset++) {
-      if (m_support->NumActions(pl,iset) > 0) {
-	center = ((T) 1 / (T) m_support->NumActions(pl, iset));
-	for (int act = 1; act <= m_support->NumActions(pl, iset); act++) {
+      if (m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions() > 0) {
+	center = ((T) 1 / (T) m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions());
+	for (int act = 1; act <= m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions(); act++) {
 	  m_profile(pl, iset, act) = center;
 	}
       }
@@ -595,8 +595,7 @@ void gbtBehavProfileBase<T>::RealizationProbs(const gbtMixedProfileTree<T> &mp,
 	  prob = tremble / (T) node->NumChildren();
       }
       else if (m_support->Contains(node->GetInfoset()->GetAction(i)))
-	prob = (T) 1 / (T) m_support->NumActions(node->GetPlayer()->GetId(),
-						 node->GetInfoset()->GetId());
+	prob = (T) 1 / (T) m_support->GetPlayer(node->GetPlayer()->GetId())->GetInfoset(node->GetInfoset()->GetId())->NumActions();
       else
 	prob = (T) 0;
     }

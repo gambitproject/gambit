@@ -68,7 +68,7 @@ bool gbtAllActionIterator::GoToNext(void)
     }
   }
 
-  if (act != m_support->NumActions(pl,iset)) {
+  if (act != m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions()) {
     act++; 
     return true;
   }
@@ -78,7 +78,7 @@ bool gbtAllActionIterator::GoToNext(void)
 
   while (temppl <= m_support->NumPlayers()) {
     while (tempiset <= m_support->GetPlayer(temppl)->NumInfosets()) {
-      if (m_support->NumActions(temppl,tempiset) > 0) {
+      if (m_support->GetPlayer(temppl)->GetInfoset(tempiset)->NumActions() > 0) {
 	pl = temppl;
 	iset = tempiset;
 	act = 1;
@@ -117,7 +117,7 @@ bool gbtAllActionIterator::IsLast(void) const
 {
   return (pl == m_support->NumPlayers() &&
 	  iset == m_support->GetPlayer(pl)->NumInfosets() &&
-	  act == m_support->NumActions(pl, iset));
+	  act == m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions());
 }
 
 bool gbtAllActionIterator::IsSubsequentTo(const gbtGameAction &p_action) const
@@ -166,4 +166,4 @@ bool gbtActionIterator::Begin(void)
 { act = 1; return true; }
 
 bool gbtActionIterator::End(void) const
-{ return act > m_support->NumActions(pl, iset); }
+{ return act > m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions(); }

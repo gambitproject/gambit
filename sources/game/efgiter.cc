@@ -75,7 +75,7 @@ void gbtEfgIterator::First(void)
 
 int gbtEfgIterator::Next(int pl, int iset)
 {  
-  if (m_current(pl, iset) == m_support->NumActions(pl, iset)) {
+  if (m_current(pl, iset) == m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions()) {
     m_current(pl, iset) = 1;
     m_profile.Set(m_support->GetAction(pl, iset, 1));
     return 0;
@@ -90,7 +90,7 @@ int gbtEfgIterator::Set(int pl, int iset, int act)
 {
   if (pl <= 0 || pl > m_support->NumPlayers() ||
       iset <= 0 || iset > m_support->GetPlayer(pl)->NumInfosets() ||
-      act <= 0 || act > m_support->NumActions(pl, iset))
+      act <= 0 || act > m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions())
     return 0;
 
   m_current(pl, iset) = act;
@@ -194,7 +194,7 @@ int gbtEfgContIterator::Next(int pl, int iset)
 {
   if (pl != m_frozenPlayer || iset != m_frozenInfoset)   return 1;
   
-  if (m_current(pl, iset) == m_support->NumActions(pl, iset)) {
+  if (m_current(pl, iset) == m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions()) {
     m_current(pl, iset) = 1;
     m_profile.Set(m_support->GetAction(pl, iset, 1));
     return 0;
@@ -225,7 +225,7 @@ int gbtEfgContIterator::NextContingency(void)
   while (true) {
     if (m_isActive[pl][iset] && (pl != m_frozenPlayer || 
 				 iset != m_frozenInfoset)) {
-      if (m_current(pl, iset) < m_support->NumActions(pl, iset))  {
+      if (m_current(pl, iset) < m_support->GetPlayer(pl)->GetInfoset(iset)->NumActions())  {
 	m_current(pl, iset) += 1;
 	m_profile.Set(m_support->GetAction(pl, iset, m_current(pl, iset)));
 	return 1;
@@ -328,7 +328,7 @@ void gbtEfgConditionalContIterator::Set(const gbtGameAction &a)
 
 int gbtEfgConditionalContIterator::Next(int pl, int iset)
 {
-  if (_current(pl, iset) == _support->NumActions(pl, iset)) {
+  if (_current(pl, iset) == _support->GetPlayer(pl)->GetInfoset(iset)->NumActions()) {
     _current(pl, iset) = 1;
     _profile.Set(_support->GetAction(pl, iset, 1));
     return 0;
@@ -350,7 +350,7 @@ int gbtEfgConditionalContIterator::NextContingency(void)
   while (true) {
 
     if (_is_active[pl][iset]) 
-      if (_current(pl, iset) < _support->NumActions(pl, iset))  {
+      if (_current(pl, iset) < _support->GetPlayer(pl)->GetInfoset(iset)->NumActions())  {
 	_current(pl, iset) += 1;
 	_profile.Set(_support->GetAction(pl, iset, _current(pl, iset)));
 	return 1;

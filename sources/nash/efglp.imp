@@ -120,8 +120,8 @@ gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
     inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support->NumActions(isets2[i]); 
-      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
+	snew+=isets2[i]->NumActions();
+      for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(s1)) {
 	  if(sol(s1)>eps) {
@@ -138,8 +138,8 @@ gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
     inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support->NumActions(isets1[i]); 
-      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
+	snew+=isets1[i]->NumActions();
+      for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(-s2)) {
 	  if(sol(-s2)>eps) {
@@ -178,9 +178,9 @@ void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
       i1=isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=p_support->NumActions(isets1[i]);
+	snew+=isets1[i]->NumActions();
       A(s1,ns2+i1+1) = (T) +1;
-      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	A(snew+i,ns2+i1+1) = (T) -1;
 	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,snew+i,s2,i1,i2);
       }
@@ -189,9 +189,9 @@ void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
       i2=isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=p_support->NumActions(isets2[i]);
+	snew+=isets2[i]->NumActions();
       A(ns1+i2+1,s2) = (T) -1;
-      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	A(ns1+i2+1,snew+i) = (T) +1;
 	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,s1,snew+i,i1,i2);
       }

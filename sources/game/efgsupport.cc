@@ -258,26 +258,6 @@ bool gbtEfgSupportBase::operator==(const gbtEfgSupportRep &p_support) const
 // gbtEfgSupportBase: Member Functions 
 //-----------------------------
 
-int gbtEfgSupportBase::NumActions(int pl, int iset) const
-{
-  if (pl == 0) {
-    return m_efg->GetChance()->GetInfoset(iset)->NumActions();
-  }
-  else {
-    return m_players[pl]->GetInfoset(iset)->NumActions();
-  }
-}
-
-int gbtEfgSupportBase::NumActions(const gbtGameInfoset &i) const
-{
-  if (i->GetPlayer()->IsChance()) {
-    return i->NumActions();
-  }
-  else {
-    return m_players[i->GetPlayer()->GetId()]->GetInfoset(i->GetId())->NumActions();
-  }
-}
-
 int gbtEfgSupportBase::GetIndex(const gbtGameAction &a) const
 {
   int pl = a->GetInfoset()->GetPlayer()->GetId();
@@ -338,7 +318,7 @@ int gbtEfgSupportBase::NumDegreesOfFreedom(void) const
 
   gbtList<gbtGameInfoset> active_infosets = ReachableInfosets(GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
-    answer += NumActions(active_infosets[i]) - 1;
+    answer += active_infosets[i]->NumActions() - 1;
 
   return answer;  
 }
@@ -362,7 +342,7 @@ gbtPVector<int> gbtEfgSupportBase::NumActions(void) const
   gbtPVector<int> bar(foo);
   for (int i = 1; i <= m_efg->NumPlayers(); i++)
     for (int j = 1; j <= m_players[i]->NumInfosets(); j++)
-      bar(i, j) = NumActions(i,j);
+      bar(i, j) = GetPlayer(i)->GetInfoset(j)->NumActions();
 
   return bar;
 }  
@@ -380,8 +360,9 @@ int gbtEfgSupportBase::NumSequences(int j) const
   if (j < 1 || j > m_efg->NumPlayers()) return 1;
   gbtList<gbtGameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
   int num = 1;
-  for(int i = 1; i <= isets.Length(); i++)
-    num+=NumActions(isets[i]);
+  for(int i = 1; i <= isets.Length(); i++) {
+    num += isets[i]->NumActions();
+  }
   return num;
 }
 
@@ -398,7 +379,7 @@ gbtEfgSupportBase::ReachableNonterminalNodes(const gbtGameNode &n) const
 {
   gbtList<gbtGameNode> answer;
   if (n->IsNonterminal()) {
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+    for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
       gbtGameNode nn = n->GetChild(GetAction(n->GetInfoset(), i));
       if (nn->IsNonterminal()) {
 	answer += nn;
@@ -467,7 +448,7 @@ bool gbtEfgSupportBase::AlwaysReachesFrom(const gbtGameInfoset &i,
   else {
     if (n->GetInfoset() == i) return true;
     else {
-      for (int j = 1; j <= NumActions(n->GetInfoset()); j++) {
+      for (int j = 1; j <= n->GetInfoset()->NumActions(); j++) {
 	if (!AlwaysReachesFrom(i, n->GetChild(GetAction(n->GetInfoset(), j)))) {
 	  return false;
 	}
@@ -511,7 +492,7 @@ void gbtEfgSupportBase::Dump(gbtOutput &p_output) const
     for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
       gbtGameInfoset infoset = player->GetInfoset(iset);
       p_output << '"' << infoset->GetLabel() << "\" { ";
-      for (int act = 1; act <= NumActions(pl, iset); act++)  {
+      for (int act = 1; act <= infoset->NumActions(); act++)  {
 	gbtGameAction action = m_players[pl]->GetInfoset(iset)->GetAction(act);
 	p_output << action << ' ';
       }
@@ -575,9 +556,11 @@ bool gbtEfgSupportBase::HasActiveActionsAtActiveInfosets(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++)
     for (int iset = 1; iset <= GetPlayer(pl)->NumInfosets(); iset++) 
-      if (InfosetIsActive(GetPlayer(pl)->GetInfoset(iset)))
-        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) == 0 )
+      if (InfosetIsActive(GetPlayer(pl)->GetInfoset(iset))) {
+        if (GetPlayer(pl)->GetInfoset(iset)->NumActions() == 0) {
           return false;
+	}
+      }
   return true;
 }
 
@@ -586,10 +569,10 @@ bool gbtEfgSupportBase::HasActiveActionsAtActiveInfosetsAndNoOthers(void)
   for (int pl = 1; pl <= NumPlayers(); pl++)
     for (int iset = 1; iset <= GetPlayer(pl)->NumInfosets(); iset++) {
       if (InfosetIsActive(GetPlayer(pl)->GetInfoset(iset)))
-        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) == 0 )
+        if (GetPlayer(pl)->GetInfoset(iset)->NumActions() == 0)
           return false;
       if (!InfosetIsActive(GetPlayer(pl)->GetInfoset(iset)))
-        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) > 0 )
+        if (GetPlayer(pl)->GetInfoset(iset)->NumActions() > 0)
           return false;
       }
   return true;
@@ -619,7 +602,7 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtGameNode
       (*list) += n->GetInfoset(); 
       deactivate(n->GetInfoset());
     }
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+    for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) 
       deactivate_this_and_lower_nodes_returning_deactivated_infosets(n->GetChild(GetAction(n->GetInfoset(), i)), list);    
   }
 }
@@ -702,7 +685,7 @@ gbtEfgSupportBase::activate_this_and_lower_nodes(const gbtGameNode &n)
   if (n->IsNonterminal()) {
     activate(n); 
     activate(n->GetInfoset());
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) 
+    for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) 
       activate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
   }
 }
@@ -714,7 +697,7 @@ gbtEfgSupportBase::deactivate_this_and_lower_nodes(const gbtGameNode &n)
     deactivate(n); 
     if ( !infoset_has_active_nodes(n->GetInfoset()) )
       deactivate(n->GetInfoset());
-    for (int i = 1; i <= NumActions(n->GetInfoset()); i++) {
+    for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
       deactivate_this_and_lower_nodes(n->GetChild(GetAction(n->GetInfoset(), i)));
     }
   }
