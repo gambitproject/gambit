@@ -228,10 +228,7 @@ void EFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class EFLiapParams<double>;
-TEMPLATE class EFLiapParams<gRational>;
 TEMPLATE class EFLiapModule<double>;
-TEMPLATE class EFLiapModule<gRational>;
 TEMPLATE class EFLiapFunc<double>;
-TEMPLATE class EFLiapFunc<gRational>;
 
 

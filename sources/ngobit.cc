@@ -8,6 +8,7 @@
 #include "ngobit.h"
 #include "gfunct.h"
 #include "rational.h"
+
 //-------------------------------------------------------------------------
 //                     NFGobitParams<T>: Member functions
 //-------------------------------------------------------------------------
@@ -253,8 +254,3 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 TEMPLATE class NFGobitParams<double>;
 TEMPLATE class NFGobitFunc<double>;
 TEMPLATE class NFGobitModule<double>;
-
-TEMPLATE class NFGobitParams<gRational>;
-TEMPLATE class NFGobitFunc<gRational>;
-TEMPLATE class NFGobitModule<gRational>;
-

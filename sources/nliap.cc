@@ -276,10 +276,7 @@ void NFLiapModule<T>::AddSolution(const LiapFunc<T> *const F)
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class NFLiapParams<double>;
-TEMPLATE class NFLiapParams<gRational>;
 TEMPLATE class NFLiapModule<double>;
-TEMPLATE class NFLiapModule<gRational>;
 TEMPLATE class NFLiapFunc<double>;
-TEMPLATE class NFLiapFunc<gRational>;
 
 
