@@ -29,49 +29,65 @@
 
 #include "math/rational.h"
 
-/* This file provides the template class
 
-   gInterval
-
-which models the concept of a nonempty compact interval.
-Since boundary points can be identified, open and half 
-open (bounded) intervals can be effected, but less directly.
-*/
-
-template<class T> class gInterval {
+//!
+//! gbtInterval models the concept of a nonempty compact interval.
+//! Since boundary points can be identified, open and half 
+//! open (bounded) intervals can be effected, but less directly.
+//!
+template <class T> class gbtInterval {
 private:
-    const T lower_bd;
-    const T upper_bd;
+  T lower_bd, upper_bd;
 
-    // Defined but not implemented to preserve constness
-    gInterval<T> &operator=(const gInterval<T> &);
+  // Defined but not implemented to preserve constness
+  gbtInterval<T> &operator=(const gbtInterval<T> &);
 
 public:
-    // constructors
-    gInterval(const gInterval<T>&);
-    gInterval(const T, const T);
-    ~gInterval();
+  // constructors
+  gbtInterval(const gbtInterval<T>& given) 
+    : lower_bd(given.lower_bd), upper_bd(given.upper_bd)
+  { }
 
-    // operators
-    bool          operator == (const gInterval<T>& y) const;
-    bool          operator != (const gInterval<T>& y) const;
+  gbtInterval(const T low, const T high) 
+    : lower_bd(low), upper_bd(high)
+  { 
+    if (low > high)  throw gbtRangeException();
+  }
 
-    // information
-    const T            LowerBound()                                 const;
-    const T            UpperBound()                                 const;
-    const bool         Contains(const T&)                           const;
-    const bool         Contains(const gInterval<T>&)                const;
-    const bool         LiesBelow(const T&)                          const;
-    const bool         LiesAbove(const T&)                          const;
-    const T            Length()                                     const;
-    const T            Midpoint()                                   const;
-    const gInterval<T> LeftHalf()                                   const;
-    const gInterval<T> RightHalf()                                  const;
-    const gInterval<T> SameCenterTwiceLength()                      const;
-    const gInterval<T> SameCenterWithNewLength(const T&)            const;
+  ~gbtInterval() { }
 
+  // operators
+  bool operator==(const gbtInterval<T> &y) const
+    { return (lower_bd == y.lower_bd && upper_bd == y.upper_bd); }
+  bool operator!=(const gbtInterval<T>& y) const
+    { return (lower_bd != y.lower_bd || upper_bd != y.upper_bd); }
+
+  // information
+  const T &LowerBound(void) const { return lower_bd; }
+  const T &UpperBound(void) const { return upper_bd; }
+  bool Contains(const T &number) const
+    { return (lower_bd <= number && number <= upper_bd); }
+
+  bool Contains(const gbtInterval<T> &I) const
+    { return (lower_bd <= I.lower_bd && I.upper_bd <= upper_bd); }
+
+  bool LiesBelow(const T &number) const { return (upper_bd <= number); }
+  bool LiesAbove(const T &number) const { return (number <= lower_bd); }
+  T Length(void) const { return (upper_bd - lower_bd); } 
+  T Midpoint(void) const { return (upper_bd + lower_bd) / (T) 2; } 
+
+  gbtInterval<T> LeftHalf(void) const 
+    { return gbtInterval<T>(lower_bd, Midpoint()); }
+  gbtInterval<T> RightHalf(void) const
+    { return gbtInterval<T>(Midpoint(), upper_bd); }
+  gbtInterval<T> SameCenterTwiceLength(void) const
+    { return gbtInterval<T>((T) 2 * LowerBound() - Midpoint(),
+			    (T) 2 * UpperBound() - Midpoint()); 
+    }
+  gbtInterval<T> SameCenterWithNewLength(const T &L) const 
+    {
+      return gbtInterval<T>(Midpoint() - L/(T)2, Midpoint() + L/(T)2); 
+    }
 };
-
-template <class T> std::ostream &operator<<(std::ostream &, const gInterval<T> &);
 
 #endif // INTERVAL_H

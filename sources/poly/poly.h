@@ -85,11 +85,11 @@ public:
   gbtList<T>               CoefficientList()                            const;
   gbtPolyUni<T>          GcdWith(const gbtPolyUni<T>&)                const;
   bool                   IsQuadratfrei()                              const;
-  bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
-  gbtList< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
-  gInterval<T>           NeighborhoodOfRoot(const gInterval<T>&, T&)  const;
-  gbtList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
-  gbtList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
+  bool                   CannotHaveRootsIn(const gbtInterval<T>&)       const;
+  gbtList< gbtInterval<T> >  RootSubintervals(const gbtInterval<T>&)        const;
+  gbtInterval<T>           NeighborhoodOfRoot(const gbtInterval<T>&, T&)  const;
+  gbtList< gbtInterval<T> >  PreciseRootIntervals(const gbtInterval<T>&,T&) const;
+  gbtList<T>               PreciseRoots(const gbtInterval<T>&, T&)        const;
 
   void Output(std::ostream &) const;
 };

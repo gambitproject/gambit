@@ -443,9 +443,9 @@ gbtPolyQuickSolve<T>::SlowNewtonPolishOnce(const gbtVector<double>& point) const
 template<class T>   gbtVector<double> 
 gbtPolyQuickSolve<T>::NewtonPolishedRoot(const gbtVector<double> &initial) const
 {
-  gbtList<gInterval<double> > interval_list;
+  gbtList<gbtInterval<double> > interval_list;
   for (int i = 1; i <= Dmnsn(); i++) 
-    interval_list += gInterval<double>(initial[i] - (double)1, 
+    interval_list += gbtInterval<double>(initial[i] - (double)1, 
 					initial[i] + (double)1);
   gRectangle<double> box(interval_list);
   gbtVector<double> point(initial);

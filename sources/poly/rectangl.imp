@@ -36,7 +36,7 @@ template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given)
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const gbtList< gInterval<T> >& given)
+template<class T> gRectangle<T>::gRectangle(const gbtList< gbtInterval<T> >& given)
 : sides(given)
 {
 }
@@ -47,7 +47,7 @@ template<class T> gRectangle<T>::gRectangle(const gbtVector<T> lower_bd,
 { 
   assert (lower_bd.Check(upper_bd));
   for (int i = 1; i <= upper_bd.Length(); i++) {
-    gInterval<T> side(lower_bd[i],upper_bd[i]);
+    gbtInterval<T> side(lower_bd[i],upper_bd[i]);
     sides += side;
   }
 }
@@ -127,7 +127,7 @@ template<class T> const T gRectangle<T>::HeightInCoord(const int& i) const
 }
 
 template<class T> 
-const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const 
+const gbtInterval<T> gRectangle<T>::CartesianFactor(const int& i) const 
 { 
   return sides[i];
 }
@@ -135,7 +135,7 @@ const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const
 template<class T> 
 const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const 
 { 
-  gbtList<gInterval<T> > new_sides;
+  gbtList<gbtInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     new_sides += CartesianFactor(i).SameCenterTwiceLength();
   return gRectangle<T>(new_sides);
@@ -155,7 +155,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   T diameter((T)0);
   while (diameter * diameter < sumsquares) diameter += maxlength;
   
-  gbtList<gInterval<T> > new_sides;
+  gbtList<gbtInterval<T> > new_sides;
   for (i = 1; i <= Dmnsn(); i++)
     new_sides += CartesianFactor(i).SameCenterWithNewLength(diameter);
   return gRectangle<T>(new_sides);
@@ -165,7 +165,7 @@ template<class T>
 const gRectangle<T> 
 gRectangle<T>::Orthant(const gbtArray<int>& top_or_bot) const 
 { 
-  gbtList<gInterval<T> > new_sides;
+  gbtList<gbtInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     if (top_or_bot[i] == 0)
     new_sides += CartesianFactor(i).LeftHalf();
@@ -293,10 +293,12 @@ const T gRectangle<T>::DiameterSquared() const
 
 template <class T> void gRectangle<T>::Output(std::ostream &output) const
 {
+/*
   for (int i = 1; i <= Dmnsn() - 1; i++)
     output << sides[i] << "x";
   if (Dmnsn() > 0) 
     output << sides[Dmnsn()];
+*/
 }
 
 template <class T>

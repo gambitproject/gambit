@@ -19,7 +19,6 @@ polyinclude_HEADERS = \
 	ineqsolv.h \
 	ineqsolv.imp \
 	interval.h \
-	interval.imp \
 	monomial.h \
 	monomial.imp \
 	poly.h \
@@ -49,9 +48,7 @@ libgambit_poly_la_SOURCES = \
 	ineqsolv.cc \
 	ineqsolv.h \
 	ineqsolv.imp \
-	interval.cc \
 	interval.h \
-	interval.imp \
 	monomial.cc \
 	monomial.h \
 	monomial.imp \

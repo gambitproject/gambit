@@ -78,7 +78,7 @@ gbtPolyMultiSolver<T>::ContinuationSolutions(const gbtList<gbtPolyMulti<T> >& li
   if (!list[1].IsZero()) {
     gbtPolyUni<T> rootpoly = list[1].UnivariateEquivalent(curvar);
 
-    gInterval<T> root_interval((T)-10,(T)10); //  Ouch!!
+    gbtInterval<T> root_interval((T)-10,(T)10); //  Ouch!!
     T error = (T) 0.0001;                           // Ditto!!
 
 //DEBUG
@@ -190,7 +190,7 @@ template<class T> gbtList<gbtVector<T> > gbtPolyMultiSolver<T>::Roots()
   gbtVector<T> zero(TheIdeal.Dmnsn());
   original += zero;
 
-  gInterval<T> root_interval((T)-10,(T)10); //  Ouch!!
+  gbtInterval<T> root_interval((T)-10,(T)10); //  Ouch!!
   T error = (T) 0.0001;                           // Ditto!!
 
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {

@@ -42,12 +42,12 @@ open (bounded) intervals can be effected, but less directly.
 
 template <class T> class gRectangle {
 private:
-    gbtList<gInterval<T> > sides;
+    gbtList<gbtInterval<T> > sides;
 
 public:
     // constructors
     gRectangle(const gRectangle<T>&);
-    gRectangle(const gbtList<gInterval<T> >&);
+    gRectangle(const gbtList<gbtInterval<T> >&);
     gRectangle(const gbtVector<T>, const gbtVector<T>);
     ~gRectangle();
 
@@ -63,7 +63,7 @@ public:
     const T                  LowerBoundOfCoord(const int&)      const;
     const T                  UpperBoundOfCoord(const int&)      const;
     const T                  HeightInCoord(const int&)          const;
-    const gInterval<T>       CartesianFactor(const int&)        const;
+    const gbtInterval<T>       CartesianFactor(const int&)        const;
     const gRectangle<T>      SameCenterDoubleSideLengths()      const;
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
     const gRectangle<T>      Orthant(const gbtArray<int>&)        const;

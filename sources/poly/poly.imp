@@ -321,7 +321,7 @@ bool gbtPolyUni<T>::IsQuadratfrei() const
 }
 
 template <class T> 
-bool gbtPolyUni<T>::CannotHaveRootsIn(const gInterval<T>& I) const
+bool gbtPolyUni<T>::CannotHaveRootsIn(const gbtInterval<T>& I) const
 {
   // get rid of easy cases
   if      (Degree() == -1) return false;
@@ -365,18 +365,18 @@ bool gbtPolyUni<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 }
 
 
-template <class T> gbtList< gInterval<T> >
-gbtPolyUni<T>::RootSubintervals(const gInterval<T>& I) const
+template <class T> gbtList< gbtInterval<T> >
+gbtPolyUni<T>::RootSubintervals(const gbtInterval<T>& I) const
 { assert ( Degree() >= 0 && IsQuadratfrei() );
 
   gbtPolyUni<T> Df = Derivative();
 
-  gbtList< gInterval<T> > answer;
+  gbtList< gbtInterval<T> > answer;
 
-  gbtList< gInterval<T> > to_be_processed; to_be_processed += I;
+  gbtList< gbtInterval<T> > to_be_processed; to_be_processed += I;
   while (to_be_processed.Length() > 0) {
 
-    gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
+    gbtInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
 
     if      ( EvaluationAt(in_process.LowerBound()) == (T)0 ) {
 
@@ -421,17 +421,17 @@ gbtPolyUni<T>::RootSubintervals(const gInterval<T>& I) const
   return answer;
 }
 
-template <class T> gInterval<T>
-gbtPolyUni<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
+template <class T> gbtInterval<T>
+gbtPolyUni<T>::NeighborhoodOfRoot(const gbtInterval<T>& I, T& error) const
 {
-  gbtList< gInterval<T> > intrvls; intrvls += I;
+  gbtList< gbtInterval<T> > intrvls; intrvls += I;
   while (intrvls[intrvls.Length()].Length() >= error) {
     if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) 
-      intrvls += gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
+      intrvls += gbtInterval<T>(intrvls[intrvls.Length()].LowerBound(),
 			      intrvls[intrvls.Length()].LowerBound());
 
     else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == (T)0) 
-      intrvls += gInterval<T>(intrvls[intrvls.Length()].UpperBound(),
+      intrvls += gbtInterval<T>(intrvls[intrvls.Length()].UpperBound(),
 			      intrvls[intrvls.Length()].UpperBound());
 
     else if ( (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= (T)0 &&
@@ -449,11 +449,11 @@ gbtPolyUni<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
   // by introducing Newton's method.
 }
 
-template <class T> gbtList< gInterval<T> >
-gbtPolyUni<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
+template <class T> gbtList< gbtInterval<T> >
+gbtPolyUni<T>::PreciseRootIntervals(const gbtInterval<T>& I, T& error) const
 {
-  gbtList< gInterval<T> > coarse = RootSubintervals(I);
-  gbtList< gInterval<T> > fine;
+  gbtList< gbtInterval<T> > coarse = RootSubintervals(I);
+  gbtList< gbtInterval<T> > fine;
 
   for (int i = 1; i <= coarse.Length(); i++) 
     fine += NeighborhoodOfRoot(coarse[i],error);
@@ -462,7 +462,7 @@ gbtPolyUni<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
 }
 
 template <class T> gbtList<T>
-gbtPolyUni<T>::PreciseRoots(const gInterval<T>& I, T& error) const
+gbtPolyUni<T>::PreciseRoots(const gbtInterval<T>& I, T& error) const
 {
   gbtList<T> roots;
 
@@ -481,7 +481,7 @@ gbtPolyUni<T>::PreciseRoots(const gInterval<T>& I, T& error) const
     }
 
     for (int i = 1; i <= depth; i++) p = p/factor;
-    gbtList< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
+    gbtList< gbtInterval<T> > fine = factor.PreciseRootIntervals(I,error);
     for (int j = 1; j <= fine.Length(); j++) {
       T approx = fine[j].LowerBound();
       for (int h = 1; h <= 2; h++) {
