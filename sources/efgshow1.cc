@@ -442,13 +442,12 @@ void EfgShow::OnMenuCommand(int id)
       break;
 
     case SOLVE_STANDARD:
-        SolveSetup(SOLVE_SETUP_STANDARD);
-        break;
+      SolveStandard();
+      break;
 
-    case SOLVE_DOMINANCE:
-    {
-        DominanceSettingsDialog EDPD(this);
-        break;
+    case SOLVE_DOMINANCE: {
+      DominanceSettingsDialog EDPD(this);
+      break;
     }
 
     case SOLVE_SUBGAMES: 

@@ -121,7 +121,7 @@ public:
     // Solution routines
     void        Solve(int id);
 
-    void        SolveSetup(int what);
+    void        SolveStandard(void);
     void        InspectSolutions(int what);
     void        RemoveSolutions(void);
     void        ChangeSolution(int soln);
