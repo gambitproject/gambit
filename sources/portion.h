@@ -440,6 +440,7 @@ protected:
 
 public:
   NfSupportPortion(NFSupport *);
+  NfSupportPortion(NFSupport &);
   virtual ~NfSupportPortion();
 
   NFSupport *Value(void) const;

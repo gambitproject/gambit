@@ -25,6 +25,7 @@ Portion *ArrayToList(const gArray<int> &);
 Portion *ArrayToList(const gArray<NFPlayer *> &);
 Portion *ArrayToList(const gArray<NFOutcome *> &);
 Portion *ArrayToList(const gArray<Strategy *> &);
+Portion *ArrayToList(const gList<const NFSupport> &);
 
 extern GSM *_gsm;
 
@@ -326,6 +327,22 @@ static Portion *GSM_Players(Portion **param)
   return ArrayToList(N->Players());
 }
 
+//------------------------
+// PossibleNashSupports
+//------------------------
+
+#include "nfgensup.h"
+
+static Portion *GSM_PossibleNashSupportsNFG(Portion **param)
+{
+  Nfg &N = *((NfgPortion*) param[0])->Value();
+
+  gList<const NFSupport> list =
+    PossibleNashSubsupports(NFSupport(N), gstatus);
+
+  Portion *por = ArrayToList(list);
+  return por;
+}
 
 //------------
 // StrategyNumber
@@ -536,9 +553,12 @@ void Init_nfgfunc(GSM *gsm)
       { "SetPayoff[outcome->NFOUTCOME, player->NFPLAYER, payoff->NUMBER] =: NFOUTCOME", GSM_SetPayoff },
       { "Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)",
 	GSM_Strategies },
-      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER", 
+      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: NUMBER", 
 	GSM_StrategyNumber },
       { "Support[nfg->NFG] =: NFSUPPORT", GSM_Support },
+      { "PossibleNashSupports[nfg->NFG] =: LIST(NFSUPPORT)", 
+	GSM_PossibleNashSupportsNFG },
+
       { 0, 0 }
     };
 
@@ -563,4 +583,3 @@ void Init_nfgfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }
-

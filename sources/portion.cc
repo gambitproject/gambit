@@ -765,6 +765,12 @@ NfSupportPortion::NfSupportPortion(NFSupport *value)
   SetGame(&value->Game());
 }
 
+NfSupportPortion::NfSupportPortion(NFSupport &value)
+  : _Value(new NFSupport *(new NFSupport(value))), _ref(false)
+{
+  SetGame(&value.Game());
+}
+
 NfSupportPortion::NfSupportPortion(NFSupport *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
@@ -836,8 +842,9 @@ EfSupportPortion::EfSupportPortion(EFSupport *value)
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport &value)
-  : _Value(new EFSupport *(new EFSupport(value))), _ref(false)
+  : _Value(new EFSupport *(NULL)), _ref(false)
 {
+  _Value = new EFSupport *(new EFSupport(value));
   SetGame(&value.Game());
 }
 
@@ -1798,7 +1805,7 @@ bool ListPortion::IsInteger(void) const
     Portion *p = (*rep->value)[i];
     if (p->Spec().ListDepth > 0)
       result = result && ((ListPortion *) p)->IsInteger();
-    else if (p->Spec().Type != porNULL)
+    else
       result = result && ((NumberPortion *) p)->Value().IsInteger();
   }
   return result;
