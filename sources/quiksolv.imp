@@ -377,7 +377,7 @@ QuikSolv<T>::NewtonPolishedRoot(const gVector<gDouble> &initial) const
   gRectangle<gDouble> box(interval_list);
   gVector<gDouble> point(initial);
   if (!NewtonRootInRectangle(box,point))
-    throw gclRuntimeError("Newton method failed to polish approximate root");
+    throw NewtonError();
   point = SlowNewtonPolishOnce(point);
   point = SlowNewtonPolishOnce(point);
   return point;
@@ -608,3 +608,12 @@ template <class T> gOutput& operator << (gOutput& output,
   else output << "It has not been solved.";
   return  output;
 }
+
+template <class T> QuikSolv<T>::NewtonError::~NewtonError()
+{ }
+
+template <class T> gText QuikSolv<T>::NewtonError::Description(void) const 
+{
+  return "Newton method failed to polish approximate root";
+}
+

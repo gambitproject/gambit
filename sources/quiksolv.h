@@ -112,6 +112,11 @@ template <class T> class QuikSolv {
 					        gArray<int>&)        const;
 
  public:
+  class NewtonError : public gException  {
+  public:
+    virtual ~NewtonError();
+    gText Description(void) const;   
+  };
    QuikSolv(const gPolyList<T> &, gStatus &);  
    QuikSolv(const gPolyList<T> &, const int &, gStatus &);  
    QuikSolv(const QuikSolv<T> &);
