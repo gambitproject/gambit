@@ -4,6 +4,7 @@
 //#
 
 #include "monomial.imp"
+#include "glist.imp"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -21,3 +22,11 @@ TEMPLATE gOutput& operator << (gOutput& output, const gMono<int>& x);
 TEMPLATE class gMono<double>;
 TEMPLATE gOutput& operator << (gOutput& output, const gMono<double>& x);
 
+TEMPLATE class gList< gMono<int> >;
+TEMPLATE class gNode< gMono<int> >;
+
+TEMPLATE class gList< gMono<double> >;
+TEMPLATE class gNode< gMono<double> >;
+
+TEMPLATE class gList< gMono<gRational> >;
+TEMPLATE class gNode< gMono<gRational> >;

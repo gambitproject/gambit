@@ -3,7 +3,17 @@
 //# @(#) pre_poly.imp	1.3 8/2/95
 //#
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+bool operator!=(const gArray<int> &, const gArray<int> &);
+void gList<gBlock<int> >::Dump(gOutput &) const { };
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
 #include "pre_poly.h"
+#include "glist.imp"
 
 //-----------------------------------------------------------
 //                      gSpace
@@ -569,8 +579,7 @@ term_order& term_order::operator=(term_order & RHS)
 
 
 bool term_order::operator==(const term_order & RHS) const
-{gout<<"pre_poly.cc51\n";//**
-
+{
   return (Space == RHS.Space && actual_order == RHS.actual_order);
 }
 
@@ -617,3 +626,11 @@ term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
   return term_order(ExtendedSpace,actual_order);
 }
 
+
+// INSTATIATIONS OF NEEDED LISTS
+
+TEMPLATE class gList<exp_vect>;
+TEMPLATE class gNode<exp_vect>;
+
+TEMPLATE class gList<exp_vect*>;
+TEMPLATE class gNode<exp_vect*>;
