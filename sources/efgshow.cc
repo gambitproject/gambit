@@ -193,13 +193,14 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
 
   CreateStatusBar();
 
-  wxAcceleratorEntry entries[5];
-  entries[0].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
-  entries[1].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
-  entries[2].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
-  entries[3].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
-  entries[4].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
-  wxAcceleratorTable accel(5, entries);
+  wxAcceleratorEntry entries[6];
+  entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
+  entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
+  entries[2].Set(wxACCEL_CTRL, (int) 'S', efgmenuFILE_SAVE);
+  entries[3].Set(wxACCEL_CTRL, (int) 'P', efgmenuFILE_PRINT);
+  entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
+  entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
+  wxAcceleratorTable accel(6, entries);
   SetAcceleratorTable(accel);
 
   MakeMenus();
@@ -492,12 +493,7 @@ void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
 void EfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  wxMenu *fileNewMenu = new wxMenu;
-  fileNewMenu->Append(FILE_NEW_NFG, "&Normal", 
-		      "Create a new normal form game");
-  fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
-		      "Create a new extensive form game");
-  fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
+  fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
   fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
   fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
   fileMenu->AppendSeparator();

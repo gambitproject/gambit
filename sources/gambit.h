@@ -36,8 +36,7 @@ private:
   wxFileHistory m_fileHistory;
 
   // Menu event handlers
-  void OnNewEfg(wxCommandEvent &);
-  void OnNewNfg(wxCommandEvent &);
+  void OnNew(wxCommandEvent &);
   void OnLoad(wxCommandEvent &);
   void OnMRUFile(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);
@@ -45,9 +44,6 @@ private:
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
-
-  int GetPlayers(void);
-  int GetStrategies(gArray<int> &);
 
   void MakeToolbar(void);
   
@@ -60,10 +56,6 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
-
-#define FILE_NEW                            1000
-#define FILE_NEW_NFG                        1001
-#define FILE_NEW_EFG                        1002
 
 #define GAMBIT_GUI_HELP "GAMBIT GUI"
 
