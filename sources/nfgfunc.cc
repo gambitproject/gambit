@@ -35,7 +35,7 @@ Portion *GSM_Lemke(Portion **param)
   NormalForm<double> *N = &((Nfg_Portion<double> *) param[0])->Value();
 
   LemkeParams LP;
-  LemkeSolver<double> LS(*N, LP);
+  LemkeModule<double> LS(*N, LP);
   LS.Lemke();
 
   ((numerical_Portion<double> *) param[2])->Value() = (double) LS.Time();
