@@ -33,10 +33,14 @@ template <class T> class gBlock : public gArray<T>   {
 
   public:
 //
-// Constructs the a block of the given length.  All elements of the block
+// Constructs a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
     gBlock(int len = 0);
+//
+// Constructs a block starting at lo, and going to hi.
+//
+    gBlock(int lo, int hi);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.

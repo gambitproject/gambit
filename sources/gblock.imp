@@ -10,6 +10,8 @@
 
 template <class T> gBlock<T>::gBlock(int len) : gArray<T>(len)   { }
 
+template <class T> gBlock<T>::gBlock(int lo, int hi) : gArray<T>(lo,hi)   { }
+
 template <class T> gBlock<T>::gBlock(const gBlock<T> &b) : gArray<T>(b)  { }
 
 template <class T> gBlock<T>::~gBlock()   { }
@@ -22,8 +24,8 @@ template <class T> gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
 
 template <class T> int gBlock<T>::operator==(const gBlock<T> &b) const
 {
-  if (length != b.length) return 0;
-  for (int i = 1; i <= length; i++) 
+  if (min != b.min || max != b.max) return 0;
+  for (int i = min; i <= max; i++) 
     if (data[i] != b.data[i]) return 0;
   return 1;
 }
@@ -36,7 +38,7 @@ template <class T> int gBlock<T>::operator!=(const gBlock<T> &b) const
 template <class T> gBlock<T> gBlock<T>::operator+(const gBlock<T>& b) const
 {
   gBlock<T> result(*this);
-  for (int i = 1; i <= b.length; i++)
+  for (int i = b.min; i <= b.max; i++)
     result.Append(b[i]);
   return result;
 }
@@ -62,13 +64,14 @@ template <class T> gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
 
 template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 {
-  T *new_data = new T[++length] - 1;
+  assert(min <=n && n <=max+1);
+  T *new_data = new T[++max-min+1] - min;
 
-  for (int i = 1; i <= n - 1; i++)       new_data[i] = data[i];
+  for (int i = min; i <= n - 1; i++)       new_data[i] = data[i];
   new_data[i++] = t;
-  for (; i <= length; i++)       new_data[i] = data[i - 1];
+  for (; i <= max; i++)       new_data[i] = data[i - 1];
 
-  if (data)   delete [] (data + 1);
+  if (data)   delete [] (data + min);
   data = new_data;
 
   return n;
@@ -76,26 +79,26 @@ template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 
 template <class T> int gBlock<T>::Append(const T &t)
 {
-  return InsertAt(t, length + 1);
+  return InsertAt(t, max + 1);
 }
 
 template <class T> int gBlock<T>::Insert(const T &t, int n)
 {
-  return InsertAt(t, (n < 1) ? 1 : ((n > length + 1) ? length + 1 : n));
+  return InsertAt(t, (n < min) ? min : ((n > max + 1) ? max + 1 : n));
 }
 
 template <class T> T gBlock<T>::Remove(int n)
 {
-  assert(n >= 1 && n <= length);
+  assert(n >= min && n <= max);
 
   T ret(data[n]);
 
-  T *new_data = (--length) ? new T[length] - 1 : 0;
+  T *new_data = (--max>=min) ? new T[max-min+1] - min : 0;
 
-  for (int i = 1; i < n; i++)      new_data[i] = data[i];
-  for (; i <= length; i++)         new_data[i] = data[i + 1];
+  for (int i = min; i < n; i++)      new_data[i] = data[i];
+  for (; i <= max; i++)         new_data[i] = data[i + 1];
 
-  delete [] (data + 1);
+  delete [] (data + min);
   data = new_data;
 
   return ret;
@@ -103,15 +106,15 @@ template <class T> T gBlock<T>::Remove(int n)
 
 template <class T> int gBlock<T>::Find(const T &t) const
 {
-  for (int i = 1; i <= length && data[i] != t; i++);
-  return (i <= length) ? i : 0;
-}
+  for (int i = min; i <= max && data[i] != t; i++);
+  return (i <= max) ? i : 0;
+} 
 
 template <class T> int gBlock<T>::Contains(const T &t) const
 { return Find(t); }
 
 template <class T> void gBlock<T>::Flush(void)
-{ length = 0;  delete [] (data + 1);  data = 0; }
+{ max=min;  delete [] (data + min);  data = 0; }
 
 //
 // Uses the Dump function to output the gBlock.  Uses the << operator
