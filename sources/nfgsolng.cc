@@ -208,7 +208,7 @@ gList<MixedSolution> guinfgLcp::Solve(void)
 
 bool guinfgLcp::SolveSetup(void)
 {
-  dialogLcp dialog(true, m_parent->Frame(), false, true);
+  dialogLcp dialog(m_parent->Frame(), false, true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -265,7 +265,7 @@ bool guinfgLp::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_eliminateMixed = dialog.EliminateMixed();
 
-    m_stopAfter = dialog.StopAfter();
+    m_stopAfter = 1;
     m_precision = dialog.Precision();
     return true;
   }

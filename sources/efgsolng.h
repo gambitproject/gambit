@@ -123,7 +123,7 @@ public:
 
 class guiefgLcpEfg : public guiEfgSolution {
 private:
-  int m_stopAfter, m_maxDepth;
+  int m_stopAfter;
   gPrecision m_precision;
 
 public:
@@ -136,7 +136,7 @@ public:
 
 class guiefgLcpNfg : public guiEfgSolution {
 private:
-  int m_stopAfter, m_maxDepth;
+  int m_stopAfter;
   gPrecision m_precision;
 
 public:

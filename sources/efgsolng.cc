@@ -393,7 +393,6 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
   wxStatus status(m_parent->Frame(), "LcpSolve Progress");
   SeqFormParams params(status);
   params.stopAfter = m_stopAfter;
-  params.maxdepth = m_maxDepth;
   params.precision = m_precision;
 
   try {
@@ -408,7 +407,7 @@ gList<BehavSolution> guiefgLcpEfg::Solve(void) const
 
 bool guiefgLcpEfg::SolveSetup(void)
 { 
-  dialogLcp dialog(false, m_parent->Frame(), true);
+  dialogLcp dialog(m_parent->Frame(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -418,7 +417,6 @@ bool guiefgLcpEfg::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
-    m_maxDepth = dialog.MaxDepth();
     return true;
   }
   else
@@ -476,7 +474,7 @@ gList<BehavSolution> guiefgLcpNfg::Solve(void) const
 
 bool guiefgLcpNfg::SolveSetup(void)
 {
-  dialogLcp dialog(true, m_parent->Frame(), true, true); 
+  dialogLcp dialog(m_parent->Frame(), true, true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -487,7 +485,6 @@ bool guiefgLcpNfg::SolveSetup(void)
 
     m_stopAfter = dialog.StopAfter();
     m_precision = dialog.Precision();
-    m_maxDepth = dialog.MaxDepth();
     return true;
   }
   else
@@ -765,7 +762,7 @@ bool guiefgLpNfg::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
     m_markSubgames = dialog.MarkSubgames();
 
-    m_stopAfter = dialog.StopAfter();
+    m_stopAfter = 1;
     m_precision = dialog.Precision();
     return true;
   }
@@ -832,7 +829,7 @@ bool guiefgLpEfg::SolveSetup(void)
     m_eliminateWeak = dialog.EliminateWeak();
     m_markSubgames = dialog.MarkSubgames();
 
-    m_stopAfter = dialog.StopAfter();
+    m_stopAfter = 1;
     m_precision = dialog.Precision();
     return true;
   }

@@ -18,7 +18,6 @@ public:
 	   bool p_vianfg = false);
   virtual ~dialogLp();
 
-  int StopAfter(void) const;
   gPrecision Precision(void) const
     { return (m_precision->GetSelection() == 0) ? precDOUBLE : precRATIONAL; }
 };
