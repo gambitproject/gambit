@@ -391,8 +391,7 @@ void gbt_efg_game_rep::Reveal(gbt_efg_infoset_rep *p_where,
       // iterate over each member of information set 'k'
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
-      const gArray<gbt_efg_node_rep *> &members = 
-	p_who->m_infosets[k]->m_members;
+      gArray<gbt_efg_node_rep *> members = p_who->m_infosets[k]->m_members;
       gbt_efg_infoset_rep *newiset = 0;
       
       for (int m = 1; m <= members.Length(); m++) {

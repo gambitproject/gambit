@@ -146,6 +146,28 @@ The empty string is returned if the information set object is null.
 
 </sect2>
 
+<sect2 id="apiref.infoset.getmember">
+<title>GetMember</title>
+<indexterm><primary>GetMember</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtEfgNode gbtEfgInfoset::GetMember(int p_index) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetMember</function> returns the member numbered
+<parameter>p_index</parameter> from the list of nodes belonging to the
+information set.  Each information set's nodes are numbered
+sequentially beginning at one.  An exception is thrown if the index
+is out of range.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.infoset.insertaction">
 <title>InsertAction</title>
@@ -227,6 +249,15 @@ is returned.
 <sect2 id="apiref.infoset.reveal">
 <title>Reveal</title>
 <indexterm><primary>Reveal</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgInfoset::Reveal(gbtEfgPlayer who)
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>

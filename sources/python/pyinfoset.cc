@@ -121,6 +121,24 @@ action_getlabel(actionobject *self, PyObject *args)
 }
 
 static PyObject *
+action_setchanceprob(actionobject *self, PyObject *args)
+{
+  double prob;
+
+  if (!PyArg_ParseTuple(args, "d", &prob)) {
+    return NULL;
+  }
+
+  if (!self->m_action->GetInfoset().IsChanceInfoset()) {
+    return NULL;
+  }
+
+  self->m_action->GetInfoset().SetChanceProb(self->m_action->GetId(), prob);
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
 action_setlabel(actionobject *self, PyObject *args)
 {
   char *label;
@@ -140,6 +158,7 @@ static struct PyMethodDef action_methods[] = {
   { "GetInfoset", (PyCFunction) action_getinfoset, 1 },
   { "GetLabel", (PyCFunction) action_getlabel, 1 },
   { "SetLabel", (PyCFunction) action_setlabel, 1 },
+  { "SetChanceProb", (PyCFunction) action_setchanceprob, 1 },
   { NULL, NULL }
 };
 
@@ -280,6 +299,24 @@ infoset_getlabel(infosetobject *self, PyObject *args)
 }
 
 static PyObject *
+infoset_getmember(infosetobject *self, PyObject *args)
+{
+  int index;
+
+  if (!PyArg_ParseTuple(args, "i", &index)) {
+    return NULL;
+  }
+
+  if (index < 1 || index > self->m_infoset->NumMembers()) {
+    return NULL;
+  }
+  
+  nodeobject *node = newnodeobject();
+  *node->m_node = self->m_infoset->GetMember(index);
+  return (PyObject *) node;
+}
+
+static PyObject *
 infoset_getplayer(infosetobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -289,6 +326,24 @@ infoset_getplayer(infosetobject *self, PyObject *args)
   efplayerobject *player = newefplayerobject();
   player->m_efplayer = new gbtEfgPlayer(self->m_infoset->GetPlayer());
   return (PyObject *) player;
+}
+
+static PyObject *
+infoset_reveal(infosetobject *self, PyObject *args)
+{
+  PyObject *player;
+
+  if (!PyArg_ParseTuple(args, "O", &player)) {
+    return NULL;
+  }
+
+  if (!is_efplayerobject(player)) {
+    return NULL;
+  }
+
+  self->m_infoset->Reveal(*((efplayerobject *) player)->m_efplayer);
+  Py_INCREF(Py_None);
+  return Py_None;
 }
 
 static PyObject *
@@ -308,7 +363,9 @@ infoset_setlabel(infosetobject *self, PyObject *args)
 static struct PyMethodDef infoset_methods[] = {
   { "GetAction", (PyCFunction) infoset_getaction, 1 },
   { "GetLabel", (PyCFunction) infoset_getlabel, 1 },
+  { "GetMember", (PyCFunction) infoset_getmember, 1 },
   { "GetPlayer", (PyCFunction) infoset_getplayer, 1 }, 
+  { "Reveal", (PyCFunction) infoset_reveal, 1 }, 
   { "SetLabel", (PyCFunction) infoset_setlabel, 1 },
   { NULL, NULL }
 };

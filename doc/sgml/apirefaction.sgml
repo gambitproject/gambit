@@ -138,6 +138,30 @@ The empty string is returned if the action object is null.
 </sect2>
 
 
+<sect2 id="apiref.action.setchanceprob">
+<title>SetChanceProb</title>
+<indexterm><primary>SetChanceProb</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgAction::SetChanceProb(gNumber)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetChanceProb</function> 
+sets the action probability for 
+to the value given.
+An error occurs if <parameter>action</parameter> is not an action controlled
+by the chance player.
+</para>
+
+</sect2>
+
+
 <sect2 id="apiref.action.setlabel"> 
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>

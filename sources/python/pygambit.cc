@@ -30,10 +30,12 @@ extern PyObject *gbt_new_efg(PyObject *, PyObject *);
 extern PyObject *gbt_read_efg(PyObject *, PyObject *); 
 extern PyObject *gbt_new_nfg(PyObject *, PyObject *);
 extern PyObject *gbt_read_nfg(PyObject *, PyObject *);
+extern PyObject *gbt_nash_enummixed(PyObject *, PyObject *);
 extern PyObject *gbt_nash_liap(PyObject *, PyObject *);
 extern PyObject *gbt_nash_logit(PyObject *, PyObject *);
 
 static struct PyMethodDef gambit_methods[] = {
+  { "EnumMixedSolve", gbt_nash_enummixed, 1 },
   { "LiapSolve", gbt_nash_liap, 1 },
   { "LogitSolve", gbt_nash_logit, 1 },
   { "NewEfg", gbt_new_efg, 1 },

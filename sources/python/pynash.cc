@@ -26,6 +26,7 @@
 
 #include <Python.h>
 #include "base/gnullstatus.h"
+#include "nash/nfgmixed.h"
 #include "nash/efgliap.h"
 #include "nash/efglogit.h"
 #include "nash/nfgliap.h"
@@ -35,6 +36,40 @@
 /************************************************************************
  * MODULE METHODS
  ************************************************************************/
+
+PyObject *
+gbt_nash_enummixed(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+
+  if (!PyArg_ParseTuple(args, "O", &support)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashEnumMixed<double> algorithm;
+    algorithm.SetStopAfter(0);
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  else {
+    return NULL;
+  }
+}
 
 PyObject *
 gbt_nash_liap(PyObject */*self*/, PyObject *args)
