@@ -7,12 +7,17 @@
 #ifndef NFGALLEQ_H
 #define NFGALLEQ_H
 
-#include "polenum.h"
+#include "nfg.h"
+#include "glist.h"
+#include "gstatus.h"
+#include "mixed.h"
+#include "mixedsol.h"
+#include "polenum.h" 
 #include "nfgensup.h"
 
-
 int AllNashSolve(const Nfg &, const PolEnumParams &, 
-	       gList<MixedSolution> &, long &nevals, double &time);
+		 gList<MixedSolution> &, long &nevals, double &time,
+		 gList<const NFSupport> &singular_supports);
 
 #endif    // NFGALLEQ_H
 

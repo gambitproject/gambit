@@ -15,6 +15,7 @@ private:
   long count,nevals;
   double time;
   gList<MixedSolution> solutions;
+  gList<const NFSupport> singular_supports;
 
 public:
   AllNashSolveModule(const Nfg &, const PolEnumParams &p);
@@ -26,6 +27,8 @@ public:
   PolEnumParams &Parameters(void);
 
   const gList<MixedSolution> &GetSolutions(void) const;
+
+  const gList<const NFSupport> &GetSingularSupports(void) const;
 };
 
 //-------------------------------------------------------------------------
@@ -38,7 +41,9 @@ AllNashSolveModule<T>::AllNashSolveModule(const Nfg &N, const PolEnumParams &p)
     fullsupport(N), 
     possiblenashsupports(), 
     params(p), 
-    count(0), nevals(0)
+    count(0), nevals(0),
+    solutions(),
+    singular_supports()
 { 
   possiblenashsupports += PossibleNashSubsupports(fullsupport,params.status);
 }
@@ -50,10 +55,14 @@ template <class T> void AllNashSolveModule<T>::NashEnum(void)
     long newevals = 0;
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
-    PolEnum(possiblenashsupports[i], params, newsolns, newevals, newtime);
+    bool is_singular = false;
+    PolEnum(possiblenashsupports[i], params, newsolns, newevals, newtime,
+	    is_singular);
     for (int j = 1; j <= newsolns.Length(); j++)
       if (newsolns[j].IsNash()) 
 	solutions += newsolns[j];
+    if (is_singular) 
+      singular_supports += possiblenashsupports[i];
     nevals += newevals;
     time += newtime;
   }
@@ -78,6 +87,12 @@ template <class T>
 const gList<MixedSolution> &AllNashSolveModule<T>::GetSolutions(void) const
 {
   return solutions;
+}
+
+template <class T> const gList<const NFSupport> &
+AllNashSolveModule<T>::GetSingularSupports(void) const
+{
+  return singular_supports;
 }
 
 
