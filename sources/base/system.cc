@@ -108,7 +108,7 @@ int System::Spawn(const char *command)
 
   int result = WinExec(command, SW_SHOW);  
   if (0 <= result && result < 32) {
-    gerr << "System::Spawn: Error executing \"" << command << "\"\n";
+    //    gerr << "System::Spawn: Error executing \"" << command << "\"\n";
     return -1;
   }
   else
