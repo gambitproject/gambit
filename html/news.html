@@ -51,18 +51,22 @@
 </td>
 
 <td ALIGN=LEFT VALIGN=TOP>
-<h3>
-Current news (last update: 21 Jul 2000)</h3>
-Version 0.97 of Gambit is under heavy development.&nbsp; We have updated
-the graphical user interface to work with version 2.2 of the <a href="http://www.wxwindows.org">wxWindows</a>
-library.&nbsp; This has allowed us to greatly streamline the interface,
-and also to support the GTK windowing toolkit to give us a stable, freely-available
-platform for use on Linux systems.&nbsp;
-<p>We have not yet set a target date for the public release of version
-0.97.&nbsp; We will first wait for the final production release of version
-2.2 of wxWindows to make sure the graphical interface is as stable as possible.&nbsp;
-Check back for updates; our current best guess is that 0.97 will be ready
-in the fall of 2000.
+<h3>November 28, 2000: Gambit 0.96.3 released</h3>
+Bug fixes:
+<ul>
+<li>Null outcomes in normal form files are now correctly read.</li>
+<li>Extensive form window sizes correctly in games with many multi-node
+information sets.  (In previous versions, outcome payoffs could not always be
+read in such games.)</li> 
+<li>Chance probabilities are copied after infoset-cut.</il>
+<li>The return type for the GCL function MoveToInfoset[] is corrected.</li>
+<li>Emptied information sets are now automatically deleted in the
+GUI when editing the extensive form.</li>
+<li>The Unix Makefile has been modified to use $(MAKE) for its recursive 
+calls.</li> 
+<li>All parsers have been changed to work with bison, instead of bison++.</li>
+</ul>
+
 <h3>
 March 2000: Gambit 0.96.2 released</h3>
 Bug fixes:

@@ -20,9 +20,9 @@ Content-type: text/html
 
 <p>Thank you for registering.  Click on each link to begin downloading
 your selections.</p>
-<p>When installing executables, refer to the <tt>README.1ST</tt> file for
-platform-specific instructions and hints.  (It is <b>HIGHLY RECOMMENDED</b>
-that you do this!)</p>
+<p>When installing executables, we highly recommend that you
+refer to the <tt>README.1ST</tt> file for
+platform-specific instructions and hints.</p>
 <HR>
 <UL>
 EndOfText
@@ -34,12 +34,14 @@ unless ($site = $query->param('site'))  {
     $site = 'US';
 }
 
-if ($site eq 'CH')  {
-    $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96';
-}
-else  {
-    $basepath = 'ftp://ftp.hss.caltech.edu/pub/gambit/ver96';
-}
+# Temporarily commenting out Bernhard's site until it is updated
+
+#if ($site eq 'CH')  {
+#    $basepath = 'http://www.inf.ethz.ch/personal/stengel/gambit/ver96';
+#}
+#else  {
+    $basepath = 'ftp://ftp.hss.caltech.edu/pub/gambit/ver96.3';
+#}
 
 unless ($name) {
     $name = 'Anonymous';
@@ -124,7 +126,7 @@ else  {
 if ($binsol = $query->param('binsol'))  {
     $binsol = ',binsol';
     print <<"EndOfText";
-<LI><a href="$basepath/gambit_motif_SunOS_5.6.zip">Solaris Executables</a>
+<LI><a href="$basepath/gambit_motif_SunOS.zip">Solaris Executables</a>
 EndOfText
 }
 else  {
@@ -214,7 +216,7 @@ else {
 if ($wxsol = $query->param('wxsol'))  {
     $wxsol = ',wxsol';
     print <<"EndOfText";
-<LI><a href="$basepath/wx_motif_SunOS_5.6.zip">wxWindows 1.68 libraries for Solaris</a>
+<LI><a href="$basepath/wx_motif_SunOS.zip">wxWindows 1.68 libraries for Solaris</a>
 EndOfText
 }
 else {
