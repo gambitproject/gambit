@@ -316,6 +316,11 @@ int EFSupport::NumActions(const Infoset &i) const
   return sets[i.GetPlayer()->GetNumber()]->NumActions(i.GetNumber());
 }
 
+int EFSupport::NumActions(const Infoset *i) const
+{
+  return sets[i->GetPlayer()->GetNumber()]->NumActions(i->GetNumber());
+}
+
 const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
 {
   return sets[pl]->ActionList(iset);
@@ -376,6 +381,26 @@ bool EFSupport::ActionIsActive(Action *a) const
     return false;
   else
     return true;
+}
+
+bool EFSupport::ActionIsActive(const int pl,
+			       const int iset, 
+			       const int act) const
+{
+  return 
+    ActionIsActive(Game().GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
+}
+
+bool 
+EFSupport::AllActionsInSupportAtInfosetAreActive(const EFSupport &S,
+						 const Infoset *infset) const
+{
+  gArray<Action *> support_actions = S.Actions(infset);
+  for (int i = 1; i <= support_actions.Length(); i++) {
+    if (!ActionIsActive(support_actions[i]))
+      return false;
+  }
+  return true;
 }
 
 bool EFSupport::IsValid(void) const
@@ -622,15 +647,30 @@ void EFSupportWithActiveInfo::activate_this_and_lower_nodes(const Node *n)
 
 void EFSupportWithActiveInfo::deactivate_this_and_lower_nodes(const Node *n)
 {
-  if (n->IsNonterminal()) {
+  if (n->IsNonterminal()) {  // THIS ALL LOOKS FISHY
     deactivate(n); 
     if ( !infoset_has_active_nodes(n->GetInfoset()) )
       deactivate(n->GetInfoset());
-    else {
-      gArray<Action *> actions(Actions(n->GetInfoset()));
+    gArray<Action *> actions(Actions(n->GetInfoset()));
       for (int i = 1; i <= actions.Length(); i++) 
 	deactivate_this_and_lower_nodes(n->GetChild(actions[i]));    
+  }
+}
+
+void EFSupportWithActiveInfo::
+deactivate_this_and_lower_nodes_returning_deactivated_infosets(const Node *n, 
+                                                gList<Infoset *> *list)
+{
+  if (n->IsNonterminal()) {
+    deactivate(n); 
+    if ( !infoset_has_active_nodes(n->GetInfoset()) ) {
+      (*list) += n->GetInfoset(); 
+      deactivate(n->GetInfoset());
     }
+    gArray<Action *> actions(Actions(n->GetInfoset()));
+      for (int i = 1; i <= actions.Length(); i++) 
+	deactivate_this_and_lower_nodes_returning_deactivated_infosets(
+			     n->GetChild(actions[i]),list);    
   }
 }
 
@@ -783,18 +823,18 @@ bool EFSupportWithActiveInfo::RemoveAction(Action *s)
   return EFSupport::RemoveAction(s);
 }
 
-void EFSupportWithActiveInfo::GoToNextSubsupportOf(const EFSupport &S)
+bool 
+EFSupportWithActiveInfo::RemoveActionReturningDeletedInfosets(Action *s,
+					   gList<Infoset *> *list)
 {
-  // Not yet constructed
-}
 
-bool EFSupportWithActiveInfo::ActionIsActive(const int pl,
-					     const int iset,
-					     const int act) const
-{
-  return 
-    EFSupport::ActionIsActive(Game().
-			      GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
+  gList<const Node *> startlist(ReachableNodesInInfoset(s->BelongsTo()));
+  for (int i = 1; i <= startlist.Length(); i++)
+    deactivate_this_and_lower_nodes_returning_deactivated_infosets(
+                                       startlist[i],list);
+
+  // the following returns false if s was not active
+  return EFSupport::RemoveAction(s);
 }
 
 int EFSupportWithActiveInfo::NumActiveNodes(const int pl,
@@ -835,19 +875,6 @@ bool EFSupportWithActiveInfo::NodeIsActive(const Node *n) const
   return NodeIsActive(n->GetInfoset()->GetPlayer()->GetNumber(),
 		      n->GetInfoset()->GetNumber(),
 		      n->NumberInInfoset());
-}
-
-bool 
-EFSupportWithActiveInfo::FinalSubsupportAtInfoset(const EFSupport &S) const
-{
-  // Needs to be defined
-  return true;
-}
-
-bool EFSupportWithActiveInfo::IsFinalSubsupportOf(const EFSupport &S) const
-{
-  // Needs to be defined
-  return true;
 }
 
 // Instantiations

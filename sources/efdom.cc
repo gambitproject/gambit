@@ -234,12 +234,15 @@ EFSupport *SupportWithoutDominatedOfPlayerList(const EFSupport &S,
   return T;
 }
 
+void AndyTest(const EFSupport &);
+
 EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
 				     const bool strong,
 				     const bool conditional,
 				           gOutput & out, // tracefile 
 				           gStatus &status)
 {
+  AndyTest(S); exit(0);
 
   gBlock<int> players(S.Game().NumPlayers());
   int i;
@@ -250,6 +253,7 @@ EFSupport *DominanceTruncatedSupport(const EFSupport &S,
 					    out, status);
 }
 
+/*
 EFSupport *UnconditionalDominanceTruncatedSupport(const EFSupport &S, 
 						  const bool strong,
 						   gOutput & out, // tracefile 
@@ -257,3 +261,4 @@ EFSupport *UnconditionalDominanceTruncatedSupport(const EFSupport &S,
 {
   return DominanceTruncatedSupport(S, strong, false, out, status);
 }
+*/

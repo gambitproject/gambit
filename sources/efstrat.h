@@ -37,12 +37,16 @@ public:
   // Return the number of players, infosets, actions in a support 
   int NumActions(int pl, int iset) const;
   int NumActions(const Infoset &) const;
+  int NumActions(const Infoset *) const;
   gPVector<int> NumActions(void) const;
 
   // Returns the position of the action in the support.  Returns zero
   // if it is not there.
   int Find(Action *) const;
+  bool ActionIsActive(const int pl, const int iset, const int act) const;
   bool ActionIsActive(Action *) const;
+  bool AllActionsInSupportAtInfosetAreActive(const EFSupport &,
+					     const Infoset *) const;
 
   // Find the active actions at an infoset
   const gArray<Action *> &Actions(int pl, int iset) const;
@@ -108,6 +112,9 @@ protected:
   bool infoset_has_active_nodes(const Infoset *i) const;
   void activate_this_and_lower_nodes(const Node *);
   void deactivate_this_and_lower_nodes(const Node *);
+  void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
+                                                 const Node *,
+						 gList<Infoset *> *);
 
 public:
   EFSupportWithActiveInfo ( const Efg &);
@@ -127,11 +134,10 @@ public:
   // Action editing functions
   void AddAction(Action *);
   bool RemoveAction(Action *);
-  void GoToNextSubsupportOf(const EFSupport &);
+  bool RemoveActionReturningDeletedInfosets(Action *, gList<Infoset *> *);
+  //  void GoToNextSubsupportOf(const EFSupport &);
 
   // Information
-  bool ActionIsActive(const int pl, const int iset, const int act) const;
-  bool ActionIsActive(const Action *) const;
   bool InfosetIsActive(const int pl, const int iset) const;
   bool InfosetIsActive(const Infoset *) const;
   int  NumActiveNodes(const int pl, const int iset) const;
@@ -139,8 +145,7 @@ public:
   bool NodeIsActive(const int pl, const int iset, const int node) const;
   bool NodeIsActive(const Node *) const;
 
-  bool FinalSubsupportAtInfoset(const EFSupport &S) const;
-  bool IsFinalSubsupportOf(const EFSupport &S) const;
+  inline  EFSupport UnderlyingSupport() { return (EFSupport)(*this); }
 };
 
 
