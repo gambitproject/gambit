@@ -13,7 +13,8 @@
 BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
   : BehavProfile<gNumber>(b.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
-    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _IsSequential(T_DONTKNOW), _Epsilon((double)0), 
+    _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -170,7 +171,7 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 
 bool BehavSolution::Equals(const BehavProfile<double> &s) const
 { 
-  gNumber eps;
+  gNumber eps(_Epsilon);
   gEpsilon(eps,4);  // this should be a function of _Epsilon
   bool flag=true;
   int i=s.First();

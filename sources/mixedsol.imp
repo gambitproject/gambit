@@ -11,7 +11,8 @@
 MixedSolution::MixedSolution(const MixedProfile<double> &m, NfgAlgType creator)
   : MixedProfile<gNumber>(m.Support()),
     _Creator(creator), _IsNash(T_DONTKNOW), _IsPerfect(T_DONTKNOW),
-    _IsProper(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _IsProper(T_DONTKNOW), _Epsilon((double)0),
+    _GobitLambda(-1), _GobitValue(-1),
     _LiapValue(-1), _Id(0)
 {
   gEpsilon(_Epsilon);
@@ -155,7 +156,7 @@ gNumber MixedSolution::LiapValue(void) const
 
 bool MixedSolution::Equals(const MixedProfile<double> &s) const
 { 
-  gNumber eps;
+  gNumber eps(_Epsilon);
   gEpsilon(eps,4);   // this should be a function of _Epsilon
   bool flag=true;
   int i=s.First();
