@@ -732,12 +732,14 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("NewNfg", 3);
+  FuncObj = new FuncDescObj("NewNfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
 					    new BoolValPortion(false)));
 
+  /* commented out for now; don't forget to change
+     the # of functions back if these are reenabled!
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewNfg_Float, 
 				       porNFG_FLOAT, 1, 0, 
 				       funcNONLISTABLE));
@@ -748,10 +750,13 @@ void Init_nfgfunc(GSM *gsm)
 				       funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("payoffs", 
 					    PortionSpec(porRATIONAL,1)));
+  */
+
   gsm->AddFunction(FuncObj);
 
 
 
+  /* commented out temporarily
   FuncObj = new FuncDescObj("ListForm", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListForm_NfgFloat, 
 				       PortionSpec(porFLOAT, NLIST), 1));
@@ -761,6 +766,9 @@ void Init_nfgfunc(GSM *gsm)
 				       PortionSpec(porRATIONAL, NLIST), 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL));
   gsm->AddFunction(FuncObj);
+  */
+
+
 
   FuncObj = new FuncDescObj("Payoff", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Nfg, 
