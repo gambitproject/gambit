@@ -826,7 +826,6 @@ bool GSM::_UnaryOperation( const gString& funcname )
 
   prog.Append(new NewInstr(iINIT_CALL_FUNCTION, funcname));
   prog.Append(new NewInstr(iBIND));
-  prog.Append(new NewInstr(iBIND));
   prog.Append(new NewInstr(iCALL_FUNCTION));
   result = Execute( prog );
 
