@@ -30,6 +30,7 @@
   int index; \
   gString input_text; \
   bool bval, triv, semi; \
+  int statementcount; \
   gInteger ival; \
   double dval; \
   gString tval, formal, funcname, paramtype;  \
@@ -143,7 +144,8 @@ clearstmt:    CLEAR LBRACK RBRACK  { emit(new Clear); }
 
 
 funcdecl:     DEFFUNC LBRACK NAME
-              { funcname = tval; function = new gList<Instruction *>; }
+              { funcname = tval; function = new gList<Instruction *>; 
+                statementcount = 0; }
               LBRACK formallist RBRACK COMMA statements
               RBRACK   { if (!triv && !semi) emit(new Display);
 			 if (!DefineFunction())  YYERROR; } 
@@ -166,7 +168,7 @@ optparen:
 binding:      RARROW    { refs.Append(false); }
        |      DBLARROW  { refs.Append(true); }
 
-statement:    { triv = true; }
+statement:    { triv = true; statementcount++; }
          |    expression { triv = false; }
          |    conditional { triv = false; }
          |    whileloop { triv = false; }
@@ -675,6 +677,7 @@ int GCLCompiler::Parse(void)
 
 void GCLCompiler::emit(Instruction *op)
 {
+  if(op) op->LineNumber() = statementcount;
   if (function)
     function->Append(op);
   else

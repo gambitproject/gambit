@@ -925,28 +925,25 @@ bool CallFuncObj::SetCurrParamIndex( const gString& param_name )
       f_index++ )
   {
     name_match_found = false;
-    if( _FuncMatch[ f_index ] )
+    for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
     {
-      for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
+      if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
       {
-	if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
+	name_match_found = true;
+	if( result == PARAM_NOT_FOUND )
 	{
-	  name_match_found = true;
-	  if( result == PARAM_NOT_FOUND )
-	  {
-	    result = index;
-	    TempFuncIndex = f_index;
-	    times_found++;
-	  }
-	  else if( result == index )
-	  {
-	    times_found++;
-	  }
-	  else // ( result != index )
-	  {
-	    result = PARAM_AMBIGUOUS;
-	    break;
-	  }
+	  result = index;
+	  TempFuncIndex = f_index;
+	  times_found++;
+	}
+	else if( result == index )
+	{
+	  times_found++;
+	}
+	else // ( result != index )
+	{
+	  result = PARAM_AMBIGUOUS;
+	  break;
 	}
       }
     }
@@ -1554,6 +1551,8 @@ void CallFuncObj::_ErrorMessage
 #if 0
   s << "CallFuncObj Error " << error_num << " : \n";
 #endif // 0
+
+  s << "GCL: ";
   
   switch( error_num )
   {
@@ -1620,9 +1619,6 @@ void CallFuncObj::_ErrorMessage
   case 26:
     s << str1 << "[]: Type mismatch on parameter #" << num1 << ", \"";
     s << str2 << "\"; expected " << str3 << ", got " << str4 << "\n";
-    break;
-  case 27:
-    s <<  str1 << "[]: Cannot match function call to the given parameters\n";
     break;
   default:
     s << "General error\n";

@@ -213,7 +213,7 @@ bool GSM::PushList( const int num_of_elements )
     else
     {
       delete p;
-      _ErrorMessage( _StdErr, 49 );
+      _ErrorMessage( _StdErr, 49, 0, 0, ((ReferencePortion*) p)->Value() );
       result = false;
     }
   }
@@ -405,7 +405,7 @@ bool GSM::UnAssign( void )
     else
     {
       _Push( p );
-      _ErrorMessage( _StdErr, 54 );
+      _ErrorMessage( _StdErr, 54, 0, 0, ((ReferencePortion*) p)->Value() );
       return false;
     }
   }
@@ -732,7 +732,7 @@ bool GSM::BindVal( const gString& param_name )
     else
     {
       _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage( _StdErr, 59 );
+      _ErrorMessage( _StdErr, 61 );
       result = false;
     }
     delete param;
@@ -876,13 +876,16 @@ int GSM::Execute( gList< Instruction* >& program, bool user_func )
 	delete p;
 	instr_success = true;
       }
+#ifndef NDEBUG
       else
       {
-	_ErrorMessage( _StdErr, 32 );
+	gerr << "Instruction IfGoto called on a non-boolean data type\n";
+	assert( p->Type() == porBOOL );	
 	_Push( p );
 	program_counter++;
 	instr_success = false;
       }
+#endif // NDEBUG
       break;
 
     case iGOTO:
@@ -986,9 +989,9 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
     break;
 
   default:
-    if( rc_result > 0 )
+    if( rc_result >= 0 )
       result = new ErrorPortion( (gString)
-				"User-define function Error on line " +
+				"User-defined function Error on line " +
 				ToString( rc_result ) );
     else
       result = 0;
@@ -1146,7 +1149,7 @@ void GSM::Help(void)
     func->Dump(_StdOut);
   }
   else
-    _StdOut << "Function " << funcname << "[] not found\n";
+    _ErrorMessage(_StdErr, 62, 0, 0, funcname);
 }
 
 //-----------------------------------------------------------------------
@@ -1167,86 +1170,48 @@ void GSM::_ErrorMessage
   s << "GSM Error " << error_num << ":\n";
 #endif // 0
 
+  s << "GCL: ";
+
   switch( error_num )
   {
-  case 13:
-    s << "Attempted to resolve undefined reference \"" << str1 << "\"\n";
-    break;
-  case 20:
-    s << "Attempted to take the subscript of an unsupported type\n";
-    break;
   case 25:
-    s << "Undefined function " << str1 << "[]\n";
-    break;
-  case 32:
-    s << "Instruction IfGoto called on a non-boolean data type\n";
+    s << "Function " << str1 << "[] undefined\n";
     break;
   case 35:
-    s << "Attempted to create a list of mixed types.\n";
-    break;
-  case 36:
-    s << "Subscript out of range\n";
-    break;
-  case 37:
-    s << "A non-integer index specified\n";
-    break;
-  case 38:
-    s << "A non-integer child number specified for a Node\n";
-    break;
-  case 39:
-    s << "Attempted to find the child of an unsupported type\n";
-    break;
-  case 40:
-    s << "Node child number out of range\n";
+    s << "Cannot create a list of mixed types\n";
     break;
   case 42:
-    s << "Attempted to change the type of variable \"" << str1 << "\"\n";
+    s << "Cannot change the type of variable \"" << str1 << "\"\n";
     break;
   case 46:
-    s << "Attempted to assign to read-only variable \"" << str1 <<"\"\n";
-    break;
-  case 48:
-    s << "Attempted to change the type of a variable\n";
+    s << "Cannot assign to read-only variable \"" << str1 <<"\"\n";
     break;
   case 49:
-    s << "Attempted to insert an undefined reference into a list\n";
-    break;
-  case 52:
-    s << "Cannot assign to a Output or Input variable\n";
+    s << "Cannot insert undefined reference \"" << str1 << "\" into a list\n";
     break;
   case 53:
-    s << "Attempted calling UnAssign() on a non-reference value\n";
+    s << "UnAssign[] called on a non-reference value\n";
     break;
   case 54:
-    s << "Attempted calling UnAssign() on a undefined reference\n";
+    s << "UnAssign[] called on undefined reference \"" << str1 << "\"\n";
     break;
   case 55:
-    s << "Attempted to remove read-only variable \"" + str1 + "\"\n";
-    break;
-  case 56:
-    s << "Attempted to change the type of a List\n";
-    break;
-  case 57:
-    s << "Atttempted to assign to a non-reference type\n";
-    break;
-  case 58:
-    s << "Attempted to resolve an undefined reference\n";
+    s << "Cannot remove read-only variable \"" + str1 + "\"\n";
     break;
   case 59:
-    s << "Attempted to pass an undefined reference to a function\n";
+    s << "Cannot to pass an undefined reference to a function\n";
     break;
   case 60:
     s << "New " << str1 << "[] parameters ambiguous with existing function\n";
     break;
+  case 61:
+    s << "Cannot pass an undefined reference to a function\n";
+    break;
+  case 62:
+    s << "Function " << str1 << "[] not found\n";
+    break;
   default:
-    s << "General error\n";
+    s << "General error " << error_num << "\n";
   }
 }
-
-
-
-
-
-
-
 
