@@ -101,7 +101,11 @@ Portion *GSM_AddStrategy(Portion **param)
   Strategy *s = ((StrategyPortion *) param[1])->Value();
 
   S->GetNFStrategySet(s->nfp->GetNumber())->AddStrategy(s);
-  return new StrategyValPortion(s);
+
+  Portion* por = new StrategyValPortion(s);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_RemoveStrategy(Portion **param)
@@ -110,7 +114,11 @@ Portion *GSM_RemoveStrategy(Portion **param)
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   
   S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
-  return new StrategyValPortion(s);
+
+  Portion* por = new StrategyValPortion(s);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 Portion *GSM_SetNameNfg(Portion **param)

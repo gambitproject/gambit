@@ -928,21 +928,31 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ] == 0 )
 	{
-	  if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference )
+	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue == 0 )
+	  {
+	    _ErrorMessage( _StdErr, 9, 0, 
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			  _FuncName );
+	    _ErrorOccurred = true;
+	  }
+	  else if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference)
 	  {
 	    _ErrorMessage( _StdErr, 10, 0,
 			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
 			  _FuncName );
 	    _ErrorOccurred = true;
 	  }
-	  else if( _RunTimeParamInfo[ index ].Ref != 0 )
+	  else 
 	  {
-	    if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
+	    if( _RunTimeParamInfo[ index ].Ref != 0 )
 	    {
-	      _Param[ index ] = 
-		_FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
-		  ValCopy();
-	    }	  
+	      if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0)
+	      {
+		_Param[ index ] = 
+		  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		    ValCopy();
+	      }	  
+	    }
 	  }
 	}
       }
