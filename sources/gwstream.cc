@@ -43,7 +43,7 @@ gWinOutput::gWinOutput(void)
 gWinOutput::~gWinOutput()
 { }
 
-int gWinOutput::GetWidth(void)
+int gWinOutput::GetWidth(void) const
 {
   return Width;
 }
@@ -54,7 +54,7 @@ gOutput &gWinOutput::SetWidth(int w)
   return *this;
 }
 
-int gWinOutput::GetPrec(void)
+int gWinOutput::GetPrec(void) const
 {
   return Prec;
 }
@@ -77,7 +77,7 @@ gOutput &gWinOutput::SetFloatMode(void)
   return *this;
 }
 
-char gWinOutput::GetRepMode(void)
+char gWinOutput::GetRepMode(void) const
 {
   return Represent;
 }

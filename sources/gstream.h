@@ -233,16 +233,17 @@ class gWinOutput : public gOutput  {
       virtual ~WriteFailed()   { }
       gText Description(void) const;
     };
+
     gWinOutput(void);
     virtual ~gWinOutput();
 
-    int GetWidth(void);
+    int GetWidth(void) const;
     gOutput &SetWidth(int w);
-    int GetPrec(void);
+    int GetPrec(void) const;
     gOutput &SetPrec(int p);
     gOutput &SetExpMode(void);
     gOutput &SetFloatMode(void);
-    char GetRepMode(void);
+    char GetRepMode(void) const;
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
