@@ -80,10 +80,10 @@ template <class T>
 int TableauInterface<T>::MaxRow() const { return A->MaxRow(); }
 
 template <class T>
-int TableauInterface<T>::MinCol() const { return A->MinCol(); }
+int TableauInterface<T>::MinCol() const { return basis.MinCol(); }
 
 template <class T>
-int TableauInterface<T>::MaxCol() const { return A->MaxCol(); }
+int TableauInterface<T>::MaxCol() const { return basis.MaxCol(); }
 
 template <class T>
 Basis & TableauInterface<T>::GetBasis(void) {return basis; }
@@ -137,10 +137,6 @@ void TableauInterface<T>::GetColumn(int col, gVector<T> &ret) const
     ret = (T) 0;
     ret[-col] = (T) 1;
   }
-  else if (basis.IsArtifColumn(col)) {
-    ret = (T) 0;
-    ret[basis.UnitEntry(col)] = (T) 1;
-  }
 }
 
 template <class T>
@@ -152,7 +148,7 @@ void TableauInterface<T>::GetBasis(Basis &out) const
 template <class T>
 BFS<T> TableauInterface<T>::GetBFS()
 {
-  gVector<T> sol((*b).First(),(*b).Last());
+  gVector<T> sol(basis.First(),basis.Last());
   BasisVector(sol);
 
   BFS<T> cbfs((T) 0);

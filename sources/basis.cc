@@ -15,9 +15,9 @@
 // -----------------------
 
 Basis::Basis(int first, int last, int firstlabel, int lastlabel)
-  : label(first, last), cols(firstlabel, lastlabel), 
-    slacks(first, last), artUnitEntry(lastlabel+1, lastlabel),
-    colBlocked(firstlabel,lastlabel),rowBlocked(first,last)
+  : basis(first, last), cols(firstlabel, lastlabel), 
+    slacks(first, last), colBlocked(firstlabel,lastlabel),
+    rowBlocked(first,last)
 {
   int i;
   for(i = cols.First(); i <= cols.Last(); i++) {
@@ -25,8 +25,8 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
     colBlocked[i] = false;
   }
 
-  for(i = label.First(); i <= label.Last(); i++) {
-    label[i]= - i;
+  for(i = basis.First(); i <= basis.Last(); i++) {
+    basis[i]= - i;
     slacks[i] = i;
     rowBlocked[i] = false;
   }
@@ -34,9 +34,9 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
 }
 
 Basis::Basis(const Basis &bas)
-: label(bas.label), cols( bas.cols ), slacks( bas.slacks ),
-  artUnitEntry(bas.artUnitEntry), colBlocked(bas.colBlocked), 
-  rowBlocked(bas.rowBlocked), IsBasisIdent(bas.IsBasisIdent)
+: basis(bas.basis), cols( bas.cols ), slacks( bas.slacks ),
+  colBlocked(bas.colBlocked), rowBlocked(bas.rowBlocked), 
+  IsBasisIdent(bas.IsBasisIdent)
 { }
 
 Basis::~Basis()
@@ -45,10 +45,9 @@ Basis::~Basis()
 Basis& Basis::operator=(const Basis &orig)
 {
   if(this != &orig) {
-    label = orig.label; 
+    basis = orig.basis; 
     cols = orig.cols;
     slacks = orig.slacks;
-    artUnitEntry = orig.artUnitEntry;
     rowBlocked = orig.rowBlocked;
     colBlocked = orig.colBlocked;
     IsBasisIdent = orig.IsBasisIdent;
@@ -62,28 +61,26 @@ Basis& Basis::operator=(const Basis &orig)
 // -------------------------
 
 int Basis::First() const
-{
-  return label.First();
-}
+{ return basis.First();}
 
 int Basis::Last() const
-{
-  return label.Last();
-}
+{ return basis.Last();}
 
-int Basis::FirstLabel() const
-{
-  return cols.First();
-}
+int Basis::MinCol() const
+{ return cols.First();}
 
-int Basis::LastLabel() const
-{
-  return cols.Last();
-}
+int Basis::MaxCol() const
+{ return cols.Last();}
 
+inline bool Basis::IsRegColumn( int col ) const
+{return col >= cols.First() && col <= cols.Last();} 
+  
+inline bool Basis::IsSlackColumn( int col ) const 
+{return  -col >= basis.First() && -col <= basis.Last();} 
+  
 int Basis::Pivot(int outindex, int col)
 {
-  int outlabel = label[outindex];
+  int outlabel = basis[outindex];
  
   if (IsSlackColumn(col)) slacks[-col] = outindex;
   else if (IsRegColumn(col)) cols[col] = outindex;
@@ -96,7 +93,7 @@ int Basis::Pivot(int outindex, int col)
     throw BadIndex(); // not a valid column to pivot out. 
   }
   
-  label[outindex] = col;
+  basis[outindex] = col;
   CheckBasis();
   
   return outlabel;
@@ -120,15 +117,14 @@ int Basis::Find( int col ) const
 
   if ( IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
-  else ret = 0;
+  else throw BadIndex();
   
-  assert (ret != 0);
   return ret;
 }
 
 int Basis::Label(int index) const
 {
-  return  label[index];
+  return  basis[index];
 }
 
 void Basis::Mark(int col )
@@ -150,39 +146,12 @@ bool Basis::IsBlocked(int col) const
   return false;
 }
 
-int Basis::AppendArtificial( int art )
-{
-  cols.Append(0);
-  return artUnitEntry.Append(art);
-}
-
-void Basis::RemoveArtificial( int col )
-{
-  assert(IsArtifColumn(col));
-  assert(cols[col]==0); // can only remove non basic columns
-  cols.Remove(col);
-  artUnitEntry.Remove( col);
-}
-
-gOutput &operator<<(gOutput &to, const Basis &v)
-{
-  v.Dump(to); return to;
-}
-
-void Basis::Dump(gOutput &to) const
-{ 
-  to << "{";
-  for(int i=label.First();i<=label.Last();i++) 
-    to << "  " << label[i];  
-  to << " }";
-}
-
 void Basis::CheckBasis() 
 {
   bool check = true;
 
-  for (int i =label.First(); i <= label.Last() && check; i++)
-    if(label[i] != -i) check = false;
+  for (int i =basis.First(); i <= basis.Last() && check; i++)
+    if(basis[i] != -i) check = false;
   
   IsBasisIdent = check;
 }
@@ -192,11 +161,24 @@ bool Basis::IsIdent()
   return IsBasisIdent;
 }
 
+void Basis::Dump(gOutput &to) const
+{ 
+  to << "{";
+  for(int i=basis.First();i<=basis.Last();i++) 
+    to << "  " << basis[i];  
+  to << " }";
+}
+
 Basis::BadIndex::~BadIndex()
 { }
 
 gText Basis::BadIndex::Description(void) const
 {
-  return "Bad index in gArray";
+  return "Bad index in Basis";
+}
+
+gOutput &operator<<(gOutput &to, const Basis &v)
+{
+  v.Dump(to); return to;
 }
 

@@ -175,8 +175,8 @@ gInteger find_lcd(const gVector<gRational> &vec)
  
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b) 
   : TableauInterface<gRational>(A,b), Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
-    Coeff(b.First(),b.Last()), nonbasic(A.MinCol(),A.MaxCol()),denom(1), 
-    tmpcol(b.First(),b.Last()){
+    Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
+    nonbasic(A.MinCol(),A.MaxCol()){
 
   int j;
   for(j=A.MinCol();j<=A.MaxCol();j++) 
@@ -203,8 +203,8 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A, const gVector<gRational
 
 Tableau<gRational>::Tableau(const Tableau<gRational> &orig) 
   : TableauInterface<gRational>(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
-    nonbasic(orig.nonbasic), totdenom(orig.totdenom), denom(orig.denom), 
-    tmpcol(orig.tmpcol)
+    totdenom(orig.totdenom), denom(orig.denom), 
+    tmpcol(orig.tmpcol), nonbasic(orig.nonbasic)
 { }
 
 Tableau<gRational>::~Tableau()
@@ -216,10 +216,10 @@ Tableau<gRational>& Tableau<gRational>::operator=(const Tableau<gRational> &orig
   if(this!= &orig) {
     Tabdat = orig.Tabdat;
     Coeff = orig.Coeff;
-    nonbasic = orig.nonbasic;
     totdenom = orig.totdenom;
     denom = orig.denom;
     tmpcol = orig.tmpcol;
+    nonbasic = orig.nonbasic;
   }
   return *this;
 }

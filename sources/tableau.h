@@ -67,13 +67,15 @@ private:
 
   gMatrix<gInteger> Tabdat;  // This caries the full tableau
   gVector<gInteger> Coeff;   // and coeffieient vector
-  gBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
   gInteger totdenom;  // This carries the denominator for Q data or 1 for Z
   gInteger denom;  // This is the denominator for the simplex
 
   gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
 
   void MySolveColumn(int, gVector<gRational> &);  // column in new basis 
+
+protected:
+  gBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
       // constructors and destructors

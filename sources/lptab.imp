@@ -652,23 +652,39 @@ BFS<T> LPTableau<T>::DualBFS() const
   return cbfs;
 }
 
-template <class T>
-int LPTableau<T>::AppendArtificial( int art )
+int LPTableau<double>::AppendArtificial( int art )
 {
+  /*
   cost.Append(0);
   return basis.AppendArtificial( art );
+  */
+  return 1;
+}
+
+int LPTableau<gRational>::AppendArtificial( int art )
+{
+  /*
+  cost.Append(0);
+  gout << "\nnonbasic: " << nonbasic;
+  nonbasic.Append(MaxCol()+1);
+  gout << "\nnonbasic: " << nonbasic;
+  int ret = basis.AppendArtificial( art );
+  BigDump(gout);
+  return ret;
+  */
+  return 1;
 }
 
 template <class T>
 void LPTableau<T>::RemoveArtificial( int col )
 {
-  basis.RemoveArtificial( col );
+  //  basis.RemoveArtificial( col );
 }
 
 template <class T>
 int LPTableau<T>::LastLabel( void )
 {
-  return basis.LastLabel();
+  return basis.MaxCol();
 }
 
 template <class T>
