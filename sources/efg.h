@@ -135,6 +135,7 @@ protected:
     int NumPlayers(void) const;
     EFPlayer *GetChance(void) const;
     EFPlayer *NewPlayer(void);
+    const EFPlayer *GetPlayer(const int pl) const { return players[pl]; }
     const gArray<EFPlayer *> &Players(void) const  { return players; }
 
        //# DATA ACCESS -- INFOSETS
@@ -167,9 +168,9 @@ protected:
     Node *MoveTree(Node *src, Node *dest);
     Node *DeleteTree(Node *n);
 
-    Action *InsertAction(Infoset *s);
-    Action *InsertAction(Infoset *s, Action *at);
-    Infoset *DeleteAction(Infoset *s, Action *a);
+    const Action *InsertAction(Infoset *s);
+    const Action *InsertAction(Infoset *s, const Action *at);
+    Infoset *DeleteAction(Infoset *s, const Action *a);
 
     void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
@@ -196,8 +197,11 @@ protected:
     int ProfileLength(void) const;
     int TotalNumInfosets(void) const;
 
-    gArray<int> NumInfosets(void) const;
+    gArray<int>   NumInfosets(void) const;
+    int           NumPlayersInfosets(const int pl) const;
     gPVector<int> NumActions(void) const;
+    int           NumActionsAtInfoset(const int pl, const int iset) const;
+    int           NumNodesInInfoset(const int pl, const int iset) const;
     gPVector<int> NumMembers(void) const;
 
         //# COMPUTING VALUES OF PROFILES
@@ -246,7 +250,7 @@ int ReadEfgFile(gInput &, Efg *&);
 template <class T> class PureBehavProfile   {
   protected:
     const Efg *E;
-    gArray<gArray<Action *> *> profile;
+    gArray<gArray<const Action *> *> profile;
     gPVector<T> *chanceprobs;
     gRectArray<T> *payoffs;
 
@@ -266,8 +270,8 @@ template <class T> class PureBehavProfile   {
     T operator()(Action *) const;
 
     // Manipulation
-    void Set(Action *);
-    void Set(const EFPlayer *, const gArray<Action *> &);
+    void Set(const Action *);
+    void Set(const EFPlayer *, const gArray<const Action *> &);
 
     // Information
     const Action *GetAction(const Infoset *) const;

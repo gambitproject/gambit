@@ -37,7 +37,7 @@ extern GSM *_gsm;
 
 static Portion *GSM_ActionNumber(Portion **param)
 {
-  Action *a = ((ActionPortion *) param[0])->Value();
+  const Action *a = ((ActionPortion *) param[0])->Value();
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
 
   return new NumberPortion(support->Find(a));
@@ -45,7 +45,7 @@ static Portion *GSM_ActionNumber(Portion **param)
 
 static Portion *GSM_BasisActionNumber(Portion **param)
 {
-  Action *a = ((ActionPortion *) param[0])->Value();
+  const Action *a = ((ActionPortion *) param[0])->Value();
   EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
 
   return new NumberPortion(basis->EFSupport::Find(a));
@@ -90,7 +90,7 @@ static Portion *GSM_BasisActions(Portion **param)
 static Portion *GSM_AddAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  Action *action = ((ActionPortion *) param[1])->Value();
+  const Action *action = ((ActionPortion *) param[1])->Value();
 
   EFSupport *S = new EFSupport(*support);
   S->AddAction(action);
@@ -101,7 +101,7 @@ static Portion *GSM_AddAction(Portion **param)
 static Portion *GSM_AddBasisAction(Portion **param)
 {  
   EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
-  Action *action = ((ActionPortion *) param[1])->Value();
+  const Action *action = ((ActionPortion *) param[1])->Value();
 
   EFBasis *S = new EFBasis(*basis);
   S->AddAction(action);
@@ -179,7 +179,7 @@ static Portion *GSM_Chance(Portion **param)
 
 static Portion *GSM_ChanceProb(Portion **param)
 {
-  Action *action = ((ActionPortion *) param[0])->Value();
+  const Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
   if (!infoset->GetPlayer()->IsChance()) 
     throw gclRuntimeError("Action must belong to the chance player");
@@ -231,7 +231,7 @@ static Portion *GSM_CopyTree(Portion **param)
 
 static Portion *GSM_DeleteAction(Portion **param)
 {
-  Action *action = ((ActionPortion *) param[0])->Value();
+  const Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
 
   if (infoset->NumActions() == 1)
@@ -397,7 +397,7 @@ static Portion *GSM_Infoset_Action(Portion **param)
     return new NullPortion( porINFOSET );
   }
 
-  Action *a = ((ActionPortion *) param[0])->Value();
+  const Action *a = ((ActionPortion *) param[0])->Value();
 
   if (!a->BelongsTo())
     return new NullPortion(porINFOSET);
@@ -432,7 +432,7 @@ static Portion *GSM_InsertAction(Portion **param)
 static Portion *GSM_InsertActionAt(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
-  Action *a = ((ActionPortion *) param[1])->Value();
+  const Action *a = ((ActionPortion *) param[1])->Value();
 
   _gsm->UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
 
@@ -848,7 +848,7 @@ static Portion *GSM_Players(Portion **param)
 static Portion *GSM_PriorAction(Portion** param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  Action* a = LastAction(n);
+  const Action* a = LastAction(n);
   if(a == 0)
     return new NullPortion(porACTION);
 
@@ -875,7 +875,7 @@ static Portion *GSM_PriorSibling(Portion **param)
 static Portion *GSM_RemoveAction(Portion **param)
 {  
   EFSupport *support = ((EfSupportPortion *) param[0])->Value();
-  Action *action = ((ActionPortion *) param[1])->Value();
+  const Action *action = ((ActionPortion *) param[1])->Value();
 
   EFSupport *S = new EFSupport(*support);
   S->RemoveAction(action);
@@ -886,7 +886,7 @@ static Portion *GSM_RemoveAction(Portion **param)
 static Portion *GSM_RemoveBasisAction(Portion **param)
 {  
   EFBasis *support = ((EfBasisPortion *) param[0])->Value();
-  Action *action = ((ActionPortion *) param[1])->Value();
+  const Action *action = ((ActionPortion *) param[1])->Value();
 
   EFBasis *S = new EFBasis(*support);
   S->RemoveAction(action);
@@ -1228,8 +1228,7 @@ void Init_efgfunc(GSM *gsm)
 				     funcLISTABLE | funcGAMEMATCH));
 
   FuncObj = new FuncDescObj("ElimDom", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, 
-				       porEFSUPPORT, 6));
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Efg, porEFSUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));

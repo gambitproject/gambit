@@ -142,7 +142,7 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 					int pl, int iset, bool strong,
 					gStatus &status)
 {
-  const gArray<Action *> &actions = S.Actions(pl, iset);
+  const gArray<const Action *> &actions = S.Actions(pl, iset);
 
   gArray<int> set(actions.Length());
   int i;

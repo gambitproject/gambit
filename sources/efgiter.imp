@@ -62,7 +62,7 @@ void EfgIter::First(void)
 
 int EfgIter::Next(int pl, int iset)
 {
-  const gArray<Action *> &actions = _support.Actions(pl, iset);
+  const gArray<const Action *> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
     _current(pl, iset) = 1;

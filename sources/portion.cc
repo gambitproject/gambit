@@ -1157,13 +1157,13 @@ bool NodePortion::IsReference(void) const
 
 gPool ActionPortion::pool(sizeof(ActionPortion));
 
-ActionPortion::ActionPortion(Action *value)
-  : _Value(new Action *(value)), _ref(false)
+ActionPortion::ActionPortion(const Action *value)
+  : _Value(new const Action *(value)), _ref(false)
 {
   SetGame(value->BelongsTo()->Game());
 }
 
-ActionPortion::ActionPortion(Action *& value, bool ref)
+ActionPortion::ActionPortion(const Action *& value, bool ref)
   : _Value(&value), _ref(ref)
 {
   SetGame(value->BelongsTo()->Game());
@@ -1174,10 +1174,10 @@ ActionPortion::~ActionPortion()
   if (!_ref)   delete _Value;
 }
 
-Action *ActionPortion::Value(void) const
+const Action *ActionPortion::Value(void) const
 { return *_Value; }
 
-void ActionPortion::SetValue(Action *value)
+void ActionPortion::SetValue(const Action *value)
 {
   SetGame(value->BelongsTo()->Game());
   *_Value = value;

@@ -56,7 +56,7 @@ void Infoset::PrintActions(gOutput &f) const
   f << "}";
 }
 
-Action *Infoset::InsertAction(int where)
+const Action *Infoset::InsertAction(int where)
 {
   Action *action = new Action(where, "", this);
   actions.Insert(action, where);
@@ -104,7 +104,7 @@ class ChanceInfoset : public Infoset  {
     void PrintActions(gOutput &f) const;
 
   public:
-    Action *InsertAction(int where);
+    const Action *InsertAction(int where);
     void RemoveAction(int which);
 
     void SetActionProb(int i, const gNumber &value)  { probs[i] = value; }
@@ -119,9 +119,9 @@ ChanceInfoset::ChanceInfoset(Efg *E, int n, EFPlayer *p, int br)
   for (int i = 1; i <= br; probs[i++] = gRational(1, br));
 }
 
-Action *ChanceInfoset::InsertAction(int where)
+const Action *ChanceInfoset::InsertAction(int where)
 { 
-  Action *action = Infoset::InsertAction(where);
+  const Action *action = Infoset::InsertAction(where);
   probs.Insert((gNumber) 0, where);
   return action;
 }
@@ -154,6 +154,15 @@ Node::~Node()
   for (int i = children.Length(); i; delete children[i--]);
 }
 
+int Node::NumberInInfoset(void) const
+{
+  for (int i = 1; i <= GetInfoset()->NumMembers(); i++)
+    if (GetInfoset()->GetMember(i) == this)
+      return i;
+  //  This could be speeded up by adding a member to Node to keep track of this
+  throw gclRuntimeError("NumberInInfoset() failed.\n");
+}
+
 
 Node *Node::NextSibling(void) const  
 {
@@ -174,12 +183,12 @@ Node *Node::PriorSibling(void) const
 
 }
 
-Action *Node::GetAction() const
+const Action *Node::GetAction() const
 {
   if (this == Game()->RootNode()) 
     throw Efg::Exception();
   
-  gArray<Action *> actions = GetParent()->GetInfoset()->Actions();
+  gArray<const Action *> actions = GetParent()->GetInfoset()->Actions();
   for (int i = 1; i <= actions.Length(); i++)
     if (this == GetParent()->GetChild(actions[i]))
       return actions[i];
@@ -715,7 +724,7 @@ void Efg::DescendantNodesRECURSION(const Node* n,
 {
   current += n;
   if (n->IsNonterminal()) {
-    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
+    const gArray<const Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
       DescendantNodesRECURSION(newn,supp,current);
@@ -729,7 +738,7 @@ void Efg::NonterminalDescendantsRECURSION(const Node* n,
 {
   if (n->IsNonterminal()) {
     current += n;
-    const gArray<Action *> actions = supp.Actions(n->GetInfoset());
+    const gArray<const Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
       DescendantNodesRECURSION(newn,supp,current);
@@ -1153,24 +1162,24 @@ Node *Efg::DeleteTree(Node *n)
   return n;
 }
 
-Action *Efg::InsertAction(Infoset *s)
+const Action *Efg::InsertAction(Infoset *s)
 {
   if (!s)  throw Exception();
-  Action *action = s->InsertAction(s->NumActions() + 1);
+  const Action *action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(new Node(this, s->members[i]));
   DeleteLexicon();
   return action;
 }
 
-Action *Efg::InsertAction(Infoset *s, Action *a)
+const Action *Efg::InsertAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return 0;
-  Action *action = s->InsertAction(where);
+  const Action *action = s->InsertAction(where);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(new Node(this, s->members[i]), where);
 
@@ -1178,7 +1187,7 @@ Action *Efg::InsertAction(Infoset *s, Action *a)
   return action;
 }
 
-Infoset *Efg::DeleteAction(Infoset *s, Action *a)
+Infoset *Efg::DeleteAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
   int where;
@@ -1316,7 +1325,7 @@ int Efg::ProfileLength(void) const
   int sum = 0;
 
   for (int i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
+    for (int j = 1; j <= NumPlayersInfosets(i); j++)
       sum += players[i]->infosets[j]->actions.Length();
 
   return sum;
@@ -1327,9 +1336,14 @@ gArray<int> Efg::NumInfosets(void) const
   gArray<int> foo(players.Length());
   
   for (int i = 1; i <= foo.Length(); i++)
-    foo[i] = players[i]->infosets.Length();
+    foo[i] = NumPlayersInfosets(i);
 
   return foo;
+}
+
+int Efg::NumPlayersInfosets(const int pl) const
+{
+  return players[pl]->infosets.Length();
 }
 
 int Efg::TotalNumInfosets(void) const
@@ -1342,6 +1356,11 @@ int Efg::TotalNumInfosets(void) const
   return foo;
 }
 
+int Efg::NumActionsAtInfoset(const int pl, const int iset) const
+{
+ return players[pl]->infosets[iset]->actions.Length(); 
+} 
+
 gPVector<int> Efg::NumActions(void) const
 {
   gArray<int> foo(players.Length());
@@ -1352,22 +1371,27 @@ gPVector<int> Efg::NumActions(void) const
   gPVector<int> bar(foo);
   for (i = 1; i <= players.Length(); i++)
     for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->actions.Length();
+      bar(i, j) = NumActionsAtInfoset(i,j);
 
   return bar;
 }  
+
+int Efg::NumNodesInInfoset(const int pl, const int iset) const
+{
+ return players[pl]->infosets[iset]->members.Length(); 
+}
 
 gPVector<int> Efg::NumMembers(void) const
 {
   gArray<int> foo(players.Length());
   int i;
   for (i = 1; i <= players.Length(); i++)
-    foo[i] = players[i]->infosets.Length();
+    foo[i] = NumPlayersInfosets(i);
 
   gPVector<int> bar(foo);
   for (i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = players[i]->infosets[j]->members.Length();
+    for (int j = 1; j <= NumPlayersInfosets(i); j++)
+      bar(i, j) = NumNodesInInfoset(i,j);
 
   return bar;
 }

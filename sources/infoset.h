@@ -73,18 +73,24 @@ class Infoset   {
     void SetName(const gText &s)    { name = s; }
     const gText &GetName(void) const   { return name; }
 
-    virtual Action *InsertAction(int where);
+    virtual const Action *InsertAction(int where);
     virtual void RemoveAction(int which);
 
     void SetActionName(int i, const gText &s)
       { actions[i]->name = s; }
     const gText &GetActionName(int i) const  { return actions[i]->name; }
 
-    const gArray<Action *> &Actions(void) const  { return actions; }  
+    const gArray<const Action *> Actions(void) const  
+      { gArray<const Action *> answer(actions.Length());
+        for (int i = 1; i <= actions.Length(); i++)
+	  answer[i] = actions[i];
+	return answer; }  
+    const Action *GetAction(const int act) const { return actions[act]; }
     const gList<const Action *> ListOfActions(void) const;
     int NumActions(void) const   { return actions.Length(); }
 
     const gArray<Node *> &Members(void) const   { return members; }
+    const Node *GetMember(const int m) const { return members[m]; }
     const gList<const Node *> ListOfMembers(void) const;
     int NumMembers(void) const   { return members.Length(); }
 

@@ -40,7 +40,7 @@ private:
   gPoly<T> zeta(int i,int j, int k) const;
 
   gPoly<T> Payoff(Node *, EFPlayer *) const;
-  gPoly<T> Payoff(Action *) const;
+  gPoly<T> Payoff(const Action *) const;
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
@@ -395,7 +395,7 @@ SequentialEquilibModule<T>::mu(int i, int j, int k) const
 template <class T> gPoly<T> 
 SequentialEquilibModule<T>::zeta(int i, int j, int k) const
 {
-  Action * act;
+  const Action * act;
   act = bigbasis.Actions(i,j)[k];
   if(basis.EFSupport::Find(act))
     return sigma(i,j,k);
@@ -431,7 +431,7 @@ Payoff(Node *n, EFPlayer *p) const
       value += (term * Payoff(n->GetChild(i),p));
     }
   else  {    // player decision node
-    const gArray<Action *> &actions =
+    const gArray<const Action *> &actions =
       support.Actions(pl, iset);
     
     for (int act = 1; act <= actions.Length(); act++)  {
@@ -443,7 +443,7 @@ Payoff(Node *n, EFPlayer *p) const
 }
 
 template <class T> gPoly<T> SequentialEquilibModule<T>::
-Payoff(Action *a) const
+Payoff(const Action *a) const
 {
 //  gout << "\nInPayoff(a)";
   int iset = a->BelongsTo()->GetNumber();

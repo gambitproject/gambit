@@ -26,7 +26,7 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   int pl = 0;
   for ( pl = 1; pl <= efg.NumPlayers(); pl++)  {
     EFPlayer *player = efg.Players()[pl];
-    profile[pl] = new gArray<Action *>(player->NumInfosets());
+    profile[pl] = new gArray<const Action *>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
       (*profile[pl])[iset] = player->Infosets()[iset]->Actions()[1];
   }
@@ -52,7 +52,7 @@ PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
     payoffs(new gRectArray<T>(*p.payoffs))
 {
   for (int pl = 1; pl <= profile.Length(); pl++)   {
-    profile[pl] = new gArray<Action *>(p.profile[pl]->Length());
+    profile[pl] = new gArray<const Action *>(p.profile[pl]->Length());
     for (int iset = 1; iset <= profile[pl]->Length(); iset++)
       (*profile[pl])[iset] = (*p.profile[pl])[iset];
   }
@@ -94,7 +94,7 @@ template <class T> T PureBehavProfile<T>::operator()(Action *action) const
     return (T) 0;
 }
 
-template <class T> void PureBehavProfile<T>::Set(Action *action)
+template <class T> void PureBehavProfile<T>::Set(const Action *action)
 {
   (*profile[action->BelongsTo()->GetPlayer()->GetNumber()])
                [action->BelongsTo()->GetNumber()] = action;
@@ -102,7 +102,7 @@ template <class T> void PureBehavProfile<T>::Set(Action *action)
 
 template <class T>
 void PureBehavProfile<T>::Set(const EFPlayer *player,
-                              const gArray<Action *> &actions)
+                              const gArray<const Action *> &actions)
 {
   *profile[player->GetNumber()] = actions;
 }
@@ -469,7 +469,7 @@ void BehavProfile<T>::Payoff(Node *p_node, T p_prob, int p_player,
     else  {
       int npl = p_node->infoset->player->number;
       int iset = p_node->infoset->number;
-      const gArray<Action *> &actions = m_support.Actions(npl, iset);
+      const gArray<const Action *> &actions = m_support.Actions(npl, iset);
 
       for (int act = 1; act <= actions.Length(); act++)
 	Payoff(p_node->children[actions[act]->GetNumber()],
@@ -528,7 +528,7 @@ void BehavProfile<T>::CondPayoff(BehavNode<T> *p_node, T p_prob,
     p_node->scratch = tmp;
   }
   else  {    // player decision node
-    const gArray<Action *> &actions =
+    const gArray<const Action *> &actions =
       m_support.Actions(p_node->node->infoset->player->number, 
 			p_node->node->infoset->number);
     
@@ -652,7 +652,7 @@ void BehavProfile<T>::Beliefs(Node *p_node, T p_prob,
     }
   }
   else {
-    const gArray<Action *> &actions = m_support.Actions(npl, iset);
+    const gArray<const Action *> &actions = m_support.Actions(npl, iset);
 
     for (int act = 1; act <= m_support.NumActions(npl, iset); act++) {
       Beliefs(p_node->children[actions[act]->GetNumber()],

@@ -650,19 +650,20 @@ class Action;
 
 class ActionPortion : public Portion  {
 protected:
-  Action** _Value;
+  const Action** _Value;
   bool _ref;
 
   static gPool pool;
 
-  ActionPortion(Action *&, bool); 
+  ActionPortion(const Action *&, bool); 
 
 public:
   ActionPortion(Action *);
+  ActionPortion(const Action *);
   virtual ~ActionPortion();
 
-  Action *Value(void) const;
-  void SetValue(Action *);
+  const Action *Value(void) const;
+  void SetValue(const Action *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

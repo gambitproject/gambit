@@ -36,6 +36,7 @@ class EFPlayer   {
 
     int NumInfosets(void) const    { return infosets.Length(); }
     const gArray<Infoset *> &Infosets(void) const  { return infosets; }
+    const Infoset *GetInfoset(const int iset) const { return infosets[iset]; }
 
     int GetNumber(void) const    { return number; }
 };

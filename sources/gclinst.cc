@@ -40,6 +40,11 @@ template class gStack<RefHashTable *>;
 //--------
 
 template class gList<bool>;
+template gOutput &operator<<(gOutput &, const gList<bool> &);
+template class gList<gList<bool> >;
+template gOutput &operator<<(gOutput &, const gList<gList<bool> > &);
+template class gList<gList<gList<bool> > >;
+
 template class gList<gclExpression *>;
 
 template class gSortList<FuncDescObj *>;

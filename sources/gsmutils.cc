@@ -33,8 +33,16 @@ Portion *ArrayToList(const gArray<gNumber> &A)
     ret->Append(new NumberPortion(A[i]));
   return ret;
 }
-
-Portion *ArrayToList(const gArray<Action *> &A)
+/*
+Portion *ArrayToList(const gArray<const Action *> &A)
+{
+  ListPortion *ret = new ListPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new ActionPortion(A[i]));
+  return ret;
+}
+*/
+Portion *ArrayToList(const gArray<const Action *> &A)
 {
   ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++)
