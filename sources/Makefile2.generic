@@ -1,0 +1,173 @@
+#
+# Generic makefile for Gambit Project
+# 
+# Makes both gui and gcl targets on multiple platforms, and 
+# automatically updates dependencies (no need to do make depend).
+#
+# Rename this makefile to 'Makefile', and then use 'make gui'
+# to make the gui, and 'make gcl' to make the gcl.
+#
+# Executable are named gcl_$(SYSNAME) and gui_$(SYSNAME)_$(GUI), 
+# where SYSNAME represents the OS and GUI represents the X libraries 
+# (motif/xt/none) that are available on the system (e.g. gui_Linux_xt or
+# gcl_SunOS_5_6).  SYSNAME and GUI must be passed to this makefile
+# e.g. "make -f Makefile2.generic SYSNAME=solaris GUI=motif".
+#
+# Object files are put in platform-specific subdirectories so that 
+# the same source directory can be used for multiple platforms.  
+# 
+# This Makefile requires 'make.filelist' to exist in the same directory.
+# 'make.filelist' contains the current file list, and defines
+# the 'ALLGCL_OBJECT' and 'ALLGUI_OBJECTS' variables. 
+#
+# The Makefile also requires the subdirectory ./fake to exist. This
+# subdirectory contains "fake" (empty)  wxwin and system header
+# files to prevent tracking down dependencies in those files.  
+#
+# Do 'cvs co -d. gambit/sources' in your gambit/sources directory to 
+# initialize the ./fake (and other subdirectories) needed by the makefile
+#
+# Note: If files are moved or renamed, this makefile can get "stuck".  
+#       In this case do 'rm *.d' or 'make clean'
+
+# Name of this makefile.
+
+MYNAME = Makefile2.generic
+
+# define compiler and flags
+
+CC = g++ 
+CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
+	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
+
+
+# define directory where object files are put
+
+OBJDIR = obj_$(SYSNAME)
+vpath %.o  $(OBJDIR)
+
+# rule for creating .o (object) files from .cc files
+
+%.o: %.cc
+	$(CC) $(CFLAGS) -c $< -o $(OBJDIR)/$@
+
+# rule for creating .d (dependency) files from .cc files
+
+%.d: %.cc
+	@echo updating dependencies: $@
+	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) -Ifake $< \
+		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
+		[ -s $@ ] || rm -f $@'
+
+# Note: everything from here to 'EndNote' (as well as all gui targets) 
+#       can be removed if only gcl targets are used 
+
+# Generic WxWin information:
+# 
+#   WXINCDIR = location of wxwin include files
+#   WXLIBDIR = location of wxwin libraries
+#   WXLIB    = any wx libraries used
+
+WXDIR = /home/mill/gambit/wxwin-new
+WXLIBDIR = -L$(WXDIR)/lib
+WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x 
+WXLIB = -lwx_motif_$(SYSNAME)
+
+# Site Specific information:
+#
+#   DEFINES = any compiler defines needed 
+#   XINCDIR = location of X include files
+#   XLIBDIR = location of X libraries
+#   XLIB    = any X libraries used
+
+ifeq ($(SYSNAME), SunOS_5_6)
+XINCDIR = -I/usr/local/X11R6.4/include/X11
+XLIBDIR = -L/usr/local/X11R6.4/lib 
+XLIB = -lsocket -lnsl -lX11 -lXm -lXt -lgen -lm
+else 
+ifeq ($(SYSNAME), HP-UX)
+DEFINES = -D_HPUX_SOURCE -DSVR4
+XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
+XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
+XLIB = -lXm -lXt -lX11 -lc -lm -lg++
+else 
+# Must be Linux.
+XINCDIR = -I/usr/local/include/X11
+XLIBDIR = -L/usr/local/X11/lib -L/usr/X11/lib
+XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
+endif
+endif
+
+# Combine the site dependent and independent data
+
+LIBDIR = $(WXLIBDIR) $(XLIBDIR)
+INCDIR = $(WXINCDIR) $(XINCDIR) -Ibitmaps
+GUILIBS = $(WXLIB) $(XLIB)
+
+# EndNote 
+
+# Include the list of files, which defines
+#
+# ALLGCL_SOURCES, ALLGCL_OBJECTS  source, object files for GCL
+# ALLGUI_SOURCES, ALLGUI_OBJECTS  source, object files GUI
+# SOURCES,        OBJECTS         all source and object files
+
+include make.filelist
+
+# Include the list of dependencies:
+
+include	$(SOURCES:.cc=.d)
+
+# Targets:
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+gcl_$(SYSNAME):	$(OBJDIR) $(ALLGCL_OBJECTS)
+	cd $(OBJDIR); $(CC) $(ALLGCL_OBJECTS) -o ../gcl_$(SYSNAME) -lm; cd ..
+
+gcl:	
+ifndef SYSNAME
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a SYSNAME e.g. linux, solaris, hp
+	@exit 1
+endif
+	make -f $(MYNAME) gcl_$(SYSNAME)
+
+gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
+	cd $(OBJDIR); \
+	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
+	    -o ../gui_$(SYSNAME)_$(GUI); cd ..
+
+gui:
+ifndef SYSNAME
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a SYSNAME e.g. linux, solaris, hp
+	@exit 1
+endif
+ifndef GUI
+	@echo usage: make -f $(MYNAME) SYSNAME=\<sysname\> GUI=\<gui\>
+	@echo Must specify a GUI e.g. xt, motif
+	@echo \(xt only supported on linux\)
+	@exit 1
+endif
+	make -f $(MYNAME) gui_$(SYSNAME)
+
+readefg.cc:  readefg.yy
+	bison++ -d -h readefg.h -o readefg.cc readefg.yy
+
+readnfg.cc:  readnfg.yy
+	bison++ -d -h readnfg.h -o readnfg.cc readnfg.yy
+
+gcompile.cc: gcompile.yy
+	bison++ -d -h gcompile.h -o gcompile.cc gcompile.yy
+
+clean:	
+	rm -f $(OBJDIR)/*.o
+
+manifest:
+	g++ -MM -MG $(SOURCES) | sed 'y/\ / \n/' | sort | uniq | \
+        grep -v ':' > Manifest
+
+
+
