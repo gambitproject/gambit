@@ -73,7 +73,7 @@ Portion *GSM_AppendAction(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   s->BelongsTo()->AppendAction(s);
 
-  Portion* por = new InfosetValPortion(s);
+  Portion* por = new ActionValPortion(s->GetActionList()[s->NumActions()]);
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
   return por;
@@ -125,6 +125,11 @@ Portion *GSM_DeleteNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   Node *keep = ((NodePortion *) param[1])->Value();
+
+  if (n->BelongsTo() != keep->BelongsTo())
+    return new ErrorPortion("The nodes are from different games\n");
+  if (keep->GetParent() != n)
+    return new ErrorPortion("keep is not a child of node\n");
 
   Portion* por = new NodeValPortion(n->BelongsTo()->DeleteNode(n, keep));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -315,6 +320,42 @@ Portion *GSM_NewPlayer(Portion **param)
   por->AddDependency();
   return por;
 }
+
+Portion *GSM_RandomEfgFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double> *) ((EfgPortion *) param[0])->Value();
+  
+  RandomEfg(E);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomEfgRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion *) param[0])->Value();
+  
+  RandomEfg(E);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomEfgSeedFloat(Portion **param)
+{
+  Efg<double> &E = * (Efg<double> *) ((EfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomEfg(E);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomEfgSeedRational(Portion **param)
+{
+  Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomEfg(E);
+  return param[0]->RefCopy();
+}  
 
 Portion *GSM_SetChanceProbs(Portion **param)
 {
@@ -515,6 +556,9 @@ Portion *GSM_CopyTree(Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
 
+  if (n1->BelongsTo() != n2->BelongsTo())
+    return new ErrorPortion("n1 and n2 belong to different trees\n");
+
   Portion* por = new NodeValPortion(n1->BelongsTo()->CopyTree(n1, n2));
   por->SetOwner( param[ 0 ]->Owner() );
   por->AddDependency();
@@ -567,6 +611,9 @@ Portion *GSM_MoveTree(Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
+
+  if (n1->BelongsTo() != n2->BelongsTo())
+    return new ErrorPortion("n1 and n2 belong to different trees\n");
 
   Portion* por = new NodeValPortion(n1->BelongsTo()->MoveTree(n1, n2));
   por->SetOwner( param[ 0 ]->Owner() );
@@ -960,6 +1007,26 @@ void Init_efgfunc(GSM *gsm)
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_NewPlayer, 1, "name", porTEXT,
 			new TextValPortion(""));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RandomEfg");
+  FuncObj->SetFuncInfo(GSM_RandomEfgFloat, 1);
+  FuncObj->SetParamInfo(GSM_RandomEfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfgRational, 1);
+  FuncObj->SetParamInfo(GSM_RandomEfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfgSeedFloat, 2);
+  FuncObj->SetParamInfo(GSM_RandomEfgSeedFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomEfgSeedFloat, 1, "seed", porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_RandomEfgSeedRational, 2);
+  FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomEfgSeedRational, 1, "seed", porINTEGER);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetChanceProbs");

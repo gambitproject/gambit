@@ -31,6 +31,23 @@ Portion *GSM_BehavFloat(Portion **param)
   return por;
 }
 
+Portion *GSM_BehavRational(Portion **param)
+{
+  MixedProfile<gRational> &mp = * (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[1])->Value();
+  Nfg<gRational> &N = *mp.BelongsTo(); 
+
+  BehavProfile<gRational> *bp = new BehavProfile<gRational>(E);
+  MixedToBehav(N, mp, E, *bp);
+
+  Portion* por = new BehavValPortion(bp);
+  por->SetOwner( param[ 1 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
 Portion *GSM_Payoff(Portion **param)
 {
   BehavProfile<double> bp = * (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
@@ -335,6 +352,28 @@ Portion *GSM_InfosetProbsRational(Portion **param)
 
   return ret;
 }
+
+Portion *GSM_NodeValuesFloat(Portion **param)
+{
+  BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
+  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
+
+  if (bp->BelongsTo() != p->BelongsTo())
+    return new ErrorPortion("Profile and player are from different games\n");
+
+  return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
+}
+
+Portion *GSM_NodeValuesRational(Portion **param)
+{
+  BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
+  EFPlayer *p = ((EfPlayerPortion *) param[1])->Value();
+
+  if (bp->BelongsTo() != p->BelongsTo())
+    return new ErrorPortion("Profile and player are from different games\n");
+
+  return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
+}
  
 Portion *GSM_RealizProbsFloat(Portion **param)
 {
@@ -437,6 +476,11 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_BehavFloat, 0, "mixed", porMIXED_FLOAT);
   FuncObj->SetParamInfo(GSM_BehavFloat, 1, "efg", porEFG_FLOAT,
 		        NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_BehavRational, 2);
+  FuncObj->SetParamInfo(GSM_BehavRational, 0, "mixed", porMIXED_RATIONAL);
+  FuncObj->SetParamInfo(GSM_BehavRational, 1, "efg", porEFG_RATIONAL,
+		        NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Nfg");
@@ -489,6 +533,17 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_InfosetProbsRational, 1);
   FuncObj->SetParamInfo(GSM_InfosetProbsRational, 0, "strategy",
 			porBEHAV_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NodeValues");
+  FuncObj->SetFuncInfo(GSM_NodeValuesFloat, 2);
+  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 0, "strategy", porBEHAV_FLOAT);
+  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 1, "player", porPLAYER_EFG);
+
+  FuncObj->SetFuncInfo(GSM_NodeValuesRational, 2);
+  FuncObj->SetParamInfo(GSM_NodeValuesRational, 0, "strategy",
+			porBEHAV_RATIONAL);
+  FuncObj->SetParamInfo(GSM_NodeValuesRational, 1, "player", porPLAYER_EFG);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RealizProbs");

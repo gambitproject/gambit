@@ -142,44 +142,30 @@ Portion *GSM_Strategies(Portion **param)
 
 #include "gwatch.h"
 
-Portion *GSM_ElimAllDom(Portion **param)
+extern NFSupport *ComputeDominated(NFSupport &S, bool strong, 
+				   const gArray<int> &players,
+				   gOutput &tracefile);
+
+
+Portion *GSM_ElimDom(Portion **param)
 {
-/*
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
-
-  gWatch watch;
-
-  N.FindAllDominated((strong) ? STRONG : WEAK, &gout);
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-
-  return new IntValPortion(N.NumStratSets());
-  */
-  return 0;
-}
-
-Portion *GSM_ElimNDom(Portion **param)
-{
-/*
-  int maxiter = ((IntPortion *) param[0])->Value();
-  BaseNfg &N = * ((NfgPortion*) param[1])->Value();
-  bool strong = ((BoolPortion *) param[2])->Value();
   
   gWatch watch;
-  gBlock<int> players(N.NumPlayers());
+  gBlock<int> players(S->BelongsTo().NumPlayers());
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  for (i = 1; i <= maxiter && 
-       N.FindDominated(players, (strong) ? STRONG : WEAK, &gout);
-       i++);
+  NFSupport *T = ComputeDominated(*S, strong, players, gout);
 
-  ((FloatPortion *) param[3])->Value() = watch.Elapsed();
- 
-  return new IntValPortion(N.NumStratSets());
-  */
-  return 0;
+  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  
+  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
 }
 
 
@@ -594,6 +580,42 @@ Portion *GSM_NewNfg(Portion **param)
   return new NfgValPortion(N);
 }
 
+Portion *GSM_RandomNfgFloat(Portion **param)
+{
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfgRational(Portion **param)
+{
+  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfgSeedFloat(Portion **param)
+{
+  Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}
+
+Portion *GSM_RandomNfgSeedRational(Portion **param)
+{
+  Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  int seed = ((IntPortion *) param[1])->Value();
+
+  SetSeed(seed);
+  RandomNfg(N);
+  return param[0]->RefCopy();
+}  
+
 Portion *GSM_NewSupport(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
@@ -639,12 +661,11 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ElimDom");
-  FuncObj->SetFuncInfo(GSM_ElimAllDom, 3);
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 0, "nfg", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 1, "strong", porBOOL,
+  FuncObj->SetFuncInfo(GSM_ElimDom, 3);
+  FuncObj->SetParamInfo(GSM_ElimDom, 0, "support", porNF_SUPPORT);
+  FuncObj->SetParamInfo(GSM_ElimDom, 1, "strong", porBOOL,
 			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimAllDom, 2, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_ElimDom, 2, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
@@ -850,6 +871,26 @@ void Init_nfgfunc(GSM *gsm)
 			new BoolValPortion(false));
   FuncObj->SetParamInfo(GSM_NewNfg, 2, "seed", porINTEGER,
 			new IntValPortion(0));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("RandomNfg");
+  FuncObj->SetFuncInfo(GSM_RandomNfgFloat, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfgFloat, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfgRational, 1);
+  FuncObj->SetParamInfo(GSM_RandomNfgRational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfgSeedFloat, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfgSeedFloat, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfgSeedFloat, 1, "seed", porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_RandomNfgSeedRational, 2);
+  FuncObj->SetParamInfo(GSM_RandomNfgSeedRational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_RandomNfgSeedRational, 1, "seed", porINTEGER);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewSupport");
