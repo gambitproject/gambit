@@ -17,8 +17,8 @@
 //                        ZSumParams: member functions
 //---------------------------------------------------------------------------
 
-ZSumParams::ZSumParams(void) 
-  :  trace(0), stopAfter(0), tracefile(&gnull)
+ZSumParams::ZSumParams(gStatus &status_) 
+  :  trace(0), stopAfter(0), tracefile(&gnull), status(status_)
 { }
 
 

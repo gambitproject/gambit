@@ -13,6 +13,7 @@
 #include "gstatus.h"
 #include "tableau.h"
 #include "lpsolve.h"
+#include "gstatus.h"
 #include "mixed.h"
 #include "mixedsol.h"
 
@@ -20,8 +21,9 @@ class ZSumParams     {
   public:
     int trace, stopAfter;
     gOutput *tracefile;
+    gStatus &status;
     
-    ZSumParams(void);
+    ZSumParams(gStatus &status_ = gstatus);
 };
 
 //
