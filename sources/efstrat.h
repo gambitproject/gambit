@@ -23,7 +23,7 @@ namespace Efg {
 class EFSupport {
 protected:
   gText m_name;
-  const Efg::Game *m_efg;
+  Efg::Game *m_efg;
   gArray<EFActionSet *> m_players;
 
 public:
@@ -35,7 +35,7 @@ public:
   bool operator==(const EFSupport &) const;
   bool operator!=(const EFSupport &) const;
 
-  const Efg::Game &GetGame(void) const { return *m_efg; }
+  Efg::Game &GetGame(void) const { return *m_efg; }
 
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
