@@ -30,11 +30,11 @@ NewFunction[GetTextFormat[{quote<->True}]=:BOOLEAN,
   True
 ]
 
-NewFunction[SetSolutionFormat[{info->False}, {names->True}]=:BOOLEAN,
+NewFunction[SetSolutionFormat[{info->False}, {names->False}]=:BOOLEAN,
   !IsNull[Format[Centroid[NewEfg[]],info,names]]
 ]
 
-NewFunction[GetSolutionFormat[{info<->False}, {names<->True}]=:BOOLEAN,
+NewFunction[GetSolutionFormat[{info<->False}, {names<->False}]=:BOOLEAN,
   GetFormat[Centroid[NewEfg[]],info,names];
   True
 ]

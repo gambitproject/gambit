@@ -46,7 +46,7 @@ BoolPortion _WriteListCommas(triTRUE);
 NumberPortion _WriteListLF(0);
 NumberPortion _WriteListIndent(2);
 BoolPortion _WriteSolutionInfo(triFALSE);
-BoolPortion _WriteSolutionLabels(triTRUE);
+BoolPortion _WriteSolutionLabels(triFALSE);
 
 static void GSM_SetWriteOptions(void)
 {
