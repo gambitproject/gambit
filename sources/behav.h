@@ -22,6 +22,17 @@ template <class T> class gPVector;
 template <class T> class gRectArray;
 class BehavSolution;
 
+//
+//  BehavProfile<T> implements a behavior profile on an Efg.  
+//
+//  The class assumes that the underlying Efg does not change during the 
+//  life of the profile, and will not correctly invalidate itself if 
+//  the game does change.  
+// 
+//  The BehavSolution class should be used For interactive use, where 
+//  the game payoffs or probabilities may change.  
+// 
+
 template <class T> class BehavProfile : public gDPVector<T>  {
   friend BehavSolution;
 public:
@@ -35,7 +46,9 @@ protected:
   gArray<BehavInfoset *> m_isets;
   mutable bool m_cached_data;
   
-  // functions for installing the BehavProfile in Efg 
+  //
+  // FUNCTIONS FOR INSTALLATION AND INITIALIZATION
+  //
   // Installation sets back-pointers in EFG to point to relevant 
   // stuff in BehavProfile
 
@@ -44,30 +57,47 @@ protected:
   void InitPayoffs(void) const;
   void InitProfile(void);
 
+  //
+  // FUNCTIONS FOR DATA ACCESS
+  //
+  // NOTE: These functions all assume that profile is installed, and that relevant 
+  // data has been computed.  
+  // Use public versions (GetNodeValue, GetIsetProb, etc) if this is not known.
+
   const T &RealizProb(const Node *node) const;
-  const T &BeliefProb(const Node *node) const;
-  const gVector<T> &NodeValue(const Node *node) const;
   T &RealizProb(const Node *node);
+
+  const T &BeliefProb(const Node *node) const;
   T &BeliefProb(const Node *node);
-  gVector<T> &NodeValue(const Node *node);
+
+  inline const gVector<T> &NodeValue(const Node *node) const
+    {return ((BehavNode *)node->solution)->nodeValue;}
+  inline gVector<T> &NodeValue(const Node *node)
+    {return ((BehavNode *)node->solution)->nodeValue;}
  
   const T &IsetProb(const Infoset *iset) const;
-  const T &IsetValue(const Infoset *iset) const;
   T &IsetProb(const Infoset *iset);
+
+  const T &IsetValue(const Infoset *iset) const;
   T &IsetValue(const Infoset *iset);
 
-  const T &ActionValue(const Action * act) const;
-  const T &ActionProb(const Action *) const;
+  inline const T &ActionValue(const Action * act) const 
+    { return ((BehavAction *)(act->solution))->condPayoff;}	
+  inline T &ActionValue(const Action * act)
+    { return ((BehavAction *)(act->solution))->condPayoff;}
+  
+  inline const T &ActionProb(const Action *act) const 
+    { return *(((BehavAction *)(act->solution))->probability);}	
+  inline T &ActionProb(const Action *act) 
+    { return *(((BehavAction *)(act->solution))->probability);}	
+
   const T &Regret(const Action * act) const;
-  T &ActionValue(const Action * act);
-  T &ActionProb(const Action *);
   T &Regret(const Action *);
 
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
+
   void Payoff(Node *, T, int, T &) const;
-  void CondPayoff(Node *, T, gPVector<T> &, gDPVector<T> &) const;
   const T Payoff(const EFOutcome *o, int pl) const;
-  const T &ChanceProb(const Action *act) const;
   
   void ComputeSolutionDataPass2(const Node *node);
   void ComputeSolutionDataPass1(const Node *node);
@@ -154,6 +184,10 @@ public:
     gText Description(void) const;
   };
 
+  //
+  // STRUCTS FOR STORING SOLUTION DATA
+  //
+
   struct BehavNode {
     Node *node;
     T nval, bval;
@@ -185,29 +219,35 @@ public:
     ~BehavAction();
   };
 
+  // CONSTRUCTORS, DESTRUCTOR
 
-  // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavProfile(const EFSupport &);
   BehavProfile(const BehavProfile<T> &);
   BehavProfile(const MixedProfile<T> &);
   BehavProfile(const BehavSolution &);
   virtual ~BehavProfile();
   
+  // OPERATOR OVERLOADING
+
   BehavProfile<T> &operator=(const BehavProfile<T> &);
-  
+  inline BehavProfile<T> &operator=(const gVector<T> &p)
+    {Invalidate(); gVector<T>::operator=(p); return *this;}
+
+  bool operator==(const BehavProfile<T> &) const;
+
+  // INSTALLATION, INITIALIZATION, VALIDATION
+
+  bool IsInstalled(void) const;  
+  inline void Invalidate(void) const {m_cached_data=false;}
+  virtual bool IsAssessment(void) const { return false; }
+  void Centroid(void) const;
+
   // GENERAL DATA ACCESS
+
   Efg &Game(void) const   { return const_cast<Efg &>(*m_efg); }
   const EFSupport &Support(void) const   { return m_support; }
   const EFSupport *SupportPtr(void) const   { return &m_support; }
   
-  virtual bool IsAssessment(void) const { return false; }
-  
-  T LiapValue(void) const;
-  T MaxRegret(void);
-  
-  // OPERATOR OVERLOADING
-  bool operator==(const BehavProfile<T> &) const;
-
   const T &GetRealizProb(const Node *node);
   const T &GetBeliefProb(const Node *node);
   const gVector<T> &GetNodeValue(const Node *node);
@@ -217,22 +257,22 @@ public:
   const T &GetActionValue(const Action *act);
   const T &GetRegret(const Action *act);
 
-  void Dump(gOutput &) const;
-  
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH, NASH
+
   bool ExtendsToANFNash(const EFSupport &, const EFSupport &, gStatus &) const;
   bool ExtendsToNash(const EFSupport &, const EFSupport &, gStatus &) const;
   
   // COMPUTATION OF INTERESTING QUANTITIES
-  T Payoff(int p_player) const;
-  
-  virtual void CondPayoff(gDPVector<T> &, gPVector<T> &) const;
-  gDPVector<T> Beliefs(void);
-  
-  void Centroid(void) const;
 
-  bool IsInstalled(void) const;  
-  void Invalidate(void) const {m_cached_data=false;}
+  T Payoff(int p_player) const;
+  void ComputeActionValues(Node *node, T prob);
+  void ComputeActionValues(void);
+  gDPVector<T> Beliefs(void);
+  T LiapValue(void);
+  T QreValue(const gVector<T> &lambda, bool &);
+  T MaxRegret(void);
+
+  void Dump(gOutput &) const;
 };
 
 

@@ -91,7 +91,6 @@ static Portion *GSM_Belief(Portion **param)
 {
   BehavSolution *bp = ((BehavPortion *) param[0])->Value();
   Node* n = ((NodePortion*) param[1])->Value();
-  Efg *e = ((FullEfg *) param[1]->Game());
   Infoset *s = n->GetInfoset();
   if(!s)
     return new NullPortion(porNUMBER);

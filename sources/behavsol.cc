@@ -540,6 +540,7 @@ void BehavSolution::Invalidate(void) const
   m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;
+  m_checkedNash = false;
   m_checkedANFNash = false;
   m_checkedSubgamePerfect = false;
   m_checkedSequential = false;

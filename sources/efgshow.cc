@@ -561,13 +561,10 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
       {
 	if (!n->GetPlayer()) return "N/A";
 	if (n->GetPlayer()->IsChance()) return "N/A";
-	//	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
+	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
 	  return ToText(cur.ActionValue(n->GetInfoset()->Actions()[br]),tw->NumDecimals());
-	
-	  /*
 	else        // this is due to a bug in the value computation
 	  return "N/A";
-	  */
       }
     case tBranchProb:   // terminal not ok
       if (!n->GetPlayer()) return "N/A";
@@ -1299,7 +1296,7 @@ gArray<AccelEvent> EfgShow::MakeEventNames(void)
 int EfgShow::CheckAccelerators(wxKeyEvent &ev)
 {
   int id = ::CheckAccelerators(accelerators, ev);
-  gout << id << '\n';
+  //  gout << id << '\n';
   
   if (id) { 
     OnMenuCommand(id);

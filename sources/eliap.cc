@@ -18,7 +18,6 @@ class EFLiapFunc : public gFunction<double>  {
     long _nevals;
     const Efg &_efg;
     BehavProfile<double> _p;
-    gDPVector<double> _cpay;
 
     double Value(const gVector<double> &x);
 
@@ -32,7 +31,7 @@ class EFLiapFunc : public gFunction<double>  {
 
 EFLiapFunc::EFLiapFunc(const Efg &E,
 		       const BehavProfile<double> &start)
-  : _nevals(0L), _efg(E), _p(start), _cpay(E.NumActions())
+  : _nevals(0L), _efg(E), _p(start)
 { }
 
 EFLiapFunc::~EFLiapFunc()
@@ -41,45 +40,11 @@ EFLiapFunc::~EFLiapFunc()
 
 double EFLiapFunc::Value(const gVector<double> &v)
 {
-  static const double BIG1 = 10000.0;
-  static const double BIG2 = 100.0;
-
   _nevals++;
-
-
   ((gVector<double> &) _p).operator=(v);
-  double x, result = 0.0, avg, sum;
-
-  gPVector<double> probs(_efg.NumInfosets());  
-  _p.CondPayoff(_cpay, probs);
-
-  for (int i = 1; i <= _efg.NumPlayers(); i++) {
-    EFPlayer *player = _efg.Players()[i];
-    for (int j = 1; j <= player->NumInfosets(); j++) {
-      avg = sum = 0.0;
-      int k;
-      for (k = 1; k <= _p.Support().NumActions(i, j); k++) {
-	x = _p(i, j, k); 
-	avg += x * _cpay(i, j, k);
-	sum += x;
-	if (x > 0.0)  x = 0.0;
-	result += BIG1 * x * x;         // add penalty for neg probabilities
-      }
-
-      for (k = 1; k <= _p.Support().NumActions(i, j); k++) {
-	x = _cpay(i, j, k) - avg;
-	if (x < 0.0) x = 0.0;
-	result += x * x;          // add penalty if not best response
-      }
-
-      x = sum - 1.0;
-      result += BIG2 * x * x;       // add penalty for sum not equal to 1
-    }
-  }
-
-  return result;
+    //_p = v;
+  return _p.LiapValue();
 }
-
 
 static void PickRandomProfile(BehavProfile<double> &p)
 {

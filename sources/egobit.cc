@@ -29,7 +29,7 @@ class EFQreFunc : public gFunction<double>   {
     const Efg &_efg;
     gVector<double> _Lambda;
     gPVector<double> _probs;
-    BehavProfile<double> _p, _cpay;
+    BehavProfile<double> _p;
     gVector<double> ***_scratch;
 
     double Value(const gVector<double> &);
@@ -49,7 +49,7 @@ EFQreFunc::EFQreFunc(const Efg &E,
 			 const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), 
     _Lambda(E.NumPlayers()),_probs(E.NumInfosets()),
-    _p(start.Support()), _cpay(start.Support())
+    _p(start.Support())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -74,56 +74,14 @@ EFQreFunc::~EFQreFunc()
   delete [] (_scratch + 1);
 }
 
-
 double EFQreFunc::Value(const gVector<double> &v)
 {
-  static const double PENALTY = 10000.0;
-
   _nevals++;
   _domain_err = false;
- ((gVector<double> &) _p).operator=(v);
-  double val = 0.0, prob, psum, z,factor;
- 
-  _p.CondPayoff(_cpay, _probs);
-  
-  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
-    EFPlayer *player = _efg.Players()[pl];
-    
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      prob = 0.0;
-      psum = 0.0;
-
-      int act;
-      
-      for (act = 1; act <= _p.Support().NumActions(pl, iset); act++)  {
-	z = _Lambda[pl] * _cpay(pl, iset, act);
-	factor=1.0;
-	if(z>500.0) {factor+=z-500.0;z=500.0;_domain_err=true;}
-	if(z<-500.0) {factor+=z+500.0;z=-500.0;_domain_err=true;}
-	z = exp(z)*factor;
-	psum += z;
-	_cpay(pl, iset, act) = z;
-      }
-      
-      for (act = 1; act <= _p.Support().NumActions(pl, iset); act++)  {
-	z = _p(pl, iset, act);
-	prob += z;
-	if (z < 0.0)
-	  val += PENALTY * z * z;
-	z -= _cpay(pl, iset, act) / psum;
-	val += z * z;
-      }
-
-      z = 1.0 - prob;
-      val += 100.0 * z * z;
-//      z -= _cpay(pl, iset, act) / psum;
-//      val += z * z;
-    }
-  }
-
-  return val;
+  ((gVector<double> &) _p).operator=(v);
+  //  _p = v;
+  return _p.QreValue(_Lambda,_domain_err);
 }
-
 
 static void WritePXIHeader(gOutput &pxifile, const Efg &E,
 			   const EFQreParams &params)
@@ -423,6 +381,74 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
   
   value = 0.0;
   
+  //  _p.CondPayoff(_cpay, _probs);
+  const gArray<EFPlayer *> players = _efg.Players();
+  for (int pl = 1; pl <= players.Length(); pl++)  {
+    const gArray<Infoset *> infosets = players[pl]->Infosets();    
+    for (int iset = 1; iset <= infosets.Length(); iset++)  {
+      double vij = 0.0;
+      const gArray<Action *> &acts = _p.Support().Actions(infosets[iset]);
+      for( int j = 1;j<=acts.Length();j++)
+	for(int k = 1;k<=acts.Length();k++)
+	  vij+=_p.GetActionProb(acts[j])*_p.GetActionProb(acts[k])*
+	    _p.GetActionValue(acts[j])*(_p.GetActionValue(acts[j])-_p.GetActionValue(acts[k]));
+      value += pow(vij -lambda[pl]*_K,2.0);
+    }
+  }
+
+  /*
+  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+    EFPlayer *player = _efg.Players()[pl];
+    
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      double vij = 0.0;
+      for( int j = 1;j<=(_p.Support().NumActions(pl,iset));j++)
+	for(int k = 1;k<=(_p.Support().NumActions(pl,iset));k++)
+	  vij+=_p(pl,iset,j)*_p(pl,iset,k)*_cpay(pl,iset,j)*(_cpay(pl,iset,j)-_cpay(pl,iset,k));
+      value += pow(vij -lambda[pl]*_K,2.0);
+    }
+  }
+  */
+
+  if(params.trace > 3) {
+    (params.tracefile->SetExpMode()).SetPrec(4);
+    *params.tracefile << "\n   EFKGobFunc val: " << value;
+    *params.tracefile << " K = " << _K;
+    *params.tracefile << " lambda = " << lambda;
+    params.tracefile->SetFloatMode().SetPrec(6);
+    *params.tracefile << " p = " << _p;
+  }
+  return value;
+}
+
+/*
+double EFKQreFunc::Value(const gVector<double> &lambda)
+{
+  int iter = 0;
+  double value = 0.0;
+  
+  F.SetLambda(lambda);
+  
+  if(params.trace > 3) {
+    *params.tracefile << "\n   EFKGobFunc start: " << _p << " Lambda = " << F.GetLambda();
+  }
+  
+  // first find Qre solution of p for given lambda vector
+  
+  
+  gMatrix<double> xi(_p.Length(), _p.Length());
+  InitMatrix(xi, _p.Lengths());
+  
+  Powell(_p, xi, F, value, iter,
+	 params.maxits1, params.tol1, params.maxitsN, params.tolN,
+	 *params.tracefile, params.trace-4,true);
+  
+  _nevals = F.NumEvals();
+  
+  // now compute objective function for KQre 
+  
+  value = 0.0;
+  
   _p.CondPayoff(_cpay, _probs);
   
   for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
@@ -446,6 +472,7 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
   }
   return value;
 }
+*/
 
 extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		      gFunction<double> &func, double &fret, int &iter,
