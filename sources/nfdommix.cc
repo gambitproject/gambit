@@ -110,7 +110,6 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
   
     s.First();
     for(n=1;n<=contingencies;n++) {
-      s.Dump();  gout << '\n';
       s.Set(pl, 1);
       B[n]=-s.Payoff(pl);
       C0 -= B[n];

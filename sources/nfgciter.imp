@@ -1,5 +1,5 @@
 //
-// FILE: contiter.imp -- Implementation of contingency iterator
+// FILE: nfgciter.imp -- Implementation of contingency iterator
 //
 // $Id$
 //
@@ -127,12 +127,12 @@ template <class T> void NfgContIter<T>::SetPayoff(int p, const T &value)
 }
 
 
-template <class T> void NfgContIter<T>::Dump(void) const
+template <class T> void NfgContIter<T>::Dump(gOutput &f) const
 {
-  gout << "{ ";
+  f << "{ ";
   for (int i = 1; i <= N->NumPlayers(); i++)
-    gout << (*profile)[i]->number << ' ';
-  gout << '}';
+    f << (*profile)[i]->number << ' ';
+  f << '}';
 }
 
 

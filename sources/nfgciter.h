@@ -56,7 +56,7 @@ public:
   void Payoff(gVector<T> &) const;
   void SetPayoff(int pl, const T &value);
   
-  void Dump(void) const;
+  void Dump(gOutput &) const;
 };
 
 #endif   // NFGCITER_H
