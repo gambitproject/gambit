@@ -43,8 +43,8 @@ class gString   {
     int lastOccur(char c);
 
 	// ASSIGNMENTS
-    void operator=(const char *s);
-    void operator=(const gString& s)   { *this = s.storage; }
+    gString &operator=(const char *s);
+    gString &operator=(const gString& s)   { *this = s.storage; return *this; }
 
 	// CONCATENATORS
     void operator+=(char c);

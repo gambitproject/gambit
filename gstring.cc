@@ -58,7 +58,7 @@ gString::gString(int len)
 }
 
 
-void gString::operator=(const char *s)
+gString &gString::operator=(const char *s)
 {
   delete [] storage;
   if (s != 0)   {
@@ -71,6 +71,7 @@ void gString::operator=(const char *s)
     assert(storage != 0);
     storage[0] = '\0';
   }
+  return *this;
 }
 
 void gString::operator+=(char c)
