@@ -30,13 +30,6 @@ basis <parameter>basis</parameter>.
 </para>
 </refsect1>
 
-<refsect1>
-<title>See also</title>
-<para>
-<xref linkend="bif.Basis">.
-</para>
-</refsect1>
-
 </refentry>
 
 

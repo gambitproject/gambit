@@ -32,13 +32,6 @@ the corresponding support, it is assigned a number of 0.
 </para>
 </refsect1>
 
-<refsect1>
-<title>See also</title>
-<para>
-<xref linkend="bif.Strategies">.
-</para>
-</refsect1>
-
 </refentry>
 
 

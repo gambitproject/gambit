@@ -122,7 +122,6 @@
 <!ENTITY bifstartwatch SYSTEM "gcl/bifstartwatch.sgml">
 <!ENTITY bifstopwatch SYSTEM "gcl/bifstopwatch.sgml">
 <!ENTITY bifstrategynumber SYSTEM "gcl/bifstrategynumber.sgml">
-<!ENTITY bifsupport SYSTEM "gcl/bifsupport.sgml">
 <!ENTITY biftext SYSTEM "gcl/biftext.sgml">
 <!ENTITY biftimes SYSTEM "gcl/biftimes.sgml">
 <!ENTITY biftranspose SYSTEM "gcl/biftranspose.sgml">

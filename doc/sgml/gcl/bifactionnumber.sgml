@@ -35,10 +35,4 @@ an action is not in the corresponding support or basis,
 </para>
 </refsect1>
 
-<refsect1><title>See also</title>
-<para>
-<xref linkend="bif.actions">
-</para>
-</refsect1>
-
 </refentry>

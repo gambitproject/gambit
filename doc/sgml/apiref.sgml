@@ -178,7 +178,6 @@ are predefined in the command language.
 &bifstartwatch;
 &bifstopwatch;
 &bifstrategynumber;
-&bifsupport;
 &biftext;
 &biftimes;
 &biftranspose;

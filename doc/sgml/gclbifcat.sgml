@@ -708,11 +708,11 @@ appreciate getting feedback on this.
 <tgroup cols="2">
 <tbody>
 <row>
-<entry><xref linkend="bif.AddAction"></entry>
+<entry><xref linkend="apiref.efgsupport.addaction"></entry>
 <entry>Adds an action to a support</entry>
 </row>
 <row>
-<entry><xref linkend="bif.AddMove"></entry>
+<entry><xref linkend="apiref.node.insertmove"></entry>
 <entry>Adds a move to a game at a terminal node</entry>
 </row>
 <row>
@@ -720,7 +720,7 @@ appreciate getting feedback on this.
 <entry></entry>
 </row>
 <row>
-<entry><xref linkend="bif.AddNode"></entry>
+<entry><xref linkend="apiref.efgbasis.addnode"></entry>
 <entry>Adds a node to a basis</entry>
 </row>
 <row>
@@ -877,11 +877,11 @@ appreciate getting feedback on this.
 <tgroup cols="2">
 <tbody>
 <row>
-<entry><xref linkend="bif.AddStrategy"></entry>
+<entry><xref linkend="apiref.nfgsupport.addstrategy"></entry>
 <entry>Adds a strategy to a support</entry>
 </row>
 <row>
-<entry><xref linkend="bif.AgentForm"></entry>
+<entry><xref linkend="apiref.efg.agentform"></entry>
 <entry>Creates the agent normal form for an extensive form game</entry>
 </row>
 <row>
@@ -1336,7 +1336,7 @@ appreciate getting feedback on this.
 <tgroup cols="3">
 <tbody>
 <row>
-<entry><xref linkend="bif.actions"></entry>
+<entry><xref linkend="apiref.infoset.getaction"></entry>
 <entry>native</entry>
 <entry></entry>
 </row>
