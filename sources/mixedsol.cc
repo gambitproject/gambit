@@ -6,6 +6,7 @@
 
 
 #include "mixedsol.h"
+#include "nfdom.h"
 
 gText NameNfgAlgType(NfgAlgType p_algorithm)
 {
@@ -270,7 +271,14 @@ gTriState MixedSolution::IsNash(void) const
 
 gTriState MixedSolution::IsPerfect(void) const
 {
-  EvalEquilibria();
+  if(m_isPerfect == triUNKNOWN) {
+    EvalEquilibria();
+    if(m_isNash && Game().NumPlayers()==2)
+      if(IsMixedDominated(*this,false,precRATIONAL,gout))
+	m_isPerfect = triFALSE;
+      else
+	m_isPerfect = triTRUE;
+  }
   return m_isPerfect;
 }
 

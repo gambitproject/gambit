@@ -150,6 +150,25 @@ static Portion *GSM_IsDominated_Nfg(Portion **param)
   return new BoolPortion(ret);
 }
 
+
+static Portion *GSM_IsProfileDominated_Nfg(Portion **param)
+{
+  MixedProfile<gNumber> pr(*((MixedPortion *) param[0])->Value());
+  bool strong = ((BoolPortion *) param[1])->Value();
+  bool mixed = ((BoolPortion *) param[2])->Value();
+  gPrecision prec = ((PrecisionPortion *) param[3])->Value();
+
+  gWatch watch;
+  bool ret = false;
+
+  ret = IsMixedDominated(pr,strong, prec, 
+			   ((OutputPortion *) param[5])->Value());
+
+  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
+  
+  return new BoolPortion(ret);
+}
+
 //----------
 // Game
 //----------
@@ -617,7 +636,7 @@ void Init_nfgfunc(GSM *gsm)
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("IsDominated", 1);
+  FuncObj = new gclFunction("IsDominated", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDominated_Nfg,
 				       porBOOLEAN, 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("strategy", porSTRATEGY));
@@ -634,6 +653,22 @@ void Init_nfgfunc(GSM *gsm)
 					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 7, gclParameter("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_IsProfileDominated_Nfg,
+				       porBOOLEAN, 7));
+  FuncObj->SetParamInfo(1, 0, gclParameter("profile", porMIXED));
+  FuncObj->SetParamInfo(1, 1, gclParameter("strong", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(1, 2, gclParameter("mixed", porBOOLEAN,
+					    new BoolPortion(false)));
+  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
+					   new PrecisionPortion(precRATIONAL)));
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
+					    new NumberPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
+					    new OutputPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }
