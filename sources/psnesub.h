@@ -19,7 +19,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMPURE_NFG; }    
   
 public:
-  efgEnumPureNfgSolve(const EFSupport &, int p_stopAfter);
+  efgEnumPureNfgSolve(int p_stopAfter);
   virtual ~efgEnumPureNfgSolve();
 };
 

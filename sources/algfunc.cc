@@ -300,8 +300,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 
   if (((BoolPortion *) param[1])->Value())   {
     try {
-      efgEnumPureNfgSolve algorithm(support,
-				    ((NumberPortion *) param[2])->Value());
+      efgEnumPureNfgSolve algorithm(((NumberPortion *) param[2])->Value());
       solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
