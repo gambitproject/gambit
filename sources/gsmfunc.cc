@@ -1199,43 +1199,48 @@ Portion *CallFuncObj::CallListFunction(GSM* gsm, Portion **ParamIn)
 }
 
 
-bool TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
-	       bool Listable, bool return_type_check = false)
+typedef enum { matchNONE = 0, matchSUBTYPE = 1, matchEXACT = 2 } gclMatchLevel;
+
+gclMatchLevel TypeMatch(Portion* p, PortionSpec ExpectedSpec, 
+			bool Listable, bool return_type_check = false)
 {
   if (p == 0 && ExpectedSpec.Type == porUNDEFINED)
-    return true;
+    return matchEXACT;
 
   if (ExpectedSpec.Type == porANYTYPE && return_type_check)
-    return true;  
+    return matchEXACT;  
 
   PortionSpec CalledSpec = p->Spec();
 
   if (p->Spec().Type == porNULL)
     CalledSpec = ((NullPortion*) p)->DataType();
 
+  gclMatchLevel matchtype = matchEXACT;
+
   if (CalledSpec.Type == porNUMBER && ExpectedSpec.Type == porINTEGER) {
     if ((CalledSpec.ListDepth > 0 && ((ListPortion *) p)->IsInteger()) ||
 	(CalledSpec.ListDepth == 0 && ((NumberPortion *) p)->Value().IsInteger()))
     CalledSpec.Type = porINTEGER;
+    matchtype = matchSUBTYPE;
   }
 
   if (CalledSpec.Type & ExpectedSpec.Type)  {
-    if(CalledSpec.ListDepth == ExpectedSpec.ListDepth)
-      return true;
-    else if(CalledSpec.ListDepth > ExpectedSpec.ListDepth && Listable)
-      return true;
-    else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
+    if (CalledSpec.ListDepth == ExpectedSpec.ListDepth)
+      return matchtype;
+    else if (CalledSpec.ListDepth > ExpectedSpec.ListDepth && Listable)
+      return matchtype;
+    else if (CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
 	    !Listable)
-      return true;
-    else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == NLIST)
-      return true;
+      return matchtype;
+    else if (CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == NLIST)
+      return matchtype;
   }
   else if (CalledSpec.Type == porUNDEFINED && CalledSpec.ListDepth > 0)  {
     if (CalledSpec.ListDepth == 1 && ExpectedSpec.ListDepth > 0) 
-      return true;
+      return matchtype;
   }
 
-  return false;
+  return matchNONE;
 }
 
 
@@ -1364,9 +1369,9 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
       // Attempt on-the-fly function matching
       for (f_index = 0; f_index < _NumFuncs; f_index++) {
 	if (m_currParamIndex < _FuncInfo[f_index].NumParams) {
-	  if (!TypeMatch(param, 
-			 _FuncInfo[f_index].ParamInfo[m_currParamIndex].Spec,
-			 (_FuncInfo[f_index].Flag & funcLISTABLE))) {
+	  if (TypeMatch(param, 
+			_FuncInfo[f_index].ParamInfo[m_currParamIndex].Spec,
+			(_FuncInfo[f_index].Flag & funcLISTABLE)) == matchNONE) {
 	    m_funcMatch[f_index] = false;
 	  }
 	}
@@ -1377,9 +1382,9 @@ bool CallFuncObj::SetCurrParam(Portion *param, bool auto_val_or_ref)
     }
     else { // (m_funcIndex != -1)
       if (m_currParamIndex < _FuncInfo[m_funcIndex].NumParams) {
-	if (!TypeMatch(param, 
-		       _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Spec,
-		       (_FuncInfo[m_funcIndex].Flag & funcLISTABLE))) {
+	if (TypeMatch(param, 
+		      _FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Spec,
+		      (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)) == matchNONE) {
 	  throw gclRuntimeError(_FuncName + "[]: Type mismatch on parameter #"+
 				ToText(m_currParamIndex + 1) + ", \"" +
 				_FuncInfo[m_funcIndex].ParamInfo[m_currParamIndex].Name +
@@ -1417,7 +1422,7 @@ ReferencePortion* CallFuncObj::GetParamRef(int index) const
 // overloaded versions.
 void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 {
-  int curr_f_index = 0;
+  int exact_index = 0, subtype_index = 0;
 
   if (m_funcIndex == -1 && _NumFuncs == 1)
     m_funcIndex = 0;
@@ -1429,46 +1434,57 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
 	param_upper_bound = index;
     }
     
-    int param_sets_matched = 0;
+    int exact_matches = 0, subtype_matches = 0;
     for (int f_index = 0; f_index < _NumFuncs; f_index++)  {
-      bool match_ok = true;
+      gclMatchLevel matchlevel = matchEXACT;
       if (param_upper_bound >= _FuncInfo[f_index].NumParams)
-	match_ok = false;
+	matchlevel = matchNONE;
 
       if (!m_funcMatch[f_index])
-	match_ok = false;
+	matchlevel = matchNONE;
 
       for (int index = 0; index < _FuncInfo[f_index].NumParams; index++)   {
 	if (m_params[index] != 0) {
 	  // parameter is defined
-	  if (!TypeMatch(m_params[index],
-			 _FuncInfo[f_index].ParamInfo[index].Spec,
-			 (_FuncInfo[f_index].Flag & funcLISTABLE)))
-	    match_ok = false;
+	  gclMatchLevel parammatch = 
+	    TypeMatch(m_params[index],
+		      _FuncInfo[f_index].ParamInfo[index].Spec,
+		      (_FuncInfo[f_index].Flag & funcLISTABLE));
+	  if (parammatch == matchNONE)
+	    matchlevel = matchNONE;
+	  else if (parammatch == matchSUBTYPE)
+	    matchlevel = matchSUBTYPE;
 	}
 	else {
 	  // parameter is undefined
 	  if (m_runTimeParamInfo[index].Ref != 0) {
 	    // specified undefined variable
 	    if(!_FuncInfo[f_index].ParamInfo[index].PassByReference)
-	      match_ok = false;
+	      matchlevel = matchNONE;
 	  }
 	  
 	  if (_FuncInfo[f_index].ParamInfo[index].DefaultValue == 0)
-	    match_ok = false;
+	    matchlevel = matchNONE;
 	}
       }
       
-      if (match_ok) {
-	curr_f_index = f_index;
-	param_sets_matched++;
+      if (matchlevel == matchEXACT) {
+	exact_index = f_index;
+	exact_matches++;
+      }
+      else if (matchlevel == matchSUBTYPE) {
+	subtype_index = f_index;
+	subtype_matches++;
       }
     }
 
-    if (param_sets_matched == 1) 
-      m_funcIndex = curr_f_index;
-    else if (param_sets_matched > 1)
+    if (exact_matches == 1) 
+      m_funcIndex = exact_index;
+    else if (exact_matches > 1 ||
+	     (exact_matches == 0 && subtype_matches > 1))
       throw gclRuntimeError(_FuncName + "[] called with ambiguous parameter(s)");
+    else if (exact_matches == 0 && subtype_matches == 1)
+      m_funcIndex = subtype_index;
     else
       throw gclRuntimeError("No matching parameter specifications found for " + _FuncName + "[]");
   }
@@ -1476,9 +1492,9 @@ void CallFuncObj::ComputeFuncIndex(GSM *gsm, Portion **param)
   if (m_funcIndex != -1)  {
     for (int index = 0; index < _FuncInfo[m_funcIndex].NumParams; index++) {
       if (m_params[index] != 0) {
-	if (!TypeMatch(m_params[index], 
-		       _FuncInfo[m_funcIndex].ParamInfo[index].Spec,
-		       (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)))
+	if (TypeMatch(m_params[index], 
+		      _FuncInfo[m_funcIndex].ParamInfo[index].Spec,
+		      (_FuncInfo[m_funcIndex].Flag & funcLISTABLE)) == matchNONE)
 	  throw gclRuntimeError(_FuncName + "[] parameter #" +
 				ToText(index + 1) + ", \"" +
 				_FuncInfo[m_funcIndex].ParamInfo[index].Name +
@@ -1646,9 +1662,9 @@ Portion *CallFuncObj::CallFunction(GSM *gsm, Portion **param)
     ((ListPortion*) result)->
       SetDataType(_FuncInfo[m_funcIndex].ReturnSpec.Type);      
   }
-  else if (!TypeMatch(result, _FuncInfo[m_funcIndex].ReturnSpec, 
-		      list_op && (_FuncInfo[m_funcIndex].Flag & funcLISTABLE),
-		      true)) {
+  else if (TypeMatch(result, _FuncInfo[m_funcIndex].ReturnSpec, 
+		     list_op && (_FuncInfo[m_funcIndex].Flag & funcLISTABLE),
+		     true) == matchNONE) {
     PortionSpec actualSpec = result->Spec();
     delete result;
     for (index = 0; index < m_numParams; index++)    {
