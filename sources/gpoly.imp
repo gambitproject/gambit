@@ -285,6 +285,18 @@ template <class T> int gPoly<T>::String_Coeff(int nega)
   else return (nega * atoi(Coeff.stradr()));  
 }
 
+template <class T> long gPoly<T>::String_Coeff(long nega)
+{
+  gString Coeff = "";
+  while (charc >= '0' && charc <= '9'){
+    Coeff += charc;
+    charnum++;
+    GetChar();
+  }
+  if (Coeff == "") return (nega);
+  else return (nega * atol(Coeff.stradr()));  
+}
+
 template <class T> double gPoly<T>::String_Coeff(double nega)
 {
   double doub;
@@ -540,6 +552,12 @@ template <class T> void gPoly<T>::printer(Power<T> *base, gString woCoef,
 // ** different GetCoefToString for each instantiation **
 
 template <class T> gString gPoly<T>::GetCoefToString( int val ) const
+{
+  gString Coeff = ToString(val);
+  return (Coeff);
+}
+
+template <class T> gString gPoly<T>::GetCoefToString( long val ) const
 {
   gString Coeff = ToString(val);
   return (Coeff);

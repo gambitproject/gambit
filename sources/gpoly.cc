@@ -40,6 +40,13 @@ TEMPLATE gPoly<double> operator*(const double val, const gPoly<double> poly);
 TEMPLATE gPoly<double> operator*(const gPoly<double> poly, const double val);
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<double> &y);
 
+TEMPLATE class gPoly<long>;
+TEMPLATE class gPolyFamily<long>;
+TEMPLATE struct Power<long>;
+TEMPLATE struct term<long>;
+TEMPLATE gPoly<long> operator*(const long val, const gPoly<long> poly);
+TEMPLATE gPoly<long> operator*(const gPoly<long> poly, const long val);
+TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<long> &y);
 
 
 

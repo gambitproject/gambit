@@ -185,6 +185,7 @@ private:
   // gString input parser functions
   void String_Term(T nega);
   int String_Coeff(int nega);
+  long String_Coeff(long nega);
   double String_Coeff(double nega);
   gRational String_Coeff(gRational nega);
   int String_GetPow(void);
@@ -193,6 +194,7 @@ private:
 
   // different instantiations of the GetCoefToString
   gString GetCoefToString (int val) const;
+  gString GetCoefToString (long val) const;
   gString GetCoefToString (double val) const;
   gString GetCoefToString (gRational val) const;
 
