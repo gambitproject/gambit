@@ -582,7 +582,6 @@ const gDPVector<gNumber> &BehavSolution::Regret(void) const
 const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
   if (!m_rnf_regret)  {
-    gout << "\ncomputing RNFRegret(), first time";
     const Efg& E = Game(); 
     Lexicon L(E);  // we use the lexicon without allocating normal form.  
     
@@ -630,8 +629,6 @@ const gNumber BehavSolution::MaxRNFRegret(void) const
   gNumber ret = 0;
   for(int i=m_rnf_regret->First();i<=m_rnf_regret->Last();i++)
     if((*m_rnf_regret)[i]>=ret)ret = (*m_rnf_regret)[i];
-
-  gout << "\nrnf_regret: " << *m_rnf_regret;
 
   return ret;
 }
@@ -1251,14 +1248,7 @@ void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
   gTriState x = triFALSE;
   BehavSolution bs(bp);
   
-  gout << "\nin SolveSubgame()";
-  gout << "\nsup: " << sup;
-  gout << "\nbp: " << bp;
-  //  gout << "\nbs: " << bs;
-  
   if(bs.MaxRNFRegret() <= eps) x = triTRUE;
-  
-  //  if(bp.MaxGripe() <= eps) x = triTRUE;
   
   if(isSubgamePerfect == triTRUE &&  x == triTRUE) 
     isSubgamePerfect = triTRUE;
