@@ -32,17 +32,22 @@ template <class T> class LemkeSolution : public MixedSolution<T>   {
 
 
 class BaseLemke    {
+  protected:
+    int num_pivots;
+
   public:
     virtual int Lemke(int) = 0;
     virtual gBlock<Solution *> GetSolutions(void) const = 0;
     virtual ~BaseLemke()   { }
+    
+    int NumPivots(void) const   { return num_pivots; }
 };
 
 template <class T> class LemkeTableau
   : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
     const NFRep<T> &rep;
-    int num_strats,num_pivots;
+    int num_strats;
     BFS_List List;
    
     int Lemke_Step(int);
@@ -383,7 +388,8 @@ LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
   for (i = 1; i <= n1 + n2; Tableau(i++, n1 + n2 + 1) = 0.0);
 }
 
-int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err)
+int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err,
+		      int &npivots)
 {
   if (NumPlayers() != 2)   return 0;
 
@@ -404,17 +410,9 @@ int NormalForm::Lemke(int dup_strat, int plev, gOutput &out, gOutput &err)
   }
 
   T->Lemke(dup_strat);
+  npivots = T->NumPivots();
 
   solutions += T->GetSolutions();
 
   PrintSolutions(gout);
 }
-
-
-
-
-
-
-
-
-
