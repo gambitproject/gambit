@@ -22,25 +22,27 @@
 
 template <class T> class LPSolve {
 private:
-  int  well_formed, feasible, bounded,flag,nvars,neqns;
-  T total_cost,eps1,eps2,eps3;
+  int  well_formed, feasible, bounded, flag, nvars, neqns;
+  T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   const gMatrix<T> &A;   // needed?
   const gVector<T> &b, &c;  // needed?
+  gMatrix<T> *AA;
   LPTableau<T> *tab;
-  gVector<int> UB, LB;
-  gVector<T> ub, lb, xx,y, x, d, cost;
+  gVector<int> *UB, *LB;
+  gVector<T> *ub, *lb, *xx, *cost; 
+  gVector<T> y, x, d;
   
-  void Solve(void);
+  void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
 	  int nequals = 0);   // nequals = number of equalies (last nequals rows)
-  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
-	  const gVector<T> &C,  const gVector<int> &sense, 
-	  const gVector<int> &LB,  const gVector<T> &lb, 
-	  const gVector<int> &UB, const gVector<T> &ub);
+//  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
+//	  const gVector<T> &C,  const gVector<int> &sense, 
+//	  const gVector<int> &LB,  const gVector<T> &lb, 
+//	  const gVector<int> &UB, const gVector<T> &ub);
   ~LPSolve();
   
   T OptimumCost(void) const;
@@ -54,6 +56,10 @@ public:
 };
 
 #endif   // LPSOLVE_H
+
+
+
+
 
 
 
