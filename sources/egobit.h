@@ -22,13 +22,13 @@ template <class T> class EFGobitModule : public GobitModule<T>  {
   protected:
     const Efg<T> &E;
     gList<BehavProfile<T> > solutions;
+    BehavProfile<T> start;
 
     GobitFunc<T> *CreateFunc(void);
     void AddSolution(const GobitFunc<T> *const);
 
   public:
-    EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p);
-    EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s);
+    EFGobitModule(const Efg<T> &EF, EFGobitParams<T> &p, BehavProfile<T> &s);
     virtual ~EFGobitModule();
     const gList<BehavProfile<T> > &GetSolutions(void) const;
 };
