@@ -24,7 +24,7 @@ Minnesota
 Theodore Turocy\\Northwestern University
 }
 
-\date{Version 0.93\\ \today\\ \jobname.tex}
+\date{Version 0.94\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -1715,19 +1715,6 @@ parameters which are not necessary for the procedure to function.
 
 %--A--
 
-\item
-\protect \large \begin{verbatim} 
-AddAction[support->EFSUPPORT, infoset->INFOSET, 
-          action->ACTION] =: EFSUPPORT
-\end{verbatim}\normalsize
-
-\bd 
-Adds the action \verb+action+, from \verb+infoset+ to the
-EFSUPPORT \verb+support+.
-\item
-[See also:] {\tt RemoveAction}
-\ed
-
 
 \item
 \protect \large \begin{verbatim} 
@@ -1760,6 +1747,20 @@ all players obey the behavioral strategy profile \verb+strategy+.
 \ed
 
 \item
+\protect \large \begin{verbatim} 
+AddAction[support->EFSUPPORT, infoset->INFOSET, 
+          action->ACTION] =: EFSUPPORT
+\end{verbatim}\normalsize
+
+\bd 
+Adds the action \verb+action+, from \verb+infoset+ to the
+EFSUPPORT \verb+support+.
+\item
+[See also:] {\tt RemoveAction}
+\ed
+
+
+\item
 \protect \large \begin{verbatim}
 AddStrategy[support->NFSUPPORT, 
             strategy->STRATEGY] =: NFSUPPORT
@@ -1772,6 +1773,17 @@ support, no action is taken.  The modified support is returned.
 \item
 [See also:] {\tt NewSupport}, {\tt RemoveStrategy}.
 \ed
+
+\item
+\protect \large \begin{verbatim}
+Afg[efg<->EFG] =: NFG
+\end{verbatim}\normalsize
+
+\bd
+Returns the agent normal form associated with the extensive form game
+\verb+efg+.
+\ed
+
 
 \item 
 \protect \large \begin{verbatim}
@@ -2609,6 +2621,27 @@ towards zero.
 
 \item
 \protect \large \begin{verbatim}
+IsConstSum[efg<->EFG] =: BOOLEAN
+IsConstSum[nfg<->NFG] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+Returns whether an extensive form game \verb+efg+ or a normal form
+game \verb+nfg+ game, as appropriate, is constant sum.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+IsNash[strategy->MIXED(T)] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd Returns whether the mixed strategy profile \verb+strategy+ is a
+Nash equilibrium of the corresponding normal form game.
+\ed
+
+
+\item
+\protect \large \begin{verbatim}
 IsPredecessor[node->NODE, of->NODE] =: BOOL
 \end{verbatim}\normalsize
 
@@ -2873,6 +2906,17 @@ Default is 2.0e-10.
 \item
 [Note:] Solution of extensive form via normal form is not currently
 available; if \verb+start->+ \verb+BEHAV+ is specified, subgame markings are ignored.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+LiapValue[strategy->MIXED(T)] =: T
+\end{verbatim} \normalsize
+
+\bd
+Returns the Liapunov function value for the mixed strategy profile
+\verb+strategy+.  This value is zero exactly when the profile is a
+Nash equilibrium of the normal form game.
 \ed
 
 \item
@@ -4234,6 +4278,17 @@ the operation is returned.
 \ed
 
 %--V--
+
+\item
+\protect \large \begin{verbatim}
+Version[] =: FLOAT
+\end{verbatim} \normalsize
+
+\bd
+Returns the version number of the command language.
+\item
+[Note:] This function was introduced in version 0.93 of the command language.
+\ed
 
 %--W--
 
