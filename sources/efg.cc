@@ -1175,6 +1175,19 @@ template <class T> gPVector<int> ExtForm<T>::Dimensionality(void) const
   return bar;
 }
 
+template <class T> void ExtForm<T>::Centroid(gDPVector<T> &profile) const
+{
+  profile = gDPVector<T>(Dimensionality());
+  T center;
+
+  for (int i = 1; i <= NumPlayers(); i++)
+    for (int j = 1; j <= NumInfosets(1, i); j++) {
+      center = ((T) 1 / (T) NumActions(1, i, j));
+      for(int k = 1;k <= NumActions(1,i,j); k++)
+	profile(i, j, k) = center;
+    }
+}
+
 template <class T> int ExtForm<T>::ProfileLength(void) const
 {
   int sum = 0;
