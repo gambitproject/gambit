@@ -17,6 +17,7 @@ template <class T> class gRectArray    {
     bool Check(int row, int col) const;
 
   public:
+    gRectArray(void);
     gRectArray(int nrows, int ncols);
     gRectArray(int minr, int maxr, int minc, int maxc);
     gRectArray(const gRectArray<T> &);
