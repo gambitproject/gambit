@@ -47,10 +47,11 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
 /******************************** CALC Y X************************************/
 double PxiCanvas::CalcY_X(double y,int y0,int ch, const PlotInfo &thisplot)
 {
-  y=gmax(y,thisplot.GetMinY());
-  y=gmin(y,thisplot.GetMaxY());
-  y-=thisplot.GetMinY();	// set DataMin to correspond to 0
-  y/=(thisplot.GetMaxY()-thisplot.GetMinY());	// normalize to [0,1]
+  y = gmax(y, m_probAxisProp.m_scale.GetMinimum());
+  y = gmin(y, m_probAxisProp.m_scale.GetMaximum());
+  y -= m_probAxisProp.m_scale.GetMinimum(); // set DataMin to correspond to 0
+  y /= (m_probAxisProp.m_scale.GetMaximum() - 
+	m_probAxisProp.m_scale.GetMinimum()); // normalize to [0,1]
   y=y0-y*ch;	// scale to screen size
   return y;
 }
@@ -59,14 +60,17 @@ double PxiCanvas::CalcY_X(double y,int y0,int ch, const PlotInfo &thisplot)
 
 double PxiCanvas::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 {
-  if (m_drawSettings.GetDataMode()==DATA_TYPE_ARITH) {
-    x-=thisplot.GetMinX(); // set MinX to correspond to 0
-    x/=(thisplot.GetMaxX()-thisplot.GetMinX()); // normalize to [0,1]
-    x=x0+x*cw; // scale to screen size
+  double min = m_lambdaAxisProp.m_scale.GetMinimum();
+  double max = m_lambdaAxisProp.m_scale.GetMaximum();
+
+  if (!m_lambdaAxisProp.m_scale.m_useLog) {
+    x -= min;         // set MinX to correspond to 0
+    x /= (max - min); // normalize to [0,1]
+    x = x0 + x*cw;    // scale to screen size
   }
   else {
-    double max_t=(log(thisplot.GetMaxX()/thisplot.GetMinX())/log(m_drawSettings.GetDelL()));
-    double t=log(x/thisplot.GetMinX())/log(m_drawSettings.GetDelL());
+    double max_t = (log(max/min)/log(m_drawSettings.GetDelL()));
+    double t=log(x/min)/log(m_drawSettings.GetDelL());
     x=x0+(t/max_t)*cw; // scale to screen size
   }
   return x;
@@ -198,7 +202,8 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
   
   while (!probs.Done() && !f.eof()) {
     //---------------------------if cur_e is in active range ------------
-    if (thisplot.RangeX(probs.E())) {
+    if (probs.E() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
+	probs.E() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
       x=CalcX_X(probs.E(),x0,cw,thisplot);
       // plot the infosets that are selected for the top graph
       // if we have experimental data, get it
@@ -300,7 +305,8 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 	if (pl1==0) {pl1=j;st1=i;} else {pl2=j;st2=i;}
   
   while (!probs.Done() && !f.eof()) {
-    if (probs.E()<thisplot.GetMaxY() && probs.E()>thisplot.GetMinY()) {
+    if (probs.E() < m_probAxisProp.m_scale.GetMaximum() && 
+	probs.E() > m_probAxisProp.m_scale.GetMinimum()) {
       point_color=equs.Check_Equ(probs,&new_equ,prev_point);
       dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[point_color%NUM_COLORS+1],3,wxSOLID)));
 
@@ -330,8 +336,10 @@ void PxiCanvas::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 double PxiCanvas::CalcX_3(double p1,double p2,int x0, int y0, int cw,int ch, const PlotInfo &thisplot)
 {
   double xx= x0+cw;
-  p1/=(thisplot.GetMaxY()-thisplot.GetMinY()); // normalize to [0,1]
-  p2/=(thisplot.GetMaxY()-thisplot.GetMinY()); // normalize to [0,1]
+  double height = (m_probAxisProp.m_scale.GetMaximum() -
+		   m_probAxisProp.m_scale.GetMinimum());
+  p1 /= height; // normalize to [0,1]
+  p2 /= height; // normalize to [0,1]
   
   return (xx-(F2OR3*p2+F1OR3*p1)*PXI_3_HEIGHT);
 }
@@ -410,7 +418,8 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 
   while (!probs.Done() && !f.eof()) {
     //------------------- if the cur_e is in range, display it -----------
-    if (thisplot.RangeX(probs.E())) {
+    if (probs.E() >= m_lambdaAxisProp.m_scale.GetMinimum() &&
+	probs.E() <= m_lambdaAxisProp.m_scale.GetMaximum()) {
       point_color=(m_drawSettings.GetColorMode()==COLOR_EQU) ? equs.Check_Equ(probs,&new_equ,prev_point) : 2;
       if (point_color>max_equ) max_equ=point_color;
       wxPen *cpen=wxThePenList->FindOrCreatePen(equ_colors[(point_color+color_start)%NUM_COLORS+1],3,wxSOLID);
@@ -461,7 +470,7 @@ void PxiCanvas::PlotData_3(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int
 void PxiCanvas::Update(wxDC& dc,int device)
 {
   int cw,ch;
-  const wxFont &font = m_drawSettings.GetAxisFont(); 
+  const wxFont &font = m_lambdaAxisProp.m_font;
   wxBeginBusyCursor();
   GetClientSize(&cw,&ch);
   cw=850/2;ch=1100/2;
@@ -523,7 +532,7 @@ void PxiCanvas::Update(wxDC& dc,int device)
   }
 
   dc.SetFont(font);
-  dc.SetTextForeground(m_drawSettings.GetAxisTextColor());
+  dc.SetTextForeground(m_lambdaAxisProp.m_color);
   dc.SetPen(*wxBLACK_PEN);
   dc.SetBrush(m_drawSettings.GetClearBrush());
   
@@ -533,16 +542,16 @@ void PxiCanvas::Update(wxDC& dc,int device)
   // used for square aspect ratio that fits in window
   int side=gmin(cw-2*XOFF, ch-2*XOFF);	
 
-  switch(thisplot.GetPlotMode()) { 
-  case PXI_PLOT_X:
-    DoPlot_X(dc,thisplot,XOFF,ch-XOFF,cw-2*XOFF, ch-2*XOFF, 1);
-    break;
-  case PXI_PLOT_2:
-    DoPlot_2(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
-    break;
-  case PXI_PLOT_3:
-    DoPlot_3(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
-  }
+  //  switch(thisplot.GetPlotMode()) { 
+  //  case PXI_PLOT_X:
+  DoPlot_X(dc,thisplot,XOFF,ch-XOFF,cw-2*XOFF, ch-2*XOFF, 1);
+    //  break;
+    // case PXI_PLOT_2:
+    // DoPlot_2(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
+    //break;
+    //case PXI_PLOT_3:
+    //DoPlot_3(dc,thisplot,XOFF,ch-XOFF, side, side, 1);
+    //}
   wxEndBusyCursor();
 }
 
@@ -552,7 +561,7 @@ void PxiCanvas::DoPlot_X(wxDC& dc, const PlotInfo &thisplot,
   // This function plots n-dimensional data on a rectangular grid.  The x-axis
   //  are error value
 {
-  PlotAxis_X(dc,thisplot,x0,y0,cw,ch,m_drawSettings.GetDataMode(),
+  PlotAxis_X(dc,thisplot,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp,
 	     m_header.EStep());
   PlotData_X(dc,thisplot,x0,y0,cw,ch, m_header, 1);
 }
@@ -660,6 +669,24 @@ PxiCanvas::PxiCanvas(wxWindow *p_parent, const wxPoint &p_position,
     m_ppu(25),
     m_dc(new wxMemoryDC), m_page(p_page)
 {
+  m_lambdaAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_lambdaAxisProp.m_color = *wxBLUE;
+  m_lambdaAxisProp.m_scale.m_minimum =
+    wxString::Format("%f", p_header.EStart());
+  m_lambdaAxisProp.m_scale.m_maximum = 
+    wxString::Format("%f", p_header.EStop());
+  m_lambdaAxisProp.m_scale.m_divisions = 10;
+  m_lambdaAxisProp.m_scale.m_useLog = true;
+  m_lambdaAxisProp.m_scale.m_canUseLog = true;
+
+  m_probAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_probAxisProp.m_color = *wxBLUE;
+  m_probAxisProp.m_scale.m_minimum = "0.0";
+  m_probAxisProp.m_scale.m_maximum = "1.0";
+  m_probAxisProp.m_scale.m_divisions = 10;
+  m_probAxisProp.m_scale.m_useLog = false;
+  m_probAxisProp.m_scale.m_canUseLog = false;
+
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);
 

@@ -3,8 +3,6 @@
 #define	DATA_TYPE_LOG           1
 #define XOFF                   30
 #define GRID_H                  5
-#define	XGRIDS                 10
-#define YGRIDS                 10
 
 // these are used in PlotAxis_3
 #define	TAN60   1.732        // tan(60) used as a constant to save time...
@@ -13,9 +11,12 @@
 #define	PXI_3_HEIGHT  cw*TAN60/2
 
 #include "pxi.h"
+#include "pxicanvas.h"
 
-void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch, 
-		int plot_type=DATA_TYPE_ARITH, float log_step=0.0);
+void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot,
+		int x0, int y0, int cw,int ch, 
+		const PxiAxisProperties &p_horizProps,
+		const PxiAxisProperties &p_vertProps, float log_step);
 
 void PlotAxis_3(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch, 
 		wxString labels[]);

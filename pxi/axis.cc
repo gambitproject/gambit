@@ -10,23 +10,25 @@
 #include "axis.h"
 #include "gmisc.h"
 #include "pxi.h"
+#include "pxicanvas.h"
 
 #define XOFF		30
-#define XGRID		cw/XGRIDS
 #define YGRID		ch/YGRIDS
 
 /***************************** PLOT AXIS X ********************************/
 void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int ch,
-		int plot_type, float log_step)
+		const PxiAxisProperties &p_horizProps, 
+		const PxiAxisProperties &p_vertProps,
+		float log_step)
 {
   int i1;
   float tempf;
   double p,k,x_per_grid;
   char axis_label_str[90];
-  float x_start = thisplot.GetMinX();
-  float x_end = thisplot.GetMaxX();
-  float y_start = thisplot.GetMinY();
-  float y_end = thisplot.GetMaxY();
+  double xStart = p_horizProps.m_scale.GetMinimum();
+  double xEnd = p_horizProps.m_scale.GetMaximum();
+  double yStart = p_vertProps.m_scale.GetMinimum();
+  double yEnd = p_vertProps.m_scale.GetMaximum();
   
   if (thisplot.ShowAxis()) {
     dc.DrawLine(x0,   y0,
@@ -34,24 +36,28 @@ void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int c
     dc.DrawLine(x0,   y0,
 		x0+cw,y0);
   }
-  if (plot_type==DATA_TYPE_ARITH) {   	// arithmetic scale
-    for (i1=0;i1<=XGRIDS;i1++) {
+
+  int xgrid = cw / p_horizProps.m_scale.m_divisions; 
+  int ygrid = ch / p_vertProps.m_scale.m_divisions;
+
+  if (!p_horizProps.m_scale.m_useLog)  {   // arithmetic scale
+    for (i1=0; i1 <= p_horizProps.m_scale.m_divisions; i1++) {
       if (thisplot.ShowTicks())
-	dc.DrawLine(x0+i1*XGRID,      y0-GRID_H, 
-		    x0+i1*XGRID,      y0+GRID_H);
+      dc.DrawLine(x0+i1*xgrid,      y0-GRID_H, 
+		  x0+i1*xgrid,      y0+GRID_H);
       if (thisplot.ShowNums()) {
-	tempf=x_start+fabs((x_start-x_end)/XGRIDS)*i1;
-	  sprintf(axis_label_str,"% 3.2f",tempf);
-	  wxCoord tw,th;
-	  dc.GetTextExtent(axis_label_str,&tw,&th);
-	  dc.DrawText(axis_label_str,
-		      x0+i1*XGRID-tw/2, y0+GRID_H);
+	tempf=xStart+fabs((xStart-xEnd)/p_horizProps.m_scale.m_divisions)*i1;
+	sprintf(axis_label_str,"% 3.2f",tempf);
+	wxCoord tw,th;
+	dc.GetTextExtent(axis_label_str,&tw,&th);
+	dc.DrawText(axis_label_str,
+		    x0+i1*xgrid-tw/2, y0+GRID_H);
       }
     }
   }
   else {																	// geometric scale
     log_step+=1;	// need to translate .1 to 1.1 that we use by convention
-    x_per_grid=(log(x_end/x_start)/log(log_step))/XGRIDS;
+    x_per_grid=(log(xEnd/xStart)/log(log_step))/p_horizProps.m_scale.m_divisions;
 #ifdef	REAL_LOG_SCALE
     for (i1=0;i1<XGRIDS;i1++) {
       k=x_per_grid*(i1);
@@ -66,33 +72,33 @@ void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int c
 		  x0+x-tw/2,y0+GRID_H);
     }
 #else
-    for (i1=0;i1<=XGRIDS;i1++) {
+    for (i1 = 0; i1 <= p_horizProps.m_scale.m_divisions; i1++) {
       k=x_per_grid*(i1);
-      p=x_start*pow(log_step,k);
+      p=xStart*pow(log_step,k);
       sprintf(axis_label_str,"% 3.2f",p);
       if (thisplot.ShowTicks())
-	dc.DrawLine(x0+i1*XGRID,    y0-GRID_H,
-		    x0+i1*XGRID,    y0+GRID_H);
+	dc.DrawLine(x0+i1*xgrid,    y0-GRID_H,
+		    x0+i1*xgrid,    y0+GRID_H);
       if (thisplot.ShowNums()) {
 	wxCoord tw,th;
 	dc.GetTextExtent(axis_label_str,&tw,&th);
 	dc.DrawText(axis_label_str,
-		    x0+i1*XGRID-tw/2,y0+GRID_H);
+		    x0+i1*xgrid-tw/2,y0+GRID_H);
       }
     }
 #endif
   }
-  for (i1=0;i1<=YGRIDS;i1++) {
+  for (i1 = 0; i1 <= p_vertProps.m_scale.m_divisions; i1++) {
     if (thisplot.ShowTicks())
-      dc.DrawLine(x0-GRID_H,  y0-ch+i1*YGRID,
-		  x0+GRID_H,  y0-ch+i1*YGRID);
+      dc.DrawLine(x0-GRID_H,  y0-ch+i1*ygrid,
+		  x0+GRID_H,  y0-ch+i1*ygrid);
       if (thisplot.ShowNums()) {
-	tempf=y_end-fabs((y_start-y_end)/YGRIDS)*i1;
+	tempf=yEnd-fabs((yStart-yEnd)/p_vertProps.m_scale.m_divisions)*i1;
 	sprintf(axis_label_str,"%3.2f",tempf);
 	wxCoord tw,th;
 	dc.GetTextExtent(axis_label_str,&tw,&th);
 	dc.DrawText(axis_label_str,
-		    x0-GRID_H-tw,  y0-ch+i1*YGRID-th/2);
+		    x0-GRID_H-tw,  y0-ch+i1*ygrid-th/2);
       }
   }
 }
@@ -102,6 +108,7 @@ void PlotAxis_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0, int cw,int c
 void PlotAxis_2(wxDC& dc, const PlotInfo &thisplot, 
 		int x0, int y0, int cw,int ch)
 {
+#ifdef NOT_PORTED_YET
   int i1;
   float tempf;
   char axis_label_str[90];
@@ -110,7 +117,11 @@ void PlotAxis_2(wxDC& dc, const PlotInfo &thisplot,
   float x_end = thisplot.GetMaxY();
   float y_start = thisplot.GetMinY();
   float y_end = thisplot.GetMaxY();
-  
+
+  // temporary replacement of old constant; should be made configurable
+  const int XGRIDS = 10;
+  int XGRID = XGRIDS / cw;
+
   if (thisplot.ShowAxis()) {
     dc.DrawLine(x0, y0, x0, y0-ch);
     dc.DrawLine(x0, y0, x0+cw, y0);}
@@ -157,6 +168,8 @@ void PlotAxis_2(wxDC& dc, const PlotInfo &thisplot,
 		    x0+cw+GRID_H, y0-ch+i1*YGRID-th/2);
     }
   }
+
+#endif // NOT_PORTED_YET
 }
 
 /******************************** PLOT AXIS 3 *****************************/

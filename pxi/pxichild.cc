@@ -17,9 +17,11 @@
 #include "wx/printdlg.h"
 
 #include "gui/valinteger.h"
+#include "gui/valnumber.h"
 
 #include "pxichild.h"
 #include "dlgpxi.h"
+#include "dlformataxis.h"
 
 //
 // wxWindows is "supposed to" pass unhandled menu commands on to
@@ -41,7 +43,8 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_VIEW_ZOOM, PxiChild::OnViewZoom)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnDataOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnDataOverlayFile)
-  EVT_MENU(PXI_FORMAT_AXIS, PxiChild::OnFormatAxis)
+  EVT_MENU(PXI_FORMAT_LAMBDA_AXIS, PxiChild::OnFormatLambdaAxis)
+  EVT_MENU(PXI_FORMAT_PROFILE_AXIS, PxiChild::OnFormatProfileAxis)
   EVT_MENU(PXI_FORMAT_LABEL, PxiChild::OnFormatLabel)
   EVT_MENU(PXI_FORMAT_OVERLAY, PxiChild::OnFormatOverlay)
   EVT_MENU(wxID_HELP_CONTENTS, PxiChild::OnHelpContents)
@@ -123,7 +126,10 @@ void PxiChild::MakeMenus(void)
 		   "Overlay another pxi file");
   
   wxMenu *formatMenu = new wxMenu;
-  formatMenu->Append(PXI_FORMAT_AXIS, "&Axis", "Format axes");
+  formatMenu->Append(PXI_FORMAT_LAMBDA_AXIS, "Lambda &axis",
+		     "Format lambda (horizontal) axis");
+  formatMenu->Append(PXI_FORMAT_PROFILE_AXIS, "&Profile axis",
+		     "Format profile (vertical) axis");
   formatMenu->Append(PXI_FORMAT_LABEL,"&Label", "Format label");
   formatMenu->Append(PXI_FORMAT_OVERLAY,"&Overlay", "Format overlay");
   formatMenu->AppendSeparator();
@@ -433,17 +439,26 @@ void PxiChild::OnFormatLabel(wxCommandEvent &)
 #endif  // NOT_PORTED_YET
 }
 
-void PxiChild::OnFormatAxis(wxCommandEvent &)
+void PxiChild::OnFormatLambdaAxis(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
-  wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetAxisFont());  
-  wxFontDialog dialog(this, &data);
+  PxiCanvas *canvas = GetShownCanvas();
+  dialogFormatAxis dialog(this, canvas->GetLambdaAxisProperties());
+
   if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetAxisFont(dialog.GetFontData().GetChosenFont());
+    canvas->GetLambdaAxisProperties() = dialog.GetProperties();
     canvas->Render();
   }
-#endif  // NOT_PORTED_YET
+}
+
+void PxiChild::OnFormatProfileAxis(wxCommandEvent &)
+{
+  PxiCanvas *canvas = GetShownCanvas();
+  dialogFormatAxis dialog(this, canvas->GetProbAxisProperties());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->GetProbAxisProperties() = dialog.GetProperties();
+    canvas->Render();
+  }
 }
 
 void PxiChild::OnFormatOverlay(wxCommandEvent &)

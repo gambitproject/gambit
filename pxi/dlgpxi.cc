@@ -149,7 +149,8 @@ dialogPlotOptions::dialogPlotOptions(wxWindow *p_parent, PlotInfo &plot)
     m_ticks(this, -1, "Draw Ticks"), m_nums(this, -1, "Draw Nums"), 
     m_square(this, -1, "Square Axis")
 {
-  int type = thisplot.GetPlotMode();
+  //  int type = thisplot.GetPlotMode();
+  int type = PXI_PLOT_X;
 
   m_axis.SetValue(thisplot.ShowAxis());
   m_labels.SetValue(thisplot.ShowLabels());
@@ -198,17 +199,18 @@ dialogPlotOptions::~dialogPlotOptions()
 void dialogPlotOptions::Run()
 {
   if (ShowModal() == wxID_OK) {
-    
+    /*    
     switch (thisplot.GetPlotMode()) {
     case PXI_PLOT_3: 
       thisplot.SetShowAxis(m_axis.GetValue());
       thisplot.SetShowLabels(m_labels.GetValue());
       break;
     case PXI_PLOT_X: 
+    */
       thisplot.SetShowAxis(m_axis.GetValue());
       thisplot.SetShowTicks(m_ticks.GetValue());
       thisplot.SetShowNums(m_nums.GetValue());
-      break;
+      /*  break;
     case PXI_PLOT_2: 
       thisplot.SetShowAxis(m_axis.GetValue());
       thisplot.SetShowTicks(m_ticks.GetValue());
@@ -216,6 +218,7 @@ void dialogPlotOptions::Run()
       thisplot.SetShowSquare(m_square.GetValue());
       break;
     }
+      */
   }
 }
 

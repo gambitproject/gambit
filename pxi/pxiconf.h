@@ -14,15 +14,13 @@
 
 class PxiDrawSettings {
 private:
-  wxFont	overlay_font, label_font, axis_font; 
+  wxFont	overlay_font, label_font;
   wxBrush       clear_brush, exp_data_brush;
-  wxColour      axis_text_color;
   
   int		overlay_symbol;      // one of : OVERLAY_TOKEN | OVERLAY_NUMBER
   Bool		overlay_lines;       // connect overlay points?
   int		overlay_token_size;  
   
-  int           data_mode;    // Can be either 1-Log or 0-Linear
   int		color_mode;   // COLOR_EQU, COLOR_PROB, or COLOR_NONE
   Bool		connect_dots;   // connect dots on plot.  
   Bool          restart_overlay_colors; // new set of colors for each overlay 
@@ -39,8 +37,6 @@ public:
   
   // Get* functions
   
-  // DataMode, returns one of DATA_TYPE_ARITH | DATA_TYPE_LOG indicating data type
-  int GetDataMode(void) const {return data_mode;}
   // ColorMode, how to color the data: by equilibrium #, prob #, or just a constant
   int GetColorMode(void) const {return color_mode;}
   void SetColorMode(int mode ) {color_mode=mode;}
@@ -95,13 +91,10 @@ public:
   void SetOverlaySym(int s) {overlay_symbol=s;}
   void SetOverlayLines(Bool l)	{overlay_lines=l;}
   void SetTokenSize(int s) {overlay_token_size=s;}
-  void SetAxisFont(const wxFont &f) {axis_font=f;}
   void SetLabelFont(const wxFont &f) {label_font=f;}
   void SetOverlayFont(const wxFont &f) {overlay_font=f;}
-  const wxFont &GetAxisFont(void) const {return axis_font;}
   const wxBrush &GetDataBrush(void) const {return exp_data_brush;}
   const wxBrush &GetClearBrush(void) const {return clear_brush;}
-  const wxColour &GetAxisTextColor(void) const {return axis_text_color;}
 };
 
 

@@ -236,9 +236,9 @@ void pxiExceptionDialog(const wxString &p_message, wxWindow *p_parent,
 }
 
 
-PlotInfo::PlotInfo(void) : plotMode(PXI_PLOT_X), x_min(0), x_max(1), 
-  y_min(0), y_max(1), showAxis(true), showTicks(true), showNums(true), 
-  showLabels(true), showSquare(true)
+PlotInfo::PlotInfo(void) 
+  : showAxis(true), showTicks(true), showNums(true), 
+    showLabels(true), showSquare(true)
 { } 
 
 PlotInfo::~PlotInfo(void) 
@@ -257,16 +257,11 @@ void PlotInfo::Init(const FileHeader &header, int plot_number)
   float l_start = header.EStart(); 
   float l_stop = header.EStop(); 
   float l_step = header.EStep();
-  x_min = l_start; 
-  x_max = l_stop; 
-  y_min = header.DataMin(); 
-  y_max = header.DataMax();
 }
 
 PlotInfo &PlotInfo::operator=(const PlotInfo &p)
 {
   if(this != &p) {
-    plotMode = p.plotMode;
     showAxis = p.showAxis;
     showTicks = p.showTicks;
     showNums = p.showNums;
@@ -593,5 +588,15 @@ gOutput &operator<<(gOutput &p_file, const PlotInfo &)
 
 template class gRectArray<gBlock<double> >;
 
+//
+// For global stream instances
+//
+gStandardInput _gin;
+gInput &gin = _gin;
 
+gStandardOutput _gout;
+gOutput &gout = _gout;
+
+gStandardOutput _gerr;
+gOutput &gerr = _gerr;
 

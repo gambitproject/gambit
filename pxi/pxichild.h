@@ -37,7 +37,8 @@ private:
   void OnDataOverlayData(wxCommandEvent &);
   void OnDataOverlayFile(wxCommandEvent &);
 
-  void OnFormatAxis(wxCommandEvent &);
+  void OnFormatLambdaAxis(wxCommandEvent &);
+  void OnFormatProfileAxis(wxCommandEvent &);
   void OnFormatLabel(wxCommandEvent &);
   void OnFormatOverlay(wxCommandEvent &);
   void OnFormatColors(wxCommandEvent &);

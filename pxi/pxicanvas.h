@@ -13,6 +13,37 @@
 #include "pxi.h"
 #include "pxiconf.h"
 
+class PxiAxisScaleProperties {
+public:
+  wxString m_minimum, m_maximum;
+  int m_divisions;
+  bool m_useLog, m_canUseLog;
+
+  double GetMinimum(void) const;
+  double GetMaximum(void) const;
+};
+
+inline double PxiAxisScaleProperties::GetMinimum(void) const
+{
+  double d;
+  m_minimum.ToDouble(&d);
+  return d;
+}
+
+inline double PxiAxisScaleProperties::GetMaximum(void) const
+{
+  double d;
+  m_maximum.ToDouble(&d);
+  return d;
+}
+
+class PxiAxisProperties  {
+public:
+  wxFont m_font;
+  wxColour m_color;
+  PxiAxisScaleProperties m_scale;
+};
+
 class PxiCanvas : public wxScrolledWindow {
 friend class PxiChild;
 public:
@@ -43,6 +74,7 @@ private:
   double m_ppu;                        // pixels per scroll unit
   wxMemoryDC *m_dc;        // stored DC
   int m_page;
+  PxiAxisProperties m_lambdaAxisProp, m_probAxisProp;
 
   int Width(void) const 
     {if(m_landscape) return m_height; return m_width;}
@@ -110,10 +142,14 @@ public:
   void SetNextPage(void) { }
   void SetPreviousPage(void) { }
 
-  PxiDrawSettings &DrawSettings(void) { return m_drawSettings; }
   void NewExpData(ExpDataParams &P);
   wxString PxiName(void) const { return m_header.FileName(); }
   const FileHeader &Header(void) { return m_header; }
+
+  // Interface to property classes
+  PxiDrawSettings &DrawSettings(void) { return m_drawSettings; }
+  PxiAxisProperties &GetLambdaAxisProperties(void) { return m_lambdaAxisProp; }
+  PxiAxisProperties &GetProbAxisProperties(void) { return m_probAxisProp; }
 
   DECLARE_EVENT_TABLE()
 };

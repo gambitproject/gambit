@@ -17,11 +17,10 @@
 
 PxiDrawSettings::PxiDrawSettings(const FileHeader &p_header, int p_index)
   : overlay_font(10,wxSWISS,wxNORMAL,wxBOLD),label_font(10,wxSWISS,wxNORMAL,wxBOLD), 
-    axis_font(10,wxSWISS,wxNORMAL,wxBOLD), clear_brush("BLACK",wxTRANSPARENT),
-    exp_data_brush("BLACK",wxSOLID), axis_text_color("BLUE"), 
-    overlay_symbol(OVERLAY_NUMBER),
+    clear_brush("BLACK",wxTRANSPARENT),
+    exp_data_brush("BLACK",wxSOLID), overlay_symbol(OVERLAY_NUMBER),
     overlay_lines(FALSE), overlay_token_size(DEF_TOKEN_SIZE), 
-    data_mode(p_header.DataType()), color_mode(COLOR_PROB),
+    color_mode(COLOR_PROB),
     connect_dots(FALSE), restart_overlay_colors(TRUE), 
     l_start(p_header.EStart()), l_stop(p_header.EStop()),
     l_step(p_header.EStep())
@@ -169,13 +168,13 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
                                wxLB_MULTIPLE
 #endif // __WXGTK__
 			       );
-  tmp.Printf( "%f", thisplot.GetMinX());
+  //  tmp.Printf( "%f", thisplot.GetMinX());
   m_minLam = new wxNumberItem(this, "minLam", tmp);
-  tmp.Printf( "%f", thisplot.GetMaxX());
+  // tmp.Printf( "%f", thisplot.GetMaxX());
   m_maxLam = new wxNumberItem(this, "maxLam", tmp);
-  tmp.Printf( "%f", thisplot.GetMinY());
+  //  tmp.Printf( "%f", thisplot.GetMinY());
   m_minY = new wxNumberItem(this, "minY", tmp);
-  tmp.Printf( "%f", thisplot.GetMaxY());
+  // tmp.Printf( "%f", thisplot.GetMaxY());
   m_maxY = new wxNumberItem(this, "maxY", tmp);
   
   wxBoxSizer *lambdaSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -209,7 +208,7 @@ dialogDrawSettings::dialogDrawSettings(wxWindow *p_parent, PxiDrawSettings &s)
 #endif
 			      );
 
-  m_plotMode->SetSelection(thisplot.GetPlotMode());
+  //  m_plotMode->SetSelection(thisplot.GetPlotMode());
   
   wxString colorModeChoices[] = { "Equ", "Prob", "None" };
   m_colorMode = new wxRadioBox(this, -1, "Color Mode",
@@ -304,7 +303,7 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
     mark = false;
   }
 
-  m_plotMode->SetSelection(thisplot.GetPlotMode());
+  //  m_plotMode->SetSelection(thisplot.GetPlotMode());
   m_plotMode->Show(true);
 
   m_actionItem->Clear();
@@ -322,6 +321,7 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &ev)
 
 void dialogDrawSettings::OnPlotMode(wxCommandEvent &)
 {
+  /*
   switch(m_plotMode->GetSelection()) {
   case 0: 
     ThisPlot().SetPlotMode(PXI_PLOT_X);
@@ -333,6 +333,7 @@ void dialogDrawSettings::OnPlotMode(wxCommandEvent &)
     ThisPlot().SetPlotMode(PXI_PLOT_3);
     break;
   }
+  */
 }
 
 void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
@@ -391,12 +392,7 @@ void dialogDrawSettings::Run()
 
   PlotInfo &thisplot(ThisPlot());
 
-  if(ShowModal() == wxID_OK){ 
-    thisplot.SetMinX(m_minLam->GetNumber());
-    thisplot.SetMaxX(m_maxLam->GetNumber());
-    thisplot.SetMinY(m_minY->GetNumber());
-    thisplot.SetMaxY(m_maxY->GetNumber());
-
+  if (ShowModal() == wxID_OK){ 
     /*
     int mode = m_plotMode->GetSelection();
     if(mode==0)thisplot.SetPlotMode(PXI_PLOT_X);

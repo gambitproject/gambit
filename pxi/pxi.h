@@ -41,7 +41,8 @@ const int PXI_VIEW_ZOOM = 137;
 const int PXI_VIEW_ZOOM_IN = 150;
 const int PXI_VIEW_ZOOM_OUT = 151;
 
-const int PXI_FORMAT_AXIS = 131;
+const int PXI_FORMAT_LAMBDA_AXIS = 130;
+const int PXI_FORMAT_PROFILE_AXIS = 131;
 const int PXI_FORMAT_OVERLAY = 132;
 const int PXI_FORMAT_LABEL = 133;
 const int PXI_FORMAT_COLORS = 124;
@@ -130,10 +131,7 @@ public:
 class PlotInfo
 {
 private:
-  PxiPlotMode plotMode;
   bool showAxis, showTicks, showNums, showLabels, showSquare;
-  double x_min,x_max;                  // plot limits on X (lambda) variable
-  double y_min,y_max;                  // plot limits on Y variable
   int number;                         // plot number
 
   // Bool instead of bool needeed here for template ambiguity in gBlock for BC
@@ -164,28 +162,12 @@ public:
   bool ShowLabels(void) const {return showLabels;}
   bool ShowSquare(void) const {return showSquare;}
 
-  double GetMinX(void) const {return x_min;}
-  double GetMaxX(void) const {return x_max;}
-  double GetMinY(void) const {return y_min;}
-  double GetMaxY(void) const {return y_max;}
-  PxiPlotMode GetPlotMode(void) const {return plotMode;}
-
   void SetStrategyShow(int j, int k, bool flag) {strategies[j][k]=flag;}
   void SetShowAxis(bool flag) {showAxis = flag;}
   void SetShowTicks(bool flag) {showTicks = flag;}
   void SetShowNums(bool flag) {showNums = flag;}
   void SetShowLabels(bool flag) {showLabels = flag;}
   void SetShowSquare(bool flag) {showSquare = flag;}
-  void SetMinX(double x) {x_min = x;}
-  void SetMaxX(double x) {x_max = x;}
-  void SetMinY(double x) {y_min = x;}
-  void SetMaxY(double x) {y_max = x;}
-  void SetPlotMode(PxiPlotMode m) {plotMode = m;}
-
-  // RangeX, determines if x falls in the drawable range
-  bool RangeX(double x) const {return (x>x_min && x<x_max);}
-  // RangeY, determines if y falls in the drawable range
-  bool RangeY(double y) const {return (y>y_min && y<y_max);}
 };
 
 class PxiFrame : public wxFrame {
