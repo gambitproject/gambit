@@ -13,6 +13,8 @@
 
 
 
+
+
 //
 // Utility functions for converting gArrays to ListPortions
 // (perhaps these are more generally useful and should appear elsewhere?
@@ -1030,6 +1032,173 @@ Portion *GSM_SaveEfg(Portion **param)
 
 
 
+//----------------------- Behav -------------------------//
+
+
+Portion *GSM_Behav_EfgFloat(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
+  BehavProfile<double> *P = new BehavProfile<double>(E);
+
+  if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != E.PlayerList()[i]->NumInfosets() )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of infosets" );
+    }
+
+    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porLIST )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      if( ( (ListPortion*) p2 )->Length() !=
+	 E.PlayerList()[i]->InfosetList()[j]->NumActions() )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching number of actions" );
+      }
+
+      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      {
+	p3 = ( (ListPortion*) p2 )->Subscript( k );
+	if( p3->Type() != porFLOAT )
+	{
+	  delete p3;
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching dimensionality" );
+	}
+      
+	(*P)( i, j, k ) = ( (FloatPortion*) p3 )->Value();
+
+	delete p3;
+      }
+      delete p2;
+    }
+    delete p1;
+  }
+
+  Portion* por = new BehavValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+
+}
+
+Portion *GSM_Behav_EfgRational(Portion **param)
+{
+  int i;
+  int j;
+  int k;
+  Portion* p1;
+  Portion* p2;
+  Portion* p3;
+
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
+  BehavProfile<gRational> *P = new BehavProfile<gRational>(E);
+
+  if( ( (ListPortion*) param[1] )->Length() != E.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= E.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != E.PlayerList()[i]->NumInfosets() )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of infosets" );
+    }
+
+    for( j = 1; j <= E.PlayerList()[i]->NumInfosets(); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porLIST )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      if( ( (ListPortion*) p2 )->Length() !=
+	 E.PlayerList()[i]->InfosetList()[j]->NumActions() )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching number of actions" );
+      }
+
+      for( k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++ )
+      {
+	p3 = ( (ListPortion*) p2 )->Subscript( k );
+	if( p3->Type() != porRATIONAL )
+	{
+	  delete p3;
+	  delete p2;
+	  delete p1;
+	  delete P;
+	  return new ErrorPortion( "Mismatching dimensionality" );
+	}
+      
+	(*P)( i, j, k ) = ( (RationalPortion*) p3 )->Value();
+
+	delete p3;
+      }
+      delete p2;
+    }
+    delete p1;
+  }
+
+  Portion* por = new BehavValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+
 void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
@@ -1494,6 +1663,23 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_SaveEfg, 0, "efg", porEFG, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_SaveEfg, 1, "file", porTEXT);
+  gsm->AddFunction(FuncObj);
+
+  
+
+  //--------------------- Behav -------------------------//
+ 
+  FuncObj = new FuncDescObj( "Behav" );
+  FuncObj->SetFuncInfo( GSM_Behav_EfgFloat, 2 );
+  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 0, "efg", porEFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 1, "list", porLIST | porFLOAT );
+
+  FuncObj->SetFuncInfo( GSM_Behav_EfgRational, 2 );
+  FuncObj->SetParamInfo( GSM_Behav_EfgRational, 0, "efg", porEFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
+			1, "list", porLIST | porRATIONAL );
   gsm->AddFunction(FuncObj);
 }
 

@@ -25,6 +25,11 @@ extern int Funct_maxitsN;
 
 
 
+
+
+
+
+
 Portion *ArrayToList(const gArray<NFPlayer *> &A)
 {
   ListPortion *ret = new ListValPortion;
@@ -1145,6 +1150,133 @@ Portion *GSM_SaveNfg_Support(Portion **param)
   return por;
 }
 
+
+
+//---------------------- Mixed -------------------//
+
+
+Portion *GSM_Mixed_NfgFloat(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<double> &N = * (Nfg<double>*) ((NfgPortion*) param[0])->Value();
+  MixedProfile<double> *P = new MixedProfile<double>(N);
+
+  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porFLOAT )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      (*P)( i, j ) = ( (FloatPortion*) p2 )->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+Portion *GSM_Mixed_NfgRational(Portion **param)
+{
+  int i;
+  int j;
+  Portion* p1;
+  Portion* p2;
+
+  Nfg<gRational> &N = * (Nfg<gRational>*) ((NfgPortion*) param[0])->Value();
+  MixedProfile<gRational> *P = new MixedProfile<gRational>(N);
+
+  if( ( (ListPortion*) param[1] )->Length() != N.NumPlayers() )
+  {
+    delete P;
+    return new ErrorPortion( "Mismatching number of players" );
+  }
+  
+  for( i = 1; i <= N.NumPlayers(); i++ )
+  {
+    p1 = ( (ListPortion*) param[1] )->Subscript( i );
+    if( p1->Type() != porLIST )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching dimensionality" );
+    }
+    if( ( (ListPortion*) p1 )->Length() != N.NumStrats( i ) )
+    {
+      delete p1;
+      delete P;
+      return new ErrorPortion( "Mismatching number of strategies" );
+    }
+
+    for( j = 1; j <= N.NumStrats( i ); j++ )
+    {
+      p2 = ( (ListPortion*) p1 )->Subscript( j );
+      if( p2->Type() != porRATIONAL )
+      {
+	delete p2;
+	delete p1;
+	delete P;
+	return new ErrorPortion( "Mismatching dimensionality" );
+      }
+      
+      (*P)( i, j ) = ( (RationalPortion*) p2 )->Value();
+      
+      delete p2;
+    }
+    delete p1;
+  }
+
+
+  Portion* por = new MixedValPortion(P);
+  por->SetOwner( param[ 0 ]->Original() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+
+
+
+
 //---------------------------------------------------------------------
 
 
@@ -1470,7 +1602,23 @@ void Init_nfgfunc(GSM *gsm)
 
   gsm->AddFunction(FuncObj);
 
+
+  //----------------------- Mixed --------------------------//
+  FuncObj = new FuncDescObj( "Mixed" );
+  FuncObj->SetFuncInfo( GSM_Mixed_NfgFloat, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 1, "list", porLIST | porFLOAT);
+
+  FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
+  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
+			1, "list", porLIST | porRATIONAL);
+  gsm->AddFunction( FuncObj );
+
 }
+
 
 
 
