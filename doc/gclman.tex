@@ -3603,6 +3603,7 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
+  Accuracy
   ActionProb 
   ActionProbs 
   ActionValue 
@@ -3653,6 +3654,19 @@ appreciate getting feedback on this.
 
 %--A--
 
+
+\item\lex{Accuracy}
+\protect \large \begin{verbatim}
+Accuracy[profile->BEHAV] =: NUMBER
+Accuracy[profile->MIXED] =: NUMBER
+\end{verbatim}\normalsize
+
+\bd 
+Returns the accuracy of \verb+profile+.  The accuracy is the error
+that is allowed in computation of which Nash refinements the profile
+satisfied.  Thus, if the profile is marked as Nash, then no deviation
+by any player can yield an improvement of more than the accuracy.  
+\ed
 
 \item\lex{ActionNumber}
 \protect \large \begin{verbatim}
