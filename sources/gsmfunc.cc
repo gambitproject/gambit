@@ -477,12 +477,20 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	gerr << "GSM Error: required parameter \"" << _ParamInfo[ index ].Name;
 	gerr << "\"" << " not found while executing CallFunction()\n";
 	gerr << "           on function \"" << _FuncName << "\"\n";
-	return 0;
+	_ErrorOccurred = true;
       }
     }
+  }
 
+  if( !_ErrorOccurred )
+  {
     result = _FuncPtr( _Param );
+    if( result == 0 )
+      _ErrorOccurred = true;
+  }
 
+  if( !_ErrorOccurred )
+  {
     for( index = 0; index < _NumParams; index++ )
     {
       if( !_ParamInfo[ index ].PassByReference )
