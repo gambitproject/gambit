@@ -1,7 +1,7 @@
 //#
 //# FILE: vertenum.cc -- Instantiation of vertex enumerator
 //#
-//#  $Id$
+//#  @(#)vertenum.cc	2.4 7/1/97
 //#
 
 #include "vertenum.imp"
