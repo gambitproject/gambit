@@ -1331,14 +1331,52 @@ int main( void )
 #endif
 
 
-  machine->Push( (gInteger) 11 );
-  machine->Dump();
 
   machine->Push( (gInteger) 11 );
   machine->Push( (gInteger) 3 );
   machine->Divide();
   machine->Dump();
 
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 3 );
+  machine->IntegerDivide();
+  machine->Dump();
+
+  machine->Push( (gInteger) 11 );
+  machine->Push( (gInteger) 3 );
+  machine->Modulus();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "Divide" );
+  machine->Push( (double) 0 );
+  machine->Bind();
+  machine->Push( (double) 0 );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->InitCallFunction( "Divide" );
+  machine->Push( (gInteger) 0 );
+  machine->Bind();
+  machine->Push( (gInteger) 0 );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->InitCallFunction( "Divide" );
+  machine->Push( (gRational) 0 );
+  machine->Bind();
+  machine->Push( (gRational) 0 );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->InitCallFunction( "Divide" );
+  machine->Push( (gInteger) 5 );
+  machine->Bind();
+  machine->Push( (gInteger) 3 );
+  machine->Bind();
+  machine->CallFunction();
+
+  machine->Dump();
 
   gout << "Deleting machine\n";
   delete machine;

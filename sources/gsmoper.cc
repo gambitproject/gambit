@@ -137,29 +137,53 @@ Portion* GSM_Divide( Portion** param )
 
   if( param[ 0 ]->Type() != param[ 1 ]->Type() )
     return 0;
-  
+
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
-    ( (numerical_Portion<double>*) param[ 0 ] )->Value() /=
-      ( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    if( ( (numerical_Portion<double>*) param[ 1 ] )->Value() != 0 )
+    {
+      ( (numerical_Portion<double>*) param[ 0 ] )->Value() /=
+	( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    }
+    else
+    {
+      gerr << "GSM_Divide Error: division by zero\n";
+      delete param[ 0 ];
+      param[ 0 ] = 0;
+    }
     delete param[ 1 ];
     result = param[ 0 ];
     break;
     
   case porINTEGER:
-    result = new numerical_Portion<gRational>
-      (
-       ( (gRational) ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() ) /
-       ( (gRational) ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() )
-       );
-    delete param[ 0 ];
+    if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
+    {
+      ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /=
+	( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    }
+    else
+    {
+      gerr << "GSM_Divide Error: division by zero\n";
+      delete param[ 0 ];
+      param[ 0 ] = 0;
+    }
     delete param[ 1 ];
+    result = param[ 0 ];
     break;
 
   case porRATIONAL:
-    ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /=
-      ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    if( ( (numerical_Portion<gRational>*) param[ 1 ] )->Value() != 0 )
+    {
+      ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /=
+	( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    }
+    else
+    {
+      gerr << "GSM_Divide Error: division by zero\n";
+      delete param[ 0 ];
+      param[ 0 ] = 0;
+    }
     delete param[ 1 ];
     result = param[ 0 ];
     break;
