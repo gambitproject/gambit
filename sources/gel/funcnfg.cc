@@ -36,13 +36,13 @@ NFSupport *gelfuncAddStrategy::EvalItem(NFSupport *S, Strategy *s) const
 // DeleteOutcome
 //-----------------
 
-DECLARE_UNARY(gelfuncDeleteOutcomeNfg, NFOutcome *, gTriState)
+DECLARE_UNARY(gelfuncDeleteOutcomeNfg, NFOutcome *, gTriState *)
 
-gTriState gelfuncDeleteOutcomeNfg::EvalItem(NFOutcome *c) const
+gTriState *gelfuncDeleteOutcomeNfg::EvalItem(NFOutcome *c) const
 {
-  if (!c)  return triFALSE;
+  if (!c)  return new gTriState(triFALSE);
   c->Game()->DeleteOutcome(c);
-  return triTRUE;
+  return new gTriState(triTRUE);
 }
 
 //---------
@@ -75,32 +75,33 @@ Nfg *gelfuncGameNFOutcome::EvalItem(NFOutcome *c) const
 // IsConstSum
 //-------------
 
-DECLARE_UNARY(gelfuncIsConstSumNfg, Nfg *, gTriState)
+DECLARE_UNARY(gelfuncIsConstSumNfg, Nfg *, gTriState *)
 
-gTriState gelfuncIsConstSumNfg::EvalItem(Nfg *N) const
+gTriState *gelfuncIsConstSumNfg::EvalItem(Nfg *N) const
 {
-  return (N) ? ((IsConstSum(*N)) ? triTRUE : triFALSE) : triFALSE;
+  return new gTriState((N) ? ((IsConstSum(*N)) ? triTRUE : triFALSE) : triFALSE);
 }
 
 //------------
 // LoadEfg
 //------------
 
-DECLARE_UNARY(gelfuncLoadNfg, gText, Nfg *)
+DECLARE_UNARY(gelfuncLoadNfg, gText *, Nfg *)
 
-Nfg *gelfuncLoadNfg::EvalItem(gText filename) const
+Nfg *gelfuncLoadNfg::EvalItem(gText *filename) const
 {
+  if (!filename)  return 0;
   try  {
-    gFileInput f(filename);
+    gFileInput f(*filename);
     Nfg *N = 0;
     ReadNfgFile(f, N);
     if (N)
       return N;
     else
-      throw gelRuntimeError(filename + " not a valid .nfg file in LoadNfg");
+      throw gelRuntimeError(*filename + " not a valid .nfg file in LoadNfg");
   }
   catch (gFileInput::OpenFailed &)  {
-    throw gelRuntimeError("Could not open " + filename + "in LoadNfg");
+    throw gelRuntimeError("Could not open " + *filename + "in LoadNfg");
   }
 }
 
@@ -108,44 +109,44 @@ Nfg *gelfuncLoadNfg::EvalItem(gText filename) const
 // Name
 //--------
 
-DECLARE_UNARY(gelfuncNameNfg, Nfg *, gText)
+DECLARE_UNARY(gelfuncNameNfg, Nfg *, gText *)
 
-gText gelfuncNameNfg::EvalItem(Nfg *N) const
+gText *gelfuncNameNfg::EvalItem(Nfg *N) const
 {
   if (N)
-    return N->GetTitle();
+    return new gText(N->GetTitle());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameNFPlayer, NFPlayer *, gText)
+DECLARE_UNARY(gelfuncNameNFPlayer, NFPlayer *, gText *)
 
-gText gelfuncNameNFPlayer::EvalItem(NFPlayer *p) const
+gText *gelfuncNameNFPlayer::EvalItem(NFPlayer *p) const
 {
   if (p)
-    return p->GetName();
+    return new gText(p->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameStrategy, Strategy *, gText)
+DECLARE_UNARY(gelfuncNameStrategy, Strategy *, gText *)
 
-gText gelfuncNameStrategy::EvalItem(Strategy *s) const
+gText *gelfuncNameStrategy::EvalItem(Strategy *s) const
 {
   if (s)
-    return s->name;
+    return new gText(s->name);
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameNFOutcome, NFOutcome *, gText)
+DECLARE_UNARY(gelfuncNameNFOutcome, NFOutcome *, gText *)
 
-gText gelfuncNameNFOutcome::EvalItem(NFOutcome *c) const
+gText *gelfuncNameNFOutcome::EvalItem(NFOutcome *c) const
 {
   if (c)
-    return c->GetName();
+    return new gText(c->GetName());
   else
-    return "";
+    return new gText("");
 }
 
 
@@ -165,14 +166,14 @@ NFOutcome *gelfuncNewOutcomeNfg::EvalItem(Nfg *N) const
 // Payoff
 //----------
 
-DECLARE_BINARY(gelfuncPayoffNFOutcome, NFOutcome *, NFPlayer *, gNumber)
+DECLARE_BINARY(gelfuncPayoffNFOutcome, NFOutcome *, NFPlayer *, gNumber *)
 
-gNumber gelfuncPayoffNFOutcome::EvalItem(NFOutcome *c, NFPlayer *p) const
+gNumber *gelfuncPayoffNFOutcome::EvalItem(NFOutcome *c, NFPlayer *p) const
 {
-  if (!c || !p)  return 0.0;
+  if (!c || !p)  return new gNumber(0.0);
   if (c->Game() != &p->Game())
     throw gelGameMismatchError("Payoff");
-  return c->Game()->Payoff(c, p->GetNumber());
+  return new gNumber(c->Game()->Payoff(c, p->GetNumber()));
 }
 
 
@@ -209,18 +210,18 @@ NFSupport *gelfuncRemoveStrategy::EvalItem(NFSupport *S, Strategy *s) const
 // SaveEfg
 //------------
 
-DECLARE_BINARY(gelfuncSaveNfg, Nfg *, gText, Nfg *)
+DECLARE_BINARY(gelfuncSaveNfg, Nfg *, gText *, Nfg *)
 
-Nfg *gelfuncSaveNfg::EvalItem(Nfg *N, gText filename) const
+Nfg *gelfuncSaveNfg::EvalItem(Nfg *N, gText *filename) const
 {
-  if (!N)   return 0;
+  if (!N || !filename)   return 0;
   try   {
-    gFileOutput f(filename);
+    gFileOutput f(*filename);
     N->WriteNfgFile(f);
     return N;
   }
   catch (gFileOutput::OpenFailed &)   {
-    throw gelRuntimeError("Cannot open " + filename + " for writing in SaveNfg");
+    throw gelRuntimeError("Cannot open " + *filename + " for writing in SaveNfg");
   }
 }
 
@@ -228,39 +229,39 @@ Nfg *gelfuncSaveNfg::EvalItem(Nfg *N, gText filename) const
 // SetName
 //-----------
 
-DECLARE_BINARY(gelfuncSetNameNfg, Nfg *, gText, Nfg *)
+DECLARE_BINARY(gelfuncSetNameNfg, Nfg *, gText *, Nfg *)
 
-Nfg *gelfuncSetNameNfg::EvalItem(Nfg *N, gText name) const
+Nfg *gelfuncSetNameNfg::EvalItem(Nfg *N, gText *name) const
 {
-  if (!N)  return 0;
-  N->SetTitle(name);
+  if (!N || !name)  return 0;
+  N->SetTitle(*name);
   return N;
 }
 
-DECLARE_BINARY(gelfuncSetNameNFPlayer, NFPlayer *, gText, NFPlayer *)
+DECLARE_BINARY(gelfuncSetNameNFPlayer, NFPlayer *, gText *, NFPlayer *)
 
-NFPlayer *gelfuncSetNameNFPlayer::EvalItem(NFPlayer *p, gText name) const
+NFPlayer *gelfuncSetNameNFPlayer::EvalItem(NFPlayer *p, gText *name) const
 {
-  if (!p)  return 0;
-  p->SetName(name);
+  if (!p || !name)  return 0;
+  p->SetName(*name);
   return p;
 }
 
-DECLARE_BINARY(gelfuncSetNameStrategy, Strategy *, gText, Strategy *)
+DECLARE_BINARY(gelfuncSetNameStrategy, Strategy *, gText *, Strategy *)
 
-Strategy *gelfuncSetNameStrategy::EvalItem(Strategy *s, gText name) const
+Strategy *gelfuncSetNameStrategy::EvalItem(Strategy *s, gText *name) const
 {
-  if (!s)  return 0;
-  s->name = name;
+  if (!s || !name)  return 0;
+  s->name = *name;
   return s;
 }
 
-DECLARE_BINARY(gelfuncSetNameNFOutcome, NFOutcome *, gText, NFOutcome *)
+DECLARE_BINARY(gelfuncSetNameNFOutcome, NFOutcome *, gText *, NFOutcome *)
 
-NFOutcome *gelfuncSetNameNFOutcome::EvalItem(NFOutcome *c, gText name) const
+NFOutcome *gelfuncSetNameNFOutcome::EvalItem(NFOutcome *c, gText *name) const
 {
-  if (!c)  return 0;
-  c->SetName(name);
+  if (!c || !name)  return 0;
+  c->SetName(*name);
   return c;
 }
 
@@ -309,7 +310,7 @@ gelExpr *GEL_IsConstSumNfg(const gArray<gelExpr *> &params)
 
 gelExpr *GEL_LoadNfg(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLoadNfg((gelExpression<gText> *) params[1]);
+  return new gelfuncLoadNfg((gelExpression<gText *> *) params[1]);
 }
 
 gelExpr *GEL_NameNfg(const gArray<gelExpr *> &params)
@@ -351,31 +352,31 @@ gelExpr *GEL_RemoveStrategy(const gArray<gelExpr *> &params)
 gelExpr *GEL_SaveNfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncSaveNfg((gelExpression<Nfg *> *) params[1],
-                            (gelExpression<gText> *) params[2]);
+                            (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameNfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameNfg((gelExpression<Nfg *> *) params[1],
-                               (gelExpression<gText> *) params[2]);
+                               (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameStrategy(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameStrategy((gelExpression<Strategy *> *) params[1],
-                                    (gelExpression<gText> *) params[2]);
+                                    (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameNFPlayer(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameNFPlayer((gelExpression<NFPlayer *> *) params[1],
-                                    (gelExpression<gText> *) params[2]);
+                                    (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameNFOutcome(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameNFOutcome((gelExpression<NFOutcome *> *) params[1],
-                                     (gelExpression<gText> *) params[2]);
+                                     (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SupportNfg(const gArray<gelExpr *> &params)

@@ -15,15 +15,15 @@ void gelVariableTable::Define(const gText &name, const gelType type)
     switch (type)    {
     case gelNUMBER:
       m_NumberNames.Append(name);
-      m_NumberValues.Append(gNestedList<gNumber>());
+      m_NumberValues.Append(gNestedList<gNumber *>());
       break;
     case gelBOOLEAN:
       m_BooleanNames.Append(name);
-      m_BooleanValues.Append(gNestedList<gTriState>());
+      m_BooleanValues.Append(gNestedList<gTriState *>());
       break;
     case gelTEXT:
       m_TextNames.Append(name);
-      m_TextValues.Append(gNestedList<gText>());
+      m_TextValues.Append(gNestedList<gText *>());
       break;
     case gelEFG:
       m_EfgNames.Append(name);
@@ -142,7 +142,7 @@ gelType gelVariableTable::Type(const gText &name) const
 }
 
 void gelVariableTable::Value(const gText &name,
-                             gNestedList<gNumber> &value) const
+                             gNestedList<gNumber *> &value) const
 {
   if (m_NumberNames.Contains(name))
     value = m_NumberValues[m_NumberNames.Find(name)];
@@ -151,7 +151,7 @@ void gelVariableTable::Value(const gText &name,
 }
 
 void gelVariableTable::Value(const gText &name,
-			     gNestedList<gTriState> &value) const
+			     gNestedList<gTriState *> &value) const
 {
   if (m_BooleanNames.Contains(name))
     value = m_BooleanValues[m_BooleanNames.Find(name)];
@@ -160,7 +160,7 @@ void gelVariableTable::Value(const gText &name,
 }
 
 void gelVariableTable::Value(const gText &name,
-			     gNestedList<gText> &value) const
+			     gNestedList<gText *> &value) const
 {
   if (m_TextNames.Contains(name))
     value = m_TextValues[m_TextNames.Find(name)];
@@ -295,21 +295,21 @@ void gelVariableTable::Value(const gText &name,
 }
 
 void gelVariableTable::SetValue(const gText &name,
-				const gNestedList<gNumber> &value)
+				const gNestedList<gNumber *> &value)
 {
   assert(m_NumberNames.Contains(name));
   m_NumberValues[m_NumberNames.Find(name)] = value;
 }
 
 void gelVariableTable::SetValue(const gText &name,
-				const gNestedList<gTriState> &value)
+				const gNestedList<gTriState *> &value)
 {
   assert(m_BooleanNames.Contains(name));
   m_BooleanValues[m_BooleanNames.Find(name)] = value;
 }
 
 void gelVariableTable::SetValue(const gText &name,
-				const gNestedList<gText> &value)
+				const gNestedList<gText *> &value)
 {
   assert(m_TextNames.Contains(name));
   m_TextValues[m_TextNames.Find(name)] = value;
@@ -416,14 +416,14 @@ void gelVariableTable::SetValue(const gText &name,
 
 #include "glist.imp"
 
-template class gList<gText>;
-template class gList<gNumber>;
-template class gList<gTriState>;
+template class gList<gText *>;
+template class gList<gNumber *>;
+template class gList<gTriState *>;
 
-template class gList<gNestedList<gText> >;
-template class gList<gNestedList<gNumber> >;
-template class gList<gNestedList<gTriState> >;
+template class gList<gNestedList<gText *> >;
+template class gList<gNestedList<gNumber *> >;
+template class gList<gNestedList<gTriState *> >;
 
-template gOutput &operator<<(gOutput &, const gList<gText> &);
-template gOutput &operator<<(gOutput &, const gList<gNumber> &);
-template gOutput &operator<<(gOutput &, const gList<gTriState> &);
+template gOutput &operator<<(gOutput &, const gList<gText *> &);
+template gOutput &operator<<(gOutput &, const gList<gNumber *> &);
+template gOutput &operator<<(gOutput &, const gList<gTriState *> &);

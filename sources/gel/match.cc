@@ -260,14 +260,14 @@ gelExpr *gelSignature::Evaluate(const gArray<gelExpr *> &actuals) const
   if (m_IsUdf)  {
     switch (m_Type)  {
     case gelNUMBER:
-      return new gelUDF<gNumber>(*this, actuals,
-                                 (gelExpression<gNumber> *) m_Udf);
+      return new gelUDF<gNumber *>(*this, actuals,
+                                 (gelExpression<gNumber *> *) m_Udf);
     case gelBOOLEAN:
-      return new gelUDF<gTriState>(*this, actuals,
-				   (gelExpression<gTriState> *) m_Udf);
+      return new gelUDF<gTriState *>(*this, actuals,
+				   (gelExpression<gTriState *> *) m_Udf);
     case gelTEXT:
-      return new gelUDF<gText>(*this, actuals,
-			       (gelExpression<gText> *) m_Udf);
+      return new gelUDF<gText *>(*this, actuals,
+			       (gelExpression<gText *> *) m_Udf);
     case gelEFG:
       return new gelUDF<Efg *>(*this, actuals,
                                (gelExpression<Efg *> *) m_Udf);
@@ -395,15 +395,15 @@ void gelSignature::AssignParams(gelVariableTable *subvt, gelVariableTable *vt,
     switch (m_Parameters[i]->Type())  {
     case gelBOOLEAN:
       subvt->SetValue(name,
-		      ((gelExpression<gTriState> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gTriState *> *) params[i])->Evaluate(vt));
       break;
     case gelNUMBER:
       subvt->SetValue(name,
-		      ((gelExpression<gNumber> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gNumber *> *) params[i])->Evaluate(vt));
       break;
     case gelTEXT:
       subvt->SetValue(name,
-		      ((gelExpression<gText> *) params[i])->Evaluate(vt));
+		      ((gelExpression<gText *> *) params[i])->Evaluate(vt));
       break;
     case gelEFG:
       subvt->SetValue(name,
@@ -483,7 +483,7 @@ extern void gelSolInit(gelEnvironment *);
 gelEnvironment::gelEnvironment(void)
 {
   gelMathInit(this);
-  gelListInit(this);
+//  gelListInit(this);
   gelEfgInit(this);
   gelNfgInit(this);
   gelAlgInit(this);

@@ -74,14 +74,7 @@ public:
   int NumElements( void ) const;
   bool Contains( const gNestedList<T>& t ) const;
 
-  // this dumb second parameter is only here to facilitate printing
-  //   of gTriState stuff
-  void Output( gOutput& out, 
-	       gOutput& (*disp_func)( gOutput& out, T ) = NULL ) const;
-
-
-
-
+  void Output( gOutput& out ) const; 
 
   // gNestedList<T> &operator=(const gNestedList<T> &);
 

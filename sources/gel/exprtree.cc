@@ -15,12 +15,12 @@ template <class T> gelExpression<T>::~gelExpression()   { }
 template <class T> void gelExpression<T>::Execute(gelVariableTable *vt) const
 { Evaluate(vt); }
   
-template class gelExpression<gNumber>;
-gelType gelExpression<gNumber>::Type(void) const   { return gelNUMBER; }
-template class gelExpression<gTriState>;
-gelType gelExpression<gTriState>::Type(void) const { return gelBOOLEAN; }
-template class gelExpression<gText>;
-gelType gelExpression<gText>::Type(void) const   { return gelTEXT; }
+template class gelExpression<gNumber *>;
+gelType gelExpression<gNumber *>::Type(void) const   { return gelNUMBER; }
+template class gelExpression<gTriState *>;
+gelType gelExpression<gTriState *>::Type(void) const { return gelBOOLEAN; }
+template class gelExpression<gText *>;
+gelType gelExpression<gText *>::Type(void) const   { return gelTEXT; }
 template class gelExpression<Efg *>;
 gelType gelExpression<Efg *>::Type(void) const   { return gelEFG; }
 template class gelExpression<Node *>;
@@ -52,32 +52,32 @@ template class gelExpression<MixedSolution *>;
 gelType gelExpression<MixedSolution *>::Type(void) const  { return gelMIXED; }
 
 
-template class gelConstant<gNumber>;
-template class gelConstant<gTriState>;
-template class gelConstant<gText>;
+template class gelConstant<gNumber *>;
+template class gelConstant<gTriState *>;
+template class gelConstant<gText *>;
 
-gelConstant<gNumber>::gelConstant(const gNumber &v)
+gelConstant<gNumber *>::gelConstant(gNumber *v)
 { m_Value.Data().Append(v); }
-gelConstant<gNumber>::gelConstant(const gNestedList<gNumber> &v)
+gelConstant<gNumber *>::gelConstant(const gNestedList<gNumber *> &v)
   : m_Value(v) { }
-gelConstant<gNumber>::~gelConstant()   { }
-gNestedList<gNumber> gelConstant<gNumber>::Evaluate(gelVariableTable *) const
+gelConstant<gNumber *>::~gelConstant()   { }
+gNestedList<gNumber *> gelConstant<gNumber *>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
-gelConstant<gTriState>::gelConstant(const gTriState &v)
+gelConstant<gTriState *>::gelConstant(gTriState *v)
 { m_Value.Data().Append(v); }
-gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v)
+gelConstant<gTriState *>::gelConstant(const gNestedList<gTriState *>& v)
   : m_Value(v) { }
-gelConstant<gTriState>::~gelConstant() { }
-gNestedList<gTriState> gelConstant<gTriState>::Evaluate(gelVariableTable *) const
+gelConstant<gTriState *>::~gelConstant() { }
+gNestedList<gTriState *> gelConstant<gTriState *>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
-gelConstant<gText>::gelConstant(const gText &v) 
+gelConstant<gText *>::gelConstant(gText *v) 
 { m_Value.Data().Append(v); }
-gelConstant<gText>::gelConstant(const gNestedList<gText>& v) 
+gelConstant<gText *>::gelConstant(const gNestedList<gText *>& v) 
   : m_Value(v) { }
-gelConstant<gText>::~gelConstant()   { }
-gNestedList<gText> gelConstant<gText>::Evaluate(gelVariableTable *) const 
+gelConstant<gText *>::~gelConstant()   { }
+gNestedList<gText *> gelConstant<gText *>::Evaluate(gelVariableTable *) const 
 { return m_Value; }
 
 
@@ -96,9 +96,9 @@ gNestedList<T> gelVariable<T>::Evaluate(gelVariableTable *vt) const
   return ret;
 }
 
-template class gelVariable<gNumber>;
-template class gelVariable<gTriState>;
-template class gelVariable<gText>;
+template class gelVariable<gNumber *>;
+template class gelVariable<gTriState *>;
+template class gelVariable<gText *>;
 template class gelVariable<Efg *>;
 template class gelVariable<Node *>;
 template class gelVariable<Infoset *>;
@@ -136,9 +136,9 @@ gNestedList<T> gelAssignment<T>::Evaluate(gelVariableTable *vt) const
   return ret;
 }
 
-template class gelAssignment<gNumber>;
-template class gelAssignment<gTriState>;
-template class gelAssignment<gText>;
+template class gelAssignment<gNumber *>;
+template class gelAssignment<gTriState *>;
+template class gelAssignment<gText *>;
 template class gelAssignment<Efg *>;
 template class gelAssignment<Node *>;
 template class gelAssignment<Action *>;
@@ -155,13 +155,13 @@ template class gelAssignment<NFSupport *>;
 template class gelAssignment<MixedSolution *>;
 
 template <class T>
-gelConditional<T>::gelConditional(gelExpression<gTriState> *g,
+gelConditional<T>::gelConditional(gelExpression<gTriState *> *g,
 				  gelExpression<T> *t)
   : guard(g), truebr(t), falsebr(0)
 { }
 
 template <class T> 
-gelConditional<T>::gelConditional(gelExpression<gTriState> *g,
+gelConditional<T>::gelConditional(gelExpression<gTriState *> *g,
 				  gelExpression<T> *t,
 				  gelExpression<T> *f)
   : guard(g), truebr(t), falsebr(f)
@@ -178,15 +178,15 @@ gelConditional<T>::~gelConditional()
 template <class T> 
 gNestedList<T> gelConditional<T>::Evaluate(gelVariableTable *vt) const
 {
-  if (guard->Evaluate(vt).Data()[1] == triTRUE)
+  if (*guard->Evaluate(vt).Data()[1] == triTRUE)
     return truebr->Evaluate(vt);
   else
     return falsebr->Evaluate(vt);
 }
 
-template class gelConditional<gNumber>;
-template class gelConditional<gTriState>;
-template class gelConditional<gText>;
+template class gelConditional<gNumber *>;
+template class gelConditional<gTriState *>;
+template class gelConditional<gText *>;
 template class gelConditional<Efg *>;
 template class gelConditional<Node *>;
 template class gelConditional<Action *>;
@@ -203,7 +203,7 @@ template class gelConditional<NFSupport *>;
 template class gelConditional<MixedSolution *>;
 
 
-template <class T> gelWhileLoop<T>::gelWhileLoop(gelExpression<gTriState> *g,
+template <class T> gelWhileLoop<T>::gelWhileLoop(gelExpression<gTriState *> *g,
 						 gelExpression<T> *b)
   : guard(g), body(b)
 { }
@@ -217,19 +217,19 @@ template <class T> gelWhileLoop<T>::~gelWhileLoop()
 template <class T> 
 gNestedList<T> gelWhileLoop<T>::Evaluate(gelVariableTable *vt) const
 {
-  gTriState guardval = guard->Evaluate(vt).Data()[1];
+  gTriState *guardval = guard->Evaluate(vt).Data()[1];
   gNestedList<T> bodyval;
 
-  while (guardval == triTRUE)  {
+  while (*guardval == triTRUE)  {
     bodyval = body->Evaluate(vt);
     guardval = guard->Evaluate(vt).Data()[1];
   }
   return bodyval;
 }
 
-template class gelWhileLoop<gNumber>;
-template class gelWhileLoop<gTriState>;
-template class gelWhileLoop<gText>;
+template class gelWhileLoop<gNumber *>;
+template class gelWhileLoop<gTriState *>;
+template class gelWhileLoop<gText *>;
 template class gelWhileLoop<Efg *>;
 template class gelWhileLoop<Node *>;
 template class gelWhileLoop<Action *>;
@@ -247,7 +247,7 @@ template class gelWhileLoop<MixedSolution *>;
 
 
 template <class T> gelForLoop<T>::gelForLoop(gelExpr *ini,
-					     gelExpression<gTriState> *g,
+					     gelExpression<gTriState *> *g,
 					     gelExpr *inc,
 					     gelExpression<T> *b)
   : init(ini), guard(g), incr(inc), body(b)
@@ -265,10 +265,10 @@ template <class T>
 gNestedList<T> gelForLoop<T>::Evaluate(gelVariableTable *vt) const
 {
   init->Execute(vt);
-  gTriState guardval = guard->Evaluate(vt).Data()[1];
+  gTriState *guardval = guard->Evaluate(vt).Data()[1];
   gNestedList<T> bodyval;
 
-  while (guardval == triTRUE)  
+  while (*guardval == triTRUE)  
   {
     bodyval = body->Evaluate(vt);
     incr->Execute(vt);
@@ -277,9 +277,9 @@ gNestedList<T> gelForLoop<T>::Evaluate(gelVariableTable *vt) const
   return bodyval;
 }
 
-template class gelForLoop<gNumber>;
-template class gelForLoop<gTriState>;
-template class gelForLoop<gText>;
+template class gelForLoop<gNumber *>;
+template class gelForLoop<gTriState *>;
+template class gelForLoop<gText *>;
 template class gelForLoop<Efg *>;
 template class gelForLoop<Node *>;
 template class gelForLoop<Action *>;
@@ -298,12 +298,12 @@ template class gelForLoop<MixedSolution *>;
 
 #include "gcmdline.h"
 
-gNestedList<gTriState> gelQuitExpr::Evaluate(gelVariableTable *) const
+gNestedList<gTriState *> gelQuitExpr::Evaluate(gelVariableTable *) const
 {
   gCmdLineInput::RestoreTermAttr();
   exit(0);
-  gNestedList<gTriState> ret;
-  ret.Data().Append( triTRUE );
+  gNestedList<gTriState *> ret;
+  ret.Data().Append(new gTriState(triTRUE));
   return ret;
 }
 
@@ -334,9 +334,9 @@ gNestedList<T> gelUDF<T>::Evaluate( gelVariableTable* vt ) const
 
 
 
-template class gelUDF<gNumber>;
-template class gelUDF<gTriState>;
-template class gelUDF<gText>;
+template class gelUDF<gNumber *>;
+template class gelUDF<gTriState *>;
+template class gelUDF<gText *>;
 template class gelUDF<Efg *>;
 template class gelUDF<Node *>;
 template class gelUDF<Action *>;

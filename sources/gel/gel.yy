@@ -32,9 +32,9 @@
   gText tval; \
   gList< int > listdim; \
   int listsep; \
-  gList<gTriState> blist; \
-  gList<gNumber> dlist; \
-  gList<gText> tlist; \
+  gList<gTriState *> blist; \
+  gList<gNumber *> dlist; \
+  gList<gText *> tlist; \
   int current_char, current_line; \
   gText current_expr, current_file, current_rawline; \
   gelEnvironment environment; \
@@ -63,7 +63,7 @@
 
 %union  {
   gelExpr *eval;
-  gelVariable<gNumber> *lval;
+  gelVariable<gNumber *> *lval;
   gBlock<gelExpr *> *exprlist;
 }
 
@@ -236,10 +236,10 @@ conditional:     IF LBRACK expression COMMA expression COMMA expression RBRACK
            |     IF LBRACK expression COMMA expression RBRACK
               { $$ = MatchConditional($3, $5); }
 
-constant:        FLOAT    { $$ = new gelConstant<gNumber>(dval); }
-        |        INTEGER  { $$ = new gelConstant<gNumber>(ival); }
-        |        BOOLEAN  { $$ = new gelConstant<gTriState>(bval); }
-        |        TEXT     { $$ = new gelConstant<gText>(tval); }
+constant:        FLOAT    { $$ = new gelConstant<gNumber *>(new gNumber(dval)); }
+        |        INTEGER  { $$ = new gelConstant<gNumber *>(new gNumber(ival)); }
+        |        BOOLEAN  { $$ = new gelConstant<gTriState *>(new gTriState(bval)); }
+        |        TEXT     { $$ = new gelConstant<gText *>(new gText(tval)); }
         |        NAME     { $$ = LookupVar(tval); }
         |        QUIT     { $$ = new gelQuitExpr(); }
         |        LBRACE   { dlist.Flush(); tlist.Flush(); blist.Flush(); 
@@ -250,18 +250,18 @@ constant:        FLOAT    { $$ = new gelConstant<gNumber>(dval); }
         ;
 
 list:            numberlist  { listdim.Append( -listsep );
-                               $$ = new gelConstant<gNumber>
-                               ( gNestedList<gNumber>( dlist, listdim ) ); }
+                               $$ = new gelConstant<gNumber *>
+                               ( gNestedList<gNumber *>( dlist, listdim ) ); }
         |        textlist    { listdim.Append( -listsep );
-                               $$ = new gelConstant<gText>
-                               ( gNestedList<gText>( tlist, listdim ) ); }
+                               $$ = new gelConstant<gText *>
+                               ( gNestedList<gText *>( tlist, listdim ) ); }
         |        booleanlist { listdim.Append( -listsep );
-                               $$ = new gelConstant<gTriState>
-                               ( gNestedList<gTriState>( blist, listdim ) ); }
+                               $$ = new gelConstant<gTriState *>
+                               ( gNestedList<gTriState *>( blist, listdim ) ); }
         ;
 
-numberitem:      INTEGER { dlist += gNumber( ival ); ++listsep; }
-        |        FLOAT   { dlist += gNumber( dval ); ++listsep; }
+numberitem:      INTEGER { dlist += new gNumber( ival ); ++listsep; }
+        |        FLOAT   { dlist += new gNumber( dval ); ++listsep; }
         |        listopen numberlist listclose
         ;
 
@@ -269,7 +269,7 @@ numberlist:      numberitem
         |        numberitem COMMA numberlist 
         ;
 
-textitem:        TEXT { tlist += tval; ++listsep; }
+textitem:        TEXT { tlist += new gText(tval); ++listsep; }
         |        listopen textlist listclose
         ;
 
@@ -277,7 +277,7 @@ textlist:        textitem
         |        textitem COMMA textlist
         ;
 
-booleanitem:     BOOLEAN { blist += bval; ++listsep; }
+booleanitem:     BOOLEAN { blist += new gTriState(bval); ++listsep; }
         |        listopen booleanlist listclose
         ;
 
@@ -292,7 +292,7 @@ listclose:       RBRACE { listdim.Append( -listsep ); listsep = 1; }
         ;
 
 
-lvalue:          NAME  { $$ = new gelVariable<gNumber>(tval); }
+lvalue:          NAME  { $$ = new gelVariable<gNumber *>(tval); }
 
 function:        NAME  { funcnames.Push(tval); }  LBRACK
                  parameterlist RBRACK

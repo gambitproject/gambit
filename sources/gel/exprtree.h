@@ -98,7 +98,7 @@ private:
   gNestedList<T> m_Value;
   
 public:
-  gelConstant(const T &);
+  gelConstant(T);
   gelConstant(const gNestedList<T> &);
   virtual ~gelConstant();
   gNestedList<T> Evaluate(gelVariableTable *) const;
@@ -120,13 +120,13 @@ public:
 template <class T> class gelConditional : public gelExpression<T>  
 {
 private:
-  gelExpression< gTriState > *guard;
+  gelExpression< gTriState * > *guard;
   gelExpression< T > *truebr, *falsebr;
   
 public:
-  gelConditional(gelExpression<gTriState> *guard,
+  gelConditional(gelExpression<gTriState *> *guard,
 		 gelExpression<T> *iftrue);
-  gelConditional(gelExpression<gTriState> *guard,
+  gelConditional(gelExpression<gTriState *> *guard,
 		 gelExpression<T> *iftrue, gelExpression<T> *iffalse);
   virtual ~gelConditional();
   
@@ -136,11 +136,11 @@ public:
 template <class T> class gelWhileLoop : public gelExpression<T>  
 {
 private:
-  gelExpression<gTriState> *guard;
+  gelExpression<gTriState *> *guard;
   gelExpression<T> *body;
   
 public:
-  gelWhileLoop(gelExpression<gTriState> *, gelExpression<T> *);
+  gelWhileLoop(gelExpression<gTriState *> *, gelExpression<T> *);
   virtual ~gelWhileLoop();
   
   gNestedList<T> Evaluate(gelVariableTable *) const;
@@ -150,12 +150,12 @@ template <class T> class gelForLoop : public gelExpression<T>
 {
 private:
   gelExpr *init;
-  gelExpression<gTriState> *guard;
+  gelExpression<gTriState *> *guard;
   gelExpr *incr;
   gelExpression<T> *body;
   
 public:
-  gelForLoop(gelExpr *, gelExpression<gTriState> *, gelExpr *,
+  gelForLoop(gelExpr *, gelExpression<gTriState *> *, gelExpr *,
 	     gelExpression<T> *);
   virtual ~gelForLoop();
   
@@ -165,13 +165,13 @@ public:
 
 #include "tristate.h"
 
-class gelQuitExpr : public gelExpression<gTriState>  
+class gelQuitExpr : public gelExpression<gTriState *>  
 {
 public:
   gelQuitExpr(void)  { }
   virtual ~gelQuitExpr()   { }
   
-  gNestedList<gTriState> Evaluate(gelVariableTable *) const;
+  gNestedList<gTriState *> Evaluate(gelVariableTable *) const;
 };
 
 

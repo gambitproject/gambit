@@ -61,15 +61,15 @@ EFPlayer *gelfuncChance::EvalItem(Efg *E) const
 // ChanceProb
 //-------------
 
-DECLARE_UNARY(gelfuncChanceProb, Action *, gNumber)
+DECLARE_UNARY(gelfuncChanceProb, Action *, gNumber *)
 
-gNumber gelfuncChanceProb::EvalItem(Action *a) const
+gNumber *gelfuncChanceProb::EvalItem(Action *a) const
 {
   if (!a)   return 0;
   Infoset *infoset = a->BelongsTo();
   if (!infoset->GetPlayer()->IsChance())
     throw gelRuntimeError("Chance action required in call to ChanceProb[]");
-  return infoset->Game()->GetChanceProb(infoset, a->GetNumber());
+  return new gNumber(infoset->Game()->GetChanceProb(infoset, a->GetNumber()));
 }
 
 //------------
@@ -107,12 +107,12 @@ Infoset *gelfuncDeleteAction::EvalItem(Action *a) const
 // DeleteEmptyInfoset
 //----------------------
 
-DECLARE_UNARY(gelfuncDeleteEmptyInfoset, Infoset *, gTriState)
+DECLARE_UNARY(gelfuncDeleteEmptyInfoset, Infoset *, gTriState *)
 
-gTriState gelfuncDeleteEmptyInfoset::EvalItem(Infoset *s) const
+gTriState *gelfuncDeleteEmptyInfoset::EvalItem(Infoset *s) const
 {
-  if (!s)  return triFALSE;
-  return (s->Game()->DeleteEmptyInfoset(s)) ? triTRUE : triFALSE;
+  if (!s)  return new gTriState(triFALSE);
+  return new gTriState((s->Game()->DeleteEmptyInfoset(s)) ? triTRUE : triFALSE);
 }
 
 //-------------
@@ -236,70 +236,71 @@ Node *gelfuncInsertMove::EvalItem(Infoset *s, Node *n) const
 // IsConstSum
 //--------------
 
-DECLARE_UNARY(gelfuncIsConstSumEfg, Efg *, gTriState)
+DECLARE_UNARY(gelfuncIsConstSumEfg, Efg *, gTriState *)
 
-gTriState gelfuncIsConstSumEfg::EvalItem(Efg *E) const
+gTriState *gelfuncIsConstSumEfg::EvalItem(Efg *E) const
 {
-  if (!E)   return triFALSE;
-  return (E->IsConstSum()) ? triTRUE : triFALSE;
+  if (!E)   return new gTriState(triFALSE);
+  return new gTriState((E->IsConstSum()) ? triTRUE : triFALSE);
 }
 
 //------------------
 // IsPerfectRecall
 //------------------
 
-DECLARE_UNARY(gelfuncIsPerfectRecall, Efg *, gTriState)
+DECLARE_UNARY(gelfuncIsPerfectRecall, Efg *, gTriState *)
 
-gTriState gelfuncIsPerfectRecall::EvalItem(Efg *E) const
+gTriState *gelfuncIsPerfectRecall::EvalItem(Efg *E) const
 {
-  if (!E)   return triFALSE;
+  if (!E)   return new gTriState(triFALSE);
   Infoset *s1, *s2;
-  return (IsPerfectRecall(*E, s1, s2)) ? triTRUE : triFALSE;
+  return new gTriState((IsPerfectRecall(*E, s1, s2)) ? triTRUE : triFALSE);
 }
 
 //-----------------
 // IsPredecessor
 //-----------------
 
-DECLARE_BINARY(gelfuncIsPredecessor, Node *, Node *, gTriState)
+DECLARE_BINARY(gelfuncIsPredecessor, Node *, Node *, gTriState *)
 
-gTriState gelfuncIsPredecessor::EvalItem(Node *n1, Node *n2) const
+gTriState *gelfuncIsPredecessor::EvalItem(Node *n1, Node *n2) const
 {
-  if (!n1 || !n2)   return triFALSE;
-  return (n1->Game()->IsPredecessor(n1, n2)) ? triTRUE : triFALSE;
+  if (!n1 || !n2)   return new gTriState(triFALSE);
+  return new gTriState((n1->Game()->IsPredecessor(n1, n2)) ? triTRUE : triFALSE);
 }
 
 //---------------
 // IsSuccessor
 //---------------
 
-DECLARE_BINARY(gelfuncIsSuccessor, Node *, Node *, gTriState)
+DECLARE_BINARY(gelfuncIsSuccessor, Node *, Node *, gTriState *)
 
-gTriState gelfuncIsSuccessor::EvalItem(Node *n1, Node *n2) const
+gTriState *gelfuncIsSuccessor::EvalItem(Node *n1, Node *n2) const
 {
-  if (!n1 || !n2)   return triFALSE;
-  return (n1->Game()->IsSuccessor(n1, n2)) ? triTRUE : triFALSE;
+  if (!n1 || !n2)   return new gTriState(triFALSE);
+  return new gTriState((n1->Game()->IsSuccessor(n1, n2)) ? triTRUE : triFALSE);
 }
 
 //------------
 // LoadEfg
 //------------
 
-DECLARE_UNARY(gelfuncLoadEfg, gText, Efg *)
+DECLARE_UNARY(gelfuncLoadEfg, gText *, Efg *)
 
-Efg *gelfuncLoadEfg::EvalItem(gText filename) const
+Efg *gelfuncLoadEfg::EvalItem(gText *filename) const
 {
+  if (!filename)  return 0;
   try   {
-    gFileInput f(filename);
+    gFileInput f(*filename);
     Efg *E = 0;
     ReadEfgFile(f, E);
     if (E)
       return E;
     else
-      throw gelRuntimeError(filename + " not a valid .efg file in LoadEfg");
+      throw gelRuntimeError(*filename + " not a valid .efg file in LoadEfg");
   }
   catch (gFileInput::OpenFailed &)   {
-    throw gelRuntimeError("Could not open " + filename + " in LoadEfg");
+    throw gelRuntimeError("Could not open " + *filename + " in LoadEfg");
   }
 }
 
@@ -307,24 +308,24 @@ Efg *gelfuncLoadEfg::EvalItem(gText filename) const
 // MarkSubgame
 //-----------------
 
-DECLARE_UNARY(gelfuncMarkSubgame, Node *, gTriState)
+DECLARE_UNARY(gelfuncMarkSubgame, Node *, gTriState *)
 
-gTriState gelfuncMarkSubgame::EvalItem(Node *n) const
+gTriState *gelfuncMarkSubgame::EvalItem(Node *n) const
 {
-  if (!n)  return triFALSE;
-  return (n->Game()->DefineSubgame(n)) ? triTRUE : triFALSE;
+  if (!n)  return new gTriState(triFALSE);
+  return new gTriState((n->Game()->DefineSubgame(n)) ? triTRUE : triFALSE);
 }
 
 //-----------------
 // MarkedSubgame
 //-----------------
 
-DECLARE_UNARY(gelfuncMarkedSubgame, Node *, gTriState)
+DECLARE_UNARY(gelfuncMarkedSubgame, Node *, gTriState *)
 
-gTriState gelfuncMarkedSubgame::EvalItem(Node *n) const
+gTriState *gelfuncMarkedSubgame::EvalItem(Node *n) const
 {
-  if (!n)  return triFALSE;
-  return (n->GetSubgameRoot() == n) ? triTRUE : triFALSE;
+  if (!n)  return new gTriState(triFALSE);
+  return new gTriState((n->GetSubgameRoot() == n) ? triTRUE : triFALSE);
 }
 
 //----------------
@@ -375,64 +376,64 @@ Node *gelfuncMoveTree::EvalItem(Node *n1, Node *n2) const
 // Name
 //--------
 
-DECLARE_UNARY(gelfuncNameAction, Action *, gText)
+DECLARE_UNARY(gelfuncNameAction, Action *, gText *)
 
-gText gelfuncNameAction::EvalItem(Action *a) const
+gText *gelfuncNameAction::EvalItem(Action *a) const
 {
   if (a)
-    return a->GetName();
+    return new gText(a->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameInfoset, Infoset *, gText)
+DECLARE_UNARY(gelfuncNameInfoset, Infoset *, gText *)
 
-gText gelfuncNameInfoset::EvalItem(Infoset *s) const
+gText *gelfuncNameInfoset::EvalItem(Infoset *s) const
 {
   if (s)
-    return s->GetName();
+    return new gText(s->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameNode, Node *, gText)
+DECLARE_UNARY(gelfuncNameNode, Node *, gText *)
 
-gText gelfuncNameNode::EvalItem(Node *n) const
+gText *gelfuncNameNode::EvalItem(Node *n) const
 {
   if (n)
-    return n->GetName();
+    return new gText(n->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameEFOutcome, EFOutcome *, gText)
+DECLARE_UNARY(gelfuncNameEFOutcome, EFOutcome *, gText *)
 
-gText gelfuncNameEFOutcome::EvalItem(EFOutcome *c) const
+gText *gelfuncNameEFOutcome::EvalItem(EFOutcome *c) const
 {
   if (c)
-    return c->GetName();
+    return new gText(c->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameEFPlayer, EFPlayer *, gText)
+DECLARE_UNARY(gelfuncNameEFPlayer, EFPlayer *, gText *)
 
-gText gelfuncNameEFPlayer::EvalItem(EFPlayer *p) const
+gText *gelfuncNameEFPlayer::EvalItem(EFPlayer *p) const
 {
   if (p)
-    return p->GetName();
+    return new gText(p->GetName());
   else
-    return "";
+    return new gText("");
 }
 
-DECLARE_UNARY(gelfuncNameEfg, Efg *, gText)
+DECLARE_UNARY(gelfuncNameEfg, Efg *, gText *)
 
-gText gelfuncNameEfg::EvalItem(Efg *E) const
+gText *gelfuncNameEfg::EvalItem(Efg *E) const
 {
   if (E)
-    return E->GetTitle();
+    return new gText(E->GetTitle());
   else
-    return "";
+    return new gText("");
 }
 
 
@@ -440,12 +441,13 @@ gText gelfuncNameEfg::EvalItem(Efg *E) const
 // NewEfg
 //-----------
 
-DECLARE_UNARY(gelfuncNewEfg, gNumber, Efg *)
+DECLARE_UNARY(gelfuncNewEfg, gNumber *, Efg *)
 
-Efg *gelfuncNewEfg::EvalItem(gNumber n) const
+Efg *gelfuncNewEfg::EvalItem(gNumber *n) const
 {
+  if (!n)  return 0;
   Efg *E = new Efg;
-  int m = n;
+  int m = *n;
   for (int i = 1; i <= m; i++)
     E->NewPlayer();
   return E;
@@ -455,14 +457,17 @@ Efg *gelfuncNewEfg::EvalItem(gNumber n) const
 // NewInfoset
 //-------------
 
-DECLARE_BINARY(gelfuncNewInfoset, EFPlayer *, gNumber, Infoset *)
+DECLARE_BINARY(gelfuncNewInfoset, EFPlayer *, gNumber *, Infoset *)
 
-Infoset *gelfuncNewInfoset::EvalItem(EFPlayer *p, gNumber n) const
+Infoset *gelfuncNewInfoset::EvalItem(EFPlayer *p, gNumber *n) const
 {
-  if (!p)   return 0;
-  if (!n.IsInteger())
+  if (!p || !n) {
+    if (n)  delete n;
+    return 0;
+  }
+  if (!n->IsInteger())
     throw gelRuntimeError("Expected integer for 'actions' in NewInfoset");
-  return p->Game()->CreateInfoset(p, n);
+  return p->Game()->CreateInfoset(p, *n);
 }
 
 //-------------
@@ -502,14 +507,17 @@ Node *gelfuncNextSibling::EvalItem(Node *n) const
 // NthChild
 //------------
 
-DECLARE_BINARY(gelfuncNthChild, Node *, gNumber, Node *)
+DECLARE_BINARY(gelfuncNthChild, Node *, gNumber *, Node *)
 
-Node *gelfuncNthChild::EvalItem(Node *n, gNumber i) const
+Node *gelfuncNthChild::EvalItem(Node *n, gNumber *i) const
 {
-  if (!n)   return 0;
-  if (!i.IsInteger())
+  if (!n || !i)  {
+    if (i)  delete i;
+    return 0;
+  }
+  if (!i->IsInteger())
     throw gelRuntimeError("Expected integer for 'child' in NthChild");
-  return n->GetChild(i);
+  return n->GetChild(*i);
 }
 
 //-----------
@@ -538,14 +546,14 @@ Node *gelfuncParent::EvalItem(Node *n) const
 // Payoff
 //-----------
 
-DECLARE_BINARY(gelfuncPayoffEFOutcome, EFOutcome *, EFPlayer *, gNumber)
+DECLARE_BINARY(gelfuncPayoffEFOutcome, EFOutcome *, EFPlayer *, gNumber *)
 
-gNumber gelfuncPayoffEFOutcome::EvalItem(EFOutcome *c, EFPlayer *p) const
+gNumber *gelfuncPayoffEFOutcome::EvalItem(EFOutcome *c, EFPlayer *p) const
 {
   if (!c || !p)   return 0;
   if (c->BelongsTo() != p->Game())
     throw gelGameMismatchError("Payoff");
-  return p->Game()->Payoff(c, p->GetNumber());
+  return new gNumber(p->Game()->Payoff(c, p->GetNumber()));
 }
 
 //----------
@@ -601,18 +609,21 @@ Node *gelfuncRootNode::EvalItem(Efg *E) const
 // SaveEfg
 //------------
 
-DECLARE_BINARY(gelfuncSaveEfg, Efg *, gText, Efg *)
+DECLARE_BINARY(gelfuncSaveEfg, Efg *, gText *, Efg *)
 
-Efg *gelfuncSaveEfg::EvalItem(Efg *E, gText filename) const
+Efg *gelfuncSaveEfg::EvalItem(Efg *E, gText *filename) const
 {
-  if (!E)   return 0;
+  if (!E || !filename)  {
+    if (filename)  delete filename;
+    return 0;
+  }
   try   {
-    gFileOutput f(filename);
+    gFileOutput f(*filename);
     E->WriteEfgFile(f);
     return E;
   }
   catch (gFileOutput::OpenFailed &)   {
-    throw gelRuntimeError("Cannot open " + filename + " for writing in SaveEfg");
+    throw gelRuntimeError("Cannot open " + *filename + " for writing in SaveEfg");
   }
 }
 
@@ -620,57 +631,63 @@ Efg *gelfuncSaveEfg::EvalItem(Efg *E, gText filename) const
 // SetName
 //------------
 
-DECLARE_BINARY(gelfuncSetNameAction, Action *, gText, Action *)
+DECLARE_BINARY(gelfuncSetNameAction, Action *, gText *, Action *)
 
-Action *gelfuncSetNameAction::EvalItem(Action *a, gText name) const
+Action *gelfuncSetNameAction::EvalItem(Action *a, gText *name) const
 {
-  if (!a)  return 0;
-  a->SetName(name);
+  if (!a || !name)   {
+    if (name)  delete name;
+    return 0;
+  }
+  a->SetName(*name);
   return a;
 }
 
-DECLARE_BINARY(gelfuncSetNameInfoset, Infoset *, gText, Infoset *)
+DECLARE_BINARY(gelfuncSetNameInfoset, Infoset *, gText *, Infoset *)
 
-Infoset *gelfuncSetNameInfoset::EvalItem(Infoset *s, gText name) const
+Infoset *gelfuncSetNameInfoset::EvalItem(Infoset *s, gText *name) const
 {
-  if (!s)  return 0;
-  s->SetName(name);
+  if (!s || !name)   {
+    if (name)  delete name;
+    return 0;
+  }
+  s->SetName(*name);
   return s;
 }
 
-DECLARE_BINARY(gelfuncSetNameNode, Node *, gText, Node *)
+DECLARE_BINARY(gelfuncSetNameNode, Node *, gText *, Node *)
 
-Node *gelfuncSetNameNode::EvalItem(Node *n, gText name) const
+Node *gelfuncSetNameNode::EvalItem(Node *n, gText *name) const
 {
-  if (!n)  return 0;
-  n->SetName(name);
+  if (!n || !name)  return 0;
+  n->SetName(*name);
   return n;
 }
 
-DECLARE_BINARY(gelfuncSetNameEFOutcome, EFOutcome *, gText, EFOutcome *)
+DECLARE_BINARY(gelfuncSetNameEFOutcome, EFOutcome *, gText *, EFOutcome *)
 
-EFOutcome *gelfuncSetNameEFOutcome::EvalItem(EFOutcome *c, gText name) const
+EFOutcome *gelfuncSetNameEFOutcome::EvalItem(EFOutcome *c, gText *name) const
 {
   if (!c)  return 0;
-  c->SetName(name);
+  c->SetName(*name);
   return c;
 }
 
-DECLARE_BINARY(gelfuncSetNameEFPlayer, EFPlayer *, gText, EFPlayer *)
+DECLARE_BINARY(gelfuncSetNameEFPlayer, EFPlayer *, gText *, EFPlayer *)
 
-EFPlayer *gelfuncSetNameEFPlayer::EvalItem(EFPlayer *p, gText name) const
+EFPlayer *gelfuncSetNameEFPlayer::EvalItem(EFPlayer *p, gText *name) const
 {
   if (!p)  return 0;
-  p->SetName(name);
+  p->SetName(*name);
   return p;
 }
 
-DECLARE_BINARY(gelfuncSetNameEfg, Efg *, gText, Efg *)
+DECLARE_BINARY(gelfuncSetNameEfg, Efg *, gText *, Efg *)
 
-Efg *gelfuncSetNameEfg::EvalItem(Efg *E, gText name) const
+Efg *gelfuncSetNameEfg::EvalItem(Efg *E, gText *name) const
 {
   if (!E)  return 0;
-  E->SetTitle(name);
+  E->SetTitle(*name);
   return E;
 }
 
@@ -835,7 +852,7 @@ gelExpr *GEL_IsSuccessor(const gArray<gelExpr *> &params)
 
 gelExpr *GEL_LoadEfg(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLoadEfg((gelExpression<gText> *) params[1]);
+  return new gelfuncLoadEfg((gelExpression<gText *> *) params[1]);
 }
 
 gelExpr *GEL_MarkSubgame(const gArray<gelExpr *> &params)
@@ -898,13 +915,13 @@ gelExpr *GEL_NameEfg(const gArray<gelExpr *> &params)
 
 gelExpr *GEL_NewEfg(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNewEfg((gelExpression<gNumber> *) params[1]);
+  return new gelfuncNewEfg((gelExpression<gNumber *> *) params[1]);
 }
 
 gelExpr *GEL_NewInfoset(const gArray<gelExpr *> &params)
 {
   return new gelfuncNewInfoset((gelExpression<EFPlayer *> *) params[1],
-                               (gelExpression<gNumber> *) params[2]);
+                               (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_NewOutcome(const gArray<gelExpr *> &params)
@@ -925,7 +942,7 @@ gelExpr *GEL_NextSibling(const gArray<gelExpr *> &params)
 gelExpr *GEL_NthChild(const gArray<gelExpr *> &params)
 {
   return new gelfuncNthChild((gelExpression<Node *> *) params[1],
-                             (gelExpression<gNumber> *) params[2]);
+                             (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_Outcome(const gArray<gelExpr *> &params)
@@ -968,43 +985,43 @@ gelExpr *GEL_RootNode(const gArray<gelExpr *> &params)
 gelExpr *GEL_SaveEfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncSaveEfg((gelExpression<Efg *> *) params[1],
-                            (gelExpression<gText> *) params[2]);
+                            (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameAction(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameAction((gelExpression<Action *> *) params[1],
-                                  (gelExpression<gText> *) params[2]);
+                                  (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameInfoset(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameInfoset((gelExpression<Infoset *> *) params[1],
-                                   (gelExpression<gText> *) params[2]);
+                                   (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameNode(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameNode((gelExpression<Node *> *) params[1],
-                                (gelExpression<gText> *) params[2]);
+                                (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameEFOutcome(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameEFOutcome((gelExpression<EFOutcome *> *) params[1],
-                                     (gelExpression<gText> *) params[2]);
+                                     (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameEFPlayer(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameEFPlayer((gelExpression<EFPlayer *> *) params[1],
-                                    (gelExpression<gText> *) params[2]);
+                                    (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetNameEfg(const gArray<gelExpr *> &params)
 {
   return new gelfuncSetNameEfg((gelExpression<Efg *> *) params[1],
-                               (gelExpression<gText> *) params[2]);
+                               (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_SetOutcome(const gArray<gelExpr *> &params)

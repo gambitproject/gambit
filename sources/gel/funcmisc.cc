@@ -18,9 +18,9 @@
 // Print
 //-------------
 
-DECLARE_UNARY_LIST(gelfuncPrintNumber, gNumber, gNumber)
-DECLARE_UNARY_LIST(gelfuncPrintBoolean, gTriState, gTriState)
-DECLARE_UNARY_LIST(gelfuncPrintText, gText, gText)
+DECLARE_UNARY_LIST(gelfuncPrintNumber, gNumber *, gNumber *)
+DECLARE_UNARY_LIST(gelfuncPrintBoolean, gTriState *, gTriState *)
+DECLARE_UNARY_LIST(gelfuncPrintText, gText *, gText *)
 DECLARE_UNARY(gelfuncPrintEfg, Efg *, Efg *)
 DECLARE_UNARY(gelfuncPrintNode, Node *, Node *)
 DECLARE_UNARY(gelfuncPrintAction, Action *, Action *)
@@ -37,30 +37,34 @@ DECLARE_UNARY(gelfuncPrintNFSupport, NFSupport *, NFSupport *)
 DECLARE_UNARY(gelfuncPrintMixed, MixedSolution *, MixedSolution *)
 
 
-gNestedList<gNumber> gelfuncPrintNumber::Evaluate(gelVariableTable *vt) const
+gNestedList<gNumber *> gelfuncPrintNumber::Evaluate(gelVariableTable *vt) const
 {
-  gNestedList<gNumber> ret = op1->Evaluate(vt);
+  gNestedList<gNumber *> ret = op1->Evaluate(vt);
   gout << ret;
   return ret;
 }
 
-gNestedList<gText> gelfuncPrintText::Evaluate(gelVariableTable *vt) const
+gNestedList<gText *> gelfuncPrintText::Evaluate(gelVariableTable *vt) const
 {
-  gNestedList<gText> ret = op1->Evaluate(vt);
+  gNestedList<gText *> ret = op1->Evaluate(vt);
   gout << ret;
   return ret;
 }
 
-gNestedList<gTriState> gelfuncPrintBoolean::Evaluate(gelVariableTable *vt) const
+gNestedList<gTriState *> gelfuncPrintBoolean::Evaluate(gelVariableTable *vt) const
 {
-  gNestedList<gTriState> ret = op1->Evaluate(vt);
-  ret.Output(gout, gTriState_Output);
+  gNestedList<gTriState *> ret = op1->Evaluate(vt);
+//  ret.Output(gout, gTriState_Output);
+  gout << ret;
   return ret;
 }
 
 Efg *gelfuncPrintEfg::EvalItem(Efg *E) const
 {
-  gout << E->GetTitle();
+  if (E)
+    gout << E->GetTitle();
+  else
+    gout << "(null TEXT)";
   return E;
 }
 
@@ -174,9 +178,9 @@ gNestedList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
   return op2->Evaluate(vt);
 }
 
-template class gelfuncSemi<gTriState>;
-template class gelfuncSemi<gNumber>;
-template class gelfuncSemi<gText>;
+template class gelfuncSemi<gTriState *>;
+template class gelfuncSemi<gNumber *>;
+template class gelfuncSemi<gText *>;
 template class gelfuncSemi<Efg *>;
 template class gelfuncSemi<Node *>;
 template class gelfuncSemi<Action *>;
@@ -201,12 +205,12 @@ gWatch _gelStopwatch(false);
 // ElapsedTime
 //---------------
 
-DECLARE_NOPARAM(gelfuncElapsedTime, gNumber)
+DECLARE_NOPARAM(gelfuncElapsedTime, gNumber *)
 
-gNestedList<gNumber> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
+gNestedList<gNumber *> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
 {
-  gNestedList<gNumber> ret;
-  ret.Data().Append(_gelStopwatch.Elapsed());
+  gNestedList<gNumber *> ret;
+  ret.Data().Append(new gNumber(_gelStopwatch.Elapsed()));
   return ret;
 }
 
@@ -214,12 +218,12 @@ gNestedList<gNumber> gelfuncElapsedTime::Evaluate(gelVariableTable *) const
 // IsWatchRunning
 //------------------
 
-DECLARE_NOPARAM(gelfuncIsWatchRunning, gTriState)
+DECLARE_NOPARAM(gelfuncIsWatchRunning, gTriState *)
 
-gNestedList<gTriState> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
+gNestedList<gTriState *> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
 {
-  gNestedList<gTriState> ret;
-  ret.Data().Append((_gelStopwatch.IsRunning()) ? triTRUE : triFALSE);
+  gNestedList<gTriState *> ret;
+  ret.Data().Append(new gTriState((_gelStopwatch.IsRunning()) ? triTRUE : triFALSE));
   return ret;
 }
 
@@ -227,13 +231,13 @@ gNestedList<gTriState> gelfuncIsWatchRunning::Evaluate(gelVariableTable *) const
 // StartWatch
 //---------------
 
-DECLARE_NOPARAM(gelfuncStartWatch, gNumber)
+DECLARE_NOPARAM(gelfuncStartWatch, gNumber *)
 
-gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
+gNestedList<gNumber *> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Start();
-  gNestedList<gNumber> ret;
-  ret.Data().Append(0);
+  gNestedList<gNumber *> ret;
+  ret.Data().Append(new gNumber(0));
   return ret;
 }
 
@@ -241,13 +245,13 @@ gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
 // StopWatch
 //--------------
 
-DECLARE_NOPARAM(gelfuncStopWatch, gNumber)
+DECLARE_NOPARAM(gelfuncStopWatch, gNumber *)
 
-gNestedList<gNumber> gelfuncStopWatch::Evaluate(gelVariableTable *) const
+gNestedList<gNumber *> gelfuncStopWatch::Evaluate(gelVariableTable *) const
 {
   _gelStopwatch.Stop();
-  gNestedList<gNumber> ret;
-  ret.Data().Append(_gelStopwatch.Elapsed());
+  gNestedList<gNumber *> ret;
+  ret.Data().Append(new gNumber(_gelStopwatch.Elapsed()));
   return ret;
 }
 
@@ -264,17 +268,17 @@ gelExpr *GEL_IsWatchRunning(const gArray<gelExpr *> &)
 
 gelExpr *GEL_PrintBoolean(const gArray<gelExpr *> &params)
 {
-  return new gelfuncPrintBoolean((gelExpression<gTriState> *) params[1]);
+  return new gelfuncPrintBoolean((gelExpression<gTriState *> *) params[1]);
 }
 
 gelExpr *GEL_PrintNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncPrintNumber((gelExpression<gNumber> *) params[1]);
+  return new gelfuncPrintNumber((gelExpression<gNumber *> *) params[1]);
 }
 
 gelExpr *GEL_PrintText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncPrintText((gelExpression<gText> *) params[1]);
+  return new gelfuncPrintText((gelExpression<gText *> *) params[1]);
 }
 
 gelExpr *GEL_PrintEfg(const gArray<gelExpr *> &params)
@@ -349,20 +353,20 @@ gelExpr *GEL_PrintMixed(const gArray<gelExpr *> &params)
 
 gelExpr *GEL_SemiBoolean(const gArray<gelExpr *> &params)
 {
-  return new gelfuncSemi<gTriState>(params[1],
-				    ((gelExpression<gTriState> *) params[2]));
+  return new gelfuncSemi<gTriState *>(params[1],
+				    ((gelExpression<gTriState *> *) params[2]));
 }
 
 gelExpr *GEL_SemiNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncSemi<gNumber>(params[1],
-				  ((gelExpression<gNumber> *) params[2]));
+  return new gelfuncSemi<gNumber *>(params[1],
+				  ((gelExpression<gNumber *> *) params[2]));
 }
 
 gelExpr *GEL_SemiText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncSemi<gText>(params[1],
-				((gelExpression<gText> *) params[2]));
+  return new gelfuncSemi<gText *>(params[1],
+				((gelExpression<gText *> *) params[2]));
 }
 
 gelExpr *GEL_SemiEfg(const gArray<gelExpr *> &params)

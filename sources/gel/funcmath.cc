@@ -11,146 +11,323 @@
 #include "tristate.h"
 
 
-DECLARE_UNARY(gelfuncNot, gTriState, gTriState)
-DECLARE_UNARY(gelfuncNegate, gNumber, gNumber)
+//-------
+// And
+//-------
 
+DECLARE_BINARY(gelfuncAnd, gTriState *, gTriState *, gTriState *)
 
-gTriState gelfuncNot::EvalItem( gTriState x1 ) const
+gTriState *gelfuncAnd::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  return TriStateNot( x1 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = TriStateAnd(*x1, *x2);
+  delete x2;
+  return x1;
 }
 
-gNumber gelfuncNegate::EvalItem( gNumber x1 ) const
+//----------
+// Divide
+//----------
+
+DECLARE_BINARY(gelfuncDivide, gNumber *, gNumber *, gNumber *)
+
+gNumber *gelfuncDivide::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return -x1;
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = *x1 / *x2;
+  delete x2;
+  return x1;
 }
 
 
+//----------
+// Equal
+//----------
 
-DECLARE_BINARY(gelfuncDivide, gNumber, gNumber, gNumber)
-DECLARE_BINARY(gelfuncMinus, gNumber, gNumber, gNumber)
-DECLARE_BINARY(gelfuncPlus, gNumber, gNumber, gNumber)
-DECLARE_BINARY(gelfuncTimes, gNumber, gNumber, gNumber)
+DECLARE_BINARY(gelfuncEqualBoolean, gTriState *, gTriState *, gTriState *)
 
-
-gNumber gelfuncDivide::EvalItem( gNumber x1, gNumber x2 ) const
+gTriState *gelfuncEqualBoolean::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  return x1 / x2;
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gNumber gelfuncMinus::EvalItem( gNumber x1, gNumber x2 ) const
+DECLARE_BINARY(gelfuncEqualNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return x1 - x2;
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gNumber gelfuncPlus::EvalItem( gNumber x1, gNumber x2 ) const
+DECLARE_BINARY(gelfuncEqualText, gText *, gText *, gTriState *)
+
+gTriState *gelfuncEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  return x1 + x2;
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gNumber gelfuncTimes::EvalItem( gNumber x1, gNumber x2 ) const
+//-----------
+// Greater
+//-----------
+
+DECLARE_BINARY(gelfuncGreaterNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncGreaterNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return x1 * x2;
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-DECLARE_BINARY(gelfuncLessNumber, gNumber, gNumber, gTriState)
-DECLARE_BINARY(gelfuncLessEqualNumber, gNumber, gNumber, gTriState)
-DECLARE_BINARY(gelfuncGreaterNumber, gNumber, gNumber, gTriState)
-DECLARE_BINARY(gelfuncGreaterEqualNumber, gNumber, gNumber, gTriState)
-DECLARE_BINARY(gelfuncEqualNumber, gNumber, gNumber, gTriState)
-DECLARE_BINARY(gelfuncNotEqualNumber, gNumber, gNumber, gTriState)
+DECLARE_BINARY(gelfuncGreaterText, gText *, gText *, gTriState *)
 
-
-gTriState gelfuncLessNumber::EvalItem( gNumber x1, gNumber x2 ) const
+gTriState *gelfuncGreaterText::EvalItem(gText *x1, gText *x2) const
 {
-  return gTriState( x1 < x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncLessEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
+//---------------
+// GreaterEqual
+//---------------
+
+DECLARE_BINARY(gelfuncGreaterEqualNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncGreaterEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return gTriState( x1 <= x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncGreaterNumber::EvalItem( gNumber x1, gNumber x2 ) const
+DECLARE_BINARY(gelfuncGreaterEqualText, gText *, gText *, gTriState *)
+
+gTriState *gelfuncGreaterEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  return gTriState( x1 > x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncGreaterEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
+//--------
+// Less
+//--------
+
+DECLARE_BINARY(gelfuncLessNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncLessNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return gTriState( x1 >= x2);
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
+DECLARE_BINARY(gelfuncLessText, gText *, gText *, gTriState *)
+
+gTriState *gelfuncLessText::EvalItem(gText *x1, gText *x2) const
 {
-  return gTriState( x1 == x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncNotEqualNumber::EvalItem( gNumber x1, gNumber x2 ) const
+//------------
+// LessEqual
+//------------
+
+DECLARE_BINARY(gelfuncLessEqualNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncLessEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return gTriState( x1 != x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-DECLARE_BINARY(gelfuncAnd, gTriState, gTriState, gTriState)
-DECLARE_BINARY(gelfuncOr, gTriState, gTriState, gTriState)
+DECLARE_BINARY(gelfuncLessEqualText, gText *, gText *, gTriState *)
 
-gTriState gelfuncAnd::EvalItem( gTriState x1, gTriState x2 ) const
+gTriState *gelfuncLessEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  return TriStateAnd( x1, x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncOr::EvalItem( gTriState x1, gTriState x2 ) const
+//---------
+// Minus
+//---------
+
+DECLARE_BINARY(gelfuncMinus, gNumber *, gNumber *, gNumber *)
+
+gNumber *gelfuncMinus::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return TriStateOr( x1, x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = *x1 - *x2;
+  delete x2;
+  return x1;
 }
 
-DECLARE_BINARY(gelfuncLessText, gText, gText, gTriState)
-DECLARE_BINARY(gelfuncLessEqualText, gText, gText, gTriState)
-DECLARE_BINARY(gelfuncGreaterText, gText, gText, gTriState)
-DECLARE_BINARY(gelfuncGreaterEqualText, gText, gText, gTriState)
-DECLARE_BINARY(gelfuncEqualText, gText, gText, gTriState)
-DECLARE_BINARY(gelfuncNotEqualText, gText, gText, gTriState)
+//----------
+// Negate
+//----------
 
+DECLARE_UNARY(gelfuncNegate, gNumber *, gNumber *)
 
-gTriState gelfuncLessText::EvalItem( gText x1, gText x2 ) const
+gNumber *gelfuncNegate::EvalItem(gNumber *x1) const
 {
-  return gTriState( x1 < x2 );
+  return (x1) ? &(*x1 = -*x1) : 0;
 }
 
-gTriState gelfuncLessEqualText::EvalItem( gText x1, gText x2 ) const
+//--------
+// Not
+//--------
+
+DECLARE_UNARY(gelfuncNot, gTriState *, gTriState *)
+
+gTriState *gelfuncNot::EvalItem(gTriState *x1) const
 {
-  return gTriState( x1 <= x2 );
+  return (x1) ? &(*x1 = TriStateNot(*x1)) : 0;
 }
 
-gTriState gelfuncGreaterText::EvalItem( gText x1, gText x2 ) const
+//------------
+// NotEqual
+//------------
+
+DECLARE_BINARY(gelfuncNotEqualBoolean, gTriState *, gTriState *, gTriState *)
+
+gTriState *gelfuncNotEqualBoolean::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  return gTriState( x1 > x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncGreaterEqualText::EvalItem( gText x1, gText x2 ) const
+DECLARE_BINARY(gelfuncNotEqualNumber, gNumber *, gNumber *, gTriState *)
+
+gTriState *gelfuncNotEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  return gTriState( x1 >= x2);
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncEqualText::EvalItem( gText x1, gText x2 ) const
+DECLARE_BINARY(gelfuncNotEqualText, gText *, gText *, gTriState *)
+
+gTriState *gelfuncNotEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  return gTriState( x1 == x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
-gTriState gelfuncNotEqualText::EvalItem( gText x1, gText x2 ) const
-{
-  return gTriState( x1 != x2 );
-}
 
-DECLARE_UNARY(gelfuncNumChars, gText, gNumber)
+//--------------
+// NthElement
+//--------------
 
-gNumber gelfuncNumChars::EvalItem( gText x1 ) const
-{
-  return x1.Length();
-}
-
-DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
-
+DECLARE_BINARY(gelfuncNthElement, gText *, gNumber *, gText *)
 
 class gelExceptionNonInteger : public gException  {
   public:
@@ -158,169 +335,234 @@ class gelExceptionNonInteger : public gException  {
     gText Description(void) const  { return "Expected integer index"; }
 };
 
-gText gelfuncNthElement::EvalItem( gText x1, gNumber x2 ) const
+gText *gelfuncNthElement::EvalItem(gText *x1, gNumber *x2) const
 {
-  if (!x2.IsInteger())   
+  if (!x1 || !x2)    {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+
+  if (!x2->IsInteger())
     throw gelExceptionNonInteger();
-  return x1[x2 - gNumber(1)];
+  gText *ret = new gText((*x1)[*x2 - gNumber(1)]);
+  delete x1;
+  delete x2;
+  return ret;
 }
 
+//------------
+// NumChars
+//------------
 
-DECLARE_BINARY(gelfuncEqualBoolean, gTriState, gTriState, gTriState)
-DECLARE_BINARY(gelfuncNotEqualBoolean, gTriState, gTriState, gTriState)
+DECLARE_UNARY(gelfuncNumChars, gText *, gNumber *)
 
-gTriState gelfuncEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
+gNumber *gelfuncNumChars::EvalItem(gText *s) const
 {
-  return gTriState( x1 == x2 );
+  if (!s)  return 0;
+  gNumber *ret = new gNumber(s->Length());
+  delete s;
+  return ret;
 }
 
-gTriState gelfuncNotEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
+//------
+// Or
+//------
+
+DECLARE_BINARY(gelfuncOr, gTriState *, gTriState *, gTriState *)
+
+gTriState *gelfuncOr::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  return gTriState( x1 != x2 );
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = TriStateOr(*x1, *x2);
+  delete x2;
+  return x1;
 }
+
+//-------
+// Plus
+//-------
+
+DECLARE_BINARY(gelfuncPlus, gNumber *, gNumber *, gNumber *)
+
+gNumber *gelfuncPlus::EvalItem(gNumber *x1, gNumber *x2) const
+{
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = *x1 + *x2;
+  delete x2;
+  return x1;
+}
+
+
+//--------
+// Times
+//--------
+
+DECLARE_BINARY(gelfuncTimes, gNumber *, gNumber *, gNumber *)
+
+gNumber *gelfuncTimes::EvalItem(gNumber *x1, gNumber *x2) const
+{
+  if (!x1 || !x2)   {
+    if (x1)  delete x1;
+    if (x2)  delete x2;
+    return 0;
+  }
+  *x1 = *x1 * *x2;
+  delete x2;
+  return x1;
+}
+
 
 
 gelExpr *GEL_And(const gArray<gelExpr *> &params)
 {
-  return new gelfuncAnd((gelExpression<gTriState> *) params[1],
-			(gelExpression<gTriState> *) params[2]);
+  return new gelfuncAnd((gelExpression<gTriState *> *) params[1],
+			(gelExpression<gTriState *> *) params[2]);
 }
 
 gelExpr *GEL_Divide(const gArray<gelExpr *> &params)
 {
-  return new gelfuncDivide((gelExpression<gNumber> *) params[1],
-			   (gelExpression<gNumber> *) params[2]);
+  return new gelfuncDivide((gelExpression<gNumber *> *) params[1],
+			   (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_EqualBoolean(const gArray<gelExpr *> &params)
 {
-  return new gelfuncEqualBoolean((gelExpression<gTriState> *) params[1],
-				 (gelExpression<gTriState> *) params[2]);
+  return new gelfuncEqualBoolean((gelExpression<gTriState *> *) params[1],
+				 (gelExpression<gTriState *> *) params[2]);
 }
 
 gelExpr *GEL_EqualNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncEqualNumber((gelExpression<gNumber> *) params[1],
-				(gelExpression<gNumber> *) params[2]);
+  return new gelfuncEqualNumber((gelExpression<gNumber *> *) params[1],
+				(gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_EqualText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncEqualText((gelExpression<gText> *) params[1],
-			      (gelExpression<gText> *) params[2]);
+  return new gelfuncEqualText((gelExpression<gText *> *) params[1],
+			      (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_GreaterNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncGreaterNumber((gelExpression<gNumber> *) params[1],
-				  (gelExpression<gNumber> *) params[2]);
+  return new gelfuncGreaterNumber((gelExpression<gNumber *> *) params[1],
+				  (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_GreaterText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncGreaterText((gelExpression<gText> *) params[1],
-				(gelExpression<gText> *) params[2]);
+  return new gelfuncGreaterText((gelExpression<gText *> *) params[1],
+				(gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_GreaterEqualNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncGreaterEqualNumber((gelExpression<gNumber> *) params[1],
-				       (gelExpression<gNumber> *) params[2]);
+  return new gelfuncGreaterEqualNumber((gelExpression<gNumber *> *) params[1],
+				       (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_GreaterEqualText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncGreaterEqualText((gelExpression<gText> *) params[1],
-				     (gelExpression<gText> *) params[2]);
+  return new gelfuncGreaterEqualText((gelExpression<gText *> *) params[1],
+				     (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_LessNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLessNumber((gelExpression<gNumber> *) params[1],
-			       (gelExpression<gNumber> *) params[2]);
+  return new gelfuncLessNumber((gelExpression<gNumber *> *) params[1],
+			       (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_LessText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLessText((gelExpression<gText> *) params[1],
-			     (gelExpression<gText> *) params[2]);
+  return new gelfuncLessText((gelExpression<gText *> *) params[1],
+			     (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_LessEqualNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLessEqualNumber((gelExpression<gNumber> *) params[1],
-				    (gelExpression<gNumber> *) params[2]);
+  return new gelfuncLessEqualNumber((gelExpression<gNumber *> *) params[1],
+				    (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_LessEqualText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncLessEqualText((gelExpression<gText> *) params[1],
-				  (gelExpression<gText> *) params[2]);
+  return new gelfuncLessEqualText((gelExpression<gText *> *) params[1],
+				  (gelExpression<gText *> *) params[2]);
 }
 
 
 gelExpr *GEL_Minus(const gArray<gelExpr *> &params)
 {
-  return new gelfuncMinus((gelExpression<gNumber> *) params[1],
-			  (gelExpression<gNumber> *) params[2]);
+  return new gelfuncMinus((gelExpression<gNumber *> *) params[1],
+			  (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_Negate(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNegate((gelExpression<gNumber> *) params[1]);
+  return new gelfuncNegate((gelExpression<gNumber *> *) params[1]);
 }
 
 gelExpr *GEL_Not(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNot((gelExpression<gTriState> *) params[1]);
+  return new gelfuncNot((gelExpression<gTriState *> *) params[1]);
 }
 
 gelExpr *GEL_NotEqualBoolean(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNotEqualBoolean((gelExpression<gTriState> *) params[1],
-				    (gelExpression<gTriState> *) params[2]);
+  return new gelfuncNotEqualBoolean((gelExpression<gTriState *> *) params[1],
+				    (gelExpression<gTriState *> *) params[2]);
 }
 
 gelExpr *GEL_NotEqualNumber(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNotEqualNumber((gelExpression<gNumber> *) params[1],
-				   (gelExpression<gNumber> *) params[2]);
+  return new gelfuncNotEqualNumber((gelExpression<gNumber *> *) params[1],
+				   (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_NotEqualText(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNotEqualText((gelExpression<gText> *) params[1],
-				 (gelExpression<gText> *) params[2]);
+  return new gelfuncNotEqualText((gelExpression<gText *> *) params[1],
+				 (gelExpression<gText *> *) params[2]);
 }
 
 gelExpr *GEL_NthElement(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNthElement((gelExpression<gText> *) params[1],
-			       (gelExpression<gNumber> *) params[2]);
+  return new gelfuncNthElement((gelExpression<gText *> *) params[1],
+			       (gelExpression<gNumber *> *) params[2]);
 }
 
 gelExpr *GEL_NumChars(const gArray<gelExpr *> &params)
 {
-  return new gelfuncNumChars((gelExpression<gText> *) params[1]);
+  return new gelfuncNumChars((gelExpression<gText *> *) params[1]);
 }
 
 gelExpr *GEL_Or(const gArray<gelExpr *> &params)
 {
-  return new gelfuncOr((gelExpression<gTriState> *) params[1],
-		       (gelExpression<gTriState> *) params[2]);
+  return new gelfuncOr((gelExpression<gTriState *> *) params[1],
+		       (gelExpression<gTriState *> *) params[2]);
 }
 
 gelExpr *GEL_Plus(const gArray<gelExpr *> &params)
 {
-  return new gelfuncPlus((gelExpression<gNumber> *) params[1],
-			 (gelExpression<gNumber> *) params[2]);
+  return new gelfuncPlus((gelExpression<gNumber *> *) params[1],
+			 (gelExpression<gNumber *> *) params[2]);
 }
 
 
 gelExpr *GEL_Times(const gArray<gelExpr *> &params)
 {
-  return new gelfuncTimes((gelExpression<gNumber> *) params[1],
-			  (gelExpression<gNumber> *) params[2]);
+  return new gelfuncTimes((gelExpression<gNumber *> *) params[1],
+			  (gelExpression<gNumber *> *) params[2]);
 }
 
 #include "match.h"

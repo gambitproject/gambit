@@ -92,14 +92,8 @@ void gNestedList<T>::GetElementInfo( int el,
   gout << "islist: " << islist << " k_start: " << k_start << " k_end: " << k_end << " el_start: " << el_start << " el_end: " << el_end << '\n';
 }
 
-
-
-
-// this dumb second parameter is only here to facilitate printing
-//   of gTriState stuff
 template <class T> 
-void gNestedList<T>::Output( gOutput& out, 
-			     gOutput& (*disp_func)( gOutput& out, T ) ) const
+void gNestedList<T>::Output( gOutput& out ) const 
 {
   int i;
   int j;
@@ -108,11 +102,7 @@ void gNestedList<T>::Output( gOutput& out,
   if( m_Dim[1] == 0 ) // not a list
   {
     assert( m_Dim.Length() == 1 );
-
-    if( disp_func )
-      disp_func( out, Data()[1] );
-    else
-      out << Data()[1];    
+    out << Data()[1];    
   }
   else // is a list
   {
@@ -121,10 +111,7 @@ void gNestedList<T>::Output( gOutput& out,
       assert( m_Dim[i] != 0 );
       for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
-	if( disp_func )
-	  disp_func( out, Data()[el] );
-	else
-	  out << Data()[el];
+	out << Data()[el];
 
 	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
 	  out << ", ";
@@ -266,8 +253,139 @@ void gNestedList<T>::Remove( int el )
 
 
 
+void gNestedList<gTriState *>::Output( gOutput& out ) const 
+{
+  int i;
+  int j;
+  int el = 1;
 
-template class gList<int>;
+  if( m_Dim[1] == 0 ) // not a list
+  {
+    assert( m_Dim.Length() == 1 );
+    switch (*Data()[1])  {
+    case triTRUE:
+      out << "True";
+      break;
+    case triFALSE:
+      out << "False";
+      break;
+    case triMAYBE:
+      out << "Maybe";
+      break;
+    }
+  }
+  else // is a list
+  {
+    for (i = 1; i <= m_Dim.Length(); ++i )
+    {
+      assert( m_Dim[i] != 0 );
+      for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
+      {
+	switch (*Data()[el])  {
+	case triTRUE:
+	  out << "True";
+	  break;
+	case triFALSE:
+	  out << "False";
+	  break;
+	case triMAYBE:
+	  out << "Maybe";
+	  break;
+	}
+
+	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
+	  out << ", ";
+	else
+	  out << ' ';
+	++el;
+      }
+      if( m_Dim[i] > 0 )
+	out << "{ ";
+      else if( i == m_Dim.Length() || 
+	       ( i < m_Dim.Length() && m_Dim[i+1] == -1 ) )
+	out << "} ";
+      else
+	out << "}, ";
+    }
+  }
+}
+
+void gNestedList<gNumber *>::Output( gOutput& out ) const 
+{
+  int i;
+  int j;
+  int el = 1;
+
+  if( m_Dim[1] == 0 ) // not a list
+  {
+    assert( m_Dim.Length() == 1 );
+
+    out << *Data()[1];    
+  }
+  else // is a list
+  {
+    for (i = 1; i <= m_Dim.Length(); ++i )
+    {
+      assert( m_Dim[i] != 0 );
+      for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
+      {
+	out << *Data()[el];
+
+	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
+	  out << ", ";
+	else
+	  out << ' ';
+	++el;
+      }
+      if( m_Dim[i] > 0 )
+	out << "{ ";
+      else if( i == m_Dim.Length() || 
+	       ( i < m_Dim.Length() && m_Dim[i+1] == -1 ) )
+	out << "} ";
+      else
+	out << "}, ";
+    }
+  }
+}
+
+void gNestedList<gText *>::Output( gOutput& out ) const 
+{
+  int i;
+  int j;
+  int el = 1;
+
+  if( m_Dim[1] == 0 ) // not a list
+  {
+    assert( m_Dim.Length() == 1 );
+
+    out << *Data()[1];    
+  }
+  else // is a list
+  {
+    for (i = 1; i <= m_Dim.Length(); ++i )
+    {
+      assert( m_Dim[i] != 0 );
+      for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
+      {
+	out << *Data()[el];
+
+	if( j != abs( m_Dim[i] ) - 2 || m_Dim[i] > 0 )
+	  out << ", ";
+	else
+	  out << ' ';
+	++el;
+      }
+      if( m_Dim[i] > 0 )
+	out << "{ ";
+      else if( i == m_Dim.Length() || 
+	       ( i < m_Dim.Length() && m_Dim[i+1] == -1 ) )
+	out << "} ";
+      else
+	out << "}, ";
+    }
+  }
+}
+
 
 class Efg;
 class Node;
@@ -284,9 +402,9 @@ class NFPlayer;
 class NFSupport;
 class MixedSolution;
 
-template class gNestedList<gNumber>;
-template class gNestedList<gText>;
-template class gNestedList<gTriState>;
+template class gNestedList<gNumber *>;
+template class gNestedList<gText *>;
+template class gNestedList<gTriState *>;
 template class gNestedList<Efg *>;
 template class gNestedList<Node *>;
 template class gNestedList<Infoset *>;
@@ -318,9 +436,9 @@ template class gList<gNestedList<NFSupport *> >;
 template class gList<gNestedList<MixedSolution *> >;
 
 
-template gOutput &operator<<(gOutput &, const gNestedList<gNumber> &);
-template gOutput &operator<<(gOutput &, const gNestedList<gText> &);
-template gOutput &operator<<(gOutput &, const gNestedList<gTriState> &);
+template gOutput &operator<<(gOutput &, const gNestedList<gNumber *> &);
+template gOutput &operator<<(gOutput &, const gNestedList<gText *> &);
+template gOutput &operator<<(gOutput &, const gNestedList<gTriState *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<Efg *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<Node *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<Action *> &);

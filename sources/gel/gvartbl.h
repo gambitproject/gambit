@@ -18,13 +18,13 @@ class gelVariableTable
 {
 private:
   gList<gText> m_NumberNames;
-  gList< gNestedList<gNumber> > m_NumberValues;
-  
+  gList< gNestedList<gNumber *> > m_NumberValues;
+
   gList<gText> m_BooleanNames;
-  gList< gNestedList<gTriState> > m_BooleanValues;
-  
+  gList< gNestedList<gTriState *> > m_BooleanValues;
+
   gList<gText> m_TextNames;
-  gList< gNestedList<gText> > m_TextValues;
+  gList< gNestedList<gText *> > m_TextValues;
 
   gList<gText> m_EfgNames;
   gList<gNestedList<Efg *> > m_EfgValues;
@@ -75,9 +75,9 @@ public:
   void Define(const gText& name, gelType type);
   gelType Type(const gText& name) const;
 
-  void Value(const gText &name, gNestedList<gNumber> &) const;
-  void Value(const gText &name, gNestedList<gTriState> &) const;
-  void Value(const gText &name, gNestedList<gText> &) const;
+  void Value(const gText &name, gNestedList<gNumber *> &) const;
+  void Value(const gText &name, gNestedList<gTriState *> &) const;
+  void Value(const gText &name, gNestedList<gText *> &) const;
   void Value(const gText &name, gNestedList<Efg *> &) const;
   void Value(const gText &name, gNestedList<Node *> &) const;
   void Value(const gText &name, gNestedList<Action *> &) const;
@@ -93,9 +93,9 @@ public:
   void Value(const gText &name, gNestedList<NFSupport *> &) const;
   void Value(const gText &name, gNestedList<MixedSolution *> &) const;
 
-  void SetValue(const gText &name, const gNestedList<gNumber> &value);
-  void SetValue(const gText &name, const gNestedList<gTriState> &value);
-  void SetValue(const gText &name, const gNestedList<gText> &value);
+  void SetValue(const gText &name, const gNestedList<gNumber *> &value);
+  void SetValue(const gText &name, const gNestedList<gTriState *> &value);
+  void SetValue(const gText &name, const gNestedList<gText *> &value);
   void SetValue(const gText &name, const gNestedList<Efg *> &value);
   void SetValue(const gText &name, const gNestedList<Node *> &value);
   void SetValue(const gText &name, const gNestedList<Action *> &value);
