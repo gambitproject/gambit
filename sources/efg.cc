@@ -661,18 +661,18 @@ Infoset *BaseEfg::SplitInfoset(Node *n)
 	if (s->members.Length() == 1)   return s;
 
 	EFPlayer *p = s->player;
-	n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
+	Infoset *ns = CreateInfoset(p->infosets.Length() + 1, p,
 					 n->children.Length());
-	n->infoset->name = s->name;
+	ns->name = s->name;
 	int i;
-	for (i=s->members.Find(n);i<=s->members.Length();i++)
+	for (i=s->members.Length();i>s->members.Find(n);i--)
 	{
 		Node *nn=s->members.Remove(i);
-		n->infoset->members.Append(nn);
-		nn->infoset=n->infoset;
+		ns->members.Append(nn);
+		nn->infoset=ns;
 	}
 	for (i = 1; i <= s->actions.Length(); i++)
-		n->infoset->actions[i]->name = s->actions[i]->name;
+		ns->actions[i]->name = s->actions[i]->name;
 
 	DeleteLexicon();
 	SortInfosets();
