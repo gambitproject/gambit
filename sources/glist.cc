@@ -23,6 +23,7 @@ template class gList<gText>;
 
 template class gList<gBlock<int> >;
 template class gList<gArray<int> >;
+template class gList<gList<int> >;
 
 template class gList<bool>;
 template gOutput &operator<<(gOutput &, const gList<bool> &);
