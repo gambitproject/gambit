@@ -58,7 +58,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+/*
 
   gout << "\n";
   machine->Push( d_1 );
@@ -2491,6 +2491,7 @@ int main( void )
 #endif
 
 
+
   prog = new gList< Instruction* >;
   prog->Append( new PushRef( "temp" ) );
   prog->Append( new PushRef( "a" ) );
@@ -2538,6 +2539,39 @@ int main( void )
   machine->PushRef( "t1" );
   machine->PushRef( "t2" );
   machine->Dump();
+
+
+  machine->PushRef( "t1" );
+  machine->Dump();
+  
+  machine->InitCallFunction( "TestSwap" );
+  machine->PushRef( "t1" );
+  machine->Bind();
+  machine->Push( "test string" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Flush();
+
+  machine->PushRef( "t1" );
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->InitCallFunction( "TestSwap" );
+  machine->PushRef( "t1" );
+  machine->Bind();
+  machine->Push( "test string" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Flush();
+
+
 
 
 #ifdef INTERACTIVE
@@ -2702,6 +2736,34 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+*/
+
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "NewInput" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
+
+  machine->InitCallFunction( "WriteEfg" );
+  machine->PushRef( "OUTPUT" );
+  machine->Bind();
+  machine->PushRef( "E" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Output();
+  
+  machine->Dump();
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;

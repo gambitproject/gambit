@@ -1201,7 +1201,7 @@ RefCountHashTable< gOutput* > Output_Portion::_RefCountTable;
 
 Output_Portion::Output_Portion( gOutput& value, bool var_static )
 {
-  _Static = var_static;
+  _Static = false;
   _Value = &value;
   if( !_Static )
   {
@@ -1230,7 +1230,8 @@ Output_Portion::~Output_Portion()
     if( _RefCountTable( _Value ) == 0 )
     {
       _RefCountTable.Remove( _Value );
-      delete _Value;
+      if( _Value != &gout && _Value != &gnull )
+	delete _Value;
 #ifdef MEMCHECK
       _NumObj--;
       gout << ">>> gOutput Dtor - count: " << _NumObj << "\n";
@@ -1269,7 +1270,7 @@ RefCountHashTable< gInput* > Input_Portion::_RefCountTable;
 
 Input_Portion::Input_Portion( gInput& value, bool var_static )
 {
-  _Static = var_static;
+  _Static = false;
   _Value = &value;
   if( !_Static )
   {
@@ -1298,7 +1299,8 @@ Input_Portion::~Input_Portion()
     if( _RefCountTable( _Value ) == 0 )
     {
       _RefCountTable.Remove( _Value );
-      delete _Value;
+      if( _Value != &gin )
+	delete _Value;
 #ifdef MEMCHECK
       _NumObj--;
       gout << ">>> gInput Dtor - count: " << _NumObj << "\n";

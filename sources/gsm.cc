@@ -51,12 +51,6 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _ErrorMessage( _StdErr, 1, size );
 #endif // NDEBUG
   
-  _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
-  _StackStack->Push( new gGrowableStack< Portion* >( size ) );
-  _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
-  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
-  _RefTableStack->Push( new RefHashTable );
-
   // global function default variables initialization
   // these should be done before InitFunctions() is called
   if( _NumObj == 0 )
@@ -76,6 +70,12 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _OUTPUT = new Output_Portion( _StdOut,  true );
     _NULL   = new Output_Portion( gnull,    true );
   }
+
+  _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
+  _StackStack->Push( new gGrowableStack< Portion* >( size ) );
+  _CallFuncStack = new gGrowableStack< CallFuncObj* >( size ) ;
+  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
+  _RefTableStack->Push( new RefHashTable );
 
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
@@ -101,6 +101,14 @@ GSM::~GSM()
   Flush();
   delete _FuncTable;
 
+  assert( _RefTableStack->Depth() == 1 );
+  delete _RefTableStack->Pop();
+  delete _RefTableStack;
+
+  assert( _StackStack->Depth() == 1 );
+  delete _StackStack->Pop();
+  delete _StackStack;
+
   if( _NumObj == 0 )
   {
     delete _DefaultNfgShadow->ShadowOf();
@@ -113,14 +121,6 @@ GSM::~GSM()
     delete _OUTPUT;
     delete _NULL;
   }
-
-  assert( _RefTableStack->Depth() == 1 );
-  delete _RefTableStack->Pop();
-  delete _RefTableStack;
-
-  assert( _StackStack->Depth() == 1 );
-  delete _StackStack->Pop();
-  delete _StackStack;
 }
 
 
