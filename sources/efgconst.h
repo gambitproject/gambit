@@ -106,7 +106,6 @@ typedef enum {
   efgmenuPREFS_SET_ZOOM = 1600,
   efgmenuPREFS_INC_ZOOM = 1601,  // toolbar only
   efgmenuPREFS_DEC_ZOOM = 1602,  // toolbar only
-  efgmenuPREFS_DISPLAY = 1603,
   efgmenuPREFS_LEGEND = 1604,
   efgmenuPREFS_COLORS = 1609,
   efgmenuPREFS_ACCELS = 1610,
@@ -115,6 +114,16 @@ typedef enum {
   efgmenuPREFS_SAVE_CUSTOM = 1607,
   efgmenuPREFS_LOAD_CUSTOM = 1608,
   efgmenuPREFS_REDRAW = 1611,  // accelerator only (?)
+  efgmenuPREFS_FONTS = 1612,
+  efgmenuPREFS_FONTS_ABOVENODE = 1613,
+  efgmenuPREFS_FONTS_BELOWNODE = 1614,
+  efgmenuPREFS_FONTS_AFTERNODE = 1615,
+  efgmenuPREFS_FONTS_ABOVEBRANCH = 1616,
+  efgmenuPREFS_FONTS_BELOWBRANCH = 1617,
+  efgmenuPREFS_DISPLAY = 1603,
+  efgmenuPREFS_DISPLAY_DECIMALS = 1618,
+  efgmenuPREFS_DISPLAY_FLASHING = 1619,
+  efgmenuPREFS_DISPLAY_LAYOUT = 1620,
 
   efgmenuHELP_CONTENTS = 1700,
   efgmenuHELP_ABOUT = 1701

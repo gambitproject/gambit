@@ -908,10 +908,34 @@ void EfgShow::MakeMenus(void)
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(efgmenuPREFS_SET_ZOOM, "&Zoom",
 		     "Specify zoom level");
-  prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display",
+
+  wxMenu *prefsDisplayMenu = new wxMenu;
+  prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_DECIMALS, "&Decimal Places",
+			   "Set number of decimal places to display");
+  prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_FLASHING, "&Flashing Cursor",
+			   "Toggle flashing cursor", TRUE);
+  prefsDisplayMenu->Append(efgmenuPREFS_DISPLAY_LAYOUT, "&Layout",
+			   "Set tree layout parameters");
+  prefs_menu->Append(efgmenuPREFS_DISPLAY, "&Display", prefsDisplayMenu,
 		     "Set display options");
-  prefs_menu->Append(efgmenuPREFS_LEGEND, "&Legend",
+
+  prefs_menu->Append(efgmenuPREFS_LEGEND, "&Legends...",
 		     "Set legends");
+
+  wxMenu *prefsFontsMenu = new wxMenu;
+  prefsFontsMenu->Append(efgmenuPREFS_FONTS_ABOVENODE, "Above Node",
+			 "Font for label above nodes");
+  prefsFontsMenu->Append(efgmenuPREFS_FONTS_BELOWNODE, "Below Node",
+			 "Font for label below nodes");
+  prefsFontsMenu->Append(efgmenuPREFS_FONTS_AFTERNODE, "After Node",
+			 "Font for label to right of nodes");
+  prefsFontsMenu->Append(efgmenuPREFS_FONTS_ABOVEBRANCH, "Above Branch",
+			 "Font for label above branches");
+  prefsFontsMenu->Append(efgmenuPREFS_FONTS_BELOWBRANCH, "Below Branch",
+			 "Font for label below branches");
+  prefs_menu->Append(efgmenuPREFS_FONTS, "&Fonts", prefsFontsMenu,
+		     "Set display fonts");
+
   prefs_menu->Append(efgmenuPREFS_COLORS, "&Colors",
 		     "Set player colors");
   prefs_menu->Append(efgmenuPREFS_ACCELS, "&Accels",
@@ -1188,8 +1212,31 @@ void EfgShow::OnMenuCommand(int id)
     case efgmenuPREFS_LEGEND:
       tw->display_legends();
       break;
-    case efgmenuPREFS_DISPLAY:
-      tw->display_options();
+    case efgmenuPREFS_FONTS_ABOVENODE:
+      tw->display_fonts_abovenode();
+      break;
+    case efgmenuPREFS_FONTS_BELOWNODE:
+      tw->display_fonts_belownode();
+      break;
+    case efgmenuPREFS_FONTS_AFTERNODE:
+      tw->display_fonts_afternode();
+      break;
+    case efgmenuPREFS_FONTS_ABOVEBRANCH:
+      tw->display_fonts_abovebranch();
+      break;
+    case efgmenuPREFS_FONTS_BELOWBRANCH:
+      tw->display_fonts_belowbranch();
+      break;
+    case efgmenuPREFS_DISPLAY_LAYOUT:
+      tw->prefs_display_layout();
+      break;
+    case efgmenuPREFS_DISPLAY_FLASHING:
+      tw->prefs_display_flashing();
+      GetMenuBar()->Check(efgmenuPREFS_DISPLAY_FLASHING,
+			  tw->DrawSettings().FlashingCursor());
+      break;
+    case efgmenuPREFS_DISPLAY_DECIMALS:
+      tw->prefs_display_decimals();
       break;
     case efgmenuPREFS_COLORS:
       tw->display_colors();

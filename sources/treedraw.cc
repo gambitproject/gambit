@@ -28,8 +28,6 @@ TreeDrawSettings::TreeDrawSettings(void)
 class dialogTreeOptions : public guiAutoDialog {
 private:
   wxSlider *m_branchLength, *m_nodeLength, *m_forkLength, *m_ySpacing;
-  wxSlider *m_decimals;
-  wxCheckBox *m_flashingCursor, *m_coloredOutcomes;
   wxRadioBox *m_infosetLines;
 
 public:
@@ -40,11 +38,7 @@ public:
   int NodeLength(void) const { return m_nodeLength->GetValue(); }
   int ForkLength(void) const { return m_forkLength->GetValue(); }
   int YSpacing(void) const { return m_ySpacing->GetValue(); }
-  int Decimals(void) const { return m_decimals->GetValue(); }
 
-  bool FlashingCursor(void) const { return m_flashingCursor->GetValue(); }
-  bool ColoredOutcomes(void) const { return m_coloredOutcomes->GetValue(); }
-  
   int InfosetStyle(void) const { return m_infosetLines->GetSelection(); }
 };
 
@@ -99,42 +93,17 @@ dialogTreeOptions::dialogTreeOptions(const TreeDrawSettings &p_settings,
   m_ySpacing->GetConstraints()->width.AsIs();
   m_ySpacing->GetConstraints()->height.AsIs();
 
-  m_flashingCursor = new wxCheckBox(this, 0, "Flashing Cursor");
-  m_flashingCursor->SetValue(p_settings.FlashingCursor());
-  m_flashingCursor->SetConstraints(new wxLayoutConstraints);
-  m_flashingCursor->GetConstraints()->left.SameAs(m_ySpacing, wxLeft);
-  m_flashingCursor->GetConstraints()->top.SameAs(layoutGroup, wxBottom, 10);
-  m_flashingCursor->GetConstraints()->width.AsIs();
-  m_flashingCursor->GetConstraints()->height.AsIs();
-
-  m_coloredOutcomes = new wxCheckBox(this, 0, "Color-coded Outcomes");
-  m_coloredOutcomes->SetValue(p_settings.ColorCodedOutcomes());
-  m_coloredOutcomes->SetConstraints(new wxLayoutConstraints);
-  m_coloredOutcomes->GetConstraints()->left.SameAs(m_flashingCursor,
-						   wxRight, 10);
-  m_coloredOutcomes->GetConstraints()->top.SameAs(m_flashingCursor, wxTop);
-  m_coloredOutcomes->GetConstraints()->width.AsIs();
-  m_coloredOutcomes->GetConstraints()->height.AsIs();
-
   char *lineChoices[] = { "None", "Same Level", "All Levels" };
   m_infosetLines = new wxRadioBox(this, 0, "Show Infoset Lines",
 				  1, 1, -1, -1, 3, lineChoices);
   m_infosetLines->SetSelection(p_settings.ShowInfosets());
   m_infosetLines->SetConstraints(new wxLayoutConstraints);
   m_infosetLines->GetConstraints()->left.SameAs(layoutGroup, wxLeft);
-  m_infosetLines->GetConstraints()->top.SameAs(m_flashingCursor, wxBottom, 10);
+  m_infosetLines->GetConstraints()->top.SameAs(layoutGroup, wxBottom, 10);
   m_infosetLines->GetConstraints()->width.AsIs();
   m_infosetLines->GetConstraints()->height.AsIs();
 
-  m_decimals = new wxSlider(this, 0, "Decimal Places",
-			    p_settings.NumDecimals(), 0, 16, 250, 1, 1);
-  m_decimals->SetConstraints(new wxLayoutConstraints);
-  m_decimals->GetConstraints()->left.SameAs(m_infosetLines, wxLeft);
-  m_decimals->GetConstraints()->top.SameAs(m_infosetLines, wxBottom, 10);
-  m_decimals->GetConstraints()->width.AsIs();
-  m_decimals->GetConstraints()->height.AsIs();
-
-  m_okButton->GetConstraints()->top.SameAs(m_decimals, wxBottom, 10);
+  m_okButton->GetConstraints()->top.SameAs(m_infosetLines, wxBottom, 10);
   m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
   m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
   m_okButton->GetConstraints()->height.AsIs();
@@ -161,10 +130,7 @@ void TreeDrawSettings::SetOptions(void)
     node_length = dialog.NodeLength();
     fork_length = dialog.ForkLength();
     y_spacing = dialog.YSpacing();
-    flashing_cursor = dialog.FlashingCursor();
-    color_coded_outcomes = dialog.ColoredOutcomes();
     show_infosets = dialog.InfosetStyle();
-    num_prec = dialog.Decimals();
   }
 }
 
@@ -238,247 +204,125 @@ void TreeDrawSettings::draw_params_legends_func(wxButton &ob, wxCommandEvent &)
 
 
 #include "legend.h"
+
+class dialogLegends : public guiAutoDialog {
+private:
+  wxChoice *m_nodeAbove, *m_nodeBelow, *m_nodeAfter;
+  wxChoice *m_branchAbove, *m_branchBelow;
+
+public:
+  dialogLegends(const TreeDrawSettings &, wxWindow *);
+  virtual ~dialogLegends() { }
+
+  int GetNodeAbove(void) const { return m_nodeAbove->GetSelection(); }
+  int GetNodeBelow(void) const { return m_nodeBelow->GetSelection(); }
+  int GetNodeAfter(void) const { return m_nodeAfter->GetSelection(); }
+
+  int GetBranchAbove(void) const { return m_branchAbove->GetSelection(); }
+  int GetBranchBelow(void) const { return m_branchBelow->GetSelection(); }
+};
+
+dialogLegends::dialogLegends(const TreeDrawSettings &p_options,
+			     wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Legends")
+{
+  wxGroupBox *nodeGroup = new wxGroupBox(this, "Nodes");
+
+  char *nodeLabelList[] = { "Nothing", "Node Label", "Player",
+			    "Infoset Label", "Infoset ID",
+			    "Outcome", "Realiz Prob", "Belief Prob",
+			    "Value" };
+  m_nodeAbove = new wxChoice(this, 0, "Above", 1, 1, -1, -1,
+			     9, nodeLabelList);
+  m_nodeAbove->SetSelection(p_options.LabelNodeAbove());
+  m_nodeAbove->SetConstraints(new wxLayoutConstraints);
+  m_nodeAbove->GetConstraints()->top.SameAs(nodeGroup, wxTop, 20);
+  m_nodeAbove->GetConstraints()->left.SameAs(nodeGroup, wxLeft, 10);
+  m_nodeAbove->GetConstraints()->width.AsIs();
+  m_nodeAbove->GetConstraints()->height.AsIs();
+
+  m_nodeBelow = new wxChoice(this, 0, "Below", 1, 1, -1, -1,
+			     9, nodeLabelList);
+  m_nodeBelow->SetSelection(p_options.LabelNodeBelow());
+  m_nodeBelow->SetConstraints(new wxLayoutConstraints);
+  m_nodeBelow->GetConstraints()->top.SameAs(m_nodeAbove, wxBottom, 10);
+  m_nodeBelow->GetConstraints()->left.SameAs(m_nodeAbove, wxLeft);
+  m_nodeBelow->GetConstraints()->width.AsIs();
+  m_nodeBelow->GetConstraints()->height.AsIs();
+
+  char *nodeAfterList[] = { "Nothing", "Payoffs", "Name" };
+  m_nodeAfter = new wxChoice(this, 0, "After", 1, 1, -1, -1,
+			     3, nodeAfterList);
+  m_nodeAfter->SetSelection(p_options.LabelNodeRight());
+  m_nodeAfter->SetConstraints(new wxLayoutConstraints);
+  m_nodeAfter->GetConstraints()->top.SameAs(m_nodeBelow, wxBottom, 10);
+  m_nodeAfter->GetConstraints()->left.SameAs(m_nodeBelow, wxLeft);
+  m_nodeAfter->GetConstraints()->width.AsIs();
+  m_nodeAfter->GetConstraints()->height.AsIs();
+
+  nodeGroup->SetConstraints(new wxLayoutConstraints);
+  nodeGroup->GetConstraints()->top.SameAs(this, wxTop, 10);
+  nodeGroup->GetConstraints()->bottom.SameAs(m_nodeAfter, wxBottom, -10);
+  nodeGroup->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  nodeGroup->GetConstraints()->right.SameAs(m_nodeAbove, wxRight, -10); 
+
+  wxGroupBox *branchGroup = new wxGroupBox(this, "Branches");
+
+  char *branchLabelList[] = { "Nothing", "Label", "Player", "Probs", "Value" };
+  m_branchAbove = new wxChoice(this, 0, "Above", 1, 1, -1, -1,
+			       5, branchLabelList);
+  m_branchAbove->SetSelection(p_options.LabelBranchAbove());
+  m_branchAbove->SetConstraints(new wxLayoutConstraints);
+  m_branchAbove->GetConstraints()->top.SameAs(branchGroup, wxTop, 20);
+  m_branchAbove->GetConstraints()->left.SameAs(branchGroup, wxLeft, 10);
+  m_branchAbove->GetConstraints()->width.AsIs();
+  m_branchAbove->GetConstraints()->height.AsIs();
+
+  m_branchBelow = new wxChoice(this, 0, "Below", 1, 1, -1, -1,
+			       5, branchLabelList);
+  m_branchBelow->SetSelection(p_options.LabelBranchBelow());
+  m_branchBelow->SetConstraints(new wxLayoutConstraints);
+  m_branchBelow->GetConstraints()->top.SameAs(m_branchAbove, wxBottom, 10);
+  m_branchBelow->GetConstraints()->left.SameAs(m_branchAbove, wxLeft);
+  m_branchBelow->GetConstraints()->width.AsIs();
+  m_branchBelow->GetConstraints()->height.AsIs();
+
+  branchGroup->SetConstraints(new wxLayoutConstraints);
+  branchGroup->GetConstraints()->top.SameAs(nodeGroup, wxTop);
+  branchGroup->GetConstraints()->bottom.SameAs(m_branchBelow, wxBottom, -10);
+  branchGroup->GetConstraints()->left.SameAs(nodeGroup, wxRight, 10);
+  branchGroup->GetConstraints()->right.SameAs(m_branchAbove, wxRight, -10);
+
+  m_okButton->GetConstraints()->top.SameAs(nodeGroup, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
 void TreeDrawSettings::SetLegends(void)
 {
-    int i;
-    wxStringList  *node_above_list    = new wxStringList;
-    wxStringList  *node_below_list    = new wxStringList;
-    wxStringList  *branch_above_list  = new wxStringList;
-    wxStringList  *branch_below_list  = new wxStringList;
-    wxStringList  *node_right_list    = new wxStringList;
-    char          *node_above_str     = new char[20];
-    char          *node_below_str     = new char[20];
-    char          *branch_above_str   = new char[20];
-    char          *branch_below_str   = new char[20];
-    char          *node_right_str     = new char[20];
-    int            node_above_num;
-    int            node_below_num;
-    int            branch_above_num;
-    int            branch_below_num;
-    int            node_right_num;
-    wxFont         fixed_font(12, wxMODERN, wxNORMAL, wxNORMAL);
+  dialogLegends dialog(*this, 0);
 
-    // Create the appropriate lists from the "legends.h" file.
-    i = 0;
-    while (node_above_src[i].l_id != -1)
-    {
-        node_above_list->Add(node_above_src[i].l_name);
-        i++;
-    }
-
-    i = 0;
-    while (node_below_src[i].l_id != -1)
-    {
-        node_below_list->Add(node_below_src[i].l_name);
-        i++;
-    }
-
-    i = 0;
-    while (branch_above_src[i].l_id != -1)
-    {
-        branch_above_list->Add(branch_above_src[i].l_name);
-        i++;
-    }
-
-    i = 0;
-    while (branch_below_src[i].l_id != -1)
-    {
-        branch_below_list->Add(branch_below_src[i].l_name);
-        i++;
-    }
-
-    i = 0;
-    while (node_right_src[i].l_id != -1)
-    {
-        node_right_list->Add(node_right_src[i].l_name);
-        i++;
-    }
-
-    // Copy the current settings into the new dialog.
-    strcpy(node_above_str,    node_above_src[LabelNodeAbove()].l_name);
-    strcpy(node_below_str,    node_below_src[LabelNodeBelow()].l_name);
-    strcpy(branch_above_str,  branch_above_src[LabelBranchAbove()].l_name);
-    strcpy(branch_below_str,  branch_below_src[LabelBranchBelow()].l_name);
-    strcpy(node_right_str,    node_right_src[LabelNodeRight()].l_name);
-
-    // Create the dialog box.
-    MyDialogBox *display_legend_dialog = new MyDialogBox(NULL, "Display Legends");
-    display_legend_dialog->SetLabelFont(&fixed_font);
-    display_legend_dialog->Add(wxMakeFormMessage("                   What to Display"));
-    display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormMessage("Above"));
-    wxFormItem *node_above_button = 
-        wxMakeFormButton("Font", (wxFunction)draw_params_legends_func);
-    display_legend_dialog->Add(node_above_button);
-    display_legend_dialog->Add(wxMakeFormString(NULL, &node_above_str, wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(node_above_list), 0)));
-    display_legend_dialog->Add(wxMakeFormString(NULL, &branch_above_str, wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(branch_above_list), 0)));
-    wxFormItem *branch_above_button = 
-        display_legend_dialog->Add(wxMakeFormButton("Font", 
-            (wxFunction)draw_params_legends_func));
-
-    display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormMessage("              Node           "));
-    display_legend_dialog->Add(wxMakeFormMessage("Branch"));
-    display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormMessage("Below"));
-    wxFormItem *node_below_button = 
-        display_legend_dialog->Add(wxMakeFormButton("Font", 
-            (wxFunction)draw_params_legends_func));
-
-    display_legend_dialog->Add(wxMakeFormString(NULL, &node_below_str, wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(node_below_list), 0)));
-    display_legend_dialog->Add(wxMakeFormString(NULL, &branch_below_str, wxFORM_CHOICE,
-        new wxList(wxMakeConstraintStrings(branch_below_list), 0)));
-    wxFormItem *branch_below_button = 
-        display_legend_dialog->Add(wxMakeFormButton("Font", 
-            (wxFunction)draw_params_legends_func));
-    display_legend_dialog->Add(wxMakeFormNewLine());
-    display_legend_dialog->Add(wxMakeFormString("At right", &node_right_str, 
-        wxFORM_CHOICE, new wxList(wxMakeConstraintStrings(node_right_list), 0)));
-    wxFormItem *node_right_button = 
-        display_legend_dialog->Add(wxMakeFormButton("Font", 
-            (wxFunction)draw_params_legends_func));
-
-    display_legend_dialog->AssociatePanel();
-
-    // Set up the font buttons.
-    draw_params_legend_struct dpls1 = { NODE_ABOVE_LEGEND, this };
-    node_above_button->PanelItem->SetClientData((char *)&dpls1);
-    draw_params_legend_struct dpls2 = { NODE_BELOW_LEGEND, this };
-    node_below_button->PanelItem->SetClientData((char *)&dpls2);
-    draw_params_legend_struct dpls3 = { BRANCH_ABOVE_LEGEND, this };
-    branch_above_button->PanelItem->SetClientData((char *)&dpls3);
-    draw_params_legend_struct dpls4 = { BRANCH_BELOW_LEGEND, this };
-    branch_below_button->PanelItem->SetClientData((char *)&dpls4);
-    draw_params_legend_struct dpls6 = { NODE_RIGHT_LEGEND, this };
-    node_right_button->PanelItem->SetClientData((char *)&dpls6);
-
-    // Start the dialog.
-    display_legend_dialog->Go1();
-
-    // Process the output of the dialog.
-    if (display_legend_dialog->Completed() == wxOK)
-    {
-        node_above_num    = wxListFindString(node_above_list,    node_above_str);
-        node_below_num    = wxListFindString(node_below_list,    node_below_str);
-        branch_above_num  = wxListFindString(branch_above_list,  branch_above_str);
-        branch_below_num  = wxListFindString(branch_below_list,  branch_below_str);
-        node_right_num    = wxListFindString(node_right_list,    node_right_str);
-
-        SetLabelNodeAbove(node_above_src[node_above_num].l_id);
-        SetLabelNodeBelow(node_below_src[node_below_num].l_id);
-        SetLabelBranchAbove(branch_above_src[branch_above_num].l_id);
-        SetLabelBranchBelow(branch_below_src[branch_below_num].l_id);
-        SetLabelNodeRight(node_right_src[node_right_num].l_id);
-    }
-
-    // Clean up.
-    delete [] node_above_str;
-    delete [] node_below_str;
-    delete [] branch_above_str;
-    delete [] branch_below_str;
-    delete [] node_right_str;
-    delete display_legend_dialog;
+  if (dialog.Completed() == wxOK) {
+    SetLabelNodeAbove(dialog.GetNodeAbove());
+    SetLabelNodeBelow(dialog.GetNodeBelow());
+    SetLabelNodeRight(dialog.GetNodeAfter());
+    SetLabelBranchAbove(dialog.GetBranchAbove());
+    SetLabelBranchBelow(dialog.GetBranchBelow());
+  }
 }
-
-
-void TreeDrawSettings::SetLegends(int what)
-{
-    MyDialogBox *d = new MyDialogBox(0, "Display Legend");
-    draw_params_legend_struct what_font = { what, this};
-    l_struct *legend_src = 0;
-    wxStringList *legend_list = new wxStringList;
-    char *legend_str = new char[30];
-    int legend_id;
-
-    switch (what)
-    {
-    case NODE_ABOVE_LEGEND: 
-        legend_src = node_above_src;
-        legend_id = node_above_label;
-        break;
-
-    case NODE_BELOW_LEGEND: 
-        legend_src = node_below_src;
-        legend_id = node_below_label;
-        break;
-
-    case BRANCH_ABOVE_LEGEND: 
-        legend_src = branch_above_src;
-        legend_id = branch_above_label;
-        break;
-
-    case BRANCH_BELOW_LEGEND: 
-        legend_src = branch_below_src;
-        legend_id = branch_below_label;
-        break;
-
-    case NODE_RIGHT_LEGEND: 
-        legend_src = node_right_src;
-        legend_id = node_right_label;
-        break;
-
-    default: 
-        assert(0 && "Invalid legend");
-    }
-
-    int i = 0;
-    while (legend_src[i].l_id != -1) 
-        legend_list->Add(legend_src[i++].l_name);
-
-    strcpy(legend_str, legend_src[legend_id].l_name); // set the current value
-    d->Add(wxMakeFormMessage("Legend For:"));
-    d->Add(wxMakeFormMessage(legends_src[what]));
-    d->Add(wxMakeFormNewLine());
-    d->Add(wxMakeFormString(0, &legend_str, wxFORM_CHOICE,
-                            new wxList(wxMakeConstraintStrings(legend_list), 0)));
-    wxFormItem *font_button = 
-        d->Add(wxMakeFormButton("Font", 
-                                (wxFunction)draw_params_legends_func));
-    d->AssociatePanel();
-
-    // Set up the font buttons.
-    font_button->GetPanelItem()->SetClientData((char *)&what_font);
-    d->Go1();
-
-    if (d->Completed() == wxOK)
-    {
-        int legend_num = wxListFindString(legend_list, legend_str);
-        legend_id = legend_src[legend_num].l_id;
-
-        switch (what)
-        {
-        case NODE_ABOVE_LEGEND: 
-            SetLabelNodeAbove(legend_id);
-            break;
-
-        case NODE_BELOW_LEGEND: 
-            SetLabelNodeBelow(legend_id);
-            break;
-
-        case BRANCH_ABOVE_LEGEND: 
-            SetLabelBranchAbove(legend_id);
-            break;
-
-        case BRANCH_BELOW_LEGEND: 
-            SetLabelBranchBelow(legend_id);
-            break;
-
-        case NODE_RIGHT_LEGEND: 
-            SetLabelNodeRight(legend_id);
-            break;
-
-        default: 
-            assert(0 && "Invalid legend");
-        }
-    }
-
-    delete [] legend_str;
-    delete d;
-}
-
 
 // Save options.  Uses the resource writing capability of wxwin to create
 // the file "gambit.ini" to which to write all the current settings from

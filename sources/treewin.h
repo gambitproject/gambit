@@ -261,7 +261,14 @@ public:
   void subgame_toggle(void);
     
   void display_legends(void);
-  void display_options(void);
+  void display_fonts_abovenode(void);
+  void display_fonts_belownode(void);
+  void display_fonts_afternode(void);
+  void display_fonts_abovebranch(void);
+  void display_fonts_belowbranch(void);
+  void prefs_display_flashing(void);
+  void prefs_display_decimals(void);
+  void prefs_display_layout(void);
   void display_colors(void);
   void display_save_options(Bool def=TRUE);
   void display_load_options(Bool def=TRUE);

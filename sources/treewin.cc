@@ -1123,11 +1123,10 @@ void TreeWindow::ProcessRDClick(wxMouseEvent &ev)
         {
 	  id = NODE_RIGHT_LEGEND;
         }
-        if (id != -1)
-        {
-            draw_settings.SetLegends(id);
-            OnPaint();
-            return;
+        if (id != -1) {
+	  draw_settings.SetLegends();
+	  OnPaint();
+	  return;
         }
     }
 }
@@ -2632,29 +2631,89 @@ void TreeWindow::display_legends(void)
     draw_settings.SetLegends();
 }
 
+void TreeWindow::display_fonts_abovenode(void)
+{
+  FontDialogBox dialog(this, draw_settings.NodeAboveFont());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetNodeAboveFont(dialog.MakeFont());
+  }
+}
+
+void TreeWindow::display_fonts_belownode(void)
+{
+  FontDialogBox dialog(this, draw_settings.NodeBelowFont());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetNodeBelowFont(dialog.MakeFont());
+  }
+}
+
+void TreeWindow::display_fonts_afternode(void)
+{
+  FontDialogBox dialog(this, draw_settings.NodeRightFont());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetNodeRightFont(dialog.MakeFont());
+  }
+}
+
+void TreeWindow::display_fonts_abovebranch(void)
+{
+  FontDialogBox dialog(this, draw_settings.BranchAboveFont());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetBranchAboveFont(dialog.MakeFont());
+  }
+}
+
+void TreeWindow::display_fonts_belowbranch(void)
+{
+  FontDialogBox dialog(this, draw_settings.BranchBelowFont());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetBranchBelowFont(dialog.MakeFont());
+  }
+}
+
 //***********************************************************************
 //                      DISPLAY OPTIONS HANDLER
 //***********************************************************************
 // Controls the size of the various tree parts
 
-void TreeWindow::display_options(void)
+void TreeWindow::prefs_display_layout(void)
 {
-    draw_settings.SetOptions();
-    // Must take care of flashing/nonflashing cursor here since draw_settings cannot
-    if (draw_settings.FlashingCursor() == TRUE && flasher->Type() == myCursor)
-    {
-        delete (TreeNodeCursor *)flasher;
-        flasher = new TreeNodeFlasher(GetDC());
-    }
-    
-    if (draw_settings.FlashingCursor() == FALSE && flasher->Type() == myFlasher)
-    {
-        delete (TreeNodeFlasher *)flasher;
-        flasher = new TreeNodeCursor(GetDC());
-    }
-
-    must_recalc = TRUE;
+  draw_settings.SetOptions();
+  must_recalc = TRUE;
 }
+
+void TreeWindow::prefs_display_decimals(void)
+{
+  guiSliderDialog dialog(this, "Decimal places", 0, 25,
+			 draw_settings.NumDecimals());
+
+  if (dialog.Completed() == wxOK) {
+    draw_settings.SetNumDecimals(dialog.GetValue());
+    must_recalc = TRUE;
+  }
+}
+
+void TreeWindow::prefs_display_flashing(void)
+{
+  if (draw_settings.FlashingCursor() == FALSE) {
+    draw_settings.SetFlashingCursor(TRUE);
+    delete (TreeNodeCursor *) flasher;
+    flasher = new TreeNodeFlasher(GetDC());
+  }
+  else {
+    draw_settings.SetFlashingCursor(FALSE);
+    delete (TreeNodeFlasher *) flasher;
+    flasher = new TreeNodeCursor(GetDC());
+  }
+
+  must_recalc = TRUE;
+}
+
 
 //***********************************************************************
 //                      DISPLAY COLORS HANDLER
