@@ -1,7 +1,7 @@
 //#
 //# FILE: nliap.cc -- Normal form Liapunov module
 //#
-//# $Id$
+//# @(#)nliap.cc	1.25 3/25/95
 //#
 
 #define MAXIT 10
@@ -158,14 +158,14 @@ template <class T> T NFLiapFunc<T>::Value(const gVector<T> &v)
       payoff(i, j) = N.Payoff(i, tmp);
       avg += x * payoff(i, j);
       sum += x;
-      x= (x > ((T) 0) ? ((T) 0) : x);
+			if (x>(T)0) x=0;
       result += BIG1*x*x;         // add penalty for neg probabilities
       tmp(i,j) = (T) 0;
     }
     tmp.CopyRow(i, p);
     for(j=1;j<=N.NumStrats(i);j++) {
       x=payoff(i,j)-avg;
-      x = (x > 0 ? x : 0);
+			if (x<=(T)0) x=(T)0;
       result += x*x;          // add penalty if not best response
     }
     x=sum - ((T) 1);
@@ -209,10 +209,10 @@ LiapDerivValue(int i1, int j1, const gPVector<T> &p) const
       psum+=p(i,j);
       x1=N.Payoff(i,i,j,p)-N.Payoff(i,p);
       if(i1==i) {
-	if(x1>0)x-=x1*(N.Payoff(i,i1,j1,p));
-      }
-      else {
-	if(x1>0)x+=x1*(N.Payoff(i,i,j,i1,j1,p)-N.Payoff(i,i1,j1,p));
+	if(x1>(T)0)x-=x1*(N.Payoff(i,i1,j1,p));
+			}
+			else {
+	if(x1>(T)0)x+=x1*(N.Payoff(i,i,j,i1,j1,p)-N.Payoff(i,i1,j1,p));
       }
     }
     if(i==i1)x+=psum-(T)1.0;
