@@ -71,6 +71,7 @@ class CallFuncObj : public FuncDescObj
 
  public:
   CallFuncObj( FuncDescObj* func );
+  ~CallFuncObj();
 
   void        SetCurrParamIndex ( const int index );
   void        SetCurrParam      ( Portion *new_param );

@@ -12,6 +12,8 @@
 #define PORTION_H
 
 
+#include "gambitio.h"
+
 #include "gblock.h"
 #include "rational.h"
 #include "gstring.h"
@@ -29,13 +31,19 @@ typedef enum
 
 
 
-typedef enum 
-{ 
-  porERROR, porBOOL, 
-  porNUMERICAL, porDOUBLE, porINTEGER, porRATIONAL, 
-  porSTRING, porLIST, porNFG,
-  porREFERENCE 
-} PortionType;
+typedef unsigned int PortionType;
+
+#define  porERROR      ( 0x00 )
+#define  porBOOL       ( 0x01 )
+#define  porDOUBLE     ( 0x02 )
+#define  porINTEGER    ( 0x04 )
+#define  porRATIONAL   ( 0x08 )
+#define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
+#define  porSTRING     ( 0x10 )
+#define  porLIST       ( 0x20 )
+#define  porNFG        ( 0x40 )
+#define  porREFERENCE  ( 0x80 )
+
 
 
 
@@ -195,6 +203,9 @@ class Nfg_Portion : public Portion
 };
 
 
+
+
+void PrintPortionTypeSpec( gOutput& s, PortionType type );
 
 
 

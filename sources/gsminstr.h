@@ -97,10 +97,7 @@ class Assign : public Instruction
 
 class UnAssign : public Instruction
 {
- private:
-  gString _Ref;
  public:
-  UnAssign( const gString& ref );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
 };

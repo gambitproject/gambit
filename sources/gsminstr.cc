@@ -73,13 +73,11 @@ bool Assign::Execute( GSM& gsm ) const
 { return gsm.Assign(); }
 
 
-UnAssign::UnAssign( const gString& ref )
-     :_Ref( ref )
-{ }
+
 Opcode UnAssign::Type( void ) const
 { return iUNASSIGN; }
 bool UnAssign::Execute( GSM& gsm ) const
-{ gsm.UnAssign( _Ref ); }
+{ gsm.UnAssign(); }
 
 
 //--------------------------- math operations ---------------------------

@@ -739,19 +739,85 @@ int main( void )
 
 
 
-  for( i = 0; i < 1000; i++ )
-  {
-    machine->Push( (double) i );
-  }
+  gout << "Negate\n";
+  machine->Push( (double) 10 );
+  machine->InitCallFunction( "Negate" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  gout << "EqualTo\n";
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "EqualTo" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "NotEqualTo" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "GreaterThan" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "LessThan" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "GreaterThanOrEqualTo" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( "hi!" );
+  machine->Push( "hello!" );
+  machine->InitCallFunction( "LessThanOrEqualTo" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
 
 
-  for( i = 0; i < 999; i++ )
-  {
-    machine->Add();
-  }
+  gout << "AND\n";
+  machine->Push( true );
+  machine->Push( false );
+  machine->InitCallFunction( "AND" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
 
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
+  machine->Push( true );
+  machine->Push( false );
+  machine->InitCallFunction( "OR" );
+  machine->Bind();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->Push( true );
+  machine->Push( false );
+  machine->InitCallFunction( "NOT" );
+  machine->Bind();
+  machine->CallFunction();
   machine->Dump();
 
 

@@ -350,23 +350,6 @@ bool GSM::UnAssign( void )
 }
 
 
-bool GSM::UnAssign( const gString& ref )
-{
-  if( _RefTable->IsDefined( ref ) )
-  {
-    _RefTable->Remove( ref );
-  }
-#ifndef NDEBUG
-  else
-  {
-    gerr << "GSM Warning: calling UnAssign() on a undefined reference\n";
-  }
-#endif // NDEBUG
-
-  return true;
-}
-
-
 
 
 //---------------------------------------------------------------------
@@ -580,21 +563,9 @@ void GSM::AddFunction( FuncDescObj* func )
 
 
 int FuncParamCheck( const PortionType stack_param_type, 
-		   const PortionType func_param_type )
+  		    const PortionType func_param_type )
 {
-  int result = true;
-
-  if( stack_param_type != func_param_type )
-  {
-    if( func_param_type != porNUMERICAL ||
-       !( stack_param_type == porDOUBLE ||
-	 stack_param_type == porINTEGER ||
-	 stack_param_type == porRATIONAL ) )
-    {
-      result = false;
-    }
-  }
-  return result;
+  return stack_param_type & func_param_type;
 }
 
 
@@ -614,7 +585,7 @@ bool GSM::InitCallFunction( const gString& funcname )
   else // ( !_FuncTable->IsDefined( funcname ) )
   {
     gerr << "GSM Error: undefined function name:\n";
-    gerr << "           InitCallFunction( \"" << funcname << "\", ... )\n";
+    gerr << "           InitCallFunction( \"" << funcname << "\" )\n";
     result = false;
   }
   return result;
@@ -665,10 +636,12 @@ bool GSM::Bind( void )
       funcname = func->FuncName();
       i        = func->GetCurrParamIndex();
       gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
-      gerr << "Error at Parameter #: " << i << "\n";
-      gerr << "       Expected type: " << func->GetCurrParamType() << "\n";
-      gerr << "       Type found:    " << param->Type() << "\n";
+      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+      gerr << "   Error at Parameter #: " << i << "\n";
+      gerr << "         Expected type: ";
+      PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
+      gerr << "         Type found:    ";
+      PrintPortionTypeSpec( gerr, param->Type() );
       result = false;
     }
   }

@@ -10,7 +10,6 @@
 
 #include <assert.h>
 #include "basic.h"
-#include "gambitio.h"
 
 
 #include "portion.h"
@@ -650,6 +649,42 @@ Portion* Nfg_Portion::operator()( const gString& ref ) const
   result = (*_RefTable)( ref );
   return result;
 }
+
+
+
+
+
+
+//--------------------------------------------------------------------
+//             miscellaneous PortionType functions
+//--------------------------------------------------------------------
+
+void PrintPortionTypeSpec( gOutput& s, PortionType type )
+{
+  if( type & porBOOL )
+    s << "porBOOL ";
+  if( type & porDOUBLE )
+    s << "porDOUBLE ";
+  if( type & porINTEGER )
+    s << "porINTEGER ";
+  if( type & porRATIONAL )
+    s << "porRATIONAL ";
+  if( type & porSTRING )
+    s << "porSTRING ";
+  if( type & porLIST )
+    s << "porLIST ";
+  if( type & porNFG )
+    s << "porNFG ";
+  if( type & porREFERENCE )
+    s << "porREFERENCE ";
+
+  s << "\n";
+}
+
+
+
+
+
 
 
 //----------------------------------------------------------------------

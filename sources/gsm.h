@@ -67,8 +67,6 @@ class GSM
   bool PushRef  ( const gString& ref, const gString& subref );
   bool Assign   ( void );
   bool UnAssign ( void );
-  bool UnAssign ( const gString& ref );
-//  bool UnAssign ( const gString& ref, const gString& subref );
 
 
   bool Add      ( void );
@@ -102,6 +100,7 @@ class GSM
   void Dump   ( void );
   void Flush  ( void );
 };
+
 
 
 

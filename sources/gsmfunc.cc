@@ -10,14 +10,14 @@
 // Usage:
 //
 // For each module of functions to be added to GSM, create an 
-// 'void Init_<name>( void )' function that calls GSM::AddFunction()
+// 'void Init_<name>( GSM* gsm )' function that calls GSM::AddFunction()
 // to add the desired functions into GSM, where <name> is the name of the 
 // particular module.  Then create a header file for that module, and include
 // it in this file.  Put the Init_<name>() function call in the 
 // GSM::InitFunctions() in this file.
 //
 // The definition for GSM::AddFunction is:
-//   GSM::AddFunction( gString reference, FuncDescObj *func_desc_obj );
+//   GSM::AddFunction( FuncDescObj *func_desc_obj );
 //
 // FuncDescObj is a class which stores the characteristics of each
 // particular function, such as the number of parameters and the type of
@@ -26,32 +26,37 @@
 // be decendents of Portion class.  Each function is expected to have
 // a return type of 'Portion *'.
 //
-// The FuncDescObj is created by passing its constructor with a function
-// pointer and the number of parameters.  Then the type of each parameter
-// can be specified with FuncDescObj::ParamType() function, as shown in
-// the example.  It is important to define the types for all parameters.
-// The valid parameter types are listed in portion.h, typedef PortionType.
+// The FuncDescObj is created by passing its constructor with the function
+// name, a pointer to the actual implementation of the function, and the 
+// number of parameters.  Then the type of each parameter can be specified 
+// with FuncDescObj::SetParamInfo() function, as shown in the example.  It 
+// is important to define the types for all parameters.  The valid parameter 
+// types are listed in portion.h, typedef PortionType.
 //
 // Example:
-//   void Init_myfunc( void )
+//   void Init_myfunc( GSM* gsm )
 //   {
 //     FuncDescObj *FuncObj;
 //
-//     FuncObj = new FuncDescObj( GCL_Sqr, 1 );
+//     FuncObj = new FuncDescObj( (gString) "Sqr", GCL_Sqr, 1 );
 //     FuncObj->SetParamInfo( 0, "n", porNUMERICAL, NO_DEFAULT_VALUE );
-//     GSM::AddFunction( (gString) "Sqr",  FuncObj );
+//     gsm->AddFunction( FuncObj );
 //
-//     FuncObj = new FuncDescObj( GCL_Angle, 2 );
+//     FuncObj = new FuncDescObj( (gString) "Angle", GCL_Angle, 2 );
 //     FuncObj->SetParamInfo( 0, "x", porDOUBLE, new numerical_Portion<double>( 1 ) );
 //     FuncObj->SetParamInfo( 1, "y", porDOUBLE, new numerical_Portion<double>( 1 ) );
-//     GSM::AddFunction( (gString) "Angle",  FuncObj );
+//     gsm->AddFunction( FuncObj );
 //   }
 //
 // Specifying a parameter type as porNUMERICAL means that the parameter
-// can be any of porDOUBLE, porINTEGER, or porRATIONAL types.  It is then
-// up to the function implementation to explicitly type cast those parameters.
-// Specifying a parameter type as porNUMERICAL also means that that parameter
-// cannot have a default value associated with it.
+// can be any of porDOUBLE, porINTEGER, or porRATIONAL types.  When a
+// parameter can accept multiple parameter types, those type declarations
+// can be ORed together with the bit-wise operater |. It is then up
+// to the function implementation to explicitly type cast those parameters.
+//
+// The current implementation mandates that if a parameter has a default
+// value, then that parameter can only accept a value with the same type
+// as the default value; otherwise the results are unpredictable.
 //
 // If a function returns 0 (null pointer), GSM will halt and give a general
 // error message.  So it may be a good idea to initialize the return value
@@ -73,15 +78,21 @@
 
 // The header files for each module should be placed here:
 
+#include "gsmoper.h"
+
 #include "gclmath.h"
 
 
 
 // This function is called once at the first instance of GSM.
 // The Init function of each module should be placed in this function:
+// Each Init() function should take the argument "this" so each instance
+// of GSM can add those functions to their memory.
 
 void GSM::InitFunctions( void )
 {
+  Init_gsmoper( this );
+
   Init_gclmath( this );
 }
 
@@ -326,6 +337,12 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
 }
 
 
+CallFuncObj::~CallFuncObj()
+{
+  delete[] _Param;
+}
+
+
 void CallFuncObj::SetCurrParamIndex( const int index )
 {
   _CurrParamIndex = index;
@@ -366,7 +383,7 @@ PortionType CallFuncObj::GetCurrParamType( void ) const
   else // ( _CurrParamIndex >= _NumParams )
   {
     gerr << "CallFuncObj Error: too many parameters specified for\n";
-    gerr << "                          function \"" << _FuncName << "\"\n";
+    gerr << "                   function \"" << _FuncName << "\"\n";
     return porERROR;
   }
 }
@@ -375,6 +392,7 @@ PortionType CallFuncObj::GetCurrParamType( void ) const
 Portion* CallFuncObj::CallFunction( void )
 {
   int index;
+  Portion* result = 0;
 
   for( index = 0; index < _NumParams; index++ )
   {
@@ -386,6 +404,8 @@ Portion* CallFuncObj::CallFunction( void )
       return 0;
     }
   }
-  return _FuncPtr( _Param );
+  result = _FuncPtr( _Param );
+  
+  return result;
 }
 
