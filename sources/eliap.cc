@@ -161,14 +161,20 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
        (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
        i++)   {
     if (i > 1)  PickRandomProfile(p);
-    
+
     InitMatrix(xi, p.Lengths());
+    
+    if(params.trace>0)
+      *params.tracefile << "\nTry #: " << i << " p: ";
     
     if (found = Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, 
-		       params.tolN,*params.tracefile, params.trace, 
-		       params.status)) 
+		       params.tolN,*params.tracefile, params.trace-1, 
+		       params.status)) {
       AddSolution(solutions, p, value);
+      if(params.trace>0)
+	*params.tracefile << p;
+    }
     if(params.status.Get()) params.status.Reset();
   }
 

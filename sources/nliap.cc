@@ -180,15 +180,21 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
        i++) { 
     if (i > 1) PickRandomProfile(p);
 
+    if(params.trace>0)
+      *params.tracefile << "\nTry #: " << i << " p: ";
+    
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		    params.maxitsN, params.tolN, *params.tracefile,
-		    params.trace, params.status))  {
+		    params.trace-1, params.status))  {
       bool add = false;
       if ((!params.status.Get()) 
 //	  || (params.status.Get() && p.IsNash())
 	)
 	add = true;
       if (add)  {
+	if(params.trace>0)
+	  *params.tracefile << p;
+	
 	int index = solutions.Append(MixedSolution<double>(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
 	if (!params.status.Get()) {
