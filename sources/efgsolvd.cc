@@ -21,6 +21,9 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
 					       wxWindow *p_parent)
   : wxDialogBox(p_parent, "Standard Solution", TRUE), m_efg(p_efg)
 {
+  wxLayoutConstraints *constraints;
+  SetAutoLayout(TRUE);
+
   gText defaultsFile(gambitApp.ResourceFile());
   int standardType = 0, standardNum = 0, precision = 0;
   wxGetResource(SOLN_SECT, "Efg-Standard-Type", &standardType, 
@@ -49,16 +52,35 @@ dialogEfgSolveStandard::dialogEfgSolveStandard(const Efg &p_efg,
   m_precision->SetSelection(precision);
   
   NewLine();
-  m_description = new wxText(this, 0, "Using algorithm", "", -1, -1, 250, -1);
+  m_description = new wxText(this, 0, "Using algorithm");
   m_description->Enable(FALSE);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.SameAs(this, wxCentreX);
+  constraints->width.PercentOf(this, wxWidth, 95);
+  constraints->height.Absolute(-1);
+  constraints->top.SameAs(m_standardType, wxBottom, 5);
+  m_description->SetConstraints(constraints);
 
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "OK");
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 35);
+  constraints->bottom.SameAs(this, wxBottom, 5);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  okButton->SetConstraints(constraints);
+  
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
+  constraints = new wxLayoutConstraints;
+  constraints->centreX.PercentOf(this, wxWidth, 65);
+  constraints->bottom.SameAs(okButton, wxBottom);
+  constraints->width.PercentOf(this, wxWidth, 20);
+  constraints->height.PercentOf(this, wxHeight, 20);
+  cancelButton->SetConstraints(constraints);
 
   OnChanged();
 
