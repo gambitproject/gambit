@@ -20,21 +20,27 @@
 
 
 // variable used to detect memory leakage
-// int Portion::num_of_Portions = 0;
+#ifdef MEMCHECK
+int Portion::num_of_Portions = 0;
+#endif
 
 Portion::Portion()
 {
   // The following two lines are for detecting memory leakage.
-  // num_of_Portions++;
-  // gout << "Portions:" << num_of_Portions << "\n";
+#ifdef MEMCHECK
+  num_of_Portions++;
+  gout << "num of Portions: " << num_of_Portions << "\n";
+#endif
 }
 
 
 Portion::~Portion()
 {
   // The following two lines are for detecting memory leakage.
-  // num_of_Portions--;
-  // gout << "Portions:" << num_of_Portions << "\n";
+#ifdef MEMCHECK
+  num_of_Portions--;
+  gout << "num of Portions: " << num_of_Portions << "\n";
+#endif
 }
 
 
