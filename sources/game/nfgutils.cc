@@ -50,7 +50,7 @@ Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
     outcome.SetLabel(nfg.GetOutcomeId(outc).GetLabel());
 
     for (int pl = 1; pl <= N->NumPlayers(); pl++) {
-      N->SetPayoff(outcome, pl, nfg.Payoff(nfg.GetOutcomeId(outc), pl));
+      outcome.SetPayoff(nfg.GetOutcomeId(outc).GetPayoff());
     }
   }
 
@@ -80,13 +80,13 @@ bool IsConstSum(const Nfg &nfg)
   if (nfg.NumOutcomes() == 0)  return true;
 
   for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-    cvalue += nfg.Payoff(nfg.GetOutcomeId(1), pl);
+    cvalue += nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(pl));
 
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     gNumber thisvalue = (gNumber) 0;
 
     for (pl = 1; pl <= nfg.NumPlayers(); pl++)
-      thisvalue += nfg.Payoff(nfg.GetOutcomeId(index), pl);
+      thisvalue += nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(pl));
 
     if (thisvalue > cvalue || thisvalue < cvalue)
       return false;
@@ -109,11 +109,11 @@ gNumber MinPayoff(const Nfg &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  minpay = nfg.Payoff(nfg.GetOutcomeId(1), p1);
+  minpay = nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(p1));
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.Payoff(nfg.GetOutcomeId(index), p) < minpay)
-	minpay = nfg.Payoff(nfg.GetOutcomeId(index), p);
+      if (nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p)) < minpay)
+	minpay = nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p));
   }
   return minpay;
 }
@@ -132,11 +132,11 @@ gNumber MaxPayoff(const Nfg &nfg, int player)
     p2 = nfg.NumPlayers();
   }
 
-  maxpay = nfg.Payoff(nfg.GetOutcomeId(1), p1);
+  maxpay = nfg.GetOutcomeId(1).GetPayoff(nfg.GetPlayer(p1));
   for (index = 2; index <= nfg.NumOutcomes(); index++)  {
     for (p = p1; p <= p2; p++)
-      if (nfg.Payoff(nfg.GetOutcomeId(index), p) > maxpay)
-	maxpay = nfg.Payoff(nfg.GetOutcomeId(index), p);
+      if (nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p)) > maxpay)
+	maxpay = nfg.GetOutcomeId(index).GetPayoff(nfg.GetPlayer(p));
   }
   return maxpay;
 }
@@ -145,7 +145,7 @@ void RandomNfg(Nfg &nfg)
 {
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)
-      nfg.SetPayoff(nfg.GetOutcomeId(outc), pl, gNumber(Uniform()));
+      nfg.GetOutcomeId(outc).SetPayoff(nfg.GetPlayer(pl), gNumber(Uniform()));
 }  
 
 

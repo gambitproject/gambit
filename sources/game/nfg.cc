@@ -132,6 +132,54 @@ void gbtNfgOutcome::SetLabel(const gText &p_label)
   }
 }
 
+gNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
+{
+  if (rep && p_player.rep) {
+    return rep->m_payoffs[p_player.rep->m_id];
+  }
+  else {
+    return 0;
+  }
+}
+
+gArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
+{
+  if (rep) {
+    return rep->m_payoffs;
+  }
+  else {
+    return gArray<gNumber>();
+  }
+}
+
+double gbtNfgOutcome::GetPayoffDouble(int p_player) const
+{
+  if (rep) {
+    return rep->m_payoffs[p_player];
+  }
+  else {
+    return 0;
+  }
+}
+
+void gbtNfgOutcome::SetPayoff(const gbtNfgPlayer &p_player,
+			      const gNumber &p_value)
+{
+  if (rep && p_player.rep) {
+    rep->m_payoffs[p_player.rep->m_id] = p_value;
+    rep->m_doublePayoffs[p_player.rep->m_id] = (double) p_value;
+    // FIXME: tell game to update cached values
+  }
+}
+
+void gbtNfgOutcome::SetPayoff(const gArray<gNumber> &p_value)
+{
+  if (rep && rep->m_payoffs.Length() == p_value.Length()) {
+    (gArray<gNumber> &) rep->m_payoffs = p_value;
+  }
+}
+
+
 gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
 { 
   return p_stream;
@@ -669,26 +717,6 @@ gbtNfgOutcome Nfg::GetOutcome(const gArray<int> &profile) const
 gbtNfgOutcome Nfg::GetOutcome(const StrategyProfile &p) const
 {
   return rep->m_results[p.index + 1];
-}
-
-void Nfg::SetPayoff(gbtNfgOutcome outcome, int pl, const gNumber &value)
-{
-  if (outcome.rep) {
-    outcome.rep->m_payoffs[pl] = value;
-    outcome.rep->m_doublePayoffs[pl] = (double) value;
-    rep->m_dirty = true;
-    rep->m_revision++;
-  }
-}
-
-gNumber Nfg::Payoff(gbtNfgOutcome outcome, int pl) const
-{
-  if (outcome.rep) {
-    return outcome.rep->m_payoffs[pl];
-  }
-  else {
-    return 0;
-  }
 }
 
 // ---------------------------------------

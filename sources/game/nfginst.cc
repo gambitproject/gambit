@@ -30,21 +30,21 @@
 #include "math/rational.h"
 
 template<>
-const gNumber MixedProfile<gNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
+gNumber MixedProfile<gNumber>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return N->Payoff(o, pl);
+  return o.GetPayoff(N->GetPlayer(pl));
 }
 
 template<>
-const gRational MixedProfile<gRational>::Payoff(const gbtNfgOutcome &o, int pl) const
+gRational MixedProfile<gRational>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return N->Payoff(o, pl);
+  return o.GetPayoff(N->GetPlayer(pl));
 }
 
 template<>
-const double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
+double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 { 
-  return N->Payoff(o, pl);
+  return o.GetPayoffDouble(pl);
 }
 
 template class MixedProfile<double>;

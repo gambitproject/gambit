@@ -371,7 +371,7 @@ gText TreeWindow::OutcomeAsString(const gbtEfgNode &n) const
 {
   gbtEfgOutcome outcome = n.GetOutcome();
   if (!outcome.IsNull()) {
-    const gArray<gNumber> &v = n.GetGame()->Payoff(outcome);
+    const gArray<gNumber> &v = outcome.GetPayoff();
     gText tmp = "(";
 
     for (int i = v.First(); i <= v.Last(); i++) {

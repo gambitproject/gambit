@@ -111,7 +111,7 @@ static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
 	   p_payoffs[i] == '.' || p_payoffs[i] == '-') {
       pay += p_payoffs[i++];
     }
-    p_nfg->SetPayoff(iter.GetOutcome(), 1, ToNumber(pay));
+    iter.GetOutcome().SetPayoff(p_nfg->GetPlayer(1), ToNumber(pay));
     EatWhitespace(p_payoffs, i);
     if (p_payoffs[i++] != ',') {
       return false;
@@ -122,7 +122,7 @@ static bool ParsePayoffs(Nfg *p_nfg, const gText &p_payoffs)
 	   p_payoffs[i] == '.' || p_payoffs[i] == '-') {
       pay += p_payoffs[i++];
     }
-    p_nfg->SetPayoff(iter.GetOutcome(), 2, ToNumber(pay));
+    iter.GetOutcome().SetPayoff(p_nfg->GetPlayer(2), ToNumber(pay));
     EatWhitespace(p_payoffs, i);
     if (p_payoffs[i++] != ']') {
       return false;

@@ -653,7 +653,8 @@ static void BuildSubtree(efgGame *p_efg, gbtEfgNode p_node,
 							  outcome));
       p_node.SetOutcome(outcome);
       for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
-	p_efg->SetPayoff(outcome, pl, (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
+	outcome.SetPayoff(p_efg->GetPlayer(pl),
+			  (*p_nodeData)->m_outcomeData->m_payoffs[pl]);
       }
     }
   }

@@ -437,7 +437,7 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, Nfg *p_nfg)
     gbtNfgOutcome outcome = p_nfg->NewOutcome();
     outcome.SetLabel(label);
     for (pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-      p_nfg->SetPayoff(outcome, pl, payoffs[pl]);
+      outcome.SetPayoff(p_nfg->GetPlayer(pl), payoffs[pl]);
     }
 
     p_parser.GetNextSymbol();
@@ -471,7 +471,7 @@ static void SetPayoff(Nfg *p_nfg, int p_cont, int p_pl, const gNumber &p_value)
   if (p_pl == 1)  {
     p_nfg->SetOutcomeIndex(p_cont, p_nfg->NewOutcome());
   }
-  p_nfg->SetPayoff(p_nfg->GetOutcomeIndex(p_cont), p_pl, p_value);
+  p_nfg->GetOutcomeIndex(p_cont).SetPayoff(p_nfg->GetPlayer(p_pl), p_value);
 }
 
 static void ParsePayoffBody(gbtNfgParserState &p_parser, Nfg *p_nfg)

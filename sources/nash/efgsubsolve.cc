@@ -223,7 +223,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
 
       gbtEfgOutcome ov = efg.NewOutcome();
       for (i = 1; i <= efg.NumPlayers(); i++) {
-	efg.SetPayoff(ov, i, subval[i]);
+	ov.SetPayoff(efg.GetPlayer(i), subval[i]);
       }
  
       values.Append(ov);

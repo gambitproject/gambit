@@ -153,8 +153,9 @@ void PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const T prob,
 				 gArray<T> &payoff) const
 {
   if (n.IsTerminal()) {
+    // FIXME: vector version of this?
     for (int pl = 1; pl <= E->NumPlayers(); pl++) {
-      payoff[pl] += prob * E->Payoff(n.GetOutcome())[pl];
+      payoff[pl] += prob * n.GetOutcome().GetPayoff(E->GetPlayer(pl));
     }
   }
   else {
@@ -206,7 +207,7 @@ const T PureBehavProfile<T>::Payoff(const gbtEfgOutcome &p_outcome,
 				    const int &pl) const
 {
   if (!p_outcome.IsNull()) {
-    return E->Payoff(p_outcome)[pl];
+    return p_outcome.GetPayoff(E->GetPlayer(pl));
   }
   else {
     return (T) 0;

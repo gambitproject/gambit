@@ -94,11 +94,6 @@ public:
   void SetOutcomeIndex(int index, const gbtNfgOutcome &outcome);
   gbtNfgOutcome GetOutcomeIndex(int index) const;
 
-  void SetPayoff(gbtNfgOutcome, int pl, const gNumber &value);
-  gNumber Payoff(gbtNfgOutcome, int pl) const;
-  gNumber Payoff(gbtNfgOutcome p_outcome, gbtNfgPlayer p_player) const 
-    { return Payoff(p_outcome, p_player.GetId()); }
-
   void InitPayoffs(void) const;
 
     // defined in nfgutils.cc

@@ -137,6 +137,16 @@ void gbtEfgOutcome::SetLabel(const gText &p_label)
   }
 }
 
+gArray<gNumber> gbtEfgOutcome::GetPayoff(void) const
+{
+  if (!rep) {
+    return gArray<gNumber>();
+  }
+  else {
+    return rep->m_payoffs;
+  }
+}
+
 gNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
 {
   if (!rep || p_player.IsNull()) {
@@ -144,6 +154,18 @@ gNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
   }
 
   return rep->m_payoffs[p_player.GetId()];
+}
+
+void gbtEfgOutcome::SetPayoff(const gbtEfgPlayer &p_player,
+			      const gNumber &p_value)
+{
+  if (!rep || p_player.IsNull()) {
+    return;
+  }
+
+  rep->m_payoffs[p_player.GetId()] = p_value;
+  rep->m_doublePayoffs[p_player.GetId()] = p_value;
+  // FIXME: tell extensive form to update cached profile values!
 }
 
 

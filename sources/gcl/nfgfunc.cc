@@ -302,10 +302,9 @@ static Portion* GSM_Payoff(GSM &, Portion** param)
     return new NumberPortion(0);
 
   gbtNfgOutcome outcome = AsNfgOutcome(param[0]);
-  Nfg *nfg = outcome.GetGame();
   gbtNfgPlayer player = AsNfgPlayer(param[1]);
 
-  return new NumberPortion(nfg->Payoff(outcome, player.GetId()));
+  return new NumberPortion(outcome.GetPayoff(player));
 }
 
 
@@ -480,8 +479,7 @@ static Portion* GSM_SetPayoff(GSM &gsm, Portion** param)
   gbtNfgPlayer player = AsNfgPlayer(param[1]);
   gNumber value = AsNumber(param[2]);
 
-  nfg->SetPayoff(outcome, player.GetId(), value);
-
+  outcome.SetPayoff(player, value);
   gsm.InvalidateGameProfile((Nfg *) nfg, false);
  
   return param[0]->ValCopy();

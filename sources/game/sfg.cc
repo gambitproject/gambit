@@ -117,7 +117,7 @@ Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gArray<int>seq,
 
   if (!n.GetOutcome().IsNull()) {
     for(pl = 1;pl<=seq.Length();pl++)
-      (*(*SF)[seq])[pl] += prob * EF.Payoff(n, EF.GetPlayer(pl));
+      (*(*SF)[seq])[pl] += prob * n.GetOutcome().GetPayoff(EF.GetPlayer(pl));
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer().IsChance()) {

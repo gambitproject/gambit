@@ -82,10 +82,10 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
       item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(1))) + ", " +
-	     ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(2))));
+    item += (" (" + ToText(outcome.GetPayoff(p_nfg.GetPlayer(1))) + ", " +
+	     ToText(outcome.GetPayoff(p_nfg.GetPlayer(2))));
     if (p_nfg.NumPlayers() > 2) {
-      item += ", " + ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(3)));
+      item += ", " + ToText(outcome.GetPayoff(p_nfg.GetPlayer(3)));
       if (p_nfg.NumPlayers() > 3) {
 	item += ",...)";
       }

@@ -63,8 +63,8 @@ gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_suppor
 
   for (int i = 1; i <= p_support.NumStrats(1); i++) {
     for (int j = 1; j <= p_support.NumStrats(2); j++) {
-      A1(i, j) = nfg.Payoff(iter.GetOutcome(), 1) - gNumber(min);
-      A2(j, i) = nfg.Payoff(iter.GetOutcome(), 2) - gNumber(min);
+      A1(i, j) = iter.GetOutcome().GetPayoff(nfg.GetPlayer(1)) - gNumber(min);
+      A2(j, i) = iter.GetOutcome().GetPayoff(nfg.GetPlayer(2)) - gNumber(min);
       A1(i, j) *= fac;
       A2(j, i) *= fac;
       iter.Next(2);

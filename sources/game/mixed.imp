@@ -223,7 +223,7 @@ T MixedProfile<T>::PPayoff(int pl, int index, int i) const
 
   if (i > N->NumPlayers())  {
     if (!N->GetOutcomeIndex(index).IsNull()) {
-      return N->Payoff(N->GetOutcomeIndex(index), pl);
+      return N->GetOutcomeIndex(index).GetPayoff(N->GetPlayer(pl));
     }
     else {
       return (T) 0;

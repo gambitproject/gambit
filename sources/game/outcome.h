@@ -60,8 +60,10 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
+  gArray<gNumber> GetPayoff(void) const;
   gNumber GetPayoff(const gbtEfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
+  void SetPayoff(const gbtEfgPlayer &, const gNumber &);
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
@@ -69,6 +71,7 @@ gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
 
 struct gbt_nfg_outcome_rep;
 class Nfg;
+class gbtNfgPlayer;
 
 class gbtNfgOutcome {
 friend class Nfg;
@@ -92,8 +95,11 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
   
-  gNumber GetPayoff(int p_playerId) const;
+  gArray<gNumber> GetPayoff(void) const;
+  gNumber GetPayoff(const gbtNfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
+  void SetPayoff(const gbtNfgPlayer &, const gNumber &);
+  void SetPayoff(const gArray<gNumber> &);
 };
 
 gOutput &operator<<(gOutput &, const gbtNfgOutcome &);

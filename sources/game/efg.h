@@ -145,7 +145,6 @@ public:
   void DeleteEmptyInfosets(void);
   gbtEfgInfoset JoinInfoset(gbtEfgInfoset, gbtEfgNode);
   gbtEfgInfoset LeaveInfoset(gbtEfgNode);
-  gbtEfgInfoset SplitInfoset(gbtEfgNode);
   gbtEfgInfoset MergeInfoset(gbtEfgInfoset to, gbtEfgInfoset from);
 
   gbtEfgInfoset SwitchPlayer(gbtEfgInfoset s, gbtEfgPlayer p);
@@ -161,10 +160,6 @@ public:
   void Reveal(gbtEfgInfoset, gbtEfgPlayer);
 
   void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
-
-  void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
-  gNumber Payoff(const gbtEfgNode &, const gbtEfgPlayer &) const;
-  gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 
   bool IsLegalSubgame(const gbtEfgNode &);
   void MarkSubgames(void);

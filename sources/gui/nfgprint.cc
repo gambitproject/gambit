@@ -74,7 +74,7 @@ wxString gbtBuildHtml(const Nfg &p_nfg, int p_rowPlayer, int p_colPlayer)
 	cont[p_colPlayer] = st2;
 	theHtml += "<td align=center>";
 	for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-	  theHtml += wxString::Format("%s", (char *) ToText(p_nfg.Payoff(p_nfg.GetOutcome(cont), pl)));
+	  theHtml += wxString::Format("%s", (char *) ToText(p_nfg.GetOutcome(cont).GetPayoff(p_nfg.GetPlayer(pl))));
 	  if (pl < p_nfg.NumPlayers()) {
 	    theHtml += ",";
 	  }

@@ -163,7 +163,7 @@ void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
   int i,snew;
   if (!n.GetOutcome().IsNull()) {
     A(s1,s2) = gNumber(A(s1,s2)) +
-      gNumber(prob) * n.GetGame()->Payoff(n, n.GetGame()->GetPlayer(1)) - gNumber(minpay);
+      gNumber(prob) * n.GetOutcome().GetPayoff(n.GetGame()->GetPlayer(1)) - gNumber(minpay);
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer().IsChance()) {

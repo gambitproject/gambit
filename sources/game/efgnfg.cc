@@ -184,7 +184,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
 
     iter.SetOutcome(L->N->NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
-      L->N->SetPayoff(iter.GetOutcome(), j, value[j]);
+      iter.GetOutcome().SetPayoff(L->N->GetPlayer(j), value[j]);
 
     iter.NextContingency();
     while (pl > 0)   {
@@ -246,7 +246,7 @@ Nfg *MakeAfg(const efgGame &E)
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
       for (int iset = 1; iset <= E.GetPlayer(epl).NumInfosets(); iset++, npl++)
-	afg->SetPayoff(iter.GetOutcome(), npl, payoff[epl]);
+	iter.GetOutcome().SetPayoff(afg->GetPlayer(npl), payoff[epl]);
 
     
     while (pl > 0)  {

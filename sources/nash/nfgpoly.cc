@@ -247,8 +247,8 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
       if(i!=k) 
 	term*=Prob(k,support.GetIndex(profile[k]));
     gDouble coeff,ap,bp;
-    ap = (double)NF.Payoff(A.GetOutcome(), i);
-    bp = (double)NF.Payoff(B.GetOutcome(), i);
+    ap = (double) A.GetOutcome().GetPayoff(NF.GetPlayer(i));
+    bp = (double) B.GetOutcome().GetPayoff(NF.GetPlayer(i));
     coeff = ap - bp;
     term*=coeff;
     equation+=term;

@@ -488,42 +488,6 @@ gbtEfgOutcome efgGame::GetOutcome(int p_index) const
   return rep->outcomes[p_index];
 }
 
-void efgGame::SetPayoff(gbtEfgOutcome p_outcome, int pl, 
-			const gNumber &value)
-{
-  if (p_outcome.IsNull()) {
-    return;
-  }
-
-  rep->m_revision++;
-  rep->m_dirty = true;
-  p_outcome.rep->m_payoffs[pl] = value;
-  p_outcome.rep->m_doublePayoffs[pl] = (double) value;
-}
-
-gNumber efgGame::Payoff(const gbtEfgNode &p_node,
-			const gbtEfgPlayer &p_player) const
-{
-  if (p_player.IsNull()) {
-    return gNumber(0);
-  }
-
-  return ((p_node.rep->m_outcome) ? 
-	  p_node.rep->m_outcome->m_payoffs[p_player.rep->m_id] : gNumber(0));
-}
-
-gArray<gNumber> efgGame::Payoff(const gbtEfgOutcome &p_outcome) const
-{
-  if (p_outcome.IsNull()) {
-    gArray<gNumber> ret(rep->players.Length());
-    for (int i = 1; i <= ret.Length(); ret[i++] = 0);
-    return ret;
-  }
-  else {
-    return p_outcome.rep->m_payoffs;
-  }
-}
-
 bool efgGame::IsConstSum(void) const
 {
   int pl, index;
@@ -810,38 +774,6 @@ gbtEfgInfoset efgGame::LeaveInfoset(gbtEfgNode n)
     n.rep->m_infoset->m_actions[i]->m_label = s->m_actions[i]->m_label;
   }
 
-  DeleteLexicon();
-  SortInfosets();
-  return n.rep->m_infoset;
-}
-
-gbtEfgInfoset efgGame::SplitInfoset(gbtEfgNode n)
-{
-  if (n.IsNull())  throw Exception();
-
-  if (!n.rep->m_infoset)   return 0;
-
-  gbt_efg_infoset_rep *s = n.rep->m_infoset;
-  if (s->m_members.Length() == 1)   return s;
-
-  rep->m_revision++;
-  rep->m_dirty = true;
-
-  gbt_efg_player_rep *p = s->m_player;
-  gbt_efg_infoset_rep *ns = CreateInfoset(p->m_infosets.Length() + 1, p,
-					  n.rep->m_children.Length());
-  ns->m_label = s->m_label;
-  for (int i = s->m_members.Length(); i > s->m_members.Find(n.rep); i--)   {
-    gbt_efg_node_rep *nn = s->m_members.Remove(i);
-    ns->m_members.Append(nn);
-    nn->m_infoset = ns;
-  }
-  for (int i = 1; i <= s->m_actions.Length(); i++) {
-    ns->m_actions[i]->m_label = s->m_actions[i]->m_label;
-    if (p == rep->chance) {
-      ns->m_chanceProbs[i] = s->m_chanceProbs[i];
-    }
-  }
   DeleteLexicon();
   SortInfosets();
   return n.rep->m_infoset;

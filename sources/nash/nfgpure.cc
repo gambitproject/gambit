@@ -52,10 +52,10 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
     NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= nfg.NumPlayers(); pl++)  {
-      gNumber current = nfg.Payoff(citer.GetOutcome(), pl);
+      gNumber current = citer.GetOutcome().GetPayoff(nfg.GetPlayer(pl));
       for (int i = 1; i <= p_support.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if (nfg.Payoff(niter.GetOutcome(), pl) > current)  {
+	if (niter.GetOutcome().GetPayoff(nfg.GetPlayer(pl)) > current)  {
 	  flag = false;
 	  break;
 	}

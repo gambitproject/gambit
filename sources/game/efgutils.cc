@@ -278,7 +278,7 @@ RandomEfg(efgGame & efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++) {
     for (int j = 1; j <= efg.NumOutcomes(); j++) {
-      efg.SetPayoff(efg.GetOutcome(j), i, gNumber(Uniform()));
+      efg.GetOutcome(j).SetPayoff(efg.GetPlayer(i), gNumber(Uniform()));
     }
   }
 }

@@ -29,8 +29,6 @@
 bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
 			      bool strong) const
 {
-  const Nfg &n = Game();
-
   NfgContIter A(*this), B(*this);
 
   A.Freeze(s.GetPlayer());
@@ -41,9 +39,9 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
   if (strong)  {
     do  {
       gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		    n.Payoff(A.GetOutcome(), s.GetPlayer()) : gNumber(0));
+		    A.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
       gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		    n.Payoff(B.GetOutcome(), s.GetPlayer()) : gNumber(0));
+		    B.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
 
       if (ap <= bp)  {
 	return false;
@@ -58,9 +56,9 @@ bool gbtNfgSupport::Dominates(gbtNfgStrategy s, gbtNfgStrategy t,
   
   do   {
     gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		  n.Payoff(A.GetOutcome(), s.GetPlayer()) : gNumber(0));
+		  A.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
     gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		  n.Payoff(B.GetOutcome(), s.GetPlayer()) : gNumber(0));
+		  B.GetOutcome().GetPayoff(s.GetPlayer()) : gNumber(0));
 
     if (ap < bp)   { 
       return false;

@@ -38,6 +38,7 @@ class Nfg;
 
 class gbtNfgPlayer {
 friend class Nfg;
+friend class gbtNfgOutcome;
 protected:
   struct gbt_nfg_player_rep *rep;
 

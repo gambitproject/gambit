@@ -50,7 +50,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     void PPayoff(int pl, int const_pl, int cur_pl, long index, T prob,
 		gVector<T> &value) const;
     void InitPayoffs(void) const;
-    const T Payoff(const gbtNfgOutcome &o, int pl) const;
+    T Payoff(const gbtNfgOutcome &o, int pl) const;
 
   public:
     MixedProfile(const gbtNfgSupport &);

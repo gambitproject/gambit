@@ -1179,10 +1179,9 @@ static Portion *GSM_SetPayoff(GSM &gsm, Portion **param)
 {
   gbtEfgOutcome outcome = AsEfgOutcome(param[0]);
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
-  efgGame *efg = player.GetGame();
   gNumber value = AsNumber(param[2]);
 
-  efg->SetPayoff(outcome, player.GetId(), value);
+  outcome.SetPayoff(player, value);
 
   gsm.InvalidateGameProfile(outcome.GetGame(), true);
 

@@ -195,7 +195,7 @@ wxString NfgGridTable::GetValue(int row, int col)
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",
-				(char *) ToText(m_nfg->Payoff(outcome, pl),
+				(char *) ToText(outcome.GetPayoff(m_nfg->GetPlayer(pl)),
 						m_table->GetSettings().GetDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxString(",");
