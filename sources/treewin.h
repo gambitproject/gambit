@@ -21,7 +21,7 @@ typedef struct NODEENTRY
     int nums;           // sum of infosets previous to this level
     int has_children;   // how many children this node has
     int child_number;   // what branch # is this node from the parent
-    bool in_sup;        // is this node in disp_sup
+    bool in_sup;        // is this node in cur_sup
     const Node *n;
     NODEENTRY *parent;
     bool expanded;      // Is this subgame root expanded or collapsed?
@@ -143,7 +143,7 @@ public:
 
 private:
     Efg &ef;
-    EFSupport * &disp_sup;    // We only need to know the displayed support.
+    EFSupport * &cur_sup;    // We only need to know the displayed support.
     EfgShow *frame;           // Actual extensive game show
     wxFrame *pframe;          // Our parent window
 
@@ -287,7 +287,7 @@ public:
   virtual void Render(wxDC &dc);
   void HilightInfoset(int pl,int iset);
   
-  // Used by parent EfgShow when disp_sup changes
+  // Used by parent EfgShow when cur_sup changes
   void SupportChanged(void);
   
   // Gives access to the parent to the private draw_settings. Used for SolnShow

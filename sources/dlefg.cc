@@ -19,6 +19,7 @@
 #include "dlefgreveal.h"
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
+#include "dlefgeditsupport.h"
 #include "dlefgsave.h"
 #include "dlefgplayers.h"
 
@@ -795,6 +796,146 @@ dialogEfgOutcomeSelect::dialogEfgOutcomeSelect(Efg &p_efg, wxWindow *p_parent)
 EFOutcome *dialogEfgOutcomeSelect::GetOutcome(void)
 {
   return m_efg.Outcomes()[m_outcomeList->GetSelection() + 1];
+}
+
+//=========================================================================
+//                   dialogEfgEditSupport: Member functions
+//=========================================================================
+
+dialogEfgEditSupport::dialogEfgEditSupport(const EFSupport &p_support,
+					   wxWindow *p_parent)
+  : guiAutoDialog(p_parent, "Edit support"),
+    m_efg(p_support.Game()), m_support(p_support)
+{
+  m_nameItem = new wxText(this, 0, "Name");
+  m_nameItem->SetValue(p_support.GetName());
+  m_nameItem->SetConstraints(new wxLayoutConstraints);
+  m_nameItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_nameItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_nameItem->GetConstraints()->width.AsIs();
+  m_nameItem->GetConstraints()->height.AsIs();
+
+  SetLabelPosition(wxVERTICAL);
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
+  m_playerItem->SetConstraints(new wxLayoutConstraints);
+  m_playerItem->GetConstraints()->top.SameAs(m_nameItem, wxBottom, 10);
+  m_playerItem->GetConstraints()->left.SameAs(m_nameItem, wxLeft);
+  m_playerItem->GetConstraints()->width.AsIs();
+  m_playerItem->GetConstraints()->height.AsIs();
+
+  m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset, "Infoset");
+  m_infosetItem->wxEvtHandler::SetClientData((char *) this);
+  m_infosetItem->SetConstraints(new wxLayoutConstraints);
+  m_infosetItem->GetConstraints()->top.SameAs(m_playerItem, wxTop);
+  m_infosetItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
+  m_infosetItem->GetConstraints()->width.AsIs();
+  m_infosetItem->GetConstraints()->height.AsIs();
+
+  m_actionItem = new wxListBox(this, (wxFunction) CallbackAction,
+			       "Action", wxMULTIPLE);
+  m_actionItem->wxEvtHandler::SetClientData((char *) this);
+  m_actionItem->SetConstraints(new wxLayoutConstraints);
+  m_actionItem->GetConstraints()->top.SameAs(m_infosetItem, wxTop);
+  m_actionItem->GetConstraints()->left.SameAs(m_infosetItem, wxRight, 10);
+  m_actionItem->GetConstraints()->width.AsIs();
+  m_actionItem->GetConstraints()->height.AsIs();
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    m_playerItem->Append(ToText(pl) + ": " + 
+			 m_efg.Players()[pl]->GetName());
+#ifndef LINUX_WXXT
+    m_playerItem->SetSelection(pl - 1, TRUE);
+#endif  // LINUX_WXXT
+  }
+
+  m_okButton->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  OnPlayer(0);
+  Go();
+}
+
+void dialogEfgEditSupport::OnPlayer(int p_number)
+{
+  m_playerItem->SetSelection(p_number);
+  EFPlayer *player = m_efg.Players()[p_number+1];
+  m_infosetItem->Clear();
+  m_actionItem->Clear();
+  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+    m_infosetItem->Append(ToText(iset) + ": " +
+			  player->Infosets()[iset]->GetName());
+  }
+  m_infosetItem->SetSelection(0);
+  for (int act = 1; act <= player->Infosets()[1]->NumActions(); act++) {
+    m_actionItem->Append(ToText(act) + ": " +
+			 player->Infosets()[1]->Actions()[act]->GetName());
+    if (m_support.Find(player->Infosets()[1]->Actions()[act])) {
+      m_actionItem->SetSelection(act - 1, TRUE);
+    }
+  }
+}
+
+void dialogEfgEditSupport::OnInfoset(int p_number)
+{
+  m_infosetItem->SetSelection(p_number);
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection() + 1];
+  Infoset *infoset = player->Infosets()[p_number + 1];
+  m_actionItem->Clear();
+  for (int act = 1; act <= infoset->NumActions(); act++) {
+    m_actionItem->Append(ToText(act) + ": " + infoset->Actions()[act]->GetName());
+    if (m_support.Find(infoset->Actions()[act])) {
+      m_actionItem->SetSelection(act - 1, TRUE);
+    }
+  }
+}
+
+void dialogEfgEditSupport::OnAction(int /*p_action*/)
+{
+  int player = m_playerItem->GetSelection() + 1;
+  int infoset = m_infosetItem->GetSelection() + 1;
+  for (int act = 0; act < m_actionItem->Number(); act++) {
+    Action *action = m_efg.Players()[player]->Infosets()[infoset]->Actions()[act+1];
+    if (m_actionItem->Selected(act)) {
+      m_support.AddAction(action);
+    }
+    else {
+      m_support.RemoveAction(action);
+    }
+  }
+}
+
+void dialogEfgEditSupport::CallbackPlayer(wxListBox &p_object,
+					  wxCommandEvent &p_event)
+{
+  ((dialogEfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
+    OnPlayer(p_event.commandInt);
+}
+
+void dialogEfgEditSupport::CallbackInfoset(wxListBox &p_object,
+					   wxCommandEvent &p_event)
+{
+  ((dialogEfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
+    OnInfoset(p_event.commandInt);
+}
+
+void dialogEfgEditSupport::CallbackAction(wxListBox &p_object, 
+					    wxCommandEvent &p_event)
+{
+  ((dialogEfgEditSupport *) p_object.wxEvtHandler::GetClientData())->
+    OnAction(p_event.commandInt);
 }
 
 //=========================================================================

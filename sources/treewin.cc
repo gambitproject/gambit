@@ -63,7 +63,7 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     : TreeRender(frame_, this, node_list, (const Infoset *&) hilight_infoset,
 		 (const Infoset *&) hilight_infoset1,
                  (const Node *&) mark_node, subgame_node, draw_settings),
-      ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
+      ef(ef_), cur_sup(disp), frame(frame_), pframe(frame_)
 {
     // Set the cursor to the root node
     m_cursor = ef.RootNode();
@@ -437,7 +437,7 @@ int TreeWindow::FillTable(const Node *n, int level)
         {
             bool in_sup = true;
             if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
-                in_sup = disp_sup->Find(n->GetInfoset()->Actions()[i]);
+                in_sup = cur_sup->Find(n->GetInfoset()->Actions()[i]);
             if (in_sup)
             {
                 yn = FillTable(n->GetChild(i), level+1);
@@ -578,7 +578,7 @@ void TreeWindow::FillInfosetTable(const Node *n)
         {
             bool in_sup = true;
             if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
-                in_sup = disp_sup->Find(n->GetInfoset()->Actions()[i]);
+                in_sup = cur_sup->Find(n->GetInfoset()->Actions()[i]);
             
             if (in_sup || !draw_settings.RootReachable())
                 FillInfosetTable(n->GetChild(i));
@@ -1303,7 +1303,7 @@ void TreeWindow::HilightInfoset(int pl, int iset)
 }
 
 //
-// SupportChanged -- must be called by parent every time the disp_sup
+// SupportChanged -- must be called by parent every time the cur_sup
 // changes.  Note that since it is a reference, it needs not be passed here.
 //
 void TreeWindow::SupportChanged(void)
@@ -1312,7 +1312,7 @@ void TreeWindow::SupportChanged(void)
   // Check if the cursor is still valid
   NodeEntry *ne = GetNodeEntry(Cursor());
   if (ne->child_number) {
-    if (!disp_sup->Find(Cursor()->GetInfoset()->Actions()[ne->child_number]))
+    if (!cur_sup->Find(Cursor()->GetInfoset()->Actions()[ne->child_number]))
       SetCursorPosition(ef.RootNode());
   }
 

@@ -16,7 +16,6 @@
 
 class EfgSolnShow;
 class guiEfgShowToolBar;
-class EFSupportInspectDialog;
 class NodeSolnShow;
 class TreeWindow;
 
@@ -51,7 +50,6 @@ private:
 
     gList<EFSupport *> supports;
     EFSupport *cur_sup;
-    EFSupportInspectDialog *support_dialog;
 
     // all_nodes must at all times refer to the prefix traversal order of the tree.
     // It is TreeWindow's job to call RemoveSolutions every time the nodes are
@@ -127,10 +125,15 @@ public:
     // Accelerators allow for platform-indep handling of hotkeys
     int CheckAccelerators(wxKeyEvent &ev);
 
-    // EFSupport support
-    void        ChangeSupport(int what);
-    EFSupport  *MakeSupport(void);
-    void        SolveElimDom(void);
+    // Supports
+  void SupportUndominated(void);
+  void SupportNew(void);
+  void SupportEdit(void);
+  void SupportDelete(void);
+  void SupportSelectFromList(void);
+  void SupportSelectPrevious(void);
+  void SupportSelectNext(void);
+  gText UniqueSupportName(void) const;
 
     // Used by TreeWindow
     virtual gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;

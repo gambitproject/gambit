@@ -20,7 +20,7 @@
 #include "dlnfgsave.h"
 
 #include "dlelim.h"
-#include "dlnfgsupportselect.h"
+#include "dlsupportselect.h"
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -1077,7 +1077,7 @@ void NfgShow::SupportDelete(void)
 {
   if (supports.Length() == 1)  return;
 
-  dialogNfgSupportSelect dialog(supports, cur_sup, "Delete Support", spread);
+  dialogSupportSelect dialog(supports, cur_sup, "Delete Support", spread);
 
   if (dialog.Completed() == wxOK) {
     try {
@@ -1096,7 +1096,7 @@ void NfgShow::SupportDelete(void)
 
 void NfgShow::SupportSelectFromList(void)
 {
-  dialogNfgSupportSelect dialog(supports, cur_sup, "Select Support", spread);
+  dialogSupportSelect dialog(supports, cur_sup, "Select Support", spread);
 
   if (dialog.Completed() == wxOK) {
     try {

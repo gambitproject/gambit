@@ -6,9 +6,12 @@
 
 #include "wx.h"
 #include "wxmisc.h"
+#include "wxstatus.h"
+
 #include "efg.h"
 #include "efgutils.h"
 #include "behavsol.h"
+#include "efdom.h"
 
 #include "efgconst.h"
 #include "treewin.h"
@@ -16,9 +19,10 @@
 #include "efgsoln.h"
 #include "nfggui.h"
 #include "efgnfgi.h"
-#include "efsuptd.h"
 
 #include "dlelim.h"
+#include "dlsupportselect.h"
+#include "dlefgeditsupport.h"
 
 //=====================================================================
 //                       class EfgShowToolBar
@@ -129,7 +133,7 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
     EfgNfgInterface(gEFG, p_nfg), 
     parent(p_frame), ef(p_efg), cur_soln(0),
-    support_dialog(0), soln_show(0), node_inspect(0), tw(0)
+    soln_show(0), node_inspect(0), tw(0)
 {
   Show(FALSE);
 
@@ -149,6 +153,9 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   // Create the accelerators (to add an accelerator, see const.h)
   ReadAccelerators(accelerators, "EfgAccelerators", gambitApp.ResourceFile());
     
+  cur_sup = new EFSupport(ef);
+  cur_sup->SetName("Full Support");
+  supports.Append(cur_sup);
   // Create the canvas(TreeWindow) on which to draw the tree
   tw = new TreeWindow(ef, cur_sup, this);
   // Create the toolbar (must be after the status bar creation)
@@ -810,10 +817,23 @@ void EfgShow::MakeMenus(void)
 		       "Expand all subgames");
   
   wxMenu *supports_menu = new wxMenu;
-  supports_menu->Append(efgmenuSUPPORTS_ELIMDOM, "&Undominated",
+  supports_menu->Append(efgmenuSUPPORT_UNDOMINATED, "&Undominated",
 			"Find undominated strategies");
-  supports_menu->Append(efgmenuSUPPORTS_SELECT, "&Select",
-			"Select and create supports");
+  supports_menu->Append(efgmenuSUPPORT_NEW, "&New",
+			"Create a new support");
+  supports_menu->Append(efgmenuSUPPORT_EDIT, "&Edit",
+			"Edit the currently displayed support");
+  supports_menu->Append(efgmenuSUPPORT_DELETE, "&Delete",
+			"Delete a support");
+  wxMenu *supportsSelectMenu = new wxMenu;
+  supportsSelectMenu->Append(efgmenuSUPPORT_SELECT_FROMLIST, "From &List...",
+			     "Select a support from the list of defined supports");
+  supportsSelectMenu->Append(efgmenuSUPPORT_SELECT_PREVIOUS, "&Previous",
+			     "Select the previous support from the list");
+  supportsSelectMenu->Append(efgmenuSUPPORT_SELECT_NEXT, "&Next",
+			     "Select the next support from the list");
+  supports_menu->Append(efgmenuSUPPORT_SELECT, "&Select", supportsSelectMenu,
+			"Change the current support");
   
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(efgmenuSOLVE_STANDARD, "S&tandard...", "Standard solutions");
@@ -927,7 +947,6 @@ Bool EfgShow::OnClose(void)
 		     wxOK | wxCANCEL) == wxCANCEL)
       return FALSE;
     else {
-      ChangeSupport(DESTROY_DIALOG);
       InspectSolutions(DESTROY_DIALOG);
       Show(FALSE);
       return TRUE;
@@ -1086,11 +1105,26 @@ void EfgShow::OnMenuCommand(int id)
       tw->SubgameExpand();
       break;
 
-    case efgmenuSUPPORTS_ELIMDOM: 
-      SolveElimDom();
+    case efgmenuSUPPORT_UNDOMINATED: 
+      SupportUndominated();
       break;
-    case efgmenuSUPPORTS_SELECT:
-      ChangeSupport(CREATE_DIALOG);
+    case efgmenuSUPPORT_NEW:
+      SupportNew();
+      break;
+    case efgmenuSUPPORT_EDIT:
+      SupportEdit();
+      break;
+    case efgmenuSUPPORT_DELETE:
+      SupportDelete();
+      break;
+    case efgmenuSUPPORT_SELECT_FROMLIST:
+      SupportSelectFromList();
+      break;
+    case efgmenuSUPPORT_SELECT_PREVIOUS:
+      SupportSelectPrevious();
+      break;
+    case efgmenuSUPPORT_SELECT_NEXT:
+      SupportSelectNext();
       break;
 
     case efgmenuINSPECT_SOLUTIONS: 
@@ -1192,7 +1226,7 @@ void EfgShow::OnMenuCommand(int id)
     }
 
     // Most menu selections modify the display somehow, so redraw w/ exceptions
-    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORTS_SELECT) {
+    if (id != efgmenuFILE_CLOSE && id != efgmenuSUPPORT_SELECT) {
       tw->OnPaint();
       tw->SetFocus();
     }
@@ -1239,114 +1273,121 @@ void EfgShow::HilightInfoset(int pl, int iset, int who)
     if (who == 2) tw->HilightInfoset(pl, iset);
 }
 
-
-//************************** EF SUPPORT FUNCTIONS *********************
-
-#define SUPPORT_CHANGE   2
-
-// Make Support
-#define ENTRIES_PER_ROW  6
-
-EFSupport *EfgShow::MakeSupport(void)
+gText EfgShow::UniqueSupportName(void) const
 {
-    MyDialogBox *support = new MyDialogBox(this, "Create Support", EFG_MAKE_SUPPORT_HELP);
-    support->SetLabelPosition(wxVERTICAL);
-    wxListBox **players = new wxListBox*[ef.NumPlayers()+1];
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-    {
-        EFPlayer *p = ef.Players()[i];
-        players[i] = new wxListBox(support, 0, ef.Players()[i]->GetName(), 
-                                   TRUE, -1, -1, 80, 100);
-        int j;
-
-        for (j = 1; j <= p->NumInfosets(); j++)
-        {
-            for (int k = 1; k <= p->Infosets()[j]->NumActions(); k++)
-                players[i]->Append("(" + ToText(j) + "," + ToText(k) + ")");
-        }
-
-        for (j = 0; j < players[i]->Number(); j++) 
-            players[i]->SetSelection(j, TRUE);
-
-        if (i%ENTRIES_PER_ROW == 0) support->NewLine();
+  int number = supports.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= supports.Length(); i++) {
+      if (supports[i]->GetName() == "Support" + ToText(number)) {
+	break;
+      }
     }
 
-    support->Go();
-
-    if (support->Completed() == wxOK)
-    {
-        EFSupport *sup = new EFSupport(ef);
-        bool failed = false;
-
-        for (int i = ef.NumPlayers(); i >= 1; i--) // going from bottom up.
-        {
-            for (int j = 1; j <= ef.Players()[i]->NumInfosets(); j++)
-            {
-                for (int k = sup->NumActions(i, j); k >= 1; k--)
-                {
-                    if (!players[i]->Selected(k-1))
-                        sup->RemoveAction(ef.Players()[i]->Infosets()[j]->Actions()[k]);
-                }
-
-                // Check that each player has at least one action
-                if (sup->NumActions(i, j) == 0) 
-                    failed = true;
-            }
-        }
-
-        delete support;
-
-        if (!failed)
-        {
-            supports.Append(sup);
-            return sup;
-        }
-        else
-        {
-            wxMessageBox("This support is invalid!\n"
-                         "Each Player must have at least one Action in each Infoset");
-            return 0;
-        }
-    }
-
-    delete support;
-    return 0;
+    if (i > supports.Length())
+      return "Support" + ToText(number);
+    
+    number++;
+  }
 }
 
-// Support Inspect
-void EfgShow::ChangeSupport(int what)
+void EfgShow::SupportNew(void)
 {
-  if (what == CREATE_DIALOG) {
-    if (!support_dialog) {
-      int cur = supports.Find(cur_sup);
-      support_dialog = new EFSupportInspectDialog(supports, cur, this);
-    }
-    else
-      support_dialog->SetFocus();
-  }
+  EFSupport newSupport(ef);
+  newSupport.SetName(UniqueSupportName());
+  dialogEfgEditSupport dialog(newSupport, this);
 
-  if (what == DESTROY_DIALOG && support_dialog) {
-    delete support_dialog;
-    support_dialog = 0;
-  }
+  if (dialog.Completed() == wxOK) {
+    try {
+      EFSupport *support = new EFSupport(dialog.Support());
+      supports.Append(support);
 
-  if (what == SUPPORT_CHANGE) {
-    assert(support_dialog);
-    cur_sup = supports[support_dialog->CurSup()];
-
-    if (supports[support_dialog->CurSup()] != cur_sup ||
-	tw->DrawSettings().RootReachable() != support_dialog->RootReachable()) {
-      tw->DrawSettings().SetRootReachable(support_dialog->RootReachable());
+      cur_sup = support;
       tw->SupportChanged();
     }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), this);
+    }
   }
 }
 
-#include "wxstatus.h"
-#include "efdom.h"
+void EfgShow::SupportEdit(void)
+{
+  dialogEfgEditSupport dialog(*cur_sup, this);
 
-void EfgShow::SolveElimDom(void)
+  if (dialog.Completed() == wxOK) {
+    try {
+      *cur_sup = dialog.Support();
+      cur_sup->SetName(dialog.Name());
+      tw->SupportChanged();
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), this);
+    }
+  }
+}
+
+void EfgShow::SupportDelete(void)
+{
+  if (supports.Length() == 1)  return;
+
+  dialogSupportSelect dialog(supports, cur_sup, "Delete Support", this);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      delete supports.Remove(dialog.Selected());
+      if (!supports.Find(cur_sup)) {
+	cur_sup = supports[1];
+	tw->SupportChanged();
+      }
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), this);
+    }
+  }
+}
+
+void EfgShow::SupportSelectFromList(void)
+{
+  dialogSupportSelect dialog(supports, cur_sup, "Select Support", this);
+
+  if (dialog.Completed() == wxOK) {
+    try {
+      cur_sup = supports[dialog.Selected()];
+      tw->SupportChanged();
+    }
+    catch (gException &E) {
+      guiExceptionDialog(E.Description(), this);
+    }
+  }
+}
+
+void EfgShow::SupportSelectPrevious(void)
+{
+  int index = supports.Find(cur_sup);
+  if (index == 1) {
+    cur_sup = supports[supports.Length()];
+  }
+  else {
+    cur_sup = supports[index - 1];
+  }
+  tw->SupportChanged();
+}
+
+void EfgShow::SupportSelectNext(void)
+{
+  int index = supports.Find(cur_sup);
+  if (index == supports.Length()) {
+    cur_sup = supports[1];
+  }
+  else {
+    cur_sup = supports[index + 1];
+  }
+  tw->SupportChanged();
+}
+
+
+void EfgShow::SupportUndominated(void)
 {
   gArray<gText> playerNames(ef.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
@@ -1362,12 +1403,14 @@ void EfgShow::SolveElimDom(void)
 	if (dialog.FindAll()) {
 	  while ((sup = sup->Undominated(dialog.DomStrong(), false,
 					 dialog.Players(), gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
 	  }
 	}
 	else {
 	  if ((sup = sup->Undominated(dialog.DomStrong(), false, 
 				      dialog.Players(), gnull, status)) != 0) {
+	    sup->SetName(UniqueSupportName());
 	    supports.Append(sup);
 	  }
 	}
@@ -1406,6 +1449,7 @@ void EfgShow::GameChanged(void)
     // Create the full support.
     cur_sup = new EFSupport(ef);
     supports.Append(cur_sup);
+    cur_sup->SetName("Full Support");
     RemoveStartProfiles();
 }
 
