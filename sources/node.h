@@ -30,7 +30,7 @@ class Node    {
     Node *whichbranch, *ptr, *gameroot;
 
     Node(BaseEfg *e, Node *p)
-      : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0), gameroot(0)   { }
+      : valid(true), mark(false), E(e), infoset(0), parent(p), outcome(0), gameroot((p) ? p->gameroot : this)   { }
     virtual ~Node()
       { for (int i = children.Length(); i; delete children[i--]); }
 
