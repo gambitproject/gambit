@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.h  --  Declaration of gPoly data type
 // 
-// @(#)gpoly.h	1.5 15 Aug 1996
+// @(#)gpoly.h	1.8 03 Jun 1997
 //
 
 #ifndef GPOLY_H
@@ -134,6 +134,7 @@ public:
   const term_order*   GetOrder(void)                       const; 
   int                 Dmnsn()                              const;
 #ifndef MINI_POLY
+  bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;
   int                 Degree()                             const;
   T                   GetCoef(const gArray<int> &Powers)   const;
@@ -144,6 +145,13 @@ public:
                       // returns 0 if constant, -1 if truly multivariate
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
+
+  //-------------
+  // Conversion:
+  //-------------
+
+  gPoly<gDouble>         TogDouble()                       const;
+
 #endif   // MINI_POLY
 
   T                   Evaluate(const gArray<T> &values)    const;
@@ -161,7 +169,8 @@ public:
 
   exp_vect       LeadingPowerProduct(const term_order &)              const;
   T              LeadingCoefficient(const term_order &)               const;
-  gPoly<T>      LeadingTerm(const term_order &)                      const;
+  gPoly<T>       LeadingTerm(const term_order &)                      const;
+  void           ToMonic(const term_order &)                               ;
   void           ReduceByDivisionAtExpV(const term_order &, 
 					const gPoly<T> &, 
 					const exp_vect &);

@@ -1,7 +1,7 @@
 //
 // FILE: monomial.imp -- Implementation of class gMono
 //
-// @(#)monomial.imp	1.1 15 Aug 1996
+// @(#)monomial.imp	1.3 10 Jun 1997
 //
 
 #include "monomial.h"
@@ -19,6 +19,7 @@ template<class T> gMono<T>::gMono(const gSpace* p, const T& x)
 template<class T> gMono<T>::gMono(const T& x, const exp_vect& e) 
 : coef(x), exps(e)
 { 
+  if (x == (T)0) exps.ToZero();
 }
 
 template<class T> gMono<T>::gMono(const gMono<T>& y) 
@@ -119,6 +120,17 @@ template<class T> bool gMono<T>::IsConstant() const
 }
 
 template<class T> T gMono<T>::Evaluate(const gArray<T>& vals) const 
+{ 
+  T answer = Coef();
+
+  for (int i = 1; i <= Dmnsn(); i++)
+    for (int j = 1; j <= exps[i]; j++)
+      answer *= vals[i];
+
+  return answer;
+}
+
+template<class T> T gMono<T>::Evaluate(const gVector<T>& vals) const 
 { 
   T answer = Coef();
 

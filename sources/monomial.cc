@@ -1,7 +1,7 @@
 //
 // FILE: monomial.cc -- Instantiation of gMono classes
 //
-// @(#)monomial.cc	1.2 15 Aug 1996
+// @(#)monomial.cc	1.6 13 Jun 1997
 //
 
 #include "monomial.imp"
@@ -17,8 +17,8 @@
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gArray<gDouble>;
-TEMPLATE class gBlock<gDouble>;
+//TEMPLATE class gArray<gDouble>;
+//TEMPLATE class gBlock<gDouble>;
 
 TEMPLATE class gMono<int>;
 TEMPLATE gOutput& operator << (gOutput& output, const gMono<int>& x);

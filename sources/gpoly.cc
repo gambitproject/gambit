@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.cc -- Instantiation of gPoly class
 //
-// @(#)gpoly.cc	1.4 16 Aug 1996
+// @(#)gpoly.cc	1.5 19 May 1997
 //
 
 #include "gpoly.imp"
@@ -129,8 +129,8 @@ TEMPLATE class gList< gPoly<gRational> * >;
 TEMPLATE class gNode< gPoly<gRational> * >;
 TEMPLATE class gList< gPoly<double> * >;
 TEMPLATE class gNode< gPoly<double> * >;
-TEMPLATE class gList<gDouble>;
-TEMPLATE class gNode<gDouble>;
+//TEMPLATE class gList<gDouble>;
+//TEMPLATE class gNode<gDouble>;
 TEMPLATE class gList< gPoly<gDouble> * >;
 TEMPLATE class gNode< gPoly<gDouble> * >;
 TEMPLATE class gList< gPoly<gDouble> >;

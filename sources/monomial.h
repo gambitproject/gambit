@@ -1,12 +1,11 @@
 //
 // FILE: monomial.h -- Multivariate monomial class
 //
-// @(#)monomial.h	1.2 15 Aug 1996
+// @(#)monomial.h	1.4 10 Jun 1997
 //
 
 
 #include "prepoly.h"
-#include "mygmisc.h"
 
 
 // This file provides the template class
@@ -45,12 +44,13 @@ public:
 #endif   // MINI_POLY
 
     // information
-    const T &       Coef()                     const;
-    int      Dmnsn()                    const;
-    int      TotalDegree()              const;
-    bool     IsConstant()               const;
-    const exp_vect &ExpV()                     const;
-    T              Evaluate(const gArray<T>&) const;
+    const T &       Coef()                      const;
+    int             Dmnsn()                     const;
+    int             TotalDegree()               const;
+    bool            IsConstant()                const;
+    const exp_vect& ExpV()                      const;
+    T               Evaluate(const gArray<T>&)  const;
+    T               Evaluate(const gVector<T>&) const;
 
     // output
   friend gOutput& operator << (gOutput&, const gMono<T>&);

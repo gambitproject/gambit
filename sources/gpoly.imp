@@ -1,7 +1,7 @@
 //
 // FILE: gpoly.imp  -- Implementation of gPoly data type
 //
-// @(#)gpoly.imp	1.5 01 Sep 1996
+// @(#)gpoly.imp	1.10 03 Jun 1997
 //
 
 #include "gpoly.h"
@@ -309,6 +309,11 @@ template <class T> const term_order* gPoly<T>::GetOrder(void) const
   return (term_order *) Order;  
 }
 
+template <class T> int gPoly<T>::Dmnsn() const
+{
+  return Space->Dmnsn();
+}
+
 #ifndef MINI_POLY
 
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
@@ -318,6 +323,12 @@ template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
     if (max < Terms[j].ExpV()[var_no]) 
       max = Terms[j].ExpV()[var_no];
   return max;
+}
+
+template <class T> bool gPoly<T>::IsZero() const
+{
+  if (Terms.Length() == 0) return true;
+  else                     return false;
 }
 
 template <class T> int gPoly<T>::Degree() const
@@ -360,11 +371,6 @@ template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
   return answer;
 }
 
-template <class T> int gPoly<T>::Dmnsn() const
-{
-  return Space->Dmnsn();
-}
-
 
 #ifndef MINI_POLY
 
@@ -395,8 +401,8 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
   for (int i = 1; i <= ExpVecs.Length(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
       if (ExpVecs[i][j] > 0)
-	if (activar > 0 && activar != ExpVecs[i][j]) return -1;// multivariate!
-	else activar = ExpVecs[i][j];
+	if (activar > 0 && activar != j) return -1;// multivariate!
+	else activar = j;
     }
   }
   return activar;
@@ -405,15 +411,39 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
 template <class T> 
 polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 {
-  T* coefs = new T[DegreeOfVar(activar)];
+//DEBUG
+//gout << "Entering UnivariateEquivalent(), " << *this << ".\n";
 
-  for (int h = 1; h <= DegreeOfVar(activar); h++)
-    coefs[h] = (T)0;
+  assert(UniqueActiveVariable() >= 0);
 
-  for (int i = 1; i <= Terms.Length(); i++)
-    coefs[Terms[i].ExpV()[activar]] = Terms[i].Coef();
+  gList<T> coefs;
 
-  return polynomial<T>(coefs,DegreeOfVar(activar));
+  if (!IsZero()) {
+    for (int h = 0; h <= DegreeOfVar(activar); h++) coefs += (T)0;
+
+    for (int i = 1; i <= Terms.Length(); i++)
+      coefs[Terms[i].ExpV()[activar] + 1] = Terms[i].Coef();
+  }
+
+  return  polynomial<T>(coefs);
+}
+
+//----------------------------------
+//           Conversion
+//----------------------------------
+
+template<class T>  
+gPoly<gDouble>  gPoly<T>::TogDouble() const
+{
+  gPoly<gDouble>   answer(GetSpace(),GetOrder());
+  gList<gMono<T> > list = MonomialList();
+  for (int i =1; i <= list.Length(); i++) {
+    gDouble nextcoef = (gDouble)list[i].Coef();
+    gPoly<gDouble> next(GetSpace(),list[i].ExpV(),nextcoef,GetOrder());
+    answer += next;
+  }
+  
+  return answer;
 }
 
 //-------------------------------------------------------------
@@ -534,27 +564,19 @@ template <class T>
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
   gPoly<T> answer(Space,(T)0,Order);
-//  gPoly<T> newPoly(*this); 
 
   for (int i = 1; i <= Terms.Length(); i++) 
     {
-
-/*
-    newPoly.Terms[i] = 
-      gMono<T>(Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
-	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber));
-*/
-
     answer += gPoly<T>(Space,
 	       Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
 	       Terms[i].Coef()*pow(val,(long int)Terms[i].ExpV()[varnumber]), 
 		       Order);
 
+//DEBUG
+//gout << "answer is now " << answer << ".\n";
   }
 
-
   return answer;
-//  return (newPoly);
 }
 
 template <class T>
@@ -611,7 +633,6 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 // Term Order Concepts
 //--------------------
 
-// NEEDS TEST
 template <class T> 
 exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
 {
@@ -629,7 +650,6 @@ exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
   }
 }
 
-// NEEDS TEST
 template <class T> 
 T gPoly<T>::LeadingCoefficient(const term_order & order) const
 {
@@ -644,7 +664,6 @@ T gPoly<T>::LeadingCoefficient(const term_order & order) const
   }
 }
 
-// NEEDS TEST
 template <class T>
 gPoly<T> gPoly<T>::LeadingTerm(const term_order & order) const
 {
@@ -657,6 +676,12 @@ gPoly<T> gPoly<T>::LeadingTerm(const term_order & order) const
 	max = j;
     return gPoly<T>(Space,Terms[max],Order);
   }
+}
+
+template <class T>
+void gPoly<T>::ToMonic(const term_order & order) 
+{
+  *this = *this/LeadingCoefficient(order);
 }
 
 template <class T>
