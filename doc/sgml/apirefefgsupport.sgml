@@ -1,0 +1,207 @@
+<sect1 id="apiref.efgsupport">
+<title>Supports on extensive forms</title>
+
+<para>
+</para>
+
+
+<sect2 id="apiref.efgsupport.addaction">
+<title>AddAction</title>
+<indexterm><primary>AddAction</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>AddAction</function> adds the action
+<parameter>action</parameter> to <parameter>support</parameter>.  If
+the action is already in the support, no change is made.  A copy of
+the modified support is returned.  It is an error if
+<parameter>support</parameter> and <parameter>action</parameter> are
+not from the same extensive form game.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efgsupport.isdominated">
+<title>IsDominated</title>
+<indexterm><primary>IsDominated</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+IsDominated[action->ACTION, support->EFSUPPORT, {strong->False}, 
+            {conditional->False}, {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: BOOLEAN }
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsDominated</function> determines if the
+<parameter>action</parameter> is dominated in
+<parameter>support</parameter>.  The following optional parameters may
+be specified to modify the behavior of the elimination:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>strong</parameter>: By default, determines if the action is
+weakly dominated.  By specifying <literal>True</literal>, strong dominance is
+used.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>conditional</parameter>: If this is <literal>True</literal>,
+checks for conditional domination.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efgsupport.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText gbtEfgSupport::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Name[x->EFSUPPORT] =: TEXT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function> (<function>Name</function> in the GCL)
+returns the text label of the support.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efgsupport.removeaction">
+<title>RemoveAction</title>
+<indexterm><primary>RemoveAction</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>RemoveAction</function> removes
+<parameter>action</parameter> from <parameter>support</parameter>.  If
+<parameter>action</parameter> is not in <parameter>support</parameter>
+there is no effect.  A copy of the modified support is returned.  It
+is an error if <parameter>support</parameter> and
+<parameter>action</parameter> are not from the same extensive form
+game, or if removing <parameter>action</parameter> would result in the
+support containing no actions at an information set.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efgsupport.setlabel">
+<title>SetLabel</title>
+<indexterm><primary>SetLabel</primary></indexterm>
+<indexterm><primary>SetName (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgSupport::SetLabel(const gText &amp;p_label)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+SetName[x->EFSUPPORT, name->TEXT] =: EFSUPPORT
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+sets the text label of the support.  The GCL version returns the support.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efgsupport.undominated">
+<title>UnDominated</title>
+<indexterm><primary>UnDominated</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+UnDominated[support->EFSUPPORT, {strong->False}, {conditional->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: EFSUPPORT 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>UnDominated</function>
+finds dominated actions in a 
+<parameter>support</parameter>.  The returned support contains only the undominated
+actions; if this support is identical to the input support,
+no actions were found to be dominated.  The following
+optional parameters may be specified to modify the behavior of
+the elimination:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>strong</parameter> By default, all weakly dominated strategies or actions
+are eliminated.  If this is specified <literal>True</literal>, elimination is based
+on strict dominance.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>conditional</parameter>: Dominance computations are conditional on
+reaching infoset containing the action.  For example, a behavior
+strategy may be strongly dominated conditional on reaching its
+information set, but only weakly dominated in the entire game.  Only
+relevant for extensive form games.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</sect2>
+
+</sect1>
+

@@ -64,35 +64,9 @@ information and plans.
 
 &apirefstrategy;
 
-<sect1 id="apiref.efsupport">
-<title>Supports on extensive forms</title>
+&apirefefgsupport;
 
-<para>
-</para>
-
-&bifaddaction;
-&bifisdominated;
-&bifname;
-&bifremoveaction;
-&bifsetname;
-&bifundominated;
-
-</sect1>
-
-<sect1 id="apiref.efbasis">
-<title>Bases on extensive forms</title>
-
-<para>
-</para>
-
-&bifaddnode;
-&bifisconsistent;
-&bifname;
-&bifremovenode;
-&bifsetname;
-
-</sect1>
-
+&apirefefgbasis;
 
 &apirefnfgsupport;
 

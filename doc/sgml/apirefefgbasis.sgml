@@ -1,0 +1,84 @@
+<sect1 id="apiref.efgbasis">
+<title>Bases on extensive forms</title>
+
+<para>
+</para>
+
+
+<sect2 id="apiref.efgbasis.addnode">
+<title>AddNode</title>
+<indexterm><primary>AddNode</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+AddNode[basis->EFBASIS, node->NODE] =: EFBASIS
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>AddNode</function> adds the node <parameter>node</parameter>
+to the basis <parameter>basis</parameter>.  If
+<parameter>node</parameter> is already in
+<parameter>basis</parameter>, no change is made.  A copy of the
+modified basis is returned.  It is an error if
+<parameter>basis</parameter> and <parameter>node</parameter> are not
+from the same extensive form game.  
+</para>
+
+</sect2>
+
+<sect2 id="apiref.efgbasis.isconsistent">
+<title>IsConsistent</title>
+<indexterm><primary>IsConsistent</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+IsConsistent[basis->EFBASIS] =: BOOLEAN
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsConsistent</function>
+returns <literal>True</literal> if <parameter>basis</parameter> is a 
+consistent basis -- i. e., if it
+is a basis which could be a support for a sequential
+equilibrium (<citation><xref linkend="KreWil82"></citation>).
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.efgbasis.removenode">
+<title>RemoveNode</title>
+<indexterm><primary>RemoveNode</primary></indexterm>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+RemoveNode[support->EFBASIS, node->NODE] =: EFBASIS 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>RemoveNode</function> 
+removes <parameter>node</parameter> from <parameter>support</parameter>.
+If <parameter>node</parameter> is not in
+the basis, there is no effect.  A copy of the modified basis is
+returned.  
+</para>
+
+</sect2>
+
+</sect1>
+
+
+
+

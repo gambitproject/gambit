@@ -111,7 +111,7 @@ SetName[x->NFSUPPORT, name->TEXT] =: NFSUPPORT
 
 <para>
 <function>SetLabel</function> (<function>SetName</function> in the GCL) 
-sets the text label of the support.  The GCL version returns the player.
+sets the text label of the support.  The GCL version returns the support.
 </para>
 
 </sect2>
