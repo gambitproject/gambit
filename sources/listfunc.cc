@@ -18,7 +18,7 @@
 Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*))
 {
   unsigned long n = ((ListPortion*) param[0])->Length();
-  Portion* a[n+1];
+  Portion* *a=new Portion* [n+1];
   unsigned long i, j, inc;
   Portion* v; 
   bool no_sub_lists = true;
