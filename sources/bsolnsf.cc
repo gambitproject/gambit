@@ -67,8 +67,11 @@ Sort();
 
 // Filtering function
 template <class T>
-bool BSolnSorterFilter<T>::Passes(const BehavSolution<T> &a) const
+bool BSolnSorterFilter<T>::Passes(const BehavSolution<T> &a_) const
 {
+// casting away CONST @@
+BehavSolution<T> &a=(BehavSolution<T> &)a_;
+
 int i;
 for (i=1;i<=NUM_BCREATORS;i++)
 	if (options.filter_cr_id[i]==a.Creator() && !options.FilterCr()[i])
@@ -87,8 +90,12 @@ return true;
 
 // Sorting function
 template <class T>
-CompareResult BSolnSorterFilter<T>::Compare(const BehavSolution<T> &a,const BehavSolution<T> &b) const
+CompareResult BSolnSorterFilter<T>::Compare(const BehavSolution<T> &a_,const BehavSolution<T> &b_) const
 {
+// casting away CONST @@
+BehavSolution<T> &a=(BehavSolution<T> &)a_;
+BehavSolution<T> &b=(BehavSolution<T> &)b_;
+
 switch (options.SortBy())
 {
 case BSORT_BY_ID:
@@ -162,7 +169,11 @@ return Equal;
 #include "gslist.imp"
 TEMPLATE class gSortList<BehavSolution<double> >;
 TEMPLATE class gSortList<BehavSolution<gRational> >;
-
+TEMPLATE class gListSorter<BehavSolution<gRational> >;
+TEMPLATE class gListSorter<BehavSolution<double> >;
+TEMPLATE class  gListFilter<MixedSolution<gRational> >;
+TEMPLATE class  gListFilter<MixedSolution<double> >; 
 TEMPLATE class BSolnSorterFilter<double>;
 TEMPLATE class BSolnSorterFilter<gRational>;
+
 
