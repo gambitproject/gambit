@@ -948,7 +948,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
       m_efg.SetOutcome(Cursor(), 0);
     }
 
-    if (m_efg.IsLegalSubgame(Cursor())) {
+    if (m_efg.IsLegalSubgame(Cursor()) && Cursor()->GetParent()) {
       if (dialog.MarkedSubgame()) {
 	m_efg.MarkSubgame(Cursor());
       }
