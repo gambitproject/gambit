@@ -79,36 +79,6 @@ public:
   bool GameIsEfg(void) const;
 };
 
-
-
-//--------
-// Error
-//--------
-
-// NB: This class is obsolecent.  The functionality will be replaced by
-// C++ exceptions.
-
-class ErrorPortion : public Portion  {
-protected:
-  gText _Value;
-
-public:
-  ErrorPortion(const gText& value = "");
-  virtual ~ErrorPortion();
-
-  gText Value(void) const;
-  PortionSpec Spec(void) const;
-
-  void Output(gOutput& s) const;
-  gText OutputString(void) const;
-
-  Portion* ValCopy(void) const;
-  Portion* RefCopy(void) const;
-  bool IsReference(void) const;
-};
-
-
-
 //---------
 // Null
 //---------

@@ -181,48 +181,6 @@ void Portion::SetGame(const Efg *game)
   }
 }
 
-//---------
-// Error
-//---------
-
-ErrorPortion::ErrorPortion(const gText& value)
-  : _Value(value)
-{ }
-
-ErrorPortion::~ErrorPortion()
-{ }
-
-gText ErrorPortion::Value(void) const
-{ return _Value; }
-
-PortionSpec ErrorPortion::Spec(void) const
-{ return PortionSpec(porERROR); }
-
-void ErrorPortion::Output(gOutput& s) const
-{
-  Portion::Output(s);
-  s << OutputString();
-}
-
-gText ErrorPortion::OutputString(void) const
-{
-  if(_Value == "")
-    return "(Error)";
-  else
-    return _Value;  
-}
-
-
-Portion* ErrorPortion::ValCopy(void) const
-{ return new ErrorPortion(_Value); }
-
-Portion* ErrorPortion::RefCopy(void) const
-{ return new ErrorPortion(_Value); }
-
-bool ErrorPortion::IsReference(void) const
-{ return false; }
-
-
 //--------
 // Null
 //--------
