@@ -244,7 +244,7 @@ static void TracePath(const MixedProfile<double> &p_start,
 		      gList<MixedSolution> &p_solutions)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
-  const double c_maxDecel = 3.0;   // maximal deceleration factor
+  const double c_maxDecel = 1.1;   // maximal deceleration factor
   const double c_maxDist = 0.4;    // maximal distance to curve
   const double c_maxContr = 0.6;   // maximal contraction rate in corrector
   const double c_eta = 0.1;        // perturbation to avoid cancellation
@@ -306,7 +306,6 @@ static void TracePath(const MixedProfile<double> &p_start,
 
       QreLHS(p_start.Support(), u, y);
       NewtonStep(q, b, u, y, dist); 
-      printf("lambda=%f, h=%f, dist=%f\n", x[x.Length()], h, dist);
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
