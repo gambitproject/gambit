@@ -10,6 +10,7 @@
 #include "gsmfunc.h"
 
 #include "gwatch.h"
+#include "gstatus.h"
 
 #include "efg.h"
 #include "efgutils.h"
@@ -256,7 +257,8 @@ Portion *GSM_DetachOutcome(Portion **param)
 
 extern EFSupport *ComputeDominated(EFSupport &S, bool strong, 
 				   const gArray<int> &players,
-				   gOutput &tracefile);
+				   gOutput &tracefile,
+				   gStatus &status);
 
 //--------------
 // ElimAllDom
@@ -278,7 +280,7 @@ Portion *GSM_ElimAllDom_EfSupport(Portion **param)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value());
+			     ((OutputPortion *) param[3])->Value(), gstatus);
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -306,7 +308,7 @@ Portion *GSM_ElimAllDom_Efg(Portion **param)
   {
     old_T = new_T;
     new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value());
+			     ((OutputPortion *) param[3])->Value(), gstatus);
   }
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
@@ -332,7 +334,8 @@ Portion *GSM_ElimDom_EfSupport(Portion **param)
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
   EFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value());
+				  ((OutputPortion *) param[3])->Value(),
+				  gstatus);
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
@@ -355,7 +358,8 @@ Portion *GSM_ElimDom_Efg(Portion **param)
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
   EFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value());
+				  ((OutputPortion *) param[3])->Value(),
+				  gstatus);
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
