@@ -83,7 +83,12 @@ gbtProfileTable::gbtProfileTable(gbtGameDocument *p_doc)
 
 int gbtProfileTable::GetInfoColumns(void) const
 {
-  return 9;
+  if (m_doc->HasEfg()) {
+    return 9;
+  }
+  else {
+    return 5;
+  }
 }
 
 int gbtProfileTable::GetBehavColumns(void) const
@@ -156,11 +161,18 @@ int gbtProfileTable::GetNumberCols(void)
 
 wxString gbtProfileTable::GetColLabelValue(int p_col)
 {
-  wxString labels[] = { _("Name"), _("Creator"), 
-			_("BNash"), _("SPE"), _("Seq"), _("BLiap"),
-			_("MNash"), _("THPE"), _("NLiap") };
   if (p_col < GetInfoColumns()) {
-    return labels[p_col];
+    if (m_doc->HasEfg()) {
+      wxString labels[] = { _("Name"), _("Creator"), 
+			    _("BNash"), _("SPE"), _("Seq"), _("BLiap"),
+			    _("MNash"), _("THPE"), _("NLiap") };
+      return labels[p_col];
+    }
+    else {
+      wxString labels[] = { _("Name"), _("Creator"), 
+			    _("MNash"), _("THPE"), _("NLiap") };
+      return labels[p_col];
+    }
   }
   else if (p_col < GetInfoColumns() + GetBehavColumns()) {
     for (int pl = 1, col = GetInfoColumns(); 
@@ -220,48 +232,52 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
     behav = &m_doc->AllBehavProfiles()[p_row + 1];
   }
 
-  switch (p_col) {
-  case 0:
-    return wxString::Format(wxT("%s"), (char *) mixed->GetLabel());
-  case 1:
-    return wxString::Format(wxT("%s"), (char *) mixed->GetCreator());
-  case 2:
-    if (behav) {
-      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsNash()));
-    }
-    else {
-      return wxT("");
-    }
-  case 3:
-    if (behav) {
-      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
-    }
-    else {
-      return wxT("");
-    }
-  case 4:
-    if (behav) {
-      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSequential()));
-    }
-    else {
-      return wxT("");
-    }
-  case 5:
-    if (behav) {
-      return wxString::Format(wxT("%s"), (char *) ToText(behav->GetLiapValue(),
+  if (p_col < GetInfoColumns()) {
+    switch (p_col) {
+    case 0:
+      return wxString::Format(wxT("%s"), (char *) mixed->GetLabel());
+    case 1:
+      return wxString::Format(wxT("%s"), (char *) mixed->GetCreator());
+    case 2:
+      if (behav) {
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsNash()));
+      }
+      else {
+	return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+      }
+    case 3:
+      if (behav) {
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
+      }
+      else {
+	return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+      }
+    case 4:
+      if (behav) {
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSequential()));
+      }
+      else {
+	return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
+							 m_doc->GetPreferences().NumDecimals()));
+      }
+    case 5:
+      if (behav) {
+	return wxString::Format(wxT("%s"), (char *) ToText(behav->GetLiapValue(),
+							   m_doc->GetPreferences().NumDecimals()));
+      }
+      else {
+	return wxT("");
+      }
+    case 6:
+      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
+    case 7:
+      return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
+    case 8:
+      return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
 							 m_doc->GetPreferences().NumDecimals()));
     }
-    else {
-      return wxT("");
-    }
-  case 6:
-    return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
-  case 7:
-    return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
-  case 8:
-    return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
-						       m_doc->GetPreferences().NumDecimals()));
-  default:
+  }
+  else {
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
       int offset = GetInfoColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
