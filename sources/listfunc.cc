@@ -186,7 +186,10 @@ Portion* GSM_Filter(Portion** param)
 {
   if(!ListDimCheck((ListPortion*) param[0], (ListPortion*) param[1]))
     return new ErrorPortion("Mismatching list dimensions");
-  return GSM_Filter_Aid((ListPortion*) param[0], (ListPortion*) param[1]);
+  ListPortion* list = GSM_Filter_Aid((ListPortion*) param[0], 
+				     (ListPortion*) param[1]);
+  list->SetDataType( param[0]->Spec().Type );
+  return list;
 }
 
 
