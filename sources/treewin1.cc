@@ -53,47 +53,6 @@ EFPlayer *EfgGetPlayer(const Efg &ef, const gText &name)
 }
 
 //-----------------------------------------------------------------------
-//                    EDIT MENU HANDLER FUNCTIONS
-//-----------------------------------------------------------------------
-
-void TreeWindow::edit_copy_infoset(void)
-{
-    copied_infoset = cursor->GetInfoset();
-    copied_outcome = 0;
-    copied_subtree = 0;
-}
-
-void TreeWindow::edit_copy_outcome(void)
-{
-    copied_outcome = cursor->GetOutcome();
-    copied_infoset = 0;
-    copied_subtree = 0;
-}
-
-void TreeWindow::edit_copy_subtree(void)
-{
-    copied_subtree = cursor;
-    copied_infoset = 0;
-    copied_outcome = 0;
-}
-
-void TreeWindow::edit_paste(void)
-{
-    if (copied_infoset && cursor->NumChildren() == 0)
-    {
-        ef.AppendNode(cursor, copied_infoset);
-        nodes_changed = TRUE;
-    }
-    else if (copied_subtree && cursor->NumChildren() == 0)
-    {
-        ef.CopyTree(copied_subtree, cursor);
-        nodes_changed = TRUE;
-    }
-    else if (copied_outcome)
-        cursor->SetOutcome(copied_outcome);
-}
-
-//-----------------------------------------------------------------------
 //                    NODE MENU HANDLER FUNCTIONS
 //-----------------------------------------------------------------------
 

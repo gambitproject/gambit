@@ -1260,8 +1260,7 @@ int TreeWindow::OutcomeDragger::Dragging(void) const
 TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_) 
     : TreeRender(frame_, this, node_list, hilight_infoset, hilight_infoset1,
                  mark_node, cursor, subgame_node, draw_settings),
-      ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_),
-      copied_infoset(0)
+      ef(ef_), disp_sup(disp), frame(frame_), pframe(frame_)
 {
     // Set the cursor to the root node
     cursor = ef.RootNode();
