@@ -141,7 +141,8 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     }
     
     for (int solno = 1; solno <= sol.Length(); solno++)  {
-      solns.Append(thissolns[soln]);
+      int ii = solns.Append(thissolns[soln]);
+      solns[ii].SetEpsilon(sol[solno].Epsilon());
       
       for (int pl = 1; pl <= foo.NumPlayers(); pl++)  {
 	EFPlayer *p = foo.Players()[pl];

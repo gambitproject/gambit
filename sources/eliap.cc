@@ -111,7 +111,8 @@ static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 		        double value, double epsilon)
 {
-  solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
+  int index = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
+  solutions[index].SetEpsilon(epsilon);
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);
