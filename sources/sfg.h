@@ -14,7 +14,6 @@
 #include "gnarray.h"
 #include "sfstrat.h"
 #include "glist.h"
-#include "gblock.h"
 
 class Sfg  {
 private:
@@ -27,7 +26,7 @@ private:
   gPVector<int> isetFlag,isetRow;
   gArray<gList<Infoset *> > infosets;
 
-  void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>,
+  void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<Infoset *>,
 		      gArray<Sequence *>);
   void GetSequenceDims(const Node *);
 

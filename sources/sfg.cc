@@ -10,7 +10,6 @@
 #include "gnarray.imp"
 #include "grarray.imp"
 #include "glist.imp"
-#include "gblock.imp"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators
@@ -22,7 +21,7 @@ Sfg::Sfg(const EFSupport &S)
     isetRow(S.Game().NumInfosets()), infosets(EF.NumPlayers())
 { 
   int i;
-  gArray<int> zero(EF.NumPlayers());
+  gArray<Infoset *> zero(EF.NumPlayers());
   gArray<int> one(EF.NumPlayers());
 
   EFSupport support(EF);
@@ -39,7 +38,6 @@ Sfg::Sfg(const EFSupport &S)
   GetSequenceDims(EF.RootNode());
 
   isetFlag = 0;
-  // gout << "\nisetRow: " << isetRow;
 
   gIndexOdometer index(seq);
 
@@ -91,7 +89,7 @@ Sfg::~Sfg()
 
 void Sfg::
 MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq, 
-		 gArray<int> iset, gArray<Sequence *> parent) 
+		 gArray<Infoset *> iset, gArray<Sequence *> parent) 
 { 
   int i,pl;
 
@@ -109,19 +107,20 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
     }
     else {
       int pl = n->GetPlayer()->GetNumber();
-      iset[pl]=n->GetInfoset()->GetNumber();
+      iset[pl]=n->GetInfoset();
+      int isetnum = iset[pl]->GetNumber();
       gArray<int> snew(seq);
       snew[pl]=1;
-      for(i=1;i<iset[pl];i++)
+      for(i=1;i<isetnum;i++)
 	if(isetRow(pl,i)) 
 	  snew[pl]+=efsupp.NumActions(pl,i);
 
-      (*(*E)[pl])(isetRow(pl,iset[pl]),seq[pl]) = (gNumber)1;
+      (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gNumber)1;
       Sequence *myparent(parent[pl]);
 
       bool flag = false;
-      if(!isetFlag(pl,iset[pl])) {   // on first visit to iset, create new sequences
-	isetFlag(pl,iset[pl])=1;
+      if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
+	isetFlag(pl,isetnum)=1;
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
@@ -136,7 +135,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq,
 	    
 	  }
 
-	  (*(*E)[pl])(isetRow(pl,iset[pl]),snew[pl]) = -(gNumber)1;
+	  (*(*E)[pl])(isetRow(pl,isetnum),snew[pl]) = -(gNumber)1;
 	  MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
 	}
       }
@@ -157,13 +156,13 @@ GetSequenceDims(const Node *n)
     }
     else {
       int pl = n->GetPlayer()->GetNumber();
-      int iset = n->GetInfoset()->GetNumber();
+      int isetnum = n->GetInfoset()->GetNumber();
     
       bool flag = false;
-      if(!isetFlag(pl,iset)) {   // on first visit to iset, create new sequences
+      if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
 	infosets[pl].Append(n->GetInfoset());
-	isetFlag(pl,iset)=1;
-	isetRow(pl,iset)=infosets[pl].Length()+1;
+	isetFlag(pl,isetnum)=1;
+	isetRow(pl,isetnum)=infosets[pl].Length()+1;
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
