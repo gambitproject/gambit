@@ -218,22 +218,6 @@ optparam:     { assert( optparam == 0 );
                 optparam = 0;
               }
 
-paramE9:      BOOLEAN { portions.Append( new BoolValPortion(bval) ); }
-  |           INTEGER { portions.Append( new IntValPortion(ival.as_long()) ); }
-  |           FLOAT   { portions.Append(  new FloatValPortion(dval) ); }
-  |           PLUS INTEGER  
-                   { portions.Append(  new IntValPortion(-ival.as_long()) ); }
-  |           PLUS FLOAT    
-                   { portions.Append(  new FloatValPortion(-dval) ); }
-  |           MINUS INTEGER  
-                   { portions.Append( new IntValPortion(-ival.as_long()) ); }
-  |           MINUS FLOAT    
-                   { portions.Append( new FloatValPortion(-dval) ); }
-  |           TEXT     { portions.Append(  new TextValPortion(tval) ); }
-  |           STDIN    { portions.Append(  new InputRefPortion(gin) ); }
-  |           STDOUT   { portions.Append(  new OutputRefPortion(gout) ); }
-  |           gNULL    { portions.Append(  new OutputRefPortion(gnull) ); }
-  ;
 
 
 typename:     starname
