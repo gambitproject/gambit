@@ -4,3 +4,6 @@
 *.obj
 *.lib
 *.a
+.deps
+Makefile
+Makefile.in
