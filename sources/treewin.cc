@@ -45,6 +45,11 @@ extern void DrawSubgamePickIcon(wxDC &, const NodeEntry &);
 #define MAX_TW                  60
 #define MAX_TH                  20
 
+#define MAX_WINDOW_WIDTH   750  // assuming an 800x600 display to be safe
+#define MAX_WINDOW_HEIGHT  550
+#define MIN_WINDOW_WIDTH   600  // at least 12 buttons
+#define MIN_WINDOW_HEIGHT  300
+
 
 wxFont   *outcome_font;
 wxBrush  *white_brush;
@@ -114,7 +119,7 @@ TreeWindow::TreeWindow(FullEfg &ef_, EFSupport * &disp, EfgShow *frame_)
     log = FALSE;
 
     // Create scrollbars
-    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 1, 1);
+    //    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 1, 1);
     draw_settings.set_x_steps(60);
     draw_settings.set_y_steps(60);
     
@@ -388,10 +393,9 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
 
 void TreeWindow::OnPaint(void)
 {
-    TreeRender::OnPaint();
-    if (zoom_window) 
-        zoom_window->OnPaint();
-    AdjustScrollbarSteps();
+  TreeRender::OnPaint();
+  if (zoom_window) 
+    zoom_window->OnPaint();
 }
 
 //---------------------------------------------------------------------
@@ -654,6 +658,28 @@ void TreeWindow::UpdateTableParents(void)
     }
 }
 
+void TreeWindow::FitZoom(void)
+{
+  int width, height;
+  width = gmin(draw_settings.MaxX(), MAX_WINDOW_WIDTH);
+  height = gmin(draw_settings.MaxY(), MAX_WINDOW_HEIGHT);
+    
+  double zoomx = (double)width/(double)draw_settings.MaxX();
+  double zoomy = (double)height/(double)draw_settings.MaxY();
+    
+  zoomx = gmin(zoomx, 1.0); zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
+  double zoom = gmin(zoomx, zoomy); // same zoom for vertical and horiz
+    
+  width = (int)(zoom*(double)draw_settings.MaxX());
+  height = (int)(zoom*(double)draw_settings.MaxY());
+    
+  width = gmax(width, MIN_WINDOW_WIDTH);
+  height = gmax(height, MIN_WINDOW_HEIGHT);
+    
+  draw_settings.SetZoom(zoom, true);
+  GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
+  pframe->SetClientSize(width, height+50); // +50 to account for the toolbar
+}
 
 //
 // Render: The main rendering routine
@@ -695,7 +721,9 @@ void TreeWindow::Render(wxDC &dc)
                               draw_settings.OutcomeLength());
         draw_settings.SetMaxY(maxy+25);
 
-        if (must_recalc) {
+	FitZoom();
+        
+	if (must_recalc) {
 	  must_recalc = FALSE;
 	  need_clear = TRUE;
         }
@@ -786,8 +814,8 @@ void TreeWindow::AdjustScrollbarSteps(void)
       (y_steps != draw_settings.y_steps())) {
     draw_settings.set_x_steps(x_steps);
     draw_settings.set_y_steps(y_steps);
-    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 
-		  x_steps, y_steps, 1, 1);
+    //    SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 
+    //		  x_steps, y_steps, 1, 1);
   }
 }
 
@@ -795,75 +823,17 @@ void TreeWindow::AdjustScrollbarSteps(void)
 
 void TreeWindow::ProcessCursor(void)
 {
-    // A little scrollbar magic to insure the focus stays with the cursor.  This
-    // can probably be optimized much further.  Consider using SetClippingRegion().
-    // This also makes sure that the virtual canvas is large enough for the entire
-    // tree.
+  NodeEntry *entry = GetNodeEntry(Cursor()); 
+  if (!entry) {
+    SetCursorPosition(ef.RootNode());
+    entry = GetNodeEntry(Cursor());
+  }
     
-    int x_start, y_start;
-    int width, height;
-    int x_steps, y_steps;
-    int xs, xe, ys, ye;
-    
-    ViewStart(&x_start, &y_start);
-    GetParent()->GetClientSize(&width, &height);
-    height -= 50; // This compensates for a bug in GetClientSize().
-    height  = int(height / draw_settings.Zoom());
-    width   = int(width  / draw_settings.Zoom());
-    x_steps = draw_settings.x_steps();
-    y_steps = draw_settings.y_steps();
-    
-    // Make sure the cursor is visible.
-    NodeEntry *entry = GetNodeEntry(Cursor()); 
-    if (!entry) {
-      SetCursorPosition(ef.RootNode());
-      entry = GetNodeEntry(Cursor());
-    }
-    
-    // Check if the cursor is in the visible x-dimension.
-    // xs, xe and NodeLength are in pixels (absolute units).
+  UpdateCursor(entry);
+  if (zoom_window)
+    zoom_window->UpdateCursor(entry);
 
-    xs = entry->x;
-    xe = xs + draw_settings.NodeLength();
-
-    if (xs < (x_start * PIXELS_PER_SCROLL))
-        x_start = xs / PIXELS_PER_SCROLL - 1;
-
-    if (xe > (x_start * PIXELS_PER_SCROLL + width))
-        x_start = xe / PIXELS_PER_SCROLL - (width / 2) / PIXELS_PER_SCROLL;
-
-    if (x_start < 0) 
-        x_start = 0;
-
-    if (x_start > x_steps)
-        x_start = x_steps;
-    
-    // Check if the cursor is in the visible y-dimension.
-    ys = entry->y-10;
-    ye = entry->y+10;
-    if (ys < y_start*PIXELS_PER_SCROLL)
-        y_start = ys/PIXELS_PER_SCROLL-1;
-    if (ye > y_start*PIXELS_PER_SCROLL+height)
-        y_start = ye/PIXELS_PER_SCROLL-height/PIXELS_PER_SCROLL;
-    if (y_start < 0) 
-        y_start = 0;
-    if (y_start > y_steps)
-        y_start = y_steps;
-    
-    // now update the flasher
-    UpdateCursor(entry);
-    if (zoom_window)
-        zoom_window->UpdateCursor(entry);
-
-    if ((x_start != draw_settings.get_x_scroll()) ||
-        (y_start != draw_settings.get_y_scroll()))
-    {
-        Scroll(x_start, y_start);
-        draw_settings.set_x_scroll(x_start);
-        draw_settings.set_y_scroll(y_start);
-    }
-
-    frame->OnSelectedMoved(Cursor());
+  frame->OnSelectedMoved(Cursor());
 }
 
 
@@ -2556,48 +2526,54 @@ void TreeWindow::delete_zoom_win(void)
 
 void TreeWindow::display_set_zoom(float z)
 {
-    draw_settings.SetZoom(z);
-    GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
-    must_recalc = TRUE;
+  if (zoom_window) {
+    zoom_window->SetZoom(z);
+  }
+  //    draw_settings.SetZoom(z);
+  //  GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
+  //  must_recalc = TRUE;
 }
 
 float TreeWindow::display_get_zoom(void)
 {
-    return draw_settings.Zoom();
+  if (zoom_window) {
+    return zoom_window->GetZoom();
+  }
+  else {
+    return 1.0;
+  }
 }
-
-#define MAX_WINDOW_WIDTH   750  // assuming an 800x600 display to be safe
-#define MAX_WINDOW_HEIGHT  550
-#define MIN_WINDOW_WIDTH   600  // at least 12 buttons
-#define MIN_WINDOW_HEIGHT  300
 
 void TreeWindow::display_zoom_fit(void)
 {
-    int width, height;
-    Render(*GetDC());
-    width = gmin(draw_settings.MaxX(), MAX_WINDOW_WIDTH);
-    height = gmin(draw_settings.MaxY(), MAX_WINDOW_HEIGHT);
+  int width, height;
+  Render(*GetDC());
+  width = gmin(draw_settings.MaxX(), MAX_WINDOW_WIDTH);
+  height = gmin(draw_settings.MaxY(), MAX_WINDOW_HEIGHT);
     
-    double zoomx = (double)width/(double)draw_settings.MaxX();
-    double zoomy = (double)height/(double)draw_settings.MaxY();
+  double zoomx = (double)width/(double)draw_settings.MaxX();
+  double zoomy = (double)height/(double)draw_settings.MaxY();
     
-    zoomx = gmin(zoomx, 1.0); zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
-    double zoom = gmin(zoomx, zoomy); // same zoom for vertical and horiz
+  zoomx = gmin(zoomx, 1.0); zoomy = gmin(zoomy, 1.0);  // never zoom in (only out)
+  double zoom = gmin(zoomx, zoomy); // same zoom for vertical and horiz
     
-    width = (int)(zoom*(double)draw_settings.MaxX());
-    height = (int)(zoom*(double)draw_settings.MaxY());
+  width = (int)(zoom*(double)draw_settings.MaxX());
+  height = (int)(zoom*(double)draw_settings.MaxY());
     
-    width = gmax(width, MIN_WINDOW_WIDTH);
-    height = gmax(height, MIN_WINDOW_HEIGHT);
+  width = gmax(width, MIN_WINDOW_WIDTH);
+  height = gmax(height, MIN_WINDOW_HEIGHT);
     
-    draw_settings.SetZoom(zoom);
-    GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
-    pframe->SetClientSize(width, height+50); // +50 to account for the toolbar
-    must_recalc = TRUE;
-    ProcessCursor();
-    OnPaint();
+  draw_settings.SetZoom(zoom);
+  GetDC()->SetUserScale(draw_settings.Zoom(), draw_settings.Zoom());
+  pframe->SetClientSize(width, height+50); // +50 to account for the toolbar
+  ProcessCursor();
+  OnPaint();
 }
 
+float TreeWindow::GetZoom(void) const
+{
+  return draw_settings.Zoom();
+}
 
 //***********************************************************************
 //                      DISPLAY LEGENGS HANDLER
@@ -2751,5 +2727,3 @@ gOutput &operator<<(gOutput &o, const TreeWindow::SUBGAMEENTRY &)
     return o;
 }
 
-int TreeZoomWindow::NumDecimals(void) const
-{ return parent->NumDecimals(); }

@@ -438,7 +438,7 @@ void TreeRender::RenderSubtree(wxDC &dc)
         
     // If we are just a renderer, there can be no zoom! 
     // For zoom, override JustRender().
-    float zoom = (JustRender()) ? 1.000 : draw_settings.Zoom();
+    float zoom = GetZoom();
 
     // Check if this node/labels are visible
     if (!(child_entry.x+dc.device_origin_x < x_start*PIXELS_PER_SCROLL  ||
@@ -671,7 +671,7 @@ TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
   : TreeRender(new TreeZoomFrame(frame, parent), parent,
 	       node_list_, hilight_infoset_, hilight_infoset1_,
 	       mark_node_, subgame_node_, draw_settings_),
-    m_parent(parent)
+    m_parent(parent), m_zoom(1.0)
 {
   MakeFlasher();
   UpdateCursor(cursor_entry);
@@ -690,12 +690,16 @@ void TreeZoomWindow::Render(wxDC &dc)
 {
   int width, height;
   GetClientSize(&width, &height);
-  int xm = (xs+xe)/2, ym = (ys+ye)/2;   // coordinates of the middle of the cursor
+  width /= m_zoom;
+  height /= m_zoom;
+
+  // coordinates of the middle of the cursor
+  int xm = (xs+xe)/2, ym = (ys+ye)/2;
   int ox = width/2-xm;
   int oy = height/2-ym;
   dc.SetDeviceOrigin(0, 0); // should not be necessary, but its a bug
   Clear();
-  dc.SetDeviceOrigin(ox, oy);
+  dc.SetDeviceOrigin(ox * m_zoom, oy * m_zoom);
   TreeRender::Render(dc);
   flasher->Flash();
 }
@@ -707,9 +711,22 @@ void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
   Render(*GetDC());
 }
 
+void TreeZoomWindow::SetZoom(float p_zoom)
+{
+  m_zoom = p_zoom;
+  GetDC()->SetUserScale(m_zoom, m_zoom);
+}
+
+float TreeZoomWindow::GetZoom(void) const
+{
+  return m_zoom;
+}
+
 void TreeZoomWindow::OnChar(wxKeyEvent &p_event)
 {
   m_parent->OnChar(p_event);
 }
 
+int TreeZoomWindow::NumDecimals(void) const
+{ return parent->NumDecimals(); }
 

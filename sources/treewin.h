@@ -95,6 +95,7 @@ public:
     void MakeFlasher(void);
 
   virtual int NumDecimals(void) const = 0;
+  virtual float GetZoom(void) const = 0;
 };
 
 
@@ -105,6 +106,7 @@ private:
   // See ::Render()
   int xs, ys, xe, ye;
   TreeWindow *m_parent;
+  float m_zoom;
 
 public:
   TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
@@ -120,6 +122,10 @@ public:
 
   void OnChar(wxKeyEvent &);
   int NumDecimals(void) const;
+
+  Bool JustRender(void) const { return false; }
+  void SetZoom(float zoom);
+  float GetZoom(void) const;
 };
 
 class TreeWindow : public TreeRender   
@@ -163,7 +169,7 @@ private:
     gOutput   *log;                 // Are we saving each action to a file?
     Infoset *hilight_infoset;       // Hilight infoset from the solution disp
     Infoset *hilight_infoset1;      // Hilight infoset by pressing control
-    TreeRender *zoom_window;
+    TreeZoomWindow *zoom_window;
     wxMenu    *edit_menu;           // a popup menu, equivalent to top level edit
 
     class NodeDragger;              // Class to take care of tree copy/move by
@@ -179,6 +185,8 @@ private:
     OutcomeDragger *outcome_drag;   // by drag and dropping
 
     // Private Functions
+    void FitZoom(void);
+
     int   FillTable(const Node *n,int level);
     void  ProcessCursor(void);
     void  ProcessClick(wxMouseEvent &ev);
@@ -315,6 +323,7 @@ public:
   // Check if a drag'n'drop object has been activated
   Node *GotObject(float &mx, float &my, int what);
   virtual Bool JustRender(void) const { return FALSE; }
+  float GetZoom(void) const;
   
   // Adjust number of scrollbar steps if needed.
   void AdjustScrollbarSteps();
