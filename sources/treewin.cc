@@ -111,10 +111,9 @@ int 	i;
 
 if (!n->GetPlayer()->IsChance())	// if this is not a chance player
 {
-	wxMessageBox("Probabilities only valid for CHANCE player","Error",wxOK | wxCENTRE,frame);
+	wxMessageBox("Probs can only be set for a CHANCE player","Error",wxOK | wxCENTRE,frame);
 	return;
 }
-//ToStringPrecision(4);
 
 int num_actions=cursor->NumChildren();
 int num_d=num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);
@@ -127,8 +126,9 @@ for (int d=0;d<=num_d;d++)
 	for (i=1;i<=actions_now;i++)
 	{
 		T temp_p=((ChanceInfoset<T> *)(n->GetInfoset()))->GetActionProb(i+d*ENTRIES_PER_DIALOG);
-		prob_vector[i]=new char[20];
-		strcpy(prob_vector[i],ToString(temp_p));
+		gString temp_s=ToString(temp_p);
+		prob_vector[i]=new char[temp_s.length()+1];
+		strcpy(prob_vector[i],temp_s);
 		node_probs_dialog->Add(wxMakeFormString("",&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
 		node_probs_dialog->Add(wxMakeFormNewLine());
 	}
@@ -141,6 +141,7 @@ for (int d=0;d<=num_d;d++)
 		T dummy;
 		for (i=1;i<=actions_now;i++)
 			((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i+d*ENTRIES_PER_DIALOG,FromString(prob_vector[i],dummy));
+		outcomes_changed=TRUE;  // game changed -- delete solutions, etc
 	}
 	for (i=1;i<=actions_now;i++) delete [] prob_vector[i];delete [] prob_vector;
 	delete node_probs_dialog;
