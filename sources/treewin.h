@@ -7,6 +7,8 @@
 #ifndef TREEWIN_H
 #define TREEWIN_H
 
+#include "wx/dragimag.h"
+
 #include "efglayout.h"
 #include "twflash.h"
 #include "wxmisc.h"
@@ -28,17 +30,15 @@ private:
   Infoset *hilight_infoset1;      // Hilight infoset by pressing control
   wxMenu *m_editMenu;           // a popup menu, equivalent to top level edit
 
-  class NodeDragger;              // Class to take care of tree copy/move by
-  NodeDragger *node_drag;         // drag and dropping nodes.
+  wxDragImage *m_dragImage;
+  Node *m_dragSource;
+  enum { dragCOPY, dragMOVE, dragOUTCOME } m_dragMode;
 
   class IsetDragger;              // Class to take care of iset join by
   IsetDragger *iset_drag;         // drag and dropping.
 
   class BranchDragger;            // Class to take care of branch addition by
   BranchDragger *branch_drag;     // drag and dropping
-
-  class OutcomeDragger;           // Class to take care of outcome copy/move
-  OutcomeDragger *outcome_drag;   // by drag and dropping
 
   TreeNodeCursor *flasher;                // Used to flash/display the cursor
 

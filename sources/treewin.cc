@@ -6,6 +6,7 @@
 
 #include "wx/wx.h"
 #include "wx/dcps.h"
+#include "wx/dragimag.h"
 #include "wxmisc.h"
 
 #include "gmisc.h"
@@ -55,7 +56,7 @@ END_EVENT_TABLE()
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxScrolledWindow(p_parent),
     ef(*p_efgShow->Game()), m_parent(p_efgShow),
-    m_layout(ef, this), m_zoom(1.0)
+    m_layout(ef, this), m_dragImage(0), m_zoom(1.0)
 {
   // Set the cursor to the root node
   m_cursor = ef.RootNode();
@@ -64,14 +65,10 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 
   // Create the flasher to flash the cursor or just a steady cursor
   flasher = new TreeNodeCursor(this);
-  // Create provision for drag'n dropping nodes
-  node_drag = new NodeDragger(this, ef);
   // Create provision for merging isets by drag'n dropping
   iset_drag = new IsetDragger(this, ef);
   // Create provision for adding/creating braches by drag'n dropping
   branch_drag = new BranchDragger(this, ef);
-  // Create provision for copying/moving outcomes by drag'n'drop
-  outcome_drag = new OutcomeDragger(this, ef);
   // No node has been marked yet--mark_node is invalid
   mark_node = 0; 
   // No isets are being hilighted
@@ -85,10 +82,8 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 
 TreeWindow::~TreeWindow()
 {
-  delete node_drag;
   delete iset_drag;
   delete branch_drag;
-  delete outcome_drag;
   Show(false);
 }
 
@@ -456,25 +451,112 @@ gText TreeWindow::OutcomeAsString(const Node *n, bool &/*hilight*/) const
 
 void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 {
-  // Check all the draggers.  Note that they are mutually exclusive
-  if (!iset_drag->Dragging() && !branch_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
-    if (node_drag->OnEvent(p_event) != DRAG_NONE) return;
-  }
+  if (p_event.LeftIsDown() && p_event.Dragging()) {
+    if (!m_dragImage) {
+      int x, y;
+      CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+      x = (int) ((float) x / m_zoom);
+      y = (int) ((float) y / m_zoom);
+
+      Node *node = m_layout.NodeHitTest(x, y);
     
-  if (!node_drag->Dragging() && !branch_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
+      if (node && ef.NumChildren(node) > 0) {
+	wxPoint hotSpot(p_event.GetPosition().x, p_event.GetPosition().y);
+#ifdef __WXMSW__
+	if (p_event.ControlDown()) {
+	  m_dragImage = new wxDragImage(wxBitmap("COPY_BITMAP"),
+					wxCursor(wxCURSOR_HAND),
+					hotSpot);
+	  m_dragMode = dragCOPY;
+	}
+	else {
+	  m_dragImage = new wxDragImage(wxBitmap("MOVE_BITMAP"),
+					wxCursor(wxCURSOR_HAND),
+					hotSpot);
+	  m_dragMode = dragMOVE;
+	}
+#else
+#include "bitmaps/copy.xpm"
+#include "bitmaps/move.xpm"
+	if (p_event.ControlDown()) {
+	  m_dragImage = new wxDragImage(wxBitmap(copy_xpm),
+					wxCursor(wxCURSOR_HAND), hotSpot);
+	  m_dragMode = dragCOPY;
+	}
+	else {
+	  m_dragImage = new wxDragImage(wxBitmap(move_xpm),
+					wxCursor(wxCURSOR_HAND), hotSpot);
+	  m_dragMode = dragMOVE;
+	}
+#endif  // __WXMSW__
+	m_dragImage->BeginDrag(wxPoint(0, 0), this);
+	m_dragImage->Move(p_event.GetPosition());
+	m_dragImage->Show();
+	m_dragSource = node;
+	return;
+      }
+
+      node = m_layout.NodeRightHitTest(x, y);
+      if (node && node->GetOutcome()) {
+	wxPoint hotSpot(p_event.GetPosition().x, p_event.GetPosition().y);
+#ifdef __WXMSW__
+	m_dragImage = new wxDragImage(wxBitmap("PAYOFF_BITMAP"),
+				      wxCursor(wxCURSOR_HAND), hotSpot);
+#else
+#include "bitmaps/payoff.xpm"
+	m_dragImage = new wxDragImage(wxBitmap(payoff_xpm),
+				      wxCursor(wxCURSOR_HAND), hotSpot);
+#endif  // __WXMSW__
+	m_dragMode = dragOUTCOME;
+	m_dragImage->BeginDrag(wxPoint(0, 0), this);
+	m_dragImage->Move(p_event.GetPosition());
+	m_dragImage->Show();
+	m_dragSource = node;
+	return;
+      }
+    }
+    else {
+      m_dragImage->Move(p_event.GetPosition());
+    }
+  }
+  else if (!p_event.LeftIsDown() && m_dragImage) {
+    m_dragImage->Hide();
+    m_dragImage->EndDrag();
+    delete m_dragImage;
+    m_dragImage = 0;
+
+    int x, y;
+    CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+    x = (int) ((float) x / m_zoom);
+    y = (int) ((float) y / m_zoom);
+
+    Node *node = m_layout.NodeHitTest(x, y);
+    if (node) {
+      try {
+	if (m_dragMode == dragCOPY) {
+	  ef.CopyTree(m_dragSource, node);
+	}
+	else if (m_dragMode == dragMOVE) {
+	  ef.MoveTree(m_dragSource, node);
+	}
+	else if (m_dragMode == dragOUTCOME) { 
+	  node->SetOutcome(m_dragSource->GetOutcome());
+	}
+      }
+      catch (gException &ex) {
+	guiExceptionDialog(ex.Description(), this);
+      }
+      Refresh();
+    }
+  }
+
+  // Check all the draggers.  Note that they are mutually exclusive
+  if (!branch_drag->Dragging()) {
     if (iset_drag->OnEvent(p_event) != DRAG_NONE) return;
   }
 
-  if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
+  if (!iset_drag->Dragging()) {
     if (branch_drag->OnEvent(p_event) != DRAG_NONE) return;
-  }
-    
-  if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-      !branch_drag->Dragging()) {
-    if (outcome_drag->OnEvent(p_event, outcomes_changed) != DRAG_NONE) return;
   }
 }    
 
@@ -485,24 +567,12 @@ void TreeWindow::OnLeftClick(wxMouseEvent &p_event)
   }   
  
   // Check all the draggers.  Note that they are mutually exclusive
-  if (!iset_drag->Dragging() && !branch_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
-    if (node_drag->OnEvent(p_event) != DRAG_NONE) return;
-  }
-    
-  if (!node_drag->Dragging() && !branch_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
+  if (!branch_drag->Dragging()) {
     if (iset_drag->OnEvent(p_event) != DRAG_NONE) return;
   }
 
-  if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-      !outcome_drag->Dragging()) {
+  if (!iset_drag->Dragging()) {
     if (branch_drag->OnEvent(p_event) != DRAG_NONE) return;
-  }
-    
-  if (!node_drag->Dragging() && !iset_drag->Dragging() &&
-      !branch_drag->Dragging()) {
-    if (outcome_drag->OnEvent(p_event, outcomes_changed) != DRAG_NONE) return;
   }
     
   int x, y;

@@ -16,38 +16,6 @@ typedef enum { DRAG_NONE = 0, DRAG_START = 1, DRAG_CONTINUE = 2,
 	       DRAG_STOP = 3 } guiDragState;
 
 //
-// This class enables the user to grab a node and drag it to a terminal node.
-// When the mouse is released, a copy or move (if Control is down) action is
-// performed.
-//
-class TreeWindow::NodeDragger {
-private:
-  FullEfg &ef;
-  wxBitmap *m_b, *c_b;
-  wxMemoryDC *move_dc, *copy_dc;
-  TreeWindow *parent;
-  int drag_now;
-  long x, y, ox, oy;  // position and old position
-  int c, oc; // control pressed and old control pressed
-  Node *start_node, *end_node;
-    
-  void RedrawObject(void);
-    
-public:
-  NodeDragger(TreeWindow *parent, FullEfg &ef);
-  ~NodeDragger();
-    
-  int OnEvent(wxMouseEvent &ev);
-
-  int ControlDown(void) const { return c; }
-  int Dragging(void) const { return drag_now; }
-    
-  Node *StartNode(void) { return start_node; }
-  Node *EndNode(void) { return end_node; }
-};
-
-
-//
 // This class enables the user to merge infosets by dragging a line from the
 // first infoset's maker to the second one's.
 //
@@ -98,27 +66,6 @@ public:
     
   Node *StartNode(void) { return start_node; }
   int BranchNum(void) { return br; }
-};
-
-
-class TreeWindow::OutcomeDragger {
-private:
-  FullEfg &ef;
-  TreeWindow *parent;
-  int drag_now;
-  EFOutcome *outcome;
-  Node *start_node;
-  long x, y;
-#ifdef NOT_PORTED_YET
-  wxCursor *outcome_cursor;
-#endif // NOT_PORTED_YET    
-
-public:
-  OutcomeDragger(TreeWindow *parent, FullEfg &ef);
-  ~OutcomeDragger();
-    
-  int Dragging(void) const { return drag_now; }
-  int OnEvent(wxMouseEvent &ev, bool &outcomes_changed);
 };
 
 #endif  // TREEDRAG_H

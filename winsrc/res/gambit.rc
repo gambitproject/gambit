@@ -15,6 +15,7 @@ INSPECT_BITMAP BITMAP bitmaps\inspect.bmp
 NFG_BITMAP     BITMAP bitmaps\makenf.bmp
 OPEN_BITMAP    BITMAP bitmaps\open.bmp
 OPTIONS_BITMAP BITMAP bitmaps\options.bmp
+PAYOFF_BITMAP  BITMAP bitmaps\payoff.bmp
 PRINT_BITMAP   BITMAP bitmaps\print.bmp
 SAVE_BITMAP    BITMAP bitmaps\save.bmp
 SOLVE_BITMAP   BITMAP bitmaps\solve.bmp
