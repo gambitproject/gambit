@@ -1,4 +1,3 @@
-#
 # Generic makefile for Gambit Project
 # 
 # Makes both gui and gcl targets on multiple platforms, and 
@@ -7,7 +6,7 @@
 # Rename this makefile to 'Makefile', and then use 'make gui'
 # to make the gui, and 'make gcl' to make the gcl.
 #
-# Executable are named gcl_$(SYSNAME) and gui_$(SYSNAME)_$(GUI), 
+# Executable are named gcl_$(SYSNAME) and gui_$(GUI)_$(SYSNAME), 
 # where SYSNAME represents the OS and GUI represents the X libraries 
 # (motif/xt/none) that are available on the system (e.g. gui_Linux_xt or
 # gcl_SunOS_5_6).  SYSNAME and GUI must be passed to this makefile
@@ -43,7 +42,8 @@ CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES -Dwx_motif $(DEFINES) \
 
 # define directory where object files are put
 
-OBJDIR = obj_$(SYSNAME)
+
+OBJDIR = obj_$(GUI)_$(SYSNAME)
 vpath %.o  $(OBJDIR)
 
 # rule for creating .o (object) files from .cc files
@@ -137,7 +137,7 @@ endif
 gui_$(SYSNAME):	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../gui_$(SYSNAME)_$(GUI); cd ..
+	    -o ../gui_$(GUI)_$(SYSNAME); cd ..
 
 gui:
 ifndef SYSNAME
