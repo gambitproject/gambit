@@ -792,22 +792,29 @@ NFSupport *NfgShow::MakeSolnSupport(void)
 
 
 // Solution To Extensive
-
-#ifndef NFG_ONLY
 #include "efg.h"
-#endif
+#include "efgutils.h"
 
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
 {
-#ifndef NFG_ONLY
-    assert(InterfaceOk());  // we better have someone to send solutions to
+  if (!InterfaceOk()) {  // we better have someone to send solutions to
+    return;
+  }
 
-    // assert(mp != Solution());
-    EFSupport S(*InterfaceObjectEfg());
-    BehavProfile<gNumber> bp(S);
-    MixedToBehav(mp.Game(), mp, S.Game(), bp);
-    SolutionToEfg(bp, set);
-#endif
+  Infoset *s1, *s2;
+  if (!IsPerfectRecall(*InterfaceObjectEfg(), s1, s2)) {
+    if (wxMessageBox("May not be able to find valid behavior strategy\n"
+		     "for game of imperfect recall\n"
+		     "Continue anyway?",
+		     "Convert to behavior strategy",
+		     wxOK | wxCANCEL | wxCENTRE) != wxOK)   
+      return;
+  }
+
+  EFSupport S(*InterfaceObjectEfg());
+  BehavProfile<gNumber> bp(S);
+  MixedToBehav(mp.Game(), mp, S.Game(), bp);
+  SolutionToEfg(bp, set);
 }
 
 void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)

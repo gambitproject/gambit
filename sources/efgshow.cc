@@ -593,7 +593,7 @@ bool EfgShow::SolveNormalReduced(void)
   if (!IsPerfectRecall(ef, bad1, bad2)) {
     int completed = wxMessageBox("This game is not perfect recall\n"
 				 "Do you wish to continue?", 
-				 "Efg -> Nfg", 
+				 "Reduced normal form", 
 				 wxOK|wxCANCEL|wxCENTRE, this);
     
     if (completed != wxOK) 
@@ -614,7 +614,7 @@ bool EfgShow::SolveNormalAgent(void)
   if (!IsPerfectRecall(ef, bad1, bad2)) {
     int completed = wxMessageBox("This game is not perfect recall\n"
 				 "Do you wish to continue?", 
-				 "Efg -> Nfg", 
+				 "Agent normal form", 
 				 wxOK|wxCANCEL|wxCENTRE, this);
     
     if (completed != wxOK) 
