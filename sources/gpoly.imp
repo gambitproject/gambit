@@ -1,7 +1,7 @@
 //#
 //# FILE: gpoly.imp  -- Implementation of gPoly data type
 //#
-//# @(#)gpoly.imp	1.7 1/19/96
+//# $Id$
 //#
 
 #include "gpoly.h"
@@ -905,6 +905,13 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
   
   one = One; two = Two;
 
+  gString foo;
+  printer(one, "", foo, List);
+  gout << foo << '\n';
+  foo = "";
+  printer(two, "", foo, List);
+  gout << foo << '\n';
+
 //BIG CASE #1  
   if (one != NULL && two != NULL &&
       two->down->Var->number != one->down->Var->number){
@@ -955,18 +962,17 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
 	kRoot->down->down = temp2;
       }
       else {
-	Power<T> *k = CreatDupl(two);
-	Power<T> *temp2 = new Power<T>;
-	temp2->down = new term<T>;
-	temp2->pow = one->pow;
-	temp2->down->Var = one->down->Var;
-	temp2->down->Coef = one->down->Coef;
-	temp2->down->down = CreatDupl(one->down->down);
-	temp2->next = k;
-	kRoot->next = CreatDupl(one->next);
 	kRoot->down->Var = one->down->Var;
-	kRoot->down->down = temp2;
 
+	if (one->pow == 0)  {
+	  kRoot->next = CreatDupl(one->next);
+	  gout << one->next << ' ' << kRoot->next << '\n';
+	  kRoot->down->down = Adder(one->down->down, two);
+	}
+	else  {
+	  kRoot->next = CreatDupl(one);
+	  kRoot->down->down = CreatDupl(two);
+	}
 
       }	
     }    
