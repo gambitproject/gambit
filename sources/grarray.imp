@@ -1,0 +1,97 @@
+//#
+//# FILE: grarray.imp -- Implementation of base rectangular array class
+//#
+//# $Id$
+//#
+
+#include "grarray.h"
+
+#include <assert.h>
+
+//------------------------------------------------------------------------
+//                   Private/protected member functions
+//------------------------------------------------------------------------
+
+template <class T> bool gRectArray<T>::Check(int row, int col) const
+{
+  return (row >= 1 && row <= nrows && col >= 1 && col <= ncols);
+}
+
+//------------------------------------------------------------------------
+//            Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> gRectArray<T>::gRectArray(int rows, int cols)
+  : nrows(rows), ncols(cols)
+{
+  assert(rows > 0 && cols > 0);
+  data = new T *[nrows] - 1;
+  for (int i = 1; i <= nrows; data[i++] = new T[ncols] - 1);
+}
+
+template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
+  : nrows(a.nrows), ncols(a.ncols)
+{
+  data = new T *[nrows] - 1;
+  for (int i = 1; i <= nrows; i++)  {
+    data[i] = new T[ncols] - 1;
+    for (int j = 1; j <= ncols; j++)
+      data[i][j] = a.data[i][j];
+  }
+}
+
+template <class T> gRectArray<T>::~gRectArray()
+{
+  for (int i = 1; i <= nrows; delete [] data[i++]);
+  delete [] data;
+}
+
+template <class T>
+gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
+{
+  assert(nrows == a.nrows && ncols == a.ncols);
+
+  for (int i = 1; i <= nrows; i++)
+    for (int j = 1; j <= nrows; j++)
+      data[i][j] = a.data[i][j];
+
+  return *this;
+}
+
+//------------------------------------------------------------------------
+//                          Data access members
+//------------------------------------------------------------------------
+
+template <class T> int gRectArray<T>::NumRows(void) const     { return nrows; }
+template <class T> int gRectArray<T>::NumColumns(void) const  { return ncols; }
+
+template <class T> T &gRectArray<T>::operator()(int r, int c)
+{
+  assert(Check(r, c));
+  return data[r][c];
+}
+
+template <class T> const T &gRectArray<T>::operator()(int r, int c) const
+{
+  assert(Check(r, c));
+  return data[r][c];
+}
+
+template <class T> void gRectArray<T>::Dump(gOutput &f) const
+{
+  f << "{ ";
+  for (int i = 1; i <= nrows; i++)  {
+    if (i > 1)  f << "\n  ";
+    f << "{ ";
+    for (int j = 1; j <= ncols; j++)
+      f << data[i][j] << ' ';
+    f << "}";
+  }
+  f << " }\n";
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
+{
+  a.Dump(f);   return f;
+}
+
