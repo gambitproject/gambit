@@ -7,13 +7,7 @@
 #include "gvector.h"
 #include "gtext.h"
 
-template <class T>
-gVector<T>::BadDim::BadDim(int line, char *file)
-  : gException(line, file)
-{ }
-
-template <class T>
-gText gVector<T>::BadDim::Description(void) const
+template <class T> gText gVector<T>::BadDim::Description(void) const
 {
   return "Mismatched vector lengths";
 }
@@ -37,7 +31,7 @@ template <class T> gVector<T>::~gVector()   { }
 
 template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
   gArray<T>::operator=(V);
   return *this;
 }
@@ -77,7 +71,7 @@ template<class T> gVector<T>& gVector<T>::operator=(T c)
 template <class T> gVector<T>
 gVector<T>::operator+(const gVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
 
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -88,7 +82,7 @@ gVector<T>::operator+(const gVector<T>& V) const
 template <class T> gVector<T>
 gVector<T>::operator-(const gVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
 
   gVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -99,7 +93,7 @@ gVector<T>::operator-(const gVector<T>& V) const
 template <class T> gVector<T>&
 gVector<T>::operator+=(const gVector<T>& V)
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] += V[i];
@@ -109,7 +103,7 @@ gVector<T>::operator+=(const gVector<T>& V)
 template <class T> gVector<T>&
 gVector<T>::operator-=(const gVector<T>& V)
 {
-  if (!Check(V))    throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))    throw BadDim();
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] -= V[i];
@@ -141,7 +135,7 @@ template <class T> gVector<T> &gVector<T>::operator*=(T c)
 
 template <class T> T gVector<T>::operator*(const gVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
 
   T sum= (T)0;
   for(int i=mindex; i<=maxdex; i++)
@@ -161,7 +155,7 @@ template <class T> gVector<T> gVector<T>::operator/(T c) const
 
 template <class T> bool gVector<T>::operator==(const gVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(V))   throw BadDim();
 
   for(int i=mindex; i<=maxdex; i++)
     if( (*this)[i] != V[i] )
@@ -177,7 +171,7 @@ template <class T> bool gVector<T>::operator==(T c) const
   return true;
 }
 
-template <class T> T gVector<T>::NormSquared() const
+template <class T> T gVector<T>::NormSquared(void) const
 {
   T answer = (T)0;
   for (int i = 1; i <= Length(); i++)

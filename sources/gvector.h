@@ -25,8 +25,6 @@ template <class T> class gVector : public gArray<T>   {
 public:
   class BadDim : public gException  {
   public:
-    BadDim(int,  char *);
-    
     virtual ~BadDim()   { }
     gText Description(void) const;
   };

@@ -5,7 +5,6 @@
 //
 
 #include <stdlib.h>
-#include <assert.h>
 #include "gblock.h"
 
 template <class T> gBlock<T>::gBlock(unsigned int len) : gArray<T>(len)   { }
@@ -64,7 +63,8 @@ template <class T> gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
 
 template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 {
-  assert(mindex <=n && n <=maxdex+1);
+  if (mindex > n || n > maxdex + 1)   throw BadIndex(); 
+    
   T *new_data = new T[++maxdex - mindex + 1] - mindex;
 
   int i;
@@ -90,8 +90,7 @@ template <class T> int gBlock<T>::Insert(const T &t, int n)
 
 template <class T> T gBlock<T>::Remove(int n)
 {
-  if (n < mindex || n > maxdex)   
-    throw BadIndex(__LINE__, __FILE__);
+  if (n < mindex || n > maxdex)    throw BadIndex();
 
   T ret(data[n]);
   T *new_data = (--maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;

@@ -20,16 +20,12 @@ template <class T> class gArray  {
   public:
     class BadIndex : public gException  {
     public:
-      BadIndex(int, char *);
-      
       virtual ~BadIndex();
       gText Description(void) const;
     };
 
     class BadRange : public gException  {
     public:
-      BadRange(int, char *);
-      
       virtual ~BadRange();
       gText Description(void) const;
     };

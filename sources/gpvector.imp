@@ -5,7 +5,6 @@
 //
 
 #include "gpvector.h"
-#include <assert.h>
 
 //-------------------------------------------------------------------------
 //          gPVector<T>: Private and protected member functions
@@ -79,7 +78,7 @@ template <class T> gPVector<T>::~gPVector()
 
 template <class T> gPVector<T>& gPVector<T>::operator=(const gPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   gVector<T>::operator=(v);
   return (*this);
 }
@@ -102,28 +101,23 @@ template <class T> gPVector<T>& gPVector<T>::operator=(T c)
 
 template <class T> T& gPVector<T>::operator()(int a, int b)
 {
-  if (svlen.First() > a || a > svlen.Last())  
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > b || b > svlen[a])   
-    throw BadIndex(__LINE__, __FILE__);
+  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
+  if (1 > b || b > svlen[a])    throw BadIndex();
 
   return svptr[a][b];
 }
 
 template <class T> const T& gPVector<T>::operator()(int a, int b) const
 {
-  if (svlen.First() > a || a > svlen.Last())
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > b || b > svlen[a])   
-    throw BadIndex(__LINE__, __FILE__);
-  
+  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
+  if (1 > b || b > svlen[a])    throw BadIndex();
   return svptr[a][b];
 }
 
 template <class T>
 gPVector<T> gPVector<T>::operator+(const gPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gPVector<T> tmp(*this);
   tmp.gVector<T>::operator+=(v);
@@ -132,7 +126,7 @@ gPVector<T> gPVector<T>::operator+(const gPVector<T> &v) const
 
 template <class T> gPVector<T>& gPVector<T>::operator+=(const gPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gVector<T>::operator+=(v);
   return (*this);
@@ -149,7 +143,7 @@ template <class T> gPVector<T> gPVector<T>::operator-(void) const
 template <class T>
 gPVector<T> gPVector<T>::operator-(const gPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gPVector<T> tmp(*this);
   tmp.gVector<T>::operator-=(v);
@@ -158,7 +152,7 @@ gPVector<T> gPVector<T>::operator-(const gPVector<T> &v) const
 
 template <class T> gPVector<T>& gPVector<T>::operator-=(const gPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gVector<T>::operator-=(v);
   return (*this);
@@ -166,7 +160,7 @@ template <class T> gPVector<T>& gPVector<T>::operator-=(const gPVector<T> &v)
 
 template <class T> T gPVector<T>::operator*(const gPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   return (*this).gVector<T>::operator*(v);
 }
@@ -186,7 +180,7 @@ template <class T> gPVector<T> gPVector<T>::operator/(T c)
 
 template <class T> int gPVector<T>::operator==(const gPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   return (*this).gVector<T>::operator==(v);
 }
@@ -200,8 +194,7 @@ template <class T> int gPVector<T>::operator!=(const gPVector<T> &v) const
 
 template <class T> gVector<T> gPVector<T>::GetRow(int row) const
 {
-  if (svlen.First() > row || row > svlen.Last())
-    throw BadIndex(__LINE__, __FILE__);
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
 
   gVector<T> v(1, svlen[row]);
 
@@ -212,9 +205,8 @@ template <class T> gVector<T> gPVector<T>::GetRow(int row) const
 
 template <class T> void gPVector<T>::GetRow(int row, gVector<T> &v) const
 {
-  if (svlen.First() > row || row > svlen.Last())
-    throw BadIndex(__LINE__, __FILE__);
-  if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim(__LINE__, __FILE__);
+  if (svlen.First() > row || row > svlen.Last())  throw BadIndex();
+  if (v.First() != 1 || v.Last() != svlen[row])   throw BadDim();
 
   for(int i=v.First(); i<=v.Last(); i++)
     v[i]= (*this)(row,i);
@@ -222,9 +214,8 @@ template <class T> void gPVector<T>::GetRow(int row, gVector<T> &v) const
 
 template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
 {
-  if (svlen.First() > row || row > svlen.Last())   
-    throw BadIndex(__LINE__, __FILE__);
-  if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim(__LINE__, __FILE__);
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim();
 
   for(int i=v.First(); i<=v.Last(); i++)
     (*this)(row,i)= v[i];
@@ -232,9 +223,8 @@ template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
 
 template <class T> void gPVector<T>::CopyRow(int row, const gPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
-  if (svlen.First() > row || row > svlen.Last())  
-    throw BadIndex(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex(); 
 
   for (int i = 1; i <= svlen[row]; i++)
     svptr[row][i] = v.svptr[row][i];

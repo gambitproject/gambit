@@ -8,7 +8,6 @@
 #define GBLOCK_H
 
 #include <stdlib.h>
-#include <assert.h>
 #include "garray.h"
 
 template <class T> class gBlock : public gArray<T>   {

@@ -91,7 +91,7 @@ template <class T> gDPVector<T>::~gDPVector()
 
 template <class T> gDPVector<T> &gDPVector<T>::operator=(const gDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gPVector<T>::operator=(v);
   return *this;
@@ -123,30 +123,24 @@ template <class T> gDPVector<T> &gDPVector<T>::operator=(T c)
 
 template <class T> T &gDPVector<T>::operator()(int a, int b, int c)
 {
-  if (dvlen.First() > a || a > dvlen.Last())
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > b || b > dvlen[a])         
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > c || c > svlen[dvidx[a] + b - 1])
-    throw BadIndex(__LINE__, __FILE__);
+  if (dvlen.First() > a || a > dvlen.Last())    throw BadIndex();
+  if (1 > b || b > dvlen[a])                    throw BadIndex();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw BadIndex();
   return dvptr[a][b][c];
 }
 
 template <class T> const T &gDPVector<T>::operator()(int a, int b, int c) const
 {
-  if (dvlen.First() > a || a > dvlen.Last()) 
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > b || b > dvlen[a])         
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > c || c > svlen[dvidx[a] + b - 1]) 
-    throw BadIndex(__LINE__, __FILE__);
+  if (dvlen.First() > a || a > dvlen.Last())    throw BadIndex();
+  if (1 > b || b > dvlen[a])                    throw BadIndex();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw BadIndex();
   return dvptr[a][b][c];
 }
 
 template <class T>
 gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
 
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator+=(v);
@@ -156,7 +150,7 @@ gDPVector<T> gDPVector<T>::operator+(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator+=(const gDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   gPVector<T>::operator+=(v);
   return *this;
 }
@@ -172,7 +166,7 @@ template <class T> gDPVector<T> gDPVector<T>::operator-(void) const
 template <class T>
 gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   gDPVector<T> tmp(*this);
   tmp.gPVector<T>::operator-=(v);
   return tmp;
@@ -181,14 +175,14 @@ gDPVector<T> gDPVector<T>::operator-(const gDPVector<T> &v) const
 template <class T>
 gDPVector<T> &gDPVector<T>::operator-=(const gDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   gPVector<T>::operator-=(v);
   return *this;
 }
 
 template <class T> T gDPVector<T>::operator*(const gDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   return (*this).gPVector<T>::operator*(v);
 }
 
@@ -207,7 +201,7 @@ template <class T> gDPVector<T> gDPVector<T>::operator/(const T &c) const
 
 template <class T> bool gDPVector<T>::operator==(const gDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
   return gPVector<T>::operator==(v);
 }
 
@@ -223,11 +217,9 @@ template <class T> bool gDPVector<T>::operator!=(const gDPVector<T> &v) const
 template <class T>
 void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim(__LINE__, __FILE__);
-  if (dvlen.First() > row || row > dvlen.Last())
-    throw BadIndex(__LINE__, __FILE__);
-  if (1 > col || col > dvlen[row])   
-    throw BadIndex(__LINE__, __FILE__);
+  if (!Check(v))   throw BadDim();
+  if (dvlen.First() > row || row > dvlen.Last())   throw BadIndex();
+  if (1 > col || col > dvlen[row])                 throw BadIndex();
 
   for (int i = 1; i <= svlen[dvidx[row]+col-1]; i++)
     dvptr[row][col][i] = v.dvptr[row][col][i];

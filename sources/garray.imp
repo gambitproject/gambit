@@ -16,7 +16,7 @@ template <class T> gArray<T>::gArray(unsigned int len)
 template <class T> gArray<T>::gArray(int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
-  if (maxdex + 1 < mindex)   throw BadRange(__LINE__, __FILE__);
+  if (maxdex + 1 < mindex)   throw BadRange();
   data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
 }
 
@@ -72,14 +72,14 @@ template <class T> int gArray<T>::Last(void) const
 template <class T> const T &gArray<T>::operator[](int index) const
 {
   if (index < mindex || index > maxdex) 
-    throw BadIndex(__LINE__, __FILE__);
+    throw BadIndex();
   return data[index];
 }	
 
 template <class T> T &gArray<T>::operator[](int index)
 {
   if (index < mindex || index > maxdex)
-    throw BadIndex(__LINE__, __FILE__);
+    throw BadIndex();
   return data[index];
 }
 
@@ -111,10 +111,6 @@ template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
 }
 
 
-template <class T> gArray<T>::BadIndex::BadIndex(int line, char *file)
-  : gException(line, file)
-{ }
-
 template <class T> gArray<T>::BadIndex::~BadIndex()
 { }
 
@@ -122,10 +118,6 @@ template <class T> gText gArray<T>::BadIndex::Description(void) const
 {
   return "Bad index in gArray";
 }
-
-template <class T> gArray<T>::BadRange::BadRange(int line, char *file)
-  : gException(line, file)
-{ }
 
 template <class T> gArray<T>::BadRange::~BadRange()
 { }
