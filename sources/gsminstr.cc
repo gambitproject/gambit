@@ -40,6 +40,42 @@ Instruction::~Instruction()
 //                     Descendent Instruction classes
 //--------------------------------------------------------------------
 
+
+//------------------------- null operation --------------------------
+
+Opcode NOP::Type( void ) const
+{ return iNOP; }
+bool NOP::Execute( GSM& gsm ) const
+{ return true; }
+
+
+//------------------------- branch operations ------------------------
+
+IfGoto::IfGoto( int index )
+     : _InstructionIndex( index )
+{ }
+int IfGoto::WhereTo( void ) const
+{ return _InstructionIndex; }
+Opcode IfGoto::Type( void ) const
+{ return iIF_GOTO; }
+bool IfGoto::Execute( GSM& gsm ) const
+{ return true; }
+
+
+Goto::Goto( int index )
+     : _InstructionIndex( index )
+{ }
+int Goto::WhereTo( void ) const
+{ return _InstructionIndex; }
+Opcode Goto::Type( void ) const
+{ return iGOTO; }
+bool Goto::Execute( GSM& gsm ) const
+{ return true; }
+
+
+
+//-------------------------  Push operations -------------------------
+
 template <class T> Push<T>::Push( const T& value )
   :_Value( value )
 { }
@@ -107,41 +143,63 @@ bool Div::Execute( GSM &gsm ) const
 { return gsm.Divide(); }
 
 
+Opcode Neg::Type( void ) const
+{ return iNEG; }
+bool Neg::Execute( GSM &gsm ) const
+{ return gsm.Negate(); }
+
+
+
+
+//---------------------------- integer math operators ---------------------
+
+Opcode IntDiv::Type( void ) const
+{ return iINT_DIV; }
+bool IntDiv::Execute( GSM &gsm ) const
+{ return gsm.IntegerDivide(); }
+
+Opcode Mod::Type( void ) const
+{ return iMOD; }
+bool Mod::Execute( GSM &gsm ) const
+{ return gsm.Modulous(); }
+
+
+
 //----------------------------- relational operators ----------------------
 
-Opcode EqualTo::Type( void ) const
-{ return iEQUAL_TO; }
-bool EqualTo::Execute( GSM& gsm ) const
+Opcode EQU::Type( void ) const
+{ return iEQU; }
+bool EQU::Execute( GSM& gsm ) const
 { return gsm.EqualTo(); }
 
 
-Opcode NotEqualTo::Type( void ) const
-{ return iNOT_EQUAL_TO; }
-bool NotEqualTo::Execute( GSM& gsm ) const
+Opcode NEQ::Type( void ) const
+{ return iNEQ; }
+bool NEQ::Execute( GSM& gsm ) const
 { return gsm.NotEqualTo(); }
 
 
-Opcode GreaterThan::Type( void ) const
-{ return iGREATER_THAN; }
-bool GreaterThan::Execute( GSM& gsm ) const
+Opcode GTN::Type( void ) const
+{ return iGTN; }
+bool GTN::Execute( GSM& gsm ) const
 { return gsm.GreaterThan(); }
 
 
-Opcode LessThan::Type( void ) const
-{ return iLESS_THAN; }
-bool LessThan::Execute( GSM& gsm ) const
+Opcode LTN::Type( void ) const
+{ return iLTN; }
+bool LTN::Execute( GSM& gsm ) const
 { return gsm.LessThan(); }
 
 
-Opcode GreaterThanOrEqualTo::Type( void ) const
-{ return iGREATER_THAN_OR_EQUAL_TO; }
-bool GreaterThanOrEqualTo::Execute( GSM& gsm ) const
+Opcode GEQ::Type( void ) const
+{ return iGEQ; }
+bool GEQ::Execute( GSM& gsm ) const
 { return gsm.GreaterThanOrEqualTo(); }
 
 
-Opcode LessThanOrEqualTo::Type( void ) const
-{ return iLESS_THAN_OR_EQUAL_TO; }
-bool LessThanOrEqualTo::Execute( GSM& gsm ) const
+Opcode LEQ::Type( void ) const
+{ return iLEQ; }
+bool LEQ::Execute( GSM& gsm ) const
 { return gsm.LessThanOrEqualTo(); }
 
 

@@ -21,14 +21,24 @@
 
 typedef enum
 {
+  iERROR,
+
+  iNOP,
+
+  iIF_GOTO, iGOTO,
+
   iPUSH, iPUSHLIST, iPUSHREF,
   iASSIGN, iUNASSIGN,
-  iADD, iSUB, iMUL, iDIV,
-  iEQUAL_TO, iNOT_EQUAL_TO, iGREATER_THAN, iLESS_THAN,
-  iGREATER_THAN_OR_EQUAL_TO, iLESS_THAN_OR_EQUAL_TO,
+
+  iADD, iSUB, iMUL, iDIV, iNEG,
+  iINT_DIV, iMOD,
+
+  iEQU, iNEQ, iGTN, iLTN, iGEQ, iLEQ,
+
   iAND, iOR, iNOT,
-  iCONCATENATE,
+
   iINIT_CALL_FUNCTION, iBIND, iCALL_FUNCTION,
+
   iOUTPUT, iDUMP, iFLUSH
 } Opcode;
 
@@ -43,7 +53,7 @@ class Instruction
 
  public:
   Instruction( void );
-  ~Instruction();
+  virtual ~Instruction();
 
   virtual Opcode Type( void ) const = 0;
   virtual bool Execute( GSM& gsm ) const = 0;
@@ -51,8 +61,48 @@ class Instruction
 
 
 //--------------------------------------------------------------------
-//                     Descendent Instruction classes
+//                      descendent Instruction classes
 //--------------------------------------------------------------------
+
+
+//-------------------------- null operation --------------------------
+
+class NOP : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+};
+
+
+//----------------------- branch operators ---------------------------
+
+class IfGoto : public Instruction
+{
+ private:
+  int _InstructionIndex;
+ public:
+  IfGoto( int index );
+  int WhereTo( void ) const;
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+};
+
+
+class Goto : public Instruction
+{
+ private:
+  int _InstructionIndex;
+ public:
+  Goto( int index );
+  int WhereTo( void ) const;
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+};
+
+
+
+//------------------------- push opeerations ------------------------
 
 template <class T> class Push : public Instruction
 {
@@ -137,9 +187,36 @@ class Div : public Instruction
 };
 
 
+class Neg : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM &gsm ) const;
+};
+
+
+
+//----------------------------- integer math operators -------------------
+
+class IntDiv : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM &gsm ) const;
+};
+
+class Mod : public Instruction
+{
+ public:
+  Opcode Type( void ) const;
+  bool Execute( GSM &gsm ) const;
+};
+
+
+
 //----------------------------- relational operators ----------------------
 
-class EqualTo : public Instruction
+class EQU : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -147,7 +224,7 @@ class EqualTo : public Instruction
 };
 
 
-class NotEqualTo : public Instruction
+class NEQ : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -155,7 +232,7 @@ class NotEqualTo : public Instruction
 };
 
 
-class GreaterThan : public Instruction
+class GTN : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -163,7 +240,7 @@ class GreaterThan : public Instruction
 };
 
 
-class LessThan : public Instruction
+class LTN : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -171,7 +248,7 @@ class LessThan : public Instruction
 };
 
 
-class GreaterThanOrEqualTo : public Instruction
+class GEQ : public Instruction
 {
  public:
   Opcode Type( void ) const;
@@ -179,7 +256,7 @@ class GreaterThanOrEqualTo : public Instruction
 };
 
 
-class LessThanOrEqualTo : public Instruction
+class LEQ : public Instruction
 {
  public:
   Opcode Type( void ) const;

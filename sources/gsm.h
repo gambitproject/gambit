@@ -75,6 +75,9 @@ class GSM
   bool Divide   ( void );
   bool Negate   ( void );
 
+  bool IntegerDivide ( void );
+  bool Modulous      ( void );
+
   bool EqualTo              ( void );
   bool NotEqualTo           ( void );
   bool GreaterThan          ( void );
@@ -85,6 +88,7 @@ class GSM
   bool AND ( void );
   bool OR  ( void );
   bool NOT ( void );
+
 
   
   void AddFunction( FuncDescObj* func );

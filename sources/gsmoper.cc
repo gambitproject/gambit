@@ -44,6 +44,19 @@ void Init_gsmoper( GSM* gsm )
 
 
 
+  FuncObj = new FuncDescObj( (gString) "IntegerDivide", GSM_IntegerDivide, 2 );
+  FuncObj->SetParamInfo( 0, "x", porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( 1, "y", porINTEGER, NO_DEFAULT_VALUE );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "Modulous", GSM_Modulous, 2 );
+  FuncObj->SetParamInfo( 0, "x", porINTEGER, NO_DEFAULT_VALUE );
+  FuncObj->SetParamInfo( 1, "y", porINTEGER, NO_DEFAULT_VALUE );
+  gsm->AddFunction( FuncObj );
+
+
+
+
   FuncObj = new FuncDescObj( (gString) "EqualTo", GSM_EqualTo, 2 );
   FuncObj->SetParamInfo( 0, "x", porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
   FuncObj->SetParamInfo( 1, "y", porNUMERICAL | porSTRING, NO_DEFAULT_VALUE );
@@ -125,6 +138,10 @@ Portion* GSM_Add( Portion** param )
     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +=
       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
     break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
   }
 
   delete param[ 1 ];
@@ -156,6 +173,10 @@ Portion* GSM_Subtract( Portion** param )
     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -=
       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
     break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
   }
 
   delete param[ 1 ];
@@ -187,6 +208,10 @@ Portion* GSM_Multiply( Portion** param )
     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *=
       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
     break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
   }
 
   delete param[ 1 ];
@@ -208,21 +233,33 @@ Portion* GSM_Divide( Portion** param )
   case porDOUBLE:
     ( (numerical_Portion<double>*) param[ 0 ] )->Value() /=
       ( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    delete param[ 1 ];
+    result = param[ 0 ];
     break;
     
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gRational>
+      (
+       ( (gRational) ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() ) /
+       ( (gRational) ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() )
+       );
+    delete param[ 0 ];
+    delete param[ 1 ];
     break;
 
   case porRATIONAL:
     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /=
       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    delete param[ 1 ];
+    result = param[ 0 ];
     break;
+
+  default:
+    delete param[ 1 ];
+    delete param[ 0 ];
+    param[ 0 ] = 0;
   }
 
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -247,6 +284,10 @@ Portion* GSM_Negate( Portion** param )
     ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() =
       -( (numerical_Portion<gRational>*) param[ 0 ] )->Value();
     break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
   }
 
   result = param[ 0 ];
@@ -254,6 +295,60 @@ Portion* GSM_Negate( Portion** param )
 }
 
 
+
+//--------------------------------------------------------------------
+//                    integer math operators
+//--------------------------------------------------------------------
+
+
+Portion* GSM_IntegerDivide( Portion** param )
+{
+  Portion* result = 0;
+
+  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
+    return 0;
+  
+  switch( param[ 0 ]->Type() )
+  {
+  case porINTEGER:
+    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /=
+      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
+  }
+
+  delete param[ 1 ];
+  result = param[ 0 ];
+  return result;
+}
+
+
+Portion* GSM_Modulous( Portion** param )
+{
+  Portion* result = 0;
+
+  if( param[ 0 ]->Type() != param[ 1 ]->Type() )
+    return 0;
+  
+  switch( param[ 0 ]->Type() )
+  {
+  case porINTEGER:
+    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %=
+      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    break;
+
+  default:
+    delete param[ 0 ];
+    param[ 0 ] = 0;
+  }
+
+  delete param[ 1 ];
+  result = param[ 0 ];
+  return result;
+}
 
 
 

@@ -80,6 +80,7 @@ bool Portion::Operation( Portion* p, OperationMode mode )
 //-----------------------------------------------------------------------
 //                        numerical type 
 //-----------------------------------------------------------------------
+
 template <class T> numerical_Portion<T>::numerical_Portion( const T& value )
      : _Value( value )
 { }
@@ -131,6 +132,32 @@ template <class T>
     case opDIVIDE:
       _Value /= p_value;
       break;
+
+    case opINTEGER_DIVIDE:
+      if( Type() == porINTEGER )
+      {
+	_Value /= p_value;
+      }
+      else
+      {
+	result = Portion::Operation( p, mode );
+      }
+      break;
+    case opMODULOUS:
+      if( Type() == porINTEGER )
+      {
+	// This is coded as is because the compiler complains when 
+	// instantiating for double and gRational types 
+        // if the % operator is used.  This version is about as fast as
+        // the original C operator %.
+	_Value = _Value - _Value / p_value * p_value;
+      }
+      else
+      {
+	result = Portion::Operation( p, mode );
+      }
+      break;
+
     case opEQUAL_TO:
       result = ( _Value == p_value );
       break;
@@ -221,6 +248,13 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
   {
     switch( mode )
     {
+    case opEQUAL_TO:
+      result = ( _Value == p_value );
+      break;
+    case opNOT_EQUAL_TO:
+      result = ( _Value != p_value );
+      break;
+
     case opLOGICAL_AND:
       _Value = ( _Value && p_value );
       break;

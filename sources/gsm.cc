@@ -441,13 +441,29 @@ bool GSM::_BinaryOperation( OperationMode mode )
 
   if( p1->Type() == p2->Type() )
   {
+    if( mode == opDIVIDE && p1->Type() == porINTEGER )
+    {
+      Portion* np1;
+      Portion* np2;
+      np1 = new numerical_Portion<gRational>
+	( (gRational) ( (numerical_Portion<gInteger>*) p1 )->Value() );
+      np2 = new numerical_Portion<gRational>
+	( (gRational) ( (numerical_Portion<gInteger>*) p2 )->Value() );
+      delete p1;
+      delete p2;
+      p1 = np1;
+      p2 = np2;
+    }
+
     result = p1->Operation( p2, mode );
-    if(mode == opEQUAL_TO ||
+    if(
+       mode == opEQUAL_TO ||
        mode == opNOT_EQUAL_TO ||
        mode == opGREATER_THAN ||
        mode == opLESS_THAN ||
        mode == opGREATER_THAN_OR_EQUAL_TO ||
-       mode == opLESS_THAN_OR_EQUAL_TO )
+       mode == opLESS_THAN_OR_EQUAL_TO 
+       )
     {
       delete p1;
       p1 = new bool_Portion( result );
@@ -519,6 +535,12 @@ bool GSM::Divide ( void )
 bool GSM::Negate( void )
 { return _UnaryOperation( opNEGATE ); }
 
+
+bool GSM::IntegerDivide ( void )
+{ return _BinaryOperation( opINTEGER_DIVIDE ); }
+
+bool GSM::Modulous ( void )
+{ return _BinaryOperation( opMODULOUS ); }
 
 
 bool GSM::EqualTo ( void )
@@ -625,26 +647,21 @@ bool GSM::Bind( void )
   
   curr_param_type = func->GetCurrParamType();
   type_match = FuncParamCheck( param->Type(), curr_param_type );
-  if( type_match )
+  if( !type_match && curr_param_type != porERROR )
   {
-    func->SetCurrParam( param ); 
+    funcname = func->FuncName();
+    i        = func->GetCurrParamIndex();
+    gerr << "GSM Error: mismatched parameter type found while executing\n";
+    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+    gerr << "           at Parameter #: " << i << "\n";
+    gerr << "           Expected type: ";
+    PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
+    gerr << "           Type found:    ";
+    PrintPortionTypeSpec( gerr, param->Type() );
+    result = false;
   }
-  else // ( !type_match )
-  {
-    if( curr_param_type != porERROR )
-    {
-      funcname = func->FuncName();
-      i        = func->GetCurrParamIndex();
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-      gerr << "   Error at Parameter #: " << i << "\n";
-      gerr << "         Expected type: ";
-      PrintPortionTypeSpec( gerr, func->GetCurrParamType() );
-      gerr << "         Type found:    ";
-      PrintPortionTypeSpec( gerr, param->Type() );
-      result = false;
-    }
-  }
+  func->SetCurrParam( param ); 
+
   _CallFuncStack->Push( func );
   return result;
 }
@@ -736,22 +753,67 @@ bool GSM::CallFunction( void )
 bool GSM::Execute( gList< Instruction* >& program )
 {
   bool result;
-  int count = 0;
+  Portion *p;
   Instruction *instruction;
+  int program_counter = 1;
+  int program_length = program.Length();
 
-  while( program.Length() > 0 )
+  while( program_counter <= program_length )
   {
-    count++;
-    instruction = program.Remove( 1 );
-    result = instruction->Execute( *this );
-    delete instruction;
+    instruction = program[ program_counter ];
+
+    switch( instruction->Type() )
+    {
+    case iIF_GOTO:
+      p = _Stack->Pop();
+      if( p->Type() == porBOOL )
+      {
+	if( ( (bool_Portion*) p )->Value() )
+	{
+	  program_counter = ( (IfGoto*) instruction )->WhereTo();
+	  assert( program_counter >= 1 && program_counter <= program_length );
+	}
+	else
+	{
+	  program_counter++;
+	}
+	delete p;
+	result = true;
+      }
+      else
+      {
+	gerr << "GSM Error: IfGoto called on a unsupported data type\n";
+	_Stack->Push( p );
+	program_counter++;
+      }
+      break;
+
+    case iGOTO:
+      program_counter = ( (Goto*) instruction )->WhereTo();
+      assert( program_counter >= 1 && program_counter <= program_length );
+      result = true;
+      break;
+
+    default:
+      result = instruction->Execute( *this );
+      program_counter++;
+    }
+
     if( result == false )
     {
-      gerr << "GSM Error: instruction #" << count << " was not executed\n";
-      gerr << "           successfully\n";
+      gerr << "GSM Error: instruction #" << program_counter << ", opcode: ";
+      gerr << instruction->Type() << ",\n";
+      gerr << "           was not executed successfully\n";
       break;
     }
   }
+
+  while( program.Length() > 0 )
+  {
+    instruction = program.Remove( 1 );
+    delete instruction;
+  }
+
   return result;
 }
 

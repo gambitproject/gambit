@@ -29,6 +29,8 @@ int main( void )
 
   machine = new GSM( 32 );
 
+  gList< Instruction* > program;
+
 
   gout << "\n";
   machine->Push( d_1 );
@@ -449,7 +451,6 @@ int main( void )
   gin >> cont;
 
   gout << "\n\nTesting the instruction memory\n";
-  gList< Instruction* > program;
   program.Append( new Push<double>( (double) 1 ) );
   program.Append( new Push<double>( (double) 2 ) );
   program.Append( new Push<double>( (double) 3 ) );
@@ -471,6 +472,7 @@ int main( void )
   program.Append( new Bind );
   program.Append( new Bind );
   program.Append( new Push<double>( (double) 3 ) );
+  program.Append( new Neg );
   program.Append( new CallFunction );
   program.Append( new Dump );
   result = machine->Execute( program );
@@ -514,22 +516,22 @@ int main( void )
   program.Append( new Dump );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new EqualTo );
+  program.Append( new EQU );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new NotEqualTo );
+  program.Append( new NEQ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GreaterThan );
+  program.Append( new GTN );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LessThan );
+  program.Append( new LTN );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GreaterThanOrEqualTo );
+  program.Append( new GEQ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LessThanOrEqualTo );
+  program.Append( new LEQ );
   program.Append( new Dump );
 
   program.Append( new PushRef( "x" ) );
@@ -546,22 +548,22 @@ int main( void )
   program.Append( new Add );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new EqualTo );
+  program.Append( new EQU );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new NotEqualTo );
+  program.Append( new NEQ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GreaterThan );
+  program.Append( new GTN );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LessThan );
+  program.Append( new LTN );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new GreaterThanOrEqualTo );
+  program.Append( new GEQ );
   program.Append( new PushRef( "x" ) );
   program.Append( new PushRef( "y" ) );
-  program.Append( new LessThanOrEqualTo );
+  program.Append( new LEQ );
   program.Append( new Dump );
 
   program.Append( new Push<bool>( false ) );
@@ -819,6 +821,126 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+
+  machine->Push( (gInteger) 6 );
+  machine->Push( (gInteger) 5 );
+  machine->Divide();
+  machine->Dump();
+
+  machine->InitCallFunction( "Divide" );
+  machine->Push( (gInteger) 6 );
+  machine->Bind();
+  machine->Push( (gInteger) 5 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->Push( (gInteger) 6 );
+  machine->Push( (gInteger) 5 );
+  machine->IntegerDivide();
+  machine->Dump();
+
+  machine->InitCallFunction( "IntegerDivide" );
+  machine->Push( (gInteger) 6 );
+  machine->Bind();
+  machine->Push( (gInteger) 5 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  gout << "Testing Modulous\n";
+  machine->Push( (gInteger) 6 );
+  machine->Push( (gInteger) 5 );
+  machine->Modulous();
+  machine->Dump();
+
+  gout << "Testing Modulous\n";
+  machine->Push( (gInteger) 5 );
+  machine->Push( (gInteger) 5 );
+  machine->Modulous();
+  machine->Dump();
+
+
+  gout << "Testing Instructions:\n";
+  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new IntDiv );
+  program.Append( new Dump );
+
+  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Mod );
+  program.Append( new Dump );
+
+  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Mod );
+  program.Append( new Dump );
+
+  machine->Execute( program );
+
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+  gout << "Testing Loops:\n";
+  program.Append( new Push<double>( 101 ) );
+  program.Append( new Push<double>( 100 ) );
+  program.Append( new GTN );
+  program.Append( new IfGoto( 8 ) );
+  program.Append( new Push<double>( 3 ) );
+  program.Append( new Dump );
+  program.Append( new Goto( 10 ) );
+  program.Append( new Push<double>( 5 ) );
+  program.Append( new Dump );
+  program.Append( new NOP );
+
+  program.Append( new Push<bool>( true ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new EQU );
+  program.Append( new Dump );
+
+  program.Append( new Push<bool>( true ) );
+  program.Append( new Push<bool>( true ) );
+  program.Append( new NEQ );
+  program.Append( new Dump );
+
+  program.Append( new Push<bool>( true ) );
+  program.Append( new Push<bool>( false ) );
+  program.Append( new EQU );
+  program.Append( new Dump );
+
+  program.Append( new Push<bool>( true ) );
+  program.Append( new Push<bool>( false ) );
+  program.Append( new NEQ );
+  program.Append( new Dump );
+
+  program.Append( new InitCallFunction( "Modulous" ) );
+  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Bind );
+  program.Append( new Push<gInteger>( 5 ) );
+  program.Append( new Bind );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+
+  program.Append( new InitCallFunction( "Modulous" ) );
+  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Bind );
+  program.Append( new Push<gInteger>( 6 ) );
+  program.Append( new Bind );
+  program.Append( new CallFunction );
+  program.Append( new Dump );
+
+  machine->Execute( program );
+
 
 
   gout << "Deleting machine\n";
