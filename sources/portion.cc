@@ -1563,56 +1563,52 @@ Portion* ListPortion::Subscript( int index ) const
 
 struct PortionTypeTextType
 {
-  const PortionType Type;
-  const gString     Text;
-  
-  PortionTypeTextType( const PortionType& type, const gString& text ) 
-    : Type( type ), Text( text )
-    { }
-};
+  PortionType Type;
+  char * Text;
+};  
 
 
 #define NumPortionTypes 31
 
 PortionTypeTextType _PortionTypeText[] =
 {
-  PortionTypeTextType( porERROR,          "ERROR" ),
+  { porERROR,          "ERROR" },
+  
+  { porBOOL,           "BOOL" },
+  { porFLOAT,          "FLOAT" },
+  { porINTEGER,        "INTEGER" },
+  { porRATIONAL,       "RATIONAL" },
+  { porTEXT,           "TEXT" },
+  { porLIST,           "LIST" },
+  { porNFG_FLOAT,      "NFG_FLOAT" },
+  { porNFG_RATIONAL,   "NFG_RATIONAL" },
+  { porNFG,            "NFG" },
+  { porEFG_FLOAT,      "EFG_FLOAT" },
+  { porEFG_RATIONAL,   "EFG_RATIONAL" },
+  { porEFG,            "EFG" },
+  { porMIXED_FLOAT,    "MIXED_FLOAT" },
+  { porMIXED_RATIONAL, "MIXED_RATIONAL" },
+  { porMIXED,          "MIXED" },
+  { porBEHAV_FLOAT,    "BEHAV_FLOAT" },
+  { porBEHAV_RATIONAL, "BEHAV_RATIONAL" },
+  { porBEHAV,          "BEHAV" },
 
-  PortionTypeTextType( porBOOL,           "BOOLEAN" ),
-  PortionTypeTextType( porFLOAT,          "FLOAT" ),
-  PortionTypeTextType( porINTEGER,        "INTEGER" ),
-  PortionTypeTextType( porRATIONAL,       "RATIONAL" ),
-  PortionTypeTextType( porTEXT,           "TEXT" ),
-  PortionTypeTextType( porLIST,           "LIST" ),
-  PortionTypeTextType( porNFG_FLOAT,      "NFG_FLOAT" ),
-  PortionTypeTextType( porNFG_RATIONAL,   "NFG_RATIONAL" ),
-  PortionTypeTextType( porNFG,            "NFG" ),
-  PortionTypeTextType( porEFG_FLOAT,      "EFG_FLOAT" ),
-  PortionTypeTextType( porEFG_RATIONAL,   "EFG_RATIONAL" ),
-  PortionTypeTextType( porEFG,            "EFG" ),
-  PortionTypeTextType( porMIXED_FLOAT,    "MIXED_FLOAT" ),
-  PortionTypeTextType( porMIXED_RATIONAL, "MIXED_RATIONAL" ),
-  PortionTypeTextType( porMIXED,          "MIXED" ),
-  PortionTypeTextType( porBEHAV_FLOAT,    "BEHAV_FLOAT" ),
-  PortionTypeTextType( porBEHAV_RATIONAL, "BEHAV_RATIONAL" ),
-  PortionTypeTextType( porBEHAV,          "BEHAV" ),
+  { porOUTCOME,        "OUTCOME" },
+  { porEF_PLAYER,      "EF_PLAYER" },
+  { porINFOSET,        "INFOSET" },
+  { porNODE,           "NODE" },
+  { porACTION,         "ACTION" },
 
-  PortionTypeTextType( porOUTCOME,        "OUTCOME" ),
-  PortionTypeTextType( porEF_PLAYER,      "EF_PLAYER" ),
-  PortionTypeTextType( porINFOSET,        "INFOSET" ),
-  PortionTypeTextType( porNODE,           "NODE" ),
-  PortionTypeTextType( porACTION,         "ACTION" ),
+  { porREFERENCE,      "REFERENCE" },
 
-  PortionTypeTextType( porREFERENCE,      "REFERENCE" ),
+  { porOUTPUT,         "OUTPUT" },
+  { porINPUT,          "INPUT" },
 
-  PortionTypeTextType( porOUTPUT,         "OUTPUT" ),
-  PortionTypeTextType( porINPUT,          "INPUT" ),
+  { porUNKNOWN,        "UNKNOWN" },
 
-  PortionTypeTextType( porUNKNOWN,        "UNKNOWN" ),
-
-  PortionTypeTextType( porNUMERICAL,      "NUMERICAL" ),
-  PortionTypeTextType( porALL,            "ALL" ),
-  PortionTypeTextType( porVALUE,          "VALUE" )
+  { porNUMERICAL,      "NUMERICAL" },
+  { porALL,            "ALL" },
+  { porVALUE,          "VALUE" }
 };
 
 
@@ -1638,7 +1634,7 @@ PortionType TextToPortionType( const gString& text )
   int i;
   for( i = 0; i < NumPortionTypes; i++ )
   {
-    if( _PortionTypeText[ i ].Text == text )
+    if( text == _PortionTypeText[ i ].Text )
     {
       return _PortionTypeText[ i ].Type;
       break;
