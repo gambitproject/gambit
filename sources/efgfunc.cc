@@ -999,10 +999,10 @@ static Portion *GSM_WriteSfg(Portion **param)
 
 void Recurse_Sfg(ListPortion *por, int pl, const Sfg &sfg, gIndexOdometer &index)
 {
-  if(pl <= sfg.NumPlayers()) 
+  if(pl >=1 ) 
     for(int j=1;j<=sfg.NumSequences(pl);j++) {
       ListPortion *p = new ListPortion;
-      Recurse_Sfg(p,pl+1,sfg,index);
+      Recurse_Sfg(p,pl-1,sfg,index);
       por->Append(p);
     }
   else {
@@ -1024,7 +1024,7 @@ static Portion *GSM_Sfg(Portion **param)
   ListPortion *por = new ListPortion;
   gIndexOdometer index(sfg.NumSequences());
 
-  Recurse_Sfg(por,1,sfg,index);
+  Recurse_Sfg(por,sfg.NumPlayers(),sfg,index);
 
   return por;
 }
