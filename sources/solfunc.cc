@@ -197,8 +197,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 	  delete P;
 	  return new ErrorPortion("Mismatching dimensionality");
 	}
-	if(((ListPortion*) p2)->Length() !=
-	   E.PlayerList()[i]->InfosetList()[j]->NumActions())
+	if (((ListPortion*) p2)->Length() != S->NumActions(i, j))
 	{
 	  delete p2;
 	  delete p1;
@@ -206,8 +205,7 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 	  return new ErrorPortion("Mismatching number of actions");
 	}
 	
-	for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
-	{
+	for (k = 1; k <= S->NumActions(i, j); k++)  {
 	  p3 = ((ListPortion*) p2)->SubscriptCopy(k);
 	  if(p3->Spec().Type != porFLOAT)
 	  {
@@ -269,17 +267,14 @@ Portion *GSM_Behav_EFSupport(Portion **param)
 	  delete P;
 	  return new ErrorPortion("Mismatching dimensionality");
 	}
-	if(((ListPortion*) p2)->Length() !=
-	   E.PlayerList()[i]->InfosetList()[j]->NumActions())
-	{
+	if (((ListPortion*) p2)->Length() != S->NumActions(i, j))  {
 	  delete p2;
 	  delete p1;
 	  delete P;
 	  return new ErrorPortion("Mismatching number of actions");
 	}
 	
-	for(k = 1; k <= E.PlayerList()[i]->InfosetList()[j]->NumActions(); k++)
-	{
+	for (k = 1; k <= S->NumActions(i, j); k++)  {
 	  p3 = ((ListPortion*) p2)->SubscriptCopy(k);
 	  if(p3->Spec().Type != porRATIONAL)
 	  {
@@ -750,15 +745,13 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
       delete P;
       return new ErrorPortion("Mismatching dimensionality");
     }
-    if(((ListPortion*) p1)->Length() != dim[i])
-    {
+    if (((ListPortion*) p1)->Length() != S->NumStrats(i))  {
       delete p1;
       delete P;
       return new ErrorPortion("Mismatching number of strategies");
     }
     
-    for(j = 1; j <= dim[i]; j++)
-    {
+    for (j = 1; j <= S->NumStrats(i); j++)  {
       p2 = ((ListPortion*) p1)->SubscriptCopy(j);
       if(p2->Spec().Type != datatype)
       {
@@ -1229,6 +1222,50 @@ Portion *GSM_SetStrategyProbs_Rational(Portion **param)
   return param[0]->RefCopy();
 }
 
+//----------------
+// StrategyProb
+//----------------
+
+Portion *GSM_StrategyProb_Float(Portion **param)
+{
+  Portion *por;
+  MixedSolution<double>* profile = 
+    (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
+  Strategy* strategy = ((StrategyPortion*) param[1])->Value();
+  NFPlayer* player = strategy->nfp;
+  
+  if (profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy))
+    por = new FloatValPortion((*profile)
+			      (player->GetNumber(),
+			       profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy)));
+  else
+    por = new FloatValPortion(0.0);
+  
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+Portion *GSM_StrategyProb_Rational(Portion **param)
+{
+  Portion *por;
+  MixedSolution<gRational>* profile = 
+    (MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value();
+  Strategy* strategy = ((StrategyPortion*) param[1])->Value();
+  NFPlayer* player = strategy->nfp;
+  
+  if (profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy))
+    por = new RationalValPortion((*profile)
+			      (player->GetNumber(),
+			       profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy)));
+  else
+    por = new RationalValPortion(0.0);
+  
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+
+
 //---------------
 // Support
 //---------------
@@ -1283,7 +1320,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEF_SUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("value", 
 					    PortionSpec(porFLOAT | 
-							porRATIONAL, 1)));
+							porRATIONAL, 3)));
   gsm->AddFunction(FuncObj);
 
 
@@ -1475,7 +1512,7 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("value", 
 					    PortionSpec(porFLOAT | 
-							porRATIONAL, 1)));
+							porRATIONAL, 2)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NodeValue", 2);
@@ -1560,6 +1597,18 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 2, ParamInfoType("value", 
 					    PortionSpec(porRATIONAL,1)));
 
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("StrategyProb", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyProb_Float, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED_FLOAT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_StrategyProb_Rational, 
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Support", 2);
