@@ -468,22 +468,22 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 
   try {
-    gFileOutput file(m_doc->GetFilename().mb_str());
+    gbtFileOutput file(m_doc->GetFilename().mb_str());
     gbtEfgGame efg = CompressEfg(m_doc->GetEfg(), m_doc->GetEfgSupport());
     efg.WriteEfg(file);
     m_doc->SetIsModified(false);
   }
-  catch (gFileOutput::OpenFailed &) {
+  catch (gbtFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format(_("Could not open %s for writing."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gFileOutput::WriteFailed &) {
+  catch (gbtFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gbtEfgException &) {
+  catch (gbtEfgbtException &) {
     wxMessageBox(_("Internal exception in extensive form"), _("Error"),
 		 wxOK, this);
   }
@@ -729,7 +729,7 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
       m_doc->OnTreeChanged(true, true);
     }
   }
-  catch (gException &ex) {
+  catch (gbtException &ex) {
     guiExceptionDialog(ex.Description(), this);
   }
 }
@@ -747,7 +747,7 @@ void EfgShow::OnEditReveal(wxCommandEvent &)
       }
       m_doc->OnTreeChanged(true, true);
     }
-    catch (gException &ex) {
+    catch (gbtException &ex) {
       guiExceptionDialog(ex.Description(), this);
     }
   }
@@ -766,7 +766,7 @@ void EfgShow::OnEditToggleSubgame(wxCommandEvent &)
 
 void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
 {
-  gList<gbtEfgNode> subgames;
+  gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->GetEfg().MarkSubgame(subgames[i]);
@@ -776,7 +776,7 @@ void EfgShow::OnEditMarkSubgameTree(wxCommandEvent &)
 
 void EfgShow::OnEditUnmarkSubgameTree(wxCommandEvent &)
 {
-  gList<gbtEfgNode> subgames;
+  gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(m_doc->GetEfg(), m_doc->GetCursor(), subgames);
   for (int i = 1; i <= subgames.Length(); i++) {
     m_doc->GetEfg().UnmarkSubgame(subgames[i]);
@@ -788,7 +788,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, m_doc->GetCursor());
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->GetCursor().SetLabel(gText(dialog.GetNodeName().mb_str()));
+    m_doc->GetCursor().SetLabel(gbtText(dialog.GetNodeName().mb_str()));
     if (dialog.GetOutcome() > 0) {
       m_doc->GetCursor().SetOutcome(m_doc->GetEfg().GetOutcome(dialog.GetOutcome()));
     }
@@ -826,7 +826,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
   dialogEditMove dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
-    infoset.SetLabel(gText(dialog.GetInfosetName().mb_str()));
+    infoset.SetLabel(gbtText(dialog.GetInfosetName().mb_str()));
     
     if (!infoset.IsChanceInfoset() && 
 	dialog.GetPlayer() != infoset.GetPlayer().GetId()) {
@@ -1061,7 +1061,7 @@ void EfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 
 void EfgShow::OnToolsDominance(wxCommandEvent &)
 {
-  gArray<gText> playerNames(m_doc->GetEfg().NumPlayers());
+  gbtArray<gbtText> playerNames(m_doc->GetEfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
     playerNames[pl] = m_doc->GetEfg().GetPlayer(pl).GetLabel();
   }
@@ -1095,7 +1095,7 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
 	}
       }
     }
-    catch (gSignalBreak &) { }
+    catch (gbtSignalBreak &) { }
     
     if (m_doc->GetEfgSupport() != support) {
       m_doc->SetEfgSupport(m_doc->AllEfgSupports().Length());
@@ -1120,7 +1120,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
 
     try {
       wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
-      gList<BehavSolution> solutions;
+      gbtList<BehavSolution> solutions;
       solutions = algorithm->Solve(m_doc->GetEfgSupport(), status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
@@ -1129,7 +1129,7 @@ void EfgShow::OnToolsEquilibrium(wxCommandEvent &)
       m_doc->SetCurrentProfile(m_doc->AllBehavProfiles().Length());
       m_doc->SetShowProfiles(true);
     }
-    catch (gException &ex) {
+    catch (gbtException &ex) {
       wxMessageDialog msgDialog(this,
 				wxString::Format(wxT("%s"),
 						 (char *) ex.Description()),
@@ -1155,7 +1155,7 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
     algorithm.SetMaxLambda(10000000);
 
     wxStatus status(this, "QreSolve Progress");
-    gList<BehavSolution> solutions = algorithm.Solve(m_doc->GetEfgSupport(),
+    gbtList<BehavSolution> solutions = algorithm.Solve(m_doc->GetEfgSupport(),
 						     status);
 
     if (solutions.Length() > 0) {
@@ -1295,7 +1295,3 @@ void EfgShow::OnFocus(wxFocusEvent &)
     m_treeWindow->SetFocus();
   }
 }
-
-
-
-

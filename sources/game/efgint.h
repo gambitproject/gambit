@@ -50,9 +50,9 @@ struct gbt_efg_outcome_rep {
   int m_id;
   gbt_efg_game_rep *m_efg;
   bool m_deleted;
-  gText m_label;
-  gBlock<gNumber> m_payoffs;
-  gBlock<double> m_doublePayoffs;
+  gbtText m_label;
+  gbtBlock<gNumber> m_payoffs;
+  gbtBlock<double> m_doublePayoffs;
   int m_refCount;
 
   gbt_efg_outcome_rep(gbt_efg_game_rep *, int);
@@ -62,8 +62,8 @@ struct gbt_efg_player_rep {
   int m_id;
   gbt_efg_game_rep *m_efg;
   bool m_deleted;
-  gText m_label;
-  gBlock<gbt_efg_infoset_rep *> m_infosets;
+  gbtText m_label;
+  gbtBlock<gbt_efg_infoset_rep *> m_infosets;
   int m_refCount;
 
   gbt_efg_player_rep(gbt_efg_game_rep *, int);
@@ -74,7 +74,7 @@ struct gbt_efg_action_rep {
   int m_id;
   gbt_efg_infoset_rep *m_infoset;
   bool m_deleted;
-  gText m_label;
+  gbtText m_label;
   int m_refCount;
 
   gbt_efg_action_rep(gbt_efg_infoset_rep *, int);
@@ -84,30 +84,30 @@ struct gbt_efg_infoset_rep {
   int m_id;
   gbt_efg_player_rep *m_player;
   bool m_deleted;
-  gText m_label;
+  gbtText m_label;
   int m_refCount;
-  gBlock<gbt_efg_action_rep *> m_actions;
-  gBlock<gNumber> m_chanceProbs;
-  gBlock<gbt_efg_node_rep *> m_members;
+  gbtBlock<gbt_efg_action_rep *> m_actions;
+  gbtBlock<gNumber> m_chanceProbs;
+  gbtBlock<gbt_efg_node_rep *> m_members;
   int m_flag, m_whichbranch;
 
   gbt_efg_infoset_rep(gbt_efg_player_rep *, int id, int br);
 
-  void PrintActions(gOutput &) const;
+  void PrintActions(gbtOutput &) const;
 };
 
 struct gbt_efg_node_rep {
   int m_id;
   gbt_efg_game_rep *m_efg;
   bool m_deleted;
-  gText m_label;
+  gbtText m_label;
   int m_refCount;
 
   bool m_mark;
   gbt_efg_infoset_rep *m_infoset;
   gbt_efg_node_rep *m_parent;
   gbt_efg_outcome_rep *m_outcome;
-  gBlock<gbt_efg_node_rep *> m_children;
+  gbtBlock<gbt_efg_node_rep *> m_children;
   gbt_efg_node_rep *m_whichbranch, *m_ptr, *m_gameroot;
 
   gbt_efg_node_rep(gbt_efg_game_rep *, gbt_efg_node_rep *);
@@ -126,9 +126,9 @@ struct gbt_efg_game_rep {
   bool sortisets;
   mutable long m_revision;
   mutable long m_outcome_revision;
-  gText m_label, comment;
-  gBlock<gbt_efg_player_rep *> players;
-  gBlock<gbt_efg_outcome_rep *> outcomes;
+  gbtText m_label, comment;
+  gbtBlock<gbt_efg_player_rep *> players;
+  gbtBlock<gbt_efg_outcome_rep *> outcomes;
   gbt_efg_node_rep *root;
   gbt_efg_player_rep *chance;
   gbtNfgGame afg;
@@ -165,7 +165,3 @@ struct gbt_efg_game_rep {
 };
 
 #endif  // EFGINT_H
-
-
-
-

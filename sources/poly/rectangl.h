@@ -42,12 +42,12 @@ open (bounded) intervals can be effected, but less directly.
 
 template <class T> class gRectangle {
 private:
-    gList<gInterval<T> > sides;
+    gbtList<gInterval<T> > sides;
 
 public:
     // constructors
     gRectangle(const gRectangle<T>&);
-    gRectangle(const gList<gInterval<T> >&);
+    gRectangle(const gbtList<gInterval<T> >&);
     gRectangle(const gVector<T>, const gVector<T>);
     ~gRectangle();
 
@@ -66,7 +66,7 @@ public:
     const gInterval<T>       CartesianFactor(const int&)        const;
     const gRectangle<T>      SameCenterDoubleSideLengths()      const;
     const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
-    const gRectangle<T>      Orthant(const gArray<int>&)        const;
+    const gRectangle<T>      Orthant(const gbtArray<int>&)        const;
     const gVector<T>         SideLengths()                      const;
     const T                  MaximalSideLength()                const;
     bool                     Contains(const gVector<T> &)       const;
@@ -74,16 +74,16 @@ public:
     const T                  Volume()                           const;
     const gVector<T>         Center()                           const;
     const gRectangle<T>      BoundingRectangle()                const;
-    const gList<gVector<T> > VertexList()                       const;
+    const gbtList<gVector<T> > VertexList()                       const;
     const int                NumberOfCellsInSubdivision()       const;
     const gRectangle<T>      SubdivisionCell(const int&)        const;
     const T                  DiameterSquared()                  const;
 
     // output
-    void Output(gOutput &) const;
+    void Output(gbtOutput &) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &, const gRectangle<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gRectangle<T> &);
 
   //-------------
   // Conversion:

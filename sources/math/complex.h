@@ -74,8 +74,8 @@ public:
   void    error(const char* msg) const;
 
 // printing
-  friend gInput&    operator >> (gInput& s, gComplex& y);
-  friend gOutput&   operator << (gOutput& s, const gComplex& y);
+  friend gbtInput&    operator >> (gbtInput& s, gComplex& y);
+  friend gbtOutput&   operator << (gbtOutput& s, const gComplex& y);
 
 // friends outside the class
   friend double    fabs(const gComplex& x);              
@@ -91,4 +91,3 @@ gString         ToString(gComplex);
 gComplex        TOgComplex(const gString &);
 
 #endif
-

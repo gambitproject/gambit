@@ -60,8 +60,8 @@ template <class T> gbtNfgNashSimpdiv<T>::~gbtNfgNashSimpdiv()
 
 template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
 {
-  gArray<int> ylabel(2);
-  gRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
+  gbtArray<int> ylabel(2);
+  gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
   gPVector<int> U(y.Support().NumStrats()), TT(y.Support().NumStrats());
   gPVector<T> ab(y.Support().NumStrats());
   gPVector<T> besty(y.Support().NumStrats());
@@ -245,8 +245,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(MixedProfile<T> &y)
   return maxz;
 }
 
-template <class T> void gbtNfgNashSimpdiv<T>::update(gRectArray<int> &pi,
-					      gRectArray<int> &labels,
+template <class T> void gbtNfgNashSimpdiv<T>::update(gbtRectArray<int> &pi,
+					      gbtRectArray<int> &labels,
 					      gPVector<T> &ab,
 					      const gPVector<int> &U,
 					      int j, int i)
@@ -297,7 +297,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
 					    const gPVector<int> &U,
 					    const gPVector<int> &TT,
 					    const gPVector<T> &ab,
-					    const gRectArray<int> &pi,
+					    const gbtRectArray<int> &pi,
 					    int k)
 {
   int j, h, i,hh;
@@ -321,7 +321,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(MixedProfile<T> &x,
 }
 
 template <class T> void gbtNfgNashSimpdiv<T>::getnexty(MixedProfile<T> &x,
-						const gRectArray<int> &pi, 
+						const gbtRectArray<int> &pi, 
 						const gPVector<int> &U,
 						int i)
 {
@@ -361,7 +361,7 @@ template <class T> int gbtNfgNashSimpdiv<T>::get_c(int j, int h, int nstrats,
 }
 
 template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
-					     gArray<int> &ylabel,
+					     gbtArray<int> &ylabel,
 					     gPVector<T> &besty)
 {
   int i,j,jj;
@@ -405,9 +405,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(MixedProfile<T> &yy,
 //               gbtNfgNashSimpdiv<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> gList<MixedSolution>
+template <class T> gbtList<MixedSolution>
 gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
-			    gStatus &p_status)
+			    gbtStatus &p_status)
 {
   int qf,i,j,k,ii;
 
@@ -432,7 +432,7 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
   // In principle, this algorithm can be started from any point
   // in the simplex.  Currently, it starts at a predefined point;
   // therefore, it is set up to compute one and only one equilibrium.
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
   k=1;
   d=(T) 1.0 / (T) k;
   for(i=1;i<=p_support.GetGame().NumPlayers();i++) {
@@ -456,9 +456,3 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
 
   return solutions;
 }
-
-
-
-
-
-

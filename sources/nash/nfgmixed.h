@@ -54,12 +54,8 @@ public:
   bool Cliques(void) const { return m_cliques; }
   void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
 
-  gText GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif  // NFGMIXED_H
-
-
-
-

@@ -203,12 +203,12 @@ nfg_writenfg(nfgobject *self, PyObject *args)
   }
 
   try {
-    gFileOutput file(filename);
+    gbtFileOutput file(filename);
     self->m_nfg->WriteNfg(file);
     Py_INCREF(Py_None);
     return Py_None;
   }
-  catch (const gFileInput::OpenFailed &) {
+  catch (const gbtFileInput::OpenFailed &) {
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -301,7 +301,7 @@ gbt_new_nfg(PyObject */*self*/, PyObject *args)
     return NULL;
   }
 
-  gArray<int> dim(PyList_Size(list));
+  gbtArray<int> dim(PyList_Size(list));
   for (int pl = 1; pl <= dim.Length(); pl++) {
     if (!PyInt_Check(PyList_GetItem(list, pl - 1))) {
       return NULL;
@@ -327,11 +327,11 @@ gbt_read_nfg(PyObject */*self*/, PyObject *args)
 
   nfgobject *nfg = newnfgobject();
   try {
-    gFileInput file(filename);
+    gbtFileInput file(filename);
     nfg->m_nfg = new gbtNfgGame(ReadNfgFile(file));
     return (PyObject *) nfg;
   }
-  catch (const gFileInput::OpenFailed &) {
+  catch (const gbtFileInput::OpenFailed &) {
     Py_INCREF(Py_None);
     return Py_None;
   }

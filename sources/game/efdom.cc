@@ -27,14 +27,14 @@
 #include "efdom.h"
 #include "game/efgciter.h"
 
-efgDominanceException::efgDominanceException(const gText &p_description)
+efgDominanceException::efgDominanceException(const gbtText &p_description)
   : m_description(p_description)
 { }
 
 efgDominanceException::~efgDominanceException()
 { }
 
-gText efgDominanceException::Description(void) const
+gbtText efgDominanceException::Description(void) const
 {
   return m_description;
 }
@@ -73,7 +73,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
   }
 
   else {
-    gList<gbtEfgNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
+    gbtList<gbtEfgNode> nodelist = SAct.ReachableNodesInInfoset(infoset);  
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this 
       // prior to entry
@@ -83,7 +83,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     }
     
     for (int n = 1; n <= nodelist.Length(); n++) {
-      gList<gbtEfgInfoset> L;
+      gbtList<gbtEfgInfoset> L;
       L += ReachableInfosets(nodelist[n], a);
       L += ReachableInfosets(nodelist[n], b);
       L.RemoveRedundancies();
@@ -115,7 +115,7 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 }
 
 bool SomeElementDominates(const gbtEfgSupport &S, 
-			  const gArray<gbtEfgAction> &array,
+			  const gbtArray<gbtEfgAction> &array,
 			  const gbtEfgAction &a,
 			  bool strong, bool conditional)
 {
@@ -130,7 +130,7 @@ bool SomeElementDominates(const gbtEfgSupport &S,
 bool gbtEfgSupport::IsDominated(const gbtEfgAction &a, 
 			    bool strong, bool conditional) const
 {
-  gArray<gbtEfgAction> array(NumActions(a.GetInfoset()));
+  gbtArray<gbtEfgAction> array(NumActions(a.GetInfoset()));
   for (int act = 1; act <= array.Length(); act++) {
     array[act] = GetAction(a.GetInfoset(), act);
   }
@@ -140,9 +140,9 @@ bool gbtEfgSupport::IsDominated(const gbtEfgAction &a,
 bool InfosetHasDominatedElement(const gbtEfgSupport &S, 
 				gbtEfgInfoset infoset,
 				bool strong, bool conditional,
-				gStatus &/*status*/)
+				gbtStatus &/*status*/)
 {
-  gArray<gbtEfgAction> actions(S.NumActions(infoset));
+  gbtArray<gbtEfgAction> actions(S.NumActions(infoset));
   for (int i = 1; i <= actions.Length(); i++) {
     actions[i] = S.GetAction(infoset, i);
   }
@@ -159,9 +159,9 @@ bool ElimDominatedInInfoset(const gbtEfgSupport &S, gbtEfgSupport &T,
 			     const int iset, 
 			     const bool strong,
 			     const bool conditional,
-		                   gStatus &status)
+		                   gbtStatus &status)
 {
-  gArray<bool> is_dominated(S.NumActions(pl, iset));
+  gbtArray<bool> is_dominated(S.NumActions(pl, iset));
   for (int k = 1; k <= S.NumActions(pl, iset); is_dominated[k++] = false);
 
   for (int i = 1; i <= S.NumActions(pl, iset); i++) {
@@ -182,7 +182,7 @@ bool ElimDominatedInInfoset(const gbtEfgSupport &S, gbtEfgSupport &T,
     if (is_dominated[k]) action_was_eliminated = true;
     else k++;
   }
-  gArray<gbtEfgAction> actions(S.NumActions(pl, iset));
+  gbtArray<gbtEfgAction> actions(S.NumActions(pl, iset));
   for (int act = 1; act <= actions.Length(); act++) {
     actions[act] = S.GetAction(pl, iset, act);
   }
@@ -199,7 +199,7 @@ bool ElimDominatedForPlayer(const gbtEfgSupport &S, gbtEfgSupport &T,
 			    const int pl, int &cumiset,
 			    const bool strong,
 			    const bool conditional,
-		                  gStatus &status)
+		                  gbtStatus &status)
 {
   bool action_was_eliminated = false;
 
@@ -216,16 +216,16 @@ bool ElimDominatedForPlayer(const gbtEfgSupport &S, gbtEfgSupport &T,
 }
 
 gbtEfgSupport gbtEfgSupport::Undominated(bool strong, bool conditional,
-				  const gArray<int> &players,
-				  gOutput &, // tracefile 
-				  gStatus &status) const
+				  const gbtArray<int> &players,
+				  gbtOutput &, // tracefile 
+				  gbtStatus &status) const
 {
   gbtEfgSupport T(*this);
   int cumiset = 0;
 
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
-    status.SetProgress(0, (gText("Eliminating strategies for player ") +
+    status.SetProgress(0, (gbtText("Eliminating strategies for player ") +
 			   ToText(players[i])));
     int pl = players[i];
     ElimDominatedForPlayer(*this, T, pl, cumiset, 

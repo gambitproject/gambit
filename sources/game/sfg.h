@@ -37,15 +37,15 @@ class Sfg  {
 private:
   gbtEfgGame m_efg;
   const gbtEfgSupport &efsupp;
-  gArray<SFSequenceSet *> *sequences;
-  gNArray<gArray<gNumber> *> *SF;  // sequence form
-  gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
-  gArray<int> seq;
+  gbtArray<SFSequenceSet *> *sequences;
+  gNArray<gbtArray<gNumber> *> *SF;  // sequence form
+  gbtArray<gbtRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
+  gbtArray<int> seq;
   gPVector<int> isetFlag,isetRow;
-  gArray<gList<gbtEfgInfoset> > infosets;
+  gbtArray<gbtList<gbtEfgInfoset> > infosets;
 
-  void MakeSequenceForm(const gbtEfgNode &, gNumber,gArray<int>, 
-			gArray<gbtEfgInfoset>, gArray<Sequence *>);
+  void MakeSequenceForm(const gbtEfgNode &, gNumber,gbtArray<int>, 
+			gbtArray<gbtEfgInfoset>, gbtArray<Sequence *>);
   void GetSequenceDims(const gbtEfgNode &);
 
 public:
@@ -54,15 +54,15 @@ public:
 
   inline int NumSequences(int pl) const {return seq[pl];}
   inline int NumInfosets(int pl) const {return infosets[pl].Length();}
-  inline gArray<int> NumSequences() const {return seq;}
+  inline gbtArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
   inline int NumPlayers() const { return m_efg.NumPlayers(); }
   
-  inline gArray<gNumber> Payoffs(const gArray<int> & index) const {return *((*SF)[index]);}
-  gNumber Payoff(const gArray<int> & index,int pl) const;
+  inline gbtArray<gNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
+  gNumber Payoff(const gbtArray<int> & index,int pl) const;
 
-  gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
+  gbtRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   gbtEfgInfoset GetInfoset(int pl, int sequence) const;
@@ -71,9 +71,8 @@ public:
   BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
   const Sequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
   
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 
 };
 
 #endif    // SFG_H
-

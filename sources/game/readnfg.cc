@@ -31,8 +31,8 @@
 
 class gbtNfgFilePlayer {
 public:
-  gText m_name;
-  gBlock<gText> m_strategies;
+  gbtText m_name;
+  gbtBlock<gbtText> m_strategies;
   gbtNfgFilePlayer *m_next;
 
   gbtNfgFilePlayer(void);
@@ -44,18 +44,18 @@ gbtNfgFilePlayer::gbtNfgFilePlayer(void)
 
 class gbtNfgFileData {
 public:
-  gText m_title, m_comment;
+  gbtText m_title, m_comment;
   gbtNfgFilePlayer *m_firstPlayer, *m_lastPlayer;
   int m_numPlayers;
 
   gbtNfgFileData(void);
   ~gbtNfgFileData();
 
-  void AddPlayer(const gText &);
+  void AddPlayer(const gbtText &);
   int NumPlayers(void) const { return m_numPlayers; }
   int NumStrategies(int pl) const;
-  gText GetPlayer(int pl) const;
-  gText GetStrategy(int pl, int st) const;
+  gbtText GetPlayer(int pl) const;
+  gbtText GetStrategy(int pl, int st) const;
 };
 
 gbtNfgFileData::gbtNfgFileData(void)
@@ -74,7 +74,7 @@ gbtNfgFileData::~gbtNfgFileData()
   }
 }
 
-void gbtNfgFileData::AddPlayer(const gText &p_name)
+void gbtNfgFileData::AddPlayer(const gbtText &p_name)
 {
   gbtNfgFilePlayer *player = new gbtNfgFilePlayer;
   player->m_name = p_name;
@@ -108,7 +108,7 @@ int gbtNfgFileData::NumStrategies(int p_player) const
   }
 }
 
-gText gbtNfgFileData::GetPlayer(int p_player) const
+gbtText gbtNfgFileData::GetPlayer(int p_player) const
 {
   gbtNfgFilePlayer *player = m_firstPlayer;
   int pl = 1;
@@ -126,7 +126,7 @@ gText gbtNfgFileData::GetPlayer(int p_player) const
   }
 }
 
-gText gbtNfgFileData::GetStrategy(int p_player, int p_strategy) const
+gbtText gbtNfgFileData::GetStrategy(int p_player, int p_strategy) const
 {
   gbtNfgFilePlayer *player = m_firstPlayer;
   int pl = 1;
@@ -161,23 +161,23 @@ typedef enum {
 
 class gbtNfgParserState {
 private:
-  gInput &m_file;
+  gbtInput &m_file;
 
   gbtNfgParserSymbol m_lastSymbol;
   double m_lastDouble;
   gInteger m_lastInteger;
   gRational m_lastRational;
-  gText m_lastText;
+  gbtText m_lastText;
 
 public:
-  gbtNfgParserState(gInput &p_file) : m_file(p_file) { }
+  gbtNfgParserState(gbtInput &p_file) : m_file(p_file) { }
 
   gbtNfgParserSymbol GetNextSymbol(void);
   gbtNfgParserSymbol GetCurrentSymbol(void) const { return m_lastSymbol; }
   const gInteger &GetLastInteger(void) const { return m_lastInteger; }
   const gRational &GetLastRational(void) const { return m_lastRational; }
   double GetLastDouble(void) const { return m_lastDouble; }
-  gText GetLastText(void) const { return m_lastText; }
+  gbtText GetLastText(void) const { return m_lastText; }
 };  
 
 gbtNfgParserSymbol gbtNfgParserState::GetNextSymbol(void)
@@ -235,7 +235,7 @@ gbtNfgParserSymbol gbtNfgParserState::GetNextSymbol(void)
     return (m_lastSymbol = symCOMMA);
   }
   else if (isdigit(c) || c == '-') {
-    gText buf;
+    gbtText buf;
     buf += c;
     m_file.get(c);
     
@@ -275,7 +275,7 @@ gbtNfgParserSymbol gbtNfgParserState::GetNextSymbol(void)
     }
   }
   else if (c == '"') {
-    // The operator>> for gText handles quote-escaping
+    // The operator>> for gbtText handles quote-escaping
     m_file.unget(c);
     m_file >> m_lastText;
     return (m_lastSymbol = symTEXT);
@@ -413,13 +413,13 @@ static void ReadOutcomeList(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
   }
 
   while (p_parser.GetCurrentSymbol() == symLBRACE) {
-    gArray<gNumber> payoffs(p_nfg.NumPlayers());
+    gbtArray<gNumber> payoffs(p_nfg.NumPlayers());
     int pl = 1;
 
     if (p_parser.GetNextSymbol() != symTEXT) {
       throw gbtNfgParserError();
     }
-    gText label = p_parser.GetLastText();
+    gbtText label = p_parser.GetLastText();
     p_parser.GetNextSymbol();
 
     while (p_parser.GetCurrentSymbol() == symINTEGER ||
@@ -520,7 +520,7 @@ static void ParsePayoffBody(gbtNfgParserState &p_parser, gbtNfgGame p_nfg)
 
 static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 {
-  gArray<int> dim(p_data.NumPlayers());
+  gbtArray<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
@@ -554,7 +554,7 @@ static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
 //  ReadNfgFile: Global visible function to read a normal form savefile
 //=========================================================================
 
-gbtNfgGame ReadNfgFile(gInput &p_file)
+gbtNfgGame ReadNfgFile(gbtInput &p_file)
 {
   gbtNfgParserState parser(p_file);
   gbtNfgFileData data;
@@ -562,5 +562,3 @@ gbtNfgGame ReadNfgFile(gInput &p_file)
   ParseHeader(parser, data);
   return BuildNfg(parser, data);
 }
-
-

@@ -41,7 +41,7 @@ template <class T> T gmax(const T &a, const T &b)
   if (a > b)   return a;   else return b;
 }
 
-template <class T> T gmax(const gArray<T> &p_array)
+template <class T> T gmax(const gbtArray<T> &p_array)
 {
   T max = p_array[1];
 
@@ -69,7 +69,7 @@ template double gmax(const double &a, const double &b);
 template gRational gmax(const gRational &a, const gRational &b);
 template gDouble gmax(const gDouble &a, const gDouble &b);
 
-template int gmax(const gArray<int> &);
+template int gmax(const gbtArray<int> &);
 
 #ifndef hpux
 double abs(double a)
@@ -97,11 +97,10 @@ int sign(const double &a)
 
 // this two-step process allows us to read in a double using either the
 // standard form xxx.xxxx or a/b form.
-double FromText(const gText &f,double &d)
+double FromText(const gbtText &f,double &d)
 {
   gRational R;
   FromText(f, R);
   d = (double) R;
   return d;
 }
-

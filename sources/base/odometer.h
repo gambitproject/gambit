@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of gIndexOdometer class 
+// Declaration of gbtIndexOdometer class 
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -40,29 +40,29 @@ significant index is the first ("leftmost").
 #include "base.h"
 
 // *****************************
-//      class gIndexOdometer
+//      class gbtIndexOdometer
 // *****************************
 
-class gIndexOdometer {
+class gbtIndexOdometer {
  private:
-  gArray<int> MinIndices;
-  gArray<int> MaxIndices;
-  gArray<int> CurIndices;
+  gbtArray<int> MinIndices;
+  gbtArray<int> MaxIndices;
+  gbtArray<int> CurIndices;
    
  public:
-   gIndexOdometer(const gArray<int>);  
-   gIndexOdometer(const gBlock<int>);  
-   gIndexOdometer(const gArray<int>, const gArray<int>);  
-   gIndexOdometer(const int*, const int);
-   gIndexOdometer(const gIndexOdometer &);
+   gbtIndexOdometer(const gbtArray<int>);  
+   gbtIndexOdometer(const gbtBlock<int>);  
+   gbtIndexOdometer(const gbtArray<int>, const gbtArray<int>);  
+   gbtIndexOdometer(const int*, const int);
+   gbtIndexOdometer(const gbtIndexOdometer &);
 
-   ~gIndexOdometer();                 // Deletes all pointees
+   ~gbtIndexOdometer();                 // Deletes all pointees
 
    // Operators
-   gIndexOdometer& operator= (const gIndexOdometer &);
+   gbtIndexOdometer& operator= (const gbtIndexOdometer &);
 
-   bool       operator==(const gIndexOdometer &) const;
-   bool       operator!=(const gIndexOdometer &) const;
+   bool       operator==(const gbtIndexOdometer &) const;
+   bool       operator!=(const gbtIndexOdometer &) const;
 
    int        operator[](const int)         const;
 
@@ -73,10 +73,10 @@ class gIndexOdometer {
    // Information
   int             NoIndices()           const;
   int             LinearIndex()         const;
-  gArray<int>     CurrentIndices()      const;
-  gIndexOdometer  AfterExcisionOf(int&) const;
+  gbtArray<int>     CurrentIndices()      const;
+  gbtIndexOdometer  AfterExcisionOf(int&) const;
 
-friend gOutput& operator << (gOutput& output, const gIndexOdometer& x);
+friend gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& x);
 };  
 
 
@@ -87,7 +87,7 @@ friend gOutput& operator << (gOutput& output, const gIndexOdometer& x);
 class gPermutationOdometer {
  private:
   const int   n;
-  gArray<int> CurIndices;
+  gbtArray<int> CurIndices;
   int         CurSign;
 
   // Declared but not defined to prohibit assignment
@@ -110,10 +110,10 @@ class gPermutationOdometer {
 
    // Information
   int             NoIndices()           const;
-  gArray<int>     CurrentIndices()      const;
+  gbtArray<int>     CurrentIndices()      const;
   int             CurrentSign()         const;
 
-friend gOutput& operator << (gOutput& output, const gPermutationOdometer& x);
+friend gbtOutput& operator << (gbtOutput& output, const gPermutationOdometer& x);
 };  
 
 #endif // ODOMETER_H

@@ -62,7 +62,7 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
     gbtNfgPlayer player = p_nfg.GetPlayer(pl);
     m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 				      (char *) player.GetLabel())); 
-    m_strategyNames.Append(gArray<gText>(player.NumStrategies()));
+    m_strategyNames.Append(gbtArray<gbtText>(player.NumStrategies()));
     for (int st = 1; st <= player.NumStrategies(); st++) {
       m_strategyNames[pl][st] = player.GetStrategy(st).GetLabel();
     }

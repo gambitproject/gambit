@@ -59,8 +59,8 @@ gbt_nash_enummixed(PyObject */*self*/, PyObject *args)
   if (is_nfsupportobject(support)) {
     gbtNfgNashEnumMixed<double> algorithm;
     algorithm.SetStopAfter(0);
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -92,8 +92,8 @@ gbt_nash_enumpoly(PyObject */*self*/, PyObject *args)
 
   if (is_nfsupportobject(support)) {
     gbtNfgNashEnumPoly algorithm;
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -107,8 +107,8 @@ gbt_nash_enumpoly(PyObject */*self*/, PyObject *args)
   }
   else if (is_efsupportobject(support)) {
     gbtEfgNashEnumPoly algorithm;
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -137,8 +137,8 @@ gbt_nash_enumpure(PyObject */*self*/, PyObject *args)
   if (is_nfsupportobject(support)) {
     gbtNfgNashEnumPure algorithm;
     algorithm.SetStopAfter(0);
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -153,8 +153,8 @@ gbt_nash_enumpure(PyObject */*self*/, PyObject *args)
   else if (is_efsupportobject(support)) {
     gbtEfgNashEnumPure algorithm;
     algorithm.SetStopAfter(0);
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -183,8 +183,8 @@ gbt_nash_lcp(PyObject */*self*/, PyObject *args)
   if (is_nfsupportobject(support)) {
     gbtNfgNashLcp<double> algorithm;
     algorithm.SetStopAfter(0);
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -199,8 +199,8 @@ gbt_nash_lcp(PyObject */*self*/, PyObject *args)
   else if (is_efsupportobject(support)) {
     gbtEfgNashLcp<double> algorithm;
     algorithm.SetStopAfter(0);
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -233,8 +233,8 @@ gbt_nash_liap(PyObject */*self*/, PyObject *args)
     algorithm.SetStopAfter(stopAfter);
     algorithm.SetNumTries(nTries);
     algorithm.SetMaxitsN(maxIters);
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -251,8 +251,8 @@ gbt_nash_liap(PyObject */*self*/, PyObject *args)
     algorithm.SetStopAfter(stopAfter);
     algorithm.SetNumTries(nTries);
     algorithm.SetMaxitsN(maxIters);
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -286,8 +286,8 @@ gbt_nash_logit(PyObject */*self*/, PyObject *args)
     algorithm.SetMaxLambda(maxLam);
     algorithm.SetStepSize(stepSize);
     algorithm.SetFullGraph(fullGraph);
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -304,8 +304,8 @@ gbt_nash_logit(PyObject */*self*/, PyObject *args)
     algorithm.SetMaxLambda(maxLam);
     algorithm.SetStepSize(stepSize);
     algorithm.SetFullGraph(fullGraph);
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -333,8 +333,8 @@ gbt_nash_lp(PyObject */*self*/, PyObject *args)
 
   if (is_nfsupportobject(support)) {
     gbtNfgNashLp<double> algorithm;
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -348,8 +348,8 @@ gbt_nash_lp(PyObject */*self*/, PyObject *args)
   }
   else if (is_efsupportobject(support)) {
     gbtEfgNashLp<double> algorithm;
-    gNullStatus status;
-    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -377,8 +377,8 @@ gbt_nash_simpdiv(PyObject */*self*/, PyObject *args)
 
   if (is_nfsupportobject(support)) {
     gbtNfgNashSimpdiv<double> algorithm;
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -410,8 +410,8 @@ gbt_nash_yamamoto(PyObject */*self*/, PyObject *args)
 
   if (is_nfsupportobject(support)) {
     gbtNfgNashYamamoto algorithm;
-    gNullStatus status;
-    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+    gbtNullStatus status;
+    gbtList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
 
     PyObject *list = PyList_New(0);
 
@@ -436,4 +436,3 @@ void
 initnash(void)
 {
 }
-

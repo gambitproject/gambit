@@ -32,7 +32,7 @@ private:
   wxRadioBox *m_gameType;
   wxSpinCtrl *m_numPlayers, *m_numStrategies;
   wxListBox *m_strategyList;
-  gBlock<int> m_strategies;
+  gbtBlock<int> m_strategies;
   int m_lastPlayer;
   wxCheckBox *m_createOutcomes;
 
@@ -51,7 +51,7 @@ public:
   int NumPlayers(void) const { return m_numPlayers->GetValue(); }
 
   // Only valid if CreateEfg() returns false
-  const gArray<int> &NumStrategies(void) const { return m_strategies; }
+  const gbtArray<int> &NumStrategies(void) const { return m_strategies; }
   bool CreateOutcomes(void) const { return m_createOutcomes->GetValue(); }
 
   DECLARE_EVENT_TABLE()

@@ -44,16 +44,16 @@ template <class T> gVector<T> Make_b2(const gbtNfgGame &,
 //---------------------------------------------------------------------------
 
 template <class T> 
-gList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
-					     gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
+					     gbtStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
 
   if (p_support.GetGame().NumPlayers() != 2) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 
-  gList<BFS<T> > bfsList;
+  gbtList<BFS<T> > bfsList;
 
   try {
     gMatrix<T> A1 = Make_A1(p_support.GetGame(), p_support, (T) 0);
@@ -71,7 +71,7 @@ gList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 
     return AddSolutions(p_support, bfsList, B.Epsilon());
   }
-  catch (gSignalBreak &E) {
+  catch (gbtSignalBreak &E) {
     // for now, we won't give *any* solutions -- but we should list
     // any solutions found!
     throw;
@@ -80,7 +80,7 @@ gList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 }
 
 template <class T> int gbtNfgNashLcp<T>::AddBfs(LHTableau<T> &p_tableau,
-					      gList<BFS<T> > &p_list)
+					      gbtList<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
   cbfs = p_tableau.GetBFS();
@@ -101,9 +101,9 @@ template <class T> int gbtNfgNashLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 //
 template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_support,
 					    int j, LHTableau<T> &B,
-					    gList<BFS<T> > &p_list,
+					    gbtList<BFS<T> > &p_list,
 					    int depth,
-					    gStatus &p_status)
+					    gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return;
@@ -133,14 +133,14 @@ template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_suppor
 }
 
 template <class T>
-gList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
-					     const gList<BFS<T> > &p_list,
+gbtList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
+					     const gbtList<BFS<T> > &p_list,
 					     const T &epsilon)
 {
   int i,j;
   int n1 = p_support.NumStrats(1);
   int n2 = p_support.NumStrats(2);
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {
     MixedProfile<T> profile(p_support);
@@ -184,6 +184,3 @@ template <class T>
 gbtNfgNashLcp<T>::gbtNfgNashLcp(void)
   : m_stopAfter(1), m_maxDepth(0)
 { }
-
-
-

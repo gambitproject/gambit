@@ -171,7 +171,7 @@ class TreeWindow;
 class efgTreeLayout {
 private:
   gbtGameDocument *m_doc;
-  gList<NodeEntry *> m_nodeList;
+  gbtList<NodeEntry *> m_nodeList;
   int m_maxX, m_maxY, m_maxLevel;
   int m_infosetSpacing;
 
@@ -226,4 +226,3 @@ public:
 };
 
 #endif  // EFGLAYOUT_H
-

@@ -29,7 +29,7 @@
 
 #include "base/gmap.h"
 
-template <class T> class BFS : public gOrdMap<int, T>  {
+template <class T> class BFS : public gbtOrdMap<int, T>  {
   public:
     BFS(void);
     BFS(const T &d);
@@ -39,9 +39,6 @@ template <class T> class BFS : public gOrdMap<int, T>  {
     int operator!=(const BFS &M) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &, const BFS<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const BFS<T> &);
 
 #endif   // BFS_H
-
-
-

@@ -43,8 +43,8 @@ Sfg::Sfg(const gbtEfgSupport &S)
     isetRow(S.GetGame().NumInfosets()), infosets(m_efg.NumPlayers())
 { 
   int i;
-  gArray<gbtEfgInfoset> zero(m_efg.NumPlayers());
-  gArray<int> one(m_efg.NumPlayers());
+  gbtArray<gbtEfgInfoset> zero(m_efg.NumPlayers());
+  gbtArray<int> one(m_efg.NumPlayers());
 
   gbtEfgSupport support(m_efg);
 
@@ -61,30 +61,30 @@ Sfg::Sfg(const gbtEfgSupport &S)
 
   isetFlag = 0;
 
-  gIndexOdometer index(seq);
+  gbtIndexOdometer index(seq);
 
-  SF = new gNArray<gArray<gNumber> *>(seq);
+  SF = new gNArray<gbtArray<gNumber> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new gArray<gNumber>(m_efg.NumPlayers());
+    (*SF)[index.CurrentIndices()] = new gbtArray<gNumber>(m_efg.NumPlayers());
     for(i=1;i<=m_efg.NumPlayers();i++)
       (*(*SF)[index.CurrentIndices()])[i]=(gNumber)0;
   } 
 
-  E = new gArray<gRectArray<gNumber> *> (m_efg.NumPlayers());
+  E = new gbtArray<gbtRectArray<gNumber> *> (m_efg.NumPlayers());
   for(i=1;i<=m_efg.NumPlayers();i++) {
-    (*E)[i] = new gRectArray<gNumber>(infosets[i].Length()+1,seq[i]);
+    (*E)[i] = new gbtRectArray<gNumber>(infosets[i].Length()+1,seq[i]);
     for(int j = (*(*E)[i]).MinRow();j<=(*(*E)[i]).MaxRow();j++)
       for(int k = (*(*E)[i]).MinCol();k<=(*(*E)[i]).MaxCol();k++)
 	(*(*E)[i])(j,k)=(gNumber)0;
     (*(*E)[i])(1,1)=(gNumber)1;
   } 
 
-  sequences = new gArray<SFSequenceSet *>(m_efg.NumPlayers());
+  sequences = new gbtArray<SFSequenceSet *>(m_efg.NumPlayers());
   for (i=1;i<=m_efg.NumPlayers();i++) {
     (*sequences)[i] = new SFSequenceSet( m_efg.GetPlayer(i) );
   }
 
-  gArray<Sequence *> parent(m_efg.NumPlayers());
+  gbtArray<Sequence *> parent(m_efg.NumPlayers());
   for(i=1;i<=m_efg.NumPlayers();i++)
     parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
 
@@ -93,7 +93,7 @@ Sfg::Sfg(const gbtEfgSupport &S)
 
 Sfg::~Sfg()
 {
-  gIndexOdometer index(seq);
+  gbtIndexOdometer index(seq);
 
   while (index.Turn()) 
     delete (*SF)[index.CurrentIndices()];
@@ -111,8 +111,8 @@ Sfg::~Sfg()
 }
 
 void 
-Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gArray<int>seq, 
-		      gArray<gbtEfgInfoset> iset, gArray<Sequence *> parent) 
+Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gbtArray<int>seq, 
+		      gbtArray<gbtEfgInfoset> iset, gbtArray<Sequence *> parent) 
 { 
   int i,pl;
 
@@ -130,7 +130,7 @@ Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gArray<int>seq,
       int pl = n.GetPlayer().GetId();
       iset[pl]=n.GetInfoset();
       int isetnum = iset[pl].GetId();
-      gArray<int> snew(seq);
+      gbtArray<int> snew(seq);
       snew[pl]=1;
       for(i=1;i<isetnum;i++)
 	if(isetRow(pl,i)) 
@@ -197,9 +197,9 @@ void Sfg::GetSequenceDims(const gbtEfgNode &n)
   }
 }
 
-void Sfg::Dump(gOutput& out) const
+void Sfg::Dump(gbtOutput& out) const
 {
-  gIndexOdometer index(seq);
+  gbtIndexOdometer index(seq);
 
   out << "\nseq: " << seq;
 
@@ -284,19 +284,19 @@ BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
   return b;
 }
 
-gNumber Sfg::Payoff(const gArray<int> & index,int pl) const 
+gNumber Sfg::Payoff(const gbtArray<int> & index,int pl) const 
 {
   return Payoffs(index)[pl];
 }
 
 
-template class gNArray<gArray<gNumber> *>;
-template class gArray<gRectArray<gNumber> *>;
+template class gNArray<gbtArray<gNumber> *>;
+template class gbtArray<gbtRectArray<gNumber> *>;
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gNumber> &);
 #endif // __BCC55__
-template class gArray<gList<gbtEfgInfoset> >;
-template gOutput &operator<<(gOutput &, const gArray<gList<gbtEfgInfoset> > &);
+template class gbtArray<gbtList<gbtEfgInfoset> >;
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtList<gbtEfgInfoset> > &);
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gList<gbtEfgInfoset> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtList<gbtEfgInfoset> &);
 #endif // __BCC55__

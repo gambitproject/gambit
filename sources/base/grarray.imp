@@ -26,61 +26,61 @@
 
 #include "base.h"
 
-template <class T> gText gRectArray<T>::BadDim::Description(void) const
+template <class T> gbtText gbtRectArray<T>::BadDim::Description(void) const
 {
-  return "Dimensionality mismatch in gRectArray";
+  return "Dimensionality mismatch in gbtRectArray";
 }
 
-template <class T> gText gRectArray<T>::BadIndex::Description(void) const
+template <class T> gbtText gbtRectArray<T>::BadIndex::Description(void) const
 {
-  return "Index out of range in gRectArray";
+  return "Index out of range in gbtRectArray";
 }
 
 //------------------------------------------------------------------------
-//            gRectArray<T>: Private/protected member functions
+//            gbtRectArray<T>: Private/protected member functions
 //------------------------------------------------------------------------
 
-template <class T> bool gRectArray<T>::CheckRow(int row) const
+template <class T> bool gbtRectArray<T>::CheckRow(int row) const
 {
   return (minrow <= row && row <= maxrow);
 }
 
-template <class T> bool gRectArray<T>::CheckRow(const gArray<T> &v) const
+template <class T> bool gbtRectArray<T>::CheckRow(const gbtArray<T> &v) const
 {
   return (v.First() == mincol && v.Last() == maxcol);
 }
 
-template <class T> bool gRectArray<T>::CheckColumn(int col) const
+template <class T> bool gbtRectArray<T>::CheckColumn(int col) const
 {
   return (mincol <= col && col <= maxcol);
 }
 
-template <class T> bool gRectArray<T>::CheckColumn(const gArray<T> &v) const
+template <class T> bool gbtRectArray<T>::CheckColumn(const gbtArray<T> &v) const
 {
   return (v.First() == minrow && v.Last() == maxrow);
 }
 
-template <class T> bool gRectArray<T>::Check(int row, int col) const
+template <class T> bool gbtRectArray<T>::Check(int row, int col) const
 {
   return (CheckRow(row) && CheckColumn(col));
 }
 
 template <class T>
-bool gRectArray<T>::CheckBounds(const gRectArray<T> &m) const
+bool gbtRectArray<T>::CheckBounds(const gbtRectArray<T> &m) const
 {
   return (minrow == m.minrow && maxrow == m.maxrow &&
 	  mincol == m.mincol && maxcol == m.maxcol);
 }
 
 //------------------------------------------------------------------------
-//     gRectArray<T>: Constructors, destructor, constructive operators
+//     gbtRectArray<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> gRectArray<T>::gRectArray(void)
+template <class T> gbtRectArray<T>::gbtRectArray(void)
   : minrow(1), maxrow(0), mincol(1), maxcol(0), data(0)
 { }
 
-template <class T> gRectArray<T>::gRectArray(unsigned int rows,
+template <class T> gbtRectArray<T>::gbtRectArray(unsigned int rows,
 					     unsigned int cols)
   : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
 {
@@ -90,7 +90,7 @@ template <class T> gRectArray<T>::gRectArray(unsigned int rows,
 }
 
 template <class T>
-gRectArray<T>::gRectArray(int minr, int maxr, int minc, int maxc)
+gbtRectArray<T>::gbtRectArray(int minr, int maxr, int minc, int maxc)
   : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc)
 {
   data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
@@ -98,7 +98,7 @@ gRectArray<T>::gRectArray(int minr, int maxr, int minc, int maxc)
        data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : 0);
 }
 
-template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
+template <class T> gbtRectArray<T>::gbtRectArray(const gbtRectArray<T> &a)
   : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
 {
   data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
@@ -109,7 +109,7 @@ template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
   }
 }
 
-template <class T> gRectArray<T>::~gRectArray()
+template <class T> gbtRectArray<T>::~gbtRectArray()
 {
   for (int i = minrow; i <= maxrow; i++)
     if (data[i])  delete [] (data[i] + mincol);
@@ -117,7 +117,7 @@ template <class T> gRectArray<T>::~gRectArray()
 }
 
 template <class T>
-gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
+gbtRectArray<T> &gbtRectArray<T>::operator=(const gbtRectArray<T> &a)
 {
   if (this != &a)   {
     int i;
@@ -143,35 +143,35 @@ gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 }
 
 //------------------------------------------------------------------------
-//                  gRectArray<T>: Data access members
+//                  gbtRectArray<T>: Data access members
 //------------------------------------------------------------------------
 
-template <class T> int gRectArray<T>::NumRows(void) const
+template <class T> int gbtRectArray<T>::NumRows(void) const
 { return maxrow - minrow + 1; }
 
-template <class T> int gRectArray<T>::NumColumns(void) const
+template <class T> int gbtRectArray<T>::NumColumns(void) const
 { return maxcol - mincol + 1; }
 
-template <class T> int gRectArray<T>::MinRow(void) const    { return minrow; }
-template <class T> int gRectArray<T>::MaxRow(void) const    { return maxrow; }
-template <class T> int gRectArray<T>::MinCol(void) const { return mincol; }
-template <class T> int gRectArray<T>::MaxCol(void) const { return maxcol; }
+template <class T> int gbtRectArray<T>::MinRow(void) const    { return minrow; }
+template <class T> int gbtRectArray<T>::MaxRow(void) const    { return maxrow; }
+template <class T> int gbtRectArray<T>::MinCol(void) const { return mincol; }
+template <class T> int gbtRectArray<T>::MaxCol(void) const { return maxcol; }
 
-template <class T> T &gRectArray<T>::operator()(int r, int c)
+template <class T> T &gbtRectArray<T>::operator()(int r, int c)
 {
   if (!Check(r, c))  throw BadIndex();
 
   return data[r][c];
 }
 
-template <class T> const T &gRectArray<T>::operator()(int r, int c) const
+template <class T> const T &gbtRectArray<T>::operator()(int r, int c) const
 {
   if (!Check(r, c))  throw BadIndex();
 
   return data[r][c];
 }
 
-template <class T> void gRectArray<T>::Dump(gOutput &f) const
+template <class T> void gbtRectArray<T>::Dump(gbtOutput &f) const
 {
   f << "{ ";
   for (int i = minrow; i <= maxrow; i++)  {
@@ -184,16 +184,16 @@ template <class T> void gRectArray<T>::Dump(gOutput &f) const
   f << " }\n";
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const gRectArray<T> &a)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtRectArray<T> &a)
 {
   a.Dump(f);   return f;
 }
 
 //------------------------------------------------------------------------
-//                   gRectArray<T>: Row and column rotation
+//                   gbtRectArray<T>: Row and column rotation
 //------------------------------------------------------------------------
 
-template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
+template <class T> void gbtRectArray<T>::RotateUp(int lo, int hi)
 {
   if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
 
@@ -203,7 +203,7 @@ template <class T> void gRectArray<T>::RotateUp(int lo, int hi)
   data[hi] = temp;
 }
 
-template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
+template <class T> void gbtRectArray<T>::RotateDown(int lo, int hi)
 {
   if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
 
@@ -213,7 +213,7 @@ template <class T> void gRectArray<T>::RotateDown(int lo, int hi)
   data[lo] = temp;
 }
 
-template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
+template <class T> void gbtRectArray<T>::RotateLeft(int lo, int hi)
 {
   if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
   
@@ -227,7 +227,7 @@ template <class T> void gRectArray<T>::RotateLeft(int lo, int hi)
   }
 }
 
-template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
+template <class T> void gbtRectArray<T>::RotateRight(int lo, int hi)
 {
   if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
 
@@ -241,10 +241,10 @@ template <class T> void gRectArray<T>::RotateRight(int lo, int hi)
 }
 
 //-------------------------------------------------------------------------
-//                 gRectArray<T>: Row manipulation functions
+//                 gbtRectArray<T>: Row manipulation functions
 //-------------------------------------------------------------------------
 
-template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
+template <class T> void gbtRectArray<T>::SwitchRow(int row, gbtArray<T> &v)
 {
   if (!CheckRow(row))  throw BadIndex();
   if (!CheckRow(v))    throw BadDim();
@@ -258,7 +258,7 @@ template <class T> void gRectArray<T>::SwitchRow(int row, gArray<T> &v)
   }
 }
 
-template <class T> void gRectArray<T>::SwitchRows(int i, int j)
+template <class T> void gbtRectArray<T>::SwitchRows(int i, int j)
 {
   if (!CheckRow(i) || !CheckRow(j))   throw BadIndex();
   T *temp = data[j];
@@ -266,7 +266,7 @@ template <class T> void gRectArray<T>::SwitchRows(int i, int j)
   data[i] = temp;
 }
 
-template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
+template <class T> void gbtRectArray<T>::GetRow(int row, gbtArray<T> &v) const
 {
   if (!CheckRow(row))   throw BadIndex();
   if (!CheckRow(v))     throw BadDim();
@@ -276,7 +276,7 @@ template <class T> void gRectArray<T>::GetRow(int row, gArray<T> &v) const
     v[i] = rowptr[i];
 }
 
-template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
+template <class T> void gbtRectArray<T>::SetRow(int row, const gbtArray<T> &v)
 {
   if (!CheckRow(row))   throw BadIndex();
   if (!CheckRow(v))     throw BadDim();
@@ -287,10 +287,10 @@ template <class T> void gRectArray<T>::SetRow(int row, const gArray<T> &v)
 }
 
 //-------------------------------------------------------------------------
-//                gRectArray<T>: Column manipulation functions
+//                gbtRectArray<T>: Column manipulation functions
 //-------------------------------------------------------------------------
 
-template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
+template <class T> void gbtRectArray<T>::SwitchColumn(int col, gbtArray<T> &v)
 {
   if (!CheckColumn(col))   throw BadIndex();
   if (!CheckColumn(v))     throw BadDim();
@@ -302,7 +302,7 @@ template <class T> void gRectArray<T>::SwitchColumn(int col, gArray<T> &v)
   }
 }
 
-template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
+template <class T> void gbtRectArray<T>::SwitchColumns(int a, int b)
 {
   if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex();
 
@@ -313,7 +313,7 @@ template <class T> void gRectArray<T>::SwitchColumns(int a, int b)
   }
 }
 
-template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
+template <class T> void gbtRectArray<T>::GetColumn(int col, gbtArray<T> &v) const
 {
   if (!CheckColumn(col))  throw BadIndex();
   if (!CheckColumn(v))    throw BadDim();
@@ -322,7 +322,7 @@ template <class T> void gRectArray<T>::GetColumn(int col, gArray<T> &v) const
     v[i] = data[i][col];
 }
 
-template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
+template <class T> void gbtRectArray<T>::SetColumn(int col, const gbtArray<T> &v)
 {
   if (!CheckColumn(col))   throw BadIndex();
   if (!CheckColumn(v))     throw BadDim();
@@ -332,12 +332,12 @@ template <class T> void gRectArray<T>::SetColumn(int col, const gArray<T> &v)
 }
 
 //-------------------------------------------------------------------------
-//                gRectArray<T>: Transpose
+//                gbtRectArray<T>: Transpose
 //-------------------------------------------------------------------------
 
-template <class T> gRectArray<T> gRectArray<T>::Transpose(void) const
+template <class T> gbtRectArray<T> gbtRectArray<T>::Transpose(void) const
 {
-  gRectArray<T> tmp(mincol, maxcol, minrow, maxrow);
+  gbtRectArray<T> tmp(mincol, maxcol, minrow, maxrow);
  
   for (int i = minrow; i <= maxrow; i++)
     for (int j = mincol; j <= maxrow; j++)
@@ -345,12 +345,3 @@ template <class T> gRectArray<T> gRectArray<T>::Transpose(void) const
 
   return tmp;
 }
-
-
-
-
-
-
-
-
-

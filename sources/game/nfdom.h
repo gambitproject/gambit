@@ -36,14 +36,12 @@
 
 bool IsMixedDominated(const gbtNfgSupport &, gbtNfgStrategy,
 		      bool strong, gPrecision precision,
-		      gOutput &tracefile);
+		      gbtOutput &tracefile);
 
 bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
-		      bool strong, gPrecision precision, gOutput &tracefile);
+		      bool strong, gPrecision precision, gbtOutput &tracefile);
 
 bool IsMixedDominated(const MixedProfile<gNumber> &sol,
-		      bool strong, gPrecision precision, gOutput &tracefile);
+		      bool strong, gPrecision precision, gbtOutput &tracefile);
 
 #endif    // NFDOM_H
-
-

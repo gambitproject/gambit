@@ -41,8 +41,8 @@ public:
   int StopAfter(void) const { return m_stopAfter; }
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
-  gText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 MixedSolution PolishEquilibrium(const gbtNfgSupport &support, 
@@ -50,7 +50,3 @@ MixedSolution PolishEquilibrium(const gbtNfgSupport &support,
 				bool &is_singular);
 
 #endif // NFGPOLY_H
-
-
-
-

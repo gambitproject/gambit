@@ -74,15 +74,11 @@ template <class T> class LinearCombination  {
     bool       LastRowIsSpanned() const;
     gVector<T> LinearDependence() const;
  
-    void Output(gOutput &) const;
+    void Output(gbtOutput &) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &,
+template <class T> gbtOutput &operator<<(gbtOutput &,
 				       const LinearCombination<T> &);
 
 
 #endif     // LinearCombination_H
-
-
-
-

@@ -33,7 +33,7 @@
 double gPoly<double>::String_Coeff(double nega)
 {
   double doub;
-  gText Coeff = "";
+  gbtText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -47,7 +47,7 @@ double gPoly<double>::String_Coeff(double nega)
 template<> gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
 {
   double doub;
-  gText Coeff = "";
+  gbtText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -60,7 +60,7 @@ template<> gDouble gPoly<gDouble>::String_Coeff(gDouble nega)
 template<> gRational gPoly<gRational>::String_Coeff(gRational nega)
 {
   gRational rat;
-  gText Coeff = "";
+  gbtText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -73,7 +73,7 @@ template<> gRational gPoly<gRational>::String_Coeff(gRational nega)
 template<> gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
 {
   gNumber num;
-  gText Coeff = "";
+  gbtText Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -93,9 +93,9 @@ template gPoly<gRational> operator*(const gPoly<gRational> &poly, const gRationa
 template gPoly<gDouble> TogDouble(const gPoly<gRational>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gRational>&);
 
-template gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
+template gbtOutput &operator<<(gbtOutput &f, const gPoly<gRational> &y);
 #ifndef __BCC55__
-template gText &operator<<(gText &, const gPoly<gRational> &);
+template gbtText &operator<<(gbtText &, const gPoly<gRational> &);
 #endif  // __BCC55__
 
 template class gPoly<gNumber>;
@@ -107,9 +107,9 @@ template gPoly<gNumber> operator*(const gPoly<gNumber> &poly, const gNumber val)
 template gPoly<gDouble> TogDouble(const gPoly<gNumber>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gNumber>&);
 
-template gOutput &operator<<(gOutput &f, const gPoly<gNumber> &y);
+template gbtOutput &operator<<(gbtOutput &f, const gPoly<gNumber> &y);
 #ifndef __BCC55__
-template gText &operator<<(gText &, const gPoly<gNumber> &);
+template gbtText &operator<<(gbtText &, const gPoly<gNumber> &);
 #endif  // __BCC55__
 
 #ifdef UNUSED
@@ -128,14 +128,14 @@ template gPoly<gDouble> operator+(const gPoly<gDouble> &poly, const gDouble val)
 
 template gPoly<gDouble> TogDouble(const gPoly<gDouble>&);
 template gPoly<gDouble> NormalizationOfPoly(const gPoly<gDouble>&);
-template gOutput &operator<<(gOutput &f, const gPoly<gDouble> &y);
+template gbtOutput &operator<<(gbtOutput &f, const gPoly<gDouble> &y);
 #ifndef __BCC55__
-template gText &operator<<(gText &, const gPoly<gDouble> &);
+template gbtText &operator<<(gbtText &, const gPoly<gDouble> &);
 #endif  // __BCC55__
 
-gText ToText(const gPoly<gNumber> &p)
+gbtText ToText(const gPoly<gNumber> &p)
 {
-  gText t;
+  gbtText t;
   t << p;
   return t;
 }
@@ -145,22 +145,18 @@ gText ToText(const gPoly<gNumber> &p)
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray< gPoly< gRational > *>;
-template class gList< gPoly<gRational> * >;
-template class gList<gPoly<gRational> >;
-template class gList<gPoly<gNumber> >;
-template class gList<gPoly<gNumber> * >;
-template gOutput& operator << (gOutput& output, 
-			       const gList<gPoly<gRational> >&);
-template gOutput& operator << (gOutput& output, 
-			       const gList<gPoly<gNumber> >&);
+template class gbtArray< gPoly< gRational > *>;
+template class gbtList< gPoly<gRational> * >;
+template class gbtList<gPoly<gRational> >;
+template class gbtList<gPoly<gNumber> >;
+template class gbtList<gPoly<gNumber> * >;
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtList<gPoly<gRational> >&);
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtList<gPoly<gNumber> >&);
 
-template class gList< gPoly<gDouble> * >;
-template class gList< gPoly<gDouble> >;
-template class gList<gVector<gDouble> >;
-template gOutput& operator << (gOutput& output, 
-			       const gList<gVector<gDouble> >&);
-
-
-
-
+template class gbtList< gPoly<gDouble> * >;
+template class gbtList< gPoly<gDouble> >;
+template class gbtList<gVector<gDouble> >;
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtList<gVector<gDouble> >&);

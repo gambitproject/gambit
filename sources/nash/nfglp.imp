@@ -33,17 +33,17 @@ template <class T> gbtNfgNashLp<T>::gbtNfgNashLp(void)
 { }
 
 template <class T> 
-gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
-					    gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
+					    gbtStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   
   if (p_support.GetGame().NumPlayers() != 2 ||
       !p_support.GetGame().IsConstSum()) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
   
-  gList<BFS<T> > bfsList;
+  gbtList<BFS<T> > bfsList;
   
   int i,j,m,k;
   
@@ -80,14 +80,14 @@ gList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
     Add_BFS(p_support, LP, bfsList); 
   }
 
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
   GetSolutions(p_support, bfsList, solutions, LP.Epsilon());
   return solutions;
 }
 
 template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
 						/*const*/ LPSolve<T> &lp,
-						gList<BFS<T> > &p_list)
+						gbtList<BFS<T> > &p_list)
 {
   BFS<T> cbfs((T) 0);
 
@@ -103,8 +103,8 @@ template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
 
 template <class T>
 void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
-				   const gList<BFS<T> > &p_list,
-				   gList<MixedSolution > &solutions,
+				   const gbtList<BFS<T> > &p_list,
+				   gbtList<MixedSolution > &solutions,
 				   const T &p_epsilon) const
 {
   int index;
@@ -130,4 +130,3 @@ void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
     solutions[index].SetEpsilon(p_epsilon);
   }
 }
-

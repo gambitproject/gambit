@@ -38,13 +38,13 @@ template <class T> class gMatrix;
  * type, the operators binary +, binary -, binary *, /, ==, and = must
  * be defined for the type.
  */
-template <class T> class gVector : public gArray<T>   {
+template <class T> class gVector : public gbtArray<T>   {
   friend class gMatrix<T>;
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim()   { }
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
   /** Create a vector of length len, starting at 1 */
@@ -89,7 +89,7 @@ public:
 };
 
 #ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gVector<T> &);
 #endif
 
 #include "math/double.h"
@@ -97,9 +97,3 @@ template <class T> gOutput &operator<<(gOutput &, const gVector<T> &);
 template <class T> gVector<gDouble> TogDouble(const gVector<T>&);
 
 #endif   //# GVECTOR_H
-
-
-
-
-
-

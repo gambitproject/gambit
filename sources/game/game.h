@@ -29,13 +29,12 @@
 
 #include "base/base.h"
 
-class gbtGameObjectDeleted : public gException {
+class gbtGameObjectDeleted : public gbtException {
 public:
   virtual ~gbtGameObjectDeleted() { }
 
-  gText Description(void) const
+  gbtText Description(void) const
     { return "Game object deleted"; }
 };
 
 #endif   // GAME_H
-

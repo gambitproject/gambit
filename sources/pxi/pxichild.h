@@ -16,7 +16,7 @@
 class PxiChild : public wxFrame {
 private:
   PxiFrame *m_parent;
-  gBlock<PxiFile *> m_qreFiles;
+  gbtBlock<PxiFile *> m_qreFiles;
   wxNotebook *m_plotBook;
 
   wxString m_expDatafile;
@@ -75,4 +75,3 @@ public:
 };
 
 #endif  // PXICHILD_H
-

@@ -34,7 +34,7 @@
 #include "gmath.h"
 #include "gnumber.h"
 
-gText gNumber::DivideByZero::Description(void) const
+gbtText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
 
 //-------------------------------------------------------------------------
@@ -356,7 +356,7 @@ gNumber operator-(const gNumber &x)
   return r;
 }
 
-gOutput& operator<<(gOutput& s, const gNumber &x)
+gbtOutput& operator<<(gbtOutput& s, const gNumber &x)
 {
   if (x.Precision() == precDOUBLE)
     s << x.dval;
@@ -367,7 +367,7 @@ gOutput& operator<<(gOutput& s, const gNumber &x)
 
   //  Basically identical to the rational >> operator, but sets y to be 
   // either a double or rational depending on input.
-gInput& operator>>(gInput& f, gNumber &y)
+gbtInput& operator>>(gbtInput& f, gNumber &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -379,7 +379,7 @@ gInput& operator>>(gInput& f, gNumber &y)
   
   if (ch != '-' && !isdigit(ch) && ch != '.') {
     f.setpos(old_pos);
-    throw gFileInput::ReadFailed();
+    throw gbtFileInput::ReadFailed();
   }
 
   if (ch == '-')  { 
@@ -465,7 +465,7 @@ bool gNumber::IsInteger(void) const
 	  (rep == precRATIONAL && rval->GetDenominator() == 1));
 }
 
-gText ToText(const gNumber &n)
+gbtText ToText(const gNumber &n)
 {
   if (n.Precision() == precDOUBLE)
     return ToText((double) n);
@@ -473,7 +473,7 @@ gText ToText(const gNumber &n)
     return ToText(n.operator gRational());
 }
 
-gText ToText(const gNumber &p_number, int p_precision)
+gbtText ToText(const gNumber &p_number, int p_precision)
 {
   if (p_number.Precision() == precDOUBLE)
     return ToText((double) p_number, p_precision);
@@ -482,11 +482,11 @@ gText ToText(const gNumber &p_number, int p_precision)
 }
 
 // Rational if there is no decimal point
-gNumber FromText(const gText &s,gNumber &n)
+gNumber FromText(const gbtText &s,gNumber &n)
 {
   gRational r;
   double d;
-  gText tmp=s;
+  gbtText tmp=s;
   if (tmp.LastOccur('.'))
     n=FromText(s,d);
   else
@@ -494,7 +494,7 @@ gNumber FromText(const gText &s,gNumber &n)
   return n;
 }
 
-gNumber ToNumber(const gText &p_string)
+gNumber ToNumber(const gbtText &p_string)
 {
   gNumber tmp;
   return FromText(p_string, tmp);
@@ -507,4 +507,3 @@ void gEpsilon(gNumber &n, int i)
   else
     n = pow(10.0,(double)-i);
 }
-

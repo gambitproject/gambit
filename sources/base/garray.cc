@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Instantiations for common gArray classes
+// Instantiations for common gbtArray classes
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -27,40 +27,39 @@
 #include "base.h"
 #include "garray.imp"
 
-template class gArray<bool>;
-template class gArray<int>;
-template class gArray<long>;
-template class gArray<float>;
-template class gArray<double>;
-template class gArray<long double>;
-template class gArray<gText>;
-template class gArray<gArray<int> >;
-template class gArray<gArray<int> *>;
-template class gArray<gArray<double> >;
-template class gArray<void *>;
-template class gArray<gList<bool> >;
-template class gArray<gList<gList<bool> > >;
-template bool operator==(const gArray<int> &, const gArray<int> &);
-template bool operator!=(const gArray<int> &, const gArray<int> &);
-template bool operator==(const gArray<gList<bool> > &, 
-			 const gArray<gList<bool> > &);
-template bool operator!=(const gArray<gList<bool> > &, 
-			 const gArray<gList<bool> > &);
-template bool operator==(const gArray<gList<gList<bool> > > &, 
-			 const gArray<gList<gList<bool> > > &);
-template bool operator!=(const gArray<gList<gList<bool> > > &, 
-			 const gArray<gList<gList<bool> > > &);
+template class gbtArray<bool>;
+template class gbtArray<int>;
+template class gbtArray<long>;
+template class gbtArray<float>;
+template class gbtArray<double>;
+template class gbtArray<long double>;
+template class gbtArray<gbtText>;
+template class gbtArray<gbtArray<int> >;
+template class gbtArray<gbtArray<int> *>;
+template class gbtArray<gbtArray<double> >;
+template class gbtArray<void *>;
+template class gbtArray<gbtList<bool> >;
+template class gbtArray<gbtList<gbtList<bool> > >;
+template bool operator==(const gbtArray<int> &, const gbtArray<int> &);
+template bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
+template bool operator==(const gbtArray<gbtList<bool> > &, 
+			 const gbtArray<gbtList<bool> > &);
+template bool operator!=(const gbtArray<gbtList<bool> > &, 
+			 const gbtArray<gbtList<bool> > &);
+template bool operator==(const gbtArray<gbtList<gbtList<bool> > > &, 
+			 const gbtArray<gbtList<gbtList<bool> > > &);
+template bool operator!=(const gbtArray<gbtList<gbtList<bool> > > &, 
+			 const gbtArray<gbtList<gbtList<bool> > > &);
 
-template gOutput &operator<<(gOutput &, const gArray<bool> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<bool> &);
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gArray<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<int> &);
 #endif  // __BCC55__
-template gOutput &operator<<(gOutput &, const gArray<long> &);
-template gOutput &operator<<(gOutput &, const gArray<float> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<long> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<float> &);
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gArray<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<double> &);
 #endif  // __BCC55__
-template gOutput &operator<<(gOutput &, const gArray<gArray<int> > &);
-template gOutput &operator<<(gOutput &, const gArray<gArray<int> *> &);
-template gOutput &operator<<(gOutput &, const gArray<gArray<double> > &);
-
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<int> > &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<int> *> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtArray<double> > &);

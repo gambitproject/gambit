@@ -593,10 +593,10 @@ void    qh_scaleinput (void);
 #include "base/gmisc.h"
 #include "base/gtext.h"
 
-class ErrorInQhull : public gException {
+class ErrorInQhull : public gbtException {
 public:
   virtual ~ErrorInQhull();
-  gText Description(void) const;
+  gbtText Description(void) const;
 };
 
 #endif
@@ -1905,6 +1905,3 @@ double  qh_strtod (const char *s, char **endp);
 
 
 #endif /* qhDEFqhull */
-
-
-

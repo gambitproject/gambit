@@ -39,7 +39,7 @@ private:
   wxTextCtrl *m_profileName;
   wxTreeCtrl *m_infosetTree;
   wxGrid *m_probGrid;
-  gOrdMap<wxTreeItemId, gbtEfgInfoset> m_map;
+  gbtOrdMap<wxTreeItemId, gbtEfgInfoset> m_map;
 
   // Event handlers
   void OnItemCollapsing(wxTreeEvent &);

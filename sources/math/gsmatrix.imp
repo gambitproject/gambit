@@ -62,7 +62,7 @@ gSquareMatrix<T> &gSquareMatrix<T>::operator=(const gSquareMatrix<T> &M)
 template <class T> gSquareMatrix<T>::MatrixSingular::~MatrixSingular() { }
 
 template <class T>
-gText gSquareMatrix<T>::MatrixSingular::Description(void) const
+gbtText gSquareMatrix<T>::MatrixSingular::Description(void) const
 {
   return "Attempted to invert a singular matrix";
 }
@@ -70,7 +70,7 @@ gText gSquareMatrix<T>::MatrixSingular::Description(void) const
 template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
 {
   if (mincol != minrow || maxcol != maxrow) {
-    throw gRectArray<T>::BadDim();
+    throw gbtRectArray<T>::BadDim();
   }
 
   gSquareMatrix<T> copy(*this);
@@ -186,8 +186,7 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
   return det;
 }
 
-template <class T> gOutput &operator<<(gOutput &to, const gSquareMatrix<T> &M)
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gSquareMatrix<T> &M)
 {
   to << (gMatrix<T>)M; return to;
 }
-

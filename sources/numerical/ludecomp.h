@@ -52,7 +52,7 @@ bool operator!=(const EtaMatrix<T> &) const;
 
 };
 
-template <class T> gOutput &operator<<( gOutput &, const EtaMatrix<T> &);
+template <class T> gbtOutput &operator<<( gbtOutput &, const EtaMatrix<T> &);
 
 // ---------------------------------------------------------------------------
 // Class LUdecomp
@@ -65,10 +65,10 @@ private:
   Tableau<T> &tab;
   Basis &basis;
 
-  gList< EtaMatrix<T> > L;
-  gList< EtaMatrix<T> > U;
-  gList< EtaMatrix<T> > E;
-  gList< int > P;
+  gbtList< EtaMatrix<T> > L;
+  gbtList< EtaMatrix<T> > U;
+  gbtList< EtaMatrix<T> > E;
+  gbtList< int > P;
 
   gVector<T> scratch1; // scratch vectors so we don't reallocate them
   gVector<T> scratch2; // everytime we do something.
@@ -81,20 +81,20 @@ private:
   int copycount;
 
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
-  class BadPivot : public gException  {
+  class BadPivot : public gbtException  {
   public:
     virtual ~BadPivot();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
-  class BadCount : public gException  {
+  class BadCount : public gbtException  {
   public:
     virtual ~BadCount();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
   // ------------------------
@@ -181,13 +181,3 @@ private:
 };  // end of class LUdecomp
     
 #endif // LUDECOMP_H
-
-
-
-
-
-
-
-
-
-

@@ -36,13 +36,13 @@ template class gVector<gRational>;
 template class gVector<gComplex>;
 template class gVector<gNumber>;
 
-template gOutput & operator<< (gOutput&, const gVector<int>&);
-template gOutput & operator<< (gOutput&, const gVector<long>&);
-template gOutput & operator<< (gOutput&, const gVector<double>&);
-template gOutput & operator<< (gOutput&, const gVector<gInteger>&);
-template gOutput & operator<< (gOutput&, const gVector<gRational>&);
-template gOutput & operator<< (gOutput&, const gVector<gComplex>&);
-template gOutput & operator<< (gOutput&, const gVector<gNumber>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<long>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<gInteger>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<gRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<gComplex>&);
+template gbtOutput & operator<< (gbtOutput&, const gVector<gNumber>&);
 
 template gVector<gDouble> TogDouble(const gVector<gRational>&);
 template gVector<gDouble> TogDouble(const gVector<double>&);
@@ -50,10 +50,8 @@ template gVector<gDouble> TogDouble(const gVector<gDouble>&);
 
 #include "base/glist.imp"
 
-template class gList<gVector<double> >;
-template class gList<gVector<gRational> >;
-template class gList<gVector<gComplex> >;
-template gOutput& operator << (gOutput& output, 
-			       const gList<gVector<gRational> >&);
-
-
+template class gbtList<gVector<double> >;
+template class gbtList<gVector<gRational> >;
+template class gbtList<gVector<gComplex> >;
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtList<gVector<gRational> >&);

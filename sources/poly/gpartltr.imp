@@ -45,8 +45,8 @@ template <class T> TreeOfPartials<T>::TreeOfPartials(const gPoly<T>& given)
 //-------------------------------------------------------------------------
 
 template <class T>
-void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T> >& t,
-					  gTreeNode<gPoly<T> >* n) const
+void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gbtTree<gPoly<T> >& t,
+					  gbtTreeNode<gPoly<T> >* n) const
 {
   if (n->GetData().Degree() >= 1) {
     for (int i = 1; i <= n->GetData().Dmnsn(); i++) {
@@ -72,7 +72,7 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord,
   if (RootPoly().Degree() <= 0) return (T)0;
   else {
     int i = 1; 
-    gTreeNode<gPoly<T> >* node = RootNode()->GetEldest();
+    gbtTreeNode<gPoly<T> >* node = RootNode()->GetEldest();
     while (i < coord) {
       i++;
       node = node->GetNext();
@@ -93,7 +93,7 @@ gVector<T> TreeOfPartials<T>::VectorOfPartials(const gVector<T>& point) const
 
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
-					     const gTreeNode<gPoly<T> >* n,
+					     const gbtTreeNode<gPoly<T> >* n,
 					     const gVector<T>& p,
 					     const gVector<T>& halvesoflengths,
 					     gVector<int>& wrtos) const
@@ -101,7 +101,7 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
   T answer = (T)0;
 
   if (n->GetEldest() != NULL) {
-    gList<gTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
+    gbtList<gbtTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
     for (int i = 1; i <= children.Length(); i++) {
       wrtos[i]++;
 
@@ -130,8 +130,8 @@ TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
-					     const gTreeNode<gPoly<T> >* n1,
-					     const gTreeNode<gPoly<T> >* n2,
+					     const gbtTreeNode<gPoly<T> >* n1,
+					     const gbtTreeNode<gPoly<T> >* n2,
 					     const gVector<T>& p,
 					     const gVector<T>& halvesoflengths,
 					     gVector<int>& wrtos) const
@@ -139,8 +139,8 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   T answer = (T)0;
 
   if (n1->GetEldest() != NULL && n2->GetEldest() != NULL) {
-    gList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
-    gList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    gbtList<gbtTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    gbtList<gbtTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -167,7 +167,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() != NULL && n2->GetEldest() == NULL) {
-    gList<gTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
+    gbtList<gbtTreeNode<gPoly<T> >*> children1 = PartialTree.Children(n1);
     for (int i = 1; i <= children1.Length(); i++) {
       wrtos[i]++;
 
@@ -192,7 +192,7 @@ TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   }
 
   else if (n1->GetEldest() == NULL && n2->GetEldest() != NULL) {
-    gList<gTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
+    gbtList<gbtTreeNode<gPoly<T> >*> children2 = PartialTree.Children(n2);
     for (int i = 1; i <= children2.Length(); i++) {
       wrtos[i]++;
 
@@ -264,7 +264,7 @@ T TreeOfPartials<T>::ValueOfRootPoly(const gVector<T>& point) const
 }
 
 
-template <class T> gOutput& operator << (gOutput& output, 
+template <class T> gbtOutput& operator << (gbtOutput& output, 
 					 const TreeOfPartials<T>& /* x */)
 {
   // Changed to just return silently.
@@ -304,15 +304,15 @@ TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T>& r) const
   else
     sign = -1;
   
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
+  gbtArray<int> zeros(Dmnsn());
+  gbtArray<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0; 
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1;
     //Equation_i_uses_var_j(index,j)) ones[j] = 1; 
     else                                ones[j] = 0;
   }
-  gIndexOdometer topbottoms(zeros,ones);
+  gbtIndexOdometer topbottoms(zeros,ones);
   
   while (topbottoms.Turn()) {
     gVector<T> point(Dmnsn());
@@ -342,14 +342,14 @@ TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(
       return true;
   }
 
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
+  gbtArray<int> zeros(Dmnsn());
+  gbtArray<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0; 
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) ones[j] = 1; 
     else                                                ones[j] = 0;
   }
-  gIndexOdometer topbottoms(zeros,ones);
+  gbtIndexOdometer topbottoms(zeros,ones);
   
   while (topbottoms.Turn()) {
     gVector<T> point(Dmnsn());
@@ -399,7 +399,7 @@ TreeOfPartials <T>::PolyEverywhereNegativeIn(const gRectangle<T>& r) const
 //---------------------------
 
 template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gList<gPoly<T> >& given) 
+ListOfPartialTrees<T>::ListOfPartialTrees(const gbtList<gPoly<T> >& given) 
 : PartialTreeList()
 {
   for (int i = 1; i <= given.Length(); i++) 
@@ -500,7 +500,7 @@ ListOfPartialTrees<T>::MaximalNonconstantDifference(const int& i,
 							 halvesoflengths);
 }
 
-template <class T> gOutput& operator << (gOutput& output, 
+template <class T> gbtOutput& operator << (gbtOutput& output, 
 					 const ListOfPartialTrees<T>& /* x */)
 {
   // Changed to just return silently.

@@ -59,8 +59,8 @@ public:
   bool IsNull(void) const;
   int GetId(void) const;
   gbtEfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
 
   int NumChildren(void) const;
   bool IsTerminal(void) const { return (NumChildren() == 0); }
@@ -93,12 +93,6 @@ public:
   gbtEfgInfoset LeaveInfoset(void);
 };
 
-gOutput &operator<<(gOutput &, const gbtEfgNode &);
+gbtOutput &operator<<(gbtOutput &, const gbtEfgNode &);
 
 #endif   // NODE_H
-
-
-
-
-
-

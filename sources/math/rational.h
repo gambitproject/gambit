@@ -63,8 +63,8 @@
 #endif // USE_GNU_MP
 #include "math/integer.h"
 
-class gInput;
-class gOutput;
+class gbtInput;
+class gbtOutput;
 
 class gRational {
 protected:
@@ -136,15 +136,14 @@ public:
 
   // CONVERSIONS
   operator double() const;
-  friend gText ToText(const gRational &);
-  friend gRational FromText(const gText &, gRational &);
+  friend gbtText ToText(const gRational &);
+  friend gRational FromText(const gbtText &, gRational &);
 
   // INPUT AND OUTPUT
-  friend gInput &operator>>(gInput& s, gRational& y);
-  friend gOutput &operator<<(gOutput& s, const gRational& y);
+  friend gbtInput &operator>>(gbtInput& s, gRational& y);
+  friend gbtOutput &operator<<(gbtOutput& s, const gRational& y);
 };
 
 void gEpsilon(gRational &v, int i = 8);
 
 #endif  // RATIONAL_H
-

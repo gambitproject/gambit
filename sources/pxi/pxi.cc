@@ -68,7 +68,7 @@
 #include "wx/print.h"
 #include "wx/printdlg.h"
 
-gOutput &operator<<(gOutput &op,const PxiPlot::LABELSTRUCT &l) 
+gbtOutput &operator<<(gbtOutput &op,const PxiPlot::LABELSTRUCT &l) 
   //{op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
 { return op; }
 
@@ -484,7 +484,7 @@ void MyFrame::OnPageSetupPS(wxCommandEvent& WXUNUSED(event))
 
 // Find String In File -- uses a file pointer to find a string in the file.
 // This is useful for quickly getting to the section of the file you need
-int FindStringInFile(gInput &in,const char *s)
+int FindStringInFile(gbtInput &in,const char *s)
 {
   char fsif_str[200];
   in.seekp(0L);	// go to the start of the file
@@ -509,44 +509,43 @@ int FindStringInFile(gInput &in,const char *s)
 #include "base/grblock.imp"
 #include "base/glist.imp"
 
-template class gArray<PxiFile *>;
-template class gBlock<PxiFile *>;
+template class gbtArray<PxiFile *>;
+template class gbtBlock<PxiFile *>;
 
-template class gArray<PxiPlot::LABELSTRUCT>;
-template class gBlock<PxiPlot::LABELSTRUCT>;
+template class gbtArray<PxiPlot::LABELSTRUCT>;
+template class gbtBlock<PxiPlot::LABELSTRUCT>;
 
-template class gArray<DataLine>;
-template class gBlock<DataLine>;
+template class gbtArray<DataLine>;
+template class gbtBlock<DataLine>;
 
-template class gArray<DataLine *>;
-template class gBlock<DataLine *>;
+template class gbtArray<DataLine *>;
+template class gbtBlock<DataLine *>;
 
-template class gList<DataLine *>;
+template class gbtList<DataLine *>;
 
-template class gArray<gBlock<bool> >;
-template class gBlock<gBlock<bool> >;
+template class gbtArray<gbtBlock<bool> >;
+template class gbtBlock<gbtBlock<bool> >;
 
-gOutput &operator<<(gOutput &p_file, const gBlock<bool> &)
+gbtOutput &operator<<(gbtOutput &p_file, const gbtBlock<bool> &)
 { return p_file; }
 
-gOutput &operator<<(gOutput &p_file, const gBlock<double> &)
+gbtOutput &operator<<(gbtOutput &p_file, const gbtBlock<double> &)
 { return p_file; }
 
-gOutput &operator<<(gOutput &p_file, const gBlock<int> &)
+gbtOutput &operator<<(gbtOutput &p_file, const gbtBlock<int> &)
 { return p_file; }
 
-template class gRectArray<gBlock<int> >;
-template class gRectBlock<gBlock<int> >;
+template class gbtRectArray<gbtBlock<int> >;
+template class gbtRectBlock<gbtBlock<int> >;
 
 //
 // For global stream instances
 //
-gStandardInput _gin;
-gInput &gin = _gin;
+gbtStandardInput _gin;
+gbtInput &gin = _gin;
 
-gStandardOutput _gout;
-gOutput &gout = _gout;
+gbtStandardOutput _gout;
+gbtOutput &gout = _gout;
 
-gStandardOutput _gerr;
-gOutput &gerr = _gerr;
-
+gbtStandardOutput _gerr;
+gbtOutput &gerr = _gerr;

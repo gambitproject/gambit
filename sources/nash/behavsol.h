@@ -38,28 +38,28 @@ protected:
   BehavProfile<gNumber> *m_profile;
   gPrecision m_precision;
   mutable gbtEfgSupport m_support;
-  mutable gText m_creator;
-  mutable gFact<gTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
+  mutable gbtText m_creator;
+  mutable gFact<gbtTriState> m_ANFNash, m_Nash, m_SubgamePerfect, m_Sequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
   mutable gFact<gNumber> m_liapValue;
   mutable gFact<gPVector<gNumber> > m_rnfRegret;
-  gText m_label;
+  gbtText m_label;
   mutable long m_revision;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
-  gTriState GetNash(void) const;
-  gTriState GetANFNash(void) const;
-  gTriState GetSubgamePerfect(void) const;
-  gTriState GetSequential(void) const;
+  gbtTriState GetNash(void) const;
+  gbtTriState GetANFNash(void) const;
+  gbtTriState GetSubgamePerfect(void) const;
+  gbtTriState GetSequential(void) const;
   gPVector<gNumber> GetRNFRegret(void) const;
 
   void LevelPrecision(void);
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-  BehavSolution(const BehavProfile<double> &, const gText & = "User");
-  BehavSolution(const BehavProfile<gRational> &, const gText & = "User");
-  BehavSolution(const BehavProfile<gNumber> &, const gText & = "User");
+  BehavSolution(const BehavProfile<double> &, const gbtText & = "User");
+  BehavSolution(const BehavProfile<gRational> &, const gbtText & = "User");
+  BehavSolution(const BehavProfile<gNumber> &, const gbtText & = "User");
   BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
@@ -92,16 +92,16 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each infoset?
   bool IsComplete(void) const;
 
-  const gText &GetLabel(void) const { return m_label; }
-  void SetLabel(const gText &p_label) { m_label = p_label; }
+  const gbtText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
 
-  const gText &GetCreator(void) const { CheckIsValid(); return m_creator; }
+  const gbtText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   gbtEfgSupport Support(void) const { CheckIsValid(); return m_support; }
-  const gTriState &IsNash(void) const;
+  const gbtTriState &IsNash(void) const;
   BehavSolution PolishEq(void) const;
-  const gTriState &IsANFNash(void) const;
-  const gTriState &IsSubgamePerfect(void) const;
-  const gTriState &IsSequential(void) const;
+  const gbtTriState &IsANFNash(void) const;
+  const gbtTriState &IsSubgamePerfect(void) const;
+  const gbtTriState &IsSequential(void) const;
   const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
   const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
   const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
@@ -110,7 +110,7 @@ public:
   const gNumber MaxRegret(void) const;
   const gNumber MaxRNFRegret(void) const;
 
-  void SetCreator(const gText &p_creator) { m_creator = p_creator; }
+  void SetCreator(const gbtText &p_creator) { m_creator = p_creator; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
@@ -146,10 +146,10 @@ public:
     { return m_profile->GetRegret(act); }
 
   // OUTPUT
-  void Dump(gOutput &) const;
-  void DumpInfo(gOutput &) const;
+  void Dump(gbtOutput &) const;
+  void DumpInfo(gbtOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const BehavSolution &);
+gbtOutput &operator<<(gbtOutput &f, const BehavSolution &);
 
 #endif    // BEHAVSOL_H

@@ -175,7 +175,7 @@ int gbtEfgNode::GetId(void) const
   return (rep) ? rep->m_id : -1;
 }
 
-gText gbtEfgNode::GetLabel(void) const
+gbtText gbtEfgNode::GetLabel(void) const
 {
   if (rep) {
     return rep->m_label;
@@ -185,7 +185,7 @@ gText gbtEfgNode::GetLabel(void) const
   }
 }
 
-void gbtEfgNode::SetLabel(const gText &p_label)
+void gbtEfgNode::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     rep->m_label = p_label;
@@ -428,6 +428,5 @@ gbtEfgInfoset gbtEfgNode::LeaveInfoset(void)
   return rep->m_efg->LeaveInfoset(rep);
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtEfgNode &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgNode &)
 { return p_stream; }
-

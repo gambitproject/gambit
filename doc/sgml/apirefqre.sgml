@@ -12,11 +12,11 @@
 <title>Python usage</title>
 <para>
 <synopsis>
-gList&lt;MixedSolution&gt; LogitSolve(gbtNfgSupport p_support,
+gbtList&lt;MixedSolution&gt; LogitSolve(gbtNfgSupport p_support,
                                 double p_maxLam,
                                 double p_stepSize,
                                 bool p_fullGraph)
-gList&lt;BehavSolution&gt; LogitSolve(gbtEfgSupport p_support,
+gbtList&lt;BehavSolution&gt; LogitSolve(gbtEfgSupport p_support,
                                 double p_maxLam,
                                 double p_stepSize,
                                 bool p_fullGraph)
@@ -67,4 +67,3 @@ subgames.
 
 
 </sect1>
-

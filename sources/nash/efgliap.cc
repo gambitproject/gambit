@@ -73,7 +73,7 @@ double EFLiapFunc::Value(const gVector<double> &v) const
 // constraints as appropriate.
 //
 static void Project(gVector<double> &grad, const gVector<double> &x,
-		    const gArray<int> &lengths)
+		    const gbtArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
@@ -152,8 +152,8 @@ gbtEfgNashLiap::gbtEfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
-					   gStatus &p_status)
+gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
+					   gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
 
@@ -172,7 +172,7 @@ gList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 
   gMatrix<double> xi(p.Length(), p.Length());
 
-  gList<BehavSolution> solutions;
+  gbtList<BehavSolution> solutions;
   
   try {
     for (int i = 1; (m_numTries == 0 || i <= m_numTries) &&
@@ -180,8 +180,8 @@ gList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 	 i++)   {
       p_status.Get();
       p_status.SetProgress((double) i / (double) m_numTries,
-			   gText("Attempt ") + ToText(i) + 
-			   gText(", equilibria so far: ") +
+			   gbtText("Attempt ") + ToText(i) + 
+			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
       gConjugatePR minimizer(p.Length());
       gVector<double> gradient(p.Length()), dx(p.Length());
@@ -209,11 +209,10 @@ gList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
       PickRandomProfile(p);
     }
   }
-  catch (gSignalBreak &) {
+  catch (gbtSignalBreak &) {
     // Just stop and return any solutions found so far
   }
   // Any other exceptions propagate out, assuming something Real Bad happened
 
   return solutions;
 }
-

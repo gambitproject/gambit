@@ -34,7 +34,7 @@ public:
   bool ExtendsToNash(const BehavSolution &p_solution,
 		     const gbtEfgSupport &p_littleSupport,
 		     const gbtEfgSupport &p_bigSupport,
-		     gStatus &p_status);
+		     gbtStatus &p_status);
 };
 
 class algExtendsToAgentNash {
@@ -42,7 +42,7 @@ public:
   bool ExtendsToAgentNash(const BehavSolution &p_solution,
 			  const gbtEfgSupport &p_littleSupport,
 			  const gbtEfgSupport &p_bigSupport,
-			  gStatus &p_status);
+			  gbtStatus &p_status);
 };
 
 

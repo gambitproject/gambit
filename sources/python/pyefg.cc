@@ -263,12 +263,12 @@ efg_writeefg(efgobject *self, PyObject *args)
   }
 
   try {
-    gFileOutput file(filename);
+    gbtFileOutput file(filename);
     self->m_efg->WriteEfg(file);
     Py_INCREF(Py_None);
     return Py_None;
   }
-  catch (const gFileInput::OpenFailed &) {
+  catch (const gbtFileInput::OpenFailed &) {
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -288,12 +288,12 @@ efg_writenfg(efgobject *self, PyObject *args)
   }
 
   try {
-    gFileOutput file(filename);
+    gbtFileOutput file(filename);
     self->m_efg->GetReducedNfg().WriteNfg(file);
     Py_INCREF(Py_None);
     return Py_None;
   }
-  catch (const gFileInput::OpenFailed &) {
+  catch (const gbtFileInput::OpenFailed &) {
     Py_INCREF(Py_None);
     return Py_None;
   }
@@ -402,11 +402,11 @@ gbt_read_efg(PyObject */*self*/, PyObject *args)
 
   efgobject *efg = newefgobject();
   try {
-    gFileInput file(filename);
+    gbtFileInput file(filename);
     efg->m_efg = new gbtEfgGame(ReadEfg(file));
     return (PyObject *) efg;
   }
-  catch (const gFileInput::OpenFailed &) {
+  catch (const gbtFileInput::OpenFailed &) {
     Py_INCREF(Py_None);
     return Py_None;
   }

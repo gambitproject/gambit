@@ -29,18 +29,18 @@
 
 #include "base/base.h"
 
-class gSignalBreak : public gException {
+class gbtSignalBreak : public gbtException {
  public:
-  gText Description(void) const { return "User interrupt occurred."; }
+  gbtText Description(void) const { return "User interrupt occurred."; }
 };
 
-class gSignal   {
+class gbtSignal   {
   public:
-    virtual ~gSignal()  { }
+    virtual ~gbtSignal()  { }
     virtual void Get(void) const = 0;
     virtual void Reset(void) = 0;
 };
 
-extern gSignal &gbreak;
+extern gbtSignal &gbreak;
 
 #endif   // GSIGNAL_H

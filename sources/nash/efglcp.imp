@@ -48,14 +48,14 @@ template <class T> gbtEfgNashLcp<T>::~gbtEfgNashLcp()
 //
 
 template <class T> 
-gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
-					     gStatus &p_status)
+gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
+					     gbtStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   int i, j;
   
   if (p_support.GetGame().NumPlayers() != 2) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
   
   isets1 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(1));
@@ -101,7 +101,7 @@ gList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   BehavProfile<T> profile(p_support);
   gVector<T> sol(tab.MinRow(),tab.MaxRow());
     
-  gList<BehavSolution> solutions;
+  gbtList<BehavSolution> solutions;
 
   if (m_stopAfter != 1) {
     All_Lemke(p_support, ns1+ns2+1, tab, 0, A, solutions, p_status);
@@ -146,8 +146,8 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 template <class T> int 
 gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 			    int j, LTableau<T> &B, int depth,
-			    gMatrix<T> &A, gList<BehavSolution> &p_solutions,
-			    gStatus &p_status)
+			    gMatrix<T> &A, gbtList<BehavSolution> &p_solutions,
+			    gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return 1;
@@ -322,4 +322,3 @@ void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
     }
   }
 }
-

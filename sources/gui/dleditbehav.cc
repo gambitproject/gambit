@@ -183,7 +183,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
   if (!m_lastInfoset.IsNull()) {
     for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
       m_profile.SetActionProb(m_lastInfoset.GetAction(act),
-			      ToNumber(gText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
+			      ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
     }
   }
 
@@ -235,7 +235,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
   for (int act = 1; act <= infoset.NumActions(); act++) {
     m_profile.SetActionProb(infoset.GetAction(act),
-			    ToNumber(gText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
+			    ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
   }
 
   p_event.Skip();
@@ -243,14 +243,14 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
 const BehavSolution &dialogEditBehav::GetProfile(void) const
 {
-  m_profile.SetLabel(gText(m_profileName->GetValue().mb_str()));
+  m_profile.SetLabel(gbtText(m_profileName->GetValue().mb_str()));
   return m_profile;
 }
 
 #include "base/gmap.imp"
 
-gOutput &operator<<(gOutput &p_output, wxTreeItemId)
+gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gBaseMap<wxTreeItemId, gbtEfgInfoset>;
-template class gOrdMap<wxTreeItemId, gbtEfgInfoset>;
+template class gbtBaseMap<wxTreeItemId, gbtEfgInfoset>;
+template class gbtOrdMap<wxTreeItemId, gbtEfgInfoset>;

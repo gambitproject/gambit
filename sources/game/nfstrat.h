@@ -38,11 +38,11 @@ friend class gbtNfgGame;
 private:
   gbtNfgGame m_nfg; 
   long index;
-  gArray<gbtNfgStrategy> profile;
+  gbtArray<gbtNfgStrategy> profile;
   
 public:
   StrategyProfile(const gbtNfgGame &);
-  StrategyProfile(const gbtNfgGame &, const gArray<int> &);
+  StrategyProfile(const gbtNfgGame &, const gbtArray<int> &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
@@ -68,10 +68,10 @@ protected:
   // This really could be a gPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gPVector<int> m_strategies;
-  gText m_label;
+  gbtText m_label;
   
   bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
-		   gOutput &tracefile, gStatus &status) const;
+		   gbtOutput &tracefile, gbtStatus &status) const;
 
 public:
   // LIFECYCLE
@@ -87,14 +87,14 @@ public:
   // DATA ACCESS: GENERAL
   gbtNfgGame GetGame(void) const { return m_nfg; }
 
-  const gText &GetLabel(void) const { return m_label; }
-  void SetLabel(const gText &p_label) { m_label = p_label; }
+  const gbtText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
   
   // DATA ACCESS: STRATEGIES
   int NumStrats(int pl) const;
   int NumStrats(const gbtNfgPlayer &p_player) const 
     { return NumStrats(p_player.GetId()); }
-  gArray<int> NumStrats(void) const;
+  gbtArray<int> NumStrats(void) const;
   int ProfileLength(void) const;
 
   gbtNfgStrategy GetStrategy(int pl, int st) const;
@@ -113,18 +113,16 @@ public:
   bool Dominates(gbtNfgStrategy, gbtNfgStrategy, bool strong) const;
   bool IsDominated(gbtNfgStrategy, bool strong) const; 
 
-  gbtNfgSupport Undominated(bool strong, const gArray<int> &players,
-			    gOutput &tracefile, gStatus &status) const;
+  gbtNfgSupport Undominated(bool strong, const gbtArray<int> &players,
+			    gbtOutput &tracefile, gbtStatus &status) const;
   gbtNfgSupport MixedUndominated(bool strong, gPrecision precision,
-				 const gArray<int> &players,
-				 gOutput &, gStatus &status) const;
+				 const gbtArray<int> &players,
+				 gbtOutput &, gbtStatus &status) const;
 
   // OUTPUT
-  void Output(gOutput &) const;
+  void Output(gbtOutput &) const;
 };
 
-gOutput &operator<<(gOutput &, const gbtNfgSupport &);
+gbtOutput &operator<<(gbtOutput &, const gbtNfgSupport &);
 
 #endif  // NFSTRAT_H
-
-

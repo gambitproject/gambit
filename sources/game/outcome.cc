@@ -144,7 +144,7 @@ gbtEfgGame gbtEfgOutcome::GetGame(void) const
   }
 }
 
-gText gbtEfgOutcome::GetLabel(void) const
+gbtText gbtEfgOutcome::GetLabel(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -157,7 +157,7 @@ gText gbtEfgOutcome::GetLabel(void) const
   }
 }
 
-void gbtEfgOutcome::SetLabel(const gText &p_label) 
+void gbtEfgOutcome::SetLabel(const gbtText &p_label) 
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -167,13 +167,13 @@ void gbtEfgOutcome::SetLabel(const gText &p_label)
   }
 }
 
-gArray<gNumber> gbtEfgOutcome::GetPayoff(void) const
+gbtArray<gNumber> gbtEfgOutcome::GetPayoff(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
   }
   else if (!rep) {
-    return gArray<gNumber>();
+    return gbtArray<gNumber>();
   }
   else {
     return rep->m_payoffs;
@@ -217,7 +217,7 @@ void gbtEfgOutcome::DeleteOutcome(void)
   }
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtEfgOutcome &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgOutcome &)
 { 
   return p_stream;
 }
@@ -329,7 +329,7 @@ gbtNfgGame gbtNfgOutcome::GetGame(void) const
   }
 }
 
-gText gbtNfgOutcome::GetLabel(void) const
+gbtText gbtNfgOutcome::GetLabel(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -342,7 +342,7 @@ gText gbtNfgOutcome::GetLabel(void) const
   }
 }
 
-void gbtNfgOutcome::SetLabel(const gText &p_label)
+void gbtNfgOutcome::SetLabel(const gbtText &p_label)
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -365,7 +365,7 @@ gNumber gbtNfgOutcome::GetPayoff(const gbtNfgPlayer &p_player) const
   }
 }
 
-gArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
+gbtArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
 {
   if (rep && rep->m_deleted) {
     throw gbtGameObjectDeleted();
@@ -374,7 +374,7 @@ gArray<gNumber> gbtNfgOutcome::GetPayoff(void) const
     return rep->m_payoffs;
   }
   else {
-    return gArray<gNumber>();
+    return gbtArray<gNumber>();
   }
 }
 
@@ -414,8 +414,7 @@ void gbtNfgOutcome::DeleteOutcome(void)
   }
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgOutcome &)
 { 
   return p_stream;
 }
-

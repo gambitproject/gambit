@@ -112,7 +112,7 @@ template <class T> gPoly<T> &gPolyArray<T>::operator[](int index)
   return *data[index];
 }
 
-template <class T> void gPolyArray<T>::Dump(gOutput &f) const
+template <class T> void gPolyArray<T>::Dump(gbtOutput &f) const
 {
   f << "{ ";
   for (int i = mindex; i <= maxdex; i++)
@@ -207,7 +207,7 @@ template <class T> int gPolyBlock<T>::Find(const gPoly<T> &t) const
 template <class T> int gPolyBlock<T>::Contains(const gPoly<T> &t) const
 { return Find(t); }
 
-template <class T> void gBlock<T>::Flush(void)
+template <class T> void gbtBlock<T>::Flush(void)
 {
   for (int i = mindex; i <= maxdex; delete data[i++]);
   maxdex = mindex - 1;
@@ -222,4 +222,4 @@ template class gPolyBlock<gNumber>;
 
 #include "base/glist.imp"
 
-template class gList<gPoly<gNumber> >;
+template class gbtList<gPoly<gNumber> >;

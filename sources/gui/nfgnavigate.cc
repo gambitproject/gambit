@@ -134,18 +134,17 @@ void gbtNfgNavigate::OnLeftClick(wxGridEvent &p_event)
     }
   }
   else if (p_event.GetCol() == 4) {
-    gArray<int> cont = m_doc->GetContingency();
+    gbtArray<int> cont = m_doc->GetContingency();
     if (cont[player] < m_doc->GetNfgSupport().NumStrats(player)) {
       cont[player]++;
     }
     m_doc->SetContingency(cont);
   }
   else if (p_event.GetCol() == 5) {
-    gArray<int> cont = m_doc->GetContingency();
+    gbtArray<int> cont = m_doc->GetContingency();
     if (cont[player] > 1) {
       cont[player]--;
     }
     m_doc->SetContingency(cont);
   }
 }
-

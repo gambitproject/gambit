@@ -33,7 +33,6 @@ template class gDPVector<double>;
 template class gDPVector<gRational>;
 template class gDPVector<gNumber>;
 
-template gOutput & operator<< (gOutput&, const gDPVector<double>&);
-template gOutput & operator<< (gOutput&, const gDPVector<gRational>&);
-template gOutput & operator<< (gOutput&, const gDPVector<gNumber>&);
-
+template gbtOutput & operator<< (gbtOutput&, const gDPVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gDPVector<gRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gDPVector<gNumber>&);

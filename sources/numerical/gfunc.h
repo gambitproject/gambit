@@ -46,10 +46,10 @@ public:
   virtual bool Gradient(const gVector<T> &, gVector<T> &) const = 0;
 };
 
-class gFuncMinError : public gException {
+class gFuncMinError : public gbtException {
 public:
   virtual ~gFuncMinError() { }
-  gText Description(void) const 
+  gbtText Description(void) const 
     { return "Internal error in minimization code"; }
 };
 

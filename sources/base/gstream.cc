@@ -31,200 +31,200 @@
 #include "base.h"
 
 //--------------------------------------------------------------------------
-//                         gInput member functions
+//                         gbtInput member functions
 //--------------------------------------------------------------------------
 
-gInput::gInput(void)   { }
+gbtInput::gbtInput(void)   { }
 
-gInput::~gInput()   { }
+gbtInput::~gbtInput()   { }
 
 
 //--------------------------------------------------------------------------
-//                       gFileInput member functions
+//                       gbtFileInput member functions
 //--------------------------------------------------------------------------
 
-gText gFileInput::OpenFailed::Description(void) const
+gbtText gbtFileInput::OpenFailed::Description(void) const
 {
-  return "Open failed in gFileInput";
+  return "Open failed in gbtFileInput";
 }
 
-gText gFileInput::ReadFailed::Description(void) const
+gbtText gbtFileInput::ReadFailed::Description(void) const
 {
-  return "Read failed in gFileInput";
+  return "Read failed in gbtFileInput";
 }
 
-gFileInput::gFileInput(const char *in) : f(fopen(in, "r"))
+gbtFileInput::gbtFileInput(const char *in) : f(fopen(in, "r"))
 {
   if (!f)   throw OpenFailed();
 }
 
-gFileInput::gFileInput(FILE *in) : f(in)
+gbtFileInput::gbtFileInput(FILE *in) : f(in)
 {
   if (!f)   throw OpenFailed();
 }
 
-gFileInput::~gFileInput()
+gbtFileInput::~gbtFileInput()
 {
   if (f)   fclose(f);
 }
 
-gInput &gFileInput::operator>>(int &x)
+gbtInput &gbtFileInput::operator>>(int &x)
 {
   if (fscanf(f, "%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gFileInput::operator>>(unsigned int &x)
+gbtInput &gbtFileInput::operator>>(unsigned int &x)
 {
   if (fscanf(f, "%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gFileInput::operator>>(long &x)
+gbtInput &gbtFileInput::operator>>(long &x)
 {
   if (fscanf(f, "%ld", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gFileInput::operator>>(char &x)
+gbtInput &gbtFileInput::operator>>(char &x)
 {
   x = (char) fgetc(f);
   return *this;
 }
 
-gInput &gFileInput::operator>>(double &x)
+gbtInput &gbtFileInput::operator>>(double &x)
 {
   if (fscanf(f, "%lf", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gFileInput::operator>>(float &x)
+gbtInput &gbtFileInput::operator>>(float &x)
 {
   if (fscanf(f, "%f", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gFileInput::operator>>(char *x)
+gbtInput &gbtFileInput::operator>>(char *x)
 {
   if (fscanf(f, "%s", x) != 1)   throw ReadFailed();
   return *this;
 }
 
-int gFileInput::get(char &c)
+int gbtFileInput::get(char &c)
 {
   c = (char) fgetc(f);
   return (!feof(f));
 }
 
-void gFileInput::unget(char c)
+void gbtFileInput::unget(char c)
 {
   ::ungetc(c, f);
 }
 
-bool gFileInput::eof(void) const
+bool gbtFileInput::eof(void) const
 {
   return feof(f);
 }
 
-void gFileInput::seekp(long pos) const
+void gbtFileInput::seekp(long pos) const
 {
   fseek(f, pos, 0);
 }
 
-long gFileInput::getpos(void) const
+long gbtFileInput::getpos(void) const
 {
   return ftell(f);
 }
 
-void gFileInput::setpos(long x) const
+void gbtFileInput::setpos(long x) const
 {
   fseek(f, x, 0);
 }
 
 //--------------------------------------------------------------------------
-//                   gStandardInput member functions
+//                   gbtStandardInput member functions
 //--------------------------------------------------------------------------
 
-gText gStandardInput::ReadFailed::Description(void) const
+gbtText gbtStandardInput::ReadFailed::Description(void) const
 {
-  return "Read failed in gStandardInput";
+  return "Read failed in gbtStandardInput";
 }
 
-gStandardInput::gStandardInput(void)
+gbtStandardInput::gbtStandardInput(void)
 { }
 
-gStandardInput::~gStandardInput()
+gbtStandardInput::~gbtStandardInput()
 { }
 
-gInput &gStandardInput::operator>>(int &x)
+gbtInput &gbtStandardInput::operator>>(int &x)
 {
   if (scanf("%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gStandardInput::operator>>(unsigned int &x)
+gbtInput &gbtStandardInput::operator>>(unsigned int &x)
 {
   if (scanf("%d", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gStandardInput::operator>>(long &x)
+gbtInput &gbtStandardInput::operator>>(long &x)
 {
   if (scanf("%ld", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gStandardInput::operator>>(char &x)
+gbtInput &gbtStandardInput::operator>>(char &x)
 {
   x = (char) fgetc(stdin);
   return *this;
 }
 
-gInput &gStandardInput::operator>>(double &x)
+gbtInput &gbtStandardInput::operator>>(double &x)
 {
   if (scanf("%lf", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gStandardInput::operator>>(float &x)
+gbtInput &gbtStandardInput::operator>>(float &x)
 {
   if (scanf("%f", &x) != 1)   throw ReadFailed();
   return *this;
 }
 
-gInput &gStandardInput::operator>>(char *x)
+gbtInput &gbtStandardInput::operator>>(char *x)
 {
   if (scanf("%s", x) != 1)   throw ReadFailed();
   return *this;
 }
 
-int gStandardInput::get(char &c)
+int gbtStandardInput::get(char &c)
 {
   c = (char) fgetc(stdin);
   return (!feof(stdin));
 }
 
-void gStandardInput::unget(char c)
+void gbtStandardInput::unget(char c)
 {
   ::ungetc(c, stdin);
 }
 
-bool gStandardInput::eof(void) const
+bool gbtStandardInput::eof(void) const
 {
   return feof(stdin);
 }
 
-void gStandardInput::seekp(long pos) const
+void gbtStandardInput::seekp(long pos) const
 {
   fseek(stdin, pos, 0);
 }
 
-long gStandardInput::getpos(void) const
+long gbtStandardInput::getpos(void) const
 {
   return ftell(stdin);
 }
 
-void gStandardInput::setpos(long x) const
+void gbtStandardInput::setpos(long x) const
 { }
 
 
@@ -236,43 +236,43 @@ gNullInput::gNullInput(void)    { }
 
 gNullInput::~gNullInput()    { }
 
-gInput &gNullInput::operator>>(int &x)
+gbtInput &gNullInput::operator>>(int &x)
 {
   x = 0;
   return *this;
 }
 
-gInput &gNullInput::operator>>(unsigned int &x)
+gbtInput &gNullInput::operator>>(unsigned int &x)
 {
   x = 0;
   return *this;
 }
 
-gInput &gNullInput::operator>>(long &x)
+gbtInput &gNullInput::operator>>(long &x)
 {
   x = 0L;
   return *this;
 }
 
-gInput &gNullInput::operator>>(char &x)
+gbtInput &gNullInput::operator>>(char &x)
 {
   x = '\0';
   return *this;
 }
 
-gInput &gNullInput::operator>>(double &x)
+gbtInput &gNullInput::operator>>(double &x)
 {
   x = 0.0;
   return *this;
 }
 
-gInput &gNullInput::operator>>(float &x)
+gbtInput &gNullInput::operator>>(float &x)
 {
   x = 0.0;
   return *this;
 }
 
-gInput &gNullInput::operator>>(char *x)
+gbtInput &gNullInput::operator>>(char *x)
 {
   if (x)   *x = '\0';
   return *this;
@@ -292,104 +292,104 @@ void gNullInput::setpos(long) const { }
 
 
 //--------------------------------------------------------------------------
-//                          gOutput member functions
+//                          gbtOutput member functions
 //--------------------------------------------------------------------------
 
-gOutput::gOutput(void)   { }
+gbtOutput::gbtOutput(void)   { }
 
-gOutput::~gOutput()   { }
+gbtOutput::~gbtOutput()   { }
 
 //--------------------------------------------------------------------------
-//                         gStandardOutput member functions
+//                         gbtStandardOutput member functions
 //--------------------------------------------------------------------------
 
-gText gStandardOutput::OpenFailed::Description(void) const
+gbtText gbtStandardOutput::OpenFailed::Description(void) const
 {
-  return "Open failed in gStandardOutput";
+  return "Open failed in gbtStandardOutput";
 }
 
-gText gStandardOutput::WriteFailed::Description(void) const
+gbtText gbtStandardOutput::WriteFailed::Description(void) const
 {
-  return "Write failed in gStandardOutput";
+  return "Write failed in gbtStandardOutput";
 }
 
-gStandardOutput::gStandardOutput(void)
+gbtStandardOutput::gbtStandardOutput(void)
   : Width(0), Prec(6), Represent('f')
 { }
 
-gStandardOutput::~gStandardOutput()
+gbtStandardOutput::~gbtStandardOutput()
 { }
 
-int gStandardOutput::GetWidth(void) const
+int gbtStandardOutput::GetWidth(void) const
 {
   return Width;
 }
 
-gOutput &gStandardOutput::SetWidth(int w) 
+gbtOutput &gbtStandardOutput::SetWidth(int w) 
 {
   Width = w;
   return *this;
 }
 
-int gStandardOutput::GetPrec(void) const 
+int gbtStandardOutput::GetPrec(void) const 
 {
   return Prec;
 }
 
-gOutput &gStandardOutput::SetPrec(int p) 
+gbtOutput &gbtStandardOutput::SetPrec(int p) 
 {
   Prec = p;
   return *this;
 }
 
-gOutput &gStandardOutput::SetExpMode(void) 
+gbtOutput &gbtStandardOutput::SetExpMode(void) 
 {
   Represent = 'e';
   return *this;
 }
 
-gOutput &gStandardOutput::SetFloatMode(void) 
+gbtOutput &gbtStandardOutput::SetFloatMode(void) 
 {
   Represent = 'f';
   return *this;
 }
 
-char gStandardOutput::GetRepMode(void) const
+char gbtStandardOutput::GetRepMode(void) const
 {
   return Represent;
 }
 
-gOutput &gStandardOutput::operator<<(int x)
+gbtOutput &gbtStandardOutput::operator<<(int x)
 {
   if (printf("%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(unsigned int x)
+gbtOutput &gbtStandardOutput::operator<<(unsigned int x)
 {
   if (printf("%*d", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(bool x)
+gbtOutput &gbtStandardOutput::operator<<(bool x)
 {
   if (printf("%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(long x)
+gbtOutput &gbtStandardOutput::operator<<(long x)
 {
   if (printf("%*ld", Width, x) < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(char x)
+gbtOutput &gbtStandardOutput::operator<<(char x)
 {
   if (printf("%c", x) < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(double x)
+gbtOutput &gbtStandardOutput::operator<<(double x)
 {
   if (Represent == 'f')   {
     if (printf("%*.*f", Width, Prec, x) < 0)  
@@ -402,7 +402,7 @@ gOutput &gStandardOutput::operator<<(double x)
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(long double x)
+gbtOutput &gbtStandardOutput::operator<<(long double x)
 {
   if (Represent == 'f')   {
     if (printf("%*.*Lf", Width, Prec, x) < 0)  
@@ -415,7 +415,7 @@ gOutput &gStandardOutput::operator<<(long double x)
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(float x)
+gbtOutput &gbtStandardOutput::operator<<(float x)
 {
   if (Represent == 'f')   {
     if (printf("%*.*f", Width, Prec, x) < 0) 
@@ -428,13 +428,13 @@ gOutput &gStandardOutput::operator<<(float x)
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(const char *x)
+gbtOutput &gbtStandardOutput::operator<<(const char *x)
 {
   if (printf("%s", x) < 0)   throw WriteFailed();
   return *this;
 }
 
-gOutput &gStandardOutput::operator<<(const void *x)
+gbtOutput &gbtStandardOutput::operator<<(const void *x)
 {
   if (printf("%p", x) < 0)   throw WriteFailed();
   return *this;
@@ -442,20 +442,20 @@ gOutput &gStandardOutput::operator<<(const void *x)
 
 
 //--------------------------------------------------------------------------
-//                         gFileOutput member functions
+//                         gbtFileOutput member functions
 //--------------------------------------------------------------------------
 
-gText gFileOutput::OpenFailed::Description(void) const
+gbtText gbtFileOutput::OpenFailed::Description(void) const
 {
-  return "Open failed in gFileOutput";
+  return "Open failed in gbtFileOutput";
 }
 
-gText gFileOutput::WriteFailed::Description(void) const
+gbtText gbtFileOutput::WriteFailed::Description(void) const
 {
-  return "Write failed in gFileOutput";
+  return "Write failed in gbtFileOutput";
 }
 
-gFileOutput::gFileOutput(const char *out, bool append /* = false */, bool close /* = true */)
+gbtFileOutput::gbtFileOutput(const char *out, bool append /* = false */, bool close /* = true */)
   : f(fopen(out, (append) ? "a" : "w")), filename(out), 
     keepClosed(close), Width(0), 
     Prec(6), Represent('f')
@@ -463,12 +463,12 @@ gFileOutput::gFileOutput(const char *out, bool append /* = false */, bool close 
   if (!f)   throw OpenFailed();
 }
 
-gFileOutput::~gFileOutput()
+gbtFileOutput::~gbtFileOutput()
 {
   if (f)   fclose(f);
 }
 
-void gFileOutput::Open(void)
+void gbtFileOutput::Open(void)
 {
   if(!f) { 
     f=fopen(filename,"a");
@@ -476,51 +476,51 @@ void gFileOutput::Open(void)
   }
 }
 
-void gFileOutput::Close(void)
+void gbtFileOutput::Close(void)
 {
   if(keepClosed) { fclose(f);f=0;} 
 }
 
-int gFileOutput::GetWidth(void) const
+int gbtFileOutput::GetWidth(void) const
 {
   return Width;
 }
 
-gOutput &gFileOutput::SetWidth(int w) 
+gbtOutput &gbtFileOutput::SetWidth(int w) 
 {
   Width = w;
   return *this;
 }
 
-int gFileOutput::GetPrec(void) const 
+int gbtFileOutput::GetPrec(void) const 
 {
   return Prec;
 }
 
-gOutput &gFileOutput::SetPrec(int p) 
+gbtOutput &gbtFileOutput::SetPrec(int p) 
 {
   Prec = p;
   return *this;
 }
 
-gOutput &gFileOutput::SetExpMode(void) 
+gbtOutput &gbtFileOutput::SetExpMode(void) 
 {
   Represent = 'e';
   return *this;
 }
 
-gOutput &gFileOutput::SetFloatMode(void) 
+gbtOutput &gbtFileOutput::SetFloatMode(void) 
 {
   Represent = 'f';
   return *this;
 }
 
-char gFileOutput::GetRepMode(void) const
+char gbtFileOutput::GetRepMode(void) const
 {
   return Represent;
 }
 
-gOutput &gFileOutput::operator<<(int x)
+gbtOutput &gbtFileOutput::operator<<(int x)
 {
   Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
@@ -528,7 +528,7 @@ gOutput &gFileOutput::operator<<(int x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(unsigned int x)
+gbtOutput &gbtFileOutput::operator<<(unsigned int x)
 {
   Open();
   if (fprintf(f, "%*d", Width, x) < 0)   throw WriteFailed();
@@ -536,7 +536,7 @@ gOutput &gFileOutput::operator<<(unsigned int x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(bool x)
+gbtOutput &gbtFileOutput::operator<<(bool x)
 {
   Open();
   if (fprintf(f, "%c", (x) ? 'T' : 'F') < 0)   throw WriteFailed();
@@ -544,7 +544,7 @@ gOutput &gFileOutput::operator<<(bool x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(long x)
+gbtOutput &gbtFileOutput::operator<<(long x)
 {
   Open();
   if (fprintf(f, "%*ld", Width, x) < 0)   throw WriteFailed();
@@ -552,7 +552,7 @@ gOutput &gFileOutput::operator<<(long x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(char x)
+gbtOutput &gbtFileOutput::operator<<(char x)
 {
   Open();
   if (fprintf(f, "%c", x) < 0)   throw WriteFailed();
@@ -560,7 +560,7 @@ gOutput &gFileOutput::operator<<(char x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(double x)
+gbtOutput &gbtFileOutput::operator<<(double x)
 {
   Open();
   if (Represent == 'f')   {
@@ -575,7 +575,7 @@ gOutput &gFileOutput::operator<<(double x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(long double x)
+gbtOutput &gbtFileOutput::operator<<(long double x)
 {
   Open();
   if (Represent == 'f')   {
@@ -590,7 +590,7 @@ gOutput &gFileOutput::operator<<(long double x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(float x)
+gbtOutput &gbtFileOutput::operator<<(float x)
 {
   Open();
   if (Represent == 'f')   {
@@ -605,7 +605,7 @@ gOutput &gFileOutput::operator<<(float x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(const char *x)
+gbtOutput &gbtFileOutput::operator<<(const char *x)
 {
   Open();
   if (fprintf(f, "%s", x) < 0)   throw WriteFailed();
@@ -613,7 +613,7 @@ gOutput &gFileOutput::operator<<(const char *x)
   return *this;
 }
 
-gOutput &gFileOutput::operator<<(const void *x)
+gbtOutput &gbtFileOutput::operator<<(const void *x)
 {
   Open();
   if (fprintf(f, "%p", x) < 0)   throw WriteFailed();
@@ -632,35 +632,34 @@ gNullOutput::~gNullOutput()   { }
 
 int gNullOutput::GetWidth(void) const  { return 0; }
 
-gOutput &gNullOutput::SetWidth(int) { return *this; }
+gbtOutput &gNullOutput::SetWidth(int) { return *this; }
 
 int gNullOutput::GetPrec(void) const { return 6; }
 
-gOutput &gNullOutput::SetPrec(int) { return *this; }
+gbtOutput &gNullOutput::SetPrec(int) { return *this; }
 
-gOutput &gNullOutput::SetExpMode(void) { return *this; }
+gbtOutput &gNullOutput::SetExpMode(void) { return *this; }
 
-gOutput &gNullOutput::SetFloatMode(void) { return *this; }
+gbtOutput &gNullOutput::SetFloatMode(void) { return *this; }
 
 char gNullOutput::GetRepMode(void) const { return 'f'; }
 
-gOutput &gNullOutput::operator<<(int)    { return *this; }
+gbtOutput &gNullOutput::operator<<(int)    { return *this; }
 
-gOutput &gNullOutput::operator<<(unsigned int)   { return *this; }
+gbtOutput &gNullOutput::operator<<(unsigned int)   { return *this; }
 
-gOutput &gNullOutput::operator<<(bool)    { return *this; }
+gbtOutput &gNullOutput::operator<<(bool)    { return *this; }
 
-gOutput &gNullOutput::operator<<(long)   { return *this; }
+gbtOutput &gNullOutput::operator<<(long)   { return *this; }
 
-gOutput &gNullOutput::operator<<(char)   { return *this; }
+gbtOutput &gNullOutput::operator<<(char)   { return *this; }
 
-gOutput &gNullOutput::operator<<(double)   { return *this; }
+gbtOutput &gNullOutput::operator<<(double)   { return *this; }
 
-gOutput &gNullOutput::operator<<(long double) { return *this; }
+gbtOutput &gNullOutput::operator<<(long double) { return *this; }
 
-gOutput &gNullOutput::operator<<(float)    { return *this; }
+gbtOutput &gNullOutput::operator<<(float)    { return *this; }
 
-gOutput &gNullOutput::operator<<(const char *)  { return *this; }
+gbtOutput &gNullOutput::operator<<(const char *)  { return *this; }
 
-gOutput &gNullOutput::operator<<(const void *)  { return *this; }
-
+gbtOutput &gNullOutput::operator<<(const void *)  { return *this; }

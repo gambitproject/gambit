@@ -38,16 +38,16 @@
 
 template <class T> class BaseTableau {
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
-  class BadPivot : public gException  {
+  class BadPivot : public gbtException  {
   public:
     virtual ~BadPivot() { }
-    gText Description(void) const { return "Bad Pivot in BaseTableau"; }
+    gbtText Description(void) const { return "Bad Pivot in BaseTableau"; }
   };
 
   bool ColIndex(int) const;
@@ -88,11 +88,11 @@ protected:
   gVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
-  gBlock<int> artificial;  // artificial variables
+  gbtBlock<int> artificial;  // artificial variables
 
 public:
   TableauInterface(const gMatrix<T> &A, const gVector<T> &b); 
-  TableauInterface(const gMatrix<T> &A, const gBlock<int> &art, 
+  TableauInterface(const gMatrix<T> &A, const gbtBlock<int> &art, 
 		   const gVector<T> &b); 
   TableauInterface(const TableauInterface<T>&);
   virtual ~TableauInterface();
@@ -127,8 +127,8 @@ public:
 
   BFS<T> GetBFS1(void) const; 
   BFS<T> GetBFS(void);  // used in lpsolve for some reason
-  void Dump(gOutput &) const;
-  void BigDump(gOutput &);
+  void Dump(gbtOutput &) const;
+  void BigDump(gbtOutput &);
 
   virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column

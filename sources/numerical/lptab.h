@@ -36,25 +36,25 @@
 template <class T> class LPTableau : public Tableau<T> {
 private:
   gVector<T> dual;
-  gBlock<T> unitcost;
-  gBlock<T> cost;
-  gBlock<bool> UB,LB;  // does col have upper/lower bound?
-  gBlock<T> ub,lb;   // upper/lower bound
+  gbtBlock<T> unitcost;
+  gbtBlock<T> cost;
+  gbtBlock<bool> UB,LB;  // does col have upper/lower bound?
+  gbtBlock<T> ub,lb;   // upper/lower bound
   
   void SolveDual();
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
-  class BadPivot : public gException  {
+  class BadPivot : public gbtException  {
   public:
     virtual ~BadPivot();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
   LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
-  LPTableau(const gMatrix<T> &A, const gBlock<int> &art, const gVector<T> &b); 
+  LPTableau(const gMatrix<T> &A, const gbtBlock<int> &art, const gVector<T> &b); 
   LPTableau(const LPTableau<T>&);
   virtual ~LPTableau();
   
@@ -72,9 +72,9 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
-  void ReversePivots(gList<gArray<int> > &);
+  void ReversePivots(gbtList<gbtArray<int> > &);
   bool IsReversePivot(int i, int j);
-  void DualReversePivots(gList<gArray<int> > &);
+  void DualReversePivots(gbtList<gbtArray<int> > &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 
@@ -82,13 +82,13 @@ public:
   int LastLabel( void );
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const gBlock<T>&rowv, gVector<T> &colv) const;
+  void BasisSelect(const gbtBlock<T>&rowv, gVector<T> &colv) const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const gBlock<T>&unitv, const gBlock<T>&rowv,
+  void BasisSelect(const gbtBlock<T>&unitv, const gbtBlock<T>&rowv,
 		   gVector<T>&colv) const; 
 
-  void BigDump(gOutput &);
+  void BigDump(gbtOutput &);
 };
 
 #endif     // LPTAB_H

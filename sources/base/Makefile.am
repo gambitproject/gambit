@@ -19,8 +19,6 @@ libbase_a_SOURCES = \
 	gblock.cc \
 	gblock.h \
 	gblock.imp \
-	ghash.h \
-	ghash.imp \
 	glist.cc \
 	glist.h \
 	glist.imp \
@@ -29,8 +27,6 @@ libbase_a_SOURCES = \
 	gmisc.cc \
 	gmisc.h \
 	gnullstatus.h \
-	gpool.cc \
-	gpool.h \
 	gprogres.h \
 	grarray.cc \
 	grarray.h \
@@ -38,10 +34,6 @@ libbase_a_SOURCES = \
 	grblock.h \
 	grblock.imp \
 	gsignal.h \
-	gslist.h \
-	gslist.imp \
-	gstack.h \
-	gstack.imp \
 	gstatus.h \
 	gstream.cc \
 	gstream.h \
@@ -52,8 +44,6 @@ libbase_a_SOURCES = \
 	gwatch.cc \
 	gwatch.h \
 	odometer.cc \
-	odometer.h \
-	system.cc \
-	system.h 
+	odometer.h 
 
 EXTRA_DIST = borland.mak

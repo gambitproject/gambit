@@ -41,12 +41,12 @@ template <class T> class gPolyList
  private:
    const gSpace*      Space;
    const term_order*  Order;
-   gList< gPoly<T> *> List;
+   gbtList< gPoly<T> *> List;
    
    // SubProcedures of ToSortedReducedGrobner   
    void        Sort(const term_order &);
-   void        CriterionTwo(      gList<index_pair>&, 
-			    const gList<index_pair>&, 
+   void        CriterionTwo(      gbtList<gbtIndexPair>&, 
+			    const gbtList<gbtIndexPair>&, 
 			    const int&,
 			    const term_order&) const;
                      // See Adams and Loustaunau, p. 130
@@ -56,8 +56,8 @@ template <class T> class gPolyList
 
  public:
    gPolyList(const gSpace *, const term_order*);  
-   gPolyList(const gSpace *, const term_order*, const gList< gPoly<T> *> &);
-   gPolyList(const gSpace *, const term_order*, const gList< gPoly<T> > &);
+   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> *> &);
+   gPolyList(const gSpace *, const term_order*, const gbtList< gPoly<T> > &);
    gPolyList(const gPolyList<T> &);
 
    ~gPolyList();                 // Deletes all pointees
@@ -97,10 +97,10 @@ template <class T> class gPolyList
    const int                Length()                                  const;
    const int                Dmnsn()                                   const;
    const bool               IsMultiaffine()                           const;
-   gList<gPoly<T> >         UnderlyingList()                          const;
+   gbtList<gPoly<T> >         UnderlyingbtList()                          const;
    const gVector<T>         Evaluate(const gVector<T>&)               const;
    const bool               IsRoot(const gVector<T>&)                 const;
-   const gRectArray<gPoly<T>*> DerivativeMatrix()                     const;
+   const gbtRectArray<gPoly<T>*> DerivativeMatrix()                     const;
    const gPoly<T>           DetOfDerivativeMatrix()                   const;
    const gMatrix<T>         DerivativeMatrix(const gVector<T>&)       const;
    const gSquareMatrix<T>   SquareDerivativeMatrix(const gVector<T>&) const;
@@ -108,11 +108,10 @@ template <class T> class gPolyList
 //  inline int static Count() { return Counted<gPolyList<T> >::objCount(); }
 
    // Conversion
-   gList<gPoly<gDouble> > ListTogDouble()  const;
-   gList<gPoly<gDouble> > NormalizedList() const;
+   gbtList<gPoly<gDouble> > ListTogDouble()  const;
+   gbtList<gPoly<gDouble> > NormalizedList() const;
 };  
 
-template <class T> gOutput &operator<<(gOutput &, const gPolyList<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gPolyList<T> &);
 
 #endif // GPOLYLST_H
-

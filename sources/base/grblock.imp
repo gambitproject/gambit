@@ -30,29 +30,29 @@
 //            Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> gRectBlock<T>::gRectBlock(void)   { }
+template <class T> gbtRectBlock<T>::gbtRectBlock(void)   { }
 
-template <class T> gRectBlock<T>::gRectBlock(unsigned int nrows,
+template <class T> gbtRectBlock<T>::gbtRectBlock(unsigned int nrows,
                          unsigned int ncols)
-  : gRectArray<T>(nrows, ncols)
+  : gbtRectArray<T>(nrows, ncols)
 { }
 
 template <class T> 
-gRectBlock<T>::gRectBlock(int minr, int maxr, int minc, int maxc)
-  : gRectArray<T>(minr, maxr, minc, maxc)
+gbtRectBlock<T>::gbtRectBlock(int minr, int maxr, int minc, int maxc)
+  : gbtRectArray<T>(minr, maxr, minc, maxc)
 { }
 
-template <class T> gRectBlock<T>::gRectBlock(const gRectBlock<T> &r)
-  : gRectArray<T>(r)
+template <class T> gbtRectBlock<T>::gbtRectBlock(const gbtRectBlock<T> &r)
+  : gbtRectArray<T>(r)
 { }
 
-template <class T> gRectBlock<T>::~gRectBlock()
+template <class T> gbtRectBlock<T>::~gbtRectBlock()
 { }
 
 template <class T>
-gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
+gbtRectBlock<T> &gbtRectBlock<T>::operator=(const gbtRectBlock<T> &a)
 {
-  gRectArray<T>::operator=(a);
+  gbtRectArray<T>::operator=(a);
   return *this;
 }
 
@@ -60,7 +60,7 @@ gRectBlock<T> &gRectBlock<T>::operator=(const gRectBlock<T> &a)
 //             The members
 //------------------------------------------------------------------------
 
-template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
+template <class T> void gbtRectBlock<T>::AddRow(const gbtArray<T> &v)
 {
   if (v.First() != mincol || v.Last() != maxcol)   throw BadIndex();
   maxrow++;
@@ -91,7 +91,7 @@ template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
   }
 }
 
-template <class T> void gRectBlock<T>::RemoveRow(int row)
+template <class T> void gbtRectBlock<T>::RemoveRow(int row)
 {
   if (minrow > row || row > maxrow)   throw BadIndex();
   maxrow--;
@@ -118,7 +118,7 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
 
 
 template <class T> 
-void gRectBlock<T>::AddColumn(const gArray<T> &v)
+void gbtRectBlock<T>::AddColumn(const gbtArray<T> &v)
 {
     if (v.First() != minrow || v.Last() != maxrow)   
         throw BadDim();
@@ -165,7 +165,7 @@ void gRectBlock<T>::AddColumn(const gArray<T> &v)
 }
 
 
-template<class T> void gRectBlock<T>::RemoveColumn(int col)
+template<class T> void gbtRectBlock<T>::RemoveColumn(int col)
 {
   // note: RemoveColumn does not reallocate memory --
   // it shrinks the rows in place.
@@ -179,7 +179,7 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
   }
 }
 
-template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
+template <class T> void gbtRectBlock<T>::InsertRow(int row, const gbtArray<T> &v)
 {
   if (v.First() != mincol || v.Last() != maxcol)   throw BadDim();
   if (minrow > row || row > maxrow + 1)   throw BadIndex();
@@ -220,7 +220,7 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 
 
 template <class T>
-void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
+void gbtRectBlock<T>::InsertColumn(int col, const gbtArray<T> &v)
 {
     if (v.First() != minrow || v.Last() != maxrow)   
         throw BadDim();
@@ -277,4 +277,3 @@ void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
         throw;
     }
 }
-

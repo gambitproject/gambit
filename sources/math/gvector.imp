@@ -27,7 +27,7 @@
 #include "base/base.h"
 #include "gvector.h"
 
-template <class T> gText gVector<T>::BadDim::Description(void) const
+template <class T> gbtText gVector<T>::BadDim::Description(void) const
 {
   return "Mismatched vector lengths";
 }
@@ -36,15 +36,15 @@ template <class T> gText gVector<T>::BadDim::Description(void) const
 //     gVector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> gVector<T>::gVector(unsigned int len) : gArray<T>(len) 
+template <class T> gVector<T>::gVector(unsigned int len) : gbtArray<T>(len) 
 { }
 
 template <class T> gVector<T>::gVector(int low, int high) 
-  : gArray<T>(low, high)
+  : gbtArray<T>(low, high)
 { }
 
 template <class T> gVector<T>::gVector(const gVector<T> &V) 
-  : gArray<T>(V) 
+  : gbtArray<T>(V) 
 { }
 
 template <class T> gVector<T>::~gVector()   { }
@@ -52,7 +52,7 @@ template <class T> gVector<T>::~gVector()   { }
 template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
 {
   if (!Check(V))   throw BadDim();
-  gArray<T>::operator=(V);
+  gbtArray<T>::operator=(V);
   return *this;
 }
 
@@ -199,7 +199,7 @@ template <class T> T gVector<T>::NormSquared(void) const
   return answer;
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gVector<T> &V)
 { V.Dump(f);  return f; }
 
 template <class T> gVector<gDouble> TogDouble(const gVector<T>& V)

@@ -29,15 +29,12 @@
 #include "base/base.h"
 #include "game/nfg.h"
 
-gList<MixedSolution> gbtNfgBehavCH::Solve(const gbtNfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<MixedSolution> gbtNfgBehavCH::Solve(const gbtNfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
 
   // Code goes in here!
 
   return solutions;
 }
-
-
-

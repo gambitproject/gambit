@@ -36,8 +36,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "base/gtext.h"
 
-class gInput;
-class gOutput;
+class gbtInput;
+class gbtOutput;
 
 #if USE_GNU_MP
 #include <gmp.h>
@@ -190,11 +190,11 @@ public:
   bool fits_in_long(void) const;
   long as_long(void) const;
 
-  friend gText Itoa(const gInteger& x, int base = 10, int width = 0);
+  friend gbtText Itoa(const gInteger& x, int base = 10, int width = 0);
   friend gInteger atoI(const char* s, int base = 10);
   
-  friend gInput& operator>>(gInput &s, gInteger& y);
-  friend gOutput& operator<<(gOutput &s, const gInteger& y);
+  friend gbtInput& operator>>(gbtInput &s, gInteger& y);
+  friend gbtOutput& operator<<(gbtOutput &s, const gInteger& y);
 
 // error detection
   void error(const char* msg) const;
@@ -212,14 +212,6 @@ public:
 
 extern gInteger  sqrt(const gInteger&); // floor of square root
 
-gText ToText(const gInteger &);
+gbtText ToText(const gInteger &);
 
 #endif  // INTEGER_H
-
-
-
-
-
-
-
-

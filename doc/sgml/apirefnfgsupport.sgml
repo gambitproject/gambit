@@ -12,7 +12,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtNfgSupport::GetLabel(void) const
+gbtText gbtNfgSupport::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -32,7 +32,7 @@ gText gbtNfgSupport::GetLabel(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtNfgSupport::SetLabel(const gText &amp;p_label)
+void gbtNfgSupport::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -44,4 +44,3 @@ void gbtNfgSupport::SetLabel(const gText &amp;p_label)
 </sect2>
 
 </sect1>
-

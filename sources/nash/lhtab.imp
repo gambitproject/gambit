@@ -235,13 +235,13 @@ BFS<T> LHTableau<T>::GetBFS()
   return cbfs;
 }
 
-template <class T> gOutput &operator<<(gOutput &to, const LHTableau<T> &v)
+template <class T> gbtOutput &operator<<(gbtOutput &to, const LHTableau<T> &v)
 {
   v.Dump(to); return to;
 }
 
 template <class T>
-void LHTableau<T>::Dump(gOutput &to) const
+void LHTableau<T>::Dump(gbtOutput &to) const
 {
   T1.Dump(to);
   to << "\n"; 
@@ -309,4 +309,3 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 //  gout << "\nend of path " << dup;
   return 1;
 }
-

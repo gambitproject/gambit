@@ -54,11 +54,8 @@ public:
   bool GetFullGraph(void) const { return m_fullGraph; }
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
-  gText GetAlgorithm(void) const { return "Qre"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Qre"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };  
 
 #endif  // NFGLOGIT_H
-
-
-

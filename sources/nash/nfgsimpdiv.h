@@ -37,13 +37,13 @@ private:
   T pay,d,maxz,bestz,mingrid;
 
   T Simplex(MixedProfile<T> &);
-  T getlabel(MixedProfile<T> &yy, gArray<int> &, gPVector<T> &);
-  void update(gRectArray<int> &, gRectArray<int> &, gPVector<T> &,
+  T getlabel(MixedProfile<T> &yy, gbtArray<int> &, gPVector<T> &);
+  void update(gbtRectArray<int> &, gbtRectArray<int> &, gPVector<T> &,
 	      const gPVector<int> &, int j, int i);
   void getY(MixedProfile<T> &x, gPVector<T> &, 
 	    const gPVector<int> &, const gPVector<int> &, 
-	    const gPVector<T> &, const gRectArray<int> &, int k);
-  void getnexty(MixedProfile<T> &x, const gRectArray<int> &,
+	    const gPVector<T> &, const gbtRectArray<int> &, int k);
+  void getnexty(MixedProfile<T> &x, const gbtRectArray<int> &,
 		const gPVector<int> &, int i);
   int get_c(int j, int h, int nstrats, const gPVector<int> &);
   int get_b(int j, int h, int nstrats, const gPVector<int> &);
@@ -58,11 +58,8 @@ public:
   int LeashLength(void) const { return m_leashLength; }
   void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
 
-  gText GetAlgorithm(void) const { return "Simpdiv[NFG]"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Simpdiv[NFG]"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif  // NFGSIMPDIV_H
-
-
-

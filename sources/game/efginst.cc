@@ -32,48 +32,46 @@ class ChanceInfoset;
 #include "base/gblock.imp"
 #include "base/glist.imp"
 
-template class gArray<gbt_efg_player_rep *>;
-template class gBlock<gbt_efg_player_rep *>;
+template class gbtArray<gbt_efg_player_rep *>;
+template class gbtBlock<gbt_efg_player_rep *>;
 
-template class gArray<gbt_efg_infoset_rep *>;
-template class gBlock<gbt_efg_infoset_rep *>;
+template class gbtArray<gbt_efg_infoset_rep *>;
+template class gbtBlock<gbt_efg_infoset_rep *>;
 
-template class gArray<gbtEfgInfoset>;
-template class gBlock<gbtEfgInfoset>;
+template class gbtArray<gbtEfgInfoset>;
+template class gbtBlock<gbtEfgInfoset>;
 
-template class gArray<gbt_efg_node_rep *>;
-template class gBlock<gbt_efg_node_rep *>;
+template class gbtArray<gbt_efg_node_rep *>;
+template class gbtBlock<gbt_efg_node_rep *>;
 
-template class gArray<gbtEfgNode>;
-template class gBlock<gbtEfgNode>;
+template class gbtArray<gbtEfgNode>;
+template class gbtBlock<gbtEfgNode>;
 
-template class gArray<gbt_efg_action_rep *>;
-template class gBlock<gbt_efg_action_rep *>;
+template class gbtArray<gbt_efg_action_rep *>;
+template class gbtBlock<gbt_efg_action_rep *>;
 
-template class gArray<gbtEfgAction>;
-template class gBlock<gbtEfgAction>;
+template class gbtArray<gbtEfgAction>;
+template class gbtBlock<gbtEfgAction>;
 
-template class gArray<gArray<gbtEfgAction> *>;
+template class gbtArray<gbtArray<gbtEfgAction> *>;
 
-//template class gArray<gArray<Action *> *>;
+//template class gbtArray<gbtArray<Action *> *>;
 
-template class gArray<gbt_efg_outcome_rep *>;
-template class gBlock<gbt_efg_outcome_rep *>;
+template class gbtArray<gbt_efg_outcome_rep *>;
+template class gbtBlock<gbt_efg_outcome_rep *>;
 
-template class gArray<gBlock<bool> >;
-template class gBlock<gBlock<bool> >;
+template class gbtArray<gbtBlock<bool> >;
+template class gbtBlock<gbtBlock<bool> >;
 
 class EFActionSet;
 class EFActionArray;
 
-//template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
-template class gArray<EFActionSet *>;
-template class gArray<EFActionArray *>;
+//template bool operator==(const gbtArray<Action *> &, const gbtArray<Action *> &);
+template class gbtArray<EFActionSet *>;
+template class gbtArray<EFActionArray *>;
 
-template class gList<gbtEfgNode>;
-template class gList<gbtEfgAction>;
-template class gList<gbtEfgInfoset>;
+template class gbtList<gbtEfgNode>;
+template class gbtList<gbtEfgAction>;
+template class gbtList<gbtEfgInfoset>;
 
-template class gList<gbt_efg_outcome_rep *>;
-
-
+template class gbtList<gbt_efg_outcome_rep *>;

@@ -46,27 +46,27 @@
 class InfosetData {
 public:
   int m_number;
-  gText m_name;
-  gBlock<gText> m_actions;
-  gBlock<gNumber> m_probs;
+  gbtText m_name;
+  gbtBlock<gbtText> m_actions;
+  gbtBlock<gNumber> m_probs;
 
   InfosetData(void)
     : m_number(0), m_name("") { }
-  void AddAction(const gText &p_action) { m_actions.Append(p_action); }
+  void AddAction(const gbtText &p_action) { m_actions.Append(p_action); }
   void AddProb(const gNumber &p_prob) { m_probs.Append(p_prob); }
 };
 
 class OutcomeData {
 public:
-  gText m_name;
-  gBlock<gNumber> m_payoffs;
+  gbtText m_name;
+  gbtBlock<gNumber> m_payoffs;
   
-  OutcomeData(const gText &p_name) : m_name(p_name) { }
+  OutcomeData(const gbtText &p_name) : m_name(p_name) { }
 };
 
 class NodeData {
 public:
-  gText m_name;
+  gbtText m_name;
   int m_player, m_infoset, m_outcome;
   InfosetData *m_infosetData;
   OutcomeData *m_outcomeData;
@@ -76,7 +76,7 @@ public:
     : m_name(""), m_player(-1), m_infoset(-1), m_outcome(-1),
       m_infosetData(0), m_outcomeData(0), m_next(0) { }
   ~NodeData();
-  InfosetData *AddInfosetData(const gText &);
+  InfosetData *AddInfosetData(const gbtText &);
 };
 
 NodeData::~NodeData()
@@ -85,7 +85,7 @@ NodeData::~NodeData()
   if (m_outcomeData)  delete m_outcomeData;
 }
   
-InfosetData *NodeData::AddInfosetData(const gText &m_infosetName)
+InfosetData *NodeData::AddInfosetData(const gbtText &m_infosetName)
 {
   m_infosetData = new InfosetData;
   m_infosetData->m_name = m_infosetName;
@@ -103,7 +103,7 @@ public:
 
 class PlayerData {
 public:
-  gText m_name;
+  gbtText m_name;
   DefinedInfosetData *m_firstInfoset, *m_lastInfoset;
   PlayerData *m_next;
 
@@ -171,17 +171,17 @@ public:
 
 class TreeData {
 public:
-  gText m_title;
-  gText m_comment;
+  gbtText m_title;
+  gbtText m_comment;
   PlayerData *m_firstPlayer, *m_lastPlayer, m_chancePlayer;
   NodeData *m_firstNode, *m_lastNode;
-  gBlock<DefinedOutcomeData *> m_outcomes;
+  gbtBlock<DefinedOutcomeData *> m_outcomes;
 
   TreeData(void);
   ~TreeData();
 
-  void AddPlayer(const gText &);
-  NodeData *AddNode(const gText &, int, int);
+  void AddPlayer(const gbtText &);
+  NodeData *AddNode(const gbtText &, int, int);
   gbtEfgOutcome GetOutcome(int p_number) const;
 };
 
@@ -215,7 +215,7 @@ TreeData::~TreeData()
   }
 }
 
-void TreeData::AddPlayer(const gText &p_player)
+void TreeData::AddPlayer(const gbtText &p_player)
 {
   PlayerData *player = new PlayerData;
   player->m_name = p_player;
@@ -230,7 +230,7 @@ void TreeData::AddPlayer(const gText &p_player)
   }
 }
 
-NodeData *TreeData::AddNode(const gText &p_name, int p_player, int p_infoset)
+NodeData *TreeData::AddNode(const gbtText &p_name, int p_player, int p_infoset)
 {
   NodeData *node = new NodeData;
   node->m_name = p_name;
@@ -282,23 +282,23 @@ typedef enum {
 
 class ParserState {
 private:
-  gInput &m_file;
+  gbtInput &m_file;
 
   SymbolSet m_lastSymbol;
   double m_lastDouble;
   gInteger m_lastInteger;
   gRational m_lastRational;
-  gText m_lastText;
+  gbtText m_lastText;
 
 public:
-  ParserState(gInput &p_file) : m_file(p_file) { }
+  ParserState(gbtInput &p_file) : m_file(p_file) { }
 
   SymbolSet GetNextSymbol(void);
   SymbolSet GetCurrentSymbol(void) const { return m_lastSymbol; }
   const gInteger &GetLastInteger(void) const { return m_lastInteger; }
   const gRational &GetLastRational(void) const { return m_lastRational; }
   double GetLastDouble(void) const { return m_lastDouble; }
-  gText GetLastText(void) const { return m_lastText; }
+  gbtText GetLastText(void) const { return m_lastText; }
 };  
 
 class ParserError { };
@@ -358,7 +358,7 @@ SymbolSet ParserState::GetNextSymbol(void)
     return (m_lastSymbol = symCOMMA);
   }
   else if (isdigit(c) || c == '-') {
-    gText buf;
+    gbtText buf;
     buf += c;
     m_file.get(c);
     
@@ -398,7 +398,7 @@ SymbolSet ParserState::GetNextSymbol(void)
     }
   }
   else if (c == '"') {
-    // The operator>> for gText handles quote-escaping
+    // The operator>> for gbtText handles quote-escaping
     m_file.unget(c);
     m_file >> m_lastText;
     return (m_lastSymbol = symTEXT);
@@ -459,7 +459,7 @@ static void ParseChanceNode(ParserState &p_state, TreeData &p_treeData)
   if (p_state.GetNextSymbol() != symTEXT) {
     throw ParserError();
   }
-  gText nodeName = p_state.GetLastText();
+  gbtText nodeName = p_state.GetLastText();
 
   if (p_state.GetNextSymbol() != symINTEGER) {
     throw ParserError();
@@ -518,7 +518,7 @@ static void ParsePersonalNode(ParserState &p_state, TreeData &p_treeData)
   if (p_state.GetNextSymbol() != symTEXT) {
     throw ParserError();
   }
-  gText nodeName = p_state.GetLastText();
+  gbtText nodeName = p_state.GetLastText();
 
   if (p_state.GetNextSymbol() != symINTEGER) {
     throw ParserError();
@@ -736,7 +736,7 @@ static void BuildEfg(gbtEfgGame p_efg, TreeData &p_treeData)
 // ReadEfgFile: Global visible function to read an extensive form savefile
 //=========================================================================
 
-gbtEfgGame ReadEfg(gInput &p_file)
+gbtEfgGame ReadEfg(gbtInput &p_file)
 {
   ParserState parser(p_file);
   TreeData treeData;
@@ -759,5 +759,5 @@ gbtEfgGame ReadEfg(gInput &p_file)
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<DefinedOutcomeData *>;
-template class gBlock<DefinedOutcomeData *>;
+template class gbtArray<DefinedOutcomeData *>;
+template class gbtBlock<DefinedOutcomeData *>;

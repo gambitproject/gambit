@@ -139,7 +139,7 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 
-  const gList<gbtNfgSupport *> &supports = m_doc->AllNfgSupports();
+  const gbtList<gbtNfgSupport *> &supports = m_doc->AllNfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append(wxString::Format(wxT("%d: %s"), i,
@@ -288,8 +288,8 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
 
 #include "base/gmap.imp"
 
-static gOutput &operator<<(gOutput &p_output, wxTreeItemId)
+static gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gBaseMap<wxTreeItemId, gbtNfgStrategy>;
-template class gOrdMap<wxTreeItemId, gbtNfgStrategy>;
+template class gbtBaseMap<wxTreeItemId, gbtNfgStrategy>;
+template class gbtOrdMap<wxTreeItemId, gbtNfgStrategy>;

@@ -42,7 +42,7 @@ template <class T> gPolyList<T>::gPolyList(const gSpace* sp,
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 					  const term_order* to,
-					  const gList< gPoly<T> *> & plist)
+					  const gbtList< gPoly<T> *> & plist)
 : Space(sp), Order(to), List()
 {
   int ii;
@@ -52,7 +52,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 
 template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 					  const term_order* to,
-					  const gList< gPoly<T> > & list)
+					  const gbtList< gPoly<T> > & list)
 : Space(sp), Order(to), List()
 {
   int ii;
@@ -120,7 +120,7 @@ template<class T>  void gPolyList<T>::operator+=(const gPoly<T> & new_poly)
 
 template<class T>  void gPolyList<T>::operator+=(const gPolyList<T> & new_list)
 {
-  gList<gPoly<T>*> temp;
+  gbtList<gPoly<T>*> temp;
   for (int i = 1; i <= new_list.Length(); i++)
     temp += new gPoly<T>(new_list[i]);
   List+=temp;
@@ -236,20 +236,20 @@ template<class T> void gPolyList<T>::Sort(const term_order& order)
 }
 
 template <class T> 
-void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed, 
-				const gList<index_pair>& computed, 
+void gPolyList<T>::CriterionTwo(      gbtList<gbtIndexPair>& uncomputed, 
+				const gbtList<gbtIndexPair>& computed, 
 				const int&               no_polys,
 				const term_order & order)           const
 {
   for (int ell = 1; ell < no_polys; ell++) {
-    int spot = uncomputed.Find(index_pair(ell,no_polys));
+    int spot = uncomputed.Find(gbtIndexPair(ell,no_polys));
     if (spot != 0) {
       int ii;
       for (ii = 1; ii < no_polys; ii++) 
 	if (ii != ell && spot != 0) 
-	  if ( uncomputed.Contains(index_pair(ii,ell)) ||
-	       computed.Contains(index_pair(ii,ell)) )
-	    if (uncomputed.Contains(index_pair(ii,no_polys)))  {
+	  if ( uncomputed.Contains(gbtIndexPair(ii,ell)) ||
+	       computed.Contains(gbtIndexPair(ii,ell)) )
+	    if (uncomputed.Contains(gbtIndexPair(ii,no_polys)))  {
 	      exp_vect lpp_i        = List[ii]->  LeadingPowerProduct(order);
 	      exp_vect lpp_ell      = List[ell]->LeadingPowerProduct(order);
 	      exp_vect lpp_no_polys = List[no_polys]->
@@ -263,10 +263,10 @@ void gPolyList<T>::CriterionTwo(      gList<index_pair>& uncomputed,
   }
   int ii;
   for (ii = 1; ii < no_polys; ii++) {
-    if ( uncomputed.Contains(index_pair(ii,no_polys)) )
+    if ( uncomputed.Contains(gbtIndexPair(ii,no_polys)) )
       for (int j = ii + 1; j < no_polys; j++) {
-	int spot = uncomputed.Find(index_pair(ii,j));
-	if ( uncomputed.Contains(index_pair(j,no_polys)) && (spot != 0) ) {
+	int spot = uncomputed.Find(gbtIndexPair(ii,j));
+	if ( uncomputed.Contains(gbtIndexPair(j,no_polys)) && (spot != 0) ) {
 	      exp_vect lpp_i        = List[ii]->LeadingPowerProduct(order);
 	      exp_vect lpp_j        = List[j]->LeadingPowerProduct(order);
 	      exp_vect lpp_no_polys = List[no_polys]->
@@ -290,12 +290,12 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) List[ii]->ToMonic(order);
 
-  gList<index_pair> uncomputed;
-  gList<index_pair>   computed;
+  gbtList<gbtIndexPair> uncomputed;
+  gbtList<gbtIndexPair>   computed;
 
   for (ii = 2; ii <= List.Length(); ii++) {
     for (int j = 1; j < ii; j++) 
-      uncomputed += index_pair(j,ii);
+      uncomputed += gbtIndexPair(j,ii);
     CriterionTwo(uncomputed, computed, ii, order);
   }
 
@@ -320,7 +320,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
 	gPoly<T>* hptr = new gPoly<T>(h);
 	List += hptr;
 	for (int k = 1; k < List.Length(); k++) 
-	  uncomputed += index_pair(k,List.Length());
+	  uncomputed += gbtIndexPair(k,List.Length());
 	CriterionTwo(uncomputed, computed, List.Length(), order);
       }
     }
@@ -390,7 +390,7 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 template<class T> gPolyList<T> 
 gPolyList<T>::TranslateOfSystem(const gVector<T>& new_origin) const
 {
-  gList<gPoly<T> > new_polys;
+  gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
     new_polys += (*this)[i].TranslateOfPoly(new_origin);
     //    assert (TranslateOfPoly((*this)[i],new_origin) == 
@@ -402,7 +402,7 @@ gPolyList<T>::TranslateOfSystem(const gVector<T>& new_origin) const
 template<class T> gPolyList<T> 
 gPolyList<T>::SystemInNewCoordinates(const gSquareMatrix<T>& M) const
 {
-  gList<gPoly<T> > new_polys;
+  gbtList<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
     //    assert ( (*this)[i].PolyInNewCoordinates(M) == 
     //     	     gPoly<T>( PolyInNewCoordinates((*this)[i],M) ) );
@@ -427,9 +427,9 @@ gPolyList<T>::InteriorSegment(int first, int last) const
 //           Information
 //----------------------------------
 
-template <class T> gList<gPoly<T> > gPolyList<T>::UnderlyingList(void) const
+template <class T> gbtList<gPoly<T> > gPolyList<T>::UnderlyingbtList(void) const
 {
-  gList<gPoly<T> > NewList;
+  gbtList<gPoly<T> > NewList;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) 
     NewList += *List[ii];
@@ -464,14 +464,14 @@ template<class T> const bool gPolyList<T>::IsRoot(const gVector<T>& v) const
 }
   
 template<class T> 
-const gRectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
+const gbtRectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 {
   gPoly<T> zero(Space, Order);
-  gRectArray<gPoly<T>*> answer(Length(),Dmnsn());
+  gbtRectArray<gPoly<T>*> answer(Length(),Dmnsn());
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = new gPoly<T>(UnderlyingList()[ii].PartialDerivative(j));
+      answer(ii,j) = new gPoly<T>(UnderlyingbtList()[ii].PartialDerivative(j));
   
   return answer;
 }
@@ -482,7 +482,7 @@ const gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
   assert(List.Length() == Space->Dmnsn());
 
   int n = List.Length();
-  gRectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
+  gbtRectArray<gPoly<T>*> deriv_matrix = DerivativeMatrix();
   gPoly<T> answer(Space, Order);
 
   gPermutationOdometer odo(n);
@@ -501,7 +501,7 @@ template<class T>
 const gMatrix<T> gPolyList<T>::DerivativeMatrix(const gVector<T>& p) const
 {
   gMatrix<T> answer(Length(),Dmnsn());
-  gList<gPoly<T> > list = UnderlyingList();
+  gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -516,7 +516,7 @@ gPolyList<T>::SquareDerivativeMatrix(const gVector<T>& p) const
   assert (Length() == Dmnsn());
 
   gSquareMatrix<T> answer(Length());
-  gList<gPoly<T> > list = UnderlyingList();
+  gbtList<gPoly<T> > list = UnderlyingbtList();
   int ii;
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
@@ -530,9 +530,9 @@ gPolyList<T>::SquareDerivativeMatrix(const gVector<T>& p) const
 //----------------------------------
 
 template<class T> 
-gList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
+gbtList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
 {
-  gList<gPoly<gDouble> > newlist;
+  gbtList<gPoly<gDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
     newlist += gPoly<gDouble>(TogDouble(*List[ii]));
@@ -541,9 +541,9 @@ gList<gPoly<gDouble> > gPolyList<T>::ListTogDouble() const
 }
 
 template<class T> 
-gList<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
+gbtList<gPoly<gDouble> > gPolyList<T>::NormalizedList() const
 {
-  gList<gPoly<gDouble> > newlist;
+  gbtList<gPoly<gDouble> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
     newlist += gPoly<gDouble>(NormalizationOfPoly(*List[ii]));
@@ -561,11 +561,10 @@ template <class T> const int gPolyList<T>::Dmnsn() const { return Space->Dmnsn()
 //           Printing
 //----------------------------------
 
-template <class T> gOutput& operator << (gOutput& output, 
+template <class T> gbtOutput& operator << (gbtOutput& output, 
 					 const gPolyList<T>& x)
 {
   for(int t = 1; t <= x.Length(); t++)
     output << t << ":  " << x[t] <<"\n"; 
   return  output;
 }
-

@@ -31,12 +31,12 @@
 
 template <class T> class gPVector : public gVector<T> {
  private:
-  int sum(const gArray<int> &V) const;
+  int sum(const gbtArray<int> &V) const;
   void setindex(void);
 
  protected:
   T **svptr;
-  gArray<int> svlen;
+  gbtArray<int> svlen;
 
   int Check(const gPVector<T> &v) const;
 
@@ -45,8 +45,8 @@ template <class T> class gPVector : public gVector<T> {
   // constructors
 
   gPVector(void);
-  gPVector(const gArray<int> &sig);
-  gPVector(const gVector<T> &val, const gArray<int> &sig);
+  gPVector(const gbtArray<int> &sig);
+  gPVector(const gVector<T> &val, const gbtArray<int> &sig);
   gPVector(const gPVector<T> &v);
   virtual ~gPVector();
 
@@ -81,16 +81,13 @@ template <class T> class gPVector : public gVector<T> {
   bool operator!=(const gPVector<T> &v) const;
 
   // parameter access functions
-  const gArray<int>& Lengths(void) const;
+  const gbtArray<int>& Lengths(void) const;
 
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 #ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gPVector<T> &v);
 #endif
 
 #endif   //# GPVECTOR_H
-
-
-

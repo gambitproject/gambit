@@ -34,7 +34,7 @@
 //----------------------------------------------------
 
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(precDOUBLE),
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -54,7 +54,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -74,7 +74,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 }
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(gbtNfgSupport(p_profile.GetGame())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
@@ -139,9 +139,9 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-gTriState MixedSolution::GetNash(void) const
+gbtTriState MixedSolution::GetNash(void) const
 {
-  gTriState answer;
+  gbtTriState answer;
   if(IsComplete())
     answer = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
   else
@@ -153,7 +153,7 @@ gTriState MixedSolution::GetNash(void) const
   return answer;
 }
 
-gTriState MixedSolution::GetPerfect(void) const
+gbtTriState MixedSolution::GetPerfect(void) const
 {
   if (IsNash()) {
     gNullOutput gnull;
@@ -167,7 +167,7 @@ gTriState MixedSolution::GetPerfect(void) const
   return triUNKNOWN;
 }
 
-gTriState MixedSolution::GetProper(void) const
+gbtTriState MixedSolution::GetProper(void) const
 {
   return triUNKNOWN;
 }
@@ -279,7 +279,7 @@ bool MixedSolution::IsComplete(void) const
   return true;
 }
 
-const gTriState &MixedSolution::IsNash(void) const
+const gbtTriState &MixedSolution::IsNash(void) const
 {
   CheckIsValid();
   if(!m_Nash.Checked())
@@ -293,7 +293,7 @@ MixedSolution MixedSolution::PolishEq(void) const
   return PolishEquilibrium(m_support,*this,is_singular);
 }
 
-const gTriState &MixedSolution::IsPerfect(void) const
+const gbtTriState &MixedSolution::IsPerfect(void) const
 {
   CheckIsValid();
   if(!m_Perfect.Checked())
@@ -301,7 +301,7 @@ const gTriState &MixedSolution::IsPerfect(void) const
   return m_Perfect.Answer();
 }
 
-const gTriState &MixedSolution::IsProper(void) const
+const gbtTriState &MixedSolution::IsProper(void) const
 {
   CheckIsValid();
   if(!m_Proper.Checked())
@@ -349,13 +349,13 @@ gNumber MixedSolution::GetStrategyValue(gbtNfgStrategy p_strategy) const
 // Output
 //----------
 
-void MixedSolution::Dump(gOutput &p_file) const
+void MixedSolution::Dump(gbtOutput &p_file) const
 {
   m_profile.Dump(p_file);
   DumpInfo(p_file);
 }
 
-void MixedSolution::DumpInfo(gOutput &p_file) const
+void MixedSolution::DumpInfo(gbtOutput &p_file) const
 {
   p_file << " Creator:" << GetCreator();
   p_file << " IsNash:" << IsNash();
@@ -368,11 +368,11 @@ void MixedSolution::DumpInfo(gOutput &p_file) const
   }
 }
 
-gOutput &operator<<(gOutput &p_file, const MixedSolution &p_solution)
+gbtOutput &operator<<(gbtOutput &p_file, const MixedSolution &p_solution)
 { 
   p_solution.Dump(p_file);
   return p_file;
 }
 
 #include "base/glist.imp"
-template class gList<MixedSolution>;
+template class gbtList<MixedSolution>;

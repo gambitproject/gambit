@@ -57,17 +57,17 @@ public:
   virtual double GetMinParameter(void) const = 0;
 
   // Get the label associated with dimension 'p_dim'
-  virtual gText GetLabel(int p_dim) const { return "Series " + ToText(p_dim); }
+  virtual gbtText GetLabel(int p_dim) const { return "Series " + ToText(p_dim); }
 };
 
 class gbtCorBranchMixed : public gbtCorBranch {
 private:
-  gList<MixedSolution> m_data;
+  gbtList<MixedSolution> m_data;
 
 public:
   // Constructors
   gbtCorBranchMixed(void);
-  gbtCorBranchMixed(const gList<MixedSolution> &);
+  gbtCorBranchMixed(const gbtList<MixedSolution> &);
   virtual ~gbtCorBranchMixed() { }
 
   // Returns the number of dimensions of the product of simplices
@@ -88,12 +88,12 @@ public:
 
 class gbtCorBranchBehav : public gbtCorBranch {
 private:
-  gList<BehavSolution> m_data;
+  gbtList<BehavSolution> m_data;
 
 public:
   // Constructors
   gbtCorBranchBehav(void);
-  gbtCorBranchBehav(const gList<BehavSolution> &);
+  gbtCorBranchBehav(const gbtList<BehavSolution> &);
   virtual ~gbtCorBranchBehav() { }
 
   // Returns the number of dimensions of the product of simplices
@@ -199,5 +199,3 @@ public:
 };
 
 #endif  // CORPLOT_H
-
-

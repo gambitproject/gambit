@@ -32,23 +32,23 @@
 #include "math/gnumber.h"
 
 template class gMono<int>;
-template gOutput& operator << (gOutput& output, const gMono<int>& x);
+template gbtOutput& operator << (gbtOutput& output, const gMono<int>& x);
 
 template class gMono<double>;
-template gOutput& operator << (gOutput& output, const gMono<double>& x);
+template gbtOutput& operator << (gbtOutput& output, const gMono<double>& x);
 
 template class gMono<gRational>;
-template gOutput& operator << (gOutput& output, const gMono<gRational>& x);
+template gbtOutput& operator << (gbtOutput& output, const gMono<gRational>& x);
 
 template class gMono<gNumber>;
-template gOutput& operator << (gOutput& output, const gMono<gNumber>& x);
+template gbtOutput& operator << (gbtOutput& output, const gMono<gNumber>& x);
 
 template class gMono<gDouble>;
-template gOutput& operator << (gOutput& output, const gMono<gDouble>& x);
+template gbtOutput& operator << (gbtOutput& output, const gMono<gDouble>& x);
 
-template class gList< gMono<int> >;
-template class gList< gMono<double> >;
-template class gList< gMono<gRational> >;
-template class gList< gMono<gNumber> >;
+template class gbtList< gMono<int> >;
+template class gbtList< gMono<double> >;
+template class gbtList< gMono<gRational> >;
+template class gbtList< gMono<gNumber> >;
 
-template class gList< gMono<gDouble> >;
+template class gbtList< gMono<gDouble> >;

@@ -57,8 +57,8 @@ returns the extensive or normal form game to which the outcome belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgOutcome::GetLabel(void) const
-gText gbtNfgOutcome::GetLabel(void) const
+gbtText gbtEfgOutcome::GetLabel(void) const
+gbtText gbtNfgOutcome::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -113,8 +113,8 @@ a rational number class for Python!)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgOutcome::SetLabel(const gText &amp;p_label)
-void gbtNfgOutcome::SetLabel(const gText &amp;p_label)
+void gbtEfgOutcome::SetLabel(const gbtText &amp;p_label)
+void gbtNfgOutcome::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -162,4 +162,3 @@ a rational number class for Python!)
 
 
 </sect1>
-

@@ -238,12 +238,12 @@ void gbtDialogEditGame::OnOK(wxCommandEvent &p_event)
 
 class gbtCmdEditGame : public gbtGameCommand {
 private:
-  gText m_title, m_comment;
-  gArray<gText> m_players;
+  gbtText m_title, m_comment;
+  gbtArray<gbtText> m_players;
 
 public:
-  gbtCmdEditGame(const gText &p_title, const gText &p_comment,
-		 const gArray<gText> &p_players)
+  gbtCmdEditGame(const gbtText &p_title, const gbtText &p_comment,
+		 const gbtArray<gbtText> &p_players)
     : m_title(p_title), m_comment(p_comment), m_players(p_players) { }
   virtual ~gbtCmdEditGame() { }
 
@@ -276,14 +276,12 @@ void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
 
 gbtGameCommand *gbtDialogEditGame::GetCommand(void) const
 {
-  gArray<gText> players(m_players->GetNumberRows());
+  gbtArray<gbtText> players(m_players->GetNumberRows());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = m_players->GetCellValue(pl - 1, 0).mb_str();
   }
 
-  return new gbtCmdEditGame(gText(m_title->GetValue().mb_str()),
-			    gText(m_comment->GetValue().mb_str()),
+  return new gbtCmdEditGame(gbtText(m_title->GetValue().mb_str()),
+			    gbtText(m_comment->GetValue().mb_str()),
 			    players);
 }
-
-

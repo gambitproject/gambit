@@ -32,28 +32,27 @@
 #include "gnumber.h"
 #include "complex.h"
 
-template class gArray<gInteger>;
-template class gArray<gRational>;
-template class gArray<gComplex>;
-template class gArray<gNumber>;
-template gOutput &operator<<(gOutput &, const gArray<gInteger> &);
-template gOutput &operator<<(gOutput &, const gArray<gRational> &);
-template gOutput &operator<<(gOutput &, const gArray<gText> &);
+template class gbtArray<gInteger>;
+template class gbtArray<gRational>;
+template class gbtArray<gComplex>;
+template class gbtArray<gNumber>;
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gInteger> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtText> &);
 
-template class gBlock<gRational>;
-template class gBlock<gNumber>;
-template gOutput &operator<<(gOutput &, const gBlock<gRational> &);
-template gOutput &operator<<(gOutput &, const gBlock<gNumber> &);
+template class gbtBlock<gRational>;
+template class gbtBlock<gNumber>;
+template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gNumber> &);
 
-template class gList<gRational>;
-template class gList<gNumber>;
+template class gbtList<gRational>;
+template class gbtList<gNumber>;
 
-template class gRectArray<gInteger>;
-template class gRectArray<gRational>;
-template class gRectArray<gNumber>;
-template gOutput &operator<<(gOutput &, const gRectArray<gInteger> &);
-template gOutput &operator<<(gOutput &, const gRectArray<gRational> &);
-template gOutput &operator<<(gOutput &, const gRectArray<gNumber> &);
+template class gbtRectArray<gInteger>;
+template class gbtRectArray<gRational>;
+template class gbtRectArray<gNumber>;
+template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gInteger> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gNumber> &);
 
-template class gRectBlock<gNumber>;
-
+template class gbtRectBlock<gNumber>;

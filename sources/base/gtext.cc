@@ -32,23 +32,23 @@
 #include <ctype.h>
 #include "base.h"
 
-gText gText::BadIndex::Description(void) const
-{ return "Bad index exception in gText"; }
+gbtText gbtText::BadIndex::Description(void) const
+{ return "Bad index exception in gbtText"; }
 
-gText::gText(void)
+gbtText::gbtText(void)
 {
   storage = new char[1];
   *storage = '\0';
 }
 
-gText::gText(char c)
+gbtText::gbtText(char c)
 {
   storage = new char[2];
   storage[0] = c;
   storage[1] = '\0';
 }
 
-gText::gText(const char *s)
+gbtText::gbtText(const char *s)
 {
   if (s != 0)   {
     storage = new char[strlen(s) + 1];
@@ -60,20 +60,20 @@ gText::gText(const char *s)
   }
 }
 
-gText::gText(const gText &s)
+gbtText::gbtText(const gbtText &s)
 {
   storage = new char[strlen(s.storage) + 1];
   strcpy(storage, s.storage);
 }
 
-gText::gText(int len)
+gbtText::gbtText(int len)
 {
   storage = new char[len + 1];
   memset(storage, 0, len + 1);
 }
 
 
-gText &gText::operator=(const gText &s)
+gbtText &gbtText::operator=(const gbtText &s)
 { 
   if (this != &s) {
     *this = s.storage; 
@@ -81,7 +81,7 @@ gText &gText::operator=(const gText &s)
   return *this; 
 }
 
-gText &gText::operator=(const char *s)
+gbtText &gbtText::operator=(const char *s)
 {
   delete [] storage;
   if (s != 0)   {
@@ -95,7 +95,7 @@ gText &gText::operator=(const char *s)
   return *this;
 }
 
-gText &gText::operator+=(char c)
+gbtText &gbtText::operator+=(char c)
 {
   char *sp = new char[strlen(storage) + 2];
   strcpy(sp, storage);
@@ -106,7 +106,7 @@ gText &gText::operator+=(char c)
   return *this;
 }
 
-gText &gText::operator+=(const char *s)
+gbtText &gbtText::operator+=(const char *s)
 {
   char *sp = new char[strlen(storage) + strlen(s) + 1];
   strcpy(sp, storage);
@@ -116,58 +116,58 @@ gText &gText::operator+=(const char *s)
   return *this;
 }
 
-gText gText::operator+(char c) const
+gbtText gbtText::operator+(char c) const
 {
-  gText tmp(*this);
+  gbtText tmp(*this);
   tmp += c;
   return tmp;
 }
 
-gText gText::operator+(const char *s) const
+gbtText gbtText::operator+(const char *s) const
 {
-  gText tmp(*this);
+  gbtText tmp(*this);
   tmp += s;
   return tmp;
 }
 
-gText gText::Right(int len) const
+gbtText gbtText::Right(int len) const
 {
   int pos = strlen( storage ) - len;
-  return gText(storage + ( pos > 0 ? pos : 0 ) );
+  return gbtText(storage + ( pos > 0 ? pos : 0 ) );
 }
 
-gText gText::Left(int len) const
+gbtText gbtText::Left(int len) const
 {
-  gText tmp(len + 1);
+  gbtText tmp(len + 1);
   strncpy(tmp.storage, storage, len);
   return tmp;
 }
 
-gText gText::Mid(int len, int where) const
+gbtText gbtText::Mid(int len, int where) const
 {
-  gText tmp(len + 1);
+  gbtText tmp(len + 1);
   strncpy(tmp.storage, storage + where - 1, len);
   return tmp;
 }
 
 
-gText gText::Upcase(void) const
+gbtText gbtText::Upcase(void) const
 {
-  gText tmp = *this;
+  gbtText tmp = *this;
   for (unsigned int i = 0; i < strlen(storage); i++)
     tmp.storage[i] = (char) toupper(tmp.storage[i]);
   return tmp;
 }
 
-gText gText::Dncase(void) const
+gbtText gbtText::Dncase(void) const
 {
-  gText tmp = *this;
+  gbtText tmp = *this;
   for (unsigned int i = 0; i < strlen(storage); i++)
     tmp.storage[i] = (char) tolower(tmp.storage[i]);
   return tmp;
 }
 
-void gText::Insert(char c, unsigned int n)
+void gbtText::Insert(char c, unsigned int n)
 {
   if (n > strlen(storage))  throw BadIndex();
 
@@ -180,7 +180,7 @@ void gText::Insert(char c, unsigned int n)
   storage = temp;
 }
 
-void gText::Remove(unsigned int n)
+void gbtText::Remove(unsigned int n)
 {
   if (n > strlen(storage) - 1)  throw BadIndex();
 
@@ -192,7 +192,7 @@ void gText::Remove(unsigned int n)
   storage = temp;
 }
 
-int gText::LastOccur(char c)
+int gbtText::LastOccur(char c)
 {
   int result = -1;
 
@@ -203,7 +203,7 @@ int gText::LastOccur(char c)
 }
 
 
-gInput& operator>>(gInput &from, gText &s)
+gbtInput& operator>>(gbtInput &from, gbtText &s)
 {
   char a;
   
@@ -241,17 +241,12 @@ gInput& operator>>(gInput &from, gText &s)
   return from;
 }
 
-gOutput& operator<<(gOutput &to, const gText &s)
+gbtOutput& operator<<(gbtOutput &to, const gbtText &s)
 {
   to << s.storage; return to;
 }
 
-gText operator+(const char *c, const gText &s)
+gbtText operator+(const char *c, const gbtText &s)
 {
-  return gText(c) + s;
+  return gbtText(c) + s;
 }
-
-
-
-
-

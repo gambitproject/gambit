@@ -47,23 +47,23 @@ struct gbt_efg_game_rep;
 //
 // Exception classes for the various bad stuff that can happen
 //
-class gbtEfgException : public gException {
+class gbtEfgbtException : public gbtException {
 public:
-  virtual ~gbtEfgException() { }
-  gText Description(void) const    { return "Error in gbtEfgGame"; }
+  virtual ~gbtEfgbtException() { }
+  gbtText Description(void) const    { return "Error in gbtEfgGame"; }
 };
 
-class gbtEfgNullObject : public gbtEfgException {
+class gbtEfgNullObject : public gbtEfgbtException {
 public:
   virtual ~gbtEfgNullObject() { }
 };
 
-class gbtEfgGameMismatch : public gbtEfgException {
+class gbtEfgGameMismatch : public gbtEfgbtException {
 public:
   virtual ~gbtEfgGameMismatch() { }
 };
 
-class gbtEfgNonterminalNode : public gbtEfgException {
+class gbtEfgNonterminalNode : public gbtEfgbtException {
 public:
   virtual ~gbtEfgNonterminalNode() { }
 };
@@ -90,12 +90,12 @@ protected:
 
   gbtEfgOutcome NewOutcome(int index);
 
-  void WriteEfg(gOutput &, gbt_efg_node_rep *) const;
+  void WriteEfg(gbtOutput &, gbt_efg_node_rep *) const;
 
   void Payoff(gbt_efg_node_rep *n, gNumber,
 	      const gPVector<int> &, gVector<gNumber> &) const;
   void Payoff(gbt_efg_node_rep *n, gNumber,
-	      const gArray<gArray<int> *> &, gArray<gNumber> &) const;
+	      const gbtArray<gbtArray<int> *> &, gbtArray<gNumber> &) const;
   
   void InfosetProbs(gbt_efg_node_rep *n, gNumber,
 		    const gPVector<int> &, gPVector<gNumber> &) const;
@@ -116,14 +116,14 @@ public:
   gbtEfgGame Copy(gbtEfgNode = gbtEfgNode(0)) const;
   
   // TITLE ACCESS AND MANIPULATION
-  void SetLabel(const gText &s);
-  const gText &GetLabel(void) const;
+  void SetLabel(const gbtText &s);
+  const gbtText &GetLabel(void) const;
   
-  void SetComment(const gText &);
-  const gText &GetComment(void) const;
+  void SetComment(const gbtText &);
+  const gbtText &GetComment(void) const;
 
   // WRITING DATA FILES
-  void WriteEfg(gOutput &p_file) const;
+  void WriteEfg(gbtOutput &p_file) const;
 
   // DATA ACCESS -- GENERAL INFORMATION
   bool IsConstSum(void) const; 
@@ -168,7 +168,7 @@ public:
   int ProfileLength(void) const;
   int TotalNumInfosets(void) const;
 
-  gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
+  gbtArray<int>   NumInfosets(void) const;  // Does not include chance infosets
   int           NumPlayerInfosets(void) const;
   gPVector<int> NumActions(void) const;
   int           NumPlayerActions(void) const;
@@ -176,8 +176,8 @@ public:
   
   // COMPUTING VALUES OF PROFILES
   void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
-  void Payoff(const gArray<gArray<int> *> &profile,
-	      gArray<gNumber> &payoff) const;
+  void Payoff(const gbtArray<gbtArray<int> *> &profile,
+	      gbtArray<gNumber> &payoff) const;
 
   void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
     
@@ -189,17 +189,17 @@ public:
 };
 
 gbtEfgGame NewEfg(void);
-gbtEfgGame ReadEfg(gInput &);
+gbtEfgGame ReadEfg(gbtInput &);
 
 template <class T> class PureBehavProfile   {
   protected:
     gbtEfgGame m_efg;
-    gArray<gArray<gbtEfgAction> *> profile;
+    gbtArray<gbtArray<gbtEfgAction> *> profile;
 
     //    void IndPayoff(const Node *n, const int &pl, const T, T &) const;
     // This aims at efficiency, but leads to a problem described in behav.imp
 
-    void Payoff(const gbtEfgNode &n, const T, gArray<T> &) const;
+    void Payoff(const gbtEfgNode &n, const T, gbtArray<T> &) const;
     void InfosetProbs(const gbtEfgNode &n, T, gPVector<T> &) const;
 
   public:
@@ -213,7 +213,7 @@ template <class T> class PureBehavProfile   {
 
     // Manipulation
     void Set(const gbtEfgAction &);
-    //    void Set(const gbtEfgPlayer &, const gArray<const Action *> &);
+    //    void Set(const gbtEfgPlayer &, const gbtArray<const Action *> &);
 
     // Information
     gbtEfgAction GetAction(const gbtEfgInfoset &) const;
@@ -223,7 +223,7 @@ template <class T> class PureBehavProfile   {
     
     const T Payoff(const gbtEfgNode &, const int &pl) const;
   //    T    Payoff(const int &pl) const;
-    void Payoff(gArray<T> &payoff) const;
+    void Payoff(gbtArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;
     gbtEfgGame GetGame(void) const   { return m_efg; }
 };
@@ -269,5 +269,3 @@ public:
 
 
 #endif   // EFG_H
-
-

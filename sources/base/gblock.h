@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include "garray.h"
 
-template <class T> class gBlock : public gArray<T>   {
+template <class T> class gbtBlock : public gbtArray<T>   {
   private:
 //
 // Insert the given element at the specified location.  Does not do any
@@ -45,48 +45,48 @@ template <class T> class gBlock : public gArray<T>   {
 // Constructs a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
-    gBlock(unsigned int len = 0);
+    gbtBlock(unsigned int len = 0);
 //
 // Constructs a block starting at lo, and going to hi.
 //
-    gBlock(int lo, int hi);
+    gbtBlock(int lo, int hi);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
 //
-    gBlock(const gBlock<T> &);
+    gbtBlock(const gbtBlock<T> &);
 //
 // Deallocates the block of memory, calling the destructors for any
 // elements still within the block.
 //
-    virtual ~gBlock();
+    virtual ~gbtBlock();
 
 //
 // Sets the block to have the same contents as another block.
 //
-    gBlock<T> &operator=(const gBlock<T> &);
+    gbtBlock<T> &operator=(const gbtBlock<T> &);
 
 //
 // Tests for equality of two blocks.  Blocks are equal if they have the
 // same length, and the contents of all components are equal.
 //+grp
-    bool operator==(const gBlock<T> &b) const;
-    bool operator!=(const gBlock<T> &b) const;
+    bool operator==(const gbtBlock<T> &b) const;
+    bool operator!=(const gbtBlock<T> &b) const;
 //-grp
 
 //
-// Append an element to a gBlock.  Operator overloaded for ease of use.
+// Append an element to a gbtBlock.  Operator overloaded for ease of use.
 //+grp
-    gBlock<T> operator+(const T &e) const;
-    gBlock<T>& operator+=(const T &e);
+    gbtBlock<T> operator+(const T &e) const;
+    gbtBlock<T>& operator+=(const T &e);
 //-grp
 
 //
-// Concatenate two gBlocks.  + puts the result in a separate gBlock,
+// Concatenate two gbtBlocks.  + puts the result in a separate gbtBlock,
 // while += puts it in the first argument.
 //+grp
-    gBlock<T> operator+(const gBlock<T>& b) const;
-    gBlock<T>& operator+=(const gBlock<T>& b);
+    gbtBlock<T> operator+(const gbtBlock<T>& b) const;
+    gbtBlock<T>& operator+=(const gbtBlock<T>& b);
 //-grp
 
 //
@@ -123,11 +123,6 @@ template <class T> class gBlock : public gArray<T>   {
     void Flush(void);
 };
 
-template <class T> gOutput &operator<<(gOutput &, const gBlock<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBlock<T> &);
 
 #endif    // GBLOCK_H
-
-
-
-
-

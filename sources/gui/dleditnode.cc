@@ -109,9 +109,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
   gbtEfgGame efg = p_node.GetGame();
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
     gbtEfgOutcome outcome = efg.GetOutcome(outc);
-    gText item = ToText(outc) + ": " + outcome.GetLabel();
+    gbtText item = ToText(outc) + ": " + outcome.GetLabel();
     if (item == "") {
-      item = gText("Outcome") + ToText(outc);
+      item = gbtText("Outcome") + ToText(outc);
     }
 
     item += (" (" + ToText(outcome.GetPayoff(efg.GetPlayer(1))) + ", " +

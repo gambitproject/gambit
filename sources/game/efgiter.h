@@ -57,11 +57,7 @@ class EfgIter    {
 
     const gbtEfgSupport &Support(void) const;
 
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
 #endif   // EFGITER_H
-
-
-
-

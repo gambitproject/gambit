@@ -35,9 +35,9 @@ private:
   wxString m_actionProbValue;
   wxListBox *m_actionList;
   wxButton *m_addBeforeButton, *m_addAfterButton, *m_deleteButton;
-  gBlock<gText> m_actionNames;
-  gBlock<gNumber> m_actionProbs;
-  gBlock<gbtEfgAction> m_actions;
+  gbtBlock<gbtText> m_actionNames;
+  gbtBlock<gNumber> m_actionProbs;
+  gbtBlock<gbtEfgAction> m_actions;
   int m_lastSelection;
 
   // Event handlers
@@ -56,8 +56,8 @@ public:
   int GetPlayer(void) const { return (m_player->GetSelection() + 1); }
 
   int NumActions(void) const { return m_actions.Length(); }
-  const gBlock<gbtEfgAction> &GetActions(void) const { return m_actions; }
-  gText GetActionName(int p_act) const { return m_actionNames[p_act]; }
+  const gbtBlock<gbtEfgAction> &GetActions(void) const { return m_actions; }
+  gbtText GetActionName(int p_act) const { return m_actionNames[p_act]; }
   gNumber GetActionProb(int p_act) const { return m_actionProbs[p_act]; }
 
   DECLARE_EVENT_TABLE()

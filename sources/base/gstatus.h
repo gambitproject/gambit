@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Declaration of an abstract class combining features of gProgress and gSignal
+// Declaration of an abstract class combining features of gbtProgress and gbtSignal
 // 
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -30,19 +30,9 @@
 #include "gsignal.h"
 #include "gprogres.h"
 
-class gStatus : public gSignal, public gProgress {
+class gbtStatus : public gbtSignal, public gbtProgress {
 public:
-  virtual ~gStatus() { }
+  virtual ~gbtStatus() { }
 };
 
 #endif  // GSTATUS_H
-
-
-
-
-
-
-
-
-
-

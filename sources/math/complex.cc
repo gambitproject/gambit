@@ -165,7 +165,7 @@ void gComplex::error(const char* msg) const
 //                            input/output
 //--------------------------------------------------------------------------
 
-gOutput& operator << (gOutput& s, const gComplex& y)
+gbtOutput& operator << (gbtOutput& s, const gComplex& y)
 {
   s << y.re;
   if (y.im >= 0.0) {
@@ -175,7 +175,7 @@ gOutput& operator << (gOutput& s, const gComplex& y)
   return s;
 }
 
-gInput &operator>>(gInput &f, gComplex &y)
+gbtInput &operator>>(gbtInput &f, gComplex &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -239,7 +239,7 @@ gComplex pow(const gComplex& x, const long y)
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
 
-gText ToText(const gComplex /* d */)
+gbtText ToText(const gComplex /* d */)
 {
   //  gout << "\nError: ToText(gComplex) must be defined for compilation,";
   // gout << " but is not functional.\n";
@@ -249,7 +249,7 @@ gText ToText(const gComplex /* d */)
 
 // conversions from strings to numbers
 
-gComplex TOgComplex(const gText & /* s */)
+gComplex TOgComplex(const gbtText & /* s */)
 { 
   //  gout << "\nError: TOgComplex must be defined for compilation,";
   // gout << " but is not functional.\n";
@@ -259,5 +259,5 @@ gComplex TOgComplex(const gText & /* s */)
 
 #include "base/glist.imp"
 
-template class gList<gComplex>;
-template gOutput& operator << (gOutput& output, const gList<gComplex>&);
+template class gbtList<gComplex>;
+template gbtOutput& operator << (gbtOutput& output, const gbtList<gComplex>&);

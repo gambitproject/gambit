@@ -43,7 +43,7 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const gbtEfgGame &efg)
 {
   for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
     gbtEfgPlayer player = efg.GetPlayer(pl);
-    profile[pl] = new gArray<gbtEfgAction>(player.NumInfosets());
+    profile[pl] = new gbtArray<gbtEfgAction>(player.NumInfosets());
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       (*profile[pl])[iset] = player.GetInfoset(iset).GetAction(1);
     }
@@ -55,7 +55,7 @@ PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
   : m_efg(p.m_efg), profile(p.profile.Length())
 {
   for (int pl = 1; pl <= profile.Length(); pl++)   {
-    profile[pl] = new gArray<gbtEfgAction>(p.profile[pl]->Length());
+    profile[pl] = new gbtArray<gbtEfgAction>(p.profile[pl]->Length());
     for (int iset = 1; iset <= profile[pl]->Length(); iset++)
       (*profile[pl])[iset] = (*p.profile[pl])[iset];
   }
@@ -96,7 +96,7 @@ template <class T> void PureBehavProfile<T>::Set(const gbtEfgAction &action)
 /*
 template <class T>
 void PureBehavProfile<T>::Set(const gbtEfgPlayer &player,
-                              const gArray<gbtEfgAction> &actions)
+                              const gbtArray<gbtEfgAction> &actions)
 {
   *profile[player.GetId()] = actions;
 }
@@ -140,7 +140,7 @@ void PureBehavProfile<T>::IndPayoff(const Node *n,
 template <class T>
 const T PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const int &pl) const
 {
-  gArray<T> payoff(m_efg.NumPlayers());
+  gbtArray<T> payoff(m_efg.NumPlayers());
   for (int i = 1; i <= m_efg.NumPlayers(); i++)
     payoff[i] = (T)0;
   Payoff(n, (T)1, payoff);
@@ -149,7 +149,7 @@ const T PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const int &pl) const
 
 template <class T>
 void PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const T prob, 
-				 gArray<T> &payoff) const
+				 gbtArray<T> &payoff) const
 {
   if (n.IsTerminal()) {
     // FIXME: vector version of this?
@@ -188,7 +188,7 @@ void PureBehavProfile<T>::InfosetProbs(const gbtEfgNode &n,
 }
 
 template <class T>
-void PureBehavProfile<T>::Payoff(gArray<T> &payoff) const
+void PureBehavProfile<T>::Payoff(gbtArray<T> &payoff) const
 {
   for (int pl = 1; pl <= payoff.Length(); payoff[pl++] = (T) 0);
   Payoff(m_efg.GetRoot(), (T) 1, payoff);
@@ -288,7 +288,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       if (p_profile(pl, st) > (T) 0)  {
-	const gArray<int> *const actions = nfg.GetPlayer(pl).GetStrategy(st).GetBehavior();
+	const gbtArray<int> *const actions = nfg.GetPlayer(pl).GetStrategy(st).GetBehavior();
 
 	m_bvals[n.GetId()] = p_profile(pl, st);
 
@@ -759,7 +759,7 @@ void BehavProfile<T>::BehaviorStrat(const gbtEfgGame &p_efg, int pl,
 template <class T>
 void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
 				       const gbtEfgGame &p_efg, int pl,
-				       const gArray<int> *const actions,
+				       const gbtArray<int> *const actions,
 				       const gbtEfgNode &node)
 {
   static const T tremble = (T) 0;
@@ -921,7 +921,7 @@ T BehavProfile<T>::MaxRegret(void)
 }
 
 
-template <class T> void BehavProfile<T>::Dump(gOutput &p_file) const
+template <class T> void BehavProfile<T>::Dump(gbtOutput &p_file) const
 {
   gDPVector<T>::Dump(p_file);
 }
@@ -931,7 +931,7 @@ template <class T> void BehavProfile<T>::Dump(gOutput &p_file) const
 template <class T> BehavProfile<T>::BadStuff::~BadStuff()
 { }
 
-template <class T> gText BehavProfile<T>::BadStuff::Description(void) const
+template <class T> gbtText BehavProfile<T>::BadStuff::Description(void) const
 {
   return "Solution not installed in BehavProfile";
 }
@@ -940,7 +940,7 @@ template <class T> gText BehavProfile<T>::BadStuff::Description(void) const
 //   Output
 //-----------------
 
-template <class T> gOutput &operator<<(gOutput &p_file,
+template <class T> gbtOutput &operator<<(gbtOutput &p_file,
 				       const BehavProfile<T> &p_profile)
 {
   p_profile.Dump(p_file);
@@ -1093,18 +1093,16 @@ void BehavAssessment<T>::CondPayoff(gDPVector<T> &p_payoff,
 //                     BehavAssessment<T>: Output
 //------------------------------------------------------------------------
 
-template <class T> void BehavAssessment<T>::Dump(gOutput &p_file) const
+template <class T> void BehavAssessment<T>::Dump(gbtOutput &p_file) const
 {
   BehavProfile<T>::Dump(p_file);
   p_file << ' ';
   p_file << m_beliefs;
 }
 
-template <class T> gOutput &operator<<(gOutput &p_file,
+template <class T> gbtOutput &operator<<(gbtOutput &p_file,
 				       const BehavAssessment<T> &p_assess)
 {
   p_assess.Dump(p_file);
   return p_file;
 }
-
-

@@ -35,22 +35,22 @@
 #pragma interface
 #endif   // __GNUG__
 
-class gInput  {
+class gbtInput  {
   private:
-    gInput(const gInput &);
-    gInput &operator=(const gInput &);
+    gbtInput(const gbtInput &);
+    gbtInput &operator=(const gbtInput &);
 
   public:
-    gInput(void); 
-    virtual ~gInput();
+    gbtInput(void); 
+    virtual ~gbtInput();
 
-    virtual gInput& operator>>(int &x) = 0;
-    virtual gInput& operator>>(unsigned int &x) = 0;
-    virtual gInput& operator>>(long &x) = 0;
-    virtual gInput& operator>>(char &x) = 0;
-    virtual gInput& operator>>(double &x) = 0;
-    virtual gInput& operator>>(float &x) = 0;
-    virtual gInput& operator>>(char *x) = 0;
+    virtual gbtInput& operator>>(int &x) = 0;
+    virtual gbtInput& operator>>(unsigned int &x) = 0;
+    virtual gbtInput& operator>>(long &x) = 0;
+    virtual gbtInput& operator>>(char &x) = 0;
+    virtual gbtInput& operator>>(double &x) = 0;
+    virtual gbtInput& operator>>(float &x) = 0;
+    virtual gbtInput& operator>>(char *x) = 0;
 
     virtual int get(char &c) = 0;
     virtual void unget(char c) = 0;
@@ -60,37 +60,37 @@ class gInput  {
     virtual void setpos(long x) const = 0;
 };
 
-class gFileInput : public gInput  {
+class gbtFileInput : public gbtInput  {
   private:
     FILE *f;
 
-    gFileInput(const gFileInput &);
-    gFileInput &operator=(const gFileInput &);
+    gbtFileInput(const gbtFileInput &);
+    gbtFileInput &operator=(const gbtFileInput &);
 
   public:
-    class OpenFailed : public gException   {
+    class OpenFailed : public gbtException   {
     public:
       virtual ~OpenFailed()   { }
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
-    class ReadFailed : public gException   {
+    class ReadFailed : public gbtException   {
     public:
       virtual ~ReadFailed()   { }
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
-    gFileInput(FILE *);
-    gFileInput(const char *);
-    virtual ~gFileInput();
+    gbtFileInput(FILE *);
+    gbtFileInput(const char *);
+    virtual ~gbtFileInput();
 
-    gInput &operator>>(int &x);
-    gInput &operator>>(unsigned int &x);
-    gInput &operator>>(long &x);
-    gInput &operator>>(char &x);
-    gInput &operator>>(double &x);
-    gInput &operator>>(float &x);
-    gInput &operator>>(char *x);
+    gbtInput &operator>>(int &x);
+    gbtInput &operator>>(unsigned int &x);
+    gbtInput &operator>>(long &x);
+    gbtInput &operator>>(char &x);
+    gbtInput &operator>>(double &x);
+    gbtInput &operator>>(float &x);
+    gbtInput &operator>>(char *x);
 
     int get(char &c);
     void unget(char c);
@@ -100,28 +100,28 @@ class gFileInput : public gInput  {
     void setpos(long x) const;
 };
 
-class gStandardInput : public gInput  {
+class gbtStandardInput : public gbtInput  {
 private:
-  gStandardInput(const gStandardInput &);
-  gStandardInput &operator=(const gStandardInput &);
+  gbtStandardInput(const gbtStandardInput &);
+  gbtStandardInput &operator=(const gbtStandardInput &);
 
 public:
-  class ReadFailed : public gException   {
+  class ReadFailed : public gbtException   {
   public:
     virtual ~ReadFailed()   { }
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
-  gStandardInput(void);
-  virtual ~gStandardInput();
+  gbtStandardInput(void);
+  virtual ~gbtStandardInput();
 
-  gInput &operator>>(int &x);
-  gInput &operator>>(unsigned int &x);
-  gInput &operator>>(long &x);
-  gInput &operator>>(char &x);
-  gInput &operator>>(double &x);
-  gInput &operator>>(float &x);
-  gInput &operator>>(char *x);
+  gbtInput &operator>>(int &x);
+  gbtInput &operator>>(unsigned int &x);
+  gbtInput &operator>>(long &x);
+  gbtInput &operator>>(char &x);
+  gbtInput &operator>>(double &x);
+  gbtInput &operator>>(float &x);
+  gbtInput &operator>>(char *x);
 
   int get(char &c);
   void unget(char c);
@@ -131,7 +131,7 @@ public:
   void setpos(long x) const;
 };
 
-class gNullInput : public gInput  {
+class gNullInput : public gbtInput  {
   private:
     gNullInput(const gNullInput &);
     gNullInput &operator=(const gNullInput &);
@@ -140,13 +140,13 @@ class gNullInput : public gInput  {
     gNullInput(void);
     virtual ~gNullInput();
 
-    gInput &operator>>(int &x);
-    gInput &operator>>(unsigned int &x);
-    gInput &operator>>(long &x);
-    gInput &operator>>(char &x);
-    gInput &operator>>(double &x);
-    gInput &operator>>(float &x);
-    gInput &operator>>(char *x);
+    gbtInput &operator>>(int &x);
+    gbtInput &operator>>(unsigned int &x);
+    gbtInput &operator>>(long &x);
+    gbtInput &operator>>(char &x);
+    gbtInput &operator>>(double &x);
+    gbtInput &operator>>(float &x);
+    gbtInput &operator>>(char *x);
 
     int get(char &c);
     void unget(char c);
@@ -156,129 +156,129 @@ class gNullInput : public gInput  {
     void setpos(long x) const;
 };
 
-class gOutput  {
+class gbtOutput  {
   private:
-    gOutput(const gOutput &);
-    gOutput &operator=(const gOutput &);
+    gbtOutput(const gbtOutput &);
+    gbtOutput &operator=(const gbtOutput &);
 
   public:
-    gOutput(void);
-    virtual ~gOutput();
+    gbtOutput(void);
+    virtual ~gbtOutput();
 
-    virtual gOutput &operator<<(int x) = 0;
-    virtual gOutput &operator<<(unsigned int x) = 0;
-    virtual gOutput &operator<<(bool x) = 0;
-    virtual gOutput &operator<<(long x) = 0;
-    virtual gOutput &operator<<(char x) = 0;
-    virtual gOutput &operator<<(double x) = 0;
-    virtual gOutput &operator<<(long double x) = 0;
-    virtual gOutput &operator<<(float x) = 0;
-    virtual gOutput &operator<<(const char *x) = 0;
-    virtual gOutput &operator<<(const void *x) = 0;
+    virtual gbtOutput &operator<<(int x) = 0;
+    virtual gbtOutput &operator<<(unsigned int x) = 0;
+    virtual gbtOutput &operator<<(bool x) = 0;
+    virtual gbtOutput &operator<<(long x) = 0;
+    virtual gbtOutput &operator<<(char x) = 0;
+    virtual gbtOutput &operator<<(double x) = 0;
+    virtual gbtOutput &operator<<(long double x) = 0;
+    virtual gbtOutput &operator<<(float x) = 0;
+    virtual gbtOutput &operator<<(const char *x) = 0;
+    virtual gbtOutput &operator<<(const void *x) = 0;
 
     virtual int GetWidth(void) const = 0;
-    virtual gOutput &SetWidth(int w) = 0;
+    virtual gbtOutput &SetWidth(int w) = 0;
     virtual int GetPrec(void) const = 0;
-    virtual gOutput &SetPrec(int p) = 0;
-    virtual gOutput &SetExpMode(void) = 0;
-    virtual gOutput &SetFloatMode(void) = 0;
+    virtual gbtOutput &SetPrec(int p) = 0;
+    virtual gbtOutput &SetExpMode(void) = 0;
+    virtual gbtOutput &SetFloatMode(void) = 0;
     virtual char GetRepMode(void) const = 0;
 };
 
-class gStandardOutput : public gOutput  {
+class gbtStandardOutput : public gbtOutput  {
 private:
   int Width, Prec;
   char Represent;
 
-  gStandardOutput(const gStandardOutput &);
-  gStandardOutput &operator=(const gStandardOutput &);
+  gbtStandardOutput(const gbtStandardOutput &);
+  gbtStandardOutput &operator=(const gbtStandardOutput &);
 
 public:
-  class OpenFailed : public gException   {
+  class OpenFailed : public gbtException   {
   public:
     virtual ~OpenFailed()   { }
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
-  class WriteFailed : public gException   {
+  class WriteFailed : public gbtException   {
   public:
     virtual ~WriteFailed()   { }
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
   
-  gStandardOutput(void);
-  virtual ~gStandardOutput();
+  gbtStandardOutput(void);
+  virtual ~gbtStandardOutput();
 
   int GetWidth(void) const;
-  gOutput &SetWidth(int w);
+  gbtOutput &SetWidth(int w);
   int GetPrec(void) const;
-  gOutput &SetPrec(int p);
-  gOutput &SetExpMode(void);
-  gOutput &SetFloatMode(void);
+  gbtOutput &SetPrec(int p);
+  gbtOutput &SetExpMode(void);
+  gbtOutput &SetFloatMode(void);
   char GetRepMode(void) const;
 
-  gOutput &operator<<(int x);
-  gOutput &operator<<(unsigned int x);
-  gOutput &operator<<(bool x);
-  gOutput &operator<<(long x);
-  gOutput &operator<<(char x);
-  gOutput &operator<<(double x);
-  gOutput &operator<<(long double x);
-  gOutput &operator<<(float x);
-  gOutput &operator<<(const char *x);
-  gOutput &operator<<(const void *x);
+  gbtOutput &operator<<(int x);
+  gbtOutput &operator<<(unsigned int x);
+  gbtOutput &operator<<(bool x);
+  gbtOutput &operator<<(long x);
+  gbtOutput &operator<<(char x);
+  gbtOutput &operator<<(double x);
+  gbtOutput &operator<<(long double x);
+  gbtOutput &operator<<(float x);
+  gbtOutput &operator<<(const char *x);
+  gbtOutput &operator<<(const void *x);
 };
 
-class gFileOutput : public gOutput  {
+class gbtFileOutput : public gbtOutput  {
   private:
     FILE *f;
-    const gText filename; 
+    const gbtText filename; 
     bool keepClosed;
     int Width, Prec;
     char Represent;
 
-    gFileOutput(const gFileOutput &);
-    gFileOutput &operator=(const gFileOutput &);
+    gbtFileOutput(const gbtFileOutput &);
+    gbtFileOutput &operator=(const gbtFileOutput &);
     void Open(void);
     void Close(void);
 
   public:
-    class OpenFailed : public gException   {
+    class OpenFailed : public gbtException   {
     public:
       virtual ~OpenFailed()   { }
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
-    class WriteFailed : public gException   {
+    class WriteFailed : public gbtException   {
     public:
       virtual ~WriteFailed()   { }
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
-    gFileOutput(const char *, bool append = false, bool close = true);
-    virtual ~gFileOutput();
+    gbtFileOutput(const char *, bool append = false, bool close = true);
+    virtual ~gbtFileOutput();
 
     int GetWidth(void) const;
-    gOutput &SetWidth(int w);
+    gbtOutput &SetWidth(int w);
     int GetPrec(void) const;
-    gOutput &SetPrec(int p);
-    gOutput &SetExpMode(void);
-    gOutput &SetFloatMode(void);
+    gbtOutput &SetPrec(int p);
+    gbtOutput &SetExpMode(void);
+    gbtOutput &SetFloatMode(void);
     char GetRepMode(void) const;
 
-    gOutput &operator<<(int x);
-    gOutput &operator<<(unsigned int x);
-    gOutput &operator<<(bool x);
-    gOutput &operator<<(long x);
-    gOutput &operator<<(char x);
-    gOutput &operator<<(double x);
-    gOutput &operator<<(long double x);
-    gOutput &operator<<(float x);
-    gOutput &operator<<(const char *x);
-    gOutput &operator<<(const void *x);
+    gbtOutput &operator<<(int x);
+    gbtOutput &operator<<(unsigned int x);
+    gbtOutput &operator<<(bool x);
+    gbtOutput &operator<<(long x);
+    gbtOutput &operator<<(char x);
+    gbtOutput &operator<<(double x);
+    gbtOutput &operator<<(long double x);
+    gbtOutput &operator<<(float x);
+    gbtOutput &operator<<(const char *x);
+    gbtOutput &operator<<(const void *x);
 };
 
-class gNullOutput : public gOutput  {
+class gNullOutput : public gbtOutput  {
   private:
     gNullOutput(const gNullOutput &);
     gNullOutput &operator=(const gNullOutput &);
@@ -288,25 +288,23 @@ class gNullOutput : public gOutput  {
     virtual ~gNullOutput();
 
     int GetWidth(void) const;
-    gOutput &SetWidth(int w);
+    gbtOutput &SetWidth(int w);
     int GetPrec(void) const;
-    gOutput &SetPrec(int p);
-    gOutput &SetExpMode(void);
-    gOutput &SetFloatMode(void);
+    gbtOutput &SetPrec(int p);
+    gbtOutput &SetExpMode(void);
+    gbtOutput &SetFloatMode(void);
     char GetRepMode(void) const;
 
-    gOutput &operator<<(int x);
-    gOutput &operator<<(unsigned int x);
-    gOutput &operator<<(bool x);
-    gOutput &operator<<(long x);
-    gOutput &operator<<(char x);
-    gOutput &operator<<(double x);
-    gOutput &operator<<(long double x);
-    gOutput &operator<<(float x);
-    gOutput &operator<<(const char *x);
-    gOutput &operator<<(const void *x);
+    gbtOutput &operator<<(int x);
+    gbtOutput &operator<<(unsigned int x);
+    gbtOutput &operator<<(bool x);
+    gbtOutput &operator<<(long x);
+    gbtOutput &operator<<(char x);
+    gbtOutput &operator<<(double x);
+    gbtOutput &operator<<(long double x);
+    gbtOutput &operator<<(float x);
+    gbtOutput &operator<<(const char *x);
+    gbtOutput &operator<<(const void *x);
 };
 
 #endif   // GSTREAM_H
-
-

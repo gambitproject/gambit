@@ -30,12 +30,12 @@
 #include "base/grarray.h"
 #include "gvector.h"
 
-template <class T> class gMatrix : public gRectArray<T>  {
+template <class T> class gMatrix : public gbtRectArray<T>  {
   public:
-    class DivideByZero : public gException  {
+    class DivideByZero : public gbtException  {
       public:
         virtual ~DivideByZero()   { }
-        gText Description(void) const;
+        gbtText Description(void) const;
     };
 
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
@@ -92,10 +92,6 @@ template <class T> class gMatrix : public gRectArray<T>  {
 };
 
 template <class T> gVector<T> operator*(const gVector<T> &, const gMatrix<T> &);
-template <class T> gOutput &operator<<(gOutput &, const gMatrix<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gMatrix<T> &);
 
 #endif     // GMATRIX_H
-
-
-
-

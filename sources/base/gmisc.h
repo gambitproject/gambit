@@ -35,11 +35,11 @@ typedef unsigned long ulong;
 typedef unsigned short ushort;
 
 
-typedef enum { triFALSE = 0, triTRUE = 1, triUNKNOWN = 2 } gTriState;
+typedef enum { triFALSE = 0, triTRUE = 1, triUNKNOWN = 2 } gbtTriState;
 
-class gText;
-class gOutput;
-gOutput &operator<<(gOutput &, gTriState);
+class gbtText;
+class gbtOutput;
+gbtOutput &operator<<(gbtOutput &, gbtTriState);
 
 //
 // Generation of random numbers
@@ -68,19 +68,19 @@ int  ToTextWidth(void); // Get the current value of the above
 void ToTextPrecision(int); // Set # of decimal places for floating point
 int  ToTextPrecision(void); // Get the current value of the above
 
-gText ToText(int);
-gText ToText(long);
-gText ToText(double);
-gText ToText(double p_number, int p_precision);
-gText ToText(long double);
-gText ToText(gTriState);
+gbtText ToText(int);
+gbtText ToText(long);
+gbtText ToText(double);
+gbtText ToText(double p_number, int p_precision);
+gbtText ToText(long double);
+gbtText ToText(gbtTriState);
 
-double ToDouble(const gText &);
+double ToDouble(const gbtText &);
 
 //
 /// Return a copy of the string with all quotes preceded by a backslash
 //
-gText EscapeQuotes(const gText &);
+gbtText EscapeQuotes(const gbtText &);
 
 //
 // Type dependent epsilon
@@ -95,34 +95,33 @@ double pow(double,long);
 // Simple class for compact reference to pairs of indices
 //
 
-class index_pair {
+class gbtIndexPair {
 private:
   const int first;
   const int second;
   
 public:
-  index_pair(const int&, const int&);
-  ~index_pair();
+  gbtIndexPair(const int&, const int&);
+  ~gbtIndexPair();
   
-  bool operator == (const index_pair&) const;
-  bool operator != (const index_pair&) const;
+  bool operator == (const gbtIndexPair&) const;
+  bool operator != (const gbtIndexPair&) const;
   int operator [] (const int&) const; 
 
-  friend gOutput& operator << (gOutput& output, const index_pair& x);  
+  friend gbtOutput& operator << (gbtOutput& output, const gbtIndexPair& x);  
 };
 
-class gException   {
+class gbtException   {
 public:
-  virtual ~gException();
+  virtual ~gbtException();
   
-  virtual gText Description(void) const = 0;
+  virtual gbtText Description(void) const = 0;
 };
 
-class gNewFailed : public gException   {
+class gNewFailed : public gbtException   {
 public:
   virtual ~gNewFailed()   { }
-  gText Description(void) const;
+  gbtText Description(void) const;
 }; 
 
 #endif    // GMISC_H
-

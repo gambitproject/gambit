@@ -36,7 +36,6 @@ template class LinearCombination<double>;
 template class LinearCombination<gDouble>;
 template class LinearCombination<gRational>;
 
-template gOutput & operator<< (gOutput&, const LinearCombination<double>&);
-template gOutput & operator<< (gOutput&, const LinearCombination<gDouble>&);
-template gOutput & operator<< (gOutput&, const LinearCombination<gRational>&);
-
+template gbtOutput & operator<< (gbtOutput&, const LinearCombination<double>&);
+template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gDouble>&);
+template gbtOutput & operator<< (gbtOutput&, const LinearCombination<gRational>&);

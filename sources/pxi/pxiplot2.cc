@@ -30,7 +30,7 @@ void PxiPlot2::DrawExpPoint_2(wxDC &dc,
 			      int x0, int y0, int cw, int ch)
 {
   try {
-    gBlock<int> points(m_expData.FitPoints(p_lambda));
+    gbtBlock<int> points(m_expData.FitPoints(p_lambda));
     for (int i = 1; i <= points.Length(); i++) {
       double x = x0 + m_expData.GetDataProb(points[i], pl1, st1) * cw;
       double y = y0 - m_expData.GetDataProb(points[i], pl2, st2) * ch;
@@ -215,11 +215,10 @@ END_EVENT_TABLE()
 
 PxiPlot2::PxiPlot2(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const gArray<PxiFile *> &p_qreFiles, int p_page,
+		   const gbtArray<PxiFile *> &p_qreFiles, int p_page,
 		   const ExpData &p_expData)
   : PxiPlot(p_parent, p_position, p_size, p_qreFiles, p_page, p_expData)
 { }
 
 PxiPlot2::~PxiPlot2()
 { }
-

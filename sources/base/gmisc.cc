@@ -123,45 +123,45 @@ int ToTextPrecision(void)
   return precision;
 }
 
-gText ToText(int i)
+gbtText ToText(int i)
 {
   sprintf(gconvert_buffer, "%d", i);
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 }
 
-gText ToText(long l)
+gbtText ToText(long l)
 {
   // sprintf(gconvert_buffer, "%.*ld", precision, l);
   sprintf(gconvert_buffer, "%*ld", width, l);
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 }
 
-gText ToText(double d)
+gbtText ToText(double d)
 {
   // sprintf(gconvert_buffer, "%.*f", precision, d);
   sprintf(gconvert_buffer, "%*.*f", width, precision, d);
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 }
 
-gText ToText(double p_number, int p_precision)
+gbtText ToText(double p_number, int p_precision)
 {
   sprintf(gconvert_buffer, "%*.*f", width, p_precision, p_number);
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 }
 
-gText ToText(long double d)
+gbtText ToText(long double d)
 {
   // sprintf(gconvert_buffer, "%.*f", precision, d);
   sprintf(gconvert_buffer, "%*.*Lf", width, precision, d);
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 }
 
-double ToDouble(const gText &s)
+double ToDouble(const gbtText &s)
 { return strtod(s, NULL); }
 
-gText EscapeQuotes(const gText &s)
+gbtText EscapeQuotes(const gbtText &s)
 {
-  gText ret;
+  gbtText ret;
   
   for (unsigned int i = 0; i < s.Length(); i++)  {
     if (s[i] == '"')   ret += '\\';
@@ -174,7 +174,7 @@ gText EscapeQuotes(const gText &s)
 
 //------------------------ TriState functions -----------------//
 
-gText ToText(gTriState b)
+gbtText ToText(gbtTriState b)
 {
   switch (b) {
   case triTRUE:
@@ -186,7 +186,7 @@ gText ToText(gTriState b)
   }
 }
 
-gOutput &operator<<(gOutput &f, gTriState b)
+gbtOutput &operator<<(gbtOutput &f, gbtTriState b)
 {
   return (f << ToText(b));
 }
@@ -217,16 +217,16 @@ double pow(double x, long n)
 // Constructors / Destructors
 //---------------------------
 
-index_pair::index_pair(const int& f, const int& s)
+gbtIndexPair::gbtIndexPair(const int& f, const int& s)
 : first(f), second(s)
 {
 }
 
-index_pair::~index_pair()
+gbtIndexPair::~gbtIndexPair()
 {
 }
 
-bool index_pair::operator == (const index_pair& other) const
+bool gbtIndexPair::operator == (const gbtIndexPair& other) const
 {
   if ((first == other.first) && (second == other.second))
     return true;
@@ -234,7 +234,7 @@ bool index_pair::operator == (const index_pair& other) const
     return false;
 }
 
-bool index_pair::operator != (const index_pair& other) const
+bool gbtIndexPair::operator != (const gbtIndexPair& other) const
 {
   if ((first != other.first) || (second != other.second))
     return true;
@@ -242,13 +242,13 @@ bool index_pair::operator != (const index_pair& other) const
     return false;
 }
 
-int index_pair::operator [] (const int& index) const 
+int gbtIndexPair::operator [] (const int& index) const 
 {
   if (index == 1) return first;
   else            return second;
 }
  
-gOutput &operator<<(gOutput &p_output, const index_pair &p_indexPair)
+gbtOutput &operator<<(gbtOutput &p_output, const gbtIndexPair &p_indexPair)
 {
   p_output << "(" << p_indexPair.first << "," << p_indexPair.second << ")";
   return p_output;
@@ -256,10 +256,10 @@ gOutput &operator<<(gOutput &p_output, const index_pair &p_indexPair)
 
 //--------------------Exceptions Related Stuff---------------------
 
-gText gNewFailed::Description(void) const
+gbtText gNewFailed::Description(void) const
 {
   return "Memory exhausted in call to new";
 }
 
-gException::~gException()
+gbtException::~gbtException()
 { }

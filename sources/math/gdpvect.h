@@ -38,7 +38,7 @@ template <class T> class gDPVector : public gPVector<T>  {
 
   protected:
     T ***dvptr;
-    gArray<int> dvlen, dvidx;
+    gbtArray<int> dvlen, dvidx;
 
   public:
     gDPVector(void);
@@ -70,16 +70,13 @@ template <class T> class gDPVector : public gPVector<T>  {
     bool operator==(const gDPVector<T> &v) const;
     bool operator!=(const gDPVector<T> &v) const;
 
-    const gArray<int> &DPLengths(void) const;
+    const gbtArray<int> &DPLengths(void) const;
 
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
 #ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &to, const gDPVector<T>&v);
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gDPVector<T>&v);
 #endif
 
 #endif   // GDPVECTOR_H
-
-
-

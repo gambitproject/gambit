@@ -149,7 +149,7 @@ const gInterval<T> gInterval<T>::SameCenterWithNewLength(const T& L) const
 //                        interval -- printing
 //--------------------------------------------------------------------------
 
-template<class T> gOutput& operator << (gOutput& output, const gInterval<T>& x)
+template<class T> gbtOutput& operator << (gbtOutput& output, const gInterval<T>& x)
 {
   output << "[" << x.LowerBound() << "," << x.UpperBound() << "]";
   return output;

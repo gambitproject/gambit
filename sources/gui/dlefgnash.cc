@@ -65,20 +65,20 @@ public:
 
 class efgOneNash : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "OneNash"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "OneNash"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgOneNash::Solve(const gbtEfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<BehavSolution> efgOneNash::Solve(const gbtEfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtEfgSupport support = p_support.Undominated(false, true,
@@ -104,7 +104,7 @@ gList<BehavSolution> efgOneNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -157,14 +157,14 @@ gbtEfgNashAlgorithm *panelEfgOneNash::GetAlgorithm(void) const
 
 class efgTwoNash : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "TwoNash"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "TwoNash"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgTwoNash::Solve(const gbtEfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<BehavSolution> efgTwoNash::Solve(const gbtEfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -173,7 +173,7 @@ gList<BehavSolution> efgTwoNash::Solve(const gbtEfgSupport &p_support,
     gbtEfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
@@ -203,7 +203,7 @@ gList<BehavSolution> efgTwoNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -256,14 +256,14 @@ gbtEfgNashAlgorithm *panelEfgTwoNash::GetAlgorithm(void) const
 
 class efgAllNash : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "AllNash"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "AllNash"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgAllNash::Solve(const gbtEfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<BehavSolution> efgAllNash::Solve(const gbtEfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -272,7 +272,7 @@ gList<BehavSolution> efgAllNash::Solve(const gbtEfgSupport &p_support,
     gbtEfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
@@ -302,7 +302,7 @@ gList<BehavSolution> efgAllNash::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -354,20 +354,20 @@ gbtEfgNashAlgorithm *panelEfgAllNash::GetAlgorithm(void) const
 
 class efgOnePerfect : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "OnePerfect"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "OnePerfect"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgOnePerfect::Solve(const gbtEfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<BehavSolution> efgOnePerfect::Solve(const gbtEfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtEfgSupport support = p_support.Undominated(false, true,
@@ -393,7 +393,7 @@ gList<BehavSolution> efgOnePerfect::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -445,14 +445,14 @@ gbtEfgNashAlgorithm *panelEfgOnePerfect::GetAlgorithm(void) const
 
 class efgTwoPerfect : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "TwoPerfect"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "TwoPerfect"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgTwoPerfect::Solve(const gbtEfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<BehavSolution> efgTwoPerfect::Solve(const gbtEfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -461,7 +461,7 @@ gList<BehavSolution> efgTwoPerfect::Solve(const gbtEfgSupport &p_support,
     gbtEfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
@@ -491,7 +491,7 @@ gList<BehavSolution> efgTwoPerfect::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -543,14 +543,14 @@ gbtEfgNashAlgorithm *panelEfgTwoPerfect::GetAlgorithm(void) const
 
 class efgAllPerfect : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "AllPerfect"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "AllPerfect"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgAllPerfect::Solve(const gbtEfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<BehavSolution> efgAllPerfect::Solve(const gbtEfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -559,7 +559,7 @@ gList<BehavSolution> efgAllPerfect::Solve(const gbtEfgSupport &p_support,
     gbtEfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtEfgSupport newSupport = support.Undominated(true, true, players,
 						 gnull, status);
@@ -589,7 +589,7 @@ gList<BehavSolution> efgAllPerfect::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -641,19 +641,19 @@ gbtEfgNashAlgorithm *panelEfgAllPerfect::GetAlgorithm(void) const
 
 class efgOneSequential : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "OneSequential"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "OneSequential"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgOneSequential::Solve(const gbtEfgSupport &p_support,
-					     gStatus &p_status)
+gbtList<BehavSolution> efgOneSequential::Solve(const gbtEfgSupport &p_support,
+					     gbtStatus &p_status)
 {
   try {
     gbtEfgNashLogit algorithm;
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -705,12 +705,12 @@ gbtEfgNashAlgorithm *panelEfgOneSequential::GetAlgorithm(void) const
 
 class efgTwoSequential : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "TwoSequential"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "TwoSequential"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgTwoSequential::Solve(const gbtEfgSupport &p_support,
-					     gStatus &p_status)
+gbtList<BehavSolution> efgTwoSequential::Solve(const gbtEfgSupport &p_support,
+					     gbtStatus &p_status)
 {
   try {
     p_support.GetGame().MarkSubgames();
@@ -721,7 +721,7 @@ gList<BehavSolution> efgTwoSequential::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -773,12 +773,12 @@ gbtEfgNashAlgorithm *panelEfgTwoSequential::GetAlgorithm(void) const
 
 class efgAllSequential : public gbtEfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "AllSequential"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "AllSequential"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
-gList<BehavSolution> efgAllSequential::Solve(const gbtEfgSupport &p_support,
-					     gStatus &p_status)
+gbtList<BehavSolution> efgAllSequential::Solve(const gbtEfgSupport &p_support,
+					     gbtStatus &p_status)
 {
   try {
     p_support.GetGame().MarkSubgames();
@@ -789,7 +789,7 @@ gList<BehavSolution> efgAllSequential::Solve(const gbtEfgSupport &p_support,
     return algorithm.Solve(p_support, p_status);
   }
   catch (...) {
-    return gList<BehavSolution>();
+    return gbtList<BehavSolution>();
   }
 }
 
@@ -1843,11 +1843,9 @@ gbtEfgNashAlgorithm *dialogEfgNash::GetAlgorithm(void) const
 }
 
 
-static gOutput &operator<<(gOutput &p_stream, wxTreeItemId)
+static gbtOutput &operator<<(gbtOutput &p_stream, wxTreeItemId)
 { return p_stream; }
 
 #include "base/gmap.imp"
-template class gBaseMap<wxTreeItemId, panelEfgNashAlgorithm *>;
-template class gOrdMap<wxTreeItemId, panelEfgNashAlgorithm *>;
-
-
+template class gbtBaseMap<wxTreeItemId, panelEfgNashAlgorithm *>;
+template class gbtOrdMap<wxTreeItemId, panelEfgNashAlgorithm *>;

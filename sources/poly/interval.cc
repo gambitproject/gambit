@@ -31,33 +31,32 @@
 #include "math/gnumber.h"
 
 template class gInterval<gRational>;
-template class gList< gInterval<gRational> >;
+template class gbtList< gInterval<gRational> >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, const gInterval<gRational>& x);
+template gbtOutput& operator << (gbtOutput& output, const gInterval<gRational>& x);
 #endif  // __BCC55__
 
 template class gInterval<int>;
-template class gList< gInterval<int> >;
+template class gbtList< gInterval<int> >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, const gInterval<int>& x);
+template gbtOutput& operator << (gbtOutput& output, const gInterval<int>& x);
 #endif  // __BCC55__
 
 
 template class gInterval<double>;
-template class gList< gInterval<double> >;
+template class gbtList< gInterval<double> >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, const gInterval<double>& x);
+template gbtOutput& operator << (gbtOutput& output, const gInterval<double>& x);
 #endif  // __BCC55__
 
 template class gInterval<gDouble>;
-template class gList< gInterval<gDouble> >;
+template class gbtList< gInterval<gDouble> >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, const gInterval<gDouble>& x);
+template gbtOutput& operator << (gbtOutput& output, const gInterval<gDouble>& x);
 #endif  // __BCC55__
 
 template class gInterval<gNumber>;
-template class gList< gInterval<gNumber> >;
+template class gbtList< gInterval<gNumber> >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, const gInterval<gNumber>& x);
+template gbtOutput& operator << (gbtOutput& output, const gInterval<gNumber>& x);
 #endif  // __BCC55__
-

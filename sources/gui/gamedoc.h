@@ -44,7 +44,7 @@ private:
   bool m_modified;
 
   // Management of views
-  gBlock<gbtGameView *> m_views;
+  gbtBlock<gbtGameView *> m_views;
   bool m_showOutcomes, m_showProfiles;
   bool m_showEfgSupports, m_showEfgNavigate;
   bool m_showNfg, m_showNfgSupports;
@@ -56,19 +56,19 @@ private:
   gbtEfgGame *m_efg;
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
   gbtEfgSupport *m_curEfgSupport;
-  gList<gbtEfgSupport *> m_efgSupports;
+  gbtList<gbtEfgSupport *> m_efgSupports;
 
   // Normal-form related state information
   gbtNfgGame *m_nfg;
   int m_rowPlayer, m_colPlayer;
-  gArray<int> m_contingency;
+  gbtArray<int> m_contingency;
   gbtNfgSupport *m_curNfgSupport;
-  gList<gbtNfgSupport *> m_nfgSupports;
+  gbtList<gbtNfgSupport *> m_nfgSupports;
 
   // The list of computed profiles (refactor into own class?)
   int m_curProfile;
-  gList<BehavSolution> m_behavProfiles;
-  gList<MixedSolution> m_mixedProfiles;
+  gbtList<BehavSolution> m_behavProfiles;
+  gbtList<MixedSolution> m_mixedProfiles;
 
   // Preferences for colors, layout, and so forth
   gbtPreferences m_prefs;
@@ -125,17 +125,17 @@ public:
   gbtEfgNode GetCutNode(void) const { return m_cutNode; }
   
   // OUTCOMES
-  gText UniqueEfgOutcomeName(void) const;
-  gText UniqueNfgOutcomeName(void) const;
+  gbtText UniqueEfgOutcomeName(void) const;
+  gbtText UniqueNfgOutcomeName(void) const;
    
   // SUPPORTS
-  gText UniqueEfgSupportName(void) const;
-  gText UniqueNfgSupportName(void) const;
+  gbtText UniqueEfgSupportName(void) const;
+  gbtText UniqueNfgSupportName(void) const;
 
   const gbtEfgSupport &GetEfgSupport(void) const { return *m_curEfgSupport; }
   int GetEfgSupportIndex(void) const
     { return m_efgSupports.Find(m_curEfgSupport); }
-  const gList<gbtEfgSupport *> &AllEfgSupports(void) const
+  const gbtList<gbtEfgSupport *> &AllEfgSupports(void) const
     { return m_efgSupports; }
   void SetEfgSupport(int p_index);
   void AddEfgSupport(gbtEfgSupport *);
@@ -146,7 +146,7 @@ public:
   const gbtNfgSupport &GetNfgSupport(void) const { return *m_curNfgSupport; }
   int GetNfgSupportIndex(void) const
     { return m_nfgSupports.Find(m_curNfgSupport); }
-  const gList<gbtNfgSupport *> &AllNfgSupports(void) const
+  const gbtList<gbtNfgSupport *> &AllNfgSupports(void) const
     { return m_nfgSupports; }
   void SetNfgSupport(int p_index);
   void AddNfgSupport(gbtNfgSupport *);
@@ -155,17 +155,17 @@ public:
   void RemoveStrategy(gbtNfgStrategy);
 
   // PROFILES
-  gText UniqueBehavProfileName(void) const;
-  gText UniqueMixedProfileName(void) const;
+  gbtText UniqueBehavProfileName(void) const;
+  gbtText UniqueMixedProfileName(void) const;
 
   void AddProfile(const BehavSolution &);
   void AddProfile(const MixedSolution &);
-  const gList<BehavSolution> &AllBehavProfiles(void) const
+  const gbtList<BehavSolution> &AllBehavProfiles(void) const
     { return m_behavProfiles; }
   const BehavSolution &GetBehavProfile(void) const
     { return m_behavProfiles[m_curProfile]; }
 
-  const gList<MixedSolution> &AllMixedProfiles(void) const
+  const gbtList<MixedSolution> &AllMixedProfiles(void) const
     { return m_mixedProfiles; }
   const MixedSolution &GetMixedProfile(void) const
     { return m_mixedProfiles[m_curProfile]; }
@@ -177,20 +177,20 @@ public:
   void RemoveProfile(int p_index);
 
   // LABELS
-  gText GetRealizProb(const gbtEfgNode &) const;
-  gText GetBeliefProb(const gbtEfgNode &) const;
-  gText GetNodeValue(const gbtEfgNode &) const;
-  gText GetInfosetProb(const gbtEfgNode &) const;
-  gText GetInfosetValue(const gbtEfgNode &) const;
-  gText GetActionValue(const gbtEfgNode &, int act) const;
-  gText GetActionProb(const gbtEfgNode &, int act) const;
+  gbtText GetRealizProb(const gbtEfgNode &) const;
+  gbtText GetBeliefProb(const gbtEfgNode &) const;
+  gbtText GetNodeValue(const gbtEfgNode &) const;
+  gbtText GetInfosetProb(const gbtEfgNode &) const;
+  gbtText GetInfosetValue(const gbtEfgNode &) const;
+  gbtText GetActionValue(const gbtEfgNode &, int act) const;
+  gbtText GetActionProb(const gbtEfgNode &, int act) const;
   gNumber ActionProb(const gbtEfgNode &, int br) const;
 
   // NORMAL FORM STATE
   gbtNfgGame GetNfg(void) const;
 
-  gArray<int> GetContingency(void) const;
-  void SetContingency(const gArray<int> &);
+  gbtArray<int> GetContingency(void) const;
+  void SetContingency(const gbtArray<int> &);
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }
   void SetRowPlayer(int p_player);

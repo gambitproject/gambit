@@ -49,7 +49,7 @@ template <class T> polynomial<T>::polynomial(const T& coeff, const int& deg)
 }
 
 template <class T> 
-polynomial<T>::polynomial(const gList<T>& coefficientlist) 
+polynomial<T>::polynomial(const gbtList<T>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
@@ -251,7 +251,7 @@ template <class T>  void polynomial<T>::ToMonic()
 template<class T>  
 polynomial<gDouble>  polynomial<T>::TogDouble() const
 {
-  gList<gDouble> newcoefs;
+  gbtList<gDouble> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
     newcoefs += (gDouble)coeflist[i];
   }
@@ -295,7 +295,7 @@ template <class T> T polynomial<T>::LeadingCoefficient() const
   else              return coeflist[Degree() + 1];
 }
 
-template <class T> gList<T> polynomial<T>::CoefficientList() const
+template <class T> gbtList<T> polynomial<T>::CoefficientList() const
 {
   return coeflist;
 }
@@ -339,7 +339,7 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   else if (EvaluationAt(I.LowerBound()) == (T)0) return false;
 
   // generate list of derivatives
-  gList< polynomial<T> > derivs;
+  gbtList< polynomial<T> > derivs;
   derivs += Derivative();
   int i;
   for (i = 2; i <= Degree(); i++) derivs += derivs[i-1].Derivative();
@@ -375,15 +375,15 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
 }
 
 
-template <class T> gList< gInterval<T> >
+template <class T> gbtList< gInterval<T> >
 polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 { assert ( Degree() >= 0 && IsQuadratfrei() );
 
   polynomial<T> Df = Derivative();
 
-  gList< gInterval<T> > answer;
+  gbtList< gInterval<T> > answer;
 
-  gList< gInterval<T> > to_be_processed; to_be_processed += I;
+  gbtList< gInterval<T> > to_be_processed; to_be_processed += I;
   while (to_be_processed.Length() > 0) {
 
     gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
@@ -434,7 +434,7 @@ polynomial<T>::RootSubintervals(const gInterval<T>& I) const
 template <class T> gInterval<T>
 polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
 {
-  gList< gInterval<T> > intrvls; intrvls += I;
+  gbtList< gInterval<T> > intrvls; intrvls += I;
   while (intrvls[intrvls.Length()].Length() >= error) {
     if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) 
       intrvls += gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
@@ -459,11 +459,11 @@ polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
   // by introducing Newton's method.
 }
 
-template <class T> gList< gInterval<T> >
+template <class T> gbtList< gInterval<T> >
 polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
 {
-  gList< gInterval<T> > coarse = RootSubintervals(I);
-  gList< gInterval<T> > fine;
+  gbtList< gInterval<T> > coarse = RootSubintervals(I);
+  gbtList< gInterval<T> > fine;
 
   for (int i = 1; i <= coarse.Length(); i++) 
     fine += NeighborhoodOfRoot(coarse[i],error);
@@ -471,10 +471,10 @@ polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
   return fine;
 }
 
-template <class T> gList<T>
+template <class T> gbtList<T>
 polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 {
-  gList<T> roots;
+  gbtList<T> roots;
 
   polynomial<T> p(*this), factor(*this);
 
@@ -491,7 +491,7 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
     }
 
     for (int i = 1; i <= depth; i++) p = p/factor;
-    gList< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
+    gbtList< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
     for (int j = 1; j <= fine.Length(); j++) {
       T approx = fine[j].LowerBound();
       for (int h = 1; h <= 2; h++) {
@@ -511,7 +511,7 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //                                printing
 //--------------------------------------------------------------------------
 
-template <class T> void polynomial<T>::Output(gOutput &output) const
+template <class T> void polynomial<T>::Output(gbtOutput &output) const
 {
   if (Degree() < 0) output << "0";
   else {
@@ -524,7 +524,7 @@ template <class T> void polynomial<T>::Output(gOutput &output) const
   }
 }
 
-template <class T> gOutput &operator<<(gOutput &p_file,
+template <class T> gbtOutput &operator<<(gbtOutput &p_file,
 				       const polynomial<T> &p_poly)
 {
   p_poly.Output(p_file);
@@ -554,7 +554,7 @@ complexpoly::complexpoly(const gComplex& coeff, const int& deg)
 }
 
  
-complexpoly::complexpoly(const gList<gComplex>& coefficientlist) 
+complexpoly::complexpoly(const gbtList<gComplex>& coefficientlist) 
 : coeflist(coefficientlist)
 { 
 }
@@ -799,11 +799,11 @@ bool complexpoly::IsQuadratfrei() const
 }
 
 
-gList<gComplex> complexpoly::Roots() const 
+gbtList<gComplex> complexpoly::Roots() const 
 {
   assert (!IsZero());
 
-  gList<gComplex> answer;
+  gbtList<gComplex> answer;
 
   if (Degree() == 0) 
     return answer;
@@ -834,7 +834,7 @@ gList<gComplex> complexpoly::Roots() const
 
   answer += guess;
 
-  gList<gComplex> lin_form_coeffs;
+  gbtList<gComplex> lin_form_coeffs;
   lin_form_coeffs += guess;
   lin_form_coeffs += gComplex(-1.0,0.0);
   complexpoly linear_form(lin_form_coeffs);
@@ -853,7 +853,7 @@ gList<gComplex> complexpoly::Roots() const
 //                                printing
 //--------------------------------------------------------------------------
 
-gOutput& operator << (gOutput& output, const complexpoly& x)
+gbtOutput& operator << (gbtOutput& output, const complexpoly& x)
 {
   if (x.Degree() < 0) output << "0";
   else {
@@ -866,6 +866,3 @@ gOutput& operator << (gOutput& output, const complexpoly& x)
   }
   return output;
 }
-
-
-

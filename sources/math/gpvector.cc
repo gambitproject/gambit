@@ -33,7 +33,7 @@ template class gPVector<double>;
 template class gPVector<gRational>;
 template class gPVector<gNumber>;
 
-template gOutput & operator<< (gOutput&, const gPVector<int>&);
-template gOutput & operator<< (gOutput&, const gPVector<double>&);
-template gOutput & operator<< (gOutput&, const gPVector<gRational>&);
-template gOutput & operator<< (gOutput&, const gPVector<gNumber>&);
+template gbtOutput & operator<< (gbtOutput&, const gPVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gPVector<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gPVector<gRational>&);
+template gbtOutput & operator<< (gbtOutput&, const gPVector<gNumber>&);

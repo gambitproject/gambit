@@ -117,7 +117,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText BehavSolution::GetCreator(void) const
+gbtText BehavSolution::GetCreator(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -229,7 +229,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText BehavSolution::GetLabel(void) const
+gbtText BehavSolution::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -398,7 +398,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState BehavSolution::IsNash(void) const
+gbtTriState BehavSolution::IsNash(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -439,7 +439,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState BehavSolution::IsSequential(void) const
+gbtTriState BehavSolution::IsSequential(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -475,7 +475,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState BehavSolution::IsSequential(void) const
+gbtTriState BehavSolution::IsSequential(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -535,7 +535,7 @@ are not from the same extensive form game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void BehavSolution::SetLabel(const gText &amp;p_label)
+void BehavSolution::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -548,4 +548,3 @@ void BehavSolution::SetLabel(const gText &amp;p_label)
 
 
 </sect1>
-

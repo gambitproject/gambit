@@ -159,7 +159,7 @@ int gbtEfgPlayer::GetId(void) const
   }
 }
 
-gText gbtEfgPlayer::GetLabel(void) const
+gbtText gbtEfgPlayer::GetLabel(void) const
 {
   if (rep) {
     if (rep->m_deleted) {
@@ -174,7 +174,7 @@ gText gbtEfgPlayer::GetLabel(void) const
   }
 }
 
-void gbtEfgPlayer::SetLabel(const gText &p_label)
+void gbtEfgPlayer::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     if (rep->m_deleted) {
@@ -236,13 +236,13 @@ gbtEfgInfoset gbtEfgPlayer::NewInfoset(int p_actions)
     throw gbtEfgNullObject();
   }
   if (p_actions <= 0) {
-    throw gbtEfgException();
+    throw gbtEfgbtException();
   }
   return rep->m_efg->NewInfoset(rep, rep->m_infosets.Length() + 1, p_actions);
 }
 
 
-gOutput &operator<<(gOutput &p_stream, const gbtEfgPlayer &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgPlayer &)
 { 
   return p_stream;
 }
@@ -399,7 +399,7 @@ gbtNfgGame gbtNfgPlayer::GetGame(void) const
   }
 }
 
-gText gbtNfgPlayer::GetLabel(void) const
+gbtText gbtNfgPlayer::GetLabel(void) const
 {
   if (rep) {
     if (rep->m_deleted) {
@@ -414,7 +414,7 @@ gText gbtNfgPlayer::GetLabel(void) const
   }
 }
 
-void gbtNfgPlayer::SetLabel(const gText &p_label)
+void gbtNfgPlayer::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     if (rep->m_deleted) {
@@ -445,4 +445,3 @@ gbtNfgStrategy gbtNfgPlayer::GetStrategy(int st) const
     return (rep) ? rep->m_strategies[st] : 0;
   }
 }
-

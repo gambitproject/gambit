@@ -37,9 +37,9 @@
 void AllSubsupportsRECURSIVE(const gbtEfgSupport *s,
 			     gbtEfgSupportWithActiveInfo *sact,
 			     gbtAllActionIterator *c,
-			     gList<const gbtEfgSupport> *list);
+			     gbtList<const gbtEfgSupport> *list);
 
-gList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
+gbtList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 
 
 // Subsupports of a given support are _path equivalent_ if they
@@ -51,9 +51,9 @@ gList<const gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport *s,
 					 gbtEfgSupportWithActiveInfo *sact,
 					 gbtAllActionIterator *c,
-					 gList<const gbtEfgSupport> *list);
+					 gbtList<const gbtEfgSupport> *list);
 
-gList<const gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
+gbtList<const gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -69,13 +69,13 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
 					 gbtAllActionIterator *c,
 					const bool strong,
 					const bool conditional,
-					 gList<const gbtEfgSupport> *list,
-					 const gStatus &status);
+					 gbtList<const gbtEfgSupport> *list,
+					 const gbtStatus &status);
   
-gList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
+gbtList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
-						 const gStatus &status);
+						 const gbtStatus &status);
 
 // The following two routines combine to produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
@@ -91,13 +91,10 @@ gList<const gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
 					    gbtEfgSupportWithActiveInfo *sact,
 				            gbtAllActionIterator *c,
-					    gList<const gbtEfgSupport> *list,
-				      const gStatus &status);
+					    gbtList<const gbtEfgSupport> *list,
+				      const gbtStatus &status);
 
-gList<const gbtEfgSupport> SortSupportsBySize(gList<const gbtEfgSupport> &);
+gbtList<const gbtEfgSupport> SortSupportsBySize(gbtList<const gbtEfgSupport> &);
   
-gList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
-					       gStatus &status);
-
-
-
+gbtList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
+					       gbtStatus &status);

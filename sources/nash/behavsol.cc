@@ -37,20 +37,20 @@ class SubgamePerfectChecker : public gbtEfgNashSubgames  {
 private:
   int subgame_number;
   gNumber eps;
-  gTriState isSubgamePerfect;
+  gbtTriState isSubgamePerfect;
   gPVector<int> infoset_subgames;
   BehavProfile<gNumber> start;
-  gList<gbtEfgNode> oldroots;
+  gbtList<gbtEfgNode> oldroots;
   
   void SolveSubgame(const gbtEfgGame &, const gbtEfgSupport &,
-		    gList<BehavSolution> &, gStatus &);
+		    gbtList<BehavSolution> &, gbtStatus &);
   
 public:
   SubgamePerfectChecker(const gbtEfgGame &,
 			const BehavProfile<gNumber> &,
 			const gNumber & epsilon);
   virtual ~SubgamePerfectChecker();
-  gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
+  gbtTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
 };
 
 //----------------------------------------------------
@@ -58,7 +58,7 @@ public:
 //----------------------------------------------------
 
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -86,7 +86,7 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 
 
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -111,7 +111,7 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 }
 
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
-			     const gText &p_creator)
+			     const gbtText &p_creator)
   : m_profile(new BehavProfile<gNumber>(gbtEfgSupport(p_profile.GetGame()))),
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
@@ -192,11 +192,11 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-gTriState BehavSolution::GetANFNash(void) const
+gbtTriState BehavSolution::GetANFNash(void) const
 {
-  gNullStatus status;
+  gbtNullStatus status;
   algExtendsToAgentNash algorithm;
-  gTriState answer = ((algorithm.ExtendsToAgentNash(*this,
+  gbtTriState answer = ((algorithm.ExtendsToAgentNash(*this,
 						    Support(), Support(),
 						    status)) ?
 		      triTRUE : triFALSE);
@@ -209,9 +209,9 @@ gTriState BehavSolution::GetANFNash(void) const
   return triUNKNOWN;
 }
 
-gTriState BehavSolution::GetNash(void) const
+gbtTriState BehavSolution::GetNash(void) const
 {
-  gTriState answer = triUNKNOWN;
+  gbtTriState answer = triUNKNOWN;
   bool decomposes = HasSubgames(GetGame());
   // check subgame perfection if game decomposes (its faster)
   if(decomposes) 
@@ -229,7 +229,7 @@ gTriState BehavSolution::GetNash(void) const
       // Is perfect recall needed here, Andy?
       if (m_profile->GetGame().IsPerfectRecall()) { 
 	// not sure MaxRegret does the right thing here
-	gNullStatus status;
+	gbtNullStatus status;
 	algExtendsToNash algorithm;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
 		  algorithm.ExtendsToNash(*this,Support(),Support(),status)) 
@@ -254,9 +254,9 @@ gTriState BehavSolution::GetNash(void) const
   return answer;
 }
 
-gTriState BehavSolution::GetSubgamePerfect(void) const
+gbtTriState BehavSolution::GetSubgamePerfect(void) const
 {
-  gTriState answer;
+  gbtTriState answer;
   // Note -- HasSubgames should be cached in Efg
   bool decomposes = HasSubgames(GetGame());
   if(!decomposes) GetNash();
@@ -268,7 +268,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
     if (IsComplete()) {
       BehavProfile<gNumber> p(*m_profile);
       SubgamePerfectChecker checker(p.GetGame(),p, Epsilon());
-      gNullStatus status;
+      gbtNullStatus status;
       checker.Solve(p.Support(), status);
       answer = checker.IsSubgamePerfect();
     }
@@ -293,7 +293,7 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
   return answer;
 }
 
-gTriState BehavSolution::GetSequential(void) const
+gbtTriState BehavSolution::GetSequential(void) const
 {
   if(IsSubgamePerfect()==triTRUE) {
     // Liap and QRE should be returning Nash solutions that give positive 
@@ -467,7 +467,7 @@ bool BehavSolution::IsComplete(void) const
   return true;
 }
 
-const gTriState &BehavSolution::IsNash(void) const
+const gbtTriState &BehavSolution::IsNash(void) const
 {
   CheckIsValid();
   if (!m_Nash.Checked()) {
@@ -485,7 +485,7 @@ BehavSolution BehavSolution::PolishEq(void) const
   return *this;
 }
 
-const gTriState &BehavSolution::IsANFNash(void) const
+const gbtTriState &BehavSolution::IsANFNash(void) const
 {
   CheckIsValid();
   if(!m_ANFNash.Checked())
@@ -493,7 +493,7 @@ const gTriState &BehavSolution::IsANFNash(void) const
   return m_ANFNash.Answer();
 }
 
-const gTriState &BehavSolution::IsSubgamePerfect(void) const
+const gbtTriState &BehavSolution::IsSubgamePerfect(void) const
 {
   CheckIsValid();
   if(!m_SubgamePerfect.Checked())
@@ -501,7 +501,7 @@ const gTriState &BehavSolution::IsSubgamePerfect(void) const
   return m_SubgamePerfect.Answer();
 }
 
-const gTriState &BehavSolution::IsSequential(void) const
+const gbtTriState &BehavSolution::IsSequential(void) const
 {
   CheckIsValid();
   if(!m_Sequential.Checked())
@@ -553,7 +553,7 @@ gPVector<gNumber> BehavSolution::GetRNFRegret(void) const
     gbtNfgPlayer player = nfg.GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
       BehavProfile<gNumber> scratch(*m_profile);
-      const gArray<int> *const actions = player.GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const actions = player.GetStrategy(st).GetBehavior();
       for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
 	for (int k = 1; k <= scratch.Support().NumActions(pl,j); k++) {
@@ -599,13 +599,13 @@ const gNumber BehavSolution::MaxRNFRegret(void) const
 // Output
 //----------
 
-void BehavSolution::Dump(gOutput &p_file) const
+void BehavSolution::Dump(gbtOutput &p_file) const
 {
   p_file << *m_profile;
   DumpInfo(p_file);
 }
 
-void BehavSolution::DumpInfo(gOutput &p_file) const
+void BehavSolution::DumpInfo(gbtOutput &p_file) const
 {
   p_file << " Creator:" << GetCreator();
   p_file << " IsNash:" << IsNash();
@@ -618,7 +618,7 @@ void BehavSolution::DumpInfo(gOutput &p_file) const
   }
 }
 
-gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
+gbtOutput &operator<<(gbtOutput &p_file, const BehavSolution &p_solution)
 {
   p_solution.Dump(p_file);
   return p_file;
@@ -631,7 +631,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
     isSubgamePerfect(triTRUE), infoset_subgames(p_efg.NumInfosets()), start(s)
 {
   MarkedSubgameRoots(p_efg, oldroots);
-  gList<gbtEfgNode> subroots;
+  gbtList<gbtEfgNode> subroots;
   LegalSubgameRoots(p_efg,subroots);
   for (int i = 1; i <= subroots.Length(); i++) {
     (start.GetGame()).MarkSubgame(subroots[i]);
@@ -655,14 +655,14 @@ SubgamePerfectChecker::SubgamePerfectChecker(const gbtEfgGame &p_efg,
 
 void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
 					 const gbtEfgSupport &sup,
-					 gList<BehavSolution> &solns,
-					 gStatus &p_status)
+					 gbtList<BehavSolution> &solns,
+					 gbtStatus &p_status)
 {
   BehavProfile<gNumber> bp(sup);
   
   subgame_number++;
   
-  gArray<int> infosets(infoset_subgames.Lengths());
+  gbtArray<int> infosets(infoset_subgames.Lengths());
   
   for (int pl = 1; pl <= p_efg.NumPlayers(); pl++)  {
     int niset = 1;
@@ -675,10 +675,10 @@ void SubgamePerfectChecker::SolveSubgame(const gbtEfgGame &p_efg,
     }
   }
   //  We need to add function to check if bp is Nash on Subgame.  
-  //  gTriState x = IsNashOnSubgame(E,bp,eps);
+  //  gbtTriState x = IsNashOnSubgame(E,bp,eps);
   // for now, we do the following, which may give wrong answer if player can deviate at
   // multiple isets simultaneously.  :
-  gTriState x = triFALSE;
+  gbtTriState x = triFALSE;
   BehavSolution bs(bp);
   
   if(bs.MaxRNFRegret() <= eps) x = triTRUE;
@@ -702,4 +702,4 @@ SubgamePerfectChecker::~SubgamePerfectChecker() {
 }
 
 #include "base/glist.imp"
-template class gList<BehavSolution>;
+template class gbtList<BehavSolution>;

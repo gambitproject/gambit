@@ -27,7 +27,7 @@
 #ifndef NFGITER_H
 #define NFGITER_H
 
-template <class T> class gArray;
+template <class T> class gbtArray;
 
 class StrategyProfile;
 #include "nfg.h"
@@ -42,7 +42,7 @@ class NfgIter    {
 private:
   gbtNfgSupport support;
   gbtNfgGame m_nfg;
-  gArray<int> current_strat;
+  gbtArray<int> current_strat;
   StrategyProfile profile;
 
 public:
@@ -58,8 +58,8 @@ public:
   int Next(int p);
   int Set(int p, int s);
 
-  void Get(gArray<int> &t) const;
-  void Set(const gArray<int> &t);
+  void Get(gbtArray<int> &t) const;
+  void Set(const gbtArray<int> &t);
 
   gbtNfgOutcome GetOutcome(void) const;
   void SetOutcome(gbtNfgOutcome);
@@ -71,7 +71,3 @@ public:
 };
 
 #endif   // NFGITER_H
-
-
-
-

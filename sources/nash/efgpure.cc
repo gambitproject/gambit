@@ -32,10 +32,10 @@
 #include "game/efgciter.h"
 #include "behavsol.h"
 
-gList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
-					       gStatus &p_status)
+gbtList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
+					       gbtStatus &p_status)
 {
-  gList<BehavSolution> solutions;
+  gbtList<BehavSolution> solutions;
 
   EfgContIter citer(p_support);
   gPVector<gNumber> probs(p_support.GetGame().NumInfosets());
@@ -96,9 +96,3 @@ gList<BehavSolution> gbtEfgNashEnumPure::Solve(const gbtEfgSupport &p_support,
 	    citer.NextContingency());
   return solutions;
 }
-
-
-
-
-
-

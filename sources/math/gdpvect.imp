@@ -35,7 +35,7 @@ int gDPVector<T>::sum(int part, const gPVector<int> &v) const
 {
   int s = 0;
 
-  gArray<int> len(v.Lengths());
+  gbtArray<int> len(v.Lengths());
   for (int j = 1; j <= len[part]; j++)
     s += v(part, j);
 
@@ -68,7 +68,7 @@ template <class T> gDPVector<T>::gDPVector(void) : dvptr(0)
 { }
 
 template <class T> gDPVector<T>::gDPVector(const gPVector<int> &sig)
-  : gPVector<T>((gArray<int>)sig), dvlen(sig.Lengths().Length()),
+  : gPVector<T>((gbtArray<int>)sig), dvlen(sig.Lengths().Length()),
     dvidx(sig.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
@@ -246,7 +246,7 @@ void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 
 
 
-template <class T> const gArray<int> &gDPVector<T>::DPLengths(void) const
+template <class T> const gbtArray<int> &gDPVector<T>::DPLengths(void) const
 {
   return dvlen;
 }
@@ -255,7 +255,7 @@ template <class T> const gArray<int> &gDPVector<T>::DPLengths(void) const
 //                      gDPVector<T>: Output functions
 //--------------------------------------------------------------------------
 
-template <class T> void gDPVector<T>::Dump(gOutput &f) const
+template <class T> void gDPVector<T>::Dump(gbtOutput &f) const
 {
   for (int i = 1; i <= dvlen.Length(); i++)  {
     f << "{ ";
@@ -269,8 +269,7 @@ template <class T> void gDPVector<T>::Dump(gOutput &f) const
   }
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const gDPVector<T> &v)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gDPVector<T> &v)
 {
   v.Dump(f);  return f;
 }
-

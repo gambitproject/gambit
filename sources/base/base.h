@@ -36,17 +36,13 @@
 #include "gblock.h"
 
 #include "glist.h"
-#include "gslist.h"
 
 #include "gtree.h"
 
 #include "grarray.h"
 #include "grblock.h"
 
-#include "gstack.h"
-
 #include "gmap.h"
-#include "gpool.h"
 
 #include "gwatch.h"
 

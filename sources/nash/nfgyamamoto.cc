@@ -70,7 +70,7 @@ static gMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
 				   int p_player)
 {
   gVector<double> payoffs(p_profile.Support().NumStrats(p_player));
-  gArray<int> strategies(p_profile.Support().NumStrats(p_player));
+  gbtArray<int> strategies(p_profile.Support().NumStrats(p_player));
   p_profile.Payoff(p_player, p_player, payoffs);
 
   for (int i = 1; i <= strategies.Length(); i++) {
@@ -115,7 +115,7 @@ static gMatrix<int> RankStrategies(const MixedProfile<double> &p_profile,
 
 static void YamamotoJacobian(const MixedProfile<double> &p_profile,
 			     double p_lambda,
-			     const gList<gMatrix<int> > &p_partition,
+			     const gbtList<gMatrix<int> > &p_partition,
 			     gMatrix<double> &p_matrix)
 {
   int rowno = 0;
@@ -240,13 +240,13 @@ static void YamamotoComputeStep(const MixedProfile<double> &p_profile,
   p_lambdainc /= sqrt(norm / p_stepsize);
 }
 
-static gList<int> SortProbs(const MixedProfile<double> &p_profile,
+static gbtList<int> SortProbs(const MixedProfile<double> &p_profile,
 			    int p_player,
 			    const gMatrix<int> &p_partition,
 			    int p_index)
 {
-  gList<int> strategies;
-  gList<double> probs;
+  gbtList<int> strategies;
+  gbtList<double> probs;
 
   for (int st = 1; st <= p_partition.NumColumns(); st++) {
     if (p_partition(p_index, st) > 0) {
@@ -289,15 +289,15 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-gList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
-					       gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
+					       gbtStatus &p_status)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}
   // and lambda=t
   MixedProfile<double> profile(p_support);
   double lambda = 1.0;
   double initialsign = -1.0; 
-  gList<gMatrix<int> > partitions;
+  gbtList<gMatrix<int> > partitions;
   gMatrix<double> H(p_support.GetGame().ProfileLength(),
 		    p_support.GetGame().ProfileLength() + 1);
 
@@ -305,13 +305,13 @@ gList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
     partitions.Append(RankStrategies(profile, pl));
   }
 
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
 
   for (int step = 1; step <= 50000 && lambda > 0.01; step++) { 
     if (step % 25 == 0) {
       p_status.Get();
       p_status.SetProgress(1.0 - lambda,
-			   gText("Lambda = ") + ToText(lambda));
+			   gbtText("Lambda = ") + ToText(lambda));
     }
     YamamotoJacobian(profile, lambda, partitions, H);
       
@@ -349,7 +349,7 @@ gList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 	  }
 	  else if (NumMembers(partitions[pl], part) > 1) {
 	    // check for possible splitting of partition
-	    gList<int> sortstrats = SortProbs(profile, pl, partitions[pl], 
+	    gbtList<int> sortstrats = SortProbs(profile, pl, partitions[pl], 
 					      part);
 	    double totX = 0.0, totP = 0.0;
 	    for (int i = 1; i < sortstrats.Length(); i++) {
@@ -389,4 +389,4 @@ gList<MixedSolution> gbtNfgNashYamamoto::Solve(const gbtNfgSupport &p_support,
 
 #include "base/glist.imp"
 
-template class gList<gMatrix<int> >; 
+template class gbtList<gMatrix<int> >;

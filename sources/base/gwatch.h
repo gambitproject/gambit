@@ -35,15 +35,15 @@
 // Note that time functions can be highly system-dependent, especially under
 // Unix, so care should be taken when porting this code.
 //
-class gWatch    {
+class gbtStopWatch    {
   private:
     bool running;
     long start, stop;
     char *time_str;
 
   public:
-    gWatch(bool run = true);
-    ~gWatch();
+    gbtStopWatch(bool run = true);
+    ~gbtStopWatch();
 
     bool IsRunning(void) const;
 

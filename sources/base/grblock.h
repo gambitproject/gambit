@@ -29,23 +29,23 @@
 
 #include "grarray.h"
 
-template <class T> class gRectBlock : public gRectArray<T>  { 
+template <class T> class gbtRectBlock : public gbtRectArray<T>  { 
  public:
-  gRectBlock(void);
-  gRectBlock(unsigned int nrows, unsigned int ncols);
-  gRectBlock(int minr, int maxr, int minc, int maxc);
-  gRectBlock(const gRectBlock<T> &);
-  virtual ~gRectBlock();
+  gbtRectBlock(void);
+  gbtRectBlock(unsigned int nrows, unsigned int ncols);
+  gbtRectBlock(int minr, int maxr, int minc, int maxc);
+  gbtRectBlock(const gbtRectBlock<T> &);
+  virtual ~gbtRectBlock();
 
-  gRectBlock<T> &operator=(const gRectBlock<T> &);
+  gbtRectBlock<T> &operator=(const gbtRectBlock<T> &);
 
-  void AddRow(const gArray<T> &);
+  void AddRow(const gbtArray<T> &);
   void RemoveRow(int);
-  void InsertRow(int, const gArray<T> &);
+  void InsertRow(int, const gbtArray<T> &);
  
-  void AddColumn(const gArray<T> &);
+  void AddColumn(const gbtArray<T> &);
   void RemoveColumn(int);
-  void InsertColumn(int, const gArray<T> &);
+  void InsertColumn(int, const gbtArray<T> &);
 };
 
 #endif   // GRBLOCK_H

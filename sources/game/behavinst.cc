@@ -51,26 +51,23 @@ double BehavProfile<double>::Payoff(const gbtEfgOutcome &p_outcome, int pl) cons
 
 template class BehavProfile<double>;
 template class BehavAssessment<double>;
-template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
-template gOutput &operator<<(gOutput &, const BehavAssessment<double> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavProfile<double> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<double> &);
 
 template class BehavProfile<gRational>;
 template class BehavAssessment<gRational>;
-template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
-template gOutput &operator<<(gOutput &, const BehavAssessment<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gRational> &);
 
 template class BehavProfile<gNumber>;
 template class BehavAssessment<gNumber>;
-template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
-template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavProfile<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const BehavAssessment<gNumber> &);
 
 template class PureBehavProfile<gNumber>;
 
 #include "base/glist.imp"
 
-template class gList<BehavProfile<double> >;
-template class gList<BehavProfile<gRational> >;
-template class gList<BehavProfile<gNumber> >;
-
-
-
+template class gbtList<BehavProfile<double> >;
+template class gbtList<BehavProfile<gRational> >;
+template class gbtList<BehavProfile<gNumber> >;

@@ -73,6 +73,6 @@ public:
 
 };
 
-template <class T> gOutput &operator<<(gOutput &, const gInterval<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gInterval<T> &);
 
 #endif // INTERVAL_H

@@ -117,7 +117,7 @@ bool gbtNfgStrategy::IsNull(void) const
   return (rep == 0);
 }
 
-gText gbtNfgStrategy::GetLabel(void) const
+gbtText gbtNfgStrategy::GetLabel(void) const
 {
   if (rep) {
     return rep->m_label;
@@ -127,7 +127,7 @@ gText gbtNfgStrategy::GetLabel(void) const
   }
 }
 
-void gbtNfgStrategy::SetLabel(const gText &p_label)
+void gbtNfgStrategy::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     rep->m_label = p_label;
@@ -144,7 +144,7 @@ gbtNfgPlayer gbtNfgStrategy::GetPlayer(void) const
   }
 }
 
-const gArray<int> *const gbtNfgStrategy::GetBehavior(void) const
+const gbtArray<int> *const gbtNfgStrategy::GetBehavior(void) const
 { 
   if (rep) {
     return rep->m_behav;
@@ -159,7 +159,7 @@ long gbtNfgStrategy::GetIndex(void) const
   return (rep) ? rep->m_index : 0L;
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtNfgStrategy &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgStrategy &)
 { 
   return p_stream;
 }
@@ -169,14 +169,14 @@ gbt_nfg_game_rep::gbt_nfg_game_rep(gbt_efg_game_rep *p_efg)
     m_efg(p_efg)
 { }
 
-static int Product(const gArray<int> &p_dim)
+static int Product(const gbtArray<int> &p_dim)
 {
   int accum = 1;
   for (int i = 1; i <= p_dim.Length(); accum *= p_dim[i++]);
   return accum;
 }
 
-gbt_nfg_game_rep::gbt_nfg_game_rep(const gArray<int> &p_dim)
+gbt_nfg_game_rep::gbt_nfg_game_rep(const gbtArray<int> &p_dim)
   : m_refCount(1),
     m_revision(0), m_outcomeRevision(-1), 
     m_label("UNTITLED"), m_dimensions(p_dim), m_players(p_dim.Length()),
@@ -226,7 +226,7 @@ void gbt_nfg_game_rep::DeleteOutcome(gbt_nfg_outcome_rep *p_outcome)
 // Nfg: Constructors, Destructors, Operators
 //----------------------------------------------------
 
-gbtNfgGame::gbtNfgGame(const gArray<int> &dim)
+gbtNfgGame::gbtNfgGame(const gbtArray<int> &dim)
   : rep(new gbt_nfg_game_rep(dim))
 {
   for (int pl = 1; pl <= rep->m_players.Length(); pl++)  {
@@ -334,7 +334,7 @@ long gbtNfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 
 static void WriteNfg(const gbtNfgGame &p_game,
-		     NfgIter &p_iter, int pl, gOutput &p_file)
+		     NfgIter &p_iter, int pl, gbtOutput &p_file)
 {
   p_iter.Set(pl, 1);
   do {
@@ -350,7 +350,7 @@ static void WriteNfg(const gbtNfgGame &p_game,
   } while (p_iter.Next(pl));
 } 
 
-void gbtNfgGame::WriteNfg(gOutput &p_file) const
+void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
 { 
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetLabel()) << "\" { ";
@@ -416,22 +416,22 @@ gbtNfgOutcome gbtNfgGame::NewOutcome(void)
   return outcome;
 }
 
-void gbtNfgGame::SetLabel(const gText &p_label) 
+void gbtNfgGame::SetLabel(const gbtText &p_label) 
 {
   rep->m_label = p_label;
   rep->m_revision++;
 }
 
-const gText &gbtNfgGame::GetLabel(void) const 
+const gbtText &gbtNfgGame::GetLabel(void) const 
 { return rep->m_label; }
 
-void gbtNfgGame::SetComment(const gText &s)
+void gbtNfgGame::SetComment(const gbtText &s)
 {
   rep->m_comment = s; 
   rep->m_revision++;
 }
 
-const gText &gbtNfgGame::GetComment(void) const
+const gbtText &gbtNfgGame::GetComment(void) const
 { return rep->m_comment; }
 
 
@@ -451,7 +451,7 @@ int gbtNfgGame::NumStrats(int pl) const
 	  rep->m_players[pl]->m_strategies.Length() : 0);
 }
 
-const gArray<int> &gbtNfgGame::NumStrats(void) const
+const gbtArray<int> &gbtNfgGame::NumStrats(void) const
 {
   return rep->m_dimensions;
 }

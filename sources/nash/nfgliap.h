@@ -56,9 +56,8 @@ public:
   double TolN(void) const { return m_tolN; }
   void SetTolN(double p_tolN) { m_tolN = p_tolN; }
 
-  gText GetAlgorithm(void) const { return "Liap[NFG]"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Liap[NFG]"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif // NFGLIAP_H
-

@@ -153,7 +153,7 @@ template <class T>
 bool LinearCombination<T>::operator!=(const LinearCombination<T> &L) const
 { return !(*this == L); }
 
-template <class T> void LinearCombination<T>::Output(gOutput &to) const
+template <class T> void LinearCombination<T>::Output(gbtOutput &to) const
 {
   if (last_row_is_spanned) {
     to << "The last row of the input matrix is spanned by the other rows,\n"
@@ -164,7 +164,7 @@ template <class T> void LinearCombination<T>::Output(gOutput &to) const
       << " other rows.\n";
 }
 
-template <class T> gOutput &operator<<(gOutput &p_file, 
+template <class T> gbtOutput &operator<<(gbtOutput &p_file, 
 				       const LinearCombination<T> &p_comb)
 {
   p_comb.Output(p_file);

@@ -42,8 +42,8 @@ private:
   gVector<double> UpdateFunc(const MixedProfile<double> &, int, double) const;
   bool CheckEqu(MixedProfile<double> &, double, int, double) const;
 
-  void OutputHeader(const gbtNfgSupport &, gOutput &) const;
-  void OutputResult(gOutput &, const MixedProfile<double> &,
+  void OutputHeader(const gbtNfgSupport &, gbtOutput &) const;
+  void OutputResult(gbtOutput &, const MixedProfile<double> &,
 		    double, double) const;
 
 protected:
@@ -87,9 +87,8 @@ public:
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
   // RUN THE ALGORITHM
-  void Solve(const gbtNfgSupport &, gOutput &p_pxifile, gStatus &p_status,
-	     gList<MixedSolution> &);
+  void Solve(const gbtNfgSupport &, gbtOutput &p_pxifile, gbtStatus &p_status,
+	     gbtList<MixedSolution> &);
 };
 
 #endif  // NFGQREGRID_H
-

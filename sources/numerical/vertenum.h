@@ -57,12 +57,12 @@ private:
   const gMatrix<T> &A;   
   const gVector<T> &b;
   gVector<T> btemp,c;
-  gList<BFS<T> > List;
-  gList<BFS<T> > DualList;
-  gList<gVector<T> > Verts;
+  gbtList<BFS<T> > List;
+  gbtList<BFS<T> > DualList;
+  gbtList<gVector<T> > Verts;
   long npivots,nodes;
-  gStatus &status;
-  gList<long> visits,branches;
+  gbtStatus &status;
+  gbtList<long> visits,branches;
 
   void Enum();
   void Deeper();
@@ -70,21 +70,21 @@ private:
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
-  VertEnum(const gMatrix<T> &, const gVector<T> &, gStatus &);
-  VertEnum(LPTableau<T> &, gStatus &);
+  VertEnum(const gMatrix<T> &, const gVector<T> &, gbtStatus &);
+  VertEnum(LPTableau<T> &, gbtStatus &);
   virtual ~VertEnum();
 
-  const gList<BFS<T> > &VertexList() const;
-  const gList<BFS<T> > &DualVertexList() const;
-  void Vertices(gList<gVector<T> > &verts) const;
+  const gbtList<BFS<T> > &VertexList() const;
+  const gbtList<BFS<T> > &DualVertexList() const;
+  void Vertices(gbtList<gVector<T> > &verts) const;
   long NumPivots() const;
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 #ifdef _A
 #undef _A
@@ -99,11 +99,11 @@ private:
   const gMatrix<T> &A, &A2;   
   const gVector<T> &b, &b2;
   gVector<T> btemp,c;
-  gList<BFS<T> > List, List2;
-  gList<gVector<T> > Verts;
+  gbtList<BFS<T> > List, List2;
+  gbtList<gVector<T> > Verts;
   long npivots,nodes;
-  gStatus &status;
-  gList<long> visits,branches;
+  gbtStatus &status;
+  gbtList<long> visits,branches;
 
   void Enum();
   void Deeper();
@@ -112,20 +112,20 @@ private:
   void DualSearch(LPTableau<T> &, Tableau<T> &);
   void EnumerateComplementaryFace(LPTableau<T> &, Tableau<T> &);
 public:
-  class BadDim : public gException  {
+  class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
   DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 		 const gMatrix<T> &_A2, const gVector<T> &_b2, 
-		 gStatus &);
+		 gbtStatus &);
   ~DoubleVertEnum();
-  const gList<BFS<T> > &VertexList() const;
-  const gList<BFS<T> > &VertexList2() const;
-  void Vertices(gList<gVector<T> > &verts, gList<gVector<T> > &verts2) const;
+  const gbtList<BFS<T> > &VertexList() const;
+  const gbtList<BFS<T> > &VertexList2() const;
+  void Vertices(gbtList<gVector<T> > &verts, gbtList<gVector<T> > &verts2) const;
   long NumPivots() const;
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 #endif // VERTENUM_H

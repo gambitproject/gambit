@@ -38,7 +38,7 @@ private:
 
 public:
   PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
-	   const wxSize &p_size, const gArray<PxiFile *> &, int p_page,
+	   const wxSize &p_size, const gbtArray<PxiFile *> &, int p_page,
 	   const ExpData &p_expData);
   virtual ~PxiPlotN();
 
@@ -46,4 +46,3 @@ public:
 };
 
 #endif  // PXIPLOTN_H
-

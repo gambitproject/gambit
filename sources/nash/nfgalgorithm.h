@@ -34,8 +34,8 @@ class gbtNfgNashAlgorithm {
 public:
   virtual ~gbtNfgNashAlgorithm() { }
 
-  virtual gText GetAlgorithm(void) const = 0;
-  virtual gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &) = 0;
+  virtual gbtText GetAlgorithm(void) const = 0;
+  virtual gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &) = 0;
 };
 
 #endif  // NFGALGORITHM_H

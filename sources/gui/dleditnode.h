@@ -33,7 +33,7 @@ private:
   wxTextCtrl *m_nodeName;
   wxCheckBox *m_markedSubgame;
   wxChoice *m_outcome, *m_infoset;
-  gBlock<gbtEfgInfoset> m_infosetList;
+  gbtBlock<gbtEfgInfoset> m_infosetList;
 
 public:
   // Lifecycle

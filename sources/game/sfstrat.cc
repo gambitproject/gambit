@@ -35,9 +35,9 @@
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-gList<gbtEfgAction> Sequence::History(void) const 
+gbtList<gbtEfgAction> Sequence::History(void) const 
 { 
-  gList<gbtEfgAction> h;
+  gbtList<gbtEfgAction> h;
   gbtEfgAction a = action;
   const Sequence *s = this;
   while (!a.IsNull()) {
@@ -48,7 +48,7 @@ gList<gbtEfgAction> Sequence::History(void) const
   return h;    
 }
 
-void Sequence::Dump(gOutput &out) const
+void Sequence::Dump(gbtOutput &out) const
 {
   int a = 0, p = 0;
   if (!action.IsNull()) a = action.GetId();
@@ -56,7 +56,7 @@ void Sequence::Dump(gOutput &out) const
   out << "\nPl#: " << player.GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }
 
-gOutput& operator<<(gOutput& s, const Sequence& seq)
+gbtOutput& operator<<(gbtOutput& s, const Sequence& seq)
 {
   seq.Dump(s);
   return s;
@@ -151,7 +151,7 @@ int SFSequenceSet::NumSequences(void) const
 }
 
 // Return the entire sequence set
-const gBlock<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
+const gbtBlock<Sequence *> &SFSequenceSet::GetSFSequenceSet(void) const
 {
   return sequences;
 }
@@ -210,7 +210,7 @@ bool SFSupport::operator!=(const SFSupport &s) const
 // SFSupport: Members
 //------------------------
 
-const gBlock<Sequence *> &SFSupport::Sequences(int pl) const
+const gbtBlock<Sequence *> &SFSupport::Sequences(int pl) const
 {
   return (sups[pl]->GetSFSequenceSet());
 }
@@ -220,9 +220,9 @@ int SFSupport::NumSequences(int pl) const
   return sups[pl]->NumSequences();
 }
 
-const gArray<int> SFSupport::NumSequences(void) const
+const gbtArray<int> SFSupport::NumSequences(void) const
 {
-  gArray<int> a(sups.Length());
+  gbtArray<int> a(sups.Length());
 
   for (int i = 1 ; i <= a.Length(); i++)
     a[i] = sups[i]->NumSequences();
@@ -261,7 +261,7 @@ bool SFSupport::IsSubset(const SFSupport &s) const
     if (NumSequences(i) > s.NumSequences(i))
       return false;
     else  {
-      const gBlock<Sequence *> &strats =
+      const gbtBlock<Sequence *> &strats =
         sups[i]->GetSFSequenceSet();
 
       for (int j = 1; j <= NumSequences(i); j++)
@@ -272,12 +272,12 @@ bool SFSupport::IsSubset(const SFSupport &s) const
 }
 
 
-void SFSupport::Dump(gOutput&s) const
+void SFSupport::Dump(gbtOutput&s) const
 {
   int numplayers;
   int i;
   int j;
-  gArray<Sequence *> strat;
+  gbtArray<Sequence *> strat;
 
   s << "{ ";
   numplayers = (*bsfg).GetEfg().NumPlayers();
@@ -294,13 +294,13 @@ void SFSupport::Dump(gOutput&s) const
   s << "} ";
 }
 
-gOutput& operator<<(gOutput& s, const SFSupport& n)
+gbtOutput& operator<<(gbtOutput& s, const SFSupport& n)
 {
   n.Dump(s);
   return s;
 }
 
-//template class gList<Action *>;
-template class gBlock<Sequence *>;
-template class gArray<Sequence *>;
-template class gArray<SFSequenceSet *>;
+//template class gbtList<Action *>;
+template class gbtBlock<Sequence *>;
+template class gbtArray<Sequence *>;
+template class gbtArray<SFSequenceSet *>;

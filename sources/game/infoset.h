@@ -60,8 +60,8 @@ public:
   bool IsNull(void) const;
   int GetId(void) const;
   gbtEfgInfoset GetInfoset(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
 
   gNumber GetChanceProb(void) const;
   bool Precedes(gbtEfgNode) const;
@@ -69,7 +69,7 @@ public:
   void DeleteAction(void);
 };
 
-gOutput &operator<<(gOutput &, const gbtEfgAction &);
+gbtOutput &operator<<(gbtOutput &, const gbtEfgAction &);
 
 class gbtEfgInfoset {
 friend class gbtEfgGame;
@@ -91,8 +91,8 @@ public:
   bool IsNull(void) const;
   int GetId(void) const;
   gbtEfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
 
   void DeleteInfoset(void);
 
@@ -124,6 +124,6 @@ public:
   void SetWhichBranch(int);
 };
 
-gOutput &operator<<(gOutput &, const gbtEfgInfoset &);
+gbtOutput &operator<<(gbtOutput &, const gbtEfgInfoset &);
 
 #endif   //# INFOSET_H

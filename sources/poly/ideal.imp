@@ -43,7 +43,7 @@ template<class T>  gIdeal<T>::gIdeal(const gSpace * ls,
 
 template<class T>  gIdeal<T>::gIdeal(const gSpace * ls, 
 				     const term_order * ordr,
-				     const gList< gPoly<T> *> & polys)
+				     const gbtList< gPoly<T> *> & polys)
 : Space(ls), order(ordr), basis(ls,ordr,polys)
 {
 }
@@ -108,7 +108,7 @@ template<class T>  bool gIdeal<T>::operator!=(const gIdeal<T> & rhs) const
 
 template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
 {
-  gList<gPoly<T> *> combined;
+  gbtList<gPoly<T> *> combined;
 
   for (int i = 1; i <= basis.Length(); i++) {
     gPoly<T>* temp = new gPoly<T>(basis[i]);
@@ -124,7 +124,7 @@ template<class T>  gIdeal<T> gIdeal<T>::operator+ (const gIdeal<T> & rhs) const
 
 template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
 {
-  gList<gPoly<T> *> basis_products;
+  gbtList<gPoly<T> *> basis_products;
 
   for (int i = 1; i <= basis.Length(); i++) 
     for (int j = 1; j <= rhs.basis.Length(); j++) {
@@ -148,11 +148,11 @@ template<class T> gIdeal<T> gIdeal<T>::MonomialIdeal() const
   return gIdeal<T>(order,mon_bss);
 }
   
-template<class T> gList<exp_vect> gIdeal<T>::MonomialBasis() const
+template<class T> gbtList<exp_vect> gIdeal<T>::MonomialBasis() const
 {
-  gList<exp_vect> answer;
+  gbtList<exp_vect> answer;
 
-  gArray<int> MinIndices(Dmnsn()), MaxIndices(Dmnsn());
+  gbtArray<int> MinIndices(Dmnsn()), MaxIndices(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) MinIndices[i] = 0;
 
   for (int j = 1; j <= basis.Length(); j++) {
@@ -161,7 +161,7 @@ template<class T> gList<exp_vect> gIdeal<T>::MonomialBasis() const
 	= basis[j].LeadingPowerProduct(*order).TotalDegree() - 1;
   }
 
-  gIndexOdometer odometer(MinIndices,MaxIndices);
+  gbtIndexOdometer odometer(MinIndices,MaxIndices);
   while (odometer.Turn()) {
     exp_vect candidate(Space,odometer.CurrentIndices());
     bool add = true;
@@ -184,7 +184,7 @@ template<class T> bool gIdeal<T>::ZeroDimensional() const
 {
   if (Dmnsn() == 0) return true;
 
-  gArray<bool> HasLeadingTermThatIsPowerOfVariable(Dmnsn());
+  gbtArray<bool> HasLeadingTermThatIsPowerOfVariable(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++)
     HasLeadingTermThatIsPowerOfVariable[i] = false;
@@ -215,6 +215,3 @@ template<class T> bool gIdeal<T>::IsEntireRing() const
   gPoly<T> one(Space,(T)1,order);
   return Contains(one);
 }
-
-
-

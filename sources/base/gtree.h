@@ -29,78 +29,78 @@
 
 #include "base.h"
 
-template <class T> class gTree;
+template <class T> class gbtTree;
 
-template <class T> class gTreeNode   {
-  friend class gTree<T>;
+template <class T> class gbtTreeNode   {
+  friend class gbtTree<T>;
 
   private:
     T data;
-    gTreeNode<T> *parent, *prev, *next, *eldest, *youngest;
+    gbtTreeNode<T> *parent, *prev, *next, *eldest, *youngest;
 
   public:
     // Constructor
-    gTreeNode(const T& _data, 
-	      gTreeNode<T>* _parent, 
-	      gTreeNode<T>* _prev,
-	      gTreeNode<T>* _next,
-	      gTreeNode<T>* _eldest,
-	      gTreeNode<T>* _youngest);
+    gbtTreeNode(const T& _data, 
+	      gbtTreeNode<T>* _parent, 
+	      gbtTreeNode<T>* _prev,
+	      gbtTreeNode<T>* _next,
+	      gbtTreeNode<T>* _eldest,
+	      gbtTreeNode<T>* _youngest);
 
-    ~gTreeNode();
+    ~gbtTreeNode();
 
   inline void SetData    (const T&      newdata)      {data = newdata;}
-  inline void SetParent  (gTreeNode<T>* newparent)    {parent   = newparent;}
-  inline void SetPrev    (gTreeNode<T>* newprev)      {prev     = newprev;}
-  inline void SetNext    (gTreeNode<T>* newnext)      {next     = newnext;}
-  inline void SetEldest  (gTreeNode<T>* neweldest)    {eldest   = neweldest;}
-  inline void SetYoungest(gTreeNode<T>* newyoungest)  {youngest = newyoungest;}
+  inline void SetParent  (gbtTreeNode<T>* newparent)    {parent   = newparent;}
+  inline void SetPrev    (gbtTreeNode<T>* newprev)      {prev     = newprev;}
+  inline void SetNext    (gbtTreeNode<T>* newnext)      {next     = newnext;}
+  inline void SetEldest  (gbtTreeNode<T>* neweldest)    {eldest   = neweldest;}
+  inline void SetYoungest(gbtTreeNode<T>* newyoungest)  {youngest = newyoungest;}
 
   inline T             GetData()        const {return data;}
-  inline gTreeNode<T>* GetParent()      const {return parent;}
-  inline gTreeNode<T>* GetPrev()        const {return prev;}
-  inline gTreeNode<T>* GetNext()        const {return next;}
-  inline gTreeNode<T>* GetEldest()      const {return eldest;}
-  inline gTreeNode<T>* GetYoungest()    const {return youngest;}
+  inline gbtTreeNode<T>* GetParent()      const {return parent;}
+  inline gbtTreeNode<T>* GetPrev()        const {return prev;}
+  inline gbtTreeNode<T>* GetNext()        const {return next;}
+  inline gbtTreeNode<T>* GetEldest()      const {return eldest;}
+  inline gbtTreeNode<T>* GetYoungest()    const {return youngest;}
 };
 
 
-template <class T> class gTree  {
+template <class T> class gbtTree  {
   protected:
-    gTreeNode<T>* root; 
+    gbtTreeNode<T>* root; 
 
-    gTreeNode<T>* RecursiveFind(const T&, gTreeNode<T>*) const;
-    void RecursiveCopy(gTreeNode<T>*, const gTreeNode<T>*);
-    void RecursiveFlush(const gTreeNode<T>*);
-    void RecursiveDump(gOutput&, const gTreeNode<T>*, const int) const;
+    gbtTreeNode<T>* RecursiveFind(const T&, gbtTreeNode<T>*) const;
+    void RecursiveCopy(gbtTreeNode<T>*, const gbtTreeNode<T>*);
+    void RecursiveFlush(const gbtTreeNode<T>*);
+    void RecursiveDump(gbtOutput&, const gbtTreeNode<T>*, const int) const;
     void Flush(void); 
 
   public:
-    gTree(void);
-    gTree(const T&);
-    gTree(const gTree<T>&);
-    virtual ~gTree();
+    gbtTree(void);
+    gbtTree(const T&);
+    gbtTree(const gbtTree<T>&);
+    virtual ~gbtTree();
 
-    gTree<T>& operator=(const gTree<T>&);
+    gbtTree<T>& operator=(const gbtTree<T>&);
 
-    bool operator==(const gTree<T>& b) const;
-    bool operator!=(const gTree<T>& b) const;
+    bool operator==(const gbtTree<T>& b) const;
+    bool operator!=(const gbtTree<T>& b) const;
 
   // Constructive Manipulation
-    void InsertAt(const T&, gTreeNode<T>*);
+    void InsertAt(const T&, gbtTreeNode<T>*);
 
   // Information
-    gList<gTreeNode<T>*> Children(const gTreeNode<T>*)              const;
-    gTreeNode<T>*        RootNode()                                 const;
-    gTreeNode<T>*        Find(const T&)                             const;
+    gbtList<gbtTreeNode<T>*> Children(const gbtTreeNode<T>*)              const;
+    gbtTreeNode<T>*        RootNode()                                 const;
+    gbtTreeNode<T>*        Find(const T&)                             const;
     bool                 Contains(const T& t)                       const;
-    bool                 SubtreesAreIsomorphic(const gTreeNode<T>*, 
-					       const gTreeNode<T>*) const;
+    bool                 SubtreesAreIsomorphic(const gbtTreeNode<T>*, 
+					       const gbtTreeNode<T>*) const;
 
   // Output
-    void Dump(gOutput&) const;
+    void Dump(gbtOutput&) const;
 };
 
-template <class T> gOutput& operator<<(gOutput& f, const gTree<T>& b);
+template <class T> gbtOutput& operator<<(gbtOutput& f, const gbtTree<T>& b);
 
 #endif    // GTREE_H

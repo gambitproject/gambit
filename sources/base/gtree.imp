@@ -28,16 +28,16 @@
 #include "gtree.h"
 
 //--------------------------------------------------------------------------
-//                 gTreeNode<T>: Member function implementations
+//                 gbtTreeNode<T>: Member function implementations
 //--------------------------------------------------------------------------
 
 template <class T>
-gTreeNode<T>::gTreeNode(const T& _data, 
-			gTreeNode<T>* _parent, 
-			gTreeNode<T>* _prev, 
-			gTreeNode<T>* _next, 
-			gTreeNode<T>* _eldest, 
-			gTreeNode<T>* _youngest)
+gbtTreeNode<T>::gbtTreeNode(const T& _data, 
+			gbtTreeNode<T>* _parent, 
+			gbtTreeNode<T>* _prev, 
+			gbtTreeNode<T>* _next, 
+			gbtTreeNode<T>* _eldest, 
+			gbtTreeNode<T>* _youngest)
   : data(_data), 
     parent(_parent), 
     prev(_prev), 
@@ -46,77 +46,77 @@ gTreeNode<T>::gTreeNode(const T& _data,
     youngest(_youngest)
 { }
 
-template <class T> gTreeNode<T>::~gTreeNode()
+template <class T> gbtTreeNode<T>::~gbtTreeNode()
 { 
 }
 
 
 
 //--------------------------------------------------------------------------
-//                 gTree<T>: Member function implementations
+//                 gbtTree<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> gTree<T>::gTree(void) 
+template <class T> gbtTree<T>::gbtTree(void) 
 : root(NULL)
 { }
 
-template <class T> gTree<T>::gTree(const T& rootdatum) 
+template <class T> gbtTree<T>::gbtTree(const T& rootdatum) 
 : root(NULL)
 { 
-  root = new gTreeNode<T>(rootdatum,NULL,NULL,NULL,NULL,NULL);
+  root = new gbtTreeNode<T>(rootdatum,NULL,NULL,NULL,NULL,NULL);
 }
 
-template <class T> gTree<T>::gTree(const gTree<T>& b)
+template <class T> gbtTree<T>::gbtTree(const gbtTree<T>& b)
 : root(NULL)
 {
   if (b.root != NULL)
     {
-      root = new gTreeNode<T>(b.root->data, NULL, NULL, NULL, NULL, NULL);
+      root = new gbtTreeNode<T>(b.root->data, NULL, NULL, NULL, NULL, NULL);
       RecursiveCopy(root, b.root);
     }
 }
 
-template <class T> gTree<T>::~gTree()
+template <class T> gbtTree<T>::~gbtTree()
 {
   Flush();
 }
 
-template <class T> void gTree<T>::InsertAt(const T& t, gTreeNode<T>* n)
+template <class T> void gbtTree<T>::InsertAt(const T& t, gbtTreeNode<T>* n)
 {
   assert (n != NULL);
 
   if (n->eldest == NULL) {
-    gTreeNode<T>* newn = new gTreeNode<T>(t,n,NULL,NULL,NULL,NULL);
+    gbtTreeNode<T>* newn = new gbtTreeNode<T>(t,n,NULL,NULL,NULL,NULL);
     n->SetEldest(newn);
     n->SetYoungest(newn);
   }
   else {
-    gTreeNode<T>* newn = new gTreeNode<T>(t,n,n->youngest,NULL,NULL,NULL);
+    gbtTreeNode<T>* newn = new gbtTreeNode<T>(t,n,n->youngest,NULL,NULL,NULL);
     n->youngest->SetNext(newn);
     n->SetYoungest(newn);
   }
 }
 
-template <class T> void gTree<T>::RecursiveCopy(      gTreeNode<T>* copyn,
-						const gTreeNode<T>* orign)
+template <class T> void gbtTree<T>::RecursiveCopy(      gbtTreeNode<T>* copyn,
+						const gbtTreeNode<T>* orign)
 {
-  gList<gTreeNode<T>*> oldchildren = Children(orign);
+  gbtList<gbtTreeNode<T>*> oldchildren = Children(orign);
   int i;
   for (i = 1; i <= oldchildren.Length(); i++)
     InsertAt(oldchildren[i]->data,copyn);
-  gList<gTreeNode<T>*> newchildren = Children(copyn);
+  gbtList<gbtTreeNode<T>*> newchildren = Children(copyn);
   for (i = 1; i <= newchildren.Length(); i++)
     RecursiveCopy(newchildren[i],oldchildren[i]);
 }
 
 //--------------------- operators ------------------------
 
-template <class T> gTree<T>& gTree<T>::operator=(const gTree<T>& b)
+template <class T> gbtTree<T>& gbtTree<T>::operator=(const gbtTree<T>& b)
 {
   if (this != &b)   {
     Flush();
     if (root != NULL)   {
-      root = new gTreeNode<T>(b.root->data, NULL, NULL, NULL, NULL, NULL);
+      root = new gbtTreeNode<T>(b.root->data, NULL, NULL, NULL, NULL, NULL);
       RecursiveCopy(root, b.root);
     }
     else
@@ -125,40 +125,40 @@ template <class T> gTree<T>& gTree<T>::operator=(const gTree<T>& b)
   return *this;
 }
 
-template <class T> bool gTree<T>::operator==(const gTree<T>& b) const
+template <class T> bool gbtTree<T>::operator==(const gbtTree<T>& b) const
 {
   if (root == NULL && b.root == NULL) return true;
   if (root == NULL || b.root == NULL) return false;
   return SubtreesAreIsomorphic(root,b.root);
 }
 
-template <class T> bool gTree<T>::operator!=(const gTree<T>& b) const
+template <class T> bool gbtTree<T>::operator!=(const gbtTree<T>& b) const
 {
   return !(*this == b);
 }
 
 template <class T> 
-gList<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
+gbtList<gbtTreeNode<T>*> gbtTree<T>::Children(const gbtTreeNode<T>* n) const
 {
   assert(n != NULL);
-  gList<gTreeNode<T>*> answer;
-  for (gTreeNode<T>* child = n->eldest; child != NULL; child = child->next)
+  gbtList<gbtTreeNode<T>*> answer;
+  for (gbtTreeNode<T>* child = n->eldest; child != NULL; child = child->next)
     answer += child;
   return answer;
 }
 
-template <class T> gTreeNode<T>* gTree<T>::RootNode() const
+template <class T> gbtTreeNode<T>* gbtTree<T>::RootNode() const
 {
   return root;
 }
 
 template <class T> 
-gTreeNode<T>* gTree<T>::RecursiveFind(const T& t, gTreeNode<T>* n) const
+gbtTreeNode<T>* gbtTree<T>::RecursiveFind(const T& t, gbtTreeNode<T>* n) const
 {
-  gTreeNode<T>* answer = NULL;
+  gbtTreeNode<T>* answer = NULL;
   if (n->data == t) answer = n;
   else {
-    gTreeNode<T>* probe = n->eldest;
+    gbtTreeNode<T>* probe = n->eldest;
     while (answer == NULL && probe != NULL) {
       answer = RecursiveFind(t,probe);
       probe = probe->next;
@@ -167,64 +167,63 @@ gTreeNode<T>* gTree<T>::RecursiveFind(const T& t, gTreeNode<T>* n) const
   return answer;
 }
 
-template <class T> gTreeNode<T>* gTree<T>::Find(const T& t) const
+template <class T> gbtTreeNode<T>* gbtTree<T>::Find(const T& t) const
 {
   return RecursiveFind(t,root);
 }
 
-template <class T> bool gTree<T>::Contains(const T& t) const
+template <class T> bool gbtTree<T>::Contains(const T& t) const
 {
   return (Find(t) != NULL);
 }
 
 template <class T> 
-bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T>* lhs, 
-				     const gTreeNode<T>* rhs) const
+bool gbtTree<T>::SubtreesAreIsomorphic(const gbtTreeNode<T>* lhs, 
+				     const gbtTreeNode<T>* rhs) const
 {
   if (lhs->data != rhs->data) return false;
-  gList<gTreeNode<T>*> lchildren = Children(lhs);
-  gList<gTreeNode<T>*> rchildren = Children(rhs);
+  gbtList<gbtTreeNode<T>*> lchildren = Children(lhs);
+  gbtList<gbtTreeNode<T>*> rchildren = Children(rhs);
   if (lchildren.Length() != rchildren.Length()) return false;
   for (int i = 1; i <= lchildren.Length(); i++)
     if ( !SubtreesAreIsomorphic(lchildren[i],rchildren[i]) ) return false;
   return true;
 }
 
-template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T>* n)
+template <class T> void gbtTree<T>::RecursiveFlush(const gbtTreeNode<T>* n)
 {
-  gList<gTreeNode<T>*> children = Children(n);
+  gbtList<gbtTreeNode<T>*> children = Children(n);
   for (int i = 1; i <= children.Length(); i++)
     RecursiveFlush(children[i]);
   delete n;
 }
 
-template <class T> void gTree<T>::Flush(void)
+template <class T> void gbtTree<T>::Flush(void)
 {
   RecursiveFlush(root);
   root = NULL;
 }
 
-template <class T> void gTree<T>::RecursiveDump(gOutput& f, 
-						const gTreeNode<T>* n, 
+template <class T> void gbtTree<T>::RecursiveDump(gbtOutput& f, 
+						const gbtTreeNode<T>* n, 
 						const int level) const
 {
   int i;
   //  for (i = 1; i <= level; i++) gout << "   ";
   //  gout << n->data << "\n";
 
-  gList<gTreeNode<T>*> children = Children(n);
+  gbtList<gbtTreeNode<T>*> children = Children(n);
   for (i = 1; i <= children.Length(); i++) {
     RecursiveDump(f,children[i],level+1);
   }
 }
 
-template <class T> void gTree<T>::Dump(gOutput& f) const
+template <class T> void gbtTree<T>::Dump(gbtOutput& f) const
 {
   RecursiveDump(f,root,0);
 }
 
-template <class T> gOutput& operator<<(gOutput& f, const gTree<T>& b)
+template <class T> gbtOutput& operator<<(gbtOutput& f, const gbtTree<T>& b)
 {
   b.Dump(f);   return f;
 }
-

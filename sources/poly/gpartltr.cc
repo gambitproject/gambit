@@ -28,61 +28,61 @@
 #include "gpartltr.imp"
 
 template class TreeOfPartials<gDouble>;
-template gOutput &operator<<(gOutput &f, const TreeOfPartials<gDouble> &y);
-template class gList<TreeOfPartials<gDouble> >;
-template gOutput &operator<<(gOutput &f, 
-			     const gList<TreeOfPartials<gDouble> > &y);
-template class gList<gList<TreeOfPartials<gDouble> > >;
-template gOutput &operator<<(gOutput &f, 
-			     const gList<gList<TreeOfPartials<gDouble> > > &y);
-template class gList<gList<gList<TreeOfPartials<gDouble> > > >;
+template gbtOutput &operator<<(gbtOutput &f, const TreeOfPartials<gDouble> &y);
+template class gbtList<TreeOfPartials<gDouble> >;
+template gbtOutput &operator<<(gbtOutput &f, 
+			     const gbtList<TreeOfPartials<gDouble> > &y);
+template class gbtList<gbtList<TreeOfPartials<gDouble> > >;
+template gbtOutput &operator<<(gbtOutput &f, 
+			     const gbtList<gbtList<TreeOfPartials<gDouble> > > &y);
+template class gbtList<gbtList<gbtList<TreeOfPartials<gDouble> > > >;
 template class ListOfPartialTrees<gDouble>;
-template gOutput &operator<<(gOutput &f, 
+template gbtOutput &operator<<(gbtOutput &f, 
 			     const ListOfPartialTrees<gDouble> &y);
 
 template class TreeOfPartials<gRational>;
-template gOutput &operator<<(gOutput &f, const TreeOfPartials<gRational> &y);
-template class gList<TreeOfPartials<gRational> >;
-template gOutput &operator<<(gOutput &f, 
-			     const gList<TreeOfPartials<gRational> > &y);
-template class gList<gList<TreeOfPartials<gRational> > >;
-template gOutput &operator<<(gOutput &f, 
-			   const gList<gList<TreeOfPartials<gRational> > > &y);
-template class gList<gList<gList<TreeOfPartials<gRational> > > >;
+template gbtOutput &operator<<(gbtOutput &f, const TreeOfPartials<gRational> &y);
+template class gbtList<TreeOfPartials<gRational> >;
+template gbtOutput &operator<<(gbtOutput &f, 
+			     const gbtList<TreeOfPartials<gRational> > &y);
+template class gbtList<gbtList<TreeOfPartials<gRational> > >;
+template gbtOutput &operator<<(gbtOutput &f, 
+			   const gbtList<gbtList<TreeOfPartials<gRational> > > &y);
+template class gbtList<gbtList<gbtList<TreeOfPartials<gRational> > > >;
 template class ListOfPartialTrees<gRational>;
-template gOutput &operator<<(gOutput &f, 
+template gbtOutput &operator<<(gbtOutput &f, 
 			     const ListOfPartialTrees<gRational> &y);
 
 
 //template class TreeOfPartials<double>;
-//template gOutput &operator<<(gOutput &f, const TreeOfPartials<double> &y);
-//template class gList<TreeOfPartials<double> >;
-//template gOutput &operator<<(gOutput &f, 
-//			     const gList<TreeOfPartials<double> > &y);
-//template class gList<gList<TreeOfPartials<double> > >;
-//template gOutput &operator<<(gOutput &f, 
-//			     const gList<gList<TreeOfPartials<double> > > &y);
-//template class gList<gList<gList<TreeOfPartials<double> > > >;
+//template gbtOutput &operator<<(gbtOutput &f, const TreeOfPartials<double> &y);
+//template class gbtList<TreeOfPartials<double> >;
+//template gbtOutput &operator<<(gbtOutput &f, 
+//			     const gbtList<TreeOfPartials<double> > &y);
+//template class gbtList<gbtList<TreeOfPartials<double> > >;
+//template gbtOutput &operator<<(gbtOutput &f, 
+//			     const gbtList<gbtList<TreeOfPartials<double> > > &y);
+//template class gbtList<gbtList<gbtList<TreeOfPartials<double> > > >;
 //template class ListOfPartialTrees<double>;
-//template gOutput &operator<<(gOutput &f, 
+//template gbtOutput &operator<<(gbtOutput &f, 
 //			     const ListOfPartialTrees<double> &y);
 
 #include "base/gtree.imp"
 
-template class gTreeNode<gPoly<gRational> >;
-template class gList<gTreeNode<gPoly<gRational> >*>;
-template class gTree<gPoly<gRational> >;
-template class gList<gTree<gPoly<gRational> > >;
+template class gbtTreeNode<gPoly<gRational> >;
+template class gbtList<gbtTreeNode<gPoly<gRational> >*>;
+template class gbtTree<gPoly<gRational> >;
+template class gbtList<gbtTree<gPoly<gRational> > >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, 
-			       const gTree<gPoly<gRational> >&);
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtTree<gPoly<gRational> >&);
 #endif  // __BCC55__
 
-template class gTreeNode<gPoly<gDouble> >;
-template class gList<gTreeNode<gPoly<gDouble> >*>;
-template class gTree<gPoly<gDouble> >;
-template class gList<gTree<gPoly<gDouble> > >;
+template class gbtTreeNode<gPoly<gDouble> >;
+template class gbtList<gbtTreeNode<gPoly<gDouble> >*>;
+template class gbtTree<gPoly<gDouble> >;
+template class gbtList<gbtTree<gPoly<gDouble> > >;
 #ifndef __BCC55__
-template gOutput& operator << (gOutput& output, 
-			       const gTree<gPoly<gDouble> >&);
+template gbtOutput& operator << (gbtOutput& output, 
+			       const gbtTree<gPoly<gDouble> >&);
 #endif  // __BCC55__

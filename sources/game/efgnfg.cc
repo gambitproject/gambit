@@ -39,8 +39,8 @@
 
 static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
 {
-  gArray<int> *behav = new gArray<int>(p_player.NumInfosets());
-  gText label = "";
+  gbtArray<int> *behav = new gbtArray<int>(p_player.NumInfosets());
+  gbtText label = "";
 
   // FIXME: This is a rather lame labeling scheme.
   for (int iset = 1; iset <= p_player.NumInfosets(); iset++)  {
@@ -130,7 +130,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
   
   gbt_nfg_game_rep *nfg = new gbt_nfg_game_rep(rep);
   nfg->m_label = rep->m_label;
-  nfg->m_dimensions = gArray<int>(NumPlayers());
+  nfg->m_dimensions = gbtArray<int>(NumPlayers());
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     nfg->m_players.Append(new gbt_nfg_player_rep(nfg, pl, 0));
     nfg->m_players[pl]->m_label = rep->players[pl]->m_label;
@@ -142,7 +142,7 @@ gbtNfgGame gbtEfgGame::GetReducedNfg(void) const
 
 gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
 {
-  gbtNfgGame afg(gArray<int>(p_efg.NumActions()));
+  gbtNfgGame afg(gbtArray<int>(p_efg.NumActions()));
 
   p_efg.rep->afg = afg;
   afg.SetLabel(p_efg.GetLabel() + " (Agent Form)");
@@ -159,7 +159,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
   NfgIter iter(afg);
   int pl = afg.NumPlayers();
 
-  gArray<int> dim(p_efg.NumPlayers());
+  gbtArray<int> dim(p_efg.NumPlayers());
   for (int i = 1; i <= dim.Length(); i++) {
     dim[i] = p_efg.GetPlayer(i).NumInfosets();
   }
@@ -193,4 +193,3 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
 
   return afg;
 }
-

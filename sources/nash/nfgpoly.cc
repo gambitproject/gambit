@@ -48,7 +48,7 @@ private:
   int num_vars;
   long count,nevals;
   double time;
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
   bool is_singular;
 
   bool EqZero(gDouble x) const;
@@ -62,24 +62,24 @@ private:
   gPolyList<gDouble>   IndifferenceEquations()                 const;
   gPolyList<gDouble>   LastActionProbPositiveInequalities()    const;
   gPolyList<gDouble>   NashOnSupportEquationsAndInequalities() const;
-  gList<gVector<gDouble> > 
+  gbtList<gVector<gDouble> > 
                NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
 					const gRectangle<gDouble> &Cube,
-					gWatch &timer,
-					gStatus &p_status);
+					gbtStopWatch &timer,
+					gbtStatus &p_status);
 
-  int SaveSolutions(const gList<gVector<gDouble> > &list);
+  int SaveSolutions(const gbtList<gVector<gDouble> > &list);
 public:
   PolEnumModule(const gbtNfgSupport &, const PolEnumParams &p);
   
-  int PolEnum(gStatus &);
+  int PolEnum(gbtStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
   
   PolEnumParams &Parameters(void);
 
-  const gList<MixedSolution> &GetSolutions(void) const;
+  const gbtList<MixedSolution> &GetSolutions(void) const;
   gVector<gDouble> SolVarsFromMixedProfile(const MixedProfile<gNumber> &) 
                                                                      const;
 
@@ -104,9 +104,9 @@ PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
 }
 
 
-int PolEnumModule::PolEnum(gStatus &p_status)
+int PolEnumModule::PolEnum(gbtStatus &p_status)
 {
-  gWatch watch;
+  gbtStopWatch watch;
   gPolyList<gDouble> equations = NashOnSupportEquationsAndInequalities();
 
   /*
@@ -128,10 +128,10 @@ int PolEnumModule::PolEnum(gStatus &p_status)
   gRectangle<gDouble> Cube(bottoms, tops); 
 
   // start QuikSolv
-  gWatch timer;
+  gbtStopWatch timer;
   timer.Start();
 
-  gList<gVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
+  gbtList<gVector<gDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube,
 								   timer,
 								   p_status);
@@ -142,7 +142,7 @@ int PolEnumModule::PolEnum(gStatus &p_status)
   return index;	 
 }
 
-int PolEnumModule::SaveSolutions(const gList<gVector<gDouble> > &list)
+int PolEnumModule::SaveSolutions(const gbtList<gVector<gDouble> > &list)
 {
   MixedProfile<double> profile(support);
   int i,j,k,kk,index=0;
@@ -188,7 +188,7 @@ PolEnumParams &PolEnumModule::Parameters(void)
   return params;
 }
 
-const gList<MixedSolution> &PolEnumModule::GetSolutions(void) const
+const gbtList<MixedSolution> &PolEnumModule::GetSolutions(void) const
 {
   return solutions;
 }
@@ -289,11 +289,11 @@ gPolyList<gDouble> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 }
 
 
-gList<gVector<gDouble> > 
+gbtList<gVector<gDouble> > 
 PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
 					      const gRectangle<gDouble> &Cube,
-					      gWatch &timer,
-					      gStatus &p_status)
+					      gbtStopWatch &timer,
+					      gbtStatus &p_status)
 {  
   QuikSolv<gDouble> quickie(equations, p_status);
   //  p_status.SetProgress(0);
@@ -301,7 +301,7 @@ PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
   try {
     quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter);
   }
-  catch (gSignalBreak &) { }
+  catch (gbtSignalBreak &) { }
   catch (gSquareMatrix<gDouble>::MatrixSingular) {
     is_singular = true;
   }
@@ -324,7 +324,7 @@ PolEnumParams::PolEnumParams(void)
 { }
 
 int PolEnum(const gbtNfgSupport &support, const PolEnumParams &params,
-	    gList<MixedSolution> &solutions, gStatus &p_status,
+	    gbtList<MixedSolution> &solutions, gbtStatus &p_status,
 	    long &nevals, double &time, bool &is_singular)
 {
   PolEnumModule module(support, params);
@@ -407,7 +407,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
 
   if (point.Length() > 0) {
     
-    gWatch watch;
+    gbtStopWatch watch;
     
     // equations for equality of strat j to strat j+1
     gPolyList<gDouble> equations(&Space,&Lex);
@@ -419,7 +419,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
     //	 << equations << "\n";
     
     // start QuikSolv
-    gNullStatus gstatus;
+    gbtNullStatus gstatus;
     QuikSolv<gDouble> quickie(equations, gstatus);
     
     //DEBUG
@@ -428,7 +428,7 @@ const int PolEnumModule::PolishKnownRoot(gVector<gDouble> &point) const
     try { 
       point = quickie.NewtonPolishedRoot(point);
     }
-    catch (gSignalBreak &) { }
+    catch (gbtSignalBreak &) { }
     catch (gSquareMatrix<gDouble>::MatrixSingular &) {
       return 0;
     }
@@ -470,19 +470,19 @@ gbtNfgNashEnumPoly::gbtNfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
-					       gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
+					       gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gList<const gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
+  gbtList<const gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
 								p_status);
 
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";
 
-  gList<const gbtNfgSupport> singularSupports;
-  gList<MixedSolution> solutions;
+  gbtList<const gbtNfgSupport> singularSupports;
+  gbtList<MixedSolution> solutions;
 
   for (int i = 1; (i <= supports.Length() &&
 		   (m_stopAfter == 0 || m_stopAfter > solutions.Length())); 
@@ -491,7 +491,7 @@ gList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
     p_status.SetProgress((double) (i-1) / (double) supports.Length());
     long newevals = 0;
     double newtime = 0.0;
-    gList<MixedSolution> newsolns;
+    gbtList<MixedSolution> newsolns;
     bool is_singular = false;
     
     PolEnumParams params;
@@ -512,10 +512,3 @@ gList<MixedSolution> gbtNfgNashEnumPoly::Solve(const gbtNfgSupport &p_support,
 
   return solutions;
 }
-
-
-
-
-
-
-

@@ -52,18 +52,18 @@ private:
   T total_cost,eps1,eps2,eps3,tmin;
   BFS<T> opt_bfs,dual_bfs;
   LPTableau<T> tab;
-  gArray<bool> *UB, *LB;
-  gArray<T> *ub, *lb;
+  gbtArray<bool> *UB, *LB;
+  gbtArray<T> *ub, *lb;
   gVector<T> *xx, *cost; 
   gVector<T> y, x, d;
-  gStatus &status;
+  gbtStatus &status;
 
   void Solve(int phase = 0);
   int Enter(void);
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
-	  int nequals, gStatus &);   // nequals = number of equalities (last nequals rows)
+	  int nequals, gbtStatus &);   // nequals = number of equalities (last nequals rows)
 //  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
 //	  const gVector<T> &C,  const gVector<int> &sense, 
 //	  const gVector<int> &LB,  const gVector<T> &lb, 
@@ -72,7 +72,7 @@ public:
   
   T OptimumCost(void) const;
   const gVector<T> &OptimumVector(void) const;
-  const gList< BFS<T> > &GetAll(void);
+  const gbtList< BFS<T> > &GetAll(void);
   const LPTableau<T> &GetTableau();
   
   int IsAborted(void) const;
@@ -85,11 +85,3 @@ public:
 };
 
 #endif   // LPSOLVE_H
-
-
-
-
-
-
-
-

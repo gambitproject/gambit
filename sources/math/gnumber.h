@@ -30,7 +30,7 @@
 #include "base/base.h"
 #include "rational.h"
 
-class gOutput;
+class gbtOutput;
 
 typedef enum { precDOUBLE, precRATIONAL } gPrecision;
 
@@ -43,10 +43,10 @@ protected:
   };
 
 public:
-  class DivideByZero : public gException  {
+  class DivideByZero : public gbtException  {
   public:
     virtual ~DivideByZero()  { }
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
@@ -81,8 +81,8 @@ public:
   gNumber &operator*=(const gNumber &y);
   gNumber &operator/=(const gNumber &y);
 
-  friend gOutput &operator<<(gOutput &s, const gNumber &y);
-  friend gInput &operator>>(gInput &s, gNumber &y);
+  friend gbtOutput &operator<<(gbtOutput &s, const gNumber &y);
+  friend gbtInput &operator>>(gbtInput &s, gNumber &y);
 
   // MISCELLANEOUS MATHEMATICAL FUNCTIONS
   friend gNumber pow(const gNumber&,long);
@@ -94,14 +94,13 @@ public:
   bool IsInteger(void) const;
 };
 
-gOutput &operator<<(gOutput &, const gNumber &);
+gbtOutput &operator<<(gbtOutput &, const gNumber &);
 
-gText ToText(const gNumber &);
-gText ToText(const gNumber &p_number, int p_precision);
-gNumber	FromText(const gText &, gNumber &);
-gNumber ToNumber(const gText &);    
+gbtText ToText(const gNumber &);
+gbtText ToText(const gNumber &p_number, int p_precision);
+gNumber	FromText(const gbtText &, gNumber &);
+gNumber ToNumber(const gbtText &);    
 
 void gEpsilon(gNumber &v, int i=8);
 
 #endif  // GNUMBER_H
-

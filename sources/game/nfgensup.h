@@ -38,18 +38,18 @@
 void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 			     gbtNfgSupport *sact,
 			     gbtStrategyIterator *c,
-			     gList<const gbtNfgSupport> *list);
+			     gbtList<const gbtNfgSupport> *list);
 
-gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
+gbtList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
 
 // Subsupports of a given support are _valid_ if each agent has an action.
 
 void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					 gbtNfgSupport *sact,
 					 gbtStrategyIterator *c,
-					 gList<const gbtNfgSupport> *list);
+					 gbtList<const gbtNfgSupport> *list);
 
-gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
+gbtList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -64,13 +64,13 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					      gbtNfgSupport *sact,
 					      gbtStrategyIterator *c,
 					const bool strong,
-					      gList<const gbtNfgSupport> *list,
-					gStatus &status);
+					      gbtList<const gbtNfgSupport> *list,
+					gbtStatus &status);
   
-gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
+gbtList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
-						 gStatus &status);
+						 gbtStatus &status);
 
 // The following two routines combine to produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
@@ -86,19 +86,10 @@ gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					    gbtNfgSupport *sact,
 				            gbtStrategyIterator *c,
-					    gList<const gbtNfgSupport> *list,
-				      gStatus &status);
+					    gbtList<const gbtNfgSupport> *list,
+				      gbtStatus &status);
 
-gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &);
+gbtList<const gbtNfgSupport> SortSupportsBySize(gbtList<const gbtNfgSupport> &);
   
-gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
-					       gStatus &status);
-
-
-
-
-
-
-
-
-
+gbtList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
+					       gbtStatus &status);

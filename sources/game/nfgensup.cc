@@ -34,7 +34,7 @@
 void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
 			           gbtNfgSupport *sact,
 			           gbtStrategyIterator *c,
-			           gList<const gbtNfgSupport> *list)
+			           gbtList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
@@ -50,9 +50,9 @@ void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
+gbtList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 {
-  gList<const gbtNfgSupport> answer;
+  gbtList<const gbtNfgSupport> answer;
   gbtNfgSupport SAct(S);
   gbtStrategyIterator cursor(S);
 
@@ -67,7 +67,7 @@ gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
                                          gbtNfgSupport *sact,
 					 gbtStrategyIterator *c,
-					 gList<const gbtNfgSupport> *list)
+					 gbtList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
@@ -83,9 +83,9 @@ void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
+gbtList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
 {
-  gList<const gbtNfgSupport> answer;
+  gbtList<const gbtNfgSupport> answer;
   gbtNfgSupport SAct(S);
   gbtStrategyIterator cursor(S);
 
@@ -99,14 +99,14 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					      gbtStrategyIterator *c,
 					const bool strong,
 					const bool conditional,
-					      gList<const gbtNfgSupport> *list,
-					gStatus &status)
+					      gbtList<const gbtNfgSupport> *list,
+					gbtStatus &status)
 { 
   bool abort = false;
   bool no_deletions = true;
 
 
-  gList<gbtNfgStrategy> deletion_list;
+  gbtList<gbtNfgStrategy> deletion_list;
   gbtStrategyIterator scanner(*s);
 
   // First we collect all the strategies that can be deleted.
@@ -128,7 +128,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
 
   // Now we delete them, recurse, then restore
   if (!abort && !no_deletions) {
-    gList<gbtNfgStrategy> actual_deletions;
+    gbtList<gbtNfgStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions += deletion_list[i];
 
@@ -174,12 +174,12 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
   }
 }
   
-gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
+gbtList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
-						 gStatus &status)
+						 gbtStatus &status)
 {
-  gList<const gbtNfgSupport> answer;
+  gbtList<const gbtNfgSupport> answer;
   gbtNfgSupport sact(S);
   gbtStrategyIterator cursor(S);
 
@@ -198,15 +198,15 @@ gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
 					    gbtNfgSupport *sact,
 				            gbtStrategyIterator *c,
-				            gList<const gbtNfgSupport> *list,
-				      gStatus &status)
+				            gbtList<const gbtNfgSupport> *list,
+				      gbtStatus &status)
 { 
   status.Get();
 
   bool abort = false;
   bool no_deletions = true;
 
-  gList<gbtNfgStrategy> deletion_list;
+  gbtList<gbtNfgStrategy> deletion_list;
   gbtStrategyIterator scanner(*s);
 
   do {
@@ -226,7 +226,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   } while (!abort && scanner.GoToNext());
   
   if (!abort) {
-    gList<gbtNfgStrategy> actual_deletions;
+    gbtList<gbtNfgStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions += deletion_list[i];
       sact->RemoveStrategy(deletion_list[i]); 
@@ -254,14 +254,14 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
   }
 }
 
-gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &list) 
+gbtList<const gbtNfgSupport> SortSupportsBySize(gbtList<const gbtNfgSupport> &list) 
 {
-  gArray<int> sizes(list.Length());
+  gbtArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++) {
     sizes[i] = list[i].ProfileLength();
   }
 
-  gArray<int> listproxy(list.Length());
+  gbtArray<int> listproxy(list.Length());
   for (int i = 1; i <= list.Length(); i++)
     listproxy[i] = i;
 
@@ -292,17 +292,17 @@ gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &list)
       }
   }
 
-  gList<const gbtNfgSupport> answer;
+  gbtList<const gbtNfgSupport> answer;
   for (int i = 1; i <= list.Length(); i++)
     answer += list[listproxy[i]];
 
   return answer;
 }
   
-gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
-					       gStatus &status)
+gbtList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
+					       gbtStatus &status)
 {
-  gList<const gbtNfgSupport> answer;
+  gbtList<const gbtNfgSupport> answer;
   gbtNfgSupport sact(S);
   gbtStrategyIterator cursor(S);
   status.SetProgress(0);
@@ -346,5 +346,3 @@ gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
   return SortSupportsBySize(answer);
   return answer;
 }
-
-

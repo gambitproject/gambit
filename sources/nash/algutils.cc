@@ -86,7 +86,7 @@ template <class T> void gFact<T>::Set(const T &p_state)
 template <class T> gFact<T>::Contradiction::~Contradiction()
 { }
 
-template <class T> gText gFact<T>::Contradiction::Description(void) const 
+template <class T> gbtText gFact<T>::Contradiction::Description(void) const 
 {
   return "Contradictory information in gFact";
 }
@@ -94,14 +94,13 @@ template <class T> gText gFact<T>::Contradiction::Description(void) const
 template <class T> gFact<T>::Unknown::~Unknown()
 { }
 
-template <class T> gText gFact<T>::Unknown::Description(void) const 
+template <class T> gbtText gFact<T>::Unknown::Description(void) const 
 {
   return "Unknown information in gFact";
 }
 
 template class gFact<gNumber>;
-template class gFact<gTriState>;
+template class gFact<gbtTriState>;
 
 #include "math/gpvector.h"
 template class gFact<gPVector<gNumber> >;
-

@@ -38,10 +38,10 @@
 class EFNodeArrays   {
 friend class EFNodeSet;
 protected:
-  gBlock<gbtEfgNode> nodes;
+  gbtBlock<gbtEfgNode> nodes;
   
 public:
-  EFNodeArrays(const gArray<gbtEfgNode> &a);
+  EFNodeArrays(const gbtArray<gbtEfgNode> &a);
   EFNodeArrays ( const EFNodeArrays &a);
   virtual ~EFNodeArrays();
   EFNodeArrays &operator=( const EFNodeArrays &a);
@@ -52,7 +52,7 @@ public:
 // EFNodeArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFNodeArrays::EFNodeArrays(const gArray<gbtEfgNode> &n)
+EFNodeArrays::EFNodeArrays(const gbtArray<gbtEfgNode> &n)
   : nodes(n.Length())
 {
   for (int i = 1; i <= nodes.Length(); i++)
@@ -73,7 +73,7 @@ EFNodeArrays &EFNodeArrays::operator=( const EFNodeArrays &n)
 }
 
 #ifdef __BORLANDC__
-bool operator==(const gArray<gbtEfgNode> &a, const gArray<gbtEfgNode> &b)
+bool operator==(const gbtArray<gbtEfgNode> &a, const gbtArray<gbtEfgNode> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())  {
     return false;
@@ -94,7 +94,7 @@ class EFNodeSet{
 
 protected:
   gbtEfgPlayer efp;
-  gArray < EFNodeArrays *> infosets;
+  gbtArray < EFNodeArrays *> infosets;
 public:
   
   //----------------------------------------
@@ -128,7 +128,7 @@ public:
   bool RemoveNode(int iset, const gbtEfgNode &);
 
   // Get a garray of the Nodes in an Infoset
-  const gArray<gbtEfgNode> &NodeList(int iset) const
+  const gbtArray<gbtEfgNode> &NodeList(int iset) const
      { return infosets[iset]->nodes; }
   
   // Get a Node
@@ -156,7 +156,7 @@ EFNodeSet::EFNodeSet(const gbtEfgPlayer &p)
   : efp(p), infosets(p.NumInfosets())
 {
   for (int i = 1; i <= p.NumInfosets(); i++) {
-    gArray<gbtEfgNode> members(p.GetInfoset(i).NumMembers());
+    gbtArray<gbtEfgNode> members(p.GetInfoset(i).NumMembers());
     for (int j = 1; j <= members.Length(); j++) {
       members[j] = p.GetInfoset(i).GetMember(j);
     }
@@ -329,7 +329,7 @@ int EFBasis::NumNodes(int pl, int iset) const
   return nodes[pl]->NumNodes(iset);
 }
 
-const gArray<gbtEfgNode> &EFBasis::Nodes(int pl, int iset) const
+const gbtArray<gbtEfgNode> &EFBasis::Nodes(int pl, int iset) const
 {
   return nodes[pl]->NodeList(iset);
 }
@@ -360,7 +360,7 @@ bool EFBasis::IsValid(void) const
 
 gPVector<int> EFBasis::NumNodes(void) const
 {
-  gArray<int> foo(m_efg.NumPlayers());
+  gbtArray<int> foo(m_efg.NumPlayers());
   int i;
   for (i = 1; i <= m_efg.NumPlayers(); i++)
     foo[i] = nodes[i]->GetPlayer().NumInfosets();
@@ -437,7 +437,7 @@ bool EFBasis::IsConsistent(void) const
   // gout << "\nb: \n" << (*b);
   // gout << "\nc: \n" << (*c);
 
-  gNullStatus status;
+  gbtNullStatus status;
   LPSolve<double> lp((*A),(*b),(*c),num_eqs, status);
 
   // gout << "\noptimum: " << lp.OptimumVector();
@@ -629,7 +629,7 @@ void EFBasis::GetConsistencySolution(const gVector<double> &x) const
   //  gout << "\nnodes: " << nodes;
 }
 
-void EFBasis::Dump(gOutput& s) const
+void EFBasis::Dump(gbtOutput& s) const
 {
   int numplayers;
   int i;
@@ -658,15 +658,15 @@ void EFBasis::Dump(gOutput& s) const
   s << "} ";
 }
 
-gOutput& operator<<(gOutput&s, const EFBasis& e)
+gbtOutput& operator<<(gbtOutput&s, const EFBasis& e)
 {
   e.Dump(s);
   return s;
 }
 
-template class gArray<EFNodeSet *>;
-template class gArray<EFNodeArrays *>;
+template class gbtArray<EFNodeSet *>;
+template class gbtArray<EFNodeArrays *>;
 template class gDPVector<int>;
 #ifndef __BCC55__
-template gOutput & operator<< (gOutput&, const gDPVector<int>&);
+template gbtOutput & operator<< (gbtOutput&, const gDPVector<int>&);
 #endif  // __BCC55__

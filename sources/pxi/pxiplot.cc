@@ -24,7 +24,7 @@
 
 PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
 		 const wxSize &p_size,
-		 const gArray<PxiFile *> &p_qreFiles, int p_page,
+		 const gbtArray<PxiFile *> &p_qreFiles, int p_page,
 		 const ExpData &p_expData)
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
     m_qreFiles(p_qreFiles), m_expData(p_expData),
@@ -265,4 +265,3 @@ void PxiPlot::SetScale(double x)
 		(int) (GetScale()*Width()/ppu),
 		(int) (GetScale()*Height()/ppu));
 }
-

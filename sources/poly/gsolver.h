@@ -39,11 +39,11 @@ private:
   const gIdeal<T>     TheIdeal;
 
 // Conversion
-  gList<gPoly<gDouble> > BasisTogDouble() const;
+  gbtList<gPoly<gDouble> > BasisTogDouble() const;
 
 // Recursive Call in Solver
-  gList<gVector<gDouble> >  
-    ContinuationSolutions(const gList<gPoly<gDouble> >& list,
+  gbtList<gVector<gDouble> >  
+    ContinuationSolutions(const gbtList<gPoly<gDouble> >& list,
 			  const int dmnsn,
 			  const int curvar,
 			  const gVector<gDouble>& knownvals);
@@ -56,7 +56,7 @@ public:
   ~gSolver();
 
   bool                     IsZeroDimensional();
-  gList<gVector<gDouble> > Roots();
+  gbtList<gVector<gDouble> > Roots();
 };
 
 #endif // GSOLVER_H

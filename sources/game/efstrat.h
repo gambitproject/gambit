@@ -36,9 +36,9 @@ class EFActionSet;
 
 class gbtEfgSupport {
 protected:
-  gText m_label;
+  gbtText m_label;
   gbtEfgGame m_efg;
-  gArray<EFActionSet *> m_players;
+  gbtArray<EFActionSet *> m_players;
 
 public:
   gbtEfgSupport(const gbtEfgGame &);
@@ -51,8 +51,8 @@ public:
 
   gbtEfgGame GetGame(void) const { return m_efg; }
 
-  const gText &GetLabel(void) const { return m_label; }
-  void SetLabel(const gText &p_label) { m_label = p_label; }
+  const gbtText &GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
 
   int NumActions(int pl, int iset) const;
   int NumActions(const gbtEfgInfoset &) const;
@@ -79,13 +79,13 @@ public:
   int TotalNumSequences(void) const;
 
   // Reachable Nodes and Information Sets
-  gList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
-  gList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &,
+  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &) const;
+  gbtList<gbtEfgNode> ReachableNonterminalNodes(const gbtEfgNode &,
 					      const gbtEfgAction &) const;
-  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
-  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &,
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &) const;
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgNode &,
 					 const gbtEfgAction &) const;
-  gList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
+  gbtList<gbtEfgInfoset> ReachableInfosets(const gbtEfgPlayer &) const;
 
   bool AlwaysReaches(const gbtEfgInfoset &) const;
   bool AlwaysReachesFrom(const gbtEfgInfoset &, const gbtEfgNode &) const;
@@ -97,15 +97,15 @@ public:
   bool IsDominated(const gbtEfgAction &,
 		   bool strong, bool conditional) const;
   gbtEfgSupport Undominated(bool strong, bool conditional,
-			 const gArray<int> &players,
-			 gOutput &, // tracefile 
-			 gStatus &status) const;
+			 const gbtArray<int> &players,
+			 gbtOutput &, // tracefile 
+			 gbtStatus &status) const;
 
 
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const gbtEfgSupport &);
+gbtOutput &operator<<(gbtOutput &f, const gbtEfgSupport &);
 
 
 // The following class keeps a record of which nodes and infosets are 
@@ -116,8 +116,8 @@ gOutput &operator<<(gOutput &f, const gbtEfgSupport &);
 
 class gbtEfgSupportWithActiveInfo : public gbtEfgSupport {
 protected:
-  gArray<gList<bool> >         is_infoset_active;
-  gArray<gList<gList<bool> > > is_nonterminal_node_active;
+  gbtArray<gbtList<bool> >         is_infoset_active;
+  gbtArray<gbtList<gbtList<bool> > > is_nonterminal_node_active;
 
   void InitializeActiveListsToAllActive();
   void InitializeActiveListsToAllInactive();
@@ -133,7 +133,7 @@ protected:
   void deactivate_this_and_lower_nodes(const gbtEfgNode &);
   void deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                                                  const gbtEfgNode &,
-						 gList<gbtEfgInfoset> *);
+						 gbtList<gbtEfgInfoset> *);
 
 public:
   gbtEfgSupportWithActiveInfo(const gbtEfgGame &);
@@ -147,14 +147,14 @@ public:
   bool operator!=(const gbtEfgSupportWithActiveInfo &) const;
 
   // Find the reachable nodes at an infoset
-  gList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
-  gList<gbtEfgNode> ReachableNonterminalNodes() const;
+  gbtList<gbtEfgNode> ReachableNodesInInfoset(const gbtEfgInfoset &) const;
+  gbtList<gbtEfgNode> ReachableNonterminalNodes() const;
 
   // Action editing functions
   void AddAction(const gbtEfgAction &);
   bool RemoveAction(const gbtEfgAction &);
   bool RemoveActionReturningDeletedInfosets(const gbtEfgAction &,
-					    gList<gbtEfgInfoset> *);
+					    gbtList<gbtEfgInfoset> *);
   //  void GoToNextSubsupportOf(const gbtEfgSupport &);
 
   // Information
@@ -168,19 +168,10 @@ public:
   bool HasActiveActionsAtActiveInfosets();
   bool HasActiveActionsAtActiveInfosetsAndNoOthers();
 
-  void Dump(gOutput& s) const;
+  void Dump(gbtOutput& s) const;
 };
 
-gOutput &operator<<(gOutput &f, const gbtEfgSupportWithActiveInfo &);
+gbtOutput &operator<<(gbtOutput &f, const gbtEfgSupportWithActiveInfo &);
 
 
 #endif  // EFSTRAT_H
-
-
-
-
-
-
-
-
-

@@ -67,29 +67,8 @@ public:
     bool            IsConstant()                const;
     bool            IsMultiaffine()             const;
     const exp_vect& ExpV()                      const;
-    T               Evaluate(const gArray<T>&)  const;
+    T               Evaluate(const gbtArray<T>&)  const;
     T               Evaluate(const gVector<T>&) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &, const gMono<T> &);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+template <class T> gbtOutput &operator<<(gbtOutput &, const gMono<T> &);

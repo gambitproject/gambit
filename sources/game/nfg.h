@@ -60,7 +60,7 @@ protected:
 
 public:
   // CONSTRUCTORS, DESTRUCTORS, CONSTRUCTIVE OPERATORS
-  gbtNfgGame(const gArray<int> &dim);
+  gbtNfgGame(const gbtArray<int> &dim);
   gbtNfgGame(const gbtNfgGame &);
   gbtNfgGame(gbt_nfg_game_rep *);
   ~gbtNfgGame();
@@ -71,23 +71,23 @@ public:
   bool operator!=(const gbtNfgGame &) const;
 
   // GENERAL DATA ACCESS AND MANIPULATION  
-  void SetLabel(const gText &s);
-  const gText &GetLabel(void) const;
+  void SetLabel(const gbtText &s);
+  const gbtText &GetLabel(void) const;
 
-  void SetComment(const gText &);
-  const gText &GetComment(void) const;
+  void SetComment(const gbtText &);
+  const gbtText &GetComment(void) const;
 
   bool IsConstSum(void) const;
   long RevisionNumber(void) const;
 
-  void WriteNfg(gOutput &p_file) const;
+  void WriteNfg(gbtOutput &p_file) const;
 
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;
   gbtNfgPlayer GetPlayer(int i) const;
 
   int NumStrats(int pl) const;
-  const gArray<int> &NumStrats(void) const; 
+  const gbtArray<int> &NumStrats(void) const; 
   int ProfileLength(void) const;
 
   // OUTCOMES
@@ -114,7 +114,7 @@ public:
 
 // Exception thrown by ReadNfgFile if not valid .nfg file
 class gbtNfgParserError { };
-gbtNfgGame ReadNfgFile(gInput &);
+gbtNfgGame ReadNfgFile(gbtInput &);
 
 #include "nfstrat.h"
 #include "mixed.h"

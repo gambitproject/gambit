@@ -26,9 +26,9 @@
 
 #include "lpsolve.h"
 
-template <class T> gBlock<int> Artificials(const gVector<T> &b) 
+template <class T> gbtBlock<int> Artificials(const gVector<T> &b) 
 {
-  gBlock<int> ret;
+  gbtBlock<int> ret;
   for(int i=b.First();i<=b.Last();i++)
     if(b[i]<(T)0) ret.Append(i);
   return ret;
@@ -36,7 +36,7 @@ template <class T> gBlock<int> Artificials(const gVector<T> &b)
 
 template <class T> 
 LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
-		    const gVector<T> &c, int nequals, gStatus &s) 
+		    const gVector<T> &c, int nequals, gbtStatus &s) 
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
     total_cost(0),tmin(0), opt_bfs((T)0),  dual_bfs((T)0) , 
@@ -67,10 +67,10 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
   // gout << "\n--- Begin Phase I ---\n";
   
-  UB = new gArray<bool>(nvars+neqns);
-  LB = new gArray<bool>(nvars+neqns);
-  ub = new gArray<T>(nvars+neqns);
-  lb = new gArray<T>(nvars+neqns);
+  UB = new gbtArray<bool>(nvars+neqns);
+  LB = new gbtArray<bool>(nvars+neqns);
+  ub = new gbtArray<T>(nvars+neqns);
+  lb = new gbtArray<T>(nvars+neqns);
   xx = new gVector<T>(nvars+neqns);
   cost = new gVector<T>(nvars+neqns);
 
@@ -390,7 +390,7 @@ template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
   return tab;
 }
 
-template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
+template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
 {
   gVector<T> c(tab.GetCost());
   gVector<T> uc(tab.GetUnitCost());
@@ -420,10 +420,10 @@ template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
   }
 
   VertEnum<T> AllSolutions(tab,status);
-  gList<gVector<T> > verts;
+  gbtList<gVector<T> > verts;
 
-  gList<BFS<T> > *bfs = new gList<BFS<T> >(AllSolutions.VertexList());
-  gList<BFS<T> > *dual_bfs = new gList<BFS<T> >(AllSolutions.DualVertexList());
+  gbtList<BFS<T> > *bfs = new gbtList<BFS<T> >(AllSolutions.VertexList());
+  gbtList<BFS<T> > *dual_bfs = new gbtList<BFS<T> >(AllSolutions.DualVertexList());
   AllSolutions.Vertices(verts);
 
   //  gout << "\nHere are the BFSs: \n";
@@ -501,4 +501,3 @@ if(i == 1) return eps1;
 if(i == 3)return eps3;
 return eps2;
 }
-

@@ -36,11 +36,11 @@
 //                     class BFS<T>: member functions
 //--------------------------------------------------------------------------
 
-template <class T> BFS<T>::BFS(void) : gOrdMap<int, T>((T) 0)  { }
+template <class T> BFS<T>::BFS(void) : gbtOrdMap<int, T>((T) 0)  { }
 
-template <class T> BFS<T>::BFS(const T &d) : gOrdMap<int, T>((T) d)  { }
+template <class T> BFS<T>::BFS(const T &d) : gbtOrdMap<int, T>((T) d)  { }
 
-template <class T> BFS<T>::BFS(const BFS<T> &m) : gOrdMap<int, T>(m)  { }
+template <class T> BFS<T>::BFS(const BFS<T> &m) : gbtOrdMap<int, T>(m)  { }
 
 template <class T> int BFS<T>::operator==(const BFS<T> &M) const
 {
@@ -57,7 +57,7 @@ template <class T> int BFS<T>::operator!=(const BFS<T> &M) const
   return !(*this == M);
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &b)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const BFS<T> &b)
 {
   b.Dump(f);
   return f;
@@ -67,18 +67,17 @@ template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &b)
 template class BFS<double>;
 template class BFS<gRational>;
 
-template gOutput &operator<<(gOutput &, const BFS<double> &);
-template gOutput &operator<<(gOutput &, const BFS<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const BFS<double> &);
+template gbtOutput &operator<<(gbtOutput &, const BFS<gRational> &);
 
-template class gArray<BFS<double> >;
-template class gArray<BFS<gRational> >;
-template class gBlock<BFS<double> >;
-template class gBlock<BFS<gRational> >;
-template class gList<BFS<double> >;
-template class gList<BFS<gRational> >;
+template class gbtArray<BFS<double> >;
+template class gbtArray<BFS<gRational> >;
+template class gbtBlock<BFS<double> >;
+template class gbtBlock<BFS<gRational> >;
+template class gbtList<BFS<double> >;
+template class gbtList<BFS<gRational> >;
 
-template class gBaseMap<int, double>;
-template class gOrdMap<int, double>;
-template class gBaseMap<int, gRational>;
-template class gOrdMap<int, gRational>;
-
+template class gbtBaseMap<int, double>;
+template class gbtOrdMap<int, double>;
+template class gbtBaseMap<int, gRational>;
+template class gbtOrdMap<int, gRational>;

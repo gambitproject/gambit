@@ -48,7 +48,7 @@ template <class T> class gPolyArray  {
 
     const gPoly<T> &operator[](int index) const;
     gPoly<T> &operator[](int index);
-    virtual void Dump(gOutput &) const;
+    virtual void Dump(gbtOutput &) const;
 };
 
 template <class T> class gPolyBlock : public gPolyArray<T>   {
@@ -76,4 +76,3 @@ template <class T> class gPolyBlock : public gPolyArray<T>   {
 };
 
 #endif    // GPOLYCTR_H
-

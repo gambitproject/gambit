@@ -38,18 +38,18 @@ template <class T> gbtNfgNashEnumMixed<T>::gbtNfgNashEnumMixed(void)
 { }
 
 template <class T> 
-gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
-					    gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
+					    gbtStatus &p_status)
 {
   gbtNfgGame nfg = p_support.GetGame();
-  gList<gVector<T> > key1, key2;  
-  gList<int> node1, node2;   // IDs of each component of the extreme equilibria
+  gbtList<gVector<T> > key1, key2;  
+  gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   if (nfg.NumPlayers() != 2) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
   
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
 
   NfgIter iter(p_support); 
 
@@ -91,13 +91,13 @@ gList<MixedSolution> gbtNfgNashEnumMixed<T>::Solve(const gbtNfgSupport &p_suppor
   p_status.SetProgress(0.0);
   p_status << "Step 3 of 3: Searching for equilibria";
   
-  const gList<BFS<T> > &verts1(poly1.VertexList());
-  const gList<BFS<T> > &verts2(poly2.VertexList());
+  const gbtList<BFS<T> > &verts1(poly1.VertexList());
+  const gbtList<BFS<T> > &verts2(poly2.VertexList());
   int v1 = verts1.Length();
   int v2 = verts2.Length();
 
-  gArray<int> vert1id(v1);
-  gArray<int> vert2id(v2);
+  gbtArray<int> vert1id(v1);
+  gbtArray<int> vert2id(v2);
   for (int i = 1; i <= vert1id.Length(); vert1id[i++] = 0);
   for (int i = 1; i <= vert2id.Length(); vert2id[i++] = 0);
 
@@ -199,12 +199,12 @@ template <class T> bool gbtNfgNashEnumMixed<T>::EqZero(const T &x) const
 }     
 
 #ifdef UNUSED
-template <class T> void EnumModule<T>::GetCliques(gOutput &p_stream) const
+template <class T> void EnumModule<T>::GetCliques(gbtOutput &p_stream) const
 {
   int n = node1.Length();
   assert(node2.Length() == n);
 
-  gArray<edge> edgelist(n);
+  gbtArray<edge> edgelist(n);
 
   p_stream << "\nKey:\nPlayer 1:";
   for (int i = 1; i <= key1.Length(); i++) {

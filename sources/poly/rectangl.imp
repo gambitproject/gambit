@@ -36,7 +36,7 @@ template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given)
 {
 }
 
-template<class T> gRectangle<T>::gRectangle(const gList< gInterval<T> >& given)
+template<class T> gRectangle<T>::gRectangle(const gbtList< gInterval<T> >& given)
 : sides(given)
 {
 }
@@ -135,7 +135,7 @@ const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const
 template<class T> 
 const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const 
 { 
-  gList<gInterval<T> > new_sides;
+  gbtList<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     new_sides += CartesianFactor(i).SameCenterTwiceLength();
   return gRectangle<T>(new_sides);
@@ -155,7 +155,7 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   T diameter((T)0);
   while (diameter * diameter < sumsquares) diameter += maxlength;
   
-  gList<gInterval<T> > new_sides;
+  gbtList<gInterval<T> > new_sides;
   for (i = 1; i <= Dmnsn(); i++)
     new_sides += CartesianFactor(i).SameCenterWithNewLength(diameter);
   return gRectangle<T>(new_sides);
@@ -163,9 +163,9 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
 
 template<class T> 
 const gRectangle<T> 
-gRectangle<T>::Orthant(const gArray<int>& top_or_bot) const 
+gRectangle<T>::Orthant(const gbtArray<int>& top_or_bot) const 
 { 
-  gList<gInterval<T> > new_sides;
+  gbtList<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     if (top_or_bot[i] == 0)
     new_sides += CartesianFactor(i).LeftHalf();
@@ -233,13 +233,13 @@ template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const
   return *this;
 }
 
-template<class T> const gList<gVector<T> > gRectangle<T>::VertexList() const 
+template<class T> const gbtList<gVector<T> > gRectangle<T>::VertexList() const 
 { 
-  gList<gVector<T> > answer;
+  gbtList<gVector<T> > answer;
 
-  gArray<int> ListOfTwos(Dmnsn());
+  gbtArray<int> ListOfTwos(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
-  gIndexOdometer ListOfTopBottoms(ListOfTwos);
+  gbtIndexOdometer ListOfTopBottoms(ListOfTwos);
 
   while (ListOfTopBottoms.Turn()) {
     gVector<T> next(Dmnsn());
@@ -266,7 +266,7 @@ template<class T>
 const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const 
 { 
   int tmp = index;
-  gArray<int> updowns(Dmnsn());
+  gbtArray<int> updowns(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) {
     if (tmp % 2 == 1) {
       updowns[i] = 1; tmp--;
@@ -294,7 +294,7 @@ const T gRectangle<T>::DiameterSquared() const
 template<class T>  
 gRectangle<gDouble>  TogDouble(const gRectangle<T>& given) 
 {
-  gList<gInterval<gDouble> > cartesian_factors;
+  gbtList<gInterval<gDouble> > cartesian_factors;
   for (int i = 1; i <= given.Dmnsn(); i++) 
     cartesian_factors += gInterval<gDouble>((gDouble)given.LowerBound()[i],
 					    (gDouble)given.UpperBound()[i]);
@@ -305,7 +305,7 @@ gRectangle<gDouble>  TogDouble(const gRectangle<T>& given)
 //                        interval -- printing
 //--------------------------------------------------------------------------
 
-template <class T> void gRectangle<T>::Output(gOutput &output) const
+template <class T> void gRectangle<T>::Output(gbtOutput &output) const
 {
   for (int i = 1; i <= Dmnsn() - 1; i++)
     output << sides[i] << "x";
@@ -314,7 +314,7 @@ template <class T> void gRectangle<T>::Output(gOutput &output) const
 }
 
 template <class T>
-gOutput &operator<<(gOutput &p_file, const gRectangle<T> &p_rect)
+gbtOutput &operator<<(gbtOutput &p_file, const gRectangle<T> &p_rect)
 {
   p_rect.Output(p_file);
   return p_file;

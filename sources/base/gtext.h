@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Definition of gText class
+// Definition of gbtText class
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -34,66 +34,66 @@
 #include <string.h>
 #include "gmisc.h"
 
-class gInput;
-class gOutput;
+class gbtInput;
+class gbtOutput;
 
-class gText   {
-  friend gInput &operator>>(gInput &, gText &);
-  friend gOutput &operator<<(gOutput &, const gText &);
+class gbtText   {
+  friend gbtInput &operator>>(gbtInput &, gbtText &);
+  friend gbtOutput &operator<<(gbtOutput &, const gbtText &);
   protected:
     char *storage;
 
     // PRIVATE CONSTRUCTORS
-    gText(int len);
+    gbtText(int len);
 
   public:
     // INDEX ERROR HANDLER CLASS
-    class BadIndex : public gException  {
+    class BadIndex : public gbtException  {
       public:
       virtual ~BadIndex()  { }
-      gText Description(void) const;
+      gbtText Description(void) const;
      };
 
     // CONSTRUCTORS, DESTRUCTORS, AND CONSTRUCTIVE OPERATORS
-    gText(void);
-    gText(char c);
-    gText(const char *s);
-    gText(const gText &s);
-    ~gText()     { delete [] storage; }
-    gText &operator=(const char *s);
-    gText &operator=(const gText &s);
+    gbtText(void);
+    gbtText(char c);
+    gbtText(const char *s);
+    gbtText(const gbtText &s);
+    ~gbtText()     { delete [] storage; }
+    gbtText &operator=(const char *s);
+    gbtText &operator=(const gbtText &s);
 
 	  // MEMBER FUNCTIONS
     unsigned int Length(void) const    { return strlen(storage); }
-    gText Right(int len) const;
-    gText Left(int len) const;
-    gText Mid(int len, int where) const;
-    gText Upcase(void) const;
-    gText Dncase(void) const;
+    gbtText Right(int len) const;
+    gbtText Left(int len) const;
+    gbtText Mid(int len, int where) const;
+    gbtText Upcase(void) const;
+    gbtText Dncase(void) const;
     void Insert(char c, unsigned int n);
     void Remove(unsigned int n);
     int LastOccur(char c);
 
 	  // CONCATENATORS
-    gText &operator+=(char c);
-    gText &operator+=(const char *s);
-    gText &operator+=(const gText &s)   { *this += s.storage; return *this; }
-    gText operator+(char c) const;
-    gText operator+(const char *s) const;
-    gText operator+(const gText &s) const { return *this + s.storage; }
+    gbtText &operator+=(char c);
+    gbtText &operator+=(const char *s);
+    gbtText &operator+=(const gbtText &s)   { *this += s.storage; return *this; }
+    gbtText operator+(char c) const;
+    gbtText operator+(const char *s) const;
+    gbtText operator+(const gbtText &s) const { return *this + s.storage; }
 
 	  // RELATIONAL OPERATORS
-    bool operator==(const gText &s) const
+    bool operator==(const gbtText &s) const
       { return strcmp(storage, s.storage) == 0; }
-    bool operator!=(const gText &s) const
+    bool operator!=(const gbtText &s) const
       { return strcmp(storage, s.storage) != 0; }
-    bool operator< (const gText &s) const
+    bool operator< (const gbtText &s) const
       { return strcmp(storage, s.storage) <  0; }
-    bool operator> (const gText &s) const
+    bool operator> (const gbtText &s) const
       { return strcmp(storage, s.storage) >  0; }
-    bool operator<=(const gText &s) const
+    bool operator<=(const gbtText &s) const
       { return strcmp(storage, s.storage) <= 0; }
-    bool operator>=(const gText &s) const
+    bool operator>=(const gbtText &s) const
       { return strcmp(storage, s.storage) >= 0; }
     
     bool operator==(const char *s) const     { return strcmp(storage, s) == 0; }
@@ -122,8 +122,6 @@ class gText   {
 
 };
 
-gText operator+(const char *c, const gText &s);
+gbtText operator+(const char *c, const gbtText &s);
 
 #endif   // GTEXT_H
-
-

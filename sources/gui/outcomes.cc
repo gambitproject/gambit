@@ -51,7 +51,7 @@ public:
 void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
 {
   if (p_doc->HasEfg()) {
-    gText outcomeName = p_doc->UniqueEfgOutcomeName();
+    gbtText outcomeName = p_doc->UniqueEfgOutcomeName();
     gbtEfgOutcome outcome = p_doc->GetEfg().NewOutcome();
     outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= p_doc->GetEfg().NumPlayers(); pl++) {
@@ -59,7 +59,7 @@ void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
     }
   }
   else {
-    gText outcomeName = p_doc->UniqueNfgOutcomeName();
+    gbtText outcomeName = p_doc->UniqueNfgOutcomeName();
     gbtNfgOutcome outcome = p_doc->GetNfg().NewOutcome();
     outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= p_doc->GetNfg().NumPlayers(); pl++) {
@@ -314,24 +314,24 @@ void gbtOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
     gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(row+1);
     if (col == 0) { 
       // Edited cell label
-      outcome.SetLabel(gText(GetCellValue(row, col).mb_str()));
+      outcome.SetLabel(gbtText(GetCellValue(row, col).mb_str()));
     }
     else {
       // Edited payoff
       outcome.SetPayoff(m_doc->GetEfg().GetPlayer(col),
-			ToNumber(gText(GetCellValue(row, col).mb_str())));
+			ToNumber(gbtText(GetCellValue(row, col).mb_str())));
     }
   }
   else {
     gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(row+1);
     if (col == 0) { 
       // Edited cell label
-      outcome.SetLabel(gText(GetCellValue(row, col).mb_str()));
+      outcome.SetLabel(gbtText(GetCellValue(row, col).mb_str()));
     }
     else {
       // Edited payoff
       outcome.SetPayoff(m_doc->GetNfg().GetPlayer(col),
-			ToNumber(gText(GetCellValue(row, col).mb_str())));
+			ToNumber(gbtText(GetCellValue(row, col).mb_str())));
     }
   }
 }
@@ -434,4 +434,3 @@ void gbtOutcomeFrame::OnOutcomeDetach(wxCommandEvent &)
 {
   m_doc->Submit(new gbtCmdAttachOutcome(0));
 }
-

@@ -76,25 +76,25 @@ template <class T> class QuikSolv {
   const int                          NoInequalities;
   const ListOfPartialTrees<gDouble>  TreesOfPartials;
         bool                         HasBeenSolved;
-        gList<gVector<gDouble> >     Roots;
+        gbtList<gVector<gDouble> >     Roots;
   const bool                         isMultiaffine;
-  const gRectArray<bool>             Equation_i_uses_var_j;
-  gStatus &m_status;
+  const gbtRectArray<bool>             Equation_i_uses_var_j;
+  gbtStatus &m_status;
 
   // Supporting routines for the constructors
 
-  gRectArray<bool> Eq_i_Uses_j()                                         const;
+  gbtRectArray<bool> Eq_i_Uses_j()                                         const;
 
   // Get Roots Using Pelican
 
   bool AllRealRootsFromPelican(const gPolyList<gDouble> &, 
-			             gList<gVector<gDouble> > &)         const;
+			             gbtList<gVector<gDouble> > &)         const;
   bool PelicanRoots(const gRectangle<T> &, 
-		          gList<gVector<gDouble> > &)                    const;
+		          gbtList<gVector<gDouble> > &)                    const;
 
   // Check whether roots are impossible
 
-   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
+   bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gbtArray<int>&)   const;
 
 
   // Ask whether Newton's method leads to a root 
@@ -126,10 +126,10 @@ template <class T> class QuikSolv {
 
   // Recursive parts of recursive methods
 
-  void               FindRootsRecursion(      gList<gVector<gDouble> >*,
+  void               FindRootsRecursion(      gbtList<gVector<gDouble> >*,
 					const gRectangle<gDouble>&, 
 					const int&,
-					      gArray<int>&,
+					      gbtArray<int>&,
 					      int&,
 					const int&,
 					      int*)                  const;
@@ -137,16 +137,16 @@ template <class T> class QuikSolv {
   const bool         ARootExistsRecursion(const gRectangle<gDouble>&, 
 					        gVector<gDouble>&,
 					  const gRectangle<gDouble>&, 
-					        gArray<int>&)        const;
+					        gbtArray<int>&)        const;
 
  public:
-  class NewtonError : public gException  {
+  class NewtonError : public gbtException  {
   public:
     virtual ~NewtonError();
-    gText Description(void) const;   
+    gbtText Description(void) const;   
   };
-   QuikSolv(const gPolyList<T> &, gStatus &);  
-   QuikSolv(const gPolyList<T> &, const int &, gStatus &);  
+   QuikSolv(const gPolyList<T> &, gbtStatus &);  
+   QuikSolv(const gPolyList<T> &, const int &, gbtStatus &);  
    QuikSolv(const QuikSolv<T> &);
    ~QuikSolv();
 
@@ -166,7 +166,7 @@ template <class T> class QuikSolv {
      { return System; }
    inline const bool                     WasSolved()                 const
      { return HasBeenSolved; }
-   inline const gList<gVector<gDouble> > RootList()                  const
+   inline const gbtList<gVector<gDouble> > RootList()                  const
      { return Roots; }
    inline const bool                     IsMultiaffine()             const
      { return isMultiaffine; }
@@ -186,9 +186,9 @@ template <class T> class QuikSolv {
    bool     FindRoots  (const gRectangle<T>&, const int&);
    bool     ARootExists (const gRectangle<T>&, gVector<gDouble>&)    const;
   
-   void Output(gOutput &) const;
+   void Output(gbtOutput &) const;
 };  
 
-template <class T> gOutput &operator<<(gOutput &output, const QuikSolv<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &output, const QuikSolv<T> &);
 
 #endif // QUIKSOLV_H

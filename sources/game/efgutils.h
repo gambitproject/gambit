@@ -31,9 +31,9 @@
 #include "node.h"
 
 // returns a glist of all nodes in the extensive form
-void Nodes(const gbtEfgGame &, gList<gbtEfgNode> &list);
+void Nodes(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
 
-void Nodes(const gbtEfgGame &, const gbtEfgNode &n, gList<gbtEfgNode> &list);
+void Nodes(const gbtEfgGame &, const gbtEfgNode &n, gbtList<gbtEfgNode> &list);
 
 // returns the number of nodes in the extensive form
 int NumNodes(const gbtEfgGame &);
@@ -42,18 +42,18 @@ int NumNodes(const gbtEfgGame &);
 int CountNodes(const gbtEfgGame &, const gbtEfgNode &);
 
 // Returns the terminal nodes in a subtree rooted at 'p_node'
-void TerminalNodes(const gbtEfgNode &, gList<gbtEfgNode> &);
+void TerminalNodes(const gbtEfgNode &, gbtList<gbtEfgNode> &);
 
 // returns the action leading up to the node
 gbtEfgAction LastAction(const gbtEfgGame &, const gbtEfgNode &node);
 
 // returns the list of nodes which are marked as the roots of subgames
-void MarkedSubgameRoots(const gbtEfgGame &, gList<gbtEfgNode> &list);
+void MarkedSubgameRoots(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
 
 // returns the list of nodes which are valid roots of subgames
-void LegalSubgameRoots(const gbtEfgGame &, gList<gbtEfgNode> &list);
+void LegalSubgameRoots(const gbtEfgGame &, gbtList<gbtEfgNode> &list);
 void LegalSubgameRoots(const gbtEfgGame &, const gbtEfgNode &,
-		       gList<gbtEfgNode> &);
+		       gbtList<gbtEfgNode> &);
 bool HasSubgames(const gbtEfgGame &);
 bool HasSubgames(const gbtEfgGame &, const gbtEfgNode &n);
 
@@ -61,7 +61,7 @@ bool AllSubgamesMarked(const gbtEfgGame &efg);
 
 // returns the list of nodes which are roots of child subgames
 void ChildSubgames(const gbtEfgGame &, const gbtEfgNode &, 
-		   gList<gbtEfgNode> &);
+		   gbtList<gbtEfgNode> &);
 
 void RandomEfg(const gbtEfgGame &);
 
@@ -70,7 +70,3 @@ gbtEfgGame CompressEfg(const gbtEfgGame &, const gbtEfgSupport &);
 void CompressEfgInPlace(gbtEfgGame, const gbtEfgSupport &);
 
 #endif // EFGUTILS_H
-
-
-
-

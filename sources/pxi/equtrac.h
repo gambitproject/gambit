@@ -16,9 +16,9 @@
 
 class EquTracker {
 private:
-  gBlock<DataLine> equs;
+  gbtBlock<DataLine> equs;
   double merror; // margin of error (i.e. how close is close enough)
-  double Distance(const gArray<double> &first, const gArray<double> &second);
+  double Distance(const gbtArray<double> &first, const gbtArray<double> &second);
   int Closest(const DataLine &this_line);
 public:
   EquTracker(void);

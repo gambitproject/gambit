@@ -42,7 +42,7 @@ friend class FullEfg;
 friend class SFSequenceSet;
 private:
   int number;
-  gText name;
+  gbtText name;
   gbtEfgPlayer player;
   gbtEfgAction action;
   const Sequence *parent;
@@ -52,23 +52,23 @@ private:
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() { }
 public:
-  const gText &GetName(void) const   { return name; }
-  void SetName(const gText &s)       { name = s; }
+  const gbtText &GetName(void) const   { return name; }
+  void SetName(const gbtText &s)       { name = s; }
   
-  gList<gbtEfgAction> History(void) const;
+  gbtList<gbtEfgAction> History(void) const;
   int GetNumber(void) const        { return number; }
   gbtEfgAction GetAction(void) const  {return action; }
   gbtEfgInfoset GetInfoset(void) const 
   { if (!action.IsNull()) return action.GetInfoset(); else return 0; }
   gbtEfgPlayer Player(void) const  { return player; }
   const Sequence *Parent(void) const   { return parent; }
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 class SFSequenceSet {
 protected:
   gbtEfgPlayer efp;
-  gBlock <Sequence *> sequences;
+  gbtBlock <Sequence *> sequences;
   
 public:
   SFSequenceSet(const SFSequenceSet &s); 
@@ -90,15 +90,15 @@ public:
   // Number of sequences in the SFSequenceSet
   int NumSequences(void) const;
 
-  //  return the entire sequence set in a const gArray
-  const gBlock<Sequence *> &GetSFSequenceSet(void) const;
+  //  return the entire sequence set in a const gbtArray
+  const gbtBlock<Sequence *> &GetSFSequenceSet(void) const;
 };
 
 
 class SFSupport {
 protected:
   const Sfg *bsfg;
-  gArray <SFSequenceSet *> sups;
+  gbtArray <SFSequenceSet *> sups;
   
 public:
   SFSupport(const Sfg &);
@@ -111,10 +111,10 @@ public:
 
   const Sfg &Game(void) const   { return *bsfg; }
   
-  const gBlock<Sequence *> &Sequences(int pl) const;
+  const gbtBlock<Sequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
-  const gArray<int> NumSequences(void) const;
+  const gbtArray<int> NumSequences(void) const;
   int TotalNumSequences(void) const;
 
   void AddSequence(Sequence *);
@@ -126,14 +126,14 @@ public:
   // otherwise returns zero
   int Find(Sequence *) const; 
 
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 class SequenceProfile   {
   friend class Sfg;
 private:
   long index;
-  gArray<Sequence *> profile;
+  gbtArray<Sequence *> profile;
   
 public:
   SequenceProfile(const Sfg &);
@@ -153,9 +153,7 @@ public:
 };
 
 
-gOutput &operator<<(gOutput &f, const Sequence &);
-gOutput &operator<<(gOutput &f, const SFSupport &);
+gbtOutput &operator<<(gbtOutput &f, const Sequence &);
+gbtOutput &operator<<(gbtOutput &f, const SFSupport &);
 
 #endif    // SFSTRAT_H
-
-

@@ -32,7 +32,6 @@ template class gSquareMatrix<double>;
 template class gSquareMatrix<gDouble>;
 template class gSquareMatrix<gRational>;
 
-template gOutput & operator<< (gOutput&, const gSquareMatrix<double>&);
-template gOutput & operator<< (gOutput&, const gSquareMatrix<gDouble>&);
-template gOutput & operator<< (gOutput&, const gSquareMatrix<gRational>&);
-
+template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<double>&);
+template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<gDouble>&);
+template gbtOutput & operator<< (gbtOutput&, const gSquareMatrix<gRational>&);

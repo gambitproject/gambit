@@ -31,11 +31,11 @@
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
 
-gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
-					       gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
+					       gbtStatus &p_status)
 {
   gbtNfgGame nfg = p_support.GetGame();
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
   gbtNfgContIterator citer(p_support);
 
   int ncont = 1;
@@ -77,6 +77,3 @@ gList<MixedSolution> gbtNfgNashEnumPure::Solve(const gbtNfgSupport &p_support,
 
   return solutions;
 }
-
-
-

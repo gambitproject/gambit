@@ -47,42 +47,39 @@ double MixedProfile<double>::Payoff(const gbtNfgOutcome &o, int pl) const
 }
 
 template class MixedProfile<double>;
-template gOutput &operator<<(gOutput &, const MixedProfile<double> &);
+template gbtOutput &operator<<(gbtOutput &, const MixedProfile<double> &);
 
 template class MixedProfile<gRational>;
-template gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gRational> &);
 
 template class MixedProfile<gNumber>;
-template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const MixedProfile<gNumber> &);
 
 
 #include "base/glist.imp"
 
-template class gList<MixedProfile<double> >;
-template class gList<MixedProfile<gRational> >;
-template class gList<MixedProfile<gNumber> >;
+template class gbtList<MixedProfile<double> >;
+template class gbtList<MixedProfile<gRational> >;
+template class gbtList<MixedProfile<gNumber> >;
 
 #include "base/grblock.imp"
 
-template class gRectBlock<double>;
-template class gRectBlock<gRational>;
+template class gbtRectBlock<double>;
+template class gbtRectBlock<gRational>;
 
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<gbt_nfg_strategy_rep *>;
-template class gArray<gbt_nfg_outcome_rep *>;
-template class gArray<gbt_nfg_player_rep *>;
-template class gArray<gbtNfgStrategy>;
+template class gbtArray<gbt_nfg_strategy_rep *>;
+template class gbtArray<gbt_nfg_outcome_rep *>;
+template class gbtArray<gbt_nfg_player_rep *>;
+template class gbtArray<gbtNfgStrategy>;
 
-template class gBlock<gbt_nfg_strategy_rep *>;
-template class gBlock<gbt_nfg_outcome_rep *>;
-template class gBlock<gbt_nfg_player_rep *>;
-template class gBlock<gbtNfgStrategy>;
+template class gbtBlock<gbt_nfg_strategy_rep *>;
+template class gbtBlock<gbt_nfg_outcome_rep *>;
+template class gbtBlock<gbt_nfg_player_rep *>;
+template class gbtBlock<gbtNfgStrategy>;
 
-template class gList<gbtNfgStrategy>;
+template class gbtList<gbtNfgStrategy>;
 
-template class gList<const gbtNfgSupport>;
-
-
-
+template class gbtList<const gbtNfgSupport>;

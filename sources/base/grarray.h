@@ -30,34 +30,34 @@
 #include "gmisc.h"
 #include "gstream.h"
 
-template <class T> class gArray;
+template <class T> class gbtArray;
 
-template <class T> class gRectArray    {
+template <class T> class gbtRectArray    {
   protected:
     int minrow, maxrow, mincol, maxcol;
     T **data;
 
   public:
-    class BadIndex : public gException  { 
+    class BadIndex : public gbtException  { 
       public:
         virtual ~BadIndex()  { }
-        gText Description(void) const;
+        gbtText Description(void) const;
     };
 
-    class BadDim : public gException  {
+    class BadDim : public gbtException  {
       public:
         virtual ~BadDim()   { }
-	gText Description(void) const;
+	gbtText Description(void) const;
     };
 
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
-    gRectArray(void);
-    gRectArray(unsigned int nrows, unsigned int ncols);
-    gRectArray(int minr, int maxr, int minc, int maxc);
-    gRectArray(const gRectArray<T> &);
-    virtual ~gRectArray();
+    gbtRectArray(void);
+    gbtRectArray(unsigned int nrows, unsigned int ncols);
+    gbtRectArray(int minr, int maxr, int minc, int maxc);
+    gbtRectArray(const gbtRectArray<T> &);
+    virtual ~gbtRectArray();
 
-    gRectArray<T> &operator=(const gRectArray<T> &);
+    gbtRectArray<T> &operator=(const gbtRectArray<T> &);
 
        // GENERAL DATA ACCESS
     int NumRows(void) const;
@@ -66,7 +66,7 @@ template <class T> class gRectArray    {
     int MaxRow(void) const;
     int MinCol(void) const;
     int MaxCol(void) const;
-    virtual void Dump(gOutput &) const;
+    virtual void Dump(gbtOutput &) const;
     
        // INDEXING OPERATORS
     T &operator()(int r, int c);
@@ -79,19 +79,19 @@ template <class T> class gRectArray    {
     void RotateRight(int lo, int hi);
 
        // ROW MANIPULATION FUNCTIONS
-    void SwitchRow(int, gArray<T> &);
+    void SwitchRow(int, gbtArray<T> &);
     void SwitchRows(int, int);
-    void GetRow(int, gArray<T> &) const;
-    void SetRow(int, const gArray<T> &);
+    void GetRow(int, gbtArray<T> &) const;
+    void SetRow(int, const gbtArray<T> &);
 
        // COLUMN MANIPULATION FUNCTIONS
-    void SwitchColumn(int, gArray<T> &);
+    void SwitchColumn(int, gbtArray<T> &);
     void SwitchColumns(int, int);
-    void GetColumn(int, gArray<T> &) const;
-    void SetColumn(int, const gArray<T> &);
+    void GetColumn(int, gbtArray<T> &) const;
+    void SetColumn(int, const gbtArray<T> &);
 
       // TRANSPOSE
-    gRectArray<T>       Transpose()         const;
+    gbtRectArray<T>       Transpose()         const;
 
 
     // originally protected functions, moved to permit compilation
@@ -101,19 +101,19 @@ template <class T> class gRectArray    {
       // check for correct row index
     bool CheckRow(int row) const;
       // check row vector for correct column boundaries
-    bool CheckRow(const gArray<T> &) const;
+    bool CheckRow(const gbtArray<T> &) const;
       // check for correct column index
     bool CheckColumn(int col) const;
       // check column vector for correct row boundaries
-    bool CheckColumn(const gArray<T> &) const;
+    bool CheckColumn(const gbtArray<T> &) const;
       // check row and column indices
     bool Check(int row, int col) const;
       // check matrix for same row and column boundaries
-    bool CheckBounds(const gRectArray<T> &) const;
+    bool CheckBounds(const gbtRectArray<T> &) const;
 
 
 };
 
-template <class T> gOutput &operator<<(gOutput &, const gRectArray<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtRectArray<T> &);
 
 #endif   // GRARRAY_H

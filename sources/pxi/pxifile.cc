@@ -9,7 +9,7 @@
 
 #include "pxifile.h"
 
-int FindStringInFile(gInput &, const char *);
+int FindStringInFile(gbtInput &, const char *);
 
 //=========================================================================
 //                            class PxiFile 
@@ -30,7 +30,7 @@ PxiFile::~PxiFile()
 //                  PxiFile: Reading and writing files
 //-------------------------------------------------------------------------
 
-void PxiFile::ReadFile(gInput &in)
+void PxiFile::ReadFile(gbtInput &in)
 {
   m_error = -1;
   m_qStep = -1;
@@ -45,7 +45,7 @@ void PxiFile::ReadFile(gInput &in)
 
   int numInfosets;
   in >> numInfosets;
-  m_numStrats = gBlock<int>(numInfosets);
+  m_numStrats = gbtBlock<int>(numInfosets);
   for (int iset = 1; iset <= numInfosets; iset++)  {
     in >> m_numStrats[iset];
   }
@@ -64,9 +64,9 @@ void PxiFile::ReadFile(gInput &in)
 
   in >> m_numColumns;
   in >> m_lambdaColumn >> m_deltaColumn;
-  m_columns = gBlock< gBlock<int> >(numInfosets);
+  m_columns = gbtBlock< gbtBlock<int> >(numInfosets);
   for (int iset = 1; iset <= numInfosets; iset++) {
-    m_columns[iset] = gBlock<int>(m_numStrats[iset]);
+    m_columns[iset] = gbtBlock<int>(m_numStrats[iset]);
   }
 
   for (int iset = 1; iset <= numInfosets; iset++) {
@@ -89,13 +89,13 @@ void PxiFile::ReadFile(gInput &in)
     return;
   }
 
-  gBlock<gBlock<double> > probs(NumInfosets());
+  gbtBlock<gbtBlock<double> > probs(NumInfosets());
   for (int iset = 1; iset <= NumInfosets(); iset++) {
-    probs[iset] = gBlock<double>(NumStrategies(iset));
+    probs[iset] = gbtBlock<double>(NumStrategies(iset));
   }
 
   while (!in.eof()) {
-    gBlock<double> data(NumColumns());
+    gbtBlock<double> data(NumColumns());
     try {
       for (int i = 1; i <= NumColumns(); i++)  {
 	in >> data[i];
@@ -132,7 +132,7 @@ void PxiFile::ReadFile(gInput &in)
   }
 }
 
-void PxiFile::WriteFile(gOutput &p_file) const
+void PxiFile::WriteFile(gbtOutput &p_file) const
 {
   p_file << "Dimensionality:\n" << NumInfosets() << ' ';
   for (int i = 1; i <= NumInfosets(); i++) {
@@ -166,4 +166,3 @@ void PxiFile::WriteFile(gOutput &p_file) const
   }
   p_file << '\n';
 }
-

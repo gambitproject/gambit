@@ -47,7 +47,7 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 {
   gbtEfgOutcome outcome = p_node.GetOutcome();
   if (!outcome.IsNull()) {
-    const gArray<gNumber> &payoffs = outcome.GetPayoff();
+    const gbtArray<gNumber> &payoffs = outcome.GetPayoff();
     wxString tmp = wxT("(");
 
     for (int pl = payoffs.First(); pl <= payoffs.Last(); pl++) {
@@ -686,7 +686,7 @@ void efgTreeLayout::UpdateTableInfosets(void)
 {
   // Note that levels are numbered from 0, not 1.
   // create an array to hold max num for each level
-  gArray<int> nums(0, m_maxLevel + 1); 
+  gbtArray<int> nums(0, m_maxLevel + 1); 
     
   for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0);
   // find the max e->num for each level

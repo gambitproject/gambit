@@ -32,7 +32,6 @@ template class LPSolve<double>;
 template class LPSolve<gRational>;
 
 #ifndef __BCC55__
-template gBlock<int> Artificials(const gVector<double> &);
-template gBlock<int> Artificials(const gVector<gRational> &);
+template gbtBlock<int> Artificials(const gVector<double> &);
+template gbtBlock<int> Artificials(const gVector<gRational> &);
 #endif  // __BCC55__
-

@@ -30,17 +30,14 @@
 #include "base/base.h"
 
 // This class is designed to give the use some feedback about the operation of
-// an algorithm.  It implements all of the functions of gOutput, and one extra
+// an algorithm.  It implements all of the functions of gbtOutput, and one extra
 // function to explicitly state the % done.
 
-class gProgress : public gOutput  {
+class gbtProgress : public gbtOutput  {
 public:
-  virtual ~gProgress(void) { }
+  virtual ~gbtProgress(void) { }
   virtual void SetProgress(double p) = 0;
-  virtual void SetProgress(double p, const gText &) = 0; 
+  virtual void SetProgress(double p, const gbtText &) = 0; 
 };
 
 #endif    // GPROGRES_H
-
-
-

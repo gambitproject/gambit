@@ -30,7 +30,7 @@
 #include "gmisc.h"
 #include "gstream.h"
 
-template <class K, class T> class gBaseMap  {
+template <class K, class T> class gbtBaseMap  {
   protected:
     int length;
     T _default;
@@ -52,18 +52,18 @@ template <class K, class T> class gBaseMap  {
 // This is the basic map constructor.  It initializes the map to be the
 // empty map with no relations defined.
 //
-    gBaseMap(const T &d);
+    gbtBaseMap(const T &d);
 //
 // Construct a map to have the same set of relations as another map.
 // 
-    gBaseMap(const gBaseMap<K, T> &);
+    gbtBaseMap(const gbtBaseMap<K, T> &);
 
 //
 // This is the map destructor.  It deletes all allocated memory, and calls
 // the destructors for the keys and values which remain in the map at the
 // time of its deallocation.
 //
-    virtual ~gBaseMap(); 
+    virtual ~gbtBaseMap(); 
 
 //
 // These implement the mapping function which maps a key to a value.  If
@@ -85,9 +85,9 @@ template <class K, class T> class gBaseMap  {
 // These are the equality and assignment operators for this and all derived
 // classes.
 //+grp
-    int operator==(const gBaseMap &M) const;
-    int operator!=(const gBaseMap &M) const;
-    gBaseMap<K, T> &operator=(const gBaseMap &M);
+    int operator==(const gbtBaseMap &M) const;
+    int operator!=(const gbtBaseMap &M) const;
+    gbtBaseMap<K, T> &operator=(const gbtBaseMap &M);
 //-grp
 
 //
@@ -117,19 +117,19 @@ template <class K, class T> class gBaseMap  {
 //
 // Prints out the contents of a map (for debugging purposes)
 //
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
 //
 // <category lib=glib sect=Containers>
 //
-// The gOrdMap is an ordered map.  That is, the index class has all the
+// The gbtOrdMap is an ordered map.  That is, the index class has all the
 // usual ordering operators defined upon it (==, !=, <, <=, >, >=).  These
 // are used to sort the map by keys, thus making search-type operations
 // logarithmic instead of linear.  This is a particularly large improvement
 // when using keys which are costly to compare
 //
-template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
+template <class K, class T> class gbtOrdMap : public gbtBaseMap<K, T>  {
   private:
     int Locate(const K &key) const;
 
@@ -137,14 +137,14 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
 //
 // Construct an ordered map with no mappings and the given default value.
 //
-    gOrdMap(const T &d);
+    gbtOrdMap(const T &d);
 //
 // Construct an ordered map with the same key-value mappings as another
 // ordered map.
 //
-    gOrdMap(const gOrdMap<K, T> &m);
+    gbtOrdMap(const gbtOrdMap<K, T> &m);
 
-    virtual ~gOrdMap();
+    virtual ~gbtOrdMap();
 
 //
 // These implement the mapping function which maps a key to a value.  If
@@ -183,5 +183,3 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
 };
 
 #endif   // GMAP_H
-
-

@@ -78,9 +78,9 @@ bool gbtNfgSupport::IsDominated(gbtNfgStrategy s, bool strong) const
 }
 
 bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
-				gOutput &tracefile, gStatus &status) const
+				gbtOutput &tracefile, gbtStatus &status) const
 {
-  gArray<int> set(NumStrats(pl));
+  gbtArray<int> set(NumStrats(pl));
   int i;
   for (i = 1; i <= set.Length(); i++)
     set[i] = i;
@@ -142,15 +142,15 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
 }
 
 gbtNfgSupport gbtNfgSupport::Undominated(bool strong,
-					 const gArray<int> &players,
-					 gOutput &tracefile, 
-					 gStatus &status) const
+					 const gbtArray<int> &players,
+					 gbtOutput &tracefile, 
+					 gbtStatus &status) const
 {
   gbtNfgSupport newS(*this);
   
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
-    status.SetProgress(0, (gText("Eliminating strategies for player ") +
+    status.SetProgress(0, (gbtText("Eliminating strategies for player ") +
 			   ToText(players[i])));
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
@@ -159,6 +159,3 @@ gbtNfgSupport gbtNfgSupport::Undominated(bool strong,
 
   return newS;
 }
-
-
-

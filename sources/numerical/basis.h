@@ -38,18 +38,18 @@
 class Basis {
 
 private:
-  gBlock<int> basis;        // current members of basis (neg for slacks)
-  gBlock<int> cols;         // location of col in basis (0 if not in basis)
-  gBlock<int> slacks;       // location of slacks in basis
-  gArray<bool> colBlocked;  
-  gArray<bool> rowBlocked;
+  gbtBlock<int> basis;        // current members of basis (neg for slacks)
+  gbtBlock<int> cols;         // location of col in basis (0 if not in basis)
+  gbtBlock<int> slacks;       // location of slacks in basis
+  gbtArray<bool> colBlocked;  
+  gbtArray<bool> rowBlocked;
   bool IsBasisIdent;
 
 public:
-    class BadIndex : public gException  {
+    class BadIndex : public gbtException  {
     public:
       virtual ~BadIndex();
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
   //-------------------------------------------
@@ -98,8 +98,7 @@ public:
   // returns whether the basis is the identity matrix
   bool IsIdent();
 
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 #endif // BASIS_H
-

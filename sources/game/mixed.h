@@ -32,7 +32,7 @@
 #include "nfstrat.h"
 #include "outcome.h"
 
-template <class T> class gRectArray;
+template <class T> class gbtRectArray;
 template <class T> class BehavProfile;
 
 template <class T> class MixedProfile : public gPVector<T>  {
@@ -78,9 +78,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
 };
 
 #ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &f, const MixedProfile<T> &);
 #endif
 
 #endif    // MIXED_H
-
-

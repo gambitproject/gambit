@@ -52,7 +52,7 @@ private:
 public:
       // constructors and destructors
   Tableau(const gMatrix<double> &A, const gVector<double> &b); 
-  Tableau(const gMatrix<double> &A, const gBlock<int> &art, 
+  Tableau(const gMatrix<double> &A, const gbtBlock<int> &art, 
 	  const gVector<double> &b); 
   Tableau(const Tableau<double>&);
   virtual ~Tableau();
@@ -99,17 +99,17 @@ private:
   void MySolveColumn(int, gVector<gRational> &);  // column in new basis 
 
 protected:
-  gBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
+  gbtBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
-  class BadDenom : public gException  {
+  class BadDenom : public gbtException  {
   public:
     virtual ~BadDenom();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
       // constructors and destructors
   Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b); 
-  Tableau(const gMatrix<gRational> &A, const gBlock<int> &art, 
+  Tableau(const gMatrix<gRational> &A, const gbtBlock<int> &art, 
 	  const gVector<gRational> &b); 
   Tableau(const Tableau<gRational>&);
   virtual ~Tableau();
@@ -134,17 +134,17 @@ public:
   
   bool IsFeasible();
   bool IsLexMin();
-  void BigDump(gOutput &);
+  void BigDump(gbtOutput &);
   void BasisVector(gVector<gRational> &out) const;
   gInteger TotDenom() const;
 };
 
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #include "math/rational.h"
-gOutput &operator<<(gOutput &, const Tableau<double> &);
-gOutput &operator<<(gOutput &, const Tableau<gRational> &);
+gbtOutput &operator<<(gbtOutput &, const Tableau<double> &);
+gbtOutput &operator<<(gbtOutput &, const Tableau<gRational> &);
 #elif defined __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &, const Tableau<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const Tableau<T> &);
 #endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H

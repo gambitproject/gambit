@@ -197,13 +197,13 @@ void gDouble::error(const char* msg) const
 //                            input/output
 //--------------------------------------------------------------------------
 
-gOutput& operator << (gOutput& s, const gDouble& y)
+gbtOutput& operator << (gbtOutput& s, const gDouble& y)
 {
   s << y.dbl;
   return s;
 }
 
-gInput &operator>>(gInput &f, gDouble &y)
+gbtInput &operator>>(gbtInput &f, gDouble &y)
 {
   f >> y.dbl;
   return f;
@@ -253,26 +253,25 @@ gDouble pow(const gDouble& x, const gDouble& y)
 char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 int myprecision = 2;
 
-gText ToText(gDouble d)
+gbtText ToText(gDouble d)
 {
   sprintf(mygconvert_buffer, "%.*f", myprecision, d.ToDouble());
-  return gText(mygconvert_buffer);
+  return gbtText(mygconvert_buffer);
 }
 
 // conversions from strings to numbers
 
-gDouble TOgDouble(const gText &s)
+gDouble TOgDouble(const gbtText &s)
 { 
   double d = strtod(s, NULL);
   gDouble answer(d);
   return answer; 
 }
 
-template class gList<gDouble>;
+template class gbtList<gDouble>;
 template class gVector<gDouble>;
-template class gArray<gDouble>;
-template class gBlock<gDouble>;
-template class gRectArray<gDouble>;
+template class gbtArray<gDouble>;
+template class gbtBlock<gDouble>;
+template class gbtRectArray<gDouble>;
 template class gMatrix<gDouble>;
-template gOutput & operator<< (gOutput&, const gVector<gDouble>&);
-
+template gbtOutput & operator<< (gbtOutput&, const gVector<gDouble>&);

@@ -1,8 +1,8 @@
 #include "equtrac.h"
 
 /**************************** DISTANCE ************************************/
-double EquTracker::Distance(const gArray<double> &first,
-			    const gArray<double> &second)
+double EquTracker::Distance(const gbtArray<double> &first,
+			    const gbtArray<double> &second)
   /*
    * Note, this calculates the distance between two n-dimentional points
    * X=(x1,x2,...xn) and Y=(y1,y2,...yn) using the formula:

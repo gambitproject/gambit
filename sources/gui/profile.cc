@@ -597,7 +597,7 @@ wxSize gbtProfileGrid::GetBestSize(void) const
 wxString gbtProfileGrid::GetReport(void) const
 {
   wxString report;
-  const gList<MixedSolution> &profiles = m_doc->AllMixedProfiles();
+  const gbtList<MixedSolution> &profiles = m_doc->AllMixedProfiles();
   gbtNfgGame nfg = m_doc->GetNfg();
 
   report += wxString::Format(_("Mixed strategy profiles on game '%s' [%s]\n\n"),
@@ -849,5 +849,3 @@ void gbtProfileFrame::OnUpdate(gbtGameView *p_sender)
   }
   Show(m_doc->ShowProfiles());
 }
-
-

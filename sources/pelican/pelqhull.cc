@@ -7367,7 +7367,7 @@ qhT qh_qh; /*= {0};*/ /* remove "= {0}" if this causes a compiler error.  Also
 #ifdef GAMBIT_EXCEPTIONS
 ErrorInQhull::~ErrorInQhull() { }
 
-gText ErrorInQhull::Description(void) const
+gbtText ErrorInQhull::Description(void) const
 {
   return "Error somewhere in Qhull";
 }
@@ -9244,5 +9244,3 @@ void qh_partitionvisible(/*visible_list*/ boolT allpoints, int *numoutside) {
   }
   trace1((qh ferr,"qh_partitionvisible: partitioned %d points from outsidesets and %d points from coplanarsets\n", *numoutside, coplanar));
 } /* partitionvisible */
-
-

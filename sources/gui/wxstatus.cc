@@ -30,7 +30,7 @@
 #endif  // WX_PRECOMP
 #include "wxstatus.h"
 
-wxStatus::wxStatus(wxWindow *p_parent, const gText &p_caption)
+wxStatus::wxStatus(wxWindow *p_parent, const gbtText &p_caption)
   : wxProgressDialog(wxString::Format(wxT("%s"), (char *) p_caption),
 		     wxT(""), 100, p_parent,
 		     wxPD_AUTO_HIDE | wxPD_CAN_ABORT | wxPD_APP_MODAL |
@@ -46,41 +46,41 @@ void wxStatus::Get(void) const
 {
   wxProgressDialog *nonconstthis = (wxProgressDialog *) this;
   if (!nonconstthis->Update(m_value)) {
-    throw gSignalBreak();
+    throw gbtSignalBreak();
   }
 }
 
-gOutput &wxStatus::operator<<(int x)
+gbtOutput &wxStatus::operator<<(int x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(unsigned int x)
+gbtOutput &wxStatus::operator<<(unsigned int x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(bool x)
+gbtOutput &wxStatus::operator<<(bool x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(long x)
+gbtOutput &wxStatus::operator<<(long x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(char x)
+gbtOutput &wxStatus::operator<<(char x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(double x)
+gbtOutput &wxStatus::operator<<(double x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(long double x)
+gbtOutput &wxStatus::operator<<(long double x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(float x)
+gbtOutput &wxStatus::operator<<(float x)
 { return *this; }
 
-gOutput &wxStatus::operator<<(const char *x)
+gbtOutput &wxStatus::operator<<(const char *x)
 {
   Update(m_value, wxString::Format(wxT("%s"), x));
   return *this; 
 }
 
-gOutput &wxStatus::operator<<(const void *x)
+gbtOutput &wxStatus::operator<<(const void *x)
 { return *this; }
 
 void wxStatus::SetProgress(double p_value)
@@ -97,7 +97,7 @@ void wxStatus::SetProgress(double p_value)
   Update(m_value);
 }
 
-void wxStatus::SetProgress(double p_value, const gText &p_message)
+void wxStatus::SetProgress(double p_value, const gbtText &p_message)
 {
   if (p_value >= 1.0) {
     m_value = 100;
@@ -110,4 +110,3 @@ void wxStatus::SetProgress(double p_value, const gText &p_message)
   }
   Update(m_value, wxString::Format(wxT("%s"), (const char *) p_message));
 }
-

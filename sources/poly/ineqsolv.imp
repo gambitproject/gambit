@@ -35,7 +35,7 @@
 //---------------------------
 
 template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
-					 gStatus &p_status) 
+					 gbtStatus &p_status) 
   : System(given), 
     TreesOfPartials(given),
     Epsilon((T)1/(T)1000000),
@@ -105,7 +105,7 @@ bool IneqSolv<T>::IsASolution(const gVector<T>& v) const
 
 template<class T> 
 bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
-					      gArray<int>& precedence) const
+					      gbtArray<int>& precedence) const
 {
   for (int i = 1; i <= System.Length(); i++) {
 
@@ -135,7 +135,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 template <class T> const bool
 IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
 				            gVector<T>& sample,
-				            gArray<int>& precedence) const
+				            gbtArray<int>& precedence) const
 {
   /*
   //DEBUG
@@ -169,7 +169,7 @@ template <class T> const bool
 IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
 {
      // precedence orders search for everywhere negative poly
-  gArray<int> precedence(System.Length());  
+  gbtArray<int> precedence(System.Length());  
   for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
 
   /*
@@ -186,13 +186,13 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
 //           Printing
 //----------------------------------
 
-template <class T> void IneqSolv<T>::Output(gOutput &output) const
+template <class T> void IneqSolv<T>::Output(gbtOutput &output) const
 {
   output << "The system is\n" << System << "\nwith error tolerance " <<
     Epsilon << ".\n";
 }
 
-template <class T> gOutput &operator<<(gOutput &p_file,
+template <class T> gbtOutput &operator<<(gbtOutput &p_file,
 				       const IneqSolv<T> &p_solver)
 {
   p_solver.Output(p_file);

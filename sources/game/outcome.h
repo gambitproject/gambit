@@ -60,10 +60,10 @@ public:
   bool IsDeleted(void) const;
   int GetId(void) const;
   gbtEfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
 
-  gArray<gNumber> GetPayoff(void) const;
+  gbtArray<gNumber> GetPayoff(void) const;
   gNumber GetPayoff(const gbtEfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
   void SetPayoff(const gbtEfgPlayer &, const gNumber &);
@@ -71,7 +71,7 @@ public:
   void DeleteOutcome(void);
 };
 
-gOutput &operator<<(gOutput &, const gbtEfgOutcome &);
+gbtOutput &operator<<(gbtOutput &, const gbtEfgOutcome &);
 
 
 struct gbt_nfg_outcome_rep;
@@ -99,10 +99,10 @@ public:
   bool IsDeleted(void) const;
   int GetId(void) const;
   gbtNfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
   
-  gArray<gNumber> GetPayoff(void) const;
+  gbtArray<gNumber> GetPayoff(void) const;
   gNumber GetPayoff(const gbtNfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
   void SetPayoff(const gbtNfgPlayer &, const gNumber &);
@@ -110,6 +110,6 @@ public:
   void DeleteOutcome(void);
 };
 
-gOutput &operator<<(gOutput &, const gbtNfgOutcome &);
+gbtOutput &operator<<(gbtOutput &, const gbtNfgOutcome &);
 
 #endif  // OUTCOME_H

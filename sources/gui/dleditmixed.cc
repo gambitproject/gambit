@@ -122,7 +122,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
 
   for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
     m_profile.SetStrategyProb(oldPlayer.GetStrategy(st),
-			      ToNumber(gText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
+			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 
   gbtNfgPlayer player = m_profile.GetGame().GetPlayer(p_event.GetSelection() + 1);
@@ -161,7 +161,7 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
 
   for (int st = 1; st <= player.NumStrategies(); st++) {
     m_profile.SetStrategyProb(player.GetStrategy(st),
-			      ToNumber(gText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
+			      ToNumber(gbtText(m_probGrid->GetCellValue(st - 1, 0).mb_str())));
   }
 
   p_event.Skip();
@@ -169,6 +169,6 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
 
 const MixedSolution &dialogEditMixed::GetProfile(void) const
 {
-  m_profile.SetLabel(gText(m_profileName->GetLabel().mb_str()));
+  m_profile.SetLabel(gbtText(m_profileName->GetLabel().mb_str()));
   return m_profile;
 }

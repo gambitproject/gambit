@@ -53,13 +53,13 @@ built on top of a pointer to a function for computing an order.
 // *************************
 
 struct Variable  { 
-  gText Name;
+  gbtText Name;
   int number;
 };
 
 class gSpace {
 private:  
-  gBlock < Variable * > Variables;
+  gbtBlock < Variable * > Variables;
 
 public:
   gSpace(int nvars = 0);
@@ -76,14 +76,14 @@ public:
   // information
   int             Dmnsn(void)              const;
   Variable*       VariableWithNumber(int)  const;
-  const gText&  GetVariableName(int)     const;
+  const gbtText&  GetVariableName(int)     const;
   gSpace          WithVariableAppended()   const;
 
   // manipulation
-  void            SetVariableName(int, const gText &);
+  void            SetVariableName(int, const gbtText &);
   void            CreateVariables (int nvars = 1);
 
-  void            Dump(gOutput &) const;  // Debugging output
+  void            Dump(gbtOutput &) const;  // Debugging output
 };
 
 
@@ -108,7 +108,7 @@ public:
   exp_vect(const gSpace*, const int&, const int&);   // x_i^j
   exp_vect(const gSpace*, int*);
   exp_vect(const gSpace*, gVector<int>);
-  exp_vect(const gSpace*, gArray<int>);
+  exp_vect(const gSpace*, gbtArray<int>);
   exp_vect(const exp_vect*);
   exp_vect(const exp_vect&);
   ~exp_vect();
@@ -153,7 +153,7 @@ public:
   void SetExp(int varno, int pow);
   void ToZero();
 
-  friend gOutput& operator<<(gOutput&, const exp_vect&);
+  friend gbtOutput& operator<<(gbtOutput&, const exp_vect&);
 };
 
 

@@ -30,15 +30,15 @@
 #include "base/gstatus.h"
 #include "game/efg.h"
 
-class efgDominanceException : public gException {
+class efgDominanceException : public gbtException {
 private:
-  gText m_description;
+  gbtText m_description;
 
 public:
-  efgDominanceException(const gText &);
+  efgDominanceException(const gbtText &);
   virtual ~efgDominanceException();
 
-  gText Description(void) const;
+  gbtText Description(void) const;
 };
 
 #endif    // EFDOM_H

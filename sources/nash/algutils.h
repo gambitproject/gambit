@@ -44,15 +44,15 @@ private:
   mutable T *m_answer;
 
 public:
-  class Contradiction : public gException  {
+  class Contradiction : public gbtException  {
   public:
     virtual ~Contradiction();
-    gText Description(void) const;   
+    gbtText Description(void) const;   
   };
-  class Unknown : public gException  {
+  class Unknown : public gbtException  {
   public:
     virtual ~Unknown();
-    gText Description(void) const;   
+    gbtText Description(void) const;   
   };
   
   gFact(void);
@@ -68,4 +68,3 @@ public:
 };
 
 #endif // ALGUTILS_H
-

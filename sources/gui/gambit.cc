@@ -106,7 +106,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       gbtEfgGame efg = NewEfg();
       efg.SetLabel("Untitled Extensive Form Game");
       for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-	efg.NewPlayer().SetLabel(gText("Player") + ToText(pl));
+	efg.NewPlayer().SetLabel(gbtText("Player") + ToText(pl));
       }
       (void) new EfgShow(new gbtGameDocument(efg), 0);
     }
@@ -114,7 +114,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       gbtNfgGame nfg(dialog.NumStrategies());
       nfg.SetLabel("Untitled Normal Form Game");
       for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-	nfg.GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
+	nfg.GetPlayer(pl).SetLabel(gbtText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
 	gbtNfgSupport support(nfg);
@@ -175,13 +175,13 @@ void GambitApp::OnHelpAbout(wxWindow *p_parent)
 void GambitApp::LoadFile(const wxString &p_filename)
 {    
   try {
-    gFileInput infile(p_filename.mb_str());
+    gbtFileInput infile(p_filename.mb_str());
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new NfgShow(new gbtGameDocument(nfg, p_filename), 0);
     return;
   }
-  catch (gFileInput::OpenFailed &) {
+  catch (gbtFileInput::OpenFailed &) {
     wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
 				  (const char *) p_filename.mb_str()),
 		 _("Error"), wxOK, 0);
@@ -192,12 +192,12 @@ void GambitApp::LoadFile(const wxString &p_filename)
   }
 
   try {
-    gFileInput infile(p_filename.mb_str());
+    gbtFileInput infile(p_filename.mb_str());
     gbtEfgGame efg = ReadEfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new EfgShow(new gbtGameDocument(efg, p_filename), 0);
   }
-  catch (gFileInput::OpenFailed &) { 
+  catch (gbtFileInput::OpenFailed &) { 
     wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
 				  (const char *) p_filename.mb_str()),
 		 _("Error"), wxOK, 0);
@@ -218,11 +218,10 @@ IMPLEMENT_APP(GambitApp)
 //
 // A general-purpose dialog box to display the description of the exception
 //
-void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
+void guiExceptionDialog(const gbtText &p_message, wxWindow *p_parent,
             long p_style /*= wxOK | wxCENTRE*/)
 {
-  gText message = "An internal error occurred in Gambit:\n" + p_message;
+  gbtText message = "An internal error occurred in Gambit:\n" + p_message;
   wxMessageBox(wxString::Format(wxT("%s"), (char *) message),
 	       _("Gambit Error"), p_style, p_parent);
 }
-

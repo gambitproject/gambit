@@ -207,18 +207,18 @@ public:
   int nextedge;
   edge() { };
   ~edge() { } ;
-  // gArray requires the following operators to exist
+  // gbtArray requires the following operators to exist
   bool operator ==( const edge &y) const 
     { return (node1 == y.node1 && node2 == y.node2);}
   bool operator !=(const edge &y) const
     {return !(*this == y);}
 };
 
-gOutput& operator << (gOutput& s, const edge& y);
+gbtOutput& operator << (gbtOutput& s, const edge& y);
 
 class EnumCliques {
 private:
-  gArray<int> firstedge;
+  gbtArray<int> firstedge;
   int maxinp1,maxinp2;
   void candtry1 (int stk[], // stack 
 	 bool connected[MAXM][MAXN],
@@ -262,25 +262,25 @@ private:
 	    int *fixp,     // the new fixpoint, if *bfound = true  
 	    int *posfix);    // position of fixpoint on the stack, if *bfound 
 public:
-  EnumCliques(gArray<edge> &, int, int);
+  EnumCliques(gbtArray<edge> &, int, int);
   ~EnumCliques();
 
   void genincidence(int e,
-		    gArray<edge> &edgelist,
+		    gbtArray<edge> &edgelist,
 		    int orignode1[MAXM],
 		    int orignode2[MAXN],
 		    bool connected[MAXM][MAXN],
 		    int *m,
 		    int *n);
-  int getconnco(gArray<int> &firstedge,
-		gArray<edge> &edgelist);
+  int getconnco(gbtArray<int> &firstedge,
+		gbtArray<edge> &edgelist);
   void outCLIQUE(int clique1[], int cliqsize1, 
 		 int clique2[], int cliqsize2,
 		 int orignode1[MAXM],
 		 int orignode2[MAXN]);
   void workonco(int numco,
-		gArray<int> &firstedge,
-		gArray<edge> &edgelist);
+		gbtArray<int> &firstedge,
+		gbtArray<edge> &edgelist);
 
 /* --- the following are unused TEST ROUTINES --- */
   void getgraph(bool connected[MAXM][MAXN], int *m, int *n);
@@ -293,5 +293,3 @@ public:
 
 
 #endif // CLIQUE_H
-
-

@@ -79,7 +79,7 @@
 gbtCorBranchMixed::gbtCorBranchMixed(void)
 { }
 
-gbtCorBranchMixed::gbtCorBranchMixed(const gList<MixedSolution> &p_data)
+gbtCorBranchMixed::gbtCorBranchMixed(const gbtList<MixedSolution> &p_data)
   : m_data(p_data)
 { }
 
@@ -116,7 +116,7 @@ double gbtCorBranchMixed::GetMinParameter(void) const
 gbtCorBranchBehav::gbtCorBranchBehav(void)
 { }
 
-gbtCorBranchBehav::gbtCorBranchBehav(const gList<BehavSolution> &p_data)
+gbtCorBranchBehav::gbtCorBranchBehav(const gbtList<BehavSolution> &p_data)
   : m_data(p_data)
 { }
 
@@ -321,5 +321,3 @@ void gbtCorPlotWindow::SetCorrespondence(gbtCorBranch *p_cor)
 
 gbtCorBranch *gbtCorPlotWindow::GetCorrespondence(void) const
 { return m_cor; }
-
-

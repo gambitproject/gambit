@@ -224,8 +224,8 @@ static void QreJacobian(const gbtEfgSupport &p_support,
 
 static void TracePath(const BehavProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
-		      gStatus &p_status,
-		      gList<BehavSolution> &p_solutions)
+		      gbtStatus &p_status,
+		      gbtList<BehavSolution> &p_solutions)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDecel = 1.1;   // maximal deceleration factor
@@ -289,7 +289,7 @@ static void TracePath(const BehavProfile<double> &p_start,
     if (niters++ % 25 == 0) {
       p_status.Get();
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
-			   gText("Lambda = ") + ToText(x[x.Length()]));
+			   gbtText("Lambda = ") + ToText(x[x.Length()]));
     }
 
     bool accept = true;
@@ -433,10 +433,10 @@ gbtEfgNashLogit::gbtEfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
-					    gStatus &p_status)
+gbtList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
+					    gbtStatus &p_status)
 {
-  gList<BehavSolution> solutions;
+  gbtList<BehavSolution> solutions;
   BehavProfile<double> start(p_support);
 
   try {
@@ -452,4 +452,3 @@ gList<BehavSolution> gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
 
   return solutions;
 }
-

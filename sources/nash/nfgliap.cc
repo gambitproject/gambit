@@ -95,7 +95,7 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 // constraints as appropriate.
 //
 static void Project(gVector<double> &grad, const gVector<double> &x,
-		    const gArray<int> &lengths)
+		    const gbtArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
@@ -215,8 +215,8 @@ gbtNfgNashLiap::gbtNfgNashLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
-					   gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
+					   gbtStatus &p_status)
 {
   static const double ALPHA = .00000001;
   MixedProfile<double> p(p_support);
@@ -232,7 +232,7 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
     }
   }
 
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
 
   try {
     for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
@@ -241,8 +241,8 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
       PickRandomProfile(p);
       p_status.Get();
       p_status.SetProgress((double) i / (double) m_numTries,
-			   gText("Attempt ") + ToText(i) + 
-			   gText(", equilibria so far: ") +
+			   gbtText("Attempt ") + ToText(i) + 
+			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
       gConjugatePR minimizer(p.Length());
       gVector<double> gradient(p.Length()), dx(p.Length());
@@ -280,13 +280,10 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
       catch (gFuncMinException &) { }
     }
   }
-  catch (gSignalBreak &) {
+  catch (gbtSignalBreak &) {
     // Just stop and return any solutions found so far
   }
   // Any other exceptions propagate out, assuming something Real Bad happened
 
   return solutions;
 }
-
-
-

@@ -63,22 +63,22 @@ template <class T> class IneqSolv {
   const ListOfPartialTrees<T>        TreesOfPartials;
         T                            Epsilon;
   //        bool                         HasBeenSolved;
-  //        gTriState                    HasASolution;
+  //        gbtTriState                    HasASolution;
   //        gVector<T>                   Sample;
-  gStatus &m_status;
+  gbtStatus &m_status;
 
   // Routines Doing the Actual Work
 
   bool IsASolution(const gVector<T>&)                              const;
 
-  bool SystemHasNoSolutionIn(const gRectangle<T>& r, gArray<int>&) const;
+  bool SystemHasNoSolutionIn(const gRectangle<T>& r, gbtArray<int>&) const;
 
   const bool ASolutionExistsRecursion(const gRectangle<T>&, 
 				            gVector<T>&,
-				            gArray<int>&)          const;
+				            gbtArray<int>&)          const;
 
  public:
-   IneqSolv(const gPolyList<T> &, gStatus &);  
+   IneqSolv(const gPolyList<T> &, gbtStatus &);  
    IneqSolv(const IneqSolv<T> &);
    ~IneqSolv();
 
@@ -102,8 +102,8 @@ template <class T> class IneqSolv {
   // The function that does everything
   const bool ASolutionExists(const gRectangle<T>&, gVector<T>& sample);
 
-  void Output(gOutput &) const;
+  void Output(gbtOutput &) const;
 };  
 
-template <class T> gOutput &operator<<(gOutput &output, const IneqSolv<T> &x);
+template <class T> gbtOutput &operator<<(gbtOutput &output, const IneqSolv<T> &x);
 #endif // INEQSOLV_H

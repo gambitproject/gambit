@@ -177,7 +177,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
 { 
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
   if (m_infoset.IsChanceInfoset()) {
-    m_actionProbs[m_lastSelection+1] = ToNumber(gText(m_actionProb->GetValue().mb_str()));
+    m_actionProbs[m_lastSelection+1] = ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
   gbtEfgAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
@@ -185,7 +185,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
 			    wxString::Format(wxT("%s"),
 					     (const char *) 
 					     ((ToText(action.GetId()) + ": " +
-					       gText(m_actionName->GetValue().mb_str())))));
+					       gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
     m_actionList->SetString(m_lastSelection, m_actionName->GetValue());
@@ -206,14 +206,14 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
   if (m_infoset.IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
-      ToNumber(gText(m_actionProb->GetValue().mb_str()));
+      ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
   gbtEfgAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
 					     (const char *) ((ToText(action.GetId()) + ": " +
-							      gText(m_actionName->GetValue().mb_str())))));
+							      gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
     m_actionList->SetString(m_lastSelection, m_actionName->GetValue());
@@ -246,14 +246,14 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
   if (m_infoset.IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
-      ToNumber(gText(m_actionProb->GetValue().mb_str()));
+      ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
   gbtEfgAction action = m_actions[m_lastSelection+1];
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
 					     (const char *) ((ToText(action.GetId()) + ": " +
-							      gText(m_actionName->GetValue().mb_str())))));
+							      gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
     m_actionList->SetString(m_lastSelection, m_actionName->GetValue());
@@ -311,13 +311,8 @@ void dialogEditMove::OnOK(wxCommandEvent &p_event)
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
   if (m_infoset.IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
-      ToNumber(gText(m_actionProb->GetValue().mb_str()));
+      ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
   // Go on with usual processing
   p_event.Skip();
 }
-
-
-
-
-

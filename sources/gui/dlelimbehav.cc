@@ -36,7 +36,7 @@
 //=========================================================================
 
 dialogElimBehav::dialogElimBehav(wxWindow *p_parent, 
-				 const gArray<gText> &p_players)
+				 const gbtArray<gbtText> &p_players)
   : wxDialog(p_parent, -1, _("Computing Dominated Actions"), 
 	     wxDefaultPosition),
     m_numPlayers(p_players.Length())
@@ -111,9 +111,9 @@ dialogElimBehav::~dialogElimBehav()
   delete [] m_players;
 }
 
-gArray<int> dialogElimBehav::Players(void) const
+gbtArray<int> dialogElimBehav::Players(void) const
 {
-  gBlock<int> players;
+  gbtBlock<int> players;
   for (int pl = 1; pl <= m_numPlayers; pl++) {
     if (m_players[pl-1]->GetValue() == 1) {
       players.Append(pl);

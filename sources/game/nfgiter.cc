@@ -109,14 +109,14 @@ int NfgIter::Set(int p, int s)
   return 1;
 }
 
-void NfgIter::Get(gArray<int> &t) const
+void NfgIter::Get(gbtArray<int> &t) const
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
     t[i] = profile[i].GetId();
   }
 }
 
-void NfgIter::Set(const gArray<int> &t)
+void NfgIter::Set(const gbtArray<int> &t)
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++){
     profile.Set(i, support.GetStrategy(i, t[i]));
@@ -234,4 +234,3 @@ int gbtNfgContIterator::NextContingency(void)
     }
   }
 }
-

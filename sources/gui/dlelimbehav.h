@@ -34,10 +34,10 @@ private:
   wxRadioBox *m_domTypeBox, *m_domConditionalBox, *m_domDepthBox;
 
 public:
-  dialogElimBehav(wxWindow *, const gArray<gText> &p_players);
+  dialogElimBehav(wxWindow *, const gbtArray<gbtText> &p_players);
   virtual ~dialogElimBehav();
 
-  gArray<int> Players(void) const;
+  gbtArray<int> Players(void) const;
 
   bool Iterative(void) const { return (m_domDepthBox->GetSelection() == 1); }
   bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }

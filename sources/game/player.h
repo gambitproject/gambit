@@ -58,8 +58,8 @@ public:
   bool IsDeleted(void) const;
 
   gbtEfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
   int GetId(void) const;
 
   bool IsChance(void) const;
@@ -95,8 +95,8 @@ public:
   bool IsDeleted(void) const;
 
   gbtNfgGame GetGame(void) const;
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
   int GetId(void) const;
 
   int NumStrategies(void) const;

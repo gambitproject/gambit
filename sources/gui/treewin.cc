@@ -450,7 +450,7 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 					     m_dragSource.GetOutcome()));
 	}
       }
-      catch (gException &ex) {
+      catch (gbtException &ex) {
 	guiExceptionDialog(ex.Description(), this);
       }
     }
@@ -589,5 +589,4 @@ void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)
   p_doc->OnTreeChanged(false, false);
 }
 
-template class gList<NodeEntry *>;
-
+template class gbtList<NodeEntry *>;

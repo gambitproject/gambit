@@ -15,20 +15,20 @@
 class DataLine {
 private:
   double m_lambda, m_delta;
-  gBlock<gBlock<double> > m_data;
+  gbtBlock<gbtBlock<double> > m_data;
 
 public:
   DataLine(void) { }
   DataLine(double p_lambda, double p_delta,
-	   const gBlock<gBlock<double> > &p_data)
+	   const gbtBlock<gbtBlock<double> > &p_data)
     : m_lambda(p_lambda), m_delta(p_delta), m_data(p_data) { }
 
   bool operator==(const DataLine &) const { return false; }
   bool operator!=(const DataLine &) const { return true; }
 
   // Return probs for i'th infoset
-  const gArray<double> &operator[](int iset) const { return m_data[iset]; }
-  gArray<double> &operator[](int iset) { return m_data[iset]; }
+  const gbtArray<double> &operator[](int iset) const { return m_data[iset]; }
+  gbtArray<double> &operator[](int iset) { return m_data[iset]; }
 
   int NumInfosets(void) const { return m_data.Length(); }
   int NumStrategies(int iset) const { return m_data[iset].Length(); }
@@ -37,32 +37,32 @@ public:
   double Delta(void) const { return m_delta; }
 };
 
-inline gOutput &operator<<(gOutput &p_file, const DataLine &)
+inline gbtOutput &operator<<(gbtOutput &p_file, const DataLine &)
 { return p_file; }
 
 class PxiFile {
 private:
-  gBlock<int> m_numStrats;
+  gbtBlock<int> m_numStrats;
   double m_minLambda, m_maxLambda, m_delLambda;
   int m_powLambda;
   double m_error, m_qStep;
   int m_numColumns, m_lambdaColumn, m_deltaColumn;
   bool m_shown;
   
-  gBlock< gBlock<int> > m_columns;
-  gList<DataLine *> m_data;
+  gbtBlock< gbtBlock<int> > m_columns;
+  gbtList<DataLine *> m_data;
 
 public:
   PxiFile(void);
   ~PxiFile();
 
-  void ReadFile(gInput &);
-  void WriteFile(gOutput &) const;
+  void ReadFile(gbtInput &);
+  void WriteFile(gbtOutput &) const;
 
   // DATA ACCESS: GAME INFORMATION
   int NumInfosets(void) const { return m_numStrats.Length(); }
   int NumStrategies(int i) const { return m_numStrats[i]; }
-  const gArray<int> &NumStrategies(void) const { return m_numStrats; }
+  const gbtArray<int> &NumStrategies(void) const { return m_numStrats; }
 
   // DATA ACCESS: FILE STRUCTURE INFORMATION
   int NumColumns(void) const { return m_numColumns; }
@@ -85,7 +85,7 @@ public:
   bool IsShown(void) const { return m_shown; }
   void Show(bool p_shown) { m_shown = p_shown; }
 
-  const gList<DataLine *> &GetData(void) const { return m_data; }
+  const gbtList<DataLine *> &GetData(void) const { return m_data; }
 };
 
 #endif  // PXIFILE_H

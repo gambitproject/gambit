@@ -47,7 +47,7 @@ chance players.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgGame::GetComment(void) const
+gbtText gbtEfgGame::GetComment(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -68,7 +68,7 @@ the game <parameter>efg</parameter>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgGame::GetLabel(void) const
+gbtText gbtEfgGame::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -305,7 +305,7 @@ on the game.
 <title>C++ usage</title>
 <para>
 <synopsis>
-gbtEfgGame ::ReadEfg(gInput &amp;p_file)
+gbtEfgGame ::ReadEfg(gbtInput &amp;p_file)
 </synopsis>
 </para>
 </formalpara>
@@ -322,7 +322,7 @@ efg = gambit.ReadEfg(filename)
 <para>
 <function>ReadEfg</function>
 reads an extensive form game from the file <parameter>file</parameter>.
-C++ users should pass a stream represented by a <type>gInput</type> object;
+C++ users should pass a stream represented by a <type>gbtInput</type> object;
 Python users should pass the filename of the file to be read.
 An error occurs if the file cannot be opened, or if the file does
 not contain a valid extensive form savefile.
@@ -339,7 +339,7 @@ not contain a valid extensive form savefile.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::SetComment(const gText &amp;p_comment)
+void gbtEfgGame::SetComment(const gbtText &amp;p_comment)
 </synopsis>
 </para>
 </formalpara>
@@ -359,7 +359,7 @@ sets the comment associated with the game <parameter>efg</parameter>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::SetLabel(const gText &amp;p_label)
+void gbtEfgGame::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -379,7 +379,7 @@ void gbtEfgGame::SetLabel(const gText &amp;p_label)
 <title>C++ usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::WriteEfg(gOutput &amp;p_file) const
+void gbtEfgGame::WriteEfg(gbtOutput &amp;p_file) const
 </synopsis>
 </para>
 </formalpara>
@@ -396,7 +396,7 @@ efg.WriteEfg(filename)
 <para>
 <function>WriteEfg</function> writes an extensive form game to an
 external savefile.  In C++, this file is given as a
-<type>gOutput</type> stream object; in Python, the filename to be
+<type>gbtOutput</type> stream object; in Python, the filename to be
 written is passed.
 </para>
 
@@ -410,7 +410,7 @@ written is passed.
 <title>C++ usage</title>
 <para>
 <synopsis>
-void gbtEfgGame::WriteNfg(gOutput &amp;p_file) const
+void gbtEfgGame::WriteNfg(gbtOutput &amp;p_file) const
 </synopsis>
 </para>
 </formalpara>
@@ -428,7 +428,7 @@ efg.WriteNfg(filename)
 <function>WriteNfg</function>
 writes the reduced normal form of the extensive form game
 to an external savefile.  In C++, this file is given as a 
-<type>gOutput</type> stream object; in Python, the filename
+<type>gbtOutput</type> stream object; in Python, the filename
 to be written is passed.
 </para>
 
@@ -436,5 +436,3 @@ to be written is passed.
 
 
 </sect1>
-
-

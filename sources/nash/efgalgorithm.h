@@ -34,8 +34,8 @@ class gbtEfgNashAlgorithm {
 public:
   virtual ~gbtEfgNashAlgorithm() { }
 
-  virtual gText GetAlgorithm(void) const = 0;
-  virtual gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &) = 0;
+  virtual gbtText GetAlgorithm(void) const = 0;
+  virtual gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &) = 0;
 };
 
 #endif  // EFGALGORITHM_H

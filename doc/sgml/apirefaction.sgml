@@ -82,7 +82,7 @@ action is assumed to belong to the null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgAction::GetLabel(void) const
+gbtText gbtEfgAction::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -128,7 +128,7 @@ by the chance player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgAction::SetLabel(const gText &amp;p_label)
+void gbtEfgAction::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -140,4 +140,3 @@ void gbtEfgAction::SetLabel(const gText &amp;p_label)
 </sect2>
 
 </sect1>
-

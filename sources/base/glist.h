@@ -30,53 +30,53 @@
 #include "gmisc.h"
 #include "gstream.h"
 
-template <class T> class gList  {
+template <class T> class gbtList  {
   protected:
 
-  class gNode   {
+  class gbtNode   {
   public:
     T data;
-    gNode *prev, *next;
+    gbtNode *prev, *next;
  
     // CONSTRUCTOR
-    gNode(const T &_data, gNode *_prev, gNode *_next);
+    gbtNode(const T &_data, gbtNode *_prev, gbtNode *_next);
   };
 
     int length;
-    gNode *head, *tail;
+    gbtNode *head, *tail;
 
     int CurrIndex;
-    gNode *CurrNode;
+    gbtNode *CurrNode;
 
     int InsertAt(const T &t, int where);
 
   public:
-    class BadIndex : public gException   {
+    class BadIndex : public gbtException   {
       public:
         virtual ~BadIndex()   { }
-        gText Description(void) const;
+        gbtText Description(void) const;
     };
 
-    gList(void);
-    gList(const gList<T> &);
-    virtual ~gList();
+    gbtList(void);
+    gbtList(const gbtList<T> &);
+    virtual ~gbtList();
 
-    gList<T> &operator=(const gList<T> &);
+    gbtList<T> &operator=(const gbtList<T> &);
 
-    bool operator==(const gList<T> &b) const;
-    bool operator!=(const gList<T> &b) const;
+    bool operator==(const gbtList<T> &b) const;
+    bool operator!=(const gbtList<T> &b) const;
 
     const T &operator[](int) const;
     T &operator[](int);
 
-    gList<T> operator+(const T &e) const;
-    gList<T>& operator+=(const T &e);
+    gbtList<T> operator+(const T &e) const;
+    gbtList<T>& operator+=(const T &e);
 
-    gList<T> operator+(const gList<T>& b) const;
-    gList<T>& operator+=(const gList<T>& b);
+    gbtList<T> operator+(const gbtList<T>& b) const;
+    gbtList<T>& operator+=(const gbtList<T>& b);
 
-    gList<T> &Combine(gList<T> &b);
-    gList<T> InteriorSegment(int, int) const;
+    gbtList<T> &Combine(gbtList<T> &b);
+    gbtList<T> InteriorSegment(int, int) const;
 
     virtual int Append(const T &);
     int Insert(const T &, int);
@@ -90,10 +90,9 @@ template <class T> class gList  {
     int Length(void) const;
 
     virtual void Flush(void);
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
-template <class T> gOutput &operator<<(gOutput &f, const gList<T> &b);
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtList<T> &b);
 
 #endif    // GLIST_H
-

@@ -44,7 +44,7 @@ BEGIN_EVENT_TABLE(dialogQreFile, wxDialog)
 END_EVENT_TABLE()
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
-			     const gList<MixedSolution> &p_profiles)
+			     const gbtList<MixedSolution> &p_profiles)
   : wxDialog(p_parent, -1, _("Quantal response equilibria"),
 	     wxDefaultPosition),
     m_mixedProfiles(p_profiles)
@@ -114,7 +114,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 }
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
-			     const gList<BehavSolution> &p_profiles)
+			     const gbtList<BehavSolution> &p_profiles)
   : wxDialog(p_parent, -1, _("Quantal response equilibria"),
 	     wxDefaultPosition),
     m_behavProfiles(p_profiles)
@@ -197,7 +197,7 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      gFileOutput file(dialog.GetPath().mb_str());
+      gbtFileOutput file(dialog.GetPath().mb_str());
 
       if (m_mixedProfiles.Length() > 0) {
 	file << "Dimensionality:\n";
@@ -277,6 +277,3 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
     catch (...) { }
   }
 }
-
-
-

@@ -56,12 +56,8 @@ public:
   bool GetFullGraph(void) const { return m_fullGraph; }
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
-  gText GetAlgorithm(void) const { return "Qre"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Qre"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 #endif  // EFGLOGIT_H
-
-
-
-

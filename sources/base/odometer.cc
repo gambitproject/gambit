@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of class gIndexOdometer
+// Implementation of class gbtIndexOdometer
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -28,14 +28,14 @@
 
 
 //---------------------------------------------------------------
-//                      gIndexOdometer
+//                      gbtIndexOdometer
 //---------------------------------------------------------------
 
 //---------------------------
 // Constructors / Destructors
 //---------------------------
 
-gIndexOdometer::gIndexOdometer(const gArray<int> IndexUpperBounds) 
+gbtIndexOdometer::gbtIndexOdometer(const gbtArray<int> IndexUpperBounds) 
 : MinIndices(IndexUpperBounds.Length()), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
@@ -46,7 +46,7 @@ gIndexOdometer::gIndexOdometer(const gArray<int> IndexUpperBounds)
   for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
-gIndexOdometer::gIndexOdometer(const gBlock<int> IndexUpperBounds) 
+gbtIndexOdometer::gbtIndexOdometer(const gbtBlock<int> IndexUpperBounds) 
 :  MinIndices(IndexUpperBounds.Length()),
    MaxIndices(IndexUpperBounds), 
    CurIndices(IndexUpperBounds.Length())
@@ -57,8 +57,8 @@ gIndexOdometer::gIndexOdometer(const gBlock<int> IndexUpperBounds)
   for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
 }
 
-gIndexOdometer::gIndexOdometer(const gArray<int> IndexLowerBounds,
-                               const gArray<int> IndexUpperBounds) 
+gbtIndexOdometer::gbtIndexOdometer(const gbtArray<int> IndexLowerBounds,
+                               const gbtArray<int> IndexUpperBounds) 
 : MinIndices(IndexLowerBounds), 
   MaxIndices(IndexUpperBounds), 
   CurIndices(IndexUpperBounds.Length())
@@ -67,7 +67,7 @@ gIndexOdometer::gIndexOdometer(const gArray<int> IndexLowerBounds,
   for (int i = 2; i <= NoIndices(); i++) CurIndices[i] = MinIndices[i];
 }
 
-gIndexOdometer::gIndexOdometer(const int* IndexUpperBounds, const int NoInd) 
+gbtIndexOdometer::gbtIndexOdometer(const int* IndexUpperBounds, const int NoInd) 
 : MinIndices(NoInd), 
   MaxIndices(NoInd), 
   CurIndices(NoInd)
@@ -81,12 +81,12 @@ gIndexOdometer::gIndexOdometer(const int* IndexUpperBounds, const int NoInd)
   CurIndices[1] = 0;
 }
 
-gIndexOdometer::gIndexOdometer(const gIndexOdometer & odo)
+gbtIndexOdometer::gbtIndexOdometer(const gbtIndexOdometer & odo)
 : MaxIndices(odo.MaxIndices), CurIndices(odo.CurIndices)
 {
 }
 
-gIndexOdometer::~gIndexOdometer()
+gbtIndexOdometer::~gbtIndexOdometer()
 {
 }
 
@@ -95,7 +95,7 @@ gIndexOdometer::~gIndexOdometer()
 //----------------------------------
 
  
-gIndexOdometer& gIndexOdometer::operator=(const gIndexOdometer & rhs)
+gbtIndexOdometer& gbtIndexOdometer::operator=(const gbtIndexOdometer & rhs)
 {
   if (*this != rhs) {
     MinIndices = rhs.MinIndices;
@@ -106,7 +106,7 @@ gIndexOdometer& gIndexOdometer::operator=(const gIndexOdometer & rhs)
 }
 
   
-bool gIndexOdometer::operator==(const gIndexOdometer & rhs) const
+bool gbtIndexOdometer::operator==(const gbtIndexOdometer & rhs) const
 {
   if (MinIndices != rhs.MinIndices) return false;
   if (MaxIndices != rhs.MaxIndices) return false;
@@ -115,12 +115,12 @@ bool gIndexOdometer::operator==(const gIndexOdometer & rhs) const
 }
 
   
-bool gIndexOdometer::operator!=(const gIndexOdometer & rhs) const
+bool gbtIndexOdometer::operator!=(const gbtIndexOdometer & rhs) const
 {
   return !(*this == rhs);
 }
 
-int gIndexOdometer::operator[](const int place) const
+int gbtIndexOdometer::operator[](const int place) const
 {
   assert(1 <= place && place <= NoIndices());
   return CurIndices[place];
@@ -130,12 +130,12 @@ int gIndexOdometer::operator[](const int place) const
 //            Manipulate
 //----------------------------------
 
-void gIndexOdometer::SetIndex(const int& place, const int& newind)
+void gbtIndexOdometer::SetIndex(const int& place, const int& newind)
 {
   CurIndices[place] = newind;
 }
 
-bool gIndexOdometer::Turn()
+bool gbtIndexOdometer::Turn()
 {
   if (CurIndices[1] == MinIndices[1]-1) {
     CurIndices[1] = MinIndices[1];
@@ -156,12 +156,12 @@ bool gIndexOdometer::Turn()
 //           Information
 //----------------------------------
 
-int gIndexOdometer::NoIndices() const 
+int gbtIndexOdometer::NoIndices() const 
 { 
   return MaxIndices.Length(); 
 }
 
-int gIndexOdometer::LinearIndex() const
+int gbtIndexOdometer::LinearIndex() const
 {
   int index = (*this)[1];
   int factor = 1;
@@ -174,21 +174,21 @@ int gIndexOdometer::LinearIndex() const
   return index;
 }
 
-gArray<int> gIndexOdometer::CurrentIndices() const
+gbtArray<int> gbtIndexOdometer::CurrentIndices() const
 {
   return CurIndices;
 }
 
-gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
+gbtIndexOdometer gbtIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 {
-  gBlock<int> NewMins, NewMaxs;
+  gbtBlock<int> NewMins, NewMaxs;
   int i;
   for (i = 1;              i < to_be_zapped; i++)
     { NewMins += MinIndices[i]; NewMaxs += MaxIndices[i]; }
   for (i = to_be_zapped+1; i <= NoIndices(); i++)
     { NewMins += MinIndices[i]; NewMaxs += MaxIndices[i]; }
 
-  gIndexOdometer NewOdo(NewMins,NewMaxs);
+  gbtIndexOdometer NewOdo(NewMins,NewMaxs);
 
   for (i = 1;              i < to_be_zapped; i++)
     NewOdo.SetIndex(i  ,CurIndices[i]);
@@ -202,7 +202,7 @@ gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 //           Printing
 //----------------------------------
 
-gOutput& operator << (gOutput& output, const gIndexOdometer& odo)
+gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& odo)
 {
   output << "[" << odo.CurIndices[1];
   for(int t = 2; t <= odo.NoIndices(); t++)
@@ -314,7 +314,7 @@ int gPermutationOdometer::NoIndices() const
   return n;
 }
 
-gArray<int> gPermutationOdometer::CurrentIndices() const
+gbtArray<int> gPermutationOdometer::CurrentIndices() const
 {
   return CurIndices;
 }
@@ -328,7 +328,7 @@ int  gPermutationOdometer::CurrentSign() const
 //           Printing
 //----------------------------------
 
-gOutput& operator << (gOutput& output, const gPermutationOdometer& odo)
+gbtOutput& operator << (gbtOutput& output, const gPermutationOdometer& odo)
 {
   output << "[" << odo.CurIndices[1];
   for(int t = 2; t <= odo.NoIndices(); t++)

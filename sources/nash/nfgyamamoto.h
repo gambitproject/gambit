@@ -34,8 +34,8 @@ public:
   gbtNfgNashYamamoto(void) { }
   virtual ~gbtNfgNashYamamoto() { }
 
-  gText GetAlgorithm(void) const { return "Yamamoto"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Yamamoto"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif  // NFGYAMAMOTO_H

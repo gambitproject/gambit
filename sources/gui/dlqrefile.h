@@ -41,20 +41,17 @@ class dialogQreFile : public wxDialog {
 private:
   wxNotebook *m_notebook;
   wxListCtrl *m_qreList;
-  gList<MixedSolution> m_mixedProfiles;
-  gList<BehavSolution> m_behavProfiles;
+  gbtList<MixedSolution> m_mixedProfiles;
+  gbtList<BehavSolution> m_behavProfiles;
 
   // Event handlers
   void OnPxiFile(wxCommandEvent &);
 
 public:
-  dialogQreFile(wxWindow *, const gList<MixedSolution> &);
-  dialogQreFile(wxWindow *, const gList<BehavSolution> &);
+  dialogQreFile(wxWindow *, const gbtList<MixedSolution> &);
+  dialogQreFile(wxWindow *, const gbtList<BehavSolution> &);
 
   DECLARE_EVENT_TABLE()
 };
 
 #endif   // DLQREFILE_H
-
-
-

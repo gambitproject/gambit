@@ -528,13 +528,13 @@ gRational pow(const gRational& x, long y)
 //                    gRational: Input and output
 //------------------------------------------------------------------------
 
-gOutput &operator<<(gOutput &s, const gRational &y)
+gbtOutput &operator<<(gbtOutput &s, const gRational &y)
 {
   s << ToText(y);
   return s;
 }
 
-gInput &operator>>(gInput &f, gRational &y)
+gbtInput &operator>>(gbtInput &f, gRational &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -579,14 +579,14 @@ gInput &operator>>(gInput &f, gRational &y)
   return f;
 }
 
-gText ToText(const gRational &r)
+gbtText ToText(const gRational &r)
 {
 #if USE_GNU_MP
   // This buffer size recommended by documentation in GMP
   char buffer[mpz_sizeinbase(mpq_numref(r.m_value), 10) +
 	      mpz_sizeinbase(mpq_denref(r.m_value), 10) + 3];
   mpq_get_str(buffer, 10, r.m_value);
-  return gText(buffer);
+  return gbtText(buffer);
 #else
   const int GCONVERT_BUFFER_LENGTH = 255;
   char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
@@ -597,11 +597,11 @@ gText ToText(const gRational &r)
     strncat(gconvert_buffer, Itoa(r.GetDenominator()), GCONVERT_BUFFER_LENGTH);
   }
   
-  return gText(gconvert_buffer);
+  return gbtText(gconvert_buffer);
 #endif  // USE_GNU_MP
 }
 
-gRational FromText(const gText &f, gRational &y)
+gRational FromText(const gbtText &f, gRational &y)
 {
 #if USE_GNU_MP
   mpq_set_str(y.m_value, (char *) f, 10);
@@ -655,6 +655,3 @@ gRational FromText(const gText &f, gRational &y)
   return y;
 #endif  // USE_GNU_MP
 }
-
-
-

@@ -182,7 +182,7 @@ bool Basis::IsIdent()
   return IsBasisIdent;
 }
 
-void Basis::Dump(gOutput &to) const
+void Basis::Dump(gbtOutput &to) const
 { 
   to << "{";
   for(int i=basis.First();i<=basis.Last();i++) 
@@ -193,13 +193,12 @@ void Basis::Dump(gOutput &to) const
 Basis::BadIndex::~BadIndex()
 { }
 
-gText Basis::BadIndex::Description(void) const
+gbtText Basis::BadIndex::Description(void) const
 {
   return "Bad index in Basis";
 }
 
-gOutput &operator<<(gOutput &to, const Basis &v)
+gbtOutput &operator<<(gbtOutput &to, const Basis &v)
 {
   v.Dump(to); return to;
 }
-

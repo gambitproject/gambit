@@ -27,21 +27,20 @@
 #include "base.h"
 #include "glist.imp"
 
-template class gList<int>;
-template class gList<long>;
-template class gList<double>;
-template class gList<gText>;
+template class gbtList<int>;
+template class gbtList<long>;
+template class gbtList<double>;
+template class gbtList<gbtText>;
 
-template class gList<gBlock<int> >;
-template class gList<gArray<int> >;
-template class gList<gList<int> >;
+template class gbtList<gbtBlock<int> >;
+template class gbtList<gbtArray<int> >;
+template class gbtList<gbtList<int> >;
 #ifndef __BCC55__
-template gOutput &operator<<(gOutput &, const gList<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtList<int> &);
 #endif  // __BCC55__
 
-template class gList<bool>;
-template gOutput &operator<<(gOutput &, const gList<bool> &);
-template class gList<gList<bool> >;
-template gOutput &operator<<(gOutput &, const gList<gList<bool> > &);
-template class gList<gList<gList<bool> > >;
-
+template class gbtList<bool>;
+template gbtOutput &operator<<(gbtOutput &, const gbtList<bool> &);
+template class gbtList<gbtList<bool> >;
+template gbtOutput &operator<<(gbtOutput &, const gbtList<gbtList<bool> > &);
+template class gbtList<gbtList<gbtList<bool> > >;

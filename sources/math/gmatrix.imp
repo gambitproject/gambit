@@ -27,7 +27,7 @@
 #include "base/base.h"
 #include "gmatrix.h"
 
-template <class T> gText gMatrix<T>::DivideByZero::Description(void) const
+template <class T> gbtText gMatrix<T>::DivideByZero::Description(void) const
 {
   return "Divide by zero attempted in gMatrix";
 }
@@ -41,20 +41,20 @@ template <class T> gMatrix<T>::gMatrix(void)
 { }
 
 template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols)
-  : gRectArray<T>(rows, cols)
+  : gbtRectArray<T>(rows, cols)
 { }
 
 template <class T> gMatrix<T>::gMatrix(unsigned int rows, unsigned int cols,
 				       int minrows)
-  : gRectArray<T>(minrows, minrows + rows - 1, 1, cols)
+  : gbtRectArray<T>(minrows, minrows + rows - 1, 1, cols)
 { }
 
 template <class T> gMatrix<T>::gMatrix(int rl, int rh, int cl, int ch)
-  : gRectArray<T>(rl, rh, cl, ch)
+  : gbtRectArray<T>(rl, rh, cl, ch)
 { }
 
 template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
-  : gRectArray<T>(M)
+  : gbtRectArray<T>(M)
 { }
  
 template <class T> gMatrix<T>::~gMatrix()
@@ -62,7 +62,7 @@ template <class T> gMatrix<T>::~gMatrix()
 
 template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 {
-  gRectArray<T>::operator=(M);
+  gbtRectArray<T>::operator=(M);
   return *this;
 }
 
@@ -219,7 +219,7 @@ void gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
 template <class T>
 gVector<T> operator*(const gVector<T> &v, const gMatrix<T> &M)
 {
-  if (!M.CheckColumn(v))   throw gRectArray<T>::BadDim();
+  if (!M.CheckColumn(v))   throw gbtRectArray<T>::BadDim();
 
   gVector<T> tmp(M.MinCol(), M.MaxCol());
   M.RMultiply(v, tmp);
@@ -465,7 +465,7 @@ template<class T> void gMatrix<T>::Pivot(int row, int col)
     }
 }
 
-template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
+template <class T> gbtOutput &operator<<(gbtOutput &to, const gMatrix<T> &M)
 {
   M.Dump(to); return to;
 }

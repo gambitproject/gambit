@@ -39,7 +39,7 @@ LPTableau<T>::LPTableau(const gMatrix<T> &A, const gVector<T> &b)
 { };
 
 template <class T>
-LPTableau<T>::LPTableau(const gMatrix<T> &A, const gBlock<int> &art, 
+LPTableau<T>::LPTableau(const gMatrix<T> &A, const gbtBlock<int> &art, 
 			const gVector<T> &b)
   : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())
@@ -243,15 +243,15 @@ void LPTableau<T>::Pivot(int outrow,int col)
 }
 
 template <class T>
-void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
+void LPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
 {
   gVector<T> tmpcol(MinRow(),MaxRow());
   // gout << "\nIn LPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
-  gList<int> BestSet;
-  gArray<int> pivot(2);
+  gbtList<int> BestSet;
+  gbtArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
 
   gVector<T> solution(tmpcol);  //$$
@@ -529,7 +529,7 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(gList<gArray<int> > &/*list*/)
+void LPTableau<T>::DualReversePivots(gbtList<gbtArray<int> > &/*list*/)
 {
 }
 
@@ -700,7 +700,7 @@ int LPTableau<T>::LastLabel( void )
 }
 
 template <class T>
-void LPTableau<T>::BigDump(gOutput &to)
+void LPTableau<T>::BigDump(gbtOutput &to)
 {
   //   Tableau<T>::BigDump(to);
 
@@ -734,7 +734,7 @@ void LPTableau<T>::BigDump(gOutput &to)
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gBlock<T> &rowv, gVector<T> &colv) const
+void LPTableau<T>::BasisSelect(const gbtBlock<T> &rowv, gVector<T> &colv) const
 {
   for(int i=basis.First(); i<=basis.Last(); i++) {
     if(basis.Label(i)<0)
@@ -745,8 +745,8 @@ void LPTableau<T>::BasisSelect(const gBlock<T> &rowv, gVector<T> &colv) const
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gBlock<T> &unitv,
-			   const gBlock<T> &rowv,
+void LPTableau<T>::BasisSelect(const gbtBlock<T> &unitv,
+			   const gbtBlock<T> &rowv,
 			   gVector<T> &colv ) const
 {
   for(int i=basis.First(); i<=basis.Last(); i++) {
@@ -760,7 +760,7 @@ void LPTableau<T>::BasisSelect(const gBlock<T> &unitv,
 template <class T> LPTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gText LPTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText LPTableau<T>::BadPivot::Description(void) const
 {
   return "Bad Pivot in LPTableau";
 }
@@ -768,8 +768,7 @@ template <class T> gText LPTableau<T>::BadPivot::Description(void) const
 template <class T> LPTableau<T>::BadDim::~BadDim()
 { }
 
-template <class T> gText LPTableau<T>::BadDim::Description(void) const
+template <class T> gbtText LPTableau<T>::BadDim::Description(void) const
 {
   return "Bad Dimension in LPTableau";
 }
-

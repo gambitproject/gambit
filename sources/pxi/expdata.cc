@@ -19,8 +19,8 @@ const double ALMOST_ZERO = 0.0000001;
 //       Static auxiliary functions for outputting likelihood data
 //========================================================================
 
-static void OutputLikeData(gOutput &p_file,
-			   gBlock<double> &p_likes,
+static void OutputLikeData(gbtOutput &p_file,
+			   gbtBlock<double> &p_likes,
 			   double p_lambda, 
 			   double &p_likeMin, double &p_likeMax)
 {
@@ -33,7 +33,7 @@ static void OutputLikeData(gOutput &p_file,
   p_file << p_lambda <<'\n';
 }
 
-static void OutputLikeHeader(gOutput &p_file, int p_numPoints)
+static void OutputLikeHeader(gbtOutput &p_file, int p_numPoints)
 {
   p_file << "Dimensionality:\n" << 1 << ' ' << p_numPoints << '\n';
   p_file << "DataFormat:\n";
@@ -57,7 +57,7 @@ ExpData::ExpData(void)
   : m_haveMLEs(false), m_numInfosets(0)
 { }
 
-ExpData::ExpData(const gArray<int> &p_numActions)
+ExpData::ExpData(const gbtArray<int> &p_numActions)
   : m_haveMLEs(false), m_numInfosets(p_numActions.Length()),
     m_numActions(p_numActions)
 { }
@@ -67,22 +67,22 @@ ExpData::ExpData(const gArray<int> &p_numActions)
 //                   Reading and writing .agg files
 //-----------------------------------------------------------------------
 
-bool ExpData::LoadData(gInput &p_file)
+bool ExpData::LoadData(gbtInput &p_file)
 {
   try {
     p_file >> m_numInfosets;
-    m_numActions = gArray<int>(m_numInfosets);
+    m_numActions = gbtArray<int>(m_numInfosets);
     for (int iset = 1; iset <= m_numInfosets; iset++) {
       p_file >> m_numActions[iset];
     }
 
     int numPoints;
     p_file >> numPoints;
-    m_points = gRectBlock<gBlock<int> >(numPoints, m_numInfosets);
+    m_points = gbtRectBlock<gbtBlock<int> >(numPoints, m_numInfosets);
     
     for (int j = 1; j <= numPoints; j++) {
       for (int iset = 1; iset <= m_numInfosets; iset++) {
-	m_points(j, iset) = gBlock<int>(m_numActions[iset]);
+	m_points(j, iset) = gbtBlock<int>(m_numActions[iset]);
       }
     }
 
@@ -94,8 +94,8 @@ bool ExpData::LoadData(gInput &p_file)
       }
     }
 
-    m_fitLambdas = gBlock<double>(numPoints);
-    m_fitLikes = gBlock<double>(numPoints);
+    m_fitLambdas = gbtBlock<double>(numPoints);
+    m_fitLikes = gbtBlock<double>(numPoints);
 
   }
   catch (...) {
@@ -105,7 +105,7 @@ bool ExpData::LoadData(gInput &p_file)
   return true;
 }
 
-bool ExpData::SaveData(gOutput &p_file)
+bool ExpData::SaveData(gbtOutput &p_file)
 {
   try {
     p_file << m_numInfosets << ' ';
@@ -157,9 +157,9 @@ double ExpData::GetDataProb(int p_point, int p_iset, int p_act) const
 
 void ExpData::AddDataPoint(void)
 {
-  gArray<gBlock<int> > row(m_numInfosets);
+  gbtArray<gbtBlock<int> > row(m_numInfosets);
   for (int iset = 1; iset <= m_numInfosets; iset++) {
-    row[iset] = gBlock<int>(m_numActions[iset]);
+    row[iset] = gbtBlock<int>(m_numActions[iset]);
   }
   m_points.AddRow(row);
 }
@@ -181,14 +181,14 @@ void ExpData::SetDataPoint(int i, int iset, int act, int value)
 //                Fitting data to QRE correspondence
 //-----------------------------------------------------------------------
 
-void ExpData::ComputeMLEs(PxiFile &p_qreFile, gOutput &p_likeFile)
+void ExpData::ComputeMLEs(PxiFile &p_qreFile, gbtOutput &p_likeFile)
 {
   double likeMax = -1000, likeMin = 1000;
   
   // Output the likelihood file header
   OutputLikeHeader(p_likeFile, m_points.NumRows());
   
-  gBlock<double> likes(NumPoints());
+  gbtBlock<double> likes(NumPoints());
   for (int j = 1; j <= NumPoints(); j++) {
     likes[j] = ALMOST_INFINITY;
     m_fitLikes[j] = ALMOST_INFINITY;
@@ -230,11 +230,11 @@ void ExpData::ComputeMLEs(PxiFile &p_qreFile, gOutput &p_likeFile)
   m_haveMLEs = true;
 }
 
-gBlock<int> ExpData::FitPoints(double p_lambda) const
+gbtBlock<int> ExpData::FitPoints(double p_lambda) const
 {
   const double DELTA_DOUBLE = 0.0001;
 
-  gBlock<int> points;
+  gbtBlock<int> points;
   if (m_haveMLEs) {
     for (int i = 1; i <= NumPoints(); i++) {
       if (m_fitLambdas[i] > p_lambda - DELTA_DOUBLE &&
@@ -245,4 +245,3 @@ gBlock<int> ExpData::FitPoints(double p_lambda) const
   }
   return points;
 }
-

@@ -92,7 +92,7 @@ void EfgNavigateWindow::OnUpdate(void)
     SetCellValue(wxString::Format(wxT("%s"),
 				  (char *) m_doc->GetNodeValue(cursor)), 2, 0);
 
-    gText tmpstr;
+    gbtText tmpstr;
   
     if (cursor.GetPlayer().IsNull()) {
       tmpstr = "TERMINAL";
@@ -138,7 +138,7 @@ void EfgNavigateWindow::OnUpdate(void)
       SetCellValue(_("N/A"), 9, 0);
     }
   }	
-  catch (gException &) { }
+  catch (gbtException &) { }
 }
 
 //-------------------------------------------------------------------------
@@ -211,5 +211,3 @@ void gbtEfgNavigateFrame::OnUpdate(gbtGameView *p_sender)
   }
   Show(m_doc->ShowEfgNavigate());
 }
-
-

@@ -355,7 +355,7 @@ wxString NfgGridTable::GetValue(int row, int col)
   int numColStrats = support.NumStrats(colPlayer);
 
   if (row < numRowStrats && col < numColStrats) {
-    gArray<int> strategy(m_doc->GetContingency());
+    gbtArray<int> strategy(m_doc->GetContingency());
     strategy[m_doc->GetRowPlayer()] = row + 1;
     strategy[m_doc->GetColPlayer()] = col + 1;
     
@@ -681,7 +681,7 @@ void gbtNfgTable::OnLeftClick(wxGridEvent &p_event)
     p_event.Veto();
   }
   else {
-    gArray<int> contingency = m_doc->GetContingency();
+    gbtArray<int> contingency = m_doc->GetContingency();
     contingency[m_doc->GetRowPlayer()] = p_event.GetRow() + 1;
     contingency[m_doc->GetColPlayer()] = p_event.GetCol() + 1;
     m_doc->SetContingency(contingency);
@@ -705,4 +705,3 @@ void gbtNfgTable::OnLabelLeftClick(wxGridEvent &p_event)
   // for the moment, just veto it
   p_event.Veto();
 }
-

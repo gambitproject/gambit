@@ -30,15 +30,15 @@
 #include "base/gmap.h"
 
 //-------------------------------------------------------------------------
-//                    gBaseMap<K, T> member functions
+//                    gbtBaseMap<K, T> member functions
 //-------------------------------------------------------------------------
 
-template <class K, class T> gBaseMap<K, T>::gBaseMap(const T &d)
+template <class K, class T> gbtBaseMap<K, T>::gbtBaseMap(const T &d)
   : length(0), _default(d), keys(0), values(0)
 { }
 
 template <class K, class T>
-gBaseMap<K, T>::gBaseMap(const gBaseMap<K, T> &m)
+gbtBaseMap<K, T>::gbtBaseMap(const gbtBaseMap<K, T> &m)
   : length(m.length), _default(m._default)
 {
   keys = new K[length];
@@ -50,14 +50,14 @@ gBaseMap<K, T>::gBaseMap(const gBaseMap<K, T> &m)
   }
 }
 
-template <class K, class T> gBaseMap<K, T>::~gBaseMap()
+template <class K, class T> gbtBaseMap<K, T>::~gbtBaseMap()
 {
   delete [] keys;
   delete [] values;
 }
 
 template <class K, class T>
-int gBaseMap<K, T>::operator==(const gBaseMap<K,T> &M) const
+int gbtBaseMap<K, T>::operator==(const gbtBaseMap<K,T> &M) const
 {
   if (length != M.length) return 0;
 
@@ -68,13 +68,13 @@ int gBaseMap<K, T>::operator==(const gBaseMap<K,T> &M) const
 }
 
 template <class K, class T>
-int gBaseMap<K, T>::operator!=(const gBaseMap<K, T> &M) const
+int gbtBaseMap<K, T>::operator!=(const gbtBaseMap<K, T> &M) const
 {
   return !(*this == M);
 }
 
 template <class K, class T>
-gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap<K,T> &M)
+gbtBaseMap<K, T> &gbtBaseMap<K, T>::operator=(const gbtBaseMap<K,T> &M)
 {
   if (this != &M)   {
     length = M.length;
@@ -101,7 +101,7 @@ gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap<K,T> &M)
 }
 
 template <class K, class T>
-T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
+T &gbtBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
 {
   K *new_keys = new K[length + 1];
   T *new_values = new T[length + 1];
@@ -132,7 +132,7 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
   return values[entry];
 }
 
-template <class K, class T> T gBaseMap<K, T>::Delete(int where)
+template <class K, class T> T gbtBaseMap<K, T>::Delete(int where)
 {
   if (length == 1)  {
     T ret = values[0];
@@ -170,43 +170,43 @@ template <class K, class T> T gBaseMap<K, T>::Delete(int where)
   return ret;
 }
 
-template <class K, class T> T &gBaseMap<K, T>::Default(void)
+template <class K, class T> T &gbtBaseMap<K, T>::Default(void)
 {
   return _default;
 }
 
-template <class K, class T> const T &gBaseMap<K, T>::Default(void) const
+template <class K, class T> const T &gbtBaseMap<K, T>::Default(void) const
 {
   return _default;
 }
 
-template <class K, class T> int gBaseMap<K, T>::Length(void) const
+template <class K, class T> int gbtBaseMap<K, T>::Length(void) const
 {
   return length;
 }
 
-template <class K, class T> void gBaseMap<K, T>::Dump(gOutput &f) const
+template <class K, class T> void gbtBaseMap<K, T>::Dump(gbtOutput &f) const
 {
   for (int i = 0; i < length; i++)
     f << keys[i] << " --> " << values[i] << '\n';
 }
 
 //-------------------------------------------------------------------------
-//                      gOrdMap<K, T> member functions
+//                      gbtOrdMap<K, T> member functions
 //-------------------------------------------------------------------------
 
-template <class K, class T> gOrdMap<K, T>::gOrdMap(const T &d)
-  : gBaseMap<K, T>(d)
+template <class K, class T> gbtOrdMap<K, T>::gbtOrdMap(const T &d)
+  : gbtBaseMap<K, T>(d)
 { }
 
-template <class K, class T> gOrdMap<K, T>::gOrdMap(const gOrdMap<K, T> &m)
-  : gBaseMap<K, T>(m)
+template <class K, class T> gbtOrdMap<K, T>::gbtOrdMap(const gbtOrdMap<K, T> &m)
+  : gbtBaseMap<K, T>(m)
 { }
 
-template <class K, class T> gOrdMap<K, T>::~gOrdMap()   { }
+template <class K, class T> gbtOrdMap<K, T>::~gbtOrdMap()   { }
 
 template <class K, class T>
-int gOrdMap<K, T>::Locate(const K &key) const
+int gbtOrdMap<K, T>::Locate(const K &key) const
 {
   int low = 0, high = length - 1, mid = 0;
   
@@ -221,7 +221,7 @@ int gOrdMap<K, T>::Locate(const K &key) const
 }
 
 
-template <class K, class T> T &gOrdMap<K, T>::operator()(const K &key)
+template <class K, class T> T &gbtOrdMap<K, T>::operator()(const K &key)
 {
   int where = Locate(key);
 
@@ -230,7 +230,7 @@ template <class K, class T> T &gOrdMap<K, T>::operator()(const K &key)
 		    _default);
 }
 
-template <class K, class T> T &gOrdMap<K, T>::Lookup(const K &key)
+template <class K, class T> T &gbtOrdMap<K, T>::Lookup(const K &key)
 {
   int where = Locate(key);
 
@@ -239,7 +239,7 @@ template <class K, class T> T &gOrdMap<K, T>::Lookup(const K &key)
 		     _default);
 }
 
-template <class K, class T> T gOrdMap<K, T>::operator()(const K &key) const
+template <class K, class T> T gbtOrdMap<K, T>::operator()(const K &key) const
 {
   int where = Locate(key);
 
@@ -247,14 +247,14 @@ template <class K, class T> T gOrdMap<K, T>::operator()(const K &key) const
   else   return _default;
 }
 
-template <class K, class T> int gOrdMap<K, T>::IsDefined(const K &key) const
+template <class K, class T> int gbtOrdMap<K, T>::IsDefined(const K &key) const
 {
   if (length == 0)   return 0;
   return (keys[Locate(key)] == key);
 }
 
 template <class K, class T>
-void gOrdMap<K, T>::Define(const K &key, const T &value)
+void gbtOrdMap<K, T>::Define(const K &key, const T &value)
 {
   if (length == 0)  {
     Insert(key, 0, value);
@@ -267,13 +267,10 @@ void gOrdMap<K, T>::Define(const K &key, const T &value)
   else Insert(key, ((key < keys[where]) ? where : where + 1), value);
 }
 
-template <class K, class T> T gOrdMap<K, T>::Remove(const K &key)
+template <class K, class T> T gbtOrdMap<K, T>::Remove(const K &key)
 {
   int where = Locate(key);
 
   if (where >= 0)    return Delete(where);
   return _default;
 }
-
-
-

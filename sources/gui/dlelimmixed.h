@@ -38,10 +38,10 @@ private:
   void OnMethod(wxCommandEvent &);
   
 public:
-  dialogElimMixed(wxWindow *, const gArray<gText> &p_players);
+  dialogElimMixed(wxWindow *, const gbtArray<gbtText> &p_players);
   virtual ~dialogElimMixed();
 
-  gArray<int> Players(void) const;
+  gbtArray<int> Players(void) const;
 
   bool Iterative(void) const { return (m_domDepthBox->GetSelection() == 1); }
   bool DomStrong(void) const { return (m_domTypeBox->GetSelection() == 1); }
@@ -53,4 +53,3 @@ public:
 };
 
 #endif   // DLELIMMIXED_H
-

@@ -79,7 +79,7 @@ returns the extensive form game to which the information set belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgInfoset::GetLabel(void) const
+gbtText gbtEfgInfoset::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -123,7 +123,7 @@ is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgInfoset::SetLabel(const gText &amp;p_label)
+void gbtEfgInfoset::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -137,4 +137,3 @@ set.
 
 
 </sect1>
-

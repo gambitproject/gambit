@@ -84,7 +84,7 @@ void gbt_efg_game_rep::SortInfosets(void)
   int pl;
 
   for (pl = 0; pl <= players.Length(); pl++)  {
-    gList<gbtEfgNode> nodes;
+    gbtList<gbtEfgNode> nodes;
 
     Nodes(gbtEfgGame(this), nodes);
 
@@ -125,7 +125,7 @@ void gbt_efg_game_rep::SortInfosets(void)
 
   // Now, we sort the nodes within the infosets
   
-  gList<gbtEfgNode> nodes;
+  gbtList<gbtEfgNode> nodes;
   Nodes(gbtEfgGame(this), nodes);
 
   for (pl = 0; pl <= players.Length(); pl++)  {
@@ -391,7 +391,7 @@ void gbt_efg_game_rep::Reveal(gbt_efg_infoset_rep *p_where,
       // iterate over each member of information set 'k'
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
-      gArray<gbt_efg_node_rep *> members = p_who->m_infosets[k]->m_members;
+      gbtArray<gbt_efg_node_rep *> members = p_who->m_infosets[k]->m_members;
       gbt_efg_infoset_rep *newiset = 0;
       
       for (int m = 1; m <= members.Length(); m++) {
@@ -523,8 +523,8 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   efg.rep->sortisets = false;
   efg.rep->m_label = rep->m_label;
   efg.rep->comment = rep->comment;
-  efg.rep->players = gBlock<gbt_efg_player_rep *>(rep->players.Length());
-  efg.rep->outcomes = gBlock<gbt_efg_outcome_rep *>(rep->outcomes.Length());
+  efg.rep->players = gbtBlock<gbt_efg_player_rep *>(rep->players.Length());
+  efg.rep->outcomes = gbtBlock<gbt_efg_outcome_rep *>(rep->outcomes.Length());
   
   for (int i = 1; i <= rep->players.Length(); i++)  {
     (efg.rep->players[i] = new gbt_efg_player_rep(efg.rep, i))->m_label = rep->players[i]->m_label;
@@ -672,22 +672,22 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
 //               Efg: Title access and manipulation
 //------------------------------------------------------------------------
 
-void gbtEfgGame::SetLabel(const gText &p_label)
+void gbtEfgGame::SetLabel(const gbtText &p_label)
 {
   rep->m_label = p_label; 
   rep->m_revision++;
 }
 
-const gText &gbtEfgGame::GetLabel(void) const
+const gbtText &gbtEfgGame::GetLabel(void) const
 { return rep->m_label; }
 
-void gbtEfgGame::SetComment(const gText &s)
+void gbtEfgGame::SetComment(const gbtText &s)
 {
   rep->comment = s;
   rep->m_revision++;
 }
 
-const gText &gbtEfgGame::GetComment(void) const
+const gbtText &gbtEfgGame::GetComment(void) const
 { return rep->comment; }
   
 
@@ -695,7 +695,7 @@ const gText &gbtEfgGame::GetComment(void) const
 //                    Efg: Writing data files
 //------------------------------------------------------------------------
 
-void gbtEfgGame::WriteEfg(gOutput &f, gbt_efg_node_rep *n) const
+void gbtEfgGame::WriteEfg(gbtOutput &f, gbt_efg_node_rep *n) const
 {
   if (n->m_children.Length() == 0)   {
     f << "t \"" << EscapeQuotes(n->m_label) << "\" ";
@@ -765,7 +765,7 @@ void gbtEfgGame::WriteEfg(gOutput &f, gbt_efg_node_rep *n) const
   }
 }
 
-void gbtEfgGame::WriteEfg(gOutput &p_file) const
+void gbtEfgGame::WriteEfg(gbtOutput &p_file) const
 {
   p_file << "EFG 2 R";
   p_file << " \"" << EscapeQuotes(rep->m_label) << "\" { ";
@@ -1143,7 +1143,7 @@ void gbtEfgGame::UnmarkSubgame(gbtEfgNode n)
 
 void gbtEfgGame::MarkSubgames(void)
 {
-  gList<gbtEfgNode> subgames;
+  gbtList<gbtEfgNode> subgames;
   LegalSubgameRoots(*this, subgames);
 
   for (int i = 1; i <= subgames.Length(); i++)  {
@@ -1179,9 +1179,9 @@ int gbtEfgGame::ProfileLength(void) const
   return sum;
 }
 
-gArray<int> gbtEfgGame::NumInfosets(void) const
+gbtArray<int> gbtEfgGame::NumInfosets(void) const
 {
-  gArray<int> foo(rep->players.Length());
+  gbtArray<int> foo(rep->players.Length());
   
   for (int i = 1; i <= foo.Length(); i++) {
     foo[i] = rep->players[i]->m_infosets.Length();
@@ -1206,7 +1206,7 @@ int gbtEfgGame::TotalNumInfosets(void) const
 
 gPVector<int> gbtEfgGame::NumActions(void) const
 {
-  gArray<int> foo(rep->players.Length());
+  gbtArray<int> foo(rep->players.Length());
   for (int i = 1; i <= rep->players.Length(); i++) {
     foo[i] = rep->players[i]->m_infosets.Length();
   }
@@ -1233,7 +1233,7 @@ int gbtEfgGame::NumPlayerActions(void) const
 
 gPVector<int> gbtEfgGame::NumMembers(void) const
 {
-  gArray<int> foo(rep->players.Length());
+  gbtArray<int> foo(rep->players.Length());
 
   for (int i = 1; i <= rep->players.Length(); i++) {
     foo[i] = rep->players[i]->m_infosets.Length();
@@ -1309,8 +1309,8 @@ void gbtEfgGame::InfosetProbs(const gPVector<int> &profile,
 }
 
 void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
-		     const gArray<gArray<int> *> &profile,
-		     gArray<gNumber> &payoff) const
+		     const gbtArray<gbtArray<int> *> &profile,
+		     gbtArray<gNumber> &payoff) const
 {
   if (n->m_outcome)   {
     for (int i = 1; i <= rep->players.Length(); i++)
@@ -1330,8 +1330,8 @@ void gbtEfgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
   }
 }
 
-void gbtEfgGame::Payoff(const gArray<gArray<int> *> &profile,
-		 gArray<gNumber> &payoff) const
+void gbtEfgGame::Payoff(const gbtArray<gbtArray<int> *> &profile,
+		 gbtArray<gNumber> &payoff) const
 {
   for (int i = 1; i <= payoff.Length(); i++)
     payoff[i] = 0;

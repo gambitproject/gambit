@@ -129,7 +129,7 @@ null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgNode::GetLabel(void) const
+gbtText gbtEfgNode::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -333,7 +333,7 @@ int gbtEfgNode::NumChildren(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgNode::SetLabel(const gText &amp;p_label)
+void gbtEfgNode::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -372,4 +372,3 @@ extensive form game.
 </sect2>
 
 </sect1>
-

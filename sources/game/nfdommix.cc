@@ -36,9 +36,9 @@
 #include "nfdommix.imp"
 
 gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
-				      const gArray<int> &players,
-				      gOutput &tracefile,
-				      gStatus &status) const
+				      const gbtArray<int> &players,
+				      gbtOutput &tracefile,
+				      gbtStatus &status) const
 {
   gbtNfgSupport newS(*this);
   
@@ -65,7 +65,7 @@ gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
 
 bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		      bool strong, gPrecision precision,
-		      gOutput &tracefile)
+		      gbtOutput &tracefile)
 {
   bool ret = false;
   if (precision == precRATIONAL) {
@@ -78,7 +78,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 }
 
 bool IsMixedDominated(const MixedProfile<gNumber> &sol,
-		 bool strong, gPrecision precision, gOutput &tracefile)
+		 bool strong, gPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
   int n = (sol.GetGame()).NumPlayers();
@@ -92,7 +92,7 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol,
 }
 
 bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
-		 bool strong, gPrecision precision, gOutput &tracefile)
+		 bool strong, gPrecision precision, gbtOutput &tracefile)
 {
   bool ret = false;
 
@@ -118,27 +118,23 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
 #ifndef __BCC55__
 template bool 
 ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
-		      gRational junk, gOutput &tracefile, gStatus &status);
+		      gRational junk, gbtOutput &tracefile, gbtStatus &status);
 template bool 
 ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
-		      double junk, gOutput &tracefile, gStatus &status);
+		      double junk, gbtOutput &tracefile, gbtStatus &status);
 
 template bool
 IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
-		 bool strong, gRational junk, gOutput &tracefile);
+		 bool strong, gRational junk, gbtOutput &tracefile);
 template bool
 IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
-		 bool strong, double junk, gOutput &tracefile);
+		 bool strong, double junk, gbtOutput &tracefile);
 
 template bool 
 IsMixedDominated(const MixedProfile<gRational> &pr, int pl,
-		 bool strong, gOutput &tracefile);
+		 bool strong, gbtOutput &tracefile);
 
 template bool 
 IsMixedDominated(const MixedProfile<double> &pr, int pl,
-		 bool strong, gOutput &tracefile);
+		 bool strong, gbtOutput &tracefile);
 #endif  // __BCC55__
-
-
-
-

@@ -58,20 +58,20 @@ public:
 
 class nfgOneNash : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "OneNash"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "OneNash"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
@@ -93,7 +93,7 @@ gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
     }
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -146,14 +146,14 @@ gbtNfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
 
 class nfgTwoNash : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "TwoNash"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "TwoNash"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -162,7 +162,7 @@ gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
     gbtNfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
@@ -187,7 +187,7 @@ gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
     }
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -240,14 +240,14 @@ gbtNfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
 
 class nfgAllNash : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "AllNash"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "AllNash"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
-				       gStatus &p_status)
+gbtList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
+				       gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -256,7 +256,7 @@ gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
     gbtNfgSupport support(p_support);
 
     while (true) {
-      gNullStatus status;
+      gbtNullStatus status;
       gNullOutput gnull;
       gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
@@ -281,7 +281,7 @@ gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
     }
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -333,20 +333,20 @@ gbtNfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
 
 class nfgOnePerfect : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "OnePerfect"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "OnePerfect"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
@@ -356,7 +356,7 @@ gList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -408,20 +408,20 @@ gbtNfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
 
 class nfgTwoPerfect : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "TwoPerfect"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "TwoPerfect"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
@@ -431,7 +431,7 @@ gList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -483,20 +483,20 @@ gbtNfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
 
 class nfgAllPerfect : public gbtNfgNashAlgorithm {
 public:
-  gText GetAlgorithm(void) const { return "AllPerfect"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "AllPerfect"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
-gList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
-					  gStatus &p_status)
+gbtList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
+					  gbtStatus &p_status)
 {
-  gArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.GetGame().NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
 
   try {
-    gNullStatus status;
+    gbtNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
     gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
@@ -506,7 +506,7 @@ gList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
     return algorithm.Solve(support, p_status);
   }
   catch (...) {
-    return gList<MixedSolution>();
+    return gbtList<MixedSolution>();
   }
 }
 
@@ -1467,10 +1467,9 @@ gbtNfgNashAlgorithm *dialogNfgNash::GetAlgorithm(void) const
   }
 }
 
-static gOutput &operator<<(gOutput &p_stream, wxTreeItemId)
+static gbtOutput &operator<<(gbtOutput &p_stream, wxTreeItemId)
 { return p_stream; }
 
 #include "base/gmap.imp"
-template class gBaseMap<wxTreeItemId, panelNfgNashAlgorithm *>;
-template class gOrdMap<wxTreeItemId, panelNfgNashAlgorithm *>;
-
+template class gbtBaseMap<wxTreeItemId, panelNfgNashAlgorithm *>;
+template class gbtOrdMap<wxTreeItemId, panelNfgNashAlgorithm *>;

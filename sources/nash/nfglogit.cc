@@ -241,8 +241,8 @@ static void QreJacobian(const gbtNfgSupport &p_support,
 
 static void TracePath(const MixedProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
-		      gStatus &p_status,
-		      gList<MixedSolution> &p_solutions)
+		      gbtStatus &p_status,
+		      gbtList<MixedSolution> &p_solutions)
 {
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
   const double c_maxDecel = 1.1;   // maximal deceleration factor
@@ -273,7 +273,7 @@ static void TracePath(const MixedProfile<double> &p_start,
     if (niters++ % 25 == 0) {
       p_status.Get();
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
-			   gText("Lambda = ") + ToText(x[x.Length()]));
+			   gbtText("Lambda = ") + ToText(x[x.Length()]));
     }
 
     bool accept = true;
@@ -414,10 +414,10 @@ gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
-					    gStatus &p_status)
+gbtList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
+					    gbtStatus &p_status)
 {
-  gList<MixedSolution> solutions;
+  gbtList<MixedSolution> solutions;
   MixedProfile<double> start(p_support);
 
   try {
@@ -433,9 +433,3 @@ gList<MixedSolution> gbtNfgNashLogit::Solve(const gbtNfgSupport &p_support,
 
   return solutions;
 }
-
-
-
-
-
-

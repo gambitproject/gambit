@@ -475,7 +475,7 @@ static int node_gc()
 #ifdef GAMBIT_EXCEPTIONS
 ErrorInPelican::~ErrorInPelican() { }
 
-gText ErrorInPelican::Description(void) const
+gbtText ErrorInPelican::Description(void) const
 {
   return "Error somewhere in Pelican";
 }
@@ -4722,6 +4722,3 @@ int IsLower(){
 
 
 /* end Dtypes.c */
-
-
-

@@ -56,18 +56,9 @@ public:
   double TolN(void) const { return m_tolN; }
   void SetTolN(double p_tolN) { m_tolN = p_tolN; }
 
-  gText GetAlgorithm(void) const { return "Liap[EFG]"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Liap[EFG]"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 
 #endif // EFGLIAP_H
-
-
-
-
-
-
-
-
-

@@ -131,8 +131,8 @@ bool gNumberValidator::Validate(wxWindow *p_parent)
     return false;
   }
 
-  if ((m_hasMin && ToNumber(gText(value.mb_str())) < m_minValue) ||
-      (m_hasMax && ToNumber(gText(value.mb_str())) > m_maxValue)) {
+  if ((m_hasMin && ToNumber(gbtText(value.mb_str())) < m_minValue) ||
+      (m_hasMax && ToNumber(gbtText(value.mb_str())) > m_maxValue)) {
     wxMessageBox(wxT("The value ") + value + wxT(" in ") +
 		 m_validatorWindow->GetName() + wxT(" is out of the range [") +
 		 wxString::Format(wxT("%s"), (char *) ToText(m_minValue)) + 
@@ -191,7 +191,3 @@ void gNumberValidator::OnChar(wxKeyEvent &p_event)
 
   p_event.Skip();
 }
-
-
-
-

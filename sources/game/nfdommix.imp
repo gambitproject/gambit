@@ -29,7 +29,7 @@
 template <class T>
 bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 			   int pl, bool strong, T /*junk*/,
-			   gOutput &tracefile, gStatus &status)
+			   gbtOutput &tracefile, gbtStatus &status)
 {
   gbtNfgGame nfg = S.GetGame();
   gbtNfgContIterator s(S);
@@ -38,7 +38,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
   d1 = (double) (pl-1) / (double) nfg.NumPlayers();
   d2 = (double) pl / (double) nfg.NumPlayers();
   
-  gArray<bool> dom(S.NumStrats(pl));
+  gbtArray<bool> dom(S.NumStrats(pl));
   
   T eps;
   gEpsilon(eps);
@@ -84,7 +84,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
       status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
       LPSolve<T> Tab(A, B, C, 1, status);
@@ -163,7 +163,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
       status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
       LPSolve<T> Tab(A, B, C, 1, status);
@@ -218,7 +218,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 template <class T>
 bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 		      bool strong, T /*junk*/,
-		      gOutput &tracefile)
+		      gbtOutput &tracefile)
 {
   int pl = str.GetPlayer().GetId();
   gbtNfgGame nfg = str.GetPlayer().GetGame();
@@ -271,10 +271,10 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
       s.NextContingency();
     }
     
-    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    gNullStatus status;
+    gbtNullStatus status;
     LPSolve<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat = "<< whichstrat;
@@ -335,10 +335,10 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
       s.NextContingency();
     }
     
-    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    gNullStatus status;
+    gbtNullStatus status;
     LPSolve<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
@@ -377,7 +377,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
 
 template <class T>
 bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
-		      bool strong, gOutput &tracefile)
+		      bool strong, gbtOutput &tracefile)
 {
   gbtNfgSupport S = pr.Support();
   gbtNfgGame nfg = pr.GetGame();
@@ -432,10 +432,10 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       A(n, strats+1) = (T) 1;
       s.NextContingency();
     }
-    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    gNullStatus status;
+    gbtNullStatus status;
     LPSolve<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat: " << prob;
@@ -495,10 +495,10 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
       s.NextContingency();
     }
     
-    // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+    // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    gNullStatus status;
+    gbtNullStatus status;
     LPSolve<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
@@ -529,4 +529,3 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     return true;
   }
 }
-

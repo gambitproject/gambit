@@ -51,13 +51,13 @@ class EfgContIter    {
     gbtEfgSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
-    gBlock<gBlock<bool> > _is_active;
-    gBlock<int> _num_active_infosets;
+    gbtBlock<gbtBlock<bool> > _is_active;
+    gbtBlock<int> _num_active_infosets;
     mutable gVector<gNumber> _payoff;
 
   public:
     EfgContIter(const gbtEfgSupport &);
-    EfgContIter(const gbtEfgSupport &, const gList<gbtEfgInfoset> &);
+    EfgContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
     ~EfgContIter();
   
     void First(void);
@@ -76,7 +76,7 @@ class EfgContIter    {
   
     gNumber Payoff(int pl) const;
   
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
 // The following class is like the above, but intended for iteration
@@ -89,13 +89,13 @@ class EfgConditionalContIter    {
     gbtEfgSupport _support;
     PureBehavProfile<gNumber> _profile;
     gPVector<int> _current;
-    gBlock<gBlock<bool> > _is_active;
-    gBlock<int> _num_active_infosets;
+    gbtBlock<gbtBlock<bool> > _is_active;
+    gbtBlock<int> _num_active_infosets;
     mutable gVector<gNumber> _payoff;
 
   public:
     EfgConditionalContIter(const gbtEfgSupport &);
-    EfgConditionalContIter(const gbtEfgSupport &, const gList<gbtEfgInfoset> &);
+    EfgConditionalContIter(const gbtEfgSupport &, const gbtList<gbtEfgInfoset> &);
     ~EfgConditionalContIter();
   
     void First(void); // Sets each infoset's action to the first in the support
@@ -112,11 +112,7 @@ class EfgConditionalContIter    {
     gNumber Payoff(int pl) const;
     gNumber Payoff(const gbtEfgNode &, int pl) const;
   
-    void Dump(gOutput &) const;
+    void Dump(gbtOutput &) const;
 };
 
 #endif   // EFGCITER_H
-
-
-
-

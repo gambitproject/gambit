@@ -35,7 +35,7 @@
 class gbtNfgGame;
 template <class T> class MixedProfile;
 template <class T> class gPVector;
-template <class T> class gRectArray;
+template <class T> class gbtRectArray;
 
 //
 //  BehavProfile<T> implements a behavior profile on an Efg.  
@@ -117,13 +117,13 @@ protected:
 
   void BehaviorStrat(const gbtEfgGame &, int, const gbtEfgNode &);
   void RealizationProbs(const MixedProfile<T> &, const gbtEfgGame &,
-			int pl, const gArray<int> *const, const gbtEfgNode &);
+			int pl, const gbtArray<int> *const, const gbtEfgNode &);
 
 public:
-  class BadStuff : public gException  {
+  class BadStuff : public gbtException  {
   public:
     virtual ~BadStuff();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
   // CONSTRUCTORS, DESTRUCTOR
@@ -177,7 +177,7 @@ public:
   T DiffNodeValue(const gbtEfgNode &node, const gbtEfgPlayer &player,
 		  const gbtEfgAction &oppAction) const;
 
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 
   // IMPLEMENTATION OF gDPVector OPERATIONS
   // These are reimplemented here to correctly handle invalidation
@@ -187,9 +187,9 @@ public:
   T &operator()(int a, int b, int c) 
     { Invalidate();  return gDPVector<T>::operator()(a, b, c); }
   const T &operator[](int a) const
-    { return gArray<T>::operator[](a); }
+    { return gbtArray<T>::operator[](a); }
   T &operator[](int a)
-    { Invalidate();  return gArray<T>::operator[](a); }
+    { Invalidate();  return gbtArray<T>::operator[](a); }
 
   BehavProfile<T> &operator=(const T &x)  
     { Invalidate();  gDPVector<T>::operator=(x);  return *this; }
@@ -209,11 +209,11 @@ public:
     { Invalidate();  gDPVector<T>::operator*=(x);  return *this; }
 
   int Length(void) const
-    { return gArray<T>::Length(); }
-  const gArray<int> &Lengths(void) const
+    { return gbtArray<T>::Length(); }
+  const gbtArray<int> &Lengths(void) const
     { return gPVector<T>::Lengths(); }
-  int First(void) const { return gArray<T>::First(); }
-  int Last(void) const { return gArray<T>::Last(); }
+  int First(void) const { return gbtArray<T>::First(); }
+  int Last(void) const { return gbtArray<T>::Last(); }
 
   const gPVector<T> &GetPVector(void) const { return *this; }
   const gDPVector<T> &GetDPVector(void) const { return *this; }
@@ -254,13 +254,13 @@ public:
   void CondPayoff(gDPVector<T> &p_payoff, gPVector<T> &p_probs) const;
   
   // OUTPUT
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
 
 #ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &, const BehavProfile<T> &);
-template <class T> gOutput &operator<<(gOutput &, const BehavAssessment<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const BehavProfile<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const BehavAssessment<T> &);
 #endif
 
 #endif   // BEHAV_H

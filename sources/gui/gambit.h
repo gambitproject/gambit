@@ -35,7 +35,7 @@
 
 #include "gamedoc.h"
 
-extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
+extern void guiExceptionDialog(const gbtText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
 
 
@@ -72,4 +72,3 @@ DECLARE_APP(GambitApp)
 const int wxID_HELP_INDEX = 1310;
 
 #endif // GAMBIT_H
-

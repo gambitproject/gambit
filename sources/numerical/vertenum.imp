@@ -28,7 +28,7 @@
 
 template <class T>
 VertEnum<T>::VertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
-		      gStatus &status_)
+		      gbtStatus &status_)
   : mult_opt(0), depth(0), A(_A), b(_b), btemp(_b), 
     c(_A.MinCol(),_A.MaxCol()), npivots(0), nodes(0), status(status_) 
 {
@@ -36,7 +36,7 @@ VertEnum<T>::VertEnum(const gMatrix<T> &_A, const gVector<T> &_b,
 }
 
 template <class T>
-VertEnum<T>::VertEnum(LPTableau<T> &tab, gStatus &status_)
+VertEnum<T>::VertEnum(LPTableau<T> &tab, gbtStatus &status_)
   : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
     btemp(tab.Get_b()), c(tab.GetCost()), 
     npivots(0), nodes(0), status(status_) 
@@ -133,8 +133,8 @@ template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
 {
   int k;
   Deeper();
-  gList<gArray<int> > PivotList;
-  gArray<int> pivot(2);
+  gbtList<gbtArray<int> > PivotList;
+  gbtArray<int> pivot(2);
   if(tab.IsLexMin()) {
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
@@ -164,8 +164,8 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   Deeper();
   branches[depth]+=1;
 
-//  gList<gArray<int> > PivotList;
-//  gArray<int> pivot(2);
+//  gbtList<gbtArray<int> > PivotList;
+//  gbtArray<int> pivot(2);
 
   // gout << "\nin DualSearch";
   if(mult_opt) {
@@ -192,17 +192,17 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
   
-template <class T> const gList<BFS<T> > &VertEnum<T>::VertexList() const
+template <class T> const gbtList<BFS<T> > &VertEnum<T>::VertexList() const
 { 
   return List;
 }
 
-template <class T> const gList<BFS<T> > &VertEnum<T>::DualVertexList() const
+template <class T> const gbtList<BFS<T> > &VertEnum<T>::DualVertexList() const
 { 
   return DualList;
 }
 
-template <class T> void VertEnum<T>::Vertices(gList<gVector<T> > &verts) const
+template <class T> void VertEnum<T>::Vertices(gbtList<gVector<T> > &verts) const
 { 
   for(int i=1;i<=List.Length();i++) {
     gVector<T> vert(A.NumColumns());
@@ -218,7 +218,7 @@ template <class T> long VertEnum<T>::NumPivots() const
   return npivots;
 }
 
-template <class T> void VertEnum<T>::Dump(gOutput &to) const
+template <class T> void VertEnum<T>::Dump(gbtOutput &to) const
 {
   // gout << "\nin VertEnum::Dump()";
   for(int i=1;i<=List.Length();i++) {
@@ -231,7 +231,7 @@ template <class T> void VertEnum<T>::Dump(gOutput &to) const
 template <class T>
 DoubleVertEnum<T>::DoubleVertEnum(const gMatrix<T> &_A, const gVector<T> &_b, 
 				  const gMatrix<T> &_A2, const gVector<T> &_b2,
-		      gStatus &status_)
+		      gbtStatus &status_)
   : mult_opt(0), depth(0), A(_A), A2(_A2), b(_b), b2(_b2), 
     btemp(_b), c(_A.MinCol(),_A.MaxCol()), npivots(0), 
     nodes(0), status(status_) 
@@ -325,8 +325,8 @@ Search(LPTableau<T> &tab, Tableau<T> &tab2)
 {
   int k;
   Deeper();
-  gList<gArray<int> > PivotList;
-  gArray<int> pivot(2);
+  gbtList<gbtArray<int> > PivotList;
+  gbtArray<int> pivot(2);
   if(tab.IsLexMin())
     EnumerateComplementaryFace(tab,tab2);
   assert(PivotList.Length()==0);
@@ -361,8 +361,8 @@ template <class T> void DoubleVertEnum<T>::DualSearch(LPTableau<T> &tab, Tableau
   Deeper();
   branches[depth]+=1;
 
-//  gList<gArray<int> > PivotList;
-//  gArray<int> pivot(2);
+//  gbtList<gbtArray<int> > PivotList;
+//  gbtArray<int> pivot(2);
 
   // gout << "\nin DoubleVertEnum::DualSearch";
   if(mult_opt) {
@@ -392,18 +392,18 @@ template <class T> void DoubleVertEnum<T>::DualSearch(LPTableau<T> &tab, Tableau
   depth--;
 }
   
-template <class T> const gList<BFS<T> > &DoubleVertEnum<T>::VertexList() const
+template <class T> const gbtList<BFS<T> > &DoubleVertEnum<T>::VertexList() const
 { 
   return List;
 }
 
-template <class T> const gList<BFS<T> > &DoubleVertEnum<T>::VertexList2() const
+template <class T> const gbtList<BFS<T> > &DoubleVertEnum<T>::VertexList2() const
 { 
   return List2;
 }
 
 template <class T> void DoubleVertEnum<T>::
-Vertices(gList<gVector<T> > &verts, gList<gVector<T> > &verts2) const
+Vertices(gbtList<gVector<T> > &verts, gbtList<gVector<T> > &verts2) const
 { 
   if(List.Length() != List2.Length()) throw BadDim();
   //  assert(List.Length() == List2.Length());
@@ -426,7 +426,7 @@ template <class T> long DoubleVertEnum<T>::NumPivots() const
   return npivots;
 }
 
-template <class T> void DoubleVertEnum<T>::Dump(gOutput &to) const
+template <class T> void DoubleVertEnum<T>::Dump(gbtOutput &to) const
 {
   if(List.Length() != List2.Length()) throw BadDim();
   //  assert(List.Length() == List2.Length());
@@ -442,7 +442,7 @@ template <class T> void DoubleVertEnum<T>::Dump(gOutput &to) const
 template <class T> VertEnum<T>::BadDim::~BadDim()
 { }
 
-template <class T> gText VertEnum<T>::BadDim::Description(void) const
+template <class T> gbtText VertEnum<T>::BadDim::Description(void) const
 {
   return "Bad Dimension in VertEnum";
 }
@@ -450,9 +450,7 @@ template <class T> gText VertEnum<T>::BadDim::Description(void) const
 template <class T> DoubleVertEnum<T>::BadDim::~BadDim()
 { }
 
-template <class T> gText DoubleVertEnum<T>::BadDim::Description(void) const
+template <class T> gbtText DoubleVertEnum<T>::BadDim::Description(void) const
 {
   return "Bad Pivot in DoubleVertEnum";
 }
-
-

@@ -78,7 +78,7 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   m_parent(p_parent)
 {
   try {
-    gFileInput file(p_filename);
+    gbtFileInput file(p_filename);
     PxiFile *pxifile = new PxiFile();
     pxifile->ReadFile(file);
     m_qreFiles.Append(pxifile);
@@ -442,7 +442,7 @@ void PxiChild::OnSeriesOverlay(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     PxiFile *pxifile = 0;
     try {
-      gFileInput file(dialog.GetPath());
+      gbtFileInput file(dialog.GetPath());
       PxiFile *pxifile = new PxiFile();
       pxifile->ReadFile(file);
 
@@ -472,14 +472,14 @@ private:
   wxListBox *m_seriesList;
 
 public:
-  dialogSeriesShow(wxWindow *p_parent, const gArray<PxiFile *> &);
+  dialogSeriesShow(wxWindow *p_parent, const gbtArray<PxiFile *> &);
 
   bool SeriesSelected(int p_series) const 
   { return m_seriesList->Selected(p_series - 1); }
 };
 
 dialogSeriesShow::dialogSeriesShow(wxWindow *p_parent,
-				   const gArray<PxiFile *> &p_files)
+				   const gbtArray<PxiFile *> &p_files)
   : wxDialog(p_parent, -1, "Show/Hide Series")
 {
   m_seriesList = new wxListBox(this, -1, wxDefaultPosition, wxDefaultSize,
@@ -537,7 +537,7 @@ void PxiChild::OnDataLoad(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_expDatafile = dialog.GetPath();
     try {
-      gFileInput file(m_expDatafile);
+      gbtFileInput file(m_expDatafile);
       m_expData.LoadData(file);
     }
     catch (...) {
@@ -570,7 +570,7 @@ void PxiChild::OnDataSave(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     m_expDatafile = dialog.GetPath();
     try {
-      gFileOutput file(m_expDatafile);
+      gbtFileOutput file(m_expDatafile);
       m_expData.SaveData(file);
     }
     catch (...) {
@@ -589,7 +589,7 @@ void PxiChild::OnDataFit(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      gFileOutput file(dialog.GetPath().c_str());
+      gbtFileOutput file(dialog.GetPath().c_str());
       m_expData.ComputeMLEs(*(m_qreFiles[1]), file);
 
     }
@@ -705,5 +705,3 @@ void PxiChild::OnHelpAbout(wxCommandEvent &p_event)
 {
   m_parent->OnHelpAbout(p_event);
 }
-
-

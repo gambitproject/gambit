@@ -183,7 +183,7 @@ void NfgShow::OnUpdate(gbtGameView *)
   }
 
   wxMenuBar *menu = GetMenuBar();
-  gArray<int> profile(m_doc->GetContingency());
+  gbtArray<int> profile(m_doc->GetContingency());
   menu->Enable(GBT_MENU_FILE_EXPORT_COMLAB, 
 	       m_doc->GetNfg().NumPlayers() == 2);
   menu->Check(GBT_MENU_VIEW_PROFILES, m_doc->ShowProfiles());
@@ -394,22 +394,22 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 
   try {
-    gFileOutput file(m_doc->GetFilename().mb_str());
+    gbtFileOutput file(m_doc->GetFilename().mb_str());
     gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(), m_doc->GetNfgSupport());
     nfg.WriteNfg(file);
     m_doc->SetIsModified(false);
   }
-  catch (gFileOutput::OpenFailed &) {
+  catch (gbtFileOutput::OpenFailed &) {
     wxMessageBox(wxString::Format(_("Could not open %s for writing."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gFileOutput::WriteFailed &) {
+  catch (gbtFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gException &) {
+  catch (gbtException &) {
     wxMessageBox(_("Internal exception in Gambit"), _("Error"), wxOK, this);
   }
 }
@@ -426,17 +426,17 @@ void NfgShow::OnFileExportHTML(wxCommandEvent &)
   }
   
   try {
-    gFileOutput file(dialog.GetPath().mb_str());
+    gbtFileOutput file(dialog.GetPath().mb_str());
     file << gbtBuildHtml(m_doc->GetNfg(),
 			 m_doc->GetRowPlayer(),
 			 m_doc->GetColPlayer()).mb_str() << '\n';
   }
-  catch (gFileOutput::OpenFailed &) { 
+  catch (gbtFileOutput::OpenFailed &) { 
     wxMessageBox(wxString::Format(_("Could not open %s for writing."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
   }
-  catch (gFileOutput::WriteFailed &) {
+  catch (gbtFileOutput::WriteFailed &) {
     wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
 				  (const char *) m_doc->GetFilename().mb_str()),
 		 _("Error"), wxOK, this);
@@ -685,7 +685,7 @@ void NfgShow::OnFormatAutosize(wxCommandEvent &)
 
 void NfgShow::OnToolsDominance(wxCommandEvent &)
 {
-  gArray<gText> playerNames(m_doc->GetNfg().NumPlayers());
+  gbtArray<gbtText> playerNames(m_doc->GetNfg().NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
     playerNames[pl] = m_doc->GetNfg().GetPlayer(pl).GetLabel();
   }
@@ -727,7 +727,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 	}
       }
     }
-    catch (gSignalBreak &) { }
+    catch (gbtSignalBreak &) { }
 
     if (m_doc->GetNfgSupport() != support) {
       m_doc->SetNfgSupport(m_doc->AllNfgSupports().Length());
@@ -752,7 +752,7 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 
     try {
       wxStatus status(this, algorithm->GetAlgorithm() + "Solve Progress");
-      gList<MixedSolution> solutions;
+      gbtList<MixedSolution> solutions;
       solutions = algorithm->Solve(m_doc->GetNfgSupport(), status);
 
       for (int soln = 1; soln <= solutions.Length(); soln++) {
@@ -777,7 +777,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
   dialogNfgQre dialog(this, m_doc->GetNfgSupport());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gList<MixedSolution> solutions;
+    gbtList<MixedSolution> solutions;
 
     try {
       if (dialog.UseGridSearch()) {
@@ -805,7 +805,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
 	solutions = algorithm.Solve(m_doc->GetNfgSupport(), status);
       }
     }
-    catch (gSignalBreak &) { }
+    catch (gbtSignalBreak &) { }
     catch (...) {
       wxMessageDialog message(this,
 			      _("An exception occurred in computing equilibria"),
@@ -830,7 +830,7 @@ void NfgShow::OnToolsCH(wxCommandEvent &)
   dialogNfgCH dialog(this, m_doc->GetNfgSupport());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gList<MixedSolution> solutions;
+    gbtList<MixedSolution> solutions;
 
     try {
       gbtNfgBehavCH algorithm;
@@ -842,7 +842,7 @@ void NfgShow::OnToolsCH(wxCommandEvent &)
       gNullOutput gnull;
       solutions = algorithm.Solve(m_doc->GetNfgSupport(), status);
     }
-    catch (gSignalBreak &) { }
+    catch (gbtSignalBreak &) { }
     catch (...) {
       wxMessageDialog message(this,
 			      "An exception occurred in computing equilibria",

@@ -76,7 +76,7 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
 
 template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 {
-  gBlock<int> BestSet;
+  gbtBlock<int> BestSet;
   int i, c;
   T ratio, tempmax;
   gVector<T> incol(MinRow(), MaxRow());
@@ -151,7 +151,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 
 template <class T> int LTableau<T>::ExitIndex(int inlabel)
 {
-  gBlock<int> BestSet;
+  gbtBlock<int> BestSet;
   int i, c;
   T ratio, tempmax;
   gVector<T> incol(MinRow(), MaxRow());
@@ -215,7 +215,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 // Executes one step of the Lemke-Howson algorithm
 //
 
-template <class T> int LTableau<T>::SF_LCPPath(int dup, gStatus &status)
+template <class T> int LTableau<T>::SF_LCPPath(int dup, gbtStatus &status)
 {
   int enter, exit;
   enter = dup;
@@ -277,7 +277,7 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 template <class T> LTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gText LTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText LTableau<T>::BadPivot::Description(void) const
 {
   return "Bad Pivot in LTableau";
 }
@@ -285,8 +285,7 @@ template <class T> gText LTableau<T>::BadPivot::Description(void) const
 template <class T> LTableau<T>::BadExitIndex::~BadExitIndex()
 { }
 
-template <class T> gText LTableau<T>::BadExitIndex::Description(void) const
+template <class T> gbtText LTableau<T>::BadExitIndex::Description(void) const
 {
   return "Bad Exit Index in LTableau";
 }
-

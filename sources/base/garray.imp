@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of gArray data type
+// Implementation of gbtArray data type
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -29,18 +29,18 @@
 #include "garray.h"
 
 
-template <class T> gArray<T>::gArray(unsigned int len) 
+template <class T> gbtArray<T>::gbtArray(unsigned int len) 
   : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0)   
 { }
 
-template <class T> gArray<T>::gArray(int lo, int hi)
+template <class T> gbtArray<T>::gbtArray(int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
   if (maxdex + 1 < mindex)   throw BadRange();
   data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
 }
 
-template <class T> gArray<T>::gArray(const gArray<T> &a) 
+template <class T> gbtArray<T>::gbtArray(const gbtArray<T> &a) 
   : mindex(a.mindex), maxdex(a.maxdex),
     data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
 {
@@ -48,12 +48,12 @@ template <class T> gArray<T>::gArray(const gArray<T> &a)
     data[i] = a.data[i];
 }
 
-template <class T> gArray<T>::~gArray()
+template <class T> gbtArray<T>::~gbtArray()
 {
   if (maxdex >= mindex)  delete [] (data + mindex);
 }
 
-template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
+template <class T> gbtArray<T> & gbtArray<T>::operator=(const gbtArray<T> &a)
 {
   if (this != &a) {
     // We only reallocate if necessary.  This should be somewhat faster
@@ -74,36 +74,36 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
   return *this;
 }
 
-template <class T> int gArray<T>::Length(void) const
+template <class T> int gbtArray<T>::Length(void) const
 {
   return maxdex - mindex + 1;
 }	
 
-template <class T> int gArray<T>::First(void) const
+template <class T> int gbtArray<T>::First(void) const
 {
   return mindex;
 }	
 
-template <class T> int gArray<T>::Last(void) const
+template <class T> int gbtArray<T>::Last(void) const
 {
   return maxdex;
 }	
 
-template <class T> const T &gArray<T>::operator[](int index) const
+template <class T> const T &gbtArray<T>::operator[](int index) const
 {
   if (index < mindex || index > maxdex) 
     throw BadIndex();
   return data[index];
 }	
 
-template <class T> T &gArray<T>::operator[](int index)
+template <class T> T &gbtArray<T>::operator[](int index)
 {
   if (index < mindex || index > maxdex)
     throw BadIndex();
   return data[index];
 }
 
-template <class T> void gArray<T>::Dump(gOutput &f) const
+template <class T> void gbtArray<T>::Dump(gbtOutput &f) const
 {
   f << "{ ";
   for (int i = mindex; i <= maxdex; i++)
@@ -111,7 +111,7 @@ template <class T> void gArray<T>::Dump(gOutput &f) const
   f << '}';
 }
 
-template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
+template <class T> bool operator==(const gbtArray<T> &a, const gbtArray<T> &b)
 {
   if (a.First() != b.First() || a.Last() != b.Last())   return false;
   for (int i = a.First(); i <= a.Last(); i++)
@@ -119,30 +119,30 @@ template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
   return true;
 }
 
-template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
+template <class T> bool operator!=(const gbtArray<T> &a, const gbtArray<T> &b)
 {
   return !(a == b);
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtArray<T> &a)
 {
   a.Dump(f);
   return f;
 }
 
 
-template <class T> gArray<T>::BadIndex::~BadIndex()
+template <class T> gbtArray<T>::BadIndex::~BadIndex()
 { }
 
-template <class T> gText gArray<T>::BadIndex::Description(void) const
+template <class T> gbtText gbtArray<T>::BadIndex::Description(void) const
 {
-  return "Bad index in gArray";
+  return "Bad index in gbtArray";
 }
 
-template <class T> gArray<T>::BadRange::~BadRange()
+template <class T> gbtArray<T>::BadRange::~BadRange()
 { }
 
-template <class T> gText gArray<T>::BadRange::Description(void) const
+template <class T> gbtText gbtArray<T>::BadRange::Description(void) const
 {
-  return "Bad range in gArray";
+  return "Bad range in gbtArray";
 }

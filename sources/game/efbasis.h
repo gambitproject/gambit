@@ -36,7 +36,7 @@ class EFNodeSet;
 
 class EFBasis : public gbtEfgSupport {
 protected:
-  gArray <EFNodeSet *> nodes;
+  gbtArray <EFNodeSet *> nodes;
 
   // This is scratch stuff for consistency computation.
   // FIXME: These shouldn't be members!!
@@ -78,17 +78,14 @@ public:
   // if it is not there.
   int Find(const gbtEfgNode &) const;
 
-  const gArray<gbtEfgNode> &Nodes(int pl, int iset) const;
+  const gbtArray<gbtEfgNode> &Nodes(int pl, int iset) const;
   gbtEfgNode GetNode(const gbtEfgInfoset &, int index) const;
 
   bool IsValid(void) const;
   bool IsConsistent(void) const;
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const EFBasis &);
+gbtOutput &operator<<(gbtOutput &f, const EFBasis &);
 
 #endif // EFBASIS_H
-
-
-

@@ -27,7 +27,7 @@
 #include "base/base.h"
 
 #ifdef __BORLANDC__
-bool operator!=(const gArray<int> &, const gArray<int> &);
+bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
@@ -99,14 +99,14 @@ Variable * gSpace::VariableWithNumber(int i) const
   return Variables[i];
 }
 
-const gText & gSpace::GetVariableName(int i) const
+const gbtText & gSpace::GetVariableName(int i) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
 
   return ((Variables[i])->Name);
 }
 
-void gSpace::SetVariableName(int i, const gText &s)
+void gSpace::SetVariableName(int i, const gbtText &s)
 {
   (Variables[i])->Name = s;
 }
@@ -174,7 +174,7 @@ bool gSpace::operator!=(const gSpace & rhs) const
 //   return result;
 // }
 
-void gSpace::Dump(gOutput &f) const
+void gSpace::Dump(gbtOutput &f) const
 {
   f << "No of Variable: " << Variables.Length() << "\n";
   for (int i=1; i<=Variables.Length(); i++) {
@@ -219,7 +219,7 @@ exp_vect::exp_vect(const gSpace* p, gVector<int> exponents)
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i];
 }
 
-exp_vect::exp_vect(const gSpace* p, gArray<int> exponents)
+exp_vect::exp_vect(const gSpace* p, gbtArray<int> exponents)
 : Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= Dmnsn(); i++) components[i] = exponents[i];
@@ -518,7 +518,7 @@ void  exp_vect::ToZero()
 //--------------------------
 
 
-gOutput& operator<<(gOutput &f, const exp_vect& vect)
+gbtOutput& operator<<(gbtOutput &f, const exp_vect& vect)
 {
   f << "(";
   for (int i = 1; i < vect.Dmnsn(); i++)
@@ -687,14 +687,12 @@ term_order term_order::WithVariableAppended(const gSpace* ExtendedSpace) const
 
 
 
-template class gList<exp_vect>;
-template gOutput& operator << (gOutput& output, const gList<exp_vect>&);
+template class gbtList<exp_vect>;
+template gbtOutput& operator << (gbtOutput& output, const gbtList<exp_vect>&);
 
-template class gList<exp_vect*>;
+template class gbtList<exp_vect*>;
 
 #include "base/garray.imp"
 #include "base/gblock.imp"
-template class gArray<Variable *>;
-template class gBlock<Variable *>;
-
-
+template class gbtArray<Variable *>;
+template class gbtBlock<Variable *>;

@@ -49,7 +49,7 @@ extern "C" long _sysconf(int);
 #include "gwatch.h"
 
 
-gWatch::gWatch(bool run /* = true */)
+gbtStopWatch::gbtStopWatch(bool run /* = true */)
   : running(run), time_str(new char[30])
 {
   if (run)
@@ -59,17 +59,17 @@ gWatch::gWatch(bool run /* = true */)
   stop = 0;
 }
 
-gWatch::~gWatch()
+gbtStopWatch::~gbtStopWatch()
 {
   delete time_str;
 }
 
-bool gWatch::IsRunning(void) const
+bool gbtStopWatch::IsRunning(void) const
 {
   return running;
 }
 
-void gWatch::Start(void)
+void gbtStopWatch::Start(void)
 {
   running = 1;
 
@@ -84,7 +84,7 @@ void gWatch::Start(void)
 #endif   // __GNUG__, __BORLANDC__
 }
 
-void gWatch::Stop(void)
+void gbtStopWatch::Stop(void)
 {
   if (!running)   return;
 
@@ -101,7 +101,7 @@ void gWatch::Stop(void)
 #endif   // __GNUG__, __BORLANDC__
 }
 
-double gWatch::Elapsed(void) const
+double gbtStopWatch::Elapsed(void) const
 {
 #ifdef __GNUG__
   if (running)   {
@@ -118,7 +118,7 @@ double gWatch::Elapsed(void) const
 #endif  // __GNUG__, __BORLANDC__
 }
 
-char *const gWatch::ElapsedStr(void)
+char *const gbtStopWatch::ElapsedStr(void)
 {
   double et = Elapsed();
   int total = (int) floor(et);
@@ -132,6 +132,3 @@ char *const gWatch::ElapsedStr(void)
   sprintf(time_str, "%02d:%02d:%02d.%03d", hours, mins, secs, mus);
   return time_str;
 }
-
-
-

@@ -72,7 +72,7 @@ TableauInterface<T>::TableauInterface(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T> 
 TableauInterface<T>::TableauInterface(const gMatrix<T> &A, 
-				      const gBlock<int> &art, const gVector<T> &b)
+				      const gbtBlock<int> &art, const gVector<T> &b)
   : A(&A), b(&b), 
     basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()), 
     solution(A.MinRow(),A.MaxRow()), npivots(0),
@@ -218,7 +218,7 @@ BFS<T> TableauInterface<T>::GetBFS1() const
 }
 
 template <class T>
-void TableauInterface<T>::Dump(gOutput &to) const
+void TableauInterface<T>::Dump(gbtOutput &to) const
 { 
   gVector<T> bb(MinRow(), MaxRow());
   BasisVector(bb);
@@ -228,7 +228,7 @@ void TableauInterface<T>::Dump(gOutput &to) const
 }
 
 template <class T>
-void TableauInterface<T>::BigDump(gOutput &to)
+void TableauInterface<T>::BigDump(gbtOutput &to)
 { 
   to << "\nBasis:";
   basis.Dump(to);
@@ -303,7 +303,7 @@ bool TableauInterface<T>::IsArtifColumn(int col) const
 template <class T> BaseTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gText BaseTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText BaseTableau<T>::BadPivot::Description(void) const
 {
   return "Bad Pivot in BaseTableau";
 }
@@ -311,8 +311,7 @@ template <class T> gText BaseTableau<T>::BadPivot::Description(void) const
 template <class T> BaseTableau<T>::BadDim::~BadDim()
 { }
 
-template <class T> gText BaseTableau<T>::BadDim::Description(void) const
+template <class T> gbtText BaseTableau<T>::BadDim::Description(void) const
 {
   return "Bad Dimension in BaseTableau";
 }
-

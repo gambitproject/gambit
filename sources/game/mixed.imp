@@ -215,7 +215,7 @@ bool MixedProfile<T>::operator==(const MixedProfile<T> &mp) const
 	  (const gPVector<T> &) *this == (const gPVector<T> &) mp);
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const MixedProfile<T> &p)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const MixedProfile<T> &p)
 { p.Dump(f);  return f; }
 
 
@@ -338,7 +338,7 @@ MixedProfile<T>::MixedProfile(const BehavProfile<T> &p_profile)
     gbtNfgPlayer player = m_nfg.GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++)  {
       T prob = (T) 1;
-      const gArray<int> *const behav = player.GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const behav = player.GetStrategy(st).GetBehavior();
 
       for (int iset = 1; iset <= efg.GetPlayer(pl).NumInfosets(); iset++) {
 	if ((*behav)[iset] > 0)

@@ -36,7 +36,7 @@ private:
   wxChoice *m_supportList;
   wxButton *m_prevButton, *m_nextButton;
   wxTreeCtrl *m_actionTree;
-  gOrdMap<wxTreeItemId, gbtEfgAction> m_map;
+  gbtOrdMap<wxTreeItemId, gbtEfgAction> m_map;
   wxMenu *m_menu;
 
   void OnSupportList(wxCommandEvent &);
@@ -173,7 +173,7 @@ void EfgSupportWindow::OnUpdate(void)
 {
   m_supportList->Clear();
 
-  const gList<gbtEfgSupport *> &supports = m_doc->AllEfgSupports();
+  const gbtList<gbtEfgSupport *> &supports = m_doc->AllEfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append(wxString::Format(wxT("%s"),
@@ -331,8 +331,8 @@ void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
 
 #include "base/gmap.imp"
 
-static gOutput &operator<<(gOutput &p_output, wxTreeItemId)
+static gbtOutput &operator<<(gbtOutput &p_output, wxTreeItemId)
 { return p_output; }
 
-template class gBaseMap<wxTreeItemId, gbtEfgAction>;
-template class gOrdMap<wxTreeItemId, gbtEfgAction>;
+template class gbtBaseMap<wxTreeItemId, gbtEfgAction>;
+template class gbtOrdMap<wxTreeItemId, gbtEfgAction>;

@@ -38,7 +38,7 @@ private:
   wxTreeCtrl *m_algorithmTree;
   wxPanel *m_currentPanel;
   wxBoxSizer *m_algPanelSizer;
-  gOrdMap<wxTreeItemId, panelEfgNashAlgorithm *> m_algorithms;
+  gbtOrdMap<wxTreeItemId, panelEfgNashAlgorithm *> m_algorithms;
 
   // Private auxiliary functions
   int LoadAlgorithms(const gbtEfgGame &);

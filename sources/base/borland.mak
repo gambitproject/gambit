@@ -19,13 +19,11 @@ libbase_a_SOURCES = \
 	gblock.cc \
 	glist.cc \
 	gmisc.cc \
-	gpool.cc \
 	grarray.cc \
 	gstream.cc \
 	gtext.cc \
 	gwatch.cc \
-	odometer.cc \
-	system.cc
+	odometer.cc 
 
 OBJECTS = $(libbase_a_SOURCES:.cc=.obj)
 

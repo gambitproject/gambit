@@ -38,22 +38,22 @@
 
 template <class T> class TreeOfPartials {
 private:
-  gTree<gPoly<T> > PartialTree;
+  gbtTree<gPoly<T> > PartialTree;
 
   /// Recursive Constructions and Computations ///
 
-   void TreeOfPartialsRECURSIVE(gTree<gPoly<T> >&,
-				gTreeNode<gPoly<T> >*)         const;
+   void TreeOfPartialsRECURSIVE(gbtTree<gPoly<T> >&,
+				gbtTreeNode<gPoly<T> >*)         const;
 
    T MaximalNonconstantContributionRECURSIVE(
-				const gTreeNode<gPoly<T> >*,
+				const gbtTreeNode<gPoly<T> >*,
 		      	        const gVector<T>&,
 			        const gVector<T>&,
 		       	              gVector<int>&)           const;
 
    T MaximalNonconstantDifferenceRECURSIVE(
-				const gTreeNode<gPoly<T> >*,
-				const gTreeNode<gPoly<T> >*,
+				const gbtTreeNode<gPoly<T> >*,
+				const gbtTreeNode<gPoly<T> >*,
 		      	        const gVector<T>&,
 			        const gVector<T>&,
 		       	              gVector<int>&)           const;
@@ -78,7 +78,7 @@ public:
 				  const gVector<T>&, 
 				  const gVector<T>&)           const;
 
-   inline gTreeNode<gPoly<T> >* RootNode()                     const 
+   inline gbtTreeNode<gPoly<T> >* RootNode()                     const 
      { return PartialTree.RootNode(); }
    inline gPoly<T> RootPoly()                                  const 
      { return RootNode()->GetData(); }
@@ -90,7 +90,7 @@ public:
    bool PolyEverywhereNegativeIn(const gRectangle<T>&)         const;
    bool MultiaffinePolyEverywhereNegativeIn(const gRectangle<T>&) const;
 
-   //friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
+   //friend gbtOutput& operator << (gbtOutput& output, const TreeOfPartials<T>& x);
 };
 
 
@@ -100,13 +100,13 @@ public:
 
 template <class T> class ListOfPartialTrees {
 private:
-  gList<TreeOfPartials<T> >     PartialTreeList;
+  gbtList<TreeOfPartials<T> >     PartialTreeList;
 
   // Disabling this operator -- we don't want it called
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &);
 
 public:
-   ListOfPartialTrees(const gList<gPoly<T> >&);  
+   ListOfPartialTrees(const gbtList<gPoly<T> >&);  
    ListOfPartialTrees(const gPolyList<T>&);  
    ListOfPartialTrees(const ListOfPartialTrees<T> &);
    ~ListOfPartialTrees();
@@ -132,7 +132,7 @@ public:
 					  const gVector<T>&, 
 					  const gVector<T>&)      const;
 
-   //friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
+   //friend gbtOutput& operator << (gbtOutput& output, const ListOfPartialTrees<T>& x);
 };
 
 #endif // GPARTLTR_H

@@ -37,7 +37,7 @@
 
 dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 					     const gbtNfgGame &p_nfg,
-					     const gArray<int> &p_cont)
+					     const gbtArray<int> &p_cont)
   : wxDialog(p_parent, -1, _("Contingency properties"), wxDefaultPosition)
 {
   SetAutoLayout(true);
@@ -83,7 +83,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   m_outcome->SetSelection(0);
   for (int outc = 1; outc <= p_nfg.NumOutcomes(); outc++) {
     gbtNfgOutcome outcome = p_nfg.GetOutcome(outc);
-    gText item = ToText(outc) + ": " + outcome.GetLabel();
+    gbtText item = ToText(outc) + ": " + outcome.GetLabel();
     if (item == "") {
       item = "Outcome" + ToText(outc);
     }

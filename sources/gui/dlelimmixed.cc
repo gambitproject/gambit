@@ -43,7 +43,7 @@ BEGIN_EVENT_TABLE(dialogElimMixed, wxDialog)
 END_EVENT_TABLE()
 
 dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
-				 const gArray<gText> &p_players)
+				 const gbtArray<gbtText> &p_players)
   : wxDialog(p_parent, -1, _("Computing Dominated Strategies"),
 	     wxDefaultPosition),
     m_numPlayers(p_players.Length())
@@ -126,9 +126,9 @@ dialogElimMixed::~dialogElimMixed()
   delete [] m_players;
 }
 
-gArray<int> dialogElimMixed::Players(void) const
+gbtArray<int> dialogElimMixed::Players(void) const
 {
-  gBlock<int> players;
+  gbtBlock<int> players;
   for (int pl = 1; pl <= m_numPlayers; pl++) {
     if (m_players[pl-1]->GetValue() == 1) {
       players.Append(pl);
@@ -141,5 +141,3 @@ void dialogElimMixed::OnMethod(wxCommandEvent &)
 {
   m_domPrecisionBox->Enable(m_domMethodBox->GetSelection() == 1);
 }
-
-

@@ -48,10 +48,8 @@ public:
   double StepTau(void) const { return m_stepTau; }
   void SetStepTau(double p_stepTau) { m_stepTau = p_stepTau; }
 
-  gText GetAlgorithm(void) const { return "CH"; }
-  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "CH"; }
+  gbtList<MixedSolution> Solve(const gbtNfgSupport &, gbtStatus &);
 };
 
 #endif // NFGCH_H
-
-

@@ -92,8 +92,8 @@ public:
 //  inline  int static Count() { return Counted<gDouble>::objCount(); }
 
 // printing
-  friend gInput&    operator >> (gInput& s, gDouble& y);
-  friend gOutput&   operator << (gOutput& s, const gDouble& y);
+  friend gbtInput&    operator >> (gbtInput& s, gDouble& y);
+  friend gbtOutput&   operator << (gbtOutput& s, const gDouble& y);
 
 // friends outside the class
   friend int      sign(const gDouble& x);             // -1, 0, or +1
@@ -108,9 +108,8 @@ public:
 // The following are facilities that are required of all arithmetic types.
 // For other types they are given in gmisc.h
 
-class gText;
-gText         ToText(gDouble);
-gDouble         TOgDouble(const gText &);
+class gbtText;
+gbtText         ToText(gDouble);
+gDouble         TOgDouble(const gbtText &);
 
 #endif
-

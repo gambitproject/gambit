@@ -28,16 +28,14 @@
 
 //template class gIdeal<int>;
 //template class gBasis<int>;
-//template gOutput &operator<<(gOutput &f, const gBasis<int> &y);
+//template gbtOutput &operator<<(gbtOutput &f, const gBasis<int> &y);
 
 template class gIdeal<gRational>;
 //template class gBasis<gRational>;
-//template gOutput &operator<<(gOutput &f, const gBasis<gRational> &y);
+//template gbtOutput &operator<<(gbtOutput &f, const gBasis<gRational> &y);
 
 //template class gIdeal<double>;
 //template class gBasis<double>;
-//template gOutput &operator<<(gOutput &f, const gBasis<double> &y);
+//template gbtOutput &operator<<(gbtOutput &f, const gBasis<double> &y);
 
 template class gIdeal<gDouble>;
-
-

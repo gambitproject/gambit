@@ -76,17 +76,17 @@ void dialogReport::OnFile(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      gFileOutput file(dialog.GetPath().mb_str());
+      gbtFileOutput file(dialog.GetPath().mb_str());
       file << m_text->GetValue().c_str();
     }
-    catch (gFileOutput::OpenFailed &) {
+    catch (gbtFileOutput::OpenFailed &) {
       wxMessageDialog msgDialog(this,
 				_("Could not open '") + dialog.GetPath() +
 				_("' for writing."),
 				_("Error"), wxOK | wxCENTER);
       msgDialog.ShowModal();
     }
-    catch (gFileOutput::WriteFailed &) {
+    catch (gbtFileOutput::WriteFailed &) {
       wxMessageDialog msgDialog(this,
 				_("Error in writing to '") +
 				dialog.GetPath() + wxT("'."),
@@ -95,4 +95,3 @@ void dialogReport::OnFile(wxCommandEvent &)
     }
   }
 }
-

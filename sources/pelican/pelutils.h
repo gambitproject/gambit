@@ -192,10 +192,10 @@ node node_print(node);
 #include "base/gmisc.h"
 #include "base/gtext.h"
 
-class ErrorInPelican : public gException {
+class ErrorInPelican : public gbtException {
 public:
   virtual ~ErrorInPelican();
-  gText Description(void) const;
+  gbtText Description(void) const;
 };
 
 #endif
@@ -779,14 +779,3 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       Dmatrix DtypesR, Dmatrix Q, Dvector t1, Dvector t2);
 
 #endif // PELUTILS
-
-
-
-
-
-
-
-
-
-
-

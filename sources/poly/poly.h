@@ -37,7 +37,7 @@
     polynomial
 
 These are univariate polynomials with coefficients of class T.
-Polynomials are implemented as gList's of coefficients.  There is no 
+Polynomials are implemented as gbtList's of coefficients.  There is no 
 attempt to maintain sparseness.
 
 */
@@ -45,13 +45,13 @@ attempt to maintain sparseness.
 template <class T> class polynomial {
 
 private:
-  gList<T> coeflist; 
+  gbtList<T> coeflist; 
 
 public: 
     // constructors and destructor
   polynomial(const int=-1);
   polynomial(const polynomial<T> &);
-  polynomial(const gList<T> &);
+  polynomial(const gbtList<T> &);
   polynomial(const gVector<T> &);
   polynomial(const T&, const int&);
   ~polynomial();
@@ -86,19 +86,19 @@ public:
   T                      EvaluationAt(const T& arg)                   const;  
   int                    Degree()                                     const;
   T                      LeadingCoefficient()                         const;
-  gList<T>               CoefficientList()                            const;
+  gbtList<T>               CoefficientList()                            const;
   polynomial<T>          GcdWith(const polynomial<T>&)                const;
   bool                   IsQuadratfrei()                              const;
   bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
-  gList< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
+  gbtList< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
   gInterval<T>           NeighborhoodOfRoot(const gInterval<T>&, T&)  const;
-  gList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
-  gList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
+  gbtList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
+  gbtList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
 
-  void Output(gOutput &) const;
+  void Output(gbtOutput &) const;
 };
 
-template <class T> gOutput& operator <<(gOutput &, const polynomial<T> &);
+template <class T> gbtOutput& operator <<(gbtOutput &, const polynomial<T> &);
 
 
 /*                       REMARKS
@@ -120,13 +120,13 @@ and the RHS will be positive whenever
 class complexpoly {
 
 private:
-  gList<gComplex> coeflist; 
+  gbtList<gComplex> coeflist; 
 
 public: 
     // constructors and destructor
   complexpoly(const int=-1);
   complexpoly(const complexpoly &);
-  complexpoly(const gList<gComplex> &);
+  complexpoly(const gbtList<gComplex> &);
   complexpoly(const gComplex&, const int&);
   ~complexpoly();
 
@@ -159,14 +159,8 @@ public:
   gComplex               LeadingCoefficient()                         const;
   complexpoly            GcdWith(const complexpoly&)                  const;
   bool                   IsQuadratfrei()                              const;
-  gList<gComplex>        Roots()                                      const;
+  gbtList<gComplex>        Roots()                                      const;
   
   // output
-friend gOutput&        operator << (gOutput& output, const complexpoly& x);
+friend gbtOutput&        operator << (gbtOutput& output, const complexpoly& x);
 };
-
-
-
-
-
-

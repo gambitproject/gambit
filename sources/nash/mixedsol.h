@@ -37,25 +37,25 @@ protected:
   MixedProfile<gNumber> m_profile;
   gPrecision m_precision;
   mutable gbtNfgSupport m_support;
-  mutable gText m_creator;
-  mutable gFact<gTriState> m_Nash, m_Perfect, m_Proper;
+  mutable gbtText m_creator;
+  mutable gFact<gbtTriState> m_Nash, m_Perfect, m_Proper;
   mutable gFact<gNumber> m_liapValue;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue;
-  gArray<gNumber> m_payoff;
-  gText m_name;
+  gbtArray<gNumber> m_payoff;
+  gbtText m_name;
   mutable long m_revision;
   
-  gTriState GetNash(void) const;
-  gTriState GetPerfect(void) const;
-  gTriState GetProper(void) const;
+  gbtTriState GetNash(void) const;
+  gbtTriState GetPerfect(void) const;
+  gbtTriState GetProper(void) const;
 
   void LevelPrecision(void);
 
 public:
   // CONSTRUCTORS, DESTRUCTOR, AND CONSTRUCTIVE OPERATORS
-  MixedSolution(const MixedProfile<double> &, const gText & = "User");
-  MixedSolution(const MixedProfile<gRational> &, const gText & = "User");
-  MixedSolution(const MixedProfile<gNumber> &, const gText & = "User");
+  MixedSolution(const MixedProfile<double> &, const gbtText & = "User");
+  MixedSolution(const MixedProfile<gRational> &, const gbtText & = "User");
+  MixedSolution(const MixedProfile<gNumber> &, const gbtText & = "User");
   MixedSolution(const MixedSolution &);
   virtual ~MixedSolution();
 
@@ -83,14 +83,14 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
 
-  const gText &GetLabel(void) const { return m_name; }
-  void SetLabel(const gText &p_name) { m_name = p_name; }
+  const gbtText &GetLabel(void) const { return m_name; }
+  void SetLabel(const gbtText &p_name) { m_name = p_name; }
 
-  const gText &GetCreator(void) const { CheckIsValid(); return m_creator; }
+  const gbtText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   const gbtNfgSupport &Support(void) const { CheckIsValid(); return m_support; }
-  const gTriState &IsNash(void) const;
-  const gTriState &IsPerfect(void) const;
-  const gTriState &IsProper(void) const;
+  const gbtTriState &IsNash(void) const;
+  const gbtTriState &IsPerfect(void) const;
+  const gbtTriState &IsProper(void) const;
   const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
   const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
   const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
@@ -109,19 +109,19 @@ public:
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
   gNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }
-  const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
+  const gbtArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
   gNumber GetPayoff(gbtNfgPlayer) const;
   gNumber GetStrategyValue(gbtNfgStrategy) const;
 
   // OUTPUT
-  void Dump(gOutput &) const;
-  void DumpInfo(gOutput &) const;
+  void Dump(gbtOutput &) const;
+  void DumpInfo(gbtOutput &) const;
 };
 
 
-gOutput &operator<<(gOutput &f, const MixedSolution &);
+gbtOutput &operator<<(gbtOutput &f, const MixedSolution &);
 
 
 #endif    // MIXEDSOL_H

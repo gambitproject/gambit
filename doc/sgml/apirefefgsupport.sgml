@@ -13,7 +13,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgSupport::GetLabel(void) const
+gbtText gbtEfgSupport::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -33,7 +33,7 @@ gText gbtEfgSupport::GetLabel(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgSupport::SetLabel(const gText &amp;p_label)
+void gbtEfgSupport::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -47,4 +47,3 @@ sets the text label of the support.
 
 
 </sect1>
-

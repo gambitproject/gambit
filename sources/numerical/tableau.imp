@@ -39,7 +39,7 @@ Tableau<double>::Tableau(const gMatrix<double> &A, const gVector<double> &b)
   Solve(b, solution);
 };
 
-Tableau<double>::Tableau(const gMatrix<double> &A, const gBlock<int> &art, 
+Tableau<double>::Tableau(const gMatrix<double> &A, const gbtBlock<int> &art, 
 			 const gVector<double> &b)
   : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
@@ -172,7 +172,7 @@ bool Tableau<double>::IsLexMin()
   return 1;
 }
 
-gOutput &operator<<(gOutput &to, const Tableau<double> &v)
+gbtOutput &operator<<(gbtOutput &to, const Tableau<double> &v)
 {
   v.Dump(to); return to;
 }
@@ -231,7 +231,7 @@ Tableau<gRational>::Tableau(const gMatrix<gRational> &A,
 }
 
 Tableau<gRational>::Tableau(const gMatrix<gRational> &A, 
-			    const gBlock<int> &art, 
+			    const gbtBlock<int> &art, 
 			    const gVector<gRational> &b) 
   : TableauInterface<gRational>(A,art,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),
@@ -534,12 +534,12 @@ bool Tableau<gRational>::IsLexMin()
   return 1;
 }
 
-gOutput &operator<<(gOutput &to, const Tableau<gRational> &v)
+gbtOutput &operator<<(gbtOutput &to, const Tableau<gRational> &v)
 {
   v.Dump(to); return to;
 }
 
-void Tableau<gRational>::BigDump(gOutput &out)
+void Tableau<gRational>::BigDump(gbtOutput &out)
 {
   TableauInterface<gRational>::BigDump(out);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
@@ -564,8 +564,7 @@ return totdenom;
 Tableau<gRational>::BadDenom::~BadDenom()
 { }
 
-gText Tableau<gRational>::BadDenom::Description(void) const
+gbtText Tableau<gRational>::BadDenom::Description(void) const
 {
   return "Bad Denominator in Tableau";
 }
-

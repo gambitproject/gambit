@@ -45,9 +45,9 @@ struct gbt_nfg_outcome_rep {
   int m_id;
   gbt_nfg_game_rep *m_nfg;
   bool m_deleted;
-  gText m_label;
-  gBlock<gNumber> m_payoffs;
-  gBlock<double> m_doublePayoffs;
+  gbtText m_label;
+  gbtBlock<gNumber> m_payoffs;
+  gbtBlock<double> m_doublePayoffs;
   int m_refCount;
 
   gbt_nfg_outcome_rep(gbt_nfg_game_rep *, int);
@@ -56,9 +56,9 @@ struct gbt_nfg_outcome_rep {
 struct gbt_nfg_strategy_rep {
   int m_id;
   gbt_nfg_player_rep *m_player;
-  gArray<int> *m_behav;
+  gbtArray<int> *m_behav;
   bool m_deleted;
-  gText m_label;
+  gbtText m_label;
   long m_index;
   int m_refCount;
 
@@ -70,8 +70,8 @@ struct gbt_nfg_player_rep {
   int m_id;
   gbt_nfg_game_rep *m_nfg;
   bool m_deleted;
-  gText m_label;
-  gBlock<gbt_nfg_strategy_rep *> m_strategies;
+  gbtText m_label;
+  gbtBlock<gbt_nfg_strategy_rep *> m_strategies;
   int m_refCount;
 
   gbt_nfg_player_rep(gbt_nfg_game_rep *, int, int);
@@ -82,23 +82,20 @@ struct gbt_nfg_game_rep {
 
   long m_revision;
   long m_outcomeRevision;
-  gText m_label, m_comment;
-  gArray<int> m_dimensions;
+  gbtText m_label, m_comment;
+  gbtArray<int> m_dimensions;
 
-  gBlock<gbt_nfg_player_rep *> m_players;
-  gBlock<gbt_nfg_outcome_rep *> m_outcomes;
+  gbtBlock<gbt_nfg_player_rep *> m_players;
+  gbtBlock<gbt_nfg_outcome_rep *> m_outcomes;
 
-  gArray<gbt_nfg_outcome_rep *> m_results;
+  gbtArray<gbt_nfg_outcome_rep *> m_results;
   gbt_efg_game_rep *m_efg;
 
   gbt_nfg_game_rep(gbt_efg_game_rep *);
-  gbt_nfg_game_rep(const gArray<int> &);
+  gbt_nfg_game_rep(const gbtArray<int> &);
   ~gbt_nfg_game_rep();
 
   void DeleteOutcome(gbt_nfg_outcome_rep *);
 };
 
 #endif // NFGINT_H
-
-
-

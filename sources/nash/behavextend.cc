@@ -40,7 +40,7 @@
 //                      class algExtendsToNash
 //=========================================================================
 
-static void DeviationInfosets(gList<gbtEfgInfoset> &answer,
+static void DeviationInfosets(gbtList<gbtEfgInfoset> &answer,
 			      const gbtEfgSupport & big_supp,
 			      const gbtEfgPlayer &pl,
 			      const gbtEfgNode &node,
@@ -66,12 +66,12 @@ static void DeviationInfosets(gList<gbtEfgInfoset> &answer,
   }
 }
 
-static gList<gbtEfgInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
+static gbtList<gbtEfgInfoset> DeviationInfosets(const gbtEfgSupport &big_supp,
 					      const gbtEfgPlayer &pl,
 					      const gbtEfgInfoset &iset,
 					      const gbtEfgAction &act)
 {
-  gList<gbtEfgInfoset> answer;
+  gbtList<gbtEfgInfoset> answer;
   
   for (int i = 1; i <= iset.NumMembers(); i++) {
     DeviationInfosets(answer, big_supp, pl, iset.GetMember(i), act);
@@ -85,7 +85,7 @@ ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
 			 const gSpace &BehavStratSpace, 
 			 const term_order &Lex,
 			 const gbtEfgSupport &big_supp,
-			 const gList<gList<int> > &var_index) 
+			 const gbtList<gbtList<int> > &var_index) 
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
@@ -103,16 +103,16 @@ ActionProbsSumToOneIneqs(const BehavSolution &p_solution,
   return answer;
 }
 
-static gList<gbtEfgSupport> 
+static gbtList<gbtEfgSupport> 
 DeviationSupports(const gbtEfgSupport & big_supp,
-		  const gList<gbtEfgInfoset> &isetlist,
+		  const gbtList<gbtEfgInfoset> &isetlist,
 		  const gbtEfgPlayer &/*pl*/,
 		  const gbtEfgInfoset &/*iset*/,
 		  const gbtEfgAction &/*act*/)
 {
-  gList<gbtEfgSupport> answer;
+  gbtList<gbtEfgSupport> answer;
 
-  gArray<int> active_act_no(isetlist.Length());
+  gbtArray<int> active_act_no(isetlist.Length());
 
   for (int k = 1; k <= active_act_no.Length(); k++)
     active_act_no[k] = 0;
@@ -179,7 +179,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 			const gSpace &BehavStratSpace, 
 			const term_order &Lex,
 			const gbtEfgSupport &dsupp,
-			const gList<gList<int> > &var_index,
+			const gbtList<gbtList<int> > &var_index,
 			gbtEfgNode tempnode,
 			const gbtEfgPlayer &/*pl*/,
 			const gbtEfgInfoset &iset,
@@ -236,11 +236,11 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			    const term_order &Lex,
 			    const gbtEfgSupport &little_supp,
 			    const gbtEfgSupport &big_supp,
-			    const gList<gList<int> > &var_index) 
+			    const gbtList<gbtList<int> > &var_index) 
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<gbtEfgNode> terminal_nodes;
+  gbtList<gbtEfgNode> terminal_nodes;
   TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
 
   for (int pl = 1; pl <= p_solution.GetGame().NumPlayers(); pl++) {
@@ -249,11 +249,11 @@ NashExpectedPayoffDiffPolys(const BehavSolution &p_solution,
       if (little_supp.MayReach(*infoset)) {
 	for (int j = 1; j <= (*infoset).NumActions(); j++)
 	  if (!little_supp.Contains((*infoset).GetAction(j))) {
-	    gList<gbtEfgInfoset> isetlist = DeviationInfosets(big_supp, 
+	    gbtList<gbtEfgInfoset> isetlist = DeviationInfosets(big_supp, 
 							      player,
 							      *infoset,
 							      (*infoset).GetAction(j));
-	    gList<gbtEfgSupport> dsupps = DeviationSupports(big_supp, 
+	    gbtList<gbtEfgSupport> dsupps = DeviationSupports(big_supp, 
 							isetlist, 
 							player,
 							*infoset,
@@ -297,7 +297,7 @@ ExtendsToNashIneqs(const BehavSolution &p_solution,
 		   const term_order &Lex,
 		   const gbtEfgSupport &little_supp,
 		   const gbtEfgSupport &big_supp,
-		   const gList<gList<int> > &var_index)
+		   const gbtList<gbtList<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
@@ -316,7 +316,7 @@ ExtendsToNashIneqs(const BehavSolution &p_solution,
 bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
 				     const gbtEfgSupport &little_supp,
 				     const gbtEfgSupport &big_supp,
-				     gStatus &m_status)
+				     gbtStatus &m_status)
 {
   // This asks whether there is a Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
@@ -328,11 +328,11 @@ bool algExtendsToNash::ExtendsToNash(const BehavSolution &p_solution,
   
   // First we compute the number of variables, and indexing information
   int num_vars(0);
-  gList<gList<int> > var_index;
+  gbtList<gbtList<int> > var_index;
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame()); 
        !player.End(); player++) {
-    gList<int> list_for_pl;
+    gbtList<int> list_for_pl;
 
     for (gbtEfgInfosetIterator infoset(*player); !infoset.End(); infoset++) {
       list_for_pl += num_vars;
@@ -382,7 +382,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 				   const gSpace &BehavStratSpace, 
 				   const term_order &Lex,
 				   const gbtEfgSupport &big_supp,
-				   const gList<gList<int> > &var_index,
+				   const gbtList<gbtList<int> > &var_index,
 				   gbtEfgNode tempnode,
 				   const int &pl,
 				   const int &i,
@@ -433,11 +433,11 @@ ANFExpectedPayoffDiffPolys(const BehavSolution &p_solution,
 			   const term_order &Lex,
 			   const gbtEfgSupport &little_supp,
 			   const gbtEfgSupport &big_supp,
-			   const gList<gList<int> > &var_index)
+			   const gbtList<gbtList<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
 
-  gList<gbtEfgNode> terminal_nodes;
+  gbtList<gbtEfgNode> terminal_nodes;
   TerminalNodes(p_solution.GetGame().GetRoot(), terminal_nodes);
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame());
@@ -481,7 +481,7 @@ ExtendsToANFNashIneqs(const BehavSolution &p_solution,
 		      const term_order &Lex,
 		      const gbtEfgSupport &little_supp,
 		      const gbtEfgSupport &big_supp,
-		      const gList<gList<int> > &var_index)
+		      const gbtList<gbtList<int> > &var_index)
 {
   gPolyList<gDouble> answer(&BehavStratSpace, &Lex);
   answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, 
@@ -499,7 +499,7 @@ ExtendsToANFNashIneqs(const BehavSolution &p_solution,
 bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
 					       const gbtEfgSupport &little_supp,
 					       const gbtEfgSupport &big_supp,
-					       gStatus &p_status)
+					       gbtStatus &p_status)
 {
   // This asks whether there is an ANF Nash extension of the BehavSolution to 
   // all information sets at which the behavioral probabilities are not
@@ -509,11 +509,11 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const BehavSolution &p_solution,
   
   // First we compute the number of variables, and indexing information
   int num_vars(0);
-  gList<gList<int> > var_index;
+  gbtList<gbtList<int> > var_index;
 
   for (gbtEfgPlayerIterator player(p_solution.GetGame());
        !player.End(); player++) {
-    gList<int> list_for_pl;
+    gbtList<int> list_for_pl;
 
     for (gbtEfgInfosetIterator infoset(*player); !infoset.End(); infoset++) {
       list_for_pl += num_vars;

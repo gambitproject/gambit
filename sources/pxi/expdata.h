@@ -42,18 +42,18 @@ class ExpData {
 private:
   bool m_haveMLEs;
   int m_numInfosets;
-  gArray<int> m_numActions;
-  gBlock<double> m_fitLambdas, m_fitLikes;
-  gRectBlock<gBlock<int> > m_points;
+  gbtArray<int> m_numActions;
+  gbtBlock<double> m_fitLambdas, m_fitLikes;
+  gbtRectBlock<gbtBlock<int> > m_points;
 
 public:
   // LIFECYCLE
   ExpData(void);
-  ExpData(const gArray<int> &m_numActions);
+  ExpData(const gbtArray<int> &m_numActions);
 
   // READING AND WRITING .AGG FILES
-  bool LoadData(gInput &);
-  bool SaveData(gOutput &);
+  bool LoadData(gbtInput &);
+  bool SaveData(gbtOutput &);
 
   // GENERAL DATA ACCESS
   int NumPoints(void) const { return m_points.NumRows(); }
@@ -73,12 +73,12 @@ public:
   void SetDataPoint(int i, int iset, int act, int value);
 
   // COMPUTING ESTIMATES
-  void ComputeMLEs(PxiFile &, gOutput &p_likeFile);
+  void ComputeMLEs(PxiFile &, gbtOutput &p_likeFile);
 
   // ACCESSING ESTIMATES
   bool HaveMLEs(void) const { return m_haveMLEs; }
 
-  gBlock<int> FitPoints(double p_lambda) const;
+  gbtBlock<int> FitPoints(double p_lambda) const;
 
   double MLELambda(int i) const { return m_fitLambdas[i]; }
   double MLEValue(int i) const { return m_fitLikes[i]; } 
@@ -86,5 +86,3 @@ public:
 };
 
 #endif  // EXPDATA_H
-
-

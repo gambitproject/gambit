@@ -77,7 +77,7 @@ index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText gbtEfgPlayer::GetLabel(void) const
+gbtText gbtEfgPlayer::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -230,8 +230,8 @@ player has in the game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtEfgPlayer::SetLabel(const gText &amp;p_label)
-void gbtNfgPlayer::SetLabel(const gText &amp;p_label)
+void gbtEfgPlayer::SetLabel(const gbtText &amp;p_label)
+void gbtNfgPlayer::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -243,5 +243,3 @@ void gbtNfgPlayer::SetLabel(const gText &amp;p_label)
 </sect2>
 
 </sect1>
-
-

@@ -37,7 +37,7 @@
 // iterating over the other players' strategies.  This is useful, for example,
 // in displaying a 2D window into the n-D space of strategy profiles as in
 // the normal form display code.  The constructor takes the normal form to
-// work on and a gBlock<int> containing the numbers of players the user wants
+// work on and a gbtBlock<int> containing the numbers of players the user wants
 // to hold constant.  The iteration is based on an index that goes from 1 to
 // the total number of possible contingencies in increments of 1.
 //
@@ -45,10 +45,10 @@ class gbtNfgContIterator    {
 friend class NfgIter;
 private:
   gbtNfgSupport m_support;
-  gArray<int> m_current;
+  gbtArray<int> m_current;
   gbtNfgGame m_nfg;
   StrategyProfile m_profile;
-  gBlock<int> m_frozen, m_thawed;
+  gbtBlock<int> m_frozen, m_thawed;
   
 public:
   gbtNfgContIterator(const gbtNfgSupport &);
@@ -74,7 +74,3 @@ public:
 };
 
 #endif   // NFGCITER_H
-
-
-
-

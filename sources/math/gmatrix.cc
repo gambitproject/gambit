@@ -45,9 +45,9 @@ template gVector<int> operator*(const gVector<int> &,
 template gVector<gNumber> operator*(const gVector<gNumber> &,
 				    const gMatrix<gNumber> &);
 
-template gOutput &operator<<(gOutput &, const gMatrix<double> &);
-template gOutput &operator<<(gOutput &, const gMatrix<gRational> &);
-template gOutput &operator<<(gOutput &, const gMatrix<gInteger> &);
-template gOutput &operator<<(gOutput &, const gMatrix<gDouble> &);
-template gOutput &operator<<(gOutput &, const gMatrix<int> &);
-template gOutput &operator<<(gOutput &, const gMatrix<gNumber> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<gRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<gInteger> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<gDouble> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<int> &);
+template gbtOutput &operator<<(gbtOutput &, const gMatrix<gNumber> &);

@@ -49,16 +49,16 @@ public:
 
   bool IsNull(void) const;
 
-  gText GetLabel(void) const;
-  void SetLabel(const gText &);
+  gbtText GetLabel(void) const;
+  void SetLabel(const gbtText &);
   int GetId(void) const;
 
   gbtNfgPlayer GetPlayer(void) const;
   long GetIndex(void) const;
 
-  const gArray<int> *const GetBehavior(void) const;
+  const gbtArray<int> *const GetBehavior(void) const;
 };
 
-gOutput &operator<<(gOutput &, const gbtNfgStrategy &);
+gbtOutput &operator<<(gbtOutput &, const gbtNfgStrategy &);
 
 #endif  // STRATEGY_H

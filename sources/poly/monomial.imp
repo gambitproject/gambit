@@ -140,7 +140,7 @@ template<class T> bool gMono<T>::IsMultiaffine() const
   return exps.IsMultiaffine(); 
 }
 
-template<class T> T gMono<T>::Evaluate(const gArray<T>& vals) const 
+template<class T> T gMono<T>::Evaluate(const gbtArray<T>& vals) const 
 { 
   T answer = Coef();
 
@@ -166,7 +166,7 @@ template<class T> T gMono<T>::Evaluate(const gVector<T>& vals) const
 //                             gMono -- printing
 //--------------------------------------------------------------------------
 
-template<class T> gOutput& operator << (gOutput& output, const gMono<T>& x)
+template<class T> gbtOutput& operator << (gbtOutput& output, const gMono<T>& x)
 {
     output << x.Coef() << x.ExpV();    return output;
 }

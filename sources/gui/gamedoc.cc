@@ -126,7 +126,7 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
     m_curNfgSupport->SetLabel("Full Support");
     m_nfgSupports.Append(m_curNfgSupport);
 
-    m_contingency = gArray<int>(m_efg->NumPlayers());
+    m_contingency = gbtArray<int>(m_efg->NumPlayers());
     for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
   }
   UpdateViews();
@@ -156,7 +156,7 @@ void gbtGameDocument::SetCutNode(gbtEfgNode p_node)
 //                 gbtGameDocument: Operations on outcomes
 //==========================================================================
 
-gText gbtGameDocument::UniqueEfgOutcomeName(void) const
+gbtText gbtGameDocument::UniqueEfgOutcomeName(void) const
 {
   int number = m_efg->NumOutcomes() + 1;
   while (1) {
@@ -175,7 +175,7 @@ gText gbtGameDocument::UniqueEfgOutcomeName(void) const
   }
 }
 
-gText gbtGameDocument::UniqueNfgOutcomeName(void) const
+gbtText gbtGameDocument::UniqueNfgOutcomeName(void) const
 {
   int number = m_nfg->NumOutcomes() + 1;
   while (1) {
@@ -198,7 +198,7 @@ gText gbtGameDocument::UniqueNfgOutcomeName(void) const
 //                 gbtGameDocument: Operations on supports
 //==========================================================================
 
-gText gbtGameDocument::UniqueEfgSupportName(void) const
+gbtText gbtGameDocument::UniqueEfgSupportName(void) const
 {
   int number = m_efgSupports.Length() + 1;
   while (1) {
@@ -216,7 +216,7 @@ gText gbtGameDocument::UniqueEfgSupportName(void) const
   }
 }
 
-gText gbtGameDocument::UniqueNfgSupportName(void) const
+gbtText gbtGameDocument::UniqueNfgSupportName(void) const
 {
   int number = m_nfgSupports.Length() + 1;
   while (1) {
@@ -305,7 +305,7 @@ void gbtGameDocument::RemoveStrategy(gbtNfgStrategy p_strategy)
 //                gbtGameDocument: Operations on profiles
 //==========================================================================
 
-gText gbtGameDocument::UniqueBehavProfileName(void) const
+gbtText gbtGameDocument::UniqueBehavProfileName(void) const
 {
   int number = m_behavProfiles.Length() + 1;
   while (1) {
@@ -379,7 +379,7 @@ void gbtGameDocument::RemoveProfile(int p_index)
 //                     gbtGameDocument: Labels
 //==========================================================================
 
-gText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
@@ -388,7 +388,7 @@ gText gbtGameDocument::GetRealizProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
@@ -398,12 +398,12 @@ gText gbtGameDocument::GetBeliefProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull()) {
     return "";
   }
-  gText tmp = "(";
+  gbtText tmp = "(";
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     tmp += ToText(m_behavProfiles[m_curProfile].NodeValue(p_node)[pl], 
 		  m_prefs.NumDecimals());
@@ -417,7 +417,7 @@ gText gbtGameDocument::GetNodeValue(const gbtEfgNode &p_node) const
   return tmp;
 }
 
-gText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull()) {
@@ -427,7 +427,7 @@ gText gbtGameDocument::GetInfosetProb(const gbtEfgNode &p_node) const
 		m_prefs.NumDecimals());
 }
 
-gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
+gbtText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
@@ -443,7 +443,7 @@ gText gbtGameDocument::GetInfosetValue(const gbtEfgNode &p_node) const
   }
 }
 
-gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
+gbtText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
   if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
     return ToText(p_node.GetInfoset().GetChanceProb(p_act),
@@ -458,7 +458,7 @@ gText gbtGameDocument::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 		m_prefs.NumDecimals());
 }
 
-gText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
+gbtText gbtGameDocument::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 {
   if (m_curProfile == 0 || p_node.IsNull() ||
       p_node.GetPlayer().IsNull() || p_node.GetPlayer().IsChance()) {
@@ -502,7 +502,7 @@ gbtNfgGame gbtGameDocument::GetNfg(void) const
   }
 }
 
-gText gbtGameDocument::UniqueMixedProfileName(void) const
+gbtText gbtGameDocument::UniqueMixedProfileName(void) const
 {
   int number = m_mixedProfiles.Length() + 1;
   while (1) {
@@ -539,12 +539,12 @@ void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
   UpdateViews();
 }
 
-gArray<int> gbtGameDocument::GetContingency(void) const
+gbtArray<int> gbtGameDocument::GetContingency(void) const
 {
   return m_contingency;
 }
 
-void gbtGameDocument::SetContingency(const gArray<int> &p_contingency)
+void gbtGameDocument::SetContingency(const gbtArray<int> &p_contingency)
 {
   m_contingency = p_contingency;
   UpdateViews();
@@ -664,9 +664,9 @@ void gbtGameView::OnUpdate(gbtGameView *)
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<gbtGameView *>;
-template class gBlock<gbtGameView *>;
+template class gbtArray<gbtGameView *>;
+template class gbtBlock<gbtGameView *>;
 
 #include "base/glist.imp"
-template class gList<gbtEfgSupport *>;
-template class gList<gbtNfgSupport *>;
+template class gbtList<gbtEfgSupport *>;
+template class gbtList<gbtNfgSupport *>;

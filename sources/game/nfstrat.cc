@@ -110,10 +110,10 @@ gNumber StrategyProfile::GetPayoff(const gbtNfgPlayer &p_player) const
     return m_nfg.rep->m_results[index + 1]->m_payoffs[p_player.GetId()];
   }
   else {
-    gArray<gArray<int> *> behav(m_nfg.NumPlayers());
+    gbtArray<gbtArray<int> *> behav(m_nfg.NumPlayers());
     for (int pl = 1; pl <= behav.Length(); pl++) {
       // Casting away const -- sloppy
-      behav[pl] = (gArray<int> *) profile[pl].GetBehavior();
+      behav[pl] = (gbtArray<int> *) profile[pl].GetBehavior();
     }
     gVector<gNumber> payoff(m_nfg.NumPlayers());
     gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);
@@ -167,9 +167,9 @@ int gbtNfgSupport::NumStrats(int pl) const
   return total;
 }
 
-gArray<int> gbtNfgSupport::NumStrats(void) const
+gbtArray<int> gbtNfgSupport::NumStrats(void) const
 {
-  gArray<int> ret(m_nfg.NumPlayers());
+  gbtArray<int> ret(m_nfg.NumPlayers());
 
   for (int pl = 1; pl <= ret.Length(); pl++) {
     ret[pl] = NumStrats(pl);
@@ -261,7 +261,7 @@ bool gbtNfgSupport::IsValid(void) const
   return true;
 }
 
-void gbtNfgSupport::Output(gOutput &p_output) const
+void gbtNfgSupport::Output(gbtOutput &p_output) const
 {
   p_output << '"' << m_label << "\" { ";
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
@@ -274,9 +274,8 @@ void gbtNfgSupport::Output(gOutput &p_output) const
   p_output << "} ";
 }
 
-gOutput& operator<<(gOutput &p_stream, const gbtNfgSupport &p_support)
+gbtOutput& operator<<(gbtOutput &p_stream, const gbtNfgSupport &p_support)
 {
   p_support.Output(p_stream);
   return p_stream;
 }
-

@@ -31,7 +31,7 @@
 #include "wx/progdlg.h"
 #include "base/gstatus.h"
 
-class wxStatus : public wxProgressDialog, public gStatus {
+class wxStatus : public wxProgressDialog, public gbtStatus {
 protected:
   int m_width, m_prec;
   char m_represent;
@@ -40,36 +40,36 @@ protected:
   int m_value;
   
 public:
-  wxStatus(wxWindow *, const gText &);
+  wxStatus(wxWindow *, const gbtText &);
   virtual ~wxStatus();
     
-  // functions for gOutput
+  // functions for gbtOutput
   int GetWidth(void) const { return m_width; }
-  gOutput &SetWidth(int p_width) { m_width = p_width; return *this; }
+  gbtOutput &SetWidth(int p_width) { m_width = p_width; return *this; }
   int GetPrec(void) const { return m_prec; }
-  gOutput &SetPrec(int p_prec)  { m_prec = p_prec; return *this; }
-  gOutput &SetExpMode(void) { m_represent = 'e'; return *this; }
-  gOutput &SetFloatMode(void) { m_represent = 'f'; return *this; }
+  gbtOutput &SetPrec(int p_prec)  { m_prec = p_prec; return *this; }
+  gbtOutput &SetExpMode(void) { m_represent = 'e'; return *this; }
+  gbtOutput &SetFloatMode(void) { m_represent = 'f'; return *this; }
   char GetRepMode(void) const { return m_represent; }
 
-  gOutput &operator<<(int x);
-  gOutput &operator<<(unsigned int x);
-  gOutput &operator<<(bool x);
-  gOutput &operator<<(long x);
-  gOutput &operator<<(char x);
-  gOutput &operator<<(double x);
-  gOutput &operator<<(long double x);
-  gOutput &operator<<(float x);
-  gOutput &operator<<(const char *x);
-  gOutput &operator<<(const void *x);
+  gbtOutput &operator<<(int x);
+  gbtOutput &operator<<(unsigned int x);
+  gbtOutput &operator<<(bool x);
+  gbtOutput &operator<<(long x);
+  gbtOutput &operator<<(char x);
+  gbtOutput &operator<<(double x);
+  gbtOutput &operator<<(long double x);
+  gbtOutput &operator<<(float x);
+  gbtOutput &operator<<(const char *x);
+  gbtOutput &operator<<(const void *x);
 
   bool IsValid(void) const { return true; }
 
-  // functions for gProgress
+  // functions for gbtProgress
   virtual void SetProgress(double p);
-  virtual void SetProgress(double, const gText &);
+  virtual void SetProgress(double, const gbtText &);
 
-  // functions for gSignal
+  // functions for gbtSignal
   virtual void SetSignal(void) { m_sig = true; }
   virtual void Get(void) const;
   virtual void Reset(void)     { m_sig = false; }

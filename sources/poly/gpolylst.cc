@@ -33,18 +33,18 @@
 #include "math/gmatrix.imp"
 
 //template class gPolyList<int>;
-//template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);
+//template gbtOutput &operator<<(gbtOutput &f, const gPolyList<int> &y);
 
 template class gPolyList<gRational>;
-template gOutput &operator<<(gOutput &f, const gPolyList<gRational> &y);
+template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gRational> &y);
 
 //template class gPolyList<double>;
-//template gOutput &operator<<(gOutput &f, const gPolyList<double> &y);
+//template gbtOutput &operator<<(gbtOutput &f, const gPolyList<double> &y);
 
 template class gPolyList<gDouble>;
-template gOutput &operator<<(gOutput &f, const gPolyList<gDouble> &y);
+template gbtOutput &operator<<(gbtOutput &f, const gPolyList<gDouble> &y);
 
-template class gList<index_pair>;
+template class gbtList<gbtIndexPair>;
 
 /*
 #include "objcount.imp"
@@ -59,16 +59,11 @@ template class Counted<gPolyList<gRational> >;
 int Counted<gPolyList<gRational> >::numObjects = 0;
 */
 
-template class gRectArray<gPoly<gDouble>*>;
-template class gArray<gPoly<gDouble>*>;
+template class gbtRectArray<gPoly<gDouble>*>;
+template class gbtArray<gPoly<gDouble>*>;
 
-template class gRectArray<gPoly<gRational>*>;
-//template class gArray<gPoly<gRational>*>;
+template class gbtRectArray<gPoly<gRational>*>;
+//template class gbtArray<gPoly<gRational>*>;
 
-//template class gRectArray<gPoly<double>*>;
-//template class gArray<gPoly<double>*>;
-
-
-
-
-
+//template class gbtRectArray<gPoly<double>*>;
+//template class gbtArray<gPoly<double>*>;

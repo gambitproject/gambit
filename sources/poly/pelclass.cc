@@ -460,10 +460,10 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 // Solve doesn't seem to exist at this point, yet this is very ambiguous.  
 }
 
-gList<gVector<gComplex> > 
+gbtList<gVector<gComplex> > 
 PelView::GambitRootsFromPelRoots(const Gen_node g) const
 {
-  gList<gVector<gComplex> > alist;
+  gbtList<gVector<gComplex> > alist;
 
   node ptr;
   ptr = Gen_to_Dvector_list(Gen_lval(copy_Gen_node(g)));
@@ -498,7 +498,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   return alist;
 }
 
-void PelView::DisplayComplexRootList(const gList<gVector<gComplex> > 
+void PelView::DisplayComplexRootList(const gbtList<gVector<gComplex> > 
 				                       &complexroots) const
 {
 #ifdef UNUSED
@@ -522,10 +522,10 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-gList<gVector<gDouble> > 
-PelView::RealRoots(const gList<gVector<gComplex> > &clist) const
+gbtList<gVector<gDouble> > 
+PelView::RealRoots(const gbtList<gVector<gComplex> > &clist) const
 {
-  gList<gVector<gDouble> > answer;
+  gbtList<gVector<gDouble> > answer;
 
   for (int i = 1; i <= clist.Length(); i++) {
 
@@ -717,12 +717,12 @@ bool PelView::operator !=(const PelView &rhs) const
   return !(*this == rhs);
 }
 
-gList<gVector<gComplex> > PelView::ComplexRoots() const
+gbtList<gVector<gComplex> > PelView::ComplexRoots() const
 {
   return complexroots;
 }
 
-gList<gVector<gDouble> > PelView::RealRoots() const
+gbtList<gVector<gDouble> > PelView::RealRoots() const
 {
   return realroots;
 }
@@ -764,10 +764,10 @@ int old_main()
   term_order ReverseLex(&Space, ptr);
   
   //Default system
-  gText gx = " 2 + n2 ";
-  gText gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
-  gText gz = " 3 + n3 + n4";
-  gText gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
+  gbtText gx = " 2 + n2 ";
+  gbtText gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
+  gbtText gz = " 3 + n3 + n4";
+  gbtText gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
   gPoly<gDouble> px(&Space,gx,&Lex);
   gPoly<gDouble> py(&Space,gy,&Lex); 
   gPoly<gDouble> pz(&Space,gz,&Lex);
@@ -790,9 +790,9 @@ int old_main()
   term_order NewReverseLex(&NewSpace, ptr);
   
   //Default system
-  gText newgx = " 2 + n2 ";
-  gText newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
-  gText newgz = " 3 + n3";
+  gbtText newgx = " 2 + n2 ";
+  gbtText newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
+  gbtText newgz = " 3 + n3";
   gPoly<gDouble> newpx(&NewSpace,newgx,&NewLex);
   gPoly<gDouble> newpy(&NewSpace,newgy,&NewLex); 
   gPoly<gDouble> newpz(&NewSpace,newgz,&NewLex);

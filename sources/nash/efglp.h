@@ -35,12 +35,12 @@ template <class T> class gbtEfgNashLp : public gbtEfgNashAlgorithm {
 private:
   T maxpay, minpay;
   int ns1,ns2,ni1,ni2;
-  gList<BFS<T> > List;
-  gList<gbtEfgInfoset> isets1, isets2;
+  gbtList<BFS<T> > List;
+  gbtList<gbtEfgInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &,
 		   gMatrix<T> &, const gbtEfgNode &, T ,int ,int , int ,int );
-  void GetSolutions(const gbtEfgSupport &, gList<BehavSolution> &) const;
+  void GetSolutions(const gbtEfgSupport &, gbtList<BehavSolution> &) const;
   int Add_BFS(/*const*/ LPSolve<T> &B);
   
   void GetProfile(const gbtEfgSupport &, gDPVector<T> &v, const BFS<T> &sol,
@@ -50,12 +50,9 @@ public:
   gbtEfgNashLp(void);
   virtual ~gbtEfgNashLp() { }
 
-  gText GetAlgorithm(void) const { return "Lp[EFG]"; }
-  gList<BehavSolution> Solve(const gbtEfgSupport &, gStatus &);
+  gbtText GetAlgorithm(void) const { return "Lp[EFG]"; }
+  gbtList<BehavSolution> Solve(const gbtEfgSupport &, gbtStatus &);
 };
 
 
 #endif  // EFGLP_H
-
-
-

@@ -75,8 +75,8 @@ int      compare(const IntRep*, const IntRep*);
 int      compare(const IntRep*, long);
 int      ucompare(const IntRep*, const IntRep*);
 int      ucompare(const IntRep*, long);
-gText Itoa(const IntRep* x, int base = 10, int width = 0);
-gText cvtItoa(const IntRep* x, gText fmt, int& fmtlen, int base,
+gbtText Itoa(const IntRep* x, int base = 10, int width = 0);
+gbtText cvtItoa(const IntRep* x, gbtText fmt, int& fmtlen, int base,
 	      int showbase, int width, int align_right, 
 	      char fillchar, char Xcase, int showpos);
 IntRep*  atoIntRep(const char* s, int base = 10);
@@ -1947,17 +1947,17 @@ IntRep* atoIntRep(const char* s, int base)
   return r;
 }
 
-gText Itoa(const IntRep *x, int base, int width)
+gbtText Itoa(const IntRep *x, int base, int width)
 {
   int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
-  gText fmtbase;
+  gbtText fmtbase;
   for (int i = 0; i < fmtlen; i++) {
     fmtbase += " ";
   }
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
-gText cvtItoa(const IntRep *x, gText fmt, int& fmtlen, int base, int showbase,
+gbtText cvtItoa(const IntRep *x, gbtText fmt, int& fmtlen, int base, int showbase,
               int width, int align_right, char fillchar, char Xcase, 
               int showpos)
 {
@@ -2049,7 +2049,7 @@ gText cvtItoa(const IntRep *x, gText fmt, int& fmtlen, int base, int showbase,
   }
 }
 
-gInput &operator>>(gInput& s, gInteger& y)
+gbtInput &operator>>(gbtInput& s, gInteger& y)
 {
   char sgn = 0;
   char ch;
@@ -2654,12 +2654,12 @@ bool odd(const gInteger &y)
 #endif // USE_GNU_MP
 }
 
-gText Itoa(const gInteger &y, int base, int width)
+gbtText Itoa(const gInteger &y, int base, int width)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, base) + 2];
   mpz_get_str(buf, base, y.m_value);
-  return gText(buf);
+  return gbtText(buf);
 #else
   return Itoa(y.rep, base, width);
 #endif // USE_GNU_MP
@@ -2762,9 +2762,9 @@ void gInteger::operator%=(long y)
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-gText ToText(const gInteger &i)
+gbtText ToText(const gInteger &i)
 {
-  return gText(Itoa(i));
+  return gbtText(Itoa(i));
 }
 
 #if !USE_GNU_MP
@@ -2842,7 +2842,7 @@ long gInteger::as_long(void) const
 #endif // USE_GNU_MP
 }
 
-gOutput &operator<<(gOutput &s, const gInteger &y)
+gbtOutput &operator<<(gbtOutput &s, const gInteger &y)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, 10) + 2];
@@ -2852,5 +2852,3 @@ gOutput &operator<<(gOutput &s, const gInteger &y)
   return s << Itoa(y.rep);
 #endif // !USE_GNU_MP
 }
-
-

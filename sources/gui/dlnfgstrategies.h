@@ -33,7 +33,7 @@ private:
   wxChoice *m_player;
   wxListBox *m_strategyList;
   wxTextCtrl *m_strategyName;
-  gBlock<gArray<gText> > m_strategyNames;
+  gbtBlock<gbtArray<gbtText> > m_strategyNames;
   int m_lastPlayer, m_lastStrategy;
 
   // Event handlers
@@ -46,7 +46,7 @@ public:
   dialogStrategies(wxWindow *, const gbtNfgGame &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  const gText &GetStrategyName(int pl, int st) const
+  const gbtText &GetStrategyName(int pl, int st) const
     { return m_strategyNames[pl][st]; }
 
   DECLARE_EVENT_TABLE()

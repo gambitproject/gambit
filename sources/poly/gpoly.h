@@ -34,9 +34,9 @@
 // These classes are used to store and mathematically manipulate polynomials.
 
 //  **NOTE**
-//  Every type T to be used needs a procedure to convert a gText coefficient
-//  to the type T for the gText SOP input form and a procedure to convert 
-//  the coefficient into a gText for the SOP output form.  
+//  Every type T to be used needs a procedure to convert a gbtText coefficient
+//  to the type T for the gbtText SOP input form and a procedure to convert 
+//  the coefficient into a gbtText for the SOP output form.  
 
 
 // *******************
@@ -48,10 +48,10 @@ template <class T> class gPoly {
 private:
   const gSpace*        Space;    // pointer to variable Space of space
   const term_order*    Order;
-  gList<gMono<T> >     Terms;    // alternative implementation
+  gbtList<gMono<T> >     Terms;    // alternative implementation
 
-  // used for gText parsing;
-  unsigned int charnum;   char charc;   gText TheString;
+  // used for gbtText parsing;
+  unsigned int charnum;   char charc;   gbtText TheString;
 
   //----------------------
   // some private members
@@ -61,10 +61,10 @@ private:
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
     // Arithmetic
-  gList<gMono<T> > Adder(const gList<gMono<T> >&, 
-			 const gList<gMono<T> >&)          const;
-  gList<gMono<T> > Mult(const gList<gMono<T> >&, 
-			const gList<gMono<T> >&)           const;
+  gbtList<gMono<T> > Adder(const gbtList<gMono<T> >&, 
+			 const gbtList<gMono<T> >&)          const;
+  gbtList<gMono<T> > Mult(const gbtList<gMono<T> >&, 
+			const gbtList<gMono<T> >&)           const;
   gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
 
   // The following is used to construct the translate of *this.
@@ -74,17 +74,17 @@ private:
 
 
   //-----------------------------------------------
-  // Going back and forth from gTexts to gPoly's
+  // Going back and forth from gbtTexts to gPoly's
   //-----------------------------------------------
 
-  // gText input parser functions
+  // gbtText input parser functions
   void      String_Term(T          nega);
   T         String_Coeff(T       nega);
   int       String_GetPow(void);
-  void      String_VarAndPow(gArray<int> &PowArray);
+  void      String_VarAndPow(gbtArray<int> &PowArray);
   void      GetChar();
   // Is the string a valid polynomial?
-  bool      Check_String(const gText &Hold);
+  bool      Check_String(const gbtText &Hold);
 
   //----------------------
   //   private friends
@@ -101,8 +101,8 @@ public:
 
   // Null gPoly constructor
   gPoly(const gSpace *, const term_order *);
-  // Constructs a gPoly equal to the SOP representation in the gText
-  gPoly(const gSpace *, const gText &, const term_order *);
+  // Constructs a gPoly equal to the SOP representation in the gbtText
+  gPoly(const gSpace *, const gbtText &, const term_order *);
   // Constructs a constant gPoly
   gPoly(const gSpace *, const T &, const term_order *);
   // Constructs a gPoly equal to another;
@@ -121,7 +121,7 @@ public:
   //----------
   
   gPoly<T>& operator =  (const gPoly<T> &);
-  gPoly<T>& operator =  (const gText &);  
+  gPoly<T>& operator =  (const gbtText &);  
                         //Set polynomial equal to the SOP form in the string
   gPoly<T>  operator -  ()                  const;
   gPoly<T>  operator -  (const gPoly<T> &) const;
@@ -148,7 +148,7 @@ public:
   bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;
   int                 Degree()                             const;
-  T                   GetCoef(const gArray<int> &Powers)   const;
+  T                   GetCoef(const gbtArray<int> &Powers)   const;
   T                   GetCoef(const exp_vect &Powers)      const;
   gPoly<T>            LeadingCoefficient(int varnumber)    const;
   T                   NumLeadCoeff()                       const; // deg == 0
@@ -158,12 +158,12 @@ public:
                       // returns 0 if constant, -1 if truly multivariate
   polynomial<T>       UnivariateEquivalent(int activar)    const;
                       // assumes UniqueActiveVariable() is true
-  T                   Evaluate(const gArray<T> &values)    const;
+  T                   Evaluate(const gbtArray<T> &values)    const;
   gPoly<T>           EvaluateOneVar(int varnumber, T val)  const;
   gPoly<T>           PartialDerivative(int varnumber)      const;
   int                No_Monomials()                        const;
-  gList<exp_vect>    ExponentVectors()                     const;
-  gList<gMono<T> >   MonomialList()                        const;
+  gbtList<exp_vect>    ExponentVectors()                     const;
+  gbtList<gMono<T> >   MonomialList()                        const;
 
   gPoly<T>           TranslateOfPoly(const gVector<T>&)    const;
   gPoly<T>   PolyInNewCoordinates(const gSquareMatrix<T>&) const;
@@ -189,11 +189,11 @@ public:
   //---------------
 
  // Print polynomial in SOP form
-  void Output(gText &) const;
+  void Output(gbtText &) const;
 };
 
-template <class T> gText &operator<< (gText &, const gPoly<T> &);
-template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
+template <class T> gbtText &operator<< (gbtText &, const gPoly<T> &);
+template <class T> gbtOutput &operator<< (gbtOutput &f, const gPoly<T> &y);
 
   //-------------
   // Conversion:
@@ -210,21 +210,8 @@ template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T val);
 template <class T> gPoly<T> operator+(const T val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T val);
 
-template <class T> gText ToText(const gPoly<T> &p);
+template <class T> gbtText ToText(const gPoly<T> &p);
 
-template <class T> gOutput &operator<< (gOutput &f, const gPoly<T> &y);
+template <class T> gbtOutput &operator<< (gbtOutput &f, const gPoly<T> &y);
 
 #endif //# GPOLY_H
-
-
-
-
-
-
-
-
-
-
-
-
-

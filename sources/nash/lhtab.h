@@ -66,7 +66,7 @@ public:
   
       // miscellaneous functions
   BFS<T> GetBFS(void);
-  void Dump(gOutput &) const;
+  void Dump(gbtOutput &) const;
 
   int PivotIn(int i);
   int ExitIndex(int i);

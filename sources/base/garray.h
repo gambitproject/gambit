@@ -31,47 +31,47 @@
 #include <assert.h>
 #include "gstream.h"
 
-template <class T> class gArray  {
+template <class T> class gbtArray  {
   protected:
     int mindex, maxdex;
     T *data;
 
   public:
-    class BadIndex : public gException  {
+    class BadIndex : public gbtException  {
     public:
       virtual ~BadIndex();
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
-    class BadRange : public gException  {
+    class BadRange : public gbtException  {
     public:
       virtual ~BadRange();
-      gText Description(void) const;
+      gbtText Description(void) const;
     };
 
 //
-// Constructs a gArray of length 'len', starting at '1'
+// Constructs a gbtArray of length 'len', starting at '1'
 //
-    gArray(unsigned int len = 0);
+    gbtArray(unsigned int len = 0);
 //
-// Constructs a gArray starting at lo and ending at hi
+// Constructs a gbtArray starting at lo and ending at hi
 //
-    gArray(int lo, int hi);
+    gbtArray(int lo, int hi);
 //
-// duplicate the input gArray<T> constant referrence
+// duplicate the input gbtArray<T> constant referrence
 //
-    gArray(const gArray<T> &);
+    gbtArray(const gbtArray<T> &);
 //
-// Destruct and deallocates gArray
+// Destruct and deallocates gbtArray
 //
-    virtual ~gArray();
+    virtual ~gbtArray();
 //
-// Copies data from input gArray
+// Copies data from input gbtArray
 //
-    gArray<T> &operator=(const gArray<T> &);
+    gbtArray<T> &operator=(const gbtArray<T> &);
 
 //
-// return length in the invoking gArray<T>
+// return length in the invoking gbtArray<T>
 //
     int Length(void) const;
 
@@ -93,12 +93,12 @@ template <class T> class gArray  {
 //
 // Output data of the array
 //
-    virtual void Dump(gOutput &) const;
+    virtual void Dump(gbtOutput &) const;
 };
-template <class T> bool operator==(const gArray<T> &, const gArray<T> &);
-template <class T> bool operator!=(const gArray<T> &, const gArray<T> &);
+template <class T> bool operator==(const gbtArray<T> &, const gbtArray<T> &);
+template <class T> bool operator!=(const gbtArray<T> &, const gbtArray<T> &);
 
-template <class T> gOutput &operator<<(gOutput &, const gArray<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtArray<T> &);
 
 
 #endif	//# GARRAY_H

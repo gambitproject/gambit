@@ -101,7 +101,7 @@ private:
   int m_staticPlayer;
   double m_step;
   MixedProfile<double> m_minVal, m_maxVal;
-  gArray<double> m_sums;
+  gbtArray<double> m_sums;
 
   bool Next(int row);
 
@@ -215,7 +215,7 @@ QreNfgGrid::QreNfgGrid(void)
 //               QreNfgGrid: Private auxiliary functions
 //--------------------------------------------------------------------------
 
-void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gOutput &out) const
+void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gbtOutput &out) const
 {
   out<< "Dimensionality:\n";
   out<< p_support.GetGame().NumPlayers()<<' ';
@@ -241,7 +241,7 @@ void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gOutput &out) cons
   out << "Data:\n";
 }
 
-void QreNfgGrid::OutputResult(gOutput &p_file,
+void QreNfgGrid::OutputResult(gbtOutput &p_file,
 			      const MixedProfile<double> &p_profile,
 			      double p_lambda, double p_objFunc) const
 {
@@ -420,8 +420,8 @@ static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
   return false;
 }
 
-void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
-		       gStatus &p_status, gList<MixedSolution> &p_solutions)
+void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gbtOutput &p_pxifile,
+		       gbtStatus &p_status, gbtList<MixedSolution> &p_solutions)
 {
   p_solutions.Flush();
 
@@ -447,7 +447,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
   double lambda = m_minLam;
   while (lambda <= m_maxLam) {
     step++;
-    gList<MixedSolution> cursolns;
+    gbtList<MixedSolution> cursolns;
 
     p_status.Get();
     MixedProfileIterator iter1(centroid, m_delp1, 1.0, staticPlayer);
@@ -481,7 +481,7 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
     } while (iter1.Next());
 
     p_status.SetProgress((double) step / (double) numSteps,
-			 gText("Lambda = ") + ToText(lambda));
+			 gbtText("Lambda = ") + ToText(lambda));
 
     if (m_fullGraph || step == numSteps) {
       p_solutions += cursolns;
@@ -496,4 +496,3 @@ void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
   }
   
 }
-

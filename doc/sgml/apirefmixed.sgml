@@ -12,7 +12,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText MixedSolution::GetCreator(void) const
+gbtText MixedSolution::GetCreator(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -54,7 +54,7 @@ returns the normal form game to which the profile belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gText MixedSolution::GetLabel(void) const
+gbtText MixedSolution::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -201,7 +201,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState MixedSolution::IsNash(void) const
+gbtTriState MixedSolution::IsNash(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -242,7 +242,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState MixedSolution::IsPerfect(void) const
+gbtTriState MixedSolution::IsPerfect(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -278,7 +278,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gTriState MixedSolution::IsProper(void) const
+gbtTriState MixedSolution::IsProper(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -312,7 +312,7 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void MixedSolution::SetLabel(const gText &amp;p_label)
+void MixedSolution::SetLabel(const gbtText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -348,5 +348,3 @@ are not from the same normal form game.  Returns <parameter>profile</parameter>.
 </sect2>
 
 </sect1>
-
-

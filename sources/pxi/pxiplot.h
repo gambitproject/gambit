@@ -69,7 +69,7 @@ class PxiPlot : public wxScrolledWindow {
 friend class PxiChild;
 public:
   typedef struct LABELSTRUCT {
-    friend gOutput &operator<<(gOutput &op,const LABELSTRUCT &l);
+    friend gbtOutput &operator<<(gbtOutput &op,const LABELSTRUCT &l);
     wxString label;
     double x,y;
     LABELSTRUCT(void):label(""),x(0.0),y(0.0) {}
@@ -82,8 +82,8 @@ public:
   } label_struct;
 
 protected:
-  const gArray<PxiFile *> &m_qreFiles;
-  gBlock<label_struct> labels;          // labels for generic text
+  const gbtArray<PxiFile *> &m_qreFiles;
+  gbtBlock<label_struct> labels;          // labels for generic text
   const ExpData &m_expData;             // reference to experimental data
   bool m_landscape;                     // landscap mode if true
   int m_width, m_height;                // width, height of page
@@ -113,7 +113,7 @@ protected:
 
 public:
   PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
-	  const wxSize &p_size, const gArray<PxiFile *> &, int p_page,
+	  const wxSize &p_size, const gbtArray<PxiFile *> &, int p_page,
 	  const ExpData &p_expData);
   virtual ~PxiPlot();
 
@@ -136,4 +136,3 @@ public:
 };
 
 #endif  // PXIPLOT_H
-

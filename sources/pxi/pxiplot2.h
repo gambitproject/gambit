@@ -32,7 +32,7 @@ private:
 
 public:
   PxiPlot2(wxWindow *p_parent, const wxPoint &p_position,
-	   const wxSize &p_size, const gArray<PxiFile *> &, int p_page,
+	   const wxSize &p_size, const gbtArray<PxiFile *> &, int p_page,
 	   const ExpData &p_expData);
   virtual ~PxiPlot2();
 
@@ -40,4 +40,3 @@ public:
 };
 
 #endif  // PXIPLOT2_H
-

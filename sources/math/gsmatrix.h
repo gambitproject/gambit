@@ -31,10 +31,10 @@
 
 template <class T> class gSquareMatrix : public gMatrix<T>   {
 public:
-  class MatrixSingular : public gException {
+  class MatrixSingular : public gbtException {
   public:
     virtual ~MatrixSingular();
-    gText Description(void) const;
+    gbtText Description(void) const;
   };
 
   gSquareMatrix(void);
@@ -49,6 +49,6 @@ public:
   T Determinant(void) const;
 };
 
-template <class T> gOutput& operator<<(gOutput &to, const gSquareMatrix<T> &M);
+template <class T> gbtOutput& operator<<(gbtOutput &to, const gSquareMatrix<T> &M);
 
 #endif    // GSMATRIX_H

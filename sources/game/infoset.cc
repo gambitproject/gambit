@@ -133,7 +133,7 @@ int gbtEfgAction::GetId(void) const
   return (rep) ? rep->m_id : -1;
 }
 
-gText gbtEfgAction::GetLabel(void) const
+gbtText gbtEfgAction::GetLabel(void) const
 {
   if (rep) {
     return rep->m_label;
@@ -143,7 +143,7 @@ gText gbtEfgAction::GetLabel(void) const
   }
 }
 
-void gbtEfgAction::SetLabel(const gText &p_label)
+void gbtEfgAction::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     rep->m_label = p_label;
@@ -200,7 +200,7 @@ void gbtEfgAction::DeleteAction(void)
   rep->m_infoset->m_player->m_efg->DeleteAction(rep->m_infoset, rep);
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtEfgAction &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgAction &)
 { 
   return p_stream;
 }
@@ -224,7 +224,7 @@ gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbt_efg_player_rep *p_player,
   }
 }
 
-void gbt_efg_infoset_rep::PrintActions(gOutput &f) const
+void gbt_efg_infoset_rep::PrintActions(gbtOutput &f) const
 { 
   f << "{ ";
   for (int i = 1; i <= m_actions.Length(); i++) {
@@ -317,7 +317,7 @@ int gbtEfgInfoset::GetId(void) const
   return (rep) ? rep->m_id : -1;
 }
 
-gText gbtEfgInfoset::GetLabel(void) const
+gbtText gbtEfgInfoset::GetLabel(void) const
 {
   if (rep) {
     return rep->m_label;
@@ -327,7 +327,7 @@ gText gbtEfgInfoset::GetLabel(void) const
   }
 }
 
-void gbtEfgInfoset::SetLabel(const gText &p_label)
+void gbtEfgInfoset::SetLabel(const gbtText &p_label)
 {
   if (rep) {
     rep->m_label = p_label;
@@ -403,7 +403,7 @@ void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
     throw gbtEfgNullObject();
   }
   if (GetPlayer().IsChance() || p_player.IsChance()) {
-    throw gbtEfgException();
+    throw gbtEfgbtException();
   }
   
   if (GetPlayer() == p_player) {
@@ -517,8 +517,7 @@ void gbtEfgInfoset::SetWhichBranch(int p_branch)
   rep->m_whichbranch = p_branch;
 }
 
-gOutput &operator<<(gOutput &p_stream, const gbtEfgInfoset &)
+gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgInfoset &)
 { 
   return p_stream;
 }
-
