@@ -325,7 +325,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
 
 static Portion *GSM_KGobit_Start(Portion **param)
 {
-//  if (param[0]->Spec().Type == porMIXED)  {
+  if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
@@ -360,7 +360,44 @@ static Portion *GSM_KGobit_Start(Portion **param)
 
     if (NP.pxifile != &gnull)  delete NP.pxifile;
     return por;
-//  }
+  }
+  else  {     // BEHAV_FLOAT  
+    BehavSolution &start = *((BehavPortion *) param[0])->Value();
+    Efg &E = start.Game();
+  
+    EFGobitParams EP;
+    if(((TextPortion*) param[1])->Value() != "")
+      EP.pxifile = new gFileOutput(((TextPortion*) param[1])->Value());
+    else
+      EP.pxifile = &gnull;
+    EP.minLam = ((NumberPortion *) param[2])->Value();
+    EP.maxLam = ((NumberPortion *) param[3])->Value();
+    EP.delLam = ((NumberPortion *) param[4])->Value();
+    EP.powLam = ((IntPortion *) param[5])->Value();
+    EP.fullGraph = ((BoolPortion *) param[6])->Value();
+    
+    EP.maxitsN = ((IntPortion *) param[7])->Value();
+    EP.tolN = ((NumberPortion *) param[8])->Value();
+    EP.maxits1 = ((IntPortion *) param[9])->Value();
+    EP.tol1 = ((NumberPortion *) param[10])->Value();
+  
+    EP.tracefile = &((OutputPortion *) param[14])->Value();
+    EP.trace = ((IntPortion *) param[15])->Value();
+    
+    gWatch watch;
+    
+    gList<BehavSolution> solutions;
+    Gobit(E, EP, start, solutions,
+	  ((IntPortion *) param[12])->Value(),
+	  ((IntPortion *) param[13])->Value());
+    
+    ((NumberPortion *) param[11])->Value() = watch.Elapsed();
+    
+    Portion * por = new Behav_ListPortion(solutions);
+
+    if (EP.pxifile != &gnull)   delete EP.pxifile;
+    return por;
+  }
 }
 
 
@@ -1011,9 +1048,9 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("KGobitSolve", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_KGobit_Start, 
-				       PortionSpec(porMIXED , 1), 16));
+				       PortionSpec(porMIXED | porBEHAV , 1), 16));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("start",
-					    porMIXED ));
+					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextPortion("")));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("minK", porNUMBER,
@@ -1021,7 +1058,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("maxK", porNUMBER,
 					    new NumberPortion(500.0)));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("delK", porNUMBER,
-					    new NumberPortion(0.02)));
+					    new NumberPortion(-0.1)));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("powK", porINTEGER,
 					    new IntPortion(1)));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("fullGraph", porBOOL,
