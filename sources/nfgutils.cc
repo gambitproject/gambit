@@ -1,7 +1,7 @@
 //
 // FILE nfgutils.cc -- useful utilities for the normal form
 //
-// $Id$
+// @(#)nfgutils.cc	2.9 4/4/97
 //
 
 #include "gmisc.h"
@@ -10,6 +10,12 @@
 #include "nfstrat.h"
 #include "nfgciter.h"
 
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 {
@@ -118,13 +124,6 @@ template <class T> void RandomNfg(Nfg<T> &nfg)
     for (int outc = 1; outc <= nfg.payoffs.NumRows(); outc++)
       nfg.payoffs(outc, pl) = (T) Uniform();
 }  
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
 
