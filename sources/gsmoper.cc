@@ -1894,7 +1894,8 @@ void Init_gsmoper(GSM* gsm)
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(3, 1, gclParameter
 			("x", PortionSpec(porBOOLEAN | porNUMBER |
-					  porTEXT | porMIXED | porBEHAV, 1)));
+					  porTEXT | porMIXED | porBEHAV |
+					  porNFSUPPORT | porEFSUPPORT, 1)));
   gsm->AddFunction(FuncObj);
 
 
