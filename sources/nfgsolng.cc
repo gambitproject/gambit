@@ -387,8 +387,8 @@ bool guinfgLiap::SolveSetup(void)
     m_eliminateMixed = dialog.EliminateMixed();
 
     m_stopAfter = dialog.StopAfter();
-    m_tol1D = dialog.Tol1D();
-    m_tolND = dialog.TolND();
+    m_tol1D = pow(10, -dialog.Tol1D());
+    m_tolND = pow(10, -dialog.TolND());
     m_maxits1D = dialog.Maxits1D();
     m_maxitsND = dialog.MaxitsND();
     m_nTries = dialog.NumTries();

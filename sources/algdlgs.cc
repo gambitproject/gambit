@@ -532,10 +532,8 @@ dialogLiap::~dialogLiap()
   if (m_completed == wxOK) {
     wxWriteResource("Algorithm Params", "Liap-nTries", NumTries(), 
 		    "gambit.ini");
-    wxWriteResource("Algorithm Params", "Func-tolND", 
-		    (float) TolND(), "gambit.ini");
-    wxWriteResource("Algorithm Params", "Func-tol1D", 
-		    (float) Tol1D(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tolND", TolND(), "gambit.ini");
+    wxWriteResource("Algorithm Params", "Func-tol1D", Tol1D(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-maxitsND",
 		    MaxitsND(), "gambit.ini");
     wxWriteResource("Algorithm Params", "Func-maxits1D",
@@ -556,12 +554,12 @@ void dialogLiap::AlgorithmFields(void)
   m_nTries = new wxIntegerItem(this, "nTries", nTries, -1, -1, 100, -1);
   NewLine();
 
-  float tolND = 1e-8;
+  int tolND = 8;
   wxGetResource("Algorithm Params", "Func-tolND", &tolND, "gambit.ini");
-  m_tolND = new wxNumberItem(this, "Tol n-D", tolND, -1, -1, 150, -1);
-  float tol1D = 1e-8;
+  m_tolND = new wxIntegerItem(this, "Tol n-D digits", tolND, -1, -1, 150, -1);
+  int tol1D = 8;
   wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, "gambit.ini");
-  m_tol1D = new wxNumberItem(this, "Tol 1-D", tol1D, -1, -1, 150, -1);
+  m_tol1D = new wxIntegerItem(this, "Tol 1-D digits", tol1D, -1, -1, 150, -1);
   NewLine();
 
   int maxitsND = 0;
