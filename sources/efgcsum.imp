@@ -88,13 +88,13 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   (*c) = (T)0;
   (*c)[ns2+1] = -(T)1;
 
-//  gout.SetWidth(1).SetPrec(1);
-//  gout << "\nA";
-//  A->Dump(gout);
-//  gout << "\nb";
-//  b->Dump(gout);
-//  gout << "\nc";
-//  c->Dump(gout);
+  // gout.SetWidth(1).SetPrec(1);
+  // gout << "\nA";
+  // A->Dump(gout);
+  // gout << "\nb";
+  // b->Dump(gout);
+  // gout << "\nc";
+  // c->Dump(gout);
 }
 
 template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
@@ -128,15 +128,7 @@ template <class T> int CSSeqFormModule<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
   if (params.stopAfter == 1)
   {
     lp.OptBFS(cbfs);
-  //  value=cbfs(EF.NumStrats(1)+1)+maxpay;
-  //  cbfs.Dump(gout);
-  //  gout << "\nvalue =" << value << "\n\n";
     if (List.Contains(cbfs))  return 0;
-  //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
-  //  (*params.tracefile)  << "\nB = ";
-  //  B.Dump(*params.tracefile);
-  //  (*params.tracefile)  << "\ncbfs = ";
-  //  cbfs.Dump(*params.tracefile );
     List.Append(cbfs);
   }
   else if (params.stopAfter == 0)
@@ -174,7 +166,6 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
   int i,pl,inf,snew;
   T eps = (T)0;
 //  eps = tab->Epsilon();
-//  gout << "\nv = " << v;
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
@@ -182,49 +173,38 @@ void CSSeqFormModule<T>::GetProfile(gDPVector<T> &v, const BFS<T> &sol,
     }
     pl = n->GetPlayer()->GetNumber();
     inf= n->GetInfoset()->GetNumber();
-//    gout << "\niset: (" << pl << "," << inf << ")"; 
     if(pl==2) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
-      for(i=1;i<=n->NumChildren();i++) {
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
-//	gout << "\npl1 ";
-//	gout << "\n  v = " << v;
 	if(sol.IsDefined(s1)) {
 	  if(sol(s1)>eps) {
 	    if(sol.IsDefined(snew+i)) {
 	      if(sol(snew+i)>eps)
 		v(pl,inf,i) = sol(snew+i)/sol(s1);
-//	      gout << "\nnum: " << s1 << " " << sol(s1) << " ";
-//	      gout << "\nden: " << snew+i << " " << sol(snew+i) << " ";
-//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(i),snew+i,s2);
+	GetProfile(v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),snew+i,s2);
       }
     }
     if(pl==1) {
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions(); 
-      for(i=1;i<=n->NumChildren();i++) {
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]); 
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
-//	gout << "\npl2 ";
-//	gout << "\n  v = " << v;
 	if(sol.IsDefined(-s2)) {
 	  if(sol(-s2)>eps) {
 	    if(sol.IsDefined(-(snew+i))) {
 	      if(sol(-(snew+i))>eps)
 		v(pl,inf,i) = sol(-(snew+i))/sol(-s2);
-//	      gout << "\nnum: " << snew+i << " " << sol(-(snew+i)) << " ";
-//	      gout << "\nden: " << s2 << " " << sol(-s2) << " ";
-//	      gout << "\n  v = " << v;
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(i),s1,snew+i);
+	GetProfile(v,sol,n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),s1,snew+i);
       }
     }
   }
@@ -235,12 +215,8 @@ template <class T>
 void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
 				     int s1, int s2, int i1, int i2)
 {
-//  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
-//  gout << " prob = " << prob;
   int i,snew;
   if(n->GetOutcome()) {
-//    (*A)(s1,s2) = (*A)(s1,s2) -
-//       prob*(((OutcomeVector<T> &) *n->GetOutcome())[1]-minpay);
     (*A)(s1,s2) = gNumber((*A)(s1,s2)) +
        gNumber(prob) * EF.Payoff(n->GetOutcome(), 1) - gNumber(minpay);
   }
@@ -256,22 +232,22 @@ void CSSeqFormModule<T>::FillTableau(const Node *n, T prob,
       i1=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
       (*A)(s1,ns2+i1+1) = (T) +1;
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(snew+i,ns2+i1+1) = (T) -1;
-	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
       i2=n->GetInfoset()->GetNumber();
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+	snew+=support.NumActions(n->GetPlayer()->Infosets()[i]);
       (*A)(ns1+i2+1,s2) = (T) -1;
-      for(i=1;i<=n->NumChildren();i++) {
+      for(i=1;i<=support.NumActions(n->GetInfoset());i++) {
 	(*A)(ns1+i2+1,snew+i) = (T) +1;
-	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
+	FillTableau(n->GetChild(support.Actions(n->GetInfoset())[i]->GetNumber()),prob,s1,snew+i,i1,i2);
       }
     }
   }
@@ -286,6 +262,8 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
   for (int i = 1; i <= List.Length(); i++)    {
     BehavProfile<T> profile(support);
     GetProfile(profile,List[i],EF.RootNode(),1,1);
+    gout << "\nsupport: " << support;
+    gout << "\nprofile: " << profile;
     index = solutions.Append(BehavSolution(profile, algorithmEfg_LP_EFG));
     solutions[index].SetIsNash(triTRUE);
   }
@@ -301,6 +279,3 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 {
   return time;
 }
-
-
-
