@@ -3,6 +3,10 @@
 //#
 //# FILE: gcompile.y -- yaccer/compiler for the GCL
 //#
+//# This parser/compiler is dedicated to the memory of
+//# Jan L. A. van de Snepscheut, who wrote a program after which
+//# this code is modeled.
+//#
 //# $Id$
 //#
 
@@ -560,7 +564,22 @@ I_dont_believe_Im_doing_this:
 
   switch (c)  {
     case ',':   return COMMA;
-    case '.':   return DOT;
+    case '.':   c = nextchar();
+      if (c < '0' || c > '9')  { ungetchar(c);  return DOT; }
+      else  {
+	gString s(".");
+	s += c;
+        c = nextchar();
+        while (isdigit(c))  {
+	  s += c;
+	  c = nextchar();
+        }
+
+        ungetchar(c);
+        dval = atof((char *) s);
+        return FLOAT;
+      }
+
     case ';':   return SEMI;
     case '(':   matching.Push('(');  return LPAREN;
     case ')':   if (matching.Depth() > 0 && matching.Peek() == '(')
