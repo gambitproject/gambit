@@ -846,7 +846,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
 }
 
   // Replaces strings with their enumerated types.
-PortionSpec ToSpec(gString &str, int num=0)
+PortionSpec ToSpec(gString &str, int num /* =0 */)
 {
   /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
   if (str == "NUMBER")
