@@ -132,12 +132,6 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
   Solve(1);
   
-  if(status.Get()) {
-    aborted=1;
-    status.Reset();
-    return;
-  }
-    
    // gout << "\nFinal tableau: ";
    // tab.Dump(gout); 
   total_cost = tab.TotalCost();
@@ -187,12 +181,6 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   
   Solve(2);
   
-  if(status.Get()) {
-    aborted=1;
-    status.Reset();
-    return;
-  }
-    
    // gout << "\n--- End Phase II ---\n";
 
   if(!bounded) {
@@ -243,7 +231,8 @@ template <class T> void LPSolve<T>::Solve(int phase)
   gVector<T> a(neqns);
   double npiv;
   
-  if(status.Get()) return;
+  status.Get();
+
   do { 
     tab.DualVector(y);         // step 1: Solve y B = c_B
     // gout << "\nstep 1, y: " << y;
@@ -277,8 +266,8 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	  (*xx)[nvars-in] -= (T)flag*tmin;
 	// gout << "\nstep 5a, xx: " << (*xx);
       }
-    }
-    while(outlab==in && outlab !=0 && !status.Get()); 
+      status.Get();
+    } while(outlab==in && outlab !=0); 
     if(in) {
      // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
       tab.Pivot(out,in);       // step5b: Pivot new variable into basis

@@ -197,9 +197,11 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
   
   newsol =0;
   for (i = B.MinRow(); 
-       i <= B.MaxRow()  && !params.status.Get() && newsol ==0 &&
+       i <= B.MaxRow()  && newsol == 0 &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter);
-       i++)
+       i++) {
+    params.status.Get();
+    
     if (i != j)  {
       len=List.Length()-1;
       p1=(double)len/(double)(len+1);
@@ -244,6 +246,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       if(newsol)
 	All_Lemke(i,BCopy,npivots,depth+1);
     }
+  }
   
   return 1;
 }

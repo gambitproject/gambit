@@ -17,7 +17,7 @@ class gGCLSignal : public gSignal   {
     gGCLSignal(void);
     virtual ~gGCLSignal();
 
-    bool Get(void) const;
+    void Get(void) const;
     void Reset(void);
 };
 
@@ -31,9 +31,10 @@ gGCLSignal::~gGCLSignal()
   signal(SIGINT, SIG_DFL);
 }
 
-bool gGCLSignal::Get(void) const
+void gGCLSignal::Get(void) const
 {
-  return sig;
+  if (sig)
+    throw gSignalBreak();
 }
 
 void gGCLSignal::Reset(void)

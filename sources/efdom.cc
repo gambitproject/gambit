@@ -25,27 +25,29 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
     B.Freeze(pl, iset);
     B.Set(pl, iset, b);
 
-		if (strong)  {
-			do  {
+    if (strong)  {
+      do  {
+	status.Get();
 	gRational ap = A.Payoff(pl);
 	gRational bp = B.Payoff(pl);
 	if (ap <= bp)  return false;
 	A.NextContingency();
-			} while (B.NextContingency() && !status.Get());
-			return true;
-		}
+      } while (B.NextContingency());
+      return true;
+    }
 
-		bool equal = true;
+    bool equal = true;
 
-		do   {
-			gRational ap = A.Payoff(pl);
-			gRational bp = B.Payoff(pl);
-			if (ap < bp)   return false;
-			else if (ap > bp)  equal = false;
-			A.NextContingency();
-		} while (B.NextContingency() && !status.Get());
-
-		return (!equal);
+    do   {
+      status.Get();
+      gRational ap = A.Payoff(pl);
+      gRational bp = B.Payoff(pl);
+      if (ap < bp)   return false;
+      else if (ap > bp)  equal = false;
+      A.NextContingency();
+    } while (B.NextContingency());
+    
+    return (!equal);
 }
 
 // With strong set to false, the following routine returns true 
@@ -88,22 +90,24 @@ bool ConditionallyDominates(const EFSupport &S,
     
     if (strong)  {
       do  {
+	status.Get();
 	gRational ap = A.Payoff(pl);  // Should be conditioned on the node?
 	gRational bp = B.Payoff(pl);
 	if (ap <= bp)  return false;
 	A.NextContingency();
-      } while (B.NextContingency() && !status.Get());
+      } while (B.NextContingency());
       
       return true;
     }
     
     do   {
+      status.Get();
       gRational ap = A.Payoff(pl);
       gRational bp = B.Payoff(pl);
       if (ap < bp)   return false;
       else if (ap > bp)  equal = false;
       A.NextContingency();
-    } while (B.NextContingency() && !status.Get());
+    } while (B.NextContingency());
   }
   
   if (strong) return true;
@@ -123,7 +127,8 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
     set[i] = i;
 
   int min, dis;
-  for (min = 0, dis = actions.Length() - 1; min <= dis && !status.Get(); )  {
+  for (min = 0, dis = actions.Length() - 1; min <= dis; )  {
+    status.Get();
     int pp;
     for (pp = 0;
 	 pp < min && !Dominates(S, pl, iset, set[pp+1], set[dis+1], strong,status);
@@ -135,7 +140,8 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
       set[dis+1] = set[min+1];
       set[min+1] = foo;
 
-			for (int inc = min + 1; inc <= dis && !status.Get(); )  {
+      for (int inc = min + 1; inc <= dis; )  {
+	status.Get();
 	if (Dominates(S, pl, iset, set[min+1], set[dis+1], strong,status))  {
 		status << actions[set[dis+1]]->GetNumber() << " dominated by "
 				<< actions[set[min+1]]->GetNumber() << '\n';
@@ -160,7 +166,8 @@ bool ComputeDominated(EFSupport &S, EFSupport &T,
 		}
 	}
 
-	if (min + 1 <= actions.Length() && !status.Get())   {
+	if (min + 1 <= actions.Length())   {
+	  status.Get();
 	  for (i = min + 1; i <= actions.Length(); i++)
 	    T.RemoveAction(actions[set[i]]);
 	  return true;
@@ -184,12 +191,14 @@ EFSupport *ComputeDominated(EFSupport &S,
   for (i = 1; i <= players.Length(); i++)
     num_isets += S.Game().Players()[players[i]]->NumInfosets();
 
-  for (i = 1; i <= players.Length() && !status.Get(); i++)   {
+  for (i = 1; i <= players.Length(); i++)   {
+    status.Get();
     int pl = players[i];
     status << "Dominated strategies for player " << pl << ":\n";
     for (iset = 1;
-	 iset <= S.Game().Players()[pl]->NumInfosets() && !status.Get();
+	 iset <= S.Game().Players()[pl]->NumInfosets();
 	 iset++)   {
+      status.Get();
       status << "Dominated strategies in infoset " << iset << ":\n";
       status.SetProgress((double)cur_iset/(double)num_isets);cur_iset++;
       if (ComputeDominated(S, *T, pl, iset, strong, status))
@@ -197,9 +206,8 @@ EFSupport *ComputeDominated(EFSupport &S,
     }
   }
 
-  if (!any || status.Get())  {
+  if (!any)  {
     delete T;
-    if (status.Get()) status.Reset();
     return 0;
   }
 

@@ -136,10 +136,8 @@ PolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
       kk+=(support.NumStrats(i)-1);
     }
     index = solutions.Append(MixedSolution(profile, NfgAlg_POLENUM));
-    if(params.status.Get() != 1) {
-      solutions[index].SetEpsilon(0);
-      solutions[index].SetIsNash(triTRUE);
-    }
+    solutions[index].SetEpsilon(0);
+    solutions[index].SetIsNash(triTRUE);
   }
   return index;
 }

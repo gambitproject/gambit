@@ -63,7 +63,8 @@ bool ComputeMixedDominated(const Nfg &nfg,
       s.NextContingency();
     }
 
-    for (k = 1; k <= strats && !status.Get(); k++)	{
+    for (k = 1; k <= strats; k++) {
+      status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
       // tracefile << '\n' << (gRectArray<T> &)A << '\n';
@@ -140,7 +141,8 @@ bool ComputeMixedDominated(const Nfg &nfg,
       s.NextContingency();
     }
 
-    for (k = 1; k <= strats && !status.Get(); k++)	{
+    for (k = 1; k <= strats; k++) {
+      status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
       // tracefile << '\n' << (gRectArray<T> &)A << '\n';
@@ -199,13 +201,14 @@ NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
   NFSupport *newS = new NFSupport(S);
   bool any = false;
   
-  for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
+  for (int i = 1; i <= players.Length(); i++)   {
+    status.Get();
     int pl = players[i];
 
     any |= ComputeMixedDominated(N, S, *newS, pl, strong, tracefile, status);
   }
   tracefile << "\n";
-  if (!any || status.Get())  {
+  if (!any)  {
     delete newS;
     return 0;
   }

@@ -178,42 +178,38 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 
   solutions.Flush();
 
-  for ( i = 1; !params.status.Get() && 
+  for (i = 1;  
        (params.nTries == 0 || i <= params.nTries) &&
-       (params.stopAfter==0 || solutions.Length() < params.stopAfter);
+	 (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) { 
+    params.status.Get();
     if (i > 1) PickRandomProfile(p);
     
-    if(params.trace>0)
+    if (params.trace>0)
       *params.tracefile << "\nTry #: " << i << " p: ";
     
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		    params.maxitsN, params.tolN, *params.tracefile,
 		    params.trace-1, false, params.status))  {
-      bool add = false;
-      if (!params.status.Get()) {
-	add=true;
-	int ii=1;
-	while(ii<=solutions.Length() && add == true) {
-	  if(solutions[ii].Equals(p)) 
-	    add = false;
+      bool add = true;
+      int ii = 1;
+      while (ii <= solutions.Length() && add == true) {
+	if (solutions[ii].Equals(p)) 
+	  add = false;
 	  ii++;
 	}
-      }
+
       if (add)  {
 	if(params.trace>0)
 	  *params.tracefile << p;
-
+      
 	int index = solutions.Append(MixedSolution(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
-	if (!params.status.Get()) {
-	  solutions[index].SetIsNash(triTRUE);
-	  solutions[index].SetEpsilon(params.tolN);
-	}
-      }   
+	solutions[index].SetIsNash(triTRUE);
+	solutions[index].SetEpsilon(params.tolN);
+      }
     }
   }
-  if(params.status.Get()) params.status.Reset(); 
 
   nevals = F.NumEvals();
   niters = 0L;

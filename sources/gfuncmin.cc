@@ -382,7 +382,8 @@ bool DFP(gPVector<double> &p,
     hessin(i, i) = 1.0;
   }
   
-  for (its = 1; its <= maxitsN && !status.Get(); its++)  {
+  for (its = 1; its <= maxitsN; its++)  {
+    status.Get();
     iter = its;
     Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
@@ -392,7 +393,7 @@ bool DFP(gPVector<double> &p,
 	  throw gFuncMinError();
       }
     
-    if (fret <= tolN || fret >= fp || its >= maxitsN || status.Get())  {
+    if (fret <= tolN || fret >= fp || its >= maxitsN)  {
       if (fret <= tolN)  return true;
       else               return false;
     }
@@ -477,7 +478,8 @@ bool Powell(gPVector<double> &p,
   }
 
   pt=p;
-  for (iter=1;!status.Get();iter++) {
+  for (iter=1; ;iter++) {
+    status.Get();
     fp=fret;
     if(startVal>tolN)
       status.SetProgress((double)(startVal-fp)/(double)(startVal-tolN));
@@ -506,7 +508,7 @@ bool Powell(gPVector<double> &p,
       tracefile << " p = " << p;
     }
 
-    if(status.Get()) return false;
+    status.Get();
     if (fret <= tolN) return true;
 
     if (iter == maxitsN)   {
@@ -601,7 +603,7 @@ bool OldPowell(gVector<double> &p,
       tracefile << " p = " << p;
       tracefile.SetFloatMode().SetPrec(prec);
     }
-    if(status.Get()) return false;
+    status.Get();
     if (fret <= tolN) return true;
 
     if (iter == maxitsN) {

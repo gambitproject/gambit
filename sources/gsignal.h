@@ -18,7 +18,7 @@ class gSignalBreak : public gException {
 class gSignal   {
   public:
     virtual ~gSignal()  { }
-    virtual bool Get(void) const = 0;
+    virtual void Get(void) const = 0;
     virtual void Reset(void) = 0;
 };
 

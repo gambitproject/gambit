@@ -31,7 +31,7 @@ int SimpdivBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  return params.status.Get();
+  return 0;
 }
 
 SimpdivBySubgame::SimpdivBySubgame(const EFSupport &S, 

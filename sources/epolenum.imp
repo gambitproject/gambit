@@ -182,10 +182,8 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
     BehavSolution sol(SF.ToBehav(x), EfgAlg_POLENUM);
     if(ExtendsToNash(sol)) {
       index = solutions.Append(sol);
-      if(params.status.Get() != 1) {
-	solutions[index].SetEpsilon(0);
-	solutions[index].SetIsNash(triTRUE);
-      }
+      solutions[index].SetEpsilon(0);
+      solutions[index].SetIsNash(triTRUE);
     }
   }
 

@@ -196,10 +196,10 @@ void Gobit(const Nfg &N, NFGobitParams &params,
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
 
-  for (nit = 1; !params.status.Get() &&
+  for (nit = 1;
        Lambda <= params.maxLam &&
        Lambda >= params.minLam && value < 10.0; nit++)  {
-
+    params.status.Get();
     F.SetLambda(Lambda);
     DFP(p, F, value, iter,
         params.maxits1, params.tol1, params.maxitsN, params.tolN,
@@ -235,8 +235,6 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
     solutions[i].SetGobit(Lambda, value);
   }
-
-  if (params.status.Get())   params.status.Reset();
 
   nevals = F.NumEvals();
   nits = 0;
@@ -376,10 +374,10 @@ void KGobit(const Nfg &N, NFGobitParams &params,
   }
 
   bool powell = true;
-  for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
+  for (nit = 1; powell && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
-
+    params.status.Get();
 
     F.SetK(K);
     
@@ -436,8 +434,6 @@ void KGobit(const Nfg &N, NFGobitParams &params,
     i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
     solutions[i].SetGobit(K_old, value);
   }
-
-  if (params.status.Get())   params.status.Reset();
 
   nevals = F.NumEvals();
   nits = 0;

@@ -160,9 +160,10 @@ bool Liap(const Efg &E, EFLiapParams &params,
   int iter;
   bool found;
 
-  for (int i = 1; !params.status.Get() && (params.nTries == 0 || i <= params.nTries) &&
+  for (int i = 1; (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
        i++)   {
+    params.status.Get();
     if (i > 1)  PickRandomProfile(p);
 
     InitMatrix(xi, p.Lengths());
@@ -175,16 +176,14 @@ bool Liap(const Efg &E, EFLiapParams &params,
 		       params.tolN,*params.tracefile, params.trace-1, true, 
 		       params.status)) {
       
-      bool add = false;
-      if (!params.status.Get()) {
-	add=true;
-	int ii=1;
-	while(ii<=solutions.Length() && add == true) {
-	  if(solutions[ii].Equals(p)) 
-	    add = false;
-	  ii++;
-	}
+      bool add = true;
+      int ii=1;
+      while(ii<=solutions.Length() && add == true) {
+	if(solutions[ii].Equals(p)) 
+	  add = false;
+	ii++;
       }
+
       if (add)  {
 	if(params.trace>0)
 	  *params.tracefile << p;
@@ -193,7 +192,6 @@ bool Liap(const Efg &E, EFLiapParams &params,
       }
     }
   }
-  if(params.status.Get()) params.status.Reset();
 
   nevals = F.NumEvals();
   niters = 0L;
@@ -234,7 +232,7 @@ int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   Liap(E, params, bp, solns, this_nevals, this_niters);
 
   nevals += this_nevals;
-  return params.status.Get();
+  return 0;
 }
 
 extern void MarkedSubgameRoots(const Efg &, gList<Node *> &);

@@ -97,10 +97,10 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
     time = watch.Elapsed();
     return List.Length();
   }
-  catch (gSignalBreak &e) {
+  catch (gSignalBreak &E) {
     // for now, we won't give *any* solutions -- but we should list
     // any solutions found!
-    return 0;
+    throw;
   }
   // any other exceptions will propagate out.
 }

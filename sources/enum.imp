@@ -116,9 +116,10 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
   const gList<BFS<T> > &verts1(poly.VertexList());
   const gList<BFS<T> > &verts2(poly.VertexList2());
 
-  for( i=2; i<=verts1.Length() &&  !params.status.Get()
-       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+  for( i=2; i<=verts1.Length() &&
+       (params.stopAfter==0 || solutions.Length()<params.stopAfter);
        i++ ) {
+    params.status.Get();
     bfs1 = verts2[i];
     bfs2 = verts1[i];
     
@@ -148,19 +149,11 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
     } 
   
     index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
-    if(params.status.Get() != 1) {
-      solutions[index].SetEpsilon(eps);
-      solutions[index].SetIsNash(triTRUE);
-    }
+    solutions[index].SetEpsilon(eps);
+    solutions[index].SetIsNash(triTRUE);
   }
   npivots = poly.NumPivots();
 
-  if(params.status.Get()) {
-    (*params.tracefile) << "\n User Break \n";
-    params.status.Reset();
-  }
-
-  
   dt = watch.Elapsed()-time;
   time = watch.Elapsed();
   if(params.trace>=2) {
@@ -173,7 +166,6 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
 template <class T> int EnumModule<T>::Enum(void)
 {
   int index;
-  bool add;
   T min;
 
   if (NF.NumPlayers() != 2)   return 0;  
@@ -260,9 +252,10 @@ template <class T> int EnumModule<T>::Enum(void)
   int i1,i2,id1=0,id2=0;
   (*params.tracefile) << "\n" << v2 << " " << v1 << "\n";
   for( i2=2; 
-       i2<=v2 &&  !params.status.Get()
-       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+       i2<=v2 &&
+       (params.stopAfter==0 || solutions.Length()<params.stopAfter);
        i2++ ) {
+    params.status.Get();
     bfs1 = verts2[i2];
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
@@ -311,41 +304,24 @@ template <class T> int EnumModule<T>::Enum(void)
 	    profile(2,k)/=sum;
 	} 
       
-	add = false;
-	if((params.status.Get() != 1) 
-//	   || (params.status.Get() == 1 && profile.IsNash())
-	 )
-	  add = true;
-	if(add)
-	{
-	  // gout << "\ni2,i1: " << i2 << " " << i1;
-	  (*params.tracefile) << "\n" << i2 << " " << i1;
+	(*params.tracefile) << "\n" << i2 << " " << i1;
 
-	  index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
-	  if(params.status.Get() != 1) {
-	    solutions[index].SetEpsilon(eps);
-	    solutions[index].SetIsNash(triTRUE);
-
-	    // note:  this is not really sufficient information -- we should also
-	    //        keep the basis
-	  if(vert1id[i1]==0){id1++;vert1id[i1]=id1;key2.Append(profile.GetRow(2));}
-	  if(vert2id[i2]==0){id2++;vert2id[i2]=id2;key1.Append(profile.GetRow(1));}
-	  node1.Append(vert2id[i2]);
-	  node2.Append(vert1id[i1]);
-	  }
-	}
+	index = solutions.Append(MixedSolution(profile, NfgAlg_ENUM));
+	solutions[index].SetEpsilon(eps);
+	solutions[index].SetIsNash(triTRUE);
+	
+	// note:  this is not really sufficient information -- we should also
+	//        keep the basis
+	if(vert1id[i1]==0){id1++;vert1id[i1]=id1;key2.Append(profile.GetRow(2));}
+	if(vert2id[i2]==0){id2++;vert2id[i2]=id2;key1.Append(profile.GetRow(1));}
+	node1.Append(vert2id[i2]);
+	node2.Append(vert1id[i1]);
       }
     }
 
   }
   npivots = poly1.NumPivots()+poly2.NumPivots();
 
-  if(params.status.Get()) {
-    (*params.tracefile) << "\n User Break \n";
-    params.status.Reset();
-  }
-
-  
   dt = watch.Elapsed()-time;
   time = watch.Elapsed();
   if(params.trace>=2) {

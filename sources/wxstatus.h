@@ -48,7 +48,7 @@ public:
 
     // functions for gSignal
     virtual void SetSignal(void) { sig = true; }
-    virtual bool Get(void) const;
+    virtual void Get(void) const;
     virtual void Reset(void)     { sig = false; }
 };
 

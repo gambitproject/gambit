@@ -59,7 +59,8 @@ bool ComputeDominated(const Nfg &N, const NFSupport &S, NFSupport &newS,
   double d1,d2;
   d1 = (double)(pl-1)/(double)S.Game().NumPlayers();
   d2 = (double)pl/(double)S.Game().NumPlayers();
-  for (min = 0, dis = S.NumStrats(pl) - 1; min <= dis && !status.Get(); )  {
+  for (min = 0, dis = S.NumStrats(pl) - 1; min <= dis; )  {
+    status.Get();
     int pp;
     double s1 = (double)min/(double)(dis+1);
     status.SetProgress((1.0-s1)*d1 + s1*d2);
@@ -121,7 +122,8 @@ NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
       (*paytable)(outc, pl) = N.Payoff(N.Outcomes()[outc], pl);
   }
 
-  for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
+  for (int i = 1; i <= players.Length(); i++)   {
+    status.Get();
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
     any |= ComputeDominated(N, S, *newS, pl, strong, tracefile, status);
@@ -130,7 +132,7 @@ NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
 
   delete paytable;
 
-  if (!any || status.Get())  {
+  if (!any)  {
     delete newS;
     return 0;
   }

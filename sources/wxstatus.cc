@@ -31,8 +31,12 @@ wxStatus::~wxStatus()
     Show(FALSE);
 }
 
-bool wxStatus::Get(void) const  
-{ wxYield(); return sig; }
+void wxStatus::Get(void) const  
+{
+  wxYield();
+  if (sig)
+    throw gSignalBreak();
+}
 
 void wxStatus::button_proc(wxButton& but, wxCommandEvent& )
 { ((wxStatus *)but.GetClientData())->SetSignal(); }

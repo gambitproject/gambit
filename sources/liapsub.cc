@@ -56,7 +56,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  return params.status.Get();
+  return 0;
 }
 
 NFLiapBySubgame::NFLiapBySubgame(const Efg &E, const NFLiapParams &p,

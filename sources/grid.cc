@@ -416,8 +416,9 @@ else
 MixedProfileGrid M(S, params.delp1);
 M.SetStatic(static_player);
 double lam=params.minLam;
-for (int step=1;step<num_steps  && !params.status.Get();step++)
+for (int step=1;step<num_steps;step++)
 {
+  params.status.Get();
 	if (params.powLam==0)  lam=lam+params.delLam; else lam=lam*(params.delLam+1);
 	do {CheckEqu(M,lam,0);} while (M.Inc())	;
 	params.status.SetProgress((double)step/(double)num_steps);
@@ -427,7 +428,6 @@ timer.Stop();
 *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 params.status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 
-if (params.status.Get()) params.status.Reset();
 }
 
 

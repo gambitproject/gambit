@@ -223,10 +223,10 @@ void Gobit(const Efg &E, EFGobitParams &params,
   InitMatrix(xi, p.Lengths());
 
   bool powell = true;
-  for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
+  for (nit = 1; powell && !F.DomainErr() &&
        Lambda <= params.maxLam && Lambda >= params.minLam &&
        value < 10.0; nit++)   {
-
+    params.status.Get();
     F.SetLambda(Lambda);
     powell = Powell(p, xi, F, value, iter,
 	   params.maxits1, params.tol1, params.maxitsN, params.tolN,
@@ -266,8 +266,6 @@ void Gobit(const Efg &E, EFGobitParams &params,
 
   if (!params.fullGraph)
     AddSolution(solutions, pold, Lambda, value);
-
-  if (params.status.Get())    params.status.Reset();
 
   nevals = F.NumEvals();
   nits = 0;
@@ -421,10 +419,10 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
   }
   
   bool powell = true;
-  for (nit = 1; !params.status.Get() && powell && !F.DomainErr() &&
+  for (nit = 1; powell && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
-    
+    params.status.Get();
     
     F.SetK(K);
     
@@ -484,8 +482,6 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
       i = solutions.Append(BehavSolution(p, EfgAlg_GOBIT));
       solutions[i].SetGobit(K_old, value);
     }
-  
-  if (params.status.Get())   params.status.Reset();
   
   nevals = F.NumEvals();
   nits = 0;

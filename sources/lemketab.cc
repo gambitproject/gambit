@@ -223,7 +223,8 @@ template <class T> int LTableau<T>::SF_LCPPath(int dup, gStatus &status)
       return 0;
     }
     enter = -exit;
-  } while (exit != 0 && !status.Get());
+    status.Get();
+  } while (exit != 0);
   return 1;
 }
 

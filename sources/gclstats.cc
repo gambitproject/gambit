@@ -41,8 +41,8 @@ public:
   bool IsValid(void) const { return true; }
 
   void SetProgress(double) { }
-  bool Get(void) const 
-    { if (m_sig) throw gSignalBreak(); return m_sig; }
+  void Get(void) const 
+    { if (m_sig) throw gSignalBreak(); }
   void Reset(void) { m_sig = false; }
 };
 

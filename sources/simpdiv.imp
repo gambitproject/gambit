@@ -397,7 +397,6 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 {
   int qf,soln,i,j,k,ii;
   int index;
-  bool add;
 
   gWatch watch;
 
@@ -406,28 +405,23 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
   mingrid=(T)(2);
   for(i=1;i<=params.nRestarts;i++)mingrid=mingrid*(T)(2);
   mingrid = ((T)(1))/mingrid;
-//  *params.tracefile << "\nleash = " << leash << " ndivs = " << ndivs;
-//  *params.tracefile << " mingrid = " << mingrid;
-  
-//   nplayers=N.NumPlayers();
   
   ((gVector<T> &) y).operator=((T) 0);
-//  *params.tracefile << "\nnplayers =" << nplayers;
-//  *params.tracefile << "\nnstrats = " << nstrats;
-//  *params.tracefile << "\ny = " << y;
   
   solutions.Flush();
-  for(soln=0;soln<params.stopAfter && !params.status.Get();soln++) {
+
+  for (soln=0;soln<params.stopAfter;soln++) {
+    params.status.Get();
     k=1;
     d=(T) 1.0 / (T) k;
     for(i=1;i<=nplayers;i++) {
-//	  *params.tracefile << "\n i = " << i;
       y(i,1)=(T)(1);
       for(j=1;j<=nstrats[i];j++)
 	if(j>1)y(i,j)=(T)(0);
     }
     
-    for(qf=0,ii=0;qf!=1 && d > mingrid && !params.status.Get();ii++) {
+    for(qf=0,ii=0;qf!=1 && d > mingrid;ii++) {
+      params.status.Get();
       params.status.SetProgress((double)ii/(double)params.nRestarts);
       d=(T)(d/(T)2.0);
       for(i=1;i<=nplayers;i++)
@@ -435,27 +429,15 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 	  v(i,j)=y(i,j);
       maxz=simplex();
       
-//	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
       if(maxz<(T)(TOL))qf=1;
     }
     *params.tracefile << "\nSimpDiv solution # " << (soln+1) << " : " << y;
     *params.tracefile << " maxz = " << maxz; 
-
-    add = false;
+    
     MixedProfile<T> profile(y);
-    if((params.status.Get() != 1) 
-//       || (params.status.Get() == 1 && profile.IsNash())
-     )
-      add = true;
-    if(add)
-    {
-      index=solutions.Append(MixedSolution(profile, NfgAlg_SIMPDIV));
-      if(params.status.Get() != 1) {
-	solutions[index].IsNash();
-      }
-    }    
+    index=solutions.Append(MixedSolution(profile, NfgAlg_SIMPDIV));
+    solutions[index].IsNash();
   }
-  if(params.status.Get()) params.status.Reset();
 
   time = watch.Elapsed();
 

@@ -32,7 +32,7 @@ int LemkeBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   delete S;
   delete N;
-  return params.status.Get();
+  return 0;
 }
 
 LemkeBySubgame::LemkeBySubgame(const EFSupport &S, const LemkeParams &p,
