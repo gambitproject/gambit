@@ -148,7 +148,7 @@ bool GSM::PushList( const int num_of_elements )
   int            i;
   Portion*       p;
   List_Portion*  list;
-  Portion*       insert_result;
+  int            insert_result;
   bool           result = true;
 
 #ifndef NDEBUG
@@ -167,11 +167,9 @@ bool GSM::PushList( const int num_of_elements )
       p = _ResolveRef( (Reference_Portion*) p );
 
     insert_result = list->Insert( p, 1 );
-    if( insert_result != 0 )
+    if( insert_result == 0 )
     {
-      assert( insert_result->Type() == porERROR );
-      insert_result->Output( _StdErr );
-      delete insert_result;
+      _ErrorMessage( _StdErr, 35 );
       result = false;
     }
   }
@@ -393,56 +391,21 @@ bool GSM::UnAssign( void )
 Portion* GSM::_ResolveRef( Reference_Portion* p )
 {
   Portion*  result = 0;
-  gString&  ref = p->Value();
-  gString&  subvalue = p->SubValue();
+  gString   ref = p->Value();
 
-
-  if( _RefTable->IsDefined( ref ) )
-  {
-    if( subvalue == "" )
-    {
-      result = (*_RefTable)( ref )->Copy();
-    }
-    else
-    {
-      result = (*_RefTable)( ref );
-      switch( result->Type() )
-      {
-      case porNFG_DOUBLE:
-	result = ((Nfg_Portion<double>*) result )->operator()( subvalue );
-	break;
-      case porNFG_RATIONAL:
-	result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
-	break;
-
-      default:
-	_ErrorMessage( _StdErr, 12 );
-	result = new Error_Portion;
-      }
-      if( result != 0 )
-      {
-	if( result->Type() != porERROR )
-	  result = result->Copy();
-      }
-      else
-      {
-	result = new Error_Portion;
-      }
-    }
-  }
-  else
+  result = _ResolveRefWithoutError( p );
+  if( result == 0 )
   {
     _ErrorMessage( _StdErr, 13, 0, 0, ref );
     result = new Error_Portion;
   }
-  delete p;
-
   return result;
 }
 
 
 Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 {
+  Portion*  primary_ref;
   Portion*  result = 0;
   gString&  ref = p->Value();
   gString&  subvalue = p->SubValue();
@@ -455,30 +418,20 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
     }
     else
     {
-      result = (*_RefTable)( ref );
-      switch( result->Type() )
+      primary_ref = (*_RefTable)( ref );
+      switch( primary_ref->Type() )
       {
       case porNFG_DOUBLE:
-	if( ((Nfg_Portion<double>*) result )->IsDefined( subvalue ) )
-	{
-	  result = ((Nfg_Portion<double>*) result )->
-	    operator()( subvalue )->Copy();
-	}
-	else
-	{
-	  result = 0;
-	}
+	result = ((Nfg_Portion<double>*) primary_ref )->
+	  operator()( subvalue );
+	if( result != 0 )
+	  result = result->Copy();
 	break;
       case porNFG_RATIONAL:
-	if( ((Nfg_Portion<gRational>*) result )->IsDefined( subvalue ) )
-	{
-	  result = ((Nfg_Portion<gRational>*) result )
-	    ->operator()( subvalue )->Copy();
-	}
-	else
-	{
-	  result = 0;
-	}
+	result = ((Nfg_Portion<gRational>*) primary_ref )->
+	  operator()( subvalue );
+	if( result != 0 )
+	  result = result->Copy();
 	break;
 
       default:
@@ -486,10 +439,6 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	result = new Error_Portion;
       }
     }
-  }
-  else
-  {
-    result = 0;
   }
   delete p;
 
@@ -1362,10 +1311,6 @@ void GSM::_ErrorMessage
   case 11:
     s << "  No reference found to be unassigned\n";
     break;
-  case 12:
-    s << "  Attempted to resolve a subvariable of a type\n";
-    s << "  that does not support subvariables\n";
-    break;
   case 13:
     s << "  Attempted to resolve an undefined reference";
     s << " \"" << str1 << "\"\n";
@@ -1462,6 +1407,10 @@ void GSM::_ErrorMessage
     break;
   case 34:
     s << "  Pop() called on an empty stack\n";
+    break;
+  case 35:
+    s << "  Attempted to insert conflicting Portion\n";
+    s << "  types into a List_Portion.\n";
     break;
   default:
     s << "  General error\n";

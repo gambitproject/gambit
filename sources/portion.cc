@@ -541,10 +541,12 @@ List_Portion::List_Portion( const gBlock<Portion*>& value )
   int i;
   int length;
   int type_match;
+  int result;
 
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
-    Insert( value[ i ]->Copy(), i );
+    result = Insert( value[ i ]->Copy(), i );
+    assert( result != 0 );
   }
 }
 
@@ -571,9 +573,9 @@ Portion* List_Portion::Copy( bool new_data ) const
 { return new List_Portion( _Value ); }
 
 
-int List_Portion::TypeCheck( Portion* item )
+bool List_Portion::TypeCheck( Portion* item )
 {
-  int result = false;
+  bool result = false;
 
   if( item->Type() == _DataType )
   {
@@ -611,13 +613,13 @@ void List_Portion::Output( gOutput& s ) const
 
 
 
-Portion* List_Portion::Append( Portion* item )
+int List_Portion::Append( Portion* item )
 { return Insert( item, _Value.Length() + 1 ); }
 
 
-Portion* List_Portion::Insert( Portion* item, int index )
+int List_Portion::Insert( Portion* item, int index )
 {
-  Portion* result = 0;
+  int result = 0;
   int type_match;
 
 #ifndef NDEBUG
@@ -639,12 +641,11 @@ Portion* List_Portion::Insert( Portion* item, int index )
       else
 	_DataType = item->Type();
       item->ParentList() = this;
-      _Value.Insert( item, index );
+      result = _Value.Insert( item, index );
     }
     else
     {
       delete item;
-      result = new Error_Portion( _ErrorMessage( 4 ) );
     }
   }
   else  // inserting into an existing list
@@ -653,12 +654,11 @@ Portion* List_Portion::Insert( Portion* item, int index )
     if( !type_match )
     {
       delete item;
-      result = new Error_Portion( _ErrorMessage( 5 ) );
     }
     else
     {
       item->ParentList() = this;
-      _Value.Insert( item, index );
+      result = _Value.Insert( item, index );
     }
   }
 
@@ -855,10 +855,6 @@ template <class T>
   {
     result = (*_RefTable)( ref );
   }
-  else
-  {
-    result = new Error_Portion( _ErrorMessage( 3 ) );
-  }
 
   return result;
 }
@@ -986,10 +982,6 @@ template <class T>
   if( _RefTable->IsDefined( ref ) )
   {
     result = (*_RefTable)( ref );
-  }
-  else
-  {
-    result = new Error_Portion( _ErrorMessage( 3 ) );
   }
 
   return result;
@@ -1214,19 +1206,6 @@ gString Portion::_ErrorMessage( const int error_num, const gString& str )
     break;
   case 2:
     result += "  Division by zero\n";
-    break;
-  case 3:
-    result += "  Attempted to access an undefined reference \"";
-    result += str;
-    result += "\"\n";
-    break;
-  case 4:
-    result += "  Attempted to insert an Error_Portion\n";
-    result += "  into a List_Portion.\n";
-    break;
-  case 5:
-    result += "  Attempted to insert conflicting Portion\n";
-    result += "  types into a List_Portion.\n";
     break;
   case 6:
     result += "  An out-of-range list subscript specified\n";

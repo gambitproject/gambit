@@ -10,7 +10,7 @@
 
 
 #define CRASHTEST
-#define INTERACTIVE
+// #define INTERACTIVE
 
 
 int main( void )

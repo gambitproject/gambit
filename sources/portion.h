@@ -216,7 +216,7 @@ class List_Portion : public Portion
   gBlock<Portion*> _Value;
   PortionType      _DataType;
 
-  int TypeCheck( Portion* item );
+  bool TypeCheck( Portion* item );
 
  public:
   List_Portion( void );
@@ -230,8 +230,8 @@ class List_Portion : public Portion
   PortionType       DataType  ( void ) const;
   void              Output    ( gOutput& s ) const;
 
-  Portion* Append     ( Portion* item );
-  Portion* Insert     ( Portion* item, int index );
+  int      Append     ( Portion* item );
+  int      Insert     ( Portion* item, int index );
   Portion* Remove     ( int index );
   int      Length     ( void ) const;
   void     Flush      ( void );
