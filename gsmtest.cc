@@ -2679,6 +2679,7 @@ int main( void )
 
 
 
+
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
@@ -2910,6 +2911,7 @@ int main( void )
 
 
 
+
   machine->PushRef( "E" );
   machine->InitCallFunction( "ReadEfg" );
   machine->InitCallFunction( "Input" );
@@ -2921,8 +2923,22 @@ int main( void )
   machine->Assign();
   machine->Output();
 
+  machine->PushRef( "E" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->InitCallFunction( "Input" );
+  machine->Push( "e03.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Output();
 
-/*
+
+
+
+
+
   machine->InitCallFunction( "WriteEfg" );
 
   machine->InitCallFunction( "WriteEfg" );
@@ -2943,8 +2959,6 @@ int main( void )
   machine->Output();
   
   machine->Dump();
-*/
-
 
 
 #ifdef INTERACTIVE
@@ -2971,6 +2985,27 @@ int main( void )
   machine->PushRef( "la" );
   machine->Dump();
 
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  machine->PushRef( "intx" );
+  machine->Push( (long) 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "intx" );
+  machine->Push( (long) 2 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "intx" );
+  machine->Dump();
 
 
 

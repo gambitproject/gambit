@@ -62,6 +62,8 @@ bool Portion::operator == ( Portion* p ) const
   return false;
 }
 
+
+
 //---------------------------------------------------------------------
 //                          Error class
 //---------------------------------------------------------------------
@@ -821,8 +823,11 @@ template <class T> Portion* MixedPortion<T>::RefCopy( void ) const
 
 template <class T> void MixedPortion<T>::AssignFrom( Portion* p )
 {
+  assert( 0 );
+/*
   assert( p->Type() == Type() );
   *_Value = *( ( (MixedPortion<T>*) p )->_Value );
+*/
 }
 
 template <class T> bool MixedPortion<T>::operator == ( Portion *p ) const
@@ -903,8 +908,11 @@ template <class T> Portion* BehavPortion<T>::RefCopy( void ) const
 
 template <class T> void BehavPortion<T>::AssignFrom( Portion* p )
 {
+  assert( 0 );
+/*
   assert( p->Type() == Type() );
   *_Value = *( ( (BehavPortion<T>*) p )->_Value );
+*/
 }
 
 template <class T> bool BehavPortion<T>::operator == ( Portion *p ) const
@@ -968,8 +976,11 @@ BaseNormalForm& BaseNfgPortion::Value( void ) const
 
 void BaseNfgPortion::AssignFrom( Portion* p )
 {
+  assert( 0 );
+/*
   assert( p->Type() == Type() );
   *_Value = *( ( (BaseNfgPortion*) p )->_Value );
+*/
 }
 
 bool BaseNfgPortion::operator == ( Portion *p ) const
@@ -1059,8 +1070,11 @@ BaseExtForm& BaseEfgPortion::Value( void ) const
 
 void BaseEfgPortion::AssignFrom( Portion* p )
 {
-  assert( p->Type() == Type() );
+  assert( 0 );
+/*
+  assert( p->Type() == Type() ); 
   *_Value = *( ( (BaseEfgPortion*) p )->_Value );
+*/
 }
 
 bool BaseEfgPortion::operator == ( Portion *p ) const

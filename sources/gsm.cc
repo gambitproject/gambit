@@ -360,7 +360,7 @@ Portion* GSM::_Pop( void )
 }
 
 //---------------------------------------------------------------------
-//     Reference related functions: PushRef(), Assign(), UnAssign()
+//     Reference related functions
 //---------------------------------------------------------------------
 
 
@@ -379,7 +379,9 @@ bool GSM::Assign( void )
   Portion*  primary_ref;
   Portion*  por_result;
   bool      result = true;
-
+  PortionType p1_type;
+  PortionType p2_type;
+  
 #ifndef NDEBUG
   if( _Depth() < 2 )
     _ErrorMessage( _StdErr, 4 );
@@ -389,8 +391,9 @@ bool GSM::Assign( void )
   p1 = _Pop();
 
   p2 = _ResolveRef( p2 );
-  p1 = _ResolveRef( p1 );
+  p2_type = p2->Type();
 
+  p1_type = p1->Type();
 
   if( p2->Type() == porREFERENCE )
   {
@@ -401,66 +404,89 @@ bool GSM::Assign( void )
     delete p2;
   }
 
-  else if ( p1->Type() == porREFERENCE )
-  {
-    result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2 );
-    delete p1;
-    _Push( p2->RefCopy() );
-    /*
-    p2_copy = p2->ValCopy();
-    result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2_copy );
-    delete p1;
-    delete p2;
-    _Push( p2_copy->RefCopy() );
-    */
-  }
-
-  else // ( p1->Type() != porREFERENCE )
-  {
-    if( p1->Type() == p2->Type() )
+  else if( p1_type == porREFERENCE )
+  { 
+    gString& RefName = ( (ReferencePortion*) p1 )->Value();
+    if( _VarIsDefined( RefName ) )
+      p1_type = _VarValue( RefName )->Type();
+    
+    if( ( p1_type & porMIXED && p2_type & porMIXED ) ||
+       ( p1_type & porBEHAV && p2_type & porBEHAV ) ||
+       ( p1_type & porNFG && p2_type & porNFG ) ||
+       ( p1_type & porEFG && p2_type & porEFG ) )
     {
-      switch( p1->Type() )
+      delete _VarRemove( RefName );
+      _VarDefine( RefName, p2 );
+      delete p1;
+      _Push( p2->RefCopy() );
+    }
+    else
+    {
+      p1 = _ResolveRef( p1 );
+
+      if ( p1->Type() == porREFERENCE )
       {
-      case porLIST:
-	if( ( ( (ListPortion*) p1 )->DataType() == 
-	     ( (ListPortion*) p2 )->DataType() ) ||
-	   ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
+	result = _VarDefine( ( (ReferencePortion*) p1 )->Value(), p2 );
+	delete p1;
+	_Push( p2->RefCopy() );
+      }
+      
+      else // ( p1->Type() != porREFERENCE )
+      {
+	if( p1->Type() == p2->Type() )
 	{
-	  p1->AssignFrom( p2 );
-	  delete p2;
-	  _Push( p1 );
+	  switch( p1->Type() )
+	  {
+	  case porLIST:
+	    if( ( ( (ListPortion*) p1 )->DataType() == 
+		 ( (ListPortion*) p2 )->DataType() ) ||
+	       ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
+	    {
+	      p1->AssignFrom( p2 );
+	      delete p2;
+	      _Push( p1 );
+	    }
+	    else
+	    {
+	      _ErrorMessage( _StdErr, 56 );
+	      _Push( p2 );
+	      result = false;
+	      delete p1;
+	    }
+	    break;
+	    
+	  case porOUTPUT:
+	  case porINPUT:	
+	    _ErrorMessage( _StdErr, 52 );
+	    _Push( p2 );
+	    result = false;
+	    delete p1;
+	    break;
+	    
+	  default:
+	    p1->AssignFrom( p2 );
+	    delete p2;
+	    _Push( p1 );
+	  }
 	}
 	else
 	{
-	  _ErrorMessage( _StdErr, 56 );
+	  _ErrorMessage( _StdErr, 48 );
 	  _Push( p2 );
 	  result = false;
 	  delete p1;
 	}
-	break;
-
-      case porOUTPUT:
-      case porINPUT:	
-	_ErrorMessage( _StdErr, 52 );
-	_Push( p2 );
-	result = false;
-	delete p1;
-	break;
-	
-      default:
-        p1->AssignFrom( p2 );
-	delete p2;
-	_Push( p1 );
       }
     }
-    else
-    {
-      _ErrorMessage( _StdErr, 48 );
-      _Push( p2 );
-      result = false;
-      delete p1;
-    }
   }
+  else // ( p1_type != porREFERENCE )
+  {
+    _ErrorMessage( _StdErr, 57 );
+    delete p2;
+    _Push( p1 );
+    result = false;
+  }
+
   return result;
 }
 
@@ -1608,6 +1634,10 @@ void GSM::_ErrorMessage
     break;
   case 56:
     s << "  Attempted to change the type of a List\n";
+    break;
+  case 57:
+    s << "  Atttempted to assign to a non-reference type\n";
+    break;
   default:
     s << "  General error\n";
   }
