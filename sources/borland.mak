@@ -18,6 +18,7 @@ EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(WXDIR)\lib\msw -I$(BCCDIR)\include -I.
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
+	"control-player.cc" \
 	"dialog-about.cc" \
 	"gambit.cc" \
 	"game-document.cc" \

@@ -33,140 +33,6 @@
 
 #include "sheet.h"     // the wxSheet widget
 
-//-----------------------------------------------------------------------
-//                  class gbtPlayerLabelCtrl
-//-----------------------------------------------------------------------
-
-class gbtPlayerLabelCtrl : public wxScrolledWindow {
-private:
-  gbtTableMatrix *m_view;
-  bool m_rowPlayer;
-  wxMenu *m_popupMenu;
-
-  void OnDraw(wxDC &);
-
-  void OnRightDown(wxMouseEvent &);
-  void OnEnterWindow(wxMouseEvent &);
-  void OnLeaveWindow(wxMouseEvent &);
-  void OnMenu(wxCommandEvent &);
-
-public:
-  gbtPlayerLabelCtrl(gbtTableMatrix *p_parent, bool p_rowPlayer);
-  virtual ~gbtPlayerLabelCtrl();
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(gbtPlayerLabelCtrl, wxScrolledWindow)
-  EVT_RIGHT_DOWN(gbtPlayerLabelCtrl::OnRightDown)
-  EVT_MENU_RANGE(1000, 32767, gbtPlayerLabelCtrl::OnMenu)
-  EVT_ENTER_WINDOW(gbtPlayerLabelCtrl::OnEnterWindow)
-  EVT_LEAVE_WINDOW(gbtPlayerLabelCtrl::OnLeaveWindow)
-END_EVENT_TABLE()
-
-gbtPlayerLabelCtrl::gbtPlayerLabelCtrl(gbtTableMatrix *p_view,
-				       bool p_rowPlayer)
-  : wxScrolledWindow(p_view, -1),
-    m_view(p_view), m_rowPlayer(p_rowPlayer),
-    m_popupMenu(0)
-{
-  SetBackgroundColour(wxColour(250, 250, 250));
-  if (p_rowPlayer) {
-    SetToolTip(_("The player choosing the row"));
-  }
-  else {
-    SetToolTip(_("The player choosing the column"));
-  }
-}
-
-gbtPlayerLabelCtrl::~gbtPlayerLabelCtrl()
-{
-  if (m_popupMenu)  delete m_popupMenu;
-}
-
-void gbtPlayerLabelCtrl::OnDraw(wxDC &p_dc)
-{
-  p_dc.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
-  wxCoord width, height;
-
-  wxString label;
-  wxColour color;
-  if (m_rowPlayer) {
-    label = m_view->GetDocument()->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetLabel().c_str();
-    color = m_view->GetDocument()->GetPlayerColor(m_view->GetRowPlayer());
-  }
-  else {
-    label = m_view->GetDocument()->GetGame()->GetPlayer(m_view->GetColPlayer())->GetLabel().c_str();
-    color = m_view->GetDocument()->GetPlayerColor(m_view->GetColPlayer());
-  }
-  
-  p_dc.GetTextExtent(label, &width, &height);
-  p_dc.SetTextForeground(color);
-  wxSize size = GetClientSize();
-
-  if (m_rowPlayer) {
-    p_dc.DrawRotatedText(label, 
-			 (size.GetWidth() - height) / 2,
-			 (size.GetHeight() + width) / 2,
-			 90);
-  }
-  else {
-    p_dc.DrawText(label, 
-		  (size.GetWidth() - width) / 2,
-		  (size.GetHeight() - height) / 2);
-  }
-}
-
-void gbtPlayerLabelCtrl::OnRightDown(wxMouseEvent &p_event)
-{
-  if (m_popupMenu)  delete m_popupMenu;
-
-  m_popupMenu = new wxMenu("Show player on this axis");
-  const gbtGame &game = m_view->GetDocument()->GetGame();
-  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    m_popupMenu->Append(1000 + pl,
-			wxString::Format("%d: %s",
-					 pl, 
-					 game->GetPlayer(pl)->GetLabel().c_str()));
-  }
-
-  PopupMenu(m_popupMenu, p_event.GetX(), p_event.GetY());
-}
-
-void gbtPlayerLabelCtrl::OnMenu(wxCommandEvent &p_event)
-{
-  int newPlayer = p_event.GetId() - 1000;
-
-  if (m_rowPlayer) {
-    if (newPlayer == m_view->GetColPlayer()) {
-      m_view->SetPlayers(m_view->GetColPlayer(), m_view->GetRowPlayer());
-    }
-    else {
-      m_view->SetPlayers(p_event.GetId() - 1000, m_view->GetColPlayer());
-    }
-  }
-  else {
-    if (newPlayer == m_view->GetRowPlayer()) {
-      m_view->SetPlayers(m_view->GetColPlayer(), m_view->GetRowPlayer());
-    }
-    else {
-      m_view->SetPlayers(m_view->GetRowPlayer(), p_event.GetId() - 1000);
-    }
-  }
-}
-
-void gbtPlayerLabelCtrl::OnEnterWindow(wxMouseEvent &)
-{
-  SetBackgroundColour(wxColour(210, 210, 210));
-  Refresh();
-}
-
-void gbtPlayerLabelCtrl::OnLeaveWindow(wxMouseEvent &)
-{
-  SetBackgroundColour(wxColour(250, 250, 250));
-  Refresh();
-}
-
 class gbtTablePlayerCtrl : public wxScrolledWindow {
 private:
   gbtTableMatrix *m_view;
@@ -623,27 +489,26 @@ void gbtMatrixSheet::OnUpdate(void)
   AdjustScrollbars();
 }
 
-//-----------------------------------------------------------------------
-//                  class gbtTablePlayerCtrl
-//-----------------------------------------------------------------------
-
 BEGIN_EVENT_TABLE(gbtTableMatrix, wxPanel)
   EVT_SIZE(gbtTableMatrix::OnSize)
+  EVT_ROW_PLAYER_CHANGE(gbtTableMatrix::OnSetRowPlayer)
+  EVT_COL_PLAYER_CHANGE(gbtTableMatrix::OnSetColPlayer)
 END_EVENT_TABLE()
 
 gbtTableMatrix::gbtTableMatrix(wxWindow *p_parent, 
 			       gbtGameDocument *p_doc)
   : wxPanel(p_parent, -1), gbtGameView(p_doc),
-    m_sheet(0), m_rowPlayerLabel(0), m_colPlayerLabel(0), m_tableChoiceCtrl(0),
-    m_rowPlayer(1), m_colPlayer(2),
+    m_sheet(0), m_rowPlayer(0), m_colPlayer(0), m_tableChoiceCtrl(0),
     m_contingency(p_doc->GetGame()->NumPlayers())
 {
   for (int pl = 1; pl <= m_contingency.Length(); m_contingency[pl++] = 1);
 
-  m_sheet = new gbtMatrixSheet(this);
-  m_colPlayerLabel = new gbtPlayerLabelCtrl(this, false);
-  m_rowPlayerLabel = new gbtPlayerLabelCtrl(this, true);
+  m_colPlayer = new gbtPlayerLabelCtrl(this, p_doc, false);
+  m_colPlayer->SetPlayer(2);
+  m_rowPlayer = new gbtPlayerLabelCtrl(this, p_doc, true);
+  m_rowPlayer->SetPlayer(1);
   m_tableChoiceCtrl = new gbtTableChoiceCtrl(this);
+  m_sheet = new gbtMatrixSheet(this);
 
   RefreshLayout();
 }
@@ -660,21 +525,31 @@ int gbtTableMatrix::GetTablePlayer(int index) const
   return pl;
 }
 
-void gbtTableMatrix::SetPlayers(int p_row, int p_col)
-{ 
-  m_rowPlayer = p_row;
-  m_colPlayer = p_col;
-  m_sheet->OnUpdate();
-  m_rowPlayerLabel->Refresh();
-  m_colPlayerLabel->Refresh();
-  m_tableChoiceCtrl->Refresh();
-}
-
 void gbtTableMatrix::SetStrategy(int pl, int st)
 {
   m_contingency[pl] = st;
   m_sheet->OnUpdate();
   m_tableChoiceCtrl->Refresh();
+}
+
+void gbtTableMatrix::OnSetRowPlayer(wxCommandEvent &p_event)
+{
+  if (p_event.GetInt() == m_colPlayer->GetPlayer()) {
+    m_colPlayer->SetPlayer(m_rowPlayer->GetPlayer());
+  }
+  m_rowPlayer->SetPlayer(p_event.GetInt());
+  m_tableChoiceCtrl->Refresh();
+  m_sheet->OnUpdate();
+}
+
+void gbtTableMatrix::OnSetColPlayer(wxCommandEvent &p_event)
+{
+  if (p_event.GetInt() == m_rowPlayer->GetPlayer()) {
+    m_rowPlayer->SetPlayer(m_colPlayer->GetPlayer());
+  }
+  m_colPlayer->SetPlayer(p_event.GetInt());
+  m_tableChoiceCtrl->Refresh();
+  m_sheet->OnUpdate();
 }
 
 void gbtTableMatrix::OnUpdate(void)
@@ -685,7 +560,7 @@ void gbtTableMatrix::OnSize(wxSizeEvent &)
 
 void gbtTableMatrix::RefreshLayout(void)
 {
-  if (!m_sheet || !m_rowPlayerLabel || !m_colPlayerLabel) return;
+  if (!m_sheet || !m_rowPlayer || !m_colPlayer) return;
 
   int width = m_sheet->GetBestSize().GetWidth() + 20;
   if (width > GetClientSize().GetWidth() - 40) {
@@ -698,32 +573,18 @@ void gbtTableMatrix::RefreshLayout(void)
     height = GetClientSize().GetHeight() - topMargin;
   }
 
-  if (m_tableChoiceCtrl) {
-    m_tableChoiceCtrl->SetSize(40, 0, 
-			       GetClientSize().GetWidth() - 80, 
-			       m_tableChoiceCtrl->GetBestHeight());
+  m_tableChoiceCtrl->SetSize(40, 0, 
+			     GetClientSize().GetWidth() - 80, 
+			     m_tableChoiceCtrl->GetBestHeight());
 
-    m_rowPlayerLabel->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_rowPlayerLabel->SetSize(0, topMargin + 40, 40, height); 
+  m_rowPlayer->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_rowPlayer->SetSize(0, topMargin + 40, 40, height); 
 
-    m_colPlayerLabel->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_colPlayerLabel->SetSize(40, topMargin, width, 40);
+  m_colPlayer->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_colPlayer->SetSize(40, topMargin, width, 40);
 
-    SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_sheet->SetSize(40, topMargin + 40, 
-		     GetClientSize().GetWidth() - 40,
-		     GetClientSize().GetHeight() - topMargin - 40);
-  }
-  else {
-    m_rowPlayerLabel->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_rowPlayerLabel->SetSize(0, 40, 40, height); 
-
-    m_colPlayerLabel->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_colPlayerLabel->SetSize(40, 0, width, 40);
-
-    SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
-    m_sheet->SetSize(40, 40, 
-		     GetClientSize().GetWidth() - 40,
-		     GetClientSize().GetHeight() - 40);
-  }
+  SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_sheet->SetSize(40, topMargin + 40, 
+		   GetClientSize().GetWidth() - 40,
+		   GetClientSize().GetHeight() - topMargin - 40);
 }

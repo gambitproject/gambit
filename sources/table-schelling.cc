@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of "about" dialog
+// Implementation of view of normal form with Schelling-style payoffs
 //
 // This file is part of Gambit
 // Copyright (c) 2004, The Gambit Project
@@ -35,10 +35,7 @@
 
 class gbtSchellingMatrix : public wxSheet, public gbtGameView {
 private:
-  int m_rowPlayer, m_colPlayer;
-
-  // Implementation of gbtGameView members
-  void OnUpdate(void);
+  gbtTableSchelling *m_view;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &);
@@ -52,16 +49,18 @@ private:
   void DrawColLabels(wxDC &, const wxArrayInt &);
 
 public:
-  gbtSchellingMatrix(wxWindow *p_parent, gbtGameDocument *p_doc);
+  gbtSchellingMatrix(gbtTableSchelling *p_view, gbtGameDocument *p_doc);
+
+  // Implementation of gbtGameView members
+  void OnUpdate(void);
 };
 
-gbtSchellingMatrix::gbtSchellingMatrix(wxWindow *p_parent,
+gbtSchellingMatrix::gbtSchellingMatrix(gbtTableSchelling *p_view,
 				       gbtGameDocument *p_doc)
-  : wxSheet(p_parent, -1), gbtGameView(p_doc),
-    m_rowPlayer(1), m_colPlayer(2)
+  : wxSheet(p_view, -1), gbtGameView(p_doc), m_view(p_view)
 {
-  CreateGrid(m_doc->GetGame()->GetPlayer(m_rowPlayer)->NumStrategies() * 2,
-	     m_doc->GetGame()->GetPlayer(m_colPlayer)->NumStrategies() * 2);
+  CreateGrid(m_doc->GetGame()->GetPlayer(p_view->GetRowPlayer())->NumStrategies() * 2,
+	     m_doc->GetGame()->GetPlayer(p_view->GetColPlayer())->NumStrategies() * 2);
 
   EnableEditing(true);
   DisableDragRowSize();
@@ -87,18 +86,18 @@ void gbtSchellingMatrix::OnUpdate(void)
 
   const gbtGame &game = m_doc->GetGame();
 
-  if (game->GetPlayer(m_rowPlayer)->NumStrategies() < stratRows) {
-    DeleteRows(0, 2 * (stratRows - game->GetPlayer(m_rowPlayer)->NumStrategies()));
+  if (game->GetPlayer(m_view->GetRowPlayer())->NumStrategies() < stratRows) {
+    DeleteRows(0, 2 * (stratRows - game->GetPlayer(m_view->GetRowPlayer())->NumStrategies()));
   }
-  else if (game->GetPlayer(m_rowPlayer)->NumStrategies() > stratRows) {
-    InsertRows(0, 2 * (game->GetPlayer(m_rowPlayer)->NumStrategies() - stratRows)); 
+  else if (game->GetPlayer(m_view->GetRowPlayer())->NumStrategies() > stratRows) {
+    InsertRows(0, 2 * (game->GetPlayer(m_view->GetRowPlayer())->NumStrategies() - stratRows)); 
   }
 
-  if (game->GetPlayer(m_colPlayer)->NumStrategies() < stratCols) {
-    DeleteCols(0, 2 * (stratCols - game->GetPlayer(m_colPlayer)->NumStrategies()));
+  if (game->GetPlayer(m_view->GetColPlayer())->NumStrategies() < stratCols) {
+    DeleteCols(0, 2 * (stratCols - game->GetPlayer(m_view->GetColPlayer())->NumStrategies()));
   }
-  else if (game->GetPlayer(m_colPlayer)->NumStrategies() > stratCols) {
-    InsertCols(0, 2 * (game->GetPlayer(m_colPlayer)->NumStrategies() - stratCols));
+  else if (game->GetPlayer(m_view->GetColPlayer())->NumStrategies() > stratCols) {
+    InsertCols(0, 2 * (game->GetPlayer(m_view->GetColPlayer())->NumStrategies() - stratCols));
   }
 
   AutoSizeRows();
@@ -122,10 +121,10 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
 {
   // Labels
   if (IsRowLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_rowPlayer)->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str();
+    return m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str();
   }
   else if (IsColLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_colPlayer)->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str();
+    return m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str();
   }
   else if (IsCornerLabelCell(p_coords)) {
     return "";
@@ -139,14 +138,14 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
 
   gbtGameContingency profile = m_doc->GetGame()->NewContingency();
 
-  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_rowPlayer)->GetStrategy(rowStrat + 1));
-  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_colPlayer)->GetStrategy(colStrat + 1));
+  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(rowStrat + 1));
+  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
 
   if (rowSubcell) {
-    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_rowPlayer))).c_str();
+    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()))).c_str();
   }
   else if (colSubcell) {
-    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_colPlayer))).c_str();
+    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()))).c_str();
   }
   else {
     return "";
@@ -166,8 +165,8 @@ void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
 
   gbtGameContingency profile = m_doc->GetGame()->NewContingency();
 
-  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_rowPlayer)->GetStrategy(rowStrat + 1));
-  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_colPlayer)->GetStrategy(colStrat + 1));
+  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(rowStrat + 1));
+  profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
 
   gbtGameOutcome outcome = profile->GetOutcome();
 
@@ -179,13 +178,13 @@ void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
   if (rowSubcell) {
     gbtRational r;
     m_doc->SetPayoff(outcome, 
-		     m_doc->GetGame()->GetPlayer(m_rowPlayer),
+		     m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()),
 		     FromText(p_value.c_str(), r));
   }
   else if (colSubcell) {
     gbtRational r;
     m_doc->SetPayoff(outcome,
-		     m_doc->GetGame()->GetPlayer(m_colPlayer),
+		     m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()),
 		     FromText(p_value.c_str(), r));
   }
   ForceRefresh();
@@ -200,7 +199,7 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    attr.SetForegroundColour(m_doc->GetPlayerColor(m_rowPlayer));
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));
     return attr;
   }
   else if (IsColLabelCell(p_coords)) {
@@ -209,7 +208,7 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
     attr.SetOrientation(wxHORIZONTAL);
     attr.SetReadOnly(FALSE);
-    attr.SetForegroundColour(m_doc->GetPlayerColor(m_colPlayer));
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetColPlayer()));
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
@@ -228,11 +227,11 @@ wxSheetCellAttr gbtSchellingMatrix::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(TRUE);
   if (rowSubcell) {
-    attr.SetForegroundColour(m_doc->GetPlayerColor(m_rowPlayer));
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetRowPlayer()));
     attr.SetReadOnly(FALSE);
   }
   else if (colSubcell) {
-    attr.SetForegroundColour(m_doc->GetPlayerColor(m_colPlayer));
+    attr.SetForegroundColour(m_doc->GetPlayerColor(m_view->GetColPlayer()));
     attr.SetReadOnly(FALSE);
   }
   return attr;
@@ -372,16 +371,72 @@ void gbtSchellingMatrix::DrawColLabels(wxDC &dc, const wxArrayInt &cols)
   }
 }
 
+BEGIN_EVENT_TABLE(gbtTableSchelling, wxPanel)
+  EVT_SIZE(gbtTableSchelling::OnSize)
+  EVT_ROW_PLAYER_CHANGE(gbtTableSchelling::OnSetRowPlayer)
+  EVT_COL_PLAYER_CHANGE(gbtTableSchelling::OnSetColPlayer)
+END_EVENT_TABLE()
+
 gbtTableSchelling::gbtTableSchelling(wxWindow *p_parent, 
 				     gbtGameDocument *p_doc)
-  : wxPanel(p_parent, -1), gbtGameView(p_doc)
+  : wxPanel(p_parent, -1), gbtGameView(p_doc),
+    m_sheet(0), m_rowPlayer(0), m_colPlayer(0)
 { 
-  gbtSchellingMatrix *matrix = new gbtSchellingMatrix(this, p_doc);
-  
-  wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
-  sizer->Add(matrix, 1, wxEXPAND, 0);
-  SetSizer(sizer);
-  Layout();
+  m_colPlayer = new gbtPlayerLabelCtrl(this, p_doc, false);
+  m_colPlayer->SetPlayer(2);
+  m_rowPlayer = new gbtPlayerLabelCtrl(this, p_doc, true);
+  m_rowPlayer->SetPlayer(1);
+  m_sheet = new gbtSchellingMatrix(this, p_doc);
+
+  RefreshLayout();
+}
+
+void gbtTableSchelling::OnSetRowPlayer(wxCommandEvent &p_event)
+{
+  if (p_event.GetInt() == m_colPlayer->GetPlayer()) {
+    m_colPlayer->SetPlayer(m_rowPlayer->GetPlayer());
+  }
+  m_rowPlayer->SetPlayer(p_event.GetInt());
+  m_sheet->OnUpdate();
+}
+
+void gbtTableSchelling::OnSetColPlayer(wxCommandEvent &p_event)
+{
+  if (p_event.GetInt() == m_rowPlayer->GetPlayer()) {
+    m_rowPlayer->SetPlayer(m_colPlayer->GetPlayer());
+  }
+  m_colPlayer->SetPlayer(p_event.GetInt());
+  m_sheet->OnUpdate();
+}
+
+void gbtTableSchelling::OnSize(wxSizeEvent &)
+{ RefreshLayout(); }
+
+void gbtTableSchelling::RefreshLayout(void)
+{
+  if (!m_sheet || !m_rowPlayer || !m_colPlayer) return;
+
+  int width = m_sheet->GetBestSize().GetWidth() + 20;
+  if (width > GetClientSize().GetWidth() - 40) {
+    width = GetClientSize().GetWidth() - 40;
+  }
+
+  int height = m_sheet->GetBestSize().GetHeight() + 20;
+  int topMargin = 0;
+  if (height > GetClientSize().GetHeight() - topMargin) {
+    height = GetClientSize().GetHeight() - topMargin;
+  }
+
+  m_rowPlayer->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_rowPlayer->SetSize(0, 40, 40, height); 
+
+  m_colPlayer->SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_colPlayer->SetSize(40, 0, width, 40);
+
+  SetBackgroundColour(m_sheet->GetCornerLabelAttr().GetBackgroundColour());
+  m_sheet->SetSize(40, 40, 
+		   GetClientSize().GetWidth() - 40,
+		   GetClientSize().GetHeight() - 40);
 }
 
 void gbtTableSchelling::OnUpdate(void)

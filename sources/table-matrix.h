@@ -28,18 +28,17 @@
 #define TABLE_MATRIX_H
 
 #include "game-document.h"
+#include "control-player.h"    // for gbtPlayerLabelCtrl
 
 class gbtMatrixSheet;
-class gbtPlayerLabelCtrl;
 class gbtTableChoiceCtrl;
 
 class gbtTableMatrix : public wxPanel, public gbtGameView {
 private:
   gbtMatrixSheet *m_sheet;
-  gbtPlayerLabelCtrl *m_rowPlayerLabel, *m_colPlayerLabel;
+  gbtPlayerLabelCtrl *m_rowPlayer, *m_colPlayer;
   gbtTableChoiceCtrl *m_tableChoiceCtrl;
 
-  int m_rowPlayer, m_colPlayer;
   gbtArray<int> m_contingency;
 
   // Implementation of gbtGameView members
@@ -49,16 +48,17 @@ private:
 
   // Event handlers
   void OnSize(wxSizeEvent &);
+  void OnSetRowPlayer(wxCommandEvent &);
+  void OnSetColPlayer(wxCommandEvent &);
 
 public:
   gbtTableMatrix(wxWindow *p_parent, gbtGameDocument *p_doc);
 
-  int GetRowPlayer(void) const { return m_rowPlayer; }
-  int GetColPlayer(void) const { return m_colPlayer; }
+  int GetRowPlayer(void) const { return m_rowPlayer->GetPlayer(); }
+  int GetColPlayer(void) const { return m_colPlayer->GetPlayer(); }
   int GetTablePlayer(int index) const;
   int GetStrategy(int pl) const { return m_contingency[pl]; }
 
-  void SetPlayers(int row, int col);
   void SetStrategy(int pl, int st);
 
   DECLARE_EVENT_TABLE()

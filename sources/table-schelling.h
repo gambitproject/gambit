@@ -28,16 +28,34 @@
 #define TABLE_SCHELLING_H
 
 #include "game-document.h"
+#include "control-player.h"    // for gbtPlayerLabelCtrl
+
+class gbtSchellingMatrix;
 
 class gbtTableSchelling : public wxPanel, public gbtGameView {
 private:
+  gbtSchellingMatrix *m_sheet;
+  gbtPlayerLabelCtrl *m_rowPlayer, *m_colPlayer;
+
   // Implementation of gbtGameView members
   void OnUpdate(void);
 
+  // Event handlers
+  void OnSize(wxSizeEvent &);
+  void OnSetRowPlayer(wxCommandEvent &);
+  void OnSetColPlayer(wxCommandEvent &);
+
+  void RefreshLayout(void);
+
 public:
   gbtTableSchelling(wxWindow *p_parent, gbtGameDocument *p_doc);
+
+  int GetRowPlayer(void) const { return m_rowPlayer->GetPlayer(); }
+  int GetColPlayer(void) const { return m_colPlayer->GetPlayer(); }
+
+  DECLARE_EVENT_TABLE()
 };
 
-#endif  // DLABOUT_H
+#endif  // TABLE_SCHELLING_H
 
 

@@ -5,6 +5,8 @@ bin_PROGRAMS = gambit
 AM_CPPFLAGS = $(WX_CXXFLAGS) -I/usr/local/include/gambit
 
 gambit_SOURCES = \
+	control-player.cc \
+	control-player.h \
 	dialog-about.cc \
 	dialog-about.h \
 	gambit.cc \
