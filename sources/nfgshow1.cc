@@ -184,7 +184,7 @@ else
 //**************************** DOMINATED STRATEGY STUFF ************************
 // SolveElimDom
 #include "wxstatus.h"
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
+NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, const gArray<gNumber> &, bool strong,
 			    const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdom.cc
 NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
 				 const gArray<int> &players,gOutput &tracefile, gStatus &status); // nfdommix.cc
@@ -198,16 +198,18 @@ if (EDPD.Completed()==wxOK)
 {
 	NFSupport *sup=cur_sup;
 	wxStatus status(spread,"Dominance Elimination");
+  gArray<gNumber> values(sup->Game().Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 	if (!EDPD.DomMixed())
 	{
 		if (EDPD.FindAll())
 		{
-			while ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			while ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 		else
 		{
-			if ((sup=ComputeDominated(sup->Game(),*sup,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
+			if ((sup=ComputeDominated(sup->Game(),*sup,values,EDPD.DomStrong(),EDPD.Players(),gnull,status)))
 				supports.Append(sup);
 		}
 	}

@@ -654,7 +654,7 @@ return start;
 //****************************************************************************
 
 #include "gstatus.h"
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
+NFSupport *ComputeDominated(const Nfg &, NFSupport &S, const gArray<gNumber> &,bool strong,
 const gArray<int> &players, gOutput &tracefile,gStatus &status); // in nfdom.cc
 
 
@@ -664,17 +664,20 @@ NFSupport *sup=new NFSupport(nf);
 DominanceSettings DS;  // reads in dominance defaults
 gArray<int> players(nf.NumPlayers());
 for (int i=1;i<=nf.NumPlayers();i++) players[i]=i;
+gArray<gNumber> values(nf.Parameters()->Dmnsn());
+for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
 if (DS.UseElimDom())
 {
   NFSupport *temp_sup;
   if (DS.FindAll())
   {
-      while ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
+      while ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 	else
 	{
-		if ((temp_sup=ComputeDominated(sup->Game(),*sup,DS.DomStrong(),players,gnull,gstatus)))
+		if ((temp_sup=ComputeDominated(sup->Game(),*sup,values,DS.DomStrong(),players,gnull,gstatus)))
 			sup=temp_sup;
 	}
 }
