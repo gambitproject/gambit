@@ -322,6 +322,7 @@ template <class T> int SeqFormModule<T>::LCPPath()
 
 template <class T> int SeqFormModule<T>::NumSequences(int j)
 {
+  if(j<EF.PlayerList().First() || j>EF.PlayerList().Last()) return 1;
   gArray<Infoset *> isets;
   isets = EF.PlayerList()[j]->InfosetList();
   int num = 1;
@@ -332,6 +333,7 @@ template <class T> int SeqFormModule<T>::NumSequences(int j)
 
 template <class T> int SeqFormModule<T>::NumInfosets(int j)
 {
+  if(j<EF.PlayerList().First() || j>EF.PlayerList().Last()) return 0;
   return EF.PlayerList()[j]->InfosetList().Length();
 }
 
