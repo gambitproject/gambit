@@ -295,6 +295,12 @@ const gTriState &MixedSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
+
+MixedSolution MixedSolution::PolishEq(void) const
+{
+  return *this;
+}
+
 const gTriState &MixedSolution::IsPerfect(void) const
 {
   CheckIsValid();

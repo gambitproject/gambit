@@ -96,6 +96,7 @@ public:
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
   bool IsValid(void) const {return (m_revision == Game().RevisionNumber());}
+  MixedSolution PolishEq() const;
 
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)

@@ -201,6 +201,27 @@ static Portion *GSM_InfosetProb(GSM &, Portion **param)
   return new NumberPortion(bp->IsetProb(s));
 }
 
+//---------
+// PolishEq
+//---------
+
+static Portion *GSM_PolishEq_Behav(GSM &, Portion **param)
+{
+  BehavSolution *P = new 
+    BehavSolution((*((BehavPortion *) param[0])->Value()).PolishEq());
+  BehavPortion *result = new BehavPortion(P);
+  return result;
+}
+
+static Portion *GSM_PolishEq_Mixed(GSM &, Portion **param)
+{
+  MixedSolution *P = new 
+    MixedSolution((*((MixedPortion *) param[0])->Value()).PolishEq());
+  MixedPortion *result = new MixedPortion(P);
+  return result;
+}
+
+
 //----------------
 // InfosetValue
 //----------------
@@ -628,8 +649,10 @@ void Init_solfunc(GSM *gsm)
       { "InfosetValue[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
 	GSM_InfosetValue },
       { "IsNash[profile->BEHAV] =: BOOLEAN", GSM_IsNash_Behav },
+      { "PolishEq[profile->BEHAV] =: BEHAV", GSM_PolishEq_Behav },
       { "IsANFNash[profile->BEHAV] =: BOOLEAN", GSM_IsANFNash_Behav },
       { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
+      { "PolishEq[profile->MIXED] =: MIXED", GSM_PolishEq_Mixed },
       { "IsPerfect[profile->MIXED] =: BOOLEAN", GSM_IsPerfect },
       { "IsSequential[profile->BEHAV] =: BOOLEAN", GSM_IsSequential },
       { "IsSubgamePerfect[profile->BEHAV] =: BOOLEAN", GSM_IsSubgamePerfect },
