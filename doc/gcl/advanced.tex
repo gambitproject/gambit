@@ -1,0 +1,438 @@
+%
+% $Header$
+%
+% Description: Advanced topics chapter for GCL manual
+%
+
+\chapter{Advanced topics}
+
+\section{\rindex{Including files}}
+
+The function \verb+Include[file->TEXT]+\index{Include} is used to
+insert the contents of the file given into the input stream, as if
+they had been typed directly by the user.  This can be particularly
+useful in conjunction with user defined functions, in that a library
+of useful functions can be constructed and included into the program
+asily.
+
+The \verb+Include+ directive may only appear at the ``top level'' of
+the program.  That is to say, it cannot be used inside a loop,
+function declaration, or expression.  However, files may be nested
+arbitrarily deep using {\tt Include}, so you can include a file which
+in turn includes other files.
+  
+When a file is included, the GCL looks for a file with that name in
+the following locations, in order.  
+\begin{enumerate}
+\item The current directory.
+\item The directory specified by the \verb+HOME+ environment variable, if any.
+\item The directory specified by the \verb+GCLLIB+ environment variable, if any.
+\item The directory where the executable is located.
+\end{enumerate}
+
+This search order applies also to the \verb+gclini.gcl+ file that is
+loaded whenever the GCL is started.  Hence, you can keep a standard
+version of a file that is frequently included in the same directory as
+the GCL executable, and then modify it for use on a particular project
+by keeping a modified copy of it in the directory associated with that
+project.  
+
+It is good practice to have included files identify themselves when
+they are included. This can be done by using the
+\verb+GetPath[]+\index{GetPath} function, which returns the full
+pathname of the file from which the command is executed.  For example,
+if the following line is placed as the first line in an included file
+(say with filename \verb+path/myfile.gcl+)
+
+\begin{verbatim}
+StdOut << "Include[\""&GetPath[]&"\"]\n"
+\end{verbatim}
+
+\noindent
+(Note that the standard escape sequences \verb+\"+ and \verb+\n+ are
+used within a text string to represent a quotation mark and a carriage
+return, respectively.)  Then when the file is included, it will identify
+itself by writing the following message to the standard output stream:
+
+\begin{verbatim}
+Include["path/myfile.gcl"]
+\end{verbatim}
+
+
+\section{\rindex{Flow control} structures}
+
+The GCL contains three functions which allow flow control within a
+program.  These functions are ``special'' in that their parameters are
+evaluated in a special way (since their parameters are expressions and
+sequences of statements); they also have no ``formal'' names for their
+parameters.
+
+\subsection{Conditional execution with \texttt{If}}\index{Flow control!If}
+
+The function \verb+If[]+ allows execution of a sequence of statements
+only under certain conditions.  The syntax of the function is
+
+\begin{verbatim}
+If[boolean-expression, statement-list {, statement-list}]
+\end{verbatim}
+
+\noindent The function is interpreted as follows: If the
+\verb+boolean-expression+ evaluates to \verb+True+, then the first
+list of statements is executed.  If it evaluates to \verb+False+, and
+the second (optional) list of statements is present, that list is
+executed; if it is not present, the If[] expression evaluates to \verb+False+.
+For example, the statement
+
+\begin{verbatim}
+If[i = 2, j := 1, j := 2]
+\end{verbatim}
+
+\noindent sets \verb+j+ to \verb+1+ if the value of \verb+i+ is
+\verb+2+, and sets \verb+j+ to \verb+2+ if the value of \verb+i+ is
+not \verb+2+.  It would also be perfectly legitimate to write
+
+\begin{verbatim}
+If[i = 2, j := 1]
+\end{verbatim}
+
+\noindent in which case \verb+j+ would be set to \verb+1+ if \verb+i+
+is equal to \verb+2+, but if \verb+i+ were not \verb+2+, the expression
+evaluates to \verb+False+.
+
+This last example brings up an important note about conditional
+execution.  Statements which appear in a branch of an \verb+If+
+statement which is not taken are treated as if they did not exist.
+So, were this the first mention of \verb+j+ in this scope, the last
+example would leave \verb+j+ defined only if \verb+i+ was equal to
+\verb+2+.  However, \verb+j+ would {\em not} be defined otherwise.  It
+is therefore necessary to be careful in constructing \verb+If+
+statements which result in the definition of new variables.
+
+\subsection{Repetitive execution with \texttt{While}}\index{Flow control!While}
+
+Often in writing programs it is necessary to execute a block of
+statements repeatedly, usually with different values for variables.
+To this end the GCL provides a special function \verb+While+ as a
+generalized looping construct.  The syntax of the function is
+
+\begin{verbatim}
+While[boolean-expression, statement-list]
+\end{verbatim}
+
+The function is interpreted as follows: While
+\verb+boolean-expression+ evalutes to \verb+True+, execute the
+statements in \verb+statement-list+.  Note that the evaluation of the
+boolean takes place at the beginning of the execution of a block, so
+it is only important whether the value is \verb+True+ or \verb+False+
+at the beginning of the block, and not at some point in the middle.
+
+This simple loop creates a list of the first ten perfect squares: 
+
+\begin{verbatim}
+i := 1;
+list := { };
+While[i <= 10, list := list & { i^2 }; i := i + 1;]
+\end{verbatim}
+
+As with \verb+If+, be wary of declaring a variable implicitly inside a
+loop.  A variable is declared only when the corresponding statement is
+executed; so, if the \verb+boolean-expression+ is \verb+False+ the
+first time it is evaluated, the body of the loop never executes, and
+no variables which appear in the loop are considered to be defined.
+
+\subsection{Indexed looping with \texttt{For}}\index{Flow control!For}
+
+The function \verb+For+ is a specialized looping construct, useful
+mostly in cases where some index variable is used to iterate a list or
+some sequence.  The general syntax for \verb+For+ is
+
+\begin{verbatim}
+For[statement-list, boolean-expression, statement-list, statement-list]
+\end{verbatim}
+
+\noindent The call is interpreted as follows:
+\begin{itemize}
+\item Execute the statements in the first \verb+statement-list+ (this
+is called the {\em initialization}).
+\item Evaluate the \verb+boolean-expression+ (called the {\em guard}).
+\item If the \verb+boolean-expression+ is \verb+False+, terminate the
+loop and continue with the first statement after the loop.  If it is
+\verb+True+, execute the third \verb+statement-list+, called the {\em
+body} of the loop.
+\item Execute the second \verb+statement-list+, called the {\em
+increment}, and return to the evaluation of the guard.
+\end{itemize}
+
+Returning to the example in the \verb+While+ section, we see another
+way of writing the loop to create a list of the first ten squares:
+
+\begin{verbatim}
+For[i:=1; list:={}, i<=10, i:=i+1, list:=list&{i^2}]
+\end{verbatim}
+
+\noindent The two methods are completely equivalent, but it is often
+more convenient to use the structure afforded by the \verb+For+
+function.
+
+\section{\rindex{Input} and \rindex{Output}}
+
+Data can be read from an input stream by the \texttt{Read} function.
+So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then
+a successful call of \verb+Read[in,x]+ will read the exposed data (see
+function reference for definition of ``exposed data'') from the input
+stream, \verb+in+, assign \verb+x+ to have that type and value, and
+position the file pointer at the end of the exposed data, to be ready
+for the next call of \verb+Read[]+.  \verb+Read[in,x]+ has the short
+form \verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
+\verb+in+, these commands can be chained.  In other words,
+
+\begin{verbatim}
+in >> x >> y
+\end{verbatim}
+ 
+\noindent
+is equivalent to 
+
+\begin{verbatim}
+Read[in,x]
+Read[in,y]
+\end{verbatim}
+
+\noindent
+In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
+data type is determined from the exposed data in the input stream.  On
+the other hand if \verb+x+ is previously defined, then the
+\verb+Read[]+ function will expect to find the corresponding data type
+in the input stream, and a file read error will be generated if the
+exposed data is of the wrong data type.  If \verb+x+ is previously
+defined to be a \verb+LIST(T)+, then \verb+Read[in,x]+ will
+successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.  Thus, if the file \verb+"file.out"+ contains
+the following data
+
+\begin{verbatim}
+25 1/3 "This is a text string!" False 3.14159 
+{{1, 0},{0, 1}}
+1 2 3 4 5
+\end{verbatim}
+
+\noindent
+then the following GCL code
+
+\begin{verbatim}
+in:=Input["file.dat"]
+x:=List[0,5]
+in >> i >> r >> t >> b >> f >> l >> x
+\end{verbatim}
+
+\noindent
+opens an input stream, consisting of the file \verb+"file.dat"+, and
+then reads data from the input stream into the corresponding
+variables.  After the last statement, 
+\verb+i+ is an \verb+NUMBER+ with value \verb+25+, 
+\verb+r+ is a \verb+NUMBER+ with value \verb+1/3+, 
+\verb+t+ is a \verb+TEXT+ with value \verb+"This is a text string!"+, 
+\verb+b+ is a \verb+BOOLEAN+ with value \verb+False+, 
+\verb+f+ is a \verb+NUMBER+ with value \verb+3.14159+, 
+\verb+l+ is a \verb+LIST(LIST(NUMBER))+ with value \verb+{{1,0},{0,1}}+, and 
+\verb+x+ is a \verb+LIST(NUMBER)+ with value \verb+{1,2,3,4,5}+.  
+
+Data can be written to an output stream by the use of the
+\texttt{Write} function.  Thus, the following commands
+
+\begin{verbatim}
+out:=Output["file.out"]
+x:=0/1;y:={0.0,0.0}
+Write[out,x]
+Write[out,y]
+\end{verbatim}
+
+\noindent
+creates an output stream, \verb+out+, and then writes out a
+\verb+NUMBER+, followed by a list of two \verb+NUMBER+s.
+\verb+Write[out,x]+ has the short form \verb+out << x+.  Since the
+return value of \verb+Write[]+ is \verb+out+, these commands can be
+chained.  So the two lines writing out \verb+x+ and \verb+y+ in the
+above example could be written instead
+
+\begin{verbatim}
+out << x << y
+\end{verbatim}
+
+The \texttt{Format} and \texttt{ListFormat} functions can be used to
+control the formatting of data written to an output stream.  Note that
+the \texttt{Read} and \texttt{Write} functions are not listable.
+
+The \verb+Read[]+ and \verb+Write[]+ functions can only be used with
+certain data types (see function documentation).  Reading and writing
+of \verb+EFG+ and \verb+NFG+ from external files can be done with the
+\texttt{LoadEfg}, \texttt{SaveEfg}, \texttt{LoadNfg} and
+\texttt{SaveNfg} functions.
+
+\section{\rindex{Null values}}
+
+Certain function calls in the GCL result in either invalid or
+undetermined values for the required data type. Examples would be
+asking for the first child node of a terminal node, or the parent of
+the root node, or an outcome attached to a node with no outcome.
+Similar problems arise in the algorithmic and computational parts of
+the code.  Here, for example, algorithms that do not compute
+sequential equilibria do not return belief probabilities for unreached
+information sets.  Other algorithms may action probabilities for off
+the equilibrium path information sets undetermined.  
+
+Under certain situations such as the above, when no valid value is
+available for return, instead of returning an error, the GCL will
+a Null value for the given type.  Returning a Null value instead of
+terminating execuation with an error message is frequently desirable
+in a setting where functions are being called listably, as it allows
+for computation of elements of the list that have valid entries
+without aborting the GCL because some elements have invalid entries.  
+
+The situations in which Null values are returned are described in the
+function reference section of the manual.  Most functions in the GCL,
+when encountering a Null value as a parameter, will abort with an
+error message.  Whether a function will accept Null values as valid
+values for an argument is indicated in the function prototype with an
+asterisk (\verb+*+) after the relevant parameter.  For example, the
+function prototype for \texttt{IsNull} is
+
+\begin{verbatim}
+IsNull[x->T*]=:BOOLEAN
+  for any data type, T
+\end{verbatim}
+
+Here, the \verb+*+ indicates that this function accepts Null values
+for its argument.  If a built-in function accepts Null values for an
+argument, it is documented in the function reference section what the
+behavior of the function is when encountering a Null value.  
+
+Note that user defined functions  will accept Null values for
+arguments also, if the relevant parameter is designated with a
+\verb+*+, as above. 
+
+\section{\rindex{System information} and commands}\index{System commands}
+
+There are several commands in the GCL that allow you to get
+information from or run processes on the host system.  
+
+A series of functions, \texttt{StartWatch}, \texttt{StopWatch},
+\texttt{ElapsedTime} provide information on the amount of cpu time
+used by the GCL, and can be used to time computation.  
+
+Another series of functions, \texttt{GetEnv}, \texttt{SetEnv},
+\texttt{UnSetEnv}, \texttt{Platform}, allow you to set and check
+environment variables, or check the operating system that the GCL is
+running on.
+
+A third series of functions, \texttt{ExePath}, \texttt{GetPath}, and the
+UDF, \texttt{GambitExe}, provide path and filenames to files being used
+by or related to the GCL.
+
+Finally, the \texttt{Shell} command allows you to run a child process on
+the GCL.  
+
+The above system functions are also used in the user defined function
+\texttt{Display}, which allows you to start a child process that brings
+up the Gambit GUI to view a graphics display of an extensive or normal
+form game. If \verb+game+ is a variable of type \verb+NFG+ or
+\verb+EFG+, then the command \verb+Display[game]+ will display the
+\verb+game+ in the GUI.\footnote{The user defined functions
+{\tt GambitExe} and {\tt Display} assume that you used the default
+directories and filenames when you installed Gambit.  If you deviated
+from the standard installation, you may have to edit these UDFs
+before they work correctly.}
+
+\section{\rindex{Orphan variables} and memory management}
+
+In the GCL, you
+can create variables to represent objects which may be deleted or
+invalidated because of subsequent things you do. For example, suppose
+you define a variable to represent an element (node, information set,
+outcome, etc) of an extensive form game.  You may subsequently delete
+the part of the tree that contains that element.  The object that the
+variable originally referred to is no longer valid.  In such a case,
+we call the variable an {\bf orphan variable}.
+
+The basic rule in the GCL is that when a variable becomes an orphan,
+it is unassigned.  Thus, situations can arise when you have defined a
+variable, but when you later try and use that variable, you will find
+that it is undefined.  
+
+In the following example, a game is loaded, and the variable \verb+n+
+is defined to be the first child of the first child of the root node.
+Now the part of the tree after the first branch is deleted, the
+variable \verb+n+ is now undefined:
+
+\begin{verbatim}
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= r:=RootNode[e]
+GCL3:= n:=r#1#1
+GCL4:= DeleteTree[r#1]
+GCL5:= << n
+ERROR: Print[]: Undefined reference "n" passed for parameter #1
+\end{verbatim}
+
+\noindent
+Since the node is no longer is valid, the variable \verb+n+ which
+refers to it must be deleted.  A similar situation occurs here if some
+element of a list becomes an orphan:
+
+\begin{verbatim}
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= t:=TerminalNodes[e]
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << t
+ERROR: Print[]: Undefined reference "t" passed for parameter #1
+\end{verbatim}
+
+In this case, a variable \verb+t+ is defined to refer to the list of
+terminal nodes.  The \texttt{DeleteTree} command deletes some of the
+terminal nodes.  Even though some of the nodes in the list \verb+t+
+are still valid, the rule currently used by the GCL for orphan
+variables is that if any element of a list becomes an orphan, the
+entire list is undefined.  
+
+Similar situations arise with mixed and behavior strategies if the
+underlying game to which they refer change in a way to invalidate the
+solutions.  In the following example, a solution to the game \verb+e+
+is saved as a variable \verb+b+ of type \verb+BEHAV+.  
+
+\begin{verbatim}
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << b:=EnumMixedSolve[e,asNfg->True]_1
+(Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << b
+ERROR: Print[]: Undefined reference "b" passed for parameter #1
+\end{verbatim}
+
+The game is subsequently edited, making the solution no longer valid
+for the changed game.  At this point the solution becomes an orphan,
+and the variable that refers to it is unassigned.  
+
+\section{\rindex{Errors}}
+
+Sometimes, programs contain errors.  The interpreter is able to detect
+errors which violate rules of the language, and reports information
+about the error so the user can correct it.  There are two main
+classes of errors which may arise in GCL programs: parse errors and
+run time errors.
+
+A parse error occurs when the GCL interpreter cannot determine the
+meaning of a statement, because it does not conform to the grammatical
+rules of the language.  This most frequently occurs when braces,
+brackets, or quotation marks fail to match up or when punctuation is
+missing.  When it encounters a parse error, the GCL interpreter will
+display an error message giving the filename and line number of the
+error and the point at which it determined an error it occurred.
+
+A run time error occurs when a statement which obeys the grammatical
+rules of the language violates another rule of the language during its
+execution.  Examples of this type of error include attempting to use a
+variable name which is not defined, and using a value of one type
+where another type was expected.  Also, builtin functions may generate
+this type of error on invalid inputs.  A run time error will result in
+termination of the GCL at the point where the error occurs, with a
+message indicating the type of error encountered.

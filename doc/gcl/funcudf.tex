@@ -1,0 +1,2580 @@
+%
+% $Header$
+%
+% Description: List of standard user-defined functions for GCL manual
+%
+
+\chapter{Standard user-defined functions}
+
+The functions listed in this section are user defined functions that
+are provided in the file \verb+stdudfs.gcl+.  For each function, the
+function prototype is followed first by a brief description of what
+the function does, and then by the body of the function.  
+
+%--A--
+
+\section*{ActionNumber}\label{ExtActionNumber}
+\index{ActionNumber (GCL user-defined function)}
+\begin{verbatim}
+ActionNumber[a->ACTION] =: INTEGER 
+\end{verbatim}
+
+Returns the action number of \verb+a+.
+
+\udfbody
+\begin{verbatim}
+  Index[Actions[Infoset[a]],a]_1
+\end{verbatim} 
+
+%----------
+
+\section*{ActionProbs}\label{ExtActionProbs}
+\index{ActionProbs (GCL user-defined function)}
+\begin{verbatim}
+ActionProbs[profile->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}
+
+Returns a nested list of probabilities for each action under
+\verb+profile+.  The \verb+(i,j,k)+th entry is the probability of
+player \verb+i+, information set \verb+j+, action \verb+k+, where the
+index numbers correspond to the output of \verb+Players+, \verb+Infosets+,
+and \verb+Actions+, respectively. 
+
+\textbf{See also:}
+\helpref{\texttt{ActionProb}}{PrimActionProb},
+\helpref{\texttt{SetActionProbs}}{PrimSetActionProbs}.
+
+\udfbody
+\begin{verbatim}
+ActionProb[profile,Actions[Game[profile]]]
+\end{verbatim} 
+
+%----------
+
+\section*{ActionValues}\label{ExtActionValues}
+\index{ActionValues (GCL user-defined function)}
+\begin{verbatim}
+ActionValues[profile->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}
+
+Returns a list of expected payoffs of each action (to the player
+who chooses that action).  The null value is returned for actions for
+which this value is not well-defined.  The \verb+(i,j,k)+th entry is
+the expected payoff to player \verb+i+ at information set \verb+j+, of
+action \verb+k+, where the index numbers correspond to the output of
+\verb+Players+, \verb+Infosets+, and \verb+Actions+, respectively.
+
+\textbf{See also:}
+\helpref{\texttt{ActionValue}}{PrimActionValue},
+\helpref{\texttt{Belief}}{PrimBelief},
+\helpref{\texttt{InfosetProb}}{PrimInfosetProb},
+\helpref{\texttt{NodeValue}}{PrimNodeValue},
+\helpref{\texttt{RealizProb}}{PrimRealizProb}.
+
+\udfbody
+\begin{verbatim}
+ActionValue[profile,Actions[Game[profile]]]
+\end{verbatim} 
+
+%----------
+
+\section*{Actions}\label{ExtActions}
+\index{Actions (GCL user-defined function)}
+\begin{verbatim}
+Actions[infoset->INFOSET] =: LIST(ACTION) 
+\end{verbatim}
+
+Returns a list of all actions in \verb+infoset+.
+
+\udfbody
+\begin{verbatim}
+  Actions[infoset,Support[Game[infoset]]]
+\end{verbatim} 
+
+\latexignore{\hrule}
+\begin{verbatim}
+Actions[efg->EFG] =: LIST(LIST(LIST(ACTION))) 
+\end{verbatim}
+
+Returns a nested list of actions in the game, whose  \verb+(i,j,k)+
+entry is action \verb+k+ in information set \verb+j+ of player \verb+i+.
+
+\udfbody
+\begin{verbatim}
+  Actions[Infosets[Players[efg]]]
+\end{verbatim} 
+
+\latexignore{\hrule}
+\begin{verbatim}
+Actions[s->EFSUPPORT] =: LIST(LIST(LIST(ACTION))) 
+\end{verbatim}
+
+A nested list of actions for the support \verb+s+ in the extensive
+form game.
+
+\udfbody
+\begin{verbatim}
+Actions[Infosets[Game[s]],s]
+\end{verbatim} 
+
+%----------
+
+\section*{AddMove}\label{ExtAddMove}
+\index{AddMove (GCL user-defined function)}
+\begin{verbatim}
+AddMove[i->INFOSET, a->ACTION] =: LIST(NODE) 
+\end{verbatim}
+
+Adds a move determined by infoset \verb+i+ to all nodes with prior
+action \verb+a+.  
+
+\udfbody
+\begin{verbatim}
+AddMove[i,Filter[n:=Nodes[Game[i]],PriorAction[n]=a]]
+\end{verbatim} 
+
+%----------
+
+\section*{AllActions}\label{ExtAllActions}
+\index{AllActions (GCL user-defined function)}
+\begin{verbatim}
+AllActions[efg->EFG] =: LIST(LIST(LIST(ACTION))) 
+\end{verbatim}
+
+Gives a nested list of all actions in the game, including those of
+the chance player.  
+
+\udfbody
+\begin{verbatim}
+  Actions[AllInfosets[efg]]
+\end{verbatim} 
+
+%----------
+
+\section*{AllInfosets}\label{ExtAllInfosets}
+\index{AllInfosets (GCL user-defined function)}
+\begin{verbatim}
+AllInfosets[efg->EFG] =: LIST(LIST(INFOSET)) 
+\end{verbatim}
+
+Gives a nested list of all actions in the game, including those for
+chance. 
+
+\udfbody
+\begin{verbatim}
+  Infosets[{Chance[efg]}&Players[efg]]
+\end{verbatim} 
+
+%----------
+
+\section*{AllMembers}\label{ExtAllMembers}
+\index{AllMembers (GCL user-defined function)}
+\begin{verbatim}
+AllMembers[efg->EFG] =: LIST(LIST(LIST(NODE))) 
+\end{verbatim}
+
+Returns a list of all member nodes of information sets, including
+those of the chance player.
+
+\udfbody
+\begin{verbatim}
+  Members[AllInfosets[efg]]
+\end{verbatim} 
+
+%----------
+
+\section*{AllNash}\label{ExtAllNash}
+\index{AllNash (GCL user-defined function)}
+\begin{verbatim}
+AllNash[e->EFG, {stopAfter->0}, {nTries->0}, 
+        {precision->Float}] =: LIST(BEHAV) 
+\end{verbatim}
+
+Finds all Nash equilibria of the extensive form game
+\verb+e+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  If[NumPlayers[e] = 2, 
+    s:=IterativeUnDominated[Nfg[e],strong->True];
+    b:=Behav[EnumMixedSolve[s,0,precision]],
+    b:=PolEnumSolve[e,False,stopAfter]
+  ];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+\latexignore{\hrule}
+
+\begin{verbatim}
+AllNash[n->NFG, {stopAfter->0}, {nTries->0}, 
+        {precision->Float}] =: LIST(MIXED) 
+\end{verbatim}
+
+Finds all Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  s:=IterativeUnDominated[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    EnumMixedSolve[s,0,precision],
+    PolEnumSolve[s,stopAfter]
+  ]
+\end{verbatim} 
+
+%----------
+
+\section*{AllPerfect}\label{ExtAllPerfect}
+\index{AllPerfect (GCL user-defined function)}
+\begin{verbatim}
+AllPerfect[n->NFG, {stopAfter->0}, {nTries->0}, 
+           {precision->Float}] =: LIST(MIXED) 
+\end{verbatim}
+
+Searches for all Perfect Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  If[NumPlayers[n] = 2, 
+    s:=IterativeUnDominated[n,mixed->True];
+    m:=EnumMixedSolve[s,0,precision];
+    Filter[m,IsPerfect[m]],
+    << " Not implemented for n-person games";
+    List[Centroid[Support[n]],0]
+  ]
+\end{verbatim} 
+
+%----------
+	
+\section*{AllSequential}\label{ExtAllSequential}
+\index{AllSequential (GCL user-defined function)}
+\begin{verbatim}
+AllSequential[e->EFG, {stopAfter->0}, {nTries->0}] =: LIST(BEHAV) 
+\end{verbatim}
+
+Searches for all sequential Nash equilibria of the extensive form
+game \verb+e+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  << InfiniteLoopWarning[stopAfter,nTries];
+  b:=LiapSolve[e,stopAfter->stopAfter,nTries->nTries];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+%----------
+
+\section*{AllSubgamePerfect}\label{ExtAllSubgamePerfect}
+\index{AllSubgamePerfect (GCL user-defined function)}
+\begin{verbatim}
+AllSubgamePerfect[e->EFG, {stopAfter->0}, {nTries->0}, 
+                  {precision->Float}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent Searches for all subgame perfect Nash equilibria of the extensive
+form game \verb+e+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2, 
+    b:=EnumMixedSolve[e,True,0,precision],
+    b:=PolEnumSolve[e,False,stopAfter]
+  ];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+%----------
+
+\section*{Ancestors}\label{ExtAncestors}
+\index{Ancestors (GCL user-defined function)}
+\begin{verbatim}
+Ancestors[n->NODE] =: LIST(NODE) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of the nodes in the tree following a given one.  
+
+\udfbody
+\begin{verbatim}
+  If[IsRoot[n],{n},Flatten[{Ancestors[Parent[n]]}&{n}]]
+\end{verbatim} 
+
+%--B--
+
+\section*{Behav}\label{ExtBehav}
+\index{Behav (GCL user-defined function)}
+\begin{verbatim}
+Behav[efg->EFG, list->LIST(LIST(LIST(NUMBER)))] =: BEHAV 
+\end{verbatim}
+
+\noindent
+Converts a nested list of numbers into a behavior strategy
+profile for the game \verb+efg+.
+
+\udfbody
+\begin{verbatim}
+  SetProbs[Behav[Support[efg]],list]
+\end{verbatim} 
+
+%----------
+
+\section*{Beliefs}\label{ExtBeliefs}
+\index{Beliefs (GCL user-defined function)}
+\begin{verbatim}
+Beliefs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))
+\end{verbatim}
+
+\noindent
+Returns a nested list of beliefs of being at each node of each
+information set under \verb+profile+. The \verb+(i,j,k)+th element of
+the list corresponds to player \verb+i+, information set \verb+j+, and
+member node \verb+k+. The null value is returned for nodes where
+beliefs are undefined.
+
+\seealso \funcxref{ActionValue}{PrimActionValue},
+\funcxref{Belief}{PrimBelief},
+\funcxref{InfosetProb}{PrimInfosetProb},
+\funcxref{NodeValue}{PrimNodeValue},
+\funcxref{RealizProb}{PrimRealizProb}.
+
+\udfbody
+\begin{verbatim}
+  Belief[profile,Members[Game[profile]]]
+\end{verbatim}
+
+%--C--
+
+\section*{CartesianProd}\label{ExtCartesianProd}
+\index{CartesianProd (GCL user-defined function)}
+\begin{verbatim}
+CartesianProd[l->LIST(LIST(ANYTYPE))] =: LIST(LIST(ANYTYPE)) 
+\end{verbatim}
+
+\noindent
+Constructs the cartesian product of a set of sets.  
+
+\udfbody
+\begin{verbatim}
+  If[NumElements[l]=1,
+    Prepend[l_1,{}],
+    r:={};i:=1;
+    l1:=l_1;
+    l2:=CartesianProd[Remove[l,1]];
+    While[i<=Length[l1], r:=r&{Prepend[l1_i,l2]};i:=i+1];
+    r
+  ]
+\end{verbatim}
+
+%----------
+
+\section*{Centroid}\label{ExtCentroid}
+\index{Centroid (GCL user-defined function)}
+\begin{verbatim}
+Centroid[efg->EFG] =: BEHAV 
+\end{verbatim}
+
+\noindent
+Returns the centroid of an extensive form game.  
+
+\udfbody
+\begin{verbatim}
+  Behav[Support[efg]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Centroid[nfg->NFG] =: MIXED 
+\end{verbatim}
+
+\noindent
+Returns the centroid of a normal form game.  
+
+\udfbody
+\begin{verbatim}
+  Mixed[Support[nfg]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Centroid[s->EFSUPPORT] =: BEHAV 
+\end{verbatim}
+
+\noindent
+Returns the centroid of the support \verb+s+ of an extensive form game.  
+
+\udfbody
+\begin{verbatim}
+  Behav[s]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Centroid[s->NFSUPPORT] =: MIXED 
+\end{verbatim}
+
+\noindent
+Returns the centroid of the support \verb+n+ of a normal form game.  
+
+\udfbody
+\begin{verbatim}
+  Mixed[s]
+\end{verbatim} 
+
+%----------
+
+\section*{Concat}\label{ExtConcat}
+\index{Concat (GCL user-defined function)}
+\begin{verbatim}
+Concat[list->LIST(TEXT)]=:TEXT
+\end{verbatim}
+
+\noindent
+Concatenates all of the elements of \verb+list+
+
+\udfbody
+\begin{verbatim}
+  If[Length[list]=1,list_1,list_1+Concat[Remove[list,1]]];
+\end{verbatim} 
+
+
+%--D--
+
+\section*{DeleteEmptyInfosets}\label{ExtDeleteEmptyInfosets}
+\index{DeleteEmptyInfosets (GCL user-defined function)}
+\begin{verbatim}
+DeleteEmptyInfosets[efg->EFG] =: LIST(BOOLEAN) 
+\end{verbatim}
+
+\noindent
+Deletes all empty information sets in a game.  
+
+\udfbody
+\begin{verbatim}
+  DeleteEmptyInfoset[Filter[i:=Infosets[efg],NumMembers[i]=0]]
+\end{verbatim} 
+
+%----------
+
+\section*{Descendants}\label{ExtDescendants}
+\index{Descendants (GCL user-defined function)}
+\begin{verbatim}
+Descendants[n->NODE] =: NLIST(NODE) 
+\end{verbatim}
+
+\noindent
+Gives a nested list of the nodes following \verb+n+.
+
+\udfbody
+\begin{verbatim}
+  {n}&Descendants[Children[n]]
+\end{verbatim} 
+
+\note The above version is very slow on large games.
+
+%----------
+
+\section*{Dimensions}\label{ExtDimensions}
+\index{Dimensions (GCL user-defined function)}
+\begin{verbatim}
+Dimensions[x->NLIST(ANYTYPE)] =: LIST(INTEGER) 
+\end{verbatim}
+
+\noindent
+Gives the dimensions of a nested rectangular list. 
+
+\udfbody
+\begin{verbatim}
+//*  Note:  x is assumed rectangular
+  l:=Length[x];
+  If[IsList[l],{NumElements[x]}&Dimensions[x_1],{l}]
+\end{verbatim} 
+
+%----------
+
+\section*{Display}\label{ExtDisplay}
+\index{Display (GCL user-defined function)}
+\begin{verbatim}
+Display[e->EFG] =: NUMBER 
+\end{verbatim}
+
+\noindent
+Runs a child process to display the game \verb+e+ in the Gambit GUI. 
+
+\udfbody
+\begin{verbatim}
+  SaveEfg[e,"junk.efg"];
+  Shell[GambitExe[]+" junk.efg"]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Display[n->NFG] =: NUMBER 
+\end{verbatim}
+
+\noindent
+Runs a child process to display the game \verb+n+ in the Gambit GUI. 
+
+\udfbody
+\begin{verbatim}
+  SaveNfg[n,"junk.nfg"];
+  Shell[GambitExe[]+" junk.nfg"]
+\end{verbatim} 
+
+%--E--
+
+\section*{EnumMixedSolve}\label{ExtEnumMixedSolve}
+\index{EnumMixedSolve (GCL user-defined function)}
+\begin{verbatim}
+EnumMixedSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, 
+               {nPivots<->0}, {time<->0.000000}, 
+               {traceFile<->(Output)}, {traceLevel->0}, 
+               {cliques->False}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+A version of \verb+EnumMixedSolve+ that takes a normal form game instead
+of a support.  See the built-in function, \verb+EnumMixedSolve+ for a
+description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  EnumMixedSolve[Support[nfg], stopAfter, precision, nPivots, time, 
+  traceFile, traceLevel, cliques]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+EnumMixedSolve[efg->EFG, {asNfg->False}, {stopAfter->0}, 
+               {precision->Float}, {nPivots<->0}, 
+               {time<->0.000000}, {traceFile<->(Output)}, 
+               {traceLevel->0}, {cliques->False}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+A version of \verb+EnumMixedSolve+ that takes an extensive form game instead
+of a support.  See the built-in function, \verb+EnumMixedSolve+ for a
+description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  EnumMixedSolve[Support[efg], asNfg,stopAfter, precision, nPivots, time,
+  traceFile, traceLevel, cliques]
+\end{verbatim} 
+
+%----------
+
+\section*{EnumPureSolve}\label{ExtEnumPureSolve}
+\index{EnumPureSolve (GCL user-defined function)}
+\begin{verbatim}
+EnumPureSolve[nfg->NFG, {stopAfter->0}, {time<->0.000000}, 
+              {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+A version of \verb+EnumPureSolve+ that takes a normal form game instead
+of a support.  See the built-in function, \verb+EnumPureSolve+ for a
+description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  EnumPureSolve[Support[nfg], stopAfter, time, traceFile, traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+EnumPureSolve[efg->EFG, {stopAfter->0}, {precision->Float}, 
+              {time<->0.000000}, {traceFile<->(Output)}, 
+              {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+A version of \verb+EnumMixedSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+EnumMixedSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  EnumPureSolve[Support[efg], False, stopAfter, precision, time, 
+  traceFile, traceLevel]
+\end{verbatim} 
+
+%--F--
+
+\section*{Float}\label{ExtFloat}
+\index{Float (GCL user-defined function)}
+\begin{verbatim}
+Float[x->BEHAV] =: BEHAV 
+Float[x->MIXED] =: MIXED 
+\end{verbatim}
+
+\noindent
+Converts the internal representation of \texttt{x} to floating point.  
+
+\udfbody
+\begin{verbatim}
+  1.0*x;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Float[g->EFG] =: EFG 
+\end{verbatim}
+
+\noindent
+Converts the internal representation of \texttt{g} to floating point.  
+
+\udfbody
+\begin{verbatim}
+  gg:=CompressEfg[Support[g]];    // to make a copy
+  i:=Infosets[Chance[gg]];
+  SetChanceProbs[i,Float[ChanceProb[Actions[i]]]];
+  SetPayoffs[Outcomes[gg],Float[Payoffs[Outcomes[gg]]]];
+  gg;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Float[g->NFG] =: NFG 
+\end{verbatim}
+
+\noindent
+Converts the internal representation of \texttt{g} to floating point.  
+
+\udfbody
+\begin{verbatim}
+  gg:=CompressNfg[Support[g]];    // to make a copy
+  SetPayoffs[Outcomes[gg],Float[Payoffs[Outcomes[gg]]]];
+  gg;
+\end{verbatim}
+
+%--G--
+
+\section*{GambitExe}\label{ExtGambitExe}
+\index{GambitExe (GCL user-defined function)}
+\begin{verbatim}
+GambitExe[] =: TEXT 
+\end{verbatim}
+
+\noindent
+Returns the path to the directory containing the Gambit GUI executable
+file, assuming a standard installation.  
+
+\udfbody
+\begin{verbatim}
+  p:=Platform[];
+  If[p="DOS/Windows" || p="Windows 95/NT",f:="gambit"];
+  If[p="HP UX" || p="HPPA",f:="gui_motif_hp"];
+  If[p="SPARC" || p="SUN",f:="gui_motif_sun4"];
+  If[p="SVR4",f:="gui_SunOS_sun4m"];
+  If[p="Linux",f:="gui_Linux"];
+  If[p="AIX32" || p="AIX",f:="gui_motif_rs6000"];
+  If[(h:=GetEnv["GAMBIT_HOME"])="",p:=ExePath[file->False]+f,p:=h+f];
+  p
+\end{verbatim} 
+
+%----------
+
+\section*{GetIntegerFormat}\label{ExtGetIntegerFormat}
+\index{GetIntegerFormat (GCL user-defined function)}
+\begin{verbatim}
+GetIntegerFormat[{width<->0}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Gets the current values of the formatting parameters for numeric
+data types.  See \verb+Format+ for definitions of the
+parameters.
+
+\udfbody 
+\begin{verbatim}
+  GetFormat[1,width];
+  True
+\end{verbatim} 
+
+%----------
+
+\section*{GetNumericFormat}\label{ExtGetNumericFormat}
+\index{GetNumericFormat (GCL user-defined function)}
+\begin{verbatim}
+GetNumericFormat[{width<->0}, {decimals<->6}, 
+                 {expmode<->False}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Gets the current values of the formatting parameters for numeric
+data types.  See \verb+Format+ for definitions of the
+parameters.  
+
+\udfbody
+\begin{verbatim}
+  GetFormat[1.0,width,decimals,expmode];
+  True
+\end{verbatim} 
+
+%----------
+
+\section*{GetSolutionFormat}\label{ExtGetSolutionFormat}
+\index{GetSolutionFormat (GCL user-defined function)}
+\begin{verbatim}
+\protect \large \begin{verbatim}
+GetSolutionFormat[{info<->False}, {names<->False}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Gets the current values of the formatting parameters for Mixed and
+Behavior strategy solution data types.  See \verb+Format+ for
+definitions of the parameters.  
+
+\udfbody
+\begin{verbatim}
+  GetFormat[Centroid[NewEfg[]],info,names];
+  True
+\end{verbatim} 
+
+%----------
+
+\section*{GetTextFormat}\label{ExtGetTextFormat}
+\index{GetTextFormat (GCL user-defined function)}
+\begin{verbatim}
+GetTextFormat[{quote<->True}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Gets the current values of the formatting parameters for text strings.  See
+\verb+Format+ for definitions of the parameters. 
+
+\udfbody
+\begin{verbatim}
+  GetFormat["",quote];
+  True
+\end{verbatim} 
+
+%--H--
+
+\section*{History}\label{ExtHistory}
+\index{History (GCL user-defined function)}
+\begin{verbatim}
+History[n->NODE] =: LIST(ACTION) 
+\end{verbatim}
+
+\noindent
+Returns a list containing the sequence of actions connecting the root
+node to \verb+n+.
+
+\udfbody
+\begin{verbatim}
+  If[IsRoot[n],{},Flatten[{History[Parent[n]]}&{PriorAction[n]}]]
+\end{verbatim} 
+
+%--I--
+
+\section*{InfiniteLoopWarning}\label{ExtInfiniteLoopWarning}
+\index{InfiniteLoopWarning (GCL user-defined function)}
+\begin{verbatim}
+InfiniteLoopWarning[stopAfter->INTEGER, nTries->INTEGER] =: TEXT 
+\end{verbatim}
+
+\noindent
+Generates a warning at the console when a solution algorithm may enter
+an infinite loop.  Used by the standard solution algorithms
+\verb+AllNash+, \verb+AllSubgamePerfect+, etc.  
+
+\udfbody
+\begin{verbatim}
+  If[nTries=0,
+    If[stopAfter=0,
+    " Warning: Entering infinite loop.  Use Ctl-C to exit.",  
+    " Warning: Entering possible infinite loop.  Use Ctl-C to exit."],
+  " Warning: May not find all"]
+\end{verbatim} 
+
+%----------
+
+\section*{InfosetProbs}\label{ExtInfosetProbs}
+\index{InfosetProbs (GCL user-defined function)}
+\begin{verbatim}
+InfosetProbs[profile->BEHAV]=:LIST(LIST(NUMBER))
+\end{verbatim}
+
+\noindent
+Returns a nested list of the probabilities of reaching each
+information set.  The \verb+(i,j)+th element is the probability of
+reaching player \verb+i+'s \verb+j+th information set. The probability
+of reaching the null information set is defined to be null.  
+
+\seealso
+\funcxref{ActionValue}{PrimActionValue},
+\funcxref{Belief}{PrimBelief},
+\funcxref{NodeValue}{PrimNodeValue},
+\funcxref{RealizProb}{PrimRealizProb}.
+
+\udfbody
+\begin{verbatim}
+  InfosetProb[profile,Infosets[Game[profile]]]
+\end{verbatim}
+
+%----------
+
+\section*{InfosetValues}\label{ExtInfosetValues}
+\index{InfosetValues (GCL user-defined function)}
+\begin{verbatim}
+InfosetValues[profile->BEHAV]=:LIST(LIST(NUMBER))
+\end{verbatim}
+
+\noindent
+Returns a nested list of the values to the controlling player of
+reaching each information set.  The \verb+(i,j)+th element is the
+value to player \verb+i+ of thier \verb+j+th information set.  
+
+\seealso
+\funcxref{ActionValue}{PrimActionValue},
+\funcxref{Belief}{PrimBelief},
+\funcxref{NodeValue}{PrimNodeValue},
+\funcxref{RealizProb}{PrimRealizProb}.
+
+\udfbody
+\begin{verbatim}
+  InfosetValue[profile,Infosets[Game[profile]]]
+\end{verbatim}
+
+%----------
+
+\section*{Infosets}\label{ExtInfosets}
+\index{Infosets (GCL user-defined function)}
+\begin{verbatim}
+Infosets[efg->EFG] =: LIST(LIST(INFOSET)) 
+\end{verbatim}
+
+\noindent
+A nested list of information sets in the game. The \verb+(i,j)+th
+element is player \verb+i+s \verb+j+th information set.  
+
+\udfbody
+\begin{verbatim}
+  Infosets[Players[efg]]
+\end{verbatim} 
+
+%----------
+
+\section*{IsRoot}\label{ExtIsRoot}
+\index{IsRoot (GCL user-defined function)}
+\begin{verbatim}
+IsRoot[n->NODE] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Returns \verb+True+ if \verb+n+ is the root node of the game, else
+false.  
+
+\udfbody
+\begin{verbatim}
+  IsNull[Parent[n]]
+\end{verbatim} 
+
+%----------
+
+\section*{IterativeUnDominated}\label{ExtIterativeUnDominated}
+\index{IterativeUnDominated (GCL user-defined function)}
+\begin{verbatim}
+IterativeUnDominated[s->EFSUPPORT, {strong->False}, {conditional->False}, 
+                     {time<->0.000000}, {traceFile<->(Output)}, 
+                     {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}
+
+\noindent
+Successively eliminates dominated strategies in \verb+s+. See
+\verb+UnDominated+ for description of parameters.  
+
+\udfbody
+\begin{verbatim}
+  While[s!=(ss:=UnDominated[s,strong,conditional,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+IterativeUnDominated[s->NFSUPPORT, {strong->False}, {mixed->False}, 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}
+
+\noindent
+Successively eliminates dominated strategies in \verb+s+. See
+\verb+UnDominated+ for description of parameters.  
+
+\udfbody
+\begin{verbatim}
+  While[s!=(ss:=UnDominated[s,strong,mixed,precision,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+IterativeUnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
+           {precision->Rational}, {time<->0.000000}, 
+           {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}
+
+\noindent
+Successively eliminates dominated strategies in \verb+nfg+.  See
+\verb+UnDominated+ for description of parameters.  
+
+\udfbody
+\begin{verbatim}
+  IterativeUnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel];
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+IterativeUnDominated[efg->EFG, {strong->False}, {conditional->False}, 
+                    {time<->0.000000}, {traceFile<->(Output)}, 
+                    {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}
+
+\noindent
+Successively eliminates dominated strategies in \verb+nfg+. See
+\verb+UnDominated+ for description of parameters.  
+
+\udfbody
+\begin{verbatim}
+  IterativeUnDominated[Support[efg],strong,conditional,time,
+    traceFile,traceLevel];
+\end{verbatim} 
+
+%--J--
+
+%--K--
+
+%--L--
+
+\section*{LcpSolve}\label{ExtLcpSolve}
+\index{LcpSolve (GCL user-defined function)}
+\begin{verbatim}
+LcpSolve[nfg->NFG, {stopAfter->1}, {precision->Float}, 
+         {nPivots<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+A version of \verb+LcpSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+LcpSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LcpSolve[Support[nfg], stopAfter, precision, nPivots,
+    time, traceFile, traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+LcpSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, 
+        {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+A version of \verb+LcpSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+LcpSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LcpSolve[Support[efg], asNfg, stopAfter, precision, nPivots,
+    time, traceFile, traceLevel]
+\end{verbatim} 
+
+%----------
+
+\section*{LiapSolve}\label{ExtLiapSolve}
+\index{LiapSolve (GCL user-defined function)}
+\begin{verbatim}
+LiapSolve[nfg->NFG, {stopAfter->01}, {nTries->10}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {traceFile<->NullOut}, {traceLevel->00}] =: LIST(MIXED)
+\end{verbatim}
+
+\noindent
+A version of \verb+LiapSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+LiapSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LiapSolve[Centroid[Support[nfg]], stopAfter, nTries,
+  accuracy, time, nEvals, traceFile, traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+LiapSolve[efg->EFG, {asNfg->False}, {stopAfter->01}, {nTries->10}, 
+          {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+          {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV)
+\end{verbatim}
+
+\noindent
+A version of \verb+LiapSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+LiapSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LiapSolve[Centroid[Support[efg]], asNfg, stopAfter, nTries,
+  accuracy, time, nEvals, traceFile, traceLevel]
+\end{verbatim} 
+
+%----------
+
+\section*{ListForm}\label{ExtListForm}
+\index{ListForm (GCL user-defined function)}
+\begin{verbatim}
+ListForm[profile->BEHAV] =: LIST(LIST(LIST(NUMBER))) 
+\end{verbatim}
+
+\noindent
+This function is provided for backwards compatibility only.  It
+provides the same output as the standard user defined function \verb+ActionProbs+.
+
+\udfbody
+\begin{verbatim}
+  ActionProb[profile,Actions[Game[profile]]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+ListForm[mixed->MIXED] =: LIST(LIST(NUMBER)) 
+\end{verbatim}
+
+\noindent
+This function is provided for backwards compatibility only.  It
+provides the same output as \verb+StrategyProbs+.
+
+\udfbody
+\begin{verbatim}
+  StrategyProb[mixed,Strategies[Game[mixed]]]
+\end{verbatim} 
+
+%----------
+
+\section*{LpSolve}\label{ExtLpSolve}
+\index{LpSolve (GCL user-defined function)}
+\begin{verbatim}
+LpSolve[nfg->NFG, {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+A version of \verb+LpSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+LpSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LpSolve[Support[nfg], precision, nPivots, time, traceFile, 
+  traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+LpSolve[efg->EFG, {asNfg->False}, {stopAfter->1},
+        {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+A version of \verb+LpSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+LpSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  LpSolve[Support[efg], asNfg, stopAfter, precision, nPivots, time, 
+  traceFile, traceLevel]
+\end{verbatim} 
+
+%--M--
+
+\section*{ManyNash}\label{ExtManyNash}
+\index{ManyNash (GCL user-defined function)}
+\begin{verbatim}
+ManyNash[n->NFG,{stopAfter->0},{nTries->0},
+         {precision->Float}] =: LIST(MIXED)
+\end{verbatim}
+
+\noindent
+Searches for all Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  s:=IterativeUnDominated[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    LiapSolve[Centroid[s],stopAfter,nTries,accuracy->.00000001]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+ManyNash[e->EFG,{stopAfter->0},{nTries->0},
+         {precision->Float}] =: LIST(BEHAV)
+\end{verbatim}
+
+\noindent
+Searches for all Nash equilibria of the extensive form game
+\verb+e+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  s:=IterativeUnDominated[Nfg[e],strong->True];
+  If[NumPlayers[e] = 2, 
+    m:=EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    m:=LiapSolve[Centroid[s],stopAfter,nTries,accuracy->.00000001]
+  ];
+  MarkSubgames[ms];Behav[m]
+]  
+\end{verbatim} 
+
+%----------
+
+\section*{MarkedSubgames}\label{ExtMarkedSubgames}
+\index{MarkedSubgames (GCL user-defined function)}
+\begin{verbatim}
+MarkedSubgames[efg->EFG] =: LIST(NODE) 
+\end{verbatim}
+
+\noindent
+Returns a list of the root nodes of all currently marked subgames.  
+
+\udfbody
+\begin{verbatim}
+  Filter[n:=Nodes[efg],MarkedSubgame[n]]
+\end{verbatim} 
+
+%----------
+
+\section*{MarkSubgames}\label{ExtMarkSubgames}
+\index{MarkSubgames (GCL user-defined function)}
+\begin{verbatim}
+MarkSubgames[efg->EFG] =: LIST(NODE) 
+\end{verbatim}
+
+\noindent
+Marks all legal subgames in \verb+efg+.  Returns a list of root nodes
+of the marked subgames.  
+
+\udfbody
+\begin{verbatim}
+  MarkSubgame[s:=Subgames[efg]];
+  MarkedSubgames[efg]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+MarkSubgames[n->LIST(NODE)] =: LIST(BOOLEAN) 
+\end{verbatim}
+
+\noindent
+Marks the subgames whose roots are in \verb+n+, leaving all other
+subgames unmarked.  Returns a list of \verb+BOOLEAN+, indicating if
+the corresponding node was successfully marked (i. e., was a valid
+subgame root).
+
+\udfbody
+\begin{verbatim}
+  UnMarkSubgames[Game[n_1]];MarkSubgame[n]
+\end{verbatim} 
+
+%----------
+
+\section*{Max}\label{ExtMax}
+\index{Max (GCL user-defined function)}
+\begin{verbatim}
+Max[x->LIST(NUMBER)] =: NUMBER 
+\end{verbatim}
+
+\noindent
+Returns the maximum value in the list \verb+x+.  
+
+\udfbody
+\begin{verbatim}
+  i:=1;r:=x_1;
+  While[i<NumElements[x],i:=i+1;If[x_i>r,r:=x_i]];
+  r
+\end{verbatim} 
+
+%----------
+
+\section*{MaxInt}\label{ExtMaxInt}
+\index{MaxInt (GCL user-defined function)}
+\begin{verbatim}
+MaxInt[] =: INTEGER 
+\end{verbatim}
+
+\noindent
+Returns the maximum integer.
+
+\udfbody
+\begin{verbatim}
+// MAXINT = 2^31-1
+  2147483647
+\end{verbatim} 
+
+%----------
+
+\section*{Members}\label{ExtMembers}
+\index{Members (GCL user-defined function)}
+\begin{verbatim}
+Members[efg->EFG] =: LIST(LIST(LIST(NODE))) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of member nodes of information sets.  The
+\verb+(i,j,k)+th element corresponds to player \verb+i+, information
+set \verb+j+, action \verb+k+.  
+
+\udfbody
+\begin{verbatim}
+  Members[Infosets[Players[efg]]]
+\end{verbatim} 
+
+%----------
+
+\section*{Min}\label{ExtMin}
+\index{Min (GCL user-defined function)}
+\begin{verbatim}
+Min[x->LIST(NUMBER)] =: NUMBER 
+\end{verbatim}
+
+\noindent
+Returns the minimum value in the list \verb+x+.  
+
+\udfbody
+\begin{verbatim}
+  -Max[-x]
+\end{verbatim} 
+
+%----------
+
+\section*{Mixed}\label{ExtMixed}
+\index{Mixed (GCL user-defined function)}
+\begin{verbatim}
+Mixed[nfg->NFG, list->LIST(LIST(NUMBER))] =: MIXED 
+\end{verbatim}
+
+\noindent
+Converts a nested list of numerical values into a mixed strategy.  The
+\verb+(i,j)+th element of \verb+list+ becomes the probability
+player \verb+i+ assigns to strategy \verb+j+. 
+
+\udfbody
+\begin{verbatim}
+  SetProbs[Mixed[Support[nfg]],list]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Mixed[list->LIST(STRATEGY)] =: MIXED 
+\end{verbatim}
+
+\noindent
+Constructs a mixed strategy profile representing the pure strategy
+profile given by \verb+list+. It is an error if \verb+list+ does not
+contain one strategy for each player.
+
+\udfbody
+\begin{verbatim}
+  n:=Game[list_1];
+  s:=Strategies[n];
+  m:=Centroid[n];
+  v:=ListForm[m];
+  For[i:=1,i<=NumElements[v],i:=i+1,
+    For[j:=1,j<=NumElements[v_i],j:=j+1,
+      v_i_j:=0/1;
+    ];
+    v_i_(Index[s_i,list_i]_1) := 1/1
+  ];
+  SetProbs[m,v];   
+\end{verbatim} 
+
+
+%--N--
+
+\section*{NewInfoset}\label{ExtNewInfoset}
+\index{NewInfoset (GCL user-defined function)}
+\begin{verbatim}
+NewInfoset[player->EFPLAYER, actions->LIST(TEXT), 
+           {name->}] =: INFOSET 
+\end{verbatim}
+
+\noindent
+A version of \verb+NewInfoset+ that assigns \verb+name+ to be the name
+of the information set, and \verb+actions_j+ to be the name of action
+\verb+j+.  The number of actions created for the new information set
+is determined implicitly by the length of the list \verb+actions+.  
+
+\udfbody
+\begin{verbatim}
+  i:=SetName[NewInfoset[player,Length[actions]],name];
+  SetName[Actions[i,Support[Game[player]]],actions];
+  i
+\end{verbatim} 
+
+%----------
+
+\section*{NewNfg}\label{ExtNewNfg}
+\index{NewNfg (GCL user-defined function)}
+\begin{verbatim}
+NewNfg[dim->LIST(INTEGER), outcomes->BOOLEAN] =: NFG
+\end{verbatim}
+
+\noindent
+Creates an new normal form game with \verb+Length[dim]+ players, and
+\verb+dim_i+ strategies for player \verb+i+.  A new outcome is
+attached to each cell of the normal form game.  Returns the newly
+created game.
+
+\udfbody
+\begin{verbatim}
+  n:=NewNfg[dim];
+  If[outcomes=True,
+    NewOutcome[CartesianProd[Strategies[n]]]
+  ];
+  n;
+\end{verbatim} 
+
+%----------
+
+\section*{NewOutcome}\label{ExtNewOutcome}
+\index{NewOutcome (GCL user-defined function)}
+\begin{verbatim}
+NewOutcome[efg->EFG, name->TEXT] =: EFOUTCOME 
+\end{verbatim}
+
+\noindent
+A version of \verb+NewOutcome+ that assigns \verb+name+ to be the name
+of the outcome created.  
+
+\udfbody
+\begin{verbatim}
+  SetName[NewOutcome[efg],name]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NewOutcome[nfg->NFG, name->TEXT] =: NFOUTCOME 
+\end{verbatim}
+
+\noindent
+A version of \verb+NewOutcome+ that assigns \verb+name+ to be the name
+of the outcome created.  
+
+\udfbody
+\begin{verbatim}
+  SetName[NewOutcome[nfg],name]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NewOutcome[profile->LIST(STRATEGY)] =: NFOUTCOME 
+\end{verbatim}
+
+\noindent
+Creates a new outcome for the normal form game, attaching it to
+the pure profile \verb+profile+.  \verb+profile+ must be a list of
+strategies, whose \verb+i+th entry is a strategy for player \verb+i+. 
+
+\udfbody
+\begin{verbatim}
+  name:=Concat[Name[profile]];
+  SetName[SetOutcome[profile,NewOutcome[Game[profile_1]]],name];
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NewOutcome[profile->LIST(STRATEGY), payoff->LIST(NUMBER)] =: NFOUTCOME 
+\end{verbatim}
+ 
+\noindent
+Creates a new outcome for the normal form game, attaching it to
+the pure profile \verb+profile+, and sets the payoffs to be the vector
+\verb+payoff+.  \verb+profile+ must be a list of strategies, whose
+\verb+i+th entry is a strategy for player \verb+i+, and \verb+payoff+
+is a list whose \verb+i+th entry is a payoff for player \verb+i+.
+
+\udfbody
+\begin{verbatim}
+  SetPayoffs[NewOutcome[profile], payoff];
+\end{verbatim} 
+
+%----------
+
+\section*{NewPlayer}\label{ExtNewPlayer}
+\index{NewPlayer (GCL user-defined function)}
+\begin{verbatim}
+NewPlayer[efg->EFG, name->TEXT] =: EFPLAYER 
+\end{verbatim}
+
+\noindent
+A version of \verb+NewPlayer+ that assigns \verb+name+ to be the name
+of the extensive form player created.  
+
+\udfbody
+\begin{verbatim}
+  SetName[NewPlayer[efg],name]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NewPlayer[nfg->NFG, name->TEXT] =: NFPLAYER 
+\end{verbatim}
+
+\noindent
+A version of \verb+NewPlayer+ that assigns \verb+name+ to be the name
+of the normal form player created.  
+
+\udfbody
+\begin{verbatim}
+  SetName[NewPlayer[nfg],name]
+\end{verbatim} 
+
+%----------
+
+\section*{Nfg}\label{ExtNfg}
+\index{Nfg (GCL user-defined function)}
+\begin{verbatim}
+Nfg[x->NLIST(NUMBER)] =: NFG 
+\end{verbatim}
+
+\noindent
+Creates an \verb+n+ person normal form game from a \verb&n+1&
+dimensional nested list \verb+x+ of payoffs.  It is an error if the
+array of payoffs is not rectangular.  Entry
+\verb+x_(k_1)_(k_2)_..._(k_n)_j+ is the payoff to player \verb+j+ from
+the strategy profile where player \verb+i+ adopts strategy \verb+k_i+.
+Returns the newly created game.
+
+\udfbody
+\begin{verbatim}
+  d:=Dimensions[x];
+  n:=NewNfg[Remove[d,Length[d]]];
+  s:=CartesianProd[Strategies[n]];
+  NewOutcome[s,x];
+  n
+\end{verbatim} 
+
+%----------
+
+\section*{NodeTree}\label{ExtNodeTree}
+\index{NodeTree (GCL user-defined function)}
+\begin{verbatim}
+NodeTree[efg->EFG] =: NLIST(NODE) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of nodes in the game tree of \verb+efg+.  
+
+\udfbody
+\begin{verbatim}
+  Descendants[RootNode[efg]]
+\end{verbatim} 
+
+%----------
+
+\section*{NodeValues}\label{ExtNodeValues}
+\index{NodeValues (GCL user-defined function)}
+\begin{verbatim}
+NodeValues[profile->BEHAV, node->NODE] =: LIST(NUMBER) 
+\end{verbatim}
+
+\noindent
+Returns a list whose \verb+i+th entry is the value to player \verb+i+
+of being at \verb+node+ under \verb+profile+.
+
+\udfbody
+\begin{verbatim}
+  NodeValue[profile,Players[Game[profile]],node]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NodeValues[profile->BEHAV,player->EFPLAYER]=:LIST(NUMBER)
+\end{verbatim}
+
+\noindent
+Returns a list of the expected payoff to \verb+player+ at
+all nodes in the game, given that all players are following
+\verb+profile+.  The nodes are in indexed traversal order.
+
+\seealso \funcxref{NodeValue}{PrimNodeValue}.
+
+\udfbody
+\begin{verbatim}
+  NodeValue[profile,player,Nodes[Game[profile]]]
+\end{verbatim}
+
+\newsignature
+
+\begin{verbatim}
+NodeValues[profile->BEHAV]=:LIST(NUMBER)
+\end{verbatim}
+
+\noindent
+Returns a nested list of payofff vectors to the players of being
+at \verb+node+ under \verb+profile+.  The nodes are in indexed traversal
+order.
+
+\seealso \funcxref{NodeValue}{PrimNodeValue}.
+
+\udfbody
+\begin{verbatim}
+  NodeValues[profile,Nodes[Game[profile]]]
+\end{verbatim}
+
+%----------
+
+\section*{NonterminalNodes}\label{ExtNonterminalNodes}
+\index{NonterminalNodes (GCL user-defined function)}
+\begin{verbatim}
+NonterminalNodes[efg->EFG] =: LIST(NODE) 
+\end{verbatim}
+
+\noindent
+A list of nonterminal nodes of \verb+efg+.
+
+\udfbody
+\begin{verbatim}
+  Filter[d:=Nodes[efg],NumChildren[d]>0]
+\end{verbatim} 
+
+%----------
+
+\section*{NthElement}\label{ExtNthElement}
+\index{NthElement (GCL user-defined function)}
+\begin{verbatim}
+NthElement[s<->EFSUPPORT, n->NUMBER] =: LIST(ACTION) 
+\end{verbatim}
+
+\noindent
+Returns the actions in \verb+s+ of player number \verb+n+
+
+\udfbody
+\begin{verbatim}
+  Actions[s]_n;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NthElement[s<->NFSUPPORT, n->NUMBER] =: LIST(STRATEGY) 
+\end{verbatim}
+
+\noindent
+Returns the strategies in \verb+s+ of player number \verb+n+
+
+\udfbody
+\begin{verbatim}
+  Strategies[s]_n;
+\end{verbatim} 
+
+%----------
+
+\section*{NumActions}\label{ExtNumActions}
+\index{NumActions (GCL user-defined function)}
+\begin{verbatim}
+NumActions[infoset->INFOSET, support->EFSUPPORT] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of actions in \verb+infoset+.
+
+\udfbody
+\begin{verbatim}
+  Length[Actions[infoset,support]] 
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NumActions[infoset->INFOSET] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of actions in  \verb+infoset+.
+
+\udfbody
+\begin{verbatim}
+  Length[Actions[infoset,Support[Game[infoset]]]] 
+\end{verbatim} 
+
+%----------
+
+\section*{NumChildren}\label{ExtNumChildren}
+\index{NumChildren (GCL user-defined function)}
+\begin{verbatim}
+NumChildren[n->NODE] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of child nodes of \verb+n+.
+
+\udfbody
+\begin{verbatim}
+  Length[Children[n]]
+\end{verbatim} 
+
+%----------
+
+\section*{NumMembers}\label{ExtNumMembers}
+\index{NumMembers (GCL user-defined function)}
+\begin{verbatim}
+NumMembers[i->INFOSET] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of member nodes in the information set \verb+i+.
+
+\udfbody
+\begin{verbatim}
+  Length[Members[i]]
+\end{verbatim} 
+
+%----------
+
+\section*{NumPlayers}\label{ExtNumPlayers}
+\index{NumPlayers (GCL user-defined function)}
+\begin{verbatim}
+NumPlayers[efg->EFG] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of players in the extensive form game \verb+efg+.
+
+\udfbody
+\begin{verbatim}
+  Length[Players[efg]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+NumPlayers[nfg->NFG] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of players in the normal form game \verb+nfg+.
+
+\udfbody
+\begin{verbatim}
+  Length[Players[nfg]]
+\end{verbatim} 
+
+%----------
+
+\section*{NumStrats}\label{ExtNumStrats}
+\index{NumStrats (GCL user-defined function)}
+\begin{verbatim}
+NumStrats[player->NFPLAYER, support->NFSUPPORT] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The number of strategies in \verb+support+ for player \verb+player+.
+
+\udfbody
+\begin{verbatim}
+  Length[Strategies[player,support]] 
+\end{verbatim} 
+
+%--O--
+
+\section*{OneNash}\label{ExtOneNash}
+\index{OneNash (GCL user-defined function)}
+\begin{verbatim}
+OneNash[e->EFG, {precision->Float}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+Finds one Nash equilibrium of the extensive form game \verb+e+.
+Returns a singleton list containing the equilibrium found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+    If[IsConstSum[e],
+      b:=LpSolve[e,False,1,precision],
+      b:=LcpSolve[e,False,1,precision]
+    ],
+    b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16,
+      precision->precision]
+  ];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+OneNash[n->NFG, {precision->Float}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+Finds one Nash equilibrium of the normal form game \verb+n+.
+Returns a singleton list containing the equilibrium found.
+
+\udfbody
+\begin{verbatim}
+  s:=IterativeUnDominated[n];
+  If[NumPlayers[n] = 2,
+    If[IsConstSum[n],LpSolve[s,1,precision],LcpSolve[s,1,precision]],
+    SimpDivSolve[s,stopAfter->1,nRestarts->16,precision->precision]
+  ]
+\end{verbatim} 
+
+%----------
+
+\section*{OnePerfect}\label{ExtOnePerfect}
+\index{OnePerfect (GCL user-defined function)}
+\begin{verbatim}
+OnePerfect[n->NFG, {precision->Float}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+Finds one Perfect Nash equilibrium of the normal form game
+\verb+n+.  Returns a singleton list containing the equilibrium found.
+
+\udfbody
+\begin{verbatim}
+  If[NumPlayers[n] = 2, 
+    s:=IterativeUnDominated[n];
+    LcpSolve[s,1,precision],
+    << " Not implemented for n-person games";
+    List[Centroid[Support[n]],0] // return empty set of mixed
+  ]
+\end{verbatim} 
+
+%----------
+
+\section*{OneSequential}\label{ExtOneSequential}
+\index{OneSequential (GCL user-defined function)}
+\begin{verbatim}
+OneSequential[e->EFG] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+Finds one sequential Nash equilibrium of the extensive form game
+\verb+e+.  Returns a singleton list containing the equilibrium found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];UnMarkSubgames[e];
+  b:=QreSolve[e,fullGraph->False];
+  If[!IsSequential[b_1],
+    << " Warning: Algorithm did not converge, returning last value"
+  ];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+%----------
+
+\section*{OneSubgamePerfect}\label{ExtOneSubgamePerfect}
+\index{OneSubgamePerfect (GCL user-defined function)}
+\begin{verbatim}
+OneSubgamePerfect[e->EFG, {precision->Float}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+Finds one subgame perfect Nash equilibrium of the extensive form
+game \verb+e+.  Returns a singleton list containing the equilibrium
+found.
+
+\udfbody
+\begin{verbatim}
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+    If[IsConstSum[e],
+      b:=LpSolve[e,False,1,precision],
+      b:=LcpSolve[e,False,1,precision]
+    ],
+    b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16,
+      precision->precision]
+  ];
+  MarkSubgames[ms];b
+\end{verbatim} 
+
+%----------
+
+\section*{OutcomeForm}\label{ExtOutcomeForm}
+\index{OutcomeForm (GCL user-defined function)}
+\begin{verbatim}
+OutcomeForm[n->NFG]=:NLIST(NFOUTCOME)
+\end{verbatim}
+
+\noindent
+Gives the game form of \verb+n+ in the form of a nested list, with
+entires as the corresponding outcomes for each pure profile. 
+
+\udfbody
+\begin{verbatim}
+  Outcome[CartesianProd[Strategies[n]]]
+\end{verbatim} 
+
+%--P--
+
+\section*{Payoffs}\label{ExtPayoffs}
+\index{Payoffs (GCL user-defined function)}
+\begin{verbatim}
+Payoffs[outcome->EFOUTCOME*] =: LIST(NUMBER) 
+Payoffs[outcome->NFOUTCOME*] =: LIST(NUMBER) 
+\end{verbatim}
+
+\noindent
+Returns a list whose \verb+i+th entry is the payoff to player \verb+i+
+at \verb+outcome+.
+
+\udfbody
+\begin{verbatim}
+  Payoff[outcome,Players[Game[outcome]]]
+outcome
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Payoffs[profile->BEHAV] =: LIST(NUMBER) 
+Payoffs[profile->MIXED] =: LIST(NUMBER) 
+\end{verbatim}
+
+\noindent
+Returns a list whose \verb+i+th entry is the payoff to player \verb+i+
+in the extensive or normal form game under \verb+profile+.
+
+\udfbody
+\begin{verbatim}
+  Payoff[profile,Players[Game[profile]]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Payoffs[profile->LIST(STRATEGY)] =: ANYTYPE 
+\end{verbatim}
+
+\noindent
+Returns a list whose \verb+i+th entry is the payoff to player \verb+i+
+in the normal form game under the pure strategy represented by \verb+profile+.
+It is an error if \verb+profile+ does not contain a list of
+strategies, one for each player, in order.  
+
+\udfbody
+\begin{verbatim}
+  Payoff[Outcome[profile],Players[Game[profile_1]]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Payoffs[n->NFG] =: NLIST(NUMBER) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of payoffs in the normal form game, verb+n+.
+The \verb+(k_1,k_2, ... , k_n, j)+ entry of the list is the payoff to
+player \verb+j+ from the strategy profile where player \verb+i+ adopts
+strategy \verb+k_i+.
+
+\udfbody
+\begin{verbatim}
+  Payoffs[CartesianProd[Strategies[n]]]
+\end{verbatim} 
+
+%----------
+
+\section*{PlayerNumber}\label{ExtPlayerNumber}
+\index{PlayerNumber (GCL user-defined function)}
+\begin{verbatim}
+PlayerNumber[p->EFPLAYER] =: INTEGER 
+PlayerNumber[p->NFPLAYER] =: INTEGER 
+\end{verbatim}
+
+\noindent
+The player number of player \verb+p+.
+
+\udfbody
+\begin{verbatim}
+  Index[Players[Game[p]],p]_1
+\end{verbatim} 
+
+%----------
+
+\section*{PolEnumSolve}\label{ExtPolEnumSolve}
+\index{PolEnumSolve (GCL user-defined function)}
+\begin{verbatim}
+PolEnumSolve[efg->EFG, {asNfg->False}, {stopAfter->0}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(BEHAV)
+\end{verbatim}
+
+\noindent
+Version of \verb+PolEnumSolve+ that takes a game rather than a support
+as an argument.  Searches for all Nash equilibria of an n person game
+\verb+efg+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  PolEnumSolve[Support[efg],asNfg,stopAfter,nEvals,time,traceFile,
+    traceLevel,singularSupps,recurse];
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+PolEnumSolve[nfg->NFG, {stopAfter->0}, {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
+\end{verbatim}
+
+\noindent
+Version of \verb+PolEnumSolve+ that takes a game rather than a support
+as an argument.  Searches for all Nash equilibria of an n person game
+\verb+nfg+.  Returns a list containing the equilibria found.
+
+\udfbody
+\begin{verbatim}
+  PolEnumSolve[Support[nfg],stopAfter,nEvals,time,traceFile,
+    traceLevel,singularSupps,recurse];
+\end{verbatim} 
+
+%----------
+
+\section*{Prepend}\label{ExtPrepend}
+\index{Prepend (GCL user-defined function)}
+\begin{verbatim}
+Prepend[x->ANYTYPE, l->LIST(ANYTYPE)] =: LIST(ANYTYPE) 
+\end{verbatim}
+
+\noindent
+Inserts \verb+x+ as the first element of the list \verb+l+.  
+
+\udfbody
+\begin{verbatim}
+  {x}&l
+\end{verbatim} 
+
+%----------
+
+\section*{Profiles}\label{ExtProfiles}
+\index{Profiles (GCL user-defined function)}
+\begin{verbatim}
+Profiles[s->NFSUPPORT] =: NLIST(STRATEGY) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of all the pure strategy profiles for the support
+\verb+s+.  Each profile is a list of strategies, one for each player.  
+
+\udfbody
+\begin{verbatim}
+  CartesianProd[Strategies[s]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Profiles[nfg->NFG] =: NLIST(STRATEGY) 
+\end{verbatim}
+
+\noindent
+Returns a nested list of all the pure strategy profiles for the normal
+form game \verb+n+.  Each profile is a list of strategies, one for
+each player.
+
+\udfbody
+\begin{verbatim}
+  Profiles[Support[nfg]]
+\end{verbatim} 
+
+%--Q--
+
+\section*{QreSolve}\label{ExtQreSolve}
+\index{QreSolve (GCL user-defined function)}
+\begin{verbatim}
+QreSolve[efg->EFG, {pxifile->""}, {minLam->.001}, {maxLam->500.}, 
+         {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {nIters<->00}, {traceFile<->NullOut}, 
+         {traceLevel->00}] =: LIST(BEHAV),
+\end{verbatim}
+
+\noindent
+A version of \verb+QreSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+QreSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
+  fullGraph,accuracy,time,nEvals,nIters,traceFile, traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+QreSolve[nfg->NFG, {pxifile->""}, {minLam->.001}, {maxLam->500.}, 
+         {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+         {accuracy->.00000001}, {time<->0.00}, {nEvals<->00}, 
+         {nIters<->00}, {traceFile<->NullOut}, 
+         {traceLevel->00}] =: LIST(MIXED),
+\end{verbatim}
+
+\noindent
+A version of \verb+QreSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+QreSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
+  fullGraph,accuracy,time,nEvals,nIters,traceFile, traceLevel]
+\end{verbatim} 
+
+%--R--
+
+\section*{Randomize}\label{ExtRandomize}
+\index{Randomize (GCL user-defined function)}
+\begin{verbatim}
+Randomize[x->EFG, {seed->0}] =: EFG 
+Randomize[x->NFG, {seed->0}] =: NFG 
+\end{verbatim}
+
+\noindent
+Assigns a payoff for each outcome for each player in the extensive
+or normal form game \verb+x+ randomly chosen from the uniform
+distribution between 0 and 1.  The optional parameter \verb+seed+ may
+be used to set the seed of the pseudo-random number generator.  The
+identical game randomized with the same seed will always produce the
+same results.
+
+\udfbody
+\begin{verbatim}
+  o:=Outcomes[x];
+  pay:=Payoffs[o];
+  Randomize[pay_1_1,seed];
+  pay:=Randomize[pay];
+  SetPayoffs[o,pay];
+  x;
+\end{verbatim} 
+
+%----------
+
+\section*{Rational}\label{ExtRational}
+\index{Rational (GCL user-defined function)}
+\begin{verbatim}
+Rational[g->EFG] =: EFG 
+\end{verbatim}
+
+\noindent
+Converts the internal representation of g to Rational.  
+
+\udfbody
+\begin{verbatim}
+  gg:=CompressEfg[Support[g]];    // to make a copy
+  i:=Infosets[Chance[gg]];
+  SetChanceProbs[i,Rational[ChanceProb[Actions[i]]]];
+  SetPayoffs[Outcomes[gg],Rational[Payoffs[Outcomes[gg]]]];
+  gg;
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Rational[g->NFG] =: NFG 
+\end{verbatim}
+
+\noindent
+Converts the internal representation of g to Rational.  
+
+\udfbody
+\begin{verbatim}
+  gg:=CompressNfg[Support[g]];    // to make a copy
+  SetPayoffs[Outcomes[gg],Rational[Payoffs[Outcomes[gg]]]];
+  gg;
+\end{verbatim} 
+
+%----------
+
+\section*{Read}\label{ExtRead}
+\index{Read (GCl user-defined function)}
+\begin{verbatim}
+Read[input<->INPUT, x<->MIXED] =: INPUT 
+Read[input<->INPUT, x<->BEHAV] =: INPUT 
+\end{verbatim}
+
+\noindent
+Reads data of type \verb+MIXED+ or \verb+BEHAV+ from the input
+stream and assigns it to \verb+x+.  If the wrong data type is found
+for any element of the list, a file read error will be returned.
+
+\shortform \texttt{input >> x}
+
+\seealso
+\funcxref{Input}{PrimInput},
+\funcxref{Read}{PrimRead},
+\funcxref{Write}{PrimWrite}
+
+\udfbody
+\begin{verbatim}
+  v:=ListForm[x];
+  input >> v;
+  SetProbs[x,v];
+  input
+\end{verbatim} 
+
+%----------
+
+\section*{RealizProbs}\label{ExtRealizProbs}
+\index{RealizProbs (GCL user-defined function)}
+\begin{verbatim}
+RealizProbs[profile->BEHAV]=:LIST(NUMBER)
+\end{verbatim}
+
+\noindent
+Returns a list of the realization probabilities generated by
+\verb+profile+ for all nodes in the game tree.  The nodes are in indexed
+traversal order.
+
+\seealso
+\funcxref{Nodes}{PrimNodes},
+\funcxref{RealizProb}{PrimRealizProb}.
+
+\udfbody
+\begin{verbatim}
+  RealizProb[profile,Nodes[Game[profile]]]
+\end{verbatim}
+
+%----------
+
+\section*{Regrets}\label{ExtRegrets}
+\index{Regrets (GCL user-defined function)}
+\begin{verbatim}
+Regrets[profile->BEHAV]=:LIST(LIST(LIST(NUMBER)))
+\end{verbatim}
+
+\noindent
+Returns a nested list of the regrets generated for each action by
+\verb+profile+.  The \verb+(i,j,k)+th entry is the regret for player
+\verb+i+, infoset \verb+j+, action \verb+k+.
+
+\udfbody
+\begin{verbatim}
+  Regret[profile,Actions[Game[profile]]]
+\end{verbatim}
+
+%--S--
+
+\section*{SetIntegerFormat}\label{ExtSetIntegerFormat}
+\index{SetIntegerFormat (GCL user-defined function)}
+\begin{verbatim}
+SetIntegerFormat[{width->0}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Sets the formatting style for output of integer types on output
+streams.  See \verb+Format+ for definitions of the parameters.
+
+\seealso
+\udfxref{SetListFormat}{ExtSetListFormat},
+\udfxref{SetSolutionFormat}{ExtSetSolutionFormat},
+\udfxref{SetTextFormat}{ExtSetTextFormat},
+\funcxref{Write}{PrimWrite}.
+
+\udfbody
+\begin{verbatim}
+  !IsNull[Format[1,width]]
+\end{verbatim} 
+
+%----------
+
+\section*{SetListFormat}\label{ExtSetListFormat}
+\index{SetListFormat (GCL user-defined function)}
+\begin{verbatim}
+SetListFormat[{braces->True}, {commas->True}, 
+              {lf->1}, {indent->2}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Sets the formatting style for output of lists on output streams. See
+\verb+ListFormat+ for definitions of the parameters. 
+
+\seealso
+\udfxref{SetNumericFormat}{ExtSetNumericFormat},
+\udfxref{SetSolutionFormat}{ExtSetSolutionFormat},
+\udfxref{SetTextFormat}{ExtSetTextFormat},
+\funcxref{Write}{PrimWrite}.
+
+\udfbody
+\begin{verbatim}
+  ListFormat[braces,commas,lf,indent]
+\end{verbatim} 
+
+%----------
+
+\section*{SetNumericFormat}\label{ExtSetNumericFormat}
+\index{SetNumericFormat (GCL user-defined function)}
+\begin{verbatim}
+SetNumericFormat[{width->0}, {precis->6}, 
+                 {expmode->False}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Sets the formatting style for output of numeric types on output
+streams.  See \verb+Format+ for definitions of the parameters.
+
+\seealso
+\udfxref{SetListFormat}{ExtSetListFormat},
+\udfxref{SetSolutionFormat}{ExtSetSolutionFormat},
+\udfxref{SetTextFormat}{ExtSetTextFormat},
+\funcxref{Write}{PrimWrite}.
+
+\udfbody
+\begin{verbatim}
+  !IsNull[Format[1.0,width,decimals,expmode]]
+\end{verbatim} 
+
+%----------
+
+\section*{SetPayoffs}\label{ExtSetPayoffs}
+\index{SetPayoffs (GCL user-defined function)}
+\begin{verbatim}
+SetPayoffs[outcome->EFOUTCOME, payoff->LIST(NUMBER)] =: EFOUTCOME 
+SetPayoffs[outcome->NFOUTCOME, payoff->LIST(NUMBER)] =: NFOUTCOME 
+\end{verbatim}
+ 
+\noindent
+Sets the payoffs of \verb+outcome+ to be the vector \verb+payoff+,
+where \verb+payoff+ is a list whose \verb+i+th entry is a payoff for
+player \verb+i+.
+
+\udfbody
+\begin{verbatim}
+  SetPayoff[outcome,Players[Game[outcome]],payoff];
+  outcome
+\end{verbatim} 
+
+%----------
+
+\section*{SetProbs}\label{ExtSetProbs}
+\index{SetProbs (GCL user-defined function)}
+\begin{verbatim}
+SetProbs[profile<->BEHAV, value->LIST(LIST(LIST(NUMBER)))] =: BEHAV 
+\end{verbatim}
+
+\noindent
+Sets the probabilities in the \verb+profile+ to the values in
+\verb+value+.
+
+\udfbody  
+\begin{verbatim}
+  SetActionProbs[profile,Infosets[Game[profile]],value];
+  profile
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+SetProbs[profile<->MIXED, value->LIST(LIST(NUMBER))] =: MIXED 
+\end{verbatim}
+
+\noindent
+Sets the probabilities in the \verb+profile+ to the values in
+\verb+value+.
+
+\udfbody  
+\begin{verbatim}
+  SetStrategyProbs[profile,Players[Game[profile]],value];
+  profile
+\end{verbatim} 
+
+%----------
+
+\section*{SetSolutionFormat}\label{ExtSetSolutionFormat}
+\index{SetSolutionFormat (GCL user-defined function)}
+\begin{verbatim}
+SetSolutionFormat[{info->False}, {names->False}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Sets the formatting style for output of solution types on output
+streams.  See \verb+Format+ for definitions of the parameters.
+
+\seealso
+\udfxref{SetListFormat}{ExtSetListFormat},
+\udfxref{SetNumericFormat}{ExtSetNumericFormat},
+\udfxref{SetTextFormat}{ExtSetTextFormat}
+\funcxref{Write}{PrimWrite}.
+
+\udfbody
+\begin{verbatim}
+  !IsNull[Format[Centroid[NewEfg[]],info,names]]
+\end{verbatim} 
+
+%----------
+
+\section*{SetTextFormat}\label{ExtSetTextFormat}
+\index{SetTextFormat (GCL user-defined function)}
+\begin{verbatim}
+SetTextFormat[{quote->True}] =: BOOLEAN 
+\end{verbatim}
+
+\noindent
+Sets the formatting style for output of text on output streams.
+See \verb+Format+ for definitions of the parameters.
+
+\seealso
+\udfxref{SetListFormat}{ExtSetListFormat},
+\udfxref{SetNumericFormat}{ExtSetNumericFormat},
+\udfxref{SetTextFormat}{ExtSetTextFormat},
+\funcxref{Write}{PrimWrite}.
+
+\udfbody
+\begin{verbatim}
+  !IsNull[Format["",quote]]
+\end{verbatim} 
+
+%----------
+
+\section*{SimpDivSolve}\label{ExtSimpDivSolve}
+\index{SimpDivSolve (GCL user-defined function)}
+\begin{verbatim}
+SimpDivSolve[nfg->NFG, {stopAfter->1}, {nRestarts->16}, 
+             {leashLength->0}, {precision->Float}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}
+
+\noindent
+A version of \verb+SimpDivSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+SimpDivSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  SimpDivSolve[Support[nfg], stopAfter, nRestarts, leashLength,
+    precision, nEvals, time, traceFile, traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+SimpDivSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, 
+             {nRestarts->16}, {leashLength->0}, {precision->Float}, 
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}
+
+\noindent
+A version of \verb+SimpDivSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+SimpDivSolve+ for a description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  SimpDivSolve[Support[efg], asNfg, stopAfter, nRestarts, leashLength,
+    precision, nEvals, time, traceFile, traceLevel]
+\end{verbatim} 
+
+%----------
+
+\section*{Strategies}\label{ExtStrategies}
+\index{Strategies (GCL user-defined function)}
+\begin{verbatim}
+Strategies[player->NFPLAYER] =: LIST(STRATEGY) 
+\end{verbatim}
+
+\noindent
+A list of strategies for \verb+player+ in the normal form game.  
+
+\udfbody
+\begin{verbatim}
+  Strategies[player,Support[Game[player]]]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Strategies[s->NFSUPPORT] =: LIST(LIST(STRATEGY)) 
+\end{verbatim}
+
+\noindent
+A list of sets of strategies in the support \verb+s+. The \verb+i+th
+element of the list returned is a list of strategies for player
+\verb+i+. 
+
+\udfbody  
+\begin{verbatim}
+  Strategies[Players[Game[s]],s]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+Strategies[nfg->NFG] =: LIST(LIST(STRATEGY)) 
+\end{verbatim}
+
+\noindent
+A list of strategy sets in the normal form game \verb+nfg+. The
+\verb+(i,j)+th element of the list is player \verb+i+s \verb+j+th
+strategy.  
+
+\udfbody
+\begin{verbatim}
+  Strategies[Players[nfg]]
+\end{verbatim} 
+
+%----------
+
+\section*{StrategyValues}\label{ExtStrategyValues}
+\index{StrategyValues (GCL user-defined function)}
+\begin{verbatim}
+StrategyValues[profile->MIXED] =: LIST(LIST(NUMBER)) 
+\end{verbatim}
+
+\noindent
+Returns the strategy values of \verb+profile+.  The
+\verb+(i,j)'th+ element is the value to player \verb+i+ of adopting
+strategy \verb+j+.
+
+\udfbody 
+\begin{verbatim}
+  StrategyValue[profile,Strategies[Game[profile]]];
+\end{verbatim} 
+
+%----------
+
+\section*{Sum}\label{ExtSum}
+\index{Sum (GCL user-defined function)}
+\begin{verbatim}
+Sum[list->LIST(NUMBER)] =: NUMBER 
+\end{verbatim}
+
+\noindent
+The sum of the elements of \verb+list+.  
+
+\udfbody
+\begin{verbatim}
+  Dot[list,List[1/1,Length[list] ]]
+\end{verbatim} 
+
+%--T--
+
+\section*{TerminalNodes}\label{ExtTerminalNodes}
+\index{TerminalNodes (GCL user-defined function)}
+\begin{verbatim}
+TerminalNodes[efg->EFG] =: LIST(NODE) 
+\end{verbatim}
+
+\noindent
+The terminal nodes of the game tree of the extensive form game \verb+efg+.
+
+\udfbody
+\begin{verbatim}
+  Filter[d:=Nodes[efg],NumChildren[d]=0]
+\end{verbatim} 
+
+%--U--
+
+\section*{UnDominated}\label{ExtUnDominated}
+\index{UnDominated (GCL user-defined function)}
+\begin{verbatim}
+UnDominated[nfg->NFG, {strong->False}, {mixed->False}, 
+            {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+\end{verbatim}
+
+\noindent
+A version of \verb+UnDominated+ that takes a normal form game instead
+of a support.  See the built-in function, \verb+UnDominated+ for a
+description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  UnDominated[Support[nfg],strong,mixed,precision,time,traceFile,traceLevel]
+\end{verbatim} 
+
+\newsignature
+
+\begin{verbatim}
+UnDominated[efg->EFG, {strong->False}, {conditional->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: EFSUPPORT 
+\end{verbatim}
+
+\noindent
+A version of \verb+UnDominated+ that takes an extensive form game instead
+of a support.  See the built-in function, \verb+UnDominated+ for a
+description of the parameters.
+
+\udfbody
+\begin{verbatim}
+  UnDominated[Support[efg],strong,conditional,time,traceFile,traceLevel]
+\end{verbatim} 
+
+%----------
+
+\section*{UnMarkSubgames}\label{ExtUnMarkSubgames}
+\index{UnMarkSubgames (GCL user-defined function)}
+\begin{verbatim}
+UnMarkSubgames[efg->EFG] =: LIST(NODE)
+\end{verbatim}
+
+\noindent
+Unmarks all subgames in \verb+efg+.
+
+\udfbody
+\begin{verbatim}
+  UnMarkSubgame[Nodes[efg]];
+  MarkedSubgames[efg]
+\end{verbatim} 
+
+%--V--
+
+%--W--
+
+%--X--
+
+%--Y--
+
+%--Z--
+

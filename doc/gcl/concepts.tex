@@ -1,0 +1,1189 @@
+%
+% $Header$
+%
+% Description: Basic concepts chapter for GCL manual
+%
+
+\chapter{Basic concepts}
+
+\section{Design principles}
+The design motifs for GCL come from two principal families of
+programming languages.  The first is traditional imperative
+programming languages such as Pascal, C, and Modula-3.  In particular,
+the GCL's concept of types draws heavily from these languages,
+although the number of predefined types in GCL is much larger due to
+the specialized nature of the language.  The second is more
+specialized programming languages such as Mathematica, from which the
+GCL's grammar is partially drawn.  Users with experience using any of
+these languages should find the GCL easy to learn; however, no
+programming experience is necessary to begin using the language
+effectively.
+
+The GCL is a language designed primarily for building, solving and
+doing econometric analysis of non-cooperative games.  Because the GCL is a
+specialized language, it has several features that are designed to
+make computing as easy and flexible as possible in this kind of
+environment.  Some of the main features of the GCL are:
+
+\begin{itemize}
+\item {\bf Specialized built-in data types with implicit typing: }
+
+The GCL has a number of specialized built-in data types to represent
+various parts of games. For example for extensive form games, there
+are built in data types to represent players, strategies, nodes in an
+extensive form game tree, information sets, actions, outcomes,
+behavior strategy profiles, and an entire extensive form game.
+These data types are used internally by the GCL to organize
+computation, and keep track of important features of the objects that
+these data types represent.
+
+Despite the large number of specialized data types, the GCL uses {\it
+implicit typing}.  Implicit typing means that you never have to
+explicitly declare what the data type of a variable is before you use
+it.  Variables can thus be easily created in an interactive mode to
+refer to any object that is a valid data type, and to save
+intermediate steps of computations on these data structures.
+
+\item {\bf Everything is a function: }
+
+Almost every statement in the GCL is built up from function calls.
+Briefly, a function in the GCL is a procedure that takes objects of
+specified data types, and uses them to construct and return an object
+of a (possibly different) specified data type.  The GCL provides a set
+of \bindex{Built-In Functions} (BIFs), which are documented in the
+function reference section of this manual.  
+
+The GCL provides functions that construct simple objects of any given
+data type, and other functions that operate on objects of given data
+types to modify them or create a new object that is guaranteed to be a
+valid object of the given data type.  A GCL program typically consists
+of using output from one function as input to a second, whose output
+is then used as input to the next, and so on.  In this way, very
+complicated objects, such as extensive form games, can be built, all
+the while guaranteeing their internal consistency.  In this fashion,
+one can construct any valid extensive form game, and (barring bugs) it
+is impossible in the GCL to construct an invalid extensive form game.
+
+In addition to the built-in functions, the GCL also allows you to
+construct your own functions, which have exactly the same behavior as
+any built-in function (listablity, recursion, optional arguments,
+and accessible via online help)
+
+\item {\bf Listability: } 
+
+Many objects of interest in game theory are {\it sets} (the set of
+players, of information sets for a player, of actions for an
+information set, etc.)  All objects in the GCL (including lists) can
+be put in lists.  Further, when a GCL function (with a few exceptions
+noted in the Function reference section) is called with a list for
+one of its arguments, the function is run ``listably''.  This means
+that the function is executed for each element of the list and
+generates a list (or nested list) of the corresponding dimension as
+output.  This makes it quite easy to generate objects of game
+theoretic interest.  It also makes it easy to perform certain
+repetitive operations usually performed by flow control statements.
+\end{itemize}
+
+\section{\rindex{Data Types}}
+
+The built-in data types for the GCL are give in Table 1.  The Table is
+divided into four sections. The data types in the first section are
+standard data types that are supported in many languages.  The data
+types in the next two sections are more specialized data types that
+are used to represent elements of normal and extensive form games,
+respectively.  The last section contains only one type, lists, which
+play an important role in the GCL. 
+
+The data types ({\tt INTEGER}, 
+%{\tt ASSESSMENT}),  
+and {\tt EFBASIS} are {\bindex subtypes}
+of another, parent type.  They are indicated in the table as the
+indented entries following their parent type.  A subtype is a data
+type which has all of the properties of its parent type, plus some
+additional characteristics.  For example, an integer is a rational
+number, with the additional restriction that its denominator is one.
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular} {|l||l|} \hline
+Type name	& Description \\ \hline
+BOOLEAN 	& boolean \\
+NUMBER 	& floating-point or rational number \\
+INTEGER 	& \verb+NUMBER+ that is an integer \\ 
+TEXT & string of arbitrary length \\
+INPUT	& input stream \\
+OUTPUT	& output stream \\ 
+\hline
+NFG	& normal form game \\
+NFPLAYER	& a player in a normal form game \\
+STRATEGY	& a strategy in a normal form game \\
+NFOUTCOME      & an outcome in a normal form game \\
+NFSUPPORT & a support of strategies in a normal form game \\
+MIXED	& a mixed strategy profile for a normal form game \\ 
+\hline
+EFG	& extensive form game \\
+EFPLAYER	& a player in an extensive form game \\
+NODE	& a node in an extensive form game \\ 
+INFOSET	& an information set in an extensive form game \\
+ACTION	& an action at an information set \\
+EFOUTCOME	& an outcome in an extensive form game \\
+EFSUPPORT	& a support of actions in an extensive form game \\
+EFBASIS	& an \verb+EFSUPPORT+ that is a basis for an assessment \\
+BEHAV	& a behavior strategy profile for an extensive form
+game \\ 
+%\tindex{  ASSESSMENT}	& a \verb+BEHAV+ that is an assessment \\
+\hline
+LIST(T)	& a list of objects of type T (T is any data type)\\ 
+\hline
+\multicolumn{2}{c}{\ }\\
+\multicolumn{2}{c}{Table 1}\\
+\multicolumn{2}{c}{GCL Supported Data Types}\\
+\end{tabular}
+\end{center}
+\end{table}
+The remainder of this section details the rules concerning the
+standard types \texttt{BOOLEAN}, \texttt{NUMBER},
+\texttt{TEXT}, \texttt{INPUT} and \texttt{OUTPUT}, as well as general
+rules for typing.  The extensive form and normal form types, and their
+related types, are detailed later in special sections.
+
+\subsection{Boolean}
+The \texttt{BOOLEAN} type is used to represent the boolean values.
+The \texttt{BOOLEAN} type is implemented in tri-state logic,
+and has the three values ``true'' and ``false'' and ``unknown''.  The
+command language predefines three constants to represent these,
+\texttt{True} and \texttt{False}, and \texttt{Unknown}
+
+\subsection{Numeric Data types}
+
+The GCL supports one basic numeric data type, \verb+NUMBER+, with a 
+subtype of \verb+INTEGER+.
+
+\begin{itemize}
+\item \bindex{Number}
+
+The \texttt{NUMBER} type may contain numbers whose internal
+representation is either floating point or rational.  The internal
+representation of the number is referred to as the \bindex{precision}
+of the number.  Whether the precision of the number is floating point
+or rational depends on how the number is initially input.  It can be
+input either as a floating point constant, or a rational constant.
+
+Floating point numbers are implemented as the machine's
+double-precision floating point type.  Computation with these numbers
+is subject to rounding of least significant digits, and hence these
+numbers can be imprecise; for example, operations usually associated
+with being inverses of each other may not be with floating point
+numbers. However, since arithmetic operations on floating point
+numbers are typically implemented in hardware, the {\tt Float}
+precision is frequently used when speed is important.
+
+Rational numbers are implemented as the ratios of two arbitrary-length
+integers. Rational numbers are capable of precisely representing any
+rational number, and arithmetic operations on rationals are exact.
+However, arithmetic operations on rational numbers are implemented in
+software.  Hence, computations with rational numbers can be slow, and
+output from them may be unreadably large.
+
+Floating point constants are represented in the GCL by any string of
+digits (where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+)
+containing exactly one decimal point (\verb+.+).  Rational constants
+are represented in the GCL by andy string of digits containing at most
+one division sign (\verb+/+).  Any \verb+NUMBER+ in the GCL is assumed
+to be in base ten representation.
+
+\item \bindex{Integer}
+
+The \texttt{INTEGER} type is a subtype of \verb+NUMBER+ consisting of
+numbers of rational precision, whose denominator is one.  
+
+\end{itemize}
+
+Since the GCL uses implicit data typing, the data type of a numeric
+constant must be identifiable by the way it is written.  Hence, when
+you write a numeric constant, keep the following in mind.  Floating
+point constants must include exactly one \verb+.+ in them.  Rational
+constants must have at most one \verb+/+ in them, and integer
+constants must have neither of the above. Thus, to represent the
+number \verb+2+ as a floating point \verb+NUMBER+, you would write
+\verb+2.+, and to represent it as a rational \verb+NUMBER+, you would
+use \verb+2+ or \verb+2/1+, and to represent it as an integer
+\verb+NUMBER+, you would use \verb+2+.
+
+\subsection{Text}
+
+The \texttt{TEXT} type is used to store text strings, typically labels
+for parts of games.  It is generally encouraged to label various
+elements of games in the command language for ease of identification;
+however it is not required.  To specify a {\tt TEXT} constant,
+surround the text with double-quote characters ({\tt "}).  Constants
+may span more than one input line.  Also, line feeds can be explicitly
+included in text constants using the \verb+C+-style notation of
+\verb+\n+. 
+
+\subsection{Input and Output}
+
+\begin{itemize}
+\item\bindex{Input}
+
+The \texttt{INPUT} type is a reference to an input stream, generally a
+file on disk.  Its principal use is to read in external data.  The
+constant, \texttt{StdIn}, is used to refer to the standard input stream
+(generally the console).  New \verb+INPUT+ streams are created with
+the function \texttt{Input}, documented in the Function Reference
+section.
+
+\item {\bf Output}
+
+The \texttt{OUTPUT} type is a reference to an output stream, generally a
+file on disk.  Its principal use is as a logging file for writing
+formatted output from an extended command language job.  The
+constants \texttt{StdOut} and \texttt{NullOut} refer to the standard
+output stream (generally the console) and the null output stream (the
+garbage can), respectively.  New \verb+OUTPUT+ streams are created with the 
+function \verb+Output+, documented in the Function Reference section.
+\end{itemize}
+
+\subsection{Normal form data types}
+
+The data type \texttt{NFG} is used to represent a normal form game.  No
+other normal form data type can exist independently of the normal form
+game to which it belongs.  The \texttt{NFPLAYER} and \texttt{STRATEGY}
+data types are used to represent players and strategies in a normal
+form game.  A \texttt{NFOUTCOME} is an outcome for a normal form game,
+and an \texttt{NFSUPPORT} represents a support for a normal form
+game, which is a collection of sets of admissible strategies, one for
+each player.  Finally a \texttt{MIXED} is a mixed strategy profile over
+an arbitrary support.
+
+There are no constants of any normal form data type.  Objects that are
+of any of the normal form data types must be built up using functions
+in the GCL.  Hence, a more detailed discussion of them is deferred
+until later.  
+
+\subsection{Extensive form data types}
+The data type \texttt{EFG} is used to represent an extensive form
+game.  As with normal form games, no other extensive form data type
+can exist independently of the extensive form game to which it
+belongs.  The \texttt{EFPLAYER} represents a player in an extensive
+form game.  The types \texttt{NODE}, \texttt{ACTION},
+\texttt{INFOSET}, \texttt{EFOUTCOME} represent the corresponding parts
+of the extensive form representation of the game.  A \texttt{BEHAV} is
+a behavior strategy profile 
+%and a \texttt{ASSESSMENT} is an assessment
+for an extensive form game. 
+%An \verb+ASSESSMENT+ is a subtype of \verb+BEHAV+, which in addition
+%to specifying a behavior strategy, specifies non null beliefs for all
+%information sets in the game.  
+An \texttt{EFSUPPORT} represents a
+support for a behavior strategy in an extensive form game, which is a
+collection of sets of admissible actions (at least one for each
+information set of each player).  An \verb+EFBASIS+ is a subtype of
+\verb+EFSUPPORT+, representing a support for an assessment in an
+extensive form game. This is a collection of sets of admissible
+actions together with a collection of sets of admissible members of
+information sets (at least one member for each information set).
+
+As with normal form games, there are no constants of any extensive form
+data type.  Objects that are of any of extensive form data types must
+be built up using functions in the GCL.  Hence, a more detailed
+discussion of them is deferred until later.
+
+\subsection{\rindex{Lists}}
+
+The \texttt{LIST(T)} data type can be used to represent lists of any
+data type \verb+T+ (including \verb+T=LIST(R)+, where \verb+R+ is any
+data type).  Lists are represented in GCL statements by including
+objects of a given data type in curly braces and separated by commas.
+For example, the following is how to represent a list containing the
+first five integers:
+
+\begin{verbatim}
+{ 1, 2, 3, 4, 5 }
+\end{verbatim}
+
+\noindent 
+The data type \verb+T+ of a list is determined by the data type of its
+first element.  All other elements of the list must be of the same
+type as the first element.  The only exception to this rule is that
+subsequent elements can be listed to a different depth than the first
+element.  For example if \verb+T+ is a basic data type, then then the
+second and subsequent elements of a \verb+LIST(T)+ can be of type
+\verb+LIST(T)+ or \verb+LIST(LIST(T))+, etc.  Similarly, the second
+and subsequent elements of a \verb+LIST(LIST(T))+ can be of type
+\verb+T+.  
+
+We refer to the elements at the bottom levels of a nested list as the
+\bindex{basic elements} of the list.  Then lists can be of heterogeneous
+depth.  However, lists must be of homogeneous type. In other words,
+all basic elements of the list must be of the same type.  Hence,
+
+\begin{verbatim}
+{ 1, { 2, 3 }, 4 }
+\end{verbatim}
+
+\noindent 
+is a legal list of type \verb+LIST(NUMBER)+, since all the basic
+elements are of type {\tt NUMBER}, and 
+
+\begin{verbatim}
+{ { 2.0, 3/2 }, 1, 4 }
+\end{verbatim}
+
+\noindent 
+is a legal list of type \verb+LIST(LIST(NUMBER))+.  On the other
+hand, 
+
+\begin{verbatim}
+{ 1, { 2, "3" }, 4 }
+\end{verbatim}
+
+\noindent 
+is not a legal list, since the second element of the nested list is
+not a {\tt NUMBER}.
+
+Lists are distinct in type from each other and from their scalar
+equivalents.  That is to say, {\tt LIST(BOOLEAN)} is a distinct data
+type from {\tt LIST(NUMBER)}, and is also a distinct data type from
+{\tt NUMBER}.
+ 
+\subsection{Conglomerate data types}
+
+In some of the function prototypes in the Function Reference section,
+you will notice certain data types which are not listed as supported
+data types in the section on GCL data types. These are referred to as
+\bindex{Conglomerate data types}. Conglomerate types are not actually
+data types, but are names used in GCL function prototypes to represent
+subsets of data types.  Following is a list of the conglomerate data
+types along with the types they include:
+
+\medskip
+\begin{center}
+\begin{tabular} {|l|l|}
+\hline 
+Conglomerate Type & Includes \\
+\hline
+\texttt{ANYTYPE} & Any type except \verb+LIST+ \\ 
+\texttt{NLIST(T)} & Nested \verb+LIST(T)+ of any depth \\ 
+& i. e., \verb+LIST(LIST( ... LIST(T) ...))+\\
+\verb+T*+ & \verb+T+, or Null value of type \verb+T+ \\ 
+\hline
+\end{tabular}
+\end{center}
+\medskip
+
+\noindent
+Here \verb+T+ could be any data type except \verb+LIST+
+
+
+\section{\rindex{Expressions}}
+A GCL program consists of a series of expressions.  An expression is
+typically a GCL command built up out of function calls. 
+Expressions can be
+entered interactively, at the command prompt, or can be entered from
+files, via the \verb+Include["filename"]+ directive (see the section
+on including files).  
+
+Expressions are terminated by an end-of-line character (the carriage
+return) at a point where all brackets, braces, and quotes are matched
+(cloed).  Expressions can be explicitly continued on additional lines
+by using the continuation character, \verb+\+.
+
+Comments can be
+included in GCL statements by preceeding the comments with the
+characters \verb+//+.  Anything after the \verb+//+ and before a
+linefeed is ignored by the GCL interpreter.
+
+Some statements can lead to computations which may take a long time to
+complete.  A control-C, typed at the console, is used to halt
+execution of the GCL and return to the command prompt.  Note that the
+effect of a control-C may not always be immediate, as the control-C is
+only polled for at convenient stages during computation.
+
+\section{\rindex{Functions}}
+
+Functions in the GCL are rules for taking objects of specified data
+types, and using them to construct and return an object of a (possibly
+different) specified data type.  All statements in the GCL are built
+up out of function calls.  In this section, we desribe the rules for
+using functions in the GCL.
+
+A function call consists of the name of a function followed (if the
+function has parameters) by a list of parameters to the function,
+enclosed in brackets.  Functions return a value, which may in turn
+be used as a parameter to another function call, allowing more complex
+computations to be expressed.
+
+Functions in the GCL can be either built-in or user defined.  Also
+functions can either require arguments or not.  This leads to four
+combinations.  We label these as follows
+
+\medskip
+\begin{center}
+\begin{tabular} {|l||c|c|} 
+\hline
+Description & Built-in & Parameters\\ 
+\hline
+Constant & Yes & No \\ 
+Built-In Function (BIF) & Yes & Yes \\ 
+Variable & No & No \\ 
+User Defined Function (UDF) & No & Yes \\ 
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{\rindex{Constants}}
+
+The simplest type of a function in the GCL is a constant.  A constant
+is a built-in function that has no arguments, and returns the same
+value whenever it is called.  How to construct constants for the basic
+data types is described in the section on data types.  Some examples
+of constants follow:
+
+\medskip
+\begin{center}
+\begin{tabular} {|l|l|} 
+\hline
+Data Type & Constant \\ 
+\hline
+\verb+BOOLEAN+  & \texttt{True},  \texttt{False} \\
+\verb+NUMBER+ (rational precision) & \verb+1+, \verb+-1234567/563+ \\
+\verb+NUMBER+ (float precision)  & \verb+1.+,  \verb+-1.234567+ \\
+\verb+TEXT+  & \verb+"Help"+ \\
+\verb+OUTPUT+  & \texttt{StdOut}, \texttt{NullOut} \\
+\verb+INPUT+  & \texttt{StdIn} \\
+\hline
+\end{tabular}
+\end{center}
+\medskip
+
+You typically don't think of a constant as a function, but it is.  It
+is a function with no arguments, whose name is the constant itself.
+You can ``execute'' a constant by simply typing its name.  When you do
+so, it returns a value, corresponding to the object that the constant
+represents.  
+
+You are now ready to write your first GCL program:
+
+\begin{verbatim}
+GCL1:= << "Help"
+"Help"
+\end{verbatim}
+
+It is important to note that like all functions in the GCL, constants
+have a data type, which is determined by the ``function name''.  If
+you try and use a \verb+NUMBER+ constant, say \verb+123+, where a
+\verb+TEXT+ or other data type is expected, you will get an error.
+
+\subsection{\rindex{Variables}}
+
+A variable is like a constant in that it has no arguments.  It stores
+one object of a particular data type, and returns it when called. The
+difference between a constant and a variable is that a variable must
+be created before it can be used, and once it is created, it can be
+deleted or redefined if you want.  To create a new variable, or to
+redefine an existing variable, one can use the built-in function,
+\texttt{Assign}, which has the prototype:
+\begin{verbatim}
+Assign[name->TEXT, value<->T] =: T
+\end{verbatim}
+\noindent 
+for any type \verb+T+.  (How to read a function's prototype is
+described in more detail in the section of function calls.  For now,
+suffice it to say that \texttt{Assign} takes two parameters, the first of
+which is the name of the variable, and the second of which is the
+value to be assigned to the variable.)  The variable name can be any
+string of alphanumeric characters (\verb+a-z+, \verb+A-Z+, or
+\verb+0-9+) beginning with a letter.  So, to create a variable with
+name \verb+x+ which returns the \verb+NUMBER+ \verb+1+, we can use
+\verb+Assign+ as follows:
+
+\begin{verbatim}
+GCL1:= << Assign["x",1]
+1
+\end{verbatim}
+
+
+\noindent 
+The \texttt{Assign} function also has an infix operator form, written
+{\tt :=}.  In this form, the quotes are not needed around the variable
+name, and the function is not ``listable'' (see the section on Lists,
+later in this chapter).  So, equivalently, and more compactly,
+
+\begin{verbatim}
+GCL1:= << x := 1
+1
+\end{verbatim}
+
+The {\tt Assign} function can be used to either create a new variable or
+modify an existing one.  However, it cannot be used to change the type
+of a variable.  Consider the calls
+
+\begin{verbatim}
+y:=2
+y:=3
+y:="3"
+\end{verbatim}
+\noindent The first call creates a new variable {\tt y} of type {\tt
+NUMBER}, with value of \verb+3+.  The second modifies \verb+y+ to
+have value \verb+3+.  Since the new assignment does not change the
+type of \verb+y+, this command is fine.  The third statement attempts
+to change the data type of \verb+y+.  This statement will result in an
+error, since {\tt Assign} cannot be used to change the type of a
+variable.  To change the data type of a variable, it must first be
+deleted, and then reassigned.  
+
+An existing variable may be deleted by the use of the \texttt{UnAssign}
+function, with the following prototype:
+
+\begin{verbatim}
+UnAssign[name->TEXT] =: BOOLEAN
+\end{verbatim}
+
+\noindent After \verb+UnAssign+ is called on a variable, the variable
+is no longer defined.  A subsequent call of {\tt Assign} may redefine
+the variable to be of any type.  \verb+UnAssign+ has a short form of
+\verb+:=+ followed immediately by a linefeed or semicolon.  Hence, if
+\verb+y+ is a variable of type \verb+BOOLEAN+ you can change it to
+\verb+NUMBER+ with value \verb+3.0+ in two steps as follows:
+
+\begin{verbatim}
+y:=
+y:= 3.0
+\end{verbatim}  
+
+\subsubsection{\rindex{Global and Static Variables}}\index{Variables!Scope}
+
+Variables in the GCL are by default only visible in the the part of
+the program in which they are defined.  In otherwords, a variable
+defined outside of a function will not be visible inside a GCL
+function (unless it is passed by reference), and a variable defined in
+a function will not be visible from outside the function.  Secondly,
+variables defined inside a function are deallocated when control
+leaves the function.  Thus, when a function is called a second time,
+variables defined within that function will not ``remember'' the
+values they were assigned in the last call to the function.  
+
+To modify the default scope and visibility of variables, the GCL uses
+the prefix \verb+$+ in a variable name to represent a ``static''
+variable\index{Variables!Static} and the prefix \verb+$$+ to represent
+a global variable\index{Variables!Global}.  A static variable
+is only visible in the function in which it is defined, but remains
+allocated after program control leaves the function, and retains its
+last value when the function is called again.  A global variable
+remains allocated and visible when control passes to any function.  The
+following example illustrates the use of static variables:
+
+\begin{verbatim}
+NewFunction[Foo[x->NUMBER]=:NUMBER,If[!IsDefined[$y],$y:=x];$y;];
+GCL2:= << Foo[3]
+3
+GCL3:= << Foo[2]
+3
+\end{verbatim}
+
+\noindent
+and the following illustrates the use of global variables:
+
+\begin{verbatim}
+$$x:=5
+NewFunction[Foo[],$$x;];
+GCL1:= << Foo[]
+5
+\end{verbatim}
+
+
+\subsection{\rindex{Built-In Functions}}\index{Functions!Built-In}
+
+Built-in functions in the GCL are just like the mathematical notion of
+a function.  They are rules which associate with each point in the  
+domain, a point in the range.  In the case of the GCL functions, each
+function has a list of arguments.  Each argument must be of a specific
+data type.  A point in the domain is specified by specifying a value
+of the correct data type for each argument of the function.  
+
+To execute a GCL function you write the function name, followed
+(if the function is not a constant) by a comma separated list of the
+arguments, enclosed in square brackets.  
+
+All of the built-in functions in the GCL are listed in the Function
+Reference section of the manual.  For each function, the \bindex{function
+prototype} is listed.  The function prototype is a template that is
+used to remind you of the correct syntax for each function.  
+
+A function call consists of the name of a function, and a list of
+parameters upon which the function is to operate.  Functions return a
+value, which may in turn be used as a parameter to another function
+call, allowing more complex computations to be expressed.
+
+A simple example of a function call is
+
+\begin{verbatim}
+Plus[x->1, y->2]
+\end{verbatim}
+
+This calls the function named \texttt{Plus}, with parameter \verb+x+ set
+to the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is
+the function for addition of two integers, the value returned would
+be, as you might expect, 3.
+
+In the addition example above, we called a function which is listed in
+the function reference as
+
+\begin{verbatim}
+Plus[x->NUMBER, y->NUMBER] =: NUMBER
+\end{verbatim}
+
+\noindent This listing of a function is called its {\it prototype}.  
+It contains the function's name, its list of parameters, and its return
+value.  In this case, the function {\tt Plus} takes two parameters, the
+first named \verb+x+ and taking a value of type {\tt NUMBER} and the
+second named \verb+y+ and taking a value of type {\tt NUMBER}, and
+returns a value of type {\tt NUMBER}.
+
+Because the parameters have explicit names, it is possible to rearrange
+the order in which parameters are listed when a function is called.
+Thus, we could write out sample call equivalently as
+
+\begin{verbatim}
+Plus[y->2, x->1]
+\end{verbatim}
+
+\noindent and achieve the same effect.
+
+Explicitly specifying the formal names for parameters all the time
+will prove tedious and can hinder readability.  For these reasons, it is
+also legal to specify parameters without their associated formal names.
+These are called passing {\it anonymous} parameters.  Our addition
+example could thus also be written
+
+\begin{verbatim}
+Plus[1, 2]
+\end{verbatim}
+
+When used without specifying the formal names, however, function
+calls are restricted to specifying parameters in exactly the same
+order as listed in the function prototype.  In our example, the GCL
+interpreter would have no way of distinguishing whether we meant 1 to
+be the value of \verb+x+ or the value of \verb+y+, and vice versa.
+While in the case of addition we may flip the values of the parameters
+without having an effect on the result, in general this is not the
+case.
+
+It is permitted to mix the two styles of parameter specification,
+subject to the following rules:
+
+\begin{itemize}
+\item All anonymous parameters must be specified before any named
+parameters
+\item No parameters may be omitted in the anonymous parameter list.
+If $k$ parameters are specified anonymously, they must match
+one-for-one the first $k$ parameters in the function's prototype.
+\item Once a named parameter has been specified, all succeeding
+parameters must be named, even if the first named parameter appeared
+in the same place in the parameter list as it does in the prototype.
+\end{itemize}
+
+\noindent Therefore, it would be legal to write
+
+\begin{verbatim}
+Plus[1, y->2]
+\end{verbatim}
+
+\noindent but
+
+\begin{verbatim}
+Plus[x->1, 2]
+\end{verbatim}
+
+\noindent is illegal since it violates the third condition.
+
+To be more precise, the function {\tt Plus} comes in several different
+variations listed in the function reference:
+
+\begin{verbatim}
+Plus[x->NUMBER, y->NUMBER] =: NUMBER
+Plus[x->TEXT, y->TEXT] =: TEXT
+Plus[x->MIXED, y->MIXED] =: MIXED
+Plus[x->BEHAV, y->BEHAV] =: BEHAV 
+\end{verbatim}
+
+\noindent This is a good example of function {\it overloading}.  This
+means that one function name may have several possible parameter
+lists, sometimes called {\it signatures}.  The GCL interpreter is
+capable of determining which version of the function to use by
+analyzing the names and types of the parameters used.
+
+Since a function may have multiple signatures, it is conceivable that
+a function call might be ambiguous, in the sense that its parameters
+match more than one signature for that function.  However, no function
+call that is complete may be ambiguous from the way that signatures
+have been chosen for the predefined functions.  Any function call
+flagged by the interpreter as ambiguous must be missing at least one
+parameter.
+
+Some functions have parameters which are optional, in the sense that
+they need not be specified in order to call the function.  These
+parameters are indicated in the function's prototype by being
+surrounded by curly braces.  (Note that these braces should not be
+included in the function call when specifying an optional parameter.)
+If an optional parameter is left unspecified in a function call, a
+default value is assumed, as given in the function's documentation.
+
+For a function, all required parameters always precede any optional
+parameters.  Optional parameters may also be specified anonymously,
+subject to the above rules on parameter specification.
+
+All parameters so far have been passed by {\it value}, that is, a copy
+of the value of the parameter is given to the function to which it is
+passed.  These parameters may not be modified by the function.  It is
+also possible to have parameters to a function passed by {\it
+reference}.  This means that the function does not receive a copy of
+the value, but rather the memory location of the value itself.  Thus,
+the function may modify the value of a parameter passed by reference.
+
+The symbol for passing a parameter by reference, both in a function's
+prototype and in a function call, is {\tt <->}.  Constants may not be
+passed by reference.  Reference parameters may be specified
+anonymously just like a value parameter, subject to the usual rules.
+It is a run-time error to attempt to pass a value to a reference
+parameter, or vice versa.
+
+In the case where functions have parameters which are subtypes, 
+it is preferred to match to the subtype over the parent type.  For example,
+suppose the following two signatures have been defined:
+
+\begin{verbatim}
+Foo[x->INTEGER] =: INTEGER
+Foo[x->NUMBER] =: NUMBER
+\end{verbatim}
+
+Then, a call of \verb+Foo[3]+ resolves to the first signature (since the
+value passed is an integer), and \verb+Foo[3.5]+ resolves to the second
+(since it is a number, but not specifically an integer).
+
+\subsection{\rindex{User defined functions}}\index{Functions!User Defined}
+
+As GCL programs become more and more complex, frequently there are
+complicated operations which must be performed repeatedly.  The
+command language therefore supports user-defined functions, which
+allow for defining sections of code which may be called later.
+
+A new function can be created using the function \texttt{NewFunction}.
+For example, one might define a function to compute the absolute value
+of an {\tt NUMBER} as such:
+
+\begin{verbatim}
+NewFunction[Abs[n->NUMBER],
+  If[n > 0, n, If[n < 0, -n, 0]];
+];
+\end{verbatim}
+
+\noindent After defining the \verb+Abs+ function, it may be called in
+exactly the same way a system-supplied predefined function may.  The
+return value of the function is the value of the last statement
+executed.
+
+Parameter type matching rules apply to user defined functions in
+exactly the same way as to predefined functions.  From the function's
+point of view, the parameter list is a list of variables on which
+assignments are automatically done at the beginning of the function
+execution.  So, taking the \verb+Abs+ example above, in executing the
+call
+
+\begin{verbatim}
+Abs[42]
+\end{verbatim}
+
+\noindent an assignment \verb+n := 42+ is implicitly performed before
+the body of the function is executed.
+
+It is also possible to pass variables by ``reference'' to a
+user-defined function in the same way as a predefined function.  In
+this case, the function's ``local'' variable is stored in the same
+physical location in the computer, and modifying the value locally
+also takes effect on the variable passed to the function.  For
+example, it might be useful instead to define \verb+Abs+ as:
+
+\begin{verbatim}
+NewFunction[Abs[n<->NUMBER],
+		 If[n > 0, n, If[n < 0, n := -n, 0]]]
+\end{verbatim}
+
+\noindent in which case the function would still return the absolute
+value of \verb+n+, but also modify the variable passed to \verb+n+ to
+be the absolute value of the input \verb+n+.  So,
+
+\begin{verbatim}
+q := -37;
+Abs[q]
+\end{verbatim}
+
+\noindent would result in the variable \verb+q+ containing the value
+37 at the conclusion of execution.
+
+Each function has its own ``scope'', or set of variables.  Within a
+function body, the only variables which are visible are those which
+are declared in the parameter list of the function (this is \verb+n+
+in the \verb+Abs+ example above), and those which are created during
+the function's execution.  That is, no ``global'' or outside variables
+may be accessed directly by the function.  For example, if the user
+typed in the following:
+
+\begin{verbatim}
+i := 4;
+NewFunction[FooFunc[x->NUMBER], x * i]
+\end{verbatim}
+
+\noindent later execution of the \verb+FooFunc+ would yield an
+``undefined variable i'' error message, since \verb+i+ is never
+defined within the function.  If instead \verb+FooFunc+ had been
+defined as follows:
+
+\begin{verbatim}
+NewFunction[FooFunc[x->NUMBER], i := 13, x * i]
+\end{verbatim}
+
+\noindent \verb+FooFunc+ would always return 13 times the value of the
+parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+
+is always 13, regardless of the value of \verb+i+ outside of the
+function.
+
+\section{Aliases for function calls}\index{Short forms}
+
+There are several functions which are so commonly used that special
+``short forms'' are defined for them.  We already saw one example with
+the function \verb+Assign+, which has the short form \verb+:=+.  Most
+functions with short forms are the standard arithmetic and logic
+operators, for which the usual binary infix or unary prefix notations
+are supported.  The example of addition used in a previous section may
+more familiarly be written
+
+\begin{verbatim}
+1 + 2
+\end{verbatim}
+
+\noindent which expression is converted to the ``long form'' function
+call by the interpreter.  Note that formal names may not be specified
+in a ``short form'' call, and the order of parameters is therefore
+significant.
+
+Here is a list of the functions thus abbreviated, and their ``short
+form'' equivalents:
+
+\begin{twocollist}
+\twocolitem{\texttt{And[x,y]}}{\texttt{x \&\& y, x AND y}}
+\twocolitem{\texttt{Assign[x,y]}}{\texttt{x := y}}
+\end{twocollist}
+
+%\begin{multicols}{2}
+%\begin{verbatim}
+%And[x,y]            x && y, x AND y 
+%Assign[x,y]         x := y 
+%%%%%Concat[x,y]         x & y 
+%Divide[x,y]         x / y
+%Dot[x,y]            x . y 
+%Equal[x,y]          x = y 
+%Greater[x,y]        x > y 
+%GreaterEqual[x,y]   x >= y
+%IntegerDivide[x,y]  x DIV y 
+%Less[x,y]           x < y 
+%LessEqual[x,y]      x <= y 
+%Minus[x,y]          x - y 
+%Modulus[x,y]        x % y, x MOD y 
+%Not[x]              NOT x, !x 
+%NotEqual[x,y]       x != y 
+%NthChar[text,n]     text[[n]], text_n 
+%NthChild[node,n]    node#n  
+%NthElement[list,n]  list[[n]], list_n
+%Or[x,y]             x || y, x OR y 
+%Parentheses[x]      (x) 
+%Plus[x,y]           x + y 
+%Power[x,y]          x ^ y 
+%Print[x]            << x
+%Read[in,x]          in >> x 
+%Times[x,y]          x * y 
+%UnAssign[x]         x:=
+%Write[out,x]        out << x 
+%\end{verbatim}
+%\end{multicols}
+
+When functions are written in their canonical forms, no ambiguity
+arises in the order of evaluation: In order to evaluate a function,
+all arguments must be evaluated first.  Arguments are evaluated from
+left-to-right as specified in the function call.  This leads to a
+recursive structure of evaluation, which stops only when an argument
+being evaluated is a constant function (i. e., a function with no
+arguments).
+
+When short form forms are used, then ambiguity can arise in the
+intended order of evaluation.  For example, the statement \verb&a + b * c&, 
+could be meant as \verb+Plus[a,Times[b,c]]+ or as
+\verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
+functions that have a short form representation are given an order of
+precedence.  When a statement is parsed by the GCL, it is first
+scanned from left to right, replacing each short form expression at
+the top level of precedence with its canonical form.  Then it is
+scanned again replacing each short form expression at the second level
+of precedence with its canonical form, and so on, until all short form
+expressions have been eliminated.
+
+The order of precedence for built-in functions is as follows:
+
+\begin{center}
+\begin{verbatim}
+()
+:=
+>> <<
+||
+&&
+NOT
+= != < <= > >=
++ - &
+* . / DIV MOD ^
+(unary) + -
+[[ ]] _ 
+\end{verbatim}
+\end{center}
+
+Thus, the statement \verb&a + b * c& would become 
+\begin{verbatim}
+Plus[a,b*c]
+Plus[a,Times[b,c]]
+\end{verbatim}
+
+\noindent
+On the other hand, the statement \verb&( a + b ) * c& would become 
+\begin{verbatim}
+Parentheses[a+b]*c
+Parentheses[Plus[a,b]]*c
+Times[Parentheses[Plus[a,b]],c]
+\end{verbatim}
+
+\noindent
+which, since \texttt{Parentheses} is just the identity mapping, is
+equivalent to
+\begin{verbatim}
+Times[Plus[a,b],c]
+\end{verbatim}
+
+\medskip
+
+\section{Getting and suppressing console output}\index{Output!console}
+\index{Console output}
+
+The GCL will only print output at the console if you explicity ask for
+it with the built-in function \texttt{Print}.  This function has the
+prototype \verb+Print[x->T] =: T+ for any data type \verb+T+, and has
+the short form \verb+<< x+.  You may have noticed that the GCL prompt
+concludes with a \verb+<<+.  In fact, this is not part of the prompt,
+but rather is a ``pre-typed'' part of your GCL command.  
+
+Once you have become accustomed to the GCL, you may prefer to supress
+output from some or all commands typed at the GCL command line.  This
+can be done for individual commands by using the backspace or delete
+keys to erase the \verb+<<+  part of the prompt.  The
+built-in function \texttt{SetVerbose} controls whether \verb+<<+ is
+pretyped at every prompt.  The command \verb+SetVerbose[False]+ will
+turn off this feature, so that your prompt will then look as
+follows:
+
+\begin{verbatim}
+GCL1:= 
+\end{verbatim}
+
+Now, the default is that no output is printed.  If you want to have
+the output of specific commands printed, then you can start your
+command with \verb+<<+.  For example
+
+\begin{verbatim}
+GCL1:= 1+1
+GCL2:= << 1+1
+2
+\end{verbatim}
+
+Note that error messages will be reported at the console regardless of
+the setting of the verbose mode.
+
+
+\section{\rindex{Lists}}
+
+\subsection{Building and modifying lists}\index{Lists!building}\index{Lists!modifying}
+Lists play a special role in the GCL.  Variables can be created to
+contain lists in the same fashion as for any other data type:  
+
+\begin{verbatim}
+list:={1,{2,3},4}
+\end{verbatim}
+
+The built in function \verb+List[x,n]+\index{List} can be used to
+create a list of length \verb+n+ all of whose elements have the value
+\verb+x+.  For numeric data types, a third parameter for \verb+List+
+allows each successive entry to be incremented.
+
+\begin{verbatim}
+GCL1:= << List["Help",3]
+{ "Help", "Help", "Help" }
+GCL2:= << List[List[0,3],3]
+{ { 0, 0, 0 },
+  { 0, 0, 0 },
+  { 0, 0, 0 } }
+GCL3:= << List[0/1, 5, 1/4]
+{ 0, 1/4, 1/2, 3/4, 1 }
+\end{verbatim}
+
+\noindent
+Lists of any data type can be created with \verb+List+.  So if
+\verb+n+ is a normal form game, then \verb+List[n,5]+ is a list of $5$
+copies of \verb+n+.
+
+The function \verb+NthElement[list,n]+\texttt{NthElement} can be used
+to get \verb+n+th element of the list, \verb+list+.  This function has
+two short forms, \verb+list[[n]]+ and \verb+list_n+.  Since the
+function returns the \verb+n+th element of the list, it can be used
+recursively to get the elements of nested lists.  So \verb+list_i_j+
+returns the \verb+j+th element of the \verb+i+th element of
+\verb+list+.  Also, since \verb+list+ is passed by reference, the
+function can be used to modify the corresponding element of a list.
+Thus, you can constuct your own $3\times 3$ identity matrix as
+follows:
+
+\begin{verbatim}
+GCL1:= list:=List[List[0,3],3]
+GCL2:= list_1_1:=list_2_2:=list_3_3:=1;
+GCL3:= << list
+{ { 1, 0, 0 },
+  { 0, 1, 0 },
+  { 0, 0, 1 } }
+\end{verbatim}
+
+
+\subsection{\rindex{Listability} of functions}\index{Functions!listability}
+
+Almost all of the functions in the GCL are ``listable''.  This means
+that if there is a version of the function which takes a type \verb+T+
+as the data type for a parameter, then it can be called with
+\verb+LIST(T)+ as well.  This results in the function generating a
+list of the corresponding length and data type as its output.  For
+example, consider a function
+
+\begin{verbatim}
+Foo[x->T,y->S] =: R
+\end{verbatim}
+
+\noindent
+where \verb+T+, \verb+S+, and \verb+R+ represent arbitrary data types.
+Then if \verb+a+ is a \verb+LIST(T)+, and \verb+b+ is of type
+\verb+S+, then \verb+c := Foo[a,b]+ generates \verb+c+ of type
+\verb+LIST(R)+, where the length of \verb+c+ is equal to the length of
+\verb+a+, and where \verb+c[[i]] = Foo[a[[i]],b]+.
+
+If \verb+Foo[]+ is called with both \verb+a+ and \verb+b+ being lists
+of the correct data type, then the GCL checks whether the length of
+\verb+a+ and \verb+b+ is the same.  If not, it generates a
+dimensionality error. If they are of the same dimension, then 
+\verb+c := Foo[a,b]+ generates \verb+c+ of type \verb+LIST(R)+, where the
+length of \verb+c+ is equal to the length of \verb+a+, and where
+\verb+c[[i]] = Foo[a[[i]],b[[i]]]+.
+
+Note that the above rules implicitly define versions of \verb+Foo[]+
+of the following forms:
+
+\begin{verbatim}
+Foo[x->LIST(T),y->S] =: LIST(R)
+Foo[x->T,y->LIST(S)] =: LIST(R)
+Foo[x->LIST(T),y->LIST(S)] =: LIST(R)
+\end{verbatim}
+
+The same rules apply recursively using these function prototypes as
+well.  So if \verb+a+ is of type \verb+LIST(LIST(T))+, and \verb+b+ is
+of type \verb+S+, the command \verb+c := Foo[a, b]+ results in a
+listable call to \verb+Foo[x->LIST(T),y->S]+.  Thus, \verb+c+ is of
+type \verb+LIST(LIST(R))+, where \verb+c[[i]] = +
+\verb+Foo[a[[i]],b]+.  Hence, \verb+c[[i]][[j]] = +
+\verb+Foo[a[[i]][[j]],b]+.
+
+Note that many vector and matrix math operations follow directly as
+listable calls to the basic arithmetic functions.  In this example,
+listability of \verb+Times+ is used to provide scalar multiplication
+of a scalar and a matrix, and listability of \verb+Plus+ is used to
+add two conformable matrices:  
+
+\begin{verbatim}
+GCL1:= a:={{1,2},{3,4}};
+GCL2:= << 2*a
+{{2,4},{6,8}}
+GCL3:= << a+Transpose[a]
+{{2,5},{5,8}}
+\end{verbatim}
+
+Here listability of \verb+Power+ is used to create a list of the first
+ten perfect squares:
+
+\begin{verbatim}
+GCL4:= << List[1,10,1]^2
+{ 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 }
+\end{verbatim}
+
+While most functions in the GCL are listable, there are some
+exceptions.  Built-in functions that are not listable are noted as
+such in the Function Reference section of this document.
+
+Listability of functions is a powerful tool of the GCL. Many GCL
+programs using flow control statements can be written using listable
+function calls instead.  It is encouraged to use listable functions as
+much as possible because it typically leads to more concise, easier to
+read GCL programs, and in addition the programs typically run
+faster than they would if flow control satements were used instead.
+This is because listable calls to functions are executed in compiled
+code, while flow control statements are executed in interpreted code.
+
+\section{Online documentation}\index{Documentation}
+
+The functions \texttt{Help} and \texttt{Manual} are used to obtain online
+documentation of any function in the GCL, including user defined
+functions that you created with the \verb+NewFunction+ command. 
+
+If the \verb+Help+ function is called with a string that is an exact
+match for a GCL function name, then it returns a list of function
+prototypes for that function name (there can be more than one
+prototype for a function name since GCL functions can be overloaded.)
+For example,
+
+\begin{verbatim}
+GCL1:= << Help["help"]
+{ Help[x->TEXT, {udf->True}, {bif->True}] =: LIST(TEXT) }
+\end{verbatim}
+
+\noindent
+returns the function prototype for \verb+Help+: Note that \verb+Help+
+has two optional \verb+BOOLEAN+ parameters, \verb+udf+ and \verb+bif+.
+By default, both user defined functions and built-in functions are
+included in the search.  To exclude one or the other of these, set the
+corresponding parameter to \verb+False+.
+
+The required text parameter for \verb+Help+ can also contain the
+regular-expression style wildcards \verb+*+ and \verb+?+.  In this
+case, if there is not an exact match, a list of function names
+matching \verb+x+ is returned.  For example, The command 
+
+\begin{verbatim}
+GCL1:= << Help["*efg"]
+{ CompressEfg, LoadEfg, NewEfg, SaveEfg }
+\end{verbatim}
+
+\noindent
+returns a list of all function names ending with ``efg''
+
+Note that the function \verb+Help+ is listable (see section on
+listability), so that we can do \verb+Help[Help["*efg"]]+ to get a
+list of function prototypes for all functions whose names end with
+\verb+efg+.  Similarly, \verb+Help["*"]+ gives a list of all function
+names in the GCL, and {\tt Help[Help["*"]]} gives a list of all
+function prototypes in the GCL.
+
+If \verb+Manual+ command is used to obtain a more complete description
+of a GCL function.  If \verb+Manual+ is called with an argument that
+is an exact match for a GCL function name, it returns the manual entry
+for that function.  For a built-in function a textual description of
+the function and its parameters is returned. 
