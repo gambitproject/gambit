@@ -22,6 +22,8 @@
 
 #include "glist.h"
 
+#include "nfplayer.h"
+#include "nfstrat.h"
 
 
 //---------------------------------------------------------------------
@@ -368,6 +370,137 @@ public:
   virtual ~OutcomeRefPortion();
   bool IsReference( void ) const;
 };
+
+
+//---------------------------------------------------------------------
+//                          NfPlayer class
+//---------------------------------------------------------------------
+
+class NFPlayer;
+
+class NfPlayerPortion : public Portion
+{
+protected:
+  NFPlayer** _Value;
+  NfPlayerPortion( void );
+
+public:
+  virtual ~NfPlayerPortion();
+
+  NFPlayer*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
+};
+
+class NfPlayerValPortion : public NfPlayerPortion
+{
+public:
+  NfPlayerValPortion( NFPlayer* value );
+  virtual ~NfPlayerValPortion();
+  bool IsReference( void ) const;
+};
+
+class NfPlayerRefPortion : public NfPlayerPortion
+{
+public:
+  NfPlayerRefPortion( NFPlayer*& value );
+  virtual ~NfPlayerRefPortion();
+  bool IsReference( void ) const;
+};
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Strategy class
+//---------------------------------------------------------------------
+
+class Strategy;
+
+class StrategyPortion : public Portion
+{
+protected:
+  Strategy** _Value;
+  StrategyPortion( void );
+
+public:
+  virtual ~StrategyPortion();
+
+  Strategy*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
+};
+
+class StrategyValPortion : public StrategyPortion
+{
+public:
+  StrategyValPortion( Strategy* value );
+  virtual ~StrategyValPortion();
+  bool IsReference( void ) const;
+};
+
+class StrategyRefPortion : public StrategyPortion
+{
+public:
+  StrategyRefPortion( Strategy*& value );
+  virtual ~StrategyRefPortion();
+  bool IsReference( void ) const;
+};
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          NfSupport class
+//---------------------------------------------------------------------
+
+class NfSupport;
+
+class NfSupportPortion : public Portion
+{
+protected:
+  NFSupport** _Value;
+  NfSupportPortion( void );
+
+public:
+  virtual ~NfSupportPortion();
+
+  NFSupport*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
+};
+
+class NfSupportValPortion : public NfSupportPortion
+{
+public:
+  NfSupportValPortion( NFSupport* value );
+  virtual ~NfSupportValPortion();
+  bool IsReference( void ) const;
+};
+
+class NfSupportRefPortion : public NfSupportPortion
+{
+public:
+  NfSupportRefPortion( NFSupport*& value );
+  virtual ~NfSupportRefPortion();
+  bool IsReference( void ) const;
+};
+
 
 
 
@@ -899,3 +1032,6 @@ gOutput& operator << ( gOutput& s, Portion* p );
 
 
 #endif // PORTION_H
+
+
+

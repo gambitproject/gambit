@@ -645,6 +645,269 @@ bool OutcomeRefPortion::IsReference( void ) const
 
 
 //---------------------------------------------------------------------
+//                          NfPlayer class
+//---------------------------------------------------------------------
+
+
+
+NfPlayerPortion::NfPlayerPortion( void )
+{ }
+
+NfPlayerPortion::~NfPlayerPortion()
+{ }
+
+NFPlayer*& NfPlayerPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType NfPlayerPortion::Type( void ) const
+{ return porPLAYER_NFG; }
+
+void NfPlayerPortion::Output( gOutput& s ) const
+{ s << "(NfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+
+Portion* NfPlayerPortion::ValCopy( void ) const
+{
+  Portion* p = new NfPlayerValPortion( *_Value ); 
+  p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
+  p->AddDependency();
+  return p;
+}
+
+Portion* NfPlayerPortion::RefCopy( void ) const
+{
+  Portion* p = new NfPlayerRefPortion( *_Value ); 
+  p->SetOriginal( Original() );
+  p->SetOwner( Owner() );
+  return p;
+}
+
+void NfPlayerPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  RemoveDependency();
+  *_Value = *( ( (NfPlayerPortion*) p )->_Value );
+  SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
+  AddDependency();
+}
+
+bool NfPlayerPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (NfPlayerPortion*) p )->_Value );
+  else
+    return false;
+}
+
+
+NfPlayerValPortion::NfPlayerValPortion( NFPlayer* value )
+{ _Value = new NFPlayer*( value ); }
+
+NfPlayerValPortion::~NfPlayerValPortion()
+{ 
+  RemoveDependency();
+  delete _Value; 
+}
+
+bool NfPlayerValPortion::IsReference( void ) const
+{ return false; }
+
+
+NfPlayerRefPortion::NfPlayerRefPortion( NFPlayer*& value )
+{ _Value = &value; }
+
+NfPlayerRefPortion::~NfPlayerRefPortion()
+{ }
+
+bool NfPlayerRefPortion::IsReference( void ) const
+{ return true; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          Strategy class
+//---------------------------------------------------------------------
+
+
+
+StrategyPortion::StrategyPortion( void )
+{ }
+
+StrategyPortion::~StrategyPortion()
+{ }
+
+Strategy*& StrategyPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType StrategyPortion::Type( void ) const
+{ return porSTRATEGY; }
+
+void StrategyPortion::Output( gOutput& s ) const
+{ s << "(Strategy) " << *_Value << " \"" << (*_Value)->name << "\""; }
+
+Portion* StrategyPortion::ValCopy( void ) const
+{
+  Portion* p = new StrategyValPortion( *_Value ); 
+  p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
+  p->AddDependency();
+  return p;
+}
+
+Portion* StrategyPortion::RefCopy( void ) const
+{
+  Portion* p = new StrategyRefPortion( *_Value ); 
+  p->SetOriginal( Original() );
+  p->SetOwner( Owner() );
+  return p;
+}
+
+void StrategyPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  RemoveDependency();
+  *_Value = *( ( (StrategyPortion*) p )->_Value );
+  SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
+  AddDependency();
+}
+
+bool StrategyPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (StrategyPortion*) p )->_Value );
+  else
+    return false;
+}
+
+
+StrategyValPortion::StrategyValPortion( Strategy* value )
+{ _Value = new Strategy*( value ); }
+
+StrategyValPortion::~StrategyValPortion()
+{ 
+  RemoveDependency();
+  delete _Value; 
+}
+
+bool StrategyValPortion::IsReference( void ) const
+{ return false; }
+
+
+StrategyRefPortion::StrategyRefPortion( Strategy*& value )
+{ _Value = &value; }
+
+StrategyRefPortion::~StrategyRefPortion()
+{ }
+
+bool StrategyRefPortion::IsReference( void ) const
+{ return true; }
+
+
+
+
+
+
+//---------------------------------------------------------------------
+//                          NfSupport class
+//---------------------------------------------------------------------
+
+
+
+NfSupportPortion::NfSupportPortion( void )
+{ }
+
+NfSupportPortion::~NfSupportPortion()
+{ }
+
+NFSupport*& NfSupportPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType NfSupportPortion::Type( void ) const
+{ return porNF_SUPPORT; }
+
+void NfSupportPortion::Output( gOutput& s ) const
+{ 
+  s << "(NfSupport) " << *_Value;
+  // s << " \"" << (*_Value)->GetName() << "\""; 
+}
+
+Portion* NfSupportPortion::ValCopy( void ) const
+{
+  Portion* p = new NfSupportValPortion( *_Value ); 
+  p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
+  p->AddDependency();
+  return p;
+}
+
+Portion* NfSupportPortion::RefCopy( void ) const
+{
+  Portion* p = new NfSupportRefPortion( *_Value ); 
+  p->SetOriginal( Original() );
+  p->SetOwner( Owner() );
+  return p;
+}
+
+void NfSupportPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  RemoveDependency();
+  *_Value = *( ( (NfSupportPortion*) p )->_Value );
+  SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
+  AddDependency();
+}
+
+bool NfSupportPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+    return ( *_Value == *( (NfSupportPortion*) p )->_Value );
+  else
+    return false;
+}
+
+
+NfSupportValPortion::NfSupportValPortion( NFSupport* value )
+{ _Value = new NFSupport*( value ); }
+
+NfSupportValPortion::~NfSupportValPortion()
+{ 
+  RemoveDependency();
+  delete _Value; 
+}
+
+bool NfSupportValPortion::IsReference( void ) const
+{ return false; }
+
+
+NfSupportRefPortion::NfSupportRefPortion( NFSupport*& value )
+{ _Value = &value; }
+
+NfSupportRefPortion::~NfSupportRefPortion()
+{ }
+
+bool NfSupportRefPortion::IsReference( void ) const
+{ return true; }
+
+
+
+
+
+
+//---------------------------------------------------------------------
 //                          EfPlayer class
 //---------------------------------------------------------------------
 
@@ -2296,5 +2559,6 @@ TEMPLATE class gArray<Portion *>;
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+
 
 

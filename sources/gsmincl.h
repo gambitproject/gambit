@@ -75,6 +75,9 @@ typedef unsigned int PortionType;
 
 #define  porUNKNOWN    ( 0x400000 )
 
+#define  porSTRATEGY   ( 0x02000000 )
+#define  porNF_SUPPORT ( 0x04000000 )
+
 #define  porNUMERICAL  ( porFLOAT | porINTEGER | porRATIONAL )
 #define  porALL        ( 0xFFFFFFFF )
 #define  porVALUE      ( porALL & ~porREFERENCE )
