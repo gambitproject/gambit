@@ -351,6 +351,53 @@ template <class T> bool BehavProfile<T>::IsPure(int) const
   return false;
 }
 
+template <class T> T BehavProfile<T>::LiapValue(void) const
+{
+  static const T BIG1 = (T) 10000;
+  static const T BIG2 = (T) 100;
+
+  BehavProfile<T> p(*this);
+  ((gVector<T> &) p).operator=(*this);
+  BehavProfile<T> tmp(p);
+  T x, result = ((T) 0), avg, sum;
+
+      // Ted -- only reason for this is because you 
+      // got rid of CondPayoff ( . , . )
+  gDPVector<T> cpay(((Efg<T> *)E)->Dimensionality());  
+  gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());  
+  tmp.CondPayoff(cpay, probs);
+
+  for (int i = 1; i <= E->NumPlayers(); i++) {
+    EFPlayer *player = E->PlayerList()[i];
+    for (int j = 1; j <= player->NumInfosets(); j++) {
+      avg = sum = (T)0;
+      Infoset *s = player->InfosetList()[j];
+      int k;
+      for (k = 1; k <= s->NumActions(); k++) {
+	x = p(i, j, k); 
+	avg += x * cpay(i, j, k);
+	sum += x;
+	if (x > (T)0)  x = (T)0;
+	result += BIG1 * x * x;         // add penalty for neg probabilities
+      }
+      for (k = 1; k <= s->NumActions(); k++) {
+	x = cpay(i, j, k) - avg;
+	if (x < (T)0) x = (T)0;
+	result += x * x;          // add penalty if not best response
+      }
+      x = sum - (T)1;
+      result += BIG2 * x * x;       // add penalty for sum not equal to 1
+    }
+  }
+  return result;
+}
+
+template <class T> bool BehavProfile<T>::IsNash(void) const
+{
+  if(LiapValue()==(T)0) return 1;
+  return 0;
+}
+
 template <class T>
 const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
 {

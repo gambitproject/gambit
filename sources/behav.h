@@ -75,6 +75,9 @@ template <class T> class BehavProfile
     void CondPayoff(gDPVector<T> &value, gPVector<T> &probs) const;
     gArray<T> NodeRealizProbs(void);
     gArray<T> Beliefs(void);
+
+    T LiapValue(void) const;
+    bool IsNash(void) const;
     void Centroid(void) const;
 
     bool operator==(const BehavProfile<T> &) const;
