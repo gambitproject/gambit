@@ -12,6 +12,90 @@ template <class T> int gVector<T>::Length(void) const
 }
 
 //------------------------------------------------------------------------
+// inline ctors
+//------------------------------------------------------------------------
+
+template <class T> gVector<T>::gVector(void) {
+    min=1; max=0;
+    data= NULL;
+  }
+
+template <class T> gVector<T>::gVector(int len) {
+    assert( len >= 0 );
+    min=1; max=len;
+    AllocateData();
+  }
+
+template <class T> gVector<T>::gVector(int low, int high) {
+    assert( high >= low-1 );
+    min=low; max=high;
+    AllocateData();
+  }
+
+template <class T> gVector<T>::gVector(const gVector<T>& V) {
+    CopyData(V);
+  }
+
+
+//------------------------------------------------------------------------
+// inline access functions
+//------------------------------------------------------------------------
+
+template <class T> int gVector<T>::First(void) const
+{ return min; }
+template <class T> int gVector<T>::Last(void) const
+{ return max; }
+
+template <class T> T& gVector<T>::operator[] (int n) {
+    assert(Check(n));
+	 return data[n];
+  }
+
+template <class T> const T& gVector<T>::operator[] (int n) const {
+    assert(Check(n));
+    return data[n];
+ }
+
+
+//------------------------------------------------------------------------
+// inline arithmetic operators
+//------------------------------------------------------------------------
+
+template <class T> int gVector<T>::operator!=(const gVector<T> &V) const
+{ return !(*this == V); }
+
+template <class T> int gVector<T>::operator!=(T c) const
+{ return !(*this == c); }
+
+
+//------------------------------------------------------------------------
+// inline internal functions
+//------------------------------------------------------------------------
+
+template <class T> int gVector<T>::Check(int index) const
+{ return( min<=index && index<=max ); }
+
+template <class T> int gVector<T>::Check(const gVector<T> &v) const
+{ return( v.min==min && v.max==max ); }
+
+template <class T> T* gVector<T>::Allocate(void) {
+    T* p = new T[max-min+1];
+    assert( p != NULL );
+    return p-min;
+  }
+
+template <class T> void gVector<T>::Delete(T* p)
+{ delete[] (p+min); }
+
+template <class T> void gVector<T>::AllocateData(void)
+{ data = Allocate(); }
+
+template <class T> void gVector<T>::DeleteData(void)
+{ Delete(data); }
+
+
+
+//------------------------------------------------------------------------
 //	gVector: internal functions
 //------------------------------------------------------------------------
 

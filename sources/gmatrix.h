@@ -131,46 +131,8 @@ public:
 
 };
 
-template <class T> inline gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
-{
-  M.Dump(to); return to;
-}
+template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M);
 
-
-// inline member functions
-template <class T>
-inline T& gMatrix<T>::operator()(int row, int col) { 
-  assert(Check(row,col));
-  return data[row][col]; 
-}
-template <class T>
-inline const T& gMatrix<T>::operator()(int row, int col) const {
-  assert(Check(row,col));
-  return data[row][col]; 
-}
-
-template <class T>
-inline int gMatrix<T>::operator!=(const gMatrix<T> &M) const {
-  return !((*this)==M);
-}
-template <class T>
-inline int gMatrix<T>::operator!=( T s ) const {
-  return !((*this)==s);
-}
-
-template <class T>
-inline const int& gMatrix<T>::MinRow(void) const { return minrow; }
-template <class T>
-inline const int& gMatrix<T>::MaxRow(void) const { return maxrow; }
-template <class T>
-inline int gMatrix<T>::NumRows(void) const { return maxrow-minrow+1; }
-  
-template <class T>
-inline const int& gMatrix<T>::MinCol(void) const { return mincol; }
-template <class T>
-inline const int& gMatrix<T>::MaxCol(void) const { return maxcol; }
-template <class T>
-inline int gMatrix<T>::NumColumns(void) const { return maxcol-mincol+1; }
 
 #ifdef __BORLANDC__
 #include "gmatrix.imp"

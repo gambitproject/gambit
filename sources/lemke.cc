@@ -335,7 +335,9 @@ template <class T> void LemkeTableau<T>::GetSolutions(void) const
       else
 	profile(2, j) = (T) 0;
 
-    gout << "Lemke solution:\n" << profile << '\n';
+	gout << "Lemke solution:\n";
+	profile.Dump(gout);
+	gout << '\n';
   }
 }
 
@@ -419,8 +421,7 @@ int LemkeSolver::Lemke(void)
       T = new LemkeTableau<double>((NormalForm<double> &) nf,
 				   *outfile, *errfile, params.plev);
       break;
-
-    case RATIONAL:
+  case RATIONAL:
       T = new LemkeTableau<gRational>((NormalForm<gRational> &) nf,
 				      *outfile, *errfile, params.plev);
       break;

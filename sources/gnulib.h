@@ -1,8 +1,8 @@
-//
-// FILE: gnulib.h -- Utilities from the g++ library
-//
-// $Id$
-//
+//#
+//# FILE: gnulib.h -- Utilities from the g++ library
+//#
+//# $Id$
+//#
 
 #ifndef GNULIB_H
 #define GNULIB_H
@@ -131,7 +131,7 @@ inline int even(long arg)
 
 inline int odd(long arg)
 {
-  return (arg & 1);
+  return (int) (arg & 1L);
 }
 
 inline long lcm(long x, long y)
@@ -141,17 +141,17 @@ inline long lcm(long x, long y)
 
 inline void (setbit)(long& x, long b)
 {
-  x |= (1 << b);
+  x |= (long) (1 << (int) b);
 }
 
 inline void clearbit(long& x, long b)
 {
-  x &= ~(1 << b);
+  x &= ~((long) (1 << (int) b));
 }
 
 inline int testbit(long x, long b)
 {
-  return ((x & (1 << b)) != 0);
+  return ((x & (1 << (int) b)) != 0);
 }
 
 #endif
@@ -219,7 +219,7 @@ public:
   void* base();
   void* next_free();
   int   alignment_mask();
-  int   chunk_size();
+  long  chunk_size();
   int   size();
   int   room();
   int   contains(void* p);      // does Obstack hold pointer p?
@@ -250,37 +250,37 @@ public:
 
 inline Obstack::~Obstack()
 {
-  _free(0); 
+  _free(0);
 }
 
 inline void* Obstack::base()
 {
-  return objectbase; 
+  return objectbase;
 }
 
 inline void* Obstack::next_free()
 {
-  return nextfree; 
+  return nextfree;
 }
 
 inline int Obstack::alignment_mask()
 {
-  return alignmentmask; 
+  return alignmentmask;
 }
 
-inline int Obstack::chunk_size()
+inline long Obstack::chunk_size()
 {
-  return chunksize; 
+  return chunksize;
 }
 
 inline int Obstack::size()
 {
-  return nextfree - objectbase; 
+  return (int) (nextfree - objectbase);
 }
 
 inline int Obstack::room()
 {
-  return chunklimit - nextfree; 
+  return (int) (chunklimit - nextfree);
 }
 
 inline void Obstack:: grow(const void* data, int size)

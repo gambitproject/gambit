@@ -6,6 +6,41 @@
 
 #include "gmatrix.h"
 
+// inline member functions
+template <class T>
+T& gMatrix<T>::operator()(int row, int col) { 
+  assert(Check(row,col));
+  return data[row][col]; 
+}
+template <class T>
+const T& gMatrix<T>::operator()(int row, int col) const {
+  assert(Check(row,col));
+  return data[row][col]; 
+}
+
+template <class T>
+int gMatrix<T>::operator!=(const gMatrix<T> &M) const {
+  return !((*this)==M);
+}
+template <class T>
+int gMatrix<T>::operator!=( T s ) const {
+  return !((*this)==s);
+}
+
+template <class T>
+const int& gMatrix<T>::MinRow(void) const { return minrow; }
+template <class T>
+const int& gMatrix<T>::MaxRow(void) const { return maxrow; }
+template <class T>
+int gMatrix<T>::NumRows(void) const { return maxrow-minrow+1; }
+  
+template <class T>
+const int& gMatrix<T>::MinCol(void) const { return mincol; }
+template <class T>
+const int& gMatrix<T>::MaxCol(void) const { return maxcol; }
+template <class T>
+int gMatrix<T>::NumColumns(void) const { return maxcol-mincol+1; }
+
 
 template <class T> int gMatrix<T>::CheckRow(int row) const
 {
@@ -961,3 +996,7 @@ gMatrix<T>::Determinant(void) const
 */
 
 
+template <class T> gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
+{
+  M.Dump(to); return to;
+}

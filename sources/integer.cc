@@ -92,13 +92,13 @@ IntRep _OneRep = {1, 0, 1, {1}};
 IntRep _MinusOneRep = {1, 0, 0, {1}};
 
 
-// utilities to extract and transfer bits 
+// utilities to extract and transfer bits
 
 // get low bits
 
 inline static unsigned short extract(unsigned long x)
 {
-  return x & I_MAXNUM;
+  return (unsigned short) (x & I_MAXNUM);
 }
 
 // transfer high bits to low
@@ -117,7 +117,7 @@ inline static unsigned long up(unsigned long x)
 
 // compare two equal-length reps
 
-inline static int docmp(const unsigned short* x, const unsigned short* y, int l)
+static int docmp(const unsigned short* x, const unsigned short* y, int l)
 {
   int diff = 0;
   const unsigned short* xs = &(x[l]);
@@ -135,7 +135,7 @@ inline static int calc_len(int len1, int len2, int pad)
 
 // ensure len & sgn are correct
 
-inline static void Icheck(IntRep* rep)
+static void Icheck(IntRep* rep)
 {
   int l = rep->len;
   const unsigned short* p = &(rep->s[l]);
@@ -146,7 +146,7 @@ inline static void Icheck(IntRep* rep)
 
 // zero out the end of a rep
 
-inline static void Iclear_from(IntRep* rep, int p)
+static void Iclear_from(IntRep* rep, int p)
 {
   unsigned short* cp = &(rep->s[p]);
   const unsigned short* cf = &(rep->s[rep->len]);
@@ -155,7 +155,7 @@ inline static void Iclear_from(IntRep* rep, int p)
 
 // copy parts of a rep
 
-static inline void scpy(const unsigned short* src, unsigned short* dest,int nb)
+void scpy(const unsigned short* src, unsigned short* dest,int nb)
 {
   while (--nb >= 0) *dest++ = *src++;
 }
@@ -169,14 +169,14 @@ static inline void nonnil(const IntRep* rep)
 
 // allocate a new Irep. Pad to something close to a power of two.
 
-inline static IntRep* Inew(int newlen)
+static IntRep* Inew(int newlen)
 {
   unsigned int siz = sizeof(IntRep) + newlen * sizeof(short) + 
     MALLOC_MIN_OVERHEAD;
   unsigned int allocsiz = MINIntRep_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  assert(allocsiz < MAXIntRep_SIZE * sizeof(short));
+  assert((long) allocsiz < MAXIntRep_SIZE * sizeof(short));
     
   IntRep* rep = (IntRep *) new char[allocsiz];
   rep->sz = (allocsiz - sizeof(IntRep) + sizeof(short)) / sizeof(short);
@@ -375,10 +375,10 @@ long Itolong(const IntRep* rep)
   else if ((unsigned)(rep->len) < (unsigned)(SHORT_PER_LONG))
   {
     unsigned long a = rep->s[rep->len-1];
-    if (SHORT_PER_LONG > 2) // normally optimized out
+	 if (SHORT_PER_LONG > 2) // normally optimized out
     {
-      for (int i = rep->len - 2; i >= 0; --i)
-        a = up(a) | rep->s[i];
+		for (int i = rep->len - 2; i >= 0; --i)
+		  a = up(a) | rep->s[i];
     }
     return (rep->sgn == I_POSITIVE)? a : -((long)a);
   }
@@ -390,10 +390,10 @@ long Itolong(const IntRep* rep)
     else
     {
       a = up(a) | rep->s[SHORT_PER_LONG - 2];
-      if (SHORT_PER_LONG > 2)
+		if (SHORT_PER_LONG > 2)
       {
-        for (int i = SHORT_PER_LONG - 3; i >= 0; --i)
-          a = up(a) | rep->s[i];
+		  for (int i = SHORT_PER_LONG - 3; i >= 0; --i)
+			 a = up(a) | rep->s[i];
       }
       return (rep->sgn == I_POSITIVE)? a : -((long)a);
     }
@@ -431,8 +431,8 @@ double Itodouble(const IntRep* rep)
   double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i)
   {
-    unsigned short a = I_RADIX >> 1;
-    while (a != 0)
+	 unsigned short a = (unsigned short) (I_RADIX >> 1);
+	 while (a != 0)
     {
       if (d >= bound)
         return (rep->sgn == I_NEGATIVE) ? -HUGE_VAL : HUGE_VAL;
@@ -458,7 +458,7 @@ int Iisdouble(const IntRep* rep)
   double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i)
   {
-    unsigned short a = I_RADIX >> 1;
+	 unsigned short a = (unsigned short) (I_RADIX >> 1);
     while (a != 0)
     {
       if (d > bound || (d == bound && (i > 0 || (rep->s[i] & a))))
@@ -489,7 +489,7 @@ double ratio(const gInteger& num, const gInteger& den)
     int cont = 1;
     for (int i = den.rep->len - 1; i >= 0 && cont; --i)
     {
-      unsigned short a = I_RADIX >> 1;
+		unsigned short a = (unsigned short) (I_RADIX >> 1);
       while (a != 0)
       {
         if (d2 + 1.0 == d2) // out of precision when we get here
@@ -1108,11 +1108,11 @@ static void do_divide(unsigned short* rs,
   {
     unsigned short qhat;       // guess q
     if (d1 == rs[i])
-      qhat = I_MAXNUM;
+		qhat = (unsigned short) I_MAXNUM;
     else
     {
       unsigned long lr = up((unsigned long)rs[i]) | rs[i-1];
-      qhat = lr / d1;
+		qhat = (unsigned short) (lr / d1);
     }
 
     for(;;)     // adjust q, use docmp to avoid overflow problems
@@ -1235,7 +1235,7 @@ IntRep* div(const IntRep* x, const IntRep* y, IntRep* q)
   {
     IntRep* yy = 0;
     IntRep* r  = 0;
-    unsigned short prescale = (I_RADIX / (1 + y->s[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1302,7 +1302,7 @@ IntRep* div(const IntRep* x, long y, IntRep* q)
   else
   {
     IntRep* r  = 0;
-    unsigned short prescale = (I_RADIX / (1 + ys[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -1377,7 +1377,7 @@ void divide(const gInteger& Ix, long y, gInteger& Iq, long& rem)
   else
   {
     IntRep* r  = 0;
-    unsigned short prescale = (I_RADIX / (1 + ys[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -1458,7 +1458,7 @@ void divide(const gInteger& Ix, const gInteger& Iy, gInteger& Iq, gInteger& Ir)
   else
   {
     IntRep* yy = 0;
-    unsigned short prescale = (I_RADIX / (1 + y->s[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1516,7 +1516,7 @@ IntRep* mod(const IntRep* x, const IntRep* y, IntRep* r)
   else
   {
     IntRep* yy = 0;
-    unsigned short prescale = (I_RADIX / (1 + y->s[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r)
     {
       yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
@@ -1582,7 +1582,7 @@ IntRep* mod(const IntRep* x, long y, IntRep* r)
   }
   else
   {
-    unsigned short prescale = (I_RADIX / (1 + ys[yl - 1]));
+	 unsigned short prescale = (unsigned short) (I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1)
     {
       unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
@@ -1623,8 +1623,8 @@ IntRep* lshift(const IntRep* x, long y, IntRep* r)
   int rsgn = x->sgn;
 
   long ay = (y < 0)? -y : y;
-  int bw = ay / I_SHIFT;
-  int sw = ay % I_SHIFT;
+  int bw = (int) (ay / I_SHIFT);
+  int sw = (int) (ay % I_SHIFT);
 
   if (y > 0)
   {
@@ -1748,17 +1748,17 @@ IntRep* bitop(const IntRep* x, long y, IntRep* r, char op)
   nonnil(x);
   unsigned short tmp[SHORT_PER_LONG];
   unsigned long u;
-  int newsgn;
-  if (newsgn = (y >= 0))
-    u = y;
+  int newsgn = (y >= 0);
+  if (newsgn)
+	 u = y;
   else
-    u = -y;
-  
+	 u = -y;
+
   int l = 0;
   while (u != 0)
   {
-    tmp[l++] = extract(u);
-    u = down(u);
+	 tmp[l++] = extract(u);
+	 u = down(u);
   }
 
   int xl = x->len;
@@ -1766,9 +1766,9 @@ IntRep* bitop(const IntRep* x, long y, IntRep* r, char op)
   int xsgn = x->sgn;
   int xrsame = x == r;
   if (xrsame)
-    r = Iresize(r, calc_len(xl, yl, 0));
+	 r = Iresize(r, calc_len(xl, yl, 0));
   else
-    r = Icalloc(r, calc_len(xl, yl, 0));
+	 r = Icalloc(r, calc_len(xl, yl, 0));
   r->sgn = xsgn;
   unsigned short* rs = r->s;
   unsigned short* topr = &(rs[r->len]);
@@ -1777,31 +1777,31 @@ IntRep* bitop(const IntRep* x, long y, IntRep* r, char op)
   const unsigned short* topb;
   if (xl >= yl)
   {
-    as = (xrsame)? rs : x->s;
-    bs = tmp;
-    topb = &(bs[yl]);
+	 as = (xrsame)? rs : x->s;
+	 bs = tmp;
+	 topb = &(bs[yl]);
   }
   else
   {
-    bs = (xrsame)? rs : x->s;
-    topb = &(bs[xl]);
-    as = tmp;
+	 bs = (xrsame)? rs : x->s;
+	 topb = &(bs[xl]);
+	 as = tmp;
   }
 
   switch (op)
   {
   case '&':
-    while (bs < topb) *rs++ = *as++ & *bs++;
-    while (rs < topr) *rs++ = 0;
-    break;
+	 while (bs < topb) *rs++ = *as++ & *bs++;
+	 while (rs < topr) *rs++ = 0;
+	 break;
   case '|':
-    while (bs < topb) *rs++ = *as++ | *bs++;
-    while (rs < topr) *rs++ = *as++;
-    break;
+	 while (bs < topb) *rs++ = *as++ | *bs++;
+	 while (rs < topr) *rs++ = *as++;
+	 break;
   case '^':
-    while (bs < topb) *rs++ = *as++ ^ *bs++;
-    while (rs < topr) *rs++ = *as++;
-    break;
+	 while (bs < topb) *rs++ = *as++ ^ *bs++;
+	 while (rs < topr) *rs++ = *as++;
+	 break;
   }
   Icheck(r);
   return r;
@@ -1837,8 +1837,8 @@ void (setbit)(gInteger& x, long b)
 {
   if (b >= 0)
   {
-    int bw = (unsigned long)b / I_SHIFT;
-    int sw = (unsigned long)b % I_SHIFT;
+	 int bw = (int) ((unsigned long)b / I_SHIFT);
+	 int sw = (int) ((unsigned long)b % I_SHIFT);
     int xl = x.rep ? x.rep->len : 0;
     if (xl <= bw)
       x.rep = Iresize(x.rep, calc_len(xl, bw+1, 0));
@@ -1855,8 +1855,8 @@ void clearbit(gInteger& x, long b)
 	x.rep = &_ZeroRep;
       else
 	{
-	  int bw = (unsigned long)b / I_SHIFT;
-	  int sw = (unsigned long)b % I_SHIFT;
+	  int bw = (int) ((unsigned long)b / I_SHIFT);
+	  int sw = (int) ((unsigned long)b % I_SHIFT);
 	  if (x.rep->len > bw)
 	    x.rep->s[bw] &= ~(1 << sw);
 	}
@@ -1868,8 +1868,8 @@ int testbit(const gInteger& x, long b)
 {
   if (x.rep != 0 && b >= 0)
   {
-    int bw = (unsigned long)b / I_SHIFT;
-    int sw = (unsigned long)b % I_SHIFT;
+	 int bw = (int) ((unsigned long)b / I_SHIFT);
+	 int sw = (int) ((unsigned long)b % I_SHIFT);
     return (bw < x.rep->len && (x.rep->s[bw] & (1 << sw)) != 0);
   }
   else
@@ -2012,7 +2012,7 @@ IntRep* power(const IntRep* x, long y, IntRep* r)
     r = Icopy(r, x);
   else
   {
-    int maxsize = ((lg(x) + 1) * y) / I_SHIFT + 2;     // pre-allocate space
+	 int maxsize = (int) (((lg(x) + 1) * y) / I_SHIFT + 2);     // pre-allocate space
     IntRep* b = Ialloc(0, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
@@ -2129,7 +2129,7 @@ gInteger lcm(const gInteger& x, const gInteger& y)
 IntRep* atoIntRep(const char* s, int base)
 {
   int sl = strlen(s);
-  IntRep* r = Icalloc(0, sl * (lg(base) + 1) / I_SHIFT + 1);
+  IntRep* r = Icalloc(0, (int) (sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != 0)
   {
     char sgn;
@@ -2169,7 +2169,7 @@ AllocRing _libgxx_fmtq(_libgxx_maxfmt);
 
 char* Itoa(const IntRep* x, int base, int width)
 {
-  int fmtlen = (x->len + 1) * I_SHIFT / lg(base) + 4 + width;
+  int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   char* fmtbase = (char *) _libgxx_fmtq.alloc(fmtlen);
   char* f = cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
   return f;
@@ -2201,7 +2201,7 @@ char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
     // find power
     int bpower = 1;
     unsigned short b = base;
-    unsigned short maxb = I_MAXNUM / base;
+	 unsigned short maxb = (unsigned short) (I_MAXNUM / base);
     while (b < maxb)
     {
       b *= base;
@@ -2251,22 +2251,24 @@ char*  cvtItoa(const IntRep* x, char* fmt, int& fmtlen, int base, int showbase,
   }
   if (x->sgn == I_NEGATIVE) *--s = '-';
   else if (showpos) *--s = '+';
-  int w = e - s - 1;
+  int w = (int) (e - s - 1);
   if (!align_right || w >= width)
   {
     while (w++ < width)
       *--s = fillchar;
-    fmtlen = e - s - 1;
+	 fmtlen = (int) (e - s - 1);
     return s;
   }
   else
   {
     char* p = fmt;
-    int gap = s - p;
-    for (char* t = s; *t != 0; ++t, ++p) *p = *t;
+#ifdef UNUSED
+	 int gap = (int) (s - p);
+#endif   // UNUSED
+	 for (char* t = s; *t != 0; ++t, ++p) *p = *t;
     while (w++ < width) *p++ = fillchar;
     *p = 0;
-    fmtlen = p - fmt;
+	 fmtlen = (int) (p - fmt);
     return fmt;
   }
 }
@@ -2293,43 +2295,41 @@ char* hex(const gInteger& x, int width)
 
 gInput &operator>>(gInput& s, gInteger& y)
 {
-  int got_one = 0;
   char sgn = 0;
   char ch;
   y.rep = Icopy_zero(y.rep);
-  
+
   do  {
-    s.get(ch);
+	 s.get(ch);
   }  while (isspace(ch));
 
   s.unget(ch);
 
   while (s.get(ch))
   {
-    if (ch == '-')
-    {
-      if (sgn == 0)
-        sgn = '-';
-      else
-        break;
-    }
-    else
-    {
-      if (ch >= '0' && ch <= '9')
-      {
-        long digit = ch - '0';
-        y *= 10;
-        y += digit;
-        got_one = 1;
-      }
-      else
-        break;
-    }
+	 if (ch == '-')
+	 {
+		if (sgn == 0)
+		  sgn = '-';
+		else
+		  break;
+	 }
+	 else
+	 {
+		if (ch >= '0' && ch <= '9')
+		{
+		  long digit = ch - '0';
+		  y *= 10;
+		  y += digit;
+		}
+		else
+		  break;
+	 }
   }
   s.unget(ch);
 
   if (sgn == '-')
-    y.negate();
+	 y.negate();
 
   return s;
 }
@@ -2337,7 +2337,7 @@ gInput &operator>>(gInput& s, gInteger& y)
 int gInteger::OK() const
 {
   if (rep != 0)
-    {
+	 {
       int l = rep->len;
       int s = rep->sgn;
       int v = l <= rep->sz || STATIC_IntRep(rep);    // length within bounds
@@ -2355,6 +2355,7 @@ int gInteger::OK() const
 void gInteger::error(const char* msg) const
 {
   // (*lib_error_handler)("gInteger", msg);
+  gerr << msg << '\n';
 }
 
 
@@ -3179,4 +3180,3 @@ void gInteger::operator %= (long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
-

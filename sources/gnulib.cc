@@ -1,8 +1,8 @@
-//
-// FILE: gnulib.cc -- Utilities from the g++ library
-//
-// $Id$
-//
+//#
+//# FILE: gnulib.cc -- Utilities from the g++ library
+//#
+//# $Id$
+//#
 
 
 #include <assert.h>
@@ -46,15 +46,15 @@ void Obstack::newchunk(int size)
   _obstack_chunk*	old_chunk = chunk;
   _obstack_chunk*	new_chunk;
   long	new_size;
-  int obj_size = nextfree - objectbase;
+  int obj_size = (int) (nextfree - objectbase);
 
   new_size = (obj_size + size) << 1;
   if (new_size < chunksize)
     new_size = chunksize;
 
-  new_chunk = chunk = (_obstack_chunk*)(new char[new_size]);
+  new_chunk = chunk = (_obstack_chunk*)(new char[(int) new_size]);
   new_chunk->prev = old_chunk;
-  new_chunk->limit = chunklimit = (char *) new_chunk + new_size;
+  new_chunk->limit = chunklimit = (char *) new_chunk + (int) new_size;
 
   memcpy((void*)new_chunk->contents, (void*)objectbase, obj_size);
   objectbase = new_chunk->contents;
@@ -156,7 +156,7 @@ int AllocRing::contains(void* p)
   return find(p) >= 0;
 }
 
-static inline unsigned int good_size(unsigned int s)
+static unsigned int good_size(unsigned int s)
 {
   unsigned int req = s + 4;
   unsigned int good = 8;
@@ -214,7 +214,4 @@ long gcd(long x, long y)        // euclid's algorithm
     }
   }
 }
-
-
-
 
