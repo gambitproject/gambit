@@ -54,6 +54,7 @@ public:
   void AddPlayer(const gText &);
   int NumPlayers(void) const { return m_numPlayers; }
   int NumStrategies(int pl) const;
+  gText GetPlayer(int pl) const;
   gText GetStrategy(int pl, int st) const;
 };
 
@@ -104,6 +105,24 @@ int gbtNfgFileData::NumStrategies(int p_player) const
   }
   else {
     return player->m_strategies.Length();
+  }
+}
+
+gText gbtNfgFileData::GetPlayer(int p_player) const
+{
+  gbtNfgFilePlayer *player = m_firstPlayer;
+  int pl = 1;
+
+  while (player && pl < p_player) {
+    player = player->m_next;
+    pl++;
+  }
+
+  if (!player) {
+    return "";
+  }
+  else {
+    return player->m_name;
   }
 }
 
@@ -510,6 +529,7 @@ static gbtNfgGame BuildNfg(gbtNfgParserState &p_parser, gbtNfgFileData &p_data)
   nfg.SetComment(p_data.m_comment);
   
   for (int pl = 1; pl <= dim.Length(); pl++) {
+    nfg.GetPlayer(pl).SetLabel(p_data.GetPlayer(pl));
     for (int st = 1; st <= dim[pl]; st++) {
       nfg.GetPlayer(pl).GetStrategy(st).SetLabel(p_data.GetStrategy(pl,st));
     }
