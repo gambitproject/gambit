@@ -1,5 +1,7 @@
 
 
+
+
 #include "gsm.h"
 
 
@@ -28,7 +30,7 @@ int main( void )
   GSM *machine;
 
 
-  machine = new GSM( 32, gout, gerr );
+  machine = new GSM( 32, gout, gout );
 
   gList< Instruction* > program;
 
@@ -1658,7 +1660,9 @@ int main( void )
   gin >> cont;
 
 
-  machine->PushRef( "N" );
+
+
+ s machine->PushRef( "N" );
   machine->InitCallFunction( "ReadNfg" );
   machine->Push( "e02.nfg" );
   machine->Bind();
@@ -1677,6 +1681,63 @@ int main( void )
 
   machine->PushRef( "time" );
   machine->Dump();
+
+
+#ifdef CRASHTEST
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind();
+  machine->Push( "test" );
+  machine->Bind();
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind( "N" );
+  machine->Push( "test" );
+  machine->Bind();
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind();
+  machine->Push( "test" );
+  machine->Bind( "pxifile" );
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind( "N" );
+  machine->Push( "test" );
+  machine->Bind( "pxifile" );
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+#endif // CRASHTEST
+
+  machine->InitCallFunction( "GobitNfg" );
+  machine->PushRef( "N" );
+  machine->Bind( "N" );
+  machine->PushStream( "test" );
+  machine->Bind( "pxifile" );
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+
+
 
 #ifdef CRASHTEST
   gout << "*********************** press return to continue ************";
@@ -1722,12 +1783,15 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+
+
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
 
   gout << "\nDeleting machine\n";
   delete machine;
+
 
   return 0;
 }
