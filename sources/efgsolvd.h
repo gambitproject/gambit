@@ -198,7 +198,7 @@ public:
 	wxGetResource(SOLN_SECT,"Efg-Standard-Num",&standard_num,defaults_file);
 	if (use_standard) StandardSettings();
 	}
-	~EfgSolveSettings()
+	virtual ~EfgSolveSettings()
 	{
 	if (result!=SD_CANCEL)
 	{
@@ -317,7 +317,7 @@ public:
 		d->Show(TRUE);
 	}
 	// Destructor
-	~EfgSolveParamsDialog(void)	{delete d;}
+	virtual ~EfgSolveParamsDialog(void)	{delete d;}
 	// Data access
 	int GetResult(void) {return result;}
 };
@@ -348,7 +348,7 @@ public:
 			 new wxList(wxMakeConstraintStrings(standard_num_list), 0)));
 	Go();
 	}
-	~EfgSolveStandardDialog()
+	virtual ~EfgSolveStandardDialog()
 	{
 	if (Completed()==wxOK)
 	{

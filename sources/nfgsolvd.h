@@ -148,7 +148,7 @@ public:
 	wxGetResource(SOLN_SECT,"Nfg-Auto-Inspect-Solns",&auto_inspect,defaults_file);
 	if (use_standard) StandardSettings();
 	}
-	~NfgSolveSettings()
+	virtual ~NfgSolveSettings()
 	{
 	if (result!=SD_CANCEL)
 	{
