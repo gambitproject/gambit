@@ -126,8 +126,8 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
 {
   DeleteAllItems();
   AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
-  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = p_support.GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= p_support.NumPlayers(); pl++) {
+    gbtEfgPlayer player = p_support.GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),

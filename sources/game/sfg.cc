@@ -38,9 +38,9 @@
 
 
 gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
-  : m_efg(S.GetGame()), efsupp(S), seq(m_efg.NumPlayers()),
-    isetFlag(S.GetGame().NumInfosets()),
-    isetRow(S.GetGame().NumInfosets()), infosets(m_efg.NumPlayers())
+  : m_efg(S.GetTree()), efsupp(S), seq(m_efg.NumPlayers()),
+    isetFlag(S.NumInfosets()),
+    isetRow(S.NumInfosets()), infosets(m_efg.NumPlayers())
 { 
   int i;
   gbtArray<gbtEfgInfoset> zero(m_efg.NumPlayers());

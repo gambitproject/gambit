@@ -116,8 +116,8 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 
   int maxColumn = 0;
   const gbtEfgSupport &support = p_profiles[1].Support();
-  for (int pl = 1; pl <= support.GetGame().NumPlayers(); pl++) {
-    for (int iset = 1; iset <= support.GetGame().GetPlayer(pl)->NumInfosets(); iset++) {
+  for (int pl = 1; pl <= support.NumPlayers(); pl++) {
+    for (int iset = 1; iset <= support.GetPlayer(pl)->NumInfosets(); iset++) {
       for (int act = 1; act <= support.NumActions(pl, iset); act++) {
 	m_qreList->InsertColumn(++maxColumn,
 				wxString::Format(wxT("%d:(%d,%d)"),

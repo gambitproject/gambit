@@ -72,7 +72,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -85,10 +85,10 @@ gbtList<BehavSolution> gbtEfgNashOneNash::Solve(const gbtEfgSupport &p_support,
 					      players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
 
-    if (p_support.GetGame().NumPlayers() == 2) {
-      if (p_support.GetGame().IsConstSum()) {
+    if (p_support.NumPlayers() == 2) {
+      if (p_support.IsConstSum()) {
 	algorithm.SetAlgorithm(new gbtEfgNashLp<double>);
       }
       else {
@@ -164,7 +164,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -187,9 +187,9 @@ gbtList<BehavSolution> gbtEfgNashTwoNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().UnmarkSubgames(p_support.GetGame().GetRoot());
+    p_support.GetTree().UnmarkSubgames(p_support.GetRoot());
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
@@ -263,7 +263,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
 				       gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -286,9 +286,9 @@ gbtList<BehavSolution> gbtEfgNashAllNash::Solve(const gbtEfgSupport &p_support,
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().UnmarkSubgames(p_support.GetGame().GetRoot());
+    p_support.GetTree().UnmarkSubgames(p_support.GetRoot());
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
@@ -361,7 +361,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -374,10 +374,10 @@ gbtList<BehavSolution> gbtEfgNashOnePerfect::Solve(const gbtEfgSupport &p_suppor
 					      players, gnull, status);
     
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
 
-    if (p_support.GetGame().NumPlayers() == 2) {
-      if (p_support.GetGame().IsConstSum()) {
+    if (p_support.NumPlayers() == 2) {
+      if (p_support.IsConstSum()) {
 	algorithm.SetAlgorithm(new gbtEfgNashLp<double>);
       }
       else {
@@ -452,7 +452,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -475,9 +475,9 @@ gbtList<BehavSolution> gbtEfgNashTwoPerfect::Solve(const gbtEfgSupport &p_suppor
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(2);
       algorithm.SetAlgorithm(subAlgorithm);
@@ -550,7 +550,7 @@ public:
 gbtList<BehavSolution> gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtArray<int> players(p_support.GetGame().NumPlayers());
+  gbtArray<int> players(p_support.NumPlayers());
   for (int pl = 1; pl <= players.Length(); pl++) {
     players[pl] = pl;
   }
@@ -573,9 +573,9 @@ gbtList<BehavSolution> gbtEfgNashAllPerfect::Solve(const gbtEfgSupport &p_suppor
     }
 
     gbtEfgNashSubgames algorithm;
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
 
-    if (p_support.GetGame().NumPlayers() == 2) {
+    if (p_support.NumPlayers() == 2) {
       gbtNfgNashEnumMixed<double> *subAlgorithm = new gbtNfgNashEnumMixed<double>;
       subAlgorithm->SetStopAfter(0);
       algorithm.SetAlgorithm(subAlgorithm);
@@ -713,7 +713,7 @@ gbtList<BehavSolution> gbtEfgNashTwoSequential::Solve(const gbtEfgSupport &p_sup
 					     gbtStatus &p_status)
 {
   try {
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(2);
@@ -781,7 +781,7 @@ gbtList<BehavSolution> gbtEfgNashAllSequential::Solve(const gbtEfgSupport &p_sup
 					     gbtStatus &p_status)
 {
   try {
-    p_support.GetGame().MarkSubgames();
+    p_support.GetTree().MarkSubgames();
     gbtEfgNashSubgames algorithm;
     gbtEfgNashLiap *subAlgorithm = new gbtEfgNashLiap;
     subAlgorithm->SetStopAfter(0);
@@ -1703,7 +1703,7 @@ dialogEfgNash::dialogEfgNash(wxWindow *p_parent, const gbtEfgSupport &p_support)
 				   wxDefaultPosition, wxSize(200, 400),
 				   wxTR_NO_BUTTONS | wxTR_HIDE_ROOT |
 				   wxTR_NO_LINES | wxTR_ROW_LINES);
-  wxTreeItemId init = LoadAlgorithms(p_support.GetGame());
+  wxTreeItemId init = LoadAlgorithms(p_support.GetTree());
   m_algPanelSizer->Add(m_algorithmTree, 0, wxALL, 5);
   m_currentPanel = m_algorithms(init);
   m_algPanelSizer->Add(m_currentPanel, 0, wxALL | wxCENTER, 5);

@@ -60,10 +60,10 @@ bool gbtAllActionIterator::operator==(const gbtAllActionIterator &p_iter) const
 
 bool gbtAllActionIterator::GoToNext(void)
 {
-  while (iset > m_support.GetGame().GetPlayer(pl)->NumInfosets()) {
+  while (iset > m_support.GetPlayer(pl)->NumInfosets()) {
     pl++;
     iset = 1;
-    if (pl > m_support.GetGame().NumPlayers()) {
+    if (pl > m_support.NumPlayers()) {
       return false;
     }
   }
@@ -76,8 +76,8 @@ bool gbtAllActionIterator::GoToNext(void)
   int temppl = pl;
   int tempiset = iset + 1;
 
-  while (temppl <= m_support.GetGame().NumPlayers()) {
-    while (tempiset <= m_support.GetGame().GetPlayer(temppl)->NumInfosets()) {
+  while (temppl <= m_support.NumPlayers()) {
+    while (tempiset <= m_support.GetPlayer(temppl)->NumInfosets()) {
       if (m_support.NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
@@ -105,18 +105,18 @@ gbtEfgAction gbtAllActionIterator::GetAction(void) const
 
 gbtEfgInfoset gbtAllActionIterator::GetInfoset(void) const
 {
-  return m_support.GetGame().GetPlayer(pl)->GetInfoset(iset);
+  return m_support.GetPlayer(pl)->GetInfoset(iset);
 }
 
 gbtEfgPlayer gbtAllActionIterator::GetPlayer(void) const
 {
-  return m_support.GetGame().GetPlayer(pl);
+  return m_support.GetPlayer(pl);
 }
 
 bool gbtAllActionIterator::IsLast(void) const
 {
-  return (pl == m_support.GetGame().NumPlayers() &&
-	  iset == m_support.GetGame().GetPlayer(pl)->NumInfosets() &&
+  return (pl == m_support.NumPlayers() &&
+	  iset == m_support.GetPlayer(pl)->NumInfosets() &&
 	  act == m_support.NumActions(pl, iset));
 }
 

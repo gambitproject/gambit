@@ -36,8 +36,8 @@ gbtEfgIterator::gbtEfgIterator(gbtEfgGame p_efg)
 }
 
 gbtEfgIterator::gbtEfgIterator(const gbtEfgSupport &s)
-  : m_efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(m_efg.NumInfosets()),
+  : m_efg(s.GetTree()), _support(s),
+    _profile(s.GetTree()), _current(m_efg.NumInfosets()),
     _payoff(m_efg.NumPlayers())
 {
   First();
@@ -126,8 +126,8 @@ void gbtEfgIterator::Dump(gbtOutput &f) const
 
 gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
   : _frozen_pl(0), _frozen_iset(0),
-    m_efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
+    m_efg(s.GetTree()), _support(s),
+    _profile(s.GetTree()), _current(s.NumInfosets()),
     _is_active(),
     _num_active_infosets(m_efg.NumPlayers()),
     _payoff(m_efg.NumPlayers())
@@ -147,8 +147,8 @@ gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s)
 gbtEfgContIterator::gbtEfgContIterator(const gbtEfgSupport &s, 
 			 const gbtList<gbtEfgInfoset >&active)
   : _frozen_pl(0), _frozen_iset(0),
-    m_efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
+    m_efg(s.GetTree()), _support(s),
+    _profile(s.GetTree()), _current(s.NumInfosets()),
     _is_active(),
     _num_active_infosets(m_efg.NumPlayers()),
     _payoff(m_efg.NumPlayers())
@@ -271,8 +271,8 @@ void gbtEfgContIterator::Dump(gbtOutput &f) const
 
 
 gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s)
-  : m_efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
+  : m_efg(s.GetTree()), _support(s),
+    _profile(s.GetTree()), _current(s.NumInfosets()),
     _is_active(),
     _num_active_infosets(m_efg.NumPlayers()),
     _payoff(m_efg.NumPlayers())
@@ -291,8 +291,8 @@ gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport
 
 gbtEfgConditionalContIterator::gbtEfgConditionalContIterator(const gbtEfgSupport &s, 
 					       const gbtList<gbtEfgInfoset> &active)
-  : m_efg(s.GetGame()), _support(s),
-    _profile(s.GetGame()), _current(s.GetGame().NumInfosets()),
+  : m_efg(s.GetTree()), _support(s),
+    _profile(s.GetTree()), _current(s.NumInfosets()),
     _is_active(),
     _num_active_infosets(m_efg.NumPlayers()),
     _payoff(m_efg.NumPlayers())

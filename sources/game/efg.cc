@@ -953,6 +953,9 @@ gbtNumber gbtEfgGame::MaxPayoff(int pl) const
 gbtEfgNode gbtEfgGame::GetRoot(void) const
 { return rep->root; }
 
+int gbtEfgGame::NumNodes(void) const
+{ return ::NumNodes(*this); }
+
 gbtEfgOutcome gbtEfgGame::NewOutcome(int index)
 {
   rep->m_revision++;

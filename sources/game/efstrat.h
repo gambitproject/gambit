@@ -58,7 +58,7 @@ public:
   bool operator==(const gbtEfgSupport &) const;
   bool operator!=(const gbtEfgSupport &) const;
 
-  gbtEfgGame GetGame(void) const { return m_efg; }
+  gbtEfgGame GetTree(void) const { return m_efg; }
 
   gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
@@ -117,7 +117,17 @@ public:
   void SetComment(const gbtText &p_comment) { m_efg.SetComment(p_comment); }
   bool IsConstSum(void) const { return m_efg.IsConstSum(); }
   int NumPlayers(void) const { return m_efg.NumPlayers(); }
+  gbtEfgPlayer GetChance(void) const { return m_efg.GetChance(); }
+  gbtEfgPlayer GetPlayer(int pl) const { return m_efg.GetPlayer(pl); }
   int NumOutcomes(void) const { return m_efg.NumOutcomes(); }
+  gbtArray<int> NumInfosets(void) const { return m_efg.NumInfosets(); }
+  gbtPVector<int> NumMembers(void) const { return m_efg.NumMembers(); }
+  int NumNodes(void) const { return m_efg.NumNodes(); }
+  int NumPlayerInfosets(void) const { return m_efg.NumPlayerInfosets(); }
+  gbtEfgNode GetRoot(void) const { return m_efg.GetRoot(); }
+  gbtNumber MaxPayoff(void) const { return m_efg.MaxPayoff(); }
+  gbtNumber MinPayoff(void) const { return m_efg.MinPayoff(); }
+  bool IsPerfectRecall(void) const { return m_efg.IsPerfectRecall(); }
 
   void Dump(gbtOutput &) const;
 };

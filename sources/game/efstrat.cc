@@ -403,7 +403,7 @@ bool gbtEfgSupport::Contains(const gbtEfgAction &a) const
 
 bool gbtEfgSupport::Contains(int pl, int iset, int act) const
 {
-  return Contains(GetGame().GetPlayer(pl)->GetInfoset(iset).GetAction(act));
+  return Contains(GetPlayer(pl)->GetInfoset(iset).GetAction(act));
 }
 
 gbtEfgAction gbtEfgSupport::GetAction(int pl, int iset, int act) const
@@ -439,7 +439,7 @@ int gbtEfgSupport::NumDegreesOfFreedom(void) const
 {
   int answer(0);
 
-  gbtList<gbtEfgInfoset> active_infosets = ReachableInfosets(GetGame().GetRoot());
+  gbtList<gbtEfgInfoset> active_infosets = ReachableInfosets(GetRoot());
   for (int i = 1; i <= active_infosets.Length(); i++)
     answer += NumActions(active_infosets[i]) - 1;
 
@@ -753,8 +753,8 @@ deactivate_this_and_lower_nodes_returning_deactivated_infosets(const gbtEfgNode 
 
 void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
 {
-  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = (pl == 0) ? GetGame().GetChance() : GetGame().GetPlayer(pl); 
+  for (int pl = 0; pl <= NumPlayers(); pl++) {
+    gbtEfgPlayer player = (pl == 0) ? GetChance() : GetPlayer(pl); 
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
@@ -772,8 +772,8 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllActive()
 
 void gbtEfgSupportWithActiveInfo::InitializeActiveListsToAllInactive()
 {
-  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer player = (pl == 0) ? GetGame().GetChance() : GetGame().GetPlayer(pl);
+  for (int pl = 0; pl <= NumPlayers(); pl++) {
+    gbtEfgPlayer player = (pl == 0) ? GetChance() : GetPlayer(pl);
     gbtList<bool>         is_players_infoset_active;
     gbtList<gbtList<bool> > is_players_node_active;
 
@@ -795,7 +795,7 @@ void gbtEfgSupportWithActiveInfo::InitializeActiveLists()
 {
   InitializeActiveListsToAllInactive();
 
-  activate_this_and_lower_nodes(GetGame().GetRoot());
+  activate_this_and_lower_nodes(GetRoot());
 }
 
 // Constructors and Destructor
@@ -809,8 +809,8 @@ gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgGame &p_efg
 
 gbtEfgSupportWithActiveInfo::gbtEfgSupportWithActiveInfo(const gbtEfgSupport& given)
   : gbtEfgSupport(given), 
-    is_infoset_active(0,given.GetGame().NumPlayers()), 
-    is_nonterminal_node_active(0,given.GetGame().NumPlayers())
+    is_infoset_active(0, given.NumPlayers()), 
+    is_nonterminal_node_active(0, given.NumPlayers())
 {
   InitializeActiveLists();
 }
@@ -889,8 +889,8 @@ gbtList<gbtEfgNode>
 gbtEfgSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
   gbtList<gbtEfgNode> answer;
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
-    gbtEfgPlayer p = GetGame().GetPlayer(pl);
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    gbtEfgPlayer p = GetPlayer(pl);
     for (int iset = 1; iset <= p->NumInfosets(); iset++) {
       answer += ReachableNodesInInfoset(p->GetInfoset(iset));
     }
@@ -973,23 +973,23 @@ bool gbtEfgSupportWithActiveInfo::NodeIsActive(const gbtEfgNode &n) const
 
 bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 {
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
-    for (int iset = 1; iset <= GetGame().GetPlayer(pl)->NumInfosets(); iset++) 
+  for (int pl = 1; pl <= NumPlayers(); pl++)
+    for (int iset = 1; iset <= GetPlayer(pl)->NumInfosets(); iset++) 
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame().GetPlayer(pl)->GetInfoset(iset)) == 0 )
+        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) == 0 )
           return false;
   return true;
 }
 
 bool gbtEfgSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 {
-  for (int pl = 1; pl <= GetGame().NumPlayers(); pl++)
-    for (int iset = 1; iset <= GetGame().GetPlayer(pl)->NumInfosets(); iset++) {
+  for (int pl = 1; pl <= NumPlayers(); pl++)
+    for (int iset = 1; iset <= GetPlayer(pl)->NumInfosets(); iset++) {
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame().GetPlayer(pl)->GetInfoset(iset)) == 0 )
+        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) == 0 )
           return false;
       if (!InfosetIsActive(pl,iset))
-        if ( NumActions(GetGame().GetPlayer(pl)->GetInfoset(iset)) > 0 )
+        if ( NumActions(GetPlayer(pl)->GetInfoset(iset)) > 0 )
           return false;
       }
   return true;
@@ -1003,16 +1003,16 @@ void gbtEfgSupportWithActiveInfo::Dump(gbtOutput& s) const
   /*
   s << "\n";
 
-  for (int pl = 0; pl <= GetGame().NumPlayers(); pl++) {
+  for (int pl = 0; pl <= NumPlayers(); pl++) {
   
     if (pl == 0)
       s << " Chance:  ";
     else 
       s << "Player " << pl << ":";
-    //    s << "(" << GetGame().Players()[pl]->NumInfosets() << ")";
+    //    s << "(" << Players()[pl]->NumInfosets() << ")";
     //    s << "\n";
 
-    for (int iset = 1; iset <= GetGame().Players()[pl]->NumInfosets(); iset++) { 
+    for (int iset = 1; iset <= Players()[pl]->NumInfosets(); iset++) { 
 
       s << "  Infoset " << iset << " is ";
       if (InfosetIsActive(pl,iset))
@@ -1021,12 +1021,12 @@ void gbtEfgSupportWithActiveInfo::Dump(gbtOutput& s) const
 	s << "inactive: ";
       
       s << "{";
-      for (int n = 1; n <= GetGame().NumNodesInInfoset(pl,iset); n++) {
+      for (int n = 1; n <= NumNodesInInfoset(pl,iset); n++) {
 	if (NodeIsActive(pl,iset,n))
 	  s << "+";
 	else
 	  s << "0";
-	if (n < GetGame().NumNodesInInfoset(pl,iset))
+	if (n < NumNodesInInfoset(pl,iset))
 	  s << ",";
       }
       s << "}";

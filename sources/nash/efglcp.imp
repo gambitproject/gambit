@@ -54,27 +54,27 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   int i, j;
   
-  if (p_support.GetGame().NumPlayers() != 2) {
+  if (p_support.NumPlayers() != 2) {
     return gbtList<BehavSolution>();
   }
   
-  isets1 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(1));
-  isets2 = p_support.ReachableInfosets(p_support.GetGame().GetPlayer(2)); 
+  isets1 = p_support.ReachableInfosets(p_support.GetPlayer(1));
+  isets2 = p_support.ReachableInfosets(p_support.GetPlayer(2)); 
 
   List.Flush();
 
   int ntot;
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame().GetPlayer(1)->NumInfosets()+1;
-  ni2 = p_support.GetGame().GetPlayer(2)->NumInfosets()+1;
+  ni1 = p_support.GetPlayer(1)->NumInfosets()+1;
+  ni2 = p_support.GetPlayer(2)->NumInfosets()+1;
 
   ntot = ns1+ns2+ni1+ni2;
 
   gbtMatrix<T> A(1,ntot,0,ntot);
   gbtVector<T> b(1,ntot);
 
-  maxpay = p_support.GetGame().MaxPayoff() + gbtNumber(1);
+  maxpay = p_support.MaxPayoff() + gbtNumber(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -84,7 +84,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
     }
   }
 
-  FillTableau(p_support, A, p_support.GetGame().GetRoot(), prob, 1, 1, 0, 0);
+  FillTableau(p_support, A, p_support.GetRoot(), prob, 1, 1, 0, 0);
   for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
     A(i,0) = -(T) 1;
   }
@@ -114,7 +114,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
       Add_BFS(tab);
       tab.BasisVector(sol);
       GetProfile(p_support, tab, profile.GetDPVector(), sol,
-		 p_support.GetGame().GetRoot(), 1, 1);
+		 p_support.GetRoot(), 1, 1);
       solutions.Append(BehavSolution(profile, "Lcp[EFG]"));
     }
   }
@@ -198,7 +198,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
 	GetProfile(p_support, BCopy, profile.GetDPVector(),
-		   sol, p_support.GetGame().GetRoot(), 1, 1);
+		   sol, p_support.GetRoot(), 1, 1);
 	if(newsol) {
 	  p_solutions.Append(BehavSolution(profile, "Lcp[EFG]")); 
 	}
@@ -226,9 +226,9 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
   int snew;
   if (!n.GetOutcome().IsNull()) {
     A(s1,ns1+s2) = gbtNumber(A(s1,ns1+s2)) +
-      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetGame().GetPlayer(1)) - gbtNumber(maxpay));
+      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetPlayer(1)) - gbtNumber(maxpay));
     A(ns1+s2,s1) = gbtNumber(A(ns1+s2,s1)) +
-      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetGame().GetPlayer(2)) - gbtNumber(maxpay));
+      gbtNumber(prob) * (n.GetOutcome()->GetPayoff(p_support.GetPlayer(2)) - gbtNumber(maxpay));
   }
   if (!n.GetInfoset().IsNull()) {
     if (n.GetPlayer()->IsChance()) {

@@ -132,7 +132,9 @@ public:
   long RevisionNumber(void) const;
   gbtNumber MinPayoff(int pl = 0) const;
   gbtNumber MaxPayoff(int pl = 0) const;
-  
+ 
+  // DATA ACCESS -- NODES
+  int NumNodes(void) const;
   gbtEfgNode GetRoot(void) const;
 
   // DATA ACCESS -- PLAYERS

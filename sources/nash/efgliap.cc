@@ -158,7 +158,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
   static const double ALPHA = .00000001;
 
   gbtBehavProfile<double> p(p_support);
-  EFLiapFunc F(p_support.GetGame(), p);
+  EFLiapFunc F(p_support.GetTree(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk = 0;

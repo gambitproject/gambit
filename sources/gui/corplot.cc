@@ -789,8 +789,8 @@ void gbtEfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
 
     int index = 1;
 
-    for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
-      gbtEfgPlayer player = m_support.GetGame().GetPlayer(pl);
+    for (int pl = 1; pl <= m_support.NumPlayers(); pl++) {
+      gbtEfgPlayer player = m_support.GetPlayer(pl);
 
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	gbtEfgInfoset infoset = player->GetInfoset(iset);

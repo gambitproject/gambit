@@ -236,18 +236,17 @@ gbtBehavProfile<T>::gbtBehavProfile(const gbtBehavProfile<T> &p_profile)
 
 template <class T> gbtBehavProfile<T>::gbtBehavProfile(const gbtEfgSupport &p_support) 
   : gbtDPVector<T>(p_support.NumActions()), 
-    m_efg(p_support.GetGame()),
+    m_efg(p_support.GetTree()),
     m_support(p_support),
     m_cached_data(false),
-    m_realizProbs(NumNodes(p_support.GetGame())),
-    m_beliefs(NumNodes(p_support.GetGame())),
-    m_nvals(NumNodes(p_support.GetGame())), 
-    m_bvals(NumNodes(p_support.GetGame())),
-    m_nodeValues(NumNodes(p_support.GetGame()),
-		 p_support.GetGame().NumPlayers()),
-    m_infosetValues(p_support.GetGame().NumInfosets()),
-    m_actionValues(p_support.GetGame().NumActions()),
-    m_gripe(p_support.GetGame().NumActions())
+    m_realizProbs(p_support.NumNodes()),
+    m_beliefs(p_support.NumNodes()),
+    m_nvals(p_support.NumNodes()),
+    m_bvals(p_support.NumNodes()),
+    m_nodeValues(p_support.NumNodes(), p_support.NumPlayers()),
+    m_infosetValues(p_support.NumInfosets()),
+    m_actionValues(p_support.NumActions()),
+    m_gripe(p_support.NumActions())
 {
   InitProfile();
   Centroid();
@@ -955,7 +954,7 @@ template <class T> gbtOutput &operator<<(gbtOutput &p_file,
 
 template <class T>
 gbtBehavAssessment<T>::gbtBehavAssessment(const gbtEfgSupport &p_support)
-  : gbtBehavProfile<T>(p_support), m_beliefs(p_support.GetGame().NumMembers())
+  : gbtBehavProfile<T>(p_support), m_beliefs(p_support.NumMembers())
 {
   m_beliefs = gbtBehavProfile<T>::Beliefs();
 }
