@@ -1,0 +1,18 @@
+EFG 2 R "Job-market signaling game (version from Watson)" { "You" "Firm" }
+""
+
+c "" 1 "" { "High" 1/3 "Low" 2/3 } 0
+p "" 1 1 "" { "E" "N" } 0
+p "" 2 1 "" { "M" "C" } 0
+t "" 1 "Outcome1" { 6, 10 }
+t "" 2 "Outcome2" { 0, 4 }
+p "" 2 2 "" { "M" "C" } 0
+t "" 3 "Outcome3" { 10, 10 }
+t "" 4 "Outcome4" { 4, 4 }
+p "" 1 2 "" { "E" "N" } 0
+p "" 2 1 "" { "M" "C" } 0
+t "" 5 "Outcome5" { 3, 0 }
+t "" 6 "Outcome6" { -3, 4 }
+p "" 2 2 "" { "M" "C" } 0
+t "" 7 "Outcome7" { 10, 0 }
+t "" 8 "Outcome8" { 4, 4 }

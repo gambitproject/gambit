@@ -38,7 +38,6 @@ dnl in search path
 CXXFLAGS=`echo $CXXFLAGS | sed 's/-I\/usr\/local\/include//g'`
 LDFLAGS="${LDFLAGS} ${LIBGAMBIT_LIBS} ${WX_LIBS}"
 
-AC_OUTPUT(Makefile sources/Makefile
-          efg/Makefile nfg/Makefile)
+AC_OUTPUT(Makefile sources/Makefile)
 
 
