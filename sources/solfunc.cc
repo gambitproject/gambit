@@ -456,6 +456,11 @@ Portion* GSM_GobitValue_MixedFloat(Portion** param)
 
 Portion *GSM_InfosetProb_Float(Portion **param)
 {
+  if( param[1]->Spec().Type == porNULL )
+  {
+    return new NullPortion( porFLOAT );
+  }
+
   BehavSolution<double> *bp = (BehavSolution<double> *) ((BehavPortion *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
 
@@ -475,6 +480,11 @@ Portion *GSM_InfosetProb_Float(Portion **param)
 
 Portion *GSM_InfosetProb_Rational(Portion **param)
 {
+  if( param[1]->Spec().Type == porNULL )
+  {
+    return new NullPortion( porRATIONAL );
+  }
+
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
   Infoset* s = ((InfosetPortion*) param[1])->Value();
 
@@ -1387,12 +1397,14 @@ void Init_solfunc(GSM *gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProb_Float, 
 				       porFLOAT, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", 
+                              PortionSpec(porINFOSET, 0, porNULLSPEC) ));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_InfosetProb_Rational, 
 				       porRATIONAL, 2));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", 
+                              PortionSpec(porINFOSET, 0, porNULLSPEC) ));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsKnownNash", 4);

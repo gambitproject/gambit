@@ -190,23 +190,33 @@ Portion *GSM_LoadNfg(Portion **param)
 // Name
 //--------
 
-Portion *GSM_Name_Nfg(Portion **param)
+Portion* GSM_Name_Nfg_Elements( Portion** param )
 {
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
-  return new TextValPortion(N.GetTitle());
+  if( param[0]->Spec().Type == porNULL )
+  {
+    return new TextValPortion( "" );
+  }
+
+  switch( param[0]->Spec().Type )
+  {
+  case porNFG_FLOAT:
+  case porNFG_RATIONAL:
+    return new TextValPortion(((NfgPortion*) param[0])->Value()->GetTitle());
+    break;
+  case porNFPLAYER:
+    return new TextValPortion(((NfPlayerPortion*) param[0])->Value()->
+			      GetName());
+    break;
+  case porSTRATEGY:
+    return new TextValPortion(((StrategyPortion*) param[0])->Value()->name);
+    break;
+  default:
+    assert( 0 );
+    return 0;
+  }
 }
 
-Portion* GSM_Name_NfPlayer(Portion** param)
-{
-  NFPlayer *p = ((NfPlayerPortion*) param[0])->Value();
-  return new TextValPortion(p->GetName());
-}
 
-Portion* GSM_Name_Strategy(Portion** param)
-{
-  Strategy *s = ((StrategyPortion*) param[0])->Value();
-  return new TextValPortion(s->name);
-}
 
 //----------
 // NewNfg
@@ -225,6 +235,7 @@ Portion *GSM_NewNfg(Portion **param)
     N = new Nfg<double>(d);
   else
     N = new Nfg<gRational>(d);
+  N->SetTitle( ((TextPortion*) param[2])->Value() );
   return new NfgValPortion(N);
 }
 
@@ -795,21 +806,21 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Name", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg, porTEXT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Name_NfPlayer, porTEXT, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFPLAYER));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Name_Strategy, porTEXT, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
+  FuncObj = new FuncDescObj("Name", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg_Elements, porTEXT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+                              PortionSpec(porNFG | porNFPLAYER | porSTRATEGY, 
+                                          0, porNULLSPEC) ));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NewNfg", 3);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 3));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
 					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("name", porTEXT,
+					    new TextValPortion("")));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NewNfg_Float, 
 				       porNFG_FLOAT, 1, 0, 
 				       funcNONLISTABLE));

@@ -706,78 +706,158 @@ Portion* GSM_Modulus_int(Portion** param)
 
 Portion* GSM_Equal_Float(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
+
   return new BoolValPortion(((FloatPortion *) param[0])->Value() ==
 			    ((FloatPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Integer(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
+
   return new BoolValPortion(((IntPortion *) param[0])->Value() ==
 			    ((IntPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Rational(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((RationalPortion *) param[0])->Value() ==
 			    ((RationalPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Text(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((TextPortion *) param[0])->Value() ==
 			    ((TextPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Boolean(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((BoolPortion *) param[0])->Value() ==
 			    ((BoolPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Efg(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((EfgPortion *) param[0])->Value() ==
 			    ((EfgPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_EfPlayer(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((EfPlayerPortion *) param[0])->Value() ==
 			    ((EfPlayerPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Node(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((NodePortion *) param[0])->Value() ==
 			    ((NodePortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Infoset(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((InfosetPortion *) param[0])->Value() ==
 			    ((InfosetPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Outcome(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((OutcomePortion *) param[0])->Value() ==
 			    ((OutcomePortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Action(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((ActionPortion *) param[0])->Value() ==
 			    ((ActionPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_EfSupport(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion((*((EfSupportPortion *) param[0])->Value()) ==
 			    (*((EfSupportPortion *) param[1])->Value()));
 }
 
 Portion* GSM_Equal_BehavFloat(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion
     ((*(BehavSolution<double> *) ((BehavPortion *) param[0])->Value()) ==
      (*(BehavSolution<double> *) ((BehavPortion *) param[1])->Value()));
@@ -785,6 +865,12 @@ Portion* GSM_Equal_BehavFloat(Portion** param)
 
 Portion* GSM_Equal_BehavRational(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion
     ((*(BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value()) ==
      (*(BehavSolution<gRational> *) ((BehavPortion *) param[1])->Value()));
@@ -792,30 +878,60 @@ Portion* GSM_Equal_BehavRational(Portion** param)
 
 Portion *GSM_Equal_Nfg(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((NfgPortion *) param[0])->Value() ==
 			    ((NfgPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_NfPlayer(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((NfPlayerPortion *) param[0])->Value() ==
 			    ((NfPlayerPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_Strategy(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion(((StrategyPortion *) param[0])->Value() ==
 			    ((StrategyPortion *) param[1])->Value());
 }
 
 Portion* GSM_Equal_NfSupport(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion((*((NfSupportPortion *) param[0])->Value()) ==
 			    (*((NfSupportPortion *) param[1])->Value()));
 }
 
 Portion* GSM_Equal_MixedFloat(Portion** param)
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion
     ((*(MixedSolution<double> *) ((MixedPortion *) param[0])->Value()) ==
      (*(MixedSolution<double> *) ((MixedPortion *) param[1])->Value()));
@@ -823,6 +939,12 @@ Portion* GSM_Equal_MixedFloat(Portion** param)
 
 Portion* GSM_Equal_MixedRational(Portion** param) 
 {
+  if( (param[0]->Spec().Type == porNULL) || 
+      (param[1]->Spec().Type == porNULL) )
+  {
+    return new BoolValPortion( param[0]->Spec().Type == 
+ 			       param[1]->Spec().Type );
+  }
   return new BoolValPortion
     ((*(MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value()) ==
      (*(MixedSolution<gRational> *) ((MixedPortion *) param[1])->Value()));
@@ -1216,11 +1338,24 @@ Portion* GSM_NewOutputStream(Portion** param)
   Portion* result = 0;
   gOutput* g;
   
-  assert(param[0]->Spec().Type == porTEXT);
+  gString filename = ((TextPortion*) param[0])->Value();
+  bool append = ((BoolPortion*) param[1])->Value();
 
-  g = new gFileOutput(((TextPortion*) param[0])->Value());
-  result = new OutputValPortion(*g);
+  if( !append )
+  {
+    g = new gFileOutput( filename );
+  }
+  else
+  {
+    FILE* f = fopen( filename, "a" );
+    g = new gFileOutput( f );
+  }
   
+  if(g->IsValid())
+    result = new OutputValPortion(*g);    
+  else
+    result = new ErrorPortion((gString) "Error opening file \"" + 
+			      ((TextPortion*) param[0])->Value() + "\"");
   return result;
 }
 
@@ -1291,6 +1426,63 @@ Portion* GSM_SetFormat(Portion** param)
 
   return new BoolValPortion(true);
 }
+
+
+
+
+
+
+Portion* GSM_SetListFormat(Portion** param)
+{
+  _WriteListBraces = ((BoolPortion*) param[4])->Value();
+  _WriteListCommas = ((BoolPortion*) param[5])->Value();
+  _WriteListLF = ((IntPortion*) param[6])->Value();
+  _WriteListIndent = ((IntPortion*) param[7])->Value();
+
+  GSM_SetWriteOptions();
+
+  return new BoolValPortion(true);
+}
+
+
+
+Portion* GSM_SetNumericFormat(Portion** param)
+{
+  _WriteWidth = ((IntPortion*) param[0])->Value();
+  _WritePrecis = ((IntPortion*) param[1])->Value();
+  _WriteExpmode = ((BoolPortion*) param[2])->Value();
+
+  GSM_SetWriteOptions();
+
+  return new BoolValPortion(true);
+}
+
+
+
+Portion* GSM_SetTextFormat(Portion** param)
+{
+  _WriteQuoted = ((BoolPortion*) param[3])->Value();
+
+  GSM_SetWriteOptions();
+
+  return new BoolValPortion(true);
+}
+
+
+
+Portion* GSM_SetSolutionFormat(Portion** param)
+{
+  _WriteSolutionInfo = ((IntPortion*) param[8])->Value();
+
+  GSM_SetWriteOptions();
+
+  return new BoolValPortion(true);
+}
+
+
+
+
+
 
 
 
@@ -2701,6 +2893,8 @@ Portion* GSM_ExePath( Portion** param)
   {
     if( txt.lastOccur( SLASH ) > 0 )
       txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+    else
+      txt = "";
   }
   else if( path )
   {
@@ -2759,6 +2953,8 @@ Portion* GSM_GetPath( Portion** param )
     {
       if( txt.lastOccur( SLASH ) > 0 )
 	txt = txt.right( txt.length() - txt.lastOccur( SLASH ) );
+      else
+	txt = "";
     }
     else if( path )
     {
@@ -3130,46 +3326,125 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("Equal", 20);
 
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Equal_Float, 
-				       porBOOL, 2, xy_Float));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Equal_Integer, 
-				       porBOOL, 2, xy_Int));
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Equal_Rational, 
-				       porBOOL, 2, xy_Rational));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Equal_Text, 
-				       porBOOL, 2, xy_Text));
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Equal_Boolean, 
-				       porBOOL, 2, xy_Bool));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Equal_Float, porBOOL, 2 ) );
+  FuncObj->SetParamInfo(0, 0, ParamInfoType( "x", 
+                              PortionSpec(porBOOL, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(0, 1, ParamInfoType( "y", 
+                              PortionSpec(porBOOL, 0, porNULLSPEC)) );
 
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Equal_Efg, porBOOL, 2, xy_Efg));
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Equal_EfPlayer, 
-				       porBOOL, 2, xy_EfPlayer));
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Equal_Node, 
-				       porBOOL, 2, xy_Node));
-  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Equal_Infoset, 
-				       porBOOL, 2, xy_Infoset));
-  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Outcome, 
-				       porBOOL, 2, xy_Outcome));
-  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_Action, 
-				       porBOOL, 2, xy_Action));
-  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Equal_EfSupport,
-					porBOOL, 2, xy_EfSupport));
-  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Equal_BehavFloat, 
-					porBOOL, 2, xy_BehavFloat));
-  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Equal_BehavRational, 
-					porBOOL, 2, xy_BehavRational));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Equal_Integer, porBOOL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType( "x", 
+                              PortionSpec(porINTEGER, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(1, 1, ParamInfoType( "y", 
+                              PortionSpec(porINTEGER, 0, porNULLSPEC)) );
 
-  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Equal_Nfg, porBOOL, 2, xy_Nfg));
-  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_Equal_NfPlayer,
-					porBOOL, 2, xy_NfPlayer));
-  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_Equal_Strategy,
-					porBOOL, 2, xy_Strategy));
-  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_NfSupport,
-					porBOOL, 2, xy_NfSupport));
-  FuncObj->SetFuncInfo(18, FuncInfoType(GSM_Equal_MixedFloat, 
-					porBOOL, 2, xy_MixedFloat));
-  FuncObj->SetFuncInfo(19, FuncInfoType(GSM_Equal_MixedRational, 
-					porBOOL, 2, xy_MixedRational));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Equal_Rational, porBOOL, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType( "x", 
+                              PortionSpec(porRATIONAL, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(2, 1, ParamInfoType( "y", 
+                              PortionSpec(porRATIONAL, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Equal_Text, porBOOL, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType( "x", 
+                              PortionSpec(porTEXT, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(3, 1, ParamInfoType( "y", 
+                              PortionSpec(porTEXT, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Equal_Boolean, porBOOL, 2));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType( "x", 
+                              PortionSpec(porBOOL, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(4, 1, ParamInfoType( "y", 
+                              PortionSpec(porBOOL, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Equal_Efg, porBOOL, 2));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType( "x", 
+                              PortionSpec(porEFG, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(5, 1, ParamInfoType( "y", 
+                              PortionSpec(porEFG, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Equal_EfPlayer, porBOOL, 2));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType( "x", 
+                              PortionSpec(porEFPLAYER, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(6, 1, ParamInfoType( "y", 
+                              PortionSpec(porEFPLAYER, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Equal_Node, porBOOL, 2));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType( "x", 
+                              PortionSpec(porNODE, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(7, 1, ParamInfoType( "y", 
+                              PortionSpec(porNODE, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Equal_Infoset, porBOOL, 2));
+  FuncObj->SetParamInfo(8, 0, ParamInfoType( "x", 
+                              PortionSpec(porINFOSET, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(8, 1, ParamInfoType( "y", 
+                              PortionSpec(porINFOSET, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Equal_Outcome, porBOOL, 2));
+  FuncObj->SetParamInfo(9, 0, ParamInfoType( "x", 
+                              PortionSpec(porOUTCOME, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(9, 1, ParamInfoType( "y", 
+                              PortionSpec(porOUTCOME, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Equal_Action, porBOOL, 2));
+  FuncObj->SetParamInfo(10, 0, ParamInfoType( "x", 
+                              PortionSpec(porACTION, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(10, 1, ParamInfoType( "y", 
+                              PortionSpec(porACTION, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Equal_EfSupport, porBOOL, 2));
+  FuncObj->SetParamInfo(11, 0, ParamInfoType( "x", 
+                              PortionSpec(porEFSUPPORT, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(11, 1, ParamInfoType( "y", 
+                              PortionSpec(porEFSUPPORT, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Equal_BehavFloat, porBOOL, 2));
+  FuncObj->SetParamInfo(12, 0, ParamInfoType( "x", 
+                              PortionSpec(porBEHAV_FLOAT, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(12, 1, ParamInfoType( "y", 
+                              PortionSpec(porBEHAV_FLOAT, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Equal_BehavRational, porBOOL, 2));
+  FuncObj->SetParamInfo(13, 0, ParamInfoType( "x", 
+                            PortionSpec(porBEHAV_RATIONAL, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(13, 1, ParamInfoType( "y", 
+                            PortionSpec(porBEHAV_RATIONAL, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Equal_Nfg, porBOOL, 2));
+  FuncObj->SetParamInfo(14, 0, ParamInfoType( "x", 
+                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(14, 1, ParamInfoType( "y", 
+                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(15, FuncInfoType(GSM_Equal_NfPlayer, porBOOL, 2));
+  FuncObj->SetParamInfo(15, 0, ParamInfoType( "x", 
+                              PortionSpec(porNFPLAYER, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(15, 1, ParamInfoType( "y", 
+                              PortionSpec(porNFPLAYER, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(16, FuncInfoType(GSM_Equal_Strategy, porBOOL, 2));
+  FuncObj->SetParamInfo(16, 0, ParamInfoType( "x", 
+                              PortionSpec(porSTRATEGY, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(16, 1, ParamInfoType( "y", 
+                              PortionSpec(porSTRATEGY, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(17, FuncInfoType(GSM_Equal_NfSupport, porBOOL, 2));
+  FuncObj->SetParamInfo(17, 0, ParamInfoType( "x", 
+                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(17, 1, ParamInfoType( "y", 
+                              PortionSpec(porNFG, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(18, FuncInfoType(GSM_Equal_MixedFloat, porBOOL, 2));
+  FuncObj->SetParamInfo(18, 0, ParamInfoType( "x", 
+                              PortionSpec(porMIXED_FLOAT, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(18, 1, ParamInfoType( "y", 
+                              PortionSpec(porMIXED_FLOAT, 0, porNULLSPEC)) );
+
+  FuncObj->SetFuncInfo(19, FuncInfoType(GSM_Equal_MixedRational, porBOOL, 2));
+  FuncObj->SetParamInfo(19, 0, ParamInfoType( "x", 
+                            PortionSpec(porMIXED_RATIONAL, 0, porNULLSPEC)) );
+  FuncObj->SetParamInfo(19, 1, ParamInfoType( "y", 
+                            PortionSpec(porMIXED_RATIONAL, 0, porNULLSPEC)) );
   gsm->AddFunction(FuncObj);
 
 
@@ -3303,7 +3578,7 @@ void Init_gsmoper(GSM* gsm)
 
 
 
-  FuncObj = new FuncDescObj("Paren", 1);
+  FuncObj = new FuncDescObj("Parenthesis", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Paren, porANYTYPE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
@@ -3312,7 +3587,10 @@ void Init_gsmoper(GSM* gsm)
 
   FuncObj = new FuncDescObj("Output", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutputStream, 
-				       porOUTPUT, 1, file_Text));
+				       porOUTPUT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("append", porBOOL,
+					    new BoolValPortion( false )));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Input", 1);
@@ -3394,6 +3672,8 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
+
+/*
   FuncObj = new FuncDescObj("SetFormat", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 9));
   FuncObj->SetParamInfo(0, 0, ParamInfoType
@@ -3424,6 +3704,57 @@ void Init_gsmoper(GSM* gsm)
 			("solutionInfo", porINTEGER,
 			 new IntRefPortion(_WriteSolutionInfo)));
   gsm->AddFunction(FuncObj);
+*/
+
+
+
+  FuncObj = new FuncDescObj("SetListFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 4));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("braces", porBOOL,
+			 new BoolRefPortion(_WriteListBraces)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("commas", porBOOL,
+			 new BoolRefPortion(_WriteListCommas)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("lf", porINTEGER,
+			 new IntRefPortion(_WriteListLF)));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType
+			("indent", porINTEGER,
+			 new IntRefPortion(_WriteListIndent)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("SetNumericFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("width", porINTEGER, 
+			 new IntRefPortion(_WriteWidth)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("precis", porINTEGER,
+			 new IntRefPortion(_WritePrecis)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("expmode", porBOOL,
+			 new BoolRefPortion(_WriteExpmode)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("SetTextFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("quote", porBOOL,
+			 new BoolRefPortion(_WriteQuoted)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("SetSolutionFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("info", porINTEGER,
+			 new IntRefPortion(_WriteSolutionInfo)));
+  gsm->AddFunction(FuncObj);
+
+
 
 
 
@@ -3618,13 +3949,15 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
 				       funcLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
-					    PortionSpec(porANYTYPE, 0, true)));
+					    PortionSpec(porANYTYPE, 0, 
+							porNULLSPEC )));
   gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("Null", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Null, 
-				       PortionSpec(porANYTYPE, 0, true),
+				       PortionSpec(porANYTYPE, 0, 
+						   porNULLSPEC ),
 				       1, 0, funcLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);

@@ -42,7 +42,7 @@ typedef enum
 #define rcQUIT    -2
 
 
-
+#define  porNULLSPEC  true
 
 
 
@@ -111,7 +111,7 @@ public:
     {}
   PortionSpec(unsigned long type = porERROR, 
 	      signed short listdepth = 0,
-	      bool null = false)
+	      bool null = false )
     : Type(type), ListDepth(listdepth), Null(null)
     {}
   ~PortionSpec()
