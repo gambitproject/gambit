@@ -17,7 +17,7 @@ Include["nqreml.gcl"]
 
 NewFunction[NQre[filename->TEXT],
   //  Load Normal form game and data
-  GetNumericFormat[width<->width:=0,precis<->precis:=0];
+  GetNumericFormat[width<->width:=0,decimals<->decimals:=0];
   GetTextFormat[quote<->quote:=True];
   GetListFormat[lf<->lf:=0];
   n := LoadNfg[filename+".nfg"];
@@ -42,7 +42,7 @@ NewFunction[NQre[filename->TEXT],
   out := filename+".out";
 
   NQreML[n,dat,min,max,del,out,pxi];
-  SetNumericFormat[width,precis];
+  SetNumericFormat[width,decimals];
   SetTextFormat[quote];
   SetListFormat[lf->lf];
 ];
