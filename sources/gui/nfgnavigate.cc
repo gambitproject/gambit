@@ -43,8 +43,7 @@ END_EVENT_TABLE()
 NfgNavigateWindow::NfgNavigateWindow(gbtGameDocument *p_doc,
 				     wxWindow *p_parent)
   : wxPanel(p_parent, -1), gbtGameView(p_doc),
-    m_rowPlayer(1), m_colPlayer(2),
-    m_support(*m_doc->m_nfg)
+    m_rowPlayer(1), m_colPlayer(2)
 {
   gbtNfgGame nfg = *m_doc->m_nfg;
 
@@ -126,116 +125,55 @@ NfgNavigateWindow::~NfgNavigateWindow()
   delete [] m_stratProfile;
 }
 
-void NfgNavigateWindow::SetProfile(const gArray<int> &p_profile)
+void NfgNavigateWindow::OnUpdate(gbtGameView *)
 {
-  for (int i = 1; i <= p_profile.Length(); i++) {
-    m_stratProfile[i-1]->SetSelection(p_profile[i] - 1);
-  }
-}
+  gbtNfgSupport *support = m_doc->GetNfgSupport();
 
-gArray<int> NfgNavigateWindow::GetProfile(void) const
-{
-  gArray<int> profile(m_support.GetGame().NumPlayers());
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile[i] = m_stratProfile[i-1]->GetSelection() + 1;
-  }
-  return profile;
-}
-
-void NfgNavigateWindow::SetPlayers(int p_rowPlayer, int p_colPlayer)
-{ 
-  m_rowPlayer = p_rowPlayer;
-  m_colPlayer = p_colPlayer;
-  SetStrategy(p_rowPlayer, 1);
-  SetStrategy(p_colPlayer, 1);
-}
-
-void NfgNavigateWindow::SetStrategy(int p_player, int p_strategy)
-{
-  m_stratProfile[p_player-1]->SetSelection(p_strategy-1);
-}
-
-void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
-{
-  m_support = p_support;
-
-  for (int pl = 1; pl <= m_support.GetGame().NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     m_stratProfile[pl-1]->Clear();
-    gbtNfgPlayer player = m_support.GetGame().GetPlayer(pl);
+    gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
     for (int st = 1; st <= player.NumStrategies(); st++) {
-      if (m_support.Contains(player.GetStrategy(st))) {
+      if (support->Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
 					       player.GetStrategy(st).GetLabel()));
       }
     }
-    m_stratProfile[pl-1]->SetSelection(0);
+    m_stratProfile[pl-1]->SetSelection(m_doc->GetContingency()[pl] - 1);
   }
-  SetPlayers(m_rowPlayer, m_colPlayer);
+  m_rowChoice->SetSelection(m_doc->GetRowPlayer() - 1);
+  m_colChoice->SetSelection(m_doc->GetColPlayer() - 1);
 }
 
 void NfgNavigateWindow::OnStrategyChange(wxCommandEvent &)
 {
-  m_doc->m_nfgShow->SetProfile(GetProfile());
+  gArray<int> contingency(m_doc->GetNfg().NumPlayers());
+  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+    contingency[pl] = m_stratProfile[pl-1]->GetSelection() + 1;
+  }
+  m_doc->SetContingency(contingency);
 }
 
 void NfgNavigateWindow::OnRowPlayerChange(wxCommandEvent &)
 {
-  int oldRowPlayer = GetRowPlayer();
+  int oldRowPlayer = m_doc->GetRowPlayer();
   int newRowPlayer = m_rowChoice->GetSelection() + 1;
 
   if (newRowPlayer == oldRowPlayer) {
     return;
   }
 
-  if (newRowPlayer == m_colChoice->GetSelection() + 1) {
-    m_colChoice->SetSelection(oldRowPlayer - 1);
-    m_doc->m_nfgShow->SetPlayers(newRowPlayer, oldRowPlayer);
-  }
-  else {
-    m_doc->m_nfgShow->SetPlayers(newRowPlayer, m_colChoice->GetSelection() + 1);
-  }
+  m_doc->SetRowPlayer(newRowPlayer);
 }
 
 void NfgNavigateWindow::OnColPlayerChange(wxCommandEvent &)
 {
-  int oldColPlayer = GetColPlayer();
+  int oldColPlayer = m_doc->GetColPlayer();
   int newColPlayer = m_colChoice->GetSelection() + 1;
 
   if (newColPlayer == oldColPlayer) {
     return;
   }
 
-  if (newColPlayer == m_rowChoice->GetSelection() + 1) {
-    m_rowChoice->SetSelection(oldColPlayer - 1);
-    m_doc->m_nfgShow->SetPlayers(oldColPlayer, newColPlayer);
-  }
-  else {
-    m_doc->m_nfgShow->SetPlayers(m_rowChoice->GetSelection() + 1, newColPlayer);
-  }
+  m_doc->SetColPlayer(newColPlayer);
 }
 
-void NfgNavigateWindow::UpdateLabels(void)
-{
-  gbtNfgGame nfg = m_doc->GetNfg();
-
-  int rowSelection = m_rowChoice->GetSelection();
-  int colSelection = m_colChoice->GetSelection();
-  m_rowChoice->Clear();
-  m_colChoice->Clear();
-  
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    wxString playerName = (char *) (ToText(pl) + ": " +
-				    nfg.GetPlayer(pl).GetLabel());
-    m_rowChoice->Append(playerName);
-    m_colChoice->Append(playerName);
-    if (nfg.GetPlayer(pl).GetLabel() != "") {
-      m_playerNames[pl-1]->SetLabel((char *) nfg.GetPlayer(pl).GetLabel());
-    }
-    else {
-      m_playerNames[pl-1]->SetLabel(wxString::Format("Player %d", pl));
-    }
-  }
-
-  m_rowChoice->SetSelection(rowSelection);
-  m_colChoice->SetSelection(colSelection);
-}

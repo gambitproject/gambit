@@ -121,6 +121,13 @@ private:
   // Decimal places to display
   long m_numDecimals;
 
+  // Fonts for normal form display
+  wxFont m_dataFont, m_labelFont;
+
+  // Display outcomes or payoffs in normal form
+  // FIXME: merge with extensive form display as well?
+  bool m_outcomeValues;
+
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
   static void SaveFont(const wxString &, wxConfig &, const wxFont &);
 
@@ -224,6 +231,18 @@ public:
   // Decimals
   long NumDecimals(void) const { return m_numDecimals; }
   void SetNumDecimals(long p_decimals) { m_numDecimals = p_decimals; }
+
+  // Normal form display
+  void SetOutcomeValues(bool p_outcomeValues) 
+    { m_outcomeValues = p_outcomeValues; }
+  bool OutcomeValues(void) const { return m_outcomeValues; }
+
+  void SetDataFont(const wxFont &p_font) { m_dataFont = p_font; }
+  const wxFont &GetDataFont(void) const { return m_dataFont; }
+
+  void SetLabelFont(const wxFont &p_font) { m_labelFont = p_font; }
+  const wxFont &GetLabelFont(void) const { return m_labelFont; }
+
 
   // Read and write config files
   void SaveOptions(void) const;

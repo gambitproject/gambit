@@ -1541,10 +1541,5 @@ void EfgShow::AdjustSizes(void)
   }
 }
 
-#include "base/glist.imp"
-
-template class gList<EFSupport *>;
-
-
 
 

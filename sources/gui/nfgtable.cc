@@ -33,71 +33,17 @@
 #include "nfgtable.h"
 #include "nfgconst.h"
 
-//-----------------------------------------------------------------------
-//               class NfgTableSettings: Member functions
-//-----------------------------------------------------------------------
-
-NfgTableSettings::NfgTableSettings(void)
-{
-  LoadSettings();
-}
-
-void NfgTableSettings::SaveFont(const wxString &p_prefix, 
-				wxConfig &p_config, const wxFont &p_font)
-{
-  p_config.Write(p_prefix + "Size", (long) p_font.GetPointSize());
-  p_config.Write(p_prefix + "Family", (long) p_font.GetFamily());
-  p_config.Write(p_prefix + "Face", p_font.GetFaceName());
-  p_config.Write(p_prefix + "Style", (long) p_font.GetStyle());
-  p_config.Write(p_prefix + "Weight", (long) p_font.GetWeight());
-}
-
-void NfgTableSettings::LoadFont(const wxString &p_prefix,
-				const wxConfig &p_config, wxFont &p_font)
-{
-  long size, family, style, weight;
-  wxString face;
-  p_config.Read(p_prefix + "Size", &size, 10);
-  p_config.Read(p_prefix + "Family", &family, wxMODERN);
-  p_config.Read(p_prefix + "Face", &face, "");
-  p_config.Read(p_prefix + "Style", &style, wxNORMAL);
-  p_config.Read(p_prefix + "Weight", &weight, wxNORMAL);
-
-  p_font = *wxTheFontList->FindOrCreateFont(size, family, style, weight,
-					    false, face);
-}
-
-void NfgTableSettings::LoadSettings(void)
-{
-  wxConfig config("Gambit");
-  config.Read("/NfgDisplay/DisplayPrecision", &m_decimals, 2);
-  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, true);
-
-  LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
-  LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);
-}
-
-void NfgTableSettings::SaveSettings(void) const
-{
-  wxConfig config("Gambit");
-  config.Write("/NfgDisplay/DisplayPrecision", (long) m_decimals);
-  config.Write("/NfgDisplay/OutcomeValues", (long) m_outcomeValues);
-
-  SaveFont("/NfgDisplay/DataFont", config, m_dataFont);
-  SaveFont("/NfgDisplay/LabelFont", config, m_labelFont);
-}
-
 //---------------------------------------------------------------------
 //                       class NfgGridTable
 //---------------------------------------------------------------------
 
 class NfgGridTable : public wxGridTableBase {
 private:
-  gbtNfgGame m_nfg;
+  gbtGameDocument *m_doc;
   NfgTable *m_table;
 
 public:
-  NfgGridTable(NfgTable *p_table, gbtNfgGame p_nfg);
+  NfgGridTable(NfgTable *p_table, gbtGameDocument *p_doc);
   virtual ~NfgGridTable() { }
 
   int GetNumberRows(void);
@@ -118,29 +64,29 @@ public:
   wxGridCellAttr *GetAttr(int row, int col);
 };
 
-NfgGridTable::NfgGridTable(NfgTable *p_table, gbtNfgGame p_nfg)
-  : m_nfg(p_nfg), m_table(p_table)
+NfgGridTable::NfgGridTable(NfgTable *p_table, gbtGameDocument *p_doc)
+  : m_doc(p_doc), m_table(p_table)
 { }
 
 int NfgGridTable::GetNumberRows(void)
 {
-  return (m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) +
+  return (m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() +
 	  m_table->ShowValues());
 }
 
 int NfgGridTable::GetNumberCols(void)
 {
-  return (m_table->GetSupport().NumStrats(m_table->GetColPlayer()) +
+  return (m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer()) +
 	  m_table->ShowProbs() + m_table->ShowDominance() + 
 	  m_table->ShowValues());
 }
 
 wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
-  int numStrats = m_table->GetSupport().NumStrats(m_table->GetRowPlayer());
+  int numStrats = m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().GetStrategy(m_table->GetRowPlayer(), p_row+1).GetLabel();
+    return (char *) m_doc->GetNfgSupport()->GetStrategy(m_doc->GetRowPlayer(), p_row+1).GetLabel();
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -156,9 +102,9 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
 
 wxString NfgGridTable::GetColLabelValue(int p_col)
 {
-  int numStrats = m_table->GetSupport().NumStrats(m_table->GetColPlayer());
+  int numStrats = m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return (char *) m_table->GetSupport().GetStrategy(m_table->GetColPlayer(), p_col+1).GetLabel();
+    return (char *) m_doc->GetNfgSupport()->GetStrategy(m_doc->GetColPlayer(), p_col+1).GetLabel();
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return "Dom";
@@ -174,29 +120,29 @@ wxString NfgGridTable::GetColLabelValue(int p_col)
 
 wxString NfgGridTable::GetValue(int row, int col)
 {
-  int rowPlayer = m_table->GetRowPlayer();
-  int colPlayer = m_table->GetColPlayer();
-  const gbtNfgSupport &support = m_table->GetSupport();
+  int rowPlayer = m_doc->GetRowPlayer();
+  int colPlayer = m_doc->GetColPlayer();
+  const gbtNfgSupport &support = *m_doc->GetNfgSupport();
   int numRowStrats = support.NumStrats(rowPlayer);
   int numColStrats = support.NumStrats(colPlayer);
 
   if (row < numRowStrats && col < numColStrats) {
-    gArray<int> strategy(m_table->GetContingency());
-    strategy[m_table->GetRowPlayer()] = row + 1;
-    strategy[m_table->GetColPlayer()] = col + 1;
+    gArray<int> strategy(m_doc->GetContingency());
+    strategy[m_doc->GetRowPlayer()] = row + 1;
+    strategy[m_doc->GetColPlayer()] = col + 1;
     
-    StrategyProfile profile(m_nfg);
+    StrategyProfile profile(m_doc->GetNfg());
     for (int pl = 1; pl <= strategy.Length(); pl++) {
       profile.Set(pl, support.GetStrategy(pl, strategy[pl]));
     }
 
-    gbtNfgOutcome outcome = m_nfg.GetOutcome(profile);
-    if (m_table->GetSettings().OutcomeValues()) {
+    gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(profile);
+    if (m_doc->GetPreferences().OutcomeValues()) {
       wxString ret = "(";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",
-				(char *) ToText(outcome.GetPayoff(m_nfg.GetPlayer(pl)),
-						m_table->GetSettings().GetDecimals()));
+				(char *) ToText(outcome.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
+						m_doc->GetPreferences().NumDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxString(",");
 	}
@@ -246,22 +192,22 @@ wxString NfgGridTable::GetValue(int row, int col)
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetProfile()(strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile()(strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetProfile()(strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile()(strategy)));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy.GetPlayer(), strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy.GetPlayer(), strategy)));
+    return ((char *) ToText(m_doc->GetMixedProfile().Payoff(strategy.GetPlayer(), strategy)));
   }
 
   return "";
@@ -323,12 +269,12 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col)
 {
   wxGridCellAttr *attr = new wxGridCellAttr;
 
-  if (row >= m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) &&
-      col >= m_table->GetSupport().NumStrats(m_table->GetColPlayer())) {
+  if (row >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer()) &&
+      col >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer())) {
     attr->SetBackgroundColour(*wxBLACK);
   }
-  else if (row >= m_table->GetSupport().NumStrats(m_table->GetRowPlayer()) ||
-	   col >= m_table->GetSupport().NumStrats(m_table->GetColPlayer())) {
+  else if (row >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer()) ||
+	   col >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer())) {
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
@@ -466,25 +412,24 @@ void ColoredStringRenderer::Draw(wxGrid& grid,
 //======================================================================
 
 BEGIN_EVENT_TABLE(NfgTable, wxPanel)
-  EVT_GRID_SELECT_CELL(NfgTable::OnCellSelect)
+  EVT_GRID_CELL_LEFT_CLICK(NfgTable::OnLeftClick)
   EVT_GRID_CELL_LEFT_DCLICK(NfgTable::OnLeftDoubleClick)
   EVT_GRID_LABEL_LEFT_CLICK(NfgTable::OnLabelLeftClick)
 END_EVENT_TABLE()
 
 NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxPanel(p_parent, -1), gbtGameView(p_doc),
-    m_editable(true), m_cursorMoving(false), m_rowPlayer(1), m_colPlayer(2),
-    m_support(*m_doc->m_nfg), m_profile(0),
+    m_editable(true), 
     m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
-  m_grid->SetTable(new NfgGridTable(this, *m_doc->m_nfg), true);
+  m_grid->SetTable(new NfgGridTable(this, m_doc), true);
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
-  m_grid->SetDefaultCellFont(m_settings.GetDataFont());
-  m_grid->SetLabelFont(m_settings.GetLabelFont());
+  m_grid->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
+  m_grid->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
   m_grid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_grid->DisableDragRowSize();
   m_grid->DisableDragColSize();
@@ -503,60 +448,35 @@ NfgTable::NfgTable(gbtGameDocument *p_doc, wxWindow *p_parent)
   Show(true);
 }
 
-void NfgTable::SetContingency(const gArray<int> &p_profile)
-{
-  m_grid->SetGridCursor(p_profile[GetRowPlayer()] - 1,
-			p_profile[GetColPlayer()] - 1);
-  RefreshTable();
-}
-
-gArray<int> NfgTable::GetContingency(void) const
-{
-  return m_doc->GetContingency();
-}
-
-void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
+void NfgTable::OnUpdate(gbtGameView *)
 { 
+  const gbtNfgSupport &support = *m_doc->GetNfgSupport();
+  int rowPlayer = m_doc->GetRowPlayer(), colPlayer = m_doc->GetColPlayer();
   m_grid->BeginBatch();
-  m_rowPlayer = p_rowPlayer;
-  m_colPlayer = p_colPlayer;
   int stratRows = m_grid->GetRows() - m_showProb - m_showDom - m_showValue;
   int stratCols = m_grid->GetCols() - m_showProb - m_showDom - m_showValue;
 
-  if (m_support.NumStrats(p_rowPlayer) < stratRows) {
-    m_grid->DeleteRows(0, stratRows - m_support.NumStrats(p_rowPlayer));
+  if (support.NumStrats(rowPlayer) < stratRows) {
+    m_grid->DeleteRows(0, stratRows - support.NumStrats(rowPlayer));
   }
-  else if (m_support.NumStrats(p_rowPlayer) > stratRows) {
-    m_grid->InsertRows(0, m_support.NumStrats(p_rowPlayer) - stratRows); 
-  }
-
-  if (m_support.NumStrats(p_colPlayer) < stratCols) {
-    m_grid->DeleteCols(0, stratCols - m_support.NumStrats(p_colPlayer));
-  }
-  else if (m_support.NumStrats(p_colPlayer) > stratCols) {
-    m_grid->InsertCols(0, m_support.NumStrats(p_colPlayer) - stratCols);
+  else if (support.NumStrats(rowPlayer) > stratRows) {
+    m_grid->InsertRows(0, support.NumStrats(rowPlayer) - stratRows); 
   }
 
-  m_doc->m_nfgShow->SetStrategy(m_rowPlayer, 1);
-  m_doc->m_nfgShow->SetStrategy(m_colPlayer, 1);
+  if (support.NumStrats(colPlayer) < stratCols) {
+    m_grid->DeleteCols(0, stratCols - support.NumStrats(colPlayer));
+  }
+  else if (support.NumStrats(colPlayer) > stratCols) {
+    m_grid->InsertCols(0, support.NumStrats(colPlayer) - stratCols);
+  }
+
   m_grid->AutoSizeRows();
   m_grid->AutoSizeColumns();
+  m_grid->SetGridCursor(m_doc->GetContingency()[m_doc->GetRowPlayer()] - 1,
+			m_doc->GetContingency()[m_doc->GetColPlayer()] - 1);
   m_grid->EndBatch();
   m_grid->AdjustScrollbars();
-  RefreshTable();
-}
-
-void NfgTable::SetStrategy(int p_player, int p_strategy)
-{
-  if (!m_cursorMoving) {
-    // prevents reentry
-    if (p_player == GetRowPlayer()) {
-      m_grid->SetGridCursor(p_strategy - 1, m_grid->GetCursorColumn());
-    }
-    else if (p_player == GetColPlayer()) {
-      m_grid->SetGridCursor(m_grid->GetCursorRow(), p_strategy - 1);
-    }
-  }
+  m_grid->ForceRefresh();
 }
 
 void NfgTable::ToggleProbs(void)
@@ -610,53 +530,28 @@ void NfgTable::ToggleValues(void)
   m_grid->Refresh();
 }
 
-void NfgTable::SetDataFont(const wxFont &p_font)
-{ 
-  m_settings.SetDataFont(p_font);
-  m_settings.SaveSettings();
-  m_grid->SetDefaultCellFont(p_font);
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-}
-
-void NfgTable::SetLabelFont(const wxFont &p_font) 
-{ 
-  m_settings.SetLabelFont(p_font); 
-  m_settings.SaveSettings();
-  m_grid->SetLabelFont(p_font);
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-}
-
-void NfgTable::SetOutcomeValues(bool p_values)
+void NfgTable::OnLeftClick(wxGridEvent &p_event)
 {
-  m_settings.SetOutcomeValues(p_values);
-  m_settings.SaveSettings();
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-}
-
-void NfgTable::OnCellSelect(wxGridEvent &p_event)
-{
-  if (p_event.GetRow() >= m_support.NumStrats(GetRowPlayer()) ||
-      p_event.GetCol() >= m_support.NumStrats(GetColPlayer())) {
+  if (p_event.GetRow() >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer()) ||
+      p_event.GetCol() >= m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer())) {
     p_event.Veto();
   }
   else {
-    m_cursorMoving = true;  // this prevents re-entry
-    m_doc->m_nfgShow->SetStrategy(GetRowPlayer(), p_event.GetRow() + 1);
-    m_doc->m_nfgShow->SetStrategy(GetColPlayer(), p_event.GetCol() + 1);
-    m_cursorMoving = false;
+    // m_cursorMoving = true;  // this prevents re-entry
+    gArray<int> contingency = m_doc->GetContingency();
+    contingency[m_doc->GetRowPlayer()] = p_event.GetRow() + 1;
+    contingency[m_doc->GetColPlayer()] = p_event.GetCol() + 1;
+    m_doc->SetContingency(contingency);
+    // m_cursorMoving = false;
     // now continue with the default behavior (i.e., highlight the new cell)
-    p_event.Skip(); 
   }
 }
 
 void NfgTable::OnLeftDoubleClick(wxGridEvent &p_event)
 {
   if (m_editable &&
-      p_event.GetRow() < m_support.NumStrats(GetRowPlayer()) &&
-      p_event.GetCol() < m_support.NumStrats(GetColPlayer())) {
+      p_event.GetRow() < m_doc->GetNfgSupport()->NumStrats(m_doc->GetRowPlayer()) &&
+      p_event.GetCol() < m_doc->GetNfgSupport()->NumStrats(m_doc->GetColPlayer())) {
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_NFG_MENU_EDIT_CONTINGENCY);
     GetParent()->AddPendingEvent(event);
@@ -668,37 +563,4 @@ void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
   // for the moment, just veto it
   p_event.Veto();
 }
-
-void NfgTable::SetSupport(const gbtNfgSupport &p_support)
-{
-  m_support = p_support;
-  SetPlayers(m_rowPlayer, m_colPlayer);
-  RefreshTable();
-}
-
-void NfgTable::SetProfile(const MixedSolution &p_solution)
-{
-  if (m_profile) {
-    delete m_profile;
-  }
-  m_profile = new MixedSolution(p_solution);
-  RefreshTable();
-}
-
-void NfgTable::ClearProfile(void)
-{
-  if (m_profile) {
-    delete m_profile;
-    m_profile = 0;
-    RefreshTable();
-  }
-}
-
-void NfgTable::RefreshTable(void)
-{
-  m_grid->ForceRefresh();
-  m_grid->AutoSizeRows();
-  m_grid->AutoSizeColumns();
-}
-
 

@@ -80,7 +80,7 @@ NfgOutcomeWindow::NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   Show(true);
 }
 
-void NfgOutcomeWindow::UpdateValues(void)
+void NfgOutcomeWindow::OnUpdate(gbtGameView *)
 {
   gbtNfgGame nfg = m_doc->GetNfg();
 
@@ -131,7 +131,7 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
       SaveEditControlValue();
       HideCellEditControl();
     }
-    gText outcomeName = m_doc->m_nfgShow->UniqueOutcomeName();
+    gText outcomeName = m_doc->UniqueNfgOutcomeName();
     gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
     outcome.SetLabel(outcomeName);
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
@@ -141,8 +141,7 @@ void NfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       SetCellEditor(GetRows() - 1, pl, new NumberEditor);
     }
-    m_doc->m_nfgShow->OnOutcomesEdited();
-    UpdateValues();
+    m_doc->UpdateViews(0, true, true);
     SetGridCursor(GetRows() - 1, 0);
   }
   else {
@@ -165,8 +164,6 @@ void NfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
     outcome.SetPayoff(m_doc->GetNfg().GetPlayer(col),
 		      ToNumber(GetCellValue(row, col).c_str()));
   }
-
-  m_doc->m_nfgShow->OnOutcomesEdited();
 }
 
 void NfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
@@ -181,7 +178,7 @@ void NfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 
 void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 {
-  gText outcomeName = m_doc->m_nfgShow->UniqueOutcomeName();
+  gText outcomeName = m_doc->UniqueNfgOutcomeName();
   gbtNfgOutcome outcome = m_doc->GetNfg().NewOutcome();
   outcome.SetLabel(outcomeName);
   // Appending the row here keeps currently selected row selected
@@ -190,32 +187,28 @@ void NfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
     outcome.SetPayoff(m_doc->GetNfg().GetPlayer(pl), gNumber(0));
     SetCellEditor(GetRows() - 1, pl, new NumberEditor);
   }
-  m_doc->m_nfgShow->OnOutcomesEdited();
-  UpdateValues();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
     m_doc->GetNfg().DeleteOutcome(m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
-    m_doc->m_nfgShow->OnOutcomesEdited();
   }
-  UpdateValues();
+  m_doc->UpdateViews(0, true, true);
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
   if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    m_doc->GetNfg().SetOutcome(m_doc->m_nfgShow->GetContingency(),
+    m_doc->GetNfg().SetOutcome(m_doc->GetContingency(),
 			       m_doc->GetNfg().GetOutcomeId(GetGridCursorRow() + 1));
-    m_doc->m_nfgShow->OnOutcomesEdited();
   }
 }
 
 void NfgOutcomeWindow::OnPopupOutcomeDetach(wxCommandEvent &)
 {
-  m_doc->GetNfg().SetOutcome(m_doc->m_nfgShow->GetContingency(), 0);
-  m_doc->m_nfgShow->OnOutcomesEdited();
+  m_doc->GetNfg().SetOutcome(m_doc->GetContingency(), 0);
 }
 
 

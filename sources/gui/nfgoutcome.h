@@ -41,14 +41,14 @@ private:
   void OnPopupOutcomeAttach(wxCommandEvent &);
   void OnPopupOutcomeDetach(wxCommandEvent &);
 
+  // Overriding view members
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
+  void OnUpdate(gbtGameView *);
 
 public:
   NfgOutcomeWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgOutcomeWindow() { }
-
-  void UpdateValues(void);
 
   DECLARE_EVENT_TABLE()
 };

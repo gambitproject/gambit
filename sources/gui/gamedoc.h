@@ -33,9 +33,6 @@
 #include "nash/mixedsol.h"
 #include "treedraw.h"
 
-class EfgShow;
-class NfgShow;
-
 // Forward declarations; classes declared at bottom
 class gbtGameView;
 class gbtGameCommand;
@@ -57,6 +54,9 @@ private:
 
   TreeDrawSettings m_prefs;
 
+  int m_rowPlayer, m_colPlayer;
+  gArray<int> m_contingency;
+  
 public:
   gbtEfgGame *m_efg;
 
@@ -66,7 +66,7 @@ public:
   gbtEfgNode m_cursor, m_copyNode, m_cutNode;
 
   gbtNfgGame *m_nfg;
-  NfgShow *m_nfgShow;
+  //  NfgShow *m_nfgShow;
   gbtNfgSupport *m_curNfgSupport;
   gList<gbtNfgSupport *> m_nfgSupports;
 
@@ -97,14 +97,19 @@ public:
   
   // OUTCOMES
   gText UniqueEfgOutcomeName(void) const;
- 
+  gText UniqueNfgOutcomeName(void) const;
+   
   // SUPPORTS
   gText UniqueEfgSupportName(void) const;
+  gText UniqueNfgSupportName(void) const;
+
   void AddSupport(EFSupport *);
   EFSupport *GetEfgSupport(void) const { return m_curEfgSupport; }
   const gList<EFSupport *> &AllEfgSupports(void) const
     { return m_efgSupports; }
+
   void SetEfgSupport(int p_index);
+  void SetNfgSupport(int p_index);
 
   // PROFILES
   gText UniqueBehavProfileName(void) const;
@@ -144,6 +149,11 @@ public:
   gbtNfgGame GetNfg(void) const { return *m_nfg; }
 
   gArray<int> GetContingency(void) const;
+  void SetContingency(const gArray<int> &);
+  int GetRowPlayer(void) const { return m_rowPlayer; }
+  int GetColPlayer(void) const { return m_colPlayer; }
+  void SetRowPlayer(int p_player);
+  void SetColPlayer(int p_player);
 
   gbtNfgSupport *GetNfgSupport(void) const { return m_curNfgSupport; }
   const gList<gbtNfgSupport *> &AllNfgSupports(void) const

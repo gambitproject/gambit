@@ -39,7 +39,7 @@ END_EVENT_TABLE()
 NfgProfileList::NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxListCtrl(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
 	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
-    m_doc(p_doc)
+    gbtGameView(p_doc)
 {
   m_menu = new wxMenu("Profiles");
   m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
@@ -50,14 +50,12 @@ NfgProfileList::NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
 		 "View and edit properties of this profile");
   m_menu->Append(GBT_NFG_MENU_PROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
-
-  UpdateValues();
 }
 
 NfgProfileList::~NfgProfileList()
 { }
 
-void NfgProfileList::UpdateValues(void)
+void NfgProfileList::OnUpdate(gbtGameView *)
 {
   ClearAll();
   InsertColumn(0, "Name");
@@ -133,7 +131,7 @@ wxString NfgProfileList::GetReport(void) const
 
   report += wxString::Format("Mixed strategy profiles on game '%s' [%s]\n\n",
 			     (const char *) nfg.GetTitle(),
-			     m_doc->m_nfgShow->Filename().c_str());
+			     m_doc->GetFilename().c_str());
 
   report += wxString::Format("Number of profiles: %d\n", profiles.Length());
 

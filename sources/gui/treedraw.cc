@@ -141,6 +141,12 @@ void TreeDrawSettings::SaveOptions(void) const
   }
 
   config.Write("/TreeDisplay/NumDecimals", (long) m_numDecimals);
+
+  config.Write("/NfgDisplay/OutcomeValues", (long) m_outcomeValues);
+
+  SaveFont("/NfgDisplay/DataFont", config, m_dataFont);
+  SaveFont("/NfgDisplay/LabelFont", config, m_labelFont);
+
 }
 
 void TreeDrawSettings::LoadOptions(void)
@@ -183,6 +189,11 @@ void TreeDrawSettings::LoadOptions(void)
   }
 
   config.Read("/TreeDisplay/NumDecimals", &m_numDecimals, 2);
+
+  config.Read("/NfgDisplay/OutcomeValues", &m_outcomeValues, true);
+
+  LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
+  LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);
 }
 
 

@@ -30,20 +30,22 @@
 #include "wx/listctrl.h"
 #include "nfgshow.h"
 
-class NfgProfileList : public wxListCtrl {
+class NfgProfileList : public wxListCtrl, public gbtGameView {
 private:
-  gbtGameDocument *m_doc;
   wxMenu *m_menu;
 
   // Event handlers
   void OnRightClick(wxMouseEvent &);
   void OnColumnClick(wxListEvent &);
 
+  // Overriding view members
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
+  void OnUpdate(gbtGameView *);
+
 public:
   NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgProfileList();
-
-  void UpdateValues(void);
 
   wxString GetReport(void) const;
 

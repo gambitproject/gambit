@@ -44,14 +44,15 @@ private:
 
   void OnTreeItemCollapse(wxTreeEvent &);
 
+  // Overriding view members
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
+  void OnUpdate(gbtGameView *);
 
 public:
   NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgSupportWindow() { }
 
-  void UpdateValues(void);
   int GetSupport(void) const { return m_supportList->GetSelection(); }
   void ToggleItem(wxTreeItemId);
 

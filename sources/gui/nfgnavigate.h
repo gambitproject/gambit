@@ -32,7 +32,6 @@ private:
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
 
   int m_rowPlayer, m_colPlayer;
-  gbtNfgSupport m_support;
   
   void OnStrategyChange(wxCommandEvent &);
   void OnRowPlayerChange(wxCommandEvent &);
@@ -40,28 +39,12 @@ private:
 
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
-
+  void OnUpdate(gbtGameView *);
+  
 public:
   NfgNavigateWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
   virtual ~NfgNavigateWindow();
   
-  void SetProfile(const gArray<int> &profile);
-  gArray<int> GetProfile(void) const;
-
-  void SetStrategy(int p_player, int p_strategy);
-  void SetPlayers(int p_rowPlayer, int p_colPlayer);
-
-  int GetRowStrategy(void) const;
-  int GetColStrategy(void) const;
-
-  void SetSupport(const gbtNfgSupport &);
-  const gbtNfgSupport &GetSupport(void) const { return m_support; }
-
-  int GetRowPlayer(void) const { return m_rowPlayer; }
-  int GetColPlayer(void) const { return m_colPlayer; }
-
-  void UpdateLabels(void);
-
   DECLARE_EVENT_TABLE()
 };
 

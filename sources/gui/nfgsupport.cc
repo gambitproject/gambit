@@ -115,7 +115,6 @@ NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
 			      wxDefaultPosition, wxSize(30, 30));
   m_strategyTree = new widgetStrategyTree(this);
-  UpdateValues();
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
@@ -135,7 +134,7 @@ NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   Show(true);
 }
 
-void NfgSupportWindow::UpdateValues(void)
+void NfgSupportWindow::OnUpdate(gbtGameView *)
 {
   m_supportList->Clear();
 
@@ -181,17 +180,17 @@ void NfgSupportWindow::UpdateValues(void)
 
 void NfgSupportWindow::OnSupportList(wxCommandEvent &p_event)
 {
-  m_doc->m_nfgShow->SetSupportNumber(p_event.GetSelection() + 1);
+  m_doc->SetNfgSupport(p_event.GetSelection() + 1);
 }
 
 void NfgSupportWindow::OnSupportPrev(wxCommandEvent &)
 {
-  m_doc->m_nfgShow->SetSupportNumber(m_supportList->GetSelection());
+  m_doc->SetNfgSupport(m_supportList->GetSelection());
 }
 
 void NfgSupportWindow::OnSupportNext(wxCommandEvent &)
 {
-  m_doc->m_nfgShow->SetSupportNumber(m_supportList->GetSelection() + 2);
+  m_doc->SetNfgSupport(m_supportList->GetSelection() + 2);
 }
 
 void NfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
@@ -218,7 +217,7 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
     m_strategyTree->SetItemTextColour(p_id, *wxBLACK);
   }
 
-  m_doc->m_nfgShow->SetSupportNumber(m_supportList->GetSelection() + 1);
+  m_doc->SetNfgSupport(m_supportList->GetSelection() + 1);
 }
 
 #include "base/gmap.imp"

@@ -62,14 +62,11 @@ private:
   NfgOutcomeWindow *m_outcomeWindow;
   NfgSupportWindow *m_supportWindow;
 
-  wxString m_filename;
-
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
 
   void MakeMenus(void);
   void MakeToolbar(void);
-  void UpdateMenus(void);
   void AdjustSizes(void);
 
   // Menu event handlers
@@ -129,33 +126,12 @@ private:
 
   bool IsEfgView(void) const { return false; }
   bool IsNfgView(void) const { return true; }
+  void OnUpdate(gbtGameView *);
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   NfgShow(gbtGameDocument *, wxWindow *p_window);
   virtual ~NfgShow();
-
-  // PROFILE ACCESS AND MANIPULATION
-  void OnProfilesEdited(void);
-  void OnChangeProfile(void);
-
-  // SUPPORT ACCESS AND MANIPULATION
-  void SetSupportNumber(int p_number);
-  gText UniqueSupportName(void) const;
-  void OnSupportsEdited(void);
-  
-  void UpdateProfile(gArray<int> &profile);
-  void SetStrategy(int p_player, int p_strategy);
-  
-  void SetFilename(const wxString &s);
-  const wxString &Filename(void) const { return m_filename; }
-
-  void SetPlayers(int, int);
-  void SetProfile(const gArray<int> &);
-  gArray<int> GetContingency(void) const;
-
-  void OnOutcomesEdited(void);
-  gText UniqueOutcomeName(void) const;
 
   DECLARE_EVENT_TABLE()
 };
