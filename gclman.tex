@@ -871,9 +871,7 @@ category.  For a description of each function, and the arguments,
 refer to the following, alphabetically organized, section.
 
 \noindent In this section, an asterisk (*) before the function name indicates
-that the function has been implemented in the current binary, and a
-hash mark (\#) indicates the function is implemented as a user-defined
-function.
+that the function has been implemented in the current binary.
 
 \protect \large \begin{verbatim}
 *Assign[x<->T, y->T] =: T
@@ -1469,11 +1467,11 @@ Name[x->STRATEGY] =: TEXT
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
-#Nodes[{efg->EFG}] =: LIST(NODE)
+Nodes[{efg->EFG}] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
-#NonterminalNodes[{efg->EFG}] =: LIST(NODE)
+NonterminalNodes[{efg->EFG}] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
@@ -1497,7 +1495,7 @@ Name[x->STRATEGY] =: TEXT
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-#NumNodes[{efg->EFG}] =: INTEGER
+NumNodes[{efg->EFG}] =: INTEGER
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -1562,7 +1560,7 @@ RealizProbs[strategy->BEHAV] =: LIST(T)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim} 
-#TerminalNodes[efg->EFG] =: LIST(NODE)
+TerminalNodes[efg->EFG] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 
@@ -1610,96 +1608,61 @@ parameters which are not necessary for the procedure to function.
 
 \item
 \protect \large \begin{verbatim} 
-*Actions[infoset->INFOSET] =: LIST(ACTION)
-\end{verbatim}\normalsize
-
-\item
-\protect \large \begin{verbatim}
-AddStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
-\end{verbatim}\normalsize
-
-\item
-\protect \large \begin{verbatim}
-Afg[efg->EFG,{time<->FLOAT}] =: NFG
+Actions[infoset->INFOSET] =: LIST(ACTION)
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Converts a game in extensive form to the same
-game in the corresponding agent normal form.
+[Description:] Returns the list of actions available at an information set
 \item
-[Return value:] The new agent normal form game.
-\item 
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[efg:] The game in extensive form to be converted to agent normal
-form.
+[See also:] {\tt AppendAction}, {\tt DeleteAction}, {\tt InsertAction},
+{\tt NumActions}.
 \ed
 
 \item
-[Optional parameters:]\hfil\null
-	
+\protect \large \begin{verbatim}
+AddStrategy[support->SUPPORT, strategies->LIST(STRATEGY)] =: SUPPORT
+\end{verbatim}\normalsize
+
 \bd
 \item
-[time:] Elapsed time for the operation.
-\ed
+[Description:] Adds the strategies in \verb+strategies+ to the
+strategies in the support.  If a specified strategy already exists in
+the support, no action is taken on that strategy.
+\item
+[See also:] {\tt NewSupport}, {\tt RemoveStrategy}.
 \ed
 
 \item 
 \protect \large \begin{verbatim}
-*And[x->BOOL, y->BOOL] =: BOOL
+And[x->BOOL, y->BOOL] =: BOOL
 \end{verbatim} \normalsize
 \bd
 \item
 [Short forms:] \verb+x && y+, \verb+x AND y+.
 \item
-[Description:] Logical And.
-\item
-[Return value:] Returns the \verb+True+ if both \verb+x+ and \verb+y+ are
-\verb+True+, else returns \verb+False+.  
-\item
-[Required parameters:]\hfil\null
-\bd
-\item
-[x:] First argument.  
-\item
-[y:] Second argument
-\ed
-\item
-[Optional parameters:] None.
+[Description:] Computes the logical conjunction of its parameters.
 \ed
 
 
 \item
 \protect \large \begin{verbatim}
-*AppendAction[infoset->INFOSET] =: INFOSET
+AppendAction[infoset->INFOSET] =: ACTION
 \end{verbatim}\normalsize
 
 \bd
 \item
 [Description:] Adds an action into the information set, as the last
-action. 
+action.  Returns the newly created action.
 \item
-[Return value:] Returns the information set. [Ted -- better to return action]
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[infoset:] The information set which is to have a new
-action appended to it.
-\ed
-
-\item
-[Optional parameters:] None.\hfill\null
+[See also:] {\tt Actions}, {\tt DeleteAction}, {\tt InsertAction},
+{\tt NumActions}.
 \ed
 
 
 \item
 \protect \large \begin{verbatim} 
-*AppendNode[node->NODE, infoset->INFOSET] =: NODE (first child)
+AppendNode[node->NODE, infoset->INFOSET] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -1707,99 +1670,52 @@ action appended to it.
 [Description:] Places \verb+node+ into the information set
 \verb+infoset+.  The result is \verb+node+ becomes a decision node,
 with number of branches equal to the number of actions in \verb+infoset+.
-
+Returns the first child of \verb+node+.
 \item
-[Return value:] Returns the first child of the source node.
-\item
-[Required parameters:]\hfil\null
-\par
-\bd
-\item
-[node:] The terminal node to which branches are to be added.
-\item
-[infoset:] The information set to which the node will now belong to.
-\ed
+[See also:] {\tt InsertNode}, {\tt NewInfoset}.
 \ed
 
 \item 
 \protect \large \begin{verbatim}
-*Assign[x<->T, y->T] =: T
+Assign[x<->T, y->T] =: T
 \end{verbatim} \normalsize
-for all types {\tt T}.
+
 \bd
 \item
-[Short form:] \verb+name := expression+
+[Short form:] \verb+x := y+
 \item
-[Description:] Creates a variable (a function with no arguments) with name
-given by \verb+name+ and return data type the same as that of
-\verb+expression+
-\item
-[Return value:] Returns the value assigned.
-\item
-[Required parameters:]\hfil\null
-\bd
-\item
-[name:] The name of the variable to be created.  This must be a different
-name from any previously existing function.  
-\item
-[expression:] Returns the value to be stored by the variable
-\ed
-\item
-[Optional parameters:] None.
+[Description:] Assigns the value \verb+y+ to the variable referred to by
+\verb+x+.  Returns the value assigned.
 \ed
 
 \item
 \protect \large \begin{verbatim} 
-*AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
+AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Attaches the indicated outcome to the specified node.
+[Description:] Attaches the outcome \verb+outcome+ to the node \verb+node+.
+Returns the outcome attached.  Note that nonterminal nodes may have
+attached outcomes.
 \item
-[Return value:] The outcome that is attached to the node. 
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[node:] The node to which the outcome is to be attached.  Note that the
-node need not be terminal in order to have an outcome attached.
-\item
-[outcome:] The outcome to be attached.  
-\ed
-
-\item
-[Optional parameters:] None.
+[See also:] {\tt DetachOutcome}.
 \ed
 
 %--B--
 
 \item
 \protect \large \begin{verbatim}
-*Behav[mixed->MIXED] =: BEHAV
-\end{verbatim}\normalsize
-\protect \large \begin{verbatim}
-Behav[mixed->LIST(MIXED)] =: LIST(BEHAV)
+Behav[mixed->MIXED] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Maps a specified mixed profile to a behavioral
-profile on the associated extensive form game.
-\item
-[Return value:] Returns the behavioral profile.
-\item
-[Required parameters:]\hfil\null
-
-\bd
-\item
-[mixed:] The mixed profile which is to be projected to a behavioral
-profile.
-\ed
-
-\item
-[Optional parameters:] None.\hfill\null
+[Description:] Converts the mixed profile \verb+mixed+ to the equivalent
+behavioral profile on the associated extensive form game.  In order to use
+this function the normal form to which \verb+mixed+ belongs must have
+been created from an extensive form game currently stored in a variable
+in the command language.
 \ed
 
 
@@ -1807,18 +1723,27 @@ profile.
 
 \item
 \protect \large \begin{verbatim} 
-*Centroid[efg->EFG] =: BEHAV
-*Centroid[nfg->NFG,support->SUPPORT] =: MIXED
+Centroid[efg->EFG] =: BEHAV
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Chance[efg->EFG] =: EFPLAYER
+Centroid[nfg->NFG] =: MIXED
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*ChanceProbs[infoset->INFOSET] =: LIST(T)
+Centroid[support->SUPPORT] =: MIXED
+\end{verbatim}\normalsize
+
+\item
+\protect \large \begin{verbatim}
+Chance[efg->EFG] =: EFPLAYER
+\end{verbatim}\normalsize
+
+\item
+\protect \large \begin{verbatim}
+ChanceProbs[infoset->INFOSET] =: LIST(T)
 \end{verbatim}\normalsize
 
 \bd
@@ -1873,7 +1798,7 @@ sets for the reduced game.
 
 \item
 \protect \large \begin{verbatim}
-*Contains[list->LIST(T), x->T] =: BOOL
+Contains[list->LIST(T), x->T] =: BOOL
 \end{verbatim}\normalsize
 
 For all types T.
@@ -1900,7 +1825,7 @@ list.
 
 \item
 \protect \large \begin{verbatim}
-*CopyTree[from->NODE, to->NODE] =: NODE
+CopyTree[from->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -1927,7 +1852,7 @@ indicated node.
 
 \item
 \protect \large \begin{verbatim}
-*DeleteAction[infoset->INFOSET, action->ACTION] =: INFOSET  (of action)
+DeleteAction[infoset->INFOSET, action->ACTION] =: INFOSET  (of action)
 \end{verbatim}\normalsize
 
 \bd
@@ -1949,7 +1874,7 @@ information set containing the specified node.
 
 \item
 \protect \large \begin{verbatim}
-*DeleteNode[node->NODE, keep->NODE] =: NODE (parent ?)  
+DeleteNode[node->NODE, keep->NODE] =: NODE (parent ?)  
 \end{verbatim}\normalsize
 
 \bd
@@ -1976,7 +1901,7 @@ of the deleted node are deleted.
 
 \item
 \protect \large \begin{verbatim}
-*DeleteOutcome[outc->OUTCOME] =: BOOL
+DeleteOutcome[outc->OUTCOME] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -2002,7 +1927,7 @@ outcome which previously had the next highest number, and so on.
 
 \item
 \protect \large \begin{verbatim}
-*DeleteTree[node->NODE] =: NODE
+DeleteTree[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -2025,7 +1950,7 @@ node then becomes a terminal node.
 
 \item
 \protect \large \begin{verbatim}
-*DetachOutcome[node->NODE] =: NODE
+DetachOutcome[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -2048,7 +1973,7 @@ null outcome.
 
 \item 
 \protect \large \begin{verbatim}
-*Divide[x->T, y->T] =: T
+Divide[x->T, y->T] =: T
 \end{verbatim} \normalsize
 
 For T = FLOAT, RATIONAL  
@@ -2073,7 +1998,7 @@ For T = FLOAT, RATIONAL
 
 \item 
 \protect \large \begin{verbatim}
-*Divide[x->INTEGER, y->INTEGER] =: INTEGER
+Divide[x->INTEGER, y->INTEGER] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd
@@ -2136,7 +2061,7 @@ Efg[nfg->NFG,{time<->FLOAT}] =: EFG
 \item
 
 \protect \large \begin{verbatim}
-*ElapsedTime[] =: FLOAT
+ElapsedTime[] =: FLOAT
 \end{verbatim}\normalsize
 
 \bd
@@ -2155,7 +2080,7 @@ Otherwise, calculates the time elapsed between the last
 
 \item
 \protect \large \begin{verbatim}
-*ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
+ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
 	{mixed->BOOL}, {players->LIST(NFPLAYERS)}, 
 	{time<->FLOAT}] =: SUPPORT
 ElimAllDom[nfg<->NFG, {maxIter->INTEGER}, {strong->BOOL}, 
@@ -2207,7 +2132,7 @@ dominated strategies are iteratively deleted.
 
 \item
 \protect \large \begin{verbatim}
-*EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
+EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
       {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -2245,7 +2170,7 @@ one could set this parameter to 2.
 
 \item
 \protect \large \begin{verbatim}
-*EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
+EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
           {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
@@ -2279,7 +2204,7 @@ find.  Has a default value of 1.
 
 \item
 \protect \large \begin{verbatim}
-*Equal[x->T, y->T] =: BOOL
+Equal[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For all types T.
@@ -2308,7 +2233,7 @@ For all types T.
 
 \item
 \protect \large \begin{verbatim}
-*Exp[x->FLOAT] =: FLOAT
+Exp[x->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
 
@@ -2316,9 +2241,9 @@ For all types T.
 
 \item
 \protect \large \begin{verbatim}
-*Float[x->INTEGER] =: FLOAT
-*Float[x->FLOAT] =: FLOAT
-*Float[x->RATIONAL] =: FLOAT
+Float[x->INTEGER] =: FLOAT
+Float[x->FLOAT] =: FLOAT
+Float[x->RATIONAL] =: FLOAT
 \end{verbatim} \normalsize
 
 
@@ -2369,7 +2294,7 @@ will be returned.
 
 \item
 \protect \large \begin{verbatim}
-*GreaterEqual[x->T, y->T] =: BOOL
+GreaterEqual[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2397,7 +2322,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-*Greater[x->T, y->T] =: BOOL
+Greater[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2453,7 +2378,7 @@ antecedent is false, returns value of $f$.
 
 \item
 \protect \large \begin{verbatim}
-*Include[file->TEXT]
+Include[file->TEXT]
 \end{verbatim}\normalsize
 
 \bd
@@ -2478,7 +2403,7 @@ valid filename.
 
 \item
 \protect \large \begin{verbatim}
-*Infoset[node->NODE] =: INFOSET
+Infoset[node->NODE] =: INFOSET
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
@@ -2487,12 +2412,12 @@ Infosets[player->EFPLAYER] =: LIST(INFOSET)
 
 \item
 \protect \large \begin{verbatim}
-*Input[file->TEXT] =: INPUT
+Input[file->TEXT] =: INPUT
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*InsertAction[infoset->INFOSET, at->ACTION] =: INFOSET 
+InsertAction[infoset->INFOSET, at->ACTION] =: INFOSET 
 \end{verbatim}\normalsize
 
 \bd
@@ -2521,7 +2446,7 @@ action inserted into it.
 
 \item
 \protect \large \begin{verbatim}
-*InsertNode[node->NODE, infoset->INFOSET] =: NODE
+InsertNode[node->NODE, infoset->INFOSET] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -2549,7 +2474,7 @@ branch of the new node.
 
 \item
 \protect \large \begin{verbatim}
-*IsPredecessor[node->NODE, of->NODE] =: BOOL
+IsPredecessor[node->NODE, of->NODE] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -2577,12 +2502,12 @@ result in the return value being True.
 
 \item
 \protect \large \begin{verbatim}
-*IsRoot[node->NODE] =: BOOL
+IsRoot[node->NODE] =: BOOL
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*IsSuccessor[node->NODE, from->NODE] =: BOOL
+IsSuccessor[node->NODE, from->NODE] =: BOOL
 \end{verbatim}\normalsize
 \bd
 \item
@@ -2609,7 +2534,7 @@ result in the return value being True.
 
 \item
 \protect \large \begin{verbatim}
-*IsWatchRunning[] =: BOOL
+IsWatchRunning[] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -2666,12 +2591,12 @@ LastAction[node->NODE] =: ACTION
 
 \item
 \protect \large \begin{verbatim}
-*LCPSolve[efg<->EFG, {stopAfter->INTEGER},
+LCPSolve[efg<->EFG, {stopAfter->INTEGER},
           {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*LCPSolve[nfg->NFG, {stopAfter->INTEGER},
+LCPSolve[nfg->NFG, {stopAfter->INTEGER},
           {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 \bd
@@ -2724,7 +2649,7 @@ equilibria reachable by the algorithm are to be found.
 
 \item
 \protect \large \begin{verbatim}
-*LeaveInfoset[node->NODE] =: INFOSET
+LeaveInfoset[node->NODE] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -2749,12 +2674,12 @@ currently belongs to.
 
 \item
 \protect \large \begin{verbatim}
-*Length[text->TEXT] =: INTEGER
+Length[text->TEXT] =: INTEGER
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Length[list->LIST(T)] =: INTEGER
+Length[list->LIST(T)] =: INTEGER
 \end{verbatim}\normalsize
 For all types T.
 
@@ -2779,7 +2704,7 @@ found.
 
 \item
 \protect \large \begin{verbatim}
-*LessEqual[x->T, y->T] =: BOOL
+LessEqual[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2807,7 +2732,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-*Less[x->T, y->T] =: BOOL
+Less[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For T = INTEGER, FLOAT, RATIONAL, or TEXT.
@@ -2834,13 +2759,13 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-*LiapSolve[efg->EFG, {time<->FLOAT}, {nEvals<->INTEGER},
+LiapSolve[efg->EFG, {time<->FLOAT}, {nEvals<->INTEGER},
          {stopAfter->INTEGER}, {nTries->INTEGER}, 
 	{start->BEHAV}] =: LIST(BEHAV)
 \end{verbatim}\normalsize
 
 \protect \large \begin{verbatim}
-*LiapSolve[nfg->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
+LiapSolve[nfg->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
          {stopAfter->INTEGER}, {nTries->INTEGER},
 	{start->MIXED}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -2911,7 +2836,7 @@ Default is 2.0e-10.
 
 \item
 \protect \large \begin{verbatim}
-*LoadEfg[file->TEXT] =: EFG
+LoadEfg[file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
@@ -2935,7 +2860,7 @@ is to be read. \ed
 
 \item
 \protect \large \begin{verbatim}
-*LoadNfg[file->TEXT] =: NFG
+LoadNfg[file->TEXT] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -2959,12 +2884,12 @@ is to be read. \ed
 
 \item
 \protect \large \begin{verbatim}
-*Log[x->FLOAT] =: FLOAT
+Log[x->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
 \item
 \protect \large \begin{verbatim}
-*LPSolve[nfg<->NFG, {nPivots<->INTEGER},
+LPSolve[nfg<->NFG, {nPivots<->INTEGER},
           {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
@@ -3108,7 +3033,7 @@ Default is 2.0e-10.
 
 \item
 \protect \large \begin{verbatim}
-*LqreGridSolve[nfg->NFG, {pxifile->OUTPUT},
+LqreGridSolve[nfg->NFG, {pxifile->OUTPUT},
            {minLam->T}, {maxLam->T}, 
            {delLam->T}, {powLam->INTEGER}, 
            {delp->T}, {tol->T},
@@ -3156,7 +3081,7 @@ which the objective function is less this value are kept.
 
 \item
 \protect \large \begin{verbatim}
-*MergeInfosets[infoset1->INFOSET,
+MergeInfosets[infoset1->INFOSET,
                infoset2->INFOSET] =: INFOSET (infoset1)
 MergeInfosets[n->LIST(NODE)] =: INFOSET  (infoset of n[[1]])
 \end{verbatim}\normalsize
@@ -3184,7 +3109,7 @@ the source information set.
 
 \item 
 \protect \large \begin{verbatim}
-*Minus[x->T, y->T] =: T
+Minus[x->T, y->T] =: T
 \end{verbatim} \normalsize
 
 For T = INTEGER, FLOAT, RATIONAL  
@@ -3209,7 +3134,7 @@ For T = INTEGER, FLOAT, RATIONAL
 
 \item
 \protect \large \begin{verbatim}
-*Modulus[x->INTEGER, y->INTEGER] =: INTEGER
+Modulus[x->INTEGER, y->INTEGER] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -3238,7 +3163,7 @@ For T = INTEGER, FLOAT, RATIONAL
 
 \item
 \protect \large \begin{verbatim}
-*MoveTree[from->NODE, to->NODE] =: NODE
+MoveTree[from->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -3265,13 +3190,13 @@ the second given node.
 
 \item
 \protect \large \begin{verbatim}
-*Name[x->ACTION] =: TEXT
-*Name[x->EFG] =: TEXT
-*Name[x->INFOSET] =: TEXT
-*Name[x->NFG] =: TEXT
-*Name[x->NODE] =: TEXT
-*Name[x->OUTCOME] =: TEXT
-*Name[x->PLAYER] =: TEXT
+Name[x->ACTION] =: TEXT
+Name[x->EFG] =: TEXT
+Name[x->INFOSET] =: TEXT
+Name[x->NFG] =: TEXT
+Name[x->NODE] =: TEXT
+Name[x->OUTCOME] =: TEXT
+Name[x->PLAYER] =: TEXT
 Name[x->STRATEGY] =: TEXT
 \end{verbatim}\normalsize
 
@@ -3295,16 +3220,16 @@ Name[x->STRATEGY] =: TEXT
 
 \item
 \protect \large \begin{verbatim} 
-*NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
+NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
             {name->TEXT}] =: INFOSET
-*NewInfoset[player->EFPLAYER, actions->INTEGER,
+NewInfoset[player->EFPLAYER, actions->INTEGER,
             {name->TEXT}] =: INFOSET
 \end{verbatim}\normalsize
 
 
 \item   
 \protect \large \begin{verbatim}
-*NewFunction[name[argument-list], body]
+NewFunction[name[argument-list], body]
 \end{verbatim}\normalsize
 
 \bd
@@ -3329,7 +3254,7 @@ than all function names in current scope.
 
 \item
 \protect \large \begin{verbatim} 
-*NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
+NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3359,7 +3284,7 @@ form game.
 
 \noindent {\bf Note}: type param not implemented yet...
 \protect \large \begin{verbatim}
-*NewNfg[dim->LIST(INTEGER), {type->DATATYPE}] =: NFG
+NewNfg[dim->LIST(INTEGER), {type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3391,7 +3316,7 @@ game.  This parameter defaults to \verb+Float+.
 
 \item
 \protect \large \begin{verbatim} 
-*NewOutcome[{efg->EFG}, {name->TEXT}] =: OUTCOME
+NewOutcome[{efg->EFG}, {name->TEXT}] =: OUTCOME
 NewOutcome[payoffs->LIST(T), {efg->EFG}, {name->TEXT}] =: OUTCOME
 \end{verbatim}\normalsize
 
@@ -3425,12 +3350,12 @@ procedure returns a value of zero.  (Ted -- is there a default name?)
 
 \item
 \protect \large \begin{verbatim}
-*NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
+NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*NextSibling[node->NODE] =: NODE
+NextSibling[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -3459,7 +3384,7 @@ NewSupport[nfg->NFG] =: SUPPORT
 
 \item
 \protect \large \begin{verbatim}
-*Nfg[{efg->EFG}, {time<->FLOAT}] =: NFG
+Nfg[{efg->EFG}, {time<->FLOAT}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
@@ -3487,17 +3412,17 @@ game as a reduced normal form game.
 
 \item
 \protect \large \begin{verbatim} 
-#Nodes[{efg->EFG}] =: LIST(NODE)
+Nodes[{efg->EFG}] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim} 
-#NonterminalNodes[{efg->EFG}] =: LIST(NODE)
+NonterminalNodes[{efg->EFG}] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Not[x->BOOL] =: BOOL
+Not[x->BOOL] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -3519,7 +3444,7 @@ game as a reduced normal form game.
 
 \item
 \protect \large \begin{verbatim}
-*NotEqual[x->T, y->T] =: BOOL
+NotEqual[x->T, y->T] =: BOOL
 \end{verbatim}\normalsize
 
 For all types T.
@@ -3548,12 +3473,12 @@ For all types T.
 
 \item
 \protect \large \begin{verbatim}
-*NthChar[text->TEXT, n->INTEGER] =: TEXT
+NthChar[text->TEXT, n->INTEGER] =: TEXT
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim} 
-*NthChild[node->NODE, n->INTEGER] =: NODE
+NthChild[node->NODE, n->INTEGER] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -3582,17 +3507,17 @@ which is to be found.
 
 \item
 \protect \large \begin{verbatim}
-*NthElement[list->LIST(T),n->INTEGER] =: T 
+NthElement[list->LIST(T),n->INTEGER] =: T 
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*NumActions[infoset->INFOSET] =: INTEGER
+NumActions[infoset->INFOSET] =: INTEGER
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*NumChildren[node->NODE] := INTEGER
+NumChildren[node->NODE] := INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -3614,7 +3539,7 @@ which is to be found.
 
 \item
 \protect \large \begin{verbatim}
-*NumInfosets[player->EFPLAYER] =: INTEGER
+NumInfosets[player->EFPLAYER] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -3638,12 +3563,12 @@ game, the return value is equal to zero.
 
 \item
 \protect \large \begin{verbatim}
-*NumMembers[infoset->INFOSET] =: INTEGER
+NumMembers[infoset->INFOSET] =: INTEGER
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-#NumNodes[efg->EFG] =: INTEGER
+NumNodes[efg->EFG] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -3667,7 +3592,7 @@ be counted.
 
 \item
 \protect \large \begin{verbatim}
-*NumOutcomes[efg->EFG] =: INTEGER
+NumOutcomes[efg->EFG] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd
@@ -3691,7 +3616,7 @@ to be found.
 
 \item
 \protect \large \begin{verbatim}
-*NumPlayers[efg->EFG] =: INTEGER
+NumPlayers[efg->EFG] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd
@@ -3748,7 +3673,7 @@ strategies for all players.
 
 \item 
 \protect \large \begin{verbatim}
-*Or[x->BOOL, y->BOOL] =: BOOL
+Or[x->BOOL, y->BOOL] =: BOOL
 \end{verbatim} \normalsize
   
 \bd
@@ -3772,12 +3697,12 @@ strategies for all players.
 
 \item
 \protect \large \begin{verbatim}
-*Outcome[node->NODE] =: OUTCOME
+Outcome[node->NODE] =: OUTCOME
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Outcomes[{efg->EFG}] =: LIST(OUTCOME)
+Outcomes[{efg->EFG}] =: LIST(OUTCOME)
 \end{verbatim}\normalsize
 
 
@@ -3810,7 +3735,7 @@ attached, a value of zero is returned.
 
 \item
 \protect \large \begin{verbatim}
-*Output[file->TEXT] =: OUTPUT
+Output[file->TEXT] =: OUTPUT
 \end{verbatim}\normalsize
 
 
@@ -3818,7 +3743,7 @@ attached, a value of zero is returned.
 
 \item
 \protect \large \begin{verbatim}
-*Paren[x->T] =: T
+Paren[x->T] =: T
 \end{verbatim}\normalsize
 
 for all types T.
@@ -3843,7 +3768,7 @@ of expressions.
 
 \item
 \protect \large \begin{verbatim}
-*Parent[node->NODE] =: NODE
+Parent[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \item
@@ -3872,7 +3797,7 @@ node.
 
 \item
 \protect \large \begin{verbatim}
-*Payoff[outcome->OUTCOME] =: LIST(T)
+Payoff[outcome->OUTCOME] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item
@@ -3887,7 +3812,7 @@ Payoff[strategy->MIXED] =: LIST(T)
 
 \item
 \protect \large \begin{verbatim}
-*Player[infoset->INFOSET] =: EFPLAYER
+Player[infoset->INFOSET] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \bd
@@ -3911,7 +3836,7 @@ decision is to be found.
 
 \item
 \protect \large \begin{verbatim}
-*Player[node->NODE] =: EFPLAYER
+Player[node->NODE] =: EFPLAYER
 \end{verbatim}\normalsize
 
 \bd
@@ -3934,7 +3859,7 @@ specified node.
 
 \item
 \protect \large \begin{verbatim}
-*Players[efg->EFG] =: LIST(EFPLAYER)
+Players[efg->EFG] =: LIST(EFPLAYER)
 \end{verbatim} \normalsize
 
 \bd
@@ -3954,7 +3879,7 @@ specified node.
 
 \item
 \protect \large \begin{verbatim}
-*Players[nfg->NFG] =: LIST(NFPLAYER)
+Players[nfg->NFG] =: LIST(NFPLAYER)
 \end{verbatim} \normalsize
 
 \bd
@@ -3974,7 +3899,7 @@ specified node.
 
 \item 
 \protect \large \begin{verbatim}
-*Plus[x->T, y->T] =: T
+Plus[x->T, y->T] =: T
 \end{verbatim} \normalsize
 
 For T = INTEGER, FLOAT, RATIONAL  
@@ -3999,12 +3924,12 @@ For T = INTEGER, FLOAT, RATIONAL
 
 \item
 \protect \large \begin{verbatim}
-*Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
+Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item 
 \protect \large \begin{verbatim}
-*Plus[x->TEXT, y->TEXT] =: TEXT
+Plus[x->TEXT, y->TEXT] =: TEXT
 \end{verbatim} \normalsize
 
 \bd
@@ -4028,7 +3953,7 @@ For T = INTEGER, FLOAT, RATIONAL
 
 \item
 \protect \large \begin{verbatim}
-*PriorSibling[node->NODE] =: NODE
+PriorSibling[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -4082,9 +4007,9 @@ RandomEfg[efg->EFG, {random->BOOL}, {seed->INTEGER}] =: EFG
 
 \item
 \protect \large \begin{verbatim}
-*Rational[x->INTEGER] =: RATIONAL
-*Rational[x->FLOAT] =: RATIONAL
-*Rational[x->RATIONAL] =: RATIONAL
+Rational[x->INTEGER] =: RATIONAL
+Rational[x->FLOAT] =: RATIONAL
+Rational[x->RATIONAL] =: RATIONAL
 \end{verbatim} \normalsize
 
 
@@ -4095,7 +4020,7 @@ Read[input->INPUT] =: [FLOAT,INTEGER,RATIONAL,TEXT,LIST]
 
 \item
 \protect \large \begin{verbatim}
-*ReadEfg[input->INPUT] =: EFG
+ReadEfg[input->INPUT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
@@ -4119,7 +4044,7 @@ read.
 
 \item
 \protect \large \begin{verbatim}
-*ReadNfg[input->INPUT] =: NFG
+ReadNfg[input->INPUT] =: NFG
 \end{verbatim}\normalsize
 \bd
 \item
@@ -4153,7 +4078,7 @@ RealizProbs[strategy->BEHAV] =: LIST(T)
 
 \item
 \protect \large \begin{verbatim}
-*Remove[list->LIST(T), n->INTEGER] =: LIST(T)
+Remove[list->LIST(T), n->INTEGER] =: LIST(T)
 \end{verbatim}\normalsize
 
 \item
@@ -4202,7 +4127,7 @@ Default is all players.
 
 \item
 \protect \large \begin{verbatim}
-*RootNode[efg->EFG] =: NODE
+RootNode[efg->EFG] =: NODE
 \end{verbatim}\normalsize
 
 \bd
@@ -4229,7 +4154,7 @@ found.
 
 \item
 \protect \large \begin{verbatim}
-*SaveEfg[file->TEXT,overWrite->BOOL] =: BOOL
+SaveEfg[file->TEXT,overWrite->BOOL] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -4258,7 +4183,7 @@ not overwrite an existing file.
 
 \item
 \protect \large \begin{verbatim}
-*SaveNfg[file->TEXT,overWrite->BOOL] =: BOOL
+SaveNfg[file->TEXT,overWrite->BOOL] =: BOOL
 \end{verbatim}\normalsize
 
 \bd
@@ -4289,7 +4214,7 @@ not overwrite an existing file.
 
 \item
 \protect \large \begin{verbatim} 
-*SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
+SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
@@ -4323,13 +4248,13 @@ SetFormat[output->OUTPUT,width->INTEGER, precis->INTEGER] =: OUTPUT
 
 \item
 \protect \large \begin{verbatim}
-*SetName[x<->ACTION, name->TEXT] =: ACTION
-*SetName[x<->EFG, name->TEXT] =: EFG
-*SetName[x<->INFOSET, name->TEXT] =: INFOSET
-*SetName[x<->NFG, name->TEXT] =: NFG
-*SetName[x<->NODE, name->TEXT] =: NODE
-*SetName[x<->OUTCOME, name->TEXT] =: OUTCOME
-*SetName[x<->PLAYER, name->TEXT] =: PLAYER
+SetName[x<->ACTION, name->TEXT] =: ACTION
+SetName[x<->EFG, name->TEXT] =: EFG
+SetName[x<->INFOSET, name->TEXT] =: INFOSET
+SetName[x<->NFG, name->TEXT] =: NFG
+SetName[x<->NODE, name->TEXT] =: NODE
+SetName[x<->OUTCOME, name->TEXT] =: OUTCOME
+SetName[x<->PLAYER, name->TEXT] =: PLAYER
 \end{verbatim}\normalsize
 
 \item
@@ -4339,7 +4264,7 @@ SetOptions[alg->TEXT, param->TEXT, value->T] =: T
 
 \item
 \protect \large \begin{verbatim}
-*SetPayoff[outcome->OUTCOME, player->PLAYER, payoff->T] =: OUTCOME
+SetPayoff[outcome->OUTCOME, player->PLAYER, payoff->T] =: OUTCOME
 \end{verbatim}\normalsize
 
 \bd
@@ -4369,7 +4294,7 @@ assigned values.
 
 \item
 \protect \large \begin{verbatim}
-*SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
+SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
 \end{verbatim}\normalsize
 
 \bd
@@ -4423,7 +4348,7 @@ SetPayoffNfg[list->LIST(INTEGER), payoffs->LIST(T)] =: LIST(INTEGER)
 
 \item
 \protect \large \begin{verbatim}
-*SimpDivSolve[nfg->NFG,{stopAfter->INTEGER}, 
+SimpDivSolve[nfg->NFG,{stopAfter->INTEGER}, 
          {nRestarts->INTEGER}, {leashLength->INTEGER},
          {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -4498,7 +4423,7 @@ constraint, or no leash.
 \item
 
 \protect \large \begin{verbatim}
-*StartWatch[] =: FLOAT
+StartWatch[] =: FLOAT
 \end{verbatim}\normalsize
 
 \bd
@@ -4514,7 +4439,7 @@ constraint, or no leash.
 
 \item
 \protect \large \begin{verbatim}
-*StopWatch[] =: FLOAT
+StopWatch[] =: FLOAT
 \end{verbatim}\normalsize
 
 \bd
@@ -4532,20 +4457,20 @@ constraint, or no leash.
 
 \item
 \protect \large \begin{verbatim} 
-#TerminalNodes[efg->EFG] =: LIST(NODE)
+TerminalNodes[efg->EFG] =: LIST(NODE)
 \end{verbatim}\normalsize
 
 \item
 \protect \large \begin{verbatim}
-*Text[x->INTEGER] =: TEXT
-*Text[x->FLOAT] =: TEXT
-*Text[x->RATIONAL] =: TEXT
-*Text[x->TEXT] =: TEXT
+Text[x->INTEGER] =: TEXT
+Text[x->FLOAT] =: TEXT
+Text[x->RATIONAL] =: TEXT
+Text[x->TEXT] =: TEXT
 \end{verbatim} \normalsize
 
 \item 
 \protect \large \begin{verbatim}
-*Times[x->T, y->T] =: T
+Times[x->T, y->T] =: T
 \end{verbatim} \normalsize
   
 \bd
@@ -4570,7 +4495,7 @@ constraint, or no leash.
 %--U--
 
 \protect \large \begin{verbatim}
-*UnAssign[x<->T] =: T
+UnAssign[x<->T] =: T
 \end{verbatim}\normalsize
 
 
