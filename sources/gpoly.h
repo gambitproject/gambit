@@ -56,8 +56,8 @@ template <class T> class gPoly {
   
 private:
 
-  Power<T> *Root;         // root node of tree
-  const gVariableList *List;    // pointer to variable list of space
+  Power<T>* Root;         // root node of tree
+  const gVariableList* List;    // pointer to variable list of space
 
   // used for gString parsing;
   int charnum;   char charc;   gString TheString;
@@ -89,7 +89,11 @@ private:
   int      TotalDegree(Power<T> *start) const;
   void     count_monomials(Power<T> *base,int &count) const;
                     // the number of monomials in the polynomial
-  void     newton_polytope(Power<T> *base, int &count, polyhedron &np) const;
+
+  void     find_more_exp_vecs(gList<exp_vect*>& cur_list,
+			      exp_vect& cur_vect,
+			      Power<T>* start)     const;
+
   bool     ExpVect(const Power<T> *here, 
 		   const Power<T> *target, 
 		   exp_vect& current) const;
@@ -106,7 +110,7 @@ private:
   Power<T> *Mult( Power<T> *one, Power<T> *two);
                     // recursive tree multiplier.
   void     DividebyConst(T val, Power<T> *start);
-  gPoly<T> DivideByPolynomial(const gPoly<T> den);
+  gPoly<T> DivideByPolynomial(const gPoly<T> den) const;
   Power<T> *PrtlDrvtv(int num, Power<T> *start, int pow_of_var);
   Power<T> *LdngCffcnt(int num, int degree, Power<T> *start, bool keep);
   void     evaluator( const gArray<T> &values, Power<T> *, T woAns, T &) const;
@@ -171,17 +175,17 @@ public:
   //----------
   
   gPoly<T> &operator =  (const gPoly<T> &);
-  gPoly<T>  operator -  ();
-  gPoly<T>  operator -  (const gPoly<T> &);
+  gPoly<T>  operator -  ()                 const;
+  gPoly<T>  operator -  (const gPoly<T> &) const;
   void      operator -= (const gPoly<T> &);
-  gPoly<T>  operator +  (const gPoly<T> &);
+  gPoly<T>  operator +  (const gPoly<T> &) const;
   void      operator += (const gPoly<T> &);
-  gPoly<T>  operator *  (const gPoly<T> &);
+  gPoly<T>  operator *  (const gPoly<T> &) const;
   void      operator *= (const gPoly<T> &);
-  gPoly<T>  operator /  (const T val);        // division by a constant
-  gPoly<T>  operator /  (const gPoly<T> &);   // division by a polynomial
-  int       operator == (gPoly<T> &p) const;
-  int       operator != (gPoly<T> &p) const;;
+  gPoly<T>  operator /  (const T val)      const;  // division by a constant
+  gPoly<T>  operator /  (const gPoly<T> &) const;  // division by a polynomial
+  int       operator == (gPoly<T> &p)      const;
+  int       operator != (gPoly<T> &p)      const;
   gPoly<T> &operator =  (const gString &);  
                         //Set polynomial equal to the SOP form in the string
 
@@ -200,7 +204,7 @@ public:
   gPoly<T>       EvaluateOneVar(int varnumber, T val);
   gPoly<T>       PartialDerivative(int varnumber);
   int            No_Monomials() const;
-  polyhedron     NewtonPolytope() const;
+  gList<exp_vect*> ExponentVectors() const;
   exp_vect       ExpVect(const Power<T> *target) const;
 
   //--------------------
@@ -222,9 +226,6 @@ public:
   // Printing Stuff
   //---------------
 
-  // Print Newton Polytope
-  void Print_Newt_Pltp(gOutput &) const;  // PROBABLY SHOULD GO ELSEWHERE
-  void Print_Newt_Pltp(gString &) const;
  // Print polynomial in SOP form
   void Print(gOutput &) const;
   void Print(gString &) const;

@@ -13,7 +13,8 @@
 #include "garray.h"
 #include "glist.h"
 #include "gblock.h"
-#include "plyhdrn.h"
+#include "rational.h"
+#include "glpsolv1.h"
 
 /*
    The classes in this file are prior to the notion of a 
@@ -144,6 +145,7 @@ pointers to functions.
 // IS A POINTER-TO-OTHER-MEMBER-FUNCTION
 typedef  const bool (*ORD_PTR)(const exp_vect &, const exp_vect &);
   bool lex(const exp_vect &, const exp_vect &);
+  bool reverselex(const exp_vect &, const exp_vect &);
   bool deglex(const exp_vect &, const exp_vect &);
   bool reversedeglex(const exp_vect &, const exp_vect &);
   bool degrevlex(const exp_vect &, const exp_vect &);

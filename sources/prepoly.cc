@@ -406,6 +406,14 @@ bool lex(const exp_vect & LHS, const exp_vect & RHS)
   return false;
 }
 
+bool reverselex(const exp_vect & LHS, const exp_vect & RHS)
+{
+  for (int i = LHS.NumberOfVariables(); i >= 1; i--)
+    if (LHS[i] < RHS[i]) return true;
+    else if (LHS[i] > RHS[i]) return false;
+  return false;
+}
+
 bool deglex(const exp_vect & LHS, const exp_vect & RHS)
 {
   if      (LHS.TotalDegree() < RHS.TotalDegree()) return true;

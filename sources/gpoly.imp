@@ -122,14 +122,14 @@ template<class T> gPoly<T> &gPoly<T>::operator=(const gPoly<T> &p)
   return (*this);
 }
 
-template<class T> gPoly<T> gPoly<T>::operator-()
+template<class T> gPoly<T> gPoly<T>::operator-() const
 {
   gPoly<T> neg(*this);
-  Negate (neg.Root);
+  neg.Negate(neg.Root);
   return neg;
 }
 
-template<class T> gPoly<T> gPoly<T>::operator-(const gPoly<T> &p)
+template<class T> gPoly<T> gPoly<T>::operator-(const gPoly<T> &p) const
 {
   gPoly<T> dif(*this);
   dif -= p;
@@ -150,7 +150,7 @@ template<class T> void gPoly<T>::operator-=(const gPoly<T> &p)
   Collapsor(Root, NULL);
 }
 
-template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p)
+template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p) const
 { 
 
   gPoly<T> sum(*this);
@@ -166,25 +166,29 @@ template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
   temp = Adder(Root, p.Root);
   Remover (Root);
   Root = temp;
+
+//DEBUG
+  gout << "In operator +=, after Adder, *this = " << *this << "\n\n";
+
   ZeroCoefRemover(Root, NULL);
   Collapsor(Root, NULL);
 }
 
-template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p)
+template<class T> gPoly<T> gPoly<T>::operator*(const gPoly<T> &p) const
 {
   gPoly<T> prod(*this);
   prod *= p;
   return prod;
 }
 
-template<class T> gPoly<T> gPoly<T>::operator/(const T val)
+template<class T> gPoly<T> gPoly<T>::operator/(const T val) const
 {
   gPoly<T> result(*this);
   result.DividebyConst(val,result.Root);
   return result;
 }
 
-template<class T> gPoly<T> gPoly<T>::operator/(const gPoly<T> & den)
+template<class T> gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
 {
   return DivideByPolynomial(den);
 }
@@ -423,7 +427,9 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
 {
   assert (TotalDegree() == 0);
 
-  if ( *this == gPoly<T>(List,(T)0) ) return (T)0;
+  gPoly<T> zero(List,(T)0);
+  if (*this == zero) return (T)0;
+//  if ( *this == gPoly<T>(List,(T)0) ) return (T)0;
   else return Root->down->Coef;
 }
 
@@ -433,14 +439,6 @@ template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
   evaluator (values, Root, 1, answer);
   return (answer);
 }  
-  
-
-template <class T> void gPoly<T>::Print_Newt_Pltp(gOutput &f) const
-{
-  polyhedron np = NewtonPolytope();
-
-  f << "\n\n" << np;
-} 
   
 
 template <class T> void gPoly<T>::Print(gOutput &f) const
@@ -553,43 +551,6 @@ template <class T> int gPoly<T>::ZeroCheck(const gArray<int> &Powers) const
   return j;
 }
 
-template <class T> polyhedron gPoly<T>::NewtonPolytope() const
-{
-  polyhedron newt_pol(List->NumVariables(), No_Monomials());
-  for (int i = 1; i <= No_Monomials(); i++)
-    for (int j = 1; j <= List->NumVariables(); j++)
-      newt_pol.set_coord(i,j-1,0);
-
-  int count = 0;
-
-  newton_polytope(Root, count, newt_pol); 
-
-  return newt_pol;
-}
-
-
-template <class T> void gPoly<T>::newton_polytope(Power<T> *base, 
-						  int &count, 
-					          polyhedron &np) 
-                                                const
-{
-  Power<T> *p;
-  Power<T> *q;
-
-  for (p = base; p!=NULL; p=p->next) {
-    count++;
-    int current_count = count;
-    q = p;
-    while ( q->down->down != NULL) {       
-      np.set_coord(current_count, q->down->Var->number - 1, q->pow);
-      q = q->down->down;
-      newton_polytope(q->next, count, np);
-    }
-    np.set_coord(current_count, q->down->Var->number - 1, q->pow);
-  }
-}
-
-
 template <class T> bool gPoly<T>::ExpVect(const Power<T>* here, 
 					  const Power<T>* target, 
 					  exp_vect& current) const
@@ -623,6 +584,35 @@ template <class T> exp_vect gPoly<T>::ExpVect(const Power<T> *target) const
   exp_vect result(List);   // initializes to 0 vector
   bool success = ExpVect(Root,target,result);     assert(success);
   return result;
+}
+
+template <class T> gList<exp_vect*> gPoly<T>::ExponentVectors() const
+{
+  gList<exp_vect*> result;
+  exp_vect cur_vect(List);
+
+  find_more_exp_vecs(result,cur_vect,Root);
+
+  return result;
+}
+
+template<class T> void gPoly<T>::find_more_exp_vecs(gList<exp_vect*>& cur_list,
+						     exp_vect& cur_vect,
+						     Power<T>* start)     const
+{
+  exp_vect* new_vec = new exp_vect(cur_vect);
+
+  Power<T>* p = start;
+  while (p != NULL) {
+
+    if (p->next != NULL)
+      find_more_exp_vecs(cur_list,*new_vec,p->next);
+
+    new_vec->SetExp(p->down->Var->number,p->pow);
+
+    p = p->down->down;
+  }
+  cur_list+=new_vec;
 }
 
 
@@ -912,7 +902,8 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
   kRoot = NULL;
   
   one = One; two = Two;
-  
+
+//BIG CASE #1  
   if (one != NULL && two != NULL &&
       two->down->Var->number != one->down->Var->number){
     kRoot = new Power<T>;
@@ -971,7 +962,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
     }    
   }
   
-  
+// BIG CASE #2
   else {
     for (i = one, j = two, pk = NULL; i != NULL 
 	 || j!=NULL; i = nexti, j = nextj, pk = k){
@@ -1084,6 +1075,7 @@ template <class T> Power<T> *gPoly<T>::Adder( Power<T> *One, Power<T> *Two)
   return kRoot;
 }
 
+
 template <class T> Power<T> *gPoly<T>::LowZero(Power<T> *start)
 {
   Power<T> *p;
@@ -1120,16 +1112,19 @@ template <class T> void gPoly<T>::DividebyConst(T val, Power<T> *start)
 }
 
 
-template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> den)
+template<class T> 
+gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> den) const
 {
-  assert( den != gPoly<T>(List,(T)0) );
-  assert(*this == gPoly<T>(List,(T)0) || den.TotalDegree() <= TotalDegree());
+  gPoly<T> zero(List,(T)0);
+
+  assert(den != zero);
+  assert(*this == zero || den.TotalDegree() <= TotalDegree());
 
   // assumes exact divisibility!
 
-  gPoly<T> result = gPoly<T>(List,(T)0);
+  gPoly<T> result = zero;
 
-  if ( *this == gPoly<T>(List,(T)0) ) return result;
+  if (*this == zero) return result;
   else if (den.TotalDegree() == 0)
     { result = *this/den.NumLeadCoeff(); return result; }
   else
@@ -1139,7 +1134,7 @@ template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> den)
 
       gPoly<T> remainder = *this;
 
-      while ( remainder != gPoly<T>(List,(T)0) )
+      while (remainder != zero)
 	{
 	  gPoly<T> quot = remainder.LeadingCoefficient(last) /
 	                     den.LeadingCoefficient(last);
@@ -1303,15 +1298,6 @@ exp_vect  gPoly<T>::LeadingPowProd(const term_order & order,
     if (p->next != NULL) 
       {
 	exp_vect candidate = LeadingPowProd(order,p->next);
-
-/*
-//DEBUG
-	if (order.Greater(candidate,answer))
-	  gout << candidate << " Gr(reversedeglex) " << answer << "\n";
-	else
-	  gout << candidate << " LEq(reversedeglex) " << answer << "\n";
-*/
-
 	if (order.Greater(candidate,answer))
 	  answer = candidate;
       }
@@ -1499,8 +1485,8 @@ void gPoly<T>::ReduceByRepeatedDivision(const term_order & order,
 }
 
 template <class T>
-gPoly<T> gPoly<T>::S_Polynomial(const term_order & order, 
-                                const gPoly<T> & arg2)
+gPoly<T> gPoly<T>::S_Polynomial(const term_order& order, 
+                                const gPoly<T>& arg2) const
 {
   exp_vect exp_lcm = 
         (LeadingPowerProduct(order)).LCM(arg2.LeadingPowerProduct(order));
