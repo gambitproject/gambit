@@ -62,7 +62,7 @@
 #define SUBGAME_EXPANDONE                   1360
 #define SUBGAME_EXPANDBRANCH                1361
 #define SUBGAME_EXPANDALL                   1362
-#define SUBGAME_TOGGLE                      1364
+//#define SUBGAME_TOGGLE                      1364
 #define SUBGAME_SET                         1366
 
 #define INFOSET_MERGE                       1400

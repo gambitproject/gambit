@@ -4,7 +4,7 @@
 #include "accels.h"
 #include "nfgconst.h"
 
-#define 	NUM_NFG_EVENTS	33
+#define 	NUM_NFG_EVENTS	35
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
 AccelEvent("FileSave",NFG_FILE_SAVE),
