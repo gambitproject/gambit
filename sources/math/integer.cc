@@ -41,13 +41,13 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "base/gstream.h"
-#include "integer.h"
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
 #include <assert.h>
+#include "base/gstream.h"
+#include "math/integer.h"
 
 // internal Integer representation
 class IntRep {
@@ -1473,7 +1473,7 @@ void divide(const gInteger& Ix, long y, gInteger& Iq, long& rem)
     rem = Itolong(r);
     if (!STATIC_IntRep(r)) delete r;
   }
-  rem = abs(rem);
+  rem = abs(rem).as_long();
   if (xsgn == I_NEGATIVE) rem = -rem;
   q->sgn = samesign;
   Icheck(q);
