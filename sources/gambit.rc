@@ -1,5 +1,23 @@
 gambit_icn ICON gambit.ico
 efg_icn    ICON efg.ico
 nfg_icn    ICON nfg.ico
+
+SAVETOOL	 	BITMAP	 bitmaps\save.bmp
+PRINTTOOL		BITMAP	 bitmaps\print.bmp
+DELETETOOL	BITMAP	 bitmaps\delete.bmp
+SOLVETOOL		BITMAP	 bitmaps\solve.bmp
+ZOOMINTOOL	BITMAP	 bitmaps\zoomin.bmp
+ZOOMOUTTOOL	BITMAP	 bitmaps\zoomout.bmp
+HELPTOOL		BITMAP	 bitmaps\help.bmp
+ADDTOOL			BITMAP	 bitmaps\add.bmp
+OPTIONSTOOL	BITMAP	 bitmaps\options.bmp
+NFGTOOL			BITMAP	 bitmaps\makenf.bmp
+INSPECTTOOL	BITMAP	 bitmaps\inspect.bmp
+PAYOFFTOOL	BITMAP	 bitmaps\payoff.bmp
+OPENTOOL		BITMAP	 bitmaps\open.bmp
+EFGTOOL			BITMAP	 bitmaps\efg.bmp
+
+
+
 rcinclude wx.rc
 
