@@ -688,7 +688,8 @@ bool CallFuncObj::_TypeMatch( Portion* p, PortionSpec ExpectedSpec,
   if( p == 0 && ExpectedSpec.Type == porUNDEFINED )
     return true;
 
-  if(ExpectedSpec.Type == porANYTYPE && ExpectedSpec.ListDepth == 0)
+  if(ExpectedSpec.Type == porANYTYPE && ExpectedSpec.ListDepth == 0 && 
+     return_type_check)
     return true;
 
   assert(p != 0);

@@ -15,12 +15,152 @@
 
 
 
-Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*))
+
+void GSM_Flatten_Top(ListPortion* list, int levels, int depth, 
+		     ListPortion* result)
 {
+  int length = list->Length();
+  int i;
+  assert(levels >= 0);
+  if(levels == 0)
+  {
+    for(i=1; i<=length; i++)
+      if((*list)[i]->Spec().ListDepth == 0)
+	result->Append((*list)[i]->ValCopy());
+      else
+	GSM_Flatten_Top((ListPortion*)(*list)[i], levels, depth+1, result);
+  }
+  else if(levels > 0)
+  {
+    if(depth >= levels)
+      for(i=1; i<=length; i++)
+	result->Append((*list)[i]->ValCopy());
+    else
+      for(i=1; i<=length; i++)
+	if((*list)[i]->Spec().ListDepth == 0)
+	  result->Append((*list)[i]->ValCopy());
+	else
+	  GSM_Flatten_Top((ListPortion*)(*list)[i], levels, depth+1, result);
+  }
+}
+
+void GSM_Flatten_Bottom(ListPortion* list, int levels, int depth, 
+			ListPortion* result)
+{
+  int length = result->Length();
+  int i;
+  assert(levels > 0);
+  assert(list == 0);
+  if(depth >= levels-1)
+  {
+    for(i=1; i<=length; i++)
+      if((*result)[i]->Spec().ListDepth == 0)
+	;
+      else
+      {
+	ListPortion* oldsublist = (ListPortion*) result->Remove(i);
+	ListPortion* newsublist = new ListValPortion();
+	GSM_Flatten_Top(oldsublist, 0, depth+1, newsublist);
+	result->Insert(newsublist, i);
+	delete oldsublist;
+      }
+  }
+  else
+  {
+    for(i=1; i<=length; i++)
+      if((*result)[i]->Spec().ListDepth == 0)
+	;
+      else
+	GSM_Flatten_Bottom(0, levels, depth+1, (ListPortion*)(*result)[i]);
+  }
+}
+
+Portion* GSM_Flatten(Portion** param)
+{
+  // if levels > 0, flatten from bottom
+  ListPortion* list;
+  int levels = ((IntPortion*) param[1])->Value();
+  if(levels >= 0)
+  {
+    list = new ListValPortion();
+    GSM_Flatten_Top((ListPortion*) param[0], levels, 0, list);
+  }
+  else
+  {
+    list = (ListPortion*) ((ListPortion*) param[0])->ValCopy();
+    GSM_Flatten_Bottom(0, -levels, 0, list);
+  }
+    
+  return list;
+}
+
+
+bool ListDimCheck(ListPortion* p0, ListPortion* p1)
+{
+  int i;
+  int length;
+  assert(p0->Spec().ListDepth > 0);
+  assert(p1->Spec().ListDepth > 0);
+  length = p0->Length();
+  if(length != p1->Length())
+    return false;
+  for(i = 1; i <= length; i++)
+  {
+    if((*p0)[i]->Spec().ListDepth != (*p1)[i]->Spec().ListDepth)
+      return false;
+    if((*p0)[i]->Spec().ListDepth > 0)
+      if(!ListDimCheck((ListPortion*)(*p0)[i], (ListPortion*)(*p1)[i]))
+	return false;
+  }
+  return true;
+}
+
+ListPortion* GSM_Filter_Aid(ListPortion* p0, ListPortion* p1)
+{
+  int i;
+  int length = p0->Length();
+  ListPortion* list = new ListValPortion();
+  for(i=1; i<=length; i++)
+    if((*p0)[i]->Spec().ListDepth == 0)
+    {
+      assert((*p1)[i]->Spec().Type == porBOOL);
+      if(((BoolPortion*) (*p1)[i])->Value())
+	list->Append((*p0)[i]->ValCopy());
+    }
+    else
+      list->Append(GSM_Filter_Aid((ListPortion*)(*p0)[i], 
+				  (ListPortion*)(*p1)[i]));
+  return list;
+}
+
+Portion* GSM_Filter(Portion** param)
+{
+  if(!ListDimCheck((ListPortion*) param[0], (ListPortion*) param[1]))
+    return new ErrorPortion("Mismatching list dimensions");
+  return GSM_Filter_Aid((ListPortion*) param[0], (ListPortion*) param[1]);
+}
+
+
+Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*), 
+		  bool altsort = false)
+{
+  // If altsort, param[1] is rearranged using the sorted result of param[0]
+
   unsigned long n = ((ListPortion*) param[0])->Length();
+  
+  assert(param[0]);
+  if(altsort)
+    assert(param[1]);
+
+  if(altsort)
+    if(n != (unsigned) ((ListPortion*) param[1])->Length())
+      return new ErrorPortion("Mismatching list dimensions");
+  
   Portion* *a=new Portion* [n+1];
+  Portion* *b=new Portion* [n+1];
   unsigned long i, j, inc;
-  Portion* v; 
+  Portion* va; 
+  Portion* vb; 
   bool no_sub_lists = true;
 
   for(i=1; i<=n; i++)
@@ -28,11 +168,18 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*))
     a[i] = ((ListPortion*) param[0])->Remove(1);
     if(a[i]->Spec().ListDepth > 0)
       no_sub_lists = false;
+    if(altsort)
+    {
+      b[i] = ((ListPortion*) param[1])->Remove(1);
+      if(b[i]->Spec().ListDepth > 0)
+	no_sub_lists = false;
+    }
   }
 
   if(no_sub_lists)
   {
-    // insertion sort, adopted from _Numerical_Recipes_in_C_
+    // sort via Shell's method, adopted from 
+    // _Numerical_Recipes_in_C_, 2nd Edition, p. 332
     inc = 1;
     do {
       inc *= 3;
@@ -41,23 +188,38 @@ Portion* GSM_Sort(Portion** param, bool (*compfunc)(Portion*, Portion*))
     do {
       inc /= 3;
       for(i=inc+1; i<=n; i++) {
-	v = a[i];
+	va = a[i];
+	vb = b[i];
 	j=i;
-	while(compfunc(a[j-inc], v)) {
+	while(compfunc(a[j-inc], va)) {
 	  a[j] = a[j-inc];
+	  b[j] = b[j-inc];
 	  j -= inc;
 	  if(j <= inc) break;
 	}
-	a[j] = v;
+	a[j] = va;
+	b[j] = vb;
       }
     } while(inc > 1);
   }
 
   for(i=1; i<=n; i++)
-    ((ListPortion*) param[0])->Append(a[i]);  
+  {
+    ((ListPortion*) param[0])->Append(a[i]);
+    if(altsort)
+      ((ListPortion*) param[1])->Append(b[i]);      
+  }
+
+  delete[] a;
+  delete[] b;
 
   if(no_sub_lists)
-    return param[0]->ValCopy();
+  {
+    if(!altsort)
+      return param[0]->ValCopy();
+    else
+      return param[1]->ValCopy();
+  }
   else
     return new ErrorPortion("Cannot sort a nested list");
 }
@@ -67,21 +229,49 @@ bool GSM_Compare_Integer(Portion* p1, Portion* p2)
 { return ((IntPortion*) p1)->Value() > ((IntPortion*) p2)->Value(); }
 Portion* GSM_Sort_Integer(Portion** param)
 { return GSM_Sort(param, GSM_Compare_Integer); }
+Portion* GSM_Sort_By_Integer(Portion** param)
+{
+  Portion* p[2]; 
+  p[0] = param[1]; 
+  p[1] = param[0];
+  return GSM_Sort(p, GSM_Compare_Integer, true);
+}
 
 bool GSM_Compare_Float(Portion* p1, Portion* p2)
 { return ((FloatPortion*) p1)->Value() > ((FloatPortion*) p2)->Value(); }
 Portion* GSM_Sort_Float(Portion** param)
 { return GSM_Sort(param, GSM_Compare_Float); }
+Portion* GSM_Sort_By_Float(Portion** param)
+{
+  Portion* p[2]; 
+  p[0] = param[1]; 
+  p[1] = param[0];
+  return GSM_Sort(p, GSM_Compare_Float, true);
+}
 
 bool GSM_Compare_Rational(Portion* p1, Portion* p2)
 { return ((RationalPortion*) p1)->Value() > ((RationalPortion*) p2)->Value(); }
 Portion* GSM_Sort_Rational(Portion** param)
 { return GSM_Sort(param, GSM_Compare_Rational); }
+Portion* GSM_Sort_By_Rational(Portion** param)
+{
+  Portion* p[2]; 
+  p[0] = param[1]; 
+  p[1] = param[0];
+  return GSM_Sort(p, GSM_Compare_Rational, true);
+}
 
 bool GSM_Compare_Text(Portion* p1, Portion* p2)
 { return ((TextPortion*) p1)->Value() > ((TextPortion*) p2)->Value(); }
 Portion* GSM_Sort_Text(Portion** param)
 { return GSM_Sort(param, GSM_Compare_Text); }
+Portion* GSM_Sort_By_Text(Portion** param)
+{
+  Portion* p[2]; 
+  p[0] = param[1]; 
+  p[1] = param[0];
+  return GSM_Sort(p, GSM_Compare_Text, true);
+}
 
 
 
@@ -724,7 +914,7 @@ void Init_listfunc(GSM *gsm)
 
 
   //------------------ Sort -----------------------
-  FuncObj = new FuncDescObj("Sort", 4);
+  FuncObj = new FuncDescObj("Sort", 8);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Sort_Integer, 
 				       PortionSpec(porINTEGER, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porINTEGER,1)));
@@ -734,8 +924,44 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Sort_Rational, 
 				       PortionSpec(porRATIONAL, 1), 1));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", PortionSpec(porRATIONAL,1)));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Sort_Text, porTEXT, 1));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Sort_Text, 
+				       PortionSpec(porTEXT, 1), 1));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", PortionSpec(porTEXT,1)));
+
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Sort_By_Integer, 
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("by", PortionSpec(porINTEGER,1)));
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Sort_By_Float, 
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("by", PortionSpec(porFLOAT,1)));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Sort_By_Rational, 
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("by", PortionSpec(porRATIONAL,1)));
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Sort_By_Text, 
+				       PortionSpec(porANYTYPE, 1), 2));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("by", PortionSpec(porTEXT,1)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Filter", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Filter, 
+				       PortionSpec(porANYTYPE, 1), 2,
+				       0, NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", PortionSpec(porBOOL,1)));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Flatten", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Flatten, 
+				       PortionSpec(porANYTYPE, 1), 2,
+				       0, NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porANYTYPE,1)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("levels", porINTEGER,
+					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 }

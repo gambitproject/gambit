@@ -40,7 +40,7 @@ PortionSpecTextType _PortionSpecText[] =
 {
   { porERROR,            "ERROR" },
   
-  { porBOOL,             "BOOL" },
+  { porBOOL,             "BOOLEAN" },
   { porFLOAT,            "FLOAT" },
   { porINTEGER,          "INTEGER" },
   { porRATIONAL,         "RATIONAL" },
