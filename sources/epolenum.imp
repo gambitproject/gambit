@@ -50,6 +50,8 @@ public:
   
   long NumEvals(void) const;
   double Time(void) const;
+
+//  void SequentialEquilibrium(const EFSupport &B, const EFBasis &b); 
   
   EfgPolEnumParams &Parameters(void);
 //   void SequenceForm(const Node *, gNumber,gArray<int>, gArray<int>);
@@ -275,6 +277,13 @@ EfgPolEnumModule<T>::Payoff(int pl) const
   }
   return equation;
 }
+
+//template <class T> void 
+//EfgPolEnumModule<T>::SequentialEquilibrium(EFSupport &B, EFBasis &b)
+//{
+//}
+
+
 /*
 
 template <class T> gPoly<T> 
