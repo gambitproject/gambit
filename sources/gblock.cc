@@ -1,7 +1,7 @@
 //#
 //# FILE: gblock.cc -- Provide implementations for commonly-used blocks
 //#
-//# $Id$
+//# @(#)gblock.cc	1.10 6/2/95
 //#
 
 #include "basic.h"
@@ -20,6 +20,11 @@ class gArray<float>;
 class gArray<double>;
 class gArray<gRational>;
 class gArray<gString>;
+
+class gArray<gArray<int> >;
+class gArray<gArray<int> *>;
+class gArray<gArray<double> >;
+
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
