@@ -27,6 +27,7 @@ NFQreParams::NFQreParams(gOutput &, gOutput &pxi, gStatus &s)
 class NFQreFunc : public gC2Function<double>  {
   private:
     long _nevals;
+    bool _domain_err;
     const Nfg &_nfg;
     gVector<double> _Lambda;
     gVector<double> **_scratch;
@@ -47,12 +48,14 @@ class NFQreFunc : public gC2Function<double>  {
     void SetLambda(double l)   { _Lambda = l; }
     void SetLambda(const gVector<double> &l)   { _Lambda = l; }
     long NumEvals(void) const  { return _nevals; }
+    bool DomainErr(void) const { return _domain_err;}
 };
 
 
 NFQreFunc::NFQreFunc(const Nfg &N,
 			 const MixedProfile<gNumber> &start)
-  : _nevals(0L), _nfg(N), _Lambda(N.NumPlayers()), _p(start.Support())
+  : _nevals(0L), _domain_err(false), _nfg(N), 
+    _Lambda(N.NumPlayers()), _p(start.Support())
 {
   for (int i = 1; i <= _p.Length(); i++)
     _p[i] = start[i];
@@ -118,6 +121,7 @@ bool NFQreFunc::Deriv(const gVector<double> &v, gVector<double> &d)
 double NFQreFunc::Value(const gVector<double> &v)
 {
   _nevals++;
+  _domain_err = false;
   ((gVector<double> &) _p).operator=(v);
   double val = 0.0, z;
   
@@ -196,60 +200,101 @@ void Qre(const Nfg &N, NFQreParams &params,
   NFQreFunc F(N, start);
 
   int iter = 0;
-  double Lambda, value = 0.0;
+  double Lambda, LambdaOld, LambdaStart, value = 0.0;
   
   if (params.pxifile) 
     WritePXIHeader(*params.pxifile, N, params);
 
-  Lambda = (params.delLam < 0.0) ? params.maxLam : params.minLam;
-  int num_steps, step = 0;
+  LambdaStart = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+  LambdaOld = Lambda = LambdaStart;
+
+  double max_prog, prog;
+
   if (params.powLam == 0)
-    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
+    max_prog = params.maxLam - params.minLam;
   else
-    num_steps = (int) (log(params.maxLam / params.minLam) /
-		       log(params.delLam + 1.0));
+    max_prog = log(params.maxLam / params.minLam);
 
   MixedProfile<double> p(start.Support());
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
+  MixedProfile<double> pold(p);
+
+  bool FoundSolution = true;
+  double delta, mindelta;
+  delta = params.delLam;
+  mindelta = delta/100.0;
 
   try {
-    for (/*nit = 1*/; Lambda <= params.maxLam &&
-		      Lambda >= params.minLam && value < 10.0; /*nit++*/)  {
+    while (delta>mindelta && Lambda <= params.maxLam &&
+		      Lambda >= params.minLam)  {
       params.status.Get();
       F.SetLambda(Lambda);
       // enter Davidon Fletcher Powell routine.  
-      DFP(p, F, value, iter, 
+      FoundSolution = DFP(p, F, value, iter, 
 	  params.maxits1, params.tol1, params.maxitsN, params.tolN,
 	  *params.tracefile,params.trace-1,true);
       
-      if (params.trace>0)  {
-	*params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
-      } 
-
-      if (params.pxifile)   {
-	*params.pxifile << "\n" << Lambda << " " << value;
-	*params.pxifile << " ";
-	for (int pl = 1; pl <= N.NumPlayers(); pl++)
-	  for (int strat = 1;
-	       strat <= p.Support().NumStrats(pl);
-	       strat++)
-	    *params.pxifile << p(pl, strat) << " ";
-      }
-      
-      if (params.fullGraph) {
-	int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
-	solutions[index].SetQre(Lambda, value);
-	solutions[index].SetEpsilon(params.Accuracy());
+      bool derr = F.DomainErr();
+      double dist = 0.0;
+      for(int jj=p.First();jj<=p.Last();jj++) {
+	double xx = abs(p[jj]-pold[jj]);
+	if(xx>dist)dist=xx;
       }
 
-      Lambda += params.delLam * pow(Lambda, (long)params.powLam);
-      params.status.SetProgress((double) step / (double) num_steps);
-      step++;
+      if(FoundSolution && !derr && dist<params.delLam) {
+	if (params.trace>0)  {
+	  *params.tracefile << "\nLam: " << Lambda << " val: " << value << " p: " << p;
+	} 
+
+	if (params.pxifile)   {
+	  *params.pxifile << "\n" << Lambda << " " << value;
+	  *params.pxifile << " ";
+	  for (int pl = 1; pl <= N.NumPlayers(); pl++)
+	    for (int strat = 1;
+		 strat <= p.Support().NumStrats(pl);
+		 strat++)
+	      *params.pxifile << p(pl, strat) << " ";
+	}
+	
+	if (params.fullGraph) {
+	  int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
+	  solutions[index].SetQre(Lambda, value);
+	  solutions[index].SetEpsilon(params.Accuracy());
+	}
+	pold=p;                              // pold is last good solution
+	if(delta < params.delLam && dist<params.delLam/2.0) delta*=2.0;
+
+      }
+      else {
+	Lambda = LambdaOld;
+	p = pold;
+	if(delta>mindelta) delta/=2.0;
+      }
+
+      if (params.powLam == 0)
+	prog = abs(Lambda - LambdaStart);
+      else
+	prog = abs(log(Lambda/LambdaStart));
+      params.status.SetProgress(prog/max_prog);
+
+      gout << "\ndelta: " << delta;
+      gout << " Lam: " << Lambda;
+      gout << " Found: " << FoundSolution;
+      gout << " Err: " << derr;
+      gout << " dist: " << dist;
+      gout << " val: ";
+      gout.SetExpMode();
+      gout << value;
+      gout.SetFloatMode();
+      gout << " p: " << p;
+
+      LambdaOld = Lambda;
+      Lambda += delta * pow(Lambda, (long)params.powLam);
     }
 
     if (!params.fullGraph) {
-      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
+      int index = solutions.Append(MixedSolution(pold, algorithmNfg_QRE));
       solutions[index].SetQre(Lambda, value);
       solutions[index].SetEpsilon(params.Accuracy());
     }
