@@ -120,6 +120,7 @@ int main( int /*argc*/, char* argv[] )
   signal(SIGSEGV, (fptr) SigSegFaultHandler);
   signal(SIGABRT, (fptr) SigSegFaultHandler);
   signal(SIGBUS,  (fptr) SigSegFaultHandler);
+  signal(SIGKILL, (fptr) SigSegFaultHandler);
 #endif  
 
   _gsm = new GSM(256);
