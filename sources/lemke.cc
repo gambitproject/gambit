@@ -19,7 +19,7 @@
 //                        LemkeParams: member functions
 //---------------------------------------------------------------------------
 
-LemkeParams::LemkeParams(void) : dup_strat(0), plev(0)
+LemkeParams::LemkeParams(void) : dup_strat(0), plev(0), nequilib(0)
 { }
 
 //---------------------------------------------------------------------------
