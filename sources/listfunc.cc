@@ -687,14 +687,79 @@ Portion* GSM_Transpose( Portion** param )
 	return new ErrorPortion( "Bad dimensionality" );
   }
   p = new ListPortion();
-  for( i = 1; i <= width; i++ )
-  {
+  for( i = 1; i <= width; i++ ) {
     s = new ListPortion();
-    for( j = 1; j <= Length; j++ )
-    {
+    for( j = 1; j <= Length; j++ ) {
       s->Append( (*(ListPortion*)(*(ListPortion*) param[0])[j])[i]->ValCopy());
     }
     p->Append( s );
+  }
+  return p;
+}
+
+#include "gsmatrix.h"
+
+Portion* GSM_Inverse( Portion** param )
+{
+  int i;
+  int Length = 0;
+  int width = 0;
+  ListPortion *p;
+  ListPortion *s;
+  assert( param[0]->Spec().ListDepth > 0 );
+  Length = ((ListPortion*) param[0])->Length();
+  for( i = 1; i <= Length; i++ )
+  {
+    if( (*(ListPortion*) param[0])[i]->Spec().ListDepth == 0 )
+      return new ErrorPortion( "Bad dimensionality" );
+    if( i == 1 ) {
+      width = ((ListPortion*) (*(ListPortion*) param[0])[i])->Length();
+      if(width != Length) return new ErrorPortion( "Not a square matrix" );
+    }
+    else 
+      if( ((ListPortion*) (*(ListPortion*) param[0])[i])->Length() != width )
+	return new ErrorPortion( "Bad dimensionality" );
+  }
+  int j;
+  Precision precis = precRATIONAL;
+  for(i=1; precis==precRATIONAL && i <= Length; i++ )
+    for(j=1; precis==precRATIONAL && j<=width; j++)
+      if((((NumberPortion*) ((*(ListPortion*) (*(ListPortion*) param[0])[i])[j]))->Value()).GetPrecision() != precRATIONAL) 
+	precis = precDOUBLE;
+  gNumber gn;
+  if(precis == precRATIONAL) {
+    gSquareMatrix<gRational> A(Length);
+    for(i=1;i<=Length;i++)
+      for(j=1;j<=width;j++) {
+	gn = ((NumberPortion*) ((*(ListPortion*) (*(ListPortion*) param[0])[i])[j]))->Value();
+	A(i,j) = gn.gNumber::operator gRational();
+      }
+    gSquareMatrix<gRational> AA(A.Inverse());
+    p = new ListPortion();
+    p->SetDataType( param[0]->Spec().Type );
+    for( i = 1; i <= width; i++ ) {
+      s = new ListPortion();
+      s->SetDataType( param[0]->Spec().Type );
+      for( j = 1; j <= Length; j++ )
+	  s->Append( new NumberPortion( AA(i,j) ));
+      p->Append( s );
+    }
+  }
+  else {
+    gSquareMatrix<double> B(Length);
+    for(i=1;i<=Length;i++)
+      for( j=1;j<=width;j++)
+	B(i,j)= (double)(((NumberPortion*) ((*(ListPortion*) (*(ListPortion*) param[0])[i])[j]))->Value());
+    gSquareMatrix<double> BB(B.Inverse());
+    p = new ListPortion();
+    p->SetDataType( param[0]->Spec().Type );
+    for( i = 1; i <= width; i++ ) {
+      s = new ListPortion();
+      s->SetDataType( param[0]->Spec().Type );
+      for( j = 1; j <= Length; j++ )
+	  s->Append( new NumberPortion( BB(i,j) ));
+      p->Append( s );
+    }
   }
   return p;
 }
@@ -928,6 +993,13 @@ void Init_listfunc(GSM *gsm)
 					    REQUIRED, BYVAL));
   gsm->AddFunction(FuncObj);
 
+  //------------------ Inverse -----------------------
+  FuncObj = new FuncDescObj("Inverse", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Inverse, 
+				       PortionSpec(porNUMBER,2), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", PortionSpec(porNUMBER,2), 
+					    REQUIRED, BYVAL));
+  gsm->AddFunction(FuncObj);
 
   //------------------ Sort -----------------------
   FuncObj = new FuncDescObj("Sort", 6);
