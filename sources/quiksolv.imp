@@ -130,7 +130,8 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 
   while (true) {
     gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
-    if (Df.Determinant() == (gDouble)0) return false;
+
+    //    if (Df.Determinant() == (gDouble)0) return false;
     gVector<gDouble> Del = - (Df.Inverse() * oldevals);
 
     if ( !bigr.Contains(point + Del) ) return false;
@@ -167,7 +168,7 @@ bool QuikSolv<T>::NewtonRootNearRectangle(const gRectangle<gDouble>& r,
   while (true) {
     gMatrix<gDouble> Df = TreesOfPartials.DerivativeMatrix(point,NoEquations);
     gSquareMatrix<gDouble> M(Df * Df.Transpose());
-    if (M.Determinant() == (gDouble)0) return false;
+
     gVector<gDouble> Del = - (Df.Transpose() * M.Inverse()) * oldevals;
 
     if ( !bigr.Contains(point + Del) ) return false;
@@ -417,11 +418,13 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
     return; // newlist; 
 
   gVector<gDouble> point = r.Center();
+
   if ( NewtonRootIsOnlyInRct(r, point) ) {
     int i;
     for (i = NoEquations + 1; i <= System.Length(); i++)
       if (TreesOfPartials[i].ValueOfRootPoly(point) < (gDouble)0)
 	return;
+
     bool already_found = false;
     for (i = 1; i <= rootlistptr->Length(); i++)
       if (point == (*rootlistptr)[i])
