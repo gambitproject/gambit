@@ -156,7 +156,7 @@ extern bool DFP(gPVector<double> &p,
 		gC2Function<double> &func,
 		double &fret, int &iter,
 		int maxits1, double tol1, int maxitsN, double tolN,
-		gOutput &tracefile, int tracelevel,
+		gOutput &tracefile, int tracelevel, bool interior = false,
 		gStatus &status = gstatus);
 
 
@@ -185,7 +185,7 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
     
     if (found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		    params.maxitsN, params.tolN, *params.tracefile,
-		    params.trace-1, params.status))  {
+		    params.trace-1, false, params.status))  {
       bool add = false;
       if ((!params.status.Get()) 
 //	  || (params.status.Get() && p.IsNash())

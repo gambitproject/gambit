@@ -343,7 +343,7 @@ bool DFP(gPVector<double> &p,
 	 gC2Function<double> &func,
 	 double &fret, int &iter,
          int maxits1, double tol1, int maxitsN, double tolN,
-	 gOutput &tracefile, int tracelevel,
+	 gOutput &tracefile, int tracelevel, bool interior = false,
 	 gStatus &status = gstatus)
 {
   int i, j, its;
@@ -375,7 +375,10 @@ bool DFP(gPVector<double> &p,
       tracefile << "DFP iteration " << iter << '\n';
 
     Project(xi, p.Lengths());
-    RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1);
+    RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
+    if(interior)
+      for(int kk=1;kk<p.Length();kk++)
+	assert(p[kk]>0.0);
     
     if (fret <= tolN || fret >= fp || its >= maxitsN || status.Get())  {
       if (fret <= tolN)  return true;
@@ -511,7 +514,7 @@ bool Powell(gPVector<double> &p,
 	xi.SetRow(ibig, xit);
 	if(interior)
 	  for(int kk=1;kk<p.Length();kk++)
-	    assert(p[kk]>=0.0);
+	    assert(p[kk]>0.0);
       }
     }
     
