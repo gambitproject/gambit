@@ -7,8 +7,6 @@
 // So if data is LIST(LIST(NUMBER)), then call function by  
 // LogLik[Mixed[n,Float[data]],sol]
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 NewFunction[ LogLike[dat->LIST(LIST(NUMBER)), sol->MIXED], 
   x:= dat * Log [ ListForm[sol]];
   Sum[Sum[x]];

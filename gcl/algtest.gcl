@@ -2,8 +2,6 @@
 // A gcl script to test the solution algorithms.  
 // 
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 NewFunction[AlgTest[n->NFG,t->TEXT,{out->StdOut},{precision->Float}],
   StdOut << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];
   out << "\nFile: " << t << ".nfg ; " << Name[n] << "; n = " << NumPlayers[n] << "; CSum: " << IsConstSum[n];

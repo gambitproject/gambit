@@ -20,8 +20,6 @@
 // nash is a Nash equilibrium selection that is passed for use
 //     in estimating the OSEM model 
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 Include["loglike.gcl"]
 
 NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max->NUMBER, del->NUMBER,out->TEXT,pxi->TEXT,nash->BEHAV],

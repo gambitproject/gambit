@@ -18,8 +18,6 @@
 //  filename.pxi
 //
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 Include["eqreml.gcl"]
 
 NewFunction[EQre[filename->TEXT],

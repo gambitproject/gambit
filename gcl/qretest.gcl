@@ -1,7 +1,5 @@
 // QRE test script
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 Include["nqre.gcl"]
 NQre["2x2a"]
 

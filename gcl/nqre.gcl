@@ -15,8 +15,6 @@
 // filename.pxi
 // 
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 Include["nqreml.gcl"]
 
 NewFunction[NQre[filename->TEXT],

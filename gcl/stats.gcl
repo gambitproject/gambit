@@ -8,8 +8,6 @@
 // correctly with version .97 or higher.  
 //
 
-StdOut << "Include[\""+GetPath[]+"\"]\n";
-
 //
 // First, some basic math operations
 //
