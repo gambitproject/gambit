@@ -20,6 +20,9 @@
 
 #include "nodeaddd.h"
 #include "infosetd.h"
+#include "dlefgsave.h"
+#include "dlnodedelete.h"
+#include "dlefgplayer.h"
 
 #include "efgutils.h"
 #include "glist.imp"
@@ -1415,106 +1418,11 @@ Node *TreeWindow::GotObject(float &x, float &y, int what)
 //***********************************************************************
 //                      FILE-SAVE MENU HANDLER
 //***********************************************************************
-Efg *CompressEfg(const Efg &, const EFSupport &);
-
-class efgFileSaveDialog : public wxDialogBox {
-private:
-  int m_completed;
-
-  wxText *m_fileName, *m_treeLabel;
-  wxSlider *m_numDecimals;
-  
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((efgFileSaveDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((efgFileSaveDialog *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackBrowse(wxButton &p_object, wxEvent &)
-    { ((efgFileSaveDialog *) p_object.GetClientData())->OnBrowse(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  void OnBrowse(void);
-  Bool OnClose(void);
-
-public:
-  efgFileSaveDialog(const gText &, const gText &, int, wxWindow *);
-  virtual ~efgFileSaveDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  gText Filename(void) const { return m_fileName->GetValue(); }
-  gText Label(void) const { return m_treeLabel->GetValue(); }
-  int NumDecimals(void) const { return m_numDecimals->GetValue(); }
-};
-
-efgFileSaveDialog::efgFileSaveDialog(const gText &p_name,
-				     const gText &p_label, int p_decimals,
-				     wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Save File", TRUE)
-{
-  m_fileName = new wxText(this, 0, "Path:");
-  m_fileName->SetValue(p_name);
-
-  wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
-					"Browse...");
-  browseButton->SetClientData((char *) this);
-  NewLine();
-
-  m_treeLabel = new wxText(this, 0, "Description:", p_label, -1, -1, 300);
-  m_treeLabel->SetValue(p_label);
-  NewLine();
-
-  m_numDecimals = new wxSlider(this, 0, "Decimal places:",
-			       p_decimals, 0, 25, 100);
-  NewLine();
-
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void efgFileSaveDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void efgFileSaveDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool efgFileSaveDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-void efgFileSaveDialog::OnBrowse(void)
-{
-  char *file = wxFileSelector("Save data file", 
-			      gPathOnly(m_fileName->GetValue()),
-			      gFileNameFromPath(m_fileName->GetValue()),
-			      ".efg", "*.efg");
-
-  if (file) {
-    m_fileName->SetValue(file);
-  }
-}
-
 
 Bool TreeWindow::file_save(void)
 {
   static int s_nDecimals = 6;
-  efgFileSaveDialog dialog(frame->Filename(), ef.GetTitle(),
-			   s_nDecimals, this);
+  dialogEfgSave dialog(frame->Filename(), ef.GetTitle(), s_nDecimals, this);
 
   if (dialog.Completed() == wxOK) {
     if (wxFileExists(dialog.Filename())) {
@@ -1746,76 +1654,10 @@ void TreeWindow::node_insert(void)
 //                      NODE-DELETE MENU HANDLER
 //***********************************************************************
 
-class efgNodeDeleteDialog : public wxDialogBox {
-private:
-  Node *m_node;
-  int m_completed;
-  wxListBox *m_branchList;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((efgNodeDeleteDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((efgNodeDeleteDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  efgNodeDeleteDialog(Node *, wxWindow *);
-  virtual ~efgNodeDeleteDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  Node *KeepNode(void) const
-    { return m_node->GetChild(m_branchList->GetSelection() + 1); }
-};
-
-efgNodeDeleteDialog::efgNodeDeleteDialog(Node *p_node, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Delete Node", TRUE), m_node(p_node)
-{
-  SetLabelPosition(wxVERTICAL);
-  m_branchList = new wxListBox(this, 0, "Keep subtree at branch");
-  for (int act = 1; act <= p_node->NumChildren(); act++) {
-    m_branchList->Append(ToText(act) + ": " +
-			 p_node->GetInfoset()->Actions()[act]->GetName());
-  }
-  m_branchList->SetSelection(0);
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void efgNodeDeleteDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void efgNodeDeleteDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool efgNodeDeleteDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
 void TreeWindow::node_delete(void)
 {
   try {
-    efgNodeDeleteDialog dialog(Cursor(), this);
+    dialogNodeDelete dialog(Cursor(), this);
 
     if (dialog.Completed() == wxOK) {
       Node *keep = dialog.KeepNode();
@@ -2310,83 +2152,14 @@ void TreeWindow::infoset_label(void)
 //                   INFOSET-SWITCH-PLAYER MENU HANDLER
 //***********************************************************************
 
-class efgSwitchPlayerDialog : public wxDialogBox {
-private:
-  const Efg &m_efg;
-  int m_completed;
-  wxListBox *m_playerList;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((efgSwitchPlayerDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((efgSwitchPlayerDialog *) p_object.GetClientData())->OnCancel(); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  efgSwitchPlayerDialog(Infoset *, wxWindow *);
-  virtual ~efgSwitchPlayerDialog() { }
-
-  int Completed(void) const { return m_completed; }
-  EFPlayer *Player(void) const;
-};
-
-efgSwitchPlayerDialog::efgSwitchPlayerDialog(Infoset *p_infoset,
-					     wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Player", TRUE), m_efg(*p_infoset->Game())
-{
-  m_playerList = new wxListBox(this, 0, "Player");
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerList->Append(ToText(pl) + ": " + m_efg.Players()[pl]->GetName());
-  }
-  m_playerList->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-void efgSwitchPlayerDialog::OnOK(void)
-{
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void efgSwitchPlayerDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool efgSwitchPlayerDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-EFPlayer *efgSwitchPlayerDialog::Player(void) const
-{
-  return m_efg.Players()[m_playerList->GetSelection() + 1];
-}
-
 void TreeWindow::infoset_switch_player(void)
 {
   try {
-    efgSwitchPlayerDialog dialog(Cursor()->GetInfoset(), this);
+    dialogEfgSelectPlayer dialog(ef, this);
         
     if (dialog.Completed() == wxOK) {
-      if (dialog.Player() != Cursor()->GetInfoset()->GetPlayer()) {
-	ef.SwitchPlayer(Cursor()->GetInfoset(), dialog.Player());
+      if (dialog.GetPlayer() != Cursor()->GetInfoset()->GetPlayer()) {
+	ef.SwitchPlayer(Cursor()->GetInfoset(), dialog.GetPlayer());
 	infosets_changed = TRUE;
       }
     }

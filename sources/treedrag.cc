@@ -11,19 +11,7 @@
 #include "treewin.h"
 #include "treedrag.h"
 
-#define DRAG_NODE_START         0       // What are we dragging
-#define DRAG_NODE_END           1
-#define DRAG_ISET_START         2
-#define DRAG_ISET_END           3
-#define DRAG_BRANCH_START       4
-#define DRAG_BRANCH_END         5
-#define DRAG_OUTCOME_START      6       // also defined in btreewn1.cc
-#define DRAG_OUTCOME_END        7
-
-#define DRAG_NONE               0       // Current drag state
-#define DRAG_START              1
-#define DRAG_CONTINUE           2
-#define DRAG_STOP               3
+#include "dlefgplayer.h"
 
 extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
                                long p_style = wxOK | wxCENTRE);
@@ -186,98 +174,6 @@ int TreeWindow::IsetDragger::OnEvent(wxMouseEvent &ev, Bool &infosets_changed)
 // BranchDragger
 //--------------------
 
-//
-// A dialog box to select the player
-//
-class BranchDraggerDialog : public wxDialogBox {
-private:
-  Efg &m_efg;
-  int m_playerSelected, m_completed;
-  wxListBox *m_playerNameList;
-
-  static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((BranchDraggerDialog *) p_object.GetClientData())->OnOK(); }
-  static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((BranchDraggerDialog *) p_object.GetClientData())->OnCancel(); }
-  static void CallbackHelp(wxButton &, wxEvent &)
-    { wxHelpContents(EFG_TREE_HELP); }
-
-  void OnOK(void);
-  void OnCancel(void);
-  Bool OnClose(void);
-
-public:
-  BranchDraggerDialog(Efg &, wxWindow * = 0);
-  virtual ~BranchDraggerDialog();
-
-  int Completed(void) const { return m_completed; }
-  EFPlayer *GetPlayer(void);
-};
-
-BranchDraggerDialog::BranchDraggerDialog(Efg &p_efg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Select Player", TRUE), m_efg(p_efg)
-{
-  m_playerNameList = new wxListBox(this, 0, "Player");
-  m_playerNameList->Append("Chance");
-
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    const gText &name = m_efg.Players()[pl]->GetName();
-    if (name != "")
-      m_playerNameList->Append(name);
-    else
-      m_playerNameList->Append("Player" + ToText(pl));
-  }
-
-  // Force a selection -- some implementations (e.g. Motif) do not
-  // automatically set any selection
-  m_playerNameList->SetSelection(0); 
-
-  NewLine();
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp,
-				      "Help");
-  helpButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
-}
-
-BranchDraggerDialog::~BranchDraggerDialog()
-{ }
-
-void BranchDraggerDialog::OnOK(void)
-{
-  m_playerSelected = m_playerNameList->GetSelection();
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void BranchDraggerDialog::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool BranchDraggerDialog::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
-}
-
-EFPlayer *BranchDraggerDialog::GetPlayer(void)
-{
-  if (m_playerSelected == 0)
-    return m_efg.GetChance();
-  else
-    return m_efg.Players()[m_playerSelected];
-}
-
-
 TreeWindow::BranchDragger::BranchDragger(TreeWindow *parent_, Efg &ef_)
   : ef(ef_), parent(parent_), dc(parent_->GetDC()), drag_now(0),
     br(0), start_node(0)
@@ -335,7 +231,7 @@ int TreeWindow::BranchDragger::OnEvent(wxMouseEvent &ev,
 	  ef.InsertAction(iset, iset->Actions()[br]);
       }
       else {
-	BranchDraggerDialog dialog(ef, parent->GetParent());
+	dialogEfgSelectPlayer dialog(ef, parent->GetParent());
 	if (dialog.Completed() == wxOK) {
 	  EFPlayer *player = dialog.GetPlayer();
 	  if (player) ef.AppendNode(start_node, player, 1);
