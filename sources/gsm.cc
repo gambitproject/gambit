@@ -1239,6 +1239,8 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool user_func )
       if( user_func )
 	_ErrorMessage( _StdErr, 33, program_counter - 1 );
       result = rcFAIL;
+      if( instruction->Type() == iINIT_CALL_FUNCTION )
+	done = true;
     }
   }
 
