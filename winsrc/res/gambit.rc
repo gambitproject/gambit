@@ -7,17 +7,21 @@ rcinclude wx.rc
 SCISSORCUR	CURSOR	 bitmaps\scissor.cur
 OUTCOMECUR	CURSOR	 bitmaps\outcome.cur
 
+new            BITMAP bitmaps\new.bmp
+open           BITMAP bitmaps\open.bmp
+save           BITMAP bitmaps\save.bmp
+print          BITMAP bitmaps\print.bmp
+preview        BITMAP bitmaps\preview.bmp
+help           BITMAP bitmaps\help.bmp
+
 ADD_BITMAP     BITMAP bitmaps\add.bmp
 DELETE_BITMAP  BITMAP bitmaps\delete.bmp
 EFG_BITMAP     BITMAP bitmaps\efg.bmp
 HELP_BITMAP    BITMAP bitmaps\help.bmp
 INSPECT_BITMAP BITMAP bitmaps\inspect.bmp
 NFG_BITMAP     BITMAP bitmaps\makenf.bmp
-OPEN_BITMAP    BITMAP bitmaps\open.bmp
 OPTIONS_BITMAP BITMAP bitmaps\options.bmp
 PAYOFF_BITMAP  BITMAP bitmaps\payoff.bmp
-PRINT_BITMAP   BITMAP bitmaps\print.bmp
-SAVE_BITMAP    BITMAP bitmaps\save.bmp
 SOLVE_BITMAP   BITMAP bitmaps\solve.bmp
 ZOOMIN_BITMAP  BITMAP bitmaps\zoomin.bmp
 ZOOMOUT_BITMAP BITMAP bitmaps\zoomout.bmp
