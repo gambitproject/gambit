@@ -271,7 +271,8 @@ const int idPREFS_PROMPT = 2103;
 
 GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 		   const wxPoint &p_position, const wxSize &p_size)
-  : wxFrame(p_parent, -1, p_title, p_position, p_size)
+  : wxFrame(p_parent, -1, p_title, p_position, p_size),
+    m_outputWindow(0), m_inputSashWindow(0)
 {
   wxMenu *fileMenu = new wxMenu;
   wxMenu *fileSaveMenu = new wxMenu;
@@ -500,6 +501,10 @@ void GclFrame::OnSize(wxSizeEvent &)
 {
   int clientWidth, clientHeight;
   GetClientSize(&clientWidth, &clientHeight);
+
+  if (!m_outputWindow || !m_inputSashWindow) {
+    return;
+  }
 
   m_outputWindow->SetSize(0, 0, clientWidth,
 			  gmax(clientHeight - m_inputSashWindow->GetRect().height, 50));
