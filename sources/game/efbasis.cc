@@ -554,7 +554,7 @@ void gbtEfgBasis::MakeAb(void) const
 
 int gbtEfgBasis::Col(const gbtEfgAction &p_action) const
 {
-  gbtEfgInfoset iset = p_action.GetInfoset();
+  gbtEfgInfoset iset = p_action->GetInfoset();
   return (*actIndex)(iset.GetPlayer()->GetId(), iset.GetId(),
 		     (*bigbasis).gbtEfgSupport::GetIndex(p_action));
 }

@@ -43,8 +43,8 @@ gbtText gbtEfgDominanceException::Description(void) const
 bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
 			  bool strong, const bool conditional) const
 {
-  gbtEfgInfoset infoset = a.GetInfoset();
-  if (infoset != b.GetInfoset())
+  gbtEfgInfoset infoset = a->GetInfoset();
+  if (infoset != b->GetInfoset())
     throw gbtEfgDominanceException
       ("Dominates(..) needs actions in same infoset.\n");
 
@@ -130,9 +130,9 @@ bool SomeElementDominates(const gbtEfgSupport &S,
 bool gbtEfgSupport::IsDominated(const gbtEfgAction &a, 
 			    bool strong, bool conditional) const
 {
-  gbtArray<gbtEfgAction> array(NumActions(a.GetInfoset()));
+  gbtArray<gbtEfgAction> array(NumActions(a->GetInfoset()));
   for (int act = 1; act <= array.Length(); act++) {
-    array[act] = GetAction(a.GetInfoset(), act);
+    array[act] = GetAction(a->GetInfoset(), act);
   }
   return SomeElementDominates(*this,array,a,strong,conditional);
 }

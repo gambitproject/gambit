@@ -39,7 +39,7 @@ gbtNfgContingency::gbtNfgContingency(const gbtNfgGame &p_nfg)
 {
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)   {
     m_profile[pl] = m_nfg.GetPlayer(pl)->GetStrategy(1);
-    m_index += m_profile[pl].GetIndex();
+    m_index += m_profile[pl]->GetIndex();
   }
 }
 
@@ -91,8 +91,8 @@ long gbtNfgContingency::GetIndex(void) const
 
 void gbtNfgContingency::SetStrategy(gbtNfgAction p_strategy)
 {
-  int pl = p_strategy.GetPlayer()->GetId();
-  m_index += p_strategy.GetIndex() - m_profile[pl].GetIndex();
+  int pl = p_strategy->GetPlayer()->GetId();
+  m_index += p_strategy->GetIndex() - m_profile[pl]->GetIndex();
   m_profile[pl] = p_strategy;
 }
 
@@ -117,7 +117,7 @@ gbtNumber gbtNfgContingency::GetPayoff(const gbtNfgPlayer &p_player) const
     gbtArray<gbtArray<int> *> behav(m_nfg.NumPlayers());
     for (int pl = 1; pl <= behav.Length(); pl++) {
       // Casting away const -- sloppy
-      behav[pl] = (gbtArray<int> *) m_profile[pl].GetBehavior();
+      behav[pl] = (gbtArray<int> *) m_profile[pl]->GetBehavior();
     }
     gbtVector<gbtNumber> payoff(m_nfg.NumPlayers());
     gbtEfgGame(m_nfg.rep->m_efg).Payoff(behav, payoff);
@@ -206,7 +206,7 @@ gbtNfgAction gbtNfgSupport::GetStrategy(int pl, int st) const
 
 int gbtNfgSupport::GetIndex(gbtNfgAction p_strategy) const
 {
-  int pl = p_strategy.GetPlayer()->GetId();
+  int pl = p_strategy->GetPlayer()->GetId();
   for (int st = 1; st <= NumStrats(pl); st++) {
     if (GetStrategy(pl, st) == p_strategy) {
       return st;
@@ -217,7 +217,7 @@ int gbtNfgSupport::GetIndex(gbtNfgAction p_strategy) const
 
 bool gbtNfgSupport::Contains(gbtNfgAction p_strategy) const
 {
-  return m_strategies(p_strategy.GetPlayer()->GetId(), p_strategy.GetId());
+  return m_strategies(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
 }
 
 //--------------------------------------------------------------------------
@@ -226,12 +226,12 @@ bool gbtNfgSupport::Contains(gbtNfgAction p_strategy) const
 
 void gbtNfgSupport::AddStrategy(gbtNfgAction s)
 {
-  m_strategies(s.GetPlayer()->GetId(), s.GetId()) = 1;
+  m_strategies(s->GetPlayer()->GetId(), s->GetId()) = 1;
 }
 
 void gbtNfgSupport::RemoveStrategy(gbtNfgAction s)
 {
-  m_strategies(s.GetPlayer()->GetId(), s.GetId()) = 0;
+  m_strategies(s->GetPlayer()->GetId(), s->GetId()) = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -271,7 +271,7 @@ void gbtNfgSupport::Output(gbtOutput &p_output) const
   for (int pl = 1; pl <= GetGame().NumPlayers(); pl++) {
     p_output << "{ ";
     for (int st = 1; st <= NumStrats(pl); st++) {
-      p_output << "\"" << GetStrategy(pl, st).GetLabel() << "\" ";
+      p_output << "\"" << GetStrategy(pl, st)->GetLabel() << "\" ";
     }
     p_output << "} ";
   }

@@ -382,9 +382,9 @@ void BehavSolution::SetActionProb(const gbtEfgAction &p_action,
 {
   Invalidate();
 
-  gbtEfgInfoset infoset = p_action.GetInfoset();
+  gbtEfgInfoset infoset = p_action->GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
-  (*m_profile)(player->GetId(), infoset.GetId(), p_action.GetId()) = p_prob;
+  (*m_profile)(player->GetId(), infoset.GetId(), p_action->GetId()) = p_prob;
   if (m_precision != p_prob.Precision())
     LevelPrecision();
 }
@@ -401,10 +401,10 @@ void BehavSolution::Set(int p_player, int p_infoset, int p_action,
 
 const gbtNumber &BehavSolution::operator()(const gbtEfgAction &p_action) const
 {
-  gbtEfgInfoset infoset = p_action.GetInfoset();
+  gbtEfgInfoset infoset = p_action->GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
   return (*m_profile)(player->GetId(), infoset.GetId(),
-		      p_action.GetId());
+		      p_action->GetId());
 }
 
 gbtNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
@@ -414,9 +414,9 @@ gbtNumber BehavSolution::operator[](const gbtEfgAction &p_action) const
 
 gbtNumber &BehavSolution::operator[](const gbtEfgAction &p_action)
 {
-  return (*m_profile)(p_action.GetInfoset().GetPlayer()->GetId(),
-		      p_action.GetInfoset().GetId(),
-		      p_action.GetId());
+  return (*m_profile)(p_action->GetInfoset().GetPlayer()->GetId(),
+		      p_action->GetInfoset().GetId(),
+		      p_action->GetId());
 }
 
 BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
@@ -553,7 +553,7 @@ gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const
     gbtNfgPlayer player = nfg.GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       gbtBehavProfile<gbtNumber> scratch(*m_profile);
-      const gbtArray<int> *const actions = player->GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const actions = player->GetStrategy(st)->GetBehavior();
       for (int j = 1; j <= actions->Length(); j++) {
 	int a = (*actions)[j];
 	for (int k = 1; k <= scratch.Support().NumActions(pl,j); k++) {

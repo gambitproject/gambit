@@ -199,7 +199,7 @@ CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
         gbtEfgAction oldact =
           efg.GetPlayer(pl)->GetInfoset(iset).GetAction(act);
         if (!S.Contains(oldact)) {
-          infoset.GetAction(act).DeleteAction();
+          infoset.GetAction(act)->DeleteAction();
         }
       }
     }
@@ -232,7 +232,7 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       for (int act = infoset.NumActions(); act >= 1; act--) {
 	if (!support(pl, iset, act)) {
-          infoset.GetAction(act).DeleteAction();
+          infoset.GetAction(act)->DeleteAction();
         }
       }
     }

@@ -48,8 +48,8 @@ template class gbtBlock<gbt_efg_node_rep *>;
 template class gbtArray<gbtEfgNode>;
 template class gbtBlock<gbtEfgNode>;
 
-template class gbtArray<gbt_efg_action_rep *>;
-template class gbtBlock<gbt_efg_action_rep *>;
+template class gbtArray<gbtEfgActionBase *>;
+template class gbtBlock<gbtEfgActionBase *>;
 
 template class gbtArray<gbtEfgAction>;
 template class gbtBlock<gbtEfgAction>;

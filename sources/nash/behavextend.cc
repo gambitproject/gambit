@@ -127,7 +127,7 @@ DeviationSupports(const gbtEfgSupport & big_supp,
     active_act_no[i] = 1;
     for (int k = 1; k < i; k++)
       if (isetlist[k].Precedes(isetlist[i].GetMember(1)))
-	if (isetlist[k].GetAction(1).Precedes(isetlist[i].GetMember(1))) {
+	if (isetlist[k].GetAction(1)->Precedes(isetlist[i].GetMember(1))) {
 	  new_supp.RemoveAction(isetlist[i].GetAction(1));
 	  active_act_no[i] = 0;
 	}
@@ -153,7 +153,7 @@ DeviationSupports(const gbtEfgSupport & big_supp,
 	while (active && h < k) {
 	  if (isetlist[h].Precedes(isetlist[k].GetMember(1)))
 	    if (active_act_no[h] == 0 || 
-		!isetlist[h].GetAction(active_act_no[h]).Precedes(isetlist[k].GetMember(1))) {
+		!isetlist[h].GetAction(active_act_no[h])->Precedes(isetlist[k].GetMember(1))) {
 	      active = false;
 	      if (active_act_no[k] > 0) {
 		new_supp.RemoveAction(isetlist[k].GetAction(active_act_no[k]));
@@ -187,10 +187,10 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 {
   while (tempnode != p_solution.GetGame().GetRoot()) {
     gbtEfgAction last_action = tempnode.GetPriorAction();
-    gbtEfgInfoset last_infoset = last_action.GetInfoset();
+    gbtEfgInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gbtDouble) last_action.GetChanceProb();
+      node_prob *= (gbtDouble) last_action->GetChanceProb();
     else 
       if (dsupp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == iset) {
@@ -200,9 +200,9 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
 	}
 	else
 	  if (dsupp.Contains(last_action)) {
-	    if (last_action.GetInfoset().GetPlayer() !=
-		act.GetInfoset().GetPlayer() ||
-		!act.Precedes(tempnode) )
+	    if (last_action->GetInfoset().GetPlayer() !=
+		act->GetInfoset().GetPlayer() ||
+		!act->Precedes(tempnode) )
 	    node_prob *= (gbtDouble) p_solution.GetActionProb(last_action);
 	  }
 	  else {
@@ -212,8 +212,8 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
       else {
 	int initial_var_no = 
 	  var_index[last_infoset.GetPlayer()->GetId()][last_infoset.GetId()];
-	if (last_action.GetId() < last_infoset.NumActions()) {
-	  int varno = initial_var_no + last_action.GetId();
+	if (last_action->GetId() < last_infoset.NumActions()) {
+	  int varno = initial_var_no + last_action->GetId();
 	  node_prob *= gbtPolyMulti<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {
@@ -390,14 +390,14 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
 {
   while (tempnode != p_solution.GetGame().GetRoot()) {
     gbtEfgAction last_action = tempnode.GetPriorAction();
-    gbtEfgInfoset last_infoset = last_action.GetInfoset();
+    gbtEfgInfoset last_infoset = last_action->GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gbtDouble) last_action.GetChanceProb();
+      node_prob *= (gbtDouble) last_action->GetChanceProb();
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == p_solution.GetGame().GetPlayer(pl)->GetInfoset(i)) {
-	  if (j != last_action.GetId()) 
+	  if (j != last_action->GetId()) 
 	    return false;
 	}
 	else
@@ -409,8 +409,8 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
       else {
 	int initial_var_no = 
 	  var_index[last_infoset.GetPlayer()->GetId()][last_infoset.GetId()];
-	if (last_action.GetId() < last_infoset.NumActions()) {
-	  int varno = initial_var_no + last_action.GetId();
+	if (last_action->GetId() < last_infoset.NumActions()) {
+	  int varno = initial_var_no + last_action->GetId();
 	  node_prob *= gbtPolyMulti<gbtDouble>(&BehavStratSpace, varno, 1, &Lex);
 	}
 	else {

@@ -157,15 +157,15 @@ gbtMixedProfile<T>::Payoff(int pl, gbtNfgAction strategy) const
 {
   if (m_nfg.rep->m_results.Length() > 0) {
     T value = (T) 0;
-    PPayoff(pl, strategy.GetPlayer()->GetId(), strategy.GetId(), 1,
-	    strategy.GetIndex() + 1, (T) 1, value);
+    PPayoff(pl, strategy->GetPlayer()->GetId(), strategy->GetId(), 1,
+	    strategy->GetIndex() + 1, (T) 1, value);
     return value;
   }
   else {
     gbtMixedProfile<T> foo(*this);
-    for (int st = 1; st <= support.NumStrats(strategy.GetPlayer()->GetId());
-	 foo(strategy.GetPlayer()->GetId(), st++) = 0);
-    foo(strategy.GetPlayer()->GetId(), support.GetIndex(strategy)) = 1;
+    for (int st = 1; st <= support.NumStrats(strategy->GetPlayer()->GetId());
+	 foo(strategy->GetPlayer()->GetId(), st++) = 0);
+    foo(strategy->GetPlayer()->GetId(), support.GetIndex(strategy)) = 1;
     return gbtBehavProfile<T>(foo).Payoff(pl);
   }
 }
@@ -179,8 +179,8 @@ gbtMixedProfile<T>::Payoff(int pl,
   if (m_nfg.rep->m_results.Length() > 0) {
     T value = (T) 0;
     PPayoff(pl, player1, strat1, player2, strat2, 1,
-	    support.GetStrategy(player1, strat1).GetIndex() +
-	    support.GetStrategy(player2, strat2).GetIndex() + 1,
+	    support.GetStrategy(player1, strat1)->GetIndex() +
+	    support.GetStrategy(player2, strat2)->GetIndex() + 1,
 	    (T) 1, value);
     return value;
   }
@@ -240,8 +240,8 @@ T gbtMixedProfile<T>::PPayoff(int pl, int index, int i) const
   for (int j = 1; j <= support.NumStrats(i); j++) {
     gbtNfgAction s = support.GetStrategy(i, j);
     if ((*this)(i, j) != (T) 0) {
-      index += s.GetIndex() - pindex;
-      pindex = s.GetIndex();
+      index += s->GetIndex() - pindex;
+      pindex = s->GetIndex();
       sum += (*this)(i, j) * PPayoff(pl, index, i + 1);
     }
   }
@@ -265,7 +265,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int const_st,
       gbtNfgAction s = support.GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, const_st, cur_pl + 1,
-		index + s.GetIndex(), prob * (*this)(cur_pl, j), value);
+		index + s->GetIndex(), prob * (*this)(cur_pl, j), value);
     }
   }
 }
@@ -289,7 +289,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl1, int const_st1,
       gbtNfgAction s = support.GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
-		cur_pl + 1, index + s.GetIndex(), prob * (*this)(cur_pl, j),
+		cur_pl + 1, index + s->GetIndex(), prob * (*this)(cur_pl, j),
 		value);
     }
   }
@@ -305,8 +305,8 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
   else if (cur_pl > m_nfg.NumPlayers())  {
     for (int j = 1; j <= support.NumStrats(const_pl); j++ ){ 
       gbtNfgAction s = support.GetStrategy(const_pl, j);
-      if (!m_nfg.GetOutcomeIndex(index + s.GetIndex()).IsNull()) {
-	value[j] += prob * Payoff(m_nfg.GetOutcomeIndex(index + s.GetIndex()), pl);
+      if (!m_nfg.GetOutcomeIndex(index + s->GetIndex()).IsNull()) {
+	value[j] += prob * Payoff(m_nfg.GetOutcomeIndex(index + s->GetIndex()), pl);
       }
     }
   }
@@ -315,7 +315,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
       gbtNfgAction s = support.GetStrategy(cur_pl, j);
       if ((*this)(cur_pl, j) > (T) 0)
 	PPayoff(pl, const_pl, cur_pl + 1,
-		index + s.GetIndex(), prob * (*this)(cur_pl, j), value);
+		index + s->GetIndex(), prob * (*this)(cur_pl, j), value);
     }
   }
 }
@@ -338,7 +338,7 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
     gbtNfgPlayer player = m_nfg.GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++)  {
       T prob = (T) 1;
-      const gbtArray<int> *const behav = player->GetStrategy(st).GetBehavior();
+      const gbtArray<int> *const behav = player->GetStrategy(st)->GetBehavior();
 
       for (int iset = 1; iset <= efg.GetPlayer(pl)->NumInfosets(); iset++) {
 	if ((*behav)[iset] > 0)

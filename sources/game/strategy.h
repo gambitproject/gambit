@@ -29,36 +29,62 @@
 
 #include "game.h"
 
-struct gbt_nfg_strategy_rep;
-class gbtNfgGame;
+class gbtNfgActionRep;
 class gbtNfgPlayer;
 
-class gbtNfgAction : public gbtGameAction  {
+class gbtNfgActionRep : public gbtGameObject {
+friend class gbtNfgAction;
+public:
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
+
+  //  virtual gbtNfgInfoset GetInfoset(void) const = 0;
+
+  virtual gbtNfgPlayer GetPlayer(void) const = 0;
+  virtual long GetIndex(void) const = 0;
+
+  virtual const gbtArray<int> *const GetBehavior(void) const = 0;
+};
+
+class gbtNfgNullAction { };
+
+class gbtNfgAction {
 friend class gbtNfgGame;
 private:
-  gbt_nfg_strategy_rep *rep;
+  gbtNfgActionRep *m_rep;
 
 public:
-  gbtNfgAction(void);
-  gbtNfgAction(gbt_nfg_strategy_rep *);
-  gbtNfgAction(const gbtNfgAction &);
-  ~gbtNfgAction();
+  gbtNfgAction(void) : m_rep(0) { }
+  gbtNfgAction(gbtNfgActionRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgAction(const gbtNfgAction &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgAction() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtNfgAction &operator=(const gbtNfgAction &);
+  gbtNfgAction &operator=(const gbtNfgAction &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
 
-  bool operator==(const gbtNfgAction &) const;
-  bool operator!=(const gbtNfgAction &) const;
+  bool operator==(const gbtNfgAction &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtNfgAction &p_player) const
+  { return (m_rep != p_player.m_rep); }
 
-  bool IsNull(void) const;
+  gbtNfgActionRep *operator->(void) 
+  { if (!m_rep) throw gbtNfgNullAction(); return m_rep; }
+  const gbtNfgActionRep *operator->(void) const 
+  { if (!m_rep) throw gbtNfgNullAction(); return m_rep; }
+  
+  gbtNfgActionRep *Get(void) const { return m_rep; }
 
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
-  int GetId(void) const;
-
-  gbtNfgPlayer GetPlayer(void) const;
-  long GetIndex(void) const;
-
-  const gbtArray<int> *const GetBehavior(void) const;
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtNfgAction &);

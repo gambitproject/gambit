@@ -46,144 +46,19 @@
 
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_action_rep: Member functions
+//              gbtEfgActionBase: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_action_rep::gbt_efg_action_rep(gbt_efg_infoset_rep *p_infoset,
+gbtEfgActionBase::gbtEfgActionBase(gbt_efg_infoset_rep *p_infoset,
 				       int p_id)
   : m_id(p_id), m_infoset(p_infoset), m_deleted(false), 
     m_refCount(0)
 { }
 
-//----------------------------------------------------------------------
-//              class gbtEfgAction: Member functions
-//----------------------------------------------------------------------
-
-gbtEfgAction::gbtEfgAction(void)
-  : rep(0)
-{ }
-
-gbtEfgAction::gbtEfgAction(gbt_efg_action_rep *p_rep)
-  : rep(p_rep)
+bool gbtEfgActionBase::Precedes(gbtEfgNode n) const
 {
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_infoset->m_player->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgAction::gbtEfgAction(const gbtEfgAction &p_action)
-  : rep(p_action.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-    if (!rep->m_deleted) {
-      rep->m_infoset->m_player->m_efg->m_refCount++;
-    }
-  }
-}
-
-gbtEfgAction::~gbtEfgAction()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
-      delete rep->m_infoset->m_player->m_efg;
-    }
-  }
-}
-
-gbtEfgAction &gbtEfgAction::operator=(const gbtEfgAction &p_action)
-{
-  if (this == &p_action) {
-    return *this;
-  }
-
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      delete rep;
-    }
-    else if (--rep->m_infoset->m_player->m_efg->m_refCount == 0) {
-      delete rep->m_infoset->m_player->m_efg;
-    }
-  }
-
-  if ((rep = p_action.rep) != 0) {
-    rep->m_refCount++;
-    if (!rep->m_deleted) {
-      rep->m_infoset->m_player->m_efg->m_refCount++;
-    }
-  }
-  return *this;
-}
-
-bool gbtEfgAction::operator==(const gbtEfgAction &p_action) const
-{
-  return (rep == p_action.rep);
-} 
-
-bool gbtEfgAction::operator!=(const gbtEfgAction &p_action) const
-{
-  return (rep != p_action.rep);
-} 
-
-bool gbtEfgAction::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-int gbtEfgAction::GetId(void) const
-{
-  return (rep) ? rep->m_id : -1;
-}
-
-gbtText gbtEfgAction::GetLabel(void) const
-{
-  if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtEfgAction::SetLabel(const gbtText &p_label)
-{
-  if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
-{
-  if (rep) {
-    return rep->m_infoset;
-  }
-  else {
-    return 0;
-  }
-}
-
-gbtNumber gbtEfgAction::GetChanceProb(void) const
-{
-  if (rep) {
-    return rep->m_infoset->m_chanceProbs[rep->m_id];
-  }
-  else {
-    return 0;
-  }
-}
-
-bool gbtEfgAction::Precedes(gbtEfgNode n) const
-{
-  if (!rep) {
-    return false;
-  }
-
-  while (n != n.GetGame().GetRoot() ) {
-    if (n.GetPriorAction().rep == rep) {
+  while (n != n.GetGame().GetRoot()) {
+    if (n.GetPriorAction().Get() == this) {
       return true;
     }
     else {
@@ -193,17 +68,18 @@ bool gbtEfgAction::Precedes(gbtEfgNode n) const
   return false;
 }
 
-void gbtEfgAction::DeleteAction(void)
+gbtNumber gbtEfgActionBase::GetChanceProb(void) const
 {
-  if (IsNull()) {
-    throw gbtEfgNullObject();
-  }
+  return m_infoset->m_chanceProbs[m_id];
+}
 
-  if (rep->m_infoset->m_actions.Length() == 1) {
+void gbtEfgActionBase::DeleteAction(void)
+{
+  if (m_infoset->m_actions.Length() == 1) {
     return;
   }
 
-  rep->m_infoset->m_player->m_efg->DeleteAction(rep->m_infoset, rep);
+  m_infoset->m_player->m_efg->DeleteAction(m_infoset, this);
 }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgAction &)
@@ -223,7 +99,7 @@ gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbtEfgPlayerBase *p_player,
     m_flag(0), m_whichbranch(0)
 {
   for (int act = 1; act <= p_br; act++) {
-    m_actions[act] = new gbt_efg_action_rep(this, act);
+    m_actions[act] = new gbtEfgActionBase(this, act);
     if (p_player->m_id == 0) {
       m_chanceProbs[act] = gbtRational(1, p_br);
     }
@@ -490,7 +366,7 @@ void gbtEfgInfoset::MergeInfoset(gbtEfgInfoset p_from)
 
 gbtEfgAction gbtEfgInfoset::InsertAction(int where)
 {
-  gbt_efg_action_rep *action = new gbt_efg_action_rep(rep, where);
+  gbtEfgActionBase *action = new gbtEfgActionBase(rep, where);
   rep->m_actions.Insert(action, where);
   if (rep->m_player->m_id == 0) {
     rep->m_chanceProbs.Insert(0, where);

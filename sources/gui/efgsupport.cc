@@ -140,7 +140,7 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
       for (int act = 1; act <= infoset.NumActions(); act++) {
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = AppendItem(isetID,
-					wxString::Format(wxT("%s"), (char *) action.GetLabel()));
+					wxString::Format(wxT("%s"), (char *) action->GetLabel()));
 	if (p_support.Contains(action)) {
 	  SetItemTextColour(actID, *wxBLACK);
 	}
@@ -308,7 +308,7 @@ void gbtEfgSupportWindow::ToggleAction(wxTreeItemId p_id)
 
   const gbtEfgSupport &support = m_doc->GetEfgSupportList().GetCurrent();
   if (support.Contains(action) &&
-      support.NumActions(action.GetInfoset()) > 1) {
+      support.NumActions(action->GetInfoset()) > 1) {
     m_doc->Submit(new gbtCmdRemoveAction(action));
   }
   else {

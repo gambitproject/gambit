@@ -122,7 +122,7 @@ gbtText gbtCorBranchMixed::GetLabel(int p_dim) const
 
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_dim) {
-	return player->GetLabel() + ":" + player->GetStrategy(st).GetLabel();
+	return player->GetLabel() + ":" + player->GetStrategy(st)->GetLabel();
       }
     }
   }

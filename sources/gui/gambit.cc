@@ -118,7 +118,7 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
 	  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
 	    outcome->SetPayoff(nfg.GetPlayer(pl), 0);
 	    outcome->SetLabel(outcome->GetLabel() +
-			      ToText(iter.GetProfile().GetStrategy(pl).GetId()));
+			      ToText(iter.GetProfile().GetStrategy(pl)->GetId()));
 	  }
 	  iter.SetOutcome(outcome);
 	} while (iter.NextContingency());

@@ -35,130 +35,24 @@
 #include "nfgciter.h"
 
 //----------------------------------------------------------------------
-//                 gbt_nfg_strategy_rep: Declaration
+//                 gbtNfgActionBase: Member functions
 //----------------------------------------------------------------------
 
-struct gbt_nfg_player_rep;
-
-gbt_nfg_strategy_rep::gbt_nfg_strategy_rep(gbt_nfg_infoset_rep *p_infoset,
-					   int p_id)
+gbtNfgActionBase::gbtNfgActionBase(gbt_nfg_infoset_rep *p_infoset,
+				   int p_id)
   : m_id(p_id), m_infoset(p_infoset), m_behav(0),
     m_deleted(false), m_index(0L), m_refCount(0)
 { }
 
-gbt_nfg_strategy_rep::~gbt_nfg_strategy_rep()
+gbtNfgActionBase::~gbtNfgActionBase()
 {
   if (m_behav) {
     delete m_behav;
   }
 }
 
-gbtNfgAction::gbtNfgAction(void)
-  : rep(0)
-{ }
-
-gbtNfgAction::gbtNfgAction(gbt_nfg_strategy_rep *p_rep)
-  : rep(p_rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-  }
-}
-
-gbtNfgAction::gbtNfgAction(const gbtNfgAction &p_outcome)
-  : rep(p_outcome.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-  }
-}
-
-gbtNfgAction::~gbtNfgAction()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0) {
-      // delete rep;
-    }
-  }
-}
-
-gbtNfgAction &gbtNfgAction::operator=(const gbtNfgAction &p_outcome)
-{
-  if (this == &p_outcome) {
-    return *this;
-  }
-
-  if (rep && --rep->m_refCount == 0) {
-    // delete rep;
-  }
-
-  if ((rep = p_outcome.rep) != 0) {
-    rep->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtNfgAction::operator==(const gbtNfgAction &p_outcome) const
-{
-  return (rep == p_outcome.rep);
-} 
-
-bool gbtNfgAction::operator!=(const gbtNfgAction &p_outcome) const
-{
-  return (rep != p_outcome.rep);
-} 
-
-int gbtNfgAction::GetId(void) const
-{
-  return (rep) ? rep->m_id : 0;
-}
-
-bool gbtNfgAction::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-gbtText gbtNfgAction::GetLabel(void) const
-{
-  if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtNfgAction::SetLabel(const gbtText &p_label)
-{
-  if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-gbtNfgPlayer gbtNfgAction::GetPlayer(void) const
-{
-  if (rep) {
-    return rep->m_infoset->m_player;
-  }
-  else {
-    return 0;
-  }
-}
-
-const gbtArray<int> *const gbtNfgAction::GetBehavior(void) const
-{ 
-  if (rep) {
-    return rep->m_behav;
-  }
-  else {
-    return 0;
-  }
-}
-
-long gbtNfgAction::GetIndex(void) const
-{
-  return (rep) ? rep->m_index : 0L;
-}
+gbtNfgPlayer gbtNfgActionBase::GetPlayer(void) const 
+{ return m_infoset->m_player; }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtNfgAction &)
 { 
@@ -171,7 +65,7 @@ gbt_nfg_infoset_rep::gbt_nfg_infoset_rep(gbtNfgPlayerBase *p_player,
     m_refCount(0), m_actions(p_br)
 {
   for (int act = 1; act <= p_br; act++) {
-    m_actions[act] = new gbt_nfg_strategy_rep(this, act);
+    m_actions[act] = new gbtNfgActionBase(this, act);
   }
 }    
 
@@ -368,7 +262,7 @@ void gbtNfgGame::WriteNfg(gbtOutput &p_file) const
     gbtNfgPlayer player = GetPlayer(i);
     p_file << "{ ";
     for (int j = 1; j <= player->NumStrategies(); j++)
-      p_file << '"' << EscapeQuotes(player->GetStrategy(j).GetLabel()) << "\" ";
+      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
     p_file << "}\n";
   }
   
@@ -504,7 +398,7 @@ void gbtNfgGame::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      gbt_nfg_strategy_rep *s = rep->m_players[i]->m_infosets[1]->m_actions[j];
+      gbtNfgActionBase *s = rep->m_players[i]->m_infosets[1]->m_actions[j];
       s->m_id = j;
       s->m_index = (j - 1) * offset;
     }

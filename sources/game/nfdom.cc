@@ -36,8 +36,8 @@ bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
 
   if (strong)  {
     do  {
-      gbtNumber ap = A.GetPayoff(s.GetPlayer());
-      gbtNumber bp = B.GetPayoff(s.GetPlayer());
+      gbtNumber ap = A.GetPayoff(s->GetPlayer());
+      gbtNumber bp = B.GetPayoff(s->GetPlayer());
 
       if (ap <= bp)  {
 	return false;
@@ -51,8 +51,8 @@ bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
   bool equal = true;
   
   do   {
-    gbtNumber ap = A.GetPayoff(s.GetPlayer());
-    gbtNumber bp = B.GetPayoff(s.GetPlayer());
+    gbtNumber ap = A.GetPayoff(s->GetPlayer());
+    gbtNumber bp = B.GetPayoff(s->GetPlayer());
 
     if (ap < bp)   { 
       return false;
@@ -67,9 +67,9 @@ bool gbtNfgSupport::Dominates(gbtNfgAction s, gbtNfgAction t,
 
 bool gbtNfgSupport::IsDominated(gbtNfgAction s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s.GetPlayer()->GetId()); i++) {
-    if (i != s.GetId()) {
-      if (Dominates(GetStrategy(s.GetPlayer()->GetId(), i), s, strong)) {
+  for (int i = 1; i <= NumStrats(s->GetPlayer()->GetId()); i++) {
+    if (i != s->GetId()) {
+      if (Dominates(GetStrategy(s->GetPlayer()->GetId(), i), s, strong)) {
 	return true;
       }
     }
@@ -108,12 +108,12 @@ bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
       for (int inc = min + 1; inc <= dis; )  {
 	if (Dominates(GetStrategy(pl, set[min+1]),
 		      GetStrategy(pl, set[dis+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[dis+1]).GetId() << " dominated by " << GetStrategy(pl, set[min+1]).GetId() << '\n';
+	  tracefile << GetStrategy(pl, set[dis+1])->GetId() << " dominated by " << GetStrategy(pl, set[min+1])->GetId() << '\n';
 	  dis--;
 	}
 	else if (Dominates(GetStrategy(pl, set[dis+1]),
 			   GetStrategy(pl, set[min+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[min+1]).GetId() << " dominated by " << GetStrategy(pl, set[dis+1]).GetId() << '\n';
+	  tracefile << GetStrategy(pl, set[min+1])->GetId() << " dominated by " << GetStrategy(pl, set[dis+1])->GetId() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;

@@ -245,7 +245,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
     do {
       gbtNfgAction str_ptr = c_copy.GetStrategy();
       if (sact->Contains(str_ptr) &&
-	  sact->NumStrats(str_ptr.GetPlayer()) > 1 ) {
+	  sact->NumStrats(str_ptr->GetPlayer()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
 	sact->AddStrategy(str_ptr);
@@ -323,8 +323,8 @@ gbtList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
     do {
       gbtNfgAction strat = crsr.GetStrategy();
       if (current.Contains(strat)) 
-	for (int j = 1; j <= strat.GetPlayer()->NumStrategies(); j++) {
-	  gbtNfgAction other_strat = strat.GetPlayer()->GetStrategy(j);
+	for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
+	  gbtNfgAction other_strat = strat->GetPlayer()->GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.Contains(other_strat)) {
 	      if (current.Dominates(other_strat,strat,false)) 

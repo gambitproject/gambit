@@ -39,7 +39,7 @@
 // Forward declarations
 //
 class gbtEfgGame;
-struct gbt_efg_action_rep;
+class gbtEfgActionBase;
 struct gbt_efg_infoset_rep;
 struct gbt_efg_node_rep;
 struct gbtEfgPlayerBase;
@@ -92,14 +92,27 @@ public:
   gbtEfgInfoset GetInfoset(int p_index) const { return m_infosets[p_index]; }
 };
 
-struct gbt_efg_action_rep {
+class gbtEfgActionBase : public gbtEfgActionRep {
+public:
   int m_id;
   gbt_efg_infoset_rep *m_infoset;
   bool m_deleted;
   gbtText m_label;
   int m_refCount;
 
-  gbt_efg_action_rep(gbt_efg_infoset_rep *, int);
+  gbtEfgActionBase(gbt_efg_infoset_rep *, int);
+  virtual ~gbtEfgActionBase() { } 
+
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return m_id; }
+  
+  gbtEfgInfoset GetInfoset(void) const { return m_infoset; }
+
+  gbtNumber GetChanceProb(void) const;
+  bool Precedes(gbtEfgNode) const;
+  
+  void DeleteAction(void);
 };
 
 struct gbt_efg_infoset_rep {
@@ -108,7 +121,7 @@ struct gbt_efg_infoset_rep {
   bool m_deleted;
   gbtText m_label;
   int m_refCount;
-  gbtBlock<gbt_efg_action_rep *> m_actions;
+  gbtBlock<gbtEfgActionBase *> m_actions;
   gbtBlock<gbtNumber> m_chanceProbs;
   gbtBlock<gbt_efg_node_rep *> m_members;
   int m_flag, m_whichbranch;
@@ -181,7 +194,7 @@ struct gbt_efg_game_rep {
   void Reveal(gbt_efg_infoset_rep *, gbtEfgPlayerBase *);
   void SetPlayer(gbt_efg_infoset_rep *, gbtEfgPlayerBase *);
 
-  void DeleteAction(gbt_efg_infoset_rep *, gbt_efg_action_rep *);
+  void DeleteAction(gbt_efg_infoset_rep *, gbtEfgActionBase *);
 
   void DeleteOutcome(gbtEfgOutcomeBase *p_outcome);
 

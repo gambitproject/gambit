@@ -178,7 +178,7 @@ void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
     bool delete_this_action = false;
 
     if ( sact->Contains(this_action) ) 
-      if ( !sact->InfosetIsActive(this_action.GetInfoset()) ) 
+      if ( !sact->InfosetIsActive(this_action->GetInfoset()) ) 
 	delete_this_action = true;  
       else 
 	if (check_domination) 
@@ -294,7 +294,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
     bool delete_this_action = false;
 
     if ( sact->Contains(this_action) ) 
-      if ( !sact->InfosetIsActive(this_action.GetInfoset()) )
+      if ( !sact->InfosetIsActive(this_action->GetInfoset()) )
 	delete_this_action = true;  
       else
 	if (check_domination) 
@@ -302,7 +302,7 @@ void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
 	       sact->IsDominated(this_action,true,false) ) {
 	    add_support = false;
 	    if (InfosetGuaranteedActiveByPriorCommitments(*c, sact,
-							  this_action.GetInfoset()) )
+							  this_action->GetInfoset()) )
 	      delete_this_action = true;
 	  }
     if (delete_this_action) {
@@ -422,8 +422,8 @@ gbtList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
     do {
       gbtEfgAction act = crsr.GetAction();
       if (current.Contains(act)) 
-	for (int j = 1; j <= act.GetInfoset().NumActions(); j++) {
-	  gbtEfgAction other_act = act.GetInfoset().GetAction(j);
+	for (int j = 1; j <= act->GetInfoset().NumActions(); j++) {
+	  gbtEfgAction other_act = act->GetInfoset().GetAction(j);
 	  if (other_act != act)
 	    if (current.Contains(other_act)) {
 	      if (current.Dominates(other_act,act,false,true) ||

@@ -55,7 +55,7 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayer p_player)
   }
 
   gbtNfgPlayerBase *player = p_nfg->m_players[p_player->GetId()];
-  gbt_nfg_strategy_rep *strategy = new gbt_nfg_strategy_rep(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
+  gbtNfgActionBase *strategy = new gbtNfgActionBase(player->m_infosets[1], player->m_infosets[1]->m_actions.Length() + 1);
   strategy->m_behav = behav;
   strategy->m_label = label;
   player->m_infosets[1]->m_actions.Append(strategy);
@@ -150,7 +150,7 @@ gbtNfgGame MakeAfg(const gbtEfgGame &p_efg)
     for (int iset = 1; iset <= p_efg.GetPlayer(epl)->NumInfosets(); iset++, npl++)  {
       gbtEfgInfoset s = p_efg.GetPlayer(epl)->GetInfoset(iset);
       for (int act = 1; act <= s.NumActions(); act++)  {
-	afg.GetPlayer(npl)->GetStrategy(act).SetLabel(ToText(act));
+	afg.GetPlayer(npl)->GetStrategy(act)->SetLabel(ToText(act));
       }
     }
   }

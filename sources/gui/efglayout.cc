@@ -86,7 +86,7 @@ gbtEfgLayoutNode::gbtEfgLayoutNode(gbtEfgNode p_node)
 int gbtEfgLayoutNode::GetChildNumber(void) const
 {
   if (!m_node.GetParent().IsNull()) {
-    return m_node.GetPriorAction().GetId();
+    return m_node.GetPriorAction()->GetId();
   }
   else {
     return 0;
@@ -432,7 +432,7 @@ wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
     return wxT("");
   case GBT_BRANCH_LABEL_LABEL:
     return wxString::Format(wxT("%s"),
-			    (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel());
+			    (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber())->GetLabel());
   case GBT_BRANCH_LABEL_PROBS:
     return wxString::Format(wxT("%s"),
 			    (const char *) m_doc->GetActionProb(parent,

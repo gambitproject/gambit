@@ -52,7 +52,7 @@ public:
   int GetNumber(void) const        { return number; }
   gbtEfgAction GetAction(void) const  {return action; }
   gbtEfgInfoset GetInfoset(void) const 
-  { if (!action.IsNull()) return action.GetInfoset(); else return 0; }
+  { if (!action.IsNull()) return action->GetInfoset(); else return 0; }
   gbtEfgPlayer Player(void) const  { return player; }
   const gbtSfgSequence *Parent(void) const   { return parent; }
   void Dump(gbtOutput &) const;

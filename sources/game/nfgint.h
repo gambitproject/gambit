@@ -36,9 +36,9 @@
 //
 // Forward declarations
 //
-struct gbtNfgPlayerBase;
+class gbtNfgPlayerBase;
 struct gbt_nfg_infoset_rep;
-struct gbt_nfg_strategy_rep;
+class gbtNfgActionBase;
 struct gbt_efg_game_rep;
 
 class gbtNfgOutcomeBase : public gbtNfgOutcomeRep {
@@ -66,7 +66,20 @@ public:
   void DeleteOutcome(void);
 };
 
-struct gbt_nfg_strategy_rep {
+struct gbt_nfg_infoset_rep {
+  int m_id;
+  gbtNfgPlayerBase *m_player;
+  bool m_deleted;
+  gbtText m_label;
+  int m_refCount;
+  gbtBlock<gbtNfgActionBase *> m_actions;
+
+  gbt_nfg_infoset_rep(gbtNfgPlayerBase *, int id, int br);
+  ~gbt_nfg_infoset_rep() { }
+};
+
+class gbtNfgActionBase : public gbtNfgActionRep {
+public:
   int m_id;
   gbt_nfg_infoset_rep *m_infoset;
   gbtArray<int> *m_behav;
@@ -75,20 +88,19 @@ struct gbt_nfg_strategy_rep {
   long m_index;
   int m_refCount;
 
-  gbt_nfg_strategy_rep(gbt_nfg_infoset_rep *, int p_id);
-  ~gbt_nfg_strategy_rep();
-};
+  gbtNfgActionBase(gbt_nfg_infoset_rep *, int p_id);
+  virtual ~gbtNfgActionBase();
 
-struct gbt_nfg_infoset_rep {
-  int m_id;
-  gbtNfgPlayerBase *m_player;
-  bool m_deleted;
-  gbtText m_label;
-  int m_refCount;
-  gbtBlock<gbt_nfg_strategy_rep *> m_actions;
+  gbtText GetLabel(void) const { return m_label; }
+  void SetLabel(const gbtText &p_label) { m_label = p_label; }
+  int GetId(void) const { return m_id; }
 
-  gbt_nfg_infoset_rep(gbtNfgPlayerBase *, int id, int br);
-  ~gbt_nfg_infoset_rep() { }
+  //  virtual gbtNfgInfoset GetInfoset(void) const = 0;
+
+  gbtNfgPlayer GetPlayer(void) const;
+  long GetIndex(void) const { return m_index; }
+
+  const gbtArray<int> *const GetBehavior(void) const { return m_behav; }
 };
 
 class gbtNfgPlayerBase : public gbtNfgPlayerRep {

@@ -123,7 +123,7 @@ void gbtEfgNavigateWindow::OnUpdate(void)
       for (branch = 1; p.GetChild(branch) != cursor; branch++);
 
       SetCellValue(wxString::Format(wxT("%s"),
-				    (char *) cursor.GetPriorAction().GetLabel()),
+				    (char *) cursor.GetPriorAction()->GetLabel()),
 		   7, 0);
       SetCellValue(wxString::Format(wxT("%s"),
 				    (char *) m_doc->GetActionProb(p, branch)),

@@ -671,7 +671,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       p_node.InsertMove(infoset);
       infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset.NumActions(); act++) {
-	infoset.GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
+	infoset.GetAction(act)->SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
       }
       player->AddInfoset((*p_nodeData)->m_infoset, infoset);
     }
@@ -697,7 +697,7 @@ static void BuildSubtree(gbtEfgGame p_efg, gbtEfgNode p_node,
       p_node.InsertMove(infoset);
       infoset.SetLabel((*p_nodeData)->m_infosetData->m_name);
       for (int act = 1; act <= infoset.NumActions(); act++) {
-	infoset.GetAction(act).SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
+	infoset.GetAction(act)->SetLabel((*p_nodeData)->m_infosetData->m_actions[act]);
 	p_efg.SetChanceProb(infoset, act, 
 			    (*p_nodeData)->m_infosetData->m_probs[act]);
       }

@@ -225,7 +225,7 @@ void gbtEfgActionSet::AddAction(int iset, const gbtEfgAction &s)
   else {
     int index = 1;
     while (index <= infosets[iset]->acts.Length() &&
-	   infosets[iset]->acts[index].GetId() < s.GetId()) 
+	   infosets[iset]->acts[index]->GetId() < s->GetId()) 
       index++;
     infosets[iset]->acts.Insert(s,index);
   }
@@ -275,7 +275,7 @@ gbtEfgPlayer gbtEfgActionSet::GetPlayer(void) const
 
 int gbtEfgActionSet::Find(const gbtEfgAction &a) const
 {
-  return (infosets[a.GetInfoset().GetId()]->acts.Find(a));
+  return (infosets[a->GetInfoset().GetId()]->acts.Find(a));
 }
 
 // checks for a valid gbtEfgActionSet
@@ -380,17 +380,17 @@ int gbtEfgSupport::NumActions(const gbtEfgInfoset &i) const
 
 int gbtEfgSupport::GetIndex(const gbtEfgAction &a) const
 {
-  if (a.GetInfoset().GetGame() != m_efg)  return 0;
-  int pl = a.GetInfoset().GetPlayer()->GetId();
+  if (a->GetInfoset().GetGame() != m_efg)  return 0;
+  int pl = a->GetInfoset().GetPlayer()->GetId();
   return m_players[pl]->Find(a);
 }
 
 bool gbtEfgSupport::Contains(const gbtEfgAction &a) const
 {
-  if (a.GetInfoset().GetGame() != m_efg)   
+  if (a->GetInfoset().GetGame() != m_efg)   
     return false;
 
-  int pl = a.GetInfoset().GetPlayer()->GetId();
+  int pl = a->GetInfoset().GetPlayer()->GetId();
 
   if (pl == 0) return true; // Chance
 
@@ -473,7 +473,7 @@ gbtPVector<int> gbtEfgSupport::NumActions(void) const
 
 bool gbtEfgSupport::RemoveAction(const gbtEfgAction &s)
 {
-  gbtEfgInfoset infoset = s.GetInfoset();
+  gbtEfgInfoset infoset = s->GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
  
   return m_players[player->GetId()]->RemoveAction(infoset.GetId(), s); 
@@ -481,7 +481,7 @@ bool gbtEfgSupport::RemoveAction(const gbtEfgAction &s)
 
 void gbtEfgSupport::AddAction(const gbtEfgAction &s)
 {
-  gbtEfgInfoset infoset = s.GetInfoset();
+  gbtEfgInfoset infoset = s->GetInfoset();
   gbtEfgPlayer player = infoset.GetPlayer();
 
   m_players[player->GetId()]->AddAction(infoset.GetId(), s);
@@ -903,14 +903,14 @@ void gbtEfgSupportWithActiveInfo::AddAction(const gbtEfgAction &s)
 {
   gbtEfgSupport::AddAction(s);
 
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     activate_this_and_lower_nodes(startlist[i]);
 }
 
 bool gbtEfgSupportWithActiveInfo::RemoveAction(const gbtEfgAction &s)
 {
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes(startlist[i].GetChild(s));
 
@@ -923,7 +923,7 @@ gbtEfgSupportWithActiveInfo::
 RemoveActionReturningDeletedInfosets(const gbtEfgAction &s,
 				     gbtList<gbtEfgInfoset> *list)
 {
-  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s.GetInfoset()));
+  gbtList<gbtEfgNode> startlist(ReachableNodesInInfoset(s->GetInfoset()));
   for (int i = 1; i <= startlist.Length(); i++)
     deactivate_this_and_lower_nodes_returning_deactivated_infosets(
                            startlist[i].GetChild(s),list);

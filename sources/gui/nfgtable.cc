@@ -314,7 +314,7 @@ wxString gbtNfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_doc->GetNfgSupportList().GetCurrent().NumStrats(m_doc->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent().GetStrategy(m_doc->GetRowPlayer(), p_row+1).GetLabel());
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent().GetStrategy(m_doc->GetRowPlayer(), p_row+1)->GetLabel());
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return wxT("Dom");
@@ -332,7 +332,7 @@ wxString gbtNfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_doc->GetNfgSupportList().GetCurrent().NumStrats(m_doc->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent().GetStrategy(m_doc->GetColPlayer(), p_col+1).GetLabel());
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent().GetStrategy(m_doc->GetColPlayer(), p_col+1)->GetLabel());
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return wxT("Dom");

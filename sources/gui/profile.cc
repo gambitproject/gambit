@@ -186,7 +186,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	      return wxString::Format(wxT("%s:%s:%s"),
 				      (char *) player->GetLabel(),
 				      (char *) infoset.GetLabel(),
-				      (char *) infoset.GetAction(act).GetLabel());
+				      (char *) infoset.GetAction(act)->GetLabel());
 	    }
 	  }
 	}
@@ -211,7 +211,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	  if (col == p_col) {
 	    return wxString::Format(wxT("%s:%s"),
 				    (char *) player->GetLabel(),
-				    (char *) player->GetStrategy(st).GetLabel());
+				    (char *) player->GetStrategy(st)->GetLabel());
 	  }
 	}
       }
@@ -318,8 +318,8 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 		  ret += wxString::Format(wxT("%s"),
 					  (char *) ToText((*behav)(infoset.GetAction(act)),
 							  m_doc->GetPreferences().NumDecimals()));
-		  if (infoset.GetAction(act).GetLabel() != "") {
-		    ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) infoset.GetAction(act).GetLabel()) + wxT("]");
+		  if (infoset.GetAction(act)->GetLabel() != "") {
+		    ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) infoset.GetAction(act)->GetLabel()) + wxT("]");
 		  }
 		  else {
 		    ret += wxString::Format(wxT("*[#%d]"), act);
@@ -367,8 +367,8 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	    ret += wxString::Format(wxT("%s"),
 				    (char *) ToText((*mixed)(strategy),
 						    m_doc->GetPreferences().NumDecimals()));
-	    if (strategy.GetLabel() != "") {
-	      ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) player->GetStrategy(st).GetLabel()) + wxT("]");
+	    if (strategy->GetLabel() != "") {
+	      ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) player->GetStrategy(st)->GetLabel()) + wxT("]");
 	    }
 	    else {
 	      ret += wxString::Format(wxT("*[#%d]"), st);
@@ -677,7 +677,7 @@ wxString gbtProfileGrid::GetReport(void) const
 
       for (int st = 1; st <= player->NumStrategies(); st++) {
 	report += wxString::Format(wxT("%2d: %-6s"), st,
-				   (const char *) player->GetStrategy(st).GetLabel());
+				   (const char *) player->GetStrategy(st)->GetLabel());
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format(wxT("%-15s "), 

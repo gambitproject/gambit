@@ -87,13 +87,13 @@ template class gbtRectBlock<gbtRational>;
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gbtArray<gbt_nfg_strategy_rep *>;
+template class gbtArray<gbtNfgActionBase *>;
 template class gbtArray<gbtNfgOutcomeBase *>;
 template class gbtArray<gbt_nfg_infoset_rep *>;
 template class gbtArray<gbtNfgPlayerBase *>;
 template class gbtArray<gbtNfgAction>;
 
-template class gbtBlock<gbt_nfg_strategy_rep *>;
+template class gbtBlock<gbtNfgActionBase *>;
 template class gbtBlock<gbtNfgOutcomeBase *>;
 template class gbtBlock<gbt_nfg_infoset_rep *>;
 template class gbtBlock<gbtNfgPlayerBase *>;

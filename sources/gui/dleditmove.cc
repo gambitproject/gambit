@@ -102,8 +102,8 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
     m_actionList->Append(wxString::Format(wxT("%s"),
 					  (const char *)
 					  (ToText(act) + ": " + 
-					   p_infoset.GetAction(act).GetLabel())));
-    m_actionNames.Append(p_infoset.GetAction(act).GetLabel());
+					   p_infoset.GetAction(act)->GetLabel())));
+    m_actionNames.Append(p_infoset.GetAction(act)->GetLabel());
     if (p_infoset.IsChanceInfoset()) {
       m_actionProbs.Append(p_infoset.GetChanceProb(act));
     }
@@ -184,7 +184,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
 					     (const char *) 
-					     ((ToText(action.GetId()) + ": " +
+					     ((ToText(action->GetId()) + ": " +
 					       gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
@@ -212,7 +212,7 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
-					     (const char *) ((ToText(action.GetId()) + ": " +
+					     (const char *) ((ToText(action->GetId()) + ": " +
 							      gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
@@ -252,7 +252,7 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
   if (!action.IsNull()) {
     m_actionList->SetString(m_lastSelection,
 			    wxString::Format(wxT("%s"),
-					     (const char *) ((ToText(action.GetId()) + ": " +
+					     (const char *) ((ToText(action->GetId()) + ": " +
 							      gbtText(m_actionName->GetValue().mb_str())))));
   }
   else {
@@ -359,7 +359,7 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
 
   for (int act = 1; act <= m_infoset.NumActions(); act++) {
     if (!m_actions.Find(m_infoset.GetAction(act))) {
-      m_infoset.GetAction(act).DeleteAction();
+      m_infoset.GetAction(act)->DeleteAction();
       act--;
     }
   }
@@ -368,19 +368,19 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
   for (int act = 1; act <= m_actions.Length(); act++) {
     gbtEfgAction action = m_actions[act];
     if (!action.IsNull()) {
-      action.SetLabel(m_actionLabels[act]);
+      action->SetLabel(m_actionLabels[act]);
       if (m_infoset.IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, action.GetId(),
+	p_doc->GetEfg().SetChanceProb(m_infoset, action->GetId(),
 				      m_actionProbs[act]);
       }
-      insertAt = m_actions[act].GetId() + 1;
+      insertAt = m_actions[act]->GetId() + 1;
     }
     else if (insertAt > m_infoset.NumActions()) {
       gbtEfgAction newAction = p_doc->GetEfg().InsertAction(m_infoset);
       insertAt++;
-      newAction.SetLabel(m_actionLabels[act]);
+      newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset.IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, newAction.GetId(), 
+	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
     }
@@ -388,9 +388,9 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
       gbtEfgAction newAction =
 	p_doc->GetEfg().InsertAction(m_infoset,
 				     m_infoset.GetAction(insertAt++));
-      newAction.SetLabel(m_actionLabels[act]);
+      newAction->SetLabel(m_actionLabels[act]);
       if (m_infoset.IsChanceInfoset()) {
-	p_doc->GetEfg().SetChanceProb(m_infoset, newAction.GetId(), 
+	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
     }

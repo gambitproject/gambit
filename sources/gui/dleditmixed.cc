@@ -82,7 +82,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   for (int st = 1; st <= firstPlayer->NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) firstPlayer->GetStrategy(st).GetLabel()),
+					       (char *) firstPlayer->GetStrategy(st)->GetLabel()),
 			      st - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(firstPlayer->GetStrategy(st)))),
@@ -146,7 +146,7 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
   for (int st = 1; st <= player->NumStrategies(); st++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) player->GetStrategy(st).GetLabel()),
+					       (char *) player->GetStrategy(st)->GetLabel()),
 			      st - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(m_profile(player->GetStrategy(st)))),

@@ -112,7 +112,7 @@ int gbtNfgIterator::Set(int p, int s)
 void gbtNfgIterator::Get(gbtArray<int> &t) const
 {
   for (int i = 1; i <= m_nfg.NumPlayers(); i++) {
-    t[i] = profile.GetStrategy(i).GetId();
+    t[i] = profile.GetStrategy(i)->GetId();
   }
 }
 
@@ -168,14 +168,14 @@ void gbtNfgContIterator::First(void)
 
 void gbtNfgContIterator::Freeze(gbtNfgAction p_strategy)
 {
-  int player = p_strategy.GetPlayer()->GetId();
+  int player = p_strategy->GetPlayer()->GetId();
   if (!m_frozen.Contains(player)) {
     m_frozen.Append(player);
     m_thawed.Remove(m_thawed.Find(player));
   }
 
   m_profile.SetStrategy(p_strategy);
-  m_current[player] = p_strategy.GetId();
+  m_current[player] = p_strategy->GetId();
   First();
 }
 

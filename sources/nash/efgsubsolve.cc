@@ -196,7 +196,7 @@ void gbtEfgNashSubgames::FindSubgames(const gbtEfgSupport &p_support,
 	  assert(index <= infosets[pl]->Length());
 	  
 	  for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
-	    int actno = subsupport.GetAction(pl, iset, act).GetId();
+	    int actno = subsupport.GetAction(pl, iset, act)->GetId();
 	    solns[solns.Length()].Set(pl, index, actno,
 				      sol[solno](subsupport.GetAction(pl, iset, act)));
 	  }

@@ -123,7 +123,7 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) m_lastInfoset.GetAction(act).GetLabel()),
+					       (char *) m_lastInfoset.GetAction(act)->GetLabel()),
 			      act - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 					      (char *) ToText(p_profile(m_lastInfoset.GetAction(act)))),
@@ -208,7 +208,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
     for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
       m_probGrid->SetLabelValue(wxVERTICAL,
 				wxString::Format(wxT("%s"),
-						 (char *) m_lastInfoset.GetAction(act).GetLabel()),
+						 (char *) m_lastInfoset.GetAction(act)->GetLabel()),
 				act - 1);
       m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
 						(char *) ToText(m_profile(m_lastInfoset.GetAction(act)))),

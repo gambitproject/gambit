@@ -140,7 +140,7 @@ void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
 
       wxTreeItemId stratID = AppendItem(id, 
 					wxString::Format(wxT("%s"),
-							 (char *) strategy.GetLabel()));
+							 (char *) strategy->GetLabel()));
       if (p_support.Contains(strategy)) {
 	SetItemTextColour(stratID, *wxBLACK);
       }
@@ -298,7 +298,7 @@ void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
 
   const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
   if (support.Contains(strategy) &&
-      support.NumStrats(strategy.GetPlayer()) > 1) {
+      support.NumStrats(strategy->GetPlayer()) > 1) {
     m_doc->Submit(new gbtCmdRemoveStrategy(strategy));
   }
   else {

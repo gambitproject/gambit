@@ -51,7 +51,7 @@ gbtList<gbtEfgAction> gbtSfgSequence::History(void) const
 void gbtSfgSequence::Dump(gbtOutput &out) const
 {
   int a = 0, p = 0;
-  if (!action.IsNull()) a = action.GetId();
+  if (!action.IsNull()) a = action->GetId();
   if(parent) p = parent->GetNumber();
   out << "\nPl#: " << player->GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }

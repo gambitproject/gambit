@@ -34,36 +34,63 @@ class gbtEfgInfoset;
 class gbtEfgNode;
 class gbtEfgPlayer;
 
-struct gbt_efg_action_rep;
+class gbtEfgActionBase;
 
-class gbtEfgAction : public gbtGameAction {
+class gbtEfgActionRep : public gbtGameObject {
+friend class gbtEfgAction;
+public:
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
+
+  virtual gbtEfgInfoset GetInfoset(void) const = 0;
+
+  virtual gbtNumber GetChanceProb(void) const = 0;
+  virtual bool Precedes(gbtEfgNode) const = 0;
+
+  virtual void DeleteAction(void) = 0;
+};
+
+class gbtEfgNullAction { };
+
+class gbtEfgAction {
 friend class gbtEfgGame;
-friend class gbtEfgInfoset;
-protected:
-  struct gbt_efg_action_rep *rep;
+private:
+  gbtEfgActionRep *m_rep;
 
 public:
-  gbtEfgAction(void);
-  gbtEfgAction(gbt_efg_action_rep *);
-  gbtEfgAction(const gbtEfgAction &);
-  virtual ~gbtEfgAction();
+  gbtEfgAction(void) : m_rep(0) { }
+  gbtEfgAction(gbtEfgActionRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgAction(const gbtEfgAction &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgAction() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtEfgAction &operator=(const gbtEfgAction &);
+  gbtEfgAction &operator=(const gbtEfgAction &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
 
-  bool operator==(const gbtEfgAction &) const;
-  bool operator!=(const gbtEfgAction &) const;
+  bool operator==(const gbtEfgAction &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtEfgAction &p_player) const
+  { return (m_rep != p_player.m_rep); }
 
-  bool IsNull(void) const;
-  int GetId(void) const;
-  gbtEfgInfoset GetInfoset(void) const;
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
+  gbtEfgActionRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  const gbtEfgActionRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  
+  gbtEfgActionRep *Get(void) const { return m_rep; }
 
-  gbtNumber GetChanceProb(void) const;
-  bool Precedes(gbtEfgNode) const;
-
-  void DeleteAction(void);
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
+
 
 gbtOutput &operator<<(gbtOutput &, const gbtEfgAction &);
 

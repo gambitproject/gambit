@@ -421,7 +421,7 @@ void gbt_efg_game_rep::SetPlayer(gbt_efg_infoset_rep *p_infoset,
 }
 
 void gbt_efg_game_rep::DeleteAction(gbt_efg_infoset_rep *p_infoset,
-				    gbt_efg_action_rep *p_action)
+				    gbtEfgActionBase *p_action)
 {
   p_infoset->m_actions.Remove(p_action->m_id);
   if (p_infoset->m_player->m_id == 0) {
@@ -1089,7 +1089,7 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
 
   int where;
   for (where = 1; (where <= s.rep->m_actions.Length() &&
-		   s.rep->m_actions[where] != a.rep);
+		   s.rep->m_actions[where] != a.m_rep);
        where++);
   if (where > s.rep->m_actions.Length())   return 0;
   gbtEfgAction action = s.InsertAction(where);

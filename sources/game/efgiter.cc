@@ -196,8 +196,8 @@ void gbtEfgContIterator::Set(int pl, int iset, int act)
 
 void gbtEfgContIterator::Set(const gbtEfgAction &a)
 {
-  if (a.GetInfoset().GetPlayer()->GetId() != _frozen_pl ||
-      a.GetInfoset().GetId() != _frozen_iset) return;
+  if (a->GetInfoset().GetPlayer()->GetId() != _frozen_pl ||
+      a->GetInfoset().GetId() != _frozen_iset) return;
   _profile.Set(a);
 }
 

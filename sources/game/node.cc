@@ -264,11 +264,11 @@ gbtEfgNode gbtEfgNode::GetSubgameRoot(void) const
 
 gbtEfgNode gbtEfgNode::GetChild(const gbtEfgAction &p_action) const
 {
-  if (!rep || p_action.GetInfoset() != rep->m_infoset) {
+  if (!rep || p_action->GetInfoset() != rep->m_infoset) {
     return 0;
   }
   else {
-    return rep->m_children[p_action.GetId()];
+    return rep->m_children[p_action->GetId()];
   }
 }
 
