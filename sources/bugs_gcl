@@ -239,6 +239,24 @@ segfaults.  The same thing happens with
 
   GCL1:= << While[True,<< True]
 
+//------------------------------
+
+Bug C30:  ElimDom on efg not working:
+
+  72 mill:/home/mill/rdm/gambit/test newgcl
+  Include["gclini.gcl"]
+  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+  GCL1:= <<  e:=LoadEfg["poker.efg"]
+  (Efg) "A simple Poker game"
+  GCL2:= << efsupp:=ElimDom[Support[e]]
+  In function ElimDom[], in file "console" at line 2:
+  EXCEPTION: Bad index in gArray
+
+Note, this is also leading to problems in the GUI (not surprisingly):
+Load poker.efg, and do Supports->ElimDom, and check Weak and
+PureStrat, then OK.  Gives internal error in Gambit
+
+
 
 //---------------  These are not bugs but suggested improvements ------------
 
