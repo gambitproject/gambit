@@ -19,6 +19,16 @@
 #include "gambit.h"
 #include "userprefs.h"
 
+//
+// The following colors are predefined in the code as defaults, overridden
+// only when the corresponding entries are present in the configuration file:
+//
+// Chance player: wxLIGHT_GREY
+// Terminal nodes: wxBLACK
+// Even-numbered players: wxGREEN
+// Odd-numbered players: wxRED
+//
+
 UserPreferences::UserPreferences(void)
   : m_terminalColor(*wxBLACK), m_chanceColor(*wxLIGHT_GREY),
     m_warnSolveImperfect(true), m_warnSupportDelete(true),
@@ -52,9 +62,9 @@ void UserPreferences::LoadOptions(void)
   wxConfig config("Gambit");
   long red, green, blue;
   
-  config.Read("/Colors/Chance-Red", &red, 0L);
-  config.Read("/Colors/Chance-Green", &green, 0L);
-  config.Read("/Colors/Chance-Blue", &blue, 0L);
+  config.Read("/Colors/Chance-Red", &red, wxLIGHT_GREY->Red());
+  config.Read("/Colors/Chance-Green", &green, wxLIGHT_GREY->Green());
+  config.Read("/Colors/Chance-Blue", &blue, wxLIGHT_GREY->Blue());
   m_chanceColor.Set(red, green, blue);
 
   config.Read("/Colors/Terminal-Red", &red, 0L);
@@ -64,8 +74,8 @@ void UserPreferences::LoadOptions(void)
 
   for (int i = 0; i < 8; i++) {
     gText playerString = "/Colors/Player" + ToText(i);
-    config.Read((char *) (playerString + "-Red"), &red, 0L);
-    config.Read((char *) (playerString + "-Green"), &green, 0L);
+    config.Read((char *) (playerString + "-Red"), &red, (i % 2 == 0) ? wxRED->Red() : 0L);
+    config.Read((char *) (playerString + "-Green"), &green, (i % 2 == 1) ? wxGREEN->Green() : 0L);
     config.Read((char *) (playerString + "-Blue"), &blue, 0L);
     m_playerColors[i].Set(red, green, blue);
   } 
