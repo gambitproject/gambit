@@ -365,9 +365,9 @@ expression:   Ea
           |   conditional
           |   whileloop
           |   forloop
-          |   funcdecl { emit(new NewInstr(iPUSH_BOOL, true)); }  
-          |   delfunc   { emit(new NewInstr(iPUSH_BOOL, true)); }
-          |   include   { emit(new NewInstr(iPUSH_BOOL, true)); }
+          |   funcdecl { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }  
+          |   delfunc   { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }
+          |   include   { emit(new NewInstr(iPUSH_BOOL, (bool)true)); }
           ;
 
 Ea:           E0
