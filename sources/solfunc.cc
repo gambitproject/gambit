@@ -581,6 +581,12 @@ Portion* GSM_Belief_Float(Portion **param)
   gDPVector<double> values(bp->Beliefs());
   Infoset* s = n->GetInfoset();
   gArray<Node*> members = s->GetMemberList();
+
+  if(s->IsChanceInfoset())
+    return new NullPortion(porFLOAT);
+  if(n->NumChildren() == 0)
+    return new NullPortion(porFLOAT);
+
   int i = 0;
   int found = 0;
   for(i=1; i<=members.Length(); i++)
@@ -600,6 +606,12 @@ Portion* GSM_Belief_Rational(Portion **param)
   gDPVector<gRational> values(bp->Beliefs());
   Infoset* s = n->GetInfoset();
   gArray<Node*> members = s->GetMemberList();
+
+  if(s->IsChanceInfoset())
+    return new NullPortion(porFLOAT);
+  if(n->NumChildren() == 0)
+    return new NullPortion(porFLOAT);
+
   int i = 0;
   int found = 0;
   for(i=1; i<=members.Length(); i++)
@@ -1392,6 +1404,9 @@ Portion *GSM_Gripe_BehavFloat_Action(Portion **param)
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
   BaseEfg* e = p->BelongsTo();
+
+  if(s->IsChanceInfoset())
+    return new NullPortion(porFLOAT);
   
   int i = 0;
   int player = 0;
@@ -1429,6 +1444,9 @@ Portion *GSM_Gripe_BehavRational_Action(Portion **param)
   Infoset* s = a->BelongsTo();
   EFPlayer* p = s->GetPlayer();
   BaseEfg* e = p->BelongsTo();
+
+  if(s->IsChanceInfoset())
+    return new NullPortion(porRATIONAL);
   
   int i = 0;
   int player = 0;

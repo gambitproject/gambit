@@ -742,7 +742,7 @@ Portion *GSM_Lcp_NfgRational(Portion **param)
   return por;
 }
 
-Portion *GSM_Lcp_Support(Portion **param)
+Portion *GSM_Lcp_NFSupport(Portion **param)
 {
   NFSupport& S = * ( (NfSupportPortion*) param[ 0 ] )->Value();
   BaseNfg* N = (BaseNfg*) &( S.BelongsTo() );
@@ -824,6 +824,62 @@ Portion* GSM_Lcp_ListRational(Portion** param)
 
 #include "seqform.h"
 #include "lemkesub.h"
+
+Portion *GSM_Lcp_EfSupport(Portion **param)
+{
+  EFSupport& S = *((EfSupportPortion*) param[0])->Value();
+  Portion* por;
+
+  SeqFormParams SP;
+  SP.stopAfter = ((IntPortion *) param[2])->Value();  
+  SP.tracefile = &((OutputPortion *) param[5])->Value();
+  SP.trace = ((IntPortion *) param[6])->Value();
+
+  switch(S.BelongsTo().Type())
+  {
+  case DOUBLE:
+    {
+      // getting E from S.BelongsTo() doesn't work for some reason...
+      Efg<double>& E = 
+	*(Efg<double>*)((EfgPortion*) param[0]->Owner())->Value();
+      gList<BehavSolution<double> > solns;
+      
+      SeqFormModule<double> SM(E, SP, S);
+      SM.Lemke();
+      
+      solns = SM.GetSolutions();
+      por = new Behav_ListPortion<double>(solns);
+      
+      ((IntPortion *) param[3])->Value() = SM.NumPivots();
+      ((FloatPortion *) param[4])->Value() = SM.Time();
+    }
+    break;
+  case RATIONAL:
+    {
+      // getting E from S.BelongsTo() doesn't work for some reason...
+      Efg<gRational>& E = 
+	*(Efg<gRational>*)((EfgPortion*) param[0]->Owner())->Value();
+      gList<BehavSolution<gRational> > solns;
+      
+      SeqFormModule<gRational> SM(E, SP, S);
+      SM.Lemke();
+      
+      solns = SM.GetSolutions();
+      por = new Behav_ListPortion<gRational>(solns);
+      
+      ((IntPortion *) param[3])->Value() = SM.NumPivots();
+      ((FloatPortion *) param[4])->Value() = SM.Time();
+    }
+    break;
+  default:
+    assert(0);
+  }
+
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
 
 Portion *GSM_Lcp_EfgFloat(Portion **param)
 {
@@ -2157,7 +2213,7 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("LcpSolve", 7);
+  FuncObj = new FuncDescObj("LcpSolve", 8);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lcp_EfgFloat, 
 				       PortionSpec(porBEHAV_FLOAT, 1), 7));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT,
@@ -2226,7 +2282,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(3, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntValPortion(0)));
 
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Lcp_Support, 
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Lcp_NFSupport, 
 				       PortionSpec(porMIXED, 1), 6));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("support", porNF_SUPPORT));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("stopAfter", porINTEGER, 
@@ -2255,6 +2311,23 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(6, 1, ParamInfoType("b", PortionSpec(porRATIONAL,1),
 					    REQUIRED, BYVAL));
 
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Lcp_EfSupport, 
+				       PortionSpec(porBEHAV_FLOAT, 1), 7));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("support", porEF_SUPPORT));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("asNfg", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(7, 2, ParamInfoType("stopAfter", porINTEGER,
+					    new IntValPortion(0)));
+  FuncObj->SetParamInfo(7, 3, ParamInfoType("nPivots", porINTEGER,
+					    new IntValPortion(0), BYREF));
+  FuncObj->SetParamInfo(7, 4, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(7, 5, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(7, 6, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
+  
   gsm->AddFunction(FuncObj);
 
 

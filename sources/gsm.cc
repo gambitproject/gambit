@@ -110,25 +110,25 @@ public:
 
 int GSM::_NumObj = 0;
 
-GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
-:_StdIn( s_in ), _StdOut( s_out ), _StdErr( s_err )
+GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
+:_StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
 #ifndef NDEBUG
-  if( size <= 0 )
+  if(size <= 0)
   {
     gerr << "  Illegal stack size specified during initialization\n";
   }
-  assert( size > 0 );
+  assert(size > 0);
 #endif // NDEBUG
   
   // global function default variables initialization
   // these should be done before InitFunctions() is called
 
-  _StackStack    = new gStack< gStack< Portion* >* >( 1 );
-  _StackStack->Push( new gStack< Portion* >( size ) );
-  _CallFuncStack = new gStack< CallFuncObj* >( 1 );
-  _RefTableStack = new gStack< RefHashTable* >( 1 );
-  _RefTableStack->Push( new RefHashTable );
+  _StackStack    = new gStack< gStack< Portion* >* >(1);
+  _StackStack->Push(new gStack< Portion* >(size));
+  _CallFuncStack = new gStack< CallFuncObj* >(1);
+  _RefTableStack = new gStack< RefHashTable* >(1);
+  _RefTableStack->Push(new RefHashTable);
 
   _FuncTable     = new FunctionHashTable;
   InitFunctions();  // This function is located in gsmfunc.cc
@@ -141,30 +141,30 @@ GSM::~GSM()
 {
   _NumObj--;
 
-  assert( _CallFuncStack->Depth() == 0 );
+  assert(_CallFuncStack->Depth() == 0);
   delete _CallFuncStack;
 
   Flush();
   delete _FuncTable;
 
-  assert( _RefTableStack->Depth() == 1 );
+  assert(_RefTableStack->Depth() == 1);
   delete _RefTableStack->Pop();
   delete _RefTableStack;
 
-  assert( _StackStack->Depth() == 1 );
+  assert(_StackStack->Depth() == 1);
   delete _StackStack->Pop();
   delete _StackStack;
 
 }
 
 
-int GSM::Depth( void ) const
+int GSM::Depth(void) const
 {
   return _Depth();
 }
 
 
-int GSM::MaxDepth( void ) const
+int GSM::MaxDepth(void) const
 {
   return _StackStack->Peek()->MaxDepth();
 }
@@ -182,54 +182,54 @@ bool GSM::Push(Portion* p)
   return true;
 }
 
-bool GSM::Push( const bool& data )
+bool GSM::Push(const bool& data)
 {
-  _Push( new BoolValPortion( data ) );
+  _Push(new BoolValPortion(data));
   return true;
 }
 
 
-bool GSM::Push( const long& data )
+bool GSM::Push(const long& data)
 {
-  _Push( new IntValPortion( data ) );
+  _Push(new IntValPortion(data));
   return true;
 }
 
 
-bool GSM::Push( const double& data )
+bool GSM::Push(const double& data)
 {
-  _Push( new FloatValPortion( data ) );
+  _Push(new FloatValPortion(data));
   return true;
 }
 
 
-bool GSM::Push( const gRational& data )
+bool GSM::Push(const gRational& data)
 {
-  _Push( new RationalValPortion( data ) );
+  _Push(new RationalValPortion(data));
   return true;
 }
 
 
-bool GSM::Push( const gString& data )
+bool GSM::Push(const gString& data)
 {
-  _Push( new TextValPortion( data ) );
+  _Push(new TextValPortion(data));
   return true;
 }
 
-bool GSM::Push( gInput& data )
+bool GSM::Push(gInput& data)
 {
-  _Push( new InputRefPortion( data ) );
+  _Push(new InputRefPortion(data));
   return true;
 }
 
-bool GSM::Push( gOutput& data )
+bool GSM::Push(gOutput& data)
 {
-  _Push( new OutputRefPortion( data ) );
+  _Push(new OutputRefPortion(data));
   return true;
 }
 
 
-bool GSM::PushList( const int num_of_elements )
+bool GSM::PushList(const int num_of_elements)
 { 
   int            i;
   Portion*       p;
@@ -238,43 +238,43 @@ bool GSM::PushList( const int num_of_elements )
   bool           result = true;
 
 #ifndef NDEBUG
-  if( num_of_elements < 0 )
+  if(num_of_elements < 0)
   {
     gerr << "  Illegal number of elements requested to PushList()\n";
   }
-  assert( num_of_elements >= 0 );
+  assert(num_of_elements >= 0);
 
-  if( num_of_elements > _Depth() )
+  if(num_of_elements > _Depth())
   {
     gerr << "  Not enough elements in GSM to PushList()\n";
   }
-  assert( num_of_elements <= Depth() );
+  assert(num_of_elements <= Depth());
 #endif // NDEBUG
 
   list = new ListValPortion;
-  for( i = 1; i <= num_of_elements; i++ )
+  for(i = 1; i <= num_of_elements; i++)
   {
     p = _Pop();
-    p = _ResolveRef( p );
+    p = _ResolveRef(p);
 
-    if( p->Spec().Type != porREFERENCE )
+    if(p->Spec().Type != porREFERENCE)
     {
-      insert_result = list->Insert( p->ValCopy(), 1 );
+      insert_result = list->Insert(p->ValCopy(), 1);
       delete p;
-      if( insert_result == 0 )
+      if(insert_result == 0)
       {
-	_ErrorMessage( _StdErr, 35 );
+	_ErrorMessage(_StdErr, 35);
 	result = false;
       }
     }
     else
     {
       delete p;
-      _ErrorMessage( _StdErr, 49, 0, 0, ((ReferencePortion*) p)->Value() );
+      _ErrorMessage(_StdErr, 49, 0, 0, ((ReferencePortion*) p)->Value());
       result = false;
     }
   }
-  _Push( list );
+  _Push(list);
 
   return result;
 }
@@ -287,36 +287,36 @@ bool GSM::PushList( const int num_of_elements )
 
 
 
-bool GSM::_VarIsDefined( const gString& var_name ) const
+bool GSM::_VarIsDefined(const gString& var_name) const
 {
   bool result;
 
-  assert( var_name != "" );
+  assert(var_name != "");
 
-  result = _RefTableStack->Peek()->IsDefined( var_name );
+  result = _RefTableStack->Peek()->IsDefined(var_name);
   return result;
 }
 
 
-bool GSM::_VarDefine( const gString& var_name, Portion* p )
+bool GSM::_VarDefine(const gString& var_name, Portion* p)
 {
   Portion* old_value;
   bool type_match = true;
   bool read_only = false;
   bool result = true;
 
-  assert( var_name != "" );
+  assert(var_name != "");
 
-  if( _RefTableStack->Peek()->IsDefined( var_name ) )
+  if(_RefTableStack->Peek()->IsDefined(var_name))
   {
-    old_value = (*_RefTableStack->Peek())( var_name );
-    if( p->Spec().ListDepth > 0 )
+    old_value = (*_RefTableStack->Peek())(var_name);
+    if(p->Spec().ListDepth > 0)
     {
-      assert( old_value->Spec().ListDepth > 0 );
-      if( ( (ListPortion*) old_value )->Spec().Type != 
-	 ( (ListPortion*) p )->Spec().Type )
+      assert(old_value->Spec().ListDepth > 0);
+      if(((ListPortion*) old_value)->Spec().Type != 
+	 ((ListPortion*) p)->Spec().Type)
       {
-	if( ( (ListPortion*) p )->Spec().Type == porUNDEFINED )
+	if(((ListPortion*) p)->Spec().Type == porUNDEFINED)
 	  ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
 	else if(old_value->Spec().Type != porUNDEFINED)
 	  type_match = false;
@@ -336,15 +336,15 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
     }
   }
 
-  if( read_only )
+  if(read_only)
   {
-    _ErrorMessage( _StdErr, 46, 0, 0, var_name );
+    _ErrorMessage(_StdErr, 46, 0, 0, var_name);
     delete p;
     result = false;
   }
-  else if( !type_match )
+  else if(!type_match)
   {
-    _ErrorMessage( _StdErr, 42, 0, 0, var_name );
+    _ErrorMessage(_StdErr, 42, 0, 0, var_name);
     delete p;
     result = false;
   }
@@ -358,39 +358,39 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 }
 
 
-Portion* GSM::_VarValue( const gString& var_name ) const
+Portion* GSM::_VarValue(const gString& var_name) const
 {
   Portion* result;
 
-  assert( var_name != "" );
-  result = (*_RefTableStack->Peek())( var_name );
+  assert(var_name != "");
+  result = (*_RefTableStack->Peek())(var_name);
   return result;
 }
 
 
-Portion* GSM::_VarRemove( const gString& var_name )
+Portion* GSM::_VarRemove(const gString& var_name)
 {
   Portion* result;
 
-  assert( var_name != "" );
+  assert(var_name != "");
 
-  result = _RefTableStack->Peek()->Remove( var_name );
+  result = _RefTableStack->Peek()->Remove(var_name);
   return result;
 }
 
 
 
-int GSM::_Depth( void ) const
+int GSM::_Depth(void) const
 {
   return _StackStack->Peek()->Depth();
 }
 
-void GSM::_Push( Portion* p )
+void GSM::_Push(Portion* p)
 {
-  _StackStack->Peek()->Push( p );
+  _StackStack->Peek()->Push(p);
 }
 
-Portion* GSM::_Pop( void )
+Portion* GSM::_Pop(void)
 {
   return _StackStack->Peek()->Pop();
 }
@@ -400,16 +400,16 @@ Portion* GSM::_Pop( void )
 //---------------------------------------------------------------------
 
 
-bool GSM::PushRef( const gString& ref )
+bool GSM::PushRef(const gString& ref)
 {
-  assert( ref != "" );
-  _Push( new ReferencePortion( ref ) );
+  assert(ref != "");
+  _Push(new ReferencePortion(ref));
   return true;
 }
 
 
 
-bool GSM::Assign( void )
+bool GSM::Assign(void)
 {
   Portion* p2;
   Portion* p1;
@@ -436,194 +436,187 @@ bool GSM::Assign( void )
   PortionSpec p1Spec(p1->Spec());
   PortionSpec p2Spec(p2->Spec());
   
-  if(p1Spec.Type == porREFERENCE)
-  {
-    if(p2Spec.Type != porREFERENCE)
-    {
-      if(p2->IsReference())
-      {
-	p_old = p2;
-	p2 = p2->ValCopy();
-	delete p_old;
-      }      
-      _VarDefine(((ReferencePortion*) p1)->Value(), p2);
-      delete p1;
-      _Push(p2->RefCopy());
-    }
-    else
-    {
-      _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
-      result = false;
-    } 
-  }
-  else if(p2Spec.Type == porREFERENCE)
+  if(p2Spec.Type == porREFERENCE)
   {
     _ErrorMessage(_StdErr, 63, 0, 0, ((ReferencePortion*) p2)->Value());
     result = false;
+  }
+  else if(p1Spec.Type == porREFERENCE)
+  {
+    if(p2->IsReference())
+    {
+      p_old = p2;
+      p2 = p2->ValCopy();
+      delete p_old;
+    }      
+    _VarDefine(varname, p2);
+    delete p1;
+    _Push(p2->RefCopy());
   }
   else if(p1Spec == p2Spec)
   {
     if(p1Spec.ListDepth == 0) // not a list
     {
-      if(!(p1Spec.Type & (porINPUT|porOUTPUT))) // not assigning to I/O
+      switch(p1Spec.Type)
       {
-	switch(p1Spec.Type)
-	{
-	case porINTEGER:
-	  ((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
-	  break;
-	case porFLOAT:
-	  ((FloatPortion*) p1)->Value() = ((FloatPortion*) p2)->Value();
-	  break;
-	case porRATIONAL:
-	  ((RationalPortion*) p1)->Value()=((RationalPortion*) p2)->Value();
-	  break;
-	case porTEXT:
-	  ((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
-	  break;
-	case porBOOL:
-	  ((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
-	  break;
-	case porOUTCOME_FLOAT:
-	case porOUTCOME_RATIONAL:
-	  p1->RemoveDependency();
-	  ((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porPLAYER_NFG:
-	  p1->RemoveDependency();
-	  ((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porSTRATEGY:
-	  p1->RemoveDependency();
-	  ((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porNF_SUPPORT:
-	  p1->RemoveDependency();
-	  ((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porEF_SUPPORT:
-	  p1->RemoveDependency();
-	  ((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porPLAYER_EFG:
-	  p1->RemoveDependency();
-	  ((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porINFOSET:
-	  p1->RemoveDependency();
-	  ((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porNODE:
-	  p1->RemoveDependency();
-	  ((NodePortion*) p1)->Value() = ((NodePortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porACTION:
-	  p1->RemoveDependency();
-	  ((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porMIXED_FLOAT:
-	  p1->RemoveDependency();
-	  (*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
-	    (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porMIXED_RATIONAL:
-	  p1->RemoveDependency();
-	  (*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) = 
-	    (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porBEHAV_FLOAT:
-	  p1->RemoveDependency();
-	  (*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
-	    (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
-	case porBEHAV_RATIONAL:
-	  p1->RemoveDependency();
-	  (*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) = 
-	    (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
-	  p1->SetOwner( p2->Owner() );
-	  p1->SetIsValid( p2->IsValid() );
-	  p1->AddDependency();
-	  break;
+      case porINTEGER:
+	((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
+	break;
+      case porFLOAT:
+	((FloatPortion*) p1)->Value() = ((FloatPortion*) p2)->Value();
+	break;
+      case porRATIONAL:
+	((RationalPortion*) p1)->Value()=((RationalPortion*) p2)->Value();
+	break;
+      case porTEXT:
+	((TextPortion*) p1)->Value() = ((TextPortion*) p2)->Value();
+	break;
+      case porBOOL:
+	((BoolPortion*) p1)->Value() = ((BoolPortion*) p2)->Value();
+	break;
+      case porOUTCOME_FLOAT:
+      case porOUTCOME_RATIONAL:
+	p1->RemoveDependency();
+	((OutcomePortion*) p1)->Value() = ((OutcomePortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porPLAYER_NFG:
+	p1->RemoveDependency();
+	((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porSTRATEGY:
+	p1->RemoveDependency();
+	((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porNF_SUPPORT:
+	p1->RemoveDependency();
+	((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porEF_SUPPORT:
+	p1->RemoveDependency();
+	((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porPLAYER_EFG:
+	p1->RemoveDependency();
+	((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porINFOSET:
+	p1->RemoveDependency();
+	((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porNODE:
+	p1->RemoveDependency();
+	((NodePortion*) p1)->Value() = ((NodePortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porACTION:
+	p1->RemoveDependency();
+	((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porMIXED_FLOAT:
+	p1->RemoveDependency();
+	(*((MixedSolution<double>*) ((MixedPortion*) p1)->Value())) = 
+	  (*((MixedSolution<double>*) ((MixedPortion*) p2)->Value()));
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porMIXED_RATIONAL:
+	p1->RemoveDependency();
+	(*((MixedSolution<gRational>*) ((MixedPortion*) p1)->Value())) = 
+	  (*((MixedSolution<gRational>*) ((MixedPortion*) p2)->Value()));
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porBEHAV_FLOAT:
+	p1->RemoveDependency();
+	(*((BehavSolution<double>*) ((BehavPortion*) p1)->Value())) = 
+	  (*((BehavSolution<double>*) ((BehavPortion*) p2)->Value()));
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
+      case porBEHAV_RATIONAL:
+	p1->RemoveDependency();
+	(*((BehavSolution<gRational>*) ((BehavPortion*) p1)->Value())) = 
+	  (*((BehavSolution<gRational>*) ((BehavPortion*) p2)->Value()));
+	p1->SetOwner(p2->Owner());
+	p1->SetIsValid(p2->IsValid());
+	p1->AddDependency();
+	break;
 
-	case porNFG_FLOAT:
-	  ((NfgPortion*) p1)->RemoveAllDependents();
-	  delete ((NfgPortion*) p1)->Value();
-	  ((NfgPortion*) p1)->Value() = new Nfg<double>
-	    (*((Nfg<double>*) ((NfgPortion*) p2)->Value())); 
-	  break;
-	case porNFG_RATIONAL:
-	  ((NfgPortion*) p1)->RemoveAllDependents();
-	  delete ((NfgPortion*) p1)->Value();
-	  ((NfgPortion*) p1)->Value() =  new Nfg<gRational>
-	    (*((Nfg<gRational>*) ((NfgPortion*) p2)->Value())); 
-	  break;
-	case porEFG_FLOAT:
-	  ((EfgPortion*) p1)->RemoveAllDependents();
-	  delete ((EfgPortion*) p1)->Value();
-	  ((EfgPortion*) p1)->Value() = new Efg<double>
-	    (*(Efg<double>*) ((EfgPortion*) p2)->Value()); 
-	  break;
-	case porEFG_RATIONAL:
-	  ((EfgPortion*) p1)->RemoveAllDependents();
-	  delete ((EfgPortion*) p1)->Value();
-	  ((EfgPortion*) p1)->Value() =  new Efg<gRational>
-	    (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
-	  break;
+      case porNFG_FLOAT:
+	((NfgPortion*) p1)->RemoveAllDependents();
+	delete ((NfgPortion*) p1)->Value();
+	((NfgPortion*) p1)->Value() = new Nfg<double>
+	  (*((Nfg<double>*) ((NfgPortion*) p2)->Value())); 
+	break;
+      case porNFG_RATIONAL:
+	((NfgPortion*) p1)->RemoveAllDependents();
+	delete ((NfgPortion*) p1)->Value();
+	((NfgPortion*) p1)->Value() =  new Nfg<gRational>
+	  (*((Nfg<gRational>*) ((NfgPortion*) p2)->Value())); 
+	break;
+      case porEFG_FLOAT:
+	((EfgPortion*) p1)->RemoveAllDependents();
+	delete ((EfgPortion*) p1)->Value();
+	((EfgPortion*) p1)->Value() = new Efg<double>
+	  (*(Efg<double>*) ((EfgPortion*) p2)->Value()); 
+	break;
+      case porEFG_RATIONAL:
+	((EfgPortion*) p1)->RemoveAllDependents();
+	delete ((EfgPortion*) p1)->Value();
+	((EfgPortion*) p1)->Value() =  new Efg<gRational>
+	  (*(Efg<gRational>*) ((EfgPortion*) p2)->Value()); 
+	break;
 
-	default:
-	  _ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
-	  assert(0);	  
-	}
-	_Push(p1->RefCopy()); 
-	delete p2;
-      }
-      else // error: assigning to INPUT or OUTPUT
-      {
+      case porINPUT:
+      case porOUTPUT:
 	_ErrorMessage(_StdErr, 64);
 	result = false;
+	break;
+
+      default:
+	_ErrorMessage(_StdErr, 67, 0, 0, PortionSpecToText(p1Spec));
+	assert(0);	  
+      }
+      if(result)
+      {
+	_Push(p1->RefCopy()); 
+	delete p2;
       }
     }
     // both p1 and p2 are lists
     else if((p1Spec.Type == p2Spec.Type) ||
-	    (p1Spec.Type == porUNDEFINED) )
+	    (p1Spec.Type == porUNDEFINED))
     {
-      if( !( p1Spec.Type & (porINPUT|porOUTPUT) ) )
+      if(!(p1Spec.Type & (porINPUT|porOUTPUT)))
       {
 	((ListPortion*) p1)->AssignFrom(p2);
 	_Push(p1->RefCopy());
@@ -643,6 +636,11 @@ bool GSM::Assign( void )
   }
   else if(varname != "") // make sure variable is associated with a var name
   {
+    if(p1Spec.Type == porNULL)
+      p1Spec = ((NullPortion*) p1)->DataType();
+    if(p2Spec.Type == porNULL)
+      p2Spec = ((NullPortion*) p2)->DataType();
+    
     if(PortionSpecMatch(p1Spec, p2Spec) ||
        (p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
 	p2Spec.ListDepth > 0))
@@ -657,26 +655,6 @@ bool GSM::Assign( void )
       _VarDefine(varname, p2);
       delete p1;
       _Push(p2->RefCopy());
-    }
-    else if(p1Spec.Type == porNULL || p2Spec.Type == porNULL)
-    {
-      if(p1Spec.Type == porNULL)
-	p1Spec = ((NullPortion*) p1)->DataType();
-      if(p2Spec.Type == porNULL)
-	p2Spec = ((NullPortion*) p2)->DataType();
-      if(p1Spec == p2Spec)
-      {
-	if(p2->IsReference())
-	{
-	  p_old = p2;
-	  p2 = p2->ValCopy();
-	  delete p_old;
-	}
-	assert(varname != "");
-	_VarDefine(varname, p2);
-	delete p1;
-	_Push(p2->RefCopy());
-      }
     }
     else // error: changing the type of variable
     {
@@ -701,68 +679,68 @@ bool GSM::Assign( void )
 
 
 
-bool GSM::UnAssign( void )
+bool GSM::UnAssign(void)
 {
   Portion* p;
 
 #ifndef NDEBUG
-  if( _Depth() < 1 )
+  if(_Depth() < 1)
   {
     gerr << "  Not enough operands to execute UnAssign[]\n";
   }
-  assert( _Depth() >= 1 );
+  assert(_Depth() >= 1);
 #endif // NDEBUG
 
   p = _Pop();
-  if( p->Spec().Type == porREFERENCE )
+  if(p->Spec().Type == porREFERENCE)
   {
-    if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
+    if(_VarIsDefined(((ReferencePortion*) p)->Value()))
     {
-      _Push( _VarRemove( ( (ReferencePortion*) p )->Value() ) );
+      _Push(_VarRemove(((ReferencePortion*) p)->Value()));
       delete p;
       return true;
     }
     else
     {
-      _Push( p );
-      _ErrorMessage( _StdErr, 54, 0, 0, ((ReferencePortion*) p)->Value() );
+      _Push(p);
+      _ErrorMessage(_StdErr, 54, 0, 0, ((ReferencePortion*) p)->Value());
       return false;
     }
   }
   else
   {
-    _Push( p );
-    _ErrorMessage( _StdErr, 53 );
+    _Push(p);
+    _ErrorMessage(_StdErr, 53);
     return false;
   }
 }
 
 
-Portion* GSM::UnAssignExt( void )
+Portion* GSM::UnAssignExt(void)
 {
   Portion* p;
   gString txt;
 
 #ifndef NDEBUG
-  if( _Depth() < 1 )
+  if(_Depth() < 1)
   {
     gerr << "  Not enough operands to execute UnAssign[]\n";
   }
-  assert( _Depth() >= 1 );
+  assert(_Depth() >= 1);
 #endif // NDEBUG
 
   p = _Pop();
-  if( p->Spec().Type == porREFERENCE )
+  if(p->Spec().Type == porREFERENCE)
   {
-    if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
+    if(_VarIsDefined(((ReferencePortion*) p)->Value()))
     {
       delete p;
-      p = _VarRemove( ( (ReferencePortion*) p )->Value() );
+      p = _VarRemove(((ReferencePortion*) p)->Value());
       return p;
     }
     else
     {
-      _Push( p );
+      _Push(p);
       txt = "UnAssign[] called on undefined reference \"";
       txt += ((ReferencePortion*) p)->Value();
       txt += '\"';
@@ -772,7 +750,7 @@ Portion* GSM::UnAssignExt( void )
   }
   else
   {
-    _Push( p );
+    _Push(p);
     txt = "UnAssign[] called on a non-reference value";
     p = new ErrorPortion(txt);
     return p;
@@ -784,29 +762,29 @@ Portion* GSM::UnAssignExt( void )
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
-Portion* GSM::_ResolveRef( Portion* p )
+Portion* GSM::_ResolveRef(Portion* p)
 {
   Portion*  result = 0;
   gString ref;
   
-  if( p->Spec().Type == porREFERENCE )
+  if(p->Spec().Type == porREFERENCE)
   {
-    ref = ( (ReferencePortion*) p )->Value();
+    ref = ((ReferencePortion*) p)->Value();
 
-    if( !_VarIsDefined( ref ) )
+    if(!_VarIsDefined(ref))
     {
       result = p;
     }
     else
     {
-      if( _VarValue( ref )->IsValid() )
+      if(_VarValue(ref)->IsValid())
       {
-	result = _VarValue( ref )->RefCopy();
+	result = _VarValue(ref)->RefCopy();
 	delete p;
       }
       else
       {
-	delete _VarRemove( ref );
+	delete _VarRemove(ref);
 	result = p;
       }
     }
@@ -827,7 +805,7 @@ Portion* GSM::_ResolveRef( Portion* p )
 
 // Main dispatcher of built-in binary operations
 
-bool GSM::_BinaryOperation( const gString& funcname )
+bool GSM::_BinaryOperation(const gString& funcname)
 {
   Portion*   p2;
   Portion*   p1;
@@ -835,26 +813,26 @@ bool GSM::_BinaryOperation( const gString& funcname )
   int result;
 
 #ifndef NDEBUG
-  if( _Depth() < 2 )
+  if(_Depth() < 2)
   {
     gerr << "  Not enough operands to perform binary operation\n";
   }
-  assert( _Depth() >= 2 );
+  assert(_Depth() >= 2);
 #endif // NDEBUG
 
   // bind the parameters in correct order
   p2 = _Pop();
   p1 = _Pop();
-  _Push( p2 );
-  _Push( p1 );
+  _Push(p2);
+  _Push(p1);
   
   prog.Append(new NewInstr(iINIT_CALL_FUNCTION, funcname));
   prog.Append(new NewInstr(iBIND));
   prog.Append(new NewInstr(iBIND));
   prog.Append(new NewInstr(iCALL_FUNCTION));
-  result = Execute( prog );
+  result = Execute(prog);
 
-  if( result == rcSUCCESS )
+  if(result == rcSUCCESS)
     return true;
   else
     return false;
@@ -867,25 +845,25 @@ bool GSM::_BinaryOperation( const gString& funcname )
 //                        unary operations
 //-----------------------------------------------------------------------
 
-bool GSM::_UnaryOperation( const gString& funcname )
+bool GSM::_UnaryOperation(const gString& funcname)
 {
   gList< NewInstr* > prog;
   int result;
 
 #ifndef NDEBUG
-  if( _Depth() < 1 )
+  if(_Depth() < 1)
   {
     gerr << "  Not enough operands to perform unary operation\n";
   }
-  assert( _Depth() >= 1 );
+  assert(_Depth() >= 1);
 #endif // NDEBUG
 
   prog.Append(new NewInstr(iINIT_CALL_FUNCTION, funcname));
   prog.Append(new NewInstr(iBIND));
   prog.Append(new NewInstr(iCALL_FUNCTION));
-  result = Execute( prog );
+  result = Execute(prog);
 
-  if( result == rcSUCCESS )
+  if(result == rcSUCCESS)
     return true;
   else
     return false;
@@ -898,7 +876,7 @@ bool GSM::_UnaryOperation( const gString& funcname )
 //                      built-in operations
 //-----------------------------------------------------------------
 
-bool GSM::Add ( void )
+bool GSM::Add (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -972,11 +950,11 @@ bool GSM::Add ( void )
   if(result)
   { delete p2; delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Plus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation("Plus"); }
   return result;
 }
 
-bool GSM::Subtract ( void )
+bool GSM::Subtract (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1017,11 +995,11 @@ bool GSM::Subtract ( void )
   if(result)
   { delete p2; delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Minus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation("Minus"); }
   return result;
 }
 
-bool GSM::Multiply ( void )
+bool GSM::Multiply (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1050,15 +1028,15 @@ bool GSM::Multiply ( void )
   if(result)
   { delete p2; delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Times" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation("Times"); }
   return result;
 }
 
 
-bool GSM::Dot ( void )
-{ return _BinaryOperation( "Dot" ); }
+bool GSM::Dot (void)
+{ return _BinaryOperation("Dot"); }
 
-bool GSM::Divide ( void )
+bool GSM::Divide (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1091,11 +1069,11 @@ bool GSM::Divide ( void )
   if(result)
   { delete p2; delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Divide" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation("Divide"); }
   return result;
 }
 
-bool GSM::Negate( void )
+bool GSM::Negate(void)
 {
   Portion* p1;
   Portion* p;
@@ -1122,18 +1100,18 @@ bool GSM::Negate( void )
   if(result)
   { delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); result = _UnaryOperation( "Negate" ); }
+  { delete p; _Push(p1); result = _UnaryOperation("Negate"); }
   return result;
 }
 
-bool GSM::Power( void )
-{ return _BinaryOperation( "Power" ); }
+bool GSM::Power(void)
+{ return _BinaryOperation("Power"); }
 
-bool GSM::Concat ( void )
-{ return _BinaryOperation( "Concat" ); }
+bool GSM::Concat (void)
+{ return _BinaryOperation("Concat"); }
 
 
-bool GSM::IntegerDivide ( void )
+bool GSM::IntegerDivide (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1159,11 +1137,11 @@ bool GSM::IntegerDivide ( void )
   { delete p2; delete p1; _Push(p); }
   else
   { delete p; _Push(p1); _Push(p2); 
-    result = _BinaryOperation( "IntegerDivide" ); }
+    result = _BinaryOperation("IntegerDivide"); }
   return result;
 }
 
-bool GSM::Modulus ( void )
+bool GSM::Modulus (void)
 {
   Portion* p1;
   Portion* p2;
@@ -1188,12 +1166,12 @@ bool GSM::Modulus ( void )
   if(result)
   { delete p2; delete p1; _Push(p); }
   else
-  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation( "Modulus" ); }
+  { delete p; _Push(p1); _Push(p2); result = _BinaryOperation("Modulus"); }
   return result;
 }
 
 
-bool GSM::EqualTo ( void )
+bool GSM::EqualTo (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1214,11 +1192,11 @@ bool GSM::EqualTo ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Equal" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("Equal"); }
   return result;
 }
 
-bool GSM::NotEqualTo ( void )
+bool GSM::NotEqualTo (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1239,11 +1217,11 @@ bool GSM::NotEqualTo ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "NotEqual" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("NotEqual"); }
   return result;
 }
 
-bool GSM::GreaterThan ( void )
+bool GSM::GreaterThan (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1273,11 +1251,11 @@ bool GSM::GreaterThan ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Greater" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("Greater"); }
   return result;
 }
 
-bool GSM::LessThan ( void )
+bool GSM::LessThan (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1307,11 +1285,11 @@ bool GSM::LessThan ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "LessEqual" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("LessEqual"); }
   return result;
 }
 
-bool GSM::GreaterThanOrEqualTo ( void )
+bool GSM::GreaterThanOrEqualTo (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1341,11 +1319,11 @@ bool GSM::GreaterThanOrEqualTo ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "GreaterEqual" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("GreaterEqual"); }
   return result;
 }
 
-bool GSM::LessThanOrEqualTo ( void )
+bool GSM::LessThanOrEqualTo (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1375,12 +1353,12 @@ bool GSM::LessThanOrEqualTo ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "LessEqual" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("LessEqual"); }
   return result;
 }
 
 
-bool GSM::AND ( void )
+bool GSM::AND (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1404,11 +1382,11 @@ bool GSM::AND ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "And" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("And"); }
   return result;
 }
 
-bool GSM::OR ( void )
+bool GSM::OR (void)
 { 
   Portion* p1;
   Portion* p2;
@@ -1432,11 +1410,11 @@ bool GSM::OR ( void )
   if(result)
   { delete p2; delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); _Push(p2); result = _BinaryOperation( "Or" ); }
+  { _Push(p1); _Push(p2); result = _BinaryOperation("Or"); }
   return result;
 }
 
-bool GSM::NOT ( void )
+bool GSM::NOT (void)
 {
   Portion* p1;
   bool b;
@@ -1457,29 +1435,29 @@ bool GSM::NOT ( void )
   if(result)
   { delete p1; _Push(new BoolValPortion(b)); }
   else
-  { _Push(p1); result = _UnaryOperation( "Not" ); }
+  { _Push(p1); result = _UnaryOperation("Not"); }
   return result;
 }
 
 
-bool GSM::Read ( void )
-{ return _BinaryOperation( "Read" ); }
+bool GSM::Read (void)
+{ return _BinaryOperation("Read"); }
 
-bool GSM::Write ( void )
-{ return _BinaryOperation( "Write" ); }
+bool GSM::Write (void)
+{ return _BinaryOperation("Write"); }
 
 
-bool GSM::Subscript ( void )
+bool GSM::Subscript (void)
 {
   Portion* p2;
   Portion* p1;
 
-  assert( _Depth() >= 2 );
+  assert(_Depth() >= 2);
   p2 = _Pop();
   p1 = _Pop();
 
-  p2 = _ResolveRef( p2 );
-  p1 = _ResolveRef( p1 );
+  p2 = _ResolveRef(p2);
+  p1 = _ResolveRef(p1);
 
   
   if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
@@ -1519,28 +1497,28 @@ bool GSM::Subscript ( void )
   }
   else
   {
-    _Push( p1 );
-    _Push( p2 );
+    _Push(p1);
+    _Push(p2);
     
-    if( p1->Spec().ListDepth > 0 )
-      return _BinaryOperation( "NthElement" );
+    if(p1->Spec().ListDepth > 0)
+      return _BinaryOperation("NthElement");
     else
-      return _BinaryOperation( "NthChar" );
+      return _BinaryOperation("NthChar");
   }
 }
 
 
-bool GSM::Child ( void )
+bool GSM::Child (void)
 {
   Portion* p2;
   Portion* p1;
 
-  assert( _Depth() >= 2 );
+  assert(_Depth() >= 2);
   p2 = _Pop();
   p1 = _Pop();
 
-  p2 = _ResolveRef( p2 );
-  p1 = _ResolveRef( p1 );
+  p2 = _ResolveRef(p2);
+  p1 = _ResolveRef(p1);
 
   
   if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
@@ -1563,16 +1541,16 @@ bool GSM::Child ( void )
   }
   else
   {
-    _Push( p1 );
-    _Push( p2 );
+    _Push(p1);
+    _Push(p2);
     
-    if( p1->Spec().ListDepth > 0 )
-      return _BinaryOperation( "NthElement" );
+    if(p1->Spec().ListDepth > 0)
+      return _BinaryOperation("NthElement");
     else
-      return _BinaryOperation( "NthChild" );
+      return _BinaryOperation("NthChild");
   }
 
-  // return _BinaryOperation( "NthChild" );
+  // return _BinaryOperation("NthChild");
 }
 
 
@@ -1581,75 +1559,75 @@ bool GSM::Child ( void )
 //               CallFunction() related functions
 //-------------------------------------------------------------------
 
-bool GSM::AddFunction( FuncDescObj* func )
+bool GSM::AddFunction(FuncDescObj* func)
 {
   FuncDescObj *old_func;
   bool result;
   assert(func != 0);
-  if( !_FuncTable->IsDefined( func->FuncName() ) )
+  if(!_FuncTable->IsDefined(func->FuncName()))
   {
-    _FuncTable->Define( func->FuncName(), func );
+    _FuncTable->Define(func->FuncName(), func);
     return true;
   }
   else
   {
-    old_func = (*_FuncTable)( func->FuncName() );
-    result = old_func->Combine( func );
-    if( !result )
-      _ErrorMessage( _StdErr, 60, 0, 0, old_func->FuncName() );
+    old_func = (*_FuncTable)(func->FuncName());
+    result = old_func->Combine(func);
+    if(!result)
+      _ErrorMessage(_StdErr, 60, 0, 0, old_func->FuncName());
     return result;
   }
 }
 
 
 #ifndef NDEBUG
-void GSM::_BindCheck( void ) const
+void GSM::_BindCheck(void) const
 {
-  if( _CallFuncStack->Depth() <= 0 )
+  if(_CallFuncStack->Depth() <= 0)
   {
     gerr << "  The CallFunction() subsystem was not initialized by\n";
     gerr << "  calling InitCallFunction() first\n";
   }
-  assert( _CallFuncStack->Depth() > 0 );
+  assert(_CallFuncStack->Depth() > 0);
 
-  if( _Depth() <= 0 )
+  if(_Depth() <= 0)
   {
     gerr << "  No value found to assign to a function parameter\n";
   }
-  assert( _Depth() > 0 );
+  assert(_Depth() > 0);
 }
 #endif // NDEBUG
 
 
-bool GSM::_Bind( const gString& param_name ) const
+bool GSM::_Bind(const gString& param_name) const
 {
-  return _CallFuncStack->Peek()->SetCurrParamIndex( param_name );
+  return _CallFuncStack->Peek()->SetCurrParamIndex(param_name);
 }
 
 
-bool GSM::InitCallFunction( const gString& funcname )
+bool GSM::InitCallFunction(const gString& funcname)
 {
-  if( _FuncTable->IsDefined( funcname ) )
+  if(_FuncTable->IsDefined(funcname))
   {
     _CallFuncStack->Push
-      ( new CallFuncObj( (*_FuncTable)( funcname ), _StdOut, _StdErr ) );
+      (new CallFuncObj((*_FuncTable)(funcname), _StdOut, _StdErr));
     return true;
   }
-  else // ( !_FuncTable->IsDefined( funcname ) )
+  else // (!_FuncTable->IsDefined(funcname))
   {
-    _ErrorMessage( _StdErr, 25, 0, 0, funcname );
+    _ErrorMessage(_StdErr, 25, 0, 0, funcname);
     return false;
   }
 }
 
 
-bool GSM::Bind( const gString& param_name )
+bool GSM::Bind(const gString& param_name)
 {
-  return BindRef( param_name, AUTO_VAL_OR_REF );
+  return BindRef(param_name, AUTO_VAL_OR_REF);
 }
 
 
-bool GSM::BindVal( const gString& param_name )
+bool GSM::BindVal(const gString& param_name)
 {
   Portion*     param;
   bool         result = true;
@@ -1658,24 +1636,24 @@ bool GSM::BindVal( const gString& param_name )
   _BindCheck();
 #endif // NDEBUG
 
-  if( param_name != "" )
-    result = _Bind( param_name );
+  if(param_name != "")
+    result = _Bind(param_name);
 
-  if( result )
+  if(result)
   {
-    param = _ResolveRef( _Pop() );
+    param = _ResolveRef(_Pop());
 
-    if( param->IsValid() )
+    if(param->IsValid())
     {
-      if( param->Spec().Type != porREFERENCE )
-	result = _CallFuncStack->Peek()->SetCurrParam( param->ValCopy() );
+      if(param->Spec().Type != porREFERENCE)
+	result = _CallFuncStack->Peek()->SetCurrParam(param->ValCopy());
       else
-	result = _CallFuncStack->Peek()->SetCurrParam( 0 );
+	result = _CallFuncStack->Peek()->SetCurrParam(0);
     }
     else
     {
       _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage( _StdErr, 61 );
+      _ErrorMessage(_StdErr, 61);
       result = false;
     }
     delete param;
@@ -1685,7 +1663,7 @@ bool GSM::BindVal( const gString& param_name )
 }
 
 
-bool GSM::BindRef( const gString& param_name, bool auto_val_or_ref )
+bool GSM::BindRef(const gString& param_name, bool auto_val_or_ref)
 {
   Portion*           param;
   bool               result    = true;
@@ -1694,21 +1672,21 @@ bool GSM::BindRef( const gString& param_name, bool auto_val_or_ref )
   _BindCheck();
 #endif // NDEBUG
 
-  if( param_name != "" )
-    result = _Bind( param_name );
+  if(param_name != "")
+    result = _Bind(param_name);
 
-  if( result )
+  if(result)
   {
-    param = _ResolveRef( _Pop() );
+    param = _ResolveRef(_Pop());
 
-    if( param->IsValid() )
+    if(param->IsValid())
     {
-      result = _CallFuncStack->Peek()->SetCurrParam( param, auto_val_or_ref );
+      result = _CallFuncStack->Peek()->SetCurrParam(param, auto_val_or_ref);
     }
     else
     {
       _CallFuncStack->Peek()->SetErrorOccurred();
-      _ErrorMessage( _StdErr, 59 );
+      _ErrorMessage(_StdErr, 59);
       delete param;
       result = false;
     }
@@ -1719,7 +1697,7 @@ bool GSM::BindRef( const gString& param_name, bool auto_val_or_ref )
 
 
 
-bool GSM::CallFunction( void )
+bool GSM::CallFunction(void)
 {
   CallFuncObj*        func;
   Portion**           param;
@@ -1730,39 +1708,39 @@ bool GSM::CallFunction( void )
   bool                result = true;
 
 #ifndef NDEBUG
-  if( _CallFuncStack->Depth() <= 0 )
+  if(_CallFuncStack->Depth() <= 0)
   {
     gerr << "  The CallFunction() subsystem was not initialized by\n";
     gerr << "  calling InitCallFunction() first\n";
   }
-  assert( _CallFuncStack->Depth() > 0 );
+  assert(_CallFuncStack->Depth() > 0);
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
 
-  param = new Portion*[ func->NumParams() ];
+  param = new Portion*[func->NumParams()];
 
-  return_value = func->CallFunction( this, param );
+  return_value = func->CallFunction(this, param);
 
-  assert( return_value != 0 );
+  assert(return_value != 0);
 
-  if( return_value->Spec().Type == porERROR )
+  if(return_value->Spec().Type == porERROR)
     result = false;
 
 
-  _Push( return_value );
+  _Push(return_value);
   
 
-  for( index = 0; index < func->NumParams(); index++ )
+  for(index = 0; index < func->NumParams(); index++)
   {
-    refp = func->GetParamRef( index );
+    refp = func->GetParamRef(index);
 
-    assert( (refp == 0) == (param[index] == 0) );
+    assert((refp == 0) == (param[index] == 0));
 
-    if( refp != 0 )
+    if(refp != 0)
     {
-      define_result = _VarDefine( refp->Value(), param[ index ] );
-      if( !define_result )
+      define_result = _VarDefine(refp->Value(), param[index]);
+      if(!define_result)
 	result = false;
       delete refp;
     }
@@ -1787,7 +1765,7 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
+int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 {
   int             result          = rcSUCCESS;
   bool            instr_success;
@@ -1804,10 +1782,10 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
   for(i=1; i<=prog.Length(); i++)
     program[i] = prog[i];
 
-  while( ( program_counter <= program_length ) && ( !done ) )
+  while((program_counter <= program_length) && (!done))
   {
-    instr = program[ program_counter ];
-    switch( instr->Code )
+    instr = program[program_counter];
+    switch(instr->Code)
     {
     case iQUIT:
       instr_success = true;
@@ -1817,12 +1795,12 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
 
     case iIF_GOTO:
       p = _Pop();
-      if( p->Spec().Type == porBOOL )
+      if(p->Spec().Type == porBOOL)
       {
-	if( ( (BoolPortion*) p )->Value() )
+	if(((BoolPortion*) p)->Value())
 	{
 	  program_counter = instr->IntVal;
-	  assert( program_counter >= 1 && program_counter <= program_length );
+	  assert(program_counter >= 1 && program_counter <= program_length);
 	}
 	else
 	{
@@ -1835,8 +1813,8 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
       else
       {
 	gerr << "NewInstr IfGoto called on a non-boolean data type\n";
-	assert( p->Spec().Type == porBOOL );	
-	_Push( p );
+	assert(p->Spec().Type == porBOOL);	
+	_Push(p);
 	program_counter++;
 	instr_success = false;
       }
@@ -1845,12 +1823,12 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
 
     case iGOTO:
       program_counter = instr->IntVal;
-      assert( program_counter >= 1 && program_counter <= program_length );
+      assert(program_counter >= 1 && program_counter <= program_length);
       instr_success = true;
       break;
 
     default:
-      //instr_success = NewInstr->Execute( *this );
+      //instr_success = NewInstr->Execute(*this);
       switch(instr->Code)
       {
 	/*
@@ -2020,8 +1998,8 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
 	break;
 
       case iPOP:
-	assert( _Depth() >= 0 );	
-	if( _Depth() > 0 )
+	assert(_Depth() >= 0);	
+	if(_Depth() > 0)
 	  delete _Pop();
 	instr_success = true;
 	break;
@@ -2049,7 +2027,7 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
       program_counter++;
     }
 
-    if( !instr_success )
+    if(!instr_success)
     {
       result = instr->LineNumber;
       done = true;
@@ -2058,20 +2036,20 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
   }
 
 
-  for( i = _CallFuncStack->Depth(); i > initial_num_of_funcs; i-- )
+  for(i = _CallFuncStack->Depth(); i > initial_num_of_funcs; i--)
   {
     funcobj = _CallFuncStack->Pop();
     delete funcobj;
   }
-  assert( _CallFuncStack->Depth() == initial_num_of_funcs );
+  assert(_CallFuncStack->Depth() == initial_num_of_funcs);
 
 
 
-  if( !user_func )
+  if(!user_func)
   {
-    while( prog.Length() > 0 )
+    while(prog.Length() > 0)
     {
-      delete prog.Remove( 1 );
+      delete prog.Remove(1);
     }
   }
 
@@ -2082,51 +2060,51 @@ int GSM::Execute( gList< NewInstr* >& prog, bool user_func )
 
 
 
-Portion* GSM::ExecuteUserFunc( gList< NewInstr* >& program, 
+Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program, 
 			      const FuncInfoType& func_info,
-			      Portion** param )
+			      Portion** param)
 {
   int rc_result;
   Portion* result;
   Portion* result_copy;
   int i;
 
-  _RefTableStack->Push( new RefHashTable );
-  _StackStack->Push( new gStack< Portion* > );
+  _RefTableStack->Push(new RefHashTable);
+  _StackStack->Push(new gStack< Portion* >);
 
 
-  for( i = 0; i < func_info.NumParams; i++ )
+  for(i = 0; i < func_info.NumParams; i++)
   {
-    if( param[ i ] != 0 && param[ i ]->Spec().Type != porREFERENCE )
+    if(param[i] != 0 && param[i]->Spec().Type != porREFERENCE)
     {
-      _VarDefine( func_info.ParamInfo[ i ].Name, param[ i ] );
-      param[ i ] = param[ i ]->RefCopy();
+      _VarDefine(func_info.ParamInfo[i].Name, param[i]);
+      param[i] = param[i]->RefCopy();
     }
   }
 
 
-  rc_result = Execute( program, true );
+  rc_result = Execute(program, true);
 
 
-  switch( rc_result )
+  switch(rc_result)
   {
   case rcSUCCESS:
-    switch( _Depth() )
+    switch(_Depth())
     {
     case 0:
       result = 
-	new ErrorPortion( (gString)
-			 "Error: No return value" );
+	new ErrorPortion((gString)
+			 "Error: No return value");
       break;
 
     default:
       result = _Pop();
-      result = _ResolveRef( result );
+      result = _ResolveRef(result);
       result_copy = result->ValCopy();
       delete result;
       result = result_copy;
       result_copy = 0;
-      if( result->Spec().Type == porERROR )
+      if(result->Spec().Type == porERROR)
       {
 	delete result;
 	result = 0;
@@ -2136,18 +2114,18 @@ Portion* GSM::ExecuteUserFunc( gList< NewInstr* >& program,
     break;
   case rcQUIT:
     result = 
-      new ErrorPortion( (gString)
-		       "Error: Interruption by user" );
+      new ErrorPortion((gString)
+		       "Error: Interruption by user");
     break;
 
   default:
-    if( rc_result >= 0 )
-      result = new ErrorPortion( (gString)
+    if(rc_result >= 0)
+      result = new ErrorPortion((gString)
 				"Error at line " +
-				ToString( rc_result / 65536) + 
+				ToString(rc_result / 65536) + 
 				" in function, line " +
-				ToString( rc_result % 65536) +
-				" in source code" );
+				ToString(rc_result % 65536) +
+				" in source code");
     else
       result = 0;
     Dump();
@@ -2155,15 +2133,15 @@ Portion* GSM::ExecuteUserFunc( gList< NewInstr* >& program,
   }
 
 
-  for( i = 0; i < func_info.NumParams; i++ )
+  for(i = 0; i < func_info.NumParams; i++)
   {
-    if( func_info.ParamInfo[ i ].PassByReference )
+    if(func_info.ParamInfo[i].PassByReference)
     {
-      if( _VarIsDefined( func_info.ParamInfo[ i ].Name ) )
+      if(_VarIsDefined(func_info.ParamInfo[i].Name))
       {
-	assert( _VarValue( func_info.ParamInfo[ i ].Name ) != 0 );
-	delete param[ i ];
-	param[ i ] = _VarRemove( func_info.ParamInfo[ i ].Name );
+	assert(_VarValue(func_info.ParamInfo[i].Name) != 0);
+	delete param[i];
+	param[i] = _VarRemove(func_info.ParamInfo[i].Name);
       }
     }
   }
@@ -2184,25 +2162,25 @@ Portion* GSM::ExecuteUserFunc( gList< NewInstr* >& program,
 //----------------------------------------------------------------------------
 
 
-void GSM::Output( void )
+void GSM::Output(void)
 {
   Portion*  p;
 
-  assert( _Depth() >= 0 );
+  assert(_Depth() >= 0);
 
-  if( _Depth() == 0 )
+  if(_Depth() == 0)
   {
     // _StdOut << "\n";
   }
   else
   {
     p = _Pop();
-    p = _ResolveRef( p );
+    p = _ResolveRef(p);
 
-    if( p->IsValid() )
+    if(p->IsValid())
     {
-      p->Output( _StdOut );
-      if( p->Spec().Type == porREFERENCE )
+      p->Output(_StdOut);
+      if(p->Spec().Type == porREFERENCE)
 	_StdOut << " (undefined)";
       _StdOut << "\n";
     }
@@ -2211,24 +2189,24 @@ void GSM::Output( void )
       _StdOut << "(undefined)\n";
     }
     
-    _Push( p );
+    _Push(p);
   }
 }
 
 
-void GSM::Dump( void )
+void GSM::Dump(void)
 {
   int  i;
 
-  assert( _Depth() >= 0 );
+  assert(_Depth() >= 0);
 
-  if( _Depth() == 0 )
+  if(_Depth() == 0)
   {
     _StdOut << "Stack : NULL\n";
   }
   else
   {
-    for( i = _Depth() - 1; i >= 0; i-- )
+    for(i = _Depth() - 1; i >= 0; i--)
     {
       _StdOut << "Stack element " << i << " : ";
       Output();
@@ -2236,18 +2214,18 @@ void GSM::Dump( void )
     }
   }
 
-  assert( _Depth() == 0 );
+  assert(_Depth() == 0);
 }
 
 
-bool GSM::Pop( void )
+bool GSM::Pop(void)
 {
   Portion* p;
   bool result = false;
 
-  assert( _Depth() >= 0 );
+  assert(_Depth() >= 0);
 
-  if( _Depth() > 0 )
+  if(_Depth() > 0)
   {
     p = _Pop();
     delete p;
@@ -2261,32 +2239,32 @@ bool GSM::Pop( void )
 }
 
 
-void GSM::Flush( void )
+void GSM::Flush(void)
 {
   int       i;
   bool result;
 
-  assert( _Depth() >= 0 );
-  for( i = _Depth() - 1; i >= 0; i-- )
+  assert(_Depth() >= 0);
+  for(i = _Depth() - 1; i >= 0; i--)
   {
     result = Pop();
-    assert( result == true );
+    assert(result == true);
   }
 
-  assert( _Depth() == 0 );
+  assert(_Depth() == 0);
 }
 
 
-void GSM::Clear( void )
+void GSM::Clear(void)
 {
   Flush();
 
-  assert( _RefTableStack->Depth() == 1 );
+  assert(_RefTableStack->Depth() == 1);
   delete _RefTableStack->Pop();
   delete _RefTableStack;
 
-  _RefTableStack = new gStack< RefHashTable* >( 1 );
-  _RefTableStack->Push( new RefHashTable );
+  _RefTableStack = new gStack< RefHashTable* >(1);
+  _RefTableStack->Push(new RefHashTable);
 
 }
 
@@ -2309,9 +2287,9 @@ Portion* GSM::Help(gString funcname)
   gSortList<FuncDescObj*> funcslist;
   Portion* result = 0;
 
-  if( _FuncTable->IsDefined( funcname ) )
+  if(_FuncTable->IsDefined(funcname))
   {
-    func = (*_FuncTable)( funcname );
+    func = (*_FuncTable)(funcname);
     gList<gString> list = func->FuncList();
     result = new ListValPortion();
     for(i=1; i<=list.Length(); i++)
@@ -2410,11 +2388,11 @@ Portion* GSM::HelpVars(gString varname)
   gSortList<gString> varslist;
   Portion* result = 0;
 
-  if( _RefTableStack->Peek()->IsDefined( varname ) )
+  if(_RefTableStack->Peek()->IsDefined(varname))
   {
     result = new ListValPortion();
     ((ListPortion*) result)->Append(new TextValPortion(varname + ":" + 
-      PortionSpecToText( (*(_RefTableStack->Peek()))(varname)->Spec())));
+      PortionSpecToText((*(_RefTableStack->Peek()))(varname)->Spec())));
   }
   else
   {
@@ -2474,7 +2452,7 @@ Portion* GSM::HelpVars(gString varname)
     result = new ListValPortion();
     for(i=1; i<=varslist.Length(); i++)
       ((ListPortion*) result)->Append(new TextValPortion(varslist[i] + ":" + 
-	PortionSpecToText( (*(_RefTableStack->Peek()))(varslist[i])->Spec())));
+	PortionSpecToText((*(_RefTableStack->Peek()))(varslist[i])->Spec())));
   }
 
   if(!result)
@@ -2499,7 +2477,7 @@ void GSM::_ErrorMessage
  const gString&  str1,
  const gString&  str2,
  const gString&  str3
- )
+)
 {
 #if 0
   s << "GSM Error " << error_num << ":\n";
@@ -2507,7 +2485,7 @@ void GSM::_ErrorMessage
 
   s << "GCL: ";
 
-  switch( error_num )
+  switch(error_num)
   {
   case 11:
     s << "NthElement[]: Subscript out of range\n";

@@ -29,6 +29,16 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 
 //-------------
+// ActionNumber
+//-------------
+
+Portion* GSM_ActionNumber(Portion** param)
+{
+  return new IntValPortion(((ActionPortion*) param[0])->Value()->GetNumber());
+}
+
+
+//-------------
 // Actions
 //-------------
 
@@ -1540,6 +1550,10 @@ void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
+  FuncObj = new FuncDescObj("ActionNumber", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionNumber, porINTEGER, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("action", porACTION));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Actions", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Actions, 

@@ -723,6 +723,24 @@ Portion *GSM_SetName_Strategy(Portion **param)
 
 
 //--------------
+// StrategieNumber
+//--------------
+
+Portion* GSM_StrategyNumber(Portion** param)
+{
+  /*
+  int i = 0;
+  Strategy* s = ((StrategyPortion*) param[0])->Value();
+  int strategy;
+  for(i=1; i<s->nfp()->NumStrats(); i++)
+    strategy = i;
+  return new IntValPortion(strategy);
+  */
+  return new IntValPortion(((StrategyPortion*) param[0])->Value()->number);
+}
+
+
+//--------------
 // Strategies
 //--------------
 
@@ -1092,4 +1110,11 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
 					    new NfSupportValPortion( 0 )));
   gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("StrategyNumber", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyNumber, porINTEGER, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porSTRATEGY));
+  gsm->AddFunction(FuncObj);
+
 }

@@ -138,7 +138,11 @@ void Portion::SetIsValid(bool is_valid)
 
 
 void Portion::SetOwner(Portion* p)
-{ Original()->_Owner = p; }
+{ 
+  if(p) 
+    assert(p->Spec().Type & (porNFG|porEFG));
+  Original()->_Owner = p; 
+}
 
 Portion* Portion::Owner(void) const
 { return Original()->_Owner; }

@@ -1506,7 +1506,7 @@ void CallFuncObj::Dump(gOutput& f) const
 	// if(_FuncInfo[i].ParamInfo[j].DefaultValue) f << '}';
       }
     }
-    f << "]\n";  
+    f << "] =: " << PortionSpecToText(_FuncInfo[i].ReturnSpec) << '\n';
   }
 }
 
