@@ -36,7 +36,7 @@ OBJECT_SUFFIX = .o
 # Default system variables, which should be overwritten if necessary.
 #
 
-SYSNAME = Linux
+SYSNAME = linux
 GUI     = gtk
 
 # define directory where object files are put
