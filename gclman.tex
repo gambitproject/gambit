@@ -24,7 +24,7 @@ Minnesota
 Theodore Turocy\\Northwestern University
 }
 
-\date{Version 0.92\\ \today\\ \jobname.tex}
+\date{Version 0.93\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -1579,6 +1579,8 @@ Text[x->TEXT] =: TEXT
 Behav[mixed->MIXED] =: BEHAV
 ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
         {time<->FLOAT} =: NFSUPPORT
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+        {time<->FLOAT} =: NFSUPPORT
 EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
@@ -2125,6 +2127,20 @@ the stopwatch was running.
 [See also:] {\tt IsWatchRunning}, {\tt StartWatch}, {\tt StopWatch}.
 \ed
 
+
+\item
+\protect \large \begin{verbatim}
+ElimAllDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
+        {time<->FLOAT} =: NFSUPPORT
+\end{verbatim} \normalsize
+
+\bd Iteratively eliminates dominated strategies until no further
+elimination is possible.  Operation and parameters are the same as in
+{\tt ElimDom}.
+\item
+[See also:] {\tt ElimDom}.  
+\ed
+
 \item
 \protect \large \begin{verbatim}
 ElimDom[nfg<->NFG | support->NFSUPPORT, {strong->BOOL}, 
@@ -2142,6 +2158,8 @@ found.  The optional parameter \verb+time+, if specified, upon completion
 contains the amount of time consumed by the elimination.  (Note that in
 the current implementation, only strategies that are dominated by
 other {\em pure} strategies are eliminated.)  
+\item
+[See also:] {\tt ElimAllDom}.  
 \ed
 
 \item
