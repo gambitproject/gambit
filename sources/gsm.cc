@@ -964,7 +964,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
     case 0:
       result = 
 	new ErrorPortion( (gString)
-			 "User-defined function Error: No return value" );
+			 "Error: No return value" );
       break;
 
     default:
@@ -985,14 +985,17 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
   case rcQUIT:
     result = 
       new ErrorPortion( (gString)
-		       "User-defined function Error: Interruption by user" );
+		       "Error: Interruption by user" );
     break;
 
   default:
     if( rc_result >= 0 )
       result = new ErrorPortion( (gString)
-				"User-defined function Error on line " +
-				ToString( rc_result ) );
+				"Error at line " +
+				ToString( rc_result / 65536) + 
+				" in function, line " +
+				ToString( rc_result % 65536) +
+				" in source code" );
     else
       result = 0;
     break;

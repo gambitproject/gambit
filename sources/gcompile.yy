@@ -677,7 +677,8 @@ int GCLCompiler::Parse(void)
 
 void GCLCompiler::emit(Instruction *op)
 {
-  if(op) op->LineNumber() = statementcount;
+  // the encoding for the line number is decoded in GSM::ExecuteUserFunc()
+  if(op) op->LineNumber() = statementcount * 65536 + lines.Peek();
   if (function)
     function->Append(op);
   else
