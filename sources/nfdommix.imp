@@ -1,7 +1,10 @@
 //
 // FILE: nfdommix.imp -- Elimination of dominated strategies in nfg
 //
+// $Id$
 //
+
+#include "gnullstatus.h"
 
 template <class T>
 bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
@@ -65,7 +68,7 @@ bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
       // tracefile << '\n' << (gRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
-      LPSolve<T> Tab(A, B, C, 1);
+      LPSolve<T> Tab(A, B, C, 1, status);
       
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -142,7 +145,7 @@ bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
       // tracefile << '\n' << (gRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
-      LPSolve<T> Tab(A, B, C, 1);
+      LPSolve<T> Tab(A, B, C, 1, status);
       
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -250,7 +253,8 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
     // tracefile << '\n' << (gRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    LPSolve<T> Tab(A, B, C, 1);
+    gNullStatus status;
+    LPSolve<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat = "<< whichstrat;
     // tracefile << " F = " << Tab.IsFeasible();
@@ -313,7 +317,8 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
     // tracefile << '\n' << (gRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    LPSolve<T> Tab(A, B, C, 1);
+    gNullStatus status;
+    LPSolve<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat = "<< whichstrat;
@@ -411,7 +416,8 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     // tracefile << '\n' << (gRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    LPSolve<T> Tab(A, B, C, 1);
+    gNullStatus status;
+    LPSolve<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat: " << prob;
     // tracefile << " F = " << Tab.IsFeasible();
@@ -473,7 +479,8 @@ bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
     // tracefile << '\n' << (gRectArray<T> &)A << '\n';
     // tracefile << B << '\n';
     // tracefile << C << '\n';
-    LPSolve<T> Tab(A, B, C, 1);
+    gNullStatus status;
+    LPSolve<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat: " << prob;

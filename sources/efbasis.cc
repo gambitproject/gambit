@@ -10,6 +10,7 @@
 #include "gpvector.h"
 #include "gdpvect.imp"
 #include "gmatrix.h"
+#include "gnullstatus.h"
 #include "efgutils.h"
 #include "lpsolve.h"
 
@@ -392,7 +393,8 @@ bool EFBasis::IsConsistent()
   // gout << "\nb: \n" << (*b);
   // gout << "\nc: \n" << (*c);
 
-  LPSolve<double> lp((*A),(*b),(*c),num_eqs);
+  gNullStatus status;
+  LPSolve<double> lp((*A),(*b),(*c),num_eqs, status);
 
   // gout << "\noptimum: " << lp.OptimumVector();
   if(!lp.IsWellFormed()) gout << "\nLP not well formed";

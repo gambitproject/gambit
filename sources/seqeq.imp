@@ -50,7 +50,7 @@ public:
 			  const SeqEquilibParams &p);
   virtual ~SequentialEquilibModule();
 
-  int SequentialEquilib(void);
+  int SequentialEquilib(gStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
@@ -183,8 +183,8 @@ SequentialEquilibModule(const BehavSolution &s,const EFBasis &b, const EFSupport
 //  gEpsilon(eps,12);
 }
 
-template <class T>SequentialEquilibModule<T>::
-~SequentialEquilibModule()
+template <class T>
+SequentialEquilibModule<T>::~SequentialEquilibModule()
 {
   delete Lex;
   delete Space;
@@ -192,7 +192,9 @@ template <class T>SequentialEquilibModule<T>::
   delete muIndex;
   delete zetaIndex;
 }
-template <class T> int SequentialEquilibModule<T>::SequentialEquilib(void)
+
+template <class T>
+int SequentialEquilibModule<T>::SequentialEquilib(gStatus &p_status)
 {
   gWatch watch;
   gPolyList<T> equations(Space,Lex);
@@ -235,7 +237,7 @@ template <class T> int SequentialEquilibModule<T>::SequentialEquilib(void)
   timer.Start();
 
   gout << "\nLast sig, mu, zeta: " << lastsig << " " << lastmu << " " << lastzeta;
-  QuikSolv<T> quickie(equations, params.status);
+  QuikSolv<T> quickie(equations, p_status);
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;

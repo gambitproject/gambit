@@ -8,8 +8,8 @@
 
 #include "gfunc.h"
 
-NFLiapParams::NFLiapParams(gStatus &s)
-  : FuncMinParams(s), nTries(10)
+NFLiapParams::NFLiapParams(void)
+  : nTries(10)
 { }
 
 class NFLiapFunc : public gC2Function<double>   {
@@ -155,13 +155,13 @@ extern bool DFP(gPVector<double> &p,
 		gC2Function<double> &func,
 		double &fret, int &iter,
 		int maxits1, double tol1, int maxitsN, double tolN,
-		gOutput &tracefile, int tracelevel, bool interior = false,
-		gStatus &status = gstatus);
+		gOutput &tracefile, int tracelevel, bool interior,
+		gStatus &status);
 
 
 bool Liap(const Nfg &N, NFLiapParams &params,
 	  const MixedProfile<gNumber> &start,
-	  gList<MixedSolution> &solutions,
+	  gList<MixedSolution> &solutions, gStatus &p_status,
 	  long &nevals, long &niters)
 {
   static const double ALPHA = .00000001;
@@ -190,7 +190,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
        (params.nTries == 0 || i <= params.nTries) &&
 	 (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) { 
-    params.status.Get();
+    p_status.Get();
     if (i > 1) PickRandomProfile(p);
     
     if (params.trace>0)
@@ -198,7 +198,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
     
     if ((found = DFP(p, F, value, iter, params.maxits1, params.tol1,
 		     params.maxitsN, params.tolN, *params.tracefile,
-		     params.trace-1, false, params.status)) == true)  {
+		     params.trace-1, false, p_status)) == true)  {
       bool add = true;
       int ii = 1;
       while (ii <= solutions.Length() && add == true) {

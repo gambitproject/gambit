@@ -8,7 +8,8 @@
 #include "nfgalleq.h"
 
 void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				      gList<BehavSolution> &solns)
+				      gList<BehavSolution> &solns,
+				      gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -21,7 +22,8 @@ void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   gList<const NFSupport> singular_supports;
 
   try {
-    AllNashSolve(support, params, solutions, neval, time, singular_supports);
+    AllNashSolve(support, params, solutions, p_status,
+		 neval, time, singular_supports);
 
     nevals += neval;
   

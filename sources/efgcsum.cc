@@ -11,8 +11,7 @@
 //                        EFCSumParams: member functions
 //---------------------------------------------------------------------------
 
-CSSeqFormParams::CSSeqFormParams(gStatus &s) 
-  :  AlgParams(s)
+CSSeqFormParams::CSSeqFormParams(void) 
 { }
 
 
@@ -21,11 +20,12 @@ CSSeqFormParams::CSSeqFormParams(gStatus &s)
 //-----------------------------------
 
 static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
-		      gList<BehavSolution> &solutions, int &npivots, double &time)
+		      gList<BehavSolution> &solutions, gStatus &p_status,
+		      int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)   {
     CSSeqFormModule<double> module(support, params);
-    module.CSSeqForm();
+    module.CSSeqForm(p_status);
     npivots = module.NumPivots();
     time = module.Time();
     module.GetSolutions(solutions);
@@ -33,7 +33,7 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   }
   else if (params.precision == precRATIONAL)  {
     CSSeqFormModule<gRational> module(support, params);
-    module.CSSeqForm();
+    module.CSSeqForm(p_status);
     npivots = module.NumPivots();
     time = module.Time();
     module.GetSolutions(solutions);
@@ -43,11 +43,11 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
 }    
 
 void efgLpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
-			      gList<BehavSolution> &solns)
+			      gList<BehavSolution> &solns, gStatus &p_status)
 {
   int npiv;
   double time;
-  _CSSeqForm(sup, params, solns, npiv, time);
+  _CSSeqForm(sup, params, solns, p_status, npiv, time);
   npivots += npiv;
 }
 

@@ -55,8 +55,8 @@ public:
     gText Description(void) const;
   };
 
-  VertEnum(const gMatrix<T> &, const gVector<T> &, gStatus &status_ = gstatus);
-  VertEnum(LPTableau<T> &, gStatus &status_ = gstatus);
+  VertEnum(const gMatrix<T> &, const gVector<T> &, gStatus &);
+  VertEnum(LPTableau<T> &, gStatus &);
   virtual ~VertEnum();
 
   const gList<BFS<T> > &VertexList() const;

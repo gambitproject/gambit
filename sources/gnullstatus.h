@@ -1,14 +1,17 @@
 //
-// FILE: gnullsts.cc -- Implementation of a placebo gStatus object
+// FILE: gnullstatus.h -- Declaration of a null status object
 //
 // $Id$
 //
+
+#ifndef GNULLSTATUS_H
+#define GNULLSTATUS_H
 
 #include "gstatus.h"
 
 class gNullStatus : public gStatus  {
 public:
-  ~gNullStatus(void) { }
+  virtual ~gNullStatus(void) { }
 
   int GetWidth(void) const { return 0; }
   gOutput &SetWidth(int) { return *this; }
@@ -35,7 +38,4 @@ public:
   void Reset(void) { }
 };
 
-gNullStatus _gstatus;
-gStatus &gstatus = _gstatus;
-
-
+#endif  // GNULLSTATUS_H

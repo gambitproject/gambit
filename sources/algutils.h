@@ -1,6 +1,8 @@
 //
 // FILE: algutils.h -- class definition for Algorithm specific classes
 //
+// $Id
+//
 
 #ifndef ALGUTILS_H
 #define ALGUTILS_H
@@ -18,9 +20,8 @@ public:
   gPrecision precision;
   
   gOutput *tracefile;
-  gStatus &status;
   
-  AlgParams(gStatus & = gstatus);
+  AlgParams(void);
   virtual ~AlgParams();
   
   const gNumber &Accuracy(void) const { return m_accuracy; }
@@ -32,7 +33,7 @@ public:
   int maxits1, maxitsN;
   double tol1, tolN;
   
-  FuncMinParams(gStatus & = gstatus);
+  FuncMinParams(void);
   virtual ~FuncMinParams();
   
   void SetAccuracy(const gNumber &);

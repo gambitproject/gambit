@@ -13,7 +13,7 @@
 #include "rational.h"
 #include "gtext.h"
 #include "glist.h"
-#include "gsm.h"
+#include "gsmconsole.h"
 #include "gstack.h"
 #include "gcompile.h"
 #include "gcmdline.h"
@@ -163,6 +163,7 @@ int main( int /*argc*/, char* argv[] )
       strcpy(_SourceDir, "");
     }
 
+    GSM *gsm = new gsmConsole(gin, gout, gerr);
     // Set up the error handling functions:
 #ifndef __BORLANDC__
     signal(SIGFPE, (fptr) SigFPEHandler);
@@ -175,14 +176,9 @@ int main( int /*argc*/, char* argv[] )
     signal(SIGKILL, (fptr) SigSegFaultHandler);
     signal(SIGILL,  (fptr) SigSegFaultHandler);
 
-    // This is added here since for some reason, the handler gets
-    // uninstalled on linux.  This shouldn't *hurt* anything to
-    // install it here as well.
-    extern void gGCLStatusHandler(int);
-    signal(SIGINT, gGCLStatusHandler);
+    signal(SIGINT, gsmConsole::gclStatusHandler);
 #endif
 
-    GSM *gsm = new GSM;
 
     GCLCompiler C(*gsm);
     gCmdLineInput gcmdline(20);

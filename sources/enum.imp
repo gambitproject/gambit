@@ -36,8 +36,8 @@ private:
 public:
   EnumModule(const NFSupport &, const EnumParams &p);
   
-  int Enum(void);
-  int DoubleEnum(void);
+  int Enum(gStatus &);
+  int DoubleEnum(gStatus &);
   
   long NumPivots(void) const;
   double Time(void) const;
@@ -61,7 +61,7 @@ EnumModule<T>::EnumModule(const NFSupport &S, const EnumParams &p)
 }
 
 
-template <class T> int EnumModule<T>::DoubleEnum(void)
+template <class T> int EnumModule<T>::DoubleEnum(gStatus &p_status)
 {
   int index;
   T min;
@@ -101,14 +101,14 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
 
-  params.status.SetProgress((double)0);
+  p_status.SetProgress((double)0);
 
   time = watch.Elapsed();
   double dt = (double)0;
   if(params.trace>=2) 
     (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
   
-  DoubleVertEnum<T> poly(A1,b1,A2,b2,params.status);
+  DoubleVertEnum<T> poly(A1,b1,A2,b2,p_status);
 
   gout << "\nDoubleVertEnum finished:\n";
   poly.Dump(gout);
@@ -124,7 +124,7 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
   for( i=2; i<=verts1.Length() &&
        (params.stopAfter==0 || solutions.Length()<params.stopAfter);
        i++ ) {
-    params.status.Get();
+    p_status.Get();
     bfs1 = verts2[i];
     bfs2 = verts1[i];
     
@@ -167,7 +167,7 @@ template <class T> int EnumModule<T>::DoubleEnum(void)
   return 1;
 }
 
-template <class T> int EnumModule<T>::Enum(void)
+template <class T> int EnumModule<T>::Enum(gStatus &p_status)
 {
   int index;
   T min;
@@ -208,7 +208,7 @@ template <class T> int EnumModule<T>::Enum(void)
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
 
-  params.status.SetProgress((double)0);
+  p_status.SetProgress((double)0);
 
   time = watch.Elapsed();
   double dt = (double)0;
@@ -216,8 +216,8 @@ template <class T> int EnumModule<T>::Enum(void)
     (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
   
 
-  VertEnum<T> poly1(A1,b1,params.status);
-  params.status.SetProgress(-(double)(1));
+  VertEnum<T> poly1(A1,b1,p_status);
+  p_status.SetProgress(-(double)(1));
 
   dt = watch.Elapsed()-time;
   time = watch.Elapsed();
@@ -225,8 +225,8 @@ template <class T> int EnumModule<T>::Enum(void)
     (*params.tracefile) << "\nafter poly1, dt = " << dt << " time = " << time; 
   
 
-  VertEnum<T> poly2(A2,b2,params.status);
-  params.status.SetProgress(-(double)1);
+  VertEnum<T> poly2(A2,b2,p_status);
+  p_status.SetProgress(-(double)1);
 
   
   dt = watch.Elapsed()-time;
@@ -266,9 +266,9 @@ template <class T> int EnumModule<T>::Enum(void)
        i2<=v2 &&
        (params.stopAfter==0 || solutions.Length()<params.stopAfter);
        i2++ ) {
-    params.status.Get();
+    p_status.Get();
     bfs1 = verts2[i2];
-    params.status.SetProgress((double)(i-2)/(double)v2);
+    p_status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
     i++;
     for( i1=2; 

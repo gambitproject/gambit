@@ -7,7 +7,8 @@
 #include "enumsub.h"
 
 void EnumBySubgame::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				 gList<BehavSolution> &solns)
+				 gList<BehavSolution> &solns,
+				 gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -18,7 +19,7 @@ void EnumBySubgame::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   long npiv;
   double time;
 
-  Enum(support, params, solutions, npiv, time);
+  Enum(support, params, solutions, p_status, npiv, time);
 
   npivots += npiv;
   
@@ -37,10 +38,11 @@ EnumBySubgame::EnumBySubgame(const EFSupport &, const EnumParams &p, int max)
 EnumBySubgame::~EnumBySubgame()   { }
 
 int Enum(const EFSupport &support, const EnumParams &params,
-	 gList<BehavSolution> &solutions, long &npivots, double &time)
+	 gList<BehavSolution> &solutions, gStatus &p_status,
+	 long &npivots, double &time)
 {
   EnumBySubgame module(support, params);
-  solutions = module.Solve(support);
+  solutions = module.Solve(support, p_status);
   npivots = module.NumPivots();
   time = module.Time();
   return 1;

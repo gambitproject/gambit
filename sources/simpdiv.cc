@@ -6,17 +6,17 @@
 
 #include "simpdiv.imp"
 
-SimpdivParams::SimpdivParams(gStatus &s)
-  : AlgParams(s), nRestarts(20), leashLength(0)
+SimpdivParams::SimpdivParams(void)
+  : nRestarts(20), leashLength(0)
 { }
 
 int Simpdiv(const NFSupport &support, const SimpdivParams &params,
-	    gList<MixedSolution> &solutions,
+	    gList<MixedSolution> &solutions, gStatus &p_status,
 	    int &nevals, int &niters, double &time)
 {
   if (params.precision == precDOUBLE)  {
     SimpdivModule<double> module(support, params);
-    module.Simpdiv();
+    module.Simpdiv(p_status);
     nevals = module.NumEvals();
     niters = module.NumIters();
     time = module.Time();
@@ -24,7 +24,7 @@ int Simpdiv(const NFSupport &support, const SimpdivParams &params,
   }
   else if (params.precision == precRATIONAL)  {
     SimpdivModule<gRational> module(support, params);
-    module.Simpdiv();
+    module.Simpdiv(p_status);
     nevals = module.NumEvals();
     niters = module.NumIters();
     time = module.Time();

@@ -74,13 +74,14 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 }
 
 void efgEnumPure::SolveSubgame(const FullEfg &, const EFSupport &p_support,
-			       gList<BehavSolution> &p_solutions)
+			       gList<BehavSolution> &p_solutions,
+			       gStatus &p_status)
 {
-  efgEnumPureSolve(p_support, p_solutions, m_stopAfter, m_status);
+  efgEnumPureSolve(p_support, p_solutions, m_stopAfter, p_status);
 }
 
-efgEnumPure::efgEnumPure(int p_stopAfter, gStatus &p_status)
-  : SubgameSolver(0), m_stopAfter(p_stopAfter), m_status(p_status)
+efgEnumPure::efgEnumPure(int p_stopAfter)
+  : SubgameSolver(0), m_stopAfter(p_stopAfter)
 { }
 
 efgEnumPure::~efgEnumPure()   { }

@@ -22,10 +22,10 @@ private:
   gList<const NFSupport> singular_supports;
 
 public:
-  AllNashSolveModule(const Nfg &, const PolEnumParams &p);
-  AllNashSolveModule(const NFSupport &, const PolEnumParams &p);
+  AllNashSolveModule(const Nfg &, const PolEnumParams &p, gStatus &);
+  AllNashSolveModule(const NFSupport &, const PolEnumParams &p, gStatus &);
 
-  void NashEnum(void);
+  void NashEnum(gStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
@@ -40,7 +40,8 @@ public:
 //                    AllNashSolveModule: Member functions
 //-------------------------------------------------------------------------
 
-AllNashSolveModule::AllNashSolveModule(const Nfg &N, const PolEnumParams &p)
+AllNashSolveModule::AllNashSolveModule(const Nfg &N, const PolEnumParams &p,
+				       gStatus &p_status)
   : NF(N), 
     supersupport(N), 
     possiblenashsubsupports(), 
@@ -49,11 +50,12 @@ AllNashSolveModule::AllNashSolveModule(const Nfg &N, const PolEnumParams &p)
     solutions(),
     singular_supports()
 { 
-  possiblenashsubsupports += PossibleNashSubsupports(supersupport,params.status);
+  possiblenashsubsupports += PossibleNashSubsupports(supersupport,p_status);
 }
 
 AllNashSolveModule::AllNashSolveModule(const NFSupport &S, 
-				       const PolEnumParams &p)
+				       const PolEnumParams &p,
+				       gStatus &p_status)
   : NF(S.Game()), 
     supersupport(S), 
     possiblenashsubsupports(), 
@@ -63,21 +65,21 @@ AllNashSolveModule::AllNashSolveModule(const NFSupport &S,
     singular_supports()
 { 
   possiblenashsubsupports += 
-    PossibleNashSubsupports(supersupport,params.status);
+    PossibleNashSubsupports(supersupport, p_status);
 }
 
 
-void AllNashSolveModule::NashEnum(void)
+void AllNashSolveModule::NashEnum(gStatus &p_status)
 {
   for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
-    params.status.Get();
-    params.status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
+    p_status.Get();
+    p_status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
     long newevals = 0;
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
     bool is_singular = false;
-    PolEnum(possiblenashsubsupports[i], params, newsolns, newevals, newtime,
-	    is_singular);
+    PolEnum(possiblenashsubsupports[i], params, newsolns, p_status,
+	    newevals, newtime, is_singular);
     for (int j = 1; j <= newsolns.Length(); j++)
       if (newsolns[j].IsNash()) 
 	solutions += newsolns[j];
@@ -115,14 +117,15 @@ AllNashSolveModule::GetSingularSupports(void) const
 }
 
 int AllNashSolve(const NFSupport &S, const PolEnumParams &params,
-		 gList<MixedSolution> &solutions, long &nevals, double &time,
+		 gList<MixedSolution> &solutions, gStatus &p_status,
+		 long &nevals, double &time,
 		 gList<const NFSupport> &singular_supports)
 {
 
-  params.status.SetProgress((double)0);
-  AllNashSolveModule module(S, params);
-  params.status.SetProgress(-(double)(1)); // trigger second pass
-  module.NashEnum();
+  p_status.SetProgress((double)0);
+  AllNashSolveModule module(S, params, p_status);
+  p_status.SetProgress(-(double)(1)); // trigger second pass
+  module.NashEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();

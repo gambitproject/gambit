@@ -21,16 +21,15 @@
 #include "mixedsol.h"
 #include "vertenum.h"
 
-class EnumParams : public AlgParams    {
+class EnumParams : public AlgParams {
 public:
   bool cliques;
 
-  EnumParams(gStatus & = gstatus);
+  EnumParams(void);
 };
 
-
 int Enum(const NFSupport &, const EnumParams &,
-	 gList<MixedSolution> &, long &npivots, double &time);
+	 gList<MixedSolution> &, gStatus &, long &npivots, double &time);
 
 #endif    // ENUM_H
 

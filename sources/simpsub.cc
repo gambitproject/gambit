@@ -7,7 +7,8 @@
 #include "simpsub.h"
 
 void efgSimpDivNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				      gList<BehavSolution> &solns)
+				      gList<BehavSolution> &solns,
+				      gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -16,7 +17,7 @@ void efgSimpDivNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   gList<MixedSolution> solutions;
   int nev, nit;
   double time;
-  Simpdiv(support, params, solutions, nev, nit, time);
+  Simpdiv(support, params, solutions, p_status, nev, nit, time);
 
   nevals += nev;
 

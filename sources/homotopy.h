@@ -20,15 +20,13 @@ public:
   bool fullGraph;
   gOutput *pxifile;
   
-  HomQreParams(gStatus & = gstatus);
-  HomQreParams(gOutput &out, gOutput &pxi,gStatus & = gstatus);
+  HomQreParams(void);
+  HomQreParams(gOutput &out, gOutput &pxi);
 };
 
-
 void HomQre(const Nfg &, HomQreParams &,
-	   const MixedProfile<gNumber> &, gList<MixedSolution> &,
-	   long &nevals, long &nits);
-
+	    const MixedProfile<gNumber> &, gList<MixedSolution> &, gStatus &,
+	    long &nevals, long &nits);
 
 
 template <class T> T my_log(T x,T eps);

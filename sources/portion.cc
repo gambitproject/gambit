@@ -124,14 +124,13 @@ bool Portion::GameIsEfg(void) const
 
 void Portion::SetGame(const Nfg *game)
 {
-#ifdef NOT_PORTED_YET
   if (game != _Game)  {
     if (_Game)  { 
-      _gsm->GameRefCount(_Game)--;
+      GSM::GameRefCount(_Game)--;
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      if(_gsm->GameRefCount(_Game) == 0) 
+      if (GSM::GameRefCount(_Game) == 0) 
         delete (Nfg *) _Game;
     }    
      
@@ -139,25 +138,23 @@ void Portion::SetGame(const Nfg *game)
     _GameIsEfg = false;
       
     if (_Game)  {
-      _gsm->GameRefCount(_Game)++;
+      GSM::GameRefCount(_Game)++;
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
 #endif
     }
   }
-#endif  // NOT_PORTED_YET
 }
 
 void Portion::SetGame(const FullEfg *game)
 {
-#ifdef NOT_PORTED_YET
   if (game != _Game)  {
     if (_Game)  {
-      _gsm->GameRefCount(_Game)--;
+      GSM::GameRefCount(_Game)--;
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count-: "<< _gsm->GameRefCount(_Game) <<'\n';
 #endif
-      if (_gsm->GameRefCount(_Game) == 0)   
+      if (GSM::GameRefCount(_Game) == 0)   
 	delete (Efg*) _Game;
     }
     
@@ -165,13 +162,12 @@ void Portion::SetGame(const FullEfg *game)
     _GameIsEfg = true;
     
     if (_Game)  {
-      _gsm->GameRefCount(_Game)++;
+      GSM::GameRefCount(_Game)++;
 #ifdef MEMCHECK
       gout<<"Game "<<_Game<<" ref count+: "<<_gsm->GameRefCount(_Game)<<'\n';
 #endif
     }
   }
-#endif  // NOT_PORTED_YET
 }
 
 

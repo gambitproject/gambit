@@ -29,12 +29,12 @@ private:
 
   gArray<gArray<Infoset *> *> infosets;
 
-  void FindSubgames(const EFSupport &, Node *, gList<BehavSolution> &,
-		    gList<EFOutcome *> &);
+  void FindSubgames(const EFSupport &, gStatus &, 
+		    Node *, gList<BehavSolution> &, gList<EFOutcome *> &);
   
 protected:
   virtual void SolveSubgame(const FullEfg &, const EFSupport &,
-			    gList<BehavSolution> &) = 0;
+			    gList<BehavSolution> &, gStatus &) = 0;
   virtual void ViewSubgame(int, const FullEfg &, EFSupport &);
 
   virtual void ViewNormal(const Nfg &, NFSupport &);
@@ -45,7 +45,7 @@ public:
   SubgameSolver(int maxsol = 0);
   virtual ~SubgameSolver();
     
-  gList<BehavSolution> Solve(const EFSupport &);
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
   
   double Time(void) const   { return time; }
 };

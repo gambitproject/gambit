@@ -11,24 +11,23 @@
 //                        ZSumParams: member functions
 //---------------------------------------------------------------------------
 
-ZSumParams::ZSumParams(gStatus &s) 
-  :  AlgParams(s)
+ZSumParams::ZSumParams(void)
 { }
 
 int ZSum(const NFSupport &support, const ZSumParams &params, 
-	 gList<MixedSolution> &solutions,
+	 gList<MixedSolution> &solutions, gStatus &p_status,
 	 int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
     ZSumModule<double> module(support, params);
-    module.ZSum();
+    module.ZSum(p_status);
     module.GetSolutions(solutions);
     npivots = module.NumPivots();
     time = module.Time();
   }
   else  {
     ZSumModule<gRational> module(support, params);
-    module.ZSum();
+    module.ZSum(p_status);
     module.GetSolutions(solutions);
     npivots = module.NumPivots();
     time = module.Time();

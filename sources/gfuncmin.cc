@@ -354,8 +354,8 @@ bool DFP(gPVector<double> &p,
 	 gC2Function<double> &func,
 	 double &fret, int &iter,
          int maxits1, double tol1, int maxitsN, double tolN,
-	 gOutput &tracefile, int tracelevel, bool interior = false,
-	 gStatus &status = gstatus)
+	 gOutput &tracefile, int tracelevel, bool interior,
+	 gStatus &status)
 {
   int i, j, its;
   int n = p.Length();
@@ -450,8 +450,8 @@ bool Powell(gPVector<double> &p,
 	    gFunction<double> &func,
 	    double &fret, int &iter,
 	    int maxits1, double tol1, int maxitsN, double tolN,
-	    gOutput &tracefile, int tracelevel, bool interior = false,
-	    gStatus &status = gstatus)
+	    gOutput &tracefile, int tracelevel, bool interior,
+	    gStatus &status)
 {
   int ibig,n;
   double t,fptt,fp,del;
@@ -549,7 +549,7 @@ bool OldPowell(gVector<double> &p,
 	    gFunction<double> &func,
 	    double &fret, int &iter,
 	    int maxits1, double tol1, int maxitsN, double tolN,
-	    gOutput &tracefile, int tracelevel, gStatus &status = gstatus)
+	    gOutput &tracefile, int tracelevel, gStatus &status)
 {
   int i,ibig,n;
   double t,fptt,fp,del;

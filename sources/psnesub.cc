@@ -8,7 +8,8 @@
 #include "nfgpure.h"
 
 void efgEnumPureNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				       gList<BehavSolution> &solns)
+				       gList<BehavSolution> &solns,
+				       gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -17,7 +18,7 @@ void efgEnumPureNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   gList<MixedSolution> solutions;
   nfgEnumPure solver;
   solver.SetStopAfter(m_stopAfter);
-  solver.Solve(support, m_status, solutions);
+  solver.Solve(support, p_status, solutions);
 
   for (int i = 1; i <= solutions.Length(); i++)  {
     MixedProfile<gNumber> profile(solutions[i]);
@@ -27,9 +28,8 @@ void efgEnumPureNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   delete N;
 }
 
-efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &,
-					 int p_stopAfter, gStatus &p_status)
-  : SubgameSolver(0), m_stopAfter(p_stopAfter), m_status(p_status)
+efgEnumPureNfgSolve::efgEnumPureNfgSolve(const EFSupport &, int p_stopAfter)
+  : SubgameSolver(0), m_stopAfter(p_stopAfter)
 { }
 
 efgEnumPureNfgSolve::~efgEnumPureNfgSolve()   { }

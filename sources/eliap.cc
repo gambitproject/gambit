@@ -9,8 +9,8 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-EFLiapParams::EFLiapParams(gStatus &s)
-  : FuncMinParams(s), nTries(10)
+EFLiapParams::EFLiapParams(void)
+  : nTries(10)
 { }
 
 class EFLiapFunc : public gFunction<double>  {
@@ -98,13 +98,13 @@ extern bool Powell(gPVector<double> &p,
 		   gFunction<double> &func,
 		   double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel, bool interior = false,
-		   gStatus &status = gstatus);
+		   gOutput &tracefile, int tracelevel, bool interior,
+		   gStatus &status);
 
 
 bool Liap(const Efg &E, EFLiapParams &params,
 	  const BehavProfile<double> &start,
-	  gList<BehavSolution> &solutions,
+	  gList<BehavSolution> &solutions, gStatus &p_status,
 	  long &nevals, long &niters)
 {
   static const double ALPHA = .00000001;
@@ -130,7 +130,7 @@ bool Liap(const Efg &E, EFLiapParams &params,
   for (int i = 1; (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter); 
        i++)   {
-    params.status.Get();
+    p_status.Get();
     if (i > 1)  PickRandomProfile(p);
 
     InitMatrix(xi, p.Lengths());
@@ -141,7 +141,7 @@ bool Liap(const Efg &E, EFLiapParams &params,
     if (Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, 
 		       params.tolN,*params.tracefile, params.trace-1, true, 
-		       params.status)) {
+		       p_status)) {
       
       bool add = true;
       int ii=1;
@@ -173,7 +173,8 @@ bool Liap(const Efg &E, EFLiapParams &params,
 //------------------------------------------
 
 void efgLiapSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				gList<BehavSolution> &solns)
+				gList<BehavSolution> &solns,
+				gStatus &p_status)
 {
   BehavProfile<double> bp(sup);
   
@@ -194,7 +195,7 @@ void efgLiapSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 
   long this_nevals, this_niters;
 
-  Liap(E, params, bp, solns, this_nevals, this_niters);
+  Liap(E, params, bp, solns, p_status, this_nevals, this_niters);
 
   nevals += this_nevals;
 }

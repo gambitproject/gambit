@@ -5,20 +5,20 @@
 //
 
 #include "epolenum.imp"
+
 //---------------------------------------------------------------------------
 //                        EfgPolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-EfgPolEnumParams::EfgPolEnumParams(gStatus &s)
-  : AlgParams(s)
+EfgPolEnumParams::EfgPolEnumParams(void)
 { }
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
-	       gList<BehavSolution> & solutions, long &nevals, double &time,
-	       bool &is_singular)
+	       gList<BehavSolution> &solutions, gStatus &p_status,
+	       long &nevals, double &time, bool &is_singular)
 {
   EfgPolEnumModule<gDouble> module(support, params);
-  module.EfgPolEnum();
+  module.EfgPolEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();

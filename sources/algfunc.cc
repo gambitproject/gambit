@@ -183,7 +183,7 @@ static Portion *GSM_Behav(GSM &, Portion **param)
 
 #include "enum.h"
 
-static Portion *GSM_EnumMixed_Nfg(GSM &, Portion **param)
+static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
 
@@ -199,12 +199,12 @@ static Portion *GSM_EnumMixed_Nfg(GSM &, Portion **param)
   try {
     double time;
     long npivots;
-    Enum(*S, params, solutions, npivots, time);
+    Enum(*S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
     ((NumberPortion *) param[3])->SetValue(npivots);
     ((NumberPortion *) param[4])->SetValue(time);
   }
   catch (gSignalBreak &) {
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
 
   return new Mixed_ListPortion(solutions);
@@ -234,12 +234,12 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
   try {
     double time;
     long npivots;
-    Enum(support, params, solutions, npivots, time);
+    Enum(support, params, solutions, gsm.GetStatusMonitor(), npivots, time);
     ((NumberPortion *) param[4])->SetValue(npivots);
     ((NumberPortion *) param[5])->SetValue(time);
   }
   catch (gSignalBreak &) {
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
   return new Behav_ListPortion(solutions);
 }
@@ -287,9 +287,8 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 
     try {
       efgEnumPureNfgSolve algorithm(support,
-				    ((NumberPortion *) param[2])->Value(),
-				    gsm.GetStatusMonitor());
-      algorithm.Solve(support);
+				    ((NumberPortion *) param[2])->Value());
+      algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
@@ -302,9 +301,8 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 
     try {
       gWatch watch;
-      efgEnumPure algorithm(((NumberPortion *) param[2])->Value(), 
-			    gsm.GetStatusMonitor());
-      solutions = algorithm.Solve(support);
+      efgEnumPure algorithm(((NumberPortion *) param[2])->Value()); 
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
@@ -320,7 +318,7 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
 
 #include "grid.h"
 
-static Portion *GSM_QreGrid_Support(GSM &, Portion **param)
+static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
 
@@ -347,10 +345,10 @@ static Portion *GSM_QreGrid_Support(GSM &, Portion **param)
   gList<MixedSolution> solutions;
 
   try {
-    GridSolve(S, GP, solutions);
+    GridSolve(S, GP, solutions, gsm.GetStatusMonitor());
   }
   catch (gSignalBreak &) {
-    GP.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
   catch (...) {
     if (GP.pxifile != &gnull)  delete GP.pxifile;
@@ -395,14 +393,15 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
     try {
       long nevals, niters;
       gWatch watch;
-      Qre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+      Qre(N, NP, MixedProfile<gNumber>(start), solutions,
+	  gsm.GetStatusMonitor(), nevals, niters);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[9])->SetValue(nevals);
       ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
-      NP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     catch (...) {
       if (NP.pxifile != &gnull)  delete NP.pxifile;
@@ -441,14 +440,15 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
       long nevals, niters;
       gWatch watch;
     
-      Qre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
+      Qre(E, EP, BehavProfile<gNumber>(start), solutions, 
+	  gsm.GetStatusMonitor(), nevals, niters);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[9])->SetValue(nevals);
       ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
-      EP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     catch (...) {
       if (EP.pxifile != &gnull)  delete EP.pxifile;
@@ -467,7 +467,7 @@ static Portion *GSM_Qre_Start(GSM &gsm, Portion **param)
 
 #include "homotopy.h"
 
-static Portion *GSM_Hom_Start(GSM &, Portion **param)
+static Portion *GSM_Hom_Start(GSM &gsm, Portion **param)
 {
   if (param[0]->Spec().Type == porMIXED)  {
     MixedSolution &start = *((MixedPortion *) param[0])->Value();
@@ -492,14 +492,15 @@ static Portion *GSM_Hom_Start(GSM &, Portion **param)
     try {
       long nevals, niters;
       gWatch watch;
-      HomQre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
+      HomQre(N, NP, MixedProfile<gNumber>(start), solutions,
+	     gsm.GetStatusMonitor(), nevals, niters);
 
       ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[9])->SetValue(nevals);
       ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
-      NP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     catch (...) {
       if (NP.pxifile != &gnull)  delete NP.pxifile;
@@ -666,7 +667,7 @@ static Portion *GSM_KQre_Start(GSM &gsm, Portion **param)
 
 #include "lemke.h"
 
-static Portion *GSM_Lcp_Nfg(GSM &, Portion **param)
+static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
@@ -684,12 +685,12 @@ static Portion *GSM_Lcp_Nfg(GSM &, Portion **param)
   try {
     double time;
     int npivots;
-    Lemke(S, params, solutions, npivots, time);
+    Lemke(S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
     ((NumberPortion *) param[3])->SetValue(npivots);
     ((NumberPortion *) param[4])->SetValue(time);
   }
   catch (gSignalBreak &) {
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
 
   return new Mixed_ListPortion(solutions);
@@ -721,12 +722,12 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
     gList<BehavSolution> solutions;
     try {
       efgLcpNfgSolve algorithm(support, params);
-      solutions = algorithm.Solve(support);
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -742,12 +743,12 @@ static Portion *GSM_Lcp_Efg(GSM &gsm, Portion **param)
     gList<BehavSolution> solutions;
     try {
       efgLcpSolve algorithm(support, params);
-      solutions = algorithm.Solve(support);
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[4])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[5])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -830,12 +831,12 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 
     try {
       efgLiapNfgSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(supp);
+      solutions = algorithm.Solve(supp, gsm.GetStatusMonitor());
       ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
-      LP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -861,12 +862,12 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 
     try {
       efgLiapSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(supp);
+      solutions = algorithm.Solve(supp, gsm.GetStatusMonitor());
       ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
-      LP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -875,7 +876,7 @@ static Portion *GSM_Liap_Behav(GSM &gsm, Portion **param)
 
 #include "nliap.h"
 
-static Portion *GSM_Liap_Mixed(GSM &, Portion **param)
+static Portion *GSM_Liap_Mixed(GSM &gsm, Portion **param)
 {
   MixedProfile<gNumber> start(*((MixedPortion *) param[0])->Value());
   Nfg &N = start.Game();
@@ -896,13 +897,13 @@ static Portion *GSM_Liap_Mixed(GSM &, Portion **param)
     long nevals, niters;
     gWatch watch;
   
-    Liap(N, params, start, solutions, nevals, niters);
+    Liap(N, params, start, solutions, gsm.GetStatusMonitor(), nevals, niters);
 
     ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     ((NumberPortion *) param[5])->SetValue(nevals);
   }
   catch (gSignalBreak &) {
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
   
   return new Mixed_ListPortion(solutions);
@@ -914,7 +915,7 @@ static Portion *GSM_Liap_Mixed(GSM &, Portion **param)
 
 #include "nfgcsum.h"
 
-static Portion *GSM_Lp_Nfg(GSM &, Portion **param)
+static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   const Nfg *N = &S.Game();
@@ -933,12 +934,12 @@ static Portion *GSM_Lp_Nfg(GSM &, Portion **param)
   try {
     double time;
     int npivots;
-    ZSum(S, params, solutions, npivots, time);
+    ZSum(S, params, solutions, gsm.GetStatusMonitor(), npivots, time);
     ((NumberPortion *) param[2])->SetValue(npivots);
     ((NumberPortion *) param[3])->SetValue(time);
   }
   catch (gSignalBreak &) {
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
 
   return new Mixed_ListPortion(solutions);
@@ -947,7 +948,7 @@ static Portion *GSM_Lp_Nfg(GSM &, Portion **param)
 
 #include "lpsolve.h"
 
-Portion* GSM_Lp_List(GSM &, Portion** param)
+Portion* GSM_Lp_List(GSM &gsm, Portion** param)
 {
   if (((PrecisionPortion *) param[4])->Value() == precDOUBLE)  {
     gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
@@ -959,7 +960,8 @@ Portion* GSM_Lp_List(GSM &, Portion** param)
     bool isBounded;
     double value;
 
-    LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals);
+    LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals,
+					     gsm.GetStatusMonitor());
     Portion* result = ArrayToList(s->OptimumVector());
     isFeasible = s->IsFeasible();
     isBounded = s->IsBounded();
@@ -984,7 +986,8 @@ Portion* GSM_Lp_List(GSM &, Portion** param)
     bool isBounded;
     gRational value;
   
-    LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals);
+    LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals,
+						   gsm.GetStatusMonitor());
     Portion* result = ArrayToList(s->OptimumVector());
     isFeasible = s->IsFeasible();
     isBounded = s->IsBounded();
@@ -1027,12 +1030,12 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
     gList<BehavSolution> solutions;
     try {
       efgLpNfgSolve algorithm(support, params);
-      solutions = algorithm.Solve(support);
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -1048,12 +1051,12 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 
     try {
       efgLpSolve algorithm(support, params);
-      solutions = algorithm.Solve(support);
+      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
       ((NumberPortion *) param[3])->SetValue(algorithm.NumPivots());
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
 
     return new Behav_ListPortion(solutions);
@@ -1067,8 +1070,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 
 #include "nfgalleq.h"
 
-
-static Portion *GSM_PolEnumSolve_Nfg(GSM &, Portion **param)
+static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 {
   const NFSupport &S = *((NfSupportPortion*) param[0])->Value();
   PolEnumParams params;
@@ -1083,14 +1085,15 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &, Portion **param)
     try {
       long nevals = 0;
       double time = 0.0;
-      AllNashSolve(S, params, solutions, nevals, time, singular_supports);
+      AllNashSolve(S, params, solutions, gsm.GetStatusMonitor(),
+		   nevals, time, singular_supports);
       
       ((NumberPortion *) param[2])->SetValue(nevals);
       ((NumberPortion *) param[3])->SetValue(time);
       ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
   }
   else {
@@ -1098,15 +1101,16 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &, Portion **param)
     try {
       long nevals;
       double time;
-      PolEnum(S, params, solutions, nevals, time, is_singular);
+      PolEnum(S, params, solutions, gsm.GetStatusMonitor(),
+	      nevals, time, is_singular);
       ((NumberPortion *) param[2])->SetValue(nevals);
       ((NumberPortion *) param[3])->SetValue(time);
-      if(is_singular)
+      if (is_singular)
 	singular_supports.Append(S);
       ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
   }
   return new Mixed_ListPortion(solutions);
@@ -1136,11 +1140,11 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
     params.trace = ((NumberPortion *) param[6])->Value();
     try {
       efgPolEnumNfgSolve algorithm(S, params);
-      solutions = algorithm.Solve(S);
+      solutions = algorithm.Solve(S, gsm.GetStatusMonitor());
       ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
-      params.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
   }
   else {
@@ -1153,14 +1157,15 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
       try {
 	long nevals = 0;
 	double time = 0.0;
-	AllEFNashSolve(S, params, solutions, nevals, time, singular_supports);
+	AllEFNashSolve(S, params, solutions, gsm.GetStatusMonitor(),
+		       nevals, time, singular_supports);
 	
 	((NumberPortion *) param[3])->SetValue(nevals);
 	((NumberPortion *) param[4])->SetValue(time);
 	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
       }
       catch (gSignalBreak &) {
-	params.status.Reset();
+	gsm.GetStatusMonitor().Reset();
       }
     }
     else {
@@ -1168,7 +1173,8 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
       try {
 	long nevals;
 	double time;
-	EfgPolEnum(S, params, solutions, nevals, time, is_singular);
+	EfgPolEnum(S, params, solutions, gsm.GetStatusMonitor(),
+		   nevals, time, is_singular);
 	//      EfgPolEnum(S, params, solutions, nevals, time);
 	((NumberPortion *) param[3])->SetValue(nevals);
 	((NumberPortion *) param[4])->SetValue(time);
@@ -1177,7 +1183,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
       }
       catch (gSignalBreak &) {
-	params.status.Reset();
+	gsm.GetStatusMonitor().Reset();
       }
     }
   }
@@ -1268,7 +1274,7 @@ Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 
 #include "simpdiv.h"
 
-static Portion *GSM_Simpdiv_Nfg(GSM &, Portion **param)
+static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
   SimpdivParams SP;
@@ -1284,13 +1290,13 @@ static Portion *GSM_Simpdiv_Nfg(GSM &, Portion **param)
 
     try {
       SimpdivModule<double> SM(S, SP);
-      SM.Simpdiv();
+      SM.Simpdiv(gsm.GetStatusMonitor());
       solutions = SM.GetSolutions();
       ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
       ((NumberPortion *) param[6])->SetValue(SM.Time());
     }
     catch (gSignalBreak &) {
-      SP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
     
     return new Mixed_ListPortion(solutions);
@@ -1300,14 +1306,14 @@ static Portion *GSM_Simpdiv_Nfg(GSM &, Portion **param)
 
     try {
       SimpdivModule<gRational> SM(S, SP);
-      SM.Simpdiv();
+      SM.Simpdiv(gsm.GetStatusMonitor());
       solutions = SM.GetSolutions();
 
       ((NumberPortion *) param[5])->SetValue(SM.NumEvals());
       ((NumberPortion *) param[6])->SetValue(SM.Time());
     }
     catch (gSignalBreak &) {
-      SP.status.Reset();
+      gsm.GetStatusMonitor().Reset();
     }
      
     return new Mixed_ListPortion(solutions);
@@ -1338,18 +1344,18 @@ static Portion *GSM_Simpdiv_Efg(GSM &gsm, Portion **param)
   gList<BehavSolution> solutions;
   try {
     efgSimpDivNfgSolve algorithm(support, params);
-    solutions = algorithm.Solve(support);
+    solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
     ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     ((NumberPortion *) param[7])->SetValue(algorithm.Time());
   }
   catch (gSignalBreak &) { 
-    params.status.Reset();
+    gsm.GetStatusMonitor().Reset();
   }
 
   return new Behav_ListPortion(solutions);
 }
 
-static Portion *GSM_VertEnum(GSM &, Portion** param)
+static Portion *GSM_VertEnum(GSM &gsm, Portion** param)
 {
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE)  {
     gMatrix<double>* A = ListToMatrix_Float((ListPortion*) param[0]);
@@ -1357,7 +1363,8 @@ static Portion *GSM_VertEnum(GSM &, Portion** param)
     
     gList< gVector< double > > verts;
     
-    VertEnum< double >* vertenum = new VertEnum< double >( *A, *b );
+    VertEnum<double> *vertenum = new VertEnum<double>(*A, *b,
+						      gsm.GetStatusMonitor());
     vertenum->Vertices( verts );
     delete vertenum;
 
@@ -1376,7 +1383,8 @@ static Portion *GSM_VertEnum(GSM &, Portion** param)
     
     gList< gVector< gRational > > verts;
     
-    VertEnum< gRational >* vertenum = new VertEnum< gRational >( *A, *b );
+    VertEnum<gRational> *vertenum = new VertEnum<gRational>(*A, *b,
+							    gsm.GetStatusMonitor());
     vertenum->Vertices( verts );
     delete vertenum;
 

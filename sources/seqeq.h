@@ -13,15 +13,15 @@
 #include "efbasis.h"
 #include "behavsol.h"
 
-class SeqEquilibParams : public AlgParams    {
+class SeqEquilibParams : public AlgParams {
 public:
-  SeqEquilibParams(gStatus &status_=gstatus);
+  SeqEquilibParams(void);
 };
 
 
 int SequentialEquilib(const EFBasis &, const EFSupport &, 
 		      const SeqEquilibParams &, gList<BehavSolution> &, 
-		      long &nevals, double &time);
+		      gStatus &, long &nevals, double &time);
 
 
 #endif    // SEQEQ_H

@@ -10,14 +10,15 @@
 
 #include "gfunc.h"
 #include "gmatrix.h"
+#include "gnullstatus.h"
 
-NFQreParams::NFQreParams(gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+NFQreParams::NFQreParams(void)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&gnull)
 { }
 
-NFQreParams::NFQreParams(gOutput &, gOutput &pxi, gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+NFQreParams::NFQreParams(gOutput &, gOutput &pxi)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }
 
@@ -182,8 +183,8 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
 extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 		double &fret, int &iter,
 	        int maxits1, double tol1, int maxitsN, double tolN,
-		gOutput &tracefile, int tracelevel, bool interior = false,
-		gStatus &status = gstatus);
+		gOutput &tracefile, int tracelevel, bool interior,
+		gStatus &status);
 
 
 // This is the function with the main computational loop for tracing the QRE 
@@ -193,9 +194,9 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 // fletcher Powell method is used for minimization.  
 
 void Qre(const Nfg &N, NFQreParams &params,
-	   const MixedProfile<gNumber> &start,
-	   gList<MixedSolution> &solutions,
-	   long &nevals, long &nits)
+	 const MixedProfile<gNumber> &start,
+	 gList<MixedSolution> &solutions, gStatus &p_status,
+	 long &nevals, long &nits)
 {
   static const double ALPHA = .00000001;
 
@@ -243,14 +244,14 @@ void Qre(const Nfg &N, NFQreParams &params,
   try {
     while (delta>mindelta && Lambda <= params.maxLam &&
 	   Lambda >= params.minLam)  {
-      params.status.Get();
+      p_status.Get();
       F.SetLambda(Lambda);
 
       // enter Davidon Fletcher Powell routine.  
 
       FoundSolution = DFP(p, F, value, iter, 
 			  params.maxits1, params.tol1, params.maxitsN, params.tolN,
-			  *params.tracefile,params.trace-1,true);
+			  *params.tracefile,params.trace-1,true,p_status);
       
       bool derr = F.DomainErr();
       double dist = 0.0;
@@ -327,7 +328,7 @@ void Qre(const Nfg &N, NFQreParams &params,
 	prog = abs(Lambda - LambdaStart);
       else
 	prog = abs(log(Lambda/LambdaStart));
-      params.status.SetProgress(prog/max_prog);
+      p_status.SetProgress(prog/max_prog);
       
       LambdaOld = Lambda;
       Lambda += delta * pow(Lambda, (long)params.powLam);
@@ -424,10 +425,11 @@ double NFKQreFunc::Value(const gVector<double> &lambda)
   }
   
   // first find Qre solution of p for given lambda vector
-
+  
+  gNullStatus status;
   DFP(_p, F, value, iter,
       params.maxits1, params.tol1, params.maxitsN, params.tolN,
-      *params.tracefile,params.trace-4,true);
+      *params.tracefile,params.trace-4,true,status);
 
   _nevals = F.NumEvals();
 
@@ -455,13 +457,13 @@ double NFKQreFunc::Value(const gVector<double> &lambda)
 extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
+		   gOutput &tracefile, int tracelevel,  gStatus &status);
 
 // This is for computation of the KQRE correspondence.  
 
 void KQre(const Nfg &N, NFQreParams &params,
 	   const MixedProfile<gNumber> &start,
-	   gList<MixedSolution> &solutions, 
+	   gList<MixedSolution> &solutions, gStatus &p_status,
 	   long &nevals, long &nits)
 {
   NFKQreFunc F(N, start, params);
@@ -499,13 +501,13 @@ void KQre(const Nfg &N, NFQreParams &params,
   for (nit = 1; powell && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
-    params.status.Get();
+    p_status.Get();
 
     F.SetK(K);
     
    powell =  OldPowell(lambda, xi, F, value, iter,
 		     params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		     *params.tracefile, params.trace-1);
+		     *params.tracefile, params.trace-1,p_status);
 
     F.Get_p(p);
 
@@ -537,7 +539,7 @@ void KQre(const Nfg &N, NFQreParams &params,
       p_old=p;                             
     }
     K += params.delLam * pow(K, (long)params.powLam);
-    params.status.SetProgress((double) step / (double) num_steps);
+    p_status.SetProgress((double) step / (double) num_steps);
     step++;
   }
 

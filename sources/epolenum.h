@@ -16,12 +16,12 @@
 
 class EfgPolEnumParams : public AlgParams {
 public:
-  EfgPolEnumParams(gStatus &status_=gstatus);
+  EfgPolEnumParams(void);
 };
 
 
 int EfgPolEnum(const EFSupport &, const EfgPolEnumParams &, 
-	       gList<BehavSolution> &, long &nevals, double &time,
+	       gList<BehavSolution> &, gStatus &, long &nevals, double &time,
 	       bool &is_singular);
 
 #endif    // EPOLENUM_H

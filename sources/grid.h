@@ -19,10 +19,11 @@ public:
   bool fullGraph;
   gOutput *pxifile;
   
-  GridParams(gStatus & = gstatus);
+  GridParams(void);
 };
 
-int GridSolve(const NFSupport &, const GridParams &, gList<MixedSolution> &);
+int GridSolve(const NFSupport &, const GridParams &, gList<MixedSolution> &,
+	      gStatus &);
 
 
 #endif    // GRID_H

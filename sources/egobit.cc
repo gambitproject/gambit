@@ -10,14 +10,15 @@
 
 #include "gfunc.h"
 #include "gmatrix.h"
+#include "gnullstatus.h"
 
-EFQreParams::EFQreParams(gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01),
+EFQreParams::EFQreParams(void)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01),
     fullGraph(false), pxifile(&gnull)
 { }
 
-EFQreParams::EFQreParams(gOutput &, gOutput &pxi,gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+EFQreParams::EFQreParams(gOutput &, gOutput &pxi)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }
 
@@ -136,15 +137,15 @@ static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
 extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 		   gFunction<double> &func, double &fret, int &iter,
 		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel,  bool interior = false,
-		   gStatus &status = gstatus);
+		   gOutput &tracefile, int tracelevel,  bool interior,
+		   gStatus &status);
 
 
 
 void Qre(const Efg &E, EFQreParams &params,
-	   const BehavProfile<gNumber> &start,
-	   gList<BehavSolution> &solutions,
-	   long &nevals, long &nits)
+	 const BehavProfile<gNumber> &start,
+	 gList<BehavSolution> &solutions, gStatus &p_status,
+	 long &nevals, long &nits)
 {
   static const double ALPHA = .00000001;
 
@@ -195,12 +196,12 @@ void Qre(const Efg &E, EFQreParams &params,
   try {
     while (delta>mindelta &&
 		      Lambda <= params.maxLam && Lambda >= params.minLam)   {
-      params.status.Get();
+      p_status.Get();
       F.SetLambda(Lambda);
 
       FoundSolution = Powell(p, xi, F, value, iter,
 		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		      *params.tracefile, params.trace-1,true);
+		      *params.tracefile, params.trace-1,true, p_status);
       bool derr = F.DomainErr();      
       // dist = dist to last good point
       // dsave = dist to last saved point
@@ -279,7 +280,7 @@ void Qre(const Efg &E, EFQreParams &params,
 	prog = abs(Lambda - LambdaStart);
       else
 	prog = abs(log(Lambda/LambdaStart));
-      params.status.SetProgress(prog/max_prog);
+      p_status.SetProgress(prog/max_prog);
 
       LambdaOld = Lambda;
       Lambda += delta * pow(Lambda, (long)params.powLam);
@@ -384,9 +385,10 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
   gMatrix<double> xi(_p.Length(), _p.Length());
   InitMatrix(xi, _p.Lengths());
   
+  gNullStatus status;
   Powell(_p, xi, F, value, iter,
 	 params.maxits1, params.tol1, params.maxitsN, params.tolN,
-	 *params.tracefile, params.trace-4,true);
+	 *params.tracefile, params.trace-4,true,status);
   
   _nevals = F.NumEvals();
   
@@ -488,10 +490,11 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
 extern bool OldPowell(gVector<double> &p, gMatrix<double> &xi,
 		      gFunction<double> &func, double &fret, int &iter,
 		      int maxits1, double tol1, int maxitsN, double tolN,
-		      gOutput &tracefile, int tracelevel,  gStatus &status = gstatus);
+		      gOutput &tracefile, int tracelevel, gStatus &status);
 
-void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
-	    gList<BehavSolution> &solutions, long &nevals, long &nits)
+void KQre(const Efg &E, EFQreParams &params,
+	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions,
+	  gStatus &p_status, long &nevals, long &nits)
 {
   EFKQreFunc F(E, start, params);
   int i;
@@ -528,13 +531,13 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
   for (nit = 1; FoundSolution && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
-    params.status.Get();
+    p_status.Get();
     
     F.SetK(K);
     
     FoundSolution =  OldPowell(lambda, xi, F, value, iter,
 			params.maxits1, params.tol1, params.maxitsN, params.tolN,
-			*params.tracefile, params.trace-1);
+			*params.tracefile, params.trace-1, p_status);
     
     F.Get_p(p);
 /*
@@ -577,7 +580,7 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
       p_old=p;                             
     }
     K += params.delLam * pow(K, (long)params.powLam);
-    params.status.SetProgress((double) step / (double) num_steps);
+    p_status.SetProgress((double) step / (double) num_steps);
     step++;
   }
   

@@ -22,10 +22,12 @@ private:
   gList<const EFSupport> singular_supports;
 
 public:
-  AllEFNashSolveModule(const Efg &, const EfgPolEnumParams &p);
-  AllEFNashSolveModule(const EFSupport &, const EfgPolEnumParams &p);
+  AllEFNashSolveModule(const Efg &, const EfgPolEnumParams &p,
+		       gStatus &);
+  AllEFNashSolveModule(const EFSupport &, const EfgPolEnumParams &p,
+		       gStatus &);
 
-  void NashEnum(void);
+  void NashEnum(gStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
@@ -41,7 +43,8 @@ public:
 //-------------------------------------------------------------------------
 
 AllEFNashSolveModule::AllEFNashSolveModule(const Efg &E, 
-					   const EfgPolEnumParams &p)
+					   const EfgPolEnumParams &p,
+					   gStatus &p_status)
   : EF(E), 
     supersupport(E), 
     possiblenashsubsupports(), 
@@ -51,11 +54,12 @@ AllEFNashSolveModule::AllEFNashSolveModule(const Efg &E,
     singular_supports()
 { 
   possiblenashsubsupports += 
-    PossibleNashSubsupports(supersupport,params.status);
+    PossibleNashSubsupports(supersupport,p_status);
 }
 
 AllEFNashSolveModule::AllEFNashSolveModule(const EFSupport &S, 
-					   const EfgPolEnumParams &p)
+					   const EfgPolEnumParams &p,
+					   gStatus &p_status)
   : EF(S.Game()), 
     supersupport(S), 
     possiblenashsubsupports(), 
@@ -65,25 +69,22 @@ AllEFNashSolveModule::AllEFNashSolveModule(const EFSupport &S,
     singular_supports()
 { 
   possiblenashsubsupports += 
-    PossibleNashSubsupports(supersupport,params.status);
+    PossibleNashSubsupports(supersupport,p_status);
 }
 
 
-void AllEFNashSolveModule::NashEnum(void)
+void AllEFNashSolveModule::NashEnum(gStatus &p_status)
 {
   for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
-    params.status.Get();
-    params.status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
+    p_status.Get();
+    p_status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
     long newevals = 0;
     double newtime = 0.0;
     gList<BehavSolution> newsolns;
     bool is_singular = false;
-    EfgPolEnum(possiblenashsubsupports[i], 
-	       params, 
-	       newsolns, 
-	       newevals, 
-	       newtime, 
-	       is_singular);
+    EfgPolEnum(possiblenashsubsupports[i], params, 
+	       newsolns, p_status, 
+	       newevals, newtime, is_singular);
     for (int j = 1; j <= newsolns.Length(); j++)
       if (newsolns[j].IsANFNash()) 
 	solutions += newsolns[j];
@@ -121,13 +122,14 @@ AllEFNashSolveModule::GetSingularSupports(void) const
 }
 
 int AllEFNashSolve(const EFSupport &S, const EfgPolEnumParams &params,
-		   gList<BehavSolution> &solutions, long &nevals, double &time,
+		   gList<BehavSolution> &solutions, gStatus &p_status,
+		   long &nevals, double &time,
 		   gList<const EFSupport> &singular_supports)
 {
-  params.status.SetProgress((double)0);
-  AllEFNashSolveModule module(S, params);
-  params.status.SetProgress(-(double)(1)); // trigger second pass
-  module.NashEnum();
+  p_status.SetProgress((double)0);
+  AllEFNashSolveModule module(S, params, p_status);
+  p_status.SetProgress(-(double)(1)); // trigger second pass
+  module.NashEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();
@@ -138,13 +140,14 @@ int AllEFNashSolve(const EFSupport &S, const EfgPolEnumParams &params,
 
 
 void efgPolEnumSolve::SolveSubgame(const FullEfg &, const EFSupport &p_support,
-				   gList<BehavSolution> &p_solutions)
+				   gList<BehavSolution> &p_solutions,
+				   gStatus &p_status)
 {
   long nevals;
   double time;
   gList<const EFSupport> singularSupports;
 
-  AllEFNashSolve(p_support, params, p_solutions, 
+  AllEFNashSolve(p_support, params, p_solutions, p_status,
 		 nevals, time, singularSupports);
 }
 

@@ -42,15 +42,15 @@ private:
   // with last probs for each player substituted out.  
 //  gPoly<T> Equation(int i, int strat2, int strat2) const;
 
-  int SaveNashSolutions(const gList<gVector<gDouble> > &list);
-  int SaveANFNashSolutions(const gList<gVector<gDouble> > &list);
+  int SaveNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
+  int SaveANFNashSolutions(const gList<gVector<gDouble> > &list, gStatus &);
   bool ExtendsToNash(const BehavSolution &, gStatus &);
   bool ExtendsToANFNash(const BehavSolution &, gStatus &);
 public:
   EfgPolEnumModule(const EFSupport &, const EfgPolEnumParams &p);
   ~EfgPolEnumModule();
 
-  int EfgPolEnum(void);
+  int EfgPolEnum(gStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
@@ -113,7 +113,7 @@ EfgPolEnumModule<T>::~EfgPolEnumModule()
   delete Space;
 }
 
-template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
+template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gStatus &p_status)
 {
   int i,j;
 
@@ -150,7 +150,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   gWatch timer;
   timer.Start();
 
-  QuikSolv<T> quickie(equations, params.status);
+  QuikSolv<T> quickie(equations, p_status);
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;
@@ -181,7 +181,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
     is_singular = true;
   }
 
-  int index = SaveNashSolutions(quickie.RootList());
+  int index = SaveNashSolutions(quickie.RootList(), p_status);
   time = watch.Elapsed();
   return index;	 
 }
@@ -201,7 +201,8 @@ EfgPolEnumModule<T>::ExtendsToNash(const BehavSolution &bs,
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list,
+					  gStatus &p_status)
 {
 
   int i,j,k,index=0;
@@ -217,7 +218,7 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list)
 
     BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
 
-    if(ExtendsToNash(sol,params.status)) { 
+    if(ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
       //    solutions[index].SetIsNash(triTRUE);
@@ -227,7 +228,8 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list)
 }
 
 template <class T> int 
-EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list)
+EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list,
+				       gStatus &p_status)
 {
 
   int i,j,k,index=0;
@@ -243,7 +245,7 @@ EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list)
 
     BehavSolution sol(SF.ToBehav(x), algorithmEfg_POLENUM_EFG);
 
-    if(ExtendsToNash(sol,params.status)) { 
+    if(ExtendsToNash(sol,p_status)) { 
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
       //    solutions[index].SetIsNash(triTRUE);

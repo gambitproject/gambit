@@ -14,7 +14,9 @@
 
 #include "subsolve.h"
 
-void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
+void SubgameSolver::FindSubgames(const EFSupport &p_support,
+				 gStatus &p_status,
+				 Node *n,
 				 gList<BehavSolution> &solns,
 				 gList<EFOutcome *> &values)
 {
@@ -35,7 +37,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     gList<BehavSolution> subsolns;
     gList<EFOutcome *> subvalues;
     
-    FindSubgames(p_support, subroots[i], subsolns, subvalues);
+    FindSubgames(p_support, p_status, subroots[i], subsolns, subvalues);
     
     if (subsolns.Length() == 0)  {
       solns.Flush();
@@ -126,7 +128,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     bool interrupted = false;
 
     try {
-      SolveSubgame(foo, subsupport, sol);
+      SolveSubgame(foo, subsupport, sol, p_status);
       SelectSolutions(subgame_number, foo, sol);
     }
     catch (gSignalBreak &) {
@@ -236,7 +238,8 @@ SubgameSolver::SubgameSolver(int max)
 SubgameSolver::~SubgameSolver()  
 { }
 
-gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
+gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support,
+					  gStatus &p_status)
 {
   gWatch watch;
 
@@ -269,7 +272,7 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
   m_isPerfectRecall = IsPerfectRecall(efg);
 
   try {
-    FindSubgames(support, efg.RootNode(), solutions, values);
+    FindSubgames(support, p_status, efg.RootNode(), solutions, values);
   }
   catch (gSignalBreak &) { }
 

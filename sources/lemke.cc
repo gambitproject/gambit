@@ -11,19 +11,17 @@
 //                       LemkeParams: member functions
 //---------------------------------------------------------------------------
 
-LemkeParams::LemkeParams(gStatus &s) 
-  : AlgParams(s), dup_strat(0), maxdepth(0)
+LemkeParams::LemkeParams(void)
+  : dup_strat(0), maxdepth(0)
 { }
 
-
-
 int Lemke(const NFSupport &support, const LemkeParams &params, 
-          gList<MixedSolution> &solutions,
+          gList<MixedSolution> &solutions, gStatus &p_status,
           int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
     LemkeModule<double> module(support, params);
-    module.Lemke(params.dup_strat);
+    module.Lemke(p_status, params.dup_strat);
     for (int i = 1; i <= module.GetSolutions().Length(); i++)  
       solutions.Append(MixedSolution(module.GetSolutions()[i]));
     npivots = module.NumPivots();
@@ -31,7 +29,7 @@ int Lemke(const NFSupport &support, const LemkeParams &params,
   }
   else  {
     LemkeModule<gRational> module(support, params);
-    module.Lemke(params.dup_strat);
+    module.Lemke(p_status, params.dup_strat);
     for (int i = 1; i <= module.GetSolutions().Length(); i++)  
       solutions.Append(MixedSolution(module.GetSolutions()[i]));
     npivots = module.NumPivots();

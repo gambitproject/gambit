@@ -13,14 +13,14 @@
 #include "algutils.h"
 
 class LemkeParams : public AlgParams    {
-  public:
-    int dup_strat, maxdepth;
-    
-    LemkeParams(gStatus & = gstatus);
+public:
+  int dup_strat, maxdepth;
+  
+  LemkeParams(void);
 };
 
 int Lemke(const NFSupport &, const LemkeParams &,
-          gList<MixedSolution> &, int &npivots, double &time);
+          gList<MixedSolution> &, gStatus &, int &npivots, double &time);
  
 
 #endif    // LEMKE_H

@@ -1,4 +1,8 @@
-// Includes //////////////////////////////////////////////////////////////
+//
+// FILE: homotopy.cc -- Homotopy version of QreSolve
+//
+// $Id$
+//
 
 #include <values.h>
 #include <math.h>
@@ -7,20 +11,20 @@
 #include "gmatrix.h"
 #include "nfgciter.h"
 
-HomQreParams::HomQreParams(gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+HomQreParams::HomQreParams(void)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&gnull)
 { }
 
-HomQreParams::HomQreParams(gOutput &, gOutput &pxi, gStatus &s)
-  : FuncMinParams(s), powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
+HomQreParams::HomQreParams(gOutput &, gOutput &pxi)
+  : powLam(1), minLam(0.01), maxLam(30.0), delLam(0.01), 
     fullGraph(false), pxifile(&pxi)
 { }
 
 void HomQre(const Nfg &nfg, HomQreParams &params,
-	   const MixedProfile<gNumber> &start,
-	   gList<MixedSolution> &solutions,
-	   long &nevals, long &nits)
+	    const MixedProfile<gNumber> &start,
+	    gList<MixedSolution> &solutions, gStatus &p_status,
+	    long &nevals, long &nits)
 { 
   echo_payoffs(start.Support());
   

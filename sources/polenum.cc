@@ -39,7 +39,7 @@ private:
 public:
   PolEnumModule(const NFSupport &, const PolEnumParams &p);
   
-  int PolEnum(void);
+  int PolEnum(gStatus &);
   
   long NumEvals(void) const;
   double Time(void) const;
@@ -65,7 +65,7 @@ PolEnumModule::PolEnumModule(const NFSupport &S, const PolEnumParams &p)
 }
 
 
-int PolEnumModule::PolEnum(void)
+int PolEnumModule::PolEnum(gStatus &p_status)
 {
   int i,j;
 
@@ -93,8 +93,8 @@ int PolEnumModule::PolEnum(void)
   timer.Start();
 
   
-  QuikSolv<gDouble> quickie(equations, params.status);
-  //  params.status.SetProgress(0);
+  QuikSolv<gDouble> quickie(equations, p_status);
+  //  p_status.SetProgress(0);
 
   if (params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
@@ -254,16 +254,15 @@ bool PolEnumModule::IsSingular() const
 //                        PolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-PolEnumParams::PolEnumParams(gStatus &s)
-  : AlgParams(s)
+PolEnumParams::PolEnumParams(void)
 { }
 
 int PolEnum(const NFSupport &support, const PolEnumParams &params,
-	    gList<MixedSolution> &solutions, long &nevals, double &time,
-	    bool &is_singular)
+	    gList<MixedSolution> &solutions, gStatus &p_status,
+	    long &nevals, double &time, bool &is_singular)
 {
   PolEnumModule module(support, params);
-  module.PolEnum();
+  module.PolEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();

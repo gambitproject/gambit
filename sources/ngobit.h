@@ -20,19 +20,19 @@ public:
   bool fullGraph;
   gOutput *pxifile;
   
-  NFQreParams(gStatus & = gstatus);
-  NFQreParams(gOutput &out, gOutput &pxi,gStatus & = gstatus);
+  NFQreParams(void);
+  NFQreParams(gOutput &out, gOutput &pxi);
 };
 
 
 void Qre(const Nfg &, NFQreParams &,
-	   const MixedProfile<gNumber> &, gList<MixedSolution> &,
-	   long &nevals, long &nits);
+	 const MixedProfile<gNumber> &, gList<MixedSolution> &, gStatus &,
+	 long &nevals, long &nits);
 
 
 void KQre(const Nfg &N, NFQreParams &params,
 	    const MixedProfile<gNumber> &start,
-	    gList<MixedSolution> &solutions, 
+	    gList<MixedSolution> &solutions, gStatus &,
 	    long &nevals, long &nits);
 
 #endif    // NGOBIT_H

@@ -9,6 +9,7 @@
 
 // we probably want to break this out into another file (rdm)
 
+#include "gnullstatus.h"
 #include "subsolve.h"
 
 class SubgamePerfectChecker : public SubgameSolver  {
@@ -20,7 +21,8 @@ private:
   BehavProfile<gNumber> start;
   gList<Node *> oldroots;
   
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
   
 public:
@@ -216,8 +218,8 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 gTriState BehavSolution::GetANFNash(void) const
 {
   gTriState answer;
-  gStatus &m_status = gstatus;
-  answer = (m_profile->ExtendsToANFNash(Support(),Support(),m_status)) ?
+  gNullStatus status;
+  answer = (m_profile->ExtendsToANFNash(Support(),Support(),status)) ?
 		triTRUE:triFALSE;
   if (answer == triFALSE) {
     m_Nash.Set(triFALSE);
@@ -245,10 +247,10 @@ gTriState BehavSolution::GetNash(void) const
     // Is perfect recall needed here, Andy?
     else 
       if (IsPerfectRecall(m_profile->Game())) { 
-	gStatus &m_status = gstatus;
 	// not sure MaxRegret does the right thing here
+	gNullStatus status;
 	answer = (m_profile->MaxRegret() <= m_epsilon  &&
-		    ExtendsToNash(Support(),Support(),m_status)) ? triTRUE:triFALSE;
+		    ExtendsToNash(Support(),Support(),status)) ? triTRUE:triFALSE;
       }
   }
   // Done.  Now mark other obvious inferences 
@@ -279,7 +281,8 @@ gTriState BehavSolution::GetSubgamePerfect(void) const
     if(IsComplete()) {
       BehavProfile<gNumber> p(*this);
       SubgamePerfectChecker checker(p.Game(),p, Epsilon());
-      checker.Solve(p.Support());
+      gNullStatus status;
+      checker.Solve(p.Support(), status);
       answer = checker.IsSubgamePerfect();
     }
     // else, for now, we require complete profiles for subgame perfection.  
@@ -1196,8 +1199,10 @@ SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gN
   }   
 }
 
-void SubgamePerfectChecker::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-					 gList<BehavSolution> &solns)
+void SubgamePerfectChecker::SolveSubgame(const FullEfg &E,
+					 const EFSupport &sup,
+					 gList<BehavSolution> &solns,
+					 gStatus &p_status)
 {
   BehavProfile<gNumber> bp(sup);
   

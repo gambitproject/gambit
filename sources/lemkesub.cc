@@ -7,7 +7,8 @@
 #include "lemkesub.h"
 
 void efgLcpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				  gList<BehavSolution> &solns)
+				  gList<BehavSolution> &solns,
+				  gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -18,7 +19,7 @@ void efgLcpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   int npiv;
   double time;
 
-  Lemke(support, params, solutions, npiv, time);
+  Lemke(support, params, solutions, p_status, npiv, time);
 
   npivots += npiv;
 

@@ -38,8 +38,8 @@ public:
   LemkeModule(const NFSupport &, const LemkeParams &);
   virtual ~LemkeModule();
   
-  int Lemke(int dup = 0);
-  int All_Lemke(int dup, LHTableau<T> &B, long &np, int depth);
+  int Lemke(gStatus &, int dup = 0);
+  int All_Lemke(int dup, LHTableau<T> &B, long &np, int depth, gStatus &);
   
   int Add_BFS(LHTableau<T> &B);
   long NumPivots(void) const;
@@ -62,7 +62,7 @@ public:
 //
 
 
-template <class T> int LemkeModule<T>::Lemke(int dup)
+template <class T> int LemkeModule<T>::Lemke(gStatus &p_status, int dup)
 {
   BFS<T> cbfs((T) 0);
   int i;
@@ -80,8 +80,9 @@ template <class T> int LemkeModule<T>::Lemke(int dup)
     gVector<T> b2 = Make_b2(NF, support, (T) 0);
     LHTableau<T> B(A1,A2,b1,b2);
     epsilon = B.Epsilon();
-    if ( params.stopAfter!=1 || dup==0)
-      All_Lemke(0,B,npivots, params.maxdepth);
+    if ( params.stopAfter!=1 || dup==0) {
+      All_Lemke(0,B,npivots, params.maxdepth, p_status);
+    }
     else  {
       B.LemkePath(dup);
       Add_BFS(B);
@@ -130,7 +131,9 @@ template <class T> int LemkeModule<T>::Add_BFS(LHTableau<T> &B)
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np, int depth)
+template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,
+						 long &np, int depth,
+						 gStatus &p_status)
 {
   if(params.maxdepth!=0 && depth>params.maxdepth) return 1;
 //  BFS<T> cbfs((T) 0);
@@ -145,18 +148,18 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
        i <= B.MaxCol() &&
        (params.stopAfter==0 || (List.Length()-1) < params.stopAfter);
        i++) {
-    params.status.Get();
+    p_status.Get();
     if (i != j)  {
       len=List.Length()-1;
       p1=(double)len/(double)(len+1);
       p2=(double)(len+1)/(double)(len+2);
       aa=(double)(i)/(double)num_strats;
-      params.status.SetProgress(p1+aa*(p2-p1));
+      p_status.SetProgress(p1+aa*(p2-p1));
 //      gout << "\n i = " << i;
       LHTableau<T> Bcopy(B);
 //      Bcopy.NumPivots();
       Bcopy.LemkePath(i);
-      All_Lemke(i,Bcopy,np, depth+1);
+      All_Lemke(i,Bcopy,np, depth+1, p_status);
 //      gout << "\nend of AllLemke: " << i;
 //      delete Bcopy;
 

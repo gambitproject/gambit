@@ -8,7 +8,8 @@
 #include "nfgcsum.h"
 
 void efgLpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				 gList<BehavSolution> &solns)
+				 gList<BehavSolution> &solns,
+				 gStatus &p_status)
 {
   Nfg *N = MakeReducedNfg(sup);
   NFSupport support(*N);
@@ -17,7 +18,7 @@ void efgLpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   int npiv;
   double time;
   gList<MixedSolution> solutions;
-  ZSum(support, params, solutions, npiv, time);
+  ZSum(support, params, solutions, p_status, npiv, time);
 
   npivots += npiv;
 

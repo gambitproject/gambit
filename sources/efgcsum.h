@@ -14,8 +14,8 @@
 #include "behavsol.h"
 
 class CSSeqFormParams : public AlgParams {
-  public:
-    CSSeqFormParams(gStatus &status_ = gstatus);
+public:
+  CSSeqFormParams(void);
 };
 
 #include "subsolve.h"
@@ -26,7 +26,7 @@ private:
   CSSeqFormParams params;
 
   void SolveSubgame(const FullEfg &, const EFSupport &,
-		    gList<BehavSolution> &);
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LP_EFG; }    
 
 public:

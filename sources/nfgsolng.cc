@@ -8,6 +8,7 @@
 #include "wx/wx.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
+#include "gnullstatus.h"
 #include "glist.h"
 #include "gpoly.h"
 #include "nfgsolng.h"
@@ -41,9 +42,10 @@ NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
   if (m_eliminateAll) {
     if (m_eliminateMixed) {
       NFSupport *oldSupport = new NFSupport(ret), *newSupport;
+      gNullStatus status;
       while ((newSupport = oldSupport->MixedUndominated(!m_eliminateWeak,
 							precRATIONAL,
-							players, gnull, gstatus)) != 0) {
+							players, gnull, status)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
       }
@@ -53,8 +55,9 @@ NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
     }
     else {
       NFSupport *oldSupport = new NFSupport(ret), *newSupport;
+      gNullStatus status;
       while ((newSupport = oldSupport->Undominated(!m_eliminateWeak,
-						   players, gnull, gstatus)) != 0) {
+						   players, gnull, status)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
       }
@@ -66,17 +69,19 @@ NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
   else {
     if (m_eliminateMixed) {
       NFSupport *newSupport;
+      gNullStatus status;
       if ((newSupport = ret.MixedUndominated(!m_eliminateWeak,
 					     precRATIONAL,
-					     players, gnull, gstatus)) != 0) {
+					     players, gnull, status)) != 0) {
 	ret = *newSupport;
 	delete newSupport;
       }
     }
     else {
       NFSupport *newSupport;
+      gNullStatus status;
       if ((newSupport = ret.Undominated(!m_eliminateWeak,
-					players, gnull, gstatus)) != 0) {
+					players, gnull, status)) != 0) {
 	ret = *newSupport;
 	delete newSupport;
       }
@@ -160,7 +165,7 @@ gList<MixedSolution> guinfgEnumMixed::Solve(const NFSupport &p_support)
 {
   wxEnumStatus status(m_parent);
 
-  EnumParams params(status);
+  EnumParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
   params.trace = m_traceLevel;
@@ -170,7 +175,7 @@ gList<MixedSolution> guinfgEnumMixed::Solve(const NFSupport &p_support)
   double time;
   gList<MixedSolution> solutions;
   try {
-    Enum(p_support, params, solutions, npivots, time);
+    Enum(p_support, params, solutions, status, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -224,7 +229,7 @@ gList<MixedSolution> guinfgLcp::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "LcpSolve Progress");
 
-  LemkeParams params(status);
+  LemkeParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
   params.trace = m_traceLevel;
@@ -234,7 +239,7 @@ gList<MixedSolution> guinfgLcp::Solve(const NFSupport &p_support)
   double time;
   gList<MixedSolution> solutions;
   try {
-    Lemke(p_support, params, solutions, npivots, time);
+    Lemke(p_support, params, solutions, status, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -299,7 +304,7 @@ gList<MixedSolution> guinfgLp::Solve(const NFSupport &p_support)
   double time;
   gList<MixedSolution> solutions;
   try {
-    ZSum(p_support, params, solutions, npivots, time);
+    ZSum(p_support, params, solutions, status, npivots, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -354,7 +359,7 @@ guinfgLiap::guinfgLiap(NfgShow *p_parent,
 gList<MixedSolution> guinfgLiap::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "Liap Algorithm");
-  NFLiapParams params(status);
+  NFLiapParams params;
   params.stopAfter = m_stopAfter;
   params.SetAccuracy(m_accuracy);
   params.nTries = m_nTries;
@@ -365,7 +370,7 @@ gList<MixedSolution> guinfgLiap::Solve(const NFSupport &p_support)
   long nevals, nits;
   gList<MixedSolution> solutions;
   try {
-    Liap(p_support.Game(), params, start, solutions, nevals, nits);
+    Liap(p_support.Game(), params, start, solutions, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -421,7 +426,7 @@ guinfgSimpdiv::guinfgSimpdiv(NfgShow *p_parent,
 gList<MixedSolution> guinfgSimpdiv::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "SimpdivSolve Progress");
-  SimpdivParams params(status);
+  SimpdivParams params;
   params.stopAfter = m_stopAfter;
   params.precision = m_precision;
   params.nRestarts = m_nRestarts;
@@ -434,7 +439,7 @@ gList<MixedSolution> guinfgSimpdiv::Solve(const NFSupport &p_support)
   gList<MixedSolution> solutions;
 
   try {
-    Simpdiv(p_support, params, solutions, nevals, niters, time);
+    Simpdiv(p_support, params, solutions, status, nevals, niters, time);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -487,7 +492,7 @@ guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent,
 gList<MixedSolution> guinfgPolEnum::Solve(const NFSupport &p_support)
 {
   wxPolEnumStatus status(m_parent);
-  PolEnumParams params(status);
+  PolEnumParams params;
   params.stopAfter = m_stopAfter;
   params.trace = m_traceLevel;
   params.tracefile = m_traceFile;
@@ -498,7 +503,8 @@ gList<MixedSolution> guinfgPolEnum::Solve(const NFSupport &p_support)
   gList<const NFSupport> singular_supports;
 
   try {
-    AllNashSolve(p_support, params, solutions, nevals, time, singular_supports);
+    AllNashSolve(p_support, params, solutions, status,
+		 nevals, time, singular_supports);
   }
   catch (gSignalBreak &) { }
   return solutions;
@@ -538,7 +544,7 @@ guinfgQre::guinfgQre(NfgShow *p_parent)
 gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "QreSolve Progress");
-  NFQreParams params(status);
+  NFQreParams params;
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
@@ -553,7 +559,7 @@ gList<MixedSolution> guinfgQre::Solve(const NFSupport &p_support)
   long nevals, nits;
   gList<MixedSolution> solutions;
   try {
-    Qre(p_support.Game(), params, start, solutions, nevals, nits);
+    Qre(p_support.Game(), params, start, solutions, status, nevals, nits);
   }
   catch (gSignalBreak &) { }
 
@@ -611,7 +617,7 @@ gList<MixedSolution> guinfgQreAll::Solve(const NFSupport &p_support)
 {
   wxStatus status(m_parent, "QreGridSolve Progress");
 
-  GridParams params(status);
+  GridParams params;
   params.minLam = m_minLam;
   params.maxLam = m_maxLam;
   params.delLam = m_delLam;
@@ -627,7 +633,7 @@ gList<MixedSolution> guinfgQreAll::Solve(const NFSupport &p_support)
 
   gList<MixedSolution> solutions;
   try {
-    GridSolve(p_support, params, solutions);
+    GridSolve(p_support, params, solutions, status);
   }
   catch (gSignalBreak &) { }
   

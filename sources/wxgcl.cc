@@ -9,7 +9,7 @@
 #include "wx/fontdlg.h"
 
 #include "wxgcl.h"
-#include "gsm.h"
+#include "gsmconsole.h"
 #include "gcmdline.h"
 #include "gpreproc.h"
 #include "gcompile.h"
@@ -239,7 +239,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
-  m_environment = new GSM(gin, *m_outputStream, *m_outputStream);
+  m_environment = new gsmConsole(gin, *m_outputStream, *m_outputStream);
   m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");

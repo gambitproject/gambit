@@ -31,7 +31,7 @@ public:
 
   bool IsConstSum();
   
-  int ZSum(int dup = 0);
+  int ZSum(gStatus &, int dup = 0);
 
   void Make_Abc();
   
@@ -95,7 +95,7 @@ template <class T> void ZSumModule<T>::Make_Abc()
 //  c->Dump(gout);
 }
 
-template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
+template <class T> int ZSumModule<T>::ZSum(gStatus &p_status, int /*dup*/)
 {
   BFS<T> cbfs((T) 0);
   
@@ -106,7 +106,7 @@ template <class T> int ZSumModule<T>::ZSum(int /*dup*/)
   List.Flush();
   
   Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,1,params.status);
+  LPSolve<T> LP(*A,*b,*c,1,p_status);
   eps = LP.Epsilon();
 
 

@@ -10,7 +10,6 @@
 #include "algutils.h"
 #include "glist.h"
 
-
 #include "nfg.h"
 #include "mixed.h"
 #include "mixedsol.h"
@@ -19,12 +18,12 @@ class NFLiapParams : public FuncMinParams  {
 public:
   int nTries;
   
-  NFLiapParams(gStatus & = gstatus);
+  NFLiapParams(void);
 };
 
 
 bool Liap(const Nfg &, NFLiapParams &,
-	  const MixedProfile<gNumber> &, gList<MixedSolution> &,
+	  const MixedProfile<gNumber> &, gList<MixedSolution> &, gStatus &,
 	  long &nevals, long &niters);
 
 #endif   // NLIAP_H

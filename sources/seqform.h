@@ -15,7 +15,7 @@ class SeqFormParams : public AlgParams {
 public:
   int maxdepth;
   
-  SeqFormParams(gStatus &status_ = gstatus);
+  SeqFormParams(void);
 };
 
 #include "subsolve.h"
@@ -26,7 +26,8 @@ private:
   SeqFormParams params;
   gArray<gNumber> values;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_EFG; }    
 
 public:

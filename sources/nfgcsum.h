@@ -14,11 +14,11 @@
 
 class ZSumParams : public AlgParams    {
 public:
-  ZSumParams(gStatus &status_ = gstatus);
+  ZSumParams(void);
 };
 
 int ZSum(const NFSupport &, const ZSumParams &,
-	 gList<MixedSolution> &, int &npivots, double &time);
+	 gList<MixedSolution> &, gStatus &, int &npivots, double &time);
 
 #endif    // NFGCSUM_H
 

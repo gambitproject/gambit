@@ -7,7 +7,8 @@
 #include "liapsub.h"
 
 void efgLiapNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
-				   gList<BehavSolution> &solns)
+				   gList<BehavSolution> &solns,
+				   gStatus &p_status)
 {
   BehavProfile<double> bp(sup);
   
@@ -43,7 +44,7 @@ void efgLiapNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   long this_nevals, this_niters;
 
   gList<MixedSolution> subsolns;
-  Liap(*N, params, start, subsolns, this_nevals, this_niters);
+  Liap(*N, params, start, subsolns, p_status, this_nevals, this_niters);
 
   nevals += this_nevals;
 

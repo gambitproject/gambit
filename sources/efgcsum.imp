@@ -36,7 +36,7 @@ public:
 
   bool IsConstSum();
   
-  int CSSeqForm(int dup = 0);
+  int CSSeqForm(gStatus &, int dup = 0);
 
   void Make_Abc();
   
@@ -100,7 +100,8 @@ template <class T> void CSSeqFormModule<T>::Make_Abc()
   // c->Dump(gout);
 }
 
-template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
+template <class T> int CSSeqFormModule<T>::CSSeqForm(gStatus &p_status,
+						     int /*dup*/)
 {
   BFS<T> cbfs((T) 0);
   
@@ -113,7 +114,7 @@ template <class T> int CSSeqFormModule<T>::CSSeqForm(int /*dup*/)
   List.Flush();
   
   Make_Abc();
-  LPSolve<T> LP(*A,*b,*c,ni2,params.status);
+  LPSolve<T> LP(*A,*b,*c,ni2,p_status);
   if(!LP.IsAborted()) 
     Add_BFS(LP); 
   

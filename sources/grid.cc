@@ -239,13 +239,8 @@ bool MixedProfileGrid1::Inc(void)
 }
 
 
-
-// ***************************************************************************
-// GRID SOLVE
-// ***************************************************************************
-
-GridParams::GridParams(gStatus &s)
-  : AlgParams(s), minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), 
+GridParams::GridParams(void)
+  : minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), 
     tol1(.01),tol2(0.01), powLam(1), fullGraph(false), pxifile(&gnull)
 { }
 
@@ -272,7 +267,7 @@ protected:
 public:
   GridSolveModule(const NFSupport &, const GridParams &);
   virtual ~GridSolveModule();
-  void GridSolve(void);
+  void GridSolve(gStatus &);
   gList<MixedSolution> &GetSolutions(void);
 };
 
@@ -396,9 +391,9 @@ GridSolveModule::GridSolveModule(const NFSupport &S_, const GridParams &P)
 
 GridSolveModule::~GridSolveModule() { }
 
-void GridSolveModule::GridSolve(void)
+void GridSolveModule::GridSolve(gStatus &p_status)
 {
-  //params.status<<"Grid Solve algorithm\n";
+  //p_status<<"Grid Solve algorithm\n";
   // Initialize the output file
   gWatch timer;timer.Start();
   OutputHeader(*params.pxifile);
@@ -412,25 +407,25 @@ void GridSolveModule::GridSolve(void)
   M.SetStatic(static_player);
   double lam=params.minLam;
   for (int step=1;step<num_steps;step++) {
-    params.status.Get();
+    p_status.Get();
     if (params.powLam==0)  lam=lam+params.delLam; else lam=lam*(params.delLam+1);
     do {CheckEqu(M,lam,0);} while (M.Inc())	;
-    params.status.SetProgress((double)step/(double)num_steps);
+    p_status.SetProgress((double)step/(double)num_steps);
   }
   // Record the time taken and close the output file
   timer.Stop();
   *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
-  params.status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
+  p_status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
   
 }
 
 gList<MixedSolution> & GridSolveModule::GetSolutions(void) { return solutions;}
 
 int GridSolve(const NFSupport &support, const GridParams &params,
-              gList<MixedSolution> &solutions)
+              gList<MixedSolution> &solutions, gStatus &p_status)
 {
   GridSolveModule module(support, params);
-  module.GridSolve();
+  module.GridSolve(p_status);
   solutions = module.GetSolutions();
   return 1;
 }

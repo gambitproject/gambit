@@ -15,7 +15,8 @@ private:
   int npivots;
   ZSumParams params;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID() const { return algorithmEfg_LP_NFG; }    
 
 public:

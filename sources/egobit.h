@@ -20,19 +20,18 @@ public:
   bool fullGraph;
   gOutput *pxifile;
   
-  EFQreParams(gStatus & = gstatus);
-  EFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
+  EFQreParams(void);
+  EFQreParams(gOutput &out, gOutput &pxi);
 };
 
 
 void Qre(const Efg &, EFQreParams &,
-	   const BehavProfile<gNumber> &, gList<BehavSolution > &,
-	   long &nevals, long &nits);
+	 const BehavProfile<gNumber> &, gList<BehavSolution > &,
+	 gStatus &, long &nevals, long &nits);
 
 void KQre(const Efg &E, EFQreParams &params,
-	    const BehavProfile<gNumber> &start,
-	    gList<BehavSolution> &solutions, 
-	    long &nevals, long &nits);
+	  const BehavProfile<gNumber> &start, gList<BehavSolution> &solutions, 
+	  gStatus &, long &nevals, long &nits);
 
 #endif    // NGOBIT_H
 

@@ -1,14 +1,16 @@
 //
-// FILE: gclstats.cc -- gStatus definition for the CommandLine gambit.
+// FILE: gclstatus.h -- Status monitor for terminal-based GCL interface
 //
 // $Id$
 //
 
-#include "gstatus.h"
-#include <signal.h>
+#ifndef GCLSTATUS_H
+#define GCLSTATUS_H
 
-class gGCLStatus : public gStatus  {
-friend void gGCLStatusHandler(int);
+#include "gstatus.h"
+
+class gclStatus : public gStatus  {
+friend class gsmConsole;
 private:
   bool m_sig;
   int m_width, m_prec;
@@ -16,8 +18,8 @@ private:
 
 public:
   // CONSTRUCTOR, DESTRUCTOR
-  gGCLStatus(void); 
-  ~gGCLStatus();
+  gclStatus(void); 
+  virtual ~gclStatus();
 
   // OUTPUT DISPLAY FORMATS
   int GetWidth(void) const { return m_width; }
@@ -46,32 +48,4 @@ public:
   void Reset(void) { m_sig = false; }
 };
 
-gGCLStatus::gGCLStatus(void)
-  : m_sig(false), m_width(0), m_prec(6), m_represent('f')
-{
-#ifndef __BORLANDC__
-  signal(SIGINT, gGCLStatusHandler);
-#endif
-}
-
-gGCLStatus::~gGCLStatus()
-{
-#ifndef __BORLANDC__
-  signal(SIGINT, SIG_DFL);
-#endif
-}
-
-
-gGCLStatus _gstatus;
-gStatus &gstatus = _gstatus;
-
-
-void gGCLStatusHandler(int)
-{
-  _gstatus.m_sig = true;
-// This is here because some systems (Solaris) reset the signal handler to
-// default when using signal().
-  signal(SIGINT, gGCLStatusHandler);
-}
-
-
+#endif  // GCLSTATUS_H

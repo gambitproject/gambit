@@ -15,13 +15,13 @@
 
 class PolEnumParams : public AlgParams  {
 public:
-  PolEnumParams(gStatus &status_=gstatus);
+  PolEnumParams(void);
 };
 
 
 int PolEnum(const NFSupport &, const PolEnumParams &, 
-	    gList<MixedSolution> &, long &nevals, double &time,
-	    bool &is_singular);
+	    gList<MixedSolution> &, gStatus &,
+	    long &nevals, double &time, bool &is_singular);
 
 #endif    // POLENUM_H
 

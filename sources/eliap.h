@@ -19,7 +19,7 @@ class EFLiapParams : public FuncMinParams {
 public:
   int nTries;
   
-  EFLiapParams(gStatus & = gstatus);
+  EFLiapParams(void);
 };
 
 class efgLiapSolve : public SubgameSolver  {
@@ -29,7 +29,8 @@ private:
   EFLiapParams params;
   BehavProfile<gNumber> start;
     
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LIAP_EFG; }    
 
 public:

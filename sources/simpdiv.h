@@ -17,7 +17,7 @@ class SimpdivParams : public AlgParams {
 public:
   int nRestarts, leashLength;
   
-  SimpdivParams(gStatus &status_ = gstatus);
+  SimpdivParams(void);
 };
 
 template <class T> class SimpdivModule  {
@@ -55,12 +55,13 @@ template <class T> class SimpdivModule  {
     int NumIters(void) const  { return nits; }
     double Time(void) const   { return time; }
 
-    int Simpdiv(void);
+    int Simpdiv(gStatus &);
     const gList<MixedSolution> &GetSolutions(void) const  { return solutions; }
 };
 
 int Simpdiv(const NFSupport &, const SimpdivParams &,
-	    gList<MixedSolution> &, int &nevals, int &niters, double &time);
+	    gList<MixedSolution> &, gStatus &,
+	    int &nevals, int &niters, double &time);
 
 
 #endif    // SIMPDIV_H

@@ -45,7 +45,7 @@ private:
   int Exit(int);
 public:
   LPSolve(const gMatrix<T> &A, const gVector<T> &B, const gVector<T> &C,
-	  int nequals = 0, gStatus &s = gstatus );   // nequals = number of equalies (last nequals rows)
+	  int nequals, gStatus &);   // nequals = number of equalities (last nequals rows)
 //  LPSolve(const gMatrix<T> &A, const gVector<T> &B, 
 //	  const gVector<T> &C,  const gVector<int> &sense, 
 //	  const gVector<int> &LB,  const gVector<T> &lb, 

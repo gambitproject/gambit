@@ -864,7 +864,8 @@ protected:
     int nref;
 
     outputrep(gOutput *v) : value(v), nref(1)  { }
-    ~outputrep()  { if (value != &gout && value != &gnull)  delete value; }
+    //  ~outputrep()  { if (value != &gout && value != &gnull)  delete value; }
+    ~outputrep() { }
   };
   
   struct outputrep *rep; 

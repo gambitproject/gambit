@@ -14,12 +14,13 @@
 #include "behavsol.h"
 #include "epolenum.h" 
 #include "efgensup.h"
+#include "subsolve.h"
 
 int AllEFNashSolve(const EFSupport &, const EfgPolEnumParams &, 
-		 gList<BehavSolution> &, long &nevals, double &time,
-		 gList<const EFSupport> &singular_supports);
+		   gList<BehavSolution> &, gStatus &,
+		   long &nevals, double &time,
+		   gList<const EFSupport> &singular_supports);
 
-#include "subsolve.h"
 
 class efgPolEnumSolve : public SubgameSolver  {
 private:
@@ -27,7 +28,8 @@ private:
   EfgPolEnumParams params;
   gArray<gNumber> values;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_EFG; }    
 
 public:

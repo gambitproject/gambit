@@ -39,8 +39,7 @@ int& GSM::GameRefCount(void* game)
 {
   if(_GameRefCount.IsDefined(game))
     return _GameRefCount(game);
-  else
-  {
+  else {
     _GameRefCount.Define(game, 0);
     return _GameRefCount(game);
   }

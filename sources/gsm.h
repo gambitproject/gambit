@@ -4,16 +4,15 @@
 // $Id$
 //
 
-
 #ifndef GSM_H
 #define GSM_H
-
 
 #include "gstream.h"
 #include "gtext.h"
 #include "gsmincl.h"
 #include "gsminstr.h"
 #include "gsmhash.h"
+#include "gclstatus.h"
 
 class gclFunction;
 class CallFuncObj;
@@ -40,6 +39,7 @@ template <class T> class RefCountHashTable;
 class GSM  {
 friend class gclFunctionCall;
 friend class gclVarName;
+friend class gclStatus;
 private:
   static int _NumObj;
 
@@ -71,7 +71,7 @@ public:
   GSM(gInput&  s_in  = gin, 
       gOutput& s_out = gout, 
       gOutput& s_err = gerr );
-  ~GSM();
+  virtual ~GSM();
 
   static int& GameRefCount(void*);
 
@@ -124,7 +124,7 @@ public:
   gOutput &OutputStream(void) const { return _StdOut; }
   gOutput &ErrorStream(void) const { return _StdErr; }
 
-  gStatus &GetStatusMonitor(void) { return gstatus; }
+  virtual gStatus &GetStatusMonitor(void) = 0;
 };
 
 

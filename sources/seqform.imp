@@ -29,8 +29,8 @@ public:
   SeqFormModule(const EFSupport &, const SeqFormParams &p);
   virtual ~SeqFormModule();
   
-  int Lemke(void);
-  int All_Lemke(int dup, LTableau<T> &B, long &np, int depth);
+  int Lemke(gStatus &);
+  int All_Lemke(int dup, LTableau<T> &B, long &np, int depth, gStatus &);
   
   int Add_BFS(const LTableau<T> &tab);
   long NumPivots(void) const;
@@ -100,7 +100,7 @@ template <class T> SeqFormModule<T>::~SeqFormModule()
 // problems, starting from the primary ray.  
 //
 
-template <class T> int SeqFormModule<T>::Lemke(void)
+template <class T> int SeqFormModule<T>::Lemke(gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
   int i;
@@ -115,12 +115,12 @@ template <class T> int SeqFormModule<T>::Lemke(void)
   solutions.Flush();
   List.Flush();
 
-  if(params.stopAfter!=1) 
-    All_Lemke(ns1+ns2+1,*tab,npivots,0);
+  if (params.stopAfter != 1) {
+    All_Lemke(ns1+ns2+1, *tab, npivots, 0, p_status);
+  }
   else {
-
     tab->Pivot(ns1+ns2+1,0);
-    tab->SF_LCPPath(ns1+ns2+1,params.status);
+    tab->SF_LCPPath(ns1+ns2+1, p_status);
 
     Add_BFS(*tab);
     tab->BasisVector(sol);
@@ -178,7 +178,8 @@ template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
+SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth,
+			    gStatus &p_status)
 {
   if(params.maxdepth!=0 && depth>params.maxdepth) return 1;
   int i,len,newsol,missing;
@@ -194,7 +195,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
        i <= B.MaxRow()  && newsol == 0 &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) {
-    params.status.Get();
+    p_status.Get();
     
     if (i != j)  {
       len=List.Length();  
@@ -202,7 +203,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       p2=(double)(len+1)/(double)(len+2);
       int num_strats = B.MaxCol()-B.MinCol()-1;
       aa=(double)(i)/(double)num_strats;
-      params.status.SetProgress(p1+aa*(p2-p1));
+      p_status.SetProgress(p1+aa*(p2-p1));
       
       LTableau<T> BCopy(B);
       (*A)(i,0)=-small_num;
@@ -218,7 +219,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       assert(missing);
       newsol=0;
 
-      if(BCopy.SF_LCPPath(-missing,params.status)==1) {
+      if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
 	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
@@ -233,7 +234,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
       (*A)(i,0)=-(T)1;
       if(newsol) {
 	BCopy.Refactor();
-	All_Lemke(i,BCopy,npivots,depth+1);
+	All_Lemke(i,BCopy,npivots,depth+1, p_status);
       }
     }
   }

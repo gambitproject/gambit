@@ -11,23 +11,23 @@
 //                        SeqFormParams: member functions
 //---------------------------------------------------------------------------
 
-SeqFormParams::SeqFormParams(gStatus &s) 
-  : AlgParams(s)
+SeqFormParams::SeqFormParams(void)
 { }
 
 int _SeqForm(const EFSupport &support, const SeqFormParams &params,
-	     gList<BehavSolution> &solutions, int &npivots, double &time)
+	     gList<BehavSolution> &solutions, gStatus &p_status,
+	     int &npivots, double &time)
 {
   if (params.precision == precDOUBLE)  {
     SeqFormModule<double> module(support, params);
-    module.Lemke();
+    module.Lemke(p_status);
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
   }
   else if (params.precision == precRATIONAL)  {
     SeqFormModule<gRational> module(support, params);
-    module.Lemke();
+    module.Lemke(p_status);
     npivots = module.NumPivots();
     time = module.Time();
     solutions = module.GetSolutions();
@@ -37,11 +37,12 @@ int _SeqForm(const EFSupport &support, const SeqFormParams &params,
 }
 
 void efgLcpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
-			       gList<BehavSolution> &solns)
+			       gList<BehavSolution> &solns,
+			       gStatus &p_status)
 {
   int npiv;
   double time;
-  _SeqForm(sup, params, solns, npiv, time);
+  _SeqForm(sup, params, solns, p_status, npiv, time);
 
   npivots += npiv;
 }

@@ -15,7 +15,8 @@ private:
   int npivots;
   EnumParams params;
 
-  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &,
+		    gList<BehavSolution> &, gStatus &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMMIXED_NFG; }    
 
 public:
@@ -26,7 +27,7 @@ public:
 };
 
 int Enum(const EFSupport &, const EnumParams &,
-	 gList<BehavSolution> &, long &npivots, double &time);
+	 gList<BehavSolution> &, gStatus &, long &npivots, double &time);
 
 #endif   // ENUMSUB_H
 
