@@ -21,13 +21,13 @@ dnl Checking for wxWindows
 dnl------------------------
 
 dnl check for wx-config
-WX_PATH_WXCONFIG(2.4.0, WXCONFIG=1)
+WX_PATH_WXCONFIG(2.5.4, WXCONFIG=1)
 if test "$WXCONFIG" != 1; then
     AC_MSG_ERROR([
             Please check that wx-config is in path, the directory
             where wxWindows libraries are installed (returned by
             'wx-config --libs' command) is in LD_LIBRARY_PATH or
-            equivalent variable and wxWindows is version 2.4.0 or above.
+            equivalent variable and wxWindows is version 2.5.4 or above.
     ])
 fi
 
