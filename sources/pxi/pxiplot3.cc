@@ -234,7 +234,9 @@ void PxiPlot3::DoPlot(wxDC& dc,
 
   dc.SetPen(*wxBLACK_PEN);
   PlotAxis_3(dc,x0,y0,cw,ch,labels);
-  PlotData_3(dc,x0,y0,cw,ch, m_header, 1);
+  for (int i = 1; i <= m_qreFiles.Length(); i++) {
+    PlotData_3(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+  }
 }
 
 void PxiPlot3::OnEvent(wxMouseEvent &ev)
@@ -271,9 +273,9 @@ END_EVENT_TABLE()
 
 PxiPlot3::PxiPlot3(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const PxiFile &p_header, int p_page,
+		   const gArray<PxiFile *> &p_qreFiles, int p_page,
 		   const ExpData &p_expData)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_qreFiles, p_page, p_expData)
 { }
 
 PxiPlot3::~PxiPlot3()

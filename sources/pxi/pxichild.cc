@@ -77,11 +77,13 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 {
   try {
     gFileInput file(p_filename);
-    m_fileHeader.ReadFile(file);
+    PxiFile *pxifile = new PxiFile();
+    pxifile->ReadFile(file);
+    m_qreFiles.Append(pxifile);
   }
   catch (...) { }
 
-  m_expData = ExpData(m_fileHeader.NumStrategies());
+  m_expData = ExpData(m_qreFiles[1]->NumStrategies());
   
   SetSizeHints(300, 300);
 
@@ -103,10 +105,10 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   m_plotBook = new wxNotebook(this, -1, wxDefaultPosition,
 			      wxDefaultSize, wxNB_BOTTOM);
   
-  for (int i = 1; i <= m_fileHeader.NumInfosets(); i++) {
+  for (int i = 1; i <= m_qreFiles[1]->NumInfosets(); i++) {
     PxiPlot *plot = new PxiPlotN(m_plotBook,
-				   wxPoint(0, 0), wxSize(width, height),
-				   m_fileHeader, i, m_expData);
+				 wxPoint(0, 0), wxSize(width, height),
+				 m_qreFiles, i, m_expData);
     m_plotBook->AddPage(plot, wxString::Format("Plot %d", i));
     plot->Render();
   }
@@ -115,7 +117,11 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
 }
 
 PxiChild::~PxiChild(void)
-{ }
+{
+  for (int i = 1; i <= m_qreFiles.Length(); i++) {
+    delete m_qreFiles[i];
+  }
+}
 
 void PxiChild::MakeMenus(void)
 {
@@ -303,22 +309,22 @@ void PxiChild::OnViewDetail(wxCommandEvent &)
   */
 
   message += wxString::Format("Lambda step size: %4.4f\n",
-			      m_fileHeader.DelLambda());
+			      m_qreFiles[1]->DelLambda());
   message += wxString::Format("Smallest lambda: %4.4f\n",
-			      m_fileHeader.MinLambda());
+			      m_qreFiles[1]->MinLambda());
   message += wxString::Format("Largest lambda: %4.4f\n",
-			      m_fileHeader.MaxLambda());
+			      m_qreFiles[1]->MaxLambda());
   /*
   message += wxString::Format("Data type: %s\n",
 			      (m_fileHeader.DataType() == DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
   */
   message += "\n";
 
-  if (m_fileHeader.MError() > -.99) {
+  if (m_qreFiles[1]->MError() > -.99) {
     message += wxString::Format("Probability step: %4.4f\n",
-				m_fileHeader.QStep());
+				m_qreFiles[1]->QStep());
     message += wxString::Format("Margin of error: %4.4f\n",
-				m_fileHeader.MError());
+				m_qreFiles[1]->MError());
   }
 
   wxMessageDialog dialog(this, message, "File Details", wxOK);
@@ -418,19 +424,34 @@ void PxiChild::OnViewOptions(wxCommandEvent &)
 
 void PxiChild::OnSeriesOverlay(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
-  char *s=copystring(wxFileSelector("Load Overlay",NULL,NULL,NULL,"*.out"));
-  if (s) {
-    FileHeader temp_header(s);
-    if ( (temp_header.NumStrategies()!=(plot->Header(1)).NumStrategies()) ||
-	 (temp_header.NumInfosets()!=(plot->Header(1)).NumInfosets()) )
-      wxMessageBox("These data files do not\nhave the same structure!");
-    else
-      plot->AppendHeader(temp_header);
+  wxFileDialog dialog(this, "Choose PXI file", "", "", "*.pxi");
+
+  if (dialog.ShowModal() == wxID_OK) {
+    PxiFile *pxifile = 0;
+    try {
+      gFileInput file(dialog.GetPath());
+      PxiFile *pxifile = new PxiFile();
+      pxifile->ReadFile(file);
+
+      if (pxifile->NumStrategies() != m_qreFiles[1]->NumStrategies() ||
+	  pxifile->NumInfosets() != m_qreFiles[1]->NumInfosets()) {
+	wxMessageDialog alert(this, "The selected file does not have "
+			      "the same structure.",
+			      "Error", wxOK | wxICON_EXCLAMATION);
+	alert.ShowModal();
+      }
+      else {
+	m_qreFiles.Append(pxifile);
+	for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
+	  ((PxiPlot *) m_plotBook->GetPage(i))->Render();
+	}
+      }
+    }
+    catch (...) {
+      if (pxifile) delete pxifile;
+      return;
+    }
   }
-  wxClientDC dc(this);
-  plot->Update(dc,PXI_UPDATE_SCREEN);
-#endif  // NOT_PORTED_YET
 }
 
 //-------------------------------------------------------------------------
@@ -497,7 +518,7 @@ void PxiChild::OnDataFit(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       gFileOutput file(dialog.GetPath().c_str());
-      m_expData.ComputeMLEs(m_fileHeader, file);
+      m_expData.ComputeMLEs(*(m_qreFiles[1]), file);
 
     }
     catch (...) {

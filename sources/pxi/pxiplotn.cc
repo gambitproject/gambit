@@ -247,7 +247,9 @@ void PxiPlotN::DoPlot(wxDC& dc,
 {
   // The .05 used to be the stepsize from PXI file
   PlotAxis(dc, x0, y0, cw, ch, m_lambdaAxisProp, m_probAxisProp, .05);
-  PlotData(dc, x0, y0, cw, ch, m_header);
+  for (int i = 1; i <= m_qreFiles.Length(); i++) {
+    PlotData(dc, x0, y0, cw, ch, *(m_qreFiles[i]));
+  }
 }
 
 void PxiPlotN::OnEvent(wxMouseEvent &ev)
@@ -284,9 +286,9 @@ END_EVENT_TABLE()
 
 PxiPlotN::PxiPlotN(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const PxiFile &p_header, int p_page,
+		   const gArray<PxiFile *> &p_qreFiles, int p_page,
 		   const ExpData &p_expData)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_qreFiles, p_page, p_expData)
 { }
 
 

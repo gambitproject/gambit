@@ -187,7 +187,9 @@ void PxiPlot2::PlotAxis_2(wxDC& dc,
 void PxiPlot2::DoPlot(wxDC& dc, int x0, int y0, int cw,int ch, int level)
 {
   PlotAxis_2(dc, x0, y0, cw, ch);
-  PlotData_2(dc, x0, y0, cw, ch, m_header, 1);
+  for (int i = 1; i <= m_qreFiles.Length(); i++) {
+    PlotData_2(dc, x0, y0, cw, ch, *(m_qreFiles[i]), 1);
+  }
 }
 
 void PxiPlot2::OnEvent(wxMouseEvent &ev)
@@ -224,9 +226,9 @@ END_EVENT_TABLE()
 
 PxiPlot2::PxiPlot2(wxWindow *p_parent, const wxPoint &p_position,
 		   const wxSize &p_size,
-		   const PxiFile &p_header, int p_page,
+		   const gArray<PxiFile *> &p_qreFiles, int p_page,
 		   const ExpData &p_expData)
-  : PxiPlot(p_parent, p_position, p_size, p_header, p_page, p_expData)
+  : PxiPlot(p_parent, p_position, p_size, p_qreFiles, p_page, p_expData)
 { }
 
 PxiPlot2::~PxiPlot2()

@@ -24,10 +24,10 @@
 
 PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
 		 const wxSize &p_size,
-		 const PxiFile &p_header, int p_page,
+		 const gArray<PxiFile *> &p_qreFiles, int p_page,
 		 const ExpData &p_expData)
   : wxScrolledWindow(p_parent, -1, p_position, p_size),
-    m_header(p_header), m_expData(p_expData),
+    m_qreFiles(p_qreFiles), m_expData(p_expData),
     m_landscape(false), m_width(850/2), m_height(1100/2), m_scale(1.0), 
     m_dc(new wxMemoryDC), m_page(p_page)
 {
