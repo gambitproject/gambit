@@ -150,24 +150,24 @@ if (what==SOLVE_SETUP_CUSTOM)
 		if (!ESD.UseNF())	// solving using the EF
 			switch (ESD.GetEfgAlgorithm())
 			{
-//@@				case EFG_GOBIT_SOLUTION: {EGobitG(ef,*cur_sup,this).SolveSetup(); break;}
-				case EFG_LIAP_SOLUTION:	 {EFLiapG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case EFG_LCP_SOLUTION:   {SeqFormG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case EFG_CSUM_SOLUTION:  {EfgCSumG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case EFG_PURENASH_SOLUTION: {EPureNashG(ef,*cur_sup,this).SolveSetup(); break;}
+				case EFG_GOBIT_SOLUTION:    {EfgEGobitG(ef,*cur_sup,this).SolveSetup(); break;}
+				case EFG_LIAP_SOLUTION:	    {EfgELiapG(ef,*cur_sup,this).SolveSetup(); break;}
+				case EFG_LCP_SOLUTION:      {EfgSeqFormG(ef,*cur_sup,this).SolveSetup(); break;}
+				case EFG_CSUM_SOLUTION:     {EfgCSumG(ef,*cur_sup,this).SolveSetup(); break;}
+				case EFG_PURENASH_SOLUTION: {EfgEPureNashG(ef,*cur_sup,this).SolveSetup(); break;}
 				default: {assert(0 && "Unknown EFG algorithm");break;}
 			}
 		else	// solving by creating a NF, solving, and then projecting solutions back
 			switch (ESD.GetNfgAlgorithm())
 			{
-//@@				case NFG_ENUMPURE_SOLUTION:	{PureNashG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_LCP_SOLUTION:      {LemkeG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_LIAP_SOLUTION:	    {NFLiapG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_GOBITALL_SOLUTION:	{GobitAllG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_GOBIT_SOLUTION:    {NGobitG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_SIMPDIV_SOLUTION:  {SimpdivG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_ENUMMIXED_SOLUTION:{EnumG(ef,*cur_sup,this).SolveSetup(); break;}
-//@@				case NFG_LP_SOLUTION:				{ZSumG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_ENUMPURE_SOLUTION: {EfgPureNashG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_LCP_SOLUTION:      {EfgLemkeG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_LIAP_SOLUTION:     {EfgNLiapG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_GOBITALL_SOLUTION: {EfgGobitAllG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_GOBIT_SOLUTION:    {EfgNGobitG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_SIMPDIV_SOLUTION:  {EfgSimpdivG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_ENUMMIXED_SOLUTION:{EfgEnumG(ef,*cur_sup,this).SolveSetup(); break;}
+				case NFG_LP_SOLUTION:       {EfgZSumG(ef,*cur_sup,this).SolveSetup(); break;}
 				default:                    assert(0 && "Unknown NFG algorithm");break;
 			}
 	}
@@ -200,24 +200,24 @@ if (!ESS.MarkSubgames() && ESS.UseStandard()) tw->subgame_clear_all(); // for st
 if (!ESS.UseNF())	// solving using the EF
 	switch (ESS.GetEfgAlgorithm())
 	{
-//@@		case EFG_GOBIT_SOLUTION:    {solns+=EGobitG(ef,*cur_sup,this).Solve(); break;}
-		case EFG_LIAP_SOLUTION:	    {solns+=EFLiapG(ef,*cur_sup,this).Solve(); break;}
-//@@		case EFG_LCP_SOLUTION:      {solns+=SeqFormG(ef,*cur_sup,this).Solve(); break;}
-//@@		case EFG_PURENASH_SOLUTION:	{solns+=EPureNashG(ef,*cur_sup,this).Solve(); break;}
-//@@		case EFG_CSUM_SOLUTION:     {solns+=EfgCSumG(ef,*cur_sup,this).Solve(); break;}
+		case EFG_GOBIT_SOLUTION:    solns+=EfgEGobitG(ef,*cur_sup,this).Solve(); break;
+		case EFG_LIAP_SOLUTION:     solns+=EfgELiapG(ef,*cur_sup,this).Solve(); break;
+		case EFG_LCP_SOLUTION:      solns+=EfgSeqFormG(ef,*cur_sup,this).Solve(); break;
+		case EFG_PURENASH_SOLUTION: solns+=EfgEPureNashG(ef,*cur_sup,this).Solve(); break;
+		case EFG_CSUM_SOLUTION:     solns+=EfgCSumG(ef,*cur_sup,this).Solve(); break;
 		default:                    assert(0 && "Unknown EFG algorithm");break;
 	}
 else	// solving by creating a NF, solving, and then projecting solutions back
 	switch (ESS.GetNfgAlgorithm())
 	{
-//@@		case NFG_ENUMPURE_SOLUTION:	{solns+=PureNashG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_LCP_SOLUTION:      {solns+=LemkeG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_LIAP_SOLUTION:	    {solns+=NFLiapG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_GOBITALL_SOLUTION:	{solns+=GobitAllG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_GOBIT_SOLUTION:    {solns+=NGobitG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_SIMPDIV_SOLUTION:  {solns+=SimpdivG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_ENUMMIXED_SOLUTION:{solns+=EnumG(ef,*cur_sup,this).Solve(); break;}
-//@@		case NFG_LP_SOLUTION:				{solns+=ZSumG(ef,*cur_sup,this).Solve(); break;}
+		case NFG_ENUMPURE_SOLUTION: solns+=EfgPureNashG(ef,*cur_sup,this).Solve(); break;
+		case NFG_LCP_SOLUTION:      solns+=EfgLemkeG(ef,*cur_sup,this).Solve(); break;
+		case NFG_LIAP_SOLUTION:	    solns+=EfgNLiapG(ef,*cur_sup,this).Solve(); break;
+		case NFG_GOBITALL_SOLUTION: solns+=EfgGobitAllG(ef,*cur_sup,this).Solve(); break;
+		case NFG_GOBIT_SOLUTION:    solns+=EfgNGobitG(ef,*cur_sup,this).Solve(); break;
+		case NFG_SIMPDIV_SOLUTION:  solns+=EfgSimpdivG(ef,*cur_sup,this).Solve(); break;
+		case NFG_ENUMMIXED_SOLUTION:solns+=EfgEnumG(ef,*cur_sup,this).Solve(); break;
+		case NFG_LP_SOLUTION:       solns+=EfgZSumG(ef,*cur_sup,this).Solve(); break;
 		default:                    assert(0 && "Unknown NFG algorithm");break;
 	}
 ChangeSolution(solns.VisLength());
@@ -575,7 +575,7 @@ AddSeparator();
 AddTool(NODE_ADD, ToolbarAddBitmap);
 AddTool(NODE_DELETE, ToolbarDeleteBitmap);
 AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
-AddTool(SOLVE_PARAMS, ToolbarParamBitmap);
+AddTool(BUILD_PARAMS, ToolbarParamBitmap);
 AddSeparator();
 AddTool(SOLVE_SOLVE, ToolbarSolveBitmap);
 AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);

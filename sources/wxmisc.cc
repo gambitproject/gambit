@@ -1,6 +1,8 @@
 // File: wxmisc.cc -- a few general purpose functions that rely on and enhance
 // wxwin.
 // $Id$
+//
+
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
@@ -523,6 +525,7 @@ public:
 	void OnChar(wxKeyEvent &ev);
 	void OnEvent(wxMouseEvent &ev);
 	void OnPaint(void);
+   void OnKillFocus(void);
    void SetCompleted(int c);
    gString GetString(void) const;
    int Completed(void) const;
@@ -533,7 +536,7 @@ public:
 #define GETTEXT_FRAME_WIDTH	100
 #define GETTEXT_FRAME_HEIGHT	30
 #define GETTEXT_FRAME_WIDTH_M	300
-#define TEXT_OFF				5
+#define TEXT_OFF              5
 
 gGetTextFrame::gGetTextFrame(const gString s0, wxFrame *frame,int x, int y,
                              const char *title,bool titlebar):
@@ -566,7 +569,7 @@ GetDC()->SetBackgroundMode(wxTRANSPARENT);
 pos=s.length();
 float h;
 gGetTextExtent(*GetDC(),s,&w,&h);
-parent->SetSize(-1,-1,(int)w*3/2,-1,wxSIZE_USE_EXISTING);
+parent->SetSize(-1,-1,(int)w*3/2+2*TEXT_OFF,-1,wxSIZE_USE_EXISTING);
 completed=wxRUNNING;
 }
 
@@ -669,14 +672,19 @@ gString gGetTextCanvas::GetString(void) const
 void gGetTextCanvas::SetCompleted(int c)
 {completed=c;}
 
+void gGetTextCanvas::OnKillFocus(void)
+{SetFocus();}
+
 gString gGetTextLine(const gString &s0,wxFrame *parent,int x,int y,
                      const char *title,bool titlebar)
 {
 gGetTextFrame *f=new gGetTextFrame(s0,parent,x,y,title,titlebar);
 f->Show(TRUE);
+f->CaptureMouse();
 while (f->Completed()==wxRUNNING) wxYield();
 gString result_str;
 if (f->Completed()==wxOK) result_str=f->GetString();
+f->ReleaseMouse();
 delete f;
 return result_str;
 }

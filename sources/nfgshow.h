@@ -19,7 +19,8 @@
 #include "nfg.h"
 #include "nfgiter.h"
 #include "mixedsol.h"
-#include "nfgsolvd.h"
+#include "nfgsolng.h"
+
 #include "msolnsf.h"
 
 #include "efgnfgi.h"
@@ -42,7 +43,8 @@ public:
 };
 typedef SolutionList<MixedSolution> MixedSolutionList;
 
-class NfgShow: public EfgNfgInterface, public ParametrizedGame
+class NfgShow: public EfgNfgInterface, public ParametrizedGame,
+               public NfgShowInterface
 {
 private:
 	Nfg &nf;
@@ -122,21 +124,18 @@ public:
 	MixedProfile<gNumber> CreateStartProfile(int how);
 	// Project solutions to EF.
 	void SolutionToExtensive(const MixedSolution &mp,bool set=false);
-
-   //
-  	bool	 SolveLiap(const NFSupport *sup);
-	//
-
 	void ChangePayoffs(int st1,int st2,bool next=false);
 	// Filename support
 	void SetFileName(const gString &s);
-	gString GetFileName(void) const;
+	const gString &Filename(void) const;
 	// Display some inherent game properties
 	void ShowGameInfo(void);
    // Process Accelerator Keys
 	void EditAccelerators(void);
 	int  CheckAccelerators(wxKeyEvent &ev);
    ParameterSetList &Parameters(void);
+   // Access to the actual window
+   wxFrame *Frame(void);
 };
 
 class NormalSpread : public SpreadSheet3D

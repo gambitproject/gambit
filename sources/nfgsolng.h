@@ -1,69 +1,102 @@
-// File: nfgsolng.h -- defines a class to take care of the normal form
+// File: nfgsolng.h -- dnfines a class to take care of the normal form
 // solution algorithms.  It is also used for the NF solution mode in the
-// extensive form.  The actual code in in normshow.cc
+// extensive form.
 // $Id$
+
 #ifndef NFGSOLNG_H
 #define NFGSOLNG_H
-#include "gmisc.h"
-#include "gslist.h"
 #include "mixedsol.h"
+#include "paramsd.h"
 
-class wxFrame;
-class NFSupport;
-
-template <class T> class SolutionList: public gSortList<T>
+// An interface class between NfgSolutionG (and related) and NfgShow
+class NfgShowInterface
 {
-private:
-	unsigned int max_id;
 public:
-	SolutionList(void):gSortList<T>(),max_id(1) {}
-	SolutionList(const gList<T> &l): gSortList<T>(l),max_id(1) { }
-	virtual int Append(const T &a)
-	{(*this)[gSortList<T>::Append(a)].SetId(max_id++);return Length();}
+	virtual ParameterSetList &Parameters(void) = 0;
+	virtual MixedProfile<gNumber> CreateStartProfile(int how) = 0;
+	virtual const gString &Filename(void) const = 0;
+	virtual wxFrame *Frame(void) = 0;
 };
 
-template <class T> class NormalSolutions: public EfgNfgInterface<T>
+class NfgSolutionG
 {
-private:
-	wxFrame *&parent_window;
-	bool from_efg;
-	bool	 SolveLCP(const NFSupport *sup);
-	bool	 SolveEnumPure(const NFSupport *sup);
-	bool	 SolveGobitAll(const NFSupport *sup);
-	bool	 SolveGobit(const NFSupport *sup);
-	bool	 SolveLiap(const NFSupport *sup);
-	bool	 SolveSimpdiv(const NFSupport *sup);
-	bool	 SolveEnumMixed(const NFSupport *sup);
-	bool	 SolveLP(const NFSupport *sup);
-// This function is necessary to make sure that the user can not run any
-// optimization solutions using gRationals
-	void doubles_only(void);
-	// Make a support based on the elimdom options
-	NFSupport *MakeSolnSupport(void);
 protected:
-	Nfg<T> &nf;
-	gList<int>		got_solns;
-	SolutionList<MixedSolution<T> > solns;
-	struct StartingPoints
-	{
-		SolutionList<MixedSolution<T> > profiles;
-		int last;
-		StartingPoints() : last(-1) { }
-	} starting_points;
-
-	gString filename;
+	const Nfg &nf;
+	const NFSupport &sup;
+	NfgShowInterface *parent;
+   gList<MixedSolution> solns;
 public:
-// Constructor
-	NormalSolutions(Nfg<T> &N,wxFrame *&parent,EfgNfgInterface<T> *efg,
-									const gString &fn,bool from_efg=false);
-// Top level
-	bool Solve(NfgSolutionT alg,bool to_extensive=false,const NFSupport *sup=0);
-	void SolveSetup(NfgSolutionT alg);
-// Project solutions to EF.
-	void SolutionToExtensive(const MixedSolution<T> &mp,bool set=false);
-  virtual MixedProfile<T> CreateStartProfile(int how) = 0;
-
+	NfgSolutionG(const Nfg &E,const NFSupport &S,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const = 0;
+	virtual void SolveSetup(void) const = 0;
 };
+
+
+// Extensive Form Liap
+class NfgLiapG : public NfgSolutionG
+{
+public:
+	NfgLiapG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgLemkeG : public NfgSolutionG
+{
+public:
+	NfgLemkeG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgEnumPureG : public NfgSolutionG
+{
+public:
+	NfgEnumPureG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgGobitAllG : public NfgSolutionG
+{
+public:
+	NfgGobitAllG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgGobitG : public NfgSolutionG
+{
+public:
+	NfgGobitG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgSimpdivG : public NfgSolutionG
+{
+public:
+	NfgSimpdivG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgEnumG : public NfgSolutionG
+{
+public:
+	NfgEnumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
+class NfgZSumG : public NfgSolutionG
+{
+public:
+	NfgZSumG(const Nfg &E,const NFSupport &sup,NfgShowInterface *parent);
+	virtual gList<MixedSolution> Solve(void) const;
+	virtual void SolveSetup(void) const;
+};
+
 
 #endif
 

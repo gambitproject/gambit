@@ -179,7 +179,7 @@ else
 	UpdateVals();
 }
 }
-
+                     
 
 //**************************** DOMINATED STRATEGY STUFF ************************
 // SolveElimDom
@@ -342,7 +342,7 @@ if (what==0)	// label game
 	if (nfg_label_dialog->Completed()==wxOK)
 	{
 		nf.SetTitle(label);
-		SetFileName(GetFileName()); // updates the title
+		SetFileName(Filename()); // updates the title
 	}
 
 	delete nfg_label_dialog;

@@ -84,6 +84,7 @@ wxMenu *build_menu=new wxMenu;
 	build_menu->Append(BUILD_INFOSET, "&Infoset",infoset_menu,"Edit infosets");
 	build_menu->Append(TREE_OUTCOMES, "&Outcomes","Edit/View the payoffs");
 	build_menu->Append(BUILD_TREE, "&Tree",tree_menu,"Edit the tree");
+	build_menu->Append(BUILD_PARAMS,  "&Params","Set/Edit parameters");
 wxMenu *subgame_menu=new wxMenu;
 	subgame_menu->Append(SUBGAME_SOLVE,"Mark &All","Scan tree for subgames");
 	subgame_menu->Append(SUBGAME_SET,"&Mark","Set node subgame root");
@@ -98,7 +99,6 @@ wxMenu *supports_menu=new wxMenu;
 	supports_menu->Append(SUPPORTS_ELIMDOM,"&ElimDom","Dominated strategies");
 	supports_menu->Append(SUPPORTS_SUPPORTS, "S&upports","Create/view EF supports");
 wxMenu *solve_menu=new wxMenu;
-	solve_menu->Append(SOLVE_PARAMS,		 "&Params","Set/Edit parameters");
 	solve_menu->Append(SOLVE_SOLVE,		 "&Solve","Start a solution algorithm");
 	solve_menu->Append(SOLVE_SOLVE_NORMAL,"Make &NF","Create a NF");
 	solve_menu->Append(SOLVE_STANDARD, "S&tandard...","Standard solutions",TRUE);
@@ -203,6 +203,7 @@ switch (id)
 	case TREE_OUTCOMES: ChangeOutcomes(CREATE_DIALOG); break;
 	case TREE_PLAYERS:tw->tree_players();break;
 	case TREE_INFOSETS:tw->tree_infosets();break;
+	case BUILD_PARAMS: ChangeParameters(CREATE_DIALOG); break;
 // Infoset menu
 	case INFOSET_MERGE:tw->infoset_merge();break;
 	case INFOSET_BREAK:tw->infoset_break();break;
@@ -240,7 +241,6 @@ switch (id)
 	case SOLVE_DOMINANCE: {DominanceSettingsDialog EDPD(this); break;}
 	case SOLVE_SUBGAMES: SubgamesSetup();break;
 	case SOLVE_GAMEINFO: ShowGameInfo();break;
-	case SOLVE_PARAMS: ChangeParameters(CREATE_DIALOG); break;
 // Display menu
 	#define ZOOM_DELTA	.2
 	case DISPLAY_SET_ZOOM:tw->display_set_zoom();break;
@@ -268,7 +268,7 @@ switch (id)
 }
 // Most menu selections modify the display somehow, so redraw w/ exceptions
 if (id!=FILE_QUIT && id!=FILE_CLOSE && id!=TREE_OUTCOMES && id!=SUPPORTS_SUPPORTS
-    && id!=SOLVE_PARAMS)
+    && id!=BUILD_PARAMS)
 	{tw->OnPaint();tw->SetFocus();}
 }
 

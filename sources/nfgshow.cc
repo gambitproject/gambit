@@ -353,7 +353,7 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 
 void NfgShow::Save(void)
 {
-gString filename=GetFileName();
+gString filename=Filename();
 gString s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".nfg", "*.nfg",wxSAVE|wxOVERWRITE_PROMPT);
 if (s!="")
 {
@@ -533,10 +533,8 @@ if (what==DESTROY_DIALOG && soln_show)
 
 #include "nfgsolvd.h"
 #include "elimdomd.h"
+#include "nfgsolng.h"
 // Solve
-
-#include "nliap.h"
-#include "liapprm.h"
 
 void NfgShow::Solve(void)
 {
@@ -551,37 +549,20 @@ if (!sup) sup=MakeSolnSupport();
 int old_max_soln=solns.Length();	// used for extensive update
 switch (NSD.GetAlgorithm())
 {
-case NFG_ENUMPURE_SOLUTION:		// Pure Nash
-//@@	solved=SolveEnumPure(sup);
-	break;
-case NFG_LCP_SOLUTION:			// Lemke
-//@@	solved=SolveLCP(sup);
-	break;
-case NFG_LIAP_SOLUTION:		// Lyapunov
-	solved=SolveLiap(sup);
-	break;
-case NFG_GOBITALL_SOLUTION:				// GobitAll search solutions
-//@@	solved=SolveGobitAll(sup);
-	break;
-case NFG_GOBIT_SOLUTION:			// Gobit solutions
-//@@	solved=SolveGobit(sup);
-	break;
-case NFG_SIMPDIV_SOLUTION:		// Simpdiv solution
-//@@	solved=SolveSimpdiv(sup);
-	break;
-case NFG_ENUMMIXED_SOLUTION:				// Enum solution
-//@@	solved=SolveEnumMixed(sup);
-	break;
-case NFG_LP_SOLUTION:
-//@@	solved=SolveLP(sup);
-	break;
+case NFG_ENUMPURE_SOLUTION: solns+=NfgEnumPureG(nf,*cur_sup,this).Solve(); break;
+case NFG_LCP_SOLUTION:	    solns+=NfgLemkeG(nf,*cur_sup,this).Solve(); break;
+case NFG_LIAP_SOLUTION:		 solns+=NfgLiapG(nf,*cur_sup,this).Solve(); break;
+case NFG_GOBITALL_SOLUTION: solns+=NfgGobitAllG(nf,*cur_sup,this).Solve(); break;
+case NFG_GOBIT_SOLUTION:	 solns+=NfgGobitG(nf,*cur_sup,this).Solve(); break;
+case NFG_SIMPDIV_SOLUTION:	 solns+=NfgSimpdivG(nf,*cur_sup,this).Solve(); break;
+case NFG_ENUMMIXED_SOLUTION:solns+=NfgEnumG(nf,*cur_sup,this).Solve(); break;
+case NFG_LP_SOLUTION:       solns+=NfgZSumG(nf,*cur_sup,this).Solve(); break;
 default:
-	wxMessageBox("Internal Error!\nUnknown NFG algorithm\nContact the author");
-	solved=0;
+	wxError("Internal Error!\nUnknown NFG algorithm\nContact the author");
 	break;
 }
 
-if (solved)
+if (old_max_soln!=solns.Length())
 {
 	if (NSD.GetExtensive())// Now, transfer the NEW solutions to extensive form if requested
 		for (int i=old_max_soln+1;i<=solns.Length();i++) SolutionToExtensive(solns[i]);
@@ -604,24 +585,15 @@ if (what==SOLVE_SETUP_CUSTOM)
 	if (NSD.GetResult()==SD_PARAMS)
    switch (NSD.GetAlgorithm())
 	{
-		case NFG_ENUMPURE_SOLUTION:		// Pure Nash
-//@@			{PureNashSolveParamsDialog PNPD(pframe,from_efg); break;}
-		case NFG_LCP_SOLUTION:			// Lemke
-//@@			{LemkeSolveParamsDialog LSPD(pframe,from_efg);break;}
-		case NFG_LIAP_SOLUTION:		// Lyapunov
-			{LiapSolveParamsDialog LSPD(pframe,from_efg);break;}
-		case NFG_GOBITALL_SOLUTION:				// GobitAll
-//@@			{GridSolveParamsDialog GSPD(pframe,filename);break;}
-		case NFG_GOBIT_SOLUTION:			// Gobit
-//@@			{GobitSolveParamsDialog GSPD(pframe,filename);break;}
-		case NFG_SIMPDIV_SOLUTION:		// Simpdiv
-//@@			{SimpdivSolveParamsDialog SDPD(pframe,from_efg);break;}
-		case NFG_ENUMMIXED_SOLUTION:				// Enum
-//@@			{EnumSolveParamsDialog ESPD(pframe,from_efg);break;}
-		case NFG_LP_SOLUTION:					// LP
-//@@			{LPSolveParamsDialog ZSPD(pframe,from_efg);break;}
-		default:
-			assert(0 && "Unknown NFG algorithm");break;
+		case NFG_ENUMPURE_SOLUTION: NfgEnumPureG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_LCP_SOLUTION:		 NfgLemkeG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_LIAP_SOLUTION:		 NfgLiapG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_GOBITALL_SOLUTION: NfgGobitAllG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_GOBIT_SOLUTION:	 NfgGobitG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_SIMPDIV_SOLUTION:	 NfgSimpdivG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_ENUMMIXED_SOLUTION:NfgEnumG(nf,*cur_sup,this).SolveSetup(); break;
+		case NFG_LP_SOLUTION:		 NfgLiapG(nf,*cur_sup,this).SolveSetup(); break;
+		default:                    assert(0 && "Unknown NFG algorithm");break;
 	}
 
 	if (NSD.GetResult()!=SD_CANCEL)
@@ -643,8 +615,11 @@ if (s!="") filename=s; else filename="untitled.nfg";
 spread->SetTitle("["+gString(wxFileNameFromPath(filename))+"] "+nf.GetTitle());
 }
 
-gString NfgShow::GetFileName(void) const
+const gString &NfgShow::Filename(void) const
 {return filename;}
+
+wxFrame *NfgShow::Frame(void)
+{return spread;}
 
 // how: 0-default,1-saved,2-query
 
@@ -725,191 +700,6 @@ SolutionToEfg(bp,set);
 #endif
 }
 
-//***************************** NORMAL FORM SOLUTIONS **************
-#include "gfunc.h"
-#include "wxstatus.h"
-
-/*
-// SolveLemke
-#include "lemke.h"
-#include "lemkeprm.h"
-
-bool NfgShow::SolveLCP(const NFSupport *sup)
-{
-if (nf.NumPlayers()!=2) {wxMessageBox("LCP algorithm only works on 2 player games.","Algorithm Error"); return 0;}
-wxStatus status(parent_window,"LCP Algorithm");
-LemkeParamsSettings LPS;
-LemkeParams P(status);
-LPS.GetParams(P);
-LemkeModule M(nf,P,*sup);
-M.Lemke();
-gList<MixedSolution > temp_solns(M.GetSolutions());
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_LCP_SOLUTION)) got_solns.Append(NFG_LCP_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-//Purenash
-#include "nfgpure.h"
-#include "purenprm.h"
-
-bool NfgShow::SolveEnumPure(const NFSupport *support)
-{
-wxStatus status(parent_window,"EnumPure Algorithm");
-status<<"Progress not implemented\n"<<"Cancel button disabled\n";
-gList<MixedSolution > temp_solns;
-FindPureNash(nf,*support,temp_solns);
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_ENUMPURE_SOLUTION)) got_solns.Append(NFG_ENUMPURE_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-#include "grid.h"
-#include "gridprm.h"
-
-bool NfgShow::SolveGobitAll(const NFSupport *sup)
-{
-GridParamsSettings GSPD(filename);
-wxStatus *status=new wxStatus(parent_window,"GobitAll Solve");
-GridParams P(*status);
-
-GSPD.GetParams(P);
-GridSolveModule M(nf,P,*sup);
-M.GridSolve();
-delete status;
-GSPD.RunPxi();
-return true;
-}
-
-#include "ngobit.h"
-#include "gobitprm.h"
-
-bool NfgShow::SolveGobit(const NFSupport *sup)
-{
-GobitParamsSettings GSPD(filename);
-wxStatus *status=new wxStatus(parent_window, "Gobit Algorithm");
-NFGobitParams P(*status);
-
-GSPD.GetParams(&P);
-MixedProfile start(CreateStartProfile(GSPD.StartOption()));
-
-gList<MixedSolution > temp_solns;
-long nevals,nits;
-Gobit(nf,P,start,temp_solns,nevals,nits);
-delete status;
-GSPD.RunPxi();
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_GOBIT_SOLUTION)) got_solns.Append(NFG_GOBIT_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-*/
-bool NfgShow::SolveLiap(const NFSupport */*sup*/)
-{
-wxStatus status(pframe,"Liap Algorithm");
-LiapParamsSettings LPS;
-NFLiapParams P(status);
-LPS.GetParams(&P);
-MixedProfile<gNumber> start(CreateStartProfile(LPS.StartOption()));
-gList<MixedSolution> temp_solns;
-long nevals,nits;
-Liap(nf,P,start,temp_solns,nevals,nits);
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	return true;
-}
-else
-	return false;
-}
-/*
-#include "simpdiv.h"
-#include "simpprm.h"
-
-bool NfgShow::SolveSimpdiv(const NFSupport *sup)
-{
-SimpdivParamsSettings SPS;
-wxStatus status(parent_window,"Simpdiv Algorithm");
-SimpdivParams P(status);
-SPS.GetParams(P);
-SimpdivModule M(nf,P,*sup);
-M.Simpdiv();
-const gList<MixedSolution > &temp_solns=M.GetSolutions();
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_SIMPDIV_SOLUTION)) got_solns.Append(NFG_SIMPDIV_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-#include "enum.h"
-#include "enumprm.h"
-
-
-bool NfgShow::SolveEnumMixed(const NFSupport *sup)
-{
-EnumParamsSettings EPS;
-wxEnumStatus status(parent_window);
-EnumParams P(status);
-EPS.GetParams(P);
-EnumModule M(nf,P,*sup);
-M.Enum();
-gList<MixedSolution > temp_solns(M.GetSolutions());
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_ENUMMIXED_SOLUTION)) got_solns.Append(NFG_ENUMMIXED_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-#include "nfgcsum.h"
-#include "csumprm.h"
-
-bool NfgShow::SolveLP(const NFSupport *sup)
-{
-if (nf.NumPlayers() > 2 || !nf.IsConstSum())
-	{wxMessageBox("Only valid for two-person zero-sum games");return 0;}
-wxStatus status(parent_window,"LP Algorithm");
-status<<"Progress not implemented\n"<<"Cancel button disabled\n";
-LPParamsSettings LPPS;
-ZSumParams P;
-LPPS.GetParams(&P);
-ZSumModule M(nf,P,*sup);
-M.ZSum();
-gList<MixedSolution > temp_solns;
-M.GetSolutions(temp_solns);
-if (temp_solns.Length())
-{
-	solns+=temp_solns;
-	if (!got_solns.Contains(NFG_LP_SOLUTION)) got_solns.Append(NFG_LP_SOLUTION);
-	return true;
-}
-else
-	return false;
-}
-
-*/
 
 template class SolutionList<MixedSolution>;
 

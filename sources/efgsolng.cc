@@ -19,7 +19,7 @@
 
 
 /************************** EXTENSIVE SOLUTION G ***************************/
-ExtensiveSolutionG::ExtensiveSolutionG(const Efg &E,const EFSupport &S,EfgShowInterface *parent_)
+EfgSolutionG::EfgSolutionG(const Efg &E,const EFSupport &S,EfgShowInterface *parent_)
 												:ef(E),sup(S),parent(parent_)
 { }
 
@@ -116,10 +116,10 @@ EFLiapBySubgameG(const Efg &E,const EFLiapParams &p,
 {Solve();}
 };
 
-EFLiapG::EFLiapG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgELiapG::EfgELiapG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
-gList<BehavSolution> EFLiapG::Solve(void) const
+gList<BehavSolution> EfgELiapG::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
@@ -130,7 +130,7 @@ EFLiapBySubgameG M(ef,P,start,LPS.MaxSolns(),parent);
 return M.GetSolutions();
 }
 
-void EFLiapG::SolveSetup(void) const
+void EfgELiapG::SolveSetup(void) const
 {LiapSolveParamsDialog LSPD(parent->Frame(),true);}
 
 // Normal Form Liap... note that it is not implemented for gRationals
@@ -150,11 +150,11 @@ NFLiapBySubgameG(const Efg &E, const NFLiapParams &p,
 };
 
 
-NFLiapG::NFLiapG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgNLiapG::EfgNLiapG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> NFLiapG::Solve(void) const
+gList<BehavSolution> EfgNLiapG::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
@@ -166,32 +166,33 @@ return M.GetSolutions();
 }
 
 
-void NFLiapG::SolveSetup(void) const
+void EfgNLiapG::SolveSetup(void) const
 {LiapSolveParamsDialog LSPD(parent->Frame(),true);}
 
-/*
 // SeqForm
-#include "seqform.h"
+#include "seqform.imp"
 #define SEQF_PRM_INST
 #include "seqfprm.h"
 class SeqFormBySubgameG:
-							public SeqFormBySubgame,public BaseBySubgameG
+						     public SeqFormBySubgame,public BaseBySubgameG
 {
 protected:
 void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 { BaseSelectSolutions(n,ef,solns);}
 public:
 SeqFormBySubgameG(const Efg &E, const EFSupport &S,const SeqFormParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													SeqFormBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+                  int max = 0,EfgShowInterface *parent_=0):
+                  SeqFormBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
-SeqFormG::SeqFormG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgSeqFormG::EfgSeqFormG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):
+             EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> SeqFormG::Solve(void) const
+gList<BehavSolution> EfgSeqFormG::Solve(void) const
 {
 wxStatus status(parent->Frame(),"LCP Algorithm");
 SeqFormParamsSettings SFPS;
@@ -202,11 +203,11 @@ return M.GetSolutions();
 }
 
 
-void SeqFormG::SolveSetup(void) const
+void EfgSeqFormG::SolveSetup(void) const
 {SeqFormParamsDialog SFPD(parent->Frame(),true);}
 
 // Lemke
-#include "lemkesub.h"
+#include "lemkesub.imp"
 #define LEMKE_PRM_INST
 #include "lemkeprm.h"
 class LemkeBySubgameG:
@@ -219,22 +220,23 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 LemkeBySubgameG(const Efg &E,const EFSupport &S, const LemkeParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													LemkeBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+                int max = 0,EfgShowInterface *parent_=0):
+                LemkeBySubgame(S,P,parent_->Parameters().CurSet(),max),
+                BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
-LemkeG::LemkeG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgLemkeG::EfgLemkeG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> LemkeG::Solve(void) const
+gList<BehavSolution> EfgLemkeG::Solve(void) const
 {
 wxStatus status(parent->Frame(),"LCP Algorithm");
 if (ef.NumPlayers()!=2)
 {
 	wxMessageBox("LCP algorithm only works on 2 player games.","Algorithm Error");
-	return gList<BehavSolution>;
+	return solns;
 }
 
 LemkeParamsSettings LPS;
@@ -245,16 +247,16 @@ return M.GetSolutions();
 }
 
 
-void LemkeG::SolveSetup(void) const
+void EfgLemkeG::SolveSetup(void) const
 {LemkeSolveParamsDialog LSPD(parent->Frame(),true);}
 
 
 // Pure Nash
-#include "psnesub.h"
+#include "psnesub.imp"
 #define PUREN_PRM_INST
 #include "purenprm.h"
 class PureNashBySubgameG:
-								public PureNashBySubgame,public BaseBySubgameG
+                        public PureNashBySubgame,public BaseBySubgameG
 {
 protected:
 void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
@@ -263,17 +265,19 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 PureNashBySubgameG(const Efg &E,const EFSupport &S,
-													int max = 0,EfgShowInterface *parent_=0):
-													PureNashBySubgame(E,S,max),BaseBySubgameG(parent_,E)
+                   int max = 0,EfgShowInterface *parent_=0):
+                   PureNashBySubgame(S,parent_->Parameters().CurSet(),max),
+                   BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
-PureNashG::PureNashG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgPureNashG::EfgPureNashG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):
+              EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> PureNashG::Solve(void) const
+gList<BehavSolution> EfgPureNashG::Solve(void) const
 {
 PureNashParamsSettings PNPS;
 wxStatus status(parent->Frame(),"EnumPure Algorithm");
@@ -283,31 +287,33 @@ return M.GetSolutions();
 }
 
 
-void PureNashG::SolveSetup(void) const
+void EfgPureNashG::SolveSetup(void) const
 {PureNashSolveParamsDialog PNPD(parent->Frame(),true);}
 
 
 // Efg Pure Nash
-#include "efgpure.h"
+#include "efgpure.imp"
 class EPureNashBySubgameG:
-								public EfgPSNEBySubgame,public BaseBySubgameG
+                         public EfgPSNEBySubgame,public BaseBySubgameG
 {
 protected:
 void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 { BaseSelectSolutions(n,ef,solns);}
 public:
 EPureNashBySubgameG(const Efg &E,const EFSupport &S,
-													int max = 0,EfgShowInterface *parent_=0):
-													EfgPSNEBySubgame(E,S,max),BaseBySubgameG(parent_,E)
+                    int max = 0,EfgShowInterface *parent_=0):
+                    EfgPSNEBySubgame(S,parent_->Parameters().CurSet(),max),
+                    BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
-EPureNashG::EPureNashG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgEPureNashG::EfgEPureNashG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):
+               EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> EPureNashG::Solve(void) const
+gList<BehavSolution> EfgEPureNashG::Solve(void) const
 {
 PureNashParamsSettings PNPS;
 wxStatus status(parent->Frame(),"Efg PureNash");
@@ -317,11 +323,11 @@ return M.GetSolutions();
 }
 
 
-void EPureNashG::SolveSetup(void) const
+void EfgEPureNashG::SolveSetup(void) const
 {PureNashSolveParamsDialog PNPD(parent->Frame(),true);}
 
 // Enum Mixed
-#include "enumsub.h"
+#include "enumsub.imp"
 #define ENUM_PRM_INST
 #include "enumprm.h"
 class EnumBySubgameG:
@@ -334,17 +340,19 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 EnumBySubgameG(const Efg &E,const EFSupport &S,const EnumParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													EnumBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+               int max = 0,EfgShowInterface *parent_=0):
+               EnumBySubgame(S,parent_->Parameters().CurSet(),P,max),
+               BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
-EnumG::EnumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgEnumG::EfgEnumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):
+          EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> EnumG::Solve(void) const
+gList<BehavSolution> EfgEnumG::Solve(void) const
 {
 EnumParamsSettings EPS;
 wxEnumStatus status(parent->Frame());
@@ -355,13 +363,13 @@ return M.GetSolutions();
 }
 
 
-void EnumG::SolveSetup(void) const
+void EfgEnumG::SolveSetup(void) const
 {EnumSolveParamsDialog ESPD(parent->Frame(),true);}
 
 
 // LP (ZSum)
-#include "csumsub.h"
-#include "efgcsum.h"
+#include "csumsub.imp"
+#include "efgcsum.imp"
 #define CSUM_PRM_INST
 #include "csumprm.h"
 class ZSumBySubgameG:
@@ -374,22 +382,24 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 ZSumBySubgameG(const Efg &E,const EFSupport &S,const ZSumParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													ZSumBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+               int max = 0,EfgShowInterface *parent_=0):
+               ZSumBySubgame(S,P,parent_->Parameters().CurSet(),max),
+               BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
-ZSumG::ZSumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgZSumG::EfgZSumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):
+          EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> ZSumG::Solve(void) const
+gList<BehavSolution> EfgZSumG::Solve(void) const
 {
 if (ef.NumPlayers() > 2 || !ef.IsConstSum())
 {
 	wxMessageBox("Only valid for two-person zero-sum games");
-	return EmptyBehavList((T)1);
+	return solns;
 }
 
 LPParamsSettings LPPS;
@@ -402,7 +412,7 @@ return M.GetSolutions();
 }
 
 
-void ZSumG::SolveSetup(void) const
+void EfgZSumG::SolveSetup(void) const
 {LPSolveParamsDialog ZSPD(parent->Frame(),true);}
 
 
@@ -415,14 +425,15 @@ void SelectSolutions(int n,const Efg &ef,gList<BehavSolution> &solns)
 { BaseSelectSolutions(n,ef,solns);}
 public:
 EfgCSumBySubgameG(const Efg &E,const EFSupport &S,const CSSeqFormParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													CSSeqFormBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+                  int max = 0,EfgShowInterface *parent_=0):
+                  CSSeqFormBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
 
-EfgCSumG::EfgCSumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgCSumG::EfgCSumG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
 
@@ -431,7 +442,7 @@ gList<BehavSolution> EfgCSumG::Solve(void) const
 if (ef.NumPlayers() > 2 || !ef.IsConstSum())
 {
 	wxMessageBox("Only valid for two-person zero-sum games");
-	return EmptyBehavList((T)1);
+   return solns;
 }
 
 LPParamsSettings LPPS;
@@ -448,7 +459,7 @@ void EfgCSumG::SolveSetup(void) const
 {LPSolveParamsDialog ZSPD(parent->Frame(),true);}
 
 // Simpdiv
-#include "simpsub.h"
+#include "simpsub.imp"
 #define SIMP_PRM_INST
 #include "simpprm.h"
 class SimpdivBySubgameG:
@@ -461,17 +472,18 @@ void ViewNormal(const Nfg &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 SimpdivBySubgameG(const Efg &E,const EFSupport &S,const SimpdivParams &P,
-													int max = 0,EfgShowInterface *parent_=0):
-													SimpdivBySubgame(E,S,P,max),BaseBySubgameG(parent_,E)
+                  int max = 0,EfgShowInterface *parent_=0):
+                  SimpdivBySubgame(S,parent_->Parameters().CurSet(),P,max),
+                  BaseBySubgameG(parent_,E)
 {Solve();}
 };
 
 
-SimpdivG::SimpdivG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgSimpdivG::EfgSimpdivG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
 
-gList<BehavSolution> SimpdivG::Solve(void) const
+gList<BehavSolution> EfgSimpdivG::Solve(void) const
 {
 SimpdivParamsSettings SPS;
 wxStatus status(parent->Frame(),"Simpdiv Algorithm");
@@ -482,7 +494,7 @@ return M.GetSolutions();
 }
 
 
-void SimpdivG::SolveSetup(void) const
+void EfgSimpdivG::SolveSetup(void) const
 {SimpdivSolveParamsDialog SDPD(parent->Frame(),true);}
 
 
@@ -511,22 +523,25 @@ NFGobitParams P(status);
 GSPD.GetParams(&P);
 
 EFSupport ES=EFSupport(E);
-Nfg *N = MakeReducedNfg((Efg &)E,ES);
-NFSupport *S=new NFSupport(N->GameForm());
+Nfg *N = MakeReducedNfg(E,ES);
+NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
 
-MixedProfile<gNumber> start(*N,*S);
+BehavProfile<gNumber> startb=parent->CreateStartProfile(GSPD.StartOption());
+MixedProfile<gNumber> startm(*N,parent->Parameters().CurSet());
+
+BehavToMixed(E,startb,*N,startm);
+
 
 long nevals,nits;
 gList<MixedSolution> nfg_solns;
-Gobit(*N,P,start,nfg_solns,nevals,nits);
+Gobit(*N,P,startm,nfg_solns,nevals,nits);
 GSPD.RunPxi();
 
 for (int i = 1; i <= nfg_solns.Length(); i++)
 {
-	BehavSolution bp(E);
-	MixedToBehav(*N, nfg_solns[i], E, bp);
-	solns.Append(bp);
+	MixedToBehav(*N, nfg_solns[i], E, startb);
+	solns.Append(BehavSolution(startb,EfgAlg_GOBIT));
 }
 delete N;
 delete S;
@@ -536,26 +551,26 @@ gList<BehavSolution> GetSolutions(void) const {return solns;}
 };
 
 
-NGobitG::NGobitG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgNGobitG::EfgNGobitG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
-gList<BehavSolution> NGobitG::Solve(void) const
+gList<BehavSolution> EfgNGobitG::Solve(void) const
 {
 NGobitBySubgameG M(ef,parent);
 return M.GetSolutions();
 }
 
-void NGobitG::SolveSetup(void) const
+void EfgNGobitG::SolveSetup(void) const
 {GobitSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
 
 
 // EF Gobit
 // This algorithm does not support solving by subgames.
 
-EGobitG::EGobitG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgEGobitG::EfgEGobitG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
-gList<BehavSolution > EGobitG::Solve(void) const
+gList<BehavSolution > EfgEGobitG::Solve(void) const
 {
 GobitParamsSettings GSPD(parent->Filename());
 wxStatus status(parent->Frame(),"Gobit Algorithm");
@@ -571,8 +586,9 @@ GSPD.RunPxi();
 return solns;
 }
 
-void EGobitG::SolveSetup(void) const
+void EfgEGobitG::SolveSetup(void) const
 {GobitSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
+
 
 
 // Gobit All
@@ -600,10 +616,12 @@ GridParams P(status);
 GSPD.GetParams(P);
 
 Nfg *N = MakeReducedNfg((Efg &)E,ES);
-NFSupport *S=new NFSupport(N->GameForm());
+NFSupport *S=new NFSupport(*N);
 ViewNormal(*N,S);
-GridSolveModule M(*N,P,*S);
-M.GridSolve();
+
+gList<MixedSolution> solns;
+GridSolve(*S,parent->Parameters().CurSet(),P,solns);
+
 GSPD.RunPxi();
 delete N;
 delete S;
@@ -611,21 +629,21 @@ delete S;
 };
 
 
-GobitAllG::GobitAllG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):ExtensiveSolutionG(E,S,parent)
+EfgGobitAllG::EfgGobitAllG(const Efg &E,const EFSupport &S,EfgShowInterface *parent):EfgSolutionG(E,S,parent)
 { }
 
 
 
-gList<BehavSolution> GobitAllG::Solve(void) const
+gList<BehavSolution> EfgGobitAllG::Solve(void) const
 {
 GobitAllBySubgameG M(ef,sup,parent);
-return gList<BehavSolution>;
+return solns;
 }
 
 
-void GobitAllG::SolveSetup(void) const
+void EfgGobitAllG::SolveSetup(void) const
 {GridSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
 
-template class GobitAllG;
 
-*/
+
+

@@ -296,9 +296,9 @@ int prow,pcol;
 for (int j=1;j<=nf.NumPlayers();j++)
 {
 	PayoffPos(outc_num,j,&prow,&pcol);
+	gPoly<gNumber> payoff(nf.Parameters(),GetCell(prow,pcol),nf.ParamOrder());
 	if (polyval==false)
    {
-		gPoly<gNumber> payoff(nf.Parameters(),GetCell(prow,pcol),nf.ParamOrder());
 		if (nf.Payoff(tmp, j)!=payoff)	{
 			nf.SetPayoff(tmp, j, payoff);
 			outcomes_changed=true;
@@ -306,11 +306,9 @@ for (int j=1;j<=nf.NumPlayers();j++)
    }
    else
    {
-		gNumber payoff;payoff=FromString(GetCell(prow,pcol),payoff);
-      gNumber diff=abs(nf.Payoff(tmp, j).Evaluate(params.CurSet()) - payoff);
-      gNumber eps=diff;gEpsilon(eps);
-		if (diff>eps)	{
-			nf.SetPayoff(tmp, j, gPoly<gNumber>(nf.Parameters(),payoff,nf.ParamOrder()));
+      gString payoff_str=ToString(nf.Payoff(tmp, j).Evaluate(params.CurSet()));
+		if (payoff_str!=GetCell(prow,pcol))	{
+			nf.SetPayoff(tmp, j, payoff);
 			outcomes_changed=true;
 		}
 	}

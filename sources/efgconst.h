@@ -15,8 +15,9 @@
 
 #define BUILD_NODE							900
 #define BUILD_ACTIONS						910
-#define	BUILD_INFOSET						920
-#define	BUILD_TREE							930
+#define BUILD_INFOSET						920
+#define BUILD_TREE							930
+#define BUILD_PARAMS						   940
 
 #define NODE_OUTCOME_OUTCOME		1100
 #define NODE_OUTCOME_DIALOG			1101
@@ -78,7 +79,6 @@
 #define SOLVE_STANDARD_TYPE			1550
 #define SOLVE_STANDARD_NUM			1560
 #define SOLVE_GAMEINFO					1580
-#define SOLVE_PARAMS						1585
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601
