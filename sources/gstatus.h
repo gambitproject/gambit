@@ -16,5 +16,7 @@ private:
 
 public:
 	virtual ~gStatus() { };
-}
+};
 
+extern gStatus &gstatus;
+#endif

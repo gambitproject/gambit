@@ -1,18 +1,22 @@
 #include "wx.h"
 #include "gstatus.h"
 
+char tmp_str[100];
 class wxStatus: public gStatus,public wxDialogBox
 {
 private:
 	// Stuff for signal
 	bool	signal;
-	static void cancel_func(wxButton &ob,wxCommandEvent &ev);
+	static void cancel_func(wxButton &ob,wxCommandEvent &ev)
+	{((wxStatus *)ob.GetClientData())->SetSignal();}
 	// stuff for progress
 	wxGauge *gauge;
+	wxTextWindow *twin;
 	int Width,Prec;
 	char Represent;
 
 public:
+	// Constructor
 	wxStatus(const char *label=0,wxFrame *parent=0);
 	// functions for gProgress::gOutput
 	int GetWidth(void) {return Width;}
@@ -24,46 +28,48 @@ public:
 	char GetRepMode(void){return Represent;}
 
 	gOutput &operator<<(int x)
-	{int c=fprintf(f, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;return *this;}
+	{sprintf(tmp_str, "%*d", Width,  x);(*twin)<<tmp_str;return *this;}
 	gOutput &operator<<(unsigned int x)
-	{int c=fprintf(f, "%*d", Width,  x);return *this;}
+	{sprintf(tmp_str, "%*d", Width,  x);(*twin)<<tmp_str;return *this;}
 	gOutput &operator<<(long x)
-	{int c=fprintf(f, "%*ld", Width, x);return *this;}
+	{sprintf(tmp_str, "%*ld", Width, x);(*twin)<<tmp_str;return *this;}
 	gOutput &operator<<(char x)
-	{int c=fprintf(f, "%c", x);return *this;}
+	{sprintf(tmp_str, "%c", x);(*twin)<<tmp_str;return *this;}
 	gOutput &operator<<(double x)
 	{
-		int c;
 		switch (Represent) {
 		case 'f':
-			c=fprintf(f, "%*.*lf", Width, Prec, x);
+			sprintf(tmp_str, "%*.*lf", Width, Prec, x);
+			(*twin)<<tmp_str;
 			break;
 		case 'e':
-			c=fprintf(f, "%*.*le", Width, Prec, x);
+			sprintf(tmp_str, "%*.*le", Width, Prec, x);
+			(*twin)<<tmp_str;
 	}
 	return *this;
 	}
-	gOutput &operator<<(float x);
+	gOutput &operator<<(float x)
 	{
-	int c;
 	switch (Represent) {
 		case 'f':
-			c=fprintf(f, "%*.*f", Width, Prec, x);
+			sprintf(tmp_str, "%*.*f", Width, Prec, x);
+			(*twin)<<tmp_str;
 			break;
 		case 'e':
-			c=fprintf(f, "%*.*e", Width, Prec, x);
+			sprintf(tmp_str, "%*.*e", Width, Prec, x);
+			(*twin)<<tmp_str;
 			break;
 		}
 	return *this;
 	}
-	gOutput &operator<<(const char *x);
-	{int c=fprintf(f, "%s", x);return *this;}
-	gOutput &operator<<(const void *x);
-	{int c=fprintf(f, "%p", x);return *this;}
+	gOutput &operator<<(const char *x)
+	{sprintf(tmp_str, "%s", x);(*twin)<<tmp_str;return *this;}
+	gOutput &operator<<(const void *x)
+	{sprintf(tmp_str, "%p", x);(*twin)<<tmp_str;return *this;}
 
 	bool IsValid(void) const {return true;}
 	// functions for gProgress
-	void	SetProgress(double p) {gauge->SetValue((int)(p*100));
+	void	SetProgress(double p) {gauge->SetValue((int)(p*100));}
 	// functions for gSignal
 	void	SetSignal() {signal=true;}
 	bool Get(void) const {return signal;}
@@ -75,7 +81,7 @@ wxStatus::wxStatus(const char *name,wxFrame *parent):wxDialogBox(parent,(char *)
 Reset();
 
 Width=0;Prec=6;Represent='f';
-
+// Build the dialog box
 gauge=new wxGauge(this,"",100,-1,-1,300,-1,wxVERTICAL);
 NewLine();
 int x,y;
@@ -87,17 +93,6 @@ wxButton *cancel=new wxButton(this,(wxFunction)cancel_func,"Cancel");
 cancel->SetClientData((char *)this);
 Fit();
 cancel->Centre();
-//gauge->Centre();
 twin->Centre(wxHORIZONTAL);
-(*twin)<<"This is a TEST\n";
-(*twin)<<1234<<'a';
-gauge->SetValue(45);
 Show(TRUE);
 }
-
-void cancel_func(wxButton &ob,wxCommandEvent &ev)
-{
-wxStatus *parent=(wxStatus *)ob.GetClientData();
-parent->SetSignal();
-}
-

@@ -18,11 +18,11 @@ class gProgress : public gOutput
 private:
 
 public:
-	virtual ~gProgress(void);
+	virtual ~gProgress(void) { ;}
 // functions for gOutput
 	// see gambitio.h
 // functions to show progress
 	virtual void SetProgress(double p)=0;
-}
+};
 
 #endif
