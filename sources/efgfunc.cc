@@ -1053,7 +1053,15 @@ Portion *GSM_Outcome(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
   if (!n->GetOutcome())
-    return new NullPortion(porOUTCOME);
+    switch(n->BelongsTo()->Type())
+    {
+    case DOUBLE:
+      return new NullPortion(porOUTCOME_FLOAT);
+    case RATIONAL:
+      return new NullPortion(porOUTCOME_RATIONAL);
+    default:
+      assert(0);
+    }
   //return new ErrorPortion("No outcome attached to node");
 
   Portion* por = new OutcomeValPortion(n->GetOutcome());
