@@ -151,13 +151,13 @@ void Qre(const Efg &E, EFQreParams &params,
   EFQreFunc F(E, start);
 
   int iter = 0;
-  double Lambda, LambdaOld, LambdaStart, value = 0.0;
+  double Lambda, LambdaOld, LambdaSave, LambdaStart, value = 0.0;
 
   if (params.pxifile)
     WritePXIHeader(*params.pxifile, E, params);
 
   LambdaStart = (params.delLam < 0.0) ? params.maxLam : params.minLam;
-  LambdaOld = Lambda = LambdaStart;
+  LambdaOld = LambdaSave = Lambda = LambdaStart;
 
   double max_prog, prog;
 
@@ -204,7 +204,9 @@ void Qre(const Efg &E, EFQreParams &params,
       bool derr = F.DomainErr();      
       // dist = dist to last good point
       // dsave = dist to last saved point
-      double dist = 0.0, dsave = 0.0;
+      double dist = 0.0;
+      assert(LambdaSave>=1.0e-200);
+      double  dsave = params.powLam ? abs(Lambda/LambdaSave - 1.0) : abs(Lambda-LambdaSave);
       for(int jj=p.First();jj<=p.Last();jj++) {
 	double xx = abs(p[jj]-pold[jj]);
 	if(xx>dist)dist=xx;
