@@ -1,7 +1,7 @@
 //
 // FILE: nfdommix.cc -- Elimination of dominated strategies in nfg
 //
-// $Id$
+// @(#)nfdommix.cc	1.6 8/13/96
 //
 
 #include "gambitio.h"
