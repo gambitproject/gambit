@@ -258,7 +258,7 @@ gbtList<gbtNfgSupport> SortSupportsBySize(gbtList<gbtNfgSupport> &list)
 {
   gbtArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++) {
-    sizes[i] = list[i].ProfileLength();
+    sizes[i] = list[i].MixedProfileLength();
   }
 
   gbtArray<int> listproxy(list.Length());

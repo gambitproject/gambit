@@ -484,6 +484,14 @@ gbtPVector<int> gbtEfgSupport::NumActions(void) const
   return bar;
 }  
 
+int gbtEfgSupport::BehavProfileLength(void) const
+{
+  gbtArray<int> actions = NumActions();
+  int total = 0;
+  for (int i = 1; i <= actions.Length(); total += actions[i++]);
+  return total;
+}
+
 int gbtEfgSupport::NumSequences(int j) const
 {
   if (j < 1 || j > m_efg->NumPlayers()) return 1;

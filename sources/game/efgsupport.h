@@ -41,7 +41,7 @@ class gbtGameActionSet;
 // This will eventually derive from gbtGame, providing the usual
 // extensive form operations
 //
-class gbtEfgSupport {
+class gbtEfgSupport : public gbtConstGameRep, public gbtConstEfgRep {
 protected:
   gbtText m_label;
   gbtGame m_efg;
@@ -85,7 +85,6 @@ public:
 
   int NumActions(int pl, int iset) const;
   int NumActions(const gbtGameInfoset &) const;
-  gbtPVector<int> NumActions(void) const;
   int NumDegreesOfFreedom(void) const;
 
   // Checks to see that every infoset in the support has at least one
@@ -131,22 +130,35 @@ public:
 			    gbtStatus &status) const;
 
 
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return true; }
+  bool IsMatrix(void) const { return false; }
+
+  int NumPlayers(void) const { return m_efg->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_efg->GetPlayer(index); }
+
+  int NumOutcomes(void) const { return m_efg->NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_efg->GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_efg->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_efg->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_efg->MinPayoff(pl); }
+
+  // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
+  gbtPVector<int> NumActions(void) const;
+  int BehavProfileLength(void) const;
+
   // The following are just echoed from the base game.  In the future,
   // derivation from gbtGame will handle these.
   gbtText GetComment(void) const { return m_efg->GetComment(); }
   void SetComment(const gbtText &p_comment) { m_efg->SetComment(p_comment); }
-  bool IsConstSum(void) const { return m_efg->IsConstSum(); }
-  int NumPlayers(void) const { return m_efg->NumPlayers(); }
   gbtGamePlayer GetChance(void) const { return m_efg->GetChance(); }
-  gbtGamePlayer GetPlayer(int pl) const { return m_efg->GetPlayer(pl); }
-  int NumOutcomes(void) const { return m_efg->NumOutcomes(); }
   gbtArray<int> NumInfosets(void) const { return m_efg->NumInfosets(); }
   gbtPVector<int> NumMembers(void) const { return m_efg->NumMembers(); }
   int NumNodes(void) const { return m_efg->NumNodes(); }
   int NumPlayerInfosets(void) const { return m_efg->NumPlayerInfosets(); }
   gbtGameNode GetRoot(void) const { return m_efg->GetRoot(); }
-  gbtNumber MaxPayoff(void) const { return m_efg->MaxPayoff(); }
-  gbtNumber MinPayoff(void) const { return m_efg->MinPayoff(); }
   bool IsPerfectRecall(void) const { return m_efg->IsPerfectRecall(); }
 
   void Dump(gbtOutput &) const;

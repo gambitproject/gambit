@@ -546,7 +546,7 @@ gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const
   gbtGame efg = GetGame();
   gbtGame nfg = efg;
   
-  gbtPVector<gbtNumber> regret(nfg->NumStrats());
+  gbtPVector<gbtNumber> regret(nfg->NumStrategies());
   
   for (int pl = 1; pl <= efg->NumPlayers(); pl++)  {
     gbtNumber pay = Payoff(pl);

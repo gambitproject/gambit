@@ -62,9 +62,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 {
   gbtArray<int> ylabel(2);
   gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
-  gbtPVector<int> U(y.Support().NumStrats()), TT(y.Support().NumStrats());
-  gbtPVector<T> ab(y.Support().NumStrats());
-  gbtPVector<T> besty(y.Support().NumStrats());
+  gbtPVector<int> U(y.Support().NumStrategies()), TT(y.Support().NumStrategies());
+  gbtPVector<T> ab(y.Support().NumStrategies());
+  gbtPVector<T> besty(y.Support().NumStrategies());
   gbtPVector<T> v(y);
 
   int i = 0;

@@ -33,7 +33,7 @@
 //---------------------------------------------------------------------------
 
 template <class T> gbtMixedProfile<T>::gbtMixedProfile(const gbtNfgSupport &s)
-  : gbtPVector<T>(s.NumStrats()), m_nfg(s.GetGame()), support(s)
+  : gbtPVector<T>(s.NumStrategies()), m_nfg(s.GetGame()), support(s)
 {
   Centroid();
 }
@@ -130,7 +130,7 @@ template <class T> T gbtMixedProfile<T>::MaxRegret(void) const
   int i;
   T maxgripe = (T)0;
 
-  gbtPVector<T> v(m_nfg->NumStrats());
+  gbtPVector<T> v(m_nfg->NumStrategies());
   Regret(v);
   for(i=v.First(); i<=v.Last(); i++)
     if(v[i] > maxgripe) maxgripe = v[i];
@@ -317,7 +317,7 @@ void gbtMixedProfile<T>::PPayoff(int pl, int const_pl, int cur_pl, long index,
 
 template <class T>
 gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
-  : gbtPVector<T>(p_profile.GetGame()->NumStrats()),
+  : gbtPVector<T>(p_profile.GetGame()->NumStrategies()),
     m_nfg(p_profile.GetGame()), support(m_nfg)
 {
   gbtGame efg = p_profile.GetGame();

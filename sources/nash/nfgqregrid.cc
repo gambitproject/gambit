@@ -232,7 +232,7 @@ void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gbtOutput &out) co
   out << 1 << '\n' << m_tol1 << '\n' << m_delp1 << '\n';
   
   out << "DataFormat:\n";
-  int numcols = p_support.ProfileLength() + 2;
+  int numcols = p_support.MixedProfileLength() + 2;
   out << numcols <<' '; 
   for (int i = 1; i <= numcols; i++) out << i << ' ';
   

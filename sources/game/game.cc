@@ -1414,7 +1414,7 @@ int gbtGameBase::NumStrats(int pl) const
 	  players[pl]->m_strategies.Length() : 0);
 }
 
-gbtArray<int> gbtGameBase::NumStrats(void) const
+gbtArray<int> gbtGameBase::NumStrategies(void) const
 {
   gbtArray<int> dim(players.Length());
   for (int pl = 1; pl <= players.Length(); pl++) {
@@ -1584,7 +1584,7 @@ gbtGame NewNfg(const gbtArray<int> &p_dim)
 
 gbtGame CompressNfg(const gbtGame &nfg, const gbtNfgSupport &S)
 {
-  gbtGame N = NewNfg(S.NumStrats());
+  gbtGame N = NewNfg(S.NumStrategies());
   N->SetLabel(nfg->GetLabel());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {

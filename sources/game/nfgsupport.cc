@@ -37,7 +37,7 @@
 //--------------------------------------------------------------------------
 
 gbtNfgSupport::gbtNfgSupport(const gbtGame &p_nfg)
-  : m_nfg(p_nfg), m_strategies(p_nfg->NumStrats())
+  : m_nfg(p_nfg), m_strategies(p_nfg->NumStrategies())
 { 
   // Initially, all strategies are contained in the support
   m_strategies = 1;
@@ -74,7 +74,7 @@ int gbtNfgSupport::NumStrats(int pl) const
   return total;
 }
 
-gbtArray<int> gbtNfgSupport::NumStrats(void) const
+gbtArray<int> gbtNfgSupport::NumStrategies(void) const
 {
   gbtArray<int> ret(m_nfg->NumPlayers());
 
@@ -84,7 +84,7 @@ gbtArray<int> gbtNfgSupport::NumStrats(void) const
   return ret;
 }
 
-int gbtNfgSupport::ProfileLength(void) const
+int gbtNfgSupport::MixedProfileLength(void) const
 {
   int total = 0;
   for (int i = 1; i <= m_strategies.Length(); i++) {

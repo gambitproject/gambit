@@ -193,7 +193,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
 	file << "DataFormat:\n";
-	int numcols = m_mixedProfiles[1].Support().ProfileLength() + 2;
+	int numcols = m_mixedProfiles[1].Support().MixedProfileLength() + 2;
 	file << numcols << ' ';
 	for (int i = 1; i <= numcols; i++) {
 	  file << i << ' ';

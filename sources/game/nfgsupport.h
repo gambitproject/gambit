@@ -39,7 +39,7 @@
 // This will eventually derive from gbtGame, providing the usual
 // normal form operations
 //
-class gbtNfgSupport {
+class gbtNfgSupport : public gbtConstGameRep, public gbtConstNfgRep {
 protected:
   gbtGame m_nfg;
   // This really could be a gbtPVector<bool> probably, but we'll keep
@@ -71,8 +71,8 @@ public:
   int NumStrats(int pl) const;
   int NumStrats(const gbtGamePlayer &p_player) const 
     { return NumStrats(p_player->GetId()); }
-  gbtArray<int> NumStrats(void) const;
-  int ProfileLength(void) const;
+  gbtArray<int> NumStrategies(void) const;
+  int MixedProfileLength(void) const;
 
   gbtGameStrategy GetStrategy(int pl, int st) const;
   int GetIndex(gbtGameStrategy) const;
@@ -99,13 +99,25 @@ public:
   // OUTPUT
   void Output(gbtOutput &) const;
 
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return m_nfg->IsTree(); }
+  bool IsMatrix(void) const { return m_nfg->IsMatrix(); }
+  
+  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_nfg->GetPlayer(index); }
+  
+  int NumOutcomes(void) const { return m_nfg->NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_nfg->GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_nfg->IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_nfg->MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_nfg->MinPayoff(pl); }
+
   // The following are just echoed from the base game.  In the future,
   // derivation from gbtGame will handle these.
   gbtText GetComment(void) const { return m_nfg->GetComment(); }
   void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
-  bool IsConstSum(void) const { return m_nfg->IsConstSum(); }
-  int NumPlayers(void) const { return m_nfg->NumPlayers(); }
-  int NumOutcomes(void) const { return m_nfg->NumOutcomes(); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtNfgSupport &);

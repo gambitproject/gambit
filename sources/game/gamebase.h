@@ -386,7 +386,7 @@ public:
   gbtPVector<int> NumActions(void) const;
   int NumPlayerActions(void) const;
   gbtPVector<int> NumMembers(void) const;
-  gbtArray<int> NumStrats(void) const;
+  gbtArray<int> NumStrategies(void) const;
   int NumStrats(int) const;
   
   // COMPUTING VALUES OF PROFILES

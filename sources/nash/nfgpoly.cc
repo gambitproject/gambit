@@ -95,8 +95,8 @@ public:
 
 PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
   : m_nfg(S.GetGame()), support(S), params(p), 
-    Space(support.ProfileLength()-m_nfg->NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.ProfileLength()-m_nfg->NumPlayers()), 
+    Space(support.MixedProfileLength()-m_nfg->NumPlayers()), 
+    Lex(&Space, lex), num_vars(support.MixedProfileLength()-m_nfg->NumPlayers()), 
     count(0), nevals(0), is_singular(false)
 { 
 //  gEpsilon(eps,12);

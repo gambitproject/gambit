@@ -103,11 +103,47 @@ class gbtGameOutcome;
 class gbtEfgSupport;
 class gbtNfgSupport;
 
-class gbtGameRep : public gbtGameObject {
+class gbtConstGameRep : public gbtGameObject {
+public:
+  // DATA ACCESS -- GENERAL
+  virtual bool IsTree(void) const = 0;
+  virtual bool IsMatrix(void) const = 0;
+
+  // DATA ACCESS -- PLAYERS
+  virtual int NumPlayers(void) const = 0;
+  virtual gbtGamePlayer GetPlayer(int index) const = 0;
+
+  // DATA ACCESS -- OUTCOMES
+  virtual int NumOutcomes(void) const = 0;
+  virtual gbtGameOutcome GetOutcome(int p_id) const = 0;
+  virtual bool IsConstSum(void) const = 0; 
+  virtual gbtNumber MinPayoff(int pl = 0) const = 0;
+  virtual gbtNumber MaxPayoff(int pl = 0) const = 0;
+};
+
+class gbtConstNfgRep {
+public:
+  // DATA ACCESS -- STRATEGIES
+  virtual gbtArray<int> NumStrategies(void) const = 0; 
+  virtual int MixedProfileLength(void) const = 0;
+};
+
+class gbtConstEfgRep {
+public:
+  // DATA ACCESS -- ACTIONS
+  virtual gbtPVector<int> NumActions(void) const = 0;
+  virtual int BehavProfileLength(void) const = 0;
+
+  // The number of information sets in the game, by player
+  // Does not include any chance information sets
+  virtual gbtArray<int> NumInfosets(void) const = 0; 
+};
+
+class gbtGameRep : public gbtConstGameRep,
+		   public gbtConstNfgRep,
+		   public gbtConstEfgRep
+{
 friend class gbtGame;
-  //friend class gbtBehavProfile<double>;
-  //friend class gbtBehavProfile<gbtRational>;
-  //friend class gbtBehavProfile<gbtNumber>;
 public:
   // Formerly the copy constructor
   virtual gbtGame Copy(gbtGameNode) const = 0;
@@ -124,29 +160,19 @@ public:
   virtual void WriteNfg(gbtOutput &p_file) const = 0;
 
   // DATA ACCESS -- GENERAL INFORMATION
-  virtual bool IsTree(void) const = 0;
-  virtual bool IsMatrix(void) const = 0;
-
-  virtual bool IsConstSum(void) const = 0; 
   virtual bool IsPerfectRecall(void) const = 0;
   virtual bool IsPerfectRecall(gbtGameInfoset &, gbtGameInfoset &) const = 0;
   virtual long RevisionNumber(void) const = 0;
-  virtual gbtNumber MinPayoff(int pl = 0) const = 0;
-  virtual gbtNumber MaxPayoff(int pl = 0) const = 0;
  
   // DATA ACCESS -- NODES
   virtual int NumNodes(void) const = 0;
   virtual gbtGameNode GetRoot(void) const = 0;
 
   // DATA ACCESS -- PLAYERS
-  virtual int NumPlayers(void) const = 0;
   virtual gbtGamePlayer GetChance(void) const = 0;
   virtual gbtGamePlayer NewPlayer(void) = 0;
-  virtual gbtGamePlayer GetPlayer(int index) const = 0;
 
   // DATA ACCESS -- OUTCOMES
-  virtual int NumOutcomes(void) const = 0;
-  virtual gbtGameOutcome GetOutcome(int p_id) const = 0;
   virtual gbtGameOutcome NewOutcome(void) = 0;
 
   virtual void SetOutcomeIndex(int index, const gbtGameOutcome &outcome) = 0;
@@ -154,7 +180,6 @@ public:
 
   // DATA ACCESS -- STRATEGIES
   virtual int NumStrats(int pl) const = 0;
-  virtual gbtArray<int> NumStrats(void) const = 0; 
 
   // DATA ACCESS -- SUPPORTS
   virtual gbtEfgSupport NewEfgSupport(void) const = 0;
@@ -176,13 +201,9 @@ public:
   virtual void UnmarkSubgame(gbtGameNode) = 0;
   virtual void UnmarkSubgames(gbtGameNode) = 0;
 
-  virtual int BehavProfileLength(void) const = 0;
-  virtual int MixedProfileLength(void) const = 0;
   virtual int TotalNumInfosets(void) const = 0;
 
-  virtual gbtArray<int> NumInfosets(void) const = 0;  // Does not include chance infosets
   virtual int NumPlayerInfosets(void) const = 0;
-  virtual gbtPVector<int> NumActions(void) const = 0;
   virtual int NumPlayerActions(void) const = 0;
   virtual gbtPVector<int> NumMembers(void) const = 0;
 
