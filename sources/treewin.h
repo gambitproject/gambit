@@ -11,12 +11,13 @@
 #include "twflash.h"
 #include "treedraw.h"
 
-typedef struct   {
+typedef struct NODEENTRY {
 		int x, y, level, color;
 		int infoset_y;	// y of the next node in the infoset to connect to
 		int	num;				// # of the infoset line on this level
 		int nums;				// sum of infosets previous to this level
 		Node n;
+    
 }  NodeEntry;
 
 class ExtensiveFrame;
@@ -31,8 +32,9 @@ class TreeWindow : public wxCanvas
 		TreeWinIter *iterator;				// Used to process cursor keys
 		TreeNodeCursor *flasher;			// Used to flash the cursor
 		wxList *node_list;						// Data for display coordinates of nodes
+		Bool		nodes_changed;    		// Used to determine if a node_list recalc
+		Bool		infosets_changed;			// is needed
 		typedef struct SUBGAMESTRUCT{
-		  friend gOutput &operator<<(gOutput &op,const SUBGAMESTRUCT &s);
 										int num;ExtensiveFrame *win;
 										SUBGAMESTRUCT(void)
 											{num=0;win=NULL;}
