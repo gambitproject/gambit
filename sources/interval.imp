@@ -1,8 +1,8 @@
-//#
-//# FILE: interval.imp -- Implementation of univariate intervalmials
-//#
-//# @(#)interval.imp	1.0   2/7/96
-//#
+//
+// FILE: interval.imp -- Implementation of univariate intervalmials
+//
+// $Id$
+//
 
 #include "interval.h"
 

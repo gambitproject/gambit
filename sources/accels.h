@@ -1,3 +1,9 @@
+//
+// FILE: accels.h
+//
+// $Id$
+//
+
 #ifndef ACCELS_H
 #define ACCELS_H
 

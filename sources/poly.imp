@@ -1,8 +1,8 @@
-//#
-//# FILE: poly.imp -- Implementation of univariate polynomial
-//#
-//# @(#)poly.imp	1.0  2/9/96
-//#
+//
+// FILE: poly.imp -- Implementation of univariate polynomial
+//
+// $Id$
+//
 
 #include "poly.h"
 

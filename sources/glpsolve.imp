@@ -1,8 +1,8 @@
-//#
-//# FILE: glpsolve.imp -- Implementation of LP solver
-//#
-//# @(#)glpsolve.imp	1.4 12/19/95
-//#
+//
+// FILE: glpsolve.imp -- Implementation of LP solver
+//
+// $Id$
+//
 
 #include "glpsolve.h"
 

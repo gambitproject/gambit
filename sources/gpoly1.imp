@@ -1,7 +1,8 @@
-//# FILE: gpoly1.imp  -- Implementation of gPoly1 data type
-//#
-//# @(#)gpoly1.imp	1.9 1/23/96
-//#
+//
+// FILE: gpoly1.imp  -- Implementation of gPoly1 data type
+//
+// $Id$
+//
 
 #include "gpoly1.h"
 

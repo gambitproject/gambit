@@ -1,7 +1,7 @@
 //
 // FILE: efgiter.imp -- Implementation of extensive form strategy iterator
 //
-// @(#)efgiter.imp	2.7 07/23/97
+// $Id$
 //
 
 #include "efgciter.h"

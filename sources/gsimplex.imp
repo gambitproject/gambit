@@ -1,7 +1,7 @@
 //
 // FILE: gsimplex.imp -- Implementation of gSimplex
 //
-// @(#)gsimplex.imp	1.4 02/14/98
+// $Id$
 //
 
 #include "gsimplex.h"

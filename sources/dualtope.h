@@ -1,4 +1,8 @@
-/* // dualtope.h // */
+//
+// FILE: dualtope.h 
+//
+// $Id$
+//
 
 #include "glist.h"
 #include "double.h"

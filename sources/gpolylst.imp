@@ -2,7 +2,7 @@
 // File: gpolylst.imp  
 //        -- Implementation of class gPolyList
 // 
-// @(#)gpolylst.imp	1.4 01/14/98 
+// $Id$
 //
 
 #include "gpolylst.h"

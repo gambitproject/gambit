@@ -1,8 +1,8 @@
 //
-// File: equisolv.imp  
+// FILE: equisolv.imp  
 //        -- Implementation of class EquiSolv
 // 
-// @(#)EquiSolv.imp	1.6 01/24/98
+// $Id$
 //
 
 #include "equisolv.h"

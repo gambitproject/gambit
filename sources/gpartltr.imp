@@ -2,7 +2,7 @@
 // File: gpartltr.imp  
 //        -- Implementation of classes TreeOfPartials and ListOfPartialTrees
 // 
-// @(#)gpartltr.imp	1.6 01/24/98
+// $Id$
 //
 
 #include "gpartltr.h"

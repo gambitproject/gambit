@@ -1,8 +1,8 @@
-//#
-//# FILE: gtableau.imp -- Implementation of tableau classes
-//#
-//# @(#)gtableau.imp	1.4 12/19/95
-//#
+//
+// FILE: gtableau.imp -- Implementation of tableau classes
+//
+// $Id$
+//
 
 #include "gtableau.h"
 

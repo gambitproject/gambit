@@ -1,7 +1,7 @@
 //
 // FILE: gsmpltpe.imp -- Implementation of gSimplex
 //
-// @(#)gsmpltpe.imp	1.4 02/14/98
+// $Id$
 //
 
 #include "gsmpltpe.h"
