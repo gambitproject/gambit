@@ -14,7 +14,6 @@
 WXWINDIR  = /home/mill/gambit/wxwin
 GUI       = motif
 GMAKEFILE = Makefile2.generic
-#FTPDIR    = /home/mill/ftp/pub/gambit/ver96
 FTPDIR    = /users/ftp/pub/gambit/ver96
 SRCDIR    = ./sources
 
@@ -92,23 +91,48 @@ gambit:
 
 	mv ../gambit_$(GUI)_$(SYSNAME).zip $(FTPDIR) 
 
-src:
+unixsrc:
 	@echo
 	@echo ------------------------------------------------------
-	@echo Updating gambit source code on ftp server 
+	@echo Updating gambit source code for unix on ftp server 
 	@echo ------------------------------------------------------
 	@echo
 
 	@# FIXME: Have to figure out what to do about bison++ ...
 
+	if [ -f $(SRCDIR)/Makefile ]; \
+	then cp $(SRCDIR)/Makefile.generic $(SRCDIR)/Makefile; fi 
+
 	cd ..; \
-	zip gambsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
-	$(SRCDIR)/*.yy $(SRCDIR)/Makefile.generic  $(SRCDIR)/gambit.ini \
+	zip gunixsrc.zip $(SRCDIR)/*.cc $(SRCDIR)/*.h $(SRCDIR)/*.imp \
+	$(SRCDIR)/*.yy $(SRCDIR)/Makefile  $(SRCDIR)/gambit.ini \
 	$(SRCDIR)/*.cpp $(SRCDIR)/*.gcl* $(SRCDIR)/*.def $(SRCDIR)/*.rc \
 	$(SRCDIR)/fake/* $(SRCDIR)/fake/sys/* $(SRCDIR)/bitmaps/* \
 	$(SRCDIR)/make.filelist 
 
-	mv ../gambsrc.zip $(FTPDIR)
+	mv ../gunixsrc.zip $(FTPDIR)
+
+winsrc:
+	@echo
+	@echo ------------------------------------------------------
+	@echo Updating gambit source code for Windows on ftp server 
+	@echo ------------------------------------------------------
+	@echo
+
+	if [ -f gwinsrc.zip ]; then rm gwinsrc.zip; fi 
+	if [ ! -d $(SRCDIR)/obj ]; then mkdir $(SRCDIR)/obj; fi
+
+	zip -l gwinsrc.zip $(SRCDIR)/*.yy \
+	$(SRCDIR)/*.h $(SRCDIR)/*.cc $(SRCDIR)/*.imp \
+	$(SRCDIR)/*.cpp $(SRCDIR)/*.def $(SRCDIR)/res/*.rc* \
+	bin/*.gcl bin/ bin/gcl.man; \
+	zip gwinsrc.zip $(SRCDIR)/*.ide $(SRCDIR)/fake/*.* \
+	$(SRCDIR)/bitmaps/*.* \
+	$(SRCDIR)/res/*.ico $(SRCDIR)/res/*.bmp \
+	$(SRCDIR)/obj \
+	bisondos/bison.exe 
+
+	mv ../gwinsrc.zip $(FTPDIR)
 
 wxwin:
 	@echo
