@@ -5,6 +5,7 @@
 //
 
 #include "sfg.h"
+#include "sfstrat.h"
 #include "garray.imp"
 #include "gnarray.imp"
 
@@ -14,12 +15,13 @@
 
 
 Sfg::Sfg(const EFSupport &S, const gArray<gNumber> &v)
-  : EF(S.Game()), support(S), seq(EF.NumPlayers()),isets(EF.NumPlayers()),
+  : EF(S.Game()), efsupp(S), seq(EF.NumPlayers()),isets(EF.NumPlayers()),
     values(v)
 { 
   int i;
   gArray<int> zero(EF.NumPlayers());
   gArray<int> one(EF.NumPlayers());
+  EFSupport support(EF);
 
   for(i=1;i<=EF.NumPlayers();i++) {
     seq[i]=support.NumSequences(i);
@@ -46,9 +48,15 @@ Sfg::Sfg(const EFSupport &S, const gArray<gNumber> &v)
     (*(*E)[i])(1,1)=(gNumber)1;
   } 
 
-  MakeSequenceForm(EF.RootNode(),(gNumber)1,one,zero);
+  sequences = new gArray<SFSequenceSet *>(EF.NumPlayers());
+  for(i=1;i<=EF.NumPlayers();i++)
+    (*sequences)[i] = new SFSequenceSet( (EF.Players())[i] );
 
-  Dump();
+  gArray<Sequence *> parent(EF.NumPlayers());
+  for(i=1;i<=EF.NumPlayers();i++)
+    parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
+
+  MakeSequenceForm(EF.RootNode(),(gNumber)1,one,zero,parent);
 }
 
 Sfg::~Sfg()
@@ -62,11 +70,16 @@ Sfg::~Sfg()
   for(int i=1;i<=EF.NumPlayers();i++) 
     delete (*E)[i];
   delete E;
+
+  for(int i=1;i<=EF.NumPlayers();i++)
+    delete (*sequences)[i];
+  delete sequences;
 }
 
 void Sfg::
-MakeSequenceForm(const Node *n, gNumber prob,gArray<int> seq, gArray<int> iset)
-{
+MakeSequenceForm(const Node *n, gNumber prob,gArray<int>seq, 
+		 gArray<int> iset, gArray<Sequence *> parent) 
+{ 
   int i,pl;
 
   if(n->GetOutcome()) {
@@ -78,7 +91,7 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int> seq, gArray<int> iset)
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	MakeSequenceForm(n->GetChild(i),
-		     prob * EF.GetChanceProb(n->GetInfoset(), i), seq,iset);
+		     prob * EF.GetChanceProb(n->GetInfoset(), i), seq,iset,parent);
     }
     else {
       int pl = n->GetPlayer()->GetNumber();
@@ -90,28 +103,37 @@ MakeSequenceForm(const Node *n, gNumber prob,gArray<int> seq, gArray<int> iset)
 	snew[pl]+=n->GetPlayer()->Infosets()[i]->NumActions();
     
       (*(*E)[pl])(iset[pl]+1,seq[pl]) = (gNumber)1;
+      Sequence *myparent(parent[pl]);
       for(i=1;i<=n->NumChildren();i++) {
 	snew[pl]+=1;
+	if(n==(n->GetInfoset()->Members())[1]) {
+	  Sequence* child;
+	  child = new Sequence(n->GetPlayer(),(n->GetInfoset()->Actions())[i], 
+			       myparent,snew[pl]);
+	  parent[pl]=child;
+//	  gout << (*child);;
+	  ((*sequences)[pl])->AddSequence(child);
+	}
 	(*(*E)[pl])(iset[pl]+1,snew[pl]) = -(gNumber)1;
-	MakeSequenceForm(n->GetChild(i),prob,snew,iset);
+	MakeSequenceForm(n->GetChild(i),prob,snew,iset,parent);
       }
     }
     
   }
 }
 
-void Sfg::Dump()
+void Sfg::Dump(gOutput& out) const
 {
   gIndexOdometer index(seq);
 
-  gout << "\nSequence Form: \n";
+  out << "\nSequence Form: \n";
   while (index.Turn()) {
-    gout << "\nrow " << index.CurrentIndices() << ": " << (*(*SF)[index.CurrentIndices()]);
+    out << "\nrow " << index.CurrentIndices() << ": " << (*(*SF)[index.CurrentIndices()]);
   } 
   
-  gout << "\nConstraint matrices: \n";
+  out << "\nConstraint matrices: \n";
   for(int i=1;i<=EF.NumPlayers();i++) 
-    gout << "\nPlayer " << i << ":\n " << (*(*E)[i]);
+    out << "\nPlayer " << i << ":\n " << (*(*E)[i]);
 }
 
 int Sfg::InfosetNumber(int pl, int sequence) const 
@@ -134,7 +156,26 @@ int Sfg::ActionNumber(int pl, int sequence) const
   return act;
 }
 
+BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
+{
+  BehavProfile<gNumber> b(efsupp,values);
+
+  Sequence *sij;
+  const Sequence *parent;
+  gNumber value;
+
+  int i,j;
+  for(i=1;i<=EF.NumPlayers();i++)
+    for(j=2;j<=seq[i];j++) {
+      sij = ((*sequences)[i]->GetSFSequenceSet())[j];
+      int sn = sij->GetNumber();
+      parent = sij->Parent();
+      assert(x(i, parent->GetNumber())>(double)0);
+      value = (gNumber)(x(i,sn)/x(i,parent->GetNumber()));
+      b(i,sij->GetInfoset()->GetNumber(),sij->GetAction()->GetNumber())= value;
+    }
+  return b;
+}
 template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
-

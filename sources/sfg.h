@@ -12,17 +12,21 @@
 #include "garray.h"
 #include "grarray.h"
 #include "gnarray.h"
+#include "sfstrat.h"
 
 class Sfg  {
 private:
   const Efg &EF;
-  const EFSupport &support;
+  const EFSupport &efsupp;
+  gArray<SFSequenceSet *> *sequences;
   gNArray<gArray<gNumber> *> *SF;  // sequence form
   gArray<gRectArray<gNumber> *> *E;   // constraint matrices for sequence form.  
   gArray<int> seq,isets;
   gArray<gNumber> values;
 
-  void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>);
+
+  void MakeSequenceForm(const Node *, gNumber,gArray<int>, gArray<int>,
+		      gArray<Sequence *> );
 
 public:
   Sfg(const EFSupport &, const gArray<gNumber> &values);
@@ -39,8 +43,10 @@ public:
   gRectArray<gNumber> Constraints(int player) const {return *((*E)[player]);};
   int InfosetNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
+  const Efg &GetEfg(void) const {return EF;}
+  BehavProfile<gNumber> ToBehav(const gPVector<double> &x) const;
   
-  void Dump();
+  void Dump(gOutput &) const;
 
 };
 
