@@ -1084,6 +1084,7 @@ private:
 
   void OnOK(void);
   void OnCancel(void);
+  Bool OnClose(void);
 
 public:
   BranchDraggerDialog(Efg &, wxWindow * = 0);
@@ -1139,6 +1140,13 @@ void BranchDraggerDialog::OnCancel(void)
 {
   m_completed = wxCANCEL;
   Show(FALSE);
+}
+
+Bool BranchDraggerDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
 }
 
 EFPlayer *BranchDraggerDialog::GetPlayer(void)

@@ -988,7 +988,7 @@ NFSupport *NfgShow::MakeSupport(void)
 //                        class nfgOutcomePayoffsDialog 
 //=========================================================================
 
-class nfgOutcomePayoffsDialog : public MyDialogBox {
+class nfgOutcomePayoffsDialog : public wxDialogBox {
 private:
   NFOutcome *m_outcome;
   const Nfg &m_nfg;
@@ -1005,6 +1005,7 @@ private:
 
   void OnOK(void);
   void OnCancel(void);
+  Bool OnClose(void);
 
 public:
   nfgOutcomePayoffsDialog(NFOutcome *, bool, wxWindow *parent);
@@ -1018,7 +1019,7 @@ public:
 nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(NFOutcome *p_outcome,
 						 bool p_solutions,
 						 wxWindow *p_parent)
-  : MyDialogBox(p_parent, "Change Payoffs"),
+  : wxDialogBox(p_parent, "Change Payoffs", TRUE),
     m_outcome(p_outcome), m_nfg(*p_outcome->Game()),
     m_payoffs(p_outcome->Game()->NumPlayers())
 {
@@ -1071,6 +1072,13 @@ void nfgOutcomePayoffsDialog::OnCancel(void)
   Show(FALSE);
 }
 
+Bool nfgOutcomePayoffsDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
 //=========================================================================
 //                        class nfgOutcomeSelectDialog 
 //=========================================================================
@@ -1088,6 +1096,7 @@ private:
 
   void OnOK(void);
   void OnCancel(void);
+  Bool OnClose(void);
 
 public:
   nfgOutcomeSelectDialog(Nfg &, wxWindow * = 0);
@@ -1147,6 +1156,13 @@ void nfgOutcomeSelectDialog::OnCancel(void)
 {
   m_completed = wxCANCEL;
   Show(FALSE);
+}
+
+Bool nfgOutcomeSelectDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
 }
 
 NFOutcome *nfgOutcomeSelectDialog::GetOutcome(void)
