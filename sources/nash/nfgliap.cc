@@ -260,6 +260,8 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	    break;
 	  }
 
+	  // Guard against wasting time when we get "stuck" on a
+	  // boundary
 	  double dist = 0.0;
 	  for (int i = 1; i <= p.Length(); i++) {
 	    dist += fabs(p[i] - q[i]);
@@ -267,9 +269,6 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	  if (dist <= 1.0e-8) {
 	    break;
 	  }
-
-	  gStandardOutput gout;
-	  gout << iter << ": (" << p.LiapValue() << ") " << p << '\n';
 
 	  if (sqrt(gradient.NormSquared()) < .001 &&
 	      fval < 1.0e-8) {

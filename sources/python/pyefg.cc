@@ -278,6 +278,31 @@ efg_writeefg(efgobject *self, PyObject *args)
   }
 }
 
+static PyObject *
+efg_writenfg(efgobject *self, PyObject *args)
+{
+  char *filename;
+
+  if (!PyArg_ParseTuple(args, "s", &filename)) {
+    return NULL;
+  }
+
+  try {
+    gFileOutput file(filename);
+    self->m_efg->GetReducedNfg().WriteNfg(file);
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  catch (const gFileInput::OpenFailed &) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+  catch (...) {
+    Py_INCREF(Py_None);
+    return Py_None;
+  }
+}
+
 static struct PyMethodDef efg_methods[] = {
   { "GetChance", (PyCFunction) efg_getchance, 1 },
   { "GetComment", (PyCFunction) efg_getcomment, 1 },
@@ -295,6 +320,7 @@ static struct PyMethodDef efg_methods[] = {
   { "SetComment", (PyCFunction) efg_setcomment, 1 },
   { "SetLabel", (PyCFunction) efg_setlabel, 1 },
   { "WriteEfg", (PyCFunction) efg_writeefg, 1 },
+  { "WriteNfg", (PyCFunction) efg_writenfg, 1 },
   { NULL, NULL }
 };
 

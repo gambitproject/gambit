@@ -782,6 +782,53 @@ The GCL version returns <parameter>efg</parameter>.
 
 </sect2>
 
+<sect2 id="apiref.efg.writenfg">
+<title>WriteNfg</title>
+<indexterm><primary>WriteNfg</primary></indexterm>
+
+<formalpara>
+<title>C++ usage</title>
+<para>
+<synopsis>
+void gbtEfgGame::WriteNfg(gOutput &amp;p_file) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Python usage</title>
+<para>
+<synopsis>
+efg.WriteNfg(filename)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>WriteNfg</function>
+writes the reduced normal form of the extensive form game
+to an external savefile.  In C, this file is given as a 
+<type>gOutput</type> stream object; in Python, the filename
+to be written is passed.
+</para>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<function>WriteNfg</function> can be written as a user-defined function
+in the GCL as
+<programlisting>
+NewFunction[WriteNfg[efg->EFG, file->TEXT] =: EFG,
+  WriteNfg[Nfg[efg], file]; efg
+];
+</programlisting>
+</para>
+</formalpara>
+
+
+</sect2>
+
+
 </sect1>
 
 

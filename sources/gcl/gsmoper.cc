@@ -1530,7 +1530,7 @@ static Portion *GSM_Write_Nfg(GSM &, Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
   gbtNfgGame nfg = AsNfg(param[1]);
-  nfg.WriteNfgFile(s, _WriteGameDecimals.Value());
+  nfg.WriteNfg(s);
   return param[0]->ValCopy();
 }
 

@@ -375,7 +375,7 @@ static Portion *GSM_SaveNfg(GSM &, Portion **param)
   gText file = AsText(param[1]);
   try {
     gFileOutput f(file);
-    nfg.WriteNfgFile(f, _WriteGameDecimals.Value());
+    nfg.WriteNfg(f);
   }
   catch (gFileOutput::OpenFailed &)  {
     throw gclRuntimeError("Unable to open file " + file + " for output");

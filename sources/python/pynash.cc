@@ -26,13 +26,67 @@
 
 #include <Python.h>
 #include "base/gnullstatus.h"
+#include "nash/efgliap.h"
 #include "nash/efglogit.h"
+#include "nash/nfgliap.h"
 #include "nash/nfglogit.h"
 #include "pygambit.h"
 
 /************************************************************************
  * MODULE METHODS
  ************************************************************************/
+
+PyObject *
+gbt_nash_liap(PyObject */*self*/, PyObject *args)
+{
+  PyObject *support;
+  int stopAfter, nTries, maxIters;
+
+  if (!PyArg_ParseTuple(args, "Oiii",
+			&support, &stopAfter, &nTries, &maxIters)) {
+    return NULL;
+  }
+
+  if (is_nfsupportobject(support)) {
+    gbtNfgNashLiap algorithm;
+    algorithm.SetStopAfter(stopAfter);
+    algorithm.SetNumTries(nTries);
+    algorithm.SetMaxitsN(maxIters);
+    gNullStatus status;
+    gList<MixedSolution> solutions = algorithm.Solve(*((nfsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      mixedobject *p = newmixedobject();
+      p->m_profile = new MixedSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else if (is_efsupportobject(support)) {
+    gbtEfgNashLiap algorithm;
+    algorithm.SetStopAfter(stopAfter);
+    algorithm.SetNumTries(nTries);
+    algorithm.SetMaxitsN(maxIters);
+    gNullStatus status;
+    gList<BehavSolution> solutions = algorithm.Solve(*((efsupportobject *) support)->m_support, status);
+
+    PyObject *list = PyList_New(0);
+
+    for (int i = 1; i <= solutions.Length(); i++) {
+      behavobject *p = newbehavobject();
+      p->m_profile = new BehavSolution(solutions[i]);
+      PyList_Append(list, (PyObject *) p);
+    }  
+
+    return list;
+  }
+  else {
+    return NULL;
+  }
+}
 
 PyObject *
 gbt_nash_logit(PyObject */*self*/, PyObject *args)

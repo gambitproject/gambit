@@ -204,7 +204,7 @@ nfg_writenfg(nfgobject *self, PyObject *args)
 
   try {
     gFileOutput file(filename);
-    self->m_nfg->WriteNfgFile(file, 6);
+    self->m_nfg->WriteNfg(file);
     Py_INCREF(Py_None);
     return Py_None;
   }

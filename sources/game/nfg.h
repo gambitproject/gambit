@@ -80,7 +80,7 @@ public:
   bool IsConstSum(void) const;
   long RevisionNumber(void) const;
 
-  void WriteNfgFile(gOutput &, int) const;
+  void WriteNfg(gOutput &p_file) const;
 
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;

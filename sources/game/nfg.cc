@@ -32,6 +32,7 @@
 #include "efg.h"
 #include "efgint.h"
 #include "nfgiter.h"
+#include "nfgciter.h"
 
 //----------------------------------------------------------------------
 //                 gbt_nfg_strategy_rep: Declaration
@@ -332,37 +333,51 @@ bool gbtNfgGame::IsConstSum(void) const
 long gbtNfgGame::RevisionNumber(void) const
 { return rep->m_revision; }
 
-void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
+static void WriteNfg(const gbtNfgGame &p_game,
+		     NfgIter &p_iter, int pl, gOutput &p_file)
+{
+  p_iter.Set(pl, 1);
+  do {
+    if (pl == 1) {
+      for (int p = 1; p <= p_game.NumPlayers(); p++) {
+	p_file << p_iter.GetPayoff(p_game.GetPlayer(p)) << ' ';
+      }
+      p_file << '\n';
+    }
+    else {
+      WriteNfg(p_game, p_iter, pl - 1, p_file);
+    }
+  } while (p_iter.Next(pl));
+} 
+
+void gbtNfgGame::WriteNfg(gOutput &p_file) const
 { 
-  int oldDecimals = p_file.GetPrec();
-  p_file.SetPrec(p_nDecimals);
+  p_file << "NFG 1 R";
+  p_file << " \"" << EscapeQuotes(GetLabel()) << "\" { ";
 
-  try {
-    p_file << "NFG 1 R";
-    p_file << " \"" << EscapeQuotes(GetLabel()) << "\" { ";
+  for (int i = 1; i <= NumPlayers(); i++) {
+    p_file << '"' << EscapeQuotes(GetPlayer(i).GetLabel()) << "\" ";
+  }
 
-    for (int i = 1; i <= NumPlayers(); i++) {
-      p_file << '"' << EscapeQuotes(GetPlayer(i).GetLabel()) << "\" ";
-    }
-
-    p_file << "}\n\n{ ";
+  p_file << "}\n\n{ ";
   
-    for (int i = 1; i <= NumPlayers(); i++)   {
-      gbtNfgPlayer player = GetPlayer(i);
-      p_file << "{ ";
-      for (int j = 1; j <= player.NumStrategies(); j++)
-	p_file << '"' << EscapeQuotes(player.GetStrategy(j).GetLabel()) << "\" ";
-      p_file << "}\n";
-    }
-  
+  for (int i = 1; i <= NumPlayers(); i++)   {
+    gbtNfgPlayer player = GetPlayer(i);
+    p_file << "{ ";
+    for (int j = 1; j <= player.NumStrategies(); j++)
+      p_file << '"' << EscapeQuotes(player.GetStrategy(j).GetLabel()) << "\" ";
     p_file << "}\n";
+  }
+  
+  p_file << "}\n";
 
-    p_file << "\"" << EscapeQuotes(rep->m_comment) << "\"\n\n";
+  p_file << "\"" << EscapeQuotes(rep->m_comment) << "\"\n\n";
 
-    int ncont = 1;
-    for (int i = 1; i <= NumPlayers(); i++)
-      ncont *= NumStrats(i);
+  int ncont = 1;
+  for (int i = 1; i <= NumPlayers(); i++)
+    ncont *= NumStrats(i);
 
+  if (rep->m_outcomes.Length() > 0) {
     p_file << "{\n";
     for (int outc = 1; outc <= rep->m_outcomes.Length(); outc++)   {
       p_file << "{ \"" << EscapeQuotes(rep->m_outcomes[outc]->m_label) << "\" ";
@@ -384,13 +399,11 @@ void gbtNfgGame::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
       else
 	p_file << "0 ";
     }
-
-    p_file << '\n';
-    p_file.SetPrec(oldDecimals);
   }
-  catch (...) {
-    p_file.SetPrec(oldDecimals);
-    throw;
+  else {
+    gbtNfgSupport support(*this);
+    NfgIter iter(support);
+    ::WriteNfg(*this, iter, NumPlayers(), p_file);
   }
 }
 

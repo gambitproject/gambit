@@ -394,7 +394,7 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   try {
     gFileOutput file(m_doc->GetFilename().c_str());
     gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(), m_doc->GetNfgSupport());
-    nfg.WriteNfgFile(file, 6);
+    nfg.WriteNfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gFileOutput::OpenFailed &) {

@@ -179,16 +179,29 @@ floating point precision.
 <indexterm><primary>LiapSolve</primary></indexterm>
 
 <formalpara>
+<title>Python usage</title>
+<para>
+<synopsis>
+gList&lt;BehavSolution&gt; LiapSolve(gbtEfgSupport p_support,
+                               int p_stopAfter,
+                               int p_nTries,
+                               int p_maxIters)
+gList&lt;MixedSolution&gt; LiapSolve(gbtNfgSupport p_support,
+                               int p_stopAfter,
+                               int p_nTries,
+                               int p_maxIters)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
 <title>GCL usage</title>
 <para>
 <synopsis>
-LiapSolve[start->BEHAV, {asNfg->False}, {stopAfter->1}, 
-          {nTries->10}, {accuracy->0.000000}, {time<->0}, 
-          {nEvals<->0}, {traceFile<->(Output)}, 
-          {traceLevel->0}] =: LIST(BEHAV)
-LiapSolve[start->MIXED, {stopAfter->1}, {nTries->10}, 
-          {accuracy->0.000000}, {time<->0}, {nEvals<->0}, 
-          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED)
+LiapSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->1}, 
+          {nTries->10}, {maxIters->500}] =: LIST(BEHAV)
+LiapSolve[support->NFSUPPORT, {stopAfter->1},
+          {nTries->10}, {maxIters->500}] =: LIST(MIXED)
 </synopsis>
 </para>
 </formalpara>
@@ -196,29 +209,31 @@ LiapSolve[start->MIXED, {stopAfter->1}, {nTries->10},
 <para>
 <function>LiapSolve</function>
 searches for a Nash equilibrium by minimizing a Lyapunov function
-which is zero exactly at Nash equilibria.  The algorithm starts from
-the initial starting point determined by the parameter 
-<parameter>start</parameter>.
+which is zero exactly at Nash equilibria.  
 The algorithm is not guaranteed to find a Nash equilibrium from any
 fixed starting point.  The algorithm thus incorporates the capability
-of restarting.  If a Nash equilibrium is not found, it will keep
-searching from new randomly chosen starting points until a Nash
-equilibrium has been found or the maximum number of tries (parameter
-<parameter>nTries</parameter>) is exceeded, whichever comes first.  The list of
-solutions found is returned.
+of restarting.  Until either the maximum specified number of equilibria
+are found, or until the upper bound on the number of attempts is reached,
+the algorithm will search from new randomly chosen starting points.
 </para>
 
 <para>
-The behavior of the algorithm may be modified by specifying the following
-optional parameters:
+The list of equilibria found is returned.  Note that it is possible
+(and in some games likely) that the same equilibrium may appear more
+than once in the returned list.
+</para>
+
+<para>
+The behavior of the algorithm is controlled by the following
+parameters, which are optional in the GCL:
 <itemizedlist>
 <listitem>
 <para>
-<parameter>asNfg</parameteR> By default, extensive forms are solved in the extensive form.
-By setting this parameter to <literal>True</literal>, each marked subgame of the
-extensive form is converted to its corresponding reduced normal form game,
-solved, and the overall behavior profile reconstructed from these
-solutions.
+<parameter>asNfg</parameter> By default, extensive forms are solved in
+the extensive form.  By setting this parameter to
+<literal>True</literal>, each marked subgame of the extensive form is
+converted to its corresponding reduced normal form game, solved, and
+the overall behavior profile reconstructed from these solutions.
 </para>
 </listitem>
 <listitem>
@@ -230,14 +245,6 @@ equilibrium. Default is 10.
 <listitem>
 <para>
 <parameter>stopAfter</parameter>: Sets the number of equilibria to find.  Default is 1.
-</para>
-</listitem>
-<listitem>
-<para>
-<parameter>accuracy</parameter>: Resulting solutions are ``epsilon equilibria'' to at least
-this accuracy.  I. e., no unilateral deviation by any player will
-result in an improvement of more than the accuracy.  Default is
-1.0e-8.
 </para>
 </listitem>
 </itemizedlist>
