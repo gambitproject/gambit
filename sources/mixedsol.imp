@@ -14,8 +14,8 @@
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
-    m_isProper(triMAYBE), m_epsilon(0.0),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
+    m_isProper(triUNKNOWN), m_epsilon(0.0),
     m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_id(0)
 {
@@ -34,8 +34,8 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
-    m_isProper(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
+    m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -53,8 +53,8 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     NfgAlgType p_creator)
   : m_profile(NFSupport(p_profile.Game())),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isPerfect(triMAYBE),
-    m_isProper(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isPerfect(triUNKNOWN),
+    m_isProper(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -105,7 +105,7 @@ MixedSolution &MixedSolution::operator=(const MixedSolution &p_solution)
 void MixedSolution::EvalEquilibria(void) const
 {
   if (IsComplete())   {
-    if (m_isNash == triMAYBE)  
+    if (m_isNash == triUNKNOWN)  
       m_isNash = (m_profile.MaxRegret() <= m_epsilon) ? triTRUE : triFALSE;
   }
   if (m_isNash == triFALSE) {
@@ -211,8 +211,8 @@ const gNumber &MixedSolution::LiapValue(void) const
 void MixedSolution::Invalidate(void) const
 {
   m_creator = NfgAlg_USER;
-  m_isNash = triMAYBE;
-  m_isProper = triMAYBE;
+  m_isNash = triUNKNOWN;
+  m_isProper = triUNKNOWN;
   m_gobitLambda = -1;
   m_gobitValue = -1;
   m_liapValue = -1;

@@ -15,8 +15,8 @@
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
-    m_isSequential(triMAYBE), m_epsilon(0.0),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_isSequential(triUNKNOWN), m_epsilon(0.0),
     m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -40,8 +40,8 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
-    m_isSequential(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -63,8 +63,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_creator(p_creator), m_isNash(triMAYBE), m_isSubgamePerfect(triMAYBE),
-    m_isSequential(triMAYBE), m_gobitLambda(-1), m_gobitValue(-1),
+    m_creator(p_creator), m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
+    m_isSequential(triUNKNOWN), m_gobitLambda(-1), m_gobitValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -139,7 +139,7 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 void BehavSolution::EvalEquilibria(void) const
 {
   if (IsComplete()) {
-    if (m_isNash == triMAYBE)
+    if (m_isNash == triUNKNOWN)
       m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
   }  
   if (m_isNash == triFALSE) {
@@ -249,9 +249,9 @@ const gNumber &BehavSolution::LiapValue(void) const
 void BehavSolution::Invalidate(void) const
 {
   m_creator = EfgAlg_USER;
-  m_isNash = triMAYBE;
-  m_isSubgamePerfect = triMAYBE;
-  m_isSequential = triMAYBE;
+  m_isNash = triUNKNOWN;
+  m_isSubgamePerfect = triUNKNOWN;
+  m_isSequential = triUNKNOWN;
   m_gobitLambda = -1;
   m_gobitValue = -1;
   m_liapValue = -1;

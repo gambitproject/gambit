@@ -430,8 +430,8 @@ static struct tokens toktable[] =
      	gerr << "True\n";
       else if (bval == triFALSE)
         gerr << "False\n";
-      else  /* (bval == triMAYBE) */
-        gerr << "Maybe\n";
+      else  /* (bval == triUNKNOWN) */
+        gerr << "Unknown\n";
       break;
     case FLOAT:
       gerr << "floating-point constant " << dval << '\n';
@@ -485,8 +485,8 @@ int GCLCompiler::yylex(void)
       bval = triFALSE;
       return BOOLEAN;
     }
-    else if (s == "Maybe") {
-      bval = triMAYBE;
+    else if (s == "Unknown") {
+      bval = triUNKNOWN;
       return BOOLEAN;
     }
     else if (s == "StdIn")  return STDIN;

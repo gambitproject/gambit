@@ -675,7 +675,7 @@ static Portion *GSM_And(Portion** param)
   else if (x == triFALSE && y == triFALSE)
     return new BoolPortion(triFALSE); 
   else
-    return new BoolPortion(triMAYBE);  
+    return new BoolPortion(triUNKNOWN);  
 }
 
 static Portion *GSM_Or(Portion** param)
@@ -685,8 +685,8 @@ static Portion *GSM_Or(Portion** param)
 
   if (x == triTRUE || y == triTRUE)    
     return new BoolPortion(triTRUE);
-  else if (x == triMAYBE || y == triMAYBE)
-    return new BoolPortion(triMAYBE); 
+  else if (x == triUNKNOWN || y == triUNKNOWN)
+    return new BoolPortion(triUNKNOWN); 
   else
     return new BoolPortion(triFALSE);
 }
@@ -700,7 +700,7 @@ static Portion *GSM_Not(Portion** param)
   else if (x == triFALSE)
     return new BoolPortion(triTRUE);
   else
-    return new BoolPortion(triMAYBE); 
+    return new BoolPortion(triUNKNOWN); 
 }
 
 
@@ -904,7 +904,7 @@ Portion* GSM_Read_Bool(Portion** param)
 {
   gInput& input = ((InputPortion*) param[0])->Value();
   long old_pos = input.getpos();
-  gTriState value = triMAYBE;
+  gTriState value = triUNKNOWN;
   bool error = false;
   char c = ' ';
 
@@ -928,18 +928,19 @@ Portion* GSM_Read_Bool(Portion** param)
     if(!input.eof()) input.get(c); if(c != 'e') error = true;
     value = triFALSE;
   }
-  else if (c == 'M')  {
-    if(!input.eof()) input.get(c); if(c != 'a') error = true;
-    if(!input.eof()) input.get(c); if(c != 'y') error = true;
-    if(!input.eof()) input.get(c); if(c != 'b') error = true;
-    if(!input.eof()) input.get(c); if(c != 'e') error = true;
-    value = triMAYBE;
+  else if (c == 'U')  {
+    if(!input.eof()) input.get(c); if(c != 'n') error = true;
+    if(!input.eof()) input.get(c); if(c != 'k') error = true;
+    if(!input.eof()) input.get(c); if(c != 'n') error = true;
+    if(!input.eof()) input.get(c); if(c != 'o') error = true;
+    if(!input.eof()) input.get(c); if(c != 'w') error = true;
+    if(!input.eof()) input.get(c); if(c != 'n') error = true;
+    value = triUNKNOWN;
   }
   else
     error = true;
 
-  if(error)
-  {
+  if (error)  {
     input.setpos(old_pos);
     throw gclRuntimeError("No boolean data found");
   }
