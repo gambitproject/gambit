@@ -749,28 +749,48 @@ MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 
 void NfgShow::AttachOutcome(void)
 {
+  if (nf.NumOutcomes() == 0)
+    return;
+
   MyDialogBox *dialog = new MyDialogBox(spread, "Attach Outcome");
     
   wxStringList *outcome_list = new wxStringList;
-  char *outcome_name = new char[20];
+  char *outcome_name = new char[256];
         
   for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
-    outcome_list->Add(nf.Outcomes()[outc]->GetName());
+    NFOutcome *outcome = nf.Outcomes()[outc];
+    gText tmp = ToText(outc) + ": " + outcome->GetName() + " (";
+    tmp += ToText(nf.Payoff(outcome, 1)) + ", " + ToText(nf.Payoff(outcome, 2));
+    if (nf.NumPlayers() > 2) {
+      tmp += ", " + ToText(nf.Payoff(outcome, 3));
+      if (nf.NumPlayers() > 3) 
+	tmp += ",...)";
+      else
+	tmp += ")";
+    }
+    else
+      tmp += ")";
+  
+    outcome_list->Add(tmp);
   }
 
   dialog->Add(wxMakeFormString("Outcome", &outcome_name,
 			       wxFORM_CHOICE,
 			       new wxList(wxMakeConstraintStrings(outcome_list), 0)));
+
   dialog->Go();
   
   if (dialog->Completed() == wxOK) {
-    for (int outc = 1; outc <= nf.NumOutcomes(); outc++) {
-      if (!strcmp(outcome_name, nf.Outcomes()[outc]->GetName())) {
-	nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
-	UpdateVals();
+    for (int i = 0; ; i++) {
+      if (outcome_name[i] == ':') {
+	outcome_name[i] = '\0';
 	break;
       }
     }
+    
+    int outc = (int) ToDouble(outcome_name);
+    nf.SetOutcome(spread->GetProfile(), nf.Outcomes()[outc]);
+    UpdateVals();
   }
 
   delete dialog;

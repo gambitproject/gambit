@@ -245,13 +245,15 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   edit_menu->Append(NFG_EDIT_GAME,      "&Game",      "Edit the entire game");
   edit_menu->Append(NFG_EDIT_STRATS,    "&Strats",    "Edit player strategies");
   edit_menu->Append(NFG_EDIT_PLAYERS,   "&Players",   "Edit players");
-  edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  "Set/Edit outcomes");
-  edit_menu->Append(NFG_EDIT_OUTCOMES_ATTACH, "Attach outcome",
-		    "Attach an outcome to the current contingency");
-  edit_menu->Append(NFG_EDIT_OUTCOMES_DETACH, "Detach outcome",
-		    "Set the outcome for the current contingency to null");
-  edit_menu->Append(NFG_EDIT_OUTCOMES_NAME, "Rename outcome",
-		    "Rename the outcome for the current contingency");
+  wxMenu *editOutcomesMenu = new wxMenu;
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_ATTACH, "&Attach",
+			   "Attach an outcome to the current contingency");
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DETACH, "&Detach",
+			   "Set the outcome for the current contingency to null");
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NAME, "&Label",
+			   "Label the outcome for the current contingency");
+  edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
+		    "Set/Edit outcomes");
 
   wxMenu *supports_menu = new wxMenu;
   supports_menu->Append(NFG_SOLVE_COMPRESS_MENU, "&ElimDom",  "Dominated strategies");
@@ -570,9 +572,6 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_EDIT_PLAYERS: 
       parent->SetLabels(2);
       break;
-    case NFG_EDIT_OUTCOMES: 
-      parent->ChangeOutcomes(CREATE_DIALOG);
-      break;
     case NFG_EDIT_OUTCOMES_ATTACH:
       parent->AttachOutcome();
       break;
@@ -652,7 +651,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     // Load palette bitmaps
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
-#include "bitmaps/payoff.xpm"
+    //#include "bitmaps/payoff.xpm"
 #include "bitmaps/solve.xpm"
 #include "bitmaps/help.xpm"
 #include "bitmaps/options.xpm"
@@ -660,7 +659,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
     wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
     wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
-    wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
+    //    wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
     wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
     wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
     wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
@@ -676,7 +675,7 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     AddTool(NFG_FILE_SAVE, ToolbarSaveBitmap);
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
     AddSeparator();
-    AddTool(NFG_EDIT_OUTCOMES, ToolbarPayoffBitmap);
+    //    AddTool(NFG_EDIT_OUTCOMES, ToolbarPayoffBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_STANDARD_MENU, ToolbarSolveBitmap);
     AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);
