@@ -101,8 +101,7 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
 				  (char *) ToText(m_doc->GetContingency()[pl])));
     SetCellValue(pl - 1, 3, 
 		 wxString::Format(wxT("%s"),
-				  (char *) support->GetStrategy(pl,
-								m_doc->GetContingency()[pl])->GetLabel()));
+				  (char *) support->GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl])->GetLabel()));
     SetCellValue(pl - 1, 4, wxT("+"));
     SetCellValue(pl - 1, 5, wxT("-"));
   }

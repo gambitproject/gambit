@@ -314,7 +314,7 @@ wxString gbtNfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->NumStrategies();
   if (p_row + 1 <= numStrats) {
-    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetStrategy(m_doc->GetRowPlayer(), p_row+1)->GetLabel());
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetRowPlayer())->GetStrategy(p_row+1)->GetLabel());
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
     return wxT("Dom");
@@ -332,7 +332,7 @@ wxString gbtNfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->NumStrategies();
   if (p_col + 1 <= numStrats) {
-    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetStrategy(m_doc->GetColPlayer(), p_col+1)->GetLabel());
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupportList().GetCurrent()->GetPlayer(m_doc->GetColPlayer())->GetStrategy(p_col+1)->GetLabel());
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
     return wxT("Dom");
@@ -361,7 +361,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
     
     gbtNfgContingency profile = m_doc->GetGame()->NewContingency();
     for (int pl = 1; pl <= strategy.Length(); pl++) {
-      profile->SetStrategy(support->GetStrategy(pl, strategy[pl]));
+      profile->SetStrategy(support->GetPlayer(pl)->GetStrategy(strategy[pl]));
     }
 
     if (m_doc->HasEfg() ||
@@ -394,7 +394,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats &&
 	   col == numColStrats + m_table->ShowDominance() - 1) {
-    gbtGameStrategy strategy = support->GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support->GetPlayer(rowPlayer)->GetStrategy(row + 1);
     if (support->IsDominated(strategy, true)) {
       return wxT("S");
     }
@@ -407,7 +407,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row == numRowStrats + m_table->ShowDominance() - 1 &&
 	   col < numColStrats) {
-    gbtGameStrategy strategy = support->GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support->GetPlayer(colPlayer)->GetStrategy(col + 1);
     if (support->IsDominated(strategy, true)) {
       return wxT("S");
     }
@@ -420,28 +420,28 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
-    gbtGameStrategy strategy = support->GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support->GetPlayer(rowPlayer)->GetStrategy(row + 1);
     return wxString::Format(wxT("%s"), 
 			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
-    gbtGameStrategy strategy = support->GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support->GetPlayer(colPlayer)->GetStrategy(col + 1);
     return wxString::Format(wxT("%s"), 
 			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
-    gbtGameStrategy strategy = support->GetStrategy(rowPlayer, row + 1);
+    gbtGameStrategy strategy = support->GetPlayer(rowPlayer)->GetStrategy(row + 1);
     return wxString::Format(wxT("%s"),
 			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
-    gbtGameStrategy strategy = support->GetStrategy(colPlayer, col + 1);
+    gbtGameStrategy strategy = support->GetPlayer(colPlayer)->GetStrategy(col + 1);
     return wxString::Format(wxT("%s"),
 			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
 					    m_doc->GetPreferences().NumDecimals()));

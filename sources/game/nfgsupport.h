@@ -51,7 +51,6 @@ public:
   virtual bool operator!=(const gbtNfgSupportRep &) const = 0;
 
   // DATA ACCESS: STRATEGIES
-  virtual gbtGameStrategy GetStrategy(int pl, int st) const = 0;
   virtual int GetIndex(gbtGameStrategy) const = 0;
   virtual bool Contains(gbtGameStrategy) const = 0;
 

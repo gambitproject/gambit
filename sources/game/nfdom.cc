@@ -93,14 +93,15 @@ bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
   double d1,d2;
   d1 = (double)(pl-1) / (double) NumPlayers();
   d2 = (double)pl / (double) NumPlayers();
-  for (min = 0, dis = GetPlayer(pl)->NumStrategies() - 1; min <= dis; )  {
+  gbtGamePlayer player = GetPlayer(pl);
+  for (min = 0, dis = player->NumStrategies() - 1; min <= dis; )  {
     status.Get();
     int pp;
     double s1 = (double)min/(double)(dis+1);
     status.SetProgress((1.0-s1)*d1 + s1*d2);
     for (pp = 0;
-	 pp < min && !Dominates(GetStrategy(pl, set[pp+1]),
-				GetStrategy(pl, set[dis+1]), strong); 
+	 pp < min && !Dominates(player->GetStrategy(set[pp+1]),
+				player->GetStrategy(set[dis+1]), strong); 
 	 pp++);
     if (pp < min)
       dis--;
@@ -110,14 +111,14 @@ bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
       set[min+1] = foo;
 
       for (int inc = min + 1; inc <= dis; )  {
-	if (Dominates(GetStrategy(pl, set[min+1]),
-		      GetStrategy(pl, set[dis+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[dis+1])->GetId() << " dominated by " << GetStrategy(pl, set[min+1])->GetId() << '\n';
+	if (Dominates(player->GetStrategy(set[min+1]),
+		      player->GetStrategy(set[dis+1]), strong)) { 
+	  tracefile << player->GetStrategy(set[dis+1])->GetId() << " dominated by " << player->GetStrategy(set[min+1])->GetId() << '\n';
 	  dis--;
 	}
-	else if (Dominates(GetStrategy(pl, set[dis+1]),
-			   GetStrategy(pl, set[min+1]), strong)) { 
-	  tracefile << GetStrategy(pl, set[min+1])->GetId() << " dominated by " << GetStrategy(pl, set[dis+1])->GetId() << '\n';
+	else if (Dominates(player->GetStrategy(set[dis+1]),
+			   player->GetStrategy(set[min+1]), strong)) { 
+	  tracefile << player->GetStrategy(set[min+1])->GetId() << " dominated by " << player->GetStrategy(set[dis+1])->GetId() << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;
@@ -134,9 +135,9 @@ bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
     }
   }
     
-  if (min + 1 <= GetPlayer(pl)->NumStrategies())   {
-    for (i = min + 1; i <= GetPlayer(pl)->NumStrategies(); i++) {
-      newS->RemoveStrategy(GetPlayer(pl)->GetStrategy(set[i]));
+  if (min + 1 <= player->NumStrategies())   {
+    for (i = min + 1; i <= player->NumStrategies(); i++) {
+      newS->RemoveStrategy(player->GetStrategy(set[i]));
     }
     
     return true;

@@ -57,7 +57,7 @@ static double Payoff(const gbtMixedProfile<double> &p_profile, int p_player,
 {
   for (int st = 1; st <= p_profile->GetPlayer(p_player)->NumStrategies(); st++) {
     if (p_partition(p_index, st) > 0) {
-      return p_profile->Payoff(p_player, p_profile->GetSupport()->GetStrategy(p_player, st));
+      return p_profile->Payoff(p_player, p_profile->GetPlayer(p_player)->GetStrategy(st));
     }
   }
   

@@ -244,8 +244,8 @@ static void QreJacobian(const gbtNfgSupport &p_support,
       }
 
       p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) *
-	(profile->Payoff(pl1, p_support->GetStrategy(pl1, st1)) -
-	 profile->Payoff(pl1, p_support->GetStrategy(pl1, 1)));
+	(profile->Payoff(pl1, p_support->GetPlayer(pl1)->GetStrategy(st1)) -
+	 profile->Payoff(pl1, p_support->GetPlayer(pl1)->GetStrategy(1)));
     }
   }
 }
@@ -427,7 +427,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
 	  for (int st = 1; st <= newSupport->GetPlayer(pl)->NumStrategies(); st++) {
 	    if (index++ == i) {
-	      newSupport->RemoveStrategy(newSupport->GetStrategy(pl, st));
+	      newSupport->RemoveStrategy(newSupport->GetPlayer(pl)->GetStrategy(st));
 	    }
 	  }
 	}

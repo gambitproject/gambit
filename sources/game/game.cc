@@ -1430,16 +1430,6 @@ int gbtGameBase::MixedProfileLength(void) const
   return nprof;
 }
 
-gbtGameOutcome gbtGameBase::GetOutcomeIndex(int p_index) const
-{
-  return m_results[p_index];
-}
-
-void gbtGameBase::SetOutcomeIndex(int p_index, const gbtGameOutcome &p_outcome)
-{
-  m_results[p_index] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
-}
-
 gbtNfgSupport gbtGameBase::NewNfgSupport(void) const
 {
   return new gbtNfgSupportBase(const_cast<gbtGameBase *>(this));
@@ -1458,7 +1448,7 @@ gbtNfgContingency gbtGameBase::NewContingency(void) const
 gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<double>(NewNfgSupport());
+    return new gbtMixedProfileTable<double>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
     return new gbtMixedProfileTree<double>(NewNfgSupport());
@@ -1469,7 +1459,7 @@ gbtMixedProfile<gbtRational>
 gbtGameBase::NewMixedProfile(const gbtRational &) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<gbtRational>(NewNfgSupport());
+    return new gbtMixedProfileTable<gbtRational>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
     return new gbtMixedProfileTree<gbtRational>(NewNfgSupport());
@@ -1480,7 +1470,7 @@ gbtMixedProfile<gbtNumber>
 gbtGameBase::NewMixedProfile(const gbtNumber &) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<gbtNumber>(NewNfgSupport());
+    return new gbtMixedProfileTable<gbtNumber>(gbtNfgSupportBase(const_cast<gbtGameBase *>(this)));
   }
   else {
     return new gbtMixedProfileTree<gbtNumber>(NewNfgSupport());

@@ -178,9 +178,6 @@ public:
   // DATA ACCESS -- OUTCOMES
   virtual gbtGameOutcome NewOutcome(void) = 0;
 
-  virtual void SetOutcomeIndex(int index, const gbtGameOutcome &outcome) = 0;
-  virtual gbtGameOutcome GetOutcomeIndex(int index) const = 0;
-
   // EDITING OPERATIONS
   virtual void DeleteEmptyInfosets(void) = 0;
 

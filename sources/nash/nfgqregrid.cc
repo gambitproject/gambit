@@ -340,7 +340,7 @@ static void Jacobian(gbtVector<double> &p_vector,
   gbtPVector<double> logitterms(p_profile->Lengths());
   for (int pl = 1; pl <= p_profile->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile->GetPlayer(pl)->NumStrategies(); st++) {
-      logitterms(pl, st) = exp(p_lambda * p_profile->Payoff(pl, p_profile->GetSupport()->GetStrategy(pl, st)));
+      logitterms(pl, st) = exp(p_lambda * p_profile->Payoff(pl, p_profile->GetPlayer(pl)->GetStrategy(st)));
     }
   }
 

@@ -63,12 +63,23 @@ public:
   { return m_player->GetInfoset(p_index); }
 
   int NumStrategies(void) const { return m_support->NumStrats(m_player->GetId()); }
-  gbtGameStrategy GetStrategy(int p_index) const 
-  { return m_support->GetStrategy(m_player->GetId(), p_index); }
+  gbtGameStrategy GetStrategy(int p_index) const; 
 };
 
 
-
+gbtGameStrategy gbtNfgSupportPlayerRep::GetStrategy(int p_index) const
+{
+  int count = 0;
+  for (int i = 1; i <= m_support->m_strategies.Lengths()[m_player->GetId()];
+       i++) {
+    if (m_support->m_strategies(m_player->GetId(), i)) {
+      if (++count == p_index) {
+	return m_player->GetStrategy(i);
+      }
+    }    
+  }
+  return 0;
+}
 
 //==========================================================================
 //                         class gbtNfgSupportBase
@@ -78,7 +89,7 @@ public:
 //                   class gbtNfgSupportBase: Lifecycle
 //--------------------------------------------------------------------------
 
-gbtNfgSupportBase::gbtNfgSupportBase(const gbtGame &p_nfg)
+gbtNfgSupportBase::gbtNfgSupportBase(gbtGameBase *p_nfg)
   : m_nfg(p_nfg), m_strategies(p_nfg->NumStrategies())
 { 
   // Initially, all strategies are contained in the support
@@ -150,25 +161,11 @@ int gbtNfgSupportBase::MixedProfileLength(void) const
   return total;
 }
 
-gbtGameStrategy gbtNfgSupportBase::GetStrategy(int pl, int st) const
-{
-  int index = 0;
-  for (int i = 1; i <= m_nfg->GetPlayer(pl)->NumStrategies(); i++) {
-    if (m_strategies(pl, i)) {
-      if (++index == st) {
-	return m_nfg->GetPlayer(pl)->GetStrategy(i);
-      }
-    }
-    
-  }
-  return 0;
-}
-
 int gbtNfgSupportBase::GetIndex(gbtGameStrategy p_strategy) const
 {
   int pl = p_strategy->GetPlayer()->GetId();
   for (int st = 1; st <= NumStrats(pl); st++) {
-    if (GetStrategy(pl, st) == p_strategy) {
+    if (GetPlayer(pl)->GetStrategy(st) == p_strategy) {
       return st;
     }
   }
@@ -206,7 +203,7 @@ gbtNfgContingency gbtNfgSupportBase::NewContingency(void) const
 gbtMixedProfile<double> gbtNfgSupportBase::NewMixedProfile(double) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<double>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTable<double>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
     return new gbtMixedProfileTree<double>(const_cast<gbtNfgSupportBase *>(this));
@@ -217,7 +214,7 @@ gbtMixedProfile<gbtRational>
 gbtNfgSupportBase::NewMixedProfile(const gbtRational &) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTable<gbtRational>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
     return new gbtMixedProfileTree<gbtRational>(const_cast<gbtNfgSupportBase *>(this));
@@ -228,7 +225,7 @@ gbtMixedProfile<gbtNumber>
 gbtNfgSupportBase::NewMixedProfile(const gbtNumber &) const
 {
   if (IsMatrix()) {
-    return new gbtMixedProfileTable<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));
+    return new gbtMixedProfileTable<gbtNumber>(*const_cast<gbtNfgSupportBase *>(this));
   }
   else {
     return new gbtMixedProfileTree<gbtNumber>(const_cast<gbtNfgSupportBase *>(this));

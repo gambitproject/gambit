@@ -78,7 +78,7 @@ bool gbtStrategyIterator::GoToNext(void)
 
 gbtGameStrategy gbtStrategyIterator::GetStrategy(void) const
 {
-  return m_support->GetStrategy(pl, st);
+  return m_support->GetPlayer(pl)->GetStrategy(st);
 }
 
 gbtGamePlayer gbtStrategyIterator::GetPlayer(void) const

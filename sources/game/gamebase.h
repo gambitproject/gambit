@@ -354,9 +354,6 @@ public:
   gbtGameOutcome GetOutcome(int p_id) const;
   gbtGameOutcome NewOutcome(void);
 
-  void SetOutcomeIndex(int, const gbtGameOutcome &);
-  gbtGameOutcome GetOutcomeIndex(int) const;
-
   // DATA ACCESS -- SUPPORTS
   gbtEfgSupport NewEfgSupport(void) const;
   gbtNfgSupport NewNfgSupport(void) const;
@@ -451,8 +448,8 @@ public:
 
 
 class gbtNfgSupportBase : public gbtNfgSupportRep {
-protected:
-  gbtGame m_nfg;
+public:
+  gbtGameBase *m_nfg;
   // This really could be a gbtPVector<bool> probably, but we'll keep
   // it this way for now to placate possibly older compilers.
   gbtPVector<int> m_strategies;
@@ -461,9 +458,8 @@ protected:
   bool Undominated(gbtNfgSupportBase &newS, int pl, bool strong,
 		   gbtOutput &tracefile, gbtStatus &status) const;
 
-public:
   // LIFECYCLE
-  gbtNfgSupportBase(const gbtGame &);
+  gbtNfgSupportBase(gbtGameBase *);
   ~gbtNfgSupportBase() { }
 
   // OPERATORS
@@ -487,7 +483,6 @@ public:
   gbtArray<int> NumStrategies(void) const;
   int MixedProfileLength(void) const;
 
-  gbtGameStrategy GetStrategy(int pl, int st) const;
   int GetIndex(gbtGameStrategy) const;
   bool Contains(gbtGameStrategy) const;
 
@@ -542,7 +537,7 @@ template <class T>
 class gbtMixedProfileTable : public gbtMixedProfileRep<T> {
 private:
   gbtPVector<T> m_profile;
-  gbtNfgSupport m_support;
+  gbtNfgSupportBase *m_support;
 
   // Private Payoff functions
 
@@ -556,10 +551,10 @@ private:
   T Payoff(const gbtGameOutcome &o, int pl) const;
 
 public:
-  gbtMixedProfileTable(const gbtNfgSupport &);
+  gbtMixedProfileTable(const gbtNfgSupportBase &p_support);
   gbtMixedProfileTable(const gbtMixedProfileTable<T> &);
   gbtMixedProfileTable(const gbtBehavProfile<T> &);
-  virtual ~gbtMixedProfileTable() { }
+  virtual ~gbtMixedProfileTable() { delete m_support; }
 
   gbtMixedProfileTable<T> *Copy(void) const;
   
@@ -572,7 +567,7 @@ public:
 
   bool operator==(const gbtMixedProfileRep<T> &) const;
 
-  const gbtNfgSupport &GetSupport(void) const   { return m_support; }
+  gbtNfgSupport GetSupport(void) const   { return m_support; }
 
   const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
   T &operator()(int pl, int st) { return m_profile(pl, st); }
@@ -649,7 +644,7 @@ public:
 
   bool operator==(const gbtMixedProfileRep<T> &) const;
 
-  const gbtNfgSupport &GetSupport(void) const   { return m_support; }
+  gbtNfgSupport GetSupport(void) const   { return m_support; }
 
   const T &operator()(int pl, int st) const { return m_profile(pl, st); } 
   T &operator()(int pl, int st) { return m_profile(pl, st); }

@@ -227,8 +227,8 @@ PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
   gbtNfgContingency profile = m_nfg->NewContingency();
 
   gbtNfgContIterator A(support), B(support);
-  A.Freeze(support->GetStrategy(i, strat1));
-  B.Freeze(support->GetStrategy(i, strat2));
+  A.Freeze(support->GetPlayer(i)->GetStrategy(strat1));
+  B.Freeze(support->GetPlayer(i)->GetStrategy(strat2));
   gbtPolyMulti<gbtDouble> equation(&Space,&Lex);
   do {
     gbtPolyMulti<gbtDouble> term(&Space,(gbtDouble)1,&Lex);
