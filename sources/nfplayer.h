@@ -31,6 +31,7 @@ public:
   int NumStrats(void) const;
 
   const gArray<Strategy *> &Strategies(void) const;
+  inline Strategy *GetStrategy(const int i) { return Strategies()[i]; }
 
   int GetNumber(void) const  { return number; }
 };
