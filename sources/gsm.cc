@@ -473,9 +473,11 @@ bool GSM::Assign(void)
       p2 = p2->ValCopy();
       delete p_old;
     }      
-    _VarDefine(varname, p2);
     delete p1;
-    _Push(p2->RefCopy());
+    if( _VarDefine(varname, p2) )
+      _Push(p2->RefCopy());
+    else
+      _Push( new ErrorPortion );
   }
   else if(p1Spec == p2Spec && p1Spec.Type != porNULL)
   {
@@ -637,9 +639,11 @@ bool GSM::Assign(void)
 	delete p_old;
       }
       assert(varname != "");
-      _VarDefine(varname, p2);
       delete p1;
-      _Push(p2->RefCopy());
+      if( _VarDefine(varname, p2) )
+	_Push(p2->RefCopy());
+      else
+	_Push( new ErrorPortion );
     }
     else // error: changing the type of variable
     {
@@ -2003,8 +2007,10 @@ Portion* GSM::ExecuteUserFunc(gList< NewInstr* >& program,
   {
     if(param[i] != 0 && param[i]->Spec().Type != porREFERENCE)
     {
-      _VarDefine(func_info.ParamInfo[i].Name, param[i]);
-      param[i] = param[i]->RefCopy();
+      if( _VarDefine(func_info.ParamInfo[i].Name, param[i]) )
+	param[i] = param[i]->RefCopy();
+      else
+	param[i] = new ErrorPortion;
     }
   }
 
