@@ -38,6 +38,7 @@ protected:
   char *trace_str, *m_precisionStr;
 
   int m_stopAfter, m_maxSolns;
+  Bool m_select;
   char *defaults_file;
   gPrecision m_precision;
 

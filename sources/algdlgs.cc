@@ -48,6 +48,8 @@ OutputParamsSettings::OutputParamsSettings(void)
   m_precisionStr = new char[10];
   wxGetResourceStr(PARAMS_SECTION, "Precision", m_precisionStr,
            defaults_file);
+  wxGetResource(SOLN_SECT, "Efg-Interactive-Solns", &m_select,
+		defaults_file);
   trace_list = wxStringListInts(4, NULL, 0);
   m_precisionList = new wxStringList;
   m_precisionList->Add("Float");
@@ -98,6 +100,8 @@ void OutputParamsSettings::SaveDefaults(void)
 
   wxWriteResource(SOLN_SECT, "Efg-Mark-Subgames", markSubgames,
           defaults_file);
+  wxWriteResource(SOLN_SECT, "Efg-Interactive-Solns", m_select,
+		  defaults_file);
 }
 
 //
@@ -225,6 +229,9 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
     Add(wxMakeFormShort("Max Ttl Solns", &m_stopAfter, wxFORM_DEFAULT,
             NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormNewLine());
+    Add(wxMakeFormBool("Select Solutions", &m_select, wxFORM_DEFAULT,
+		       NULL, NULL, wxVERTICAL, 100));
+    Add(wxMakeFormNewLine());
   }
 
   if ((fields & MAXSOLN_FIELD) && (fields & SPS_FIELD)) {
@@ -232,6 +239,9 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
             NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormShort("Max Ttl Solns", &m_maxSolns, wxFORM_DEFAULT, 
             NULL, NULL, wxVERTICAL, 100));
+    Add(wxMakeFormNewLine());
+    Add(wxMakeFormBool("Select Solutions", &m_select, wxFORM_DEFAULT,
+		       NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormNewLine());
   }
 
