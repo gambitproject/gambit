@@ -8,7 +8,7 @@
 #define GUIOBJ_H
 
 #include "gtext.h"
-#include "hash.h"
+#include "ghash.h"
 
 
 class GuiObject;

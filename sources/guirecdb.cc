@@ -9,7 +9,7 @@
 #include "guiobj.h"
 
 #include "glist.imp"
-#include "hash.imp"
+#include "ghash.imp"
 
 
 // Instantiate the HashTable template class used in the

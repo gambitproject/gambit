@@ -6,7 +6,7 @@
 
 #include "stdio.h"  // for debugging
 #include "glist.imp"
-#include "hash.imp"
+#include "ghash.imp"
 #include "guiobj.h"
 #include "guirecdb.h"
 
