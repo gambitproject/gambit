@@ -124,6 +124,8 @@ QuikSolv<T>::PelicanRoots(const gRectangle<T>& r,
     return false;
 
   for (int i = 1; i <= firstcut.Length(); i++) {
+    firstcut[i] = NewtonPolishOnce(firstcut[i]);
+    firstcut[i] = NewtonPolishOnce(firstcut[i]);
     bool isokay(true);
     if (!TogDouble(r).Contains(firstcut[i]))
       isokay = false;
