@@ -429,7 +429,7 @@ bool GSM::Assign( void )
 
   else if( p1_type == porREFERENCE )
   { 
-    gString& RefName = ( (ReferencePortion*) p1 )->Value();
+    gString RefName = ( (ReferencePortion*) p1 )->Value();
     if( _VarIsDefined( RefName ) )
       p1_type = _VarValue( RefName )->Type();
     
@@ -439,11 +439,19 @@ bool GSM::Assign( void )
        ( p1_type & porNFG && p2_type & porNFG ) ||
        ( p1_type & porEFG && p2_type & porEFG ) )
     {
-      delete _VarRemove( RefName );
-      _VarDefine( RefName, p2 );
-      delete p1;
-      _Push( p2->RefCopy() );
-      
+      p1 = _ResolveRef( p1 );
+      if( p1->Original() != p2->Original() )
+      {
+	delete _VarRemove( RefName );
+	_VarDefine( RefName, p2 );
+	delete p1;
+	_Push( p2->RefCopy() );
+      }
+      else
+      {
+	delete p2;
+	_Push( p1 );
+      }
       return result;
     }
   }
@@ -1391,8 +1399,10 @@ void GSM::Output( void )
     p->Output( _StdOut );
     if( p->Type() == porREFERENCE )
       _StdOut << " (undefined)";
+    /*
     if( p->Original() != 0 )
       gout << " " << (void*) p->Original()->Owner();
+    */
     _StdOut << "\n";
     
     _Push( p );
