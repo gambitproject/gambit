@@ -58,11 +58,10 @@ bool gbtApplication::OnInit(void)
   config.Read(wxT("/General/CurrentDirectory"), &m_currentDir, wxT(""));
 
   wxBitmap bitmap(wxBITMAP(gambit));
-  wxSplashScreen *splash =
-    new wxSplashScreen(bitmap,
-		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
-		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
+  (void) new wxSplashScreen(bitmap,
+			    wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+			    2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+			    wxSIMPLE_BORDER | wxSTAY_ON_TOP);
   wxYield();
 
   // Process command line arguments, if any.

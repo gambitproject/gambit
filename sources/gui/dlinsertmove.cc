@@ -44,6 +44,9 @@ public:
   virtual ~gbtCmdInsertMove() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
   
 
@@ -80,6 +83,9 @@ public:
   virtual ~gbtCmdInsertMoveInfoset() { }
 
   void Do(gbtGameDocument *);
+  
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
   
 

@@ -52,7 +52,6 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *listPanelSizer = new wxBoxSizer(wxVERTICAL);
   m_qreList = new wxListCtrl(this, -1, wxDefaultPosition,
 			     wxSize(500, 300), wxLC_REPORT | wxLC_SINGLE_SEL);
   m_qreList->InsertColumn(0, _("Lambda"));
@@ -110,7 +109,6 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  wxBoxSizer *listPanelSizer = new wxBoxSizer(wxVERTICAL);
   m_qreList = new wxListCtrl(this, -1, wxDefaultPosition,
 			     wxSize(500, 300), wxLC_REPORT | wxLC_SINGLE_SEL);
   m_qreList->InsertColumn(0, _("Lambda"));

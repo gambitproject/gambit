@@ -99,6 +99,9 @@ public:
   virtual ~gbtCmdMoveTree() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
 
 //
@@ -114,6 +117,9 @@ public:
   virtual ~gbtCmdCopyTree() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
 
 //
@@ -130,6 +136,9 @@ public:
   virtual ~gbtCmdSetOutcome() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return true; }
 };
 
 

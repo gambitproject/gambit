@@ -229,6 +229,14 @@ public:
   virtual ~gbtGameCommand() { }
 
   virtual void Do(gbtGameDocument *) = 0;
+
+  // ModifiesGame(): return true if the command causes a change
+  // in the game that alters the number of players, strategies, etc.
+  virtual bool ModifiesGame(void) const = 0;
+
+  // ModifiesPayoffs(): return true if the command causes a change
+  // in the game that invalidates cached quantities (IsNash(), etc.)
+  virtual bool ModifiesPayoffs(void) const = 0;
 };
 
 #endif  // GAMEDOC_H

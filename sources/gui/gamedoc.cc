@@ -634,6 +634,19 @@ void gbtGameDocument::Submit(gbtGameCommand *p_command)
     guiExceptionDialog("", wxGetApp().GetTopWindow());
   }
 
+  if (p_command->ModifiesGame()) {
+    // FIXME: Clear out profile lists, etc.
+  }
+  
+  if (p_command->ModifiesPayoffs()) {
+    for (int i = 1; i <= m_behavProfiles.Length(); i++) {
+      m_behavProfiles[i].Invalidate();
+    }
+    for (int i = 1; i <= m_mixedProfiles.Length(); i++) {
+      m_mixedProfiles[i].Invalidate();
+    }
+  }
+  
   UpdateViews();
 
   // Someday, we might save the command for undo/redo; for now, 

@@ -46,6 +46,9 @@ public:
   virtual ~gbtCmdNewOutcome() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
 
 void gbtCmdNewOutcome::Do(gbtGameDocument *p_doc)
@@ -81,6 +84,9 @@ public:
   virtual ~gbtCmdDeleteOutcome() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return true; }
 };
 
 void gbtCmdDeleteOutcome::Do(gbtGameDocument *p_doc)
@@ -106,6 +112,9 @@ public:
   virtual ~gbtCmdAttachOutcome() { }
 
   void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return true; }
 };
 
 void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
@@ -129,6 +138,69 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
     else {
       profile.SetOutcome(0);
     }
+  }
+}
+
+//-------------------------------------------------------------------------
+//                   class gbtCmdLabelOutcome
+//-------------------------------------------------------------------------
+
+class gbtCmdLabelOutcome : public gbtGameCommand {
+private:
+  int m_id;
+  wxString m_label;
+
+public:
+  gbtCmdLabelOutcome(int p_id, const wxString &p_label) 
+	: m_id(p_id), m_label(p_label) { }
+  virtual ~gbtCmdLabelOutcome() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdLabelOutcome::Do(gbtGameDocument *p_doc)
+{
+  if (p_doc->HasEfg()) {
+    p_doc->GetEfg().GetOutcome(m_id).SetLabel((const char *) m_label.mb_str());
+  }
+  else {
+    p_doc->GetNfg().GetOutcome(m_id).SetLabel((const char *) m_label.mb_str());
+  }
+}
+
+//-------------------------------------------------------------------------
+//                   class gbtCmdPayoffOutcome
+//-------------------------------------------------------------------------
+
+class gbtCmdPayoffOutcome : public gbtGameCommand {
+private:
+  int m_id, m_player;
+  gbtNumber m_payoff;
+
+public:
+  gbtCmdPayoffOutcome(int p_id, int p_player, const wxString &p_payoff) 
+    : m_id(p_id), m_player(p_player),
+      m_payoff(ToNumber(gbtText((const char *) p_payoff.mb_str()))) { }
+  virtual ~gbtCmdPayoffOutcome() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return true; }
+};
+
+void gbtCmdPayoffOutcome::Do(gbtGameDocument *p_doc)
+{
+  if (p_doc->HasEfg()) {
+    gbtEfgPlayer player = p_doc->GetEfg().GetPlayer(m_player);
+    p_doc->GetEfg().GetOutcome(m_id).SetPayoff(player, m_payoff);
+  }
+  else {
+    gbtNfgPlayer player = p_doc->GetNfg().GetPlayer(m_player);
+    p_doc->GetNfg().GetOutcome(m_id).SetPayoff(player, m_payoff);
   }
 }
 
@@ -310,29 +382,15 @@ void gbtOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   int row = p_event.GetRow();
   int col = p_event.GetCol();
 
-  if (m_doc->HasEfg()) {
-    gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(row+1);
-    if (col == 0) { 
-      // Edited cell label
-      outcome.SetLabel(gbtText(GetCellValue(row, col).mb_str()));
-    }
-    else {
-      // Edited payoff
-      outcome.SetPayoff(m_doc->GetEfg().GetPlayer(col),
-			ToNumber(gbtText(GetCellValue(row, col).mb_str())));
-    }
+  if (col == 0) { 
+    // Edited cell label
+    m_doc->Submit(new gbtCmdLabelOutcome(row + 1,
+					 GetCellValue(row, col)));
   }
   else {
-    gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(row+1);
-    if (col == 0) { 
-      // Edited cell label
-      outcome.SetLabel(gbtText(GetCellValue(row, col).mb_str()));
-    }
-    else {
-      // Edited payoff
-      outcome.SetPayoff(m_doc->GetNfg().GetPlayer(col),
-			ToNumber(gbtText(GetCellValue(row, col).mb_str())));
-    }
+    // Edited payoff
+    m_doc->Submit(new gbtCmdPayoffOutcome(row + 1, col,
+					  GetCellValue(row, col)));
   }
 }
 

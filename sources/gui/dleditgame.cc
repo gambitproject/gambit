@@ -248,6 +248,9 @@ public:
   virtual ~gbtCmdEditGame() { }
 
   void Do(gbtGameDocument *); 
+
+  bool ModifiesGame(void) const { return true; }
+  bool ModifiesPayoffs(void) const { return false; }
 };
 
 void gbtCmdEditGame::Do(gbtGameDocument *p_doc)
