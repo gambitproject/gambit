@@ -201,14 +201,17 @@ bool ElimDominatedInInfoset(const EFSupport &S, EFSupport &T,
 }
 
 bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
-			    const int pl, 
+			    const int pl, int &cumiset,
 			    const bool strong,
 			    const bool conditional,
 		                  gStatus &status)
 {
   bool action_was_eliminated = false;
 
-  for (int iset = 1; iset <= S.Game().Players()[pl]->NumInfosets(); iset++) {
+  for (int iset = 1; iset <= S.Game().Players()[pl]->NumInfosets();
+       iset++, cumiset++) {
+    status.SetProgress((double) cumiset /
+		       (double) S.Game().TotalNumInfosets());
     status.Get();
     if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional, status)) 
       action_was_eliminated = true;
@@ -226,17 +229,26 @@ EFSupport *ComputeDominated(const EFSupport &S,
 {
   EFSupport *T = new EFSupport(S);
   bool any = false;
+  int cumiset;
 
-  for (int i = 1; i <= players.Length(); i++)   {
-    status.Get();
-    int pl = players[i];
-    if (ElimDominatedForPlayer(S, *T, pl, strong, conditional, status)) 
-      any = true;
+  try {
+    cumiset = 0;
+    for (int i = 1; i <= players.Length(); i++)   {
+      status.Get();
+      int pl = players[i];
+      if (ElimDominatedForPlayer(S, *T, pl, cumiset, 
+				 strong, conditional, status)) 
+	any = true;
+    }
+
+    if (!any)  {
+      delete T;
+      return 0;
+    }
   }
-
-  if (!any)  {
+  catch (gSignalBreak &E) {
     delete T;
-    return 0;
+    throw;
   }
 
   return T;
