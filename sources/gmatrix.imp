@@ -367,12 +367,12 @@ gMatrix<T>::RMultiply(const gVector<T> &in, gVector<T> &out) const
       T k= in[i];
 
       // inner loop
-      T *src= in.data + mincol;
+      T *src= data[i] + mincol;
       T *dst= out.data + mincol;
       int j= maxcol-mincol+1;
       while( j-- )
 	*(dst++) += *(src++) * k;
-      assert( src-1 == in.data + maxcol ); // debug
+      assert( src-1 == data[i] + maxcol ); // debug
       // end inner loop
     }
 }
