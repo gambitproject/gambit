@@ -12,9 +12,6 @@
 #include "treedraw.h"
 #include "efgconst.h"
 
-extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
-			       long p_style = wxOK | wxCENTRE);
-
 typedef struct NODEENTRY 
 {
     int x, y, level, color;

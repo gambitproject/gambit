@@ -522,7 +522,7 @@ void GambitFrame::ExecuteLoggedCommand(const gText& command,
 // A general-purpose dialog box to display the description of the exception
 //
 void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
-            long p_style = wxOK | wxCENTRE)
+            long p_style /*= wxOK | wxCENTRE*/)
 {
   gText message = "An internal error occurred in Gambit:\n" + p_message;
   wxMessageBox(message, "Gambit Error", p_style, p_parent);

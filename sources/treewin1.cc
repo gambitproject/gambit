@@ -16,6 +16,10 @@
 #include "infosetd.h"
 
 
+extern void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
+			       long p_style = wxOK | wxCENTRE);
+
+
 #define MAX_LABEL_LENGTH    25
 
 // Validation function for string dialogs
