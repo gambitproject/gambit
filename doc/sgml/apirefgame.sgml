@@ -482,6 +482,25 @@ adding players to the game after creation.
 
 </sect2>
 
+<sect2 id="apiref.game.numnodes">
+<title>NumNodes</title>
+<indexterm><primary>NumNodes</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtGame::NumNodes(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NumNodes</function> returns the number of nodes present in
+the game tree.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.game.numoutcomes">
 <title>NumOutcomes</title>

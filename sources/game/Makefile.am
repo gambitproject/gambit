@@ -8,8 +8,6 @@ libgambit_game_la_SOURCES = \
 	efgciter.h \
 	efgiter.cc \
 	efgiter.h \
-	efgutils.cc \
-	efgutils.h \
 	game.h \
 	game-behav-mixed.h \
 	game-contingency.h \

@@ -16,7 +16,6 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libgame_a_SOURCES = \
 	"efgiter.cc" \
-	"efgutils.cc" \
 	"game-file.cc" \
 	"nfgiter.cc" \
 	"sfg.cc" \

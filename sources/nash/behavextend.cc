@@ -42,6 +42,19 @@
 // This file is disabled while support interface is in flux
 //
 
+void
+TerminalNodes(const gbtGameNode & p_node, gbtList < gbtGameNode > &p_list)
+{
+  if (p_node->NumChildren() == 0) {
+    p_list.Append(p_node);
+  }
+  else {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      TerminalNodes(p_node->GetChild(i), p_list);
+    }
+  }
+}
+
 //=========================================================================
 //                      class algExtendsToNash
 //=========================================================================

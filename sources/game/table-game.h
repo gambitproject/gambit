@@ -88,6 +88,7 @@ public:
   //@{
   bool HasTree(void) const { return false; }
   gbtGameNode GetRoot(void) const { throw gbtGameUndefinedException(); }
+  int NumNodes(void) const { throw gbtGameUndefinedException(); }
   //@}
 
   /// @name Information about the game table

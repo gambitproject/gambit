@@ -47,7 +47,7 @@
 gbtTreeGameRep::gbtTreeGameRep(void)
   : m_refCount(0), m_sortInfosets(true), 
     m_hasStrategies(false), m_label("UNTITLED"),
-    m_chance(new gbtTreePlayerRep(this, 0))
+    m_numNodes(1), m_chance(new gbtTreePlayerRep(this, 0))
 {
   m_root = new gbtTreeNodeRep(this, 0);
   m_root->m_id = 1;
@@ -223,6 +223,9 @@ gbtRational gbtTreeGameRep::GetMaxPayoff(void) const
   
 gbtGameNode gbtTreeGameRep::GetRoot(void) const
 { return m_root; }
+
+int gbtTreeGameRep::NumNodes(void) const
+{ return m_numNodes; }
 
 //----------------------------------------------------------------------
 //               class gbtTreeGameRep: Game table
@@ -594,11 +597,11 @@ void gbtTreeGameRep::BuildReducedNfg(void) const
 //! Recursively numbers nodes.  Nodes are numbered in prefix traversal
 //! order, starting at 1 for the root node.
 //!
-void gbtTreeGameRep::NumberNodes(gbtTreeNodeRep *n, int &index)
+void gbtTreeGameRep::NumberNodes(gbtTreeNodeRep *n) 
 {
-  n->m_id = index++;
+  n->m_id = ++m_numNodes;
   for (int child = 1; child <= n->m_children.Length();
-       NumberNodes(n->m_children[child++], index));
+       NumberNodes(n->m_children[child++]));
 } 
 
 //!
@@ -609,68 +612,51 @@ void gbtTreeGameRep::SortInfosets(void)
 {
   if (!m_sortInfosets)  return;
 
-  int pl;
+  m_numNodes = 0;
+  NumberNodes(m_root);
 
-  for (pl = 0; pl <= m_players.Length(); pl++)  {
-    gbtList<gbtGameNode> nodes;
-
-    Nodes(gbtGame(this), nodes);
-
+  for (int pl = 0; pl <= m_players.Length(); pl++)  {
     gbtTreePlayerRep *player = (pl) ? m_players[pl] : m_chance;
-
-    int i, isets = 0;
-
-    // First, move all empty infosets to the back of the list so
-    // we don't "lose" them
-    int foo = player->m_infosets.Length();
-    i = 1;
-    while (i < foo)   {
-      if (player->m_infosets[i]->m_members.Length() == 0)  {
-	gbtTreeInfosetRep *bar = player->m_infosets[i];
-	player->m_infosets[i] = player->m_infosets[foo];
-	player->m_infosets[foo--] = bar;
-      }
-      else
-	i++;
-    }
-
-    // This will give empty infosets their proper number; the nonempty
-    // ones will be renumbered by the next loop
-    for (i = 1; i <= player->m_infosets.Length(); i++)
-      if (player->m_infosets[i]->m_members.Length() == 0)
-	player->m_infosets[i]->m_id = i;
-      else
-	player->m_infosets[i]->m_id = 0;
-  
-    for (i = 1; i <= nodes.Length(); i++)  {
-      gbtTreeNodeRep *n = dynamic_cast<gbtTreeNodeRep *>(nodes[i].Get());
-      if (n->GetPlayer().Get() == player && n->GetInfoset()->GetId() == 0)  {
-	n->m_infoset->m_id = ++isets;
-	player->m_infosets[isets] = n->m_infoset;
-      }
-    }  
-  }
-
-  // Now, we sort the nodes within the infosets
-  gbtList<gbtGameNode> nodes;
-  Nodes(gbtGame(this), nodes);
-
-  for (pl = 0; pl <= m_players.Length(); pl++)  {
-    gbtTreePlayerRep *player = (pl) ? m_players[pl] : m_chance;
-
-    for (int iset = 1; iset <= player->m_infosets.Length(); iset++)  {
-      gbtTreeInfosetRep *s = player->m_infosets[iset];
-      for (int i = 1, j = 1; i <= nodes.Length(); i++)  {
-	gbtTreeNodeRep *n = dynamic_cast<gbtTreeNodeRep *>(nodes[i].Get());
-	if (n->m_infoset == s) {
-	  s->m_members[j++] = n;
+    
+    // Sort nodes within information sets according to ID.
+    // Coded using a bubble sort for simplicity; large games might
+    // find a quicksort worthwhile.
+    for (int iset = 1; iset <= player->m_infosets.Length(); iset++) {
+      gbtTreeInfosetRep *infoset = player->m_infosets[iset];
+      for (int i = 1; i < infoset->m_members.Length(); i++) {
+	for (int j = 1; j < infoset->m_members.Length() - i - 1; j++) {
+	  if (infoset->m_members[j+1]->m_id < infoset->m_members[j]->m_id) {
+	    gbtTreeNodeRep *tmp = infoset->m_members[j];
+	    infoset->m_members[j] = infoset->m_members[j+1];
+	    infoset->m_members[j+1] = tmp;
+	  }
 	}
       }
     }
-  }
 
-  int nodeindex = 1;
-  NumberNodes(m_root, nodeindex);
+    // Sort information sets by the smallest ID among their members
+    // Coded using a bubble sort for simplicity; large games might
+    // find a quicksort worthwhile.
+    for (int i = 1; i < player->m_infosets.Length(); i++) {
+      for (int j = 1; j < player->m_infosets.Length() - i - 1; j++) {
+	int a = ((player->m_infosets[j+1]->m_members.Length()) ?
+		 player->m_infosets[j+1]->m_members[1]->m_id : 0);
+	int b = ((player->m_infosets[j]->m_members.Length()) ?
+		 player->m_infosets[j]->m_members[1]->m_id : 0);
+
+	if (a < b || b == 0) {
+	  gbtTreeInfosetRep *tmp = player->m_infosets[j];
+	  player->m_infosets[j] = player->m_infosets[j+1];
+	  player->m_infosets[j+1] = tmp;
+	}
+      }
+    }
+
+    // Reassign information set IDs
+    for (int iset = 1; iset <= player->m_infosets.Length(); iset++) {
+      player->m_infosets[iset]->m_id = iset;
+    }
+  }
 }
 
 void gbtTreeGameRep::Payoff(gbtTreeNodeRep *n, const gbtRational &prob,

@@ -192,6 +192,7 @@ public:
   //--------------------------------------------------------------------
   bool HasTree(void) const { return (*self)->HasTree(); }
   gbtGameNode GetRoot(void) const { return (*self)->GetRoot(); }
+  int NumNodes(void) const { return (*self)->NumNodes(); }
 
   //--------------------------------------------------------------------
   //                Information about the game table

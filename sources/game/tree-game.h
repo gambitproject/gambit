@@ -55,6 +55,7 @@ public:
   gbtBlock<gbtTreePlayerRep *> m_players;
   gbtBlock<gbtTreeOutcomeRep *> m_outcomes;
   gbtTreeNodeRep *m_root;
+  int m_numNodes;
   gbtTreePlayerRep *m_chance;
 
   /// @name Constructor and destructor
@@ -92,6 +93,7 @@ public:
   //@{
   bool HasTree(void) const { return true; }
   gbtGameNode GetRoot(void) const;
+  int NumNodes(void) const;
   //@}
 
   /// @name Information about the game table
@@ -142,7 +144,7 @@ public:
   /// @name Member functions private to the implementation
   //@{
   void SortInfosets(void);
-  void NumberNodes(gbtTreeNodeRep *, int &);
+  void NumberNodes(gbtTreeNodeRep *);
   void OnStrategiesChanged(void);
 
   void Payoff(gbtTreeNodeRep *n, const gbtRational &prob,

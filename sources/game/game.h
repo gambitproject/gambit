@@ -232,6 +232,8 @@ public:
   virtual bool HasTree(void) const = 0;
   /// Returns the root node of the game tree.
   virtual gbtGameNode GetRoot(void) const = 0;
+  /// Returns the number of nodes in the tree.
+  virtual int NumNodes(void) const = 0;
   //}
 
   //!
@@ -344,8 +346,6 @@ public:
   virtual ~gbtNfgParserException() { }
   std::string GetDescription(void) const { return "Not a valid .nfg file"; }
 };
-
-#include "efgutils.h"
 
 #include "game-behav-mixed.h"
 #include "tree-behav-pure.h"

@@ -54,6 +54,5 @@ template class gbtArray<gbtArray<gbtGameAction> *>;
 template class gbtArray<gbtTreeOutcomeRep *>;
 template class gbtBlock<gbtTreeOutcomeRep *>;
 
-template class gbtList<gbtGameNode>;
 template class gbtList<gbtGameInfoset>;
 
