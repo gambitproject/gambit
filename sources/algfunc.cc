@@ -258,16 +258,22 @@ static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
   gWatch watch;
   gList<MixedSolution> solutions;
 
+  gStatus *status = gsm.StartAlgorithmMonitor("EnumPureSolve Progress");
   try {
     nfgEnumPure solver;
     solver.SetStopAfter(((NumberPortion *) param[1])->Value());
-    solver.Solve(*support, gsm.GetStatusMonitor(), solutions);
+    solver.Solve(*support, *status, solutions);
     ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
   }
   catch (gSignalBreak &) {
-    gsm.GetStatusMonitor().Reset();
+    status->Reset();
+  }
+  catch (...) {
+    gsm.EndAlgorithmMonitor(status);
+    throw;
   }
 
+  gsm.EndAlgorithmMonitor(status);
   return new Mixed_ListPortion(solutions);
 }
 
@@ -282,34 +288,42 @@ static Portion *GSM_EnumPure_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with EnumPure; results not guaranteed\n";
   }
 
-  if (((BoolPortion *) param[1])->Value())   {
-    gList<BehavSolution> solutions;
+  gStatus *status = gsm.StartAlgorithmMonitor("EnumPureSolve Progress");
 
+  gList<BehavSolution> solutions;
+
+  if (((BoolPortion *) param[1])->Value())   {
     try {
       efgEnumPureNfgSolve algorithm(support,
 				    ((NumberPortion *) param[2])->Value());
-      algorithm.Solve(support, gsm.GetStatusMonitor());
+      solutions = algorithm.Solve(support, *status);
       ((NumberPortion *) param[4])->SetValue(algorithm.Time());
     }
     catch (gSignalBreak &) {
-      gsm.GetStatusMonitor().Reset();
+      status->Reset();
     }
-    return new Behav_ListPortion(solutions);
+    catch (...) {
+      gsm.EndAlgorithmMonitor(status);
+      throw;
+    }
   }
   else  {
-    gList<BehavSolution> solutions;
-
     try {
       gWatch watch;
       efgEnumPure algorithm(((NumberPortion *) param[2])->Value()); 
-      solutions = algorithm.Solve(support, gsm.GetStatusMonitor());
+      solutions = algorithm.Solve(support, *status);
       ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
     }
     catch (gSignalBreak &) {
-      gsm.GetStatusMonitor().Reset();
+      status->Reset();
     }
-    return new Behav_ListPortion(solutions);
+    catch (...) {
+      gsm.EndAlgorithmMonitor(status);
+      throw;
+    }
   }
+  gsm.EndAlgorithmMonitor(status);
+  return new Behav_ListPortion(solutions);
 }
 
 //------------------
@@ -1081,11 +1095,12 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
   gList<MixedSolution> solutions;
   gList<const NFSupport> singular_supports;
 
-  if(recurse) {
+  gStatus *status = gsm.StartAlgorithmMonitor("PolEnumSolve Progress");
+  if (recurse) {
     try {
       long nevals = 0;
       double time = 0.0;
-      AllNashSolve(S, params, solutions, gsm.GetStatusMonitor(),
+      AllNashSolve(S, params, solutions, *status,
 		   nevals, time, singular_supports);
       
       ((NumberPortion *) param[2])->SetValue(nevals);
@@ -1093,7 +1108,11 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
       ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
     }
     catch (gSignalBreak &) {
-      gsm.GetStatusMonitor().Reset();
+      status->Reset();
+    }
+    catch (...) {
+      gsm.EndAlgorithmMonitor(status);
+      throw;
     }
   }
   else {
@@ -1101,18 +1120,23 @@ static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
     try {
       long nevals;
       double time;
-      PolEnum(S, params, solutions, gsm.GetStatusMonitor(),
-	      nevals, time, is_singular);
+      PolEnum(S, params, solutions, *status, nevals, time, is_singular);
       ((NumberPortion *) param[2])->SetValue(nevals);
       ((NumberPortion *) param[3])->SetValue(time);
-      if (is_singular)
+      if (is_singular) {
 	singular_supports.Append(S);
+      }
       ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
     }
     catch (gSignalBreak &) {
-      gsm.GetStatusMonitor().Reset();
+      status->Reset();
+    }
+    catch (...) {
+      gsm.EndAlgorithmMonitor(status);
+      throw;
     }
   }
+  gsm.EndAlgorithmMonitor(status);
   return new Mixed_ListPortion(solutions);
 }
 
@@ -1130,21 +1154,28 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
     gsm.OutputStream() << "WARNING: Solving game of imperfect recall with AllNash; results not guaranteed\n";
   }
   // If asNfg->True (salvaged from old PolEnum_Efg)  
+
+  gStatus *status = gsm.StartAlgorithmMonitor("PolEnumSolve Progress");
   if (((BoolPortion *) param[1])->Value()) {
     // need to add recurse capability here
-    if(recurse) 
+    if (recurse) { 
       throw gclRuntimeError("Recursion not implemented for asNfg->True");
+    }
     PolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
     params.tracefile = &((OutputPortion *) param[5])->Value();
     params.trace = ((NumberPortion *) param[6])->Value();
     try {
       efgPolEnumNfgSolve algorithm(S, params);
-      solutions = algorithm.Solve(S, gsm.GetStatusMonitor());
+      solutions = algorithm.Solve(S, *status);
       ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
-      gsm.GetStatusMonitor().Reset();
+      status->Reset();
+    }
+    catch (...) {
+      gsm.EndAlgorithmMonitor(status);
+      throw;
     }
   }
   else {
@@ -1153,11 +1184,11 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
     params.stopAfter = ((NumberPortion *) param[2])->Value();
     params.tracefile = &((OutputPortion *) param[5])->Value();
     params.trace = ((NumberPortion *) param[6])->Value();
-    if(recurse) {
+    if (recurse) {
       try {
 	long nevals = 0;
 	double time = 0.0;
-	AllEFNashSolve(S, params, solutions, gsm.GetStatusMonitor(),
+	AllEFNashSolve(S, params, solutions, *status, 
 		       nevals, time, singular_supports);
 	
 	((NumberPortion *) param[3])->SetValue(nevals);
@@ -1165,7 +1196,11 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
 	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
       }
       catch (gSignalBreak &) {
-	gsm.GetStatusMonitor().Reset();
+	status->Reset();
+      }
+      catch (...) {
+	gsm.EndAlgorithmMonitor(status);
+	throw;
       }
     }
     else {
@@ -1173,20 +1208,24 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
       try {
 	long nevals;
 	double time;
-	EfgPolEnum(S, params, solutions, gsm.GetStatusMonitor(),
-		   nevals, time, is_singular);
-	//      EfgPolEnum(S, params, solutions, nevals, time);
+	EfgPolEnum(S, params, solutions, *status, nevals, time, is_singular);
 	((NumberPortion *) param[3])->SetValue(nevals);
 	((NumberPortion *) param[4])->SetValue(time);
-	if(is_singular)
+	if (is_singular) {
 	  singular_supports.Append(S);
+	}
 	((EfSupport_ListPortion *) param[7])->SetValue(singular_supports);
       }
       catch (gSignalBreak &) {
-	gsm.GetStatusMonitor().Reset();
+	status->Reset();
+      }
+      catch (...) {
+	gsm.EndAlgorithmMonitor(status);
+	throw;
       }
     }
   }
+  gsm.EndAlgorithmMonitor(status);
   return new Behav_ListPortion(solutions);
 }
 

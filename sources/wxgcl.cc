@@ -9,6 +9,7 @@
 #include "wx/fontdlg.h"
 
 #include "wxgcl.h"
+#include "wxstatus.h"
 #include "gsm.h"
 #include "gnullstatus.h"
 #include "gcmdline.h"
@@ -133,14 +134,28 @@ gOutput &wxOutputWindowStream::operator<<(const void *x)
 class wxGSM : public GSM {
 private:
   gNullStatus m_status;
+  wxWindow *m_parent;
 
 public:
-  wxGSM(gInput &p_input, gOutput &p_output, gOutput &p_error)
-    : GSM(p_input, p_output, p_error) { }
+  wxGSM(wxWindow *p_parent,
+	gInput &p_input, gOutput &p_output, gOutput &p_error)
+    : GSM(p_input, p_output, p_error), m_parent(p_parent) { }
   virtual ~wxGSM() { }
 
   gStatus &GetStatusMonitor(void) { return m_status; }
+  gStatus *StartAlgorithmMonitor(const gText &);
+  void EndAlgorithmMonitor(gStatus *);
 };
+
+gStatus *wxGSM::StartAlgorithmMonitor(const gText &p_caption)
+{
+  return new wxStatus(m_parent, p_caption);
+}
+
+void wxGSM::EndAlgorithmMonitor(gStatus *p_status)
+{
+  delete p_status;
+}
 
 
 IMPLEMENT_APP(GclApp)
@@ -253,7 +268,7 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
   _ExePath = new char[1024];
   strncpy(_ExePath, wxGetWorkingDirectory(), 1023);
 
-  m_environment = new wxGSM(gin, *m_outputStream, *m_outputStream);
+  m_environment = new wxGSM(this, gin, *m_outputStream, *m_outputStream);
   m_compiler = new GCLCompiler(*m_environment);
   wxCommandLine cmdline(20);
   gPreprocessor preproc(*m_environment, &cmdline, "Include[\"gclini.gcl\"]");
