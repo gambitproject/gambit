@@ -13,27 +13,16 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &S)
+template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
   gMatrix<T> A1(1,n1,n1+1,n1+n2);
   NfgIter<T> iter(&S); 
-  T min = (T) 1, x; 
-  
-  for (i = 1; i <= n1; i++)   {
-    for (j = 1; j <= n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
+  T min; 
 
-  min-=(T)1;
+  min = N.MinPayoff()-(T)1; 
   
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
@@ -49,28 +38,17 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &, const NFSupport &S)
   return A1;
 }
 
-template <class T> gMatrix<T> Make_A2(const Nfg<T> &, const NFSupport &S)
+template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
 {
   int n1, n2, i,j;
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
   gMatrix<T> A2(n1+1,n1+n2,1,n1);
   NfgIter<T> iter(&S); 
-  T min = (T) 1, x; 
-  
-  for (i = 1; i <= n1; i++)   {
-    for (j = 1; j <= n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
+  T min; 
 
-  min-=(T)1;
-  
+  min = N.MinPayoff()-(T)1; 
+
   for (i = 1; i <= n1; i++)  {
     for (j = 1; j <= n2; j++)  {
       A2(n1 + j, i) = iter.Payoff(2) - min;

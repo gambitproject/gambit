@@ -40,6 +40,7 @@ template <class T> int EnumModule<T>::Enum(void)
 {
   int index;
   bool add;
+  T min;
 
   if (NF.NumPlayers() != 2)   return 0;  
   int n1, n2, v1,v2,i,j,k;
@@ -55,20 +56,8 @@ template <class T> int EnumModule<T>::Enum(void)
   gVector<T> b1(1,n1);
   gVector<T> b2(1,n2);
 
-   // compute minimum payoff  
+  min = NF.MinPayoff()-(T)1; 
 
-  T min = (T) 1, x; 
-  for (i=1; i<=n1; i++)   {
-    for (j=1; j<=n2; j++)  {
-      x = iter.Payoff(1);
-      if (x < min)   min = x;
-      x = iter.Payoff(2);
-      if (x < min)   min = x;
-      iter.Next(2);
-    }
-    iter.Next(1);
-  }
-  min-=(T)1;
 
    // construct A1,A2,b1,b2  
   
