@@ -1,4 +1,4 @@
-<sect1>
+<sect2>
 <title>Introduction to the command language</title>
 
 <para>
@@ -17,7 +17,7 @@ your prompt may be different from the above depending on settings in
 your <filename>gclini.gcl</filename> file.  
 </para>
 
-<sect2>
+<sect3>
 <title>Command line editing</title>
 <para>
 You can edit the command line by using the arrow keys. The left and
@@ -26,9 +26,9 @@ used to delete characters, and the typing characters will enter the
 characters in insert mode. The up and down arrow keys can be used to
 recall previous lines.  
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Meaning of the prompt</title>
 <para>
 The GCL prompt is of the form <prompt>GCLnn:= &lt;&lt;</prompt>.
@@ -45,11 +45,11 @@ to the variable <prompt>GCLnn</prompt>.  Backspacing over
 this will prevent saving of the output into a variable.
 </para>
 
+</sect3>
+
 </sect2>
 
-</sect1>
-
-<sect1>
+<sect2>
 <title>Basic concepts</title>
 <para>
 The design motifs for GCL come from two principal families of
@@ -146,9 +146,9 @@ repetitive operations usually performed by flow control statements.
 </itemizedlist>
 </para>
 
-</sect1>
+</sect2>
 
-<sect1>
+<sect2>
 <title>Data types</title>
 <para>
 The built-in data types for the GCL are given in Table 1.  The Table is
@@ -262,7 +262,7 @@ rules for typing.  The extensive form and normal form types, and their
 related types, are detailed later in special sections.
 </para>
 
-<sect2>
+<sect3>
 <title>Boolean</title>
 <para>
 The <type>BOOLEAN</type> type is used to represent the boolean values.
@@ -273,9 +273,9 @@ command language predefines three constants to represent these:
 <literal>True</literal>, <literal>False</literal>, and 
 <literal>Unknown</literal>.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Numeric data types</title>
 <para>
 The GCL supports one basic numeric data type, <type>NUMBER</type>, with a 
@@ -346,9 +346,9 @@ number <literal>2</literal> as a floating point <type>NUMBER</type>, you would w
 use <literal>2</literal> or <literal>2/1</literal>, and to represent it as an integer
 <type>NUMBER</type>, you would use <literal>2</literal>.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Text</title>
 <para>
 The <type>TEXT</type> type is used to store text strings, typically labels
@@ -360,9 +360,9 @@ may span more than one input line.  Also, line feeds can be explicitly
 included in text constants using the C-style notation of
 \verb+\n+. 
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Input and output</title>
 <para>
 The <type>INPUT</type> type is a reference to an input stream, generally a
@@ -382,9 +382,9 @@ output stream (generally the console) and the null output stream (the
 garbage can), respectively.  New <type>OUTPUT</type> streams are created with the 
 function \verb+Output+, documented in the Function Reference section.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Normal form data types</title>
 <para>
 The data type <type>NFG</type> is used to represent a normal form game.  No
@@ -404,9 +404,9 @@ of any of the normal form data types must be built up using functions
 in the GCL.  Hence, a more detailed discussion of them is deferred
 until later.  
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Extensive form data types</title>
 <para>
 The data type <type>EFG</type> is used to represent an extensive form
@@ -434,9 +434,9 @@ data type.  Objects that are of any of extensive form data types must
 be built up using functions in the GCL.  Hence, a more detailed
 discussion of them is deferred until later.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Lists</title>
 <para>
 The <type>LIST(T)</type> data type can be used to represent lists of any
@@ -479,9 +479,9 @@ equivalents.  That is to say, <type>LIST(BOOLEAN)</type> is a distinct data
 type from <type>LIST(NUMBER)</type>, and is also a distinct data type from
 <type>BOOLEAN</type>.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Conglomerate data types</title> 
 <para>
 In some of the function prototypes in the Function Reference section,
@@ -512,11 +512,11 @@ types along with the types they include:
 </table>
 </para>
 
+</sect3>
+
 </sect2>
 
-</sect1>
-
-<sect1>
+<sect2>
 <title>Expressions</title>
 <para>
 A GCL program consists of a series of expressions.  An expression is
@@ -549,9 +549,9 @@ execution of the GCL and return to the command prompt.  Note that the
 effect of a control-C may not always be immediate, as the control-C is
 only polled for at convenient stages during computation.
 </para>
-</sect1>
+</sect2>
 
-<sect1>
+<sect2>
 <title>Functions</title>
 <para>
 Functions in the GCL are rules for taking objects of specified data
@@ -589,7 +589,7 @@ combinations.  We label these as follows
 </table>
 </para>
 
-<sect2>
+<sect3>
 <title>Constants</title>
 <para>
 The simplest type of a function in the GCL is a constant.  A constant
@@ -655,9 +655,9 @@ have a data type, which is determined by the function name.  If
 you try and use a <type>NUMBER</type> constant, say <literal>123</literal>, where a
 <type>TEXT</type> or other data type is expected, you will get an error.
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Variables</title>
 <para>
 A variable is like a constant in that it has no arguments.  It stores
@@ -733,7 +733,7 @@ y:= 3.0
 </programlisting>
 </para>
 
-<sect3>
+<sect4>
 <title>Global and static variables</title>
 <para>
 Variables in the GCL are by default only visible in the the part of
@@ -773,11 +773,11 @@ GCL1:= << Foo[]
 </programlisting>
 </para>
 
+</sect4>
+
 </sect3>
 
-</sect2>
-
-<sect2>
+<sect3>
 <title>Built-in functions</title>
 <para>
 Built-in functions in the GCL are just like the mathematical notion of
@@ -972,9 +972,9 @@ resolves to the second
 (since it is a number, but not specifically an integer).
 </para>
 
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>User-defined functions</title>
 <para>
 As GCL programs become more and more complex, frequently there are
@@ -1060,9 +1060,9 @@ parameter \verb+x+, since the value of \verb+i+ inside <function>FooFunc</functi
 function.
 </para>
 
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Aliases for function calls</title>
 <para>
 There are several functions which are so commonly used that special
@@ -1273,11 +1273,11 @@ Times[Plus[a,b],c]
 </programlisting>
 </para>
 
+</sect3>
+
 </sect2>
 
-</sect1>
-
-<sect1>
+<sect2>
 <title>Getting and suppressing console output</title>
 <para>
 The GCL will only print output at the console if you explicity ask for
@@ -1322,13 +1322,13 @@ Note that error messages will be reported at the console regardless of
 the setting of the verbose mode.
 </para>
 
-</sect1>
+</sect2>
 
-<sect1>
+<sect2>
 <title>Lists</title>
 <para></para>
 
-<sect2>
+<sect3>
 <title>Building and modifying lists</title>
 <para>
 Lists play a special role in the GCL.  Variables can be created to
@@ -1378,11 +1378,11 @@ GCL3:= << list
 </programlisting>
 </para>
 
+</sect3>
+
 </sect2>
 
-</sect1>
-
-<sect1>
+<sect2>
 <title>Listability of functions</title>
 <para>
 Almost all of the functions in the GCL are ``listable''.  This means
@@ -1474,9 +1474,9 @@ This is because listable calls to functions are executed in compiled
 code, while flow control statements are executed in interpreted code.
 </para>
 
-</sect1>
+</sect2>
 
-<sect1>
+<sect2>
 <title>Online documentation</title>
 <para>
 The functions <function>Help</function> and <function>Manual</function>
@@ -1532,7 +1532,7 @@ for that function.  For a built-in function a textual description of
 the function and its parameters is returned. 
 </para>
 
-</sect1>
+</sect2>
 
 
 

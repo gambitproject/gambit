@@ -51,10 +51,21 @@
 
 </chapter>
 
-<chapter>
-    <title>The Gambit Command Language</title>
-    <para>
-This chapter is an introduction to the Gambit Command Language (GCL).
+
+<chapter id="apiuser">
+<title>Gambit API User's Guide</title>
+
+<para>
+
+</para>
+
+&apigame;
+
+<sect1 id="api.gcl">
+<title>GCL language description</title>
+
+<para>
+This section is an introduction to the Gambit Command Language (GCL).
 The GCL provides a
 method of directing the operation of Gambit that is analagous to that
 of a high level general purpose programming language.
@@ -75,17 +86,18 @@ operations.  Thus the GCL is also suitable for certain types of
 econometric analysis of games.
 </para>
 
-    &gclbasic;
-    &gcladv;
-    &gclgame;
+&gclbasic;
+&gcladv;
 
-  </chapter>
+</sect1>
 
-<chapter>
-    <title>Command Language Function Reference</title>
-    <para>Function reference goes here</para>
+</chapter>
 
-    &gclbif;
+<chapter id="apiref">
+<title>Gambit API Reference Manual</title>
+<para></para>
+
+&apiref;
       
   </chapter>
 

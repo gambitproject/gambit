@@ -1,4 +1,4 @@
-<sect1>
+<sect1 id="api.game">
 <title>Constructing and manipulating games</title>
 
 <para>
@@ -7,7 +7,7 @@ building and doing computations on games.  This chapter describes how
 to build and solve normal and extensive form games in the GCL.  
 </para>
 
-<sect2>
+<sect2 id="api.game.nfg">
 <title>Normal form games</title>
 
 <para>
@@ -23,106 +23,48 @@ functions are given in the table.
 
 <table>
 <title>Overview of normal form manipulation functions</title>
-<tgroup cols="2">
+<tgroup cols="4">
 <thead>
 <row>
-<entry>Function</entry><entry>Description</entry>
+<entry>Operation</entry>
+<entry>C++</entry>
+<entry>Python</entry>
+<entry>GCL</entry>
 </row>
 </thead>
+
 <tbody>
 <row>
-<entry><function>DeleteOutcome[o]</function></entry>
-<entry>Deletes outcome \verb+o+ from its game</entry>
+<entry>Delete <varname>outcome</varname> from its game</entry>
+<entry><function>outcome.DeleteOutcome()</function></entry>
+<entry><function>outcome.DeleteOutcome()</function></entry>
+<entry><function>DeleteOutcome[outcome]</function></entry>
 </row>
+
 <row>
-<entry><function>NewOutcome[n]</function></entry>
-<entry>Returns a new outcome for the game</entry>
+<entry>Create a new outcome in <varname>nfg</varname></entry>
+<entry><function>nfg.NewOutcome()</function></entry>
+<entry><function>nfg.NewOutcome()</function></entry>
+<entry><function>NewOutcome[nfg]</function></entry>
 </row> 
+
 <row>
-<entry><function>NewOutcome[n,name]</function> (user-defined)</entry>
-<entry>Returns a new outcome named <varname>name</varname> for game 
-<varname>n</varname></entry>
+<entry>Number of outcomes defined in <varname>nfg</varname></entry>
+<entry><function>nfg.NumOutcomes()</function></entry>
+<entry><function>nfg.NumOutcomes()</function></entry>
+<entry><function>NumOutcomes[nfg]</function></entry>
 </row>
+
 <row>
-<entry><function>NewOutcome[p]</function> (user-defined)</entry>
-<entry>Attaches a new outcome with zero payoffs to
-the pure profile <varname>p</varname></entry>
+<entry>The <varname>i</varname>th outcome in <varname>nfg</varname></entry>
+<entry><function>nfg.GetOutcome(i)</function></entry>
+<entry><function>nfg.GetOutcome(i)</function></entry>
+<entry><function>GetOutcome[nfg, i]</function></entry>
 </row>
-<row>
-<entry><function>Outcome[p]</function></entry>
-<entry>The outcome attached to the pure strategy profile <varname>p</varname></entry> 
-</row>
-<row>
-<entry><function>OutcomeForm[n]</function></entry>
-<entry>The game form for game <varname>n</varname></entry>
-</row>
-<row>
-<entry><function>Outcomes[n]</function></entry>
-<entry>List of outcomes defined for game <varname>n</varname></entry>
-</row>
-<row>
-<entry><function>SetOutcome[p,o]</function></entry>
-<entry>Attach outcome <varname>o</varname> to pure strategy profile <varname>p</varname></entry>
-</row>
-<row>
-<entry><function>NewNfg[dim]</function></entry>
-<entry>A new normal form with dimensions <varname>dim</varname></entry> 
-</row>
-<row>
-<entry><function>NewNfg[dim,True]</function> (user-defined)</entry>
-<entry>A new normal form with dimensions <varname>dim</varname>,
-outcomes in all cells</entry>
-</row>
-<row>
-<entry><function>Nfg[e]</function></entry>
-<entry>Converts extensive form game <varname>e</varname> to normal form</entry>
-</row>
-<row>
-<entry><function>Nfg[x]</function> (user-defined)</entry>
-<entry>Converts nested list of numbers <varname>x</varname> to normal form</entry>
-</row>
-<row>
-<entry><function>Payoff[o,pl]</function></entry>
-<entry>Payoff of outcome <varname>o</varname> to player <varname>pl</varname></entry>
-</row> 
-<row>
-<entry><function>Payoff[m,pl]</function></entry>
-<entry>Payoff of mixed profile <varname>m</varname> to player <varname>pl</varname></entry>
-</row> 
-<row>
-<entry><function>Payoffs[p]</function> (user-defined)</entry>
-<entry>Payoffs of pure strategy <varname>p</varname></entry>
-</row>
-<row>
-<entry><function>Payoffs[n]</function> (user-defined)</entry>
-<entry>Normal form game payoffs of <varname>n</varname> as a nested list</entry>
-</row>
-<row>
-<entry><function>Payoffs[o]</function> (user-defined)</entry>
-<entry>Payoffs of outcome <varname>o</varname></entry>
-</row>
-<row>
-<entry><function>Payoffs[m]</function> (user-defined)</entry>
-<entry>Payoffs of mixed profile <varname>m</varname></entry>
-</row>
-<row>
-<entry><function>Randomize[n,j]</function> (user-defined)</entry>
-<entry>Randomizes the payoffs in <varname>n</varname> with seed <varname>j</varname></entry>
-</row>
-<row>
-<entry><function>Strategies[pl]</function> (user-defined)</entry>
-<entry>Strategies for player <varname>pl</varname></entry>
-</row>
-<row>
-<entry><function>Strategies[n]</function> (user-defined)</entry>
-<entry>Strategies for game <varname>n</varname></entry>
-</row>
-<row>
-<entry><function>SetPayoff[o,pl,pay]</function></entry>
-<entry>Set payoff to player <varname>pl</varname> in outcome <varname>o</varname> to <varname>pay</varname></entry>
-</row> 
+
 </tbody>
 </tgroup>
+
 </table>
 </para>
 

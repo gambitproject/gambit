@@ -1,9 +1,9 @@
-<sect1>
+<sect2>
 <title>Advanced topics</title>
 
 <para></para>
 
-<sect2>
+<sect3>
 <title>Including files</title>
 
 <para>
@@ -72,10 +72,10 @@ itself by writing the following message to the standard output stream:
 Include["path/myfile.gcl"]
 </programlisting>
 </para>
-</sect2>
+</sect3>
 
 
-<sect2>
+<sect3>
 <title>Flow control structures</title>
 
 <para>
@@ -86,7 +86,7 @@ sequences of statements); they also have no ``formal'' names for their
 parameters.
 </para>
 
-<sect3>
+<sect4>
 <title>Conditional execution with <function>If</function></title>
 
 <para>
@@ -127,9 +127,9 @@ is therefore necessary to be careful in constructing <function>If</function>
 expressions which result in the definition of new variables.
 </para>
 
-</sect3>
+</sect4>
 
-<sect3>
+<sect4>
 <title>Repetitive execution with <function>While</function></title>
 
 <para>
@@ -168,9 +168,9 @@ first time it is evaluated, the body of the loop never executes, and
 no variables which appear in the loop are considered to be defined.
 </para>
 
-</sect3>
+</sect4>
 
-<sect3>
+<sect4>
 <title>Indexed looping with <function>For</function></title>
 
 <para>
@@ -222,11 +222,11 @@ The two methods are completely equivalent, but it is often
 more convenient to use the structure afforded by the <function>For</function>
 function.
 </para>
+</sect4>
+
 </sect3>
 
-</sect2>
-
-<sect2>
+<sect3>
 <title>Input and output</title>
 
 <para>
@@ -321,9 +321,9 @@ of <type>EFG</type> and <type>NFG</type> from external files can be done with th
 <function>LoadNfg</function> and <function>SaveNfg</function> functions.
 </para>
 
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Null values</title>
 
 <para>
@@ -371,9 +371,9 @@ Note that user defined functions  will accept Null values for
 arguments also, if the relevant parameter is designated with a
 \verb+*+, as above. 
 </para>
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>System information</title>
 
 <para>
@@ -417,9 +417,9 @@ from the standard installation, you may have to edit these functions
 before they work correctly.}
 </para>
 
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Variables pointing to deleted objects</title>
 
 <para>
@@ -481,9 +481,9 @@ for the changed game; therefore, the variable containing it is
 automatically unassigned.
 </para>
 
-</sect2>
+</sect3>
 
-<sect2>
+<sect3>
 <title>Errors</title>
 
 <para>
@@ -515,9 +515,9 @@ termination of the GCL at the point where the error occurs, with a
 message indicating the type of error encountered.
 </para>
 
-</sect2>
+</sect3>
 
-</sect1>
+</sect2>
 
 
 
