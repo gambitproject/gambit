@@ -812,7 +812,7 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
   int param_sets_matched;
   Portion* result = 0;
 
-  int params_defined;
+  int param_upper_bound;
   bool match_ok;
 
 
@@ -825,17 +825,19 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 
   if( _FuncIndex == -1 )
   {
-    params_defined = 0;
+    param_upper_bound = 0;
     for( index = 0; index < _NumParams; index++ )
     {
-      if( _Param[ index ] != 0 )
-	params_defined++;
+      if( _Param[ index ] != 0 || _RunTimeParamInfo[ index ].Ref != 0 )
+	param_upper_bound = index;
     }
 
     param_sets_matched = 0;
     for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
       match_ok = true;
+      if( param_upper_bound >= _FuncInfo[ f_index ].NumParams )
+	match_ok = false;
 
       for( index = 0; 
 	  index < _FuncInfo[ f_index ].NumParams; 
@@ -843,15 +845,24 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       {
 	if( _Param[ index ] != 0 )
 	{
+	  // parameter is defined
 	  if( !_TypeMatch( _Param[ index ], 
 			  _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
 	    match_ok = false;
 	}
 	else
 	{
+	  // parameter is undefined
 	  if( _RunTimeParamInfo[ index ].Ref != 0 )
 	  {
+	    // specified undefined variable
 	    if( !_FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	      match_ok = false;
+	  }
+	  else
+	  {
+	    // no parameter specified
+	    if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
 	      match_ok = false;
 	  }
 	}
