@@ -61,13 +61,11 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
-  :gBFunctMin<T>(EF.ProfileLength(true), P.tolOpt, P.maxitsOpt,
-		 P.tolBrent,P.maxitsBrent), E(EF),
+  :gBFunctMin<T>(EF.ProfileLength(true)), E(EF),
 		 p(EF, true), pp(EF, true), cpay(EF),
 		 probs(EF.Dimensionality().Lengths()),
 		 xi(p.Length(), p.Length())
 {
-  SetPlev(P.plev);
   Init();
   E.Centroid(pp);
 }
@@ -75,13 +73,11 @@ EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
 template <class T>
 EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P,
 			    const BehavProfile<T> &s)
-  :gBFunctMin<T>(EF.ProfileLength(true), P.tolOpt, P.maxitsOpt,
-		 P.tolBrent,P.maxitsBrent), E(EF),
+  :gBFunctMin<T>(EF.ProfileLength(true)), E(EF),
 		 p(EF, true), pp(EF, true), cpay(EF),
 		 probs(EF.Dimensionality().Lengths()),
 		 xi(p.Length(), p.Length())
 {
-  SetPlev(P.plev);
   Init();
   pp = s;
 }

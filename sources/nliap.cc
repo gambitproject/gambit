@@ -1,7 +1,7 @@
 //#
 //# FILE: nliap.cc -- Normal form Liapunov module
 //#
-//# @(#)nliap.cc	1.25 3/25/95
+//# $Id$
 //#
 
 #define MAXIT 10
@@ -60,25 +60,21 @@ class NFLiapFunc : public LiapFunc<T>, public gBC2FunctMin<T>   {
 
 
 
-template <class T>NFLiapFunc<T>
-::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+template <class T>
+NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P)
+  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
 		    pp(NF.Dimensionality()),  niters(0), nevals(0)
 {
-  SetPlev(P.plev);
   N.Centroid(pp);
 }
 
 
-template <class T>NFLiapFunc<T>
-::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P,
-	   const gPVector<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+template <class T>
+NFLiapFunc<T>::NFLiapFunc(const NormalForm<T> &NF, const LiapParams<T> &P,
+			  const gPVector<T>& s)
+  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
 		    pp(NF.Dimensionality()),  niters(0), nevals(0)
 {
-  SetPlev(P.plev);
   pp = s;
 }
 

@@ -97,7 +97,10 @@ Portion *GSM_SequenceR(Portion **param)
   return new Behav_List_Portion<gRational>(&E, SM.GetSolutions());
 }
 
-Portion *GSM_SetOptions(Portion **param)
+extern double Funct_tolBrent, Funct_tolN;
+extern int Funct_maxitsBrent, Funct_maxitsN;
+
+Portion *GSM_SetFloatOptions(Portion **param)
 {
   gString alg = ((gString_Portion *) param[0])->Value();
   gString par = ((gString_Portion *) param[1])->Value();
@@ -110,9 +113,37 @@ Portion *GSM_SetOptions(Portion **param)
     else return 0;
     return new numerical_Portion<double>(value);
   }
+  else if (alg == "FuncMin")  {
+    if (par == "tolBrent")         Funct_tolBrent = value;
+    else if (par == "tolN")        Funct_tolN = value;
+    else return 0;
+    return new numerical_Portion<double>(value);
+  }
   else
     return 0;
 }
+
+Portion *GSM_SetIntegerOptions(Portion **param)
+{
+  gString alg = ((gString_Portion *) param[0])->Value();
+  gString par = ((gString_Portion *) param[1])->Value();
+  int value = ((numerical_Portion<gInteger> *) param[2])->Value().as_long();
+  
+  if (alg == "Gobit")   {
+    if (par == "powLam")           Gobit_default_powLam = value;
+    else return 0;
+    return new numerical_Portion<gInteger>(value);
+  }
+  else if (alg == "FuncMin")  {
+    if (par == "maxitsBrent")      Funct_maxitsBrent = value;
+    else if (par == "maxitsN")     Funct_maxitsN = value;
+    else return 0;
+    return new numerical_Portion<gInteger>(value);
+  }
+  else
+    return 0;
+}
+
   
 void Init_algfunc(GSM *gsm)
 {
@@ -151,10 +182,15 @@ void Init_algfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("SetOptions");
-  FuncObj->SetFuncInfo(GSM_SetOptions, 3);
-  FuncObj->SetParamInfo(GSM_SetOptions, 0, "alg", porSTRING);
-  FuncObj->SetParamInfo(GSM_SetOptions, 1, "param", porSTRING);
-  FuncObj->SetParamInfo(GSM_SetOptions, 2, "value", porDOUBLE);
+  FuncObj->SetFuncInfo(GSM_SetFloatOptions, 3);
+  FuncObj->SetParamInfo(GSM_SetFloatOptions, 0, "alg", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetFloatOptions, 1, "param", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetFloatOptions, 2, "value", porDOUBLE);
+
+  FuncObj->SetFuncInfo(GSM_SetIntegerOptions, 3);
+  FuncObj->SetParamInfo(GSM_SetIntegerOptions, 0, "alg", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetIntegerOptions, 1, "param", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetIntegerOptions, 2, "value", porINTEGER);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("EfgToNfg");

@@ -63,13 +63,11 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
 
 template <class T>EFLiapFunc<T>
 ::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P)
-  : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
+  : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF, false),
 		  pp(EF, false), cpay(EF.Dimensionality()),
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
-  SetPlev(P.plev);
   xi.MakeIdent();
   E.Centroid(pp);
 }
@@ -77,13 +75,11 @@ template <class T>EFLiapFunc<T>
 template <class T>EFLiapFunc<T>
 ::EFLiapFunc(const ExtForm<T> &EF, const LiapParams<T> &P,
 			  const BehavProfile<T> &s)
-  : gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		  P.tolBrent,P.maxitsBrent), E(EF), p(EF, false),
+  : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF, false),
 		  pp(EF,false), cpay(EF.Dimensionality()),
 		  xi(p.Length(),p.Length()),
 		  niters(0), nevals(0)
 {
-  SetPlev(P.plev);
   xi.MakeIdent();
   pp = s;
 }

@@ -61,11 +61,9 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 
 template <class T> NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
-  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
 		    pp(NF.Dimensionality())
 { 
-  SetPlev(P.plev);
   Init();
   N.Centroid(pp);
 }
@@ -73,11 +71,9 @@ template <class T> NFGobitFunc<T>
 template <class T>NFGobitFunc<T>
 ::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P,
 	      const gPVector<T>& s)
-  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
-		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
 		    pp(NF.Dimensionality())
 {
-  SetPlev(P.plev);
   Init();
   pp = s;
 }
@@ -93,9 +89,6 @@ template <class T> void NFGobitFunc<T>::Init(void)
     scratch2[i] = new gVector<T>(N.NumStrats(i));
   }
 }
-
-//template class NFGobitFunc<double>;
-//template class NFGobitFunc<gRational>;
 
 template <class T> NFGobitFunc<T>::~NFGobitFunc()
 {
