@@ -379,14 +379,7 @@ void CallFuncObj::SetCurrParamIndex( const int index )
 }
 
 
-void CallFuncObj::SetCurrParamRef( Reference_Portion* ref )
-{
-  assert( _CurrParamIndex < _NumParams );
-  _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref;
-}
-
-
-bool CallFuncObj::SetCurrParam( Portion *param )
+bool CallFuncObj::SetCurrParam( Portion *param, Reference_Portion* ref_param )
 {
   bool result = true;
   bool type_match;
@@ -401,8 +394,7 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	if( param == 0 || _FuncIndex == -1 )
 	  type_match = true;
 	else 
-	  if( _TypeMatch( param, 
-			 _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type ) )
+	  if( _TypeMatch( param, _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type ) )
 	    type_match = true;
 
 	if( type_match )
@@ -415,6 +407,7 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	  _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
 	  if( param )
 	    _RunTimeParamInfo[ _CurrParamIndex ].ShadowOf = param->ShadowOf();
+	  _RunTimeParamInfo[ _CurrParamIndex ].Ref = ref_param;
 	  _CurrParamIndex++;
 	  _NumParamsDefined++;
 	}
@@ -440,56 +433,18 @@ bool CallFuncObj::SetCurrParam( Portion *param )
   }
   else
   {
-    if( param != 0 )
-    {
-      delete param;
-    }
+    delete param;
+    delete ref_param;
   }
 
   if( result == false )
   {
     _ErrorOccurred = true;
     delete param;
-    delete _RunTimeParamInfo[ _CurrParamIndex ].Ref;
+    delete ref_param;
   }
   return result;
 }
-
-
-/*
-Reference_Portion* CallFuncObj::GetParamRef( const int index ) const
-{
-  return _RunTimeParamInfo[ index ].Ref;
-}
-
-
-int CallFuncObj::GetCurrParamIndex( void ) const
-{
-  return _CurrParamIndex;
-}
-
-
-PortionType CallFuncObj::GetCurrParamType( void ) const
-{
-  if( _CurrParamIndex < _NumParams )
-  {
-    return _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].Type;
-  }
-  else // ( _CurrParamIndex >= _NumParams )
-  {
-    return porERROR;
-  }
-}
-
-
-bool CallFuncObj::GetCurrParamPassByRef( void ) const
-{
-  assert( _FuncIndex >= 0 && _FuncIndex < _NumFuncs );
-  assert( _CurrParamIndex >= 0 && 
-	 _CurrParamIndex < _FuncInfo[ _FuncIndex ].NumParams );
-  return _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].PassByReference;
-}
-*/
 
 
 Reference_Portion* CallFuncObj::GetCurrParamRef( void ) const

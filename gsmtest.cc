@@ -1474,6 +1474,7 @@ int main( void )
 
 
 
+
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
@@ -1500,7 +1501,7 @@ int main( void )
   machine->Subscript();
   machine->Bind();
   machine->Push( (double) 5 );
-  machine->Bind();
+  machine->Bind(); 
   machine->CallFunction();
   machine->Dump();
 
@@ -1511,7 +1512,6 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 #endif
-
 
 
 
@@ -1972,6 +1972,19 @@ int main( void )
 #endif
 
 
+
+  machine->PushRef( "xyz" );
+  machine->Push( (gInteger) 2 );
+  machine->Subscript();
+  machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
   gout << "\nDeleting machine\n";
   delete machine;
 
@@ -1980,3 +1993,4 @@ int main( void )
 
   return 0;
 }
+

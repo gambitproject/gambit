@@ -197,7 +197,6 @@ bool GSM::Assign( void )
   Portion*  p2_copy;
   Portion*  p2;
   Portion*  p1;
-  Portion*  p;
   Portion*  primary_ref;
   gString   p1_subvalue;
   Portion*  por_result;
@@ -254,6 +253,15 @@ bool GSM::Assign( void )
 	  break;
 	case porNFG_RATIONAL:
 	  ( (Nfg_Portion<gRational>*) primary_ref )->
+	    Assign( p1_subvalue, p2_copy );
+	  break;
+
+	case porEFG_DOUBLE:
+	  ( (Efg_Portion<double>*) primary_ref )->
+	    Assign( p1_subvalue, p2_copy );
+	  break;
+	case porEFG_RATIONAL:
+	  ( (Efg_Portion<gRational>*) primary_ref )->
 	    Assign( p1_subvalue, p2_copy );
 	  break;
 	  
@@ -356,6 +364,13 @@ bool GSM::UnAssign( void )
 	  ( (Nfg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
 	  break;
 	  
+	case porEFG_DOUBLE:
+	  ( (Efg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
+	  break;
+	case porEFG_RATIONAL:
+	  ( (Efg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
+	  break;
+	  
 	default:
 	  _ErrorMessage( _StdErr, 9 );
 	}
@@ -429,6 +444,19 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	break;
       case porNFG_RATIONAL:
 	result = ((Nfg_Portion<gRational>*) primary_ref )->
+	  operator()( subvalue );
+	if( result != 0 )
+	  result = result->Copy();
+	break;
+
+      case porEFG_DOUBLE:
+	result = ((Efg_Portion<double>*) primary_ref )->
+	  operator()( subvalue );
+	if( result != 0 )
+	  result = result->Copy();
+	break;
+      case porEFG_RATIONAL:
+	result = ((Efg_Portion<gRational>*) primary_ref )->
 	  operator()( subvalue );
 	if( result != 0 )
 	  result = result->Copy();
@@ -670,11 +698,12 @@ bool GSM::Subscript ( void )
   if( p1->Type() == porREFERENCE )
   {
     refp = p1;
+
     if( _RefTable->IsDefined( ( (Reference_Portion*) refp )->Value() ) )
       p1 = (*_RefTable)( ( (Reference_Portion*) refp )->Value() );
     else
       p1 = 0;
-    
+
     if( p1 != 0 && p1->Type() == porLIST )
     {
       delete refp;
@@ -818,15 +847,9 @@ bool GSM::Bind( void )
 
 bool GSM::BindVal( void )
 {
-  CallFuncObj*        func;
-  PortionType         curr_param_type;
-  Portion*            param = 0;
-  gString             funcname;
-  int                 i;
-  int                 type_match;
-  gString             ref;
-  Reference_Portion*  refp;
-  bool                result = true;
+  CallFuncObj* func;
+  Portion*     param;
+  bool         result;
 
 #ifndef NDEBUG
   _BindCheck();
@@ -841,11 +864,6 @@ bool GSM::BindVal( void )
   param->ShadowOf() = 0;
   result = func->SetCurrParam( param ); 
 
-  if( !result )  // == false
-  {
-    func->SetErrorOccurred();
-  }
-
   _CallFuncStack->Push( func );
   return result;
 }
@@ -853,16 +871,10 @@ bool GSM::BindVal( void )
 
 bool GSM::BindRef( void )
 {
-  CallFuncObj*  func;
-  PortionType   curr_param_type;
-  Portion*      param;
-  Portion*      subparam;
-  gString       funcname;
-  int           i;
-  int           type_match;
-  bool          result = true;
-  gString       ref;
-  gString       subref;
+  CallFuncObj*       func;
+  Portion*           param;
+  Reference_Portion* ref_param = 0;
+  bool               result    = true;
 
 #ifndef NDEBUG
   _BindCheck();
@@ -873,15 +885,14 @@ bool GSM::BindRef( void )
   
   if( param->Type() == porREFERENCE )
   {
-    ref = ( (Reference_Portion*) param )->Value();
-    subref = ( (Reference_Portion*) param )->SubValue();
-    func->SetCurrParamRef( (Reference_Portion*)( param->Copy() ) );
+    ref_param = (Reference_Portion*)( param->Copy() );
     param = _ResolveRefWithoutError( (Reference_Portion*) param );
     if( param != 0 )
     {
       if( param->Type() == porERROR )
       {
 	delete param;
+	delete ref_param;
 	result = false;
       }
     }
@@ -900,10 +911,9 @@ bool GSM::BindRef( void )
   
   if( result )  // == true
   {
-    result = func->SetCurrParam( param );
+    result = func->SetCurrParam( param, ref_param );
   }
-
-  if( !result )  // == false
+  else
   {
     func->SetErrorOccurred();
   }
@@ -1014,6 +1024,15 @@ bool GSM::CallFunction( void )
 	      break;
 	    case porNFG_RATIONAL:
 	      ( (Nfg_Portion<gRational>*) p )->
+		Assign( refp->SubValue(), param[ index ]->Copy() );
+	      break;
+
+	    case porEFG_DOUBLE:
+	      ( (Efg_Portion<double>*) p )->
+		Assign( refp->SubValue(), param[ index ]->Copy() );
+	      break;
+	    case porEFG_RATIONAL:
+	      ( (Efg_Portion<gRational>*) p )->
 		Assign( refp->SubValue(), param[ index ]->Copy() );
 	      break;
 

@@ -112,18 +112,10 @@ class CallFuncObj : public FuncDescObj
   bool        ParamPassByReference( const int index ) const;
   int         FindParamName        ( const gString& param_name );
 
-  void        SetCurrParamIndex   ( const int index );
-  bool        SetCurrParam        ( Portion *new_param );
-  void        SetCurrParamRef ( Reference_Portion* ref );
+  void  SetCurrParamIndex   ( const int index );
+  bool  SetCurrParam ( Portion* param, Reference_Portion* ref_param = 0 );
 
   void        SetErrorOccurred ( void );
-
-/*
-  Reference_Portion* GetParamRef ( const int index ) const;
-  int         GetCurrParamIndex           ( void ) const;
-  PortionType GetCurrParamType            ( void ) const;
-  bool        GetCurrParamPassByRef ( void ) const;
-*/
 
   Reference_Portion* GetCurrParamRef ( void ) const;
   Portion*    GetCurrParamShadowOf ( void ) const;
