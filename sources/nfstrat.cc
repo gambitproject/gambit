@@ -205,7 +205,7 @@ NFSupport &NFSupport::operator=(const NFSupport &s)
 
 bool NFSupport::operator==(const NFSupport &s) const
 {
-  assert(sups.Length() == s.sups.Length());
+  if (bnfg != s.bnfg)  return false;
   int i;
   for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
   if (i > sups.Length()) return (true);
@@ -267,7 +267,7 @@ bool NFSupport::RemoveStrategy(Strategy *s)
 // Returns true if all strategies in _THIS_ belong to _S_
 bool NFSupport::IsSubset(const NFSupport &s) const
 {
-  assert(sups.Length() == s.sups.Length());
+  if (bnfg != s.bnfg)  return false;
   for (int i = 1; i <= sups.Length(); i++)
     if (NumStrats(i) > s.NumStrats(i))
       return false;
