@@ -249,10 +249,13 @@ template <class T>  T polynomial<T>::EvaluationAt(const T& arg) const
 {
   T answer;
 
-  for (int i = 0; i <= Degree(); i++) {
-    T monom_val = (T)1;
-    for (int j = 1; j <= i; j++) monom_val *= arg;
-    answer += coeflist[i+1] * monom_val;
+  if (IsZero()) answer = (T)0;
+  else {
+    answer = coeflist[Degree() + 1];
+    for (int i = Degree(); i >= 1; i--) {
+      answer *= arg;
+      answer += coeflist[i];
+    }
   }
 
   return answer;
