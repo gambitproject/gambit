@@ -16,7 +16,7 @@
 #include "gambitio.h"
 
 #include "normal.h"
-#include "extform.h"
+#include "efg.h"
 
 
 
@@ -612,7 +612,7 @@ EfPlayerPortion::EfPlayerPortion( void )
 EfPlayerPortion::~EfPlayerPortion()
 { }
 
-Player*& EfPlayerPortion::Value( void ) const
+EFPlayer*& EfPlayerPortion::Value( void ) const
 { return *_Value; }
 
 PortionType EfPlayerPortion::Type( void ) const
@@ -652,8 +652,8 @@ bool EfPlayerPortion::operator == ( Portion *p ) const
 }
 
 
-EfPlayerValPortion::EfPlayerValPortion( Player* value )
-{ _Value = new Player*( value ); }
+EfPlayerValPortion::EfPlayerValPortion( EFPlayer* value )
+{ _Value = new EFPlayer*( value ); }
 
 EfPlayerValPortion::~EfPlayerValPortion()
 { delete _Value; }
@@ -662,7 +662,7 @@ bool EfPlayerValPortion::IsReference( void ) const
 { return false; }
 
 
-EfPlayerRefPortion::EfPlayerRefPortion( Player*& value )
+EfPlayerRefPortion::EfPlayerRefPortion( EFPlayer*& value )
 { _Value = &value; }
 
 EfPlayerRefPortion::~EfPlayerRefPortion()
@@ -1303,7 +1303,7 @@ EfgPortion::EfgPortion( void )
 EfgPortion::~EfgPortion()
 { }
 
-BaseExtForm*& EfgPortion::Value( void ) const
+BaseEfg*& EfgPortion::Value( void ) const
 { return *_Value; }
 
 PortionType EfgPortion::Type( void ) const
@@ -1330,11 +1330,11 @@ Portion* EfgPortion::ValCopy( void ) const
   {
   case DOUBLE:
     return new EfgValPortion
-      ( new ExtForm<double>( * (ExtForm<double>*) (*_Value) ) ); 
+      ( new Efg<double>( * (Efg<double>*) (*_Value) ) ); 
     break;
   case RATIONAL:
     return new EfgValPortion
-      ( new ExtForm<gRational>( * (ExtForm<gRational>*) (*_Value) ) ); 
+      ( new Efg<gRational>( * (Efg<gRational>*) (*_Value) ) ); 
     break;
   default:
     assert( 0 );
@@ -1359,12 +1359,12 @@ void EfgPortion::AssignFrom( Portion* p )
   switch( ( (EfgPortion*) p )->Value()->Type() )
   {
   case DOUBLE:
-    *_Value = new ExtForm<double>
-      ( * (ExtForm<double>*) ( (EfgPortion*) p )->Value() ); 
+    *_Value = new Efg<double>
+      ( * (Efg<double>*) ( (EfgPortion*) p )->Value() ); 
     break;
   case RATIONAL:
-    *_Value =  new ExtForm<gRational>
-      ( * (ExtForm<gRational>*) ( (EfgPortion*) p )->Value() ); 
+    *_Value =  new Efg<gRational>
+      ( * (Efg<gRational>*) ( (EfgPortion*) p )->Value() ); 
     break;
   default:
     assert( 0 );
@@ -1384,8 +1384,8 @@ bool EfgPortion::operator == ( Portion *p ) const
 }
 
 
-EfgValPortion::EfgValPortion( BaseExtForm* value )
-{ _Value = new BaseExtForm*( value ); }
+EfgValPortion::EfgValPortion( BaseEfg* value )
+{ _Value = new BaseEfg*( value ); }
 
 EfgValPortion::~EfgValPortion()
 { 
@@ -1397,7 +1397,7 @@ bool EfgValPortion::IsReference( void ) const
 { return false; }
 
 
-EfgRefPortion::EfgRefPortion( BaseExtForm*& value )
+EfgRefPortion::EfgRefPortion( BaseEfg*& value )
 { _Value = &value; }
 
 EfgRefPortion::~EfgRefPortion()

@@ -23,7 +23,7 @@
 
 #include "garray.h"
 #include "normal.h"
-#include "extform.h"
+#include "efg.h"
 
 
 
@@ -61,7 +61,7 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _NULL   = new OutputRefPortion( gnull );
 
     _DefaultNfg = new NfgValPortion( new NormalForm<gRational> );
-    _DefaultEfg = new EfgValPortion( new ExtForm<double> );
+    _DefaultEfg = new EfgValPortion( new Efg<double> );
   }
 
   _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );

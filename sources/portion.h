@@ -18,7 +18,7 @@
 
 #include "mixed.h"
 #include "normal.h"
-#include "extform.h"
+#include "efg.h"
 
 
 
@@ -370,13 +370,13 @@ class Player;
 class EfPlayerPortion : public Portion
 {
 protected:
-  Player** _Value;
+  EFPlayer** _Value;
   EfPlayerPortion( void );
 
 public:
   virtual ~EfPlayerPortion();
 
-  Player*& Value( void ) const;
+  EFPlayer*& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -388,7 +388,7 @@ public:
 class EfPlayerValPortion : public EfPlayerPortion
 {
 public:
-  EfPlayerValPortion( Player* value );
+  EfPlayerValPortion( EFPlayer* value );
   virtual ~EfPlayerValPortion();
   bool IsReference( void ) const;
 };
@@ -396,7 +396,7 @@ public:
 class EfPlayerRefPortion : public EfPlayerPortion
 {
 public:
-  EfPlayerRefPortion( Player*& value );
+  EfPlayerRefPortion( EFPlayer*& value );
   virtual ~EfPlayerRefPortion();
   bool IsReference( void ) const;
 };
@@ -674,18 +674,18 @@ public:
 //                          new Efg class
 //---------------------------------------------------------------------
 
-class BaseExtForm;
+class BaseEfg;
 
 class EfgPortion : public Portion
 {
 protected:
-  BaseExtForm** _Value;
+  BaseEfg** _Value;
   EfgPortion( void );
 
 public:
   virtual ~EfgPortion();
 
-  BaseExtForm*& Value( void ) const;
+  BaseEfg*& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
   Portion* ValCopy( void ) const;
@@ -698,7 +698,7 @@ public:
 class EfgValPortion : public EfgPortion
 {
 public:
-  EfgValPortion( BaseExtForm* value );
+  EfgValPortion( BaseEfg* value );
   virtual ~EfgValPortion();
   bool IsReference( void ) const;
 };
@@ -706,7 +706,7 @@ public:
 class EfgRefPortion : public EfgPortion
 {
 public:
-  EfgRefPortion( BaseExtForm*& value );
+  EfgRefPortion( BaseEfg*& value );
   virtual ~EfgRefPortion();
   bool IsReference( void ) const;
 };

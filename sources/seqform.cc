@@ -10,7 +10,7 @@
 #include "gdpvect.h"
 
 #include "behav.h"
-#include "player.h"
+#include "efplayer.h"
 #include "infoset.h"
 
 void Epsilon(double &v) {v=(double).0000000001; }
@@ -32,7 +32,7 @@ SeqFormParams::SeqFormParams(void)
 //---------------------------------------------------------------------------
 
 template <class T>
-SeqFormModule<T>::SeqFormModule(const ExtForm<T> &E, const SeqFormParams &p)
+SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p)
   : EF(E), params(p), A(0), b(0), maxpay((T) 0), npivots(0)
 { 
   int ntot;
@@ -350,7 +350,7 @@ class SeqFormModule<gRational>;
 //-------------------------------------------------------------------------
 
 template <class T>
-int SeqForm(const ExtForm<T> &E, const SeqFormParams &p,
+int SeqForm(const Efg<T> &E, const SeqFormParams &p,
 	  gList<BehavProfile<T> > &solutions,
 	  long &npivots, double &time)
 { 
@@ -366,15 +366,15 @@ int SeqForm(const ExtForm<T> &E, const SeqFormParams &p,
 }
 
 #ifdef __GNUG__
-template int SeqForm(const ExtForm<double> &, const SeqFormParams &,
+template int SeqForm(const Efg<double> &, const SeqFormParams &,
 		   gList<BehavProfile<double> > &, long &, double &);
-template int SeqForm(const ExtForm<gRational> &, const SeqFormParams &,
+template int SeqForm(const Efg<gRational> &, const SeqFormParams &,
 		   gList<BehavProfile<gRational> > &, long &, double &);
 #elif defined __BORLANDC__
 #pragma option -Jgd
-int SeqForm(const ExtForm<double> &, const SeqFormParams &,
+int SeqForm(const Efg<double> &, const SeqFormParams &,
 	  gList<BehavProfile<double> > &, long &, double &);
-int SeqForm(const ExtForm<gRational> &, const SeqFormParams &,
+int SeqForm(const Efg<gRational> &, const SeqFormParams &,
 	  gList<BehavProfile<gRational> > &, long &, double &);
 #pragma option -Jgx
 #endif   // __GNUG__, __BORLANDC__

@@ -7,7 +7,7 @@
 #ifndef SEQFORM_H
 #define SEQFORM_H
 
-#include "extform.h"
+#include "efg.h"
 #include "rational.h"
 #include "glist.h"
 #include "gdpvect.h"
@@ -28,7 +28,7 @@ class SeqFormParams     {
 
 template <class T> class SeqFormModule  {
 private:
-  const ExtForm<T> &EF;
+  const Efg<T> &EF;
   const SeqFormParams &params;
   gMatrix<T> *A;
   gVector<T> *b;
@@ -41,7 +41,7 @@ private:
   gList< BehavProfile<T> > solutions;
 
 public:
-  SeqFormModule(const ExtForm<T> &E, const SeqFormParams &p);
+  SeqFormModule(const Efg<T> &E, const SeqFormParams &p);
   virtual ~SeqFormModule();
   
   int Lemke(int dup = 0);
@@ -64,7 +64,7 @@ public:
 //
 
 /*
-template <class T> int SeqForm(const ExtForm<T> &N, const SeqFormParams &p,
+template <class T> int SeqForm(const Efg<T> &N, const SeqFormParams &p,
 			     gList<gDPVector<T> > &solutions,
 			     long &npivots, double &time);
 */				   

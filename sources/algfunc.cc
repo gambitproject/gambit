@@ -14,11 +14,11 @@
 #include "rational.h"
 
 
-template <class T> int BuildReducedNormal(const ExtForm<T> &,
+template <class T> int BuildReducedNormal(const Efg<T> &,
 					  NormalForm<T> *&);
 template <class T>
 void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
-		  const ExtForm<T> &E, gDPVector<T> &bp);
+		  const Efg<T> &E, gDPVector<T> &bp);
 
 #include "gwatch.h"
 #include "mixed.h"
@@ -26,7 +26,7 @@ void MixedToBehav(const NormalForm<T> &N, const gPVector<T> &mp,
 Portion *GSM_BehavFloat(Portion **param)
 {
   MixedProfile<double> &mp = * (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
-  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[1])->Value();
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[1])->Value();
   NormalForm<double> &N = *mp.BelongsTo(); 
 
   BehavProfile<double> *bp = new BehavProfile<double>(E);
@@ -45,7 +45,7 @@ Portion *GSM_Payoff(Portion **param)
 
 Portion *GSM_Nfg(Portion **param)
 {
-  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[0])->Value();
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
   NormalForm<double> *N = 0;
   gWatch watch;
   BuildReducedNormal(E, (NormalForm<double>*&) N);
@@ -56,11 +56,11 @@ Portion *GSM_Nfg(Portion **param)
 
 template <class T> class Behav_ListPortion : public ListValPortion   {
   public:
-    Behav_ListPortion(ExtForm<T> *, const gList<BehavProfile<T> > &);
+    Behav_ListPortion(Efg<T> *, const gList<BehavProfile<T> > &);
     virtual ~Behav_ListPortion()   { }
 };
 
-Behav_ListPortion<double>::Behav_ListPortion(ExtForm<double> *E,
+Behav_ListPortion<double>::Behav_ListPortion(Efg<double> *E,
 			   const gList<BehavProfile<double> > &list)
 {
   _DataType = porBEHAV_FLOAT;
@@ -68,7 +68,7 @@ Behav_ListPortion<double>::Behav_ListPortion(ExtForm<double> *E,
     Append( new BehavValPortion( new BehavProfile<double>(list[i])));
 }
 
-Behav_ListPortion<gRational>::Behav_ListPortion(ExtForm<gRational> *E,
+Behav_ListPortion<gRational>::Behav_ListPortion(Efg<gRational> *E,
 			      const gList<BehavProfile<gRational> > &list)
 {
   _DataType = porBEHAV_RATIONAL;
@@ -86,7 +86,7 @@ Portion *GSM_GobitEfg(Portion **param)
   EP.delLam = ((FloatPortion *) param[5])->Value();
   EP.powLam = ((IntPortion *) param[6])->Value();
   
-  EFGobitModule<double> M( * (ExtForm<double>*) ((EfgPortion*) param[0])->Value(), EP);
+  EFGobitModule<double> M( * (Efg<double>*) ((EfgPortion*) param[0])->Value(), EP);
   M.Gobit(1);
 
   ((FloatPortion *) param[2])->Value() = M.Time();
@@ -96,7 +96,7 @@ Portion *GSM_GobitEfg(Portion **param)
 
 Portion *GSM_LiapEfg(Portion **param)
 {
-  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[0])->Value();
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
 
   EFLiapParams<double> LP;
 
@@ -116,7 +116,7 @@ Portion *GSM_LiapEfg(Portion **param)
 
 Portion *GSM_LemkeEfgFloat(Portion **param)
 {
-  ExtForm<double> &E = * (ExtForm<double>*) ((EfgPortion*) param[0])->Value();
+  Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
 
   SeqFormParams SP;
   SP.nequilib = ((IntPortion *) param[1])->Value();
@@ -132,7 +132,7 @@ Portion *GSM_LemkeEfgFloat(Portion **param)
 
 Portion *GSM_LemkeEfgRational(Portion **param)
 {
-  ExtForm<gRational> &E = * (ExtForm<gRational>*) ((EfgPortion*) param[0])->Value();
+  Efg<gRational> &E = * (Efg<gRational>*) ((EfgPortion*) param[0])->Value();
 
   SeqFormParams SP;
   SP.nequilib = ((IntPortion *) param[1])->Value();
