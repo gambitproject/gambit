@@ -51,43 +51,43 @@ template <class T> class gStack   {
 };
 
 
-template <class T> gStack<T>::gStack(int md) : depth(0), max_depth(md)
+template <class T> inline gStack<T>::gStack(int md) : depth(0), max_depth(md)
 {
   assert(md > 0);
   contents = new T[md];
   assert(contents != 0);
 }
 
-template <class T> gStack<T>::~gStack()
+template <class T> inline gStack<T>::~gStack()
 {
   delete [] contents;
 }
 
-template <class T> void gStack<T>::Push(T new_el)
+template <class T> inline void gStack<T>::Push(T new_el)
 {
   assert(depth < max_depth);
   contents[depth++] = new_el;
 }
 
-template <class T> T gStack<T>::Pop(void)
+template <class T> inline T gStack<T>::Pop(void)
 {
   assert(depth > 0);
   return contents[--depth];
 }
 
-template <class T> T& gStack<T>::Peek(void)
+template <class T> inline T& gStack<T>::Peek(void)
 {
   assert(depth > 0);
   return contents[depth - 1];
 }
 
-template <class T> T gStack<T>::Peek(void) const
+template <class T> inline T gStack<T>::Peek(void) const
 {
   assert(depth > 0);
   return contents[depth - 1];
 }
 
-template <class T> void gStack<T>::Flush(void)
+template <class T> inline void gStack<T>::Flush(void)
 {
   depth = 0;
 }
