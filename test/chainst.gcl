@@ -1,0 +1,81 @@
+//
+// A gcl program to construct a n-stage chain store game
+//
+
+NewFunction[PlayerNumber[e<->EFG, p->EFPLAYER],
+list:=Players[e];
+i:=1;
+While[i<=NumPlayers[e] && p != list_i,i:=i+1];
+i];
+
+NewFunction[MultiStageChainStore[ efg<->EFG, node->NODE, strong->BOOLEAN, list->LIST(INFOSET)],
+// build tree
+incIset:=list_1;
+entIset:=list_2;
+incumbent:=Player[incIset];
+entrant:=Player[entIset];
+AddMove[entIset, node ];
+AddMove[incIset, node#1 ];
+AddMove[NewInfoset[incumbent,{""} ], node#2 ];
+// attach outcomes 
+SetOutcome[node#1#1,Float[NewOutcome[efg]]];
+SetOutcome[node#1#2,Float[NewOutcome[efg]]];
+SetOutcome[node#2#1,Float[NewOutcome[efg]]];
+pay:=Payoffs[Outcome[node#1#1]];
+entnum:=PlayerNumber[efg,entrant];
+incnum:=PlayerNumber[efg,incumbent];
+a:=0.5;b:=0.5;
+pay_entnum:=b-1.;
+pay_incnum:=-1.;
+If[strong, pay_incnum := 0.0];
+SetPayoffs[Outcome[node#1#1],pay];
+pay_entnum:=b;
+pay_incnum:=0.;
+If[strong, pay_incnum := -1.0];
+SetPayoffs[Outcome[node#1#2],pay];
+pay_entnum:=0.;
+pay_incnum:=a;
+SetPayoffs[Outcome[node#2#1],pay];
+// recurse down the tree
+list:=Remove[list,2];
+If[Length[list] > 1,
+  MultiStageChainStore[efg, node#1#1, strong, list];
+  MultiStageChainStore[efg, node#1#2, strong, list];
+  MultiStageChainStore[efg, node#2#1, strong, list]
+  ]
+];
+
+NewFunction[ChainStoreGame[ numStages->NUMBER, prob -> NUMBER],
+e := NewEfg[];
+n := RootNode[e];
+iset := NewInfoset[Chance[e], {"Strong", "Weak"} , "Chance move"];
+AddMove[iset, n ];
+inc := NewPlayer[e,"Incumbent"];
+isinc := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
+lpl := { inc };
+lisets := { isinc }; 
+For[i:=1,i<=numStages,i:=i+1,
+  lpl := lpl & { NewPlayer[e,"Entrant"+Text[i]] };
+  lisets := lisets & {NewInfoset[lpl_(i+1),  {"Enter", "Out"}] }
+  ];
+MultiStageChainStore[ e, n#1, True, lisets];
+MultiStageChainStore[ e, n#2, False, lisets];
+
+nonterm:=NonterminalNodes[e];
+For[i:=1,i<=Length[nonterm],i:=i+1,
+  If[Player[ Infoset[nonterm_i ] ]!=Chance[e],
+    Reveal[Infoset[nonterm_i ],lpl] ]
+  ];	
+Reveal[iset,{inc}];
+e
+];
+
+// Example:  The following command will build a 3 stage chain store 
+// game with .5 probability of incumbent being weak
+//
+// e:= ChainStoreGame[3,0.5]
+
+
+
+
+

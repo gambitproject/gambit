@@ -1,0 +1,55 @@
+//
+// A gcl script to test the solution algorithms.  
+// 
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+NewFunction[AlgTest[n->NFG,{out->StdOut},{precision->Float}],
+  << "\nGame: "+Name[n];
+  out << "\nGame: " << Name[n] << " n = " << NumPlayers[n];
+  out << "\n";
+  out << "\nOneNash\n" << OneNash[n,precision];
+  out << "\nAllNash\n" << AllNash[n,0,10,precision];
+  out << "\nOnePerfect\n" << OnePerfect[n,precision];
+  out << "\nAllPerfect\n" << AllPerfect[n,0,10,precision];
+  out << "\n";
+];
+
+NewFunction[AlgTest[e->EFG,{out->StdOut},{precision->Float}],
+  << "\nGame: "+Name[e];
+  out << "\nGame: " << Name[e] << " n = " << NumPlayers[e];
+  out << "\n";
+  out << "\nOneNash\n" << OneNash[e,precision];
+  out << "\nAllNash\n" << AllNash[e,0,10,precision];
+  out << "\nOneSubgamePerfect\n" << OneSubgamePerfect[e,precision];
+  out << "\nAllSubgamePerfect\n" << AllSubgamePerfect[e,0,10,precision];
+  out << "\nOneSequential\n" << OneSequential[e];
+  out << "\nAllSequential\n" << AllSequential[e,0,10];
+  out << "\n";
+];
+
+//out:=StdOut;
+out:=Output["algtest.out"];
+SetListFormat[lf->1];
+SetNumericFormat[precis->4];
+
+time:=StartWatch[];
+
+gamelist:={"wink3","winkels","deg1","deg2","sh3","todd2","oneill","coord3","8x8","g1","g2","g3"}
+r:=Rational;m:=Float;
+prec:={r,m,r,r,m,m,r,m,m,m,m,m}
+g:=LoadNfg["../nfg/"+gamelist+".nfg"]
+AlgTest[g,out,prec];
+g:=
+time:=StopWatch[];
+out << "\n\nTime = " << time;
+time:=StartWatch[];
+
+gamelist:={"e01","e02","e03","e04","e05","e06","e07","cent3","g1","g2","g3","coord3","coord4","coord2ts"};
+g:=LoadEfg["../efg/"+gamelist+".efg"]
+AlgTest[g,out];
+time:=StopWatch[];
+out << "\n\nTime = " << time;
+<< "Finished algtest.gcl";
+
+

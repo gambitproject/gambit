@@ -1,0 +1,66 @@
+//
+//  This gcl program estimates the principal branch of
+//  the QRE and corresponding OSEM for a given extensive 
+//  form game, finds MLE fits to experimental data 
+//  and computes 95% confidence intervals for each model. 
+//
+//  The extensive form is assumed to be in filename.efg
+//  and the data is in filename.agg.  The first line
+//  in the agg file should contain the bounds for lambda 
+//  The second line should contain an equilibrium selection 
+//  to be used by the OSEM model. The third line gives 
+//  the number of data sets
+//  for which the estimation is to be conducted.  This 
+//  should be followed by at least that many sets of data.
+//
+//  The output is put in filename.out, and the pxifile is put in
+//  filename.pxi
+//
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+Include["eqreml.gcl"]
+
+NewFunction[EQre[filename->TEXT],
+  //  Load efg and open agg file for reading
+  width:=0;precis:=0;quote:=True;lf:=0;
+  GetNumericFormat[width<->width,precis<->precis];
+  GetTextFormat[quote<->quote];
+  GetListFormat[lf<->lf];
+
+  e := LoadEfg[filename+".efg"];
+  in := Input[filename+".agg"];
+
+  // read in range of lambdas for QRE estimation
+  in >> min >> max >> del;
+
+  // read in nash equilibrium selection to be used for OSEM model
+  nash :=Centroid[e];
+  datlist := Integer[ListForm[nash]];
+  in >> nash;
+
+  //  Load data into dat
+  in >> ndat;
+  dat := {};
+  For[i := 1, i <= ndat, i := i+1,
+    dat := dat & {datlist};
+    in >> dat_i;
+  ];
+
+  pxi := filename+".pxi";
+  out := filename+".out";
+
+  EQreML[e,dat,min,max,del,out,pxi,nash];
+  SetNumericFormat[width,precis];
+  SetTextFormat[quote];
+  SetListFormat[lf->lf];
+];
+
+// The following command will run EQre on the game bhg3.efg
+//
+// EQre["bhg3"]
+
+
+
+
+

@@ -1,0 +1,56 @@
+//
+// A gcl program to estimate the principal branch of the 
+// QRE for data from a normal form game.  
+// 
+// It is assumed that the normal form is in filename.nfg, 
+// and that the data is in the file filename.agg.  
+// 
+// The output is put in filename.out, and the pxifile is put in 
+// filename.pxi
+// 
+// Here the program is run on some experiments on a 2x2 game 
+// 
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+Include["nqreml.gcl"]
+
+NewFunction[NQre[filename->TEXT],
+  //  Load Normal form game and data
+  GetNumericFormat[width<->width:=0,precis<->precis:=0];
+  GetTextFormat[quote<->quote:=True];
+  GetListFormat[lf<->lf:=0];
+  n := LoadNfg[filename+".nfg"];
+  in := Input[filename+".agg"];
+  in >> n1 >> n11 >> n12 >> ndat;
+
+  da:={};
+  dat1:=ListForm[Float[Centroid[n]]]; 
+  For[i:=1,i<=ndat,i:=i+1,
+    in >> dat1;
+    da:=da&{dat1};
+  ];
+  dat:=Mixed[n,da];
+  
+  // set parameters for NQreML
+
+  min := 0.01;
+  max := 30.0;
+  del := 0.1;
+
+  pxi := filename+".pxi";
+  out := filename+".out";
+
+  NQreML[n,dat,min,max,del,out,pxi];
+  SetNumericFormat[width,precis];
+  SetTextFormat[quote];
+  SetListFormat[lf->lf];
+];
+
+
+// The following command will run NQre on the game "2x2a.nfg
+//
+// NQre["2x2a"]
+
+
+

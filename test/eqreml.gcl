@@ -1,0 +1,104 @@
+//
+// A gcl program to estimate the principal branch of the 
+// QRE for an extensive form game, and find the maximum likelihood 
+// estimate of lambda for a list of aggregate experimental data
+// 
+// e is the normal form game
+// dat is a list of observations.  Each observation is in the form of  
+//      a LIST(LIST(LIST(INTEGER))), where the integers correspond to
+//	the number times the corresponding action (for that player in
+//	that information set) was chosen.  So for a 2 player game where
+//	each player has two information sets with two actions each, the 
+//      element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
+//	used to indicate that player 1 chose the first action at the
+//	first information set 43 times, etc.  
+// min is the minimum value for Lambda used by QreSolve[]
+// max is the maximum value for Lambda used by QreSolve[]
+// del is the increment for Lambda used by QreSolve[]
+// out is the name of a file in which the results will be written
+// pxi is the name of a file where the pxi file is written
+// nash is a Nash equilibrium selection that is passed for use
+//     in estimating the OSEM model 
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+Include["loglike.gcl"]
+
+NewFunction[EQreML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max->NUMBER, del->NUMBER,out->TEXT,pxi->TEXT,nash->BEHAV],
+  o:=Output[out];
+  gob := QreSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+    pxifile->pxi];
+
+  size := Length[gob];
+
+  eps:=0.0000000001;
+  For[i := size , i>=1 , i:=i-1,
+    If[QreValue[gob_i] > eps, 
+      o << "\nRemoved element: " << i << " lambda: " << QreLambda[gob_i];
+      gob:=Remove[gob,i]; 
+    ];
+  ];
+  lamlist:=QreLambda[gob];
+  size := Length[gob];
+
+  goblist := ListForm[gob];
+  exdat := Float[dat];
+
+  numactions := Length[ListForm[nash]];
+  numisets := Length[numactions];
+  numplayers := Length[numisets];
+
+  o << "\nUsing Nash: " << nash << "\n";
+  o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
+
+  delgam := .001;
+  o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
+
+  gamsize := Integer[1./delgam] - 1;
+  gamlist := List[delgam, gamsize, delgam];
+
+  c := Float[Centroid[e]];
+  n := nash;
+  osem := (1.0-gamlist)*c + gamlist*n;
+  osemlist := ListForm[osem];
+
+  // compute maximum likelihoods and pretty-print results to output file
+
+  SetTextFormat[quote->False];
+
+  ldat := Length[Length[Length[Length[dat]]]];
+
+  For[ii:=1, ii<=ldat, ii:=ii+1,
+    goblogl := LogLike[exdat_ii,gob];
+    osemlogl := LogLike[exdat_ii, osem];
+    header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
+    o << header;
+
+    gobllmax := ArgMax[goblogl];
+    osemllmax := ArgMax[osemlogl];
+    For[i:=1, i<=numplayers, i:=i+1,
+      For[j:=1, j<=numisets_i, j:=j+1,
+        sum:=Sum[exdat_ii_i_j];
+        For[k:=1,k<=numactions_i_j,k:=k+1,
+          nob:=exdat_ii_i_j_k;
+          SetNumericFormat[precis->0,width->7];
+          o << "\n" << i << j << nob;
+          SetNumericFormat[precis->4,width->10];
+          If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
+          o << goblist_gobllmax_i_j_k;
+          o << osemlist_osemllmax_i_j_k;
+        ];
+      ];
+    ];
+    LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
+    GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
+    o << "\nLam\Gam                " << 0.0 <<  lamlist_gobllmax << gamlist_osemllmax;
+    o << "\nLam\Gam_lo                       " << LamCI_1 << GamCI_1;
+    o << "\nLam\Gam_hi                       " << LamCI_2 << GamCI_2;
+    SetNumericFormat[precis->3, width->10];
+    o << "\nLogLik                           " << goblogl_gobllmax << osemlogl_osemllmax << "\n";
+  ];
+];
+
+
+

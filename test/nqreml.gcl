@@ -1,0 +1,87 @@
+//
+// A gcl program to estimate the principal branch of the 
+// QRE for a normal form game, and find the maximum likelihood 
+// estimate of lambda for a list of aggregate experimental data
+// 
+// n is the normal form game
+// dat is a list of observations.  Each observation is in the form of a 
+//      MIXED profile, and the entries represent the number times the 
+//      corresponding strategy was chosen.  So for a 3 x 2 game. The 
+//      MIXED Profile {{43.0, 32.0}, {15.0, 32.0, 28.0}} is used to indicate
+//      that player 1 chose the first strategy 43 times, etc.  
+// min is the minimum value for Lambda used by QreSolve[]
+// max is the maximum value for Lambda used by QreSolve[]
+// del is the increment for Lambda used by QreSolve[]
+// out is the name of a file in which the results will be written
+// pxi is the name of a file where the pxi file is written
+//     currently, the value of the objective function in this file
+//     should be checked to make sure that the solution is valid
+// 
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+Include["loglike.gcl"]
+
+NewFunction[NQreML[n<->NFG,dat->LIST(MIXED),min->NUMBER,max->NUMBER,\
+  del->NUMBER,out->TEXT,pxi->TEXT],
+  o := Output[out];
+  gob := QreSolve[n, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+    pxifile->pxi];
+  goblist := ListForm[gob];
+  exdat := ListForm[dat];
+  // Note:  In general should check objective function in .pxi file to 
+  //        make sure that solution is valid before proceeding.
+
+  // reconstruct lambda vector
+
+
+  size := Length[gob];
+
+  lamlist := QreLambda[gob];
+//  lamlist := List[0.0, size];
+
+//  For[i:=1;lam := min, i <= size, i:=i+1;lam := lam + Times[del, lam],
+//    lamlist_i := lam;
+//  ];
+
+  // compute maximum likelihoods and write to file
+
+  SetTextFormat[quote->False];
+
+  cent:=ListForm[Centroid[n]];
+  nacts := Length[cent];
+  npl := Length[nacts];
+  Length[dat];
+
+  For[ii:=1,ii<=Length[dat],ii:=ii+1,
+
+    plog := LogLike[dat_ii,gob];
+
+    header:="\n            n      f      QRE\n";
+    o << header;
+
+    llmax := ArgMax[plog];
+    For[i:=1,i<=npl,i:=i+1,
+        sum:=Sum[exdat_ii_i];
+        For[k:=1,k<=nacts_i,k:=k+1,
+          nob:=exdat_ii_i_k;
+          SetNumericFormat[precis->0,width->4];
+          o << "\n        " << nob;
+          SetNumericFormat[precis->4,width->8];
+          If[sum != 0.0, o << " " << nob/sum, o << " " << 0.0];
+//          o << " " << cent_i_k;
+          o << goblist_llmax_i_k;
+      ];
+    ];
+    LamCI := LamHiLo[plog, lamlist, 1.9205, llmax];
+    o << "\nLam          " << 0.0 <<  lamlist_llmax;
+    o << "\nLam_lo               " << LamCI_1;
+    o << "\nLam_hi               " << LamCI_2;
+    o << "\nLogLik              " << plog_llmax << "\n";
+  ];
+];
+
+
+
+
+

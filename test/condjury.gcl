@@ -1,0 +1,84 @@
+//
+// gcl program to create a Condorcet Jury extensive form game
+//
+// CondorcetJuryGame[n->NUMBER,quota->NUMBER,pG->NUMBER,
+//               psigG->NUMBER, psigI->NUMBER,{uCG->1.0},{uCI->-1.0},
+//               {uAG->-1.0},{uAI-> 1.0}]=:EFG,
+//
+//    n               number of players
+//    quota           votes needed to convict (quota <= n)
+//    pG              probability suspect is guilty 
+//    pGG             prob of correct signal when guilty
+//    pII             prob of correct signal when innocent
+//    uCG             utility of convicting when guilty 
+//    uCI             utility of conficting when innocent 
+//    uAG             utility of aquitting when guilty 
+//    uAI             utility of aquitting when innocent 
+//
+
+NewFunction[Subtree[e<->EFG, n->NODE, list->LIST(INFOSET),state->BOOLEAN,
+  vote->NUMBER,quota->NUMBER,outcomes->LIST(EFOUTCOME)],
+  If[Length[list]>0, 
+    iset:=list_1;
+    newlist:=Remove[list,1];
+    If[Player[iset]=Chance[e], myvote:=0,myvote:=1];
+    AddMove[iset, n ];
+    Subtree[e, n#1, newlist,state,vote+myvote,quota,outcomes];
+    If[n=RootNode[e],state:=False];
+    Subtree[e, n#2, newlist,state,vote,quota,outcomes];
+    e,
+    If[(vote>=quota && state=True), SetOutcome[n,outcomes_1 ]];
+    If[(vote>=quota && state=False), SetOutcome[n,outcomes_2 ]];
+    If[(vote<quota && state=True),  SetOutcome[n,outcomes_3 ]];
+    If[(vote<quota && state=False),  SetOutcome[n,outcomes_4 ]]	
+    ];
+  e
+];
+
+NewFunction[CondorcetJuryGame[n->NUMBER,quota->NUMBER,pG->NUMBER,pGG->NUMBER,
+  pII->NUMBER,{uCG->1.0},{uCI->-1.0},{uAG->-1.0},{uAI->1.0}]=:EFG,
+  e:=NewEfg[];
+  r:= RootNode[e];
+  c:= Chance[e];
+  iset:= NewInfoset[c, {"Guilty", "Innocent"}];
+  liset:={iset};
+  For [i:=1, i<=n, i:=i+1,
+    liset :=liset & {NewInfoset[c, {"Signal Guilty", "Signal Innocent"}]}
+  ];
+  For [i:=1, i<=n, i:=i+1,
+    liset :=liset & {NewInfoset[NewPlayer[e, "Player"+Text[i]], {"Convict",\
+    "Acquit"}]}
+  ];
+  oCG := SetPayoffs[NewOutcome[e,"Convict-Guilty"],List[uCG,n]];
+  oCI := SetPayoffs[NewOutcome[e,"Convict-Innocent"],List[uCI,n]];
+  oAG := SetPayoffs[NewOutcome[e,"Acquit-Guilty"],List[uAG,n]];
+  oAI := SetPayoffs[NewOutcome[e,"Acquit-Innocent"],List[uAI,n]];
+  outcomes:={oCG,oCI,oAG,oAI};  
+
+  Subtree[e, r, liset,True,0,quota,outcomes];
+
+  For[i:=1,i<=n,i:=i+1,
+    Reveal[liset_(i+1),{ Player[liset_(n+1+i) ]} ]
+  ];
+  Reveal[liset_1,{c}];
+  DeleteEmptyInfosets[e];  // Reveal should take care of this!
+
+  n1:=n2:=r;
+  For[i:=1,i<=n,i:=i+1,
+    n1:=n1#1;
+    n2:=n2#2;
+    SetChanceProbs[Infoset[n1],{pGG,1.0-pGG}];    
+    SetChanceProbs[Infoset[n2],{1.0-pII,pII}]
+  ];
+  SetChanceProbs[Infoset[r],{pG,1.0-pG}];
+  e
+]
+
+//  For example, the following command creates a Condorcet 
+//  Jury Game with 3 players, using majority rule, with 
+//  prior prob of .5 of guilt, and signal accuracy of .75
+// 
+//  e:=CondorcetJuryGame[3, 2, .5, .75, .75]
+// 
+
+
