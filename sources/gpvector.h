@@ -64,9 +64,9 @@ template <class T> class gPVector : public gVector<T> {
 
   void Dump(gOutput &) const;
 };
-
+#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v);
-
+#endif
 #endif   //# GPVECTOR_H
 
 

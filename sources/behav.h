@@ -59,7 +59,7 @@ template <class T> class BehavProfile
 
     const T &GetValue(Infoset *s, int act) const;
 };
-
+#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p);
-
+#endif
 #endif   // BEHAV_H

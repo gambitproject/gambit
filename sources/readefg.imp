@@ -23,7 +23,7 @@ template <class T> class EfgFile : public EfgFileReader    {
 };
 
 template <class T> EfgFile<T>::EfgFile(gInput &f, Efg<T> *& E)
-  : EfgFileReader(f, E)
+  : EfgFileReader(f,(BaseEfg *&) E)
 { }
 
 template <class T> EfgFile<T>::~EfgFile()
