@@ -368,8 +368,12 @@ Portion *GSM_GobitGrid_Support(Portion **param)
 	GP.powLam = ((IntPortion *) param[5])->Value();
 	GP.delp1 = ((FloatPortion *) param[6])->Value();
 	GP.tol1 = ((FloatPortion *) param[7])->Value();
-//	GP.delp2 = ((FloatPortion *) param[8])->Value();
-//	GP.tol2 = ((FloatPortion *) param[9])->Value();
+
+	GP.delp2 = ((FloatPortion *) param[8])->Value();
+	GP.tol2 = ((FloatPortion *) param[9])->Value();
+
+	GP.multi_grid = 0;
+	if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
 
 	switch(N->Type())
 	{
@@ -377,8 +381,8 @@ Portion *GSM_GobitGrid_Support(Portion **param)
 		{
 			GridSolveModule GM(* (Nfg<double>*) N, GP, S);
 			GM.GridSolve();
-			// ((IntPortion *) param[8])->Value() = GM.NumEvals();
-			// ((FloatPortion *) param[9])->Value() = GM.Time();
+			// ((IntPortion *) param[10])->Value() = GM.NumEvals();
+			// ((FloatPortion *) param[11])->Value() = GM.Time();
 			gList<MixedSolution<double> > solns;
 			por = new Mixed_ListPortion<double>(solns);
 		}
@@ -1199,7 +1203,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("GobitGridSolve", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitGrid_Support, 
-				       PortionSpec(porMIXED, 1), 12));
+				       PortionSpec(porMIXED, 1), 14));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextValPortion("")));
@@ -1211,18 +1215,22 @@ void Init_algfunc(GSM *gsm)
 					    new FloatValPortion(0.01)));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("powLam", porINTEGER,
 					    new IntValPortion(1)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType("delp", porFLOAT,
+  FuncObj->SetParamInfo(0, 6, ParamInfoType("delp1", porFLOAT,
+					    new FloatValPortion(.1)));
+  FuncObj->SetParamInfo(0, 7, ParamInfoType("tol1", porFLOAT,
+					    new FloatValPortion(.1)));
+  FuncObj->SetParamInfo(0, 8, ParamInfoType("delp2", porFLOAT,
 					    new FloatValPortion(.01)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType("tol", porFLOAT,
+  FuncObj->SetParamInfo(0, 9, ParamInfoType("tol2", porFLOAT,
 					    new FloatValPortion(.01)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 10, ParamInfoType("nEvals", porINTEGER,
 					    new IntValPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, ParamInfoType("time", porFLOAT,
+  FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porFLOAT,
 					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 10, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 12, ParamInfoType("traceFile", porOUTPUT,
 					     new OutputRefPortion(gnull),
 					     BYREF));
-  FuncObj->SetParamInfo(0, 11, ParamInfoType("traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(0, 13, ParamInfoType("traceLevel", porINTEGER,
 					     new IntValPortion(0)));
 
   gsm->AddFunction(FuncObj);
