@@ -91,9 +91,14 @@ NfgOutcomeDialogC::OutcomeDragger::OutcomeDragger(NfgOutcomeDialogC *parent_,
         outcome_cursor = new wxCursor("OUTCOMECUR");
 #else
 #include "bitmaps/outcome.xbm"
+#ifndef LINUX_WXXT
         outcome_cursor = new wxCursor(outcome_bits, outcome_width, outcome_height, 
                                       -1, -1, outcome_bits);
-#endif
+#else
+        outcome_cursor = new wxCursor(outcome_bits, outcome_width, outcome_height, 
+                                      outcome_width/2, outcome_height/2);
+#endif // LINUX_WXXT
+#endif // wx_msw
     }
 }
 
