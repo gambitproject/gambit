@@ -22,7 +22,7 @@ template <class T> int PureNashModule<T>::PureNash(void)
     {
       SingleNash(i);
     }
-  printf("## %d\n",Number_Nash());
+  gout << Number_Nash();
   /**********print payoffs**************/
  
   return 0;
@@ -111,13 +111,13 @@ template <class T> void PureNashModule<T>::SingleNash(long i)
     /*****that index is a nash eq****/
       solution.Append(i);sol.Append(players);
       
-      printf("Nash Eq:\n");
+      gout << "Nash Eq:\n";
       for(int h=1;h<=players;h++)
 	{
 	  sol[sol.Length()].SetStrategy(Strategy(h,Reverse(i,h)));
 	  gout<<h<<a.Evaluate(h);
 	}
-      printf("\n");
+      gout << "\n";
     }
 }
 	    
