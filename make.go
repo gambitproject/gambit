@@ -8,9 +8,14 @@ VPATH= %.o . % ../
 .SUFFIXES:
 .SUFFIXES: .h .cc .o .y
 
-%:: SCCS/s.%
-	rm -f $@
-        $(GET) -p $< > $@
+#Nasty SCCS hack to work around HPUX get inability to specify output dir
+#%:: SCCS/s.%
+#	rm -f $@
+#	$(GET) -p $< > $@
+#%:: s.%
+#	rm -f $@
+#	$(GET) -p $< > $@
+
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 .y.o:
@@ -143,7 +148,7 @@ integer.o: gnulib.h /usr/include/stddef.h /usr/include/stdlib.h
 integer.o: /usr/include/memory.h /usr/include/errno.h
 integer.o: /usr/include/sys/errno.h /usr/include/fcntl.h
 integer.o: /usr/include/sys/fcntl.h /usr/include/sys/types.h
-integer.o: /usr/include/math.h /usr/include/ctype.h /usr/include/float.h
+integer.o: /usr/include/math.h /usr/include/ctype.h ./wx_fake/float.h
 integer.o: /usr/include/limits.h /usr/include/sys/param.h
 integer.o: /usr/include/machine/param.h /usr/include/sys/sysmacros.h
 integer.o: /usr/include/sys/time.h /usr/include/sys/sigevent.h
@@ -154,7 +159,7 @@ rational.o: integer.h /usr/include/math.h gnulib.h /usr/include/stddef.h
 rational.o: /usr/include/stdlib.h /usr/include/memory.h /usr/include/errno.h
 rational.o: /usr/include/sys/errno.h /usr/include/fcntl.h
 rational.o: /usr/include/sys/fcntl.h /usr/include/sys/types.h
-rational.o: /usr/include/values.h /usr/include/float.h /usr/include/assert.h
+rational.o: /usr/include/values.h ./wx_fake/float.h /usr/include/assert.h
 rational.o: /usr/include/ctype.h
 gnulib.o: /usr/include/assert.h /usr/include/sys/stdsyms.h
 gnulib.o: /usr/include/values.h gnulib.h /usr/include/stddef.h
@@ -324,6 +329,12 @@ seqform.o: gmisc.h behav.h efstrat.h gpvector.h gvector.h gdpvect.h
 seqform.o: efplayer.h infoset.h rational.h integer.h /usr/include/math.h
 seqform.o: node.h outcome.h glist.h gmatrix.h grarray.h lemketab.h tableau.h
 seqform.o: ludecomp.h bfs.h gmap.h gmessage.h gwatch.h
+lemke.o: rational.h integer.h /usr/include/math.h gwatch.h gpvector.h
+lemke.o: gvector.h gmisc.h gstring.h /usr/include/string.h
+lemke.o: /usr/include/sys/stdsyms.h gambitio.h /usr/include/stdio.h garray.h
+lemke.o: /usr/include/stdlib.h /usr/include/assert.h nfg.h nfgiter.h
+lemke.o: gtableau.h gmatrix.h grarray.h gblock.h gmap.h gmessage.h bfs.h
+lemke.o: lemke.h mixed.h nfstrat.h glist.h
 nliap.o: /usr/include/math.h nliap.h nfg.h garray.h /usr/include/stdlib.h
 nliap.o: /usr/include/assert.h /usr/include/sys/stdsyms.h gambitio.h
 nliap.o: /usr/include/stdio.h gmisc.h gstring.h /usr/include/string.h
@@ -480,9 +491,9 @@ spreadim.o: gstring.h /usr/include/string.h /usr/include/sys/stdsyms.h
 spreadim.o: garray.h /usr/include/stdlib.h /usr/include/assert.h spread.h
 spreadim.o: glist.h gblock.h rational.h integer.h /usr/include/math.h
 spreadim.o: glist.imp glistit.h grarray.imp grblock.imp garray.imp
-gambit.o: /usr/include/assert.h /usr/include/sys/stdsyms.h ./wx_fake/wx.h
-gambit.o: ./wx_fake/wx_tbar.h wxio.h /usr/include/stdio.h gambitio.h gmisc.h
-gambit.o: gstring.h /usr/include/string.h gambit.h wxmisc.h
+gambit.o: /usr/include/assert.h /usr/include/sys/stdsyms.h
+gambit.o: /usr/include/string.h ./wx_fake/wx.h ./wx_fake/wx_tbar.h wxio.h
+gambit.o: /usr/include/stdio.h gambitio.h gmisc.h gstring.h gambit.h wxmisc.h
 gambit.o: ./wx_fake/wx_timer.h ./wx_fake/wx_form.h normgui.h extgui.h
 gambit.o: /usr/include/signal.h /usr/include/sys/signal.h
 gambit.o: /usr/include/sys/sigevent.h /usr/include/sys/siginfo.h

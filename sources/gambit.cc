@@ -4,6 +4,7 @@
 // $Id$
 //
 #include <assert.h>
+#include <string.h>
 #include "wx.h"
 #ifdef wx_msw
 #include "wx_bbar.h"
@@ -189,14 +190,14 @@ if (!s) return;
 s=copystring(s);
 if (strcmp(s,"")!=0)
 {
-	char *filename=FileNameFromPath(s);
+	char *filename=copystring(FileNameFromPath(s));
 #ifndef EFG_ONLY
-	if (StringMatch(".nfg",filename))		// This must be a normal form
+	if (strstr(filename,".nfg"))		// This must be a normal form
 		{NfgGUI(0,s,0,this);return;}
 #endif
 #ifndef NFG_ONLY
-	if (StringMatch(".efg",filename))		// This must be an extensive form
-		{ExtensiveFormGUI(0,s,0,this);return;}
+	if (strstr(filename,".efg"))		// This must be an extensive form
+		{printf("EFG");fflush(stdout);ExtensiveFormGUI(0,s,0,this);printf("EFG-done");fflush(stdout);return;}
 #endif
 	wxMessageBox("Unknown file type");	// If we got here, there is something wrong
 }

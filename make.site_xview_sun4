@@ -2,7 +2,9 @@
 # Edit the following where appropriate
 # WxWin information
 
-WXGUI = -Dwx_ol
+WXDIR = /home/ironbark/gambit/wxwin
+
+WXGUI = -Dwx_xview 
 GUISUFFIX = _ol
 
 # XWindows information
