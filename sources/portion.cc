@@ -1632,15 +1632,18 @@ PortionTypeTextType _PortionTypeText[] =
 gString PortionTypeToText( const PortionType& type )
 {
   int i;
+  gString result = "";
   for( i = 0; i < NumPortionTypes; i++ )
   {
-    if( _PortionTypeText[ i ].Type == type )
+    if( _PortionTypeText[ i ].Type & type )
     {
-      return _PortionTypeText[ i ].Text;
+      result = result + " " + _PortionTypeText[ i ].Text;
       break;
     }
   }
-  return _PortionTypeText[ 0 ].Text;
+  if( result == "" )
+    result = (gString) " " + _PortionTypeText[ 0 ].Text;
+  return result;
 }
 
 
@@ -1661,67 +1664,9 @@ PortionType TextToPortionType( const gString& text )
 
 
 
-// This will be changed to use PortionTypeToText() eventually
 void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
-  if( type == porERROR )
-  {
-    s << " ERROR";
-  }
-  else
-  {
-    if( type & porBOOL )
-      s << " BOOLEAN";
-    if( type & porFLOAT )
-      s << " FLOAT";
-    if( type & porINTEGER )
-      s << " INTEGER";
-    if( type & porRATIONAL )
-      s << " RATIONAL";
-    if( type & porTEXT )
-      s << " TEXT";
-    if( type & porLIST )
-      s << " LIST";
-
-    if( type & porNFG_FLOAT )
-      s << " NFG_FLOAT";
-    if( type & porNFG_RATIONAL )
-      s << " NFG_RATIONAL";
-    if( type & porEFG_FLOAT )
-      s << " EFG_FLOAT";
-    if( type & porEFG_RATIONAL )
-      s << " EFG_RATIONAL";
-    if( type & porMIXED_FLOAT )
-      s << " MIXED_FLOAT";
-    if( type & porMIXED_RATIONAL )
-      s << " MIXED_RATIONAL";
-    if( type & porBEHAV_FLOAT )
-      s << " BEHAV_FLOAT";
-    if( type & porBEHAV_RATIONAL )
-      s << " BEHAV_RATIONAL";
-
-    if( type & porOUTCOME )
-      s << " OUTCOME";
-    if( type & porEF_PLAYER )
-      s << " EF_PLAYER";
-    if( type & porINFOSET )
-      s << " INFOSET";
-    if( type & porNODE )
-      s << " NODE";
-    if( type & porACTION )
-      s << " ACTION";
-
-    if( type & porOUTPUT )
-      s << " OUTPUT";
-    if( type & porINPUT )
-      s << " INPUT";
-
-    if( type & porREFERENCE )
-      s << " REFERENCE";
-
-    if( type & porUNKNOWN )
-      s << " UNKNOWN";
-  }
+  s << PortionTypeToText( type );
 }
 
 
@@ -1750,6 +1695,8 @@ TEMPLATE class gArray<Portion *>;
 #include "gblock.imp"
 
 TEMPLATE class gBlock<Portion*>;
+
+
 
 
 

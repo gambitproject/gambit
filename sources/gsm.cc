@@ -1327,7 +1327,7 @@ void GSM::Output( void )
 
   if( _Depth() == 0 )
   {
-    _StdOut << "Stack : NULL\n";
+    _StdOut << "\n";
   }
   else
   {

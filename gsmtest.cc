@@ -2993,20 +2993,65 @@ int main( void )
 #endif
 
 
-
   machine->PushRef( "intx" );
   machine->Push( (long) 1 );
   machine->Assign();
   machine->Dump();
 
-  machine->PushRef( "intx" );
+  machine->PushRef( "inty" );
   machine->Push( (long) 2 );
   machine->Assign();
   machine->Dump();
 
   machine->PushRef( "intx" );
+  machine->PushRef( "inty" );
+  machine->EqualTo();
   machine->Dump();
 
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Push<long>( 1 ) );
+  prog->Append( new Leq );
+  prog->Append( new IfGoto( 14 ) );
+
+  prog->Append( new InitCallFunction( "Factorial" ) );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Push<long>( 1 ) );
+  prog->Append( new Sub );
+  prog->Append( new Bind );
+  prog->Append( new CallFunction );
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new Mul );
+  prog->Append( new Goto( 15 ) );
+
+  prog->Append( new PushRef( "a" ) );
+  prog->Append( new NOP );
+
+
+  func = new FuncDescObj( "Factorial" );
+  func->SetFuncInfo( prog, 1 );
+  func->SetParamInfo( prog, 0, "a", porINTEGER );
+  machine->AddFunction( func );
+
+
+  gout << "Testing Factorial\n";
+  machine->InitCallFunction( "Factorial" );
+  machine->Push( (long) 6 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+  
 
 
   gout << "*********************** Press Return to continue ************";
