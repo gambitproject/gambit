@@ -81,6 +81,14 @@ void gelVariableTable::Define(const gText &name, const gelType type)
       m_MixedNames.Append(name);
       m_MixedValues.Append(gNestedList<MixedSolution *>());
       break;
+    case gelINPUT:
+      m_InputNames.Append(name);
+      m_InputValues.Append(gNestedList<gInput *>());
+      break;
+    case gelOUTPUT:
+      m_OutputNames.Append(name);
+      m_OutputValues.Append(gNestedList<gOutput *>());
+      break;
     default:
       assert(0);
     }
@@ -97,7 +105,8 @@ bool gelVariableTable::IsDefined(const gText &name) const
 	 m_BehavNames.Contains(name) || m_NfgNames.Contains(name) ||
          m_StrategyNames.Contains(name) || m_NFPlayerNames.Contains(name) ||
          m_NFOutcomeNames.Contains(name) || m_NFSupportNames.Contains(name) ||
-	 m_MixedNames.Contains(name);
+	 m_MixedNames.Contains(name) || m_InputNames.Contains(name) ||
+	 m_OutputNames.Contains(name);
 }
 
 gelType gelVariableTable::Type(const gText &name) const
@@ -136,6 +145,10 @@ gelType gelVariableTable::Type(const gText &name) const
     return gelNFSUPPORT;
   else if (m_MixedNames.Contains(name))
     return gelMIXED;
+  else if (m_InputNames.Contains(name))
+    return gelINPUT;
+  else if (m_OutputNames.Contains(name))
+    return gelOUTPUT;
 
   assert(0);
   return gelBOOLEAN;
@@ -294,6 +307,24 @@ void gelVariableTable::Value(const gText &name,
     assert(0);
 }
 
+void gelVariableTable::Value(const gText &name,
+                             gNestedList<gInput *> &value) const
+{
+  if (m_InputNames.Contains(name))
+    value = m_InputValues[m_InputNames.Find(name)];
+  else
+    assert(0);
+}
+
+void gelVariableTable::Value(const gText &name,
+                             gNestedList<gOutput *> &value) const
+{
+  if (m_OutputNames.Contains(name))
+    value = m_OutputValues[m_OutputNames.Find(name)];
+  else
+    assert(0);
+}
+
 void gelVariableTable::SetValue(const gText &name,
 				const gNestedList<gNumber *> &value)
 {
@@ -411,6 +442,20 @@ void gelVariableTable::SetValue(const gText &name,
 {
   assert(m_MixedNames.Contains(name));
   m_MixedValues[m_MixedNames.Find(name)] = value;
+}
+
+void gelVariableTable::SetValue(const gText &name,
+                                const gNestedList<gInput *> &value)
+{
+  assert(m_InputNames.Contains(name));
+  m_InputValues[m_InputNames.Find(name)] = value;
+}
+
+void gelVariableTable::SetValue(const gText &name,
+                                const gNestedList<gOutput *> &value)
+{
+  assert(m_OutputNames.Contains(name));
+  m_OutputValues[m_OutputNames.Find(name)] = value;
 }
 
 

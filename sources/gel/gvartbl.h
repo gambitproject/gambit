@@ -68,6 +68,12 @@ private:
   gList<gText> m_MixedNames;
   gList<gNestedList<MixedSolution *> > m_MixedValues;
 
+  gList<gText> m_InputNames;
+  gList<gNestedList<gInput *> > m_InputValues;
+
+  gList<gText> m_OutputNames;
+  gList<gNestedList<gOutput *> > m_OutputValues;
+
 public:
   gelVariableTable(void);
 
@@ -92,6 +98,8 @@ public:
   void Value(const gText &name, gNestedList<NFOutcome *> &) const;
   void Value(const gText &name, gNestedList<NFSupport *> &) const;
   void Value(const gText &name, gNestedList<MixedSolution *> &) const;
+  void Value(const gText &name, gNestedList<gInput *> &) const;
+  void Value(const gText &name, gNestedList<gOutput *> &) const;
 
   void SetValue(const gText &name, const gNestedList<gNumber *> &value);
   void SetValue(const gText &name, const gNestedList<gTriState *> &value);
@@ -110,6 +118,8 @@ public:
   void SetValue(const gText &name, const gNestedList<NFOutcome *> &value);
   void SetValue(const gText &name, const gNestedList<NFSupport *> &value);
   void SetValue(const gText &name, const gNestedList<MixedSolution *> &value);
+  void SetValue(const gText &name, const gNestedList<gInput *> &value);
+  void SetValue(const gText &name, const gNestedList<gOutput *> &value);
 };
 
 

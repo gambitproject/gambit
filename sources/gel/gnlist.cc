@@ -401,6 +401,8 @@ class NFOutcome;
 class NFPlayer;
 class NFSupport;
 class MixedSolution;
+class gInput;
+class gOutput;
 
 template class gNestedList<gNumber *>;
 template class gNestedList<gText *>;
@@ -419,6 +421,8 @@ template class gNestedList<NFPlayer *>;
 template class gNestedList<NFOutcome *>;
 template class gNestedList<NFSupport *>;
 template class gNestedList<MixedSolution *>;
+template class gNestedList<gInput *>;
+template class gNestedList<gOutput *>;
 
 template class gList<gNestedList<Efg *> >;
 template class gList<gNestedList<Node *> >;
@@ -434,7 +438,8 @@ template class gList<gNestedList<NFPlayer *> >;
 template class gList<gNestedList<NFOutcome *> >;
 template class gList<gNestedList<NFSupport *> >;
 template class gList<gNestedList<MixedSolution *> >;
-
+template class gList<gNestedList<gInput *> >;
+template class gList<gNestedList<gOutput *> >;
 
 template gOutput &operator<<(gOutput &, const gNestedList<gNumber *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<gText *> &);
@@ -453,4 +458,5 @@ template gOutput &operator<<(gOutput &, const gNestedList<NFPlayer *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<NFOutcome *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<NFSupport *> &);
 template gOutput &operator<<(gOutput &, const gNestedList<MixedSolution *> &);
-
+template gOutput &operator<<(gOutput &, const gNestedList<gInput *> &);
+template gOutput &operator<<(gOutput &, const gNestedList<gOutput *> &);

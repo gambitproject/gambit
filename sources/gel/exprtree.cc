@@ -51,6 +51,12 @@ gelType gelExpression<NFSupport *>::Type(void) const  { return gelNFSUPPORT; }
 template class gelExpression<MixedSolution *>;
 gelType gelExpression<MixedSolution *>::Type(void) const  { return gelMIXED; }
 
+template class gelExpression<gInput *>;
+gelType gelExpression<gInput *>::Type(void) const   { return gelINPUT; }
+template class gelExpression<gOutput *>;
+gelType gelExpression<gOutput *>::Type(void) const  { return gelOUTPUT; }
+
+
 
 template class gelConstant<gNumber *>;
 template class gelConstant<gTriState *>;
@@ -113,7 +119,8 @@ template class gelVariable<NFOutcome *>;
 template class gelVariable<NFPlayer *>;
 template class gelVariable<NFSupport *>;
 template class gelVariable<MixedSolution *>;
-
+template class gelVariable<gInput *>;
+template class gelVariable<gOutput *>;
 
 
 template <class T> gelAssignment<T>::gelAssignment(const gText &varname,
@@ -153,6 +160,8 @@ template class gelAssignment<NFPlayer *>;
 template class gelAssignment<NFOutcome *>;
 template class gelAssignment<NFSupport *>;
 template class gelAssignment<MixedSolution *>;
+template class gelAssignment<gInput *>;
+template class gelAssignment<gOutput *>;
 
 template <class T>
 gelConditional<T>::gelConditional(gelExpression<gTriState *> *g,
@@ -201,7 +210,8 @@ template class gelConditional<NFPlayer *>;
 template class gelConditional<NFOutcome *>;
 template class gelConditional<NFSupport *>;
 template class gelConditional<MixedSolution *>;
-
+template class gelConditional<gInput *>;
+template class gelConditional<gOutput *>;
 
 template <class T> gelWhileLoop<T>::gelWhileLoop(gelExpression<gTriState *> *g,
 						 gelExpression<T> *b)
@@ -244,7 +254,8 @@ template class gelWhileLoop<NFPlayer *>;
 template class gelWhileLoop<NFOutcome *>;
 template class gelWhileLoop<NFSupport *>;
 template class gelWhileLoop<MixedSolution *>;
-
+template class gelWhileLoop<gInput *>;
+template class gelWhileLoop<gOutput *>;
 
 template <class T> gelForLoop<T>::gelForLoop(gelExpr *ini,
 					     gelExpression<gTriState *> *g,
@@ -294,7 +305,8 @@ template class gelForLoop<NFPlayer *>;
 template class gelForLoop<NFOutcome *>;
 template class gelForLoop<NFSupport *>;
 template class gelForLoop<MixedSolution *>;
-
+template class gelForLoop<gInput *>;
+template class gelForLoop<gOutput *>;
 
 #include "gcmdline.h"
 
@@ -351,7 +363,8 @@ template class gelUDF<NFPlayer *>;
 template class gelUDF<NFOutcome *>;
 template class gelUDF<NFSupport *>;
 template class gelUDF<MixedSolution *>;
-
+template class gelUDF<gInput *>;
+template class gelUDF<gOutput *>;
 
 
 #include "glist.imp"
@@ -370,4 +383,8 @@ template class gList<NFPlayer *>;
 template class gList<NFOutcome *>;
 template class gList<NFSupport *>;
 template class gList<MixedSolution *>;
+template class gList<gInput *>;
+template class gList<gOutput *>;
+
+
 
