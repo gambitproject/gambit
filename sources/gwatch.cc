@@ -9,6 +9,7 @@
 #include <math.h>
 
 #ifdef __GNUG__
+#include <time.h>
 #include <sys/times.h>
 #include <limits.h>
 
