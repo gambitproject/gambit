@@ -1,30 +1,21 @@
 //
-// File: quiksolv.cc  
+// File: equisolv.cc  
 //        -- Instantiations of classes 
 // 
-// @(#)quiksolv.cc	1.1 1/7/98
+// @(#)equisolv.cc	1.1 1/7/98
 //
 
-#include "quiksolv.imp"
+#include "equisolv.imp"
 #include "double.h"
 
-//template class QuikSolv<int>;
-//template gOutput &operator<<(gOutput &f, const QuikSolv<int> &y);
+template class EquiSolv<gRational>;
+template gOutput &operator<<(gOutput &f, const EquiSolv<gRational> &y);
 
-template class QuikSolv<gRational>;
-template gOutput &operator<<(gOutput &f, const QuikSolv<gRational> &y);
+template class EquiSolv<double>;
+template gOutput &operator<<(gOutput &f, const EquiSolv<double> &y);
 
-template class QuikSolv<double>;
-template gOutput &operator<<(gOutput &f, const QuikSolv<double> &y);
+template class EquiSolv<gDouble>;
+template gOutput &operator<<(gOutput &f, const EquiSolv<gDouble> &y);
 
-template class QuikSolv<gDouble>;
-template gOutput &operator<<(gOutput &f, const QuikSolv<gDouble> &y);
+// #include "glist.imp"
 
-#include "glist.imp"
-
-//Experimental, eventually should preceed QuikSolv
-template class TreeOfPartials<gDouble>;
-template gOutput &operator<<(gOutput &f, const TreeOfPartials<gDouble> &y);
-template class gList<TreeOfPartials<gDouble> >;
-template class gNode<TreeOfPartials<gDouble> >;
-template class ListOfPartialTrees<gDouble>;

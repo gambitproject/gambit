@@ -1,18 +1,13 @@
 //
-// File: quiksolv.h  --  Declaration of gpolylst data type
+// File: equisolv.h  --  
 // 
-// @(#)quiksolv.h	1.5 01/24/98
+// @(#)equisolv.h	1.5 01/24/98
 //
 
-#ifndef QUIKSOLV_H
-#define QUIKSOLV_H
+#ifndef EQUISOLV_H
+#define EQUISOLV_H
 
-#include "gsolver.h"
-#include "odometer.h"
-#include "rectangl.h"
-#include "gtree.h"
-#include "gpoly.h"
-#include "gpolylst.h"
+#include "quiksolv.h"
 
 /*
     The (optimistically named) class described in this file is a method
@@ -31,81 +26,6 @@ is necessary because the procedure will not terminate if there are
 singular roots.
 */
 
-// ****************************
-//      class TreeOfPartials
-// ****************************
-
-template <class T> class TreeOfPartials {
-private:
-  gTree<gPoly<T> > PartialTree;
-
-// Recursive Construction
-   void TreeOfPartialsRECURSIVE(gTree<gPoly<T> >&,
-				gTreeNode<gPoly<T> >*)         const;
-
-   T MaximalNonconstantContributionRECURSIVE(
-				const gTreeNode<gPoly<T> >*,
-		      	        const gVector<T>&,
-			        const gVector<T>&,
-		       	              gVector<int>&)           const;
-
-public:
-   TreeOfPartials(const gPoly<T> &);  
-   TreeOfPartials(const TreeOfPartials<T> &);
-   ~TreeOfPartials();
-
-   inline const bool operator ==(const TreeOfPartials<T>& rhs) const 
-     { return (PartialTree == rhs.PartialTree); }
-   inline const bool operator !=(const TreeOfPartials<T>& rhs) const 
-     { return !(*this == rhs); }
-   inline const int Dmnsn()                                    const 
-     { return RootNode()->GetData().Dmnsn(); }
-   inline const T EvaluateRootPoly(const gVector<T>& point)    const 
-     { return RootNode()->GetData().Evaluate(point); }
-
-
-   T MaximalNonconstantContribution(const gVector<T>&, 
-				    const gVector<T>&)         const;
-
-   inline gTreeNode<gPoly<T> >* RootNode()                     const 
-     { return PartialTree.RootNode(); }
-   inline gPoly<T> RootPoly()                                  const 
-     { return RootNode()->GetData(); }
-   inline T ValueOfRootPoly(const gVector<T>& point)           const 
-     { return RootPoly().Evaluate(point); }
-   T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
-
-friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
-};
-
-
-// *********************************
-//      class ListOfPartialTrees
-// *********************************
-
-template <class T> class ListOfPartialTrees {
-private:
-  gList<TreeOfPartials<T> >     PartialTreeList;
-
-public:
-   ListOfPartialTrees(const gList<gPoly<T> >&);  
-   ListOfPartialTrees(const gPolyList<T>&);  
-   ListOfPartialTrees(const ListOfPartialTrees<T> &);
-   ~ListOfPartialTrees();
-
-  inline const TreeOfPartials<T>& operator[](const int& i)        const 
-    { return PartialTreeList[i]; }
-
-  // Information
-  inline int Length()                                             const
-    { return PartialTreeList.Length(); }
-  inline int Dmnsn()                                              const
-    { assert (Length() > 0); return PartialTreeList[1].Dmnsn(); }
-  gMatrix<T> DerivativeMatrix(const gVector<T>&)                  const; 
-  gSquareMatrix<T> SquareDerivativeMatrix(const gVector<T>&)      const; 
-  gVector<T> ValuesOfRootPolys(const gVector<T>&)                 const;
-};
-
 /*
    The main constructor for this takes a gPolyList<T>.  The list must
 be at least as long as the dimension Dmnsn() of the space of the
@@ -116,10 +36,10 @@ sense that the polynomial is required to be nonnegative.
 
 
 // ***********************
-//      class QuikSolv
+//      class EquiSolv
 // ***********************
 
-template <class T> class QuikSolv {
+template <class T> class EquiSolv {
  private:
   const gPolyList<T>                 System;
   const gPolyList<gDouble>           gDoubleSystem;
@@ -179,14 +99,14 @@ template <class T> class QuikSolv {
 					      int*)                  const;
 
  public:
-   QuikSolv(const gPolyList<T> &);  
-   QuikSolv(const QuikSolv<T> &);
-   ~QuikSolv();
+   EquiSolv(const gPolyList<T> &);  
+   EquiSolv(const EquiSolv<T> &);
+   ~EquiSolv();
 
    // Operators
-   QuikSolv<T>& operator= (const QuikSolv<T> &);
-   bool         operator==(const QuikSolv<T> &) const;
-   bool         operator!=(const QuikSolv<T> &) const;
+   EquiSolv<T>& operator= (const EquiSolv<T> &);
+   bool         operator==(const EquiSolv<T> &) const;
+   bool         operator!=(const EquiSolv<T> &) const;
 
    // Information
    inline const gSpace*                  AmbientSpace()              const 
@@ -211,7 +131,7 @@ template <class T> class QuikSolv {
 				       const int&);
    bool     FindRoots  (const gRectangle<T>&, const int&);
 
-friend gOutput& operator << (gOutput& output, const QuikSolv<T>& x);
+friend gOutput& operator << (gOutput& output, const EquiSolv<T>& x);
 };  
 
-#endif QUIKSOLV_H
+#endif EQUISOLV_H

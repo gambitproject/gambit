@@ -1,213 +1,22 @@
 //
-// File: quiksolv.imp  
+// File: equisolv.imp  
 //        -- Implementation of class gPolyList
 // 
-// @(#)quiksolv.imp	1.6 01/24/98
+// @(#)EquiSolv.imp	1.6 01/24/98
 //
 
-#include "quiksolv.h"
-
-//template class gTree<gPoly<gDouble> >
-template class gPolyList<gDouble>; 
-template class gList<TreeOfPartials<gDouble> >; 
+#include "equisolv.h"
 
 
 //---------------------------------------------------------------
-//                   class: TreeOfPartials
+//                      class: EquiSolv
 //---------------------------------------------------------------
 
 //---------------------------
 // Constructors / Destructors
 //---------------------------
 
-template <class T> TreeOfPartials<T>::TreeOfPartials(const gPoly<T>& given) 
-: PartialTree(given)
-{
-  TreeOfPartialsRECURSIVE(PartialTree, PartialTree.RootNode());  
-}
-
-//-------------------------------------------------------------------------
-// Recursive generation of all partial derivatives of the root polynomial
-//-------------------------------------------------------------------------
-
-template <class T>
-void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T> >& t,
-					  gTreeNode<gPoly<T> >* n) const
-{
-  if (n->GetData().Degree() >= 1) {
-    for (int i = 1; i <= n->GetData().Dmnsn(); i++) {
-      t.InsertAt(n->GetData().PartialDerivative(i),n);
-      TreeOfPartialsRECURSIVE(t,n->GetYoungest());
-    }
-  }
-}
-
-template<class T> TreeOfPartials<T>::TreeOfPartials(const TreeOfPartials& qs)
-: PartialTree(qs.PartialTree)
-{
-}
-
-template<class T> TreeOfPartials<T>::~TreeOfPartials()
-{
-}
-
-template <class T> 
-T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord, 
-					      const gVector<T>& p) const
-{
-  if (RootPoly().Degree() <= 0) return (T)0;
-  else {
-    int i = 1; 
-    gTreeNode<gPoly<T> >* node = RootNode()->GetEldest();
-    while (i < coord) {
-      i++;
-      node = node->GetNext();
-    }
-    T answer = node->GetData().Evaluate(p);
-    return answer;
-  }
-}
-
-template <class T> T
-TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
-					     const gTreeNode<gPoly<T> >* n,
-					     const gVector<T>& p,
-					     const gVector<T>& halvesoflengths,
-					     gVector<int>& wrtos) const
-{
-  T answer = (T)0;
-
-  if (n->GetEldest() != NULL) {
-    gList<gTreeNode<gPoly<T> >*> children = PartialTree.Children(n);
-    for (int i = 1; i <= children.Length(); i++) {
-      wrtos[i]++;
-
-      T increment = children[i]->GetData().Evaluate(p);
-      if (increment < (T)0) increment = -increment;
-     	  
-      for (int j = 1; j <= p.Length(); j++) 
-	for (int k = 1; k <= wrtos[j]; k++) {
-	  increment *= halvesoflengths[j];
-	  increment /= (T)k;
-	}
-
-      answer += increment;
-
-      answer += MaximalNonconstantContributionRECURSIVE(children[i],
-							p,
-							halvesoflengths,
-							wrtos);
-      
-      wrtos[i]--;
-    }
-  }
-
-  return answer;
-}
-
-
-template <class T> T
-TreeOfPartials<T>::MaximalNonconstantContribution(const gVector<T>& p,
-						  const gVector<T>& 
-						     halvesoflengths) const
-{
-  gVector<int> WithRespectTos(p.Length());
-  for (int i = 1; i <= p.Length(); i++) WithRespectTos[i] = 0;
-
-  return MaximalNonconstantContributionRECURSIVE(PartialTree.RootNode(),
-						 p,
-						 halvesoflengths,
-						 WithRespectTos); 
-}
-
-
-template <class T> gOutput& operator << (gOutput& output, 
-					 const TreeOfPartials<T>& /* x */)
-{
-  output << "Error: you shouldn't be printing a TreeOfPartials.\n";
-  exit(0);
-}
-
-
-//---------------------------------------------------------------
-//                    class: ListOfPartialTrees
-//---------------------------------------------------------------
-
-//---------------------------
-// Constructors / Destructors
-//---------------------------
-
-template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gList<gPoly<T> >& given) 
-: PartialTreeList()
-{
-  for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList += TreeOfPartials<T>(given[i]);
-}
-
-template <class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const gPolyList<T>& given) 
-: PartialTreeList()
-{
-  for (int i = 1; i <= given.Length(); i++) 
-    PartialTreeList += TreeOfPartials<T>(given[i]);
-}
-
-template<class T> 
-ListOfPartialTrees<T>::ListOfPartialTrees(const ListOfPartialTrees& qs)
-: PartialTreeList(qs.PartialTreeList)
-{
-}
-
-template<class T> ListOfPartialTrees<T>::~ListOfPartialTrees()
-{
-}
-
-template <class T> 
-gMatrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const gVector<T>& p) const
-{
-  gMatrix<T> answer(Length(),Dmnsn());
-  int ii;
-  for (ii = 1; ii <= Length(); ii++)
-    for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
-  
-  return answer;
-}
-
-template <class T> gSquareMatrix<T> 
-ListOfPartialTrees<T>::SquareDerivativeMatrix(const gVector<T>& p) const
-{
-  assert (Length() >= Dmnsn());
-  gSquareMatrix<T> answer(Dmnsn());
-  int ii;
-  for (ii = 1; ii <= Dmnsn(); ii++)
-    for (int j = 1; j <= Dmnsn(); j++)
-      answer(ii,j) = (*this)[ii].ValueOfPartialOfRootPoly(j,p);
- 
-  return answer;
-}
-
-template <class T> gVector<T> 
-ListOfPartialTrees<T>::ValuesOfRootPolys(const gVector<T>& point) const
-{
-  gVector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++)
-    answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
-
-  return answer;
-}
-
-
-//---------------------------------------------------------------
-//                      class: QuikSolv
-//---------------------------------------------------------------
-
-//---------------------------
-// Constructors / Destructors
-//---------------------------
-
-template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given) 
+template <class T> EquiSolv<T>::EquiSolv(const gPolyList<T>& given) 
 : System(given), 
   gDoubleSystem(given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()),
   TreesOfPartials(gDoubleSystem),
@@ -215,7 +24,7 @@ template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given)
 {
 }
 
-template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
+template<class T> EquiSolv<T>::EquiSolv(const EquiSolv& qs)
 : System(qs.System), 
   gDoubleSystem(qs.gDoubleSystem),
   TreesOfPartials(qs.TreesOfPartials), 
@@ -224,7 +33,7 @@ template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
 {
 }
 
-template<class T> QuikSolv<T>::~QuikSolv()
+template<class T> EquiSolv<T>::~EquiSolv()
 {
 }
 
@@ -237,7 +46,7 @@ template<class T> QuikSolv<T>::~QuikSolv()
 //---------------------------
 
 template<class T> bool
-QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, 
+EquiSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r, 
 			      const int &index) const
 {
   gVector<gDouble> center = r.Center();
@@ -263,7 +72,7 @@ QuikSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r,
 }
 
 template<class T> bool
-QuikSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
+EquiSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r, 
 				      const int &index) const
 {
   gVector<gDouble> center = r.Center();
@@ -284,7 +93,7 @@ QuikSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r,
 }
 
 template<class T> 
-bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
+bool EquiSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
 				     gArray<int>& precedence)        const
 {
   for (int i = 1; i <= System.Length(); i++)
@@ -308,7 +117,7 @@ bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<gDouble>& r,
 //--------------------------------------
 
 template <class T>
-bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
+bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 					      gVector<gDouble>& point) const
 {
   assert(TreesOfPartials.Length() == System.Length());
@@ -346,7 +155,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
 //------------------------------------
 
 template<class T> 
-gPoly<gDouble> QuikSolv<T>::TranslateOfMono(const gMono<gDouble>& m, 
+gPoly<gDouble> EquiSolv<T>::TranslateOfMono(const gMono<gDouble>& m, 
 				      const gVector<gDouble>& new_origin) const
 {
   gPoly<gDouble> answer(AmbientSpace(), (gDouble)1, TermOrder());
@@ -366,7 +175,7 @@ gPoly<gDouble> QuikSolv<T>::TranslateOfMono(const gMono<gDouble>& m,
 }
 
 template<class T> 
-gPoly<gDouble>  QuikSolv<T>::TranslateOfPoly(const gPoly<gDouble>& p, 
+gPoly<gDouble>  EquiSolv<T>::TranslateOfPoly(const gPoly<gDouble>& p, 
 				       const gVector<gDouble>& new_origin) const
 {
   gPoly<gDouble> answer(AmbientSpace(), TermOrder());
@@ -377,7 +186,7 @@ gPoly<gDouble>  QuikSolv<T>::TranslateOfPoly(const gPoly<gDouble>& p,
 
 
 template<class T> 
-gPolyList<gDouble>  QuikSolv<T>::TranslateOfSystem(const gPolyList<gDouble>& old,
+gPolyList<gDouble>  EquiSolv<T>::TranslateOfSystem(const gPolyList<gDouble>& old,
 					     const gVector<gDouble>& new_origin) 
 const
 {
@@ -389,7 +198,7 @@ const
 
 
 template<class T> 
-gPoly<gDouble>  QuikSolv<T>::MonoInNewCoordinates(const gMono<gDouble>& m, 
+gPoly<gDouble>  EquiSolv<T>::MonoInNewCoordinates(const gMono<gDouble>& m, 
 					    const gSquareMatrix<gDouble>& M) const
 {
   assert(M.NumRows() == Dmnsn());
@@ -413,7 +222,7 @@ gPoly<gDouble>  QuikSolv<T>::MonoInNewCoordinates(const gMono<gDouble>& m,
 }
 
 template<class T> 
-gPoly<gDouble> QuikSolv<T>::PolyInNewCoordinates(const gPoly<gDouble>& p, 
+gPoly<gDouble> EquiSolv<T>::PolyInNewCoordinates(const gPoly<gDouble>& p, 
 					   const gSquareMatrix<gDouble>& M) const
 {
   gPoly<gDouble> answer(AmbientSpace(), TermOrder());
@@ -424,7 +233,7 @@ gPoly<gDouble> QuikSolv<T>::PolyInNewCoordinates(const gPoly<gDouble>& p,
 
 
 template<class T> gPolyList<gDouble> 
-QuikSolv<T>::SystemInNewCoordinates(const gPolyList<gDouble>& old,
+EquiSolv<T>::SystemInNewCoordinates(const gPolyList<gDouble>& old,
 				    const gSquareMatrix<gDouble>& M) const
 {
   gList<gPoly<gDouble> > new_polys;
@@ -435,7 +244,7 @@ QuikSolv<T>::SystemInNewCoordinates(const gPolyList<gDouble>& old,
 
 
 template<class T>
-   gDouble QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
+   gDouble EquiSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 				      const gRectangle<gDouble>& r,
 				      const gVector<gDouble>& p,
 				      const gSquareMatrix<gDouble>& M)    const
@@ -465,7 +274,7 @@ template<class T>
 }
 
 template<class T>
-gDouble QuikSolv<T>::MaximalContributionOfHigherOrderTerms(
+gDouble EquiSolv<T>::MaximalContributionOfHigherOrderTerms(
 						 const gPoly<gDouble>& p,
 						 const gDouble& radius)  const
 {
@@ -480,7 +289,7 @@ gDouble QuikSolv<T>::MaximalContributionOfHigherOrderTerms(
 
 
 template<class T>
-bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
+bool EquiSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
 			  const gVector<gDouble>& p,
 			  const gSquareMatrix<gDouble>& M)  const
 {
@@ -503,7 +312,7 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<gDouble>& r,
 //--------------------------------------------
 
 template <class T>
-bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<gDouble>& r,
+bool EquiSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<gDouble>& r,
 					gVector<gDouble>& point) const
 {
 
@@ -521,7 +330,7 @@ bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<gDouble>& r,
 //----------------------------------
 
 template<class T> 
-QuikSolv<T>& QuikSolv<T>::operator=(const QuikSolv<T> & rhs)
+EquiSolv<T>& EquiSolv<T>::operator=(const EquiSolv<T> & rhs)
 {
   assert (System == rhs.System);
 
@@ -533,7 +342,7 @@ QuikSolv<T>& QuikSolv<T>::operator=(const QuikSolv<T> & rhs)
 }
 
 template<class T>  
-bool QuikSolv<T>::operator==(const QuikSolv<T> & rhs) const
+bool EquiSolv<T>::operator==(const EquiSolv<T> & rhs) const
 {
     if (System        != rhs.System        ||
 	HasBeenSolved != rhs.HasBeenSolved ||
@@ -543,7 +352,7 @@ bool QuikSolv<T>::operator==(const QuikSolv<T> & rhs) const
 }
 
 template<class T>  
-bool QuikSolv<T>::operator!=(const QuikSolv<T> & rhs) const
+bool EquiSolv<T>::operator!=(const EquiSolv<T> & rhs) const
 {
   return !(*this == rhs);
 }
@@ -553,7 +362,7 @@ bool QuikSolv<T>::operator!=(const QuikSolv<T> & rhs) const
 //-------------------------------------------
 
 template<class T> bool
-QuikSolv<T>::MightHaveSingularRoots() const
+EquiSolv<T>::MightHaveSingularRoots() const
 {
   gPoly<gDouble> newpoly = 
     gDoubleSystem.ReductionOf(  gDoubleSystem.DetOfDerivativeMatrix(),
@@ -577,14 +386,14 @@ QuikSolv<T>::MightHaveSingularRoots() const
 //-------------------------------------------
 
 template<class T> bool
-QuikSolv<T>::FindRoots(const gRectangle<T>& r, const int& max_iterations) 
+EquiSolv<T>::FindRoots(const gRectangle<T>& r, const int& max_iterations) 
 {
   int zero = 0;
   return FindCertainNumberOfRoots(r,max_iterations,zero);
 }
 
 template<class T> bool
-QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r, 
+EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r, 
 				      const int& max_iterations,
 				      const int& max_no_roots) 
 {
@@ -634,7 +443,7 @@ QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
 
 template <class T> void // gList<gVector<gDouble> >  
-QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
+EquiSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 				const gRectangle<gDouble>& r, 
 				const int& max_iterations,
 				      gArray<int>& precedence,
@@ -689,7 +498,7 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 //----------------------------------
 
 template <class T> gOutput& operator << (gOutput& output, 
-					 const QuikSolv<T>& x)
+					 const EquiSolv<T>& x)
 {
   output << "The system is\n" << x.System;
   if (x.HasBeenSolved) 

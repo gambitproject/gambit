@@ -1,11 +1,11 @@
 // test file for the class polylist
 
 #include <time.h>
-#include "quiksolv.h"
+#include "equisolv.h"
 #include "rational.h"
 #include "gwatch.h"
 
-// This program is a test program for class QuikSolv
+// This program is a test program for class EquiSolv
 
 int main()
 { 
@@ -146,7 +146,7 @@ int main()
 
   timer.Start();
 
-  QuikSolv<gRational> quickie(test_bss1);
+  EquiSolv<gRational> quickie(test_bss1);
 
 /*
   gTree<gPoly<gRational> > partials = quickie.TreeOfPartials(test_bss1[4]);
@@ -166,7 +166,7 @@ int main()
     gout << "The system is guaranteed to have only regular roots.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of potential singularity took " 
+  gout << "The EquiSolv computation of potential singularity took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 */
   gout << "Starting computation ... \n";
@@ -180,7 +180,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots using FindRootsRec took " 
+  gout << "The EquiSolv computation of roots using FindRootsRec took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 
 
@@ -196,7 +196,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots Using FindRoots took " 
+  gout << "The EquiSolv computation of roots Using FindRoots took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 
   // Second System
@@ -216,7 +216,7 @@ int main()
 
   timer.Start();
 
-  QuikSolv<gRational> quickie2(test_bss2);
+  EquiSolv<gRational> quickie2(test_bss2);
 
 /*
   if (quickie2.MightHaveSingularRoots())
@@ -225,7 +225,7 @@ int main()
     gout << "The system is guaranteed to have only regular roots.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of potential singularity took " 
+  gout << "The EquiSolv computation of potential singularity took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 */
 
@@ -240,7 +240,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots using FindRootsRec took " 
+  gout << "The EquiSolv computation of roots using FindRootsRec took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 
 
@@ -258,7 +258,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots using FindRoots took " 
+  gout << "The EquiSolv computation of roots using FindRoots took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 
   // Third System
@@ -282,7 +282,7 @@ int main()
 
   timer.Start();
 
-  QuikSolv<gRational> quickie3(test_bss3);
+  EquiSolv<gRational> quickie3(test_bss3);
 
 /*
   if (quickie3.MightHaveSingularRoots())
@@ -291,7 +291,7 @@ int main()
     gout << "The system is guaranteed to have only regular roots.\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of potential singularity took " 
+  gout << "The EquiSolv computation of potential singularity took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
 */
 
@@ -306,7 +306,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots took " 
+  gout << "The EquiSolv computation of roots took " 
     << (int)timer.Elapsed() << " seconds.\n";
 
   timer.Start();
@@ -322,7 +322,7 @@ int main()
 	 << " could not be resolved by FindRootsRec.\n\n";
 
   timer.Stop();
-  gout << "The QuikSolv computation of roots took " 
+  gout << "The EquiSolv computation of roots took " 
     << (int)timer.Elapsed() << " seconds.\n";
 
   exit(0);
