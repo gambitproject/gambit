@@ -20,7 +20,6 @@ void SubgameSolver<T>::FindSubgames(Node *n)
   for (i = 1; i <= n->NumChildren(); i++)
     FindSubgames(n->GetChild(i));
   
-//  if (!n->GetParent() || efg.Decompose(n))  {
   if (n->GetSubgameRoot() == n)  {
     Efg<T> foo(efg, n);
 
@@ -89,7 +88,6 @@ template <class T> SubgameSolver<T>::~SubgameSolver()
 template <class T> 
 const BehavProfile<T> &SubgameSolver<T>::Solve(void)
 {
-  efg.FindSubgames(efg.RootNode());
   FindSubgames(efg.RootNode());
 
   return solution;
