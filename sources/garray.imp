@@ -43,9 +43,9 @@ template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
     // _essential_ for the correctness of the gPVector and gDPVector
     // assignment operator, since it assumes the value of data does
     // not change.
-    if (data && (min != a.min && max != a.max))  {
-      delete [] (data + min);
-      min = a.min;  max = a.max;
+    if (!data || (data && (min != a.min || max != a.max)))  {
+      if (data)   delete [] (data + min);
+      min = a.min;   max = a.max;
       data = (max >= min) ? new T[max - min + 1] - min : 0;
     }
     for (int i = min; i <= max; i++)
