@@ -219,6 +219,7 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   // gout << "FIRST\n";
   // gout << Tabdat << '\n';
   int col;
+  int row(outrow+Tabdat.MinRow()-(*A).MinRow());
   int i,j; // loop-control variables
 
 
@@ -264,9 +265,9 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
       // try{Tabdat(outrow,col);} catch(...){gout << "o,c\n"; assert(0);}
       // try{Tabdat(i,col);} catch(...){gout << "i,c\n"; assert(0);}
 
-      if(i!=outrow){
+      if(i!=row){
 	if(j!=col){
-	  Tabdat(i,j)=((Tabdat(outrow,col)*Tabdat(i,j))-(Tabdat(outrow,j)*Tabdat(i,col)));
+	  Tabdat(i,j)=((Tabdat(row,col)*Tabdat(i,j))-(Tabdat(row,j)*Tabdat(i,col)));
 	  Tabdat(i,j)=Tabdat(i,j)/gRational(denom);
 	}
       }
@@ -274,18 +275,18 @@ void Tableau<gRational>::Pivot(int outrow,int in_col)
   }
   // Step 2
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();++i){
-    if(i!=outrow){
+    if(i!=row){
       Tabdat(i,col)=0;
     }
   }
   // Step 4
-  denom=Tabdat(outrow,col);
+  denom=Tabdat(row,col);
   // BigDump(gout);
   npivots++;
   basis.Pivot(outrow,in_col);
 
   for (i=solution.First();i<=solution.Last();++i){
-    solution[i]=Tabdat(i,(*A).MaxCol()-(*A).MinCol()+2)*(gRational)sign(denom*totdenom);
+    solution[i]=Tabdat(i+Tabdat.MinRow()-solution.First(),(*A).MaxCol()-(*A).MinCol()+2)*(gRational)sign(denom*totdenom);
   }
 
   // gout << "LAST\n";
