@@ -46,6 +46,26 @@ protected:
   void CheckIsNash(void) const;
   void LevelPrecision(void);
 
+  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
+  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
+					      const term_order&,
+					      const gList<gList<int> > &) 
+    const;
+  bool NodeProbabilityPoly(      gPoly<gDouble> &,
+			   const gSpace &, 
+			   const term_order&,
+			   const gList<gList<int> > &,
+			   const Node *,
+			   const int &pl,
+			   const int &i,
+			   const int &j) const;
+  gPolyList<gDouble> ExpectedPayoffDiffPolys(const gSpace &, 
+					     const term_order&,
+					     const gList<gList<int> > &) const;
+  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
+					   const term_order&,
+					   const gList<gList<int> > &) const;
+
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavSolution(const BehavProfile<double> &, EfgAlgType = algorithmEfg_USER);
@@ -115,25 +135,6 @@ public:
   const gNumber &GetValue(Infoset *s, int act) const
     { return m_profile->GetValue(s, act); }
 
-  // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO BEHAV NASH
-  gPolyList<gDouble> ActionProbsSumToOneIneqs(const gSpace &, 
-					      const term_order&,
-					      const gList<gList<int> > &) 
-    const;
-  bool NodeProbabilityPoly(      gPoly<gDouble> &,
-			   const gSpace &, 
-			   const term_order&,
-			   const gList<gList<int> > &,
-			   const Node *,
-			   const int &pl,
-			   const int &i,
-			   const int &j) const;
-  gPolyList<gDouble> ExpectedPayoffDiffPolys(const gSpace &, 
-					     const term_order&,
-					     const gList<gList<int> > &) const;
-  gPolyList<gDouble> ExtendsToANFNashIneqs(const gSpace &, 
-					const term_order&,
-					const gList<gList<int> > &) const;
   // TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
   bool ExtendsToANFNash(gStatus &) const;
 
