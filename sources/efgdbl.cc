@@ -4,24 +4,35 @@
 //# $Id$
 //#
 
-#include "extform.imp"
+#include "rational.h"
+#include "extform.h"
+#include "glist.h"
+#include "glistit.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class BehavProfile<gRational>;
+class ExtForm<gRational>;
+class gList<Node *>;
+class gListIter<Node *>;
+
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
+#include "extform.imp"
+TEMPLATE class ExtForm<double>;
 DataType ExtForm<double>::Type(void) const    { return DOUBLE; }
 
 TEMPLATE class TypedNode<double>;
 TEMPLATE class ChanceInfoset<double>;
 TEMPLATE class OutcomeVector<double>;
-TEMPLATE class ExtForm<double>;
 TEMPLATE int ReadEfgFile(gInput &, ExtForm<double> *&);
 TEMPLATE class BehavProfile<double>;
 TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
+//TEMPLATE bool operator==(const gArray<double> &, const gArray<double> &);
+//TEMPLATE bool operator!=(const gArray<double> &, const gArray<double> &);
 
 #include "glist.imp"
 
