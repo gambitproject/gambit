@@ -147,7 +147,8 @@ END_EVENT_TABLE()
 NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   : wxPanel(p_parent, -1), m_nfg(p_nfg), m_parent(p_parent), 
     m_editable(true), m_rowPlayer(1), m_colPlayer(2),
-    m_support(m_nfg), m_solution(0)
+    m_support(m_nfg), m_solution(0),
+    m_showProb(0), m_showDom(0), m_showValue(0)
 {
   SetAutoLayout(true);
 
