@@ -785,7 +785,9 @@ I_dont_believe_Im_doing_this:
     case CR:    if (matching.Depth())
                   return CRLF;
     case EOF:   return EOC;
-    default:    return c;
+    default:    if ((inputs.Depth() == 0 && gin.eof()) ||
+                    (inputs.Depth() > 0 && inputs.Peek()->eof())) return EOC;
+                return c;
   }
 }
 
