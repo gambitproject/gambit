@@ -1,0 +1,258 @@
+//
+// FILE: gsimplex.imp -- Implementation of gSimplex
+//
+// @(#)gsimplex.imp	1.4 02/14/98
+//
+
+#include "gsimplex.h"
+
+
+//--------------------------------------------------------------------------
+//                   gSimplex -- constructors and destructor
+//--------------------------------------------------------------------------
+
+template<class T> gSimplex<T>::gSimplex(const gSimplex<T>& given) 
+: sides(given.sides)
+{
+}
+
+template<class T> gSimplex<T>::gSimplex(const gList< gInterval<T> >& given)
+: sides(given)
+{
+}
+
+template<class T> gSimplex<T>::gSimplex(const gVector<T> lower_bd, 
+                                            const gVector<T> upper_bd) 
+: sides()
+{ 
+  assert (lower_bd.Check(upper_bd));
+  for (int i = 1; i <= upper_bd.Length(); i++) {
+    gInterval<T> side(lower_bd[i],upper_bd[i]);
+    sides += side;
+  }
+}
+
+
+template<class T> gSimplex<T>::~gSimplex() 
+{
+}
+
+//--------------------------------------------------------------------------
+//                          gSimplex -- operators
+//--------------------------------------------------------------------------
+
+
+template<class T> gSimplex<T>& 
+gSimplex<T>::operator = (const gSimplex<T>& /* rhs */)
+{
+  gout << "For const'ness, operator = not allowed for gSimplexs\n";
+  exit (0);
+  return *this;
+}
+
+
+template<class T> bool gSimplex<T>::operator == (const gSimplex<T>& rhs)
+     const
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (sides[i] != rhs.sides[i]) return false;
+  return true;
+}
+
+template<class T> bool gSimplex<T>::operator != (const gSimplex<T>& rhs)
+     const
+{
+  return !(*this == rhs);
+}
+
+//--------------------------------------------------------------------------
+//                             interval -- information
+//--------------------------------------------------------------------------
+
+template<class T> const int gSimplex<T>::Dmnsn() const 
+{ 
+  return sides.Length();
+}
+
+template<class T> const gVector<T> gSimplex<T>::LowerBound() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
+  return answer;
+}
+
+template<class T> const gVector<T> gSimplex<T>::UpperBound() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
+  return answer;
+}
+
+template<class T> const T gSimplex<T>::LowerBoundOfCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].LowerBound();
+}
+
+template<class T> const T gSimplex<T>::UpperBoundOfCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].UpperBound();
+}
+
+template<class T> const T gSimplex<T>::HeightInCoord(const int& i) const 
+{ 
+  assert (1 <= i && i <= Dmnsn());
+  return sides[i].Length();
+}
+
+template<class T> 
+const gInterval<T> gSimplex<T>::CartesianFactor(const int& i) const 
+{ 
+  return sides[i];
+}
+
+template<class T> 
+const gSimplex<T> gSimplex<T>::SameCenterDoubleSideLengths() const 
+{ 
+  gList<gInterval<T> > new_sides;
+  for (int i = 1; i <= Dmnsn(); i++)
+    new_sides += CartesianFactor(i).SameCenterTwiceLength();
+  return gSimplex<T>(new_sides);
+}
+
+template<class T> 
+const gSimplex<T> 
+gSimplex<T>::Orthant(const gArray<int>& top_or_bot) const 
+{ 
+  gList<gInterval<T> > new_sides;
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (top_or_bot[i] == 0)
+    new_sides += CartesianFactor(i).LeftHalf();
+  else
+    new_sides += CartesianFactor(i).RightHalf();
+  return gSimplex<T>(new_sides);
+}
+
+template<class T> const gVector<T> gSimplex<T>::SideLengths() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) 
+    answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
+  return answer;
+}
+
+template<class T> bool gSimplex<T>::Contains(const gVector<T>& point) const 
+{ 
+  assert (point.Length() == Dmnsn());
+
+  for (int i = 1; i <= Dmnsn(); i++)
+    if (point[i] < sides[i].LowerBound() || sides[i].UpperBound() < point[i])
+      return false;
+  return true;
+}
+
+template<class T> bool gSimplex<T>::Contains(const gSimplex<T>& R) const 
+{ 
+  assert (R.Dmnsn() == Dmnsn());
+
+  for (int i = 1; i <= Dmnsn(); i++)
+    if ( !sides[i].Contains(R.sides[i]) )
+      return false;
+  return true;
+}
+
+template<class T> const T gSimplex<T>::Volume() const 
+{ 
+  T answer = (T)1;
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer *= ( sides[i].UpperBound() - sides[i].LowerBound() );
+  return answer;
+}
+
+template<class T> const gVector<T> gSimplex<T>::Center() const 
+{ 
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) 
+    answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
+		                     / ((T)2);
+  return answer;
+}
+
+template<class T> const gSimplex<T> gSimplex<T>::BoundingSimplex() const 
+{ 
+  return *this;
+}
+
+template<class T> const gList<gVector<T> > gSimplex<T>::VertexList() const 
+{ 
+  gList<gVector<T> > answer;
+
+  gArray<int> ListOfTwos(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
+  gIndexOdometer ListOfTopBottoms(ListOfTwos);
+
+  while (ListOfTopBottoms.Turn()) {
+    gVector<T> next(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++)
+      if (ListOfTopBottoms[i] == 1)
+	next[i] = LowerBoundOfCoord(i);
+      else 
+	next[i] = UpperBoundOfCoord(i);
+    answer += next;
+  }
+  return answer;
+}
+
+template<class T> 
+const int gSimplex<T>::NumberOfCellsInSubdivision() const 
+{ 
+  int answer = 1;
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer *= 2;
+  return answer;
+}
+
+template<class T> 
+const gSimplex<T> gSimplex<T>::SubdivisionCell(const int& index) const 
+{ 
+  int tmp = index;
+  gArray<int> updowns(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) {
+    if (tmp % 2 == 1) {
+      updowns[i] = 1; tmp--;
+    }
+    else
+      updowns[i] = 0;
+  tmp /= 2;
+  }
+  return Orthant(updowns);
+}
+
+//----------------------------------
+//           Conversion
+//----------------------------------
+
+template<class T>  
+gSimplex<gDouble>  TogDouble(const gSimplex<T>& given) 
+{
+  gList<gInterval<gDouble> > cartesian_factors;
+  for (int i = 1; i <= given.Dmnsn(); i++) 
+    cartesian_factors += gInterval<gDouble>((gDouble)given.LowerBound()[i],
+					    (gDouble)given.UpperBound()[i]);
+  return gSimplex<gDouble>(cartesian_factors);
+}
+
+//--------------------------------------------------------------------------
+//                        interval -- printing
+//--------------------------------------------------------------------------
+
+template<class T> gOutput& operator << (gOutput& output, 
+					const gSimplex<T>& x)
+{
+  for (int i = 1; i <= x.Dmnsn() - 1; i++)
+    output << x.sides[i] << "x";
+  if (x.Dmnsn() > 0) 
+    output << x.sides[x.Dmnsn()];
+  return output;
+}
