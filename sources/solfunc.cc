@@ -239,7 +239,8 @@ static Portion *GSM_QreLambda_Behav(Portion** param)
 static Portion *GSM_QreLambda_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if (bs->Creator() != algorithmNfg_QRE)
+  if (bs->Creator() != algorithmNfg_QRE && 
+      bs->Creator() != algorithmNfg_QREALL)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreLambda());
 }
@@ -260,7 +261,8 @@ static Portion *GSM_QreValue_Behav(Portion** param)
 static Portion *GSM_QreValue_Mixed(Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if (bs->Creator() != algorithmNfg_QRE)
+  if (bs->Creator() != algorithmNfg_QRE && 
+      bs->Creator() != algorithmNfg_QREALL)
     return new NullPortion(porNUMBER);
   return new NumberPortion(bs->QreValue());
 }
