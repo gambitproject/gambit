@@ -27,38 +27,10 @@
 #ifndef NFGSUPPORT_H
 #define NFGSUPPORT_H
 
-#include "wx/treectrl.h"
+#include <wx/treectrl.h>
 #include "nfgshow.h"
-#include "base/gmap.h"
 
-class gbtNfgSupportWindow : public wxPanel, public gbtGameView {
-private:
-  wxChoice *m_supportList;
-  wxButton *m_prevButton, *m_nextButton;
-  wxTreeCtrl *m_strategyTree;
-  gbtOrdMap<wxTreeItemId, gbtNfgStrategy> m_map;
-
-  void OnSupportList(wxCommandEvent &);
-  void OnSupportPrev(wxCommandEvent &);
-  void OnSupportNext(wxCommandEvent &);
-
-  void OnTreeItemCollapse(wxTreeEvent &);
-
-  // Overriding view members
-  bool IsEfgView(void) const { return false; }
-  bool IsNfgView(void) const { return true; }
-
-public:
-  gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~gbtNfgSupportWindow() { }
-
-  int GetSupport(void) const { return m_supportList->GetSelection(); }
-  void ToggleItem(wxTreeItemId);
-
-  void OnUpdate(gbtGameView *);
-
-  DECLARE_EVENT_TABLE()
-};
+class gbtNfgSupportWindow;
 
 class gbtNfgSupportFrame : public wxFrame, public gbtGameView {
 private:

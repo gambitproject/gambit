@@ -24,10 +24,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "wx/wxprec.h"
+#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
-#include "wx/wx.h"
+#include <wx/wx.h>
 #endif  // WX_PRECOMP
+#include "base/gmap.h"
 #include "nfgsupport.h"
 #include "id.h"
 
@@ -110,92 +111,132 @@ void gbtCmdSetNfgSupport::Do(gbtGameDocument *p_doc)
 }
 
 
+//==========================================================================
+//                    class gbtNfgSupportWidget
+//==========================================================================
 
-const int idSTRATEGYTREE = 8003;
-
-class widgetStrategyTree : public wxTreeCtrl {
+class gbtNfgSupportWidget : public wxTreeCtrl {
 private:
   gbtNfgSupportWindow *m_parent;
-  wxMenu *m_menu;
+  gbtOrdMap<wxTreeItemId, gbtNfgStrategy> m_map;
 
-  void OnRightClick(wxTreeEvent &);
-  void OnMiddleClick(wxTreeEvent &);
-  void OnKeypress(wxTreeEvent &);
+  void OnTreeItemCollapse(wxTreeEvent &);
 
 public:
-  widgetStrategyTree(gbtNfgSupportWindow *p_parent);
+  gbtNfgSupportWidget(wxWindow *p_parent, wxWindowID p_id);
+
+  void SetSupport(const gbtNfgSupport &);
+  gbtNfgStrategy GetStrategy(wxTreeItemId p_id) { return m_map(p_id); }
+};
+
+gbtNfgSupportWidget::gbtNfgSupportWidget(wxWindow *p_parent,
+					 wxWindowID p_id)
+  : wxTreeCtrl(p_parent, p_id), m_map(gbtNfgStrategy())
+{
+  Connect(p_id, wxEVT_COMMAND_TREE_ITEM_COLLAPSING,
+	  (wxObjectEventFunction) (wxEventFunction)
+	  (wxTreeEventFunction) &gbtNfgSupportWidget::OnTreeItemCollapse);
+}
+
+void gbtNfgSupportWidget::SetSupport(const gbtNfgSupport &p_support)
+{
+  DeleteAllItems();
+  AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
+  for (int pl = 1; pl <= p_support.GetGame().NumPlayers(); pl++) {
+    gbtNfgPlayer player = p_support.GetGame().GetPlayer(pl);
+
+    wxTreeItemId id = AppendItem(GetRootItem(),
+				 wxString::Format(wxT("%s"),
+						  (char *) player.GetLabel()));
+    
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      gbtNfgStrategy strategy = player.GetStrategy(st);
+
+      wxTreeItemId stratID = AppendItem(id, 
+					wxString::Format(wxT("%s"),
+							 (char *) strategy.GetLabel()));
+      if (p_support.Contains(strategy)) {
+	SetItemTextColour(stratID, *wxBLACK);
+      }
+      else {
+	SetItemTextColour(stratID, *wxLIGHT_GREY);
+      }
+      m_map.Define(stratID, strategy);
+    }
+    Expand(id);
+  }
+  Expand(GetRootItem());
+}
+
+void gbtNfgSupportWidget::OnTreeItemCollapse(wxTreeEvent &p_event)
+{
+  if (p_event.GetItem() == GetRootItem()) {
+    p_event.Veto();
+  }
+}
+
+//==========================================================================
+//                    class gbtNfgSupportWindow
+//==========================================================================
+
+const int GBT_NFG_SUPPORT_LIST = 8000;
+const int GBT_NFG_SUPPORT_PREV = 8001;
+const int GBT_NFG_SUPPORT_NEXT = 8002;
+const int GBT_NFG_STRATEGY_TREE = 8003;
+
+class gbtNfgSupportWindow : public wxPanel, public gbtGameView {
+private:
+  wxChoice *m_supportList;
+  wxButton *m_prevButton, *m_nextButton;
+  gbtNfgSupportWidget *m_supportWidget;
+
+  void OnSupportList(wxCommandEvent &);
+  void OnSupportPrev(wxCommandEvent &);
+  void OnSupportNext(wxCommandEvent &);
+
+  void OnTreeKeypress(wxTreeEvent &);
+  void OnTreeItemActivated(wxTreeEvent &);
+
+  void ToggleStrategy(wxTreeItemId);
+
+  // Overriding view members
+  bool IsEfgView(void) const { return false; }
+  bool IsNfgView(void) const { return true; }
+
+public:
+  gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgSupportWindow() { }
+
+  void OnUpdate(gbtGameView *);
 
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(widgetStrategyTree, wxTreeCtrl)
-  EVT_TREE_KEY_DOWN(idSTRATEGYTREE, widgetStrategyTree::OnKeypress)
-  EVT_TREE_ITEM_MIDDLE_CLICK(idSTRATEGYTREE, widgetStrategyTree::OnMiddleClick)
-  EVT_TREE_ITEM_RIGHT_CLICK(idSTRATEGYTREE, widgetStrategyTree::OnRightClick)
-END_EVENT_TABLE()
-
-widgetStrategyTree::widgetStrategyTree(gbtNfgSupportWindow *p_parent)
-  : wxTreeCtrl(p_parent, idSTRATEGYTREE), m_parent(p_parent)
-{ 
-  m_menu = new wxMenu;
-  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, _("Duplicate support"),
-		 _("Duplicate this support"));
-  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, _("Delete support"),
-		 _("Delete this support"));
-}
-
-void widgetStrategyTree::OnRightClick(wxTreeEvent &p_event)
-{
-  // Cannot delete the "full support"
-  m_menu->Enable(GBT_MENU_SUPPORTS_DELETE, (m_parent->GetSupport() > 0));
-  PopupMenu(m_menu, p_event.GetPoint());
-}
-
-void widgetStrategyTree::OnKeypress(wxTreeEvent &p_event)
-{
-  if (m_parent->GetSupport() == 0) {
-    return;
-  }
-  if (p_event.GetCode() == WXK_SPACE) {
-    m_parent->ToggleItem(GetSelection());
-  }
-}
-
-void widgetStrategyTree::OnMiddleClick(wxTreeEvent &p_event)
-{
-  if (m_parent->GetSupport() == 0) {
-    return;
-  }
-  m_parent->ToggleItem(p_event.GetItem());
-}
-
-
-
-const int idSUPPORTLISTCHOICE = 8000;
-const int idSUPPORTPREVBUTTON = 8001;
-const int idSUPPORTNEXTBUTTON = 8002;
-
 BEGIN_EVENT_TABLE(gbtNfgSupportWindow, wxPanel)
-  EVT_CHOICE(idSUPPORTLISTCHOICE, gbtNfgSupportWindow::OnSupportList)
-  EVT_BUTTON(idSUPPORTPREVBUTTON, gbtNfgSupportWindow::OnSupportPrev)
-  EVT_BUTTON(idSUPPORTNEXTBUTTON, gbtNfgSupportWindow::OnSupportNext)
-  EVT_TREE_ITEM_COLLAPSING(idSTRATEGYTREE, gbtNfgSupportWindow::OnTreeItemCollapse)
+  EVT_CHOICE(GBT_NFG_SUPPORT_LIST, gbtNfgSupportWindow::OnSupportList)
+  EVT_BUTTON(GBT_NFG_SUPPORT_PREV, gbtNfgSupportWindow::OnSupportPrev)
+  EVT_BUTTON(GBT_NFG_SUPPORT_NEXT, gbtNfgSupportWindow::OnSupportNext)
+  EVT_TREE_KEY_DOWN(GBT_NFG_STRATEGY_TREE,
+		    gbtNfgSupportWindow::OnTreeKeypress)
+  EVT_TREE_ITEM_ACTIVATED(GBT_NFG_STRATEGY_TREE,
+			  gbtNfgSupportWindow::OnTreeItemActivated)
 END_EVENT_TABLE()
 
-gbtNfgSupportWindow::gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
+gbtNfgSupportWindow::gbtNfgSupportWindow(gbtGameDocument *p_doc,
+					 wxWindow *p_parent)
   : wxPanel(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_doc), m_map(gbtNfgStrategy())
+    gbtGameView(p_doc)
 {
   SetAutoLayout(true);
 
-  m_supportList = new wxChoice(this, idSUPPORTLISTCHOICE,
+  m_supportList = new wxChoice(this, GBT_NFG_SUPPORT_LIST,
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0);
-  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, wxT("<-"),
+  m_prevButton = new wxButton(this, GBT_NFG_SUPPORT_PREV, wxT("<-"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, wxT("->"),
+  m_nextButton = new wxButton(this, GBT_NFG_SUPPORT_NEXT, wxT("->"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_strategyTree = new widgetStrategyTree(this);
+  m_supportWidget = new gbtNfgSupportWidget(this, GBT_NFG_STRATEGY_TREE);
 
   wxBoxSizer *selectSizer = new wxBoxSizer(wxHORIZONTAL);
   selectSizer->Add(m_prevButton, 0, wxALL, 5);
@@ -204,7 +245,7 @@ gbtNfgSupportWindow::gbtNfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_par
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(selectSizer, 0, wxEXPAND, 5);
-  topSizer->Add(m_strategyTree, 1, wxEXPAND, 5);
+  topSizer->Add(m_supportWidget, 1, wxEXPAND, 5);
   
   SetSizer(topSizer);
   topSizer->Fit(this);
@@ -227,38 +268,11 @@ void gbtNfgSupportWindow::OnUpdate(gbtGameView *)
   }
 
   int supportIndex = m_doc->GetNfgSupportList().GetCurrentIndex();
-  const gbtNfgSupport &support = m_doc->GetNfgSupportList().GetCurrent();
   m_supportList->SetSelection(supportIndex - 1);
   m_prevButton->Enable((supportIndex > 1) ? true : false);
   m_nextButton->Enable((supportIndex < supports.Length()) ? true : false);
+  m_supportWidget->SetSupport(m_doc->GetNfgSupportList().GetCurrent());
 
-  m_strategyTree->DeleteAllItems();
-
-  m_strategyTree->AddRoot(wxString::Format(wxT("%s"),
-					   (char *) support.GetLabel()));
-  for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-    gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
-
-    wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
-						 wxString::Format(wxT("%s"),
-								  (char *) player.GetLabel()));
-    
-    for (int st = 1; st <= m_doc->GetNfg().NumStrats(pl); st++) {
-      gbtNfgStrategy strategy = m_doc->GetNfg().GetPlayer(pl).GetStrategy(st);
-
-      wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
-							wxString::Format(wxT("%s"), (char *) strategy.GetLabel()));
-      if (support.Contains(strategy)) {
-	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
-      }
-      else {
-	m_strategyTree->SetItemTextColour(stratID, *wxLIGHT_GREY);
-      }
-      m_map.Define(stratID, strategy);
-    }
-    m_strategyTree->Expand(id);
-  }
-  m_strategyTree->Expand(m_strategyTree->GetRootItem());
   Layout();
 }
 
@@ -277,16 +291,21 @@ void gbtNfgSupportWindow::OnSupportNext(wxCommandEvent &)
   m_doc->Submit(new gbtCmdSetNfgSupport(m_supportList->GetSelection() + 2));
 }
 
-void gbtNfgSupportWindow::OnTreeItemCollapse(wxTreeEvent &p_event)
+void gbtNfgSupportWindow::OnTreeKeypress(wxTreeEvent &p_event)
 {
-  if (p_event.GetItem() == m_strategyTree->GetRootItem()) {
-    p_event.Veto();
+  if (p_event.GetKeyCode() == WXK_SPACE) {
+    ToggleStrategy(m_supportWidget->GetSelection());
   }
 }
 
-void gbtNfgSupportWindow::ToggleItem(wxTreeItemId p_id)
+void gbtNfgSupportWindow::OnTreeItemActivated(wxTreeEvent &p_event)
 {
-  gbtNfgStrategy strategy = m_map(p_id);
+  ToggleStrategy(p_event.GetItem());
+}
+
+void gbtNfgSupportWindow::ToggleStrategy(wxTreeItemId p_id)
+{
+  gbtNfgStrategy strategy = m_supportWidget->GetStrategy(p_id);
   if (strategy.IsNull()) {
     return;
   }
@@ -321,6 +340,10 @@ gbtNfgSupportFrame::gbtNfgSupportFrame(gbtGameDocument *p_doc,
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
+  editMenu->Append(GBT_MENU_SUPPORTS_DUPLICATE, _("Duplicate support"),
+		   _("Duplicate this support"));
+  editMenu->Append(GBT_MENU_SUPPORTS_DELETE, _("Delete support"),
+		   _("Delete this support"));
 
   wxMenu *viewMenu = new wxMenu;
 
