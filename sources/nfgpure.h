@@ -1,11 +1,11 @@
-//#
-//# FILE: purenash.h -- Interface to pure-strategy Nash equilibrium finder
-//#
-//# $Id$
-//#
+//
+// FILE: nfgpure.h -- Interface to pure-strategy Nash equilibrium finder
+//
+// $Id$
+//
 
-#ifndef PURENASH_H
-#define PURENASH_H
+#ifndef NFGPURE_H
+#define NFGPURE_H
 
 #include "nfg.h"
 #include "mixed.h"
@@ -17,6 +17,6 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 				    gList<MixedSolution<T> > &);
 
 
-#endif    // PURENASH_H
+#endif    // NFGPURE_H
 
 

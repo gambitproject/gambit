@@ -1,10 +1,10 @@
-//#
-//# FILE: purenash.cc -- Find all pure strategy Nash equilibria
-//#
-//# $Id$
-//#
+//
+// FILE: nfgpure.cc -- Find all pure strategy Nash equilibria
+//
+// $Id$
+//
 
-#include "purenash.h"
+#include "nfgpure.h"
 
 #include "gambitio.h"
 #include "nfg.h"
