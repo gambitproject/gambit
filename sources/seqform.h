@@ -48,15 +48,17 @@ public:
   virtual ~SeqFormModule();
   
   int Lemke(int dup = 0);
+  int All_Lemke(int dup, LTableau<T> &B, long &np);
   
   int Add_BFS(const LTableau<T> &tab);
   long NumPivots(void) const;
   double Time(void) const;
   
   void FillTableau(const Node *n,T prob,int s1,int s2,int i1,int i2);
-  int LCPPath(); // follow a path of ACBFS's from one CBFS to another
-  void GetProfile(gDPVector<T> &, const gVector<T> &, 
+  void GetProfile(const LTableau<T> &tab, gDPVector<T> &, const gVector<T> &, 
 		  const Node *n, int,int);
+
+  void AddSolutions(void);
   const gList<BehavSolution<T> > &GetSolutions() const;
 };
 

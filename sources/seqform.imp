@@ -23,8 +23,14 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   ns2=S.NumSequences(2);
   ni1=E.Players()[1]->NumInfosets()+1;
   ni2=E.Players()[2]->NumInfosets()+1;
+  gout << "\nns1: " << ns1 << " ns2: " << ns2 << " ni1: " << ni1 << " ni2: " << ni2;
 
-  ntot = ns1+ns2+(ni1+ni2)+2;
+//  old version: 
+//  ntot = ns1+ns2+2*(ni1+ni2)+2;
+
+  ntot = ns1+ns2+ni1+ni2;
+
+
   A = new gMatrix<T>(1,ntot,0,ntot);
   b = new gVector<T>(1,ntot);
   int i,j;
@@ -35,9 +41,11 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   for(i=A->MinRow();i<=A->MaxRow();i++) {
     (*b)[i] = (T)0;
     for(j=A->MinCol();j<=A->MaxCol();j++)
-      (*A)(i,j) = (T)0;
+      (*A)(i,j) = (T)0; 
   }
 
+
+  // New code
   FillTableau(EF.RootNode(),prob,1,1,0,0);
   for(i=A->MinRow();i<=A->MaxRow();i++) 
     (*A)(i,0) = -(T)1;
@@ -45,19 +53,55 @@ SeqFormModule<T>::SeqFormModule(const Efg<T> &E, const SeqFormParams &p,
   (*A)(ns1+ns2+1,1) = -(T)1;
   (*A)(ns1+1,ns1+ns2+ni1+1) = (T)1;
   (*A)(ns1+ns2+ni1+1,ns1+1) = -(T)1;
-  (*b)[ns1+ns2+1] = (T)1;
-  (*b)[ns1+ns2+ni1+1] = (T)1;
-//  gout.SetWidth(1).SetPrec(1);
-//  gout << "\nA";
-//  A->Dump(gout);
-//  gout << "\nb";
-//  b->Dump(gout);
+  (*b)[ns1+ns2+1] = -(T)1;
+  (*b)[ns1+ns2+ni1+1] = -(T)1;
+  gout.SetWidth(4).SetPrec(1);
+  gout << "\nA:\n";
+  A->Dump(gout);
+  gout << "\nb:\n";
+  b->Dump(gout);
 
   tab = new LTableau<T>(*A,*b);
   eps = tab->Epsilon();
 //  tab->Refactor();  // not necessary?
-  tab->Pivot(ns1+ns2+ni1+1,0);
+  gout << "\ntab:\n";
+  tab->Dump(gout);
+  // end new code
+
+  /*
+    // old code
+  FillTableau(EF.RootNode(),prob,1,1,0,0);
+  for(i=A->MinRow();i<=A->MaxRow();i++) 
+    (*A)(i,0) = -(T)1;
+  (*A)(1,ns1+ns2+1) = -(T)1;
+  (*A)(1,ns1+ns2+ni1+1) = (T)1;
+  (*A)(ns1+ns2+1,1) = (T)1;
+  (*A)(ns1+ns2+ni1+1,1) = -(T)1;
+  (*A)(ns1+1,ns1+ns2+ni1+ni1+1) = -(T)1;
+  (*A)(ns1+1,ns1+ns2+ni1+ni1+ni2+1) = (T)1;
+  (*A)(ns1+ns2+ni1+ni1+1,ns1+1) = (T)1;
+  (*A)(ns1+ns2+ni1+ni1+ni2+1,ns1+1) = -(T)1;
+  (*b)[ns1+ns2+1] = (T)1;
+  (*b)[ns1+ns2+ni1+1] = -(T)1;
+  (*b)[ns1+ns2+ni1+ni1+1] = (T)1;
+  (*b)[ns1+ns2+ni1+ni1+ni2+1] = -(T)1;
+  gout.SetWidth(4).SetPrec(1);
+  gout << "\nA:\n";
+  A->Dump(gout);
+  gout << "\nb:\n";
+  b->Dump(gout);
+
+  tab = new LTableau<T>(*A,*b);
+  eps = tab->Epsilon();
+  // end old code
+  */
+
+//  tab->Refactor();  // not necessary?
+//  tab->Pivot(ns1+ns2+ni1+1,0);
 //  tab->Dump(gout);
+
+
+
 }
 
 template <class T> SeqFormModule<T>::~SeqFormModule()
@@ -71,7 +115,7 @@ template <class T> SeqFormModule<T>::~SeqFormModule()
 //
 
 
-template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
+template <class T> int SeqFormModule<T>::Lemke(int dup)
 {
   BFS<T> cbfs((T) 0);
   int i;
@@ -80,9 +124,71 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   
   gWatch watch;
   
+  T big_num = (T)1000;
+  int newsol;
+  BehavProfile<T> profile(EF);
+  gVector<T> sol(tab->MinRow(),tab->MaxRow());
+    
+//  gVector<T> bnew(tab->MinRow(),tab->MaxRow());
+//  tab->BasisVector(bnew);
+//  gout << "\nbnew = " << bnew;
+
+  solutions.Flush();
   List.Flush();
-  LCPPath();
-  Add_BFS(*tab);
+  if ( params.stopAfter!=1 || dup==0) {
+    for (i = tab->MinRow();i <= tab->MaxRow();i++) 
+      if( (*b)[i]>=(T)0 && 
+	  (params.stopAfter==0 || solutions.Length() < params.stopAfter)) {
+      Basis<T> basis(*A);
+
+      (*A)(i,0)=-big_num;
+
+//      gout << "\n i = " << i << " basis = \n";
+//      basis.Dump(gout);
+      tab->SetBasis(basis);
+
+      tab->Pivot(ns1+ns2+1,0);
+      if(tab->SF_LCPPath(ns1+ns2+1,params.status)==1) {
+
+	// tab->GetBasis(basis);
+	// basis.Dump(gout);
+	gout << "\n i = " << i << " after LCPPath \n";
+	tab->Dump(gout);
+
+	newsol = Add_BFS(*tab);
+	tab->BasisVector(sol);
+	// gout << "\nsol = " << sol;
+	GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
+	if(newsol) 
+	  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
+	gout << "\nprofile = " << profile << "\n";
+      }
+      else {
+	gout << ": Dead End";
+	gout << "\n i = " << i << " after LCPPath \n";
+	tab->Dump(gout);
+	tab->BasisVector(sol);
+	GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
+	gout << "\nprofile = " << profile << "\n";
+	newsol = 0;
+      }
+      (*A)(i,0)=-(T)1;
+      if(newsol)
+	All_Lemke(i,*tab,npivots);
+    }
+  }
+  else {
+
+
+    tab->Pivot(ns1+ns2+1,0);
+    tab->SF_LCPPath(ns1+ns2+1,params.status);
+
+// old code
+//    tab->Pivot(ns1+ns2+ni1+1,0);
+//    tab->LCPPath(ns1+ns2+ni1+1,params.status);
+
+    Add_BFS(*tab);
+  }
   
   if (params.trace >= 2)  {
     for (i = 1; i <= List.Length(); i++)   {
@@ -90,15 +196,17 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
       (*params.tracefile) << "\n";
     }
   }
+/*
   gVector<T> sol(tab->MinRow(),tab->MaxRow());
   BehavProfile<T> profile(EF);
 //  gout << "\nsol = " << sol;
   tab->BasisVector(sol);
 //  gout << "\nsol = " << sol;
-  GetProfile(profile,sol,EF.RootNode(),1,1);
+  GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
 //  gout << "\nprofile = " << profile << "\n";
   solutions.Flush();
   solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
+*/
   
 //  if(params.trace >= 1)
 //    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";
@@ -108,24 +216,103 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   return List.Length();
 }
 
-template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tab)
+template <class T> int SeqFormModule<T>::Add_BFS(const LTableau<T> &tableau)
 {
   BFS<T> cbfs((T) 0);
-  gVector<T> v(tab.MinRow(), tab.MaxRow());
-  tab.BasisVector(v);
+  gVector<T> v(tableau.MinRow(), tableau.MaxRow());
+  tableau.BasisVector(v);
 
-  for (int i = tab.MinCol(); i <= tab.MaxCol(); i++)
-    if (tab.Member(i)) {
-      cbfs.Define(i, v[tab.Find(i)]);
+  for (int i = tableau.MinCol(); i <= tableau.MaxCol(); i++)
+    if (tableau.Member(i)) {
+      cbfs.Define(i, v[tableau.Find(i)]);
     }
 
   if (List.Contains(cbfs))  return 0;
+  gout  << "\nFound CBFS";
+  gout  << "\nB = ";
+  tableau.Dump(gout);
+  gout  << "\ncbfs = ";
+  cbfs.Dump(gout);
+
 //  if(params.trace >=2) (*params.tracefile) << "\nFound CBFS";
 //  (*params.tracefile)  << "\nB = ";
 //  tab.Dump(*params.tracefile);
 //  (*params.tracefile)  << "\ncbfs = ";
 //  cbfs.Dump(*params.tracefile );
   List.Append(cbfs);
+  return 1;
+}
+
+//
+// All_Lemke finds all accessible Nash equilibria by recursively 
+// calling itself.  List maintains the list of basic variables 
+// for the equilibria that have already been found.  
+// From each new accessible equilibrium, it follows
+// all possible paths, adding any new equilibria to the List.  
+//
+template <class T> int SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np)
+{
+  int i;
+  int len,newsol,missing;
+  T p1,p2,aa;
+  T big_num = (T)1000;
+  np+=B.NumPivots();
+  gVector<T> sol(tab->MinRow(),tab->MaxRow());
+  BehavProfile<T> profile(EF);
+
+  gout << "\nIn All_Lemke()";
+  
+  for (i = B.MinRow(); 
+       i <= B.MaxRow()  && !params.status.Get() &&
+       (params.stopAfter==0 || solutions.Length() < params.stopAfter);
+       i++)
+    if (i != j)  {
+      len=List.Length()-1;
+      p1=(double)len/(double)(len+1);
+      p2=(double)(len+1)/(double)(len+2);
+      int num_strats = B.MaxCol()-B.MinCol()-1;
+      aa=(double)(i)/(double)num_strats;
+      params.status.SetProgress(p1+aa*(p2-p1));
+      
+      LTableau<T> BCopy(B);
+      (*A)(i,0)=-big_num;
+
+//      gout << "\nA";
+//      A->Dump(gout);
+//      gout << "\nb";
+//      b->Dump(gout);
+//      gout << "\nBCopy:\n";
+//      BCopy.Dump(gout);
+      newsol=0;
+      missing = BCopy.SF_PivotIn(0);
+//      assert(missing!=0);
+//      gout << "\nafter Pivot, missing: " << missing << "\n";
+//      BCopy.Dump(gout);
+      gout << "\nPath: " << i;
+      if(missing) {
+	if(BCopy.SF_LCPPath(-missing,params.status)==1) {
+	  gout << "\nafter LCPPath\n";
+	  BCopy.Dump(gout);
+	  
+	  newsol = Add_BFS(BCopy);
+	  BCopy.BasisVector(sol);
+	  // gout << "\nsol = " << sol;
+	  GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
+	  if(newsol)
+	    solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
+	  gout << "\nprofile = " << profile << "\n";
+	}
+	else {
+	  gout << ": Dead End";
+	  newsol = 0;
+	}
+
+      }
+      (*A)(i,0)=-(T)1;
+      if(newsol)
+	All_Lemke(i,BCopy,npivots);
+    }
+  
   return 1;
 }
 
@@ -139,6 +326,60 @@ const gList<BehavSolution<T> > &SeqFormModule<T>::GetSolutions(void) const
   return solutions;
 }
 
+
+/*
+template <class T> void LemkeModule<T>::AddSolutions(void)
+{
+  int i,j;
+  int n1=support.NumStrats(1);
+  int n2=support.NumStrats(2);
+  solutions.Flush();
+
+  for (i = 1; i <= List.Length(); i++)    {
+    MixedProfile<T> profile(NF,support);
+    T sum = (T) 0;
+
+    for (j = 1; j <= n1; j++)
+      if (List[i].IsDefined(j))   sum += List[i](j);
+
+    if (sum == (T) 0)  continue;
+
+    for (j = 1; j <= n1; j++) 
+      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
+      else  profile(1, j) = (T) 0;
+
+    sum = (T) 0;
+
+    for (j = 1; j <= n2; j++)
+      if (List[i].IsDefined(n1 + j))  
+	sum += List[i](n1 + j);
+
+    if (sum == (T) 0)  continue;
+
+    for (j = 1; j <= n2; j++)
+      if (List[i].IsDefined(n1 + j))
+	profile(2, j) = List[i](n1 + j) / sum;
+      else
+	profile(2, j) = (T) 0;
+
+    int index;
+    bool add = false;
+    if((params.status.Get() !=1) 
+//       || (params.status.Get() ==1 && profile.IsNash())
+     )
+      add = true;
+    if(add) {
+      index = solutions.Append(MixedSolution<T>(profile, NfgAlg_LEMKE));
+      if(params.status.Get() != 1) {
+	solutions[index].SetIsNash(T_YES);
+	solutions[index].SetIsPerfect(T_YES);
+	solutions[index].SetEpsilon(epsilon);
+      }
+    }
+  }
+}
+*/
+
 template <class T> long SeqFormModule<T>::NumPivots(void) const
 {
   return npivots;
@@ -150,7 +391,6 @@ template <class T> double SeqFormModule<T>::Time(void) const
 }
 
 
-
 template <class T> void SeqFormModule<T>
 ::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
 {
@@ -159,9 +399,9 @@ template <class T> void SeqFormModule<T>
   int i,snew;
   if(n->GetOutcome()) {
     (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
-       prob * EF.Payoff(n->GetOutcome(), 1) - maxpay;
+       prob*EF.Payoff(n->GetOutcome(), 1) - maxpay;
     (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
-       prob * EF.Payoff(n->GetOutcome(), 2) - maxpay;
+       prob*EF.Payoff(n->GetOutcome(), 2) - maxpay;
   }
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
@@ -202,8 +442,9 @@ template <class T> void SeqFormModule<T>
   }
 }
 
+
 template <class T> void SeqFormModule<T>
-::GetProfile(gDPVector<T> &v, const gVector<T> &sol,
+::GetProfile(const LTableau<T> &tab, gDPVector<T> &v, const gVector<T> &sol,
 	       const Node *n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
@@ -213,7 +454,7 @@ template <class T> void SeqFormModule<T>
   if(n->GetInfoset()) {
     if(n->GetPlayer()->IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
-	GetProfile(v,sol,n->GetChild(i),s1,s2);
+	GetProfile(tab, v,sol,n->GetChild(i),s1,s2);
     }
     pl = n->GetPlayer()->GetNumber();
     inf= n->GetInfoset()->GetNumber();
@@ -226,13 +467,15 @@ template <class T> void SeqFormModule<T>
 	v(pl,inf,i) = (T)0;
 //	gout << "\npl1 ";
 //	gout << "\n  v = " << v;
-	if(tab->Member(s1)) {
-	  ind = tab->Find(s1);
+	if(tab.Member(s1)) {
+	  ind = tab.Find(s1);
 //	  if(sol[ind]!=(T)0) {
-	  if(sol[ind]<-eps) {
-	    if(tab->Member(snew+i)) {
-	      ind2 = tab->Find(snew+i);
-	      if(sol[ind2]<-eps)
+//*	  if(sol[ind]<-eps) {
+	  if(sol[ind]>eps) {
+	    if(tab.Member(snew+i)) {
+	      ind2 = tab.Find(snew+i);
+	      if(sol[ind2]>eps)
+//*	      if(sol[ind2]<-eps)
 		v(pl,inf,i) = sol[ind2]/sol[ind];
 //	      gout << "\nind: " << ind << " " << sol[ind] << " ";
 //	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
@@ -240,7 +483,7 @@ template <class T> void SeqFormModule<T>
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(i),snew+i,s2);
+	GetProfile(tab, v,sol,n->GetChild(i),snew+i,s2);
       }
     }
     if(pl==2) {
@@ -251,13 +494,15 @@ template <class T> void SeqFormModule<T>
 	v(pl,inf,i) = (T)0;
 //	gout << "\npl2 ";
 //	gout << "\n  v = " << v;
-	if(tab->Member(ns1+s2)) {
-	  ind = tab->Find(ns1+s2);
+	if(tab.Member(ns1+s2)) {
+	  ind = tab.Find(ns1+s2);
 //	  if(sol[ind]!=(T)0) {
-	  if(sol[ind]<-eps) {
-	    if(tab->Member(ns1+snew+i)) {
-	      ind2 = tab->Find(ns1+snew+i);
-	      if(sol[ind2]<-eps)
+//*	  if(sol[ind]<-eps) {
+	  if(sol[ind]>eps) {
+	    if(tab.Member(ns1+snew+i)) {
+	      ind2 = tab.Find(ns1+snew+i);
+//*	      if(sol[ind2]<-eps)
+	      if(sol[ind2]>eps)
 		v(pl,inf,i) = sol[ind2]/sol[ind];
 //	      gout << "\nind: " << ind << " " << sol[ind] << " ";
 //	      gout << "\nind2: " << ind2 << " " << sol[ind2] << " ";
@@ -265,47 +510,11 @@ template <class T> void SeqFormModule<T>
 	    }
 	  } 
 	} 
-	GetProfile(v,sol,n->GetChild(i),s1,snew+i);
+	GetProfile(tab, v,sol,n->GetChild(i),s1,snew+i);
       }
     }
   }
 }
-
-template <class T> int SeqFormModule<T>::LCPPath()
-{
-//  if (!At_CBFS())  return 0;
-  int enter, exit;
-  enter = ns1+ns2+ni1+1;
-//  if(params.trace >=2) {
-//    (*params.tracefile) << "\nbegin LCP path: enter = " << enter << "\n";
-//    Dump(*params.tracefile);
-//  }
-//  gout << "\nbegin LCP path: enter = " << enter << "\n";
-//  tab->Dump(gout);
-  
-//  enter = dup;
-//  if (Member(dup))
-//    enter = -dup;
-      // Central loop - pivot until another CBFS is found
-  long nits = 0;
-  do  {
-    // Talk about optimism! This is dumb, but better than nothing (I guess):
-    params.status.SetProgress((double)nits/(double)(nits+1)); 
-    nits++;
-    exit = tab->PivotIn(enter);
-//    if(params.trace >=2)
-//      Dump(*params.tracefile);
-    
-//    tab->Dump(gout);
-    
-    enter = -exit;
-  } while (exit != 0 && !params.status.Get());
-      // Quit when at a CBFS.
-      //  if(params.trace >=2 ) (*params.tracefile) << "\nend of path " << dup;
-//  gout << "\nend of path ";
-  return 1;
-}
-
 
 
 //-----------------------------------
@@ -336,3 +545,68 @@ SeqFormBySubgame<T>::SeqFormBySubgame(const Efg<T> &E, const EFSupport &S,
 
 template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
   
+/*
+// old Fill Tableau (two E and F matrices)
+
+template <class T> void SeqFormModule<T>
+::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
+{
+  T EPSILON;
+//  EPSILON = eps;
+  gEpsilon(EPSILON);
+  
+//  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
+//  gout << " prob = " << prob;
+  int i,snew;
+  if(n->GetOutcome()) {
+    (*A)(s1,ns1+s2) = (*A)(s1,ns1+s2) +
+      prob*EF.Payoff(n->GetOutcome(), 1) - maxpay;
+    (*A)(ns1+s2,s1) = (*A)(ns1+s2,s1) +
+      prob*EF.Payoff(n->GetOutcome(), 2) - maxpay;
+  }
+  if(n->GetInfoset()) {
+    if(n->GetPlayer()->IsChance()) {
+      for(i=1;i<=n->NumChildren();i++)
+	FillTableau(n->GetChild(i),
+		    prob * EF.GetChanceProb(n->GetInfoset(), i), 
+		    s1,s2,i1,i2);
+    }
+    int pl = n->GetPlayer()->GetNumber();
+    if(pl==1) {
+      i1=n->GetInfoset()->GetNumber();
+      snew=1;
+      for(i=1;i<i1;i++)
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+      (*A)(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
+      (*A)(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
+      (*A)(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
+      (*A)(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
+      for(i=1;i<=n->NumChildren();i++) {
+	(*A)(snew+i,ns1+ns2+i1+1) = -(T)1;
+	(*A)(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
+	(*A)(ns1+ns2+i1+1,snew+i) = (T)1;
+	(*A)(ns1+ns2+ni1+i1+1,snew+i) = -(T)1;
+	FillTableau(n->GetChild(i),prob,snew+i,s2,i1,i2);
+      }
+    }
+    if(pl==2) {
+      i2=n->GetInfoset()->GetNumber();
+      snew=1;
+      for(i=1;i<i2;i++)
+	snew+=n->GetPlayer()->Infosets()[i]->NumActions();
+      (*A)(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
+      (*A)(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
+      (*A)(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
+      (*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
+      for(i=1;i<=n->NumChildren();i++) {
+	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
+	(*A)(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
+	(*A)(ns1+ns2+ni1+ni1+i2+1,ns1+snew+i) = (T)1;
+	(*A)(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+snew+i) = -(T)1;
+	FillTableau(n->GetChild(i),prob,s1,snew+i,i1,i2);
+      }
+    }
+    
+  }
+}
+*/
