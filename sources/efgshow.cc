@@ -1541,12 +1541,11 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
   if (!p_efg) {
     // must create a new extensive form from scratch or file
     if (p_filename == "") {  // from scratch
-      gArray<gText> names;
-
-      if (GetEfgParams(names, p_parent)) {
+      int numPlayers;
+      if ((numPlayers = GetEfgParams(p_parent)) > 0) {
 	p_efg = new Efg;
-	for (int i = 1; i <= names.Length(); i++)   
-	  p_efg->NewPlayer()->SetName(names[i]);
+	for (int i = 1; i <= numPlayers; i++)
+	  p_efg->NewPlayer();
       }
     }
     else {
@@ -1577,57 +1576,22 @@ EfgGUI::EfgGUI(Efg *p_efg, const gText &p_filename,
 
 
 #define MAX_PLAYERS           100
-#define NUM_PLAYERS_PER_LINE    8
 
-int EfgGUI::GetEfgParams(gArray<gText> &names, wxFrame *parent)
+int EfgGUI::GetEfgParams(wxFrame *parent)
 {
   static int num_players = 2;
 
   // Get the number of players first
-  MyDialogBox *make_ef_p = new MyDialogBox(parent,
-					   "Extensive Form Parameters");
-  make_ef_p->Form()->Add(wxMakeFormShort("How many players", 
+  MyDialogBox dialog(parent, "Create new extensive form");
+  dialog.Form()->Add(wxMakeFormShort("How many players",
 					 &num_players, wxFORM_TEXT,
 					 new wxList(wxMakeConstraintRange(1, MAX_PLAYERS), 0), 
 					 NULL, 0, 220));
-  make_ef_p->Go();
-  int ok = make_ef_p->Completed();
-  delete make_ef_p;
-
-  if (ok != wxOK || num_players < 1) 
+  dialog.Go();
+  if (dialog.Completed() == wxOK)
+    return num_players;
+  else
     return 0;
-
-  // Now get player names
-  MyDialogBox *make_ef_names = new MyDialogBox(parent, "Player Names");
-  names = gArray<gText>(num_players);
-  char **names_str = new char*[num_players+1];
-
-  for (int i = 1; i <= num_players; i++) {
-    names_str[i] = new char[20];
-    strcpy(names_str[i], "Player"+ToText(i));
-    make_ef_names->Add(wxMakeFormString(ToText(i), 
-					&names_str[i], wxFORM_TEXT,
-					NULL, NULL, 0, 140));
-
-    if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
-      make_ef_names->Add(wxMakeFormNewLine());
-  }
-
-  make_ef_names->Go();
-  ok = make_ef_names->Completed();
-  delete make_ef_names;
-
-  if (ok != wxOK) 
-    return 0;
-
-  for (int i = 1; i <= num_players; i++) {
-    names[i] = names_str[i];
-    delete [] names_str[i];
-  }
-
-  delete [] names_str;
-  
-  return 1;
 }
 
 template class SolutionList<BehavSolution>;

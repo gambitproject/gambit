@@ -13,7 +13,7 @@ class EfgNfgInterface;
 
 class EfgGUI {
 private:
-  int GetEfgParams(gArray<gText> &names, wxFrame *parent);
+  int GetEfgParams(wxFrame *parent);
 
 public:
   EfgGUI(Efg *p_efg, const gText &p_filename,
