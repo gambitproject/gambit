@@ -68,14 +68,13 @@ private:
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
-  void OnEditLabel(wxCommandEvent &);
-  void OnEditPlayers(wxCommandEvent &);
   void OnEditStrategies(wxCommandEvent &);
   void OnEditOutcomeNew(wxCommandEvent &);
   void OnEditOutcomeDelete(wxCommandEvent &);
   void OnEditOutcomeAttach(wxCommandEvent &);
   void OnEditOutcomeDetach(wxCommandEvent &);
   void OnEditOutcomePayoffs(wxCommandEvent &);
+  void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
   void OnViewNavigation(wxCommandEvent &);
@@ -85,7 +84,6 @@ private:
   void OnViewProbabilities(wxCommandEvent &);
   void OnViewValues(wxCommandEvent &);
   void OnViewOutcomeLabels(wxCommandEvent &);
-  void OnViewGameInfo(wxCommandEvent &);
 
   void OnFormatDisplayColumns(wxCommandEvent &);
   void OnFormatDisplayDecimals(wxCommandEvent &);

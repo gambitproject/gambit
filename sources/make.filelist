@@ -104,7 +104,7 @@ GUI_SOURCES = gambit.cc treewin.cc treedraw.cc \
               efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgnavigate.cc nfgprofile.cc mixededit.cc \
               nfgprint.cc nfgoutcome.cc nfgsupport.cc \
-              userprefs.cc \
+              dlnfgproperties.cc userprefs.cc \
               algenumpure.cc algenummixed.cc alglcp.cc algliap.cc alglp.cc \
               algpolenum.cc algqre.cc algqregrid.cc algsimpdiv.cc
 

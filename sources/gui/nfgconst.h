@@ -10,9 +10,7 @@
 #ifndef NFGCONST_H
 #define NFGCONST_H
 
-#define NFG_EDIT_LABEL                  300
 #define NFG_EDIT_STRATS                 301
-#define NFG_EDIT_PLAYERS                302
 #define NFG_EDIT_OUTCOMES               303
 #define NFG_EDIT_OUTCOMES_ATTACH        304
 #define NFG_EDIT_OUTCOMES_DETACH        305
@@ -20,6 +18,7 @@
 #define NFG_EDIT_OUTCOMES_PAYOFFS       307
 #define NFG_EDIT_OUTCOMES_NEW           308
 #define NFG_EDIT_OUTCOMES_DELETE        309
+const int NFG_EDIT_GAME = 310;
 
 const int NFG_VIEW_PROFILES = 101;
 const int NFG_VIEW_NAVIGATION = 102;
@@ -29,7 +28,6 @@ const int NFG_VIEW_DOMINANCE = 110;
 const int NFG_VIEW_PROBABILITIES = 111;
 const int NFG_VIEW_VALUES = 112;
 const int NFG_VIEW_OUTCOME_LABELS = 120;
-const int NFG_VIEW_GAMEINFO = 121;
 
 #define NFG_FORMAT_DISPLAY               204
 #define NFG_FORMAT_DISPLAY_COLUMNS       205

@@ -38,8 +38,8 @@
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgeditsupport.h"
-#include "dlnfgplayers.h"
 #include "dlstrategies.h"
+#include "dlnfgproperties.h"
 
 #include "algenumpure.h"
 #include "algenummixed.h"
@@ -73,14 +73,13 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
   EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
-  EVT_MENU(NFG_EDIT_LABEL, NfgShow::OnEditLabel)
-  EVT_MENU(NFG_EDIT_PLAYERS, NfgShow::OnEditPlayers)
   EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
   EVT_MENU(NFG_EDIT_OUTCOMES_NEW, NfgShow::OnEditOutcomeNew)
   EVT_MENU(NFG_EDIT_OUTCOMES_DELETE, NfgShow::OnEditOutcomeDelete)
   EVT_MENU(NFG_EDIT_OUTCOMES_ATTACH, NfgShow::OnEditOutcomeAttach)
   EVT_MENU(NFG_EDIT_OUTCOMES_DETACH, NfgShow::OnEditOutcomeDetach)
   EVT_MENU(NFG_EDIT_OUTCOMES_PAYOFFS, NfgShow::OnEditOutcomePayoffs)
+  EVT_MENU(NFG_EDIT_GAME, NfgShow::OnEditGame)
   EVT_MENU(NFG_VIEW_PROFILES, NfgShow::OnViewProfiles)
   EVT_MENU(NFG_VIEW_NAVIGATION, NfgShow::OnViewNavigation)
   EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
@@ -89,7 +88,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
   EVT_MENU(NFG_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
-  EVT_MENU(NFG_VIEW_GAMEINFO, NfgShow::OnViewGameInfo)
   EVT_MENU(NFG_FORMAT_DISPLAY_COLUMNS, NfgShow::OnFormatDisplayColumns)
   EVT_MENU(NFG_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
   EVT_MENU(NFG_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
@@ -328,8 +326,6 @@ void NfgShow::MakeMenus(void)
   fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
   
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
-  editMenu->Append(NFG_EDIT_PLAYERS, "&Players", "Edit player names");
   editMenu->Append(NFG_EDIT_STRATS, "&Strategies", "Edit strategy names");
 
   wxMenu *editOutcomesMenu = new wxMenu;
@@ -345,6 +341,8 @@ void NfgShow::MakeMenus(void)
 			   "Set the payoffs for outcome of the current contingency");
   editMenu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
 		    "Set/Edit outcomes");
+  editMenu->AppendSeparator();
+  editMenu->Append(NFG_EDIT_GAME, "&Game", "Edit game properties");
 
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(NFG_VIEW_PROFILES, "&Profiles",
@@ -371,8 +369,6 @@ void NfgShow::MakeMenus(void)
   // This probably belongs in formatting instead
   viewMenu->Append(NFG_VIEW_OUTCOME_LABELS, "Outcome &Labels",
 		   "Display outcome labels", TRUE);
-  viewMenu->Append(NFG_VIEW_GAMEINFO, "Game&Info",
-		   "Display information about the game");
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
@@ -647,22 +643,6 @@ void NfgShow::OnFileMRUFile(wxCommandEvent &p_event)
 //                NfgShow: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
-void NfgShow::OnEditLabel(wxCommandEvent &)
-{
-  const char *label = wxGetTextFromUser("Label of game", "Label Game",
-					(char *) m_nfg.GetTitle());
-  if (label) {
-    m_nfg.SetTitle(label);
-    SetFilename(Filename());
-  }
-}
-
-void NfgShow::OnEditPlayers(wxCommandEvent &)
-{
-  dialogNfgPlayers dialog(m_nfg, this);
-  dialog.ShowModal();
-}
-
 void NfgShow::OnEditStrategies(wxCommandEvent &)
 {
   dialogStrategies dialog(m_nfg, this);
@@ -727,6 +707,20 @@ void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
 		   m_table->GetColStrategy(), false);
   }
 }
+
+void NfgShow::OnEditGame(wxCommandEvent &)
+{
+  dialogNfgProperties dialog(this, m_nfg, m_filename);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_nfg.SetTitle(dialog.GetGameTitle().c_str());
+    SetFilename(Filename());
+    m_nfg.SetComment(dialog.GetComment().c_str());
+    for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
+      m_nfg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
+    }
+  }
+}
+
 
 //----------------------------------------------------------------------
 //                NfgShow: Menu handlers - View menu
@@ -834,19 +828,6 @@ void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 {
   m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
   m_table->Refresh();
-}
-
-void NfgShow::OnViewGameInfo(wxCommandEvent &)
-{
-  gText message = "Number of Players: " + ToText(m_nfg.NumPlayers()) + "\n";
-  message += "Is ";
-  message += ((IsConstSum(m_nfg)) ? " " : "NOT ");
-  message += "constant sum\n";
-  message += "Game ";
-  message += ((m_nfg.IsDirty()) ? "HAS " : "has not ");
-  message += "been modified\n";
-
-  wxMessageBox((char *) message, "Game Information", wxOK, this);
 }
 
 //----------------------------------------------------------------------

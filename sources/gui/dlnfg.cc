@@ -16,7 +16,6 @@
 
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
-#include "dlnfgplayers.h"
 #include "dlstrategies.h"
 #include "dlnfgeditsupport.h"
 
@@ -112,60 +111,6 @@ dialogNfgOutcomeSelect::dialogNfgOutcomeSelect(Nfg &p_nfg, wxWindow *p_parent)
 NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 {
   return m_nfg.Outcomes()[m_outcomeList->GetSelection() + 1];
-}
-
-//=========================================================================
-//                   dialogNfgPlayers: Member functions
-//=========================================================================
-
-BEGIN_EVENT_TABLE(dialogNfgPlayers, guiAutoDialog)
-  EVT_BUTTON(idNFPLAYERS_EDIT_BUTTON, dialogNfgPlayers::OnEdit)
-END_EVENT_TABLE()
-
-dialogNfgPlayers::dialogNfgPlayers(Nfg &p_nfg, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Player Names"), m_nfg(p_nfg)
-{
-  m_playerNameList = new wxListBox(this, -1);
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_playerNameList->Append((char *) (ToText(pl) + ": " + m_nfg.Players()[pl]->GetName()));
-  }
-  m_playerNameList->SetSelection(0);
-  m_lastSelection = 0;
-
-  wxButton *editPlayer = new wxButton(this, idNFPLAYERS_EDIT_BUTTON, "Edit...");
-
-  m_cancelButton->Show(FALSE);
-
-  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-
-  rightSizer->Add(editPlayer, 0, wxALL, 5);
-
-  topSizer->Add(new wxStaticText(this, -1, "Player:"), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_playerNameList, 0, wxEXPAND | wxALL, 5);
-  topSizer->Add(rightSizer, 0, wxALL, 5);
-
-  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetAutoLayout(TRUE);
-  SetSizer(allSizer); 
-  allSizer->Fit(this);
-  allSizer->SetSizeHints(this); 
-  Layout();
-}
-
-void dialogNfgPlayers::OnEdit(wxCommandEvent &)
-{
-  int selection = m_playerNameList->GetSelection();
-  gText defaultName = m_nfg.Players()[selection + 1]->GetName();
-
-  gText newName = wxGetTextFromUser("Name", "Enter Name", (char *) defaultName, this).c_str();
-  if (newName != "") {
-    m_nfg.Players()[selection + 1]->SetName(newName);
-    m_playerNameList->SetString(selection, (char *) (ToText(selection + 1) + ": " + newName));
-  }
 }
 
 //=========================================================================
