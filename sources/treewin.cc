@@ -1,7 +1,7 @@
 //*************************************************************************
 //* Treewin.cc: This file contains the type-specific (templated) portion of
 //* the extensive form rendering code.
-// $Id$
+// @(#)treewin.cc	1.18 7/4/95
 //
 #pragma hdrstop
 #include "wx.h"
@@ -17,7 +17,7 @@
 
 
 template <class T>
-char *OutcomeToString(const gVector<T> &v,TreeDrawSettings &draw_settings,Bool color_coded=TRUE)
+char *OutcomeToString(const gVector<T> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE)
 {
 char tempstr[20];
 static gString gvts;
@@ -235,10 +235,10 @@ if (s)
 	#define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
 TEMPLATE class TreeWindow<double> ;
-TEMPLATE char *OutcomeToString(const gVector<double> &v,TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
+TEMPLATE char *OutcomeToString(const gVector<double> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
 
 #ifdef GRATIONAL
 	TEMPLATE class TreeWindow<gRational> ;
-	TEMPLATE char *OutcomeToString(const gVector<gRational> &v,TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
+	TEMPLATE char *OutcomeToString(const gVector<gRational> &v,const TreeDrawSettings &draw_settings,Bool color_coded=TRUE);
 #endif
 

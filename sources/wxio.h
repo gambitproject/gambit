@@ -14,41 +14,36 @@
 #pragma interface
 #endif   // __GNUG__
 
-typedef enum {gIOWxInput,gIOWxOutput,gIOFileInput,gIOFileOutput,gIOInput,gIOOutput} gWxIOType; 
 
-class gWxInput: public gInput
+class gWxInput: public gInput, public wxFrame
 {
 private:
 	wxTextWindow	*f;
-	gWxIOType			__type;
 	char					line_buffer[100];
-  bool						ok;
+	bool						ok;
 	gWxInput(const gFileInput &);
 	gWxInput &operator=(const gFileInput &);
 public:
-	// Constructors 
-	gWxInput(void)
+	// Constructors
+	gWxInput(void):wxFrame(0,"gWxInput",0,0,200,200)
 	{
-	__type=gIOWxInput;
-	wxFrame *frame=new wxFrame(0,"gWxInput",0,0,200,200);
-	f=new wxTextWindow(frame,-1,-1,-1,-1,wxNATIVE_IMPL);
-  frame->Show(TRUE);
+	f=new wxTextWindow(this,-1,-1,-1,-1,wxNATIVE_IMPL);
 	ok=(f) ? true:false;
+	Show(TRUE);
 	}
 
-	gWxInput(const char *in)
+	gWxInput(const char *in):wxFrame(0,(char *)in,0,0,200,200)
 	{
-	__type=gIOWxInput;
-	wxFrame *frame=new wxFrame(NULL,(char *)in,0,0,200,200);
-	f=new wxTextWindow(frame,-1,-1,-1,-1,wxNATIVE_IMPL);
-	frame->Show(TRUE);
+	f=new wxTextWindow(this,-1,-1,-1,-1,wxNATIVE_IMPL);
 	ok=(f) ? true:false;
+	Show(TRUE);
 	}
 
+	Bool OnClose(void) {Show(FALSE);return TRUE;}
 //
 // Close the window pointed to, if any.
 //
-	~gWxInput()   { if (f) delete f->GetParent();}
+	~gWxInput()   { }
 
 // Load a text file into the input window (this is unique to WxInput)
 	void Load(const char *file) {f->LoadFile((char *)file);}
@@ -94,11 +89,10 @@ public:
 // since some compilers (notable GNU C++) suffer from executable bloat
 // when iostreams are used.
 //
-class gWxOutput: public gOutput
+class gWxOutput: public gOutput, public wxFrame
 {
 	private:
 	wxTextWindow	*f;
-	gWxIOType			__type;
 	char					buffer[100];
 	bool					ok;
 	int Width,Prec;
@@ -117,38 +111,32 @@ class gWxOutput: public gOutput
 //
 // The default constructor, initializing the instance to point to no stream
 //
-		gWxOutput(void)
+		gWxOutput(void):wxFrame(NULL,"gWxOutput",0,0,200,200)
 		{
-		__type=gIOWxOutput;
-		wxFrame *frame=new wxFrame(NULL,"gWxOutput",0,0,200,200);
-		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
-		frame->Show(TRUE);
+		f=new wxTextWindow(this,-1,-1,-1,-1,wxREADONLY);
 		ok=(f) ? true:false;
 		Width=0;
 		Prec=6;
 		Represent='f';
+		Show(TRUE);
+		}
 
-		}
-//
-// Initialize the instance to point to the stream with a certain filename.
-//
-// <note> This is the preferred way to initialize an instance of this class.
-//
-		gWxOutput(const char *out)
+		gWxOutput(const char *out):wxFrame(NULL,(char *)out,0,0,200,200)
 		{
-		__type=gIOWxOutput;
-		wxFrame *frame=new wxFrame(NULL,(char *)out,0,0,200,200);
-		f=new wxTextWindow(frame,-1,-1,-1,-1,wxREADONLY);
-		frame->Show(TRUE);
+		f=new wxTextWindow(this,-1,-1,-1,-1,wxREADONLY);
 		ok=(f) ? true:false;
 		Width=0;
 		Prec=6;
 		Represent='f';
+		Show(TRUE);
 		}
+
+	Bool OnClose(void) {Show(FALSE);return TRUE;}
+
 //
 // Close the window pointed to, if any.
 //
-		~gWxOutput()   {if (f) delete f->GetParent();}
+		~gWxOutput()   { }
 
 //
 // Output primitives for the basic types

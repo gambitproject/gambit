@@ -676,52 +676,41 @@ Resize();
 
 void SpreadSheet3D::MakeFeatures(void)
 {
-//------------------make the panel---------------------------
-if (features&ALL_BUTTONS) // Create the panel
-{
-	int h,w;
-	panel_x=panel_y=0;
-	panel_new_line=FALSE;
-	GetClientSize(&w,&h);
-	panel=new wxPanel(this,0,h-MIN_BUTTON_SPACE,w,MIN_BUTTON_SPACE,wxBORDER);
+panel=0;
+MakeButtons(features&ALL_BUTTONS);
+SetMenuBar(MakeMenuBar());
+}
 
-	if (levels>1) // create a slider to choose the active level
+void SpreadSheet3D::MakeButtons(long buttons)
+{
+//------------------make the panel---------------------------
+if (buttons) // Create the panel
+{
+	if (!panel)
+	{
+		int h,w;
+		panel_x=panel_y=0;
+		panel_new_line=FALSE;
+		GetClientSize(&w,&h);
+		panel=new wxPanel(this,0,h-MIN_BUTTON_SPACE,w,MIN_BUTTON_SPACE,wxBORDER);
+	}
+	if (levels>1 && !level_item) // create a slider to choose the active level
 	{
 		level_item=new wxSlider(panel,(wxFunction)SpreadSheet3D::spread_slider_func,NULL,1,1,levels,140);
 		level_item->SetClientData((char *)this);
 		panel->NewLine();
 		SavePanelPos();
 	}
-	if (features&OK_BUTTON)
-	{
-		wxButton	*ok=AddButton("OK",(wxFunction)SpreadSheet3D::spread_ok_func);
-		ok->SetClientData((char*)this);
-	}
-	if (features&CANCEL_BUTTON)
-	{
-		wxButton	*cancel=AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
-		cancel->SetClientData((char*)this);
-	}
-	if (features&PRINT_BUTTON)
-	{
-		wxButton *print=AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
-		print->SetClientData((char*)this);
-	}
-	if (features&OPTIONS_BUTTON)
-	{
-		wxButton *options=AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
-		options->SetClientData((char*)this);
-	}
-	if (features&CHANGE_BUTTON)
+	if (buttons&OK_BUTTON) AddButton("OK",(wxFunction)SpreadSheet3D::spread_ok_func);
+	if (buttons&CANCEL_BUTTON) AddButton("Cancel",(wxFunction)SpreadSheet3D::spread_cancel_func);
+	if (buttons&PRINT_BUTTON) AddButton("P",(wxFunction)SpreadSheet3D::spread_print_func);
+	if (buttons&OPTIONS_BUTTON) AddButton("Config",(wxFunction)SpreadSheet3D::spread_options_func);
+	if (buttons&CHANGE_BUTTON)
 	{
 		AddButtonNewLine();
-		wxButton *change=AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
-		change->SetClientData((char *)this);
+		AddButton("Grow/Shrink",(wxFunction)SpreadSheet3D::spread_change_func);
 	}
 }
-else
-	panel=0;
-	SetMenuBar(MakeMenuBar());
 }
 
 void SpreadSheet3D::OnMenuCommand(int id)
@@ -957,7 +946,7 @@ wxButton *button=new wxButton(panel,fun,(char *)label,panel_x,panel_y);
 if (panel_new_line) panel->NewLine();
 wxButton *button=new wxButton(panel,fun,(char *)label);
 #endif
-
+button->SetClientData((char *)this);
 return button;
 }
 wxPanel *SpreadSheet3D::AddPanel(void)

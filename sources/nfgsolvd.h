@@ -1,3 +1,9 @@
+// File: nfgsolvd.h -- the main dialog for running NormalForm solution
+// algorithms.  You must add an entry here for each new algorithm.
+// Update: this now takes the number of players so that it can turn
+// of the algorithms that will not work with this number of players.
+// Please list these explicitly
+// Only work for 2 players: Lemke, Enum
 #define SD_CANCEL			-1
 #define SD_SOLVE			1
 #define	SD_ALGORITHM 	2
@@ -15,7 +21,7 @@ private:
 	gList<int> solns;
 public:
 // Constructor
-	NfgSolveParamsDialog(const gList<int> &got_solns,int have_efg,wxWindow *parent=0):solns(got_solns)
+	NfgSolveParamsDialog(const gList<int> &got_solns,int have_efg,int num_players,wxWindow *parent=0):solns(got_solns)
 	{
 		d=new wxDialogBox(parent,"Solutions",TRUE);
 		char *algorithm_list[NFG_NUM_SOLUTIONS];
@@ -30,6 +36,11 @@ public:
 		algorithm_list[NFG_ALL_SOLUTION]="All";
 		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,NFG_NUM_SOLUTIONS,algorithm_list,2);
 		algorithm_box->SetClientData((char *)this);
+		if (num_players!=2)
+		{
+			algorithm_box->Enable(NFG_LEMKE_SOLUTION,FALSE);
+			algorithm_box->Enable(NFG_ENUM_SOLUTION,FALSE);
+		}
 		d->NewLine();
 		extensive_box=new wxCheckBox(d,0,"Extensive Form");
 		if (!have_efg) extensive_box->Enable(FALSE);

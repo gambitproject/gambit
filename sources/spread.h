@@ -53,7 +53,7 @@
 // OnMenuCommand, OnCharNew (this receives events from the active canvas),
 // OnSize, OnOk, OnCancel, OnDoubleClick (Ctrl-Click in X), and some others.
  
-// $Id$
+// @(#)spread.h	1.5 7/4/95
 
 #ifndef	SPREAD_H
 #define	SPREAD_H
@@ -428,6 +428,7 @@ protected:
 	wxMenuBar *MenuBar(void) {return menubar;}
 	wxMenuBar *MakeMenuBar(void);
 	void SetMenuBar(wxMenuBar *bar);
+	void MakeButtons(long buttons);
 public:
 	// Constructor
 	SpreadSheet3D(int rows,int cols,int levels,char *title,
