@@ -326,14 +326,20 @@ const gArray<Action *> &EFSupport::Actions(int pl, int iset) const
   return sets[pl]->ActionList(iset);
 }
 
-const gArray<Action *>& EFSupport::Actions(const Infoset &i) const
+const gArray<Action *> &EFSupport::Actions(const Infoset &i) const
 {
-  return sets[i.GetPlayer()->GetNumber()]->ActionList(i.GetNumber());
+  if (i.GetPlayer()->IsChance())
+    return i.Actions();
+  else
+    return sets[i.GetPlayer()->GetNumber()]->ActionList(i.GetNumber());
 }
 
-const gArray<Action *>& EFSupport::Actions(const Infoset *i) const
+const gArray<Action *> &EFSupport::Actions(const Infoset *i) const
 {
-  return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
+  if (i->GetPlayer()->IsChance())
+    return i->Actions();
+  else
+    return sets[i->GetPlayer()->GetNumber()]->ActionList(i->GetNumber());
 }
 
 gList<Action *> EFSupport::ListOfActions(const Infoset *i) const

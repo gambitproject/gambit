@@ -57,16 +57,12 @@ static Portion *GSM_BasisActionNumber(Portion **param)
 
 static Portion *GSM_Actions(Portion **param)
 {
-  if( param[0]->Spec().Type == porNULL )
+  if (param[0]->Spec().Type == porNULL)
     return new ListPortion;
 
-  Infoset *s = ((InfosetPortion *) param[0])->Value();
-  EFSupport* sup = ((EfSupportPortion*) param[1])->Value();
-
-  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
-                ArrayToList(sup->Actions(s->GetPlayer()->GetNumber(),
-					 s->GetNumber()));
-  return por;
+  Infoset *infoset = ((InfosetPortion *) param[0])->Value();
+  EFSupport *support = ((EfSupportPortion *) param[1])->Value();
+  return ArrayToList(support->Actions(infoset));
 }
 
 static Portion *GSM_BasisActions(Portion **param)
