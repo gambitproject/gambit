@@ -2,7 +2,7 @@
 // FILE: enum.cc -- Nash Enum module
 //
 // $Id$
-//
+// 
 
 #include "enum.imp"
 
