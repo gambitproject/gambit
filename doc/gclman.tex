@@ -7158,8 +7158,9 @@ required, and the function is not listable.
 UnDominated[support->NFSUPPORT, {strong->False}, 
             {mixed->False}, {precision->Rational}, {time<->0.000000}, 
             {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
-UnDominated[support->EFSUPPORT, {strong->False}, {time<->0.000000}, 
-            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+UnDominated[support->EFSUPPORT, {strong->False}, {conditional->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd
@@ -7178,6 +7179,11 @@ on strict dominance.
 actions.  If this is specified \verb+True+, elimination is done by
 examining mixtures over other strategies or actions.  Note that mixed 
 elimination is only implemented for normal form games.  
+\item [conditional:] Dominance computations are conditional on
+reaching infoset containing the action.  For example, a behavior
+strategy may be strongly dominated conditional on reaching its
+information set, but only weakly dominated in the entire game.  Only
+relevant for extensive form games.
 \item [precision:] Default precision is Rational.  Note that the precision
 parameter is only applicable for mixed domination.  Pure strategy
 domination always uses Rational precision.
@@ -7929,15 +7935,16 @@ false.
 
 \item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativeUnDominated[s->EFSUPPORT, {strong->False}, {time<->0.000000}, 
-                       {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+IterativeUnDominated[s->EFSUPPORT, {strong->False}, {conditional->False}, 
+                     {time<->0.000000}, {traceFile<->(Output)}, 
+                     {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
 Successively eliminates dominated strategies in \verb+s+. See
 \verb+UnDominated+ for description of parameters.  
 \begin{verbatim}
-  While[s!=(ss:=UnDominated[s,strong,time,traceFile,traceLevel]),
+  While[s!=(ss:=UnDominated[s,strong,conditional,time,traceFile,traceLevel]),
     s:=ss
   ];
   s;
@@ -7979,15 +7986,17 @@ Successively eliminates dominated strategies in \verb+nfg+.  See
 
 \item\lex{IterativeUnDominated}
 \protect \large \begin{verbatim}
-IterativeUnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
-           {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+IterativeUnDominated[efg->EFG, {strong->False}, {conditional->False}, 
+                    {time<->0.000000}, {traceFile<->(Output)}, 
+                    {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
 Successively eliminates dominated strategies in \verb+nfg+. See
 \verb+UnDominated+ for description of parameters.  
 \begin{verbatim}
-  IterativeUnDominated[Support[efg],strong,time,traceFile,traceLevel];
+  IterativeUnDominated[Support[efg],strong,conditional,time,
+    traceFile,traceLevel];
 \end{verbatim} 
 \ed
 
@@ -9245,8 +9254,9 @@ description of the parameters.
 
 \item\lex{UnDominated}
 \protect \large \begin{verbatim}
-UnDominated[efg->EFG, {strong->False}, {time<->0.000000}, 
-            {traceFile<->(Output)}, {traceLevel->0}] =: EFSUPPORT 
+UnDominated[efg->EFG, {strong->False}, {conditional->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
@@ -9254,7 +9264,7 @@ A version of \verb+UnDominated+ that takes an extensive form game instead
 of a support.  See the built-in function, \verb+UnDominated+ for a
 description of the parameters.
 \begin{verbatim}
-  UnDominated[Support[efg],strong,time,traceFile,traceLevel]
+  UnDominated[Support[efg],strong,conditional,time,traceFile,traceLevel]
 \end{verbatim} 
 \ed
 
