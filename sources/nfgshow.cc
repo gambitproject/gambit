@@ -1146,17 +1146,6 @@ void NfgShow::PrefsDisplayColumns(void)
   }
 }
 
-void NfgShow::PrefsDisplayRows(void)
-{
-  guiSliderDialog dialog(spread, "Row height", 0, 100, 
-			 spread->DrawSettings()->GetRowHeightRaw());
-
-  if (dialog.Completed() == wxOK) {
-    spread->DrawSettings()->SetRowHeight(dialog.GetValue());
-    spread->Repaint();
-  }
-}
-
 void NfgShow::PrefsDisplayDecimals(void)
 {
   guiSliderDialog dialog(spread, "Decimal places", 0, 25, ToTextPrecision());
@@ -1167,17 +1156,7 @@ void NfgShow::PrefsDisplayDecimals(void)
   }
 }
 
-void NfgShow::PrefsFontsLabels(void)
-{
-  FontDialogBox dialog(spread, spread->DrawSettings()->GetLabelFont());
-    
-  if (dialog.Completed() == wxOK) {
-    spread->DrawSettings()->SetLabelFont(dialog.MakeFont());
-    spread->Repaint();
-  }
-}
-
-void NfgShow::PrefsFontsCells(void)
+void NfgShow::PrefsFont(void)
 {
   FontDialogBox dialog(spread, spread->DrawSettings()->GetDataFont());
     
@@ -1713,20 +1692,12 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   wxMenu *prefsDisplayMenu = new wxMenu;
   prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_COLUMNS, "&Column Width",
 			   "Set column width");
-  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_ROWS, "&Row Height",
-			   "Set row height");
   prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
 
-  wxMenu *prefsFontsMenu = new wxMenu;
-  prefsFontsMenu->Append(NFG_PREFS_FONTS_LABELS, "&Labels",
-			 "Set font for strategy labels");
-  prefsFontsMenu->Append(NFG_PREFS_FONTS_CELLS, "&Cells",
-			 "Set font for table cells");
-
   prefsMenu->Append(NFG_PREFS_DISPLAY, "&Display", prefsDisplayMenu,
 		    "Configure display options");
-  prefsMenu->Append(NFG_PREFS_FONTS, "&Fonts", prefsFontsMenu, "Set fonts");
+  prefsMenu->Append(NFG_PREFS_FONT, "&Font", "Set font");
   prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
   prefsMenu->Append(NFG_PREFS_ACCELS, "&Accels", "Edit accelerators");
 
@@ -2105,17 +2076,11 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_PREFS_DISPLAY_COLUMNS:
       parent->PrefsDisplayColumns();
       break;
-    case NFG_PREFS_DISPLAY_ROWS:
-      parent->PrefsDisplayRows();
-      break;
     case NFG_PREFS_DISPLAY_DECIMALS:
       parent->PrefsDisplayDecimals();
       break;
-    case NFG_PREFS_FONTS_LABELS:
-      parent->PrefsFontsLabels();
-      break;
-    case NFG_PREFS_FONTS_CELLS:
-      parent->PrefsFontsCells();
+    case NFG_PREFS_FONT:
+      parent->PrefsFont();
       break;
     case NFG_PREFS_COLORS: 
       parent->SetColors();

@@ -123,11 +123,9 @@ public:
       UpdateVals();
     }
 
-  void PrefsDisplayRows(void);
   void PrefsDisplayColumns(void);
   void PrefsDisplayDecimals(void);
-  void PrefsFontsLabels(void);
-  void PrefsFontsCells(void);
+  void PrefsFont(void);
 
   void UpdateVals(void);
   void UpdateSoln(void);

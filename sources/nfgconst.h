@@ -48,11 +48,8 @@
 
 #define NFG_PREFS_DISPLAY               204
 #define NFG_PREFS_DISPLAY_COLUMNS       205
-#define NFG_PREFS_DISPLAY_ROWS          206
 #define NFG_PREFS_DISPLAY_DECIMALS      207
-#define NFG_PREFS_FONTS                 208
-#define NFG_PREFS_FONTS_LABELS          209
-#define NFG_PREFS_FONTS_CELLS           210
+#define NFG_PREFS_FONT                  208
 #define NFG_PREFS_COLORS                200
 #define NFG_PREFS_ACCELS                202
 
