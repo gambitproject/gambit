@@ -759,12 +759,21 @@ public:
 
 class OutputPortion : public Portion  {
 protected:
-  gOutput *_Value;
+  struct outputrep  {
+    gOutput *value;
+    int nref;
+
+    outputrep(gOutput *v) : value(v), nref(1)  { }
+    ~outputrep()  { if (value != &gout && value != &gnull)  delete value; }
+  };
+  
+  struct outputrep *rep; 
   bool _ref;
+
+  OutputPortion(const OutputPortion *, bool);
 
 public:
   OutputPortion(gOutput &value);
-  OutputPortion(gOutput &value, bool);
 
   virtual ~OutputPortion();
 

@@ -699,7 +699,7 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));

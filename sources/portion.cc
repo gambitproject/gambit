@@ -1497,18 +1497,22 @@ bool EfgPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 OutputPortion::OutputPortion(gOutput& value)
-  : _Value(&value), _ref(false)
+  : rep(new struct outputrep(&value)), _ref(false)
 { }
 
-OutputPortion::OutputPortion(gOutput& value, bool ref)
-  : _Value(&value), _ref(ref)
-{ }
+OutputPortion::OutputPortion(const OutputPortion *p, bool ref)
+  : rep(p->rep), _ref(ref)
+{
+  rep->nref++;
+}
 
 OutputPortion::~OutputPortion()
-{ if (!_ref)   delete _Value; }
+{
+  if (--rep->nref == 0)   delete rep;
+}
 
 gOutput& OutputPortion::Value(void) const
-{ return *_Value; }
+{ return *rep->value; }
 
 PortionSpec OutputPortion::Spec(void) const
 { return PortionSpec(porOUTPUT); }
@@ -1519,17 +1523,19 @@ void OutputPortion::Output(gOutput& s) const
   s << "(Output)"; 
 }
 
-gString OutputPortion::OutputString( void ) const
+gString OutputPortion::OutputString(void) const
 {
   return "(Output)";
 }
 
 Portion* OutputPortion::ValCopy(void) const
-{ return RefCopy(); }
+{ 
+  return new OutputPortion(this, false);
+}
 
 Portion* OutputPortion::RefCopy(void) const
 { 
-  Portion* p = new OutputPortion(*_Value, true); 
+  Portion* p = new OutputPortion(this, true); 
   p->SetOriginal(Original());
   return p;
 }

@@ -300,9 +300,9 @@ constant:        BOOLEAN
         |        STDIN
           { $$ = new gclConstExpr(new InputPortion(gin, true)); }
         |        STDOUT
-          { $$ = new gclConstExpr(new OutputPortion(gout, true)); }
+          { $$ = new gclConstExpr(new OutputPortion(gout)); }
         |        gNULL
-          { $$ = new gclConstExpr(new OutputPortion(gnull, true)); }
+          { $$ = new gclConstExpr(new OutputPortion(gnull)); }
         |        MACHINEPREC
           { $$ = new gclConstExpr(new PrecisionPortion(precDOUBLE)); }
         |        RATIONALPREC

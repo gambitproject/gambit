@@ -2798,7 +2798,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Manual, porBOOL, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("y", porOUTPUT,
-					    new OutputPortion(gout, true)));
+					    new OutputPortion(gout)));
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("HelpVars", 1);

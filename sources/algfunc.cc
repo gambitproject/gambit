@@ -872,7 +872,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -891,7 +891,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -909,7 +909,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -926,7 +926,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -960,7 +960,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 11, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 12, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputPortion(gnull, true),
+					     new OutputPortion(gnull),
 					     BYREF));
   FuncObj->SetParamInfo(0, 13, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1000,7 +1000,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porINTEGER,
 					     new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputPortion(gnull, true), 
+					     new OutputPortion(gnull), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1040,7 +1040,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 13, ParamInfoType("nIters", porINTEGER,
 					     new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 14, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputPortion(gnull, true), 
+					     new OutputPortion(gnull), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 15, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1061,7 +1061,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true),
+					    new OutputPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1094,7 +1094,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(3, 5, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(3, 6, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(3, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1125,7 +1125,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 9, ParamInfoType("nEvals", porINTEGER,
 					    new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(0, 10, ParamInfoType("traceFile", porOUTPUT,
-					     new OutputPortion(gnull, true), 
+					     new OutputPortion(gnull), 
 					     BYREF));
   FuncObj->SetParamInfo(0, 11, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1150,7 +1150,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 8, ParamInfoType("nEvals", porINTEGER,
 					    new IntPortion(0), BYREF));
   FuncObj->SetParamInfo(1, 9, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 10, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
@@ -1169,7 +1169,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true),
+					    new OutputPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1186,7 +1186,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true), 
+					    new OutputPortion(gnull), 
 					    BYREF));
   FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1249,7 +1249,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 6, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(0, 7, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true),
+					    new OutputPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(0, 8, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
@@ -1272,7 +1272,7 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 7, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
   FuncObj->SetParamInfo(1, 8, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputPortion(gnull, true),
+					    new OutputPortion(gnull),
 					    BYREF));
   FuncObj->SetParamInfo(1, 9, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
