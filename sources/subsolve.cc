@@ -6,6 +6,28 @@
 
 #include "efg.h"
 #include "efgutils.h"
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+#include "glist.imp"
+
+TEMPLATE class gList<gVector<double> >;
+TEMPLATE class gNode<gVector<double> >;
+TEMPLATE class gList<gVector<gRational> >;
+TEMPLATE class gNode<gVector<gRational> >;
+
+TEMPLATE class gList<Outcome *>;
+TEMPLATE class gNode<Outcome *>;
+
+TEMPLATE class gList<gArray<Outcome *> >;
+TEMPLATE class gNode<gArray<Outcome *> >;
+
+#pragma option -Jgx
+
 #include "subsolve.h"
 
 #include "gwatch.h"
@@ -27,7 +49,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
   gList<Node *> subroots;
   ChildSubgames(n, subroots);
 
-  gList<gArray<Outcome *> > subrootvalues;
+	gList<gArray<Outcome *> > subrootvalues;
   subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
 
   for (i = 1; i <= subroots.Length(); i++)  {
@@ -57,7 +79,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 
 	newsubrootvalues.Append(subrootvalues[soln]);
 	newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
-      }
+			}
 
     thissolns = newsolns;
     subrootvalues = newsubrootvalues;
@@ -117,7 +139,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 	  
 	  for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	       act++)
-	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
+			solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
 	}
       }
     
@@ -327,7 +349,7 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E,
   for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
     BehavProfile<T> bp(E);
     MixedToBehav(*N, M.GetSolutions()[i], E, bp);
-    solns.Append(bp);
+		solns.Append(bp);
   }
 
   delete N;
@@ -477,7 +499,7 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
 
   npivots += M.NumPivots();
 
-  gList<MixedProfile<T> > sol;
+	gList<MixedProfile<T> > sol;
   M.GetSolutions(sol);
 
   for (int i = 1; i <= sol.Length(); i++)  {
@@ -504,6 +526,31 @@ template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
 class gArray<unsigned char>;
 class gArray<BFS<double> >;
 class gArray<BFS<gRational> >;
+class gList<LUupdate<double> >;
+class gList<LUupdate<gRational> >;
+class gList<BehavProfile<double> >;
+class gList<BehavProfile<gRational> >;
+class gListIter<BehavProfile<double> >;
+class gListIter<BehavProfile<gRational> >;
+class gNode<BehavProfile<double> >;
+class gNode<BehavProfile<gRational> >;
+class gListIter<MixedProfile<double> >;
+class gListIter<MixedProfile<gRational> >;
+class gNode<MixedProfile<double> >;
+class gNode<MixedProfile<gRational> >;
+bool operator==(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
+{
+	if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
+	for (int i = a.mindex; i <= a.maxdex; i++)
+		if (a[i] != b[i])   return false;
+	return true;
+}
+
+bool operator!=(const gArray<Outcome *> &a, const gArray<Outcome *> &b)
+{
+	return !(a == b);
+}
+
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
@@ -539,22 +586,8 @@ TEMPLATE class ZSumBySubgame<gRational>;
 
 TEMPLATE class gArray<gArray<Infoset *> *>;
 
-#include "glist.imp"
-
-TEMPLATE class gList<gVector<double> >;
-TEMPLATE class gNode<gVector<double> >;
-TEMPLATE class gList<gVector<gRational> >;
-TEMPLATE class gNode<gVector<gRational> >;
-
-TEMPLATE class gList<Outcome *>;
-TEMPLATE class gNode<Outcome *>;
-
-TEMPLATE class gList<gArray<Outcome *> >;
-TEMPLATE class gNode<gArray<Outcome *> >;
-
-
-TEMPLATE int operator==(const gArray<Outcome *> &, const gArray<Outcome *> &);
-TEMPLATE int operator!=(const gArray<Outcome *> &, const gArray<Outcome *> &);
+TEMPLATE bool operator==(const gArray<Outcome *> &, const gArray<Outcome *> &);
+TEMPLATE bool operator!=(const gArray<Outcome *> &, const gArray<Outcome *> &);
 
 TEMPLATE gOutput &operator<<(gOutput &, const gArray<Outcome *> &);
 
