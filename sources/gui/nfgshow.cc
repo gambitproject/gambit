@@ -47,6 +47,7 @@
 #include "alglcp.h"
 #include "algliap.h"
 #include "alglp.h"
+#include "algpolenum.h"
 #include "algqre.h"
 #include "algsimpdiv.h"
 
@@ -114,6 +115,8 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 	   NfgShow::OnToolsEquilibriumCustomLiap)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP,
 	   NfgShow::OnToolsEquilibriumCustomLp)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM,
+	   NfgShow::OnToolsEquilibriumCustomPolEnum)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
 	   NfgShow::OnToolsEquilibriumCustomQre)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV,
@@ -1187,9 +1190,6 @@ void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiNfgSolution *solver;
 
   switch (id) {
-  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM:
-    solver = new guinfgPolEnum(this);
-    break;
   case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID:
     solver = new guinfgQreAll(this);
     break;
@@ -1287,6 +1287,24 @@ void NfgShow::OnToolsEquilibriumCustomLp(wxCommandEvent &)
 {
   gList<MixedSolution> solutions;
   if (LpNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
+    ChangeSolution(m_solutionTable->Length());
+
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+    }
+
+    UpdateMenus();
+  }
+}
+
+void NfgShow::OnToolsEquilibriumCustomPolEnum(wxCommandEvent &)
+{
+  gList<MixedSolution> solutions;
+  if (PolEnumNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddSolution(solutions[soln], true);
     }

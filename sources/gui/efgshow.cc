@@ -66,6 +66,7 @@
 #include "alglcp.h"
 #include "algliap.h"
 #include "alglp.h"
+#include "algpolenum.h"
 #include "algqre.h"
 #include "algsimpdiv.h"
 
@@ -174,7 +175,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_LP,
 	   EfgShow::OnToolsEquilibriumCustomEfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_POLENUM,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomEfgPolEnum)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_QRE,
 	   EfgShow::OnToolsEquilibriumCustomEfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_ENUMPURE,
@@ -188,7 +189,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_LP, 
 	   EfgShow::OnToolsEquilibriumCustomNfgLp)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM, 
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgPolEnum)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QRE,
 	   EfgShow::OnToolsEquilibriumCustomNfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID,
@@ -2225,13 +2226,6 @@ void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
   guiEfgSolution *solver = 0;
 
   switch (algorithm) {
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_EFG_POLENUM:
-    solver = new guiefgPolEnumEfg(this);
-    break;
-
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_POLENUM:
-    solver = new guiefgPolEnumNfg(this);
-    break;
   case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID: 
     solver = new guiefgQreAllNfg(this);
     break;
@@ -2347,6 +2341,25 @@ void EfgShow::OnToolsEquilibriumCustomEfgLp(wxCommandEvent &)
   }
 }
 
+void EfgShow::OnToolsEquilibriumCustomEfgPolEnum(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (PolEnumEfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
 void EfgShow::OnToolsEquilibriumCustomEfgQre(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
@@ -2446,6 +2459,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgLp(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (LpNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgPolEnum(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (PolEnumNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

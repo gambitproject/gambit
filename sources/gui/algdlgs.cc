@@ -21,7 +21,6 @@
 
 #include "nfgconst.h"
 
-#include "dlpolenum.h"
 #include "dlqregrid.h"
 
 //========================================================================
@@ -348,37 +347,6 @@ gOutput *dialogAlgorithm::TraceFile(void) const
   default:
     return &gnull;
   }
-}
-
-
-//=======================================================================
-//                    dialogPolEnum: Member functions
-//=======================================================================
-
-dialogPolEnum::dialogPolEnum(wxWindow *p_parent,
-			     bool p_subgames, bool p_vianfg)
-  : dialogAlgorithm("PolEnumSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-}
-
-dialogPolEnum::~dialogPolEnum()
-{ }
-
-void dialogPolEnum::AlgorithmFields(void)
-{
-  m_algorithmBox = new wxStaticBoxSizer
-    (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
-  m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
-  StopAfterField();
-}
-
-int dialogPolEnum::StopAfter(void) const
-{
-  if (m_findAll->GetValue())
-    return 0;
-  else
-    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================

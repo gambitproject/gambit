@@ -1101,7 +1101,7 @@ static Portion *GSM_PolEnumSolve_Efg(GSM &gsm, Portion **param)
     params.tracefile = &((OutputPortion *) param[5])->Value();
     params.trace = ((NumberPortion *) param[6])->Value();
     try {
-      efgPolEnumNfgSolve algorithm(S, params);
+      efgPolEnumNfgSolve algorithm(params);
       solutions = algorithm.Solve(S, gsm.GetStatusMonitor());
       ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
     }

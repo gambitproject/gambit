@@ -21,7 +21,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_NFG; }
 
 public:
-  efgPolEnumNfgSolve(const EFSupport &, const PolEnumParams &, int max = 0);
+  efgPolEnumNfgSolve(const PolEnumParams &, int max = 0);
   virtual ~efgPolEnumNfgSolve();
 
   int NumEvals(void) const   { return nevals; }

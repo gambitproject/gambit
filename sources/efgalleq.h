@@ -33,7 +33,7 @@ private:
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_EFG; }    
 
 public:
-  efgPolEnumSolve(const EFSupport &, const EfgPolEnumParams &, int max = 0);
+  efgPolEnumSolve(const EfgPolEnumParams &, int max = 0);
   virtual ~efgPolEnumSolve();
 };
 

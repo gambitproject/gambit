@@ -109,6 +109,7 @@ private:
   void OnToolsEquilibriumCustomLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomLiap(wxCommandEvent &);
   void OnToolsEquilibriumCustomLp(wxCommandEvent &);
+  void OnToolsEquilibriumCustomPolEnum(wxCommandEvent &);
   void OnToolsEquilibriumCustomQre(wxCommandEvent &);
   void OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &);
 

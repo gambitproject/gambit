@@ -39,8 +39,7 @@ void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
   }
 }
 
-efgPolEnumNfgSolve::efgPolEnumNfgSolve(const EFSupport &,
-				       const PolEnumParams &p, int max)
+efgPolEnumNfgSolve::efgPolEnumNfgSolve(const PolEnumParams &p, int max)
   : SubgameSolver(max), nevals(0), params(p)
 { }
 

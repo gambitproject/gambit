@@ -153,8 +153,7 @@ void efgPolEnumSolve::SolveSubgame(const FullEfg &, const EFSupport &p_support,
 		 nevals, time, singularSupports);
 }
 
-efgPolEnumSolve::efgPolEnumSolve(const EFSupport &,
-				 const EfgPolEnumParams &p_params, int p_max)
+efgPolEnumSolve::efgPolEnumSolve(const EfgPolEnumParams &p_params, int p_max)
   : SubgameSolver(p_max), params(p_params)
 { }
 

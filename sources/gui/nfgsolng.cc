@@ -95,68 +95,6 @@ NFSupport guiNfgSolution::Eliminate(const NFSupport &p_support)
 //                     Derived classes, by algorithm
 //=========================================================================
 
-//----------
-// PolEnum
-//----------
-
-#include "dlpolenum.h"
-#include "nfgalleq.h"
-
-guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent)
-  : guiNfgSolution(p_parent)
-{ }
-
-guinfgPolEnum::guinfgPolEnum(NfgShow *p_parent,
-			     int p_stopAfter, bool p_eliminateWeak)
-  : guiNfgSolution(p_parent), m_stopAfter(p_stopAfter)
-{
-  m_eliminate = true;
-  m_eliminateAll = true;
-  m_eliminateWeak = p_eliminateWeak;
-  m_eliminateMixed = false;
-}
-
-gList<MixedSolution> guinfgPolEnum::Solve(const NFSupport &p_support)
-{
-  wxStatus status(m_parent, "PolEnumSolve Progress");
-  PolEnumParams params;
-  params.stopAfter = m_stopAfter;
-  params.trace = m_traceLevel;
-  params.tracefile = m_traceFile;
-
-  long nevals;
-  double time;
-  gList<MixedSolution> solutions;
-  gList<const NFSupport> singular_supports;
-
-  try {
-    AllNashSolve(p_support, params, solutions, status,
-		 nevals, time, singular_supports);
-  }
-  catch (gSignalBreak &) { }
-  return solutions;
-}
-
-bool guinfgPolEnum::SolveSetup(void)
-{
-  dialogPolEnum dialog(m_parent, false, true);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    m_eliminate = dialog.Eliminate();
-    m_eliminateAll = dialog.EliminateAll();
-    m_eliminateWeak = dialog.EliminateWeak();
-    m_eliminateMixed = dialog.EliminateMixed();
-
-    m_stopAfter = dialog.StopAfter();
-
-    m_traceFile = dialog.TraceFile();
-    m_traceLevel = dialog.TraceLevel();
-    return true;
-  }
-  else
-    return false;
-}
-
 //-------------
 // QreGrid
 //-------------
