@@ -9,7 +9,7 @@
 
 #ifdef __GNUG__
 // this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
-#pragma interface
+//#pragma interface
 #elif defined(__BORLANDC__)
 #pragma option -Jgx
 #else
@@ -64,14 +64,8 @@ public:
   ~gMatrix();
 
   // Access a gMatrix element
-  T& operator()(int row, int col) { 
-    assert(Check(row,col));
-    return data[row][col]; 
-  }
-  const T& operator()(int row, int col) const {
-    assert(Check(row,col));
-    return data[row][col]; 
-  }
+  T& operator()(int row, int col);
+  const T& operator()(int row, int col) const;
 
   // = operator
   gMatrix<T> &operator=(const gMatrix<T> &M);
@@ -99,13 +93,9 @@ public:
 
   // comparison functions
   int operator==(const gMatrix<T> &) const;
-  int operator!=(const gMatrix<T> &M) const {
-    return !((*this)==M);
-  }
+  int operator!=(const gMatrix<T> &M) const;
   int operator==( T ) const;
-  int operator!=( T s ) const {
-    return !((*this)==s);
-  }
+  int operator!=( T s ) const;
 
   // manipulation functions
   void AddRow(const gVector<T> &);
@@ -134,13 +124,13 @@ public:
   T Determinant(void) const;
 
   // parameter access functions
-  const int& MinRow(void) const { return minrow; }
-  const int& MaxRow(void) const { return maxrow; }
-  int NumRows(void) const { return maxrow-minrow+1; }
+  const int& MinRow(void) const;
+  const int& MaxRow(void) const;
+  int NumRows(void) const;
   
-  const int& MinCol(void) const { return mincol; }
-  const int& MaxCol(void) const { return maxcol; }
-  int NumColumns(void) const { return maxcol-mincol+1; }
+  const int& MinCol(void) const;
+  const int& MaxCol(void) const;
+  int NumColumns(void) const;
 
   void Dump(gOutput &to) const;
   
@@ -154,6 +144,42 @@ template <class T> inline gOutput &operator<<(gOutput &to, const gMatrix<T> &M)
 {
   M.Dump(to); return to;
 }
+
+
+// inline member functions
+template <class T>
+inline T& gMatrix<T>::operator()(int row, int col) { 
+  assert(Check(row,col));
+  return data[row][col]; 
+}
+template <class T>
+inline const T& gMatrix<T>::operator()(int row, int col) const {
+  assert(Check(row,col));
+  return data[row][col]; 
+}
+
+template <class T>
+inline int gMatrix<T>::operator!=(const gMatrix<T> &M) const {
+  return !((*this)==M);
+}
+template <class T>
+inline int gMatrix<T>::operator!=( T s ) const {
+  return !((*this)==s);
+}
+
+template <class T>
+inline const int& gMatrix<T>::MinRow(void) const { return minrow; }
+template <class T>
+inline const int& gMatrix<T>::MaxRow(void) const { return maxrow; }
+template <class T>
+inline int gMatrix<T>::NumRows(void) const { return maxrow-minrow+1; }
+  
+template <class T>
+inline const int& gMatrix<T>::MinCol(void) const { return mincol; }
+template <class T>
+inline const int& gMatrix<T>::MaxCol(void) const { return maxcol; }
+template <class T>
+inline int gMatrix<T>::NumColumns(void) const { return maxcol-mincol+1; }
 
 
 #endif     // GMATRIX_H

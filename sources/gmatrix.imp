@@ -6,7 +6,7 @@
 
 #ifdef __GNUG__
 // this pragma is not necessary with g++ 2.6.3 /w -fno-implicit-templates
-#pragma implementation
+//#pragma implementation
 #elif defined(__BORLANDC__)
 #pragma option -Jgd
 #else
@@ -768,6 +768,7 @@ gMatrix<T>::GetSlice(int rl, int rh, int cl, int ch) const
   return m;
 }
 
+/* commented out to avoid 'null character' bug
 template<class T> gMatrix<T>
 gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
 			  const gBlock<int> &colV) const
@@ -789,6 +790,7 @@ gMatrix<T>::GetSubMatrix(const gBlock<int> &rowV,
     }
   return m;
 }
+*/
 
 template<class T> gMatrix<T>
 gMatrix<T>::Invert(void) const
@@ -936,7 +938,7 @@ gMatrix<T>::Pivot(int row, int col)
 	}
     }
 }
-
+/* commented out to avoid 'null character' bug
 template<class T> T
 gMatrix<T>::Determinant(void) const
 {
@@ -965,4 +967,6 @@ gMatrix<T>::Determinant(void) const
     }
   return result;
 }
+*/
+
 
