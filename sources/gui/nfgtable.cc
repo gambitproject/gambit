@@ -359,9 +359,9 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
     strategy[m_doc->GetRowPlayer()] = row + 1;
     strategy[m_doc->GetColPlayer()] = col + 1;
     
-    gbtNfgContingency profile(m_doc->GetGame());
+    gbtNfgContingency profile = m_doc->GetGame()->NewContingency();
     for (int pl = 1; pl <= strategy.Length(); pl++) {
-      profile.SetStrategy(support->GetStrategy(pl, strategy[pl]));
+      profile->SetStrategy(support->GetStrategy(pl, strategy[pl]));
     }
 
     if (m_doc->HasEfg() ||
@@ -369,7 +369,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
       wxString ret = wxT("");
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format(wxT("%s"),
-				(char *) ToText(profile.GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
+				(char *) ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
 						m_doc->GetPreferences().NumDecimals()));
 	if (pl < strategy.Length()) {
 	  ret += wxT(",");
@@ -379,7 +379,7 @@ wxString gbtNfgGridTable::GetValue(int row, int col)
       return ret;
     }
     else {
-      gbtGameOutcome outcome = profile.GetOutcome();
+      gbtGameOutcome outcome = profile->GetOutcome();
       if (!outcome.IsNull()) {
 	wxString ret = wxString::Format(wxT("%s"), (char *) outcome->GetLabel());
 	if (ret == wxT("")) {

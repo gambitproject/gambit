@@ -197,14 +197,9 @@ void gbtNfgSupportBase::RemoveStrategy(gbtGameStrategy s)
 //           class gbtNfgSupportBase: Data access -- properties
 //--------------------------------------------------------------------------
 
-bool gbtNfgSupportBase::IsValid(void) const
+gbtNfgContingency gbtNfgSupportBase::NewContingency(void) const
 {
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    if (NumStrats(pl) == 0) {
-      return false;
-    }
-  }
-  return true;
+  return m_nfg->NewContingency();
 }
 
 gbtOutput& operator<<(gbtOutput &p_stream, const gbtNfgSupport &p_support)

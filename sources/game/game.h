@@ -83,6 +83,8 @@ class gbtGameOutcome;
 class gbtEfgSupport;
 class gbtNfgSupport;
 
+class gbtNfgContingency;
+
 class gbtConstGameRep : public gbtGameObject {
 public:
   // DATA ACCESS -- GENERAL
@@ -108,6 +110,8 @@ public:
   // DATA ACCESS -- STRATEGIES
   virtual gbtArray<int> NumStrategies(void) const = 0; 
   virtual int MixedProfileLength(void) const = 0;
+
+  virtual gbtNfgContingency NewContingency(void) const = 0;
 
   // DATA ACCESS -- SUPPORTS
   virtual gbtNfgSupport NewNfgSupport(void) const = 0;

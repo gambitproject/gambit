@@ -35,9 +35,9 @@ class gbtNfgSupport;
 class gbtNfgSupportRep : public gbtConstNfgRep {
 friend class gbtNfgSupport;
 private:
-  bool gbtNfgSupportRep::Undominated(gbtNfgSupport &newS, int pl, bool strong,
-				     gbtOutput &tracefile, 
-				     gbtStatus &status) const;
+  bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
+		   gbtOutput &tracefile, 
+		   gbtStatus &status) const;
 public:
   // DATA ACCESS: GENERAL
   virtual gbtGame GetGame(void) const = 0;
@@ -59,9 +59,6 @@ public:
   virtual void AddStrategy(gbtGameStrategy) = 0;
   virtual void RemoveStrategy(gbtGameStrategy) = 0;
   
-  // DATA ACCESS: PROPERTIES
-  //  virtual bool IsValid(void) const = 0;
-
   // DOMINANCE AND ELIMINATION OF STRATEGIES
   // Not declared virtual; implementation of functions is generic already
   bool Dominates(gbtGameStrategy, gbtGameStrategy, bool strong) const;

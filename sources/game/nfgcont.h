@@ -29,32 +29,52 @@
 
 #include "game.h"
 
-class gbtNfgContingency   {
-friend class gbtGame;
-private:
-  gbtGame m_nfg; 
-  long m_index;
-  gbtArray<gbtGameStrategy> m_profile;
-  
+class gbtNfgContingencyRep : public gbtGameObject {
+friend class gbtNfgContingency;
 public:
-  gbtNfgContingency(const gbtGame &);
-  gbtNfgContingency(const gbtNfgContingency &p);
-  ~gbtNfgContingency();
+  virtual ~gbtNfgContingencyRep() { }
+
+  virtual gbtNfgContingencyRep *Copy(void) const = 0;
   
-  gbtNfgContingency &operator=(const gbtNfgContingency &);
+  virtual gbtGameStrategy GetStrategy(const gbtGamePlayer &) const = 0;
+  virtual void SetStrategy(gbtGameStrategy) = 0;
 
-  bool operator==(const gbtNfgContingency &p_cont) const;
-  bool operator!=(const gbtNfgContingency &p_cont) const
-    { return !(*this == p_cont); }
+  virtual gbtGameOutcome GetOutcome(void) const = 0;
+  virtual void SetOutcome(const gbtGameOutcome &) const = 0;
 
-  gbtGameStrategy GetStrategy(int p_player) const
-    { return m_profile[p_player]; }
-  void SetStrategy(gbtGameStrategy);
+  virtual gbtNumber GetPayoff(const gbtGamePlayer &) const = 0;
+};
 
-  void SetOutcome(const gbtGameOutcome &) const;
-  gbtGameOutcome GetOutcome(void) const;
+class gbtNfgContingency {
+private:
+  gbtNfgContingencyRep *m_rep;
 
-  gbtNumber GetPayoff(const gbtGamePlayer &) const;
+public:
+  gbtNfgContingency(void) : m_rep(0) { }
+  gbtNfgContingency(gbtNfgContingencyRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtNfgContingency(const gbtNfgContingency &p_cont)
+    : m_rep(p_cont.m_rep->Copy()) { if (m_rep) m_rep->Reference(); }
+  ~gbtNfgContingency() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+
+  gbtNfgContingency &operator=(const gbtNfgContingency &p_cont) {
+    if (this != &p_cont) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_cont.m_rep->Copy();
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  gbtNfgContingencyRep *operator->(void) 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+  const gbtNfgContingencyRep *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
+  
+  gbtNfgContingencyRep *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 #endif // NFGCONT_H

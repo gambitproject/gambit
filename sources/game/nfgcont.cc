@@ -29,10 +29,10 @@
 #include "gamebase.h"
 
 //-------------------------------------------------------------------------
-//                    gbtNfgContingency member functions
+//                    gbtNfgContingencyBase member functions
 //-------------------------------------------------------------------------
 
-gbtNfgContingency::gbtNfgContingency(const gbtGame &p_nfg)
+gbtNfgContingencyBase::gbtNfgContingencyBase(const gbtGame &p_nfg)
   : m_nfg(p_nfg), m_index(0L), m_profile(m_nfg->NumPlayers())
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
@@ -41,55 +41,33 @@ gbtNfgContingency::gbtNfgContingency(const gbtGame &p_nfg)
   }
 }
 
-gbtNfgContingency::gbtNfgContingency(const gbtNfgContingency &p)
-  : m_nfg(p.m_nfg), m_index(p.m_index), m_profile(p.m_profile)
-{ }
-
-gbtNfgContingency::~gbtNfgContingency()
-{ }
-
-gbtNfgContingency &gbtNfgContingency::operator=(const gbtNfgContingency &p)
+gbtNfgContingencyRep *gbtNfgContingencyBase::Copy(void) const
 {
-  if (this != &p) {
-    m_nfg = p.m_nfg;
-    m_index = p.m_index;
-    m_profile = p.m_profile;
-  }
-  return *this;  
+  gbtNfgContingencyBase *copy = new gbtNfgContingencyBase(m_nfg);
+  copy->m_index = m_index;
+  copy->m_profile = m_profile;
+  return copy;
 }
 
-bool gbtNfgContingency::operator==(const gbtNfgContingency &p_cont) const
-{
-  if (m_nfg != p_cont.m_nfg) {
-    return false;
-  }
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    if (m_profile[pl] != p_cont.m_profile[pl]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-void gbtNfgContingency::SetStrategy(gbtGameStrategy p_strategy)
+void gbtNfgContingencyBase::SetStrategy(gbtGameStrategy p_strategy)
 {
   int pl = p_strategy->GetPlayer()->GetId();
   m_index += p_strategy->GetIndex() - m_profile[pl]->GetIndex();
   m_profile[pl] = p_strategy;
 }
 
-void gbtNfgContingency::SetOutcome(const gbtGameOutcome &p_outcome) const
+void gbtNfgContingencyBase::SetOutcome(const gbtGameOutcome &p_outcome) const
 {
   dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_results[m_index + 1] = dynamic_cast<gbtGameOutcomeBase *>(p_outcome.Get());
   dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_revision++;
 }
 
-gbtGameOutcome gbtNfgContingency::GetOutcome(void) const
+gbtGameOutcome gbtNfgContingencyBase::GetOutcome(void) const
 {
   return dynamic_cast<gbtGameBase *>(m_nfg.Get())->m_results[m_index + 1];
 }
 
-gbtNumber gbtNfgContingency::GetPayoff(const gbtGamePlayer &p_player) const
+gbtNumber gbtNfgContingencyBase::GetPayoff(const gbtGamePlayer &p_player) const
 {
   gbtGameBase *rep = dynamic_cast<gbtGameBase *>(m_nfg.Get());
   if (rep->m_results.Length() > 0) {

@@ -25,6 +25,7 @@
 //
 
 #include "nfgsupport.h"
+#include "nfgcont.h"
 #include "mixed.h"
 #include "gamebase.h"
 
@@ -347,4 +348,11 @@ gbtMixedProfile<T>::gbtMixedProfile(const gbtBehavProfile<T> &p_profile)
       (*this)(pl, st) = prob;
     }
   }
+}
+
+
+template <class T>
+gbtNfgContingency gbtMixedProfile<T>::NewContingency(void) const
+{
+  return m_support->NewContingency(); 
 }

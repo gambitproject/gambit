@@ -586,16 +586,16 @@ void gbtNfgFrame::OnEditContingency(wxCommandEvent &)
   dialogEditContingency dialog(this, m_doc->GetGame(), m_doc->GetContingency());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtNfgContingency profile(m_doc->GetGame());
+    gbtNfgContingency profile = m_doc->GetGame()->NewContingency();
     for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-      profile.SetStrategy(m_doc->GetGame()->GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl]));
+      profile->SetStrategy(m_doc->GetGame()->GetPlayer(pl)->GetStrategy(m_doc->GetContingency()[pl]));
     }
 
     if (dialog.GetOutcome() == 0) { 
-      profile.SetOutcome(0);
+      profile->SetOutcome(0);
     }
     else {
-      profile.SetOutcome(m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
+      profile->SetOutcome(m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
     }
     m_doc->UpdateViews();
   }

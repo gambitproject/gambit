@@ -27,6 +27,8 @@
 #ifndef GAMEBASE_H
 #define GAMEBASE_H
 
+#include "nfgcont.h"
+
 //
 // Forward declarations
 //
@@ -339,7 +341,7 @@ public:
   // DATA ACCESS -- NODES
   int NumNodes(void) const;
   gbtGameNode GetRoot(void) const;
-
+  
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
   gbtGamePlayer GetChance(void) const;
@@ -357,6 +359,8 @@ public:
   // DATA ACCESS -- SUPPORTS
   gbtEfgSupport NewEfgSupport(void) const;
   gbtNfgSupport NewNfgSupport(void) const;
+
+  gbtNfgContingency NewContingency(void) const;
 
   // EDITING OPERATIONS
   void DeleteEmptyInfosets(void);
@@ -396,6 +400,29 @@ public:
 			    gbtPVector<gbtNumber> &prob) const;
 };
 
+class gbtNfgContingencyBase : public gbtNfgContingencyRep {
+private:
+  gbtGame m_nfg; 
+  long m_index;
+  gbtArray<gbtGameStrategy> m_profile;
+  
+public:
+  gbtNfgContingencyBase(const gbtGame &);
+  virtual ~gbtNfgContingencyBase() { }
+  
+  virtual gbtNfgContingencyRep *Copy(void) const;
+
+  gbtGameStrategy GetStrategy(const gbtGamePlayer &p_player) const
+    { return m_profile[p_player->GetId()]; }
+  void SetStrategy(gbtGameStrategy);
+
+  void SetOutcome(const gbtGameOutcome &) const;
+  gbtGameOutcome GetOutcome(void) const;
+
+  gbtNumber GetPayoff(const gbtGamePlayer &) const;
+};
+
+
 class gbtNfgSupportBase : public gbtNfgSupportRep {
 protected:
   gbtGame m_nfg;
@@ -414,7 +441,7 @@ public:
 
   // OPERATORS
   // This acts as the assignment operator and copy constructor
-  virtual gbtNfgSupportRep *Copy(void) const;
+  gbtNfgSupportRep *Copy(void) const;
   
   bool operator==(const gbtNfgSupportRep &) const;
   bool operator!=(const gbtNfgSupportRep &p_support) const
@@ -441,9 +468,6 @@ public:
   void AddStrategy(gbtGameStrategy);
   void RemoveStrategy(gbtGameStrategy);
   
-  // DATA ACCESS: PROPERTIES
-  bool IsValid(void) const;
-
   // DOMINANCE AND ELIMINATION OF STRATEGIES
   bool Dominates(gbtGameStrategy, gbtGameStrategy, bool strong) const;
   bool IsDominated(gbtGameStrategy, bool strong) const; 
@@ -478,6 +502,8 @@ public:
   void SetComment(const gbtText &p_comment) { m_nfg->SetComment(p_comment); }
 
   gbtNfgSupport NewNfgSupport(void) const { return Copy(); }
+  gbtNfgContingency NewContingency(void) const;
+
 };
 
 #endif  // GAMEBASE_H

@@ -101,6 +101,8 @@ public:
   virtual int MixedProfileLength(void) const
   { return m_support->MixedProfileLength(); }
 
+  gbtNfgContingency NewContingency(void) const;
+
   gbtNfgSupport NewNfgSupport(void) const { return m_support->NewNfgSupport(); }
 };
 

@@ -65,11 +65,11 @@ public:
 
   int NextContingency(void);
   
-  gbtGameOutcome GetOutcome(void) const { return m_profile.GetOutcome(); }
+  gbtGameOutcome GetOutcome(void) const { return m_profile->GetOutcome(); }
 
 
   gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
-    { return m_profile.GetPayoff(p_player); }
+    { return m_profile->GetPayoff(p_player); }
 };
 
 #endif   // NFGCITER_H

@@ -1438,6 +1438,11 @@ gbtNfgSupport gbtGameBase::NewNfgSupport(void) const
   return new gbtNfgSupportBase(const_cast<gbtGameBase *>(this));
 }
 
+gbtNfgContingency gbtGameBase::NewContingency(void) const
+{
+  return new gbtNfgContingencyBase(const_cast<gbtGameBase *>(this));
+}
+
 // ---------------------------------------
 // gbtGame: Private member functions
 // ---------------------------------------

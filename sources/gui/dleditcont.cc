@@ -43,9 +43,9 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 {
   SetAutoLayout(true);
 
-  gbtNfgContingency profile(p_nfg);
+  gbtNfgContingency profile = p_nfg->NewContingency();
   for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    profile.SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(p_cont[pl]));
+    profile->SetStrategy(p_nfg->GetPlayer(pl)->GetStrategy(p_cont[pl]));
   }
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -105,7 +105,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
     }
 
     m_outcome->Append(wxString::Format(wxT("%s"), (const char *) item));
-    if (profile.GetOutcome() == outcome) {
+    if (profile->GetOutcome() == outcome) {
       m_outcome->SetSelection(outc);
     }
   }

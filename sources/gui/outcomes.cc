@@ -113,15 +113,15 @@ void gbtCmdAttachOutcome::Do(gbtGameDocument *p_doc)
     }
   }
   else {
-    gbtNfgContingency profile(p_doc->GetGame());
+    gbtNfgContingency profile = p_doc->GetGame()->NewContingency();
     for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
-      profile.SetStrategy(p_doc->GetGame()->GetPlayer(pl)->GetStrategy(p_doc->GetContingency()[pl]));
+      profile->SetStrategy(p_doc->GetGame()->GetPlayer(pl)->GetStrategy(p_doc->GetContingency()[pl]));
     }
     if (m_id > 0) {
-      profile.SetOutcome(p_doc->GetGame()->GetOutcome(m_id));
+      profile->SetOutcome(p_doc->GetGame()->GetOutcome(m_id));
     }
     else {
-      profile.SetOutcome(0);
+      profile->SetOutcome(0);
     }
   }
 }

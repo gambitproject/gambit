@@ -118,9 +118,9 @@ void gbtApplication::OnFileNew(wxWindow *p_parent)
 	  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
 	    outcome->SetPayoff(nfg->GetPlayer(pl), 0);
 	    outcome->SetLabel(outcome->GetLabel() +
-			      ToText(iter.GetContingency().GetStrategy(pl)->GetId()));
+			      ToText(iter.GetContingency()->GetStrategy(support->GetPlayer(pl))->GetId()));
 	  }
-	  iter.GetContingency().SetOutcome(outcome);
+	  iter.GetContingency()->SetOutcome(outcome);
 	} while (iter.NextContingency());
       }
       (void) new gbtNfgFrame(new gbtGameDocument(nfg), 0);
