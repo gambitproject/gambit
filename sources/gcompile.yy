@@ -143,9 +143,9 @@ gStack<gText> GCL_InputFileNames(4);
 %left  UWRITE
 %right  ASSIGN
 %left  WRITE  READ
-%left  LNOT
 %left  LOR
 %left  LAND
+%left  LNOT
 %nonassoc  EQU  NEQ  LTN  LEQ  GTN  GEQ
 %left  PLUS  MINUS  AMPER
 %left  STAR  SLASH  PERCENT  DIV  DOT  
