@@ -25,7 +25,7 @@ WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
-.path.cc = .;base;math;gcl;guishare;gui;pxi
+.path.cc = .;base;math;game;gcl;guishare;gui;pxi
 
 $(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
@@ -100,8 +100,8 @@ gcompile.cc:     gcl\gcompile.yy
 readefg.cc:      readefg.yy
    $(BISON) -p efg_yy -o readefg.cc readefg.yy
 
-readnfg.cc:      readnfg.yy
-   $(BISON) -p nfg_yy -o readnfg.cc readnfg.yy
+readnfg.cc:      game\readnfg.yy
+   $(BISON) -p nfg_yy -o game\readnfg.cc game\readnfg.yy
 
 clean:
         -erase *.obj
