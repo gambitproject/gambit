@@ -668,7 +668,11 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
     }
 
     int childno = actions[act]->GetNumber();
-    newprob = (truncated) ? ((T) 1.0 - cumprob) : (*this)(pl, n->infoset->number, act);
+	if (truncated)
+		newprob = ((T) 1.0 - cumprob);
+	else
+			newprob = (*this)(pl, n->infoset->number, act);
+
     CondPayoff(n->children[childno], prob * newprob, probs, payoff);
 
     for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)

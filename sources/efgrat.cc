@@ -5,7 +5,6 @@
 //
 
 #include "rational.h"
-#include "glist.h"
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -22,6 +21,8 @@ template <class T> class ChanceInfoset;
 class ChanceInfoset<double>;
 class Node;
 class gString;
+template <class T> class gList;
+template <class T> class gNode;
 class gList<gString>;
 class gList<gRational>;
 class gList<Node *>;
