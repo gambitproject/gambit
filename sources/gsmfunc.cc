@@ -802,15 +802,23 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
 
     // check whether undefined variables are allowed
     AllowUndefinedRef = false;
-    for( f_index = 0; f_index < _NumFuncs; f_index++ )
+    if( _FuncName == "Assign" )
     {
-      if( _CurrParamIndex < _FuncInfo[ f_index ].NumParams )
+      AllowUndefinedRef = true;      
+    }
+    else
+    {
+      for( f_index = 0; f_index < _NumFuncs; f_index++ )
       {
-	if(_FuncInfo[ f_index ].ParamInfo[_CurrParamIndex].PassByReference &&
-	   _FuncInfo[ f_index ].ParamInfo[_CurrParamIndex].DefaultValue != 0 )
-	  AllowUndefinedRef = true;
-	else
-	  _FuncMatch[ f_index ] = false;
+	if( _CurrParamIndex < _FuncInfo[ f_index ].NumParams )
+	{
+	  if(_FuncInfo[f_index].ParamInfo[_CurrParamIndex].PassByReference &&
+	     (_FuncInfo[f_index].ParamInfo[_CurrParamIndex].DefaultValue!=0 ||
+	      _FuncName == "Assign" ) )
+	    AllowUndefinedRef = true;
+	  else
+	    _FuncMatch[ f_index ] = false;
+	}
       }
     }
 
@@ -1051,9 +1059,12 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 	{
 	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue == 0 )
 	  {
-	    _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
-			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
-	    _ErrorOccurred = true;
+	    if( _FuncName != "Assign" )
+	    {
+	      _ErrorMessage( _StdErr, 9, index + 1, _FuncName, 
+			    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name );
+	      _ErrorOccurred = true;
+	    }
 	  }
 	  else if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference)
 	  {
