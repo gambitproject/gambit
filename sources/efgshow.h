@@ -66,7 +66,7 @@ private:
    EfgSolnShow *soln_show;
 	BSolnSortFilterOptions sf_options;
 	gList<Accel>	accelerators;
-	gString	filename;
+	gText	filename;
 	int log_item,zoom_win_item;	// menu items of checkable menus
 	EfgShowToolBar *toolbar;
    // Private functions
@@ -104,7 +104,7 @@ public:
 	void		RemoveSolutions(void);
 	void		ChangeSolution(int soln);
    void		ChangeParameters(int what);
-   void		ChangeOutcomes(int what,const gString out_name=gString());
+   void		ChangeOutcomes(int what,const gText out_name=gText());
 	void 		OnSelectedMoved(const Node *n);
 	BehavSolution CreateSolution(void);
 	// Solution interface to the algorithms
@@ -129,15 +129,15 @@ public:
 	EFSupport *MakeSupport(void);
 	void			SolveElimDom(void);
 	// Used by TreeWindow
-	virtual gString AsString(TypedSolnValues what,const Node *n,int br=0) const;
+	virtual gText AsString(TypedSolnValues what,const Node *n,int br=0) const;
 	// Display some inherent game properties
 	void ShowGameInfo(void);
 	// Currently used support
 	const EFSupport *GetSupport(int which);
 	// File name
    void SetFileName(void);
-	void SetFileName(const gString &s);
-  	const gString &Filename(void) const;
+	void SetFileName(const gText &s);
+  	const gText &Filename(void) const;
 	ParameterSetList &Parameters(void);   
 };
 

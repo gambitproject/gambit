@@ -41,13 +41,13 @@ protected:
 public:
 	EfgOutcomeDialogC(int rows,int cols,Efg &ef,ParameterSetList &params,
                      TreeWindow *tw,EfgOutcomeDialog *parent);
-	void SetCurOutcome(const gString &out_name);
+	void SetCurOutcome(const gText &out_name);
 	void OnHelp(int );
 	// This implements the behavior that a new row is created automatically
 	// below the greatest ENTERED row.  Also, if we move to a new row, the
 	// previous row is automatically saved in the ef.
 	virtual void OnSelectedMoved(int ,int ,SpreadMoveDir ) { };
-	virtual void OnDoubleClick(int ,int ,int ,const gString &);
+	virtual void OnDoubleClick(int ,int ,int ,const gText &);
 	virtual void UpdateValues(void);
 	virtual void OnOk(void);
 	virtual int  OutcomeNum(int row=0,int col=0) = 0;
@@ -166,7 +166,7 @@ void EfgOutcomeDialogC::OnDelete(void)
 {
 char tmp_str[256];
 int outc_num=OutcomeNum();
-gString outc_name=ef.Outcomes()[outc_num]->GetName();
+gText outc_name=ef.Outcomes()[outc_num]->GetName();
 sprintf(tmp_str,"Delete Outcome '%s'?",(const char *)outc_name);
 if (wxMessageBox(tmp_str,"Confirm",wxOK|wxCANCEL)==wxOK)
 {
@@ -211,7 +211,7 @@ void EfgOutcomeDialogC::OnHelp(int )
 {wxHelpContents(EFG_OUTCOME_HELP);}
 
 // SetCurOutcome
-void EfgOutcomeDialogC::SetCurOutcome(const gString &out_name)
+void EfgOutcomeDialogC::SetCurOutcome(const gText &out_name)
 {
 int out=0;
 if (out_name!="")
@@ -246,7 +246,7 @@ void EfgOutcomeDialogC::UpdateValues(void)
 {
 int row,col;
 EFOutcome *tmp;
-gString payoff;
+gText payoff;
 bool hilight;
 for (int i=1;i<=ef.NumOutcomes();i++)
 {
@@ -256,10 +256,10 @@ for (int i=1;i<=ef.NumOutcomes();i++)
 		PayoffPos(i,j,&row,&col);
       hilight=false;
       if (polyval==false)
-      	payoff=ToString(ef.Payoff(tmp, j));
+      	payoff=ToText(ef.Payoff(tmp, j));
       else
       {
-      	payoff=ToString(ef.Payoff(tmp, j).Evaluate(params.CurSet()));
+      	payoff=ToText(ef.Payoff(tmp, j).Evaluate(params.CurSet()));
          if (ef.Payoff(tmp, j).Degree()>0) hilight=true;
       }
 		SetCell(row,col,payoff);
@@ -280,7 +280,7 @@ EFOutcome *tmp;
 if (outc_num>ef.NumOutcomes())
 {
 	tmp=ef.NewOutcome();
-	tmp->SetName("Outcome "+ToString(ef.NumOutcomes()));
+	tmp->SetName("Outcome "+ToText(ef.NumOutcomes()));
 }
 else
 	tmp=ef.Outcomes()[outc_num];
@@ -300,7 +300,7 @@ for (int j=1;j<=ef.NumPlayers();j++)
    }
    else
    {
-		gNumber payoff;payoff=FromString(GetCell(prow,pcol),payoff);
+		gNumber payoff;payoff=FromText(GetCell(prow,pcol),payoff);
       gNumber diff=abs(ef.Payoff(tmp, j).Evaluate(params.CurSet()) - payoff);
       gNumber eps=diff;gEpsilon(eps);
 		if (diff>eps)	{
@@ -311,7 +311,7 @@ for (int j=1;j<=ef.NumPlayers();j++)
 }
 // check if the name has changed
 NamePos(outc_num,&prow,&pcol);
-gString new_name=GetCell(prow,pcol);
+gText new_name=GetCell(prow,pcol);
 if (new_name!=tmp->GetName())
 	if (new_name!="")
 	{
@@ -327,7 +327,7 @@ if (outcomes_changed) tw->node_outcome(-1);
 }
 
 
-void EfgOutcomeDialogC::OnDoubleClick(int row,int col,int /*level*/,const gString &)
+void EfgOutcomeDialogC::OnDoubleClick(int row,int col,int /*level*/,const gText &)
 {
 static bool busy=false;
 if (busy) return;
@@ -336,10 +336,10 @@ EFOutcome *tmp=ef.Outcomes()[outc_num];
 int pl=PlayerNum(row,col);
 busy=true;
 if (pl==0) return; // double click only edits player payoffs.
-gString s0=ToString(ef.Payoff(tmp, pl));
+gText s0=ToText(ef.Payoff(tmp, pl));
 int x=GetSheet()->MaxX(col-1)+TEXT_OFF,y=GetSheet()->MaxY(row-1)+TEXT_OFF;
 GetSheet()->ClientToScreen(&x,&y);
-gString s1=gGetTextLine(s0,this,x,y);
+gText s1=gGetTextLine(s0,this,x,y);
 if (s1!="" && s0!=s1)
 {
 	ef.SetPayoff(tmp, pl, gPoly<gNumber>(ef.Parameters(),s1,ef.ParamOrder()));
@@ -382,7 +382,7 @@ DataSettings()->SetAutoLabelStr("Out:%d",S_AUTO_LABEL_ROW);
 DrawSettings()->SetColWidth(9,GetCols()); // 'Outcome #'=9 chars
 SetLabelCol(GetCols(),"Name");
 int i,j;
-for (j=1;j<=ef.NumPlayers();j++) DrawSettings()->SetColWidth(2+ToStringPrecision(),j);
+for (j=1;j<=ef.NumPlayers();j++) DrawSettings()->SetColWidth(2+ToTextPrecision(),j);
 // make all the cells string input
 for (i=1;i<=GetRows();i++)
 	for (j=1;j<=GetCols();j++)
@@ -450,7 +450,7 @@ if (options&S_PREC_CHANGED)
 {
 	UpdateValues();
 	for (int j=1;j<=ef.NumPlayers();j++)
-	DrawSettings()->SetColWidth(2+ToStringPrecision(),j);
+	DrawSettings()->SetColWidth(2+ToTextPrecision(),j);
 	Resize();Repaint();
 }
 }
@@ -499,7 +499,7 @@ for (j=1;j<=ef.NumOutcomes();j++)				// set player and outcome names
 		Bold((j-1)*ef.NumPlayers()+i,1,0,TRUE);
 	}
 	SetCell((j-1)*ef.NumPlayers()+1,3,ef.Outcomes()[j]->GetName());
-	SetLabelRow((j-1)*ef.NumPlayers()+1,"Out:"+ToString(j));
+	SetLabelRow((j-1)*ef.NumPlayers()+1,"Out:"+ToText(j));
 	SetType((j-1)*ef.NumPlayers()+1,3,gSpreadStr);
 }
 SetCurRow(1);SetCurCol(2);
@@ -517,7 +517,7 @@ int i;
 for (i=1;i<=ef.NumPlayers();i++)
 	DelRow(ef.NumPlayers()*outc_num-i+1);
 for (i=outc_num+1;i<=ef.NumOutcomes();i++)
-	SetLabelRow((i-1)*ef.NumPlayers()+1,"Out:"+ToString(i));
+	SetLabelRow((i-1)*ef.NumPlayers()+1,"Out:"+ToText(i));
 
 Redraw();
 }
@@ -566,7 +566,7 @@ if (row==GetRows() && EnteredCell(row,2))	// add an outcome
 		SetCell(GetRows(),1,ef.Players()[i]->GetName());
 		Bold(GetRows(),1,0,TRUE);
 	}
-	SetLabelRow(GetRows()-ef.NumPlayers()+1,"Out:"+ToString(ef.NumOutcomes()+1));
+	SetLabelRow(GetRows()-ef.NumPlayers()+1,"Out:"+ToText(ef.NumOutcomes()+1));
 	Redraw();OnPaint();
 }
 }
@@ -605,7 +605,7 @@ void EfgOutcomeDialogLong::OnOptionsChanged(unsigned int options)
 if (options&S_PREC_CHANGED)
 {
 	UpdateValues();
-	DrawSettings()->SetColWidth(2+ToStringPrecision(),2);
+	DrawSettings()->SetColWidth(2+ToTextPrecision(),2);
 	Resize();Repaint();
 }
 }
@@ -629,7 +629,7 @@ d->Show(TRUE);
 EfgOutcomeDialog::~EfgOutcomeDialog()
 {d->Show(FALSE);delete d;}
 
-void EfgOutcomeDialog::SetOutcome(const gString &outc_name)
+void EfgOutcomeDialog::SetOutcome(const gText &outc_name)
 {d->SetCurOutcome(outc_name);d->SetFocus();}
 
 void EfgOutcomeDialog::UpdateVals(void)

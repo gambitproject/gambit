@@ -27,7 +27,7 @@ Bool StringConstraint(int type, char *value, char *label, char *msg_buffer)
 
 // This function used to be in the ef and is used frequently
 
-EFPlayer *EfgGetPlayer(const Efg &ef,const gString &name)
+EFPlayer *EfgGetPlayer(const Efg &ef,const gText &name)
 {
 for (int i=1;i<=ef.NumPlayers();i++)
 	if (ef.Players()[i]->GetName()==name) return ef.Players()[i];
@@ -102,8 +102,8 @@ MyDialogBox *branch_num_dialog=new MyDialogBox(this,"Keep Branch",EFG_NODE_HELP)
 wxStringList *branch_list=new wxStringList;char *branch_name=new char[MAX_LABEL_LENGTH];
 for (int i=1;i<=cursor->NumChildren();i++)
 {
-	gString tmp=cursor->GetChild(i)->GetName();
-	if (tmp=="") tmp=ToString(i);
+	gText tmp=cursor->GetChild(i)->GetName();
+	if (tmp=="") tmp=ToText(i);
 	branch_list->Add(tmp);
 }
 branch_num_dialog->Form()->Add(wxMakeFormString("Branch",&branch_name,wxFORM_CHOICE,
@@ -216,7 +216,7 @@ if (mark_node->GetPlayer()!=cursor->GetPlayer())
 char *iset_name=wxGetTextFromUser("Merged infoset name");
 Infoset *new_iset=ef.MergeInfoset(cursor->GetInfoset(),mark_node->GetInfoset());
 if (iset_name) new_iset->SetName(iset_name);
-else new_iset->SetName("Infoset"+ToString(new_iset->GetPlayer()->NumInfosets()));
+else new_iset->SetName("Infoset"+ToText(new_iset->GetPlayer()->NumInfosets()));
 infosets_changed=TRUE;
 }
 
@@ -230,7 +230,7 @@ if (!cursor->GetInfoset()) {wxMessageBox("Cursor belongs to no infosets");return
 char *iset_name=wxGetTextFromUser("New infoset name");
 Infoset *new_iset=ef.LeaveInfoset(cursor);
 if (iset_name) new_iset->SetName(iset_name);
-else new_iset->SetName("Infoset"+ToString(new_iset->GetPlayer()->NumInfosets()));
+else new_iset->SetName("Infoset"+ToText(new_iset->GetPlayer()->NumInfosets()));
 infosets_changed=TRUE;
 }
 
@@ -244,7 +244,7 @@ if (!cursor->GetInfoset()) {wxMessageBox("Cursor belongs to no infosets");return
 char *iset_name=wxGetTextFromUser("New infoset name");
 Infoset *new_iset=ef.SplitInfoset(cursor);
 if (iset_name) new_iset->SetName(iset_name);
-else new_iset->SetName("Infoset"+ToString(new_iset->GetPlayer()->NumInfosets()));
+else new_iset->SetName("Infoset"+ToText(new_iset->GetPlayer()->NumInfosets()));
 infosets_changed=TRUE;
 }
 
@@ -274,7 +274,7 @@ Bool label_actions=TRUE;
 if (cursor->GetInfoset()->GetName()!="")
 	strcpy(label,cursor->GetInfoset()->GetName());
 else
-	strcpy(label,"Infoset"+ToString(cursor->GetPlayer()->NumInfosets()));
+	strcpy(label,"Infoset"+ToText(cursor->GetPlayer()->NumInfosets()));
 MyDialogBox *label_dialog = new MyDialogBox(pframe, "Label Infoset",EFG_INFOSET_HELP);
 label_dialog->Add(wxMakeFormString("Label", &label,wxFORM_DEFAULT,
 	new wxList(wxMakeConstraintFunction(StringConstraint),0)));
@@ -396,7 +396,7 @@ for (int d=0;d<=num_d;d++)
 	{
 		action_names[i-1]=new char[MAX_LABEL_LENGTH];
 		strcpy(action_names[i-1],cursor->GetInfoset()->GetActionName(i+d*ENTRIES_PER_DIALOG));
-		branch_label_dialog->Add(wxMakeFormString("Action "+ToString(i+d*ENTRIES_PER_DIALOG),&action_names[i-1],wxFORM_DEFAULT,
+		branch_label_dialog->Add(wxMakeFormString("Action "+ToText(i+d*ENTRIES_PER_DIALOG),&action_names[i-1],wxFORM_DEFAULT,
 									new wxList(wxMakeConstraintFunction(StringConstraint),0),0,0,220));
 		branch_label_dialog->Add(wxMakeFormNewLine());
 	}
@@ -502,8 +502,8 @@ for (int d=0;d<=num_d;d++)
 	{
 		gNumber temp_p=ef.GetChanceProb(n->GetInfoset(),
 					  i + d * ENTRIES_PER_DIALOG);
-		gString temp_s=ToString(temp_p);
-		prob_vector[i]=new char[temp_s.length()+1];
+		gText temp_s=ToText(temp_p);
+		prob_vector[i]=new char[temp_s.Length()+1];
 		strcpy(prob_vector[i],temp_s);
 		node_probs_dialog->Add(wxMakeFormString("",&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
 		node_probs_dialog->Add(wxMakeFormNewLine());
@@ -518,7 +518,7 @@ for (int d=0;d<=num_d;d++)
 		for (i=1;i<=actions_now;i++)
 		  ef.SetChanceProb(n->GetInfoset(),
 				   i + d * ENTRIES_PER_DIALOG,
-				   FromString(prob_vector[i], dummy));
+				   FromText(prob_vector[i], dummy));
 		outcomes_changed=TRUE;  // game changed -- delete solutions, etc
 	}
 	for (i=1;i<=actions_now;i++) delete [] prob_vector[i];delete [] prob_vector;
@@ -1030,7 +1030,7 @@ else
 return ((log) ? TRUE : FALSE);
 }
 
-void TreeWindow::Log(const gString &s)
+void TreeWindow::Log(const gText &s)
 {
 if (!log) return;
 (*log)<<s<<'\n';
@@ -1138,7 +1138,7 @@ must_recalc=TRUE;
 // Controls the size of the various tree parts
 void TreeWindow::display_colors(void)
 {
-gArray<gString> names(ef.NumPlayers());
+gArray<gText> names(ef.NumPlayers());
 for (int i=1;i<=names.Length();i++) names[i]=(ef.Players()[i])->GetName();
 draw_settings.PlayerColorDialog(names);
 must_recalc=TRUE;

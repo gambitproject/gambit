@@ -338,7 +338,7 @@ for (int i=1;i<=ef.NumPlayers();i++)
 	int j;
 	for (j=1;j<=p->NumInfosets();j++)
 		for (int k=1;k<=p->Infosets()[j]->NumActions();k++)
-			players[i]->Append("("+ToString(j)+","+ToString(k)+")");
+			players[i]->Append("("+ToText(j)+","+ToText(k)+")");
 	for (j=0;j<players[i]->Number();j++) players[i]->SetSelection(j,TRUE);
 	if (i%ENTRIES_PER_ROW==0) support->NewLine();
 }
@@ -467,23 +467,23 @@ void EfgShow::SetFileName(void)
 {
 // Title the window
 #ifndef _HPUX_SOURCE // for some strange reason SetTitle crashes on hp
-SetTitle("["+gString(wxFileNameFromPath(filename))+"] "+ef.GetTitle());
+SetTitle("["+gText(wxFileNameFromPath(filename))+"] "+ef.GetTitle());
 #endif
 }
 
-void EfgShow::SetFileName(const gString &s)
+void EfgShow::SetFileName(const gText &s)
 {
 if (s!="") filename=s; else filename="untitled.efg";
 // Title the window
 #ifndef _HPUX_SOURCE // for some strange reason SetTitle crashes on hp
-SetTitle("["+gString(wxFileNameFromPath(filename))+"] "+ef.GetTitle());
+SetTitle("["+gText(wxFileNameFromPath(filename))+"] "+ef.GetTitle());
 #endif
 }
 // Show some game info
 bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 void EfgShow::ShowGameInfo(void)
 {
-gString tmp;
+gText tmp;
 char tempstr[200];
 sprintf(tempstr,"Number of Players: %d",ef.NumPlayers());
 tmp+=tempstr;tmp+="\n";
@@ -508,13 +508,13 @@ const EFSupport *EfgShow::GetSupport(int which)
 //                EXTENSIVE FORM GUI
 //***************************************************************************
 
-EfgGUI::EfgGUI(Efg *ef,const gString infile_name,EfgNfgInterface *inter,wxFrame *parent)
+EfgGUI::EfgGUI(Efg *ef,const gText infile_name,EfgNfgInterface *inter,wxFrame *parent)
 {
 if (!ef)	// must create a new extensive form from scratch or file
 {
-	if (infile_name==gString())	// from scratch
+	if (infile_name==gText())	// from scratch
 	{
-   	gArray<gString> names;
+   	gArray<gText> names;
 		if (GetEFParams(names,parent))
       {
 			gSpace *space = new gSpace;
@@ -543,7 +543,7 @@ if (ef_show) ef_show->SetFileName(infile_name);
 #define MAX_PLAYERS 100
 #define MAX_STRATEGIES	100
 #define NUM_PLAYERS_PER_LINE 8
-int EfgGUI::GetEFParams(gArray<gString> &names,wxFrame *parent)
+int EfgGUI::GetEFParams(gArray<gText> &names,wxFrame *parent)
 {
 int num_players=2;
 // Get the number of players first
@@ -557,12 +557,12 @@ if (ok!=wxOK || num_players<1) return 0;
 
 // Now get player names
 MyDialogBox *make_ef_names=new MyDialogBox(parent,"Player Names");
-names=gArray<gString>(num_players);
+names=gArray<gText>(num_players);
 char **names_str=new char*[num_players+1];
 for (int i=1;i<=num_players;i++)
 {
-	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToString(i));
-	make_ef_names->Add(wxMakeFormString(ToString(i),&names_str[i],wxFORM_TEXT,
+	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToText(i));
+	make_ef_names->Add(wxMakeFormString(ToText(i),&names_str[i],wxFORM_TEXT,
                       NULL,NULL,0,140));
 	if (i%(NUM_PLAYERS_PER_LINE/2)==0) make_ef_names->Add(wxMakeFormNewLine());
 }

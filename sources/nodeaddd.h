@@ -12,7 +12,7 @@ private:
 	Efg &ef;
 	int		branches;
 	char	*player_name;
-	gArray<gString> player_names;
+	gArray<gText> player_names;
 	char	*iset_name;
 	Bool	set_names;
 	// keep track of the panel items
@@ -51,7 +51,7 @@ set_names=TRUE;
 wxStringList *player_list=new wxStringList;player_name=new char[20];
 player_list->Add("Chance");
 for (int i=1;i<=ef.NumPlayers();i++) {
-  player_names[i] = ToString(i) + ": " + ef.Players()[i]->GetName();
+  player_names[i] = ToText(i) + ": " + ef.Players()[i]->GetName();
   player_list->Add(player_names[i]);
 }
 
@@ -131,7 +131,7 @@ EFPlayer *NodeAddDialog::GetPlayer(void)
 if (strcmp(player_name,"New Player")==0)
 {
 	EFPlayer *player=ef.NewPlayer();
-	player->SetName(ToString(ef.NumPlayers()));
+	player->SetName(ToText(ef.NumPlayers()));
    return player;
 }
 else
@@ -177,7 +177,7 @@ for (int iset = 1; iset <= player->NumInfosets(); iset++)
   }
 
 if (!infoset) return;
-branch_item->SetValue(ToString(infoset->NumActions()));
+branch_item->SetValue(ToText(infoset->NumActions()));
 }
 
 void NodeAddDialog::OnBranch(void)

@@ -20,7 +20,7 @@ public:
 class GridSolveParamsDialog : public MyDialogBox,public GridParamsSettings
 {
 public:
-	GridSolveParamsDialog(wxWindow *parent,const gString filename);
+	GridSolveParamsDialog(wxWindow *parent,const gText filename);
 //	~GridSolveParamsDialog(void);
 };
 #ifdef GRID_PRM_INST    // instantiate only once
@@ -66,7 +66,7 @@ P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 
-GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *parent,const gString filename)
+GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *parent,const gText filename)
 				: MyDialogBox(parent,"Gobit All Solve Params",GOBIT_HELP),
 				 GridParamsSettings(filename),PxiParamsSettings("grid",filename)
 {
@@ -102,13 +102,13 @@ wxText *tracefilet = new wxText(this, 0, "Trace File", "", 187, 402, 200, 30, 0,
 //	ok_button = new wxButton(this, (wxFunction)ok_func, "Ok", 34, 455, -1, -1, 0, "ok_button");
 //	cancel_button = new wxButton(this, (wxFunction)ButtonProc42, "Cancel", 114, 457, -1, -1, 0, "cancel_button");
 //	help_button = new wxButton(this, (wxFunction)ButtonProc44, "Help", 224, 458, -1, -1, 0, "help_button");
-minLamt->SetValue(ToString(minLam));
-maxLamt->SetValue(ToString(maxLam));
-delLamt->SetValue(ToString(delLam));
-delp1t->SetValue(ToString(delp1));
-delp2t->SetValue(ToString(delp2));
-tol1t->SetValue(ToString(tol1));
-tol2t->SetValue(ToString(tol2));
+minLamt->SetValue(ToText(minLam));
+maxLamt->SetValue(ToText(maxLam));
+delLamt->SetValue(ToText(delLam));
+delp1t->SetValue(ToText(delp1));
+delp2t->SetValue(ToText(delp2));
+tol1t->SetValue(ToText(tol1));
+tol2t->SetValue(ToText(tol2));
 tracefilet->SetValue(outname);
 tracet->SetStringSelection(trace_str);
 pxitypet->SetStringSelection(type_str);

@@ -12,7 +12,7 @@
 #include "efgconst.h"
 
 typedef struct NODEENTRY {
-		int x, y, level, color;
+                int x, y, level, color;
 		struct {int x,y;} infoset;	// pos of the next node in the infoset to connect to
 		int	num;				// # of the infoset line on this level
 		int nums;				// sum of infosets previous to this level
@@ -151,7 +151,7 @@ private:
 	void	CheckInfosetEntry(NodeEntry *e);
 	void	UpdateTableInfosets(void);
 	void	UpdateTableParents(void);
-	void	Log(const gString &s);
+	void	Log(const gText &s);
 	int PlayerNum(const EFPlayer *p) const ;
 	int IsetNum(const Infoset *i) const ;
 	static void OnPopup(wxMenu &ob,wxCommandEvent &ev);
@@ -189,7 +189,7 @@ public:
 	void tree_label(void);
 	void tree_players(void);
 	void tree_infosets(void);
-	void tree_outcomes(const gString out_name=gString());
+	void tree_outcomes(const gText out_name=gText());
 
 	void infoset_merge(void);
 	void infoset_break(void);
@@ -228,7 +228,7 @@ public:
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
 	Bool	logging(void);
 
-	gString Title(void) const;
+	gText Title(void) const;
 
 	virtual void Render(wxDC &dc);
 	void HilightInfoset(int pl,int iset);
@@ -245,8 +245,8 @@ public:
 	virtual Bool JustRender(void) const;
    // Access to the numeric values from the renderer
  	double 	ProbAsDouble(const Node *n,int action) const;
-	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
-	gString	OutcomeAsString(const Node *n,bool &hilight) const;
+	gText	AsString(TypedSolnValues what,const Node *n,int br=0) const;
+	gText	OutcomeAsString(const Node *n,bool &hilight) const;
 
 };
 

@@ -50,6 +50,26 @@ int SeqForm(const EFSupport &support, const gArray<gNumber> &values,
   return 1;
 }
 
+int SeqFormBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+				   gList<BehavSolution> &solns)
+{
+  int npiv;
+  double time;
+  _SeqForm(sup, values, params, solns, npiv, time);
+
+  npivots += npiv;
+
+  return 1;
+}
+
+SeqFormBySubgame::SeqFormBySubgame(const EFSupport &S,
+				   const gArray<gNumber> &v,
+				   const SeqFormParams &p, int max)
+  : SubgameSolver(S, v, max), npivots(0), params(p), values(v)
+{ }
+
+SeqFormBySubgame::~SeqFormBySubgame()   { }
+
 
 template class SeqFormModule<double>;
 template class SeqFormModule<gRational>;

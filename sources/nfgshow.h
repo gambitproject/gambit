@@ -75,7 +75,7 @@ private:
 	NormalDrawSettings	draw_settings;
 	MSolnSortFilterOptions sf_options;
 	gList<Accel>	accelerators;
-	gString filename;
+	gText filename;
 	// Private functions
 	void UpdateSoln(void);
 	void UpdateDom(void);
@@ -126,8 +126,8 @@ public:
 	void SolutionToExtensive(const MixedSolution &mp,bool set=false);
 	void ChangePayoffs(int st1,int st2,bool next=false);
 	// Filename support
-	void SetFileName(const gString &s);
-	const gString &Filename(void) const;
+	void SetFileName(const gText &s);
+	const gText &Filename(void) const;
 	// Display some inherent game properties
 	void ShowGameInfo(void);
    // Process Accelerator Keys
@@ -206,7 +206,7 @@ public:
 	// Functions to enable/disable menuiterms
 	void EnableInspect(Bool enable) {GetMenuBar()->Enable(inspect_item,enable);}
 	// Callback for double clicking on a cell.  Currently this edits the cell
-	void OnDoubleClick(int row,int col,int ,const gString &) {parent->ChangePayoffs(row,col);}
+	void OnDoubleClick(int row,int col,int ,const gText &) {parent->ChangePayoffs(row,col);}
 	// Callback for moving the selected cell.  Currently this updates the pl1,pl2 choice boxes
 	void OnSelectedMoved(int row,int col,SpreadMoveDir /*how*/=SpreadMoveJump)
 	{strat_profile[pl1]->SetSelection(row-1);strat_profile[pl2]->SetSelection(col-1);}

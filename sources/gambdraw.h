@@ -4,7 +4,7 @@
 #define GAMBDRAW_H
 
 #include "gblock.h"
-#include "gstring.h"
+#include "gtext.h"
 class GambitDrawSettings
 {
 private:
@@ -23,7 +23,7 @@ public:
 	void	SaveOptions(char *f=0) const;
 	void	LoadOptions(char *f);
 // GUI Set colors
-	void	PlayerColorDialog(gArray<gString> &);
+	void	PlayerColorDialog(gArray<gText> &);
 };
 
 #define INIFILE		"gambit.ini"

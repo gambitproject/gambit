@@ -38,8 +38,8 @@ public:
 	int Completed(void);
 };
 
-MSolnSortFilterDialog::MSolnSortFilterDialog(MSolnSortFilterOptions &options_):options(options_),
-															wxDialogBox(0,"Sort & Filter",TRUE)
+MSolnSortFilterDialog::MSolnSortFilterDialog(MSolnSortFilterOptions &options_)
+  : wxDialogBox(0, "Sort & Filter", TRUE), options(options_)
 {
 SetLabelPosition(wxVERTICAL);
 char *sort_by_str[] = { "ID", "Creator", "Nash", "Perfect", "Proper", "G Value", "G Lambda", "L Value" };
@@ -172,7 +172,7 @@ if (opts&MSOLN_O_OPTIONS)
 			AddCol(col);
 			SetCell(1,col,feature_names[i]);Bold(1,col,0,TRUE);
 			if (feature_width[i]==-1)	// precision dependent
-				DrawSettings()->SetColWidth(2+ToStringPrecision(),col);
+				DrawSettings()->SetColWidth(2+ToTextPrecision(),col);
 			else											// precision independent
 				DrawSettings()->SetColWidth(feature_width[i],col);
 		}
@@ -184,7 +184,7 @@ else
 DrawSettings()->SetColWidth(4,FeaturePos(MSOLN_ID));	// Id # "id"=3 chars
 DrawSettings()->SetColWidth(8,FeaturePos(MSOLN_PLAYER));	// Player number "Player #"=8 chars
 for (i=1;i<=max_strats;i++) // strat, prob "#: #.###..."
-	DrawSettings()->SetColWidth(5+ToStringPrecision(),FeaturePos(MSOLN_NUM_FEATURES-1)+i);
+	DrawSettings()->SetColWidth(5+ToTextPrecision(),FeaturePos(MSOLN_NUM_FEATURES-1)+i);
 SetCell(1,FeaturePos(MSOLN_ID),"Id");Bold(1,FeaturePos(MSOLN_ID),0,TRUE);
 SetCell(1,FeaturePos(MSOLN_PLAYER),"Pl");Bold(1,FeaturePos(MSOLN_PLAYER),0,TRUE);
 
@@ -252,7 +252,7 @@ if (new_soln!=cur_soln)
 }
 
 // On Double Click
-void NfgSolnShow::OnDoubleClick(int row,int col,int ,const gString &)
+void NfgSolnShow::OnDoubleClick(int row,int col,int ,const gText &)
 {
 if (col==FeaturePos(MSOLN_ID)) UpdateSoln(row,col);	// change solution
 if (col>FeaturePos(MSOLN_NUM_FEATURES-1))	// edit solution
@@ -377,7 +377,7 @@ if (options_dialog->Completed()==wxOK)
 					AddCol(col);
 					SetCell(1,col,feature_names[i]);Bold(1,col,0,TRUE);
 					if (feature_width[i]==-1)	// precision dependent
-						DrawSettings()->SetColWidth(2+ToStringPrecision(),col);
+						DrawSettings()->SetColWidth(2+ToTextPrecision(),col);
 					else											// precision independent
 						DrawSettings()->SetColWidth(feature_width[i],col);
 				}
@@ -399,7 +399,7 @@ void NfgSolnShow::OnOptionsChanged(unsigned int options)
 if (options&S_PREC_CHANGED)
 {
 for (int i=FeaturePos(MSOLN_NUM_FEATURES-1)+1;i<=GetCols();i++) // strat, prob "#: #.###..."
-	DrawSettings()->SetColWidth(5+ToStringPrecision(),i);
+	DrawSettings()->SetColWidth(5+ToTextPrecision(),i);
 UpdateValues();Resize();Repaint();
 }
 }
@@ -408,14 +408,14 @@ UpdateValues();Resize();Repaint();
 
 void NfgSolnShow::UpdateValues(void)
 {
-gString tmp_str;
+gText tmp_str;
 int sp=FeaturePos(MSOLN_NUM_FEATURES-1);	// first column with actual strategies
 for (int i=1;i<=num_solutions;i++)
 {
 	int cur_pos=2+(i-1)*num_players;
 	const MixedSolution &cur_vector=solns[i];
 	const NFSupport &sup=cur_vector.Support();
-	SetCell(cur_pos,FeaturePos(MSOLN_ID),ToString((int)cur_vector.Id()));
+	SetCell(cur_pos,FeaturePos(MSOLN_ID),ToText((int)cur_vector.Id()));
 	if (features[MSOLN_CREATOR])
 		SetCell(cur_pos,FeaturePos(MSOLN_CREATOR),NameNfgAlgType(cur_vector.Creator()));
 	if (features[MSOLN_ISNASH])
@@ -426,37 +426,37 @@ for (int i=1;i<=num_solutions;i++)
 		SetCell(cur_pos,FeaturePos(MSOLN_ISPROP),NameTriState(cur_vector.IsProper()));
 	if (features[MSOLN_GLAMBDA])
 		if (cur_vector.Creator()==NfgAlg_GOBIT)
-		SetCell(cur_pos,FeaturePos(MSOLN_GLAMBDA),ToString(cur_vector.GobitLambda()));
+		SetCell(cur_pos,FeaturePos(MSOLN_GLAMBDA),ToText(cur_vector.GobitLambda()));
 		else
 		SetCell(cur_pos,FeaturePos(MSOLN_GLAMBDA),"---------");
 	if (features[MSOLN_GVALUE])
 		if (cur_vector.Creator()==NfgAlg_GOBIT)
-		SetCell(cur_pos,FeaturePos(MSOLN_GVALUE),ToString(cur_vector.GobitValue()));
+		SetCell(cur_pos,FeaturePos(MSOLN_GVALUE),ToText(cur_vector.GobitValue()));
 		else
 		SetCell(cur_pos,FeaturePos(MSOLN_GVALUE),"---------");
 	if (features[MSOLN_LVALUE])
-		SetCell(cur_pos,FeaturePos(MSOLN_LVALUE),ToString(cur_vector.LiapValue()));
+		SetCell(cur_pos,FeaturePos(MSOLN_LVALUE),ToText(cur_vector.LiapValue()));
 	int j;
 	if (features[MSOLN_EQUVALS])
 		for (j=1;j<=num_players;j++)
-			SetCell(cur_pos+(j-1),FeaturePos(MSOLN_EQUVALS),ToString(cur_vector.Payoff(j)));
+			SetCell(cur_pos+(j-1),FeaturePos(MSOLN_EQUVALS),ToText(cur_vector.Payoff(j)));
 	// Update the soln#, player and strategies values
 	for (j=1;j<=num_players;j++)
 	{
-		gString pl_name=sup.Game().Players()[j]->GetName();
-		if (pl_name=="") pl_name=ToString(j);
+		gText pl_name=sup.Game().Players()[j]->GetName();
+		if (pl_name=="") pl_name=ToText(j);
 		SetCell(cur_pos+(j-1),FeaturePos(MSOLN_PLAYER),pl_name); // print the player names
 		int k1=1;
 		for (int k=1;k<=cur_vector.Lengths()[j];k++)	// print the probs
 		{
 			if (features[MSOLN_ZERPROB] || cur_vector(j,k)>gNumber(0))
 			{
-				tmp_str="\\C{"+ToString(norm_draw_settings.GetPlayerColor(j))+"}";
+				tmp_str="\\C{"+ToText(norm_draw_settings.GetPlayerColor(j))+"}";
 				if (sup.Strategies(j)[k]->name!="")
 					tmp_str+=sup.Strategies(j)[k]->name;
 				else
-					tmp_str+=ToString(k);
-				tmp_str+=": "+ToString(cur_vector(j,k));
+					tmp_str+=ToText(k);
+				tmp_str+=": "+ToText(cur_vector(j,k));
 				SetCell(cur_pos+(j-1),sp+k1,tmp_str);
 				k1++;
 			}
@@ -500,7 +500,7 @@ if (completed==wxOK)
 int old_num_sol=num_solutions;  // current state
 const MixedSolution *cur_solnp=0;
 if (cur_soln) cur_solnp=&solns[cur_soln];
-MSolnSorterFilter SF(solns,sf_options);
+//MSolnSorterFilter SF(solns,sf_options);
 int i,j;
 int new_soln=0;									// try to find the new pos of cur_soln
 for (i=1;i<=solns.VisLength();i++) if (cur_solnp==&solns[i]) new_soln=i;
@@ -577,18 +577,18 @@ public:
 	DrawSettings()->SetColWidth(8,1);
 	for (i=1;i<=num_players;i++)		// label rows
 	{
-		gString tmp_str=sup.Game().Players()[i]->GetName();
-		if (tmp_str=="") tmp_str="Player "+ToString(i);
+		gText tmp_str=sup.Game().Players()[i]->GetName();
+		if (tmp_str=="") tmp_str="Player "+ToText(i);
 		SetCell(i+1,1,tmp_str);Bold(i+1,1,0,TRUE);
 	}
 	for (i=1;i<=max_dim;i++)				// label cols
 	{
-		SetCell(1,i+1,ToString(i));Bold(1,i+1,0,TRUE);
-		DrawSettings()->SetColWidth(2+ToStringPrecision(),i+1);
+		SetCell(1,i+1,ToText(i));Bold(1,i+1,0,TRUE);
+		DrawSettings()->SetColWidth(2+ToTextPrecision(),i+1);
 	}
 	for (i=1;i<=num_players;i++)		// enter values
 	{
-		for (j=1;j<=dim[i];j++) SetCell(i+1,j+1,ToString(soln(i,j)));
+		for (j=1;j<=dim[i];j++) SetCell(i+1,j+1,ToText(soln(i,j)));
 		for (j=dim[i]+1;j<=max_dim;j++) HiLighted(i+1,j+1,1,TRUE);
 	}
 	SetCurCol(2);SetCurRow(2);
@@ -608,7 +608,7 @@ public:
 	{
 	for (int i=1;i<=dim.Length();i++)
 		for (int j=1;j<=dim[i];j++)
-			FromString(GetCell(i+1,j+1),soln(i,j));
+			FromText(GetCell(i+1,j+1),soln(i,j));
 	SetCompleted(wxOK);
 	Show(FALSE);
 	}
@@ -709,7 +709,7 @@ Repaint();
 }
 
 
-void Nfg1SolnPicker::OnDoubleClick(int row,int col,int ,const gString &)
+void Nfg1SolnPicker::OnDoubleClick(int row,int col,int ,const gText &)
 {
 if (col>FeaturePos(MSOLN_NUM_FEATURES-1))	// edit solution
 {

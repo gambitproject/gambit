@@ -37,9 +37,9 @@ private:
 	{
 	if (es->MakeSupport())
 	{
-		disp_item->Append(ToString(sups.Length()));
+		disp_item->Append(ToText(sups.Length()));
 		disp_item->SetSize(-1,-1,-1,-1);
-		cur_item->Append(ToString(sups.Length()));
+		cur_item->Append(ToText(sups.Length()));
 		cur_item->SetSize(-1,-1,-1,-1);
 	}
 	}
@@ -57,15 +57,15 @@ private:
 	void OnDisp(int disp_sup)
 	{disp_dim->SetValue(gpvect_to_string(sups[disp_sup]->NumActions()));}
 // Utility funcs
-	static gString gpvect_to_string(const gPVector<int> &a)
+	static gText gpvect_to_string(const gPVector<int> &a)
 	{
 	int sum;
-	gString tmp='(';
+	gText tmp='(';
 	for (int i=1;i<=a.Lengths().Length();i++)
 	{
 	  sum=0;
 		for (int j=1;j<=a.Lengths()[i];j++) sum+=a(i,j);
-		tmp+=ToString(sum)+((i==a.Lengths().Length()) ? ")" : ",");
+		tmp+=ToText(sum)+((i==a.Lengths().Length()) ? ")" : ",");
 	}
 	return tmp;
 	}
@@ -84,8 +84,8 @@ public:
 											gpvect_to_string(sups[disp_sup]->NumActions()),
 											-1,-1,80,-1,wxREADONLY);
 	support_list=wxStringListInts(sups.Length());
-	cur_str=new char[10];strcpy(cur_str,ToString(cur_sup));
-	disp_str=new char[10];strcpy(disp_str,ToString(disp_sup));
+	cur_str=new char[10];strcpy(cur_str,ToText(cur_sup));
+	disp_str=new char[10];strcpy(disp_str,ToText(disp_sup));
 	wxFormItem *cur_fitem=wxMakeFormString("",&cur_str,wxFORM_CHOICE,
 					new wxList(wxMakeConstraintStrings(support_list),0));
 	f->Add(cur_fitem);
@@ -152,7 +152,7 @@ for (i=sups.Length();i>=2;i--)
 	}
 disp_item->Clear();cur_item->Clear();
 for (i=1;i<=sups.Length();i++)
-	{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
+	{disp_item->Append(ToText(i));cur_item->Append(ToText(i));}
 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
 disp_item->SetSelection(0);cur_item->SetSelection(0);
 if (revert) es->ChangeSupport(UPDATE_DIALOG);

@@ -149,13 +149,13 @@ Bool	IsDelete(wxKeyEvent &ev);
 // of: "text[/C{#}]", where # is the number of the color to select
 // from the gambit_color_list.  Also allows sup/superscripts
 // Note: uses gString
-#include "gstring.h"
-void gDrawText(wxDC &dc,const gString &s,float x,float y);
+#include "gtext.h"
+void gDrawText(wxDC &dc,const gText &s,float x,float y);
 // Calculates the size of the string when parsed as gDrawText
-void gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y);
+void gGetTextExtent(wxDC &dc,const gText &s0, float *x, float *y);
 // Returns just the text portion of a gDrawText formated string
-gString gPlainText(const gString &s);
-gString gGetTextLine(const gString &s0="",wxFrame *parent=0,int x=-1,int y=-1,
+gText gPlainText(const gText &s);
+gText gGetTextLine(const gText &s0="",wxFrame *parent=0,int x=-1,int y=-1,
                      const char *title="",bool titlebar=false);
 // FindFile: finds the specified file in the path.  User deletes the
 // result

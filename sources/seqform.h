@@ -21,10 +21,32 @@ class SeqFormParams     {
     SeqFormParams(gStatus &status_ = gstatus);
 };
 
+#include "subsolve.h"
+
+class SeqFormBySubgame : public SubgameSolver  {
+  private:
+    int npivots;
+    SeqFormParams params;
+    gArray<gNumber> values;
+
+    int SolveSubgame(const Efg &, const EFSupport &,
+		     gList<BehavSolution> &);
+    EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
+
+  public:
+    SeqFormBySubgame(const EFSupport &, const gArray<gNumber> &values,
+                     const SeqFormParams &, int max = 0);
+    virtual ~SeqFormBySubgame();
+
+    int NumPivots(void) const  { return npivots; }
+};
+
 int SeqForm(const EFSupport &, const gArray<gNumber> &, const SeqFormParams &,
 	    gList<BehavSolution> &, int &npivots, double &time);
 
 #endif    // SEQFORM_H
+
+
 
 
 

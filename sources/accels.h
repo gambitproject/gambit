@@ -3,7 +3,7 @@
 
 #include "garray.h"
 #include "glist.h"
-#include "gstring.h"
+#include "gtext.h"
 
 // This structure describes an accelerator--key combination w/ event id to trigger
 typedef enum {aOff=0,aOn,aEither} AccelState;
@@ -31,17 +31,17 @@ gOutput &operator<<(gOutput &o,const Accel &p);
 // This structure defines a possible accelerator event.
 typedef struct accelevent_struct
 {
-	gString name;
+	gText name;
 	long id;
 	// Constructor
 	accelevent_struct(void) : name(""),id(0) { }
-	accelevent_struct(const gString &n,long i) :name(n),id(i) { }
+	accelevent_struct(const gText &n,long i) :name(n),id(i) { }
 	// operators
 	accelevent_struct &operator=(const accelevent_struct &a) {name=a.name;id=a.id;return *this;}
 	int operator==(const accelevent_struct &a) {return (name==a.name && id==a.id);}
 	int operator!=(const accelevent_struct &a) {return !(name==a.name && id==a.id);}
 	int operator==(long new_id) {return (id==new_id);}
-	int operator==(const gString new_name) {return (name==new_name);}
+	int operator==(const gText new_name) {return (name==new_name);}
 } AccelEvent;
 gOutput &operator<<(gOutput &o,const AccelEvent &p);
 // Functions for working with accelerators

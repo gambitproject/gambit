@@ -95,7 +95,7 @@ public:
 	// Take care of some options changes
 	void OnOptionsChanged(unsigned int options=0);
 	// Double clicking on a solution will update the parent
-	void OnDoubleClick(int row,int col,int level,const gString &value);
+	void OnDoubleClick(int row,int col,int level,const gText &value);
 	// Moving a cell updates the parent, if the dynamic option is set
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	// OnOk must be defined to inform parent that I am killed
@@ -123,7 +123,7 @@ public:
 						BSolnSortFilterOptions	&sf_options,
 						EfgShow *parent_=0);
 	// Double clicking on a solution will toggle it.
-	void OnDoubleClick(int row,int col,int level,const gString &value);
+	void OnDoubleClick(int row,int col,int level,const gText &value);
 	// Override parent class feature
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	// OnOk must be defined to inform parent that I am killed
@@ -149,7 +149,7 @@ public:
 						BSolnSortFilterOptions	&sf_options,
 						EfgShow *parent_=0);
 	// Double clicking on a solution will select it
-	void OnDoubleClick(int row,int col,int level,const gString &value);
+	void OnDoubleClick(int row,int col,int level,const gText &value);
 	// Override parent class feature
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	// OnOk must be defined to inform parent that I am killed

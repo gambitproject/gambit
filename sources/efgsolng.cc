@@ -173,7 +173,7 @@ void EfgNLiapG::SolveSetup(void) const
 {LiapSolveParamsDialog LSPD(parent->Frame(),true);}
 
 // SeqForm
-#include "seqform.imp"
+#include "seqform.h"
 #define SEQF_PRM_INST
 #include "seqfprm.h"
 class SeqFormBySubgameG:
@@ -210,7 +210,7 @@ void EfgSeqFormG::SolveSetup(void) const
 {SeqFormParamsDialog SFPD(parent->Frame(),true);}
 
 // Lemke
-#include "lemkesub.imp"
+#include "lemkesub.h"
 #define LEMKE_PRM_INST
 #include "lemkeprm.h"
 class LemkeBySubgameG:
@@ -255,7 +255,7 @@ void EfgLemkeG::SolveSetup(void) const
 
 
 // Pure Nash
-#include "psnesub.imp"
+#include "psnesub.h"
 #define PUREN_PRM_INST
 #include "purenprm.h"
 class PureNashBySubgameG:
@@ -295,7 +295,7 @@ void EfgPureNashG::SolveSetup(void) const
 
 
 // Efg Pure Nash
-#include "efgpure.imp"
+#include "efgpure.h"
 class EPureNashBySubgameG:
                          public EfgPSNEBySubgame,public BaseBySubgameG
 {
@@ -330,7 +330,7 @@ void EfgEPureNashG::SolveSetup(void) const
 {PureNashSolveParamsDialog PNPD(parent->Frame(),true);}
 
 // Enum Mixed
-#include "enumsub.imp"
+#include "enumsub.h"
 #define ENUM_PRM_INST
 #include "enumprm.h"
 class EnumBySubgameG:
@@ -371,8 +371,8 @@ void EfgEnumG::SolveSetup(void) const
 
 
 // LP (ZSum)
-#include "csumsub.imp"
-#include "efgcsum.imp"
+#include "csumsub.h"
+#include "efgcsum.h"
 #define CSUM_PRM_INST
 #include "csumprm.h"
 class ZSumBySubgameG:
@@ -462,7 +462,7 @@ void EfgCSumG::SolveSetup(void) const
 {LPSolveParamsDialog ZSPD(parent->Frame(),true);}
 
 // Simpdiv
-#include "simpsub.imp"
+#include "simpsub.h"
 #define SIMP_PRM_INST
 #include "simpprm.h"
 class SimpdivBySubgameG:

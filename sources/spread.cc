@@ -54,7 +54,7 @@ if (!LoadOptions())
 for (int i=1;i<=col_width.Length();i++) col_width[i]=DEFAULT_COL_WIDTH;
 x_scroll=y_scroll=0;scrolling=FALSE;
 x_start=-1;y_start=-1;
-ToStringPrecision(num_prec);
+ToTextPrecision(num_prec);
 }
 
 void	SpreadSheetDrawSettings::SetOptions(void)
@@ -106,8 +106,8 @@ if (options_dialog->Completed()==wxOK)
 	labels=0;
 	if (labels_row) labels|=S_LABEL_ROW;
 	if (labels_col) labels|=S_LABEL_COL;
-	if (ToStringPrecision()!=num_prec)
-		{ToStringPrecision(num_prec);changed|=S_PREC_CHANGED;}
+	if (ToTextPrecision()!=num_prec)
+		{ToTextPrecision(num_prec);changed|=S_PREC_CHANGED;}
 	if (save) SaveOptions();
 	parent->OnOptionsChanged(changed);
 }
@@ -221,7 +221,7 @@ if (cols<col_width.Length())
 //****************************************************************************
 //*                             SPREAD SHEET DATA SETTINGS                   *
 //****************************************************************************
-void SpreadSheetDataSettings::SetAutoLabelStr(const gString s,int what)
+void SpreadSheetDataSettings::SetAutoLabelStr(const gText s,int what)
 {
 switch (what)
 {
@@ -230,9 +230,9 @@ switch (what)
 	case S_AUTO_LABEL_LEVEL :	auto_label_level=s; break;
 }
 }
-gString	SpreadSheetDataSettings::AutoLabelStr(int what) const
+gText	SpreadSheetDataSettings::AutoLabelStr(int what) const
 {
-gString label;
+gText label;
 switch (what)
 {
 	case S_AUTO_LABEL_ROW 	:	label=auto_label_row; 		break;
@@ -398,7 +398,7 @@ if (ch==WXK_F3)
 		if (IsDelete(ev))
 		{
 			if (cell.editing==FALSE) cell.editing=TRUE;
-			if (cell.str.length()) cell.str.remove(cell.str.length()-1);
+			if (cell.str.Length()) cell.str.Remove(cell.str.Length()-1);
 		}
 		top_frame->SetStatusText(cell.str);
 	}
@@ -781,7 +781,7 @@ level=level_;
 int h,w;
 parent->GetClientSize(&w,&h);
 sheet=new SpreadSheetC(this,parent,0,0,w,h-MIN_BUTTON_SPACE);
-if (title) label=title; else label=" : #"+ToString(level);
+if (title) label=title; else label=" : #"+ToText(level);
 }
 
 void SpreadSheet::Clear(void)
@@ -796,8 +796,8 @@ void SpreadSheet::SetDimensions(int rows_,int cols_)
 assert(rows_>0 && cols_>0 && "SpreadSheet::Invalid Dimensions");
 rows=rows_;cols=cols_;
 data=gRectBlock<SpreadDataCell>(rows,cols);
-row_labels=gBlock<gString>(rows);
-col_labels=gBlock<gString>(cols);
+row_labels=gBlock<gText>(rows);
+col_labels=gBlock<gText>(cols);
 }
 
 void SpreadSheet::AddRow(int row)
@@ -808,7 +808,7 @@ data.InsertRow(row,(const gArray<SpreadDataCell>)gArray<SpreadDataCell>(cols));
 // Copy the cell types from the previous row
 for (int i=1;i<=cols;i++) data(rows+1,i).SetType(data(rows,i).GetType());
 // add a new entry to the row_labels
-row_labels.Insert((const gString)gString(),row);
+row_labels.Insert((const gText)gText(),row);
 rows++;
 }
 
@@ -818,7 +818,7 @@ if (col==0) col=cols+1;
 // add a new column to the matrix
 data.InsertColumn(col,(const gArray<SpreadDataCell>)gArray<SpreadDataCell>(rows));
 // add a new entry to the col_labels
-col_labels.Insert((const gString)gString(),col);
+col_labels.Insert((const gText)gText(),col);
 cols++;
 }
 
@@ -1126,14 +1126,14 @@ data[cur_level].SetActive(TRUE);
 SetTitle(label+":"+data[cur_level].GetLabel());
 }
 
-void SpreadSheet3D::SetLabelRow(int row,const gString &s,int level)
+void SpreadSheet3D::SetLabelRow(int row,const gText &s,int level)
 {
 if (level==0)
 	for (level=1;level<=levels;level++) data[level].SetLabelRow(row,s);
 else
 	data[level].SetLabelRow(row,s);
 }
-void SpreadSheet3D::SetLabelCol(int col,const gString &s,int level)
+void SpreadSheet3D::SetLabelCol(int col,const gText &s,int level)
 {
 if (level==0)
 	for (level=1;level<=levels;level++)

@@ -25,7 +25,7 @@ public:
 class GobitSolveParamsDialog : public PxiParamsDialog,public GobitParamsSettings
 {
 public:
-	GobitSolveParamsDialog(wxWindow *parent,const gString filename);
+	GobitSolveParamsDialog(wxWindow *parent,const gText filename);
 //	~GobitSolveParamsDialog(void);
 };
 
@@ -85,7 +85,7 @@ P->trace=TraceLevel();P->tracefile=OutFile();
 int GobitParamsSettings::StartOption(void) const {return start_option;}
 
 //******************************** Constructor ************************
-GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *parent,const gString filename)
+GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *parent,const gText filename)
 												:PxiParamsDialog("gobit","Gobit Params",filename,parent,GOBIT_HELP),
 													GobitParamsSettings(filename),PxiParamsSettings("gobit",filename)
 {

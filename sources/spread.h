@@ -77,7 +77,7 @@
 #include "glist.h"
 #include "gblock.h"
 #include "grblock.h"
-#include "gstring.h"
+#include "gtext.h"
 
 #define	XSTEPS							20    // Scroll steps horizontally
 #define	YSTEPS							20		// Scroll steps vertically
@@ -119,9 +119,9 @@ class SpreadSheetDataSettings
 private:
 	int			change;
 	int			auto_label;
-	gString	auto_label_row;
-	gString	auto_label_col;
-	gString auto_label_level;
+	gText	auto_label_row;
+	gText	auto_label_col;
+	gText auto_label_level;
 public:
 	int ref_cnt;	// reference counter
 	SpreadSheetDataSettings *GetThis(void) {ref_cnt++; return this;}
@@ -136,8 +136,8 @@ public:
 	// sprintf(temp,fmt,row/col) function.
 	int		AutoLabel(int l)	{return auto_label&l;}
 	void	SetAutoLabel(int l)	{auto_label=l;}
-	void	SetAutoLabelStr(const gString s,int what);
-	gString	AutoLabelStr(int what) const;
+	void	SetAutoLabelStr(const gText s,int what);
+	gText	AutoLabelStr(int what) const;
 };
 
 //********************** SPREAD SHEET DRAW SETTINGS ***********************
@@ -247,7 +247,7 @@ class SpreadCell {
 								int 				row;
 								int 				col;
 								Bool				editing;
-								gString 		str;
+								gText 		str;
 								SpreadCell(void)	{row=1;col=1;editing=FALSE;}
 								~SpreadCell(void)	{}
 								void Reset(const char *s=NULL)	{editing=FALSE;str=s;}
@@ -310,7 +310,7 @@ friend gOutput &operator<<(gOutput &op,const SpreadDataCell &s);
 private:
 	Bool							entered;
 	gSpreadValType		val_type;
-	gString						value;
+	gText						value;
 	long							attributes;
 public:
 	// Constructor
@@ -328,7 +328,7 @@ public:
 		value=C.value;attributes=C.attributes;
 		return (*this);
 	}
-	SpreadDataCell &operator=(const gString &S)
+	SpreadDataCell &operator=(const gText &S)
 	{if (val_type!=gSpreadStr) val_type=gSpreadNum;value=S;return (*this);}
 	// Equality
 	int operator==(const SpreadDataCell &C) {return value==C.value;}
@@ -343,10 +343,10 @@ public:
 	void 	Bold(Bool _b) {if (_b) attributes|=S_BOLD; else attributes&=(~S_BOLD);}
 	void	SetType(gSpreadValType _type) {val_type=_type;}
 	gSpreadValType	GetType(void)	const {return val_type;}
-	const gString		&GetValue(void)	const {return value;}
-	void						SetValue(const gString &S) {value=S;}
+	const gText		&GetValue(void)	const {return value;}
+	void						SetValue(const gText &S) {value=S;}
 	// Erase all the data in the cell, including clearing all cell attributes
-	void 	Clear(void) {entered=FALSE;value=gString();attributes=0;}
+	void 	Clear(void) {entered=FALSE;value=gText();attributes=0;}
 };
 gOutput &operator<<(gOutput &op,const gBlock<SpreadDataCell> &s);
 
@@ -358,10 +358,10 @@ friend gOutput &operator<<(gOutput &op,const SpreadSheet &s);
 private:
 	SpreadSheetC	*sheet;
 	gRectBlock<SpreadDataCell> data;
-	gBlock<gString>	row_labels;
-	gBlock<gString> col_labels;
+	gBlock<gText>	row_labels;
+	gBlock<gText> col_labels;
 	int						rows,cols,level;
-	gString				label;
+	gText				label;
 	Bool					active;
 public:
 	// Constructors & destructors
@@ -397,10 +397,10 @@ public:
 	active=_s;
 	}
 	// General data access
-	void		SetValue(int row,int col,const gString &s) {data(row,col)=s;data(row,col).Entered(TRUE);}
-	const gString &GetValue(int row,int col) const {return data(row,col).GetValue();}
-	gString &GetLabel(void)	{return label;}
-	void		SetLabel(const gString &s) {label=s;}
+	void		SetValue(int row,int col,const gText &s) {data(row,col)=s;data(row,col).Entered(TRUE);}
+	const gText &GetValue(int row,int col) const {return data(row,col).GetValue();}
+	gText &GetLabel(void)	{return label;}
+	void		SetLabel(const gText &s) {label=s;}
 	void		SetType(int row,int col,gSpreadValType t) {data(row,col).SetType(t);}
 	int			GetLevel(void)	{return level;}
 	// Cell attributes
@@ -414,12 +414,12 @@ public:
 	// Checking if the cell has something in it
 	Bool		EnteredCell(int row,int col) {return data(row,col).Entered();}
 	// Row/Column labeling
-	void		SetLabelRow(int row,const gString &s) 	{row_labels[row]=s;}
-	void		SetLabelCol(int col,const gString &s)	{col_labels[col]=s;}
-	void		SetLabelRow(const gBlock<gString> &vs) {row_labels=vs;}
-	void		SetLabelCol(const gBlock<gString> &vs) {col_labels=vs;}
-	gString	GetLabelRow(int row)	{return row_labels[row];}
-	gString	GetLabelCol(int col)	{return col_labels[col];}
+	void		SetLabelRow(int row,const gText &s) 	{row_labels[row]=s;}
+	void		SetLabelCol(int col,const gText &s)	{col_labels[col]=s;}
+	void		SetLabelRow(const gBlock<gText> &vs) {row_labels=vs;}
+	void		SetLabelCol(const gBlock<gText> &vs) {col_labels=vs;}
+	gText	GetLabelRow(int row)	{return row_labels[row];}
+	gText	GetLabelCol(int col)	{return col_labels[col];}
 	// Accessing the currently hilighted cell
 	int			CurRow(void)	{return sheet->Row();}
 	int			CurCol(void)	{return sheet->Col();}
@@ -459,7 +459,7 @@ private:
 	int										levels;
 	Bool									editable;
 	unsigned int					features;
-	gString								label;
+	gText								label;
 	void	SavePanelPos(void)	{panel->GetCursor(&panel_x,&panel_y);}
 	void	MakeFeatures();
 	static void spread_slider_func(wxSlider &ob,wxCommandEvent &ev);
@@ -493,7 +493,7 @@ public:
 	virtual void OnMenuCommand(int id);
 	virtual void OnOk(void);
 	virtual void OnCancel(void);
-	virtual void OnDoubleClick(int ,int ,int ,const gString &) { }
+	virtual void OnDoubleClick(int ,int ,int ,const gText &) { }
 	virtual void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
   virtual void OnOptionsChanged(unsigned int /*opts*/=0) { }
 	virtual void OnPrint(void);
@@ -507,13 +507,13 @@ public:
 	void		SetType(int row,int col,int level,gSpreadValType t) {data[level].SetType(row,col,t);}
 	gSpreadValType GetType(int row,int col,int level) {return data[level].GetType(row,col);}
 	SpreadSheet &operator[](int i){assert(i>0&&i<=levels);return data[i];}
-	void		SetCell(int row,int col,const gString &s)
+	void		SetCell(int row,int col,const gText &s)
 		{data[cur_level].SetValue(row,col,s);}
-	const gString &GetCell(int row,int col) const
+	const gText &GetCell(int row,int col) const
 		{return data[cur_level].GetValue(row,col);}
-	void		SetCell(int row,int col,int level,const gString &s)
+	void		SetCell(int row,int col,int level,const gText &s)
 		{assert(level>0 && level<=levels);data[level].SetValue(row,col,s);}
-	const gString &GetCell(int row,int col,int level) const
+	const gText &GetCell(int row,int col,int level) const
 		{assert(level>0 && level<=levels);return data[level].GetValue(row,col);}
 	// Erase all the data in the spreadsheet, including clearing all cell attributes
 	void Clear(int level=0) {if (level==0) level=cur_level;data[level].Clear();}
@@ -540,19 +540,19 @@ public:
 	void DelCol(int col=0) {for(int i=1;i<=levels;i++) data[i].DelCol(col);DrawSettings()->DelCol(col);}
 	void DelLevel(void);
 	// Row/Column labeling
-	void		SetLabelRow(int row,const gString &s,int level=0);
-	void		SetLabelCol(int col,const gString &s,int level=0);
-	void		SetLabelLevel(const gString &s,int level=0)
+	void		SetLabelRow(int row,const gText &s,int level=0);
+	void		SetLabelCol(int col,const gText &s,int level=0);
+	void		SetLabelLevel(const gText &s,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabel(s);}
-	void		SetLabelRow(const gBlock<gString> &vs,int level=0)
+	void		SetLabelRow(const gBlock<gText> &vs,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabelRow(vs);}
-	void		SetLabelCol(const gBlock<gString> &vs,int level=0)
+	void		SetLabelCol(const gBlock<gText> &vs,int level=0)
 		{if (level==0) level=cur_level;data[level].SetLabelCol(vs);}
-	gString	GetLabelRow(int row,int level=0)
+	gText	GetLabelRow(int row,int level=0)
 		{if (level==0) level=cur_level;return data[level].GetLabelCol(row);}
-	gString	GetLabelCol(int col,int level=0)
+	gText	GetLabelCol(int col,int level=0)
 		{if (level==0) level=cur_level;return data[level].GetLabelRow(col);}
-	gString GetLabelLevel(int level=0)
+	gText GetLabelLevel(int level=0)
 		{if (level==0) level=cur_level;return data[level].GetLabel();}
 	// User Interface
 	int			Completed(void)	{return completed;}

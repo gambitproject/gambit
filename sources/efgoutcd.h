@@ -12,7 +12,7 @@ protected:
 public:
 	EfgOutcomeDialog(Efg &ef,EfgShow *es);
 	~EfgOutcomeDialog();
-	void SetOutcome(const gString &outc_name);
+	void SetOutcome(const gText &outc_name);
    void UpdateVals(void);
 	void OnOk(void);
 };

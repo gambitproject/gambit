@@ -194,11 +194,11 @@ if (pxifile && run_pxi && pxi_command && pxiname)
 // first of all, close the pxifile
 	delete pxifile;pxifile=0;
 
-	gString pxi_run(pxi_command);
+	gText pxi_run(pxi_command);
 	pxi_run+=" ";
 // if the filename includes path, use it, if not, append current dir
 	char *fname=copystring(FileNameFromPath(pxiname));
-	gString pxifilename;
+	gText pxifilename;
 	if (strcmp(fname,pxiname)==0)
 	{
 		pxifilename=wxGetWorkingDirectory();

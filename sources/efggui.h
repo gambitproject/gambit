@@ -1,16 +1,16 @@
 // Extgui.h  the wrapper class for creating the extensive form GUI
 // $Id$
 #include "gmisc.h"
-#include "gstring.h"
+#include "gtext.h"
 class wxFrame;
 class Efg;
 class EfgNfgInterface;
 class EfgGUI
 {
 private:
-	int GetEFParams(gArray<gString> &names,wxFrame *parent);
+	int GetEFParams(gArray<gText> &names,wxFrame *parent);
 public:
-	EfgGUI(Efg *ef=0, const gString infile_name=gString(),
+	EfgGUI(Efg *ef=0, const gText infile_name=gText(),
 			 EfgNfgInterface *inter=0, wxFrame *parent=0);
 };
 

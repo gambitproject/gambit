@@ -16,7 +16,7 @@ private:
 	wxText		*new_name_item;
 	char			*new_player_name;
 	// player name
-	gString		prev_name;
+	gText		prev_name;
 	// private functions
 	static	 	void name_func(wxChoice &ob,wxCommandEvent &ev);
 	static		void new_func(wxButton &ob,wxCommandEvent &ev);
@@ -32,11 +32,11 @@ public:
 };
 
 #ifdef PLAYERSD_INST // instantiate only once
-EFPlayer *EfgGetPlayer(const Efg &ef,const gString &name);
+EFPlayer *EfgGetPlayer(const Efg &ef,const gText &name);
 
 //************************************** CONSTRUCTOR **************************
-PlayerNamesDialog::PlayerNamesDialog(Efg &ef_,wxWindow *parent)
-												:ef(ef_),MyDialogBox(parent,"Player Names",EFG_TREE_HELP)
+PlayerNamesDialog::PlayerNamesDialog(Efg &ef_, wxWindow *parent)
+  : MyDialogBox(parent,"Player Names",EFG_TREE_HELP), ef(ef_)
 {
 wxStringList *player_list=new wxStringList;char *player_name=new char[20];
 player_list->Add(ef.GetChance()->GetName());  // CHANCE is always first
@@ -78,7 +78,7 @@ void PlayerNamesDialog::UpdateName(void)
 {
 EFPlayer *player=EfgGetPlayer(ef,prev_name);assert(player);
 
-gString new_name=name_item->GetStringSelection();
+gText new_name=name_item->GetStringSelection();
 if (strcmp(player->GetName(),new_name_item->GetValue())!=0)	// name changed
 {
 	player->SetName(new_name_item->GetValue());	// might want to check if there already exists one

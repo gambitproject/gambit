@@ -284,10 +284,10 @@ if (what==DESTROY_DIALOG && params_dialog)
 if (what==PARAMS_ADD_VAR)
 {
 	// Save old poly's in strings to re-create later
-	gRectArray<gString> old_polys(ef.NumOutcomes(),ef.NumPlayers());
+	gRectArray<gText> old_polys(ef.NumOutcomes(),ef.NumPlayers());
 	for (int i=1;i<=ef.NumOutcomes();i++)
 		for (int j=1;j<=ef.NumPlayers();j++)
-			old_polys(i,j)=ToString(ef.Payoff(ef.Outcomes()[i],j));
+			old_polys(i,j)=ToText(ef.Payoff(ef.Outcomes()[i],j));
 	// Create a new variable
 	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
    ef.Parameters()->CreateVariables();
@@ -311,7 +311,7 @@ if (what==UPDATE1_DIALOG) // Just changed some values
 ParameterSetList &EfgShow::Parameters(void)
 {return param_sets;}
 
-void EfgShow::ChangeOutcomes(int what,const gString out_name)
+void EfgShow::ChangeOutcomes(int what,const gText out_name)
 {
 if (what==CREATE_DIALOG && !outcome_dialog)
 {
@@ -343,13 +343,13 @@ if (set)
 
 // Solution access for TreeWindow
 
-gString EfgShow::AsString(TypedSolnValues what,const Node *n,int br) const
+gText EfgShow::AsString(TypedSolnValues what,const Node *n,int br) const
 {
 int i;
 // Special case that does not fit in ANYWHERE: Chance nodes have probs w/out solutions
 if (what==tBranchProb && n->GetPlayer())
 	if (n->GetPlayer()->IsChance())
-	  return ToString(ef.GetChanceProb(n->GetInfoset(), br));
+	  return ToText(ef.GetChanceProb(n->GetInfoset(), br));
 
 if (!n || !cur_soln) return "N/A";
 
@@ -359,7 +359,7 @@ int n_index=all_nodes.Find((Node *const)n);
 switch (what)
 {
 case tRealizProb:			// terminal ok
-	return ToString(cur.NodeRealizProbs()[n_index]);
+	return ToText(cur.NodeRealizProbs()[n_index]);
 case tBeliefProb: // terminal ok
 {
 		if (!n->GetPlayer()) return "N/A";
@@ -368,14 +368,14 @@ case tBeliefProb: // terminal ok
 		int memb_num;
 		for (memb_num=1;n->GetInfoset()->Members()[memb_num]!=n;memb_num++) ;
 
-		return ToString((((BehavSolution &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
+		return ToText((((BehavSolution &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
 												n->GetInfoset()->GetNumber(),memb_num));
 }
 case tNodeValue:  // terminal ok
 	{
-		gString tmp="(";
+		gText tmp="(";
 		for (i=1;i<=ef.NumPlayers();i++)
-			tmp+=ToString(cur.NodeValues(i)[n_index])+((i==ef.NumPlayers()) ? ")" : ",");
+			tmp+=ToText(cur.NodeValues(i)[n_index])+((i==ef.NumPlayers()) ? ")" : ",");
 		return tmp;
 	}
 case tIsetProb: // terminal not ok
@@ -385,7 +385,7 @@ case tIsetProb: // terminal not ok
 		gDPVector<gNumber> value(ef.NumActions());
 		gPVector<gNumber> probs(ef.NumInfosets());
 		cur.CondPayoff(value,probs);
-		return ToString(probs(n->GetPlayer()->GetNumber(),n->GetInfoset()->GetNumber()));
+		return ToText(probs(n->GetPlayer()->GetNumber(),n->GetInfoset()->GetNumber()));
 	}
 case tBranchVal: // terminal not ok
 	{
@@ -395,7 +395,7 @@ case tBranchVal: // terminal not ok
 		gPVector<gNumber> probs(ef.NumInfosets());
 		cur.CondPayoff(value,probs);
 		if (probs(n->GetPlayer()->GetNumber(),n->GetInfoset()->GetNumber()) > gNumber(0))
-			return ToString(value(n->GetPlayer()->GetNumber(),
+			return ToText(value(n->GetPlayer()->GetNumber(),
 												n->GetInfoset()->GetNumber(),br));
 		else		// this is due to a bug in the value computation
 			return "N/A";
@@ -403,7 +403,7 @@ case tBranchVal: // terminal not ok
 case tBranchProb:	// terminal not ok
 	if (!n->GetPlayer()) return "N/A";
 	// For chance node prob, see first line of this function
-	return ToString(cur.GetValue(n->GetInfoset(),br));
+	return ToText(cur.GetValue(n->GetInfoset(),br));
 case tIsetValue:	// terminal not ok, not implemented
 	return "N.I.";
 default:
@@ -469,7 +469,7 @@ return false;
 //************************************************************************
 
 
-const gString &EfgShow::Filename(void) const
+const gText &EfgShow::Filename(void) const
 {return filename;}
 
 void EfgShow::SetPickSubgame(const Node *n)

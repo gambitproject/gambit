@@ -314,29 +314,29 @@ return ((ev.KeyCode()==WXK_DELETE) ||
 // for a number.  It will stop at the first non-digit character.
 #include <ctype.h>
 #include <stdlib.h>
-int gDrawTextGetNum(const gString &s,int *i)
+int gDrawTextGetNum(const gText &s,int *i)
 {
-gString tmp;
+gText tmp;
 (*i)+=2;	// skip the opening {
-while (isdigit(s[*i]) && *i<s.length() && s[*i]!='}')	{tmp+=s[*i];(*i)++;}
+while (isdigit(s[*i]) && *i<s.Length() && s[*i]!='}')	{tmp+=s[*i];(*i)++;}
 (*i)++;		// skip the closing }
 return atoi((char *)tmp);
 }
 // Hack to be able to parse gPolys (x^2 -> x\^2\~).  No error checking: a bad
 // input will cause a crash.
-gString gDrawTextPreParse(const gString &s)
+gText gDrawTextPreParse(const gText &s)
 {
-if (((gString &)s).lastOccur('^')==0) return s;
-gString tmp;
-for (int n=0;n<s.length();n++)
+if (((gText &)s).LastOccur('^')==0) return s;
+gText tmp;
+for (int n=0;n<s.Length();n++)
 	if (s[n]!='^')
    	tmp+=s[n];
    else
    {
 		tmp+="\\^";
-      while (isdigit(s[++n]) && n<s.length()) tmp+=s[n];
+      while (isdigit(s[++n]) && n<s.Length()) tmp+=s[n];
       tmp+="\\~";
-      if (n<s.length()) tmp+=s[n];
+      if (n<s.Length()) tmp+=s[n];
    }
 return tmp;
 }
@@ -346,21 +346,21 @@ return tmp;
 // to change the color of the output text.  The codes have the format
 // of: "text[/C{#}]", where # is the number of the color to select
 // from the wx_color_list.  To print a \, use a \\.
-void gDrawText(wxDC &dc,const gString &s0,float x,float y)
+void gDrawText(wxDC &dc,const gText &s0,float x,float y)
 {
 int i=0,c;
 float dx,dy;
-gString s=gDrawTextPreParse(s0);
-gString tmp;
-//gString old_foreground(wxTheColourDatabase->FindName(dc.GetTextForeground()));
-gString old_foreground("BLACK");
+gText s=gDrawTextPreParse(s0);
+gText tmp;
+//gText old_foreground(wxTheColourDatabase->FindName(dc.GetTextForeground()));
+gText old_foreground("BLACK");
 wxFont *old_font=0,*small_font=0;
 float	old_y=0;int old_size=0;
 
-while(i<s.length())
+while(i<s.Length())
 {
-	tmp=gString();
-	while (i<s.length() && s[i]!='\\') {tmp+=s[i];i++;}
+	tmp=gText();
+	while (i<s.Length() && s[i]!='\\') {tmp+=s[i];i++;}
 	dc.DrawText((char *)tmp,x,y);
 	dc.GetTextExtent((char *)tmp,&dx,&dy);
 	x+=dx;
@@ -407,20 +407,20 @@ dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
 if (old_font) dc.SetFont(old_font);
 }
 
-void gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
+void gGetTextExtent(wxDC &dc,const gText &s0, float *x, float *y)
 {
 int i=0,c;
 float dx,dy;
-gString s=gDrawTextPreParse(s0);
-gString tmp;
+gText s=gDrawTextPreParse(s0);
+gText tmp;
 wxFont *old_font=0,*small_font=0;
 float	old_y=0;int old_size=0;
 *x=0;*y=0;
 
-while(i<s.length())
+while(i<s.Length())
 {
-	tmp=gString();
-	while (i<s.length() && s[i]!='\\') {tmp+=s[i];i++;}
+	tmp=gText();
+	while (i<s.Length() && s[i]!='\\') {tmp+=s[i];i++;}
 	dc.GetTextExtent((char *)tmp,&dx,&dy);
 	*x+=dx;if (dy<*y) *y=dy;
 	if (s[i]=='\\')	// has to be a command
@@ -464,13 +464,13 @@ if (old_font) dc.SetFont(old_font);
 }
 
 // Takes a string formated for gDrawText and returns just the text value of it.
-gString gPlainText(const gString &s)
+gText gPlainText(const gText &s)
 {
 int i=0;
-gString plain;
-while(i<s.length())
+gText plain;
+while(i<s.Length())
 {
-	while (i<s.length() && s[i]!='\\') {plain+=s[i];i++;}
+	while (i<s.Length() && s[i]!='\\') {plain+=s[i];i++;}
 	if (s[i]=='\\')	// has to be a command
 	{
 		i++;
@@ -506,10 +506,10 @@ class gGetTextFrame : public wxFrame
 private:
 	gGetTextCanvas *d;
 public:
-	gGetTextFrame(const gString s0, wxFrame *frame, int x,int y, const char *title, bool titlebar);
+	gGetTextFrame(const gText s0, wxFrame *frame, int x,int y, const char *title, bool titlebar);
 	Bool OnClose(void);
    int  Completed(void) const;
-   gString GetString(void) const;
+   gText GetString(void) const;
 };
 
 class gGetTextCanvas: public wxCanvas
@@ -517,17 +517,17 @@ class gGetTextCanvas: public wxCanvas
 private:
 	int completed;
 	gGetTextFrame *parent;
-	gString s;
+	gText s;
    float w;
    int pos;
 public:
-	gGetTextCanvas(gGetTextFrame *p,const gString s0);
+	gGetTextCanvas(gGetTextFrame *p,const gText s0);
 	void OnChar(wxKeyEvent &ev);
 	void OnEvent(wxMouseEvent &ev);
 	void OnPaint(void);
    void OnKillFocus(void);
    void SetCompleted(int c);
-   gString GetString(void) const;
+   gText GetString(void) const;
    int Completed(void) const;
 };
 
@@ -538,7 +538,7 @@ public:
 #define GETTEXT_FRAME_WIDTH_M	300
 #define TEXT_OFF              5
 
-gGetTextFrame::gGetTextFrame(const gString s0, wxFrame *frame,int x, int y,
+gGetTextFrame::gGetTextFrame(const gText s0, wxFrame *frame,int x, int y,
                              const char *title,bool titlebar):
 	wxFrame(frame,(char *) title,x,y,GETTEXT_FRAME_WIDTH,GETTEXT_FRAME_HEIGHT,
     (titlebar) ? wxDEFAULT_FRAME : wxRESIZE_BORDER)
@@ -557,16 +557,16 @@ return FALSE;
 int gGetTextFrame::Completed(void) const
 {return d->Completed();}
 
-gString gGetTextFrame::GetString(void) const
+gText gGetTextFrame::GetString(void) const
 {return d->GetString();}
 
-gGetTextCanvas::gGetTextCanvas(gGetTextFrame *parent_,const gString s0):
+gGetTextCanvas::gGetTextCanvas(gGetTextFrame *parent_,const gText s0):
 			wxCanvas(parent_), parent(parent_), s(s0)
 {
 SetBackground(wxTheBrushList->FindOrCreateBrush("YELLOW",wxSOLID));
 SetFont(wxTheFontList->FindOrCreateFont(12,wxSWISS,wxNORMAL,wxNORMAL));
 GetDC()->SetBackgroundMode(wxTRANSPARENT);
-pos=s.length();
+pos=s.Length();
 float h;
 gGetTextExtent(*GetDC(),s,&w,&h);
 parent->SetSize(-1,-1,(int)w*3/2+2*TEXT_OFF,-1,wxSIZE_USE_EXISTING);
@@ -588,7 +588,7 @@ case WXK_LEFT:
 }
 case WXK_RIGHT:
 {
-	if (pos>s.length()-1) break;
+	if (pos>s.Length()-1) break;
    pos++;
    OnPaint();
    break;
@@ -599,7 +599,7 @@ case WXK_BACK:
 {
 	if (pos<1) break;
    pos--;
-   s.remove(pos);
+   s.Remove(pos);
    float h;
    gGetTextExtent(*GetDC(),s,&w,&h);
 	int cur_w,cur_h;
@@ -615,7 +615,7 @@ case WXK_BACK:
 }
 default:
 {
-	s.insert((char)ev.KeyCode(),pos);
+	s.Insert((char)ev.KeyCode(),pos);
    pos++;
    float h;
    gGetTextExtent(*GetDC(),s,&w,&h);
@@ -638,7 +638,7 @@ void gGetTextCanvas::OnPaint(void)
 Clear();
 gDrawText(*GetDC(),s,TEXT_OFF,TEXT_OFF);
 float h;
-gGetTextExtent(*GetDC(),s.left(pos),&w,&h);
+gGetTextExtent(*GetDC(),s.Left(pos),&w,&h);
 SetPen(wxGREEN_PEN);
 DrawLine(w+TEXT_OFF*3/2,0,w+TEXT_OFF*3/2,GETTEXT_FRAME_HEIGHT);
 }
@@ -650,13 +650,13 @@ if (ev.LeftDown())
 	float tw,th,tw1=-1;
    // Find out where we clicked
    int npos=-1;
-   for (int tpos=1;tpos<=s.length() && npos==-1;tpos++)
+   for (int tpos=1;tpos<=s.Length() && npos==-1;tpos++)
    {
-	   gGetTextExtent(*GetDC(),s.left(tpos),&tw,&th);
+	   gGetTextExtent(*GetDC(),s.Left(tpos),&tw,&th);
    	if (ev.x>tw1 && ev.x<=tw) npos=tpos-1;
       tw1=tw;
    }
-   if (npos==-1) npos=s.length();
+   if (npos==-1) npos=s.Length();
    pos=npos;
    OnPaint();
 }
@@ -665,7 +665,7 @@ if (ev.LeftDown())
 int gGetTextCanvas::Completed(void) const
 {return completed;}
 
-gString gGetTextCanvas::GetString(void) const
+gText gGetTextCanvas::GetString(void) const
 {return s;}
 
 
@@ -675,14 +675,14 @@ void gGetTextCanvas::SetCompleted(int c)
 void gGetTextCanvas::OnKillFocus(void)
 {SetFocus();}
 
-gString gGetTextLine(const gString &s0,wxFrame *parent,int x,int y,
+gText gGetTextLine(const gText &s0,wxFrame *parent,int x,int y,
                      const char *title,bool titlebar)
 {
 gGetTextFrame *f=new gGetTextFrame(s0,parent,x,y,title,titlebar);
 f->Show(TRUE);
 f->CaptureMouse();
 while (f->Completed()==wxRUNNING) wxYield();
-gString result_str;
+gText result_str;
 if (f->Completed()==wxOK) result_str=f->GetString();
 f->ReleaseMouse();
 delete f;

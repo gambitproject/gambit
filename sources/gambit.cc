@@ -62,6 +62,7 @@ public:
 	int Option(void) {return opt;}
 };
 
+/*
 #ifdef wx_msw // this handler is defined differently under win/unix
 int _RTLENTRY _matherr (struct exception *e)
 #else
@@ -92,7 +93,7 @@ if (option==MATH_QUIT) wxExit();
 }
 return 1;		// we did not really fix anything, but want no more warnings
 }
-
+*/
 
 char *wxStrLwr(char *s)
 {for (int i=0;i<strlen(s);i++) s[i]=tolower(s[i]); return s;}
@@ -212,7 +213,7 @@ wxInitHelp("gambit","Gambit -- Graphics User Interface, Version 0.94\n\nDevelope
 // Init the output (floating point) precision
 int num_prec;
 wxGetResource("Gambit","Output-Precision",&num_prec,"gambit.ini");
-ToStringPrecision(num_prec);
+ToTextPrecision(num_prec);
 
 gambit_frame->Show(TRUE);
 // Set up the error handling functions.
@@ -283,10 +284,10 @@ void GambitFrame::OnMenuCommand(int id)
 		case FILE_QUIT: Close();	break;
 		case FILE_LOAD:	LoadFile(); break;
 #ifndef EFG_ONLY
-		case FILE_NEW_NFG: NfgGUI(0,gString(),0,this);	break;
+		case FILE_NEW_NFG: NfgGUI(0,gText(),0,this);	break;
 #endif
 #ifndef NFG_ONLY
-		case FILE_NEW_EFG: EfgGUI(0,gString(),0,this); break;
+		case FILE_NEW_EFG: EfgGUI(0,gText(),0,this); break;
 #endif
 		case GAMBIT_HELP_ABOUT:	wxHelpAbout(); break;
 		case GAMBIT_HELP_CONTENTS: wxHelpContents(GAMBIT_GUI_HELP);	break;

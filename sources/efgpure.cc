@@ -17,4 +17,18 @@ int EnumPure(const EFSupport &support, const gArray<gNumber> &values,
   return 1;
 }
 
+int EfgPSNEBySubgame::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+				   gList<BehavSolution> &solns)
+{
+  FindPureNash(sup, values, solns);
+
+  return 0;
+}
+
+EfgPSNEBySubgame::EfgPSNEBySubgame(const EFSupport &S, 
+				   const gArray<gNumber> &v, int max)
+  : SubgameSolver(S, v, max), values(v)
+{ }
+
+EfgPSNEBySubgame::~EfgPSNEBySubgame()   { }
 

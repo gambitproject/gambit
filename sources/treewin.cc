@@ -127,10 +127,10 @@ TreeRender::TreeRender(wxFrame *frame,const TreeWindow *parent_,const gList<Node
 						const Infoset * &hilight_infoset_,const Infoset * &hilight_infoset1_,
 						const Node *&mark_node_,const Node *&cursor_,const Node *&subgame_node_,
 						const TreeDrawSettings &draw_settings_)
-:parent(parent_),node_list(node_list_),hilight_infoset(hilight_infoset_),hilight_infoset1(hilight_infoset1_),
+: wxCanvas(frame,-1,-1,-1,-1,0),
+parent(parent_),node_list(node_list_),hilight_infoset(hilight_infoset_),hilight_infoset1(hilight_infoset1_),
  mark_node(mark_node_),subgame_node(subgame_node_),
- cursor(cursor_),draw_settings(draw_settings_),flasher(0),painting(false),
- wxCanvas(frame,-1,-1,-1,-1,0)
+ cursor(cursor_),draw_settings(draw_settings_),flasher(0),painting(false)
 {
 
 }
@@ -154,7 +154,7 @@ painting=false;
 // TreeWindow
 void TreeRender::RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEntry *entry)
 {
-gString 		label;		// temporary to hold the label
+gText 		label;		// temporary to hold the label
 const Node	*n=child_entry->n;
 float 		tw,th;
 bool			hilight=false;
@@ -172,7 +172,7 @@ switch (draw_settings.LabelNodeAbove())
 		if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
 	case NODE_ABOVE_ISETID:
 		if (n->GetInfoset())
-			label="("+ToString(n->GetPlayer()->GetNumber())+","+ToString(n->GetInfoset()->GetNumber())+")";
+			label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
 		break;
 	case NODE_ABOVE_OUTCOME:
 		label=parent->OutcomeAsString(n,hilight);break;
@@ -205,7 +205,7 @@ switch (draw_settings.LabelNodeBelow())
 		if (n->GetInfoset()) label=n->GetInfoset()->GetName();break;
 	case NODE_BELOW_ISETID:
 		if (n->GetInfoset())
-			label="("+ToString(n->GetPlayer()->GetNumber())+","+ToString(n->GetInfoset()->GetNumber())+")";
+			label="("+ToText(n->GetPlayer()->GetNumber())+","+ToText(n->GetInfoset()->GetNumber())+")";
 		break;
 	case NODE_BELOW_OUTCOME:
 		label=parent->OutcomeAsString(n,hilight);break;
@@ -714,7 +714,7 @@ if (ev.LeftUp() && drag_now)
 		{
 			if (to->GetPlayer()==from->GetPlayer())
 			{
-				gString iset_name=from->GetName();
+				gText iset_name=from->GetName();
 				Infoset *miset=ef.MergeInfoset(to,from);
 				miset->SetName(iset_name+":1");
 				infosets_changed=TRUE;
@@ -936,10 +936,10 @@ int TreeWindow::OutcomeDragger::Dragging(void) const
 //---------------------------------------------------------------------
 //                TREEWINDOW: CONSTRUCTOR AND DESTRUCTOR
 //---------------------------------------------------------------------
-TreeWindow::TreeWindow(Efg &ef_,EFSupport * &disp,EfgShow *frame_) :
-	ef(ef_),disp_sup(disp),frame(frame_),pframe(frame_),
-	TreeRender(frame_,this,node_list,(const Infoset *&)hilight_infoset,(const Infoset *&)hilight_infoset1,
-						(const Node *&)mark_node,(const Node *&)cursor,(const Node *&)subgame_node,draw_settings)
+TreeWindow::TreeWindow(Efg &ef_,EFSupport * &disp,EfgShow *frame_) 
+  : TreeRender(frame_,this,node_list,(const Infoset *&)hilight_infoset,(const Infoset *&)hilight_infoset1,
+	       (const Node *&)mark_node,(const Node *&)cursor,(const Node *&)subgame_node,draw_settings),
+    ef(ef_),disp_sup(disp),frame(frame_),pframe(frame_)
 {
 // Set the cursor to the root node
 cursor=ef.RootNode();
@@ -1038,10 +1038,10 @@ build_menu->SetClientData((char *)frame); // call back to parent later
 
 
 // ******************************title****************
-gString TreeWindow::Title(void) const {return ef.GetTitle();}
+gText TreeWindow::Title(void) const {return ef.GetTitle();}
 Bool TreeWindow::JustRender(void) const {return FALSE;}
 
-gString	TreeWindow::AsString(TypedSolnValues what,const Node *n,int br) const
+gText	TreeWindow::AsString(TypedSolnValues what,const Node *n,int br) const
 {return frame->AsString(what,n,br);}
 
 double TreeWindow::ProbAsDouble(const Node *n,int action) const
@@ -1049,27 +1049,27 @@ double TreeWindow::ProbAsDouble(const Node *n,int action) const
 return (double)frame->BranchProb(n,action);
 }
 
-gString TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
+gText TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
 {
 if (n->GetOutcome())
 {
 	EFOutcome *tv = n->GetOutcome();
 	const gPolyArray<gNumber> &v=ef.Payoff(tv);
-	gString tmp="(";
+	gText tmp="(";
 	for (int i=v.First();i<=v.Last();i++)
 	{
 		if (i!=1) tmp+=",";
 		if (draw_settings.ColorCodedOutcomes())
-			tmp+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
+			tmp+=("\\C{"+ToText(draw_settings.GetPlayerColor(i))+"}");
       if (frame->Parameters().PolyVal()==false)
-			tmp+=ToString(v[i]);
+			tmp+=ToText(v[i]);
       else
       {
-      	tmp+=ToString(v[i].Evaluate(frame->Parameters().CurSet()));
+      	tmp+=ToText(v[i].Evaluate(frame->Parameters().CurSet()));
          if (v[i].Degree()>0) hilight=true;
       }
 	}
-	if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToString(WX_COLOR_LIST_LENGTH-1)+"}");
+	if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToText(WX_COLOR_LIST_LENGTH-1)+"}");
 	tmp+=")";
 
 	return tmp;
@@ -1868,7 +1868,7 @@ if (ev.LeftDown() && cut_cursor) // clicking the left mouse button will ...
 	if (iset_cut_entry)  // cut an infoset
 	{
 		Infoset *siset=ef.SplitInfoset((Node *)iset_cut_entry->n);
-		siset->SetName("Infoset"+ToString(siset->GetPlayer()->NumInfosets()));
+		siset->SetName("Infoset"+ToText(siset->GetPlayer()->NumInfosets()));
 		infosets_changed=TRUE;OnPaint();return true;
 	}
 	if (node_cut_entry)  // cut a node
@@ -2017,8 +2017,8 @@ return 0;
 Efg *CompressEfg(const Efg &, const EFSupport &);
 void TreeWindow::file_save(void)
 {
-gString filename=frame->Filename();
-gString s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".efg", "*.efg",wxSAVE|wxOVERWRITE_PROMPT);
+gText filename=frame->Filename();
+gText s=wxFileSelector("Save data file",wxPathOnly(filename),wxFileNameFromPath(filename),".efg", "*.efg",wxSAVE|wxOVERWRITE_PROMPT);
 if (s!="")
 {
 	// Change description if saving under a different filename
@@ -2035,7 +2035,7 @@ if (s!="")
 //***********************************************************************
 //                      TREE-OUTCOME MENU HANDLER
 //***********************************************************************
-void TreeWindow::tree_outcomes(const gString out_name)
+void TreeWindow::tree_outcomes(const gText out_name)
 {frame->ChangeOutcomes(CREATE_DIALOG,out_name);}
 
 #include "glist.imp"

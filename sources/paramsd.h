@@ -8,25 +8,25 @@
 class ParameterSet: public gBlock<gNumber>
 {
 private:
-	gString	name;
+	gText	name;
 public:
-   ParameterSet(int l=1,gString n="var") : gBlock<gNumber>(l), name(n) { }
+   ParameterSet(int l=1,gText n="var") : gBlock<gNumber>(l), name(n) { }
    ParameterSet(const ParameterSet &s): gBlock<gNumber>(s),name(s.name) { }
-   void SetName(const gString &m) {name=m;}
-   gString Name(void) const {return name;}
+   void SetName(const gText &m) {name=m;}
+   gText Name(void) const {return name;}
 };
 
 class ParameterSetList: public gList<ParameterSet>
 {
 private:
-	gString	name;
+	gText	name;
    int cur_set;
    bool polyval;
 public:
-	ParameterSetList(gSpace *space,gString n="ParamSet"):
+	ParameterSetList(gSpace *space,gText n="ParamSet"):
                                          name(n),cur_set(1),polyval(false)
    {Append(ParameterSet(space->Dmnsn(),"DefaultSet"));}
-   gString Name(void) const {return name;}
+   gText Name(void) const {return name;}
    int &CurSetNum(void) {return cur_set;}
    gArray<gNumber> &CurSet(void) {return (*this)[cur_set];}
    bool &PolyVal(void) {return polyval;}
