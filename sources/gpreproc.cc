@@ -80,16 +80,19 @@ gString gPreprocessor::GetLine( void )
 	  {
 	    if( line.right( 1 ) == '\\' )
 	      line = line.left( line.length() - 1 );
-	    line += ' ';
+	    line += '\n';
 	  }
 	  else
+	  {
+	    line += '\n';
 	    break;
+	  }
 	}
 
 
 	if( c == '[' )
 	{
-	  // Turn of prompts until the bracket is matched.
+	  // Turn off prompts until the bracket is matched.
 	  if( bracket == 0 )
 	    SetPrompt( false );	  
 	  ++bracket;
