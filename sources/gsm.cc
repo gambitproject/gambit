@@ -481,6 +481,14 @@ Portion* GSM::UnAssignExt(Portion *p)
 }
 
 
+bool GSM::VarRemove(const gText& var_name)
+{
+  if(VarIsDefined(var_name))
+    _VarRemove(var_name);
+  return true;
+}
+
+
 //-----------------------------------------------------------------------
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------

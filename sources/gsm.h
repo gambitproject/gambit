@@ -86,6 +86,7 @@ public:
   Portion* VarValue     ( const gText& var_name ) const;
   bool     UnAssign     ( Portion * );
   Portion* UnAssignExt  ( Portion * );
+  bool VarRemove    ( const gText& var_name );
 
   bool AddFunction( gclFunction* func );
   bool DeleteFunction( gclFunction* func );

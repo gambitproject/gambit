@@ -1654,8 +1654,42 @@ static Portion* GSM_ExePath( Portion** param)
 }
 
 
+//-------------------------------------------
+//              Assign
+//-------------------------------------------
 
 
+Portion* GSM_Assign(Portion** param)
+{
+  Portion* p = 0;
+  Portion* result = 0;
+  if( param[1]->IsReference() )
+  {
+    p = param[1]->RefCopy();
+    result = param[1]->RefCopy();
+  }
+  else
+  {
+    p = param[1]->ValCopy();
+    result = param[1]->ValCopy();
+  }
+  gText txt = ((TextPortion*) param[0])->Value();
+
+  if(!isalpha(txt[0])) 
+      throw gclRuntimeError("Bad Variable Name");
+  for(int i = 1;i<txt.Length();i++) 
+    if(!isalnum(txt[i]))
+      throw gclRuntimeError("Bad Variable Name");
+
+  _gsm->VarDefine(txt,p);
+  return result;
+}
+
+Portion * GSM_UnAssign(Portion** param)
+{
+  gText txt = ((TextPortion*) param[0])->Value();
+  return new BoolPortion(_gsm->VarRemove(txt));
+}
 
 static Portion* GSM_Platform( Portion** )
 {
@@ -2070,6 +2104,18 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Clear, porBOOLEAN, 0));
   gsm->AddFunction(FuncObj);
 
+
+  FuncObj = new gclFunction("Assign", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_Assign, porANYTYPE, 2));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT));
+  FuncObj->SetParamInfo(0, 1, gclParameter("value", porANYTYPE, 
+					    REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new gclFunction("UnAssign", 1);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_UnAssign, porBOOLEAN, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("name", porTEXT));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new gclFunction("Date", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Date, porTEXT, 0));
