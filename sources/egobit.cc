@@ -197,7 +197,7 @@ EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p)
 
 template <class T>
 EFGobitModule<T>::EFGobitModule(const ExtForm<T> &EF, EFGobitParams<T> &p, gDPVector<T> &s)
-  : GobitModule<T>(p,&s), E(EF)
+  : GobitModule<T>(p,s), E(EF)
 { }
 
 template <class T> EFGobitModule<T>::~EFGobitModule()

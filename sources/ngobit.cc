@@ -214,7 +214,7 @@ NFGobitModule<T>::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p)
 
 template <class T>NFGobitModule<T>
 ::NFGobitModule(const NormalForm<T> &NF, NFGobitParams<T> &p, gPVector<T> &s)
-  : GobitModule<T>(p,&s), N(NF)
+  : GobitModule<T>(p,s), N(NF)
 { }
 
 template <class T> NFGobitModule<T>::~NFGobitModule()
