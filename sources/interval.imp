@@ -71,23 +71,23 @@ template<class T> const T gInterval<T>::UpperBound() const
   return upper_bd; 
 }
 
-template<class T> bool gInterval<T>::Contains(const T& number) const 
+template<class T> const bool gInterval<T>::Contains(const T& number) const 
 { 
   return (lower_bd <= number && number <= upper_bd);
 }
 
 template<class T> 
-bool gInterval<T>::Contains(const gInterval<T>& I) const 
+const bool gInterval<T>::Contains(const gInterval<T>& I) const 
 { 
   return (lower_bd <= I.lower_bd && I.upper_bd <= upper_bd);
 }
 
-template<class T> bool gInterval<T>::LiesBelow(const T& number) const 
+template<class T> const bool gInterval<T>::LiesBelow(const T& number) const 
 { 
   return (upper_bd <= number);
 }
 
-template<class T> bool gInterval<T>::LiesAbove(const T& number) const 
+template<class T> const bool gInterval<T>::LiesAbove(const T& number) const 
 { 
   return (number <= lower_bd);
 }
@@ -117,6 +117,12 @@ const gInterval<T> gInterval<T>::SameCenterTwiceLength() const
 { 
   return gInterval<T>((T)2 * LowerBound() - Midpoint(),
 		      (T)2 * UpperBound() - Midpoint()); 
+}
+
+template<class T> 
+const gInterval<T> gInterval<T>::SameCenterWithNewLength(const T& L) const 
+{ 
+  return gInterval<T>(Midpoint() - L/(T)2,Midpoint() + L/(T)2); 
 }
 
 //--------------------------------------------------------------------------
