@@ -51,7 +51,7 @@ wxCursor *scissor_cursor;
 //-----------------------------------------------------------------------
 
 extern Bool LongStringConstraint(int type, char *value, char *label,
-				 char *msg_buffer);
+                 char *msg_buffer);
 
 //
 // Draw Line.  A quick and dirty way of easily drawing lines with a set color.
@@ -566,15 +566,17 @@ void TreeRender::RenderSubtree(wxDC &dc)
     
     ViewStart(&x_start, &y_start);
     GetClientSize(&width, &height);
+
     // go through the list of nodes, plotting them
     for (int pos = 1; pos <= node_list.Length(); pos++)
     {
         child_entry = *node_list[pos];    // must make a copy to use Translate
         entry = *child_entry.parent;
         
-        // if we are just a renderer, there can be no zoom! 
-        // For zoom, override JustRender
+        // If we are just a renderer, there can be no zoom! 
+        // For zoom, override JustRender().
         float zoom = (JustRender()) ? 1.000 : draw_settings.Zoom();
+
         // Check if this node/labels are visible
         if (!(child_entry.x+dc.device_origin_x < x_start*PIXELS_PER_SCROLL  ||
               entry.x+dc.device_origin_x > x_start*PIXELS_PER_SCROLL+width/zoom ||
@@ -586,52 +588,72 @@ void TreeRender::RenderSubtree(wxDC &dc)
         {
             // draw the labels
             RenderLabels(dc, &child_entry, &entry);
-            if (child_entry.child_number == 1) // only draw the node line once for all children
+            // Only draw the node line once for all children.
+            if (child_entry.child_number == 1) 
             {  
                 // draw the 'node' line
-                bool hilight = (hilight_infoset &&
-                                entry.n->GetInfoset() == hilight_infoset) ||
-                    (hilight_infoset1 &&
-                     entry.n->GetInfoset() == hilight_infoset1);
+                bool hilight = 
+                    (hilight_infoset  && (entry.n->GetInfoset() == hilight_infoset)) ||
+                    (hilight_infoset1 && (entry.n->GetInfoset() == hilight_infoset1));
                 ::DrawLine(dc, entry.x, entry.y,
-                           entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING, entry.y,
+                           entry.x + draw_settings.NodeLength() + 
+                             entry.nums * INFOSET_SPACING, entry.y, 
                            entry.color, hilight ? 1 : 0);
+
                 // show the infoset lines, if required by draw settings
-                ::DrawCircle(dc, entry.x+entry.num*INFOSET_SPACING, entry.y, 3, entry.color);
+                ::DrawCircle(dc, entry.x + entry.num * INFOSET_SPACING, entry.y, 
+                             3, entry.color);
+
+                // FIXME! When infosets are shown, branch lines (and infoset
+                // lines) often disappear at different zoom levels and positions.
+
                 if (draw_settings.ShowInfosets())
                 {
                     if (entry.infoset.y != -1)
                     {
-                        ::DrawThinLine(dc, entry.x+entry.num*INFOSET_SPACING, 
+                        ::DrawThinLine(dc, 
+                                       entry.x + entry.num * INFOSET_SPACING, 
                                        entry.y, 
-                                       entry.x+entry.num*INFOSET_SPACING, 
+                                       entry.x + entry.num * INFOSET_SPACING, 
                                        entry.infoset.y, 
                                        entry.color);
                     }
 
-                    if (entry.infoset.x != -1)  // draw a little arrow in the dir of the iset
+                    if (entry.infoset.x != -1)  
                     {
+                        // Draw a little arrow in the direction of the iset.
                         if (entry.infoset.x > entry.x) // iset is to the right
-                            ::DrawLine(dc, entry.x+entry.num*INFOSET_SPACING, 
+                        {
+                            ::DrawLine(dc, 
+                                       entry.x+entry.num*INFOSET_SPACING, 
                                        entry.infoset.y, 
                                        entry.x+(entry.num+1)*INFOSET_SPACING, 
                                        entry.infoset.y, entry.color);
+                        }
                         else // iset is to the left
-                            ::DrawLine(dc, entry.x+entry.num*INFOSET_SPACING, 
+                        {
+                            ::DrawLine(dc, 
+                                       entry.x + entry.num * INFOSET_SPACING, 
                                        entry.infoset.y, 
-                                       entry.x+(entry.num-1)*INFOSET_SPACING, 
+                                       entry.x + (entry.num - 1) * INFOSET_SPACING, 
                                        entry.infoset.y, 
                                        entry.color);
+                        }
                     }
                 }
+
                 // Draw a triangle to show sugame roots
                 if (entry.n->GetSubgameRoot() == entry.n)
-                    if (entry.expanded) DrawSmallSubgameIcon(dc, entry);
+                {
+                    if (entry.expanded) 
+                        DrawSmallSubgameIcon(dc, entry);
+                }
                 
             }
             if (child_entry.n == subgame_node)
                 DrawSubgamePickIcon(dc, child_entry);
             // draw the 'branches'
+
             if (child_entry.n->GetParent() && child_entry.in_sup) // no branches for root node
             {  
                 xs = entry.x+draw_settings.NodeLength()+entry.nums*INFOSET_SPACING;
@@ -639,11 +661,15 @@ void TreeRender::RenderSubtree(wxDC &dc)
                 xe = xs+draw_settings.ForkLength();
                 ye = child_entry.y;
                 ::DrawLine(dc, xs, ys, xe, ye, entry.color);
-                // Draw the hilight...y = a+bx = ys+(ye-ys)/(xe-xs)*x
+
+                // Draw the highlight... y = a + bx = ys + (ye-ys) / (xe-xs) * x
                 double prob = parent->ProbAsDouble(entry.n, child_entry.child_number);
                 if (prob > 0)
-                    ::DrawLine(dc, xs, ys, xs+draw_settings.ForkLength()*prob, 
-                               ys+(ye-ys)*prob, WX_COLOR_LIST_LENGTH-1);
+                {
+                    ::DrawLine(dc, xs, ys, (xs + draw_settings.ForkLength() * prob), 
+                               (ys + (ye - ys) * prob), WX_COLOR_LIST_LENGTH - 1);
+                }
+
                 xs = xe;
                 ys = ye;
                 xe = child_entry.x;
@@ -655,47 +681,59 @@ void TreeRender::RenderSubtree(wxDC &dc)
                 xe = entry.x;
                 ye = entry.y;
             }
-            
+           
             // Take care of terminal nodes (either real terminal or collapsed subgames)
             if (!child_entry.has_children)
             {
                 ::DrawLine(dc, xe, ye, 
-                           xe+draw_settings.NodeLength()+child_entry.nums*INFOSET_SPACING, 
+                           xe + draw_settings.NodeLength() + 
+                             child_entry.nums * INFOSET_SPACING, 
                            ye, draw_settings.GetPlayerColor(-1));
 
                 // Collapsed subgame: subgame icon is drawn at this terminal node.
-                if (child_entry.n->GetSubgameRoot() == child_entry.n && !child_entry.expanded)
+                if ((child_entry.n->GetSubgameRoot() == child_entry.n) && 
+                    !child_entry.expanded)
                     DrawLargeSubgameIcon(dc, child_entry, draw_settings.NodeLength());
 
                 // Marked Node: a circle is drawn at this terminal node
                 if (child_entry.n == mark_node)
+                {
                     ::DrawCircle(dc, 
-                                 xe+child_entry.nums*INFOSET_SPACING+draw_settings.NodeLength(), 
-                                 ye, 4, draw_settings.CursorColor());
+                                 xe + child_entry.nums * INFOSET_SPACING +
+                                   draw_settings.NodeLength(), ye, 
+                                 4, draw_settings.CursorColor());
+                }
             }
 
             // Draw a circle to show the marked node
-            if (entry.n == mark_node && child_entry.child_number == entry.n->NumChildren())
-                ::DrawCircle(dc, entry.x+entry.nums*INFOSET_SPACING+draw_settings.NodeLength(), 
-                             entry.y, 4, draw_settings.CursorColor());
+            if ((entry.n == mark_node) && 
+                (child_entry.child_number == entry.n->NumChildren()))
+            {
+                ::DrawCircle(dc, entry.x + entry.nums * INFOSET_SPACING + 
+                               draw_settings.NodeLength(), entry.y, 
+                             4, draw_settings.CursorColor());
+            }
         }
     }
 }
+
 
 void TreeRender::UpdateCursor(const NodeEntry *entry)
 {
     if (entry->n->GetSubgameRoot() == entry->n && !entry->expanded)
     {
         flasher->SetFlashNode(entry->x + draw_settings.NodeLength() +
-                                entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE,
+                                entry->nums*INFOSET_SPACING - SUBGAME_LARGE_ICON_SIZE,
                               entry->y,
-                              entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING,
+                              entry->x + draw_settings.NodeLength() +
+                                entry->nums*INFOSET_SPACING,
                               entry->y, subgameCursor);
     }
     else
     {
-        flasher->SetFlashNode(entry->x+entry->nums*INFOSET_SPACING, entry->y,
-                              entry->x+draw_settings.NodeLength()+entry->nums*INFOSET_SPACING-8,
+        flasher->SetFlashNode(entry->x + entry->nums*INFOSET_SPACING, entry->y,
+                              entry->x + draw_settings.NodeLength() + 
+                                entry->nums*INFOSET_SPACING - 8,
                               entry->y, nodeCursor);
     }
 
@@ -1309,6 +1347,7 @@ TreeWindow::TreeWindow(Efg &ef_, EFSupport * &disp, EfgShow *frame_)
     outcomes_changed = FALSE;
     must_recalc = FALSE;
     log = FALSE;
+
     // Create scrollbars
     SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 60, 60, 4, 4);
     draw_settings.set_x_steps(60);
@@ -1539,8 +1578,10 @@ void TreeWindow::OnChar(wxKeyEvent& ch)
             break;
         }
         
-        if (c) ProcessCursor(); // cursor moved
-        // implement the behavior that when control+cursor key is pressed, the
+        if (c) 
+            ProcessCursor(); // cursor moved
+
+        // Implement the behavior that when control+cursor key is pressed, the
         // nodes belonging to the iset are hilighted.
         if (c && ch.ControlDown())
         {
@@ -1597,7 +1638,8 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
     {
         Node *old_cursor = cursor;
         ProcessClick(ev);
-        if (cursor != old_cursor) ProcessCursor();
+        if (cursor != old_cursor) 
+            ProcessCursor();
         SetFocus(); // click on the canvas to restore keyboard focus
     }
     
@@ -1612,7 +1654,9 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
 void TreeWindow::OnPaint(void)
 {
     TreeRender::OnPaint();
-    if (zoom_window) zoom_window->OnPaint();
+    if (zoom_window) 
+        zoom_window->OnPaint();
+    AdjustScrollbarSteps();
 }
 
 //---------------------------------------------------------------------
@@ -1903,24 +1947,28 @@ void TreeWindow::Render(wxDC &dc)
     int width, height, x_start, y_start;
     if (nodes_changed || infosets_changed || must_recalc)
     {
-        // Recalc only if needed
-        
-        // Note that node_table is preserved until the next re-calc
+        // Recalculate only if needed.
+        // Note that node_table is preserved until the next recalculation.
         node_list.Flush();
+
         // If we modify the structure of the game, revert back to the full support
         // for the time being.  Otherwise, we run into weird problems.
-        if (nodes_changed || infosets_changed) frame->GameChanged();
+        if (nodes_changed || infosets_changed) 
+            frame->GameChanged();
         
         maxlev = miny = maxy = 0;
         ViewStart(&x_start, &y_start);
         GetClientSize(&width, &height);
         ycoord = TOP_MARGIN;
         FillTable(ef.RootNode(), 0);
+
         if (draw_settings.ShowInfosets())
         {
+            // FIXME! This causes lines to disappear... sometimes.
             FillInfosetTable(ef.RootNode());
             UpdateTableInfosets();
         }
+
         UpdateTableParents();
         draw_settings.SetMaxX((maxlev + 1) * 
                               (draw_settings.BranchLength() + 
@@ -1928,12 +1976,14 @@ void TreeWindow::Render(wxDC &dc)
                                draw_settings.NodeLength()) + 
                               draw_settings.OutcomeLength());
         draw_settings.SetMaxY(maxy+25);
+
         if (must_recalc)
         {
             must_recalc = FALSE;
             need_clear = TRUE;
         }
     }
+
     if (nodes_changed || infosets_changed || outcomes_changed)
     {
         frame->RemoveSolutions();
@@ -1942,6 +1992,7 @@ void TreeWindow::Render(wxDC &dc)
         outcomes_changed = FALSE;
         need_clear = TRUE;
     }
+
     char *dc_type = dc.GetClassInfo()->GetClassName();
     
     if (strcmp(dc_type, "wxCanvasDC") == 0)  // if drawing to screen
@@ -1949,10 +2000,12 @@ void TreeWindow::Render(wxDC &dc)
         if (cursor)
         {
             NodeEntry *entry = GetNodeEntry(cursor);
+
             if (!entry)
             {
                 cursor = ef.RootNode(); entry = GetNodeEntry(cursor);
             }
+
             UpdateCursor(entry);
         }
         
@@ -1968,22 +2021,74 @@ void TreeWindow::Render(wxDC &dc)
         dc.BeginDrawing();
     }
     else
+    {
         flasher->SetFlashing(FALSE);
+    }
     
     TreeRender::Render(dc);
+
     if (strcmp(dc_type, "wxCanvasDC") != 0)
         flasher->SetFlashing(TRUE); 
     else
         dc.EndDrawing();
+
     flasher->Flash();
 }
 
+
+// Adjust number of scrollbar steps if necessary.
+void TreeWindow::AdjustScrollbarSteps(void)
+{
+    int width, height;
+    int x_steps, y_steps;
+    float zoom = draw_settings.Zoom();
+
+    GetParent()->GetClientSize(&width, &height);
+    // width and height are the dimensions of the visible canvas.
+    height -= 50; // This compensates for a bug in GetClientSize().
+    height = int(height / zoom);
+    width  = int(width  / zoom);
+
+    // x_steps and y_steps are the maximum number of scrollbar
+    // steps in the x and y directions.
+    if (draw_settings.MaxX() < width)
+    {
+        x_steps = 1;
+    }
+    else
+    {
+        //x_steps = draw_settings.MaxX() / PIXELS_PER_SCROLL + 1;
+        x_steps = int((draw_settings.MaxX() * zoom) / PIXELS_PER_SCROLL) + 1;
+    }
+
+    if (draw_settings.MaxX() < height)
+    {
+        y_steps = 1;
+    }
+    else
+    {
+        //y_steps = draw_settings.MaxY() / PIXELS_PER_SCROLL + 1;
+        y_steps = int((draw_settings.MaxY() * zoom) / PIXELS_PER_SCROLL) + 1;
+    }
+
+    if ((x_steps != draw_settings.x_steps()) ||
+        (y_steps != draw_settings.y_steps()))
+    {
+        draw_settings.set_x_steps(x_steps);
+        draw_settings.set_y_steps(y_steps);
+        SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, 
+                    x_steps, y_steps, 4, 4);
+    }
+}
+
+
+
 void TreeWindow::ProcessCursor(void)
 {
-    // A little scrollbar magic to insure the focus stays w/ cursor.  This
-    // can probably be optimized much further.  Consider using SetClippingRegion
+    // A little scrollbar magic to insure the focus stays with the cursor.  This
+    // can probably be optimized much further.  Consider using SetClippingRegion().
     // This also makes sure that the virtual canvas is large enough for the entire
-    // tree
+    // tree.
     
     int x_start, y_start;
     int width, height;
@@ -1992,19 +2097,13 @@ void TreeWindow::ProcessCursor(void)
     
     ViewStart(&x_start, &y_start);
     GetParent()->GetClientSize(&width, &height);
-    height -= 50; // bug in GetClientSize
-    height = int(height/draw_settings.Zoom());
-    width = int(width/draw_settings.Zoom());
-    x_steps = (draw_settings.MaxX() < width) ? 1 : draw_settings.MaxX()/PIXELS_PER_SCROLL+1;
-    y_steps = (draw_settings.MaxY() < height)? 1 : draw_settings.MaxY()/PIXELS_PER_SCROLL+1;
-    if (x_steps != draw_settings.x_steps() || y_steps != draw_settings.y_steps())
-    {
-        draw_settings.set_x_steps(x_steps);
-        draw_settings.set_y_steps(y_steps);
-        SetScrollbars(PIXELS_PER_SCROLL, PIXELS_PER_SCROLL, x_steps, y_steps, 4, 4);
-    }
+    height -= 50; // This compensates for a bug in GetClientSize().
+    height  = int(height / draw_settings.Zoom());
+    width   = int(width  / draw_settings.Zoom());
+    x_steps = draw_settings.x_steps();
+    y_steps = draw_settings.y_steps();
     
-    // Make sure the cursor is visible
+    // Make sure the cursor is visible.
     NodeEntry *entry = GetNodeEntry(cursor);
     if (!entry)
     {
@@ -2012,19 +2111,25 @@ void TreeWindow::ProcessCursor(void)
         entry = GetNodeEntry(cursor);
     }
     
-    // check if in the visible x-dimension
+    // Check if the cursor is in the visible x-dimension.
+    // xs, xe and NodeLength are in pixels (absolute units).
+
     xs = entry->x;
-    xe = (int)(xs+draw_settings.NodeLength());
-    if (xs < x_start*PIXELS_PER_SCROLL) 
-        x_start = xs/PIXELS_PER_SCROLL-1;
-    if (xe > x_start*PIXELS_PER_SCROLL+width)
-        x_start = xe/PIXELS_PER_SCROLL-width/2/PIXELS_PER_SCROLL;
+    xe = xs + draw_settings.NodeLength();
+
+    if (xs < (x_start * PIXELS_PER_SCROLL))
+        x_start = xs / PIXELS_PER_SCROLL - 1;
+
+    if (xe > (x_start * PIXELS_PER_SCROLL + width))
+        x_start = xe / PIXELS_PER_SCROLL - (width / 2) / PIXELS_PER_SCROLL;
+
     if (x_start < 0) 
         x_start = 0;
+
     if (x_start > x_steps)
         x_start = x_steps;
     
-    // check if in the visible y-dimension
+    // Check if the cursor is in the visible y-dimension.
     ys = entry->y-10;
     ye = entry->y+10;
     if (ys < y_start*PIXELS_PER_SCROLL)
@@ -2040,14 +2145,15 @@ void TreeWindow::ProcessCursor(void)
     UpdateCursor(entry);
     if (zoom_window)
         zoom_window->UpdateCursor(entry);
-    
-    if (x_start != draw_settings.get_x_scroll() ||
-        y_start != draw_settings.get_y_scroll())
+
+    if ((x_start != draw_settings.get_x_scroll()) ||
+        (y_start != draw_settings.get_y_scroll()))
     {
         Scroll(x_start, y_start);
         draw_settings.set_x_scroll(x_start);
         draw_settings.set_y_scroll(y_start);
     }
+
     frame->OnSelectedMoved(cursor);
 }
 
@@ -2644,8 +2750,8 @@ void TreeWindow::file_save(void)
   static int s_nDecimals = 6;
   gText filename = frame->Filename();
   gText s = wxFileSelector("Save data file", wxPathOnly(filename),
-			   wxFileNameFromPath(filename), ".efg", "*.efg",
-			   wxSAVE | wxOVERWRITE_PROMPT);
+               wxFileNameFromPath(filename), ".efg", "*.efg",
+               wxSAVE | wxOVERWRITE_PROMPT);
 
 #ifdef __GNUG__
     // Overwrite protection doesn't work in Unix, so we
@@ -2653,8 +2759,8 @@ void TreeWindow::file_save(void)
 
     if (wxFileExists((char *) s))  {  // Ask for confirmation.
       if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK | wxCANCEL) 
-	  != wxOK) {
-	return;
+      != wxOK) {
+    return;
       }
     }
 #endif  // __GNUG__
@@ -2662,44 +2768,44 @@ void TreeWindow::file_save(void)
     if (s != "") {
       // Change description if saving under a different filename
       if (filename != "untitled.efg" && s != filename) {
-	char *label = 0;
-	MyDialogBox *tree_label_dialog = 0;
+    char *label = 0;
+    MyDialogBox *tree_label_dialog = 0;
 
-	try {
-	  label = new char[256];
-	  strcpy(label, ef.GetTitle());
+    try {
+      label = new char[256];
+      strcpy(label, ef.GetTitle());
 
-	  tree_label_dialog = new MyDialogBox(pframe, "Label Tree",
-					      EFG_TREE_HELP);
-	  wxFormItem *label_item = 
-	    wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-			     new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
-			     0, 0, 350);
-	  tree_label_dialog->Add(label_item);
-	  tree_label_dialog->Add(wxMakeFormNewLine());
-	  wxFormItem *decimals_item =
-	    wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
-			    new wxList(wxMakeConstraintRange(0, 25), 0));
+      tree_label_dialog = new MyDialogBox(pframe, "Label Tree",
+                          EFG_TREE_HELP);
+      wxFormItem *label_item = 
+        wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+                 new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
+                 0, 0, 350);
+      tree_label_dialog->Add(label_item);
+      tree_label_dialog->Add(wxMakeFormNewLine());
+      wxFormItem *decimals_item =
+        wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
+                new wxList(wxMakeConstraintRange(0, 25), 0));
           tree_label_dialog->Add(decimals_item);
-	  tree_label_dialog->AssociatePanel();
-	  ((wxText *)label_item->PanelItem)->SetFocus();
-	  tree_label_dialog->Go1();
+      tree_label_dialog->AssociatePanel();
+      ((wxText *)label_item->PanelItem)->SetFocus();
+      tree_label_dialog->Go1();
     
-	  if (tree_label_dialog->Completed() == wxOK)
-	    ef.SetTitle(label);
+      if (tree_label_dialog->Completed() == wxOK)
+        ef.SetTitle(label);
     
-	  delete tree_label_dialog;
-	  delete [] label;
-	}
-	catch (gException &E) {
-	  if (label)
-	    delete [] label;
-	  if (tree_label_dialog)
-	    delete tree_label_dialog;
+      delete tree_label_dialog;
+      delete [] label;
+    }
+    catch (gException &E) {
+      if (label)
+        delete [] label;
+      if (tree_label_dialog)
+        delete tree_label_dialog;
     
-	  guiExceptionDialog(E.Description(), pframe);
-	  return;
-	}
+      guiExceptionDialog(E.Description(), pframe);
+      return;
+    }
       }
       gFileOutput out((const char *)s);
       // Compress the efg to the current support

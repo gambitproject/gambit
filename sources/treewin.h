@@ -300,6 +300,9 @@ public:
     Node *GotObject(float &mx, float &my, int what);
     virtual Bool JustRender(void) const;
 
+	// Adjust number of scrollbar steps if needed.
+	void AdjustScrollbarSteps();
+
     // Access to the numeric values from the renderer
     double ProbAsDouble(const Node *n, int action) const;
     gText AsString(TypedSolnValues what, const Node *n, int br = 0) const;
