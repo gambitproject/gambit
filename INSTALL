@@ -130,6 +130,6 @@ to install it to the appropriate directories for Python to find it.
 Note that this is an initial release of the Python API, and as such all
 manner of problems may arise.  We'd *really* like to get reports and
 suggestions regarding this; we want this to be more-or-less "production"
-quality by the release of 0.97.2 sometime in fall 2003.
+quality by the release of 0.97.2.0 sometime during academic year 2003-04.
 
  
