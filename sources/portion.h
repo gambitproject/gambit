@@ -28,6 +28,7 @@
 
 class Portion
 {
+friend class ListPortion; 
 private:
   static int _NumObj;
 
@@ -48,6 +49,8 @@ protected:
   static long _WriteListLF;
   static long _WriteListIndent;
   static long _WriteSolutionInfo;
+
+  void SetGame(void* game, bool efg);
 
 public:
   static void _SetWriteWidth(long);
@@ -76,10 +79,8 @@ public:
   virtual Portion* RefCopy(void) const = 0;
   virtual bool IsReference(void) const = 0;
 
-
   void* Game(void) const;
   bool GameIsEfg(void) const;
-  virtual void SetGame(void* game, bool efg);
 };
 
 
@@ -393,7 +394,8 @@ protected:
 public:
   virtual ~EfOutcomePortion();
 
-  EFOutcome*& Value(void) const;
+  EFOutcome *Value(void) const;
+  void SetValue(EFOutcome *);
   PortionSpec Spec(void) const;
   DataType SubType( void ) const;
 
@@ -436,7 +438,8 @@ protected:
 public:
   virtual ~NfPlayerPortion();
 
-  NFPlayer*& Value(void) const;
+  NFPlayer *Value(void) const;
+  void SetValue(NFPlayer *); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -482,7 +485,8 @@ protected:
 public:
   virtual ~StrategyPortion();
 
-  Strategy*& Value(void) const;
+  Strategy *Value(void) const;
+  void SetValue(Strategy *); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -525,7 +529,8 @@ protected:
 public:
   virtual ~NfOutcomePortion();
 
-  NFOutcome*& Value(void) const;
+  NFOutcome *Value(void) const;
+  void SetValue(NFOutcome *); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -570,7 +575,8 @@ protected:
 public:
   virtual ~NfSupportPortion();
 
-  NFSupport*& Value(void) const;
+  NFSupport *Value(void) const;
+  void SetValue(NFSupport *);
   PortionSpec Spec(void) const;
   DataType SubType(void) const;
 
@@ -616,7 +622,8 @@ protected:
 public:
   virtual ~EfSupportPortion();
 
-  EFSupport*& Value(void) const;
+  EFSupport *Value(void) const;
+  void SetValue(EFSupport *);
   PortionSpec Spec(void) const;
   DataType SubType( void ) const;
 
@@ -660,7 +667,8 @@ protected:
 public:
   virtual ~EfPlayerPortion();
 
-  EFPlayer*& Value(void) const;
+  EFPlayer *Value(void) const;
+  void SetValue(EFPlayer *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -704,7 +712,8 @@ protected:
 public:
   virtual ~InfosetPortion();
 
-  Infoset*& Value(void) const;
+  Infoset *Value(void) const;
+  void SetValue(Infoset *);
   PortionSpec Spec(void) const;
   DataType SubType( void ) const;
 
@@ -748,7 +757,8 @@ protected:
 public:
   virtual ~NodePortion();
 
-  Node*& Value(void) const;
+  Node *Value(void) const;
+  void SetValue(Node *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -791,7 +801,8 @@ protected:
 public:
   virtual ~ActionPortion();
 
-  Action*& Value(void) const;
+  Action *Value(void) const;
+  void SetValue(Action *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -833,7 +844,8 @@ protected:
 public:
   virtual ~MixedPortion();
 
-  MixedProfile<T> *& Value(void) const;
+  MixedProfile<T> *Value(void) const;
+  void SetValue(MixedProfile<T> *);
   PortionSpec Spec(void) const;
   DataType SubType(void) const;
 
@@ -875,7 +887,8 @@ protected:
 public:
   virtual ~BehavPortion();
 
-  BehavProfile<T> *& Value(void) const;
+  BehavProfile<T> *Value(void) const;
+  void SetValue(BehavProfile<T> *);
   PortionSpec Spec(void) const;
   DataType SubType(void) const;
 
@@ -917,7 +930,8 @@ protected:
 public:
   virtual ~NfgPortion();
 
-  Nfg<T> *& Value(void) const;
+  Nfg<T> *Value(void) const;
+  void SetValue(Nfg<T> *);
   PortionSpec Spec(void) const;
   DataType SubType(void) const;
 
@@ -961,7 +975,8 @@ protected:
 public:
   virtual ~EfgPortion();
 
-  BaseEfg*& Value(void) const;
+  BaseEfg *Value(void) const;
+  void SetValue(BaseEfg *);
   PortionSpec Spec(void) const;
   DataType SubType( void ) const;
 
@@ -1100,8 +1115,6 @@ protected:
 
 public:
   virtual ~ListPortion();
-
-  virtual void SetGame(void* game, bool efg);
 
   bool BelongsToGame( void* game ) const;  
   bool MatchGameData( void* game, void* data ) const;  

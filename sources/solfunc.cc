@@ -437,10 +437,7 @@ static Portion *GSM_Behav_EFSupport(Portion **param)
 
   if(por == 0)
     por = new ErrorPortion("Mismatching EFG and list type");
-  else
-  {
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  }
+
   return por;
 }
 
@@ -512,7 +509,6 @@ static Portion *GSM_CentroidEFSupport(Portion **param)
   else
     por = new BehavValPortion<double>(new BehavSolution<double>((Efg<double> &) S->BelongsTo(), *S));
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -527,7 +523,6 @@ static Portion *GSM_CentroidNFSupport(Portion **param)
   else
     por = new MixedValPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) *N, *S));
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1001,7 +996,7 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
     por = new MixedValPortion<double>(Pd);
   else
     por = new MixedValPortion<gRational>(Pr);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+
   return por;
 }
 
@@ -1472,7 +1467,6 @@ static Portion *GSM_StrategyProb_Float(Portion **param)
   else
     por = new FloatValPortion(0.0);
   
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1491,7 +1485,6 @@ static Portion *GSM_StrategyProb_Rational(Portion **param)
   else
     por = new RationalValPortion(0.0);
   
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 

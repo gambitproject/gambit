@@ -136,7 +136,6 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
   
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -397,14 +396,12 @@ Portion* GSM_NewNfg_Rational(Portion** param)
 static Portion *GSM_NewOutcome_Nfg_Float(Portion **param)
 {
   Portion *por = new NfOutcomeValPortion(((NfgPortion<double> *) param[0])->Value()->GameForm().NewOutcome());
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
 static Portion *GSM_NewOutcome_Nfg_Rational(Portion **param)
 {
   Portion *por = new NfOutcomeValPortion(((NfgPortion<gRational> *) param[0])->Value()->GameForm().NewOutcome());
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -514,7 +511,6 @@ static Portion* GSM_Outcome_Nfg(Portion** param)
   }
   
   Portion *por = new NfOutcomeValPortion(nfg.GetOutcome(profile));
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -527,7 +523,6 @@ static Portion *GSM_Outcomes_NfgFloat(Portion **param)
   Nfg<double> *N = ((NfgPortion<double> *) param[0])->Value();
   
   Portion* por = ArrayToList(N->Outcomes());
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -536,7 +531,6 @@ static Portion *GSM_Outcomes_NfgRational(Portion **param)
   Nfg<gRational> *N = ((NfgPortion<gRational> *) param[0])->Value();
   
   Portion* por = ArrayToList(N->Outcomes());
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -575,7 +569,6 @@ static Portion *GSM_Player(Portion **param)
   Strategy *s = ((StrategyPortion *) param[0])->Value();
 
   Portion* por = new NfPlayerValPortion(s->nfp);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -589,14 +582,12 @@ static Portion *GSM_Players_Nfg(Portion **param)
     Nfg<double> &N = *((NfgPortion<double> *) param[0])->Value();
 
     Portion* por = ArrayToList(N.Players());
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
     Nfg<gRational> &N = *((NfgPortion<gRational> *) param[0])->Value();
 
     Portion* por = ArrayToList(N.Players());
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 }
@@ -813,7 +804,6 @@ static Portion *GSM_Strategies(Portion **param)
   NFSupport* s = ((NfSupportPortion*) param[1])->Value();
 
   Portion *por = ArrayToList(s->Strategies(P->GetNumber()));
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -826,15 +816,11 @@ static Portion *GSM_Support_Nfg(Portion **param)
   if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
     Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
-
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
     Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
-
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 

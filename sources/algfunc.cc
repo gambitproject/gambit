@@ -123,7 +123,6 @@ static Portion *GSM_Behav_Float(Portion **param)
   MixedToBehav(N, mp, E, *bp);
 
   Portion* por = new BehavValPortion<double>(bp);
-  por->SetGame((void *) &E, true);
   return por;
 }
 
@@ -139,7 +138,6 @@ static Portion *GSM_Behav_Rational(Portion **param)
   MixedToBehav(N, mp, E, *bp);
 
   Portion* por = new BehavValPortion<gRational>(bp);
-  por->SetGame((void *) &E, true);
   return por;
 }
 
@@ -186,7 +184,6 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
   }
 
   assert(por != 0);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -240,7 +237,6 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
       assert(0);
   }
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -281,7 +277,6 @@ static Portion *GSM_EnumPure_Nfg(Portion **param)
 
   ((FloatPortion *) param[2])->Value() = watch.Elapsed();
   
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -339,7 +334,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
     default:
       assert(0);
   }
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+
   return por;
 }
 
@@ -393,7 +388,6 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
   }
 
   assert(por != 0);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -439,7 +433,6 @@ static Portion *GSM_Gobit_Start(Portion **param)
     ((FloatPortion *) param[11])->Value() = watch.Elapsed();
 
     Portion *por = new Mixed_ListPortion<double>(solutions);
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
 
     if (NP.pxifile != &gnull)  delete NP.pxifile;
     return por;
@@ -478,7 +471,6 @@ static Portion *GSM_Gobit_Start(Portion **param)
     ((FloatPortion *) param[11])->Value() = watch.Elapsed();
     
     Portion * por = new Behav_ListPortion<double>(solutions);
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
 
     if (EP.pxifile != &gnull)   delete EP.pxifile;
     return por;
@@ -527,7 +519,6 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
     assert(0);
   }
   assert(por != 0);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -621,7 +612,6 @@ static Portion *GSM_Lcp_Efg(Portion **param)
     assert(0);
   }
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -662,7 +652,6 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
     ((IntPortion *) param[8])->Value() = M.NumEvals();
 
     Portion *por = new Behav_ListPortion<double>(M.GetSolutions());
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
@@ -688,7 +677,6 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
     ((IntPortion *) param[8])->Value() = M.NumEvals();
 
     Portion *por = new Behav_ListPortion<double>(M.GetSolutions());
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
 }
@@ -724,7 +712,6 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
   ((FloatPortion *) param[7])->Value() = watch.Elapsed();
 
   Portion *por = new Mixed_ListPortion<double>(solutions);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -779,7 +766,6 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   }
 
   assert(por != 0);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -932,7 +918,7 @@ static Portion *GSM_Lp_Efg(Portion **param)
     default:
       assert(0); 
   }
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+
   return por;
 }
 
@@ -1057,7 +1043,6 @@ static Portion *GSM_Simpdiv_Nfg(Portion **param)
   }
 
   assert(por != 0);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -1108,7 +1093,6 @@ static Portion *GSM_Simpdiv_Efg(Portion **param)
       assert(0);
   }
 
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 

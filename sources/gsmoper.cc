@@ -2257,7 +2257,6 @@ Portion *GSM_Mixed_NfgFloat(Portion **param)
 
 
   Portion* por = new MixedValPortion<double>(P);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -2315,7 +2314,6 @@ Portion *GSM_Mixed_NfgRational(Portion **param)
 
 
   Portion* por = new MixedValPortion<gRational>(P);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 
@@ -2394,7 +2392,6 @@ Portion *GSM_Behav_EfgFloat(Portion **param)
   }
 
   Portion* por = new BehavValPortion<double>(P);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 
 }
@@ -2474,7 +2471,6 @@ Portion *GSM_Behav_EfgRational(Portion **param)
   }
 
   Portion* por = new BehavValPortion<gRational>(P);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
 

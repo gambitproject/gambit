@@ -507,47 +507,38 @@ bool GSM::Assign(void)
 
       case porEFOUTCOME_FLOAT:
       case porEFOUTCOME_RATIONAL:
-	((EfOutcomePortion*) p1)->Value() = ((EfOutcomePortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((EfOutcomePortion *) p1)->SetValue(((EfOutcomePortion *) p2)->Value());
 	break;
 
       case porNFSUPPORT_FLOAT:
       case porNFSUPPORT_RATIONAL:
-	((NfSupportPortion*) p1)->Value()=((NfSupportPortion*)p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((NfSupportPortion *) p1)->SetValue(((NfSupportPortion *) p2)->Value());
 	break;
 
       case porEFSUPPORT_FLOAT:
       case porEFSUPPORT_RATIONAL:
-	((EfSupportPortion*) p1)->Value()=((EfSupportPortion*)p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((EfSupportPortion *) p1)->SetValue(((EfSupportPortion *) p2)->Value());
 	break;
 
       case porINFOSET_FLOAT:
       case porINFOSET_RATIONAL:
-	((InfosetPortion*) p1)->Value() = ((InfosetPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((InfosetPortion *) p1)->SetValue(((InfosetPortion *) p2)->Value());
 	break;
 
       case porNFPLAYER:
-	((NfPlayerPortion*) p1)->Value()=((NfPlayerPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((NfPlayerPortion *) p1)->SetValue(((NfPlayerPortion *) p2)->Value());
 	break;
       case porEFPLAYER:
-	((EfPlayerPortion*) p1)->Value()=((EfPlayerPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((EfPlayerPortion *) p1)->SetValue(((EfPlayerPortion *) p2)->Value());
 	break;
       case porSTRATEGY:
-	((StrategyPortion*) p1)->Value()=((StrategyPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((StrategyPortion *) p1)->SetValue(((StrategyPortion *) p2)->Value());
 	break;
       case porNODE:
-	((NodePortion*) p1)->Value() = ((NodePortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((NodePortion *) p1)->SetValue(((NodePortion *) p2)->Value());
 	break;
       case porACTION:
-	((ActionPortion*) p1)->Value() = ((ActionPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
+	((ActionPortion *) p1)->SetValue(((ActionPortion *) p2)->Value());
 	break;
 
 
@@ -583,21 +574,18 @@ bool GSM::Assign(void)
 
 
       case porNFG_FLOAT:
-	((NfgPortion<double>*) p1)->Value() = ((NfgPortion<double>*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	p1->Original()->SetGame(p2->Game(), false);
+	((NfgPortion<double> *) p1)->SetValue(((NfgPortion<double> *) p2)->Value());
+//	p1->Original()->SetGame(p2->Game(), false);
 	break;
       case porNFG_RATIONAL:
-	((NfgPortion<gRational>*) p1)->Value() = ((NfgPortion<gRational>*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	p1->Original()->SetGame(p2->Game(), false);
+	((NfgPortion<gRational> *) p1)->SetValue(((NfgPortion<gRational> *) p2)->Value());
+//	p1->Original()->SetGame(p2->Game(), false);
 	break;
 
       case porEFG_FLOAT:
       case porEFG_RATIONAL:
-	((EfgPortion*) p1)->Value() = ((EfgPortion*) p2)->Value();
-	p1->SetGame(p2->Game(), p2->GameIsEfg());
-	p1->Original()->SetGame(p2->Game(), true);
+	((EfgPortion *) p1)->SetValue(((EfgPortion *) p2)->Value());
+//	p1->Original()->SetGame(p2->Game(), true);
 	break;
 
       case porINPUT:
