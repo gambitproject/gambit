@@ -171,7 +171,7 @@ public:
 //  LPTableau Stuff (For Linear Programming code)
 // ---------------------------------------------------------------------------
 
-#include "tableau3.h"
+#include "tableau2.h"
 
 template <class T> class LPTableau : public Tableau<T> {
 private:

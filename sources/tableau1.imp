@@ -5,7 +5,7 @@
 //
 
 #include "tableau.h"
-#include "tableau3.imp"
+#include "tableau2.imp"
 
 // ---------------------------------------------------------------------------
 //                BaseTableau method definitions
@@ -434,6 +434,9 @@ void LPTableau<T>::SetCost(const gVector<T>& c)
     return;
   }
   assert(c.First()==cost.First());
+  gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
+  gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
+  gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
   assert(c.Last()==(cost.Last()+unitcost.Length()));
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
@@ -482,7 +485,6 @@ void LPTableau<T>::DualVector(gVector<T> &L) const
 {
   L= dual;
 }
-
 
 template <class T>
 T LPTableau<T>::RelativeCost(int col) const
@@ -548,6 +550,12 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
   gArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
 
+  // BigDump(gout);
+  // gout << "\ncost: " << GetCost();
+  // gout << "\nunitcost: " << GetUnitCost() << "\n";
+  // for(i=MinCol();i<=MaxCol();i++) gout << " " << RelativeCost(i);
+  // for(i=MinRow();i<=MaxRow();i++) gout << " " << RelativeCost(-i);
+
   for(j=-MaxRow();j<=MaxCol();j++) if(j && !Member(j)  && !IsBlocked(j)) {
     SolveColumn(j,tmpcol);
     // gout << "\nColumn " << j;
@@ -607,8 +615,8 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	}
       }
     }
-    //** gout << "\nafter checking rows, BestSet = ";
-    //** BestSet.Dump(gout);
+    // gout << "\nafter checking rows, BestSet = ";
+    // BestSet.Dump(gout);
 
     // check that i would be the column to enter in prior tableau
 
@@ -621,7 +629,7 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
       // gout << "\ntmpcol, loc 1: " << tmpcol;
       SolveT(tmpcol,tmpdual);
       // gout << "\ntmpcol, loc 2: " << tmpcol;
-      //** gout << "\ntmpdual, loc 1: " << tmpdual;
+      // gout << "\ntmpdual, loc 1: " << tmpdual;
       
 /*      if( j<0 )
 	{ tmpcol=(T)0; tmpcol[-j]=(T)1; }
@@ -629,17 +637,17 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	A->GetColumn(j,tmpcol);
 */
       GetColumn(j,tmpcol);      
-      //** gout << "\ncol " << j << ": " << tmpcol;
+      // gout << "\ncol " << j << ": " << tmpcol;
       a_ij = tmpdual*tmpcol;
       c_j = RelativeCost(j);
       if(EqZero(a_ij)) {
-	//** gout << "\ni not col to enter in prior tableau: ";
-	//** gout << "a_ij=0";
+	// gout << "\ni not col to enter in prior tableau: ";
+	// gout << "a_ij=0";
 	BestSet.Remove(i);
       }
       else {
 	ratio = c_j/a_ij;
-	//** gout << " ratio: " << ratio;
+	// gout << " ratio: " << ratio;
 	if(enter<0) 
 	  a_ik = tmpdual[-enter];
 	else {

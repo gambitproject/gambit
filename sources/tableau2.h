@@ -31,6 +31,7 @@ public:
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, gVector<gRational> &);  // column in new basis 
+  void GetColumn(int, gVector<gRational> &) const;  // column in new basis 
   
   // raw Tableau functions
 
