@@ -75,14 +75,14 @@ Portion *GSM_LiapEfg(Portion **param)
 
   EFLiapParams<double> LP;
 
-  LP.nequilib = ((IntPortion *) param[1])->Value();
-  LP.ntries = ((IntPortion *) param[2])->Value();
+  LP.nequilib = ((IntPortion *) param[3])->Value();
+  LP.ntries = ((IntPortion *) param[4])->Value();
  
   EFLiapModule<double> LM(E, LP);
   LM.Liap(1);
 
-  ((IntPortion *) param[4])->Value() = LM.NumEvals();
-  ((FloatPortion *) param[5])->Value() = LM.Time();
+  ((IntPortion *) param[1])->Value() = LM.NumEvals();
+  ((FloatPortion *) param[2])->Value() = LM.Time();
 
   return new Behav_ListPortion<double>(&E, LM.GetSolutions());
 }
@@ -187,16 +187,14 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_LiapEfg, 6);
   FuncObj->SetParamInfo(GSM_LiapEfg, 0, "efg", porEFG_FLOAT, NO_DEFAULT_VALUE,
 			PASS_BY_REFERENCE, DEFAULT_EFG );
-  FuncObj->SetParamInfo(GSM_LiapEfg, 1, "stopAfter", porINTEGER,
-		        new IntValPortion(1));
-  FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nTries", porINTEGER,
-		        new IntValPortion(10));
-  FuncObj->SetParamInfo(GSM_LiapEfg, 3, "start", porLIST | porFLOAT,
-			new ListValPortion);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 4, "nEvals", porINTEGER,
-			new IntValPortion(0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_LiapEfg, 5, "time", porFLOAT,
+  FuncObj->SetParamInfo(GSM_LiapEfg, 1, "time", porFLOAT,
 			new FloatValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 2, "nEvals", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LiapEfg, 3, "stopAfter", porINTEGER,
+		        new IntValPortion(1));
+  FuncObj->SetParamInfo(GSM_LiapEfg, 4, "nTries", porINTEGER,
+		        new IntValPortion(10));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Sequence");
