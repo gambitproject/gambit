@@ -157,8 +157,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   while (1)  {
     E.Payoff(corr, value);
     
-    if (iter.GetIndex() > 0)  
-      iter.SetOutcome(L->N->GameForm().NewOutcome());
+    iter.SetOutcome(L->N->GameForm().NewOutcome());
     for (int j = 1; j <= E.NumPlayers(); j++)
       L->N->SetPayoff(iter.GetOutcome(), j, value[j]);
     
