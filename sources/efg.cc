@@ -1398,7 +1398,7 @@ gPVector<int> Efg::NumMembers(void) const
 }
 
 //------------------------------------------------------------------------
-//                   Efg<T>: Payoff computation
+//                       Efg: Payoff computation
 //------------------------------------------------------------------------
 
 void Efg::Payoff(Node *n, gNumber prob, const gPVector<int> &profile,
@@ -1437,14 +1437,14 @@ void Efg::InfosetProbs(Node *n, gNumber prob, const gPVector<int> &profile,
 void Efg::Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const
 {
   ((gVector<gNumber> &) payoff).operator=((gNumber) 0);
-  Payoff(root, 1.0, profile, payoff);
+  Payoff(root, 1, profile, payoff);
 }
 
 void Efg::InfosetProbs(const gPVector<int> &profile,
 			  gPVector<gNumber> &probs) const
 {
   ((gVector<gNumber> &) probs).operator=((gNumber) 0);
-  InfosetProbs(root, 1.0, profile, probs);
+  InfosetProbs(root, 1, profile, probs);
 }
 
 void Efg::Payoff(Node *n, gNumber prob, const gArray<gArray<int> *> &profile,
@@ -1470,7 +1470,7 @@ void Efg::Payoff(const gArray<gArray<int> *> &profile,
 {
   for (int i = 1; i <= payoff.Length(); i++)
     payoff[i] = 0;
-  Payoff(root, 1.0, profile, payoff);
+  Payoff(root, 1, profile, payoff);
 }
 
 #include "efgiter.imp"
