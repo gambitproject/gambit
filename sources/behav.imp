@@ -103,9 +103,6 @@ template <class T> Infoset *ExtForm<T>::CreateInfoset(int n, Player *p, int br)
                new Infoset(this, n, p, br);
   
   n = 1;
-  do  {
-    s->name = "(" + ToString(p->number) + "," + ToString(n++) + ")";
-  }  while (p->IsInfosetDefined(s->name));
   return s;
 }
 
@@ -134,7 +131,6 @@ template <class T> OutcomeVector<T> *ExtForm<T>::NewOutcome(void)
   OutcomeVector<T> *ret = new OutcomeVector<T>(this, outcomes.Length() + 1,
 					       players.Length());
   outcomes.Append(ret);
-  ret->name = "Outcome " + ToString(outcomes.Length());
   return ret;
 }
 
