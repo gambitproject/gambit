@@ -131,6 +131,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       SelectSolutions(subgame_number, foo, sol);
     }
     catch (gSignalBreak &) {
+      gout << sol << '\n';
       interrupted = true;
     }
     
@@ -174,21 +175,21 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 				      sol[solno](subsupport.Actions(pl, iset)[act]));
 	  }
 	}
-
-	int j = solns.Length();
-	solns[j].SetCreator((EfgAlgType) AlgorithmID());
-	
-	if (m_isPerfectRecall)
-	  solns[j].SetIsNash(triTRUE);
-	if (marked && m_isPerfectRecall)
-	  solns[j].SetIsSubgamePerfect(triTRUE); 
-	if (solns[j].Creator() == algorithmEfg_LIAP_EFG && m_isPerfectRecall) {
-	  solns[j].SetLiap(solns[j].LiapValue());
-	  solns[j].SetIsSequential(triTRUE);      // even if marked = false
-	  solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
-	}
       }
       
+      int j = solns.Length();
+      solns[j].SetCreator((EfgAlgType) AlgorithmID());
+	
+      if (m_isPerfectRecall)
+	solns[j].SetIsNash(triTRUE);
+      if (marked && m_isPerfectRecall)
+	solns[j].SetIsSubgamePerfect(triTRUE); 
+      if (solns[j].Creator() == algorithmEfg_LIAP_EFG && m_isPerfectRecall) {
+	solns[j].SetLiap(solns[j].LiapValue());
+	solns[j].SetIsSequential(triTRUE);      // even if marked = false
+	solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
+      }
+
       gVector<gNumber> subval(foo.NumPlayers());
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
@@ -202,10 +203,11 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	efg.SetPayoff(ov, i, subval[i]);
  
       values.Append(ov);
+    }
 
-      if (interrupted) {
-	throw gSignalBreak();
-      }
+    if (interrupted) {
+      gout << solns << '\n';
+      throw gSignalBreak();
     }
   }
 
