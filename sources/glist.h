@@ -10,6 +10,7 @@
 #include "gambitio.h"
 
 template <class T> class gNode;
+template <class T> class gListIter;
 
 //
 // <category lib=glib sect=Containers>
@@ -24,9 +25,10 @@ template <class T> class gNode;
 //
 //
 template <class T> class gList  {
+  friend class gListIter<T>;
   private:
     int length;
-    gNode<T> *head;
+    gNode<T> *head, *tail;
 
 //
 // Insert the given element at the specified location.  Does not do any
@@ -90,6 +92,8 @@ template <class T> class gList  {
     gList<T>& operator+=(const gList<T>& b);
 //-grp
 
+    gList<T> &Combine(gList<T> &b);
+
 //
 // Append a new element to the list, and return the index at which the
 // element can be found.  Note that this index is guaranteed to be the
@@ -122,12 +126,6 @@ template <class T> class gList  {
 // Return the number of elements currently in the block.
 //
     int Length(void) const;
-
-//
-// Returns the first gNode in the list
-//
-    gNode<T> *const First(void) const;
-    gNode<T> *First(void);
 
 //
 // Empty the block
