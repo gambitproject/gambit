@@ -229,8 +229,10 @@ Portion *gclFunctionCall::Evaluate(void)
   for (int i = 1; i <= params->req->NumParams(); i++)   {
     Portion *val = (*params->req)[i]->Evaluate();
     if (val->Spec().Type == porREFERENCE)   {
-      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
+      if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value())) {
 	call.SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
+	delete val;
+      }
       else  {
 	call.SetCurrParam(val, AUTO_VAL_OR_REF);
       }
@@ -568,8 +570,10 @@ Portion *gclForExpr::Evaluate(void)
     }
 
     if (guardval->Spec().Type != porBOOLEAN ||
-	      guardval->Spec().ListDepth > 0)
+	guardval->Spec().ListDepth > 0) {
+      delete guardval;
       throw gclRuntimeError("Guard must evaluate to BOOLEAN"); 
+    }
 
     if (((BoolPortion *) guardval)->Value() != triTRUE)  {
       delete guardval;
