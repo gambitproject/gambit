@@ -26,32 +26,32 @@ template <class T> gNArray<T>::gNArray(const gArray<int> &d)
       assert(dim[i] >= 1);
       storage_size *= dim[i];
     }
-
-		storage = new GHUGE T[storage_size];
-		for (i = 0; i < storage_size; storage[i++] = 0);
-	}
+    
+    storage = new GHUGE T[storage_size];
+    for (int i = 0; i < storage_size; storage[i++] = 0);
+  }
 }
 
 template <class T> gNArray<T>::gNArray(const gNArray<T> &a)
-	: storage_size(a.storage_size), dim(a.dim)
+  : storage_size(a.storage_size), dim(a.dim)
 {
-	storage = (storage_size > 0) ? new GHUGE T[storage_size] : 0;
-	for (int i = 0; i < storage_size; i++)
-		storage[i] = a.storage[i];
+  storage = (storage_size > 0) ? new GHUGE T[storage_size] : 0;
+  for (int i = 0; i < storage_size; i++)
+    storage[i] = a.storage[i];
 }
 
 template <class T> gNArray<T>::~gNArray()
 {
-	if (storage)    delete [] storage;
+  if (storage)    delete [] storage;
 }
 
 template <class T>
 gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
 {
-	if (this != &a)   {
-		if (storage)    delete [] storage;
-		dim = a.dim;
-		storage_size = a.storage_size;
+  if (this != &a)   {
+    if (storage)    delete [] storage;
+    dim = a.dim;
+    storage_size = a.storage_size;
     storage = (storage_size > 0) ? new GHUGE T[storage_size] : 0;
     for (int i = 0; i < storage_size; i++)
       storage[i] = a.storage[i];
@@ -59,11 +59,42 @@ gNArray<T> &gNArray<T>::operator=(const gNArray<T> &a)
   return *this;
 }
 
+/*
 template <class T> T gNArray<T>::operator[](const gVector<int> &v) const
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
+  int i,location,offset;
   
-  for (int i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
+  for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
+    assert(v[i] > 0 && v[i] <= dim[i]);
+    location += (v[i] - 1) * offset;
+    offset *= dim[i];
+  }
+  
+  return storage[location];
+}
+
+template <class T> T &gNArray<T>::operator[](const gVector<int> &v)
+{
+  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  int i, location, offset;
+  
+  for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
+    assert(v[i] > 0 && v[i] <= dim[i]);
+    location += (v[i] - 1) * offset;
+    offset *= dim[i];
+  }
+  
+  return storage[location];
+}
+*/
+
+template <class T> T gNArray<T>::operator[](const gArray<int> &v) const
+{
+  assert(dim.Length() > 0 && dim.Length() == v.Length());
+  int i, location, offset;
+  
+  for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
     assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
@@ -72,11 +103,12 @@ template <class T> T gNArray<T>::operator[](const gVector<int> &v) const
   return storage[location];
 }
 
-template <class T> T &gNArray<T>::operator[](const gVector<int> &v)
+template <class T> T &gNArray<T>::operator[](const gArray<int> &v)
 {
   assert(dim.Length() > 0 && dim.Length() == v.Length());
+  int i, location, offset;
   
-  for (int i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
+  for (i = 1, location = 0, offset = 1; i <= dim.Length(); i++)   {
     assert(v[i] > 0 && v[i] <= dim[i]);
     location += (v[i] - 1) * offset;
     offset *= dim[i];
@@ -90,7 +122,7 @@ template <class T> void gNArray<T>::Output(gOutput &f) const
   if (dim.Length() > 0)   {
     for (int i = dim.Length(); i > 0; f << i-- << ' ');
     f << '\n';
-
+    
     gVector<int> v(1, dim.Length());
     DumpFrom(f, 1, v);
     f << '\n';
@@ -109,12 +141,14 @@ void gNArray<T>::DumpFrom(gOutput &f, int offset, gVector<int> &v) const
   }
 }
 
+/*
 template <class T> 
 void gNArray<T>::Input(gInput &f, const gVector<int> &norder, int i)
 {
   gVector<int> strat(1, i);
   ReadFrom(f, norder, strat, i);
 }
+
 
 template <class T> 
 void gNArray<T>::ReadFrom(gInput &f, const gVector<int> &norder,
@@ -128,6 +162,7 @@ void gNArray<T>::ReadFrom(gInput &f, const gVector<int> &norder,
       f >> (*this)[strat];
   }
 }
+*/
 
 template <class T> const T &gNArray<T>::operator[](long l) const
 {
@@ -161,7 +196,7 @@ gIndexedNArray<T>::gIndexedNArray(const gVector<int> &d)
   : gNArray<T>(d)
 {
   long offset = 1;
-
+  
   index = new gArray<long>[dim.Length()];
   for (int i = 1; i <= dim.Length(); i++)  {
     for (int j = 0; j < dim[i]; j++)
@@ -189,7 +224,7 @@ gIndexedNArray<T> &gIndexedNArray<T>::operator=(const gIndexedNArray<T> &a)
 {
   if (this != &a)   {
     gNArray<T>::operator=(a);
-
+    
     if (index)   delete [] index;
     index = new gArray<long>[dim.Length()];
     for (int i = 0; i < dim.Length(); i++)
@@ -202,14 +237,14 @@ template <class T>
 T gIndexedNArray<T>::operator=(const gVector<int> &v) const
 {
   long location = 0;
-
+  
   assert(dim.Length() > 0 && dim.Length() == v.Length());
   
   for (int i = 1; i <= dim.Length(); i++)   {
     assert(v[i] > 0 && v[i] <= dim[i]);
     location += index[i - 1][v[i]];
   }
-
+  
   return storage[location];
 }
 
@@ -228,6 +263,7 @@ T &gIndexedNArray<T>::operator=(const gVector<int> &v)
   return storage[location];
 }
 
-
-
 #endif   // UNUSED
+
+
+
