@@ -360,6 +360,9 @@ BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
   return *this;
 }
 
+template <class T> T BehavProfile<T>::Payoff(int pl) const
+{ return ((ExtForm<T> *) E)->Payoff(pl, *this); }
+
 #include <assert.h>
 
 template <class T> bool BehavProfile<T>::IsPure(void) const

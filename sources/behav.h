@@ -53,7 +53,7 @@ template <class T> class BehavProfile
     bool IsPure(void) const;
     bool IsPure(int pl) const;
 
-    T Payoff(int pl) const    { return ((ExtForm<T> *) E)->Payoff(pl, *this); }
+    T Payoff(int pl) const;
 
     ExtForm<T> *BelongsTo(void) const   { return (ExtForm<T> *) E; }
 
