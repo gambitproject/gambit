@@ -4,6 +4,9 @@
 // $Id$ 
 //
 
+#ifndef RECTANGL_H
+#define RECTANGL_H
+
 #include "interval.h"
 #include "odometer.h"
 #include "gvector.h"
@@ -64,3 +67,4 @@ friend gOutput& operator << (gOutput& output, const gRectangle<T>& x);
 
 template <class T> gRectangle<gDouble> TogDouble(const gRectangle<T>&);
 
+#endif // RECTANGL_H
