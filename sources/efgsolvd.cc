@@ -25,9 +25,7 @@
 
 void EfgSolveSettings::Warn(const char *p_warning) 
 {
-  if (solving) {
-    wxMessageBox((char *) p_warning, "Standard Solution");
-  }
+  wxMessageBox((char *) p_warning, "Standard Solution");
 }
 
 //=========================================================================
@@ -133,164 +131,218 @@ EfgSolveStandardDialog::~EfgSolveStandardDialog()
 
 void EfgSolveStandardDialog::StandardSettings(void)
 {
-  int stopAfter=1,max_solns=1,dom_type=DOM_WEAK;
-  bool use_elimdom=true,all=true;
+  int stopAfter = 1, max_solns = 1, dom_type = DOM_WEAK;
+  bool use_elimdom = true, all = true;
+  Infoset *bad1, *bad2;   // for use with IsPerfectRecall
 
-  Infoset *bad1,*bad2;
-  bool perf=IsPerfectRecall(ef,bad1,bad2);
-
-  // a separate case for each of the possible alg/num/game combinations
-  // One Nash for 2 person
-  if (m_standardType == efgSTANDARD_NASH && m_standardNum == efgSTANDARD_ONE
-      && ef.NumPlayers() == 2) {
-    use_nfg=FALSE;
-    if (perf)
-      algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
+  if (m_standardType == efgSTANDARD_NASH
+      && m_standardNum == efgSTANDARD_ONE &&
+      ef.NumPlayers() == 2) {
+    use_nfg = FALSE;
+    if (IsPerfectRecall(ef, bad1, bad2))
+      algorithm = (ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
     else
-      algorithm=EFG_QRE_SOLUTION;
-    stopAfter=1;max_solns=1;
-    use_elimdom=true;all=true;dom_type=DOM_WEAK;
-    subgames=TRUE;
+      algorithm = EFG_QRE_SOLUTION;
+    stopAfter = 1;
+    max_solns = 1;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_WEAK;
+    subgames = TRUE;
   }
 
-  // One Nash for n person
-  if (m_standardType==efgSTANDARD_NASH && m_standardNum==efgSTANDARD_ONE
-      && ef.NumPlayers()!=2) {
-    use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
-    stopAfter=1;max_solns=1;
-    use_elimdom=true;all=true;dom_type=DOM_WEAK;
-    subgames=TRUE;
+  else if (m_standardType == efgSTANDARD_NASH
+	   && m_standardNum == efgSTANDARD_ONE
+	   && ef.NumPlayers() != 2)  {
+    use_nfg = TRUE;
+    algorithm = NFG_SIMPDIV_SOLUTION;
+    stopAfter = 1;
+    max_solns = 1;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_WEAK;
+    subgames = TRUE;
   }
 	
-  // Two Nash 2 person
-  if (m_standardType==efgSTANDARD_NASH && m_standardNum==efgSTANDARD_TWO
-      && ef.NumPlayers()==2) {
-    use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
-    stopAfter=2;max_solns=2;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+  else if (m_standardType == efgSTANDARD_NASH
+	   && m_standardNum == efgSTANDARD_TWO
+	   && ef.NumPlayers() == 2) {
+    use_nfg = TRUE;
+    algorithm = NFG_ENUMMIXED_SOLUTION;
+    stopAfter = 2;
+    max_solns = 2;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
   }
 	
-  // Two Nash n person
-  if (m_standardType==efgSTANDARD_NASH && m_standardNum==efgSTANDARD_TWO 
-      && ef.NumPlayers()!=2) {
-    use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
-    stopAfter=2;max_solns=2;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+  else if (m_standardType == efgSTANDARD_NASH
+	   && m_standardNum == efgSTANDARD_TWO 
+	   && ef.NumPlayers() != 2) {
+    use_nfg = FALSE;
+    algorithm = EFG_LIAP_SOLUTION;
+    stopAfter = 2;
+    max_solns = 2;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
   }
 	
-  // All Nash 2 person
-  if (m_standardType==efgSTANDARD_NASH && m_standardNum==efgSTANDARD_ALL 
-      && ef.NumPlayers()==2) {
-    use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
-    stopAfter=0;max_solns=0;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+  else if (m_standardType == efgSTANDARD_NASH
+	   && m_standardNum == efgSTANDARD_ALL 
+	   && ef.NumPlayers()==2) {
+    use_nfg = TRUE;
+    algorithm = NFG_ENUMMIXED_SOLUTION;
+    stopAfter = 0;
+    max_solns = 0;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
   }
 	
-  // ALL Nash n person
-  if (m_standardType==efgSTANDARD_NASH && m_standardNum==efgSTANDARD_ALL
-      && ef.NumPlayers()!=2) {
-    use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
-    stopAfter=0;max_solns=0;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+  else if (m_standardType == efgSTANDARD_NASH 
+	   && m_standardNum == efgSTANDARD_ALL
+	   && ef.NumPlayers() != 2) {
+    use_nfg = FALSE;
+    algorithm = EFG_LIAP_SOLUTION;
+    stopAfter = 0;
+    max_solns = 0;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
     Warn("Not guaranteed to find all solutions for 'All Nash n-person'\n");
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
   }
 
-  // One Subgame Perfect (same as One Nash)
-  // One Subgame Perfect for 2 person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_ONE 
-      && ef.NumPlayers()==2) {
-    use_nfg=FALSE;
-    if (perf)
-      algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
+  else if (m_standardType == efgSTANDARD_PERFECT
+	   && m_standardNum == efgSTANDARD_ONE 
+	   && ef.NumPlayers() == 2) {
+    use_nfg = FALSE;
+    if (IsPerfectRecall(ef, bad1, bad2))
+      algorithm = (ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
     else
-      algorithm=EFG_QRE_SOLUTION;
-    stopAfter=1;max_solns=1;
-    use_elimdom=true;all=true;dom_type=DOM_WEAK;
-    subgames=TRUE;
+      algorithm = EFG_QRE_SOLUTION;
+    stopAfter = 1;
+    max_solns = 1;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_WEAK;
+    subgames = TRUE;
   }
   
-  // One Subgame Pefect for n person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_ONE
-      && ef.NumPlayers()!=2) {
-    use_nfg=TRUE;algorithm=NFG_SIMPDIV_SOLUTION;
-    stopAfter=1;max_solns=1;
-    use_elimdom=true;all=true;dom_type=DOM_WEAK;
-    subgames=TRUE;
+  else if (m_standardType == efgSTANDARD_PERFECT
+	   && m_standardNum == efgSTANDARD_ONE
+	   && ef.NumPlayers() != 2) {
+    use_nfg = TRUE;
+    algorithm = NFG_SIMPDIV_SOLUTION;
+    stopAfter = 1;
+    max_solns = 1;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_WEAK;
+    subgames = TRUE;
   }
 	
-  // Two Subgame Perfect 2 person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_TWO 
-      && ef.NumPlayers()==2) {
-    use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
-    stopAfter=2;max_solns=2;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=TRUE;
+  else if (m_standardType == efgSTANDARD_PERFECT
+	   && m_standardNum == efgSTANDARD_TWO 
+	   && ef.NumPlayers() == 2) {
+    use_nfg = TRUE;
+    algorithm = NFG_ENUMMIXED_SOLUTION;
+    stopAfter = 2;
+    max_solns = 2;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = TRUE;
     Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
   }
 	
-  // Two Subgame Perfect n person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_TWO
-      && ef.NumPlayers()!=2) {
-    use_nfg=TRUE;algorithm=NFG_LIAP_SOLUTION;
-    stopAfter=2;max_solns=2;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=TRUE;
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+  else if (m_standardType == efgSTANDARD_PERFECT 
+	   && m_standardNum == efgSTANDARD_TWO
+	   && ef.NumPlayers() != 2) {
+    use_nfg = TRUE;
+    algorithm = NFG_LIAP_SOLUTION;
+    stopAfter = 2;
+    max_solns = 2;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = TRUE;
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
     Warn("Not guaranteed to find 2 solutions for 'Two Perfect'");
   }
 	
-  // All Subgame Perfect 2 person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_ALL 
-      && ef.NumPlayers()==2) {
-    use_nfg=TRUE;algorithm=NFG_ENUMMIXED_SOLUTION;
-    stopAfter=0;max_solns=0;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=TRUE;
+  else if (m_standardType == efgSTANDARD_PERFECT
+	   && m_standardNum == efgSTANDARD_ALL 
+	   && ef.NumPlayers() == 2) {
+    use_nfg = TRUE;
+    algorithm = NFG_ENUMMIXED_SOLUTION;
+    stopAfter = 0;
+    max_solns = 0;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = TRUE;
   }
 	
-  // All Subgame Perfect n person
-  if (m_standardType==efgSTANDARD_PERFECT && m_standardNum==efgSTANDARD_ALL 
-      && ef.NumPlayers()!=2) {
-    use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
-    stopAfter=0;max_solns=0;
-    use_elimdom=true;all=true;dom_type=DOM_STRONG;
-    subgames=TRUE;
+  else if (m_standardType == efgSTANDARD_PERFECT 
+	   && m_standardNum == efgSTANDARD_ALL 
+	   && ef.NumPlayers() != 2) {
+    use_nfg = FALSE;
+    algorithm = EFG_LIAP_SOLUTION;
+    stopAfter = 0;
+    max_solns = 0;
+    use_elimdom = true;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = TRUE;
     Warn("Not guaranteed to find all solutions for 'All Subgame Perfect n-person'\n");
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
   }
-	
-  // One Sequential
-  if (m_standardType==efgSTANDARD_SEQUENTIAL && m_standardNum==efgSTANDARD_ONE) {
-    use_nfg=FALSE;algorithm=EFG_QRE_SOLUTION;
-    stopAfter=1;max_solns=1;
-    use_elimdom=false;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+
+  else if (m_standardType == efgSTANDARD_SEQUENTIAL 
+	   && m_standardNum == efgSTANDARD_ONE) {
+    use_nfg = FALSE;
+    algorithm = EFG_QRE_SOLUTION;
+    stopAfter = 1;
+    max_solns = 1;
+    use_elimdom = false;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
   }
-	
-  // Two Sequential
-  if (m_standardType==efgSTANDARD_SEQUENTIAL && m_standardNum==efgSTANDARD_TWO) {
-    use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
-    stopAfter=2;max_solns=2;
-    use_elimdom=false;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+
+  else if (m_standardType == efgSTANDARD_SEQUENTIAL
+	   && m_standardNum == efgSTANDARD_TWO) {
+    use_nfg = FALSE;
+    algorithm = EFG_LIAP_SOLUTION;
+    stopAfter = 2;
+    max_solns = 2;
+    use_elimdom = false;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
     Warn("Not guaranteed to find all solutions for 'Two Sequential'\n");
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
   }
-	
-  // All Sequential
-  if (m_standardType==efgSTANDARD_SEQUENTIAL && m_standardNum==efgSTANDARD_ALL) {
-    use_nfg=FALSE;algorithm=EFG_LIAP_SOLUTION;
-    stopAfter=0;max_solns=0;
-    use_elimdom=false;all=true;dom_type=DOM_STRONG;
-    subgames=FALSE;
+
+  if (m_standardType == efgSTANDARD_SEQUENTIAL 
+      && m_standardNum == efgSTANDARD_ALL) {
+    use_nfg = FALSE;
+    algorithm = EFG_LIAP_SOLUTION;
+    stopAfter = 0;
+    max_solns = 0;
+    use_elimdom = false;
+    all = true;
+    dom_type = DOM_STRONG;
+    subgames = FALSE;
     Warn("Not guaranteed to find all solutions for 'All Sequential'\n");
-    wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);
+    wxWriteResource(PARAMS_SECTION, "Liap-Ntries", 2*stopAfter, defaults_file);
   }
 
   pick_solns=false; // pick solution subgames off for all standard solns

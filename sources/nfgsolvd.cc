@@ -14,9 +14,7 @@
 
 void NfgSolveSettings::Warn(const char *warning) 
 {
-  if (solving) {
-    wxMessageBox((char *) warning, "Standard Solution");
-  }
+  wxMessageBox((char *) warning, "Standard Solution");
 }
 
 //========================================================================
