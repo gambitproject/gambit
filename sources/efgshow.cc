@@ -1453,25 +1453,19 @@ void EfgShow::SupportUndominated(void)
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      if (!dialog.DomMixed()) {
-	if (dialog.FindAll()) {
-	  while ((sup = sup->Undominated(dialog.DomStrong(), false,
-					 dialog.Players(), gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
-	  }
-	}
-	else {
-	  if ((sup = sup->Undominated(dialog.DomStrong(), false, 
-				      dialog.Players(), gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    supports.Append(sup);
-	  }
+      if (dialog.FindAll()) {
+	while ((sup = sup->Undominated(dialog.DomStrong(), false,
+				       dialog.Players(), gnull, status)) != 0) {
+	  sup->SetName(UniqueSupportName());
+	  supports.Append(sup);
 	}
       }
       else {
-	wxMessageBox("Mixed dominance is not implemented for\n"
-		     "Extensive form games");
+	if ((sup = sup->Undominated(dialog.DomStrong(), false, 
+				    dialog.Players(), gnull, status)) != 0) {
+	  sup->SetName(UniqueSupportName());
+	  supports.Append(sup);
+	}
       }
     }
     catch (gSignalBreak &E) { }
