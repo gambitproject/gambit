@@ -38,7 +38,6 @@ gambit_SOURCES = \
 	nfgsupport.cc \
 	nfgtable.cc \
         numberedit.cc \
-	splash.cc \
 	treedraw.cc \
 	treewin.cc \
         valinteger.cc \
