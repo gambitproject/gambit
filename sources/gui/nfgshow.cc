@@ -132,7 +132,7 @@ END_EVENT_TABLE()
 NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
     gbtGameView(p_doc),
-    m_table(0), m_profileTable(0),
+    m_table(0), m_profileGrid(0),
     m_solutionSashWindow(0), m_infoSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
 {
@@ -166,8 +166,8 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
 					  wxSize(600, 100));
   m_solutionSashWindow->SetSashVisible(wxSASH_TOP, true);
 
-  m_profileTable = new NfgProfileList(m_doc, m_solutionSashWindow);
-  m_profileTable->Show(false);
+  m_profileGrid = new gbtNfgProfileGrid(m_doc, m_solutionSashWindow);
+  m_profileGrid->Show(false);
   m_solutionSashWindow->Show(false);
 
   m_infoSashWindow = new wxSashWindow(this, idINFOWINDOW,
@@ -626,12 +626,12 @@ void NfgShow::OnEditGame(wxCommandEvent &)
 void NfgShow::OnViewProfiles(wxCommandEvent &)
 {
   if (m_solutionSashWindow->IsShown()) {
-    m_profileTable->Show(false);
+    m_profileGrid->Show(false);
     m_solutionSashWindow->Show(false);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, false);
   }
   else {
-    m_profileTable->Show(true);
+    m_profileGrid->Show(true);
     m_solutionSashWindow->Show(true);
     GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, true);
   }
@@ -871,7 +871,7 @@ void NfgShow::OnToolsEquilibrium(wxCommandEvent &)
 	GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROBABILITIES, true);
       }
       if (!m_solutionSashWindow->IsShown()) {
-	m_profileTable->Show(true);
+	m_profileGrid->Show(true);
 	m_solutionSashWindow->Show(true);
 	GetMenuBar()->Check(GBT_NFG_MENU_VIEW_PROFILES, true);
 	AdjustSizes();
@@ -1044,7 +1044,7 @@ void NfgShow::OnProfilesProperties(wxCommandEvent &)
 
 void NfgShow::OnProfilesReport(wxCommandEvent &)
 {
-  dialogReport dialog(this, m_profileTable->GetReport());
+  dialogReport dialog(this, m_profileGrid->GetReport());
   dialog.ShowModal();
 }
 

@@ -29,18 +29,220 @@
 #include "nfgconst.h"
 
 //-------------------------------------------------------------------------
-//                  class NfgProfileList: Member functions
+//                      class gbtNfgProfileTable
 //-------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(NfgProfileList, wxListCtrl)
-  EVT_RIGHT_DOWN(NfgProfileList::OnRightClick)
+//
+// Design choice: One profile table class, the behavior of which depends
+// on the "profile style" chosen in the document preferences.
+// Alternative possibility would be an appropriate base class/derived class
+// setup; not sure that's not just overkill here.
+//
+class gbtNfgProfileTable : public wxGridTableBase {
+private:
+  gbtGameDocument *m_doc;
+
+public:
+  gbtNfgProfileTable(gbtGameDocument *);
+  virtual ~gbtNfgProfileTable() { }
+
+  int GetNumberRows(void);
+  int GetNumberCols(void);
+  wxString GetValue(int, int);
+  wxString GetColLabelValue(int);
+  void SetValue(int, int, const wxString &) { }
+  bool IsEmptyCell(int, int) { return false; }
+
+  bool InsertRows(size_t pos = 0, size_t numRows = 1);
+  bool AppendRows(size_t numRows = 1);
+  bool DeleteRows(size_t pos = 0, size_t numRows = 1);
+
+  wxGridCellAttr *GetAttr(int row, int col, wxGridCellAttr::wxAttrKind kind);
+};
+
+gbtNfgProfileTable::gbtNfgProfileTable(gbtGameDocument *p_doc)
+  : m_doc(p_doc)
+{ }
+
+int gbtNfgProfileTable::GetNumberRows(void)
+{ return m_doc->AllMixedProfiles().Length(); }
+
+int gbtNfgProfileTable::GetNumberCols(void)
+{
+  switch (m_doc->GetPreferences().ProfileStyle()) {
+  case GBT_PROFILES_GRID:
+    return 5 + m_doc->GetNfg().ProfileLength();
+  case GBT_PROFILES_VECTOR:
+  case GBT_PROFILES_MYERSON:
+  default:
+    return 5 + m_doc->GetNfg().NumPlayers();
+  }
+}
+
+wxString gbtNfgProfileTable::GetColLabelValue(int p_col)
+{
+  wxString labels[] = { "Name", "Creator", "Nash", "Perfect", "Liap" };
+  if (p_col < 5) {
+    return labels[p_col];
+  }
+
+  if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
+    for (int pl = 1, col = 5; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+      gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
+      for (int st = 1; st <= player.NumStrategies(); col++, st++) {
+	if (col == p_col) {
+	  return wxString::Format("%s:%s",
+				  (char *) player.GetLabel(),
+				  (char *) player.GetStrategy(st).GetLabel());
+	}
+      }
+    }
+  }
+  else {
+    return (char *) m_doc->GetNfg().GetPlayer(p_col - 4).GetLabel();
+  }
+
+  return "";
+}
+
+wxString gbtNfgProfileTable::GetValue(int p_row, int p_col) 
+{
+  const MixedSolution &profile = m_doc->AllMixedProfiles()[p_row + 1];
+  switch (p_col) {
+  case 0:
+    return (char *) profile.GetName();
+  case 1:
+    return (char *) profile.Creator();
+  case 2:
+    return (char *) ToText(profile.IsNash());
+  case 3:
+    return (char *) ToText(profile.IsPerfect());
+  case 4:
+    return (char *) ToText(profile.LiapValue(),
+			   m_doc->GetPreferences().NumDecimals());
+  default:
+    if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
+      return (char *) ToText((*profile.Profile())[p_col - 4],
+			     m_doc->GetPreferences().NumDecimals());
+    }
+    else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
+      wxString ret = _T("("); 
+      gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - 4);
+      for (int st = 1; st <= player.NumStrategies(); st++) {
+	gbtNfgStrategy strategy = player.GetStrategy(st);
+	if (st > 1) {
+	  ret += _T(",");
+	}
+	ret += (char *) ToText(profile(strategy),
+			       m_doc->GetPreferences().NumDecimals());
+      }
+      return ret + _T(")");
+    }
+    else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
+      wxString ret;
+      gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - 4);
+      for (int st = 1; st <= player.NumStrategies(); st++) {
+	gbtNfgStrategy strategy = player.GetStrategy(st);
+	if (profile(strategy) > gNumber(0)) {
+	  if (ret != "") {
+	    ret += _T("+");
+	  }
+	  ret += (char *) ToText(profile(strategy),
+				 m_doc->GetPreferences().NumDecimals());
+	  if (strategy.GetLabel() != "") {
+	    ret += _T("*[") + player.GetStrategy(st).GetLabel() + _T("]");
+	  }
+	  else {
+	    ret += wxString::Format("*[#%d]", st);
+	  }
+	}
+      }
+      return ret;
+    }
+    else {
+      return "Unimplemented";
+    }
+  }
+}
+
+bool gbtNfgProfileTable::InsertRows(size_t pos, size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_INSERTED,
+			 pos, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool gbtNfgProfileTable::AppendRows(size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_APPENDED, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+bool gbtNfgProfileTable::DeleteRows(size_t pos, size_t numRows)
+{
+  wxGridTableMessage msg(this, wxGRIDTABLE_NOTIFY_ROWS_DELETED,
+			 pos, numRows);
+  GetView()->ProcessTableMessage(msg);
+  return true;
+}
+
+wxGridCellAttr *
+gbtNfgProfileTable::GetAttr(int row, int col, wxGridCellAttr::wxAttrKind)
+{
+  wxGridCellAttr *attr = new wxGridCellAttr;
+
+  if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
+    int firstCol = 5;
+    int lastCol = 4 + m_doc->GetNfg().GetPlayer(1).NumStrategies();
+    for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
+      if (col >= firstCol && col <= lastCol) {
+	attr->SetTextColour(m_doc->GetPreferences().PlayerColor(pl));
+	break;
+      }
+      if (pl == m_doc->GetNfg().NumPlayers()) {
+	break;
+      }
+      firstCol = lastCol + 1;
+      lastCol += m_doc->GetNfg().GetPlayer(pl+1).NumStrategies();
+    }
+  }
+  else {
+    if (col >= 5) {
+      attr->SetTextColour(m_doc->GetPreferences().PlayerColor(col - 4));
+    }
+  }
+
+  if (col >= 2) {
+    attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  }
+
+  return attr;
+}
+
+//-------------------------------------------------------------------------
+//                  class gbtNfgProfileGrid: Member functions
+//-------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtNfgProfileGrid, wxGrid)
+  EVT_GRID_CELL_LEFT_CLICK(gbtNfgProfileGrid::OnLeftClick)
+  EVT_GRID_CELL_RIGHT_CLICK(gbtNfgProfileGrid::OnRightClick)
+  EVT_GRID_LABEL_RIGHT_CLICK(gbtNfgProfileGrid::OnRightClick)
 END_EVENT_TABLE()
 
-NfgProfileList::NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxListCtrl(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
-	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
+gbtNfgProfileGrid::gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent)
+  : wxGrid(p_parent, idNFG_SOLUTION_LIST, wxDefaultPosition,
+	   wxDefaultSize),
     gbtGameView(p_doc)
 {
+  SetTable(new gbtNfgProfileTable(m_doc), true);
+  SetEditable(false);
+  DisableDragRowSize();
+  DisableDragColSize();
+  SetLabelSize(wxVERTICAL, 0);
+  SetSelectionMode(wxGrid::wxGridSelectRows);
+
   m_menu = new wxMenu("Profiles");
   m_menu->Append(GBT_NFG_MENU_PROFILES_NEW, "New profile", "Create a new profile");
   m_menu->Append(GBT_NFG_MENU_PROFILES_DUPLICATE, "Duplicate profile",
@@ -52,65 +254,41 @@ NfgProfileList::NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent)
 		 "Generate a report with information on profiles");
 }
 
-NfgProfileList::~NfgProfileList()
+gbtNfgProfileGrid::~gbtNfgProfileGrid()
 { }
 
-void NfgProfileList::OnUpdate(gbtGameView *)
+void gbtNfgProfileGrid::OnUpdate(gbtGameView *)
 {
-  ClearAll();
-  InsertColumn(0, "Name");
-  InsertColumn(1, "Creator");
-  InsertColumn(2, "Nash");
-  InsertColumn(3, "Perfect");
-  InsertColumn(4, "Liap Value");
-  InsertColumn(5, "Qre Lambda");
-  
-  gbtNfgGame nfg = m_doc->GetNfg();
-  int maxColumn = 5;
-
-  for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    gbtNfgPlayer player = nfg.GetPlayer(pl);
-    for (int st = 1; st <= player.NumStrategies(); st++) {
-      InsertColumn(++maxColumn,
-		   wxString::Format("%d:%d", pl, st));
+  if (GetRows() > m_doc->AllMixedProfiles().Length())  {
+    DeleteRows(0, GetRows() - m_doc->AllMixedProfiles().Length());
+  }
+  else if (GetRows() < m_doc->AllMixedProfiles().Length()) {
+    AppendRows(m_doc->AllMixedProfiles().Length() - GetRows());
+  }
+  AutoSizeRows();
+  AutoSizeColumns();
+  // Set all probability columns to be the same width, which is
+  // the narrowest width which fits all the entries
+  int max = 0;
+  for (int col = 5; col < GetCols(); col++) {
+    if (GetColSize(col) > max) {
+      max = GetColSize(col);
     }
   }
-
-  for (int i = 1; i <= m_doc->AllMixedProfiles().Length(); i++) {
-    const MixedSolution &profile = m_doc->AllMixedProfiles()[i];
-    InsertItem(i - 1, (char *) profile.GetName());
-    SetItem(i - 1, 1, (char *) profile.Creator());
-    SetItem(i - 1, 2, (char *) ToText(profile.IsNash()));
-    SetItem(i - 1, 3, (char *) ToText(profile.IsPerfect()));
-    SetItem(i - 1, 4, (char *) ToText(profile.LiapValue()));
-    if (profile.Creator() == "Qre[NFG]") {
-      SetItem(i - 1, 5, (char *) ToText(profile.QreLambda()));
-    }
-    else {
-      SetItem(i - 1, 5, "--");
-    }
-
-    int column = 5;
-    for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-      gbtNfgPlayer player = nfg.GetPlayer(pl);
-      for (int st = 1; st <= player.NumStrategies(); st++) {
-	SetItem(i - 1, ++column,
-		(char *) ToText(profile(player.GetStrategy(st))));
-      }
-    }    
+  for (int col = 5; col < GetCols(); col++) {
+    SetColSize(col, max);
   }
 
+  AdjustScrollbars();
+  ForceRefresh();
   if (m_doc->IsProfileSelected()) {
-    wxListItem item;
-    item.m_mask = wxLIST_MASK_STATE;
-    item.m_itemId = m_doc->AllMixedProfiles().Find(m_doc->GetMixedProfile()) - 1;
-    item.m_state = wxLIST_STATE_SELECTED;
-    item.m_stateMask = wxLIST_STATE_SELECTED;
-    SetItem(item);
+    int row = m_doc->AllMixedProfiles().Find(m_doc->GetMixedProfile()) - 1;
+    SelectRow(row);
+    MakeCellVisible(row, 0);
   }
 }
 
-void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
+void gbtNfgProfileGrid::OnRightClick(wxGridEvent &p_event)
 {
   m_menu->Enable(GBT_NFG_MENU_PROFILES_DUPLICATE,
 		 m_doc->IsProfileSelected());
@@ -120,10 +298,17 @@ void NfgProfileList::OnRightClick(wxMouseEvent &p_event)
 		 m_doc->IsProfileSelected());
   m_menu->Enable(GBT_NFG_MENU_PROFILES_REPORT,
 		 m_doc->IsProfileSelected());
-  PopupMenu(m_menu, p_event.m_x, p_event.m_y);
+  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
 }
 
-wxString NfgProfileList::GetReport(void) const
+void gbtNfgProfileGrid::OnLeftClick(wxGridEvent &p_event)
+{
+  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  // Veto this event; when grid refreshes, correct row will be selected
+  p_event.Veto();
+}
+
+wxString gbtNfgProfileGrid::GetReport(void) const
 {
   wxString report;
   const gList<MixedSolution> &profiles = m_doc->AllMixedProfiles();

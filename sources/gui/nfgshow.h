@@ -47,14 +47,14 @@ const int idNFG_SOLUTION_LIST = 1900;
 class NfgNavigateWindow;
 class NfgOutcomeWindow;
 class NfgSupportWindow;
-class NfgProfileList;
+class gbtNfgProfileGrid;
 class NfgTable;
 class dialogNfgSupportInspect;
 
 class NfgShow : public wxFrame, public gbtGameView {
 private:
   NfgTable *m_table;
-  NfgProfileList *m_profileTable;
+  gbtNfgProfileGrid *m_profileGrid;
   wxNotebook *m_infoNotebook;
 
   wxSashWindow *m_solutionSashWindow, *m_infoSashWindow;

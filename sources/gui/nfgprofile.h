@@ -27,16 +27,21 @@
 #ifndef NFGPROFILE_H
 #define NFGPROFILE_H
 
-#include "wx/listctrl.h"
+#include "wx/grid.h"
 #include "nfgshow.h"
 
-class NfgProfileList : public wxListCtrl, public gbtGameView {
+class gbtNfgProfileGrid : public wxGrid, public gbtGameView {
 private:
   wxMenu *m_menu;
+  wxGridTableBase *m_table;
+
+  // wxGrid members
+  // Overriding this suppresses drawing of the grid cell highlight
+  virtual void DrawCellHighlight(wxDC &, const wxGridCellAttr *) { }
 
   // Event handlers
-  void OnRightClick(wxMouseEvent &);
-  void OnColumnClick(wxListEvent &);
+  void OnRightClick(wxGridEvent &);
+  void OnLeftClick(wxGridEvent &);
 
   // Overriding view members
   bool IsEfgView(void) const { return false; }
@@ -44,8 +49,8 @@ private:
   void OnUpdate(gbtGameView *);
 
 public:
-  NfgProfileList(gbtGameDocument *p_doc, wxWindow *p_parent);
-  virtual ~NfgProfileList();
+  gbtNfgProfileGrid(gbtGameDocument *p_doc, wxWindow *p_parent);
+  virtual ~gbtNfgProfileGrid();
 
   wxString GetReport(void) const;
 

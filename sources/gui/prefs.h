@@ -90,6 +90,18 @@ typedef enum {
   GBT_BRANCH_LABEL_VALUE = 3
 };
 
+//
+// Convention to use for displaying randomized strategies:
+// GBT_PROFILES_GRID: Use a grid (Gambit traditional)
+// GBT_PROFILES_VECTOR: A comma-separated vector of numbers
+// GBT_PROFILES_MYERSON: Square-bracket style used by Roger Myerson
+//
+typedef enum {
+  GBT_PROFILES_GRID = 0,
+  GBT_PROFILES_VECTOR = 1,
+  GBT_PROFILES_MYERSON = 2
+};
+
 class gbtPreferences {
 private:
   // Node styling
@@ -124,6 +136,9 @@ private:
 
   // Fonts for normal form display
   wxFont m_dataFont, m_labelFont;
+
+  // Style for display of randomized profiles
+  long m_profileStyle;
 
   static void LoadFont(const wxString &, const wxConfig &, wxFont &);
   static void SaveFont(const wxString &, wxConfig &, const wxFont &);
@@ -180,6 +195,10 @@ public:
   // Subgame styling
   long SubgameStyle(void) const { return m_subgameStyle; }
   void SetSubgameStyle(long p_style) { m_subgameStyle = p_style; }
+
+  // Profile styling
+  long ProfileStyle(void) const { return m_profileStyle; }
+  void SetProfileStyle(long p_style) { m_profileStyle = p_style; }
 
 
   // Legends

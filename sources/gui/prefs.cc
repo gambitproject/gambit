@@ -120,6 +120,8 @@ void gbtPreferences::SaveOptions(void) const
 
   config.Write("/TreeDisplay/SubgameStyle", (long) m_subgameStyle);
 
+  config.Write("/TreeDisplay/ProfileStyle", (long) m_profileStyle);
+
   config.Write("/TreeDisplay/NodeAboveLabel", (long) m_nodeAboveLabel);
   config.Write("/TreeDisplay/NodeBelowLabel", (long) m_nodeBelowLabel);
   config.Write("/TreeDisplay/OutcomeLabel", (long) m_outcomeLabel);
@@ -165,6 +167,9 @@ void gbtPreferences::LoadOptions(void)
   config.Read("/TreeDisplay/InfosetJoin", &m_infosetJoin, 1);
 
   config.Read("/TreeDisplay/SubgameStyle", &m_subgameStyle, 1);
+
+  config.Read("/TreeDisplay/ProfileStyle", &m_profileStyle, 
+	      GBT_PROFILES_MYERSON);
 
   config.Read("/TreeDisplay/NodeAboveLabel", &m_nodeAboveLabel, 1);
   config.Read("/TreeDisplay/NodeBelowLabel", &m_nodeBelowLabel, 4);
