@@ -23,7 +23,7 @@ int main()
   gPoly<gRational> py(&Space,&ReverseDegLex);
   gPoly<gRational> pz(&Space,&ReverseDegLex);
 
-  gString gw; gString gx; gString gy; gString gz;
+  gText gw; gText gx; gText gy; gText gz;
 
 /* 3x2x2 game form */
   gw = "3 + 5n3 - 4n4 + 25n3 * n4";                         pw = gw;
@@ -33,8 +33,8 @@ int main()
 /**/
 
 
-  gPolyList<gRational> test_bss1(&Space);
-  test_bss1 = gPolyList<gRational>(&Space);
+  gPolyList<gRational> test_bss1(&Space,&ReverseDegLex);
+  test_bss1 = gPolyList<gRational>(&Space,&ReverseDegLex);
   test_bss1 += pw;
   test_bss1 += px;
   test_bss1 += py;
@@ -80,8 +80,8 @@ int main()
   gz = "25 + 4n1 - -2n2 - 3n3 + 5n1 * n2 - 6n1 * n3 - 2n2 * n3";   pz = gz;
 /**/
 
-  gPolyList<gRational> test_bss2(&Space);
-  test_bss2 = gPolyList<gRational>(&Space);
+  gPolyList<gRational> test_bss2(&Space,&ReverseDegLex);
+  test_bss2 = gPolyList<gRational>(&Space,&ReverseDegLex);
   test_bss2 += pw;
   test_bss2 += px;
   test_bss2 += py;
@@ -112,8 +112,8 @@ int main()
     pz = gz;
 /**/
 
-  gPolyList<gRational> test_bss3(&Space);
-  test_bss3 = gPolyList<gRational>(&Space);
+  gPolyList<gRational> test_bss3(&Space,&ReverseDegLex);
+  test_bss3 = gPolyList<gRational>(&Space,&ReverseDegLex);
   test_bss3 += pw;
   test_bss3 += px;
   test_bss3 += py;
