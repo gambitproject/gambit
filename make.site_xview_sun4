@@ -8,7 +8,7 @@ WXGUI = -Dwx_xview
 GUISUFFIX = _ol
 
 # XWindows information
-XINCDIR = -I/usr/include/X11
-XLIBDIR = -L/usr/lib/X11
+XINCDIR = -I/usr/openwin/include
+XLIBDIR = -L/usr/openwin/lib
 XLIB = -lxview -lolgx -lX11 -lm -lg++
 
