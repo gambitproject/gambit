@@ -105,6 +105,7 @@ private:
   void OnSashDrag(wxSashEvent &);
   void OnSetFocus(wxFocusEvent &);
   void OnSolutionSelected(wxListEvent &);
+  void OnActivate(wxActivateEvent &);
 
 public:
   NfgShow(Nfg &N, GambitFrame *p_frame);

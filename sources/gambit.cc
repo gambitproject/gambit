@@ -115,7 +115,7 @@ bool GambitApp::OnInit(void)
 
   // Create the main frame window.
   GambitFrame *gambitFrame = new GambitFrame(0, "Gambit", 
-					      wxPoint(0, 0), wxSize(200, 150));
+					      wxPoint(0, 0), wxDefaultSize);
 
   // Set up the help system.
   wxString helpDir = wxGetWorkingDirectory();
@@ -165,6 +165,7 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   : wxFrame(p_parent, -1, p_title, p_position, p_size),
     m_fileHistory(5)
 {
+  SetAutoLayout(true);
 #ifdef __WXMSW__
   SetIcon(wxIcon("gambit_icn"));
 #else
@@ -204,13 +205,26 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   CreateStatusBar();
   MakeToolbar();
 
-  m_gameListCtrl = new wxListCtrl(this, idGAMELISTCTRL, wxDefaultPosition,
-				  wxDefaultSize,
+  m_gameListCtrl = new wxListCtrl(this, idGAMELISTCTRL,
+				  wxPoint(0, 0), wxSize(400, 200),
 				  wxLC_REPORT | wxLC_SINGLE_SEL);
   m_gameListCtrl->InsertColumn(0, "Title");
+  m_gameListCtrl->SetColumnWidth(0, 200);
   m_gameListCtrl->InsertColumn(1, "Filename");
+  m_gameListCtrl->SetColumnWidth(1, 100);
   m_gameListCtrl->InsertColumn(2, "Efg");
+  m_gameListCtrl->SetColumnWidth(2, 50);
   m_gameListCtrl->InsertColumn(3, "Nfg");
+  m_gameListCtrl->SetColumnWidth(3, 50);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_gameListCtrl, 0, wxALL, 0);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
+  Layout();
 }
 
 GambitFrame::~GambitFrame()
@@ -263,6 +277,7 @@ BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
   EVT_MENU(wxID_HELP_CONTENTS, GambitFrame::OnHelpContents)
   EVT_MENU(wxID_ABOUT, GambitFrame::OnHelpAbout)
   EVT_CLOSE(GambitFrame::OnCloseWindow)
+  EVT_LIST_ITEM_SELECTED(idGAMELISTCTRL, GambitFrame::OnGameSelected)
 END_EVENT_TABLE()
 
 
@@ -499,6 +514,7 @@ void GambitFrame::OnNew(wxCommandEvent &)
       EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName("");
       AddGame(efg, efgShow);
+      SetActiveWindow(efgShow);
       m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
     }
@@ -510,6 +526,7 @@ void GambitFrame::OnNew(wxCommandEvent &)
       NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName("");
       AddGame(nfg, nfgShow);
+      SetActiveWindow(nfgShow);
       m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
     }
@@ -623,6 +640,7 @@ void GambitFrame::LoadFile(const gText &p_filename)
       NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName(p_filename);
       AddGame(nfg, nfgShow);
+      SetActiveWindow(nfgShow);
       m_fileHistory.UseMenu(nfgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(nfgShow->GetMenuBar()->GetMenu(0));
       return;
@@ -648,6 +666,7 @@ void GambitFrame::LoadFile(const gText &p_filename)
       EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName(filename);
       AddGame(efg, efgShow);
+      SetActiveWindow(efgShow);
       m_fileHistory.UseMenu(efgShow->GetMenuBar()->GetMenu(0));
       m_fileHistory.AddFilesToMenu(efgShow->GetMenuBar()->GetMenu(0));
       return;
@@ -761,6 +780,14 @@ void GambitFrame::RemoveGame(Nfg *p_nfg)
   UpdateGameList();
 }
 
+void GambitFrame::OnGameSelected(wxListEvent &p_event)
+{
+  if (m_gameList[p_event.GetSelection()+1]->m_efgShow) {
+    wxActivateEvent event;
+    m_gameList[p_event.GetSelection()+1]->m_efgShow->AddPendingEvent(event);
+  }
+}
+
 EfgShow *GambitFrame::GetWindow(const Efg *p_efg)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
@@ -785,6 +812,21 @@ void GambitFrame::SetActiveWindow(EfgShow *p_efgShow)
 {
   for (int i = 1; i <= m_gameList.Length(); i++) {
     if (m_gameList[i]->m_efgShow == p_efgShow) {
+      wxListItem item;
+      item.m_mask = wxLIST_MASK_STATE;
+      item.m_itemId = i - 1;
+      item.m_state = wxLIST_STATE_SELECTED;
+      item.m_stateMask = wxLIST_STATE_SELECTED;
+      m_gameListCtrl->SetItem(item);
+      return;
+    }
+  }
+}
+
+void GambitFrame::SetActiveWindow(NfgShow *p_nfgShow)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_nfgShow == p_nfgShow) {
       wxListItem item;
       item.m_mask = wxLIST_MASK_STATE;
       item.m_itemId = i - 1;

@@ -91,6 +91,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_CLOSE(NfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED(idSOLUTIONWINDOW, NfgShow::OnSashDrag)
   EVT_SET_FOCUS(NfgShow::OnSetFocus)
+  EVT_ACTIVATE(NfgShow::OnActivate)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
 END_EVENT_TABLE()
 
@@ -434,6 +435,13 @@ void NfgShow::OnSashDrag(wxSashEvent &p_event)
 void NfgShow::OnSetFocus(wxFocusEvent &)
 {
   m_table->SetFocus();
+}
+
+void NfgShow::OnActivate(wxActivateEvent &p_event)
+{
+  if (p_event.GetActive()) {
+    m_parent->SetActiveWindow(this);
+  }
 }
 
 //----------------------------------------------------------------------

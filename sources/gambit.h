@@ -54,6 +54,7 @@ private:
 
   // Other event handlers
   void OnCloseWindow(wxCloseEvent &);
+  void OnGameSelected(wxListEvent &);
 
   void MakeToolbar(void);
   void UpdateGameList(void);

@@ -62,6 +62,7 @@ private:
   void OnFocus(wxFocusEvent &);
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
+  void OnActivate(wxActivateEvent &);
 
   void OnSolutionSelected(wxListEvent &);
 

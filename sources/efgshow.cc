@@ -168,6 +168,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
+  EVT_ACTIVATE(EfgShow::OnActivate)
   EVT_LIST_ITEM_SELECTED(idEFG_SOLUTION_LIST, EfgShow::OnSolutionSelected)
   EVT_COMBOBOX(idZOOM_COMBOBOX, EfgShow::OnSetZoom)
 END_EVENT_TABLE()
@@ -2178,6 +2179,13 @@ void EfgShow::OnFocus(wxFocusEvent &)
 void EfgShow::OnSize(wxSizeEvent &)
 {
   AdjustSizes();
+}
+
+void EfgShow::OnActivate(wxActivateEvent &p_event)
+{
+  if (p_event.GetActive()) {
+    m_parent->SetActiveWindow(this);
+  }
 }
 
 void EfgShow::OnSashDrag(wxSashEvent &p_event)
