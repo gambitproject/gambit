@@ -60,6 +60,7 @@ template<class T> gIdeal<T>& gIdeal<T>::operator=(const gIdeal<T> & rhs)
     this->order = rhs.order;
     this->basis = rhs.basis;
   }
+  return *this;
 }
 
 template<class T>  bool gIdeal<T>::operator==(const gIdeal<T> & rhs) const
