@@ -174,8 +174,42 @@ void dialogQreFile::OnPxiFile(wxCommandEvent &)
       }
       else {
 	// Export behavior profiles
+	file << "Dimensionality:\n";
+	file << m_behavProfiles[1].GetGame().NumPlayers() << ' ';
+	for (int pl = 1; pl <= m_behavProfiles[1].GetGame().NumPlayers(); pl++) {
+	  EFPlayer *player = m_behavProfiles[1].GetGame().Players()[pl];
+	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	    file << m_behavProfiles[1].Support().NumActions(pl, iset) << ' ';
+	  }
+	}
+	file << "\n";
+	
+	file << "Settings:\n";
+	file << ((double) m_behavProfiles[1].QreLambda()) << '\n';
+	file << ((double) m_behavProfiles[m_behavProfiles.Length()].QreLambda()) << '\n';
+	file << 0.1 << '\n';
+	file << 0 << '\n' << 1 << '\n' << 1 << '\n';
 
+	file << "DataFormat:\n";
+	int numcols = m_behavProfiles[1].Profile()->Length() + 2;
+	file << numcols << ' ';
+	for (int i = 1; i <= numcols; i++) {
+	  file << i << ' ';
+	}
+	file << '\n';
 
+	file << "Data:\n";
+
+	for (int i = 1; i <= m_behavProfiles.Length(); i++) {
+	  const BehavProfile<gNumber> &profile = *m_behavProfiles[i].Profile();
+	  file << ((double) m_behavProfiles[i].QreLambda()) << " 0.000000 ";
+	  
+	  for (int j = 1; j <= profile.Length(); j++) {
+	    file << ((double) profile[j]) << ' ';
+	  }
+
+	  file << '\n';
+	}
       }
     }
     catch (...) { }
