@@ -1043,7 +1043,7 @@ Portion *GSM_Read_Bool(Portion** param)
 
   if (error)  {
     input.setpos(old_pos);
-    throw gclRuntimeError("No boolean data found");
+    throw gclRuntimeError("No BOOLEAN data found");
   }
 
   ((BoolPortion*) param[1])->SetValue(value);
@@ -1068,9 +1068,9 @@ static Portion* GSM_Read_Number(Portion** param)
   try {
     input >> value;
   }
-  catch(gFileInput::ReadFailed &) {
+  catch (gFileInput::ReadFailed &) {
     input.setpos(old_pos);
-    throw gclRuntimeError("File read error");
+    throw gclRuntimeError("No NUMBER data found");
   }
 
   ((NumberPortion*) param[1])->SetValue(value);
@@ -1096,6 +1096,11 @@ static Portion* GSM_Read_Text(Portion** param)
     input.setpos(old_pos);
     throw gclRuntimeError("End of file reached");
   }
+  if (c != '"') {
+    input.setpos(old_pos);
+    throw gclRuntimeError("No TEXT data found");
+  }
+
   if (!input.eof() && c == '\"')
     input.get(c); 
   else {
@@ -1298,8 +1303,6 @@ Portion* GSM_Read_Undefined(Portion** param)
 	result = NULL;
       }
       catch (...) {
-	delete result;
-	result = NULL;
 	read_success = false;
       }
 
@@ -1340,21 +1343,18 @@ Portion* GSM_Read_Undefined(Portion** param)
     }
     catch (...) {
       delete param[1];
-      delete result;
       param[1] = new NumberPortion(0);
       try {
 	result = GSM_Read_Number(param);    
       }
       catch (...) {
 	delete param[1];
-	delete result;
 	param[1] = new TextPortion("");
 	try {
 	  result = GSM_Read_Text(param);    
 	}
 	catch (...) {
 	  delete param[1];
-	  delete result;
 	  param[1] = 0;
 	  input.setpos(old_pos);
 	  throw gclRuntimeError("Cannot determine data type");
