@@ -11,6 +11,14 @@
 #include "rational.h"
 #include "node.h"
 
+//#define EPSILON (T)()
+//#define EPSILON (T)0
+
+void Epsilon(double &v) {v=(double).0000000001; }
+
+void Epsilon(gRational &v) {v=(gRational)0; }
+
+
 template <class T> int NumSequences(int j, const ExtForm<T> &E)
 {
   gArray<Infoset *> isets;
@@ -53,6 +61,10 @@ template <class T> SFTableau<T>::SFTableau(const ExtForm<T> &E)
     }
   maxpay=maxpay+(T)1;
   T prob = (T)1;
+  for(i=MinRow();i<=MaxRow();i++)
+    for(j=MinCol();j<=MaxCol();j++)
+      dtab->Set_A(i,j) = (T)0;
+
   FillTableau(E.RootNode(),prob,1,1,0,0);
   for(i=MinRow();i<=MaxRow();i++)
     dtab->Set_A(i,0) = -(T)1;
@@ -81,6 +93,9 @@ template <class T> SFTableau<T>::~SFTableau(void)
 template <class T> void SFTableau<T>
 ::FillTableau(const Node *n, T prob,int s1,int s2, int i1,int i2)
 {
+  T EPSILON;
+  Epsilon(EPSILON);
+
 //  gout << "\ns1,s2,i1,i2: " << s1 << " " << s2  << " " << i1  << " " << i2;
 //  gout << " prob = " << prob;
   int i,snew;
@@ -103,10 +118,10 @@ template <class T> void SFTableau<T>
       snew=1;
       for(i=1;i<i1;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      dtab->Set_A(s1,ns1+ns2+i1+1) = (T)1;
-      dtab->Set_A(s1,ns1+ns2+ni1+i1+1) = -(T)1;
-      dtab->Set_A(ns1+ns2+i1+1,s1) = -(T)1;
-      dtab->Set_A(ns1+ns2+ni1+i1+1,s1) = (T)1;
+      dtab->Set_A(s1,ns1+ns2+i1+1) = (T)1 - EPSILON;
+      dtab->Set_A(s1,ns1+ns2+ni1+i1+1) = -(T)1 - EPSILON;
+      dtab->Set_A(ns1+ns2+i1+1,s1) = -(T)1 + EPSILON;
+      dtab->Set_A(ns1+ns2+ni1+i1+1,s1) = (T)1 + EPSILON;
       for(i=1;i<=n->NumChildren();i++) {
 	dtab->Set_A(snew+i,ns1+ns2+i1+1) = -(T)1;
 	dtab->Set_A(snew+i,ns1+ns2+ni1+i1+1) = (T)1;
@@ -120,10 +135,10 @@ template <class T> void SFTableau<T>
       snew=1;
       for(i=1;i<i2;i++)
 	snew+=n->GetPlayer()->InfosetList()[i]->NumActions();
-      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1;
-      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1;
-      dtab->Set_A(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1;
-      dtab->Set_A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1;
+      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+i2+1) = (T)1 - EPSILON;
+      dtab->Set_A(ns1+s2,ns1+ns2+ni1+ni1+ni2+i2+1) = -(T)1 - EPSILON;
+      dtab->Set_A(ns1+ns2+ni1+ni1+i2+1,ns1+s2) = -(T)1 + EPSILON;
+      dtab->Set_A(ns1+ns2+ni1+ni1+ni2+i2+1,ns1+s2) = (T)1 + EPSILON;
       for(i=1;i<=n->NumChildren();i++) {
 	dtab->Set_A(ns1+snew+i,ns1+ns2+ni1+ni1+i2+1) = -(T)1;
 	dtab->Set_A(ns1+snew+i,ns1+ns2+ni1+ni1+ni2+i2+1) = (T)1;
