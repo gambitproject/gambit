@@ -236,8 +236,10 @@ GambitFrame::GambitFrame(wxFrame *frame, char *title, int x, int y, int w, int h
 
 void GambitFrame::LoadFile(char *s)
 {
+Enable(FALSE); // do not want to allow anything while the dialog is up
 if (!s)
 	s=wxFileSelector("Load data file", NULL, NULL, NULL, "*.?fg");
+Enable(TRUE);
 if (!s) return;
 s=copystring(s);
 if (strcmp(s,"")!=0)
