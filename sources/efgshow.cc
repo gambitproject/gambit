@@ -772,20 +772,22 @@ void EfgShow::MakeMenus(void)
   wxMenu *solveCustomMenu = new wxMenu;
   wxMenu *solveCustomEfgMenu = new wxMenu;
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_ENUMPURE, "EnumPure",
-                 "Enumerate pure strategy equilibria");
+			     "Enumerate pure strategy equilibria");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LCP, "LCP",
-                 "Solve by linear complementarity program");
+			     "Solve by linear complementarity program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LP, "LP",
-                 "Solve by linear program");
+			     "Solve by linear program");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_LIAP, "Liapunov",
-                 "Liapunov function minimization");
+			     "Liapunov function minimization");
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_POLENUM, "PolEnum",
-		 "Enumeration by systems of polynomials");
+			     "Enumeration by systems of polynomials", TRUE);
+  // FIXME: This item currently disabled since algorithm not implemented yet
+  solveCustomEfgMenu->Enable(SOLVE_CUSTOM_EFG_POLENUM, FALSE);
   solveCustomEfgMenu->Append(SOLVE_CUSTOM_EFG_QRE, "QRE",
-                 "Compute quantal response equilibria");
+			     "Compute quantal response equilibria");
   solveCustomMenu->Append(SOLVE_CUSTOM_EFG, "Extensive form",
-              solveCustomEfgMenu,
-              "Solve using extensive form based algorithms");
+			  solveCustomEfgMenu,
+			  "Solve using extensive form based algorithms");
 
   wxMenu *solveCustomNfgMenu = new wxMenu;
   solveCustomNfgMenu->Append(SOLVE_CUSTOM_NFG_ENUMPURE, "EnumPure",
