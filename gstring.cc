@@ -1,8 +1,8 @@
-//#
-//# FILE: gstring.cc -- Implementation of String class
-//#
-//# $Id$
-//#
+//
+// FILE: gstring.cc -- Implementation of String class
+//
+// $Id$
+//
 
 #ifdef __GNUG__
 #pragma implementation "gstring.h"
@@ -192,10 +192,21 @@ gInput& operator>>(gInput &from, gString &s)
     from >> a;
   }  while (isspace(a));
 
-  if (a == '\"'){
+  if (a == '\"')  {
+    bool lastslash = false;
+
     from >> a;
-    while  (a != '\"')  {
-      s += a;
+    while  (a != '\"' || lastslash)  {
+      if (lastslash && a == '"')  
+        s += '"';
+      else if (lastslash)  {
+        s += '\\';
+	s += a;
+      }
+      else if (a != '\\')
+	s += a;
+
+      lastslash = (a == '\\');
       from >> a;
     }
   }
@@ -213,3 +224,8 @@ gOutput& operator<<(gOutput &to, const gString &A)
 {
   to << A.storage; return to;
 }
+
+
+
+
+
