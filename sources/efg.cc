@@ -326,7 +326,6 @@ void BaseEfg::SortInfosets(void)
 
     assert(isets == players[pl]->infosets.Length() ||
 	   players[pl]->infosets[isets + 1]->members.Length() == 0);
-//    assert(isets == players[pl]->infosets.Length());
   }
 
   // Now, we sort the nodes within the infosets
@@ -526,6 +525,9 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
   if (n->gameroot == n)
     MarkSubgame(keep, keep);
 
+// turn infoset sorting off during tree deletion -- problems will occur
+  sortisets = false;
+
   n->children.Remove(n->children.Find(keep));
   DeleteTree(n);
   keep->parent = n->parent;
@@ -536,6 +538,9 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
 
   ScrapNode(n);
   DeleteLexicon();
+
+  sortisets = true;
+
   SortInfosets();
 
   return keep;
@@ -792,8 +797,8 @@ Node *BaseEfg::DeleteTree(Node *n)
   
   if (n->infoset)  {
     n->infoset->members.Remove(n->infoset->members.Find(n));
-    if (n->infoset->members.Length() == 0)
-      dead_infosets.Append(n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset)));
+    if (n->infoset->members.Length() == 0) 
+      dead_infosets.Append(n->infoset->player->infosets.Remove(n->infoset->player->infosets.Find(n->infoset)));  
     for (int j = 1; j <= n->infoset->player->infosets.Length(); j++)
       n->infoset->player->infosets[j]->number = j;
     n->infoset = 0;
