@@ -235,8 +235,7 @@ const Action* Sfg::GetAction(int pl, int j) const
 
 BehavProfile<gNumber> Sfg::ToBehav(const gPVector<double> &x) const
 {
-//  BehavProfile<gNumber> b(efsupp);
-  BehavProfile<gNumber> b(EF);
+  BehavProfile<gNumber> b(efsupp);
 
   b.gDPVector<gNumber>::operator=((gNumber)0);
 
