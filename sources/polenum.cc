@@ -38,8 +38,10 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
 }
 
 #include "rational.h"
+#include "double.h"
 
 template class PolEnumModule<double>;
+template class PolEnumModule<gDouble>;
 template class PolEnumModule<gRational>;
 
 

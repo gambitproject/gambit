@@ -18,16 +18,24 @@ private:
   const Nfg &NF;
   const NFSupport &support;
   PolEnumParams params;
-  int rows,cols,level;
+  gSpace Space;
+  term_order Lex;
+  int num_vars;
   long count,nevals;
   double time;
   gArray<gNumber> values;
   gList<MixedSolution> solutions;
 
   bool EqZero(T x) const;
-//  gPoly<T> PEquation(int pl, int const_pl, int const_st,
-//	    int cur_pl, long index, T prob, T &value) const;
   
+  // p_i_j as a gPoly, with last prob in terms of previous probs
+  gPoly<T> Prob(int i,int j) const;
+
+  // equation for when player i sets strat1 = strat2
+  // with last probs for each player substituted out.  
+  gPoly<T> Equation(int i, int strat2, int strat2) const;
+
+  int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
   PolEnumModule(const NFSupport &, const PolEnumParams &p,
 	     const gArray<gNumber> &values);
@@ -39,8 +47,6 @@ public:
   
   PolEnumParams &Parameters(void);
 
-//  gPoly<T> Equation(int pl, int player1, int strat1) const;
-
   const gList<MixedSolution> &GetSolutions(void) const;
 };
 
@@ -51,147 +57,86 @@ public:
 template <class T>
 PolEnumModule<T>::PolEnumModule(const NFSupport &S, const PolEnumParams &p,
 			  const gArray<gNumber> &v)
-  : NF(S.Game()), support(S), params(p), rows(S.NumStrats(1)), cols(S.NumStrats(2)), 
-    level(0), count(0), nevals(0), values(v)
+  : NF(S.Game()), support(S), params(p), 
+    Space(NF.ProfileLength()-NF.NumPlayers()), 
+    Lex(&Space, &lex), num_vars(NF.ProfileLength()-NF.NumPlayers()), 
+    count(0), nevals(0), values(v)
 { 
-  gEpsilon(eps,12);
+//  gEpsilon(eps,12);
 }
 
 
 template <class T> int PolEnumModule<T>::PolEnum(void)
 {
-  int i,j,num = 0;
-  for( i=1;i<=NF.NumPlayers();i++)
-    num+=(support.NumStrats(i)-1);
-  gSpace Space(num);
+  int i,j;
 
-  ORD_PTR ptr = &lex;
-  term_order Lex(&Space, ptr);
-  
   gPolyList<T> equations(&Space,&Lex);
 
-  gArray<int> strats(NF.NumPlayers());
-  gArray<gNumber> values(NF.Parameters()->Dmnsn());
-  for (i = 1; i <= values.Length(); values[i++] = gNumber(0));
-  NfgContIter A(support), B(support);
+  // equations for equality of strat j to strat j+1
+  for( i=1;i<=NF.NumPlayers();i++) 
+    for(j=1;j<support.NumStrats(i);j++) 
+      equations+=Equation(i,j,j+1);
 
-  for( i=1;i<=NF.NumPlayers();i++) {
-    for(j=1;j<support.NumStrats(i);j++) {
-      gPoly<T> equation(&Space,&Lex);
-      gArray<int> exps(num);
-      do {
-	A.Freeze(i);
-	A.Set(i, j);
-	B.Freeze(i);
-	B.Set(i, j+1);
-	strats = A.Get();
-	int k,kk = 0;
-	for(k=1;k<=NF.NumPlayers();k++) 
-	  if(i!=k) {
-	    exps[k+kk]=1;
-	    kk+=(NF.NumStrats(k)-1);
-	  }
-	exp_vect exponent(&Space,exps);
-	T ap = NF.Payoff(A.GetOutcome(), i).Evaluate(values);
-	T bp = NF.Payoff(B.GetOutcome(), i).Evaluate(values);
-	T coeff = ap - bp;
-	gMono<T> term(coeff,exponent);
-	gPoly<T> new_term(&Space,term,&Lex);
-	equation+=new_term;
-	A.NextContingency();
-      } while (B.NextContingency());
-      equations+=equation;    
-    }
-  }
-
-  // Set up the rectangle of search
-  gVector<T> bottoms(num); 
-  gVector<T> tops(num); 
-  for (i = 1; i <= num; i++) {
-    bottoms[i] = (T)0; tops[i] = (T)1;
-  }
-
+  // set up the rectangle of search
+  gVector<T> bottoms(num_vars), tops(num_vars);
+  bottoms = (T)0;
+  tops = (T)1;
+ 
   gRectangle<T> Cube(bottoms, tops); 
 
+  // start QuikSolv
   gWatch timer;
-
   timer.Start();
 
   QuikSolv<T> quickie(equations);
-  gout << "\nThe first test system is\n" 
+  gout << "\nThe equilibrium equations are \n" 
     << quickie.UnderlyingEquations() ;
-    /*
-  if (quickie.FindRoots(Cube,22,2000))
-    gout << "\nThe first test system is\n" 
-	 << quickie.UnderlyingEquations() 
-	 << "It has the following roots in [0,1]^num:\n"
-	 << quickie.RootList();
-  else
-    gout << "The system\n" << quickie.UnderlyingEquations()
-	 << " could not be resolved by FindRoots.\n";
-  */
-  timer.Stop();
-  gout << "The QuikSolv computation of roots took " 
-    << (int)timer.Elapsed() << " seconds.\n\n";
-/*
-  gSpace Space(4);
+  
 
-  ORD_PTR ptr = &lex;
-  term_order Lex(&Space, ptr);
-  ptr = &reversedeglex;
-  term_order ReverseDegLex(&Space, ptr);
-  ptr = &reverselex;
-  term_order ReverseLex(&Space, ptr);
-
-  gPoly<gDouble> pw(&Space,&Lex);
-  gPoly<gDouble> px(&Space,&Lex);
-  gPoly<gDouble> py(&Space,&Lex);
-  gPoly<gDouble> pz(&Space,&Lex);
-
-  gString gw; gString gx; gString gy; gString gz;
-
-  gw = "3 + 5n3 - 4n4 + 25n3 * n4";                         pw = gw;
-  gx = "4 + 3n3 - 7n4 + 10n3 * n4";                         px = gx;
-  gy = "7 - 2n1 + 4n2 + 37n4 + 3n1 * n4 - 5n2 * n4";        py = gy;
-  gz = "25 + 4n1 - -2n2 - 3n3 + 6n1 * n3 -2n2 * n3";        pz = gz;
-
-  // Set up the rectangle of search
-  gVector<gDouble> bottoms(4); 
-  gVector<gDouble> tops(4); 
-  for (int i = 1; i <= 4; i++) {
-    bottoms[i] = (gDouble)-4; tops[i] = (gDouble)4;
+  if (quickie.FindRoots(Cube,22,2000)) {
+    gout << "\nThe system has the following roots in [0,1]^"; 
+    gout << num_vars << " :\n" << quickie.RootList();
   }
-
-  gRectangle<gDouble> Cube(bottoms, tops); 
-
-  // First System
-  gPolyList<gDouble> test_bss1(&Space,&ReverseDegLex);
-  test_bss1 += pw;
-  test_bss1 += px;
-  test_bss1 += py;
-  test_bss1 += pz;
-
-  gWatch timer;
-
-  timer.Start();
-
-  QuikSolv<gDouble> quickie(test_bss1);
-  if (quickie.FindRoots(Cube,22,2000))
-    gout << "\nThe first test system is\n" 
-	 << quickie.UnderlyingEquations() 
-	 << "It has the following roots in [-4,4]^4:\n"
-	 << quickie.RootList();
   else
     gout << "The system\n" << quickie.UnderlyingEquations()
 	 << " could not be resolved by FindRoots.\n";
 
   timer.Stop();
+
   gout << "The QuikSolv computation of roots took " 
     << (int)timer.Elapsed() << " seconds.\n\n";
-  */
-  return 1;
+
+  int index = SaveSolutions(quickie.RootList());
+  return index;	 
+
 }
 
+template <class T> int 
+PolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
+{
+  MixedProfile<double> profile(support, values);
+  int i,j,k,kk,index;
+  double sum;
+
+  for(k=1;k<=list.Length();k++) {
+    kk=0;
+    for(i=1;i<=NF.NumPlayers();i++) {
+      sum=0;
+      for(j=1;j<support.NumStrats(i);j++) {
+	profile(i,j) = (list[k][j+kk]).ToDouble();
+	sum+=profile(i,j);
+      }
+      profile(i,j) = (double)1.0 - sum;
+      kk+=(support.NumStrats(i)-1);
+    }
+    index = solutions.Append(MixedSolution(profile, NfgAlg_POLENUM));
+    if(params.status.Get() != 1) {
+      solutions[index].SetEpsilon(0);
+      solutions[index].SetIsNash(T_YES);
+    }
+  }
+  return index;
+}
 
 template <class T> bool PolEnumModule<T>::EqZero(T x) const
 {
@@ -220,38 +165,68 @@ const gList<MixedSolution> &PolEnumModule<T>::GetSolutions(void) const
   return solutions;
 }
 
-/*
-template <class T>
-gPoly<T> PolEnumModule<T>::Equation(int pl, int player1, int strat1) const
+template <class T> gPoly<T> PolEnumModule<T>::Prob(int p, int strat) const
 {
-  T value = (T) 0;
-  PEquation(pl, player1, strat1, 1,
-	 support.Strategies(player1)[strat1]->index + 1, (T) 1, value);
-  return value;
-}
+  gPoly<T> equation(&Space,&Lex);
+  gVector<int> exps(num_vars);
+  int i,j,kk = 0;
+  
+  for(i=1;i<p;i++) 
+    kk+=(NF.NumStrats(i)-1);
 
-template <class T>
-gPoly<T> PolEnumModule<T>::PEquation(int pl, int const_pl, int const_st,
-				int cur_pl, long index, T prob, T &value) const
-{
-  Strategy *s;
-
-  if (cur_pl == const_pl)
-    PEquation(pl, const_pl, const_st, cur_pl + 1, index,
-	    prob, value);
-  else if (cur_pl > N->NumPlayers())  {
-    if (N->GetOutcome(index))
-      value += prob *
-      (*payoffs)(N->GetOutcome(index)->GetNumber(), pl);
+  if(strat<support.NumStrats(p)) {
+    exps=0;
+    exps[strat+kk]=1;
+    exp_vect const_exp(&Space,exps);
+    gMono<T> const_term((T)1,const_exp);
+    gPoly<T> new_term(&Space,const_term,&Lex);
+    equation+=new_term;
   }
-  else   {
-    for (int j = 1; j <= support.NumStrats(cur_pl); j++)  {
-      s = support.Strategies(cur_pl)[j];
-      if ((*this)(cur_pl, j) > (T) 0)
-	PEquation(pl, const_pl, const_st, cur_pl + 1,
-		index + s->index, prob * (*this)(cur_pl, j), value);
+  else {
+    for(j=1;j<support.NumStrats(p);j++) {
+      exps=0;
+      exps[j+kk]=1;
+      exp_vect exponent(&Space,exps);
+      gMono<T> term((T)(-1),exponent);
+      gPoly<T> new_term(&Space,term,&Lex);
+      equation+=new_term;
     }
+    exps=0;
+    exp_vect const_exp(&Space,exps);
+    gMono<T> const_term((T)1,const_exp);
+    gPoly<T> new_term(&Space,const_term,&Lex);
+    equation+=new_term;
   }
+  return equation;
 }
 
-*/
+template <class T> gPoly<T> 
+PolEnumModule<T>::Equation(int i, int strat1, int strat2) const
+{
+  gArray<int> strat(NF.NumPlayers());
+
+  NfgContIter A(support), B(support);
+  A.Freeze(i);
+  A.Set(i, strat1);
+  B.Freeze(i);
+  B.Set(i, strat2);
+  gPoly<T> equation(&Space,&Lex);
+  do {
+    gPoly<T> term(&Space,(T)1,&Lex);
+    strat = A.Get();
+    int k;
+    for(k=1;k<=NF.NumPlayers();k++) 
+      if(i!=k) 
+	term*=Prob(k,strat[k]);
+    T coeff,ap,bp;
+    ap = (T)NF.Payoff(A.GetOutcome(), i).Evaluate(values);
+    bp = (T)NF.Payoff(B.GetOutcome(), i).Evaluate(values);
+    coeff = ap - bp;
+    term*=coeff;
+    equation+=term;
+    A.NextContingency();
+  } while (B.NextContingency());
+  return equation;
+}
+
+
