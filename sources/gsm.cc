@@ -124,15 +124,20 @@ GSM::~GSM()
 }
 
 
-bool GSM::VarIsDefined(const gText& var_name) const
+bool GSM::VarIsDefined(const gText &p_name) const
 {
-  if (var_name == "")
+  if (p_name == "")
     throw gclRuntimeError("Tried to see if empty variable name defined");
 
-  else if (var_name[0] == '$')
-    return _GlobalRefTable.IsDefined(var_name.Right(var_name.Length() - 1));
+  else if (p_name[0] == '$') {
+    if (p_name[1] == '$')
+      return _GlobalRefTable.IsDefined(p_name.Right(p_name.Length() - 2));
+    else
+      return _GlobalRefTable.IsDefined(UserFuncName() + gText((char) 1) +
+				       p_name.Right(p_name.Length() - 1));
+  }
 
-  return _RefTableStack->Peek()->IsDefined(var_name);
+  return _RefTableStack->Peek()->IsDefined(p_name);
 }
 
 
@@ -147,7 +152,12 @@ void GSM::VarDefine(const gText& var_name, Portion* p)
   _ResolveRef(p);
 
   if (var_name[0] == '$') {
-    gText global_name = var_name.Right(var_name.Length() - 1);
+    gText global_name;
+    if (var_name[1] != '$')
+      global_name = (UserFuncName() + gText((char) 1) +
+		     var_name.Right(var_name.Length() - 1));
+    else
+      global_name = var_name.Right(var_name.Length() - 2);
 
     if (_GlobalRefTable.IsDefined(global_name)) {
       old_value = _GlobalRefTable(global_name);
@@ -223,17 +233,20 @@ void GSM::VarDefine(const gText& var_name, Portion* p)
 }
 
 
-Portion* GSM::VarValue(const gText& var_name) const
+Portion* GSM::VarValue(const gText &p_name) const
 {
-  if (var_name == "")
+  if (p_name == "")
     throw gclRuntimeError("Tried to get value of empty variable name");
 
-  else if (var_name[0] == '$')
-    return _GlobalRefTable(var_name.Right(var_name.Length() - 1)); 
+  else if (p_name[0] == '$') {
+    if (p_name[1] == '$')
+      return _GlobalRefTable(p_name.Right(p_name.Length() - 2));
+    else
+      return _GlobalRefTable(UserFuncName() + gText((char) 1) +
+			     p_name.Right(p_name.Length() - 1));
+  }
 
- return (*_RefTableStack->Peek())(var_name);
-
-
+  return (*_RefTableStack->Peek())(p_name);
 }
 
 
@@ -349,7 +362,6 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       case porOUTPUT:
 	delete p1;
 	throw gclRuntimeError("Cannot assign from INPUT/OUTPUT variable" );
-	break;
       default:
 	throw gclRuntimeError("Assigning to unknown type " +
 			      PortionSpecToText(p1Spec));
@@ -569,7 +581,6 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 	result_copy = result->ValCopy();
 	delete result;
 	result = result_copy;
-	result_copy = 0;
       }
       
       for (int i = 0; i < func_info.NumParams; i++) {
@@ -637,7 +648,7 @@ Portion* GSM::Help(gText funcname, bool udf, bool bif, bool getdesc)
   FuncDescObj *func;
   gList<FuncDescObj*> funclist;
   gSortList<FuncDescObj*> funcslist;
-  Portion* result = 0;
+  Portion* result;
 
   if(_FuncTable->IsDefined(funcname))
   {
@@ -742,7 +753,7 @@ Portion* GSM::HelpVars(gText varname)
   gText var;
   gList<gText> varlist;
   gSortList<gText> varslist;
-  Portion* result = 0;
+  Portion* result;
 
   if(_RefTableStack->Peek()->IsDefined(varname))
   {
@@ -834,14 +845,12 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 
 
     gList<Portion*> varslist;
-    int i = 0;
-    int j = 0;
     
-    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-      for(j=1; j<=vars[i].Length(); j++)
+    for (int i = 0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for (int j = 1; j<=vars[i].Length(); j++)
 	varslist.Append(vars[i][j]);
 
-    for( i = 1; i <= varslist.Length(); i++ )
+    for (int i = 1; i <= varslist.Length(); i++ )
     {
       if( varslist[i]->Game() == game && varslist[i]->GameIsEfg() == IsEfg )
       {
@@ -870,7 +879,7 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
 // UnAssignGameElement
 //------------------------
 
-void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
+void GSM::UnAssignGameElement( void* game, bool /*IsEfg*/, PortionSpec spec )
 {
   if (spec.ListDepth > 0)
     return;
@@ -882,14 +891,12 @@ void GSM::UnAssignGameElement( void* game, bool IsEfg, PortionSpec spec )
 
     const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
     gList<Portion*> varslist;
-    int i = 0;
-    int j = 0;
     
-    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-      for(j=1; j<=vars[i].Length(); j++)
+    for (int i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for (int j=1; j<=vars[i].Length(); j++)
 	varslist.Append(vars[i][j]);
 
-    for( i = 1; i <= varslist.Length(); i++ )
+    for (int i = 1; i <= varslist.Length(); i++ )
     {
       if( varslist[i]->Spec().ListDepth == 0 )
       {
@@ -938,14 +945,12 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 
     const gList<Portion*>* vars = _RefTableStack->Peek()->Value();
     gList<Portion*> varslist;
-    int i = 0;
-    int j = 0;
     
-    for(i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
-      for(j=1; j<=vars[i].Length(); j++)
+    for (int i=0; i<_RefTableStack->Peek()->NumBuckets(); i++)
+      for (int j=1; j<=vars[i].Length(); j++)
 	varslist.Append(vars[i][j]);
 
-    for( i = 1; i <= varslist.Length(); i++ )
+    for (int i = 1; i <= varslist.Length(); i++ )
     {
       if( varslist[i]->Spec().ListDepth == 0 )
       {

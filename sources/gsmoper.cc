@@ -357,6 +357,23 @@ static Portion *GSM_IntegerDivide(Portion** param)
     return new NullPortion(porNUMBER);
 }
 
+//-------------
+// IsDefined
+//-------------
+
+static Portion *GSM_IsDefined(Portion **param)
+{
+  if (param[0]->Spec().Type != porREFERENCE)
+    return new BoolPortion(true);
+  else
+    return new BoolPortion(_gsm->VarIsDefined(((ReferencePortion *) param[0])->Value()));
+}
+
+static Portion *GSM_IsDefined_Undefined(Portion **)
+{
+  return new BoolPortion(false);
+}
+
 //--------
 // IsEof
 //--------
@@ -2035,6 +2052,13 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, gclParameter("input", porINPUT));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("IsDefined", 2);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_IsDefined, porBOOLEAN, 1));
+  FuncObj->SetParamInfo(0, 0, gclParameter("x", porANYTYPE));
+
+  FuncObj->SetFuncInfo(1, gclSignature(GSM_IsDefined_Undefined, porBOOLEAN, 1));
+  FuncObj->SetParamInfo(1, 0, gclParameter("x", porUNDEFINED));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Help", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Help, PortionSpec(porTEXT, 1), 3));
