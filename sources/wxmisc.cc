@@ -120,8 +120,12 @@ void wxInitHelp(const char *name, const char *help_about_str)
 void wxHelpContents(const char *section)
 {
 #ifdef __GNUG__
-  if(!section || section == "") return; 
-  gText text(section);
+  // get topic
+  gText topic;
+  if(!section || section == "") 
+    topic = "GAMBIT GUI"; 
+  else 
+    topic = section;
 
   // get html Directory
   gText htmlDir = System::GetEnv("GAMBITHOME");
@@ -129,7 +133,7 @@ void wxHelpContents(const char *section)
   wxGetResourceStr("Install", "HTML-Dir", htmlDir,"gambitrc");
 
   // search for html file corresponding to section.  
-  System::Shell("grep -l '<title>"+text+"' "+htmlDir+"/*.html > junk.hlp");
+  System::Shell("grep -l '<title>"+topic+"<' "+htmlDir+"/*.html > junk.hlp");
   gFileInput file("junk.hlp");
   char a;
   gText html_file;
@@ -138,14 +142,16 @@ void wxHelpContents(const char *section)
     if(a != '\n') html_file += a;
   }
   int last = html_file.Length()-1;
-
+  if(html_file[last]!='l') html_file.Remove(last); // get rid of line feed
+  System::Shell("rm junk.hlp");
 
   // display on netscape.
   // Use -install flag when launching netscape to install private color map
   // Otherwise gambit and netscape cannot run simultaneously.  
-  if(html_file[last]!='l') html_file.Remove(last); // get rid of line feed
-  if(System::Shell("netscape -remote 'OpenFile("+html_file+")'"))
+  if(System::Shell("netscape -remote 'OpenFile("+html_file+")'")) {
+    System::Shell("echo Launching Netscape");
     System::Shell("netscape -install "+html_file+" &");
+  }
 #else
     s_helpInstance->LoadFile();
     
