@@ -112,7 +112,7 @@ inline long sqr(long arg)
   return arg * arg;
 }
 
-#if ! _G_MATH_H_INLINES /* hpux and SCO define this in math.h */
+#ifndef hpux
 inline double sqr(double arg)
 {
   return arg * arg;

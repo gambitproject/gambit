@@ -26,10 +26,12 @@ template <class T> T gmax(const T &a, const T &b)
   if (a > b)   return a;   else return b;
 }
 
+#ifndef hpux
 double abs(double a)
 {
   if (a >= 0.0)   return a;   else return -a;
 }
+#endif   //# hpux
 
 //
 // Nasty little hack to make Borland C happy
