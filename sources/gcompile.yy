@@ -706,7 +706,7 @@ gclExpression *GCLCompiler::DefineFunction(gclExpression *expr)
       FuncInfoType(expr, funcspec, formals.Length());
 
     funcbody = current_rawline;
-    if( !strstr( funcbody, "/*Private*/" ) )
+    if( !strstr((const char *) funcbody, "/*Private*/" ) )
       funcinfo.Desc = funcbody;
     else
       funcinfo.Desc = "/*Private*/";

@@ -185,7 +185,7 @@ polynomial:        polyterm
           |        polynomial '-' { last_poly += "- "; } polyterm
           ;
 
-polyterm:          NUMBER { last_poly += ToString(last_number) + ' '; }
+polyterm:          NUMBER { last_poly += ToString(last_number) + " "; }
                    variables
         ;
 
@@ -194,9 +194,9 @@ variables:         variable
          ;
 
 variable:          varname
-                   { last_poly += ' '; }
+                   { last_poly += " "; }
         |          varname '^' NUMBER
-                   { last_poly += "^" + ToString(last_number) + ' '; }
+                   { last_poly += "^" + ToString(last_number) + " "; }
         ;
 
 varname:           VARNAME

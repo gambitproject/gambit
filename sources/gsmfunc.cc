@@ -2,7 +2,7 @@
 // FILE: gsmfunc.cc -- handles initialization of defined functions for GSM
 //                     companion to GSM
 //
-// @(#)gsmfunc.cc	2.7 8/16/97
+// $Id$
 //
 
 #include <assert.h>
@@ -135,7 +135,7 @@ Portion* CallFuncObj::CallNormalFunction( GSM* gsm, Portion** param )
     else 
       result = gsm->ExecuteUserFunc(*(_FuncInfo[_FuncIndex].FuncInstr), 
 				    _FuncInfo[_FuncIndex], param,
-				    FuncName() + (char) (_FuncIndex+1) );
+				    FuncName() + gString((char) (_FuncIndex+1)) );
   }
   return result;
 }
