@@ -1,0 +1,34 @@
+<refentry id="bif.ArgMax" xreflabel="ArgMax">
+
+<refmeta>
+<indexterm>
+<primary>ArgMax</primary>
+</indexterm>
+
+<refentrytitle>ArgMax</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ArgMax</refname>
+<refpurpose>
+Returns the index of a maximal element of a list 
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ArgMax[x->LIST(NUMBER)] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ArgMax</function>
+returns the index of the first element of the list <parameter>x</parameter> which
+attains the maximum value of any elements in the list.  
+</para>
+</refsect1>
+
+</refentry>
+

@@ -1,0 +1,43 @@
+<refentry id="bif.ChanceProb" xreflabel="ChanceProb">
+
+<refmeta>
+<indexterm>
+<primary>ChanceProb</primary>
+</indexterm>
+
+<refentrytitle>ChanceProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ChanceProb</refname>
+<refpurpose>
+Returns the probability an action is chosen by nature
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ChanceProb[action->ACTION] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ChanceProb</function> returns the probability of 
+<parameter>action</parameter> being chosen at its information
+set by the chance player.  It is an error if <parameter>action</parameter>
+is not an action
+which is chosen by the chance player.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetChanceProbs">.
+</para>
+</refsect1>
+
+</refentry>
+

@@ -1,0 +1,126 @@
+<refentry id="bif.Format" xreflabel="Format">
+
+<refmeta>
+<indexterm>
+<primary>Format</primary>
+</indexterm>
+
+<refentrytitle>Format</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Format</refname>
+<refpurpose>
+Sets various formatting options
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Format[x->NUMBER, {width<->0}, {decimals<->6}, {expmode<->False}] =: NUMBER 
+Format[x->TEXT, {quote<->False}] =: TEXT 
+Format[x->MIXED, {info<->False}, {names<->False}] =: MIXED
+Format[x->BEHAV, {info<->False}, {names<->False}] =: BEHAV
+Format[x->EFG, {decimals<->6}] =: EFG
+Format[x->NFG, {decimals<->6}] =: NFG
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Format</function> sets various formatting options.
+</para>
+
+<para>
+The first version sets the formatting style for output of 
+<type>NUMBER</type> data types on output streams.
+<itemizedlist>
+<listitem>
+<para>
+<parameter>width</parameter>:
+The width for a numeric field.  If the width of the
+data is greater than <parameter>width</parameter>, the width is overridden.
+(The default is 0.)
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>decimals</parameter>:
+The number of decimal places shown for floating point numbers.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>expmode</parameter>:
+If <literal>True</literal>, floating point numbers are printed in
+exponential format.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+The second version sets the formatting style for output of 
+text on output streams.
+<itemizedlist>
+<listitem>
+<para>
+<parameter>quote</parameter>: Whether opening and closing quotation marks are
+written.  The default is <literal>True</literal>.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+The third and fourth versions set the formatting style for output of
+profiles on output streams.
+<itemizedlist>
+<listitem>
+<para>
+<parameter>info:</parameter> The amount of information to be displayed.
+If <literal>True</literal>,
+displays all of the information about the profile.
+If <literal>False</literal>,
+only the strategy or action probabilities are displayed.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>names</parameter>:
+If <literal>True</literal>, the profiles are printed in a sparse format,
+with only positive-probability strategy or action profiles displayed, tagged
+by their strategy or action labels.  If <literal>False</literal>,
+the whole vector
+(including zeroes) is printed, without any labels.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+<para>
+The fifth and sixth versions set the formatting style for game savefiles.
+<itemizedlist>
+<listitem>
+<para>
+<parameter>decimals</parameter>: The number of decimal places to use
+in representing floating-point numbers.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ListFormat">,
+<xref linkend="bif.Write">.
+</para>
+</refsect1>
+
+</refentry>
+
+

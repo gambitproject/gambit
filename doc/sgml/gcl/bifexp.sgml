@@ -1,0 +1,44 @@
+<refentry id="bif.Exp" xreflabel="Exp">
+
+<refmeta>
+<indexterm>
+<primary>Exp</primary>
+</indexterm>
+
+<refentrytitle>Exp</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Exp</refname>
+<refpurpose>
+Evaluates the exponential function
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Exp[x->NUMBER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Exp</function> returns the value of the exponential function
+evaluated at <parameter>x</parameter>.
+The result is always in floating-point precision, regardless of the
+precision of <parameter>x</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Log">,
+<xref linkend="bif.Power">.
+</para>
+</refsect1>
+
+</refentry>
+
+

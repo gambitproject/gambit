@@ -1,0 +1,43 @@
+<refentry id="bif.For" xreflabel="For">
+
+<refmeta>
+<indexterm>
+<primary>For</primary>
+</indexterm>
+
+<refentrytitle>For</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>For</refname>
+<refpurpose>
+Iterates over a block of functions
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+For[statement-list, boolean-expression, 
+    statement-list, statement-list]
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>For</function>
+defines a piece of code to be executed repeatedly.  See the section
+on control structures for complete information.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.While">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,76 @@
+<refentry id="bif.And" xreflabel="And">
+
+<refmeta>
+<indexterm>
+<primary>And</primary>
+</indexterm>
+
+<refentrytitle>And</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>And</refname>
+<refpurpose>
+Returns the logical conjunction of two boolean values
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>And</function> computes the logical conjunction of
+<parameter>x</parameter> and <parameter>y</parameter>, defined by the
+truth table:
+<informaltable>
+<tgroup cols="4">
+<tbody>
+<row>
+<entry></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+<row>
+<entry><literal>True</literal></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+<row>
+<entry><literal>False</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>False</literal></entry>
+</row>
+<row>
+<entry><literal>Unknown</literal></entry>
+<entry><literal>Unknown</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</refsect1>
+
+<refsect1><title>Short forms</title>
+<para>
+<literal>x &amp;&amp; y</literal>, <literal>x AND y</literal>.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.Not">, <xref linkend="bif.Or">.
+</para>
+</refsect1>
+
+</refentry>
+

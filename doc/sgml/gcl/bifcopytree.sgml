@@ -1,0 +1,48 @@
+<refentry id="bif.CopyTree" xreflabel="CopyTree">
+
+<refmeta>
+<indexterm>
+<primary>CopyTree</primary>
+</indexterm>
+
+<refentrytitle>CopyTree</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>CopyTree</refname>
+<refpurpose>
+Copies a subtree to a terminal node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+CopyTree[from->NODE, to->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>CopyTree</function> copies the subtree rooted at
+<parameter>from</parameter> to the terminal node
+<parameter>to</parameter> in the same extensive form game.  The nodes
+in the copied subtree belong to the same information sets as their
+counterparts in the original subtree.  Returns the node
+<parameter>to</parameter>.  It is an error if
+<parameter>from</parameter> and <parameter>to</parameter> are not from
+the same extensive form game, or if <parameter>to</parameter> is not a
+terminal node.  The function has no effect if the copying operation
+would violate the currently marked subgame structure.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MoveTree">.
+</para>
+</refsect1>
+
+</refentry>
+

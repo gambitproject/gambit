@@ -1,0 +1,43 @@
+<refentry id="bif.ExePath" xreflabel="ExePath">
+
+<refmeta>
+<indexterm>
+<primary>ExePath</primary>
+</indexterm>
+
+<refentrytitle>ExePath</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ExePath</refname>
+<refpurpose>
+Returns the path of the GCL executable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ExePath[{file->True}, {path->True}] =: TEXT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ExePath</function> returns the path of the GCL executable.
+If <parameter>file</parameter> is <literal>True</literal>, the filename
+is included.  If <parameter>path</parameter> is <literal>True</literal>,
+the path to the executable is included.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.GetPath">.
+</para>
+</refsect1>
+
+</refentry>
+
+

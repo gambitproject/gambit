@@ -1,0 +1,42 @@
+<refentry id="bif.Contains" xreflabel="Contains">
+
+<refmeta>
+<indexterm>
+<primary>Contains</primary>
+</indexterm>
+
+<refentrytitle>Contains</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Contains</refname>
+<refpurpose>
+Tests for the presence of an element in a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Contains[list->NLIST(T), x->T] =: BOOLEAN 
+Contains[list->NLIST(T), x->LIST(T)] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Contains</function>
+returns <literal>True</literal> when the value <parameter>x</parameter> is
+contained in <parameter>list</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NthElement">.
+</para>
+</refsect1>
+
+</refentry>
+

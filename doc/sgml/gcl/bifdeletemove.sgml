@@ -1,0 +1,52 @@
+<refentry id="bif.DeleteMove" xreflabel="DeleteMove">
+
+<refmeta>
+<indexterm>
+<primary>DeleteMove</primary>
+</indexterm>
+
+<refentrytitle>DeleteMove</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>DeleteMove</refname>
+<refpurpose>
+Removes a move from an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+DeleteMove[node->NODE, keep->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>DeleteMove</function>
+deletes <parameter>node</parameter> from its extensive form game.  The
+subtree rooted in node <parameter>keep</parameter>, which must be a child of
+<parameter>node</parameter>, is kept, and <parameter>keep</parameter> takes
+the place of <parameter>node</parameter> in
+the tree.  All other subtrees descending from <parameter>node</parameter> 
+are deleted.
+The kept node <parameter>keep</parameter> is returned.
+It is an error if <parameter>keep</parameter>
+is not a child of <parameter>node</parameter>, 
+or if <parameter>keep</parameter> and <parameter>node</parameter> are not
+from the same extensive form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddMove">,
+<xref linkend="bif.DeleteTree">,
+<xref linkend="bif.InsertMove">.
+</para>
+</refsect1>
+
+</refentry>
+

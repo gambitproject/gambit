@@ -1,0 +1,45 @@
+<refentry id="bif.Filter" xreflabel="Filter">
+
+<refmeta>
+<indexterm>
+<primary>Filter</primary>
+</indexterm>
+
+<refentrytitle>Filter</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Filter</refname>
+<refpurpose>
+Filters a list based on a criterion
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Filter[x->NLIST(T*), y->NLIST(BOOLEAN)] =: LIST(T)
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Filter</function> returns a list with the same dimension structure 
+as <parameter>list</parameter>, with the
+elements for which the corresponding elements of <parameter>by</parameter> are
+<literal>False</literal>
+removed.  It is an error if <parameter>x</parameter> and <parameter>y</parameter> do not have the same
+dimensionality.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Sort">.
+</para>
+</refsect1>
+
+</refentry>
+
+

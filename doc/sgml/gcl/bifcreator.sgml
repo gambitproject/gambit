@@ -1,0 +1,41 @@
+<refentry id="bif.Creator" xreflabel="Creator">
+
+<refmeta>
+<indexterm>
+<primary>Creator</primary>
+</indexterm>
+
+<refentrytitle>Creator</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Creator</refname>
+<refpurpose>
+Returns the algorithm that created a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Creator[profile->MIXED] =: TEXT
+Creator[profile->BEHAV] =: TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Creator</function> returns the GCL function name 
+(excluding the <literal>Solve</literal> suffix) of
+the algorithm that was called to create the profile. For
+behavior profiles, the string includes an indication of whether the
+extensive or normal form version of the algorithm was used.  Thus,
+<literal>Liap[EFG]</literal> and <literal>Liap[NFG]</literal> are used to 
+identify the
+extensive and normal form versions of the algorithm.  A profile
+created by the user is identified by <literal>User</literal>.  
+</para>
+</refsect1>
+
+</refentry>
+

@@ -1,0 +1,36 @@
+<refentry id="bif.Chance" xreflabel="Chance">
+
+<refmeta>
+<indexterm>
+<primary>Chance</primary>
+</indexterm>
+
+<refentrytitle>Chance</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Chance</refname>
+<refpurpose>
+Returns the chance player for an extensive form
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Chance[efg->EFG] =: EFPLAYER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Chance</function> returns the chance, or nature, player 
+defined on <parameter>efg</parameter>.
+Each extensive form has exactly one
+chance player predefined, and it is not possible to define any additional
+chance players.
+</para>
+</refsect1>
+
+</refentry>
+

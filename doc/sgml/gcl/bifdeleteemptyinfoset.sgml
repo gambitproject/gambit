@@ -1,0 +1,44 @@
+<refentry id="bif.DeleteEmptyInfoset" xreflabel="DeleteEmptyInfoset">
+
+<refmeta>
+<indexterm>
+<primary>DeleteEmptyInfoset</primary>
+</indexterm>
+
+<refentrytitle>DeleteEmptyInfoset</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>DeleteEmptyInfoset</refname>
+<refpurpose>
+Removes an information set from a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+DeleteEmptyInfoset[infoset->INFOSET] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>DeleteEmptyInfoset</function> deletes
+<parameter>infoset</parameter> from its extensive form game.  An
+information set may be deleted only when it has no members; otherwise,
+this function has no effect.  Returns <literal>True</literal> when the
+information set was successfully deleted.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Members">,
+<xref linkend="bif.NewInfoset">.
+</para>
+</refsect1>
+
+</refentry>
+

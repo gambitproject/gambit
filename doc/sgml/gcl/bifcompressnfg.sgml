@@ -1,0 +1,35 @@
+<refentry id="bif.CompressNfg" xreflabel="CompressNfg">
+
+<refmeta>
+<indexterm>
+<primary>CompressNfg</primary>
+</indexterm>
+
+<refentrytitle>CompressNfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>CompressNfg</refname>
+<refpurpose>
+Creates a normal form containing only the actions in a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+CompressNfg[support->NFSUPPORT] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>CompressNfg</function> creates a copy of the normal form game
+on which <parameter>support</parameter> is
+defined, where all strategies not present in <parameter>support</parameter>
+have been removed.
+</para>
+</refsect1>
+
+</refentry>
+

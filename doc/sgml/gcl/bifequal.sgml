@@ -1,0 +1,52 @@
+<refentry id="bif.Equal" xreflabel="Equal">
+
+<refmeta>
+<indexterm>
+<primary>Equal</primary>
+</indexterm>
+
+<refentrytitle>Equal</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Equal</refname>
+<refpurpose>
+Determines if two values are equal
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Equal[x->T*, y->T*] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Equal</function> returns <literal>True</literal> when
+<parameter>x</parameter> and <parameter>y</parameter> are equal.  For games,
+<parameter>x</parameter> and <parameter>y</parameter> are considered equal when they refer to the same
+game (but not if they refer to two different games with exactly the
+same structure, payoffs, and so forth).  A null value is considered equal
+to the null value, but is not equal to any non-null value.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x = y </literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NotEqual">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,37 @@
+<refentry id="bif.Flatten" xreflabel="Flatten">
+
+<refmeta>
+<indexterm>
+<primary>Flatten</primary>
+</indexterm>
+
+<refentrytitle>Flatten</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Flatten</refname>
+<refpurpose>
+Removes nesting from a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Flatten[x->NLIST(T*), {levels->0}] =: LIST(T) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Flatten</function> returns a list with the same elements as
+<parameter>x</parameter>, with the nesting
+structure flattened.  By default, all levels are flattened, returning
+a one-dimensional list; the optional parameter <parameter>levels</parameter> may be
+used to limit the flattening to the topmost <parameter>levels</parameter>.
+</para>
+</refsect1>
+
+</refentry>
+
+

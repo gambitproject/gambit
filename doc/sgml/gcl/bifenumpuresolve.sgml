@@ -1,0 +1,57 @@
+<refentry id="bif.EnumPureSolve" xreflabel="EnumPureSolve">
+
+<refmeta>
+<indexterm>
+<primary>EnumPureSolve</primary>
+</indexterm>
+
+<refentrytitle>EnumPureSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>EnumPureSolve</refname>
+<refpurpose>
+Computes Nash equilibria via pure strategy enumeration
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+EnumPureSolve[support->NFSUPPORT, {stopAfter->0}, 
+              {time<->0.000000}, {traceFile<->(Output)},
+              {traceLevel->0}] =: LIST(MIXED) 
+EnumPureSolve[support->EFSUPPORT, {asNfg->False}, 
+              {stopAfter->0}, {precision->Float}, 
+              {time<->0.000000}, {traceFile<->(Output)}, 
+              {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+Returns all pure strategy Nash equilibria of a game using the given
+<function>support</function>.  The behavior
+of the algorithm may be modified by the following optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, this is <literal>False</literal>.  If it is specified to be
+<literal>True</literal>, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>:
+By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+

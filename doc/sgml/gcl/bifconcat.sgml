@@ -1,0 +1,40 @@
+<refentry id="bif.Concat" xreflabel="Concat">
+
+<refmeta>
+<indexterm>
+<primary>Concat</primary>
+</indexterm>
+
+<refentrytitle>Concat</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Concat</refname>
+<refpurpose>
+Concatenates two lists
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Concat[x->NLIST(T), y->NLIST(T)] =: LIST(T) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Concat</function> returns the concatenation of the lists
+<parameter>x</parameter> and <parameter>y</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x &amp; y</literal>
+</para>
+</refsect1>
+
+</refentry>
+

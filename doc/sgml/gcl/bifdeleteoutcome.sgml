@@ -1,0 +1,46 @@
+<refentry id="bif.DeleteOutcome" xreflabel="DeleteOutcome">
+
+<refmeta>
+<indexterm>
+<primary>DeleteOutcome</primary>
+</indexterm>
+
+<refentrytitle>DeleteOutcome</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>DeleteOutcome</refname>
+<refpurpose>
+Removes an outcome from a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+DeleteOutcome[outcome->EFOUTCOME] =: LIST(NODE) 
+DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>DeleteOutcome</function> removes
+<parameter>outcome</parameter> from its game.  All nodes (for
+extensive forms) or contingencies (for normal forms) with the
+specified outcome attached are reset to having no outcome attached.
+The extensive form version returns the list of nodes to which the
+outcome was attached; the normal form version returns
+<literal>True</literal>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NewOutcome">.
+</para>
+</refsect1>
+
+</refentry>
+

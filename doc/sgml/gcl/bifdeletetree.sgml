@@ -1,0 +1,41 @@
+<refentry id="bif.DeleteTree" xreflabel="DeleteTree">
+
+<refmeta>
+<indexterm>
+<primary>DeleteTree</primary>
+</indexterm>
+
+<refentrytitle>DeleteTree</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>DeleteTree</refname>
+<refpurpose>
+Removes a subtree from an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+DeleteTree[node->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>DeleteTree</function>
+deletes the subtree rooted at <parameter>node</parameter>.  The
+node then becomes a terminal node, which is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.DeleteMove">.
+</para>
+</refsect1>
+
+</refentry>
+

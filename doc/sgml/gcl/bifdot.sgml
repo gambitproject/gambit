@@ -1,0 +1,42 @@
+<refentry id="bif.Dot" xreflabel="Dot">
+
+<refmeta>
+<indexterm>
+<primary>Dot</primary>
+</indexterm>
+
+<refentrytitle>Dot</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Dot</refname>
+<refpurpose>
+Returns the dot product of two vectors
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Dot[x->LIST(NUMBER), y->LIST(NUMBER)] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Dot</function> returns the dot product of
+<parameter>x</parameter> and <parameter>y</parameter>, where the lists
+are treated as vectors.  It is an error to attempt to multiply two
+lists of different lengths.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x . y</literal>
+</para>
+</refsect1>
+
+</refentry>
+

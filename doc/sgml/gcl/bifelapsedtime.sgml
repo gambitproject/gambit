@@ -1,0 +1,44 @@
+<refentry id="bif.ElapsedTime" xreflabel="ElapsedTime">
+
+<refmeta>
+<indexterm>
+<primary>ElapsedTime</primary>
+</indexterm>
+
+<refentrytitle>ElapsedTime</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ElapsedTime</refname>
+<refpurpose>
+Returns the time on the stopwatch
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ElapsedTime[] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+If the system stopwatch is currently running, <function>ElapsedTime</function> returns the
+time elapsed since the stopwatch was started.  If the system stopwatch
+is not running, <function>ElapsedTime</function> returns the time elapsed during the last period during which
+the stopwatch was running.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IsWatchRunning">,
+<xref linkend="bif.StartWatch">,
+<xref linkend="bif.StopWatch">.
+</para>
+</refsect1>
+
+</refentry>
+

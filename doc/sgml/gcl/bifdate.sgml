@@ -1,0 +1,32 @@
+<refentry id="bif.Date" xreflabel="Date">
+
+<refmeta>
+<indexterm>
+<primary>Date</primary>
+</indexterm>
+
+<refentrytitle>Date</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Date</refname>
+<refpurpose>
+Returns the current date and time
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Date[] =: TEXT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Date</function> returns the current date and time. 
+</para>
+</refsect1>
+
+</refentry>
+

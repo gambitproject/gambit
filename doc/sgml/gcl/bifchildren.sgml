@@ -1,0 +1,40 @@
+<refentry id="bif.Children" xreflabel="Children">
+
+<refmeta>
+<indexterm>
+<primary>Children</primary>
+</indexterm>
+
+<refentrytitle>Children</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Children</refname>
+<refpurpose>
+Returns the list of children of a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Children[node->NODE] =: LIST(NODE) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Children</function> returns the list of children of 
+<parameter>node</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Parent">.
+</para>
+</refsect1>
+
+</refentry>
+

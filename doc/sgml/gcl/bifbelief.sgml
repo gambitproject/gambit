@@ -1,0 +1,52 @@
+<refentry id="bif.Belief" xreflabel="Belief">
+
+<refmeta>
+<indexterm>
+<primary>Belief</primary>
+</indexterm>
+
+<refentrytitle>Belief</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Belief</refname>
+<refpurpose>
+Returns the probability of being at a node, given the information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Belief[profile->BEHAV, node->NODE] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Belief</function> returns the probability of being at
+<parameter>node</parameter>, conditional on the
+player who chooses at <parameter>node</parameter> knowing she is in
+<parameter>node</parameter>'s
+information set, assuming all players follow <parameter>profile</parameter>.
+The null
+value is returned if the belief value is not well-defined, or if
+<parameter>node</parameter> is terminal.
+It is an error if <parameter>profile</parameter> and <parameter>node</parameter>
+are not from the same extensive form game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionValue">,
+<xref linkend="udf.Beliefs">,
+<xref linkend="bif.InfosetProb">,
+<xref linkend="bif.NodeValue">,
+<xref linkend="bif.RealizProb">.
+</para>
+</refsect1>
+
+</refentry>
+

@@ -1,0 +1,45 @@
+<refentry id="bif.Basis" xreflabel="Basis">
+
+<refmeta>
+<indexterm>
+<primary>Basis</primary>
+</indexterm>
+
+<refentrytitle>Basis</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Basis</refname>
+<refpurpose>
+Creates a basis for an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Basis[efg->EFG] =: EFBASIS
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Basis</function> creates and returns a new basis for
+the game <parameter>efg</parameter>.  The basis contains all nodes and
+all actions in the game.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddNode">,
+<xref linkend="bif.RemoveNode">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
+</refentry>
+
+
+

@@ -1,0 +1,42 @@
+<refentry id="bif.Float" xreflabel="Float">
+
+<refmeta>
+<indexterm>
+<primary>Float</primary>
+</indexterm>
+
+<refentrytitle>Float</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Float</refname>
+<refpurpose>
+Converts a number to floating-point precision
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Float[x->NUMBER] =: NUMBER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Float</function>
+returns <parameter>x</parameter> converted to the machine's floating point
+representation.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Rational">.
+</para>
+</refsect1>
+
+</refentry>
+
+

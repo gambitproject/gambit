@@ -1,0 +1,41 @@
+<refentry id="bif.Clear" xreflabel="Clear">
+
+<refmeta>
+<indexterm>
+<primary>Clear</primary>
+</indexterm>
+
+<refentrytitle>Clear</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Clear</refname>
+<refpurpose>
+Unassigns all variables in the current scope
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Clear[] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Clear</function> unassigns all variables defined in the
+current scope.  Returns <literal>True</literal>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Assign">,
+<xref linkend="bif.UnAssign">.
+</para>
+</refsect1>
+
+</refentry>
+

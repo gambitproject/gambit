@@ -1,0 +1,47 @@
+<refentry id="bif.Divide" xreflabel="Divide">
+
+<refmeta>
+<indexterm>
+<primary>Divide</primary>
+</indexterm>
+
+<refentrytitle>Divide</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Divide</refname>
+<refpurpose>
+Returns the quotient of two numbers
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Divide[x->NUMBER, y->NUMBER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Divide</function>
+returns the quotient <parameter>x</parameter> divided by <parameter>y</parameter>. 
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x / y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IntegerDivide">.
+</para>
+</refsect1>
+
+</refentry>
+

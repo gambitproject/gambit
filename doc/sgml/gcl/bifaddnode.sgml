@@ -33,5 +33,17 @@ modified basis is returned.  It is an error if
 from the same extensive form game.  
 </para>
 </refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AddAction">,
+<xref linkend="bif.Basis">,
+<xref linkend="bif.RemoveNode">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
 </refentry>
+
 

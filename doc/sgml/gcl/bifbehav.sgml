@@ -1,0 +1,94 @@
+<refentry id="bif.Behav" xreflabel="Behav">
+
+<refmeta>
+<indexterm>
+<primary>Behav</primary>
+</indexterm>
+
+<refentrytitle>Behav</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Behav</refname>
+<refpurpose>
+Converts a mixed profile into the equivalent behavior profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Behav[mixed->MIXED] =: BEHAV 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Behav</function> converts <parameter>mixed</parameter>
+to the equivalent behavior strategy profile on
+the associated extensive form game using Kuhn's Theorem.  It is an
+error if there is no extensive form game associated with the normal
+form game of <function>profile</function>.  Note that this function assumes that the
+associated extensive form game is a game of perfect recall.  If it is
+not, then the resulting behavior profile is unpredictable, and may not
+be a valid profile.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Mixed">.
+</para>
+</refsect1>
+
+</refentry>
+
+
+<refentry id="bif.Behav2" xreflabel="Behav">
+
+<refmeta>
+<indexterm>
+<primary>Behav</primary>
+</indexterm>
+
+<refentrytitle>Behav</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Behav</refname>
+<refpurpose>
+Creates a behavior profile on a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Behav[support->EFSUPPORT] =: BEHAV
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1>
+<title>Description</title>
+<para>
+<function>Behav</function> returns a behavior strategy profile with equal
+probabilities for all actions in <parameter>support</parameter>
+in each same information set. 
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Centroid">,
+<xref linkend="bif.Mixed">.
+</para>
+</refsect1>
+
+</refentry>
+
+
+
+
+

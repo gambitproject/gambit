@@ -1,0 +1,55 @@
+<refentry id="bif.Assign" xreflabel="Assign">
+
+<refmeta>
+<indexterm>
+<primary>Assign</primary>
+</indexterm>
+
+<refentrytitle>Assign</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Assign</refname>
+<refpurpose>
+Sets the value of a variable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Assign[name->TEXT, value->T*] =: T
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+
+<function>Assign</function> creates a new variable
+<parameter>name</parameter>, with value <parameter>value</parameter>.
+Returns the value assigned.  If <parameter>name</parameter> is already a 
+defined
+variable in the current scope, then if it is of type <type>T</type>, it is
+modified to have return value of <parameter>value</parameter>.  If it is of a
+different type, an error results.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x := value</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Clear">, <xref linkend="bif.UnAssign">.
+</para>
+</refsect1>
+
+</refentry>
+
+
+

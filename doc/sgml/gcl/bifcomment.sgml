@@ -1,0 +1,41 @@
+<refentry id="bif.Comment" xreflabel="Comment">
+
+<refmeta>
+<indexterm>
+<primary>Comment</primary>
+</indexterm>
+
+<refentrytitle>Comment</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Comment</refname>
+<refpurpose>
+Returns the comment associated with a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Comment[efg->EFG] =: TEXT
+Comment[nfg->NFG] =: TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Comment</function> returns the comment associated with the game
+<parameter>efg</parameter> or <parameter>nfg</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetComment">.
+</para>
+</refsect1>
+
+</refentry>
+

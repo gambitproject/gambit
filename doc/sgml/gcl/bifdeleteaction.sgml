@@ -1,0 +1,46 @@
+<refentry id="bif.DeleteAction" xreflabel="DeleteAction">
+
+<refmeta>
+<indexterm>
+<primary>DeleteAction</primary>
+</indexterm>
+
+<refentrytitle>DeleteAction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>DeleteAction</refname>
+<refpurpose>
+Removes an action from all nodes in its information set
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+DeleteAction[action->ACTION] =: INFOSET 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>DeleteAction</function>
+deletes <parameter>action</parameter> from its information set. 
+As a consequence, the corresponding subtrees associated
+with the action from each member of the information set are deleted.
+Returns the information set to which <parameter>action</parameter> belonged.
+It is an
+error if <parameter>action</parameter> is the only action at its information set.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Actions">,
+<xref linkend="bif.InsertAction">.
+</para>
+</refsect1>
+
+</refentry>
+

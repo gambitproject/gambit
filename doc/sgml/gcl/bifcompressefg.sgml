@@ -1,0 +1,35 @@
+<refentry id="bif.CompressEfg" xreflabel="CompressEfg">
+
+<refmeta>
+<indexterm>
+<primary>CompressEfg</primary>
+</indexterm>
+
+<refentrytitle>CompressEfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>CompressEfg</refname>
+<refpurpose>
+Creates an extensive form containing only the actions in a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+CompressEfg[support->EFSUPPORT] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>CompressEfg</function> creates a copy of the 
+extensive form game on which <parameter>support</parameter> is
+defined, where all actions not present in <parameter>support</parameter>
+have been removed.
+</para>
+</refsect1>
+
+</refentry>
+

@@ -12,7 +12,7 @@
 <refnamediv>
 <refname>AddAction</refname>
 <refpurpose>
-Adds an action to a support
+Adds an action to a support or basis
 </refpurpose>
 </refnamediv>
 
@@ -37,6 +37,7 @@ same extensive form game.
 
 <refsect1><title>See also</title>
 <para>
+<xref linkend="bif.Basis">,
 <xref linkend="bif.RemoveAction">,
 <xref linkend="bif.Support">.
 </para>
