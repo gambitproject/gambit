@@ -432,7 +432,7 @@ gText EfgShow::AsString(TypedSolnValues what, const Node *n, int br) const
       return ToText(cur.ActionProb(n->GetInfoset()->Actions()[br]),m_treeWindow->NumDecimals());
     case tIsetValue:    // terminal not ok, not implemented
       {
-	if (!n->GetPlayer()) return "N/A";
+	if (!n->GetPlayer() || n->GetPlayer()->IsChance()) return "N/A";
 	if (cur.IsetProb(n->GetInfoset()) > gNumber(0))
 	  return ToText(cur.IsetValue(n->GetInfoset()), m_treeWindow->NumDecimals());
 	else        // this is due to a bug in the value computation
