@@ -1292,7 +1292,7 @@ Portion* GSM_SetFormat( Portion** param )
   _WriteWidth = ( (IntPortion*) param[ 0 ] )->Value();
   _WritePrecis = ( (IntPortion*) param[ 1 ] )->Value();
   _WriteExpmode = ( (BoolPortion*) param[ 2 ] )->Value();
-  _WriteQuoted = ( (BoolPortion*) param[ 2 ] )->Value();
+  _WriteQuoted = ( (BoolPortion*) param[ 3 ] )->Value();
   return new BoolValPortion( true );
 }
 
