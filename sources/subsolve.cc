@@ -22,9 +22,12 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns)
   solns.Append(solution);
   ((gVector<T> &) solns[1]).operator=((T) 0);
 
-  for (i = 1; i <= n->NumChildren(); i++)  {
+  gList<Node *> subroots;
+  ChildSubgames(n, subroots);
+
+  for (i = 1; i <= subroots.Length(); i++)  {
     gList<BehavProfile<T> > subsolns;
-    FindSubgames(n->GetChild(i), subsolns);
+    FindSubgames(subroots[i], subsolns);
 
     if (subsolns.Length() == 0)  {
       solns.Flush();
@@ -33,7 +36,9 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns)
 
     solns[1] += subsolns[1];
   }
-  
+
+  assert(n->GetSubgameRoot() == n);
+
   if (n->GetSubgameRoot() == n)  {
     Efg<T> foo(efg, n);
 
