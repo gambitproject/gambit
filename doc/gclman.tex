@@ -68,18 +68,18 @@ Gary Wu\\California Institute of Technology
 The Gambit Project is a project for the development of computer code
 for the solution of extensive and normal form games.  The software
 developed under the project is public domain.  The Gambit Project is
-funded in part by National Science Foundation grants SBR-9308637 to
-the California Institute of Technology and SBR-9308862 to the
-University of Minnesota.
+funded in part by National Science Foundation grants SBR-9308637 and
+SBR-9617854 to the California Institute of Technology and SBR-9308862
+to the University of Minnesota.
 
 Numerous students at Caltech and the University of Minnesota have
 contributed to the Gambit Command Language and to the Gambit Project
 more generally: Among these are Bruce Bell, Anand Chelian, Matthew
-Derer, Nelson Escobar, Eugene Grayver, Todd Kaplan, Geoff Matters,
-Brian Trotter, and Rob Weber. We are particularly grateful to Eugene
-Grayver for setting up and maintaining our Web site, for compiling the
-DOS/WINDOWS version of the GCL, and for his extensive work on the
-related GUI and PXI programs.
+Derer, Nelson Escobar, Ben Freeman, Eugene Grayver, Todd Kaplan, Geoff
+Matters, Brian Trotter, and Rob Weber. We are particularly grateful to
+Eugene Grayver for setting up and maintaining our Web site, for
+compiling the DOS/WINDOWS version of the GCL, and for his extensive
+work on the related GUI and PXI programs.
 
 \chapter{Introduction}
 \pagestyle{headings}
@@ -174,8 +174,7 @@ suggestions as possible to our future releases.
 
 Although we have made every effort to ensure the reliability and
 correctness of the code, it is certain that errors of varying degrees
-of severity exist.  (However, as the saying goes, no undiscovered bugs
-have been found yet.)  If you experience problems with the software,
+of severity exist.   If you experience problems with the software,
 send us email at {\tt gambit@hss.caltech.edu} describing your problem.
 
 When reporting a bug, it is important to include the following
@@ -287,19 +286,24 @@ standard data types that are supported in many languages.  The data
 types in the next two sections are more specialized data types that
 are used to represent elements of normal and extensive form games,
 respectively.  The last section contains only one type, lists, which
-play an important role in the GCL.
-\marginpar{{\tt BOOLEAN} is now tri-state}
-\marginpar{{\tt EFBASIS}, {\tt ASSESSMENT}, {\tt INTEGER} are subtypes}
+play an important role in the GCL. 
 
-\medskip
-
+\marginpar{{\tt ASSESSMENT} is not yet installed} Three of the data
+types ({\tt INTEGER}, {\tt EFBASIS}, and {\tt ASSESSMENT}) are not
+true data types, but are {\bindex subtypes} of another, parent type.
+They are indicated in the table as the indented entries following
+their parent type.  A subtype is a data type which has all of the
+properties of its parent type, plus some additional characteristics.
+For example, an integer is a rational number, with the additional
+restriction that it's denominator is one.
+\marginpar{Do we need to say more about subtypes?}
 \begin{table}[htp]
 \begin{center}
 \begin{tabular} {|l||l|} \hline
 Type name	& Description \\ \hline
 \tindex{BOOLEAN} 	& boolean \\
-\tindex{INTEGER} 	& integer \\ 
 \tindex{NUMBER} 	& floating-point or rational number \\
+\tindex{  INTEGER} 	& \verb+NUMBER+ that is an integer \\ 
 \tindex{TEXT}	& string of arbitrary length \\
 \tindex{INPUT}	& input stream \\
 \tindex{OUTPUT}	& output stream \\ 
@@ -318,8 +322,10 @@ Type name	& Description \\ \hline
 \tindex{ACTION}	& an action at an information set \\
 \tindex{EFOUTCOME}	& an outcome in an extensive form game \\
 \tindex{EFSUPPORT}	& a support of actions in an extensive form game \\
+\tindex{  EFBASIS}	& an \verb+EFSUPPORT+ that is a basis for an assessment \\
 \tindex{BEHAV}	& a behavior strategy profile for an extensive form
 game \\ 
+\tindex{  ASSESSMENT}	& a \verb+BEHAV+ that is an assessment \\
 \hline
 \tindex{LIST(T)}	& a list of objects of type T (T is any data type)\\ 
 \hline
@@ -329,63 +335,43 @@ game \\
 \end{tabular}
 \end{center}
 \end{table}
-\medskip
-
 The remainder of this section details the rules concerning the
-standard types
-\tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{NUMBER}, \tindex{TEXT},
-\tindex{INPUT} and \tindex{OUTPUT}, as well as general rules for typing.
-The extensive form and normal form types, and their related types, are
-detailed later in special sections.
-\marginpar{{\tt INTEGER} now a subtype}
-
+standard types \tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{NUMBER},
+\tindex{TEXT}, \tindex{INPUT} and \tindex{OUTPUT}, as well as general
+rules for typing.  The extensive form and normal form types, and their
+related types, are detailed later in special sections.
 
 \subsection{Boolean}
-\marginpar{{\tt BOOLEAN} is tri-state!}
-The \tindex{BOOLEAN} type represents the boolean values
-``true'' and ``false''.  The command language predefines two constants
-to represent these, \tindex{True} and \tindex{False}.
+The \tindex{BOOLEAN} type is used to represent the boolean values.
+The \tindex{BOOLEAN} type is implemented in tri-state logic,
+and has the three values ``true'' and ``false'' and ``unknown''.  The
+command language predefines three constants to represent these,
+\tindex{True} and \tindex{False}, and \tindex{Maybe}
+\marginpar{will this change to Unknown?}
 
 \subsection{Numeric Data types}
 
-The GCL supports two numeric data types, \verb+INTEGER+,
-and \verb+NUMBER+.
+The GCL supports one basic numeric data type, \verb+NUMBER+, with a 
+subtype of \verb+INTEGER+.
 
 \begin{itemize}
-\item \bindex{Integer}
-
-The \tindex{INTEGER} type may contain integer values.  Integer constants
-are represented in the GCL by a finite string of consecutive digits
-(where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+). Integer
-constants are assumed to be in base ten representation.  
-
-The \verb+INTEGER+ type is implemented as the machine's long integer
-type, which is typically at least 32 bits in modern machines.  Thus,
-there is a danger of overflow or underflow in computations involving
-these numbers.  The largest legal integer is given by
-\verb+\index{MaxInt}, and the smallest legal integer is
-\verb+-Maxint[]+.  Integer computations that exceed these limits are
-subject to truncation or wraparound, depending on the platform.
-
-\item {\bf Number}
+\item \bindex{Number}
 
 The \tindex{NUMBER} type may contain numbers whose internal
-representation is either floating point or rational.  Whether the
-internal representation is floating point or rational depends on how
-the number is initially input.  It can be input either as a floating
-point constant, or a ratio of integers.  
+representation is either floating point or rational.  The internal
+representation of the number is referred to as the \bindex{precision}
+of the number.  Whether the precision of the number is floating point
+or rational depends on how the number is initially input.  It can be
+input either as a floating point constant, or a rational constant.
 
-Floating point constants are represented in the GCL by any
-string of digits containing exactly one decimal point (\verb+.+).
-
-Floating point numbers are implemented as the machine's double-precision
-floating point type.  Computation with these numbers is subject to
-rounding of least significant digits, and hence these numbers can be
-imprecise; for example, operations usually associated with being
-inverses of each other may not be with floating point
+Floating point numbers are implemented as the machine's
+double-precision floating point type.  Computation with these numbers
+is subject to rounding of least significant digits, and hence these
+numbers can be imprecise; for example, operations usually associated
+with being inverses of each other may not be with floating point
 numbers. However, since arithmetic operations on floating point
-numbers are typically implemented in hardware, the {\tt Machine} precision
-is frequently used when speed is important.
+numbers are typically implemented in hardware, the {\tt Machine}
+precision is frequently used when speed is important.
 
 Rational numbers are implemented as the ratios of two arbitrary-length
 integers. Rational numbers are capable of precisely representing any
@@ -394,21 +380,30 @@ However, arithmetic operations on rational numbers are implemented in
 software.  Hence, computations with rational numbers can be slow, and
 output from them may be unreadably large.
 
-In the current implementation, rational constants are not supported.
-Instead, rational numbers can be formed from two integers using the
-{\tt /} (or \tindex{Divide}) operator, described below. 
+Floating point constants are represented in the GCL by any string of
+digits (where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+)
+containing exactly one decimal point (\verb+.+).  Rational constants
+are represented in the GCL by andy string of digits containing at most
+one division sign (\verb+/+).  Any \verb+NUMBER+ in the gcl is assumed
+to be in base ten representation.
+
+\item \bindex{Integer}
+
+The \tindex{INTEGER} type is a subtype of \verb+NUMBER+ consisting of
+numbers of rational precision, whose denominator is one.  
 
 \end{itemize}
 
 Since the GCL uses implicit data typing, the data type of a numeric
 constant must be identifiable by the way it is written.  Hence, when
 you write a numeric constant, keep the following in mind.  Floating
-point constants must include a \verb+.+ in them.  Rational numbers are
-built from integers, and hence must have a \verb+/+ in them, and
-integer constants must have neither of the above. Thus, to represent
-the number \verb+2+ as a floating point \verb+NUMBER+, you would write
-\verb+2.+, and to represent it in rational precision, you would use \verb+2+ or
-\verb+2/1+.
+point constants must include exactly one \verb+.+ in them.  Rational
+constants must have at most one \verb+/+ in them, and integer
+constants must have neither of the above. Thus, to represent the
+number \verb+2+ as a floating point \verb+NUMBER+, you would write
+\verb+2.+, and to represent it as a rational \verb+NUMBER+, you would
+use \verb+2+ or \verb+2/1+, and to represent it as an integer
+\verb+NUMBER+, you would use \verb+2+.
 
 \subsection{Text}
 
@@ -462,17 +457,25 @@ in the GCL.  Hence, a more detailed discussion of them is deferred
 until later.  
 
 \subsection{Extensive form data types}
-\marginpar{{\tt EFBASIS}, {\tt ASSESSMENT}}
-The data type \tindex{EFG} is used to represent an extensive form game.  As
-with normal form games, no other extensive form data type can exist
-independently of the extensive form game to which it belongs.  The
-\tindex{EFPLAYER} represents a player in an extensive form game.  The
-types \tindex{NODE}, \tindex{ACTION}, \tindex{INFOSET}, \tindex{EFOUTCOME}
-represent the corresponding parts of the extensive form representation
-of the game.  A \tindex{EFSUPPORT} represents a support for an extensive
-form game, which is a collection of sets of admissible actions, one
-for each inofrmation set of each player.  Finally a \tindex{BEHAV} is a
-behavior strategy profile over an arbitrary support.
+The data type \tindex{EFG} is used to represent an extensive form
+game.  As with normal form games, no other extensive form data type
+can exist independently of the extensive form game to which it
+belongs.  The \tindex{EFPLAYER} represents a player in an extensive
+form game.  The types \tindex{NODE}, \tindex{ACTION},
+\tindex{INFOSET}, \tindex{EFOUTCOME} represent the corresponding parts
+of the extensive form representation of the game.  A \tindex{BEHAV} is
+a behavior strategy profile and a \tindex{ASSESSMENT} is an assessment
+for an extensive form game. An \verb+ASSESSMENT+ is a subtype of
+\verb+BEHAV+, which in addition to specifying a behavior strategy,
+specifies non null beliefs for all information sets in the game.  An
+\tindex{EFSUPPORT} represents a support for a behavior strategy in an
+extensive form game, which is a collection of sets of admissible
+actions (at least one for each information set of each player).  An
+\verb+EFBASIS+ is a subtype of \verb+EFSUPPORT+, representing a
+support for an assessment in an extensive form game. This is a
+collection of sets of admissible actions together with a collection of
+sets of admissible members of information sets (at least one member
+for each information set).
 
 As with normal form games, there are no constants of any extensive form
 data type.  Objects that are of any of extensive form data types must
@@ -513,26 +516,26 @@ all basic elements of the list must be of the same type.  Hence,
 \end{verbatim}
 
 \noindent 
-is a legal list of type \verb+LIST(INTEGER)+, since all the basic
-elements are of type {\tt INTEGER}, and 
+is a legal list of type \verb+LIST(NUMBER)+, since all the basic
+elements are of type {\tt NUMBER}, and 
 
 \begin{verbatim}
-{ { 2, 3 }, 1, 4 }
-\end{verbatim}
-\marginpar{This is a bad example!}
+{ { 2.0, 3/2 }, 1, 4 }
+
 \noindent 
-is a legal list of type \verb+LIST(LIST(INTEGER))+.  On the other
+is a legal list of type \verb+LIST(LIST(NUMBER))+.  On the other
 hand, 
 
 \begin{verbatim}
-{ 1, { 2.0, 3.0 }, 4 }
+{ 1, { 2, "3" }, 4 }
 \end{verbatim}
 
 \noindent 
-is not a legal list, since the second element is a {\tt LIST(NUMBER)}.
+is not a legal list, since the second element of the nested list is
+not a {\tt NUMBER}.
 
 Lists are distinct in type from each other and from their scalar
-equivalents.  That is to say, {\tt LIST(INTEGER)} is a distinct data
+equivalents.  That is to say, {\tt LIST(BOOLEAN)} is a distinct data
 type from {\tt LIST(NUMBER)}, and is also a distinct data type from
 {\tt INTEGER}.
  
@@ -566,10 +569,10 @@ Here \verb+T+ could be any data type except \verb+LIST+
 
 
 \section{\rindex{Expressions}}
-
+\marginpar{Ted:  you'de better reword this to your taste}
 A GCL program consists of a series of expressions.  An expression is
-typically an expression built up out of function calls.  A statement
-is terminated by a linefeed or by a semicolon.  Statements can be
+typically a GCL command built up out of function calls.  An expression
+is terminated by a linefeed or by a semicolon.  Expressions can be
 entered interactively, at the command prompt, or can be entered from
 files, via the \verb+Include["filename"]+ directive (see the section
 on including files).  Statements can be continued for more than one
@@ -657,9 +660,8 @@ GCL1:= << "Help"
 
 It is important to note that like all functions in the GCL, constants
 have a data type, which is determined by the ``function name''.  If
-you try and use a \verb+INTEGER+ constant, say \verb+123+, where a
-\verb+NUMBER+ or other data type is expected, you will get an error.
-\marginpar{Another outdated example!}
+you try and use a \verb+NUMBER+ constant, say \verb+123+, where a
+\verb+TEXT+ or other data type is expected, you will get an error.
 
 \subsection{\rindex{Variables}}
 
@@ -709,9 +711,8 @@ of a variable.  Consider the calls
 \begin{verbatim}
 y:=2
 y:=3
-y:= 3.0
+y:="3"
 \end{verbatim}
-\marginpar{Another outdated example}
 \noindent The first call creates a new variable {\tt y} of type {\tt
 INTEGER}, with value of \verb+3+.  The second modifies \verb+y+ to
 have value \verb+3+.  Since the new assignment does not change the
@@ -5890,7 +5891,7 @@ Returns the number of characters in \verb+text+.
 NumElements[list->NLIST(T*)] =: INTEGER 
 \end{verbatim}\normalsize
 
-{\for all types} {\tt T}
+{\it for all types} {\tt T}
 \bd
 Returns the number of elements in \verb+list+.  The difference between
 this function and \verb+Length+ is that this function is not listable,
