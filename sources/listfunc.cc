@@ -869,7 +869,7 @@ void Init_listfunc(GSM *gsm)
 				       PortionSpec(porINTEGER, 1), 
 				       3, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porINTEGER));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("ength", porINTEGER, 
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("length", porINTEGER, 
 					    new IntPortion(1)));
   FuncObj->SetParamInfo(2, 2, ParamInfoType("delta", porINTEGER, 
 					    new IntPortion(0)));
