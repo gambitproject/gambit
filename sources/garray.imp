@@ -10,56 +10,74 @@
 #include "gambitio.h"
 
 
-template <class T> gArray<T>::gArray(int len) : length(len)	
+template <class T> gArray<T>::gArray(int len) : min(1), max(len)
 {
-  assert(len >= 0);
+  assert(len>=0);
   data = (len) ? new T[len] - 1 : 0;
 }
 
-template <class T> gArray<T>::gArray(const gArray<T> &a) : length(a.length)
+template <class T> gArray<T>::gArray(int lo, int hi) : min(lo), max(hi)
 {
-  data = (length) ? new T[length] - 1 : 0;
-  for (int i = 1; i <= length; i++)
+  assert(max>=min);
+  data = (max>=min) ? new T[max-min+1] - min : 0;
+}
+
+template <class T> gArray<T>::gArray(const gArray<T> &a) 
+  : min(a.min), max(a.max)
+{
+  data = (max>=min) ? new T[max-min+1] - min : 0;
+  for (int i = min; i <= max; i++)
     data[i] = a.data[i];
 }
 
 template <class T> gArray<T>::~gArray()
 {
-  if (length)  delete [] (data + 1);
+  if (max>=min)  delete [] (data + min);
 }
 
 template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
 {
   if (this != &a) {
-    if (data)   delete [] (data + 1);
-    data = (length = a.length) ? new T[length] - 1 : 0;
-    for (int i = 1; i <= length; i++)
+    if (data)   delete [] (data + min);
+    min=a.min;max=a.max;
+    data = (max>=min) ? new T[max-min+1] - min : 0;
+    for (int i = min; i <= max; i++)
       data[i] = a.data[i];
   }
   return *this;
 }
 
-template <class T> int gArray<T>::Length(void) const
-{	
-  return length;
-}
+template <class T> int gArray<T>::Length(void)
+{
+return max - min + 1;
+}	
+
+template <class T> int gArray<T>::First(void)
+{
+return min;
+}	
+
+template <class T> int gArray<T>::Last(void)
+{
+return max;
+}	
 
 template <class T> const T &gArray<T>::operator[](int index) const
 {
-  assert(index >= 1 && index <= length);
+  assert(index >= min && index <= max);
   return data[index];
 }	
 
 template <class T> T &gArray<T>::operator[](int index)
 {
-  assert(index >= 1 && index <= length);
+  assert(index >= min && index <= max);
   return data[index];
 }
 
 template <class T> void gArray<T>::Dump(gOutput &f) const
 {
   f << "{ ";
-  for (int i = 1; i <= length; i++)
+  for (int i = min; i <= max; i++)
     f << data[i] << ' ';
   f << '}';
 }

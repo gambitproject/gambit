@@ -13,14 +13,18 @@
 
 template <class T> class gArray  {
   protected:
-    int length;
+    int min, max;
     T *data;
 
   public:
 //
-// Constructs a gArray of length 'len'
+// Constructs a gArray of length 'len', starting at '1'
 //
     gArray(int len = 0);
+//
+// Constructs a gArray starting at lo and ending at hi
+//
+    gArray(int lo, int hi);
 //
 // duplicate the input gArray<T> constant referrence
 //
@@ -38,6 +42,16 @@ template <class T> class gArray  {
 // return length in the invoking gArray<T>
 //
     int Length(void) const;
+
+//
+// return first index
+//
+    int First(void) const;
+
+//
+// return last index
+//
+    int Last(void) const;
 
 //
 // Check bounds of index. Exit program if out of bounds
