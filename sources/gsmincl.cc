@@ -34,7 +34,7 @@ struct PortionSpecTextType
 };  
 
 
-#define NumPortionSpecs 35
+#define NumPortionSpecs 34
 
 PortionSpecTextType _PortionSpecText[] =
 {
@@ -56,10 +56,10 @@ PortionSpecTextType _PortionSpecText[] =
 
   { porOUTCOME_FLOAT,    "OUTCOME(FLOAT)" },
   { porOUTCOME_RATIONAL, "OUTCOME(RATIONAL)" },
-  { porPLAYER_NFG,       "PLAYER(NFG)" },
-  { porPLAYER_EFG,       "PLAYER(EFG)" },
-  { porNF_SUPPORT,       "SUPPORT(NFG)" },
-  { porEF_SUPPORT,       "SUPPORT(EFG)" },
+  { porPLAYER_NFG,       "NFPLAYER" },
+  { porPLAYER_EFG,       "EFPLAYER" },
+  { porNF_SUPPORT,       "NFSUPPORT" },
+  { porEF_SUPPORT,       "EFSUPPORT" },
   { porINFOSET,          "INFOSET" },
   { porNODE,             "NODE" },
   { porACTION,           "ACTION" },
@@ -77,7 +77,6 @@ PortionSpecTextType _PortionSpecText[] =
   { porMIXED,            "MIXED" },
   { porBEHAV,            "BEHAV" },
   { porOUTCOME,          "OUTCOME" },
-  { porPLAYER,           "PLAYER" },
 
   { porANYTYPE,          "ANYTYPE" }
 };
@@ -95,7 +94,7 @@ gString PortionSpecToText(const PortionSpec& spec)
 	result = result + " " + _PortionSpecText[i].Text;
 
   if(result == "")
-    for(i=0; i<NumPortionSpecs-7; i++)
+    for(i=0; i<NumPortionSpecs-6; i++)
       if(spec.Type & _PortionSpecText[i].Type)
 	if(result == "")
 	  result = _PortionSpecText[i].Text;

@@ -496,8 +496,11 @@ Portion *GSM_Exp(Portion **param)
 
 Portion *GSM_Log(Portion **param)
 {
-  return new FloatValPortion
-    (log(((FloatPortion *) param[0])->Value()));
+  double d = ((FloatPortion *) param[0])->Value();
+  if(d <= 0.0)
+    return new ErrorPortion("Argument must be greater than zero");
+  else
+    return new FloatValPortion(log(d));
 }
 
 
@@ -1326,22 +1329,8 @@ Portion* GSM_Write_numerical( Portion** param )
 Portion* GSM_Write_gString( Portion** param )
 {
   assert(param[1]->Spec().Type == porTEXT);
-  int i = 0;
-
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-
-  gString text = ( (TextPortion*) param[ 1 ] )->Value();
-
-  for( i = 0; i < text.length(); i++ )
-  {
-    if( text[ i ] == '\\' && text[ i + 1 ] == 'n' )
-    {
-      text.remove( i );
-      text[ i ] = '\n';
-    }
-  }
-
-  s << text;
+  s << param[1];
   return param[0]->RefCopy();
 }
 
@@ -1670,8 +1659,7 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
 
   for( i=1; i <= list->Length(); i++ )
   {
-    assert( (*list)[i]->Spec().Type==spec.Type || 
-	   (*list)[i]->Spec().ListDepth > 0 );
+    assert((*list)[i]->Spec().Type==spec.Type);
     sub_param[0] = param[0];
     sub_param[1] = (*list)[i];
 
@@ -1689,7 +1677,7 @@ Portion* GSM_Read_List( Portion** param, PortionSpec spec,
 	input.unget(c);      
     }
 
-    if( (*list)[i]->Spec().Type == spec.Type )
+    if( (*list)[i]->Spec() == spec )
       p = (*func)( sub_param );
     else
       p = GSM_Read_List( sub_param, spec, func, ListFormat );

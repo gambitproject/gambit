@@ -428,8 +428,17 @@ PortionSpec TextPortion::Spec( void ) const
 void TextPortion::Output( gOutput& s ) const
 { 
   Portion::Output( s );
+  gString text = *_Value;
+  int i;
+  for( i = 0; i < text.length(); i++ )
+    if( text[ i ] == '\\' && text[ i + 1 ] == 'n' )
+    {
+      text.remove( i );
+      text[ i ] = '\n';
+    }
+
   if( _WriteQuoted ) s << "\"";
-  s << *_Value;
+  s << text;
   if( _WriteQuoted ) s << "\""; 
 }
 
@@ -2043,8 +2052,11 @@ int ListPortion::_ListDepth(void) const
   {
     Depth = operator[](1)->Spec().ListDepth + 1;
     for(i=2; i<=Length(); i++)
+    {
+      assert(i>=0 && i<=Length());
       if(operator[](i)->Spec().ListDepth + 1 < Depth)
 	Depth = operator[](i)->Spec().ListDepth + 1;
+    }
   }
 
   return Depth;

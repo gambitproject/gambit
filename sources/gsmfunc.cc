@@ -118,7 +118,16 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
 	if( ParamIn[i]->Spec().ListDepth > 0 && 
 	   ParamIn[j]->Spec().ListDepth > 0)
 	  if(!_ListDimMatch((ListPortion*)ParamIn[i],(ListPortion*)ParamIn[j]))
+	  {
+	    gout << "NumParams: " << NumParams << " i: " << i << " j: " << j << '\n';
+	    gout << "i: " << ((ListPortion*)ParamIn[i])->Length() << '\n';
+	    gout << "j: " << ((ListPortion*)ParamIn[j])->Length() << '\n';
+	    gout << "i: " << PortionSpecToText(ParamIn[i]->Spec()) << '\n';
+	    gout << "j: " << PortionSpecToText(ParamIn[j]->Spec()) << '\n';
+	    gout << "i: " << ParamIn[i] << '\n';
+	    gout << "j: " << ParamIn[j] << '\n';
 	    return new ErrorPortion( "Mismatched dimensionalities" );
+	  }
     }
   }
 

@@ -15,8 +15,11 @@
 
 Portion *GSM_NthElement(Portion **param)
 {
-  return ((ListPortion *) param[0])->Subscript
-    (((IntPortion *) param[1])->Value());
+  int n = ((IntPortion *) param[1])->Value();
+  if(n < 0 || n > ((ListPortion *) param[0])->Length())
+    return new ErrorPortion("Subscript out of range");
+  else
+    return ((ListPortion *) param[0])->Subscript(n);
 }
 
 Portion *GSM_Remove(Portion **param)
@@ -49,7 +52,8 @@ Portion *GSM_NthChar(Portion **param)
 {
   gString text(((TextPortion *) param[0])->Value());
   int n = ((IntPortion *) param[1])->Value();
-  if (n < 0 || n >= text.length())   return 0;
+  if (n <= 0 || n > text.length())
+    return 0;
   return new TextValPortion(text[n-1]);
 }
 

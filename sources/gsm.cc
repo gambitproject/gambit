@@ -277,27 +277,22 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
   if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
-    if( old_value->Spec().Type != p->Spec().Type )
-    {
-      if( !PortionSpecMatch( old_value->Spec().Type, p->Spec().Type ) )
-	type_match = false;
-    }
-    else if( p->Spec().ListDepth > 0 )
+    if( p->Spec().ListDepth > 0 )
     {
       assert( old_value->Spec().ListDepth > 0 );
       if( ( (ListPortion*) old_value )->Spec().Type != 
 	 ( (ListPortion*) p )->Spec().Type )
       {
 	if( ( (ListPortion*) p )->Spec().Type == porUNDEFINED )
-	{
-	  ( (ListPortion*) p )->
-	    SetDataType( ( (ListPortion*) old_value )->Spec().Type );
-	}
-	else
-	{
+	  ((ListPortion*) p)->SetDataType(old_value->Spec().Type);
+	else if(old_value->Spec().Type != porUNDEFINED)
 	  type_match = false;
-	}
       }
+    }
+    else if( old_value->Spec().Type != p->Spec().Type )
+    {
+      if( !PortionSpecMatch( old_value->Spec(), p->Spec() ) )
+	type_match = false;
     }
   }
 
@@ -603,7 +598,14 @@ bool GSM::Assign( void )
       result = false;
     }
   }
-  else if(PortionSpecMatch(p1Spec.Type, p2Spec.Type))
+  else if(PortionSpecMatch(p1Spec, p2Spec))
+  {
+    _VarDefine(varname, p2);
+    delete p1;
+    _Push(p2->RefCopy());
+  }
+  else if(p1Spec.Type == porUNDEFINED && p1Spec.ListDepth > 0 &&
+	  p2Spec.ListDepth > 0)
   {
     _VarDefine(varname, p2);
     delete p1;
@@ -611,6 +613,8 @@ bool GSM::Assign( void )
   }
   else
   {
+    gout << "spec1: " << PortionSpecToText(p1Spec) << '\n';
+    gout << "spec2: " << PortionSpecToText(p2Spec) << '\n';
     _ErrorMessage(_StdErr, 66);
     result = false;
   }
@@ -1408,10 +1412,21 @@ bool GSM::Subscript ( void )
   
   if(p1->Spec().ListDepth > 0 && p2->Spec().Type == porINTEGER)
   {
-    _Push(((ListPortion*) p1)->Subscript(((IntPortion*) p2)->Value()));
+    int n = ((IntPortion *) p2)->Value();
+    bool result = true;
+    if (n <= 0 || n > ((ListPortion*) p1)->Length())
+    {
+      _ErrorMessage(_StdErr, 11);
+      result = false;
+    }
+    else
+    {
+      _Push(((ListPortion*) p1)->Subscript(n));
+      result = true;
+    }
     delete p1;
     delete p2;
-    return true;
+    return result;
   }
   if(p1->Spec().Type == porTEXT && p2->Spec().Type == porINTEGER)
   {
@@ -1419,9 +1434,9 @@ bool GSM::Subscript ( void )
     int n = ((IntPortion *) p2)->Value();
     delete p1;
     delete p2;
-    if (n < 0 || n >= text.length())
+    if (n <= 0 || n > text.length())
     {
-      _Push(new ErrorPortion);
+      _ErrorMessage(_StdErr, 12);
       return false;
     }
     else
@@ -2379,6 +2394,12 @@ void GSM::_ErrorMessage
 
   switch( error_num )
   {
+  case 11:
+    s << "NthElement[]: Subscript out of range\n";
+    break;
+  case 12:
+    s << "NthChar[]: Subscript out of range\n";
+    break;
   case 25:
     s << "Function " << str1 << "[] undefined\n";
     break;
