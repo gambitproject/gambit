@@ -1,5 +1,5 @@
 // File: nfgconst.h -- defines various constants for NormShow menu events
-// $Id$
+// @(#)nfgconst.h	1.9 7/8/96
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
@@ -40,6 +40,9 @@
 #define NFG_SUPPORTS_HELP		"Examining NF Supports"
 #define NFG_MAKE_SUPPORT_HELP	"Creating NF Supports"
 #define NFG_STANDARD_HELP					"NFG Standard Solutions"
+#define NFG_SOLN_SORT_HELP		"Sorting and Filtering Solutions"
+#define NFG_SOLNSTART_HELP		"Setting algorithm starting point"
+
 // help names for actual solution algorithms
 #define ENUMPURE_HELP						"EnumPure"
 #define ENUMMIXED_HELP          "EnumMixed"

@@ -54,7 +54,7 @@
 #define SUBGAME_COLLAPSEONE				1356
 #define SUBGAME_COLLAPSEALL				1358
 #define SUBGAME_EXPANDONE					1360
-#define	SUBGAME_EXPANDBRANCH			1361 
+#define	SUBGAME_EXPANDBRANCH			1361
 #define SUBGAME_EXPANDALL					1362
 #define SUBGAME_TOGGLE						1364
 #define SUBGAME_SET							1366
@@ -67,11 +67,7 @@
 #define INFOSET_REVEAL						1407
 
 #define SOLVE_SOLVE							1501
-#define SOLVE_INSPECT						1502
-#define SOLVE_REMOVE						1503
 #define SOLVE_SOLVE_NORMAL			1504
-#define SOLVE_FEATURES					1505
-#define SOLVE_SUPPORTS					1510
 #define	SOLVE_SETTINGS					1520		// settings submenu
 #define	SOLVE_ALGORITHM					1522
 #define	SOLVE_DOMINANCE					1524
@@ -100,6 +96,16 @@
 #define DISPLAY_REDRAW					1611
 #define DISPLAY_ZOOM_WIN				1613
 
+#define SUPPORTS_SUPPORTS				1800
+#define SUPPORTS_ELIMDOM				1810
+
+#define INSPECT_INSPECT					1850
+#define INSPECT_REMOVE 					1855
+#define INSPECT_FEATURES				1860
+
+#define	GAMBIT_HELP_CONTENTS 					1700
+#define GAMBIT_HELP_ABOUT							1701
+
 // Help system
 #define	EFG_GUI_HELP				"Extensive Form GUI"
 #define EFG_OUTCOME_HELP		"Outcomes GUI"
@@ -115,7 +121,8 @@
 #define EFG_STANDARD_HELP			"EFG Standard Solutions"
 #define EFG_CUSTOM_HELP			  "EFG Custom Solutions"
 #define EFG_SUBGAMESOLN_HELP	"EFG Solutions and Subgames"
-
+#define EFG_SOLN_SORT_HELP		"Sorting and Filtering Solutions"
+#define EFG_SOLNSTART_HELP		"Setting algorithm starting point"
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"
 #define		BSOLN_SHOW_SECT	"Behav-Soln-Show"
