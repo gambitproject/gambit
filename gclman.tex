@@ -507,8 +507,7 @@ in a ``short form'' call, and the order of parameters is therefore
 significant.
 
 Here is a list of the functions thus abbreviated, and their ``short form''
-equivalents:\marginpar[]{The changes to {\tt Concat} and {\tt Power} are
-pending}
+equivalents:
 
 \medskip
 
@@ -576,7 +575,7 @@ The order of precedence for built-in functions is as follows:
 \item
 \verb&+ - &\verb+&+
 \item
-\verb+* / DIV MOD $\wedge$+
+\verb+* . / DIV MOD+ $\wedge$
 \item
 \verb&(unary) + -&
 \item
@@ -613,7 +612,7 @@ are evaluated in a special way (since their parameters are expressions
 and sequences of statements); they also have no ``formal'' names for
 their parameters.
 
-\subsubsection{Conditional execution with {\tt If[]}}
+\subsubsection{Conditional execution with {\tt If}}
 
 The function \verb+If[]+ allows execution of a sequence of statements
 only under certain conditions.  The syntax of the function is
@@ -658,7 +657,77 @@ statements which result in the definition of new variables.
 
 \subsubsection{Repetitive execution with {\tt While}}
 
+Often in writing programs it is necessary to execute a block of statements
+repeatedly, usually with different values for variables.  To this end
+the GCL provides a special function \verb+While+ as a generalized looping
+construct.  The syntax of the function is
+
+\begin{verbatim}
+While[boolean-expression, statement-list]
+\end{verbatim}
+
+The function is interpreted as follows: While \verb+boolean-expression+
+evalutes to \verb+True+, execute the statements in \verb+statement-list+.
+Note that the evaluation of the boolean takes place at the beginning of
+the execution of a block, so it is only important whether the value is
+\verb+True+ or \verb+False+ at the beginning of the block, and not at
+some point in the middle.
+
+This simple loop generates the numbers from one to ten:
+
+\begin{verbatim}
+i := 0;
+While[i <= 10, i := i + 1];
+\end{verbatim}
+
+\noindent Alternately, one can create a list of the values one through ten with
+a small modification:
+
+\begin{verbatim}
+i := 1;
+list := { };
+While[i <= 10, list := list + { i }; i := i + 1;]
+\end{verbatim}
+
+As with \verb+If+, be wary of declaring a variable implicitly inside a loop.
+A variable is declared only when the corresponding statement is executed;
+so, if the \verb+boolean-expression+ is \verb+False+ the first time it is
+evaluated, the body of the loop never executes, and no variables which
+appear in the loop are considered to be defined.
+
 \subsubsection{Special looping with {\tt For}}
+
+The function \verb+For+ is a specialized looping construct, useful mostly
+in cases where some index variable is used to iterate a list or some sequence.
+The general syntax for \verb+For+ is
+
+\begin{verbatim}
+For[statement-list, boolean-expression, statement-list, statement-list]
+\end{verbatim}
+
+\noindent The call is interpreted as follows:
+\begin{itemize}
+\item Execute the statements in
+the first \verb+statement-list+ (this is called the {\em initialization}).
+\item Evaluate the \verb+boolean-expression+ (called the {\em guard}).
+\item If the \verb+boolean-expression+ is \verb+False+, terminate the loop and
+continue with the first statement after the loop.  If it is \verb+True+,
+execute the third \verb+statement-list+, called the {\em body} of the loop.
+\item Execute the second \verb+statement-list+, called the {\em increment},
+and return to the evaluation of the guard.
+\end{itemize}
+
+Returning to the examples in the \verb+While+ section, we see another way
+of writing the two loops:
+
+\begin{verbatim}
+For[i := 1, i <= 10, i := i + 1, i];
+
+For[i := 1, list := { }; i <= 10, list := list + {i}; i := i + 1;]
+\end{verbatim}
+
+\noindent The two methods are completely equivalent, but it is often
+more convenient to use the structure afforded by the \verb+For+ function.
 
 
 \section{Advanced topics}
@@ -669,7 +738,7 @@ The function {\tt Include[TEXT]} is used to insert the contents of the file
 given into the input stream, as if they had been typed directly by the user.
 This can be particularly useful in conjunction with user defined functions, in that
 a library of useful functions can be constructed and included into the program
-easily.
+asily.
 
 The {\tt Include} directive may only appear at the ``top level'' of the
 program.  That is to say, it cannot be used inside a loop, function declaration, or expression.  However, files may be nested arbitrarily deep using
@@ -1111,10 +1180,10 @@ UnAssign[x<->T] =: T
 \subsection{Flow Control}
 
 \begin{verbatim}
-For[statement-list, guard, statement-list, statement-list]
-If[guard, statement-list]
-If[guard, statement-list, statement-list]
-While[guard, statement-list]
+For[statement-list, boolean-expression, statement-list, statement-list]
+If[boolean-expression, statement-list]
+If[boolean-expression, statement-list, statement-list]
+While[boolean-expression, statement-list]
 \end{verbatim}
 
 \subsection{Lists}
@@ -1180,7 +1249,6 @@ Or[x->BOOL, y->BOOL] =: BOOL
 
 \subsection{Arithmetic}
 
-\marginpar{The vector versions of these functions are pending.}
 \begin{verbatim}
 Divide[x->FLOAT, y->FLOAT] =: FLOAT
 Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
@@ -1647,7 +1715,6 @@ the given information set does not belong to the chance player.
 Concat[x->LIST(T), y->LIST(T)] =: LIST(T)
 \end{verbatim}\normalsize
 
-\marginpar{This function is pending.}
 \bd
 Returns the concatenation of the lists \verb+x+ and \verb+y+.
 \item
@@ -1661,7 +1728,6 @@ Returns the concatenation of the lists \verb+x+ and \verb+y+.
 Concat[x->TEXT, y->TEXT] =: TEXT
 \end{verbatim} \normalsize
 
-\marginpar{This function is pending.}
 \bd
 Returns the concatenation of the text strings \verb+x+
 and \verb+y+.
@@ -1787,7 +1853,6 @@ Returns the quotient $x / y$.
 Dot[x->LIST(T), y->LIST(T)] =: T
 \end{verbatim}\normalsize
 
-\marginpar{This function is pending.}
 \bd
 Returns the dot product of $x$ and $y$, where the lists are treated as vectors.
 It is a run-time error to attempt to multiply two lists of different
@@ -1833,34 +1898,72 @@ other {\em pure} strategies are eliminated.)
 
 \item
 \protect \large \begin{verbatim}
+EnumMixedSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
+               {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 EnumMixedSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
                {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
 Returns the extreme points of the set of all Nash equilibria (pure or
-mixed) for a given support, \verb+support+, of a two person normal form
-game.  By default, all equilibria are found; the optional parameter
-\verb+stopAfter+ may be used to specify a maximum number of
-equilibria.  Upon completion, \verb+nPivots+ returns the number of
-pivots done by the algorithm, and
-\verb+time+ returns the amount of time consumed by the function.
+mixed) for a two person game.  The extensive form version converts
+each marked subgame into its associated reduced normal form, enumerates
+equilibria, and reassembles the behavioral profiles.  The normal form
+and support versions operate directly on the given normal form or support
+of the normal form.
+
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+\bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will implement
+the algorithm on extensive forms.}
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[nPivots:] Upon completion, contains the number of pivots done by the
+algorithm.
+\item
+[time:] Upon completion, returns the elapsed time during the execution
+of the algorithm.
+\ed
 \item
 [See also:] {\tt EnumPureSolve}.
 \ed
 
 \item
 \protect \large \begin{verbatim}
+EnumPureSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
+              {time<->FLOAT}] =: LIST(BEHAV)
 EnumPureSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
               {time<->FLOAT}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd
-Returns all pure strategy Nash equilibria in the support, \verb+support+,
-of a normal form game.  By default, all equilibria are found; the optional
-parameter \verb+stopAfter+ may be used to specify a maximum number of
-equilibria.  Upon completion, \verb+time+ returns the amount of time
-consumed by the function. 
+Returns all pure strategy Nash equilibria of a game.  The behavior
+of the algorithm may be modified by the following optional parameters:
+\bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will implement
+the algorithm on extensive forms.}
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[time:] Upon completion, returns the elapsed time during the execution
+of the algorithm.
+\ed
 \item
 [See also:] {\tt EnumMixedSolve}.
 \ed
@@ -1911,7 +2014,7 @@ of precision.
 
 \item
 \protect \large \begin{verbatim}
-For[statement-list, guard, statement-list, statement-list]
+For[statement-list, boolean-expression, statement-list, statement-list]
 \end{verbatim}\normalsize
 
 \bd
@@ -2105,8 +2208,8 @@ with it.
 
 \item 
 \protect \large \begin{verbatim}
-If[guard, statement-list]
-If[guard, statement-list, statement-list]
+If[boolean-expression, statement-list]
+If[boolean-expression, statement-list, statement-list]
 \end{verbatim} \normalsize
   
 \bd
@@ -2198,14 +2301,13 @@ becomes the first child of the new node.  Returns the new node.
 
 \item
 \protect \large \begin{verbatim}
-Integer[x->NUMBER] =: INTEGER
-Integer[x->LIST(NUMBER)] =: LIST(INTEGER)
+Integer[x->FLOAT] =: INTEGER
+Integer[x->INTEGER] =: INTEGER
+Integer[x->RATIONAL] =: INTEGER
 \end{verbatim} \normalsize
 
-\marginpar{This prototype is a proposed change to the pseudotype {\tt NUMBER}}
 \bd
-Converts \verb+x+ into a value of type \verb+INTEGER+, or a list of
-numbers \verb+x+ into a list of \verb+INTEGER+s componentwise.
+Converts \verb+x+ into a value of type \verb+INTEGER+.
 \item
 [See also:] {\tt Float}, {\tt Rational}.
 \ed
@@ -2275,22 +2377,21 @@ Returns whether the system stopwatch is currently running.
 
 %--J--
 
-% Not yet implemented
-%\item
-%\protect \large \begin{verbatim}
-%JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
-%\end{verbatim}\normalsize
-%
-%\bd
-%Makes the node \verb+node+ a member of the information set
-%\verb+infoset+.  If the previous information set of \verb+node+ was
-%a singleton (i.e., it contained only \verb+node+), it is removed from the
-%extensive form.  It is a run-time error if the number of actions at the
-%information set does not match the number of branches at the node.
-%Returns the node \verb+node+.
-%\item
-%[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
-%\ed
+\item
+\protect \large \begin{verbatim}
+JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
+\end{verbatim}\normalsize
+
+\bd
+Makes the node \verb+node+ a member of the information set
+\verb+infoset+.  If the previous information set of \verb+node+ was
+a singleton (i.e., it contained only \verb+node+), it is removed from the
+extensive form.  It is a run-time error if the number of actions at the
+information set does not match the number of branches at the node.
+Returns the node \verb+node+.
+\item
+[See also:] {\tt LeaveInfoset}, {\tt MergeInfosets}.
+\ed
 
 %--K--
 
@@ -2503,8 +2604,8 @@ Default is 2.0e-10.
 \ed
 
 \item
-[Note:] If \verb+start->BEHAV+ is specified, subgame markings are ignored,
-and solution by normal form is not available in the current version.
+[Note:] Solution of extensive form via normal form is not currently
+available; if \verb+start->BEHAV+ is specified, subgame markings are ignored.
 \ed
 
 
@@ -2563,7 +2664,7 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
-LpSolve[efg<->EFG, {asNfg->BOOLEAN},
+LpSolve[efg<->EFG,
         {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LpSolve[nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
@@ -2576,6 +2677,9 @@ The list of solutions computed is returned.  If \verb+npivots+ is
 specified, upon return it contains the number of pivots required to
 compute the solution.  If \verb+time+ is specified, upon return it
 contains the time elapsed in computing the solution.
+\item
+[Note:] The extensive form version implicitly creates the associated
+reduced normal form for computation of equilibrium.
 \item
 [See also:] {\tt LcpSolve}.
 \ed
@@ -3271,7 +3375,6 @@ Power[x->INTEGER, y->INTEGER] =: INTEGER
 Power[x->FLOAT, y->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
-\marginpar{This function is pending.}
 \bd
 Computes the value $x^{y}$.
 \item
@@ -3660,13 +3763,13 @@ on the stopwatch.
 SubgameRoots[efg<->EFG] =: LIST(NODE)
 \end{verbatim}\normalsize
 
-\marginpar{This function is part of the proposed subgame interface.}
 \bd
 Returns the list of nodes which are roots of subgames in the extensive
 form {\tt efg}.  The ordering of the list is such that all children
 of a node are listed before a node.
 \item
-[See also:] {\tt DeleteSubgame}, {\tt NewSubgame}, {\tt FindSubgames}.
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}.
 \ed
 
 %--T--
@@ -3774,7 +3877,7 @@ the operation is returned.
 
 \item 
 \protect \large \begin{verbatim}
-While[guard, statements]
+While[boolean-expression, statement-list]
 \end{verbatim} \normalsize
   
 \bd
