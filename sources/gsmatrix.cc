@@ -1,7 +1,7 @@
 //#
 //# FILE: gsmatrix.cc -- Instantiation of common squarematrix types
 //#
-//# $Id$ 
+//# @(#)gsmatrix.cc	2.5 07/01/97 
 //#
 
 #include "gsmatrix.imp"
