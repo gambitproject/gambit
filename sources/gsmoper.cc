@@ -199,6 +199,20 @@ Portion* GSM_Divide_gRational( Portion** param )
 }
 
 
+/*---------------------- GSM_Exp, GSM_Log --------------------*/
+
+Portion *GSM_Exp(Portion **param)
+{
+  return new numerical_Portion<double>
+    (exp(((numerical_Portion<double> *) param[0])->Value()));
+}
+
+Portion *GSM_Log(Portion **param)
+{
+  return new numerical_Portion<double>
+    (log(((numerical_Portion<double> *) param[0])->Value()));
+}
+
 
 /*------------------------ GSM_Negate ------------------------*/
 
@@ -763,6 +777,19 @@ void Init_gsmoper( GSM* gsm )
 			porRATIONAL, NO_DEFAULT_VALUE );
 
   gsm->AddFunction( FuncObj );
+
+
+  /*----------------------- Exp, Log ---------------------*/
+
+  FuncObj = new FuncDescObj("Exp");
+  FuncObj->SetFuncInfo(GSM_Exp, 1);
+  FuncObj->SetParamInfo(GSM_Exp, 0, "x", porDOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("Log");
+  FuncObj->SetFuncInfo(GSM_Log, 1);
+  FuncObj->SetParamInfo(GSM_Log, 0, "x", porDOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
 
 
   /*----------------------- Negate -----------------------*/
