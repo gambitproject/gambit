@@ -84,9 +84,9 @@ void gbtTablePlayerCtrl::OnDraw(wxDC &p_dc)
   int player = m_view->GetTablePlayer(m_index);
   int strat = m_view->GetStrategy(player);
   const gbtGame &game = m_view->GetDocument()->GetGame();
-  wxString label = (game->GetPlayer(player)->GetLabel() +
-		    " plays strategy " +
-		    game->GetPlayer(player)->GetStrategy(strat)->GetLabel()).c_str();
+  wxString label = wxString::Format(wxT("%s plays strategy %s"),
+				    game->GetPlayer(player)->GetLabel().c_str(),
+				    game->GetPlayer(player)->GetStrategy(strat)->GetLabel().c_str());
   wxColour color = m_view->GetDocument()->GetPlayerColor(player);
   
   p_dc.GetTextExtent(label, &width, &height);
@@ -105,12 +105,12 @@ void gbtTablePlayerCtrl::OnRightDown(wxMouseEvent &p_event)
   gbtGamePlayer player = 
     m_view->GetDocument()->GetGame()->GetPlayer(m_view->GetTablePlayer(m_index));
 
-  m_popupMenu = new wxMenu(wxString::Format("Set displayed strategy for %s",
+  m_popupMenu = new wxMenu(wxString::Format(_("Set displayed strategy for %s"),
 					    player->GetLabel().c_str()));
 
   for (int st = 1; st <= player->NumStrategies(); st++) {
     m_popupMenu->Append(1000 + st,
-			wxString::Format("%d: %s", st,
+			wxString::Format(wxT("%d: %s"), st,
 					 player->GetStrategy(st)->GetLabel().c_str()));
   }
 
@@ -186,13 +186,13 @@ void gbtTableChoiceCtrl::OnPaint(wxPaintEvent &)
 
   dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
   wxCoord textWidth, textHeight;
-  dc.GetTextExtent("Table", &textWidth, &textHeight);
+  dc.GetTextExtent(_("Table"), &textWidth, &textHeight);
   
-  dc.DrawText("Table",
+  dc.DrawText(_("Table"),
 	      (100 - textWidth) / 2,
 	      GetClientSize().GetHeight() / 2 - textHeight);
-  dc.GetTextExtent("Choices:", &textWidth, &textHeight);
-  dc.DrawText("Choices:",
+  dc.GetTextExtent(_("Choices:"), &textWidth, &textHeight);
+  dc.DrawText(_("Choices:"),
 	      (100 - textWidth) / 2,
 	      GetClientSize().GetHeight() / 2);
 
@@ -317,21 +317,21 @@ void gbtMatrixSheet::OnLabelRightDown(wxSheetEvent &p_event)
 {
   wxMenu *menu = new wxMenu;
   if (IsCornerLabelCell(p_event.GetCoords())) {
-    menu->Append(GBT_MENU_ADD_PLAYER, "Add a new player");
+    menu->Append(GBT_MENU_ADD_PLAYER, _("Add a new player"));
   }
   else if (IsRowLabelCell(p_event.GetCoords())) {
     menu->Append(GBT_MENU_ROW_STRATEGY_BEFORE + p_event.GetRow() + 1, 
-		 "Add strategy before");
+		 _("Add strategy before"));
     menu->Append(GBT_MENU_ROW_STRATEGY_AFTER + p_event.GetRow() + 1, 
-		 "Add strategy after");
+		 _("Add strategy after"));
   }
   else {
     menu->Append(GBT_MENU_COL_STRATEGY_BEFORE + 
 		 (p_event.GetCol() / m_doc->GetGame()->NumPlayers()) + 1, 
-		 "Add strategy before");
+		 _("Add strategy before"));
     menu->Append(GBT_MENU_COL_STRATEGY_AFTER + 
 		 (p_event.GetCol() / m_doc->GetGame()->NumPlayers()) + 1, 
-		 "Add strategy after");
+		 _("Add strategy after"));
   }
 
   PopupMenu(menu, p_event.GetPosition().x, p_event.GetPosition().y);
@@ -458,13 +458,15 @@ wxString gbtMatrixSheet::GetCellValue(const wxSheetCoords &p_coords)
 
   try {
     if (IsRowLabelCell(p_coords)) {
-      return m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() + 1)->GetLabel().c_str();
+      return wxString::Format(wxT("%s"),
+			      m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() + 1)->GetLabel().c_str());
     }
     else if (IsColLabelCell(p_coords)) {
-      return m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / m_doc->GetGame()->NumPlayers() + 1)->GetLabel().c_str();
+      return wxString::Format(wxT("%s"),
+			      m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / m_doc->GetGame()->NumPlayers() + 1)->GetLabel().c_str());
     }
     else if (IsCornerLabelCell(p_coords)) {
-      return "";
+      return wxT("");
     }
 
     int rowStrat = p_coords.GetRow();
@@ -479,7 +481,8 @@ wxString gbtMatrixSheet::GetCellValue(const wxSheetCoords &p_coords)
     profile->SetStrategy(game->GetPlayer(m_view->GetRowPlayer())->GetStrategy(rowStrat + 1));
     profile->SetStrategy(game->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
 
-    return ToText(profile->GetPayoff(game->GetPlayer(player))).c_str();
+    return wxString::Format(wxT("%s"),
+			    ToText(profile->GetPayoff(game->GetPlayer(player))).c_str());
   }
   catch (gbtException &) {
     printf("exception getting cell value %d %d\n", p_coords.GetRow(), p_coords.GetCol());
@@ -498,7 +501,7 @@ void gbtMatrixSheet::SetCellValue(const wxSheetCoords &p_coords,
     gbtGame game = m_doc->GetGame();
     gbtGamePlayer player = game->GetPlayer(m_view->GetRowPlayer());
     m_doc->SetStrategyLabel(player->GetStrategy(rowStrat + 1),
-			    p_value.c_str());
+			    (const char *) p_value.mb_str());
     return;
   }
   else if (IsColLabelCell(p_coords)) {
@@ -506,7 +509,7 @@ void gbtMatrixSheet::SetCellValue(const wxSheetCoords &p_coords,
     int colStrat = p_coords.GetCol() / game->NumPlayers();
     gbtGamePlayer player = game->GetPlayer(m_view->GetColPlayer());
     m_doc->SetStrategyLabel(player->GetStrategy(colStrat + 1),
-			    p_value.c_str());
+			    (const char *) p_value.mb_str());
     return;
   }
 
@@ -533,7 +536,7 @@ void gbtMatrixSheet::SetCellValue(const wxSheetCoords &p_coords,
   gbtRational r;
   m_doc->SetPayoff(outcome,
 		   m_doc->GetGame()->GetPlayer(player),
-		   FromText(p_value.c_str(), r));
+		   FromText((const char *) p_value.c_str(), r));
 
   ForceRefresh();
 }

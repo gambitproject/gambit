@@ -78,7 +78,8 @@ void gbtPlayerLabelCtrl::OnDraw(wxDC &p_dc)
   p_dc.SetFont(wxFont(12, wxSWISS, wxNORMAL, wxBOLD));
   wxCoord width, height;
 
-  wxString label = m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str();
+  wxString label = wxString::Format(wxT("%s"),
+				    m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str());
   wxColour color = m_doc->GetPlayerColor(m_player);
   
   p_dc.GetTextExtent(label, &width, &height);
@@ -102,11 +103,11 @@ void gbtPlayerLabelCtrl::OnRightDown(wxMouseEvent &p_event)
 {
   if (m_popupMenu)  delete m_popupMenu;
 
-  m_popupMenu = new wxMenu("Show player on this axis");
+  m_popupMenu = new wxMenu(_T("Show player on this axis"));
   const gbtGame &game = m_doc->GetGame();
   for (int pl = 1; pl <= game->NumPlayers(); pl++) {
     m_popupMenu->Append(1000 + pl,
-			wxString::Format("%d: %s",
+			wxString::Format(wxT("%d: %s"),
 					 pl, 
 					 game->GetPlayer(pl)->GetLabel().c_str()));
   }

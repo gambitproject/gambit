@@ -79,34 +79,33 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *paramSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Computing Nash equilibria"),
+					 _("Computing Nash equilibria")),
 			 wxVERTICAL);
 
   wxBoxSizer *countSizer = new wxBoxSizer(wxHORIZONTAL);
-  countSizer->Add(new gbtTextWindow(this, wxID_STATIC,
-				    "Compute"),
+  countSizer->Add(new gbtTextWindow(this, wxID_STATIC, _("Compute")),
 		  0, wxALL | wxALIGN_CENTER, 5);
-  m_count = new gbtTextWindow(this, GBT_BUTTON_COUNT, "one Nash equilibrium");
+  m_count = new gbtTextWindow(this, GBT_BUTTON_COUNT, _("one Nash equilibrium"));
   m_count->SetUnderline(true);
   countSizer->Add(m_count, 0, wxALL | wxALIGN_CENTER, 5);
   paramSizer->Add(countSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *methodSizer = new wxBoxSizer(wxHORIZONTAL);
-  methodSizer->Add(new gbtTextWindow(this, wxID_STATIC, "using"),
+  methodSizer->Add(new gbtTextWindow(this, wxID_STATIC, _("using")),
 		   0, wxALL | wxALIGN_CENTER, 5);
   m_method = new gbtTextWindow(this, GBT_BUTTON_METHOD,
-			       "Gambit's recommended method",
-			       "linear complementarity programming");
+			       _("Gambit's recommended method"),
+			       _("linear complementarity programming"));
   m_method->SetUnderline(true);
   methodSizer->Add(m_method, 0, wxALL | wxALIGN_CENTER, 5);
   paramSizer->Add(methodSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   
-  m_startButton = new wxButton(this, GBT_BUTTON_START, "Start");
+  m_startButton = new wxButton(this, GBT_BUTTON_START, _("Start"));
   buttonSizer->Add(m_startButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_cancelButton = new wxButton(this, GBT_BUTTON_CANCEL, "Cancel");
+  m_cancelButton = new wxButton(this, GBT_BUTTON_CANCEL, _("Cancel"));
   buttonSizer->Add(m_cancelButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_cancelButton->Enable(false);
 
@@ -116,7 +115,7 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *listSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "List of computed equilibria"),
+					 _("List of computed equilibria")),
 			 wxVERTICAL);
   m_profileCtrl = new gbtMixedProfileCtrl(this, p_doc, m_eqa);
   listSizer->Add(m_profileCtrl, 1, wxALL | wxEXPAND, 5);
@@ -125,7 +124,7 @@ gbtNashPanel::gbtNashPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *detailSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Equilibrium details"),
+					 _("Equilibrium details")),
 			 wxVERTICAL);
   m_profileDetail = new gbtMixedProfileDetail(this, p_doc, m_eqa);
   detailSizer->Add(m_profileDetail, 1, wxALL | wxEXPAND, 5);
@@ -141,6 +140,7 @@ void gbtNashPanel::OnStartButton(wxCommandEvent &)
   m_startButton->Enable(false);
   m_cancelButton->Enable(true);
   m_eqa.Flush();
+  m_profileCtrl->OnUpdate();
 
   switch (m_methodValue) {
   case GBT_MENU_METHOD_BEST:
@@ -225,8 +225,8 @@ void gbtNashPanel::OnUpdate(void)
 void gbtNashPanel::OnCountButton(wxCommandEvent &)
 {
   wxMenu *menu = new wxMenu;
-  menu->Append(GBT_MENU_COUNT_ONE, "one Nash equilibrium");
-  menu->Append(GBT_MENU_COUNT_ALL, "all Nash equilibria");
+  menu->Append(GBT_MENU_COUNT_ONE, _("one Nash equilibrium"));
+  menu->Append(GBT_MENU_COUNT_ALL, _("all Nash equilibria"));
   PopupMenu(menu,
 	    m_count->GetPosition().x,
 	    m_count->GetPosition().y + m_count->GetSize().GetHeight());
@@ -235,38 +235,39 @@ void gbtNashPanel::OnCountButton(wxCommandEvent &)
 void gbtNashPanel::OnMethodButton(wxCommandEvent &)
 {
   wxMenu *menu = new wxMenu;
-  menu->Append(GBT_MENU_METHOD_BEST, "Gambit's recommended method");
+  menu->Append(GBT_MENU_METHOD_BEST, _("Gambit's recommended method"));
   
   if (m_doc->GetGame()->NumPlayers() == 2) {
     menu->Append(GBT_MENU_METHOD_ENUMMIXED,
-		 "enumeration of extreme points");
-    menu->Append(GBT_MENU_METHOD_LCP, "linear complementarity programming");
+		 _("enumeration of extreme points"));
+    menu->Append(GBT_MENU_METHOD_LCP, _("linear complementarity programming"));
     menu->Append(GBT_MENU_METHOD_BFSLCP,
-		 "linear complementarity (breadth-first)");
+		 _("linear complementarity (breadth-first)"));
   }
   
   if (m_countValue == GBT_MENU_COUNT_ONE && 
       m_doc->GetGame()->NumPlayers() == 2 &&
       m_doc->GetGame()->IsConstSum()) {
-    menu->Append(GBT_MENU_METHOD_LP, "linear programming");
+    menu->Append(GBT_MENU_METHOD_LP, _("linear programming"));
   }
-  menu->Append(GBT_MENU_METHOD_LIAP, "minimization of the Lyapunov function");
+  menu->Append(GBT_MENU_METHOD_LIAP, 
+	       _("minimization of the Lyapunov function"));
   menu->Append(GBT_MENU_METHOD_ENUMPOLY,
-	       "systems of polynomial equations");
+	       _("systems of polynomial equations"));
   if (m_countValue == GBT_MENU_COUNT_ONE) {
     menu->Append(GBT_MENU_METHOD_LOGIT,
-		 "tracing logit equilibria");
+		 _("tracing logit equilibria"));
   }
   menu->Append(GBT_MENU_METHOD_PNS,
-	       "enumeration of possible supports");
+	       _("enumeration of possible supports"));
   if (m_countValue == GBT_MENU_COUNT_ONE) {
-    menu->Append(GBT_MENU_METHOD_SIMPDIV, "simplicial subdivision");
+    menu->Append(GBT_MENU_METHOD_SIMPDIV, _("simplicial subdivision"));
     menu->Append(GBT_MENU_METHOD_YAMAMOTO, 
-		 "Yamamoto's path-following procedure");
+		 _("Yamamoto's path-following procedure"));
     menu->Append(GBT_MENU_METHOD_IPA,
-		 "iterated polymatrix approximation");
+		 _("iterated polymatrix approximation"));
   }
-  menu->Append(GBT_MENU_METHOD_GNM, "a global Newton method");
+  menu->Append(GBT_MENU_METHOD_GNM, _("a global Newton method"));
   
   PopupMenu(menu,
 	    m_method->GetPosition().x,
@@ -277,59 +278,59 @@ void gbtNashPanel::OnMenu(wxCommandEvent &p_event)
 {
   switch (p_event.GetId()) {
   case GBT_MENU_COUNT_ONE:
-    m_count->SetLabel("one Nash equilibrium");
+    m_count->SetLabel(_("one Nash equilibrium"));
     m_countValue = GBT_MENU_COUNT_ONE;
     break;
   case GBT_MENU_COUNT_ALL:
-    m_count->SetLabel("all Nash equilibria");
+    m_count->SetLabel(_("all Nash equilibria"));
     m_countValue = GBT_MENU_COUNT_ALL;
     break;
   case GBT_MENU_METHOD_ENUMMIXED:
-    m_method->SetLabel("enumeration of extreme points");
+    m_method->SetLabel(_("enumeration of extreme points"));
     m_methodValue = GBT_MENU_METHOD_ENUMMIXED;
     break;
   case GBT_MENU_METHOD_LCP:
-    m_method->SetLabel("linear complementarity programming");
+    m_method->SetLabel(_("linear complementarity programming"));
     m_methodValue = GBT_MENU_METHOD_LCP;
     break;
   case GBT_MENU_METHOD_BFSLCP:
-    m_method->SetLabel("linear complementarity (breadth-first)");
+    m_method->SetLabel(_("linear complementarity (breadth-first)"));
     m_methodValue = GBT_MENU_METHOD_BFSLCP;
     break;
   case GBT_MENU_METHOD_LP:
-    m_method->SetLabel("linear programming");
+    m_method->SetLabel(_("linear programming"));
     m_methodValue = GBT_MENU_METHOD_LP;
     break;
   case GBT_MENU_METHOD_LIAP:
-    m_method->SetLabel("minimization of the Lyapunov function");
+    m_method->SetLabel(_("minimization of the Lyapunov function"));
     m_methodValue = GBT_MENU_METHOD_LIAP;
     break;
   case GBT_MENU_METHOD_LOGIT:
-    m_method->SetLabel("tracing logit equilibria");
+    m_method->SetLabel(_("tracing logit equilibria"));
     m_methodValue = GBT_MENU_METHOD_LOGIT;
     break;
   case GBT_MENU_METHOD_ENUMPOLY:
-    m_method->SetLabel("systems of polynomial equations");
+    m_method->SetLabel(_("systems of polynomial equations"));
     m_methodValue = GBT_MENU_METHOD_ENUMPOLY;
     break;
   case GBT_MENU_METHOD_PNS:
-    m_method->SetLabel("enumeration of possible supports");
+    m_method->SetLabel(_("enumeration of possible supports"));
     m_methodValue = GBT_MENU_METHOD_PNS;
     break;
   case GBT_MENU_METHOD_SIMPDIV:
-    m_method->SetLabel("simplicial subdivision");
+    m_method->SetLabel(_("simplicial subdivision"));
     m_methodValue = GBT_MENU_METHOD_SIMPDIV;
     break;
   case GBT_MENU_METHOD_YAMAMOTO:
-    m_method->SetLabel("Yamamoto's path-following procedure");
+    m_method->SetLabel(_("Yamamoto's path-following procedure"));
     m_methodValue = GBT_MENU_METHOD_YAMAMOTO;
     break;
   case GBT_MENU_METHOD_IPA:
-    m_method->SetLabel("iterated polymatrix approximation");
+    m_method->SetLabel(_("iterated polymatrix approximation"));
     m_methodValue = GBT_MENU_METHOD_IPA;
     break;
   case GBT_MENU_METHOD_GNM:
-    m_method->SetLabel("a global Newton method");
+    m_method->SetLabel(_("a global Newton method"));
     m_methodValue = GBT_MENU_METHOD_GNM;
     break;
   default:

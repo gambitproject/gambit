@@ -64,29 +64,31 @@ wxString gbtMixedProfileDetail::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
     if (p_coords.GetRow() == 0) {
-      return "Lyapunov";
+      return wxT("Lyapunov");
     }
     else {
       gbtGamePlayer player = m_doc->GetGame()->GetPlayer(p_coords.GetRow());
       if (player->GetLabel() != "") {
-	return wxString::Format("Payoff to %s", player->GetLabel().c_str());
+	return wxString::Format(wxT("Payoff to %s"),
+				player->GetLabel().c_str());
       }
       else {
-	return wxString::Format("Payoff to Player %d", p_coords.GetRow());
+	return wxString::Format(wxT("Payoff to Player %d"),
+				p_coords.GetRow());
       }
     }
   }
   else if (IsColLabelCell(p_coords) || IsCornerLabelCell(p_coords)) {
-    return "";
+    return wxT("");
   }
 
-  if (m_index == 0)  return "";
+  if (m_index == 0)  return wxT("");
 
   if (p_coords.GetRow() == 0) {
-    return wxString::Format("%f", m_eqa[m_index]->GetLiapValue(false));
+    return wxString::Format(wxT("%f"), m_eqa[m_index]->GetLiapValue(false));
   }
   else {
-    return wxString::Format("%f", 
+    return wxString::Format(wxT("%f"), 
 			    m_eqa[m_index]->GetPayoff(m_doc->GetGame()->GetPlayer(p_coords.GetRow())));
   }
 }

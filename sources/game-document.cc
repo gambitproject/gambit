@@ -87,7 +87,7 @@ void gbtGameDocument::UpdateViews(void)
 
 void gbtGameDocument::SaveUndo(const wxString &p_description)
 {
-  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   Save(tempfile);
   m_undoFiles.Append(tempfile);
   m_undoDescriptions.Append(p_description);
@@ -101,7 +101,7 @@ void gbtGameDocument::SaveUndo(const wxString &p_description)
 
 void gbtGameDocument::Undo(void)
 {
-  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   Save(tempfile);
   m_redoFiles.Append(tempfile);
   m_redoDescriptions.Append(m_undoDescriptions[m_undoDescriptions.Last()]);
@@ -120,7 +120,7 @@ void gbtGameDocument::Undo(void)
 
 void gbtGameDocument::Redo(void)
 {
-  wxString tempfile = wxFileName::CreateTempFileName("gambit");
+  wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   Save(tempfile);
   m_undoFiles.Append(tempfile);
   m_undoDescriptions.Append(m_redoDescriptions[m_redoDescriptions.Last()]);
@@ -141,7 +141,7 @@ void gbtGameDocument::Redo(void)
 
 gbtGameOutcome gbtGameDocument::NewOutcome(void) 
 { 
-  SaveUndo("creating new outcome");
+  SaveUndo(_("creating new outcome"));
   gbtGameOutcome r = m_game->NewOutcome(); 
   m_modified = true;
   UpdateViews(); 
@@ -152,7 +152,7 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
 				const gbtGamePlayer &p_player, 
 				const gbtRational &p_value)
 { 
-  SaveUndo("setting payoff");
+  SaveUndo(_("setting payoff"));
   p_outcome->SetPayoff(p_player, p_value); 
   m_modified = true;
   UpdateViews(); 
@@ -161,10 +161,11 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
 
 void gbtGameDocument::NewPlayer(void)
 {
-  SaveUndo("adding player");
+  SaveUndo(_("adding player"));
   m_playerColors.Append(s_defaultColors[m_game->NumPlayers() % 8]);
   gbtGamePlayer player = m_game->NewPlayer();
-  player->SetLabel(wxString::Format("Player%d", m_game->NumPlayers()).c_str());
+  player->SetLabel((const char *) wxString::Format(wxT("Player%d"),
+						   m_game->NumPlayers()).mb_str());
   if (!m_game->HasTree()) {
     player->GetInfoset(1)->GetAction(1)->SetLabel("Strategy1");
   }
@@ -175,11 +176,12 @@ void gbtGameDocument::NewPlayer(void)
 
 void gbtGameDocument::InsertStrategy(int p_player, int p_where)
 {
-  SaveUndo("adding strategy");
+  SaveUndo(_("adding strategy"));
   gbtGamePlayer player = m_game->GetPlayer(p_player);
   gbtGameAction action = player->GetInfoset(1)->InsertAction(p_where);
-  action->SetLabel(wxString::Format("Strategy%d",
-				    player->NumStrategies()).c_str());
+  action->SetLabel((const char *) 
+		   wxString::Format(wxT("Strategy%d"),
+				    player->NumStrategies()).mb_str());
 				    
   m_modified = true;
   UpdateViews();
@@ -188,7 +190,7 @@ void gbtGameDocument::InsertStrategy(int p_player, int p_where)
 void gbtGameDocument::SetStrategyLabel(gbtGameStrategy p_strategy,
 				       const std::string &p_label)
 {
-  SaveUndo("setting strategy label");
+  SaveUndo(_("setting strategy label"));
   p_strategy->SetLabel(p_label);
   m_modified = true;
   UpdateViews();
@@ -213,7 +215,7 @@ void gbtGameDocument::SetPlayerColor(int p_player, const wxColour &p_color)
 
 void gbtGameDocument::Load(const wxString &p_filename)
 {
-  std::ifstream file(p_filename.c_str());
+  std::ifstream file((const char *) p_filename.mb_str());
 
   while (!file.eof()) {
     std::string key, value;
@@ -263,7 +265,7 @@ void gbtGameDocument::Save(const wxString &p_filename) const
     if (gamefile[i] == '\n')  gamefile[i] = ' ';
   }
 
-  std::ofstream file(p_filename.c_str());
+  std::ofstream file((const char *) p_filename.mb_str());
   if (m_game->HasTree()) {
     file << "efg= " << gamefile << std::endl;
   }

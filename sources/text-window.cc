@@ -42,7 +42,7 @@ gbtTextWindow::gbtTextWindow(wxWindow *p_parent, wxWindowID p_id,
   : wxScrolledWindow(p_parent, p_id), 
     m_underline(false), m_label(p_label), m_longestLabel(p_longestLabel)
 {
-  if (m_longestLabel == "")  m_longestLabel = p_label;
+  if (m_longestLabel == wxT(""))  m_longestLabel = p_label;
   SetSize(GetBestSize());
 }
 

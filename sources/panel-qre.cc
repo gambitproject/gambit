@@ -121,21 +121,21 @@ gbtMixedLogitCtrl::gbtMixedLogitCtrl(wxWindow *p_parent,
 static wxString ToMyerson(const gbtMixedProfile<double> &p_profile,
 			  const gbtGamePlayer &p_player)
 {
-  wxString ret = "";
+  wxString ret = wxT("");
   for (int st = 1; st <= p_player->NumStrategies(); st++) {
     gbtGameStrategy strategy = p_player->GetStrategy(st);
     if (p_profile->GetStrategyProb(strategy) > 0.0) {
-      if (ret != "") {
-	ret += " + ";
+      if (ret != wxT("")) {
+	ret += wxT(" + ");
       }
 
       if (strategy->GetLabel() != "") {
-	ret += wxString::Format("%f*[%s]",
+	ret += wxString::Format(wxT("%f*[%s]"),
 				p_profile->GetStrategyProb(strategy),
 				strategy->GetLabel().c_str());
       }
       else {
-	ret += wxString::Format("%f*[<%d>]",
+	ret += wxString::Format(wxT("%f*[<%d>]"),
 				p_profile->GetStrategyProb(strategy), st);
       }
     }
@@ -147,14 +147,15 @@ static wxString ToMyerson(const gbtMixedProfile<double> &p_profile,
 wxString gbtMixedLogitCtrl::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format("%f", 
+    return wxString::Format(wxT("%f"), 
 			    m_cor.GetLambda(p_coords.GetRow() + 1));
   }
   else if (IsColLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str();
+    return wxString::Format(wxT("%s"),
+			    m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str());
   }
   else if (IsCornerLabelCell(p_coords)) {
-    return "Lambda";
+    return _("Lambda");
   }
 
   return ToMyerson(m_cor.GetProfile(p_coords.GetRow() + 1),
@@ -321,10 +322,10 @@ wxString gbtMixedLogitGraph::GetXAxisLabel(double p_percent) const
   double lambda = thisnu / (1.0 - thisnu) / alpha;
   
   if (lambda < 10000.0) {
-    return wxString::Format("%3.2f", lambda);
+    return wxString::Format(wxT("%3.2f"), lambda);
   }
   else {
-    return wxString::Format("%.3e", lambda);
+    return wxString::Format(wxT("%.3e"), lambda);
   }
 }
 
@@ -356,7 +357,7 @@ void gbtMixedLogitGraph::DrawYAxis(wxDC &p_dc)
     int c_tickLength = 5;
     p_dc.DrawLine(x - c_tickLength / 2, y, x + c_tickLength / 2, y);
 
-    wxString label = wxString::Format("%3.2f", 
+    wxString label = wxString::Format(wxT("%3.2f"), 
 				      (double) i / (double) c_numTicks);
     wxCoord tw, th;
     p_dc.GetTextExtent(label, &tw, &th);
@@ -424,21 +425,21 @@ void gbtMixedLogitGraph::OnSave(wxCommandEvent &p_event)
   wxString filter;
   switch (p_event.GetId()) {
   case GBT_LOGIT_SAVE_BMP:
-    filter = "BMP files (*.bmp)|*.bmp";
+    filter = _("BMP files (*.bmp)|*.bmp");
     break;
   case GBT_LOGIT_SAVE_JPG:
-    filter = "JPG files (*.jpg)|*.jpg";
+    filter = _("JPG files (*.jpg)|*.jpg");
     break;
   case GBT_LOGIT_SAVE_PNG:
-    filter = "PNG files (*.png)|*.png";
+    filter = _("PNG files (*.png)|*.png");
     break;
   default:
     break;
   }
 
-  filter += "|All files (*.*)|*.*";
+  filter += _("|All files (*.*)|*.*");
 
-  wxFileDialog dialog(this, "Choose output file", "", "",
+  wxFileDialog dialog(this, _("Choose output file"), wxT(""), wxT(""),
 		      filter, wxSAVE | wxOVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -450,7 +451,7 @@ void gbtMixedLogitGraph::OnSave(wxCommandEvent &p_event)
     dc.Clear();
     OnDraw(dc);
 
-    int filetype;
+    wxBitmapType filetype;
     switch (p_event.GetId()) {
     case GBT_LOGIT_SAVE_BMP:
       filetype = wxBITMAP_TYPE_BMP;
@@ -466,9 +467,9 @@ void gbtMixedLogitGraph::OnSave(wxCommandEvent &p_event)
     }
 
     if (!bitmap.SaveFile(dialog.GetPath(), filetype)) {
-      wxMessageBox(wxString::Format("An error occurred in writing '%s'.\n",
+      wxMessageBox(wxString::Format(_("An error occurred in writing '%s'."),
 				    dialog.GetPath().c_str()),
-		   "Error", wxOK, this);
+		   _("Error"), wxOK, this);
     }
   }
 }
@@ -486,10 +487,10 @@ gbtQrePanel::gbtQrePanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *paramSizer =
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Computing logit equilibria"),
+					 _("Computing logit equilibria")),
 			 wxVERTICAL);
 
-  m_startButton = new wxButton(this, GBT_BUTTON_START, "Start");
+  m_startButton = new wxButton(this, GBT_BUTTON_START, _("Start"));
   paramSizer->Add(m_startButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   topSizer->Add(paramSizer, 0, wxALL | wxEXPAND, 5);
@@ -497,7 +498,7 @@ gbtQrePanel::gbtQrePanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *listSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Points on the correspondence branch"),
+					 _("Points on the correspondence branch")),
 			 wxVERTICAL);
   m_profileCtrl = new gbtMixedLogitCtrl(this, p_doc, *m_cor);
   listSizer->Add(m_profileCtrl, 1, wxALL | wxEXPAND, 5);
@@ -507,7 +508,7 @@ gbtQrePanel::gbtQrePanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxStaticBoxSizer *graphSizer = 
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Correspondence graph"),
+					 _("Correspondence graph")),
 			 wxVERTICAL);
   m_branchGraph = new gbtMixedLogitGraph(this, p_doc, *m_cor);
   graphSizer->Add(m_branchGraph, 1, wxALL | wxEXPAND, 5);

@@ -67,16 +67,18 @@ gbtMixedProfileCtrl::gbtMixedProfileCtrl(wxWindow *p_parent,
 wxString gbtMixedProfileCtrl::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format("%d", p_coords.GetRow() + 1);
+    return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
   }
   else if (IsColLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str();
+    return wxString::Format(wxT("%s"),
+			    m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)->GetLabel().c_str());
   }
   else if (IsCornerLabelCell(p_coords)) {
-    return "#";
+    return wxT("#");
   }
 
-  return m_eqa[p_coords.GetRow() + 1]->ToMyerson(m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)).c_str();
+  return wxString::Format(wxT("%s"),
+			  m_eqa[p_coords.GetRow() + 1]->ToMyerson(m_doc->GetGame()->GetPlayer(p_coords.GetCol() + 1)).c_str());
 }
 
 wxSheetCellAttr gbtMixedProfileCtrl::GetAttr(const wxSheetCoords &p_coords,

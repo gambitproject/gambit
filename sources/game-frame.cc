@@ -98,7 +98,7 @@ END_EVENT_TABLE()
 //-------------------------------------------------------------------------
 
 gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxFrame(p_parent, -1, "",
+  : wxFrame(p_parent, -1, wxT(""),
 	    wxDefaultPosition, wxSize(800, 600)), 
     gbtGameView(p_doc)
 {
@@ -235,7 +235,8 @@ void gbtGameFrame::MakeMenu(void)
 void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+    if (wxMessageBox(_("Game has been modified.  Close anyway?"),
+		     _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();
       return;
@@ -266,7 +267,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 			"All files|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
-    if (dialog.GetPath().substr(dialog.GetPath().length() - 3, 3) == "gbt") {
+    if (dialog.GetPath().substr(dialog.GetPath().length() - 3, 3) == wxT("gbt")) {
       gbtGameDocument *doc = new gbtGameDocument(0);
       doc->Load(dialog.GetPath());
       doc->SetFilename(dialog.GetPath());
@@ -334,7 +335,7 @@ void gbtGameFrame::OnFileMRU(wxCommandEvent &p_event)
 {
   wxString filename(wxGetApp().GetFileHistory()->GetHistoryFile(p_event.GetId() - wxID_FILE1));
 
-  if (filename.substr(filename.length() - 3, 3) == "gbt") {
+  if (filename.substr(filename.length() - 3, 3) == wxT("gbt")) {
     gbtGameDocument *doc = new gbtGameDocument(0);
     doc->Load(filename);
     doc->SetFilename(filename);
@@ -576,7 +577,8 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &)
 {
   for (int i = 1; i <= wxGetApp().NumWindows(); i++) {
     if (wxGetApp().GetWindow(i)->GetDocument()->IsModified()) {
-      if (wxMessageBox("There are modified games.  Exit anyway?", "Warning",
+      if (wxMessageBox(_("There are modified games.  Exit anyway?"),
+		       _("Warning"),
 		       wxOK | wxCANCEL) == wxCANCEL) {
 	return;
       }
@@ -737,13 +739,13 @@ void gbtGameFrame::OnHelpAbout(wxCommandEvent &)
 
 void gbtGameFrame::OnUpdate(void)
 {
-  if (m_doc->GetFilename() == "") {
-    SetTitle(wxString::Format("Gambit: [<no file>%s] %s",
+  if (m_doc->GetFilename() == wxT("")) {
+    SetTitle(wxString::Format(_("Gambit: [<no file>%s] %s"),
 			      (m_doc->IsModified()) ? "*" : "",
 			      m_doc->GetGame()->GetLabel().c_str()));
   }
   else {
-    SetTitle(wxString::Format("Gambit: [%s%s] %s",
+    SetTitle(wxString::Format(_("Gambit: [%s%s] %s"),
 			      m_doc->GetFilename().c_str(),
 			      (m_doc->IsModified()) ? "*" : "",
 			      m_doc->GetGame()->GetLabel().c_str()));
@@ -781,18 +783,20 @@ void gbtGameFrame::OnUpdate(void)
 
   GetMenuBar()->Enable(wxID_UNDO, m_doc->CanUndo());
   if (m_doc->CanUndo()) {
-    GetMenuBar()->SetLabel(wxID_UNDO, "Undo " + m_doc->GetUndoDescription());
+    GetMenuBar()->SetLabel(wxID_UNDO, 
+			   _("Undo ") + m_doc->GetUndoDescription());
   }
   else {
-    GetMenuBar()->SetLabel(wxID_UNDO, "Undo");
+    GetMenuBar()->SetLabel(wxID_UNDO, _("Undo"));
   }
 
   GetMenuBar()->Enable(wxID_REDO, m_doc->CanRedo());
   if (m_doc->CanRedo()) {
-    GetMenuBar()->SetLabel(wxID_REDO, "Redo " + m_doc->GetRedoDescription());
+    GetMenuBar()->SetLabel(wxID_REDO, 
+			   _("Redo ") + m_doc->GetRedoDescription());
   }
   else {
-    GetMenuBar()->SetLabel(wxID_REDO, "Redo");
+    GetMenuBar()->SetLabel(wxID_REDO, _("Redo"));
   }
   
   

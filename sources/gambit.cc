@@ -42,7 +42,7 @@ bool gbtApplication::OnInit(void)
   wxInitAllImageHandlers();
 
   m_fileHistory = new wxFileHistory;
-  wxConfig config("GambitDev");
+  wxConfig config(wxT("GambitDev"));
   m_fileHistory->Load(config);
 
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
@@ -60,7 +60,7 @@ bool gbtApplication::OnInit(void)
 
 int gbtApplication::OnExit(void)
 {
-  wxConfig config("GambitDev");
+  wxConfig config(wxT("GambitDev"));
   m_fileHistory->Save(config);
   delete m_fileHistory;
   return 0;

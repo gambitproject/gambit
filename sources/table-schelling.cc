@@ -154,19 +154,19 @@ void gbtSchellingMatrix::OnLabelRightDown(wxSheetEvent &p_event)
 {
   wxMenu *menu = new wxMenu;
   if (IsCornerLabelCell(p_event.GetCoords())) {
-    menu->Append(GBT_MENU_ADD_PLAYER, "Add a new player");
+    menu->Append(GBT_MENU_ADD_PLAYER, _("Add a new player"));
   }
   else if (IsRowLabelCell(p_event.GetCoords())) {
     menu->Append(GBT_MENU_ROW_STRATEGY_BEFORE + (p_event.GetRow() / 2) + 1, 
-		 "Add strategy before");
+		 _("Add strategy before"));
     menu->Append(GBT_MENU_ROW_STRATEGY_AFTER + (p_event.GetRow() / 2) + 1, 
-		 "Add strategy after");
+		 _("Add strategy after"));
   }
   else {
     menu->Append(GBT_MENU_COL_STRATEGY_BEFORE + (p_event.GetCol() / 2) + 1, 
-		 "Add strategy before");
+		 _("Add strategy before"));
     menu->Append(GBT_MENU_COL_STRATEGY_AFTER + (p_event.GetCol() / 2) + 1, 
-		 "Add strategy after");
+		 _("Add strategy after"));
   }
 
   PopupMenu(menu, p_event.GetPosition().x, p_event.GetPosition().y);
@@ -210,13 +210,15 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
 {
   // Labels
   if (IsRowLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str();
+    return wxString::Format(wxT("%s"),
+			    m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer())->GetStrategy(p_coords.GetRow() / 2 + 1)->GetLabel().c_str());
   }
   else if (IsColLabelCell(p_coords)) {
-    return m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str();
+    return wxString::Format(wxT("%s"),
+			    m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(p_coords.GetCol() / 2 + 1)->GetLabel().c_str());
   }
   else if (IsCornerLabelCell(p_coords)) {
-    return "";
+    return wxT("");
   }
 
   int rowStrat = p_coords.GetRow() / 2;
@@ -231,13 +233,15 @@ wxString gbtSchellingMatrix::GetCellValue(const wxSheetCoords &p_coords)
   profile->SetStrategy(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->GetStrategy(colStrat + 1));
 
   if (rowSubcell) {
-    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()))).c_str();
+    return wxString::Format(wxT("%s"),
+			    ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()))).c_str());
   }
   else if (colSubcell) {
-    return ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()))).c_str();
+    return wxString::Format(wxT("%s"),
+			    ToText(profile->GetPayoff(m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()))).c_str());
   }
   else {
-    return "";
+    return wxT("");
   }
 }
 
@@ -252,7 +256,7 @@ void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
     gbtGame game = m_doc->GetGame();
     gbtGamePlayer player = game->GetPlayer(m_view->GetRowPlayer());
     m_doc->SetStrategyLabel(player->GetStrategy(rowStrat + 1),
-			    p_value.c_str());
+			    (const char *) p_value.c_str());
     return;
   }
   else if (IsColLabelCell(p_coords)) {
@@ -260,7 +264,7 @@ void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
     int colStrat = p_coords.GetCol() / 2;
     gbtGamePlayer player = game->GetPlayer(m_view->GetColPlayer());
     m_doc->SetStrategyLabel(player->GetStrategy(colStrat + 1),
-			    p_value.c_str());
+			    (const char *) p_value.c_str());
     return;
   }
 
@@ -286,13 +290,13 @@ void gbtSchellingMatrix::SetCellValue(const wxSheetCoords &p_coords,
     gbtRational r;
     m_doc->SetPayoff(outcome, 
 		     m_doc->GetGame()->GetPlayer(m_view->GetRowPlayer()),
-		     FromText(p_value.c_str(), r));
+		     FromText((const char *) p_value.c_str(), r));
   }
   else if (colSubcell) {
     gbtRational r;
     m_doc->SetPayoff(outcome,
 		     m_doc->GetGame()->GetPlayer(m_view->GetColPlayer()),
-		     FromText(p_value.c_str(), r));
+		     FromText((const char *) p_value.c_str(), r));
   }
   ForceRefresh();
 }

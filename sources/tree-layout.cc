@@ -186,7 +186,7 @@ gbtNodeEntry::gbtNodeEntry(gbtGameDocument *p_doc, const gbtGameNode &p_node)
     m_token(GBT_NODE_TOKEN_CIRCLE),
     m_branchStyle(GBT_BRANCH_STYLE_FORKTINE), 
     m_branchLength(0),
-    m_sublevel(0), m_actionProb("")
+    m_sublevel(0), m_actionProb(wxT(""))
 { }
 
 int gbtNodeEntry::GetChildNumber(void) const
@@ -392,7 +392,8 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc) const
 
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    wxString label = ToText(outcome->GetPayoff(player)).c_str();
+    wxString label = wxString::Format(wxT("%s"),
+				      ToText(outcome->GetPayoff(player)).c_str());
     int width, height;
     p_dc.GetTextExtent(label, &width, &height);
     p_dc.SetTextForeground(m_doc->GetPlayerColor(pl));
@@ -413,7 +414,8 @@ int gbtNodeEntry::GetOutcomeExtent(void) const
 
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     gbtGamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-    wxString label = ToText(outcome->GetPayoff(player)).c_str();
+    wxString label = wxString::Format(wxT("%s"),
+				      ToText(outcome->GetPayoff(player)).c_str());
     int width, height;
     dc.GetTextExtent(label, &width, &height);
     extent += width + 10;

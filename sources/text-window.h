@@ -37,7 +37,7 @@ private:
 
 public:
   gbtTextWindow(wxWindow *p_parent, wxWindowID, 
-		const wxString &, const wxString & = "");
+		const wxString &, const wxString & = wxT(""));
   virtual ~gbtTextWindow() { }
 
   wxSize GetBestSize(void) const;
