@@ -74,30 +74,64 @@ Portion *GSM_LiapEfg(Portion **param)
   return new Behav_List_Portion<double>(&E, LM.GetSolutions());
 }
 
+Portion *GSM_NewEfg(Portion **param)
+{
+  ExtForm<double> *E = new ExtForm<double>;
+  return new Efg_Portion<double>(*E);
+}
+
 Portion *GSM_ReadEfg(Portion **param)
 {
   gFileInput f(((gString_Portion *) param[0])->Value());
   
   if (f.IsValid())   {
-    ExtForm<double> *E = 0;
-    ReadEfgFile((gInput &) f, E);
+    DataType type;
+    bool valid;
 
-    if (E)
-      return new Efg_Portion<double>(*E);
-    else
-      return 0;
+    EfgFileType(f, valid, type);
+    if (!valid)   return 0;
+    
+    switch (type)   {
+      case DOUBLE:  {
+	ExtForm<double> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+
+	if (E)
+	  return new Efg_Portion<double>(*E);
+	else
+	  return 0;
+      }
+      case RATIONAL:   {
+	ExtForm<gRational> *E = 0;
+	ReadEfgFile((gInput &) f, E);
+	
+	if (E)
+	  return new Efg_Portion<gRational>(*E);
+	else
+	  return 0;
+      }
+    }
   }
   else
     return 0;
 }
 
-Portion *GSM_WriteEfg(Portion **param)
+Portion *GSM_WriteEfgD(Portion **param)
 {
   ExtForm<double> *E = &((Efg_Portion<double> *) param[0])->Value();
   gOutput &f = ((Stream_Portion *) param[1])->Value();
   
   E->WriteEfgFile(f);
   return new Efg_Portion<double>(*E);
+}
+
+Portion *GSM_WriteEfgR(Portion **param)
+{
+  ExtForm<gRational> *E = &((Efg_Portion<gRational> *) param[0])->Value();
+  gOutput &f = ((Stream_Portion *) param[1])->Value();
+  
+  E->WriteEfgFile(f);
+  return new Efg_Portion<gRational>(*E);
 }
 
 template <class T> int BuildReducedNormal(const ExtForm<T> &,
@@ -110,6 +144,37 @@ Portion *GSM_EfgToNfg(Portion **param)
   BuildReducedNormal(E, N);
   return new Nfg_Portion<double>(*N);
 }
+
+Portion *GSM_RootNode(Portion **param)
+{
+  ExtForm<double> &E = ((Efg_Portion<double> *) param[0])->Value();
+  return new Node_Portion(E.RootNode());
+}
+
+Portion *GSM_NumChildren(Portion **param)
+{
+  Node *n = ((Node_Portion *) param[0])->Value();
+  return new numerical_Portion<gInteger>(n->NumChildren());
+}
+
+Portion *GSM_GetInfoset(Portion **param)
+{
+  Node *n = ((Node_Portion *) param[0])->Value();
+  return new Infoset_Portion(n->GetInfoset());
+}
+
+Portion *GSM_NumMembers(Portion **param)
+{
+  Infoset *s = ((Infoset_Portion *) param[0])->Value();
+  return new numerical_Portion<gInteger>(s->NumMembers());
+}
+
+Portion *GSM_NumActions(Portion **param)
+{
+  Infoset *s = ((Infoset_Portion *) param[0])->Value();
+  return new numerical_Portion<gInteger>(s->NumActions());
+}
+
 
 //
 // A few temporary functions for modifying game parameters.  Don't document!
@@ -168,15 +233,23 @@ void Init_efgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
+  FuncObj = new FuncDescObj("NewEfg");
+  FuncObj->SetFuncInfo(GSM_NewEfg, 0);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("ReadEfg");
   FuncObj->SetFuncInfo(GSM_ReadEfg, 1);
   FuncObj->SetParamInfo(GSM_ReadEfg, 0, "f", porSTRING, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("WriteEfg");
-  FuncObj->SetFuncInfo(GSM_WriteEfg, 2);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(GSM_WriteEfg, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
+  FuncObj->SetFuncInfo(GSM_WriteEfgD, 2);
+  FuncObj->SetParamInfo(GSM_WriteEfgD, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_WriteEfgD, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
+
+  FuncObj->SetFuncInfo(GSM_WriteEfgR, 2);
+  FuncObj->SetParamInfo(GSM_WriteEfgR, 0, "E", porEFG_RATIONAL, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo(GSM_WriteEfgR, 1, "f", porSTREAM, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitEfg");
@@ -236,6 +309,31 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_TextRat, 1);
   FuncObj->SetParamInfo(GSM_TextRat, 0, "v", porRATIONAL, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+  
+  FuncObj = new FuncDescObj("RootNode");
+  FuncObj->SetFuncInfo(GSM_RootNode, 1);
+  FuncObj->SetParamInfo(GSM_RootNode, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NumChildren");
+  FuncObj->SetFuncInfo(GSM_NumChildren, 1);
+  FuncObj->SetParamInfo(GSM_NumChildren, 0, "n", porNODE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("GetInfoset");
+  FuncObj->SetFuncInfo(GSM_GetInfoset, 1);
+  FuncObj->SetParamInfo(GSM_GetInfoset, 0, "s", porNODE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NumActions");
+  FuncObj->SetFuncInfo(GSM_NumActions, 1);
+  FuncObj->SetParamInfo(GSM_NumActions, 0, "s", porINFOSET, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("NumMembers");
+  FuncObj->SetFuncInfo(GSM_NumMembers, 1);
+  FuncObj->SetParamInfo(GSM_NumMembers, 0, "s", porINFOSET, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 }
 
