@@ -118,7 +118,6 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 
 dialogAlgorithm::~dialogAlgorithm()
 {
-  /*
   if (Completed() == wxOK) {
     if (m_usesNfg) {
       wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
@@ -157,7 +156,6 @@ dialogAlgorithm::~dialogAlgorithm()
       wxWriteResource("Algorithm Params", "Precision", m_precision->GetSelection(), gambitApp.ResourceFile());
     }
   }
-  */
 }
 
 void dialogAlgorithm::OnDepth(void)
@@ -296,31 +294,32 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   if (p_subgames)    SubgameFields();
   AlgorithmFields();
 
-  /*
   wxButton *traceButton = new wxButton(this, (wxFunction) CallbackTrace,
 					"Trace...");
   traceButton->SetClientData((char *) this);
-  */
 
   m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
   m_okButton->GetConstraints()->top.SameAs(m_algorithmGroup, wxBottom, 10);
   m_okButton->GetConstraints()->height.AsIs();
   m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
 
-  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
   m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   m_cancelButton->GetConstraints()->height.AsIs();
   m_cancelButton->GetConstraints()->width.AsIs();
 
-  /*
-  traceButton->SetConstraints(new wxLayoutConstraints);
-  traceButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
-  traceButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
-  traceButton->GetConstraints()->height.AsIs();
-  traceButton->GetConstraints()->width.AsIs();
-  */
+  // The following constraints are handled differently due to what appears
+  // to be some type of compiler (or wxwin?) bug involving setting
+  // constraints for pointers on the stack, under Linux and Solaris
+  // and g++ 2.8.1.  -- TLT 
+  wxLayoutConstraints *constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_cancelButton, wxRight, 10);
+  constraints->centreY.SameAs(m_okButton, wxCentreY);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  traceButton->SetConstraints(constraints);
 
-  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->left.SameAs(traceButton, wxRight, 10);
   m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
   m_helpButton->GetConstraints()->height.AsIs();
   m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
