@@ -10,7 +10,6 @@
 #include "nfg.imp"
 #include "nfgiter.h"
 #include "rational.h"
-#include "gnarray.h"
 #include "gpset.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
@@ -29,6 +28,17 @@ BaseNfg::BaseNfg( const gArray<int> &dim)
   IndexStrategies();
 }
 
+BaseNfg::BaseNfg (const BaseNfg &b)
+: title(b.title), players(b.players.Length()), dimensions(b.dimensions)
+{
+  for (int i = 1; i <= players.Length(); i++){
+    players[i] = new NFPlayer(this, dimensions[i]);
+    players[i]->name = b.players[i]->name;
+    for (int j = 1; j <= players[i]->NumStrats(); j++)
+      *(players[i]->strategies[j]) = *(b.players[i]->strategies[j]);
+  }
+  IndexStrategies();
+}
 BaseNfg::~BaseNfg() 
 { 
   for (int i = 1; i <= players.Length(); i++) 
@@ -184,7 +194,10 @@ DataType BaseMixedProfile::Type(void) const
   return N->Type();
 }
 
-
+const NFSupport &BaseMixedProfile::GetNFSupport(void)
+{
+  return (stratset);
+}
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__

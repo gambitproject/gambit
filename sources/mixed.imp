@@ -14,13 +14,25 @@
 //---------------------------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-  : BaseNfg(dim), payoffs(dim.Length())
+: BaseNfg(dim), payoffs(dim.Length())
 {
   int accum = 1,i;
   for (i = 1; i <= dim.Length(); i++)
     accum *= dim[i];
   for (i = 1; i <= dim.Length(); i++)
     payoffs[i] = new T[accum];
+  NumPayPerPlayer = accum;
+}
+
+template <class T> Nfg<T>::Nfg(const Nfg &n)
+: BaseNfg(n), payoffs(n.payoffs.Length())
+{
+  NumPayPerPlayer = n.NumPayPerPlayer;
+  for (int i = 1; i <= payoffs.Length(); i++){
+    payoffs[i] = new T[NumPayPerPlayer];
+    for (int j = 0; j < NumPayPerPlayer; j++)
+      payoffs[i][j] = n.payoffs[i][j];
+  }
 }
 
 template <class T> Nfg<T>::~Nfg()
@@ -88,19 +100,6 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 }
 
 #include "gpvector.h"
-template <class T> void Nfg<T>::Centroid(gPVector<T> &profile) const
-{
-  profile = gPVector<T>(dimensions);
-  T center;
-  
-  for (int i = 1; i <= NumPlayers(); i++)  {
-    center = ((T) 1) / ((T) NumStrats(i));
-    for (int j = 1; j <= NumStrats(i); j++)
-      profile(i, j) = center;
-  }
-}
-
-
 #include "mixed.h"
 
 //---------------------------------------------------------------------------
@@ -111,14 +110,14 @@ template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 bool truncated)
 : BaseMixedProfile(NF, truncated), Nf(&NF), gPVector<T>(NF.dimensions)
 {
-  NF.Centroid(*this);
+  Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
 						 NFSupport &s)
 : BaseMixedProfile(NF, false, s), Nf(&NF), gPVector<T>(NF.dimensions)
 {
-  NF.Centroid(*this);
+  Centroid();
 }
 
 template <class T> MixedProfile<T>::MixedProfile(const Nfg<T> &NF,
@@ -140,6 +139,17 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
   return *this;
 }
 
+template <class T> void MixedProfile<T>::Centroid() 
+{
+  gVector<T>::operator=(gPVector<T>(N->Dimensionality()));
+  T center;
+  
+  for (int i = 1; i <= Nf->NumPlayers(); i++)  {
+    center = ((T) 1) / ((T) stratset.GetStrategy(i).Length());
+    for (int j = 1; j <= stratset.GetStrategy(i).Length(); j++)
+      svptr[i][j] = center;
+  }
+}
 template <class T> bool MixedProfile<T>::IsPure(void) const
 {
   for (int i = 1; i <= svlen.Length(); i++)

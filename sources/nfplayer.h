@@ -31,10 +31,11 @@ private:
   gArray<Strategy *> strategies;
  
 
-  NFPlayer(BaseNfg *n, int num);
+public:
+
+  NFPlayer( BaseNfg *n, int num );
   virtual ~NFPlayer();
 
-public:
   BaseNfg *BelongsTo(void) const;
   
   const gString &GetName(void) const;

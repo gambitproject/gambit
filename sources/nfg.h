@@ -28,6 +28,7 @@ public:
   // ------------------------------------
   
   BaseNfg(const gArray<int> &dim);
+  BaseNfg(const BaseNfg &b);
   virtual ~BaseNfg();
   
   
@@ -67,10 +68,12 @@ template <class T> class Nfg : public BaseNfg {
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
 private:
+  int NumPayPerPlayer;
   gArray<T *> payoffs;
 
 public:
   Nfg(const gArray<int> &dim);
+  Nfg(const Nfg &n);
   virtual ~Nfg();
 
   // returns the type of the nfg, DOUBLE or RATIONAL
@@ -80,7 +83,6 @@ public:
 
   void SetPayoff(int pl, const gArray<int> &profile, const T &value);
   const T &Payoff(int pl, const gArray<int> &profile) const;
-  void Centroid(gPVector<T> &profile) const;
 
 };
 

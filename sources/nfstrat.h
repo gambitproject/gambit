@@ -22,6 +22,7 @@ struct Strategy   {
 
   Strategy(void);
   Strategy(const Strategy &s);
+  Strategy &operator=(const Strategy &s);
   ~Strategy();
 };
 

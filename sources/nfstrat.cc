@@ -22,6 +22,13 @@ Strategy::Strategy(void) : number (0), dominator(NULL), index(0L)
 Strategy::Strategy(const Strategy &s) : dominator(NULL), name(s.name)
 { }
 
+Strategy &Strategy::operator=(const Strategy &s)
+{
+  dominator = NULL;
+  name = s.name;
+  return (*this);
+}
+
 Strategy::~Strategy()
 { }
 

@@ -29,6 +29,7 @@ class BaseMixedProfile     {
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
     bool IsTruncated(void) const    { return truncated; }
+    const NFSupport &GetNFSupport(void);
 };
 
 
@@ -56,6 +57,7 @@ template <class T> class MixedProfile
 
     bool IsPure(void) const;
     bool IsPure(int pl) const;
+    void Centroid(void);
 
     T Payoff(int pl) const;
     T Payoff(int pl, int player1, int strat1) const;
