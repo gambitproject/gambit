@@ -21,13 +21,10 @@
 
 #include "dlefgplayer.h"
 #include "dlefgdelete.h"
-#include "dlactionselect.h"
-#include "dlactionprobs.h"
 #include "dlefgreveal.h"
 #include "dlefgpayoff.h"
 #include "dlefgoutcome.h"
 #include "dlefgeditsupport.h"
-#include "dlinfosets.h"
 #include "dlsubgames.h"
 
 //=========================================================================
@@ -131,62 +128,6 @@ void dialogEfgDelete::OnDeleteTree(wxCommandEvent &)
 }
 
 //=========================================================================
-//                   dialogActionSelect: Member functions
-//=========================================================================
-
-dialogActionSelect::dialogActionSelect(Infoset *p_infoset,
-				       const gText &p_caption,
-				       const gText &p_label,
-				       wxWindow *p_parent)
-  : guiAutoDialog(p_parent, p_caption), m_infoset(p_infoset)
-{
-  m_actionList = new wxListBox(this, -1);
-
-  const gArray<Action *> &acts(p_infoset->Actions());
-  for (int act = 1; act <= acts.Length(); act++) 
-    m_actionList->Append((char *) (ToText(act) + ": " + acts[act]->GetName()));
-  m_actionList->SetSelection(0);
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(new wxStaticText(this, -1, (char *)p_label), 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_actionList, 0, wxCENTRE | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-//=========================================================================
-//                   dialogActionProbs: Member functions
-//=========================================================================
-
-dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
-  : guiPagedDialog(p_parent, "Action Probabilities", p_infoset->NumActions()),
-    m_infoset(p_infoset)
-{
-
-  const gArray<Action *> &acts(m_infoset->Actions());
-  for (int act = 1; act <= acts.Length(); act++) 
-    SetValue(act, ToText(m_infoset->Game()->GetChanceProb(acts[act])));
-
-  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_grid, 0, wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxALL, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  Layout();
-}
-
-gNumber dialogActionProbs::GetActionProb(int p_action) const
-{ return ToNumber(GetValue(p_action)); }
-
-//=========================================================================
 //                    dialogEfgPayoffs: Member functions
 //=========================================================================
 
@@ -279,169 +220,6 @@ gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
   }
 
   return players;
-}
-
-//=========================================================================
-//                    dialogInfosets: Member functions
-//=========================================================================
-
-BEGIN_EVENT_TABLE(dialogInfosets, guiAutoDialog)
-  EVT_LISTBOX(idINFOSET_PLAYER_LISTBOX, dialogInfosets::OnPlayer)
-  EVT_LISTBOX(idINFOSET_INFOSET_LISTBOX, dialogInfosets::OnInfoset)
-  EVT_BUTTON(idINFOSET_EDIT_BUTTON, dialogInfosets::OnEdit)
-  EVT_BUTTON(idINFOSET_NEW_BUTTON, dialogInfosets::OnNew)
-  EVT_BUTTON(idINFOSET_REMOVE_BUTTON, dialogInfosets::OnRemove)
-END_EVENT_TABLE()
-
-dialogInfosets::dialogInfosets(FullEfg &p_efg, wxWindow *p_parent)
-  : guiAutoDialog(p_parent, "Infoset Information"), m_efg(p_efg),
-    m_gameChanged(false), m_prevInfoset(0)
-{
-  m_playerItem = new wxListBox(this, idINFOSET_PLAYER_LISTBOX);
-  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerItem->Append((char *) (ToText(pl) + ": " + m_efg.Players()[pl]->GetName()));
-  }
-  m_playerItem->SetSelection(0);
-  m_infosetItem = new wxListBox(this, idINFOSET_INFOSET_LISTBOX);
-  m_actionsItem = new wxTextCtrl(this, -1, "",
-				 wxDefaultPosition, wxDefaultSize,
-				 wxTE_READONLY);
-  m_membersItem = new wxTextCtrl(this, -1, "",
-				 wxDefaultPosition, wxDefaultSize,
-				 wxTE_READONLY);
-  m_editButton = new wxButton(this, idINFOSET_EDIT_BUTTON, "Edit...");
-
-  wxButton *newButton = new wxButton(this, idINFOSET_NEW_BUTTON, "New");
-
-  m_removeButton = new wxButton(this, idINFOSET_REMOVE_BUTTON, "Remove");
-
-  m_cancelButton->Show(FALSE);
-
-  wxBoxSizer *allSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer *botSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxBoxSizer *leftSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *midSizer = new wxBoxSizer(wxVERTICAL);
-  wxBoxSizer *rightSizer = new wxBoxSizer(wxVERTICAL);
-  leftSizer->Add(new wxStaticText(this, -1, "Player:"), 0, wxCENTRE | wxALL, 5);
-  leftSizer->Add(m_playerItem, 0, wxCENTRE | wxALL, 5);
-
-  midSizer->Add(new wxStaticText(this, -1, "Infoset:"), 0, wxCENTRE | wxALL, 5);
-  midSizer->Add(m_infosetItem, 0, wxCENTRE | wxALL, 5);
-
-  rightSizer->Add(new wxStaticText(this, -1, "Actions:"), 0, wxCENTRE | wxALL, 5);
-  rightSizer->Add(m_actionsItem, 0, wxCENTRE | wxALL, 5);
-  rightSizer->Add(new wxStaticText(this, -1, "Members:"), 0, wxCENTRE | wxALL, 5);
-  rightSizer->Add(m_membersItem, 0, wxCENTRE | wxALL, 5);
-
-  topSizer->Add(leftSizer, 0, wxALL, 5);
-  topSizer->Add(midSizer, 0, wxALL, 5);
-  topSizer->Add(rightSizer, 0, wxALL, 5);
-
-  botSizer->Add(m_editButton, 0, wxALL, 5);
-  botSizer->Add(newButton, 0, wxALL, 5);
-  botSizer->Add(m_removeButton, 0, wxALL, 5);
-
-  allSizer->Add(topSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(botSizer, 0, wxCENTRE | wxALL, 5);
-  allSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
-  
-  SetSizer(allSizer); 
-  allSizer->Fit(this);
-  allSizer->SetSizeHints(this); 
-  Layout();
-  wxCommandEvent event;
-  OnPlayer(event);
-}
-
-void dialogInfosets::OnPlayer(wxCommandEvent &)
-{
-  int p_number = m_playerItem->GetSelection();
-  EFPlayer *player = m_efg.Players()[p_number+1];
-  m_infosetItem->Clear();
-  if (player->NumInfosets() > 0)  {
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)
-      m_infosetItem->Append((char *) (ToText(iset) + ": " + player->Infosets()[iset]->GetName()));
-    m_infosetItem->SetSelection(0);
-    m_infosetItem->Enable(TRUE);
-    m_editButton->Enable(TRUE);
-    wxCommandEvent event;
-    OnInfoset(event);
-  }
-  else {
-    m_infosetItem->Append("(None)");
-    m_infosetItem->Enable(FALSE);
-    m_editButton->Enable(FALSE);
-    m_removeButton->Enable(FALSE);
-  }
-}
-
-void dialogInfosets::OnInfoset(wxCommandEvent &)
-{
-  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection() + 1];
-  Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection() + 1];
-
-  m_actionsItem->SetValue((char *) ToText(infoset->NumActions()));
-  m_membersItem->SetValue((char *) ToText(infoset->NumMembers()));
-
-  m_removeButton->Enable(infoset->NumMembers() == 0);
-}
-
-void dialogInfosets::OnEdit(wxCommandEvent &)
-{
-  int selection = m_infosetItem->GetSelection();
-  gText defaultName = (m_efg.Players()[m_playerItem->GetSelection()+1]->
-                       Infosets()[selection+1])->GetName();
-
-  gText newName = wxGetTextFromUser("Name", "Enter Name", (char *) defaultName, this).c_str();
-  if (newName != "") {
-	 m_efg.Players()[m_playerItem->GetSelection()+1]->
-      Infosets()[selection+1]->SetName(newName);
-	 m_infosetItem->SetString(selection, (char *) (ToText(selection + 1) + ": " + newName));
-  }
-}
-
-void dialogInfosets::OnNew(wxCommandEvent &)
-{
-  static int s_numActions = 2;
-
-  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
-
-  gText prompt = "Number of actions at new information set for ";
-  if (player->GetName() != "")
-    prompt += player->GetName();
-  else
-    prompt += "Player " + ToText(player->GetNumber());
-
-  gText reply = wxGetTextFromUser((char *) prompt, "New Infoset",
-				  (char *) ToText(s_numActions)).c_str();
-  int numActions = atoi(reply);
-
-  if (numActions > 0) {
-    s_numActions = numActions;
-    m_efg.CreateInfoset(player, numActions);
-    m_gameChanged = true;
-    if (player->NumInfosets() == 1)  {
-      m_infosetItem->Clear();
-    }
-    m_infosetItem->Append((char *) (ToText(player->NumInfosets()) + ": "));
-    m_infosetItem->SetSelection(player->NumInfosets() - 1);
-    wxCommandEvent event;
-    OnInfoset(event);
-    m_removeButton->Enable(TRUE);
-    m_editButton->Enable(TRUE);
-    m_infosetItem->Enable(TRUE);
-  }
-}
-
-void dialogInfosets::OnRemove(wxCommandEvent &)
-{
-  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
-  Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection()+1];
-  m_efg.DeleteEmptyInfoset(infoset);
-  m_gameChanged = true;
-  wxCommandEvent event;
-  OnPlayer(event);
 }
 
 //=========================================================================

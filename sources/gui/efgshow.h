@@ -72,11 +72,6 @@ private:
   void OnEditInsert(wxCommandEvent &);
   void OnEditDelete(wxCommandEvent &);
 
-  void OnEditActionDelete(wxCommandEvent &);
-  void OnEditActionInsert(wxCommandEvent &);
-  void OnEditActionAppend(wxCommandEvent &);
-  void OnEditActionProbs(wxCommandEvent &);
-
   void OnEditInfosetMerge(wxCommandEvent &);
   void OnEditInfosetBreak(wxCommandEvent &);
   void OnEditInfosetSplit(wxCommandEvent &);
@@ -87,8 +82,7 @@ private:
   void OnEditOutcomesNew(wxCommandEvent &);
   void OnEditOutcomesDelete(wxCommandEvent &);
 
-  void OnEditTreeInfosets(wxCommandEvent &);
-
+  void OnEditMove(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
   void OnViewProfiles(wxCommandEvent &);
@@ -199,7 +193,7 @@ public:
   void SetCursor(Node *m_node);
   Node *Cursor(void) const { return m_cursor; }
 
-  void OnEditProperties(wxCommandEvent &);
+  void OnEditNode(wxCommandEvent &);
   void OnTreeChanged(bool, bool);
 
   DECLARE_EVENT_TABLE()

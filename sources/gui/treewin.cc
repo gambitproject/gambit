@@ -62,12 +62,16 @@ void TreeWindow::MakeMenus(void)
 {
   m_nodeMenu = new wxMenu;
 
-  m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert", "Insert a move");
-  m_nodeMenu->Append(efgmenuEDIT_PROPERTIES, "Properties",
+  m_nodeMenu->Append(efgmenuEDIT_INSERT, "Insert move", "Insert a move");
+  m_nodeMenu->Append(efgmenuEDIT_NODE, "Edit node",
 		     "View and change node properties");
+  m_nodeMenu->Append(efgmenuEDIT_MOVE, "Edit move",
+		     "View and change move properties");
+  m_nodeMenu->Append(efgmenuEDIT_GAME, "Edit game",
+		     "View and change game properties");
 
   m_gameMenu = new wxMenu;
-  m_gameMenu->Append(efgmenuEDIT_GAME, "Properties",
+  m_gameMenu->Append(efgmenuEDIT_GAME, "Edit game",
 		     "View and change game properties");
 }
 
@@ -450,7 +454,7 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
     m_parent->SetCursor(node);
     Refresh();
     wxCommandEvent event;
-    m_parent->OnEditProperties(event);
+    m_parent->OnEditNode(event);
   }
 }
 
@@ -503,6 +507,8 @@ void TreeWindow::SetCursorPosition(Node *p_cursor)
 void TreeWindow::UpdateMenus(void)
 {
   m_nodeMenu->Enable(efgmenuEDIT_INSERT, (m_parent->Cursor()) ? true : false);
+  m_nodeMenu->Enable(efgmenuEDIT_MOVE, 
+		     (m_parent->Cursor() && m_parent->Cursor()->GetInfoset()));
 }
 
 //-----------------------------------------------------------------------

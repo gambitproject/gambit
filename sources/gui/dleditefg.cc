@@ -13,7 +13,7 @@
 #endif  // WX_PRECOMP
 #include "wx/notebook.h"
 #include "game/efg.h"
-#include "dlefgproperties.h"
+#include "dleditefg.h"
 
 //========================================================================
 //                        class panelEfgGeneral
@@ -181,15 +181,15 @@ bool panelEfgPlayers::Validate(void)
 }
 
 //========================================================================
-//                      class dialogEfgProperties
+//                        class dialogEditEfg
 //========================================================================
 
-BEGIN_EVENT_TABLE(dialogEfgProperties, wxDialog)
-  EVT_BUTTON(wxID_OK, dialogEfgProperties::OnOK)
+BEGIN_EVENT_TABLE(dialogEditEfg, wxDialog)
+  EVT_BUTTON(wxID_OK, dialogEditEfg::OnOK)
 END_EVENT_TABLE()
 
-dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
-					 const wxString &p_filename)
+dialogEditEfg::dialogEditEfg(wxWindow *p_parent, FullEfg &p_efg,
+			     const wxString &p_filename)
   : wxDialog(p_parent, -1, "Extensive form properties"), m_efg(p_efg)
 {
   SetAutoLayout(true);
@@ -218,7 +218,7 @@ dialogEfgProperties::dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg,
   Layout();
 }
 
-void dialogEfgProperties::OnOK(wxCommandEvent &)
+void dialogEditEfg::OnOK(wxCommandEvent &)
 {
   if (!m_notebook->GetPage(0)->Validate() ||
       !m_notebook->GetPage(1)->Validate()) {
@@ -228,22 +228,22 @@ void dialogEfgProperties::OnOK(wxCommandEvent &)
   EndModal(wxID_OK);
 }
 
-wxString dialogEfgProperties::GetGameTitle(void) const
+wxString dialogEditEfg::GetGameTitle(void) const
 {
   return ((panelEfgGeneral *) m_notebook->GetPage(0))->GetGameTitle();
 }
 
-wxString dialogEfgProperties::GetComment(void) const
+wxString dialogEditEfg::GetComment(void) const
 {
   return ((panelEfgGeneral *) m_notebook->GetPage(0))->GetComment();
 }
 
-int dialogEfgProperties::NumPlayers(void) const
+int dialogEditEfg::NumPlayers(void) const
 {
   return ((panelEfgPlayers *) m_notebook->GetPage(1))->NumPlayers();
 }
 
-wxString dialogEfgProperties::GetPlayerName(int pl) const
+wxString dialogEditEfg::GetPlayerName(int pl) const
 {
   return ((panelEfgPlayers *) m_notebook->GetPage(1))->GetPlayerName(pl);
 }

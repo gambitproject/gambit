@@ -7,12 +7,12 @@
 // Dialog for viewing and editing properties of an extensive form game
 //
 
-#ifndef DLEFGPROPERTIES_H
-#define DLEFGPROPERTIES_H
+#ifndef DLEDITEFG_H
+#define DLEDITEFG_H
 
 #include "wx/notebook.h"
 
-class dialogEfgProperties : public wxDialog {
+class dialogEditEfg : public wxDialog {
 private:
   FullEfg &m_efg;
   wxNotebook *m_notebook;
@@ -22,9 +22,9 @@ private:
 
 public:
   // Lifecycle
-  dialogEfgProperties(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
+  dialogEditEfg(wxWindow *p_parent, FullEfg &p_efg, const wxString &);
 
-  // Data access (only valid when ShowModal() returns with wxID_OK
+  // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetGameTitle(void) const;
   wxString GetComment(void) const;
 
@@ -35,5 +35,5 @@ public:
 };
 
 
-#endif  // DLEFGPROPERTIES_H
+#endif  // DLEDITEFG_H
 

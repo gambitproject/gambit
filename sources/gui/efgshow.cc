@@ -44,12 +44,10 @@
 #include "dlefgoutcome.h"
 #include "dlefgpayoff.h"
 #include "dlefgreveal.h"
-#include "dlactionselect.h"
-#include "dlactionprobs.h"
-#include "dlinfosets.h"
 #include "dlsubgames.h"
-#include "dlefgproperties.h"
-#include "dlnodeproperties.h"
+#include "dleditnode.h"
+#include "dleditmove.h"
+#include "dleditefg.h"
 
 #include "dllayout.h"
 #include "dllegends.h"
@@ -93,10 +91,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
   EVT_MENU(efgmenuEDIT_INSERT, EfgShow::OnEditInsert)
   EVT_MENU(efgmenuEDIT_DELETE, EfgShow::OnEditDelete)
-  EVT_MENU(efgmenuEDIT_ACTION_DELETE, EfgShow::OnEditActionDelete)
-  EVT_MENU(efgmenuEDIT_ACTION_INSERT, EfgShow::OnEditActionInsert)
-  EVT_MENU(efgmenuEDIT_ACTION_APPEND, EfgShow::OnEditActionAppend)
-  EVT_MENU(efgmenuEDIT_ACTION_PROBS, EfgShow::OnEditActionProbs)
   EVT_MENU(efgmenuEDIT_INFOSET_MERGE, EfgShow::OnEditInfosetMerge)
   EVT_MENU(efgmenuEDIT_INFOSET_BREAK, EfgShow::OnEditInfosetBreak)
   EVT_MENU(efgmenuEDIT_INFOSET_SPLIT, EfgShow::OnEditInfosetSplit)
@@ -105,9 +99,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuEDIT_INFOSET_REVEAL, EfgShow::OnEditInfosetReveal)
   EVT_MENU(efgmenuEDIT_OUTCOMES_NEW, EfgShow::OnEditOutcomesNew)
   EVT_MENU(efgmenuEDIT_OUTCOMES_DELETE, EfgShow::OnEditOutcomesDelete)
-  EVT_MENU(efgmenuEDIT_TREE_INFOSETS, EfgShow::OnEditTreeInfosets)
+  EVT_MENU(efgmenuEDIT_NODE, EfgShow::OnEditNode)
+  EVT_MENU(efgmenuEDIT_MOVE, EfgShow::OnEditMove)
   EVT_MENU(efgmenuEDIT_GAME, EfgShow::OnEditGame)
-  EVT_MENU(efgmenuEDIT_PROPERTIES, EfgShow::OnEditProperties)
   EVT_MENU(efgmenuVIEW_PROFILES, EfgShow::OnViewProfiles)
   EVT_MENU(efgmenuVIEW_NAVIGATION, EfgShow::OnViewCursor)
   EVT_MENU(efgmenuVIEW_OUTCOMES, EfgShow::OnViewOutcomes)
@@ -572,16 +566,6 @@ void EfgShow::MakeMenus(void)
   editMenu->Append(efgmenuEDIT_DELETE, "&Delete...", "Delete an object");
   editMenu->AppendSeparator();
 
-  wxMenu *actionMenu = new wxMenu;
-  actionMenu->Append(efgmenuEDIT_ACTION_DELETE, "&Delete",
-		     "Delete an action from cursor information set");
-  actionMenu->Append(efgmenuEDIT_ACTION_INSERT, "&Insert",
-		     "Insert an action in the cursor's information set");
-  actionMenu->Append(efgmenuEDIT_ACTION_APPEND, "&Append",
-		     "Append an action to the cursor's information set");
-  actionMenu->Append(efgmenuEDIT_ACTION_PROBS, "&Probabilities",
-		     "Set chance probabilities for the cursor's information set");
-
   wxMenu *infosetMenu = new wxMenu;
   infosetMenu->Append(efgmenuEDIT_INFOSET_MERGE, "&Merge", 
 		      "Merge cursor information set w/ marked");
@@ -602,24 +586,17 @@ void EfgShow::MakeMenus(void)
   outcomeMenu->Append(efgmenuEDIT_OUTCOMES_DELETE, "Dele&te",
 		      "Delete an outcome");
 
-  wxMenu *treeMenu = new wxMenu;
-  treeMenu->Append(efgmenuEDIT_TREE_INFOSETS, "&Infosets",
-		   "Edit/View infosets");
-
-  editMenu->Append(efgmenuEDIT_ACTIONS, "&Actions", actionMenu, 
-		   "Edit actions");
   editMenu->Append(efgmenuEDIT_INFOSET, "&Infoset", infosetMenu,
 		   "Edit infosets");
   editMenu->Append(efgmenuEDIT_OUTCOMES, "&Outcomes", outcomeMenu,
 		   "Edit outcomes and payoffs");
-  editMenu->Append(efgmenuEDIT_TREE, "&Tree", treeMenu,
-		   "Edit the tree");
   editMenu->AppendSeparator();
+  editMenu->Append(efgmenuEDIT_NODE, "&Node",
+		   "Edit properties of the node");
+  editMenu->Append(efgmenuEDIT_MOVE, "&Move",
+		   "Edit properties of the move");
   editMenu->Append(efgmenuEDIT_GAME, "&Game",
 		   "Edit properties of the game");
-  editMenu->AppendSeparator();
-  editMenu->Append(efgmenuEDIT_PROPERTIES, "Pr&operties",
-		   "View and change properties of current selection");
 
   wxMenu *toolsMenu = new wxMenu;
 
@@ -822,21 +799,13 @@ void EfgShow::UpdateMenus(void)
   menuBar->Enable(efgmenuEDIT_INFOSET_REVEAL, 
 		  (cursor && cursor->GetInfoset()) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_ACTION_INSERT,
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
-  menuBar->Enable(efgmenuEDIT_ACTION_APPEND,
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
-  menuBar->Enable(efgmenuEDIT_ACTION_DELETE, 
-		  (cursor && m_efg.NumChildren(cursor) > 0) ? true : false);
-  menuBar->Enable(efgmenuEDIT_ACTION_PROBS,
-		  (cursor && cursor->GetInfoset() &&
-		   cursor->GetPlayer()->IsChance()) ? true : false);
-
   menuBar->Enable(efgmenuEDIT_OUTCOMES_DELETE,
 		  (m_efg.NumOutcomes() > 0) ? true : false);
 
-  menuBar->Enable(efgmenuEDIT_PROPERTIES, (cursor) ? true : false);
-  
+  menuBar->Enable(efgmenuEDIT_NODE, (cursor) ? true : false);
+  menuBar->Enable(efgmenuEDIT_MOVE,
+		  (cursor && cursor->GetInfoset()) ? true : false);
+
   if (m_treeWindow) {
     menuBar->Check(efgmenuTOOLS_SUPPORT_REACHABLE,
 		   m_treeWindow->DrawSettings().RootReachable());
@@ -1067,69 +1036,6 @@ void EfgShow::OnEditDelete(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//            EfgShow: Menu handlers - Edit->Action menu
-//----------------------------------------------------------------------
-
-void EfgShow::OnEditActionDelete(wxCommandEvent &)
-{
-  Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionSelect dialog(infoset, "Delete Action", "Action to delete",
-			    this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_efg.DeleteAction(infoset, dialog.GetAction());
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnEditActionInsert(wxCommandEvent &)
-{
-  Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionSelect dialog(infoset, "Insert action",
-			    "Insert new action before", this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      m_efg.InsertAction(infoset, dialog.GetAction());
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
-void EfgShow::OnEditActionAppend(wxCommandEvent &)
-{
-  try {
-    m_efg.InsertAction(Cursor()->GetInfoset());
-  }
-  catch (gException &ex) {
-    guiExceptionDialog(ex.Description(), this);
-  }
-}
-
-void EfgShow::OnEditActionProbs(wxCommandEvent &)
-{
-  Infoset *infoset = Cursor()->GetInfoset();
-  dialogActionProbs dialog(infoset, this);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    try {
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	m_efg.SetChanceProb(infoset, act, dialog.GetActionProb(act));
-      }
-    }
-    catch (gException &ex) {
-      guiExceptionDialog(ex.Description(), this);
-    }
-  }
-}
-
-//----------------------------------------------------------------------
 //           EfgShow: Menu handlers - Edit->Outcomes menu
 //----------------------------------------------------------------------
 
@@ -1252,15 +1158,70 @@ void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
 //           EfgShow: Menu handlers - Edit->Tree menu
 //----------------------------------------------------------------------
 
-void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
+void EfgShow::OnEditNode(wxCommandEvent &)
 {
-  dialogInfosets dialog(m_efg, this);
-  dialog.ShowModal();
+  dialogEditNode dialog(this, Cursor());
+  if (dialog.ShowModal() == wxID_OK) {
+    Cursor()->SetName(dialog.GetNodeName().c_str());
+    m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
+    m_treeWindow->RefreshTree();
+    m_treeWindow->Refresh();
+    UpdateMenus();
+  }
+}
+
+void EfgShow::OnEditMove(wxCommandEvent &)
+{
+  Infoset *infoset = Cursor()->GetInfoset();
+
+  dialogEditMove dialog(this, infoset);
+  if (dialog.ShowModal() == wxID_OK) {
+    infoset->SetName(dialog.GetInfosetName().c_str());
+    for (int act = 1; act <= infoset->NumActions(); act++) {
+      if (!dialog.GetActions().Find(infoset->Actions()[act])) {
+	m_efg.DeleteAction(infoset, infoset->Actions()[act]);
+      }
+    }
+
+    int insertAt = 1;
+    for (int act = 1; act <= dialog.NumActions(); act++) {
+      Action *action = dialog.GetActions()[act];
+      if (action) {
+	action->SetName(dialog.GetActionName(act));
+	if (infoset->IsChanceInfoset()) {
+	  m_efg.SetChanceProb(infoset, action->GetNumber(),
+			      dialog.GetActionProb(act));
+	}
+	insertAt = dialog.GetActions()[act]->GetNumber() + 1;
+      }
+      else if (insertAt > infoset->NumActions()) {
+	Action *newAction = m_efg.InsertAction(infoset);
+	insertAt++;
+	newAction->SetName(dialog.GetActionName(act));
+	if (infoset->IsChanceInfoset()) {
+	  m_efg.SetChanceProb(infoset, newAction->GetNumber(), 
+			      dialog.GetActionProb(act));
+	}
+      }
+      else {
+	Action *newAction = m_efg.InsertAction(infoset,
+					       infoset->GetAction(insertAt++));
+	newAction->SetName(dialog.GetActionName(act));
+	if (infoset->IsChanceInfoset()) {
+	  m_efg.SetChanceProb(infoset, newAction->GetNumber(), 
+			      dialog.GetActionProb(act));
+	}
+      }
+    }
+    OnTreeChanged(true, true);
+    m_treeWindow->Refresh();
+    UpdateMenus();
+  }
 }
 
 void EfgShow::OnEditGame(wxCommandEvent &)
 {
-  dialogEfgProperties dialog(this, m_efg, m_filename);
+  dialogEditEfg dialog(this, m_efg, m_filename);
   if (dialog.ShowModal() == wxID_OK) {
     m_efg.SetTitle(dialog.GetGameTitle().c_str());
     SetFilename(Filename());
@@ -1273,27 +1234,6 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 	m_efg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
       }
     }
-  }
-}
-
-void EfgShow::OnEditProperties(wxCommandEvent &)
-{
-  dialogNodeProperties dialog(this, Cursor());
-  if (dialog.ShowModal() == wxID_OK) {
-    Cursor()->SetName(dialog.GetNodeName().c_str());
-    m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
-
-    if (Cursor()->GetInfoset()) {
-      Infoset *infoset = Cursor()->GetInfoset();
-      infoset->SetName(dialog.GetInfosetName().c_str());
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-	infoset->Actions()[act]->SetName(dialog.GetActionName(act));
-      }
-    }
-
-    m_treeWindow->RefreshTree();
-    m_treeWindow->Refresh();
-    UpdateMenus();
   }
 }
 
