@@ -217,7 +217,7 @@ Nfg *MakeAfg(const Efg::Game &E)
   while (1)  {
     E.Payoff(profile, payoff);
 
-    if (iter.GetIndex() > 0)
+    if (iter.GetIndex() >= 0)
       iter.SetOutcome(afg->NewOutcome());
 
     for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)
