@@ -18,7 +18,7 @@
 //---------------------------------------------------------------------------
 
 ZSumParams::ZSumParams(void) 
-  :  trace(0), nequilib(0), tracefile(&gnull)
+  :  trace(0), stopAfter(0), tracefile(&gnull)
 { }
 
 
@@ -92,7 +92,6 @@ template <class T> void ZSumModule<T>::Make_Abc()
 template <class T> int ZSumModule<T>::ZSum(int dup)
 {
   BFS<T> cbfs((T) 0);
-  int i;
   
   if (NF.NumPlayers() != 2 || !params.tracefile)   return 0;
   if(!IsConstSum()) return 0;;
@@ -130,19 +129,15 @@ template <class T> int ZSumModule<T>::Add_BFS(const LPSolve<T> &lp)
   return 1;
 }
 
-template <class T> void ZSumModule<T>::
-GetSolutions(gList<MixedProfile<T> > &solutions) const
+template <class T>
+void ZSumModule<T>::GetSolutions(gList<MixedProfile<T> > &solutions) const
 {
   int n1=NF.NumStrats(1);
   int n2=NF.NumStrats(2);
   solutions.Flush();
 
   for (int i = 1; i <= List.Length(); i++)    {
-    gArray<int> dim(2);
-    dim[1] = n1;
-    dim[2] = n2;
-
-    MixedProfile<T> profile(dim);
+    MixedProfile<T> profile(NF);
     for (int j = 1; j <= n1; j++) 
       if (List[i].IsDefined(j))   
 	profile(1, j) = List[i](j);

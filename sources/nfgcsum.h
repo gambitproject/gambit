@@ -17,7 +17,7 @@
 
 class ZSumParams     {
   public:
-    int trace, nequilib;
+    int trace, stopAfter;
     gOutput *tracefile;
     
     ZSumParams(void);

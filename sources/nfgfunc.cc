@@ -150,6 +150,40 @@ Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedProfile<gRation
     Append(new MixedValPortion( new MixedProfile<gRational>(list[i])));
 }
 
+#include "csum.h"
+
+Portion *GSM_ConstSumFloat(Portion **param)
+{
+  NormalForm<double> &N = * (NormalForm<double> *) ((NfgPortion *) param[0])->Value();
+
+  ZSumParams ZP;
+  ZSumModule<double> ZM(N, ZP);
+  ZM.ZSum();
+
+  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[2])->Value() = ZM.Time();
+
+  gList<MixedProfile<double> > solns;
+  ZM.GetSolutions(solns);
+  return new Mixed_ListPortion<double>(solns);
+}
+
+Portion *GSM_ConstSumRational(Portion **param)
+{
+  NormalForm<gRational> &N = * (NormalForm<gRational> *) ((NfgPortion *) param[0])->Value();
+
+  ZSumParams ZP;
+  ZSumModule<gRational> ZM(N, ZP);
+  ZM.ZSum();
+
+  ((IntPortion *) param[1])->Value() = ZM.NumPivots();
+  ((FloatPortion *) param[2])->Value() = ZM.Time();
+
+  gList<MixedProfile<gRational> > solns;
+  ZM.GetSolutions(solns);
+  return new Mixed_ListPortion<gRational>(solns);
+}
+
 #include "enum.h"
 
 Portion *GSM_EnumFloat(Portion **param)
@@ -421,6 +455,24 @@ Portion *GSM_WriteNfg(Portion **param)
 void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
+
+  FuncObj = new FuncDescObj("ConstSum");
+  FuncObj->SetFuncInfo(GSM_ConstSumFloat, 3);
+  FuncObj->SetParamInfo(GSM_ConstSumFloat, 0, "nfg", porNFG_FLOAT,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+  FuncObj->SetParamInfo(GSM_ConstSumFloat, 1, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ConstSumFloat, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_ConstSumRational, 3);
+  FuncObj->SetParamInfo(GSM_ConstSumRational, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE, DEFAULT_NFG);
+  FuncObj->SetParamInfo(GSM_ConstSumRational, 1, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_ConstSumRational, 2, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("ElimDom");
   FuncObj->SetFuncInfo(GSM_ElimAllDom, 3);

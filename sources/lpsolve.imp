@@ -257,7 +257,7 @@ template <class T> int LPSolve<T>::Enter()
 
 template <class T> int LPSolve<T>::Exit(int in)
 {
-  int i,j,out,lab,col;
+  int j,out,lab,col;
   T t, tmin;
 
   tmin = (T)100000000;
