@@ -80,7 +80,12 @@ PortionType ErrorPortion::Type( void ) const
 { return porERROR; }
 
 void ErrorPortion::Output( gOutput& s ) const
-{ s << "(Error) " << _Value; }
+{
+  if( _Value == "" )
+    s << "(Error)";
+  else
+    s << _Value;
+}
 
 Portion* ErrorPortion::ValCopy( void ) const
 { return new ErrorPortion( _Value ); }

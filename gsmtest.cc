@@ -585,64 +585,64 @@ int main( void )
   gout << "\n\nTesting the instruction memory\n";
   gout << "Huge general test\n";
 
-  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "ix" ) );
   program.Append( new Push<gRational>( 17 ) );
   program.Append( new Assign );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Push<gRational>( 23 ) );
   program.Append( new Assign );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Dump );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Equ );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Neq );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Gtn );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Ltn );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Geq );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "ix" ) );
+  program.Append( new PushRef( "iy" ) );
   program.Append( new Leq );
   program.Append( new Dump );
 
-  program.Append( new PushRef( "x" ) );
+  program.Append( new PushRef( "jx" ) );
   program.Append( new Push<gString>( "hi!" ) );
   program.Append( new Assign );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Push<gString>( "hello!" ) );
   program.Append( new Assign );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Dump );
   program.Append( new Push<gString>( "hi!" ) );
   program.Append( new Push<gString>( "hello!" ) );
   program.Append( new Add );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Equ );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Neq );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Gtn );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Ltn );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Geq );
-  program.Append( new PushRef( "x" ) );
-  program.Append( new PushRef( "y" ) );
+  program.Append( new PushRef( "jx" ) );
+  program.Append( new PushRef( "jy" ) );
   program.Append( new Leq );
   program.Append( new Dump );
 
@@ -930,7 +930,7 @@ int main( void )
 
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 10 );
   for( i = 1; i <= 9; i++ )
   {
@@ -941,24 +941,24 @@ int main( void )
   machine->Dump();
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
 
 #ifdef CRASHTEST
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 0 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 9 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 10 );
   machine->Subscript();
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (double) 6 );
   machine->Subscript();  
   machine->Dump();
@@ -1012,7 +1012,7 @@ int main( void )
 #endif
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->PushRef( "x1" );
   machine->PushRef( "x2" );
   machine->PushRef( "x3" );
@@ -1027,16 +1027,16 @@ int main( void )
   gin >> cont;
 #endif
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 3 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 5 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) -2 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 7 );
   machine->Subscript();
   machine->Dump();
@@ -1052,7 +1052,7 @@ int main( void )
   gin >> cont;
 #endif
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (double) 10 );
   for( i = 1; i <= 9; i++ )
   {
@@ -1062,21 +1062,21 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 3 );
   machine->Subscript();
   machine->Dump();
 
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 0 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 9 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (long) 10 );
   machine->Subscript();
-  machine->PushRef( "x" );
+  machine->PushRef( "lx" );
   machine->Push( (double) 6 );
   machine->Subscript();  
   machine->Dump();
@@ -1244,21 +1244,24 @@ int main( void )
 
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "nx" );
   machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
   machine->Bind();
   machine->CallFunction();
   machine->Assign();
   machine->Dump();
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "nx" );
   machine->Dump();
 
 
 
-  machine->PushRef( "x" );
+  machine->PushRef( "nx" );
   machine->Push( (double) 10 );
   machine->Assign();
   machine->Dump();
@@ -1275,12 +1278,15 @@ int main( void )
 
   
   machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x" );
+  machine->PushRef( "nx" );
   machine->Bind();
   machine->InitCallFunction( "ReadNfg" );
+  machine->InitCallFunction( "Input" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
   machine->CallFunction();
+  machine->Bind();
+  machine->CallFunction();
 
   machine->Bind();
   machine->CallFunction();
@@ -1292,23 +1298,6 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
-
-
-
-#ifdef CRASHTEST
-  machine->InitCallFunction( "Assign" );
-  machine->PushRef( "x" );
-  machine->Bind();
-  machine->Push( (gRational) 11 );
-  machine->Bind();
-  machine->CallFunction();
-  machine->Dump();
-
-  gout << "assigned primary ref\n";
-
-  machine->PushRef( "x" );
-  machine->Dump();
-#endif
 
 
 
