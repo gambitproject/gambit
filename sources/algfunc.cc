@@ -96,6 +96,23 @@ Portion *GSM_SequenceR(Portion **param)
   
   return new Behav_List_Portion<gRational>(&E, SM.GetSolutions());
 }
+
+Portion *GSM_SetOptions(Portion **param)
+{
+  gString alg = ((gString_Portion *) param[0])->Value();
+  gString par = ((gString_Portion *) param[1])->Value();
+  double value = ((numerical_Portion<double> *) param[2])->Value();
+  
+  if (alg == "Gobit")   {
+    if (par == "minLam")           Gobit_default_minLam = value;
+    else if (par == "maxLam")      Gobit_default_maxLam = value;
+    else if (par == "delLam")      Gobit_default_delLam = value;
+    else return 0;
+    return new numerical_Portion<double>(value);
+  }
+  else
+    return 0;
+}
   
 void Init_algfunc(GSM *gsm)
 {
@@ -131,6 +148,13 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj->SetFuncInfo(GSM_SequenceR, 1);
   FuncObj->SetParamInfo(GSM_SequenceR, 0, "E", porEFG_RATIONAL);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("SetOptions");
+  FuncObj->SetFuncInfo(GSM_SetOptions, 3);
+  FuncObj->SetParamInfo(GSM_SetOptions, 0, "alg", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetOptions, 1, "param", porSTRING);
+  FuncObj->SetParamInfo(GSM_SetOptions, 2, "value", porDOUBLE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("EfgToNfg");
