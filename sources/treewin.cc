@@ -1100,7 +1100,11 @@ BranchDraggerDialog::BranchDraggerDialog(Efg &p_efg, wxWindow *p_parent)
   m_playerNameList->Append("Chance");
 
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
-    m_playerNameList->Append(m_efg.Players()[pl]->GetName());
+    const gText &name = m_efg.Players()[pl]->GetName();
+    if (name != "")
+      m_playerNameList->Append(name);
+    else
+      m_playerNameList->Append("Player" + ToText(pl));
   }
 
   // Force a selection -- some implementations (e.g. Motif) do not
