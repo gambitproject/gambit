@@ -428,7 +428,7 @@ Portion *gclConditional::Evaluate(void)
     return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
 
   Portion *ret;
-  if (((BoolPortion *) guardval)->Value())
+  if (((BoolPortion *) guardval)->Value() == T_YES)
     ret = truebr->Evaluate();
   else
     ret = falsebr->Evaluate();
@@ -459,7 +459,7 @@ Portion *gclWhileExpr::Evaluate(void)
 	guardval->Spec().ListDepth > 0)
       return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
 
-    if (!((BoolPortion *) guardval)->Value())  {
+    if (((BoolPortion *) guardval)->Value() != T_YES)  {
       delete guardval;
       return ret;
     }
@@ -506,7 +506,7 @@ Portion *gclForExpr::Evaluate(void)
 	guardval->Spec().ListDepth > 0)
       return new ErrorPortion("Guard must evaluate to BOOLEAN"); 
 
-    if (!((BoolPortion *) guardval)->Value())  {
+    if (((BoolPortion *) guardval)->Value() != T_YES)  {
       delete guardval;
       return ret;
     }
