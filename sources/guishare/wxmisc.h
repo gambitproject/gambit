@@ -79,49 +79,13 @@ public:
 // from the gambit_color_list.  Also allows sup/superscripts
 void gDrawText(wxDC &dc, const gText &s, float x, float y);
 
-// in efgsolvd.cc, nfgsolvd.cc
-const int idTYPE_RADIOBOX = 501;
-const int idNUM_RADIOBOX = 502;
-
-// in dlefg.cc
-const int idMOVE_ANCESTOR_LISTBOX = 1013;
-const int idINFOSET_EDIT_BUTTON = 1021;
-const int idINFOSET_PLAYER_LISTBOX = 1022;
-const int idINFOSET_INFOSET_LISTBOX = 1023;
-const int idINFOSET_NEW_BUTTON = 1024;
-const int idINFOSET_REMOVE_BUTTON = 1025;
-const int idEFPLAYERS_NEW_BUTTON = 1031;
-const int idEFPLAYERS_EDIT_BUTTON = 1032;
-const int idEFSUPPORT_PLAYER_LISTBOX = 1041;
-const int idEFSUPPORT_INFOSET_LISTBOX = 1042;
-const int idEFSUPPORT_ACTION_LISTBOX = 1043;
-const int idEFG_BROWSE_BUTTON = 1051;
-
 // in nfgshow.cc
 const int idSTRATEGY_CHOICE = 2001;
 const int idROWPLAYER_CHOICE = 2002;
 const int idCOLPLAYER_CHOICE = 2003;
 
-// in algdlgs.cc
-const int idTRACE_CHOICE = 2400;
-const int idALL_CHECKBOX = 2500;
-const int idTRACE_BUTTON = 2501;
-const int idDEPTH_CHOICE = 2502;
-const int idRUNPXI_BOX = 2300;
-
 // in dlnfg.cc
-const int idNFPLAYERS_EDIT_BUTTON = 3001;
 const int idSTRATEGY_PLAYER_LISTBOX = 3011;
 const int idSTRATEGY_STRATEGY_LISTBOX = 3012;
-const int idNFSUPPORT_PLAYER_LISTBOX = 3021;
-const int idNFSUPPORT_STRATEGY_LISTBOX = 3022;
-const int idNFG_BROWSE_BUTTON = 3031;
-
-// in accels.cc
-const int idACCELS_EVENT_LISTBOX = 4001;
-const int idACCELS_KEY_LISTBOX = 4002;
-
-// in efgsolutions.cc, nfgsolutions.cc
-const int idSOLUTION_WINDOW = 5001;
 
 #endif // WXMISC_H
