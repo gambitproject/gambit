@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Tableau class for Lemke-Howson algorithm
+// gbtTableau class for Lemke-Howson algorithm
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project

@@ -46,12 +46,12 @@
 // excess columns representing the artificial and slack variables.   
 //
 
-template <class T> class LPSolve {
+template <class T> class gbtLPSolver {
 private:
   int  well_formed, feasible, bounded, aborted, flag, nvars, neqns,nequals;
   T total_cost,eps1,eps2,eps3,tmin;
-  BFS<T> opt_bfs,dual_bfs;
-  LPTableau<T> tab;
+  gbtBasicFeasibleSolution<T> opt_bfs,dual_bfs;
+  gbtLPTableau<T> tab;
   gbtArray<bool> *UB, *LB;
   gbtArray<T> *ub, *lb;
   gbtVector<T> *xx, *cost; 
@@ -62,25 +62,25 @@ private:
   int Enter(void);
   int Exit(int);
 public:
-  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
+  gbtLPSolver(const gbtMatrix<T> &A, const gbtVector<T> &B, const gbtVector<T> &C,
 	  int nequals, gbtStatus &);   // nequals = number of equalities (last nequals rows)
-//  LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &B, 
+//  gbtLPSolver(const gbtMatrix<T> &A, const gbtVector<T> &B, 
 //	  const gbtVector<T> &C,  const gbtVector<int> &sense, 
 //	  const gbtVector<int> &LB,  const gbtVector<T> &lb, 
 //	  const gbtVector<int> &UB, const gbtVector<T> &ub);
-  ~LPSolve();
+  ~gbtLPSolver();
   
   T OptimumCost(void) const;
   const gbtVector<T> &OptimumVector(void) const;
-  const gbtList< BFS<T> > &GetAll(void);
-  const LPTableau<T> &GetTableau();
+  const gbtList< gbtBasicFeasibleSolution<T> > &GetAll(void);
+  const gbtLPTableau<T> &GetTableau();
   
   int IsAborted(void) const;
   int IsWellFormed(void) const;
   int IsFeasible(void) const;
   int IsBounded(void) const;
   long NumPivots(void) const;
-  void OptBFS(BFS<T> &b) const;
+  void OptBFS(gbtBasicFeasibleSolution<T> &b) const;
   T Epsilon(int i = 2) const;
 };
 

@@ -29,30 +29,30 @@
 #include "tableau.h"
 
 // ---------------------------------------------------------------------------
-// Class EtaMatrix
+// Class gbtEtaMatrix
 // ---------------------------------------------------------------------------
 
 template <class T>
-gbtOutput& operator<<(gbtOutput &out, const EtaMatrix<T> &a)
+gbtOutput& operator<<(gbtOutput &out, const gbtEtaMatrix<T> &a)
 {
   out << "column: " << a.col << '\n' << a.etadata << '\n';
   return out;
 }
 
 template <class T>
-bool EtaMatrix<T>::operator==(const EtaMatrix<T> &a) const
+bool gbtEtaMatrix<T>::operator==(const gbtEtaMatrix<T> &a) const
 {
   return ( col == a.col && etadata == a.etadata );
 }
 
 template <class T>
-bool EtaMatrix<T>::operator!=(const EtaMatrix<T> &a) const
+bool gbtEtaMatrix<T>::operator!=(const gbtEtaMatrix<T> &a) const
 {
   return ( col != a.col || etadata != a.etadata );
 }
 
 // ---------------------------------------------------------------------------
-// Class LUdecomp
+// Class gbtLUDecomposition
 // ---------------------------------------------------------------------------
 // -------------------------
 //  C-tors, D-tor, Operators
@@ -61,7 +61,7 @@ bool EtaMatrix<T>::operator!=(const EtaMatrix<T> &a) const
 // copy constructor
 
 template <class T> 
-LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Tableau<T> &t)
+gbtLUDecomposition<T>::gbtLUDecomposition( const gbtLUDecomposition<T> &a, gbtTableau<T> &t)
 : tab(t), basis(t.GetBasis()), 
   scratch1(basis.First(), basis.Last()), 
   scratch2(basis.First(), basis.Last()),
@@ -70,13 +70,13 @@ LUdecomp<T>::LUdecomp( const LUdecomp<T> &a, Tableau<T> &t)
   parent(&a), copycount(0)
 
 { 
-  ((LUdecomp<T> &)*parent).copycount++;
+  ((gbtLUDecomposition<T> &)*parent).copycount++;
 }
 
 // Decomposes given matrix
 
 template <class T> 
-LUdecomp<T>::LUdecomp( Tableau<T> &t,
+gbtLUDecomposition<T>::gbtLUDecomposition( gbtTableau<T> &t,
 		      int rfac/* = 0 */)	
 : tab(t), basis(t.GetBasis()),  
   scratch1(basis.First(), basis.Last()), 
@@ -88,10 +88,10 @@ LUdecomp<T>::LUdecomp( Tableau<T> &t,
 }
 
 // Destructor
-template <class T> LUdecomp<T>::~LUdecomp() 
+template <class T> gbtLUDecomposition<T>::~gbtLUDecomposition() 
 { 
   if ( parent != NULL )
-    ((LUdecomp<T> &) *parent).copycount--;
+    ((gbtLUDecomposition<T> &) *parent).copycount--;
   if(copycount != 0) throw BadCount();
 }
 
@@ -103,11 +103,11 @@ template <class T> LUdecomp<T>::~LUdecomp()
 
 // use this to copy ludecomps.... 
 template <class T>
-void LUdecomp<T>::Copy(const LUdecomp<T> &orig, Tableau<T> &t)
+void gbtLUDecomposition<T>::Copy(const gbtLUDecomposition<T> &orig, gbtTableau<T> &t)
 {
   if(this != &orig) {
     if (parent != NULL)
-      ((LUdecomp<T> &) *parent).copycount--;
+      ((gbtLUDecomposition<T> &) *parent).copycount--;
  
     tab = t;
     basis = t.GetBasis();
@@ -122,12 +122,12 @@ void LUdecomp<T>::Copy(const LUdecomp<T> &orig, Tableau<T> &t)
     total_operations = orig.total_operations;
     parent = &orig;
     copycount = 0;
-    ((LUdecomp<T> &)*parent).copycount++;
+    ((gbtLUDecomposition<T> &)*parent).copycount++;
   }
 }
 
 template <class T>
-void LUdecomp<T>::update( int col, int matcol )
+void gbtLUDecomposition<T>::update( int col, int matcol )
 {
 
   if( copycount != 0 ) throw BadCount();
@@ -141,7 +141,7 @@ void LUdecomp<T>::update( int col, int matcol )
     tab.GetColumn( matcol, scratch1); 
     solve( scratch1, scratch1 );
     if ( scratch1[col] == (T) 0 ) throw BadPivot();
-    E.Append( EtaMatrix<T>( col, scratch1 ) );
+    E.Append( gbtEtaMatrix<T>( col, scratch1 ) );
     
     total_operations += iterations * m + 2 * m * m;    
   }
@@ -150,7 +150,7 @@ void LUdecomp<T>::update( int col, int matcol )
 
 
 template <class T> 
-void LUdecomp<T>::refactor( ) 
+void gbtLUDecomposition<T>::refactor( ) 
 {
 
   L.Flush();
@@ -163,13 +163,13 @@ void LUdecomp<T>::refactor( )
   iterations = 0;
   int m = basis.Last() - basis.First() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
-  if (parent != NULL) ((LUdecomp<T> &)*parent).copycount--;
+  if (parent != NULL) ((gbtLUDecomposition<T> &)*parent).copycount--;
   parent = NULL;
   
 }
 
 template <class T>
-void LUdecomp<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) const  
+void gbtLUDecomposition<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) const  
 {
 
   if ( c.First() != y.First() || c.Last() != y.Last() ) throw BadDim();
@@ -188,7 +188,7 @@ void LUdecomp<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) const
 }
 
 template <class T>
-void LUdecomp<T>::solve( const gbtVector<T> &a, gbtVector<T> &d ) const
+void gbtLUDecomposition<T>::solve( const gbtVector<T> &a, gbtVector<T> &d ) const
 {
 
   if ( a.First() != d.First() || a.Last() != d.Last() ) throw BadDim();
@@ -207,7 +207,7 @@ void LUdecomp<T>::solve( const gbtVector<T> &a, gbtVector<T> &d ) const
 }
 
 template<class T>
-void LUdecomp<T>::SetRefactor( int a )
+void gbtLUDecomposition<T>::SetRefactor( int a )
 {
   refactor_number = a;
 }
@@ -218,7 +218,7 @@ void LUdecomp<T>::SetRefactor( int a )
 
 
 template<class T>
-void LUdecomp<T>::FactorBasis()
+void gbtLUDecomposition<T>::FactorBasis()
 {
   int i, j, piv;
   T pivVal;
@@ -249,18 +249,18 @@ void LUdecomp<T>::FactorBasis()
     for ( j = i+1; j <= B.MaxRow(); j++ ) {
       scratch2[j] =  - B(j, i) / B(i,i);
     }
-    L.Append( EtaMatrix<T>(i, scratch2) );
+    L.Append( gbtEtaMatrix<T>(i, scratch2) );
     GaussElem(B, i, i);
 
   }
   for ( j = B.MinCol(); j <= B.MaxCol(); j++ ) {
     B.GetColumn( j, scratch2 );
-    U.Append( EtaMatrix<T>( j, scratch2 ));
+    U.Append( gbtEtaMatrix<T>( j, scratch2 ));
   }
 }
 
 template<class T>
-void LUdecomp<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
+void gbtLUDecomposition<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
 {
   if( B(row, col) == (T) 0) throw BadPivot();
 
@@ -283,30 +283,30 @@ void LUdecomp<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
 
 
 template<class T>
-void LUdecomp<T>::BTransE( gbtVector<T> &y ) const
+void gbtLUDecomposition<T>::BTransE( gbtVector<T> &y ) const
 {
 
   int i;
   for ( i = E.Length(); i >= 1; i-- ) {
-    ((LUdecomp<T> &) *this).scratch2 = y;
+    ((gbtLUDecomposition<T> &) *this).scratch2 = y;
     VectorEtaSolve(scratch2, E[i], y );
   }
 }
   
 template<class T>
-void LUdecomp<T>::FTransU( gbtVector<T> &y ) const
+void gbtLUDecomposition<T>::FTransU( gbtVector<T> &y ) const
 {
 
   int i;
   for ( i = 1; i <= U.Length(); i++ ) {
-    ((LUdecomp<T> &) *this).scratch2 = y;
+    ((gbtLUDecomposition<T> &) *this).scratch2 = y;
     VectorEtaSolve(scratch2, U[i], y );
   }
 }
 
 template<class T>
-void LUdecomp<T>::VectorEtaSolve( const gbtVector<T> &v,  
-				 const EtaMatrix<T>  &eta, 
+void gbtLUDecomposition<T>::VectorEtaSolve( const gbtVector<T> &v,  
+				 const gbtEtaMatrix<T>  &eta, 
 				 gbtVector<T> &y ) const
 {
 
@@ -325,30 +325,30 @@ void LUdecomp<T>::VectorEtaSolve( const gbtVector<T> &v,
 }
 
 template<class T>
-void LUdecomp<T>::FTransE( gbtVector<T> &y ) const
+void gbtLUDecomposition<T>::FTransE( gbtVector<T> &y ) const
 {
 
   int i;
   for ( i = 1; i <= E.Length(); i++ ) {
-    ((LUdecomp<T> &) *this).scratch2 = y;
+    ((gbtLUDecomposition<T> &) *this).scratch2 = y;
     EtaVectorSolve(scratch2, E[i], y );
   }
 }
   
 template<class T>
-void LUdecomp<T>::BTransU( gbtVector<T> &y ) const
+void gbtLUDecomposition<T>::BTransU( gbtVector<T> &y ) const
 {
 
   int i;
   for ( i = U.Length(); i >= 1; i-- ) {
-    ((LUdecomp<T> &) *this).scratch2 = y;
+    ((gbtLUDecomposition<T> &) *this).scratch2 = y;
     EtaVectorSolve(scratch2, U[i], y );
   }
 }
 
 template<class T>
-void LUdecomp<T>::EtaVectorSolve( const gbtVector<T> &v,  
-				 const EtaMatrix<T>  &eta, 
+void gbtLUDecomposition<T>::EtaVectorSolve( const gbtVector<T> &v,  
+				 const gbtEtaMatrix<T>  &eta, 
 				 gbtVector<T> &d ) const
 {
   int i;
@@ -369,19 +369,19 @@ void LUdecomp<T>::EtaVectorSolve( const gbtVector<T> &v,
 }
 
 template<class T>
-void LUdecomp<T>::yLP_Trans( gbtVector<T> &y ) const
+void gbtLUDecomposition<T>::yLP_Trans( gbtVector<T> &y ) const
 {
   int j;
   
   for (j = L.Length(); j >= 1; j--) {
-    yLP_mult( y, j, ((LUdecomp<T> &) *this).scratch2 );
+    yLP_mult( y, j, ((gbtLUDecomposition<T> &) *this).scratch2 );
     y = scratch2;
   }
 }
 
 
 template<class T>
-void LUdecomp<T>::yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &ans ) const
+void gbtLUDecomposition<T>::yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &ans ) const
 {
     
   if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw BadDim();
@@ -407,17 +407,17 @@ void LUdecomp<T>::yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &ans ) co
 }
 
 template<class T>
-void LUdecomp<T>::LPd_Trans( gbtVector<T> &d ) const
+void gbtLUDecomposition<T>::LPd_Trans( gbtVector<T> &d ) const
 {
   int j;
   for (j = 1; j <= L.Length(); j++) {
-    LPd_mult( d, j, ((LUdecomp<T> &) *this).scratch2 );
+    LPd_mult( d, j, ((gbtLUDecomposition<T> &) *this).scratch2 );
     d = scratch2;
   }
 }
 
 template<class T>
-void LUdecomp<T>::LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &ans ) const
+void gbtLUDecomposition<T>::LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &ans ) const
 {
   
   if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw BadDim();
@@ -445,7 +445,7 @@ void LUdecomp<T>::LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &ans ) const
 }
 
 template<class T>
-bool LUdecomp<T>::CheckBasis() 
+bool gbtLUDecomposition<T>::CheckBasis() 
 {
   int i;
   bool ret = true;
@@ -457,7 +457,7 @@ bool LUdecomp<T>::CheckBasis()
 }
 
 template<class T>
-bool LUdecomp<T>::RefactorCheck()
+bool gbtLUDecomposition<T>::RefactorCheck()
 {
   int m = basis.Last() - basis.First() + 1;
   int i = iterations * (iterations * m + 2 * m * m );
@@ -468,26 +468,26 @@ bool LUdecomp<T>::RefactorCheck()
   return tmp;
 }
   
-template <class T> LUdecomp<T>::BadCount::~BadCount()
+template <class T> gbtLUDecomposition<T>::BadCount::~BadCount()
 { }
 
-template <class T> gbtText LUdecomp<T>::BadCount::Description(void) const
+template <class T> gbtText gbtLUDecomposition<T>::BadCount::Description(void) const
 {
-  return "Bad Reference count in LUdecomp";
+  return "Bad Reference count in gbtLUDecomposition";
 }
 
-template <class T> LUdecomp<T>::BadDim::~BadDim()
+template <class T> gbtLUDecomposition<T>::BadDim::~BadDim()
 { }
 
-template <class T> gbtText LUdecomp<T>::BadDim::Description(void) const
+template <class T> gbtText gbtLUDecomposition<T>::BadDim::Description(void) const
 {
-  return "Bad Dimension in LUdecomp";
+  return "Bad Dimension in gbtLUDecomposition";
 }
 
-template <class T> LUdecomp<T>::BadPivot::~BadPivot()
+template <class T> gbtLUDecomposition<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gbtText LUdecomp<T>::BadPivot::Description(void) const
+template <class T> gbtText gbtLUDecomposition<T>::BadPivot::Description(void) const
 {
-  return "Bad Pivot in LUdecomp";
+  return "Bad Pivot in gbtLUDecomposition";
 }

@@ -438,7 +438,7 @@ bool gbtEfgBasis::IsConsistent(void) const
   // gout << "\nc: \n" << (*c);
 
   gbtNullStatus status;
-  LPSolve<double> lp((*A),(*b),(*c),num_eqs, status);
+  gbtLPSolver<double> lp((*A),(*b),(*c),num_eqs, status);
 
   // gout << "\noptimum: " << lp.OptimumVector();
   //  if(!lp.IsWellFormed()) gout << "\nLP not well formed";

@@ -38,7 +38,7 @@ template <class T>
 gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
 					    gbtStatus &p_status)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
   ns1 = p_support.NumSequences(1);
   ns2 = p_support.NumSequences(2);
@@ -74,7 +74,7 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
   c = (T)0;
   c[ns2+1] = -(T)1;
 
-  LPSolve<T> LP(A,b,c,ni2,p_status);
+  gbtLPSolver<T> LP(A,b,c,ni2,p_status);
   if (!LP.IsAborted()) {
     Add_BFS(LP); 
   }
@@ -85,11 +85,11 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
 }
 
 
-template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
+template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ gbtLPSolver<T> &lp)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
-  // LPSolve<T>::GetAll() does not currently work correctly; for now,
+  // gbtLPSolver<T>::GetAll() does not currently work correctly; for now,
   // LpSolve is restricted to returning only one equilibrium 
   lp.OptBFS(cbfs);
   if (List.Contains(cbfs))  return 0;
@@ -101,7 +101,7 @@ template <class T> int gbtEfgNashLp<T>::Add_BFS(/*const*/ LPSolve<T> &lp)
 
 template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_support,
 						    gbtDPVector<T> &v,
-						    const BFS<T> &sol,
+						    const gbtBasicFeasibleSolution<T> &sol,
 						    const gbtEfgNode &n,
 						    int s1,int s2) const
 {

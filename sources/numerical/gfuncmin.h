@@ -31,27 +31,27 @@
 #include "gfunc.h"
 
 //
-// gFunctionMinimizer is an abstract base class for function minimization
+// gbtFunctionMinimizer is an abstract base class for function minimization
 //
-class gFunctionMinimizer {
+class gbtFunctionMinimizer {
 public:
-  virtual ~gFunctionMinimizer() { }
+  virtual ~gbtFunctionMinimizer() { }
 
-  virtual void Set(const gC1Function<double> &fdf,
+  virtual void Set(const gbtC1Function<double> &fdf,
 		   const gbtVector<double> &x, double &f,
 		   gbtVector<double> &gradient, double step_size,
 		   double p_tol) = 0;
   virtual void Restart(void) = 0;
 
-  virtual bool Iterate(const gC1Function<double> &fdf,
+  virtual bool Iterate(const gbtC1Function<double> &fdf,
 		       gbtVector<double> &x, double &f,
 		       gbtVector<double> &gradient, gbtVector<double> &dx) = 0;
 };
 
 //
-// gConjugatePR: implements Polak-Ribiere conjugate gradient descent
+// gbtConjugatePRMinimizer: implements Polak-Ribiere conjugate gradient descent
 //
-class gConjugatePR : public gFunctionMinimizer {
+class gbtConjugatePRMinimizer : public gbtFunctionMinimizer {
 private:
   int iter;
   double step;
@@ -66,20 +66,18 @@ private:
   gbtVector<double> g0;
 
 public:
-  gConjugatePR(int n);
-  virtual ~gConjugatePR() { }
+  gbtConjugatePRMinimizer(int n);
+  virtual ~gbtConjugatePRMinimizer() { }
 
-  void Set(const gC1Function<double> &fdf,
+  void Set(const gbtC1Function<double> &fdf,
 	   const gbtVector<double> &x, double &f,
 	   gbtVector<double> &gradient, double step_size,
 	   double p_tol);
   void Restart(void);
 
-  bool Iterate(const gC1Function<double> &fdf,
+  bool Iterate(const gbtC1Function<double> &fdf,
 	       gbtVector<double> &x, double &f,
 	       gbtVector<double> &gradient, gbtVector<double> &dx);
 };
-
-class gFuncMinException { };
 
 #endif  // GFUNCMIN_H

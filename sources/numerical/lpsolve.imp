@@ -35,7 +35,7 @@ template <class T> gbtBlock<int> Artificials(const gbtVector<T> &b)
 }
 
 template <class T> 
-LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
+gbtLPSolver<T>::gbtLPSolver(const gbtMatrix<T> &A, const gbtVector<T> &b,
 		    const gbtVector<T> &c, int nequals, gbtStatus &s) 
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
@@ -54,7 +54,7 @@ LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
     well_formed = 0;
     return;
   }
-  // gout << "\n--- Begin LPSolve ---\n";
+  // gout << "\n--- Begin gbtLPSolver ---\n";
   // tab.BigDump(gout);
 
   // initialize data
@@ -108,7 +108,7 @@ LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
   
   tab.SetCost((*cost));
   
-  // gout << "\nInitial Tableau = \n";
+  // gout << "\nInitial gbtTableau = \n";
   // tab.Dump(gout);
   
   // set xx to be initial feasible solution to phase II  
@@ -201,11 +201,11 @@ LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
     if(dual_bfs.IsDefined(-i))
       opt_bfs.Define(-i,dual_bfs(-i));
 
-  // gout << "\n--- End LPSolve ---\n";
+  // gout << "\n--- End gbtLPSolver ---\n";
 }
 
-//template <class T> LPSolve<T>::
-//LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &/*B*/, 
+//template <class T> gbtLPSolver<T>::
+//gbtLPSolver(const gbtMatrix<T> &A, const gbtVector<T> &/*B*/, 
 //	const gbtVector<T> &/*C*/,  const gbtVector<int> &/*sense*/, 
 //	const gbtVector<int> &/*LB*/,  const gbtVector<T> &/*lb*/, 
 //	const gbtVector<int> &/*UB*/, const gbtVector<T> &/*ub*/)
@@ -222,7 +222,7 @@ LPSolve<T>::LPSolve(const gbtMatrix<T> &A, const gbtVector<T> &b,
 //  assert(0);
 //}
 
-template <class T> void LPSolve<T>::Solve(int phase)
+template <class T> void gbtLPSolver<T>::Solve(int phase)
 {
   int i, in,xlab;
   int outlab = 0;
@@ -287,9 +287,9 @@ template <class T> void LPSolve<T>::Solve(int phase)
   while(in);
 }
   
-template <class T> int LPSolve<T>::Enter()
+template <class T> int gbtLPSolver<T>::Enter()
 { 
-  // gout << "\nIn LPSolve<T>::Enter()";
+  // gout << "\nIn gbtLPSolver<T>::Enter()";
   int i,in;
   T rc;
   in = 0;
@@ -317,7 +317,7 @@ template <class T> int LPSolve<T>::Enter()
   return in;
 }
 
-template <class T> int LPSolve<T>::Exit(int in)
+template <class T> int gbtLPSolver<T>::Exit(int in)
 {
   int j,out,lab,col;
   T t;
@@ -375,22 +375,22 @@ template <class T> int LPSolve<T>::Exit(int in)
   return out;
 }
 
-template <class T> T LPSolve<T>::OptimumCost(void) const
+template <class T> T gbtLPSolver<T>::OptimumCost(void) const
 {
   return total_cost;
 }
 
-template <class T> const gbtVector<T> &LPSolve<T>::OptimumVector(void) const
+template <class T> const gbtVector<T> &gbtLPSolver<T>::OptimumVector(void) const
 {
   return (*xx);
 }
 
-template <class T> const LPTableau<T> &LPSolve<T>::GetTableau(void)
+template <class T> const gbtLPTableau<T> &gbtLPSolver<T>::GetTableau(void)
 {
   return tab;
 }
 
-template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
+template <class T> const gbtList<gbtBasicFeasibleSolution <T> > &gbtLPSolver<T>::GetAll(void)
 {
   gbtVector<T> c(tab.GetCost());
   gbtVector<T> uc(tab.GetUnitCost());
@@ -419,11 +419,11 @@ template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
     }
   }
 
-  VertEnum<T> AllSolutions(tab,status);
+  gbtVertEnum<T> AllSolutions(tab,status);
   gbtList<gbtVector<T> > verts;
 
-  gbtList<BFS<T> > *bfs = new gbtList<BFS<T> >(AllSolutions.VertexList());
-  gbtList<BFS<T> > *dual_bfs = new gbtList<BFS<T> >(AllSolutions.DualVertexList());
+  gbtList<gbtBasicFeasibleSolution<T> > *bfs = new gbtList<gbtBasicFeasibleSolution<T> >(AllSolutions.VertexList());
+  gbtList<gbtBasicFeasibleSolution<T> > *dual_bfs = new gbtList<gbtBasicFeasibleSolution<T> >(AllSolutions.DualVertexList());
   AllSolutions.Vertices(verts);
 
   //  gout << "\nHere are the BFSs: \n";
@@ -455,37 +455,37 @@ template <class T> const gbtList<BFS <T> > &LPSolve<T>::GetAll(void)
   return *bfs;
 }
 
-template <class T> int LPSolve<T>::IsFeasible(void) const
+template <class T> int gbtLPSolver<T>::IsFeasible(void) const
 {
   return feasible;
 }
 
-template <class T> int LPSolve<T>::IsBounded(void) const
+template <class T> int gbtLPSolver<T>::IsBounded(void) const
 {
   return bounded;
 }
 
-template <class T> int LPSolve<T>::IsWellFormed(void) const
+template <class T> int gbtLPSolver<T>::IsWellFormed(void) const
 {
   return well_formed;
 }
 
-template <class T> int LPSolve<T>::IsAborted(void) const
+template <class T> int gbtLPSolver<T>::IsAborted(void) const
 {
   return aborted;
 }
 
-template <class T> long LPSolve<T>::NumPivots(void) const
+template <class T> long gbtLPSolver<T>::NumPivots(void) const
 {
   return tab.NumPivots();
 }
 
-template <class T> void LPSolve<T>::OptBFS(BFS<T> &b) const
+template <class T> void gbtLPSolver<T>::OptBFS(gbtBasicFeasibleSolution<T> &b) const
 {
   b = opt_bfs;
 }
 
-template <class T> LPSolve<T>::~LPSolve()
+template <class T> gbtLPSolver<T>::~gbtLPSolver()
 { 
   if(UB) delete UB; 
   if(LB) delete LB; 
@@ -495,7 +495,7 @@ template <class T> LPSolve<T>::~LPSolve()
   if(cost) delete cost; 
 }
 
-template <class T> T LPSolve<T>::Epsilon(int i/* = 2*/) const
+template <class T> T gbtLPSolver<T>::Epsilon(int i/* = 2*/) const
 {
 if(i == 1) return eps1;
 if(i == 3)return eps3;

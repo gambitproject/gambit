@@ -34,10 +34,10 @@ template <class T> class gbtNfgNashLcp : public gbtNfgNashAlgorithm  {
 private:
   int m_stopAfter, m_maxDepth;
 
-  int AddBfs(LHTableau<T> &, gbtList<BFS<T> > &);
+  int AddBfs(LHTableau<T> &, gbtList<gbtBasicFeasibleSolution<T> > &);
   gbtList<MixedSolution> AddSolutions(const gbtNfgSupport &,
-				    const gbtList<BFS<T> > &, const T &);
-  void AllLemke(const gbtNfgSupport &, int, LHTableau<T> &B, gbtList<BFS<T> > &,
+				    const gbtList<gbtBasicFeasibleSolution<T> > &, const T &);
+  void AllLemke(const gbtNfgSupport &, int, LHTableau<T> &B, gbtList<gbtBasicFeasibleSolution<T> > &,
 		int depth, gbtStatus &);
   
 public:

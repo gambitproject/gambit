@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Tableau class for Lemke-Howson algorithm
+// gbtTableau class for Lemke-Howson algorithm
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -30,7 +30,7 @@
 #include "game/nfstrat.h"
 
 //---------------------------------------------------------------------------
-//                        LemkeHowson Tableau: member functions
+//                        LemkeHowson gbtTableau: member functions
 //---------------------------------------------------------------------------
 
 template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &N,
@@ -206,7 +206,7 @@ template <class T> long LHTableau<T>::NumPivots() const
 { return T1.NumPivots() + T2.NumPivots(); }
 
 //
-// raw Tableau functions
+// raw gbtTableau functions
 //
 
 template <class T> void LHTableau<T>::Refactor()
@@ -218,7 +218,7 @@ template <class T> void LHTableau<T>::Refactor()
 // miscellaneous functions
 
 template <class T>
-BFS<T> LHTableau<T>::GetBFS()
+gbtBasicFeasibleSolution<T> LHTableau<T>::GetBFS()
 {
   int i;
   T1.BasisVector(tmp1);
@@ -227,7 +227,7 @@ BFS<T> LHTableau<T>::GetBFS()
     solution[i] = tmp1[i];
   for(i=tmp2.First();i<=tmp2.Last();i++)
     solution[i] = tmp2[i];
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   for(i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[Find(i)]);

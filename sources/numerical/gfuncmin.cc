@@ -64,7 +64,7 @@ TakeStep(const gbtVector<double> &x, const gbtVector<double> &p,
 }
 
 static void 
-IntermediatePoint(const gC1Function<double> &fdf,
+IntermediatePoint(const gbtC1Function<double> &fdf,
 		  const gbtVector<double> &x, const gbtVector<double> &p,
 		  double lambda, 
 		  double pg,
@@ -81,7 +81,7 @@ trial:
   if ((fc - fa) + u == 0) {
     // TLT: Added this check 2002/08/31 due to floating point exceptions
     // under MSW.  Not really sure how to handle this correctly.
-    throw gFuncMinException();
+    throw gbtFuncMinException();
   }
   stepb = 0.5 * stepc * u / ((fc - fa) + u);
 
@@ -102,7 +102,7 @@ trial:
 }
 
 static void
-Minimize(const gC1Function<double> &fdf,
+Minimize(const gbtC1Function<double> &fdf,
 	 const gbtVector<double> &x, const gbtVector<double> &p,
 	 double lambda,
 	 double stepa, double stepb, double stepc,
@@ -246,11 +246,11 @@ mid_trial:
 // These routines are based on ones found in
 // multimin/conjugate_pr.c in the GSL 1.2 distribution
 
-gConjugatePR::gConjugatePR(int n)
+gbtConjugatePRMinimizer::gbtConjugatePRMinimizer(int n)
   : x1(n), dx1(n), x2(n), p(n), g0(n)
 { }
 
-void gConjugatePR::Set(const gC1Function<double> &fdf,
+void gbtConjugatePRMinimizer::Set(const gbtC1Function<double> &fdf,
 		       const gbtVector<double> &x, double &f,
 		       gbtVector<double> &gradient, double step_size,
 		       double p_tol)
@@ -272,12 +272,12 @@ void gConjugatePR::Set(const gC1Function<double> &fdf,
   g0norm = gnorm;
 }
 
-void gConjugatePR::Restart(void)
+void gbtConjugatePRMinimizer::Restart(void)
 {
   iter = 0;
 }
 
-bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
+bool gbtConjugatePRMinimizer::Iterate(const gbtC1Function<double> &fdf,
 			   gbtVector<double> &x, double &f,
 			   gbtVector<double> &gradient, gbtVector<double> &dx)
 {

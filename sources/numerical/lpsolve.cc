@@ -28,8 +28,8 @@
 #include "math/rational.h"
 
 
-template class LPSolve<double>;
-template class LPSolve<gbtRational>;
+template class gbtLPSolver<double>;
+template class gbtLPSolver<gbtRational>;
 
 #ifndef __BCC55__
 template gbtBlock<int> Artificials(const gbtVector<double> &);

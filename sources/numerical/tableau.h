@@ -30,34 +30,34 @@
 #include "btableau.h"
 #include "ludecomp.h"
 
-template <class T> class Tableau;
-template <class T> class LPTableau;
+template <class T> class gbtTableau;
+template <class T> class gbtLPTableau;
 
 
 // ---------------------------------------------------------------------------
-// We have different implementations of Tableau for double and gbtRational, 
+// We have different implementations of gbtTableau for double and gbtRational, 
 // but with the same interface
 // ---------------------------------------------------------------------------
 
 // 
-// Tableau<double>
+// gbtTableau<double>
 //  
 
 template<>
-class Tableau<double> : public TableauInterface<double>{
+class gbtTableau<double> : public gbtTableauInterface<double>{
 private:
-  LUdecomp<double> B;     // LU decomposition
+  gbtLUDecomposition<double> B;     // LU decomposition
   gbtVector<double> tmpcol; // temporary column vector, to avoid allocation
 
 public:
       // constructors and destructors
-  Tableau(const gbtMatrix<double> &A, const gbtVector<double> &b); 
-  Tableau(const gbtMatrix<double> &A, const gbtBlock<int> &art, 
+  gbtTableau(const gbtMatrix<double> &A, const gbtVector<double> &b); 
+  gbtTableau(const gbtMatrix<double> &A, const gbtBlock<int> &art, 
 	  const gbtVector<double> &b); 
-  Tableau(const Tableau<double>&);
-  virtual ~Tableau();
+  gbtTableau(const gbtTableau<double>&);
+  virtual ~gbtTableau();
   
-  Tableau<double>& operator=(const Tableau<double>&);
+  gbtTableau<double>& operator=(const gbtTableau<double>&);
   
   // pivoting
   int CanPivot(int outgoing,int incoming);
@@ -67,24 +67,24 @@ public:
   void Solve(const gbtVector<double> &b, gbtVector<double> &x);  // solve M x = b
   void SolveT(const gbtVector<double> &c, gbtVector<double> &y);  // solve y M = c
   
-  // raw Tableau functions
+  // raw gbtTableau functions
 
   void Refactor();
   void SetRefactor(int);
 
   void SetConst(const gbtVector<double> &bnew);
-  void SetBasis( const Basis &); // set new Tableau
+  void SetBasis(const gbtBasis &); // set new gbtTableau
   
   bool IsFeasible();
   bool IsLexMin();
 };
 
 // 
-// Tableau<gbtRational> 
+// gbtTableau<gbtRational> 
 //  
 
 template<>
-class Tableau<gbtRational> : public TableauInterface<gbtRational>{
+class gbtTableau<gbtRational> : public gbtTableauInterface<gbtRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
   gbtMatrix<gbtRational> GetInverse();
@@ -108,13 +108,13 @@ public:
     gbtText Description(void) const;
   };
       // constructors and destructors
-  Tableau(const gbtMatrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
-  Tableau(const gbtMatrix<gbtRational> &A, const gbtBlock<int> &art, 
+  gbtTableau(const gbtMatrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
+  gbtTableau(const gbtMatrix<gbtRational> &A, const gbtBlock<int> &art, 
 	  const gbtVector<gbtRational> &b); 
-  Tableau(const Tableau<gbtRational>&);
-  virtual ~Tableau();
+  gbtTableau(const gbtTableau<gbtRational>&);
+  virtual ~gbtTableau();
   
-  Tableau<gbtRational>& operator=(const Tableau<gbtRational>&);
+  gbtTableau<gbtRational>& operator=(const gbtTableau<gbtRational>&);
   
   // pivoting
   int CanPivot(int outgoing,int incoming);
@@ -122,13 +122,13 @@ public:
   void SolveColumn(int, gbtVector<gbtRational> &);  // column in new basis 
   void GetColumn(int, gbtVector<gbtRational> &) const;  // column in new basis 
   
-  // raw Tableau functions
+  // raw gbtTableau functions
 
   void Refactor();
   void SetRefactor(int);
 
   void SetConst(const gbtVector<gbtRational> &bnew);
-  void SetBasis( const Basis &); // set new Tableau
+  void SetBasis(const gbtBasis &); // set new gbtTableau
   void Solve(const gbtVector<gbtRational> &b, gbtVector<gbtRational> &x);  // solve M x = b
   void SolveT(const gbtVector<gbtRational> &c, gbtVector<gbtRational> &y);  // solve y M = c
   
@@ -141,10 +141,10 @@ public:
 
 #if defined(__GNUG__) && !defined(__APPLE_CC__)
 #include "math/rational.h"
-gbtOutput &operator<<(gbtOutput &, const Tableau<double> &);
-gbtOutput &operator<<(gbtOutput &, const Tableau<gbtRational> &);
+gbtOutput &operator<<(gbtOutput &, const gbtTableau<double> &);
+gbtOutput &operator<<(gbtOutput &, const gbtTableau<gbtRational> &);
 #elif defined __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, const Tableau<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtTableau<T> &);
 #endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H

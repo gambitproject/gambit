@@ -37,16 +37,16 @@ private:
 
   int ns1,ns2,ni1,ni2;
   T maxpay,eps;
-  gbtList<BFS<T> > List;
+  gbtList<gbtBasicFeasibleSolution<T> > List;
   gbtList<gbtEfgInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtEfgNode &, T,
 		   int, int, int, int);
-  int Add_BFS(const LTableau<T> &tab);
-  int All_Lemke(const gbtEfgSupport &, int dup, LTableau<T> &B,
+  int Add_BFS(const gbtLemkeTableau<T> &tab);
+  int All_Lemke(const gbtEfgSupport &, int dup, gbtLemkeTableau<T> &B,
 		int depth, gbtMatrix<T> &, gbtList<BehavSolution> &, gbtStatus &);
   
-  void GetProfile(const gbtEfgSupport &, const LTableau<T> &tab, 
+  void GetProfile(const gbtEfgSupport &, const gbtLemkeTableau<T> &tab, 
 		  gbtDPVector<T> &, const gbtVector<T> &, 
 		  const gbtEfgNode &n, int,int);
 

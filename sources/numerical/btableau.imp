@@ -25,25 +25,25 @@
 //
 
 // ---------------------------------------------------------------------------
-//                BaseTableau method definitions
+//                gbtBaseTableau method definitions
 // ---------------------------------------------------------------------------
 
 #include "btableau.h"
 
 template <class T>
-bool BaseTableau<T>::ColIndex(int x) const
+bool gbtBaseTableau<T>::ColIndex(int x) const
 { return MinCol()<=x && x<=MaxCol(); }
 
 template <class T>
-bool BaseTableau<T>::RowIndex(int x) const
+bool gbtBaseTableau<T>::RowIndex(int x) const
 { return MinRow()<=x && x<=MaxRow(); }
 
 template <class T>
-bool BaseTableau<T>::ValidIndex(int x) const
+bool gbtBaseTableau<T>::ValidIndex(int x) const
 { return (ColIndex(x) || RowIndex(-x)); }
 
 template <class T>
-void BaseTableau<T>::CompPivot(int outlabel, int col)
+void gbtBaseTableau<T>::CompPivot(int outlabel, int col)
 {
   Pivot(Find(outlabel),col);
   Pivot(Find(-col),-outlabel);
@@ -51,13 +51,13 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
 
 
 // ---------------------------------------------------------------------------
-//            TableauInterface method definitions
+//            gbtTableauInterface method definitions
 // ---------------------------------------------------------------------------
 
 // Constructors and Destructor
  
 template <class T> 
-TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b)
+gbtTableauInterface<T>::gbtTableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b)
   : A(&A), b(&b), basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
     solution(A.MinRow(),A.MaxRow()), npivots(0), 
     artificial(A.MaxCol()+1,A.MaxCol())
@@ -71,7 +71,7 @@ TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> 
 }
 
 template <class T> 
-TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A, 
+gbtTableauInterface<T>::gbtTableauInterface(const gbtMatrix<T> &A, 
 				      const gbtBlock<int> &art, const gbtVector<T> &b)
   : A(&A), b(&b), 
     basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()), 
@@ -85,18 +85,18 @@ TableauInterface<T>::TableauInterface(const gbtMatrix<T> &A,
 }
 
 template <class T>
-TableauInterface<T>::TableauInterface(const TableauInterface<T> &orig) 
+gbtTableauInterface<T>::gbtTableauInterface(const gbtTableauInterface<T> &orig) 
   : A(orig.A), b(orig.b), basis(orig.basis), solution(orig.solution),
     npivots(orig.npivots), eps1(orig.eps1), eps2(orig.eps2), 
     artificial(orig.artificial)
 { }
 
 template <class T>
-TableauInterface<T>::~TableauInterface()
+gbtTableauInterface<T>::~gbtTableauInterface()
 { }
 
 template <class T>
-TableauInterface<T>& TableauInterface<T>::operator=(const TableauInterface<T> &orig)
+gbtTableauInterface<T>& gbtTableauInterface<T>::operator=(const gbtTableauInterface<T> &orig)
 {
   if(this!= &orig) {
     A = orig.A;
@@ -112,62 +112,62 @@ TableauInterface<T>& TableauInterface<T>::operator=(const TableauInterface<T> &o
 // getting information
 
 template <class T>
-int TableauInterface<T>::MinRow() const { return A->MinRow(); }
+int gbtTableauInterface<T>::MinRow() const { return A->MinRow(); }
 
 template <class T>
-int TableauInterface<T>::MaxRow() const { return A->MaxRow(); }
+int gbtTableauInterface<T>::MaxRow() const { return A->MaxRow(); }
 
 template <class T>
-int TableauInterface<T>::MinCol() const { return basis.MinCol(); }
+int gbtTableauInterface<T>::MinCol() const { return basis.MinCol(); }
 
 template <class T>
-int TableauInterface<T>::MaxCol() const { return basis.MaxCol(); }
+int gbtTableauInterface<T>::MaxCol() const { return basis.MaxCol(); }
 
 template <class T>
-Basis & TableauInterface<T>::GetBasis(void) {return basis; }
+gbtBasis & gbtTableauInterface<T>::GetBasis(void) {return basis; }
 
 template <class T>
-const gbtMatrix<T> & TableauInterface<T>::Get_A(void) const {return *A; }
+const gbtMatrix<T> & gbtTableauInterface<T>::Get_A(void) const {return *A; }
 
 template <class T>
-const gbtVector<T> & TableauInterface<T>::Get_b(void) const {return *b;}
+const gbtVector<T> & gbtTableauInterface<T>::Get_b(void) const {return *b;}
 
 template <class T>
-bool TableauInterface<T>::Member(int i) const
+bool gbtTableauInterface<T>::Member(int i) const
 { return basis.Member(i);}
 
 template <class T>
-int TableauInterface<T>::Label(int i) const
+int gbtTableauInterface<T>::Label(int i) const
 { return basis.Label(i);}
 
 template <class T>
-int TableauInterface<T>::Find(int i) const
+int gbtTableauInterface<T>::Find(int i) const
 { return basis.Find(i);}
 
 template <class T>
-long TableauInterface<T>::NumPivots() const
+long gbtTableauInterface<T>::NumPivots() const
 { return npivots; }
 
 template <class T>
-long &TableauInterface<T>::NumPivots()
+long &gbtTableauInterface<T>::NumPivots()
 { return npivots; }
 
 template <class T>
-void TableauInterface<T>::Mark(int label)
+void gbtTableauInterface<T>::Mark(int label)
 {basis.Mark(label);}
 
 template <class T>
-void TableauInterface<T>::UnMark(int label)
+void gbtTableauInterface<T>::UnMark(int label)
 {basis.UnMark(label);}
 
 template <class T>
-bool TableauInterface<T>::IsBlocked(int label) const
+bool gbtTableauInterface<T>::IsBlocked(int label) const
 {
   return basis.IsBlocked(label);
 }
 
 template <class T>
-void TableauInterface<T>::GetColumn(int col, gbtVector<T> &ret) const
+void gbtTableauInterface<T>::GetColumn(int col, gbtVector<T> &ret) const
 {
   if(IsArtifColumn(col)) {
     ret = (T) 0;
@@ -182,18 +182,18 @@ void TableauInterface<T>::GetColumn(int col, gbtVector<T> &ret) const
 }
 
 template <class T>
-void TableauInterface<T>::GetBasis(Basis &out) const
+void gbtTableauInterface<T>::GetBasis(gbtBasis &out) const
 {
   out= basis;
 }
 
 template <class T>
-BFS<T> TableauInterface<T>::GetBFS()
+gbtBasicFeasibleSolution<T> gbtTableauInterface<T>::GetBFS()
 {
   gbtVector<T> sol(basis.First(),basis.Last());
   BasisVector(sol);
 
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   for(int i=MinCol();i<=MaxCol();i++) 
     if(Member(i)) 
       cbfs.Define(i,sol[basis.Find(i)]);
@@ -201,12 +201,12 @@ BFS<T> TableauInterface<T>::GetBFS()
 }
 
 template <class T>
-BFS<T> TableauInterface<T>::GetBFS1() const
+gbtBasicFeasibleSolution<T> gbtTableauInterface<T>::GetBFS1() const
 {
   gbtVector<T> sol(basis.First(),basis.Last());
   BasisVector(sol);
 
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   int i;
   for(i=-MaxRow();i<=-MinRow();i++) 
     if(Member(i)) 
@@ -218,7 +218,7 @@ BFS<T> TableauInterface<T>::GetBFS1() const
 }
 
 template <class T>
-void TableauInterface<T>::Dump(gbtOutput &to) const
+void gbtTableauInterface<T>::Dump(gbtOutput &to) const
 { 
   gbtVector<T> bb(MinRow(), MaxRow());
   BasisVector(bb);
@@ -228,7 +228,7 @@ void TableauInterface<T>::Dump(gbtOutput &to) const
 }
 
 template <class T>
-void TableauInterface<T>::BigDump(gbtOutput &to)
+void gbtTableauInterface<T>::BigDump(gbtOutput &to)
 { 
   to << "\nBasis:";
   basis.Dump(to);
@@ -254,39 +254,39 @@ void TableauInterface<T>::BigDump(gbtOutput &to)
 // miscellaneous functions
 
 template <class T>
-bool TableauInterface<T>::EqZero(T x) const
+bool gbtTableauInterface<T>::EqZero(T x) const
 { 
   return (LeZero(x) && GeZero(x));
 }
 
 template <class T>
-bool TableauInterface<T>::LtZero(T x) const
+bool gbtTableauInterface<T>::LtZero(T x) const
 { 
   return !GeZero(x);
 }
 
 template <class T>
-bool TableauInterface<T>::GtZero(T x) const
+bool gbtTableauInterface<T>::GtZero(T x) const
 { 
   return !LeZero(x);
 }
 
 template <class T>
-bool TableauInterface<T>::LeZero(T x) const
+bool gbtTableauInterface<T>::LeZero(T x) const
 { 
   if(x <=eps2) return 1;
   return 0;
 }
 
 template <class T>
-bool TableauInterface<T>::GeZero(T x) const
+bool gbtTableauInterface<T>::GeZero(T x) const
 { 
   if(x >= -eps2) return 1;
   return 0;
 }
 
 template <class T>
-T TableauInterface<T>::Epsilon(int i) const
+T gbtTableauInterface<T>::Epsilon(int i) const
 {
   if(i!=1 && i!=2) throw BadDim();
   if(i==1) return eps1;
@@ -294,24 +294,24 @@ T TableauInterface<T>::Epsilon(int i) const
 }
 
 template <class T>
-bool TableauInterface<T>::IsArtifColumn(int col) const
+bool gbtTableauInterface<T>::IsArtifColumn(int col) const
 {
   return col>=artificial.First() && col<=artificial.Last();
 }
 
 /*
-template <class T> BaseTableau<T>::BadPivot::~BadPivot()
+template <class T> gbtBaseTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gbtText BaseTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText gbtBaseTableau<T>::BadPivot::Description(void) const
 {
-  return "Bad Pivot in BaseTableau";
+  return "Bad Pivot in gbtBaseTableau";
 }
 */
-template <class T> BaseTableau<T>::BadDim::~BadDim()
+template <class T> gbtBaseTableau<T>::BadDim::~BadDim()
 { }
 
-template <class T> gbtText BaseTableau<T>::BadDim::Description(void) const
+template <class T> gbtText gbtBaseTableau<T>::BadDim::Description(void) const
 {
-  return "Bad Dimension in BaseTableau";
+  return "Bad Dimension in gbtBaseTableau";
 }

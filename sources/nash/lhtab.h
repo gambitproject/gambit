@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Tableau class for Lemke-Howson algorithm
+// gbtTableau class for Lemke-Howson algorithm
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -30,9 +30,9 @@
 #include "numerical/lemketab.h"
 #include "game/nfg.h"
 
-template <class T> class LHTableau : public BaseTableau<T>{
+template <class T> class LHTableau : public gbtBaseTableau<T>{
 protected:
-  LTableau<T> T1,T2;
+  gbtLemkeTableau<T> T1,T2;
   gbtVector<T> tmp1,tmp2; // temporary column vectors, to avoid allocation
   gbtVector<T> solution;
 public:
@@ -52,8 +52,8 @@ public:
   T Epsilon() const;
   
   bool Member(int i) const;
-  int Label(int i) const;   // return variable in i'th position of Tableau
-  int Find(int i) const;  // return Tableau position of variable i
+  int Label(int i) const;   // return variable in i'th position of gbtTableau
+  int Find(int i) const;  // return gbtTableau position of variable i
   
       // pivoting
   int CanPivot(int outgoing,int incoming);
@@ -61,11 +61,11 @@ public:
       // perform pivot operation -- outgoing is row, incoming is column
   long NumPivots() const;
   
-      // raw Tableau functions
+      // raw gbtTableau functions
   void Refactor();
   
       // miscellaneous functions
-  BFS<T> GetBFS(void);
+  gbtBasicFeasibleSolution<T> GetBFS(void);
   void Dump(gbtOutput &) const;
 
   int PivotIn(int i);

@@ -32,10 +32,10 @@
 #include "math/gmatrix.h"
 
 //---------------------------------------------------------------------------
-// Class Basis
+// Class gbtBasis
 //---------------------------------------------------------------------------
 
-class Basis {
+class gbtBasis {
 
 private:
   gbtBlock<int> basis;        // current members of basis (neg for slacks)
@@ -56,11 +56,11 @@ public:
   // Constructors, Destructor, Operators
   //-------------------------------------------
   
-  Basis(int first, int last, int firstlabel, int lastlabel);
-  Basis(const Basis &);
-  virtual ~Basis();
+  gbtBasis(int first, int last, int firstlabel, int lastlabel);
+  gbtBasis(const gbtBasis &);
+  virtual ~gbtBasis();
   
-  Basis& operator=(const Basis&);
+  gbtBasis& operator=(const gbtBasis&);
 
   //------------------------------
   // Public Members
@@ -77,13 +77,13 @@ public:
   //remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col); 
 
-  // return true iff label is a Basis member
+  // return true iff label is a gbtBasis member
   bool Member(int label) const;
 
-  // finds Basis index corresponding to label number,
+  // finds gbtBasis index corresponding to label number,
   int Find(int label) const;
 
-  // finds label of variable corresponding to Basis index
+  // finds label of variable corresponding to gbtBasis index
   int Label(int index) const;
 
   // marks/unmarks label to block it from entering basis
@@ -93,7 +93,7 @@ public:
   // returns true if label is blocked from entering basis
   bool IsBlocked(int label) const;
 
-  // Check if Basis is Ident
+  // Check if gbtBasis is Ident
   virtual void CheckBasis();
   // returns whether the basis is the identity matrix
   bool IsIdent();

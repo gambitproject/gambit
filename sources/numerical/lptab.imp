@@ -28,38 +28,38 @@
 #include "base/base.h"
 
 // ---------------------------------------------------------------------------
-//                   LPTableau member definitions 
+//                   gbtLPTableau member definitions 
 // ---------------------------------------------------------------------------
 
 
 template <class T>
-LPTableau<T>::LPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b)
-  : Tableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
+gbtLPTableau<T>::gbtLPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b)
+  : gbtTableau<T>(A,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol())
 { };
 
 template <class T>
-LPTableau<T>::LPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, 
+gbtLPTableau<T>::gbtLPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, 
 			const gbtVector<T> &b)
-  : Tableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
+  : gbtTableau<T>(A,art,b), dual(A.MinRow(),A.MaxRow()),
     unitcost(A.MinRow(),A.MaxRow()), cost(A.MinCol(),A.MaxCol()+art.Length())
 { };
 
 template <class T>
-LPTableau<T>::LPTableau(const LPTableau<T> &orig)
-  : Tableau<T>(orig), dual(orig.dual),  unitcost(orig.unitcost),
+gbtLPTableau<T>::gbtLPTableau(const gbtLPTableau<T> &orig)
+  : gbtTableau<T>(orig), dual(orig.dual),  unitcost(orig.unitcost),
     cost(orig.cost)
 { }
 
 template <class T>
-LPTableau<T>::~LPTableau()
+gbtLPTableau<T>::~gbtLPTableau()
 { }
 
 
 template <class T>
-LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
+gbtLPTableau<T>& gbtLPTableau<T>::operator=(const gbtLPTableau<T> &orig)
 {
-  Tableau<T>::operator=(orig);
+  gbtTableau<T>::operator=(orig);
   if(this!= &orig) {
     dual=orig.dual;
     unitcost= orig.unitcost;
@@ -71,11 +71,11 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 // cost-based functions
 
 template<>
-void LPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
+void gbtLPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
-    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(gbtRational)Tableau<gbtRational>::TotDenom();
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(gbtRational)gbtTableau<gbtRational>::TotDenom();
     for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (gbtRational)0;
     Refactor();
     SolveDual();
@@ -84,7 +84,7 @@ void LPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
   if(c.First()!=cost.First()) throw BadDim();
   if(c.Last()!=(cost.Last()+unitcost.Length())) throw BadDim();
   for(i=c.First();i<=cost.Last();i++)
-    cost[i]=c[i]*(gbtRational)Tableau<gbtRational>::TotDenom();
+    cost[i]=c[i]*(gbtRational)gbtTableau<gbtRational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
     unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
   // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
@@ -96,7 +96,7 @@ void LPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
 }
 
 template<>
-void LPTableau<double>::SetCost(const gbtVector<double>& c)
+void gbtLPTableau<double>::SetCost(const gbtVector<double>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
@@ -121,7 +121,7 @@ void LPTableau<double>::SetCost(const gbtVector<double>& c)
 }
 
 template <class T>
-void LPTableau<T>::SetCost(const gbtVector<T> &uc, const gbtVector<T> &c)
+void gbtLPTableau<T>::SetCost(const gbtVector<T> &uc, const gbtVector<T> &c)
 {
   if(cost.First()!=c.First() || cost.Last()!=c.Last()) 
     throw BadDim();
@@ -135,7 +135,7 @@ void LPTableau<T>::SetCost(const gbtVector<T> &uc, const gbtVector<T> &c)
 
 
 template <class T>
-gbtVector<T> LPTableau<T>::GetCost(void) const
+gbtVector<T> gbtLPTableau<T>::GetCost(void) const
 {
   gbtVector<T> x(cost.First(),cost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
@@ -145,40 +145,40 @@ gbtVector<T> LPTableau<T>::GetCost(void) const
 
 
 template <class T>
-gbtVector<T> LPTableau<T>::GetUnitCost(void) const
+gbtVector<T> gbtLPTableau<T>::GetUnitCost(void) const
 {
   gbtVector<T> x(unitcost.First(),unitcost.Last());
   for(int i=x.First();i<=x.Last();i++)x[i]=unitcost[i];
   return x;
 }
 
-template<> double LPTableau<double>::TotalCost(void)
+template<> double gbtLPTableau<double>::TotalCost(void)
 {
   gbtVector<double> tmpcol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
 }
 
-template<> gbtRational LPTableau<gbtRational>::TotalCost(void)
+template<> gbtRational gbtLPTableau<gbtRational>::TotalCost(void)
 {
   gbtVector<gbtRational> tmpcol(MinRow(),MaxRow());
   gbtVector<gbtRational> sol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   BasisVector(sol);
   for(int i=tmpcol.First();i<=tmpcol.Last();i++)
-    if(Label(i)>0)tmpcol[i]/=(gbtRational)Tableau<gbtRational>::TotDenom();
+    if(Label(i)>0)tmpcol[i]/=(gbtRational)gbtTableau<gbtRational>::TotDenom();
 
   return tmpcol*sol;
 }
 
 template<>
-void LPTableau<double>::DualVector(gbtVector<double> &L) const
+void gbtLPTableau<double>::DualVector(gbtVector<double> &L) const
 {
   L= dual;
 }
 
 template<>
-void LPTableau<gbtRational>::DualVector(gbtVector<gbtRational> &out) const
+void gbtLPTableau<gbtRational>::DualVector(gbtVector<gbtRational> &out) const
 {
   out= dual;
   //  for(int i=out.First();i<=out.Last();i++) 
@@ -186,7 +186,7 @@ void LPTableau<gbtRational>::DualVector(gbtVector<gbtRational> &out) const
 }
 
 template <class T>
-T LPTableau<T>::RelativeCost(int col) const
+T gbtLPTableau<T>::RelativeCost(int col) const
 {
   gbtVector<T> tmpcol(MinRow(),MaxRow());
   if( col<0 ) {
@@ -201,7 +201,7 @@ T LPTableau<T>::RelativeCost(int col) const
 /*
 
 template <class T>
-void LPTableau<T>::RelativeCostVector(gbtVector<T> &relunitcost,
+void gbtLPTableau<T>::RelativeCostVector(gbtVector<T> &relunitcost,
 				      gbtVector<T> &relcost) const
 {
 
@@ -215,7 +215,7 @@ void LPTableau<T>::RelativeCostVector(gbtVector<T> &relunitcost,
 
 
 template <class T>
-void LPTableau<T>::SolveDual()
+void gbtLPTableau<T>::SolveDual()
 {
   gbtVector<T> tmpcol1(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol1);
@@ -225,28 +225,28 @@ void LPTableau<T>::SolveDual()
 // Redefined functions
 
 template <class T>
-void LPTableau<T>::Refactor()
+void gbtLPTableau<T>::Refactor()
 {
-  // gout << "\nIn LPTableau<T>::Refactor()";  
-  Tableau<T>::Refactor();
+  // gout << "\nIn gbtLPTableau<T>::Refactor()";  
+  gbtTableau<T>::Refactor();
   SolveDual();
 }
 
 template <class T>
-void LPTableau<T>::Pivot(int outrow,int col)
+void gbtLPTableau<T>::Pivot(int outrow,int col)
 {
-  // gout << "\nIn LPTableau<T>::Pivot() ";
+  // gout << "\nIn gbtLPTableau<T>::Pivot() ";
   // gout << "outrow: " << outrow << " col: " << col;
   // BigDump(gout);
-  Tableau<T>::Pivot(outrow,col);
+  gbtTableau<T>::Pivot(outrow,col);
   SolveDual();
 }
 
 template <class T>
-void LPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
+void gbtLPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
 {
   gbtVector<T> tmpcol(MinRow(),MaxRow());
-  // gout << "\nIn LPTableau<T>::ReversePivots";
+  // gout << "\nIn gbtLPTableau<T>::ReversePivots";
   bool flag;
   int i,j,k,enter;
   T ratio,a_ij,a_ik,b_i,b_k,c_j,c_k,c_jo,x;
@@ -411,7 +411,7 @@ void LPTableau<T>::ReversePivots(gbtList<gbtArray<int> > &PivotList)
 }
 
 template <class T>
-bool LPTableau<T>::IsReversePivot(int i, int j)
+bool gbtLPTableau<T>::IsReversePivot(int i, int j)
 {
   gbtVector<T> tmpcol(MinRow(),MaxRow());
 
@@ -529,12 +529,12 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
 }
 
 template <class T>
-void LPTableau<T>::DualReversePivots(gbtList<gbtArray<int> > &/*list*/)
+void gbtLPTableau<T>::DualReversePivots(gbtList<gbtArray<int> > &/*list*/)
 {
 }
 
 template <class T>
-bool LPTableau<T>::IsDualReversePivot(int i, int j)
+bool gbtLPTableau<T>::IsDualReversePivot(int i, int j)
 {
   // first check that pivot preserves dual feasibility
   
@@ -667,9 +667,9 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
 /*
 template <class T>
-BFS<T> LPTableau<T>::DualBFS() const
+gbtBasicFeasibleSolution<T> gbtLPTableau<T>::DualBFS() const
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   for(int i=MinRow();i<=MaxRow();i++) {
     if(!Member(-i)) 
       cbfs.Define(-i,dual[i]);
@@ -679,9 +679,9 @@ BFS<T> LPTableau<T>::DualBFS() const
 */
 
 template <class T>
-BFS<T> LPTableau<T>::DualBFS() const
+gbtBasicFeasibleSolution<T> gbtLPTableau<T>::DualBFS() const
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   gbtVector<T> d(MinRow(),MaxRow());
   DualVector(d);
 
@@ -694,15 +694,15 @@ BFS<T> LPTableau<T>::DualBFS() const
 }
 
 template <class T>
-int LPTableau<T>::LastLabel( void )
+int gbtLPTableau<T>::LastLabel( void )
 {
   return artificial.Last();
 }
 
 template <class T>
-void LPTableau<T>::BigDump(gbtOutput &to)
+void gbtLPTableau<T>::BigDump(gbtOutput &to)
 {
-  //   Tableau<T>::BigDump(to);
+  //   gbtTableau<T>::BigDump(to);
 
   to << "\nBasis:";
   basis.Dump(to);
@@ -734,7 +734,7 @@ void LPTableau<T>::BigDump(gbtOutput &to)
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gbtBlock<T> &rowv, gbtVector<T> &colv) const
+void gbtLPTableau<T>::BasisSelect(const gbtBlock<T> &rowv, gbtVector<T> &colv) const
 {
   for(int i=basis.First(); i<=basis.Last(); i++) {
     if(basis.Label(i)<0)
@@ -745,7 +745,7 @@ void LPTableau<T>::BasisSelect(const gbtBlock<T> &rowv, gbtVector<T> &colv) cons
 }
 
 template <class T>
-void LPTableau<T>::BasisSelect(const gbtBlock<T> &unitv,
+void gbtLPTableau<T>::BasisSelect(const gbtBlock<T> &unitv,
 			   const gbtBlock<T> &rowv,
 			   gbtVector<T> &colv ) const
 {
@@ -757,18 +757,18 @@ void LPTableau<T>::BasisSelect(const gbtBlock<T> &unitv,
   }
 }
 
-template <class T> LPTableau<T>::BadPivot::~BadPivot()
+template <class T> gbtLPTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gbtText LPTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText gbtLPTableau<T>::BadPivot::Description(void) const
 {
-  return "Bad Pivot in LPTableau";
+  return "Bad Pivot in gbtLPTableau";
 }
 
-template <class T> LPTableau<T>::BadDim::~BadDim()
+template <class T> gbtLPTableau<T>::BadDim::~BadDim()
 { }
 
-template <class T> gbtText LPTableau<T>::BadDim::Description(void) const
+template <class T> gbtText gbtLPTableau<T>::BadDim::Description(void) const
 {
-  return "Bad Dimension in LPTableau";
+  return "Bad Dimension in gbtLPTableau";
 }

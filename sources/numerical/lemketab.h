@@ -30,11 +30,11 @@
 #include "base/gstatus.h"
 #include "numerical/tableau.h"
 
-template <class T> class LTableau : public Tableau<T> {
+template <class T> class gbtLemkeTableau : public gbtTableau<T> {
 protected:
 //  T eps2;
 public:
-//   LTableau(void);
+//   gbtLemkeTableau(void);
   class BadPivot : public gbtException  {
   public:
     virtual ~BadPivot();
@@ -45,9 +45,9 @@ public:
     virtual ~BadExitIndex();
     gbtText Description(void) const;
   };
-  LTableau(const gbtMatrix<T> &A, const gbtVector<T> &b);
-  LTableau(Tableau<T> &);
-  virtual ~LTableau();
+  gbtLemkeTableau(const gbtMatrix<T> &A, const gbtVector<T> &b);
+  gbtLemkeTableau(gbtTableau<T> &);
+  virtual ~gbtLemkeTableau();
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);

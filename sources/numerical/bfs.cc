@@ -33,16 +33,16 @@
 #include "bfs.h"
 
 //--------------------------------------------------------------------------
-//                     class BFS<T>: member functions
+//                     class gbtBasicFeasibleSolution<T>: member functions
 //--------------------------------------------------------------------------
 
-template <class T> BFS<T>::BFS(void) : gbtOrdMap<int, T>((T) 0)  { }
+template <class T> gbtBasicFeasibleSolution<T>::gbtBasicFeasibleSolution(void) : gbtOrdMap<int, T>((T) 0)  { }
 
-template <class T> BFS<T>::BFS(const T &d) : gbtOrdMap<int, T>((T) d)  { }
+template <class T> gbtBasicFeasibleSolution<T>::gbtBasicFeasibleSolution(const T &d) : gbtOrdMap<int, T>((T) d)  { }
 
-template <class T> BFS<T>::BFS(const BFS<T> &m) : gbtOrdMap<int, T>(m)  { }
+template <class T> gbtBasicFeasibleSolution<T>::gbtBasicFeasibleSolution(const gbtBasicFeasibleSolution<T> &m) : gbtOrdMap<int, T>(m)  { }
 
-template <class T> int BFS<T>::operator==(const BFS<T> &M) const
+template <class T> int gbtBasicFeasibleSolution<T>::operator==(const gbtBasicFeasibleSolution<T> &M) const
 {
   if (length != M.length)  return 0;
 
@@ -52,30 +52,30 @@ template <class T> int BFS<T>::operator==(const BFS<T> &M) const
   return 1;
 }
 
-template <class T> int BFS<T>::operator!=(const BFS<T> &M) const
+template <class T> int gbtBasicFeasibleSolution<T>::operator!=(const gbtBasicFeasibleSolution<T> &M) const
 {
   return !(*this == M);
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const BFS<T> &b)
+template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtBasicFeasibleSolution<T> &b)
 {
   b.Dump(f);
   return f;
 }
 
 
-template class BFS<double>;
-template class BFS<gbtRational>;
+template class gbtBasicFeasibleSolution<double>;
+template class gbtBasicFeasibleSolution<gbtRational>;
 
-template gbtOutput &operator<<(gbtOutput &, const BFS<double> &);
-template gbtOutput &operator<<(gbtOutput &, const BFS<gbtRational> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<double> &);
+template gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<gbtRational> &);
 
-template class gbtArray<BFS<double> >;
-template class gbtArray<BFS<gbtRational> >;
-template class gbtBlock<BFS<double> >;
-template class gbtBlock<BFS<gbtRational> >;
-template class gbtList<BFS<double> >;
-template class gbtList<BFS<gbtRational> >;
+template class gbtArray<gbtBasicFeasibleSolution<double> >;
+template class gbtArray<gbtBasicFeasibleSolution<gbtRational> >;
+template class gbtBlock<gbtBasicFeasibleSolution<double> >;
+template class gbtBlock<gbtBasicFeasibleSolution<gbtRational> >;
+template class gbtList<gbtBasicFeasibleSolution<double> >;
+template class gbtList<gbtBasicFeasibleSolution<gbtRational> >;
 
 template class gbtBaseMap<int, double>;
 template class gbtOrdMap<int, double>;

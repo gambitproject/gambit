@@ -32,11 +32,11 @@
 #include "basis.h"
 
 // ---------------------------------------------------------------------------
-//                          BaseTableau Stuff
+//                          gbtBaseTableau Stuff
 // ---------------------------------------------------------------------------
 
 
-template <class T> class BaseTableau {
+template <class T> class gbtBaseTableau {
 public:
   class BadDim : public gbtException  {
   public:
@@ -47,7 +47,7 @@ public:
   class BadPivot : public gbtException  {
   public:
     virtual ~BadPivot() { }
-    gbtText Description(void) const { return "Bad Pivot in BaseTableau"; }
+    gbtText Description(void) const { return "Bad Pivot in gbtBaseTableau"; }
   };
 
   bool ColIndex(int) const;
@@ -61,7 +61,7 @@ public:
   virtual bool Member(int i) const = 0;
     // is variable i is a member of basis
   virtual int Label(int i) const = 0;   
-    // return variable in i'th position of Tableau
+    // return variable in i'th position of gbtTableau
   virtual int Find(int i) const = 0;  
     // return position of variable i
   
@@ -72,32 +72,32 @@ public:
   void CompPivot(int outlabel,int col);
   virtual long NumPivots() const = 0;
   
-      // raw Tableau functions
+      // raw gbtTableau functions
   virtual  void Refactor() = 0;
 };
 
 // ---------------------------------------------------------------------------
-//                           TableauInterface Stuff
+//                           gbtTableauInterface Stuff
 // ---------------------------------------------------------------------------
 
-template <class T> class TableauInterface : public BaseTableau<T>{
+template <class T> class gbtTableauInterface : public gbtBaseTableau<T>{
 protected:
   const gbtMatrix<T> *A;  // should this be private?
   const gbtVector<T> *b;  // should this be private?
-  Basis basis; 
+  gbtBasis basis; 
   gbtVector<T> solution;  // current solution vector. should this be private?
   long npivots;
   T eps1,eps2;
   gbtBlock<int> artificial;  // artificial variables
 
 public:
-  TableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b); 
-  TableauInterface(const gbtMatrix<T> &A, const gbtBlock<int> &art, 
+  gbtTableauInterface(const gbtMatrix<T> &A, const gbtVector<T> &b); 
+  gbtTableauInterface(const gbtMatrix<T> &A, const gbtBlock<int> &art, 
 		   const gbtVector<T> &b); 
-  TableauInterface(const TableauInterface<T>&);
-  virtual ~TableauInterface();
+  gbtTableauInterface(const gbtTableauInterface<T>&);
+  virtual ~gbtTableauInterface();
 
-  TableauInterface<T>& operator=(const TableauInterface<T>&);
+  gbtTableauInterface<T>& operator=(const gbtTableauInterface<T>&);
 
   // information
 
@@ -106,13 +106,13 @@ public:
   int MinCol() const;
   int MaxCol() const;
 
-  Basis & GetBasis(void);
+  gbtBasis & GetBasis(void);
   const gbtMatrix<T> & Get_A(void) const;
   const gbtVector<T> & Get_b(void) const;
   
   bool Member(int i) const;
-  int Label(int i) const;   // return variable in i'th position of Tableau
-  int Find(int i) const;  // return Tableau position of variable i
+  int Label(int i) const;   // return variable in i'th position of gbtTableau
+  int Find(int i) const;  // return gbtTableau position of variable i
 
   long NumPivots() const;
   long &NumPivots();
@@ -123,10 +123,10 @@ public:
   
   virtual void BasisVector(gbtVector<T> &x) const = 0; // solve M x = (*b)
   void GetColumn( int , gbtVector<T> &) const;  // raw column
-  void GetBasis( Basis & ) const; // return Basis for current Tableau
+  void GetBasis( gbtBasis & ) const; // return Basis for current gbtTableau
 
-  BFS<T> GetBFS1(void) const; 
-  BFS<T> GetBFS(void);  // used in lpsolve for some reason
+  gbtBasicFeasibleSolution<T> GetBFS1(void) const; 
+  gbtBasicFeasibleSolution<T> GetBFS(void);  // used in lpsolve for some reason
   void Dump(gbtOutput &) const;
   void BigDump(gbtOutput &);
 

@@ -51,7 +51,7 @@ template <class T>
 gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
 					     gbtStatus &p_status)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   int i, j;
   
   if (p_support.GetGame().NumPlayers() != 2) {
@@ -95,7 +95,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   b[ns1+ns2+1] = -(T)1;
   b[ns1+ns2+ni1+1] = -(T)1;
 
-  LTableau<T> tab(A,b);
+  gbtLemkeTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
   gbtBehavProfile<T> profile(p_support);
@@ -120,9 +120,9 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   return solutions;
 }
 
-template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
+template <class T> int gbtEfgNashLcp<T>::Add_BFS(const gbtLemkeTableau<T> &tableau)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   gbtVector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
@@ -145,7 +145,7 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const LTableau<T> &tableau)
 //
 template <class T> int 
 gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
-			    int j, LTableau<T> &B, int depth,
+			    int j, gbtLemkeTableau<T> &B, int depth,
 			    gbtMatrix<T> &A, gbtList<BehavSolution> &p_solutions,
 			    gbtStatus &p_status)
 {
@@ -175,7 +175,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       aa=(double)(i)/(double)num_strats;
       p_status.SetProgress(p1+aa*(p2-p1));
       
-      LTableau<T> BCopy(B);
+      gbtLemkeTableau<T> BCopy(B);
       A(i,0)=-small_num;
       BCopy.Refactor();
 
@@ -269,7 +269,7 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
 
 template <class T>
 void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
-				  const LTableau<T> &tab, 
+				  const gbtLemkeTableau<T> &tab, 
 				  gbtDPVector<T> &v, const gbtVector<T> &sol,
 				  const gbtEfgNode &n, int s1,int s2)
 {

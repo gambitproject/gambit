@@ -25,7 +25,7 @@
 //
 
 // ---------------------------------------------------------------------------
-//  LPTableau Stuff (For Linear Programming code)
+//  gbtLPTableau Stuff (For Linear Programming code)
 // ---------------------------------------------------------------------------
 
 #ifndef LPTAB_H  
@@ -33,7 +33,7 @@
 
 #include "tableau.h"
 
-template <class T> class LPTableau : public Tableau<T> {
+template <class T> class gbtLPTableau : public gbtTableau<T> {
 private:
   gbtVector<T> dual;
   gbtBlock<T> unitcost;
@@ -53,12 +53,12 @@ public:
     virtual ~BadPivot();
     gbtText Description(void) const;
   };
-  LPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b); 
-  LPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, const gbtVector<T> &b); 
-  LPTableau(const LPTableau<T>&);
-  virtual ~LPTableau();
+  gbtLPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b); 
+  gbtLPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, const gbtVector<T> &b); 
+  gbtLPTableau(const gbtLPTableau<T>&);
+  virtual ~gbtLPTableau();
   
-  LPTableau<T>& operator=(const LPTableau<T>&);
+  gbtLPTableau<T>& operator=(const gbtLPTableau<T>&);
   
       // cost information
   void SetCost(const gbtVector<T>& ); // unit column cost := 0
@@ -76,12 +76,12 @@ public:
   bool IsReversePivot(int i, int j);
   void DualReversePivots(gbtList<gbtArray<int> > &);
   bool IsDualReversePivot(int i, int j);
-  BFS<T> DualBFS(void) const;
+  gbtBasicFeasibleSolution<T> DualBFS(void) const;
 
   // returns the label of the index of the last artificial variable
   int LastLabel( void );
 
-  // select Basis elements according to Tableau rows and cols
+  // select Basis elements according to gbtTableau rows and cols
   void BasisSelect(const gbtBlock<T>&rowv, gbtVector<T> &colv) const;
 
   // as above, but unit column elements nonzero

@@ -28,35 +28,35 @@
 #include "base/base.h"
 
 // ---------------------------------------------------------------------------
-//                   Tableau<double> method definitions
+//                   gbtTableau<double> method definitions
 // ---------------------------------------------------------------------------
 
 // Constructors and Destructor
  
-Tableau<double>::Tableau(const gbtMatrix<double> &A, const gbtVector<double> &b)
-  : TableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
+gbtTableau<double>::gbtTableau(const gbtMatrix<double> &A, const gbtVector<double> &b)
+  : gbtTableauInterface<double>(A,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
-Tableau<double>::Tableau(const gbtMatrix<double> &A, const gbtBlock<int> &art, 
+gbtTableau<double>::gbtTableau(const gbtMatrix<double> &A, const gbtBlock<int> &art, 
 			 const gbtVector<double> &b)
-  : TableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
+  : gbtTableauInterface<double>(A,art,b), B(*this), tmpcol(b.First(),b.Last())
 {
   Solve(b, solution);
 };
 
 
-Tableau<double>::Tableau(const Tableau<double> &orig)
-  : TableauInterface<double>(orig), B(orig.B,*this), tmpcol(orig.tmpcol)
+gbtTableau<double>::gbtTableau(const gbtTableau<double> &orig)
+  : gbtTableauInterface<double>(orig), B(orig.B,*this), tmpcol(orig.tmpcol)
 { }
 
-Tableau<double>::~Tableau()
+gbtTableau<double>::~gbtTableau()
 { }
 
-Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
+gbtTableau<double>& gbtTableau<double>::operator=(const gbtTableau<double> &orig)
 {
-  TableauInterface<double>::operator=(orig);
+  gbtTableauInterface<double>::operator=(orig);
   if(this!= &orig) {
     B.Copy(orig.B,*this);
     tmpcol = orig.tmpcol;
@@ -68,7 +68,7 @@ Tableau<double>& Tableau<double>::operator=(const Tableau<double> &orig)
 // pivoting operations
 //
 
-int Tableau<double>::CanPivot(int outlabel, int col)
+int gbtTableau<double>::CanPivot(int outlabel, int col)
 {
   SolveColumn(col,tmpcol);
   double val = tmpcol[basis.Find(outlabel)];
@@ -76,7 +76,7 @@ int Tableau<double>::CanPivot(int outlabel, int col)
   return 1;  
 }
 
-void Tableau<double>::Pivot(int outrow,int col)
+void gbtTableau<double>::Pivot(int outrow,int col)
 {
   if(!RowIndex(outrow) || !ValidIndex(col)) throw BadPivot();
 
@@ -93,7 +93,7 @@ void Tableau<double>::Pivot(int outrow,int col)
   // BigDump(gout);
 }
 
-void Tableau<double>::SolveColumn(int col, gbtVector<double> &out)
+void gbtTableau<double>::SolveColumn(int col, gbtVector<double> &out)
 {
   //** can we use tmpcol here, instead of allocating new vector?
   gbtVector<double> tmpcol2(MinRow(),MaxRow());
@@ -101,28 +101,28 @@ void Tableau<double>::SolveColumn(int col, gbtVector<double> &out)
   Solve(tmpcol2,out);
 }
 
-void Tableau<double>::BasisVector(gbtVector<double> &out) const
+void gbtTableau<double>::BasisVector(gbtVector<double> &out) const
 {
   out= solution;
 }
 
 //
-// raw Tableau functions
+// raw gbtTableau functions
 //
 
-void Tableau<double>::Refactor()
+void gbtTableau<double>::Refactor()
 {
   B.refactor();
   //** is re-solve necessary here?
   Solve(*b, solution);
 }
 
-void Tableau<double>::SetRefactor(int n)
+void gbtTableau<double>::SetRefactor(int n)
 {
   B.SetRefactor(n);
 }
 
-void Tableau<double>::SetConst(const gbtVector<double> &bnew)
+void gbtTableau<double>::SetConst(const gbtVector<double> &bnew)
 {
   if(bnew.First()!=b->First() || bnew.Last()!=b->Last())
     throw BadDim();
@@ -131,26 +131,26 @@ void Tableau<double>::SetConst(const gbtVector<double> &bnew)
 }
 
 //** this function is not currently used.  Drop it?
-void Tableau<double>::SetBasis(const Basis &in)
+void gbtTableau<double>::SetBasis(const gbtBasis &in)
 {
   basis= in;
   B.refactor();
   Solve(*b, solution);
 }
 
-void Tableau<double>::Solve(const gbtVector<double> &b, gbtVector<double> &x)
+void gbtTableau<double>::Solve(const gbtVector<double> &b, gbtVector<double> &x)
 {
   B.solve(b,x);
 }
 
-void Tableau<double>::SolveT(const gbtVector<double> &c, gbtVector<double> &y)
+void gbtTableau<double>::SolveT(const gbtVector<double> &c, gbtVector<double> &y)
 {
   B.solveT(c,y);
   //** gout << "\nTableau<double>::SolveT(), y: " << y;
   //   gout << "\nc: " << c;
 }
 
-bool Tableau<double>::IsFeasible()
+bool gbtTableau<double>::IsFeasible()
 {
   //** is it really necessary to solve first here?
   Solve(*b, solution);
@@ -159,7 +159,7 @@ bool Tableau<double>::IsFeasible()
   return true;
 }
 
-bool Tableau<double>::IsLexMin()
+bool gbtTableau<double>::IsLexMin()
 {
   int i,j;
   for(i=MinRow();i<=MaxRow();i++)
@@ -172,13 +172,13 @@ bool Tableau<double>::IsLexMin()
   return 1;
 }
 
-gbtOutput &operator<<(gbtOutput &to, const Tableau<double> &v)
+gbtOutput &operator<<(gbtOutput &to, const gbtTableau<double> &v)
 {
   v.Dump(to); return to;
 }
 
 // ---------------------------------------------------------------------------
-//                   Tableau<gbtRational> method definitions
+//                   gbtTableau<gbtRational> method definitions
 // ---------------------------------------------------------------------------
 
 
@@ -201,9 +201,9 @@ gbtInteger find_lcd(const gbtVector<gbtRational> &vec)
 
 // Constructors and Destructor
  
-Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A, 
+gbtTableau<gbtRational>::gbtTableau(const gbtMatrix<gbtRational> &A, 
 			    const gbtVector<gbtRational> &b) 
-  : TableauInterface<gbtRational>(A,b), 
+  : gbtTableauInterface<gbtRational>(A,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
     nonbasic(A.MinCol(),A.MaxCol())
@@ -230,10 +230,10 @@ Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A,
     solution[i] = (gbtRational)Coeff[i];
 }
 
-Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A, 
+gbtTableau<gbtRational>::gbtTableau(const gbtMatrix<gbtRational> &A, 
 			    const gbtBlock<int> &art, 
 			    const gbtVector<gbtRational> &b) 
-  : TableauInterface<gbtRational>(A,art,b), 
+  : gbtTableauInterface<gbtRational>(A,art,b), 
     Tabdat(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),
     Coeff(b.First(),b.Last()), denom(1), tmpcol(b.First(),b.Last()), 
     nonbasic(A.MinCol(),A.MaxCol()+art.Length())
@@ -264,18 +264,18 @@ Tableau<gbtRational>::Tableau(const gbtMatrix<gbtRational> &A,
 }
 
 
-Tableau<gbtRational>::Tableau(const Tableau<gbtRational> &orig) 
-  : TableauInterface<gbtRational>(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
+gbtTableau<gbtRational>::gbtTableau(const gbtTableau<gbtRational> &orig) 
+  : gbtTableauInterface<gbtRational>(orig), Tabdat(orig.Tabdat), Coeff(orig.Coeff), 
     totdenom(orig.totdenom), denom(orig.denom), 
     tmpcol(orig.tmpcol), nonbasic(orig.nonbasic)
 { }
 
-Tableau<gbtRational>::~Tableau()
+gbtTableau<gbtRational>::~gbtTableau()
 { }
 
-Tableau<gbtRational>& Tableau<gbtRational>::operator=(const Tableau<gbtRational> &orig)
+gbtTableau<gbtRational>& gbtTableau<gbtRational>::operator=(const gbtTableau<gbtRational> &orig)
 {
-  TableauInterface<gbtRational>::operator=(orig);
+  gbtTableauInterface<gbtRational>::operator=(orig);
   if(this!= &orig) {
     Tabdat = orig.Tabdat;
     Coeff = orig.Coeff;
@@ -289,7 +289,7 @@ Tableau<gbtRational>& Tableau<gbtRational>::operator=(const Tableau<gbtRational>
 
 // Aligns the column indexes
 
-int Tableau<gbtRational>::remap(int col_index) const
+int gbtTableau<gbtRational>::remap(int col_index) const
 {
   int i = nonbasic.First(); 
   while(i <= nonbasic.Last() && nonbasic[i] !=col_index) { i++;}
@@ -297,7 +297,7 @@ int Tableau<gbtRational>::remap(int col_index) const
   return i;
 }
 
-gbtMatrix<gbtRational> Tableau<gbtRational>::GetInverse()
+gbtMatrix<gbtRational> gbtTableau<gbtRational>::GetInverse()
 {
   gbtVector<gbtRational> mytmpcol(tmpcol.First(),tmpcol.Last());
   gbtMatrix<gbtRational> inv(MinRow(),MaxRow(),MinRow(),MaxRow());
@@ -311,7 +311,7 @@ gbtMatrix<gbtRational> Tableau<gbtRational>::GetInverse()
 
 // pivoting operations
 
-int Tableau<gbtRational>::CanPivot(int outlabel, int col)
+int gbtTableau<gbtRational>::CanPivot(int outlabel, int col)
 {
   MySolveColumn(col,tmpcol);
   gbtRational val = tmpcol[basis.Find(outlabel)];
@@ -320,9 +320,9 @@ int Tableau<gbtRational>::CanPivot(int outlabel, int col)
   return 1;  
 }
 
-void Tableau<gbtRational>::Pivot(int outrow,int in_col)
+void gbtTableau<gbtRational>::Pivot(int outrow,int in_col)
 {
-  // gout << "\nIn Tableau<gbtRational>::Pivot() ";
+  // gout << "\nIn gbtTableau<gbtRational>::Pivot() ";
   // gout << " outrow:" << outrow;
   // gout << " inlabel: " << in_col;
   if(!RowIndex(outrow) || !ValidIndex(in_col)) 
@@ -348,7 +348,7 @@ void Tableau<gbtRational>::Pivot(int outrow,int in_col)
   // Pivot Algorithm:
   // i* denotes Pivot Row
   // j* denotes Pivot Column
-  // C is the Tableau
+  // C is the gbtTableau
   // Cij is the (i,j)th component of C
   // X denotes multiplication
   // d is the denominator (initially 1)
@@ -399,7 +399,7 @@ void Tableau<gbtRational>::Pivot(int outrow,int in_col)
   // Refactor();
 }
 
-void Tableau<gbtRational>::SolveColumn(int in_col, gbtVector<gbtRational> &out)
+void gbtTableau<gbtRational>::SolveColumn(int in_col, gbtVector<gbtRational> &out)
 {
   gbtVector<gbtInteger> tempcol(tmpcol.First(),tmpcol.Last());
   if(Member(in_col)) {
@@ -418,7 +418,7 @@ void Tableau<gbtRational>::SolveColumn(int in_col, gbtVector<gbtRational> &out)
     if(Label(i)<0) out[i]=(gbtRational)out[i]/(gbtRational)totdenom;
 }
 
-void Tableau<gbtRational>::MySolveColumn(int in_col, gbtVector<gbtRational> &out)
+void gbtTableau<gbtRational>::MySolveColumn(int in_col, gbtVector<gbtRational> &out)
 {
   gbtVector<gbtInteger> tempcol(tmpcol.First(),tmpcol.Last());
   if(Member(in_col)) {
@@ -433,14 +433,14 @@ void Tableau<gbtRational>::MySolveColumn(int in_col, gbtVector<gbtRational> &out
   }
 }
 
-void Tableau<gbtRational>::GetColumn(int col, gbtVector<gbtRational> &out) const
+void gbtTableau<gbtRational>::GetColumn(int col, gbtVector<gbtRational> &out) const
 {
-  TableauInterface<gbtRational>::GetColumn(col,out);
+  gbtTableauInterface<gbtRational>::GetColumn(col,out);
   if(col>=0) out*=gbtRational(totdenom);
 
 }
 
-void Tableau<gbtRational>::Refactor()
+void gbtTableau<gbtRational>::Refactor()
 { 
   gbtVector<gbtRational> mytmpcol(tmpcol);
   //BigDump(gout);
@@ -481,10 +481,10 @@ void Tableau<gbtRational>::Refactor()
   //BigDump(gout);
 }
   
-void Tableau<gbtRational>::SetRefactor(int)
+void gbtTableau<gbtRational>::SetRefactor(int)
 { }
 
-void Tableau<gbtRational>::SetConst(const gbtVector<gbtRational> &bnew)
+void gbtTableau<gbtRational>::SetConst(const gbtVector<gbtRational> &bnew)
 {
   b=&bnew;
   Refactor();
@@ -492,7 +492,7 @@ void Tableau<gbtRational>::SetConst(const gbtVector<gbtRational> &bnew)
 
 
 //** this function is not currently used.  Drop it?
-void Tableau<gbtRational>::SetBasis(const Basis &in)
+void gbtTableau<gbtRational>::SetBasis(const gbtBasis &in)
 {
   basis= in;
   //** this has to be changed -- Need to start over and pivot to new basis.  
@@ -501,27 +501,27 @@ void Tableau<gbtRational>::SetBasis(const Basis &in)
 }
 
  // solve M x = b
-void Tableau<gbtRational>::Solve(const gbtVector<gbtRational> &b, gbtVector<gbtRational> &x)
+void gbtTableau<gbtRational>::Solve(const gbtVector<gbtRational> &b, gbtVector<gbtRational> &x)
 {
   // Here, we do x = V * b, where V = M inverse
   x = (GetInverse() * b )/(gbtRational)abs(denom);
 }
 
  // solve y M = c
-void Tableau<gbtRational>::SolveT(const gbtVector<gbtRational> &c, gbtVector<gbtRational> &y)
+void gbtTableau<gbtRational>::SolveT(const gbtVector<gbtRational> &c, gbtVector<gbtRational> &y)
 {
   // Here we do y = c * V, where V = M inverse
   y = (c * GetInverse()) /(gbtRational)abs(denom);
 }
 
-bool Tableau<gbtRational>::IsFeasible()
+bool gbtTableau<gbtRational>::IsFeasible()
 {
   for(int i=solution.First();i<=solution.Last();i++)
     if(solution[i]>=eps2) return false;
   return true;
 }
 
-bool Tableau<gbtRational>::IsLexMin()
+bool gbtTableau<gbtRational>::IsLexMin()
 {
   int i,j;
   for(i=MinRow();i<=MaxRow();i++)
@@ -534,21 +534,21 @@ bool Tableau<gbtRational>::IsLexMin()
   return 1;
 }
 
-gbtOutput &operator<<(gbtOutput &to, const Tableau<gbtRational> &v)
+gbtOutput &operator<<(gbtOutput &to, const gbtTableau<gbtRational> &v)
 {
   v.Dump(to); return to;
 }
 
-void Tableau<gbtRational>::BigDump(gbtOutput &out)
+void gbtTableau<gbtRational>::BigDump(gbtOutput &out)
 {
-  TableauInterface<gbtRational>::BigDump(out);
+  gbtTableauInterface<gbtRational>::BigDump(out);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
   // gout << "\nnonbasic: " << nonbasic;
   // gout << "\nTabdat:\n" << Tabdat;
   // gout << "\nCoeff:\n" << Coeff;
 }
 
-void Tableau<gbtRational>::BasisVector(gbtVector<gbtRational> &out) const
+void gbtTableau<gbtRational>::BasisVector(gbtVector<gbtRational> &out) const
 {
   out = solution;
   out= out/(gbtRational)abs(denom) ;
@@ -556,15 +556,15 @@ void Tableau<gbtRational>::BasisVector(gbtVector<gbtRational> &out) const
     if(Label(i)<0) out[i]=out[i]/(gbtRational)totdenom;
 }
 
-gbtInteger Tableau<gbtRational>::TotDenom() const
+gbtInteger gbtTableau<gbtRational>::TotDenom() const
 {
 return totdenom;
 }
 
-Tableau<gbtRational>::BadDenom::~BadDenom()
+gbtTableau<gbtRational>::BadDenom::~BadDenom()
 { }
 
-gbtText Tableau<gbtRational>::BadDenom::Description(void) const
+gbtText gbtTableau<gbtRational>::BadDenom::Description(void) const
 {
-  return "Bad Denominator in Tableau";
+  return "Bad Denominator in gbtTableau";
 }

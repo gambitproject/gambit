@@ -4,7 +4,7 @@
 // $Revision$
 //
 // DESCRIPTION:
-// Implementation of Basis class
+// Implementation of gbtBasis class
 //
 // This file is part of Gambit
 // Copyright (c) 2002, The Gambit Project
@@ -28,14 +28,14 @@
 #include "base/base.h"
 
 // ---------------------------------------------------------------------------
-// Class Basis
+// Class gbtBasis
 // ---------------------------------------------------------------------------
 
 // -----------------------
 // C-tor, D-tor, Operators
 // -----------------------
 
-Basis::Basis(int first, int last, int firstlabel, int lastlabel)
+gbtBasis::gbtBasis(int first, int last, int firstlabel, int lastlabel)
   : basis(first, last), cols(firstlabel, lastlabel), 
     slacks(first, last), colBlocked(firstlabel,lastlabel),
     rowBlocked(first,last)
@@ -54,16 +54,16 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
   IsBasisIdent = true;
 }
 
-Basis::Basis(const Basis &bas)
+gbtBasis::gbtBasis(const gbtBasis &bas)
 : basis(bas.basis), cols( bas.cols ), slacks( bas.slacks ),
   colBlocked(bas.colBlocked), rowBlocked(bas.rowBlocked), 
   IsBasisIdent(bas.IsBasisIdent)
 { }
 
-Basis::~Basis()
+gbtBasis::~gbtBasis()
 { }
 
-Basis& Basis::operator=(const Basis &orig)
+gbtBasis& gbtBasis::operator=(const gbtBasis &orig)
 {
   if(this != &orig) {
     basis = orig.basis; 
@@ -81,25 +81,25 @@ Basis& Basis::operator=(const Basis &orig)
 // Public Members
 // -------------------------
 
-int Basis::First() const
+int gbtBasis::First() const
 { return basis.First();}
 
-int Basis::Last() const
+int gbtBasis::Last() const
 { return basis.Last();}
 
-int Basis::MinCol() const
+int gbtBasis::MinCol() const
 { return cols.First();}
 
-int Basis::MaxCol() const
+int gbtBasis::MaxCol() const
 { return cols.Last();}
 
-bool Basis::IsRegColumn( int col ) const
+bool gbtBasis::IsRegColumn( int col ) const
 {return col >= cols.First() && col <= cols.Last();} 
   
-bool Basis::IsSlackColumn( int col ) const 
+bool gbtBasis::IsSlackColumn( int col ) const 
 {return  -col >= basis.First() && -col <= basis.Last();} 
   
-int Basis::Pivot(int outindex, int col)
+int gbtBasis::Pivot(int outindex, int col)
 {
   int outlabel = basis[outindex];
  
@@ -120,7 +120,7 @@ int Basis::Pivot(int outindex, int col)
   return outlabel;
 }
 
-bool Basis::Member( int col ) const
+bool gbtBasis::Member( int col ) const
 {
   int ret;
 
@@ -132,7 +132,7 @@ bool Basis::Member( int col ) const
 }
 
 
-int Basis::Find( int col ) const
+int gbtBasis::Find( int col ) const
 {
   int ret;
 
@@ -143,31 +143,31 @@ int Basis::Find( int col ) const
   return ret;
 }
 
-int Basis::Label(int index) const
+int gbtBasis::Label(int index) const
 {
   return  basis[index];
 }
 
-void Basis::Mark(int col )
+void gbtBasis::Mark(int col )
 {
   if (IsSlackColumn(col)) rowBlocked[-col] = true;
   else if (IsRegColumn(col)) colBlocked[col] = true;
 }
 
-void Basis::UnMark(int col )
+void gbtBasis::UnMark(int col )
 {
   if (IsSlackColumn(col)) rowBlocked[-col] = false;
   else if (IsRegColumn(col)) colBlocked[col] = false;
 }
 
-bool Basis::IsBlocked(int col) const
+bool gbtBasis::IsBlocked(int col) const
 {
   if (IsSlackColumn(col)) return rowBlocked[-col];
   else if (IsRegColumn(col)) return colBlocked[col];
   return false;
 }
 
-void Basis::CheckBasis() 
+void gbtBasis::CheckBasis() 
 {
   bool check = true;
 
@@ -177,12 +177,12 @@ void Basis::CheckBasis()
   IsBasisIdent = check;
 }
 
-bool Basis::IsIdent()
+bool gbtBasis::IsIdent()
 {
   return IsBasisIdent;
 }
 
-void Basis::Dump(gbtOutput &to) const
+void gbtBasis::Dump(gbtOutput &to) const
 { 
   to << "{";
   for(int i=basis.First();i<=basis.Last();i++) 
@@ -190,15 +190,15 @@ void Basis::Dump(gbtOutput &to) const
   to << " }";
 }
 
-Basis::BadIndex::~BadIndex()
+gbtBasis::BadIndex::~BadIndex()
 { }
 
-gbtText Basis::BadIndex::Description(void) const
+gbtText gbtBasis::BadIndex::Description(void) const
 {
-  return "Bad index in Basis";
+  return "Bad index in gbtBasis";
 }
 
-gbtOutput &operator<<(gbtOutput &to, const Basis &v)
+gbtOutput &operator<<(gbtOutput &to, const gbtBasis &v)
 {
   v.Dump(to); return to;
 }

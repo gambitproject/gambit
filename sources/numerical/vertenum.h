@@ -48,7 +48,7 @@
 // and Fukuda, Discrete Computational Geom (1992) 8:295-313.
 //
 
-template <class T> class VertEnum {
+template <class T> class gbtVertEnum {
 private:
   int mult_opt,depth;
   int n;  // N is the number of columns, which is the # of dimensions.
@@ -57,8 +57,8 @@ private:
   const gbtMatrix<T> &A;   
   const gbtVector<T> &b;
   gbtVector<T> btemp,c;
-  gbtList<BFS<T> > List;
-  gbtList<BFS<T> > DualList;
+  gbtList<gbtBasicFeasibleSolution<T> > List;
+  gbtList<gbtBasicFeasibleSolution<T> > DualList;
   gbtList<gbtVector<T> > Verts;
   long npivots,nodes;
   gbtStatus &status;
@@ -67,8 +67,8 @@ private:
   void Enum();
   void Deeper();
   void Report();
-  void Search(LPTableau<T> &tab);
-  void DualSearch(LPTableau<T> &tab);
+  void Search(gbtLPTableau<T> &tab);
+  void DualSearch(gbtLPTableau<T> &tab);
 public:
   class BadDim : public gbtException  {
   public:
@@ -76,12 +76,12 @@ public:
     gbtText Description(void) const;
   };
 
-  VertEnum(const gbtMatrix<T> &, const gbtVector<T> &, gbtStatus &);
-  VertEnum(LPTableau<T> &, gbtStatus &);
-  virtual ~VertEnum();
+  gbtVertEnum(const gbtMatrix<T> &, const gbtVector<T> &, gbtStatus &);
+  gbtVertEnum(gbtLPTableau<T> &, gbtStatus &);
+  virtual ~gbtVertEnum();
 
-  const gbtList<BFS<T> > &VertexList() const;
-  const gbtList<BFS<T> > &DualVertexList() const;
+  const gbtList<gbtBasicFeasibleSolution<T> > &VertexList() const;
+  const gbtList<gbtBasicFeasibleSolution<T> > &DualVertexList() const;
   void Vertices(gbtList<gbtVector<T> > &verts) const;
   long NumPivots() const;
   void Dump(gbtOutput &) const;
@@ -90,7 +90,7 @@ public:
 #undef _A
 #endif
 
-template <class T> class DoubleVertEnum {
+template <class T> class gbtDoubleVertEnum {
 private:
   int mult_opt,depth;
   int n;  // N is the number of columns, which is the # of dimensions.
@@ -99,7 +99,7 @@ private:
   const gbtMatrix<T> &A, &A2;   
   const gbtVector<T> &b, &b2;
   gbtVector<T> btemp,c;
-  gbtList<BFS<T> > List, List2;
+  gbtList<gbtBasicFeasibleSolution<T> > List, List2;
   gbtList<gbtVector<T> > Verts;
   long npivots,nodes;
   gbtStatus &status;
@@ -108,21 +108,21 @@ private:
   void Enum();
   void Deeper();
   void Report();
-  void Search(LPTableau<T> &, Tableau<T> &);
-  void DualSearch(LPTableau<T> &, Tableau<T> &);
-  void EnumerateComplementaryFace(LPTableau<T> &, Tableau<T> &);
+  void Search(gbtLPTableau<T> &, gbtTableau<T> &);
+  void DualSearch(gbtLPTableau<T> &, gbtTableau<T> &);
+  void EnumerateComplementaryFace(gbtLPTableau<T> &, gbtTableau<T> &);
 public:
   class BadDim : public gbtException  {
   public:
     virtual ~BadDim();
     gbtText Description(void) const;
   };
-  DoubleVertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b,
+  gbtDoubleVertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b,
 		 const gbtMatrix<T> &_A2, const gbtVector<T> &_b2, 
 		 gbtStatus &);
-  ~DoubleVertEnum();
-  const gbtList<BFS<T> > &VertexList() const;
-  const gbtList<BFS<T> > &VertexList2() const;
+  ~gbtDoubleVertEnum();
+  const gbtList<gbtBasicFeasibleSolution<T> > &VertexList() const;
+  const gbtList<gbtBasicFeasibleSolution<T> > &VertexList2() const;
   void Vertices(gbtList<gbtVector<T> > &verts, gbtList<gbtVector<T> > &verts2) const;
   long NumPivots() const;
   void Dump(gbtOutput &) const;

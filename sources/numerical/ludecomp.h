@@ -32,42 +32,42 @@
 #include "math/gmatrix.h"
 #include "basis.h"
 
-template <class T> class Tableau;
+template <class T> class gbtTableau;
 
 // ---------------------------------------------------------------------------
-// Class EtaMatrix
+// Class gbtEtaMatrix
 // ---------------------------------------------------------------------------
 
-template <class T> class EtaMatrix {
+template <class T> class gbtEtaMatrix {
   public:
   int col;
   gbtVector<T> etadata;
   
   
-  EtaMatrix(int c, gbtVector<T> &v) : col(c), etadata(v) {};
+  gbtEtaMatrix(int c, gbtVector<T> &v) : col(c), etadata(v) {};
 
 // required for list class
-bool operator==(const EtaMatrix<T> &) const;
-bool operator!=(const EtaMatrix<T> &) const;
+bool operator==(const gbtEtaMatrix<T> &) const;
+bool operator!=(const gbtEtaMatrix<T> &) const;
 
 };
 
-template <class T> gbtOutput &operator<<( gbtOutput &, const EtaMatrix<T> &);
+template <class T> gbtOutput &operator<<( gbtOutput &, const gbtEtaMatrix<T> &);
 
 // ---------------------------------------------------------------------------
-// Class LUdecomp
+// Class gbtLUDecomposition
 // ---------------------------------------------------------------------------
 
-template <class T> class LUdecomp {
+template <class T> class gbtLUDecomposition {
 
 private:
 
-  Tableau<T> &tab;
-  Basis &basis;
+  gbtTableau<T> &tab;
+  gbtBasis &basis;
 
-  gbtList< EtaMatrix<T> > L;
-  gbtList< EtaMatrix<T> > U;
-  gbtList< EtaMatrix<T> > E;
+  gbtList< gbtEtaMatrix<T> > L;
+  gbtList< gbtEtaMatrix<T> > U;
+  gbtList< gbtEtaMatrix<T> > E;
   gbtList< int > P;
 
   gbtVector<T> scratch1; // scratch vectors so we don't reallocate them
@@ -77,7 +77,7 @@ private:
   int iterations;
   int total_operations;
 
-  const LUdecomp<T> *parent;
+  const gbtLUDecomposition<T> *parent;
   int copycount;
 
 public:
@@ -103,30 +103,30 @@ public:
     
 
   // don't use this copy constructor
-  LUdecomp( const LUdecomp<T> &a) : tab(a.tab), basis(a.basis) { assert(0); };
+  gbtLUDecomposition( const gbtLUDecomposition<T> &a) : tab(a.tab), basis(a.basis) { assert(0); };
 
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
   //        the original before the copy has been deleted, refactored
   //        Or set to something else.
-  LUdecomp( const LUdecomp<T> &, Tableau<T> & );
+  gbtLUDecomposition( const gbtLUDecomposition<T> &, gbtTableau<T> & );
 
   // Decompose given matrix
-  LUdecomp( Tableau<T> &, int rfac = 0 ); 
+  gbtLUDecomposition( gbtTableau<T> &, int rfac = 0 ); 
 
   // Destructor
-  ~LUdecomp();
+  ~gbtLUDecomposition();
 
   // don't use the equals operator, use the Copy function instead
-  LUdecomp<T>& operator=(const LUdecomp<T>&) { assert(0); return *this; };
+  gbtLUDecomposition<T>& operator=(const gbtLUDecomposition<T>&) { assert(0); return *this; };
 
 
   // --------------------
   // Public Members
   // --------------------
 
-  // copies the LUdecomp given (expect for the basis &).
-  void Copy( const LUdecomp<T> &, Tableau<T> & );
+  // copies the gbtLUDecomposition given (expect for the basis &).
+  void Copy( const gbtLUDecomposition<T> &, gbtTableau<T> & );
 
   // replace (update) the column given with the vector given.
   void update( int, int matcol ); // matcol is the column number in the matrix
@@ -166,11 +166,11 @@ private:
   void yLP_Trans( gbtVector<T> & ) const;
 
   void VectorEtaSolve( const gbtVector<T> &v,  
-		      const EtaMatrix<T> &, 
+		      const gbtEtaMatrix<T> &, 
 		      gbtVector<T> &y ) const;
 
   void EtaVectorSolve( const gbtVector<T> &v, 
-		      const EtaMatrix<T> &,
+		      const gbtEtaMatrix<T> &,
 		      gbtVector<T> &d ) const;
 
   void yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &) const;
@@ -178,6 +178,6 @@ private:
   void LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &) const;
 
 
-};  // end of class LUdecomp
+};  // end of class gbtLUDecomposition
     
 #endif // LUDECOMP_H

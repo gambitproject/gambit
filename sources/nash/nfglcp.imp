@@ -47,13 +47,13 @@ template <class T>
 gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 					     gbtStatus &p_status)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
   if (p_support.GetGame().NumPlayers() != 2) {
     return gbtList<MixedSolution>();
   }
 
-  gbtList<BFS<T> > bfsList;
+  gbtList<gbtBasicFeasibleSolution<T> > bfsList;
 
   try {
     gbtMatrix<T> A1 = Make_A1(p_support.GetGame(), p_support, (T) 0);
@@ -80,9 +80,9 @@ gbtList<MixedSolution> gbtNfgNashLcp<T>::Solve(const gbtNfgSupport &p_support,
 }
 
 template <class T> int gbtNfgNashLcp<T>::AddBfs(LHTableau<T> &p_tableau,
-					      gbtList<BFS<T> > &p_list)
+					      gbtList<gbtBasicFeasibleSolution<T> > &p_list)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   cbfs = p_tableau.GetBFS();
   if ((m_stopAfter > 0 && p_list.Length() > m_stopAfter) ||
       p_list.Contains(cbfs)) {  
@@ -101,7 +101,7 @@ template <class T> int gbtNfgNashLcp<T>::AddBfs(LHTableau<T> &p_tableau,
 //
 template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_support,
 					    int j, LHTableau<T> &B,
-					    gbtList<BFS<T> > &p_list,
+					    gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 					    int depth,
 					    gbtStatus &p_status)
 {
@@ -134,7 +134,7 @@ template <class T> void gbtNfgNashLcp<T>::AllLemke(const gbtNfgSupport &p_suppor
 
 template <class T>
 gbtList<MixedSolution> gbtNfgNashLcp<T>::AddSolutions(const gbtNfgSupport &p_support,
-					     const gbtList<BFS<T> > &p_list,
+					     const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 					     const T &epsilon)
 {
   int i,j;

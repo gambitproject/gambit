@@ -30,9 +30,9 @@
 
 template <class T> class gbtNfgNashLp : public gbtNfgNashAlgorithm {
 private:
-  int Add_BFS(const gbtNfgSupport &, /*const*/ LPSolve<T> &B,
-	      gbtList<BFS<T> > &);
-  void GetSolutions(const gbtNfgSupport &, const gbtList<BFS<T> > &,
+  int Add_BFS(const gbtNfgSupport &, /*const*/ gbtLPSolver<T> &B,
+	      gbtList<gbtBasicFeasibleSolution<T> > &);
+  void GetSolutions(const gbtNfgSupport &, const gbtList<gbtBasicFeasibleSolution<T> > &,
 		    gbtList<MixedSolution > &,
 		    const T &) const;
 

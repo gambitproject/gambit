@@ -87,7 +87,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
       // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
-      LPSolve<T> Tab(A, B, C, 1, status);
+      gbtLPSolver<T> Tab(A, B, C, 1, status);
       
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -166,7 +166,7 @@ bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
       // tracefile << '\n' << (gbtRectArray<T> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
-      LPSolve<T> Tab(A, B, C, 1, status);
+      gbtLPSolver<T> Tab(A, B, C, 1, status);
       
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -275,7 +275,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
     // tracefile << B << '\n';
     // tracefile << C << '\n';
     gbtNullStatus status;
-    LPSolve<T> Tab(A, B, C, 1, status);
+    gbtLPSolver<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat = "<< whichstrat;
     // tracefile << " F = " << Tab.IsFeasible();
@@ -339,7 +339,7 @@ bool IsMixedDominated(const gbtNfgSupport &S, gbtNfgStrategy str,
     // tracefile << B << '\n';
     // tracefile << C << '\n';
     gbtNullStatus status;
-    LPSolve<T> Tab(A, B, C, 1, status);
+    gbtLPSolver<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat = "<< whichstrat;
@@ -436,7 +436,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
     // tracefile << B << '\n';
     // tracefile << C << '\n';
     gbtNullStatus status;
-    LPSolve<T> Tab(A, B, C, 1, status);
+    gbtLPSolver<T> Tab(A, B, C, 1, status);
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat: " << prob;
     // tracefile << " F = " << Tab.IsFeasible();
@@ -499,7 +499,7 @@ bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
     // tracefile << B << '\n';
     // tracefile << C << '\n';
     gbtNullStatus status;
-    LPSolve<T> Tab(A, B, C, 1, status);
+    gbtLPSolver<T> Tab(A, B, C, 1, status);
     
     COpt = Tab.OptimumCost();
     tracefile << "\nPlayer = " << pl << " Strat: " << prob;

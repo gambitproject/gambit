@@ -26,5 +26,5 @@
 
 #include "lptab.imp"
 
-template class LPTableau<double>;
-template class LPTableau<gbtRational>;
+template class gbtLPTableau<double>;
+template class gbtLPTableau<gbtRational>;

@@ -28,7 +28,7 @@
 #include "math/gmatrix.h"
 #include "numerical/gfuncmin.h"
 
-class EFLiapFunc : public gC1Function<double>  {
+class EFLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
   gbtEfgGame m_efg;
@@ -183,7 +183,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 			   gbtText("Attempt ") + ToText(i) + 
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
-      gConjugatePR minimizer(p.Length());
+      gbtConjugatePRMinimizer minimizer(p.Length());
       gbtVector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
@@ -205,7 +205,7 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 	  }
 	}
       }
-      catch (gFuncMinException &) { }
+      catch (gbtFuncMinException &) { }
       PickRandomProfile(p);
     }
   }

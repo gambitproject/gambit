@@ -36,14 +36,14 @@ template <class T>
 gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
 					    gbtStatus &p_status)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
   if (p_support.GetGame().NumPlayers() != 2 ||
       !p_support.GetGame().IsConstSum()) {
     return gbtList<MixedSolution>();
   }
   
-  gbtList<BFS<T> > bfsList;
+  gbtList<gbtBasicFeasibleSolution<T> > bfsList;
   
   int i,j,m,k;
   
@@ -74,7 +74,7 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
   c = (T)0;
   c[m+1] = (T)1;
 
-  LPSolve<T> LP(A,b,c,1,p_status);
+  gbtLPSolver<T> LP(A,b,c,1,p_status);
 
   if (!LP.IsAborted()) {
     Add_BFS(p_support, LP, bfsList); 
@@ -86,12 +86,12 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgSupport &p_support,
 }
 
 template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
-						/*const*/ LPSolve<T> &lp,
-						gbtList<BFS<T> > &p_list)
+						/*const*/ gbtLPSolver<T> &lp,
+						gbtList<gbtBasicFeasibleSolution<T> > &p_list)
 {
-  BFS<T> cbfs((T) 0);
+  gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
-  // LPSolve<T>::GetAll() does not currently work correctly; for now,
+  // gbtLPSolver<T>::GetAll() does not currently work correctly; for now,
   // LpSolve is restricted to returning only one equilibrium
   lp.OptBFS(cbfs);
   cbfs.Remove(p_support.GetGame().NumStrats(1)+1);
@@ -103,7 +103,7 @@ template <class T> int gbtNfgNashLp<T>::Add_BFS(const gbtNfgSupport &p_support,
 
 template <class T>
 void gbtNfgNashLp<T>::GetSolutions(const gbtNfgSupport &p_support,
-				   const gbtList<BFS<T> > &p_list,
+				   const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 				   gbtList<MixedSolution > &solutions,
 				   const T &p_epsilon) const
 {

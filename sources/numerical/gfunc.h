@@ -33,22 +33,22 @@
 template <class T> class gbtVector;
 template <class T> class gbtMatrix;
 
-template <class T> class gFunction   {
+template <class T> class gbtFunction   {
   public:
-    virtual ~gFunction()    { }
+    virtual ~gbtFunction()    { }
     virtual T Value(const gbtVector<T> &) const = 0;
 };
 
-template <class T> class gC1Function : public gFunction<T> {
+template <class T> class gbtC1Function : public gbtFunction<T> {
 public:
-  virtual ~gC1Function() { }
+  virtual ~gbtC1Function() { }
 
   virtual bool Gradient(const gbtVector<T> &, gbtVector<T> &) const = 0;
 };
 
-class gFuncMinError : public gbtException {
+class gbtFuncMinException : public gbtException {
 public:
-  virtual ~gFuncMinError() { }
+  virtual ~gbtFuncMinException() { }
   gbtText Description(void) const 
     { return "Internal error in minimization code"; }
 };

@@ -58,13 +58,4 @@ the copyright statement:
 Copyright (C) 1996, 1997, 1998, 1999, 2000 Fabrice Rossi
 
 These files have been modified only to port them from C to C++ and
-to use the gFunction class.
-
-
-
-
-
-
-
-
-
+to use the gbtFunction class.

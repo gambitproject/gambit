@@ -27,8 +27,8 @@
 #include "vertenum.imp"
 #include "math/rational.h"
 
-template class VertEnum<double>;
-template class VertEnum<gbtRational>;
+template class gbtVertEnum<double>;
+template class gbtVertEnum<gbtRational>;
 
-template class DoubleVertEnum<double>;
-template class DoubleVertEnum<gbtRational>;
+template class gbtDoubleVertEnum<double>;
+template class gbtDoubleVertEnum<gbtRational>;

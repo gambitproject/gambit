@@ -28,18 +28,18 @@
 #include "base/glist.imp"
 #include "math/rational.h"
 
-template class EtaMatrix< double >;
-template class gbtList< EtaMatrix< double > >;
-template class LUdecomp< double >;
+template class gbtEtaMatrix< double >;
+template class gbtList< gbtEtaMatrix< double > >;
+template class gbtLUDecomposition< double >;
 
 #ifndef __BCC55__
-template gbtOutput& operator<<( gbtOutput&, const EtaMatrix< double > &); 
+template gbtOutput& operator<<( gbtOutput&, const gbtEtaMatrix< double > &); 
 #endif  // __BCC55__
 
-template class EtaMatrix< gbtRational >;
-template class gbtList< EtaMatrix< gbtRational > >;
-template class LUdecomp< gbtRational >;
+template class gbtEtaMatrix< gbtRational >;
+template class gbtList< gbtEtaMatrix< gbtRational > >;
+template class gbtLUDecomposition< gbtRational >;
 
 #ifndef __BCC55__
-template gbtOutput& operator<<( gbtOutput&, const EtaMatrix< gbtRational > &); 
+template gbtOutput& operator<<( gbtOutput&, const gbtEtaMatrix< gbtRational > &); 
 #endif  // __BCC55__

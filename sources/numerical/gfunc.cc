@@ -26,5 +26,5 @@
 
 #include "gfunc.h"
 
-template class gFunction<double>;
-template class gC1Function<double>;
+template class gbtFunction<double>;
+template class gbtC1Function<double>;

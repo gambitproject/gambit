@@ -29,8 +29,8 @@
 #include "base/grarray.imp"
 #include "btableau.imp"
 
-template class BaseTableau<double>;
-template class BaseTableau<gbtRational>;
+template class gbtBaseTableau<double>;
+template class gbtBaseTableau<gbtRational>;
 
-template class TableauInterface<double>;
-template class TableauInterface<gbtRational>;
+template class gbtTableauInterface<double>;
+template class gbtTableauInterface<gbtRational>;

@@ -26,5 +26,5 @@
 
 #include "lemketab.imp"
 
-template class LTableau<double>;
-template class LTableau<gbtRational>;
+template class gbtLemkeTableau<double>;
+template class gbtLemkeTableau<gbtRational>;

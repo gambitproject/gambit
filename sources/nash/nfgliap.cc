@@ -31,7 +31,7 @@
 //                        class NFLiapFunc
 //---------------------------------------------------------------------
 
-class NFLiapFunc : public gC1Function<double>  {
+class NFLiapFunc : public gbtC1Function<double>  {
 private:
   mutable long _nevals;
   gbtNfgGame m_nfg;
@@ -244,7 +244,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 			   gbtText("Attempt ") + ToText(i) + 
 			   gbtText(", equilibria so far: ") +
 			   ToText(solutions.Length())); 
-      gConjugatePR minimizer(p.Length());
+      gbtConjugatePRMinimizer minimizer(p.Length());
       gbtVector<double> gradient(p.Length()), dx(p.Length());
       double fval;
       minimizer.Set(F, p, fval, gradient, .01, .0001);
@@ -277,7 +277,7 @@ gbtList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	  }
 	}
       }
-      catch (gFuncMinException &) { }
+      catch (gbtFuncMinException &) { }
     }
   }
   catch (gbtSignalBreak &) {

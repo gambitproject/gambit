@@ -29,16 +29,16 @@
 
 #include "base/gmap.h"
 
-template <class T> class BFS : public gbtOrdMap<int, T>  {
+template <class T> class gbtBasicFeasibleSolution : public gbtOrdMap<int, T>  {
   public:
-    BFS(void);
-    BFS(const T &d);
-    BFS(const BFS<T> &m);
-           // define two BFS's to be equal if their bases are equal
-    int operator==(const BFS &M) const;
-    int operator!=(const BFS &M) const;
+    gbtBasicFeasibleSolution(void);
+    gbtBasicFeasibleSolution(const T &d);
+    gbtBasicFeasibleSolution(const gbtBasicFeasibleSolution<T> &m);
+           // define two gbtBasicFeasibleSolution's to be equal if their bases are equal
+    int operator==(const gbtBasicFeasibleSolution &M) const;
+    int operator!=(const gbtBasicFeasibleSolution &M) const;
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const BFS<T> &);
+template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<T> &);
 
 #endif   // BFS_H

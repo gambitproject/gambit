@@ -27,22 +27,22 @@
 #include "lemketab.h"
 
 //---------------------------------------------------------------------------
-//                        Lemke Tableau: member functions
+//                        Lemke gbtTableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> LTableau<T>::LTableau(const gbtMatrix<T> &A, 
+template <class T> gbtLemkeTableau<T>::gbtLemkeTableau(const gbtMatrix<T> &A, 
 					 const gbtVector<T> &b)
-  : Tableau<T>(A,b)
+  : gbtTableau<T>(A,b)
 { } 
 
-template <class T> LTableau<T>::LTableau(Tableau<T> &tab)
-  : Tableau<T>(tab) 
+template <class T> gbtLemkeTableau<T>::gbtLemkeTableau(gbtTableau<T> &tab)
+  : gbtTableau<T>(tab) 
 { }
 
-template <class T> LTableau<T>::~LTableau(void) 
+template <class T> gbtLemkeTableau<T>::~gbtLemkeTableau(void) 
 { }
 
-template <class T> int LTableau<T>::SF_PivotIn(int inlabel)
+template <class T> int gbtLemkeTableau<T>::SF_PivotIn(int inlabel)
 { 
   //* gout << "\n inlabel = " << inlabel;
   int outindex = SF_ExitIndex(inlabel);
@@ -58,7 +58,7 @@ template <class T> int LTableau<T>::SF_PivotIn(int inlabel)
   return outlabel;
 }
 
-template <class T> int LTableau<T>::PivotIn(int inlabel)
+template <class T> int gbtLemkeTableau<T>::PivotIn(int inlabel)
 { 
   //   gout << "\n inlabel = " << inlabel;
   int outindex = ExitIndex(inlabel);
@@ -74,7 +74,7 @@ template <class T> int LTableau<T>::PivotIn(int inlabel)
   return outlabel;
 }
 
-template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
+template <class T> int gbtLemkeTableau<T>::SF_ExitIndex(int inlabel)
 {
   gbtBlock<int> BestSet;
   int i, c;
@@ -149,7 +149,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
 //
 
 
-template <class T> int LTableau<T>::ExitIndex(int inlabel)
+template <class T> int gbtLemkeTableau<T>::ExitIndex(int inlabel)
 {
   gbtBlock<int> BestSet;
   int i, c;
@@ -215,7 +215,7 @@ template <class T> int LTableau<T>::ExitIndex(int inlabel)
 // Executes one step of the Lemke-Howson algorithm
 //
 
-template <class T> int LTableau<T>::SF_LCPPath(int dup, gbtStatus &status)
+template <class T> int gbtLemkeTableau<T>::SF_LCPPath(int dup, gbtStatus &status)
 {
   int enter, exit;
   enter = dup;
@@ -246,7 +246,7 @@ template <class T> int LTableau<T>::SF_LCPPath(int dup, gbtStatus &status)
   return 1;
 }
 
-template <class T> int LTableau<T>::LemkePath(int dup)
+template <class T> int gbtLemkeTableau<T>::LemkePath(int dup)
 {
 //  if (!At_CBFS())  return 0;
   int enter, exit;
@@ -274,18 +274,18 @@ template <class T> int LTableau<T>::LemkePath(int dup)
   return 1;
 }
 
-template <class T> LTableau<T>::BadPivot::~BadPivot()
+template <class T> gbtLemkeTableau<T>::BadPivot::~BadPivot()
 { }
 
-template <class T> gbtText LTableau<T>::BadPivot::Description(void) const
+template <class T> gbtText gbtLemkeTableau<T>::BadPivot::Description(void) const
 {
-  return "Bad Pivot in LTableau";
+  return "Bad Pivot in gbtLemkeTableau";
 }
 
-template <class T> LTableau<T>::BadExitIndex::~BadExitIndex()
+template <class T> gbtLemkeTableau<T>::BadExitIndex::~BadExitIndex()
 { }
 
-template <class T> gbtText LTableau<T>::BadExitIndex::Description(void) const
+template <class T> gbtText gbtLemkeTableau<T>::BadExitIndex::Description(void) const
 {
-  return "Bad Exit Index in LTableau";
+  return "Bad Exit Index in gbtLemkeTableau";
 }

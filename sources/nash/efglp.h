@@ -35,15 +35,15 @@ template <class T> class gbtEfgNashLp : public gbtEfgNashAlgorithm {
 private:
   T maxpay, minpay;
   int ns1,ns2,ni1,ni2;
-  gbtList<BFS<T> > List;
+  gbtList<gbtBasicFeasibleSolution<T> > List;
   gbtList<gbtEfgInfoset> isets1, isets2;
 
   void FillTableau(const gbtEfgSupport &,
 		   gbtMatrix<T> &, const gbtEfgNode &, T ,int ,int , int ,int );
   void GetSolutions(const gbtEfgSupport &, gbtList<BehavSolution> &) const;
-  int Add_BFS(/*const*/ LPSolve<T> &B);
+  int Add_BFS(/*const*/ gbtLPSolver<T> &B);
   
-  void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const BFS<T> &sol,
+  void GetProfile(const gbtEfgSupport &, gbtDPVector<T> &v, const gbtBasicFeasibleSolution<T> &sol,
 		  const gbtEfgNode &n, int s1,int s2) const;
 
 public:
