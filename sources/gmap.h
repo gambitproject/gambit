@@ -1,7 +1,7 @@
 //
 // FILE: gmap.h -- Declaration of Map container type
 //
-// $Id$
+// @(#)gmap.h	1.16 7/28/94
 //
 
 #ifndef GMAP_H
@@ -406,7 +406,7 @@ length(m.length), _default(m._default)
 }
 
 template <class K, class T> INLINE
-int gBaseMap<K, T>::operator==(const gBaseMap &M) const
+int gBaseMap<K, T>::operator==(const gBaseMap<K,T> &M) const
 {
   if (length != M.length) return 0;
 
@@ -417,7 +417,7 @@ int gBaseMap<K, T>::operator==(const gBaseMap &M) const
 }
 
 template <class K, class T> INLINE
-gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap &M)
+gBaseMap<K, T> &gBaseMap<K, T>::operator=(const gBaseMap<K,T> &M)
 {
   if (this != &M)   {
     Send(gBaseMapMessage<K, T>(-1, gBaseMapMessage<K, T>::FLUSH));
