@@ -9,20 +9,6 @@
 #include "nfplayer.h"
 
 
-static int gmax(const gArray<int> &a)
-{
-    int t = a[1];
-
-    for (int i = 2; i <= a.Length(); i++) 
-    {
-        if (a[i] > t) 
-            t = a[i];
-    }
-
-    return t;
-}
-
-
 //****************************************************************************
 //                   SORTER FILTER OPTIONS DIALOG
 //****************************************************************************

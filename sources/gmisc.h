@@ -25,8 +25,11 @@ gOutput &operator<<(gOutput &, gTriState);
 //
 // A few mathematically-related functions which appear frequently
 //
+template <class T> class gArray;
+
 template <class T> T gmin(const T &a, const T &b);
 template <class T> T gmax(const T &a, const T &b);
+template <class T> T gmax(const gArray<T> &);
 
 class gNumber;
 double abs(double a);

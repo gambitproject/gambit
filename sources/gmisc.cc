@@ -15,6 +15,7 @@
 
 #include "gstream.h"
 #include "gtext.h"
+#include "garray.h"
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
@@ -30,6 +31,18 @@ template <class T> T gmax(const T &a, const T &b)
   if (a > b)   return a;   else return b;
 }
 
+template <class T> T gmax(const gArray<T> &p_array)
+{
+  T max = p_array[1];
+
+  for (int i = 2; i <= p_array.Length(); i++) {
+    if (p_array[i] > max)
+      max = p_array[i];
+  }
+
+  return max;
+}
+
 //--------------------------------------------------------------------------
 //                     Template function instantiations
 //--------------------------------------------------------------------------
@@ -43,6 +56,8 @@ template int gmax(const int &a, const int &b);
 template float gmax(const float &a, const float &b);
 template double gmax(const double &a, const double &b);
 template gRational gmax(const gRational &a, const gRational &b);
+
+template int gmax(const gArray<int> &);
 
 #ifndef hpux
 double abs(double a)

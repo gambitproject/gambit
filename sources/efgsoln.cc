@@ -18,31 +18,6 @@
 #define NODESOLN_SECTION    "NodeSolnShow"  // for parameter reading
 
 
-int gmax(const gPVector<int> &a)
-{
-    int t = a[1];
-
-    for (int i = 2; i <= a.Length(); i++) 
-    { 
-        if (a[i] > t) 
-            t = a[i];
-    }
-
-    return t;
-}
-
-
-static int NumIsets(const Efg &ef)
-{
-    int num_isets = 0;
-
-    for (int i = 1; i <= ef.NumPlayers(); i++)
-        num_isets += ef.Players()[i]->NumInfosets();
-
-    return num_isets;
-}
-
-
 //****************************************************************************
 //                       NODE INSPECT WINDOW
 //****************************************************************************
@@ -518,10 +493,10 @@ EfgSolnShow::EfgSolnShow(const Efg &ef_, BehavSolutionList &soln,
                          int cur_soln_, const GambitDrawSettings &draw_settings_,
                          BSolnSortFilterOptions &sf_options_,
                          EfgShow *parent_, unsigned int opts_)
-    : SpreadSheet3D(1+soln.Length()*NumIsets(ef_), 4, 1, "Solutions", parent_, ANY_BUTTON),
+    : SpreadSheet3D(1+soln.Length()*ef_.TotalNumInfosets(), 4, 1, "Solutions", parent_, ANY_BUTTON),
       ef(ef_), parent(parent_), gamb_draw_settings(draw_settings_),
       solns(soln), dim(ef_.NumActions()),
-      num_players(ef_.NumPlayers()), num_isets(NumIsets(ef_)),
+      num_players(ef_.NumPlayers()), num_isets(ef_.TotalNumInfosets()),
       num_solutions(soln.Length()), cur_soln(cur_soln_),
       features(0, BSOLN_NUM_FEATURES-1), opts(opts_),
       sf_options(sf_options_)
@@ -1299,12 +1274,12 @@ void EfgSolnShow::delete_all_button(wxButton &ob, wxEvent &)
 
 BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
                              int iset_disp, wxFrame *parent)
-    : SpreadSheet3D(NumIsets(soln_.Game())+1,
+    : SpreadSheet3D(soln_.Game().TotalNumInfosets()+1,
                     gmax(soln_.Support().NumActions())+2,
                     1, "Edit Behav Solution", parent, ANY_BUTTON),
       soln(soln_), dim(soln_.Support().NumActions())
 {
-    num_isets = NumIsets(soln.Game());
+    num_isets = soln.Game().TotalNumInfosets();
     Show(FALSE);
     int j;
     int max_dim = gmax(dim);
