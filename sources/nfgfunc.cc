@@ -510,8 +510,10 @@ static Portion* GSM_Outcome_Nfg(Portion** param)
     profile.Set(i, strat);
   }
   
-  Portion *por = new NfOutcomePortion(nfg.GetOutcome(profile));
-  return por;
+  if (nfg.GetOutcome(profile))
+    return new NfOutcomePortion(nfg.GetOutcome(profile));
+  else
+    return new NullPortion(porNFOUTCOME);
 }
 
 //------------
@@ -540,15 +542,21 @@ static Portion *GSM_Outcomes_NfgRational(Portion **param)
 
 static Portion* GSM_Payoff_NFOutcome_Float(Portion** param)
 {
+  if (param[1]->Spec().Type == porNULL)
+    return new FloatPortion(0);
+
   Nfg<double> *nfg = ((NfgPortion<double> *) param[0])->Value();
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
-  
+
   return new FloatPortion(nfg->Payoff(outcome, player->GetNumber()));
 }
 
 static Portion* GSM_Payoff_NFOutcome_Rational(Portion** param)
 {
+  if (param[1]->Spec().Type == porNULL)
+    return new RationalPortion(0);
+
   Nfg<gRational> *nfg = ((NfgPortion<gRational> *) param[0])->Value();
   NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
@@ -967,14 +975,18 @@ void Init_nfgfunc(GSM *gsm)
 				       porFLOAT, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", porNFOUTCOME));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", 
+					    PortionSpec(porNFOUTCOME,
+							0, porNULLSPEC)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("player", porNFPLAYER));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_NFOutcome_Rational, 
 				       porRATIONAL, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("outcome", porNFOUTCOME));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("outcome", 
+					    PortionSpec(porNFOUTCOME,
+							0, porNULLSPEC)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("player", porNFPLAYER));
   gsm->AddFunction(FuncObj);
 
