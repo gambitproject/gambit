@@ -15,11 +15,11 @@
 
 class EnumParams     {
 public:
-  int plev, nequilib;
+  int plev, stopAfter;
   gOutput *outfile, *errfile;
   gStatus &status;
 
-	EnumParams(gStatus &status_=gstatus);
+  EnumParams(gStatus &status_=gstatus);
 };
 
 //
@@ -33,7 +33,7 @@ private:
   EnumParams params;
   int rows,cols,level;
   long count,npivots;
-  gRational time;
+  double time;
   
 //  void AddSolution(const gPVector<T> &s);
   
@@ -44,7 +44,7 @@ public:
   void SubSolve(int pr, int pcl, LHTableau<T> &B1, gBlock<int> &targ1);
   
   int NumPivots(void) const;
-  gRational Time(void) const;
+  double Time(void) const;
   
   EnumParams &Parameters(void);
 

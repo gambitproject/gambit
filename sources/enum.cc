@@ -17,7 +17,7 @@
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(gStatus &status_) : plev(0), nequilib(0),outfile(0),
+EnumParams::EnumParams(gStatus &status_) : plev(0), stopAfter(0),outfile(0),
 errfile(0),status(status_)
 { }
 
@@ -28,7 +28,7 @@ errfile(0),status(status_)
 template <class T>
 EnumModule<T>::EnumModule(const NormalForm<T> &N, const EnumParams &p)
   : NF(N), params(p), rows(N.NumStrats(1)), cols(N.NumStrats(2)), 
-    npivots(0),level(0),count(0),List()
+    level(0), count(0), npivots(0)
 { }
 
 template <class T> int EnumModule<T>::Enum(void)
@@ -49,7 +49,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	i = rows+1;
 
 	while(i<=rows+cols && !params.status.Get())
-		if(params.nequilib==0 || List.Length()<params.nequilib) {
+		if(params.stopAfter==0 || List.Length()<params.stopAfter) {
 			SubSolve(rows,i,tableau,target);
 			i++;
       params.status.SetProgress((double)(i-rows-1)/(double)cols);
@@ -149,7 +149,7 @@ template <class T> void EnumModule<T>
   if(pr>1) {
     i=targ2[pr-1];
 		while(i+1<targ2[pr] && !params.status.Get())
-      if(params.nequilib==0 || List.Length()<params.nequilib) {
+      if(params.stopAfter==0 || List.Length()<params.stopAfter) {
 	i++;
 	SubSolve(pr-1,i,B2,targ2);
       }
@@ -199,7 +199,7 @@ template <class T> int EnumModule<T>::NumPivots(void) const
   return npivots;
 }
 
-template <class T> gRational EnumModule<T>::Time(void) const
+template <class T> double EnumModule<T>::Time(void) const
 {
   return time;
 }
