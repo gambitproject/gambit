@@ -61,13 +61,14 @@ static Portion *GSM_CompressNfg(Portion **param)
     return new NfgValPortion<gRational>(CompressNfg((const Nfg<gRational> &) N, *S));
 }
 
-  
-extern NFSupport *ComputeDominated(NFSupport &S, bool strong,
-				   const gArray<int> &players,
-				   gOutput &tracefile,gStatus &status=gstatus);
-NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
+template <class T>  
+NFSupport *ComputeDominated(const Nfg<T> &, NFSupport &S, bool strong,
+			    const gArray<int> &players,
+			    gOutput &tracefile, gStatus &status);
+template <class T>
+NFSupport *ComputeMixedDominated(const Nfg<T> &, NFSupport &S, bool strong,
 				 const gArray<int> &players,
-				 gOutput &tracefile,gStatus &status=gstatus);
+				 gOutput &tracefile, gStatus &status);
 
 
 //-------------
@@ -77,6 +78,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 static Portion *GSM_ElimDom_Nfg(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  const BaseNfg &N = S->BelongsTo();
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
   
@@ -85,11 +87,24 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  NFSupport *T = (mixed) ?
-    ComputeMixedDominated(*S, strong, players,
-			  ((OutputPortion *) param[4])->Value()) :
-    ComputeDominated(*S, strong, players,
-		     ((OutputPortion *) param[4])->Value());
+  NFSupport *T;
+  
+  if (mixed)  {
+    if (N.Type() == DOUBLE)
+      T = ComputeMixedDominated((Nfg<double> &) N, *S, strong, players,
+				((OutputPortion *) param[4])->Value(), gstatus);
+    else
+      T = ComputeMixedDominated((Nfg<gRational> &) N, *S, strong, players,
+				((OutputPortion *) param[4])->Value(), gstatus);
+  }
+  else  {
+    if (N.Type() == DOUBLE)
+      T = ComputeDominated((Nfg<double> &) N, *S, strong, players,
+			   ((OutputPortion *) param[4])->Value(), gstatus);
+    else
+      T = ComputeDominated((Nfg<gRational> &) N, *S, strong, players,
+			   ((OutputPortion *) param[4])->Value(), gstatus);
+  }
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
   

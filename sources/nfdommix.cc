@@ -193,13 +193,37 @@ bool ComputeMixedDominated(const Nfg<T> &nfg,
   }
 }
 
+template <class T> 
+NFSupport *ComputeMixedDominated(const Nfg<T> &N, NFSupport &S, bool strong,
+				 const gArray<int> &players,
+				 gOutput &tracefile, gStatus &status)
+{
+  NFSupport *newS = new NFSupport(S);
+  bool any = false;
+  
+  for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
+    int pl = players[i];
+
+    any |= ComputeMixedDominated(N, S, *newS, pl, strong, tracefile, status);
+  }
+  tracefile << "\n";
+  if (!any || status.Get())  {
+    delete newS;
+    return 0;
+  }
+  
+  return newS;
+}
+
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
+
 #include "rational.h"
+
 TEMPLATE bool ComputeMixedDominated(const Nfg<double> &,
 				    const NFSupport &, NFSupport &,
 				    int, bool, gOutput &,
@@ -208,34 +232,15 @@ TEMPLATE bool ComputeMixedDominated(const Nfg<gRational> &,
 				    const NFSupport &, NFSupport &,
 				    int, bool, gOutput &,
 				    gStatus &);
-#pragma option -Jgx
 
-NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
+TEMPLATE
+NFSupport *ComputeMixedDominated(const Nfg<double> &N, NFSupport &S, bool strong,
 				 const gArray<int> &players,
-				 gOutput &tracefile, gStatus &status=gstatus)
-{
-  NFSupport *T = new NFSupport(S);
-  bool any = false;
-  
-  for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
-    int pl = players[i];
-
-    if (S.BelongsTo().Type() == DOUBLE)
-      any |= ComputeMixedDominated((Nfg<double> &) S.BelongsTo(),
-				 S, *T, pl, strong, tracefile, status);
-    else
-      any |= ComputeMixedDominated((Nfg<gRational> &) S.BelongsTo(),
-				 S, *T, pl, strong, tracefile, status);
-//	status.SetProgress((double)i/players.Length()); 
-  }
-  tracefile << "\n";
-  if (!any || status.Get())  {
-    delete T;
-    return 0;
-  }
-  
-  return T;
-}
+				 gOutput &tracefile, gStatus &status);
+TEMPLATE
+NFSupport *ComputeMixedDominated(const Nfg<gRational> &N, NFSupport &S, bool strong,
+				 const gArray<int> &players,
+				 gOutput &tracefile, gStatus &status);
 
 
 
