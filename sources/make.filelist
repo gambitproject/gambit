@@ -4,9 +4,19 @@
 # $Id$
 #
 
-GLIB_SOURCES = gfuncmin.cc gfunc.cc system.cc gnarray.cc
+# These are found in subdirectory base/
+BASE_SOURCES = garray.cc gblock.cc glist.cc gmisc.cc gpool.cc \
+               grarray.cc gstream.cc gtext.cc gwatch.cc
 
-GLIB_OBJECTS = $(GLIB_SOURCES:.cc=$(OBJECT_SUFFIX))
+# These are found in subdirectory math/
+MATH_SOURCES = complex.cc double.cc integer.cc gdpvect.cc gmatrix.cc \
+               gnulib.cc gnumber.cc gpvector.cc gsmatrix.cc gvector.cc \
+               mathinst.cc misc.cc rational.cc
+
+GLIB_SOURCES = $(BASE_SOURCES) $(MATH_SOURCES) \
+               gfuncmin.cc gfunc.cc system.cc gnarray.cc
+
+GLIB_OBJECTS = $(GLIB_SOURCES:.cc=$(OBJECT_SUFFIX)) 
 
 
 GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc \

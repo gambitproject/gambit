@@ -94,7 +94,7 @@ OBJECT_SUFFIX = .o
 #
 OBJDIR = obj_gtk_linux
 vpath %.o  $(OBJDIR)
-
+vpath %.cc  base:math
 
 # rule for creating .o (object) files from .cc files
 
@@ -104,6 +104,12 @@ vpath %.o  $(OBJDIR)
 # rule for creating .d (dependency) files from .cc files
 
 %.d: %.cc
+	@echo updating dependencies: $@
+	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $(INCDIR) $< \
+		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
+		[ -s $@ ] || rm -f $@'
+
+%.d: base/%.cc
 	@echo updating dependencies: $@
 	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) $(INCDIR) $< \
 		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
@@ -135,17 +141,17 @@ $(OBJDIR):
 all:	gcl wxgcl gui
 
 gcl:	$(OBJDIR) $(TTYGCL_OBJECTS)
-	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../$(GCLBINARY) -L../base -L../math -lgambit_base -lgambit_math -lm; cd ..
+	cd $(OBJDIR); $(CC) $(TTYGCL_OBJECTS) -o ../$(GCLBINARY); cd ..
 
 wxgcl:	$(OBJDIR) $(WXGCL_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(WXGCL_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../$(WXGCLBINARY) -L../base -L../math -lgambit_base -lgambit_math; cd ..
+	    -o ../$(WXGCLBINARY); cd ..
 
 gui:	$(OBJDIR) $(ALLGUI_OBJECTS)
 	cd $(OBJDIR); \
 	$(CC) $(ALLGUI_OBJECTS) $(LIBDIR) $(GUILIBS) \
-	    -o ../$(GUIBINARY) -L../base -L../math -lgambit_base -lgambit_math; cd ..
+	    -o ../$(GUIBINARY); cd ..
 
 readefg.cc:  readefg.yy
 	bison -p efg_yy -o readefg.cc readefg.yy
