@@ -390,6 +390,7 @@ void LUdecomp<T>::update( int col, int matcol )
   else {
     basis.GetColumn( matcol, scratch1); 
     solve( scratch1, scratch1 );
+    assert ( scratch1[col] != (T) 0 );
     E.Append( EtaMatrix<T>( col, scratch1 ) );
     
     total_operations += iterations * basis.label.Length() +  
