@@ -1360,6 +1360,7 @@ void NfgShow::SetLabels(int what)
     }
 
     spread->SetLabels(disp_sup, what);
+    UpdateVals();
 }
 
 
