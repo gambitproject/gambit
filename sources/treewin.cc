@@ -2324,14 +2324,13 @@ void TreeWindow::ProcessDClick(wxMouseEvent &ev)
         if (id != -1)
         {
             cursor = (Node *)entry->n;
-            switch (id)
-            {
-            case NODE_TERMINAL_NOTHING: break;
+            switch (id) {
+            case NODE_TERMINAL_NOTHING:
+	      break;
             case NODE_TERMINAL_OUTCOME:
             case NODE_TERMINAL_NAME:
-                if (entry->n->GetOutcome())
-                    ChangePayoffs();
-                break;
+	      ChangePayoffs();
+	      break;
             }
             OnPaint();
             return;

@@ -52,6 +52,7 @@
 #define TREE_OUTCOMES_ATTACH                1321
 #define TREE_OUTCOMES_DETACH                1322
 #define TREE_OUTCOMES_LABEL                 1323
+#define TREE_OUTCOMES_PAYOFFS               1324
 
 #define SUBGAME_SOLVE                       1350
 #define SUBGAME_CLEARALL                    1352

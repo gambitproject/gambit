@@ -744,6 +744,8 @@ void EfgShow::MakeMenus(void)
 		       "Detach the outcome from the node at cursor");
   outcome_menu->Append(TREE_OUTCOMES_LABEL, "&Label",
 		       "Label the outcome at the node at cursor");
+  outcome_menu->Append(TREE_OUTCOMES_PAYOFFS, "&Payoffs",
+		       "Set the payoffs for the outcome at the cursor");
 
   wxMenu *tree_menu = new wxMenu;
   tree_menu->Append(TREE_COPY,      "&Copy",     "Copy tree from marked node");
@@ -953,6 +955,9 @@ void EfgShow::OnMenuCommand(int id)
       break;
     case TREE_OUTCOMES_LABEL:
       tw->EditOutcomeLabel();
+      break;
+    case TREE_OUTCOMES_PAYOFFS:
+      tw->ChangePayoffs();
       break;
     case TREE_PLAYERS:
       tw->tree_players();

@@ -43,7 +43,8 @@
 #define NFG_EDIT_OUTCOMES               303
 #define NFG_EDIT_OUTCOMES_ATTACH        304
 #define NFG_EDIT_OUTCOMES_DETACH        305
-#define NFG_EDIT_OUTCOMES_NAME          306
+#define NFG_EDIT_OUTCOMES_LABEL         306
+#define NFG_EDIT_OUTCOMES_PAYOFFS       307
 
 #define NFG_FILE_SAVE                   250
 

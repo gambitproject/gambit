@@ -250,8 +250,10 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 			   "Attach an outcome to the current contingency");
   editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_DETACH, "&Detach",
 			   "Set the outcome for the current contingency to null");
-  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_NAME, "&Label",
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_LABEL, "&Label",
 			   "Label the outcome for the current contingency");
+  editOutcomesMenu->Append(NFG_EDIT_OUTCOMES_PAYOFFS, "&Payoffs",
+			   "Set the payoffs for outcome of the current contingency");
   edit_menu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
 		    "Set/Edit outcomes");
 
@@ -578,8 +580,11 @@ void NormalSpread::OnMenuCommand(int id)
     case NFG_EDIT_OUTCOMES_DETACH:
       parent->DetachOutcome();
       break;
-    case NFG_EDIT_OUTCOMES_NAME:
+    case NFG_EDIT_OUTCOMES_LABEL:
       parent->RenameOutcome();
+      break;
+    case NFG_EDIT_OUTCOMES_PAYOFFS:
+      parent->ChangePayoffs(CurRow(), CurCol(), false);
       break;
 
     case NFG_FILE_SAVE:
