@@ -323,6 +323,24 @@ Portion* GSM::_VarValue( const gString& var_name ) const
 }
 
 
+Portion* GSM::_VarRemove( const gString& var_name )
+{
+  Portion* result;
+
+  assert( var_name != "" );
+
+  if( var_name == "INPUT" || var_name == "OUTPUT" || var_name == "NULL" )
+  {
+    _ErrorMessage( _StdErr, 55, 0, 0, var_name );
+    result = _VarValue( var_name )->ValCopy();
+  }
+  else
+  {
+    result = _VarValue( var_name )->ValCopy();
+    _RefTableStack->Peek()->Remove( var_name );
+  }
+  return result;
+}
 
 
 
@@ -445,6 +463,35 @@ bool GSM::Assign( void )
   return result;
 }
 
+
+
+bool GSM::UnAssign( void )
+{
+  Portion* p;
+
+  p = _Pop();
+  if( p->Type() == porREFERENCE )
+  {
+    if( _VarIsDefined( ( (ReferencePortion*) p )->Value() ) )
+    {
+      _Push( _VarRemove( ( (ReferencePortion*) p )->Value() ) );
+      delete p;
+      return true;
+    }
+    else
+    {
+      _Push( p );
+      _ErrorMessage( _StdErr, 54 );
+      return false;
+    }
+  }
+  else
+  {
+    _Push( p );
+    _ErrorMessage( _StdErr, 53 );
+    return false;
+  }
+}
 
 
 //-----------------------------------------------------------------------
@@ -1547,6 +1594,15 @@ void GSM::_ErrorMessage
     break;
   case 52:
     s << "  Cannot assign to a Output or Input variable\n";
+    break;
+  case 53:
+    s << "  Attempted calling UnAssign() on a non-reference value\n";
+    break;
+  case 54:
+    s << "  Attempted calling UnAssign() on a undefined reference\n";
+    break;
+  case 55:
+    s << "  Attempted to remove read-only variable \"" + str1 + "\"\n";
     break;
   default:
     s << "  General error\n";

@@ -2845,6 +2845,26 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+#endif
+
+  gout << "Testing UnAssign\n";
+  machine->PushRef( "lx" );
+  machine->UnAssign();
+  machine->Dump();
+  machine->PushRef( "lx" );
+  machine->UnAssign();
+  machine->Dump();
+  machine->PushRef( "lx2" );
+  machine->UnAssign();
+  machine->Dump();
+  machine->PushRef( "OUTPUT" );
+  machine->UnAssign();
+  machine->Dump();
   
 
   gout << "*********************** Press Return to continue ************";

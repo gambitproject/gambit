@@ -61,6 +61,7 @@ private:
   bool     _VarIsDefined ( const gString& var_name ) const;
   bool     _VarDefine    ( const gString& var_name, Portion* p );
   Portion* _VarValue     ( const gString& var_name ) const;
+  Portion* _VarRemove    ( const gString& var_name );
 
   int      _Depth( void ) const;
   void     _Push( Portion* p );
