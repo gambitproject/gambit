@@ -818,10 +818,10 @@ void gbtTreeLayout::Layout(void)
   m_infosetSpacing = 
     (m_doc->GetTreeOptions().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.Length() != m_doc->GetGame()->NumNodes()) {
+  //  if (m_nodeList.Length() != m_doc->GetGame()->NumNodes()) {
     // A rebuild is in order; force it
     BuildNodeList();
-  }
+    //  }
 
   int miny = 0, maxy = 0, ycoord = c_topMargin;
   LayoutSubtree(m_doc->GetGame()->GetRoot(), maxy, miny, ycoord);

@@ -81,7 +81,12 @@ public:
 			const std::string &p_label);
 
   void NewMove(gbtGameNode, gbtGamePlayer);
-
+  void SetMove(gbtGameNode, gbtGameInfoset);
+  void NewAction(gbtGameInfoset);
+  void SetPlayer(gbtGameInfoset, gbtGamePlayer);
+  void CopyTree(gbtGameNode src, gbtGameNode dest);
+  void MoveTree(gbtGameNode src, gbtGameNode dest);
+  
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;
   void SetPlayerColor(int p_index, const wxColour &);

@@ -46,6 +46,8 @@
 #include "panel-qre.h"
 
 enum {
+  GBT_MENU_FILE_NEW_EFG = 968,
+  GBT_MENU_FILE_NEW_NFG = 969,
   GBT_MENU_FILE_EXPORT = 970,
   GBT_MENU_FILE_EXPORT_BMP = 971,
   GBT_MENU_FILE_EXPORT_JPG = 972,
@@ -66,7 +68,8 @@ enum {
 };
 
 BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
-  EVT_MENU(wxID_NEW, gbtGameFrame::OnFileNew)
+  EVT_MENU(GBT_MENU_FILE_NEW_EFG, gbtGameFrame::OnFileNewEfg)
+  EVT_MENU(GBT_MENU_FILE_NEW_NFG, gbtGameFrame::OnFileNewNfg)
   EVT_MENU(wxID_OPEN, gbtGameFrame::OnFileOpen)
   EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
@@ -105,25 +108,24 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxGetApp().AddWindow(this);
   MakeMenu();
 
-  wxPanel *treePanel = 0;
-
   if (p_doc->GetGame()->HasTree()) {
-    treePanel = new wxPanel(this);
-    m_treeDisplay = new gbtTreeDisplay(treePanel, p_doc);
+    m_treePanel = new wxPanel(this);
+    m_treeDisplay = new gbtTreeDisplay(m_treePanel, p_doc);
     
-    gbtTreeToolbar *treeToolbar = new gbtTreeToolbar(treePanel, p_doc);
+    gbtTreeToolbar *treeToolbar = new gbtTreeToolbar(m_treePanel, p_doc);
 
     wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
     sizer->Add(treeToolbar, 1, wxEXPAND, 0);
     sizer->Add(m_treeDisplay, 10, wxEXPAND, 0);
-    treePanel->SetSizer(sizer);
-    treePanel->Layout();
+    m_treePanel->SetSizer(sizer);
+    m_treePanel->Layout();
     m_matrixPanel = 0;
     m_schellingPanel = 0;
   }
   else {
     m_matrixPanel = new gbtTableMatrix(this, p_doc);
     m_schellingPanel = new gbtTableSchelling(this, p_doc);
+    m_treePanel = 0;
     m_treeDisplay = 0;
   }
 
@@ -132,7 +134,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
   if (m_treeDisplay) {
-    sizer->Add(treePanel, 1, wxEXPAND, 0);
+    sizer->Add(m_treePanel, 1, wxEXPAND, 0);
   }
   else {
     sizer->Add(m_matrixPanel, 1, wxEXPAND, 0);
@@ -170,7 +172,16 @@ gbtGameFrame::~gbtGameFrame()
 void gbtGameFrame::MakeMenu(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_NEW, _("&New"), _("Create a new game"));
+
+  wxMenu *fileNewMenu = new wxMenu;
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_EFG,
+		      _("&Extensive"), 
+		      _("Create a new game in extensive form"));
+  fileNewMenu->Append(GBT_MENU_FILE_NEW_NFG,
+		      _("&Normal"),
+		      _("Create a new game in normal form"));
+  fileMenu->Append(wxID_NEW, _("&New"), fileNewMenu,
+		   _("Create a new game"));
   fileMenu->Append(wxID_OPEN, _("&Open"), _("Open a saved game"));
   fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
   fileMenu->AppendSeparator();
@@ -260,11 +271,26 @@ void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
 //                 gbtGameFrame: Menu command handlers
 //-------------------------------------------------------------------------
 
-void gbtGameFrame::OnFileNew(wxCommandEvent &)
+void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
+{
+  gbtGame efg = NewEfg();
+  efg->SetLabel("Untitled extensive form game");
+  efg->NewPlayer()->SetLabel("Player1");
+  efg->NewPlayer()->SetLabel("Player2");
+  (void) new gbtGameFrame(0, new gbtGameDocument(efg));
+}
+
+void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
 {
   gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
   gbtGame nfg = NewNfg(dim);
   nfg->SetLabel("Untitled normal form game");
+  nfg->GetPlayer(1)->SetLabel("Player1");
+  nfg->GetPlayer(1)->GetStrategy(1)->SetLabel("Strategy1");
+  nfg->GetPlayer(1)->GetStrategy(2)->SetLabel("Strategy2");
+  nfg->GetPlayer(2)->SetLabel("Player2");
+  nfg->GetPlayer(2)->GetStrategy(1)->SetLabel("Strategy1");
+  nfg->GetPlayer(2)->GetStrategy(2)->SetLabel("Strategy2");
   (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
 }
 
@@ -616,12 +642,12 @@ void gbtGameFrame::OnEditRedo(wxCommandEvent &)
 
 void gbtGameFrame::OnViewEfg(wxCommandEvent &)
 {
-  if (GetSizer()->IsShown(m_treeDisplay)) {
+  if (GetSizer()->IsShown(m_treePanel)) {
     GetMenuBar()->Check(GBT_MENU_VIEW_EFG, true);
     return;
   }
   
-  GetSizer()->Show(m_treeDisplay, true);
+  GetSizer()->Show(m_treePanel, true);
   GetSizer()->Show(m_schellingPanel, false);
   GetSizer()->Show(m_matrixPanel, false);
   GetMenuBar()->Check(GBT_MENU_VIEW_NFG, false);
@@ -643,7 +669,7 @@ void gbtGameFrame::OnViewNfg(wxCommandEvent &)
   // just way too big.
 
   // At this point, we know that there must be a tree view to hide
-  GetSizer()->Show(m_treeDisplay, false);
+  GetSizer()->Show(m_treePanel, false);
   if (m_doc->GetGame()->NumPlayers() == 2) {
     if (!m_schellingPanel) {
       m_schellingPanel = new gbtTableSchelling(this, m_doc);
@@ -812,13 +838,13 @@ void gbtGameFrame::OnUpdate(void)
   
   
   GetMenuBar()->Check(GBT_MENU_VIEW_EFG, 
-		      m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		      m_treeDisplay && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(GBT_MENU_VIEW_EFG, m_doc->GetGame()->HasTree());
   GetMenuBar()->Check(GBT_MENU_VIEW_NFG, 
 		      GetSizer()->IsShown(m_matrixPanel) ||
 		      GetSizer()->IsShown(m_schellingPanel));
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT,
-		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+		       m_treeDisplay && GetSizer()->IsShown(m_treePanel));
 }

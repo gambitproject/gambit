@@ -45,16 +45,11 @@ bool gbtApplication::OnInit(void)
   wxConfig config(wxT("GambitDev"));
   m_fileHistory->Load(config);
 
-  gbtArray<int> dim(2);  dim[1] = dim[2] = 2;
-  gbtGame nfg = NewNfg(dim);
-  nfg->SetLabel("Untitled normal form game");
-  nfg->GetPlayer(1)->SetLabel("Player1");
-  nfg->GetPlayer(1)->GetStrategy(1)->SetLabel("Strategy1");
-  nfg->GetPlayer(1)->GetStrategy(2)->SetLabel("Strategy2");
-  nfg->GetPlayer(2)->SetLabel("Player2");
-  nfg->GetPlayer(2)->GetStrategy(1)->SetLabel("Strategy1");
-  nfg->GetPlayer(2)->GetStrategy(2)->SetLabel("Strategy2");
-  (void) new gbtGameFrame(0, new gbtGameDocument(nfg));
+  gbtGame efg = NewEfg();
+  efg->SetLabel("Untitled extensive form game");
+  efg->NewPlayer()->SetLabel("Player1");
+  efg->NewPlayer()->SetLabel("Player2");
+  (void) new gbtGameFrame(0, new gbtGameDocument(efg));
   return true;
 }
 

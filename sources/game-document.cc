@@ -169,6 +169,9 @@ void gbtGameDocument::NewPlayer(void)
   if (!m_game->HasTree()) {
     player->GetInfoset(1)->GetAction(1)->SetLabel("Strategy1");
   }
+  else {
+    m_game->Canonicalize();
+  }
 
   m_modified = true;
   UpdateViews();
@@ -201,6 +204,52 @@ void gbtGameDocument::NewMove(gbtGameNode p_node, gbtGamePlayer p_player)
   SaveUndo(_("adding new move"));
   gbtGameInfoset infoset = p_player->NewInfoset(2);
   p_node->InsertMove(infoset);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::SetMove(gbtGameNode p_node, gbtGameInfoset p_infoset)
+{
+  SaveUndo(_("adding new move"));
+  p_node->InsertMove(p_infoset);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::NewAction(gbtGameInfoset p_infoset)
+{
+  SaveUndo(_("adding new action"));
+  p_infoset->InsertAction(p_infoset->NumActions() + 1);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::SetPlayer(gbtGameInfoset p_infoset,
+				gbtGamePlayer p_player)
+{
+  SaveUndo(_("changing player at node"));
+  p_infoset->SetPlayer(p_player);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::CopyTree(gbtGameNode p_src, gbtGameNode p_dest)
+{
+  SaveUndo(_("copying tree"));
+  p_dest->CopyTree(p_src);
+  m_game->Canonicalize();
+  m_modified = true;
+  UpdateViews();
+}
+
+void gbtGameDocument::MoveTree(gbtGameNode p_src, gbtGameNode p_dest)
+{
+  SaveUndo(_("moving tree"));
+  p_dest->MoveTree(p_src);
   m_game->Canonicalize();
   m_modified = true;
   UpdateViews();

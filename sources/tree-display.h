@@ -55,11 +55,14 @@ private:
 
   // Event handlers
   void OnDraw(wxDC &);
+  void OnLeftDown(wxMouseEvent &);
 
 public:
   gbtTreeDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
 
   const gbtTreeLayout &GetLayout(void) const { return m_layout; }
+
+  DECLARE_EVENT_TABLE()
 };
 
 #endif  // TREE_DISPLAY_H

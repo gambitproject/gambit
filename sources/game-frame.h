@@ -35,7 +35,8 @@ class gbtTreeDisplay;
 
 class gbtGameFrame : public wxFrame, gbtGameView {
 private:
-  wxPanel *m_matrixPanel, *m_schellingPanel, *m_algorithmPanel, *m_qrePanel;
+  wxPanel *m_treePanel, *m_matrixPanel, *m_schellingPanel;
+  wxPanel *m_algorithmPanel, *m_qrePanel;
   gbtTreeDisplay *m_treeDisplay;
 
   // Printing state... should be part of document instead?
@@ -49,7 +50,8 @@ private:
   void OnCloseWindow(wxCloseEvent &);
 
   // Menu command handlers
-  void OnFileNew(wxCommandEvent &);
+  void OnFileNewEfg(wxCommandEvent &);
+  void OnFileNewNfg(wxCommandEvent &);
   void OnFileOpen(wxCommandEvent &);
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);

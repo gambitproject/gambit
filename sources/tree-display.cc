@@ -57,6 +57,13 @@ void gbtTreeToolbar::OnDraw(wxDC &p_dc)
     p_dc.DrawRectangle(x, y, 16, 15);
     p_dc.DrawText(wxString::Format(_("%d"), pl), x + 4, y);
   }
+
+  int x = m_doc->GetGame()->NumPlayers() * 20 + 10;
+  int y = 5;
+
+  p_dc.SetBrush(*wxWHITE_BRUSH);
+  p_dc.DrawRectangle(x, y, 16, 15);
+  p_dc.DrawText(_("+"), x + 4, y);
 }
 
 void gbtTreeToolbar::OnUpdate(void)
@@ -72,13 +79,14 @@ void gbtTreeToolbar::OnLeftDown(wxMouseEvent &p_event)
   }
 
   int pl = ((p_event.GetX() - 10) / 20) + 1;
-  if (pl < 1 || pl > m_doc->GetGame()->NumPlayers()) {
-    return;
+  if (pl == m_doc->GetGame()->NumPlayers() + 1) {
+    m_doc->NewPlayer();
   }
-
-  wxTextDataObject textData(wxString::Format(_("%d"), pl));
-  wxDropSource source(textData, this);
-  wxDragResult result = source.DoDragDrop(true);
+  else if (pl >= 1 && pl <= m_doc->GetGame()->NumPlayers()) {
+    wxTextDataObject textData(wxString::Format(wxT("P%d"), pl));
+    wxDropSource source(textData, this);
+    wxDragResult result = source.DoDragDrop(true);
+  }
 }
 
 //--------------------------------------------------------------------------
@@ -95,20 +103,103 @@ public:
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text);
 };
 
-bool gbtPlayerDropTarget::OnDropText(wxCoord x, wxCoord y,
+//
+// This recurses the subtree starting at 'p_node' looking for a node
+// with the ID 'p_id'. 
+//
+static gbtGameNode GetNode(const gbtGameNode &p_node, int p_id)
+{
+  if (p_node->GetId() == p_id) {
+    return p_node;
+  }
+  else if (p_node->NumChildren() == 0) {
+    return 0;
+  }
+  else {
+    for (int i = 1; i <= p_node->NumChildren(); i++) {
+      gbtGameNode node = GetNode(p_node->GetChild(i), p_id);
+      if (!node.IsNull())  return node;
+    }
+    return 0;
+  }
+}
+
+bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y,
 				     const wxString &p_text)
 {
+  gbtGameDocument *doc = m_owner->GetDocument();
+  int x, y;
+  m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
+  x = (int) ((float) x / doc->GetTreeZoom());
+  y = (int) ((float) y / doc->GetTreeZoom());
+
   gbtGameNode node = m_owner->GetLayout().NodeHitTest(x, y);
 
   if (!node.IsNull()) {
-    if (node->NumChildren() == 0) {
+    if (p_text[0] == 'P') { 
       long pl;
-      p_text.ToLong(&pl);
-      gbtGameDocument *doc = m_owner->GetDocument();
-      doc->NewMove(node, doc->GetGame()->GetPlayer(pl));
+      p_text.Right(p_text.Length() - 1).ToLong(&pl);
+      gbtGamePlayer player = doc->GetGame()->GetPlayer(pl);
+    
+      if (node->NumChildren() == 0) {
+	doc->NewMove(node, player);
+      }
+      else if (node->GetPlayer() == player) {
+	doc->NewAction(node->GetInfoset());
+      }
+      else {
+	doc->SetPlayer(node->GetInfoset(), player);
+      }
       return true;
     }
-    return false;
+    else if (p_text[0] == 'C') {
+      long n;
+      p_text.Right(p_text.Length() - 1).ToLong(&n);
+      gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
+
+      if (srcNode.IsNull()) {
+	return false;
+      }
+      
+      if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+	doc->CopyTree(srcNode, node);
+	return true;
+      }
+      
+      return false;
+    }
+    else if (p_text[0] == 'M') {
+      long n;
+      p_text.Right(p_text.Length() - 1).ToLong(&n);
+      gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
+
+      if (srcNode.IsNull()) {
+	return false;
+      }
+      
+      if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+	doc->MoveTree(srcNode, node);
+	return true;
+      }
+      
+      return false;
+    }
+    else if (p_text[0] == 'I') {
+      long n;
+      p_text.Right(p_text.Length() - 1).ToLong(&n);
+      gbtGameNode srcNode = GetNode(doc->GetGame()->GetRoot(), n);
+
+      if (srcNode.IsNull()) {
+	return false;
+      }
+      
+      if (node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+	doc->SetMove(node, srcNode->GetInfoset());
+	return true;
+      }
+      
+      return false;
+    }
   }
   else {
     return false;
@@ -118,6 +209,10 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord x, wxCoord y,
 //--------------------------------------------------------------------------
 //                         class gbtTreeDisplay
 //--------------------------------------------------------------------------
+
+BEGIN_EVENT_TABLE(gbtTreeDisplay, wxScrolledWindow)
+  EVT_MOTION(gbtTreeDisplay::OnLeftDown)
+END_EVENT_TABLE()
 
 gbtTreeDisplay::gbtTreeDisplay(wxWindow *p_parent, 
 			       gbtGameDocument *p_doc)
@@ -145,3 +240,32 @@ void gbtTreeDisplay::OnUpdate(void)
   Refresh();
 }
 
+void gbtTreeDisplay::OnLeftDown(wxMouseEvent &p_event)
+{
+  if (p_event.LeftIsDown() && p_event.Dragging()) {
+    int x, y;
+    CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
+    x = (int) ((float) x / m_doc->GetTreeZoom());
+    y = (int) ((float) y / m_doc->GetTreeZoom());
+  
+    gbtGameNode node = m_layout.NodeHitTest(x, y);
+    
+    if (!node.IsNull()) {
+      if (p_event.ControlDown()) {
+	wxTextDataObject textData(wxString::Format(wxT("C%d"), node->GetId()));
+	wxDropSource source(textData, this);
+	wxDragResult result = source.DoDragDrop(true);
+      }
+      else if (p_event.ShiftDown()) {
+	wxTextDataObject textData(wxString::Format(wxT("I%d"), node->GetId()));
+	wxDropSource source(textData, this);
+	wxDragResult result = source.DoDragDrop(true);
+      }
+      else {
+	wxTextDataObject textData(wxString::Format(wxT("M%d"), node->GetId()));
+	wxDropSource source(textData, this);
+	wxDragResult result = source.DoDragDrop(true);
+      }
+    }
+  }
+}
