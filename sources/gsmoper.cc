@@ -62,7 +62,7 @@ Portion* GSM_Randomize_Rational(Portion** param)
   gRational v;
   if(_RandomSeed != 0)
     _idum = _RandomSeed;
-  v = (gRational) ran1(&_idum) / IM; 
+  v = (gRational) ran1(&_idum) / (gRational) IM; 
   return new RationalValPortion(v);
 }
 
@@ -2092,7 +2092,9 @@ Portion* GSM_Clear(Portion**)
 
 
 #include <sys/types.h>
+#ifndef __BORLANDC__
 #include <sys/time.h>
+#endif
 #include <time.h>
 
 Portion* GSM_Date(Portion**)
