@@ -448,11 +448,18 @@ int  exp_vect::TotalDegree() const
   return exp_sum;
 }
 
-
 bool  exp_vect::Divides(const exp_vect& n) const
 {
   for (int i = 1; i <= Dmnsn(); i++)
     if ((*this)[i] > n[i])
+      return false;
+  return true;
+}
+
+bool  exp_vect::UsesDifferentVariablesThan(const exp_vect& n) const
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    if ( ((*this)[i] > 0) && (n[i] > 0) )
       return false;
   return true;
 }
