@@ -1269,20 +1269,6 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(2, 5, ParamInfoType("isBounded", porBOOL,
 					    new BoolPortion(false), BYREF));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Lp_ListRational, 
-				       PortionSpec(porNUMBER, 1), 6));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("a", PortionSpec(porNUMBER,2),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("b", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(3, 2, ParamInfoType("c", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYVAL));
-  FuncObj->SetParamInfo(3, 3, ParamInfoType("nEqualities", porINTEGER));
-  FuncObj->SetParamInfo(3, 4, ParamInfoType("isFeasible", porBOOL,
-					    new BoolPortion(false), BYREF));
-  FuncObj->SetParamInfo(3, 5, ParamInfoType("isBounded", porBOOL,
-					    new BoolPortion(false), BYREF));
-
   gsm->AddFunction(FuncObj);
 
 
