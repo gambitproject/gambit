@@ -250,6 +250,8 @@ gDouble TOgDouble(const gString &s)
   return answer; 
 }
 
+template class gList<gDouble>;
+template class gNode<gDouble>;
 template class gVector<gDouble>;
 template class gArray<gDouble>;
 template class gBlock<gDouble>;
