@@ -16,7 +16,7 @@ template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
     ZSumParams params;
 
     int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution<T> > &);
+		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_ZSUMSUB; }    
 
   public:

@@ -1,7 +1,7 @@
 //
 // FILE: eliap.cc -- Extensive Form Liapunov module
 //
-// @(#)eliap.cc	2.4 19 Jul 1997
+// $Id$
 //
 
 #include "eliap.h"
@@ -110,11 +110,11 @@ static void PickRandomProfile(BehavProfile<double> &p)
 }
 
 
-static void AddSolution(gList<BehavSolution<double> > &solutions,
+static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 		        double value, double epsilon)
 {
-  int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_LIAP));
+  int i = solutions.Append(BehavSolution(profile, EfgAlg_LIAP));
   solutions[i].SetLiap(value);
   solutions[i].SetEpsilon(epsilon);
   solutions[i].SetIsNash(T_YES);
@@ -147,7 +147,7 @@ extern bool Powell(gPVector<double> &p,
 
 bool Liap(const Efg &E, EFLiapParams &params,
 	  const BehavProfile<double> &start,
-	  gList<BehavSolution<double> > &solutions,
+	  gList<BehavSolution> &solutions,
 	  long &nevals, long &niters)
 {
   EFLiapFunc F(E, start);
@@ -210,7 +210,7 @@ bool Liap(const Efg &E, EFLiapParams &params,
 
 
 int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
-				  gList<BehavSolution<double> > &solns)
+				  gList<BehavSolution> &solns)
 {
   BehavProfile<double> bp(E, sup, start.ParameterValues());
   

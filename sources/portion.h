@@ -2,7 +2,7 @@
 // FILE: portion.h -- header file for Portion class
 //                    companion to GSM
 //
-// @(#)portion.h	2.18 19 Jul 1997
+// $Id$
 //
 
 
@@ -633,27 +633,28 @@ public:
 //---------------------------------------------------------------------
 //                           Mixed class
 //---------------------------------------------------------------------
-#include "mixed.h"
+
+#include "mixedsol.h"
 
 class MixedPortion : public Portion  {
 protected:
-  MixedProfile<gNumber> ** _Value;
+  MixedSolution ** _Value;
   bool _ref;
 
-  MixedPortion(MixedProfile<gNumber> *&, bool);
+  MixedPortion(MixedSolution *&, bool);
 
 public:
-  MixedPortion(MixedProfile<gNumber> *);
+  MixedPortion(MixedSolution *);
   MixedPortion(MixedProfile<double> *);
   MixedPortion(MixedProfile<gRational> *);
   virtual ~MixedPortion();
 
-  MixedProfile<gNumber> *Value(void) const;
-  void SetValue(MixedProfile<gNumber> *);
+  MixedSolution *Value(void) const;
+  void SetValue(MixedSolution *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gString OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;
@@ -666,27 +667,28 @@ public:
 //---------------------------------------------------------------------
 //                            Behav class
 //---------------------------------------------------------------------
-#include "behav.h"
+
+#include "behavsol.h"
 
 class BehavPortion : public Portion  {
 protected:
-  BehavProfile<gNumber> ** _Value;
+  BehavSolution ** _Value;
   bool _ref;
 
-  BehavPortion(BehavProfile<gNumber> *&, bool);
+  BehavPortion(BehavSolution *&, bool);
 
 public:
-  BehavPortion(BehavProfile<gNumber> *);
+  BehavPortion(BehavSolution *);
   BehavPortion(BehavProfile<double> *);
   BehavPortion(BehavProfile<gRational> *);
   virtual ~BehavPortion();
 
-  BehavProfile<gNumber> *Value(void) const;
-  void SetValue(BehavProfile<gNumber> *);
+  BehavSolution *Value(void) const;
+  void SetValue(BehavSolution *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
-  gString OutputString( void ) const;
+  gString OutputString(void) const;
 
   Portion* ValCopy(void) const;
   Portion* RefCopy(void) const;

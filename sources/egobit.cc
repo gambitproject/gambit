@@ -152,12 +152,12 @@ static void WritePXIHeader(gOutput &pxifile, const Efg &E,
   pxifile << "\nData:\n";
 }
 
-static void AddSolution(gList<BehavSolution<double> > &solutions,
+static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 			double lambda,
 			double value)
 {
-  int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_GOBIT));
+  int i = solutions.Append(BehavSolution(profile, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
   solutions[i].SetEpsilon(0.0001);
   if(solutions[i].IsNash() == T_YES) {
@@ -190,7 +190,7 @@ extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 
 void Gobit(const Efg &E, EFGobitParams &params,
 	   const BehavProfile<gNumber> &start,
-	   gList<BehavSolution<double> > &solutions,
+	   gList<BehavSolution> &solutions,
 	   long &nevals, long &nits)
 {
   EFGobitFunc F(E, start);

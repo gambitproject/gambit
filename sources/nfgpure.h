@@ -13,8 +13,7 @@
 #include "glist.h"
 
 
-template <class T> int FindPureNash(const Nfg &N, const NFSupport &,
-				    gList<MixedSolution<T> > &);
+int FindPureNash(const Nfg &N, const NFSupport &, gList<MixedSolution> &);
 
 
 #endif    // NFGPURE_H

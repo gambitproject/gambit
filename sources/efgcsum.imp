@@ -1,7 +1,7 @@
 //
 // FILE: efgcsum.imp -- Constant Sum Extensive Form Game Solution Module
 //
-// @(#)efgcsum.imp	2.5.1.1 7/15/97
+// $Id$
 //
 
 #include "gwatch.h"
@@ -219,7 +219,7 @@ template <class T> void CSSeqFormModule<T>
 }
 
 template <class T>
-void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution<T> > &solutions) const
+void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
 {
   solutions.Flush();
 
@@ -227,7 +227,7 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution<T> > &solutions) const
   for (int i = 1; i <= List.Length(); i++)    {
     BehavProfile<T> profile(EF, support);
     GetProfile(profile,List[i],EF.RootNode(),1,1);
-    index = solutions.Append(BehavSolution<T>(profile, EfgAlg_CSSEQFORM));
+    index = solutions.Append(BehavSolution(profile, EfgAlg_CSSEQFORM));
     solutions[index].SetIsNash(T_YES);
   }
 
@@ -251,7 +251,7 @@ template <class T> double CSSeqFormModule<T>::Time(void) const
 
 template <class T>
 int CSSeqFormBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-					gList<BehavSolution<T> > &solns)
+					gList<BehavSolution> &solns)
 {
   BehavProfile<T> bp(E, sup);
 

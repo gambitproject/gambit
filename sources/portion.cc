@@ -1224,27 +1224,25 @@ bool ActionPortion::IsReference(void) const
 //                            Mixed class
 //---------------------------------------------------------------------
 
-MixedPortion::MixedPortion(MixedProfile<gNumber> *value)
-  : _Value(new MixedProfile<gNumber> *(value)), _ref(false)
+MixedPortion::MixedPortion(MixedSolution *value)
+  : _Value(new MixedSolution *(value)), _ref(false)
 {
   SetGame(&value->Game());
 }
 
 MixedPortion::MixedPortion(MixedProfile<double> *value)
-  : _Value(new MixedProfile<gNumber> *(new MixedProfile<gNumber>(value->Game(), value->Support())))
+  : _Value(new MixedSolution *(new MixedSolution(*value)))
 {
-  for (int i = 1; i <= value->Length(); i++)
-    (**_Value)[i] = (*value)[i];
+  SetGame(&value->Game());
 }
 
 MixedPortion::MixedPortion(MixedProfile<gRational> *value)
-  : _Value(new MixedProfile<gNumber> *(new MixedProfile<gNumber>(value->Game(), value->Support())))
+  : _Value(new MixedSolution *(new MixedSolution(*value)))
 {
-  for (int i = 1; i <= value->Length(); i++)
-    (**_Value)[i] = (*value)[i];
+  SetGame(&value->Game());
 }
 
-MixedPortion::MixedPortion(MixedProfile<gNumber> *&value, bool ref)
+MixedPortion::MixedPortion(MixedSolution *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
   SetGame(&value->Game());
@@ -1258,10 +1256,10 @@ MixedPortion::~MixedPortion()
   }
 }
 
-MixedProfile<gNumber> *MixedPortion::Value(void) const
+MixedSolution *MixedPortion::Value(void) const
 { return *_Value; }
 
-void MixedPortion::SetValue(MixedProfile<gNumber> *value)
+void MixedPortion::SetValue(MixedSolution *value)
 {
   SetGame(&value->Game());
   delete *_Value;
@@ -1278,9 +1276,9 @@ void MixedPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Mixed) ";
   if (_WriteSolutionInfo>1)
-    s << (MixedSolution<gNumber>) *(MixedSolution<gNumber>*)(*_Value);
+    s << **_Value;
   else
-    s << (MixedProfile<gNumber>) *(MixedSolution<gNumber>*)(*_Value);
+    s << (const MixedProfile<gNumber> &) **_Value;
 }
 
 
@@ -1291,7 +1289,7 @@ gString MixedPortion::OutputString( void ) const
 
 Portion* MixedPortion::ValCopy(void) const
 { 
-  return new MixedPortion(new MixedProfile<gNumber>(**_Value));
+  return new MixedPortion(new MixedSolution(**_Value));
 }
 
 Portion* MixedPortion::RefCopy(void) const
@@ -1312,30 +1310,28 @@ bool MixedPortion::IsReference(void) const
 //                            Behav class
 //---------------------------------------------------------------------
 
-BehavPortion::BehavPortion(BehavProfile<gNumber> *value)
-  : _Value(new BehavProfile<gNumber> *(value)), _ref(false)
+BehavPortion::BehavPortion(BehavSolution *value)
+  : _Value(new BehavSolution *(value)), _ref(false)
 {
-  SetGame(&value->Support().Game());
+  SetGame(&value->Game());
 }
 
 BehavPortion::BehavPortion(BehavProfile<double> *value)
-  : _Value(new BehavProfile<gNumber> *(new BehavProfile<gNumber>(value->Game(), value->Support())))
+  : _Value(new BehavSolution *(new BehavSolution(*value)))
 {
-  for (int i = 1; i <= value->Length(); i++)
-    (**_Value)[i] = (*value)[i];
+  SetGame(&value->Game());
 }
 
 BehavPortion::BehavPortion(BehavProfile<gRational> *value)
-  : _Value(new BehavProfile<gNumber> *(new BehavProfile<gNumber>(value->Game(), value->Support())))
+  : _Value(new BehavSolution *(new BehavSolution(*value)))
 {
-  for (int i = 1; i <= value->Length(); i++)
-    (**_Value)[i] = (*value)[i];
+  SetGame(&value->Game());
 }
 
-BehavPortion::BehavPortion(BehavProfile<gNumber> *& value, bool ref)
+BehavPortion::BehavPortion(BehavSolution *& value, bool ref)
   : _Value(&value), _ref(ref)
 {
-  SetGame(&value->Support().Game());
+  SetGame(&value->Game());
 }
 
 BehavPortion::~BehavPortion()
@@ -1346,12 +1342,12 @@ BehavPortion::~BehavPortion()
   }
 }
 
-BehavProfile<gNumber> *BehavPortion::Value(void) const
+BehavSolution *BehavPortion::Value(void) const
 { return *_Value; }
 
-void BehavPortion::SetValue(BehavProfile<gNumber> *value)
+void BehavPortion::SetValue(BehavSolution *value)
 {
-  SetGame(&value->Support().Game());
+  SetGame(&value->Game());
   delete *_Value;
   *_Value = value;
 }
@@ -1366,9 +1362,9 @@ void BehavPortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Behav) ";
   if (_WriteSolutionInfo>1)
-    s << (BehavSolution<gNumber>) *(BehavSolution<gNumber>*)(*_Value);
+    s << **_Value;
   else
-    s << (BehavProfile<gNumber>) *(BehavSolution<gNumber>*)(*_Value);
+    s << (const BehavProfile<gNumber> &) **_Value;
 }
 
 gString BehavPortion::OutputString( void ) const
@@ -1378,7 +1374,7 @@ gString BehavPortion::OutputString( void ) const
 
 Portion* BehavPortion::ValCopy(void) const
 { 
-  return new BehavPortion(new BehavProfile<gNumber>(**_Value));
+  return new BehavPortion(new BehavSolution(**_Value));
 }
 
 Portion* BehavPortion::RefCopy(void) const
@@ -2277,11 +2273,9 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
 	 *(((EfSupportPortion*) p2)->Value()));
   
   else if(p1->Spec().Type & porMIXED)
-    b = ((*((MixedSolution<gNumber>*) ((MixedPortion*) p1)->Value())) ==
-	 (*((MixedSolution<gNumber>*) ((MixedPortion*) p2)->Value())));
+    b = (*((MixedPortion*) p1)->Value() == *((MixedPortion*) p2)->Value());
   else if(p1->Spec().Type & porBEHAV)
-    b = ((*((BehavSolution<gNumber>*) ((BehavPortion*) p1)->Value())) ==
-	 (*((BehavSolution<gNumber>*) ((BehavPortion*) p2)->Value())));
+    b = (*((BehavPortion*) p1)->Value() == *((BehavPortion*) p2)->Value());
 
   else if(p1->Spec().Type & porNFG)
     b = false;

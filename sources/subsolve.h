@@ -19,22 +19,22 @@ template <class T> class SubgameSolver   {
     Efg efg;
     EFSupport support;
     BehavProfile<T> solution;
-    gList<BehavSolution<T> > solutions;
+    gList<BehavSolution> solutions;
 
     gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(Node *, gList<BehavSolution<T> > &,
+    void FindSubgames(Node *, gList<BehavSolution> &,
 		      gList<EFOutcome *> &);
 
   protected:
     virtual int SolveSubgame(const Efg &, const EFSupport &,
-			     gList<BehavSolution<T> > &) = 0;
+			     gList<BehavSolution> &) = 0;
     // changed to return int = status.Get()
 
     virtual void ViewSubgame(int, const Efg &);
 
     virtual void ViewNormal(const Nfg &, NFSupport *&);
-    virtual void SelectSolutions(int, const Efg &, gList<BehavSolution<T> > &);
+    virtual void SelectSolutions(int, const Efg &, gList<BehavSolution> &);
     virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
@@ -44,7 +44,7 @@ template <class T> class SubgameSolver   {
     void Solve(void);
 
     double Time(void) const   { return time; }
-    const gList<BehavSolution<T> > &GetSolutions(void) const
+    const gList<BehavSolution> &GetSolutions(void) const
       { return solutions; }
 };
 

@@ -339,6 +339,7 @@ template class MixedProfile<gNumber>;
 template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
 
 #include "mixedsol.imp"
-template class MixedSolution<gNumber>;
-template gOutput &operator<<(gOutput &, const MixedSolution<gNumber> &);
+
+template class gList<MixedSolution>;
+template class gNode<MixedSolution>;
 

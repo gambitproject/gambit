@@ -40,7 +40,7 @@ private:
   long npivots;
   double time;
   gList<BFS<T> > List;
-  gList< BehavSolution<T> > solutions;
+  gList<BehavSolution> solutions;
 
 public:
   SeqFormModule(const Efg &E, const SeqFormParams &p,
@@ -59,7 +59,7 @@ public:
 		  const Node *n, int,int);
 
   void AddSolutions(void);
-  const gList<BehavSolution<T> > &GetSolutions() const;
+  const gList<BehavSolution> &GetSolutions() const;
 };
 
 
@@ -71,7 +71,7 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     SeqFormParams params;
 
     int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution<T> > &);
+		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:

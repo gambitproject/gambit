@@ -1,7 +1,7 @@
 //
 // FILE: gsm.cc  implementation of GSM (Stack machine)
 //
-// @(#)gsm.cc	2.19 30 Jul 1997
+// $Id$
 //
 
 
@@ -1612,16 +1612,10 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
     {
       if( varslist[i]->Game() == game && varslist[i]->GameIsEfg() == IsEfg )
       {
-	if( !IsEfg && varslist[i]->Spec() == porMIXED )
-	{
-	    ((MixedSolution<gNumber>*) ((MixedPortion *)
-				       varslist[i])->Value())->Invalidate();
-	}
-	else if( IsEfg && varslist[i]->Spec() == porBEHAV )
-	{
-	    ((BehavSolution<gNumber>*) ((BehavPortion *)
-				       varslist[i])->Value())->Invalidate();
-	}
+	if (!IsEfg && varslist[i]->Spec() == porMIXED)  
+	  ((MixedPortion *) varslist[i])->Value()->Invalidate();
+	else if (IsEfg && varslist[i]->Spec() == porBEHAV)
+	  ((BehavPortion *) varslist[i])->Value()->Invalidate();
       }
     }
 

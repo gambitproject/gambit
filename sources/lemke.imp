@@ -10,11 +10,40 @@
 #include "nfg.h"
 
 #include "lemke.h"
+#include "lhtab.h"
 
 template <class T> gMatrix<T> Make_A1(const Nfg &, const NFSupport &, const T &);
 template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &, const T &);
 template <class T> gMatrix<T> Make_A2(const Nfg &, const NFSupport &, const T &);
 template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &, const T &);
+
+
+template <class T> class LemkeModule  {
+private:
+  const Nfg &NF;
+  const NFSupport &support;
+  const LemkeParams &params;
+  long npivots;
+  double time;
+  T epsilon;
+  int num_strats;
+  gList<BFS<T> > List;
+  gList<MixedSolution> solutions;
+
+public:
+  LemkeModule(const Nfg &N, const LemkeParams &p, const NFSupport &);
+  virtual ~LemkeModule();
+  
+  int Lemke(int dup = 0);
+  int All_Lemke(int dup, LHTableau<T> &B, long &np);
+  
+  int Add_BFS(LHTableau<T> &B);
+  long NumPivots(void) const;
+  double Time(void) const;
+  
+  void AddSolutions(void);
+  const gList<MixedSolution> &GetSolutions(void) const;
+};
 
 
 //---------------------------------------------------------------------------
@@ -126,7 +155,7 @@ template <class T> int LemkeModule<T>::All_Lemke(int j, LHTableau<T> &B,long &np
 }
 
 template <class T>
-const gList<MixedSolution<T> > &LemkeModule<T>::GetSolutions(void) const
+const gList<MixedSolution> &LemkeModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -172,7 +201,7 @@ template <class T> void LemkeModule<T>::AddSolutions(void)
      )
       add = true;
     if(add) {
-      index = solutions.Append(MixedSolution<T>(profile, NfgAlg_LEMKE));
+      index = solutions.Append(MixedSolution(profile, NfgAlg_LEMKE));
       if(params.status.Get() != 1) {
 	solutions[index].SetIsNash(T_YES);
 	solutions[index].SetIsPerfect(T_YES);

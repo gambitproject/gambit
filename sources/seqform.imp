@@ -99,7 +99,7 @@ template <class T> int SeqFormModule<T>::Lemke(void)
     GetProfile(*tab, profile,sol,EF.RootNode(),1,1);
     //  gout << "\nprofile = " << profile << "\n";
     solutions.Flush();
-    solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
+    solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM));
   }
 
   gout << "\n";  
@@ -198,7 +198,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 	// gout << "\nsol = " << sol;
 	GetProfile(BCopy, profile,sol,EF.RootNode(),1,1);
 	if(newsol)
-	  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM)); 
+	  solutions.Append(BehavSolution(profile, EfgAlg_SEQFORM)); 
 	// gout << "\nprofile = " << profile;
       }
       else 
@@ -217,7 +217,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
 //-------------------------------------------------------------------------
 
 template <class T> 
-const gList<BehavSolution<T> > &SeqFormModule<T>::GetSolutions(void) const
+const gList<BehavSolution> &SeqFormModule<T>::GetSolutions(void) const
 {
   return solutions;
 }
@@ -421,7 +421,7 @@ template <class T> void SeqFormModule<T>
 
 template <class T>
 int SeqFormBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-				      gList<BehavSolution<T> > &solns)
+				      gList<BehavSolution> &solns)
 {
   BehavProfile<T> bp(E, sup);
 

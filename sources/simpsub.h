@@ -16,7 +16,7 @@ template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
     SimpdivParams params;
 
     int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution<T> > &);
+		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_SIMPDIVSUB; }    
 
   public:

@@ -168,7 +168,7 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 
 void Gobit(const Nfg &N, NFGobitParams &params,
 	   const MixedProfile<gNumber> &start,
-	   gList<MixedSolution<double> > &solutions,
+	   gList<MixedSolution> &solutions,
 	   long &nevals, long &nits)
 {
   NFGobitFunc F(N, start);
@@ -217,7 +217,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     
     if (params.fullGraph) 
     {
-      i = solutions.Append(MixedSolution<double>(p, NfgAlg_GOBIT));      
+      i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));      
       solutions[i].SetGobit(Lambda, value);
     }
 
@@ -228,7 +228,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution<double>(p, NfgAlg_GOBIT));
+    i = solutions.Append(MixedSolution(p, NfgAlg_GOBIT));
     solutions[i].SetGobit(Lambda, value);
   }
 

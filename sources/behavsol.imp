@@ -10,104 +10,57 @@
 #include "behavsol.h"
 #include "gmisc.h"
 
-template <class T> 
-BehavSolution<T>::BehavSolution(const Efg& e)
-  : BehavProfile<T>(e),
-  _Creator(EfgAlg_USER),
-  _IsNash(T_DONTKNOW),
-  _IsSubgamePerfect(T_DONTKNOW),
-  _IsSequential(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1),
-  _Beliefs(0),
-  _Regret(0),
-  _Id(0)
+BehavSolution::BehavSolution(const BehavProfile<double>& b, EfgAlgType creator)
+  : BehavProfile<gNumber>(b.Game(), b.Support()),
+    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
+    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
-
+  for (int i = 1; i <= b.Length(); i++)
+    (*this)[i] = b[i];
 }
 
-
-template <class T> 
-BehavSolution<T>::BehavSolution(const Efg& e, const gDPVector<T>& v)
-  : BehavProfile<T>(e, v),
-  _Creator(EfgAlg_USER),
-  _IsNash(T_DONTKNOW),
-  _IsSubgamePerfect(T_DONTKNOW),
-  _IsSequential(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1),
-  _Beliefs(0),
-  _Regret(0),
-  _Id(0)
+BehavSolution::BehavSolution(const BehavProfile<gRational>& b, EfgAlgType creator)
+  : BehavProfile<gNumber>(b.Game(), b.Support()),
+    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
+    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
-
+  for (int i = 1; i <= b.Length(); i++)
+    (*this)[i] = b[i];
 }
 
-template <class T> 
-BehavSolution<T>::BehavSolution(const Efg &E, const EFSupport& s)
-  : BehavProfile<T>(E, s),
-  _Creator(EfgAlg_USER),
-  _IsNash(T_DONTKNOW),
-  _IsSubgamePerfect(T_DONTKNOW),
-  _IsSequential(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1),
-  _Beliefs(0),
-  _Regret(0),
-  _Id(0)
+BehavSolution::BehavSolution(const BehavProfile<gNumber>& b, EfgAlgType creator)
+  : BehavProfile<gNumber>(b.Game(), b.Support()),
+    _Creator(creator), _IsNash(T_DONTKNOW), _IsSubgamePerfect(T_DONTKNOW),
+    _IsSequential(T_DONTKNOW), _GobitLambda(-1), _GobitValue(-1),
+    _LiapValue(-1), _Beliefs(0), _Regret(0), _Id(0)
 {
   gEpsilon(_Epsilon);
-
+  for (int i = 1; i <= b.Length(); i++)
+    (*this)[i] = b[i];
 }
 
-template <class T> 
-BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
-: BehavProfile<T>(b),
-  _Creator(creator),
-  _IsNash(T_DONTKNOW),
-  _IsSubgamePerfect(T_DONTKNOW),
-  _IsSequential(T_DONTKNOW),
-  _GobitLambda(-1),
-  _GobitValue(-1),
-  _LiapValue(-1),
-  _Beliefs(0),
-  _Regret(0),
-  _Id(0)
+BehavSolution::BehavSolution(const BehavSolution& b)
+  : BehavProfile<gNumber>(b), _Creator(b._Creator),
+    _IsNash(b._IsNash), _IsSubgamePerfect(b._IsSubgamePerfect),
+    _IsSequential(b._IsSequential), _Epsilon(b._Epsilon),
+    _GobitLambda(b._GobitLambda), _GobitValue(b._GobitValue),
+    _LiapValue(b._LiapValue), _Beliefs(0), _Regret(0), _Id(b._Id)
 {
-  gEpsilon(_Epsilon);
-
+  if (b._Beliefs) _Beliefs = new gDPVector<gNumber>(*b._Beliefs);
+  if (b._Regret)  _Regret = new gDPVector<gNumber>(*b._Regret);   
 }
 
-
-template <class T> BehavSolution<T>::BehavSolution(const BehavSolution<T>& b)
-: BehavProfile<T>(b),
-  _Creator(b._Creator),
-  _IsNash(b._IsNash),
-  _IsSubgamePerfect(b._IsSubgamePerfect),
-  _IsSequential(b._IsSequential),
-  _Epsilon(b._Epsilon),
-  _GobitLambda(b._GobitLambda),
-  _GobitValue(b._GobitValue),
-  _LiapValue(b._LiapValue),
-  _Beliefs(0), _Regret(0),
-  _Id(b._Id)
-{
-  if (b._Beliefs) _Beliefs = new gDPVector<T>(*b._Beliefs);
-  if (b._Regret)  _Regret = new gDPVector<T>(*b._Regret);   
-}
-
-template <class T> BehavSolution<T>::~BehavSolution() 
+BehavSolution::~BehavSolution() 
 { 
   if (_Beliefs) delete _Beliefs;
   if (_Regret)  delete _Regret;
 }
 
-template <class T> void BehavSolution<T>::EvalEquilibria()
+void BehavSolution::EvalEquilibria(void) const
 {
   if (IsComplete()) 
     if( _IsNash == T_DONTKNOW )
@@ -123,20 +76,20 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
     }
 }
 
-template <class T> unsigned int BehavSolution<T>::Id(void) const
+unsigned int BehavSolution::Id(void) const
 {return _Id;}
-template <class T> void BehavSolution<T>::SetId(unsigned int i)
+void BehavSolution::SetId(unsigned int i)
 {_Id=i;}
 
-template <class T> void BehavSolution<T>::SetCreator(EfgAlgType c)
+void BehavSolution::SetCreator(EfgAlgType c)
 { _Creator = c; }
 
-template <class T> bool BehavSolution<T>::IsComplete(void) const
+bool BehavSolution::IsComplete(void) const
 { 
-  T sum;
+  gNumber sum;
   for(int pl= 1; pl <=dvlen.Length(); pl++)
     for(int iset = 1;iset <=dvlen[pl]; iset++) { 
-      sum = -(T)1;
+      sum = -1;
       for(int act = 1;act <= svlen[dvidx[pl] + iset -1]; act++) 
 	sum+= dvptr[pl][iset][act];
       if(sum > _Epsilon || sum < -_Epsilon) 
@@ -145,82 +98,81 @@ template <class T> bool BehavSolution<T>::IsComplete(void) const
   return true;
 }
 
-template <class T> EfgAlgType BehavSolution<T>::Creator(void) const
+EfgAlgType BehavSolution::Creator(void) const
 { return _Creator; }
 
-template <class T> void BehavSolution<T>::SetIsNash(TriState i)
+void BehavSolution::SetIsNash(TriState i)
 { _IsNash = i; }
 
-template <class T> TriState BehavSolution<T>::IsNash(void) const
-{ ((BehavSolution<T> &) *this).EvalEquilibria(); return _IsNash; }
+TriState BehavSolution::IsNash(void) const
+{ EvalEquilibria(); return _IsNash; }
 
-template <class T> void BehavSolution<T>::SetIsSubgamePerfect(TriState i)
+void BehavSolution::SetIsSubgamePerfect(TriState i)
 { _IsSubgamePerfect = i; }
 
-template <class T> TriState BehavSolution<T>::IsSubgamePerfect(void) const
+TriState BehavSolution::IsSubgamePerfect(void) const
 {
-  ((BehavSolution<T> &) *this).EvalEquilibria(); 
+  EvalEquilibria(); 
   return _IsSubgamePerfect; 
 }
 
-template <class T> void BehavSolution<T>::SetIsSequential(TriState i)
+void BehavSolution::SetIsSequential(TriState i)
 { _IsSequential = i; }
 
-template <class T> TriState BehavSolution<T>::IsSequential(void) const
-{ ((BehavSolution<T> &) *this).EvalEquilibria(); return _IsSequential; }
+TriState BehavSolution::IsSequential(void) const
+{ EvalEquilibria(); return _IsSequential; }
 
-template <class T> void BehavSolution<T>::SetGobit(T lambda, T value)
+void BehavSolution::SetGobit(gNumber lambda, gNumber value)
 {
   _GobitLambda = lambda;
   _GobitValue = value;
 }
 
-template <class T> T BehavSolution<T>::GobitLambda(void) const
+gNumber BehavSolution::GobitLambda(void) const
 { return _GobitLambda; }
 
-template <class T> void BehavSolution<T>::SetEpsilon(T value)
+void BehavSolution::SetEpsilon(gNumber value)
 {
   _Epsilon = value;
 }
 
-template <class T> T BehavSolution<T>::Epsilon(void) const
+gNumber BehavSolution::Epsilon(void) const
 { return _Epsilon; }
 
-template <class T> T BehavSolution<T>::GobitValue(void) const
+gNumber BehavSolution::GobitValue(void) const
 { return _GobitValue; }
 
-template <class T> void BehavSolution<T>::SetLiap(T value)
+void BehavSolution::SetLiap(gNumber value)
 { _LiapValue = value; }
 
-template <class T> T BehavSolution<T>::LiapValue(void) const
+gNumber BehavSolution::LiapValue(void) const
 { 
-  if (_LiapValue < (T)0)
-    ((BehavSolution<T> &) *this)._LiapValue = BehavProfile<T>::LiapValue();
+  if (_LiapValue < 0)
+    _LiapValue = BehavProfile<gNumber>::LiapValue();
   return _LiapValue; 
 }
 
-template <class T> const gDPVector<T> &BehavSolution<T>::Beliefs(void)
+const gDPVector<gNumber> &BehavSolution::Beliefs(void) const
 { 
   if (! _Beliefs) 
-    _Beliefs = new gDPVector<T>(BehavProfile<T>::Beliefs());
+    _Beliefs = new gDPVector<gNumber>(BehavProfile<gNumber>::Beliefs());
 
   return *_Beliefs; 
 }
 
-template <class T> const gDPVector<T> &BehavSolution<T>::Regret(void)
+const gDPVector<gNumber> &BehavSolution::Regret(void) const
 {
   if (!_Regret)  {
-    _Regret = new gDPVector<T>(E->NumActions());
+    _Regret = new gDPVector<gNumber>(E->NumActions());
     Gripe(*_Regret);
   }
 
   return *_Regret;
 }
 
-template <class T> 
-bool BehavSolution<T>::Equals(const BehavProfile<T> & s) const
+bool BehavSolution::Equals(const BehavProfile<double> &s) const
 { 
-  T eps;
+  gNumber eps;
   gEpsilon(eps,4);  // this should be a function of _Epsilon
   bool flag=true;
   int i=s.First();
@@ -232,15 +184,14 @@ bool BehavSolution<T>::Equals(const BehavProfile<T> & s) const
   return flag;
 }
 
-template <class T> 
-bool BehavSolution<T>::operator==(const BehavSolution<T> & s) const
+bool BehavSolution::operator==(const BehavSolution &s) const
 {
-  return BehavProfile<T>::operator==(s);
+  return BehavProfile<gNumber>::operator==(s);
 }
 
-template <class T> void BehavSolution<T>::Dump(gOutput& f) const
+void BehavSolution::Dump(gOutput& f) const
 {
-  BehavProfile<T>::Dump(f);
+  BehavProfile<gNumber>::Dump(f);
   f << " Creator:"; DisplayEfgAlgType(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsSubgamePerfect:"; DisplayTriState(f, _IsSubgamePerfect);
@@ -252,11 +203,11 @@ template <class T> void BehavSolution<T>::Dump(gOutput& f) const
   if(_Beliefs) f << " Beliefs:" << *_Beliefs;
 }
 
-template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &s)
+gOutput &operator<<(gOutput &f, const BehavSolution &s)
 { s.Dump(f); return f; }
 
 
-template <class T> void BehavSolution<T>::Invalidate(void)
+void BehavSolution::Invalidate(void)
 {
   _Creator = EfgAlg_USER;
   _IsNash = T_DONTKNOW;
@@ -276,23 +227,22 @@ template <class T> void BehavSolution<T>::Invalidate(void)
   }
 }
 
-template <class T> T& BehavSolution<T>::operator[](int i)
-{ Invalidate(); return BehavProfile<T>::operator[](i); }
+gNumber &BehavSolution::operator[](int i)
+{ Invalidate(); return BehavProfile<gNumber>::operator[](i); }
 
-template <class T> const T& BehavSolution<T>::operator[](int i) const
-{ return BehavProfile<T>::operator[](i); }
+const gNumber& BehavSolution::operator[](int i) const
+{ return BehavProfile<gNumber>::operator[](i); }
 
-template <class T> T& BehavSolution<T>::operator()(int a, int b, int c)
-{ Invalidate(); return BehavProfile<T>::operator()(a, b, c); }
+gNumber& BehavSolution::operator()(int a, int b, int c)
+{ Invalidate(); return BehavProfile<gNumber>::operator()(a, b, c); }
 
-template <class T> const T& BehavSolution<T>::operator()(int a, int b, int c) const
-{ return BehavProfile<T>::operator()(a, b, c); }
+const gNumber& BehavSolution::operator()(int a, int b, int c) const
+{ return BehavProfile<gNumber>::operator()(a, b, c); }
 
-template <class T>
-BehavSolution<T>& BehavSolution<T>::operator=(const BehavSolution<T> &s)
+BehavSolution& BehavSolution::operator=(const BehavSolution &s)
 {
   if (this != &s)   {
-    BehavProfile<T>::operator=(s);
+    BehavProfile<gNumber>::operator=(s);
     _Creator = s._Creator;
     _IsNash = s._IsNash;
     _IsSubgamePerfect = s._IsSubgamePerfect;
@@ -302,12 +252,12 @@ BehavSolution<T>& BehavSolution<T>::operator=(const BehavSolution<T> &s)
     _LiapValue = s._LiapValue;
     if (_Beliefs)   delete _Beliefs;
     if (s._Beliefs)
-      _Beliefs = new gDPVector<T>(*s._Beliefs);
+      _Beliefs = new gDPVector<gNumber>(*s._Beliefs);
     else
       _Beliefs = 0;
     if (_Regret)   delete _Regret;
     if (s._Regret)
-      _Regret = new gDPVector<T>(*s._Regret);
+      _Regret = new gDPVector<gNumber>(*s._Regret);
     else
       _Regret = 0;
   }
@@ -315,109 +265,3 @@ BehavSolution<T>& BehavSolution<T>::operator=(const BehavSolution<T> &s)
   return *this;
 }
     
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator=(const BehavProfile<T>& v)
-{ 
-  Invalidate(); 
-  BehavProfile<T>::operator=(v);
-  return *this;
-}
-
-template <class T>
-BehavSolution<T>& BehavSolution<T>::operator=(const gDPVector<T>& v)
-{ 
-  Invalidate(); 
-  gDPVector<T>::operator=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator=(const gPVector<T>& v)
-{    
-  assert(0);
-  Invalidate();
-  gDPVector<T>::operator=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator=(const gVector<T>& v)
-{
-  assert(0);
-  Invalidate();
-  gDPVector<T>::operator=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator=(T x)
-{ 
-  assert(0);
-  Invalidate();
-  gDPVector<T>::operator=(x);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator+=(const gDPVector<T>& v)
-{ 
-  Invalidate(); 
-  gDPVector<T>::operator+=(v); 
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator+=(const gPVector<T>& v)
-{
-  assert(0);
-  Invalidate(); 
-  gPVector<T>::operator+=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator+=(const gVector<T>& v)
-{
-  assert(0); 
-  Invalidate();
-  gVector<T>::operator+=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator-=(const gDPVector<T>& v)
-{ 
-  Invalidate();
-  gDPVector<T>::operator-=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator-=(const gPVector<T>& v)
-{
-  assert(0);
-  Invalidate();
-  gPVector<T>::operator-=(v);
-  return *this;
-}
-
-template <class T> 
-BehavSolution<T>& BehavSolution<T>::operator-=(const gVector<T>& v)
-{ 
-  assert(0);
-  Invalidate();
-  gVector<T>::operator-=(v);
-  return *this;
-}
-
-template <class T> BehavSolution<T>& BehavSolution<T>::operator*=(T x)
-{ 
-  Invalidate();
-  gDPVector<T>::operator*=(x);
-  return *this;
-}
-
-
-
-
-

@@ -13,24 +13,24 @@
 
 #include "efgpure.h"
 
-template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
-				    gList<BehavSolution<T> > &eqs)
+int FindPureNash(const Efg &efg, const EFSupport &sup,
+		 gList<BehavSolution> &eqs)
 {
   int index;
-  EfgContIter<T> citer(sup);
-  gPVector<T> probs(efg.NumInfosets());
+  EfgContIter<double> citer(sup);
+  gPVector<double> probs(efg.NumInfosets());
 
   do  {
     int flag = 1;
     citer.GetProfile().InfosetProbs(probs);
 
-    EfgIter<T> eiter(citer);
+    EfgIter<double> eiter(citer);
 
     for (int pl = 1; flag && pl <= efg.NumPlayers(); pl++)  {
-      T current = citer.Payoff(pl);
+      double current = citer.Payoff(pl);
       for (int iset = 1; flag && iset <= efg.Players()[pl]->NumInfosets();
 	         iset++)  {
-      	if ((T) probs(pl, iset) == (T) 0)   continue;
+      	if (probs(pl, iset) == 0)   continue;
 	      Infoset *s = efg.Players()[pl]->Infosets()[iset];
        	for (int act = 1; act <= s->NumActions(); act++)  {
 	        eiter.Next(pl, iset);
@@ -43,17 +43,17 @@ template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
     }
 
     if (flag)  {
-      BehavProfile<T> temp(efg);
+      BehavProfile<double> temp(efg);
       // zero out all the entries, since any equlibria are pure
-      ((gVector<T> &) temp).operator=((T) 0);
-      const PureBehavProfile<T> &profile = citer.GetProfile();
+      ((gVector<double> &) temp).operator=(0);
+      const PureBehavProfile<double> &profile = citer.GetProfile();
       for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
 	      for (int iset = 1; iset <= efg.Players()[pl]->NumInfosets();
 	           iset++)
-	        temp(pl, iset, profile.Get(efg.Players()[pl]->Infosets()[iset])->GetNumber()) = (T) 1;
+	        temp(pl, iset, profile.Get(efg.Players()[pl]->Infosets()[iset])->GetNumber()) = 1;
       }
 
-      index = eqs.Append(BehavSolution<T>(temp, EfgAlg_PURENASH));
+      index = eqs.Append(BehavSolution(temp, EfgAlg_PURENASH));
       eqs[index].SetIsNash(T_YES);
     }
   }  while (citer.NextContingency());
@@ -70,7 +70,7 @@ template <class T> int FindPureNash(const Efg &efg, const EFSupport &sup,
 
 template <class T>
 int EfgPSNEBySubgame<T>::SolveSubgame(const Efg &E, const EFSupport &sup,
-				      gList<BehavSolution<T> > &solns)
+				      gList<BehavSolution> &solns)
 {
   FindPureNash(E, sup, solns);
 

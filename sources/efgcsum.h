@@ -58,7 +58,7 @@ public:
   
   void GetProfile(gDPVector<T> &v, const BFS<T> &sol,
 		  const Node *n, int s1,int s2) const;
-  void GetSolutions(gList<BehavSolution<T> > &) const;
+  void GetSolutions(gList<BehavSolution> &) const;
 };
 
 
@@ -70,7 +70,7 @@ template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
     CSSeqFormParams params;
 
     int SolveSubgame(const Efg &, const EFSupport &,
-		     gList<BehavSolution<T> > &);
+		     gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:

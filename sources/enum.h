@@ -43,10 +43,9 @@ private:
   int rows,cols,level;
   long count,npivots;
   double time;
-  gList<MixedSolution<T> > solutions;
+  gList<MixedSolution> solutions;
 
   bool EqZero(T x) const;
-//  void AddSolution(const gPVector<T> &s);
   
 public:
   EnumModule(const Nfg &N, const EnumParams &p, const NFSupport &s); 
@@ -58,7 +57,7 @@ public:
   
   EnumParams &Parameters(void);
 
-  const gList<MixedSolution<T> > &GetSolutions(void) const;
+  const gList<MixedSolution> &GetSolutions(void) const;
 };
 
 

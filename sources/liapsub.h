@@ -18,7 +18,7 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
     BehavProfile<gNumber> start;
 
     int SolveSubgame(const Efg &, const EFSupport &,
-		      gList<BehavSolution<double> > &);
+		      gList<BehavSolution> &);
     EfgAlgType AlgorithmID() const { return EfgAlg_NLIAPSUB; }    
 
   public:

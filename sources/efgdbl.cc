@@ -15,12 +15,6 @@ template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
 template class PureBehavProfile<double>;
 
-#include "behavsol.imp"
-
-template class BehavSolution<double>;
-template gOutput &operator<<(gOutput &, const BehavSolution<double> &);
-
-
 #include "efgiter.imp"
 
 template class EfgIter<double>;
@@ -37,9 +31,6 @@ template class gArray<BehavNode<double> *>;
 
 template class gList<BehavProfile<double> >;
 template class gNode<BehavProfile<double> >;
-
-template class gList<BehavSolution<double> >;
-template class gNode<BehavSolution<double> >;
 
 
 

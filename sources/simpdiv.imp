@@ -450,7 +450,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
       add = true;
     if(add)
     {
-      index=solutions.Append(MixedSolution<T>(profile, NfgAlg_SIMPDIV));
+      index=solutions.Append(MixedSolution(profile, NfgAlg_SIMPDIV));
       if(params.status.Get() != 1) {
 	solutions[index].IsNash();
       }

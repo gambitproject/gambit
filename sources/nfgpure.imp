@@ -13,9 +13,7 @@
 #include "glist.h"
 #include "mixed.h"
 
-template <class T> int FindPureNash(const Nfg &N,
-				    const NFSupport &S,
-				    gList<MixedSolution<T> > &eqs)
+int FindPureNash(const Nfg &N, const NFSupport &S, gList<MixedSolution> &eqs)
 {
   int index;
   NfgContIter citer(S);
@@ -27,10 +25,10 @@ template <class T> int FindPureNash(const Nfg &N,
     NfgIter niter(citer);
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
-      T current = N.Payoff(citer.GetOutcome(), pl).Evaluate(values);
+      double current = N.Payoff(citer.GetOutcome(), pl).Evaluate(values);
       for (int i = 1; i <= S.NumStrats(pl); i++)  {
 	niter.Next(pl);
-	if ((T) N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > current)  {
+	if (N.Payoff(niter.GetOutcome(), pl).Evaluate(values) > current)  {
 	  flag = 0;
 	  break;
 	}
@@ -38,14 +36,14 @@ template <class T> int FindPureNash(const Nfg &N,
     }
     
     if (flag)  {
-      MixedProfile<T> temp(N);
+      MixedProfile<double> temp(N);
       // zero out all the entries, since any equlibria are pure
-      ((gVector<T> &) temp).operator=((T) 0);
+      ((gVector<double> &) temp).operator=(0);
       gArray<int> profile = citer.Get();
       for (int i = 1; i <= profile.Length(); i++)
-	temp(i, profile[i]) = (T) 1;
+	temp(i, profile[i]) = 1;
 
-      index = eqs.Append(MixedSolution<T>(temp, NfgAlg_PURENASH));
+      index = eqs.Append(MixedSolution(temp, NfgAlg_PURENASH));
       eqs[index].SetIsNash(T_YES);
     }
   }  while (citer.NextContingency());

@@ -55,7 +55,7 @@ public:
   long NumPivots(void) const;
   double Time(void) const;
   
-  void GetSolutions(gList<MixedSolution<T> > &) const;
+  void GetSolutions(gList<MixedSolution > &) const;
 };
 
 #endif    // NFGCSUM_H

@@ -12,7 +12,7 @@
 #include "behav.h"
 #include "gambitio.h"
 #include "gstring.h"
-
+#include "gnumber.h"
 
 typedef enum 
 {
@@ -37,28 +37,27 @@ void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
 
 
 
-template <class T> class BehavSolution : public BehavProfile<T>  {
+class BehavSolution : public BehavProfile<gNumber>  {
 protected:
   EfgAlgType _Creator;
-  TriState _IsNash;
-  TriState _IsSubgamePerfect;
-  TriState _IsSequential;
-  T _Epsilon;
-  T _GobitLambda;
-  T _GobitValue;
-  T _LiapValue;
-  gDPVector<T> *_Beliefs;
-  gDPVector<T> *_Regret;
+  mutable TriState _IsNash;
+  mutable TriState _IsSubgamePerfect;
+  mutable TriState _IsSequential;
+  gNumber _Epsilon;
+  gNumber _GobitLambda;
+  gNumber _GobitValue;
+  mutable gNumber _LiapValue;
+  mutable gDPVector<gNumber> *_Beliefs;
+  mutable gDPVector<gNumber> *_Regret;
   unsigned int _Id;
 
-  void EvalEquilibria(void);
+  void EvalEquilibria(void) const;
 
 public:
-  BehavSolution(const Efg &);
-  BehavSolution(const Efg &, const gDPVector<T> &);
-  BehavSolution(const Efg &, const EFSupport &);
-  BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
-  BehavSolution(const BehavSolution<T> &);
+  BehavSolution(const BehavProfile<double> &, EfgAlgType creator = EfgAlg_USER);
+  BehavSolution(const BehavProfile<gRational> &, EfgAlgType creator = EfgAlg_USER);
+  BehavSolution(const BehavProfile<gNumber> &, EfgAlgType creator = EfgAlg_USER);
+  BehavSolution(const BehavSolution &);
   virtual ~BehavSolution();
 
   unsigned int Id(void) const;
@@ -74,48 +73,33 @@ public:
   void SetIsSequential(TriState);
   TriState IsSequential(void) const; // Is it Sequential? Y/N/DK
 
-  void SetEpsilon(T value);
-  T Epsilon(void) const; // epsilon for zero tolerance
+  void SetEpsilon(gNumber value);
+  gNumber Epsilon(void) const; // epsilon for zero tolerance
 
-  void SetGobit(T lambda, T value);
-  T GobitLambda(void) const; // lambda from gobit alg
-  T GobitValue(void) const; // objective function from gobit alg
-  void SetLiap(T value);
-  T LiapValue(void) const; // liapunov function value (to test for Nash)
-  const gDPVector<T> &Beliefs(void);
+  void SetGobit(gNumber lambda, gNumber value);
+  gNumber GobitLambda(void) const; // lambda from gobit alg
+  gNumber GobitValue(void) const; // objective function from gobit alg
+  void SetLiap(gNumber value);
+  gNumber LiapValue(void) const; // liapunov function value (to test for Nash)
+  const gDPVector<gNumber> &Beliefs(void) const;
      // Belief vector, if a sequential equilibrium
 
-  const gDPVector<T> &Regret(void);
+  const gDPVector<gNumber> &Regret(void) const;
 	 
-  bool Equals(const BehavProfile<T> &) const;
-  bool operator==(const BehavSolution<T> &) const;
+  bool Equals(const BehavProfile<double> &s) const;
+  bool operator==(const BehavSolution &) const;
   void Dump(gOutput& f) const;
 
   void Invalidate(void);
 
-  T& operator[](int);
-  const T& operator[](int) const;
-  T& operator()(int, int, int);
-  const T& operator()(int, int, int) const;
+  gNumber& operator[](int);
+  const gNumber& operator[](int) const;
+  gNumber& operator()(int, int, int);
+  const gNumber& operator()(int, int, int) const;
 
-  BehavSolution<T>& operator=(const BehavSolution<T> &);
-  BehavSolution<T>& operator=(const BehavProfile<T>&);
-  BehavSolution<T>& operator=(const gDPVector<T>&);
-  BehavSolution<T>& operator=(const gPVector<T>&);
-  BehavSolution<T>& operator=(const gVector<T>&);
-  BehavSolution<T>& operator=(T);
-  
-  BehavSolution<T>& operator+=(const gDPVector<T>&);
-  BehavSolution<T>& operator+=(const gPVector<T>&);
-  BehavSolution<T>& operator+=(const gVector<T>&);
-  BehavSolution<T>& operator-=(const gDPVector<T>&);
-  BehavSolution<T>& operator-=(const gPVector<T>&);
-  BehavSolution<T>& operator-=(const gVector<T>&);
-  BehavSolution<T>& operator*=(T);
+  BehavSolution& operator=(const BehavSolution &);
 };
 
-#ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &);
-#endif
+gOutput &operator<<(gOutput &f, const BehavSolution &);
 
 #endif    // BEHAVSOL_H

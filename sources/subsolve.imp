@@ -11,7 +11,7 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
+void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution> &solns,
 						gList<EFOutcome *> &values)
 {
   int i;
@@ -29,7 +29,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
   subrootvalues.Append(gArray<EFOutcome *>(subroots.Length()));
   
   for (i = 1; i <= subroots.Length(); i++)  {
-    gList<BehavSolution<T> > subsolns;
+    gList<BehavSolution> subsolns;
     gList<EFOutcome *> subvalues;
     
     FindSubgames(subroots[i], subsolns, subvalues);
@@ -50,7 +50,8 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
       for (int subsoln = 1; subsoln <= subsolns.Length() &&
 	   (max_solns == 0 || newsolns.Length() <= max_solns); subsoln++)  {
 	BehavProfile<T> bp(thissolns[soln]);
-	bp += subsolns[subsoln];
+	for (int j = 1; j <= bp.Length(); j++)
+	  bp[j] += subsolns[subsoln][j];
 	newsolns.Append(bp);
 	
 	newsubrootvalues.Append(subrootvalues[soln]);
@@ -83,7 +84,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
     
-    gList<BehavSolution<T> > sol;
+    gList<BehavSolution> sol;
 
     EFSupport subsupport(foo);
     // here, we build the support for the subgame
@@ -225,7 +226,7 @@ void SubgameSolver<T>::ViewNormal(const Nfg &, NFSupport *&)
 
 template <class T>
 void SubgameSolver<T>::SelectSolutions(int, const Efg &,
-				       gList<BehavSolution<T> > &)
+				       gList<BehavSolution> &)
 { }
 
 template <class T> 

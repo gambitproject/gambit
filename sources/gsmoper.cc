@@ -156,8 +156,7 @@ Portion* GSM_Add_Mixed(Portion** param)
     return new ErrorPortion("Support mismatch");
 
   Portion *result = param[0]->ValCopy();
-  (* (MixedSolution<gNumber>*) ((MixedPortion*) result)->Value()) +=
-    (* (MixedSolution<gNumber>*) ((MixedPortion*) param[1])->Value());
+  *((MixedPortion*) result)->Value() += *((MixedPortion*) param[1])->Value();
   return result;
 }
 
@@ -168,8 +167,7 @@ Portion* GSM_Add_Behav(Portion** param)
     return new ErrorPortion("Support mismatch");
 
   Portion *result = param[0]->ValCopy();
-  (* (BehavSolution<gNumber>*) ((BehavPortion*) result)->Value()) +=
-    (* (BehavSolution<gNumber>*) ((BehavPortion*) param[1])->Value());
+  *((BehavPortion*) result)->Value() += *((BehavPortion*) param[1])->Value();
   return result;
 }
 
@@ -238,8 +236,7 @@ Portion* GSM_Subtract_Mixed(Portion** param)
     return new ErrorPortion("Support mismatch");
 
   Portion *result = param[0]->ValCopy();
-  (* (MixedSolution<gNumber>*) ((MixedPortion*) result)->Value()) -=
-    (* (MixedSolution<gNumber>*) ((MixedPortion*) param[1])->Value());
+  *((MixedPortion*) result)->Value() -= *((MixedPortion*) param[1])->Value();
   return result;
 }
 
@@ -251,8 +248,7 @@ Portion* GSM_Subtract_Behav(Portion** param)
     return new ErrorPortion("Support mismatch");
 
   Portion *result = param[0]->ValCopy();
-  (* (BehavSolution<gNumber>*) ((BehavPortion*) result)->Value()) -=
-    (* (BehavSolution<gNumber>*) ((BehavPortion*) param[1])->Value());
+  *((BehavPortion*) result)->Value() -= *((BehavPortion*) param[1])->Value();
   return result;
 }
 
@@ -280,16 +276,14 @@ Portion* GSM_Multiply_Number(Portion** param)
 Portion* GSM_Multiply_Mixed(Portion** param)
 {
   Portion *result = param[1]->ValCopy();
-  (* (MixedSolution<gNumber>*) ((MixedPortion*) result)->Value()) *=
-    ((NumberPortion*) param[0])->Value();
+  *((MixedPortion*) result)->Value() *= ((NumberPortion*) param[0])->Value();
   return result;
 }
 
 Portion* GSM_Multiply_Behav(Portion** param)
 {
   Portion *result = param[1]->ValCopy();
-  (* (BehavSolution<gNumber>*) ((BehavPortion*) result)->Value()) *=
-    ((NumberPortion*) param[0])->Value();
+  *((BehavPortion*) result)->Value() *= ((NumberPortion*) param[0])->Value();
   return result;
 }
 
@@ -605,8 +599,8 @@ Portion* GSM_Equal_Behav(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolPortion
-    ((*(BehavSolution<gNumber> *) ((BehavPortion *) param[0])->Value()) ==
-     (*(BehavSolution<gNumber> *) ((BehavPortion *) param[1])->Value()));
+    (*((BehavPortion *) param[0])->Value() ==
+     *((BehavPortion *) param[1])->Value());
 }
 
 Portion *GSM_Equal_Nfg(Portion** param)
@@ -668,8 +662,8 @@ Portion* GSM_Equal_Mixed(Portion** param)
  			       param[1]->Spec().Type );
   }
   return new BoolPortion
-    ((*(MixedSolution<gNumber> *) ((MixedPortion *) param[0])->Value()) ==
-     (*(MixedSolution<gNumber> *) ((MixedPortion *) param[1])->Value()));
+    (*((MixedPortion *) param[0])->Value() ==
+     *((MixedPortion *) param[1])->Value());
 }
 
 
@@ -746,8 +740,8 @@ Portion* GSM_NotEqual_EfSupport(Portion** param)
 Portion* GSM_NotEqual_Behav(Portion** param)
 {
   return new BoolPortion
-    ((*(BehavSolution<gNumber> *) ((BehavPortion *) param[0])->Value()) !=
-     (*(BehavSolution<gNumber> *) ((BehavPortion *) param[1])->Value()));
+    (*((BehavPortion *) param[0])->Value() !=
+     *((BehavPortion *) param[1])->Value());
 }
 
 Portion* GSM_NotEqual_NfPlayer(Portion** param)
@@ -784,8 +778,8 @@ Portion* GSM_NotEqual_NfSupport(Portion** param)
 Portion* GSM_NotEqual_Mixed(Portion** param)
 {
   return new BoolPortion
-    ((*(MixedSolution<gNumber> *) ((MixedPortion *) param[0])->Value()) !=
-     (*(MixedSolution<gNumber> *) ((MixedPortion *) param[1])->Value()));
+    (*((MixedPortion *) param[0])->Value() !=
+     *((MixedPortion *) param[1])->Value());
 }
 
 
@@ -1668,8 +1662,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 Portion *GSM_ListForm_Behav(Portion **param)
 {
-  BehavSolution<gNumber> *P =
-    (BehavSolution<gNumber>*) ((BehavPortion*) param[0])->Value();
+  BehavSolution *P = ((BehavPortion*) param[0])->Value();
   return gDPVectorToList(* (gDPVector<gNumber>*) P);
 }
 
@@ -1681,8 +1674,7 @@ Portion *GSM_ListForm_Mixed(Portion **param)
   Portion* p2;
   Portion* por;
 
-  MixedSolution<gNumber> *P =
-    (MixedSolution<gNumber>*) ((MixedPortion*) param[0])->Value();
+  MixedSolution *P = ((MixedPortion*) param[0])->Value();
 
   por = new ListValPortion();
 
@@ -1711,7 +1703,7 @@ Portion *GSM_Mixed_Nfg(Portion **param)
   Portion* p2;
 
   Nfg &N = * ((NfgPortion*) param[0])->Value();
-  MixedSolution<gNumber> *P = new MixedSolution<gNumber>(N);
+  MixedSolution *P = new MixedSolution(MixedProfile<gNumber>(N));
 
   if(((ListPortion*) param[1])->Length() != N.NumPlayers())
   {
@@ -1767,7 +1759,7 @@ Portion *GSM_Behav_Efg(Portion **param)
   Portion* p3;
 
   Efg &E = *((EfgPortion*) param[0])->Value();
-  BehavSolution<gNumber> *P = new BehavSolution<gNumber>(E);
+  BehavSolution *P = new BehavSolution(BehavProfile<gNumber>(E));
 
   if(((ListPortion*) param[1])->Length() != E.NumPlayers())
   {
@@ -1845,8 +1837,7 @@ Portion* GSM_Read_Mixed(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner =
-    new NfgValPortion(& ((MixedSolution<gNumber>*)
-		       ((MixedPortion*) param[1])->Value())->Game());
+    new NfgValPortion(&(((MixedPortion*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -1865,8 +1856,7 @@ Portion* GSM_Read_Mixed(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Mixed_Nfg(sub_param);
-  (*((MixedSolution<gNumber>*) ((MixedPortion*) param[1])->Value())) =
-    (*((MixedSolution<gNumber>*) ((MixedPortion*) p)->Value()));
+  *((MixedPortion *) param[1])->Value() = *((MixedPortion*) p)->Value();
 
   delete owner;
   delete list;
@@ -1883,8 +1873,7 @@ Portion* GSM_Read_Behav(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new EfgValPortion(&((BehavSolution<gNumber>*)
-		       ((BehavPortion*) param[1])->Value())->Game());
+    new EfgValPortion(&(((BehavPortion*) param[1])->Value())->Game());
 
   sub_param[0] = param[1];
   sub_param[1] = 0;
@@ -1903,8 +1892,7 @@ Portion* GSM_Read_Behav(Portion** param)
   sub_param[0] = owner;
   sub_param[1] = list;
   Portion* p = GSM_Behav_Efg(sub_param);
-  (*((BehavSolution<gNumber>*) ((BehavPortion*) param[1])->Value())) =
-    (*((BehavSolution<gNumber>*) ((BehavPortion*) p)->Value()));
+  *((BehavPortion*) param[1])->Value() = *((BehavPortion*) p)->Value();
 
   delete owner;
   delete list;

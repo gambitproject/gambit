@@ -11,6 +11,7 @@
 #include "mixed.h"
 #include "gambitio.h"
 #include "gstring.h"
+#include "gnumber.h"
 
 typedef enum 
 {
@@ -31,30 +32,29 @@ void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
 
 
 
-template <class T> class MixedSolution : public MixedProfile<T>  {
+class MixedSolution : public MixedProfile<gNumber>  {
 protected:
   NfgAlgType _Creator;
-  TriState _IsNash;
-  TriState _IsPerfect;
-  TriState _IsProper;
-  T _Epsilon;
-  T _GobitLambda;
-  T _GobitValue;
-  T _LiapValue;
-  gArray<T> _Payoff;
+  mutable TriState _IsNash;
+  mutable TriState _IsPerfect;
+  mutable TriState _IsProper;
+  gNumber _Epsilon;
+  gNumber _GobitLambda;
+  gNumber _GobitValue;
+  mutable gNumber _LiapValue;
+  gArray<gNumber> _Payoff;
   unsigned int _Id;
   
-  void EvalEquilibria();
+  void EvalEquilibria(void) const;
   
 public:
-  MixedSolution(const Nfg &);
-  MixedSolution(const Nfg &, const NFSupport &);
-  MixedSolution(const Nfg &, const gPVector<T> &);
-  MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
-  MixedSolution(const MixedSolution<T> &);
+  MixedSolution(const MixedProfile<double> &, NfgAlgType creator = NfgAlg_USER);
+  MixedSolution(const MixedProfile<gRational> &, NfgAlgType creator = NfgAlg_USER);
+  MixedSolution(const MixedProfile<gNumber> &, NfgAlgType creator = NfgAlg_USER);
+  MixedSolution(const MixedSolution &);
   
   virtual ~MixedSolution();
-  
+
   unsigned int Id(void) const;
   void SetId(unsigned int );
   void SetCreator(NfgAlgType);
@@ -68,45 +68,34 @@ public:
   void SetIsProper(TriState);
   TriState IsProper(void) const; //Is it Proper? Y/N/DK
   
-  void SetEpsilon(T value);
-  T Epsilon(void) const; // epsilon for zero tolerance
+  void SetEpsilon(gNumber value);
+  gNumber Epsilon(void) const; // epsilon for zero tolerance
   
-  void SetGobit(T lambda, T value);
-  T GobitLambda(void) const; // lambda from gobit alg
-  T GobitValue(void) const; // objective function from gobit alg
-  void SetLiap(T value);
-  T LiapValue(void) const; // liapunov function value (to test for Nash)
+  void SetGobit(gNumber lambda, gNumber value);
+  gNumber GobitLambda(void) const; // lambda from gobit alg
+  gNumber GobitValue(void) const; // objective function from gobit alg
+  void SetLiap(gNumber value);
+  gNumber LiapValue(void) const; // liapunov function value (to test for Nash)
   
-  bool Equals(const MixedProfile<T> &) const;
-  bool operator==(const MixedSolution<T> &) const;
+  bool Equals(const MixedProfile<double> &s) const;
+  bool operator==(const MixedSolution &) const;
   void Dump(gOutput& f) const;
   
   
   void Invalidate();
   
-  T& operator[](int);
-  const T& operator[](int) const;
-  T& operator()(int, int);
-  const T& operator()(int, int) const;
+  gNumber& operator[](int);
+  const gNumber& operator[](int) const;
+  gNumber& operator()(int, int);
+  const gNumber& operator()(int, int) const;
   
 // for now, we may safely use the predefined assignment operator
 // for MixedProfile.  This must be written if dynamically allocated
 // members are added!!!!!!
-  
-  MixedSolution<T> &operator=(const MixedProfile<T>&);
-  MixedSolution<T> &operator=(const gPVector<T>&);
-  MixedSolution<T> &operator=(const gVector<T>&);
-  MixedSolution<T> &operator=(T);
-  MixedSolution<T> &operator+=(const gPVector<T>&);
-  MixedSolution<T> &operator+=(const gVector<T>&);
-  MixedSolution<T> &operator-=(const gPVector<T>&);
-  MixedSolution<T> &operator-=(const gVector<T>&);
-  MixedSolution<T> &operator*=(T);
+  MixedSolution &operator=(const MixedSolution &);
 };
 
 
-#ifndef __BORLANDC__
-template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &);
-#endif
+gOutput &operator<<(gOutput &f, const MixedSolution &);
 
 #endif    // MIXEDSOL_H

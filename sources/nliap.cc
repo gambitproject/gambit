@@ -1,7 +1,7 @@
 //
 // FILE: nliap.cc -- Implementation of Liapunov algorithm for normal forms
 //
-// @(#)nliap.cc	2.3 19 Jul 1997
+// $Id$
 //
 
 #include "nliap.h"
@@ -162,7 +162,7 @@ extern bool DFP(gPVector<double> &p,
 
 bool Liap(const Nfg &N, NFLiapParams &params,
 	  const MixedProfile<gNumber> &start,
-	  gList<MixedSolution<double> > &solutions,
+	  gList<MixedSolution> &solutions,
 	  long &nevals, long &niters)
 {
   MixedProfile<double> p(start.Game(), start.Support());
@@ -203,7 +203,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	if(params.trace>0)
 	  *params.tracefile << p;
 
-	int index = solutions.Append(MixedSolution<double>(p, NfgAlg_LIAP));
+	int index = solutions.Append(MixedSolution(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
 	if (!params.status.Get()) {
 	  solutions[index].SetIsNash(T_YES);
