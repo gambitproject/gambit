@@ -15,16 +15,16 @@ typedef enum {
   efgSTANDARD_ONE = 0, efgSTANDARD_TWO = 1, efgSTANDARD_ALL = 2
 } efgStandardNum;
 
-class dialogEfgSolveStandard : public guiAutoDialog {
+class dialogEfgSolveStandard : public wxDialog {
 private:
-  wxRadioBox *m_standardType, *m_standardNum, *m_precision;
-  wxTextCtrl *m_description;
+  wxRadioBox *m_equilibriumType, *m_precision;
+  wxTextCtrl *m_algorithm, *m_details;
   const Efg::Game &m_efg;
+
+  void UpdateFields(void);
 
   // Button event handler
   void OnChanged(wxCommandEvent &);
-
-  const char *HelpString(void) const { return "EFG Standard Solutions"; }
 
 public:
   dialogEfgSolveStandard(wxWindow *p_parent, const Efg::Game &p_efg);

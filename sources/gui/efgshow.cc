@@ -2027,7 +2027,6 @@ void EfgShow::OnToolsSupportReachable(wxCommandEvent &)
 
 void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 {
-#ifdef COMMENTED_OUT
   // This is a guard against trying to solve the "trivial" game.
   // Most of the GUI code assumes information sets exist.
   if (m_efg.NumPlayerInfosets() == 0)  return;
@@ -2049,6 +2048,7 @@ void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
     return;
   }
 
+#ifdef COMMENTED_OUT
   guiEfgSolution *solver = 0;
 
   wxBeginBusyCursor();

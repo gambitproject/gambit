@@ -18,213 +18,183 @@
 //                dialogEfgSolveStandard: Member functions
 //========================================================================
 
-BEGIN_EVENT_TABLE(dialogEfgSolveStandard, guiAutoDialog)
-  EVT_RADIOBOX(idTYPE_RADIOBOX, dialogEfgSolveStandard::OnChanged)
-  EVT_RADIOBOX(idNUM_RADIOBOX, dialogEfgSolveStandard::OnChanged)
+const int idTYPE_CHOICE = 1000;
+
+BEGIN_EVENT_TABLE(dialogEfgSolveStandard, wxDialog)
+  EVT_RADIOBOX(idTYPE_CHOICE, dialogEfgSolveStandard::OnChanged)
 END_EVENT_TABLE()
 
 dialogEfgSolveStandard::dialogEfgSolveStandard(wxWindow *p_parent,
 					       const Efg::Game &p_efg)
-  : guiAutoDialog(p_parent, "Standard Solution"), m_efg(p_efg)
+  : wxDialog(p_parent, -1, "Standard Equilibrium Algorithms"), m_efg(p_efg)
 {
-  wxString standardType = "Nash", standardNum = "One", precision = "Float";
-  wxConfig config("Gambit");
-  config.Read("Solutions/Efg-Standard-Type", &standardType);
-  config.Read("Solutions/Efg-Standard-Num", &standardNum);
-  config.Read("Solutions/Efg-Standard-Precision", &precision);
+  wxString typeChoices[] = { "One Nash equilibrium",
+			     "Two Nash equilibria",
+			     "All Nash equilibria",
+			     "One subgame-perfect Nash equilibrium",
+			     "Two subgame-perfect Nash equilibria",
+			     "All subgame-perfect Nash equilibria",
+			     "One sequential Nash equilibrium",
+			     "Two sequential Nash equilibria",
+			     "All sequential Nash equilibria" };
+  m_equilibriumType = new wxRadioBox(this, idTYPE_CHOICE, "What to compute",
+				     wxDefaultPosition, wxDefaultSize,
+				     9, typeChoices, 1, wxRA_SPECIFY_COLS);
 
-  wxBoxSizer *radioSizer = new wxBoxSizer(wxHORIZONTAL);
-
-  wxString typeChoices[] = { "Nash", "Subgame Perfect", "Sequential" };
-  m_standardType = new wxRadioBox(this, idTYPE_RADIOBOX, "Type",
-				  wxDefaultPosition, wxDefaultSize,
-				  3, typeChoices, 1, wxRA_SPECIFY_COLS);
-  m_standardType->SetStringSelection(standardType);
-  radioSizer->Add(m_standardType, 0, wxALL, 5);
-
-  wxString numChoices[] = { "One", "Two", "All" };
-  m_standardNum = new wxRadioBox(this, idNUM_RADIOBOX, "Number",
-				 wxDefaultPosition, wxDefaultSize,
-				 3, numChoices, 1, wxRA_SPECIFY_COLS);
-  m_standardNum->SetStringSelection(standardNum);
-  radioSizer->Add(m_standardNum, 0, wxALL, 5);
-
-  wxString precisionChoices[] = { "Float", "Rational" };
+  wxString precisionChoices[] = { "Use floating-point arithmetic (faster)",
+				  "Use rational numbers (more precise)" };
   m_precision = new wxRadioBox(this, -1, "Precision",
 			       wxDefaultPosition, wxDefaultSize,
 			       2, precisionChoices, 1, wxRA_SPECIFY_COLS);
-  m_precision->SetStringSelection(precision);
-  radioSizer->Add(m_precision, 0, wxALL, 5);
-  
-  m_description = new wxTextCtrl(this, -1);
-  m_description->Enable(false);
+
+  wxBoxSizer *algorithmSizer = new wxBoxSizer(wxHORIZONTAL);
+  algorithmSizer->Add(new wxStaticText(this, wxID_STATIC, "Algorithm"),
+		      0, wxALL | wxCENTER, 5);
+  m_algorithm = new wxTextCtrl(this, -1);
+  m_algorithm->Enable(false);
+  algorithmSizer->Add(m_algorithm, 1, wxALL | wxEXPAND, 5);
+
+  wxBoxSizer *detailsSizer = new wxBoxSizer(wxHORIZONTAL);
+  detailsSizer->Add(new wxStaticText(this, wxID_STATIC, "Details"),
+		    0, wxALL | wxCENTER, 5);
+  m_details = new wxTextCtrl(this, -1, "", wxDefaultPosition, wxDefaultSize,
+			     wxTE_MULTILINE);
+  m_details->SetSize(m_algorithm->GetSize().GetWidth(),
+		     2 * m_algorithm->GetSize().GetHeight());
+  m_details->Enable(false);
+  detailsSizer->Add(m_details, 1, wxALL | wxEXPAND, 5);
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, wxID_CANCEL, "Cancel");
+  wxButton *helpButton = new wxButton(this, wxID_HELP, "Help");
+
+  wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+  buttonSizer->Add(okButton, 0, wxALL, 5);
+  buttonSizer->Add(cancelButton, 0, wxALL, 5);
+  buttonSizer->Add(helpButton, 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(radioSizer, 0, wxALL, 5);
-  topSizer->Add(m_description, 0, wxEXPAND | wxALL, 5);
-  topSizer->Add(m_buttonSizer, 0, wxCENTRE | wxALL, 5);
+  topSizer->Add(m_equilibriumType, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(m_precision, 0, wxALL | wxCENTER, 5);
+  topSizer->Add(algorithmSizer, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(detailsSizer, 0, wxEXPAND | wxALL, 5);
+  topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
 
-  wxCommandEvent event;
-  OnChanged(event);
   Layout();
+  UpdateFields();
 }
 
 dialogEfgSolveStandard::~dialogEfgSolveStandard()
 {
-  wxConfig config("Gambit");
-  config.Write("Solutions/Efg-Standard-Type",
-	       m_standardType->GetStringSelection());
-  config.Write("Solutions/Efg-Standard-Num",
-	       m_standardNum->GetStringSelection());
-  config.Write("Solutions/Efg-Standard-Precision",
-	       m_precision->GetStringSelection());
 }
 
 void dialogEfgSolveStandard::OnChanged(wxCommandEvent &)
 {
-  switch (m_standardType->GetSelection()) {
-  case 0:
-    switch (m_standardNum->GetSelection()) {
-    case 0:
-      if (IsPerfectRecall(m_efg)) {
-	if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
-	  m_description->SetValue("LpSolve[EFG]");
-	  m_precision->Enable(true);
-	}
-	else if (m_efg.NumPlayers() == 2) {
-	  m_description->SetValue("LcpSolve[EFG]");
-	  m_precision->Enable(true);
-	}
-	else {
-	  m_description->SetValue("SimpdivSolve[NFG]");
-	  m_precision->SetSelection(0);
-	  m_precision->Enable(false);
-	}
+  UpdateFields();
+}
+
+void dialogEfgSolveStandard::UpdateFields(void)
+{
+  switch (m_equilibriumType->GetSelection()) {
+  case 0:  // one Nash equilibrium
+  case 3:  // one subgame perfect equilibrium
+    if (IsPerfectRecall(m_efg)) {
+      if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
+	m_algorithm->SetValue("LpSolve[EFG]");
+	m_precision->Show(true);
+	m_details->SetValue("Uses linear programming on "
+			    "the associated sequence form.");
+      }
+      else if (m_efg.NumPlayers() == 2) {
+	m_algorithm->SetValue("LcpSolve[EFG]");
+	m_precision->Show(true);
+	m_details->SetValue("Uses linear complementarity algorithms on "
+			    "the associated sequence form.");
       }
       else {
-	m_description->SetValue("QreSolve[EFG]");
-	m_precision->SetSelection(0);
-	m_precision->Enable(false);
+	m_algorithm->SetValue("SimpdivSolve[NFG]");
+	m_precision->Show(false);
+	m_details->SetValue("Uses simplicial subdivision on the "
+			    "associated reduced normal form.  This "
+			    "algorithm uses floating-point arithmetic.");
       }
-      break;
-    case 1:
-      if (m_efg.NumPlayers() == 2) {
-	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(true);
-      }
-      else {
-	m_description->SetValue("LiapSolve[EFG]");
-	m_precision->SetSelection(0);
-	m_precision->Enable(false);
-      }
-      break;
-    case 2:
-      if (m_efg.NumPlayers() == 2) {
-	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(true);
-      }
-      else {
-	m_description->SetValue("PolEnumSolve[EFG]");
-	m_precision->SetSelection(1);
-	m_precision->Enable(false);
-      }
-      break;
+    }
+    else {
+      m_algorithm->SetValue("QreSolve[EFG]");
+      m_precision->Show(false);
+      m_details->SetValue("Uses agent logistic quantal response equilibrium "
+			  "correspondence tracing.  This "
+			  "algorithm uses floating-point arithmetic.");
     }
     break;
-  case 1:
-    switch (m_standardNum->GetSelection()) {
-    case 0:
-      if (IsPerfectRecall(m_efg)) {
-	if (m_efg.NumPlayers() == 2 && m_efg.IsConstSum()) {
-	  m_description->SetValue("LpSolve[EFG]");
-	  m_precision->Enable(true);
-	}
-	else if (m_efg.NumPlayers() == 2) {
-	  m_description->SetValue("LcpSolve[EFG]");
-	  m_precision->Enable(true);
-	}
-	else {
-	  m_description->SetValue("SimpdivSolve[NFG]");
-	  m_precision->SetSelection(0);
-	  m_precision->Enable(false);
-	}
-      }
-      else {
-	m_description->SetValue("QreSolve[EFG]");
-	m_precision->SetSelection(0);
-	m_precision->Enable(false);
-      }
-      break;
-    case 1:
-      if (m_efg.NumPlayers() == 2) {
-	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(true);
-      }
-      else {
-	m_description->SetValue("LiapSolve[EFG]");
-	m_precision->SetSelection(0);
-	m_precision->Enable(false);
-      }
-      break;
-    case 2:
-      if (m_efg.NumPlayers() == 2) {
-	m_description->SetValue("EnumMixedSolve[NFG]");
-	m_precision->Enable(true);
-      }
-      else {
-	m_description->SetValue("PolEnumSolve[EFG]");
-	m_precision->SetSelection(1);
-	m_precision->Enable(false);
-      }
-      break;
+  case 1:  // two Nash equilibria
+  case 4:  // two subgame perfect equilibria
+    if (m_efg.NumPlayers() == 2) {
+      m_algorithm->SetValue("EnumMixedSolve[NFG]");
+      m_precision->Show(true);
+      m_details->SetValue("Uses enumeration of mixed strategies "
+			  "on the associated normal form.");
+    }
+    else {
+      // Query: Should this be LiapSolve[NFG]?
+      m_algorithm->SetValue("LiapSolve[EFG]");
+      m_precision->Show(false);
+      m_details->SetValue("Uses Liapunov function minimization. "
+			  "Note: this algorithm is not guaranteed to find "
+			  "two equilibria. "
+			  "This algorithm uses floating-point arithmetic.");
     }
     break;
-  case 2:
-    switch (m_standardNum->GetSelection()) {
-    case 0:
-      m_description->SetValue("QreSolve[EFG]");
-      m_precision->SetSelection(0);
-      m_precision->Enable(false);
-      break;
-    case 1:
-    case 2:
-      m_description->SetValue("LiapSolve[EFG]");
-      m_precision->SetSelection(0);
-      m_precision->Enable(false);
-      break;
+  case 2:  // all Nash equilibria
+  case 5:  // all subgame perfect equilibria
+    if (m_efg.NumPlayers() == 2) {
+      m_algorithm->SetValue("EnumMixedSolve[NFG]");
+      m_precision->Show(true);
+      m_details->SetValue("Uses enumeration of mixed strategies "
+			  "on the associated normal form.");
     }
+    else {
+      m_algorithm->SetValue("PolEnumSolve[EFG]");
+      m_precision->Show(false);
+      m_details->SetValue("Uses enumeration of solutions to systems "
+			  "of polynomial equations and inequalities. "
+			  "This algorithm uses rational arithmetic.");
+    }
+  case 6:  // one sequential equilibrium
+      m_algorithm->SetValue("QreSolve[EFG]");
+      m_precision->Show(false);
+      m_details->SetValue("Uses agent logistic quantal response equilibrium "
+			  "correspondence tracing.  This "
+			  "algorithm uses floating-point arithmetic.");
+      break;
+  case 7:  // two sequential equilibria
+  case 8:  // all sequential equilibria
+    m_algorithm->SetValue("LiapSolve[EFG]");
+    m_precision->Show(false);
+    m_details->SetValue("Uses Liapunov function minimization. "
+			"Note: this algorithm is not guaranteed to find "
+			"two equilibria. "
+			"This algorithm uses floating-point arithmetic.");
+    break;
+  default:  // shouldn't happen; just clear entries if it does
+    m_algorithm->SetValue("");
+    m_details->SetValue("");
+    break;
   }
 }
 
 efgStandardType dialogEfgSolveStandard::Type(void) const
 {
-  switch (m_standardType->GetSelection()) {
-  case 0:
-    return efgSTANDARD_NASH;
-  case 1:
-    return efgSTANDARD_PERFECT;
-  case 2:
-    return efgSTANDARD_SEQUENTIAL;
-  default:
-    return efgSTANDARD_NASH;
-  }
+  return efgSTANDARD_NASH;
 }
 
 efgStandardNum dialogEfgSolveStandard::Number(void) const
 {
-  switch (m_standardNum->GetSelection()) {
-  case 0:
-    return efgSTANDARD_ONE;
-  case 1:
-    return efgSTANDARD_TWO;
-  case 2:
-    return efgSTANDARD_ALL;
-  default:
-    return efgSTANDARD_ALL;
-  }
+  return efgSTANDARD_ONE;
 }
 
