@@ -1,24 +1,16 @@
 #include "wx.h"
 #include "gstatus.h"
-
-class wxStatus:public gStatus, public wxFrame
+class wxStatus: public wxFrame,public gStatus
 {
 private:
-	// Stuff for sig
-	bool	sig;
-	static void cancel_func(wxButton &ob,wxEvent &ev)
-	{((wxStatus *)ob.GetClientData())->SetSignal();}
-	// stuff for progress
-	wxGauge *gauge;
-	wxTextWindow *twin;
-	wxButton *cancel;
 	int Width,Prec;
 	char Represent;
+	wxGauge *gauge;
+	wxTextWindow *twin;
+	bool sig;
+	static void button_proc(wxButton& but, wxCommandEvent& event);
 public:
-	// Constructor
-	wxStatus(const char *label=0,wxFrame *parent=0);
-	// Destructor
-	~wxStatus() {Show(FALSE);}
+	wxStatus(wxFrame *frame,const char *title="Progress", int x=300, int y=300, int w=300, int h=250);
 	// functions for gProgress::gOutput
 	int GetWidth(void) {return Width;}
 	gOutput &SetWidth(int w) {Width=w;return *this;}
@@ -36,15 +28,17 @@ public:
 	gOutput &operator<<(float x);
 	gOutput &operator<<(const char *x);
 	gOutput &operator<<(const void *x);
+
 	bool IsValid(void) const {return true;}
 	// functions for gProgress
-	void	SetProgress(double p) {gauge->SetValue((int)(p*100));wxYield();}
+	void	SetProgress(double p);
 	// functions for gSignal
 	void	SetSignal(void) {sig=true;}
 	bool Get(void) const {return sig;}
 	void Reset(void) {sig=false;}
 	// Window event handlers
-	void OnSize(int, int) {Layout();}
+	void OnSize(int w, int h);
+	Bool OnClose(void);
+	void OnActivate(Bool) {}
 };
-
 
