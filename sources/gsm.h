@@ -42,7 +42,7 @@ private:
   gGrowableStack< RefHashTable* >* _RefTableStack;
   FunctionHashTable*               _FuncTable;
 
-  Portion* _ResolveRef             ( Reference_Portion* p );
+  Portion* _ResolveRef             ( Portion* p );
   Portion* _ResolveRefWithoutError ( Reference_Portion* p );
 
   bool _UnaryOperation  ( OperationMode mode );
@@ -52,7 +52,7 @@ private:
   bool _BindCheck ( const gString& param_name ) const;
 
   bool     _VarIsDefined ( const gString& var_name ) const;
-  void     _VarDefine    ( const gString& var_name, Portion* p );
+  bool     _VarDefine    ( const gString& var_name, Portion* p );
   Portion* _VarValue     ( const gString& var_name ) const;
 
   static void _ErrorMessage

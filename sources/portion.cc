@@ -167,7 +167,7 @@ template <class T> T& numerical_Portion<T>::Value( void )
 { return *_Value; }
 
 template <class T> PortionType numerical_Portion<T>::Type( void ) const
-{ return porERROR; }
+{ return porUNKNOWN; }
 
 template <class T> Portion* numerical_Portion<T>::Copy( bool new_data ) const
 { 
@@ -608,7 +608,7 @@ void Reference_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 List_Portion::List_Portion( void )
 {
-  _DataType = porERROR;
+  _DataType = porUNKNOWN;
 }
 
 
@@ -619,7 +619,7 @@ List_Portion::List_Portion( const gBlock<Portion*>& value )
   int type_match;
   int result;
 
-  _DataType = porERROR;
+  _DataType = porUNKNOWN;
 
   for( i = 1, length = value.Length(); i <= length; i++ )
   {
@@ -641,11 +641,22 @@ gBlock<Portion*>& List_Portion::Value( void )
 PortionType List_Portion::Type( void ) const
 { return porLIST; }
 
+void List_Portion::SetDataType( PortionType data_type )
+{
+  assert( _DataType == porUNKNOWN );
+  _DataType = data_type;
+}
+
 PortionType List_Portion::DataType( void ) const
 { return _DataType; }
 
 Portion* List_Portion::Copy( bool new_data ) const
-{ return new List_Portion( _Value ); }
+{ 
+  Portion* p;
+  p = new List_Portion( _Value ); 
+  ( (List_Portion*) p )->_DataType = _DataType;
+  return p;
+}
 
 
 bool List_Portion::TypeCheck( Portion* item )
@@ -749,8 +760,7 @@ int List_Portion::Insert( Portion* item, int index )
   
   if( _Value.Length() == 0 )  // creating a new list
   {
-    if( item->Type() != porERROR && 
-       ( item->Type() == _DataType || _DataType == porERROR ) )
+    if( item->Type() == _DataType || _DataType == porUNKNOWN )
     {
       if( item->Type() == porLIST )
 	_DataType = ( (List_Portion*) item )->_DataType;
@@ -929,7 +939,7 @@ template <class T> NormalForm<T>& Nfg_Portion<T>::Value( void )
 { return (NormalForm<T>&) *_Value; }
 
 template <class T> PortionType Nfg_Portion<T>::Type( void ) const
-{ return porERROR; }
+{ return porUNKNOWN; }
 
 template <class T> Portion* Nfg_Portion<T>::Copy( bool new_data ) const
 { 
@@ -1028,7 +1038,7 @@ template <class T> ExtForm<T>& Efg_Portion<T>::Value( void )
 { return (ExtForm<T>&) *_Value; }
 
 template <class T> PortionType Efg_Portion<T>::Type( void ) const
-{ return porERROR; }
+{ return porUNKNOWN; }
 
 template <class T> Portion* Efg_Portion<T>::Copy( bool new_data ) const
 { 
@@ -1332,6 +1342,9 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
 
     if( type & porREFERENCE )
       s << "porREFERENCE ";
+
+    if( type & porUNKNOWN )
+      s << "porUNKNOWN ";
   }
   s << "\n";
 }

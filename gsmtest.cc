@@ -37,7 +37,6 @@ int main( void )
   gString x = "x";
   gString y = "y";
   gString z = "z";
-  gString *name;
   GSM *machine;
 
   gOutput* sout = new gFileOutput( "sout" );
@@ -144,6 +143,8 @@ int main( void )
   machine->PushRef( "z" );
   machine->Push( "hi!!" );
   machine->Assign();
+  machine->Dump();
+  machine->PushRef( "z" );
   machine->Dump();
 
 
@@ -2363,8 +2364,6 @@ int main( void )
 #endif
 
 
-
-
   machine->PushRef( "L" );
   machine->Push( (gInteger) 1 );
   machine->Push( (gInteger) 2 );
@@ -2414,6 +2413,41 @@ int main( void )
   machine->PushRef( "L" );
   machine->Dump();
 
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+  machine->PushRef( "a" );
+  machine->Push( (gInteger) 1 );
+  machine->PushList( 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "a" );
+  machine->PushList( 0 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "a" );
+  machine->Push( "a" );
+  machine->PushList( 1 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "a" );
+  machine->Bind();
+  machine->Push( "a" );
+  machine->PushList( 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "a" );
+  machine->Dump();
 
   gout << "*********************** Press Return to continue ************";
   gin >> cont;

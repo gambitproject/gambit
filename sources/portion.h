@@ -175,12 +175,13 @@ class List_Portion : public Portion
   List_Portion( const gBlock<Portion*>& value );
   ~List_Portion();
 
-  gBlock<Portion*>& Value     ( void );
-  Portion*          Copy      ( bool new_data ) const;
-  PortionType       Type      ( void ) const;
-  PortionType       DataType  ( void ) const;
-  Portion*          Operation ( Portion* p, OperationMode mode );
-  void              Output    ( gOutput& s ) const;
+  gBlock<Portion*>& Value       ( void );
+  Portion*          Copy        ( bool new_data ) const;
+  PortionType       Type        ( void ) const;
+  void              SetDataType ( PortionType data_type );
+  PortionType       DataType    ( void ) const;
+  Portion*          Operation   ( Portion* p, OperationMode mode );
+  void              Output      ( gOutput& s ) const;
 
   int      Append     ( Portion* item );
   int      Insert     ( Portion* item, int index );

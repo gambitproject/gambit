@@ -137,8 +137,7 @@ bool GSM::PushList( const int num_of_elements )
   for( i = 1; i <= num_of_elements; i++ )
   {
     p = _Stack->Pop();
-    if( p->Type() == porREFERENCE )
-      p = _ResolveRef( (Reference_Portion*) p );
+    p = _ResolveRef( p );
 
     insert_result = list->Insert( p, 1 );
     if( insert_result == 0 )
@@ -166,34 +165,23 @@ bool GSM::_VarIsDefined( const gString& var_name ) const
   RefHashTable* ref_table;
 
   result = _RefTableStack->Peek()->IsDefined( var_name );
-/*
-  assert( var_name != "::" );
-  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
-  {
-    ref_table = _RefTableStack->Pop();
-    result = _VarIsDefined( var_name.right( var_name.length()-2 ) );
-    _RefTableStack->Push( ref_table );
-  }
-  else
-  {
-    result = _RefTableStack->Peek()->IsDefined( var_name );
-  }
-*/
   return result;
 }
 
 
-void GSM::_VarDefine( const gString& var_name, Portion* p )
+bool GSM::_VarDefine( const gString& var_name, Portion* p )
 {
   RefHashTable* ref_table;
   Portion* old_value;
+  bool type_match = true;
+  bool result = true;
 
   if( _RefTableStack->Peek()->IsDefined( var_name ) )
   {
     old_value = (*_RefTableStack->Peek())( var_name );
     if( old_value->Type() != p->Type() )
     {
-      _ErrorMessage( _StdErr, 41, 0, 0, var_name );
+      type_match = false;
     }
     else if( p->Type() == porLIST )
     {
@@ -201,25 +189,30 @@ void GSM::_VarDefine( const gString& var_name, Portion* p )
       if( ( (List_Portion*) old_value )->DataType() != 
 	 ( (List_Portion*) p )->DataType() )
       {
-	_ErrorMessage( _StdErr, 41, 0, 0, var_name );
+	if( ( (List_Portion*) p )->DataType() == porUNKNOWN )
+	{
+	  ( (List_Portion*) p )->
+	    SetDataType( ( (List_Portion*) old_value )->DataType() );
+	}
+	else
+	{
+	  type_match = false;
+	}
       }
     }
   }
-  _RefTableStack->Peek()->Define( var_name, p );
 
-/*
-  assert( var_name != "::" );
-  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
-  {
-    ref_table = _RefTableStack->Pop();
-    _VarDefine( var_name.right( var_name.length()-2 ), p );
-    _RefTableStack->Push( ref_table );
-  }
-  else
+  if( type_match )
   {
     _RefTableStack->Peek()->Define( var_name, p );
   }
-*/
+  else
+  {
+    _ErrorMessage( _StdErr, 42, 0, 0, var_name );
+    delete p;
+    result = false;
+  }
+  return result;
 }
 
 
@@ -229,19 +222,6 @@ Portion* GSM::_VarValue( const gString& var_name ) const
   RefHashTable* ref_table;
 
   result = (*_RefTableStack->Peek())( var_name );
-/*
-  assert( var_name != "::" );
-  if( var_name.left(2) == "::" && _RefTableStack->Depth() > 1 )
-  {
-    ref_table = _RefTableStack->Pop();
-    result = _VarValue( var_name.right( var_name.length()-2 ) );
-    _RefTableStack->Push( ref_table );
-  }
-  else
-  {
-    result = (*_RefTableStack->Peek())( var_name );
-  }
-*/
   return result;
 }
 
@@ -286,7 +266,7 @@ bool GSM::Assign( void )
     {
       p2_copy = p2->Copy();
     }
-    _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
+    result = _VarDefine( ( (Reference_Portion*) p1 )->Value(), p2_copy );
     delete p1;
     _Stack->Push( p2 );
   }
@@ -330,22 +310,25 @@ bool GSM::Assign( void )
 //                        _ResolveRef functions
 //-----------------------------------------------------------------------
 
-Portion* GSM::_ResolveRef( Reference_Portion* p )
+Portion* GSM::_ResolveRef( Portion* p )
 {
   Portion*  result = 0;
-  gString&  ref = p->Value();
-
-  if( _VarIsDefined( ref ) )
+  gString ref;
+  
+  if( p->Type() == porREFERENCE )
   {
-    result = _VarValue( ref )->Copy();
+    ref = ( (Reference_Portion*) p )->Value();
+    result = _ResolveRefWithoutError( (Reference_Portion*) p );
+    if( result == 0 )
+    {
+      _ErrorMessage( _StdErr, 13, 0, 0, ref );
+      result = new Error_Portion;
+    }
   }
   else
   {
-    _ErrorMessage( _StdErr, 13, 0, 0, ref );
-    result = new Error_Portion;
+    result = p;
   }
-  delete p;
-
   return result;
 }
 
@@ -393,12 +376,8 @@ bool GSM::_BinaryOperation( OperationMode mode )
   p2 = _Stack->Pop();
   p1 = _Stack->Pop();
   
-  if( p2->Type() == porREFERENCE )
-    p2 = _ResolveRef( (Reference_Portion*) p2 );
-  
-  if( p1->Type() == porREFERENCE )
-    p1 = _ResolveRef( (Reference_Portion*) p1 );
-
+  p2 = _ResolveRef( p2 );
+  p1 = _ResolveRef( p1 );
 
   if( p1->Type() == p2->Type() )
   {
@@ -472,9 +451,7 @@ bool GSM::_UnaryOperation( OperationMode mode )
   if( _Stack->Depth() >= 1 )
   {
     p1 = _Stack->Pop();
-    
-    if( p1->Type() == porREFERENCE )
-      p1 = _ResolveRef( (Reference_Portion*) p1 );
+    p1 = _ResolveRef( p1 );
 
     result = p1->Operation( 0, mode );
     _Stack->Push( p1 );
@@ -606,8 +583,7 @@ bool GSM::Subscript ( void )
     }
   }
 
-  if( p2->Type() == porREFERENCE )
-    p2 = _ResolveRef( (Reference_Portion*) p2 );
+  p2 = _ResolveRef( p2 );
 
   if( p2->Type() == porINTEGER )
   {
@@ -697,11 +673,8 @@ bool GSM::Child ( void )
   p2 = _Stack->Pop();
   p1 = _Stack->Pop();
 
-  if( p2->Type() == porREFERENCE )
-    p2 = _ResolveRef( (Reference_Portion*) p2 );
-
-  if( p1->Type() == porREFERENCE )
-    p1 = _ResolveRef( (Reference_Portion*) p1 );
+  p2 = _ResolveRef( p2 );
+  p1 = _ResolveRef( p1 );
 
   if( p1->Type() == porNODE )
   {
@@ -836,8 +809,7 @@ bool GSM::BindVal( void )
   func = _CallFuncStack->Pop();
   param = _Stack->Pop();
   
-  if( param->Type() == porREFERENCE )
-    param = _ResolveRef( (Reference_Portion *)param );
+  param = _ResolveRef( param );
 
   param->ShadowOf() = 0;
   result = func->SetCurrParam( param ); 
@@ -952,6 +924,7 @@ bool GSM::CallFunction( void )
   Portion*            p;
   Portion*            shadowof;
   Portion*            por_result;
+  bool                define_result;
   bool                result = true;
 
 #ifndef NDEBUG
@@ -985,7 +958,9 @@ bool GSM::CallFunction( void )
 
       if( refp != 0 && param[ index ] != 0 )
       {
-	_VarDefine( refp->Value(), param[ index ] );
+	define_result = _VarDefine( refp->Value(), param[ index ] );
+	if( !define_result )
+	  result = false;
 	delete refp;
       }
       else // ( !( refp != 0 && param[ index ] != 0 ) )
@@ -1146,8 +1121,8 @@ void GSM::Output( void )
   else
   {
     p = _Stack->Pop();
-    if( p->Type() == porREFERENCE )
-      p = _ResolveRef( (Reference_Portion*) p );
+    p = _ResolveRef( p );
+
     p->Output( _StdOut );
     _StdOut << "\n";
     delete p;
@@ -1403,6 +1378,9 @@ void GSM::_ErrorMessage
   case 41:
     s << "  Warning: variable \"" << str1 << "\" has changed type\n";
     break;
+  case 42:
+    s << "  Attempted to change the type of variable \"" << str1 << "\"\n";
+    break;
   default:
     s << "  General error\n";
   }
@@ -1441,9 +1419,5 @@ TEMPLATE class gStack< RefHashTable* >;
 TEMPLATE class gGrowableStack< Portion* >;
 TEMPLATE class gGrowableStack< CallFuncObj* >;
 TEMPLATE class gGrowableStack< RefHashTable* >;
-
-
-gOutput& operator << ( class gOutput& s, class Portion* (*funcname)() )
-{ return s << funcname; }
 
 

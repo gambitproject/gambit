@@ -68,6 +68,8 @@ typedef unsigned int PortionType;
 
 #define  porREFERENCE  ( 0x100000 )
 
+#define  porUNKNOWN    ( 0x200000 )
+
 #define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
 				  
 #define  porNUMERICAL  ( porDOUBLE | porINTEGER | porRATIONAL )
