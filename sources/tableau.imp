@@ -326,7 +326,7 @@ void Tableau<T>::Dump(gOutput &to) const
 { basis.Dump(to);to << "\n";solution.Dump(to); }
 
 template <class T>
-void Tableau<T>::BigDump(gOutput &to) const
+void Tableau<T>::BigDump(gOutput &to)
 { 
   to << "\nBasis:\n";
   Dump(to);
