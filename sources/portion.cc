@@ -484,7 +484,19 @@ Outcome*& OutcomePortion::Value( void ) const
 { return *_Value; }
 
 PortionType OutcomePortion::Type( void ) const
-{ return porOUTCOME; }
+{ 
+  assert( (*_Value)->BelongsTo() != 0 );
+  switch( (*_Value)->BelongsTo()->Type() )
+  {
+  case DOUBLE:
+    return porOUTCOME_FLOAT;
+  case RATIONAL:
+    return porOUTCOME_RATIONAL;
+  default:
+    return porUNKNOWN;
+  }
+  // return porOUTCOME; 
+}
 
 void OutcomePortion::Output( gOutput& s ) const
 {
@@ -1442,6 +1454,7 @@ bool ListPortion::TypeCheck( Portion* item )
   }
   else if( ( _DataType & porMIXED && item->Type() & porMIXED ) ||
 	  ( _DataType & porBEHAV && item->Type() & porBEHAV ) ||
+	  ( _DataType & porOUTCOME && item->Type() & porOUTCOME ) ||
 	  ( _DataType & porNFG && item->Type() & porNFG ) ||
 	  ( _DataType & porEFG && item->Type() & porEFG ) )
     result = true;
@@ -1452,6 +1465,7 @@ bool ListPortion::TypeCheck( Portion* item )
       result = true;
     else if( ( _DataType & porMIXED && NewType & porMIXED ) ||
 	    ( _DataType & porBEHAV && NewType & porBEHAV ) ||
+	    ( _DataType & porOUTCOME && item->Type() & porOUTCOME ) ||
 	    ( _DataType & porNFG && NewType & porNFG ) ||
 	    ( _DataType & porEFG && NewType & porEFG ) )
       result = true;

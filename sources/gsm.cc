@@ -256,6 +256,8 @@ bool GSM::_VarDefine( const gString& var_name, Portion* p )
 	 !( 
 	   ( ( old_value->Type() & porMIXED ) && ( p->Type() & porMIXED ) ) ||
 	   ( ( old_value->Type() & porBEHAV ) && ( p->Type() & porBEHAV ) ) ||
+	   ( ( old_value->Type() & porOUTCOME ) && 
+	    ( p->Type() & porOUTCOME ) ) ||
 	   ( ( old_value->Type() & porNFG   ) && ( p->Type() & porNFG   ) ) ||
 	   ( ( old_value->Type() & porEFG   ) && ( p->Type() & porEFG   ) ) 
 	   ) 
@@ -408,6 +410,7 @@ bool GSM::Assign( void )
     
     if( ( p1_type & porMIXED && p2_type & porMIXED ) ||
        ( p1_type & porBEHAV && p2_type & porBEHAV ) ||
+       ( p1_type & porOUTCOME && p2_type & porOUTCOME ) ||
        ( p1_type & porNFG && p2_type & porNFG ) ||
        ( p1_type & porEFG && p2_type & porEFG ) )
     {
