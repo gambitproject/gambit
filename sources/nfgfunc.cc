@@ -217,7 +217,7 @@ static Portion *GSM_NewNfg(Portion **param)
   gArray<int> d(dim->Length());
   
   for (int i = 1; i <= dim->Length(); i++)
-    d[i] = ((IntPortion *) (*dim)[i])->Value();
+    d[i] = ((NumberPortion *) (*dim)[i])->Value();
 
   return new NfgPortion(new Nfg(d));
 }
@@ -328,7 +328,7 @@ static Portion *GSM_StrategyNumber(Portion **param)
   Strategy *s = ((StrategyPortion *) param[0])->Value();
   NFSupport *support = ((NfSupportPortion *) param[1])->Value();
 
-  return new IntPortion(support->Find(s));
+  return new NumberPortion(support->Find(s));
 }
 
 //------------------
@@ -504,7 +504,7 @@ void Init_nfgfunc(GSM *gsm)
       { "Name[x->NFPLAYER*] =: TEXT", GSM_Name_NfgElements },
       { "Name[x->STRATEGY*] =: TEXT", GSM_Name_NfgElements },
       { "Name[x->NFOUTCOME*] =: TEXT", GSM_Name_NfgElements },
-      { "NewNfg[dim->LIST(INTEGER)] =: NFG", GSM_NewNfg },
+      { "NewNfg[dim->LIST(NUMBER)] =: NFG", GSM_NewNfg },
       { "NewOutcome[nfg->NFG] =: NFOUTCOME", GSM_NewOutcome },
       { "Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME", GSM_Outcome },
       { "Outcomes[nfg->NFG] =: LIST(NFOUTCOME)", GSM_Outcomes },
@@ -512,7 +512,7 @@ void Init_nfgfunc(GSM *gsm)
 	GSM_Payoff },
       { "Player[strategy->STRATEGY*] =: NFPLAYER", GSM_Player },
       { "Players[nfg->NFG] =: LIST(NFPLAYER)", GSM_Players },
-      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER", 
+      { "StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: NUMBER", 
 	GSM_StrategyNumber },
       { "RemoveStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT",
 	GSM_RemoveStrategy },
@@ -551,8 +551,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
-					    new IntPortion(0)));
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }
 

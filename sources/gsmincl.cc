@@ -35,7 +35,7 @@ struct PortionSpecTextType
 };  
 
 
-#define NUM_PortionSpecs 27
+#define NUM_PortionSpecs 26
 #define NUM_CompositePortionSpecs 2
 
 PortionSpecTextType _PortionSpecText[] =
@@ -43,7 +43,6 @@ PortionSpecTextType _PortionSpecText[] =
   { porERROR,              "ERROR" },
   
   { porBOOL,               "BOOLEAN" },
-  { porINTEGER,            "INTEGER" },
   { porNUMBER,             "NUMBER" },
   { porTEXT,               "TEXT" },
 

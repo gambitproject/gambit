@@ -302,9 +302,6 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 
       switch(p1Spec.Type)
       {
-      case porINTEGER:
-	((IntPortion*) p1)->Value() = ((IntPortion*) p2)->Value();
-	break;
       case porNUMBER:
 	((NumberPortion*) p1)->Value()=((NumberPortion*) p2)->Value();
 	break;

@@ -40,7 +40,7 @@ static Portion *GSM_ActionNumber(Portion **param)
   Action *a = ((ActionPortion *) param[0])->Value();
   EFSupport *support = ((EfSupportPortion *) param[1])->Value();
 
-  return new IntPortion(support->Find(a));
+  return new NumberPortion(support->Find(a));
 }
 
 static Portion *GSM_BasisActionNumber(Portion **param)
@@ -48,7 +48,7 @@ static Portion *GSM_BasisActionNumber(Portion **param)
   Action *a = ((ActionPortion *) param[0])->Value();
   EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
 
-  return new IntPortion(basis->EFSupport::Find(a));
+  return new NumberPortion(basis->EFSupport::Find(a));
 }
 
 //-------------
@@ -118,7 +118,7 @@ static Portion *GSM_BasisNodeNumber(Portion **param)
   Node *n = ((NodePortion *) param[0])->Value();
   EFBasis *basis = ((EfBasisPortion *) param[1])->Value();
 
-  return new IntPortion(basis->Find(n));
+  return new NumberPortion(basis->Find(n));
 }
 
 static Portion *GSM_BasisNodes(Portion **param)
@@ -680,7 +680,7 @@ static Portion *GSM_NewEfg(Portion **param)
 static Portion *GSM_NewInfoset(Portion **param)
 {
   EFPlayer *p = ((EfPlayerPortion *) param[0])->Value();
-  int n = ((IntPortion *) param[1])->Value();
+  int n = ((NumberPortion *) param[1])->Value();
 
   if (n <= 0)
     return new ErrorPortion("Information sets must have at least one action");
@@ -753,7 +753,7 @@ static Portion *GSM_Nodes(Portion **param)
 static Portion *GSM_NthChild(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  int child = ((IntPortion *) param[1])->Value();
+  int child = ((NumberPortion *) param[1])->Value();
   if (child < 1 || child > n->NumChildren())  
     return new NullPortion(porNODE);
 
@@ -1126,9 +1126,9 @@ void Init_efgfunc(GSM *gsm)
  	GSM_Actions },
       { "Actions[infoset->INFOSET*, basis->EFBASIS] =: LIST(ACTION)",
  	GSM_BasisActions },
-      { "ActionNumber[action->ACTION, sup->EFSUPPORT] =: INTEGER", 
+      { "ActionNumber[action->ACTION, sup->EFSUPPORT] =: NUMBER", 
 	GSM_ActionNumber },
-      { "ActionNumber[action->ACTION, basis->EFBASIS] =: INTEGER", 
+      { "ActionNumber[action->ACTION, basis->EFBASIS] =: NUMBER", 
 	GSM_BasisActionNumber },
       { "AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT",
 	GSM_AddAction },
@@ -1184,7 +1184,7 @@ void Init_efgfunc(GSM *gsm)
       { "Name[x->EFOUTCOME*] =: TEXT", GSM_Name_EfgElements },
       { "Name[x->EFPLAYER*] =: TEXT", GSM_Name_EfgElements },
       { "Name[x->EFG*] =: TEXT", GSM_Name_EfgElements },
-      { "NewInfoset[player->EFPLAYER, actions->INTEGER] =: INFOSET",
+      { "NewInfoset[player->EFPLAYER, actions->NUMBER] =: INFOSET",
 	GSM_NewInfoset },
       { "NewOutcome[efg->EFG] =: EFOUTCOME", GSM_NewOutcome },
       { "NewPlayer[efg->EFG] =: EFPLAYER", GSM_NewPlayer },
@@ -1192,9 +1192,9 @@ void Init_efgfunc(GSM *gsm)
       { "Nodes[efg->EFG] =: LIST(NODE)", GSM_Nodes },
       { "Nodes[infoset->INFOSET*, basis->EFBASIS] =: LIST(NODE)",
  	GSM_BasisNodes },
-      { "NodeNumber[node->NODE, basis->EFBASIS] =: INTEGER", 
+      { "NodeNumber[node->NODE, basis->EFBASIS] =: NUMBER", 
 	GSM_BasisNodeNumber },
-      { "NthChild[node->NODE, n->INTEGER] =: NODE", GSM_NthChild },
+      { "NthChild[node->NODE, n->NUMBER] =: NODE", GSM_NthChild },
       { "Outcome[node->NODE*] =: EFOUTCOME", GSM_Outcome },
       { "Outcomes[efg->EFG] =: LIST(EFOUTCOME)", GSM_Outcomes },
       { "Parent[node->NODE*] =: NODE", GSM_Parent },
@@ -1250,8 +1250,8 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
-					    new IntPortion(0)));
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porNUMBER,
+					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewEfg", 1);

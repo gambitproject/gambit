@@ -861,8 +861,6 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     return PortionSpec(porNUMBER, num);
   else if (str == "BOOLEAN") 
     return PortionSpec(porBOOL, num); 
-  else if (str == "INTEGER")
-    return PortionSpec(porINTEGER, num);
   else if (str == "TEXT")
     return PortionSpec(porTEXT, num);
   else if (str == "EFG")
@@ -907,8 +905,6 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     return PortionSpec(porNUMBER, num, porNULLSPEC);
   else if (str == "BOOLEAN*")
     return PortionSpec(porBOOL, num, porNULLSPEC);
-  else if (str == "INTEGER*")
-    return PortionSpec(porINTEGER, num, porNULLSPEC);
   else if (str == "TEXT*")
     return PortionSpec(porTEXT, num, porNULLSPEC);
   else if (str == "EFG*")
@@ -1761,10 +1757,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	      {
 	      case porBOOL:
 		_Param[index] = new BoolPortion(false);
-		_RunTimeParamInfo[index].Defined = true;
-		break;
-	      case porINTEGER:
-		_Param[index] = new IntPortion(0);
 		_RunTimeParamInfo[index].Defined = true;
 		break;
 	      case porNUMBER:

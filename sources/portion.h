@@ -37,15 +37,15 @@ private:
 protected:
   Portion(void);
 
-  static long _WriteWidth;
-  static long _WritePrecis;
+  static gNumber _WriteWidth;
+  static gNumber _WritePrecis;
   static TriState _WriteExpmode;
   static TriState _WriteQuoted;
   static TriState _WriteListBraces;
   static TriState _WriteListCommas;
-  static long _WriteListLF;
-  static long _WriteListIndent;
-  static long _WriteSolutionInfo;
+  static gNumber _WriteListLF;
+  static gNumber _WriteListIndent;
+  static gNumber _WriteSolutionInfo;
 
   void SetGame(const Efg *game);
   void SetGame(const Nfg *game);
@@ -200,38 +200,6 @@ public:
 };
 
 
-//-------
-// Int
-//-------
-
-class IntPortion : public Portion  {
-protected:
-  long* _Value;
-  bool _ref;
-
-  static gPool pool;
-
-public:
-  IntPortion(long);
-  IntPortion(long &, bool);
-  virtual ~IntPortion();
-
-  long& Value(void) const;
-  PortionSpec Spec(void) const;
-
-  void Output(gOutput& s) const;
-  gText OutputString(void) const;
-
-  Portion* ValCopy(void) const;
-  Portion* RefCopy(void) const;
-
-  bool IsReference(void) const;
-
-  void *operator new(size_t) { return pool.Alloc(); }
-  void operator delete(void *p) { pool.Free(p); }
-};
-
-
 //----------
 // Number
 //----------
@@ -243,10 +211,9 @@ protected:
 
   static gPool pool;
 
-  NumberPortion(gNumber &, bool);
-
 public:
   NumberPortion(const gNumber &);
+  NumberPortion(gNumber &, bool);
   virtual ~NumberPortion();
 
   gNumber& Value(void) const;

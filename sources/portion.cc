@@ -32,15 +32,15 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 //-----------
 
 
-long Portion::_WriteWidth = 0;
-long Portion::_WritePrecis = 6;
+gNumber Portion::_WriteWidth = 0;
+gNumber Portion::_WritePrecis = 6;
 TriState Portion::_WriteExpmode = T_NO;
 TriState Portion::_WriteQuoted = T_YES;
 TriState Portion::_WriteListBraces = T_YES;
 TriState Portion::_WriteListCommas = T_YES;
-long Portion::_WriteListLF = 0;
-long Portion::_WriteListIndent = 2;
-long Portion::_WriteSolutionInfo = 1;
+gNumber Portion::_WriteListLF = 0;
+gNumber Portion::_WriteListIndent = 2;
+gNumber Portion::_WriteSolutionInfo = 1;
 
 void Portion::_SetWriteWidth(long x)
 { _WriteWidth = x; }
@@ -350,53 +350,6 @@ Portion* PrecisionPortion::RefCopy(void) const
 bool PrecisionPortion::IsReference(void) const
 { return _ref; }
 
-
-//-------
-// Int
-//-------
-
-gPool IntPortion::pool(sizeof(IntPortion));
-
-IntPortion::IntPortion(long value)
-  : _Value(new long(value)), _ref(false)
-{ }
-
-IntPortion::IntPortion(long &value, bool ref)
-  : _Value(&value), _ref(ref)
-{ }
-
-IntPortion::~IntPortion()
-{ }
-
-long& IntPortion::Value(void) const
-{ return *_Value; }
-
-PortionSpec IntPortion::Spec(void) const
-{ return PortionSpec(porINTEGER); }
-
-void IntPortion::Output(gOutput& s) const
-{
-  Portion::Output(s);
-  s << *_Value; 
-}
-
-gText IntPortion::OutputString(void) const
-{
-  return ToText( *_Value );
-}
-
-Portion* IntPortion::ValCopy(void) const
-{ return new IntPortion(*_Value); }
-
-Portion* IntPortion::RefCopy(void) const
-{ 
-  Portion* p = new IntPortion(*_Value, true);
-  p->SetOriginal(Original());
-  return p;
-}
-
-bool IntPortion::IsReference(void) const
-{ return _ref; }
 
 
 //---------
@@ -1345,7 +1298,7 @@ void MixedPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << "(Mixed) ";
-  if (_WriteSolutionInfo>1)
+  if (_WriteSolutionInfo > gNumber(1))
     (*rep->value).Dump(s);
   else
     (*rep->value).MixedProfile<gNumber>::Dump(s);
@@ -1425,7 +1378,7 @@ void BehavPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
   s << "(Behav) ";
-  if (_WriteSolutionInfo>1)
+  if (_WriteSolutionInfo > gNumber(1))
     (*rep->value).Dump(s);
   else
     (*rep->value).BehavProfile<gNumber>::Dump(s);
@@ -1942,16 +1895,16 @@ void ListPortion::Output(gOutput& s, long ListLF) const
 	  s << ',';
 	else
 	  s << ' ';
-	if(_WriteListLF > ListLF) 
+	if(_WriteListLF > gNumber(ListLF))
 	  s << '\n';
-	if(_WriteListLF > ListLF) 
-	  for(c = 0; c < (ListLF+1) * _WriteListIndent; c++)
+	if(_WriteListLF > gNumber(ListLF))
+	  for(c = 0; c < (double) ((gNumber) (ListLF+1) * _WriteListIndent); c++)
 	    s << ' ';
       }
       else
-	if(_WriteListLF > ListLF) 
+	if(_WriteListLF > gNumber(ListLF))
 	  s << ' ';
-      if(_WriteListLF <= ListLF)
+      if(_WriteListLF <= gNumber(ListLF))
 	s << ' ';
       if((*rep->value)[i]->Spec().ListDepth == 0)
 	s << (*rep->value)[i];
@@ -1961,8 +1914,8 @@ void ListPortion::Output(gOutput& s, long ListLF) const
   }
   else
   {
-    if(_WriteListLF > ListLF) 
-      for(c = 0; c < (ListLF+1) * _WriteListIndent-1; c++)
+    if(_WriteListLF > gNumber(ListLF))
+      for(c = 0; c < (double) ((gNumber) (ListLF+1) * _WriteListIndent) - 1; c++)
 	s << ' ';
     s << " (" << PortionSpecToText(rep->_DataType) << ')';
   }
@@ -2172,8 +2125,6 @@ bool PortionEqual(Portion* p1, Portion* p2, bool &type_found)
 
   if(p1->Spec().Type & porBOOL)   
     b = (((BoolPortion*) p1)->Value() == ((BoolPortion*) p2)->Value());
-  else if(p1->Spec().Type & porINTEGER)   
-    b = (((IntPortion*) p1)->Value() == ((IntPortion*) p2)->Value());
   else if(p1->Spec().Type & porNUMBER)
     b = (((NumberPortion*) p1)->Value()==((NumberPortion*) p2)->Value());
   else if(p1->Spec().Type & porTEXT)

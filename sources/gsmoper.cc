@@ -73,16 +73,16 @@ Portion* GSM_Null(Portion** param)
 
 long _idum = -1;
 
-Portion* GSM_Randomize_Integer(Portion** param)
+Portion* GSM_Randomize(Portion** param)
 {
-  long _RandomSeed = ((IntPortion*) param[1])->Value();
+  long _RandomSeed = ((NumberPortion*) param[1])->Value();
   if(_RandomSeed > 0)
     _RandomSeed = -_RandomSeed;
   long v;
   if(_RandomSeed != 0)
     _idum = _RandomSeed;
   v = ran1(&_idum);
-  return new IntPortion(v);
+  return new NumberPortion(v);
 }
 
 
@@ -93,12 +93,6 @@ Portion* GSM_Randomize_Integer(Portion** param)
 //---------
 // Plus
 //---------
-
-static Portion *GSM_Plus_Integer(Portion** param)
-{
-  return new IntPortion(((IntPortion*) param[0])->Value() +
-			((IntPortion*) param[1])->Value());
-}
 
 static Portion *GSM_Plus_Number(Portion** param)
 {
@@ -144,12 +138,6 @@ static Portion* GSM_Concat_Text(Portion** param)
 // Minus
 //---------
 
-static Portion *GSM_Minus_Integer(Portion** param)
-{
-  return new IntPortion(((IntPortion*) param[0])->Value() -
-			((IntPortion*) param[1])->Value());
-}
-
 static Portion *GSM_Minus_Number(Portion** param)
 {
   return new NumberPortion(((NumberPortion *) param[0])->Value() -
@@ -183,12 +171,6 @@ static Portion *GSM_Minus_Behav(Portion** param)
 // Times
 //----------
 
-static Portion *GSM_Times_Integer(Portion** param)
-{
-  return new IntPortion(((IntPortion*) param[0])->Value() *
-			((IntPortion*) param[1])->Value());
-}
-
 static Portion *GSM_Times_Number(Portion** param)
 {
   return new NumberPortion(((NumberPortion *) param[0])->Value() *
@@ -213,38 +195,14 @@ static Portion *GSM_Times_Behav(Portion** param)
 // Divide
 //----------
 
-static Portion *GSM_Divide_Integer(Portion** param)
+static Portion *GSM_Divide(Portion** param)
 {
-  if (((IntPortion*) param[1])->Value() != 0) 
-    return new NumberPortion(gRational(((IntPortion *) param[0])->Value(),
-				       ((IntPortion *) param[1])->Value()));
-  else
-    return new NullPortion(porNUMBER);
-}
-
-static Portion *GSM_Divide_Number(Portion** param)
-{
-  if(((NumberPortion*) param[1])->Value() != (gNumber)0)  
+  if(((NumberPortion*) param[1])->Value() != (gNumber)0)
     return new NumberPortion(((NumberPortion*) param[0])->Value() /
 			     ((NumberPortion*) param[1])->Value());
   else
     return new NullPortion(porNUMBER);
 }
-
-
-//-----------------
-// IntegerDivide
-//-----------------
-
-static Portion *GSM_IntegerDivide(Portion** param)
-{
-  if (((IntPortion*) param[1])->Value() != 0)  
-    return new IntPortion(((IntPortion*) param[0])->Value() /
-			  ((IntPortion*) param[1])->Value());
-  else
-    return new NullPortion(porINTEGER);
-}
-
 
 
 //--------
@@ -289,12 +247,7 @@ static Portion *GSM_Power(Portion** param)
 // Negate
 //----------
 
-static Portion *GSM_Negate_Integer(Portion** param)
-{
-  return new IntPortion(-((IntPortion*) param[0])->Value());
-}
-
-static Portion *GSM_Negate_Number(Portion** param)
+static Portion *GSM_Negate(Portion** param)
 {
   return new NumberPortion(-((NumberPortion *) param[0])->Value());
 }
@@ -305,11 +258,11 @@ static Portion *GSM_Negate_Number(Portion** param)
 
 static Portion *GSM_Modulus(Portion** param)
 {
-  if (((IntPortion*) param[1])->Value() != 0)
-    return new IntPortion(((IntPortion*) param[0])->Value() %
-			  ((IntPortion*) param[1])->Value());
+  if (((NumberPortion*) param[1])->Value() != gNumber(0))
+    return new NumberPortion((long) ((NumberPortion*) param[0])->Value() %
+			  (long) ((NumberPortion*) param[1])->Value());
   else
-    return new NullPortion(porINTEGER);
+    return new NullPortion(porNUMBER);
 }
 
 
@@ -317,19 +270,6 @@ static Portion *GSM_Modulus(Portion** param)
 //-----------
 // Equal
 //-----------
-
-static Portion* GSM_Equal_Integer(Portion** param)
-{
-  if( (param[0]->Spec().Type == porNULL) || 
-      (param[1]->Spec().Type == porNULL) )
-  {
-    return new BoolPortion( param[0]->Spec().Type == 
- 			       param[1]->Spec().Type );
-  }
-
-  return new BoolPortion(((IntPortion *) param[0])->Value() ==
-			    ((IntPortion *) param[1])->Value());
-}
 
 static Portion* GSM_Equal_Number(Portion** param)
 {
@@ -544,12 +484,6 @@ static Portion* GSM_Equal_Mixed(Portion** param)
 // NotEqual
 //------------
 
-static Portion* GSM_NotEqual_Integer(Portion** param)
-{
-  return new BoolPortion(((IntPortion *) param[0])->Value() !=
-			    ((IntPortion *) param[1])->Value());
-}
-
 static Portion* GSM_NotEqual_Number(Portion** param)
 {
   return new BoolPortion(((NumberPortion *) param[0])->Value() !=
@@ -668,12 +602,6 @@ static Portion* GSM_NotEqual_Mixed(Portion** param)
 // Greater
 //------------
 
-static Portion *GSM_Greater_Integer(Portion** param)
-{
-  return new BoolPortion(((IntPortion*) param[0])->Value() >
-			 ((IntPortion*) param[1])->Value());
-}
-
 static Portion *GSM_Greater_Number(Portion** param)
 {
   return new BoolPortion(((NumberPortion*) param[0])->Value() >
@@ -690,12 +618,6 @@ static Portion* GSM_Greater_Text(Portion** param)
 //---------
 // Less
 //---------
-
-static Portion *GSM_Less_Integer(Portion** param)
-{
-  return new BoolPortion(((IntPortion*) param[0])->Value() <
-			 ((IntPortion*) param[1])->Value());
-}
 
 static Portion *GSM_Less_Number(Portion** param)
 {
@@ -714,12 +636,6 @@ static Portion *GSM_Less_Text(Portion** param)
 // GreaterEqual
 //---------------
 
-static Portion *GSM_GreaterEqual_Integer(Portion** param)
-{
-  return new BoolPortion(((IntPortion*) param[0])->Value() >=
-			 ((IntPortion*) param[1])->Value());
-}
-
 static Portion *GSM_GreaterEqual_Number(Portion** param)
 {
   return new BoolPortion(((NumberPortion*) param[0])->Value() >=
@@ -736,12 +652,6 @@ static Portion *GSM_GreaterEqual_Text(Portion** param)
 //-------------
 // LessEqual
 //-------------
-
-static Portion *GSM_LessEqual_Integer(Portion** param)
-{
-  return new BoolPortion(((IntPortion*) param[0])->Value() <=
-			 ((IntPortion*) param[1])->Value());
-}
 
 static Portion *GSM_LessEqual_Number(Portion** param)
 {
@@ -828,15 +738,15 @@ Portion* GSM_Input(Portion** param)
 //    Write and SetFormat function - possibly belong somewhere else
 //-----------------------------------------------------------------
 
-long _WriteWidth = 0;
-long _WritePrecis = 6;
+gNumber _WriteWidth = 0;
+gNumber _WritePrecis = 6;
 TriState _WriteExpmode = T_NO;
 TriState _WriteQuoted = T_YES;
 TriState _WriteListBraces = T_YES;
 TriState _WriteListCommas = T_YES;
-long _WriteListLF = 0;
-long _WriteListIndent = 2;
-long _WriteSolutionInfo = 1;
+gNumber _WriteListLF = 0;
+gNumber _WriteListIndent = 2;
+gNumber _WriteSolutionInfo = 1;
 
 
 void GSM_SetWriteOptions(void)
@@ -864,8 +774,8 @@ Portion* GSM_ListFormat(Portion** param)
 {
   _WriteListBraces = ((BoolPortion*) param[0])->Value();
   _WriteListCommas = ((BoolPortion*) param[1])->Value();
-  _WriteListLF = ((IntPortion*) param[2])->Value();
-  _WriteListIndent = ((IntPortion*) param[3])->Value();
+  _WriteListLF = ((NumberPortion*) param[2])->Value();
+  _WriteListIndent = ((NumberPortion*) param[3])->Value();
 
   GSM_SetWriteOptions();
 
@@ -876,32 +786,16 @@ Portion* GSM_GetListFormat(Portion** param)
 {
   ((BoolPortion*) param[0])->Value() = (_WriteListBraces) ? T_YES : T_NO;
   ((BoolPortion*) param[1])->Value() = (_WriteListCommas) ? T_YES : T_NO;
-  ((IntPortion*) param[2])->Value() = _WriteListLF;
-  ((IntPortion*) param[3])->Value() = _WriteListIndent;
+  ((NumberPortion*) param[2])->Value() = _WriteListLF;
+  ((NumberPortion*) param[3])->Value() = _WriteListIndent;
 
   return new BoolPortion(true);
 }
 
-Portion* GSM_IntFormat(Portion** param)
-{
-  _WriteWidth = ((IntPortion*) param[1])->Value();
-
-  GSM_SetWriteOptions();
-
-  return param[0]->RefCopy();
-}
-
-Portion* GSM_GetIntFormat(Portion** param)
-{
-  ((IntPortion*) param[1])->Value() = _WriteWidth;
-
-  return param[0]->RefCopy();
-}
-
 Portion* GSM_FloatFormat(Portion** param)
 {
-  _WriteWidth = ((IntPortion*) param[1])->Value();
-  _WritePrecis = ((IntPortion*) param[2])->Value();
+  _WriteWidth = ((NumberPortion*) param[1])->Value();
+  _WritePrecis = ((NumberPortion*) param[2])->Value();
   _WriteExpmode = ((BoolPortion*) param[3])->Value();
 
   GSM_SetWriteOptions();
@@ -911,8 +805,8 @@ Portion* GSM_FloatFormat(Portion** param)
 
 Portion* GSM_GetFloatFormat(Portion** param)
 {
-  ((IntPortion*) param[1])->Value() = _WriteWidth;
-  ((IntPortion*) param[2])->Value() = _WritePrecis;
+  ((NumberPortion*) param[1])->Value() = _WriteWidth;
+  ((NumberPortion*) param[2])->Value() = _WritePrecis;
   ((BoolPortion*) param[3])->Value() = (_WriteExpmode) ? T_YES : T_NO;
 
   return param[0]->RefCopy();
@@ -937,7 +831,7 @@ Portion* GSM_GetTextFormat(Portion** param)
 
 Portion* GSM_SolutionFormat(Portion** param)
 {
-  _WriteSolutionInfo = ((IntPortion*) param[1])->Value();
+  _WriteSolutionInfo = ((NumberPortion*) param[1])->Value();
 
   GSM_SetWriteOptions();
 
@@ -946,7 +840,7 @@ Portion* GSM_SolutionFormat(Portion** param)
 
 Portion* GSM_GetSolutionFormat(Portion** param)
 {
-  ((IntPortion*) param[1])->Value() = _WriteSolutionInfo;
+  ((NumberPortion*) param[1])->Value() = _WriteSolutionInfo;
 
   return param[0]->RefCopy();
 }
@@ -1048,51 +942,6 @@ Portion* GSM_Read_Bool(Portion** param)
 }
 
 
-Portion* GSM_Read_Integer(Portion** param)
-{
-  gInput& input = ((InputPortion*) param[0])->Value();
-  long old_pos = input.getpos();
-  int value;
-  char c;
-
-  if(input.eof())
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("End of file reached");
-  }
-  try {
-    input >> value;
-  }
-  catch(gFileInput::ReadFailed &) {
-    input.setpos(old_pos);
-    return new ErrorPortion("File read error");
-  }
-
-  input.get(c);
-  while(!input.eof() && isspace(c)) 
-    input.get(c); 
-  if(c == '/')
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("Type mismatch: expected INTEGER, got RATIONAL");
-  }
-  else if(c == '.')
-  {
-    input.setpos(old_pos);
-    return new ErrorPortion("Type mismatch: expected INTEGER, got FLOAT");
-  }
-  else
-    input.unget(c);
-
-  ((IntPortion*) param[1])->Value() = value;
-
-
-  // swap the first parameter with the return value, so things like
-  //   Input["..."] >> x >> y  would work
-  Portion* p = param[0];
-  param[0] = p->RefCopy();
-  return p;
-}
 
 Portion* GSM_Read_Number(Portion** param)
 {
@@ -1285,16 +1134,6 @@ Portion* GSM_Read_List_Bool(Portion** param)
 {
   Portion* temp = param[1]->ValCopy();
   Portion* p = GSM_Read_List(param, porBOOL, GSM_Read_Bool, false);
-  if(p->Spec().Type == porERROR)
-    ((ListPortion*) param[1])->AssignFrom(temp);
-  delete temp;
-  return p;
-}
-
-Portion* GSM_Read_List_Integer(Portion** param)
-{
-  Portion* temp = param[1]->ValCopy();
-  Portion* p = GSM_Read_List(param, porINTEGER, GSM_Read_Integer, false);
   if(p->Spec().Type == porERROR)
     ((ListPortion*) param[1])->AssignFrom(temp);
   delete temp;
@@ -1595,15 +1434,15 @@ Portion* GSM_Shell( Portion** param )
 
   if (!spawn)  {
     if (str.Length() > 0)
-      return new IntPortion(System::Shell(str));
+      return new NumberPortion(System::Shell(str));
     else
-      return new IntPortion(System::Shell(0));
+      return new NumberPortion(System::Shell(0));
   }
   else  {
     if (str.Length() > 0)
-      return new IntPortion(System::Spawn(str));
+      return new NumberPortion(System::Spawn(str));
     else
-      return new IntPortion(System::Spawn(0));
+      return new NumberPortion(System::Spawn(0));
   }
 }
 
@@ -1801,10 +1640,8 @@ void Init_gsmoper(GSM* gsm)
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_And },
       { "Concat[x->TEXT, y->TEXT] =: TEXT", GSM_Concat_Text },
-      { "Divide[x->INTEGER, y->INTEGER] =: NUMBER", GSM_Divide_Integer },
-      { "Divide[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Divide_Number },
+      { "Divide[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Divide },
       { "Equal[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_Equal_Boolean },
-      { "Equal[x->INTEGER, y->INTEGER] =: BOOLEAN", GSM_Equal_Integer },
       { "Equal[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_Equal_Number },
       { "Equal[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Equal_Text },
       { "Equal[x->EFG, y->EFG] =: BOOLEAN", GSM_Equal_Efg },
@@ -1829,36 +1666,22 @@ void Init_gsmoper(GSM* gsm)
 	GSM_Equal_NfSupport },
       { "Equal[x->MIXED, y->MIXED] =: BOOLEAN", GSM_Equal_Mixed },
       { "Exp[x->NUMBER] =: NUMBER", GSM_Exp },
-      { "Greater[x->INTEGER, y->INTEGER] =: BOOLEAN", GSM_Greater_Integer },
       { "Greater[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_Greater_Number },
       { "Greater[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Greater_Text },
-      { "GreaterEqual[x->INTEGER, y->INTEGER] =: BOOLEAN", 
-	GSM_GreaterEqual_Integer },
-      { "GreaterEqual[x->NUMBER, y->NUMBER] =: BOOLEAN",
-	GSM_GreaterEqual_Number },
-      { "GreaterEqual[x->TEXT, y->TEXT] =: BOOLEAN",
-	GSM_GreaterEqual_Text },
-      { "IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER", GSM_IntegerDivide},
-      { "Less[x->INTEGER, y->INTEGER] =: BOOLEAN", GSM_Less_Integer },
+      { "GreaterEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_GreaterEqual_Number },
+      { "GreaterEqual[x->TEXT, y->TEXT] =: BOOLEAN", GSM_GreaterEqual_Text },
       { "Less[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_Less_Number },
       { "Less[x->TEXT, y->TEXT] =: BOOLEAN", GSM_Less_Text },
-      { "LessEqual[x->INTEGER, y->INTEGER] =: BOOLEAN", 
-	GSM_LessEqual_Integer },
-      { "LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN",
-	GSM_LessEqual_Number },
-      { "LessEqual[x->TEXT, y->TEXT] =: BOOLEAN",
-	GSM_LessEqual_Text },
+      { "LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_LessEqual_Number },
+      { "LessEqual[x->TEXT, y->TEXT] =: BOOLEAN", GSM_LessEqual_Text },
       { "Log[x->NUMBER] =: NUMBER", GSM_Log },
-      { "Minus[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Minus_Integer },
       { "Minus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Minus_Number },
       { "Minus[x->MIXED, y->MIXED] =: MIXED", GSM_Minus_Mixed },
       { "Minus[x->BEHAV, y->BEHAV] =: BEHAV", GSM_Minus_Behav },
-      { "Modulus[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Modulus },
-      { "Negate[x->INTEGER] =: INTEGER", GSM_Negate_Integer },
-      { "Negate[x->NUMBER] =: NUMBER", GSM_Negate_Number },
+      { "Modulus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Modulus },
+      { "Negate[x->NUMBER] =: NUMBER", GSM_Negate },
       { "Not[x->BOOLEAN] =: BOOLEAN", GSM_Not },
       { "NotEqual[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_NotEqual_Boolean },
-      { "NotEqual[x->INTEGER, y->INTEGER] =: BOOLEAN", GSM_NotEqual_Integer },
       { "NotEqual[x->NUMBER, y->NUMBER] =: BOOLEAN", GSM_NotEqual_Number },
       { "NotEqual[x->TEXT, y->TEXT] =: BOOLEAN", GSM_NotEqual_Text },
       { "NotEqual[x->EFG, y->EFG] =: BOOLEAN", GSM_NotEqual_Efg },
@@ -1884,12 +1707,10 @@ void Init_gsmoper(GSM* gsm)
       { "NotEqual[x->MIXED, y->MIXED] =: BOOLEAN", GSM_NotEqual_Mixed },
       { "Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_Or },
       { "Parentheses[x->ANYTYPE] =: ANYTYPE", GSM_Parentheses },
-      { "Plus[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Plus_Integer },
       { "Plus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Plus_Number },
       { "Plus[x->MIXED, y->MIXED] =: MIXED", GSM_Plus_Mixed },
       { "Plus[x->BEHAV, y->BEHAV] =: BEHAV", GSM_Plus_Behav },
       { "Power[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Power },
-      { "Times[x->INTEGER, y->INTEGER] =: INTEGER", GSM_Times_Integer },
       { "Times[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Times_Number },
       { "Times[x->NUMBER, y->MIXED] =: MIXED", GSM_Times_Mixed },
       { "Times[x->NUMBER, y->BEHAV] =: BEHAV", GSM_Times_Behav },
@@ -1937,7 +1758,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType
-			("x", porBOOL | porINTEGER | porNUMBER));
+			("x", porBOOL | porNUMBER | porNUMBER));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
@@ -1975,7 +1796,7 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(6, 1, ParamInfoType
-			("x", PortionSpec(porBOOL | porINTEGER | porNUMBER |
+			("x", PortionSpec(porBOOL | porNUMBER |
 					  porTEXT | porMIXED | porBEHAV, 1)));
 
   FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Write,
@@ -2020,11 +1841,11 @@ void Init_gsmoper(GSM* gsm)
 			("commas", porBOOL,
 			 new BoolPortion(_WriteListCommas, true), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
-			("lf", porINTEGER,
-			 new IntPortion(_WriteListLF, true), BYREF ));
+			("lf", porNUMBER,
+			 new NumberPortion(_WriteListLF, true), BYREF ));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
-			("indent", porINTEGER,
-			 new IntPortion(_WriteListIndent, true), BYREF ));
+			("indent", porNUMBER,
+			 new NumberPortion(_WriteListIndent, true), BYREF ));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GetListFormat", 1);
@@ -2036,85 +1857,73 @@ void Init_gsmoper(GSM* gsm)
 			("commas", porBOOL,
 			 new BoolPortion(_WriteListCommas, true), BYREF));
   FuncObj->SetParamInfo(0, 2, ParamInfoType
-			("lf", porINTEGER,
-			 new IntPortion(_WriteListLF, true), BYREF ));
+			("lf", porNUMBER,
+			 new NumberPortion(_WriteListLF, true), BYREF ));
   FuncObj->SetParamInfo(0, 3, ParamInfoType
-			("indent", porINTEGER,
-			 new IntPortion(_WriteListIndent, true), BYREF ));
+			("indent", porNUMBER,
+			 new NumberPortion(_WriteListIndent, true), BYREF ));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Format", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IntFormat, porINTEGER, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porINTEGER) );
+  FuncObj = new FuncDescObj("Format", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_FloatFormat, porNUMBER, 4));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, ParamInfoType
-			("width", porINTEGER, 
-			 new IntPortion(_WriteWidth, true), BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_FloatFormat, porNUMBER, 4));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNUMBER) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType
-			("width", porINTEGER, 
-			 new IntPortion(_WriteWidth, true), BYREF));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType
-			("precis", porINTEGER,
-			 new IntPortion(_WritePrecis, true), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType
+			("width", porNUMBER, 
+			 new NumberPortion(_WriteWidth, true), BYREF));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("precis", porNUMBER,
+			 new NumberPortion(_WritePrecis, true), BYREF));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("expmode", porBOOL,
 			 new BoolPortion(_WriteExpmode, true), BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_TextFormat, porTEXT, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porTEXT) );
-  FuncObj->SetParamInfo(2, 1, ParamInfoType
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_TextFormat, porTEXT, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, ParamInfoType
 			("quote", porBOOL,
 			 new BoolPortion(_WriteQuoted, true), BYREF));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_SolutionFormat, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SolutionFormat,
 				       porBEHAV | porMIXED, 2));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porBEHAV | porMIXED) );
-  FuncObj->SetParamInfo(3, 1, ParamInfoType
-			("info", porINTEGER,
-			 new IntPortion(_WriteSolutionInfo, true), BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
+  FuncObj->SetParamInfo(2, 1, ParamInfoType
+			("info", porNUMBER,
+			 new NumberPortion(_WriteSolutionInfo, true), BYREF));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("GetFormat", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetIntFormat, porINTEGER, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porINTEGER) );
+  FuncObj = new FuncDescObj("GetFormat", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GetFloatFormat, porNUMBER, 4));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, ParamInfoType
-			("width", porINTEGER, 
-			 new IntPortion(_WriteWidth, true), BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GetFloatFormat, porNUMBER, 4));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNUMBER) );
-  FuncObj->SetParamInfo(1, 1, ParamInfoType
-			("width", porINTEGER, 
-			 new IntPortion(_WriteWidth, true), BYREF));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType
-			("precis", porINTEGER,
-			 new IntPortion(_WritePrecis, true), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType
+			("width", porNUMBER, 
+			 new NumberPortion(_WriteWidth, true), BYREF));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("precis", porNUMBER,
+			 new NumberPortion(_WritePrecis, true), BYREF));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType
 			("expmode", porBOOL,
 			 new BoolPortion(_WriteExpmode, true), BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GetTextFormat, porTEXT, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porTEXT) );
-  FuncObj->SetParamInfo(2, 1, ParamInfoType
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GetTextFormat, porTEXT, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, ParamInfoType
 			("quote", porBOOL,
 			 new BoolPortion(_WriteQuoted, true), BYREF));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_GetSolutionFormat, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GetSolutionFormat,
 				       porBEHAV | porMIXED, 2));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porBEHAV | porMIXED) );
-  FuncObj->SetParamInfo(3, 1, ParamInfoType
-			("info", porINTEGER,
-			 new IntPortion(_WriteSolutionInfo, true), BYREF));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV | porMIXED) );
+  FuncObj->SetParamInfo(2, 1, ParamInfoType
+			("info", porNUMBER,
+			 new NumberPortion(_WriteSolutionInfo, true), BYREF));
   gsm->AddFunction(FuncObj);
 
 
 
   //-------------------- Read --------------------------
 
-  FuncObj = new FuncDescObj("Read", 8);
+  FuncObj = new FuncDescObj("Read", 6);
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Read_Bool, 
 				       porINPUT, 2, 0, funcNONLISTABLE));
@@ -2130,55 +1939,36 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porBOOL,1), 
 					    REQUIRED, BYREF));
 
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Read_Integer, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Read_Number,
 				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porINTEGER, 
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porNUMBER,
 					    REQUIRED, BYREF));
   
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Read_List_Integer, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Read_List_Number,
 				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", PortionSpec(porINTEGER,1), 
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", PortionSpec(porNUMBER,1),
 					    REQUIRED, BYREF));
   
-
-  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Read_Number,
+  
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Read_Text,
 				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(4, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNUMBER,
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porTEXT,
 					    REQUIRED, BYREF));
   
-  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Read_List_Number,
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Read_List_Text,
 				       porINPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("input", porINPUT,
 					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", PortionSpec(porNUMBER,1),
-					    REQUIRED, BYREF));
-  
-  
-  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Read_Text,
-				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(6, 0, ParamInfoType("input", porINPUT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(6, 1, ParamInfoType("x", porTEXT,
-					    REQUIRED, BYREF));
-  
-  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Read_List_Text,
-				       porINPUT, 2, 0, funcNONLISTABLE));
-  FuncObj->SetParamInfo(7, 0, ParamInfoType("input", porINPUT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", PortionSpec(porTEXT,1),
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", PortionSpec(porTEXT,1),
 					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
-  
-
-  //---------------- faked functions -----------------//
 
   FuncObj = new FuncDescObj("Help", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Help, PortionSpec(porTEXT, 1), 3));
@@ -2213,10 +2003,10 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("Randomize", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_Integer, porINTEGER, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porINTEGER));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("seed", porINTEGER,
-					    new IntPortion(0)));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize, porNUMBER, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNUMBER));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("seed", porNUMBER,
+					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsFloat", 1);
@@ -2246,7 +2036,7 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("Shell", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Shell, porINTEGER, 2 ));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Shell, porNUMBER, 2 ));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("command", porTEXT,
 					    new TextPortion("")));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("spawn", porBOOL, 

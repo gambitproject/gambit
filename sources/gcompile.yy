@@ -282,7 +282,7 @@ arrow:         RARROW | DBLARROW
 constant:        BOOLEAN 
           { $$ = new gclConstExpr(new BoolPortion(bval)); }
         |        INTEGER   
-          { $$ = new gclConstExpr(new IntPortion(ival)); }
+          { $$ = new gclConstExpr(new NumberPortion(ival)); }
         |        FLOAT
           { $$ = new gclConstExpr(new NumberPortion(dval)); }
         |        TEXT
