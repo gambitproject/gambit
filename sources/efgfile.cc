@@ -353,13 +353,13 @@ void write_efg_file(FILE *f)
 
 void dt1toefg(FILE *in, FILE *out)
 {
-  int errorYes;
-  
   initialize();
-  errorYes = read_dt1_file(in);
-  if (errorYes) 
-    {printf("Input file formatted incorrectly.  Operation aborted.\n");  
-     exit(1);}
+  if (read_dt1_file(in))  {
+    printf("Input file formatted incorrectly.  Operation aborted.\n");
+    cleanup();
+    return;
+  }
+
   split_subgame_roots();
   write_efg_file(out);
   cleanup();
