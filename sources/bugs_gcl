@@ -131,28 +131,6 @@ Bug C21: Algorithms producing nonsense on games of imperfect recall
 
 //------------------------------
 
-Bug C25:  Saving games loses precision.  
-
-
-  GCL1:= << n:=NewNfg[{2,2},True]
-  (Nfg) ""
-  GCL2:= << SetPayoffs[Outcomes[n]_1,{1.0123456789,0.0}]
-  (NFOutcome) 0x83917b0 "11"
-  GCL3:= << SetNumericFormat[precis->10]
-  True
-  GCL4:= << Payoffs[n]
-  { { { 1.0123456789, 0.0000000000 }, { 0, 0 } },
-    { { 0, 0 }, { 0, 0 } } }
-  GCL5:= << SaveNfg[n,"junk"]
-  (Nfg) ""
-  GCL6:= << nn:=LoadNfg["junk"]
-  (Nfg) ""
-  GCL7:= << Payoffs[nn]        
-  { { { 1.0123460000, 0.0000000000 }, { 0, 0 } },
-    { { 0, 0 }, { 0, 0 } } }
-
-//-----------------------------
-
 Bug C26:  Incomplete profiles, LiapValue, and so forth
 
 GCL1:= << LoadEfg["D:/gambit/efg/e02.efg"]
@@ -215,20 +193,6 @@ Bug C30:  ElimDom on efg not working:
 Note, this is also leading to problems in the GUI (not surprisingly):
 Load poker.efg, and do Supports->ElimDom, and check Weak and
 PureStrat, then OK.  Gives internal error in Gambit
-
-//------------------------------
-
-Bug C32:  Seg fault when file does not exist
-
-This is on mill, using version compiled with O2.  Here, poker.efg is
-not in the working directory.
-
-  57 mill:/home/mill/rdm/gambit newgcl
-  Include["/home/mill/rdm/gambit/bin/gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << e:=LoadEfg["poker.efg"]
-  In function LoadEfg[], in file "console" at line 1:
-  A segmentation fault has occurred
 
 //---------------  These are not bugs but suggested improvements ------------
 
