@@ -400,15 +400,36 @@ public:
 			    gbtPVector<gbtNumber> &prob) const;
 };
 
-class gbtNfgContingencyBase : public gbtNfgContingencyRep {
+class gbtNfgContingencyTree : public gbtNfgContingencyRep {
+private:
+  gbtGame m_nfg; 
+  gbtArray<gbtGameStrategy> m_profile;
+  
+public:
+  gbtNfgContingencyTree(const gbtGame &);
+  virtual ~gbtNfgContingencyTree() { }
+  
+  virtual gbtNfgContingencyRep *Copy(void) const;
+
+  gbtGameStrategy GetStrategy(const gbtGamePlayer &p_player) const
+    { return m_profile[p_player->GetId()]; }
+  void SetStrategy(gbtGameStrategy);
+
+  void SetOutcome(const gbtGameOutcome &) const;
+  gbtGameOutcome GetOutcome(void) const;
+
+  gbtNumber GetPayoff(const gbtGamePlayer &) const;
+};
+
+class gbtNfgContingencyTable : public gbtNfgContingencyRep {
 private:
   gbtGame m_nfg; 
   long m_index;
   gbtArray<gbtGameStrategy> m_profile;
   
 public:
-  gbtNfgContingencyBase(const gbtGame &);
-  virtual ~gbtNfgContingencyBase() { }
+  gbtNfgContingencyTable(const gbtGame &);
+  virtual ~gbtNfgContingencyTable() { }
   
   virtual gbtNfgContingencyRep *Copy(void) const;
 

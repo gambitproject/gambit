@@ -1440,7 +1440,12 @@ gbtNfgSupport gbtGameBase::NewNfgSupport(void) const
 
 gbtNfgContingency gbtGameBase::NewContingency(void) const
 {
-  return new gbtNfgContingencyBase(const_cast<gbtGameBase *>(this));
+  if (m_results.Length() > 0) {
+    return new gbtNfgContingencyTable(const_cast<gbtGameBase *>(this));
+  }
+  else {
+    return new gbtNfgContingencyTree(const_cast<gbtGameBase *>(this));
+  }
 }
 
 // ---------------------------------------
