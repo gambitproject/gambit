@@ -14,7 +14,6 @@ dnl Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
-AC_PROG_YACC
 
 dnl The following checks are currently commented out.
 dnl These were generated during the original autoconfiscation of gambit,
@@ -74,12 +73,10 @@ AC_OUTPUT(Makefile sources/Makefile \
 	  sources/pelican/Makefile \
 	  sources/poly/Makefile \
 	  sources/nash/Makefile \
-	  sources/gcl/Makefile \
 	  sources/python/Makefile \
 	  sources/bitmaps/Makefile \
-	  sources/wxgcl/Makefile \
           sources/gui/Makefile \
           efg/Makefile nfg/Makefile \
-	  scripts/Makefile scripts/gcl/Makefile scripts/python/Makefile)
+	  scripts/Makefile scripts/python/Makefile)
 
 

@@ -44,18 +44,8 @@ nash:
 	make -f borland
 	cd ..
 
-gcl:
-	cd gcl
-	make -f borland
-	cd ..
-
 gui:
 	cd gui
-	make -f borland
-	cd ..
-
-wxgcl:
-	cd wxgcl
 	make -f borland
 	cd ..
 
@@ -74,11 +64,7 @@ clean:
 	make -f borland clean
 	cd ..\nash
 	make -f borland clean
-	cd ..\gcl
-	make -f borland clean
 	cd ..\gui
-	make -f borland clean
-	cd ..\wxgcl
 	make -f borland clean
 
 
