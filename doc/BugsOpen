@@ -156,22 +156,8 @@ ITEM 0004: Algorithms producing nonsense on games of imperfect recall
 
 DATE:     9/8/1999 by TLT (was Bug C21 in bugs_gcl)
 AFFECTS:  GCL, GUI; all platforms
-STATUS:   OPEN
+STATUS:   CLOSED 9/9/1999 by TLT
 SEVERITY: MAJOR
-DETAILS:
-
-  GCL1:= << e:=LoadEfg["myerson.efg"]
-  (Efg) "Myerson - Game with no solution in behavioral strategies"
-  GCL2:= << IsPerfectRecall[e]       
-  False
-  GCL3:= << b:=LcpSolve[e]              
-  { (Behav) { { 0.000000 1.000000 }{ 0.250000 0.750000 } }{ { 0.500000 0.500000 } } }
-  GCL4:= << IsNash[b]
-  { False }
-  GCL5:= << OneNash[e]   
-  { (Behav) { { 0.500000 0.500000 }{ 1.000000 1.000000 } }{ { 0.500000 0.500000 } } }
-  GCL6:= << IsNash[GCL5] 
-  { Maybe }
 
 ---------------
 
