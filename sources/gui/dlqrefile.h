@@ -28,6 +28,7 @@
 #define DLQREFILE_H
 
 #include "wx/listctrl.h"
+#include "wx/notebook.h"
 
 //
 // Keeping both types of solution here is more than a bit kludgy;
@@ -38,6 +39,7 @@
 //
 class dialogQreFile : public wxDialog {
 private:
+  wxNotebook *m_notebook;
   wxListCtrl *m_qreList;
   gList<MixedSolution> m_mixedProfiles;
   gList<BehavSolution> m_behavProfiles;

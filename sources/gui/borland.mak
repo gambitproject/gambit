@@ -18,6 +18,7 @@ EXTRACPPFLAGS = -v -I$(WXDIR)\include -I$(BCCDIR)\include -I.. -D__BCC55__ -DVER
 EXTRALINKFLAGS = 
 
 gambit_SOURCES = \
+	corplot.cc \
         dlabout.cc \
 	dleditbehav.cc \
 	dleditcont.cc \

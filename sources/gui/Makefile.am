@@ -5,6 +5,8 @@ bin_PROGRAMS = gambit
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
 gambit_SOURCES = \
+	corplot.cc \
+	corplot.h \
 	dlabout.cc \
 	dlabout.h \
 	dleditbehav.cc \
