@@ -224,6 +224,7 @@ named_arg:    NAME RARROW { formalstack.Push(tval); } expression
                              emit(new Bind(formalstack.Pop())); }
 
 list:         LBRACE  { listlen.Push(0); } listels RBRACE
+    |         LBRACE  { listlen.Push(0); }  RBRACE
 
 listels:      listel
        |      listels COMMA listel
