@@ -1,4 +1,8 @@
-// lapack.h by David Bustos, 6/25/99
+//
+// FILE: lapack.h -- Hompack code, translated by David Bustos, 6/25/99
+//
+// $Id$
+//
 
 #ifndef LAPACK_H
 #define LAPACK_H
@@ -6,7 +10,6 @@
 // Includes //////////////////////////////////////////////////////////////
 #include "gvector.h"
 #include "gmatrix.h"
-
 
 // Prototypes ////////////////////////////////////////////////////////////
 void dgeqpf(gMatrix<double> &A, gArray<int> &jpvt, gVector<double> &tau, int &info);
@@ -26,3 +29,7 @@ void dlarf(char side, gVector<double> &V, double tau, gMatrix<double> &C);
 void xerbla(char *srname, int info);
 
 #endif
+
+
+
+

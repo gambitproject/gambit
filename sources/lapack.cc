@@ -1,3 +1,9 @@
+//
+// FILE: lapack.cc -- Hompack code
+//
+// $Id$
+//
+
 // Includes //////////////////////////////////////////////////////////////
 #include <float.h>
 #include <iostream.h>
@@ -70,202 +76,202 @@
 
 void dgeqpf(gMatrix<double> &A, gArray<int> &jpvt, gVector<double> &tau, int &info)
 {
-    //cout << "Entered dgeqpf()." << endl;
-
-    int m = A.NumRows();
-    int n = A.NumColumns();
-
-    info = 0;
-    if (m < 0)          info = -1;
-    else if (n < 0)     info = -2;
-
-    if (info != 0) {
-	xerbla("DGEQPF", -info);
-	return;
+  //cout << "Entered dgeqpf()." << endl;
+  
+  int m = A.NumRows();
+  int n = A.NumColumns();
+  
+  info = 0;
+  if (m < 0)          info = -1;
+  else if (n < 0)     info = -2;
+  
+  if (info != 0) {
+    xerbla("DGEQPF", -info);
+    return;
+  }
+  
+  int mn = gmin(m,n);
+  
+  // "Move initial columns up front"
+  int itemp = 1;
+  for (int i = 1; i <= n; ++i) {
+    if (jpvt[i] != 0) {
+      if (i != itemp) {
+	A.SwitchColumns(i, itemp);
+	jpvt[i] = jpvt[itemp];
+	jpvt[itemp] = i;
+      } else {
+	jpvt[i] = i;
+      }
+      ++itemp;
+    } 
+    else {
+      jpvt[i] = i;
     }
-
-    int mn = gmin(m,n);
-
-    // "Move initial columns up front"
-    int itemp = 1;
-    for (int i = 1; i <= n; ++i) {
-	if (jpvt[i] != 0) {
-            if (i != itemp) {
-                A.SwitchColumns(i, itemp);
-                jpvt[i] = jpvt[itemp];
-                jpvt[itemp] = i;
-            } else {
-                jpvt[i] = i;
-	    }
-	    ++itemp;
-        } else {
-            jpvt[i] = i;
-	}
+  }
+  --itemp;
+  
+  // "Compute the QR factorization and update remaining columns"
+  if (itemp > 0) {
+    int ma = gmin(itemp,m);
+    
+    //dgeqr2(m, ma, &A(1,1), lda, &TAU(1), &WORK(1), info);
+    // Extract apropriate members of A.
+    gMatrix<double> temp(m, ma);
+    for (int c = 1; c <= ma; ++c) {
+      gVector<double> temp2(n);
+      A.GetColumn(c, temp2);
+      temp.SetColumn(c, temp2);
     }
-    --itemp;
-
-    // "Compute the QR factorization and update remaining columns"
-    if (itemp > 0) {
-	int ma = gmin(itemp,m);
-
-        //dgeqr2(m, ma, &A(1,1), lda, &TAU(1), &WORK(1), info);
-        // Extract apropriate members of A.
-        gMatrix<double> temp(m, ma);
-        for (int c = 1; c <= ma; ++c) {
-            gVector<double> temp2(n);
-            A.GetColumn(c, temp2);
-            temp.SetColumn(c, temp2);
-        }
-        // Call dgeqr2
-        dgeqr2(temp, tau, info);
-        //cout << "dgeqpf: Left dgeqr2." << endl;
-        // Put the results back in A.
-        for (int c = 1; c <= ma; ++c) {
-            gVector<double> temp2(n);
-            temp.GetColumn(c, temp2);
-            A.SetColumn(c, temp2);
-        }
-
-        if (ma < n) {
-            //dorm2r('L', 'T', m, n - ma, ma, &A(1,1), lda,
-            //     &TAU(1), &A(1,ma+1), lda, &WORK(1), info);
-            // Extract the apropriate members of A.
-            gMatrix<double> temp(m, ma);
-            for (int c = 1; c <= ma; ++c) {
-                gVector<double> temp2(n);
-                A.GetColumn(c, temp2);
-                temp.SetColumn(c, temp2);
-            }
-            gMatrix<double> C(m, n-ma);
-            for (int c = 1; c <= n-ma; ++c) {
-                gVector<double> temp2(n);
-                A.GetColumn(ma+c, temp2);
-                C.SetColumn(c, temp2);
-            }
-
-            // Call dorm2r
-            dorm2r('L', 'T', ma, temp, tau, C, info);
-            //cout << "dgeqpf: Left dorm2r." << endl;
-
-            // Put the results back in A.
-            for (int c = 1; c <= n-ma; ++c) {
-                gVector<double> temp2(n);
-                C.GetColumn(c, temp2);
-                A.SetColumn(ma+c, temp2);
-            }
-        }
+    // Call dgeqr2
+    dgeqr2(temp, tau, info);
+    //cout << "dgeqpf: Left dgeqr2." << endl;
+    // Put the results back in A.
+    for (int c = 1; c <= ma; ++c) {
+      gVector<double> temp2(n);
+      temp.GetColumn(c, temp2);
+      A.SetColumn(c, temp2);
     }
-
-    if (itemp < mn)
+    
+    if (ma < n) {
+      //dorm2r('L', 'T', m, n - ma, ma, &A(1,1), lda,
+      //     &TAU(1), &A(1,ma+1), lda, &WORK(1), info);
+      // Extract the apropriate members of A.
+      gMatrix<double> temp(m, ma);
+      for (int c = 1; c <= ma; ++c) {
+	gVector<double> temp2(n);
+	A.GetColumn(c, temp2);
+	temp.SetColumn(c, temp2);
+      }
+      gMatrix<double> C(m, n-ma);
+      for (int c = 1; c <= n-ma; ++c) {
+	gVector<double> temp2(n);
+	A.GetColumn(ma+c, temp2);
+	C.SetColumn(c, temp2);
+      }
+      
+      // Call dorm2r
+      dorm2r('L', 'T', ma, temp, tau, C, info);
+      //cout << "dgeqpf: Left dorm2r." << endl;
+      
+      // Put the results back in A.
+      for (int c = 1; c <= n-ma; ++c) {
+	gVector<double> temp2(n);
+	C.GetColumn(c, temp2);
+	A.SetColumn(ma+c, temp2);
+      }
+    }
+  }
+  
+  if (itemp < mn)
     {
-        gVector<double> work(3*n);
-
-        // "Initialize partial column norms. The first n elements of
-        //  work store the exact column norms."
-        for (int i = itemp + 1; i <= n; ++i) {
-            //WORK(i) = dnrm2_(m - itemp, &A(itemp+1,i), 1);
-	    //WORK(n + i) = WORK(i);
-
-            gVector<double> temp(m - itemp);
-            for (int j = 1; j <= temp.Length(); ++j)
-                temp[j] = A(itemp+j, i);
-            work[n + i] = work[i] = sqrt(temp.NormSquared());
+      gVector<double> work(3*n);
+      
+      // "Initialize partial column norms. The first n elements of
+      //  work store the exact column norms."
+      for (int i = itemp + 1; i <= n; ++i) {
+	//WORK(i) = dnrm2_(m - itemp, &A(itemp+1,i), 1);
+	//WORK(n + i) = WORK(i);
+	
+	gVector<double> temp(m - itemp);
+	for (int j = 1; j <= temp.Length(); ++j)
+	  temp[j] = A(itemp+j, i);
+	work[n + i] = work[i] = sqrt(temp.NormSquared());
+      }
+      
+      // "Compute factorization"
+      for (int i = itemp + 1; i <= mn; ++i) {
+	// "Determine ith pivot column and swap if necessary"
+	//int pvt = i - 1 + idamax_(n - i + 1, &WORK(i), 1);
+	int pvt = i; double max = fabs(work[pvt]);
+	for (int idx = pvt+1; idx <= n; ++idx) {
+	  double tmp = fabs(work[idx]);
+	  if ( tmp > max ) {
+	    pvt = idx; max = tmp;
+	  }
 	}
-
-        // "Compute factorization"
-        for (int i = itemp + 1; i <= mn; ++i)
-        {
-            // "Determine ith pivot column and swap if necessary"
-            //int pvt = i - 1 + idamax_(n - i + 1, &WORK(i), 1);
-            int pvt = i; double max = fabs(work[pvt]);
-            for (int idx = pvt+1; idx <= n; ++idx) {
-                double tmp = fabs(work[idx]);
-                if ( tmp > max ) {
-                    pvt = idx; max = tmp;
-                }
-            }
-
-            if (pvt != i) {
-                A.SwitchColumns(pvt, i);
-                itemp = jpvt[pvt];
-                jpvt[pvt] = jpvt[i];
-		jpvt[i] = itemp;
-		work[pvt] = work[i];
-		work[n + pvt] = work[n + i];
+	
+	if (pvt != i) {
+	  A.SwitchColumns(pvt, i);
+	  itemp = jpvt[pvt];
+	  jpvt[pvt] = jpvt[i];
+	  jpvt[i] = itemp;
+	  work[pvt] = work[i];
+	  work[n + pvt] = work[n + i];
+	}
+	
+	// "Generate elementary reflector H(i)"
+	if (i < m) {
+	  //dlarfg(m - i + 1, &A(i,i), &A(i+1,i), 1, &TAU(i));
+	  // Extract the apropriate members of A
+	  gVector<double> X(m-i);
+	  for (int j = 1; j <= X.Length(); ++j)
+	    X[j] = A(i+j, i);
+	  // Call dlarfg
+	  dlarfg( A(i, i), X, tau[i] );
+	  //cout << "dgeqpf: Left dlarfg, #1." << endl;
+	  // And put the results back in A
+	  for (int j = 1; j <= X.Length(); ++j)
+	    A(i+j, i) = X[j];
+	} 
+	else {
+	  //dlarfg(1, &A(m,m), &A(m,m), 1, &TAU(m));
+	  gVector<double> X(0);
+	  //X = A(m, m);
+	  dlarfg( A(m, m), X, tau[m] );
+	  //cout << "dgeqpf: Left dlarfg, #2." << endl;
+	  //A(m, m) = X[1];
+	}
+	
+	if (i < n) {
+	  // "Apply H(i) to A(i:m,i+1:n) from the left"
+	  double aii = A(i,i);
+	  A(i,i) = 1;
+	  
+	  //dlarf('L', m - i + 1, n - i, &A(i,i), 1, &TAU(i),
+	  //       &A(i,i+1), lda, &WORK((n << 1) +	1));
+	  gVector<double> V(m-i+1);                       // Extract
+	  for (int j = 1; j <= V.Length(); ++j)
+	    V[j] = A(i+j-1, i);
+	  gMatrix<double> C(m-i+1, n-i);
+	  for (int r = 1; r <= C.NumRows(); ++r)
+	    for (int c = 1; c <= C.NumColumns(); ++c)
+	      C(r, c) = A(i+r-1, i+c);
+	  dlarf('L', V, tau[i], C);                       // Call
+	  //cout << "dgeqpf: Left dlarfg, #3." << endl;
+	  for (int r = 1; r <= C.NumRows(); ++r)          // Restore
+	    for (int c = 1; c <= C.NumColumns(); ++c)
+	      A(i+r-1, i+c) = C(r, c);
+	  
+	  A(i,i) = aii;
+	}
+	
+	// "Update partial column norms"
+	for (int j = i + 1; j <= n; ++j) {
+	  if (work[j] != 0) {
+	    // "Computing 2nd power"
+	    double d = A(i,j) / work[j];
+	    double temp = 1 - d * d;
+	    if (temp < 0)
+	      temp = 0;
+	    
+	    // "Computing 2nd power"
+	    d = work[j] / work[n + j];
+	    if (temp * d * d == 0) {
+	      if (m - i > 0) {
+		gVector<double> tempV(m - i);
+		for (int k = 1; k <= tempV.Length(); ++k)
+		  tempV[k] = A(i+k, j);
+		work[n + j] = work[j] = sqrt(tempV.NormSquared());
+	      } else {
+		work[n + j] = work[j] = 0;
+	      }
+	    } else {
+	      work[j] *= sqrt(temp);
 	    }
-
-            // "Generate elementary reflector H(i)"
-            if (i < m) {
-                //dlarfg(m - i + 1, &A(i,i), &A(i+1,i), 1, &TAU(i));
-                // Extract the apropriate members of A
-                gVector<double> X(m-i);
-                for (int j = 1; j <= X.Length(); ++j)
-                    X[j] = A(i+j, i);
-                // Call dlarfg
-                dlarfg( A(i, i), X, tau[i] );
-                //cout << "dgeqpf: Left dlarfg, #1." << endl;
-                // And put the results back in A
-                for (int j = 1; j <= X.Length(); ++j)
-                    A(i+j, i) = X[j];
-            } else {
-                //dlarfg(1, &A(m,m), &A(m,m), 1, &TAU(m));
-                gVector<double> X(0);
-                //X = A(m, m);
-                dlarfg( A(m, m), X, tau[m] );
-                //cout << "dgeqpf: Left dlarfg, #2." << endl;
-                //A(m, m) = X[1];
-            }
-
-	    if (i < n) {
-                // "Apply H(i) to A(i:m,i+1:n) from the left"
-		double aii = A(i,i);
-		A(i,i) = 1;
-
-                //dlarf('L', m - i + 1, n - i, &A(i,i), 1, &TAU(i),
-                //       &A(i,i+1), lda, &WORK((n << 1) +	1));
-                gVector<double> V(m-i+1);                       // Extract
-                for (int j = 1; j <= V.Length(); ++j)
-                    V[j] = A(i+j-1, i);
-                gMatrix<double> C(m-i+1, n-i);
-                for (int r = 1; r <= C.NumRows(); ++r)
-                    for (int c = 1; c <= C.NumColumns(); ++c)
-                        C(r, c) = A(i+r-1, i+c);
-                dlarf('L', V, tau[i], C);                       // Call
-                //cout << "dgeqpf: Left dlarfg, #3." << endl;
-                for (int r = 1; r <= C.NumRows(); ++r)          // Restore
-                    for (int c = 1; c <= C.NumColumns(); ++c)
-                        A(i+r-1, i+c) = C(r, c);
-
-                A(i,i) = aii;
-	    }
-
-            // "Update partial column norms"
-            for (int j = i + 1; j <= n; ++j) {
-                if (work[j] != 0)
-                {
-                    // "Computing 2nd power"
-                    double d = A(i,j) / work[j];
-                    double temp = 1 - d * d;
-                    if (temp < 0)
-                        temp = 0;
-
-                    // "Computing 2nd power"
-		    d = work[j] / work[n + j];
-                    if (temp * d * d == 0) {
-                        if (m - i > 0) {
-                            gVector<double> tempV(m - i);
-                            for (int k = 1; k <= tempV.Length(); ++k)
-                                tempV[k] = A(i+k, j);
-                            work[n + j] = work[j] = sqrt(tempV.NormSquared());
-                        } else {
-                            work[n + j] = work[j] = 0;
-                        }
-                    } else {
-                        work[j] *= sqrt(temp);
-                    }
-                }
-            }
-        }
+	  }
+	}
+      }
     }
 }
 
@@ -323,64 +329,64 @@ void dgeqpf(gMatrix<double> &A, gArray<int> &jpvt, gVector<double> &tau, int &in
 
 void dgeqr2(gMatrix<double> &A, gArray<double> &tau, int &info)
 {
-    //cout << "Entered dgeqr2." << endl;
-
-    int m = A.NumRows();
-    int n = A.NumColumns();
-
-    info = 0;
-    if (m < 0)	        info = -1;
-    else if (n < 0)     info = -2;
-
-    if (info != 0) {
-	xerbla("DGEQR2", -info);
-	return;
+  //cout << "Entered dgeqr2." << endl;
+  
+  int m = A.NumRows();
+  int n = A.NumColumns();
+  
+  info = 0;
+  if (m < 0)	        info = -1;
+  else if (n < 0)     info = -2;
+  
+  if (info != 0) {
+    xerbla("DGEQR2", -info);
+    return;
+  }
+  
+  int k = gmin(m,n);
+  for (int i = 1; i <= k; ++i) {
+    // "Generate elementary reflector H(i) to annihilate A(i+1:m,i)"
+    // "Computing MIN"
+    
+    // First extract the proper vector from A.
+    gVector<double> temp(A.NumRows() - i);
+    for (int j = 1; j <= temp.Length(); ++j)
+      temp[j] = A(i+j, i);
+    
+    // Now call dlarfg
+    dlarfg( A(i, i), temp, tau[i] );
+    //cout << "dgeqr2: Left dlarfg #1." << endl;
+    
+    // And put the results back in A.
+    for (int j = 1; j <= temp.Length(); ++j)
+      A(i+j, i) = temp[j];
+    
+    if (i < n) {
+      // "Apply H(i) to A(i:m,i+1:n) from the left"
+      double aii = A(i,i);
+      A(i,i) = 1.;
+      
+      // First extract the appropriate members of A.
+      gVector<double> V(m-i+1);
+      for (int j = 1; j <= V.Length(); ++j)
+	V[j] = A(i+j-1, i);
+      gMatrix<double> temp(m-i+1, n-1);
+      for (int r = 1; r <= temp.NumRows(); ++r)
+	for (int c = 1; c <= temp.NumColumns(); ++c)
+	  temp(r, c) = A(i+r-1, i+c);
+      
+      // Now call dlarf
+      dlarf('L', V, tau[i], temp);
+      //cout << "dgeqr2: Left dlarfg, #2." << endl;
+      
+      // And put the results back into A.
+      for (int r = 1; r <= temp.NumRows(); ++r)
+	for (int c = 1; c <= temp.NumColumns(); ++c)
+	  A(i+r-1, i+c) = temp(r, c);
+      
+      A(i,i) = aii;
     }
-
-    int k = gmin(m,n);
-    for (int i = 1; i <= k; ++i) {
-        // "Generate elementary reflector H(i) to annihilate A(i+1:m,i)"
-        // "Computing MIN"
-
-        // First extract the proper vector from A.
-        gVector<double> temp(A.NumRows() - i);
-        for (int j = 1; j <= temp.Length(); ++j)
-            temp[j] = A(i+j, i);
-
-        // Now call dlarfg
-        dlarfg( A(i, i), temp, tau[i] );
-        //cout << "dgeqr2: Left dlarfg #1." << endl;
-
-        // And put the results back in A.
-        for (int j = 1; j <= temp.Length(); ++j)
-            A(i+j, i) = temp[j];
-
-        if (i < n) {
-            // "Apply H(i) to A(i:m,i+1:n) from the left"
-	    double aii = A(i,i);
-            A(i,i) = 1.;
-
-            // First extract the appropriate members of A.
-            gVector<double> V(m-i+1);
-            for (int j = 1; j <= V.Length(); ++j)
-                V[j] = A(i+j-1, i);
-            gMatrix<double> temp(m-i+1, n-1);
-            for (int r = 1; r <= temp.NumRows(); ++r)
-                for (int c = 1; c <= temp.NumColumns(); ++c)
-                    temp(r, c) = A(i+r-1, i+c);
-
-            // Now call dlarf
-            dlarf('L', V, tau[i], temp);
-            //cout << "dgeqr2: Left dlarfg, #2." << endl;
-
-            // And put the results back into A.
-            for (int r = 1; r <= temp.NumRows(); ++r)
-                for (int c = 1; c <= temp.NumColumns(); ++c)
-                    A(i+r-1, i+c) = temp(r, c);
-
-	    A(i,i) = aii;
-	}
-    }
+  }
 }
 
 // dlarfg ////////////////////////////////////////////////////////////////
@@ -428,56 +434,56 @@ void dgeqr2(gMatrix<double> &A, gArray<double> &tau, int &info)
 
 void dlarfg(double &alpha, gVector<double> &X, double &tau)
 {
-    //cout << "Entered dlarfg()." << endl;
-
-    int n = X.Length() + 1;
-    if (n <= 1) {
-	tau = 0;
-	return;
-    }
-
-    double xnorm2 = X.NormSquared();
-
-    if (xnorm2 == 0)
-        // "H  =  I"
-	tau = 0;
+  //cout << "Entered dlarfg()." << endl;
+  
+  int n = X.Length() + 1;
+  if (n <= 1) {
+    tau = 0;
+    return;
+  }
+  
+  double xnorm2 = X.NormSquared();
+  
+  if (xnorm2 == 0)
+    // "H  =  I"
+    tau = 0;
+  else {
+    // "general case"
+    double d = sqrt(alpha*alpha + xnorm2);
+    double beta = (alpha > 0) ? -d : d;
+    double safmin = DBL_MIN / (DBL_EPSILON / 2);
+    if (d < safmin)
+      {
+	// "XNORM, BETA may be inaccurate; scale X and recompute them"
+	double rsafmn = 1. / safmin;
+	int knt = 0;
+	
+	do {
+	  ++knt;
+	  X *= rsafmn;
+	  beta *= rsafmn;
+	  alpha *= rsafmn;
+	} 
+	while ( abs(beta) < safmin );
+	
+	// "New BETA is at most 1, at least SAFMIN"
+	xnorm2 = X.NormSquared();
+	double d = sqrt(alpha*alpha + xnorm2);
+	beta = (alpha > 0) ? -d : d;
+	tau = (beta - alpha) / beta;
+	X *= 1. / (alpha - beta);
+	
+	// "If ALPHA is subnormal, it may lose relative accuracy"
+	alpha = beta;
+	for (int j = 1; j <= knt; ++j)
+	  alpha *= safmin;
+      }
     else {
-        // "general case"
-        double d = sqrt(alpha*alpha + xnorm2);
-        double beta = (alpha > 0) ? -d : d;
-	double safmin = DBL_MIN / (DBL_EPSILON / 2);
-        if (d < safmin)
-        {
-            // "XNORM, BETA may be inaccurate; scale X and recompute them"
-	    double rsafmn = 1. / safmin;
-	    int knt = 0;
-
-            do {
-                ++knt;
-                X *= rsafmn;
-                beta *= rsafmn;
-                alpha *= rsafmn;
-            } while ( abs(beta) < safmin );
-
-            // "New BETA is at most 1, at least SAFMIN"
-            xnorm2 = X.NormSquared();
-            double d = sqrt(alpha*alpha + xnorm2);
-            beta = (alpha > 0) ? -d : d;
-            tau = (beta - alpha) / beta;
-            X *= 1. / (alpha - beta);
-
-            // "If ALPHA is subnormal, it may lose relative accuracy"
-	    alpha = beta;
-	    for (int j = 1; j <= knt; ++j)
-                alpha *= safmin;
-        }
-        else
-        {
-            tau = (beta - alpha) / beta;
-            X *= 1. / (alpha - beta);
-	    alpha = beta;
-	}
+      tau = (beta - alpha) / beta;
+      X *= 1. / (alpha - beta);
+      alpha = beta;
     }
+  }
 }
 
 // dormqr ////////////////////////////////////////////////////////////////
@@ -562,41 +568,42 @@ void dlarfg(double &alpha, gVector<double> &X, double &tau)
 void dormqr(char side, char trans, int k, gMatrix<double> &A,
             gVector<double> &tau, gMatrix<double> &C, int &info)
 {
-    //cout << "Entered dormqr()." << endl;
-
-    int nq, nw;
-    int m = C.NumRows();
-    int n = C.NumColumns();
-
-    info = 0;
-    bool left   = (side == 'L');
-    bool notran = (trans == 'N');
-
-    // "NQ is the order of Q and NW is the minimum dimension of WORK"
-    if (left) {
-	nq = m;	nw = n;
-    } else {
-        nq = n;	nw = m;
-    }
-
-    if ( !left && !(side == 'R') )              info = -1;
-    else if ( !notran && !(trans == 'T') )      info = -2;
-    else if (m < 0)                             info = -3;
-    else if (n < 0)                             info = -4;
-    else if (k < 0 || k > nq)                   info = -5;
-
-    if (info != 0) {
-	xerbla("DORMQR", -info);
-	return;
-    }
-
-    // "Quick return if possible"
-    if (m == 0 || n == 0 || k == 0)
-	return;
-
-    int iinfo;
-    dorm2r(side, trans, k, A, tau, C, iinfo);
-    //cout << "dormqr: Left dorm2r()." << endl;
+  //cout << "Entered dormqr()." << endl;
+  
+  int nq, nw;
+  int m = C.NumRows();
+  int n = C.NumColumns();
+  
+  info = 0;
+  bool left   = (side == 'L');
+  bool notran = (trans == 'N');
+  
+  // "NQ is the order of Q and NW is the minimum dimension of WORK"
+  if (left) {
+    nq = m;	nw = n;
+  } 
+  else {
+    nq = n;	nw = m;
+  }
+  
+  if ( !left && !(side == 'R') )              info = -1;
+  else if ( !notran && !(trans == 'T') )      info = -2;
+  else if (m < 0)                             info = -3;
+  else if (n < 0)                             info = -4;
+  else if (k < 0 || k > nq)                   info = -5;
+  
+  if (info != 0) {
+    xerbla("DORMQR", -info);
+    return;
+  }
+  
+  // "Quick return if possible"
+  if (m == 0 || n == 0 || k == 0)
+    return;
+  
+  int iinfo;
+  dorm2r(side, trans, k, A, tau, C, iinfo);
+  //cout << "dormqr: Left dorm2r()." << endl;
 }
 
 // dorm2r ////////////////////////////////////////////////////////////////
@@ -676,90 +683,91 @@ void dormqr(char side, char trans, int k, gMatrix<double> &A,
 void dorm2r(char side, char trans, int k, gMatrix<double> &A,
             gVector<double> &tau, gMatrix<double> &C, int &info)
 {
-    //cout << "Entered dorm2r()." << endl;
-
-    /* Local variables */
-    static int ic, jc, mi, ni;
-    int m = C.NumRows();
-    int n = C.NumColumns();
-
-    info = 0;
-    bool left   = (side  == 'L');
-    bool notran = (trans == 'N');
-
-    gVector<double> work(left ? n : m);
-
-    // "NQ is the order of Q"
-    int nq = left ? m : n;
-
-    if (!left && side != 'R')           info = -1;
-    else if (!notran && trans != 'T')   info = -2;
-    else if (m < 0)                     info = -3;
-    else if (n < 0)                     info = -4;
-    else if (k < 0 || k > nq)           info = -5;
-
-    if (info != 0) {
-	xerbla("DORM2R", -info);
-	return;
-    }
-
-    // "Quick return if possible"
-    if (m == 0 || n == 0 || k == 0)
-	return;
-
-    int i1, i2, i3;
-    if (left && !notran || !left && notran) {
-	i1 = 1; i2 = k; i3 = 1;
-    } else {
-	i1 = k; i2 = 1; i3 = -1;
-    }
-
+  //cout << "Entered dorm2r()." << endl;
+  
+  /* Local variables */
+  static int ic, jc, mi, ni;
+  int m = C.NumRows();
+  int n = C.NumColumns();
+  
+  info = 0;
+  bool left   = (side  == 'L');
+  bool notran = (trans == 'N');
+  
+  gVector<double> work(left ? n : m);
+  
+  // "NQ is the order of Q"
+  int nq = left ? m : n;
+  
+  if (!left && side != 'R')           info = -1;
+  else if (!notran && trans != 'T')   info = -2;
+  else if (m < 0)                     info = -3;
+  else if (n < 0)                     info = -4;
+  else if (k < 0 || k > nq)           info = -5;
+  
+  if (info != 0) {
+    xerbla("DORM2R", -info);
+    return;
+  }
+  
+  // "Quick return if possible"
+  if (m == 0 || n == 0 || k == 0)
+    return;
+  
+  int i1, i2, i3;
+  if (left && !notran || !left && notran) {
+    i1 = 1; i2 = k; i3 = 1;
+  } 
+  else {
+    i1 = k; i2 = 1; i3 = -1;
+  }
+  
+  if (left) {
+    ni = n; jc = 1;
+  } 
+  else {
+    mi = m; ic = 1;
+  }
+  
+  for ( int i = i1;
+	i3 < 0 ? i >= i2 : i <= i2;
+	i += i3) {
     if (left) {
-        ni = n; jc = 1;
-    } else {
-        mi = m; ic = 1;
+      // "H(i) is applied to C(i:m,1:n)"
+      mi = m - i + 1;
+      ic = i;
+    } 
+    else {
+      // "H(i) is applied to C(1:m,i:n)"
+      ni = n - i + 1;
+      jc = i;
     }
-
-    for ( int i = i1;
-          i3 < 0 ? i >= i2 : i <= i2;
-          i += i3
-        )
-    {
-	if (left) {
-            // "H(i) is applied to C(i:m,1:n)"
-	    mi = m - i + 1;
-	    ic = i;
-	} else {
-            // "H(i) is applied to C(1:m,i:n)"
-	    ni = n - i + 1;
-	    jc = i;
-	}
-
-        // "Apply H(i)"
-	double aii = A(i,i);
-        A(i,i) = 1;
-
-        //dlarf(side, mi, ni, &A(i,i), 1, &tau[i], &C(ic,jc), ldc, &work[1]);
-        // First extract the apropriate members of A and C
-        gVector<double> V(left ? mi : ni);
-        for (int j = 1; j <= V.Length(); ++j)
-            V[j] = A(i+j-1, i);
-        gMatrix<double> temp(mi, ni);
-        for (int r = 1; r <= mi; ++r)
-            for (int c = 1; c <= ni; ++c)
-                temp(r, c) = C(ic+r-1, jc+c-1);
-
-        // Now call dlarf
-        dlarf(side, V, tau[i], temp);
-        //cout << "dorm2r: Left dlarf()." << endl;
-
-        // And finaly put the results back into C
-        for (int r = 1; r <= mi; ++r)
-            for (int c = 1; c <= ni; ++c)
-                C(ic+r-1, jc+c-1) = temp(r, c);
-
-	A(i,i) = aii;
-    }
+    
+    // "Apply H(i)"
+    double aii = A(i,i);
+    A(i,i) = 1;
+    
+    //dlarf(side, mi, ni, &A(i,i), 1, &tau[i], &C(ic,jc), ldc, &work[1]);
+    // First extract the apropriate members of A and C
+    gVector<double> V(left ? mi : ni);
+    for (int j = 1; j <= V.Length(); ++j)
+      V[j] = A(i+j-1, i);
+    gMatrix<double> temp(mi, ni);
+    for (int r = 1; r <= mi; ++r)
+      for (int c = 1; c <= ni; ++c)
+	temp(r, c) = C(ic+r-1, jc+c-1);
+    
+    // Now call dlarf
+    dlarf(side, V, tau[i], temp);
+    //cout << "dorm2r: Left dlarf()." << endl;
+    
+    // And finaly put the results back into C
+    for (int r = 1; r <= mi; ++r)
+      for (int c = 1; c <= ni; ++c)
+	C(ic+r-1, jc+c-1) = temp(r, c);
+    
+    A(i,i) = aii;
+  }
 }
 
 // dlarf /////////////////////////////////////////////////////////////////
@@ -813,38 +821,37 @@ void dorm2r(char side, char trans, int k, gMatrix<double> &A,
 
 void dlarf(char side, gVector<double> &V, double tau, gMatrix<double> &C)
 {
-    //cout << "Entered dlarf()." << endl;
-
-    if (side == 'L')
-    {
-        // "Form  H * C"
-	if (tau != 0) {
-            // "w := C' * v"
-            gMatrix<double> work(C.NumColumns(), 1);
-            work.SetColumn(1, C.Transpose() * V);
-            gMatrix<double> Vmat(V.Length(), 1);
-            Vmat.SetColumn(1, V);
-
-            // "C := C - v * w'"
-            // C += -tau * V * W'
-            C += (Vmat * work.Transpose()) * (-tau);
-	}
+  //cout << "Entered dlarf()." << endl;
+  
+  if (side == 'L') {
+    // "Form  H * C"
+    if (tau != 0) {
+      // "w := C' * v"
+      gMatrix<double> work(C.NumColumns(), 1);
+      work.SetColumn(1, C.Transpose() * V);
+      gMatrix<double> Vmat(V.Length(), 1);
+      Vmat.SetColumn(1, V);
+      
+      // "C := C - v * w'"
+      // C += -tau * V * W'
+      C += (Vmat * work.Transpose()) * (-tau);
     }
-    else // if (side != 'L')
+  }
+  else // if (side != 'L')
     {
-        // "Form  C * H"
-	if (tau != 0) {
-            // "w := C * v"
-            gMatrix<double> work(C.NumRows(), 1);
-            work.SetColumn(1, C * V);
-
-            // "C := C - w * v'"
-            // C += -tau * W * V'
-            // V needs to be transposed first
-            gMatrix<double> Vmat(V.Length(), 1);
-            Vmat.SetColumn(1, V);
-            C += (work * Vmat.Transpose()) * (-tau);
-	}
+      // "Form  C * H"
+      if (tau != 0) {
+	// "w := C * v"
+	gMatrix<double> work(C.NumRows(), 1);
+	work.SetColumn(1, C * V);
+	
+	// "C := C - w * v'"
+	// C += -tau * W * V'
+	// V needs to be transposed first
+	gMatrix<double> Vmat(V.Length(), 1);
+	Vmat.SetColumn(1, V);
+	C += (work * Vmat.Transpose()) * (-tau);
+      }
     }
 }
 
@@ -881,7 +888,7 @@ void dlarf(char side, gVector<double> &V, double tau, gMatrix<double> &C)
 
 void xerbla(char *srname, int info)
 {
-    printf("** On entry to %6s, parameter number %2i had an illegal value\n",
-		srname, info);
+  printf("** On entry to %6s, parameter number %2i had an illegal value\n",
+	 srname, info);
 }
 

@@ -1,4 +1,8 @@
-// hompack.h by David Bustos, 6/25/99
+//
+// FILE: hompack.h -- Hompack code, translated by David Bustos, 6/25/99
+//
+// $Id$
+//
 
 #ifndef HOMPACK_H
 #define HOMPACK_H
