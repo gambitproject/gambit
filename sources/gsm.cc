@@ -498,7 +498,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 			      Portion** param, 
 			      const gText& funcname )
 {
-  Portion* result_copy;
+  Portion *result, *result_copy;
 
   _RefTableStack->Push(new RefHashTable);
   _StackStack->Push(new gStack< Portion* >);
@@ -515,7 +515,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 
 
   try {
-    Portion *result = Execute(&program, true);
+    result = Execute(&program, true);
   
     if (result)   {
       _ResolveRef(result);
@@ -526,7 +526,7 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 	result_copy = 0;
       }
       
-      for (i = 0; i < func_info.NumParams; i++) {
+      for (int i = 0; i < func_info.NumParams; i++) {
 	if (func_info.ParamInfo[i].PassByReference) {
 	  if (VarIsDefined(func_info.ParamInfo[i].Name)) {
 	    delete param[i];
