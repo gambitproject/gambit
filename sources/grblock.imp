@@ -1,8 +1,8 @@
-//#
-//# FILE: grblock.imp -- Implementation of resizable 2-D rect array class
-//#
-//# $Id$
-//#
+//
+// FILE: grblock.imp -- Implementation of resizable 2-D rect array class
+//
+// $Id$
+//
 
 #include "grblock.h"
 #include "garray.h"
@@ -49,7 +49,7 @@ template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
   T* p = new T[maxcol - mincol + 1];
   assert(p);
   T* newrow= p - mincol;
-int i;
+  int i;
   for(i=mincol; i<=maxcol; i++ )
     newrow[i]= v[i];
 
@@ -60,7 +60,7 @@ int i;
   for( i=minrow; i<maxrow; i++ )
     newidx[i]= data[i];
   newidx[maxrow]= newrow;
-  delete[] (data + minrow);
+  if (data)   delete [] (data + minrow);
   data= newidx;
 }
 
@@ -68,6 +68,13 @@ template <class T> void gRectBlock<T>::RemoveRow(int row)
 {
   assert( minrow <= row && row <= maxrow);
   maxrow--;
+  
+  if (maxrow < minrow)   {
+    delete (data[minrow] + mincol);
+    delete (data + minrow);
+    data = 0;
+    return;
+  }
 
   T** pp = new T*[maxrow - minrow + 1];
   assert(pp);
@@ -116,9 +123,9 @@ template<class T> void gRectBlock<T>::RemoveColumn(int col)
 
 template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
 {
-	assert( v.First() == mincol && v.Last() == maxcol);
-	assert( minrow <= row && row <= maxrow+1);
-	if (row==maxrow+1) {AddRow(v);return;}
+  assert( v.First() == mincol && v.Last() == maxcol);
+  assert( minrow <= row && row <= maxrow+1);
+  if (row==maxrow+1) {AddRow(v);return;}
 
 
   maxrow++;
