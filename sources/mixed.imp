@@ -126,7 +126,8 @@ template <class T> void MixedProfile<T>::Regret(gPVector<T> &value) const
       x = Payoff(i, N->Strategies(i)[j]);
       if(x > pay)
 	value(i, j) = x - pay;
-      else value(i,j) = (T) 0;
+      // use pay - pay instead of zero for correct precision
+      else value(i,j) = pay - pay; 
     }
   }
 }

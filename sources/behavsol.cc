@@ -542,7 +542,7 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
 {
   if (!m_rnf_regret)  {
     const Efg& E = Game(); 
-    Lexicon L(E);
+    Lexicon L(E);  // we use the lexicon without allocating normal form.  
 
     for (int i = 1; i <= E.NumPlayers(); i++)
       L.MakeReducedStrats(m_support, E.Players()[i], E.RootNode(), NULL);
@@ -555,23 +555,18 @@ const gPVector<gNumber> &BehavSolution::ReducedNormalFormRegret(void) const
     
     for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
       gNumber pay = Payoff(pl);
-      
       for (int st = 1; st <= (L.strategies[pl]).Length(); st++) {
-	
 	BehavProfile<gNumber> scratch(*this);
 	const gArray<int> *const actions = L.strategies[pl][st];
-	//	gout << "\nstrat: " << st << " actions: " << *actions;
-	
 	for(int j = 1;j<=(*actions).Length();j++) {
 	  int a = (*actions)[j];
 	  for (int k = 1;k<=m_support.NumActions(pl,j);k++)
 	    scratch(pl,j,k) = (gNumber)0;
 	  if(a>0)scratch(pl,j,a) = (gNumber)1;
 	}
-	//	gout << " scratch: " << scratch;
 	gNumber pay2 = scratch.Payoff(pl);
-	gNumber regret = (pay2 < pay) ? (gNumber)0 : pay2 - pay ;
-	(*m_rnf_regret)(pl,st) = regret;
+	// use pay - pay instead of zero to get correct precision
+	(*m_rnf_regret)(pl,st) = (pay2 < pay) ? pay - pay : pay2 - pay ;
       }
     }
   }

@@ -414,17 +414,18 @@ template <class T> void BehavProfile<T>::Gripe(gDPVector<T> &value) const
   
   for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
     T pay = Payoff(pl);
+    T zero = pay - pay;
     EFPlayer *player = m_efg->Players()[pl];
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       Infoset *infoset = player->Infosets()[iset];
       for (int act = 1; act <= infoset->NumActions(); act++) 
-	scratch(pl, iset, act) = (T) 0;
+	scratch(pl, iset, act) = zero;
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	scratch(pl, iset, act) = (T) 1;
 	value(pl, iset, act) = scratch.Payoff(pl) - pay;
 	if (value(pl, iset, act) < (T) 0) 
-	  value(pl, iset, act) = (T) 0;
-	scratch(pl, iset, act) = (T) 0;
+	  value(pl, iset, act) = zero;
+	scratch(pl, iset, act) = zero;
       }
       for (int act = 1; act <= infoset->NumActions(); act++) 
 	scratch(pl, iset, act) = (*this)(pl, iset, act);
