@@ -206,9 +206,9 @@ static gText ResolveVersion(void)
 
 #else   // non-microsoft platforms
   int ver = 0;
-  wxGetResource("Gambit", "Gambit-Version", &ver, "gambit.ini");
+  wxGetResource("Gambit", "Gambit-Version", &ver, "gambitrc");
   if (ver == GAMBIT_VERSION)
-    return "gambit.ini";
+    return "gambitrc";
   else
     return "";
 #endif
