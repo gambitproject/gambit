@@ -9,7 +9,6 @@
 #endif
 #include "gambitio.h"
 #include "gnumber.h"
-#include "gnulib.h"
 #include "gmisc.h"
 #include <math.h>
 #include <values.h>
