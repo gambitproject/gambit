@@ -6,6 +6,7 @@
 
 #include "math/gsmatrix.h"
 #include "base/base.h"
+#include "math/math.h"   // for abs(double)
 
 //-----------------------------------------------------------------------------
 //     gSquareMatrix<T>: Constructors, destructor, constructive operators
@@ -136,14 +137,15 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
     // elimination with respect to the row (of those feasible)
     // whose entry has the largest absolute value.
     int swap_row = row;
-    for (int i = row+1; i <= maxrow; i++)
+    for (int i = row+1; i <= maxrow; i++) {
       if (abs(M.data[i][row]) > abs(M.data[swap_row][row]))
 	swap_row = i;
+    }
 
     if (swap_row != row)  {
       M.SwitchRows(row, swap_row);
-	  for (int j = mincol; j <= maxcol; j++)
-	    M.data[row][j] *= (T) -1;
+      for (int j = mincol; j <= maxcol; j++)
+	M.data[row][j] *= (T) -1;
     }
 
     if (M.data[row][row] == (T)0) return (T)0;
