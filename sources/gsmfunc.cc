@@ -531,7 +531,8 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s)
 }
 
 void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
-                              Portion* (*funcptr)(Portion**)  )
+                              Portion* (*funcptr)(Portion**), 
+                              FuncFlagType FFT /* = funcLISTABLE */  )
 {
 
     // Here we will parse the gString and call the above SetFuncInfo function.
@@ -772,7 +773,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   }
 
   SetFuncInfo(funcindex, 
-              FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, PIT));
+              FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, PIT, FFT));
 }
 
   // Replaces strings with their enumerated types.
