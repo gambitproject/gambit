@@ -109,6 +109,12 @@ template<class T> void TreeWindow<T>::action_probs(void)
 Node *n=cursor;
 int 	i;
 
+if (!n->GetInfoset())
+{
+	wxMessageBox("Probs can only be set for a CHANCE player","Error",wxOK | wxCENTRE,frame);
+	return;
+}
+
 if (!n->GetPlayer()->IsChance())	// if this is not a chance player
 {
 	wxMessageBox("Probs can only be set for a CHANCE player","Error",wxOK | wxCENTRE,frame);
