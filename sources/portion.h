@@ -174,7 +174,7 @@ class Reference_Portion : public Portion
 
 class List_Portion : public Portion
 {
- private:
+ protected:
   gBlock<Portion*> _Value;
   PortionType      _DataType;
 
