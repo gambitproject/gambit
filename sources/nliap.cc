@@ -164,11 +164,21 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	  gList<MixedSolution> &solutions,
 	  long &nevals, long &niters)
 {
+  static const double ALPHA = .00000001;
   MixedProfile<double> p(start.Support());
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
 
   NFLiapFunc F(N, p);
+
+  // if starting vector not interior, perturb it towards centroid
+  int kk;
+  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
+  if(kk<=p.Length()) {
+    MixedProfile<double> c(start.Support());
+    for(int k=1;k<=p.Length();k++)
+      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+  }
 
   double value;
   int iter;

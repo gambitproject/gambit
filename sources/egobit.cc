@@ -146,6 +146,8 @@ void Qre(const Efg &E, EFQreParams &params,
 	   gList<BehavSolution> &solutions,
 	   long &nevals, long &nits)
 {
+  static const double ALPHA = .00000001;
+
   EFQreFunc F(E, start);
 
   int iter = 0;
@@ -167,7 +169,18 @@ void Qre(const Efg &E, EFQreParams &params,
   BehavProfile<double> p(start.Support());
   for (int i = 1; i <= p.Length(); i++)
     p[i] = start[i];
+
+  // if starting vector not interior, perturb it towards centroid
+  int kk;
+  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
+  if(kk<=p.Length()) {
+    BehavProfile<double> c(start.Support());
+    for(int k=1;k<=p.Length();k++)
+      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+  }
+
   BehavProfile<double> pold(p);
+  BehavProfile<double> psave(p);
   BehavProfile<double> pdiff(p);
   pdiff-= pold;
   gMatrix<double> xi(p.Length(), p.Length());
@@ -185,57 +198,47 @@ void Qre(const Efg &E, EFQreParams &params,
       params.status.Get();
       F.SetLambda(Lambda);
 
-      /*
-      gout << "\ndelta: " << delta;
-      gout << " Lam: " << Lambda;
-      */
-
       FoundSolution = Powell(p, xi, F, value, iter,
 		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		      *params.tracefile, params.trace-1,true);
       bool derr = F.DomainErr();      
-      double dist = 0.0;
+      // dist = dist to last good point
+      // dsave = dist to last saved point
+      double dist = 0.0, dsave = 0.0;
       for(int jj=p.First();jj<=p.Last();jj++) {
 	double xx = abs(p[jj]-pold[jj]);
 	if(xx>dist)dist=xx;
+	xx = abs(p[jj]-psave[jj]);
+	if(xx>dsave)dsave=xx;
       }
 
-      /*
-      gout << " Found: " << FoundSolution;
-      gout << " Err: " << derr;
-      gout << " dist: " << dist;
-      gout << " val: ";
-      gout.SetExpMode();
-      gout << value;
-      gout.SetFloatMode();
-      gout << " p: " << p;
-      */
-
-
       if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
+
 	if (params.trace>0)  {
 	  *params.tracefile << "\nLam: " << Lambda << " val: ";
-	  params.tracefile->SetExpMode();
-	  *params.tracefile << value;
-	  params.tracefile->SetFloatMode();
-	  *params.tracefile << " p: " << p;
+	  (*params.tracefile).SetExpMode() << value;
+	  (*params.tracefile).SetFloatMode() << " p: " << p;
 	} 
 	
-	if (params.pxifile)  {
-	  *params.pxifile << "\n" << Lambda << " " << value << " ";
-	  for (int pl = 1; pl <= E.NumPlayers(); pl++)
-	    for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
-		 iset++)  {
-	      double prob = 0.0;
-	      for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
-		   prob += p(pl, iset, act++))
-		*params.pxifile << p(pl, iset, act) << ' ';
-	      //	  *params.pxifile << (1.0 - prob) << ' ';
-	    }
-	} 
+	if(dsave > params.delLam/4.0) {
+
+	  if (params.pxifile)  {
+	    *params.pxifile << "\n" << Lambda << " " << value << " ";
+	    for (int pl = 1; pl <= E.NumPlayers(); pl++)
+	      for (int iset = 1; iset <= E.Players()[pl]->NumInfosets();
+		   iset++)  {
+		double prob = 0.0;
+		for (int act = 1; act <= E.Players()[pl]->Infosets()[iset]->NumActions(); 
+		     prob += p(pl, iset, act++))
+		  *params.pxifile << p(pl, iset, act) << ' ';
+	      }
+	  } 
 	
-	if (params.fullGraph)
-	  AddSolution(solutions, p, Lambda, value, params.Accuracy());
+	  if (params.fullGraph)
+	    AddSolution(solutions, p, Lambda, value, params.Accuracy());
+
+	  psave=p;
+	}
 
 	pdiff = p; pdiff-= pold;
 	pold=p;                              // pold is last good solution
@@ -265,7 +268,6 @@ void Qre(const Efg &E, EFQreParams &params,
 	jj++;
       }
       if(flag) {
-	//	gout << "\np negative: set pdiff to 0";
 	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
 	  pdiff[jj] = 0.0;
       }
@@ -288,12 +290,21 @@ void Qre(const Efg &E, EFQreParams &params,
     nits = 0;
   }
   catch (gSignalBreak &E) {
-    if (!params.fullGraph)
+    if (!params.fullGraph) 
       AddSolution(solutions, pold, Lambda, value, params.Accuracy());
 
     nevals = F.NumEvals();
     nits = 0;
     throw;
+  }
+  catch (gFuncMinError &E) {
+    if (!params.fullGraph)
+      AddSolution(solutions, pold, Lambda, value, params.Accuracy());
+
+    nevals = F.NumEvals();
+    nits = 0;
+    // This should be re-thrown, but wait til we have better exception handling downstream
+    //    throw;  
   }
 }
 
@@ -411,12 +422,10 @@ double EFKQreFunc::Value(const gVector<double> &lambda)
   */
 
   if(params.trace > 3) {
-    (params.tracefile->SetExpMode()).SetPrec(4);
-    *params.tracefile << "\n   EFKGobFunc val: " << value;
+    (*params.tracefile).SetExpMode().SetPrec(4) << "\n   EFKGobFunc val: " << value;
     *params.tracefile << " K = " << _K;
     *params.tracefile << " lambda = " << lambda;
-    params.tracefile->SetFloatMode().SetPrec(6);
-    *params.tracefile << " p = " << _p;
+    (*params.tracefile).SetFloatMode().SetPrec(6) << " p = " << _p;
   }
   return value;
 }
@@ -539,10 +548,8 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
     if(FoundSolution && !F.DomainErr()) {
       if (params.trace>0)  {
 	*params.tracefile << "\nKQre iter: " << nit << " val = ";
-	params.tracefile->SetExpMode();
-	*params.tracefile << value;
-	params.tracefile->SetFloatMode();
-	*params.tracefile << " K: " << K << " lambda: " << lambda << " val: ";
+	(*params.tracefile).SetExpMode() << value;
+	(*params.tracefile).SetFloatMode() << " K: " << K << " lambda: " << lambda << " val: ";
 	*params.tracefile << " p: " << p;
       }
       

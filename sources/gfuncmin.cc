@@ -12,16 +12,8 @@
 
 #include "gvector.h"
 
-class gFuncMinError : public gException {
-public:
-  virtual ~gFuncMinError() { }
-  gText Description(void) const 
-    { return "Internal error in minimization code"; }
-};
-
 static const double GOLD = 1.618034;
 static const double TINY = 1.0e-20;
-
 
 bool MinBracket(double tmin, double tmax,
 		gFunction<double> &func,
@@ -37,12 +29,6 @@ bool MinBracket(double tmin, double tmax,
   b = a + ((tmax - a > 4.0) ? 1.0 : (tmax - a) / 4.0);
 
   if (tmin >= a || a >= b || b >= tmax) {
-    /*
-      gout << "\ntmin: " << tmin;
-      gout << "\ntmin: " << tmax;
-      gout << "\na: " << a;
-      gout << "\nb: " << b;
-    */
     throw gFuncMinError();
   }
 
@@ -332,14 +318,13 @@ void RayMin(gFunction<double> &func,
   fret = LineMin(tjmin, tjmax, func, v, xi, xmin, maxitsBrent, tolBrent,
 	         tracefile,tracelevel);
 
-//  tracefile.SetExpMode();
-//  tracefile << "\nxmin= " << xmin;
-//  tracefile.SetFloatMode();
-//  tracefile << " v = " << v;
-//  tracefile << "\n2a: xi = " << xi;
-
   xi *= xmin;
   v += xi;
+  if (interior)
+    for (int kk = 1; kk <= v.Length(); kk++) {
+      if (v[kk] <= 0.0)
+	throw gFuncMinError();
+    }
 }
 
 
@@ -400,11 +385,6 @@ bool DFP(gPVector<double> &p,
     iter = its;
     Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
-    if (interior)
-      for (int kk = 1; kk < p.Length(); kk++) {
-	if (p[kk] <= 0.0)
-	  throw gFuncMinError();
-      }
     
     if (fret <= tolN || fret >= fp || its >= maxitsN)  {
       if (fret <= tolN)  return true;

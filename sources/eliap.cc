@@ -107,9 +107,20 @@ bool Liap(const Efg &E, EFLiapParams &params,
 	  gList<BehavSolution> &solutions,
 	  long &nevals, long &niters)
 {
+  static const double ALPHA = .00000001;
+
   EFLiapFunc F(E, start);
 
   BehavProfile<double> p(start);
+
+  // if starting vector not interior, perturb it towards centroid
+  int kk;
+  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
+  if(kk<=p.Length()) {
+    BehavProfile<double> c(start.Support());
+    for(int k=1;k<=p.Length();k++)
+      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+  }
 
   gMatrix<double> xi(p.Length(), p.Length());
 

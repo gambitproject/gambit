@@ -197,6 +197,8 @@ void Qre(const Nfg &N, NFQreParams &params,
 	   gList<MixedSolution> &solutions,
 	   long &nevals, long &nits)
 {
+  static const double ALPHA = .00000001;
+
   NFQreFunc F(N, start);
 
   int iter = 0;
@@ -218,7 +220,18 @@ void Qre(const Nfg &N, NFQreParams &params,
   MixedProfile<double> p(start.Support());
   for (int j = 1; j <= p.Length(); j++)
     p[j] = start[j];
+
+  // if starting vector not interior, perturb it towards centroid
+  int kk;
+  for(kk=1;kk <= p.Length() && p[kk]>ALPHA;kk++);
+  if(kk<=p.Length()) {
+    MixedProfile<double> c(start.Support());
+    for(int k=1;k<=p.Length();k++)
+      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+  }
+
   MixedProfile<double> pold(p);
+  MixedProfile<double> psave(p);
   MixedProfile<double> pdiff(p);
   pdiff-= pold;
 
@@ -232,56 +245,48 @@ void Qre(const Nfg &N, NFQreParams &params,
 	   Lambda >= params.minLam)  {
       params.status.Get();
       F.SetLambda(Lambda);
+
       // enter Davidon Fletcher Powell routine.  
-      /*
-      gout << "\ndelta: " << delta;
-      gout << " Lam: " << Lambda;
-      */
-      
+
       FoundSolution = DFP(p, F, value, iter, 
 			  params.maxits1, params.tol1, params.maxitsN, params.tolN,
 			  *params.tracefile,params.trace-1,true);
       
       bool derr = F.DomainErr();
-      double dist = 0.0;
+      double dist = 0.0, dsave = 0.0;
       for(int jj=p.First();jj<=p.Last();jj++) {
 	double xx = abs(p[jj]-pold[jj]);
 	if(xx>dist)dist=xx;
+	xx = abs(p[jj]-psave[jj]);
+	if(xx>dsave)dsave=xx;
       }
       
-      /*
-      gout << " Found: " << FoundSolution;
-      gout << " Err: " << derr;
-      gout << " dist: " << dist;
-      gout << " val: ";
-      gout.SetExpMode();
-      gout << value;
-      gout.SetFloatMode();
-      gout << " p: " << p;
-      */
-      
       if(FoundSolution && !derr && (Lambda == LambdaStart || dist < params.delLam)) {
+
 	if (params.trace>0)  {
 	  *params.tracefile << "\nLam: " << Lambda << " val: ";
-	  params.tracefile->SetExpMode();
-	  *params.tracefile << value;
-	  params.tracefile->SetFloatMode();
-	  *params.tracefile << " p: " << p;
+	  (*params.tracefile).SetExpMode() << value;
+	  (*params.tracefile).SetFloatMode() << " p: " << p;
 	} 
 	
-	if (params.pxifile)   {
-	  *params.pxifile << "\n" << Lambda << " " << value << " ";
-	  for (int pl = 1; pl <= N.NumPlayers(); pl++)
-	    for (int strat = 1;
-		 strat <= p.Support().NumStrats(pl);
-		 strat++)
-	      *params.pxifile << p(pl, strat) << " ";
-	}
-	
-	if (params.fullGraph) {
-	  int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
-	  solutions[index].SetQre(Lambda, value);
-	  solutions[index].SetEpsilon(params.Accuracy());
+	if(dsave > params.delLam/4.0) {
+
+	  if (params.pxifile)   {
+	    *params.pxifile << "\n" << Lambda << " " << value << " ";
+	    for (int pl = 1; pl <= N.NumPlayers(); pl++)
+	      for (int strat = 1;
+		   strat <= p.Support().NumStrats(pl);
+		   strat++)
+		*params.pxifile << p(pl, strat) << " ";
+	  }
+	  
+	  if (params.fullGraph) {
+	    int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));      
+	    solutions[index].SetQre(Lambda, value);
+	    solutions[index].SetEpsilon(params.Accuracy());
+	  }
+
+	  psave = p;
 	}
 	
 	pdiff = p; pdiff-= pold;
@@ -310,7 +315,6 @@ void Qre(const Nfg &N, NFQreParams &params,
 	jj++;
       }
       if(flag) {
-	//	gout << "\np negative: set pdiff to 0";
 	for(jj = pdiff.First();jj<=pdiff.Last();jj++)
 	  pdiff[jj] = 0.0;
       }
@@ -343,6 +347,15 @@ void Qre(const Nfg &N, NFQreParams &params,
       solutions[index].SetEpsilon(params.Accuracy());
     }
     throw;
+  }
+  catch (gFuncMinError &E) {
+    if (!params.fullGraph) {
+      int index = solutions.Append(MixedSolution(p, algorithmNfg_QRE));
+      solutions[index].SetQre(Lambda, value);
+      solutions[index].SetEpsilon(params.Accuracy());
+    }
+    // This should be re-thrown, but wait til we have better exception handling downstream
+    //    throw;
   }
 }
 
@@ -429,12 +442,10 @@ double NFKQreFunc::Value(const gVector<double> &lambda)
     value += pow(vij -lambda[pl]*_K,2.0);
   }
   if(params.trace > 3) {
-    (params.tracefile->SetExpMode()).SetPrec(4);
-    *params.tracefile << "\n   NFKGobFunc val: " << value;
+    (*params.tracefile).SetExpMode().SetPrec(4) << "\n   NFKGobFunc val: " << value;
     *params.tracefile << " K = " << _K;
     *params.tracefile << " lambda = " << lambda;
-    params.tracefile->SetFloatMode().SetPrec(6);
-    *params.tracefile << " p = " << _p;
+    (*params.tracefile).SetFloatMode().SetPrec(6) << " p = " << _p;
   }
   return value;
 }
@@ -495,23 +506,12 @@ void KQre(const Nfg &N, NFQreParams &params,
 		     *params.tracefile, params.trace-1);
 
     F.Get_p(p);
-/*
-    if (params.trace>0)  {
-	*params.tracefile << "\nKQre iter: " << nit << " val = ";
-	params.tracefile->SetExpMode();
-	*params.tracefile << value;
-	params.tracefile->SetFloatMode();
-	*params.tracefile << " K: " << K << " lambda: " << lambda << " val: ";
-	*params.tracefile << " p: " << p;
-    }
-*/
+
     if(powell && !F.DomainErr()) {
       if (params.trace>0)  {
 	*params.tracefile << "\nKQre iter: " << nit << " val = ";
-	params.tracefile->SetExpMode();
-	*params.tracefile << value;
-	params.tracefile->SetFloatMode();
-	*params.tracefile << " K: " << K << " lambda: " << lambda << " val: ";
+	(*params.tracefile).SetExpMode() << value;
+	(*params.tracefile).SetFloatMode() << " K: " << K << " lambda: " << lambda << " val: ";
 	*params.tracefile << " p: " << p;
       }
       
