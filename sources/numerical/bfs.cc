@@ -26,9 +26,6 @@
 
 #include "math/rational.h"
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-#include "base/glist.imp"
 #include "base/gmap.imp"
 #include "bfs.h"
 
@@ -70,13 +67,6 @@ template class gbtBasicFeasibleSolution<gbtRational>;
 
 template std::ostream &operator<<(std::ostream &, const gbtBasicFeasibleSolution<double> &);
 template std::ostream &operator<<(std::ostream &, const gbtBasicFeasibleSolution<gbtRational> &);
-
-template class gbtArray<gbtBasicFeasibleSolution<double> >;
-template class gbtArray<gbtBasicFeasibleSolution<gbtRational> >;
-template class gbtBlock<gbtBasicFeasibleSolution<double> >;
-template class gbtBlock<gbtBasicFeasibleSolution<gbtRational> >;
-template class gbtList<gbtBasicFeasibleSolution<double> >;
-template class gbtList<gbtBasicFeasibleSolution<gbtRational> >;
 
 template class gbtBaseMap<int, double>;
 template class gbtOrdMap<int, double>;

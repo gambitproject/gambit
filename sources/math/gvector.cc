@@ -40,8 +40,3 @@ template class gbtVector<gbtMPFloat>;
 template std::ostream &operator<<(std::ostream &, const gbtVector<gbtMPFloat> &);
 #endif  // GBT_WITH_MP_FLOAT
 
-#include "base/glist.imp"
-
-template class gbtList<gbtVector<double> >;
-template class gbtList<gbtVector<gbtRational> >;
-template class gbtList<gbtVector<gbtComplex> >;

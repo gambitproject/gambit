@@ -24,26 +24,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-#include "base/glist.imp"
 #include "base/grarray.imp"
 #include "base/grblock.imp"
 #include "mpfloat.h"
 #include "rational.h"
 #include "complex.h"
-
-template class gbtArray<gbtInteger>;
-template class gbtArray<gbtRational>;
-template class gbtArray<gbtComplex>;
-
-#if GBT_WITH_MP_FLOAT
-template class gbtArray<gbtMPFloat>;
-#endif  // GBT_WITH_MP_FLOAT
-
-template class gbtBlock<gbtRational>;
-
-template class gbtList<gbtRational>;
 
 template class gbtRectArray<gbtInteger>;
 template class gbtRectArray<gbtRational>;

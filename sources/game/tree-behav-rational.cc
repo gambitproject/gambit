@@ -31,7 +31,3 @@ std::ostream &operator<<(std::ostream &f,
 			 const gbtBehavProfile<gbtRational> &)
 { return f; }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtBehavProfile<gbtRational> >;
-

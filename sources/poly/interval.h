@@ -43,6 +43,9 @@ private:
     const T lower_bd;
     const T upper_bd;
 
+    // Defined but not implemented to preserve constness
+    gInterval<T> &operator=(const gInterval<T> &);
+
 public:
     // constructors
     gInterval(const gInterval<T>&);
@@ -50,7 +53,6 @@ public:
     ~gInterval();
 
     // operators
-    gInterval<T>& operator =  (const gInterval<T>& y);
     bool          operator == (const gInterval<T>& y) const;
     bool          operator != (const gInterval<T>& y) const;
 

@@ -77,11 +77,3 @@ template std::ostream &operator<<(std::ostream &f, const gbtPolyMulti<double> &y
 template std::string &operator<<(std::string &, const gbtPolyMulti<double> &);
 #endif  // __BCC55__
 
-#include "base/glist.imp"
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
-template class gbtArray< gbtPolyMulti< gbtRational > *>;
-template class gbtList< gbtPolyMulti<gbtRational> * >;
-template class gbtList<gbtPolyMulti<gbtRational> >;
-

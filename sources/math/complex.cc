@@ -257,6 +257,3 @@ gbtComplex TOgComplex(const std::string & /* s */)
   return gbtComplex(0, 0);
 }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtComplex>;

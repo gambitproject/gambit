@@ -668,5 +668,3 @@ std::ostream &operator<<(std::ostream&s, const edge& y)
   return s;
 }
 
-#include "base/garray.imp"
-template class gbtArray<edge>;

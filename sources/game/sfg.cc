@@ -26,10 +26,8 @@
 
 #include "sfg.h"
 #include "sfstrat.h"
-#include "base/garray.imp"
 #include "base/gnarray.imp"
 #include "base/grarray.imp"
-#include "base/glist.imp"
 
 //----------------------------------------------------
 // gbtSfgGame: Constructors, Destructors, Operators
@@ -272,6 +270,3 @@ gbtRational gbtSfgGame::Payoff(const gbtArray<int> & index,int pl) const
 
 
 template class gbtNDArray<gbtArray<gbtRational> *>;
-template class gbtArray<gbtRectArray<gbtRational> *>;
-
-template class gbtArray<gbtList<gbtGameInfoset> >;

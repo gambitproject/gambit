@@ -24,38 +24,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "base/glist.imp"
 #include "gpartltr.imp"
 
 template class gbtPolyPartialTree<gbtRational>;
 template std::ostream &operator<<(std::ostream &f, const gbtPolyPartialTree<gbtRational> &y);
-template class gbtList<gbtPolyPartialTree<gbtRational> >;
-template class gbtList<gbtList<gbtPolyPartialTree<gbtRational> > >;
-template class gbtList<gbtList<gbtList<gbtPolyPartialTree<gbtRational> > > >;
 template class gbtPolyPartialTreeList<gbtRational>;
 
 
 template class gbtPolyPartialTree<double>;
 template std::ostream &operator<<(std::ostream &f, const gbtPolyPartialTree<double> &y);
-//template class gbtList<gbtPolyPartialTree<double> >;
-//template std::ostream &operator<<(std::ostream &f, 
-//			     const gbtList<gbtPolyPartialTree<double> > &y);
-//template class gbtList<gbtList<gbtPolyPartialTree<double> > >;
-//template std::ostream &operator<<(std::ostream &f, 
-//			     const gbtList<gbtList<gbtPolyPartialTree<double> > > &y);
-//template class gbtList<gbtList<gbtList<gbtPolyPartialTree<double> > > >;
 template class gbtPolyPartialTreeList<double>;
 template std::ostream &operator<<(std::ostream &f, 
 			     const gbtPolyPartialTreeList<double> &y);
-
-#include "base/gtree.imp"
-
-template class gbtTreeNode<gbtPolyMulti<gbtRational> >;
-template class gbtList<gbtTreeNode<gbtPolyMulti<gbtRational> >*>;
-template class gbtTree<gbtPolyMulti<gbtRational> >;
-template class gbtList<gbtTree<gbtPolyMulti<gbtRational> > >;
-#ifndef __BCC55__
-template std::ostream& operator << (std::ostream& output, 
-			       const gbtTree<gbtPolyMulti<gbtRational> >&);
-#endif  // __BCC55__
 

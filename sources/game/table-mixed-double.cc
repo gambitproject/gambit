@@ -33,6 +33,3 @@ template class gbtTreeMixedProfileRep<double>;
 std::ostream &operator<<(std::ostream &f, const gbtMixedProfile<double> &)
 { return f; }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtMixedProfile<double> >;

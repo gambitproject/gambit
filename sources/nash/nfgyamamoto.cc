@@ -408,6 +408,3 @@ gbtList<gbtMixedProfile<double> > gbtNashYamamotoNfg(const gbtGame &p_game)
   return algorithm.Solve(p_game, status);
 }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtMatrix<int> >;

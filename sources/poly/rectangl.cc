@@ -25,17 +25,14 @@
 //
 
 #include <assert.h>
-#include "base/glist.imp"
 #include "rectangl.imp"
 
 template class gRectangle<gbtRational>;
-template class gbtList< gRectangle<gbtRational> >;
 #ifndef __BCC55__
 template std::ostream& operator << (std::ostream& output, const gRectangle<gbtRational>& x);
 #endif  // __BCC55__
 
 template class gRectangle<double>;
-template class gbtList< gRectangle<double> >;
 #ifndef __BCC55__
 template std::ostream& operator << (std::ostream& output, const gRectangle<double>& x);
 #endif  // __BCC55__

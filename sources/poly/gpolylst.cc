@@ -25,13 +25,8 @@
 //
 
 #include "gpolylst.imp"
-#include "base/glist.imp"
-#include "base/garray.imp"
 #include "base/grarray.imp"
 #include "math/gmatrix.imp"
-
-//template class gbtPolyMultiList<int>;
-//template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<int> &y);
 
 template class gbtPolyMultiList<gbtRational>;
 template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<gbtRational> &y);
@@ -39,10 +34,5 @@ template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<gbtRat
 template class gbtPolyMultiList<double>;
 template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<double> &y);
 
-template class gbtList<gbtIndexPair>;
-
 template class gbtRectArray<gbtPolyMulti<gbtRational>*>;
-//template class gbtArray<gbtPolyMulti<gbtRational>*>;
 
-//template class gbtRectArray<gbtPolyMulti<double>*>;
-//template class gbtArray<gbtPolyMulti<double>*>;

@@ -25,14 +25,11 @@
 //
 
 #include "ludecomp.imp"
-#include "base/glist.imp"
 #include "math/rational.h"
 
 template class gbtEtaMatrix< double >;
-template class gbtList< gbtEtaMatrix< double > >;
 template class gbtLUDecomposition< double >;
 
 template class gbtEtaMatrix< gbtRational >;
-template class gbtList< gbtEtaMatrix< gbtRational > >;
 template class gbtLUDecomposition< gbtRational >;
 

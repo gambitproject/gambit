@@ -61,7 +61,6 @@ libgambit_game_la_SOURCES = \
 	table-file.cc \
 	table-game.cc \
 	table-game.h \
-	table-inst.cc \
 	table-mixed-double.cc \
 	table-mixed-mpfloat.cc \
 	table-mixed-rational.cc \
@@ -85,7 +84,6 @@ libgambit_game_la_SOURCES = \
 	tree-game.h \
 	tree-infoset.cc \
 	tree-infoset.h \
-	tree-inst.cc \
 	tree-node.cc \
 	tree-node.h \
 	tree-outcome.cc \

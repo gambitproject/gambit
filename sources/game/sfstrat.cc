@@ -31,10 +31,6 @@
 // gbtSfgSequence:  Member functions
 //--------------------------------------
 
-#include "base/glist.imp"
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
 gbtList<gbtGameAction> gbtSfgSequence::History(void) const 
 { 
   gbtList<gbtGameAction> h;
@@ -155,7 +151,3 @@ const gbtBlock<gbtSfgSequence *> &gbtSfgSequenceSet::GetSFSequenceSet(void) cons
 {
   return sequences;
 }
-
-template class gbtBlock<gbtSfgSequence *>;
-template class gbtArray<gbtSfgSequence *>;
-template class gbtArray<gbtSfgSequenceSet *>;

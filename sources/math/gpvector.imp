@@ -41,7 +41,7 @@ template <class T> void gbtPVector<T>::setindex(void)
 {
   int index = First();
   for(int i = 1; i <= svlen.Length(); i++)  {
-    svptr[i] = data + index - 1;
+    svptr[i] = m_data + index - 1;
     index += svlen[i];
   }
 }
@@ -49,7 +49,7 @@ template <class T> void gbtPVector<T>::setindex(void)
 
 template <class T> int gbtPVector<T>::Check(const gbtPVector<T> &v) const
 {
-  if (v.mindex == mindex && v.maxdex == maxdex)  {
+  if (v.m_mindex == m_mindex && v.m_maxdex == m_maxdex)  {
     for (int i = 1; i <= svlen.Length(); i++)
       if (svlen[i] != v.svlen[i])   return 0;
     return 1;

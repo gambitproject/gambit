@@ -15,11 +15,8 @@ baseincludedir = $(includedir)/gambit-$(VERSION)/gambit/base
 baseinclude_HEADERS = \
 	base.h \
 	garray.h \
-	garray.imp \
 	gblock.h \
-	gblock.imp \
 	glist.h \
-	glist.imp \
 	gmap.h \
 	gmap.imp \
 	gmisc.h \
@@ -31,20 +28,13 @@ baseinclude_HEADERS = \
 	grblock.imp \
 	gstatus.h \
 	gtree.h \
-	gtree.imp \
 	odometer.h
 
 libgambit_base_la_SOURCES = \
 	base.h \
-	garray.cc \
 	garray.h \
-	garray.imp \
-	gblock.cc \
 	gblock.h \
-	gblock.imp \
-	glist.cc \
 	glist.h \
-	glist.imp \
 	gmap.h \
 	gmap.imp \
 	gmisc.cc \
@@ -58,7 +48,6 @@ libgambit_base_la_SOURCES = \
 	grblock.imp \
 	gstatus.h \
 	gtree.h \
-	gtree.imp \
 	odometer.cc \
 	odometer.h 
 

@@ -24,15 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <assert.h>
 #include "base/base.h"
-
-#ifdef __BORLANDC__
-bool operator!=(const gbtArray<int> &, const gbtArray<int> &);
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
 #include "prepoly.h"
-#include "base/glist.imp"
 
 //-----------------------------------------------------------
 //                      gbtPolySpace
@@ -47,7 +41,6 @@ gbtPolySpace::gbtPolySpace(int nvars)
 : Variables()
 {
   Variable *newvar;
-  assert (nvars >= 0);
 
   for (int i = 1; i <= nvars; i++){
     newvar = new Variable;
@@ -685,13 +678,3 @@ gbtPolyTermOrder gbtPolyTermOrder::WithVariableAppended(const gbtPolySpace* Exte
   return gbtPolyTermOrder(ExtendedSpace,actual_order);
 }
 
-
-
-template class gbtList<gbtPolyExponent>;
-
-template class gbtList<gbtPolyExponent*>;
-
-#include "base/garray.imp"
-#include "base/gblock.imp"
-template class gbtArray<Variable *>;
-template class gbtBlock<Variable *>;

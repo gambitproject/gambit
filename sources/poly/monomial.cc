@@ -25,9 +25,6 @@
 //
 
 #include "monomial.imp"
-#include "base/glist.imp"
-#include "base/garray.imp"
-#include "base/gblock.imp"
 
 template class gbtMonomial<int>;
 template std::ostream& operator << (std::ostream& output, const gbtMonomial<int>& x);
@@ -37,7 +34,3 @@ template std::ostream& operator << (std::ostream& output, const gbtMonomial<doub
 
 template class gbtMonomial<gbtRational>;
 template std::ostream& operator << (std::ostream& output, const gbtMonomial<gbtRational>& x);
-
-template class gbtList< gbtMonomial<int> >;
-template class gbtList< gbtMonomial<double> >;
-template class gbtList< gbtMonomial<gbtRational> >;

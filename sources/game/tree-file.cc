@@ -612,8 +612,3 @@ gbtGame ReadEfg(std::istream &p_file)
   }
 }
 
-#include "base/garray.imp"
-#include "base/gblock.imp"
-
-template class gbtArray<gbtTreeFileOutcome *>;
-template class gbtBlock<gbtTreeFileOutcome *>;

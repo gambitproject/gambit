@@ -68,18 +68,17 @@ template <class T> bool gbtVector<T>::operator!=(T c) const
 //------------------------------------------------------------------------
 
 template <class T> bool gbtVector<T>::Check(const gbtVector<T> &v) const
-{ return( v.mindex == mindex && v.maxdex == maxdex ); }
+{ return (v.m_mindex == m_mindex && v.m_maxdex == m_maxdex); }
 
 
 //------------------------------------------------------------------------
 //	gbtVector: arithmetic operators
 //------------------------------------------------------------------------
 
-template<class T> gbtVector<T>& gbtVector<T>::operator=(T c)
+template <class T> gbtVector<T> &gbtVector<T>::operator=(T c)
 {
-  for(int i=mindex; i<=maxdex; i++)
-    (*this)[i]= c;
-  return (*this);
+  for (int i = m_mindex; i <= m_maxdex; (*this)[i++] = c);
+  return *this;
 }
 
 // arithmetic operators
@@ -88,8 +87,8 @@ gbtVector<T>::operator+(const gbtVector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  gbtVector<T> tmp(mindex,maxdex);
-  for(int i=mindex; i<=maxdex; i++)
+  gbtVector<T> tmp(m_mindex, m_maxdex);
+  for (int i = m_mindex; i <= m_maxdex; i++)
     tmp[i]= (*this)[i] + V[i];
   return tmp;
 }
@@ -99,8 +98,8 @@ gbtVector<T>::operator-(const gbtVector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  gbtVector<T> tmp(mindex,maxdex);
-  for(int i=mindex; i<=maxdex; i++)
+  gbtVector<T> tmp(m_mindex, m_maxdex);
+  for (int i = m_mindex; i <= m_maxdex; i++)
     tmp[i]= (*this)[i] - V[i];
   return tmp;
 }
@@ -110,7 +109,7 @@ gbtVector<T>::operator+=(const gbtVector<T>& V)
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  for(int i=mindex; i<=maxdex; i++)
+  for (int i = m_mindex; i <= m_maxdex; i++)
     (*this)[i] += V[i];
   return (*this);
 }
@@ -120,30 +119,30 @@ gbtVector<T>::operator-=(const gbtVector<T>& V)
 {
   if (!Check(V))    throw gbtDimensionException();
 
-  for(int i=mindex; i<=maxdex; i++)
+  for (int i = m_mindex; i <= m_maxdex; i++)
     (*this)[i] -= V[i];
   return (*this);
 }
 
 template <class T> gbtVector<T> gbtVector<T>::operator-(void)
 {
-  gbtVector<T> tmp(mindex,maxdex);
-  for(int i=mindex; i<=maxdex; i++)
+  gbtVector<T> tmp(m_mindex, m_maxdex);
+  for (int i = m_mindex; i <= m_maxdex; i++)
     tmp[i]= -(*this)[i];
   return tmp;
 }
 
 template <class T> gbtVector<T> gbtVector<T>::operator*(T c) const
 {
-  gbtVector<T> tmp(mindex,maxdex);
-  for(int i=mindex; i<=maxdex; i++)
+  gbtVector<T> tmp(m_mindex, m_maxdex);
+  for (int i = m_mindex; i <= m_maxdex; i++)
     tmp[i]= (*this)[i]*c;
   return tmp;
 }
 
 template <class T> gbtVector<T> &gbtVector<T>::operator*=(T c)
 {
-  for(int i=mindex; i<=maxdex; i++)
+  for(int i=m_mindex; i<=m_maxdex; i++)
     (*this)[i] *= c;
   return (*this);
 }
@@ -153,7 +152,7 @@ template <class T> T gbtVector<T>::operator*(const gbtVector<T>& V) const
   if (!Check(V))   throw gbtDimensionException();
 
   T sum= (T)0;
-  for(int i=mindex; i<=maxdex; i++)
+  for(int i=m_mindex; i<=m_maxdex; i++)
     sum += (*this)[i] * V[i];
   return sum;
 }
@@ -161,8 +160,8 @@ template <class T> T gbtVector<T>::operator*(const gbtVector<T>& V) const
 
 template <class T> gbtVector<T> gbtVector<T>::operator/(T c) const
 {
-  gbtVector<T> tmp(mindex,maxdex);
-  for(int i=mindex; i<=maxdex; i++)
+  gbtVector<T> tmp(m_mindex,m_maxdex);
+  for(int i=m_mindex; i<=m_maxdex; i++)
     tmp[i]= (*this)[i]/c;
   return tmp;
 }
@@ -172,7 +171,7 @@ template <class T> bool gbtVector<T>::operator==(const gbtVector<T>& V) const
 {
   if (!Check(V))   throw gbtDimensionException();
 
-  for(int i=mindex; i<=maxdex; i++)
+  for(int i=m_mindex; i<=m_maxdex; i++)
     if( (*this)[i] != V[i] )
       return false;
   return true;
@@ -180,7 +179,7 @@ template <class T> bool gbtVector<T>::operator==(const gbtVector<T>& V) const
 
 template <class T> bool gbtVector<T>::operator==(T c) const
 {
-  for(int i=mindex; i<=maxdex; i++)
+  for(int i=m_mindex; i<=m_maxdex; i++)
     if( (*this)[i] != c )
       return false;
   return true;

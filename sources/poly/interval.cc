@@ -24,27 +24,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <assert.h>
 #include "interval.imp"
-#include "base/glist.imp"
 
 template class gInterval<gbtRational>;
-template class gbtList< gInterval<gbtRational> >;
 #ifndef __BCC55__
-template std::ostream& operator << (std::ostream& output, const gInterval<gbtRational>& x);
+template std::ostream& operator<<(std::ostream& output, 
+				  const gInterval<gbtRational>& x);
 #endif  // __BCC55__
 
 template class gInterval<int>;
-template class gbtList< gInterval<int> >;
 #ifndef __BCC55__
-template std::ostream& operator << (std::ostream& output, const gInterval<int>& x);
+template std::ostream& operator<<(std::ostream& output, 
+				  const gInterval<int>& x);
 #endif  // __BCC55__
 
 
 template class gInterval<double>;
-template class gbtList< gInterval<double> >;
 #ifndef __BCC55__
-template std::ostream& operator << (std::ostream& output, const gInterval<double>& x);
+template std::ostream& operator<<(std::ostream& output, 
+				  const gInterval<double>& x);
 #endif  // __BCC55__
 
 

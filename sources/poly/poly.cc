@@ -38,10 +38,3 @@ template class gbtPolyUni<double>;
 template std::ostream& operator << (std::ostream& output, 
 			       const gbtPolyUni<double>& x);
 
-#include "base/glist.imp"
-template class gbtList< gbtPolyUni<gbtRational> >;
-
-template class gbtList< gbtPolyUni<int> >;
-
-template class gbtList< gbtPolyUni<double> >;
-

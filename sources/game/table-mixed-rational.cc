@@ -34,6 +34,3 @@ std::ostream &operator<<(std::ostream &f,
 			 const gbtMixedProfile<gbtRational> &)
 { return f; }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtMixedProfile<gbtRational> >;

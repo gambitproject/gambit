@@ -155,7 +155,7 @@ void gbtMatrix<T>::CMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
     T sum = (T)0;
 
     T *src1 = data[i] + mincol;
-    T *src2 = in.data + mincol;
+    T *src2 = in.m_data + mincol;
     int j = maxcol - mincol +1;
     while (j--)
       sum += *(src1++) * *(src2++);
@@ -197,7 +197,7 @@ void gbtMatrix<T>::RMultiply(const gbtVector<T> &in, gbtVector<T> &out) const
     T k = in[i];
 
     T *src = data[i] + mincol;
-    T *dst = out.data + mincol;
+    T *dst = out.m_data + mincol;
     int j = maxcol - mincol + 1;
     while (j--)
       *(dst++) += *(src++) * k;

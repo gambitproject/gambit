@@ -30,7 +30,3 @@ template class gbtTreeBehavProfileRep<double>;
 std::ostream &operator<<(std::ostream &f, const gbtBehavProfile<double> &)
 { return f; }
 
-#include "base/glist.imp"
-
-template class gbtList<gbtBehavProfile<double> >;
-
