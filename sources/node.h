@@ -38,7 +38,6 @@ class Node    {
     FullEfgNamespace::Outcome *outcome;
     gBlock<Node *> children;
     Node *whichbranch, *ptr, *gameroot;
-    void *solution;
 
     Node(FullEfg *e, Node *p);
     ~Node();

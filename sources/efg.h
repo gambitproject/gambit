@@ -53,9 +53,15 @@ namespace Efg {
     { return p_file; }
 
   class Game {
+    friend class BehavProfile<double>;
+    friend class BehavProfile<gRational>;
+    friend class BehavProfile<gNumber>;
   protected:
     int GetOutcomeID(const Outcome &p_outcome) const
       { return p_outcome.GetID(); }
+
+    // currently "installed" profile
+    mutable void *m_profile;
     
   public:
     class Exception : public gException   {
@@ -64,6 +70,7 @@ namespace Efg {
       gText Description(void) const    { return "Efg error"; }
     };
 
+    Game(void) : m_profile(0) { }
     virtual ~Game() { }
     
     virtual const gText &GetTitle(void) const = 0;

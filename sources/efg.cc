@@ -185,7 +185,7 @@ void ChanceInfoset::PrintActions(gOutput &f) const
 
 Node::Node(FullEfg *e, Node *p)
   : mark(false), number(0), E(e), infoset(0), parent(p), outcome(0),
-    gameroot((p) ? p->gameroot : this), solution(0)
+    gameroot((p) ? p->gameroot : this)
 { }
 
 Node::~Node()

@@ -9,6 +9,7 @@
 
 #include "base/base.h"
 #include "math/gdpvect.h"
+#include "math/gmatrix.h"
 #include "efstrat.h"
 
 class Infoset;
@@ -34,14 +35,16 @@ template <class T> class BehavProfile : public gDPVector<T>  {
 public:
   struct BehavInfoset;
   struct BehavAction;
-  struct BehavNode;
 protected:
   const Efg::Game *m_efg;
-  BehavNode *m_root;
   EFSupport m_support;
   gArray<BehavInfoset *> m_isets;
   mutable bool m_cached_data;
-  
+
+  // structures for storing cached data
+  mutable gVector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
+  mutable gMatrix<T> m_nodeValues;
+
   //
   // FUNCTIONS FOR INSTALLATION AND INITIALIZATION
   //
@@ -49,7 +52,6 @@ protected:
   // stuff in BehavProfile
 
   void InstallMe(void) const;  
-  void InstallMe(BehavNode *) const; 
   void InitPayoffs(void) const;
   void InitProfile(void);
 
@@ -65,12 +67,14 @@ protected:
 
   const T &BeliefProb(const Node *node) const;
   T &BeliefProb(const Node *node);
+  
+  gVector<T> NodeValues(const Node *node) const
+    { return m_nodeValues.Row(node->number); }
+  const T &NodeValue(const Node *node, int pl) const
+    { return m_nodeValues(node->number, pl); }
+  T &NodeValue(const Node *node, int pl)
+    { return m_nodeValues(node->number, pl); }
 
-  inline const gVector<T> &NodeValue(const Node *node) const
-    {return ((BehavNode *)node->solution)->nodeValue;}
-  inline gVector<T> &NodeValue(const Node *node)
-    {return ((BehavNode *)node->solution)->nodeValue;}
- 
   const T &IsetProb(const Infoset *iset) const;
   T &IsetProb(const Infoset *iset);
 
@@ -99,9 +103,9 @@ protected:
   void ComputeSolutionDataPass1(const Node *node);
   void ComputeSolutionData(void);
 
-  void BehaviorStrat(const Efg::Game &, int, BehavNode *);
+  void BehaviorStrat(const Efg::Game &, int, Node *);
   void RealizationProbs(const MixedProfile<T> &, const Efg::Game &,
-			int pl, const gArray<int> *const, BehavNode *);
+			int pl, const gArray<int> *const, Node *);
 
 public:
   class BadStuff : public gException  {
@@ -113,20 +117,6 @@ public:
   //
   // STRUCTS FOR STORING SOLUTION DATA
   //
-
-  struct BehavNode {
-    Node *node;
-    T nval, bval;
-    gArray<BehavNode *> children;
-    
-    T realizProb, belief;
-    gVector<T> nodeValue;
-    
-    BehavNode(Efg::Game *e, Node *n, int pl);
-    ~BehavNode();
-    
-    void ClearNodeProbs(void);
-  };
 
   struct BehavInfoset {
     Infoset *iset;
@@ -175,7 +165,7 @@ public:
   
   const T &GetRealizProb(const Node *node);
   const T &GetBeliefProb(const Node *node);
-  const gVector<T> &GetNodeValue(const Node *node);
+  gVector<T> GetNodeValue(const Node *node);
   const T &GetIsetProb(const Infoset *iset);
   const T &GetIsetValue(const Infoset *iset);
   const T &GetActionProb(const Action *act) const;
@@ -207,7 +197,7 @@ protected:
   gDPVector<T> m_beliefs;
   
   // AUXILIARY MEMBER FUNCTIONS FOR COMPUTATION OF INTERESTING QUANTITES
-  void CondPayoff(BehavProfile<T>::BehavNode *, T,
+  void CondPayoff(Node *, T,
 		  gPVector<T> &, gDPVector<T> &) const;
   
 public:

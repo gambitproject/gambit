@@ -49,10 +49,6 @@ template class PureBehavProfile<gNumber>;
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<BehavProfile<double>::BehavNode *>;
-template class gArray<BehavProfile<gRational>::BehavNode *>;
-template class gArray<BehavProfile<gNumber>::BehavNode *>;
-
 template class gArray<BehavProfile<double>::BehavAction *>;
 template class gArray<BehavProfile<gRational>::BehavAction *>;
 template class gArray<BehavProfile<gNumber>::BehavAction *>;
