@@ -51,11 +51,12 @@ public:
   
   void AddSolutions(void);
   const gList<MixedSolution<T> > &GetSolutions(void) const;
-//  void GetSolutions(gList<MixedSolution<T> > &) const;
+//   void GetSolutions(gList<MixedSolution<T> > &) const;
 };
 
 
 #endif    // LEMKE_H
+
 
 
 
