@@ -313,6 +313,9 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
       case porEFOUTCOME:
 	((EfOutcomePortion *) p1)->SetValue(((EfOutcomePortion *) p2)->Value());
 	break;
+      case porNFOUTCOME:
+	((NfOutcomePortion *) p1)->SetValue(((NfOutcomePortion *) p2)->Value());
+	break;
       case porNFSUPPORT:
 	((NfSupportPortion *) p1)->SetValue(new NFSupport(*((NfSupportPortion *) p2)->Value()));
 	break;
