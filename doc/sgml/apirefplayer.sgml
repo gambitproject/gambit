@@ -26,7 +26,7 @@ type is referred to as <type>NFPLAYER</type>.
 
 
 <sect2 id="apiref.player.getgame">
-<title>GetGame -- The game in which the player acts</title>
+<title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
 <indexterm><primary>Game (GCL function)</primary></indexterm>
 
@@ -59,7 +59,7 @@ returns the extensive or normal form game to which the player belongs.
 
 
 <sect2 id="apiref.player.getinfoset">
-<title>GetInfoset -- Access an information set of a player</title>
+<title>GetInfoset</title>
 <indexterm><primary>GetInfoset</primary></indexterm>
 <indexterm><primary>Infosets (GCL function)</primary></indexterm>
 
@@ -99,7 +99,7 @@ returns the list of information sets at which the
 
 
 <sect2 id="apiref.player.getlabel">
-<title>GetLabel -- Returns the text label of a player</title>
+<title>GetLabel</title>
 <indexterm><primary>GetLabel</primary></indexterm>
 <indexterm><primary>Name (GCL function)</primary></indexterm>
 
@@ -116,7 +116,8 @@ gText gbtEfgPlayer::GetLabel(void) const
 <title>GCL usage</title>
 <para>
 <synopsis>
-Name[x->INFOSET*] =: TEXT
+Name[x->EFPLAYER*] =: TEXT
+Name[x->NFPLAYER*] =: TEXT
 </synopsis>
 </para>
 </formalpara>
@@ -131,7 +132,7 @@ The empty string is returned if the player object is null.
 
 
 <sect2>
-<title>GetStrategy -- Access a strategy of a player</title>
+<title>GetStrategy</title>
 <indexterm><primary>GetStrategy</primary></indexterm>
 <indexterm><primary>Strategies (GCL function)</primary></indexterm>
 
@@ -169,7 +170,7 @@ in <parameter>support</parameter>.
 </sect2>
 
 <sect2 id="apiref.player.ischance">
-<title>IsChance -- Returns whether the player represents the nature player</title>
+<title>IsChance</title>
 <indexterm><primary>IsChance</primary></indexterm>
 
 <formalpara>
@@ -204,7 +205,7 @@ NewFunction[IsChance[player->EFPLAYER] =: BOOLEAN,
 
 
 <sect2 id="apiref.player.isnull">
-<title>IsNull -- Returns whether the player is the null player</title>
+<title>IsNull</title>
 <indexterm><primary>IsNull</primary></indexterm>
 
 <formalpara>
@@ -236,7 +237,7 @@ null, and <literal>False</literal> (zero) if it is null.
 </sect2>
 
 <sect2 id="apiref.player.newinfoset">
-<title>NewInfoset -- Create a new information set for a player</title>
+<title>NewInfoset</title>
 <indexterm><primary>NewInfoset</primary></indexterm>
 
 <formalpara>
@@ -272,8 +273,8 @@ positive.  The newly created information set is returned.
 </sect2>
 
 
-<sect2>
-<title>NumInfosets -- How many information sets belong to a player</title>
+<sect2 id="apiref.player.numinfosets">
+<title>NumInfosets</title>
 <indexterm><primary>NumInfosets</primary></indexterm>
 
 <formalpara>
@@ -305,8 +306,8 @@ NewFunction[NumInfosets[player->EFPLAYER] =: INTEGER,
 
 </sect2>
 
-<sect2>
-<title>NumStrategies -- How many strategies belong to a player</title>
+<sect2 id="apiref.player.numstrategies">
+<title>NumStrategies</title>
 <indexterm><primary>NumStrategies</primary></indexterm>
 
 <formalpara>
@@ -339,8 +340,8 @@ NewFunction[NumStrategies[player->NFPLAYER] =: INTEGER,
 </sect2>
 
 
-<sect2>
-<title>SetLabel -- Set the text label of a player</title>
+<sect2 id="apiref.player.setlabel">
+<title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
 <indexterm><primary>SetName (GCL function)</primary></indexterm>
 
@@ -372,4 +373,5 @@ sets the text label of the player.  The GCL version returns the player.
 </sect2>
 
 </sect1>
+
 

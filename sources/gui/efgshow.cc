@@ -820,7 +820,7 @@ void EfgShow::OnEditMove(wxCommandEvent &)
 
     for (int act = 1; act <= infoset.NumActions(); act++) {
       if (!dialog.GetActions().Find(infoset.GetAction(act))) {
-	m_doc->GetEfg().DeleteAction(infoset, infoset.GetAction(act));
+	infoset.GetAction(act).DeleteAction();
 	act--;
       }
     }

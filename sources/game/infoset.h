@@ -42,6 +42,7 @@ struct gbt_efg_action_rep;
 
 class gbtEfgAction {
 friend class gbtEfgGame;
+friend class gbtEfgInfoset;
 protected:
   struct gbt_efg_action_rep *rep;
 
@@ -64,6 +65,8 @@ public:
 
   gNumber GetChanceProb(void) const;
   bool Precedes(gbtEfgNode) const;
+
+  void DeleteAction(void);
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgAction &);
@@ -91,6 +94,8 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
+  void DeleteInfoset(void);
+
   bool IsChanceInfoset(void) const;
 
   gbtEfgPlayer GetPlayer(void) const;
@@ -100,7 +105,6 @@ public:
   gNumber GetChanceProb(int act) const;
 
   gbtEfgAction InsertAction(int where);
-  void RemoveAction(int which);
 
   gbtEfgAction GetAction(int act) const;
   int NumActions(void) const;

@@ -249,6 +249,21 @@ gbt_efg_infoset_rep *gbt_efg_game_rep::NewInfoset(gbt_efg_player_rep *p_player,
   return s;
 }
 
+void gbt_efg_game_rep::DeleteInfoset(gbt_efg_infoset_rep *p_infoset)
+{
+  gbt_efg_player_rep *player = p_infoset->m_player;
+  player->m_infosets.Remove(player->m_infosets.Find(p_infoset));
+  if (p_infoset->m_refCount == 0) {
+    delete p_infoset;
+  }
+  else {
+    p_infoset->m_deleted = true;
+  }
+
+  m_revision++;
+  DeleteLexicon();
+}
+
 //
 // Deletes the outcome from the extensive form.
 // Assumes outcome is not null.
@@ -408,6 +423,41 @@ void gbt_efg_game_rep::SetPlayer(gbt_efg_infoset_rep *p_infoset,
   oldPlayer->m_infosets.Remove(oldPlayer->m_infosets.Find(p_infoset));
   p_infoset->m_player = p_player;
   p_player->m_infosets.Append(p_infoset);
+
+  m_revision++;
+  DeleteLexicon();
+  SortInfosets();
+}
+
+void gbt_efg_game_rep::DeleteAction(gbt_efg_infoset_rep *p_infoset,
+				    gbt_efg_action_rep *p_action)
+{
+  p_infoset->m_actions.Remove(p_action->m_id);
+  if (p_infoset->m_player->m_id == 0) {
+    p_infoset->m_chanceProbs.Remove(p_action->m_id);
+  }
+  for (int act = 1; act <= p_infoset->m_actions.Length(); act++) {
+    p_infoset->m_actions[act]->m_id = act;
+  }
+
+  for (int i = 1; i <= p_infoset->m_members.Length(); i++)   {
+    DeleteTree(p_infoset->m_members[i]->m_children[p_action->m_id]);
+    gbt_efg_node_rep *node = 
+      p_infoset->m_members[i]->m_children.Remove(p_action->m_id);
+    if (node->m_refCount == 0) {
+      delete node;
+    }
+    else {
+      node->m_deleted = true;
+    }
+  }
+
+  if (p_action->m_refCount == 0) {
+    delete p_action;
+  }
+  else {
+    p_action->m_deleted = true;
+  }
 
   m_revision++;
   DeleteLexicon();
@@ -911,30 +961,13 @@ gbtEfgPlayer gbtEfgGame::GetChance(void) const
   return rep->chance;
 }
 
-bool gbtEfgGame::DeleteEmptyInfoset(gbtEfgInfoset s)
-{
-  if (s.IsNull())  {
-    throw gbtEfgNullObject();
-  }
-
-  if (s.NumMembers() > 0)   return false;
-
-  rep->m_revision++;
-  s.rep->m_player->m_infosets.Remove(s.rep->m_player->m_infosets.Find(s.rep));
-  // Note that there's at least one reference to this infoset (namely, 's')
-  // at this point; just mark as deleted and let things take care of themselves
-  // later...
-  s.rep->m_deleted = true;
-
-
-  return true;
-}
-
 void gbtEfgGame::DeleteEmptyInfosets(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     for (int iset = 1; iset <= NumInfosets()[pl]; iset++) {
-      if (DeleteEmptyInfoset(rep->players[pl]->m_infosets[iset])) {
+      gbt_efg_infoset_rep *infoset = rep->players[pl]->m_infosets[iset];
+      if (infoset->m_members.Length() == 0) {
+	rep->DeleteInfoset(infoset);
         iset--;
       }
     }
@@ -1055,29 +1088,6 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
   rep->DeleteLexicon();
   rep->SortInfosets();
   return action;
-}
-
-gbtEfgInfoset gbtEfgGame::DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a)
-{
-  if (a.IsNull() || s.IsNull()) {
-    throw gbtEfgNullObject();
-  }
-
-  rep->m_revision++;
-  int where;
-  for (where = 1; (where <= s.rep->m_actions.Length() &&
-		   s.rep->m_actions[where] != a.rep);
-       where++);
-  if (where > s.rep->m_actions.Length() || s.rep->m_actions.Length() == 1)
-    return s;
-  s.RemoveAction(where);
-  for (int i = 1; i <= s.rep->m_members.Length(); i++)   {
-    rep->DeleteTree(s.rep->m_members[i]->m_children[where]);
-    delete s.rep->m_members[i]->m_children.Remove(where);
-  }
-  rep->DeleteLexicon();
-  rep->SortInfosets();
-  return s;
 }
 
 void gbtEfgGame::SetChanceProb(gbtEfgInfoset infoset,

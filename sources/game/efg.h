@@ -147,7 +147,6 @@ public:
   gbtEfgOutcome NewOutcome(void);
 
   // EDITING OPERATIONS
-  bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
 
   gbtEfgNode CopyTree(gbtEfgNode src, gbtEfgNode dest);
@@ -155,7 +154,6 @@ public:
 
   gbtEfgAction InsertAction(gbtEfgInfoset);
   gbtEfgAction InsertAction(gbtEfgInfoset, const gbtEfgAction &at);
-  gbtEfgInfoset DeleteAction(gbtEfgInfoset s, const gbtEfgAction &a);
 
   void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
 

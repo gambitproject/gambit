@@ -58,27 +58,7 @@ information and plans.
 
 &apirefnode;
 
-<sect1 id="apiref.infoset">
-<title>Information sets</title>
-
-<para>
-</para>
-
-&bifactions;
-&bifchanceprob;
-&bifdeleteaction;
-&bifdeleteemptyinfoset;
-&bifgame;
-&bifinsertaction;
-&bifmembers;
-&bifmergeinfosets;
-&bifname;
-&bifplayer;
-&bifreveal;
-&bifsetchanceprobs;
-&bifsetname;
-
-</sect1>
+&apirefinfoset;
 
 &apirefaction;
 

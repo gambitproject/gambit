@@ -147,11 +147,14 @@ struct gbt_efg_game_rep {
 
   gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,
 				  int p_id, int p_actions);
+  void DeleteInfoset(gbt_efg_infoset_rep *);
   void JoinInfoset(gbt_efg_infoset_rep *, gbt_efg_node_rep *); 
   gbt_efg_infoset_rep *LeaveInfoset(gbt_efg_node_rep *);
   void MergeInfoset(gbt_efg_infoset_rep *, gbt_efg_infoset_rep *);
   void Reveal(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
   void SetPlayer(gbt_efg_infoset_rep *, gbt_efg_player_rep *);
+
+  void DeleteAction(gbt_efg_infoset_rep *, gbt_efg_action_rep *);
 
   void DeleteOutcome(gbt_efg_outcome_rep *p_outcome);
 

@@ -5,6 +5,75 @@
 </para>
 
 
+<sect2 id="apiref.action.deleteaction">
+<title>DeleteAction</title>
+<indexterm><primary>DeleteAction</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtEfgAction::DeleteAction(void)
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+DeleteAction[action->ACTION] =: INFOSET 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>DeleteAction</function> deletes
+<parameter>action</parameter> from its information set.  As a
+consequence, the corresponding subtrees associated with the action
+from each member of the information set are deleted.  The GCL version
+returns the information set to which <parameter>action</parameter>
+belonged.  It is an error if <parameter>action</parameter> is the only
+action at its information set.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.action.getchanceprob">
+<title>GetChanceProb</title>
+<indexterm><primary>GetChanceProb</primary></indexterm>
+<indexterm><primary>ChanceProb (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber gbtEfgAction::GetChanceProb(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+ChanceProb[action->ACTION] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetChanceProb</function> (<function>ChanceProb</function> in
+the GCL) returns the probability of 
+<parameter>action</parameter> being chosen at its information
+set by the chance player.  It is an error if <parameter>action</parameter>
+is not an action
+which is chosen by the chance player.
+</para>
+
+</sect2>
+
 <sect2 id="apiref.action.getinfoset">
 <title>GetInfoset</title>
 <indexterm><primary>GetInfoset</primary></indexterm>

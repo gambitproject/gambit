@@ -73,6 +73,32 @@ PyTypeObject Actiontype = {      /* main python type-descriptor */
  *****************************************************************************/
 
 static PyObject *
+action_deleteaction(actionobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+  
+  self->m_action->DeleteAction();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
+
+static PyObject *
+action_getchanceprob(actionobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  if (!self->m_action->GetInfoset().IsChanceInfoset()) {
+    return NULL;
+  }
+
+  return Py_BuildValue("d", (double) self->m_action->GetChanceProb());
+}
+
+static PyObject *
 action_getinfoset(actionobject *self, PyObject *args)
 {
   if (!PyArg_ParseTuple(args, "")) {
@@ -109,6 +135,8 @@ action_setlabel(actionobject *self, PyObject *args)
 }
 
 static struct PyMethodDef action_methods[] = {
+  { "DeleteAction", (PyCFunction) action_deleteaction, 1 },
+  { "GetChanceProb", (PyCFunction) action_getchanceprob, 1 },
   { "GetInfoset", (PyCFunction) action_getinfoset, 1 },
   { "GetLabel", (PyCFunction) action_getlabel, 1 },
   { "SetLabel", (PyCFunction) action_setlabel, 1 },
@@ -206,6 +234,22 @@ PyTypeObject Infosettype = {      /* main python type-descriptor */
 /*****************************************************************************
  * INSTANCE METHODS
  *****************************************************************************/
+
+static PyObject *
+infoset_deleteinfoset(infosetobject *self, PyObject *args)
+{
+  if (!PyArg_ParseTuple(args, "")) {
+    return NULL;
+  }
+
+  if (self->m_infoset->NumMembers() > 0) {
+    return NULL;
+  }
+
+  self->m_infoset->DeleteInfoset();
+  Py_INCREF(Py_None);
+  return Py_None;
+}
 
 static PyObject *
 infoset_getaction(infosetobject *self, PyObject *args)

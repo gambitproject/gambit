@@ -267,10 +267,11 @@ static Portion *GSM_DeleteAction(GSM &gsm, Portion **param)
   gbtEfgAction action = AsEfgAction(param[0]);
   gbtEfgInfoset infoset = action.GetInfoset();
 
-  if (infoset.NumActions() == 1)
+  if (infoset.NumActions() == 1) {
     throw gclRuntimeError("Cannot delete the only action at an infoset.");
+  }
 
-  infoset.GetGame().DeleteAction(infoset, action);
+  action.DeleteAction();
   return new InfosetPortion(infoset);
 }
 
@@ -281,7 +282,13 @@ static Portion *GSM_DeleteAction(GSM &gsm, Portion **param)
 static Portion *GSM_DeleteEmptyInfoset(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset infoset = AsEfgInfoset(param[0]);
-  return new BoolPortion(infoset.GetGame().DeleteEmptyInfoset(infoset));
+  if (infoset.NumMembers() > 0) {
+    return new BoolPortion(false);
+  }
+  else {
+    infoset.DeleteInfoset();
+    return new BoolPortion(true);
+  }
 }
 
 //----------------

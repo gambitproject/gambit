@@ -187,6 +187,19 @@ bool gbtEfgAction::Precedes(gbtEfgNode n) const
   return false;
 }
 
+void gbtEfgAction::DeleteAction(void)
+{
+  if (IsNull()) {
+    throw gbtEfgNullObject();
+  }
+
+  if (rep->m_infoset->m_actions.Length() == 1) {
+    return;
+  }
+
+  rep->m_infoset->m_player->m_efg->DeleteAction(rep->m_infoset, rep);
+}
+
 gOutput &operator<<(gOutput &p_stream, const gbtEfgAction &)
 { 
   return p_stream;
@@ -319,6 +332,19 @@ void gbtEfgInfoset::SetLabel(const gText &p_label)
   if (rep) {
     rep->m_label = p_label;
   }
+}
+
+void gbtEfgInfoset::DeleteInfoset(void)
+{
+  if (IsNull())  {
+    throw gbtEfgNullObject();
+  }
+
+  if (NumMembers() > 0)  {
+    return;
+  }
+
+  rep->m_player->m_efg->DeleteInfoset(rep);
 }
 
 gbtEfgAction gbtEfgInfoset::GetAction(int p_index) const
@@ -454,17 +480,6 @@ gbtEfgAction gbtEfgInfoset::InsertAction(int where)
     rep->m_actions[where]->m_id = where;
   }
   return action;
-}
-
-void gbtEfgInfoset::RemoveAction(int which)
-{
-  delete rep->m_actions.Remove(which);
-  if (rep->m_player->m_id == 0) {
-    rep->m_chanceProbs.Remove(which);
-  }
-  for (; which <= rep->m_actions.Length(); which++) {
-    rep->m_actions[which]->m_id = which;
-  }
 }
 
 void gbtEfgInfoset::SetChanceProb(int p_action, const gNumber &p_value)
