@@ -141,12 +141,30 @@ void Nfg::WriteNfgFile(gOutput &f) const
   for (i = 1; i <= NumPlayers(); i++)
     ncont *= NumStrats(i);
 
+/*
   for (i = 1; i <= ncont; i++)
     for (int j = 1; j <= NumPlayers(); j++)
       if (GetOutcome(i))
 	f << Payoff(GetOutcome(i), j) << ' ';
       else
 	f << 0 << ' ';
+  */
+  
+  f << "{\n";
+  for (int outc = 1; outc <= outcomes.Length(); outc++)   {
+    f << "{ \"" << EscapeQuotes(outcomes[outc]->name) << "\" ";
+    for (int pl = 1; pl <= players.Length(); pl++)
+      f << outcomes[outc]->payoffs[pl] << ' ';
+    f << "}\n";
+  }
+  f << "}\n";
+  
+  for (int cont = 1; cont <= ncont; cont++)  {
+    if (results[cont] != 0)
+      f << results[cont]->number << ' ';
+    else
+      f << "0 ";
+  }
 
   f << '\n';
 }

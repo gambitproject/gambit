@@ -23,6 +23,7 @@
                      gList<gString> names; \
                      gList<gNumber> numbers; \
                      gList<gString> stratnames; \
+                     NFOutcome *outcome; \
                      \
                      bool CreateNfg(const gList<gString> &, \
 					    const gList<gNumber> &, \
@@ -83,8 +84,10 @@ intlist:      integer
 
 integer:      NUMBER  { numbers.Append(last_number); }
 
+body:         payoffbody | outcomebody
 
-body:         { cont = 1;
+
+payoffbody:         { cont = 1;
                 pl = 1; }
               payofflist
 
@@ -100,6 +103,39 @@ payoff:       NUMBER
 		SetPayoff(cont, pl, last_number);
 		pl++;
 	      }
+
+outcomebody:   outcomelist { cont = 1; } contingencylist
+
+outcomelist:   LBRACE RBRACE
+           |   LBRACE outcomes RBRACE
+
+outcomes:      outcome
+        |      outcomes outcome
+
+outcome:       LBRACE NAME
+                 { outcome = N->NewOutcome();
+                   outcome->SetName(last_name);  pl = 1; }
+               outcpaylist RBRACE
+
+outcpaylist:   outcpay
+           |   outcpaylist outcpay
+
+outcpay:       NUMBER   
+                 { if (pl > N->NumPlayers())  YYERROR;
+                   N->SetPayoff(outcome, pl++, 
+	                        gPoly<gNumber>(N->Parameters(),
+                                               last_number,
+					       N->ParamOrder())); } 
+
+contingencylist:  contingency
+               |  contingencylist contingency
+
+contingency:   NUMBER
+                { if (cont > ncont)  YYERROR;
+                  if (last_number != 0)
+                    N->SetOutcome(cont++, N->Outcomes()[last_number]); }
+              
+
 
 %%
 
