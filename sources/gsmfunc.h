@@ -137,6 +137,7 @@ protected:
   
 public:
   FuncDescObj(const gString& func_name, int numfuncs);
+  FuncDescObj(const gString& func_proto);
   virtual ~FuncDescObj();
 
   void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
