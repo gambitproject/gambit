@@ -17,6 +17,7 @@ class PxiChild : public wxFrame {
 private:
   PxiFrame *parent;
   FileHeader m_fileHeader;
+  wxNotebook *m_plotBook;
 
   wxPrintData m_printData;
   wxPageSetupData m_pageSetupData;
@@ -26,11 +27,9 @@ private:
   void OnFilePrintPreview(wxCommandEvent &);
   void OnFilePrint(wxCommandEvent &); 
 
-  void OnQuit(wxCommandEvent &);
   void OnOverlayData(wxCommandEvent &);
   void OnOverlayFile(wxCommandEvent &);
-  void OnFileDetail(wxCommandEvent &);
-  void OnFileOutput(wxCommandEvent &);
+  void OnDisplayDetail(wxCommandEvent &);
   void OnDisplayOptions(wxCommandEvent &);
   void OnPrefsFontAxis(wxCommandEvent &);
   void OnPrefsFontLabel(wxCommandEvent &);
@@ -53,9 +52,10 @@ public:
   PxiChild(PxiFrame *p_parent, const wxString &p_title);
   ~PxiChild(void);
 
-  void  LoadFile(const wxString &file) {parent->LoadFile(file);}
+  void LoadFile(const wxString &file) {parent->LoadFile(file);}
 
   DECLARE_EVENT_TABLE()
 };
 
 #endif  // PXICHILD_H
+

@@ -109,7 +109,7 @@ PxiFrame::PxiFrame(wxFrame *p_parent, const wxString &p_title,
   SetIcon(wxICON(pxi));
     
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(PXI_LOAD_FILE, "&Load file", "Load file");
+  fileMenu->Append(PXI_FILE_OPEN, "&Open", "Load file");
   fileMenu->Append(wxID_EXIT, "E&xit", "Exit PXI");
 
   wxMenu *helpMenu = new wxMenu;
@@ -140,7 +140,7 @@ PxiFrame::~PxiFrame()
 }
 
 BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
-  EVT_MENU(PXI_LOAD_FILE, PxiFrame::OnFileLoad) 
+  EVT_MENU(PXI_FILE_OPEN, PxiFrame::OnFileOpen) 
   EVT_MENU(wxID_EXIT, PxiFrame::OnCloseWindow)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, PxiFrame::OnMRUFile)
   EVT_MENU(wxID_ABOUT, PxiFrame::OnHelpAbout)
@@ -148,7 +148,7 @@ BEGIN_EVENT_TABLE(PxiFrame, wxFrame)
   EVT_CLOSE(PxiFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
-void PxiFrame::OnFileLoad(wxCommandEvent &)
+void PxiFrame::OnFileOpen(wxCommandEvent &)
 {
   wxString filename = wxFileSelector("Load data file", wxGetApp().CurrentDir(),
 				  NULL, NULL, "*.pxi").c_str();
@@ -162,7 +162,7 @@ void PxiFrame::OnFileLoad(wxCommandEvent &)
 
 void PxiFrame::OnMRUFile(wxCommandEvent &p_event)
 {
-  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetSelection() - wxID_FILE1).c_str());
+  LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
 }
 
 void PxiFrame::OnHelpAbout(wxCommandEvent &)
@@ -179,10 +179,7 @@ void PxiFrame::OnHelpContents(wxCommandEvent &)
 
 void PxiFrame::LoadFile(const wxString &p_filename)
 {    
-  wxString filename(wxFileNameFromPath(p_filename));
-  filename = filename.MakeLower();
-
-  if (filename.Contains(".pxi")) {
+  if (p_filename.Contains(".pxi")) {
     if (!wxFileExists(p_filename)) {
       wxMessageBox("File could not be found or opened");
       return;
@@ -207,7 +204,7 @@ void PxiFrame::MakeToolbar(void)
 
   toolBar->SetMargins(4, 4);
 
-  toolBar->AddTool(PXI_LOAD_FILE, wxBITMAP(open), wxNullBitmap, false,
+  toolBar->AddTool(PXI_FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
 		   -1, -1, 0, "Open", "Open a saved datafile");
   toolBar->AddSeparator();
   toolBar->AddTool(wxID_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,

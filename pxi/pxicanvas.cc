@@ -594,36 +594,6 @@ void PxiCanvas::DoPlot_3(wxDC& dc, const PlotInfo &thisplot,
   PlotData_3(dc,thisplot,x0,y0,cw,ch, m_header, 1);
 }
 
-void PxiCanvas::ShowDetail(void)
-{
-  char tempstr[200];
-  wxString message;
-  int		i1,i;
-  sprintf(tempstr, "Detail for: %s\n",
-	  (const char *) FileNameFromPath(m_header.FileName()));
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) step:  %4.4f\n",m_header.EStep());
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) start: %4.4f\n",m_header.EStart());
-  message+=tempstr;
-  sprintf(tempstr,"Error (lambda) stop : %4.4f\n",m_header.EStop());
-  message+=tempstr;
-  sprintf(tempstr,"Minimum data value  : %4.4f\n",m_header.DataMin());
-  message+=tempstr;
-  sprintf(tempstr,"Maximum data value  : %4.4f\n",m_header.DataMax());
-  message+=tempstr;
-  sprintf(tempstr,"Data type:  %s\n",(m_header.DataType()==DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
-  message+=tempstr;
-  message+="\n";
-  if (m_header.MError()>-.99) {
-    sprintf(tempstr,"Probability step :    %4.4f\n",m_header.QStep());
-    message+=tempstr;
-    sprintf(tempstr,"Margin of error:      %4.4f\n",m_header.MError());
-    message+=tempstr;
-  }
-  wxMessageBox(message,"File Details",wxOK);
-}
-
 void PxiCanvas::NewExpData(ExpDataParams &P) 
 { 
   if(exp_data) delete exp_data;

@@ -35,24 +35,21 @@
 // wxWindows does not provide this constant
 const int wxID_HELP_INDEX = 1310;
 
-#define PXI_LOAD_FILE         111
+const int PXI_FILE_OPEN = 116;
+const int PXI_FILE_CLOSE = 118;
 #define	PXI_NEW_WINDOW	      117
-#define	PXI_CHILD_CLOSE	      118
-#define	PXI_CHILD_QUIT	      134
 #define	PXI_JUST_REPAINT      115
 #define	PXI_NEW_FILE_REPAINT  116
 #define	PXI_UPDATE_SCREEN     119
 #define	PXI_UPDATE_FILE       120
 #define	PXI_UPDATE_PRINTER    121
 #define	PXI_UPDATE_METAFILE   122
-#define	PXI_FILE_DETAIL	      123
+#define	PXI_DISPLAY_DETAIL    123
 #define	PXI_PREFS_COLORS      124
 #define	PXI_PREFS_FONTS    125
 #define	PXI_PREFS_FONT_AXIS    131
 #define	PXI_PREFS_FONT_OVERLAY  132
 #define	PXI_PREFS_FONT_LABEL    133
-#define	PXI_PAGE_NEXT           135
-#define	PXI_PAGE_PREV           136
 #define	PXI_PREFS_SCALE         137
 #define	PXI_PREFS_SCALE_1         138
 #define	PXI_PREFS_SCALE_2         139
@@ -210,7 +207,7 @@ private:
   wxFileHistory m_fileHistory;
 
   // Menu event handlers
-  void OnFileLoad(wxCommandEvent &);
+  void OnFileOpen(wxCommandEvent &);
   void OnMRUFile(wxCommandEvent &);
   void OnDataGridSolve(wxCommandEvent &);
   void OnHelpAbout(wxCommandEvent &);

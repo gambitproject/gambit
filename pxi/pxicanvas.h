@@ -104,7 +104,6 @@ public:
   virtual ~PxiCanvas();
 
   void Update(wxDC& dc,int device);
-  void ShowDetail(void);
 
   void Render(void);
   void SetPage(int page) { }

@@ -21,15 +21,13 @@
 #include "gui/dlabout.h"
 
 BEGIN_EVENT_TABLE(PxiChild, wxFrame)
-  //  EVT_MENU(PXI_LOAD_FILE, PxiChild::On)
   EVT_MENU(wxID_PRINT_SETUP, PxiChild::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, PxiChild::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, PxiChild::OnFilePrint)
-  EVT_MENU(PXI_CHILD_CLOSE, PxiChild::OnCloseWindow)
-  EVT_MENU(PXI_CHILD_QUIT, PxiChild::OnQuit)
+  EVT_MENU(PXI_FILE_CLOSE, PxiChild::OnCloseWindow)
   EVT_MENU(PXI_DATA_OVERLAY_DATA, PxiChild::OnOverlayData)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnOverlayFile)
-  EVT_MENU(PXI_FILE_DETAIL, PxiChild::OnFileDetail)
+  EVT_MENU(PXI_DISPLAY_DETAIL, PxiChild::OnDisplayDetail)
   EVT_MENU(PXI_DISPLAY_OPTIONS, PxiChild::OnDisplayOptions)
   EVT_MENU(PXI_PREFS_FONT_AXIS, PxiChild::OnPrefsFontAxis)
   EVT_MENU(PXI_PREFS_FONT_LABEL, PxiChild::OnPrefsFontLabel)
@@ -46,11 +44,6 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_CHAR_HOOK(PxiChild::OnChar)
   EVT_LEFT_DOWN(PxiChild::OnEvent)
 END_EVENT_TABLE()
-
-void PxiChild::OnQuit(wxCommandEvent &)
-{
-  GetParent()->Close();
-}
 
 void PxiChild::OnOverlayData(wxCommandEvent &)
 {
@@ -77,11 +70,6 @@ void PxiChild::OnOverlayFile(wxCommandEvent &)
 #endif  // NOT_PORTED_YET
 }
 
-void PxiChild::OnFileDetail(wxCommandEvent &)
-{
-  //  canvas->ShowDetail();
-}
-
 void PxiChild::OnFilePageSetup(wxCommandEvent &)
 {
   wxPageSetupDialog dialog(this, &m_pageSetupData);
@@ -93,7 +81,9 @@ void PxiChild::OnFilePageSetup(wxCommandEvent &)
 
 void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
+  PxiCanvas *canvas =
+    (PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection());
+
   wxPrintDialogData data(m_printData);
   wxPrintPreview *preview 
     = new wxPrintPreview(new PxiPrintout(*canvas, "PXI printout"), 
@@ -110,12 +100,13 @@ void PxiChild::OnFilePrintPreview(wxCommandEvent &)
 					     wxSize(600, 650));
   frame->Initialize();
   frame->Show(true);
-#endif  // NOT_PORTED_YET
 }
 
 void PxiChild::OnFilePrint(wxCommandEvent &)
 {
-#ifdef NOT_PORTED_YET
+  PxiCanvas *canvas =
+    (PxiCanvas *) m_plotBook->GetPage(m_plotBook->GetSelection());
+
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
   PxiPrintout printout(*canvas, "PXI printout");
@@ -127,6 +118,45 @@ void PxiChild::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
+}
+
+void PxiChild::OnDisplayDetail(wxCommandEvent &)
+{
+  wxString message;
+
+  message += "Detail for: ";
+  message += m_fileHeader.FileName();
+  message += "\n";
+
+  message += wxString::Format("Error (lambda) step: %4.4f\n",
+			      m_fileHeader.EStep());
+  message += wxString::Format("Error (lambda) start: %4.4f\n",
+			      m_fileHeader.EStart());
+  message += wxString::Format("Error (lambda) stop: %4.4f\n",
+			      m_fileHeader.EStop());
+  message += wxString::Format("Minimum data value: %4.4f\n",
+			      m_fileHeader.DataMin());
+  message += wxString::Format("Maximum data value: %4.4f\n",
+			      m_fileHeader.DataMax());
+  message += wxString::Format("Data type: %s\n",
+			      (m_fileHeader.DataType() == DATA_TYPE_ARITH) ? "Arithmetic" : "Logarithmic");
+  message += "\n";
+
+  if (m_fileHeader.MError() > -.99) {
+    message += wxString::Format("Probability step: %4.4f\n",
+				m_fileHeader.QStep());
+    message += wxString::Format("Margin of error: %4.4f\n",
+				m_fileHeader.MError());
+  }
+
+  wxMessageBox(message, "File Details", wxOK);
+}
+
+void PxiChild::OnDisplayOptions(wxCommandEvent &)
+{
+#ifdef NOT_PORTED_YET
+  canvas->DrawSettings()->SetOptions(this);
+  canvas->Render();
 #endif  // NOT_PORTED_YET
 }
 
@@ -240,14 +270,6 @@ void PxiChild::OnHelpContents(wxCommandEvent &)
 {
 }
 
-void PxiChild::OnDisplayOptions(wxCommandEvent &)
-{
-#ifdef NOT_PORTED_YET
-  canvas->DrawSettings()->SetOptions(this);
-  canvas->Render();
-#endif  // NOT_PORTED_YET
-}
-
 PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   wxFrame(p_parent, -1, p_filename, wxPoint(0,0), wxSize(480,480)),
   parent(p_parent), m_fileHeader(p_filename)
@@ -273,14 +295,14 @@ PxiChild::PxiChild(PxiFrame *p_parent, const wxString &p_filename) :
   int width, height;
   GetClientSize(&width, &height);
 
-  wxNotebook *plotBook = new wxNotebook(this, -1, wxDefaultPosition,
-					wxDefaultSize, wxNB_BOTTOM);
+  m_plotBook = new wxNotebook(this, -1, wxDefaultPosition,
+			      wxDefaultSize, wxNB_BOTTOM);
   
   for (int i = 1; i <= m_fileHeader.NumInfosets(); i++) {
-    PxiCanvas *canvas = new PxiCanvas(plotBook,
+    PxiCanvas *canvas = new PxiCanvas(m_plotBook,
 				      wxPoint(0, 0), wxSize(width, height),
 				      m_fileHeader, i);
-    plotBook->AddPage(canvas, wxString::Format("Plot %d", i));
+    m_plotBook->AddPage(canvas, wxString::Format("Plot %d", i));
   }
 
   MarkScaleMenu();
@@ -293,8 +315,8 @@ PxiChild::~PxiChild(void)
 void PxiChild::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(PXI_LOAD_FILE, "&Open", "Open data file");
-  fileMenu->Append(PXI_CHILD_CLOSE, "&Close", "Close child window");
+  fileMenu->Append(PXI_FILE_OPEN, "&Open", "Open data file");
+  fileMenu->Append(PXI_FILE_CLOSE, "&Close", "Close child window");
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
@@ -341,7 +363,7 @@ void PxiChild::MakeMenus(void)
   help_menu->Append(wxID_ABOUT, "&About", "About PXI");
 
   wxMenu *display_menu = new wxMenu;
-  display_menu->Append(PXI_FILE_DETAIL,"&Details", "File Details");
+  display_menu->Append(PXI_DISPLAY_DETAIL,"&Details", "File Details");
   display_menu->Append(PXI_DISPLAY_OPTIONS,"&Options...", "Change plot options");
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(fileMenu, "&File");
