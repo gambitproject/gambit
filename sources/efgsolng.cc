@@ -1070,6 +1070,7 @@ bool EfgSimpdivG::SolveSetup(void) const
 
 #include "peprm.h"
 #include "polenum.h"
+#include "polensub.h"
 
 guiPolEnumParamsSettings::guiPolEnumParamsSettings(void)
 { }
@@ -1130,6 +1131,21 @@ bool guiPolEnumEfgNfg::SolveSetup(void) const
 // PolEnum on efg
 //------------------
 
+class guiPolEnumEfgBySubgame : public PolEnumBySubgame, public BaseBySubgameG {
+protected:
+  void SelectSolutions(int p_subgame, const Efg &p_efg,
+		       gList<BehavSolution> &p_solutions)
+    { BaseSelectSolutions(p_subgame, p_efg, p_solutions); }
+  
+public:
+  guiPolEnumEfgBySubgame(const Efg &p_efg, const EFSupport &p_support,
+			 const PolEnumParams &p_params, int p_max = 0,
+			 EfgShowInterface *p_parent = 0)
+    : PolEnumBySubgame(p_support, p_params, p_max),
+      BaseBySubgameG(p_parent, p_efg)
+    { Solve(); }
+};
+
 guiPolEnumEfg::guiPolEnumEfg(const EFSupport &p_support, 
 			     EfgShowInterface *p_parent)
   : guiEfgSolution(p_support.Game(), p_support, p_parent)
@@ -1137,7 +1153,18 @@ guiPolEnumEfg::guiPolEnumEfg(const EFSupport &p_support,
 
 gList<BehavSolution> guiPolEnumEfg::Solve(void) const
 {
-  return gList<BehavSolution>();
+  guiPolEnumParamsSettings PES;
+  wxStatus status(parent->Frame(), "PolEnum Algorithm");
+  PolEnumParams P(status);
+  PES.GetParams(P);
+
+  try {
+    guiPolEnumEfgBySubgame M(ef, sup, P, PES.MaxSolns(), parent);
+    return M.GetSolutions();
+  }
+  catch (gSignalBreak &) {
+    return gList<BehavSolution>();
+  }
 }
 
 bool guiPolEnumEfg::SolveSetup(void) const
