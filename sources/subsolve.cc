@@ -49,7 +49,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
   gList<Node *> subroots;
   ChildSubgames(n, subroots);
 
-	gList<gArray<Outcome *> > subrootvalues;
+  gList<gArray<Outcome *> > subrootvalues;
   subrootvalues.Append(gArray<Outcome *>(subroots.Length()));
 
   for (i = 1; i <= subroots.Length(); i++)  {
@@ -87,18 +87,24 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 
   assert(n->GetSubgameRoot() == n);
 
+// This is here to allow called hook code to figure out which subgame
+// is currently being solved.  The number should correspond to the index
+// of the subgame in the list returned by SubgameRoots().
+
+  subgame_number++;
+
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
     for (i = 1; i <= subroots.Length(); i++)
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
 
     Efg<T> foo(efg, n);
 
-    ViewSubgame(n, foo);
+    ViewSubgame(subgame_number, foo);
 
     gList<BehavProfile<T> > sol;
     SolveSubgame(foo, sol);
 
-    SelectSolutions(n, foo, sol);
+    SelectSolutions(subgame_number, foo, sol);
 
     // put behav profile in "total" solution here...
 
@@ -169,7 +175,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns,
 // isn't generally useful.
 
 template <class T>
-void SubgameSolver<T>::ViewSubgame(Node *, const Efg<T> &)
+void SubgameSolver<T>::ViewSubgame(int, const Efg<T> &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -189,7 +195,7 @@ void SubgameSolver<T>::ViewNormal(const Nfg<T> &, NFSupport &)
 // Caveat utor!
 
 template <class T>
-void SubgameSolver<T>::SelectSolutions(Node *, const Efg<T> &,
+void SubgameSolver<T>::SelectSolutions(int, const Efg<T> &,
 				       gList<BehavProfile<T> > &)
 { }
 
@@ -212,6 +218,7 @@ void SubgameSolver<T>::Solve(void)
   gWatch watch;
 
   solutions.Flush();
+  subgame_number = 0;
 
   gList<Outcome *> values;
 

@@ -11,7 +11,7 @@
 
 template <class T> class SubgameSolver   {
   private:
-    int max_solns;
+    int max_solns, subgame_number;
     double time;
     Efg<T> efg;
     BehavProfile<T> solution;
@@ -25,9 +25,9 @@ template <class T> class SubgameSolver   {
   protected:
     virtual void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &) = 0;
 
-    virtual void ViewSubgame(Node *, const Efg<T> &);
+    virtual void ViewSubgame(int, const Efg<T> &);
     virtual void ViewNormal(const Nfg<T> &, NFSupport &);
-    virtual void SelectSolutions(Node *, const Efg<T> &, gList<BehavProfile<T> > &);
+    virtual void SelectSolutions(int, const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     SubgameSolver(const Efg<T> &E, int maxsol = 0);
