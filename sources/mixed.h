@@ -21,7 +21,9 @@ class BaseMixedProfile     {
 
     BaseMixedProfile &operator=(const BaseMixedProfile &);
 
-    virtual DataType Type(void) const = 0;
+    DataType Type(void) const;
+    virtual bool IsPure(void) const = 0;
+    virtual bool IsPure(int pl) const = 0;
 };
 
 
@@ -37,7 +39,8 @@ template <class T> class MixedProfile
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
-    DataType Type(void) const = 0;
+    bool IsPure(void) const;
+    bool IsPure(int pl) const;
 };
 
 #endif    // MIXED_H
