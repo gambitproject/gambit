@@ -78,7 +78,7 @@ int gbtTableau<double>::CanPivot(int outlabel, int col)
 
 void gbtTableau<double>::Pivot(int outrow,int col)
 {
-  if(!RowIndex(outrow) || !ValidIndex(col)) throw BadPivot();
+  if (!RowIndex(outrow) || !ValidIndex(col)) throw gbtIndexException();
 
   // int outlabel = Label(outrow);
   // gout << "\noutrow:" << outrow;
@@ -124,8 +124,9 @@ void gbtTableau<double>::SetRefactor(int n)
 
 void gbtTableau<double>::SetConst(const gbtVector<double> &bnew)
 {
-  if(bnew.First()!=b->First() || bnew.Last()!=b->Last())
-    throw BadDim();
+  if (bnew.First()!=b->First() || bnew.Last()!=b->Last()) {
+    throw gbtDimensionException();
+  }
   b=&bnew;
   Solve(*b, solution);
 }
@@ -172,10 +173,6 @@ bool gbtTableau<double>::IsLexMin()
   return 1;
 }
 
-gbtOutput &operator<<(gbtOutput &to, const gbtTableau<double> &v)
-{
-  v.Dump(to); return to;
-}
 
 // ---------------------------------------------------------------------------
 //                   gbtTableau<gbtRational> method definitions
@@ -213,17 +210,14 @@ gbtTableau<gbtRational>::gbtTableau(const gbtMatrix<gbtRational> &A,
     nonbasic[j] = j;
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
-  if(totdenom<=0) throw BadDenom();
   
   for (int i = b.First();i<=b.Last();i++) {
     gbtRational x = b[i]*(gbtRational)totdenom;
-    if(x.GetDenominator() != 1) throw BadDenom();
     Coeff[i] = x.GetNumerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) 
     for (int j = MinCol();j<=MaxCol();j++) {
       gbtRational x = A(i,j)*(gbtRational)totdenom;
-      if(x.GetDenominator() != 1) throw BadDenom();
       Tabdat(i,j) = x.GetNumerator();
     }
   for (int i = b.First();i<=b.Last();i++) 
@@ -243,17 +237,14 @@ gbtTableau<gbtRational>::gbtTableau(const gbtMatrix<gbtRational> &A,
     nonbasic[j] = j;
   
   totdenom = lcm(find_lcd(A),find_lcd(b));
-  if(totdenom<=0) throw BadDenom();
   
   for (int i = b.First();i<=b.Last();i++) {
     gbtRational x = b[i]*(gbtRational)totdenom;
-    if(x.GetDenominator() != 1) throw BadDenom();
     Coeff[i] = x.GetNumerator();
   }
   for (int i = MinRow();i<=MaxRow();i++) {
     for (int j = MinCol();j<=A.MaxCol();j++) {
       gbtRational x = A(i,j)*(gbtRational)totdenom;
-      if(x.GetDenominator() != 1) throw BadDenom();
       Tabdat(i,j) = x.GetNumerator();
     }
     for (int j = A.MaxCol()+1;j<=MaxCol();j++)
@@ -293,7 +284,7 @@ int gbtTableau<gbtRational>::remap(int col_index) const
 {
   int i = nonbasic.First(); 
   while(i <= nonbasic.Last() && nonbasic[i] !=col_index) { i++;}
-  if(i > nonbasic.Last()) throw BadDim();
+  if(i > nonbasic.Last()) throw gbtDimensionException();
   return i;
 }
 
@@ -325,8 +316,9 @@ void gbtTableau<gbtRational>::Pivot(int outrow,int in_col)
   // gout << "\nIn gbtTableau<gbtRational>::Pivot() ";
   // gout << " outrow:" << outrow;
   // gout << " inlabel: " << in_col;
-  if(!RowIndex(outrow) || !ValidIndex(in_col)) 
-    throw BadPivot();
+  if(!RowIndex(outrow) || !ValidIndex(in_col)) {
+    throw gbtIndexException();
+  }
   int outlabel = Label(outrow);
 
   // gout << "\noutrow:" << outrow;
@@ -447,7 +439,6 @@ void gbtTableau<gbtRational>::Refactor()
   //** Note -- we may need to recompute totdenom here, if A and b have changed. 
   //gout << "\ndenom: " << denom << " totdenom: " << totdenom;
   totdenom = lcm(find_lcd(*A),find_lcd(*b));
-  if(totdenom<=0) throw BadDenom();
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
 
   int i,j;
@@ -471,10 +462,8 @@ void gbtTableau<gbtRational>::Refactor()
   //gout << "\nCoeffew:\n" << Coeffnew;
 
   for(i=Tabdat.MinRow();i<=Tabdat.MaxRow();i++) {
-    if(Coeffnew[i].GetDenominator() != 1) throw BadDenom();
     Coeff[i] = Coeffnew[i].GetNumerator();
     for(j=Tabdat.MinCol();j<=Tabdat.MaxCol();j++) {
-      if(Tabnew(i,j).GetDenominator() != 1) throw BadDenom();
       Tabdat(i,j) = Tabnew(i,j).GetNumerator();
    }
   }
@@ -534,12 +523,9 @@ bool gbtTableau<gbtRational>::IsLexMin()
   return 1;
 }
 
-gbtOutput &operator<<(gbtOutput &to, const gbtTableau<gbtRational> &v)
-{
-  v.Dump(to); return to;
-}
+#ifdef UNUSED
 
-void gbtTableau<gbtRational>::BigDump(gbtOutput &out)
+void gbtTableau<gbtRational>::BigDump(std::ostream &out)
 {
   gbtTableauInterface<gbtRational>::BigDump(out);
   // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
@@ -547,6 +533,8 @@ void gbtTableau<gbtRational>::BigDump(gbtOutput &out)
   // gout << "\nTabdat:\n" << Tabdat;
   // gout << "\nCoeff:\n" << Coeff;
 }
+
+#endif  //UNUSED
 
 void gbtTableau<gbtRational>::BasisVector(gbtVector<gbtRational> &out) const
 {
@@ -561,10 +549,3 @@ gbtInteger gbtTableau<gbtRational>::TotDenom() const
 return totdenom;
 }
 
-gbtTableau<gbtRational>::BadDenom::~BadDenom()
-{ }
-
-gbtText gbtTableau<gbtRational>::BadDenom::Description(void) const
-{
-  return "Bad Denominator in gbtTableau";
-}

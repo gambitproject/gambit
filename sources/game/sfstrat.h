@@ -28,14 +28,14 @@
 #define SFSTRAT_H
 
 #include "base/base.h"
-#include "game/game.h"
+#include "game.h"
 
 struct gbtSfgSequence {
 friend class gbtSfgGame;
 friend class gbtSfgSequenceSet;
 private:
   int number;
-  gbtText name;
+  std::string name;
   gbtGamePlayer player;
   gbtGameAction action;
   const gbtSfgSequence *parent;
@@ -45,8 +45,8 @@ private:
     : number(n), player(pl), action(a), parent(p) { }
   ~gbtSfgSequence() { }
 public:
-  const gbtText &GetName(void) const   { return name; }
-  void SetName(const gbtText &s)       { name = s; }
+  const std::string &GetName(void) const   { return name; }
+  void SetName(const std::string &s)       { name = s; }
   
   gbtList<gbtGameAction> History(void) const;
   int GetNumber(void) const        { return number; }
@@ -55,7 +55,7 @@ public:
   { if (!action.IsNull()) return action->GetInfoset(); else return 0; }
   gbtGamePlayer Player(void) const  { return player; }
   const gbtSfgSequence *Parent(void) const   { return parent; }
-  void Dump(gbtOutput &) const;
+  void Dump(std::ostream &) const;
 };
 
 class gbtSfgSequenceSet {
@@ -87,41 +87,6 @@ public:
   const gbtBlock<gbtSfgSequence *> &GetSFSequenceSet(void) const;
 };
 
-
-class gbtSfgSupport {
-protected:
-  const gbtSfgGame *bsfg;
-  gbtArray <gbtSfgSequenceSet *> sups;
-  
-public:
-  gbtSfgSupport(const gbtSfgGame &);
-  gbtSfgSupport(const gbtSfgSupport &s); 
-  virtual ~gbtSfgSupport();
-  gbtSfgSupport &operator=(const gbtSfgSupport &s);
-
-  bool operator==(const gbtSfgSupport &s) const;
-  bool operator!=(const gbtSfgSupport &s) const;
-
-  const gbtSfgGame &Game(void) const   { return *bsfg; }
-  
-  const gbtBlock<gbtSfgSequence *> &Sequences(int pl) const;
-
-  int NumSequences(int pl) const;
-  const gbtArray<int> NumSequences(void) const;
-  int TotalNumSequences(void) const;
-
-  void AddSequence(gbtSfgSequence *);
-  bool RemoveSequence(gbtSfgSequence *);
-  
-  bool IsSubset(const gbtSfgSupport &s) const;
-
-  // returns the index of the sequence in the support if it exists,
-  // otherwise returns zero
-  int Find(gbtSfgSequence *) const; 
-
-  void Dump(gbtOutput &) const;
-};
-
 class gbtSfgContingency   {
   friend class gbtSfgGame;
 private:
@@ -146,7 +111,6 @@ public:
 };
 
 
-gbtOutput &operator<<(gbtOutput &f, const gbtSfgSequence &);
-gbtOutput &operator<<(gbtOutput &f, const gbtSfgSupport &);
+std::ostream &operator<<(std::ostream &f, const gbtSfgSequence &);
 
 #endif    // SFSTRAT_H

@@ -25,6 +25,7 @@
 //
 
 #include "base/base.h"
+#include "base/gnullstatus.h"
 #include "game/game.h"
 #include "game/nfgiter.h"
 #include "numerical/vertenum.h"
@@ -32,40 +33,61 @@
 #include "nfgmixed.h"
 #include "clique.h"
 
+template <class T> class gbtNfgNashEnumMixed {
+private:
+  int m_stopAfter;
+  bool m_cliques;
+
+  // Private auxiliary functions
+  bool EqZero(const T &) const;
+
+public:
+  gbtNfgNashEnumMixed(void);
+  virtual ~gbtNfgNashEnumMixed() { }
+  
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  bool Cliques(void) const { return m_cliques; }
+  void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
+
+  std::string GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
+  gbtList<gbtMixedProfile<T> > Solve(const gbtGame &, gbtStatus &);
+};
+
 
 template <class T> gbtNfgNashEnumMixed<T>::gbtNfgNashEnumMixed(void)
   : m_stopAfter(0), m_cliques(false)
 { }
 
-template <class T> gbtMixedNashSet
-gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
-			      gbtStatus &p_status)
+template <class T> gbtList<gbtMixedProfile<T> > 
+gbtNfgNashEnumMixed<T>::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
   gbtList<gbtVector<T> > key1, key2;  
   gbtList<int> node1, node2;   // IDs of each component of the extreme equilibria
 
   if (p_game->NumPlayers() != 2) {
-    return gbtMixedNashSet();
+    return gbtList<gbtMixedProfile<T> >();
   }
   
-  gbtMixedNashSet solutions;
+  gbtList<gbtMixedProfile<T> > solutions;
 
   gbtNfgIterator iter(p_game); 
 
-  T min = p_game->GetMinPayoff() - gbtNumber(1);
+  T min = p_game->GetMinPayoff() - gbtRational(1);
   T max = p_game->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2
-  gbtMatrix<T> A1(1, p_game->GetPlayer(1)->NumStrategies(),
+  gbtMatrix<T> A1(1, p_game->GetPlayer(1)->NumStrategies(), 
 		  1, p_game->GetPlayer(2)->NumStrategies());
-  gbtMatrix<T> A2(1, p_game->GetPlayer(2)->NumStrategies(),
+  gbtMatrix<T> A2(1, p_game->GetPlayer(2)->NumStrategies(), 
 		  1, p_game->GetPlayer(1)->NumStrategies());
 
   for (int i = 1; i <= p_game->GetPlayer(1)->NumStrategies(); i++) {
     for (int j = 1; j <= p_game->GetPlayer(2)->NumStrategies(); j++) {
-      A1(i, j) = iter.GetPayoff(p_game->GetPlayer(1)) - gbtNumber(min);
-      A2(j, i) = iter.GetPayoff(p_game->GetPlayer(2)) - gbtNumber(min);
+      A1(i, j) = iter.GetPayoff(p_game->GetPlayer(1)) - gbtRational(min);
+      A2(j, i) = iter.GetPayoff(p_game->GetPlayer(2)) - gbtRational(min);
       A1(i, j) *= fac;
       A2(j, i) *= fac;
       iter.Next(2);
@@ -124,20 +146,22 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 	// check if solution is nash 
 	// need only check complementarity, since it is feasible
 	bool nash = true;
-	for (int k = 1; nash && k <= p_game->GetPlayer(1)->NumStrategies(); k++) {
+	for (int k = 1; nash && k <= p_game->GetPlayer(1)->NumStrategies();
+	     k++) {
 	  if (bfs1.IsDefined(k) && bfs2.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs1(k) * bfs2(-k));
 	  }
 	}
 	
-	for (int k = 1; nash && k <= p_game->GetPlayer(2)->NumStrategies(); k++) {
+	for (int k = 1; nash && k <= p_game->GetPlayer(2)->NumStrategies(); 
+	     k++) {
 	  if (bfs2.IsDefined(k) && bfs1.IsDefined(-k)) {
 	    nash = nash && EqZero(bfs2(k) * bfs1(-k));
 	  }
 	}
 	
 	if (nash) {
-	  gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0.0);
+	  gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0);
 	  T sum = (T) 0;
 	  for (int k = 1; k <= p_game->GetPlayer(1)->NumStrategies(); k++) {
 	    profile(1, k) = (T) 0;
@@ -168,7 +192,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 	    }
 	  }
 
-	  solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
+	  solutions.Append(profile);
     
 	  // note: The keys give the mixed strategy associated with each node. 
 	  //       The keys should also keep track of the basis
@@ -177,12 +201,20 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 	  if (vert1id[i1] == 0) {
 	    id1++;
 	    vert1id[i1] = id1;
-	    key2.Append(profile->GetStrategy(profile->GetPlayer(2)));
+	    gbtVector<T> v(p_game->GetPlayer(2)->NumStrategies());
+	    for (int i = 1; i <= v.Length(); i++) {
+	      v[i] = profile(2, i);
+	    }
+	    key2.Append(v);
 	  }
 	  if (vert2id[i2] == 0) {
 	    id2++;
 	    vert2id[i2] = id2;
-	    key1.Append(profile->GetStrategy(profile->GetPlayer(1)));
+	    gbtVector<T> v(p_game->GetPlayer(1)->NumStrategies());
+	    for (int i = 1; i <= v.Length(); i++) {
+	      v[i] = profile(1, i);
+	    }
+	    key1.Append(v);
 	  }
 	  node1.Append(vert2id[i2]);
 	  node2.Append(vert1id[i1]);
@@ -190,7 +222,7 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
       }
     }
   }
-  catch (gbtSignalBreak &) {
+  catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)
   }
 
@@ -203,6 +235,16 @@ template <class T> bool gbtNfgNashEnumMixed<T>::EqZero(const T &x) const
   gEpsilon(eps, 12);
   return (x <= eps && x >= -eps);
 }     
+
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashEnumMixedNfg(const gbtGame &p_game, const T &, int p_stopAfter)
+{
+  gbtNfgNashEnumMixed<T> algorithm;
+  algorithm.SetStopAfter(p_stopAfter);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
+}
+			
 
 #ifdef UNUSED
 template <class T> void EnumModule<T>::GetCliques(gbtOutput &p_stream) const

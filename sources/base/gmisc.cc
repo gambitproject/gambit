@@ -31,132 +31,48 @@
 #include <ctype.h>
 
 #include "gmisc.h"
-#include "gstream.h"
-#include "gtext.h"
 #include "garray.h"
-
-//--------------------------------------------------------------------------
-//                      Generation of random numbers
-//--------------------------------------------------------------------------
-
-#ifdef RAND_MAX
-#define GRAND_MAX   RAND_MAX
-#elif defined INT_MAX
-#define GRAND_MAX   INT_MAX
-#endif
-
-// Generates a random number between 0 and IM exclusive of endpoints
-// Adapted from _Numerical_Recipes_for_C_
-
-#define IA 16807
-#define AM (1.0/IM)
-#define IQ 127773
-#define IR 2836
-#define NTAB 32
-#define NDIV (1+(IM-1)/NTAB)
-
-long ran1(long* idum)
-{
-  int j;
-  long k;
-  static long iy = 0;
-  static long iv[NTAB];
-
-  if(*idum <= 0 || !iy) {
-    if(-(*idum) < 1) *idum = 1;
-    else *idum = -(*idum);
-    for(j = NTAB+7; j >= 0; j--) {
-      k = (*idum)/IQ;
-      *idum = IA*(*idum-k*IQ)-IR*k;
-      if(*idum < 0) *idum += IM;
-      if(j < NTAB) iv[j] = *idum;
-    }
-    iy = iv[0];
-  }
-  k = (*idum)/IQ;
-  *idum = IA*(*idum-k*IQ)-IR*k;
-  if(*idum < 0) *idum += IM;
-  j = iy/NDIV;
-  iy = iv[j];
-  iv[j] = *idum;
-  return iy;
-}
-
-
-void SetSeed(unsigned int seed)
-{
-  srand(seed);
-}
-
-double Uniform(void)
-{
-  return ((double) rand()) / ((double) GRAND_MAX);
-}
 
 //--------------------------------------------------------------------------
 //                         Text string conversions
 //--------------------------------------------------------------------------
 
-#define GCONVERT_BUFFER_LENGTH     64
-static char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
-static int precision = 6;
-static int width = 0;
-
-void ToTextWidth(int i)
+std::string ToText(int i)
 {
-  width = i;
+  char buffer[256];
+  sprintf(buffer, "%d", i);
+  return std::string(buffer);
 }
 
-int ToTextWidth(void)
+std::string ToText(long l)
 {
-  return width;
+  char buffer[256];
+  sprintf(buffer, "%ld", l);
+  return std::string(buffer);
 }
 
-
-void ToTextPrecision(int i)
+std::string ToText(double d)
 {
-  precision = i;
+  char buffer[256];
+  sprintf(buffer, "%f", d);
+  return std::string(buffer);
 }
 
-int ToTextPrecision(void)
+std::string ToText(double p_number, int p_precision)
 {
-  return precision;
+  char buffer[256];
+  sprintf(buffer, "%.*f", p_precision, p_number);
+  return std::string(buffer);
 }
 
-gbtText ToText(int i)
-{
-  sprintf(gconvert_buffer, "%d", i);
-  return gbtText(gconvert_buffer);
-}
+double ToDouble(const std::string &s)
+{ return strtod(s.c_str(), NULL); }
 
-gbtText ToText(long l)
+std::string EscapeQuotes(const std::string &s)
 {
-  // sprintf(gconvert_buffer, "%.*ld", precision, l);
-  sprintf(gconvert_buffer, "%*ld", width, l);
-  return gbtText(gconvert_buffer);
-}
-
-gbtText ToText(double d)
-{
-  // sprintf(gconvert_buffer, "%.*f", precision, d);
-  sprintf(gconvert_buffer, "%*.*f", width, precision, d);
-  return gbtText(gconvert_buffer);
-}
-
-gbtText ToText(double p_number, int p_precision)
-{
-  sprintf(gconvert_buffer, "%*.*f", width, p_precision, p_number);
-  return gbtText(gconvert_buffer);
-}
-
-double ToDouble(const gbtText &s)
-{ return strtod(s, NULL); }
-
-gbtText EscapeQuotes(const gbtText &s)
-{
-  gbtText ret;
+  std::string ret;
   
-  for (unsigned int i = 0; i < s.Length(); i++)  {
+  for (unsigned int i = 0; i < s.length(); i++)  {
     if (s[i] == '"')   ret += '\\';
     ret += s[i];
   }
@@ -164,25 +80,6 @@ gbtText EscapeQuotes(const gbtText &s)
   return ret;
 }
 
-
-//------------------------ TriState functions -----------------//
-
-gbtText ToText(gbtTriState b)
-{
-  switch (b) {
-  case GBT_TRISTATE_TRUE:
-    return "Y";
-  case GBT_TRISTATE_FALSE:
-    return "N"; 
-  default:
-    return "DK";
-  }
-}
-
-gbtOutput &operator<<(gbtOutput &f, gbtTriState b)
-{
-  return (f << ToText(b));
-}
 
 //------------------------ Type dependent epsilon -----------------//
 
@@ -241,11 +138,14 @@ int gbtIndexPair::operator [] (const int& index) const
   else            return second;
 }
  
-gbtOutput &operator<<(gbtOutput &p_output, const gbtIndexPair &p_indexPair)
-{
-  p_output << "(" << p_indexPair.first << "," << p_indexPair.second << ")";
-  return p_output;
-}
 
-gbtException::~gbtException()
-{ }
+std::string gbtIndexException::GetDescription(void) const
+{ return "Index out of range"; }
+
+std::string gbtDimensionException::GetDescription(void) const
+{ return "Dimension out of range"; }
+
+std::string gbtRangeException::GetDescription(void) const 
+{ return "Invalid range"; }
+
+

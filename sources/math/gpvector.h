@@ -83,11 +83,12 @@ template <class T> class gbtPVector : public gbtVector<T> {
   // parameter access functions
   const gbtArray<int>& Lengths(void) const;
 
-  void Dump(gbtOutput &) const;
+  void Dump(std::ostream &) const;
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtPVector<T> &v);
+template <class T> 
+std::ostream &operator<<(std::ostream &, const gbtPVector<T> &);
 #endif
 
-#endif   //# GPVECTOR_H
+#endif   // GPVECTOR_H

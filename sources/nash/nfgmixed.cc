@@ -28,4 +28,9 @@
 #include "nfgmixed.imp"
 
 template class gbtNfgNashEnumMixed<double>;
+template gbtList<gbtMixedProfile<double> >
+gbtNashEnumMixedNfg(const gbtGame &, const double &, int);
+
 template class gbtNfgNashEnumMixed<gbtRational>;
+template gbtList<gbtMixedProfile<gbtRational> >
+gbtNashEnumMixedNfg(const gbtGame &, const gbtRational &, int);

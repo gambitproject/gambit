@@ -29,41 +29,27 @@
 #include "base/glist.imp"
 #include "base/grarray.imp"
 #include "base/grblock.imp"
-#include "gnumber.h"
 #include "mpfloat.h"
+#include "rational.h"
 #include "complex.h"
 
 template class gbtArray<gbtInteger>;
 template class gbtArray<gbtRational>;
 template class gbtArray<gbtComplex>;
-template class gbtArray<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtInteger> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtText> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtArray<gbtMPFloat>;
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtMPFloat> &);
 #endif  // GBT_WITH_MP_FLOAT
 
 template class gbtBlock<gbtRational>;
-template class gbtBlock<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtNumber> &);
 
 template class gbtList<gbtRational>;
-template class gbtList<gbtNumber>;
 
 template class gbtRectArray<gbtInteger>;
 template class gbtRectArray<gbtRational>;
-template class gbtRectArray<gbtNumber>;
-template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtInteger> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtNumber> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtRectArray<gbtMPFloat>;
-template gbtOutput &operator<<(gbtOutput &, const gbtRectArray<gbtMPFloat> &);
 #endif  // GBT_WITH_MP_FLOAT
 
-template class gbtRectBlock<gbtNumber>;
+template class gbtRectBlock<gbtRational>;

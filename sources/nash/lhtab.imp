@@ -27,27 +27,27 @@
 #include "lhtab.h"
 #include "game/game.h"
 #include "game/nfgiter.h"
-#include "game/nfgsupport.h"
 
 //---------------------------------------------------------------------------
 //                        LemkeHowson gbtTableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &p_game, const T &)
+template <class T> gbtMatrix<T> Make_A1(const gbtGame &N,
+                                      const T &)
 {
-  int n1 = p_game->GetPlayer(1)->NumStrategies();
-  int n2 = p_game->GetPlayer(2)->NumStrategies();
+  int i,j;
+  int n1 = N->GetPlayer(1)->NumStrategies();
+  int n2 = N->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A1(1,n1,n1+1,n1+n2);
-  gbtNfgIterator iter(p_game); 
-  T min; 
+  gbtNfgIterator iter(N); 
 
-  min = p_game->GetMinPayoff() - gbtNumber(1);
-  T max = p_game->GetMaxPayoff();
+  T min = N->GetMinPayoff() - gbtRational(1);
+  T max = N->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
-  for (int i = 1; i <= n1; i++)  {
-    for (int j = 1; j <= n2; j++)  {
-      A1(i, n1 + j) = iter.GetPayoff(p_game->GetPlayer(1)) - gbtNumber(min);
+  for (i = 1; i <= n1; i++)  {
+    for (j = 1; j <= n2; j++)  {
+      A1(i, n1 + j) = iter.GetPayoff(N->GetPlayer(1)) - gbtRational(min);
       A1(i, n1 + j) *= fac;
       iter.Next(2);
     }
@@ -56,21 +56,22 @@ template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &p_game, const T &)
   return A1;
 }
 
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &p_game, const T &)
+template <class T> gbtMatrix<T> Make_A2(const gbtGame &N,
+                                      const T &)
 {
-  int n1 = p_game->GetPlayer(1)->NumStrategies();
-  int n2 = p_game->GetPlayer(2)->NumStrategies();
+  int i,j;
+  int n1 = N->GetPlayer(1)->NumStrategies();
+  int n2 = N->GetPlayer(2)->NumStrategies();
   gbtMatrix<T> A2(n1+1,n1+n2,1,n1);
-  gbtNfgIterator iter(p_game); 
-  T min; 
+  gbtNfgIterator iter(N); 
 
-  min = p_game->GetMinPayoff() - gbtNumber(1);
-  T max = p_game->GetMaxPayoff();
+  T min = N->GetMinPayoff() - gbtRational(1);
+  T max = N->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
-  for (int i = 1; i <= n1; i++)  {
-    for (int j = 1; j <= n2; j++)  {
-      A2(n1 + j, i) = iter.GetPayoff(p_game->GetPlayer(2)) - gbtNumber(min);
+  for (i = 1; i <= n1; i++)  {
+    for (j = 1; j <= n2; j++)  {
+      A2(n1 + j, i) = iter.GetPayoff(N->GetPlayer(2)) - gbtRational(min);
       A2(n1 + j, i) *= fac;
       iter.Next(2);
     }
@@ -79,20 +80,27 @@ template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &p_game, const T &)
   return A2;
 }
 
-template <class T> gbtVector<T> Make_b1(const gbtNfgGame &p_game, const T &)
+template <class T> gbtVector<T> Make_b1(const gbtGame &N,
+				      const T &)
 {
-  int n1 = p_game->GetPlayer(1)->NumStrategies();
+  int n1 = N->GetPlayer(1)->NumStrategies();
   gbtVector<T> b1(1,n1);
-  for (int i = 1; i <= n1; b1[i++] = -(T) 1); 
+
+  for (int i = 1; i <= n1; i++) 
+    b1[i]=-(T)1;
   return b1;
 }
 
-template <class T> gbtVector<T> Make_b2(const gbtNfgGame &p_game, const T &)
+template <class T> gbtVector<T> Make_b2(const gbtGame &N,
+				          const T &)
 {
-  int n1 = p_game->GetPlayer(1)->NumStrategies();
-  int n2 = p_game->GetPlayer(2)->NumStrategies();
+  int i;
+  int n1 = N->GetPlayer(1)->NumStrategies();
+  int n2 = N->GetPlayer(2)->NumStrategies();
   gbtVector<T> b2(n1+1,n1+n2);
-  for (int i = n1+1; i <= n1+n2; b2[i++] = -(T) 1); 
+
+  for (i = n1+1; i <= n1+n2; i++) 
+    b2[i]=-(T)1;
   return b2;
 }
 
@@ -183,7 +191,7 @@ int gbtLemkeHowsonTableau<T>::CanPivot(int outlabel, int inlabel)
 template <class T>
 void gbtLemkeHowsonTableau<T>::Pivot(int outrow,int inlabel)
 {
-  if(!RowIndex(outrow) ) throw BadPivot();
+  if(!RowIndex(outrow) ) throw gbtIndexException();
   if(T1.RowIndex(outrow)) T1.Pivot(outrow,inlabel);
   if(T2.RowIndex(outrow)) T2.Pivot(outrow,inlabel);
 }
@@ -221,18 +229,15 @@ gbtBasicFeasibleSolution<T> gbtLemkeHowsonTableau<T>::GetBFS()
   return cbfs;
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtLemkeHowsonTableau<T> &v)
-{
-  v.Dump(to); return to;
-}
-
+#ifdef UNUSED
 template <class T>
-void gbtLemkeHowsonTableau<T>::Dump(gbtOutput &to) const
+void gbtLemkeHowsonTableau<T>::Dump(std::ostream &to) const
 {
   T1.Dump(to);
   to << "\n"; 
   T2.Dump(to);
 }
+#endif  //UNUSED
 
 
 template <class T> int gbtLemkeHowsonTableau<T>::PivotIn(int inlabel)

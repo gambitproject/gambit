@@ -122,7 +122,7 @@ bool gbtIndexOdometer::operator!=(const gbtIndexOdometer & rhs) const
 
 int gbtIndexOdometer::operator[](const int place) const
 {
-  assert(1 <= place && place <= NoIndices());
+  //  assert(1 <= place && place <= NoIndices());
   return CurIndices[place];
 }
 
@@ -202,7 +202,7 @@ gbtIndexOdometer gbtIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 //           Printing
 //----------------------------------
 
-gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& odo)
+std::ostream& operator << (std::ostream& output, const gbtIndexOdometer& odo)
 {
   output << "[" << odo.CurIndices[1];
   for(int t = 2; t <= odo.NoIndices(); t++)
@@ -262,7 +262,7 @@ bool gbtPermutationOdometer::operator!=(const gbtPermutationOdometer & rhs) cons
 
 int gbtPermutationOdometer::operator[](const int place) const
 {
-  assert(1 <= place && place <= n);
+  //assert(1 <= place && place <= n);
   return CurIndices[place];
 }
 
@@ -328,7 +328,8 @@ int  gbtPermutationOdometer::CurrentSign() const
 //           Printing
 //----------------------------------
 
-gbtOutput& operator << (gbtOutput& output, const gbtPermutationOdometer& odo)
+std::ostream &operator<<(std::ostream &output,
+			 const gbtPermutationOdometer &odo)
 {
   output << "[" << odo.CurIndices[1];
   for(int t = 2; t <= odo.NoIndices(); t++)

@@ -29,7 +29,6 @@
 #include "math/rational.h"
 #include "interval.h"
 #include "math/gvector.h"
-#include "math/double.h"
 #include "math/complex.h"
 
 /*  This file supplies the template class
@@ -77,9 +76,6 @@ public:
 
   // manipulation
   void                   ToMonic()                                         ;
-//  gbtPolyUni<gbtDouble>    Togdouble()                                  const;
-
-  gbtPolyUni<gbtDouble>         TogDouble()                       const;
 
   // information
   bool                   IsZero()                                     const;
@@ -95,10 +91,10 @@ public:
   gbtList< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
   gbtList<T>               PreciseRoots(const gInterval<T>&, T&)        const;
 
-  void Output(gbtOutput &) const;
+  void Output(std::ostream &) const;
 };
 
-template <class T> gbtOutput& operator <<(gbtOutput &, const gbtPolyUni<T> &);
+template <class T> std::ostream& operator <<(std::ostream &, const gbtPolyUni<T> &);
 
 
 /*                       REMARKS
@@ -162,5 +158,5 @@ public:
   gbtList<gbtComplex>        Roots()                                      const;
   
   // output
-friend gbtOutput&        operator << (gbtOutput& output, const gbtPolyComplex& x);
+friend std::ostream&        operator << (std::ostream& output, const gbtPolyComplex& x);
 };

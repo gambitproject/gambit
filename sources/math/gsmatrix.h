@@ -29,14 +29,14 @@
 
 #include "gmatrix.h"
 
+class gbtSingularMatrixException : public gbtException {
+public:
+  virtual ~gbtSingularMatrixException() { }
+  std::string GetDescription(void) const { return "Matrix singular"; }
+};
+
 template <class T> class gbtSquareMatrix : public gbtMatrix<T>   {
 public:
-  class MatrixSingular : public gbtException {
-  public:
-    virtual ~MatrixSingular();
-    gbtText Description(void) const;
-  };
-
   gbtSquareMatrix(void);
   gbtSquareMatrix(int size);
   gbtSquareMatrix(const gbtMatrix<T> &);
@@ -49,6 +49,7 @@ public:
   T Determinant(void) const;
 };
 
-template <class T> gbtOutput& operator<<(gbtOutput &to, const gbtSquareMatrix<T> &M);
+template <class T> 
+std::ostream &operator<<(std::ostream &, const gbtSquareMatrix<T> &);
 
 #endif    // GSMATRIX_H

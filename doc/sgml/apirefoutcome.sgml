@@ -2,6 +2,11 @@
 <title>Outcomes</title>
 
 <para>
+An outcome contains information about the utilities players assign to
+events.  In extensive form games, outcomes may be attached to one or more
+nodes.  Outcomes attached to nonterminal nodes are interpreted as 
+incremental payoffs.  In normal form games, outcomes may be attached to
+one or more contingencies.
 </para>
 
 
@@ -14,37 +19,35 @@
 <para>
 <synopsis>
 void gbtGameOutcome::DeleteOutcome(void)
-void gbtGameOutcome::DeleteOutcome(void)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>DeleteOutcome</function> removes
-<parameter>outcome</parameter> from its game.  All nodes (for
+<function>DeleteOutcome</function> removes the
+outcome from its game.  All nodes (for
 extensive forms) or contingencies (for normal forms) with the
 specified outcome attached are reset to having no outcome attached.
 </para>
 
 </sect2>
 
-<sect2 id="apiref.outcome.getgame">
-<title>GetGame</title>
-<indexterm><primary>GetGame</primary></indexterm>
+<sect2 id="apiref.outcome.getid">
+<title>GetId</title>
+<indexterm><primary>GetId</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGame gbtGameOutcome::GetGame(void) const
-gbtGame gbtGameOutcome::GetGame(void) const
+int gbtGameOutcome::GetId(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetGame</function>
-returns the extensive or normal form game to which the outcome belongs.
+<function>GetId</function> returns the ID number of the outcome.
+This ID number is unique within the game. 
 </para>
 
 </sect2>
@@ -57,16 +60,13 @@ returns the extensive or normal form game to which the outcome belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGameOutcome::GetLabel(void) const
-gbtText gbtGameOutcome::GetLabel(void) const
+std::string gbtGameOutcome::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetLabel</function> 
-returns the text label of the outcome.
-The empty string is returned if the outcome object is null.
+<function>GetLabel</function> returns the text label of the outcome.
 </para>
 
 </sect2>
@@ -79,29 +79,20 @@ The empty string is returned if the outcome object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber gbtGameOutcome::GetPayoff(gbtGamePlayer) const
-gbtNumber gbtGameOutcome::GetPayoff(gbtGamePlayer) const
+gbtRational gbtGameOutcome::GetPayoff(gbtGamePlayer p_player) const
 </synopsis>
 </para>
 </formalpara>
 
 
 <para>
-<function>Payoff</function>
-returns the value of the outcome <parameter>outcome</parameter> to the
-player <parameter>player</parameter>.
-An error occurs if the parameters are not from the
-same game.
+<function>GetPayoff</function> returns the value of the outcome to the
+player <parameter>p_player</parameter>.  If the player is not from the
+same game as the outcome, a
+<errorname>gbtGameMismatchException</errorname> is thrown in C++,
+which is mapped to a <errorname>RuntimeError</errorname> exception in
+Python. 
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating point number, even
-if the value of the outcome is specified as a rational number in the game.
-This will be improved in the near future (hopefully, because Guido approves
-a rational number class for Python!)
-</para>
-</note>
 
 </sect2>
 
@@ -113,8 +104,7 @@ a rational number class for Python!)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameOutcome::SetLabel(const gbtText &amp;p_label)
-void gbtGameOutcome::SetLabel(const gbtText &amp;p_label)
+void gbtGameOutcome::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -134,29 +124,20 @@ void gbtGameOutcome::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameOutcome::SetPayoff(gbtGamePlayer, gbtNumber)
-void gbtGameOutcome::SetPayoff(gbtGamePlayer, gbtNumber)
+void gbtGameOutcome::SetPayoff(const gbtGamePlayer &amp;p_player,
+                               const gbtRational &amp;p_payoff)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>SetPayoff</function> sets the payoff of
-the outcome for <parameter>player</parameter> to
-<parameter>payoff</parameter>.  It is an error if
-the outcome and <parameter>player</parameter> are
-not from the same game. 
+<function>SetPayoff</function> sets the payoff of the outcome for
+<parameter>p_player</parameter> to <parameter>p_payoff</parameter>.
+If the player is not from the same game as the outcome, a
+<errorname>gbtGameMismatchException</errorname> is thrown in C++,
+which is mapped to a <errorname>RuntimeError</errorname> exception in
+Python.
 </para>
-
-<note>
-<para>
-The Python implementation results in a floating point number being
-assigned as the payoff; there is no direct way to set a payoff to rational
-precision.
-This will be improved in the near future (hopefully, because Guido approves
-a rational number class for Python!)
-</para>
-</note>
 
 </sect2>
 

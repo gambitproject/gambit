@@ -110,7 +110,7 @@ template <class T> gbtDPVector<T>::~gbtDPVector()
 
 template <class T> gbtDPVector<T> &gbtDPVector<T>::operator=(const gbtDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtPVector<T>::operator=(v);
   return *this;
@@ -142,24 +142,24 @@ template <class T> gbtDPVector<T> &gbtDPVector<T>::operator=(T c)
 
 template <class T> T &gbtDPVector<T>::operator()(int a, int b, int c)
 {
-  if (dvlen.First() > a || a > dvlen.Last())    throw BadIndex();
-  if (1 > b || b > dvlen[a])                    throw BadIndex();
-  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw BadIndex();
+  if (dvlen.First() > a || a > dvlen.Last())    throw gbtIndexException();
+  if (1 > b || b > dvlen[a])                    throw gbtIndexException();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw gbtIndexException();
   return dvptr[a][b][c];
 }
 
 template <class T> const T &gbtDPVector<T>::operator()(int a, int b, int c) const
 {
-  if (dvlen.First() > a || a > dvlen.Last())    throw BadIndex();
-  if (1 > b || b > dvlen[a])                    throw BadIndex();
-  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw BadIndex();
+  if (dvlen.First() > a || a > dvlen.Last())    throw gbtIndexException();
+  if (1 > b || b > dvlen[a])                    throw gbtIndexException();
+  if (1 > c || c > svlen[dvidx[a] + b - 1])     throw gbtIndexException();
   return dvptr[a][b][c];
 }
 
 template <class T>
 gbtDPVector<T> gbtDPVector<T>::operator+(const gbtDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtDPVector<T> tmp(*this);
   tmp.gbtPVector<T>::operator+=(v);
@@ -169,7 +169,7 @@ gbtDPVector<T> gbtDPVector<T>::operator+(const gbtDPVector<T> &v) const
 template <class T>
 gbtDPVector<T> &gbtDPVector<T>::operator+=(const gbtDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   gbtPVector<T>::operator+=(v);
   return *this;
 }
@@ -185,7 +185,7 @@ template <class T> gbtDPVector<T> gbtDPVector<T>::operator-(void) const
 template <class T>
 gbtDPVector<T> gbtDPVector<T>::operator-(const gbtDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   gbtDPVector<T> tmp(*this);
   tmp.gbtPVector<T>::operator-=(v);
   return tmp;
@@ -194,14 +194,14 @@ gbtDPVector<T> gbtDPVector<T>::operator-(const gbtDPVector<T> &v) const
 template <class T>
 gbtDPVector<T> &gbtDPVector<T>::operator-=(const gbtDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   gbtPVector<T>::operator-=(v);
   return *this;
 }
 
 template <class T> T gbtDPVector<T>::operator*(const gbtDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   return (*this).gbtPVector<T>::operator*(v);
 }
 
@@ -220,7 +220,7 @@ template <class T> gbtDPVector<T> gbtDPVector<T>::operator/(const T &c) const
 
 template <class T> bool gbtDPVector<T>::operator==(const gbtDPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   return gbtPVector<T>::operator==(v);
 }
 
@@ -236,9 +236,9 @@ template <class T> bool gbtDPVector<T>::operator!=(const gbtDPVector<T> &v) cons
 template <class T>
 void gbtDPVector<T>::CopySubRow(int row, int col, const gbtDPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
-  if (dvlen.First() > row || row > dvlen.Last())   throw BadIndex();
-  if (1 > col || col > dvlen[row])                 throw BadIndex();
+  if (!Check(v))   throw gbtDimensionException();
+  if (dvlen.First() > row || row > dvlen.Last())   throw gbtIndexException();
+  if (1 > col || col > dvlen[row])                 throw gbtIndexException();
 
   for (int i = 1; i <= svlen[dvidx[row]+col-1]; i++)
     dvptr[row][col][i] = v.dvptr[row][col][i];
@@ -255,7 +255,7 @@ template <class T> const gbtArray<int> &gbtDPVector<T>::DPLengths(void) const
 //                      gbtDPVector<T>: Output functions
 //--------------------------------------------------------------------------
 
-template <class T> void gbtDPVector<T>::Dump(gbtOutput &f) const
+template <class T> void gbtDPVector<T>::Dump(std::ostream &f) const
 {
   for (int i = 1; i <= dvlen.Length(); i++)  {
     f << "{ ";
@@ -269,7 +269,8 @@ template <class T> void gbtDPVector<T>::Dump(gbtOutput &f) const
   }
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtDPVector<T> &v)
+template <class T>
+std::ostream &operator<<(std::ostream &f, const gbtDPVector<T> &v)
 {
   v.Dump(f);  return f;
 }

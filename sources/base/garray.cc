@@ -30,9 +30,11 @@
 template class gbtArray<bool>;
 template class gbtArray<int>;
 template class gbtArray<double>;
-template class gbtArray<gbtText>;
+template class gbtArray<std::string>;
 
-template class gbtArray<gbtArray<gbtText> >;
+template class gbtArray<gbtBlock<bool> >;
+
+template class gbtArray<gbtArray<std::string> >;
 template class gbtArray<gbtList<bool> >;
 template class gbtArray<gbtList<gbtList<bool> > >;
 
@@ -50,8 +52,4 @@ template bool operator==(const gbtArray<gbtList<gbtList<bool> > > &,
 template bool operator!=(const gbtArray<gbtList<gbtList<bool> > > &, 
 			 const gbtArray<gbtList<gbtList<bool> > > &);
 
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<bool> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtArray<gbtText> &);
 

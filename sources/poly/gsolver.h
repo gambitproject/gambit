@@ -28,7 +28,6 @@
 #define GSOLVER_H
 
 #include "ideal.h"
-#include "math/double.h"
 #include "numerical/linrcomb.h"
 #include "gpolylst.h"
 
@@ -39,14 +38,14 @@ private:
   const gbtPolyIdeal<T>     TheIdeal;
 
 // Conversion
-  gbtList<gbtPolyMulti<gbtDouble> > BasisTogDouble() const;
+  gbtList<gbtPolyMulti<T> > Basis() const;
 
 // Recursive Call in Solver
-  gbtList<gbtVector<gbtDouble> >  
-    ContinuationSolutions(const gbtList<gbtPolyMulti<gbtDouble> >& list,
+  gbtList<gbtVector<T> >  
+    ContinuationSolutions(const gbtList<gbtPolyMulti<T> >& list,
 			  const int dmnsn,
 			  const int curvar,
-			  const gbtVector<gbtDouble>& knownvals);
+			  const gbtVector<T>& knownvals);
 
 public:
 
@@ -56,7 +55,7 @@ public:
   ~gbtPolyMultiSolver();
 
   bool                     IsZeroDimensional();
-  gbtList<gbtVector<gbtDouble> > Roots();
+  gbtList<gbtVector<T> > Roots();
 };
 
 #endif // GSOLVER_H

@@ -43,16 +43,6 @@ private:
   
   void SolveDual();
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim();
-    gbtText Description(void) const;
-  };
-  class BadPivot : public gbtException  {
-  public:
-    virtual ~BadPivot();
-    gbtText Description(void) const;
-  };
   gbtLPTableau(const gbtMatrix<T> &A, const gbtVector<T> &b); 
   gbtLPTableau(const gbtMatrix<T> &A, const gbtBlock<int> &art, const gbtVector<T> &b); 
   gbtLPTableau(const gbtLPTableau<T>&);
@@ -87,8 +77,6 @@ public:
   // as above, but unit column elements nonzero
   void BasisSelect(const gbtBlock<T>&unitv, const gbtBlock<T>&rowv,
 		   gbtVector<T>&colv) const; 
-
-  void BigDump(gbtOutput &);
 };
 
 #endif     // LPTAB_H

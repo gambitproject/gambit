@@ -81,8 +81,8 @@ void gbtLPTableau<gbtRational>::SetCost(const gbtVector<gbtRational>& c)
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw BadDim();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw BadDim();
+  if(c.First()!=cost.First()) throw gbtDimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw gbtDimensionException();
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i]*(gbtRational)gbtTableau<gbtRational>::TotDenom();
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -106,8 +106,8 @@ void gbtLPTableau<double>::SetCost(const gbtVector<double>& c)
     SolveDual();
     return;
   }
-  if(c.First()!=cost.First()) throw BadDim();
-  if(c.Last()!=(cost.Last()+unitcost.Length())) throw BadDim();
+  if(c.First()!=cost.First()) throw gbtDimensionException();
+  if(c.Last()!=(cost.Last()+unitcost.Length())) throw gbtDimensionException();
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
@@ -124,9 +124,9 @@ template <class T>
 void gbtLPTableau<T>::SetCost(const gbtVector<T> &uc, const gbtVector<T> &c)
 {
   if(cost.First()!=c.First() || cost.Last()!=c.Last()) 
-    throw BadDim();
+    throw gbtDimensionException();
   if(unitcost.First()!=uc.First() || unitcost.Last()!=uc.Last()) 
-    throw BadDim();
+    throw gbtDimensionException();
   int i;
   for(i=cost.First();i<=cost.Last();i++) cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i]=uc[i];
@@ -205,8 +205,8 @@ void gbtLPTableau<T>::RelativeCostVector(gbtVector<T> &relunitcost,
 				      gbtVector<T> &relcost) const
 {
 
-  if(!A->CheckColumn(relunitcost)) throw BadDim();
-  if(!A->CheckRow(relcost)) throw BadDim();
+  if(!A->CheckColumn(relunitcost)) throw gbtDimensionException();
+  if(!A->CheckRow(relcost)) throw gbtDimensionException();
   
   relunitcost= unitcost - dual;
   relcost= cost - dual*A;  // pre multiplication not defined?  
@@ -699,8 +699,9 @@ int gbtLPTableau<T>::LastLabel( void )
   return artificial.Last();
 }
 
+#ifdef UNUSED
 template <class T>
-void gbtLPTableau<T>::BigDump(gbtOutput &to)
+void gbtLPTableau<T>::BigDump(std::ostream &to)
 {
   //   gbtTableau<T>::BigDump(to);
 
@@ -732,6 +733,7 @@ void gbtLPTableau<T>::BigDump(gbtOutput &to)
   to << "\nUnit Cost  : " << GetUnitCost();
   to << "\nTotal Cost: " << TotalCost();
 }
+#endif  // UNUSED
 
 template <class T>
 void gbtLPTableau<T>::BasisSelect(const gbtBlock<T> &rowv, gbtVector<T> &colv) const
@@ -757,18 +759,6 @@ void gbtLPTableau<T>::BasisSelect(const gbtBlock<T> &unitv,
   }
 }
 
-template <class T> gbtLPTableau<T>::BadPivot::~BadPivot()
-{ }
 
-template <class T> gbtText gbtLPTableau<T>::BadPivot::Description(void) const
-{
-  return "Bad Pivot in gbtLPTableau";
-}
 
-template <class T> gbtLPTableau<T>::BadDim::~BadDim()
-{ }
 
-template <class T> gbtText gbtLPTableau<T>::BadDim::Description(void) const
-{
-  return "Bad Dimension in gbtLPTableau";
-}

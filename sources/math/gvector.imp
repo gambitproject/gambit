@@ -27,11 +27,6 @@
 #include "base/base.h"
 #include "gvector.h"
 
-template <class T> gbtText gbtVector<T>::BadDim::Description(void) const
-{
-  return "Mismatched vector lengths";
-}
-
 //------------------------------------------------------------------------
 //     gbtVector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
@@ -51,7 +46,7 @@ template <class T> gbtVector<T>::~gbtVector()   { }
 
 template <class T> gbtVector<T>& gbtVector<T>::operator=(const gbtVector<T>& V)
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
   gbtArray<T>::operator=(V);
   return *this;
 }
@@ -91,7 +86,7 @@ template<class T> gbtVector<T>& gbtVector<T>::operator=(T c)
 template <class T> gbtVector<T>
 gbtVector<T>::operator+(const gbtVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
 
   gbtVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -102,7 +97,7 @@ gbtVector<T>::operator+(const gbtVector<T>& V) const
 template <class T> gbtVector<T>
 gbtVector<T>::operator-(const gbtVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
 
   gbtVector<T> tmp(mindex,maxdex);
   for(int i=mindex; i<=maxdex; i++)
@@ -113,7 +108,7 @@ gbtVector<T>::operator-(const gbtVector<T>& V) const
 template <class T> gbtVector<T>&
 gbtVector<T>::operator+=(const gbtVector<T>& V)
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] += V[i];
@@ -123,7 +118,7 @@ gbtVector<T>::operator+=(const gbtVector<T>& V)
 template <class T> gbtVector<T>&
 gbtVector<T>::operator-=(const gbtVector<T>& V)
 {
-  if (!Check(V))    throw BadDim();
+  if (!Check(V))    throw gbtDimensionException();
 
   for(int i=mindex; i<=maxdex; i++)
     (*this)[i] -= V[i];
@@ -155,7 +150,7 @@ template <class T> gbtVector<T> &gbtVector<T>::operator*=(T c)
 
 template <class T> T gbtVector<T>::operator*(const gbtVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
 
   T sum= (T)0;
   for(int i=mindex; i<=maxdex; i++)
@@ -175,7 +170,7 @@ template <class T> gbtVector<T> gbtVector<T>::operator/(T c) const
 
 template <class T> bool gbtVector<T>::operator==(const gbtVector<T>& V) const
 {
-  if (!Check(V))   throw BadDim();
+  if (!Check(V))   throw gbtDimensionException();
 
   for(int i=mindex; i<=maxdex; i++)
     if( (*this)[i] != V[i] )
@@ -199,13 +194,3 @@ template <class T> T gbtVector<T>::NormSquared(void) const
   return answer;
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtVector<T> &V)
-{ V.Dump(f);  return f; }
-
-template <class T> gbtVector<gbtDouble> TogDouble(const gbtVector<T>& V)
-{
-  gbtVector<gbtDouble> answer(V.Length());
-  for (int i = 1; i <= V.Length(); i++)
-    answer[i] = (gbtDouble)V[i];
-  return answer;
-}

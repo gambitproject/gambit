@@ -99,14 +99,14 @@ Variable * gbtPolySpace::VariableWithNumber(int i) const
   return Variables[i];
 }
 
-const gbtText & gbtPolySpace::GetVariableName(int i) const
+const std::string & gbtPolySpace::GetVariableName(int i) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
 
   return ((Variables[i])->Name);
 }
 
-void gbtPolySpace::SetVariableName(int i, const gbtText &s)
+void gbtPolySpace::SetVariableName(int i, const std::string &s)
 {
   (Variables[i])->Name = s;
 }
@@ -174,7 +174,7 @@ bool gbtPolySpace::operator!=(const gbtPolySpace & rhs) const
 //   return result;
 // }
 
-void gbtPolySpace::Dump(gbtOutput &f) const
+void gbtPolySpace::Dump(std::ostream &f) const
 {
   f << "No of Variable: " << Variables.Length() << "\n";
   for (int i=1; i<=Variables.Length(); i++) {
@@ -518,7 +518,7 @@ void  gbtPolyExponent::ToZero()
 //--------------------------
 
 
-gbtOutput& operator<<(gbtOutput &f, const gbtPolyExponent& vect)
+std::ostream& operator<<(std::ostream &f, const gbtPolyExponent& vect)
 {
   f << "(";
   for (int i = 1; i < vect.Dmnsn(); i++)
@@ -688,7 +688,6 @@ gbtPolyTermOrder gbtPolyTermOrder::WithVariableAppended(const gbtPolySpace* Exte
 
 
 template class gbtList<gbtPolyExponent>;
-template gbtOutput& operator << (gbtOutput& output, const gbtList<gbtPolyExponent>&);
 
 template class gbtList<gbtPolyExponent*>;
 

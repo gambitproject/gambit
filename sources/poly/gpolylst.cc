@@ -25,42 +25,21 @@
 //
 
 #include "gpolylst.imp"
-#include "math/double.h"
 #include "base/glist.imp"
 #include "base/garray.imp"
 #include "base/grarray.imp"
-#include "math/gnumber.h"
 #include "math/gmatrix.imp"
 
 //template class gbtPolyMultiList<int>;
-//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<int> &y);
+//template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<int> &y);
 
 template class gbtPolyMultiList<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<gbtRational> &y);
+template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<gbtRational> &y);
 
-//template class gbtPolyMultiList<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<double> &y);
-
-template class gbtPolyMultiList<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMultiList<gbtDouble> &y);
+template class gbtPolyMultiList<double>;
+template std::ostream &operator<<(std::ostream &f, const gbtPolyMultiList<double> &y);
 
 template class gbtList<gbtIndexPair>;
-
-/*
-#include "objcount.imp"
-
-template class Counted<gbtPolyMultiList<gbtDouble> >;
-int Counted<gbtPolyMultiList<gbtDouble> >::numObjects = 0;
-
-template class Counted<gbtPolyMultiList<double> >;
-int Counted<gbtPolyMultiList<double> >::numObjects = 0;
-
-template class Counted<gbtPolyMultiList<gbtRational> >;
-int Counted<gbtPolyMultiList<gbtRational> >::numObjects = 0;
-*/
-
-template class gbtRectArray<gbtPolyMulti<gbtDouble>*>;
-template class gbtArray<gbtPolyMulti<gbtDouble>*>;
 
 template class gbtRectArray<gbtPolyMulti<gbtRational>*>;
 //template class gbtArray<gbtPolyMulti<gbtRational>*>;

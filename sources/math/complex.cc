@@ -165,7 +165,7 @@ void gbtComplex::error(const char* msg) const
 //                            input/output
 //--------------------------------------------------------------------------
 
-gbtOutput& operator << (gbtOutput& s, const gbtComplex& y)
+std::ostream &operator<<(std::ostream &s, const gbtComplex &y)
 {
   s << y.re;
   if (y.im >= 0.0) {
@@ -175,7 +175,7 @@ gbtOutput& operator << (gbtOutput& s, const gbtComplex& y)
   return s;
 }
 
-gbtInput &operator>>(gbtInput &f, gbtComplex &y)
+std::istream &operator>>(std::istream &f, gbtComplex &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -239,7 +239,7 @@ gbtComplex pow(const gbtComplex& x, const long y)
 //char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 //int myprecision = 2;
 
-gbtText ToText(const gbtComplex /* d */)
+std::string ToText(const gbtComplex /* d */)
 {
   //  gout << "\nError: ToText(gbtComplex) must be defined for compilation,";
   // gout << " but is not functional.\n";
@@ -249,7 +249,7 @@ gbtText ToText(const gbtComplex /* d */)
 
 // conversions from strings to numbers
 
-gbtComplex TOgComplex(const gbtText & /* s */)
+gbtComplex TOgComplex(const std::string & /* s */)
 { 
   //  gout << "\nError: TOgComplex must be defined for compilation,";
   // gout << " but is not functional.\n";
@@ -260,4 +260,3 @@ gbtComplex TOgComplex(const gbtText & /* s */)
 #include "base/glist.imp"
 
 template class gbtList<gbtComplex>;
-template gbtOutput& operator << (gbtOutput& output, const gbtList<gbtComplex>&);

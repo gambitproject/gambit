@@ -28,4 +28,9 @@
 #include "math/rational.h"
 
 template class gbtNfgNashLcp<double>;
+template gbtList<gbtMixedProfile<double> >
+gbtNashLcpNfg(const gbtGame &, const double &, int, int);
+
 template class gbtNfgNashLcp<gbtRational>;
+template gbtList<gbtMixedProfile<gbtRational> >
+gbtNashLcpNfg(const gbtGame &, const gbtRational &, int, int);

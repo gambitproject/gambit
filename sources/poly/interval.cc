@@ -27,36 +27,24 @@
 #include <assert.h>
 #include "interval.imp"
 #include "base/glist.imp"
-#include "math/double.h"
-#include "math/gnumber.h"
 
 template class gInterval<gbtRational>;
 template class gbtList< gInterval<gbtRational> >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gInterval<gbtRational>& x);
+template std::ostream& operator << (std::ostream& output, const gInterval<gbtRational>& x);
 #endif  // __BCC55__
 
 template class gInterval<int>;
 template class gbtList< gInterval<int> >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gInterval<int>& x);
+template std::ostream& operator << (std::ostream& output, const gInterval<int>& x);
 #endif  // __BCC55__
 
 
 template class gInterval<double>;
 template class gbtList< gInterval<double> >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gInterval<double>& x);
+template std::ostream& operator << (std::ostream& output, const gInterval<double>& x);
 #endif  // __BCC55__
 
-template class gInterval<gbtDouble>;
-template class gbtList< gInterval<gbtDouble> >;
-#ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gInterval<gbtDouble>& x);
-#endif  // __BCC55__
 
-template class gInterval<gbtNumber>;
-template class gbtList< gInterval<gbtNumber> >;
-#ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, const gInterval<gbtNumber>& x);
-#endif  // __BCC55__

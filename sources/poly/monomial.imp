@@ -78,19 +78,19 @@ template<class T> gbtMonomial<T> gbtMonomial<T>::operator * (const gbtMonomial<T
 
 template<class T> gbtMonomial<T> gbtMonomial<T>::operator / (const gbtMonomial<T>& y) const
 {
-  assert ( y.coef != (T)0);
+  //  assert ( y.coef != (T)0);
   return gbtMonomial<T>(coef / y.coef,exps - y.exps);
 }
 
 template<class T> gbtMonomial<T> gbtMonomial<T>::operator + (const gbtMonomial<T> & y) const
 {
-  assert (exps == y.exps);
+  // assert (exps == y.exps);
   return gbtMonomial<T>(coef + y.coef,exps);
 }
 
 template<class T> gbtMonomial<T>& gbtMonomial<T>::operator += (const gbtMonomial<T> & y) 
 {
-  assert (exps == y.exps);
+  // assert (exps == y.exps);
   coef += y.coef;
   return *this;
 }
@@ -166,7 +166,7 @@ template<class T> T gbtMonomial<T>::Evaluate(const gbtVector<T>& vals) const
 //                             gbtMonomial -- printing
 //--------------------------------------------------------------------------
 
-template<class T> gbtOutput& operator << (gbtOutput& output, const gbtMonomial<T>& x)
+template<class T> std::ostream& operator << (std::ostream& output, const gbtMonomial<T>& x)
 {
     output << x.Coef() << x.ExpV();    return output;
 }

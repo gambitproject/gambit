@@ -27,14 +27,30 @@
 #include "nfgpure.h"
 
 #include "base/base.h"
+#include "base/gnullstatus.h"
 #include "game/game.h"
 #include "game/nfgiter.h"
 #include "game/nfgciter.h"
 
-gbtMixedNashSet
-gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
+class gbtNfgNashEnumPure {
+private:
+  int m_stopAfter;
+
+public:
+  gbtNfgNashEnumPure(void) : m_stopAfter(0) { }
+  virtual ~gbtNfgNashEnumPure() { }
+
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  std::string GetAlgorithm(void) const { return "EnumPure"; }
+  gbtList<gbtMixedProfile<gbtRational> > Solve(const gbtGame &, gbtStatus &);
+};
+
+gbtList<gbtMixedProfile<gbtRational> >
+gbtNfgNashEnumPure::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
-  gbtMixedNashSet solutions;
+  gbtList<gbtMixedProfile<gbtRational> > solutions;
   gbtNfgContIterator citer(p_game);
 
   int ncont = 1;
@@ -52,7 +68,7 @@ gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
       gbtNfgIterator niter(citer);
     
       for (int pl = 1; flag && pl <= p_game->NumPlayers(); pl++)  {
-	gbtNumber current = citer.GetPayoff(p_game->GetPlayer(pl));
+	gbtRational current = citer.GetPayoff(p_game->GetPlayer(pl));
 	for (int i = 1; i <= p_game->GetPlayer(pl)->NumStrategies(); i++)  {
 	  niter.Next(pl);
 	  if (niter.GetPayoff(p_game->GetPlayer(pl)) > current)  {
@@ -63,20 +79,36 @@ gbtNfgNashEnumPure::Solve(const gbtNfgGame &p_game, gbtStatus &p_status)
       }
       
       if (flag)  {
-	gbtMixedProfile<gbtNumber> temp = p_game->NewMixedProfile(gbtNumber(0));
-	((gbtVector<gbtNumber> &) temp).operator=(gbtNumber(0));
+	gbtMixedProfile<gbtRational> soln = p_game->NewMixedProfile(gbtRational(0));
 	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	  temp[citer.GetContingency()->GetStrategy(p_game->GetPlayer(pl))->GetId()] = 1;
+	  gbtGamePlayer player = p_game->GetPlayer(pl);
+	  for (int st = 1; st <= player->NumStrategies(); st++) {
+	    if (citer.GetProfile()->GetStrategy(player)->GetId() == st) {
+	      soln(pl, st) = 1;
+	    }
+	    else {
+	      soln(pl, st) = 0;
+	    }
+	  }
 	}
-	solutions.Append(temp);
+	solutions.Append(soln);
       }
       contNumber++;
     }  while ((m_stopAfter == 0 || solutions.Length() < m_stopAfter) &&
 	      citer.NextContingency());
   }
-  catch (gbtSignalBreak &) {
+  catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)
   }
 
   return solutions;
+}
+
+gbtList<gbtMixedProfile<gbtRational> >
+gbtNashEnumPureNfg(const gbtGame &p_game, int p_stopAfter)
+{
+  gbtNfgNashEnumPure algorithm;
+  algorithm.SetStopAfter(p_stopAfter);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
 }

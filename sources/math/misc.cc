@@ -24,9 +24,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "base/base.h"
 #include "gmath.h"
-#include "double.h"
 #include "mpfloat.h"
+#include "rational.h" 
 
 //--------------------------------------------------------------------------
 //                      Simple mathematical functions
@@ -62,7 +63,6 @@ template int gmin(const int &a, const int &b);
 template float gmin(const float &a, const float &b);
 template double gmin(const double &a, const double &b);
 template gbtRational gmin(const gbtRational &a, const gbtRational &b);
-template gbtDouble gmin(const gbtDouble &a, const gbtDouble &b);
 #if GBT_WITH_MP_FLOAT
 template gbtMPFloat gmin(const gbtMPFloat &, const gbtMPFloat &);
 #endif // GBT_WITH_MP_FLOAT
@@ -71,24 +71,11 @@ template int gmax(const int &a, const int &b);
 template float gmax(const float &a, const float &b);
 template double gmax(const double &a, const double &b);
 template gbtRational gmax(const gbtRational &a, const gbtRational &b);
-template gbtDouble gmax(const gbtDouble &a, const gbtDouble &b);
 #if GBT_WITH_MP_FLOAT
 template gbtMPFloat gmax(const gbtMPFloat &, const gbtMPFloat &);
 #endif // GBT_WITH_MP_FLOAT
 
 template int gmax(const gbtArray<int> &);
-
-#ifndef hpux
-double abs(double a)
-{
-  if (a >= 0.0)   return a;   else return -a;
-}
-#endif   //# hpux
-
-gbtNumber abs(const gbtNumber &a)
-{
-  if (a > gbtNumber(0))  return a;  else return -a;
-}
 
 //
 // Nasty little hack to make Borland C happy
@@ -104,7 +91,7 @@ int sign(const double &a)
 
 // this two-step process allows us to read in a double using either the
 // standard form xxx.xxxx or a/b form.
-double FromText(const gbtText &f,double &d)
+double FromText(const std::string &f,double &d)
 {
   gbtRational R;
   FromText(f, R);

@@ -27,9 +27,8 @@
 #ifndef GARRAY_H
 #define GARRAY_H
 
+#include "gmisc.h"
 #include <stdlib.h>
-#include <assert.h>
-#include "gstream.h"
 
 template <class T> class gbtArray  {
   protected:
@@ -37,68 +36,36 @@ template <class T> class gbtArray  {
     T *data;
 
   public:
-    class BadIndex : public gbtException  {
-    public:
-      virtual ~BadIndex();
-      gbtText Description(void) const;
-    };
-
-    class BadRange : public gbtException  {
-    public:
-      virtual ~BadRange();
-      gbtText Description(void) const;
-    };
-
-//
-// Constructs a gbtArray of length 'len', starting at '1'
-//
+/// Constructs a gbtArray of length 'len', starting at '1'
     gbtArray(unsigned int len = 0);
-//
-// Constructs a gbtArray starting at lo and ending at hi
-//
+
+/// Constructs a gbtArray starting at lo and ending at hi
     gbtArray(int lo, int hi);
-//
-// duplicate the input gbtArray<T> constant referrence
-//
+
+/// Copy constructor
     gbtArray(const gbtArray<T> &);
-//
-// Destruct and deallocates gbtArray
-//
+
+/// Destruct and deallocate gbtArray
     virtual ~gbtArray();
-//
-// Copies data from input gbtArray
-//
+
+/// Copies data from input gbtArray
     gbtArray<T> &operator=(const gbtArray<T> &);
 
-//
-// return length in the invoking gbtArray<T>
-//
-    int Length(void) const;
+/// Return length in the invoking gbtArray<T>
+    int Length(void) const throw () { return maxdex - mindex + 1; }
 
-//
-// return first index
-//
-    int First(void) const;
+/// Return first index
+    int First(void) const throw () { return mindex; }
 
-//
-// return last index
-//
-    int Last(void) const;
+/// Return last index
+    int Last(void) const throw () { return maxdex; }
 
-//
-// Check bounds of index. Exit program if out of bounds
-//
-    const T &operator[](int index) const;
-    T &operator[](int index);
-//
-// Output data of the array
-//
-    virtual void Dump(gbtOutput &) const;
+/// Subscripting operator; throws exception if index is out of bounds
+    const T &operator[](int index) const throw (gbtIndexException);
+    T &operator[](int index) throw (gbtIndexException);
 };
+
 template <class T> bool operator==(const gbtArray<T> &, const gbtArray<T> &);
 template <class T> bool operator!=(const gbtArray<T> &, const gbtArray<T> &);
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtArray<T> &);
-
-
-#endif	//# GARRAY_H
+#endif	// GARRAY_H

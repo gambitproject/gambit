@@ -27,30 +27,27 @@
 #ifndef NFGITER_H
 #define NFGITER_H
 
-template <class T> class gbtArray;
-
-#include "nfgcont.h"
-#include "nfgsupport.h"
+#include "game.h"
 
 class gbtNfgContIterator;
 
+//
+// This class is useful for iterating around the normal form.
+//
 
-//
-// This is a generic class useful for iterating around the normal form.
-// It depends only on the gbtNfgGame interface, so it can be used with
-// any implementation providing that interface.
-//
 class gbtNfgIterator    {
 private:
-  gbtNfgGame m_nfg;
-  gbtArray<int> m_current;
-  gbtNfgContingency m_profile;
+  gbtGame m_nfg;
+  gbtArray<int> current_strat;
+  gbtNfgContingency profile;
 
 public:
-  gbtNfgIterator(const gbtNfgGame &);
+  gbtNfgIterator(gbtGame);
   gbtNfgIterator(const gbtNfgIterator &);
   gbtNfgIterator(const gbtNfgContIterator &);
   ~gbtNfgIterator();
+
+  gbtNfgIterator &operator=(const gbtNfgIterator &);
 
   void First(void);
   int Next(int p);
@@ -60,9 +57,10 @@ public:
   void Set(const gbtArray<int> &t);
 
   gbtGameOutcome GetOutcome(void) const;
+  void SetOutcome(gbtGameOutcome);
 
-  gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
-    { return m_profile->GetPayoff(p_player); }
+  gbtRational GetPayoff(const gbtGamePlayer &p_player) const 
+    { return profile->GetPayoff(p_player); }
 };
 
 #endif   // NFGITER_H

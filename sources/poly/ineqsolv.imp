@@ -186,13 +186,13 @@ gbtPolyIneqSolve<T>::ASolutionExists (const gRectangle<T>& r, gbtVector<T>& samp
 //           Printing
 //----------------------------------
 
-template <class T> void gbtPolyIneqSolve<T>::Output(gbtOutput &output) const
+template <class T> void gbtPolyIneqSolve<T>::Output(std::ostream &output) const
 {
   output << "The system is\n" << System << "\nwith error tolerance " <<
     Epsilon << ".\n";
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &p_file,
+template <class T> std::ostream &operator<<(std::ostream &p_file,
 				       const gbtPolyIneqSolve<T> &p_solver)
 {
   p_solver.Output(p_file);

@@ -102,8 +102,8 @@ template <class T> class gbtPolyIneqSolve {
   // The function that does everything
   const bool ASolutionExists(const gRectangle<T>&, gbtVector<T>& sample);
 
-  void Output(gbtOutput &) const;
+  void Output(std::ostream &) const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &output, const gbtPolyIneqSolve<T> &x);
+template <class T> std::ostream &operator<<(std::ostream &output, const gbtPolyIneqSolve<T> &x);
 #endif // INEQSOLV_H

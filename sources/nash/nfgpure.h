@@ -27,23 +27,13 @@
 #ifndef NFGPURE_H
 #define NFGPURE_H
 
-#include "base/base.h"
-#include "base/gstatus.h"
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-class gbtNfgNashEnumPure : public gbtNfgNashAlgorithm {
-private:
-  int m_stopAfter;
-
-public:
-  gbtNfgNashEnumPure(void) : m_stopAfter(0) { }
-  virtual ~gbtNfgNashEnumPure() { }
-
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gbtText GetAlgorithm(void) const { return "EnumPure"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
+//!
+//! This implements a search for pure strategy equilibria in the
+//! normal form.
+//!
+gbtList<gbtMixedProfile<gbtRational> >
+gbtNashEnumPureNfg(const gbtGame &p_game, int p_stopAfter = 0);
 
 #endif // NFGPURE_H

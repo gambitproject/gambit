@@ -30,7 +30,6 @@
 #endif
 #define _Complex_h 1
 
-#include "base/gstream.h"
 #include <math.h>
 
 class gbtComplex
@@ -74,8 +73,8 @@ public:
   void    error(const char* msg) const;
 
 // printing
-  friend gbtInput&    operator >> (gbtInput& s, gbtComplex& y);
-  friend gbtOutput&   operator << (gbtOutput& s, const gbtComplex& y);
+  friend std::istream&    operator >> (std::istream& s, gbtComplex& y);
+  friend std::ostream &operator<<(std::ostream& s, const gbtComplex &y);
 
 // friends outside the class
   friend double    fabs(const gbtComplex& x);              

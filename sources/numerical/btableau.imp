@@ -217,8 +217,9 @@ gbtBasicFeasibleSolution<T> gbtTableauInterface<T>::GetBFS1() const
   return cbfs;
 }
 
+#ifdef UNUSED
 template <class T>
-void gbtTableauInterface<T>::Dump(gbtOutput &to) const
+void gbtTableauInterface<T>::Dump(std::ostream &to) const
 { 
   gbtVector<T> bb(MinRow(), MaxRow());
   BasisVector(bb);
@@ -228,7 +229,7 @@ void gbtTableauInterface<T>::Dump(gbtOutput &to) const
 }
 
 template <class T>
-void gbtTableauInterface<T>::BigDump(gbtOutput &to)
+void gbtTableauInterface<T>::BigDump(std::ostream &to)
 { 
   to << "\nBasis:";
   basis.Dump(to);
@@ -250,6 +251,7 @@ void gbtTableauInterface<T>::BigDump(gbtOutput &to)
   }
   to << "\nTableau:\n" << AA;
 }
+#endif  //UNUSED
 
 // miscellaneous functions
 
@@ -288,7 +290,7 @@ bool gbtTableauInterface<T>::GeZero(T x) const
 template <class T>
 T gbtTableauInterface<T>::Epsilon(int i) const
 {
-  if(i!=1 && i!=2) throw BadDim();
+  if(i!=1 && i!=2) throw gbtDimensionException();
   if(i==1) return eps1;
   return eps2;
 }
@@ -299,19 +301,4 @@ bool gbtTableauInterface<T>::IsArtifColumn(int col) const
   return col>=artificial.First() && col<=artificial.Last();
 }
 
-/*
-template <class T> gbtBaseTableau<T>::BadPivot::~BadPivot()
-{ }
 
-template <class T> gbtText gbtBaseTableau<T>::BadPivot::Description(void) const
-{
-  return "Bad Pivot in gbtBaseTableau";
-}
-*/
-template <class T> gbtBaseTableau<T>::BadDim::~BadDim()
-{ }
-
-template <class T> gbtText gbtBaseTableau<T>::BadDim::Description(void) const
-{
-  return "Bad Dimension in gbtBaseTableau";
-}

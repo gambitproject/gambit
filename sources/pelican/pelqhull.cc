@@ -1423,7 +1423,9 @@ facetT *qh_findbest (pointT *point, facetT *facet, boolT bestoutside,
 #endif
   facet->visitid= ++qh visit_id;
   facet->seen= False;
+#ifdef UNUSED
   if (True) {                   /* directed search for bestfacet */
+#endif  //UNUSED
 LABELrepeat:			   /* facet->seen if clearly worse */
     trace4((qh ferr, "qh_findbest: neighbors of f%d\n", facet->id));
     FOREACHneighbor_(facet) {
@@ -1458,7 +1460,9 @@ LABELrepeat:			   /* facet->seen if clearly worse */
       }else if (*dist < bestdist - searchdist)
         neighbor->seen= True;
     }
+#ifdef UNUSED
   }
+#endif  // UNUSED
   do {                   /* search horizon of facet */
     FOREACHneighbor_(facet) {
       if ((int)neighbor->visitid == qh visit_id) {
@@ -3547,7 +3551,9 @@ void qh_check_maxout (void) {
     qh min_vertex= minvertex;
   }
   FOREACHfacet_i_(facets) {
+#ifdef UNUSED
     if (True) { /* inside points can end up outside after merging */
+#endif  // UNUSED
       zinc_(Ztotverify);
       if (!facet)
         facet= qh facet_list;
@@ -3570,7 +3576,9 @@ void qh_check_maxout (void) {
       if (dist > qh TRACEdist || bestfacet == qh tracefacet)
 	  fprintf (qh ferr, "qh_check_maxout: p%d is %.2g above f%d\n",
 		   qh_pointid (point), dist, bestfacet->id);
+#ifdef UNUSED
     }
+#endif  // UNUSED
   }
   qh_settempfree (&vertices);
   qh_settempfree (&facets);
@@ -5275,7 +5283,7 @@ setT *qh_pointfacet (void /*qh facet_list*/) {
 -pointid- return id for a point, -3 if null, -2 if interior, or -1 if not known
 */
 int qh_pointid (pointT *point) {
-  unsigned id;
+  int id;
 
   if (!point)
     return -3;
@@ -5286,7 +5294,7 @@ int qh_pointid (pointT *point) {
     else if ((int)(id= qh_setindex (qh other_points, point)) != -1)
       id += qh num_points;
   }
-  return (int) id;
+  return id;
 } /* pointid */
   
 /*-------------------------------------------------
@@ -7364,19 +7372,10 @@ qhT qh_qh; /*= {0};*/ /* remove "= {0}" if this causes a compiler error.  Also
 
 /* ------------Simple all purpose error report-------------*/
 
-#ifdef GAMBIT_EXCEPTIONS
-ErrorInQhull::~ErrorInQhull() { }
-
-gbtText ErrorInQhull::Description(void) const
-{
-  return "Error somewhere in Qhull";
-}
-#endif
-
 void qhull_fatal(int errorno)
 {
 #ifdef GAMBIT_EXCEPTIONS
-  throw ErrorInQhull();
+  throw gbtQhullException();
 #endif
 
   printf("\nError number %d in qhull.\n", errorno);
@@ -8113,8 +8112,9 @@ void qh_initqhull_start (FILE *infile, FILE *outfile, FILE *errfile) {
   qh DROPdim= -1;
   qh TRACEdist= REALmax;
   qh TRACEpoint= -1;
-  qh tracefacet_id= -1;  /* stderr set these to id for tracefacet/tracevertex */
-  qh tracevertex_id= -1;
+  // FIXME: Added explicit casts to silence compiler warnings
+  qh tracefacet_id= (unsigned int) -1;  /* stderr set these to id for tracefacet/tracevertex */
+  qh tracevertex_id= (unsigned int) -1;
 } /* initqhull_start */
 
 /*---------------------------------------------
@@ -8568,7 +8568,7 @@ At %d:%d:%d & %2.5g CPU secs, qhull has created %d facets and merged %d.\n\
   }
 #ifndef __BCC55__
   // This condition is always false under BCC55
-  if (qh visit_id > (unsigned) INT_MAX) {
+  if (qh visit_id > INT_MAX) {
     qh visit_id= 0;
     FORALLfacets
       facet->visitid= qh visit_id;
@@ -8576,7 +8576,7 @@ At %d:%d:%d & %2.5g CPU secs, qhull has created %d facets and merged %d.\n\
 #endif  // __BCC55__
 #ifndef __BCC55__
   // This condition is always false under BCC55
-  if (qh vertex_visit > (unsigned) INT_MAX) {
+  if (qh vertex_visit > INT_MAX) {
     qh vertex_visit= 0;
     FORALLvertices
       vertex->visitid= qh vertex_visit;

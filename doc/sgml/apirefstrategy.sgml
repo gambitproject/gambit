@@ -4,26 +4,29 @@
 <para>
 </para>
 
-<sect2 id="apiref.strategy.getgame">
-<title>GetGame</title>
-<indexterm><primary>GetGame</primary></indexterm>
+<sect2 id="apiref.strategy.getbehavior">
+<title>GetBehavior</title>
+<indexterm><primary>GetBehavior</primary></indexterm>
 
 <formalpara>
-<title>C++/Python usage</title>
+<title>C++/Python usage</title
 <para>
 <synopsis>
-gbtGame gbtGameAction::GetGame(void) const
+gbtGameAction gbtGameStrategy::GetBehavior(const gbtGameInfoset &amp;p_infoset) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetGame</function> 
-returns the normal form game to which the strategy belongs.
+<function>GetBehavior</function> returns the action specified by
+the strategy to be taken at <parameter>p_infoset</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if 
+<parameter>p_infoset</parameter> is not from the same game as the
+strategy.
 </para>
 
 </sect2>
-
 
 <sect2 id="apiref.strategy.getlabel">
 <title>GetLabel</title>
@@ -33,7 +36,7 @@ returns the normal form game to which the strategy belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGameAction::GetLabel(void) const
+std::string gbtGameStrategy::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -41,7 +44,26 @@ gbtText gbtGameAction::GetLabel(void) const
 <para>
 <function>GetLabel</function> 
 returns the text label of the strategy.
-The empty string is returned if the strategy object is null.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.strategy.getplayer">
+<title>GetPlayer</title>
+<indexterm><primary>GetPlayer</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGamePlayer gbtGameStrategy::GetPlayer(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPlayer</function>
+returns the player to whom the strategy belongs.
 </para>
 
 </sect2>
@@ -54,7 +76,7 @@ The empty string is returned if the strategy object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameAction::SetLabel(const gbtText &amp;p_label)
+void gbtGameStrategy::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

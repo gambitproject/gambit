@@ -26,20 +26,19 @@
 
 #include "base/base.h"
 #include "math/gdpvect.imp"
-#include "math/gnumber.h"
 #include "math/mpfloat.h"
+#include "math/rational.h"
 
 template class gbtDPVector<int>;
 template class gbtDPVector<double>;
 template class gbtDPVector<gbtRational>;
-template class gbtDPVector<gbtNumber>;
 
-template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<gbtNumber> &);
+template std::ostream &operator<<(std::ostream &, const gbtDPVector<double> &);
+template std::ostream &operator<<(std::ostream &, 
+				  const gbtDPVector<gbtRational> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtDPVector<gbtMPFloat>;
-template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<gbtMPFloat> &);
+template std::ostream &operator<<(std::ostream &, 
+				  const gbtDPVector<gbtMPFloat> &);
 #endif // GBT_WITH_MP_FLOAT

@@ -65,8 +65,7 @@ template <class T> int gbtLemkeTableau<T>::PivotIn(int inlabel)
 //  gout << " outindex = " << outindex;
   if(outindex==0) return inlabel;
   int outlabel = Label(outindex);
-  if(outlabel==0)
-    throw BadPivot();
+  if (outlabel==0) throw gbtIndexException();
 
   //   gout << " outlabel = " << outlabel;
   //   gout << " outindex = " << outindex;
@@ -98,7 +97,7 @@ template <class T> int gbtLemkeTableau<T>::SF_ExitIndex(int inlabel)
        && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
       return Find(0);
   */
-    if(BestSet.Length() <= 0) throw BadExitIndex();
+    if(BestSet.Length() <= 0) throw gbtIndexException();
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns,
@@ -109,7 +108,7 @@ template <class T> int gbtLemkeTableau<T>::SF_ExitIndex(int inlabel)
   // gout << "\nLength = " <<  BestSet.Length();
   //* gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
-    if(c > MaxRow()) throw BadExitIndex();
+    if(c > MaxRow()) throw gbtIndexException();
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -122,7 +121,7 @@ template <class T> int gbtLemkeTableau<T>::SF_ExitIndex(int inlabel)
 //*      if (ratio > tempmax)  tempmax = ratio;
       if (ratio < tempmax)  tempmax = ratio;
     }
-//    if (tempmax <= (T 2)*eps1) throw BadExitIndex();
+//    if (tempmax <= (T 2)*eps1) throw gbtIndexException();
     
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
@@ -132,12 +131,12 @@ template <class T> int gbtLemkeTableau<T>::SF_ExitIndex(int inlabel)
 	BestSet.Remove(i);
     }
 //    else  {
-//      if(!Member(FindColumn(c))) throw BadExitIndex();
+//      if(!Member(FindColumn(c))) throw gbtIndexException();
 //      if (BestSet.Contains(c_row)) return c_row;
 //    }
     c++;
   }
-  if(BestSet.Length() <= 0) throw BadExitIndex();
+  if(BestSet.Length() <= 0) throw gbtIndexException();
   return BestSet[1];
 }
 
@@ -169,7 +168,7 @@ template <class T> int gbtLemkeTableau<T>::ExitIndex(int inlabel)
   if(BestSet.Length()==0  
      && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
     return Find(0);
-  if(BestSet.Length() <= 0) throw BadExitIndex();
+  if(BestSet.Length() <= 0) throw gbtIndexException();
   
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns, 
@@ -181,7 +180,7 @@ template <class T> int gbtLemkeTableau<T>::ExitIndex(int inlabel)
   //   gout << "\n x =     " << col << "\n";
   while (BestSet.Length() > 1)   {
     // this is where ITEM 001 is failing
-    if(c > MaxRow()) throw BadExitIndex();
+    if(c > MaxRow()) throw gbtIndexException();
     if(c>=MinRow()) {
       SolveColumn(-c,col);
       // gout << "\n-c = " << -c << " col = " << col;
@@ -193,7 +192,7 @@ template <class T> int gbtLemkeTableau<T>::ExitIndex(int inlabel)
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax)  tempmax = ratio;
     }
-//    if(tempmax <= (T 2)*eps1) throw BadExitIndex();
+//    if(tempmax <= (T 2)*eps1) throw gbtIndexException();
     
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
@@ -202,12 +201,12 @@ template <class T> int gbtLemkeTableau<T>::ExitIndex(int inlabel)
 	BestSet.Remove(i);
     }
 //    else  {
-//      if(!Member(FindColumn(c))) throw BadExitIndex();
+//      if(!Member(FindColumn(c))) throw gbtIndexException();
 //      if (BestSet.Contains(c_row)) return c_row;
 //    }
     c++;
   }
-  if(BestSet.Length() <= 0) throw BadExitIndex();
+  if(BestSet.Length() <= 0) throw gbtIndexException();
   return BestSet[1];
 }
 
@@ -274,18 +273,5 @@ template <class T> int gbtLemkeTableau<T>::LemkePath(int dup)
   return 1;
 }
 
-template <class T> gbtLemkeTableau<T>::BadPivot::~BadPivot()
-{ }
 
-template <class T> gbtText gbtLemkeTableau<T>::BadPivot::Description(void) const
-{
-  return "Bad Pivot in gbtLemkeTableau";
-}
 
-template <class T> gbtLemkeTableau<T>::BadExitIndex::~BadExitIndex()
-{ }
-
-template <class T> gbtText gbtLemkeTableau<T>::BadExitIndex::Description(void) const
-{
-  return "Bad Exit Index in gbtLemkeTableau";
-}

@@ -50,7 +50,7 @@ template <class T> gbtPolyMulti<T>::gbtPolyMulti(const gbtPolySpace*     p,
 }
 
 template <class T> gbtPolyMulti<T>::gbtPolyMulti(const gbtPolySpace *p, 
-				       const gbtText &s,
+				       const std::string &s,
 				       const gbtPolyTermOrder* o)
 : Space(p), Order(o), Terms()
 {
@@ -103,7 +103,7 @@ template<class T> gbtPolyMulti<T> &gbtPolyMulti<T>::operator=(const gbtPolyMulti
   Terms = p.Terms; return (*this);
 }
 
-template <class T> gbtPolyMulti<T>& gbtPolyMulti<T>::operator=(const gbtText &Hold)
+template <class T> gbtPolyMulti<T>& gbtPolyMulti<T>::operator=(const std::string &Hold)
 {
   gbtList<gbtMonomial<T> > nullTerms;
   Terms = nullTerms;           // get rid of old Terms
@@ -116,7 +116,7 @@ template <class T> gbtPolyMulti<T>& gbtPolyMulti<T>::operator=(const gbtText &Ho
 
   charc = TheString[charnum];
 
-  while (charnum <= TheString.Length() && contflag){
+  while (charnum <= TheString.length() && contflag){
     switch (charc) {
     case '+' :
     case ' ':
@@ -273,7 +273,7 @@ template <class T> void gbtPolyMulti<T>::String_Term(T nega)
 template <class T> int gbtPolyMulti<T>::String_GetPow(void)
 {
 
-  gbtText Pow = "";
+  std::string Pow = "";
   while (charc == ' '){
     charnum++;
     charc = TheString[charnum];
@@ -284,12 +284,12 @@ template <class T> int gbtPolyMulti<T>::String_GetPow(void)
     charnum++;
     charc = TheString[charnum];
   }
-  return (atoi(Pow));
+  return (atoi(Pow.c_str()));
 }
 
 template <class T> void gbtPolyMulti<T>::String_VarAndPow(gbtArray<int> &PowArray)
 {
-  gbtText VarName = "";
+  std::string VarName = "";
   int pow, varname;
   while (charc != '^' && charc != ' '){
     VarName += charc;
@@ -310,7 +310,7 @@ template <class T> void gbtPolyMulti<T>::String_VarAndPow(gbtArray<int> &PowArra
 
 // bool function to check the string in &Hold
 
-template <class T> bool gbtPolyMulti<T>::Check_String(const gbtText &Hold){
+template <class T> bool gbtPolyMulti<T>::Check_String(const std::string &Hold){
  unsigned int charnum=0;
  int boolflag=0;
 // state variables
@@ -321,10 +321,10 @@ template <class T> bool gbtPolyMulti<T>::Check_String(const gbtText &Hold){
  enum number {nonumberbef, numberbef};
  enum var {novarbef, varbef};
  enum sign {nosignbef, signbef}; 
- gbtText TheString = Hold;
+ std::string TheString = Hold;
  char charc = TheString[charnum];
 //movement along the string with a switch case
- while (charnum < TheString.Length()){
+ while (charnum < TheString.length()){
   switch (charc){
    case '0':
    case '1':
@@ -341,7 +341,7 @@ template <class T> bool gbtPolyMulti<T>::Check_String(const gbtText &Hold){
     break;
    case 'n':
     if (statenumber==0 && statesign==0) boolflag++;
-    if (charnum == (TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.length()-1)) boolflag++;
     statenumber=number(0);
     statevar=varbef;
     statesign=nosignbef;
@@ -349,7 +349,7 @@ template <class T> bool gbtPolyMulti<T>::Check_String(const gbtText &Hold){
    case '^':
     if (statenumber==0) boolflag++;
     if (statevar==0) boolflag++;
-    if (charnum == (TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=nosignbef;
@@ -357,14 +357,14 @@ template <class T> bool gbtPolyMulti<T>::Check_String(const gbtText &Hold){
    case '/':
    case '.':
     if (statenumber==0) boolflag++;
-    if (charnum == (TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.length()-1)) boolflag++;
     statenumber=nonumberbef;
     statesign=nosignbef;
     break;
    case '+':
    case '-':
     if (statenumber==0 && charnum!=0) boolflag++;
-    if (charnum == (TheString.Length()-1)) boolflag++;
+    if (charnum == (TheString.length()-1)) boolflag++;
     statenumber=nonumberbef;
     statevar=novarbef;
     statesign=signbef;
@@ -908,9 +908,9 @@ template<class T> gbtPolyMulti<T> operator+(const gbtPolyMulti<T> &poly, const T
   return val + poly;
 }
 
-template <class T> void gbtPolyMulti<T>::Output(gbtText &t) const
+template <class T> void gbtPolyMulti<T>::Output(std::string &t) const
 {
-  gbtText s;
+  std::string s;
   if (Terms.Length() == 0)  {
     s += "0";
   }
@@ -951,7 +951,7 @@ template <class T> void gbtPolyMulti<T>::Output(gbtText &t) const
   t += s;
 }
 
-template <class T> gbtText &operator<<(gbtText &p_text, const gbtPolyMulti<T> &p_poly)
+template <class T> std::string &operator<<(std::string &p_text, const gbtPolyMulti<T> &p_poly)
 {
   p_poly.Output(p_text);
   return p_text;
@@ -962,13 +962,20 @@ template <class T> gbtText &operator<<(gbtText &p_text, const gbtPolyMulti<T> &p
 //----------------------------------
 
 template<class T>  
-gbtPolyMulti<gbtDouble>  TogDouble(const gbtPolyMulti<T>& given) 
+gbtPolyMulti<double> NormalizationOfPoly(const gbtPolyMulti<T>& given) 
 {
-  gbtPolyMulti<gbtDouble>   answer(given.GetSpace(),given.GetOrder());
   gbtList<gbtMonomial<T> > list = given.MonomialList();
+  T maxcoeff = (T) 0;
   for (int i =1; i <= list.Length(); i++) {
-    gbtDouble nextcoef = (gbtDouble)list[i].Coef();
-    gbtPolyMulti<gbtDouble> next(given.GetSpace(),
+    maxcoeff = gmax(maxcoeff,fabs((T)list[i].Coef()));
+  }
+
+  //  if (maxcoeff < (T) 0.000000001) return given;
+
+  gbtPolyMulti<double>   answer(given.GetSpace(),given.GetOrder());
+  for (int i =1; i <= list.Length(); i++) {
+    double nextcoef = (double)list[i].Coef()/(double) maxcoeff;
+    gbtPolyMulti<double> next(given.GetSpace(),
 			list[i].ExpV(),
 			nextcoef,
 			given.GetOrder());
@@ -978,33 +985,9 @@ gbtPolyMulti<gbtDouble>  TogDouble(const gbtPolyMulti<T>& given)
   return answer;
 }
 
-template<class T>  
-gbtPolyMulti<gbtDouble>  NormalizationOfPoly(const gbtPolyMulti<T>& given) 
+template <class T> std::ostream &operator<<(std::ostream &f, const gbtPolyMulti<T> &p)
 {
-  gbtList<gbtMonomial<T> > list = given.MonomialList();
-  gbtDouble maxcoeff = (gbtDouble)0;
-  for (int i =1; i <= list.Length(); i++) {
-    maxcoeff = gmax(maxcoeff,abs((gbtDouble)list[i].Coef()));
-  }
-
-  if (maxcoeff < 0.000000001) return TogDouble(given);
-
-  gbtPolyMulti<gbtDouble>   answer(given.GetSpace(),given.GetOrder());
-  for (int i =1; i <= list.Length(); i++) {
-    gbtDouble nextcoef = (gbtDouble)list[i].Coef()/maxcoeff;
-    gbtPolyMulti<gbtDouble> next(given.GetSpace(),
-			list[i].ExpV(),
-			nextcoef,
-			given.GetOrder());
-    answer += next;
-  }
-  
-  return answer;
-}
-
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtPolyMulti<T> &p)
-{
-  gbtText s;
+  std::string s;
   s << p;
   f << s;
   return f;

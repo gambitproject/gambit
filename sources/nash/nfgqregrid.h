@@ -28,8 +28,7 @@
 #define NFGQREGRID_H
 
 #include "base/base.h"
-#include "nash/nfgalgorithm.h"
-
+#include "base/gstatus.h"
 
 class QreNfgGrid {
 private:
@@ -42,20 +41,20 @@ private:
   gbtVector<double> UpdateFunc(const gbtMixedProfile<double> &, int, double) const;
   bool CheckEqu(gbtMixedProfile<double> &, double, int, double) const;
 
-  void OutputHeader(const gbtNfgSupport &, gbtOutput &) const;
-  void OutputResult(gbtOutput &, const gbtMixedProfile<double> &,
+  void OutputHeader(const gbtGame &, std::ostream &) const;
+  void OutputResult(std::ostream &, const gbtMixedProfile<double> &,
 		    double, double) const;
 
 protected:
   // could use norms other then the simple one
-  virtual double Distance(const gbtMixedProfile<gbtNumber> &,
-			  const gbtMixedProfile<double> &) const;
-
-  virtual double Distance(const gbtVector<gbtNumber> &,
+  virtual double Distance(const gbtVector<gbtRational> &,
 			  const gbtVector<double> &) const;
 
   virtual double Distance(const gbtVector<double> &,
 			  const gbtVector<double> &) const;
+
+  virtual double Distance(const gbtMixedProfile<double> &,
+			  const gbtMixedProfile<double> &) const;
 
 public:
   // LIFECYCLE
@@ -90,8 +89,8 @@ public:
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
 
   // RUN THE ALGORITHM
-  void Solve(const gbtNfgSupport &, gbtOutput &p_pxifile, gbtStatus &p_status,
-	     gbtMixedNashSet &);
+  void Solve(const gbtGame &, std::ostream &p_pxifile, gbtStatus &p_status,
+	     gbtList<gbtMixedProfile<double> > &);
 };
 
 #endif  // NFGQREGRID_H

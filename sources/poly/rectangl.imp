@@ -287,25 +287,11 @@ const T gRectangle<T>::DiameterSquared() const
   return answer;
 }
 
-//----------------------------------
-//           Conversion
-//----------------------------------
-
-template<class T>  
-gRectangle<gbtDouble>  TogDouble(const gRectangle<T>& given) 
-{
-  gbtList<gInterval<gbtDouble> > cartesian_factors;
-  for (int i = 1; i <= given.Dmnsn(); i++) 
-    cartesian_factors += gInterval<gbtDouble>((gbtDouble)given.LowerBound()[i],
-					    (gbtDouble)given.UpperBound()[i]);
-  return gRectangle<gbtDouble>(cartesian_factors);
-}
-
 //--------------------------------------------------------------------------
 //                        interval -- printing
 //--------------------------------------------------------------------------
 
-template <class T> void gRectangle<T>::Output(gbtOutput &output) const
+template <class T> void gRectangle<T>::Output(std::ostream &output) const
 {
   for (int i = 1; i <= Dmnsn() - 1; i++)
     output << sides[i] << "x";
@@ -314,7 +300,7 @@ template <class T> void gRectangle<T>::Output(gbtOutput &output) const
 }
 
 template <class T>
-gbtOutput &operator<<(gbtOutput &p_file, const gRectangle<T> &p_rect)
+std::ostream &operator<<(std::ostream &p_file, const gRectangle<T> &p_rect)
 {
   p_rect.Output(p_file);
   return p_file;

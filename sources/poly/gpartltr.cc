@@ -27,45 +27,26 @@
 #include "base/glist.imp"
 #include "gpartltr.imp"
 
-template class gbtPolyPartialTree<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyPartialTree<gbtDouble> &y);
-template class gbtList<gbtPolyPartialTree<gbtDouble> >;
-template gbtOutput &operator<<(gbtOutput &f, 
-			     const gbtList<gbtPolyPartialTree<gbtDouble> > &y);
-template class gbtList<gbtList<gbtPolyPartialTree<gbtDouble> > >;
-template gbtOutput &operator<<(gbtOutput &f, 
-			     const gbtList<gbtList<gbtPolyPartialTree<gbtDouble> > > &y);
-template class gbtList<gbtList<gbtList<gbtPolyPartialTree<gbtDouble> > > >;
-template class gbtPolyPartialTreeList<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, 
-			     const gbtPolyPartialTreeList<gbtDouble> &y);
-
 template class gbtPolyPartialTree<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyPartialTree<gbtRational> &y);
+template std::ostream &operator<<(std::ostream &f, const gbtPolyPartialTree<gbtRational> &y);
 template class gbtList<gbtPolyPartialTree<gbtRational> >;
-template gbtOutput &operator<<(gbtOutput &f, 
-			     const gbtList<gbtPolyPartialTree<gbtRational> > &y);
 template class gbtList<gbtList<gbtPolyPartialTree<gbtRational> > >;
-template gbtOutput &operator<<(gbtOutput &f, 
-			   const gbtList<gbtList<gbtPolyPartialTree<gbtRational> > > &y);
 template class gbtList<gbtList<gbtList<gbtPolyPartialTree<gbtRational> > > >;
 template class gbtPolyPartialTreeList<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, 
-			     const gbtPolyPartialTreeList<gbtRational> &y);
 
 
-//template class gbtPolyPartialTree<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyPartialTree<double> &y);
+template class gbtPolyPartialTree<double>;
+template std::ostream &operator<<(std::ostream &f, const gbtPolyPartialTree<double> &y);
 //template class gbtList<gbtPolyPartialTree<double> >;
-//template gbtOutput &operator<<(gbtOutput &f, 
+//template std::ostream &operator<<(std::ostream &f, 
 //			     const gbtList<gbtPolyPartialTree<double> > &y);
 //template class gbtList<gbtList<gbtPolyPartialTree<double> > >;
-//template gbtOutput &operator<<(gbtOutput &f, 
+//template std::ostream &operator<<(std::ostream &f, 
 //			     const gbtList<gbtList<gbtPolyPartialTree<double> > > &y);
 //template class gbtList<gbtList<gbtList<gbtPolyPartialTree<double> > > >;
-//template class gbtPolyPartialTreeList<double>;
-//template gbtOutput &operator<<(gbtOutput &f, 
-//			     const gbtPolyPartialTreeList<double> &y);
+template class gbtPolyPartialTreeList<double>;
+template std::ostream &operator<<(std::ostream &f, 
+			     const gbtPolyPartialTreeList<double> &y);
 
 #include "base/gtree.imp"
 
@@ -74,15 +55,7 @@ template class gbtList<gbtTreeNode<gbtPolyMulti<gbtRational> >*>;
 template class gbtTree<gbtPolyMulti<gbtRational> >;
 template class gbtList<gbtTree<gbtPolyMulti<gbtRational> > >;
 #ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, 
+template std::ostream& operator << (std::ostream& output, 
 			       const gbtTree<gbtPolyMulti<gbtRational> >&);
 #endif  // __BCC55__
 
-template class gbtTreeNode<gbtPolyMulti<gbtDouble> >;
-template class gbtList<gbtTreeNode<gbtPolyMulti<gbtDouble> >*>;
-template class gbtTree<gbtPolyMulti<gbtDouble> >;
-template class gbtList<gbtTree<gbtPolyMulti<gbtDouble> > >;
-#ifndef __BCC55__
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtTree<gbtPolyMulti<gbtDouble> >&);
-#endif  // __BCC55__

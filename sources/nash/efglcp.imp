@@ -26,8 +26,45 @@
 //
 
 #include "base/base.h"
+#include "base/gnullstatus.h"
 #include "efglcp.h"
 #include "lhtab.h"
+
+#include "numerical/lemketab.h"
+
+template <class T> class gbtEfgNashLcp {
+private:
+  int m_stopAfter, m_maxDepth;
+
+  int ns1,ns2,ni1,ni2;
+  T maxpay,eps;
+  gbtList<gbtBasicFeasibleSolution<T> > List;
+  gbtList<gbtGameInfoset> isets1, isets2;
+
+  void FillTableau(const gbtGame &, gbtMatrix<T> &, const gbtGameNode &, T,
+		   int, int, int, int);
+  int Add_BFS(const gbtLemkeTableau<T> &tab);
+  int All_Lemke(const gbtGame &, int dup, gbtLemkeTableau<T> &B,
+		int depth, gbtMatrix<T> &, 
+		gbtList<gbtBehavProfile<T> > &, gbtStatus &);
+  
+  void GetProfile(const gbtGame &, const gbtLemkeTableau<T> &tab, 
+		  gbtBehavProfile<T> &, const gbtVector<T> &, 
+		  const gbtGameNode &n, int,int);
+
+public:
+  gbtEfgNashLcp(void);
+  virtual ~gbtEfgNashLcp();
+  
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  int MaxDepth(void) const { return m_maxDepth; }
+  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
+
+  std::string GetAlgorithm(void) const { return "Lcp[EFG]"; }
+  gbtList<gbtBehavProfile<T> > Solve(const gbtGame &, gbtStatus &);
+};
 
 //---------------------------------------------------------------------------
 //                     gbtEfgNashLcp: member functions
@@ -47,34 +84,37 @@ template <class T> gbtEfgNashLcp<T>::~gbtEfgNashLcp()
 // problems, starting from the primary ray.  
 //
 
-template <class T> 
-gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
-					gbtStatus &p_status)
+template <class T> gbtList<gbtBehavProfile<T> > 
+gbtEfgNashLcp<T>::Solve(const gbtGame &p_efg, gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   int i, j;
   
-  if (p_support->NumPlayers() != 2) {
-    return gbtBehavNashSet();
+  if (p_efg->NumPlayers() != 2) {
+    return gbtList<gbtBehavProfile<T> >();
   }
   
-  isets1 = p_support->ReachableInfosets(p_support->GetPlayer(1));
-  isets2 = p_support->ReachableInfosets(p_support->GetPlayer(2)); 
+  for (int i = 1; i <= p_efg->GetPlayer(1)->NumInfosets(); i++) {
+    isets1.Append(p_efg->GetPlayer(1)->GetInfoset(i));
+  }
+  for (int i = 1; i <= p_efg->GetPlayer(2)->NumInfosets(); i++) {
+    isets2.Append(p_efg->GetPlayer(2)->GetInfoset(i));
+  }
 
   List.Flush();
 
   int ntot;
-  ns1 = p_support->NumSequences(1);
-  ns2 = p_support->NumSequences(2);
-  ni1 = p_support->GetPlayer(1)->NumInfosets()+1;
-  ni2 = p_support->GetPlayer(2)->NumInfosets()+1;
+  ns1 = p_efg->GetPlayer(1)->NumSequences();
+  ns2 = p_efg->GetPlayer(2)->NumSequences();
+  ni1 = p_efg->GetPlayer(1)->NumInfosets()+1;
+  ni2 = p_efg->GetPlayer(2)->NumInfosets()+1;
 
   ntot = ns1+ns2+ni1+ni2;
 
   gbtMatrix<T> A(1,ntot,0,ntot);
   gbtVector<T> b(1,ntot);
 
-  maxpay = p_support->GetMaxPayoff() + gbtNumber(1);
+  maxpay = p_efg->GetMaxPayoff() + gbtRational(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {
@@ -84,7 +124,7 @@ gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
     }
   }
 
-  FillTableau(p_support, A, p_support->GetRoot(), prob, 1, 1, 0, 0);
+  FillTableau(p_efg, A, p_efg->GetRoot(), prob, 1, 1, 0, 0);
   for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
     A(i,0) = -(T) 1;
   }
@@ -98,14 +138,14 @@ gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   gbtLemkeTableau<T> tab(A,b);
   eps = tab.Epsilon();
   
-  gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
+  gbtBehavProfile<T> profile = p_efg->NewBehavProfile((T) 0);
   gbtVector<T> sol(tab.MinRow(),tab.MaxRow());
     
-  gbtBehavNashSet solutions;
+  gbtList<gbtBehavProfile<T> > solutions;
 
   try {
     if (m_stopAfter != 1) {
-      All_Lemke(p_support, ns1+ns2+1, tab, 0, A, solutions, p_status);
+      All_Lemke(p_efg, ns1+ns2+1, tab, 0, A, solutions, p_status);
     }
     else {
       tab.Pivot(ns1+ns2+1,0);
@@ -113,12 +153,11 @@ gbtBehavNashSet gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
       
       Add_BFS(tab);
       tab.BasisVector(sol);
-      GetProfile(p_support, tab, profile, sol,
-		 p_support->GetRoot(), 1, 1);
-      solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
+      GetProfile(p_efg, tab, profile, sol, p_efg->GetRoot(), 1, 1);
+      solutions.Append(profile);
     }
   }
-  catch (gbtSignalBreak &) {
+  catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)
   }
 
@@ -149,9 +188,10 @@ template <class T> int gbtEfgNashLcp<T>::Add_BFS(const gbtLemkeTableau<T> &table
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> int 
-gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
+gbtEfgNashLcp<T>::All_Lemke(const gbtGame &p_game,
 			    int j, gbtLemkeTableau<T> &B, int depth,
-			    gbtMatrix<T> &A, gbtBehavNashSet &p_solutions,
+			    gbtMatrix<T> &A, 
+			    gbtList<gbtBehavProfile<T> > &p_solutions,
 			    gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
@@ -163,7 +203,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
   T small_num = (T)1/(T)1000;
 
   gbtVector<T> sol(B.MinRow(),B.MaxRow());
-  gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
+  gbtBehavProfile<T> profile = p_game->NewBehavProfile((T) 0);
 
   newsol =0;
   for (i = B.MinRow(); 
@@ -191,16 +231,15 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       else
 	missing = BCopy.SF_PivotIn(0);
 
-      assert(missing);
       newsol=0;
 
       if(BCopy.SF_LCPPath(-missing,p_status)==1) {
 	newsol = Add_BFS(BCopy);
 	BCopy.BasisVector(sol);
-	GetProfile(p_support, BCopy, profile,
-		   sol, p_support->GetRoot(), 1, 1);
+	GetProfile(p_game, BCopy, profile,
+		   sol, p_game->GetRoot(), 1, 1);
 	if(newsol) {
-	  p_solutions.Append(profile->NewBehavProfile(gbtNumber(0)));
+	  p_solutions.Append(profile);
 	}
       }
       else {
@@ -210,7 +249,7 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
       A(i,0)=-(T)1;
       if(newsol) {
 	BCopy.Refactor();
-	All_Lemke(p_support,i,BCopy,depth+1, A, p_solutions, p_status);
+	All_Lemke(p_game,i,BCopy,depth+1, A, p_solutions, p_status);
       }
     }
   }
@@ -219,22 +258,22 @@ gbtEfgNashLcp<T>::All_Lemke(const gbtEfgSupport &p_support,
 }
 
 template <class T>
-void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> &A,
+void gbtEfgNashLcp<T>::FillTableau(const gbtGame &p_game, gbtMatrix<T> &A,
 				   const gbtGameNode &n, T prob,
 				   int s1, int s2, int i1, int i2)
 {
   int snew;
   if (!n->GetOutcome().IsNull()) {
-    A(s1,ns1+s2) = gbtNumber(A(s1,ns1+s2)) +
-      gbtNumber(prob) * (n->GetOutcome()->GetPayoff(p_support->GetPlayer(1)) - gbtNumber(maxpay));
-    A(ns1+s2,s1) = gbtNumber(A(ns1+s2,s1)) +
-      gbtNumber(prob) * (n->GetOutcome()->GetPayoff(p_support->GetPlayer(2)) - gbtNumber(maxpay));
+    A(s1,ns1+s2) = gbtRational(A(s1,ns1+s2)) +
+      gbtRational(prob) * (n->GetOutcome()->GetPayoff(p_game->GetPlayer(1)) - gbtRational(maxpay));
+    A(ns1+s2,s1) = gbtRational(A(ns1+s2,s1)) +
+      gbtRational(prob) * (n->GetOutcome()->GetPayoff(p_game->GetPlayer(2)) - gbtRational(maxpay));
   }
   if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer()->IsChance()) {
       for (int i = 1; i <= n->NumChildren(); i++) {
-	FillTableau(p_support, A, n->GetChild(i),
-		    gbtNumber(prob) * n->GetInfoset()->GetChanceProb(i),
+	FillTableau(p_game, A, n->GetChild(i),
+		    gbtRational(prob) * n->GetInfoset()->GetAction(i)->GetChanceProb(),
 		    s1,s2,i1,i2);
       }
     }
@@ -243,28 +282,28 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
       i1=isets1.Find(n->GetInfoset());
       snew=1;
       for (int i = 1; i < i1; i++) {
-	snew += isets1[i]->NumActions();
+	snew+=isets1[i]->NumActions();
       }
       A(s1,ns1+ns2+i1+1) = -(T)1;
       A(ns1+ns2+i1+1,s1) = (T)1;
       for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
 	A(snew+i,ns1+ns2+i1+1) = (T)1;
 	A(ns1+ns2+i1+1,snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,snew+i,s2,i1,i2);
+	FillTableau(p_game, A, n->GetChild(n->GetInfoset()->GetAction(i)->GetId()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
       i2=isets2.Find(n->GetInfoset());
       snew=1;
       for (int i = 1; i < i2; i++) {
-	snew += isets2[i]->NumActions();
+	snew+=isets2[i]->NumActions();
       }
       A(ns1+s2,ns1+ns2+ni1+i2+1) = -(T)1;
       A(ns1+ns2+ni1+i2+1,ns1+s2) = (T)1;
       for (int i = 1; i <= n->GetInfoset()->NumActions(); i++) {
 	A(ns1+snew+i,ns1+ns2+ni1+i2+1) = (T)1;
 	A(ns1+ns2+ni1+i2+1,ns1+snew+i) = -(T)1;
-	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,s1,snew+i,i1,i2);
+	FillTableau(p_game, A, n->GetChild(n->GetInfoset()->GetAction(i)->GetId()),prob,s1,snew+i,i1,i2);
       }
     }
     
@@ -273,26 +312,24 @@ void gbtEfgNashLcp<T>::FillTableau(const gbtEfgSupport &p_support, gbtMatrix<T> 
 
 
 template <class T>
-void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
+void gbtEfgNashLcp<T>::GetProfile(const gbtGame &p_efg,
 				  const gbtLemkeTableau<T> &tab, 
-				  gbtBehavProfile<T> &v,
-				  const gbtVector<T> &sol,
+				  gbtBehavProfile<T> &v, const gbtVector<T> &sol,
 				  const gbtGameNode &n, int s1,int s2)
 {
   int i,pl,inf,snew,ind,ind2;
   if (!n->GetInfoset().IsNull()) {
     if (n->GetPlayer()->IsChance()) {
       for (i = 1; i <= n->NumChildren();i++)
-	GetProfile(p_support, tab, v, sol, n->GetChild(i), s1, s2);
+	GetProfile(p_efg, tab, v, sol, n->GetChild(i), s1, s2);
     }
     pl = n->GetPlayer()->GetId();
     if(pl==1) {
       inf = isets1.Find(n->GetInfoset());
       snew=1;
-      for (i = 1; i < inf; i++) {
-	snew += isets1[i]->NumActions();
-      }
-      for (i = 1; i <= n->GetInfoset()->NumActions(); i++) {
+      for(i=1;i<inf;i++)
+	snew+=isets1[i]->NumActions();
+      for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(s1)) {
 	  ind = tab.Find(s1);
@@ -304,14 +341,14 @@ void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),snew+i,s2);
+	GetProfile(p_efg, tab, v,sol,n->GetChild(n->GetInfoset()->GetAction(i)->GetId()),snew+i,s2);
       }
     }
     if(pl==2) {
       inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew += isets2[i]->NumActions();
+	snew+=isets2[i]->NumActions();
       for(i=1;i<=n->GetInfoset()->NumActions();i++) {
 	v(pl,inf,i) = (T)0;
 	if(tab.Member(ns1+s2)) {
@@ -324,8 +361,19 @@ void gbtEfgNashLcp<T>::GetProfile(const gbtEfgSupport &p_support,
 	    }
 	  } 
 	} 
-	GetProfile(p_support, tab, v,sol,n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),s1,snew+i);
+	GetProfile(p_efg, tab, v, sol, n->GetChild(n->GetInfoset()->GetAction(i)->GetId()),s1,snew+i);
       }
     }
   }
+}
+
+template <class T> gbtList<gbtBehavProfile<T> >
+gbtNashLcpEfg(const gbtGame &p_game, const T &,
+	      int p_stopAfter, int p_maxDepth)
+{
+  gbtEfgNashLcp<T> algorithm;
+  algorithm.SetStopAfter(p_stopAfter);
+  algorithm.SetMaxDepth(p_maxDepth);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
 }

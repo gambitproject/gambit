@@ -66,7 +66,6 @@ public:
   
       // miscellaneous functions
   gbtBasicFeasibleSolution<T> GetBFS(void);
-  void Dump(gbtOutput &) const;
 
   int PivotIn(int i);
   int ExitIndex(int i);

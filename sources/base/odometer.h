@@ -76,7 +76,7 @@ class gbtIndexOdometer {
   gbtArray<int>     CurrentIndices()      const;
   gbtIndexOdometer  AfterExcisionOf(int&) const;
 
-friend gbtOutput& operator << (gbtOutput& output, const gbtIndexOdometer& x);
+friend std::ostream& operator << (std::ostream& output, const gbtIndexOdometer& x);
 };  
 
 
@@ -113,7 +113,8 @@ class gbtPermutationOdometer {
   gbtArray<int>     CurrentIndices()      const;
   int             CurrentSign()         const;
 
-friend gbtOutput& operator << (gbtOutput& output, const gbtPermutationOdometer& x);
+friend std::ostream& operator << (std::ostream& output, 
+				  const gbtPermutationOdometer& x);
 };  
 
 #endif // ODOMETER_H

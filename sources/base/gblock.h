@@ -123,6 +123,7 @@ template <class T> class gbtBlock : public gbtArray<T>   {
     void Flush(void);
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBlock<T> &);
+template <class T> 
+std::ostream &operator<<(std::ostream &, const gbtBlock<T> &);
 
 #endif    // GBLOCK_H

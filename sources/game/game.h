@@ -28,7 +28,114 @@
 #define GAME_H
 
 #include "base/base.h"
-#include "math/gmath.h"
+#include "math/gpvector.h"
+#include "math/rational.h"
+
+//!
+//! Exception thrown when attempting to manipulate an object that has
+//! been deleted from its game.
+//!
+class gbtGameDeletedException : public gbtException {
+public:
+  virtual ~gbtGameDeletedException() { }
+  std::string GetDescription(void) const  { return "Game object deleted"; }
+};
+
+//!
+//! Exception thrown when attempting to dereference a null object
+//! (via its handle class)
+//!
+class gbtGameNullException : public gbtException {
+public:
+  virtual ~gbtGameNullException() { }
+  std::string GetDescription(void) const { return "Accessing a null object"; }
+};
+
+//!
+//! Exception thrown when an operation is not defined for the implementation
+//! of the game interface.
+//!
+class gbtGameUndefinedException : public gbtException {
+public:
+  virtual ~gbtGameUndefinedException() { }
+  std::string GetDescription(void) const { return "Undefined operation"; }
+};
+
+//!
+//! Exception thrown when attempting to operate between two mismatched
+//! game objects.
+//!
+class gbtGameMismatchException : public gbtException {
+public:
+  virtual ~gbtGameMismatchException() { }
+  std::string GetDescription(void) const { return "Mismatched operands"; }
+};
+
+template <class T> class gbtGameObjectHandle {
+private:
+  T *m_rep;
+
+public:
+  gbtGameObjectHandle(void) : m_rep(0) { }
+  gbtGameObjectHandle(T *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtGameObjectHandle(const gbtGameObjectHandle<T> &p_handle)
+    : m_rep(p_handle.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtGameObjectHandle() { if (m_rep && m_rep->Dereference()) delete m_rep; }
+
+  gbtGameObjectHandle<T> &operator=(const gbtGameObjectHandle<T> &p_handle) {
+    if (this != &p_handle) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_handle.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
+
+  bool operator==(const gbtGameObjectHandle<T> &p_handle) const
+  { return (m_rep == p_handle.m_rep); }
+  bool operator!=(const gbtGameObjectHandle<T> &p_handle) const
+  { return (m_rep != p_handle.m_rep); }
+
+  T *operator->(void) 
+  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  const T *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  
+  T *Get(void) const { return m_rep; }
+
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
+};
+
+template <class T> class gbtGameSingleHandle {
+private:
+  T *m_rep;
+
+public:
+  gbtGameSingleHandle(void) : m_rep(0) { }
+  gbtGameSingleHandle(T *p_rep)
+    : m_rep(p_rep) { }
+  gbtGameSingleHandle(const gbtGameSingleHandle<T> &p_handle)
+    : m_rep(p_handle.m_rep->Copy()) { }
+  ~gbtGameSingleHandle() { delete m_rep; }
+
+  gbtGameSingleHandle<T> &operator=(const gbtGameSingleHandle<T> &p_handle) {
+    if (this != &p_handle) {
+      if (m_rep) delete m_rep;
+      m_rep = p_handle.m_rep->Copy();
+    }
+    return *this;
+  }
+
+  T *operator->(void) 
+  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  const T *operator->(void) const 
+  { if (!m_rep) throw gbtGameNullException(); return m_rep; }
+  
+  T *Get(void) const { return m_rep; }
+};
+
 
 //
 // A base class for all game object types, providing interfaces common
@@ -46,307 +153,191 @@ public:
   virtual ~gbtGameObject() { }
 };
 
-//
-// Exception classes for the various bad stuff that can happen
-//
-class gbtGameException : public gbtException {
-public:
-  virtual ~gbtGameException() { }
-  gbtText Description(void) const    { return "Error in gbtGame"; }
-};
+class gbtGamePlayerRep;
+typedef gbtGameObjectHandle<gbtGamePlayerRep> gbtGamePlayer;
 
-class gbtGameNullObject : public gbtGameException {
-public:
-  virtual ~gbtGameNullObject() { }
-};
+class gbtGameOutcomeRep;
+typedef gbtGameObjectHandle<gbtGameOutcomeRep> gbtGameOutcome;
 
-class gbtGameObjectDeleted : public gbtGameException {
-public:
-  virtual ~gbtGameObjectDeleted() { }
-};
+class gbtGameNodeRep;
+typedef gbtGameObjectHandle<gbtGameNodeRep> gbtGameNode;
 
-class gbtGameUndefinedOperation : public gbtGameException {
-public:
-  virtual ~gbtGameUndefinedOperation() { }
-};
+class gbtNfgContingencyRep;
+typedef gbtGameSingleHandle<gbtNfgContingencyRep> gbtNfgContingency;
 
-//
-// Forward declarations of game objects
-//
-class gbtGameAction;
-class gbtGameInfoset;
-class gbtGameStrategy;
-class gbtGamePlayer;
-class gbtGameNode;
-class gbtGameOutcome;
-
-class gbtEfgSupport;
-class gbtNfgSupport;
-
-class gbtNfgContingency;
-
-template <class T> class gbtMixedProfile;
 template <class T> class gbtBehavProfile;
+template <class T> class gbtMixedProfile;
+class gbtPureBehavProfile;
 
-class gbtConstGameRep : public gbtGameObject {
+//!
+//! An abstract representation of a game.  Implementations of this
+//! interface may define the extensive form features, normal form
+//! features, or both.  Member functions corresponding to unimplemented
+//! or unsupported representations should throw a gbtGameUndefined
+//! exception.
+//!
+class gbtGameRep : public gbtGameObject {
+  friend class gbtGameObjectHandle<gbtGameRep>;
+
 public:
-  // DATA ACCESS -- GENERAL
-  virtual bool IsTree(void) const = 0;
-  virtual bool IsMatrix(void) const = 0;
-  virtual gbtText GetLabel(void) const = 0;
-  virtual gbtText GetComment(void) const = 0;
+  //!
+  //! @name Manipulation of titles and comments
+  //!
+  //@{
+  /// Set the text label associated with the game.
+  virtual void SetLabel(const std::string &s) = 0;
+  /// Get the text label associated with the game.
+  virtual std::string GetLabel(void) const = 0;
 
-  // DATA ACCESS -- PLAYERS
-  virtual int NumPlayers(void) const = 0;
-  virtual gbtGamePlayer GetPlayer(int index) const = 0;
+  /// Set the comment (a longer text string) associated with the game.
+  virtual void SetComment(const std::string &) = 0;
+  /// Get the comment (a longer text string) associated with the game.
+  virtual std::string GetComment(void) const = 0;
+  //@}
 
-  // DATA ACCESS -- OUTCOMES
-  virtual int NumOutcomes(void) const = 0;
-  virtual gbtGameOutcome GetOutcome(int p_id) const = 0;
+  //!
+  //! @name General information about the game
+  //!
+  //@{
+  /// Returns true if the game is constant sum.
   virtual bool IsConstSum(void) const = 0; 
-  virtual gbtNumber GetMinPayoff(void) const = 0;
-  virtual gbtNumber GetMaxPayoff(void) const = 0;
-};
 
-class gbtConstNfgRep : public virtual gbtConstGameRep {
-  friend class gbtNfgGame;
-public:
-  // DATA ACCESS -- STRATEGIES
-  virtual gbtArray<int> NumStrategies(void) const = 0; 
-  virtual int MixedProfileLength(void) const = 0;
-
-  virtual gbtNfgContingency NewContingency(void) const = 0;
-
-  // DATA ACCESS -- SUPPORTS
-  virtual gbtNfgSupport NewNfgSupport(void) const = 0;
-
-  // DATA ACCESS -- PROFILES
-  // These could be declared template, but aren't, for portability
-  virtual gbtMixedProfile<double> NewMixedProfile(double) const = 0;
-  virtual gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const = 0;
-  virtual gbtMixedProfile<gbtNumber> NewMixedProfile(const gbtNumber &) const = 0;
-};
-
-class gbtNfgGame {
-private:
-  gbtConstNfgRep *m_rep;
-
-public:
-  gbtNfgGame(void) : m_rep(0) { }
-  gbtNfgGame(gbtConstNfgRep *p_rep)
-    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtNfgGame(const gbtNfgGame &p_nfg)
-    : m_rep(p_nfg.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtNfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
-  
-  gbtNfgGame &operator=(const gbtNfgGame &p_nfg) {
-    if (this != &p_nfg) {
-      if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_nfg.m_rep;
-      if (m_rep) m_rep->Reference();
-    }
-    return *this;
-  }
-
-  bool operator==(const gbtNfgGame &p_nfg) const
-  { return (m_rep == p_nfg.m_rep); }
-  bool operator!=(const gbtNfgGame &p_nfg) const
-  { return (m_rep != p_nfg.m_rep); }
-  
-  gbtConstNfgRep *operator->(void) 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-  const gbtConstNfgRep *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-
-  gbtConstNfgRep *Get(void) const { return m_rep; }
-  
-  // Questionable whether this should be provided
-  bool IsNull(void) const { return (m_rep == 0); }
-};
-
-class gbtConstEfgRep : public virtual gbtConstGameRep {
-  friend class gbtEfgGame;
-public:
-  // DATA ACCESS -- GENERAL
+  /// Returns true if the game is perfect recall.
   virtual bool IsPerfectRecall(void) const = 0;
 
-  // DATA ACCESS -- PLAYERS
-  virtual gbtGamePlayer GetChance(void) const = 0;
+  /// Returns the smallest payoff to any player possible in the game.
+  virtual gbtRational GetMinPayoff(void) const = 0;
 
-  // DATA ACCESS -- NODES
-  virtual int NumNodes(void) const = 0;
+  /// Returns the largest payoff to any player possible in the game.
+  virtual gbtRational GetMaxPayoff(void) const = 0;
+  //@}
+
+  //!
+  //! @name Information about the game tree (if present)
+  //!
+  //@{
+  /// Returns true if the game has a tree representation.
+  virtual bool HasTree(void) const = 0;
+  /// Returns the root node of the game tree.
   virtual gbtGameNode GetRoot(void) const = 0;
-  virtual gbtList<gbtGameNode> GetNodes(void) const = 0;
-  virtual gbtList<gbtGameNode> GetTerminalNodes(void) const = 0;
+  //}
 
-  // DATA ACCESS -- ACTIONS
-  virtual gbtPVector<int> NumActions(void) const = 0;
-  virtual int BehavProfileLength(void) const = 0;
+  //!
+  //! @name Information about the game table
+  //!
+  //@{
+  /// Returns an object representing a contingency in the game.
+  virtual gbtNfgContingency NewContingency(void) const = 0;
+  //@}
 
-  // DATA ACCESS -- INFORMATION SETS
-  virtual int TotalNumInfosets(void) const = 0;
-  // The number of information sets in the game, by player
-  // Does not include any chance information sets
-  virtual gbtArray<int> NumInfosets(void) const = 0; 
-  virtual int NumPlayerInfosets(void) const = 0;
-  virtual int NumPlayerActions(void) const = 0;
-  virtual gbtPVector<int> NumMembers(void) const = 0;
-
-  // DATA ACCESS -- SUPPORTS
-  virtual gbtEfgSupport NewEfgSupport(void) const = 0;
-
-  // DATA ACCESS -- PROFILES
-  // These could be declared template, but aren't, for portability
-  virtual gbtBehavProfile<double> NewBehavProfile(double) const = 0;
-  virtual gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const = 0;
-  virtual gbtBehavProfile<gbtNumber> NewBehavProfile(const gbtNumber &) const = 0;
-};
-
-class gbtEfgGame {
-private:
-  gbtConstEfgRep *m_rep;
-
-public:
-  gbtEfgGame(void) : m_rep(0) { }
-  gbtEfgGame(gbtConstEfgRep *p_rep)
-    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtEfgGame(const gbtEfgGame &p_efg)
-    : m_rep(p_efg.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtEfgGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
-  
-  gbtEfgGame &operator=(const gbtEfgGame &p_efg) {
-    if (this != &p_efg) {
-      if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_efg.m_rep;
-      if (m_rep) m_rep->Reference();
-    }
-    return *this;
-  }
-
-  bool operator==(const gbtEfgGame &p_efg) const
-  { return (m_rep == p_efg.m_rep); }
-  bool operator!=(const gbtEfgGame &p_efg) const
-  { return (m_rep != p_efg.m_rep); }
-  
-  gbtConstEfgRep *operator->(void) 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-  const gbtConstEfgRep *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-
-  gbtConstEfgRep *Get(void) const { return m_rep; }
-  
-  // Questionable whether this should be provided
-  bool IsNull(void) const { return (m_rep == 0); }
-};
-
-class gbtGameRep : public gbtConstNfgRep, public gbtConstEfgRep {
-friend class gbtGame;
-public:
-  // Formerly the copy constructor
-  virtual gbtGame Copy(gbtGameNode) const = 0;
-  
-  // TITLE ACCESS AND MANIPULATION
-  virtual void SetLabel(const gbtText &) = 0;
-  virtual void SetComment(const gbtText &) = 0;
-
-  // WRITING DATA FILES
-  virtual void WriteEfg(gbtOutput &p_file) const = 0;
-  virtual void WriteNfg(gbtOutput &p_file) const = 0;
-
-  // DATA ACCESS -- PLAYERS
+  //!
+  //! @name Manipulation of players in the game
+  //!
+  //@{
+  /// Returns the number of players in the game.
+  virtual int NumPlayers(void) const = 0;
+  /// Returns the chance (or nature) player in the game.
+  virtual gbtGamePlayer GetChance(void) const = 0;
+  /// Creates a new player in the game.
   virtual gbtGamePlayer NewPlayer(void) = 0;
+  /// Returns the indexth player in the game.
+  virtual gbtGamePlayer GetPlayer(int index) const = 0;
+  //@}
 
-  // DATA ACCESS -- OUTCOMES
+  //!
+  //! @name Manipulation of outcomes in the game
+  //!
+  //@{
+  /// Returns the number of outcomes in the game.
+  virtual int NumOutcomes(void) const = 0;
+  /// Creates a new outcome in the game.
   virtual gbtGameOutcome NewOutcome(void) = 0;
-  virtual void DeleteOutcome(gbtGameOutcome) = 0;
+  /// Returns the indexth outcome in the game.
+  virtual gbtGameOutcome GetOutcome(int index) const = 0;
+  //@}
 
-  // EDITING OPERATIONS
-  virtual void DeleteEmptyInfosets(void) = 0;
+  //!
+  //! @name Information about the dimensions of the game
+  //!
+  //@{
+  /// Returns the length of a behavior profile on the game.
+  virtual int BehaviorProfileLength(void) const = 0;
+  /// Returns the number of information sets, by player.
+  virtual gbtArray<int> NumInfosets(void) const = 0;
+  /// Returns the number of actions, by information set.
+  virtual gbtPVector<int> NumActions(void) const = 0;
+  /// Returns the number of information set members, by information set.
+  virtual gbtPVector<int> NumMembers(void) const = 0;
+  
+  /// Returns the length of a (mixed) strategy profile on the game.
+  virtual int StrategyProfileLength(void) const = 0;
+  /// Returns the number of strategies, by player.
+  virtual gbtArray<int> NumStrategies(void) const = 0;
+  //@}
 
-  virtual gbtGameNode CopyTree(gbtGameNode src, gbtGameNode dest) = 0;
-  virtual gbtGameNode MoveTree(gbtGameNode src, gbtGameNode dest) = 0;
+  //!
+  //! @name Creating strategy profiles on the game
+  //!
+  //@{
+  /// Create a new mixed strategy profile in double precision
+  virtual gbtMixedProfile<double> NewMixedProfile(double) const = 0;
+  /// Create a new mixed strategy profile in rational precision
+  virtual gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const = 0;
 
-  virtual gbtGameAction InsertAction(gbtGameInfoset) = 0;
-  virtual gbtGameAction InsertAction(gbtGameInfoset, const gbtGameAction &at) = 0;
+  /// Create a new behavior profile in double precision
+  virtual gbtBehavProfile<double> NewBehavProfile(double) const = 0;
+  /// Create a new behavior profile in rational precision
+  virtual gbtBehavProfile<gbtRational> NewBehavProfile(const gbtRational &) const = 0;
+  //@}
 
-  virtual void SetChanceProb(gbtGameInfoset, int, const gbtNumber &) = 0;
+  //!
+  //! @name Writing data files
+  //!
+  //@{
+  /// Writes the game tree (if defined) to p_file
+  virtual void WriteEfg(std::ostream &p_file) const = 0;
+  
+  /// Writes the normal form to p_file
+  virtual void WriteNfg(std::ostream &p_file) const = 0;
+  //@}
 };
 
+typedef gbtGameObjectHandle<gbtGameRep> gbtGame;
 
-class gbtGame {
-private:
-  gbtGameRep *m_rep;
 
-public:
-  gbtGame(void) : m_rep(0) { }
-  gbtGame(gbtGameRep *p_rep)
-    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
-  gbtGame(const gbtGame &p_player)
-    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
-  ~gbtGame() { if (m_rep && m_rep->Dereference()) delete m_rep; }
-  
-  gbtGame &operator=(const gbtGame &p_player) {
-    if (this != &p_player) {
-      if (m_rep && m_rep->Dereference()) delete m_rep;
-      m_rep = p_player.m_rep;
-      if (m_rep) m_rep->Reference();
-    }
-    return *this;
-  }
-
-  bool operator==(const gbtGame &p_player) const
-  { return (m_rep == p_player.m_rep); }
-  bool operator!=(const gbtGame &p_player) const
-  { return (m_rep != p_player.m_rep); }
-  
-  gbtGameRep *operator->(void) 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-  const gbtGameRep *operator->(void) const 
-  { if (!m_rep) throw gbtGameNullObject(); return m_rep; }
-
-  gbtGameRep *Get(void) const { return m_rep; }
-  
-  // Questionable whether this should be provided
-  bool IsNull(void) const { return (m_rep == 0); }
-};
-
+#include "game-outcome.h"
+#include "game-infoset.h"
+#include "game-player.h"
+#include "game-node.h"
+#include "game-strategy.h"
+#include "game-contingency.h"
 
 gbtGame NewEfg(void);
-gbtGame NewNfg(const gbtArray<int> &);
+gbtGame ReadEfg(std::istream &);
 
 // Exception thrown by ReadEfg if not valid .efg file
-class gbtEfgParserError { };
-gbtGame ReadEfg(gbtInput &);
+class gbtEfgParserException : public gbtException {
+public:
+  virtual ~gbtEfgParserException() { }
+  std::string GetDescription(void) const { return "Not a valid .efg file"; }
+};
+
+
+gbtGame NewNfg(const gbtArray<int> &);
+gbtGame ReadNfg(std::istream &);
 
 // Exception thrown by ReadNfg if not valid .nfg file
-class gbtNfgParserError { };
-gbtGame ReadNfg(gbtInput &);
-
-
-#include "outcome.h"
-#include "player.h"
-#include "infoset.h"
-#include "node.h"
-
-//
-// Stuff below here needs to have everything defined before we can
-// declare these.
-// Hopefully, once things are settled, these can be moved to more
-// logical locations.
-//
-class gbtGamePlayerIterator {
-private:
-  int m_index;
-  gbtGame m_efg;
-
+class gbtNfgParserException : public gbtException {
 public:
-  gbtGamePlayerIterator(const gbtGame &p_efg);
-
-  gbtGamePlayer operator*(void) const;
-  gbtGamePlayerIterator &operator++(int);
-
-  bool Begin(void);
-  bool End(void) const;
+  virtual ~gbtNfgParserException() { }
+  std::string GetDescription(void) const { return "Not a valid .nfg file"; }
 };
+
+#include "efgutils.h"
+
+#include "game-behav-mixed.h"
+#include "tree-behav-pure.h"
+#include "game-strategy-mixed.h"
+
 
 #endif   // GAME_H

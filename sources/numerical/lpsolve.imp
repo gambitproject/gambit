@@ -136,10 +136,10 @@ gbtLPSolver<T>::gbtLPSolver(const gbtMatrix<T> &A, const gbtVector<T> &b,
 
   // gout << "\n--- End Phase I ---\n";
   
-  if(!bounded) {
+  if (!bounded) {
     // gout << "\nPhase 1 Unbounded\n";
+    return;
   }
-  assert(bounded);
   
   // which eps should be used here?  
   if(total_cost < -eps1) {   

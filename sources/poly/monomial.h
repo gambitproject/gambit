@@ -71,4 +71,4 @@ public:
     T               Evaluate(const gbtVector<T>&) const;
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtMonomial<T> &);
+template <class T> std::ostream &operator<<(std::ostream &, const gbtMonomial<T> &);

@@ -25,28 +25,56 @@
 //
 
 #include "base/base.h"
+#include "base/gnullstatus.h"
 #include "math/gpvector.h"
 #include "game/game.h"
+#include "lhtab.h"
 #include "nfglcp.h"
 
-template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &, const T &);
-template <class T> gbtVector<T> Make_b1(const gbtNfgGame &, const T &);
-template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &, const T &);
-template <class T> gbtVector<T> Make_b2(const gbtNfgGame &, const T &);
+template <class T> gbtMatrix<T> Make_A1(const gbtGame &, const T &);
+template <class T> gbtVector<T> Make_b1(const gbtGame &, const T &);
+template <class T> gbtMatrix<T> Make_A2(const gbtGame &, const T &);
+template <class T> gbtVector<T> Make_b2(const gbtGame &, const T &);
 
+
+template <class T> class gbtNfgNashLcp {
+private:
+  int m_stopAfter, m_maxDepth;
+
+  int AddBfs(gbtLemkeHowsonTableau<T> &, 
+	     gbtList<gbtBasicFeasibleSolution<T> > &);
+  gbtList<gbtMixedProfile<T> > AddSolutions(const gbtGame &,
+					    const gbtList<gbtBasicFeasibleSolution<T> > &, const T &);
+  void AllLemke(const gbtGame &, int, 
+		gbtLemkeHowsonTableau<T> &B, 
+		gbtList<gbtBasicFeasibleSolution<T> > &,
+		int depth, gbtStatus &);
+  
+public:
+  gbtNfgNashLcp(void);
+  virtual ~gbtNfgNashLcp() { }
+  
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  int MaxDepth(void) const { return m_maxDepth; }
+  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
+
+  std::string GetAlgorithm(void) const { return "Lcp[NFG]"; }
+  gbtList<gbtMixedProfile<T> > Solve(const gbtGame &, gbtStatus &);
+};
 
 //---------------------------------------------------------------------------
 //                      gbtNfgNashLcp: member functions
 //---------------------------------------------------------------------------
 
-template <class T> 
-gbtMixedNashSet gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
-					gbtStatus &p_status)
+template <class T> gbtList<gbtMixedProfile<T> > 
+gbtNfgNashLcp<T>::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
 
   if (p_game->NumPlayers() != 2) {
-    return gbtMixedNashSet();
+    return gbtList<gbtMixedProfile<T> >();
   }
 
   gbtList<gbtBasicFeasibleSolution<T> > bfsList;
@@ -58,7 +86,7 @@ gbtMixedNashSet gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
     gbtVector<T> b2 = Make_b2(p_game, (T) 0);
     gbtLemkeHowsonTableau<T> B(A1,A2,b1,b2);
     if (m_stopAfter != 1) {
-      AllLemke(p_game,0,B,bfsList,m_maxDepth, p_status);
+      AllLemke(p_game, 0, B, bfsList, m_maxDepth, p_status);
     }
     else  {
       B.LemkePath(1);
@@ -67,7 +95,7 @@ gbtMixedNashSet gbtNfgNashLcp<T>::Solve(const gbtNfgGame &p_game,
 
     return AddSolutions(p_game, bfsList, B.Epsilon());
   }
-  catch (gbtSignalBreak &E) {
+  catch (gbtInterruptException &) {
     // for now, we won't give *any* solutions -- but we should list
     // any solutions found!
     throw;
@@ -96,11 +124,11 @@ template <class T> int gbtNfgNashLcp<T>::AddBfs(gbtLemkeHowsonTableau<T> &p_tabl
 // all possible paths, adding any new equilibria to the List.  
 //
 template <class T> 
-void gbtNfgNashLcp<T>::AllLemke(const gbtNfgGame &p_game,
+void gbtNfgNashLcp<T>::AllLemke(const gbtGame &p_game,
 				int j, gbtLemkeHowsonTableau<T> &B,
 				gbtList<gbtBasicFeasibleSolution<T> > &p_list,
-					    int depth,
-					    gbtStatus &p_status)
+				int depth,
+				gbtStatus &p_status)
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return;
@@ -123,21 +151,22 @@ void gbtNfgNashLcp<T>::AllLemke(const gbtNfgGame &p_game,
       p_status.SetProgress(p1 + aa * (p2 - p1));
       gbtLemkeHowsonTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
-      AllLemke(p_game,i,Bcopy, p_list, depth+1, p_status);
+      AllLemke(p_game, i, Bcopy, p_list, depth+1, p_status);
     }
   }
   return;
 }
 
-template <class T> gbtMixedNashSet
-gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
+template <class T>
+gbtList<gbtMixedProfile<T> > 
+gbtNfgNashLcp<T>::AddSolutions(const gbtGame &p_game,
 			       const gbtList<gbtBasicFeasibleSolution<T> > &p_list,
 			       const T &epsilon)
 {
   int i,j;
   int n1 = p_game->GetPlayer(1)->NumStrategies();
   int n2 = p_game->GetPlayer(2)->NumStrategies();
-  gbtMixedNashSet solutions;
+  gbtList<gbtMixedProfile<T> > solutions;
 
   for (i = 1; i <= p_list.Length(); i++)    {
     gbtMixedProfile<T> profile = p_game->NewMixedProfile((T) 0);
@@ -166,7 +195,7 @@ gbtNfgNashLcp<T>::AddSolutions(const gbtNfgGame &p_game,
       else
 	profile(2, j) = (T) 0;
 
-    solutions.Append(profile->NewMixedProfile(gbtNumber(0)));
+    solutions.Append(profile);
   }
 
   return solutions;
@@ -180,3 +209,14 @@ template <class T>
 gbtNfgNashLcp<T>::gbtNfgNashLcp(void)
   : m_stopAfter(1), m_maxDepth(0)
 { }
+
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashLcpNfg(const gbtGame &p_game, const T &,
+	      int p_stopAfter, int p_maxDepth)
+{
+  gbtNfgNashLcp<T> algorithm;
+  algorithm.SetStopAfter(p_stopAfter);
+  algorithm.SetMaxDepth(p_maxDepth);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
+}

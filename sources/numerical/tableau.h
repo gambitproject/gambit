@@ -33,7 +33,6 @@
 template <class T> class gbtTableau;
 template <class T> class gbtLPTableau;
 
-
 // ---------------------------------------------------------------------------
 // We have different implementations of gbtTableau for double and gbtRational, 
 // but with the same interface
@@ -102,11 +101,6 @@ protected:
   gbtBlock<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
 
 public:
-  class BadDenom : public gbtException  {
-  public:
-    virtual ~BadDenom();
-    gbtText Description(void) const;
-  };
       // constructors and destructors
   gbtTableau(const gbtMatrix<gbtRational> &A, const gbtVector<gbtRational> &b); 
   gbtTableau(const gbtMatrix<gbtRational> &A, const gbtBlock<int> &art, 
@@ -134,17 +128,8 @@ public:
   
   bool IsFeasible();
   bool IsLexMin();
-  void BigDump(gbtOutput &);
   void BasisVector(gbtVector<gbtRational> &out) const;
   gbtInteger TotDenom() const;
 };
-
-#if defined(__GNUG__) && !defined(__APPLE_CC__)
-#include "math/rational.h"
-gbtOutput &operator<<(gbtOutput &, const gbtTableau<double> &);
-gbtOutput &operator<<(gbtOutput &, const gbtTableau<gbtRational> &);
-#elif defined __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtTableau<T> &);
-#endif   // __GNUG__, __BORLANDC__
 
 #endif     // TABLEAU_H

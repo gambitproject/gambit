@@ -30,8 +30,6 @@
 #include "base/base.h"
 
 #include "game.h"
-#include "efgcont.h"
-#include "efgsupport.h"
 
 class gbtEfgIterator;
 
@@ -46,68 +44,37 @@ class gbtEfgIterator;
 //
 class gbtEfgContIterator    {
   friend class gbtEfgIterator;
-private:
-  int m_frozenPlayer, m_frozenInfoset;
-  gbtEfgSupport m_support;
-  gbtEfgContingency m_profile;
-  gbtPVector<int> m_current;
-  gbtBlock<gbtBlock<bool> > m_isActive;
-  gbtBlock<int> m_numActiveInfosets;
-
-public:
-  gbtEfgContIterator(const gbtEfgSupport &);
-  gbtEfgContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
-  ~gbtEfgContIterator();
-  
-  void First(void);
-  
-  void Freeze(int pl, int iset);
-  
-  // These next two only work on frozen infosets
-  void Set(int pl, int iset, int act);
-  void Set(const gbtGameAction &);
-  int Next(int pl, int iset);
-  
-  const gbtEfgContingency &GetProfile(void) const { return m_profile; }
-
-  int NextContingency(void);
-  
-  gbtNumber GetPayoff(int pl) const;
-};
-
-// The following class is like the above, but intended for iteration
-// over contingencies that are relevant once a particular node 
-// has been reached.
-class gbtEfgConditionalContIterator    {
-  friend class gbtEfgIterator;
   private:
-    gbtEfgSupport _support;
-    gbtEfgContingency _profile;
+    int _frozen_pl, _frozen_iset;
+    gbtGame m_efg;
+    gbtPureBehavProfile _profile;
     gbtPVector<int> _current;
     gbtBlock<gbtBlock<bool> > _is_active;
     gbtBlock<int> _num_active_infosets;
-    mutable gbtVector<gbtNumber> _payoff;
+    mutable gbtVector<gbtRational> _payoff;
 
   public:
-    gbtEfgConditionalContIterator(const gbtEfgSupport &);
-    gbtEfgConditionalContIterator(const gbtEfgSupport &, const gbtList<gbtGameInfoset> &);
-    ~gbtEfgConditionalContIterator();
+    gbtEfgContIterator(const gbtGame &);
+    gbtEfgContIterator(const gbtGame &, const gbtList<gbtGameInfoset> &);
+    ~gbtEfgContIterator();
   
-    void First(void); // Sets each infoset's action to the first in the support
+    void First(void);
   
+    void Freeze(int pl, int iset);
+  
+  // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
     void Set(const gbtGameAction &);
-    int Next(int pl, int iset); 
+    int Next(int pl, int iset);
   
-    const gbtEfgContingency &GetProfile(void) const   
+    const gbtPureBehavProfile &GetProfile(void) const   
       { return _profile; }
 
-    int NextContingency(void);   // Needs rewriting
+    int NextContingency(void);
   
-    gbtNumber Payoff(int pl) const;
-    gbtNumber Payoff(const gbtGameNode &, int pl) const;
+    gbtRational Payoff(int pl) const;
   
-    void Dump(gbtOutput &) const;
+    void Dump(std::ostream &) const;
 };
 
 #endif   // EFGCITER_H

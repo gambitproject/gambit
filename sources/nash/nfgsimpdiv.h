@@ -27,39 +27,15 @@
 #ifndef NFGSIMPDIV_H
 #define NFGSIMPDIV_H
 
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-template <class T> class gbtNfgNashSimpdiv : public gbtNfgNashAlgorithm {
-private:
-  int m_nRestarts, m_leashLength;
-
-  int t, ibar;
-  T pay,d,maxz,bestz,mingrid;
-
-  T Simplex(gbtMixedProfile<T> &);
-  T getlabel(gbtMixedProfile<T> &yy, gbtArray<int> &, gbtPVector<T> &);
-  void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<T> &,
-	      const gbtPVector<int> &, int j, int i);
-  void getY(gbtMixedProfile<T> &x, gbtPVector<T> &, 
-	    const gbtPVector<int> &, const gbtPVector<int> &, 
-	    const gbtPVector<T> &, const gbtRectArray<int> &, int k);
-  void getnexty(gbtMixedProfile<T> &x, const gbtRectArray<int> &,
-		const gbtPVector<int> &, int i);
-  int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
-  int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
-  
-public:
-  gbtNfgNashSimpdiv(void);
-  virtual ~gbtNfgNashSimpdiv();
-
-  int NumRestarts(void) const { return m_nRestarts; }
-  void SetNumRestarts(int p_nRestarts) { m_nRestarts = p_nRestarts; }
-
-  int LeashLength(void) const { return m_leashLength; }
-  void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
-
-  gbtText GetAlgorithm(void) const { return "Simpdiv[NFG]"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
+//!
+//! This computes an equilibrium of a normal form game using the
+//! simplicial subdivision method described in
+//! van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987.
+//!
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashSimpdivNfg(const gbtMixedProfile<T> &p_start,
+		  int p_leashLength = 0);
 
 #endif  // NFGSIMPDIV_H

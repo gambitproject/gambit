@@ -37,10 +37,10 @@
 
 class PelView {
  private:
-  gbtPolyMultiList<gbtDouble>        input;
+  gbtPolyMultiList<double>        input;
 
   gbtList<gbtVector<gbtComplex> > complexroots;
-  gbtList<gbtVector<gbtDouble> >  realroots;
+  gbtList<gbtVector<double> >  realroots;
   int                       mixedvolume;
   bool                      solutionsarecorrect;
 
@@ -51,10 +51,10 @@ class PelView {
   void        Initialize_Idf_T_Gen_node(const Gen_node &node, 
 					const char * label)             const;
   Gen_node    CreateRing(const int numvar)                              const;
-  polynomial1 GamPolyToPelPoly(const gbtPolyMulti<gbtDouble> &p, 
+  polynomial1 GamPolyToPelPoly(const gbtPolyMulti<double> &p, 
 			       const int n, 
 			       const Pring ring)                        const;
-  Gen_node    CreatePelicanVersionOfSystem(const gbtPolyMultiList<gbtDouble> &input,
+  Gen_node    CreatePelicanVersionOfSystem(const gbtPolyMultiList<double> &input,
 					   const Pring ring)            const;
   int         GutsOfGetMixedVolume(      node A, 
 		   	                 node norms, 
@@ -79,11 +79,11 @@ class PelView {
 
   gbtList<gbtVector<gbtComplex> > GambitRootsFromPelRoots(const Gen_node g)   const;
   void        DisplayComplexRootList(const gbtList<gbtVector<gbtComplex> > &) const;
-  gbtList<gbtVector<gbtDouble> > RealRoots(const gbtList<gbtVector<gbtComplex> > &) const;
+  gbtList<gbtVector<double> > RealRoots(const gbtList<gbtVector<gbtComplex> > &) const;
   bool        CheckSolutions(const Gen_node g)                          const;
 
  public:
-  PelView(const gbtPolyMultiList<gbtDouble> &mylist);
+  PelView(const gbtPolyMultiList<double> &mylist);
   PelView(const PelView &);
   ~PelView();
 
@@ -93,7 +93,7 @@ class PelView {
 
   int                       Dmnsn()           const;
   gbtList<gbtVector<gbtComplex> > ComplexRoots()    const;
-  gbtList<gbtVector<gbtDouble> >  RealRoots()       const;
+  gbtList<gbtVector<double> >  RealRoots()       const;
   int                       MixedVolume()     const;
   int                       NumComplexRoots() const;
   bool                      FoundAllRoots()   const;

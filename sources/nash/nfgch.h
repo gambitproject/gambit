@@ -29,9 +29,9 @@
 
 #include "base/base.h"
 #include "base/gstatus.h"
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-class gbtNfgBehavCH : public gbtNfgNashAlgorithm {
+class gbtNfgBehavCH {
 private:
   double m_minTau, m_maxTau, m_stepTau;
 
@@ -48,8 +48,8 @@ public:
   double StepTau(void) const { return m_stepTau; }
   void SetStepTau(double p_stepTau) { m_stepTau = p_stepTau; }
 
-  gbtText GetAlgorithm(void) const { return "CH"; }
-  gbtMixedNashSet Solve(const gbtNfgSupport &, gbtStatus &);
+  std::string GetAlgorithm(void) const { return "CH"; }
+  gbtList<gbtMixedProfile<double> > Solve(const gbtGame &, gbtStatus &);
 };
 
 #endif // NFGCH_H

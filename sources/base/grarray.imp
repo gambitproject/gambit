@@ -26,16 +26,6 @@
 
 #include "base.h"
 
-template <class T> gbtText gbtRectArray<T>::BadDim::Description(void) const
-{
-  return "Dimensionality mismatch in gbtRectArray";
-}
-
-template <class T> gbtText gbtRectArray<T>::BadIndex::Description(void) const
-{
-  return "Index out of range in gbtRectArray";
-}
-
 //------------------------------------------------------------------------
 //            gbtRectArray<T>: Private/protected member functions
 //------------------------------------------------------------------------
@@ -159,35 +149,16 @@ template <class T> int gbtRectArray<T>::MaxCol(void) const { return maxcol; }
 
 template <class T> T &gbtRectArray<T>::operator()(int r, int c)
 {
-  if (!Check(r, c))  throw BadIndex();
-
+  if (!Check(r, c))  throw gbtIndexException();
   return data[r][c];
 }
 
 template <class T> const T &gbtRectArray<T>::operator()(int r, int c) const
 {
-  if (!Check(r, c))  throw BadIndex();
-
+  if (!Check(r, c))  throw gbtIndexException();
   return data[r][c];
 }
 
-template <class T> void gbtRectArray<T>::Dump(gbtOutput &f) const
-{
-  f << "{ ";
-  for (int i = minrow; i <= maxrow; i++)  {
-    if (i > 1)  f << "\n  ";
-    f << "{ ";
-    for (int j = mincol; j <= maxcol; j++)
-      f << data[i][j] << ' ';
-    f << "}";
-  }
-  f << " }\n";
-}
-
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtRectArray<T> &a)
-{
-  a.Dump(f);   return f;
-}
 
 //------------------------------------------------------------------------
 //                   gbtRectArray<T>: Row and column rotation
@@ -195,7 +166,7 @@ template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtRectArray<T> &a)
 
 template <class T> void gbtRectArray<T>::RotateUp(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
+  if (lo < minrow || hi < lo || maxrow < hi)  throw gbtIndexException();
 
   T *temp = data[lo];
   for (int k = lo; k < hi; k++)
@@ -205,7 +176,7 @@ template <class T> void gbtRectArray<T>::RotateUp(int lo, int hi)
 
 template <class T> void gbtRectArray<T>::RotateDown(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi)  throw BadIndex();
+  if (lo < minrow || hi < lo || maxrow < hi)  throw gbtIndexException();
 
   T *temp = data[hi];
   for (int k = hi; k > lo; k--)
@@ -215,7 +186,7 @@ template <class T> void gbtRectArray<T>::RotateDown(int lo, int hi)
 
 template <class T> void gbtRectArray<T>::RotateLeft(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
+  if (lo < mincol || hi < lo || maxcol < hi)   throw gbtIndexException();
   
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -229,7 +200,7 @@ template <class T> void gbtRectArray<T>::RotateLeft(int lo, int hi)
 
 template <class T> void gbtRectArray<T>::RotateRight(int lo, int hi)
 {
-  if (lo < mincol || hi < lo || maxcol < hi)   throw BadIndex();
+  if (lo < mincol || hi < lo || maxcol < hi)   throw gbtIndexException();
 
   for (int i = minrow; i <= maxrow; i++)  {
     T *row = data[i];
@@ -246,8 +217,8 @@ template <class T> void gbtRectArray<T>::RotateRight(int lo, int hi)
 
 template <class T> void gbtRectArray<T>::SwitchRow(int row, gbtArray<T> &v)
 {
-  if (!CheckRow(row))  throw BadIndex();
-  if (!CheckRow(v))    throw BadDim();
+  if (!CheckRow(row))  throw gbtIndexException();
+  if (!CheckRow(v))    throw gbtDimensionException();
 
   T *rowptr = data[row];
   T tmp;
@@ -260,7 +231,7 @@ template <class T> void gbtRectArray<T>::SwitchRow(int row, gbtArray<T> &v)
 
 template <class T> void gbtRectArray<T>::SwitchRows(int i, int j)
 {
-  if (!CheckRow(i) || !CheckRow(j))   throw BadIndex();
+  if (!CheckRow(i) || !CheckRow(j))   throw gbtIndexException();
   T *temp = data[j];
   data[j] = data[i];
   data[i] = temp;
@@ -268,8 +239,8 @@ template <class T> void gbtRectArray<T>::SwitchRows(int i, int j)
 
 template <class T> void gbtRectArray<T>::GetRow(int row, gbtArray<T> &v) const
 {
-  if (!CheckRow(row))   throw BadIndex();
-  if (!CheckRow(v))     throw BadDim();
+  if (!CheckRow(row))   throw gbtIndexException();
+  if (!CheckRow(v))     throw gbtDimensionException();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -278,8 +249,8 @@ template <class T> void gbtRectArray<T>::GetRow(int row, gbtArray<T> &v) const
 
 template <class T> void gbtRectArray<T>::SetRow(int row, const gbtArray<T> &v)
 {
-  if (!CheckRow(row))   throw BadIndex();
-  if (!CheckRow(v))     throw BadDim();
+  if (!CheckRow(row))   throw gbtIndexException();
+  if (!CheckRow(v))     throw gbtDimensionException();
 
   T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++)
@@ -292,8 +263,8 @@ template <class T> void gbtRectArray<T>::SetRow(int row, const gbtArray<T> &v)
 
 template <class T> void gbtRectArray<T>::SwitchColumn(int col, gbtArray<T> &v)
 {
-  if (!CheckColumn(col))   throw BadIndex();
-  if (!CheckColumn(v))     throw BadDim();
+  if (!CheckColumn(col))   throw gbtIndexException();
+  if (!CheckColumn(v))     throw gbtDimensionException();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][col];
@@ -304,7 +275,7 @@ template <class T> void gbtRectArray<T>::SwitchColumn(int col, gbtArray<T> &v)
 
 template <class T> void gbtRectArray<T>::SwitchColumns(int a, int b)
 {
-  if (!CheckColumn(a) || !CheckColumn(b))   throw BadIndex();
+  if (!CheckColumn(a) || !CheckColumn(b))   throw gbtIndexException();
 
   for (int i = minrow; i <= maxrow; i++)   {
     T tmp = data[i][a];
@@ -315,8 +286,8 @@ template <class T> void gbtRectArray<T>::SwitchColumns(int a, int b)
 
 template <class T> void gbtRectArray<T>::GetColumn(int col, gbtArray<T> &v) const
 {
-  if (!CheckColumn(col))  throw BadIndex();
-  if (!CheckColumn(v))    throw BadDim();
+  if (!CheckColumn(col))  throw gbtIndexException();
+  if (!CheckColumn(v))    throw gbtDimensionException();
 
   for (int i = minrow; i <= maxrow; i++)
     v[i] = data[i][col];
@@ -324,8 +295,8 @@ template <class T> void gbtRectArray<T>::GetColumn(int col, gbtArray<T> &v) cons
 
 template <class T> void gbtRectArray<T>::SetColumn(int col, const gbtArray<T> &v)
 {
-  if (!CheckColumn(col))   throw BadIndex();
-  if (!CheckColumn(v))     throw BadDim();
+  if (!CheckColumn(col))   throw gbtIndexException();
+  if (!CheckColumn(v))     throw gbtDimensionException();
 
   for (int i = minrow; i <= maxrow; i++)
     data[i][col] = v[i];

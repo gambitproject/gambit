@@ -29,10 +29,10 @@
 #include "base/base.h"
 #include "game/game.h"
 
-gbtMixedNashSet gbtNfgBehavCH::Solve(const gbtNfgSupport &p_support,
-				     gbtStatus &p_status)
+gbtList<gbtMixedProfile<double> > 
+gbtNfgBehavCH::Solve(const gbtGame &p_nfg, gbtStatus &p_status)
 {
-  gbtMixedNashSet solutions;
+  gbtList<gbtMixedProfile<double> > solutions;
 
   // Code goes in here!
 

@@ -27,15 +27,12 @@
 #ifndef NFGYAMAMOTO_H
 #define NFGYAMAMOTO_H
 
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-class gbtNfgNashYamamoto : public gbtNfgNashAlgorithm {
-public:
-  gbtNfgNashYamamoto(void) { }
-  virtual ~gbtNfgNashYamamoto() { }
-
-  gbtText GetAlgorithm(void) const { return "Yamamoto"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
+//!
+//! This computes a proper equilibrium of a normal form game using the
+//! path-following procedure in Yamamoto, IJGT, 1993.
+//!
+gbtList<gbtMixedProfile<double> > gbtNashYamamotoNfg(const gbtGame &p_game);
 
 #endif  // NFGYAMAMOTO_H

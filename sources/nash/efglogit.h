@@ -27,37 +27,14 @@
 #ifndef EFGLOGIT_H
 #define EFGLOGIT_H
 
-#include "efgalgorithm.h"
+#include "base/gstatus.h"
+#include "game/game.h"
 
-//
-// Computes a branch of the agent logistic quantal response equilibrium 
-// correspondence.
-//
-// Currently, only starting from the centroid at lambda = 0 is supported.
-// Eventually, starting from a Nash equilibrium at lambda = infinity will
-// be added.
-//
-
-class gbtEfgNashLogit : public gbtEfgNashAlgorithm {
-private:
-  double m_maxLam, m_stepSize;
-  bool m_fullGraph;
-
-public:
-  gbtEfgNashLogit(void);
-  virtual ~gbtEfgNashLogit() { }
-
-  double GetMaxLambda(void) const { return m_maxLam; }
-  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
-
-  double GetStepSize(void) const { return m_stepSize; }
-  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
-
-  bool GetFullGraph(void) const { return m_fullGraph; }
-  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
-
-  gbtText GetAlgorithm(void) const { return "Qre"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
+//!
+//! Computes (a good approximation to) the Nash equilibrium at the end
+//! of the principal branch of the (agent) logit quantal response equilibrium
+//! correspondence.
+//!
+gbtList<gbtBehavProfile<double> > gbtNashLogitEfg(const gbtGame &p_game);
 
 #endif  // EFGLOGIT_H

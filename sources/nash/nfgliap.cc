@@ -24,62 +24,57 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include "base/gnullstatus.h"
 #include "numerical/gfuncmin.h"
 #include "nfgliap.h"
 
-//---------------------------------------------------------------------
-//                        class gbtMixedLiapFunc
-//---------------------------------------------------------------------
 
-class gbtMixedLiapFunc : public gbtC1Function<double>  {
+class gbtMixedLiapFunction : public gbtC1Function<double>  {
 private:
-  mutable long _nevals;
-  mutable gbtMixedProfile<double> _p;
+  mutable gbtMixedProfile<double> m_profile;
 
   double Value(const gbtVector<double> &) const;
   bool Gradient(const gbtVector<double> &, gbtVector<double> &) const;
 
   double LiapDerivValue(int, int, const gbtMixedProfile<double> &) const;
     
-
 public:
-  gbtMixedLiapFunc(const gbtMixedProfile<double> &);
-  virtual ~gbtMixedLiapFunc();
-    
-  long NumEvals(void) const  { return _nevals; }
+  gbtMixedLiapFunction(const gbtMixedProfile<double> &);
+  virtual ~gbtMixedLiapFunction();
 };
 
-gbtMixedLiapFunc::gbtMixedLiapFunc(const gbtMixedProfile<double> &start)
-  : _nevals(0L), _p(start)
+gbtMixedLiapFunction::gbtMixedLiapFunction(const gbtMixedProfile<double> &start)
+  : m_profile(start)
 { }
 
-gbtMixedLiapFunc::~gbtMixedLiapFunc()
+gbtMixedLiapFunction::~gbtMixedLiapFunction()
 { }
 
-double gbtMixedLiapFunc::LiapDerivValue(int i1, int j1,
-					const gbtMixedProfile<double> &p) const
+double 
+gbtMixedLiapFunction::LiapDerivValue(int i1, int j1,
+				     const gbtMixedProfile<double> &p) const
 {
   int i, j;
   double x, x1, psum;
   
-  gbtGamePlayer player1 = p->GetPlayer(i1);
   x = 0.0;
-  for (i = 1; i <= p->NumPlayers(); i++)  {
+  for (i = 1; i <= m_profile->GetGame()->NumPlayers(); i++)  {
+    gbtGamePlayer player = m_profile->GetGame()->GetPlayer(i);
     psum = 0.0;
-    gbtGamePlayer player = p->GetPlayer(i);
     for (j = 1; j <= player->NumStrategies(); j++)  {
+      gbtGameStrategy strategy = player->GetStrategy(j);
       psum += p(i,j);
-      x1 = p->GetStrategyValue(player->GetStrategy(j)) - p->GetPayoff(player);
+      x1 = p->GetPayoffDeriv(player, strategy) - p->GetPayoff(player);
       if (i1 == i) {
 	if (x1 > 0.0) {
-	  x -= x1 * p->GetPayoff(player, player1->GetStrategy(j1));
+	  x -= x1 * p->GetPayoffDeriv(player, m_profile->GetGame()->GetPlayer(i1)->GetStrategy(j1));
 	}
       }
       else {
 	if (x1 > 0.0) {
-	  x += x1 * (p->GetPayoff(player, player->GetStrategy(j),
-				  player1->GetStrategy(j1)) -
-		     p->GetPayoff(player, player1->GetStrategy(j1)));
+	  x += x1 * (p->GetPayoffDeriv(player, strategy, 
+				  m_profile->GetGame()->GetPlayer(i1)->GetStrategy(j1)) - 
+		     p->GetPayoffDeriv(player, m_profile->GetGame()->GetPlayer(i1)->GetStrategy(j1)));
 	}
       }
     }
@@ -125,174 +120,104 @@ static void Project(gbtVector<double> &grad, const gbtVector<double> &x,
   }
 }
 
-bool gbtMixedLiapFunc::Gradient(const gbtVector<double> &v, gbtVector<double> &d) const
+bool gbtMixedLiapFunction::Gradient(const gbtVector<double> &v, 
+				    gbtVector<double> &d) const
 {
-  ((gbtVector<double> &) _p).operator=(v);
+  for (int i = 1; i <= v.Length(); i++) {
+    m_profile[i] = v[i];
+  }
   int i1, j1, ii;
   
-  for (i1 = 1, ii = 1; i1 <= _p->NumPlayers(); i1++) {
-    gbtGamePlayer player = _p->GetPlayer(i1);
-    for (j1 = 1; j1 <= player->NumStrategies(); j1++) {
-      d[ii++] = LiapDerivValue(i1, j1, _p);
+  for (i1 = 1, ii = 1; i1 <= m_profile->GetGame()->NumPlayers(); i1++) {
+    for (j1 = 1; j1 <= m_profile->GetGame()->GetPlayer(i1)->NumStrategies(); j1++) {
+      d[ii++] = LiapDerivValue(i1, j1, m_profile);
     }
   }
 
   // Project for constraints
-  Project(d, v, _p->NumStrategies());
+  Project(d, v, m_profile->GetGame()->NumStrategies());
   return true;
 }
   
-double gbtMixedLiapFunc::Value(const gbtVector<double> &v) const
+double gbtMixedLiapFunction::Value(const gbtVector<double> &v) const
 {
-  static const double BIG1 = 100.0;
-  static const double BIG2 = 100.0;
-
-  _nevals++;
-
-  ((gbtVector<double> &) _p).operator=(v);
-  
-  gbtMixedProfile<double> tmp(_p);
-  gbtPVector<double> payoff(_p->NumStrategies());
-
-  double x, result = 0.0, avg, sum;
-  payoff = 0.0;
-  
-  for (int i = 1; i <= _p->NumPlayers(); i++)  {
-    tmp->CopyStrategy(tmp->GetPlayer(i), payoff);
-    avg = sum = 0.0;
-
-    // then for each strategy for player i, consider the value of
-    // deviating to that strategy
-
-    int j;
-    gbtGamePlayer player = _p->GetPlayer(i);
-    for (j = 1; j <= player->NumStrategies(); j++)  {
-      tmp(i, j) = 1.0;
-      x = _p(i, j);
-      payoff(i, j) = tmp->GetPayoff(tmp->GetPlayer(i));
-      avg += x * payoff(i, j);
-      sum += x;
-      if (x > 0.0)  x = 0.0;
-      result += BIG1 * x * x;   // penalty for neg probabilities
-      tmp(i, j) = 0.0;
-    }
-
-    tmp->CopyStrategy(tmp->GetPlayer(i), _p);
-    for (j = 1; j <= player->NumStrategies(); j++)  {
-      x = payoff(i, j) - avg;
-      if (x < 0.0)  x = 0.0;
-      result += x * x;        // penalty for not best response
-    }
-    
-    x = sum - 1.0;
-    result += BIG2 * x * x;   // penalty for not summing to 1
+  for (int i = 1; i <= v.Length(); i++) {
+    m_profile[i] = v[i];
   }
-  return result;
+
+  return m_profile->GetLiapValue(false);
 }
 
-static void PickRandomProfile(gbtMixedProfile<double> &p)
-{
-  double sum, tmp;
-
-  for (int pl = 1; pl <= p->NumPlayers(); pl++)  {
-    sum = 0.0;
-    int st;
-    
-    gbtGamePlayer player = p->GetPlayer(pl);
-    for (st = 1; st < player->NumStrategies(); st++)  {
-      do
-	tmp = Uniform();
-      while (tmp + sum > 1.0);
-      p(pl, st) = tmp;
-      sum += tmp;
-    }
-    p(pl, st) = 1.0 - sum;
-  }
-}
-
-//---------------------------------------------------------------------
-//                  class gbtNfgNashLiap: Member functions
-//---------------------------------------------------------------------
-
-gbtNfgNashLiap::gbtNfgNashLiap(void)
-  : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
-    m_tol1(2.0e-10), m_tolN(1.0e-10)
-{ }
-
-gbtMixedNashSet gbtNfgNashLiap::Solve(const gbtNfgGame &p_game,
-				      gbtStatus &p_status)
+gbtList<gbtMixedProfile<double> > 
+gbtNashLiapNfg(const gbtMixedProfile<double> &p_start, 
+	       int p_maxitsN, double p_tolN,
+	       int p_maxits1, double p_tol1)
 {
   static const double ALPHA = .00000001;
-  gbtMixedProfile<double> p = p_game->NewMixedProfile(0.0);
-  gbtMixedLiapFunc F(p);
+  gbtMixedProfile<double> p(p_start);
+  gbtMixedLiapFunction F(p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk;
-  for (kk = 1; kk <= p->MixedProfileLength() && p[kk] > ALPHA; kk++);
-  if (kk <= p->MixedProfileLength()) {
-    gbtMixedProfile<double> centroid = p->NewMixedProfile(0.0);
-    centroid->SetCentroid();
-    for (int k = 1; k <= p->MixedProfileLength(); k++) {
+  for (kk = 1; kk <= p->StrategyProfileLength() && p[kk] > ALPHA;
+       kk++);
+  if (kk <= p->StrategyProfileLength()) {
+    gbtMixedProfile<double> centroid = p_start->GetGame()->NewMixedProfile(0.0);
+    for (int k = 1; k <= p->StrategyProfileLength(); k++) {
       p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
     }
   }
 
-  gbtMixedNashSet solutions;
+  gbtNullStatus status;
 
   try {
-    for (int i = 1; ((m_numTries == 0 || i <= m_numTries) &&
-		     (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
-	 i++) { 
-      PickRandomProfile(p);
-      p_status.Get();
-      p_status.SetProgress((double) i / (double) m_numTries,
-			   gbtText("Attempt ") + ToText(i) + 
-			   gbtText(", equilibria so far: ") +
-			   ToText(solutions.Length())); 
-      gbtConjugatePRMinimizer minimizer(p->MixedProfileLength());
-      gbtVector<double> gradient(p->MixedProfileLength()), dx(p->MixedProfileLength());
-      double fval;
-      gbtVector<double> pcopy(p->MixedProfileLength());
-      for (int j = 1; j <= pcopy.Length(); j++) {
-	pcopy[j] = p[j];
-      }
-      minimizer.Set(F, pcopy, fval, gradient, .01, .0001);
+    gbtConjugatePRMinimizer minimizer(p->StrategyProfileLength());
+    gbtVector<double> gradient(p->StrategyProfileLength()), dx(p->StrategyProfileLength());
+    double fval;
+    gbtVector<double> pvect(p->StrategyProfileLength());
+    for (int i = 1; i <= pvect.Length(); i++) {
+      pvect[i] = p[i];
+    }
+    
+    minimizer.Set(F, pvect, fval, gradient, .01, p_tol1);
 
-      try {
-	for (int iter = 1; iter <= m_maxitsN; iter++) {
-	  if (iter % 20 == 0) {
-	    p_status.Get();
-	  }
+    try {
+      for (int iter = 1; iter <= p_maxitsN; iter++) {
+	if (iter % 20 == 0) {
+	  status.Get();
+	}
 	  
-	  gbtMixedProfile<double> q(p);
-	  if (!minimizer.Iterate(F, pcopy, fval, gradient, dx)) {
-	    break;
-	  }
+	gbtMixedProfile<double> q(p);
+	gbtVector<double> pvect(p->StrategyProfileLength());
+	for (int i = 1; i <= pvect.Length(); i++) {
+	  pvect[i] = p[i];
+	}
+	if (!minimizer.Iterate(F, pvect, fval, gradient, dx)) {
+	  break;
+	}
+	
+	// Guard against wasting time when we get "stuck" on a
+	// boundary
+	double dist = 0.0;
+	for (int i = 1; i <= p->StrategyProfileLength(); i++) {
+	  dist += fabs(p[i] - q[i]);
+	}
+	if (dist <= 1.0e-8) {
+	  break;
+	}
 
-	  // Guard against wasting time when we get "stuck" on a
-	  // boundary
-	  double dist = 0.0;
-	  for (int i = 1; i <= pcopy.Length(); i++) {
-	    dist += fabs(pcopy[i] - q[i]);
-	  }
-	  if (dist <= 1.0e-8) {
-	    break;
-	  }
-
-	  if (sqrt(gradient.NormSquared()) < .001 &&
-	      fval < 1.0e-8) {
-	    solutions.Append(p->NewMixedProfile(gbtNumber(0)));
-	    break;
-	  }
+	if (sqrt(gradient.NormSquared()) < .001 && fval < p_tolN) {
+	  gbtList<gbtMixedProfile<double> > results;
+	  results.Append(p);
+	  return results;
 	}
       }
-      catch (gbtFuncMinException &) { }
     }
+    catch (gbtMinimizationException &) { }
   }
-  catch (gbtSignalBreak &) {
-    // Just stop and return any solutions found so far
+  catch (gbtInterruptException &) {
+    // Just stop and return the empty list
+    // Any other exceptions propagate out, assuming something Real Bad happened
   }
-  // Any other exceptions propagate out, assuming something Real Bad happened
-
-  return solutions;
+  return gbtList<gbtMixedProfile<double> >();
 }

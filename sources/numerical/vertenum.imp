@@ -77,8 +77,11 @@ template <class T> gbtVertEnum<T>::~gbtVertEnum()
 
 template <class T> void gbtVertEnum<T>::Enum()
 {
-      // Check dimensions
-  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
+  // Check dimensions
+  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
+    throw gbtDimensionException();
+  }
+
   //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
 
       // Initialize the tableau
@@ -139,7 +142,7 @@ template <class T> void gbtVertEnum<T>::Search(gbtLPTableau<T> &tab)
     List.Append(tab.GetBFS1());
     DualList.Append(tab.DualBFS());
   }
-  if(PivotList.Length()!=0) throw BadDim();
+  if (PivotList.Length() != 0) throw gbtDimensionException();
   //  assert(PivotList.Length()==0);
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
@@ -218,7 +221,7 @@ template <class T> long gbtVertEnum<T>::NumPivots() const
   return npivots;
 }
 
-template <class T> void gbtVertEnum<T>::Dump(gbtOutput &to) const
+template <class T> void gbtVertEnum<T>::Dump(std::ostream &to) const
 {
   // gout << "\nin gbtVertEnum::Dump()";
   for(int i=1;i<=List.Length();i++) {
@@ -245,8 +248,10 @@ template <class T> gbtDoubleVertEnum<T>::~gbtDoubleVertEnum()
 template <class T> void gbtDoubleVertEnum<T>::Enum()
 {
       // Check dimensions
-  if(A.NumRows() != b.Length() || A.NumColumns() != c.Length()) throw BadDim();
-  if(A2.NumRows() != b2.Length()) throw BadDim();
+  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
+    throw gbtDimensionException();
+  }
+  if(A2.NumRows() != b2.Length())  throw gbtDimensionException();
   //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
   //  assert(A2.NumRows() == b2.Length());
 
@@ -329,7 +334,8 @@ Search(gbtLPTableau<T> &tab, gbtTableau<T> &tab2)
   gbtArray<int> pivot(2);
   if(tab.IsLexMin())
     EnumerateComplementaryFace(tab,tab2);
-  assert(PivotList.Length()==0);
+  if (PivotList.Length() != 0) throw gbtDimensionException();
+
   tab.ReversePivots(PivotList);  // get list of reverse pivots
   if(PivotList.Length()) {
     branches[depth]+=PivotList.Length();
@@ -405,7 +411,7 @@ template <class T> const gbtList<gbtBasicFeasibleSolution<T> > &gbtDoubleVertEnu
 template <class T> void gbtDoubleVertEnum<T>::
 Vertices(gbtList<gbtVector<T> > &verts, gbtList<gbtVector<T> > &verts2) const
 { 
-  if(List.Length() != List2.Length()) throw BadDim();
+  if (List.Length() != List2.Length()) throw gbtDimensionException();
   //  assert(List.Length() == List2.Length());
   for(int i=1;i<=List.Length();i++) {
     gbtVector<T> vert(A.NumColumns());
@@ -426,9 +432,9 @@ template <class T> long gbtDoubleVertEnum<T>::NumPivots() const
   return npivots;
 }
 
-template <class T> void gbtDoubleVertEnum<T>::Dump(gbtOutput &to) const
+template <class T> void gbtDoubleVertEnum<T>::Dump(std::ostream &to) const
 {
-  if(List.Length() != List2.Length()) throw BadDim();
+  if (List.Length() != List2.Length()) throw gbtDimensionException();
   //  assert(List.Length() == List2.Length());
   // gout << "\nin gbtVertEnum::Dump()";
   for(int i=1;i<=List.Length();i++) {
@@ -439,18 +445,3 @@ template <class T> void gbtDoubleVertEnum<T>::Dump(gbtOutput &to) const
   }
 }
 
-template <class T> gbtVertEnum<T>::BadDim::~BadDim()
-{ }
-
-template <class T> gbtText gbtVertEnum<T>::BadDim::Description(void) const
-{
-  return "Bad Dimension in gbtVertEnum";
-}
-
-template <class T> gbtDoubleVertEnum<T>::BadDim::~BadDim()
-{ }
-
-template <class T> gbtText gbtDoubleVertEnum<T>::BadDim::Description(void) const
-{
-  return "Bad Pivot in gbtDoubleVertEnum";
-}

@@ -264,7 +264,7 @@ T gbtPolyPartialTree<T>::ValueOfRootPoly(const gbtVector<T>& point) const
 }
 
 
-template <class T> gbtOutput& operator << (gbtOutput& output, 
+template <class T> std::ostream& operator << (std::ostream& output, 
 					 const gbtPolyPartialTree<T>& /* x */)
 {
   // Changed to just return silently.
@@ -500,7 +500,7 @@ gbtPolyPartialTreeList<T>::MaximalNonconstantDifference(const int& i,
 							 halvesoflengths);
 }
 
-template <class T> gbtOutput& operator << (gbtOutput& output, 
+template <class T> std::ostream& operator << (std::ostream& output, 
 					 const gbtPolyPartialTreeList<T>& /* x */)
 {
   // Changed to just return silently.

@@ -27,10 +27,7 @@
 #ifndef INTERVAL_H
 #define INTERVAL_H
 
-//#include<stream.h>
-//#include<String.h>
 #include "math/rational.h"
-#include "base/gstream.h"
 
 /* This file provides the template class
 
@@ -73,6 +70,6 @@ public:
 
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gInterval<T> &);
+template <class T> std::ostream &operator<<(std::ostream &, const gInterval<T> &);
 
 #endif // INTERVAL_H

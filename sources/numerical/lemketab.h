@@ -35,16 +35,6 @@ protected:
 //  T eps2;
 public:
 //   gbtLemkeTableau(void);
-  class BadPivot : public gbtException  {
-  public:
-    virtual ~BadPivot();
-    gbtText Description(void) const;
-  };
-  class BadExitIndex : public gbtException  {
-  public:
-    virtual ~BadExitIndex();
-    gbtText Description(void) const;
-  };
   gbtLemkeTableau(const gbtMatrix<T> &A, const gbtVector<T> &b);
   gbtLemkeTableau(gbtTableau<T> &);
   virtual ~gbtLemkeTableau();

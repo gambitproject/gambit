@@ -32,14 +32,7 @@ template class gbtEtaMatrix< double >;
 template class gbtList< gbtEtaMatrix< double > >;
 template class gbtLUDecomposition< double >;
 
-#ifndef __BCC55__
-template gbtOutput& operator<<( gbtOutput&, const gbtEtaMatrix< double > &); 
-#endif  // __BCC55__
-
 template class gbtEtaMatrix< gbtRational >;
 template class gbtList< gbtEtaMatrix< gbtRational > >;
 template class gbtLUDecomposition< gbtRational >;
 
-#ifndef __BCC55__
-template gbtOutput& operator<<( gbtOutput&, const gbtEtaMatrix< gbtRational > &); 
-#endif  // __BCC55__

@@ -72,7 +72,8 @@ template <class T> class gbtTree  {
     gbtTreeNode<T>* RecursiveFind(const T&, gbtTreeNode<T>*) const;
     void RecursiveCopy(gbtTreeNode<T>*, const gbtTreeNode<T>*);
     void RecursiveFlush(const gbtTreeNode<T>*);
-    void RecursiveDump(gbtOutput&, const gbtTreeNode<T>*, const int) const;
+    void RecursiveDump(std::ostream &,
+		       const gbtTreeNode<T>*, const int) const;
     void Flush(void); 
 
   public:
@@ -98,9 +99,10 @@ template <class T> class gbtTree  {
 					       const gbtTreeNode<T>*) const;
 
   // Output
-    void Dump(gbtOutput&) const;
+    void Dump(std::ostream &) const;
 };
 
-template <class T> gbtOutput& operator<<(gbtOutput& f, const gbtTree<T>& b);
+template <class T> 
+std::ostream &operator<<(std::ostream &f, const gbtTree<T> &b);
 
 #endif    // GTREE_H

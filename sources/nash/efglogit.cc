@@ -30,6 +30,28 @@
 #include "math/gsmatrix.h"
 #include "efglogit.h"
 
+class gbtEfgNashLogit {
+private:
+  double m_maxLam, m_stepSize;
+  bool m_fullGraph;
+
+public:
+  gbtEfgNashLogit(void);
+  virtual ~gbtEfgNashLogit() { }
+
+  double GetMaxLambda(void) const { return m_maxLam; }
+  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
+
+  double GetStepSize(void) const { return m_stepSize; }
+  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
+
+  bool GetFullGraph(void) const { return m_fullGraph; }
+  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
+
+  std::string GetAlgorithm(void) const { return "Qre"; }
+  gbtList<gbtBehavProfile<double> > Solve(const gbtGame &, gbtStatus &);
+};
+
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -115,12 +137,11 @@ static void NewtonStep(gbtMatrix<double> &q, gbtMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const gbtEfgGame &p_efg,
-		   const gbtVector<double> &p_point,
+static void QreLHS(const gbtGame &p_efg, const gbtVector<double> &p_point,
 		   gbtVector<double> &p_lhs)
 {
   gbtBehavProfile<double> profile = p_efg->NewBehavProfile(0.0);
-  for (int i = 1; i <= profile->BehavProfileLength(); i++) {
+  for (int i = 1; i <= profile->BehaviorProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
@@ -131,30 +152,29 @@ static void QreLHS(const gbtEfgGame &p_efg,
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
     gbtGamePlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      gbtGameInfoset infoset = player->GetInfoset(iset);
       rowno++;
-      for (int act = 1; act <= infoset->NumActions(); act++) {
+      for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++) {
 	p_lhs[rowno] += profile(pl, iset, act);
       }
       p_lhs[rowno] -= 1.0;
 
-      for (int act = 2; act <= infoset->NumActions(); act++) {
+      for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
 	p_lhs[++rowno] = log(profile(pl, iset, act) / profile(pl, iset, 1));
 	p_lhs[rowno] -= (lambda *
-			 (profile->GetActionValue(infoset->GetAction(act)) -
-			  profile->GetActionValue(infoset->GetAction(1))));
+			 (profile->GetActionValue(player->GetInfoset(iset)->GetAction(act)) -
+			  profile->GetActionValue(player->GetInfoset(iset)->GetAction(1))));
 	p_lhs[rowno] *= profile(pl, iset, 1) * profile(pl, iset, act);
       }
     }
   }
 }
 
-static void QreJacobian(const gbtEfgGame &p_efg,
+static void QreJacobian(const gbtGame &p_efg,
 			const gbtVector<double> &p_point,
 			gbtMatrix<double> &p_matrix)
 {
   gbtBehavProfile<double> profile = p_efg->NewBehavProfile(0.0);
-  for (int i = 1; i <= profile->BehavProfileLength(); i++) {
+  for (int i = 1; i <= profile->BehaviorProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
@@ -170,7 +190,7 @@ static void QreJacobian(const gbtEfgGame &p_efg,
       for (int pl2 = 1; pl2 <= p_efg->NumPlayers(); pl2++) {
 	gbtGamePlayer player2 = p_efg->GetPlayer(pl2);
 	for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
-	  for (int act2 = 1; act2 <= p_efg->GetPlayer(pl2)->GetInfoset(iset2)->NumActions(); act2++) {
+	  for (int act2 = 1; act2 <= player2->GetInfoset(iset2)->NumActions(); act2++) {
 	    colno++;
 	    if (pl1 == pl2 && iset1 == iset2) {
 	      p_matrix(colno, rowno) = 1.0;
@@ -192,7 +212,7 @@ static void QreJacobian(const gbtEfgGame &p_efg,
 	  for (int iset2 = 1; iset2 <= player2->NumInfosets(); iset2++) {
 	    gbtGameInfoset infoset2 = player2->GetInfoset(iset2);
 
-	    for (int act2 = 1; act2 <= p_efg->GetPlayer(pl2)->GetInfoset(iset2)->NumActions(); act2++) {
+	    for (int act2 = 1; act2 <= infoset2->NumActions(); act2++) {
 	      colno++;
 	      if (infoset1 == infoset2) {
 		if (act2 == 1) {
@@ -210,7 +230,7 @@ static void QreJacobian(const gbtEfgGame &p_efg,
 		  p_matrix(colno, rowno) = 0;
 		}
 		else {
-		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(act1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(act2)) - profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(act2)));
+		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(act1), p_efg->GetPlayer(pl2)->GetInfoset(pl2)->GetAction(act2)) - profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(1)));
 		}
 	      }
 	    }
@@ -226,7 +246,7 @@ static void QreJacobian(const gbtEfgGame &p_efg,
 static void TracePath(const gbtBehavProfile<double> &p_start,
 		      double p_startLambda, double p_maxLambda, double p_omega,
 		      gbtStatus &p_status,
-		      gbtBehavNashSet &p_solutions)
+		      gbtList<gbtBehavProfile<double> > &p_solutions)
 {
   const int c_maxIters = 5000;     // maximum number of iterations
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -238,19 +258,19 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
   double h = .03;                  // initial stepsize
   const double c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<double> x(p_start->BehavProfileLength() + 1);
-  gbtVector<double> u(p_start->BehavProfileLength() + 1);
-  for (int i = 1; i <= p_start->BehavProfileLength(); i++) {
+  gbtVector<double> x(p_start->BehaviorProfileLength() + 1);
+  gbtVector<double> u(p_start->BehaviorProfileLength() + 1);
+  for (int i = 1; i <= p_start->BehaviorProfileLength(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gbtVector<double> t(p_start->BehavProfileLength() + 1);
-  gbtVector<double> y(p_start->BehavProfileLength());
+  gbtVector<double> t(p_start->BehaviorProfileLength() + 1);
+  gbtVector<double> y(p_start->BehaviorProfileLength());
 
-  gbtMatrix<double> b(p_start->BehavProfileLength() + 1,
-		      p_start->BehavProfileLength());
-  gbtSquareMatrix<double> q(p_start->BehavProfileLength() + 1);
-  QreJacobian(p_start, x, b);
+  gbtMatrix<double> b(p_start->BehaviorProfileLength() + 1, 
+		      p_start->BehaviorProfileLength());
+  gbtSquareMatrix<double> q(p_start->BehaviorProfileLength() + 1);
+  QreJacobian(p_start->GetGame(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -258,23 +278,26 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
   for (int i = 1; i < x.Length(); i++) {
     if (x[i] < 1.0e-10) {
+#ifdef UNUSED
+      // This is commented out while support functionality is in flux
+
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      gbtEfgSupport newSupport(p_start->NewEfgSupport());
+      gbtGame newSupport(p_start->Support());
       int index = 1;
-      for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
-	gbtGamePlayer player = newSupport->GetPlayer(pl);
+      for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
+	gbtGamePlayer player = newSupport.GetGame().GetPlayer(pl);
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	  for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++) {
+	  for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	    if (index++ == i) {
-	      newSupport->RemoveAction(newSupport->GetAction(pl, iset, act));
+	      newSupport.RemoveAction(newSupport.GetAction(pl, iset, act));
 	    }
 	  }
 	}
       }
       
-      gbtBehavProfile<double> newProfile = newSupport->NewBehavProfile(0.0);
-      for (int j = 1; j <= newProfile->BehavProfileLength(); j++) {
+      gbtBehavProfile<double> newProfile(newSupport);
+      for (int j = 1; j <= newProfile->Length(); j++) {
 	if (j < i) {
 	  newProfile[j] = x[j];
 	}
@@ -285,6 +308,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
       TracePath(newProfile, x[x.Length()], p_maxLambda, p_omega,
 		p_status, p_solutions);
+#endif  // UNUSED
       return;
     }
   }
@@ -298,7 +322,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
     if (niters++ % 25 == 0) {
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
-			   gbtText("Lambda = ") + ToText(x[x.Length()]));
+			   std::string("Lambda = ") + ToText(x[x.Length()]));
     }
 
     bool accept = true;
@@ -322,7 +346,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     }
 
     double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start, u, b);
+    QreJacobian(p_start->GetGame(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -330,7 +354,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start, u, y);
+      QreLHS(p_start->GetGame(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -383,23 +407,26 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     // PC step was successful; update and iterate
     for (int i = 1; i < x.Length(); i++) {
       if (u[i] < 1.0e-10) {
+#ifdef UNUSED
+	// This is commented out while support implementation is in flux
+
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtEfgSupport newSupport(p_start->NewEfgSupport());
+	gbtGame newSupport(p_start->Support());
 	int index = 1;
-	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
-	  gbtGamePlayer player = newSupport->GetPlayer(pl);
+	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
+	  gbtGamePlayer player = newSupport.GetGame().GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    for (int act = 1; act <= player->GetInfoset(iset)->NumActions(); act++) {
+	    for (int act = 1; act <= newSupport.NumActions(pl, iset); act++) {
 	      if (index++ == i) {
-		newSupport->RemoveAction(newSupport->GetAction(pl, iset, act));
+		newSupport.RemoveAction(newSupport.GetAction(pl, iset, act));
 	      }
 	    }
 	  }
 	}
 
-	gbtBehavProfile<double> newProfile = newSupport->NewBehavProfile(0.0);
-	for (int j = 1; j <= newProfile->BehavProfileLength(); j++) {
+	gbtBehavProfile<double> newProfile(newSupport);
+	for (int j = 1; j <= newProfile->Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
 	  }
@@ -410,6 +437,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
 	TracePath(newProfile, u[u.Length()], p_maxLambda, p_omega,
 		  p_status, p_solutions);
+#endif  // UNUSED
 	return;
       }
       else {
@@ -420,10 +448,11 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     x[x.Length()] = u[u.Length()];
 
     gbtBehavProfile<double> foo(p_start);
-    for (int i = 1; i <= foo->BehavProfileLength(); i++) {
+    for (int i = 1; i <= foo->BehaviorProfileLength(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(foo->NewBehavProfile(gbtNumber(0)));
+    p_solutions.Append(foo);
+    //p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
     
     gbtVector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -441,11 +470,11 @@ gbtEfgNashLogit::gbtEfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gbtBehavNashSet gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
-				       gbtStatus &p_status)
+gbtList<gbtBehavProfile<double> > 
+gbtEfgNashLogit::Solve(const gbtGame &p_efg, gbtStatus &p_status)
 {
-  gbtBehavNashSet solutions;
-  gbtBehavProfile<double> start = p_support->NewBehavProfile(0.0);
+  gbtList<gbtBehavProfile<double> > solutions;
+  gbtBehavProfile<double> start = p_efg->NewBehavProfile(0.0);
 
   try {
     TracePath(start, 0.0, m_maxLam, 1.0, p_status, solutions);
@@ -459,4 +488,13 @@ gbtBehavNashSet gbtEfgNashLogit::Solve(const gbtEfgSupport &p_support,
   }
 
   return solutions;
+}
+
+gbtList<gbtBehavProfile<double> > gbtNashLogitEfg(const gbtGame &p_game)
+{
+  gbtEfgNashLogit algorithm;
+  algorithm.SetMaxLambda(10000000);
+  algorithm.SetFullGraph(false);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
 }

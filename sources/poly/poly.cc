@@ -25,42 +25,23 @@
 //
 
 #include "poly.imp"
-#include "math/double.h"
-#include "math/gnumber.h"
 
 template class gbtPolyUni<gbtRational>;
-template gbtOutput& operator << (gbtOutput& output, 
+template std::ostream& operator << (std::ostream& output, 
 			       const gbtPolyUni<gbtRational>& x);
 
 template class gbtPolyUni<int>;
-template gbtOutput& operator << (gbtOutput& output,
+template std::ostream& operator << (std::ostream& output,
 			       const gbtPolyUni<int>& x);
 
 template class gbtPolyUni<double>;
-template gbtOutput& operator << (gbtOutput& output, 
+template std::ostream& operator << (std::ostream& output, 
 			       const gbtPolyUni<double>& x);
-
-template class gbtPolyUni<gbtDouble>;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtPolyUni<gbtDouble>& x);
-
-template class gbtPolyUni<gbtNumber>;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtPolyUni<gbtNumber>& x);
 
 #include "base/glist.imp"
 template class gbtList< gbtPolyUni<gbtRational> >;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtPolyUni<gbtRational> >&);
 
 template class gbtList< gbtPolyUni<int> >;
 
 template class gbtList< gbtPolyUni<double> >;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtPolyUni<double> >&);
 
-template class gbtList< gbtPolyUni<gbtDouble> >;
-
-template class gbtList< gbtPolyUni<gbtNumber> >;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtPolyUni<gbtNumber> >&);

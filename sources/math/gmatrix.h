@@ -28,16 +28,11 @@
 #define GMATRIX_H
 
 #include "base/grarray.h"
+#include "gmath.h"
 #include "gvector.h"
 
 template <class T> class gbtMatrix : public gbtRectArray<T>  {
   public:
-    class DivideByZero : public gbtException  {
-      public:
-        virtual ~DivideByZero()   { }
-        gbtText Description(void) const;
-    };
-
        // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gbtMatrix(void);
     gbtMatrix(unsigned int rows, unsigned int cols);
@@ -91,7 +86,8 @@ template <class T> class gbtMatrix : public gbtRectArray<T>  {
   void Pivot(int, int);
 };
 
-template <class T> gbtVector<T> operator*(const gbtVector<T> &, const gbtMatrix<T> &);
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtMatrix<T> &);
+template <class T> 
+gbtVector<T> operator*(const gbtVector<T> &, const gbtMatrix<T> &);
+
 
 #endif     // GMATRIX_H

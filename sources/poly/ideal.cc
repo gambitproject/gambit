@@ -26,16 +26,11 @@
 
 #include "ideal.imp"
 
-//template class gbtPolyIdeal<int>;
-//template class gBasis<int>;
-//template gbtOutput &operator<<(gbtOutput &f, const gBasis<int> &y);
-
 template class gbtPolyIdeal<gbtRational>;
 //template class gBasis<gbtRational>;
 //template gbtOutput &operator<<(gbtOutput &f, const gBasis<gbtRational> &y);
 
-//template class gbtPolyIdeal<double>;
+template class gbtPolyIdeal<double>;
 //template class gBasis<double>;
 //template gbtOutput &operator<<(gbtOutput &f, const gBasis<double> &y);
 
-template class gbtPolyIdeal<gbtDouble>;

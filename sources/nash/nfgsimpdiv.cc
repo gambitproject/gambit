@@ -25,4 +25,9 @@
 #include "nfgsimpdiv.imp"
 
 template class gbtNfgNashSimpdiv<double>;
+template gbtList<gbtMixedProfile<double> >
+gbtNashSimpdivNfg(const gbtMixedProfile<double> &, int);
+
 template class gbtNfgNashSimpdiv<gbtRational>;
+template gbtList<gbtMixedProfile<gbtRational> >
+gbtNashSimpdivNfg(const gbtMixedProfile<gbtRational> &, int);

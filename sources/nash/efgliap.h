@@ -27,38 +27,27 @@
 #ifndef EFGLIAP_H
 #define EFGLIAP_H
 
-#include "efgalgorithm.h"
+#include "game/game.h"
 
-class gbtEfgNashLiap : public gbtEfgNashAlgorithm {
-private:
-  int m_stopAfter, m_numTries, m_maxits1, m_maxitsN;
-  double m_tol1, m_tolN;
+/// Attempt to compute an approximate Nash equilibrium via Lyapunov minimization.
 
-public:
-  gbtEfgNashLiap(void);
-  virtual ~gbtEfgNashLiap() { }
+//!
+//! Attempts to compute an approximate Nash equilibrium using Lyapunov function
+//! minimization (McKelvey, working paper) over behavior profiles.  The function
+//! is minimized using Polak-Ribiere conjugate gradient descent, with the 
+//! implementation based on the implementation in the GNU Scientific Library.
+//!
+//! @param p_maxitsN The maximum number of steps to take before giving up.
+//! @param p_tolN The tolerance criterion for accepting a candidate profile.
+//! @param p_maxits1 The maximum number of steps to take in one-dimensional 
+//! optimization.
+//! @param p_tol1 The tolerance criterion for one-dimensional optimization.
+//!
+gbtList<gbtBehavProfile<double> > 
+gbtNashLiapEfg(const gbtBehavProfile<double> &, 
+	       int p_maxitsN = 100, double p_tolN = 1.0e-8,
+	       int p_maxits1 = 100, double p_tol1 = .0001);
 
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  int NumTries(void) const { return m_numTries; }
-  void SetNumTries(int p_numTries) { m_numTries = p_numTries; }
-
-  int Maxits1(void) const { return m_maxits1; }
-  void SetMaxits1(int p_maxits1) { m_maxits1 = p_maxits1; }
-
-  double Tol1(void) const { return m_tol1; }
-  void SetTol1(double p_tol1) { m_tol1 = p_tol1; }
-
-  int MaxitsN(void) const { return m_maxitsN; }
-  void SetMaxitsN(int p_maxitsN) { m_maxitsN = p_maxitsN; }
-
-  double TolN(void) const { return m_tolN; }
-  void SetTolN(double p_tolN) { m_tolN = p_tolN; }
-
-  gbtText GetAlgorithm(void) const { return "Liap[EFG]"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
 
 
 #endif // EFGLIAP_H

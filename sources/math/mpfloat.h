@@ -111,7 +111,7 @@ inline gbtMPFloat sqrt(const gbtMPFloat &y)
   return ret;
 }
 
-inline gbtText ToText(const gbtMPFloat &y)
+inline std::string ToText(const gbtMPFloat &y)
 { return ToText((double) y); }
 
 gbtOutput &operator<<(gbtOutput &, const gbtMPFloat &);

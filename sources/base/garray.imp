@@ -24,8 +24,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <stdlib.h>
-#include <assert.h>
 #include "garray.h"
 
 
@@ -36,7 +34,7 @@ template <class T> gbtArray<T>::gbtArray(unsigned int len)
 template <class T> gbtArray<T>::gbtArray(int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
-  if (maxdex + 1 < mindex)   throw BadRange();
+  if (maxdex + 1 < mindex)   throw gbtRangeException();
   data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
 }
 
@@ -74,41 +72,18 @@ template <class T> gbtArray<T> & gbtArray<T>::operator=(const gbtArray<T> &a)
   return *this;
 }
 
-template <class T> int gbtArray<T>::Length(void) const
+template <class T> 
+const T &gbtArray<T>::operator[](int index) const throw (gbtIndexException)
 {
-  return maxdex - mindex + 1;
-}	
-
-template <class T> int gbtArray<T>::First(void) const
-{
-  return mindex;
-}	
-
-template <class T> int gbtArray<T>::Last(void) const
-{
-  return maxdex;
-}	
-
-template <class T> const T &gbtArray<T>::operator[](int index) const
-{
-  if (index < mindex || index > maxdex) 
-    throw BadIndex();
+  if (index < mindex || index > maxdex) throw gbtIndexException();
   return data[index];
 }	
 
-template <class T> T &gbtArray<T>::operator[](int index)
+template <class T> 
+T &gbtArray<T>::operator[](int index) throw (gbtIndexException)
 {
-  if (index < mindex || index > maxdex)
-    throw BadIndex();
+  if (index < mindex || index > maxdex) throw gbtIndexException();
   return data[index];
-}
-
-template <class T> void gbtArray<T>::Dump(gbtOutput &f) const
-{
-  f << "{ ";
-  for (int i = mindex; i <= maxdex; i++)
-    f << data[i] << ' ';
-  f << '}';
 }
 
 template <class T> bool operator==(const gbtArray<T> &a, const gbtArray<T> &b)
@@ -124,25 +99,4 @@ template <class T> bool operator!=(const gbtArray<T> &a, const gbtArray<T> &b)
   return !(a == b);
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtArray<T> &a)
-{
-  a.Dump(f);
-  return f;
-}
 
-
-template <class T> gbtArray<T>::BadIndex::~BadIndex()
-{ }
-
-template <class T> gbtText gbtArray<T>::BadIndex::Description(void) const
-{
-  return "Bad index in gbtArray";
-}
-
-template <class T> gbtArray<T>::BadRange::~BadRange()
-{ }
-
-template <class T> gbtText gbtArray<T>::BadRange::Description(void) const
-{
-  return "Bad range in gbtArray";
-}

@@ -57,7 +57,8 @@ template <class T> int gbtBasicFeasibleSolution<T>::operator!=(const gbtBasicFea
   return !(*this == M);
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtBasicFeasibleSolution<T> &b)
+template <class T> 
+std::ostream &operator<<(std::ostream &f, const gbtBasicFeasibleSolution<T> &b)
 {
   b.Dump(f);
   return f;
@@ -67,8 +68,8 @@ template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtBasicFeasibleSol
 template class gbtBasicFeasibleSolution<double>;
 template class gbtBasicFeasibleSolution<gbtRational>;
 
-template gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<gbtRational> &);
+template std::ostream &operator<<(std::ostream &, const gbtBasicFeasibleSolution<double> &);
+template std::ostream &operator<<(std::ostream &, const gbtBasicFeasibleSolution<gbtRational> &);
 
 template class gbtArray<gbtBasicFeasibleSolution<double> >;
 template class gbtArray<gbtBasicFeasibleSolution<gbtRational> >;

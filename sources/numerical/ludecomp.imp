@@ -25,19 +25,13 @@
 //
 
 #include "math/gmath.h"
+#include "math/gsmatrix.h"   // for singular matrix exception
 #include "ludecomp.h"
 #include "tableau.h"
 
 // ---------------------------------------------------------------------------
 // Class gbtEtaMatrix
 // ---------------------------------------------------------------------------
-
-template <class T>
-gbtOutput& operator<<(gbtOutput &out, const gbtEtaMatrix<T> &a)
-{
-  out << "column: " << a.col << '\n' << a.etadata << '\n';
-  return out;
-}
 
 template <class T>
 bool gbtEtaMatrix<T>::operator==(const gbtEtaMatrix<T> &a) const
@@ -92,7 +86,6 @@ template <class T> gbtLUDecomposition<T>::~gbtLUDecomposition()
 { 
   if ( parent != NULL )
     ((gbtLUDecomposition<T> &) *parent).copycount--;
-  if(copycount != 0) throw BadCount();
 }
 
 
@@ -129,8 +122,6 @@ void gbtLUDecomposition<T>::Copy(const gbtLUDecomposition<T> &orig, gbtTableau<T
 template <class T>
 void gbtLUDecomposition<T>::update( int col, int matcol )
 {
-
-  if( copycount != 0 ) throw BadCount();
   int m = basis.Last() - basis.First() + 1;
 
   iterations++;
@@ -140,7 +131,7 @@ void gbtLUDecomposition<T>::update( int col, int matcol )
   else {
     tab.GetColumn( matcol, scratch1); 
     solve( scratch1, scratch1 );
-    if ( scratch1[col] == (T) 0 ) throw BadPivot();
+    if ( scratch1[col] == (T) 0 ) throw gbtDivisionByZeroException();
     E.Append( gbtEtaMatrix<T>( col, scratch1 ) );
     
     total_operations += iterations * m + 2 * m * m;    
@@ -169,11 +160,15 @@ void gbtLUDecomposition<T>::refactor( )
 }
 
 template <class T>
-void gbtLUDecomposition<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) const  
+void gbtLUDecomposition<T>::solveT(const gbtVector<T> &c, 
+				   gbtVector<T> &y) const  
 {
-
-  if ( c.First() != y.First() || c.Last() != y.Last() ) throw BadDim();
-  if ( c.First() != basis.First() || c.Last() != basis.Last()) throw BadDim();
+  if (c.First() != y.First() || c.Last() != y.Last())  {
+    throw gbtDimensionException();
+  }
+  if (c.First() != basis.First() || c.Last() != basis.Last()) {
+    throw gbtDimensionException();
+  }
 
   y = c;
   if ( basis.IsIdent() != true ) {
@@ -188,11 +183,14 @@ void gbtLUDecomposition<T>::solveT( const gbtVector<T> &c, gbtVector<T> &y ) con
 }
 
 template <class T>
-void gbtLUDecomposition<T>::solve( const gbtVector<T> &a, gbtVector<T> &d ) const
+void gbtLUDecomposition<T>::solve(const gbtVector<T> &a, gbtVector<T> &d) const
 {
-
-  if ( a.First() != d.First() || a.Last() != d.Last() ) throw BadDim();
-  if ( a.First() != basis.First() || a.Last() != basis.Last()) throw BadDim();
+  if (a.First() != d.First() || a.Last() != d.Last()) {
+    throw gbtDimensionException();
+  }
+  if (a.First() != basis.First() || a.Last() != basis.Last()) {
+    throw gbtDimensionException();
+  }
   
   d = a;
   if ( basis.IsIdent() != true ) {
@@ -233,7 +231,7 @@ void gbtLUDecomposition<T>::FactorBasis()
   }
   
   for ( i = B.MinRow(); i <= B.MaxRow(); i++) {    
-    pivVal = abs ( B(i, i));
+    pivVal = fabs ( B(i, i));
     piv = i;
     for ( j = i+1; j <= B.MaxRow(); j++) {
       if (  B( j, i ) * B( j, i )  > pivVal * pivVal ) {
@@ -262,7 +260,7 @@ void gbtLUDecomposition<T>::FactorBasis()
 template<class T>
 void gbtLUDecomposition<T>::GaussElem(gbtMatrix<T> &B, int row, int col)
 {
-  if( B(row, col) == (T) 0) throw BadPivot();
+  if (B(row, col) == (T) 0) throw gbtDivisionByZeroException();
 
   int i,j;
 
@@ -312,7 +310,9 @@ void gbtLUDecomposition<T>::VectorEtaSolve( const gbtVector<T> &v,
 
   int i, j;
 
-  if ( v.First() != y.First() || v.Last() != y.Last() ) throw BadDim();
+  if (v.First() != y.First() || v.Last() != y.Last()) {
+    throw gbtDimensionException();
+  }
 
   for ( i = v.First(); i <= v.Last(); i++ ) {
     y[i] = v[i];
@@ -354,9 +354,14 @@ void gbtLUDecomposition<T>::EtaVectorSolve( const gbtVector<T> &v,
   int i;
   T temp;
 
-  if ( v.First() != d.First() || v.Last() != d.Last() ) throw BadDim();
-  if ( eta.etadata[eta.col] == (T)0 )
-    throw BadPivot(); // or we would have a singular matrix
+  if (v.First() != d.First() || v.Last() != d.Last()) {
+    throw gbtDimensionException();
+  }
+
+  if (eta.etadata[eta.col] == (T)0) {
+    // we would have a singular matrix
+    throw gbtSingularMatrixException(); 
+  }
   
   temp = v[eta.col] / eta.etadata[eta.col];
 
@@ -381,10 +386,12 @@ void gbtLUDecomposition<T>::yLP_Trans( gbtVector<T> &y ) const
 
 
 template<class T>
-void gbtLUDecomposition<T>::yLP_mult( const gbtVector<T> &y, int j, gbtVector<T> &ans ) const
+void gbtLUDecomposition<T>::yLP_mult(const gbtVector<T> &y, int j, 
+				     gbtVector<T> &ans ) const
 {
-    
-  if ( ans.First() != y.First() || ans.Last() != y.Last() ) throw BadDim();
+  if ( ans.First() != y.First() || ans.Last() != y.Last()) {
+    throw gbtDimensionException();
+  }
   T temp;
   int i, k, l;
   
@@ -417,10 +424,12 @@ void gbtLUDecomposition<T>::LPd_Trans( gbtVector<T> &d ) const
 }
 
 template<class T>
-void gbtLUDecomposition<T>::LPd_mult( gbtVector<T> &d, int j, gbtVector<T> &ans ) const
+void gbtLUDecomposition<T>::LPd_mult(gbtVector<T> &d, int j, 
+				     gbtVector<T> &ans ) const
 {
-  
-  if ( d.First() != ans.First() || d.Last() != ans.Last() ) throw BadDim();
+  if (d.First() != ans.First() || d.Last() != ans.Last()) {
+    throw gbtDimensionException();
+  }
 
   T temp;
 
@@ -468,26 +477,4 @@ bool gbtLUDecomposition<T>::RefactorCheck()
   return tmp;
 }
   
-template <class T> gbtLUDecomposition<T>::BadCount::~BadCount()
-{ }
 
-template <class T> gbtText gbtLUDecomposition<T>::BadCount::Description(void) const
-{
-  return "Bad Reference count in gbtLUDecomposition";
-}
-
-template <class T> gbtLUDecomposition<T>::BadDim::~BadDim()
-{ }
-
-template <class T> gbtText gbtLUDecomposition<T>::BadDim::Description(void) const
-{
-  return "Bad Dimension in gbtLUDecomposition";
-}
-
-template <class T> gbtLUDecomposition<T>::BadPivot::~BadPivot()
-{ }
-
-template <class T> gbtText gbtLUDecomposition<T>::BadPivot::Description(void) const
-{
-  return "Bad Pivot in gbtLUDecomposition";
-}

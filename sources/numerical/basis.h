@@ -46,12 +46,6 @@ private:
   bool IsBasisIdent;
 
 public:
-    class BadIndex : public gbtException  {
-    public:
-      virtual ~BadIndex();
-      gbtText Description(void) const;
-    };
-
   //-------------------------------------------
   // Constructors, Destructor, Operators
   //-------------------------------------------
@@ -98,7 +92,7 @@ public:
   // returns whether the basis is the identity matrix
   bool IsIdent();
 
-  void Dump(gbtOutput &) const;
+  void Dump(std::ostream &) const;
 };
 
 #endif // BASIS_H

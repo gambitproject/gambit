@@ -472,19 +472,10 @@ static int node_gc()
 /********************** implementations from error.c **********************/
 /**************************************************************************/
 
-#ifdef GAMBIT_EXCEPTIONS
-ErrorInPelican::~ErrorInPelican() { }
-
-gbtText ErrorInPelican::Description(void) const
-{
-  return "Error somewhere in Pelican";
-}
-#endif
-
 void bad_error(char *m)     /* generates an error message and aborts*/
 {
 #ifdef GAMBIT_EXCEPTIONS
-  throw ErrorInPelican();
+  throw gbtPelicanException();
 #endif
 
  #ifdef LOG_PRINT
@@ -2921,7 +2912,7 @@ node aset_new(int r, int d)
     A = node_new();
     node_set_int(A, r, ASET, LEFT);
     node_set_ptr(A, node_new(), NODE, RIGHT);
-    node_set_int((node) Cdr(A), d, INT, LEFT);
+    node_set_int((node) Cdr(A), d, PELINT, LEFT);
     while ((r--) > 0)
 	ptr = Cons(pcfg_new(), ptr);
     node_set_ptr((node) Cdr(A), ptr, NODE, RIGHT);
@@ -3196,7 +3187,7 @@ node node_print(node N)
     case DBL:
 	printf("%f ", node_get_double(N, LEFT));
 	break;
-    case INT:
+    case PELINT:
 	printf("%d ", node_get_int(N, LEFT));
 	break;
     case CELL:
@@ -3215,7 +3206,7 @@ node node_print(node N)
         }
         level--;
 	break;
-    case PROC: printf("%d",(int)node_get_ptr(N,LEFT));
+    case PELPROC: printf("%d",(int)node_get_ptr(N,LEFT));
         break;
     default:
 	printf("Unknown type %d in Node_Print\n",
@@ -3230,7 +3221,7 @@ node atom_int(int val)
 {
     node R;
     R = node_new();
-    node_set_int(R, val, INT, LEFT);
+    node_set_int(R, val, PELINT, LEFT);
     return R;
 }
 
@@ -3253,7 +3244,7 @@ node atom_proc(node (*prc)(node))
 {
     node R;
     R = node_new();
-    node_set_ptr(R, (void *)prc, PROC, LEFT);
+    node_set_ptr(R, (void *)prc, PELPROC, LEFT);
     return R;
 }
 
@@ -3300,7 +3291,7 @@ void atom_free(node N)
     case CELL:
     case ASET:
     case PCFG:
-    case INT:
+    case PELINT:
     case NPTR:
 	break;
     default:
@@ -3312,7 +3303,7 @@ void atom_free(node N)
 
 int numericP(int t){
    switch(t){
-      case INT: case DBL: case CMPX: case POLY: return TRUE;
+      case PELINT: case DBL: case CMPX: case POLY: return TRUE;
                 break;
       default: return FALSE;
    }
@@ -3722,8 +3713,11 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
    /*
    ** if ratios were all nonnegative current solution is optimal
    */
-    if (q==n+1){           
+    if (q==n+1){
+#ifndef __BCC55__
+        /* Condition always false */
       if (verbose>0) printf("optimal solution found in %d iterations\n",k);
+#endif   /* __BCC55__ */
       return OPT;
     }
    /* 
@@ -3766,9 +3760,12 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       }
     }
     if (l==0){
+#ifndef __BCC55__
+    /* condition always false */
       if (verbose>0){
          printf("Objective function Unbounded (%d iterations)\n",k);
       }
+#endif  /* __BCC55__ */
       return UNBD;
     }
    /*
@@ -3783,9 +3780,12 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
     nonbasis(q)=basis(l);
     basis(l)=qv;
   }
+#ifndef __BCC55__
+    /* condition always false */
   if (verbose>=0){ 
       printf("Simplex Algorithm did not Terminate in %d iterations\n",k);
   }
+#endif  /* __BCC55__ */
   return FAIL;
 }
 
@@ -4649,10 +4649,13 @@ int IsLower(){
    /*
    ** if ratios were all nonnegative current solution is optimal
    */
-    if (q==n+1){           
+    if (q==n+1){ 
+#ifndef __BCC55__
+    /* condition always false */
       if (verbose>0){
          printf("optimal solution found in %d iterations\n",k);
       }
+#endif  /* __BCC55__ */
       return TRUE;
     }
    /* 
@@ -4694,28 +4697,37 @@ int IsLower(){
       }
     }
     if (l==0){
+#ifndef __BCC55__
+    /* condition always false */
       if (verbose>0){
          printf("Objective function Unbounded (%d iterations)\n",k);
       }
+#endif  /* __BCC55__ */
       return FAIL;
     }
    /*
    ** Step 5) If step is non-degenerate stop. otherwise update basis 
    */
    if (a>=MSDzero_tol){
+#ifndef __BCC55__
+    /* condition always false */
      if (verbose>0){
        printf("non-degenerate step after %d iterations\n",k);
      }
+#endif  /* __BCC55__ */
      return FALSE;
     }
     qv=MSDnonbasis(q);
     MSDnonbasis(q)=MSDbasis(l);
     MSDbasis(l)=qv;
    }
-   
+
+#ifndef __BCC55__
+       /* condition always false */
   if (verbose>=0){ 
       printf("Simplex Algorithm did not Terminate in %d iterations\n",k);
   }
+#endif  /* __BCC55__ */
   return FAIL;
 }
 

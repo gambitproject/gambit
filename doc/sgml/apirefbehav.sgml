@@ -4,6 +4,26 @@
 <para>
 </para>
 
+<sect2 id="apiref.behav.behaviorprofilelength">
+<title>BehaviorProfileLength</title>
+<indexterm><primary>BehaviorProfileLength</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtBehavProfile&lt;T&gt;::BehaviorProfileLength(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>BehaviorProfileLength</function>
+returns the number of probabilities that are specified in the behavior profile.
+the total number of actions at all information sets for all players.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.behav.getactionprob">
 <title>GetActionProb</title>
@@ -13,7 +33,7 @@
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetActionProb(gbtGameAction p_action) const
+T gbtBehavProfile&lt;T&gt;::GetActionProb(const gbtGameAction &amp;p_action) const
 </synopsis>
 </para>
 </formalpara>
@@ -21,21 +41,15 @@ gbtNumber BehavSolution::GetActionProb(gbtGameAction p_action) const
 <para>
 <function>GetActionProb</function>
 returns the probability that
-<parameter>action</parameter> is chosen at its information set when
-all players are following <parameter>profile</parameter>.  If
-<parameter>action</parameter> is a chance action, the probability of
-chance selecting the action is returned.  If the probability is not
-specified by the profile, the null value is returned.  It is an error
-if <parameter>profile</parameter> and <parameter>action</parameter>
-are not from the same extensive form game.
+<parameter>p_action</parameter> is chosen at its information set 
+in the profile.  If
+<parameter>p_action</parameter> is a chance action, the probability of
+chance selecting the action is returned. 
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_action</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if the probability specified in the profile is rational.
-</para>
-</note>
 
 </sect2>
 
@@ -48,7 +62,7 @@ if the probability specified in the profile is rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetActionValue(gbtGameAction) const
+T gbtBehavProfile&lt;T&gt;::GetActionValue(const gbtGameAction &amp;p_action) const
 </synopsis>
 </para>
 </formalpara>
@@ -56,81 +70,41 @@ gbtNumber BehavSolution::GetActionValue(gbtGameAction) const
 <para>
 <function>GetActionValue</function> returns the expected payoff to a
 player (who is in control of the information set including
-<parameter>action</parameter>) of choosing
-<parameter>action</parameter> when all players are following
-<parameter>profile</parameter>.  If the value is not well-defined, the
-null value is returned.  It is an error if
-<parameter>profile</parameter> and <parameter>action</parameter> are
-not from the same extensive form game, or if
-<parameter>action</parameter> is an action at an information set owned
-by the chance player.
+<parameter>p_action</parameter>) of choosing
+<parameter>p_action</parameter> when all players are following
+the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_action</parameter> is
+not from the same game as the profile, or <parameter>p_action</parameter>
+is controlled by the chance player.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
-<sect2 id="apiref.behav.getbelief">
-<title>GetBelief</title>
-<indexterm><primary>GetBelief</primary></indexterm>
+<sect2 id="apiref.behav.getbeliefprob">
+<title>GetBeliefProb</title>
+<indexterm><primary>GetBeliefProb</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetBelief(gbtGameNode) const
+T gbtBehavProfile&lt;T&gt;::GetBeliefProb(const gbtGameNode &amp;p_node) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetBelief</function> returns the probability of being at
-<parameter>node</parameter>, conditional on the player who chooses at
-<parameter>node</parameter> knowing she is in
-<parameter>node</parameter>'s information set, assuming all players
-follow <parameter>profile</parameter>.  The null value is returned if
-the belief value is not well-defined, or if
-<parameter>node</parameter> is terminal.  It is an error if
-<parameter>profile</parameter> and <parameter>node</parameter> are not
-from the same extensive form game.
-</para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
-
-</sect2>
-
-<sect2 id="apiref.behav.getcreator">
-<title>GetCreator</title>
-<indexterm><primary>GetCreator</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtText BehavSolution::GetCreator(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetCreator</function> 
-returns a text string identifying the algorithm used to create
-the profile.  The string includes an indication of whether the
-extensive or normal form version of the algorithm was used.  Thus,
-<literal>Liap[EFG]</literal> and <literal>Liap[NFG]</literal> are used
-to identify the extensive and normal form versions of the
-<function>LiapSolve</function> algorithm.  A profile created or modified 
-by the user is identified by <literal>User</literal>.
+<function>GetBeliefProb</function> returns the probability of being at
+<parameter>p_node</parameter>, conditional on the player who chooses at
+<parameter>p_node</parameter> knowing she is in
+<parameter>p_node</parameter>'s information set, assuming all players
+follow the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> is not from the same game as the
+profile.
 </para>
 
 </sect2>
@@ -143,14 +117,14 @@ by the user is identified by <literal>User</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGame BehavSolution::GetGame(void) const
+gbtEfgGame gbtBehavProfile&lt;T&gt;::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetGame</function>
-returns the extensive form game to which the profile belongs.
+returns the game on which the profile is defined.
 </para>
 
 </sect2>
@@ -164,26 +138,20 @@ returns the extensive form game to which the profile belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetInfosetProb(gbtGameInfoset) const
+T gbtBehavProfile&lt;T&gt;::GetInfosetProb(const gbtGameInfoset &amp;p_prob) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetInfosetProb</function> returns the probability of reaching
-<parameter>infoset</parameter> when all players follow
-<parameter>profile</parameter>.  The probability of reaching the null
-information set is defined to be null.  It is an error if
-<parameter>profile</parameter> and <parameter>infoset</parameter> are
-not defined on the same extensive form game.
+<parameter>p_infoset</parameter> when all players follow
+the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -195,47 +163,20 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetInfosetValue(gbtGameInfoset) const
+T gbtBehavProfile&lt;T&gt;::GetInfosetValue(const gbtGameInfoset &amp;p_infoset) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>InfosetValue</function>
+<function>GetInfosetValue</function>
 returns the value to the controlling player of reaching 
-<parameter>infoset</parameter>
-when all players follow <parameter>profile</parameter>.
-It is an error if
-<parameter>profile</parameter> and <parameter>infoset</parameter>
-are not defined on the same
-extensive form game.
-</para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.getlabel">
-<title>GetLabel</title>
-<indexterm><primary>GetLabel</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtText BehavSolution::GetLabel(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function> returns the text label of the profile.
+<parameter>p_infoset</parameter>
+when all players follow the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_infoset</parameter> is
+not from the same game as the profile.
 </para>
 
 </sect2>
@@ -249,7 +190,7 @@ gbtText BehavSolution::GetLabel(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetLiapValue(void) const
+T gbtBehavProfile&lt;T&gt;::GetLiapValue(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -259,13 +200,6 @@ gbtNumber BehavSolution::GetLiapValue(void) const
 <parameter>profile</parameter>.  This is a nonnegative value which is
 zero exactly when the profile is a Nash equilibrium.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -277,24 +211,22 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetNodeValue(gbtGameNode, gbtGamePlayer) const
+T gbtBehavProfile&lt;T&gt;::GetNodeValue(const gbtGameNode &amp;p_node, const gbtGamePlayer &amp;p_player) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetNodeValue</function>
-returns the expected payoff to <parameter>player</parameter> at
-<parameter>node</parameter>, given
-that all players are following <parameter>profile</parameter>.
+returns the expected payoff to <parameter>p_player</parameter> 
+conditional on being at 
+<parameter>p_node</parameter>, given
+that all players are following the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> and <parameter>p_player</parameter> are
+not from the same game as the profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -306,24 +238,20 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetPayoff(gbtGamePlayer p_player) const
+T gbtBehavProfile&lt;T&gt;::GetPayoff(const gbtGamePlayer &amp;p_player) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetPayoff</function> returns the expected payoff to player
-<parameter>player</parameter>, when all players play according to
-<parameter>profile</parameter>.  An error occurs if the parameters are
-not from the same game.
+<function>GetPayoff</function> returns the expected payoff to 
+<parameter>p_player</parameter>, when all players play according to
+the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_player</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -336,170 +264,21 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber BehavSolution::GetRealizProb(gbtGameNode) const
+T gbtBehavProfile&lt;T&gt;::GetRealizProb(const gbtGameNode &amp;p_node) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetRealizProb</function>
-returns the realization probability for <parameter>node</parameter>
+returns the realization probability for <parameter>p_node</parameter>
 given that all players
-are following <parameter>profile</parameter>.  It is an error if
-<parameter>profile</parameter> and
-<parameter>node</parameter> are not from the same extensive form game.
+are following the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
-
-</sect2>
-
-<sect2 id="apiref.behav.getregret">
-<title>GetRegret</title>
-<indexterm><primary>GetRegret</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtNumber BehavSolution::GetRegret(gbtGameAction p_action) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetRegret</function> returns the gain to a player for deviating to
-<parameter>action</parameter> assuming all players are following
-<parameter>profile</parameter>.  A strategy profile is a Nash
-equilibrium if and only if the regrets of all actions or strategies
-are zero.
-</para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.isnash">
-<title>IsNash</title>
-<indexterm><primary>IsNash</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtTriState BehavSolution::IsNash(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>IsNash</function>
-returns <literal>True</literal> when <parameter>profile</parameter>
-is known by Gambit to be a
-Nash equilibrium of the corresponding game, and <literal>False</literal>
-if <parameter>profile</parameter> is known to not be Nash.
-Otherwise, the return value
-is <literal>Unknown</literal>. 
-If <parameter>profile</parameter> is complete (probabilities sum
-to one for every player, and every information set), then there is a
-definitive test for Nash equilibrium.  However if the profile is
-incomplete (i. e., it does not specify actions at off the equilibrium
-path information sets), then it is possible that a profile (or set of
-all completions of the profile) may be Nash, but is not known by
-Gambit to be Nash.
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.issequential">
-<title>IsSequential</title>
-<indexterm><primary>IsSequential</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtTriState BehavSolution::IsSequential(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>IsSequential</function>
-returns <literal>True</literal> if <parameter>profile</parameter>
-is known by Gambit to be an approximation to a
-sequential Nash equilibrium, <literal>False</literal> if it is not,
-and <literal>Unknown</literal> if the answer is not known.  There is
-currently no definitive test in Gambit for whether an arbitrary
-profile is sequential.  However any Nash equilibrium of an extensive
-form game which is computed via the <function>LiapSolve</function> or
-<function>QreSolve</function> algorithms is sequential.
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.behav.issubgameperfect">
-<title>IsSubgamePerfect</title>
-<indexterm><primary>IsSubgamePerfect</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtTriState BehavSolution::IsSequential(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>IsSubgamePerfect</function>
-returns <literal>True</literal> if <parameter>profile</parameter>
-is known by Gambit to be a subgame perfect Nash
-equilibrium, <literal>False</literal> if it is known not to be a 
-subgame perfect equilibrium, and <literal>Unknown</literal> otherwise.
-There is currently no
-definitive test in Gambit for whether an arbitrary profile is subgame
-perfect.  However, any Nash equilibrium of an extensive form game which
-is computed when all subgames are marked will only return a subgame
-perfect equilibrium.  
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
 
 </sect2>
 
@@ -511,40 +290,43 @@ and <literal>-1</literal> for <literal>Unknown</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void BehavSolution::SetStrategyProb(gbtGameAction, gbtNumber)
+void gbtBehavProfile&lt;T&gt;::SetActionProb(const gbtGameAction &amp;p_action, const T &amp;p_prob)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>SetActionProb</function> 
-sets the component of <parameter>profile</parameter> for
-<parameter>action</parameter> to be equal to <parameter>value</parameter>,
-and returns <parameter>profile</parameter>.  It is an error if 
-<parameter>profile</parameter> and <parameter>action</parameter>
-are not from the same extensive form game. 
+sets the probability <parameter>p_action</parameter> is played to
+<parameter>p_prob</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_action</parameter> is not from the same game as the
+profile.
 </para>
 
 </sect2>
 
-<sect2 id="apiref.behav.setlabel">
-<title>SetLabel</title>
-<indexterm><primary>SetLabel</primary></indexterm>
+<sect2 id="apiref.behav.setcentroid">
+<title>SetCentroid</title>
+<indexterm><primary>SetCentroid</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void BehavSolution::SetLabel(const gbtText &amp;p_label)
+void gbtBehavProfile&lt;T&gt;::SetCentroid(void)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>SetLabel</function> sets the text label of the profile.
+<function>SetCentroid</function>
+sets the profile to the centroid of the strategy space, in which each
+player plays all of his actions at each information set
+with equal probability.
 </para>
 
 </sect2>
-
 
 </sect1>

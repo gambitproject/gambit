@@ -73,12 +73,6 @@ template <class T> class gbtLinearCombination  {
        // Information
     bool       LastRowIsSpanned() const;
     gbtVector<T> LinearDependence() const;
- 
-    void Output(gbtOutput &) const;
 };
-
-template <class T> gbtOutput &operator<<(gbtOutput &,
-				       const gbtLinearCombination<T> &);
-
 
 #endif     // LinearCombination_H

@@ -16,34 +16,27 @@ form is created by computing the reduced normal form of an extensive
 form).  This limitation is intended to disappear in future versions.
 </para>
 
-<para>
-Players in extensive form games are of type <type>gbtGamePlayer</type>
-in C++.  Players in normal form games are of
-type <type>gbtGamePlayer</type> in C++.
-</para>
-
-
-<sect2 id="apiref.player.getgame">
-<title>GetGame</title>
-<indexterm><primary>GetGame</primary></indexterm>
+<sect2 id="apiref.player.getid">
+<title>GetId</title>
+<indexterm><primary>GetId</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGame gbtGamePlayer::GetGame(void) const
-gbtGame gbtGamePlayer::GetGame(void) const
+int gbtGamePlayer::GetId(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetGame</function> 
-returns the extensive or normal form game to which the player belongs.
+<function>GetId</function> returns the ID number of the player.
+This ID number is unique within the game.  By convention, the chance
+player has ID number zero, and all personal players have positive
+ID numbers.
 </para>
 
 </sect2>
-
 
 <sect2 id="apiref.player.getinfoset">
 <title>GetInfoset</title>
@@ -62,8 +55,10 @@ gbtGameInfoset gbtGamePlayer::GetInfoset(int p_index) const
 <function>GetInfoset</function> returns the information set numbered
 <parameter>p_index</parameter> from the list of information sets at
 which the player has the decision.  Each player's information sets are
-numbered sequentially beginning at one.  An exception is thrown if the
-index is out of range.
+numbered sequentially beginning at one. 
+An exception is thrown (<errorname>gbtIndexException</errorname> in
+C++, <errorname>IndexError</errorname> in Python) if the index is out
+of range.
 </para>
 
 </sect2>
@@ -77,14 +72,13 @@ index is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGamePlayer::GetLabel(void) const
+std::string gbtGamePlayer::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetLabel</function> returns the text label of the player.
-The empty string is returned if the player object is null.
 </para>
 
 </sect2>
@@ -98,7 +92,7 @@ The empty string is returned if the player object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGameAction gbtGamePlayer::GetStrategy(int p_index) const
+gbtGameStrategy gbtGamePlayer::GetStrategy(int p_index) const
 </synopsis>
 </para>
 </formalpara>
@@ -107,7 +101,10 @@ gbtGameAction gbtGamePlayer::GetStrategy(int p_index) const
 <function>GetStrategy</function> returns the strategy numbered
 <parameter>p_index</parameter> from the list of strategies for the
 player.  Each player's strategies are numbered sequentially beginning
-at one.  An exception is thown if the index is out of range.
+at one.  An exception is thrown (<errorname>gbtIndexException</errorname> in
+C++, <errorname>IndexError</errorname> in Python) if the index is out
+of range.
+
 </para>
 
 </sect2>
@@ -143,7 +140,6 @@ if the player is a personal player.
 <para>
 <synopsis>
 bool gbtGamePlayer::IsNull(void) const
-bool gbtGamePlayer::IsNull(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -170,12 +166,9 @@ gbtGameInfoset gbtGamePlayer::NewInfoset(int p_actions)
 </formalpara>
 
 <para>
-<function>NewInfoset</function>
-creates a new information set belonging to the player, with
-<parameter>actions</parameter> actions. 
-The newly created information set has no members.
-It is an error if <parameter>actions</parameter> is not
-positive.  The newly created information set is returned.
+<function>NewInfoset</function> creates a new information set
+belonging to the player, with <parameter>actions</parameter> actions.
+The newly created information set is returned. 
 </para>
 
 </sect2>
@@ -197,6 +190,27 @@ int gbtGamePlayer::NumInfosets(void) const
 <para>
 <function>NumInfosets</function> returns how many information
 sets are defined where the player has the decision.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.player.numsequences">
+<title>NumSequences</title>
+<indexterm><primary>NumSequences</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtGamePlayer::NumSequences(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NumStrategies</function> returns the number of sequences
+associated with the player's strategy set
+(as defined by the Koller-Megiddo-von Stengel sequence form representation).
 </para>
 
 </sect2>
@@ -230,14 +244,13 @@ player has in the game.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGamePlayer::SetLabel(const gbtText &amp;p_label)
-void gbtGamePlayer::SetLabel(const gbtText &amp;p_label)
+void gbtGamePlayer::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>SetLabel</function> sets the text label of the player.
+<function>SetLabel</function> sets the text label associated with the player.
 </para>
 
 </sect2>

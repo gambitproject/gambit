@@ -33,6 +33,29 @@
 #include "math/gmatrix.h"
 #include "math/gsmatrix.h"
 
+class gbtNfgNashLogit {
+private:
+  double m_maxLam, m_stepSize;
+  bool m_fullGraph;
+
+public:
+  gbtNfgNashLogit(void);
+  virtual ~gbtNfgNashLogit() { }
+
+  double GetMaxLambda(void) const { return m_maxLam; }
+  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
+
+  double GetStepSize(void) const { return m_stepSize; }
+  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
+
+  bool GetFullGraph(void) const { return m_fullGraph; }
+  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
+
+  std::string GetAlgorithm(void) const { return "Qre"; }
+  gbtList<gbtMixedProfile<double> > Solve(const gbtGame &, gbtStatus &);
+};  
+
+
 //=========================================================================
 //             QRE Correspondence Computation via Homotopy
 //=========================================================================
@@ -148,12 +171,12 @@ template static void NewtonStep(gbtMatrix<gbtMPFloat> &,
 #endif // GBT_WITH_MP_FLOAT 
 
 template <class T>
-static void QreLHS(const gbtNfgGame &p_nfg,
+static void QreLHS(const gbtGame &p_game,
 		   const gbtVector<T> &p_point,
 		   gbtVector<T> &p_lhs)
 {
-  gbtMixedProfile<T> profile = p_nfg->NewMixedProfile((T) 0.0);
-  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
+  gbtMixedProfile<T> profile = p_game->NewMixedProfile(0.0);
+  for (int i = 1; i <= p_game->StrategyProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   T lambda = p_point[p_point.Length()];
@@ -161,8 +184,8 @@ static void QreLHS(const gbtNfgGame &p_nfg,
   p_lhs = (T) 0.0;
   int rowno = 0;
 
-  for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    gbtGamePlayer player = p_nfg->GetPlayer(pl);
+  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_game->GetPlayer(pl);
     rowno++;
     for (int st = 1; st <= player->NumStrategies(); st++) {
       p_lhs[rowno] += profile(pl, st);
@@ -172,40 +195,41 @@ static void QreLHS(const gbtNfgGame &p_nfg,
     for (int st = 2; st <= player->NumStrategies(); st++) {
       p_lhs[++rowno] = log(profile(pl, st) / profile(pl, 1));
       p_lhs[rowno] -= (lambda * 
-		       (profile->GetStrategyValue(player->GetStrategy(st)) -
-			profile->GetStrategyValue(player->GetStrategy(1))));
+		       (profile->GetPayoffDeriv(player, player->GetStrategy(st)) -
+			profile->GetPayoffDeriv(player, player->GetStrategy(1))));
       p_lhs[rowno] *= profile(pl, 1) * profile(pl, st);
     }
   }
 }
 
-template static void QreLHS(const gbtNfgGame &, const gbtVector<double> &,
+template static void QreLHS(const gbtGame &, const gbtVector<double> &,
 			    gbtVector<double> &);
 #if GBT_WITH_MP_FLOAT
-template static void QreLHS(const gbtNfgGame &, 
+template static void QreLHS(const gbtGame &, 
 			    const gbtVector<gbtMPFloat> &,
 			    gbtVector<gbtMPFloat> &);
 #endif // GBT_WITH_MP_FLOAT
 
 template <class T>
-static void QreJacobian(const gbtNfgGame &p_nfg,
+static void QreJacobian(const gbtGame &p_game,
 			const gbtVector<T> &p_point,
 			gbtMatrix<T> &p_matrix)
 {
-  gbtMixedProfile<T> profile = p_nfg->NewMixedProfile((T) 0.0);
-  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
+  gbtMixedProfile<T> profile = p_game->NewMixedProfile(0.0);
+  for (int i = 1; i <= profile->StrategyProfileLength(); i++) {
     profile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
 
   int rowno = 0;
-  for (int pl1 = 1; pl1 <= p_nfg->NumPlayers(); pl1++) {
+  for (int pl1 = 1; pl1 <= p_game->NumPlayers(); pl1++) {
+    gbtGamePlayer player1 = p_game->GetPlayer(pl1);
     rowno++;
     // First, do the "sum to one" equation
     int colno = 0;
-    for (int pl2 = 1; pl2 <= p_nfg->NumPlayers(); pl2++) {
-      for (int st2 = 1; st2 <= p_nfg->GetPlayer(pl2)->NumStrategies();
-	   st2++) {
+    for (int pl2 = 1; pl2 <= p_game->NumPlayers(); pl2++) {
+      gbtGamePlayer player2 = p_game->GetPlayer(pl2);
+      for (int st2 = 1; st2 <= player2->NumStrategies(); st2++) {
 	colno++;
 	if (pl1 == pl2) {
 	  p_matrix(colno, rowno) = 1.0;
@@ -217,14 +241,13 @@ static void QreJacobian(const gbtNfgGame &p_nfg,
     }
     p_matrix(p_matrix.NumRows(), rowno) = 0.0;
 
-    for (int st1 = 2; st1 <= p_nfg->GetPlayer(pl1)->NumStrategies();
-	 st1++) {
+    for (int st1 = 2; st1 <= player1->NumStrategies(); st1++) {
       rowno++;
       int colno = 0;
 
-      for (int pl2 = 1; pl2 <= p_nfg->NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_nfg->GetPlayer(pl2)->NumStrategies();
-	     st2++) {
+      for (int pl2 = 1; pl2 <= p_game->NumPlayers(); pl2++) {
+	gbtGamePlayer player2 = p_game->GetPlayer(pl2);
+	for (int st2 = 1; st2 <= player2->NumStrategies(); st2++) {
 	  colno++;
 	  if (pl1 == pl2) {
 	    if (st2 == 1) {
@@ -238,31 +261,23 @@ static void QreJacobian(const gbtNfgGame &p_nfg,
 	    }
 	  }
 	  else {
-	    p_matrix(colno, rowno) = 
-	      -lambda * profile(pl1, 1) * profile(pl1, st1) * 
-	      (profile->GetPayoff(profile->GetPlayer(pl1),
-				  profile->GetPlayer(pl1)->GetStrategy(st1),
-				  profile->GetPlayer(pl2)->GetStrategy(st2)) -
-	       profile->GetPayoff(profile->GetPlayer(pl1),
-				  profile->GetPlayer(pl1)->GetStrategy(1),
-				  profile->GetPlayer(pl2)->GetStrategy(st2)));
+	    p_matrix(colno, rowno) = -lambda * profile(pl1, 1) * profile(pl1, st1) * (profile->GetPayoffDeriv(player1, player1->GetStrategy(st1), player2->GetStrategy(st2)) - profile->GetPayoffDeriv(player1, player1->GetStrategy(1), player2->GetStrategy(st2)));
 	  }
 	}
       }
 
-      p_matrix(p_matrix.NumRows(), rowno) = 
-	-profile(pl1, 1) * profile(pl1, st1) *
-	(profile->GetStrategyValue(p_nfg->GetPlayer(pl1)->GetStrategy(st1)) -
-	 profile->GetStrategyValue(p_nfg->GetPlayer(pl1)->GetStrategy(1)));
+      p_matrix(p_matrix.NumRows(), rowno) = -profile(pl1, 1) * profile(pl1, st1) *
+	(profile->GetPayoffDeriv(player1, player1->GetStrategy(st1)) -
+	 profile->GetPayoffDeriv(player1, player1->GetStrategy(1)));
     }
   }
 }
 
-template static void QreJacobian(const gbtNfgGame &p_nfg, 
+template static void QreJacobian(const gbtGame &p_game,
 				 const gbtVector<double> &p_point,
 				 gbtMatrix<double> &p_matrix);
 #if GBT_WITH_MP_FLOAT
-template static void QreJacobian(const gbtNfgGame &p_nfg,
+template static void QreJacobian(const gbtGame &p_game,
 				 const gbtVector<gbtMPFloat> &p_point,
 				 gbtMatrix<gbtMPFloat> &p_matrix);
 #endif // GBT_WITH_MP_FLOAT
@@ -306,7 +321,7 @@ template <class T>
 static void TracePath(const gbtMixedProfile<T> &p_start,
 		      T p_startLambda, T p_maxLambda, T p_omega,
 		      gbtStatus &p_status,
-		      gbtMixedNashSet &p_solutions)
+		      gbtList<gbtMixedProfile<T> > &p_solutions)
 {
   const int c_maxIters = 5000;     // maximum number of iterations
   const T c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -318,17 +333,17 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
   T h = .03;                  // initial stepsize
   const T c_hmin = 1.0e-5;    // minimal stepsize
 
-  gbtVector<T> x(p_start->MixedProfileLength() + 1), u(p_start->MixedProfileLength() + 1);
-  for (int i = 1; i <= p_start->MixedProfileLength(); i++) {
+  gbtVector<T> x(p_start->StrategyProfileLength() + 1), u(p_start->StrategyProfileLength() + 1);
+  for (int i = 1; i <= p_start->StrategyProfileLength(); i++) {
     x[i] = p_start[i];
   }
   x[x.Length()] = p_startLambda;
-  gbtVector<T> t(p_start->MixedProfileLength() + 1);
-  gbtVector<T> y(p_start->MixedProfileLength());
+  gbtVector<T> t(p_start->StrategyProfileLength() + 1);
+  gbtVector<T> y(p_start->StrategyProfileLength());
 
-  gbtMatrix<T> b(p_start->MixedProfileLength() + 1, p_start->MixedProfileLength());
-  gbtSquareMatrix<T> q(p_start->MixedProfileLength() + 1);
-  QreJacobian(p_start, x, b);
+  gbtMatrix<T> b(p_start->StrategyProfileLength() + 1, p_start->StrategyProfileLength());
+  gbtSquareMatrix<T> q(p_start->StrategyProfileLength() + 1);
+  QreJacobian(p_start->GetGame(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -343,7 +358,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 
     if (niters++ % 25 == 0) {
       p_status.SetProgress(x[x.Length()] / p_maxLambda,
-			   gbtText("Lambda = ") + ToText(x[x.Length()]));
+			   std::string("Lambda = ") + ToText(x[x.Length()]));
     }
 
     bool accept = true;
@@ -367,7 +382,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     }
 
     T decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start, u, b);
+    QreJacobian(p_start->GetGame(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -375,7 +390,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     while (true) {
       T dist;
 
-      QreLHS(p_start, u, y);
+      QreLHS(p_start->GetGame(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -428,20 +443,22 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     // PC step was successful; update and iterate
     for (int i = 1; i < x.Length(); i++) {
       if (u[i] < (T) 1.0e-10) {
+	// This is disabled pending redoing how supports work.
+#ifdef DISABLED
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtNfgSupport newSupport = p_start->NewNfgSupport();
+	gbtNfgSupport newSupport(p_start.Support());
 	int index = 1;
-	for (int pl = 1; pl <= newSupport->NumPlayers(); pl++) {
-	  for (int st = 1; st <= newSupport->GetPlayer(pl)->NumStrategies(); st++) {
+	for (int pl = 1; pl <= newSupport.GetGame().NumPlayers(); pl++) {
+	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {
 	    if (index++ == i) {
-	      newSupport->RemoveStrategy(newSupport->GetPlayer(pl)->GetStrategy(st));
+	      newSupport.RemoveStrategy(newSupport.GetStrategy(pl, st));
 	    }
 	  }
 	}
 
-	gbtMixedProfile<T> newProfile = newSupport->NewMixedProfile((T) 0.0);
-	for (int j = 1; j <= newProfile->MixedProfileLength(); j++) {
+	gbtMixedProfile<T> newProfile(newSupport);
+	for (int j = 1; j <= newProfile.Length(); j++) {
 	  if (j < i) {
 	    newProfile[j] = u[j];
 	  }
@@ -452,6 +469,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 
 	TracePath(newProfile, u[u.Length()], p_maxLambda, p_omega,
 		  p_status, p_solutions);
+#endif  // DISABLED
 	return;
       }
       else {
@@ -462,10 +480,11 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     x[x.Length()] = u[u.Length()];
 
     gbtMixedProfile<T> foo(p_start);
-    for (int i = 1; i <= foo->MixedProfileLength(); i++) {
+    for (int i = 1; i <= foo->StrategyProfileLength(); i++) {
       foo[i] = x[i];
     }
-    p_solutions.Append(foo->NewMixedProfile(gbtNumber(0)));
+    p_solutions.Append(foo);
+    //p_solutions[p_solutions.Length()].SetQre((double) x[x.Last()], 0);
     
     gbtVector<T> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -483,27 +502,27 @@ template static void TracePath(const gbtMixedProfile<double> &p_start,
 			       double p_startLambda, double p_maxLambda, 
 			       double p_omega,
 			       gbtStatus &p_status,
-			       gbtMixedNashSet &p_solutions);
+			       gbtList<gbtMixedProfile<double> > &p_solutions);
 #if GBT_WITH_MP_FLOAT
 template static void TracePath(const gbtMixedProfile<gbtMPFloat> &p_start,
 			       gbtMPFloat p_startLambda,
 			       gbtMPFloat p_maxLambda, 
 			       gbtMPFloat p_omega,
 			       gbtStatus &p_status,
-			       gbtMixedNashSet &p_solutions);
+			       gbtList<gbtMixedProfile<gbtMPFloat> > &p_solutions);
 #endif // GBT_WITH_MP_FLOAT
 
 gbtNfgNashLogit::gbtNfgNashLogit(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gbtMixedNashSet gbtNfgNashLogit::Solve(const gbtNfgGame &p_game,
-				       gbtStatus &p_status)
+gbtList<gbtMixedProfile<double> >
+gbtNfgNashLogit::Solve(const gbtGame &p_game, gbtStatus &p_status)
 {
-  gbtMixedNashSet solutions;
+  gbtList<gbtMixedProfile<double> > solutions;
 
 #if GBT_WITH_MP_FLOAT
-  gbtMixedProfile<gbtMPFloat> start(p_support);
+  gbtMixedProfile<gbtMPFloat> start(p_game);
 #else
   gbtMixedProfile<double> start = p_game->NewMixedProfile(0.0);
 #endif  // GBT_WITH_MP_FLOAT
@@ -525,4 +544,13 @@ gbtMixedNashSet gbtNfgNashLogit::Solve(const gbtNfgGame &p_game,
   }
 
   return solutions;
+}
+
+gbtList<gbtMixedProfile<double> > gbtNashLogitNfg(const gbtGame &p_game)
+{
+  gbtNfgNashLogit algorithm;
+  algorithm.SetMaxLambda(10000000);
+  algorithm.SetFullGraph(false);
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
 }

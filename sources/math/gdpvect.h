@@ -27,6 +27,7 @@
 #ifndef GDPVECT_H
 #define GDPVECT_H
 
+#include "math/gmath.h"
 #include "math/gpvector.h"
 
 template <class T> class gbtDPVector : public gbtPVector<T>  {
@@ -72,11 +73,12 @@ template <class T> class gbtDPVector : public gbtPVector<T>  {
 
     const gbtArray<int> &DPLengths(void) const;
 
-    void Dump(gbtOutput &) const;
+    void Dump(std::ostream &) const;
 };
 
 #ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtDPVector<T>&v);
+template <class T> 
+std::ostream &operator<<(std::ostream &, const gbtDPVector<T> &);
 #endif
 
 #endif   // GDPVECTOR_H

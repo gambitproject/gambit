@@ -1,17 +1,16 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libpoly.a
+noinst_LTLIBRARIES = libgambit_poly.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libpoly_a_SOURCES = \
+libgambit_poly_la_SOURCES = \
 	gpartltr.cc \
 	gpartltr.h \
 	gpartltr.imp \
 	gpoly.cc \
 	gpoly.h \
 	gpoly.imp \
-	gpolyctr.h \
 	gpolylst.cc \
 	gpolylst.h \
 	gpolylst.imp \

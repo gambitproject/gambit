@@ -31,26 +31,31 @@
       </author>
     </authorgroup>
     <edition>Version 0.97.1</edition>
-    <pubdate>2003</pubdate>
+    <pubdate>2004</pubdate>
     <copyright>
-      <year>2003</year>
+      <year>2004</year>
       <holder>The Gambit Project</holder>
     </copyright>
   </bookinfo>
 
 &intro;
-&guistart;
 
 <chapter id="gui.ref">
 <title>Graphical Interface Reference</title>
-<para>This chapter covers the graphical interface in some detail.</para>
 
-&guiconv;
-&guiefg;
-&guinfg;
+<para>
+There is no graphical interface included with version 0.97.1.2.
+The graphical interface included in the version 0.97.0 releases
+read and write game savefiles which are fully compatible with
+this version, and vice versa.
+</para>
+
+<para>
+A reconstituted graphical interface will ship with future releases
+in the 0.97.1 series.
+</para>
 
 </chapter>
-
 
 &apiref;
 

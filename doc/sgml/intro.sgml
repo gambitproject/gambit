@@ -9,15 +9,16 @@ the GNU General Public License.
 </para>
 
 <sect1 id="intro.history">
-<title>History and acknowledgements</title>
-<para>
-The Gambit Project is a project for the development of computer code
-for the solution of extensive and normal form games.  The software
-developed under the project is distributed under the GNU General Public
-License.  The Gambit Project has been
-funded in the past by National Science Foundation grants SBR-9308637 and
-SBR-9617854 to the California Institute of Technology and SBR-9308862
-to the University of Minnesota.</para>
+<title>History and acknowledgements</title> 
+<para> 
+The Gambit Project
+is a project for the development of computer code for the analysis of
+finite extensive and normal form games.  The software developed under
+the project is distributed under the GNU General Public License.  The
+Gambit Project has been funded in the past by National Science
+Foundation grants SBR-9308637 and SBR-9617854 to the California
+Institute of Technology and SBR-9308862 to the University of
+Minnesota.</para>
 
       <para>
 The Gambit Project was founded in the mid-1980s by Richard McKelvey.
@@ -33,8 +34,8 @@ of the NSF grants in 1994, with McKelvey and Andrew McLennan as
 principal investigators.  The grants sponsored a complete rewrite
 of Gambit in C++, with the code taking essentially the organization it
 has today.  The graphical interface was made portable across
-platforms through the use of the wxWindows library
-(<ulink url="http://www.wxwindows.org">http://www.wxwindows.org</ulink>),
+platforms through the use of the wxWidgets library
+(<ulink url="http://www.wxwidgets.org">http://www.wxwidgets.org</ulink>),
 and a scripting language,
 the Gambit Command Language, was developed.  Version 0.94 of Gambit
 was released in the late summer of 1994, and version 0.96 followed in 1999.
@@ -109,7 +110,19 @@ available under *nix (called <application>wxgcl</application>).
 </para>
 </listitem>
 </itemizedlist>
+This stable series of releases currently stands at version 0.97.0.6.
+</para>
 
+<para>
+The current development series of releases, numbered 0.97.1.x,
+is focusing on the packaging of the Gambit code as a library.
+The build system now creates a shared library of the Gambit code.
+In addition to the C++ API, the Gambit code is made available through
+a Python interface via the SWIG tool (see 
+<ulink url="http://www.swig.org">http://www.swig.org</ulink>).
+Creating interfaces in the other languages supported by SWIG is
+a future possibility; please contact the Gambit developers if you
+are interested in another of the languages supported by SWIG.
 </para>
 
 </sect1>
@@ -227,26 +240,11 @@ boundaries of the space of mixed strategies much more readily.
 <title>Getting and installing Gambit</title>
 <para>
 The development and testing of Gambit takes place primarily
-on the following platforms:
-<itemizedlist>
-<listitem>
-<para>
-Linux, using wxWindows, the GTK toolkit and
-<application>gcc</application>.  The wxWindows library
-also supports Motif/Lesstif, and the code should compile
-on other flavors of Unix. Reports and patches so that
-Gambit will run on other flavors are welcome!
-</para>
-</listitem>
-<listitem>
-<para>
-Microsoft Windows, using the free Borland C++ 5.5
-compiler.  The binary distributions for Windows should work on
-other versions of Windows, but may not be tested.  Reports are
-always welcome.
-</para>
-</listitem>
-</itemizedlist>
+on Linux using gcc.  We also provide makefiles for building Gambit on
+Microsoft Windows using the free Borland C++ 5.5 compiler.
+We have reports that Gambit builds just fine on MacOS X and FreeBSD.
+We are interested in reports, or patches, for other operating systems,
+and for other compilers.
 </para>
 
 <sect2 id="intro.getting.releases">
@@ -255,49 +253,184 @@ always welcome.
 The latest stable and unstable releases of Gambit can always
 be found at the Gambit website at
 <ulink url="http://econweb.tamu.edu/gambit">http://econweb.tamu.edu/gambit</ulink>.
-You can build Gambit from source, in which case you will need one
-of the compilers mentioned above, and the appropriate version of 
-wxWindows.  Build instructions are found in the file INSTALL in the
-main directory of the source distribution.  Gambit is also distributed
-in binary form for Windows, in which case you don't need the compiler
-or wxWindows installed.  There currently are not any prebuilt binaries
-for *nix.
+Note that this document only details building the 0.97.1.z series
+of Gambit; please see the 0.97.0 documentation for instructions on
+building the stable version.
 </para>
 </sect2>
 
-<sect2 id="intro.getting.cvs">
-<title>The bleeding edge: Gambit CVS access</title>
+<sect2 id="intro.getting.building.linux">
+<title>Building Gambit on Linux (and other Un*ces, MacOS X)</title>
+
 <para>
-Beginning in March 2003, anonymous access to the Gambit CVS repository is
-available on SourceForge.  Instructions for accessing the repository can
-be found at 
-<ulink url="http://sourceforge.net/cvs/?group_id=57119">
-http://sourceforge.net/cvs/?group_id=57119</ulink>.
-Be warned that the current state of CVS is very bleeding-edge; the
-code may not work, or even compile correctly!  If you are interested in
-helping Gambit's development, or if you need access to the latest and
-greatest features of Gambit not yet available in a release, this is for
-you; it is not recommended to use the current CVS version for serious
-research or teaching applications otherwise.
+This section details how to build the Gambit library and Python
+API on Linux.  It should apply equally to all Un*ces, as well as
+MacOS X.  It probably works under Cygwin or MinGW as well, but has
+not been tested in those environments.
+</para>
+
+<sect3>
+<title>Building the shared library</title>
+
+<para>
+Configuring and building Gambit uses the standard autotools approach.
+Start by unpacking your source tarball (the examples will use version
+0.97.1.2, change the version number as appropriate):
+<programlisting>
+tar zxvf gambit-0.97.1.2.tar.gz
+</programlisting>
+and change into the created directory
+<programlisting>
+cd gambit-0.97.1.2
+</programlisting>
 </para>
 
 <para>
-If you choose to build from CVS on *nix, please note that you will need
-to run <command>aclocal</command>, <command>automake</command> and
-<command>autoconf</command>, in that order, to set up the build system;
-after this, follow the instructions in the file INSTALL in the root
+Configuration is done by the standard configure script.  For most
+users, just doing
+<programlisting>
+./configure
+</programlisting>
+is good enough.  The most useful optional argument to the script
+is the installation directory.  By default, this is
+/usr/local; so, for example, the Gambit shared library will be placed
+in /usr/local/lib/libgambit.so.
+If you want to change this (for example, because you
+don't have root access), pass the directory to install like so:
+<programlisting>
+./configure --prefix=/home/arbiter
+</programlisting>
+In this case, the shared library will wind up in 
+/home/arbiter/lib/libgambit.so.
+</para>
+
+<para>
+Gambit does not have any significant dependencies; any reasonably
+current system should result in a successful configuration.
+Build and install the shared library by issuing
+<programlisting>
+make 
+make install
+</programlisting>
+Remember to su to root in between the commands if you're installing
+to a system directory.
+</para>
+
+</sect3>
+
+<sect3>
+<title>Building the Python API (optional)</title>
+
+<para>
+If you want to use the Python API, you'll need to build it
+separately.  (If you aren't going to be using this, you can
+skip this section.)  The configuration script will take a stab
+at finding your Python executable and include files.  If you
+have a standard installation of Python, all you should need to do is
+(starting from the main directory of the unpacked source tree)
+<programlisting>
+cd sources/python
+make python
+</programlisting>
+Be sure to do this after the make install step above; the makefile
+assumes the main Gambit shared library has been installed already.
+</para>
+
+<para>
+If all goes well, you'll wind up with three files in the directory:
+gambit.py, _gbt.so (the shared library for the wrapper), 
+and gbt.py (the SWIG wrapper around the shared library). 
+There is currently no installation feature in the makefile in
+this directory, so you'll need to manually place these files where
+you'd like them.  You can try a
+<programlisting>
+echo "import gambit" | python
+</programlisting>
+to test out the import.  Don't forget to set your LD_LIBRARY_PATH
+environment variable if you installed the Gambit shared library
+in some unusual place not in the linker's search path.
+</para>
+
+</sect3>
+
+</sect2>
+
+<sect2 id="intro.getting.building.borland">
+<title>Building Gambit on Windows (using Borland C++)</title>
+
+<para>
+This section details how to build the Gambit library and Python
+API on Windows using Borland C++ 5.5.  We are interested in
+getting makefiles for other compilers as well; please contact
+us if you're interested in using a different compiler.
+</para>
+
+<sect3>
+<title>Building the library</title>
+
+<para>
+Open up a command prompt window, and change to the sources subdirectory
+of the unpacked source tree.  For example, if you unpack the
+source tarball into D:\, then you should change directory to
+D:\gambit-0.97.1.2\sources.
+</para>
+
+<para>
+In this directory, you need to create a file named MAKEDEF.BCC.
+In this file, you need to specify where to find the Borland compiler.
+A typical file might be
+<programlisting>
+BCCDIR = C:\BORLAND\BCC55
+</programlisting>
+if you installed the Borland compiler in C:\BORLAND\BCC55
+(the standard location).  Alter this to fit your system.
+</para>
+
+<para>
+After MAKEDEF.BCC is created, compile the library by issuing
+<programlisting>
+make -f borland
+</programlisting>
+The build creates a (large) library GAMBIT.LIB in the current
 directory.
-You should only need to do this the first time you build; after later
-updates, the build system should take care of changes in the dependencies
-for you.
+</para>
+
+</sect3>
+
+
+<sect3>
+<title>Building the Python API (optional)</title>
+
+<para>
+If you want to use the Python API, you'll need to build it
+separately.  (If you aren't going to be using this, you can
+skip this section.)  Take a look at sources/python/borland.mak;
+in particular, make sure that the PYTHONDIR points to the correct
+location of your Python installation.
+From the python subdirectory of the Gambit source tree, issue
+<programlisting>
+make -f borland
+</programlisting>
+Be sure to do this after building the main library above; the makefile
+assumes the main Gambit library has been built already.
 </para>
 
 <para>
-Bug reports on the CVS version are particularly welcomed.
+If all goes well, you'll wind up with three files in the directory:
+gambit.py, _gbt.so (the shared library for the wrapper), 
+and gbt.py (the SWIG wrapper around the shared library). 
+There is currently no installation feature in the makefile in
+this directory, so you'll need to manually place these files where
+you'd like them.  You can try running python and doing a
+<programlisting>
+import gambit
+</programlisting>
+to test out the import. 
 </para>
 
-</sect2>
+</sect3>
 
+</sect2>
 
 </sect1>
 

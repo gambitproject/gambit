@@ -30,17 +30,12 @@
 template class gbtList<int>;
 template class gbtList<long>;
 template class gbtList<double>;
-template class gbtList<gbtText>;
+template class gbtList<std::string>;
 
 template class gbtList<gbtBlock<int> >;
 template class gbtList<gbtArray<int> >;
 template class gbtList<gbtList<int> >;
-#ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtList<int> &);
-#endif  // __BCC55__
 
 template class gbtList<bool>;
-template gbtOutput &operator<<(gbtOutput &, const gbtList<bool> &);
 template class gbtList<gbtList<bool> >;
-template gbtOutput &operator<<(gbtOutput &, const gbtList<gbtList<bool> > &);
 template class gbtList<gbtList<gbtList<bool> > >;

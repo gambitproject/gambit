@@ -1,68 +1,70 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libgame.a
+noinst_LTLIBRARIES = libgambit_game.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libgame_a_SOURCES = \
-        actiter.cc \
-        actiter.h \
-	behav.h \
-	behav.cc \
-	behavtree.h \
-	behavtree.imp \
-	efdom.cc \
-	efdom.h \
+libgambit_game_la_SOURCES = \
 	efgciter.h \
-	efgcont.cc \
-	efgcont.h \
-	efgensup.cc \
-	efgensup.h \
 	efgiter.cc \
 	efgiter.h \
-	efgsupport.cc \
-	efgsupport.h \
-	game.cc \
+	efgutils.cc \
+	efgutils.h \
 	game.h \
-	gamebase.h \
-	gameinst.cc \
-	gnarray.h \
-	gnarray.imp \
-	infoset.cc \
-	infoset.h \
-	mixed.cc \
-	mixed.h \
-	mixed.imp \
-	mixedtable.h \
-	mixedtable.imp \
-	mixedtree.h \
-	mixedtree.imp \
-	nfdom.cc \
-	nfdom.h \
-	nfdommix.cc \
-	nfdommix.imp \
+	game-behav-mixed.h \
+	game-contingency.h \
+	game-file.cc \
+	game-file.h \
+	game-infoset.h \
+	game-node.h \
+	game-outcome.h \
+	game-player.h \
+	game-strategy.h \
+	game-strategy-mixed.h \
 	nfgciter.h \
-	nfgcont.cc \
-	nfgcont.h \
-	nfgensup.cc \
-	nfgensup.h \
 	nfgiter.cc \
 	nfgiter.h \
-	nfgsupport.cc \
-	nfgsupport.h \
-	node.cc \
-	node.h \
-	outcome.cc \
-	outcome.h \
-	player.cc \
-        player.h \
-	readefg.cc \
-	readnfg.cc \
 	sfg.cc \
 	sfg.h \
 	sfstrat.cc \
 	sfstrat.h \
-`       striter.cc \
-        striter.h
+	table-contingency.cc \
+	table-contingency.h \
+	table-file.cc \
+	table-game.cc \
+	table-game.h \
+	table-inst.cc \
+	table-mixed-double.cc \
+	table-mixed-mpfloat.cc \
+	table-mixed-rational.cc \
+	table-outcome.cc \
+	table-outcome.h \
+	table-player.cc \
+	table-player.h \
+	table-strategy-mixed.h \
+	table-strategy-mixed.imp \
+	tree-behav-double.cc \
+	tree-behav-mixed.h \
+	tree-behav-mixed.imp \
+	tree-behav-mpfloat.cc \
+	tree-behav-pure.cc \
+	tree-behav-pure.h \
+	tree-behav-rational.cc \
+	tree-contingency.cc \
+	tree-contingency.h \
+	tree-file.cc \
+	tree-game.cc \
+	tree-game.h \
+	tree-infoset.cc \
+	tree-infoset.h \
+	tree-inst.cc \
+	tree-node.cc \
+	tree-node.h \
+	tree-outcome.cc \
+	tree-outcome.h \
+	tree-player.cc \
+	tree-player.h \
+	tree-strategy-mixed.h \
+	tree-strategy-mixed.imp
 
 EXTRA_DIST = borland.mak 

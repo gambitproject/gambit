@@ -30,6 +30,17 @@
 #include "math/gvector.h"
 #include "gfunc.h"
 
+//!
+//! An exception thrown on internal errors in function minimization
+//!
+class gbtMinimizationException : public gbtException {
+public:
+  virtual ~gbtMinimizationException() { }
+  std::string GetDescription(void) const 
+    { return "Internal error in function minimization"; }
+};
+
+
 //
 // gbtFunctionMinimizer is an abstract base class for function minimization
 //

@@ -52,8 +52,6 @@ bool operator!=(const gbtEtaMatrix<T> &) const;
 
 };
 
-template <class T> gbtOutput &operator<<( gbtOutput &, const gbtEtaMatrix<T> &);
-
 // ---------------------------------------------------------------------------
 // Class gbtLUDecomposition
 // ---------------------------------------------------------------------------
@@ -81,21 +79,6 @@ private:
   int copycount;
 
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim();
-    gbtText Description(void) const;
-  };
-  class BadPivot : public gbtException  {
-  public:
-    virtual ~BadPivot();
-    gbtText Description(void) const;
-  };
-  class BadCount : public gbtException  {
-  public:
-    virtual ~BadCount();
-    gbtText Description(void) const;
-  };
 
   // ------------------------
   // Constructors, Destructor
@@ -103,7 +86,7 @@ public:
     
 
   // don't use this copy constructor
-  gbtLUDecomposition( const gbtLUDecomposition<T> &a) : tab(a.tab), basis(a.basis) { assert(0); };
+  gbtLUDecomposition( const gbtLUDecomposition<T> &a) : tab(a.tab), basis(a.basis) { }
 
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
@@ -118,7 +101,7 @@ public:
   ~gbtLUDecomposition();
 
   // don't use the equals operator, use the Copy function instead
-  gbtLUDecomposition<T>& operator=(const gbtLUDecomposition<T>&) { assert(0); return *this; };
+  gbtLUDecomposition<T>& operator=(const gbtLUDecomposition<T>&) { return *this; };
 
 
   // --------------------

@@ -63,9 +63,6 @@
 #endif // USE_GNU_MP
 #include "math/integer.h"
 
-class gbtInput;
-class gbtOutput;
-
 class gbtRational {
 protected:
 #if USE_GNU_MP
@@ -77,9 +74,6 @@ protected:
 #if !USE_GNU_MP
   void normalize();
 #endif  // USE_GNU_MP
-
-  // error reporting
-  void error(const char *msg) const;
 
 public:
   // LIFECYCLE
@@ -125,7 +119,7 @@ public:
   void invert(void);   // x = 1/x
 
   friend int sign(const gbtRational& x);             // -1, 0, or +1
-  friend gbtRational abs(const gbtRational& x);              // absolute value
+  friend gbtRational fabs(const gbtRational& x);              // absolute value
   friend gbtRational sqr(const gbtRational& x);              // square
   friend gbtRational pow(const gbtRational& x, long y);
   friend gbtRational pow(const gbtRational& x, const gbtInteger& y);
@@ -136,12 +130,12 @@ public:
 
   // CONVERSIONS
   operator double() const;
-  friend gbtText ToText(const gbtRational &);
-  friend gbtRational FromText(const gbtText &, gbtRational &);
+  friend std::string ToText(const gbtRational &);
+  friend gbtRational FromText(const std::string &, gbtRational &);
 
   // INPUT AND OUTPUT
-  friend gbtInput &operator>>(gbtInput& s, gbtRational& y);
-  friend gbtOutput &operator<<(gbtOutput& s, const gbtRational& y);
+  friend std::istream &operator>>(std::istream& s, gbtRational& y);
+  friend std::ostream &operator<<(std::ostream &s, const gbtRational& y);
 };
 
 void gEpsilon(gbtRational &v, int i = 8);

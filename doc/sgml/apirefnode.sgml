@@ -2,7 +2,35 @@
 <title>Nodes</title>
 
 <para>
+A node represents a (public) history in a game.  At nonterminal nodes, a
+player (possibly the chance player) makes a move.
 </para>
+
+<sect2 id="apiref.node.copytree">
+<title>CopyTree</title>
+<indexterm><primary>CopyTree</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameNode gbtGameNode::CopyTree(gbtGameNode p_src)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>CopyTree</function>
+copies the subtree rooted at <parameter>p_src</parameter> to this node.
+<parameter>p_src</parameter> may be a predecessor of the node.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_src</parameter> is from a different game, or if this node
+is not a terminal node.
+</para>
+
+</sect2>
+
 
 <sect2 id="apiref.node.deletemove">
 <title>DeleteMove</title>
@@ -22,16 +50,8 @@ void gbtGameNode::DeleteMove(void)
 deletes the move prior to the node from its extensive form game. 
 All other subtrees emanating from the parent move are deleted, and the
 node assumes its parent's former place in the game tree.
+If the node is the root node, no action is taken.
 </para>
-
-<note>
-<para>
-The meaning of <function>DeleteMove</function> changed beginning with
-version 0.97.1.1.  In prior versions, <function>DeleteMove</function>
-was called on the node where the move was to be deleted, and the branch
-to keep was specified.
-</para>
-</note>
 
 </sect2>
 
@@ -50,7 +70,7 @@ void gbtGameNode::DeleteTree(void)
 
 <para>
 <function>DeleteTree</function>
-deletes the subtree rooted at <parameter>node</parameter>.  The
+deletes the subtree rooted at the node.  The
 node then becomes a terminal node. 
 </para>
 
@@ -75,28 +95,68 @@ gbtGameNode gbtGameNode::GetChild(int p_index) const
 returns the child numbered
 <parameter>p_index</parameter> from the list of children for the node.
 Each node's children, if any, are numbered sequentially beginning at one.
-An exception is thrown if the index is out of range.
+An exception is thrown (<errorname>gbtIndexException</errorname> in
+C++, <errorname>IndexError</errorname> in Python) if the index is out
+of range.
 </para>
 
 </sect2>
 
-
-<sect2 id="apiref.node.getgame">
-<title>GetGame</title>
-<indexterm><primary>GetGame</primary></indexterm>
+<sect2 id="apiref.node.getchildaction">
+<title>GetChildAction</title>
+<indexterm><primary>GetChildAction</primary></indexterm>
 
 <formalpara>
-<title>C++/Python usage</title>
+<title>C++ usage</title>
 <para>
 <synopsis>
-gbtGame gbtGameNode::GetGame(void) const
+gbtGameNode gbtGameNode::GetChild(const gbtAction &amp;p_action) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Python usage</title>
+<para>
+<synopsis>
+node.GetChildAction(action)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetGame</function> returns the extensive form game to which
-the node belongs.
+<function>GetChild</function> (<function>GetChildAction</function> in
+Python) returns the child node reached by following the branch leading
+out of the node corresponding to the specified action.  If the action
+does not belong to the same information set to which the node belongs,
+a <errorname>gbtGameMismatchException</errorname> is thrown in C++,
+which is mapped to a <errorname>RuntimeError</errorname> exception in
+Python.  </para>
+
+</sect2>
+
+
+<sect2 id="apiref.node.getid">
+<title>GetId</title>
+<indexterm><primary>GetId</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title
+<para>
+<synopsis>
+int gbtGameNode::GetId(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetId</function> returns the ID number of the node.
+The ID is unique within a game, and is assigned in the order nodes
+are encountered in a traversal of the tree.  Note that this implies the
+&quot;same&quot; node may have different ID numbers as the tree is
+edited, but that two independently built games that have equivalent
+tree structures will be such that corresponding nodes will have the same
+ID, no matter how the tree is built.
 </para>
 
 </sect2>
@@ -116,8 +176,7 @@ gbtGameInfoset gbtGameNode::GetInfoset(void) const
 
 <para>
 <function>GetInfoset</function> returns the information set to which
-the <parameter>node</parameter> belongs.  The null node belongs to the
-null information set.
+the node belongs.  Terminal nodes belong to the null information set.  
 </para>
 
 </sect2>
@@ -131,18 +190,58 @@ null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGameNode::GetLabel(void) const
+std::string gbtGameNode::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetLabel</function> returns the text label of the node.  The
-empty string is returned if the node object is null.
+<function>GetLabel</function> returns the text label of the node.  
 </para>
 
 </sect2>
 
+<sect2 id="apiref.node.getmemberid">
+<title>GetMemberId</title>
+<indexterm><primary>GetMemberId</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title
+<para>
+<synopsis>
+int gbtGameNode::GetMemberId(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetMemberId</function> returns the ID number of the node in
+its information set.
+The ID is assigned in the order the nodes in the information set.
+are encountered in a traversal of the tree. 
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.getnextmember">
+<title>GetNextMember</title>
+<indexterm><primary>GetNextMember</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameNode gbtGameNode::GetNextMember(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetNextMember</function> returns the next member of the information
+set.  If there is no subsequent member, the null node is returned.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.node.getnextsibling">
 <title>GetNextSibling</title>
@@ -158,9 +257,8 @@ gbtGameNode gbtGameNode::GetNextSibling(void) const
 </formalpara>
 
 <para>
-<function>GetNextSibling</function> returns the next sibling of
-<parameter>node</parameter>.  If <parameter>node</parameter> has no
-next sibling, the null node is returned.
+<function>GetNextSibling</function> returns the next sibling of the
+node.  If the node has no next sibling, the null node is returned.
 </para>
 
 </sect2>
@@ -179,10 +277,8 @@ gbtGameOutcome gbtGameNode::GetOutcome(void) const
 </formalpara>
 
 <para>
-<function>GetOutcome</function>
-returns the outcome associated with the <parameter>node</parameter>.
-The outcome associated
-with the null node is the null outcome.
+<function>GetOutcome</function> returns the outcome associated with
+the node.
 </para>
 
 </sect2>
@@ -204,8 +300,27 @@ gbtGameNode gbtGameNode::GetParent(void) const
 <para>
 <function>GetParent</function> 
 returns the parent of <parameter>node</parameter>.
-If <parameter>node</parameter> is the root node,
-or if <parameter>node</parameter> is null, the null node is returned.
+If <parameter>node</parameter> is the root node, the null node is returned.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.getplayern">
+<title>GetPlayer</title>
+<indexterm><primary>GetPlayer</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title
+<para>
+<synopsis>
+gbtGamePlayer gbtGameNode::GetPlayer(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPlayer</function> returns the player who has the move at the
+node.  If the node is terminal, the null player is returned.
 </para>
 
 </sect2>
@@ -225,9 +340,29 @@ gbtGameAction gbtGameNode::GetPriorAction(void) const
 
 <para>
 <function>GetPriorAction</function> returns the action corresponding
-to the branch leading to <parameter>node</parameter>.  If
-<parameter>node</parameter> is the root node, its prior action is the
-null action.
+to the branch leading to the node.  If the node is the root node, its
+prior action is the null action.  
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.getpriormember">
+<title>GetPriorMember</title>
+<indexterm><primary>GetPriorMember</primary></indexterm>
+
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameNode gbtGameNode::GetPriorMember(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPriorMember</function> returns the previous member in the
+information set.  If there is no previous member, the null node is returned.
 </para>
 
 </sect2>
@@ -247,10 +382,9 @@ gbtGameNode gbtGameNode::GetPriorSibling(void) const
 </formalpara>
 
 <para>
-<function>GetPriorSibling</function>
-returns the previous sibling of <parameter>node</parameter>. 
-If <parameter>node</parameter> has no previous
-sibling, the null node is returned.
+<function>GetPriorSibling</function> returns the previous sibling of
+the node.  If the node has no previous sibling, the null node is
+returned. 
 </para>
 
 </sect2>
@@ -271,15 +405,60 @@ gbtGameNode gbtGameNode::InsertMove(gbtGameInfoset)
 
 <para>
 <function>InsertMove</function>
-inserts a new node in the tree at the location of <parameter>node</parameter>.
+inserts a new node in the tree at the location of the node.
 The
 new node is made a member of <parameter>infoset</parameter>, and the
 corresponding number of branches are created from the new node.
-The node <parameter>node</parameter>
-becomes the first child of the new node.  Returns the new node.
+The node becomes the first child of the new node.  Returns the new node.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) is thrown if the
+information set does not belong to the same game as the node.
 </para>
 
 </sect2>
+
+<sect2 id="apiref.node.isnonterminal">
+<title>IsNonterminal</title>
+<indexterm><primary>IsNonterminal</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameNode::IsNonterminal(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsNonterminal</function>
+returns <literal>True</literal> (nonzero) when the node
+is not a terminal node (that is, the node has children).
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.isnull">
+<title>IsNull</title>
+<indexterm><primary>IsNull</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameNode::IsNull(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsNull</function>
+returns <literal>True</literal> (nonzero) when the node
+is the null node.
+</para>
+
+</sect2>
+
 
 <sect2 id="apiref.node.ispredecessorof">
 <title>IsPredecessorOf</title>
@@ -289,22 +468,113 @@ becomes the first child of the new node.  Returns the new node.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-bool gbtGameNode::IsPredecessorOf(gbtGameNode) const
+bool gbtGameNode::IsPredecessorOf(gbtGameNode p_other) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>IsPredecessorOf</function>
-returns <literal>True</literal> (nonzero) when <parameter>node</parameter>
+returns <literal>True</literal> (nonzero) when the node
 is a predecessor
-in the tree of the node <parameter>of</parameter>, and
+in the tree of the node <parameter>p_other</parameter>, and
 <literal>False</literal> (zero) otherwise.
 A node is considered its own predecessor.
 </para>
 
 </sect2>
 
+<sect2 id="apiref.node.isterminal">
+<title>IsTerminal</title>
+<indexterm><primary>IsTerminal</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameNode::IsTerminal(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsTerminal</function>
+returns <literal>True</literal> (nonzero) when the node
+is a terminal node (that is, the node has no children).
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.joininfoset">
+<title>JoinInfoset</title>
+<indexterm><primary>JoinInfoset</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtGameNode::JoinInfoset(const gbtGameInfoset &amp;p_infoset)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>JoinInfoset</function> places the node into
+<parameter>p_infoset</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) is thrown if the
+information set does not belong to the same game as the node, or if
+the number of actions specified by the information set does not match
+the number of actions at the node.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.leaveinfoset">
+<title>LeaveInfoset</title>
+<indexterm><primary>LeaveInfoset</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameInfoset gbtGameNode::LeaveInfoset(void)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LeaveInfoset</function> removes the node from its information
+set and places it in a new information set.  No action is taken if the
+node is already the only member of its information set, or if the node
+is a terminal node.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.node.movetree">
+<title>MoveTree</title>
+<indexterm><primary>MoveTree</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameNode gbtGameNode::MoveTree(gbtGameNode p_src)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>MoveTree</function>
+moves the subtree rooted at <parameter>p_src</parameter> to this node.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_src</parameter> is from a different game, or if this node
+is not a terminal node.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.node.numchildren">
 <title>NumChildren</title>
@@ -335,7 +605,7 @@ int gbtGameNode::NumChildren(void) const
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameNode::SetLabel(const gbtText &amp;p_label)
+void gbtGameNode::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -362,13 +632,12 @@ void gbtGameNode::SetOutcome(gbtGameOutcome)
 
 <para>
 <function>SetOutcome</function> 
-attaches <parameter>outcome</parameter> to <parameter>node</parameter>.
-Returns the outcome attached.
+attaches the outcome to the node.
 Note that nonterminal nodes may have outcomes attached; the interpretation
 is that nonterminal outcomes represent incremental payoffs.  
-It is an error if <parameter>node</parameter> and <parameter>outcome</parameter>
-are not from the same
-extensive form game.
+A <errorname>gbtGameMismatchException</errorname> (mapped to 
+<errorname>RuntimeError</errorname> in Python) occurs if the outcome does
+not belong to the same game as the node.
 </para>
 
 </sect2>

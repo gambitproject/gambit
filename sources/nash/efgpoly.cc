@@ -24,7 +24,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "game/efgensup.h"
 #include "efgpoly.imp"
 
 //---------------------------------------------------------------------------
@@ -39,13 +38,13 @@ EfgPolEnumParams::EfgPolEnumParams(void)
 //                    EfgPolEnum: nontemplate functions
 //---------------------------------------------------------------------------
 
-template class EfgPolEnumModule<gbtDouble>;
+template class EfgPolEnumModule<double>;
 
-int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
-	       gbtBehavNashSet &solutions, gbtStatus &p_status,
+int EfgPolEnum(const gbtGame &p_efg, const EfgPolEnumParams &params,
+	       gbtList<gbtBehavProfile<double> > &solutions, gbtStatus &p_status,
 	       long &nevals, double &time, bool &is_singular)
 {
-  EfgPolEnumModule<gbtDouble> module(support, params);
+  EfgPolEnumModule<double> module(p_efg, params);
   module.EfgPolEnum(p_status);
   nevals = module.NumEvals();
   time = module.Time();
@@ -55,14 +54,13 @@ int EfgPolEnum(const gbtEfgSupport &support, const EfgPolEnumParams &params,
   return 1;
 }
 
-gbtBehavProfile<gbtNumber>
-PolishEquilibrium(const gbtEfgSupport &support, 
-		  const gbtBehavProfile<gbtNumber> &sol, 
-		  bool &is_singular)
+gbtBehavProfile<double> PolishEquilibrium(const gbtGame &p_efg,
+					  const gbtBehavProfile<double> &sol, 
+					  bool &is_singular)
 {
   EfgPolEnumParams params;
-  EfgPolEnumModule<gbtDouble> module(support, params);
-  gbtVector<gbtDouble> vec = module.SolVarsFromBehavProfile(sol);
+  EfgPolEnumModule<double> module(p_efg, params);
+  gbtVector<double> vec = module.SolVarsFromBehavProfile(sol);
   module.PolishKnownRoot(vec);
   return module.ReturnPolishedSolution(vec);
 }
@@ -71,54 +69,66 @@ PolishEquilibrium(const gbtEfgSupport &support,
 //                    class gbtEfgNashEnumPoly
 //=======================================================================
 
+class gbtEfgNashEnumPoly {
+private:
+  int m_stopAfter;
+
+public:
+  gbtEfgNashEnumPoly(void);
+  virtual ~gbtEfgNashEnumPoly() { }
+
+  int StopAfter(void) const { return m_stopAfter; }
+  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
+
+  std::string GetAlgorithm(void) const { return "PolEnum[EFG]"; }
+  gbtList<gbtBehavProfile<double> > Solve(const gbtGame &, gbtStatus &);
+};
+
 gbtEfgNashEnumPoly::gbtEfgNashEnumPoly(void)
   : m_stopAfter(0)
 { }
 
-gbtBehavNashSet gbtEfgNashEnumPoly::Solve(const gbtEfgSupport &p_support,
-					  gbtStatus &p_status)
+gbtList<gbtBehavProfile<double> >
+gbtEfgNashEnumPoly::Solve(const gbtGame &p_efg, gbtStatus &p_status)
 {
   p_status.SetProgress(0.0);
-  p_status << "Step 1 of 2: Enumerating supports";
-  gbtList<gbtEfgSupport> supports = PossibleNashSubsupports(p_support,
-							    p_status);
+  p_status << std::string("Step 1 of 2: Enumerating supports");
 
   p_status.SetProgress(0.0);
-  p_status << "Step 2 of 2: Computing equilibria";
+  p_status << std::string("Step 2 of 2: Computing equilibria");
 
-  gbtList<gbtEfgSupport> singularSupports;
-  gbtBehavNashSet solutions;
+  gbtList<gbtBehavProfile<double> > solutions;
 
   try {
-    for (int i = 1; (i <= supports.Length() &&
-		     (m_stopAfter == 0 || m_stopAfter > solutions.Length()));
-	 i++) {
-      p_status.Get();
-      p_status.SetProgress((double) (i-1) / (double) supports.Length());
-      long newevals = 0;
-      double newtime = 0.0;
-      gbtBehavNashSet newsolns;
-      bool is_singular = false;
+    p_status.Get();
+    p_status.SetProgress(0.0);
+    long newevals = 0;
+    double newtime = 0.0;
+    gbtList<gbtBehavProfile<double> > newsolns;
+    bool is_singular = false;
 
-      EfgPolEnumParams params;
-      params.stopAfter = 0;
-      EfgPolEnum(supports[i], params, newsolns, p_status, 
-		 newevals, newtime, is_singular);
-      for (int j = 1; j <= newsolns.Length(); j++) {
-	// FIXME: This needs filtered!
-	//	if (newsolns[j].IsANFNash()) {
-	  solutions += newsolns[j];
-	  //	}
-      }
-
-      if (is_singular) { 
-	singularSupports += supports[i];
-      }
+    EfgPolEnumParams params;
+    params.stopAfter = 0;
+    EfgPolEnum(p_efg, params, newsolns, p_status, 
+	       newevals, newtime, is_singular);
+    for (int j = 1; j <= newsolns.Length(); j++) {
+      // FIXME: what about ANFNash check?
+      //	if (newsolns[j].IsANFNash()) {
+      solutions += newsolns[j];
+      //	}
     }
   }
-  catch (gbtSignalBreak &) {
+  catch (gbtInterruptException &) {
     // catch exception; return list of computed equilibria (if any)
   }
 
   return solutions;
+}
+
+  
+gbtList<gbtBehavProfile<double> > gbtNashEnumPolyEfg(const gbtGame &p_game)
+{
+  gbtEfgNashEnumPoly algorithm;
+  gbtNullStatus status;
+  return algorithm.Solve(p_game, status);
 }

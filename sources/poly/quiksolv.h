@@ -38,6 +38,13 @@
 #include "pelican/pelqhull.h"
 #include "poly/pelclass.h"
 
+class gbtNewtonPolishException : public gbtException  {
+public:
+  virtual ~gbtNewtonPolishException() { }
+  std::string GetDescription(void) const 
+  { return "Newton method failed to polish approximate root"; }
+};
+
 /*
     The (optimistically named) class described in this file is a method
 of finding the roots of a system of polynomials and inequalities, with
@@ -71,12 +78,12 @@ sense that the gbtPolyUni is required to be nonnegative.
 template <class T> class gbtPolyQuickSolve {
  private:
   const gbtPolyMultiList<T>                 System;
-  const gbtPolyMultiList<gbtDouble>           gDoubleSystem;
+  const gbtPolyMultiList<double>           gDoubleSystem;
   const int                          NoEquations;
   const int                          NoInequalities;
-  const gbtPolyPartialTreeList<gbtDouble>  TreesOfPartials;
+  const gbtPolyPartialTreeList<double>  TreesOfPartials;
         bool                         HasBeenSolved;
-        gbtList<gbtVector<gbtDouble> >     Roots;
+        gbtList<gbtVector<double> >     Roots;
   const bool                         isMultiaffine;
   const gbtRectArray<bool>             Equation_i_uses_var_j;
   gbtStatus &m_status;
@@ -87,64 +94,59 @@ template <class T> class gbtPolyQuickSolve {
 
   // Get Roots Using Pelican
 
-  bool AllRealRootsFromPelican(const gbtPolyMultiList<gbtDouble> &, 
-			             gbtList<gbtVector<gbtDouble> > &)         const;
+  bool AllRealRootsFromPelican(const gbtPolyMultiList<double> &, 
+			             gbtList<gbtVector<double> > &)         const;
   bool PelicanRoots(const gRectangle<T> &, 
-		          gbtList<gbtVector<gbtDouble> > &)                    const;
+		          gbtList<gbtVector<double> > &)                    const;
 
   // Check whether roots are impossible
 
-   bool SystemHasNoRootsIn(const gRectangle<gbtDouble>& r, gbtArray<int>&)   const;
+   bool SystemHasNoRootsIn(const gRectangle<double>& r, gbtArray<int>&)   const;
 
 
   // Ask whether Newton's method leads to a root 
 
-   bool NewtonRootInRectangle(  const gRectangle<gbtDouble>&, 
-			              gbtVector<gbtDouble>&) const;
-   bool NewtonRootNearRectangle(const gRectangle<gbtDouble>&, 
-			              gbtVector<gbtDouble>&) const;
+   bool NewtonRootInRectangle(  const gRectangle<double>&, 
+			              gbtVector<double>&) const;
+   bool NewtonRootNearRectangle(const gRectangle<double>&, 
+			              gbtVector<double>&) const;
 
 
   // Ask whether we can prove that there is no root other than 
   // the one produced by the last step
 
-   gbtDouble MaxDistanceFromPointToVertexAfterTransformation(
-				      const gRectangle<gbtDouble>&,
-				      const gbtVector<gbtDouble>&,
-				      const gbtSquareMatrix<gbtDouble>&)     const;
+   double MaxDistanceFromPointToVertexAfterTransformation(
+				      const gRectangle<double>&,
+				      const gbtVector<double>&,
+				      const gbtSquareMatrix<double>&)     const;
 
-   bool HasNoOtherRootsIn(const gRectangle<gbtDouble>&,
-			  const gbtVector<gbtDouble>&,
-			  const gbtSquareMatrix<gbtDouble>&)                 const;
+   bool HasNoOtherRootsIn(const gRectangle<double>&,
+			  const gbtVector<double>&,
+			  const gbtSquareMatrix<double>&)                 const;
 
 
   // Combine the last two steps into a single query
 
-   bool NewtonRootIsOnlyInRct(const gRectangle<gbtDouble>&, 
-			            gbtVector<gbtDouble>&) const;
+   bool NewtonRootIsOnlyInRct(const gRectangle<double>&, 
+			            gbtVector<double>&) const;
 
 
   // Recursive parts of recursive methods
 
-  void               FindRootsRecursion(      gbtList<gbtVector<gbtDouble> >*,
-					const gRectangle<gbtDouble>&, 
+  void               FindRootsRecursion(      gbtList<gbtVector<double> >*,
+					const gRectangle<double>&, 
 					const int&,
 					      gbtArray<int>&,
 					      int&,
 					const int&,
 					      int*)                  const;
 
-  const bool         ARootExistsRecursion(const gRectangle<gbtDouble>&, 
-					        gbtVector<gbtDouble>&,
-					  const gRectangle<gbtDouble>&, 
+  const bool         ARootExistsRecursion(const gRectangle<double>&, 
+					        gbtVector<double>&,
+					  const gRectangle<double>&, 
 					        gbtArray<int>&)        const;
 
  public:
-  class NewtonError : public gbtException  {
-  public:
-    virtual ~NewtonError();
-    gbtText Description(void) const;   
-  };
    gbtPolyQuickSolve(const gbtPolyMultiList<T> &, gbtStatus &);  
    gbtPolyQuickSolve(const gbtPolyMultiList<T> &, const int &, gbtStatus &);  
    gbtPolyQuickSolve(const gbtPolyQuickSolve<T> &);
@@ -166,29 +168,27 @@ template <class T> class gbtPolyQuickSolve {
      { return System; }
    inline const bool                     WasSolved()                 const
      { return HasBeenSolved; }
-   inline const gbtList<gbtVector<gbtDouble> > RootList()                  const
+   inline const gbtList<gbtVector<double> > RootList()                  const
      { return Roots; }
    inline const bool                     IsMultiaffine()             const
      { return isMultiaffine; }
 
   // Refines the accuracy of roots obtained from other algorithms
-  gbtVector<gbtDouble> NewtonPolishOnce(const gbtVector<gbtDouble> &)        const;
-  gbtVector<gbtDouble> SlowNewtonPolishOnce(const gbtVector<gbtDouble> &)    const;
-  gbtVector<gbtDouble> NewtonPolishedRoot(const gbtVector<gbtDouble> &)      const;
+  gbtVector<double> NewtonPolishOnce(const gbtVector<double> &)        const;
+  gbtVector<double> SlowNewtonPolishOnce(const gbtVector<double> &)    const;
+  gbtVector<double> NewtonPolishedRoot(const gbtVector<double> &)      const;
 
   // Checks for complex singular roots
    bool     MightHaveSingularRoots()                                 const;
 
   // The grand calculation - returns true if successful
-   bool     FindCertainNumberOfRoots  (const gRectangle<T>&, 
+   bool     FindCertainNumberOfRoots  (const gRectangle<double>&, 
 				       const int&,
 				       const int&);
-   bool     FindRoots  (const gRectangle<T>&, const int&);
-   bool     ARootExists (const gRectangle<T>&, gbtVector<gbtDouble>&)    const;
-  
-   void Output(gbtOutput &) const;
+   bool     FindRoots  (const gRectangle<double>&, const int&);
+   bool     ARootExists (const gRectangle<double>&, gbtVector<double>&)    const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &output, const gbtPolyQuickSolve<T> &);
+template <class T> std::ostream &operator<<(std::ostream &output, const gbtPolyQuickSolve<T> &);
 
 #endif // QUIKSOLV_H

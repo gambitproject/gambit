@@ -39,6 +39,7 @@ template <class T> class gbtBasicFeasibleSolution : public gbtOrdMap<int, T>  {
     int operator!=(const gbtBasicFeasibleSolution &M) const;
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtBasicFeasibleSolution<T> &);
+template <class T> 
+std::ostream &operator<<(std::ostream &, const gbtBasicFeasibleSolution<T> &);
 
 #endif   // BFS_H

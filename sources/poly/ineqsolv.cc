@@ -25,14 +25,11 @@
 //
 
 #include "ineqsolv.imp"
-#include "math/double.h"
 #include "base/grarray.imp"
 
 template class gbtPolyIneqSolve<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<gbtRational> &y);
+template std::ostream &operator<<(std::ostream &f, const gbtPolyIneqSolve<gbtRational> &y);
 
 //template class gbtPolyIneqSolve<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<double> &y);
+//template std::ostream &operator<<(std::ostream &f, const gbtPolyIneqSolve<double> &y);
 
-template class gbtPolyIneqSolve<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyIneqSolve<gbtDouble> &y);

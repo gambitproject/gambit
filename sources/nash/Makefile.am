@@ -1,15 +1,14 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libnash.a
+noinst_LTLIBRARIES = libgambit_nash.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libnash_a_SOURCES = \
+libgambit_nash_la_SOURCES = \
 	behavextend.cc \
 	behavextend.h \
 	clique.cc \
 	clique.h \
-	efgalgorithm.h \
 	efglcp.cc \
 	efglcp.h \
 	efglcp.imp \
@@ -25,12 +24,9 @@ libnash_a_SOURCES = \
 	efgpoly.imp \
 	efgpure.cc \
 	efgpure.h \
-	efgsubsolve.cc \
-	efgsubsolve.h \
 	lhtab.cc \
 	lhtab.h \
 	lhtab.imp \
-	nfgalgorithm.h \
 	nfgch.cc \
 	nfgch.h \
 	nfglcp.cc \

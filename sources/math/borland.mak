@@ -16,10 +16,8 @@ EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libmath_a_SOURCES = \
 	complex.cc \
-	double.cc \
 	gdpvect.cc \
 	gmatrix.cc \
-	gnumber.cc \
 	gpvector.cc \
 	gsmatrix.cc \
 	gvector.cc \
@@ -46,10 +44,7 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 math: $(OBJECTS)
-        -erase math.lib
-	tlib math /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+        copy *.obj ..
 
 clean:
         -erase *.obj

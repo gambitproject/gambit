@@ -25,23 +25,13 @@
 #ifndef NFGLP_H
 #define NFGLP_H
 
-#include "nfgalgorithm.h"
-#include "numerical/lpsolve.h"
+#include "game/game.h"
 
-template <class T> class gbtNfgNashLp : public gbtNfgNashAlgorithm {
-private:
-  int Add_BFS(const gbtNfgGame &, /*const*/ gbtLPSolver<T> &B,
-	      gbtList<gbtBasicFeasibleSolution<T> > &);
-  void GetSolutions(const gbtNfgGame &,
-		    const gbtList<gbtBasicFeasibleSolution<T> > &,
-		    gbtMixedNashSet &, const T &) const;
-
-public:
-  gbtNfgNashLp(void);
-  virtual ~gbtNfgNashLp() { }
-
-  gbtText GetAlgorithm(void) const { return "Lp[NFG]"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
+//!
+//! This computes an equilibrium of a two-player zero-sum normal form
+//! game via solving a linear program.
+//!
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashLpNfg(const gbtGame &p_game, const T &p_precision);
 
 #endif  // NFGLP_H

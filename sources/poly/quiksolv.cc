@@ -25,16 +25,11 @@
 //
 
 #include "quiksolv.imp"
-#include "math/double.h"
 #include "base/grarray.imp"
 
 template class gbtRectArray<bool>;
 
+template class gbtPolyQuickSolve<double>;
 template class gbtPolyQuickSolve<gbtRational>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyQuickSolve<gbtRational> &y);
 
-//template class gbtPolyQuickSolve<double>;
-//template gbtOutput &operator<<(gbtOutput &f, const gbtPolyQuickSolve<double> &y);
 
-template class gbtPolyQuickSolve<gbtDouble>;
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyQuickSolve<gbtDouble> &y);

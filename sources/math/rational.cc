@@ -30,22 +30,16 @@
 // Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 
+#include <iostream>
 #include <math.h>
 #include <float.h>
-#include <assert.h>
 #include <ctype.h>
-#include "base/gstream.h"
+#include "math/gmath.h"
 #include "math/rational.h"
 
 //------------------------------------------------------------------------
 //                 gbtRational: Private member functions
 //------------------------------------------------------------------------
-
-void gbtRational::error(const char* msg) const
-{
-  //  gerr << "gbtRational class error: " << msg << '\n';
-  assert(0);
-}
 
 #if !USE_GNU_MP
 static const gbtInteger _Int_One(1);
@@ -55,8 +49,9 @@ static const gbtInteger _Int_One(1);
 void gbtRational::normalize(void)
 {
   int s = sign(den);
-  if (s == 0)
-    error("Zero denominator.");
+  if (s == 0) {
+    throw gbtDivisionByZeroException();
+  }
   else if (s < 0) {
     den.negate();
     num.negate();
@@ -443,7 +438,7 @@ void gbtRational::invert(void)
   den = tmp;  
   int s = sign(den);
   if (s == 0) {
-    error("Zero denominator.");
+    throw gbtDivisionByZeroException();
   }
   else if (s < 0) {
     den.negate();
@@ -458,7 +453,7 @@ gbtRational pow(const gbtRational &x, const gbtInteger &y)
   return pow(x, yy);
 }               
 
-gbtRational abs(const gbtRational &x) 
+gbtRational fabs(const gbtRational &x) 
 {
 #if USE_GNU_MP
   gbtRational r;
@@ -528,13 +523,13 @@ gbtRational pow(const gbtRational& x, long y)
 //                    gbtRational: Input and output
 //------------------------------------------------------------------------
 
-gbtOutput &operator<<(gbtOutput &s, const gbtRational &y)
+std::ostream &operator<<(std::ostream &s, const gbtRational &y)
 {
   s << ToText(y);
   return s;
 }
 
-gbtInput &operator>>(gbtInput &f, gbtRational &y)
+std::istream &operator>>(std::istream &f, gbtRational &y)
 {
   char ch = ' ';
   int sign = 1;
@@ -573,35 +568,37 @@ gbtInput &operator>>(gbtInput &f, gbtRational &y)
     }
   }
 
-  f.unget(ch);
+  f.unget();
 
   y = gbtRational(sign * num, denom);
   return f;
 }
 
-gbtText ToText(const gbtRational &r)
+std::string ToText(const gbtRational &r)
 {
 #if USE_GNU_MP
   // This buffer size recommended by documentation in GMP
   char buffer[mpz_sizeinbase(mpq_numref(r.m_value), 10) +
 	      mpz_sizeinbase(mpq_denref(r.m_value), 10) + 3];
   mpq_get_str(buffer, 10, r.m_value);
-  return gbtText(buffer);
+  return std::string(buffer);
 #else
   const int GCONVERT_BUFFER_LENGTH = 255;
   char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
 
-  strncpy(gconvert_buffer, Itoa(r.GetNumerator()), GCONVERT_BUFFER_LENGTH);
+  strncpy(gconvert_buffer, 
+	  Itoa(r.GetNumerator()).c_str(), GCONVERT_BUFFER_LENGTH);
   if (r.GetDenominator() != gbtInteger(1)) {
     strcat(gconvert_buffer, "/");
-    strncat(gconvert_buffer, Itoa(r.GetDenominator()), GCONVERT_BUFFER_LENGTH);
+    strncat(gconvert_buffer, 
+	    Itoa(r.GetDenominator()).c_str(), GCONVERT_BUFFER_LENGTH);
   }
   
-  return gbtText(gconvert_buffer);
+  return std::string(gconvert_buffer);
 #endif  // USE_GNU_MP
 }
 
-gbtRational FromText(const gbtText &f, gbtRational &y)
+gbtRational FromText(const std::string &f, gbtRational &y)
 {
 #if USE_GNU_MP
   mpq_set_str(y.m_value, (char *) f, 10);
@@ -610,7 +607,7 @@ gbtRational FromText(const gbtText &f, gbtRational &y)
 #else
   char ch = ' ';
   int sign = 1;
-  unsigned int index = 0, length = f.Length();
+  unsigned int index = 0, length = f.length();
   gbtInteger num = 0, denom = 1;
 
   while (isspace(ch) && index<=length) {

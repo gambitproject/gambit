@@ -27,35 +27,14 @@
 #ifndef NFGLOGIT_H
 #define NFGLOGIT_H
 
-#include "nfgalgorithm.h"
+#include "base/gstatus.h"
+#include "game/game.h"
 
-//
-// A useful function for QRE stability analysis
-//
-void QreJacobian(const gbtGame &p_nfg,
-		 const gbtMixedProfile<double> &p_profile,
-		 const double &p_nu, gbtMatrix<double> &p_matrix);
-
-class gbtNfgNashLogit : public gbtNfgNashAlgorithm {
-private:
-  double m_maxLam, m_stepSize;
-  bool m_fullGraph;
-
-public:
-  gbtNfgNashLogit(void);
-  virtual ~gbtNfgNashLogit() { }
-
-  double GetMaxLambda(void) const { return m_maxLam; }
-  void SetMaxLambda(double p_maxLam) { m_maxLam = p_maxLam; }
-
-  double GetStepSize(void) const { return m_stepSize; }
-  void SetStepSize(double p_stepSize) { m_stepSize = p_stepSize; }
-
-  bool GetFullGraph(void) const { return m_fullGraph; }
-  void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
-
-  gbtText GetAlgorithm(void) const { return "Qre"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};  
+//!
+//! Computes (a good approximation to) the Nash equilibrium at the end
+//! of the principal branch of the logit quantal response equilibrium
+//! correspondence.
+//!
+gbtList<gbtMixedProfile<double> > gbtNashLogitNfg(const gbtGame &p_game);
 
 #endif  // NFGLOGIT_H

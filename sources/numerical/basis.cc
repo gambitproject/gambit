@@ -105,13 +105,13 @@ int gbtBasis::Pivot(int outindex, int col)
  
   if (IsSlackColumn(col)) slacks[-col] = outindex;
   else if (IsRegColumn(col)) cols[col] = outindex;
-  else throw BadIndex(); // not a valid column to pivot in.
+  else throw gbtIndexException(); // not a valid column to pivot in.
   
   if (IsSlackColumn(outlabel)) slacks[-outlabel] = 0;
   else if (IsRegColumn(outlabel)) cols[outlabel] = 0;
   else {
     // Note: here, should back out outindex.    
-    throw BadIndex(); // not a valid column to pivot out. 
+    throw gbtIndexException(); // not a valid column to pivot out. 
   }
   
   basis[outindex] = col;
@@ -138,7 +138,7 @@ int gbtBasis::Find( int col ) const
 
   if ( IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
-  else throw BadIndex();
+  else throw gbtIndexException();
   
   return ret;
 }
@@ -182,7 +182,7 @@ bool gbtBasis::IsIdent()
   return IsBasisIdent;
 }
 
-void gbtBasis::Dump(gbtOutput &to) const
+void gbtBasis::Dump(std::ostream &to) const
 { 
   to << "{";
   for(int i=basis.First();i<=basis.Last();i++) 
@@ -190,15 +190,7 @@ void gbtBasis::Dump(gbtOutput &to) const
   to << " }";
 }
 
-gbtBasis::BadIndex::~BadIndex()
-{ }
-
-gbtText gbtBasis::BadIndex::Description(void) const
-{
-  return "Bad index in gbtBasis";
-}
-
-gbtOutput &operator<<(gbtOutput &to, const gbtBasis &v)
+std::ostream &operator<<(std::ostream &to, const gbtBasis &v)
 {
   v.Dump(to); return to;
 }

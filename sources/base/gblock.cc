@@ -29,15 +29,12 @@
 #include "garray.imp"
 #include "gblock.imp"
 
+template class gbtBlock<bool>;
 template class gbtBlock<int>;
 template class gbtBlock<double>;
-template class gbtBlock<gbtText>;
+template class gbtBlock<std::string>;
 
-template class gbtBlock<gbtArray<gbtText> >;
+template class gbtBlock<gbtBlock<bool> >;
 
-#ifndef __BCC55__
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtBlock<gbtText> &);
-#endif  // __BCC55__
+template class gbtBlock<gbtArray<std::string> >;
 

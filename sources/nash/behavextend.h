@@ -27,24 +27,28 @@
 #ifndef BEHAVEXTEND_H
 #define BEHAVEXTEND_H
 
-#include "game/behav.h"
+#include "game/game.h"
 
-class algExtendsToNash {
+#ifdef UNUSED
+//
+// Commented out while support interface is in flux.
+//
+template <class T> class algExtendsToNash {
 public:
-  bool ExtendsToNash(const gbtBehavProfile<gbtNumber> &p_solution,
+  bool ExtendsToNash(const gbtBehavProfile<T> &p_solution,
 		     const gbtEfgSupport &p_littleSupport,
 		     const gbtEfgSupport &p_bigSupport,
 		     gbtStatus &p_status);
 };
 
-class algExtendsToAgentNash {
+template <class T> class algExtendsToAgentNash {
 public:
-  bool ExtendsToAgentNash(const gbtBehavProfile<gbtNumber> &p_solution,
+  bool ExtendsToAgentNash(const gbtBehavProfile<T> &p_solution,
 			  const gbtEfgSupport &p_littleSupport,
 			  const gbtEfgSupport &p_bigSupport,
 			  gbtStatus &p_status);
 };
-
+#endif  // UNUSED
 
 
 #endif   // BEHAVEXTEND_H

@@ -28,7 +28,6 @@
 #define GRARRAY_H
 
 #include "gmisc.h"
-#include "gstream.h"
 
 template <class T> class gbtArray;
 
@@ -38,19 +37,7 @@ template <class T> class gbtRectArray    {
     T **data;
 
   public:
-    class BadIndex : public gbtException  { 
-      public:
-        virtual ~BadIndex()  { }
-        gbtText Description(void) const;
-    };
-
-    class BadDim : public gbtException  {
-      public:
-        virtual ~BadDim()   { }
-	gbtText Description(void) const;
-    };
-
-       // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
+    // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
     gbtRectArray(void);
     gbtRectArray(unsigned int nrows, unsigned int ncols);
     gbtRectArray(int minr, int maxr, int minc, int maxc);
@@ -59,61 +46,56 @@ template <class T> class gbtRectArray    {
 
     gbtRectArray<T> &operator=(const gbtRectArray<T> &);
 
-       // GENERAL DATA ACCESS
+    // GENERAL DATA ACCESS
     int NumRows(void) const;
     int NumColumns(void) const;
     int MinRow(void) const;
     int MaxRow(void) const;
     int MinCol(void) const;
     int MaxCol(void) const;
-    virtual void Dump(gbtOutput &) const;
     
-       // INDEXING OPERATORS
+    // INDEXING OPERATORS
     T &operator()(int r, int c);
     const T &operator()(int r, int c) const;
 
-       // ROW AND COLUMN ROTATION OPERATORS
+    // ROW AND COLUMN ROTATION OPERATORS
     void RotateUp(int lo, int hi);
     void RotateDown(int lo, int hi);
     void RotateLeft(int lo, int hi);
     void RotateRight(int lo, int hi);
 
-       // ROW MANIPULATION FUNCTIONS
+    // ROW MANIPULATION FUNCTIONS
     void SwitchRow(int, gbtArray<T> &);
     void SwitchRows(int, int);
     void GetRow(int, gbtArray<T> &) const;
     void SetRow(int, const gbtArray<T> &);
 
-       // COLUMN MANIPULATION FUNCTIONS
+    // COLUMN MANIPULATION FUNCTIONS
     void SwitchColumn(int, gbtArray<T> &);
     void SwitchColumns(int, int);
     void GetColumn(int, gbtArray<T> &) const;
     void SetColumn(int, const gbtArray<T> &);
 
-      // TRANSPOSE
-    gbtRectArray<T>       Transpose()         const;
+    // TRANSPOSE
+    gbtRectArray<T> Transpose(void) const;
 
 
     // originally protected functions, moved to permit compilation
     // should be moved back eventually
 
-      // RANGE CHECKING FUNCTIONS
-      // check for correct row index
+    // RANGE CHECKING FUNCTIONS
+    // check for correct row index
     bool CheckRow(int row) const;
-      // check row vector for correct column boundaries
+    // check row vector for correct column boundaries
     bool CheckRow(const gbtArray<T> &) const;
-      // check for correct column index
+    // check for correct column index
     bool CheckColumn(int col) const;
-      // check column vector for correct row boundaries
+    // check column vector for correct row boundaries
     bool CheckColumn(const gbtArray<T> &) const;
-      // check row and column indices
+    // check row and column indices
     bool Check(int row, int col) const;
-      // check matrix for same row and column boundaries
+    // check matrix for same row and column boundaries
     bool CheckBounds(const gbtRectArray<T> &) const;
-
-
 };
-
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtRectArray<T> &);
 
 #endif   // GRARRAY_H

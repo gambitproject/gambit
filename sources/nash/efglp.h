@@ -27,33 +27,13 @@
 #ifndef EFGLP_H
 #define EFGLP_H
 
-#include "numerical/tableau.h"
-#include "numerical/lpsolve.h"
-#include "efgalgorithm.h"
+#include "game/game.h"
 
-template <class T> class gbtEfgNashLp : public gbtEfgNashAlgorithm {
-private:
-  T maxpay, minpay;
-  int ns1,ns2,ni1,ni2;
-  gbtList<gbtBasicFeasibleSolution<T> > List;
-  gbtList<gbtGameInfoset> isets1, isets2;
-
-  void FillTableau(const gbtEfgSupport &,
-		   gbtMatrix<T> &, const gbtGameNode &, T ,int ,int , int ,int );
-  void GetSolutions(const gbtEfgSupport &, gbtBehavNashSet &) const;
-  int Add_BFS(/*const*/ gbtLPSolver<T> &B);
-  
-  void GetProfile(const gbtEfgSupport &, gbtBehavProfile<T> &v, 
-		  const gbtBasicFeasibleSolution<T> &sol,
-		  const gbtGameNode &n, int s1,int s2) const;
-
-public:
-  gbtEfgNashLp(void);
-  virtual ~gbtEfgNashLp() { }
-
-  gbtText GetAlgorithm(void) const { return "Lp[EFG]"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
-
+//!
+//! This computes an equilibrium of a two-player zero-sum extensive form
+//! game via solving a linear program based on the sequence form.
+//!
+template <class T> gbtList<gbtBehavProfile<T> >
+gbtNashLpEfg(const gbtGame &p_game, const T &p_precision);
 
 #endif  // EFGLP_H

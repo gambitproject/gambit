@@ -23,7 +23,6 @@ libnash_a_SOURCES = \
 	efglp.cc \
 	efgpoly.cc \
 	efgpure.cc \
-	efgsubsolve.cc \
 	lhtab.cc \
         nfgch.cc \
 	nfglcp.cc \
@@ -54,10 +53,7 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 nash: $(OBJECTS)
-        -erase nash.lib
-	tlib nash /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+        copy *.obj ..
 
 clean:
         -erase *.obj

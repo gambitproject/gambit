@@ -7,11 +7,11 @@
 # automake input for base module
 #
 
-noinst_LIBRARIES = libbase.a
+noinst_LTLIBRARIES = libgambit_base.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libbase_a_SOURCES = \
+libgambit_base_la_SOURCES = \
 	base.h \
 	garray.cc \
 	garray.h \
@@ -26,19 +26,15 @@ libbase_a_SOURCES = \
 	gmap.imp \
 	gmisc.cc \
 	gmisc.h \
+	gnarray.imp \
+	gnarray.h \
 	gnullstatus.h \
-	gprogres.h \
 	grarray.cc \
 	grarray.h \
 	grarray.imp \
 	grblock.h \
 	grblock.imp \
-	gsignal.h \
 	gstatus.h \
-	gstream.cc \
-	gstream.h \
-	gtext.cc \
-	gtext.h \
 	gtree.h \
 	gtree.imp \
 	odometer.cc \

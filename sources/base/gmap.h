@@ -28,7 +28,6 @@
 #define GMAP_H
 
 #include "gmisc.h"
-#include "gstream.h"
 
 template <class K, class T> class gbtBaseMap  {
   protected:
@@ -117,7 +116,7 @@ template <class K, class T> class gbtBaseMap  {
 //
 // Prints out the contents of a map (for debugging purposes)
 //
-    void Dump(gbtOutput &) const;
+    void Dump(std::ostream &) const;
 };
 
 //

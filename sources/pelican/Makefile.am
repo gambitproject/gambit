@@ -1,10 +1,10 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libpelican.a
+noinst_LTLIBRARIES = libgambit_pelican.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libpelican_a_SOURCES = \
+libgambit_pelican_la_SOURCES = \
 	pelclhpk.cc \
 	pelclhpk.h \
 	pelclqhl.cc \

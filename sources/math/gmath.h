@@ -27,24 +27,29 @@
 #ifndef GMATH_H
 #define GMATH_H
 
-#include "gnumber.h"
+#include "base/base.h"
 #include "gvector.h"
 #include "gpvector.h"
 #include "gdpvect.h"
 #include "gmatrix.h"
 #include "mpfloat.h"
 
-template <class T> class gbtArray;
-
 template <class T> T gmin(const T &a, const T &b);
 template <class T> T gmax(const T &a, const T &b);
 template <class T> T gmax(const gbtArray<T> &);
 
-double abs(double a);
-gbtNumber abs(const gbtNumber &);
-
 int sign(const double &a);
 
-double FromText(const gbtText &, double &);
+double FromText(const std::string &, double &);
+
+//!
+//! An exception thrown when division by zero is attempted.
+//!
+class gbtDivisionByZeroException : public gbtException {
+public:
+  ~gbtDivisionByZeroException() { }
+  std::string GetDescription(void) const 
+    { return "Attempted to divide by zero."; }
+};
 
 #endif  // GMATH_H

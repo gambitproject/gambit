@@ -27,15 +27,7 @@
 #include "linrcomb.imp"
 #include "math/gvector.imp"
 #include "math/gmatrix.imp"
-#include "math/double.h"
-
-template gbtVector<gbtDouble> operator* (const gbtVector<gbtDouble>&,
-			  	     const gbtMatrix<gbtDouble>&);
 
 template class gbtLinearCombination<double>;
-template class gbtLinearCombination<gbtDouble>;
 template class gbtLinearCombination<gbtRational>;
 
-template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<double>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<gbtDouble>&);
-template gbtOutput & operator<< (gbtOutput&, const gbtLinearCombination<gbtRational>&);

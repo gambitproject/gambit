@@ -46,10 +46,7 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 poly: $(OBJECTS)
-        -erase poly.lib
-	tlib poly /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+        copy *.obj ..
 
 clean:
         -erase *.obj

@@ -26,29 +26,18 @@
 
 #include "monomial.imp"
 #include "base/glist.imp"
-#include "math/double.h"
 #include "base/garray.imp"
 #include "base/gblock.imp"
-#include "math/gnumber.h"
 
 template class gbtMonomial<int>;
-template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<int>& x);
+template std::ostream& operator << (std::ostream& output, const gbtMonomial<int>& x);
 
 template class gbtMonomial<double>;
-template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<double>& x);
+template std::ostream& operator << (std::ostream& output, const gbtMonomial<double>& x);
 
 template class gbtMonomial<gbtRational>;
-template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtRational>& x);
-
-template class gbtMonomial<gbtNumber>;
-template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtNumber>& x);
-
-template class gbtMonomial<gbtDouble>;
-template gbtOutput& operator << (gbtOutput& output, const gbtMonomial<gbtDouble>& x);
+template std::ostream& operator << (std::ostream& output, const gbtMonomial<gbtRational>& x);
 
 template class gbtList< gbtMonomial<int> >;
 template class gbtList< gbtMonomial<double> >;
 template class gbtList< gbtMonomial<gbtRational> >;
-template class gbtList< gbtMonomial<gbtNumber> >;
-
-template class gbtList< gbtMonomial<gbtDouble> >;

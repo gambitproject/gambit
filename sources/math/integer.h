@@ -34,10 +34,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #ifndef INTEGER_H
 #define INTEGER_H
 
-#include "base/gtext.h"
-
-class gbtInput;
-class gbtOutput;
+#include <string>
 
 #if USE_GNU_MP
 #include <gmp.h>
@@ -190,11 +187,11 @@ public:
   bool fits_in_long(void) const;
   long as_long(void) const;
 
-  friend gbtText Itoa(const gbtInteger& x, int base = 10, int width = 0);
+  friend std::string Itoa(const gbtInteger& x, int base = 10, int width = 0);
   friend gbtInteger atoI(const char* s, int base = 10);
   
-  friend gbtInput& operator>>(gbtInput &s, gbtInteger& y);
-  friend gbtOutput& operator<<(gbtOutput &s, const gbtInteger& y);
+  friend std::istream& operator>>(std::istream &s, gbtInteger& y);
+  friend std::ostream &operator<<(std::ostream &s, const gbtInteger& y);
 
 // error detection
   void error(const char* msg) const;
@@ -212,6 +209,6 @@ public:
 
 extern gbtInteger  sqrt(const gbtInteger&); // floor of square root
 
-gbtText ToText(const gbtInteger &);
+std::string ToText(const gbtInteger &);
 
 #endif  // INTEGER_H

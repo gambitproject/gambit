@@ -53,7 +53,7 @@ built on top of a pointer to a function for computing an order.
 // *************************
 
 struct Variable  { 
-  gbtText Name;
+  std::string Name;
   int number;
 };
 
@@ -76,14 +76,14 @@ public:
   // information
   int             Dmnsn(void)              const;
   Variable*       VariableWithNumber(int)  const;
-  const gbtText&  GetVariableName(int)     const;
+  const std::string&  GetVariableName(int)     const;
   gbtPolySpace          WithVariableAppended()   const;
 
   // manipulation
-  void            SetVariableName(int, const gbtText &);
+  void            SetVariableName(int, const std::string &);
   void            CreateVariables (int nvars = 1);
 
-  void            Dump(gbtOutput &) const;  // Debugging output
+  void            Dump(std::ostream &) const;  // Debugging output
 };
 
 
@@ -153,7 +153,7 @@ public:
   void SetExp(int varno, int pow);
   void ToZero();
 
-  friend gbtOutput& operator<<(gbtOutput&, const gbtPolyExponent&);
+  friend std::ostream& operator<<(std::ostream&, const gbtPolyExponent&);
 };
 
 

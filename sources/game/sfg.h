@@ -29,27 +29,26 @@
 
 #include "base/base.h"
 #include "base/odometer.h"
+#include "base/gnarray.h"
 #include "game.h"
-#include "behav.h"
-#include "gnarray.h"
 #include "sfstrat.h"
 
 class gbtSfgGame  {
 private:
-  const gbtEfgSupport &m_support;
+  gbtGame m_efg;
   gbtArray<gbtSfgSequenceSet *> *sequences;
-  gbtNDArray<gbtArray<gbtNumber> *> *SF;  // sequence form
-  gbtArray<gbtRectArray<gbtNumber> *> *E;   // constraint matrices for sequence form.  
+  gbtNDArray<gbtArray<gbtRational> *> *SF;  // sequence form
+  gbtArray<gbtRectArray<gbtRational> *> *E;   // constraint matrices for sequence form.  
   gbtArray<int> seq;
   gbtPVector<int> isetFlag,isetRow;
   gbtArray<gbtList<gbtGameInfoset> > infosets;
 
-  void MakeSequenceForm(const gbtGameNode &, gbtNumber,gbtArray<int>, 
+  void MakeSequenceForm(const gbtGameNode &, gbtRational,gbtArray<int>, 
 			gbtArray<gbtGameInfoset>, gbtArray<gbtSfgSequence *>);
   void GetSequenceDims(const gbtGameNode &);
 
 public:
-  gbtSfgGame(const gbtEfgSupport &);
+  gbtSfgGame(const gbtGame &);
   virtual ~gbtSfgGame();  
 
   inline int NumSequences(int pl) const {return seq[pl];}
@@ -57,22 +56,19 @@ public:
   inline gbtArray<int> NumSequences() const {return seq;}
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const { return m_support->NumPlayers(); }
-  gbtGamePlayer GetPlayer(int pl) const { return m_support->GetPlayer(pl); }
+  inline int NumPlayers() const { return m_efg->NumPlayers(); }
   
-  inline gbtArray<gbtNumber> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
-  gbtNumber Payoff(const gbtArray<int> & index,int pl) const;
+  inline gbtArray<gbtRational> Payoffs(const gbtArray<int> & index) const {return *((*SF)[index]);}
+  gbtRational Payoff(const gbtArray<int> & index,int pl) const;
 
-  gbtRectArray<gbtNumber> Constraints(int player) const {return *((*E)[player]);};
+  gbtRectArray<gbtRational> Constraints(int player) const {return *((*E)[player]);};
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
   gbtGameInfoset GetInfoset(int pl, int sequence) const;
   gbtGameAction GetAction(int pl, int sequence) const;
-  gbtBehavProfile<gbtNumber> ToBehav(const gbtPVector<double> &x) const;
+  gbtGame GetEfg(void) const { return m_efg; }
+  gbtBehavProfile<double> ToBehav(const gbtPVector<double> &x) const;
   const gbtSfgSequence* GetSequence(int pl, int seq) const {return ((*sequences)[pl])->Find(seq);}
-  
-  void Dump(gbtOutput &) const;
-
 };
 
 #endif    // SFG_H

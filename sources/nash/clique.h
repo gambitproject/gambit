@@ -214,7 +214,7 @@ public:
     {return !(*this == y);}
 };
 
-gbtOutput& operator << (gbtOutput& s, const edge& y);
+std::ostream &operator<<(std::ostream&s, const edge& y);
 
 class EnumCliques {
 private:

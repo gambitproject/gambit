@@ -25,37 +25,23 @@
 //
 
 #include "gvector.imp"
-#include "gnumber.h"
 #include "complex.h"
 #include "mpfloat.h"
+#include "rational.h"
 
 template class gbtVector<int>;
 template class gbtVector<double>;
 template class gbtVector<gbtInteger>;
 template class gbtVector<gbtRational>;
 template class gbtVector<gbtComplex>;
-template class gbtVector<gbtNumber>;
-
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtInteger> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtComplex> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtNumber> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtVector<gbtMPFloat>;
-template gbtOutput &operator<<(gbtOutput &, const gbtVector<gbtMPFloat> &);
+template std::ostream &operator<<(std::ostream &, const gbtVector<gbtMPFloat> &);
 #endif  // GBT_WITH_MP_FLOAT
-
-template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtRational>&);
-template gbtVector<gbtDouble> TogDouble(const gbtVector<double>&);
-template gbtVector<gbtDouble> TogDouble(const gbtVector<gbtDouble>&);
 
 #include "base/glist.imp"
 
 template class gbtList<gbtVector<double> >;
 template class gbtList<gbtVector<gbtRational> >;
 template class gbtList<gbtVector<gbtComplex> >;
-template gbtOutput &operator<<(gbtOutput& output, 
-			       const gbtList<gbtVector<gbtRational> >&);

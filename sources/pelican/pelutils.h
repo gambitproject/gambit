@@ -68,9 +68,11 @@ dependencies on the rest of the code.
   #define STR  120  /* a string (currently a pntr to a C-string)*/
   #define IDF  121  /* a string (currently a pntr to a C-string)*/
   #define ERR  123  /* a string (currently a pntr to a C-string)*/
-  #define PROC 130
+  /* Modified to avoid a conflict with a Borland C++ header file */
+  #define PELPROC 130
   /* Scalor Types */
-  #define INT  210  /* an int (will one always fit in a (char *)*/
+  /* Modified to avoid a conflict with a Borland C++ header file */
+  #define PELINT  210  /* an int (will one always fit in a (char *)*/
   #define DBL  220  /* a double (will it fit ) */
   #define CMPX 230  /* NOT SET UP YET a complex  */
   #define POLY 240  /* NOT SET UP YET a pointer to a gbtPolyUni */
@@ -190,15 +192,14 @@ node node_print(node);
 #define GAMBIT_EXCEPTIONS
 #ifdef GAMBIT_EXCEPTIONS
 #include "base/gmisc.h"
-#include "base/gtext.h"
 
-class ErrorInPelican : public gbtException {
+class gbtPelicanException : public gbtException {
 public:
-  virtual ~ErrorInPelican();
-  gbtText Description(void) const;
+  virtual ~gbtPelicanException() { }
+  std::string GetDescription(void) const 
+    { return "Internal error in pelican"; }
 };
-
-#endif
+#endif  // GAMBIT_EXCEPTIONS
 
 void bad_error(char *);
 void warning(char *);

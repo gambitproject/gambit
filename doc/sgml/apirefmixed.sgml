@@ -4,27 +4,6 @@
 <para>
 </para>
 
-<sect2 id="apiref.mixed.getcreator">
-<title>GetCreator</title>
-<indexterm><primary>GetCreator</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtText MixedSolution::GetCreator(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetCreator</function> returns a text string identifying the algorithm used to create
-the profile.  A profile created or modified by the user is identified by
-<literal>User</literal>.
-</para>
-
-</sect2>
-	
 <sect2 id="apiref.mixed.getgame">
 <title>GetGame</title>
 <indexterm><primary>GetGame</primary></indexterm>
@@ -33,36 +12,14 @@ the profile.  A profile created or modified by the user is identified by
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtGame MixedSolution::GetGame(void) const
+gbtGame gbtMixedProfile&lt;T&gt;::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetGame</function> 
-returns the normal form game to which the profile belongs.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.mixed.getlabel">
-<title>GetLabel</title>
-<indexterm><primary>GetLabel</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtText MixedSolution::GetLabel(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>GetLabel</function>
-returns the text label of the profile.  
-The empty string is returned if the profile object is null.
+returns the game on which the profile is defined.
 </para>
 
 </sect2>
@@ -76,24 +33,17 @@ The empty string is returned if the profile object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber MixedSolution::GetLiapValue(void) const
+T gbtMixedProfile&lt;T&gt;::GetLiapValue(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>LiapValue</function>
-returns the Lyapunov function value for <parameter>profile</parameter>.
+returns the Lyapunov function value for the profile.
 This is a nonnegative value which is zero exactly when the
 profile is a Nash equilibrium.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -106,7 +56,7 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber MixedSolution::GetPayoff(gbtGamePlayer p_player) const
+T gbtMixedProfile&lt;T&gt;::GetPayoff(const gbtGamePlayer &amp;p_player) const
 </synopsis>
 </para>
 </formalpara>
@@ -114,16 +64,12 @@ gbtNumber MixedSolution::GetPayoff(gbtGamePlayer p_player) const
 <para>
 <function>GetPayoff</function> returns the expected payoff to player
 <parameter>player</parameter>, when all players play according to
-the profile.  An error occurs if the parameters are
-not from the same game.
+the profile.  
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_player</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
@@ -136,26 +82,19 @@ if all the data of the game and profile are rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber MixedSolution::GetStrategyProb(gbtGameAction p_strategy) const
+T gbtMixedProfile&lt;T&gt;::GetStrategyProb(const gbtGameStrategy &amp;p_strategy) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetStrategyProb</function>
-returns the probability
-that <parameter>strategy</parameter> is chosen when all players are
-following <parameter>profile</parameter>.  It is an error if
-<parameter>profile</parameter> and <parameter>strategy</parameter> are
-not from the same normal form game.
+returns the probability the strategy is chosen.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_strategy</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if the probability specified in the profile is rational.
-</para>
-</note>
 
 </sect2>
 
@@ -167,7 +106,7 @@ if the probability specified in the profile is rational.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber MixedSolution::GetStrategyValue(gbtGameAction) const
+T gbtMixedProfile&lt;T&gt;::GetStrategyValue(const gbtGameStrategy &amp;p_strategy) const
 </synopsis>
 </para>
 </formalpara>
@@ -178,147 +117,32 @@ returns the expected
 payoff to a player (who is in control of the strategy set including
 <parameter>strategy</parameter>) of choosing
 <parameter>strategy</parameter> when all players are following
-<parameter>profile</parameter>.  It is an error if
-<parameter>profile</parameter> and <parameter>strategy</parameter> are
-not from the same normal form game.
+the profile.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_strategy</parameter> is not from the same game as the
+profile.
 </para>
-
-<note>
-<para>
-The Python implementation always returns a floating-point number, even
-if all the data of the game and profile are rational.
-</para>
-</note>
 
 </sect2>
 
-
-<sect2 id="apiref.mixed.isnash">
-<title>IsNash</title>
-<indexterm><primary>IsNash</primary></indexterm>
+<sect2 id="apiref.mixed.setcentroid">
+<title>SetCentroid</title>
+<indexterm><primary>SetCentroid</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtTriState MixedSolution::IsNash(void) const
+void gbtMixedProfile&lt;T&gt;::SetCentroid(void)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>IsNash</function>
-returns <literal>True</literal> when <parameter>profile</parameter>
-is known by Gambit to be a
-Nash equilibrium of the corresponding game, and <parameter>False</parameter>
-if <parameter>profile</parameter> is known to not be Nash.
-Otherwise, the return value
-is <literal>Unknown</literal>. 
-If <parameter>profile</parameter> is complete (probabilities sum
-to one for every player, and every information set), then there is a
-definitive test for Nash equilibrium.  However if the profile is
-incomplete (i. e., it does not specify actions at off the equilibrium
-path information sets), then it is possible that a profile (or set of
-all completions of the profile) may be Nash, but is not known by
-Gambit to be Nash.
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.mixed.isperfect">
-<title>IsPerfect</title>
-<indexterm><primary>IsPerfect</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtTriState MixedSolution::IsPerfect(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>IsPerfect</function>
-returns <literal>True</literal> if <parameter>profile</parameter>
-is known by Gambit to be a
-perfect Nash equilibrium, <literal>False</literal> if it is known to not be
-perfect, and <literal>Unknown</literal> otherwise.  There is currently no
-definitive test in Gambit for whether an arbitrary profile is perfect.
-However some of the algorithms (notably <function>LcpSolve</function>)
-will only
-return perfect equilibria, which are marked as such.   
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
-
-</sect2>
-
-
-<sect2 id="apiref.mixed.isproper">
-<title>IsProper</title>
-<indexterm><primary>IsProper</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-gbtTriState MixedSolution::IsProper(void) const
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>IsProper</function>
-returns <literal>True</literal> if <parameter>profile</parameter>
-is known by Gambit to be a
-proper Nash equilibrium, <literal>False</literal> if it is known to not be
-proper, and <literal>Unknown</literal> otherwise.  There is currently no
-definitive test in Gambit for whether an arbitrary profile is proper.
-However some algorithms will only
-return proper equilibria, which are marked as such.   
-</para>
-
-<note>
-<para>
-The Python implementation returns a value of <literal>1</literal> for
-<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
-and <literal>-1</literal> for <literal>Unknown</literal>.
-</para>
-</note>
-
-</sect2>
-
-<sect2 id="apiref.mixed.setlabel">
-<title>SetLabel</title>
-<indexterm><primary>SetLabel</primary></indexterm>
-
-<formalpara>
-<title>C++/Python usage</title>
-<para>
-<synopsis>
-void MixedSolution::SetLabel(const gbtText &amp;p_label)
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>SetLabel</function> sets the text label of the profile.
+<function>SetCentroid</function>
+sets the profile to the centroid of the strategy space, in which each
+player plays all of his strategies with equal probability.
 </para>
 
 </sect2>
@@ -332,17 +156,40 @@ void MixedSolution::SetLabel(const gbtText &amp;p_label)
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void MixedSolution::SetStrategyProb(gbtGameAction, gbtNumber)
+void gbtMixedProfile&lt;T&gt;::SetStrategyProb(const gbtGameStrategy &amp;p_strategy, const T &amp;p_prob)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>SetStrategyProb</function>
-sets the component of <parameter>profile</parameter> for 
-<parameter>strategy</parameter> to be equal
-to <parameter>value</parameter>.  It is an error if <parameter>profile</parameter> and <parameter>strategy</parameter>
-are not from the same normal form game.  Returns <parameter>profile</parameter>.
+sets the probability that <parameter>p_strategy</parameter> is played
+in the profile to <parameter>p_prob</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_strategy</parameter> is not from the same game as the
+profile.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.mixed.strategyprofilelength">
+<title>StrategyProfileLength</title>
+<indexterm><primary>StrategyProfileLength</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtMixedProfile&lt;T&gt;::StrategyProfileLength(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>StrategyProfileLength</function> returns the number of
+probabilities that are specified in a strategy profile on the game.
+This length is the total number of strategies for all players.
 </para>
 
 </sect2>

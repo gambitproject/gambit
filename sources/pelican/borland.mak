@@ -48,10 +48,7 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 pelican: $(OBJECTS)
-        -erase pelican.lib
-	tlib pelican /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+    copy *.obj ..
 
 clean:
         -erase *.obj

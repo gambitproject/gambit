@@ -27,7 +27,7 @@ node pcfg_facets(node PC, Imatrix Controll)
     facetT *facet;
     vertexT *vertex, **vertexp;
     node NormList = 0, *pt_table;
-    Imatrix M, Norm, P0, P1;
+    Imatrix M, Norm, P0 = 0, P1;
     LOCS(2);
 
 

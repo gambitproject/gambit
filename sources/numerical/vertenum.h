@@ -70,12 +70,6 @@ private:
   void Search(gbtLPTableau<T> &tab);
   void DualSearch(gbtLPTableau<T> &tab);
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim();
-    gbtText Description(void) const;
-  };
-
   gbtVertEnum(const gbtMatrix<T> &, const gbtVector<T> &, gbtStatus &);
   gbtVertEnum(gbtLPTableau<T> &, gbtStatus &);
   virtual ~gbtVertEnum();
@@ -84,7 +78,7 @@ public:
   const gbtList<gbtBasicFeasibleSolution<T> > &DualVertexList() const;
   void Vertices(gbtList<gbtVector<T> > &verts) const;
   long NumPivots() const;
-  void Dump(gbtOutput &) const;
+  void Dump(std::ostream &) const;
 };
 #ifdef _A
 #undef _A
@@ -112,11 +106,6 @@ private:
   void DualSearch(gbtLPTableau<T> &, gbtTableau<T> &);
   void EnumerateComplementaryFace(gbtLPTableau<T> &, gbtTableau<T> &);
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim();
-    gbtText Description(void) const;
-  };
   gbtDoubleVertEnum(const gbtMatrix<T> &_A, const gbtVector<T> &_b,
 		 const gbtMatrix<T> &_A2, const gbtVector<T> &_b2, 
 		 gbtStatus &);
@@ -125,7 +114,7 @@ public:
   const gbtList<gbtBasicFeasibleSolution<T> > &VertexList2() const;
   void Vertices(gbtList<gbtVector<T> > &verts, gbtList<gbtVector<T> > &verts2) const;
   long NumPivots() const;
-  void Dump(gbtOutput &) const;
+  void Dump(std::ostream &) const;
 };
 
 #endif // VERTENUM_H

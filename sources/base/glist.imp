@@ -27,11 +27,6 @@
 #include "base.h"
 #include <assert.h>
 
-template <class T>
-gbtText gbtList<T>::BadIndex::Description(void) const
-{ return "Bad index in gbtList"; }
-
-
 //--------------------------------------------------------------------------
 //                 gbtNode: Member function implementations
 //--------------------------------------------------------------------------
@@ -80,7 +75,7 @@ template <class T> gbtList<T>::~gbtList()
 
 template <class T> int gbtList<T>::InsertAt(const T &t, int num)
 {
-  if (num < 1 || num > length + 1)   throw BadIndex();
+  if (num < 1 || num > length + 1)   throw gbtIndexException();
   
   if (!length)  {
     head = tail = new gbtNode(t, 0, 0);
@@ -162,7 +157,7 @@ template <class T> bool gbtList<T>::operator!=(const gbtList<T> &b) const
 
 template <class T> const T &gbtList<T>::operator[](int num) const
 {
-  if (num < 1 || num > length)    throw BadIndex();
+  if (num < 1 || num > length)  throw gbtIndexException();
 
   int i;
   gbtNode *n;
@@ -177,7 +172,7 @@ template <class T> const T &gbtList<T>::operator[](int num) const
 
 template <class T> T &gbtList<T>::operator[](int num)
 {
-  if (num < 1 || num > length)   throw BadIndex();
+  if (num < 1 || num > length)   throw gbtIndexException();
   gbtNode *n;
   int i;
   if( num < CurrIndex )
@@ -275,7 +270,7 @@ template <class T> int gbtList<T>::Insert(const T &t, int n)
 
 template <class T> T gbtList<T>::Remove(int num)
 {
-  if (num < 1 || num > length)   throw BadIndex();
+  if (num < 1 || num > length)   throw gbtIndexException();
   gbtNode *n;
   int i;
 
@@ -364,20 +359,4 @@ template <class T> void gbtList<T>::Flush(void)
   CurrNode = 0;
 }
 
-template <class T> void gbtList<T>::Dump(gbtOutput &f) const
-{
-  if (length)   {
-    gbtNode *n = head;
-    int i = 1;
-    while (n)  {
-      f << i << ": " << (n->data) << '\n';
-      i++;
-      n = n->next;
-    }
-  }
-}
 
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtList<T> &b)
-{
-  b.Dump(f);   return f;
-}

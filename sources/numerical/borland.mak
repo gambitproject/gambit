@@ -45,10 +45,7 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 numerical: $(OBJECTS)
-        -erase numerical.lib
-	tlib numerical /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+        copy *.obj ..
 
 clean:
         -erase *.obj

@@ -27,53 +27,23 @@
 #ifndef GMISC_H
 #define GMISC_H
 
-
-typedef enum { GBT_TRISTATE_FALSE = 0, GBT_TRISTATE_TRUE = 1, 
-	           GBT_TRISTATE_UNKNOWN = 2 } gbtTriState;
-
-class gbtText;
-class gbtOutput;
-gbtOutput &operator<<(gbtOutput &, gbtTriState);
-
-//
-// Generation of random numbers
-//
-
-// Set the seed of the random number generator
-void SetSeed(unsigned int);
-
-// Generate a random variable from the distribution U[0..1]
-double Uniform(void);
-
-// Generates a random number between 0 and IM exclusive of endpoints
-// Adapted from _Numerical_Recipes_for_C_
-#define IM 2147483647
-long ran1(long* idum);
+#include <iostream>
+#include <string>
 
 //
 // Converting between strings and other datatypes
 //
+std::string ToText(int);
+std::string ToText(long);
+std::string ToText(double);
+std::string ToText(double p_number, int p_precision);
 
-class gbtInteger;
-class gbtRational;
-
-void ToTextWidth(int); // Set # of decimal places for floating point
-int  ToTextWidth(void); // Get the current value of the above
-void ToTextPrecision(int); // Set # of decimal places for floating point
-int  ToTextPrecision(void); // Get the current value of the above
-
-gbtText ToText(int);
-gbtText ToText(long);
-gbtText ToText(double);
-gbtText ToText(double p_number, int p_precision);
-gbtText ToText(gbtTriState);
-
-double ToDouble(const gbtText &);
+double ToDouble(const std::string &);
 
 //
 /// Return a copy of the string with all quotes preceded by a backslash
 //
-gbtText EscapeQuotes(const gbtText &);
+std::string EscapeQuotes(const std::string &);
 
 //
 // Type dependent epsilon
@@ -100,16 +70,49 @@ public:
   bool operator == (const gbtIndexPair&) const;
   bool operator != (const gbtIndexPair&) const;
   int operator [] (const int&) const; 
-
-  friend gbtOutput& operator << (gbtOutput& output, const gbtIndexPair& x);  
 };
 
+inline std::ostream &operator<<(std::ostream &f, const gbtIndexPair &)
+{ return f; }
+
+
+//!
+//! Abstract base class for all exceptions
+//!
 class gbtException   {
 public:
-  virtual ~gbtException();
-  
-  virtual gbtText Description(void) const = 0;
+  virtual ~gbtException() { }
+  virtual std::string GetDescription(void) const = 0;
 };
 
+//!
+//! An exception thrown when indexing outside the range of, for example,
+//! an array.
+//!
+class gbtIndexException : public gbtException  {
+public:
+  virtual ~gbtIndexException() { }
+  std::string GetDescription(void) const;
+};
+
+//!
+//! An exception thrown on a dimension error (for example, operating on
+//! two different length vectors).
+//!
+class gbtDimensionException : public gbtException {
+public:
+  virtual ~gbtDimensionException() { }
+  std::string GetDescription(void) const;
+};
+
+//!
+//! An exception thrown when a range is invalid (for example, last index
+//! is smaller than first index)
+//!
+class gbtRangeException : public gbtException {
+public:
+  virtual ~gbtRangeException() { }
+  std::string GetDescription(void) const;
+};
 
 #endif    // GMISC_H

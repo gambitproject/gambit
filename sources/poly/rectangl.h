@@ -80,15 +80,9 @@ public:
     const T                  DiameterSquared()                  const;
 
     // output
-    void Output(gbtOutput &) const;
+    void Output(std::ostream &) const;
 };
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gRectangle<T> &);
-
-  //-------------
-  // Conversion:
-  //-------------
-
-template <class T> gRectangle<gbtDouble> TogDouble(const gRectangle<T>&);
+template <class T> std::ostream &operator<<(std::ostream &, const gRectangle<T> &);
 
 #endif // RECTANGL_H

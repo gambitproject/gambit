@@ -27,23 +27,13 @@
 #ifndef EFGPURE_H
 #define EFGPURE_H
 
-#include "base/base.h"
-#include "base/gstatus.h"
-#include "efgalgorithm.h"
+#include "game/game.h"
 
-class gbtEfgNashEnumPure : public gbtEfgNashAlgorithm {
-private:
-  int m_stopAfter;
-
-public:
-  gbtEfgNashEnumPure(void) : m_stopAfter(0) { }
-  virtual ~gbtEfgNashEnumPure() { }
-
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gbtText GetAlgorithm(void) const { return "EnumPure[EFG]"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
+//!
+//! This implements a search for pure strategy equilbria in the
+//! extensive form.
+//!
+gbtList<gbtBehavProfile<gbtRational> >
+gbtNashEnumPureEfg(const gbtGame &p_game, int p_stopAfter = 0);
 
 #endif    // EFGPURE_H

@@ -36,7 +36,41 @@
 // simplify things. (TLT, 6/2002)
 //
 
+#include "base/gnullstatus.h"
 #include "nfgsimpdiv.h"
+
+template <class T> class gbtNfgNashSimpdiv {
+private:
+  int m_nRestarts, m_leashLength;
+
+  int t, ibar;
+  T pay,d,maxz,bestz,mingrid;
+
+  T Simplex(gbtMixedProfile<T> &);
+  T getlabel(gbtMixedProfile<T> &yy, gbtArray<int> &, gbtPVector<T> &);
+  void update(gbtRectArray<int> &, gbtRectArray<int> &, gbtPVector<T> &,
+	      const gbtPVector<int> &, int j, int i);
+  void getY(gbtMixedProfile<T> &x, gbtPVector<T> &, 
+	    const gbtPVector<int> &, const gbtPVector<int> &, 
+	    const gbtPVector<T> &, const gbtRectArray<int> &, int k);
+  void getnexty(gbtMixedProfile<T> &x, const gbtRectArray<int> &,
+		const gbtPVector<int> &, int i);
+  int get_c(int j, int h, int nstrats, const gbtPVector<int> &);
+  int get_b(int j, int h, int nstrats, const gbtPVector<int> &);
+  
+public:
+  gbtNfgNashSimpdiv(void);
+  virtual ~gbtNfgNashSimpdiv();
+
+  int NumRestarts(void) const { return m_nRestarts; }
+  void SetNumRestarts(int p_nRestarts) { m_nRestarts = p_nRestarts; }
+
+  int LeashLength(void) const { return m_leashLength; }
+  void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
+
+  std::string GetAlgorithm(void) const { return "Simpdiv[NFG]"; }
+  gbtList<gbtMixedProfile<T> > Solve(const gbtMixedProfile<T> &, gbtStatus &);
+};
 
 //-------------------------------------------------------------------------
 //               gbtNfgNashSimpdiv<T>: Constructor and destructor
@@ -61,12 +95,11 @@ template <class T> gbtNfgNashSimpdiv<T>::~gbtNfgNashSimpdiv()
 template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 {
   gbtArray<int> ylabel(2);
-  gbtRectArray<int> labels(y->MixedProfileLength(), 2), pi(y->MixedProfileLength(), 2);
-  gbtPVector<int> U(y->NumStrategies());
-  gbtPVector<int> TT(y->NumStrategies());
-  gbtPVector<T> ab(y->NumStrategies());
-  gbtPVector<T> besty(y->NumStrategies());
-  gbtPVector<T> v(y->NumStrategies());
+  gbtRectArray<int> labels(y->StrategyProfileLength(), 2), pi(y->StrategyProfileLength(), 2);
+  gbtPVector<int> U(y->GetGame()->NumStrategies()), TT(y->GetGame()->NumStrategies());
+  gbtPVector<T> ab(y->GetGame()->NumStrategies());
+  gbtPVector<T> besty(y->GetGame()->NumStrategies());
+  gbtPVector<T> v(y->GetGame()->NumStrategies());
   for (int i = 1; i <= v.Length(); i++) {
     v[i] = y[i];
   }
@@ -79,8 +112,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 // step0:;
   ibar=1;
   t=0;
-  for (j = 1; j <= y->NumPlayers(); j++) {
-      for(h=1;h<=y->GetPlayer(j)->NumStrategies();h++)
+  for (j = 1; j <= y->GetGame()->NumPlayers(); j++) {
+      for(h=1;h<=y->GetGame()->GetPlayer(j)->NumStrategies();h++)
 	{
 	  TT(j,h)=0;
 	  U(j,h)=0;
@@ -102,9 +135,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 // case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
-      for(hh=1,tot=0;hh<=y->GetPlayer(j)->NumStrategies();hh++)
+      for(hh=1,tot=0;hh<=y->GetGame()->GetPlayer(j)->NumStrategies();hh++)
 	if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-      if(tot==y->GetPlayer(j)->NumStrategies()-1)goto end;
+      if(tot==y->GetGame()->GetPlayer(j)->NumStrategies()-1)goto end;
       else {
 	i=t+1;
 	goto step2;
@@ -121,7 +154,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   else if(U(j,h))
     {
       k=h;
-      while(U(j,k)){k++;if(k>y->GetPlayer(j)->NumStrategies())k=1;}
+      while(U(j,k)){k++;if(k>y->GetGame()->GetPlayer(j)->NumStrategies())k=1;}
       if(TT(j,k)==0)i=t+1;
       else {
 	i=1;
@@ -149,8 +182,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   j=pi(ii,1);
   h=pi(ii,2);
   k=h;
-  if(i<t+1)k=get_b(j,h,y->GetPlayer(j)->NumStrategies(),U);
-  kk=get_c(j,h,y->GetPlayer(j)->NumStrategies(),U);
+  if(i<t+1)k=get_b(j,h,y->GetGame()->GetPlayer(j)->NumStrategies(),U);
+  kk=get_c(j,h,y->GetGame()->GetPlayer(j)->NumStrategies(),U);
   if(i==1)ii=t+1;
   else if(i==t+1)ii=1;
   else ii=i-1;
@@ -158,9 +191,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   
       /* case3a */
   if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(m_leashLength))*d)) {
-    for(hh=1,tot=0;hh<=y->GetPlayer(j)->NumStrategies();hh++)
+    for(hh=1,tot=0;hh<=y->GetGame()->GetPlayer(j)->NumStrategies();hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-    if(tot==y->GetPlayer(j)->NumStrategies()-1) {
+    if(tot==y->GetGame()->GetPlayer(j)->NumStrategies()-1) {
       U(j,k)=1;
       goto end;
     }
@@ -184,10 +217,10 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
       while(ab(j,kk)==(T)(0) && k==0) {
 	if(kk==h)k=1;
 	kk++;
-	if(kk>y->GetPlayer(j)->NumStrategies())kk=1;
+	if(kk>y->GetGame()->GetPlayer(j)->NumStrategies())kk=1;
       }
       kk--;
-      if(kk==0)kk=y->GetPlayer(j)->NumStrategies();
+      if(kk==0)kk=y->GetGame()->GetPlayer(j)->NumStrategies();
       if(kk==h)goto step4;
       else goto step5;
     }
@@ -198,7 +231,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
       else if(i==t+1) {
 	j=pi(t,1);
 	h=pi(t,2);
-	hh=get_b(j,h,y->GetPlayer(j)->NumStrategies(),U);
+	hh=get_b(j,h,y->GetGame()->GetPlayer(j)->NumStrategies(),U);
 	y(j,h)-=d;
 	y(j,hh)+=d;
       }
@@ -227,24 +260,24 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   U(j,k)=0;
   jj=pi(1,1);
   hh=pi(1,2);
-  kk=get_b(jj,hh,y->GetPlayer(jj)->NumStrategies(),U);
+  kk=get_b(jj,hh,y->GetGame()->GetPlayer(jj)->NumStrategies(),U);
   y(jj,hh)-=d;
   y(jj,kk)+=d;
   
-  k=get_c(j,h,y->GetPlayer(j)->NumStrategies(),U);
+  k=get_c(j,h,y->GetGame()->GetPlayer(j)->NumStrategies(),U);
   kk=1;
   while(kk){
     if(k==h)kk=0;
     ab(j,k)=(ab(j,k)-((T)(1)));
     k++;
-    if(k>y->GetPlayer(j)->NumStrategies())k=1;
+    if(k>y->GetGame()->GetPlayer(j)->NumStrategies())k=1;
   }
   goto step1;
 
  end:;
   maxz=bestz;
-  for(i=1;i<=y->NumPlayers();i++)
-    for(j=1;j<=y->GetPlayer(i)->NumStrategies();j++)
+  for(i=1;i<=y->GetGame()->NumPlayers();i++)
+    for(j=1;j<=y->GetGame()->GetPlayer(i)->NumStrategies();j++)
       y(i,j)=besty(i,j);
   return maxz;
 }
@@ -306,15 +339,15 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(gbtMixedProfile<T> &x,
 {
   int j, h, i,hh;
   
-  for(j=1;j<=x->NumPlayers();j++)
-    for(h=1;h<=x->GetPlayer(j)->NumStrategies();h++)
+  for(j=1;j<=x->GetGame()->NumPlayers();j++)
+    for(h=1;h<=x->GetGame()->GetPlayer(j)->NumStrategies();h++)
       x(j,h)=v(j,h);
-  for(j=1;j<=x->NumPlayers();j++)
-    for(h=1;h<=x->GetPlayer(j)->NumStrategies();h++)
+  for(j=1;j<=x->GetGame()->NumPlayers();j++)
+    for(h=1;h<=x->GetGame()->GetPlayer(j)->NumStrategies();h++)
       if(TT(j,h)==1 || U(j,h)==1) {
 	x(j,h)+=(d*ab(j,h));
 	hh=h-1;
-	if(hh==0)hh=x->GetPlayer(j)->NumStrategies();
+	if(hh==0)hh=x->GetGame()->GetPlayer(j)->NumStrategies();
 	x(j,hh)-=(d*ab(j,h));
       }
   i=2;
@@ -331,11 +364,11 @@ template <class T> void gbtNfgNashSimpdiv<T>::getnexty(gbtMixedProfile<T> &x,
 {
   int j,h,hh;
   
-  assert(i>=1);
+  //assert(i>=1);
   j=pi(i,1);
   h=pi(i,2);
   x(j,h)+=d;
-  hh=get_b(j,h,x->GetPlayer(j)->NumStrategies(),U);
+  hh=get_b(j,h,x->GetGame()->GetPlayer(j)->NumStrategies(),U);
   x(j,hh)-=d;
 }
 
@@ -376,19 +409,19 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
   ylabel[1]=1;
   ylabel[2]=1;
   
-  for(i=1;i<=yy->NumPlayers();i++) {
+  for(i=1;i<=yy->GetGame()->NumPlayers();i++) {
     payoff=(T)(0);
     maxval=((T)(-1000000));
     jj=0;
-    for(j=1;j<=yy->GetPlayer(i)->NumStrategies();j++) {
-      pay=yy->GetStrategyValue(yy->GetPlayer(i)->GetStrategy(j));
+    for(j=1;j<=yy->GetGame()->GetPlayer(i)->NumStrategies();j++) {
+      pay = yy->GetStrategyValue(yy->GetGame()->GetPlayer(i)->GetStrategy(j));
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;
 	jj=j;
       }
     }
-    assert(jj>0);
+    //    assert(jj>0);
     if((maxval-payoff)>maxz) {
       maxz=maxval-payoff;
       ylabel[1]=i;
@@ -397,8 +430,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
   }
   if(maxz<bestz) {
     bestz=maxz;
-    for(i=1;i<=yy->NumPlayers();i++)
-      for(j=1;j<=yy->GetPlayer(i)->NumStrategies();j++)
+    for(i=1;i<=yy->GetGame()->NumPlayers();i++)
+      for(j=1;j<=yy->GetGame()->GetPlayer(i)->NumStrategies();j++)
 	besty(i,j)=yy(i,j);
   }
   return maxz;
@@ -409,11 +442,11 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
 //               gbtNfgNashSimpdiv<T>: Main solution algorithm
 //-------------------------------------------------------------------------
 
-template <class T> gbtMixedNashSet
-gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNfgNashSimpdiv<T>::Solve(const gbtMixedProfile<T> &p_start, 
 			    gbtStatus &p_status)
 {
-  int qf,i,j,k,ii;
+  int qf,i,k,ii;
 
   // A raft of initializations moved here from the former constructor.
   // This algorithm is in need of some serious reorganization!
@@ -430,20 +463,19 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
   }
   mingrid = ((T)(1))/mingrid;
   
-  gbtMixedProfile<T> y = p_game->NewMixedProfile((T) 0.0);
-  ((gbtVector<T> &) y).operator=((T) 0);
+  gbtMixedProfile<T> y = p_start;
+  //((gbtVector<T> &) y).operator=((T) 0);
 
-  // In principle, this algorithm can be started from any point
-  // in the simplex.  Currently, it starts at a predefined point;
-  // therefore, it is set up to compute one and only one equilibrium.
-  gbtMixedNashSet solutions;
   k=1;
   d=(T) 1.0 / (T) k;
+#ifdef UNUSED
+  // The old default starting point
   for(i=1;i<=p_game->NumPlayers();i++) {
     y(i,1)=(T)(1);
     for(j=1;j<=p_game->GetPlayer(i)->NumStrategies();j++)
       if(j>1)y(i,j)=(T)(0);
   }
+#endif  //UNUSED
     
   for(qf=0,ii=0;qf!=1 && d > mingrid;ii++) {
     const double TOL = 1.0e-10;
@@ -454,9 +486,18 @@ gbtNfgNashSimpdiv<T>::Solve(const gbtNfgGame &p_game,
       
     if(maxz<(T)(TOL))qf=1;
   }
-    
-  gbtMixedProfile<T> profile(y);
-  solutions.Append(y->NewMixedProfile(gbtNumber(0)));
+
+  gbtList<gbtMixedProfile<T> > solutions;
+  solutions.Append(y);
 
   return solutions;
+}
+
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashSimpdivNfg(const gbtMixedProfile<T> &p_start, int p_leashLength)
+{
+  gbtNfgNashSimpdiv<T> algorithm;
+  algorithm.SetLeashLength(p_leashLength);
+  gbtNullStatus status;
+  return algorithm.Solve(p_start, status);
 }

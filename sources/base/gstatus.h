@@ -27,12 +27,31 @@
 #ifndef GSTATUS_H
 #define GSTATUS_H
 
-#include "gsignal.h"
-#include "gprogres.h"
+#include "base/base.h"
 
-class gbtStatus : public gbtSignal, public gbtProgress {
+//!
+//! An exception thrown to indicate a user request for an interrupt.
+//! Thrown by gbtStatus::Get()
+//!
+class gbtInterruptException : public gbtException {
+public:
+  virtual ~gbtInterruptException() { }
+  std::string GetDescription(void) const { return "User interrupt occurred."; }
+};
+
+class gbtStatus {
 public:
   virtual ~gbtStatus() { }
+
+  // Get() throws a gbtInterruptException exception if the computation
+  // should be interrupted.
+  virtual void Get(void) const throw (gbtInterruptException) = 0;
+  virtual void Reset(void) = 0;
+
+  virtual void SetProgress(double p) = 0;
+  virtual void SetProgress(double p, const std::string &) = 0; 
+
+  virtual gbtStatus &operator<<(const std::string &) = 0;
 };
 
 #endif  // GSTATUS_H

@@ -20,10 +20,10 @@ void gbtGameAction::DeleteAction(void)
 
 <para>
 <function>DeleteAction</function> deletes
-<parameter>action</parameter> from its information set.  As a
+the action from its information set.  As a
 consequence, the corresponding subtrees associated with the action
-from each member of the information set are deleted.  It is an error
-if <parameter>action</parameter> is the only action at its information
+from each member of the information set are deleted.  
+No action is taken if the action is the only action at its information
 set.
 </para>
 
@@ -38,16 +38,18 @@ set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtNumber gbtGameAction::GetChanceProb(void) const
+gbtRational gbtGameAction::GetChanceProb(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>GetChanceProb</function> returns the probability of
-<parameter>action</parameter> being chosen at its information set by
-the chance player.  It is an error if <parameter>action</parameter> is
-not an action which is chosen by the chance player.
+the action being chosen at its information set by
+the chance player. 
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+the action does not belong to the chance player.
 </para>
 
 </sect2>
@@ -67,9 +69,7 @@ gbtGameInfoset gbtGameAction::GetInfoset(void) const
 
 <para>
 <function>GetInfoset</function> 
-returns the information set to which <parameter>action</parameter> belongs.
-The null
-action is assumed to belong to the null information set.
+returns the information set to which the action belongs.
 </para>
 
 </sect2>
@@ -82,7 +82,7 @@ action is assumed to belong to the null information set.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGameAction::GetLabel(void) const
+std::string gbtGameAction::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -95,6 +95,28 @@ The empty string is returned if the action object is null.
 
 </sect2>
 
+<sect2 id="apiref.action.precedes">
+<title>Precedes</title>
+<indexterm><primary>Precedes</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameAction::Precedes(const gbtGameNode &amp;p_node) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Precedes</function> returns true if the action
+precedes <parameter>p_node</parameter> in the game tree.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> is from a different game.
+</para>
+
+</sect2>
 
 <sect2 id="apiref.action.setchanceprob">
 <title>SetChanceProb</title>
@@ -104,17 +126,18 @@ The empty string is returned if the action object is null.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameAction::SetChanceProb(gbtNumber)
+void gbtGameAction::SetChanceProb(const gbtRational &amp;p_prob)
 </synopsis>
 </para>
 </formalpara>
 
 <para>
 <function>SetChanceProb</function> 
-sets the action probability for 
-to the value given.
-An error occurs if <parameter>action</parameter> is not an action controlled
-by the chance player.
+sets the probability chance chooses the action to
+<parameter>p_prob</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+the action does not belong to the chance player.
 </para>
 
 </sect2>
@@ -128,7 +151,7 @@ by the chance player.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameAction::SetLabel(const gbtText &amp;p_label)
+void gbtGameAction::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>

@@ -27,21 +27,12 @@
 #ifndef EFGPOLY_H
 #define EFGPOLY_H
 
-#include "efgalgorithm.h"
+#include "game/game.h"
 
-class gbtEfgNashEnumPoly : public gbtEfgNashAlgorithm {
-private:
-  int m_stopAfter;
+//!
+//! This computes all totally-mixed Nash equilibria on the
+//! extensive form
+//!
+gbtList<gbtBehavProfile<double> > gbtNashEnumPolyEfg(const gbtGame &p_game);
 
-public:
-  gbtEfgNashEnumPoly(void);
-  virtual ~gbtEfgNashEnumPoly() { }
-
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gbtText GetAlgorithm(void) const { return "PolEnum[EFG]"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
-  
 #endif  // EFGPOLY_H

@@ -38,12 +38,11 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
   Thanks to the creators of the algorithms.
 */
 
+#include <iostream>
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include <assert.h>
-#include "base/gstream.h"
 #include "math/integer.h"
 
 #if !USE_GNU_MP
@@ -75,8 +74,8 @@ int      compare(const gbt_integer_rep*, const gbt_integer_rep*);
 int      compare(const gbt_integer_rep*, long);
 int      ucompare(const gbt_integer_rep*, const gbt_integer_rep*);
 int      ucompare(const gbt_integer_rep*, long);
-gbtText Itoa(const gbt_integer_rep* x, int base = 10, int width = 0);
-gbtText cvtItoa(const gbt_integer_rep* x, gbtText fmt, int& fmtlen, int base,
+std::string Itoa(const gbt_integer_rep* x, int base = 10, int width = 0);
+std::string cvtItoa(const gbt_integer_rep* x, std::string fmt, int& fmtlen, int base,
 	      int showbase, int width, int align_right, 
 	      char fillchar, char Xcase, int showpos);
 gbt_integer_rep*  atoIntRep(const char* s, int base = 10);
@@ -210,9 +209,7 @@ void scpy(const unsigned short* src, unsigned short* dest,int nb)
 // make sure an argument is valid
 
 static inline void nonnil(const gbt_integer_rep* rep)
-{
-  assert(rep != 0);
-}
+{ }
 
 // allocate a new Irep. Pad to something close to a power of two.
 
@@ -223,7 +220,7 @@ static gbt_integer_rep* Inew(int newlen)
   unsigned int allocsiz = MINIntRep_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  assert((unsigned long) allocsiz < MAXIntRep_SIZE * sizeof(short));
+  //  assert((unsigned long) allocsiz < MAXIntRep_SIZE * sizeof(short));
     
   gbt_integer_rep* rep = (gbt_integer_rep *) new char[allocsiz];
   rep->sz = (allocsiz - sizeof(gbt_integer_rep) + sizeof(short)) / sizeof(short);
@@ -1220,7 +1217,7 @@ gbt_integer_rep* div(const gbt_integer_rep* x, const gbt_integer_rep* y, gbt_int
   int xl = x->len;
   int yl = y->len;
   // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
-  assert(yl != 0);
+  //assert(yl != 0);
 
   int comp = ucompare(x, y);
   int xsgn = x->sgn;
@@ -1272,7 +1269,7 @@ gbt_integer_rep* div(const gbt_integer_rep* x, long y, gbt_integer_rep* q)
   nonnil(x);
   int xl = x->len;
   // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
-  assert(y != 0);
+  //assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
@@ -1348,7 +1345,7 @@ void divide(const gbtInteger &Ix, long y, gbtInteger &Iq, long &rem)
   gbt_integer_rep* q = Iq.rep;
   int xl = x->len;
   // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
-  assert(y != 0);
+  //assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
@@ -1446,7 +1443,7 @@ void divide(const gbtInteger &Ix, const gbtInteger &Iy, gbtInteger &Iq, gbtInteg
   /* if (yl == 0)
     (*lib_error_handler)("gbtInteger", "attempted division by zero");
   */
-  assert(yl != 0);
+  //assert(yl != 0);
 
   int comp = ucompare(x, y);
   int xsgn = x->sgn;
@@ -1515,7 +1512,7 @@ gbt_integer_rep* mod(const gbt_integer_rep* x, const gbt_integer_rep* y, gbt_int
   int xl = x->len;
   int yl = y->len;
   // if (yl == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
-  assert(yl != 0);
+  //assert(yl != 0);
 
   int comp = ucompare(x, y);
   int xsgn = x->sgn;
@@ -1566,7 +1563,7 @@ gbt_integer_rep* mod(const gbt_integer_rep* x, long y, gbt_integer_rep* r)
   nonnil(x);
   int xl = x->len;
   // if (y == 0) (*lib_error_handler)("gbtInteger", "attempted division by zero");
-  assert(y != 0);
+  //assert(y != 0);
 
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
@@ -1947,21 +1944,21 @@ gbt_integer_rep* atoIntRep(const char* s, int base)
   return r;
 }
 
-gbtText Itoa(const gbt_integer_rep *x, int base, int width)
+std::string Itoa(const gbt_integer_rep *x, int base, int width)
 {
   int fmtlen = (int) ((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
-  gbtText fmtbase;
+  std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
     fmtbase += " ";
   }
   return cvtItoa(x, fmtbase, fmtlen, base, 0, width, 0, ' ', 'X', 0);
 }
 
-gbtText cvtItoa(const gbt_integer_rep *x, gbtText fmt, int& fmtlen, int base, int showbase,
+std::string cvtItoa(const gbt_integer_rep *x, std::string fmt, int& fmtlen, int base, int showbase,
               int width, int align_right, char fillchar, char Xcase, 
               int showpos)
 {
-  char* e = fmt + fmtlen - 1;
+  char* e = const_cast<char *>(fmt.c_str()) + fmtlen - 1;
   char* s = e;
   *--s = 0;
 
@@ -2037,19 +2034,19 @@ gbtText cvtItoa(const gbt_integer_rep *x, gbtText fmt, int& fmtlen, int base, in
     return s;
   }
   else {
-    char *p = (char *) fmt;
+    char *p = const_cast<char *>(fmt.c_str());
 #ifdef UNUSED
     int gap = (int) (s - p);
 #endif   // UNUSED
     for (char* t = s; *t != 0; ++t, ++p) *p = *t;
     while (w++ < width) *p++ = fillchar;
     *p = 0;
-    fmtlen = (int) (p - (char *) fmt);
+    fmtlen = (int) (p - const_cast<char *>(fmt.c_str()));
     return fmt;
   }
 }
 
-gbtInput &operator>>(gbtInput& s, gbtInteger& y)
+std::istream &operator>>(std::istream& s, gbtInteger& y)
 {
   char sgn = 0;
   char ch;
@@ -2059,7 +2056,7 @@ gbtInput &operator>>(gbtInput& s, gbtInteger& y)
     s.get(ch);
   }  while (isspace(ch));
 
-  s.unget(ch);
+  s.unget();
 
   while (s.get(ch)) {
     if (ch == '-') {
@@ -2078,7 +2075,7 @@ gbtInput &operator>>(gbtInput& s, gbtInteger& y)
 	break;
     }
   }
-  s.unget(ch);
+  s.unget();
 
   if (sgn == '-') {
     y.negate();
@@ -2654,12 +2651,12 @@ bool odd(const gbtInteger &y)
 #endif // USE_GNU_MP
 }
 
-gbtText Itoa(const gbtInteger &y, int base, int width)
+std::string Itoa(const gbtInteger &y, int base, int width)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, base) + 2];
   mpz_get_str(buf, base, y.m_value);
-  return gbtText(buf);
+  return std::string(buf);
 #else
   return Itoa(y.rep, base, width);
 #endif // USE_GNU_MP
@@ -2762,9 +2759,9 @@ void gbtInteger::operator%=(long y)
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
 
-gbtText ToText(const gbtInteger &i)
+std::string ToText(const gbtInteger &i)
 {
-  return gbtText(Itoa(i));
+  return std::string(Itoa(i));
 }
 
 #if !USE_GNU_MP
@@ -2842,7 +2839,7 @@ long gbtInteger::as_long(void) const
 #endif // USE_GNU_MP
 }
 
-gbtOutput &operator<<(gbtOutput &s, const gbtInteger &y)
+std::ostream &operator<<(std::ostream &s, const gbtInteger &y)
 {
 #if USE_GNU_MP
   char buf[mpz_sizeinbase(y.m_value, 10) + 2];

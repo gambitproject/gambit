@@ -530,23 +530,23 @@ gbtPolyMultiList<T>::SquareDerivativeMatrix(const gbtVector<T>& p) const
 //----------------------------------
 
 template<class T> 
-gbtList<gbtPolyMulti<gbtDouble> > gbtPolyMultiList<T>::ListTogDouble() const
+gbtList<gbtPolyMulti<T> > gbtPolyMultiList<T>::ToList(void) const
 {
-  gbtList<gbtPolyMulti<gbtDouble> > newlist;
+  gbtList<gbtPolyMulti<T> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist += gbtPolyMulti<gbtDouble>(TogDouble(*List[ii]));
+    newlist += gbtPolyMulti<T>(*List[ii]);
   }
   return newlist;
 }
 
 template<class T> 
-gbtList<gbtPolyMulti<gbtDouble> > gbtPolyMultiList<T>::NormalizedList() const
+gbtList<gbtPolyMulti<double> > gbtPolyMultiList<T>::NormalizedList(void) const
 {
-  gbtList<gbtPolyMulti<gbtDouble> > newlist;
+  gbtList<gbtPolyMulti<double> > newlist;
   int ii;
   for (ii = 1; ii <= List.Length(); ii++) {
-    newlist += gbtPolyMulti<gbtDouble>(NormalizationOfPoly(*List[ii]));
+    newlist += gbtPolyMulti<double>(NormalizationOfPoly(*List[ii]));
   }
   return newlist;
 }
@@ -561,7 +561,7 @@ template <class T> const int gbtPolyMultiList<T>::Dmnsn() const { return Space->
 //           Printing
 //----------------------------------
 
-template <class T> gbtOutput& operator << (gbtOutput& output, 
+template <class T> std::ostream& operator << (std::ostream& output, 
 					 const gbtPolyMultiList<T>& x)
 {
   for(int t = 1; t <= x.Length(); t++)

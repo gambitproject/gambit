@@ -62,7 +62,7 @@ gbtRectBlock<T> &gbtRectBlock<T>::operator=(const gbtRectBlock<T> &a)
 
 template <class T> void gbtRectBlock<T>::AddRow(const gbtArray<T> &v)
 {
-  if (v.First() != mincol || v.Last() != maxcol)   throw BadIndex();
+  if (v.First() != mincol || v.Last() != maxcol)   throw gbtIndexException();
   maxrow++;
   
   T *p = 0, **pp = 0;
@@ -93,7 +93,7 @@ template <class T> void gbtRectBlock<T>::AddRow(const gbtArray<T> &v)
 
 template <class T> void gbtRectBlock<T>::RemoveRow(int row)
 {
-  if (minrow > row || row > maxrow)   throw BadIndex();
+  if (minrow > row || row > maxrow)   throw gbtIndexException();
   maxrow--;
   
   if (maxrow < minrow)   {
@@ -120,48 +120,42 @@ template <class T> void gbtRectBlock<T>::RemoveRow(int row)
 template <class T> 
 void gbtRectBlock<T>::AddColumn(const gbtArray<T> &v)
 {
-    if (v.First() != minrow || v.Last() != maxrow)   
-        throw BadDim();
+  if (v.First() != minrow || v.Last() != maxrow) throw gbtDimensionException();
     
-    maxcol++;
+  maxcol++;
     
-    T **new_data = 0;
-    try  
-    {
-        new_data = new T *[maxrow - minrow + 1] - minrow;
-        int i, j;
+  T **new_data = 0;
+  try {
+    new_data = new T *[maxrow - minrow + 1] - minrow;
+    int i, j;
 
-        for (i = minrow; i <= maxrow; new_data[i++] = 0);
-        for (i = minrow; i <= maxrow; i++)    
-        {
-            new_data[i] = new T[maxcol - mincol + 1] - mincol;
-            T *oldrow = data[i];
+    for (i = minrow; i <= maxrow; new_data[i++] = 0);
+    for (i = minrow; i <= maxrow; i++) {
+      new_data[i] = new T[maxcol - mincol + 1] - mincol;
+      T *oldrow = data[i];
 
-            for (j = mincol; j < maxcol; j++)
-                new_data[i][j] = oldrow[j];
+      for (j = mincol; j < maxcol; j++) {
+	new_data[i][j] = oldrow[j];
+      }
 
-            new_data[i][maxcol] = v[i];
+      new_data[i][maxcol] = v[i];
 
-            data[i] = new_data[i];
-            delete [] (oldrow + mincol);            
-        }
+      data[i] = new_data[i];
+      delete [] (oldrow + mincol);            
     }
-    catch (...)   // probably a failure of new
-    {   
-        if (new_data)   
-        {
-            for (int i = minrow; i <= maxrow; i++)
-            {
-                if (new_data[i])
-                    delete (new_data[i] + mincol);
-            }
+  }
+  catch (...) {   // probably a failure of new
+    if (new_data) {
+      for (int i = minrow; i <= maxrow; i++) {
+	if (new_data[i])  delete (new_data[i] + mincol);
+      }
 
-            delete (new_data + minrow);
-        }
-
-        maxcol--;
-        throw;
+      delete (new_data + minrow);
     }
+    
+    maxcol--;
+    throw;
+  }
 }
 
 
@@ -169,7 +163,7 @@ template<class T> void gbtRectBlock<T>::RemoveColumn(int col)
 {
   // note: RemoveColumn does not reallocate memory --
   // it shrinks the rows in place.
-  if (mincol > col || col > maxcol)   throw BadIndex();
+  if (mincol > col || col > maxcol)   throw gbtIndexException();
 
   maxcol--;
   for (int i = minrow; i <= maxrow; i++)  {
@@ -179,10 +173,11 @@ template<class T> void gbtRectBlock<T>::RemoveColumn(int col)
   }
 }
 
-template <class T> void gbtRectBlock<T>::InsertRow(int row, const gbtArray<T> &v)
+template <class T> 
+void gbtRectBlock<T>::InsertRow(int row, const gbtArray<T> &v)
 {
-  if (v.First() != mincol || v.Last() != maxcol)   throw BadDim();
-  if (minrow > row || row > maxrow + 1)   throw BadIndex();
+  if (v.First() != mincol || v.Last() != maxcol) throw gbtDimensionException();
+  if (minrow > row || row > maxrow + 1)   throw gbtIndexException();
 
   if (row == maxrow + 1)  {
     AddRow(v);
@@ -222,58 +217,51 @@ template <class T> void gbtRectBlock<T>::InsertRow(int row, const gbtArray<T> &v
 template <class T>
 void gbtRectBlock<T>::InsertColumn(int col, const gbtArray<T> &v)
 {
-    if (v.First() != minrow || v.Last() != maxrow)   
-        throw BadDim();
+  if (v.First() != minrow || v.Last() != maxrow) throw gbtDimensionException();
+  if (mincol > col || col > maxcol + 1)   throw gbtIndexException();
     
-    if (mincol > col || col > maxcol + 1)
-        throw BadIndex();
+  if (col == maxcol + 1) {
+    AddColumn(v);
+    return;
+  }
     
-    if (col == maxcol + 1) 
-    {
-        AddColumn(v);
-        return;
-    }
+  maxcol++;
     
-    maxcol++;
-    
-    T **new_data = 0;
-    try  
-    {
-        new_data = new T *[maxrow - minrow + 1] - minrow;
-        int i, j;
+  T **new_data = 0;
+  try {
+    new_data = new T *[maxrow - minrow + 1] - minrow;
+    int i, j;
         
-        for (i = minrow; i <= maxrow; new_data[i++] = 0);
-        for (i = minrow; i <= maxrow; i++)    
-        {
-            new_data[i] = new T[maxcol - mincol + 1] - mincol;
-            T *oldrow = data[i];
+    for (i = minrow; i <= maxrow; new_data[i++] = 0);
+    for (i = minrow; i <= maxrow; i++) {
+      new_data[i] = new T[maxcol - mincol + 1] - mincol;
+      T *oldrow = data[i];
             
-            for (j = mincol; j < col; j++)
-                new_data[i][j] = oldrow[j];
+      for (j = mincol; j < col; j++) {
+	new_data[i][j] = oldrow[j];
+      }
             
-            new_data[i][col] = v[i];
+      new_data[i][col] = v[i];
+      
+      for (j = col + 1; j <= maxcol; j++) {
+	new_data[i][j] = oldrow[j-1];
+      }
             
-            for (j = col + 1; j <= maxcol; j++)
-                new_data[i][j] = oldrow[j-1];
-            
-            data[i] = new_data[i];
-            delete [] (oldrow + mincol);
-        }
+      data[i] = new_data[i];
+      delete [] (oldrow + mincol);
     }
-    catch (...)   // probably a failure of new
-    {   
-        if (new_data)   
-        {
-            for (int i = minrow; i <= maxrow; i++)
-            {
-                if (new_data[i])   
-                    delete (new_data[i] + mincol);
-            }
+  }
+  catch (...)  {  // probably a failure of new
+    if (new_data) {
+      for (int i = minrow; i <= maxrow; i++) {
+	if (new_data[i])   
+	  delete (new_data[i] + mincol);
+      }
 
-            delete (new_data + minrow);
-        }
-
-        maxcol--;
-        throw;
+      delete (new_data + minrow);
     }
+
+    maxcol--;
+    throw;
+  }
 }

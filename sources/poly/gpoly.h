@@ -34,9 +34,9 @@
 // These classes are used to store and mathematically manipulate polynomials.
 
 //  **NOTE**
-//  Every type T to be used needs a procedure to convert a gbtText coefficient
-//  to the type T for the gbtText SOP input form and a procedure to convert 
-//  the coefficient into a gbtText for the SOP output form.  
+//  Every type T to be used needs a procedure to convert a std::string coefficient
+//  to the type T for the std::string SOP input form and a procedure to convert 
+//  the coefficient into a std::string for the SOP output form.  
 
 
 // *******************
@@ -50,8 +50,8 @@ private:
   const gbtPolyTermOrder*    Order;
   gbtList<gbtMonomial<T> >     Terms;    // alternative implementation
 
-  // used for gbtText parsing;
-  unsigned int charnum;   char charc;   gbtText TheString;
+  // used for std::string parsing;
+  unsigned int charnum;   char charc;   std::string TheString;
 
   //----------------------
   // some private members
@@ -74,17 +74,17 @@ private:
 
 
   //-----------------------------------------------
-  // Going back and forth from gbtTexts to gbtPolyMulti's
+  // Going back and forth from std::strings to gbtPolyMulti's
   //-----------------------------------------------
 
-  // gbtText input parser functions
+  // std::string input parser functions
   void      String_Term(T          nega);
   T         String_Coeff(T       nega);
   int       String_GetPow(void);
   void      String_VarAndPow(gbtArray<int> &PowArray);
   void      GetChar();
   // Is the string a valid gbtPolyUni?
-  bool      Check_String(const gbtText &Hold);
+  bool      Check_String(const std::string &Hold);
 
   //----------------------
   //   private friends
@@ -101,8 +101,8 @@ public:
 
   // Null gbtPolyMulti constructor
   gbtPolyMulti(const gbtPolySpace *, const gbtPolyTermOrder *);
-  // Constructs a gbtPolyMulti equal to the SOP representation in the gbtText
-  gbtPolyMulti(const gbtPolySpace *, const gbtText &, const gbtPolyTermOrder *);
+  // Constructs a gbtPolyMulti equal to the SOP representation in the std::string
+  gbtPolyMulti(const gbtPolySpace *, const std::string &, const gbtPolyTermOrder *);
   // Constructs a constant gbtPolyMulti
   gbtPolyMulti(const gbtPolySpace *, const T &, const gbtPolyTermOrder *);
   // Constructs a gbtPolyMulti equal to another;
@@ -121,7 +121,7 @@ public:
   //----------
   
   gbtPolyMulti<T>& operator =  (const gbtPolyMulti<T> &);
-  gbtPolyMulti<T>& operator =  (const gbtText &);  
+  gbtPolyMulti<T>& operator =  (const std::string &);  
                         //Set gbtPolyUni equal to the SOP form in the string
   gbtPolyMulti<T>  operator -  ()                  const;
   gbtPolyMulti<T>  operator -  (const gbtPolyMulti<T> &) const;
@@ -189,18 +189,17 @@ public:
   //---------------
 
  // Print gbtPolyUni in SOP form
-  void Output(gbtText &) const;
+  void Output(std::string &) const;
 };
 
-template <class T> gbtText &operator<< (gbtText &, const gbtPolyMulti<T> &);
-template <class T> gbtOutput &operator<< (gbtOutput &f, const gbtPolyMulti<T> &y);
+template <class T> std::string &operator<< (std::string &, const gbtPolyMulti<T> &);
+template <class T> std::ostream &operator<< (std::ostream &f, const gbtPolyMulti<T> &y);
 
   //-------------
   // Conversion:
   //-------------
 
-template <class T> gbtPolyMulti<gbtDouble> TogDouble(const gbtPolyMulti<T>&);
-template <class T> gbtPolyMulti<gbtDouble> NormalizationOfPoly(const gbtPolyMulti<T>&);
+template <class T> gbtPolyMulti<double> NormalizationOfPoly(const gbtPolyMulti<T>&);
 
 // global multiply by scalar operators
 template <class T> gbtPolyMulti<T> operator*(const T val, const gbtPolyMulti<T> &poly);
@@ -210,8 +209,8 @@ template <class T> gbtPolyMulti<T> operator*(const gbtPolyMulti<T> &poly, const 
 template <class T> gbtPolyMulti<T> operator+(const T val, const gbtPolyMulti<T> &poly);
 template <class T> gbtPolyMulti<T> operator+(const gbtPolyMulti<T> &poly, const T val);
 
-template <class T> gbtText ToText(const gbtPolyMulti<T> &p);
+template <class T> std::string ToText(const gbtPolyMulti<T> &p);
 
-template <class T> gbtOutput &operator<< (gbtOutput &f, const gbtPolyMulti<T> &y);
+template <class T> std::ostream &operator<< (std::ostream &f, const gbtPolyMulti<T> &y);
 
 #endif //# GPOLY_H

@@ -29,4 +29,9 @@
 #include "math/rational.h"
 
 template class gbtEfgNashLcp<double>;
+template gbtList<gbtBehavProfile<double> >
+gbtNashLcpEfg(const gbtGame &, const double &, int, int);
+
 template class gbtEfgNashLcp<gbtRational>;
+template gbtList<gbtBehavProfile<gbtRational> >
+gbtNashLcpEfg(const gbtGame &, const gbtRational &, int, int);

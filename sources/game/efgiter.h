@@ -27,30 +27,33 @@
 #ifndef EFGITER_H
 #define EFGITER_H
 
-#include "efgcont.h"
+#include "game.h"
 
 class gbtEfgContIterator;
 
-class gbtEfgIterator {
-private:
-  gbtEfgSupport m_support;
-  gbtPVector<int> m_current;
-  gbtEfgContingency m_profile;
+class gbtEfgIterator    {
+  private:
+    gbtGame m_efg;
+    gbtPureBehavProfile _profile;
+    gbtPVector<int> _current;
+    mutable gbtVector<gbtRational> _payoff;
 
-public:
-  gbtEfgIterator(const gbtEfgSupport &);
-  gbtEfgIterator(const gbtEfgIterator &);
-  gbtEfgIterator(const gbtEfgContIterator &);
-  ~gbtEfgIterator();
+  public:
+    gbtEfgIterator(gbtGame);
+    gbtEfgIterator(const gbtEfgIterator &);
+    gbtEfgIterator(const gbtEfgContIterator &);
+    ~gbtEfgIterator();
   
-  gbtEfgIterator &operator=(const gbtEfgIterator &);
+    gbtEfgIterator &operator=(const gbtEfgIterator &);
   
-  void First(void);
-  int Next(int p, int iset);
-  int Set(int p, int iset, int act);
+    void First(void);
+    int Next(int p, int iset);
+    int Set(int p, int iset, int act);
   
-  gbtNumber GetPayoff(int p) const;
-  void GetPayoff(gbtVector<gbtNumber> &) const;
+    gbtRational Payoff(int p) const;
+    void Payoff(gbtVector<gbtRational> &) const;
+
+    void Dump(std::ostream &) const;
 };
 
 #endif   // EFGITER_H

@@ -1,10 +1,10 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libnumerical.a
+noinst_LTLIBRARIES = libgambit_numerical.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libnumerical_a_SOURCES = \
+libgambit_numerical_la_SOURCES = \
 	basis.cc \
 	basis.h \
 	bfs.cc \

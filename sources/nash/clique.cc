@@ -662,7 +662,7 @@ void EnumCliques::outgraph(
   }
 }
 
-gbtOutput& operator << (gbtOutput& s, const edge& y)
+std::ostream &operator<<(std::ostream&s, const edge& y)
 {
   s << "\n( " << y.node1 << " " << y.node2 << " " << y.nextedge << " )";
   return s;

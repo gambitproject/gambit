@@ -466,7 +466,9 @@ struct qhT {
 
 #define otherfacet_(ridge, facet) \
                         (((ridge)->top == (facet)) ? (ridge)->bottom : (ridge)->top)
-#define getid_(p)       ((p) ? (p)->id : -1)
+// FIXME: Introduced explicit cast of negative to unsigned to satisfy
+// compiler warning.  Why was original written this way?
+#define getid_(p)       ((p) ? (p)->id : (unsigned int) -1)
 
 /* ---------------------------------------------
 -FORALL and FOREACH macros
@@ -591,12 +593,11 @@ void    qh_scaleinput (void);
 #define GAMBIT_EXCEPTIONS
 #ifdef GAMBIT_EXCEPTIONS
 #include "base/gmisc.h"
-#include "base/gtext.h"
 
-class ErrorInQhull : public gbtException {
+class gbtQhullException : public gbtException {
 public:
-  virtual ~ErrorInQhull();
-  gbtText Description(void) const;
+  virtual ~gbtQhullException() { }
+  std::string GetDescription(void) const { return "Fatal error in qhull"; }
 };
 
 #endif

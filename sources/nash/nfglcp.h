@@ -27,35 +27,15 @@
 #ifndef NFGLCP_H
 #define NFGLCP_H
 
-#include "lhtab.h"
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-template <class T> class gbtNfgNashLcp : public gbtNfgNashAlgorithm  {
-private:
-  int m_stopAfter, m_maxDepth;
-
-  int AddBfs(gbtLemkeHowsonTableau<T> &,
-	     gbtList<gbtBasicFeasibleSolution<T> > &);
-  gbtMixedNashSet AddSolutions(const gbtNfgGame &,
-			       const gbtList<gbtBasicFeasibleSolution<T> > &,
-			       const T &);
-  void AllLemke(const gbtNfgGame &, int, 
-		gbtLemkeHowsonTableau<T> &B, 
-		gbtList<gbtBasicFeasibleSolution<T> > &,
-		int depth, gbtStatus &);
-  
-public:
-  gbtNfgNashLcp(void);
-  virtual ~gbtNfgNashLcp() { }
-  
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  int MaxDepth(void) const { return m_maxDepth; }
-  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
-
-  gbtText GetAlgorithm(void) const { return "Lcp[NFG]"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
+//!
+//! This implements the algorithm due to Lemke and Howson (1964)
+//! for computing Nash equilibria in two-player normal-form games,
+//! as refined by Eaves to handle degeneracies.
+//!
+template <class T> gbtList<gbtMixedProfile<T> >
+gbtNashLcpNfg(const gbtGame &p_game, const T &p_precision,
+	      int p_stopAfter = 0, int p_maxDepth = 0);
 
 #endif  // NFGLCP_H

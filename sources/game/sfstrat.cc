@@ -48,7 +48,7 @@ gbtList<gbtGameAction> gbtSfgSequence::History(void) const
   return h;    
 }
 
-void gbtSfgSequence::Dump(gbtOutput &out) const
+void gbtSfgSequence::Dump(std::ostream &out) const
 {
   int a = 0, p = 0;
   if (!action.IsNull()) a = action->GetId();
@@ -56,7 +56,7 @@ void gbtSfgSequence::Dump(gbtOutput &out) const
   out << "\nPl#: " << player->GetId() << " Seq# " << number << " act# " << a << " parent: " << p;
 }
 
-gbtOutput& operator<<(gbtOutput& s, const gbtSfgSequence& seq)
+std::ostream& operator<<(std::ostream& s, const gbtSfgSequence& seq)
 {
   seq.Dump(s);
   return s;
@@ -156,151 +156,6 @@ const gbtBlock<gbtSfgSequence *> &gbtSfgSequenceSet::GetSFSequenceSet(void) cons
   return sequences;
 }
 
-//-----------------------------------------------
-// gbtSfgSupport: Ctors, Dtor, Operators
-//-----------------------------------------------
-
-gbtSfgSupport::gbtSfgSupport(const gbtSfgGame &SF) 
-  : bsfg(&SF), sups(SF.NumPlayers())
-{ 
-  for (int i = 1; i <= sups.Length(); i++) {
-    sups[i] = new gbtSfgSequenceSet(SF.GetPlayer(i));
-  }
-}
-
-gbtSfgSupport::gbtSfgSupport(const gbtSfgSupport &s)
-  : bsfg(s.bsfg), sups(s.sups.Length())
-{
-  for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new gbtSfgSequenceSet(*s.sups[i]);
-}
-
-gbtSfgSupport::~gbtSfgSupport()
-{ 
-  for (int i = 1; i <= sups.Length(); i++)
-    delete sups[i];
-}
-
-gbtSfgSupport &gbtSfgSupport::operator=(const gbtSfgSupport &s)
-{
-  if (this != &s && bsfg == s.bsfg) {
-    for (int i = 1; i <= sups.Length(); i++)  {
-      delete sups[i];
-      sups[i] = new gbtSfgSequenceSet(*s.sups[i]);
-    }
-  }
-  return *this;
-}
-
-bool gbtSfgSupport::operator==(const gbtSfgSupport &s) const
-{
-  assert(sups.Length() == s.sups.Length());
-  int i;
-  for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
-  if (i > sups.Length()) return (true);
-  else return (false);
-}
-  
-bool gbtSfgSupport::operator!=(const gbtSfgSupport &s) const
-{
-  return !(*this == s);
-}
-
-//------------------------
-// gbtSfgSupport: Members
-//------------------------
-
-const gbtBlock<gbtSfgSequence *> &gbtSfgSupport::Sequences(int pl) const
-{
-  return (sups[pl]->GetSFSequenceSet());
-}
-
-int gbtSfgSupport::NumSequences(int pl) const
-{
-  return sups[pl]->NumSequences();
-}
-
-const gbtArray<int> gbtSfgSupport::NumSequences(void) const
-{
-  gbtArray<int> a(sups.Length());
-
-  for (int i = 1 ; i <= a.Length(); i++)
-    a[i] = sups[i]->NumSequences();
-  return a;
-}
-
-int gbtSfgSupport::TotalNumSequences(void) const
-{
-  int total = 0;
-  for (int i = 1 ; i <= sups.Length(); i++)
-    total += sups[i]->NumSequences();
-  return total;
-}
-
-int gbtSfgSupport::Find(gbtSfgSequence *s) const
-{
-  return sups[s->Player()->GetId()]->GetSFSequenceSet().Find(s);
-}
-
-void gbtSfgSupport::AddSequence(gbtSfgSequence *s)
-{
-  sups[s->Player()->GetId()]->AddSequence(s);
-}
-
-bool gbtSfgSupport::RemoveSequence(gbtSfgSequence *s)
-{
-  return sups[s->Player()->GetId()]->RemoveSequence(s);
-}
-
-
-// Returns true if all sequences in _THIS_ belong to _S_
-bool gbtSfgSupport::IsSubset(const gbtSfgSupport &s) const
-{
-  assert(sups.Length() == s.sups.Length());
-  for (int i = 1; i <= sups.Length(); i++)
-    if (NumSequences(i) > s.NumSequences(i))
-      return false;
-    else  {
-      const gbtBlock<gbtSfgSequence *> &strats =
-        sups[i]->GetSFSequenceSet();
-
-      for (int j = 1; j <= NumSequences(i); j++)
-	if (!s.sups[i]->GetSFSequenceSet().Find(strats[j]))
-	  return false;
-    }
-  return true;
-}
-
-
-void gbtSfgSupport::Dump(gbtOutput&s) const
-{
-  int numplayers;
-  int i;
-  int j;
-  gbtArray<gbtSfgSequence *> strat;
-
-  s << "{ ";
-  numplayers = bsfg->NumPlayers();
-  for( i = 1; i <= numplayers; i++ )
-  {
-    s << "{ ";
-    strat = Sequences( i );
-    for (j = 1; j <= strat.Length(); j++ )
-    {
-      s << "\"" << strat[ j ]->GetName() << "\" ";
-    }
-    s << "} ";
-  }
-  s << "} ";
-}
-
-gbtOutput& operator<<(gbtOutput& s, const gbtSfgSupport& n)
-{
-  n.Dump(s);
-  return s;
-}
-
-//template class gbtList<Action *>;
 template class gbtBlock<gbtSfgSequence *>;
 template class gbtArray<gbtSfgSequence *>;
 template class gbtArray<gbtSfgSequenceSet *>;

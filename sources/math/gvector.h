@@ -41,12 +41,6 @@ template <class T> class gbtMatrix;
 template <class T> class gbtVector : public gbtArray<T>   {
   friend class gbtMatrix<T>;
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim()   { }
-    gbtText Description(void) const;
-  };
-
   /** Create a vector of length len, starting at 1 */
   gbtVector(unsigned int len = 0);
   /** Create a vector indexed from low to high */
@@ -88,12 +82,4 @@ public:
   bool Check(const gbtVector<T> &v) const;
 };
 
-#ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtVector<T> &);
-#endif
-
-#include "math/double.h"
-
-template <class T> gbtVector<gbtDouble> TogDouble(const gbtVector<T>&);
-
-#endif   //# GVECTOR_H
+#endif   // GVECTOR_H

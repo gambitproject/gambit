@@ -26,14 +26,12 @@
 
 #include "gmatrix.imp"
 #include "rational.h"
-#include "gnumber.h"
 #include "mpfloat.h"
 
 template class gbtMatrix<double>;
 template class gbtMatrix<gbtRational>;
 template class gbtMatrix<gbtInteger>;
 template class gbtMatrix<int>;
-template class gbtMatrix<gbtNumber>;
 
 template gbtVector<double> operator*(const gbtVector<double> &,
 				     const gbtMatrix<double> &);
@@ -43,19 +41,10 @@ template gbtVector<gbtInteger> operator*(const gbtVector<gbtInteger> &,
 					 const gbtMatrix<gbtInteger> &);
 template gbtVector<int> operator*(const gbtVector<int> &,
 				  const gbtMatrix<int> &);
-template gbtVector<gbtNumber> operator*(const gbtVector<gbtNumber> &,
-					const gbtMatrix<gbtNumber> &);
-
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<double> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtRational> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtInteger> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtDouble> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<int> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtNumber> &);
 
 #if GBT_WITH_MP_FLOAT
 template class gbtMatrix<gbtMPFloat>;
 template gbtVector<gbtMPFloat> operator*(const gbtVector<gbtMPFloat> &,
 					 const gbtMatrix<gbtMPFloat> &);
-template gbtOutput &operator<<(gbtOutput &, const gbtMatrix<gbtMPFloat> &);
+template std::ostream &operator<<(std::ostream &, const gbtMatrix<gbtMPFloat> &);
 #endif  // GBT_WITH_MP_FLOAT

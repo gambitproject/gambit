@@ -25,15 +25,12 @@
 //
 
 #include "gpoly.imp"
-#include "math/double.h"
 #include "math/rational.h"
-#include "math/gnumber.h"
 
-#ifdef UNUSED
-double gbtPolyMulti<double>::String_Coeff(double nega)
+template<> double gbtPolyMulti<double>::String_Coeff(double nega)
 {
   double doub;
-  gbtText Coeff = "";
+  std::string Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -42,25 +39,11 @@ double gbtPolyMulti<double>::String_Coeff(double nega)
   if (Coeff == "") return (nega);
   else return (nega * FromText(Coeff,doub));  
 }
-#endif  // UNUSED
-
-template<> gbtDouble gbtPolyMulti<gbtDouble>::String_Coeff(gbtDouble nega)
-{
-  double doub;
-  gbtText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-  if (Coeff == "") return (nega);
-  else return (nega * (gbtDouble)FromText(Coeff,doub));  
-}
 
 template<> gbtRational gbtPolyMulti<gbtRational>::String_Coeff(gbtRational nega)
 {
   gbtRational rat;
-  gbtText Coeff = "";
+  std::string Coeff = "";
   while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
     Coeff += charc;
     charnum++;
@@ -70,76 +53,29 @@ template<> gbtRational gbtPolyMulti<gbtRational>::String_Coeff(gbtRational nega)
   else return (nega * FromText(Coeff,rat));  
 }
 
-template<> gbtNumber gbtPolyMulti<gbtNumber>::String_Coeff(gbtNumber nega)
-{
-  gbtNumber num;
-  gbtText Coeff = "";
-  while (charc >= '0' && charc <= '9' || charc == '/' || charc == '.'){
-    Coeff += charc;
-    charnum++;
-    GetChar();
-  }
-
-  if (Coeff == "") return (nega);
-  else return (nega * gbtNumber(FromText(Coeff, num)));  
-}
-
 template class gbtPolyMulti<gbtRational>;
 #ifndef __BCC55__
 template gbtPolyMulti<gbtRational> operator*(const gbtRational val, const gbtPolyMulti<gbtRational> &poly);
 #endif  // _BCC55__
 template gbtPolyMulti<gbtRational> operator*(const gbtPolyMulti<gbtRational> &poly, const gbtRational val);
 
-template gbtPolyMulti<gbtDouble> TogDouble(const gbtPolyMulti<gbtRational>&);
-template gbtPolyMulti<gbtDouble> NormalizationOfPoly(const gbtPolyMulti<gbtRational>&);
+template gbtPolyMulti<double> NormalizationOfPoly(const gbtPolyMulti<gbtRational>&);
 
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMulti<gbtRational> &y);
+template std::ostream &operator<<(std::ostream &f, const gbtPolyMulti<gbtRational> &y);
 #ifndef __BCC55__
-template gbtText &operator<<(gbtText &, const gbtPolyMulti<gbtRational> &);
+template std::string &operator<<(std::string &, const gbtPolyMulti<gbtRational> &);
 #endif  // __BCC55__
 
-template class gbtPolyMulti<gbtNumber>;
-#ifndef __BCC55__
-template gbtPolyMulti<gbtNumber> operator*(const gbtNumber val, const gbtPolyMulti<gbtNumber> &poly);
-#endif  // __BCC55__
-template gbtPolyMulti<gbtNumber> operator*(const gbtPolyMulti<gbtNumber> &poly, const gbtNumber val);
-
-template gbtPolyMulti<gbtDouble> TogDouble(const gbtPolyMulti<gbtNumber>&);
-template gbtPolyMulti<gbtDouble> NormalizationOfPoly(const gbtPolyMulti<gbtNumber>&);
-
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMulti<gbtNumber> &y);
-#ifndef __BCC55__
-template gbtText &operator<<(gbtText &, const gbtPolyMulti<gbtNumber> &);
-#endif  // __BCC55__
-
-#ifdef UNUSED
 template class gbtPolyMulti<double>;
+#ifndef __BCC55__
 template gbtPolyMulti<double> operator*(const double val, const gbtPolyMulti<double> &poly);
+#endif  // __BCC55__
 template gbtPolyMulti<double> operator*(const gbtPolyMulti<double> &poly, const double val);
-#endif // UNUSED
-
-template class gbtPolyMulti<gbtDouble>;
+template gbtPolyMulti<double> NormalizationOfPoly(const gbtPolyMulti<double>&);
+template std::ostream &operator<<(std::ostream &f, const gbtPolyMulti<double> &y);
 #ifndef __BCC55__
-template gbtPolyMulti<gbtDouble> operator*(const gbtDouble val, const gbtPolyMulti<gbtDouble> &poly);
+template std::string &operator<<(std::string &, const gbtPolyMulti<double> &);
 #endif  // __BCC55__
-template gbtPolyMulti<gbtDouble> operator*(const gbtPolyMulti<gbtDouble> &poly, const gbtDouble val);
-template gbtPolyMulti<gbtDouble> operator+(const gbtDouble val, const gbtPolyMulti<gbtDouble> &poly);
-template gbtPolyMulti<gbtDouble> operator+(const gbtPolyMulti<gbtDouble> &poly, const gbtDouble val);
-
-template gbtPolyMulti<gbtDouble> TogDouble(const gbtPolyMulti<gbtDouble>&);
-template gbtPolyMulti<gbtDouble> NormalizationOfPoly(const gbtPolyMulti<gbtDouble>&);
-template gbtOutput &operator<<(gbtOutput &f, const gbtPolyMulti<gbtDouble> &y);
-#ifndef __BCC55__
-template gbtText &operator<<(gbtText &, const gbtPolyMulti<gbtDouble> &);
-#endif  // __BCC55__
-
-gbtText ToText(const gbtPolyMulti<gbtNumber> &p)
-{
-  gbtText t;
-  t << p;
-  return t;
-}
-
 
 #include "base/glist.imp"
 #include "base/garray.imp"
@@ -148,15 +84,4 @@ gbtText ToText(const gbtPolyMulti<gbtNumber> &p)
 template class gbtArray< gbtPolyMulti< gbtRational > *>;
 template class gbtList< gbtPolyMulti<gbtRational> * >;
 template class gbtList<gbtPolyMulti<gbtRational> >;
-template class gbtList<gbtPolyMulti<gbtNumber> >;
-template class gbtList<gbtPolyMulti<gbtNumber> * >;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtPolyMulti<gbtRational> >&);
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtPolyMulti<gbtNumber> >&);
 
-template class gbtList< gbtPolyMulti<gbtDouble> * >;
-template class gbtList< gbtPolyMulti<gbtDouble> >;
-template class gbtList<gbtVector<gbtDouble> >;
-template gbtOutput& operator << (gbtOutput& output, 
-			       const gbtList<gbtVector<gbtDouble> >&);

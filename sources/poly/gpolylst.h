@@ -108,10 +108,10 @@ template <class T> class gbtPolyMultiList
 //  inline int static Count() { return Counted<gbtPolyMultiList<T> >::objCount(); }
 
    // Conversion
-   gbtList<gbtPolyMulti<gbtDouble> > ListTogDouble()  const;
-   gbtList<gbtPolyMulti<gbtDouble> > NormalizedList() const;
+   gbtList<gbtPolyMulti<T> > ToList(void) const;
+   gbtList<gbtPolyMulti<double> > NormalizedList(void) const;
 };  
 
-template <class T> gbtOutput &operator<<(gbtOutput &, const gbtPolyMultiList<T> &);
+template <class T> std::ostream &operator<<(std::ostream &, const gbtPolyMultiList<T> &);
 
 #endif // GPOLYLST_H

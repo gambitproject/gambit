@@ -83,7 +83,7 @@ template <class T> gbtBlock<T> &gbtBlock<T>::operator+=(const gbtBlock<T> &b)
 
 template <class T> int gbtBlock<T>::InsertAt(const T &t, int n)
 {
-  if (mindex > n || n > maxdex + 1)   throw BadIndex(); 
+  if (mindex > n || n > maxdex + 1)   throw gbtIndexException();
     
   T *new_data = new T[++maxdex - mindex + 1] - mindex;
 
@@ -110,7 +110,7 @@ template <class T> int gbtBlock<T>::Insert(const T &t, int n)
 
 template <class T> T gbtBlock<T>::Remove(int n)
 {
-  if (n < mindex || n > maxdex)    throw BadIndex();
+  if (n < mindex || n > maxdex)    throw gbtIndexException();
 
   T ret(data[n]);
   T *new_data = (--maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
@@ -138,11 +138,4 @@ template <class T> int gbtBlock<T>::Contains(const T &t) const
 template <class T> void gbtBlock<T>::Flush(void)
 { maxdex = mindex - 1;  if (data)  delete [] (data + mindex);  data = 0; }
 
-//
-// Uses the Dump function to output the gbtBlock.  Uses the << operator
-// overload to use output streams, gout.
-//
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtBlock<T> &b)
-{
-  b.Dump(f);   return f;
-}
+

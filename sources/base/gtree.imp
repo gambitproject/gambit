@@ -204,7 +204,7 @@ template <class T> void gbtTree<T>::Flush(void)
   root = NULL;
 }
 
-template <class T> void gbtTree<T>::RecursiveDump(gbtOutput& f, 
+template <class T> void gbtTree<T>::RecursiveDump(std::ostream& f, 
 						const gbtTreeNode<T>* n, 
 						const int level) const
 {
@@ -218,12 +218,12 @@ template <class T> void gbtTree<T>::RecursiveDump(gbtOutput& f,
   }
 }
 
-template <class T> void gbtTree<T>::Dump(gbtOutput& f) const
+template <class T> void gbtTree<T>::Dump(std::ostream& f) const
 {
   RecursiveDump(f,root,0);
 }
 
-template <class T> gbtOutput& operator<<(gbtOutput& f, const gbtTree<T>& b)
+template <class T> std::ostream& operator<<(std::ostream& f, const gbtTree<T>& b)
 {
   b.Dump(f);   return f;
 }

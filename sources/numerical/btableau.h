@@ -35,21 +35,8 @@
 //                          gbtBaseTableau Stuff
 // ---------------------------------------------------------------------------
 
-
 template <class T> class gbtBaseTableau {
 public:
-  class BadDim : public gbtException  {
-  public:
-    virtual ~BadDim();
-    gbtText Description(void) const;
-  };
-
-  class BadPivot : public gbtException  {
-  public:
-    virtual ~BadPivot() { }
-    gbtText Description(void) const { return "Bad Pivot in gbtBaseTableau"; }
-  };
-
   bool ColIndex(int) const;
   bool RowIndex(int) const;
   bool ValidIndex(int) const;
@@ -127,8 +114,6 @@ public:
 
   gbtBasicFeasibleSolution<T> GetBFS1(void) const; 
   gbtBasicFeasibleSolution<T> GetBFS(void);  // used in lpsolve for some reason
-  void Dump(gbtOutput &) const;
-  void BigDump(gbtOutput &);
 
   virtual int CanPivot(int outgoing,int incoming) = 0;
   virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column

@@ -28,25 +28,12 @@
 #ifndef NFGPOLY_H
 #define NFGPOLY_H
 
-#include "nfgalgorithm.h"
+#include "game/game.h"
 
-class gbtNfgNashEnumPoly : public gbtNfgNashAlgorithm {
-private:
-  int m_stopAfter;
-
-public:
-  gbtNfgNashEnumPoly(void);
-  virtual ~gbtNfgNashEnumPoly() { }
-
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  gbtText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
-  gbtMixedNashSet Solve(const gbtNfgGame &, gbtStatus &);
-};
-
-gbtMixedProfile<gbtNumber> PolishEquilibrium(const gbtNfgSupport &support, 
-					     const gbtMixedProfile<gbtNumber> &sol, 
-					     bool &is_singular);
+//!
+//! This computes all totally-mixed Nash equilibria on the
+//! normal form
+//!
+gbtList<gbtMixedProfile<double> > gbtNashEnumPolyNfg(const gbtGame &p_game);
 
 #endif // NFGPOLY_H

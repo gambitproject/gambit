@@ -1,0 +1,248 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of mixed strategy profile class for game trees
+//
+// This file is part of Gambit
+// Copyright (c) 2002, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "game.h"
+#include "table-game.h"
+#include "tree-game.h"
+#include "tree-strategy-mixed.h"
+#include "tree-behav-mixed.h"
+
+//======================================================================
+//         Implementation of class gbtTreeMixedProfileRep<T>
+//======================================================================
+
+//----------------------------------------------------------------------
+//    class gbtTreeMixedProfileRep<T>: Constructor and destructor
+//----------------------------------------------------------------------
+
+template <class T> 
+gbtTreeMixedProfileRep<T>::gbtTreeMixedProfileRep(const gbtTreeGameRep *p_game)
+  : m_game(p_game), m_profile(p_game->NumStrategies())
+{
+  SetCentroid();
+}
+
+template <class T>
+gbtTreeMixedProfileRep<T>::gbtTreeMixedProfileRep(const gbtTreeMixedProfileRep<T> &p_profile)
+  : m_game(p_profile.m_game), m_profile(p_profile.m_profile)
+{ }
+
+template <class T>
+gbtTreeMixedProfileRep<T>::gbtTreeMixedProfileRep(const gbtBehavProfile<T> &p_profile)
+  : m_game(dynamic_cast<gbtTreeGameRep *>(p_profile->GetGame().Get())),
+    m_profile(m_game->NumStrategies())
+{
+  for (int pl = 1; pl <= m_game->NumPlayers(); pl++)  {
+    gbtTreePlayerRep *player = m_game->m_players[pl];
+    for (int st = 1; st <= player->NumStrategies(); st++)  {
+      T prob = (T) 1;
+      const gbtArray<int> &behav = player->m_strategies[st]->m_behav;
+
+      for (int iset = 1; iset <= player->m_infosets.Length(); iset++) {
+	if (behav[iset] > 0)  prob *= p_profile(pl, iset, behav[iset]);
+      }
+      m_profile(pl, st) = prob;
+    }
+  }
+}
+
+template <class T> gbtTreeMixedProfileRep<T>::~gbtTreeMixedProfileRep()
+{ }
+
+template <class T>
+gbtMixedProfileRep<T> *gbtTreeMixedProfileRep<T>::Copy(void) const
+{
+  return new gbtTreeMixedProfileRep(*this);
+}
+
+//----------------------------------------------------------------------
+//       class gbtTreeMixedProfileRep<T>: General information
+//----------------------------------------------------------------------
+
+template <class T> bool
+gbtTreeMixedProfileRep<T>::operator==(const gbtMixedProfileRep<T> &mp) const
+{
+  const gbtTreeMixedProfileRep<T> *profile = 
+    dynamic_cast<const gbtTreeMixedProfileRep<T> *>(&mp);
+  if (!profile)  return false;
+  return (m_game == profile->m_game && m_profile == profile->m_profile);
+}
+
+//----------------------------------------------------------------------
+//  class gbtTreeMixedProfileRep<T>: Accessing profile probabilities
+//----------------------------------------------------------------------
+
+template <class T> T
+gbtTreeMixedProfileRep<T>::GetStrategyProb(const gbtGameStrategy &p_strategy) const
+{
+  if (p_strategy.IsNull())  throw gbtGameNullException();
+  gbtTreeStrategyRep *strategy =
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_player->m_efg != m_game) {
+    throw gbtGameMismatchException();
+  }
+  return m_profile(strategy->m_player->m_id, strategy->m_id);
+}
+
+template <class T> void
+gbtTreeMixedProfileRep<T>::SetStrategyProb(const gbtGameStrategy &p_strategy,
+					   const T &p_prob)
+{
+  if (p_strategy.IsNull())  throw gbtGameNullException();
+  gbtTreeStrategyRep *strategy =
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_player->m_efg != m_game) {
+    throw gbtGameMismatchException();
+  }
+  m_profile(strategy->m_player->m_id, strategy->m_id) = p_prob;
+}
+
+template <class T> void gbtTreeMixedProfileRep<T>::SetCentroid(void) 
+{
+  for (int pl = 1; pl <= m_game->m_players.Length(); pl++)  {
+    gbtTreePlayerRep *player = m_game->m_players[pl];
+    T center = ((T) 1) / ((T) player->NumStrategies());
+    for (int st = 1; st <= player->NumStrategies(); 
+	 m_profile(pl, st++) = center);
+  }
+}
+
+//----------------------------------------------------------------------
+//       class gbtTreeMixedProfileRep<T>: Payoff information
+//----------------------------------------------------------------------
+
+template <class T> 
+T gbtTreeMixedProfileRep<T>::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  if (p_player.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_game)  throw gbtGameMismatchException();
+
+  return gbtTreeBehavProfileRep<T>(*this).GetPayoff(player);
+}
+
+template <class T> T
+gbtTreeMixedProfileRep<T>::GetPayoffDeriv(const gbtGamePlayer &p_player,
+					  const gbtGameStrategy &p_strategy) const
+{
+  if (p_player.IsNull() || p_strategy.IsNull())  throw gbtGameNullException();
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_game) throw gbtGameMismatchException();
+
+  gbtTreeStrategyRep *strategy =
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy.Get());
+  if (!strategy || strategy->m_player->m_efg != m_game) {
+    throw gbtGameMismatchException();
+  }
+
+  gbtTreeMixedProfileRep<T> foo(*this);
+  for (int st = 1; st <= strategy->GetPlayer()->NumStrategies();
+       foo.SetStrategyProb(strategy->GetPlayer()->GetStrategy(st++), 0));
+  foo.SetStrategyProb(strategy, 1);
+  return gbtTreeBehavProfileRep<T>(foo).GetPayoff(player);
+}
+
+template <class T> T
+gbtTreeMixedProfileRep<T>::GetPayoffDeriv(const gbtGamePlayer &p_player,
+					  const gbtGameStrategy &p_strategy1,
+					  const gbtGameStrategy &p_strategy2) const
+{
+  if (p_player.IsNull() || p_strategy1.IsNull() || p_strategy2.IsNull()) {
+    throw gbtGameNullException();
+  }
+
+  gbtTreePlayerRep *player = dynamic_cast<gbtTreePlayerRep *>(p_player.Get());
+  if (!player || player->m_efg != m_game) throw gbtGameMismatchException();
+
+  gbtTreeStrategyRep *s1 = 
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy1.Get());
+  if (!s1 || s1->m_player->m_efg != m_game) throw gbtGameMismatchException();
+
+  gbtTreeStrategyRep *s2 = 
+    dynamic_cast<gbtTreeStrategyRep *>(p_strategy2.Get());
+  if (!s2 || s2->m_player->m_efg != m_game) throw gbtGameMismatchException();
+
+  if (s1->m_player == s2->m_player)  return (T) 0;
+
+  gbtTreeMixedProfileRep<T> foo(*this);
+  for (int st = 1; st <= s1->GetPlayer()->NumStrategies();
+       foo(s1->GetPlayer()->GetId(), st++) = 0);
+  for (int st = 1; st <= s2->GetPlayer()->NumStrategies();
+       foo(s2->GetPlayer()->GetId(), st++) = 0);
+  foo.SetStrategyProb(s1, 1);
+  foo.SetStrategyProb(s2, 1);
+  return gbtTreeBehavProfileRep<T>(foo).GetPayoff(player);
+}
+
+template <class T> 
+T gbtTreeMixedProfileRep<T>::GetLiapValue(bool penalize) const
+{
+  static const T BIG1 = (T) 100;
+  static const T BIG2 = (T) 100;
+
+  gbtTreeMixedProfileRep<T> p(*this);
+  p.m_profile = m_profile;
+  gbtTreeMixedProfileRep<T> tmp(p);
+  gbtPVector<T> payoff(p.m_profile);
+  T x, result((T) 0), avg, sum;
+  payoff = (T) 0;
+
+  for (int i = 1; i <= m_game->NumPlayers(); i++) {
+    tmp.m_profile.CopyRow(i, payoff);
+    avg = sum = (T) 0;
+    // then for each strategy for that player set it to 1 and evaluate
+    int j;
+    for (j = 1; j <= m_game->m_players[i]->NumStrategies(); j++) {
+      tmp(i, j) = (T) 1;
+      x = p(i, j);
+      payoff(i, j) = tmp.GetPayoff(m_game->GetPlayer(i));
+      avg += x * payoff(i, j);
+      sum += x;
+      if (x>(T)0) x=0;
+      if (penalize) {
+	result += BIG1*x*x;         // add penalty for neg probabilities
+      }
+      tmp(i,j) = (T) 0;
+    }
+    tmp.m_profile.CopyRow(i, p.m_profile);
+    for (j = 1; j <= m_game->m_players[i]->NumStrategies(); j++) {
+      x=payoff(i,j)-avg;
+      if (x<=(T)0) x=(T)0;
+      result += x*x;          // add penalty if not best response
+    }
+    x=sum - ((T) 1);
+    if (penalize) {
+      result += BIG2*x*x;   // add penalty for sum not equal to 1
+    }
+  }
+  return result;
+}
+
+template <class T> 
+std::ostream &operator<<(std::ostream &f, const gbtTreeMixedProfileRep<T> &p)
+{ p.Dump(f);  return f; }
+
+

@@ -20,8 +20,6 @@ libbase_a_SOURCES = \
 	glist.cc \
 	gmisc.cc \
 	grarray.cc \
-	gstream.cc \
-	gtext.cc \
 	odometer.cc 
 
 OBJECTS = $(libbase_a_SOURCES:.cc=.obj)
@@ -33,18 +31,15 @@ OPT = -Od
 .cc.obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
 
-LINKFLAGS= /Tpe /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
+LINKFLAGS= /Tpd /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS= -v
 
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
-base: $(OBJECTS)
-        -erase base.lib
-	tlib base /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
+base:  $(OBJECTS)
+    copy *.obj ..
 
 clean:
         -erase *.obj

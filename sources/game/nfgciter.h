@@ -27,8 +27,9 @@
 #ifndef NFGCITER_H
 #define NFGCITER_H
 
-#include "nfgcont.h"
-#include "nfgsupport.h"
+#include "base/base.h"
+#include "math/rational.h"
+#include "game.h"
 
 //
 // This class is useful for iterating around the normal form.  This iterator
@@ -43,13 +44,13 @@
 class gbtNfgContIterator    {
 friend class gbtNfgIterator;
 private:
-  gbtNfgGame m_nfg;
   gbtArray<int> m_current;
+  gbtGame m_nfg;
   gbtNfgContingency m_profile;
   gbtBlock<int> m_frozen, m_thawed;
   
 public:
-  gbtNfgContIterator(const gbtNfgGame &);
+  gbtNfgContIterator(const gbtGame &);
   ~gbtNfgContIterator();
   
   void First(void);
@@ -60,13 +61,15 @@ public:
   // This only has an effect if the player is currently frozen
   int Next(gbtGamePlayer);
   
-  const gbtNfgContingency &GetContingency(void) const { return m_profile; }
+  const gbtNfgContingency &GetProfile(void) const { return m_profile; }
 
   int NextContingency(void);
   
   gbtGameOutcome GetOutcome(void) const { return m_profile->GetOutcome(); }
+  void SetOutcome(gbtGameOutcome p_outcome)
+    { m_profile->SetOutcome(p_outcome); }
 
-  gbtNumber GetPayoff(const gbtGamePlayer &p_player) const 
+  gbtRational GetPayoff(const gbtGamePlayer &p_player) const 
     { return m_profile->GetPayoff(p_player); }
 };
 

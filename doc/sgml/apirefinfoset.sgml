@@ -43,33 +43,35 @@ gbtGameAction gbtGameInfoset::GetAction(int p_index) const
 <function>GetAction</function> returns the action numbered
 <parameter>p_index</parameter> from the list of actions at the
 information set.  Each information set's actions are numbered
-sequentially beginning at one.  An exception is thrown if the index
-is out of range.
+sequentially beginning at one.
+An exception is thrown (<errorname>gbtIndexException</errorname> in
+C++, <errorname>IndexError</errorname> in Python) if the index is out
+of range.
 </para>
 
 </sect2>
 
-
-<sect2 id="apiref.infoset.getgame">
-<title>GetGame</title>
-<indexterm><primary>GetGame</primary></indexterm>
+<sect2 id="apiref.infoset.getid">
+<title>GetId</title>
+<indexterm><primary>GetId</primary></indexterm>
 
 <formalpara>
-<title>C++/Python usage</title>
+<title>C++/Python usage</title
 <para>
 <synopsis>
-gbtGame gbtGameInfoset::GetGame(void) const
+int gbtGameInfoset::GetId(void) const
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>GetGame</function> 
-returns the extensive form game to which the information set belongs.
+<function>GetId</function> returns the ID number of the information set.
+The ID is unique among the information sets of a player.  Information
+sets are numbered in the order they are first encountered when traversing
+the game tree.
 </para>
 
 </sect2>
-
 
 <sect2 id="apiref.infoset.getlabel">
 <title>GetLabel</title>
@@ -79,7 +81,7 @@ returns the extensive form game to which the information set belongs.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-gbtText gbtGameInfoset::GetLabel(void) const
+std::string gbtGameInfoset::GetLabel(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -87,7 +89,6 @@ gbtText gbtGameInfoset::GetLabel(void) const
 <para>
 <function>GetLabel</function>
 returns the text label of the information set.
-The empty string is returned if the information set object is null.
 </para>
 
 </sect2>
@@ -109,9 +110,191 @@ gbtGameNode gbtGameInfoset::GetMember(int p_index) const
 <function>GetMember</function> returns the member numbered
 <parameter>p_index</parameter> from the list of nodes belonging to the
 information set.  Each information set's nodes are numbered
-sequentially beginning at one.  An exception is thrown if the index
-is out of range.
+sequentially beginning at one.  
+An exception is thrown (<errorname>gbtIndexException</errorname> in
+C++, <errorname>IndexError</errorname> in Python) if the index is out
+of range.
 </para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.getplayer">
+<title>GetPlayer</title>
+<indexterm><primary>GetPlayer</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGamePlayer gbtGameInfoset::GetPlayer(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPlayer</function>
+returns the player who has the move at the information set.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.insertaction">
+<title>InsertAction</title>
+<indexterm><primary>InsertAction</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gbtGameAction gbtGameInfoset::InsertAction(int p_index) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>InsertAction</function> inserts a new action in the information
+set.  The action becomes the <parameter>p_index</parameter>th action
+in the information set.  The new action is returned.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.ischanceinfoset">
+<title>IsChanceInfoset</title>
+<indexterm><primary>IsChanceInfoset</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameInfoset::IsChanceInfoset(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>IsChanceInfoset</function> returns <literal>True</literal>
+(nonzero) if the information set is controlled by the chance player.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.mergeinfoset">
+<title>MergeInfoset</title>
+<indexterm><primary>MergeInfoset</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtGameInfoset::MergeInfoset(const gbtGameInfoset &amp;p_infoset) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>MergeInfoset</function> moves all the nodes in
+<parameter>p_infoset</parameter> into this information set.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_infoset</parameter> is from a different game.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.numactions">
+<title>NumActions</title>
+<indexterm><primary>NumActions</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtGameInfoset::NumActions(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NumActions</function> returns the number of actions
+available to the player at the information set.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.nummembers">
+<title>NumMembers</title>
+<indexterm><primary>NumMembers</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+int gbtGameInfoset::NumMembers(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>NumMembers</function> returns the number of nodes which
+belong to the information set.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.precedes">
+<title>Precedes</title>
+<indexterm><primary>Precedes</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+bool gbtGameInfoset::Precedes(const gbtGameNode &amp;p_node) const
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Precedes</function> returns true if the information set
+precedes <parameter>p_node</parameter> in the game tree.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_node</parameter> is from a different game.
+</para>
+
+</sect2>
+
+<sect2 id="apiref.infoset.reveal">
+<title>Reveal</title>
+<indexterm><primary>Reveal</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtGameInfoset::Reveal(const gbtGamePlayer &amp;p_player)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>Reveal</function> modifies the information sets of
+<parameter>p_player</parameter> that follow this information set
+in the tree to reflect that the player observes the action taken at
+this information set.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_player</parameter> is from a different game.
+</para>
+
+<note>
+<para>
+<function>Reveal</function> does not enforce that the player continues
+to distinguish the choices made at this information set if subsequent
+edits are made to the game. 
+</para>
+</note>
 
 </sect2>
 
@@ -123,7 +306,7 @@ is out of range.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-void gbtGameInfoset::SetLabel(const gbtText &amp;p_label)
+void gbtGameInfoset::SetLabel(const std::string &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -135,5 +318,28 @@ set.
 
 </sect2>
 
+<sect2 id="apiref.infoset.setplayer">
+<title>SetPlayer</title>
+<indexterm><primary>SetPlayer</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void gbtGameInfoset::SetPlayer(const gbtGamePlayer &amp;p_player)
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>SetPlayer</function>
+sets the player who has the move at the information set to
+<parameter>p_player</parameter>.
+A <errorname>gbtGameMismatchException</errorname> (mapped to
+<errorname>RuntimeError</errorname> in Python) occurs if
+<parameter>p_player</parameter> is from a different game.
+</para>
+
+</sect2>
 
 </sect1>

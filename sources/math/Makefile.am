@@ -1,14 +1,12 @@
 ## Process this file with automake to create Makefile.in
 
-noinst_LIBRARIES = libmath.a
+noinst_LTLIBRARIES = libgambit_math.la
 
 AM_CPPFLAGS = -I$(top_srcdir)/sources
 
-libmath_a_SOURCES = \
+libgambit_math_la_SOURCES = \
 	complex.cc \
 	complex.h \
-	double.cc \
-	double.h \
 	gdpvect.cc \
 	gdpvect.h \
 	gdpvect.imp \
@@ -16,8 +14,6 @@ libmath_a_SOURCES = \
 	gmatrix.cc \
 	gmatrix.h \
 	gmatrix.imp \
-	gnumber.cc \
-	gnumber.h \
 	gpvector.cc \
 	gpvector.h \
 	gpvector.imp \

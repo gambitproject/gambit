@@ -28,7 +28,6 @@
 #define GLIST_H
 
 #include "gmisc.h"
-#include "gstream.h"
 
 template <class T> class gbtList  {
   protected:
@@ -51,12 +50,6 @@ template <class T> class gbtList  {
     int InsertAt(const T &t, int where);
 
   public:
-    class BadIndex : public gbtException   {
-      public:
-        virtual ~BadIndex()   { }
-        gbtText Description(void) const;
-    };
-
     gbtList(void);
     gbtList(const gbtList<T> &);
     virtual ~gbtList();
@@ -90,9 +83,6 @@ template <class T> class gbtList  {
     int Length(void) const;
 
     virtual void Flush(void);
-    void Dump(gbtOutput &) const;
 };
-
-template <class T> gbtOutput &operator<<(gbtOutput &f, const gbtList<T> &b);
 
 #endif    // GLIST_H

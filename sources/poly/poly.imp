@@ -248,16 +248,6 @@ template <class T>  void gbtPolyUni<T>::ToMonic()
     coeflist[i] /= lc;
 }
 
-template<class T>  
-gbtPolyUni<gbtDouble>  gbtPolyUni<T>::TogDouble() const
-{
-  gbtList<gbtDouble> newcoefs;
-  for (int i = 1; i <= coeflist.Length(); i++) {
-    newcoefs += (gbtDouble)coeflist[i];
-  }
-  return gbtPolyUni<gbtDouble>(newcoefs);
-}
-
 //--------------------------------------------------------------------------
 //                              information
 //--------------------------------------------------------------------------
@@ -511,7 +501,7 @@ gbtPolyUni<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //                                printing
 //--------------------------------------------------------------------------
 
-template <class T> void gbtPolyUni<T>::Output(gbtOutput &output) const
+template <class T> void gbtPolyUni<T>::Output(std::ostream &output) const
 {
   if (Degree() < 0) output << "0";
   else {
@@ -524,7 +514,7 @@ template <class T> void gbtPolyUni<T>::Output(gbtOutput &output) const
   }
 }
 
-template <class T> gbtOutput &operator<<(gbtOutput &p_file,
+template <class T> std::ostream &operator<<(std::ostream &p_file,
 				       const gbtPolyUni<T> &p_poly)
 {
   p_poly.Output(p_file);
@@ -853,7 +843,7 @@ gbtList<gbtComplex> gbtPolyComplex::Roots() const
 //                                printing
 //--------------------------------------------------------------------------
 
-gbtOutput& operator << (gbtOutput& output, const gbtPolyComplex& x)
+std::ostream& operator << (std::ostream& output, const gbtPolyComplex& x)
 {
   if (x.Degree() < 0) output << "0";
   else {

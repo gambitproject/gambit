@@ -44,7 +44,6 @@ template <class T> void gbtPVector<T>::setindex(void)
     svptr[i] = data + index - 1;
     index += svlen[i];
   }
-  assert(index == Last() + 1);
 }
 
 
@@ -77,7 +76,7 @@ template <class T> gbtPVector<T>::gbtPVector(const gbtVector<T> &val,
 					 const gbtArray<int> &sig)
   : gbtVector<T>(val), svlen(sig)
 {
-  assert(sum(svlen) == val.Length());
+  if (sum(svlen) != val.Length())  throw gbtRangeException();
   svptr = new T *[sig.Last() - sig.First() + 1];
   svptr -= 1;
   setindex();
@@ -98,7 +97,7 @@ template <class T> gbtPVector<T>::~gbtPVector()
 
 template <class T> gbtPVector<T>& gbtPVector<T>::operator=(const gbtPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
   gbtVector<T>::operator=(v);
   return (*this);
 }
@@ -121,23 +120,23 @@ template <class T> gbtPVector<T>& gbtPVector<T>::operator=(T c)
 
 template <class T> T& gbtPVector<T>::operator()(int a, int b)
 {
-  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
-  if (1 > b || b > svlen[a])    throw BadIndex();
+  if (svlen.First() > a || a > svlen.Last())   throw gbtIndexException();
+  if (1 > b || b > svlen[a])    throw gbtIndexException();
 
   return svptr[a][b];
 }
 
 template <class T> const T& gbtPVector<T>::operator()(int a, int b) const
 {
-  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
-  if (1 > b || b > svlen[a])    throw BadIndex();
+  if (svlen.First() > a || a > svlen.Last())   throw gbtIndexException();
+  if (1 > b || b > svlen[a])    throw gbtIndexException();
   return svptr[a][b];
 }
 
 template <class T>
 gbtPVector<T> gbtPVector<T>::operator+(const gbtPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtPVector<T> tmp(*this);
   tmp.gbtVector<T>::operator+=(v);
@@ -146,7 +145,7 @@ gbtPVector<T> gbtPVector<T>::operator+(const gbtPVector<T> &v) const
 
 template <class T> gbtPVector<T>& gbtPVector<T>::operator+=(const gbtPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtVector<T>::operator+=(v);
   return (*this);
@@ -163,7 +162,7 @@ template <class T> gbtPVector<T> gbtPVector<T>::operator-(void) const
 template <class T>
 gbtPVector<T> gbtPVector<T>::operator-(const gbtPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtPVector<T> tmp(*this);
   tmp.gbtVector<T>::operator-=(v);
@@ -172,7 +171,7 @@ gbtPVector<T> gbtPVector<T>::operator-(const gbtPVector<T> &v) const
 
 template <class T> gbtPVector<T>& gbtPVector<T>::operator-=(const gbtPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   gbtVector<T>::operator-=(v);
   return (*this);
@@ -180,7 +179,7 @@ template <class T> gbtPVector<T>& gbtPVector<T>::operator-=(const gbtPVector<T> 
 
 template <class T> T gbtPVector<T>::operator*(const gbtPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   return (*this).gbtVector<T>::operator*(v);
 }
@@ -207,7 +206,7 @@ template <class T> gbtPVector<T> gbtPVector<T>::operator/(T c)
 
 template <class T> bool gbtPVector<T>::operator==(const gbtPVector<T> &v) const
 {
-  if (!Check(v))   throw BadDim();
+  if (!Check(v))   throw gbtDimensionException();
 
   return (*this).gbtVector<T>::operator==(v);
 }
@@ -221,7 +220,7 @@ template <class T> bool gbtPVector<T>::operator!=(const gbtPVector<T> &v) const
 
 template <class T> gbtVector<T> gbtPVector<T>::GetRow(int row) const
 {
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (svlen.First() > row || row > svlen.Last())   throw gbtIndexException();
 
   gbtVector<T> v(1, svlen[row]);
 
@@ -232,8 +231,8 @@ template <class T> gbtVector<T> gbtPVector<T>::GetRow(int row) const
 
 template <class T> void gbtPVector<T>::GetRow(int row, gbtVector<T> &v) const
 {
-  if (svlen.First() > row || row > svlen.Last())  throw BadIndex();
-  if (v.First() != 1 || v.Last() != svlen[row])   throw BadDim();
+  if (svlen.First() > row || row > svlen.Last())  throw gbtIndexException();
+  if (v.First() != 1 || v.Last() != svlen[row])   throw gbtDimensionException();
 
   for(int i=v.First(); i<=v.Last(); i++)
     v[i]= (*this)(row,i);
@@ -241,8 +240,8 @@ template <class T> void gbtPVector<T>::GetRow(int row, gbtVector<T> &v) const
 
 template <class T> void gbtPVector<T>::SetRow(int row, const gbtVector<T> &v)
 {
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
-  if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim();
+  if (svlen.First() > row || row > svlen.Last())   throw gbtIndexException();
+  if (v.First() != 1 || v.Last() != svlen[row])    throw gbtDimensionException();
 
   for(int i=v.First(); i<=v.Last(); i++)
     (*this)(row,i)= v[i];
@@ -250,8 +249,8 @@ template <class T> void gbtPVector<T>::SetRow(int row, const gbtVector<T> &v)
 
 template <class T> void gbtPVector<T>::CopyRow(int row, const gbtPVector<T> &v)
 {
-  if (!Check(v))   throw BadDim();
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex(); 
+  if (!Check(v))   throw gbtDimensionException();
+  if (svlen.First() > row || row > svlen.Last())   throw gbtIndexException(); 
 
   for (int i = 1; i <= svlen[row]; i++)
     svptr[row][i] = v.svptr[row][i];
@@ -266,12 +265,13 @@ template <class T> const gbtArray<int> &gbtPVector<T>::Lengths(void) const
 //                    gbtPVector<T>: Output functions
 //-------------------------------------------------------------------------
 
-template <class T> gbtOutput &operator<<(gbtOutput &to, const gbtPVector<T> &v)
+template <class T> 
+std::ostream &operator<<(std::ostream &to, const gbtPVector<T> &v)
 {
   v.Dump(to); return to;
 }
 
-template <class T> void gbtPVector<T>::Dump(gbtOutput &f) const
+template <class T> void gbtPVector<T>::Dump(std::ostream &f) const
 {
   for (int i = svlen.First(); i <= svlen.Last(); i++)    {
     f << "{ ";

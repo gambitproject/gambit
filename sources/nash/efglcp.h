@@ -28,40 +28,15 @@
 #ifndef EFGLCP_H
 #define EFGLCP_H
 
-#include "efgalgorithm.h"
-#include "numerical/lemketab.h"
+#include "game/game.h"
 
-template <class T> class gbtEfgNashLcp : public gbtEfgNashAlgorithm {
-private:
-  int m_stopAfter, m_maxDepth;
-
-  int ns1,ns2,ni1,ni2;
-  T maxpay,eps;
-  gbtList<gbtBasicFeasibleSolution<T> > List;
-  gbtList<gbtGameInfoset> isets1, isets2;
-
-  void FillTableau(const gbtEfgSupport &, gbtMatrix<T> &, const gbtGameNode &, T,
-		   int, int, int, int);
-  int Add_BFS(const gbtLemkeTableau<T> &tab);
-  int All_Lemke(const gbtEfgSupport &, int dup, gbtLemkeTableau<T> &B,
-		int depth, gbtMatrix<T> &, gbtBehavNashSet &, gbtStatus &);
-  
-  void GetProfile(const gbtEfgSupport &, const gbtLemkeTableau<T> &tab, 
-		  gbtBehavProfile<T> &, const gbtVector<T> &, 
-		  const gbtGameNode &n, int,int);
-
-public:
-  gbtEfgNashLcp(void);
-  virtual ~gbtEfgNashLcp();
-  
-  int StopAfter(void) const { return m_stopAfter; }
-  void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
-
-  int MaxDepth(void) const { return m_maxDepth; }
-  void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
-
-  gbtText GetAlgorithm(void) const { return "Lcp[EFG]"; }
-  gbtBehavNashSet Solve(const gbtEfgSupport &, gbtStatus &);
-};
+//!
+//! This uses the algorithm of Lemke to compute Nash equilibria
+//! in two player extensive games, via the sequence form methods
+//! of Koller-Megiddo-von Stengel.
+//!
+template <class T> gbtList<gbtBehavProfile<T> >
+gbtNashLcpEfg(const gbtGame &p_game, const T &p_precision,
+	      int p_stopAfter = 0, int p_maxDepth = 0);
 
 #endif  // EFGLCP_H

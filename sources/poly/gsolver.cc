@@ -27,4 +27,4 @@
 #include "gsolver.imp"
 
 template class gbtPolyMultiSolver<gbtRational>;
-template class gbtPolyMultiSolver<gbtDouble>;
+template class gbtPolyMultiSolver<double>;

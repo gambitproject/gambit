@@ -46,12 +46,4 @@ public:
   virtual bool Gradient(const gbtVector<T> &, gbtVector<T> &) const = 0;
 };
 
-class gbtFuncMinException : public gbtException {
-public:
-  virtual ~gbtFuncMinException() { }
-  gbtText Description(void) const 
-    { return "Internal error in minimization code"; }
-};
-
-
 #endif   // GFUNC_H

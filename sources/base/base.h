@@ -27,10 +27,9 @@
 #ifndef BASE_H
 #define BASE_H
 
+#include <string>
 
 #include "gmisc.h"
-#include "gstream.h"
-#include "gtext.h"
 
 #include "garray.h"
 #include "gblock.h"

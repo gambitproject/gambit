@@ -15,31 +15,33 @@ EXTRACPPFLAGS = -v -I$(BCCDIR)\include -I.. -D__BCC55__
 EXTRALINKFLAGS = -Tpe -aa -v -V4.0 -c
 
 libgame_a_SOURCES = \
-        actiter.cc \
-	behav.cc \
-	efdom.cc \
-	efgcont.cc \
-	efgensup.cc \
-	efgiter.cc \
-	efgsupport.cc \
-	game.cc \
-	gameinst.cc \
-        infoset.cc \
-	mixed.cc \
-	nfdom.cc \
-	nfdommix.cc \
-	nfgcont.cc \
-	nfgensup.cc \
-	nfgiter.cc \
-	nfgsupport.cc \
-        node.cc \
-        outcome.cc \
-        player.cc \
-	readefg.cc \
-	readnfg.cc \
-	sfg.cc \
-	sfstrat.cc \
-        striter.cc
+	"efgiter.cc" \
+	"efgutils.cc" \
+	"game-file.cc" \
+	"nfgiter.cc" \
+	"sfg.cc" \
+	"sfstrat.cc" \
+	"table-mixed-double.cc" \
+	"table-mixed-mpfloat.cc" \
+	"table-mixed-rational.cc" \ 
+	"table-contingency.cc" \
+        "table-file.cc" \
+	"table-game.cc" \
+	"table-inst.cc" \
+	"table-outcome.cc" \
+	"table-player.cc" \
+	"tree-behav-double.cc" \
+	"tree-behav-mpfloat.cc" \
+	"tree-behav-pure.cc" \
+	"tree-behav-rational.cc" \
+	"tree-contingency.cc" \
+	"tree-file.cc" \
+	"tree-game.cc" \
+	"tree-infoset.cc" \
+	"tree-inst.cc" \
+	"tree-node.cc" \
+	"tree-outcome.cc" \
+	"tree-player.cc" 
 
 OBJECTS = $(libgame_a_SOURCES:.cc=.obj)
 
@@ -58,11 +60,8 @@ DEBUG_FLAGS= -v
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
 game: $(OBJECTS)
-        -erase game.lib
-	tlib game /P1024 @&&!
-+$(OBJECTS:.obj =.obj +) +$(PERIPH_LIBS:.lib =.lib +)
-!
-
+        copy *.obj ..
+        
 clean:
         -erase *.obj
         -erase *.exe
