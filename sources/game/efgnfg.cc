@@ -48,7 +48,9 @@ Lexicon::~Lexicon()
 {
   for (int i = 1; i <= strategies.Length(); i++)
     while (strategies[i].Length())  delete strategies[i].Remove(1);
-  m_nfg.rep->m_efg = 0;
+  if (m_nfg != 0) {
+    m_nfg.rep->m_efg = 0;
+  }
 }
 
 void SetEfg(gbtNfgGame nfg, gbtEfgGame efg)
