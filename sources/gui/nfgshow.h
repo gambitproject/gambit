@@ -134,7 +134,6 @@ public:
   int CurrentSolution(void) const { return m_currentSolution; }
   const gList<MixedSolution> &Solutions(void) const;
 
-  void SolutionToExtensive(const MixedSolution &mp, bool set = false);
   void AddSolution(const MixedSolution &, bool);
 
   void SetFilename(const wxString &s);

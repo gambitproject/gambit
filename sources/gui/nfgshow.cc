@@ -49,13 +49,13 @@
 #include "dlelim.h"
 #include "dlsupportselect.h"
 
+//=====================================================================
+//                 Implementation of class NfgShow
+//=====================================================================
+
 const int idSOLUTIONWINDOW = 3002;
 const int idINFONOTEBOOK = 3003;
 const int idINFOWINDOW = 3004;
-
-//----------------------------------------------------------------------
-//                   class NfgShow: Member functions
-//----------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
@@ -120,7 +120,7 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
-//                      class NfgShow: Lifecycle
+//               NfgShow: Constructor and destructor
 //----------------------------------------------------------------------
 
 NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
@@ -203,7 +203,80 @@ NfgShow::~NfgShow()
 }
 
 //----------------------------------------------------------------------
-//               class NfgShow: Private member functions
+//                NfgShow: Manipulation of profile list
+//----------------------------------------------------------------------
+
+void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
+{
+  m_solutionTable->Append(p_profile);
+  if (m_nfg.AssociatedEfg() && p_map) {
+    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
+  }
+  m_solutionTable->UpdateValues();
+  UpdateMenus();
+}
+
+void NfgShow::ChangeSolution(int sol)
+{
+  m_currentSolution = sol;
+    
+  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
+  if (m_solutionTable) {
+    m_solutionTable->UpdateValues();
+  }
+}
+
+void NfgShow::OnSolutionSelected(wxListEvent &p_event)
+{
+  m_currentSolution = p_event.m_itemIndex + 1;
+  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
+}
+ 
+//----------------------------------------------------------------------
+//            NfgShow: Coordinating updates of child windows
+//----------------------------------------------------------------------
+
+void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
+{
+  if (m_navigateWindow) {
+    m_navigateWindow->SetPlayers(p_rowPlayer, p_colPlayer);
+  }
+  m_table->SetPlayers(p_rowPlayer, p_colPlayer);
+}
+
+void NfgShow::SetStrategy(int p_player, int p_strategy)
+{
+  if (m_navigateWindow)  {
+    m_navigateWindow->SetStrategy(p_player, p_strategy);
+  }
+  if (m_table) {
+    m_table->SetStrategy(p_player, p_strategy);
+  }
+}
+
+void NfgShow::SetProfile(const gArray<int> &p_profile)
+{
+  m_navigateWindow->SetProfile(p_profile);
+  m_table->SetProfile(p_profile);
+}
+
+gArray<int> NfgShow::GetProfile(void) const
+{
+  return m_navigateWindow->GetProfile();
+}
+
+void NfgShow::UpdateProfile(gArray<int> &profile)
+{
+  //  m_table->OnChangeValues();
+}
+
+void NfgShow::OnOutcomesEdited(void)
+{
+  m_table->Refresh();
+}
+
+//----------------------------------------------------------------------
+//           NfgShow: Creating and updating menus and toolbar
 //----------------------------------------------------------------------
 
 void NfgShow::MakeMenus(void)
@@ -425,128 +498,8 @@ void NfgShow::UpdateMenus(void)
   }
 }
 
-gText NfgShow::UniqueSupportName(void) const
-{
-  int number = m_supports.Length() + 1;
-  while (1) {
-    int i;
-    for (i = 1; i <= m_supports.Length(); i++) {
-      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
-	break;
-      }
-    }
-
-    if (i > m_supports.Length())
-      return "Support" + ToText(number);
-    
-    number++;
-  }
-}
-
 //----------------------------------------------------------------------
-//                    class NfgShow: Event handlers
-//----------------------------------------------------------------------
-
-void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
-{
-  if (p_event.CanVeto() && GameIsDirty()) {
-    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
-		     wxOK | wxCANCEL) == wxCANCEL) {
-      p_event.Veto();
-      return;
-    }
-  }
-
-  Show(false);
-  Destroy();
-}
-
-void NfgShow::AdjustSizes(void)
-{
-  int width, height;
-  GetClientSize(&width, &height);
-
-  if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
-    m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
-				  width, m_solutionSashWindow->GetRect().height);
-    height -= m_solutionSashWindow->GetRect().height;
-  }
-
-  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
-    if (m_table) {
-      m_table->SetSize(250, 0, width - 250, height);
-    }
-  }
-  else if (m_table) {
-    m_table->SetSize(0, 0, width, height);
-  }
-
-  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->SetSize(0, 0, 250, height);
-  }
-
-  if (m_table) {
-    m_table->SetFocus();
-  }
-}
-
-
-void NfgShow::OnSize(wxSizeEvent &)
-{
-  AdjustSizes();
-}
-
-void NfgShow::OnSashDrag(wxSashEvent &p_event)
-{
-  int clientWidth, clientHeight;
-  GetClientSize(&clientWidth, &clientHeight);
-
-  switch (p_event.GetId()) {
-  case idINFOWINDOW:
-    m_table->SetSize(p_event.GetDragRect().width,
-		     m_table->GetRect().y,
-		     clientWidth - p_event.GetDragRect().width,
-		     m_table->GetRect().height);
-    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
-			      m_infoSashWindow->GetRect().y,
-			      p_event.GetDragRect().width,
-			      m_infoSashWindow->GetRect().height);
-    break;
-  case idSOLUTIONWINDOW:
-    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
-		     m_table->GetRect().width,
-		     clientHeight - p_event.GetDragRect().height - 40);
-    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
-			      m_infoSashWindow->GetRect().y,
-			      m_infoSashWindow->GetRect().width,
-			      clientHeight - p_event.GetDragRect().height);
-    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
-				  clientWidth, p_event.GetDragRect().height);
-    break;
-  }
-}
-
-void NfgShow::OnSetFocus(wxFocusEvent &)
-{
-  m_table->SetFocus();
-}
-
-void NfgShow::OnActivate(wxActivateEvent &p_event)
-{
-  if (p_event.GetActive()) {
-    m_parent->SetActiveWindow(this);
-  }
-}
-
-void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
-{
-  GetMenuBar()->Check(NFG_VIEW_NAVIGATION, p_event.GetSelection() == 0);
-  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, p_event.GetSelection() == 1);
-  GetMenuBar()->Check(NFG_VIEW_SUPPORTS, p_event.GetSelection() == 2);
-}
-
-//----------------------------------------------------------------------
-//                 class NfgShow: Menu event handlers
+//               NfgShow: Menu handlers - File menu
 //----------------------------------------------------------------------
 
 void NfgShow::OnFileSave(wxCommandEvent &p_event)
@@ -635,6 +588,10 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
   }
 }
 
+//----------------------------------------------------------------------
+//                NfgShow: Menu handlers - Edit menu
+//----------------------------------------------------------------------
+
 void NfgShow::OnEditLabel(wxCommandEvent &)
 {
   const char *label = wxGetTextFromUser("Label of game", "Label Game",
@@ -715,6 +672,172 @@ void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
 		   m_table->GetColStrategy(), false);
   }
 }
+
+//----------------------------------------------------------------------
+//                NfgShow: Menu handlers - View menu
+//----------------------------------------------------------------------
+
+void NfgShow::OnViewProfiles(wxCommandEvent &)
+{
+  if (m_solutionSashWindow->IsShown()) {
+    m_solutionTable->Show(false);
+    m_solutionSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_PROFILES, false);
+  }
+  else {
+    m_solutionTable->Show(true);
+    m_solutionSashWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
+  }
+
+  AdjustSizes();
+}
+
+void NfgShow::OnViewNavigation(wxCommandEvent &)
+{
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
+    m_infoNotebook->SetSelection(0);
+    m_navigateWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+  }
+  else if (m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+  }
+  else {
+    m_infoSashWindow->Show(true);
+    m_infoNotebook->SetSelection(0);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
+  }
+
+  AdjustSizes();
+}
+
+void NfgShow::OnViewOutcomes(wxCommandEvent &)
+{
+  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
+    m_infoNotebook->SetSelection(1);
+    m_navigateWindow->Show(true);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
+    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
+    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
+  }
+  else if (m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->Show(false);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
+  }
+  else {
+    m_infoSashWindow->Show(true);
+    m_infoNotebook->SetSelection(1);
+    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
+  }
+
+  AdjustSizes();
+}
+
+void NfgShow::OnViewDominance(wxCommandEvent &)
+{
+  m_table->ToggleDominance();
+}
+
+void NfgShow::OnViewProbabilities(wxCommandEvent &)
+{
+  m_table->ToggleProbs();
+}
+
+void NfgShow::OnViewValues(wxCommandEvent &)
+{
+  m_table->ToggleValues();
+}
+
+void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
+{
+  m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
+  m_table->Refresh();
+}
+
+void NfgShow::OnViewGameInfo(wxCommandEvent &)
+{
+  gText message = "Number of Players: " + ToText(m_nfg.NumPlayers()) + "\n";
+  message += "Is ";
+  message += ((IsConstSum(m_nfg)) ? " " : "NOT ");
+  message += "constant sum\n";
+  message += "Game ";
+  message += ((m_nfg.IsDirty()) ? "HAS " : "has not ");
+  message += "been modified\n";
+
+  wxMessageBox((char *) message, "Game Information", wxOK, this);
+}
+
+//----------------------------------------------------------------------
+//               NfgShow: Menu handlers - Format menu
+//----------------------------------------------------------------------
+
+void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
+{
+  guiSliderDialog dialog(this, "Column width", 0, 100, 20);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    //    for (int i = 1; i <= m_currentSupport->NumStrats(m_); i++) {
+    //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
+    //    }
+  }
+}
+
+void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
+{
+  guiSliderDialog dialog(this, "Decimal places", 0, 25,
+			 m_table->GetDecimals());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_table->SetDecimals(dialog.GetValue());
+    m_table->Refresh();
+  }
+}
+
+void NfgShow::OnFormatFontData(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
+    m_table->SetCellFont(dialog.GetFontData().GetChosenFont());
+    m_table->Refresh();
+  }
+}
+
+void NfgShow::OnFormatFontLabels(wxCommandEvent &)
+{
+  wxFontData data;
+  wxFontDialog dialog(this, &data);
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
+    m_table->Refresh();
+  }
+}
+
+void NfgShow::OnFormatColors(wxCommandEvent &)
+{
+}
+
+void NfgShow::OnFormatSave(wxCommandEvent &)
+{
+  m_table->SaveSettings();
+}
+
+void NfgShow::OnFormatLoad(wxCommandEvent &)
+{
+  m_table->LoadSettings();
+}
+
+//----------------------------------------------------------------------
+//            NfgShow: Menu handlers - Tools->Support menu
+//----------------------------------------------------------------------
 
 void NfgShow::OnToolsSupportUndominated(wxCommandEvent &)
 {
@@ -870,6 +993,10 @@ void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
     m_currentSupport = m_supports[index + 1];
   }
 }
+
+//----------------------------------------------------------------------
+//          NfgShow: Menu handlers - Tools->Equilibrium menu
+//----------------------------------------------------------------------
 
 void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 { 
@@ -1224,100 +1351,9 @@ void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
   UpdateMenus();
 }
 
-
-void NfgShow::OnViewProfiles(wxCommandEvent &)
-{
-  if (m_solutionSashWindow->IsShown()) {
-    m_solutionTable->Show(false);
-    m_solutionSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_PROFILES, false);
-  }
-  else {
-    m_solutionTable->Show(true);
-    m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_PROFILES, true);
-  }
-
-  AdjustSizes();
-}
-
-void NfgShow::OnViewNavigation(wxCommandEvent &)
-{
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
-    m_infoNotebook->SetSelection(0);
-    m_navigateWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
-  }
-  else if (m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
-  }
-  else {
-    m_infoSashWindow->Show(true);
-    m_infoNotebook->SetSelection(0);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, true);
-  }
-
-  AdjustSizes();
-}
-
-void NfgShow::OnViewOutcomes(wxCommandEvent &)
-{
-  if (m_infoSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
-    m_infoNotebook->SetSelection(1);
-    m_navigateWindow->Show(true);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
-    GetMenuBar()->Check(NFG_VIEW_NAVIGATION, false);
-    GetMenuBar()->Check(NFG_VIEW_SUPPORTS, false);
-  }
-  else if (m_infoSashWindow->IsShown()) {
-    m_infoSashWindow->Show(false);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, false);
-  }
-  else {
-    m_infoSashWindow->Show(true);
-    m_infoNotebook->SetSelection(1);
-    GetMenuBar()->Check(NFG_VIEW_OUTCOMES, true);
-  }
-
-  AdjustSizes();
-}
-
-void NfgShow::OnViewDominance(wxCommandEvent &)
-{
-  m_table->ToggleDominance();
-}
-
-void NfgShow::OnViewProbabilities(wxCommandEvent &)
-{
-  m_table->ToggleProbs();
-}
-
-void NfgShow::OnViewValues(wxCommandEvent &)
-{
-  m_table->ToggleValues();
-}
-
-void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
-{
-  m_table->SetOutcomeValues(1 - m_table->OutcomeValues());
-  m_table->Refresh();
-}
-
-void NfgShow::OnViewGameInfo(wxCommandEvent &)
-{
-  gText message = "Number of Players: " + ToText(m_nfg.NumPlayers()) + "\n";
-  message += "Is ";
-  message += ((IsConstSum(m_nfg)) ? " " : "NOT ");
-  message += "constant sum\n";
-  message += "Game ";
-  message += ((m_nfg.IsDirty()) ? "HAS " : "has not ");
-  message += "been modified\n";
-
-  wxMessageBox((char *) message, "Game Information", wxOK, this);
-}
+//----------------------------------------------------------------------
+//              EfgShow: Menu handlers - Profiles menu
+//----------------------------------------------------------------------
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
@@ -1377,130 +1413,130 @@ void NfgShow::OnProfilesDelete(wxCommandEvent &)
   UpdateMenus();
 }
 
-void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
-{
-  guiSliderDialog dialog(this, "Column width", 0, 100, 20);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    //    for (int i = 1; i <= m_currentSupport->NumStrats(m_); i++) {
-    //      m_table->SetColumnWidth(i - 1, dialog.GetValue());
-    //    }
-  }
-}
-
-void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
-{
-  guiSliderDialog dialog(this, "Decimal places", 0, 25,
-			 m_table->GetDecimals());
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_table->SetDecimals(dialog.GetValue());
-    m_table->Refresh();
-  }
-}
-
-void NfgShow::OnFormatFontData(wxCommandEvent &)
-{
-  wxFontData data;
-  wxFontDialog dialog(this, &data);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    //    m_drawSettings.SetDataFont(dialog.GetFontData().GetChosenFont());
-    m_table->SetCellFont(dialog.GetFontData().GetChosenFont());
-    m_table->Refresh();
-  }
-}
-
-void NfgShow::OnFormatFontLabels(wxCommandEvent &)
-{
-  wxFontData data;
-  wxFontDialog dialog(this, &data);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    // m_drawSettings.SetLabelFont(dialog.GetFontData().GetChosenFont());
-    m_table->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    m_table->Refresh();
-  }
-}
-
-void NfgShow::OnFormatColors(wxCommandEvent &)
-{
-}
-
-void NfgShow::OnFormatSave(wxCommandEvent &)
-{
-  m_table->SaveSettings();
-}
-
-void NfgShow::OnFormatLoad(wxCommandEvent &)
-{
-  m_table->LoadSettings();
-}
-
 //----------------------------------------------------------------------
-//                class NfgShow: Public member functions
+//                  NfgShow: Non-menu event handlers
 //----------------------------------------------------------------------
 
-void NfgShow::SetPlayers(int p_rowPlayer, int p_colPlayer)
+void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (m_navigateWindow) {
-    m_navigateWindow->SetPlayers(p_rowPlayer, p_colPlayer);
+  if (p_event.CanVeto() && GameIsDirty()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL) {
+      p_event.Veto();
+      return;
+    }
   }
-  m_table->SetPlayers(p_rowPlayer, p_colPlayer);
+
+  Show(false);
+  Destroy();
 }
 
-void NfgShow::SetStrategy(int p_player, int p_strategy)
+void NfgShow::AdjustSizes(void)
 {
-  if (m_navigateWindow)  {
-    m_navigateWindow->SetStrategy(p_player, p_strategy);
+  int width, height;
+  GetClientSize(&width, &height);
+
+  if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
+    m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
+				  width, m_solutionSashWindow->GetRect().height);
+    height -= m_solutionSashWindow->GetRect().height;
   }
+
+  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
+    if (m_table) {
+      m_table->SetSize(250, 0, width - 250, height);
+    }
+  }
+  else if (m_table) {
+    m_table->SetSize(0, 0, width, height);
+  }
+
+  if (m_navigateWindow && m_infoSashWindow->IsShown()) {
+    m_infoSashWindow->SetSize(0, 0, 250, height);
+  }
+
   if (m_table) {
-    m_table->SetStrategy(p_player, p_strategy);
+    m_table->SetFocus();
   }
 }
 
-void NfgShow::SetProfile(const gArray<int> &p_profile)
+
+void NfgShow::OnSize(wxSizeEvent &)
 {
-  m_navigateWindow->SetProfile(p_profile);
-  m_table->SetProfile(p_profile);
+  AdjustSizes();
 }
 
-gArray<int> NfgShow::GetProfile(void) const
+void NfgShow::OnSashDrag(wxSashEvent &p_event)
 {
-  return m_navigateWindow->GetProfile();
-}
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
 
-void NfgShow::UpdateProfile(gArray<int> &profile)
-{
-  //  m_table->OnChangeValues();
-}
-
-void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
-{
-  m_solutionTable->Append(p_profile);
-  if (m_nfg.AssociatedEfg() && p_map) {
-    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
+  switch (p_event.GetId()) {
+  case idINFOWINDOW:
+    m_table->SetSize(p_event.GetDragRect().width,
+		     m_table->GetRect().y,
+		     clientWidth - p_event.GetDragRect().width,
+		     m_table->GetRect().height);
+    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
+			      m_infoSashWindow->GetRect().y,
+			      p_event.GetDragRect().width,
+			      m_infoSashWindow->GetRect().height);
+    break;
+  case idSOLUTIONWINDOW:
+    m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
+		     m_table->GetRect().width,
+		     clientHeight - p_event.GetDragRect().height - 40);
+    m_infoSashWindow->SetSize(m_infoSashWindow->GetRect().x,
+			      m_infoSashWindow->GetRect().y,
+			      m_infoSashWindow->GetRect().width,
+			      clientHeight - p_event.GetDragRect().height);
+    m_solutionSashWindow->SetSize(0, clientHeight - p_event.GetDragRect().height,
+				  clientWidth, p_event.GetDragRect().height);
+    break;
   }
-  m_solutionTable->UpdateValues();
-  UpdateMenus();
 }
 
-void NfgShow::ChangeSolution(int sol)
+void NfgShow::OnSetFocus(wxFocusEvent &)
 {
-  m_currentSolution = sol;
+  m_table->SetFocus();
+}
+
+void NfgShow::OnActivate(wxActivateEvent &p_event)
+{
+  if (p_event.GetActive()) {
+    m_parent->SetActiveWindow(this);
+  }
+}
+
+void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
+{
+  GetMenuBar()->Check(NFG_VIEW_NAVIGATION, p_event.GetSelection() == 0);
+  GetMenuBar()->Check(NFG_VIEW_OUTCOMES, p_event.GetSelection() == 1);
+  GetMenuBar()->Check(NFG_VIEW_SUPPORTS, p_event.GetSelection() == 2);
+}
+
+//----------------------------------------------------------------------
+//                   NfgShow: Miscellaneous members
+//----------------------------------------------------------------------
+
+gText NfgShow::UniqueSupportName(void) const
+{
+  int number = m_supports.Length() + 1;
+  while (1) {
+    int i;
+    for (i = 1; i <= m_supports.Length(); i++) {
+      if (m_supports[i]->GetName() == "Support" + ToText(number)) {
+	break;
+      }
+    }
+
+    if (i > m_supports.Length())
+      return "Support" + ToText(number);
     
-  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
-  if (m_solutionTable) {
-    m_solutionTable->UpdateValues();
+    number++;
   }
 }
 
-void NfgShow::OnSolutionSelected(wxListEvent &p_event)
-{
-  m_currentSolution = p_event.m_itemIndex + 1;
-  m_table->SetSolution((*m_solutionTable)[m_currentSolution]);
-}
- 
 void NfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
@@ -1512,29 +1548,6 @@ void NfgShow::SetFilename(const wxString &p_name)
     SetTitle((char *) m_nfg.GetTitle());
   }
   m_parent->SetFilename(this, p_name.c_str());
-}
-
-void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
-{
-#ifdef NOT_PORTED_YET
-  const Efg *efg = InterfaceObjectEfg();
-
-  if (efg->AssociatedNfg() != &m_nfg) 
-    return;
-
-  if (!IsPerfectRecall(*efg)) {
-    if (wxMessageBox("May not be able to find valid behavior strategy\n"
-		     "for game of imperfect recall\n"
-		     "Continue anyway?",
-		     "Convert to behavior strategy",
-		     wxOK | wxCANCEL | wxCENTRE) != wxOK)   
-      return;
-  }
-
-  EFSupport S(*InterfaceObjectEfg());
-  BehavProfile<gNumber> bp(mp);
-  SolutionToEfg(bp, set);
-#endif  // NOT_PORTED_YET
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
@@ -1560,11 +1573,6 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
 
     m_table->Refresh();
   }
-}
-
-void NfgShow::OnOutcomesEdited(void)
-{
-  m_table->Refresh();
 }
 
 const gList<MixedSolution> &NfgShow::Solutions(void) const
