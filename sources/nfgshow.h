@@ -10,6 +10,7 @@
 #include "wx/wx.h"
 #include "wx/listctrl.h"
 #include "wx/sashwin.h"
+#include "wx/printdlg.h"
 #include "wxmisc.h"
 
 #include "nfgdraw.h"
@@ -55,6 +56,8 @@ private:
   gList<Accel> m_accelerators;
   gText m_fileName;
 
+  wxPageSetupData m_pageSetupData;
+  wxPrintData m_printData;
 
   void MakeMenus(void);
   void UpdateMenus(void);

@@ -13,6 +13,7 @@
 #include "nfgpanel.h"
 #include "nfgtable.h"
 #include "nfgsoln.h"
+#include "nfgprint.h"
 #include "nfgprofile.h"
 #include "mixededit.h"
 #include "nfgconst.h"
@@ -559,14 +560,46 @@ void NfgShow::OnFileSave(wxCommandEvent &)
 
 void NfgShow::OnFilePageSetup(wxCommandEvent &)
 {
+  wxPageSetupDialog dialog(this, &m_pageSetupData);
+  if (dialog.ShowModal() == wxID_OK) {
+    m_printData = dialog.GetPageSetupData().GetPrintData();
+    m_pageSetupData = dialog.GetPageSetupData();
+  }
 }
 
 void NfgShow::OnFilePrintPreview(wxCommandEvent &)
 {
+  wxPrintDialogData data(m_printData);
+  wxPrintPreview *preview = new wxPrintPreview(new NfgPrintout(m_table),
+					       new NfgPrintout(m_table),
+					       &data);
+
+  if (!preview->Ok()) {
+    delete preview;
+    return;
+  }
+
+  wxPreviewFrame *frame = new wxPreviewFrame(preview, this,
+					     "Print Preview",
+					     wxPoint(100, 100),
+					     wxSize(600, 650));
+  frame->Initialize();
+  frame->Show(true);
 }
 
 void NfgShow::OnFilePrint(wxCommandEvent &)
 {
+  wxPrintDialogData data(m_printData);
+  wxPrinter printer(&data);
+  NfgPrintout printout(m_table);
+
+  if (!printer.Print(this, &printout, true)) {
+    wxMessageBox("There was an error in printing", "Error", wxOK);
+    return;
+  }
+  else {
+    m_printData = printer.GetPrintDialogData().GetPrintData();
+  }
 }
 
 void NfgShow::OnEditLabel(wxCommandEvent &)
