@@ -23,8 +23,6 @@ bool operator==(const gArray<int> &, const gArray<int> &);
 #include "rational.h"
 #include "glist.h"
 #include "glist.imp"
-TEMPLATE class gNode<int>;
-TEMPLATE class gList<int>;
 TEMPLATE class gNode<SpreadSheet> ;
 TEMPLATE class gList<SpreadSheet> ;
 
