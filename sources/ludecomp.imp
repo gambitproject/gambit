@@ -1,0 +1,369 @@
+//#
+//# FILE: ludecomp.imp -- Implementation of LU decomposition
+//#
+//# $Id$
+//#
+
+#include "ludecomp.h"
+#include "glistit.h"
+
+
+// LUdecomp class methods
+// constructors, destructor
+
+template <class T>
+LUdecomp<T>::LUdecomp(int size)
+: mat(size,size), rpp(size), updates()
+{
+  identity();
+  null_rpp();
+}
+
+template <class T>
+LUdecomp<T>::LUdecomp(int min, int max)
+: mat(min,max,min,max), rpp(min,max), updates()
+{
+  identity();
+  null_rpp();
+}
+
+template <class T>
+LUdecomp<T>::LUdecomp(const gMatrix<T> &M)
+: mat(M),
+  rpp(M.MinRow(),M.MaxRow()),
+  updates()
+{
+  assert(mat.MinRow()==mat.MinCol() && mat.MaxRow()==mat.MaxCol());
+
+  null_rpp();
+  factor();
+}
+
+template <class T>
+LUdecomp<T>::LUdecomp(const gMatrix<T> &M, const gTuple<int> &basis)
+: mat(M.MinRow(),M.MaxRow(), basis.First(),basis.Last()),
+  rpp(M.MinRow(),M.MaxRow()),
+  updates()
+{
+  assert(mat.MinRow()==mat.MinCol() && mat.MaxRow()==mat.MaxCol());
+
+  gVector<T> column(mat.MinRow(),mat.MaxRow());
+  for(int i=basis.First(); i<=basis.Last(); i++)
+    {
+      M.GetColumn(basis[i], column);
+      mat.SetColumn(i, column);
+    }
+  null_rpp();
+  factor();
+}
+
+template <class T>
+LUdecomp<T>::~LUdecomp()
+{
+}
+
+
+template <class T>
+void LUdecomp<T>::refactor(gMatrix<T> &M)
+{
+  mat= M;
+  null_rpp();
+  updates.Flush();
+  factor();
+}
+
+template<class T>
+void LUdecomp<T>::refactor(gMatrix<T> &M, gTuple<int> &basis)
+{
+  assert(mat.MinCol()==basis.First() && mat.MaxCol()==basis.Last());
+
+  gVector<T> column(mat.MinRow(),mat.MaxRow());
+  for(int i=basis.First(); i<=basis.Last(); i++)
+    {
+      M.GetColumn(basis[i], column);
+      mat.SetColumn(i, column);
+    }
+  null_rpp();
+  updates.Flush();
+  factor();
+}
+
+
+template<class T>
+void LUdecomp<T>::null_rpp() // initialize row permutation to identity
+{
+  // initial permutation is null
+  for(int i=rpp.First(); i<=rpp.Last(); i++)
+    rpp[i]= i;
+  rpparity= 0;
+}
+
+template<class T>
+void LUdecomp<T>::identity()
+{
+  for(int i=mat.MinRow(); i<=mat.MaxRow(); i++)
+    {
+      for(int j=mat.MinCol(); j<=mat.MaxCol(); j++)
+	mat(i,j)= (i==j)? (T)1 : (T)0;
+    }
+}
+
+
+template<class T>
+void LUdecomp<T>::PermuteColumn(const gVector<T> &in, gVector<T> &out) const
+// perform row permutation on column vector
+{
+  assert( mat.CheckColumn(in) && mat.CheckColumn(out) );
+  assert( &in != &out );
+  int min=out.First(), max=out.Last();
+
+  // out <- permute(in)
+  for(int i=min; i<=max; i++)
+    out[rpp[i]]= in[i];
+} // end PermuteColumn
+
+template<class T>
+void LUdecomp<T>::Lsolve(const gVector<T> &b, gVector<T> &x) const
+// solve L x = b
+{
+  assert( mat.CheckColumn(x) && mat.CheckColumn(b) );
+  assert( &b != &x );
+  int min=x.First(), max=x.Last();
+
+  T sum;
+  for(int row=min; row<=max; row++)
+    {
+      sum= b[row];
+      for(int col=min; col<row; col++)
+	sum-= mat(row,col)*x[col];
+      x[row]= sum;
+    }
+} // end Lsolve
+
+template<class T>
+void LUdecomp<T>::apply(LUupdate<T> &update, gVector<T> &v) const
+// solve Z v_out = v_in
+// where Z is the update not factored into L:
+// Z= (first applied) P M^-1 P M^-1 ... P M^-1 (last applied)
+// Z^-1= (last applied) M P ... M P M P (first applied)
+// Z^-1 v is done in place
+{
+  assert( mat.CheckColumn(v) );
+  assert( v.First()<=update.First() && update.Last()=v.Last()-1 );
+  T tmp;
+
+  for(int i=update.First(); i<=update.Last(); i++)
+    {
+      if(update.rowp[i])
+	{
+	  tmp= v[i];
+	  v[i]= v[i+1];
+	  v[i+1]= tmp;
+	}
+      v[i+1]-= v[i]*update.alpha[i];
+    }
+}
+
+template<class T>
+void LUdecomp<T>::Usolve(const gVector<T> &b, gVector<T> &x) const
+// solve U x = b
+{
+  assert( mat.CheckColumn(x) && mat.CheckColumn(b) );
+  assert( &b != &x );
+  int min=x.First(), max=x.Last();
+
+  T sum;
+  for(int row=max; row>=min; row--)
+    {
+      sum= b[row];
+      for(int col=max; col>row; col--)
+	sum-= mat(row,col)*x[col];
+      x[row]= sum/mat(row,row);
+    }
+} // end Usolve
+
+
+template<class T>
+void LUdecomp<T>::solve(gVector<T> &x, const gVector<T> &b) const
+// solve A x = b
+{
+  // &x can be the same as &b...
+  assert( mat.CheckColumn(x) && mat.CheckColumn(b) );
+  int min= mat.MinCol(), max= mat.MaxCol();
+  gVector<T> tmp(min,max);
+
+  PermuteColumn(b,x);
+  Lsolve(x,tmp);
+  for( gListIter<LUupdate<T>> iter(updates);
+       ! iter.PastEnd();
+       iter++
+     )
+    apply(iter.GetValue(),tmp);
+  Usolve(tmp,x);
+}
+
+/* solveT isnt done yet
+template<class T>
+void LUdecomp<T>::solveT(gVector<T> &y, const gVector<T> &c) const
+// solve y A = c
+{
+  assert( mat.CheckRow(y) && mat.CheckRow(c) );
+
+  int min=y.First(), max=y.Last();
+  gVector<T> tmp(min,max);
+  int row,col;
+
+  // solve y U = c
+  T sum;
+  for(col=min; col<=max; col++)
+    {
+      sum= c[col];
+      for(row=min; row<col; row++)
+	sum-= mat[row,col]*y[row];
+      y[col]= sum/mat[col,col];
+    }
+
+  // solve tmp L = y
+  for(col=max; col>=min; col--)
+    {
+      sum= y[col];
+      for(row=max; row>col; row--)
+	sum-= mat[row,col]*tmp[row];
+      tmp[col]= sum;
+    }
+
+  // y <- permute^-1(tmp)
+  for(int i=min; i<=max; i++)
+    y[i]= tmp[rpp[i]];
+}
+*/ // end solveT (commented out)
+
+template<class T>
+void LUdecomp<T>::factor()
+// factor mat (in place) into P^-1 L U
+{
+  int min=mat.MinRow(), max= mat.MaxRow();
+  int k, row, col;
+  T temp, tmax;
+
+  for(k=min; k<=max; k++)
+    {
+
+      // partial pivot
+
+      int pindex= k;
+      T tmax= abs( mat(pindex,k) );
+      for(row=max; row>k; row--)
+	{
+	  temp= abs( mat(row,c) );
+	  if( temp>tmax )
+	    {
+	      pindex= row;
+	      tmax= temp;
+	    }
+	}
+      if( pindex != k )
+	{
+	  mat.SwitchRows(k,pindex);
+	  int tmp= rpp(k);
+	  rpp(k)= rpp(pindex);
+	  rpp(pindex)= tmp;
+	  rpparity++;
+	}
+      assert( mat(k,k) != (T)0 );
+
+      // do Gaussian elimination
+      for(row=max; row>k; row--)
+	{
+	  // calculate L element
+	  temp= mat(row,k)/ mat(k,k);
+	  mat(row,k)= temp
+
+	  // calculate A_k elements
+	  for(col=max; col>k; col--)
+	    mat(row,col)-= temp*mat(k,col);
+	}
+    } // end for(k)
+} // end factor()
+
+
+template<class T>
+void LUdecomp<T>::update(int column, const gVector<T> &v)
+// delete column, add v on the right (mat.MaxCol()), update LU decomposition
+{
+  assert( CheckColumn(column) && CheckColumn(v) );
+
+  int min= v.First(), max= v.Last();
+  gVector<T> temp(min,max);
+  gVector<T> Ucol(min,max);
+
+  // shift matrix, add new column
+  PermuteColumn(v,temp);
+  Lsolve(temp,Ucol); // Ucol is new U column
+  mat.GetColumn(column,temp); // temp is temp. storage for L column
+  mat.RotateLeft(column,max); // shift columns over
+  mat.PutColumn(mat.MaxCol(),Ucol); // insert new U column
+
+  LUupdate update(column, mat.MaxCol()-1);
+  T tmp, alpha;
+  for(int k=column; k<max; k++)
+    {
+      // do pivot and update U rows
+      if( abs(mat(k+1,k)) <= abs(mat(k,k)) )
+	{
+	  // do not permute U_k, U_k+1
+	  assert( mat(k,k) != 0 ); // must be nonsingular
+          alpha= mat(k+1,k)/mat(k,k);
+          update.rowp[k]= 0;
+          update.alpha[k]= alpha;
+	  for(int i=max; i>k; i--)
+            mat[k+1,i]-= alpha*mat[k,i];
+	}
+      else
+	{
+	  assert( mat(k,k+1) != 0 ); // must be nonsingular
+	  alpha= mat(k,k)/mat(k+1,k);
+	  update.rowp[k]= 1;
+	  update.alpha[k]= alpha;
+	  // switch U rows (but not L rows -- perm. stored in factored form)
+	  for(int i=max; i>k; i--)
+	    {
+	      tmp= mat[k+1,i];
+	      mat[k+1,i]= mat[k,i] - tmp*alpha;
+	      mat[k,i]= tmp;
+	    }
+	}
+
+      // append update to updates list
+      updates.append(update);
+
+      // switch L column with temp
+      for(int i=max; i>k; i--)
+	{
+	  tmp= mat(i,k);
+	  mat(i,k)= temp[i];
+	  temp[i]= tmp;
+	}
+    } // end for(k)
+
+  // make sure U is nonsingular (practically useless as written...)
+  assert( mat(max,max) != (T)0 )
+} // end update()
+
+
+template<class T>
+T LUdecomp<T>::Determinant() const
+{
+  assert( updates.Length()==0 );
+
+  T x;
+  if( rpparity&1 )
+    x= -1; // parity odd
+  else
+    x= 1; // parity even
+
+  for(int i=mat.MinCol(); i<=mat.MaxCol(); i++)
+    x*= mat(i,i);
+  return x;
+}
+
