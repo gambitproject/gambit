@@ -5,7 +5,7 @@ WXDIR=/home/ironbark/gambit/wxwin
 GUI=none
 
 all:
-	@echo Specify a target: gcll, gui, source.
+	@echo Specify a target: gcll, gui, src.
 	@echo If specifying gui, make sure to add GUI=ol/motif
 gui:
 	@echo Updating gambit_$(GUI)_$(HOST) on hss
@@ -23,7 +23,7 @@ gcl:
 	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
 	ftp_put gcl_$(HOST).zip
 	rm gcl_$(HOST).zip
-source:
+src:
 	@echo Updating source code on hss
 # 	get the BCC specific binary files from my (egrayver's) dir
 #	cp /egrayver/job/gambit/*.ide .
