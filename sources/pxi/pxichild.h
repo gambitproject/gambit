@@ -42,6 +42,7 @@ private:
   void OnDataLoad(wxCommandEvent &);
   void OnDataSave(wxCommandEvent &);
   void OnDataEdit(wxCommandEvent &);
+  void OnDataFit(wxCommandEvent &);
 
   void OnFormatLambdaAxis(wxCommandEvent &);
   void OnFormatProfileAxis(wxCommandEvent &);

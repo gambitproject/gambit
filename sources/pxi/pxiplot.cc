@@ -33,10 +33,8 @@ PxiPlot::PxiPlot(wxWindow *p_parent, const wxPoint &p_position,
 {
   m_lambdaAxisProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
   m_lambdaAxisProp.m_color = *wxBLUE;
-  m_lambdaAxisProp.m_scale.m_minimum =
-    wxString::Format("%f", p_header.EStart());
-  m_lambdaAxisProp.m_scale.m_maximum = 
-    wxString::Format("%f", p_header.EStop());
+  m_lambdaAxisProp.m_scale.m_minimum = wxString(".01");
+  m_lambdaAxisProp.m_scale.m_maximum = wxString("100"); 
   m_lambdaAxisProp.m_scale.m_divisions = 10;
   m_lambdaAxisProp.m_scale.m_useLog = true;
   m_lambdaAxisProp.m_scale.m_canUseLog = true;

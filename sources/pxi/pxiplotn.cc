@@ -245,8 +245,9 @@ void PxiPlotN::DoPlot(wxDC& dc,
   // This function plots n-dimensional data on a rectangular grid.  The x-axis
   //  are error value
 {
-  PlotAxis(dc,x0,y0,cw,ch, m_lambdaAxisProp, m_probAxisProp, m_header.EStep());
-  PlotData(dc,x0,y0,cw,ch, m_header);
+  // The .05 used to be the stepsize from PXI file
+  PlotAxis(dc, x0, y0, cw, ch, m_lambdaAxisProp, m_probAxisProp, .05);
+  PlotData(dc, x0, y0, cw, ch, m_header);
 }
 
 void PxiPlotN::OnEvent(wxMouseEvent &ev)

@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_DATA_LOAD, PxiChild::OnDataLoad)
   EVT_MENU(PXI_DATA_SAVE, PxiChild::OnDataSave)
   EVT_MENU(PXI_DATA_EDIT, PxiChild::OnDataEdit)
+  EVT_MENU(PXI_DATA_FIT, PxiChild::OnDataFit)
   EVT_MENU(PXI_FORMAT_LAMBDA_AXIS, PxiChild::OnFormatLambdaAxis)
   EVT_MENU(PXI_FORMAT_PROFILE_AXIS, PxiChild::OnFormatProfileAxis)
   EVT_MENU(PXI_FORMAT_TITLE, PxiChild::OnFormatTitle)
@@ -143,6 +144,9 @@ void PxiChild::MakeMenus(void)
   dataMenu->Append(PXI_DATA_LOAD, "&Load", "Load experimental data");
   dataMenu->Append(PXI_DATA_SAVE, "&Save", "Save experimental data");
   dataMenu->Append(PXI_DATA_EDIT, "&Edit", "Edit experimental data");
+  dataMenu->AppendSeparator();
+  dataMenu->Append(PXI_DATA_FIT, "&Fit", "Compute maximum likelihood "
+		   "estimates");
   
   wxMenu *formatMenu = new wxMenu;
   formatMenu->Append(PXI_FORMAT_LAMBDA_AXIS, "Lambda &axis",
@@ -443,7 +447,6 @@ void PxiChild::OnDataLoad(wxCommandEvent &)
     try {
       gFileInput file(m_expDatafile);
       m_expData.LoadData(file);
-      m_expData.ComputeMLEs(m_fileHeader, gnull);
     }
     catch (...) {
       return;
@@ -461,8 +464,6 @@ void PxiChild::OnDataEdit(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_expData = dialog.GetData();
-    m_expData.ComputeMLEs(m_fileHeader, gnull);
-    
     for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
       ((PxiPlot *) m_plotBook->GetPage(i))->Render();
     }
@@ -487,6 +488,32 @@ void PxiChild::OnDataSave(wxCommandEvent &)
     }
   }
 }
+
+void PxiChild::OnDataFit(wxCommandEvent &)
+{
+  wxFileDialog dialog(this, "Choose output file", 
+		      wxPathOnly(m_expDatafile), "", "*.out",
+		      wxSAVE | wxOVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() == wxID_OK) {
+    try {
+      gFileOutput file(dialog.GetPath().c_str());
+      m_expData.ComputeMLEs(m_fileHeader, file);
+
+    }
+    catch (...) {
+      wxMessageBox(wxString::Format("There was an error in writing to '%s'",
+				    dialog.GetPath().c_str()),
+		   "Error", wxOK | wxCENTRE | wxICON_ERROR);
+      return;
+    }
+
+    for (int i = 0; i < m_plotBook->GetPageCount(); i++) {
+      ((PxiPlot *) m_plotBook->GetPage(i))->Render();
+    }
+  }
+}
+
 
 //-------------------------------------------------------------------------
 //                       Format menu handlers

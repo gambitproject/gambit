@@ -44,6 +44,7 @@ const int PXI_VIEW_ZOOM_OUT = 151;
 const int PXI_DATA_LOAD = 215;
 const int PXI_DATA_SAVE = 216;
 const int PXI_DATA_EDIT = 217;
+const int PXI_DATA_FIT = 218;
 
 const int PXI_SERIES_OVERLAY = 220;
 
