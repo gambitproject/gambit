@@ -19,7 +19,8 @@ void efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
   double time;
 
   try {
-    PolEnum(support, params, solutions, neval, time);
+    bool is_singular = false; // This info is currently unutilized!!
+    PolEnum(support, params, solutions, neval, time, is_singular);
 
     nevals += neval;
   
