@@ -1131,10 +1131,11 @@ void wxIntegerItem::SetInteger(int p_value)
 
 static bool IsNumber(wxText &p_item)
 {
-  int i;
+  int i = 0;
   char *entry = p_item.GetValue();
 
-  for (i = 0; isdigit(entry[i]) && entry[i] != '\0'; i++);
+  if (entry[i] == '-')  i = 1;
+  for (; isdigit(entry[i]) && entry[i] != '\0'; i++);
   if (entry[i] == '\0')
     return true;
   else if (entry[i] == '.' || entry[i] == '/') {

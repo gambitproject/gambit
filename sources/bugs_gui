@@ -199,15 +199,6 @@ Plus, the tableau should not be failing assertions but throwing exceptions.
 
 -------------  older bugs that still remain ---------------
 
-//--------------------------------
-
-Bug D35:  Windows version does not accept negative payoffs for outcomes
-
-Load poker.efg, and double click on an outcome.  It will crash.
-create any extensive form game, and try to enter an outcome with
-negative payoff.  The minus sign is not interpreted as a minus sign,
-but as a backspace-0.
-
 //------------------------------
 
 GUI Bug 5.2
