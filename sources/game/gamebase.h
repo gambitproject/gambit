@@ -442,7 +442,6 @@ public:
   void RemoveStrategy(gbtGameStrategy);
   
   // DATA ACCESS: PROPERTIES
-  bool IsSubset(const gbtNfgSupportBase &s) const;
   bool IsValid(void) const;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES

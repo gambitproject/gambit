@@ -60,7 +60,7 @@ public:
   virtual void RemoveStrategy(gbtGameStrategy) = 0;
   
   // DATA ACCESS: PROPERTIES
-  virtual bool IsValid(void) const = 0;
+  //  virtual bool IsValid(void) const = 0;
 
   // DOMINANCE AND ELIMINATION OF STRATEGIES
   // Not declared virtual; implementation of functions is generic already

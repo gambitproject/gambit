@@ -152,7 +152,7 @@ int gbtNfgSupportBase::MixedProfileLength(void) const
 gbtGameStrategy gbtNfgSupportBase::GetStrategy(int pl, int st) const
 {
   int index = 0;
-  for (int i = 1; i <= m_nfg->NumStrats(pl); i++) {
+  for (int i = 1; i <= m_nfg->GetPlayer(pl)->NumStrategies(); i++) {
     if (m_strategies(pl, i)) {
       if (++index == st) {
 	return m_nfg->GetPlayer(pl)->GetStrategy(i);
@@ -196,23 +196,6 @@ void gbtNfgSupportBase::RemoveStrategy(gbtGameStrategy s)
 //--------------------------------------------------------------------------
 //           class gbtNfgSupportBase: Data access -- properties
 //--------------------------------------------------------------------------
-
-bool gbtNfgSupportBase::IsSubset(const gbtNfgSupportBase &s) const
-{
-  if (m_nfg != s.m_nfg)  return false;
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    if (NumStrats(pl) > s.NumStrats(pl)) {
-      return false;
-    }
-
-    for (int st = 1; st <= m_nfg->NumStrats(pl); st++) {
-      if (m_strategies(pl, st) && !s.m_strategies(pl, st)) {
-	return false;
-      }
-    }
-  }
-  return true;
-}
 
 bool gbtNfgSupportBase::IsValid(void) const
 {

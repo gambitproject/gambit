@@ -59,17 +59,17 @@ wxString gbtBuildHtml(const gbtGame &p_nfg,
     theHtml += wxT("<table>");
     theHtml += wxT("<tr>");
     theHtml += wxT("<td></td>");
-    for (int st = 1; st <= p_nfg->NumStrats(p_colPlayer); st++) {
+    for (int st = 1; st <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
       theHtml += wxString::Format(wxT("<td align=center><b>%s</b></td>"),
 				  (char *) p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel());
     } 
     theHtml += wxT("</tr>");
-    for (int st1 = 1; st1 <= p_nfg->NumStrats(p_rowPlayer); st1++) {
+    for (int st1 = 1; st1 <= p_nfg->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
       profile.SetStrategy(p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1));
       theHtml += wxT("<tr>");
       theHtml += wxString::Format(wxT("<td align=center><b>%s</b></td>"),
 				  (char *) p_nfg->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel());
-      for (int st2 = 1; st2 <= p_nfg->NumStrats(p_colPlayer); st2++) {
+      for (int st2 = 1; st2 <= p_nfg->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
 	profile.SetStrategy(p_nfg->GetPlayer(p_colPlayer)->GetStrategy(st2));
 	theHtml += wxT("<td align=center>");
 	for (int pl = 1; pl <= p_nfg->NumPlayers(); pl++) {

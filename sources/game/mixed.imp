@@ -119,7 +119,7 @@ template <class T> void gbtMixedProfile<T>::Regret(gbtPVector<T> &value) const
   
   for (i = 1; i <= m_support->NumPlayers(); i++) {
     pay = Payoff(i);
-    for (j = 1; j <= m_support->GetGame()->NumStrats(i); j++) {
+    for (j = 1; j <= m_support->GetPlayer(i)->NumStrategies(); j++) {
       x = Payoff(i, m_support->GetPlayer(i)->GetStrategy(j));
       if(x > pay)
 	value(i, j) = x - pay;

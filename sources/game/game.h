@@ -159,9 +159,6 @@ public:
   virtual void SetOutcomeIndex(int index, const gbtGameOutcome &outcome) = 0;
   virtual gbtGameOutcome GetOutcomeIndex(int index) const = 0;
 
-  // DATA ACCESS -- STRATEGIES
-  virtual int NumStrats(int pl) const = 0;
-
   // DATA ACCESS -- SUPPORTS
   virtual gbtEfgSupport NewEfgSupport(void) const = 0;
   virtual gbtNfgSupport NewNfgSupport(void) const = 0;
