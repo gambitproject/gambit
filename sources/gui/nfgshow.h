@@ -67,19 +67,6 @@ private:
   void OnEditOutcomeDetach(wxCommandEvent &);
   void OnEditOutcomePayoffs(wxCommandEvent &);
 
-  void OnSupportUndominated(wxCommandEvent &);
-  void OnSupportNew(wxCommandEvent &);
-  void OnSupportEdit(wxCommandEvent &);
-  void OnSupportDelete(wxCommandEvent &);
-  void OnSupportSelectFromList(wxCommandEvent &);
-  void OnSupportSelectPrevious(wxCommandEvent &);
-  void OnSupportSelectNext(wxCommandEvent &);
-
-  void OnSolveStandard(wxCommandEvent &);
-  void OnSolveCustom(wxCommandEvent &);
-  void OnSolveCustomQre(wxCommandEvent &);
-  void OnSolveCustomYamamoto(wxCommandEvent &);
-
   void OnViewSolutions(wxCommandEvent &);
   void OnViewDominance(wxCommandEvent &);
   void OnViewProbabilities(wxCommandEvent &);
@@ -87,13 +74,26 @@ private:
   void OnViewOutcomes(wxCommandEvent &);
   void OnViewGameInfo(wxCommandEvent &);
 
-  void OnPrefsDisplayColumns(wxCommandEvent &);
-  void OnPrefsDisplayDecimals(wxCommandEvent &);
-  void OnPrefsFontData(wxCommandEvent &);
-  void OnPrefsFontLabels(wxCommandEvent &);
-  void OnPrefsColors(wxCommandEvent &);
-  void OnPrefsSave(wxCommandEvent &);
-  void OnPrefsLoad(wxCommandEvent &);
+  void OnFormatDisplayColumns(wxCommandEvent &);
+  void OnFormatDisplayDecimals(wxCommandEvent &);
+  void OnFormatFontData(wxCommandEvent &);
+  void OnFormatFontLabels(wxCommandEvent &);
+  void OnFormatColors(wxCommandEvent &);
+  void OnFormatSave(wxCommandEvent &);
+  void OnFormatLoad(wxCommandEvent &);
+
+  void OnToolsSupportUndominated(wxCommandEvent &);
+  void OnToolsSupportNew(wxCommandEvent &);
+  void OnToolsSupportEdit(wxCommandEvent &);
+  void OnToolsSupportDelete(wxCommandEvent &);
+  void OnToolsSupportSelectFromList(wxCommandEvent &);
+  void OnToolsSupportSelectPrevious(wxCommandEvent &);
+  void OnToolsSupportSelectNext(wxCommandEvent &);
+
+  void OnToolsEquilibriumStandard(wxCommandEvent &);
+  void OnToolsEquilibriumCustom(wxCommandEvent &);
+  void OnToolsEquilibriumCustomQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomYamamoto(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);

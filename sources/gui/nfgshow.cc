@@ -67,30 +67,36 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(NFG_EDIT_OUTCOMES_ATTACH, NfgShow::OnEditOutcomeAttach)
   EVT_MENU(NFG_EDIT_OUTCOMES_DETACH, NfgShow::OnEditOutcomeDetach)
   EVT_MENU(NFG_EDIT_OUTCOMES_PAYOFFS, NfgShow::OnEditOutcomePayoffs)
-  EVT_MENU(NFG_SUPPORT_UNDOMINATED, NfgShow::OnSupportUndominated)
-  EVT_MENU(NFG_SUPPORT_NEW, NfgShow::OnSupportNew)
-  EVT_MENU(NFG_SUPPORT_EDIT, NfgShow::OnSupportEdit)
-  EVT_MENU(NFG_SUPPORT_DELETE, NfgShow::OnSupportDelete)
-  EVT_MENU(NFG_SUPPORT_SELECT_FROMLIST, NfgShow::OnSupportSelectFromList)
-  EVT_MENU(NFG_SUPPORT_SELECT_PREVIOUS, NfgShow::OnSupportSelectPrevious)
-  EVT_MENU(NFG_SUPPORT_SELECT_NEXT, NfgShow::OnSupportSelectNext)
-  EVT_MENU(NFG_SOLVE_STANDARD, NfgShow::OnSolveStandard)
-  EVT_MENU(NFG_SOLVE_CUSTOM_QRE, NfgShow::OnSolveCustomQre)
-  EVT_MENU(NFG_SOLVE_CUSTOM_YAMAMOTO, NfgShow::OnSolveCustomYamamoto)
-  EVT_MENU_RANGE(NFG_SOLVE_CUSTOM_ENUMPURE, NFG_SOLVE_CUSTOM_QREGRID, NfgShow::OnSolveCustom)
   EVT_MENU(NFG_VIEW_SOLUTIONS, NfgShow::OnViewSolutions)
   EVT_MENU(NFG_VIEW_DOMINANCE, NfgShow::OnViewDominance)
   EVT_MENU(NFG_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(NFG_VIEW_VALUES, NfgShow::OnViewValues)
   EVT_MENU(NFG_VIEW_OUTCOMES, NfgShow::OnViewOutcomes)
   EVT_MENU(NFG_VIEW_GAMEINFO, NfgShow::OnViewGameInfo)
-  EVT_MENU(NFG_PREFS_DISPLAY_COLUMNS, NfgShow::OnPrefsDisplayColumns)
-  EVT_MENU(NFG_PREFS_DISPLAY_DECIMALS, NfgShow::OnPrefsDisplayDecimals)
-  EVT_MENU(NFG_PREFS_FONT_DATA, NfgShow::OnPrefsFontData)
-  EVT_MENU(NFG_PREFS_FONT_LABELS, NfgShow::OnPrefsFontLabels)
-  EVT_MENU(NFG_PREFS_COLORS, NfgShow::OnPrefsColors)
-  EVT_MENU(NFG_PREFS_SAVE, NfgShow::OnPrefsSave)
-  EVT_MENU(NFG_PREFS_LOAD, NfgShow::OnPrefsLoad)
+  EVT_MENU(NFG_FORMAT_DISPLAY_COLUMNS, NfgShow::OnFormatDisplayColumns)
+  EVT_MENU(NFG_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
+  EVT_MENU(NFG_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
+  EVT_MENU(NFG_FORMAT_FONT_LABELS, NfgShow::OnFormatFontLabels)
+  EVT_MENU(NFG_FORMAT_COLORS, NfgShow::OnFormatColors)
+  EVT_MENU(NFG_FORMAT_SAVE, NfgShow::OnFormatSave)
+  EVT_MENU(NFG_FORMAT_LOAD, NfgShow::OnFormatLoad)
+  EVT_MENU(NFG_TOOLS_SUPPORT_UNDOMINATED, NfgShow::OnToolsSupportUndominated)
+  EVT_MENU(NFG_TOOLS_SUPPORT_NEW, NfgShow::OnToolsSupportNew)
+  EVT_MENU(NFG_TOOLS_SUPPORT_EDIT, NfgShow::OnToolsSupportEdit)
+  EVT_MENU(NFG_TOOLS_SUPPORT_DELETE, NfgShow::OnToolsSupportDelete)
+  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_FROMLIST, 
+	   NfgShow::OnToolsSupportSelectFromList)
+  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS,
+	   NfgShow::OnToolsSupportSelectPrevious)
+  EVT_MENU(NFG_TOOLS_SUPPORT_SELECT_NEXT, NfgShow::OnToolsSupportSelectNext)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_STANDARD, NfgShow::OnToolsEquilibriumStandard)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
+	   NfgShow::OnToolsEquilibriumCustomQre)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_YAMAMOTO,
+	   NfgShow::OnToolsEquilibriumCustomYamamoto)
+  EVT_MENU_RANGE(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
+		 NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
+		 NfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
   EVT_MENU(NFG_PROFILES_CLONE, NfgShow::OnProfilesClone)
   EVT_MENU(NFG_PROFILES_RENAME, NfgShow::OnProfilesRename)
@@ -206,54 +212,6 @@ void NfgShow::MakeMenus(void)
   editMenu->Append(NFG_EDIT_OUTCOMES,  "&Outcomes",  editOutcomesMenu,
 		    "Set/Edit outcomes");
 
-  wxMenu *supportsMenu = new wxMenu;
-  supportsMenu->Append(NFG_SUPPORT_UNDOMINATED, "&Undominated",
-		       "Find undominated strategies");
-  supportsMenu->Append(NFG_SUPPORT_NEW, "&New",
-		       "Create a new support");
-  supportsMenu->Append(NFG_SUPPORT_EDIT, "&Edit",
-		       "Edit the currently displayed support");
-  supportsMenu->Append(NFG_SUPPORT_DELETE, "&Delete",
-		       "Delete a support");
-  wxMenu *supportsSelectMenu = new wxMenu;
-  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_FROMLIST, "From &List...",
-			     "Select a support from the list of defined supports");
-  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_PREVIOUS, "&Previous",
-			     "Select the previous support from the list");
-  supportsSelectMenu->Append(NFG_SUPPORT_SELECT_NEXT, "&Next",
-			     "Select the next support from the list");
-  supportsMenu->Append(NFG_SUPPORT_SELECT, "&Select", supportsSelectMenu,
-		       "Change the current support");
-
-  wxMenu *solveMenu = new wxMenu;
-  solveMenu->Append(NFG_SOLVE_STANDARD,  "S&tandard...",
-		    "Standard solutions");
-  
-  wxMenu *solveCustomMenu = new wxMenu;
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMPURE, "EnumPure",
-			  "Enumerate pure strategy equilibria");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMMIXED, "EnumMixed",
-			  "Enumerate mixed strategy equilibria");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LCP, "LCP",
-			  "Solve via linear complementarity program");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LP, "LP",
-			  "Solve via linear program");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_LIAP, "Liapunov",
-			  "Minimization of liapunov function");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_SIMPDIV, "Simpdiv",
-			  "Solve via simplicial subdivision");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_POLENUM, "PolEnum",
-			  "Enumeration by systems of polynomials");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QRE, "QRE",
-			  "Compute quantal response equilibrium");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_QREGRID, "QREGrid",
-			  "Compute quantal response equilibrium");
-  solveCustomMenu->Append(NFG_SOLVE_CUSTOM_YAMAMOTO, "Yamamoto",
-			  "Compute a proper equilibrium via Yamamoto's algorithm");
-  solveMenu->Append(NFG_SOLVE_CUSTOM, "Custom", solveCustomMenu,
-		    "Solve with a particular algorithm");
-
-  
   wxMenu *viewMenu = new wxMenu;
   viewMenu->Append(NFG_VIEW_SOLUTIONS, "&Solutions",
 		   "Display solutions", true);
@@ -268,24 +226,77 @@ void NfgShow::MakeMenus(void)
   viewMenu->Append(NFG_VIEW_GAMEINFO, "Game&Info",
 		   "Display information about the game");
   
-  wxMenu *prefsMenu = new wxMenu;
-  wxMenu *prefsDisplayMenu = new wxMenu;
-  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_COLUMNS, "&Column Width",
+  wxMenu *formatMenu = new wxMenu;
+  wxMenu *formatDisplayMenu = new wxMenu;
+  formatDisplayMenu->Append(NFG_FORMAT_DISPLAY_COLUMNS, "&Column Width",
 			   "Set column width");
-  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_DECIMALS, "&Decimal Places",
+  formatDisplayMenu->Append(NFG_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
 			   "Set number of decimal places to display");
 
-  prefsMenu->Append(NFG_PREFS_DISPLAY, "&Display", prefsDisplayMenu,
+  formatMenu->Append(NFG_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
 		    "Configure display options");
-  wxMenu *prefsFontMenu = new wxMenu;
-  prefsFontMenu->Append(NFG_PREFS_FONT_DATA, "&Data", "Set data font");
-  prefsFontMenu->Append(NFG_PREFS_FONT_LABELS, "&Labels", "Set label font");
-  prefsMenu->Append(NFG_PREFS_FONT, "&Font", prefsFontMenu, "Set fonts");
-  prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
-  prefsMenu->AppendSeparator();
-  prefsMenu->Append(NFG_PREFS_SAVE, "&Save", "Save current configuration");
-  prefsMenu->Append(NFG_PREFS_LOAD, "&Load", "Load configuration");
+  wxMenu *formatFontMenu = new wxMenu;
+  formatFontMenu->Append(NFG_FORMAT_FONT_DATA, "&Data", "Set data font");
+  formatFontMenu->Append(NFG_FORMAT_FONT_LABELS, "&Labels", "Set label font");
+  formatMenu->Append(NFG_FORMAT_FONT, "&Font", formatFontMenu, "Set fonts");
+  formatMenu->Append(NFG_FORMAT_COLORS, "&Colors", "Set player colors");
+  formatMenu->AppendSeparator();
+  formatMenu->Append(NFG_FORMAT_SAVE, "&Save", "Save current configuration");
+  formatMenu->Append(NFG_FORMAT_LOAD, "&Load", "Load configuration");
 
+  wxMenu *toolsMenu = new wxMenu;
+  wxMenu *supportsMenu = new wxMenu;
+  supportsMenu->Append(NFG_TOOLS_SUPPORT_UNDOMINATED, "&Undominated",
+		       "Find undominated strategies");
+  supportsMenu->Append(NFG_TOOLS_SUPPORT_NEW, "&New",
+		       "Create a new support");
+  supportsMenu->Append(NFG_TOOLS_SUPPORT_EDIT, "&Edit",
+		       "Edit the currently displayed support");
+  supportsMenu->Append(NFG_TOOLS_SUPPORT_DELETE, "&Delete",
+		       "Delete a support");
+  wxMenu *supportsSelectMenu = new wxMenu;
+  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_FROMLIST,
+			     "From &List...",
+			     "Select a support from the list of defined supports");
+  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS, "&Previous",
+			     "Select the previous support from the list");
+  supportsSelectMenu->Append(NFG_TOOLS_SUPPORT_SELECT_NEXT, "&Next",
+			     "Select the next support from the list");
+  supportsMenu->Append(NFG_TOOLS_SUPPORT_SELECT, "&Select", supportsSelectMenu,
+		       "Change the current support");
+  toolsMenu->Append(NFG_TOOLS_SUPPORT, "&Support", supportsMenu,
+		    "Manipulate supports");
+
+  wxMenu *solveMenu = new wxMenu;
+  solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_STANDARD,  "S&tandard...",
+		    "Standard solutions");
+  
+  wxMenu *solveCustomMenu = new wxMenu;
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE, "EnumPure",
+			  "Enumerate pure strategy equilibria");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED, "EnumMixed",
+			  "Enumerate mixed strategy equilibria");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP, "LCP",
+			  "Solve via linear complementarity program");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP, "LP",
+			  "Solve via linear program");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LIAP, "Liapunov",
+			  "Minimization of liapunov function");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV, "Simpdiv",
+			  "Solve via simplicial subdivision");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM, "PolEnum",
+			  "Enumeration by systems of polynomials");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE, "QRE",
+			  "Compute quantal response equilibrium");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID, "QREGrid",
+			  "Compute quantal response equilibrium");
+  solveCustomMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM_YAMAMOTO, "Yamamoto",
+			  "Compute a proper equilibrium via Yamamoto's algorithm");
+  solveMenu->Append(NFG_TOOLS_EQUILIBRIUM_CUSTOM, "Custom", solveCustomMenu,
+		    "Solve with a particular algorithm");
+  toolsMenu->Append(NFG_TOOLS_EQUILIBRIUM, "&Equilibrium", solveMenu,
+		    "Compute (Nash) equilibria");
+  
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_HELP_CONTENTS, "&Contents", "Table of contents");
   helpMenu->Append(wxID_HELP_INDEX, "&Index", "Index of help file");
@@ -295,10 +306,9 @@ void NfgShow::MakeMenus(void)
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(supportsMenu, "S&upports");
-  menuBar->Append(solveMenu, "&Solve");
   menuBar->Append(viewMenu, "&View");
-  menuBar->Append(prefsMenu, "&Prefs");
+  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(toolsMenu, "&Tools");
   menuBar->Append(helpMenu, "&Help");
 
   SetMenuBar(menuBar);
@@ -349,14 +359,15 @@ void NfgShow::UpdateMenus(void)
   menu->Enable(NFG_EDIT_OUTCOMES_DETACH, m_nfg.GetOutcome(profile) != 0);
   menu->Enable(NFG_EDIT_OUTCOMES_PAYOFFS, m_nfg.GetOutcome(profile) != 0);
 
-  menu->Enable(NFG_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
-  menu->Enable(NFG_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
-  menu->Enable(NFG_SUPPORT_SELECT_NEXT, NumSupports() > 1);
+  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_FROMLIST, NumSupports() > 1);
+  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_PREVIOUS, NumSupports() > 1);
+  menu->Enable(NFG_TOOLS_SUPPORT_SELECT_NEXT, NumSupports() > 1);
 
-  menu->Enable(NFG_SOLVE_CUSTOM_ENUMMIXED, m_nfg.NumPlayers() == 2);
-  menu->Enable(NFG_SOLVE_CUSTOM_LP,
+  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED, 
+	       m_nfg.NumPlayers() == 2);
+  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP,
 	       m_nfg.NumPlayers() == 2 && IsConstSum(m_nfg));
-  menu->Enable(NFG_SOLVE_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
+  menu->Enable(NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP, m_nfg.NumPlayers() == 2);
 
   menu->Enable(NFG_VIEW_PROBABILITIES, m_solutionTable->Length() > 0);
   menu->Enable(NFG_VIEW_VALUES, m_solutionTable->Length() > 0);
@@ -630,7 +641,7 @@ void NfgShow::OnEditOutcomePayoffs(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportUndominated(wxCommandEvent &)
+void NfgShow::OnToolsSupportUndominated(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_nfg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++)
@@ -689,7 +700,7 @@ void NfgShow::OnSupportUndominated(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportNew(wxCommandEvent &)
+void NfgShow::OnToolsSupportNew(wxCommandEvent &)
 {
   NFSupport newSupport(m_nfg);
   newSupport.SetName(UniqueSupportName());
@@ -710,7 +721,7 @@ void NfgShow::OnSupportNew(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportEdit(wxCommandEvent &)
+void NfgShow::OnToolsSupportEdit(wxCommandEvent &)
 {
   dialogNfgEditSupport dialog(*m_currentSupport, this);
 
@@ -727,7 +738,7 @@ void NfgShow::OnSupportEdit(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportDelete(wxCommandEvent &)
+void NfgShow::OnToolsSupportDelete(wxCommandEvent &)
 {
   if (m_supports.Length() == 1)  return;
 
@@ -748,7 +759,7 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportSelectFromList(wxCommandEvent &)
+void NfgShow::OnToolsSupportSelectFromList(wxCommandEvent &)
 {
   dialogSupportSelect dialog(this, m_supports,
 			     m_currentSupport, "Select Support");
@@ -763,7 +774,7 @@ void NfgShow::OnSupportSelectFromList(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportSelectPrevious(wxCommandEvent &)
+void NfgShow::OnToolsSupportSelectPrevious(wxCommandEvent &)
 {
   int index = m_supports.Find(m_currentSupport);
   if (index == 1) {
@@ -774,7 +785,7 @@ void NfgShow::OnSupportSelectPrevious(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSupportSelectNext(wxCommandEvent &)
+void NfgShow::OnToolsSupportSelectNext(wxCommandEvent &)
 {
   int index = m_supports.Find(m_currentSupport);
   if (index == m_supports.Length()) {
@@ -785,7 +796,7 @@ void NfgShow::OnSupportSelectNext(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnSolveStandard(wxCommandEvent &)
+void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 { 
   dialogNfgSolveStandard dialog(this, m_nfg);
   
@@ -890,38 +901,38 @@ void NfgShow::OnSolveStandard(wxCommandEvent &)
   UpdateMenus();
 }
 
-void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
+void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
 {
   int id = p_event.GetId();
 
   guiNfgSolution *solver;
 
   switch (id) {
-  case NFG_SOLVE_CUSTOM_ENUMPURE:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE:
     solver = new guinfgEnumPure(this);
     break;
-  case NFG_SOLVE_CUSTOM_ENUMMIXED:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMMIXED:
     solver = new guinfgEnumMixed(this);
     break;
-  case NFG_SOLVE_CUSTOM_LCP:      
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_LCP:      
     solver = new guinfgLcp(this);
     break;
-  case NFG_SOLVE_CUSTOM_LP:       
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_LP:       
     solver = new guinfgLp(this);
     break;
-  case NFG_SOLVE_CUSTOM_LIAP:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_LIAP:
     solver = new guinfgLiap(this);
     break;
-  case NFG_SOLVE_CUSTOM_SIMPDIV:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV:
     solver = new guinfgSimpdiv(this);
     break;
-  case NFG_SOLVE_CUSTOM_POLENUM:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_POLENUM:
     solver = new guinfgPolEnum(this);
     break;
-  case NFG_SOLVE_CUSTOM_QRE:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE:
     solver = new guinfgQre(this);
     break;
-  case NFG_SOLVE_CUSTOM_QREGRID:
+  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID:
     solver = new guinfgQreAll(this);
     break;
   default:
@@ -960,7 +971,7 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
   UpdateMenus();
 }
 
-void NfgShow::OnSolveCustomQre(wxCommandEvent &)
+void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
 {
   dialogQre dialog(this);
 
@@ -1094,7 +1105,7 @@ ParametersPage::ParametersPage(wxWizard *p_parent)
 
 }  // YamamotoWizard
 
-void NfgShow::OnSolveCustomYamamoto(wxCommandEvent &)
+void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
 {
   wxWizard *wizard = wxWizard::Create(this, -1, "Yamamoto's Algorithm Parameters");
   YamamotoWizard::SupportsPage *page1 =
@@ -1247,7 +1258,7 @@ void NfgShow::OnProfilesDelete(wxCommandEvent &)
   UpdateMenus();
 }
 
-void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
+void NfgShow::OnFormatDisplayColumns(wxCommandEvent &)
 {
   guiSliderDialog dialog(this, "Column width", 0, 100, 20);
 
@@ -1258,7 +1269,7 @@ void NfgShow::OnPrefsDisplayColumns(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
+void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
   guiSliderDialog dialog(this, "Decimal places", 0, 25,
 			 m_table->GetDecimals());
@@ -1269,7 +1280,7 @@ void NfgShow::OnPrefsDisplayDecimals(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnPrefsFontData(wxCommandEvent &)
+void NfgShow::OnFormatFontData(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -1281,7 +1292,7 @@ void NfgShow::OnPrefsFontData(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
+void NfgShow::OnFormatFontLabels(wxCommandEvent &)
 {
   wxFontData data;
   wxFontDialog dialog(this, &data);
@@ -1293,16 +1304,16 @@ void NfgShow::OnPrefsFontLabels(wxCommandEvent &)
   }
 }
 
-void NfgShow::OnPrefsColors(wxCommandEvent &)
+void NfgShow::OnFormatColors(wxCommandEvent &)
 {
 }
 
-void NfgShow::OnPrefsSave(wxCommandEvent &)
+void NfgShow::OnFormatSave(wxCommandEvent &)
 {
   m_table->SaveSettings();
 }
 
-void NfgShow::OnPrefsLoad(wxCommandEvent &)
+void NfgShow::OnFormatLoad(wxCommandEvent &)
 {
   m_table->LoadSettings();
 }
