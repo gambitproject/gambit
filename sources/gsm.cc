@@ -1744,19 +1744,20 @@ bool GSM::CallFunction(void)
 int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 {
   int             result          = rcSUCCESS;
-  bool            instr_success;
+  bool            instr_success   = false;
   bool            done            = false;
-  Portion*        p;
-  NewInstr*       instr;
+  Portion*        p               = 0;
+  NewInstr*       instr           = 0;
   int             program_counter = 1;
   int             program_length  = prog.Length();
   int             initial_num_of_funcs = _CallFuncStack->Depth();
-  int             i;
-  CallFuncObj*    funcobj;
+  int             i               = 0;
+  CallFuncObj*    funcobj         = 0;
 
   gArray<NewInstr*> program(prog.Length());
   for(i=1; i<=prog.Length(); i++)
     program[i] = prog[i];
+
 
   while((program_counter <= program_length) && (!done))
   {
@@ -1804,72 +1805,39 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
       break;
 
     default:
-      //instr_success = NewInstr->Execute(*this);
       switch(instr->Code)
       {
-	/*
-      case iUNDEFINED:
-	instr_success = true;
-	break;
-	*/
-
       case iNOP:
 	instr_success = true;
 	break;
 	
-	/*
-      case iQUIT:
-	assert(0);
-	instr_success = true;
-	break;
-      case iIF_GOTO: 
-	assert(0);
-	instr_success = true;
-	break;
-      case iGOTO:
-	assert(0);
-	instr_success = true;
-	break;
-      case iCLEAR:
-	break;
-	*/
-
       case iPUSHREF:
 	instr_success = PushRef(instr->TextVal);
 	break;
 
       case iPUSH_BOOL:
-	// instr_success = Push(instr->BoolVal);
 	_Push(new BoolValPortion(instr->BoolVal));
 	instr_success = true;
 	break;
       case iPUSH_INTEGER:
-	// instr_success = Push(instr->IntVal);
 	_Push(new IntValPortion(instr->IntVal));
+	instr_success = true;
 	break;
       case iPUSH_FLOAT:
-	// instr_success = Push(instr->FloatVal);
 	_Push(new FloatValPortion(instr->FloatVal));
 	instr_success = true;
 	break;
-      /* There is no iPUSH_RATIONAL!
-      case iPUSH_RATIONAL:
-	instr_success = Push(instr->RationalVal);
-	break;
-      */
+
       case iPUSH_TEXT:
-	// instr_success = Push(instr->TextVal);
 	_Push(new TextValPortion(instr->TextVal));
 	instr_success = true;
 	break;
 
       case iPUSHINPUT:
-	// instr_success = Push(*(instr->InputVal));
 	_Push(new InputRefPortion(*(instr->InputVal)));
 	instr_success = true;
 	break;
       case iPUSHOUTPUT:
-	// instr_success = Push(*(instr->OutputVal));
 	_Push(new OutputRefPortion(*(instr->OutputVal)));
 	instr_success = true;
 	break;
@@ -1957,8 +1925,7 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	break;
 
       case iINIT_CALL_FUNCTION:
-	instr_success = 
-	  InitCallFunction(instr->TextVal);
+	instr_success = InitCallFunction(instr->TextVal);
 	break;
       case iBIND:
 	instr_success = Bind(instr->TextVal);
@@ -1992,11 +1959,6 @@ int GSM::Execute(gList< NewInstr* >& prog, bool user_func)
 	instr_success = true;
 	break;
 	
-	/*
-      case iHELP:
-	instr_success = true;
-	break;
-	*/
       default:
 	assert(0);
       }
@@ -2219,6 +2181,27 @@ bool GSM::Pop(void)
     result = true;
   }
   return result;
+}
+
+
+Portion* GSM::PopValue( void )
+{
+  assert(_Depth() >= 0);
+  Portion* p = 0;
+  Portion* p_old = 0;
+
+  if(_Depth() > 0)
+  {
+    p = _ResolveRef( _Pop() );
+    assert( p );
+    if( p->IsReference() )
+    {
+      p_old = p;
+      p = p_old->ValCopy();
+      delete p_old;
+    }
+  }
+  return p;
 }
 
 

@@ -58,7 +58,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   gInteger ival; \
   double dval; \
   gString tval, formal, funcname, paramtype, functype;  \
-  gList<NewInstr*> program, *function; \
+  gList<NewInstr*> program, *function, *optparam; \
   gList<gString> formals, types; \
   gList<bool> refs; \
   gList<Portion*> portions; \
@@ -84,7 +84,9 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   void Execute(void); \
   void LoadInputs( void ); 
 
-%define CONSTRUCTOR_INIT     : function(0), formalstack(4), \
+%define CONSTRUCTOR_INIT     : function(0), \
+                               optparam(0), \
+                               formalstack(4), \
                                labels(4), \
                                listlen(4), matching(4), \
                                filenames(4), lines(4), \
@@ -202,7 +204,19 @@ formalparam:  NAME { formals.Append(tval); } binding
               { types.Append(paramtype); portions.Append(NO_DEFAULT_VALUE); } 
             | LBRACE NAME { formals.Append(tval); } binding
               { paramtype = ""; types.Append(paramtype); }
-              paramE9  RBRACE
+              optparam RBRACE
+
+optparam:     { assert( optparam == 0 );
+                optparam = new gList<NewInstr*>; }
+              expression 
+              { 
+                assert( gsm.Execute( *optparam ) == rcSUCCESS );
+                Portion* _p_ = gsm.PopValue();
+                assert( _p_ != 0 );
+                portions.Append( _p_ );
+                delete optparam;
+                optparam = 0;
+              }
 
 paramE9:      BOOLEAN { portions.Append( new BoolValPortion(bval) ); }
   |           INTEGER { portions.Append( new IntValPortion(ival.as_long()) ); }
@@ -789,7 +803,9 @@ void GCLCompiler::emit(NewInstr* op)
 {
   // the encoding for the line number is decoded in GSM::ExecuteUserFunc()
   if(op) op->LineNumber = statementcount * 65536 + lines.Peek();
-  if (function)
+  if( optparam )
+    optparam->Append( op );
+  else if (function)
     function->Append(op);
   else
     program.Append(op);
