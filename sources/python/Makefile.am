@@ -17,6 +17,7 @@ SWIGFILES = \
 EXTRA_DIST = \
 	borland.mak \
 	gambit.py \
+	gbt.def \
 	gbt.py \
 	gbt_wrap_python.cc \
 	${SWIGFILES}
