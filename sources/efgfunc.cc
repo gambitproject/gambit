@@ -985,7 +985,7 @@ static Portion *GSM_RandomEfg_Float(Portion **param)
   Efg<double> &E = * (Efg<double> *) ((EfgPortion *) param[0])->Value();
   
   RandomEfg(E);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_RandomEfg_Rational(Portion **param)
@@ -993,7 +993,7 @@ static Portion *GSM_RandomEfg_Rational(Portion **param)
   Efg<gRational> &E = * (Efg<gRational> *) ((EfgPortion *) param[0])->Value();
   
   RandomEfg(E);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_RandomEfg_SeedFloat(Portion **param)
@@ -1003,7 +1003,7 @@ static Portion *GSM_RandomEfg_SeedFloat(Portion **param)
 
   SetSeed(seed);
   RandomEfg(E);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }
 
 static Portion *GSM_RandomEfg_SeedRational(Portion **param)
@@ -1013,7 +1013,7 @@ static Portion *GSM_RandomEfg_SeedRational(Portion **param)
 
   SetSeed(seed);
   RandomEfg(E);
-  return param[0]->RefCopy();
+  return param[0]->ValCopy();
 }  
 
 //-------------
