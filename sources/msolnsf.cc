@@ -55,8 +55,8 @@ const gArray<bool> &MSolnSortFilterOptions::FilterProper(void) const {return fil
 ****************************************************************************/
 // Constructor
 
-MSolnSorterFilter::MSolnSorterFilter(gSortList<MixedSolutionT > &solns,MSolnSortFilterOptions &options_):
-	gListSorter<MixedSolutionT >(solns),gListFilter<MixedSolutionT >(solns),
+MSolnSorterFilter::MSolnSorterFilter(gSortList<MixedSolution > &solns,MSolnSortFilterOptions &options_):
+	gListSorter<MixedSolution >(solns),gListFilter<MixedSolution >(solns),
 	options(options_)
 {
 Filter();
@@ -65,7 +65,7 @@ Sort();
 
 // Filtering function
 
-bool MSolnSorterFilter::Passes(const MixedSolutionT &a) const
+bool MSolnSorterFilter::Passes(const MixedSolution &a) const
 {
 int i;
 for (i=1;i<=NUM_MCREATORS;i++)
@@ -85,7 +85,7 @@ return true;
 
 // Sorting function
 
-CompareResult MSolnSorterFilter::Compare(const MixedSolutionT &a,const MixedSolutionT &b) const
+CompareResult MSolnSorterFilter::Compare(const MixedSolution &a,const MixedSolution &b) const
 {
 switch (options.SortBy())
 {
@@ -152,7 +152,7 @@ return Equal;
 
 #include "gnumber.h"
 #include "gslist.imp"
-template class gSortList<MixedSolutionT>;
-template class gListSorter<MixedSolutionT>;
-template class gListFilter<MixedSolutionT>;
+template class gSortList<MixedSolution>;
+template class gListSorter<MixedSolution>;
+template class gListFilter<MixedSolution>;
 

@@ -2,6 +2,7 @@
 // functionality in the GUI enviroment.  This is only needed/working under
 // windows.
 // $Id$
+//
 #ifdef __BORLANDC__
 
 #include <assert.h>
@@ -36,7 +37,7 @@ wxError(tempstr,"Assertion Failed");
 //wxFatalError("GAMBIT will now terminate","Fatal Error");
 exit(1);
 }
-
+                              
 
 // Take care of the output to stdout
 extern "C"

@@ -156,7 +156,8 @@ void TreeRender::RenderLabels(wxDC &dc,const NodeEntry *child_entry,const NodeEn
 {
 gString 		label;		// temporary to hold the label
 const Node	*n=child_entry->n;
-float 			tw,th;
+float 		tw,th;
+bool			hilight=false;
 // First take care of labeling the node on top
 label="";
 switch (draw_settings.LabelNodeAbove())
@@ -174,7 +175,7 @@ switch (draw_settings.LabelNodeAbove())
 			label="("+ToString(n->GetPlayer()->GetNumber())+","+ToString(n->GetInfoset()->GetNumber())+")";
 		break;
 	case NODE_ABOVE_OUTCOME:
-		label=parent->OutcomeAsString(n);break;
+		label=parent->OutcomeAsString(n,hilight);break;
 	case NODE_ABOVE_REALIZPROB:
 		label=parent->AsString(tRealizProb,n);break;
 	case NODE_ABOVE_BELIEFPROB:
@@ -207,7 +208,7 @@ switch (draw_settings.LabelNodeBelow())
 			label="("+ToString(n->GetPlayer()->GetNumber())+","+ToString(n->GetInfoset()->GetNumber())+")";
 		break;
 	case NODE_BELOW_OUTCOME:
-		label=parent->OutcomeAsString(n);break;
+		label=parent->OutcomeAsString(n,hilight);break;
 	case NODE_BELOW_REALIZPROB:
 		label=parent->AsString(tRealizProb,n);break;
 	case NODE_BELOW_BELIEFPROB:
@@ -279,6 +280,7 @@ if (label!="")
 }
 // Now take care of displaying the terminal node labels
 label="";
+hilight=false;
 if (!child_entry->has_children)	// if the node is terminal
 {
 	switch (draw_settings.LabelNodeTerminal())
@@ -286,7 +288,7 @@ if (!child_entry->has_children)	// if the node is terminal
 		case NODE_TERMINAL_NOTHING:
 			label="";break;
 		case NODE_TERMINAL_OUTCOME:
-			label=parent->OutcomeAsString(n);break;
+			label=parent->OutcomeAsString(n,hilight);break;
 		case NODE_TERMINAL_NAME:
 			if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
 		default:
@@ -295,7 +297,9 @@ if (!child_entry->has_children)	// if the node is terminal
 	if (label!="")
 	{
 		dc.SetFont(draw_settings.NodeTerminalFont());
+      if (hilight) {dc.SetBackgroundMode(wxSOLID);dc.SetTextBackground(wxLIGHT_GREY);}
 		gDrawText(dc,label,child_entry->x+draw_settings.NodeLength()+child_entry->nums*INFOSET_SPACING+10,child_entry->y-12);
+		if (hilight) {dc.SetBackgroundMode(wxTRANSPARENT);dc.SetTextBackground(wxWHITE);}
 	}
 }
 // Now take care of displaying the right node labels, for non-terminal nodes
@@ -306,7 +310,7 @@ else
 		case NODE_RIGHT_NOTHING:
 			label="";break;
 		case NODE_RIGHT_OUTCOME:
-			label=parent->OutcomeAsString(n);break;
+			label=parent->OutcomeAsString(n,hilight);break;
 		case NODE_RIGHT_NAME:
 			if (n->GetOutcome()) label=n->GetOutcome()->GetName();break;
 		default:
@@ -891,33 +895,26 @@ if (ev.Dragging())
 		if (start_node)
 		{
 			outcome=start_node->GetOutcome();
-			if (!outcome) wxMessageBox("Problem 0");
 			if (outcome)
 			{
 //				int wx=(int)(x*parent->DrawSettings().Zoom());
 //				int wy=(int)(y*parent->DrawSettings().Zoom());
-				if (!outcome) wxMessageBox("Problem 0a");
 //				parent->WarpPointer(wx,wy);
-				if (!outcome) wxMessageBox("Problem 0a1");
 				parent->SetCursor(outcome_cursor);
-				if (!outcome) wxMessageBox("Problem 0b");
 				drag_now=1;ret=DRAG_START;
 			}
-			if (!outcome) wxMessageBox("Problem 1");
 		}
 	}
 }
 else
 if (drag_now)
 {
-	if (!outcome) wxMessageBox("Problem 2");
 	parent->SetCursor(wxSTANDARD_CURSOR);
 	ev.Position(&x,&y);Bool c=ev.ControlDown();
 	ret=DRAG_STOP;
 	Node *end_node=parent->GotObject(x,y,DRAG_OUTCOME_END);
 	if (end_node)
 	{
-		if (!outcome) wxMessageBox("Problem 3");
 		end_node->SetOutcome(outcome);
 		if (c) start_node->SetOutcome(0);	// move
 		outcomes_changed=1;
@@ -966,7 +963,6 @@ mark_node=0;old_mark_node=0;
 hilight_infoset=0;hilight_infoset1=0;
 // No zoom window or outcome dialog
 zoom_window=0;
-outcome_dialog=0;
 outcome_font=wxTheFontList->FindOrCreateFont(9,wxSWISS,wxNORMAL,wxNORMAL);
 white_brush=wxTheBrushList->FindOrCreateBrush("WHITE",wxSOLID);
 
@@ -1053,7 +1049,7 @@ double TreeWindow::ProbAsDouble(const Node *n,int action) const
 return (double)frame->BranchProb(n,action);
 }
 
-gString TreeWindow::OutcomeAsString(const Node *n) const
+gString TreeWindow::OutcomeAsString(const Node *n,bool &hilight) const
 {
 if (n->GetOutcome())
 {
@@ -1065,7 +1061,13 @@ if (n->GetOutcome())
 		if (i!=1) tmp+=",";
 		if (draw_settings.ColorCodedOutcomes())
 			tmp+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
-		tmp+=ToString(v[i]);
+      if (frame->Parameters().PolyVal()==false)
+			tmp+=ToString(v[i]);
+      else
+      {
+      	tmp+=ToString(v[i].Evaluate(frame->Parameters().CurSet()));
+         if (v[i].Degree()>0) hilight=true;
+      }
 	}
 	if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToString(WX_COLOR_LIST_LENGTH-1)+"}");
 	tmp+=")";
@@ -2029,6 +2031,12 @@ if (s!="")
 	frame->SetFileName(s);
 }
 }
+
+//***********************************************************************
+//                      TREE-OUTCOME MENU HANDLER
+//***********************************************************************
+void TreeWindow::tree_outcomes(const gString out_name)
+{frame->ChangeOutcomes(CREATE_DIALOG,out_name);}
 
 #include "glist.imp"
 template class gNode<NODEENTRY *>;

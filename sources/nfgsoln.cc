@@ -131,7 +131,7 @@ int	NfgSolnShow::feature_width[MSOLN_NUM_FEATURES]={0,0,-1,8,2,2,2,7,7,7};
 
 
 
-NfgSolnShow::NfgSolnShow(gSortList<MixedSolutionT> &solns_,int num_players_,
+NfgSolnShow::NfgSolnShow(gSortList<MixedSolution> &solns_,int num_players_,
 											int max_strats,int cur_soln_,
 											NormalDrawSettings	&ds,MSolnSortFilterOptions &sf_options_,
 											NfgShow *parent_,wxFrame *parent_frame,unsigned int opts):
@@ -196,7 +196,7 @@ if (opts&MSOLN_O_EFGNFG)
 {
 	wxButton *extensive_button=AddButton("NF->EF",(wxFunction)NfgSolnShow::extensive_button);
 	if (parent)
-		/*@@if (!parent->InterfaceOk())*/ extensive_button->Enable(FALSE);
+		if (!parent->InterfaceOk()) extensive_button->Enable(FALSE);
 
 	if (!parent) extensive_button->Enable(FALSE);
 }
@@ -310,7 +310,7 @@ if (features[MSOLN_DYNAMIC]) UpdateSoln(row,col);
 
 // On Ok
 void NfgSolnShow::OnOk(void)
-{Show(FALSE);if (parent) parent->SolnShowDied();Close();}
+{Show(FALSE);if (parent) parent->InspectSolutions(DESTROY_DIALOG);Close();}
 
 // Overide help system
 void NfgSolnShow::OnHelp(int help_type)
@@ -413,7 +413,7 @@ int sp=FeaturePos(MSOLN_NUM_FEATURES-1);	// first column with actual strategies
 for (int i=1;i<=num_solutions;i++)
 {
 	int cur_pos=2+(i-1)*num_players;
-	const MixedSolutionT &cur_vector=solns[i];
+	const MixedSolution &cur_vector=solns[i];
 	const NFSupport &sup=cur_vector.Support();
 	SetCell(cur_pos,FeaturePos(MSOLN_ID),ToString((int)cur_vector.Id()));
 	if (features[MSOLN_CREATOR])
@@ -498,7 +498,7 @@ else
 if (completed==wxOK)
 {
 int old_num_sol=num_solutions;  // current state
-const MixedSolutionT *cur_solnp=0;
+const MixedSolution *cur_solnp=0;
 if (cur_soln) cur_solnp=&solns[cur_soln];
 MSolnSorterFilter SF(solns,sf_options);
 int i,j;
@@ -558,11 +558,11 @@ Redraw();
 class MixedSolnEdit : public SpreadSheet3D
 {
 private:
-	MixedSolutionT &soln;
+	MixedSolution &soln;
 	gArray<int> dim;
 public:
 	// Constructor
-	MixedSolnEdit(MixedSolutionT &soln_,wxFrame *parent)
+	MixedSolnEdit(MixedSolution &soln_,wxFrame *parent)
 	  :  SpreadSheet3D(soln_.Game().NumPlayers()+1,
 			   gmax(soln_.Support().NumStrats())+1,
 			   1,"Edit Mixed Solution",parent,ANY_BUTTON),
@@ -619,7 +619,7 @@ public:
 
 void NfgSolnShow::OnAdd(void)
 {
-MixedSolutionT temp_soln(parent->CreateSolution());
+MixedSolution temp_soln(parent->CreateSolution());
 MixedSolnEdit *add_dialog=new MixedSolnEdit(temp_soln,this);
 Enable(FALSE);	// disable this window until the edit window is close
 while (add_dialog->Completed()==wxRUNNING) wxYield();
@@ -642,7 +642,7 @@ int row=CurRow();
 if (row==1) {wxMessageBox("Edit what?");return;}
 int soln_num=SolnNum(row);
 
-MixedSolutionT temp_soln=solns[soln_num];
+MixedSolution temp_soln=solns[soln_num];
 MixedSolnEdit *add_dialog=new MixedSolnEdit(temp_soln,this);
 Enable(FALSE);	// disable this window until the edit window is close
 while (add_dialog->Completed()==wxRUNNING) wxYield();
@@ -684,7 +684,7 @@ void NfgSolnShow::delete_all_button(wxButton &ob,wxEvent &)
 //                       MIXED SOLUTION PICKER (single)
 //****************************************************************************
 
-Nfg1SolnPicker::Nfg1SolnPicker(gSortList<MixedSolutionT > &soln,int num_players,int max_strats,
+Nfg1SolnPicker::Nfg1SolnPicker(gSortList<MixedSolution > &soln,int num_players,int max_strats,
 						int cur_soln_,NormalDrawSettings	&ds,
 						MSolnSortFilterOptions &sf_options,
 						NfgShow *parent_,wxFrame *parent_frame)

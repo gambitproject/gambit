@@ -18,6 +18,7 @@ class BaseTreeWindow;
 class EfgSolnShow;
 class EfgShowToolBar;
 class EFSupportInspectDialog;
+class EfgOutcomeDialog;
 class NodeSolnShow;
 class TreeWindow;
 
@@ -32,15 +33,14 @@ public:
 	{(*this)[gSortList<T>::Append(a)].SetId(max_id++);return Length();}
 };
 
-typedef BehavSolution<gNumber> BehavSolutionT;
-typedef SolutionList<BehavSolutionT> BehavSolutionList;
+typedef SolutionList<BehavSolution> BehavSolutionList;
 
 class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface,
                public ParametrizedGame
 {
 private:
+	wxFrame *parent;
 	Efg &ef;
-	gList<EFSupport *> supports;
 	// Solution routines
 	BehavSolutionList solns;
 	struct StartingPoints
@@ -51,11 +51,13 @@ private:
 	} starting_points;
   	int cur_soln;
    ParameterSetList param_sets;
+   ParameterDialog *params_dialog;
+   EfgOutcomeDialog *outcome_dialog;
 	// we can display EF for one support, while working on a different support
 	// disp_sup always corresponds to the support currently displayed.  cur_sup
 	// corresponds to the support that will be operated upon by solution algs.
+	gList<EFSupport *> supports;
 	EFSupport *cur_sup,*disp_sup;
-	wxFrame *parent;
 	EFSupportInspectDialog *support_dialog;
 	// all_nodes must at all times refer to the prefix traversal order of the tree.
 	// It is TreeWindow's job to call RemoveSolutions every time the nodes are
@@ -98,19 +100,20 @@ public:
 	// Solution routines
 	void		Solve(void);
 	void		SolveSetup(int what);
-	void 		InspectSolutions(void);
+	void 		InspectSolutions(int what);
 	void		RemoveSolutions(void);
 	void		ChangeSolution(int soln);
-   void		SetParameters(void);
+   void		ChangeParameters(int what);
+   void		ChangeOutcomes(int what,const gString out_name=gString());
 	void 		OnSelectedMoved(const Node *n);
-	BehavSolutionT CreateSolution(void);
+	BehavSolution CreateSolution(void);
 	// Solution interface to the algorithms
-	void 		PickSolutions(const Efg &,gList<BehavSolutionT> &);
-	BehavProfileT CreateStartProfile(int how);
+	void 		PickSolutions(const Efg &,gList<BehavSolution> &);
+	BehavProfile<gNumber> CreateStartProfile(int how);
 	void		RemoveStartProfiles(void);
 	void 		SetPickSubgame(const Node *n);
 	// Solution interface to normal form
-	void 		SolutionToEfg(const BehavProfileT &s,bool set=false);
+	void 		SolutionToEfg(const BehavProfile<gNumber> &s,bool set=false);
 	const 	Efg *InterfaceObjectEfg(void) {return &ef;}
 	wxFrame *Frame(void);
 	// Solution access for TreeWindow
@@ -120,11 +123,9 @@ public:
 	// Inteface for infoset hilighting between the tree and solution display
 	void HilightInfoset(int pl,int iset,int who);
 	// Accelerators allow for platform-indep handling of hotkeys
-	int			CheckAccelerators(wxKeyEvent &ev);
-	// Need this to let the parent know that a solution window has been closed
-	void		SolnShowDied(void);
+	int CheckAccelerators(wxKeyEvent &ev);
 	// EFSupport support
-	void SupportInspect(int what=0);
+	void ChangeSupport(int what);
 	EFSupport *MakeSupport(void);
 	void			SolveElimDom(void);
 	// Used by TreeWindow
@@ -137,8 +138,7 @@ public:
    void SetFileName(void);
 	void SetFileName(const gString &s);
   	const gString &Filename(void) const;
-
-   void UpdateSpace(void);
+	ParameterSetList &Parameters(void);   
 };
 
 // Solution constants

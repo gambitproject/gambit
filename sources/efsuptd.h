@@ -28,7 +28,7 @@ private:
 	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(EFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
-	{((EfgShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
+	{((EfgShow *)ob.GetClientData())->ChangeSupport(DESTROY_DIALOG);}
 	static void remove_sup_func(wxButton &ob,wxEvent &)
 	{((EFSupportInspectDialog *)ob.GetClientData())->OnRemoveSupport();}
 
@@ -46,7 +46,7 @@ private:
 	void OnRemoveSupport(void);
 	void OnChangeSupport(void)
 	{
-	es->SupportInspect(SUPPORT_CHANGE);init_disp=DispSup();init_cur=CurSup();
+	es->ChangeSupport(UPDATE_DIALOG);init_disp=DispSup();init_cur=CurSup();
 	}
 	void OnCur(int cur_sup)
 	{
@@ -155,7 +155,7 @@ for (i=1;i<=sups.Length();i++)
 	{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
 disp_item->SetSelection(0);cur_item->SetSelection(0);
-if (revert) es->SupportInspect(SUPPORT_CHANGE);
+if (revert) es->ChangeSupport(UPDATE_DIALOG);
 }
 }
 #endif

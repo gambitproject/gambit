@@ -149,9 +149,16 @@ menu_bar->Check(SOLVE_STANDARD,use_standard);
 }
 
 Bool EfgShow::OnClose(void)
-{if (support_dialog) delete support_dialog; Show(FALSE);return TRUE;}
+{
+	ChangeSupport(DESTROY_DIALOG);
+   ChangeParameters(DESTROY_DIALOG);
+   ChangeOutcomes(DESTROY_DIALOG);
+   InspectSolutions(DESTROY_DIALOG);
+   Show(FALSE);
+   return TRUE;
+}
 //---------------------------------------------------------------------
-//             BASE EXTENSIVE SHOW: EVENT-HANDLING HOOK MEMBERS
+//             EXTENSIVE SHOW: EVENT-HANDLING HOOK MEMBERS
 //---------------------------------------------------------------------
 void EfgShow::OnSetFocus(void)
 {tw->SetFocus();}
@@ -193,7 +200,7 @@ switch (id)
 	case TREE_COPY:tw->tree_copy();break;
 	case TREE_MOVE:tw->tree_move();break;
 	case TREE_LABEL:tw->tree_label();SetFileName();break;
-	case TREE_OUTCOMES:tw->tree_outcomes();break;
+	case TREE_OUTCOMES: ChangeOutcomes(CREATE_DIALOG); break;
 	case TREE_PLAYERS:tw->tree_players();break;
 	case TREE_INFOSETS:tw->tree_infosets();break;
 // Infoset menu
@@ -212,7 +219,7 @@ switch (id)
 // Inspect menu
 	case INSPECT_FEATURES: SetOptions(); break;
 // Supports menu
-	case SUPPORTS_SUPPORTS: SupportInspect(); break;
+	case SUPPORTS_SUPPORTS: ChangeSupport(CREATE_DIALOG); break;
 	case SUPPORTS_ELIMDOM: SolveElimDom(); break;
 // Subgames menu
 	case SUBGAME_SOLVE:tw->subgame_solve();break;
@@ -225,7 +232,7 @@ switch (id)
 	case SUBGAME_EXPANDONE:tw->subgame_expand_one();break;
 	case SUBGAME_SET:tw->subgame_set();break;
 // Solve menu
-	case INSPECT_SOLUTIONS: InspectSolutions(); break;
+	case INSPECT_SOLUTIONS: InspectSolutions(CREATE_DIALOG); break;
 	case SOLVE_SOLVE: Solve(); break;
 	case SOLVE_SOLVE_NORMAL: SolveNormal(); break;
 	case SOLVE_ALGORITHM: SolveSetup(SOLVE_SETUP_CUSTOM);break;
@@ -233,7 +240,7 @@ switch (id)
 	case SOLVE_DOMINANCE: {DominanceSettingsDialog EDPD(this); break;}
 	case SOLVE_SUBGAMES: SubgamesSetup();break;
 	case SOLVE_GAMEINFO: ShowGameInfo();break;
-	case SOLVE_PARAMS: SetParameters(); break;
+	case SOLVE_PARAMS: ChangeParameters(CREATE_DIALOG); break;
 // Display menu
 	#define ZOOM_DELTA	.2
 	case DISPLAY_SET_ZOOM:tw->display_set_zoom();break;
@@ -260,7 +267,8 @@ switch (id)
 	break;
 }
 // Most menu selections modify the display somehow, so redraw w/ exceptions
-if (id!=FILE_QUIT && id!=FILE_CLOSE && id!=TREE_OUTCOMES && id!=SUPPORTS_SUPPORTS)
+if (id!=FILE_QUIT && id!=FILE_CLOSE && id!=TREE_OUTCOMES && id!=SUPPORTS_SUPPORTS
+    && id!=SOLVE_PARAMS)
 	{tw->OnPaint();tw->SetFocus();}
 }
 
@@ -302,8 +310,6 @@ delete options_dialog;
 }
 
 
-void EfgShow::SolnShowDied(void)
-{soln_show=0;}
 
 // if who==2, hilight in the tree display
 // if who==1, hilight in the solution window display
@@ -316,8 +322,6 @@ if (who==2) tw->HilightInfoset(pl,iset);
 }
 //************************** EF SUPPORT FUNCTIONS *********************
 
-#define SUPPORT_OPEN		0
-#define SUPPORT_CLOSE		1
 #define SUPPORT_CHANGE	2
 
 // Make Support
@@ -371,9 +375,9 @@ return 0;
 }
 
 // Support Inspect
-void EfgShow::SupportInspect(int what)
+void EfgShow::ChangeSupport(int what)
 {
-if (what==SUPPORT_OPEN)
+if (what==CREATE_DIALOG)
 {
 	if (!support_dialog)
 	{
@@ -383,9 +387,8 @@ if (what==SUPPORT_OPEN)
 	else
 		support_dialog->SetFocus();
 }
-if (what==SUPPORT_CLOSE)
+if (what==DESTROY_DIALOG && support_dialog)
 {
-	assert(support_dialog);
 	delete support_dialog;
 	support_dialog=0;
 }
@@ -511,7 +514,14 @@ if (!ef)	// must create a new extensive form from scratch or file
 {
 	if (infile_name==gString())	// from scratch
 	{
-		if (GetEFParams()) ef=new Efg();
+   	gArray<gString> names;
+		if (GetEFParams(names,parent))
+      {
+			gSpace *space = new gSpace;
+			ORD_PTR ord = &lex;
+      	ef=new Efg(space, new term_order(space, ord));
+         for (int i=1;i<=names.Length();i++)	ef->NewPlayer()->SetName(names[i]);
+      }
 	}
 	else												// from data file
 	{
@@ -530,20 +540,44 @@ if (ef)
 if (ef_show) ef_show->SetFileName(infile_name);
 }
 
-int EfgGUI::GetEFParams(void)
+#define MAX_PLAYERS 100
+#define MAX_STRATEGIES	100
+#define NUM_PLAYERS_PER_LINE 8
+int EfgGUI::GetEFParams(gArray<gString> &names,wxFrame *parent)
 {
-MyDialogBox *make_ef=new MyDialogBox(NULL,"Extensive Form Parameters");
-make_ef->Go();
-if (make_ef->Completed()==wxOK)
+int num_players=2;
+// Get the number of players first
+MyDialogBox *make_ef_p=new MyDialogBox(parent,"Extensive Form Parameters");
+make_ef_p->Form()->Add(wxMakeFormShort("How many players",&num_players,wxFORM_TEXT,
+										 new wxList(wxMakeConstraintRange(1, MAX_PLAYERS), 0),NULL,0,220));
+make_ef_p->Go();
+int ok=make_ef_p->Completed();
+delete make_ef_p;
+if (ok!=wxOK || num_players<1) return 0;
+
+// Now get player names
+MyDialogBox *make_ef_names=new MyDialogBox(parent,"Player Names");
+names=gArray<gString>(num_players);
+char **names_str=new char*[num_players+1];
+for (int i=1;i<=num_players;i++)
 {
-	delete make_ef;
-	return 1;
+	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToString(i));
+	make_ef_names->Add(wxMakeFormString(ToString(i),&names_str[i],wxFORM_TEXT,
+                      NULL,NULL,0,140));
+	if (i%(NUM_PLAYERS_PER_LINE/2)==0) make_ef_names->Add(wxMakeFormNewLine());
 }
-else
+make_ef_names->Go();
+ok=make_ef_names->Completed();
+delete make_ef_names;
+if (ok!=wxOK)	return 0;
+for (int i=1;i<=num_players;i++)
 {
-	delete make_ef;
-	return 0;
+   names[i]=names_str[i];
+	delete [] names_str[i];
 }
+delete [] names_str;
+
+return 1;
 }
 
 

@@ -1,6 +1,6 @@
 // File: wxmisc.cc -- a few general purpose functions that rely on and enhance
 // wxwin.
-// @(#)wxmisc.cc	2.1 3/24/97
+// $Id$
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
@@ -405,6 +405,62 @@ dc.SetTextForeground(wxTheColourDatabase->FindColour(old_foreground));
 if (old_font) dc.SetFont(old_font);
 }
 
+gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y)
+{
+int i=0,c;
+float dx,dy;
+gString s=gDrawTextPreParse(s0);
+gString tmp;
+wxFont *old_font=0,*small_font=0;
+float	old_y=0;int old_size=0;
+*x=0;*y=0;
+
+while(i<s.length())
+{
+	tmp=gString();
+	while (i<s.length() && s[i]!='\\') {tmp+=s[i];i++;}
+	dc.GetTextExtent((char *)tmp,&dx,&dy);
+	*x+=dx;if (dy<*y) *y=dy;
+	if (s[i]=='\\')	// has to be a command
+	{
+		i++;
+		switch (s[i])
+		{
+			case '\\':
+				dc.GetTextExtent("\\",&dx,&dy);
+				*x+=dx;i++;
+				break;
+			case 'C':
+				c=(gDrawTextGetNum(s,&i)%WX_COLOR_LIST_LENGTH);
+				break;
+			case '^':		// Start superscript
+				if (!old_font) old_font=dc.GetFont();
+				if (!old_size) old_size=old_font->GetPointSize();
+				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
+				dc.SetFont(small_font);
+				old_y=*y;*y-=dy/4;
+				i++;
+				break;
+			case '_':		// Start subscript
+				if (!old_font) old_font=dc.GetFont();
+				if (!old_size) old_size=old_font->GetPointSize();
+				if (!small_font) small_font=wxTheFontList->FindOrCreateFont(old_size*2/3,old_font->GetFamily(),old_font->GetStyle(),old_font->GetWeight());
+				dc.SetFont(small_font);
+				old_y=*y;*y+=dy*2/3;
+				i++;
+				break;
+			case '~':		// Stop sub/super script
+				if (old_font) {dc.SetFont(old_font);*y=old_y;i++;}
+				break;
+			default:
+				wxError("Unknown code in gDrawText");
+				break;
+		}
+	}
+}
+if (old_font) dc.SetFont(old_font);
+}
+
 // Takes a string formated for gDrawText and returns just the text value of it.
 gString gPlainText(const gString &s)
 {
@@ -424,6 +480,12 @@ while(i<s.length())
 			case 'C' :
 				gDrawTextGetNum(s,&i); // just absorb that info
 				break;
+         case '^' :
+         case '_' :
+         	plain+=s[i];
+            break;
+         case '~' :
+         	break;
 			default:
 				wxError("Unknown code in gDrawText");
 				break;
@@ -432,3 +494,190 @@ while(i<s.length())
 }
 return plain;
 }
+
+// gGetTextLine is a fancy version of the wxGetTextFrom user.  This single line
+// input allows for all of the capability of gDrawText, line editing using
+// cursor keys and the mouse.
+class gGetTextCanvas;
+class gGetTextFrame : public wxFrame
+{
+private:
+	gGetTextCanvas *d;
+public:
+	gGetTextFrame(const gString s0, wxFrame *frame, int x,int y, const char *title, bool titlebar);
+	Bool OnClose(void);
+   int  Completed(void) const;
+   gString GetString(void) const;
+};
+
+class gGetTextCanvas: public wxCanvas
+{
+private:
+	int completed;
+	gGetTextFrame *parent;
+	gString s;
+   float w;
+   int pos;
+public:
+	gGetTextCanvas(gGetTextFrame *p,const gString s0);
+	void OnChar(wxKeyEvent &ev);
+	void OnEvent(wxMouseEvent &ev);
+	void OnPaint(void);
+   void SetCompleted(int c);
+   gString GetString(void) const;
+   int Completed(void) const;
+};
+
+
+
+#define GETTEXT_FRAME_WIDTH	100
+#define GETTEXT_FRAME_HEIGHT	30
+#define GETTEXT_FRAME_WIDTH_M	300
+#define TEXT_OFF				5
+
+gGetTextFrame::gGetTextFrame(const gString s0, wxFrame *frame,int x, int y,
+                             const char *title,bool titlebar):
+	wxFrame(frame, title,x,y,GETTEXT_FRAME_WIDTH,GETTEXT_FRAME_HEIGHT,
+    (titlebar) ? wxDEFAULT_FRAME : wxRESIZE_BORDER)
+{
+d=new gGetTextCanvas(this,s0);
+}
+
+Bool gGetTextFrame::OnClose()
+{
+d->SetCompleted(wxCANCEL);
+Show(FALSE);
+return FALSE;
+
+}
+
+int gGetTextFrame::Completed(void) const
+{return d->Completed();}
+
+gString gGetTextFrame::GetString(void) const
+{return d->GetString();}
+
+gGetTextCanvas::gGetTextCanvas(gGetTextFrame *parent_,const gString s0):
+			wxCanvas(parent_),s(s0),parent(parent_)
+{
+SetBackground(wxTheBrushList->FindOrCreateBrush("YELLOW",wxSOLID));
+SetFont(wxTheFontList->FindOrCreateFont(12,wxSWISS,wxNORMAL,wxNORMAL));
+GetDC()->SetBackgroundMode(wxTRANSPARENT);
+pos=s.length();
+float h;
+gGetTextExtent(*GetDC(),s,&w,&h);
+parent->SetSize(-1,-1,w*3/2,-1,wxSIZE_USE_EXISTING);
+completed=wxRUNNING;
+}
+
+void gGetTextCanvas::OnChar(wxKeyEvent &ev)
+{
+switch(ev.KeyCode())
+{
+case WXK_ESCAPE: completed=wxCANCEL; break;
+case WXK_RETURN: completed=wxOK; break;
+case WXK_LEFT:
+{
+	if (pos<1) break;
+   pos--;
+   OnPaint();
+   break;
+}
+case WXK_RIGHT:
+{
+	if (pos>s.length()-1) break;
+   pos++;
+   OnPaint();
+   break;
+}
+
+case WXK_DELETE:
+case WXK_BACK:
+{
+	if (pos<1) break;
+   pos--;
+   s.remove(pos);
+   float h;
+   gGetTextExtent(*GetDC(),s,&w,&h);
+	int cur_w,cur_h;
+	GetSize(&cur_w,&cur_h);
+   if (w<cur_w*2/3 && w>GETTEXT_FRAME_WIDTH)
+   {
+   	cur_w=w+3*TEXT_OFF;
+      parent->SetSize(-1,-1,cur_w,-1,wxSIZE_USE_EXISTING);
+   }
+   else
+	   OnPaint();
+   break;
+}
+default:
+{
+	s.insert((char)ev.KeyCode(),pos);
+   pos++;
+   float h;
+   gGetTextExtent(*GetDC(),s,&w,&h);
+	int cur_w,cur_h;
+	GetSize(&cur_w,&cur_h);
+   if (w>cur_w && cur_w<GETTEXT_FRAME_WIDTH_M)
+   {
+   	cur_w=w*3/2+3*TEXT_OFF;
+      parent->SetSize(-1,-1,cur_w,-1,wxSIZE_USE_EXISTING);
+   }
+   else
+	   OnPaint();
+   break;
+}
+}
+}
+
+void gGetTextCanvas::OnPaint(void)
+{
+Clear();
+gDrawText(*GetDC(),s,TEXT_OFF,TEXT_OFF);
+float h;
+gGetTextExtent(*GetDC(),s.left(pos),&w,&h);
+SetPen(wxGREEN_PEN);
+DrawLine(w+TEXT_OFF*3/2,0,w+TEXT_OFF*3/2,GETTEXT_FRAME_HEIGHT);
+}
+
+void gGetTextCanvas::OnEvent(wxMouseEvent &ev)
+{
+if (ev.LeftDown())
+{
+	float tw,th,tw1=-1;
+   // Find out where we clicked
+   int npos=-1;
+   for (int tpos=1;tpos<=s.length() && npos==-1;tpos++)
+   {
+	   gGetTextExtent(*GetDC(),s.left(tpos),&tw,&th);
+   	if (ev.x>tw1 && ev.x<=tw) npos=tpos-1;
+      tw1=tw;
+   }
+   if (npos==-1) npos=s.length();
+   pos=npos;
+   OnPaint();
+}
+}
+
+int gGetTextCanvas::Completed(void) const
+{return completed;}
+
+gString gGetTextCanvas::GetString(void) const
+{return s;}
+
+
+void gGetTextCanvas::SetCompleted(int c)
+{completed=c;}
+
+gString gGetTextLine(const gString &s0,wxFrame *parent,int x,int y,
+                     const char *title,bool titlebar)
+{
+gGetTextFrame *f=new gGetTextFrame(s0,parent,x,y,title,titlebar);
+f->Show(TRUE);
+while (f->Completed()==wxRUNNING) wxYield();
+gString result_str;
+if (f->Completed()==wxOK) result_str=f->GetString();
+delete f;
+return result_str;
+}
+

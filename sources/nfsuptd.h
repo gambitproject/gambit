@@ -30,7 +30,7 @@ private:
 	static void help_func(wxButton &,wxEvent &)
 	{wxHelpContents(NFG_SUPPORTS_HELP);}
 	static void close_func(wxButton &ob,wxEvent &)
-	{((NfgShow *)ob.GetClientData())->SupportInspect(SUPPORT_CLOSE);}
+	{((NfgShow *)ob.GetClientData())->ChangeSupport(DESTROY_DIALOG);}
 	static void remove_sup_func(wxButton &ob,wxEvent &)
 	{((NFSupportInspectDialog *)ob.GetClientData())->OnRemoveSupport();}
 // High level event handlers
@@ -47,7 +47,7 @@ private:
 	void OnRemoveSupport(void);
 	void OnChangeSupport(void)
 	{
-	bns->SupportInspect(SUPPORT_CHANGE);init_disp=DispSup();init_cur=CurSup();
+	bns->ChangeSupport(UPDATE_DIALOG);init_disp=DispSup();init_cur=CurSup();
 	}
 	void OnCur(int cur_sup)
 	{
@@ -142,7 +142,7 @@ void NFSupportInspectDialog::OnRemoveSupport(void)
 		{disp_item->Append(ToString(i));cur_item->Append(ToString(i));}
 	 disp_item->SetSize(-1,-1,-1,-1);cur_item->SetSize(-1,-1,-1,-1);
 	 disp_item->SetSelection(0);cur_item->SetSelection(0);
-	 if (revert) bns->SupportInspect(SUPPORT_CHANGE);
+	 if (revert) bns->ChangeSupport(UPDATE_DIALOG);
   }
 }
 

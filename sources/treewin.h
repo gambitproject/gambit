@@ -160,7 +160,6 @@ protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
 	Bool		outcomes_changed;
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
-	EfgOutcomeDialog *outcome_dialog;		// do we have outcomes open for this window?
 public:
 	// Constructor
 	TreeWindow(Efg &ef_,EFSupport * &disp, EfgShow *frame);
@@ -170,7 +169,7 @@ public:
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
 	void OnPaint(void);
-	// Menu event handlers (these are mostly in btreewn1.cc)
+	// Menu event handlers (these are mostly in treewin1.cc)
 	void node_add(void);
 	void node_game(void);
 	void node_label(void);
@@ -243,13 +242,11 @@ public:
 	void	SetSubgamePickNode(const Node *n);
 	// Check if a drag'n'drop object has been activated
 	Node *GotObject(float &mx,float &my,int what);
-	// Used by a child outcomes inspect when it is close
-	void OutcomeDialogDied(void);
 	virtual Bool JustRender(void) const;
    // Access to the numeric values from the renderer
  	double 	ProbAsDouble(const Node *n,int action) const;
 	gString	AsString(TypedSolnValues what,const Node *n,int br=0) const;
-	gString	OutcomeAsString(const Node *n) const;
+	gString	OutcomeAsString(const Node *n,bool &hilight) const;
 
 };
 

@@ -39,6 +39,7 @@ spread=new NormalSpread(disp_sup,pl1,pl2,this,pframe);
 support_dialog=0;	// no support dialog yet
 soln_show=0;			// no solution inspect window yet.
 outcome_dialog=0;	// no outcome dialog yet.
+params_dialog=0;	// no parameter dialog yet
 SetPlayers(pl1,pl2,true);
 // Create the accelerators (to add an accelerator, see const.h)
 ReadAccelerators(accelerators,"NfgAccelerators");
@@ -61,12 +62,19 @@ for (i=1;i<=rows;i++)
 	nf_iter.Set(pl1,i);nf_iter.Set(pl2,j);
 	gString pay_str;
 	NFOutcome *outcome = nf_iter.GetOutcome();
+   bool hilight=false;
 	if (draw_settings.OutcomeDisp()==OUTCOME_VALUES)
 	{
 		for (int k=1;k<=nf.NumPlayers();k++)
 		{
 			pay_str+=("\\C{"+ToString(draw_settings.GetPlayerColor(k))+"}");
-			pay_str+=ToString(nf.Payoff(outcome, k));
+         if (param_sets.PolyVal()==false)
+				pay_str+=ToString(nf.Payoff(outcome, k));
+         else
+         {
+         	pay_str+=ToString(nf.Payoff(outcome, k).Evaluate(param_sets.CurSet()));
+            if (nf.Payoff(outcome, k).Degree()>0) hilight=true;
+         }
 			if (k!=nf.NumPlayers()) pay_str+=',';
 		}
 	}
@@ -81,6 +89,7 @@ for (i=1;i<=rows;i++)
 			pay_str="Outcome 0";
 	}
 	spread->SetCell(i,j,pay_str);
+   spread->HiLighted(i,j,0,hilight);
  }
 nf_iter.Set(pl1,1);nf_iter.Set(pl2,1);
 
@@ -89,14 +98,14 @@ spread->Repaint();
 
 // ****************************** NORM SHOW::UPDATE Soln
 
-MixedProfileT FitToSupport(const MixedProfileT &from,const NFSupport &sup_to)
+MixedProfile<gNumber> FitToSupport(const MixedProfile<gNumber> &from,const NFSupport &sup_to)
 {
 const NFSupport &sup_from=from.Support();
 if (sup_to==sup_from) return from;
 gArray<int> dim_from=sup_from.NumStrats();
 gArray<int> dim_to=sup_to.NumStrats();
 assert(dim_from.Length()==dim_to.Length());
-MixedProfileT to(sup_to.Game(),sup_to);
+MixedProfile<gNumber> to(sup_to.Game(),sup_to);
 for (int i=1;i<=dim_to.Length();i++)
 	for (int j=1;j<=dim_to[i];j++)
 	{
@@ -117,7 +126,7 @@ if (!cur_soln) return;
 // strategy to the highest soluton strat.
 // (Note that MixedSolution.Pure() is not yet implemented :(
 // Add support for displaying solutions created for supports other than disp_sup
-MixedProfileT soln=FitToSupport((const MixedProfileT &)solns[cur_soln],*disp_sup);
+MixedProfile<gNumber> soln=FitToSupport((const MixedProfile<gNumber> &)solns[cur_soln],*disp_sup);
 gNumber t_max;
 gArray<int> profile(nf.NumPlayers());
 // Figure out the index in the disp_sup, then map it onto the full support
@@ -171,7 +180,7 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
 if (!cur_soln || !spread->HaveProbs()) return;
 // The value in the maximum row&col cell corresponds to prob of being
 // at this contingency=Product(Prob(strat_here), all players except pl1,pl2)
-const MixedSolutionT &soln=solns[cur_soln];
+const MixedSolution &soln=solns[cur_soln];
 
 gNumber cont_prob(1);
 for (int i=1;i<=nf.NumPlayers();i++)
@@ -187,7 +196,7 @@ UpdateContingencyProb(profile);
 UpdateVals();
 }
 
-#define ENTRIES_PER_ROW	8
+#define ENTRIES_PER_ROW	5
 
 class NFChangePayoffs: public MyDialogBox
 {
@@ -246,8 +255,8 @@ wxFormItem **payoff_fitems=new wxFormItem *[profile.Length()+1];
 payoff_items=new wxText *[profile.Length()+1];
 for (i=1;i<=nf.NumPlayers();i++)
 {
-	new_payoffs[i]=new char[20];
-	payoff_fitems[i]=Add(wxMakeFormString("",&(new_payoffs[i]),wxFORM_TEXT,0,0,0,80));
+	new_payoffs[i]=new char[40];
+	payoff_fitems[i]=Add(wxMakeFormString("",&(new_payoffs[i]),wxFORM_TEXT,0,0,0,160));
 	if (i%ENTRIES_PER_ROW==0) Add(wxMakeFormNewLine());
 }
 AssociatePanel();
@@ -324,18 +333,17 @@ if (payoffs_dialog->Completed()==wxOK)  {
 	nf.SetOutcome(profile,outc);
 	UpdateVals();
 	RemoveSolutions();
-//	InterfaceDied();
+	InterfaceDied();
 }
 delete payoffs_dialog;
 }
 
-void NfgShow::EditOutcomes(void)
+void NfgShow::ChangeOutcomes(int what)
 {
-if (!outcome_dialog) // no window for this nfg
-{
-	outcome_dialog=new NfgOutcomeDialog(nf,this);
-	return;
-}
+if (what==CREATE_DIALOG && !outcome_dialog)
+  	outcome_dialog=new NfgOutcomeDialog(nf,this);
+if (what==DESTROY_DIALOG && outcome_dialog)
+	{delete outcome_dialog;outcome_dialog=0;}
 }
 
 
@@ -484,37 +492,42 @@ ClearSolutions();
 if (cur_soln) spread->Repaint();
 cur_soln=0;
 solns.Flush();
-//@@got_solns.Flush();
 spread->EnableInspect(FALSE);
 }
 
 
 
-MixedSolutionT NfgShow::CreateSolution(void)
+MixedSolution NfgShow::CreateSolution(void)
 {
-return MixedSolutionT(nf,*cur_sup);
+return MixedSolution(MixedProfile<gNumber>(nf,*cur_sup));
 }
 
-
-//@@ #include "extgui.h"
 
 #define SUPPORT_CLOSE		1 // in elimdomd.h
 
 void NfgShow::OnOk(void)
 {
 if (soln_show) {soln_show->OnOk();}
-if (support_dialog) SupportInspect(SUPPORT_CLOSE);
+ChangeSupport(DESTROY_DIALOG);
+if (outcome_dialog) delete outcome_dialog;
+ChangeParameters(DESTROY_DIALOG);
 spread->Close();
 delete &nf;
 }
 
 
-void NfgShow::InspectSolutions(void)
+void NfgShow::InspectSolutions(int what)
 {
-// find the max # of strats per player
-if (solns.Length()==0) {wxMessageBox("No Solutions to Inspect!"); return;}
-if (soln_show) {soln_show->Show(FALSE);delete soln_show;}
-soln_show=new NfgSolnShow(solns,nf.NumPlayers(),gmax(nf.NumStrats()),cur_soln,draw_settings,sf_options,this,spread);
+if (what==CREATE_DIALOG)
+{
+	if (solns.Length()==0) {wxMessageBox("Solution list currently empty"); return;}
+	if (soln_show) {soln_show->Show(FALSE);delete soln_show;}
+	soln_show=new NfgSolnShow(solns,nf.NumPlayers(),gmax(nf.NumStrats()),cur_soln,draw_settings,sf_options,this,spread);
+}
+if (what==DESTROY_DIALOG && soln_show)
+{
+	soln_show=0;
+}
 }
 
 
@@ -575,7 +588,7 @@ if (solved)
 	if (!spread->HaveProbs()) {spread->MakeProbDisp();spread->Redraw();}
 	ChangeSolution(solns.VisLength());
 	spread->EnableInspect(TRUE);
-	if (NSD.AutoInspect()) InspectSolutions();
+	if (NSD.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }
 }
 
@@ -586,7 +599,7 @@ void NfgShow::SolveSetup(int what)
 {
 if (what==SOLVE_SETUP_CUSTOM)
 {
-	NfgSolveParamsDialog NSD(nf,/*@@InterfaceOk()*/ 0,(wxWindow *)spread);
+	NfgSolveParamsDialog NSD(nf,InterfaceOk(),(wxWindow *)spread);
    bool from_efg=0;
 	if (NSD.GetResult()==SD_PARAMS)
    switch (NSD.GetAlgorithm())
@@ -635,9 +648,9 @@ gString NfgShow::GetFileName(void) const
 
 // how: 0-default,1-saved,2-query
 
-MixedProfileT NfgShow::CreateStartProfile(int how)
+MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 {
-MixedSolutionT start(nf,*cur_sup);
+MixedSolution start(MixedProfile<gNumber>(nf,*cur_sup));
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {
@@ -697,16 +710,16 @@ return sup;
 // Solution To Exensive
 #ifndef NFG_ONLY
 #include "efg.h"
-void MixedToBehav(const Nfg &N, const MixedProfileT &mp,const Efg &E, BehavProfile<gNumber> &bp);
+void MixedToBehav(const Nfg &N, const MixedProfile<gNumber> &mp,const Efg &E, BehavProfile<gNumber> &bp);
 #endif
 
-void NfgShow::SolutionToExtensive(const MixedSolutionT &mp,bool set)
+void NfgShow::SolutionToExtensive(const MixedSolution &mp,bool set)
 {
 #ifndef NFG_ONLY
 assert(InterfaceOk());	// we better have someone to send solutions to
 //assert(mp!=Solution());
 BehavProfile<gNumber> bp(*InterfaceObjectEfg());
-//@@MixedToBehav(nf,mp,*InterfaceObjectEfg(),bp);
+MixedToBehav(nf,mp,*InterfaceObjectEfg(),bp);
 SolutionToEfg(bp,set);
 #endif
 }
@@ -805,51 +818,19 @@ else
 }
 
 */
-MixedSolutionT MixedSolution2Num(const MixedSolution<double> &x)
-{
-MixedSolutionT y(x.Game(),x.Support());
-y.SetCreator(x.Creator());
-y.SetIsNash(x.IsNash());
-y.SetIsPerfect(x.IsPerfect());
-y.SetIsProper(x.IsProper());
-y.SetEpsilon(x.Epsilon());
-y.SetGobit(x.GobitLambda(),x.GobitValue());
-y.SetLiap(x.LiapValue());
-y.SetId(x.Id());
-gVector<gNumber> &yy=(gVector<gNumber> &)y;
-gVector<double> &xx=(gVector<double> &)x;
-for (int i=1;i<=yy.Length();i++) yy[i]=xx[i];
-return y;
-}
-
-gList<MixedSolutionT> MixedSolution2NumL(const gList<MixedSolution<double> > &x)
-{
-gList<MixedSolutionT> y;
-for (int i=1;i<=x.Length();i++) y.Append(MixedSolution2Num(x[i]));
-return y;
-}
-
-MixedProfile<double> MixedProfile2Dbl(const MixedProfileT &x)
-{
-MixedProfile<double> y(x.Game(),x.Support());
-gVector<double> &yy=(gVector<double> &)y;
-gVector<gNumber> &xx=(gVector<gNumber> &)x;
-for (int i=1;i<=yy.Length();i++) yy[i]=xx[i];
-return y;
-}
 bool NfgShow::SolveLiap(const NFSupport */*sup*/)
 {
 wxStatus status(pframe,"Liap Algorithm");
 LiapParamsSettings LPS;
 NFLiapParams P(status);
 LPS.GetParams(&P);
-MixedProfile<double> start(MixedProfile2Dbl(CreateStartProfile(LPS.StartOption())));
-gList<MixedSolution<double> > temp_solns;
+MixedProfile<gNumber> start(CreateStartProfile(LPS.StartOption()));
+gList<MixedSolution> temp_solns;
 long nevals,nits;
 Liap(nf,P,start,temp_solns,nevals,nits);
 if (temp_solns.Length())
 {
-	solns+=MixedSolution2NumL(temp_solns);
+	solns+=temp_solns;
 	return true;
 }
 else
@@ -938,11 +919,15 @@ NfgGUI::NfgGUI(Nfg *nf,const gString infile_name,EfgNfgInterface *inter,wxFrame 
 if (nf==0) // must create a new normal form, from scratch or from file
 {
 	gArray<int> dimensionality;
+   gArray<gString> names;
 	if (infile_name==gString())	// from scratch
 	{
-		if (GetNFParams(dimensionality))
+		if (GetNFParams(dimensionality,names,parent))
 		{
-			nf=new Nfg(dimensionality);
+		   gSpace *space = new gSpace;
+		   ORD_PTR ord = &lex;
+			nf=new Nfg(dimensionality,space,new term_order(space, ord));
+         for (int i=1;i<=names.Length();i++) nf->Players()[i]->SetName(names[i]);
 		}
 	}
 	else												// from data file
@@ -970,38 +955,58 @@ if (nf)
 #define MAX_PLAYERS 100
 #define MAX_STRATEGIES	100
 #define NUM_PLAYERS_PER_LINE 8
-int NfgGUI::GetNFParams(gArray<int> &dimensionality)
+int NfgGUI::GetNFParams(gArray<int> &dimensionality,gArray<gString> &names,wxFrame *parent)
 {
+
 int num_players=2;
 // Get the number of players first
-MyDialogBox *make_nf_p=new MyDialogBox(0,"Normal Form Parameters");
+MyDialogBox *make_nf_p=new MyDialogBox(parent,"Normal Form Parameters");
 make_nf_p->Form()->Add(wxMakeFormShort("How many players",&num_players,wxFORM_TEXT,
 										 new wxList(wxMakeConstraintRange(2, MAX_PLAYERS), 0),NULL,0,220));
 make_nf_p->Go();
 int ok=make_nf_p->Completed();
 delete make_nf_p;
 if (ok!=wxOK || num_players<1) return 0;
+
 // if we got a valid # of players, go on to get the dimensionality
-MyDialogBox *make_nf=new MyDialogBox(0,"Normal Form Parameters");
+MyDialogBox *make_nf_dim=new MyDialogBox(parent,"Normal Form Parameters");
+make_nf_dim->Add(wxMakeFormMessage("How many strategies for\neach player?"));
 dimensionality=gArray<int>(num_players);
 for (int i=1;i<=num_players;i++)
 {
 	dimensionality[i]=2;  // Why 2?  why not?
-	make_nf->Add(wxMakeFormShort(ToString(i),&dimensionality[i],wxFORM_TEXT,
+	make_nf_dim->Add(wxMakeFormShort(ToString(i),&dimensionality[i],wxFORM_TEXT,
 										 new wxList(wxMakeConstraintRange(1, MAX_STRATEGIES), 0),NULL,0,70));
-	if (i%NUM_PLAYERS_PER_LINE==0) make_nf->Add(wxMakeFormNewLine());
+	if (i%NUM_PLAYERS_PER_LINE==0) make_nf_dim->Add(wxMakeFormNewLine());
 }
-make_nf->Go();
-if (make_nf->Completed()==wxOK)
+make_nf_dim->Go();
+ok=make_nf_dim->Completed();
+delete make_nf_dim;
+if (ok!=wxOK)	return 0;
+
+// Now get player names
+MyDialogBox *make_nf_names=new MyDialogBox(parent,"Player Names");
+names=gArray<gString>(num_players);
+char **names_str=new char*[num_players+1];
+for (int i=1;i<=num_players;i++)
 {
-	delete make_nf;
-	return 1;
+	names_str[i]=new char[20];strcpy(names_str[i],"Player"+ToString(i));
+	make_nf_names->Add(wxMakeFormString(ToString(i),&names_str[i],wxFORM_TEXT,
+                      NULL,NULL,0,140));
+	if (i%(NUM_PLAYERS_PER_LINE/2)==0) make_nf_names->Add(wxMakeFormNewLine());
 }
-else
+make_nf_names->Go();
+ok=make_nf_names->Completed();
+delete make_nf_names;
+if (ok!=wxOK)	return 0;
+for (int i=1;i<=num_players;i++)
 {
-	delete make_nf;
-	return 0;
+   names[i]=names_str[i];
+	delete [] names_str[i];
 }
+delete [] names_str;
+
+return 1;
 }
 
 

@@ -10,7 +10,7 @@
 #include "nfgoutcd.h"
 
 //**************************************************************************
-//                         BASE NORM SHOW
+//                         NORMAL FORM GAME SHOW
 //**************************************************************************
 #include "nfgconst.h"
 // SetPlayers
@@ -116,23 +116,41 @@ return 0;
 }
 
 //**************************** OUTCOMES STUFF *********************************
-void NfgShow::UpdateSpace(void)
+#define UPDATE1_DIALOG	4
+#define PARAMS_ADD_VAR	5
+void NfgShow::ChangeParameters(int what)
 {
-gPoly<gNumber> blank(nf.Parameters(),nf.ParamOrder());
-for (int i=1;i<=nf.NumOutcomes();i++)
-	for (int j=1;j<=nf.NumPlayers();j++)
-		nf.SetPayoff(nf.Outcomes()[i],j,blank);
-UpdateVals();
+if (what==CREATE_DIALOG && !params_dialog)
+	params_dialog=new ParameterDialog(nf.Parameters(),this,spread);
+if (what==DESTROY_DIALOG && params_dialog)
+	{delete params_dialog;params_dialog=0;}
+if (what==PARAMS_ADD_VAR)  // Added a variable
+{
+	// Save old poly's in strings to re-create later
+	gRectArray<gString> old_polys(nf.NumOutcomes(),nf.NumPlayers());
+	for (int i=1;i<=nf.NumOutcomes();i++)
+		for (int j=1;j<=nf.NumPlayers();j++)
+			old_polys(i,j)=ToString(nf.Payoff(nf.Outcomes()[i],j));
+	// Create a new variable
+	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
+   nf.Parameters()->CreateVariables();
+	// Re-create the outcomes
+	for (int i=1;i<=nf.NumOutcomes();i++)
+		for (int j=1;j<=nf.NumPlayers();j++)
+			nf.SetPayoff(nf.Outcomes()[i],j,
+             gPoly<gNumber>(nf.Parameters(),old_polys(i,j),nf.ParamOrder()));
+   if (outcome_dialog) outcome_dialog->UpdateVals();
+	UpdateVals();
+}
+if (what==UPDATE1_DIALOG) // Just changed some values
+{
+   if (outcome_dialog) outcome_dialog->UpdateVals();
+	UpdateVals();
+}
 }
 
-
-void NfgShow::SetParameters(void)
-{
-ParameterDialog *P=new ParameterDialog(nf.Parameters(),param_sets,spread,this);
-while (P->Completed()!=wxOK) wxYield();
-delete P;
-}
-
+ParameterSetList &NfgShow::Parameters(void)
+{return param_sets;}
 
 void NfgShow::SetOutcome(int out,int x, int y)
 {
@@ -161,13 +179,6 @@ else
 	UpdateVals();
 }
 }
-
-void NfgShow::OutcomeDialogDied(void)
-{
-delete outcome_dialog;
-outcome_dialog=0;
-}
-
 
 
 //**************************** DOMINATED STRATEGY STUFF ************************
@@ -233,25 +244,19 @@ void NfgShow::DominanceSetup(void)
 {DominanceSettingsDialog EDPD(spread);}
 
 // Support Inspect
-void NfgShow::SupportInspect(int what)
+void NfgShow::ChangeSupport(int what)
 {
-if (what==SUPPORT_OPEN)
+if (what==CREATE_DIALOG && !support_dialog)
 {
-	if (!support_dialog)
-	{
-		int disp=supports.Find(disp_sup),cur=supports.Find(cur_sup);
-		support_dialog=new NFSupportInspectDialog(supports,cur,disp,this,spread);
-	}
-	else
-		support_dialog->SetFocus();
+	int disp=supports.Find(disp_sup),cur=supports.Find(cur_sup);
+	support_dialog=new NFSupportInspectDialog(supports,cur,disp,this,spread);
 }
-if (what==SUPPORT_CLOSE)
+if (what==DESTROY_DIALOG && support_dialog)
 {
-	assert(support_dialog);
 	delete support_dialog;
 	support_dialog=0;
 }
-if (what==SUPPORT_CHANGE)
+if (what==UPDATE_DIALOG)
 {
 	assert(support_dialog);
 	cur_sup=supports[support_dialog->CurSup()];
@@ -451,7 +456,7 @@ delete norm_options;
 }
 
 // Process Accelerators
-#include "normaccl.h"
+#include "nfgaccl.h"
 #include "sprdaccl.h"
 // These events include those for NormShow and those for SpreadSheet3D
 gArray<AccelEvent> NfgShow::MakeEventNames(void)
@@ -477,10 +482,6 @@ void NfgShow::EditAccelerators(void)
 ::EditAccelerators(accelerators,MakeEventNames());
 WriteAccelerators(accelerators,"NfgAccelerators");
 }
-
-void NfgShow::SolnShowDied(void)
-{soln_show=0;}
-
 
 
 //**********************************************************************
@@ -807,20 +808,20 @@ void NormalSpread::OnMenuCommand(int id)
 {
 switch (id)
 {
-case	NFG_SOLVE_OUTCOMES_MENU: parent->EditOutcomes(); break;
+case	NFG_SOLVE_OUTCOMES_MENU: parent->ChangeOutcomes(CREATE_DIALOG); break;
 case	NFG_PREFS_OUTCOMES_MENU: parent->OutcomeOptions(); break;
 case	NFG_SOLVE_SOLVE_MENU: parent->Solve(); break;
 case	NFG_DISPLAY_COLORS: parent->SetColors(); break;
 case	NFG_DISPLAY_ACCELS:	parent->EditAccelerators(); break;
 case	NFG_SOLVE_FEATURES_MENU: parent->SetOptions(); break;
-case	NFG_SOLVE_INSPECT_MENU: parent->InspectSolutions(); break;
+case	NFG_SOLVE_INSPECT_MENU: parent->InspectSolutions(CREATE_DIALOG); break;
 case	NFG_SOLVE_COMPRESS_MENU: parent->SolveElimDom(); break;
-case	NFG_SOLVE_SUPPORTS_MENU: parent->SupportInspect(); break;
+case	NFG_SOLVE_SUPPORTS_MENU: parent->ChangeSupport(CREATE_DIALOG); break;
 case	NFG_SOLVE_ALGORITHM_MENU: parent->SolveSetup(SOLVE_SETUP_CUSTOM); break;
 case  NFG_SOLVE_STANDARD_MENU: parent->SolveSetup(SOLVE_SETUP_STANDARD); break;
 case	NFG_SOLVE_DOMINANCE_MENU: parent->DominanceSetup(); break;
 case	NFG_SOLVE_GAMEINFO_MENU: parent->ShowGameInfo(); break;
-case	NFG_SOLVE_PARAMS_MENU: parent->SetParameters(); break;
+case	NFG_SOLVE_PARAMS_MENU: parent->ChangeParameters(CREATE_DIALOG); break;
 case	NFG_LABEL_GAME: parent->SetLabels(0);break;
 case	NFG_LABEL_STRATS: parent->SetLabels(1);break;
 case	NFG_LABEL_PLAYERS: parent->SetLabels(2);break;

@@ -21,19 +21,23 @@ class ParameterSetList: public gList<ParameterSet>
 private:
 	gString	name;
    int cur_set;
+   bool polyval;
 public:
-	ParameterSetList(gSpace *space,gString n="ParamSet"):name(n),cur_set(1)
+	ParameterSetList(gSpace *space,gString n="ParamSet"):
+                                         name(n),cur_set(1),polyval(false)
    {Append(ParameterSet(space->Dmnsn(),"DefaultSet"));}
    gString Name(void) const {return name;}
    int &CurSetNum(void) {return cur_set;}
    gArray<gNumber> &CurSet(void) {return (*this)[cur_set];}
+   bool &PolyVal(void) {return polyval;}
 };
 
 class ParameterDialogC;
 class ParametrizedGame
 {
 public:
-	virtual void UpdateSpace(void) = 0;
+   virtual void ChangeParameters(int what) = 0;
+   virtual ParameterSetList &Parameters(void) = 0;
 };
 
 class ParameterDialog
@@ -41,10 +45,8 @@ class ParameterDialog
 private:
 	ParameterDialogC *d;
 public:
-	ParameterDialog(gSpace *space,ParameterSetList &params,wxFrame *parent,
-                   ParametrizedGame *game);
+	ParameterDialog(gSpace *space,ParametrizedGame *game,wxFrame *parent);
    ~ParameterDialog();
-   int Completed(void);
 };
 
 #endif

@@ -8,7 +8,7 @@ class EfgNfgInterface;
 class EfgGUI
 {
 private:
-	int GetEFParams(void);
+	int GetEFParams(gArray<gString> &names,wxFrame *parent);
 public:
 	EfgGUI(Efg *ef=0, const gString infile_name=gString(),
 			 EfgNfgInterface *inter=0, wxFrame *parent=0);

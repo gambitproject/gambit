@@ -13,7 +13,7 @@ template <class T> class gArray;
 class NfgGUI
 {
 private:
-	int GetNFParams(gArray<int> &dimensionality);
+	int GetNFParams(gArray<int> &dimensionality,gArray<gString> &names,wxFrame *parent);
 public:
 	NfgGUI(Nfg *nf=0, const gString infile_name=gString(),
    		EfgNfgInterface *inter=0, wxFrame *parent=0);

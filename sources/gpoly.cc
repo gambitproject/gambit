@@ -136,9 +136,8 @@ gNumber gPoly<gNumber>::String_Coeff(gNumber nega)
     GetChar();
   }
 
-  double dbl = (double) num;
   if (Coeff == "") return (nega);
-  else return (nega * gNumber(FromString(Coeff, dbl)));  
+  else return (nega * gNumber(FromString(Coeff, num)));  
 }
 
 

@@ -64,6 +64,8 @@ wxIcon *frame_icon;
 SetIcon(frame_icon);
 // No support dialog yet
 support_dialog=0;
+outcome_dialog=0;
+params_dialog=0;
 // No solution inspect window yet
 soln_show=0;
 // Create the status bar
@@ -220,15 +222,22 @@ else	// solving by creating a NF, solving, and then projecting solutions back
 	}
 ChangeSolution(solns.VisLength());
 Enable(TRUE);
-if (ESS.AutoInspect()) InspectSolutions();
+if (ESS.AutoInspect()) InspectSolutions(CREATE_DIALOG);
 }
 
 
-void EfgShow::InspectSolutions(void)
+void EfgShow::InspectSolutions(int what)
 {
-if (solns.Length()==0) {wxMessageBox("Solution list currently empty"); return;}
-if (soln_show) {soln_show->Show(FALSE);delete soln_show;}
-soln_show=new EfgSolnShow(ef,solns,cur_soln,tw->DrawSettings(),sf_options,this);
+if (what==CREATE_DIALOG)
+{
+	if (solns.Length()==0) {wxMessageBox("Solution list currently empty"); return;}
+	if (soln_show) {soln_show->Show(FALSE);delete soln_show;}
+	soln_show=new EfgSolnShow(ef,solns,cur_soln,tw->DrawSettings(),sf_options,this);
+}
+if (what==DESTROY_DIALOG && soln_show)
+{
+	soln_show=0;
+}
 }
 
 
@@ -258,25 +267,59 @@ OnSelectedMoved(0);	// update the node inspect window if any
 }
 
 
-BehavSolutionT EfgShow::CreateSolution(void)
+BehavSolution EfgShow::CreateSolution(void)
 {
-return BehavSolutionT(ef, *cur_sup);
+return BehavSolution(BehavProfile<gNumber>(ef, *cur_sup));
 }
 
-void EfgShow::SetParameters(void)
+#include "efgoutcd.h"
+#define UPDATE1_DIALOG	4
+#define PARAMS_ADD_VAR	5       
+void EfgShow::ChangeParameters(int what)
 {
-ParameterDialog *P=new ParameterDialog(ef.Parameters(),param_sets,this,this);
-while (P->Completed()!=wxOK) wxYield();
-delete P;
+if (what==CREATE_DIALOG && !params_dialog)
+	params_dialog=new ParameterDialog(ef.Parameters(),this,this);
+if (what==DESTROY_DIALOG && params_dialog)
+	{delete params_dialog;params_dialog=0;}
+if (what==PARAMS_ADD_VAR)
+{
+	// Save old poly's in strings to re-create later
+	gRectArray<gString> old_polys(ef.NumOutcomes(),ef.NumPlayers());
+	for (int i=1;i<=ef.NumOutcomes();i++)
+		for (int j=1;j<=ef.NumPlayers();j++)
+			old_polys(i,j)=ToString(ef.Payoff(ef.Outcomes()[i],j));
+	// Create a new variable
+	for (int i=1;i<=Parameters().Length();i++) Parameters()[i].Append(0);
+   ef.Parameters()->CreateVariables();
+	// Re-create the outcomes
+	for (int i=1;i<=ef.NumOutcomes();i++)
+		for (int j=1;j<=ef.NumPlayers();j++)
+			ef.SetPayoff(ef.Outcomes()[i],j,
+             gPoly<gNumber>(ef.Parameters(),old_polys(i,j),ef.ParamOrder()));
+
+   if (outcome_dialog) outcome_dialog->UpdateVals();
+	tw->OnPaint();
+}
+if (what==UPDATE1_DIALOG) // Just changed some values
+{
+   if (outcome_dialog) outcome_dialog->UpdateVals();
+	tw->OnPaint();
 }
 
-void EfgShow::UpdateSpace(void)
+}
+
+ParameterSetList &EfgShow::Parameters(void)
+{return param_sets;}
+
+void EfgShow::ChangeOutcomes(int what,const gString out_name)
 {
-gPoly<gNumber> blank(ef.Parameters(),ef.ParamOrder());
-for (int i=1;i<=ef.NumOutcomes();i++)
-	for (int j=1;j<=ef.NumPlayers();j++)
-		ef.SetPayoff(ef.Outcomes()[i],j,blank);
-tw->OnPaint();
+if (what==CREATE_DIALOG && !outcome_dialog)
+{
+  	outcome_dialog=new EfgOutcomeDialog(ef,this);
+ 	if (out_name!="") outcome_dialog->SetOutcome(out_name);
+}
+if (what==DESTROY_DIALOG && outcome_dialog)
+	{delete outcome_dialog;outcome_dialog=0;}
 }
 
 //************************************************************************
@@ -287,7 +330,7 @@ tw->OnPaint();
 // SolutionToEfg: overrides the corresponding member of the EfgNfgInterface,
 // to allow the NormalForm to send its solutions here
 
-void EfgShow::SolutionToEfg(const BehavProfileT &s,bool set)
+void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s,bool set)
 {
 assert(Interface());	// we better have someone to get a solution from!
 solns.Append(s);
@@ -310,7 +353,7 @@ if (what==tBranchProb && n->GetPlayer())
 
 if (!n || !cur_soln) return "N/A";
 
-const BehavSolutionT &cur=solns[cur_soln];
+const BehavSolution &cur=solns[cur_soln];
 int n_index=all_nodes.Find((Node *const)n);
 
 switch (what)
@@ -325,7 +368,7 @@ case tBeliefProb: // terminal ok
 		int memb_num;
 		for (memb_num=1;n->GetInfoset()->Members()[memb_num]!=n;memb_num++) ;
 
-		return ToString((((BehavSolutionT &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
+		return ToString((((BehavSolution &)cur).Beliefs())(n->GetPlayer()->GetNumber(),
 												n->GetInfoset()->GetNumber(),memb_num));
 }
 case tNodeValue:  // terminal ok
@@ -438,7 +481,7 @@ wxFrame *EfgShow::Frame(void)
 
 
 
-void EfgShow::PickSolutions(const Efg &p_ef,gList<BehavSolutionT> &p_solns)
+void EfgShow::PickSolutions(const Efg &p_ef,gList<BehavSolution> &p_solns)
 {
 BehavSolutionList temp_solns;	// coerce the list into a sortable
 temp_solns+=p_solns;				// format, and automatically number id's
@@ -453,9 +496,9 @@ delete pick;
 
 // how: 0-default,1-saved,2-query
 
-BehavProfileT EfgShow::CreateStartProfile(int how)
+BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
 {
-BehavSolutionT start((Efg &) ef, *cur_sup);
+BehavSolution start(BehavProfile<gNumber>(ef, *cur_sup));
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {

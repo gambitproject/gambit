@@ -6,7 +6,6 @@
 #include "gslist.h"
 #include "behavsol.h"
 
-typedef BehavSolution<gNumber> BehavSolutionT;
 // Sorting and filtering options
 class BSolnSortFilterOptions
 {
@@ -38,17 +37,17 @@ public:
 };
 
 // Implement sorting and filtering
-class BSolnSorterFilter:public gListSorter<BehavSolutionT>,
-												public gListFilter<BehavSolutionT>
+class BSolnSorterFilter:public gListSorter<BehavSolution>,
+												public gListFilter<BehavSolution>
 {
 private:
 	BSolnSortFilterOptions &options;
 protected:
 	// Overload the comparison functions
-	bool Passes(const BehavSolutionT &a) const;
-	CompareResult Compare(const BehavSolutionT &a,const BehavSolutionT &b) const;
+	bool Passes(const BehavSolution &a) const;
+	CompareResult Compare(const BehavSolution &a,const BehavSolution &b) const;
 public:
-	BSolnSorterFilter(gSortList<BehavSolutionT> &solns,BSolnSortFilterOptions &options_);
+	BSolnSorterFilter(gSortList<BehavSolution> &solns,BSolnSortFilterOptions &options_);
 };
 
 #define		BSOLN_SHOW_SECT	"Behav-Soln-Show"

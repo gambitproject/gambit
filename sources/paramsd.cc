@@ -29,6 +29,7 @@ public:
                     ParametrizedGame *game);
    void OnSelectedMoved(int row,int col,SpreadMoveDir how=SpreadMoveJump);
    void OnOk(void);
+   Bool OnClose(void);
 };
 
 ParameterDialogC::ParameterDialogC(gSpace *space_,ParameterSetList &params_,
@@ -49,14 +50,16 @@ MakeButtons(OK_BUTTON|PRINT_BUTTON|OPTIONS_BUTTON|HELP_BUTTON);
 SetLabelCol(1,"Name");SetLabelCol(2,"Value");
 DrawSettings()->SetLabels(S_LABEL_COL);
 DrawSettings()->SetColWidth(10,1);
-DrawSettings()->SetColWidth(5,2);
+DrawSettings()->SetColWidth(8,2);
+set_set_item->SetSelection(cur_set-1);
 
 for (int i=1;i<=space->Dmnsn();i++)
 	{SetCell(i,1,space->GetVariableName(i));Bold(i,1,1,TRUE);}
-SetCurCol(2);
-set_set_item->SetSelection(cur_set-1);
 UpdateVals();
+SetCurCol(2);
 Redraw();
+Show(TRUE);
+CanvasFocus();
 }
 
 void ParameterDialogC::UpdateVals(void)
@@ -64,13 +67,20 @@ void ParameterDialogC::UpdateVals(void)
 for (int i=1;i<=space->Dmnsn();i++) SetCell(i,2,ToString(params[cur_set][i]));
 Repaint();
 }
-
+#define UPDATE1_DIALOG	4
+#define PARAMS_ADD_VAR	5
 void ParameterDialogC::CheckVals(void)
 {
 gNumber tmp;
+bool changed=false;
 for (int i=1;i<=space->Dmnsn();i++)
-	params[cur_set][i]=FromString(GetCell(i,2),tmp);
-cur_set=set_set_item->GetSelection()+1;
+{
+	tmp=FromString(GetCell(i,2),tmp);
+   if (params[cur_set][i]!=tmp) {params[cur_set][i]=tmp;changed=true;}
+}
+if (cur_set!=set_set_item->GetSelection()+1)
+	{cur_set=set_set_item->GetSelection()+1;changed=true;}
+if (changed) game->ChangeParameters(UPDATE1_DIALOG);
 }
 
 void ParameterDialogC::OnSetSet(void)
@@ -90,22 +100,19 @@ if (s)
    set_set_item->Append(s);
    set_set_item->SetSize(-1,-1,-1,-1);
    set_set_item->SetSelection(i-1);
-   cur_set=i;
-   UpdateVals();
+   OnSetSet();
 }
 CanvasFocus();
 }
 
 void ParameterDialogC::OnAddVar(void)
 {
-gString new_name="Var "+ToString(space->Dmnsn()+1);
+gString new_name=(char)('a'+('x'-'a'+space->Dmnsn())%('z'-'a'+1));
 char *s=wxGetTextFromUser("New Variable Name","Variable",new_name,this);
 if (s)
 {
-	for (int i=1;i<=params.Length();i++) params[i].Append(0);
-   space->CreateVariables();
+   game->ChangeParameters(PARAMS_ADD_VAR);
    space->SetVariableName(space->Dmnsn(),s);
-   game->UpdateSpace();
    AddRow();
 	SetCell(space->Dmnsn(),1,s);Bold(space->Dmnsn(),1,1,TRUE);
    Redraw();
@@ -116,12 +123,20 @@ CanvasFocus();
 void ParameterDialogC::OnSelectedMoved(int row,int col,SpreadMoveDir how)
 {
 if (col==1) SetCurCol(2);
+CheckVals();
 }
 
 void ParameterDialogC::OnOk(void)
 {
 CheckVals();
 SpreadSheet3D::OnOk();
+game->ChangeParameters(DESTROY_DIALOG);
+}
+
+Bool ParameterDialogC::OnClose(void)
+{
+OnOk();
+return FALSE;
 }
 
 void ParameterDialogC::add_var_func(wxButton &ob,wxEvent &)
@@ -131,32 +146,23 @@ void ParameterDialogC::add_set_func(wxButton &ob,wxEvent &)
 void ParameterDialogC::set_set_func(wxChoice &ob,wxEvent &)
 {((ParameterDialogC *)ob.GetClientData())->OnSetSet();}
 
-ParameterDialog::ParameterDialog(gSpace *space,ParameterSetList &params,
-                                 wxFrame *parent,ParametrizedGame *game)
+ParameterDialog::ParameterDialog(gSpace *space,ParametrizedGame *game,wxFrame *parent)
 {
 d=0;
 if (space->Dmnsn()==0)
 {
 	wxMessageBox("The parameter space is empty.\nNo parameters have been defined.\nPlease create the first parameter now.\n");
-	gString new_name="Var "+ToString(space->Dmnsn()+1);
+	gString new_name='x';
 	char *s=wxGetTextFromUser("New Variable Name","Variable",new_name,parent);
 	if (s)
 	{
-	   space->CreateVariables();
+      game->ChangeParameters(PARAMS_ADD_VAR);
 	   space->SetVariableName(space->Dmnsn(),s);
-      game->UpdateSpace();
-		for (int i=1;i<=params.Length();i++) params[i].Append(0);
    }
 }
 if (space->Dmnsn()>0)
-{
-	d=new ParameterDialogC(space,params,parent,game);
-	d->Show(TRUE);
+	d=new ParameterDialogC(space,game->Parameters(),parent,game);
 }
-}
-
-int ParameterDialog::Completed(void)
-{return (d) ? d->Completed() : wxOK;}
 
 ParameterDialog::~ParameterDialog()
 {d->Show(FALSE); delete d;}

@@ -164,12 +164,12 @@ public:
 class BehavSolnEdit : public SpreadSheet3D
 {
 private:
-	BehavSolutionT &soln;
+	BehavSolution &soln;
 	gPVector<int> dim;
 	int	num_isets;
 public:
 	// Constructor
-	BehavSolnEdit(BehavSolutionT &soln,int iset_disp,wxFrame *parent);
+	BehavSolnEdit(BehavSolution &soln,int iset_disp,wxFrame *parent);
 	void OnSelectedMoved(int row,int col,SpreadMoveDir how);
 	void OnOk(void);
 };

@@ -1,6 +1,8 @@
 // File: spread.cc -- Defines a 3 dimensional spreadsheet/table control.  Used
 // extensively in gambit.
 // $Id$
+//
+
 #include <stdio.h>
 #include "wx.h"
 #include "wx_mf.h"
@@ -200,7 +202,7 @@ else
 // need to update these values every time the font changes
 void SpreadSheetDrawSettings::UpdateFontSize(float x,float y)
 {
-if (x<0 && y<0) parent->GetDataExtent(&x,&y);
+if (x<0 && y<0) {parent->GetDataExtent(&x,&y,"A quick greW");x/=12;}
 tw=(int)x;th=(int)y;
 }
 
@@ -254,8 +256,8 @@ draw_settings=top_frame->DrawSettings();
 data_settings=top_frame->DataSettings();
 // Make sure that draw_settings knows about the current font size
 float tw,th;
-GetDataExtent(&tw,&th);
-draw_settings->UpdateFontSize(tw,th);
+GetDataExtent(&tw,&th,"A quick greW");
+draw_settings->UpdateFontSize(tw/12,th);
 // Allow double clicking on canvas
 AllowDoubleClick(TRUE);
 // Give myself some scrollbars if necessary
@@ -282,7 +284,7 @@ return temp;
 Bool SpreadSheetC::XYtoRowCol(int x,int y,int *row,int *col)
 {
 if (x<MaxX(0) || y<MaxY(0) || x>MaxX() || y>MaxY())
-	{*row=-1;*col=-1; return FALSE;}
+	{/**row=-1;*col=-1; */return FALSE;}
 *row=(y-draw_settings->YStart())/draw_settings->GetRowHeight()+1;
 *col=0;int i=1;
 while (*col==0 && i<=sheet->GetCols())

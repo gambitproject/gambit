@@ -7,7 +7,6 @@
 #include "mixedsol.h"
 #include "gnumber.h"
 // Sorting and filtering options
-typedef MixedSolution<gNumber> MixedSolutionT;
 class MSolnSortFilterOptions
 {
 private:
@@ -38,17 +37,17 @@ public:
 };
 
 // Implement sorting and filtering
-class MSolnSorterFilter:public gListSorter<MixedSolutionT>,
-												public gListFilter<MixedSolutionT>
+class MSolnSorterFilter:public gListSorter<MixedSolution>,
+												public gListFilter<MixedSolution>
 {
 private:
 	MSolnSortFilterOptions &options;
 protected:
 	// Overload the comparison functions
-	bool Passes(const MixedSolutionT &a) const;
-	CompareResult Compare(const MixedSolutionT &a,const MixedSolutionT &b) const;
+	bool Passes(const MixedSolution &a) const;
+	CompareResult Compare(const MixedSolution &a,const MixedSolution &b) const;
 public:
-	MSolnSorterFilter(gSortList<MixedSolutionT> &solns,MSolnSortFilterOptions &options_);
+	MSolnSorterFilter(gSortList<MixedSolution> &solns,MSolnSortFilterOptions &options_);
 };
 
 #define		MSOLN_SHOW_SECT	"Mixed-Soln-Show"

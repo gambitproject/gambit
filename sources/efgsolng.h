@@ -5,15 +5,12 @@
 #ifndef EFGSOLNG_H
 #define EFGSOLNG_H
 #include "behavsol.h"
-typedef BehavSolution<gNumber> BehavSolutionT;
-typedef BehavProfile<gNumber> BehavProfileT;
-
 // An interface class between ExtensiveSolutionG (and related) and ExtensiveShow
 class EfgShowInterface
 {
 public:
-	virtual void PickSolutions(const Efg &,gList<BehavSolutionT > &) = 0;
-	virtual BehavProfileT CreateStartProfile(int how) = 0;
+	virtual void PickSolutions(const Efg &,gList<BehavSolution> &) = 0;
+	virtual BehavProfile<gNumber> CreateStartProfile(int how) = 0;
 	virtual void SetPickSubgame(const Node *n) = 0;
 	virtual const gString &Filename(void) const = 0;
 	virtual wxFrame *Frame(void) = 0;
@@ -27,7 +24,7 @@ protected:
 	EfgShowInterface *parent;
 public:
 	ExtensiveSolutionG(const Efg &E,const EFSupport &S,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const = 0;
+	virtual gList<BehavSolution> Solve(void) const = 0;
 	virtual void SolveSetup(void) const = 0;
 };
 
@@ -36,7 +33,7 @@ class EFLiapG : public ExtensiveSolutionG
 {
 public:
 	EFLiapG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -45,7 +42,7 @@ class NFLiapG : public ExtensiveSolutionG
 {
 public:
 	NFLiapG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -54,7 +51,7 @@ class SeqFormG : public ExtensiveSolutionG
 {
 public:
 	SeqFormG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -63,7 +60,7 @@ class LemkeG : public ExtensiveSolutionG
 {
 public:
 	LemkeG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -72,7 +69,7 @@ class PureNashG : public ExtensiveSolutionG
 {
 public:
 	PureNashG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 // Efg Pure Nash
@@ -80,7 +77,7 @@ class EPureNashG : public ExtensiveSolutionG
 {
 public:
 	EPureNashG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -89,7 +86,7 @@ class EnumG : public ExtensiveSolutionG
 {
 public:
 	EnumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -98,7 +95,7 @@ class ZSumG : public ExtensiveSolutionG
 {
 public:
 	ZSumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -107,7 +104,7 @@ class EfgCSumG : public ExtensiveSolutionG
 {
 public:
 	EfgCSumG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -116,7 +113,7 @@ class SimpdivG : public ExtensiveSolutionG
 {
 public:
 	SimpdivG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -125,7 +122,7 @@ class GobitAllG : public ExtensiveSolutionG
 {
 public:
 	GobitAllG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -134,7 +131,7 @@ class NGobitG : public ExtensiveSolutionG
 {
 public:
 	NGobitG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 
@@ -143,7 +140,7 @@ class EGobitG : public ExtensiveSolutionG
 {
 public:
 	EGobitG(const Efg &E,const EFSupport &sup,EfgShowInterface *parent);
-	virtual gList<BehavSolutionT > Solve(void) const;
+	virtual gList<BehavSolution> Solve(void) const;
 	virtual void SolveSetup(void) const;
 };
 

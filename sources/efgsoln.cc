@@ -10,7 +10,6 @@
 #include "garray.h"
 #include "rational.h"
 #include "gmisc.h"
-#pragma hdrstop
 #include "efgsoln.h"
 #include "treedraw.h"
 #include "treewin.h"
@@ -596,7 +595,7 @@ gString tmp_str;
 int cur_pos=2;
 for (int i=1;i<=num_solutions;i++)
 {
-	const BehavSolutionT &cur=solns[i];
+	const BehavSolution &cur=solns[i];
 		SetCell(cur_pos,FeaturePos(BSOLN_ID),ToString((int)cur.Id()));
 	if (features[BSOLN_CREATOR])
 		SetCell(cur_pos,FeaturePos(BSOLN_CREATOR),NameEfgAlgType(cur.Creator()));
@@ -749,7 +748,7 @@ if (features[BSOLN_DYNAMIC] && parent) UpdateSoln(row,col);
 
 
 void EfgSolnShow::OnOk(void)
-{Show(FALSE);if (parent) parent->SolnShowDied();delete this;}
+{Show(FALSE);if (parent) parent->InspectSolutions(DESTROY_DIALOG);delete this;}
 
 // On Sort Filter
 
@@ -770,7 +769,7 @@ else
 if (completed==wxOK)
 {
 int old_num_sol=num_solutions;  // current state
-const BehavSolutionT *cur_solnp=0;
+const BehavSolution *cur_solnp=0;
 if (cur_soln) cur_solnp=&solns[cur_soln];
 BSolnSorterFilter SF(solns,sf_options);
 int new_num_sol=solns.VisLength();	// new state
@@ -829,7 +828,7 @@ Redraw();
 
 void EfgSolnShow::OnAdd(void)
 {
-BehavSolutionT temp_soln(parent->CreateSolution());
+BehavSolution temp_soln(parent->CreateSolution());
 BehavSolnEdit *add_dialog=new BehavSolnEdit(temp_soln,parent->tw->DrawSettings().LabelNodeBelow(),this);
 Enable(FALSE);	// disable this window until the edit window is closed
 while (add_dialog->Completed()==wxRUNNING) wxYield();
@@ -852,7 +851,7 @@ int row=CurRow();
 if (row==1) {wxMessageBox("Edit what?");return;}
 int soln_num=SolnNum(row);
 
-BehavSolutionT temp_soln=solns[soln_num];
+BehavSolution temp_soln=solns[soln_num];
 BehavSolnEdit *add_dialog=new BehavSolnEdit(temp_soln,parent->tw->DrawSettings().LabelNodeBelow(),this);
 Enable(FALSE);	// disable this window until the edit window is closed
 while (add_dialog->Completed()==wxRUNNING) wxYield();
@@ -896,7 +895,7 @@ void EfgSolnShow::delete_all_button(wxButton &ob,wxEvent &)
 *****************************************************************************/
 // Constructor
 
-BehavSolnEdit::BehavSolnEdit(BehavSolutionT &soln_,
+BehavSolnEdit::BehavSolnEdit(BehavSolution &soln_,
 				int iset_disp, wxFrame *parent)
   : SpreadSheet3D(NumIsets(soln_.Game())+1,
   		  gmax(soln_.Support().NumActions())+2,

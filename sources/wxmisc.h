@@ -3,7 +3,7 @@
 // Right now its a dialog box with a built in form, a font selector, and
 // a wxListFindString function... More to come
 //
-// @(#)wxmisc.h	1.1 6/6/94
+// $Id$
 //
 
 #ifndef WXMISC_H
@@ -147,12 +147,16 @@ Bool	IsDelete(wxKeyEvent &ev);
 // Besides providing the same features, it also supports imbedded codes
 // to change the color of the output text.  The codes have the format
 // of: "text[/C{#}]", where # is the number of the color to select
-// from the gambit_color_list.  Note: uses gString
+// from the gambit_color_list.  Also allows sup/superscripts
+// Note: uses gString
 #include "gstring.h"
 void gDrawText(wxDC &dc,const gString &s,float x,float y);
+// Calculates the size of the string when parsed as gDrawText
+gGetTextExtent(wxDC &dc,const gString &s0, float *x, float *y);
 // Returns just the text portion of a gDrawText formated string
 gString gPlainText(const gString &s);
-
+gString gGetTextLine(const gString &s0="",wxFrame *parent=0,int x=-1,int y=-1,
+                     const char *title="",bool titlebar=false);
 // FindFile: finds the specified file in the path.  User deletes the
 // result
 char *wxFindFile(const char *name);
@@ -166,4 +170,10 @@ void wxInitHelp(const char *file_name,const char *help_about_str=0);
 void wxHelpContents(const char *name);
 void wxHelpAbout(const char *help_str=0);
 void wxKillHelp(void);
+
+
+#define	CREATE_DIALOG		0
+#define	DESTROY_DIALOG		1
+#define	UPDATE_DIALOG		2
+
 #endif //WXMISC_H

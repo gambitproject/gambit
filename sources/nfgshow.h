@@ -11,7 +11,7 @@
 #include "wxmisc.h"
 
 #include "spread.h"
-#include "normdraw.h"
+#include "nfgdraw.h"
 #include "accels.h"
 
 #include "gmisc.h"
@@ -29,8 +29,6 @@ class NfgSolnShow;
 class NormalSpread;
 class NFSupportInspectDialog;
 class NfgOutcomeDialog;
-typedef MixedProfile<gNumber> MixedProfileT;
-typedef MixedSolution<gNumber>  MixedSolutionT;
 
 template <class T> class SolutionList: public gSortList<T>
 {
@@ -42,7 +40,7 @@ public:
 	virtual int Append(const T &a)
 	{(*this)[gSortList<T>::Append(a)].SetId(max_id++);return Length();}
 };
-typedef SolutionList<MixedSolutionT> MixedSolutionList;
+typedef SolutionList<MixedSolution> MixedSolutionList;
 
 class NfgShow: public EfgNfgInterface, public ParametrizedGame
 {
@@ -59,6 +57,7 @@ private:
 	} starting_points;
 	int cur_soln;
    ParameterSetList param_sets;
+   ParameterDialog *params_dialog;
  // we can display NF for one support, while working on a different support
  // disp_sup always corresponds to the support currently displayed.  cur_sup
  // corresponds to the support that will be operated upon by solution algs.
@@ -99,15 +98,14 @@ public:
 	void Save(void);
 	// Supports and domination
 	int SolveElimDom(void);
-	void SupportInspect(int what=0);
+	void ChangeSupport(int what);
 	NFSupport *MakeSupport(void);
 	void	DominanceSetup(void);
 	// Outcomes
 	void SetOutcome(int outc,int x=-1, int y=-1);
-	void EditOutcomes(void);
-	void OutcomeDialogDied(void);
+	void ChangeOutcomes(int what);
 	void OutcomeOptions(void) {draw_settings.OutcomeOptions();UpdateVals();}
-   void SetParameters(void);
+   void ChangeParameters(int what);
 
    void UpdateVals(void);
 	void UpdateProfile(gArray<int> &profile);
@@ -116,31 +114,29 @@ public:
 	// Now come the solution functions
 	void Solve(void);
 	void SolveSetup(int what);
-	void InspectSolutions(void);
+	void InspectSolutions(int what);
 	void ClearSolutions(void);
 	void RemoveSolutions(void);
-	MixedSolutionT CreateSolution(void);
+	MixedSolution CreateSolution(void);
 	void ChangeSolution(int sol);
 	MixedProfile<gNumber> CreateStartProfile(int how);
 	// Project solutions to EF.
-	void SolutionToExtensive(const MixedSolutionT &mp,bool set=false);
+	void SolutionToExtensive(const MixedSolution &mp,bool set=false);
 
    //
   	bool	 SolveLiap(const NFSupport *sup);
 	//
 
-	virtual void UpdateSpace(void);
 	void ChangePayoffs(int st1,int st2,bool next=false);
 	// Filename support
 	void SetFileName(const gString &s);
 	gString GetFileName(void) const;
-	// Allows a child SolnShow to inform me of its death
-	void SolnShowDied(void);
 	// Display some inherent game properties
 	void ShowGameInfo(void);
    // Process Accelerator Keys
 	void EditAccelerators(void);
 	int  CheckAccelerators(wxKeyEvent &ev);
+   ParameterSetList &Parameters(void);
 };
 
 class NormalSpread : public SpreadSheet3D

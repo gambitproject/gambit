@@ -56,8 +56,8 @@ const gArray<bool> &BSolnSortFilterOptions::FilterSeq(void) const {return filter
 ****************************************************************************/
 // Constructor
 
-BSolnSorterFilter::BSolnSorterFilter(gSortList<BehavSolutionT>  &solns,BSolnSortFilterOptions &options_):
-	gListSorter<BehavSolutionT>(solns),gListFilter<BehavSolutionT> (solns),
+BSolnSorterFilter::BSolnSorterFilter(gSortList<BehavSolution>  &solns,BSolnSortFilterOptions &options_):
+	gListSorter<BehavSolution>(solns),gListFilter<BehavSolution> (solns),
 	options(options_)
 {
 Filter();
@@ -66,10 +66,10 @@ Sort();
 
 // Filtering function
 
-bool BSolnSorterFilter::Passes(const BehavSolutionT &a_) const
+bool BSolnSorterFilter::Passes(const BehavSolution &a_) const
 {
 // casting away CONST @@
-BehavSolutionT &a=(BehavSolutionT &)a_;
+BehavSolution &a=(BehavSolution &)a_;
 
 int i;
 for (i=1;i<=NUM_BCREATORS;i++)
@@ -89,11 +89,11 @@ return true;
 
 // Sorting function
 
-CompareResult BSolnSorterFilter::Compare(const BehavSolutionT &a_,const BehavSolutionT &b_) const
+CompareResult BSolnSorterFilter::Compare(const BehavSolution &a_,const BehavSolution &b_) const
 {
 // casting away CONST @@
-BehavSolutionT &a=(BehavSolutionT &)a_;
-BehavSolutionT &b=(BehavSolutionT &)b_;
+BehavSolution &a=(BehavSolution &)a_;
+BehavSolution &b=(BehavSolution &)b_;
 
 switch (options.SortBy())
 {
@@ -160,7 +160,7 @@ return Equal;
 
 #include "rational.h"
 #include "gslist.imp"
-template class gSortList<BehavSolutionT>;
-template class gListSorter<BehavSolutionT>;
-template class gListFilter<BehavSolutionT>;
+template class gSortList<BehavSolution>;
+template class gListSorter<BehavSolution>;
+template class gListFilter<BehavSolution>;
 

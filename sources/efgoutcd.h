@@ -3,15 +3,17 @@
 #ifndef EFGOUTCD_H
 #define EFGOUTCD_H
 class EfgOutcomeDialogC;
+#include "paramsd.h"
 class EfgOutcomeDialog
 {
 protected:
 	EfgOutcomeDialogC *d;
-	TreeWindow *tw;
+	EfgShow *es;
 public:
-	EfgOutcomeDialog(Efg &ef,TreeWindow *tw);
+	EfgOutcomeDialog(Efg &ef,EfgShow *es);
 	~EfgOutcomeDialog();
 	void SetOutcome(const gString &outc_name);
+   void UpdateVals(void);
 	void OnOk(void);
 };
 

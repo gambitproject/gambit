@@ -15,7 +15,6 @@
 #define		MSOLN_O_SORTFILT	4
 #define		MSOLN_O_EFGNFG		16
 
-typedef MixedSolution<gNumber> MixedSolutionT;
 class NfgShow;
 class NfgSolnShow: public SpreadSheet3D
 {
@@ -29,7 +28,7 @@ private:
 	static void sortfilt_button(wxButton &ob,wxEvent &ev);
 protected:
 	NfgShow *parent;
-	gSortList<MixedSolutionT> &solns;
+	gSortList<MixedSolution> &solns;
 	int 	num_players,cur_soln,num_solutions;
 	NormalDrawSettings	&norm_draw_settings;
 	gBlock<Bool> features;
@@ -47,7 +46,7 @@ protected:
 	virtual void	SortFilter(bool inter=true);
 	virtual void	SetOptions(void);
 public:
-	NfgSolnShow(gSortList<MixedSolutionT> &soln,int num_players,int max_strats,
+	NfgSolnShow(gSortList<MixedSolution> &soln,int num_players,int max_strats,
 						int cur_soln_,NormalDrawSettings	&ds,
 						MSolnSortFilterOptions &sf_options,
 						NfgShow *parent_=0,wxFrame *parent_frame=0,
@@ -78,7 +77,7 @@ private:
 protected:
 	virtual void OnRemove(bool all);
 public:
-	Nfg1SolnPicker(gSortList<MixedSolutionT> &soln,int num_players,int max_strats,
+	Nfg1SolnPicker(gSortList<MixedSolution> &soln,int num_players,int max_strats,
 						int cur_soln_,NormalDrawSettings	&ds,
 						MSolnSortFilterOptions &sf_options,
 						NfgShow *parent_=0,wxFrame *parent_frame=0);

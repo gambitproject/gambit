@@ -78,7 +78,7 @@ switch (dpls->what_font)
 	case NODE_RIGHT_LEGEND: f=new FontDialogBox((wxWindow *)ob.GetParent(),dpls->draw_settings->NodeRightFont());break;
 }
 
-if (f->Completed())
+if (f->Completed()==wxOK)
 {
 	wxFont *the_font=f->MakeFont();
 	switch (dpls->what_font)
