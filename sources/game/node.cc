@@ -60,6 +60,10 @@ void gbt_efg_node_rep::DeleteOutcome(gbt_efg_outcome_rep *p_outcome)
 
 gbt_efg_node_rep *gbt_efg_node_rep::GetNextSibling(void)
 {
+  if (!m_parent) {
+    return 0;
+  }
+
   int childNumber = m_parent->m_children.Find(this);
   if (childNumber == m_parent->m_children.Length()) {
     return 0;
@@ -71,6 +75,10 @@ gbt_efg_node_rep *gbt_efg_node_rep::GetNextSibling(void)
 
 gbt_efg_node_rep *gbt_efg_node_rep::GetPriorSibling(void)
 {
+  if (!m_parent) {
+    return 0;
+  }
+
   int childNumber = m_parent->m_children.Find(this);
   if (childNumber == 1) {
     return 0;
