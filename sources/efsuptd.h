@@ -12,19 +12,17 @@ class EFSupportInspectDialog : public wxDialogBox {
 private:
   EfgShow *es;
   gList<EFSupport *> &sups;
-  int init_disp,init_cur;
-  wxText *cur_dim,*disp_dim;
-  wxChoice *disp_item,*cur_item;
+  int init_cur;
+  wxText *cur_dim;
+  wxChoice *cur_item;
   wxCheckBox *root_item;
-  char *cur_str,*disp_str;
+  char *cur_str;
   wxStringList *support_list;
   Bool root_reachable;
 
   // Low level event handlers
   static void cur_func(wxChoice &ob,wxEvent &)
     {((EFSupportInspectDialog *)ob.GetClientData())->OnCur(ob.GetSelection()+1);}
-  static void disp_func(wxChoice &ob,wxEvent &)
-    {((EFSupportInspectDialog *)ob.GetClientData())->OnDisp(ob.GetSelection()+1);}
   static void new_sup_func(wxButton &ob,wxEvent &)
     {((EFSupportInspectDialog *)ob.GetClientData())->OnNewSupport();}
   static void change_sup_func(wxButton &ob,wxEvent &)
@@ -41,20 +39,18 @@ private:
   void OnRemoveSupport(void);
   void OnChangeSupport(void);
   void OnCur(int cur_sup);
-  void OnDisp(int disp_sup);
 
 // Utility funcs
   static gText gpvect_to_string(const gPVector<int> &);
 
 public:
   EFSupportInspectDialog(gList<EFSupport *> &sups_, int cur_sup,
-			 int disp_sup, EfgShow *es_, wxWindow *parent = 0);
+			 EfgShow *es_, wxWindow *parent = 0);
 
   Bool OnClose(void);
 
   // Data Access members
   int CurSup(void) { return (cur_item->GetSelection() + 1); }
-  int DispSup(void) { return (disp_item->GetSelection() + 1); }
   Bool RootReachable(void) { return root_item->GetValue(); }
 };
 

@@ -1323,7 +1323,7 @@ void EfgShow::ChangeSupport(int what)
   if (what == CREATE_DIALOG) {
     if (!support_dialog) {
       int cur = supports.Find(cur_sup);
-      support_dialog = new EFSupportInspectDialog(supports, cur, cur, this);
+      support_dialog = new EFSupportInspectDialog(supports, cur, this);
     }
     else
       support_dialog->SetFocus();
