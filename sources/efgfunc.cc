@@ -1,7 +1,7 @@
 //
 // FILE: efgfunc.cc -- Extensive form editing builtins
 //
-// $Id$
+// @(#)efgfunc.cc	2.28 02/11/98
 //
 
 
