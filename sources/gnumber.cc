@@ -517,8 +517,10 @@ gNumber operator / (const gNumber& x, const gNumber& y)
   {
     if (y.rep == precDOUBLE)
     {
-      double temp = y.dval;
-      temp /= double(*(x.rval));
+//      double temp = y.dval;
+//      temp /= double(*(x.rval));
+      double temp = double(*(x.rval));
+      temp /= y.dval;
       gNumber r(temp);
       return r;
     }
