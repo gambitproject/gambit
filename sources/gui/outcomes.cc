@@ -168,7 +168,7 @@ gbtOutcomeWindow::gbtOutcomeWindow(gbtGameDocument *p_doc,
   EnableEditing(true);
   SetSelectionMode(wxGridSelectRows);
   SetLabelSize(wxVERTICAL, 0);
-  SetLabelValue(wxHORIZONTAL, "Name", 0);
+  SetLabelValue(wxHORIZONTAL, _("Name"), 0);
   EnableDragRowSize(false);
   EnableGridLines(false);
 
@@ -199,10 +199,12 @@ void gbtOutcomeWindow::OnUpdate(void)
     for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
       gbtEfgOutcome outcome = efg.GetOutcome(outc);
 
-      SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
+      SetCellValue(wxString::Format(wxT("%s"), (char *) outcome.GetLabel()),
+		   outc - 1, 0);
 
       for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-	SetCellValue((char *) ToText(outcome.GetPayoff(efg.GetPlayer(pl))),
+	SetCellValue(wxString::Format(wxT("%s"),
+				      (char *) ToText(outcome.GetPayoff(efg.GetPlayer(pl)))),
 		     outc - 1, pl);
 	SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
 			  outc - 1, pl);
@@ -220,10 +222,14 @@ void gbtOutcomeWindow::OnUpdate(void)
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
       if (efg.GetPlayer(pl).GetLabel() != "") {
-	SetLabelValue(wxHORIZONTAL, (char *) efg.GetPlayer(pl).GetLabel(), pl);
+	SetLabelValue(wxHORIZONTAL,
+		      wxString::Format(wxT("%s"),
+				       (char *) efg.GetPlayer(pl).GetLabel()),
+		      pl);
       }
       else {
-	SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);
+	SetLabelValue(wxHORIZONTAL,
+		      wxString::Format(_("Player %d"), pl), pl);
       }
     }
   }
@@ -244,10 +250,12 @@ void gbtOutcomeWindow::OnUpdate(void)
     for (int outc = 1; outc <= nfg.NumOutcomes(); outc++) {
       gbtNfgOutcome outcome = nfg.GetOutcome(outc);
 
-      SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
+      SetCellValue(wxString::Format(wxT("%s"),
+				    (char *) outcome.GetLabel()), outc - 1, 0);
 
       for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-	SetCellValue((char *) ToText(outcome.GetPayoff(nfg.GetPlayer(pl))),
+	SetCellValue(wxString::Format(wxT("%s"),
+				      (char *) ToText(outcome.GetPayoff(nfg.GetPlayer(pl)))),
 		     outc - 1, pl);
 	SetCellTextColour(m_doc->GetPreferences().PlayerColor(pl),
 			  outc - 1, pl);
@@ -265,10 +273,13 @@ void gbtOutcomeWindow::OnUpdate(void)
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
       if (nfg.GetPlayer(pl).GetLabel() != "") {
-	SetLabelValue(wxHORIZONTAL, (char *) nfg.GetPlayer(pl).GetLabel(), pl);
+	SetLabelValue(wxHORIZONTAL,
+		      wxString::Format(wxT("%s"),
+				       (char *) nfg.GetPlayer(pl).GetLabel()),
+		      pl);
       }
       else {
-	SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);
+	SetLabelValue(wxHORIZONTAL, wxString::Format(_("Player %d"), pl), pl);
       }
     }
   }
@@ -303,24 +314,24 @@ void gbtOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
     gbtEfgOutcome outcome = m_doc->GetEfg().GetOutcome(row+1);
     if (col == 0) { 
       // Edited cell label
-      outcome.SetLabel(GetCellValue(row, col).c_str());
+      outcome.SetLabel(gText(GetCellValue(row, col).mb_str()));
     }
     else {
       // Edited payoff
       outcome.SetPayoff(m_doc->GetEfg().GetPlayer(col),
-			ToNumber(GetCellValue(row, col).c_str()));
+			ToNumber(gText(GetCellValue(row, col).mb_str())));
     }
   }
   else {
     gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(row+1);
     if (col == 0) { 
       // Edited cell label
-      outcome.SetLabel(GetCellValue(row, col).c_str());
+      outcome.SetLabel(gText(GetCellValue(row, col).mb_str()));
     }
     else {
       // Edited payoff
       outcome.SetPayoff(m_doc->GetNfg().GetPlayer(col),
-			ToNumber(GetCellValue(row, col).c_str()));
+			ToNumber(gText(GetCellValue(row, col).mb_str())));
     }
   }
 }
@@ -339,34 +350,34 @@ BEGIN_EVENT_TABLE(gbtOutcomeFrame, wxFrame)
 END_EVENT_TABLE()
 
 gbtOutcomeFrame::gbtOutcomeFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 200)),
     gbtGameView(p_doc)
 {
   m_grid = new gbtOutcomeWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(GBT_MENU_OUTCOMES_NEW, "New",
-		   "Create a new outcome");
-  editMenu->Append(GBT_MENU_OUTCOMES_DELETE, "Delete",
-		   "Delete this outcome");
+  editMenu->Append(GBT_MENU_OUTCOMES_NEW, _("New"),
+		   _("Create a new outcome"));
+  editMenu->Append(GBT_MENU_OUTCOMES_DELETE, _("Delete"),
+		   _("Delete this outcome"));
   editMenu->AppendSeparator();
-  editMenu->Append(GBT_MENU_OUTCOMES_ATTACH, "Attach",
-		   "Attach this outcome at the cursor");
-  editMenu->Append(GBT_MENU_OUTCOMES_DETACH, "Detach",
-		   "Detach the outcome at the cursor");
+  editMenu->Append(GBT_MENU_OUTCOMES_ATTACH, _("Attach"),
+		   _("Attach this outcome at the cursor"));
+  editMenu->Append(GBT_MENU_OUTCOMES_DETACH, _("Detach"),
+		   _("Detach the outcome at the cursor"));
 
   wxMenu *viewMenu = new wxMenu;
 
   wxMenu *formatMenu = new wxMenu;
 
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   SetMenuBar(menuBar);
 
   Show(false);
@@ -391,13 +402,13 @@ void gbtOutcomeFrame::OnUpdate(gbtGameView *p_sender)
     m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
     m_grid->SetScrollRate(0, 0);
 
-    if (m_doc->GetFilename() != "") {
-      SetTitle(wxString::Format("Gambit - Outcomes: [%s] %s", 
-				m_doc->GetFilename().c_str(), 
+    if (m_doc->GetFilename() != wxT("")) {
+      SetTitle(wxString::Format(_("Gambit - Outcomes: [%s] %s"), 
+				(const char *) m_doc->GetFilename().mb_str(), 
 				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
-      SetTitle(wxString::Format("Gambit - Outcomes: %s",
+      SetTitle(wxString::Format(_("Gambit - Outcomes: %s"),
 				(char *) m_doc->GetNfg().GetLabel()));
     }
   }

@@ -58,10 +58,10 @@ widgetStrategyTree::widgetStrategyTree(NfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idSTRATEGYTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
-  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, "Duplicate support",
-		 "Duplicate this support");
-  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, "Delete support",
-		 "Delete this support");
+  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, _("Duplicate support"),
+		 _("Duplicate this support"));
+  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, _("Delete support"),
+		 _("Delete this support"));
 }
 
 void widgetStrategyTree::OnRightClick(wxTreeEvent &p_event)
@@ -111,9 +111,9 @@ NfgSupportWindow::NfgSupportWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
   m_supportList = new wxChoice(this, idSUPPORTLISTCHOICE,
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0);
-  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, "<-",
+  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, wxT("<-"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
+  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, wxT("->"),
 			      wxDefaultPosition, wxSize(30, 30));
   m_strategyTree = new widgetStrategyTree(this);
 
@@ -142,8 +142,8 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
   const gList<gbtNfgSupport *> &supports = m_doc->AllNfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
-    m_supportList->Append((char *)
-			  (ToText(i) + ": " + supports[i]->GetLabel()));
+    m_supportList->Append(wxString::Format(wxT("%d: %s"), i,
+					   (char *) supports[i]->GetLabel()));
   }
 
   int supportIndex = m_doc->GetNfgSupportIndex();
@@ -153,18 +153,20 @@ void NfgSupportWindow::OnUpdate(gbtGameView *)
 
   m_strategyTree->DeleteAllItems();
 
-  m_strategyTree->AddRoot((char *) m_doc->GetNfgSupport().GetLabel());
+  m_strategyTree->AddRoot(wxString::Format(wxT("%s"),
+					   (char *) m_doc->GetNfgSupport().GetLabel()));
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 
     wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
-					       (char *) player.GetLabel());
+						 wxString::Format(wxT("%s"),
+								  (char *) player.GetLabel()));
     
     for (int st = 1; st <= m_doc->GetNfg().NumStrats(pl); st++) {
       gbtNfgStrategy strategy = m_doc->GetNfg().GetPlayer(pl).GetStrategy(st);
 
       wxTreeItemId stratID = m_strategyTree->AppendItem(id, 
-						       (char *) strategy.GetLabel());
+							wxString::Format(wxT("%s"), (char *) strategy.GetLabel()));
       if (m_doc->GetNfgSupport().Contains(strategy)) {
 	m_strategyTree->SetItemTextColour(stratID, *wxBLACK);
       }
@@ -232,13 +234,13 @@ END_EVENT_TABLE()
 
 gbtNfgSupportFrame::gbtNfgSupportFrame(gbtGameDocument *p_doc, 
 				       wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 300)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 300)),
     gbtGameView(p_doc)
 {
   m_panel = new NfgSupportWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
 
@@ -247,10 +249,10 @@ gbtNfgSupportFrame::gbtNfgSupportFrame(gbtGameDocument *p_doc,
   wxMenu *formatMenu = new wxMenu;
 
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   SetMenuBar(menuBar);
 
   Show(false);
@@ -271,13 +273,13 @@ void gbtNfgSupportFrame::OnUpdate(gbtGameView *p_sender)
   if (m_doc->ShowNfgSupports()) {
     m_panel->OnUpdate(p_sender);
 
-    if (m_doc->GetFilename() != "") {
-      SetTitle(wxString::Format("Gambit - Supports: [%s] %s", 
-				m_doc->GetFilename().c_str(), 
+    if (m_doc->GetFilename() != wxT("")) {
+      SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
+				(const char *) m_doc->GetFilename().mb_str(), 
 				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
-      SetTitle(wxString::Format("Gambit - Supports: %s",
+      SetTitle(wxString::Format(_("Gambit - Supports: %s"),
 				(char *) m_doc->GetNfg().GetLabel()));
     }
   }

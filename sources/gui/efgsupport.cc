@@ -89,10 +89,10 @@ widgetActionTree::widgetActionTree(EfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
-  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, "Duplicate support",
-		 "Duplicate this support");
-  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, "Delete support",
-		 "Delete this support");
+  m_menu->Append(GBT_MENU_SUPPORTS_DUPLICATE, _("Duplicate support"),
+		 _("Duplicate this support"));
+  m_menu->Append(GBT_MENU_SUPPORTS_DELETE, _("Delete support"),
+		 _("Delete this support"));
 }
 
 void widgetActionTree::OnRightClick(wxTreeEvent &p_event)
@@ -145,9 +145,9 @@ EfgSupportWindow::EfgSupportWindow(gbtGameDocument *p_doc,
   m_supportList = new wxChoice(this, idSUPPORTLISTCHOICE,
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0);
-  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, "<-",
+  m_prevButton = new wxButton(this, idSUPPORTPREVBUTTON, wxT("<-"),
 			      wxDefaultPosition, wxSize(30, 30));
-  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, "->",
+  m_nextButton = new wxButton(this, idSUPPORTNEXTBUTTON, wxT("->"),
 			      wxDefaultPosition, wxSize(30, 30));
   m_actionTree = new widgetActionTree(this);
 
@@ -176,8 +176,9 @@ void EfgSupportWindow::OnUpdate(void)
   const gList<gbtEfgSupport *> &supports = m_doc->AllEfgSupports();
 
   for (int i = 1; i <= supports.Length(); i++) {
-    m_supportList->Append((char *)
-			  (ToText(i) + ": " + supports[i]->GetLabel()));
+    m_supportList->Append(wxString::Format(wxT("%s"),
+					   (char *)
+					   (ToText(i) + ": " + supports[i]->GetLabel())));
   }
 
   int supportIndex = m_doc->GetEfgSupportIndex();
@@ -187,21 +188,23 @@ void EfgSupportWindow::OnUpdate(void)
 
   m_actionTree->DeleteAllItems();
 
-  m_actionTree->AddRoot((char *) m_doc->GetEfgSupport().GetLabel());
+  m_actionTree->AddRoot(wxString::Format(wxT("%s"),
+					 (char *) m_doc->GetEfgSupport().GetLabel()));
   for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
     gbtEfgPlayer player = m_doc->GetEfg().GetPlayer(pl);
 
     wxTreeItemId id = m_actionTree->AppendItem(m_actionTree->GetRootItem(),
-					       (char *) player.GetLabel());
+					       wxString::Format(wxT("%s"),
+								(char *) player.GetLabel()));
     
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player.GetInfoset(iset);
       wxTreeItemId isetID = m_actionTree->AppendItem(id, 
-						     (char *) infoset.GetLabel());
+						     wxString::Format(wxT("%s"), (char *) infoset.GetLabel()));
       for (int act = 1; act <= infoset.NumActions(); act++) {
 	gbtEfgAction action = infoset.GetAction(act);
 	wxTreeItemId actID = m_actionTree->AppendItem(isetID,
-						      (char *) action.GetLabel());
+						      wxString::Format(wxT("%s"), (char *) action.GetLabel()));
 	if (m_doc->GetEfgSupport().Contains(action)) {
 	  m_actionTree->SetItemTextColour(actID, *wxBLACK);
 	}
@@ -273,13 +276,13 @@ END_EVENT_TABLE()
 
 gbtEfgSupportFrame::gbtEfgSupportFrame(gbtGameDocument *p_doc, 
 				       wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 300)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 300)),
     gbtGameView(p_doc)
 {
   m_panel = new EfgSupportWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
 
@@ -288,10 +291,10 @@ gbtEfgSupportFrame::gbtEfgSupportFrame(gbtGameDocument *p_doc,
   wxMenu *formatMenu = new wxMenu;
 
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   SetMenuBar(menuBar);
 
   Show(false);
@@ -312,13 +315,13 @@ void gbtEfgSupportFrame::OnUpdate(gbtGameView *p_sender)
   if (m_doc->ShowEfgSupports()) {
     m_panel->OnUpdate();
 
-    if (m_doc->GetFilename() != "") {
-      SetTitle(wxString::Format("Gambit - Supports: [%s] %s", 
-				m_doc->GetFilename().c_str(), 
+    if (m_doc->GetFilename() != wxT("")) {
+      SetTitle(wxString::Format(_("Gambit - Supports: [%s] %s"), 
+				(const char *) m_doc->GetFilename().mb_str(), 
 				(char *) m_doc->GetEfg().GetLabel()));
     }
     else {
-      SetTitle(wxString::Format("Gambit - Supports: %s",
+      SetTitle(wxString::Format(_("Gambit - Supports: %s"),
 				(char *) m_doc->GetEfg().GetLabel()));
     }
   }

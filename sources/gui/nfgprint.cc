@@ -37,53 +37,53 @@ wxString gbtBuildHtml(const gbtNfgGame &p_nfg,
   gbtNfgContIterator iter(support);
   iter.First();
 
-  theHtml += wxString::Format("<center><h1>%s<h1></center>\n",
+  theHtml += wxString::Format(wxT("<center><h1>%s<h1></center>\n"),
 			      (char *) p_nfg.GetLabel());
 
   do {
     StrategyProfile profile(iter.GetProfile());
 
     if (p_nfg.NumPlayers() > 2) {
-      theHtml += "<center><b>Subtable with strategies:</b></center>";
+      theHtml += wxT("<center><b>Subtable with strategies:</b></center>");
       for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
 	if (pl == p_rowPlayer || pl == p_colPlayer) {
 	  continue;
 	}
 
 	theHtml += 
-	  wxString::Format("<center><b>Player %d: Strategy %d</b></center>",
+	  wxString::Format(wxT("<center><b>Player %d: Strategy %d</b></center>"),
 			   pl, profile[pl].GetId());
       }
     }
     
-    theHtml += "<table>";
-    theHtml += "<tr>";
-    theHtml += "<td></td>";
+    theHtml += wxT("<table>");
+    theHtml += wxT("<tr>");
+    theHtml += wxT("<td></td>");
     for (int st = 1; st <= p_nfg.NumStrats(p_colPlayer); st++) {
-      theHtml += wxString::Format("<td align=center><b>%s</b></td>",
+      theHtml += wxString::Format(wxT("<td align=center><b>%s</b></td>"),
 				  (char *) p_nfg.GetPlayer(p_colPlayer).GetStrategy(st).GetLabel());
     } 
-    theHtml += "</tr>";
+    theHtml += wxT("</tr>");
     for (int st1 = 1; st1 <= p_nfg.NumStrats(p_rowPlayer); st1++) {
       profile[p_rowPlayer] = p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1);
-      theHtml += "<tr>";
-      theHtml += wxString::Format("<td align=center><b>%s</b></td>",
+      theHtml += wxT("<tr>");
+      theHtml += wxString::Format(wxT("<td align=center><b>%s</b></td>"),
 				  (char *) p_nfg.GetPlayer(p_rowPlayer).GetStrategy(st1).GetLabel());
       for (int st2 = 1; st2 <= p_nfg.NumStrats(p_colPlayer); st2++) {
 	profile[p_colPlayer] = p_nfg.GetPlayer(p_colPlayer).GetStrategy(st2);
-	theHtml += "<td align=center>";
+	theHtml += wxT("<td align=center>");
 	for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-	  theHtml += wxString::Format("%s", (char *) ToText(profile.GetOutcome().GetPayoff(p_nfg.GetPlayer(pl))));
+	  theHtml += wxString::Format(wxT("%s"), (char *) ToText(profile.GetOutcome().GetPayoff(p_nfg.GetPlayer(pl))));
 	  if (pl < p_nfg.NumPlayers()) {
-	    theHtml += ",";
+	    theHtml += wxT(",");
 	  }
 	}
-	theHtml += "</td>";
+	theHtml += wxT("</td>");
       }
-      theHtml += "</tr>";
+      theHtml += wxT("</tr>");
     } 
 
-    theHtml += "</table>";
+    theHtml += wxT("</table>");
   } while (iter.NextContingency());
 
   return theHtml;

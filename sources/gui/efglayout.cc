@@ -48,20 +48,22 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
   gbtEfgOutcome outcome = p_node.GetOutcome();
   if (!outcome.IsNull()) {
     const gArray<gNumber> &payoffs = outcome.GetPayoff();
-    wxString tmp = "(";
+    wxString tmp = wxT("(");
 
     for (int pl = payoffs.First(); pl <= payoffs.Last(); pl++) {
       if (pl != 1) { 
-	tmp += ",";
+	tmp += wxT(",");
       }
-      tmp += (const char *) ToText(payoffs[pl], p_numDecimals);
+      tmp += wxString::Format(wxT("%s"),
+			      (const char *) ToText(payoffs[pl],
+						    p_numDecimals));
     }
-    tmp += ")";
+    tmp += wxT(")");
         
     return tmp;
   }
   else {
-    return "";
+    return wxT("");
   }
 }
 
@@ -373,31 +375,43 @@ wxString efgTreeLayout::CreateNodeLabel(const NodeEntry *p_entry,
     
   switch (p_which) {
   case GBT_NODE_LABEL_NOTHING:
-    return "";
+    return wxT("");
   case GBT_NODE_LABEL_LABEL:
-    return (const char *) n.GetLabel();
+    return wxString::Format(wxT("%s"), (const char *) n.GetLabel());
   case GBT_NODE_LABEL_PLAYER:
-    return ((const char *) 
-	    (!(n.GetPlayer().IsNull()) ? 
-	     n.GetPlayer().GetLabel() : gText("")));
+    if (n.GetPlayer().IsNull()) {
+      return wxT("");
+    }
+    else {
+      return wxString::Format(wxT("%s"),
+			      (const char *) n.GetPlayer().GetLabel());
+    }
   case GBT_NODE_LABEL_ISETLABEL:
-    return ((const char *)
-	    (!(n.GetInfoset().IsNull()) ? n.GetInfoset().GetLabel() : gText("")));
+    if (n.GetInfoset().IsNull()) {
+      return wxT("");
+    }
+    else {
+      return wxString::Format(wxT("%s"),
+			      (const char *) n.GetInfoset().GetLabel());
+    }
   case GBT_NODE_LABEL_ISETID:
-    return ((const char *)
-	    ((!n.GetInfoset().IsNull()) ?
-	     ("(" + ToText(n.GetPlayer().GetId()) +
-	      "," + ToText(n.GetInfoset().GetId()) + ")") : gText("")));
+    if (n.GetInfoset().IsNull()) {
+      return wxT("");
+    }
+    else {
+      return wxString::Format(wxT("(%d,%d)"),
+			      n.GetPlayer().GetId(), n.GetInfoset().GetId());
+    }
   case GBT_NODE_LABEL_OUTCOME:
     return OutcomeAsString(n, m_doc->GetPreferences().NumDecimals());
   case GBT_NODE_LABEL_REALIZPROB:
-    return (const char *) m_doc->GetRealizProb(n);
+    return wxString::Format(wxT("%s"), (const char *) m_doc->GetRealizProb(n));
   case GBT_NODE_LABEL_BELIEFPROB:
-    return (const char *) m_doc->GetBeliefProb(n);
+    return wxString::Format(wxT("%s"), (const char *) m_doc->GetBeliefProb(n));
   case GBT_NODE_LABEL_VALUE:
-    return (const char *) m_doc->GetNodeValue(n);
+    return wxString::Format(wxT("%s"), (const char *) m_doc->GetNodeValue(n));
   default:
-    return "";
+    return wxT("");
   }
 }    
 
@@ -409,9 +423,10 @@ wxString efgTreeLayout::CreateOutcomeLabel(const NodeEntry *p_entry) const
   case GBT_OUTCOME_LABEL_PAYOFFS:
     return OutcomeAsString(node, m_doc->GetPreferences().NumDecimals());
   case GBT_OUTCOME_LABEL_LABEL:
-    return (const char *) node.GetOutcome().GetLabel();
+    return wxString::Format(wxT("%s"), 
+			    (const char *) node.GetOutcome().GetLabel());
   default:
-    return "";
+    return wxT("");
   }
 }
 
@@ -422,17 +437,20 @@ wxString efgTreeLayout::CreateBranchLabel(const NodeEntry *p_entry,
 
   switch (p_which) {
   case GBT_BRANCH_LABEL_NOTHING:
-    return "";
+    return wxT("");
   case GBT_BRANCH_LABEL_LABEL:
-    return (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel();
+    return wxString::Format(wxT("%s"),
+			    (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber()).GetLabel());
   case GBT_BRANCH_LABEL_PROBS:
-    return (const char *) m_doc->GetActionProb(parent,
-					       p_entry->GetChildNumber());
+    return wxString::Format(wxT("%s"),
+			    (const char *) m_doc->GetActionProb(parent,
+								p_entry->GetChildNumber()));
   case GBT_BRANCH_LABEL_VALUE:
-    return (const char *) m_doc->GetActionValue(parent,
-						p_entry->GetChildNumber());
+    return wxString::Format(wxT("%s"),
+			    (const char *) m_doc->GetActionValue(parent,
+								 p_entry->GetChildNumber()));
   default:
-    return "";
+    return wxT("");
   }
 }
 

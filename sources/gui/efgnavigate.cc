@@ -39,16 +39,16 @@ EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_doc,
   SetEditable(false);
   SetDefaultCellAlignment(wxCENTER, wxCENTER);
 
-  SetLabelValue(wxVERTICAL, "Node label", 0);
-  SetLabelValue(wxVERTICAL, "Pr(node reached)", 1);
-  SetLabelValue(wxVERTICAL, "Node value", 2);
-  SetLabelValue(wxVERTICAL, "Information set", 3);
-  SetLabelValue(wxVERTICAL, "Pr(infoset reached)", 4);
-  SetLabelValue(wxVERTICAL, "Belief", 5);
-  SetLabelValue(wxVERTICAL, "Information set value", 6);
-  SetLabelValue(wxVERTICAL, "Incoming action label", 7);
-  SetLabelValue(wxVERTICAL, "Pr(incoming action)", 8);
-  SetLabelValue(wxVERTICAL, "Incoming action value", 9);
+  SetLabelValue(wxVERTICAL, _("Node label"), 0);
+  SetLabelValue(wxVERTICAL, _("Pr(node reached)"), 1);
+  SetLabelValue(wxVERTICAL, _("Node value"), 2);
+  SetLabelValue(wxVERTICAL, _("Information set"), 3);
+  SetLabelValue(wxVERTICAL, _("Pr(infoset reached)"), 4);
+  SetLabelValue(wxVERTICAL, _("Belief"), 5);
+  SetLabelValue(wxVERTICAL, _("Information set value"), 6);
+  SetLabelValue(wxVERTICAL, _("Incoming action label"), 7);
+  SetLabelValue(wxVERTICAL, _("Pr(incoming action)"), 8);
+  SetLabelValue(wxVERTICAL, _("Incoming action value"), 9);
 
   SetLabelSize(wxHORIZONTAL, 0);
   SetLabelSize(wxVERTICAL, 150);
@@ -77,16 +77,20 @@ void EfgNavigateWindow::OnUpdate(void)
   
   if (cursor.IsNull()) { // no data available
     for (int i = 0; i < GetRows(); i++) { 
-      SetCellValue("", i, 0);
+      SetCellValue(wxT(""), i, 0);
     }
     return;
   }
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) cursor.GetLabel(), 0, 0);
-    SetCellValue((char *) m_doc->GetRealizProb(cursor), 1, 0);
-    SetCellValue((char *) m_doc->GetNodeValue(cursor), 2, 0);
+    SetCellValue(wxString::Format(wxT("%s"), (char *) cursor.GetLabel()),
+		 0, 0);
+    SetCellValue(wxString::Format(wxT("%s"),
+				  (char *) m_doc->GetRealizProb(cursor)),
+		 1, 0);
+    SetCellValue(wxString::Format(wxT("%s"),
+				  (char *) m_doc->GetNodeValue(cursor)), 2, 0);
 
     gText tmpstr;
   
@@ -101,10 +105,16 @@ void EfgNavigateWindow::OnUpdate(void)
 		  ToText(cursor.GetInfoset().GetId()) + ")");
     }
 	  
-    SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_doc->GetInfosetProb(cursor), 4, 0);
-    SetCellValue((char *) m_doc->GetBeliefProb(cursor), 5, 0);
-    SetCellValue((char *) m_doc->GetInfosetValue(cursor), 6, 0);
+    SetCellValue(wxString::Format(wxT("%s"), (char *) tmpstr), 3, 0);
+    SetCellValue(wxString::Format(wxT("%s"), 
+				  (char *) m_doc->GetInfosetProb(cursor)),
+		 4, 0);
+    SetCellValue(wxString::Format(wxT("%s"), 
+				  (char *) m_doc->GetBeliefProb(cursor)),
+		 5, 0);
+    SetCellValue(wxString::Format(wxT("%s"),
+				  (char *) m_doc->GetInfosetValue(cursor)),
+		 6, 0);
 	
     gbtEfgNode p = cursor.GetParent();
 
@@ -112,14 +122,20 @@ void EfgNavigateWindow::OnUpdate(void)
       int branch = 0;
       for (branch = 1; p.GetChild(branch) != cursor; branch++);
 
-      SetCellValue((char *) cursor.GetPriorAction().GetLabel(), 7, 0);
-      SetCellValue((char *) m_doc->GetActionProb(p, branch), 8, 0);
-      SetCellValue((char *) m_doc->GetActionValue(p, branch), 9, 0);
+      SetCellValue(wxString::Format(wxT("%s"),
+				    (char *) cursor.GetPriorAction().GetLabel()),
+		   7, 0);
+      SetCellValue(wxString::Format(wxT("%s"),
+				    (char *) m_doc->GetActionProb(p, branch)),
+		   8, 0);
+      SetCellValue(wxString::Format(wxT("%s"),
+				    (char *) m_doc->GetActionValue(p, branch)),
+		   9, 0);
     }
     else {
-      SetCellValue("N/A (root)", 7, 0);
-      SetCellValue("1", 8, 0);
-      SetCellValue("N/A", 9, 0);
+      SetCellValue(_("N/A (root)"), 7, 0);
+      SetCellValue(wxT("1"), 8, 0);
+      SetCellValue(_("N/A"), 9, 0);
     }
   }	
   catch (gException &) { }
@@ -136,13 +152,13 @@ END_EVENT_TABLE()
 
 gbtEfgNavigateFrame::gbtEfgNavigateFrame(gbtGameDocument *p_doc,
 					 wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 200)),
     gbtGameView(p_doc)
 {
   m_grid = new EfgNavigateWindow(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
 
@@ -151,10 +167,10 @@ gbtEfgNavigateFrame::gbtEfgNavigateFrame(gbtGameDocument *p_doc,
   wxMenu *formatMenu = new wxMenu;
 
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   SetMenuBar(menuBar);
 
   Show(false);
@@ -183,13 +199,13 @@ void gbtEfgNavigateFrame::OnUpdate(gbtGameView *p_sender)
     m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
     m_grid->SetScrollRate(0, 0);
 
-    if (m_doc->GetFilename() != "") {
-      SetTitle(wxString::Format("Gambit - Node View: [%s] %s", 
+    if (m_doc->GetFilename() != wxT("")) {
+      SetTitle(wxString::Format(_("Gambit - Node View: [%s] %s"), 
 				m_doc->GetFilename().c_str(), 
 				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
-      SetTitle(wxString::Format("Gambit - Node View: %s",
+      SetTitle(wxString::Format(_("Gambit - Node View: %s"),
 				(char *) m_doc->GetNfg().GetLabel()));
     }
   }

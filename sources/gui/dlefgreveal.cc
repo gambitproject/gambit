@@ -39,7 +39,7 @@
 
 dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 					 const gbtEfgGame &p_efg)
-  : wxDialog(p_parent, -1, "Reveal move", wxDefaultPosition), m_efg(p_efg)
+  : wxDialog(p_parent, -1, _("Reveal move"), wxDefaultPosition), m_efg(p_efg)
 {
   SetAutoLayout(true);
 
@@ -47,7 +47,7 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
 
   wxStaticBoxSizer *playerBox =
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC,
-					 "Reveal to players"),
+					 _("Reveal to players")),
 			 wxHORIZONTAL);
 
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(wxVERTICAL,
@@ -57,11 +57,13 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
   for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
     gbtEfgPlayer player = m_efg.GetPlayer(pl);
     if (player.GetLabel() != "") {
-      m_players[pl-1] = new wxCheckBox(this, -1, (char *) player.GetLabel());
+      m_players[pl-1] = new wxCheckBox(this, -1,
+				       wxString::Format(wxT("%s"),
+							(char *) player.GetLabel()));
     }
     else {
       m_players[pl-1] = new wxCheckBox(this, -1, 
-				       wxString::Format("Player %d", pl));
+				       wxString::Format(_("Player %d"), pl));
     }
     m_players[pl-1]->SetValue(1);
     gridSizer->Add(m_players[pl-1], 1, wxALL | wxEXPAND, 0);
@@ -70,11 +72,11 @@ dialogInfosetReveal::dialogInfosetReveal(wxWindow *p_parent,
   topSizer->Add(playerBox, 1, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
   SetSizer(topSizer);

@@ -66,20 +66,20 @@ panelNodes::panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *tokenSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString tokenChoices[] = { "Line", "Box", "Circle", "Diamond" };
-  m_chanceToken = new wxRadioBox(this, -1, "Chance nodes",
+  wxString tokenChoices[] = { _("Line"), _("Box"), _("Circle"), _("Diamond") };
+  m_chanceToken = new wxRadioBox(this, -1, _("Chance nodes"),
 				 wxDefaultPosition, wxDefaultSize,
 				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_chanceToken->SetSelection(p_prefs.ChanceToken());
   tokenSizer->Add(m_chanceToken, 0, wxALL, 5);
 
-  m_playerToken = new wxRadioBox(this, -1, "Player nodes",
+  m_playerToken = new wxRadioBox(this, -1, _("Player nodes"),
 				 wxDefaultPosition, wxDefaultSize,
 				 4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_playerToken->SetSelection(p_prefs.PlayerToken());
   tokenSizer->Add(m_playerToken, 0, wxALL, 5);
 
-  m_terminalToken = new wxRadioBox(this, -1, "Terminal nodes",
+  m_terminalToken = new wxRadioBox(this, -1, _("Terminal nodes"),
 				   wxDefaultPosition, wxDefaultSize,
 				   4, tokenChoices, 1, wxRA_SPECIFY_COLS);
   m_terminalToken->SetSelection(p_prefs.TerminalToken());
@@ -88,20 +88,20 @@ panelNodes::panelNodes(wxWindow *p_parent, const gbtPreferences &p_prefs)
 
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
 		
-  gridSizer->Add(new wxStaticText(this, -1, "Size of nodes"),
+  gridSizer->Add(new wxStaticText(this, -1, _("Size of nodes")),
 		 0, wxCENTER | wxALL, 5);
   m_nodeSize = new wxSpinCtrl(this, -1,
-			      wxString::Format("%ld", p_prefs.NodeSize()),
+			      wxString::Format(wxT("%ld"), p_prefs.NodeSize()),
 			      wxDefaultPosition, wxDefaultSize,
 			      wxSP_ARROW_KEYS,
 			      NODE_LENGTH_MIN, NODE_LENGTH_MAX);
   gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
 
-  gridSizer->Add(new wxStaticText(this, -1, "Terminal node spacing"),
+  gridSizer->Add(new wxStaticText(this, -1, _("Terminal node spacing")),
 		 0, wxCENTER | wxALL, 5);
   m_terminalSpacing =
     new wxSpinCtrl(this, -1,
-		   wxString::Format("%ld", p_prefs.TerminalSpacing()),
+		   wxString::Format(wxT("%ld"), p_prefs.TerminalSpacing()),
 		   wxDefaultPosition, wxDefaultSize,
 		   wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
   gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
@@ -144,15 +144,15 @@ panelBranches::panelBranches(wxWindow *p_parent,
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *styleSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString styleChoices[] = { "Straight line", "Fork-Tine" };
-  m_branchStyle = new wxRadioBox(this, -1, "Branch style",
+  wxString styleChoices[] = { _("Straight line"), _("Fork-Tine") };
+  m_branchStyle = new wxRadioBox(this, -1, _("Branch style"),
 				 wxDefaultPosition, wxDefaultSize,
 				 2, styleChoices, 1, wxRA_SPECIFY_COLS);
   m_branchStyle->SetSelection(p_prefs.BranchStyle());
   styleSizer->Add(m_branchStyle, 0, wxALL, 5);
 
-  wxString labelChoices[] = { "Horizontal", "Rotated" };
-  m_branchLabels = new wxRadioBox(this, -1, "Branch labels",
+  wxString labelChoices[] = { _("Horizontal"), _("Rotated") };
+  m_branchLabels = new wxRadioBox(this, -1, _("Branch labels"),
 				  wxDefaultPosition, wxDefaultSize,
 				  2, labelChoices, 1, wxRA_SPECIFY_COLS);
   m_branchLabels->SetSelection(p_prefs.BranchLabels());
@@ -161,20 +161,20 @@ panelBranches::panelBranches(wxWindow *p_parent,
   topSizer->Add(styleSizer, 0, wxALL | wxCENTER, 5);
 
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(2);
-  gridSizer->Add(new wxStaticText(this, -1, "Branch length"),
+  gridSizer->Add(new wxStaticText(this, -1, _("Branch length")),
 		 0, wxCENTER | wxALL, 5);
   m_branchLength = new wxSpinCtrl(this, -1,
-				  wxString::Format("%ld",
+				  wxString::Format(wxT("%ld"),
 						   p_prefs.BranchLength()),
 				  wxDefaultPosition, wxDefaultSize,
 				  wxSP_ARROW_KEYS,
 				  BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
   gridSizer->Add(m_branchLength, 1, wxEXPAND | wxALL, 5);
 
-  gridSizer->Add(new wxStaticText(this, -1, "Tine length"),
+  gridSizer->Add(new wxStaticText(this, -1, _("Tine length")),
 		 0, wxCENTER | wxALL, 5);
   m_tineLength = new wxSpinCtrl(this, -1,
-				wxString::Format("%ld",
+				wxString::Format(wxT("%ld"),
 						 p_prefs.TineLength()),
 				wxDefaultPosition, wxDefaultSize,
 				wxSP_ARROW_KEYS,
@@ -208,17 +208,17 @@ panelInfosets::panelInfosets(wxWindow *p_parent,
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *styleSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString connectChoices[] = { "Never", "Only on same level",
-				"Across all levels" };
+  wxString connectChoices[] = { _("Never"), _("Only on same level"),
+				_("Across all levels") };
   m_infosetConnect = new wxRadioBox(this, -1,
-				    "Connect information set members",
+				    _("Connect information set members"),
 				    wxDefaultPosition, wxDefaultSize,
 				    3, connectChoices, 1, wxRA_SPECIFY_COLS);
   m_infosetConnect->SetSelection(p_prefs.InfosetConnect());
   styleSizer->Add(m_infosetConnect, 0, wxALL, 5);
 
-  wxString joinChoices[] = { "Lines", "Circles" };
-  m_infosetJoin = new wxRadioBox(this, -1, "Join style",
+  wxString joinChoices[] = { _("Lines"), _("Circles") };
+  m_infosetJoin = new wxRadioBox(this, -1, _("Join style"),
 				 wxDefaultPosition, wxDefaultSize,
 				 2, joinChoices, 1, wxRA_SPECIFY_COLS);
   m_infosetJoin->SetSelection(p_prefs.InfosetJoin());
@@ -249,8 +249,8 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
   SetAutoLayout(true);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
-  wxString styleChoices[] = { "Do not show", "Use arcs" };
-  m_subgameStyle = new wxRadioBox(this, -1, "Subgame display",
+  wxString styleChoices[] = { _("Do not show"), _("Use arcs") };
+  m_subgameStyle = new wxRadioBox(this, -1, _("Subgame display"),
 				  wxDefaultPosition, wxDefaultSize,
 				  2, styleChoices, 1, wxRA_SPECIFY_COLS);
   m_subgameStyle->SetSelection(p_prefs.SubgameStyle());
@@ -265,24 +265,24 @@ panelSubgames::panelSubgames(wxWindow *p_parent,
 
 dialogLayout::dialogLayout(wxWindow *p_parent, 
 			   const gbtPreferences &p_prefs)
-  : wxDialog(p_parent, -1, "Layout options", wxDefaultPosition)
+  : wxDialog(p_parent, -1, _("Layout options"), wxDefaultPosition)
 {
   SetAutoLayout(true);
 
   m_notebook = new wxNotebook(this, -1, wxDefaultPosition, wxDefaultSize);
   wxNotebookSizer *notebookSizer = new wxNotebookSizer(m_notebook);
-  m_notebook->AddPage(new panelNodes(m_notebook, p_prefs), "Nodes");
-  m_notebook->AddPage(new panelBranches(m_notebook, p_prefs), "Branches");
+  m_notebook->AddPage(new panelNodes(m_notebook, p_prefs), _("Nodes"));
+  m_notebook->AddPage(new panelBranches(m_notebook, p_prefs), _("Branches"));
   m_notebook->AddPage(new panelInfosets(m_notebook, p_prefs),
-		      "Information sets");
-  m_notebook->AddPage(new panelSubgames(m_notebook, p_prefs), "Subgames");
+		      _("Information sets"));
+  m_notebook->AddPage(new panelSubgames(m_notebook, p_prefs), _("Subgames"));
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(notebookSizer, 0, wxEXPAND | wxALL, 5);

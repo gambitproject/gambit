@@ -46,34 +46,40 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
 		0, wxTOP | wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, -1, p_versionString),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "Part of the Gambit Project"),
+  topSizer->Add(new wxStaticText(this, -1, _("Part of the Gambit Project")),
 		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "http://econweb.tamu.edu/gambit"),
+  topSizer->Add(new wxStaticText(this, -1, 
+				 wxT("http://econweb.tamu.edu/gambit")),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "gambit@econmail.tamu.edu"),
-		0, wxALIGN_CENTER, 5);
-
-  topSizer->Add(new wxStaticText(this, -1, "Built with " wxVERSION_STRING),
-		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "http://www.wxwindows.org"),
+  topSizer->Add(new wxStaticText(this, -1, wxT("gambit@econmail.tamu.edu")),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 2003"),
+  topSizer->Add(new wxStaticText(this, -1, 
+				 wxString(_("Built with ")) +
+				 wxString(wxVERSION_STRING)),
 		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "The Gambit Project"),
+  topSizer->Add(new wxStaticText(this, -1, wxT("http://www.wxwindows.org")),
+		0, wxALIGN_CENTER, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, _("Copyright (C) 2003")),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, _("The Gambit Project")),
 		0, wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, -1,
-				 "Theodore Turocy, Project Maintainer"),
+				 wxT("Theodore Turocy, Project Maintainer")),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(new wxStaticText(this, -1, "This program is free software,"),
+  topSizer->Add(new wxStaticText(this, -1,
+				 _("This program is free software,")),
 		0, wxTOP | wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "distributed under the terms of"),
+  topSizer->Add(new wxStaticText(this, -1,
+				 _("distributed under the terms of")),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(new wxStaticText(this, -1, "the GNU General Public License"),
+  topSizer->Add(new wxStaticText(this, -1, 
+				 _("the GNU General Public License")),
 		0, wxALIGN_CENTER, 5);
 
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   topSizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 10);
 

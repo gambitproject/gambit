@@ -61,12 +61,12 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
 
-  SetColLabelValue(0, "R/C");
-  SetColLabelValue(1, "Player");
-  SetColLabelValue(2, "#");
-  SetColLabelValue(3, "Strategy");
-  SetColLabelValue(4, "");
-  SetColLabelValue(5, "");
+  SetColLabelValue(0, wxT("R/C"));
+  SetColLabelValue(1, _("Player"));
+  SetColLabelValue(2, wxT("#"));
+  SetColLabelValue(3, _("Strategy"));
+  SetColLabelValue(4, wxT(""));
+  SetColLabelValue(5, wxT(""));
 
   if (GetNumberRows() < m_doc->GetNfg().NumPlayers()) {
     AppendRows(m_doc->GetNfg().NumPlayers() - GetNumberRows());
@@ -84,22 +84,27 @@ void gbtNfgNavigate::OnUpdate(gbtGameView *)
     }
 
     if (m_doc->GetRowPlayer() == pl) {
-      SetCellValue(pl - 1, 0, "(row)");
+      SetCellValue(pl - 1, 0, wxT("(row)"));
     }
     else if (m_doc->GetColPlayer() == pl) {
-      SetCellValue(pl - 1, 0, "(col)");
+      SetCellValue(pl - 1, 0, wxT("(col)"));
     } 
     else {
-      SetCellValue(pl - 1, 0, "");
+      SetCellValue(pl - 1, 0, wxT(""));
     }
 
-    SetCellValue(pl - 1, 1, (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel());
-    SetCellValue(pl - 1, 2, (char *) ToText(m_doc->GetContingency()[pl]));
+    SetCellValue(pl - 1, 1, 
+		 wxString::Format(wxT("%s"),
+				  (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel()));
+    SetCellValue(pl - 1, 2, 
+		 wxString::Format(wxT("%s"), 
+				  (char *) ToText(m_doc->GetContingency()[pl])));
     SetCellValue(pl - 1, 3, 
-		 (char *) support.GetStrategy(pl,
-					      m_doc->GetContingency()[pl]).GetLabel());
-    SetCellValue(pl - 1, 4, "+");
-    SetCellValue(pl - 1, 5, "-");
+		 wxString::Format(wxT("%s"),
+				  (char *) support.GetStrategy(pl,
+							       m_doc->GetContingency()[pl]).GetLabel()));
+    SetCellValue(pl - 1, 4, wxT("+"));
+    SetCellValue(pl - 1, 5, wxT("-"));
   }
 
   AutoSizeRows();

@@ -116,32 +116,34 @@ END_EVENT_TABLE()
 
 dialogInsertMove::dialogInsertMove(wxWindow *p_parent, 
 				   gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, "Insert Move", wxDefaultPosition), m_doc(p_doc)
+  : wxDialog(p_parent, -1, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
 {
   m_playerItem = new wxListBox(this, idMOVE_PLAYER_LISTBOX);
-  m_playerItem->Append("Chance");
+  m_playerItem->Append(_("Chance"));
   for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
-    m_playerItem->Append((char *)
-			 (ToText(pl) + ": " + m_doc->GetEfg().GetPlayer(pl).GetLabel()));
+    m_playerItem->Append(wxString::Format(wxT("%s"),
+					  (char *)
+					  (ToText(pl) + ": " + m_doc->GetEfg().GetPlayer(pl).GetLabel())));
   }
-  m_playerItem->Append("New Player");
+  m_playerItem->Append(_("New Player"));
   m_playerItem->SetSelection(1);
 
   m_infosetItem = new wxListBox(this, idMOVE_INFOSET_LISTBOX);
-  m_infosetItem->Append("New");
+  m_infosetItem->Append(_("New"));
   gbtEfgPlayer player = p_doc->GetEfg().GetPlayer(1);
   for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-    m_infosetItem->Append((char *) (ToText(iset) + ": " +
-				    player.GetInfoset(iset).GetLabel()));
+    m_infosetItem->Append(wxString::Format(wxT("%s"),
+					   (char *) (ToText(iset) + ": " +
+						     player.GetInfoset(iset).GetLabel())));
   }
   m_infosetItem->SetSelection(0);
 
   wxBoxSizer *playerSizer = new wxBoxSizer(wxVERTICAL);
-  playerSizer->Add(new wxStaticText(this, -1, "Player"),0, wxALL, 5);
+  playerSizer->Add(new wxStaticText(this, -1, _("Player")), 0, wxALL, 5);
   playerSizer->Add(m_playerItem, 0, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *infosetSizer = new wxBoxSizer(wxVERTICAL);
-  infosetSizer->Add(new wxStaticText(this, -1, "Information set"),
+  infosetSizer->Add(new wxStaticText(this, -1, _("Information set")),
 		    0, wxALL, 5);
   infosetSizer->Add(m_infosetItem, 0, wxEXPAND | wxALL, 5);
 
@@ -150,19 +152,20 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent,
   playerInfosetSizer->Add(infosetSizer, 1, wxALL, 5);
 
   wxBoxSizer *actionSizer = new wxBoxSizer(wxHORIZONTAL);
-  actionSizer->Add(new wxStaticText(this, -1, "Number of actions"),
+  actionSizer->Add(new wxStaticText(this, -1, _("Number of actions")),
 		   0, wxALL, 5);
-  m_actions = new wxSpinCtrl(this, -1, "2", wxDefaultPosition, wxDefaultSize,
+  m_actions = new wxSpinCtrl(this, -1, wxT("2"),
+			     wxDefaultPosition, wxDefaultSize,
 			     wxSP_ARROW_KEYS, 1, 10000, 2);
   m_actions->Enable(m_infosetItem->GetSelection() == 0);
   actionSizer->Add(m_actions, 0, wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(playerInfosetSizer, 0, wxALL | wxCENTER, 5);
@@ -188,11 +191,12 @@ void dialogInsertMove::OnPlayer(wxCommandEvent &)
     player = m_doc->GetEfg().GetPlayer(playerNumber);
 
   m_infosetItem->Clear();
-  m_infosetItem->Append("New");
+  m_infosetItem->Append(_("New"));
   if (!player.IsNull()) {
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
-      m_infosetItem->Append((char *) (ToText(iset) + ": " +
-			    player.GetInfoset(iset).GetLabel()));
+      m_infosetItem->Append(wxString::Format(wxT("%s"),
+					     (char *) (ToText(iset) + ": " +
+						       player.GetInfoset(iset).GetLabel())));
     }
   }
   m_infosetItem->SetSelection(0);

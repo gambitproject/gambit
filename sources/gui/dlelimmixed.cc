@@ -44,29 +44,30 @@ END_EVENT_TABLE()
 
 dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
 				 const gArray<gText> &p_players)
-  : wxDialog(p_parent, -1, "Computing Dominated Strategies",wxDefaultPosition),
+  : wxDialog(p_parent, -1, _("Computing Dominated Strategies"),
+	     wxDefaultPosition),
     m_numPlayers(p_players.Length())
 {
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *optionSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString domTypeList[2] = { "Weak", "Strong" };
-  m_domTypeBox = new wxRadioBox(this, -1, "Type",
+  wxString domTypeList[2] = { _("Weak"), _("Strong") };
+  m_domTypeBox = new wxRadioBox(this, -1, _("Type"),
 				wxDefaultPosition, wxDefaultSize,
 				2, domTypeList, 1, wxRA_SPECIFY_COLS);
   m_domTypeBox->SetSelection(0);
   optionSizer->Add(m_domTypeBox, 0, wxALL, 5);
   
-  wxString domMethodList[2] = { "Pure", "Mixed" };
-  m_domMethodBox = new wxRadioBox(this, idMETHOD_BOX, "Method",
+  wxString domMethodList[2] = { _("Pure"), _("Mixed") };
+  m_domMethodBox = new wxRadioBox(this, idMETHOD_BOX, _("Method"),
 				  wxDefaultPosition, wxDefaultSize,
 				  2, domMethodList, 1, wxRA_SPECIFY_COLS);
   m_domMethodBox->SetSelection(0);
   optionSizer->Add(m_domMethodBox, 0, wxALL, 5);
 
-  wxString domPrecisionList[2] = { "Float", "Rational" };
-  m_domPrecisionBox = new wxRadioBox(this, -1, "Precision",
+  wxString domPrecisionList[2] = { _("Float"), _("Rational") };
+  m_domPrecisionBox = new wxRadioBox(this, -1, _("Precision"),
 				     wxDefaultPosition, wxDefaultSize,
 				     2, domPrecisionList,
 				     1, wxRA_SPECIFY_COLS);
@@ -74,15 +75,15 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   m_domPrecisionBox->Enable(false);
   optionSizer->Add(m_domPrecisionBox, 0, wxALL, 5);
 
-  wxString domDepthList[2] = { "One level", "Iteratively" };
-  m_domDepthBox = new wxRadioBox(this, -1, "Depth",
+  wxString domDepthList[2] = { _("One level"), _("Iteratively") };
+  m_domDepthBox = new wxRadioBox(this, -1, _("Depth"),
 				 wxDefaultPosition, wxDefaultSize,
 				 2, domDepthList, 1, wxRA_SPECIFY_COLS);
   optionSizer->Add(m_domDepthBox, 0, wxALL, 5);
   topSizer->Add(optionSizer, 0, wxALL, 5);
 
   wxStaticBoxSizer *playerBox =
-    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, "Players"),
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Players")),
 			 wxHORIZONTAL);
 
   wxFlexGridSizer *gridSizer = new wxFlexGridSizer(wxVERTICAL,
@@ -91,11 +92,13 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   m_players = new wxCheckBox *[p_players.Length()];
   for (int pl = 1; pl <= p_players.Length(); pl++) {
     if (p_players[pl] != "") {
-      m_players[pl-1] = new wxCheckBox(this, -1, (char *) p_players[pl]);
+      m_players[pl-1] = new wxCheckBox(this, -1,
+				       wxString::Format(wxT("%s"),
+							(char *) p_players[pl]));
     }
     else {
       m_players[pl-1] = new wxCheckBox(this, -1, 
-				       wxString::Format("Player %d", pl));
+				       wxString::Format(_("Player %d"), pl));
     }
     m_players[pl-1]->SetValue(1);
     gridSizer->Add(m_players[pl-1], 1, wxALL | wxEXPAND, 0);
@@ -104,11 +107,11 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
   topSizer->Add(playerBox, 1, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
   SetSizer(topSizer);

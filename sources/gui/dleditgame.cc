@@ -46,22 +46,25 @@ END_EVENT_TABLE()
 
 gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 				     gbtGameDocument *p_doc)
-  : wxDialog(p_parent, -1, "Game properties", wxDefaultPosition), m_doc(p_doc)
+  : wxDialog(p_parent, -1, _("Game properties"), wxDefaultPosition), 
+    m_doc(p_doc)
 {
   SetAutoLayout(true);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *titleSizer = new wxBoxSizer(wxHORIZONTAL);
-  titleSizer->Add(new wxStaticText(this, wxID_STATIC, "Title"),
+  titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxCENTER, 5);
   if (m_doc->HasEfg()) {
     m_title = new wxTextCtrl(this, -1, 
-			     (const char *) m_doc->GetEfg().GetLabel());
+			     wxString::Format(wxT("%s"),
+					      (const char *) m_doc->GetEfg().GetLabel()));
   }
   else {
     m_title = new wxTextCtrl(this, -1, 
-			     (const char *) m_doc->GetNfg().GetLabel());
+			     wxString::Format(wxT("%s"),
+					      (const char *) m_doc->GetNfg().GetLabel()));
   }
 
   titleSizer->Add(m_title, 1, wxALL | wxCENTER | wxEXPAND, 5);
@@ -69,48 +72,48 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 
   wxBoxSizer *centralSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  wxStaticBox *propBox = new wxStaticBox(this, wxID_STATIC, "Properties");
+  wxStaticBox *propBox = new wxStaticBox(this, wxID_STATIC, _("Properties"));
   wxStaticBoxSizer *propSizer = new wxStaticBoxSizer(propBox, wxVERTICAL);
   propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				  wxString::Format("Representation: %s",
+				  wxString::Format(_("Representation: %s"),
 						   (m_doc->HasEfg()) ?
-						   "Extensive form" :
-						   "Normal form")),
+						   _("Extensive form") :
+						   _("Normal form"))),
 		 0, wxALL, 5);
   propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				  wxString("Filename: ") +
+				  wxString(_("Filename: ")) +
 				  m_doc->GetFilename()),
 		 0, wxALL, 5);
   if (m_doc->HasEfg()) {
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format("Number of players: %d",
+				    wxString::Format(_("Number of players: %d"),
 						     m_doc->GetEfg().NumPlayers())),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format("Constant-sum game: %s",
+				    wxString::Format(_("Constant-sum game: %s"),
 						     (m_doc->GetEfg().IsConstSum()) ?
-						     "YES" : "NO")),
+						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format("Perfect recall: %s",
+				    wxString::Format(_("Perfect recall: %s"),
 						     (m_doc->GetEfg().IsPerfectRecall()) ?
-						     "YES" : "NO")),
+						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
   }
   else {
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format("Number of players: %d",
+				    wxString::Format(_("Number of players: %d"),
 						     m_doc->GetNfg().NumPlayers())),
 		   0, wxALL, 5);
     propSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    wxString::Format("Constant-sum game: %s",
+				    wxString::Format(_("Constant-sum game: %s"),
 						     (m_doc->GetNfg().IsConstSum()) ?
-						     "YES" : "NO")),
+						     _("YES") : _("NO"))),
 		   0, wxALL, 5);
   }
   centralSizer->Add(propSizer, 1, wxALL | wxEXPAND, 5);
 
-  wxStaticBox *playerGridBox = new wxStaticBox(this, wxID_STATIC, "Players");
+  wxStaticBox *playerGridBox = new wxStaticBox(this, wxID_STATIC, _("Players"));
   wxStaticBoxSizer *playerGridSizer = new wxStaticBoxSizer(playerGridBox,
 							   wxVERTICAL);
   m_players = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 150));
@@ -127,12 +130,13 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   m_players->SetRowLabelAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_players->SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   m_players->SetLabelFont(m_doc->GetPreferences().GetLabelFont());
-  m_players->SetLabelValue(wxHORIZONTAL, "Name", 0);
+  m_players->SetLabelValue(wxHORIZONTAL, _("Name"), 0);
 
   if (m_doc->HasEfg()) {
     for (int pl = 1; pl <= m_doc->GetEfg().NumPlayers(); pl++) {
       m_players->SetCellValue(pl - 1, 0, 
-			      (char *) m_doc->GetEfg().GetPlayer(pl).GetLabel());
+			      wxString::Format(wxT("%s"),
+					       (char *) m_doc->GetEfg().GetPlayer(pl).GetLabel()));
       if ((pl - 1) % 2 == 0) {
 	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
       }
@@ -144,7 +148,8 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   else {
     for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
       m_players->SetCellValue(pl - 1, 0, 
-			      (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel());
+			      wxString::Format(wxT("%s"),
+					       (char *) m_doc->GetNfg().GetPlayer(pl).GetLabel()));
       if ((pl - 1) % 2 == 0) {
 	m_players->SetCellBackgroundColour(pl - 1, 0, wxColour(200, 200, 200));
       }
@@ -158,25 +163,27 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
 
   if (m_doc->HasEfg()) {
     playerGridSizer->Add(new wxButton(this, GBT_BUTTON_ADD_PLAYER,
-				      "Add Player"),
+				      _("Add Player")),
 			 0, wxALL | wxCENTER, 5);
   }
 
   centralSizer->Add(playerGridSizer, 0, wxALL, 5);
   topSizer->Add(centralSizer, 0, wxALL, 0);
   
-  wxStaticBox *commentBox = new wxStaticBox(this, wxID_STATIC, "Comments");
+  wxStaticBox *commentBox = new wxStaticBox(this, wxID_STATIC, _("Comments"));
   wxStaticBoxSizer *commentSizer = new wxStaticBoxSizer(commentBox,
 							wxHORIZONTAL);
   if (m_doc->HasEfg()) {
     m_comment = new wxTextCtrl(this, -1, 
-			       (const char *) m_doc->GetEfg().GetComment(),
+			       wxString::Format(wxT("%s"),
+						(const char *) m_doc->GetEfg().GetComment()),
 			       wxDefaultPosition, wxSize(100, 100),
 			       wxTE_MULTILINE);
   }
   else {
     m_comment = new wxTextCtrl(this, -1, 
-			       (const char *) m_doc->GetNfg().GetComment(),
+			       wxString::Format(wxT("%s"),
+						(const char *) m_doc->GetNfg().GetComment()),
 			       wxDefaultPosition, wxSize(100, 100),
 			       wxTE_MULTILINE);
   }
@@ -184,10 +191,10 @@ gbtDialogEditGame::gbtDialogEditGame(wxWindow *p_parent,
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
@@ -271,11 +278,11 @@ gbtGameCommand *gbtDialogEditGame::GetCommand(void) const
 {
   gArray<gText> players(m_players->GetNumberRows());
   for (int pl = 1; pl <= players.Length(); pl++) {
-    players[pl] = m_players->GetCellValue(pl - 1, 0).c_str();
+    players[pl] = m_players->GetCellValue(pl - 1, 0).mb_str();
   }
 
-  return new gbtCmdEditGame(m_title->GetValue().c_str(),
-			    m_comment->GetValue().c_str(),
+  return new gbtCmdEditGame(gText(m_title->GetValue().mb_str()),
+			    gText(m_comment->GetValue().mb_str()),
 			    players);
 }
 

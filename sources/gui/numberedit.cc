@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <ctype.h>
 #include "wx/wxprec.h"
 #ifndef WX_PRECOMP
 #include "wx/wx.h"
@@ -68,7 +69,7 @@ void NumberEditor::StartingKey(wxKeyEvent &event)
   int keycode = (int)event.KeyCode();
   if (isdigit(keycode) ||
       keycode == '+' || keycode == '-' || keycode == '.') {
-    Text()->SetValue(wxString::Format("%c", keycode));
+    Text()->SetValue(wxString::Format(wxT("%c"), keycode));
     Text()->SetInsertionPointEnd();
     return;
   }

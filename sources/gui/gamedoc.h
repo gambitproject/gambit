@@ -75,8 +75,8 @@ private:
 
 public:
   // Lifecycle
-  gbtGameDocument(gbtEfgGame, wxString = "");
-  gbtGameDocument(gbtNfgGame, wxString = "");
+  gbtGameDocument(gbtEfgGame, wxString = wxT(""));
+  gbtGameDocument(gbtNfgGame, wxString = wxT(""));
   ~gbtGameDocument();
 
   // General information about game

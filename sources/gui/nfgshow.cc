@@ -119,7 +119,7 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(800, 500)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(800, 500)),
     gbtGameView(p_doc),
     m_table(0)
 {
@@ -127,7 +127,8 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetIcon(wxIcon("nfg_icn"));
 #else
 #include "bitmaps/nfg.xbm"
-  SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
+  SetIcon(wxIcon(wxString::Format(wxT("%s"), nfg_bits),
+		 nfg_width, nfg_height));
 #endif  // __WXMSW__
 
   CreateStatusBar();
@@ -171,13 +172,13 @@ void NfgShow::OnUpdate(gbtGameView *)
     return;
   }
 
-  if (m_doc->GetFilename() != "") {
-    SetTitle(wxString::Format("Gambit - [%s] %s", 
-			      m_doc->GetFilename().c_str(), 
+  if (m_doc->GetFilename() != wxT("")) {
+    SetTitle(wxString::Format(wxT("Gambit - [%s] %s"), 
+			      (const char *) m_doc->GetFilename().mb_str(), 
 			      (char *) m_doc->GetNfg().GetLabel()));
   }
   else {
-    SetTitle(wxString::Format("Gambit - %s",
+    SetTitle(wxString::Format(wxT("Gambit - %s"),
 			      (char *) m_doc->GetNfg().GetLabel()));
   }
 
@@ -203,120 +204,121 @@ void NfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
   if (!m_doc->HasEfg()) {
-    fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
-    fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
-    fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+    fileMenu->Append(wxID_NEW, _("&New\tCtrl-N"), _("Create a new game"));
+    fileMenu->Append(wxID_OPEN, _("&Open\tCtrl-O"), _("Open a saved game"));
+    fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
-    fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
+    fileMenu->Append(wxID_SAVE, _("&Save\tCtrl-S"), _("Save this game"));
+    fileMenu->Append(wxID_SAVEAS, _("Save &as"), 
+		     _("Save game to a different file"));
     fileMenu->AppendSeparator();
     wxMenu *fileExportMenu = new wxMenu;
-    fileExportMenu->Append(GBT_MENU_FILE_EXPORT_HTML, "&HTML",
-			   "Save this game in HTML format");
-    fileMenu->Append(GBT_MENU_FILE_EXPORT, "&Export", fileExportMenu,
-		     "Export the game in various formats");
+    fileExportMenu->Append(GBT_MENU_FILE_EXPORT_HTML, _("&HTML"),
+			   _("Save this game in HTML format"));
+    fileMenu->Append(GBT_MENU_FILE_EXPORT, _("&Export"), fileExportMenu,
+		     _("Export the game in various formats"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
-		     "Set up preferences for printing");
-    fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
-		     "View a preview of the game printout");
-    fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
+    fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"),
+		     _("Set up preferences for printing"));
+    fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"),
+		     _("View a preview of the game printout"));
+    fileMenu->Append(wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
+    fileMenu->Append(wxID_EXIT, _("E&xit\tCtrl-X"), _("Exit Gambit"));
   }
   else {
-    fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+    fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
     fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
-		     "Set up preferences for printing");
-    fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
-		     "View a preview of the game printout");
-    fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
+    fileMenu->Append(wxID_PRINT_SETUP, _("Page Se&tup"),
+		     _("Set up preferences for printing"));
+    fileMenu->Append(wxID_PREVIEW, _("Print Pre&view"),
+		     _("View a preview of the game printout"));
+    fileMenu->Append(wxID_PRINT, _("&Print\tCtrl-P"), _("Print this game"));
   }
   
   wxMenu *editMenu = new wxMenu;
   if (!m_doc->HasEfg()) {
-    editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
-    editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
-    editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
+    editMenu->Append(wxID_CUT, _("Cu&t"), _("Cut the current selection"));
+    editMenu->Append(wxID_COPY, _("&Copy"), _("Copy the current selection"));
+    editMenu->Append(wxID_PASTE, _("&Paste"), _("Paste from clipboard"));
     // For the moment, these are not implemented -- leave disabled
     editMenu->Enable(wxID_CUT, false);
     editMenu->Enable(wxID_COPY, false);
     editMenu->Enable(wxID_PASTE, false);
     editMenu->AppendSeparator();
-    editMenu->Append(GBT_MENU_EDIT_STRATS, "&Strategies",
-		     "Edit strategy names");
-    editMenu->Append(GBT_MENU_EDIT_CONTINGENCY, "&Contingency",
-		     "Edit the selected contingency");
+    editMenu->Append(GBT_MENU_EDIT_STRATS, _("&Strategies"),
+		     _("Edit strategy names"));
+    editMenu->Append(GBT_MENU_EDIT_CONTINGENCY, _("&Contingency"),
+		     _("Edit the selected contingency"));
   }
-  editMenu->Append(GBT_MENU_EDIT_GAME, "&Game", "Edit game properties");
+  editMenu->Append(GBT_MENU_EDIT_GAME, _("&Game"), _("Edit game properties"));
 
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(GBT_MENU_VIEW_PROFILES, "&Profiles",
-		   "Display/hide profiles window", true);
+  viewMenu->Append(GBT_MENU_VIEW_PROFILES, _("&Profiles"),
+		   _("Display/hide profiles window"), true);
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_MENU_VIEW_OUTCOMES, "&Outcomes", 
-		   "Display and edit outcomes", true);
+  viewMenu->Append(GBT_MENU_VIEW_OUTCOMES, _("&Outcomes"), 
+		   _("Display and edit outcomes"), true);
   viewMenu->Check(GBT_MENU_VIEW_OUTCOMES, false);
-  viewMenu->Append(GBT_MENU_VIEW_SUPPORTS, "&Supports",
-		   "Display and edit supports", true);
+  viewMenu->Append(GBT_MENU_VIEW_SUPPORTS, _("&Supports"),
+		   _("Display and edit supports"), true);
   viewMenu->Check(GBT_MENU_VIEW_SUPPORTS, false);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_MENU_VIEW_DOMINANCE, "&Dominance",
-		   "Display dominance information", TRUE);
-  viewMenu->Append(GBT_MENU_VIEW_PROBABILITIES, "&Probabilities",
-		   "Display solution probabilities", TRUE);
-  viewMenu->Append(GBT_MENU_VIEW_VALUES, "&Values",
-		   "Display strategy values", TRUE);
+  viewMenu->Append(GBT_MENU_VIEW_DOMINANCE, _("&Dominance"),
+		   _("Display dominance information"), true);
+  viewMenu->Append(GBT_MENU_VIEW_PROBABILITIES, _("&Probabilities"),
+		   _("Display solution probabilities"), true);
+  viewMenu->Append(GBT_MENU_VIEW_VALUES, _("&Values"),
+		   _("Display strategy values"), true);
   if (!m_doc->HasEfg()) {
     // "Outcomes" aren't implemented in reduced normal forms
     // This probably belongs in formatting instead
     viewMenu->AppendSeparator();
-    viewMenu->Append(GBT_MENU_VIEW_OUTCOME_LABELS, "Outcome &Labels",
-		     "Display outcome labels", TRUE);
+    viewMenu->Append(GBT_MENU_VIEW_OUTCOME_LABELS, _("Outcome &Labels"),
+		     _("Display outcome labels"), true);
   }
 
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
   formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_COLORS,
-			    "&Colors", "Set colors");
+			    _("&Colors"), _("Set colors"));
   formatDisplayMenu->Append(GBT_MENU_FORMAT_DISPLAY_DECIMALS,
-			    "&Decimal Places",
-			   "Set number of decimal places to display");
+			    _("&Decimal Places"),
+			    _("Set number of decimal places to display"));
 
-  formatMenu->Append(GBT_MENU_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
-		    "Configure display options");
+  formatMenu->Append(GBT_MENU_FORMAT_DISPLAY, _("&Display"), formatDisplayMenu,
+		     _("Configure display options"));
   wxMenu *formatFontsMenu = new wxMenu;
-  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_DATA, "&Data",
-			  "Set data font");
-  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_LABELS, "&Labels", 
-			  "Set label font");
-  formatMenu->Append(GBT_MENU_FORMAT_FONTS, "&Fonts",
-		     formatFontsMenu, "Set fonts");
-  formatMenu->Append(GBT_MENU_FORMAT_AUTOSIZE, "&Autosize",
-		     "Automatically size grid rows and columns");
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_DATA, _("&Data"),
+			  _("Set data font"));
+  formatFontsMenu->Append(GBT_MENU_FORMAT_FONTS_LABELS, _("&Labels"), 
+			  _("Set label font"));
+  formatMenu->Append(GBT_MENU_FORMAT_FONTS, _("&Fonts"),
+		     formatFontsMenu, _("Set fonts"));
+  formatMenu->Append(GBT_MENU_FORMAT_AUTOSIZE, _("&Autosize"),
+		     _("Automatically size grid rows and columns"));
 
   wxMenu *toolsMenu = new wxMenu;
-  toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, "&Dominance",
-		       "Find undominated strategies");
-  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, "&Equilibrium",
-		    "Compute Nash equilibria (and refinements)");
-  toolsMenu->Append(GBT_MENU_TOOLS_QRE, "&Qre",
-		    "Compute quantal response equilibria");
-  toolsMenu->Append(GBT_MENU_TOOLS_CH, "&CH",
-		    "Compute cognitive hierarchy correspondence");
+  toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"),
+		    _("Find undominated strategies"));
+  toolsMenu->Append(GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
+		    _("Compute Nash equilibria (and refinements)"));
+  toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&Qre"),
+		    _("Compute quantal response equilibria"));
+  toolsMenu->Append(GBT_MENU_TOOLS_CH, _("&CH"),
+		    _("Compute cognitive hierarchy correspondence"));
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
+  helpMenu->Append(wxID_ABOUT, _("&About"), _("About Gambit"));
 
   wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
-  menuBar->Append(toolsMenu, "&Tools");
-  menuBar->Append(helpMenu, "&Help");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
+  menuBar->Append(toolsMenu, _("&Tools"));
+  menuBar->Append(helpMenu, _("&Help"));
 
   SetMenuBar(menuBar);
 
@@ -338,22 +340,22 @@ void NfgShow::MakeToolbar(void)
   toolBar->SetMargins(4, 4);
 
   toolBar->AddTool(wxID_NEW, wxBITMAP(new), wxNullBitmap, false,
-		   -1, -1, 0, "New game", "Create a new game");
+		   -1, -1, 0, _("New game"), _("Create a new game"));
   toolBar->AddTool(wxID_OPEN, wxBITMAP(open), wxNullBitmap, false,
-		   -1, -1, 0, "Open file", "Open a saved game");
+		   -1, -1, 0, _("Open file"), _("Open a saved game"));
   toolBar->AddTool(wxID_SAVE, wxBITMAP(save), wxNullBitmap, false,
-		   -1, -1, 0, "Save game", "Save this game");
+		   -1, -1, 0, _("Save game"), _("Save this game"));
   toolBar->AddSeparator();
 
   toolBar->AddTool(wxID_PREVIEW, wxBITMAP(preview), wxNullBitmap,
-		   false, -1, -1, 0, "Print Preview",
-		   "View a preview of the game printout");
+		   false, -1, -1, 0, _("Print Preview"),
+		   _("View a preview of the game printout"));
   toolBar->AddTool(wxID_PRINT, wxBITMAP(print), wxNullBitmap, false,
-		   -1, -1, 0, "Print", "Print this game");
+		   -1, -1, 0, _("Print"), _("Print this game"));
   toolBar->AddSeparator();
 
   toolBar->AddTool(wxID_ABOUT, wxBITMAP(help), wxNullBitmap, false,
-		   -1, -1, 0, "Help", "Table of contents");
+		   -1, -1, 0, _("Help"), _("Table of contents"));
 
   toolBar->Realize();
   toolBar->SetRows(1);
@@ -375,10 +377,10 @@ void NfgShow::OnFileOpen(wxCommandEvent &)
 
 void NfgShow::OnFileSave(wxCommandEvent &p_event)
 {
-  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == "") {
-    wxFileDialog dialog(this, "Choose file",
+  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename() == wxT("")) {
+    wxFileDialog dialog(this, _("Choose file"),
 			wxPathOnly(m_doc->GetFilename()),
-			wxFileNameFromPath(m_doc->GetFilename()), "*.nfg",
+			wxFileNameFromPath(m_doc->GetFilename()), wxT("*.nfg"),
 			wxSAVE | wxOVERWRITE_PROMPT);
 
     switch (dialog.ShowModal()) {
@@ -392,54 +394,55 @@ void NfgShow::OnFileSave(wxCommandEvent &p_event)
   }
 
   try {
-    gFileOutput file(m_doc->GetFilename().c_str());
+    gFileOutput file(m_doc->GetFilename().mb_str());
     gbtNfgGame nfg = CompressNfg(m_doc->GetNfg(), m_doc->GetNfgSupport());
     nfg.WriteNfg(file);
     m_doc->SetIsModified(false);
   }
   catch (gFileOutput::OpenFailed &) {
-    wxMessageBox(wxString::Format("Could not open %s for writing.",
-				  m_doc->GetFilename().c_str()),
-		 "Error", wxOK, this);
+    wxMessageBox(wxString::Format(_("Could not open %s for writing."),
+				  (const char *) m_doc->GetFilename().mb_str()),
+		 _("Error"), wxOK, this);
   }
   catch (gFileOutput::WriteFailed &) {
-    wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
-				  m_doc->GetFilename().c_str()),
-		 "Error", wxOK, this);
+    wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
+				  (const char *) m_doc->GetFilename().mb_str()),
+		 _("Error"), wxOK, this);
   }
   catch (gException &) {
-    wxMessageBox("Internal exception in Gambit", "Error", wxOK, this);
+    wxMessageBox(_("Internal exception in Gambit"), _("Error"), wxOK, this);
   }
 }
 
 void NfgShow::OnFileExportHTML(wxCommandEvent &)
 {
-  wxFileDialog dialog(this, "Choose output file", wxGetApp().CurrentDir(), "",
-		      "HTML files (*.html)|*.html|"
-		      "HTML files (*.htm)|*.htm", wxSAVE);
+  wxFileDialog dialog(this, _("Choose output file"),
+		      wxGetApp().CurrentDir(), wxT(""),
+		      _("HTML files (*.html)|*.html|"
+			"HTML files (*.htm)|*.htm"), wxSAVE);
 
   if (dialog.ShowModal() != wxID_OK) {
     return;
   }
   
   try {
-    gFileOutput file(dialog.GetPath().c_str());
+    gFileOutput file(dialog.GetPath().mb_str());
     file << gbtBuildHtml(m_doc->GetNfg(),
 			 m_doc->GetRowPlayer(),
-			 m_doc->GetColPlayer()).c_str() << '\n';
+			 m_doc->GetColPlayer()).mb_str() << '\n';
   }
   catch (gFileOutput::OpenFailed &) { 
-    wxMessageBox(wxString::Format("Could not open %s for writing.",
-				  m_doc->GetFilename().c_str()),
-		 "Error", wxOK, this);
+    wxMessageBox(wxString::Format(_("Could not open %s for writing."),
+				  (const char *) m_doc->GetFilename().mb_str()),
+		 _("Error"), wxOK, this);
   }
   catch (gFileOutput::WriteFailed &) {
-    wxMessageBox(wxString::Format("Write error occurred in saving %s.\n",
-				  m_doc->GetFilename().c_str()),
-		 "Error", wxOK, this);
+    wxMessageBox(wxString::Format(_("Write error occurred in saving %s."),
+				  (const char *) m_doc->GetFilename().mb_str()),
+		 _("Error"), wxOK, this);
   }
   catch (...) {
-    wxMessageBox("An internal exeception occurred in Gambit", "Error",
+    wxMessageBox(_("An internal exeception occurred in Gambit"), _("Error"),
 		 wxOK, this);
   }
 }
@@ -460,11 +463,11 @@ void NfgShow::OnFilePrintPreview(wxCommandEvent &)
     new wxPrintPreview(new NfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(), 
 				       m_doc->GetColPlayer(),
-				       (char *) m_doc->GetNfg().GetLabel()),
+				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetLabel())),
 		       new NfgPrintout(m_doc->GetNfg(),
 				       m_doc->GetRowPlayer(),
 				       m_doc->GetColPlayer(),
-				       (char *) m_doc->GetNfg().GetLabel()),
+				       wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetLabel())),
 		       &data);
 
   if (!preview->Ok()) {
@@ -473,7 +476,7 @@ void NfgShow::OnFilePrintPreview(wxCommandEvent &)
   }
 
   wxPreviewFrame *frame = new wxPreviewFrame(preview, this,
-					     "Print Preview",
+					     _("Print Preview"),
 					     wxPoint(100, 100),
 					     wxSize(600, 650));
   frame->Initialize();
@@ -486,11 +489,12 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
   wxPrinter printer(&data);
   NfgPrintout printout(m_doc->GetNfg(),
 		       m_doc->GetRowPlayer(), m_doc->GetColPlayer(),
-		       (char *) m_doc->GetNfg().GetLabel());
+		       wxString::Format(wxT("%s"),
+					(char *) m_doc->GetNfg().GetLabel()));
 
   if (!printer.Print(this, &printout, true)) {
     if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
-      wxMessageBox("There was an error in printing", "Error", wxOK);
+      wxMessageBox(_("There was an error in printing"), _("Error"), wxOK);
     }
     // Otherwise, user hit "cancel"; just be quiet and return.
     return;
@@ -622,7 +626,7 @@ void NfgShow::OnFormatDisplayColors(wxCommandEvent &)
 
 void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {
-  dialogSpinCtrl dialog(this, "Decimal places", 0, 25,
+  dialogSpinCtrl dialog(this, _("Decimal places"), 0, 25,
 			m_doc->GetPreferences().NumDecimals());
 
   if (dialog.ShowModal() == wxID_OK) {
@@ -804,8 +808,8 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
     catch (gSignalBreak &) { }
     catch (...) {
       wxMessageDialog message(this,
-			      "An exception occurred in computing equilibria",
-			      "Error", wxID_OK);
+			      _("An exception occurred in computing equilibria"),
+			      _("Error"), wxID_OK);
       message.ShowModal();
     }
 
@@ -948,7 +952,7 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
   }
 
   if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+    if (wxMessageBox(_("Game has been modified.  Close anyway?"), _("Warning"),
 		     wxOK | wxCANCEL) == wxCANCEL) {
       p_event.Veto();
       return;

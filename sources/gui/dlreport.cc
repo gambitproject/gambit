@@ -39,7 +39,7 @@ BEGIN_EVENT_TABLE(dialogReport, wxDialog)
 END_EVENT_TABLE()
 
 dialogReport::dialogReport(wxWindow *p_parent, const wxString &p_text)
-  : wxDialog(p_parent, -1, "Report",wxDefaultPosition)
+  : wxDialog(p_parent, -1, _("Report"), wxDefaultPosition)
 {
   SetAutoLayout(true);
 
@@ -53,11 +53,11 @@ dialogReport::dialogReport(wxWindow *p_parent, const wxString &p_text)
   m_text->SetFont(font);
   topSizer->Add(m_text, 1, wxALL | wxEXPAND, 5);
 
-  topSizer->Add(new wxButton(this, idBUTTON_FILE, "Save to file..."),
+  topSizer->Add(new wxButton(this, idBUTTON_FILE, _("Save to file...")),
 		0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
@@ -71,26 +71,26 @@ dialogReport::dialogReport(wxWindow *p_parent, const wxString &p_text)
 
 void dialogReport::OnFile(wxCommandEvent &)
 {
-  wxFileDialog dialog(this, "Save profile report", "", "", "*.*", wxSAVE);
+  wxFileDialog dialog(this, _("Save profile report"), wxT(""), wxT(""),
+		      wxT("*.*"), wxSAVE);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      gFileOutput file(dialog.GetPath().c_str());
+      gFileOutput file(dialog.GetPath().mb_str());
       file << m_text->GetValue().c_str();
     }
     catch (gFileOutput::OpenFailed &) {
       wxMessageDialog msgDialog(this,
-				wxString::Format("Could not open '%s' "
-						 "for writing.",
-						 dialog.GetPath().c_str()),
-				"Error", wxOK | wxCENTER);
+				_("Could not open '") + dialog.GetPath() +
+				_("' for writing."),
+				_("Error"), wxOK | wxCENTER);
       msgDialog.ShowModal();
     }
     catch (gFileOutput::WriteFailed &) {
       wxMessageDialog msgDialog(this,
-				wxString::Format("Error in writing to  '%s'.",
-						 dialog.GetPath().c_str()),
-				"Error", wxOK | wxCENTER);
+				_("Error in writing to '") +
+				dialog.GetPath() + wxT("'."),
+				_("Error"), wxOK | wxCENTER);
       msgDialog.ShowModal();
     }
   }

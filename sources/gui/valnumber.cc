@@ -124,20 +124,22 @@ bool gNumberValidator::Validate(wxWindow *p_parent)
   wxString value(control->GetValue());
 
   if (!IsNumeric(value)) {
-    wxMessageBox(wxString("The value ") + value + " in " +
-		 m_validatorWindow->GetName() + " is not a valid number.",
-		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
+    wxMessageBox(wxT("The value ") + value + wxT(" in ") +
+		 m_validatorWindow->GetName() + wxT(" is not a valid number."),
+		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
   }
 
-  if ((m_hasMin && ToNumber(value.c_str()) < m_minValue) ||
-      (m_hasMax && ToNumber(value.c_str()) > m_maxValue)) {
-    wxMessageBox(wxString("The value ") + value + " in " +
-		 m_validatorWindow->GetName() + " is out of the range [" +
-		 wxString((char *) ToText(m_minValue)) + ", " + 
-		 wxString((char *) ToText(m_maxValue)) + "].",
-		 "Error", wxOK | wxICON_EXCLAMATION, p_parent);
+  if ((m_hasMin && ToNumber(gText(value.mb_str())) < m_minValue) ||
+      (m_hasMax && ToNumber(gText(value.mb_str())) > m_maxValue)) {
+    wxMessageBox(wxT("The value ") + value + wxT(" in ") +
+		 m_validatorWindow->GetName() + wxT(" is out of the range [") +
+		 wxString::Format(wxT("%s"), (char *) ToText(m_minValue)) + 
+		 wxT(", ") + 
+		 wxString::Format(wxT("%s"), (char *) ToText(m_maxValue)) +
+		 wxT("]."),
+		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
     return false;
   }

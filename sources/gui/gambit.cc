@@ -53,9 +53,9 @@ GambitApp::GambitApp(void)
 bool GambitApp::OnInit(void)
 {
 #include "bitmaps/gambit.xpm"
-  wxConfig config("Gambit");
+  wxConfig config(wxT("Gambit"));
   m_fileHistory.Load(config);
-  config.Read("/General/CurrentDirectory", &m_currentDir, "");
+  config.Read(wxT("/General/CurrentDirectory"), &m_currentDir, wxT(""));
 
   wxBitmap bitmap(wxBITMAP(gambit));
   wxSplashScreen *splash =
@@ -93,7 +93,7 @@ bool GambitApp::OnInit(void)
 
 GambitApp::~GambitApp()
 {
-  wxConfig config("Gambit");
+  wxConfig config(wxT("Gambit"));
   m_fileHistory.Save(config);
 }
 
@@ -137,16 +137,16 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 
 void GambitApp::OnFileOpen(wxWindow *p_parent)
 {
-  wxFileDialog dialog(p_parent, "Choose file", CurrentDir(), "", 
-		      "Games (*.?fg)|*.?fg|"
-		      "Extensive form games (*.efg)|*.efg|"
-		      "Normal form games (*.nfg)|*.nfg|"
-		      "All files|*.*");
+  wxFileDialog dialog(p_parent, _("Choose file"), CurrentDir(), wxT(""), 
+		      _("Extensive form games (*.efg)|*.efg|"
+			"Normal form games (*.nfg)|*.nfg|"
+			"All files|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
     SetCurrentDir(wxPathOnly(dialog.GetPath()));
-    wxConfig config("Gambit");
-    config.Write("/General/CurrentDirectory", wxPathOnly(dialog.GetPath()));
+    wxConfig config(wxT("Gambit"));
+    config.Write(wxT("/General/CurrentDirectory"),
+		 wxPathOnly(dialog.GetPath()));
     LoadFile(dialog.GetPath());
   }
 }
@@ -166,25 +166,25 @@ void GambitApp::OnHelpIndex(void)
 
 void GambitApp::OnHelpAbout(wxWindow *p_parent)
 {
-  dialogAbout dialog(p_parent, "About Gambit...",
-		     "Gambit Graphical User Interface",
-		     "Version " VERSION);
+  dialogAbout dialog(p_parent, _("About Gambit..."),
+		     _("Gambit Graphical User Interface"),
+		     _("Version " VERSION));
   dialog.ShowModal();
 }
 
 void GambitApp::LoadFile(const wxString &p_filename)
 {    
   try {
-    gFileInput infile(p_filename);
+    gFileInput infile(p_filename.mb_str());
     gbtNfgGame nfg = ReadNfgFile(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new NfgShow(new gbtGameDocument(nfg, p_filename), 0);
     return;
   }
   catch (gFileInput::OpenFailed &) {
-    wxMessageBox(wxString::Format("Could not open '%s' for reading",
-				  p_filename.c_str()),
-		 "Error", wxOK, 0);
+    wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				  (const char *) p_filename.mb_str()),
+		 _("Error"), wxOK, 0);
     return;
   }
   catch (gbtNfgParserError &) {
@@ -192,21 +192,21 @@ void GambitApp::LoadFile(const wxString &p_filename)
   }
 
   try {
-    gFileInput infile(p_filename);
+    gFileInput infile(p_filename.mb_str());
     gbtEfgGame efg = ReadEfg(infile);
     m_fileHistory.AddFileToHistory(p_filename);
     (void) new EfgShow(new gbtGameDocument(efg, p_filename), 0);
   }
   catch (gFileInput::OpenFailed &) { 
-    wxMessageBox(wxString::Format("Could not open '%s' for reading",
-				  p_filename.c_str()),
-		 "Error", wxOK, 0);
+    wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				  (const char *) p_filename.mb_str()),
+		 _("Error"), wxOK, 0);
     return;
   }
   catch (...) {
-    wxMessageBox(wxString::Format("File '%s' not in a recognized format",
-				  p_filename.c_str()),
-		 "Error", wxOK, 0);
+    wxMessageBox(wxString::Format(_("File '%s' not in a recognized format"),
+				  (const char *) p_filename.mb_str()),
+		 _("Error"), wxOK, 0);
     return;
 
   }
@@ -222,6 +222,7 @@ void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
             long p_style /*= wxOK | wxCENTRE*/)
 {
   gText message = "An internal error occurred in Gambit:\n" + p_message;
-  wxMessageBox((char *) message, "Gambit Error", p_style, p_parent);
+  wxMessageBox(wxString::Format(wxT("%s"), (char *) message),
+	       _("Gambit Error"), p_style, p_parent);
 }
 

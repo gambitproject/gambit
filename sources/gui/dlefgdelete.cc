@@ -43,27 +43,28 @@ BEGIN_EVENT_TABLE(dialogEfgDelete, wxDialog)
 END_EVENT_TABLE()
 
 dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
-  : wxDialog(p_parent, -1, "Delete...", wxDefaultPosition), m_node(p_node)
+  : wxDialog(p_parent, -1, _("Delete..."), wxDefaultPosition), m_node(p_node)
 {
   SetAutoLayout(true);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *choicesSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxString deleteChoices[] = { "Entire subtree", "Selected move" };
-  m_deleteTree = new wxRadioBox(this, idRADIOBOX_DELETE_TREE, "Delete",
+  wxString deleteChoices[] = { _("Entire subtree"), _("Selected move") };
+  m_deleteTree = new wxRadioBox(this, idRADIOBOX_DELETE_TREE, _("Delete"),
 				wxDefaultPosition, wxDefaultSize,
 				2, deleteChoices, 1, wxRA_SPECIFY_COLS);
   m_deleteTree->SetSelection(0);
   choicesSizer->Add(m_deleteTree, 0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *actionSizer = new wxBoxSizer(wxVERTICAL);
-  actionSizer->Add(new wxStaticText(this, -1, "Keep subtree after action"),
+  actionSizer->Add(new wxStaticText(this, -1, _("Keep subtree after action")),
 		   0, wxCENTER | wxALL, 5);
   m_branchList = new wxListBox(this, -1);
   for (int act = 1; act <= m_node.NumChildren(); act++) {
-    m_branchList->Append((char *) (ToText(act) + ": " + 
-				   m_node.GetInfoset().GetAction(act).GetLabel()));
+    m_branchList->Append(wxString::Format(wxT("%s"),
+					  (char *) (ToText(act) + ": " + 
+						    m_node.GetInfoset().GetAction(act).GetLabel())));
   }
   m_branchList->SetSelection(0);
   m_branchList->Enable(false);
@@ -72,11 +73,11 @@ dialogEfgDelete::dialogEfgDelete(wxWindow *p_parent, gbtEfgNode p_node)
   topSizer->Add(choicesSizer, 0, wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
   SetSizer(topSizer); 

@@ -156,8 +156,9 @@ int gbtProfileTable::GetNumberCols(void)
 
 wxString gbtProfileTable::GetColLabelValue(int p_col)
 {
-  wxString labels[] = { "Name", "Creator", "BNash", "SPE", "Seq", "BLiap",
-			"MNash", "THPE", "NLiap" };
+  wxString labels[] = { _("Name"), _("Creator"), 
+			_("BNash"), _("SPE"), _("Seq"), _("BLiap"),
+			_("MNash"), _("THPE"), _("NLiap") };
   if (p_col < GetInfoColumns()) {
     return labels[p_col];
   }
@@ -170,7 +171,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	  gbtEfgInfoset infoset = player.GetInfoset(iset);
 	  for (int act = 1; act <= infoset.NumActions(); col++, act++) {
 	    if (col == p_col) {
-	      return wxString::Format("%s:%s:%s",
+	      return wxString::Format(wxT("%s:%s:%s"),
 				      (char *) player.GetLabel(),
 				      (char *) infoset.GetLabel(),
 				      (char *) infoset.GetAction(act).GetLabel());
@@ -181,7 +182,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
       else {
 	for (int iset = 1; iset <= player.NumInfosets(); col++, iset++) {
 	  if (col == p_col) {
-	    return wxString::Format("%s:%s",
+	    return wxString::Format(wxT("%s:%s"),
 				    (char *) player.GetLabel(),
 				    (char *) player.GetInfoset(iset).GetLabel());
 	  }
@@ -196,7 +197,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
 	for (int st = 1; st <= player.NumStrategies(); col++, st++) {
 	  if (col == p_col) {
-	    return wxString::Format("%s:%s",
+	    return wxString::Format(wxT("%s:%s"),
 				    (char *) player.GetLabel(),
 				    (char *) player.GetStrategy(st).GetLabel());
 	  }
@@ -204,11 +205,11 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
       }
     }
     else {
-      return (char *) m_doc->GetNfg().GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1).GetLabel();
+      return wxString::Format(wxT("%s"), (char *) m_doc->GetNfg().GetPlayer(p_col - GetInfoColumns() - GetBehavColumns() + 1).GetLabel());
     }
   }
 
-  return "";
+  return wxT("");
 }
 
 wxString gbtProfileTable::GetValue(int p_row, int p_col) 
@@ -221,63 +222,64 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 
   switch (p_col) {
   case 0:
-    return (char *) mixed->GetLabel();
+    return wxString::Format(wxT("%s"), (char *) mixed->GetLabel());
   case 1:
-    return (char *) mixed->GetCreator();
+    return wxString::Format(wxT("%s"), (char *) mixed->GetCreator());
   case 2:
     if (behav) {
-      return (char *) ToText(behav->IsNash());
+      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsNash()));
     }
     else {
-      return "";
+      return wxT("");
     }
   case 3:
     if (behav) {
-      return (char *) ToText(behav->IsSubgamePerfect());
+      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSubgamePerfect()));
     }
     else {
-      return "";
+      return wxT("");
     }
   case 4:
     if (behav) {
-      return (char *) ToText(behav->IsSequential());
+      return wxString::Format(wxT("%s"), (char *) ToText(behav->IsSequential()));
     }
     else {
-      return "";
+      return wxT("");
     }
   case 5:
     if (behav) {
-      return (char *) ToText(behav->GetLiapValue(),
-			     m_doc->GetPreferences().NumDecimals());
+      return wxString::Format(wxT("%s"), (char *) ToText(behav->GetLiapValue(),
+							 m_doc->GetPreferences().NumDecimals()));
     }
     else {
-      return "";
+      return wxT("");
     }
   case 6:
-    return (char *) ToText(mixed->IsNash());
+    return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsNash()));
   case 7:
-    return (char *) ToText(mixed->IsPerfect());
+    return wxString::Format(wxT("%s"), (char *) ToText(mixed->IsPerfect()));
   case 8:
-    return (char *) ToText(mixed->GetLiapValue(),
-			   m_doc->GetPreferences().NumDecimals());
+    return wxString::Format(wxT("%s"), (char *) ToText(mixed->GetLiapValue(),
+						       m_doc->GetPreferences().NumDecimals()));
   default:
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
       int offset = GetInfoColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return (char *) ToText((*behav->Profile())[p_col - offset],
-			       m_doc->GetPreferences().NumDecimals());
+	return wxString::Format(wxT("%s"), (char *) ToText((*behav->Profile())[p_col - offset],
+							   m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
 	const gPVector<gNumber> &profile = behav->Profile()->GetPVector();
-	wxString ret = _T("("); 
+	wxString ret = wxT("("); 
 	for (int i = 1; i <= profile.Lengths()[p_col - offset]; i++) {
 	  if (i > 1) {
-	    ret += _T(",");
+	    ret += wxT(",");
 	  }
-	  ret += (char *) ToText(profile(p_col - offset, i),
-				 m_doc->GetPreferences().NumDecimals());
+	  ret += wxString::Format(wxT("%s"),
+				  (char *) ToText(profile(p_col - offset, i),
+						  m_doc->GetPreferences().NumDecimals()));
 	}
-	return ret + _T(")");
+	return ret + wxT(")");
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	for (int pl = 1, col = GetInfoColumns();
@@ -289,16 +291,17 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	      wxString ret;
 	      for (int act = 1; act <= infoset.NumActions(); act++) {
 		if ((*behav)(infoset.GetAction(act)) > gNumber(0)) {
-		  if (ret != "") {
-		    ret += _T("+");
+		  if (ret != wxT("")) {
+		    ret += wxT("+");
 		  }
-		  ret += (char *) ToText((*behav)(infoset.GetAction(act)),
-					 m_doc->GetPreferences().NumDecimals());
+		  ret += wxString::Format(wxT("%s"),
+					  (char *) ToText((*behav)(infoset.GetAction(act)),
+							  m_doc->GetPreferences().NumDecimals()));
 		  if (infoset.GetAction(act).GetLabel() != "") {
-		    ret += _T("*[") + infoset.GetAction(act).GetLabel() + _T("]");
+		    ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) infoset.GetAction(act).GetLabel()) + wxT("]");
 		  }
 		  else {
-		    ret += wxString::Format("*[#%d]", act);
+		    ret += wxString::Format(wxT("*[#%d]"), act);
 		  }
 		}
 	      }
@@ -308,27 +311,28 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	}
       }
       else {
-	return "Unimplemented";
+	return wxT("Unimplemented");
       }
     }
     else {
       int offset = GetInfoColumns() + GetBehavColumns() - 1;
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	return (char *) ToText((*mixed->Profile())[p_col - offset],
-			       m_doc->GetPreferences().NumDecimals());
+	return wxString::Format(wxT("%s"),
+				(char *) ToText((*mixed->Profile())[p_col - offset],
+						m_doc->GetPreferences().NumDecimals()));
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_VECTOR) {
-	wxString ret = _T("("); 
+	wxString ret = wxT("("); 
 	gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(p_col - offset);
 	for (int st = 1; st <= player.NumStrategies(); st++) {
 	  gbtNfgStrategy strategy = player.GetStrategy(st);
 	  if (st > 1) {
-	    ret += _T(",");
+	    ret += wxT(",");
 	  }
-	  ret += (char *) ToText((*mixed)(strategy),
-				 m_doc->GetPreferences().NumDecimals());
+	  ret += wxString::Format(wxT("%s"), (char *) ToText((*mixed)(strategy),
+							     m_doc->GetPreferences().NumDecimals()));
 	}
-	return ret + _T(")");
+	return ret + wxT(")");
       }
       else if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_MYERSON) {
 	wxString ret;
@@ -336,27 +340,28 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	for (int st = 1; st <= player.NumStrategies(); st++) {
 	  gbtNfgStrategy strategy = player.GetStrategy(st);
 	  if ((*mixed)(strategy) > gNumber(0)) {
-	    if (ret != "") {
-	      ret += _T("+");
+	    if (ret != wxT("")) {
+	      ret += wxT("+");
 	    }
-	    ret += (char *) ToText((*mixed)(strategy),
-				   m_doc->GetPreferences().NumDecimals());
+	    ret += wxString::Format(wxT("%s"),
+				    (char *) ToText((*mixed)(strategy),
+						    m_doc->GetPreferences().NumDecimals()));
 	    if (strategy.GetLabel() != "") {
-	      ret += _T("*[") + player.GetStrategy(st).GetLabel() + _T("]");
+	      ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) player.GetStrategy(st).GetLabel()) + wxT("]");
 	    }
 	    else {
-	      ret += wxString::Format("*[#%d]", st);
+	      ret += wxString::Format(wxT("*[#%d]"), st);
 	    }
 	  }
 	}
 	return ret;
       }
       else {
-	return "Unimplemented";
+	return wxT("Unimplemented");
       }
     }
   }
-  return "";
+  return wxT("");
 }
 
 bool gbtProfileTable::InsertRows(size_t pos, size_t numRows)
@@ -595,72 +600,72 @@ wxString gbtProfileGrid::GetReport(void) const
   const gList<MixedSolution> &profiles = m_doc->AllMixedProfiles();
   gbtNfgGame nfg = m_doc->GetNfg();
 
-  report += wxString::Format("Mixed strategy profiles on game '%s' [%s]\n\n",
+  report += wxString::Format(_("Mixed strategy profiles on game '%s' [%s]\n\n"),
 			     (const char *) nfg.GetLabel(),
-			     m_doc->GetFilename().c_str());
+			     (const char *) m_doc->GetFilename().mb_str());
 
-  report += wxString::Format("Number of profiles: %d\n", profiles.Length());
+  report += wxString::Format(_("Number of profiles: %d\n"), profiles.Length());
 
   for (int i = 1; i <= profiles.Length(); i += 4) {
-    report += "\n----------\n\n";
+    report += wxT("\n----------\n\n");
 
-    report += "          ";
+    report += wxT("          ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format("%-15s ", 
+      report += wxString::Format(wxT("%-15s "), 
 				 (const char *) profiles[i+j].GetLabel());
     }
-    report += "\n";
+    report += wxT("\n");
 
-    report += "          ";
+    report += wxT("          ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += ("--------------- "); 
+      report += wxT("--------------- "); 
     }
-    report += "\n";
+    report += wxT("\n");
 
-    report += "Creator:  ";
+    report += wxT("Creator:  ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format("%-15s ",
+      report += wxString::Format(wxT("%-15s "),
 				 (const char *) profiles[i+j].GetCreator());
     }
-    report += "\n";
+    report += wxT("\n");
 
-    report += "Nash?     ";
+    report += wxT("Nash?     ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format("%-15s ",
+      report += wxString::Format(wxT("%-15s "),
 				 (const char *) ToText(profiles[i+j].IsNash()));
     }
-    report += "\n";
+    report += wxT("\n");
 
-    report += "Perfect?  ";
+    report += wxT("Perfect?  ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format("%-15s ",
+      report += wxString::Format(wxT("%-15s "),
 				 (const char *) ToText(profiles[i+j].IsPerfect()));
     }
-    report += "\n";
+    report += wxT("\n");
 
-    report += "Liap:     ";
+    report += wxT("Liap:     ");
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-      report += wxString::Format("%-15s ",
+      report += wxString::Format(wxT("%-15s "),
 				 (const char *) ToText(profiles[i+j].GetLiapValue()));
     }
-    report += "\n\n";
+    report += wxT("\n\n");
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
       gbtNfgPlayer player = nfg.GetPlayer(pl);
-      report += wxString::Format("%s\n", (const char *) player.GetLabel());
+      report += wxString::Format(wxT("%s\n"), (const char *) player.GetLabel());
 
       for (int st = 1; st <= player.NumStrategies(); st++) {
-	report += wxString::Format("%2d: %-6s", st,
+	report += wxString::Format(wxT("%2d: %-6s"), st,
 				   (const char *) player.GetStrategy(st).GetLabel());
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
-	  report += wxString::Format("%-15s ", 
+	  report += wxString::Format(wxT("%-15s "), 
 				     (const char *) ToText((*profiles[i+j].Profile())(pl, st)));
 	}
-	report += "\n";
+	report += wxT("\n");
       }
 
-      report += "\n";
+      report += wxT("\n");
     }
   }
 
@@ -683,50 +688,51 @@ BEGIN_EVENT_TABLE(gbtProfileFrame, wxFrame)
 END_EVENT_TABLE()
 
 gbtProfileFrame::gbtProfileFrame(gbtGameDocument *p_doc, wxWindow *p_parent)
-  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(300, 200)),
+  : wxFrame(p_parent, -1, wxT(""), wxDefaultPosition, wxSize(300, 200)),
     gbtGameView(p_doc)
 {
   m_grid = new gbtProfileGrid(p_doc, this);
 
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(GBT_MENU_PROFILES_REPORT, "Report",
-		   "Generate a report with information on profiles");
+  fileMenu->Append(GBT_MENU_PROFILES_REPORT, _("Report"),
+		   _("Generate a report with information on profiles"));
   fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(wxID_CLOSE, _("&Close"), _("Close this window"));
 
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(GBT_MENU_PROFILES_NEW, "New",
-		   "Create a new profile");
-  editMenu->Append(GBT_MENU_PROFILES_DUPLICATE, "Duplicate",
-		   "Duplicate this profile");
-  editMenu->Append(GBT_MENU_PROFILES_DELETE, "Delete",
-		   "Delete this profile");
-  editMenu->Append(GBT_MENU_PROFILES_PROPERTIES, "Properties",
-		   "View and edit properties of this profile");
+  editMenu->Append(GBT_MENU_PROFILES_NEW, _("New"),
+		   _("Create a new profile"));
+  editMenu->Append(GBT_MENU_PROFILES_DUPLICATE, _("Duplicate"),
+		   _("Duplicate this profile"));
+  editMenu->Append(GBT_MENU_PROFILES_DELETE, _("Delete"),
+		   _("Delete this profile"));
+  editMenu->Append(GBT_MENU_PROFILES_PROPERTIES, _("Properties"),
+		   _("View and edit properties of this profile"));
 
   wxMenu *viewMenu = new wxMenu;
-  viewMenu->Append(GBT_MENU_PROFILES_INFO, "Info",
-		   "Display general information about profiles", true);
-  viewMenu->Append(GBT_MENU_PROFILES_BEHAV, "Behavior",
-		   "Display behavior strategy representations", true);
+  viewMenu->Append(GBT_MENU_PROFILES_INFO, _("Info"),
+		   _("Display general information about profiles"), true);
+  viewMenu->Append(GBT_MENU_PROFILES_BEHAV, _("Behavior"),
+		   _("Display behavior strategy representations"), true);
   viewMenu->Enable(GBT_MENU_PROFILES_BEHAV, m_doc->HasEfg());
-  viewMenu->Append(GBT_MENU_PROFILES_MIXED, "Mixed",
-		   "Display mixed strategy representations", true);
+  viewMenu->Append(GBT_MENU_PROFILES_MIXED, _("Mixed"),
+		   _("Display mixed strategy representations"), true);
   viewMenu->AppendSeparator();
-  viewMenu->Append(GBT_MENU_PROFILES_GRID, "Grid",
-		   "Display probabilities in grid format", true);
-  viewMenu->Append(GBT_MENU_PROFILES_MYERSON, "Myerson",
-		   "Display probabilities in Myerson (bracket) format", true);
-  viewMenu->Append(GBT_MENU_PROFILES_VECTOR, "Vector",
-		   "Display probabilities in vector format", true);
+  viewMenu->Append(GBT_MENU_PROFILES_GRID, _("Grid"),
+		   _("Display probabilities in grid format"), true);
+  viewMenu->Append(GBT_MENU_PROFILES_MYERSON, _("Myerson"),
+		   _("Display probabilities in Myerson (bracket) format"),
+		   true);
+  viewMenu->Append(GBT_MENU_PROFILES_VECTOR, _("Vector"),
+		   _("Display probabilities in vector format"), true);
 
   wxMenu *formatMenu = new wxMenu;
 
   wxMenuBar *menuBar = new wxMenuBar;
-  menuBar->Append(fileMenu, "&File");
-  menuBar->Append(editMenu, "&Edit");
-  menuBar->Append(viewMenu, "&View");
-  menuBar->Append(formatMenu, "&Format");
+  menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(editMenu, _("&Edit"));
+  menuBar->Append(viewMenu, _("&View"));
+  menuBar->Append(formatMenu, _("&Format"));
   SetMenuBar(menuBar);
 
   Show(false);
@@ -831,13 +837,13 @@ void gbtProfileFrame::OnUpdate(gbtGameView *p_sender)
     m_grid->SetSize(size.GetWidth() + 1, size.GetHeight() + 1);
     m_grid->SetScrollRate(0, 0);
 
-    if (m_doc->GetFilename() != "") {
-      SetTitle(wxString::Format("Gambit - Profiles: [%s] %s", 
-				m_doc->GetFilename().c_str(), 
+    if (m_doc->GetFilename() != wxT("")) {
+      SetTitle(wxString::Format(_("Gambit - Profiles: [%s] %s"), 
+				(const char *) m_doc->GetFilename().mb_str(), 
 				(char *) m_doc->GetNfg().GetLabel()));
     }
     else {
-      SetTitle(wxString::Format("Gambit - Profiles: %s",
+      SetTitle(wxString::Format(_("Gambit - Profiles: %s"),
 				(char *) m_doc->GetNfg().GetLabel()));
     }
   }

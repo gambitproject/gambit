@@ -48,23 +48,27 @@ END_EVENT_TABLE()
 
 dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 				 const BehavSolution &p_profile)
-  : wxDialog(p_parent, -1, "Behavior profile properties", wxDefaultPosition),
+  : wxDialog(p_parent, -1, _("Behavior profile properties"),
+	     wxDefaultPosition),
     m_profile(p_profile), m_lastInfoset(0), m_map(gbtEfgInfoset())
 {
   SetAutoLayout(true);
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *nameSizer = new wxBoxSizer(wxHORIZONTAL);
-  nameSizer->Add(new wxStaticText(this, wxID_STATIC, "Profile name"),
+  nameSizer->Add(new wxStaticText(this, wxID_STATIC, _("Profile name")),
 		 0, wxALL, 5);
-  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetLabel());
+  m_profileName = new wxTextCtrl(this, -1, 
+				 wxString::Format(wxT("%s"),
+						  (char *) p_profile.GetLabel()));
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nameSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxHORIZONTAL);
   m_infosetTree = new wxTreeCtrl(this, idINFOSET_TREE,
 				 wxDefaultPosition, wxSize(200, 200));
-  m_infosetTree->AddRoot((char *) p_profile.GetLabel());
+  m_infosetTree->AddRoot(wxString::Format(wxT("%s"),
+					  (char *) p_profile.GetLabel()));
 
   for (int pl = 1; ; pl++) {
     if (p_profile.GetGame().GetPlayer(pl).NumInfosets() > 0) {
@@ -79,22 +83,26 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     wxTreeItemId id;
     if (player.GetLabel() != "") {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
-				     (char *) player.GetLabel());
+				     wxString::Format(wxT("%s"),
+						      (char *) player.GetLabel()));
     }
     else {
       id = m_infosetTree->AppendItem(m_infosetTree->GetRootItem(),
-				     wxString::Format("Player %d", pl));
+				     wxString::Format(wxT("Player %d"), pl));
     }
     m_infosetTree->SetItemBold(id, true);
     for (int iset = 1; iset <= player.NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player.GetInfoset(iset);
       wxTreeItemId isetID;
       if (infoset.GetLabel() != "") {
-	isetID = m_infosetTree->AppendItem(id, (char *) infoset.GetLabel());
+	isetID = m_infosetTree->AppendItem(id,
+					   wxString::Format(wxT("%s"),
+							    (char *) infoset.GetLabel()));
       }
       else {
-	isetID = m_infosetTree->AppendItem(id, wxString::Format("(%d,%d)",
-								pl, iset));
+	isetID = m_infosetTree->AppendItem(id,
+					   wxString::Format(wxT("(%d,%d)"),
+							    pl, iset));
       }
       m_map.Define(isetID, player.GetInfoset(iset));
       if (player.GetInfoset(iset) == m_lastInfoset) {
@@ -109,13 +117,15 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   m_probGrid = new wxGrid(this, idPROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
   m_probGrid->CreateGrid(m_lastInfoset.NumActions(), 1);
-  m_probGrid->SetLabelValue(wxHORIZONTAL, "Probability", 0);
+  m_probGrid->SetLabelValue(wxHORIZONTAL, _("Probability"), 0);
   m_probGrid->SetDefaultCellAlignment(wxRIGHT, wxCENTER);
   for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
-			      (char *) m_lastInfoset.GetAction(act).GetLabel(),
+			      wxString::Format(wxT("%s"),
+					       (char *) m_lastInfoset.GetAction(act).GetLabel()),
 			      act - 1);
-    m_probGrid->SetCellValue((char *) ToText(p_profile(m_lastInfoset.GetAction(act))),
+    m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
+					      (char *) ToText(p_profile(m_lastInfoset.GetAction(act)))),
 			     act - 1, 0);
     m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
   }
@@ -126,11 +136,11 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
   topSizer->Add(editSizer, 1, wxEXPAND | wxALL, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
 
   // We wait and do this until the end, since this emits a
@@ -173,7 +183,7 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
   if (!m_lastInfoset.IsNull()) {
     for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
       m_profile.SetActionProb(m_lastInfoset.GetAction(act),
-			      ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
+			      ToNumber(gText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
     }
   }
 
@@ -191,9 +201,11 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
 
     for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
       m_probGrid->SetLabelValue(wxVERTICAL,
-				(char *) m_lastInfoset.GetAction(act).GetLabel(),
+				wxString::Format(wxT("%s"),
+						 (char *) m_lastInfoset.GetAction(act).GetLabel()),
 				act - 1);
-      m_probGrid->SetCellValue((char *) ToText(m_profile(m_lastInfoset.GetAction(act))),
+      m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
+						(char *) ToText(m_profile(m_lastInfoset.GetAction(act)))),
 			       act - 1, 0);
       m_probGrid->SetCellEditor(act - 1, 0, new NumberEditor);
     }
@@ -223,7 +235,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
   for (int act = 1; act <= infoset.NumActions(); act++) {
     m_profile.SetActionProb(infoset.GetAction(act),
-			    ToNumber(m_probGrid->GetCellValue(act - 1, 0).c_str()));
+			    ToNumber(gText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
   }
 
   p_event.Skip();
@@ -231,7 +243,7 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
 
 const BehavSolution &dialogEditBehav::GetProfile(void) const
 {
-  m_profile.SetLabel(m_profileName->GetValue().c_str());
+  m_profile.SetLabel(gText(m_profileName->GetValue().mb_str()));
   return m_profile;
 }
 

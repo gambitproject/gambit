@@ -47,7 +47,7 @@ BEGIN_EVENT_TABLE(dialogStrategies, wxDialog)
 END_EVENT_TABLE()
 
 dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
-  : wxDialog(p_parent, -1, "Strategies", wxDefaultPosition), 
+  : wxDialog(p_parent, -1, _("Strategies"), wxDefaultPosition), 
     m_nfg(p_nfg), m_lastPlayer(0), m_lastStrategy(0)
 {
   SetAutoLayout(true);
@@ -55,12 +55,12 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
 
   wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC,
-				    "Strategies for player"),
+				    _("Strategies for player")),
 		   0, wxALL, 5);
   m_player = new wxChoice(this, idCHOICE_PLAYER);
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
     gbtNfgPlayer player = p_nfg.GetPlayer(pl);
-    m_player->Append(wxString::Format("%d: %s", pl,
+    m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 				      (char *) player.GetLabel())); 
     m_strategyNames.Append(gArray<gText>(player.NumStrategies()));
     for (int st = 1; st <= player.NumStrategies(); st++) {
@@ -72,31 +72,33 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 5);
 
   wxStaticBoxSizer *strategyBoxSizer = 
-    new wxStaticBoxSizer(new wxStaticBox(this, -1, "Strategies"),
+    new wxStaticBoxSizer(new wxStaticBox(this, -1, _("Strategies")),
 			 wxHORIZONTAL);
   m_strategyList = new wxListBox(this, idLISTBOX_STRATEGIES);
   for (int st = 1; st <= m_nfg.GetPlayer(1).NumStrategies(); st++) {
-    m_strategyList->Append(wxString::Format("%d: %s", st,
+    m_strategyList->Append(wxString::Format(wxT("%d: %s"), st,
 					    (char *) m_strategyNames[1][st]));
   }
   m_strategyList->SetSelection(0);
   strategyBoxSizer->Add(m_strategyList, 0, wxALL, 5);
 
   wxBoxSizer *editSizer = new wxBoxSizer(wxVERTICAL);
-  editSizer->Add(new wxStaticText(this, wxID_STATIC, "Strategy name"),
+  editSizer->Add(new wxStaticText(this, wxID_STATIC, _("Strategy name")),
 		 0, wxALL | wxCENTER, 5);
-  m_strategyName = new wxTextCtrl(this, -1, (char *) m_strategyNames[1][1]);
+  m_strategyName = new wxTextCtrl(this, -1, 
+				  wxString::Format(wxT("%s"),
+						   (char *) m_strategyNames[1][1]));
   editSizer->Add(m_strategyName, 0, wxALL | wxCENTER, 5);
   strategyBoxSizer->Add(editSizer, 0, wxALL, 5);
 
   topSizer->Add(strategyBoxSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxCENTER | wxALL, 5);
   
   SetSizer(topSizer); 
@@ -109,15 +111,16 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const gbtNfgGame &p_nfg)
 void dialogStrategies::OnPlayerChanged(wxCommandEvent &)
 {
   m_strategyNames[m_lastPlayer+1][m_lastStrategy+1] =
-    m_strategyName->GetValue().c_str();
+    m_strategyName->GetValue().mb_str();
   m_strategyList->Clear();
   int player = m_player->GetSelection() + 1;
   for (int st = 1; st <= m_strategyNames[player].Length(); st++) {
-    m_strategyList->Append(wxString::Format("%d: %s", st,
+    m_strategyList->Append(wxString::Format(wxT("%d: %s"), st,
 					    (char *) m_strategyNames[player][st]));
   }
   m_strategyList->SetSelection(0);
-  m_strategyName->SetValue((char *) m_strategyNames[player][1]);
+  m_strategyName->SetValue(wxString::Format(wxT("%s"),
+					    (char *) m_strategyNames[player][1]));
   m_lastPlayer = m_player->GetSelection();
   m_lastStrategy = 0;
 }
@@ -126,12 +129,13 @@ void dialogStrategies::OnStrategyChanged(wxCommandEvent &)
 {
   int player = m_player->GetSelection() + 1;
   m_strategyNames[player][m_lastStrategy+1] =
-    m_strategyName->GetValue().c_str();
+    m_strategyName->GetValue().mb_str();
   m_strategyList->SetString(m_lastStrategy,
-			    wxString::Format("%d: %s", m_lastStrategy + 1,
+			    wxString::Format(wxT("%d: %s"), m_lastStrategy + 1,
 					     m_strategyName->GetValue().c_str()));
   m_lastStrategy = m_strategyList->GetSelection();
-  m_strategyName->SetValue((char *) m_strategyNames[player][m_lastStrategy+1]);
+  m_strategyName->SetValue(wxString::Format(wxT("%s"),
+					    (char *) m_strategyNames[player][m_lastStrategy+1]));
 }
 
 void dialogStrategies::OnOK(wxCommandEvent &p_event)
@@ -139,7 +143,7 @@ void dialogStrategies::OnOK(wxCommandEvent &p_event)
   // Copy any edited data into the blocks
   int player = m_player->GetSelection() + 1;
   m_strategyNames[player][m_lastStrategy+1] =
-    m_strategyName->GetValue().c_str();
+    m_strategyName->GetValue().mb_str();
   // Go on with usual processing
   p_event.Skip();
 }

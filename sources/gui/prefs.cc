@@ -59,11 +59,11 @@ gbtPreferences::gbtPreferences(void)
 void gbtPreferences::SaveFont(const wxString &p_prefix, 
 				wxConfig &p_config, const wxFont &p_font)
 {
-  p_config.Write(p_prefix + "Size", (long) p_font.GetPointSize());
-  p_config.Write(p_prefix + "Family", (long) p_font.GetFamily());
-  p_config.Write(p_prefix + "Face", p_font.GetFaceName());
-  p_config.Write(p_prefix + "Style", (long) p_font.GetStyle());
-  p_config.Write(p_prefix + "Weight", (long) p_font.GetWeight());
+  p_config.Write(p_prefix + wxT("Size"), (long) p_font.GetPointSize());
+  p_config.Write(p_prefix + wxT("Family"), (long) p_font.GetFamily());
+  p_config.Write(p_prefix + wxT("Face"), p_font.GetFaceName());
+  p_config.Write(p_prefix + wxT("Style"), (long) p_font.GetStyle());
+  p_config.Write(p_prefix + wxT("Weight"), (long) p_font.GetWeight());
 }
 
 void gbtPreferences::LoadFont(const wxString &p_prefix,
@@ -71,11 +71,11 @@ void gbtPreferences::LoadFont(const wxString &p_prefix,
 {
   long size, family, style, weight;
   wxString face;
-  p_config.Read(p_prefix + "Size", &size, 10);
-  p_config.Read(p_prefix + "Family", &family, wxMODERN);
-  p_config.Read(p_prefix + "Face", &face, "");
-  p_config.Read(p_prefix + "Style", &style, wxNORMAL);
-  p_config.Read(p_prefix + "Weight", &weight, wxNORMAL);
+  p_config.Read(p_prefix + wxT("Size"), &size, 10);
+  p_config.Read(p_prefix + wxT("Family"), &family, wxMODERN);
+  p_config.Read(p_prefix + wxT("Face"), &face, wxT(""));
+  p_config.Read(p_prefix + wxT("Style"), &style, wxNORMAL);
+  p_config.Read(p_prefix + wxT("Weight"), &weight, wxNORMAL);
 
   p_font = *wxTheFontList->FindOrCreateFont(size, family, style, weight,
 					    false, face);
@@ -84,116 +84,118 @@ void gbtPreferences::LoadFont(const wxString &p_prefix,
 void gbtPreferences::SaveColor(const wxString &p_prefix,
 				 wxConfig &p_config, const wxColour &p_color)
 {
-  p_config.Write(p_prefix + "Red", (long) p_color.Red());
-  p_config.Write(p_prefix + "Green", (long) p_color.Green());
-  p_config.Write(p_prefix + "Blue", (long) p_color.Blue());
+  p_config.Write(p_prefix + wxT("Red"), (long) p_color.Red());
+  p_config.Write(p_prefix + wxT("Green"), (long) p_color.Green());
+  p_config.Write(p_prefix + wxT("Blue"), (long) p_color.Blue());
 }
 
 void gbtPreferences::LoadColor(const wxString &p_prefix,
 				 const wxConfig &p_config, wxColour &p_color)
 {
   long red, green, blue;
-  p_config.Read(p_prefix + "Red", &red, p_color.Red());
-  p_config.Read(p_prefix + "Green", &green, p_color.Green());
-  p_config.Read(p_prefix + "Blue", &blue, p_color.Blue());
+  p_config.Read(p_prefix + wxT("Red"), &red, p_color.Red());
+  p_config.Read(p_prefix + wxT("Green"), &green, p_color.Green());
+  p_config.Read(p_prefix + wxT("Blue"), &blue, p_color.Blue());
   p_color = wxColour(red, green, blue);
 }
 
 void gbtPreferences::SaveOptions(void) const
 {
-  wxConfig config("Gambit");
+  wxConfig config(wxT("Gambit"));
 
-  config.Write("/TreeDisplay/NodeSize", (long) m_nodeSize);
-  config.Write("/TreeDisplay/TerminalSpacing", (long) m_terminalSpacing);
-  config.Write("/TreeDisplay/ChanceToken", (long) m_chanceToken);
-  config.Write("/TreeDisplay/PlayerToken", (long) m_playerToken);
-  config.Write("/TreeDisplay/TerminalToken", (long) m_terminalToken);
-  config.Write("/TreeDisplay/RootReachable", (long) m_rootReachable);
+  config.Write(wxT("/TreeDisplay/NodeSize"), (long) m_nodeSize);
+  config.Write(wxT("/TreeDisplay/TerminalSpacing"), (long) m_terminalSpacing);
+  config.Write(wxT("/TreeDisplay/ChanceToken"), (long) m_chanceToken);
+  config.Write(wxT("/TreeDisplay/PlayerToken"), (long) m_playerToken);
+  config.Write(wxT("/TreeDisplay/TerminalToken"), (long) m_terminalToken);
+  config.Write(wxT("/TreeDisplay/RootReachable"), (long) m_rootReachable);
 
-  config.Write("/TreeDisplay/BranchLength", (long) m_branchLength);
-  config.Write("/TreeDisplay/TineLength", (long) m_tineLength);
-  config.Write("/TreeDisplay/BranchStyle", (long) m_branchStyle);
-  config.Write("/TreeDisplay/BranchLabels", (long) m_branchLabels);
+  config.Write(wxT("/TreeDisplay/BranchLength"), (long) m_branchLength);
+  config.Write(wxT("/TreeDisplay/TineLength"), (long) m_tineLength);
+  config.Write(wxT("/TreeDisplay/BranchStyle"), (long) m_branchStyle);
+  config.Write(wxT("/TreeDisplay/BranchLabels"), (long) m_branchLabels);
 
-  config.Write("/TreeDisplay/InfosetConnect", (long) m_infosetConnect);
-  config.Write("/TreeDisplay/InfosetJoin", (long) m_infosetJoin);
+  config.Write(wxT("/TreeDisplay/InfosetConnect"), (long) m_infosetConnect);
+  config.Write(wxT("/TreeDisplay/InfosetJoin"), (long) m_infosetJoin);
 
-  config.Write("/TreeDisplay/SubgameStyle", (long) m_subgameStyle);
+  config.Write(wxT("/TreeDisplay/SubgameStyle"), (long) m_subgameStyle);
 
-  config.Write("/TreeDisplay/ProfileStyle", (long) m_profileStyle);
+  config.Write(wxT("/TreeDisplay/ProfileStyle"), (long) m_profileStyle);
 
-  config.Write("/TreeDisplay/NodeAboveLabel", (long) m_nodeAboveLabel);
-  config.Write("/TreeDisplay/NodeBelowLabel", (long) m_nodeBelowLabel);
-  config.Write("/TreeDisplay/OutcomeLabel", (long) m_outcomeLabel);
-  config.Write("/TreeDisplay/BranchAboveLabel", (long) m_branchAboveLabel);
-  config.Write("/TreeDisplay/BranchBelowLabel", (long) m_branchBelowLabel);
+  config.Write(wxT("/TreeDisplay/NodeAboveLabel"), (long) m_nodeAboveLabel);
+  config.Write(wxT("/TreeDisplay/NodeBelowLabel"), (long) m_nodeBelowLabel);
+  config.Write(wxT("/TreeDisplay/OutcomeLabel"), (long) m_outcomeLabel);
+  config.Write(wxT("/TreeDisplay/BranchAboveLabel"),
+	       (long) m_branchAboveLabel);
+  config.Write(wxT("/TreeDisplay/BranchBelowLabel"),
+	       (long) m_branchBelowLabel);
 
-  SaveFont("/TreeDisplay/NodeAboveFont", config, m_nodeAboveFont);
-  SaveFont("/TreeDisplay/NodeBelowFont", config, m_nodeBelowFont);
-  SaveFont("/TreeDisplay/NodeRightFont", config, m_nodeRightFont);
-  SaveFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
-  SaveFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
+  SaveFont(wxT("/TreeDisplay/NodeAboveFont"), config, m_nodeAboveFont);
+  SaveFont(wxT("/TreeDisplay/NodeBelowFont"), config, m_nodeBelowFont);
+  SaveFont(wxT("/TreeDisplay/NodeRightFont"), config, m_nodeRightFont);
+  SaveFont(wxT("/TreeDisplay/BranchAboveFont"), config, m_branchAboveFont);
+  SaveFont(wxT("/TreeDisplay/BranchBelowFont"), config, m_branchBelowFont);
 
-  SaveColor("/TreeDisplay/ChanceColor", config, m_chanceColor);
-  SaveColor("/TreeDisplay/TerminalColor", config, m_terminalColor);
+  SaveColor(wxT("/TreeDisplay/ChanceColor"), config, m_chanceColor);
+  SaveColor(wxT("/TreeDisplay/TerminalColor"), config, m_terminalColor);
   for (int pl = 0; pl < 8; pl++) {
-    SaveColor(wxString::Format("/TreeDisplay/Player%dColor", pl + 1),
+    SaveColor(wxString::Format(wxT("/TreeDisplay/Player%dColor"), pl + 1),
 	      config, m_playerColor[pl]);
   }
 
-  config.Write("/TreeDisplay/NumDecimals", (long) m_numDecimals);
+  config.Write(wxT("/TreeDisplay/NumDecimals"), (long) m_numDecimals);
 
-  SaveFont("/NfgDisplay/DataFont", config, m_dataFont);
-  SaveFont("/NfgDisplay/LabelFont", config, m_labelFont);
+  SaveFont(wxT("/NfgDisplay/DataFont"), config, m_dataFont);
+  SaveFont(wxT("/NfgDisplay/LabelFont"), config, m_labelFont);
 
 }
 
 void gbtPreferences::LoadOptions(void)
 {
-  wxConfig config("Gambit");
-  config.Read("/TreeDisplay/NodeSize", &m_nodeSize, 20);
-  config.Read("/TreeDisplay/TerminalSpacing", &m_terminalSpacing, 45);
-  config.Read("/TreeDisplay/ChanceToken", &m_chanceToken, 2);
-  config.Read("/TreeDisplay/PlayerToken", &m_playerToken, 2);
-  config.Read("/TreeDisplay/TerminalToken", &m_terminalToken, 2);
-  config.Read("/TreeDisplay/RootReachable", &m_rootReachable, 0);
+  wxConfig config(wxT("Gambit"));
+  config.Read(wxT("/TreeDisplay/NodeSize"), &m_nodeSize, 20);
+  config.Read(wxT("/TreeDisplay/TerminalSpacing"), &m_terminalSpacing, 45);
+  config.Read(wxT("/TreeDisplay/ChanceToken"), &m_chanceToken, 2);
+  config.Read(wxT("/TreeDisplay/PlayerToken"), &m_playerToken, 2);
+  config.Read(wxT("/TreeDisplay/TerminalToken"), &m_terminalToken, 2);
+  config.Read(wxT("/TreeDisplay/RootReachable"), &m_rootReachable, 0);
 
-  config.Read("/TreeDisplay/BranchLength", &m_branchLength, 60);
-  config.Read("/TreeDisplay/TineLength", &m_tineLength, 20);
-  config.Read("/TreeDisplay/BranchStyle", &m_branchStyle, 0);
-  config.Read("/TreeDisplay/BranchLabels", &m_branchLabels, 0);
+  config.Read(wxT("/TreeDisplay/BranchLength"), &m_branchLength, 60);
+  config.Read(wxT("/TreeDisplay/TineLength"), &m_tineLength, 20);
+  config.Read(wxT("/TreeDisplay/BranchStyle"), &m_branchStyle, 0);
+  config.Read(wxT("/TreeDisplay/BranchLabels"), &m_branchLabels, 0);
 
-  config.Read("/TreeDisplay/InfosetConnect", &m_infosetConnect, 2);
-  config.Read("/TreeDisplay/InfosetJoin", &m_infosetJoin, 1);
+  config.Read(wxT("/TreeDisplay/InfosetConnect"), &m_infosetConnect, 2);
+  config.Read(wxT("/TreeDisplay/InfosetJoin"), &m_infosetJoin, 1);
 
-  config.Read("/TreeDisplay/SubgameStyle", &m_subgameStyle, 1);
+  config.Read(wxT("/TreeDisplay/SubgameStyle"), &m_subgameStyle, 1);
 
-  config.Read("/TreeDisplay/ProfileStyle", &m_profileStyle, 
+  config.Read(wxT("/TreeDisplay/ProfileStyle"), &m_profileStyle, 
 	      GBT_PROFILES_MYERSON);
 
-  config.Read("/TreeDisplay/NodeAboveLabel", &m_nodeAboveLabel, 1);
-  config.Read("/TreeDisplay/NodeBelowLabel", &m_nodeBelowLabel, 4);
-  config.Read("/TreeDisplay/OutcomeLabel", &m_outcomeLabel, 0);
-  config.Read("/TreeDisplay/BranchAboveLabel", &m_branchAboveLabel, 1);
-  config.Read("/TreeDisplay/BranchBelowLabel", &m_branchBelowLabel, 2);
+  config.Read(wxT("/TreeDisplay/NodeAboveLabel"), &m_nodeAboveLabel, 1);
+  config.Read(wxT("/TreeDisplay/NodeBelowLabel"), &m_nodeBelowLabel, 4);
+  config.Read(wxT("/TreeDisplay/OutcomeLabel"), &m_outcomeLabel, 0);
+  config.Read(wxT("/TreeDisplay/BranchAboveLabel"), &m_branchAboveLabel, 1);
+  config.Read(wxT("/TreeDisplay/BranchBelowLabel"), &m_branchBelowLabel, 2);
 
-  LoadFont("/TreeDisplay/NodeAboveFont", config, m_nodeAboveFont);
-  LoadFont("/TreeDisplay/NodeBelowFont", config, m_nodeBelowFont);
-  LoadFont("/TreeDisplay/NodeRightFont", config, m_nodeRightFont);
-  LoadFont("/TreeDisplay/BranchAboveFont", config, m_branchAboveFont);
-  LoadFont("/TreeDisplay/BranchBelowFont", config, m_branchBelowFont);
+  LoadFont(wxT("/TreeDisplay/NodeAboveFont"), config, m_nodeAboveFont);
+  LoadFont(wxT("/TreeDisplay/NodeBelowFont"), config, m_nodeBelowFont);
+  LoadFont(wxT("/TreeDisplay/NodeRightFont"), config, m_nodeRightFont);
+  LoadFont(wxT("/TreeDisplay/BranchAboveFont"), config, m_branchAboveFont);
+  LoadFont(wxT("/TreeDisplay/BranchBelowFont"), config, m_branchBelowFont);
 
-  LoadColor("/TreeDisplay/ChanceColor", config, m_chanceColor);
-  LoadColor("/TreeDisplay/TerminalColor", config, m_terminalColor);
+  LoadColor(wxT("/TreeDisplay/ChanceColor"), config, m_chanceColor);
+  LoadColor(wxT("/TreeDisplay/TerminalColor"), config, m_terminalColor);
   for (int pl = 0; pl < 8; pl++) {
-    LoadColor(wxString::Format("/TreeDisplay/Player%dColor", pl + 1),
+    LoadColor(wxString::Format(wxT("/TreeDisplay/Player%dColor"), pl + 1),
 	      config, m_playerColor[pl]);
   }
 
-  config.Read("/TreeDisplay/NumDecimals", &m_numDecimals, 2);
+  config.Read(wxT("/TreeDisplay/NumDecimals"), &m_numDecimals, 2);
 
-  LoadFont("/NfgDisplay/DataFont", config, m_dataFont);
-  LoadFont("/NfgDisplay/LabelFont", config, m_labelFont);
+  LoadFont(wxT("/NfgDisplay/DataFont"), config, m_dataFont);
+  LoadFont(wxT("/NfgDisplay/LabelFont"), config, m_labelFont);
 }
 
 

@@ -79,32 +79,36 @@ void TreeWindow::MakeMenus(void)
 {
   m_nodeMenu = new wxMenu;
 
-  m_nodeMenu->Append(wxID_CUT, "Cut subtree", "Cut subtree to clipboard");
-  m_nodeMenu->Append(wxID_COPY, "Copy subtree", "Copy subtree to clipboard");
-  m_nodeMenu->Append(wxID_PASTE, "Paste subtree",
-		     "Paste subtree from clipboard");
+  m_nodeMenu->Append(wxID_CUT, _("Cut subtree"),
+		     _("Cut subtree to clipboard"));
+  m_nodeMenu->Append(wxID_COPY, _("Copy subtree"),
+		     _("Copy subtree to clipboard"));
+  m_nodeMenu->Append(wxID_PASTE, _("Paste subtree"),
+		     _("Paste subtree from clipboard"));
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT, "Insert move", "Insert a move");
-  m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, "Reveal move",
-		     "Reveal this move");
+  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT, _("Insert move"), 
+		     _("Insert a move"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("Reveal move"),
+		     _("Reveal this move"));
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_MENU_EDIT_TOGGLE_SUBGAME, "Mark subgame",
-		     "Mark or unmark this subgame");
-  m_nodeMenu->Append(GBT_MENU_EDIT_MARK_SUBGAME_TREE, "Mark subgame tree",
-		     "Mark all subgames in this tree");
-  m_nodeMenu->Append(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE, "Unmark subgame tree",
-		     "Unmark all subgames in this tree");
+  m_nodeMenu->Append(GBT_MENU_EDIT_TOGGLE_SUBGAME, _("Mark subgame"),
+		     _("Mark or unmark this subgame"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_MARK_SUBGAME_TREE, _("Mark subgame tree"),
+		     _("Mark all subgames in this tree"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_UNMARK_SUBGAME_TREE,
+		     _("Unmark subgame tree"), 
+		     _("Unmark all subgames in this tree"));
   m_nodeMenu->AppendSeparator();
-  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, "Edit node",
-		     "View and change node properties");
-  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, "Edit move",
-		     "View and change move properties");
-  m_nodeMenu->Append(GBT_MENU_EDIT_GAME, "Edit game",
-		     "View and change game properties");
+  m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("Edit node"),
+		     _("View and change node properties"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("Edit move"),
+		     _("View and change move properties"));
+  m_nodeMenu->Append(GBT_MENU_EDIT_GAME, _("Edit game"),
+		     _("View and change game properties"));
 
   m_gameMenu = new wxMenu;
-  m_gameMenu->Append(GBT_MENU_EDIT_GAME, "Edit game",
-		     "View and change game properties");
+  m_gameMenu->Append(GBT_MENU_EDIT_GAME, _("Edit game"),
+		     _("View and change game properties"));
 }
 
 //---------------------------------------------------------------------
@@ -239,7 +243,7 @@ void TreeWindow::OnUpdate(gbtGameView *)
 		       (!cursor.IsNull() && !cursor.GetParent().IsNull() &&
 			cursor.IsSubgameRoot() &&
 			cursor.GetSubgameRoot() == cursor) ?
-		       "Unmark subgame" : "Mark subgame");
+		       _("Unmark subgame") : _("Mark subgame"));
   Refresh();
 }
 
@@ -401,12 +405,12 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
       if (!node.IsNull() && node.NumChildren() > 0) {
 	m_dragSource = node;
 	if (p_event.ControlDown()) {
-	  m_dragImage = new wxDragImage("Copy subtree",
+	  m_dragImage = new wxDragImage(_("Copy subtree"),
 					wxCursor(wxCURSOR_HAND));
 	  m_dragMode = dragCOPY;
 	}
 	else {
-	  m_dragImage = new wxDragImage("Move subtree",
+	  m_dragImage = new wxDragImage(_("Move subtree"),
 					wxCursor(wxCURSOR_HAND));
 	  m_dragMode = dragMOVE;
 	}

@@ -45,7 +45,8 @@ END_EVENT_TABLE()
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
 			     const gList<MixedSolution> &p_profiles)
-  : wxDialog(p_parent, -1, "Quantal response equilibria",wxDefaultPosition),
+  : wxDialog(p_parent, -1, _("Quantal response equilibria"),
+	     wxDefaultPosition),
     m_mixedProfiles(p_profiles)
 {
   SetAutoLayout(true);
@@ -53,29 +54,33 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 
   m_notebook = new wxNotebook(this, -1);
   wxPanel *listPanel = new wxPanel(m_notebook, -1);
-  m_notebook->AddPage(listPanel, "QREs");
+  m_notebook->AddPage(listPanel, _("QREs"));
 
   topSizer->Add(new wxNotebookSizer(m_notebook), 0, wxALL, 5);
 
   wxBoxSizer *listPanelSizer = new wxBoxSizer(wxVERTICAL);
   m_qreList = new wxListCtrl(listPanel, -1, wxDefaultPosition,
 			     wxSize(500, 300), wxLC_REPORT | wxLC_SINGLE_SEL);
-  m_qreList->InsertColumn(0, "Lambda");
+  m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
   const gbtNfgSupport &support = p_profiles[1].Support();
   for (int pl = 1; pl <= support.GetGame().NumPlayers(); pl++) {
     for (int st = 1; st <= support.NumStrats(pl); st++) {
       m_qreList->InsertColumn(++maxColumn,
-			      wxString::Format("%d:%d", pl, st));
+			      wxString::Format(wxT("%d:%d"), pl, st));
     }
   }
 
   for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_qreList->InsertItem(i - 1, (char *) ToText(p_profiles[i].QreLambda()));
+    m_qreList->InsertItem(i - 1, 
+			  wxString::Format(wxT("%s"),
+					   (char *) ToText(p_profiles[i].QreLambda())));
     const gPVector<gNumber> &profile = *p_profiles[i].Profile();
     for (int j = 1; j <= profile.Length(); j++) {
-      m_qreList->SetItem(i - 1, j, (char *) ToText(profile[j]));
+      m_qreList->SetItem(i - 1, j, 
+			 wxString::Format(wxT("%s"),
+					  (char *) ToText(profile[j])));
     }
   }
   listPanelSizer->Add(m_qreList, 0, wxALL, 0);
@@ -86,17 +91,18 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 						      wxPoint(0, 0),
 						      wxSize(500, 300));
   plotWindow->SetCorrespondence(new gbtCorBranchMixed(p_profiles));
-  m_notebook->AddPage(plotWindow, "Plot");
+  m_notebook->AddPage(plotWindow, _("Plot"));
 
-  topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, "Export to PXI file..."),
+  topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, 
+			     _("Export to PXI file...")),
 		0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
@@ -109,7 +115,8 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 
 dialogQreFile::dialogQreFile(wxWindow *p_parent,
 			     const gList<BehavSolution> &p_profiles)
-  : wxDialog(p_parent, -1, "Quantal response equilibria",wxDefaultPosition),
+  : wxDialog(p_parent, -1, _("Quantal response equilibria"),
+	     wxDefaultPosition),
     m_behavProfiles(p_profiles)
 {
   SetAutoLayout(true);
@@ -117,14 +124,14 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 
   m_notebook = new wxNotebook(this, -1);
   wxPanel *listPanel = new wxPanel(m_notebook, -1);
-  m_notebook->AddPage(listPanel, "QREs");
+  m_notebook->AddPage(listPanel, _("QREs"));
 
   topSizer->Add(new wxNotebookSizer(m_notebook), 0, wxALL, 5);
 
   wxBoxSizer *listPanelSizer = new wxBoxSizer(wxVERTICAL);
   m_qreList = new wxListCtrl(listPanel, -1, wxDefaultPosition,
 			     wxSize(500, 300), wxLC_REPORT | wxLC_SINGLE_SEL);
-  m_qreList->InsertColumn(0, "Lambda");
+  m_qreList->InsertColumn(0, _("Lambda"));
 
   int maxColumn = 0;
   const gbtEfgSupport &support = p_profiles[1].Support();
@@ -132,16 +139,21 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
     for (int iset = 1; iset <= support.GetGame().GetPlayer(pl).NumInfosets(); iset++) {
       for (int act = 1; act <= support.NumActions(pl, iset); act++) {
 	m_qreList->InsertColumn(++maxColumn,
-				wxString::Format("%d:(%d,%d)", pl, iset, act));
+				wxString::Format(wxT("%d:(%d,%d)"),
+						 pl, iset, act));
       }
     }
   }
 
   for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_qreList->InsertItem(i - 1, (char *) ToText(p_profiles[i].QreLambda()));
+    m_qreList->InsertItem(i - 1, 
+			  wxString::Format(wxT("%s"),
+					   (char *) ToText(p_profiles[i].QreLambda())));
     const gPVector<gNumber> &profile = p_profiles[i].Profile()->GetPVector();
     for (int j = 1; j <= profile.Length(); j++) {
-      m_qreList->SetItem(i - 1, j, (char *) ToText(profile[j]));
+      m_qreList->SetItem(i - 1, j, 
+			 wxString::Format(wxT("%s"),
+					  (char *) ToText(profile[j])));
     }
   }
   listPanelSizer->Add(m_qreList, 0, wxALL, 0);
@@ -152,17 +164,18 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 						      wxPoint(0, 0),
 						      wxSize(500, 300));
   plotWindow->SetCorrespondence(new gbtCorBranchBehav(p_profiles));
-  m_notebook->AddPage(plotWindow, "Plot");
+  m_notebook->AddPage(plotWindow, _("Plot"));
 
-  topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, "Export to PXI file..."),
+  topSizer->Add(new wxButton(this, idBUTTON_PXIFILE, 
+			     _("Export to PXI file...")),
 		0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
@@ -179,11 +192,12 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
 //
 void dialogQreFile::OnPxiFile(wxCommandEvent &)
 {
-  wxFileDialog dialog(this, "Save PXI file", "", "", "*.pxi", wxSAVE);
+  wxFileDialog dialog(this, _("Save PXI file"), wxT(""), wxT(""),
+		      wxT("*.pxi"), wxSAVE);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      gFileOutput file(dialog.GetPath().c_str());
+      gFileOutput file(dialog.GetPath().mb_str());
 
       if (m_mixedProfiles.Length() > 0) {
 	file << "Dimensionality:\n";

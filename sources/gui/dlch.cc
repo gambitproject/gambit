@@ -31,45 +31,46 @@
 #include "dlch.h"
 
 dialogNfgCH::dialogNfgCH(wxWindow *p_parent, const gbtNfgSupport &p_support)
-  : wxDialog(p_parent, -1, "Compute cognitive hierarchy correspondence", wxDefaultPosition)
+  : wxDialog(p_parent, -1, _("Compute cognitive hierarchy correspondence"),
+	     wxDefaultPosition)
 {
   SetAutoLayout(true);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxStaticBox *tauBox = new wxStaticBox(this, wxID_STATIC,
-					"Compute over tau values");
+					_("Compute over tau values"));
   wxStaticBoxSizer *tauSizer = new wxStaticBoxSizer(tauBox, wxVERTICAL);
 
   wxBoxSizer *minTauSizer = new wxBoxSizer(wxHORIZONTAL);
-  minTauSizer->Add(new wxStaticText(this, wxID_STATIC, "Start at tau"),
+  minTauSizer->Add(new wxStaticText(this, wxID_STATIC, _("Start at tau")),
 		   0, wxALL | wxCENTER, 5);
-  m_minTau = new wxTextCtrl(this, -1, "0");
+  m_minTau = new wxTextCtrl(this, -1, wxT("0"));
   minTauSizer->Add(m_minTau, 0, wxALL | wxCENTER, 5);
   tauSizer->Add(minTauSizer, 0, wxLEFT | wxRIGHT | wxCENTER, 5);
 
   wxBoxSizer *maxTauSizer = new wxBoxSizer(wxHORIZONTAL);
-  maxTauSizer->Add(new wxStaticText(this, wxID_STATIC, "Stop at tau"),
+  maxTauSizer->Add(new wxStaticText(this, wxID_STATIC, _("Stop at tau")),
 		   0, wxALL | wxCENTER, 5);
-  m_maxTau = new wxTextCtrl(this, -1, "10");
+  m_maxTau = new wxTextCtrl(this, -1, wxT("10"));
   maxTauSizer->Add(m_maxTau, 0, wxALL | wxCENTER, 5);
   tauSizer->Add(maxTauSizer, 0, wxLEFT | wxRIGHT | wxCENTER, 5);
 
   wxBoxSizer *stepTauSizer = new wxBoxSizer(wxHORIZONTAL);
-  stepTauSizer->Add(new wxStaticText(this, wxID_STATIC, "Increment by"),
+  stepTauSizer->Add(new wxStaticText(this, wxID_STATIC, _("Increment by")),
 		    0, wxALL | wxCENTER, 5);
-  m_stepTau = new wxTextCtrl(this, -1, ".01");
+  m_stepTau = new wxTextCtrl(this, -1, wxT(".01"));
   stepTauSizer->Add(m_stepTau, 0, wxALL | wxCENTER, 5);
   tauSizer->Add(stepTauSizer, 0, wxLEFT | wxRIGHT | wxCENTER, 5);
 
   topSizer->Add(tauSizer, 0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
 
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 

@@ -122,11 +122,11 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
   rect.x = rect.x + (rect.width - x) / 2;
 
   rect.Inflate(-1);
-  p_grid.DrawTextRectangle(p_dc, wxString("("), rect);
-  p_dc.GetTextExtent("(", &x, &y);
+  p_grid.DrawTextRectangle(p_dc, wxT("("), rect);
+  p_dc.GetTextExtent(wxT("("), &x, &y);
   rect.x += x;
 
-  wxStringTokenizer tok(text, ",");
+  wxStringTokenizer tok(text, wxT(","));
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
     p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
     wxString payoff = tok.GetNextToken();
@@ -136,12 +136,12 @@ void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
     
     p_dc.SetTextForeground(*wxBLACK);
     if (pl < m_doc->GetNfg().NumPlayers()) {
-      p_grid.DrawTextRectangle(p_dc, ",", rect);
-      p_dc.GetTextExtent(")", &x, &y);
+      p_grid.DrawTextRectangle(p_dc, wxT(","), rect);
+      p_dc.GetTextExtent(wxT(")"), &x, &y);
       rect.x += x;
     }
     else {
-      p_grid.DrawTextRectangle(p_dc, wxString(")"), rect); 
+      p_grid.DrawTextRectangle(p_dc, wxT(")"), rect); 
     }
   }
 }
@@ -235,7 +235,7 @@ void gbtSchellingRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
   // now we only have to draw the text
   SetTextColoursAndFont(p_grid, p_attr, p_dc, p_isSelected);
 
-  wxStringTokenizer tok(p_grid.GetCellValue(p_row, p_col), ",");
+  wxStringTokenizer tok(p_grid.GetCellValue(p_row, p_col), wxT(","));
 
   // A small margin to place around payoffs to avoid butting up against
   // grid lines
@@ -314,17 +314,17 @@ wxString NfgGridTable::GetRowLabelValue(int p_row)
 {
   int numStrats = m_doc->GetNfgSupport().NumStrats(m_doc->GetRowPlayer());
   if (p_row + 1 <= numStrats) {
-    return (char *) m_doc->GetNfgSupport().GetStrategy(m_doc->GetRowPlayer(), p_row+1).GetLabel();
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupport().GetStrategy(m_doc->GetRowPlayer(), p_row+1).GetLabel());
   }
   else if (p_row + 1 == numStrats + m_table->ShowDominance()) {
-    return "Dom";
+    return wxT("Dom");
   }
   else if (p_row + 1 == 
 	   numStrats + m_table->ShowDominance() + m_table->ShowProbs()) {
-    return "Prob";
+    return wxT("Prob");
   }
   else {
-    return "Val";
+    return wxT("Val");
   }
 }
 
@@ -332,17 +332,17 @@ wxString NfgGridTable::GetColLabelValue(int p_col)
 {
   int numStrats = m_doc->GetNfgSupport().NumStrats(m_doc->GetColPlayer());
   if (p_col + 1 <= numStrats) {
-    return (char *) m_doc->GetNfgSupport().GetStrategy(m_doc->GetColPlayer(), p_col+1).GetLabel();
+    return wxString::Format(wxT("%s"), (char *) m_doc->GetNfgSupport().GetStrategy(m_doc->GetColPlayer(), p_col+1).GetLabel());
   }
   else if (p_col + 1 == numStrats + m_table->ShowDominance()) {
-    return "Dom";
+    return wxT("Dom");
   }
   else if (p_col + 1 == 
 	   numStrats + m_table->ShowDominance() + m_table->ShowProbs()) {
-    return "Prob";
+    return wxT("Prob");
   }
   else {
-    return "Val";
+    return wxT("Val");
   }
 }
 
@@ -366,28 +366,29 @@ wxString NfgGridTable::GetValue(int row, int col)
 
     if (m_doc->HasEfg() ||
 	m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
-      wxString ret = "";
+      wxString ret = wxT("");
       for (int pl = 1; pl <= strategy.Length(); pl++) {
-	ret += (char *) ToText(profile.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
-			       m_doc->GetPreferences().NumDecimals());
+	ret += wxString::Format(wxT("%s"),
+				(char *) ToText(profile.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
+						m_doc->GetPreferences().NumDecimals()));
 	if (pl < strategy.Length()) {
-	  ret += wxString(",");
+	  ret += wxT(",");
 	}
       }
-      ret += "";
+      ret += wxT("");
       return ret;
     }
     else {
       gbtNfgOutcome outcome = profile.GetOutcome();
       if (!outcome.IsNull()) {
-	wxString ret = (char *) outcome.GetLabel();
-	if (ret == "") {
-	  ret = (char *) (gText("Outcome") + ToText(outcome.GetId()));
+	wxString ret = wxString::Format(wxT("%s"), (char *) outcome.GetLabel());
+	if (ret == wxT("")) {
+	  ret = wxString::Format(wxT("Outcome%d"), outcome.GetId());
 	}
 	return ret;
       }
       else {
-	return "Null";
+	return wxT("Null");
       }
     }
   }
@@ -395,54 +396,58 @@ wxString NfgGridTable::GetValue(int row, int col)
 	   col == numColStrats + m_table->ShowDominance() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
     if (support.IsDominated(strategy, true)) {
-      return "S";
+      return wxT("S");
     }
     else if (support.IsDominated(strategy, false)) {
-      return "W";
+      return wxT("W");
     }
     else {
-      return "N";
+      return wxT("N");
     }
   }
   else if (row == numRowStrats + m_table->ShowDominance() - 1 &&
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
     if (support.IsDominated(strategy, true)) {
-      return "S";
+      return wxT("S");
     }
     else if (support.IsDominated(strategy, false)) {
-      return "W";
+      return wxT("W");
     }
     else {
-      return "N";
+      return wxT("N");
     }
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile()(strategy),
-			    m_doc->GetPreferences().NumDecimals()));
+    return wxString::Format(wxT("%s"), 
+			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
+					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile()(strategy),
-			    m_doc->GetPreferences().NumDecimals()));
+    return wxString::Format(wxT("%s"), 
+			    (char *) ToText(m_doc->GetMixedProfile()(strategy),
+					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     gbtNfgStrategy strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
-			    m_doc->GetPreferences().NumDecimals()));
+    return wxString::Format(wxT("%s"),
+			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
+					    m_doc->GetPreferences().NumDecimals()));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     gbtNfgStrategy strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
-			    m_doc->GetPreferences().NumDecimals()));
+    return wxString::Format(wxT("%s"),
+			    (char *) ToText(m_doc->GetMixedProfile().GetStrategyValue(strategy),
+					    m_doc->GetPreferences().NumDecimals()));
   }
 
-  return "";
+  return wxT("");
 }
 
 void NfgGridTable::SetValue(int row, int col, const wxString &)

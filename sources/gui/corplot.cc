@@ -228,7 +228,8 @@ void gbtCorPlotWindow::DrawXAxis(wxDC &p_dc)
     p_dc.DrawLine(xCoord, height - m_marginY - c_tickWidth,
 		  xCoord, height - m_marginY + c_tickWidth);
     double value = m_cor->GetMinParameter() + cumstep - 1.0;
-    wxString label = wxString::Format((value < 10000.0) ? "%6.2f" : "%6.2e", 
+    wxString label = wxString::Format((value < 10000.0) ? 
+				      wxT("%6.2f") : wxT("%6.2e"), 
 				      value);
     wxCoord textWidth, textHeight;
     p_dc.GetTextExtent(label, &textWidth, &textHeight);
@@ -254,7 +255,7 @@ void gbtCorPlotWindow::DrawYAxis(wxDC &p_dc)
     int yCoord = height - m_marginY - i * (plotHeight/m_yAxis.NumDivisions());
     p_dc.DrawLine(m_marginX - c_tickWidth, yCoord, 
 		  m_marginX + c_tickWidth, yCoord);
-    wxString label = wxString::Format("%3.2f", 
+    wxString label = wxString::Format(wxT("%3.2f"), 
 				      (double) i /
 				      (double) m_yAxis.NumDivisions());
     wxCoord textWidth, textHeight;
@@ -298,10 +299,11 @@ void gbtCorPlotWindow::OnPaint(wxPaintEvent &)
     dc.SetFont(wxFont(10, wxSWISS, wxNORMAL, wxBOLD));
     dc.SetTextForeground(*wxBLUE);
     wxCoord tw,th;
-    dc.GetTextExtent((char *) m_cor->GetLabel(i), &tw, &th);
+    dc.GetTextExtent(wxString::Format(wxT("%s"),
+				      (char *) m_cor->GetLabel(i)), &tw, &th);
     dc.DrawLine(width - m_marginX - 50, 3*th*i/2+th/2,
 		width - m_marginX - 40, 3*th*i/2+th/2);
-    dc.DrawText((char *) m_cor->GetLabel(i), 
+    dc.DrawText(wxString::Format(wxT("%s"), (char *) m_cor->GetLabel(i)), 
 		width - m_marginX - 35, 3*th*i/2);
     DrawDimension(dc, i);
   }

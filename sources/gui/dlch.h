@@ -39,11 +39,11 @@ public:
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   double MinTau(void) const
-    { return ToNumber(m_minTau->GetValue().c_str()); }
+    { return ToNumber(gText(m_minTau->GetValue().mb_str())); }
   double MaxTau(void) const
-    { return ToNumber(m_maxTau->GetValue().c_str()); }
+    { return ToNumber(gText(m_maxTau->GetValue().mb_str())); }
   double StepTau(void) const
-    { return ToNumber(m_stepTau->GetValue().c_str()); }
+    { return ToNumber(gText(m_stepTau->GetValue().mb_str())); }
 };
 
 

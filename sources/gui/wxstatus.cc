@@ -31,7 +31,8 @@
 #include "wxstatus.h"
 
 wxStatus::wxStatus(wxWindow *p_parent, const gText &p_caption)
-  : wxProgressDialog((char *) p_caption, "", 100, p_parent,
+  : wxProgressDialog(wxString::Format(wxT("%s"), (char *) p_caption),
+		     wxT(""), 100, p_parent,
 		     wxPD_AUTO_HIDE | wxPD_CAN_ABORT | wxPD_APP_MODAL |
 		     wxPD_ELAPSED_TIME | wxPD_ESTIMATED_TIME |
 		     wxPD_REMAINING_TIME),
@@ -75,7 +76,7 @@ gOutput &wxStatus::operator<<(float x)
 
 gOutput &wxStatus::operator<<(const char *x)
 {
-  Update(m_value, x);
+  Update(m_value, wxString::Format(wxT("%s"), x));
   return *this; 
 }
 
@@ -107,6 +108,6 @@ void wxStatus::SetProgress(double p_value, const gText &p_message)
   else {
     m_value = (int) (p_value * 100.0);
   }
-  Update(m_value, (const char *) p_message);
+  Update(m_value, wxString::Format(wxT("%s"), (const char *) p_message));
 }
 

@@ -38,7 +38,7 @@
 dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
 					     const gbtNfgGame &p_nfg,
 					     const gArray<int> &p_cont)
-  : wxDialog(p_parent, -1, "Contingency properties",wxDefaultPosition)
+  : wxDialog(p_parent, -1, _("Contingency properties"), wxDefaultPosition)
 {
   SetAutoLayout(true);
 
@@ -50,23 +50,24 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
 
   wxStaticBoxSizer *contSizer =
-    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, "Contingency"),
+    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Contingency")),
 			 wxVERTICAL);
   for (int pl = 1; pl <= p_cont.Length(); pl++) {
     gbtNfgPlayer player = p_nfg.GetPlayer(pl);
     wxString text;
     if (player.GetLabel() != "") {
-      text += wxString::Format("%s: ", (const char *) player.GetLabel());
+      text += wxString::Format(wxT("%s: "), (const char *) player.GetLabel());
     }
     else {
-      text += wxString::Format("Player %d: ", pl);
+      text += wxString::Format(wxT("Player %d: "), pl);
     }
 
     if (player.GetStrategy(p_cont[pl]).GetLabel() != "") {
-      text += (const char *) player.GetStrategy(p_cont[pl]).GetLabel();
+      text += wxString::Format(wxT("%s"),
+			       (const char *) player.GetStrategy(p_cont[pl]).GetLabel());
     }
     else {
-      text += wxString::Format("Strategy %d", p_cont[pl]);
+      text += wxString::Format(wxT("Strategy %d"), p_cont[pl]);
     }
 
     contSizer->Add(new wxStaticText(this, wxID_STATIC, text), 0, wxALL, 5);
@@ -75,10 +76,10 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   topSizer->Add(contSizer, 0, wxALL | wxCENTER, 5);
 
   wxBoxSizer *outcomeSizer = new wxBoxSizer(wxHORIZONTAL);
-  outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, "Outcome"),
+  outcomeSizer->Add(new wxStaticText(this, wxID_STATIC, _("Outcome")),
 		    0, wxALL | wxCENTER, 5);
   m_outcome = new wxChoice(this, -1);
-  m_outcome->Append("(null)");
+  m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
   for (int outc = 1; outc <= p_nfg.NumOutcomes(); outc++) {
     gbtNfgOutcome outcome = p_nfg.GetOutcome(outc);
@@ -102,7 +103,7 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
       item += ")";
     }
 
-    m_outcome->Append((const char *) item);
+    m_outcome->Append(wxString::Format(wxT("%s"), (const char *) item));
     if (profile.GetOutcome() == outcome) {
       m_outcome->SetSelection(outc);
     }
@@ -111,11 +112,11 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
   topSizer->Add(outcomeSizer, 0, wxALL | wxEXPAND, 5);
 
   wxBoxSizer *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  wxButton *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
   buttonSizer->Add(okButton, 0, wxALL, 5);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, "Cancel"), 0, wxALL, 5);
-  //  buttonSizer->Add(new wxButton(this, wxID_HELP, "Help"), 0, wxALL, 5);
+  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
+  //  buttonSizer->Add(new wxButton(this, wxID_HELP, _("Help")), 0, wxALL, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxCENTER, 5);
 
   SetSizer(topSizer);
