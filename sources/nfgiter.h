@@ -1,7 +1,7 @@
 //
 // FILE: nfgiter.h -- Normal form iterator class
 //
-// $Id$
+// @(#)nfgiter.h	1.9 2/14/97
 //
 
 #ifndef NFGITER_H
@@ -11,6 +11,7 @@ template <class T> class gArray;
 template <class T> class Nfg;
 template <class T> class ContIter;
 class StrategyProfile;
+#include "nfstrat.h"
 class NFSupport;
 
 //

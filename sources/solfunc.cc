@@ -1,7 +1,7 @@
 //
 // FILE: solfunc.cc -- GCL functions on profiles and solutions
 //
-// $Id$
+// @(#)solfunc.cc	1.33 2/15/97
 //
 
 #include "gsm.h"
@@ -247,26 +247,26 @@ static Portion *GSM_ActionValues_Rational(Portion **param)
 {
   BehavSolution<gRational> *bp = (BehavSolution<gRational> *) ((BehavPortion *) param[0])->Value();
 
-  const EFSupport &support = bp->GetEFSupport(); 
+  const EFSupport &support = bp->GetEFSupport();
   Efg<gRational> *E = bp->BelongsTo();
-  ListPortion *por = new ListValPortion; 
-  
+  ListPortion *por = new ListValPortion;
+
   gDPVector<gRational> values(E->Dimensionality());
   gPVector<gRational> probs(E->Dimensionality().Lengths());
 
   bp->CondPayoff(values, probs);
-  
+
   for (int pl = 1; pl <= E->NumPlayers(); pl++)  {
-    EFPlayer *player = E->PlayerList()[pl];
-    ListPortion *p1 = new ListValPortion;
-    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
-      Infoset *infoset = player->InfosetList()[iset];
-      ListPortion *p2 = new ListValPortion;
- 
-      gVector<double> ret(infoset->NumActions());
-      for (int act = 1; act <= infoset->NumActions(); act++)  {
+	 EFPlayer *player = E->PlayerList()[pl];
+	 ListPortion *p1 = new ListValPortion;
+	 for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+		Infoset *infoset = player->InfosetList()[iset];
+		ListPortion *p2 = new ListValPortion;
+
+		gVector<double> ret(infoset->NumActions());
+		for (int act = 1; act <= infoset->NumActions(); act++)  {
 	if (support.Find(infoset->GetActionList()[act]) &&
-	    probs(pl, iset) > 0)
+		 probs(pl, iset) > (gRational)(0))
 	  p2->Append(new RationalValPortion(values(pl, iset,
 		      support.Find(infoset->GetActionList()[act]))));
 	else
