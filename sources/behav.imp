@@ -1,7 +1,7 @@
 //#
 //# FILE: efg.imp -- Implementation of templated extensive form members
 //#
-//# $Id$
+//# @(#)efg.imp	1.26 28 Aug 1995
 //#
 
 #include "efg.h"
@@ -143,8 +143,6 @@ template <class T> OutcomeVector<T> *Efg<T>::NewOutcome(void)
 //                   Efg<T>: Payoff computation
 //------------------------------------------------------------------------
 
-#include "gdpvect.h"
-
 template <class T>
 void Efg<T>::Payoff(Node *n, T prob, const gPVector<int> &profile,
 			gVector<T> &payoff) const
@@ -196,197 +194,6 @@ void Efg<T>::Payoff(const gArray<gArray<int> *> &profile,
   Payoff(root, (T) 1.0, profile, payoff);
 }
 
-template <class T>
-void Efg<T>::Payoff(Node *n, T prob, int pl, T &value,
-			const BehavProfile<T> &profile) const
-{
-  if (n->outcome)
-    value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
-  if (n->children.Length())
-    if (profile.IsTruncated())   {
-      T p = (T) 0.0;
-      for (int i = 1, npl = n->infoset->player->number,
-	   iset = n->infoset->number; i < n->children.Length(); i++)  {
-	p += ((npl) ? profile(npl, iset, i) :
-	      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-	Payoff(n->children[i],
-	       prob * ((npl) ? profile(npl, iset, i) :
-		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-	       pl, value, profile);
-      }
-      Payoff(n->children[i], prob * ((T)1 - p), pl, value, profile);
-    }
-    else  {
-      for (int i = 1, npl = n->infoset->player->number,
-	   iset = n->infoset->number; i <= n->children.Length(); i++)
-	Payoff(n->children[i],
-	       prob * ((npl) ? profile(npl, iset, i) :
-		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
-	       pl, value, profile);
-    }
-}
-
-template <class T>
-T Efg<T>::Payoff(int pl, const BehavProfile<T> &profile) const
-{
-  T value = (T) 0.0;
-  Payoff(root, (T) 1.0, pl, value, profile);
-  return value;
-}
-
-template <class T>
-void Efg<T>::CondPayoff(Node *n, T prob,
-			    const BehavProfile<T> &profile,
-			    gPVector<T> &probs,
-			    gDPVector<T> &payoff) const
-{
-  int pl = (n->infoset) ? n->infoset->player->number : -1;
-  int iset = (n->infoset) ? n->infoset->number : 0;
-
-  if (n->outcome)
-    *((TypedNode<T> *) n)->scratch += (OutcomeVector<T> &) *n->outcome;
-  for (int i = 1, nc = n->children.Length(); i <= nc; i++)
-    *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
-  
-  T cumprob((T) 0), newprob((T) 0);
-
-
-  for (i = 1; i < nc; i++)   {
-    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
-	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-    cumprob += newprob;
-    CondPayoff(n->children[i], prob * newprob, profile, probs, payoff);
-
-    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
-      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
-    if (pl > 0)
-      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
-  }
-  
-  if (nc > 0)  {
-    if (profile.IsTruncated())
-      newprob = (T) 1.0 - cumprob;
-    else
-      newprob = ((pl) ? profile(pl, n->infoset->number, i) : 
-		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-
-    CondPayoff(n->children[nc], prob * newprob, profile, probs, payoff);
-
-    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
-      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
-    if (pl > 0)
-      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
-  }
-
-  if (pl > 0)
-    probs(pl, n->infoset->number) += prob;
-}
-
-
-template <class T> void Efg<T>::CondPayoff(const BehavProfile<T> &profile,
-					       gDPVector<T> &payoff,
-					       gPVector<T> &probs) const
-{
-  ((gVector<T> &) payoff).operator=((T) 0);
-  ((gVector<T> &) probs).operator=((T) 0);
-
-  *((TypedNode<T> *) root)->scratch = (T) 0;
-  CondPayoff(root, (T) 1.0, profile, probs, payoff);
-
-  for (int i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      for (int k = 1; k <= players[i]->infosets[j]->actions.Length(); k++)
-	// Note that bad things happen if probs(i, j, k) == 0
-	payoff(i, j, k) /= probs(i, j);
-}
-
-template <class T> 
-gArray<T> Efg<T>::NodeRealizProbs(const BehavProfile<T> &bp)
-{
-  gArray<T> NRProbs(NumNodes(*bp.BelongsTo()));
-  int index = 1;
-  NodeRealizProbs( root, (T) 1.0, bp, index, NRProbs);
-  return NRProbs;
-}
-
-template <class T>
-void Efg<T>::NodeRealizProbs(Node *n, T prob, const BehavProfile<T> &profile,
-			     int &index, gArray<T> &NRProbs)
-{
-
-  NRProbs[index] = prob;
-
-  int pl = (n->infoset) ? n->infoset->player->number : -1;
-
-  T cumprob((T) 0), newprob((T) 0);
-  int i, nc = n->children.Length();
-
-  for (i = 1; i < nc; i++) {
-    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
-	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-    cumprob += newprob;
-    NodeRealizProbs(n->children[i], prob * newprob, profile, ++index,
-		     NRProbs);
-  }
-  
-  if (nc > 0) {
-    if (profile.IsTruncated())
-      newprob = (T) 1.0 - cumprob;
-    else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
-		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-    
-    NodeRealizProbs(n->children[nc], prob * newprob, profile, ++index,
-		     NRProbs);
-  }
-}
-
-template <class T> gArray<T> Efg<T>::Beliefs( const BehavProfile<T> &bp )
-{
-  gArray<T> BProbs(NumNodes(*bp.BelongsTo()));
-  gDPVector<T> payoff(Dimensionality());
-  gPVector<T> probs(Dimensionality().Lengths());
-  CondPayoff( bp, payoff, probs);
-  probs.Dump(gout);  gout << '\n';
-  int index = 1;
-  Beliefs ( root, (T) 1.0, bp, index, BProbs, probs);
-  BProbs.Dump(gout);  gout << '\n';
-  return BProbs;
-}
-
-template <class T>
-void Efg<T>::Beliefs(Node *n, T prob, const BehavProfile<T> &profile,
-		     int &index, gArray<T> &BProbs, gPVector<T> &gpv)
-{
-  int pl = (n->infoset) ? n->infoset->player->number : -1;
-  int iset = (n->infoset) ? n->infoset->number : 0;
-  T cumprob((T) 0), newprob((T) 0);
-  int i, nc = n->children.Length();
-
-  gout << prob << '\n';
-
-  if (pl == 0 || pl == -1)
-    BProbs[index] = (T) 1.0;
-  else
-    BProbs[index] = prob / gpv(pl, iset);
-  
-  for (i = 1; i < nc; i++) {
-    newprob = ((pl) ? profile(pl, n->infoset->number, i) :
-	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-    cumprob += newprob;
-    Beliefs(n->children[i], prob * newprob, profile, ++index,
-	    BProbs, gpv);
-  }
-  
-  if (nc > 0) {
-    if (profile.IsTruncated())
-      newprob = (T) 1.0 - cumprob;
-    else newprob = ((pl) ? profile(pl, n->infoset->number, i) :
-		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
-    
-    Beliefs(n->children[nc], prob * newprob, profile, ++index,
-	    BProbs, gpv);
-  }
-}
 
 template <class T> int Efg<T>::ProfileLength(bool trunc) const
 {
@@ -456,9 +263,6 @@ BehavProfile<T> &BehavProfile<T>::operator=(const BehavProfile<T> &p)
   return *this;
 }
 
-template <class T> T BehavProfile<T>::Payoff(int pl) const
-{ return ((Efg<T> *) E)->Payoff(pl, *this); }
-
 #include <assert.h>
 
 template <class T> bool BehavProfile<T>::IsPure(void) const
@@ -484,3 +288,199 @@ const T &BehavProfile<T>::GetValue(Infoset *s, int act) const
 template <class T> gOutput &operator<<(gOutput &f, const BehavProfile<T> &p)
 { p.Dump(f);   return f;  }
 
+
+//------------------------------------------------------------------------
+//                   BehavProfile<T>: Payoff computation
+//------------------------------------------------------------------------
+
+#include "gdpvect.h"
+
+template <class T>
+void BehavProfile<T>::Payoff(Node *n, T prob, int pl, T &value) const
+{
+  if (n->outcome)
+    value += prob * ((OutcomeVector<T> &) *n->outcome)[pl];
+  if (n->children.Length())
+    if (IsTruncated())   {
+      T p = (T) 0.0;
+      for (int i = 1, npl = n->infoset->player->number,
+	   iset = n->infoset->number; i < n->children.Length(); i++)  {
+	p += ((npl) ? (*this)(npl, iset, i) :
+	      ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+	Payoff(n->children[i],
+	       prob * ((npl) ? (*this)(npl, iset, i) :
+		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
+	       pl, value);
+      }
+      Payoff(n->children[i], prob * ((T)1 - p), pl, value);
+    }
+    else  {
+      for (int i = 1, npl = n->infoset->player->number,
+	   iset = n->infoset->number; i <= n->children.Length(); i++)
+	Payoff(n->children[i],
+	       prob * ((npl) ? (*this)(npl, iset, i) :
+		       ((ChanceInfoset<T> *) n->infoset)->probs[i]),
+	       pl, value);
+    }
+}
+
+template <class T>
+T BehavProfile<T>::Payoff(int pl) const
+{
+  T value = (T) 0.0;
+  Payoff(E->RootNode(), (T) 1.0, pl, value);
+  return value;
+}
+
+template <class T>
+void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
+				 gDPVector<T> &payoff) const
+{
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+  int iset = (n->infoset) ? n->infoset->number : 0;
+
+  if (n->outcome)
+    *((TypedNode<T> *) n)->scratch += (OutcomeVector<T> &) *n->outcome;
+  for (int i = 1, nc = n->children.Length(); i <= nc; i++)
+    *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
+  
+  T cumprob((T) 0), newprob((T) 0);
+
+
+  for (i = 1; i < nc; i++)   {
+    newprob = ((pl) ? (*this)(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    CondPayoff(n->children[i], prob * newprob, probs, payoff);
+
+    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
+      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
+    if (pl > 0)
+      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
+  }
+  
+  if (nc > 0)  {
+    if (IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else
+      newprob = ((pl) ? (*this)(pl, n->infoset->number, i) : 
+		 ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+
+    CondPayoff(n->children[nc], prob * newprob, probs, payoff);
+
+    for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
+      (*((TypedNode<T> *) n)->scratch)[j] += newprob * (*((TypedNode<T> *) n->children[i])->scratch)[j];
+    if (pl > 0)
+      payoff(pl, iset, i) += prob * (*((TypedNode<T> *) n->children[i])->scratch)[pl];
+  }
+
+  if (pl > 0)
+    probs(pl, n->infoset->number) += prob;
+}
+
+
+template <class T> 
+void BehavProfile<T>::CondPayoff( gDPVector<T> &payoff, 
+				 gPVector<T> &probs) const
+{
+  ((gVector<T> &) payoff).operator=((T) 0);
+  ((gVector<T> &) probs).operator=((T) 0);
+
+  *((TypedNode<T> *) E->RootNode())->scratch = (T) 0;
+  CondPayoff(E->RootNode(), (T) 1.0, probs, payoff);
+
+  for (int i = 1; i <= E->NumPlayers(); i++)
+    for (int j = 1; j <= (E->PlayerList())[i]->infosets.Length(); j++)
+      for (int k = 1; k <= (E->PlayerList())[i]->infosets[j]->actions.Length();
+	   k++)
+	// Note that bad things happen if probs(i, j, k) == 0
+	payoff(i, j, k) /= probs(i, j);
+}
+
+template <class T> 
+gArray<T> BehavProfile<T>::NodeRealizProbs( void )
+{
+  gArray<T> NRProbs(NumNodes(*BelongsTo()));
+  int index = 1;
+  NodeRealizProbs( E->RootNode(), (T) 1.0, index, NRProbs);
+  return NRProbs;
+}
+
+template <class T>
+void BehavProfile<T>::NodeRealizProbs(Node *n, T prob, int &index, 
+				      gArray<T> &NRProbs)
+{
+
+  NRProbs[index] = prob;
+
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+
+  T cumprob((T) 0), newprob((T) 0);
+  int i, nc = n->children.Length();
+
+  for (i = 1; i < nc; i++) {
+    newprob = ((pl) ? (*this)(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    NodeRealizProbs(n->children[i], prob * newprob, ++index,
+		     NRProbs);
+  }
+  
+  if (nc > 0) {
+    if (IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else newprob = ((pl) ? (*this)(pl, n->infoset->number, i) :
+		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    
+    NodeRealizProbs(n->children[nc], prob * newprob, ++index,
+		     NRProbs);
+  }
+}
+
+template <class T> gArray<T> BehavProfile<T>::Beliefs(void)
+{
+  gArray<T> BProbs(NumNodes(*BelongsTo()));
+  gDPVector<T> payoff(((Efg<T> *)E)->Dimensionality());
+  gPVector<T> probs(((Efg<T> *)E)->Dimensionality().Lengths());
+  CondPayoff( payoff, probs);
+  probs.Dump(gout);  gout << '\n';
+  int index = 1;
+  Beliefs ( E->RootNode(), (T) 1.0, index, BProbs, probs);
+  BProbs.Dump(gout);  gout << '\n';
+  return BProbs;
+}
+
+template <class T>
+void BehavProfile<T>::Beliefs(Node *n, T prob,
+		     int &index, gArray<T> &BProbs, gPVector<T> &gpv)
+{
+  int pl = (n->infoset) ? n->infoset->player->number : -1;
+  int iset = (n->infoset) ? n->infoset->number : 0;
+  T cumprob((T) 0), newprob((T) 0);
+  int i, nc = n->children.Length();
+
+  gout << prob << '\n';
+
+  if (pl == 0 || pl == -1)
+    BProbs[index] = (T) 1.0;
+  else
+    BProbs[index] = prob / gpv(pl, iset);
+  
+  for (i = 1; i < nc; i++) {
+    newprob = ((pl) ? (*this)(pl, n->infoset->number, i) :
+	       ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    cumprob += newprob;
+    Beliefs(n->children[i], prob * newprob, ++index,
+	    BProbs, gpv);
+  }
+  
+  if (nc > 0) {
+    if (IsTruncated())
+      newprob = (T) 1.0 - cumprob;
+    else newprob = ((pl) ? (*this)(pl, n->infoset->number, i) :
+		    ((ChanceInfoset<T> *) n->infoset)->probs[i]);
+    
+    Beliefs(n->children[nc], prob * newprob, ++index,
+	    BProbs, gpv);
+  }
+}
