@@ -1,13 +1,11 @@
-//#
-//# FILE: gnulib.cc -- Utilities from the g++ library
-//#
-//# $Id$
-//#
+//
+// FILE: gnulib.cc -- Utilities from the g++ library
+//
+// $Id$
+//
 
 
-#include <assert.h>
 #include <values.h>
-//#include <new.h>
 #include "gnulib.h"
 
 Obstack::Obstack(int size, int alignment)
@@ -37,8 +35,6 @@ void Obstack::_free(void* obj)
     chunklimit = lp->limit;
     chunk = lp;
   }
-  else if (obj != 0)
-    assert(0);
 }
 
 void Obstack::newchunk(int size)
@@ -95,8 +91,6 @@ int Obstack::OK()
   long x = MAXLONG;
   while (p != 0 && x != 0) { --x; p = p->prev; }
   v &= x > 0;
-  if (!v) 
-    assert(0);
   return v;
 }
 

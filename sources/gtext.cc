@@ -9,7 +9,6 @@
 #endif  // __GNUG__
 
 #include <stdlib.h>
-#include <assert.h>
 #include <ctype.h>
 #include "gstream.h"
 #include "gtext.h"

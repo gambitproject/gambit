@@ -5,7 +5,6 @@
 // $Id$
 //
 
-#include <assert.h>
 #include <ctype.h>
 
 #include "gsmfunc.h"
@@ -220,19 +219,16 @@ FuncDescObj::~FuncDescObj()
   
   for(f_index = 0; f_index < _NumFuncs; f_index++)
   {
-    for(index = 0; index < _FuncInfo[f_index].NumParams; index ++)
-    {
+    for(index = 0; index < _FuncInfo[f_index].NumParams; index++) {
       delete _FuncInfo[f_index].ParamInfo[index].DefaultValue;
     }
-    if(_FuncInfo[f_index].UserDefined)
-    {
-      assert(_RefCountTable.IsDefined(_FuncInfo[f_index].FuncInstr));
-      assert(_RefCountTable(_FuncInfo[f_index].FuncInstr) > 0);
+    if(_FuncInfo[f_index].UserDefined) {
+      if (!_RefCountTable.IsDefined(_FuncInfo[f_index].FuncInstr) ||
+	  _RefCountTable(_FuncInfo[f_index].FuncInstr) <= 0)
+	throw gclRuntimeError("Internal GCL error");
       _RefCountTable(_FuncInfo[f_index].FuncInstr)--;
-      if(_RefCountTable(_FuncInfo[f_index].FuncInstr) == 0)
-      {
+      if (_RefCountTable(_FuncInfo[f_index].FuncInstr) == 0) {
 	_RefCountTable.Remove(_FuncInfo[f_index].FuncInstr);
-	assert(_FuncInfo[f_index].FuncInstr != 0);
 	delete _FuncInfo[f_index].FuncInstr;
       }
     }
@@ -244,7 +240,8 @@ FuncDescObj::~FuncDescObj()
 
 void FuncDescObj::SetFuncInfo(int funcindex, gclSignature funcinfo)
 {
-  assert((funcindex >= 0) && (funcindex < _NumFuncs));
+  if ((funcindex < 0) || (funcindex >= _NumFuncs))
+    throw gclRuntimeError("Internal GCL error");
   _FuncInfo[funcindex] = funcinfo;
   if(funcinfo.UserDefined)
     if(!_RefCountTable.IsDefined(funcinfo.FuncInstr))
@@ -320,14 +317,10 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gText& s,
     while (ch != '>' && ch != ']' && index<=length)  
       ch=s[index++];
 
-    if (ch == ']')  // If we hit the end (this should NEVER happen)
-    {
-      gout << "hit end when unexpected\n\n";
-      assert(0);
-      done = true;
+    if (ch == ']')  {  // If we hit the end (this should NEVER happen)
+      throw gclRuntimeError("Bad function signature");
     }
-    else
-    {
+    else {
       ch=s[index++];
   
         // Word gets the word, which is the type of variable.
@@ -680,16 +673,18 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
 void FuncDescObj::SetParamInfo(int funcindex, int index, 
 			       const gclParameter param)
 {
-  assert((funcindex >= 0) && (funcindex < _NumFuncs));
-  assert((index >= 0) && (index < _FuncInfo[funcindex].NumParams));
+  if ((funcindex < 0) || (funcindex >= _NumFuncs))
+    throw gclRuntimeError("Internal GCL error");
+  if ((index < 0) || (index >= _FuncInfo[funcindex].NumParams))
+    throw gclRuntimeError("Internal GCL error");
   _FuncInfo[funcindex].ParamInfo[index] = param;
 }
 
 void FuncDescObj::SetParamInfo(int funcindex, const gclParameter params[])
 {
-  assert((funcindex >= 0) && (funcindex < _NumFuncs));
-  int i;
-  for(i = 0; i < _FuncInfo[funcindex].NumParams; i++)
+  if ((funcindex < 0) || (funcindex >= _NumFuncs))
+    throw gclRuntimeError("Internal GCL error");
+  for (int i = 0; i < _FuncInfo[funcindex].NumParams; i++)
     _FuncInfo[funcindex].ParamInfo[i] = params[i];
 }
 

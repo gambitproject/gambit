@@ -12,6 +12,13 @@
 
 #include "gvector.h"
 
+class gFuncMinError : public gException {
+public:
+  virtual ~gFuncMinError() { }
+  gText Description(void) const 
+    { return "Internal error in minimization code"; }
+};
+
 static const double GOLD = 1.618034;
 static const double TINY = 1.0e-20;
 
@@ -29,7 +36,8 @@ bool MinBracket(double tmin, double tmax,
   a = (tmin < 0.0) ? 0.0 : (3.0 * tmin + tmax) / 4.0;
   b = a + ((tmax - a > 4.0) ? 1.0 : (tmax - a) / 4.0);
 
-  assert(tmin < a && a < b && b < tmax);
+  if (tmin >= a || a >= b || b >= tmax)
+    throw gFuncMinError();
 
   gVector<double> scratch(direction);
   scratch *= a;
@@ -112,7 +120,8 @@ bool MinBracket(double tmin, double tmax,
 
     if ((double) direc * (u - ulim) > 0.0)  u = ulim;
 
-    assert((-ulim - u) * (u - ulim) >= 0.0);
+    if ((-ulim - u) * (u - ulim) < 0.0)
+      throw gFuncMinError();
 
     if (u == ulim) {
       alpha *= alpha;
@@ -256,7 +265,8 @@ double LineMin(double tmin, double tmax,
     tracefile.SetFloatMode();
   }
 
-  assert(tmin < tmax);
+  if (tmin >= tmax)
+    throw gFuncMinError();
 
   if (!MinBracket(tmin, tmax, func, origin, direction, a, b, c))  {
     xmin = c;
@@ -376,9 +386,11 @@ bool DFP(gPVector<double> &p,
     iter = its;
     Project(xi, p.Lengths());
     RayMin(func, p, xi, fret, maxits1, tol1, tracefile,tracelevel-1,interior);
-    if(interior)
-      for(int kk=1;kk<p.Length();kk++)
-	assert(p[kk]>0.0);
+    if (interior)
+      for (int kk = 1; kk < p.Length(); kk++) {
+	if (p[kk] <= 0.0)
+	  throw gFuncMinError();
+      }
     
     if (fret <= tolN || fret >= fp || its >= maxitsN || status.Get())  {
       if (fret <= tolN)  return true;
@@ -518,9 +530,11 @@ bool Powell(gPVector<double> &p,
 	Project(xit, p.Lengths());
 	RayMin(func, p, xit, fret, maxits1, tol1, tracefile, tracelevel-2,interior);
 	xi.SetRow(ibig, xit);
-	if(interior)
-	  for(int kk=1;kk<p.Length();kk++)
-	    assert(p[kk]>0.0);
+	if (interior)
+	  for (int kk = 1; kk < p.Length(); kk++) {
+	    if (p[kk] <= 0.0)
+	      throw gFuncMinError();
+	  }
       }
     }
     

@@ -465,7 +465,6 @@ static Portion* GSM_Manual(Portion** param)
   int body;
 
   for (i = 1; i <= Prototypes->Length(); i++) {
-    assert(Prototypes->Spec().Type == porTEXT);
     s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
   }
 
@@ -1158,7 +1157,6 @@ static Portion* GSM_Read_List(Portion** param, PortionSpec spec,
   for (int i = 1; i <= list->Length(); i++) {
     Portion* p;
 
-    assert((*list)[i]->Spec().Type==spec.Type);
     sub_param[0] = param[0];
     sub_param[1] = (*list)[i];
 
@@ -1190,11 +1188,6 @@ static Portion* GSM_Read_List(Portion** param, PortionSpec spec,
       //   p is actually swapped with sub_param[0] in the
       //   GSM_Read() functions!  So, can't just delete p;
       //   need to swap p and sub_param[0] first.
-
-      // just to make sure that the above description is still
-      //   correct...
-      assert( p == param[0] );
-      assert( sub_param[0] != param[0] );
 
       // delete and swap
       delete sub_param[0];
@@ -1279,9 +1272,6 @@ Portion* GSM_Read_Undefined(Portion** param)
 
   Portion* result = 0;
 
-  assert(param[1] == 0);
-
-
   while(!input.eof() && isspace(c))
     input.get(c);
   if (input.eof())
@@ -1303,11 +1293,6 @@ Portion* GSM_Read_Undefined(Portion** param)
 	//   GSM_Read() functions!  So, can't just delete p;
 	//   need to swap result and sub_param[0] first.
 	
-	// just to make sure that the above description is still
-	//   correct...
-	assert( result == param[0] );
-	assert( sub_param[0] != param[0] );
-	
 	// delete and swap
 	delete sub_param[0];
 	sub_param[0] = result;
@@ -1327,8 +1312,6 @@ Portion* GSM_Read_Undefined(Portion** param)
 
     } while (read_success && !input.eof());
 
-    assert( result == NULL );
-    
     c = ' ';
     while(!input.eof() && isspace(c))
       input.get(c);

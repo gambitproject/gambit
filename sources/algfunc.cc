@@ -651,7 +651,6 @@ Portion* GSM_Lp_List(Portion** param)
     gMatrix<double>* a = ListToMatrix_Float((ListPortion*) param[0]);
     gVector<double>* b = ListToVector_Float((ListPortion*) param[1]);
     gVector<double>* c = ListToVector_Float((ListPortion*) param[2]);
-    assert(a && b && c);
 
     int nequals = ((NumberPortion*) param[3])->Value();
     bool isFeasible;
@@ -674,7 +673,6 @@ Portion* GSM_Lp_List(Portion** param)
     gMatrix<gRational>* a = ListToMatrix_Rational((ListPortion*) param[0]);
     gVector<gRational>* b = ListToVector_Rational((ListPortion*) param[1]);
     gVector<gRational>* c = ListToVector_Rational((ListPortion*) param[2]);
-    assert(a && b && c);
 
     int nequals = ((NumberPortion*) param[3])->Value();
     bool isFeasible;

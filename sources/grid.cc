@@ -332,10 +332,10 @@ out << '\n';
 
 double GridSolveModule::Distance(const gVector<double> &a,const gVector<double> &b) const
 {
-assert(a.Check(b)); // better be the same size
-double dist=0;
-for (int i=1;i<=a.Length();i++)	dist+=abs(a[i]-b[i]);
-return dist;
+  double dist=0;
+  for (int i = 1; i <= a.Length(); i++)
+    dist+=abs(a[i]-b[i]);
+  return dist;
 }
 
 

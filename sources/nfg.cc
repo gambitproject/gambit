@@ -6,7 +6,6 @@
 //
 
 #include "rational.h"
-#include <assert.h>
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
@@ -297,7 +296,6 @@ void Nfg::IndexStrategies(void)
       s->m_number = j;
       s->m_index = (j - 1) * offset;
     }
-	 assert(j - 1 == NumStrats(i));
     offset *= (j - 1);
   }
 }

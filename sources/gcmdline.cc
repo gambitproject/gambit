@@ -1,6 +1,9 @@
+//
+// FILE: gcmdline.cc -- Implementation of editing interface for GCL
+//
 //  $Id$
+//
 
-#include <assert.h>
 #include <ctype.h>
 
 #ifdef __GNUG__
@@ -8,11 +11,10 @@
 #endif   // __GNUG__
 
 #ifdef __BORLANDC__
-// #include "winio.h"
 #include "stdafx.h"
-#include "MainFrm.h"
-#include "WinEditDoc.h"
-#include "WinEditView.h"
+#include "mainfrm.h"
+#include "wineditdoc.h"
+#include "wineditview.h"
 
 char WinGetChar( void )
 {
@@ -28,9 +30,6 @@ int gCmdLineInput::s_NumInstances = 0;
 #ifdef __GNUG__
 struct termios gCmdLineInput::s_TermAttr;
 #endif // __GNUG__
-
-
-
 
 void gCmdLineInput::SaveTermAttr( void )
 {
@@ -171,14 +170,8 @@ void gCmdLineInput::GetCmdExec( void )
 
   gout << cmdBuf;
 
-  for( ; ; ) // infinite loop
-  {
-    assert( 0 <= curPos );
-    assert( curPos <= cmdBuf.Length() );
-
+  for( ; ; ) { // infinite loop
 #ifdef __BORLANDC__
-//    winio_setecho( winio_current(), false );
-//    c = winio_getchar();
     c = WinGetChar();
 #else
     gin.get( c );
@@ -431,32 +424,20 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   default:
     return ESC_ERROR;
   }
-
-  
 }
-
-
 
 void gCmdLineInput::EatSpace( int num )
 {
-  assert( num <= m_CmdExec.Length() );
-  int i = 0;
-  for( i = 0; i < num; ++i )
-    m_CmdExec.Remove( 0 );
+  for (int i = 0; i < num; i++)
+    m_CmdExec.Remove(0);
 }
-
-
-
-
 
 gInput& gCmdLineInput::operator >> (int &x)
 {
   int tokens = 0;
-  while( tokens == 0 )
-  {
+  while (tokens == 0) {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
-    
+
     int num = 0;
     tokens = sscanf( m_CmdExec, "%d%n", &x, &num );
     EatSpace( num );
@@ -467,10 +448,8 @@ gInput& gCmdLineInput::operator >> (int &x)
 gInput& gCmdLineInput::operator >> (unsigned int &x)
 {
   int tokens = 0;
-  while( tokens == 0 )
-  {
+  while (tokens == 0) {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
     tokens = sscanf( m_CmdExec, "%d%n", &x, &num );
@@ -485,7 +464,6 @@ gInput& gCmdLineInput::operator >> (long &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
     tokens = sscanf( m_CmdExec, "%ld%n", &x, &num );
@@ -500,7 +478,6 @@ gInput& gCmdLineInput::operator >> (char &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
     tokens = sscanf( m_CmdExec, "%c%n", &x, &num );
@@ -515,8 +492,7 @@ gInput& gCmdLineInput::operator >> (double &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
-    
+
     int num = 0;
     tokens = sscanf( m_CmdExec, "%lf%n", &x, &num );
     EatSpace( num );
@@ -530,7 +506,6 @@ gInput& gCmdLineInput::operator >> (float &x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
     tokens = sscanf( m_CmdExec, "%f%n", &x, &num );
@@ -545,7 +520,6 @@ gInput& gCmdLineInput::operator >> (char *x)
   while( tokens == 0 )
   {
     GetCmdExec();
-    assert( m_CmdExec.Length() > 0 );
 
     int num = 0;
     tokens = sscanf( m_CmdExec, "%s%n", x, &num );

@@ -134,7 +134,6 @@ Action *LastAction(Node *node)
   for (int i = 1; i <= parent->NumChildren(); i++) 
     if (parent->GetChild(i) == node)  
       return parent->GetInfoset()->Actions()[i];
-  assert(0);
   return 0;
 }
 

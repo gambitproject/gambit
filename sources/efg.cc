@@ -16,7 +16,6 @@
 
 #include "efg.h"
 #include "efgutils.h"
-#include <assert.h>
 
 
 //----------------------------------------------------------------------
@@ -362,13 +361,9 @@ void Efg::SortInfosets(void)
       Node *n = nodes[i];
       if (n->GetPlayer() == player && n->GetInfoset()->number == 0)  {
 	n->GetInfoset()->number = ++isets;
-	assert(n->GetInfoset()->number <= n->GetPlayer()->NumInfosets());
 	player->infosets[isets] = n->GetInfoset();
       }
     }  
-
-    assert(isets == player->infosets.Length() ||
-	   player->infosets[isets + 1]->members.Length() == 0);
   }
 
   // Now, we sort the nodes within the infosets
@@ -784,7 +779,7 @@ Infoset *Efg::AppendNode(Node *n, EFPlayer *p, int count)
 
 Infoset *Efg::AppendNode(Node *n, Infoset *s)
 {
-  assert(n && s);
+  if (!n || !s)   throw Exception();
   
   // Can't bridge subgames...
   if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
@@ -804,7 +799,7 @@ Infoset *Efg::AppendNode(Node *n, Infoset *s)
   
 Node *Efg::DeleteNode(Node *n, Node *keep)
 {
-  assert(n && keep);
+  if (!n || !keep)   throw Exception();
 
   if (keep->parent != n)   return n;
 
@@ -834,7 +829,7 @@ Node *Efg::DeleteNode(Node *n, Node *keep)
 
 Infoset *Efg::InsertNode(Node *n, EFPlayer *p, int count)
 {
-  assert(n && p && count > 0);
+  if (!n || !p || count <= 0)  throw Exception();
 
   Node *m = new Node(this, n->parent);
   m->infoset = CreateInfoset(p->infosets.Length() + 1, p, count);
@@ -855,7 +850,7 @@ Infoset *Efg::InsertNode(Node *n, EFPlayer *p, int count)
 
 Infoset *Efg::InsertNode(Node *n, Infoset *s)
 {
-  assert(n && s);
+  if (!n || !s)  throw Exception();
 
   // can't bridge subgames
   if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
@@ -881,13 +876,13 @@ Infoset *Efg::InsertNode(Node *n, Infoset *s)
 
 Infoset *Efg::CreateInfoset(EFPlayer *p, int br)
 {
-  assert(p && p->Game() == this);
+  if (!p || p->Game() != this)  throw Exception();
   return CreateInfoset(p->infosets.Length() + 1, p, br);
 }
 
 Infoset *Efg::JoinInfoset(Infoset *s, Node *n)
 {
-  assert(n && s);
+  if (!n || !s)  throw Exception();
 
   // can't bridge subgames
   if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
@@ -911,7 +906,7 @@ Infoset *Efg::JoinInfoset(Infoset *s, Node *n)
 
 Infoset *Efg::LeaveInfoset(Node *n)
 {
-  assert(n);
+  if (!n)  throw Exception();
 
   if (!n->infoset)   return 0;
 
@@ -934,7 +929,7 @@ Infoset *Efg::LeaveInfoset(Node *n)
 
 Infoset *Efg::SplitInfoset(Node *n)
 {
-  assert(n);
+  if (!n)  throw Exception();
 
   if (!n->infoset)   return 0;
 
@@ -961,7 +956,7 @@ Infoset *Efg::SplitInfoset(Node *n)
 
 Infoset *Efg::MergeInfoset(Infoset *to, Infoset *from)
 {
-  assert(to && from);
+  if (!to || !from)  throw Exception();
 
   if (to == from ||
       to->actions.Length() != from->actions.Length())   return from;
@@ -982,7 +977,7 @@ Infoset *Efg::MergeInfoset(Infoset *to, Infoset *from)
 
 bool Efg::DeleteEmptyInfoset(Infoset *s)
 {
-  assert(s);
+  if (!s)  throw Exception();
 
   if (s->NumMembers() > 0)   return false;
 
@@ -994,7 +989,7 @@ bool Efg::DeleteEmptyInfoset(Infoset *s)
 
 Infoset *Efg::SwitchPlayer(Infoset *s, EFPlayer *p)
 {
-  assert(s && p);
+  if (!s || !p)  throw Exception();
   
   if (s->player == p)   return s;
 
@@ -1077,7 +1072,7 @@ void Efg::Reveal(Infoset *where, const gArray<EFPlayer *> &who)
 
 Node *Efg::CopyTree(Node *src, Node *dest)
 {
-  assert(src && dest);
+  if (!src || !dest)  throw Exception();
   if (src == dest || dest->children.Length())   return src;
   if (src->gameroot != dest->gameroot)  return src;
 
@@ -1094,7 +1089,7 @@ Node *Efg::CopyTree(Node *src, Node *dest)
 
 Node *Efg::MoveTree(Node *src, Node *dest)
 {
-  assert(src && dest);
+  if (!src || !dest)  throw Exception();
   if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
     return src;
   if (src->gameroot != dest->gameroot)  return src;
@@ -1117,7 +1112,7 @@ Node *Efg::MoveTree(Node *src, Node *dest)
 
 Node *Efg::DeleteTree(Node *n)
 {
-  assert(n);
+  if (!n)  throw Exception();
 
   while (n->NumChildren() > 0)   {
     DeleteTree(n->children[1]);
@@ -1138,7 +1133,7 @@ Node *Efg::DeleteTree(Node *n)
 
 Action *Efg::InsertAction(Infoset *s)
 {
-  assert(s);
+  if (!s)  throw Exception();
   Action *action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(new Node(this, s->members[i]));
@@ -1148,7 +1143,7 @@ Action *Efg::InsertAction(Infoset *s)
 
 Action *Efg::InsertAction(Infoset *s, Action *a)
 {
-  assert(a && s);
+  if (!a || !s)  throw Exception();
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
@@ -1163,7 +1158,7 @@ Action *Efg::InsertAction(Infoset *s, Action *a)
 
 Infoset *Efg::DeleteAction(Infoset *s, Action *a)
 {
-  assert(a && s);
+  if (!a || !s)  throw Exception();
   int where;
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);

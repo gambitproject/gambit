@@ -12,7 +12,6 @@
 #include <math.h>
 #include <limits.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include "gstream.h"
 #include "gtext.h"
@@ -413,7 +412,6 @@ bool index_pair::operator != (const index_pair& other) const
 
 int index_pair::operator [] (const int& index) const 
 {
-  assert ((index == 1) || (index == 2));
   if (index == 1) return first;
   else            return second;
 }

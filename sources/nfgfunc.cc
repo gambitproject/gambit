@@ -200,8 +200,7 @@ static Portion* GSM_Name_NfgElements( Portion** param )
     return new TextPortion(((NfOutcomePortion*) param[0])->Value()->
 			   GetName());
   default:
-    assert( 0 );
-    return 0;
+    throw gclRuntimeError("Unknown type passed to Name[]");
   }
 }
 

@@ -365,10 +365,8 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
 
 Portion* GSM_Game_EfgElements(Portion** param)
 {
-  if (param[0]->Game())  {
-    assert(param[0]->GameIsEfg());
+  if (param[0]->Game())
     return new EfgPortion((Efg*) param[0]->Game());
-  }
   else
     return 0;
 }
@@ -624,10 +622,8 @@ static Portion *GSM_MoveTree(Portion **param)
 
 static Portion *GSM_Name_EfgElements(Portion **param)
 {
-  if( param[0]->Spec().Type == porNULL )
-  {
-    return new TextPortion( "" );
-  }
+  if (param[0]->Spec().Type == porNULL)
+    return new TextPortion("");
 
   switch (param[0]->Spec().Type)  {
     case porACTION:
@@ -649,8 +645,7 @@ static Portion *GSM_Name_EfgElements(Portion **param)
       return new TextPortion(((EfgPortion *) param[0])->Value()->
 				GetTitle());
     default:
-      assert(0);
-      return 0;
+      throw gclRuntimeError("Unknown type passed to Name[]");
   }
 }
 
@@ -1014,7 +1009,7 @@ static Portion *GSM_SetName(Portion **param)
       ((EfgPortion *) param[0])->Value()->SetTitle(name);
       break;
     default:
-      assert(0);
+      throw gclRuntimeError("Bad type passed to SetName[]");
   }
 
   return param[0]->ValCopy();

@@ -258,8 +258,6 @@ EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
       for (index = 1; index <= subroots.Length() &&
 	   member->GetSubgameRoot() != subroots[index]; index++);
 
-      assert(index <= subroots.Length());
-
       infoset_subgames(pl, iset) = index;
     }
   }   

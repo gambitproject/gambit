@@ -7,7 +7,6 @@
 #include <signal.h>
 #include <values.h>
 #include <math.h>
-#include <assert.h>
 #include <stdlib.h>
 
 #include "rational.h"
@@ -119,7 +118,7 @@ int main( int /*argc*/, char* argv[] )
     _SourceDir = new char[256];
     if (c != NULL)  {
       int len = strlen(argv[0]) - strlen(c);
-      assert(len < 256);
+      if (len >= 256)  len = 255;
       strncpy(_SourceDir, argv[0], len);
     }
     else   {
