@@ -114,8 +114,10 @@ template <class T> long ContIter<T>::GetIndex(void) const
 
 template <class T> gTuple<int> ContIter<T>::Get(void) const
 {
-  gTuple<int> t(N->NumPlayers());
-  Get(t);
+  gTuple<int> current(N->NumPlayers());
+  for (int i = 1; i <= current.Length(); i++)
+    current[i] = (*profile)[i]->number;
+  return current;
 }
 
 template <class T> void ContIter<T>::Get(gTuple<int> &t) const
