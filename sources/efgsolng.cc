@@ -660,7 +660,7 @@ guiNGobitBySubgame::guiNGobitBySubgame(const Efg &p_efg,
   BehavProfile<gNumber> startb = m_parent->CreateStartProfile(GSPD.StartOption());
   MixedProfile<gNumber> startm(*N);
   
-  BehavToMixed(startb, startm);
+  BehavToMixed(p_efg, startb, *N, startm);
 	
   long nevals, nits;
   gList<MixedSolution> nfg_solns;
@@ -669,7 +669,7 @@ guiNGobitBySubgame::guiNGobitBySubgame(const Efg &p_efg,
     GSPD.RunPxi();
   
     for (int i = 1; i <= nfg_solns.Length(); i++) {
-      MixedToBehav(nfg_solns[i], startb);
+      MixedToBehav(*N, nfg_solns[i], p_efg, startb);
       m_solutions.Append(BehavSolution(startb, EfgAlg_GOBIT));
     }
 

@@ -80,15 +80,10 @@ template <class T> void ClearNodeProbs(BehavNode<T> *n)
     ClearNodeProbs(n->children[i]);
 }
 
-
-
-
 template <class T>
-void MixedToBehav(const MixedProfile<T> &mp, BehavProfile<T> &bp)
+void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
+		  const Efg &E, BehavProfile<T> &bp)
 {
-  const Nfg &N = mp.Game();
-  const Efg &E = bp.Game();
-
   if (AssociatedAfg((Efg *) &E) == &N)   {
     ((gVector<T> &) bp).operator=((gVector<T> &) mp);
     return;
@@ -121,11 +116,9 @@ void MixedToBehav(const MixedProfile<T> &mp, BehavProfile<T> &bp)
 }
 
 template <class T>
-void BehavToMixed(const BehavProfile<T> &bp, MixedProfile<T> &mp)
+void BehavToMixed(const Efg &E, const BehavProfile<T> &bp, 
+		  const Nfg &N, MixedProfile<T> &mp)
 {
-  const Efg &E = bp.Game();
-  const Nfg &N = mp.Game();
-
   if (E.afg == &N)   {
     ((gVector<T> &) mp).operator=((gVector<T> &) bp);
     return;

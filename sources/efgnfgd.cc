@@ -10,11 +10,11 @@
 
 template void ClearNodeProbs(BehavNode<double> *);
 
-template void MixedToBehav(const MixedProfile<double> &,
-			   BehavProfile<double> &);
+template void MixedToBehav(const Nfg &, const MixedProfile<double> &,
+			   const Efg &, BehavProfile<double> &);
 
-template void BehavToMixed(const BehavProfile<double> &,
-			   MixedProfile<double> &);
+template void BehavToMixed(const Efg &, const BehavProfile<double> &,
+			   const Nfg &, MixedProfile<double> &);
 
 template void RealizationProbs(const Nfg &N, const MixedProfile<double> &mp,
 			       const Efg &E, BehavProfile<double> &bp,

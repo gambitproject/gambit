@@ -218,18 +218,18 @@ protected:
 #ifndef EFG_ONLY
     friend Nfg *MakeReducedNfg(const EFSupport &);
     friend Nfg *MakeAfg(const Efg &);
-    friend void MixedToBehav(const MixedProfile<double> &mp,
-		             BehavProfile<double> &bp);
-    friend void BehavToMixed(const BehavProfile<double> &,
-			     MixedProfile<double> &);
-    friend void MixedToBehav(const MixedProfile<gRational> &mp,
-		             BehavProfile<gRational> &bp);
-    friend void BehavToMixed(const BehavProfile<gRational> &,
-			     MixedProfile<gRational> &);
-    friend void MixedToBehav(const MixedProfile<gNumber> &mp,
-		             BehavProfile<gNumber> &bp);
-    friend void BehavToMixed(const BehavProfile<gNumber> &,
-			     MixedProfile<gNumber> &);
+    friend void MixedToBehav(const Nfg &, const MixedProfile<double> &mp,
+		             const Efg &, BehavProfile<double> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<double> &,
+			     const Nfg &, MixedProfile<double> &);
+    friend void MixedToBehav(const Nfg &, const MixedProfile<gRational> &mp,
+		             const Efg &, BehavProfile<gRational> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
+			     const Nfg &, MixedProfile<gRational> &);
+    friend void MixedToBehav(const Nfg &, const MixedProfile<gNumber> &mp,
+		             const Efg &, BehavProfile<gNumber> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
+			     const Nfg &, MixedProfile<gNumber> &);
 #endif   // EFG_ONLY
 };
 

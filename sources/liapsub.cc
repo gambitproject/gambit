@@ -34,7 +34,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   MixedProfile<double> mp(*S);
 
-  BehavToMixed(bp, mp);
+  BehavToMixed(E, bp, *N, mp);
 
   MixedProfile<gNumber> st(*S);
   for (int i = 1; i <= st.Length(); i++)
@@ -49,7 +49,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   for (int i = 1; i <= subsolns.Length(); i++)  {
     BehavProfile<gNumber> bp(start);
-    MixedToBehav(MixedProfile<gNumber>(subsolns[i]), bp);
+    MixedToBehav(*N, MixedProfile<gNumber>(subsolns[i]), E, bp);
     solns.Append(bp);
   }
 

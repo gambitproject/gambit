@@ -1001,7 +1001,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
     // assert(mp != Solution());
     EFSupport S(*InterfaceObjectEfg());
     BehavProfile<gNumber> bp(S);
-    MixedToBehav(mp, bp);
+    MixedToBehav(mp.Game(), mp, S.Game(), bp);
     SolutionToEfg(bp, set);
 #endif
 }
