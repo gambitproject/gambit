@@ -2308,38 +2308,18 @@ char* hex(const Integer& x, int width)
 // work with the input/output classes later...
 //
 
-/*
-istream& operator >> (istream& s, Integer& y)
+gInput &operator>>(gInput& s, Integer& y)
 {
-#ifdef _OLD_STREAMS
-  if (!s.good())
-    return s;
-#else
-  if (!s.ipfx(0))
-  {
-    s.clear(ios::failbit|s.rdstate());
-    return s;
-  }
-#endif
-  s >> ws;
-  if (!s.good())
-  {
-    s.clear(ios::failbit|s.rdstate());
-    return s;
-  }
-  
-#ifdef _OLD_STREAMS
-  int know_base = 0;
-  int base = 10;
-#else
-  int know_base = s.flags() & (ios::oct | ios::hex | ios::dec);
-  int base = (s.flags() & ios::oct) ? 8 : (s.flags() & ios::hex) ? 16 : 10;
-#endif
-
   int got_one = 0;
   char sgn = 0;
   char ch;
   y.rep = Icopy_zero(y.rep);
+  
+  do  {
+    s.get(ch);
+  }  while (isspace(ch));
+
+  s.unget(ch);
 
   while (s.get(ch))
   {
@@ -2350,43 +2330,7 @@ istream& operator >> (istream& s, Integer& y)
       else
         break;
     }
-    else if (!know_base & !got_one && ch == '0')
-      base = 8, got_one = 1;
-    else if (!know_base & !got_one && base == 8 && (ch == 'X' || ch == 'x'))
-      base = 16;
-    else if (base == 8)
-    {
-      if (ch >= '0' && ch <= '7')
-      {
-        long digit = ch - '0';
-        y <<= 3;
-        y += digit;
-        got_one = 1;
-      }
-      else
-        break;
-    }
-    else if (base == 16)
-    {
-      long digit;
-      if (ch >= '0' && ch <= '9')
-        digit = ch - '0';
-      else if (ch >= 'A' && ch <= 'F')
-        digit = ch - 'A' + 10;
-      else if (ch >= 'a' && ch <= 'f')
-        digit = ch - 'a' + 10;
-      else
-        digit = base;
-      if (digit < base)
-      {
-        y <<= 4;
-        y += digit;
-        got_one = 1;
-      }
-      else
-        break;
-    }
-    else if (base == 10)
+    else
     {
       if (ch >= '0' && ch <= '9')
       {
@@ -2398,20 +2342,14 @@ istream& operator >> (istream& s, Integer& y)
       else
         break;
     }
-    else
-      abort(); // can't happen for now
   }
-  if (s.good())
-    s.putback(ch);
-  if (!got_one)
-    s.clear(ios::failbit|s.rdstate());
+  s.unget(ch);
 
   if (sgn == '-')
     y.negate();
 
   return s;
 }
-*/
 
 int Integer::OK() const
 {

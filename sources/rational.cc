@@ -357,6 +357,31 @@ gOutput& operator << (gOutput& s, const Rational& y)
   }
   return s;
 }
+
+gInput &operator>>(gInput &f, Rational &y)
+{
+  Integer num = 0, den = 1;
+  f >> num;
+
+  char ch;
+  f >> ch;
+  if (ch == '/')   f >> den;
+  else if (ch == '.')  {
+    Integer x;
+    f >> x;
+    Integer z = 1;
+    while (x / z > 0)   z *= 10;
+    y = Rational(x, z) + Rational(num);
+    return f;
+  }
+  else
+    f.unget(ch);
+
+  y = Rational(num, den);
+  return f;
+}
+
+
 /*
 istream& operator >> (istream& s, Rational& y)
 {
