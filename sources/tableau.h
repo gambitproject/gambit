@@ -23,7 +23,8 @@ template <class T> class LPTableau;
 // Tableau<double>
 //  
 
-template<> class Tableau<double> : public TableauInterface<double>{
+TEMPLATE_SPECIALIZATION()
+class Tableau<double> : public TableauInterface<double>{
 private:
   LUdecomp<double> B;     // LU decomposition
   gVector<double> tmpcol; // temporary column vector, to avoid allocation
@@ -62,7 +63,8 @@ public:
 // Tableau<gRational> 
 //  
 
-template<> class Tableau<gRational> : public TableauInterface<gRational>{
+TEMPLATE_SPECIALIZATION()
+class Tableau<gRational> : public TableauInterface<gRational>{
 private:
   int remap(int col_index) const;  // aligns the column indexes
   gMatrix<gRational> GetInverse();
