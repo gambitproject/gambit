@@ -34,13 +34,14 @@ class NFOutcome   {
 
 #include "glist.h"
 
+template <class T> class Lexicon;
+template <class T> class Nfg;
+template <class T> class Efg;
+
 class BaseNfg {
 // these friend declarations are awful... but they get the job done for now
-friend class Lexicon; 
-friend void SetEfg(BaseNfg *, BaseEfg *);
 protected:
   gString title;
-  BaseEfg *efg;
   gArray<int> dimensions;
 
   gArray<NFPlayer *> players;
@@ -49,7 +50,7 @@ protected:
   gArray<NFOutcome *> results;
 
   void IndexStrategies(void);
-  void BreakLink(void);
+  virtual void BreakLink(void) = 0;
 
   int Product(const gArray<int> &);
 
@@ -93,8 +94,6 @@ public:
   void SetOutcome(int index, NFOutcome *outcome)  { results[index] = outcome; }
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
 
-  BaseEfg *AssociatedEfg(void) const   { return efg; }
-
   const gArray<Strategy *> &Strategies(int p) const;
 
   virtual void WriteNfgFile(gOutput &) const = 0;
@@ -112,8 +111,13 @@ template <class T> class Nfg : public BaseNfg {
 
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
+friend class Lexicon<T>;
+friend void SetEfg(Nfg<T> *, Efg<T> *);
 private:
+  Efg<T> *efg;
   gRectBlock<T> payoffs;
+
+  void BreakLink(void);
 
 public:
   Nfg(const gArray<int> &dim);
@@ -132,6 +136,8 @@ public:
   const T &Payoff(NFOutcome *, int pl) const;
 
   void WriteNfgFile(gOutput &) const;
+
+  Efg<T> *AssociatedEfg(void) const   { return efg; }
 
   // defined in nfgutils.cc
   friend void RandomNfg(Nfg<T> &);

@@ -24,7 +24,7 @@ int BaseNfg::Product(const gArray<int> &dim)
 }
   
 BaseNfg::BaseNfg(const gArray<int> &dim)
-  : efg(0), dimensions(dim), players(dim.Length()), results(Product(dim))
+  : dimensions(dim), players(dim.Length()), results(Product(dim))
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -40,7 +40,7 @@ BaseNfg::BaseNfg(const gArray<int> &dim)
 }
 
 BaseNfg::BaseNfg (const BaseNfg &b)
-  : title(b.title), efg(0), dimensions(b.dimensions),
+  : title(b.title), dimensions(b.dimensions),
     players(b.players.Length())
 {
   for (int i = 1; i <= players.Length(); i++){
@@ -55,30 +55,17 @@ BaseNfg::BaseNfg (const BaseNfg &b)
 }
 
 #include "efg.h"
-#include "lexicon.h"
-
-void BaseNfg::BreakLink(void)
-{
-  if (efg)  {
-    BaseEfg *tmp = efg;
-    // note that Lexicon dtor unsets the efg member...
-
-    delete efg->lexicon;
-    tmp->lexicon = 0;
-  }
-}
 
 BaseNfg::~BaseNfg()
 {
-  BreakLink();
   for (int i = 1; i <= players.Length(); i++)
     delete players[i];
 }
 
 
-// -------------------------
-// BaseNfg: Member Functions
-// -------------------------
+//-------------------------
+//BaseNfg: Member Functions
+//-------------------------
 
 
 const gArray<Strategy *> &BaseNfg::Strategies(int p) const

@@ -178,7 +178,7 @@ template <class T> Efg<T>::Efg(const Efg<T> &E)
 // Use with care, if at all!
 //
 template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
-  : BaseEfg(E)
+  : BaseEfg(E), lexicon(0)
 {
   int i;
 

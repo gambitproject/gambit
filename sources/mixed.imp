@@ -14,7 +14,7 @@
 //---------------------------------------------------------------
 
 template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
-  : BaseNfg(dim), payoffs(1, dim.Length())
+  : BaseNfg(dim), efg(0), payoffs(1, dim.Length())
 {
   gVector<T> zeroes(dim.Length());
   zeroes = (T) 0;
@@ -22,11 +22,23 @@ template <class T> Nfg<T>::Nfg(const gArray<int> &dim)
 }
 
 template <class T> Nfg<T>::Nfg(const Nfg<T> &N)
-  : BaseNfg(N), payoffs(N.payoffs)
+  : BaseNfg(N), efg(0), payoffs(N.payoffs)
 { }
 
+#include "lexicon.h"
+#include "efg.h"
+
 template <class T> Nfg<T>::~Nfg()
-{ }
+{
+  if (efg)  {
+    Efg<T> *tmp = efg;
+    // note that Lexicon dtor unsets the efg member...
+
+    delete efg->lexicon;
+    tmp->lexicon = 0;
+  }
+  efg = 0;
+}
 
 
 //------------------------
@@ -148,6 +160,18 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
       f << payoffs(results[i]->GetNumber(), j) << ' ';
 
   f << '\n';
+}
+
+template <class T> void Nfg<T>::BreakLink(void)
+{
+  if (efg)  {
+    Efg<T> *tmp = efg;
+    // note that Lexicon dtor unsets the efg member...
+
+    delete efg->lexicon;
+    tmp->lexicon = 0;
+  }
+  efg = 0;
 }
 
 #include "gpvector.h"
