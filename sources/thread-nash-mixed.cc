@@ -164,3 +164,27 @@ void gbtNashYamamotoMixedThread::Compute(void)
   m_eqa = gbtNashYamamotoNfg(m_parent->GetDocument()->GetGame());
 }
 
+//==========================================================================
+//                    class gbtNashGnmMixedThread
+//==========================================================================
+
+void gbtNashGnmMixedThread::Compute(void)
+{
+  m_eqa = gbtNashGnmNfg(m_parent->GetDocument()->GetGame());
+}
+
+//==========================================================================
+//                    class gbtNashIpaMixedThread
+//==========================================================================
+
+void gbtNashIpaMixedThread::Compute(void)
+{
+  gbtGame game = m_parent->GetDocument()->GetGame();
+  gbtArray<double> pert(game->StrategyProfileLength());
+  for (int i = 1; i <= pert.Length(); i++) {
+    pert[i] = (double) i;
+  }
+
+  m_eqa = gbtNashIpaNfg(game, pert);
+}
+

@@ -52,6 +52,8 @@ const int GBT_MENU_METHOD_LOGIT = 909;
 const int GBT_MENU_METHOD_ENUMPOLY = 910;
 const int GBT_MENU_METHOD_PNS = 911;
 const int GBT_MENU_METHOD_YAMAMOTO = 912;
+const int GBT_MENU_METHOD_GNM = 913;
+const int GBT_MENU_METHOD_IPA = 914;
 const int GBT_MENU_LAST = 950;
 
 const int GBT_BUTTON_START = 997;
@@ -182,6 +184,12 @@ void gbtNashPanel::OnStartButton(wxCommandEvent &)
   case GBT_MENU_METHOD_YAMAMOTO:
     m_thread = new gbtNashYamamotoMixedThread(this, m_eqa);
     break;
+  case GBT_MENU_METHOD_GNM:
+    m_thread = new gbtNashGnmMixedThread(this, m_eqa);
+    break;
+  case GBT_MENU_METHOD_IPA:
+    m_thread = new gbtNashIpaMixedThread(this, m_eqa);
+    break;
   default:
     return;
   }
@@ -250,7 +258,10 @@ void gbtNashPanel::OnMethodButton(wxCommandEvent &)
   if (m_countValue == GBT_MENU_COUNT_ONE) {
     menu->Append(GBT_MENU_METHOD_YAMAMOTO, 
 		 "Yamamoto's path-following procedure");
+    menu->Append(GBT_MENU_METHOD_IPA,
+		 "iterated polymatrix approximation");
   }
+  menu->Append(GBT_MENU_METHOD_GNM, "a global Newton method");
   
   PopupMenu(menu,
 	    m_method->GetPosition().x,
@@ -303,6 +314,14 @@ void gbtNashPanel::OnMenu(wxCommandEvent &p_event)
   case GBT_MENU_METHOD_YAMAMOTO:
     m_method->SetLabel("Yamamoto's path-following procedure");
     m_methodValue = GBT_MENU_METHOD_YAMAMOTO;
+    break;
+  case GBT_MENU_METHOD_IPA:
+    m_method->SetLabel("iterated polymatrix approximation");
+    m_methodValue = GBT_MENU_METHOD_IPA;
+    break;
+  case GBT_MENU_METHOD_GNM:
+    m_method->SetLabel("a global Newton method");
+    m_methodValue = GBT_MENU_METHOD_GNM;
     break;
   default:
     break;

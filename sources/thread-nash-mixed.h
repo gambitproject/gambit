@@ -228,4 +228,32 @@ private:
   void Compute(void);
 };
 
+//==========================================================================
+//                    class gbtNashGnmMixedThread
+//==========================================================================
+
+class gbtNashGnmMixedThread : public gbtNashMixedThread {
+public:
+  gbtNashGnmMixedThread(gbtNashPanel *p_parent,
+			gbtList<gbtMixedProfile<double> > &p_eqa)
+    : gbtNashMixedThread(p_parent, p_eqa) { }
+
+private:
+  void Compute(void);
+};
+
+//==========================================================================
+//                    class gbtNashIpaMixedThread
+//==========================================================================
+
+class gbtNashIpaMixedThread : public gbtNashMixedThread {
+public:
+  gbtNashIpaMixedThread(gbtNashPanel *p_parent,
+			gbtList<gbtMixedProfile<double> > &p_eqa)
+    : gbtNashMixedThread(p_parent, p_eqa) { }
+
+private:
+  void Compute(void);
+};
+
 #endif  // THREAD_NASH_MIXED_H
