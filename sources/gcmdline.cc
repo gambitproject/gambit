@@ -4,14 +4,12 @@
 #include <ctype.h>
 
 #ifdef __GNUG__
-
 #include <unistd.h>
+#endif   // __GNUG__
 
-#elif defined __BORLANDC__
-
+#ifdef __BORLANDC__
 #include "winio.h"
-
-#endif   // __GNUG__, __BORLANDC__
+#endif   __BORLANDC__
 
 #include "gcmdline.h"
 
