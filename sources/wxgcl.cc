@@ -373,8 +373,8 @@ GclFrame::GclFrame(wxFrame *p_parent, const wxString &p_title,
 
   // For the moment, default to a fixed-width font.
   // In the long run, this will be read from wxConfig
-  m_inputWindow->SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL));
-  m_outputWindow->SetFont(wxFont(8, wxMODERN, wxNORMAL, wxNORMAL));
+  m_inputWindow->SetFont(wxFont(12, wxMODERN, wxNORMAL, wxNORMAL));
+  m_outputWindow->SetFont(wxFont(12, wxMODERN, wxNORMAL, wxNORMAL));
 
   m_cancelButton = new wxCancelButton(m_inputSashWindow);
   m_cancelButton->Enable(false);
