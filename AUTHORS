@@ -1,12 +1,70 @@
 -*-text-*-
 
+This is Gambit, a project dedicated to tools and methods for
+computation in game theory.
+
+Contacting Gambit:
+------------------
+
+The Gambit developers can be reached at
+gambit (at) hss (dot) caltech (dot) edu, or individually at email 
+addresses listed below.
+
+The surface mail contact address for Gambit is
+
+The Gambit Project
+c/o Prof. Theodore Turocy
+Department of Economics
+Texas A&M University
+4228 TAMU
+College Station TX 77843
+
 Main Developers:
 ----------------
 
 Richard D. McKelvey
-Andrew M. McLennan
-Theodore L. Turocy
+Andrew M. McLennan -- mclennan (at) icarus (dot) socsci (dot) umn (dot) edu
+Theodore L. Turocy -- arbiter (at) econ (dot) tamu (dot) edu
 
 A complete list of contributors to Gambit can be found
 in the History and Acknowledgements section of the
 manual.
+
+In particular, please note the following:
+
+Pelican:
+--------
+The code in sources/pelican is the Pelican system, 
+copyright (C) 1995 by Birk Huber, modified only to work within the
+Gambit build system.
+
+Integer/Rational classes:
+-------------------------
+The files integer.(cc,h), rational.(cc,h), and gnulib.(cc,h) in
+sources/base are from an old GNU g++ library, with copyright statement:
+
+Copyright (C) 1988 Free Software Foundation
+    written by Doug Lea (dl@rocky.oswego.edu)
+
+These files have been modified only to work as appropriate with other
+Gambit classes.
+
+Function minimization code:
+---------------------------
+The files gfuncmin.(cc,h) in sources/numerical contain source code derived
+from the GNU Scientific Library, version 1.2.  The original files have
+the copyright statement:
+
+Copyright (C) 1996, 1997, 1998, 1999, 2000 Fabrice Rossi
+
+These files have been modified only to port them from C to C++ and
+to use the gFunction class.
+
+
+
+
+
+
+
+
+
