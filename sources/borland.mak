@@ -30,7 +30,8 @@ gambit_SOURCES = \
 	"sheetsel.cc" \
 	"sheetspt.cc" \
 	"table-matrix.cc" \
-	"table-schelling.cc"
+	"table-schelling.cc" \
+	"tree-display.cc"
 
 OBJECTS = $(gambit_SOURCES:.cc=.obj)
 

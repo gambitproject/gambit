@@ -32,7 +32,7 @@
 #include "game-document.h"
 
 gbtGameDocument::gbtGameDocument(const gbtGame &p_game)
-  : m_game(p_game), m_modified(false)
+  : m_game(p_game), m_modified(false), m_treeZoom(0.8)
 {
   m_playerColor[0] = wxColour(255, 0, 0);
   m_playerColor[1] = wxColour(0, 0, 255);
@@ -85,7 +85,12 @@ void gbtGameDocument::SetPayoff(gbtGameOutcome p_outcome,
 
 wxColour gbtGameDocument::GetPlayerColor(int p_player) const
 {
-  return m_playerColor[(p_player - 1) % 8];
+  if (p_player == 0) {
+    return *wxLIGHT_GREY;
+  }
+  else {
+    return m_playerColor[(p_player - 1) % 8];
+  }
 }
 
 void gbtGameDocument::SetPlayerColor(int p_player, const wxColour &p_color)

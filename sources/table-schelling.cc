@@ -62,11 +62,12 @@ gbtSchellingMatrix::gbtSchellingMatrix(gbtTableSchelling *p_view,
   CreateGrid(m_doc->GetGame()->GetPlayer(p_view->GetRowPlayer())->NumStrategies() * 2,
 	     m_doc->GetGame()->GetPlayer(p_view->GetColPlayer())->NumStrategies() * 2);
 
-  EnableEditing(true);
+  EnableEditing(!m_doc->GetGame()->HasTree());
   DisableDragRowSize();
   DisableDragColSize();
   SetCursorCellHighlightColour(*wxWHITE);
 
+  /*
   AutoSizeRows();
   AutoSizeColumns();
   for (int col = 0; col <= GetNumberCols(); col++) {
@@ -74,6 +75,7 @@ gbtSchellingMatrix::gbtSchellingMatrix(gbtTableSchelling *p_view,
       SetColWidth(col, GetRowHeight(col));
     }
   }
+  */
   AdjustScrollbars();
 
 }
@@ -100,6 +102,7 @@ void gbtSchellingMatrix::OnUpdate(void)
     InsertCols(0, 2 * (game->GetPlayer(m_view->GetColPlayer())->NumStrategies() - stratCols));
   }
 
+  /*
   AutoSizeRows();
   AutoSizeColumns();
   for (int col = 0; col <= GetNumberCols(); col++) {
@@ -107,6 +110,7 @@ void gbtSchellingMatrix::OnUpdate(void)
       SetColWidth(col, GetRowHeight(col));
     }
   }
+  */
   EndBatch();
   AdjustScrollbars();
 }

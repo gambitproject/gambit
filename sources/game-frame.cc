@@ -36,10 +36,17 @@
 
 #include "dialog-about.h"        // for "About..." dialog
 
+#include "tree-display.h"
 #include "table-schelling.h"
 #include "table-matrix.h"
 #include "panel-nash.h"
 #include "panel-qre.h"
+
+const int GBT_MENU_VIEW_EFG = 998;
+const int GBT_MENU_VIEW_NFG = 999;
+
+const int GBT_MENU_VIEW_ZOOMIN = 997;
+const int GBT_MENU_VIEW_ZOOMOUT = 996;
 
 const int GBT_MENU_TOOLS_EQM = 1000;
 const int GBT_MENU_TOOLS_QRE = 1001;
@@ -51,6 +58,10 @@ BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
   EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
   EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRU)
+  EVT_MENU(GBT_MENU_VIEW_EFG, gbtGameFrame::OnViewEfg)
+  EVT_MENU(GBT_MENU_VIEW_NFG, gbtGameFrame::OnViewNfg)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtGameFrame::OnViewZoomIn)
+  EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtGameFrame::OnViewZoomOut)
   EVT_MENU(GBT_MENU_TOOLS_EQM, gbtGameFrame::OnToolsEquilibrium)
   EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
   EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
@@ -69,6 +80,13 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   wxGetApp().AddWindow(this);
   MakeMenu();
 
+  if (p_doc->GetGame()->HasTree()) {
+    m_treeDisplay = new gbtTreeDisplay(this, p_doc);
+  }
+  else {
+    m_treeDisplay = 0;
+  }
+
   if (p_doc->GetGame()->NumPlayers() == 2) {
     m_tablePanel = new gbtTableSchelling(this, p_doc);
   }
@@ -80,7 +98,11 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   m_qrePanel = new gbtQrePanel(this, p_doc);
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+  if (m_treeDisplay) {
+    sizer->Add(m_treeDisplay, 1, wxEXPAND, 0);
+  }
   sizer->Add(m_tablePanel, 1, wxEXPAND, 0);
+  sizer->Show(m_tablePanel, !m_doc->GetGame()->HasTree());
 
   sizer->Add(m_algorithmPanel, 1, wxEXPAND, 0);
   sizer->Show(m_algorithmPanel, false);
@@ -116,6 +138,17 @@ void gbtGameFrame::MakeMenu(void)
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, _("E&xit"), _("Exit Gambit"));
 
+  wxMenu *viewMenu = new wxMenu;
+  viewMenu->Append(GBT_MENU_VIEW_EFG, _("&Extensive form"),
+		   _("Show the extensive form of this game"), true);
+  viewMenu->Append(GBT_MENU_VIEW_NFG, _("&Normal form"),
+		   _("Show the normal form of this game"), true);
+  viewMenu->AppendSeparator();
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMIN, _("Zoom &in"),
+		   _("Increase magnification of tree"));
+  viewMenu->Append(GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out"),
+		   _("Decrease magnification of tree"));
+
   wxMenu *toolsMenu = new wxMenu;	
   toolsMenu->Append(GBT_MENU_TOOLS_EQM, _("&Equilibrium"),
 		    _("Compute Nash equilibria of the game"), true);
@@ -128,6 +161,7 @@ void gbtGameFrame::MakeMenu(void)
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, _("&File"));
+  menuBar->Append(viewMenu, _("&View"));
   menuBar->Append(toolsMenu, _("&Tools"));
   menuBar->Append(helpMenu, _("&Help"));
 
@@ -171,33 +205,56 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     std::ifstream file(dialog.GetPath().mb_str());
+
+    if (!file.is_open()) {
+      wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				    (const char *) dialog.GetPath().mb_str()),
+		   _("Error"), wxOK, 0);
+      return;
+    }
+
+    gbtGame game;
+
     try {
-      if (file.is_open()) {
-	gbtGame nfg = ReadNfg(file);
-	if (file.bad()) {
-	  wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
-					(const char *) dialog.GetPath().mb_str()),
-		       _("Error"), wxOK, 0);
-	}
-	else {
-	  gbtGameDocument *doc = new gbtGameDocument(nfg);
-	  doc->SetFilename(dialog.GetPath());
-	  wxGetApp().GetFileHistory()->AddFileToHistory(dialog.GetPath());
-	  (void) new gbtGameFrame(0, doc);
-	}
-      }
-      else {
-	wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+      game = ReadNfg(file);
+      if (file.bad()) {
+	wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
 				      (const char *) dialog.GetPath().mb_str()),
 		     _("Error"), wxOK, 0);
+	return;
       }
+      gbtGameDocument *doc = new gbtGameDocument(game);
+      doc->SetFilename(dialog.GetPath());
+      wxGetApp().GetFileHistory()->AddFileToHistory(dialog.GetPath());
+      (void) new gbtGameFrame(0, doc);
+      return;
     }
     catch (gbtNfgParserException &) {
+      // Not a normal form file; eat exception and try extensive form
+    }
+
+    try {
+      file.seekg(0);
+      game = ReadEfg(file);
+      if (file.bad()) {
+	wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
+				      (const char *) dialog.GetPath().mb_str()),
+		     _("Error"), wxOK, 0);
+	return;
+      }
+    }
+    catch (gbtEfgParserException &) {
       wxMessageBox(wxString::Format(_("File '%s' not in a recognized format"),
 				    (const char *) dialog.GetPath().mb_str()),
 		   _("Error"), wxOK, 0);
 
+      return;
     }
+
+    gbtGameDocument *doc = new gbtGameDocument(game);
+    doc->SetFilename(dialog.GetPath());
+    wxGetApp().GetFileHistory()->AddFileToHistory(dialog.GetPath());
+    (void) new gbtGameFrame(0, doc);
   }
 }
 
@@ -206,33 +263,57 @@ void gbtGameFrame::OnFileMRU(wxCommandEvent &p_event)
   wxString filename(wxGetApp().GetFileHistory()->GetHistoryFile(p_event.GetId() - wxID_FILE1));
 
   std::ifstream file(filename.mb_str());
+
+  if (!file.is_open()) {
+    wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+				  (const char *) filename.mb_str()),
+		 _("Error"), wxOK, 0);
+    return;
+  }
+
+  gbtGame game;
+
   try {
-    if (file.is_open()) {
-      gbtGame nfg = ReadNfg(file);
-      if (file.bad()) {
-	wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
-				      (const char *) filename.mb_str()),
-		     _("Error"), wxOK, 0);
-      }
-      else {
-	gbtGameDocument *doc = new gbtGameDocument(nfg);
-	doc->SetFilename(filename);
-	wxGetApp().GetFileHistory()->AddFileToHistory(filename);
-	(void) new gbtGameFrame(0, doc);
-      }
-    }
-    else {
-      wxMessageBox(wxString::Format(_("Could not open '%s' for reading"),
+    game = ReadNfg(file);
+    if (file.bad()) {
+      wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
 				    (const char *) filename.mb_str()),
 		   _("Error"), wxOK, 0);
+      return;
     }
+
+    gbtGameDocument *doc = new gbtGameDocument(game);
+    doc->SetFilename(filename);
+    wxGetApp().GetFileHistory()->AddFileToHistory(filename);
+    (void) new gbtGameFrame(0, doc);
+    return;
   }
   catch (gbtNfgParserException &) {
+    // Not a normal form file; eat exception and try extensive form
+  }
+
+  try {
+    file.seekg(0);
+    game = ReadEfg(file);
+    if (file.bad()) {
+      wxMessageBox(wxString::Format(_("An error occured in reading '%s'"),
+				    (const char *) filename.mb_str()),
+		   _("Error"), wxOK, 0);
+      return;
+    }
+  }
+  catch (gbtEfgParserException &) {
     wxMessageBox(wxString::Format(_("File '%s' not in a recognized format"),
 				  (const char *) filename.mb_str()),
 		 _("Error"), wxOK, 0);
     
+    return;
   }
+  gbtGameDocument *doc = new gbtGameDocument(game);
+  doc->SetFilename(filename);
+  wxGetApp().GetFileHistory()->AddFileToHistory(filename);
+  (void) new gbtGameFrame(0, doc);
+
 }
 
 void gbtGameFrame::OnFileClose(wxCommandEvent &)
@@ -301,6 +382,45 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &)
   }
 }
 
+void gbtGameFrame::OnViewEfg(wxCommandEvent &)
+{
+  if (GetSizer()->IsShown(m_treeDisplay)) {
+    GetMenuBar()->Check(GBT_MENU_VIEW_EFG, true);
+    return;
+  }
+  
+  GetSizer()->Show(m_treeDisplay, true);
+  GetSizer()->Show(m_tablePanel, false);
+  GetMenuBar()->Check(GBT_MENU_VIEW_NFG, false);
+  Layout();
+  OnUpdate();
+}
+
+void gbtGameFrame::OnViewNfg(wxCommandEvent &)
+{
+  if (GetSizer()->IsShown(m_tablePanel)) {
+    GetMenuBar()->Check(GBT_MENU_VIEW_NFG, true);
+    return;
+  }
+
+  // At this point, we know that there must be a tree view to hide
+  GetSizer()->Show(m_treeDisplay, false);
+  GetSizer()->Show(m_tablePanel, true);
+  GetMenuBar()->Check(GBT_MENU_VIEW_EFG, false);
+  Layout();
+  OnUpdate();
+}
+
+void gbtGameFrame::OnViewZoomIn(wxCommandEvent &)
+{
+  m_doc->SetTreeZoom(m_doc->GetTreeZoom() * 1.1);
+}
+
+void gbtGameFrame::OnViewZoomOut(wxCommandEvent &)
+{
+  m_doc->SetTreeZoom(m_doc->GetTreeZoom() / 1.1);
+}
+
 void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (GetSizer()->IsShown(m_qrePanel)) {
@@ -347,4 +467,14 @@ void gbtGameFrame::OnUpdate(void)
 			      (m_doc->IsModified()) ? "*" : "",
 			      m_doc->GetGame()->GetLabel().c_str()));
   }
+
+  GetMenuBar()->Check(GBT_MENU_VIEW_EFG, 
+		      m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+  GetMenuBar()->Enable(GBT_MENU_VIEW_EFG, m_doc->GetGame()->HasTree());
+  GetMenuBar()->Check(GBT_MENU_VIEW_NFG, 
+		      GetSizer()->IsShown(m_tablePanel));
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
+  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT,
+		       m_treeDisplay && GetSizer()->IsShown(m_treeDisplay));
 }

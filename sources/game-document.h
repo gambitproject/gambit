@@ -40,6 +40,7 @@ private:
   wxColour m_playerColor[8];
   bool m_modified;
   wxString m_filename;
+  double m_treeZoom;
 
   // Management of view list
   gbtList<gbtGameView *> m_views;
@@ -60,6 +61,9 @@ public:
   // Various properties of the document
   wxColour GetPlayerColor(int p_index) const;
   void SetPlayerColor(int p_index, const wxColour &);
+
+  double GetTreeZoom(void) const { return m_treeZoom; }
+  void SetTreeZoom(double p_zoom) { m_treeZoom = p_zoom; UpdateViews(); }
 
   bool IsModified(void) const { return m_modified; }
   void SetModified(bool p_modified) 

@@ -246,7 +246,7 @@ gbtMatrixSheet::gbtMatrixSheet(gbtTableMatrix *p_view)
 	     m_doc->GetGame()->GetPlayer(m_view->GetColPlayer())->NumStrategies() *
 	     m_doc->GetGame()->NumPlayers());
 
-  EnableEditing(true);
+  EnableEditing(!m_doc->GetGame()->HasTree());
   DisableDragRowSize();
   DisableDragColSize();
   SetCursorCellHighlightColour(*wxWHITE);

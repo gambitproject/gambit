@@ -32,6 +32,8 @@ gambit_SOURCES = \
 	table-matrix.h \
 	table-schelling.cc \
 	table-schelling.h \
+	tree-display.cc \
+	tree-display.h \
 	wx24defs.h
 
 gambit_LDADD = -lgambit
