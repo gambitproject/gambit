@@ -226,20 +226,23 @@ gText gPreprocessor::GetLine( void )
 	  }
 
 	  // note: filename might be changed after this call
-	  gInput* input = LoadInput( filename );
+	  gInput * input = 0;
+	  try {
+	    input = LoadInput( filename );
+	  }
+	  catch (gFileInput::OpenFailed &)  {
+	    line += "False";
+	    errorMsg = "Include file \"" + filename + "\" not found";
+	    error = true;
+	  }
+	  
 	  if( input )
 	  {
-	    assert( input->IsValid() );
+	    //	    assert( input->IsValid() );
 	    line += "True";
 	    m_InputStack.Push( input );
 	    m_FileNameStack.Push( filename );
 	    m_LineNumberStack.Push( 1 );
-	  }
-	  else
-	  {
-	    line += "False";
-	    errorMsg = "Include file \"" + filename + "\" not found";
-	    error = true;
 	  }
 
 	  line += restOfLine;

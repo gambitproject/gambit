@@ -512,19 +512,19 @@ static Portion *GSM_LoadEfg(Portion **param)
 {
   gText file = ((TextPortion *) param[0])->Value();
   
-  gFileInput f(file);
-
-  if (f.IsValid())   {
+  try{
+    gFileInput f(file);
     Efg *E = 0;
     ReadEfgFile((gInput &) f, E);
-	
+    
     if (E)
       return new EfgPortion(E);
     else
       return new ErrorPortion("Not a valid .efg file");
   }
-  else
+  catch (gFileInput::OpenFailed &)  {
     return new ErrorPortion("Unable to open file for reading");
+  }
 }
 
 //-------------------
@@ -958,12 +958,14 @@ static Portion *GSM_SaveEfg(Portion **param)
 {
   Efg* E = ((EfgPortion *) param[0])->Value();
   gText text = ((TextPortion *) param[1])->Value();
-  gFileOutput f(text);
 
-  if (!f.IsValid())
+  try { 
+    gFileOutput f(text);
+    E->WriteEfgFile(f);
+  }
+  catch (gFileOutput::OpenFailed &)  {
     return new ErrorPortion("Cannot open file for writing");
-
-  E->WriteEfgFile(f);
+  }
 
   return param[0]->ValCopy();
 }

@@ -132,11 +132,6 @@ void gFileInput::setpos(long x) const
   fseek(f, x, 0);
 }
 
-bool gFileInput::IsValid(void) const
-{
-  return true;
-}
-
 //--------------------------------------------------------------------------
 //                         gNullInput member functions
 //--------------------------------------------------------------------------
@@ -198,8 +193,6 @@ void gNullInput::seekp(long) const   { }
 long gNullInput::getpos(void) const { return 0; }
 
 void gNullInput::setpos(long) const { }
-
-bool gNullInput::IsValid(void) const   { return true; }
 
 
 //--------------------------------------------------------------------------
@@ -352,12 +345,6 @@ gOutput &gFileOutput::operator<<(const void *x)
   return *this;
 }
 
-bool gFileOutput::IsValid(void) const
-{
-  return true;
-}
-
-
 
 //--------------------------------------------------------------------------
 //                         gNullOutput member functions
@@ -398,11 +385,6 @@ gOutput &gNullOutput::operator<<(float)    { return *this; }
 gOutput &gNullOutput::operator<<(const char *)  { return *this; }
 
 gOutput &gNullOutput::operator<<(const void *)  { return *this; }
-
-bool gNullOutput::IsValid(void) const   { return true; }
-
-
-
 
 
 gNullInput _gzero;

@@ -165,19 +165,17 @@ static Portion *GSM_LoadNfg(Portion **param)
 {
   gText file = ((TextPortion *) param[0])->Value();
 
-  gFileInput f(file);
-
   Nfg *nfg = 0;
 
-  if (f.IsValid())   {
+  try { 
+    gFileInput f(file);
     if (!ReadNfgFile(f, nfg))
       return new ErrorPortion("Not a valid .nfg file");
-
     return new NfgPortion(nfg);
   }
-  else
+  catch (gFileInput::OpenFailed &)  {
     return new ErrorPortion("Unable to open file for reading");
-
+  }
 }
 
 //--------
@@ -356,12 +354,13 @@ static Portion *GSM_SaveNfg(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
   gText file = ((TextPortion *) param[1])->Value();
-  gFileOutput f(file);
-
-  if (!f.IsValid())
+  try {
+    gFileOutput f(file);
+    N->WriteNfgFile(f);
+  }
+  catch (gFileOutput::OpenFailed &)  {
     return new ErrorPortion("Unable to open file for output");
-
-  N->WriteNfgFile(f);
+  }
 
   return param[0]->ValCopy();
 }

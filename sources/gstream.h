@@ -37,14 +37,11 @@ class gInput  {
     virtual void seekp(long x) const = 0;
     virtual long getpos(void) const = 0;
     virtual void setpos(long x) const = 0;
-
-    virtual bool IsValid(void) const = 0;
 };
 
 class gFileInput : public gInput  {
   private:
     FILE *f;
-    bool valid;
 
     gFileInput(const gFileInput &);
     gFileInput &operator=(const gFileInput &);
@@ -84,8 +81,6 @@ class gFileInput : public gInput  {
     void seekp(long x) const;
     long getpos(void) const;
     void setpos(long x) const;
-
-    bool IsValid(void) const;
 };
 
 class gNullInput : public gInput  {
@@ -111,8 +106,6 @@ class gNullInput : public gInput  {
     void seekp(long x) const;
     long getpos(void) const;
     void setpos(long x) const;
-
-    bool IsValid(void) const;
 };
 
 class gOutput  {
@@ -135,8 +128,6 @@ class gOutput  {
     virtual gOutput &operator<<(float x) = 0;
     virtual gOutput &operator<<(const char *x) = 0;
     virtual gOutput &operator<<(const void *x) = 0;
-
-    virtual bool IsValid(void) const = 0;
 
     virtual int GetWidth(void)  = 0;
     virtual gOutput &SetWidth(int w)  = 0;
@@ -194,8 +185,6 @@ class gFileOutput : public gOutput  {
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
-
-    bool IsValid(void) const;
 };
 
 class gNullOutput : public gOutput  {
@@ -224,8 +213,6 @@ class gNullOutput : public gOutput  {
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
-
-    bool IsValid(void) const;
 };
 
 
@@ -234,7 +221,6 @@ class gNullOutput : public gOutput  {
 
 class gWinOutput : public gOutput  {
   private:
-    bool valid;
     int Width,Prec;
     char Represent;
     char m_Buffer[4096];
@@ -266,10 +252,6 @@ class gWinOutput : public gOutput  {
     gOutput &operator<<(float x);
     gOutput &operator<<(const char *x);
     gOutput &operator<<(const void *x);
-
-    bool IsValid(void) const;
-
-
 };
 
 #endif //  __BORLANDC__

@@ -798,13 +798,14 @@ Portion* GSM_NewOutputStream(Portion** param)
   gText filename = ((TextPortion*) param[0])->Value();
   bool append = ((BoolPortion*) param[1])->Value();
 
-  g = new gFileOutput(filename, append);
-  
-  if(g->IsValid())
+  try{
+    g = new gFileOutput(filename, append);
     result = new OutputPortion(*g);    
-  else
+  }
+  catch(gFileInput::OpenFailed &) {
     result = new ErrorPortion((gText) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
+  }
   return result;
 }
 
@@ -816,14 +817,15 @@ Portion* GSM_NewInputStream(Portion** param)
   
   assert(param[0]->Spec().Type == porTEXT);
 
+  try {
   g = new gFileInput(((TextPortion*) param[0])->Value());
-
-  if(g->IsValid())
-    result = new InputPortion(*g);
-  else
+  result = new InputPortion(*g);
+  }
+  catch(gFileInput::OpenFailed &) {
     result = new ErrorPortion((gText) "Error opening file \"" + 
 			      ((TextPortion*) param[0])->Value() + "\"");
-  
+  }
+
   return result;
 }
 
@@ -1061,9 +1063,10 @@ Portion* GSM_Read_Integer(Portion** param)
     input.setpos(old_pos);
     return new ErrorPortion("End of file reached");
   }
-  input >> value;
-  if(!input.IsValid())
-  {
+  try {
+    input >> value;
+  }
+  catch(gFileInput::ReadFailed &) {
     input.setpos(old_pos);
     return new ErrorPortion("File read error");
   }
@@ -1105,9 +1108,10 @@ Portion* GSM_Read_Number(Portion** param)
     input.setpos(old_pos);
     return new ErrorPortion("End of file reached");
   }
-  input >> value;
-  if(!input.IsValid())
-  {
+  try {
+    input >> value;
+  }
+  catch(gFileInput::ReadFailed &) {
     input.setpos(old_pos);
     return new ErrorPortion("File read error");
   }
@@ -1344,9 +1348,14 @@ gText GetLine(gInput& f)
 {
   char c = 0;
   gText result;
-  while(f.IsValid())
+  bool valid = true;
+  while(valid)
   {
+    try{
     f >> c;
+    }
+    catch(gFileInput::ReadFailed &) {valid = false;}
+
     if(f.eof())
       break;
     if(c != '\n')
@@ -1442,9 +1451,13 @@ Portion* GSM_Manual(Portion** param)
   gText line;
   gText line_out;
   bool found = false;
-  while(f->IsValid() && !f->eof() && !found)
+  bool valid = true;
+  while(valid && !f->eof() && !found)
   {
-    line = GetLine(*f);
+    try{
+      line = GetLine(*f);
+    }
+    catch(gFileInput::ReadFailed &) {valid=false;}
     if(line.Length() > txt.Length())
       if( line.Left(txt.Length() + 1).Dncase() == (txt + "[").Dncase() )
 	found = true;
@@ -1452,9 +1465,14 @@ Portion* GSM_Manual(Portion** param)
   if(found)
   {
     body = 0;
-    while(f->IsValid() && !f->eof())
+    bool valid = true;
+    while(valid && !f->eof())
     {
-      line = GetLine(*f);      
+      try{
+	line = GetLine(*f);
+      }
+      catch(gFileInput::ReadFailed &) {valid = false;}
+
       if(line.Length()>=3 && line.Left(3) == "\\bd")
 	body++;
       if(body > 0)
