@@ -19,7 +19,13 @@ template <class T> class gHompack {
 private: 
   const Nfg &nfg;
   const NFSupport &supp;
+  const MixedProfile<gNumber> &start;
   HomQreParams params;
+  gList<MixedSolution> solutions;
+
+  const int limitd, Newton_iter_limit;
+  const double curvature_limit;
+
   /*
     // Why doesn't this work ?? 
   static gVector<T> *Ytan_p;    // YP = tangent vector to zero curve at Y
@@ -27,7 +33,7 @@ private:
   static gVector<T> *Ytan_old_p; // YPold = previous tangent vector
   */
 public: 
-  gHompack(const NFSupport &S, const HomQreParams &p);
+  gHompack(const MixedProfile<gNumber> &s, const HomQreParams &p);
   virtual ~gHompack(void);
 
   void F(const gVector<T> &X, gVector<T> &V );
@@ -36,20 +42,17 @@ public:
 	   const gVector<T> &X, gVector<T> &V);
   void rhojac(const gVector<T> &A, const T lambda,
 	      const gVector<T> &X, gVector<T> &V, int K );
-  void fixpnf(gList<MixedSolution> &solutions,
-	      int N, gVector<T> &Y, int &flag, T rel_arc_err,
+  void fixpnf(int N, gVector<T> &Y, int &flag, T rel_arc_err,
 	      T abs_arc_err, T rel_ans_err, T abs_ans_err,
 	      bool trace, gVector<T> &A, gArray<T> &stepsize_params,
 	      int &jeval_num, T &arclength,T max_lambda,
 	      bool poly_switch);
-  void stepnf(int N, int &jeval_num,
-	      int &flag,
-	      bool &start,       bool &crash,
-	      T &old_step,  T &step_size,
-	      T &rel_err,   T &abs_err,
-	      T &arclength,
-	      gVector<T> &Y,        gVector<T> &Ytan,
-	      gVector<T> &Y_old,    gVector<T> &Ytan_old,
+  void stepnf(int N, int &jeval_num, int &flag,
+	      bool &start, bool &crash,
+	      T &old_step, T &step_size,
+	      T &rel_err, T &abs_err, T &arclength,
+	      gVector<T> &Y, gVector<T> &Ytan,
+	      gVector<T> &Y_old, gVector<T> &Ytan_old,
 	      const gVector<T> &A,
 	      const gArray<T> &stepsize_params
 	      );
@@ -62,10 +65,8 @@ public:
 	      gVector<T> &Ytan_old,
 	      const gVector<T> &A
 	      );
-  void root(T &t, T &F_of_t,
-	    T &b, T &c,
-	    T relerr, T abserr,
-	    int &flag
+  void root(T &t, T &F_of_t, T &b, T &c,
+	    T relerr, T abserr, int &flag
 	    );
   void show_probs(char *msg,const gVector<T> &Y);
   bool out_of_bounds(gVector<T> &W,int range);
@@ -84,6 +85,7 @@ public:
 
   T qofs(T f0, T fp0, T f1, T fp1, T dels, T s);
   void cleanup(void);
+  const gList<MixedSolution> &GetSolutions(void) const;
 };
 
 #endif // HOMPACK_H

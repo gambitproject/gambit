@@ -17,30 +17,6 @@ HomQreParams::HomQreParams(gOutput &, gOutput &pxi, gStatus &s)
     fullGraph(false), pxifile(&pxi)
 { }
 
-static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
-			   const HomQreParams &params)
-{
-  pxifile << "Dimensionality:\n";
-  pxifile << N.NumPlayers() << " ";
-  for (int pl = 1; pl <= N.NumPlayers(); pl++)
-    pxifile << N.NumStrats(pl) << " ";
-  pxifile << "\n";
-  N.WriteNfgFile(pxifile, 6);
-
-  pxifile << "Settings:\n" << params.minLam;
-  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
-  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
-  
-  int numcols = N.ProfileLength() + 2;
-
-  pxifile << "DataFormat:\n" << numcols;
-  
-  for (int i = 1; i <= numcols; i++)
-    pxifile << " " << i;
- 
-  pxifile << "\nData:\n";
-}
-
 void HomQre(const Nfg &nfg, HomQreParams &params,
 	   const MixedProfile<gNumber> &start,
 	   gList<MixedSolution> &solutions,
@@ -49,41 +25,8 @@ void HomQre(const Nfg &nfg, HomQreParams &params,
   NFSupport supp(start.Support());
   echo_payoffs(supp);
   
-  int N = supp.TotalNumStrats()-nfg.NumPlayers();
-  gVector<double> Y(N+1);
-  gVector<double> A(0);
-  gVector<double> ssp(8);
-  double max_lambda = 1; // Vale Murthy 1/24/00
-  
-  int flag = -2;
-  int jeval_num = 0;
-  double arclength = 0;
-  
-  // initialize lambda to zero
-  Y[1] = 0.0;
-  
-  // initialize Y
-  int j = 1;
-  for(int pl = 1;pl<=nfg.NumPlayers();pl++)
-    for(int i = 1;i < supp.NumStrats(pl);i++) {
-      Y[j+1] = start(pl,i);
-      j++;
-    }
-
-  gout << "\nY: " << Y;  
-
-  // Use default stepsize parameters
-  ssp = 0;
-  
-  if (params.pxifile) 
-    WritePXIHeader(*params.pxifile, nfg, params);
-  
-  gHompack<double> hom(supp, params);
-  hom.fixpnf(solutions, N, Y, flag, 1., 1., .1, .1, true,
-  	 A, ssp, jeval_num,arclength,max_lambda,false);
-
-  printf("Exiting flag: %d\n",flag);
-  printf("Done\n");
+  gHompack<double> hom(start, params);
+  solutions = hom.GetSolutions();
 }
 
 template <class T> void VectorToProfile(gVector<T> &vec, MixedProfile<gNumber> &sol)
@@ -380,6 +323,7 @@ template <class T> T eu(const gVector<T> p,const gMatrix<T> M,
 #endif  // UNUSED
 
 // assumes that the row and column are consistently dimensioned
+
 void echo_payoffs(const NFSupport &supp)
 {
   NfgContIter iter(supp);

@@ -13,28 +13,87 @@
 #include "lapack.h"
 #include "homotopy.h"
 
-// Constants ////////////////////////////////////////////////////////////// "LIMITD is an upper bound on the number of steps."
- const int limitd = 10000;  //originally = 1000
- 						          // temporarily 100000 2/16/00 Vale Murthy
-                            // This change seems to have affected the range of
-                            // lambda when lambda is untransformed
-                            //  Vale Murthy
+static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
+			   const HomQreParams &params)
+{
+  pxifile << "Dimensionality:\n";
+  pxifile << N.NumPlayers() << " ";
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)
+    pxifile << N.NumStrats(pl) << " ";
+  pxifile << "\n";
+  N.WriteNfgFile(pxifile, 6);
 
- // "Switch from the tolerance ???_arc_err to the (finer) tolerance//  ???_ans_err if the curvature of any component of Y exceeds CURSW."
- const double curvature_limit = 10.0;
+  pxifile << "Settings:\n" << params.minLam;
+  pxifile << "\n" << params.maxLam << "\n" << params.delLam;
+  pxifile << "\n" << 0 << "\n" << 1 << "\n" << params.powLam << "\n";
+  
+  int numcols = N.ProfileLength() + 2;
 
- // The number of Newton iterations before reducing the step size.
- const int Newton_iter_limit = 4; //Originally at 4
-                                  //Changed from 4 to 20 .. may have had an
-                                  //effect when lambda is untransformed
+  pxifile << "DataFormat:\n" << numcols;
+  
+  for (int i = 1; i <= numcols; i++)
+    pxifile << " " << i;
+ 
+  pxifile << "\nData:\n";
+}
 
  // qofs //////////////////////////////////////////////////////////////////
  // The code below is related to the  Hermite cubic predictor
 
+/*
+// Constants // "LIMITD is an upper bound on the number of steps."
+  const int limitd = 10000;  //originally = 1000
+// temporarily 100000 2/16/00 Vale Murthy
+// This change seems to have affected the range of lambda when lambda is untransformed
+
+// "Switch from the tolerance ???_arc_err to the (finer) tolerance
+//  ???_ans_err if the curvature of any component of Y exceeds CURSW."
+  const double curvature_limit = 10.0;
+
+// The number of Newton iterations before reducing the step size.
+  const int Newton_iter_limit = 4; //Originally at 4
+*/  
+
+// Constructor, destructor
+
 template <class T> 
-gHompack<T>::gHompack(const NFSupport &S, const HomQreParams &p)
-  : nfg(S.Game()), supp(S), params(p)
-{ } 
+gHompack<T>::gHompack(const MixedProfile<gNumber> &s, const HomQreParams &p)
+  : nfg(s.Game()), supp(s.Support()), start(s), params(p), limitd(10000), 
+    Newton_iter_limit(4), curvature_limit(10.0) 
+{
+  int N = supp.TotalNumStrats()-nfg.NumPlayers();
+  gVector<double> Y(N+1);
+  gVector<double> A(0);
+  gVector<double> ssp(8);
+  double max_lambda = 1; // Vale Murthy 1/24/00
+  
+  int flag = -2;
+  int jeval_num = 0;
+  double arclength = 0;
+  
+  // initialize lambda to zero
+  Y[1] = 0.0;
+  
+  // initialize Y
+  int j = 1;
+  for(int pl = 1;pl<=nfg.NumPlayers();pl++)
+    for(int i = 1;i < supp.NumStrats(pl);i++) {
+      Y[j+1] = start(pl,i);
+      j++;
+    }
+
+  gout << "\nY: " << Y;  
+
+  // Use default stepsize parameters
+  ssp = 0;
+  if (params.pxifile) 
+    WritePXIHeader(*params.pxifile, nfg, params);
+  
+  fixpnf(N, Y, flag, 1., 1., .1, .1, true,
+  	 A, ssp, jeval_num,arclength,max_lambda,false);
+  printf("Exiting flag: %d\n",flag);
+  printf("Done\n");
+} 
 
 template <class T> gHompack<T>::~gHompack(void)
 { } 
@@ -274,7 +333,6 @@ static gVector<double> *Ytan_old_p; // YPold = previous tangent vector
 
 template <class T> 
 void gHompack<T>::fixpnf(
-             gList<MixedSolution> &solutions,
 	     int N,                     // N is the dimension
 	     gVector<T> &Y,        // Y = [lambda, X]
 	     int &flag,                 // IFLAG
@@ -537,7 +595,7 @@ void gHompack<T>::fixpnf(
     //          T tlambda = Y[1];
     
     int j = 2;
-    for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+    for(int pl = 1;pl<=nfg.NumPlayers();pl++) {
       T resid = 1;
       int i;
       for(i=1;i<supp.NumStrats(pl);i++) {
@@ -558,7 +616,7 @@ void gHompack<T>::fixpnf(
       (*params.pxifile).SetFloatMode();
       *params.pxifile << " " << tlambda;
       *params.pxifile << " " << total_arclength;
-      for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) 
+      for(int pl = 1;pl<=nfg.NumPlayers();pl++) 
 	for(int i=1;i<=supp.NumStrats(pl);i++) 
 	  *params.pxifile << " " << sol(pl,i);
       *params.pxifile << "\n";
@@ -655,7 +713,7 @@ void gHompack<T>::show_probs(char *msg,const gVector<T> &Y)
   MixedProfile<gNumber> sol(supp);
 
   int j=2;
-  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+  for(int pl = 1;pl<=nfg.NumPlayers();pl++) {
     T resid = 1;
     int i;
     for(i=1;i<supp.NumStrats(pl);i++) {
@@ -1756,7 +1814,7 @@ void gHompack<T>::rho(const gVector<T> &A,
 
   MixedProfile<T> sol(supp);
   int j = 1;
-  for(int pl = 1;pl<=supp.Game().NumPlayers();pl++) {
+  for(int pl = 1;pl<=nfg.NumPlayers();pl++) {
     T resid = 1;
     int i;
     for(i=1;i<supp.NumStrats(pl);i++) {
@@ -1768,11 +1826,10 @@ void gHompack<T>::rho(const gVector<T> &A,
   }
 
   j=1;
-  for(int pl=1;pl<=supp.Game().NumPlayers();pl++)
+  for(int pl=1;pl<=nfg.NumPlayers();pl++)
     for(int i = 2; i <= supp.NumStrats(pl); i++) {
-      T x =  (T) my_log((T)sol(pl,1),eps)- (T) my_log((T)sol(pl,i),eps) 
-	- tlambda*((T)(sol.Payoff(pl,pl,1)-sol.Payoff(pl,pl,i)));
-      V[j] = x;
+      V[j] =  my_log(sol(pl,1),eps)- my_log(sol(pl,i),eps) 
+	- tlambda*(sol.Payoff(pl,pl,1)-sol.Payoff(pl,pl,i));
       j++;
     }  
 }
@@ -1783,7 +1840,7 @@ void gHompack<T>::rhojac(const gVector<T> &A,
 			 gVector<T> &V, int K )
 {
   int n_strats =supp.TotalNumStrats() ;  
-  int n_players = supp.Game().NumPlayers();
+  int n_players = nfg.NumPlayers();
   
   gVector<T> Vxh(n_strats-n_players);
   gVector<T> Vx(n_strats-n_players);
@@ -1805,6 +1862,12 @@ void gHompack<T>::rhojac(const gVector<T> &A,
     V = (Vxh-Vx)/dh;
   } // end of ((K >= 2) && (K <= n_strats-n_players+1 ))
 } 
+
+template <class T>
+const gList<MixedSolution> &gHompack<T>::GetSolutions(void) const
+{
+  return solutions;
+}
 
 // Instantiations  
 
