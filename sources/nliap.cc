@@ -201,7 +201,8 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	if(params.trace>0)
 	  *params.tracefile << p;
       
-	solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+	int index = solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+	solutions[index].SetEpsilon( pow(params.tolN,.5) );
       }
     }
   }
