@@ -556,10 +556,10 @@ void dialogLiap::AlgorithmFields(void)
 
   int tolND = 8;
   wxGetResource("Algorithm Params", "Func-tolND", &tolND, "gambit.ini");
-  m_tolND = new wxIntegerItem(this, "Tol n-D digits", tolND, -1, -1, 150, -1);
+  m_tolND = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolND, -1, -1, 150, -1);
   int tol1D = 8;
   wxGetResource("Algorithm Params", "Func-tol1D", &tol1D, "gambit.ini");
-  m_tol1D = new wxIntegerItem(this, "Tol 1-D digits", tol1D, -1, -1, 150, -1);
+  m_tol1D = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1D, -1, -1, 150, -1);
   NewLine();
 
   int maxitsND = 0;
@@ -733,8 +733,8 @@ void dialogQre::AlgorithmFields(void)
   m_delLam = new wxNumberItem(this, "delLam", delLam);
   NewLine();
 
-  m_tolN = new wxIntegerItem(this, "Tol n-D digits", tolN);
-  m_tol1 = new wxIntegerItem(this, "Tol 1-D digits", tol1);
+  m_tolN = new wxIntegerItem(this, "Tol n-D: 1.0 e -", tolN);
+  m_tol1 = new wxIntegerItem(this, "Tol 1-D: 1.0 e -", tol1);
   NewLine();
 
   m_maxitsN = new wxIntegerItem(this, "Iterations n-D", maxitsN);
