@@ -84,19 +84,38 @@ template <class T> int EnumModule<T>::Enum(void)
 
   params.status.SetProgress((double)0);
 
+  time = watch.Elapsed();
+  double dt = (double)0;
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nat start,    dt = " << dt << " time = " << time; 
+  
+
   VertEnum<T> poly1(A1,b1,params.status);
   params.status.SetProgress(-(double)(1));
+
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nafter poly1, dt = " << dt << " time = " << time; 
+  
 
   VertEnum<T> poly2(A2,b2,params.status);
   params.status.SetProgress(-(double)1);
 
-  BFS_List verts1,verts2;
-  verts1 = poly1.VertexList();
-  verts2 = poly2.VertexList();
+  
+  dt = watch.Elapsed()-time;
+  time = watch.Elapsed();
+  if(params.trace>=2) 
+    (*params.tracefile) << "\nafter poly2, dt = " << dt << " time = " << time; 
+  
+
+  BFS_List verts1(poly1.VertexList());
+  BFS_List verts2(poly2.VertexList());
   v1=verts1.Last();
   v2=verts2.Last();
 
-//  gout << "\n v1 = " << v1 << ", v2 = " << v2 << "\n";
+  if(params.trace>=2) 
+    (*params.tracefile) << "\n v1 = " << v1 << ", v2 = " << v2;
 
   BFS<T> bfs1,bfs2;
   MixedProfile<T> profile(NF,support);
@@ -107,18 +126,6 @@ template <class T> int EnumModule<T>::Enum(void)
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
     bfs1 = verts2[i];
-    sum = (T)0;
-    for(k=1;k<=n1;k++) {
-      profile(1,k) = (T)0;
-      if(bfs1.IsDefined(k)) {
-	profile(1,k) =-bfs1(k);
-	sum+=profile(1,k);
-      }
-    } 
-    for(k=1;k<=n1;k++) {
-      if(bfs1.IsDefined(k)) 
-	profile(1,k)/=sum;
-    }
     for(j=2;j<=v1;j++) {
       bfs2 = verts1[j];
 
@@ -136,6 +143,18 @@ template <class T> int EnumModule<T>::Enum(void)
 	    nash=0;
 
       if(nash) {
+	sum = (T)0;
+	for(k=1;k<=n1;k++) {
+	  profile(1,k) = (T)0;
+	  if(bfs1.IsDefined(k)) {
+	    profile(1,k) =-bfs1(k);
+	    sum+=profile(1,k);
+	  }
+	} 
+	for(k=1;k<=n1;k++) {
+	  if(bfs1.IsDefined(k)) 
+	    profile(1,k)/=sum;
+	}
 	sum = (T)0;
 	for(k=1;k<=n2;k++) {
 	  profile(2,k) = (T)0;
@@ -160,7 +179,13 @@ template <class T> int EnumModule<T>::Enum(void)
     params.status.Reset();
   }
 
+  
+  dt = watch.Elapsed()-time;
   time = watch.Elapsed();
+  if(params.trace>=2) {
+    (*params.tracefile) << "\nafter loop,  dt = " << dt << " time = " << time;
+    (*params.tracefile) << "\n";
+  }
   return 1;
 }
 
