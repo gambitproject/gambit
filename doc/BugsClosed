@@ -270,6 +270,65 @@ TLT 9/10/1999.  These will be checked as we finalize dialog boxes.
 
 ---------------
 
+ITEM 0024:  Scrolling problems
+
+DATE:     9/8/1999 by TLT (was Bug 5.4 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   CLOSED 12/12/1999 by TLT
+SEVERITY: MAJOR
+DETAILS:
+
+> 4. When the main window for the tree design is not maximized the
+> vertical and the horizontal bars are getting out of the screen.
+
+COMMENTS:
+RDM 9/3/1998.  Here are further details:
+
+On Linux: Load caro2.efg.  Hit +magnify button twice.  Move cursor
+R,R,D,R,R.  Notice how screen does not always display cursor.  Now hit
+L,L,L,L, and try to get back to the root node.  Again cursor moves off
+the screen, and the bottom scroll bar does not help to move the window
+to display the cursor.  Also, the scroll bars require a complete
+redraw before the next scroll bar hit is recorded. Load a big game
+like bayes2a.efg, andthen hit the right scroll bar three times
+insuccession to try and scroll the screen down.  It redraws the screen
+three times instead of halting the redraw when the second and third
+hits to the scroll bar are made.  Also, dragging the scroll bar does
+not work.  This makes it very time consuming to move around a large
+game.
+
+On MSWindows: Load condjury.efg, and hit the -magnify button twice (to
+get to mag .6).  Then try and get to the lower right part of the tree.
+It is impossible either by the cursor or by the use of the scrollbars.
+
+TLT 12/12/1999.  This was due to problems in wxWindows in scrolling
+and zooming.  Solved by removing scrolling features from the tree window.
+
+---------------
+
+ITEM 0025:  Information set lines are lost or broken on large trees
+
+DATE:     9/8/1999 by TLT (was Bug 5.7 in bugs_gui)
+AFFECTS:  GUI (all platforms?)
+STATUS:   CLOSED 12/12/1999 by TLT
+SEVERITY: INTERMEDIATE
+DETAILS:
+
+> 7. In the magnify mode the lines representing information sets are
+> broken or lost on trees with big verical dimension ( due to many
+> branches emanating from a single node). Also in this case horizontal
+> gray lines appear and payoffs seems like double-stroked.
+
+COMMENTS:
+RDM 9/3/1998.  This is still a problem.  Look at Bayes2a, try and
+remember what the game is supposed to look like (or bring up two
+copies, one for comparison). Then hit +Magnify three times.  Now move
+around the tree with the cursor, and eventually you will see this.
+
+TLT 12/12/1999.  This was a bug in the clipping code.
+
+---------------
+
 ITEM 0032:  Perfect equilibrium test for 2-player games
 
 DATE:     9/8/1999 by TLT/RDM
