@@ -83,6 +83,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
   : wxToolBar(p_parent, EFG_TOOLBAR_ID), m_parent(p_frame)
 {
 #ifdef __WXMSW__
+  wxBitmap openBitmap("OPEN_BITMAP");
   wxBitmap saveBitmap("SAVE_BITMAP");
   wxBitmap printBitmap("PRINT_BITMAP");
   wxBitmap deleteBitmap("DELETE_BITMAP");
@@ -95,6 +96,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
   wxBitmap makenfBitmap("NFG_BITMAP");
   wxBitmap inspectBitmap("INSPECT_BITMAP");
 #else
+#include "bitmaps/open.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/delete.xpm"
@@ -106,6 +108,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
 #include "bitmaps/options.xpm"
 #include "bitmaps/makenf.xpm"
 #include "bitmaps/inspect.xpm"
+  wxBitmap openBitmap(open_xpm);
   wxBitmap saveBitmap(save_xpm);
   wxBitmap printBitmap(print_xpm);
   wxBitmap deleteBitmap(delete_xpm);
@@ -123,6 +126,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
 #ifdef __WXMSW__
   SetToolBitmapSize(wxSize(33, 30));
 #endif // _WXMSW__
+  AddTool(FILE_OPEN, openBitmap);
   AddTool(efgmenuFILE_SAVE, saveBitmap);
   AddTool(efgmenuFILE_PRINT_PREVIEW, printBitmap);
   AddSeparator();
@@ -137,7 +141,7 @@ EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
   AddTool(efgmenuPREFS_DEC_ZOOM, zoomoutBitmap);
   AddTool(efgmenuPREFS_DISPLAY_LAYOUT, optionsBitmap);
   AddSeparator();
-  AddTool(efgmenuHELP_CONTENTS, helpBitmap);
+  AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
 
   Realize();
 }
@@ -252,8 +256,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuPREFS_SAVE, EfgShow::OnPrefsSave)
   EVT_MENU(efgmenuPREFS_LOAD, EfgShow::OnPrefsLoad)
   EVT_MENU(efgmenuPREFS_ACCELS, EfgShow::OnPrefsAccels)
-  EVT_MENU(efgmenuHELP_ABOUT, EfgShow::OnHelpAbout)
-  EVT_MENU(efgmenuHELP_CONTENTS, EfgShow::OnHelpContents)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
   EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
   EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
@@ -577,7 +579,16 @@ void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
 void EfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(efgmenuFILE_SAVE, "&Save", "Save the game");
+  wxMenu *fileNewMenu = new wxMenu;
+  fileNewMenu->Append(FILE_NEW_NFG, "&Normal", 
+		      "Create a new normal form game");
+  fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
+		      "Create a new extensive form game");
+  fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
+  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(efgmenuFILE_SAVE, "&Save", "Save this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(efgmenuFILE_PAGE_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
@@ -585,7 +596,7 @@ void EfgShow::MakeMenus(void)
 		   "View a preview of the game printout");
   fileMenu->Append(efgmenuFILE_PRINT, "&Print", "Print this game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(efgmenuFILE_CLOSE, "&Close", "Close this window");
+  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
 
   wxMenu *edit_menu = new wxMenu;
   wxMenu *nodeMenu  = new wxMenu;
@@ -799,8 +810,8 @@ void EfgShow::MakeMenus(void)
   prefs_menu->Append(efgmenuPREFS_LOAD, "&Load");
   
   wxMenu *help_menu = new wxMenu;
-  help_menu->Append(efgmenuHELP_CONTENTS, "&Contents", "Table of contents");
-  help_menu->Append(efgmenuHELP_ABOUT, "&About", "About this program");
+  help_menu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  help_menu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menu_bar = new wxMenuBar;
   menu_bar->Append(fileMenu, "&File");
@@ -2107,16 +2118,6 @@ void EfgShow::OnPrefsAccels(wxCommandEvent &)
 {
   EditAccelerators(accelerators, MakeEventNames());
   //  WriteAccelerators(accelerators, "EfgAccelerators", wxGetApp().ResourceFile());
-}
-
-void EfgShow::OnHelpAbout(wxCommandEvent &)
-{
-  wxHelpAbout();
-}
-
-void EfgShow::OnHelpContents(wxCommandEvent &)
-{
-  wxHelpContents("");
 }
 
 void EfgShow::OnCloseWindow(wxCloseEvent &p_event)

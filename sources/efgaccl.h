@@ -9,7 +9,7 @@
 
 #include "accels.h"
 
-const int NUM_EFG_EVENTS = 77;
+const int NUM_EFG_EVENTS = 75;
 
 AccelEvent efg_events[NUM_EFG_EVENTS] = 
 {
@@ -85,8 +85,6 @@ AccelEvent efg_events[NUM_EFG_EVENTS] =
   AccelEvent("PrefsAccels", efgmenuPREFS_ACCELS),
   AccelEvent("PrefsSave", efgmenuPREFS_SAVE),
   AccelEvent("PrefsLoad", efgmenuPREFS_LOAD),
-  AccelEvent("Help", efgmenuHELP_CONTENTS),
-  AccelEvent("HelpAbout", efgmenuHELP_ABOUT),
   AccelEvent("ZoomIn", efgmenuPREFS_INC_ZOOM),
   AccelEvent("ZoomOut", efgmenuPREFS_DEC_ZOOM),
   AccelEvent("Redraw", efgmenuPREFS_REDRAW),

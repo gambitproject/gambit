@@ -7,7 +7,6 @@
 #ifndef NFGCONST_H
 #define NFGCONST_H
 
-// must make sure that none of the menus are a power of two
 #define NFG_FILE_SAVE                   250
 #define NFG_FILE_PAGE_SETUP             251
 #define NFG_FILE_PRINT_PREVIEW          252
@@ -67,9 +66,6 @@
 
 #define NFG_ACCL_PAYOFF                 400
 #define NFG_ACCL_NEXT_PAYOFF            410
-
-#define NFG_HELP_ABOUT                  601
-#define NFG_HELP_CONTENTS               602
 
 #define NFG_PROFILES_FILTER             700
 #define NFG_PROFILES_NEW                701

@@ -63,7 +63,7 @@ public:
 #define FILE_NEW                            1000
 #define FILE_NEW_NFG                        1001
 #define FILE_NEW_EFG                        1002
-#define FILE_LOAD                           1010
+#define FILE_OPEN                           1010
 #define FILE_QUIT                           1030
 
 #define GAMBIT_HELP_CONTENTS                1700

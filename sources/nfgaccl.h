@@ -7,7 +7,7 @@
 #include "accels.h"
 #include "nfgconst.h"
 
-const int NUM_NFG_EVENTS = 33;
+const int NUM_NFG_EVENTS = 31;
 
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
@@ -40,8 +40,6 @@ AccelEvent nfg_events[NUM_NFG_EVENTS]=
   AccelEvent("ViewOutcomes", NFG_VIEW_OUTCOMES),
   AccelEvent("PrefsColors", NFG_PREFS_COLORS),
   AccelEvent("PrefsAccels", NFG_PREFS_ACCELS),
-  AccelEvent("HelpAbout", NFG_HELP_ABOUT),
-  AccelEvent("HelpContents", NFG_HELP_CONTENTS),
   AccelEvent("EditPayoff", NFG_ACCL_PAYOFF),
   AccelEvent("EditNextPayoff", NFG_ACCL_NEXT_PAYOFF)
 };

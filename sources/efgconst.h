@@ -125,9 +125,6 @@ typedef enum {
   efgmenuPREFS_DISPLAY_FLASHING = 1619,
   efgmenuPREFS_DISPLAY_LAYOUT = 1620,
 
-  efgmenuHELP_CONTENTS = 1700,
-  efgmenuHELP_ABOUT = 1701,
-
   // Menu items for profiles window
   efgmenuPROFILES_FILTER = 2000,
   efgmenuPROFILES_NEW = 2001,

@@ -112,7 +112,7 @@ bool GambitApp::OnInit(void)
   config.Read("Help-Directory", &helpDir);
 
   wxInitHelp(gText(helpDir.c_str()) + "/gambit", 
-	     "Gambit Graphics User Interface, Version 0.96.1\n"
+	     "Gambit Graphics User Interface, Version 0.96.3\n"
 	     "Built with " wxVERSION_STRING "\n\n"
 	     "Part of the Gambit Project\n"
 	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
@@ -191,7 +191,7 @@ GambitToolbar::GambitToolbar(wxFrame *p_parent, const wxPoint &p_position,
 #ifdef __WXMSW__
   SetToolBitmapSize(wxSize(33, 30));
 #endif  // __WXMSW__
-  AddTool(FILE_LOAD, loadBitmap);
+  AddTool(FILE_OPEN, loadBitmap);
   AddSeparator();
   AddTool(FILE_NEW_EFG, efgBitmap);
   AddTool(FILE_NEW_NFG, nfgBitmap);
@@ -229,15 +229,17 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
     
   wxMenu *fileMenu = new wxMenu;
   wxMenu *newMenu = new wxMenu;
-  newMenu->Append(FILE_NEW_NFG, "Normal", "Normal form game");
-  newMenu->Append(FILE_NEW_EFG, "Extensive", "Extensive form game");
+  newMenu->Append(FILE_NEW_NFG, "&Normal", "Create a new normal form game");
+  newMenu->Append(FILE_NEW_EFG, "&Extensive",
+		  "Create a new extensive form game");
   fileMenu->Append(FILE_NEW, "&New", newMenu, "Create a new game");
-  fileMenu->Append(FILE_LOAD, "&Open", "Open a file");
-  fileMenu->Append(FILE_QUIT, "&Quit", "Quit program");
+  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About this program");
   helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
   
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
@@ -267,7 +269,7 @@ GambitFrame::~GambitFrame()
 BEGIN_EVENT_TABLE(GambitFrame, wxFrame)
   EVT_MENU(FILE_NEW_EFG, GambitFrame::OnNewEfg)
   EVT_MENU(FILE_NEW_NFG, GambitFrame::OnNewNfg)
-  EVT_MENU(FILE_LOAD, GambitFrame::OnLoad)
+  EVT_MENU(FILE_OPEN, GambitFrame::OnLoad)
   EVT_MENU(FILE_QUIT, wxWindow::Close)
   EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GambitFrame::OnMRUFile)
   EVT_MENU(GAMBIT_HELP_CONTENTS, GambitFrame::OnHelpContents)

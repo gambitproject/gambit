@@ -158,8 +158,6 @@ private:
   void OnPrefsSave(wxCommandEvent &);
   void OnPrefsLoad(wxCommandEvent &);
   void OnPrefsAccels(wxCommandEvent &);
-  void OnHelpAbout(wxCommandEvent &);
-  void OnHelpContents(wxCommandEvent &);
 
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);

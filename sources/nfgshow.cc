@@ -68,6 +68,7 @@ NfgToolbar::NfgToolbar(wxFrame *p_frame)
   : wxToolBar(p_frame, NFG_TOOLBAR_ID), m_parent(p_frame)
 {
 #ifdef __WXMSW__
+  wxBitmap openBitmap("OPEN_BITMAP");
   wxBitmap saveBitmap("SAVE_BITMAP");
   wxBitmap printBitmap("PRINT_BITMAP");
   wxBitmap solveBitmap("SOLVE_BITMAP");
@@ -75,12 +76,14 @@ NfgToolbar::NfgToolbar(wxFrame *p_frame)
   wxBitmap optionsBitmap("OPTIONS_BITMAP");
   wxBitmap inspectBitmap("INSPECT_BITMAP");
 #else
+#include "bitmaps/open.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/solve.xpm"
 #include "bitmaps/help.xpm"
 #include "bitmaps/options.xpm"
 #include "bitmaps/inspect.xpm"
+  wxBitmap openBitmap(open_xpm);
   wxBitmap saveBitmap(save_xpm);
   wxBitmap printBitmap(print_xpm);
   wxBitmap solveBitmap(solve_xpm);
@@ -94,6 +97,7 @@ NfgToolbar::NfgToolbar(wxFrame *p_frame)
   SetToolBitmapSize(wxSize(33, 30));
 #endif // __WXMSW__
 
+  AddTool(FILE_OPEN, openBitmap);
   AddTool(NFG_FILE_SAVE, saveBitmap);
   AddTool(NFG_FILE_PRINT_PREVIEW, printBitmap);
   AddSeparator();
@@ -102,7 +106,7 @@ NfgToolbar::NfgToolbar(wxFrame *p_frame)
   AddSeparator();
   AddTool(NFG_OPTIONS_MENU, optionsBitmap);
   AddSeparator();
-  AddTool(NFG_HELP_CONTENTS, helpBitmap);
+  AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
 
   Realize();
   Show(true);
@@ -242,7 +246,16 @@ NfgShow::~NfgShow()
 void NfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(NFG_FILE_SAVE, "&Save", "Save the game");
+  wxMenu *fileNewMenu = new wxMenu;
+  fileNewMenu->Append(FILE_NEW_NFG, "&Normal",
+		      "Create a new normal form game");
+  fileNewMenu->Append(FILE_NEW_EFG, "&Extensive",
+		      "Create a new extensive form game");
+  fileMenu->Append(FILE_NEW, "&New", fileNewMenu, "Create a new game");
+  fileMenu->Append(FILE_OPEN, "&Open", "Open a saved game");
+  fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close this window");
+  fileMenu->AppendSeparator();
+  fileMenu->Append(NFG_FILE_SAVE, "&Save", "Save this game");
   fileMenu->AppendSeparator();
   fileMenu->Append(NFG_FILE_PAGE_SETUP, "Page Se&tup",
 		   "Set up preferences for printing");
@@ -250,7 +263,7 @@ void NfgShow::MakeMenus(void)
 		   "View a preview of the game printout");
   fileMenu->Append(NFG_FILE_PRINT, "&Print", "Print this game");
   fileMenu->AppendSeparator();
-  fileMenu->Append(NFG_FILE_CLOSE, "&Close", "Close the window");
+  fileMenu->Append(FILE_QUIT, "&Quit", "Quit Gambit");
   
   wxMenu *editMenu = new wxMenu;
   editMenu->Append(NFG_EDIT_LABEL, "&Label", "Set the label of the game");
@@ -351,8 +364,8 @@ void NfgShow::MakeMenus(void)
   prefsMenu->Append(NFG_PREFS_LOAD, "&Load", "Load configuration");
 
   wxMenu *helpMenu = new wxMenu;
-  helpMenu->Append(NFG_HELP_ABOUT, "&About");
-  helpMenu->Append(NFG_HELP_CONTENTS, "&Contents");
+  helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents", "Table of contents");
+  helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
   wxMenuBar *menuBar = new wxMenuBar;
   menuBar->Append(fileMenu, "&File");
