@@ -122,6 +122,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E)
   L->N->SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
+    L->N->PlayerList()[i]->SetName(E.PlayerList()[i]->GetName());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gString name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
