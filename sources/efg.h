@@ -261,19 +261,22 @@ template <class T> class PureBehavProfile   {
     PureBehavProfile(const PureBehavProfile<T> &);
     ~PureBehavProfile();
 
+    // Operators
     PureBehavProfile<T> &operator=(const PureBehavProfile<T> &);
-
-    Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
-
     T operator()(Action *) const;
+
+    // Manipulation
     void Set(Action *);
     void Set(const EFPlayer *, const gArray<Action *> &);
-    Action *Get(Infoset *) const;
+
+    // Information
+    Action *GetAction(Infoset *) const;
 
   //    T    Payoff(const Node *, const int &pl) const;
   //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;
+    Efg &Game(void) const   { return const_cast< Efg& >( *E ); }
 };
 
 

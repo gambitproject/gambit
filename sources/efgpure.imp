@@ -49,7 +49,7 @@ int FindPureNash(const EFSupport &sup, gList<BehavSolution> &eqs)
       for (int pl = 1; pl <= sup.Game().NumPlayers(); pl++)  {
 	for (int iset = 1; iset <= sup.Game().Players()[pl]->NumInfosets();
 	     iset++)
-	  temp(pl, iset, profile.Get(sup.Game().Players()[pl]->Infosets()[iset])->GetNumber()) = 1;
+	  temp(pl, iset, profile.GetAction(sup.Game().Players()[pl]->Infosets()[iset])->GetNumber()) = 1;
       }
 
       index = eqs.Append(BehavSolution(temp, EfgAlg_PURENASH));
