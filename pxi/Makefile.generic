@@ -1,0 +1,110 @@
+# PXI: http://www.cco.caltech.edu/~egrayver/pxi.html
+# Makefile for the PXI.  This will only work for unix systems
+
+# All the site dependent settings are in make.site_$(GUI)_$(SYSNAME)
+
+# define compiler and flags
+
+CC = g++
+COPTS = -fguiding-decls
+CFLAGS=$(COPTS) $(INCDIR) -Dwx_motif
+
+# define variable for system name.  
+
+ifeq ($(shell uname -s), SunOS)
+SYSNAME = $(shell uname -s)_$(shell uname -r)
+else
+SYSNAME = $(shell uname -s)
+endif
+
+GUI = motif
+
+# define directory where object files are put
+
+OBJDIR = obj_$(GUI)_$(SYSNAME)
+vpath %.o  $(OBJDIR)
+
+# rule for creating .o (object) files from .cc files
+
+%.o: %.cc
+	$(CC) -c $(CFLAGS) -o $(OBJDIR)/$@ $<
+
+# rule for creating .d (dependency) files from .cc files
+
+%.d: %.cc
+	@echo updating dependencies: $@
+	@$(SHELL) -ec '$(CC) -MM $(CPPFLAGS) -I../sources/fake $< \
+		| sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
+		[ -s $@ ] || rm -f $@'
+
+# Generic WxWin information:
+# 
+#   WXINCDIR = location of wxwin include files
+#   WXLIBDIR = location of wxwin libraries
+#   WXLIB    = any wx libraries used
+
+WXDIR = /home/mill/gambit/wxwin-new
+WXLIBDIR = -L$(WXDIR)/lib
+WXINCDIR = -I$(WXDIR)/include/base -I$(WXDIR)/include/x
+WXLIB = -lwx_$(GUI)_$(SYSNAME)
+
+# Site Specific information:
+#
+#   DEFINES = any compiler defines needed 
+#   XINCDIR = location of X include files
+#   XLIBDIR = location of X libraries
+#   XLIB    = any X libraries used
+
+ifeq ($(SYSNAME), SunOS_5.6)
+XINCDIR = -I/usr/local/X11R6.4/include/X11
+XLIBDIR = -L/usr/local/X11R6.4/lib 
+XLIB = -lsocket -lnsl -lX11 -lXm -lXmu -lXt -lgen -lm
+else 
+ifeq ($(SYSNAME), HP-UX)
+DEFINES = -D_HPUX_SOURCE -DSVR4
+XINCDIR = -I/usr/include/X11R5 -I/usr/include/Motif1.2
+XLIBDIR = -L/usr/lib/X11R5 -L/usr/lib/Motif1.2
+XLIB = -lXm -lXt -lX11 -lc -lm -lg++
+else 
+XINCDIR = -I/usr/local/include/X11
+XLIBDIR = -L/usr/local/X11/lib -L/usr/X11/lib
+XLIB = -lX11 -lXm -lXp -lXmu -lXext -lXt -lm
+endif
+endif
+
+# Combine the site dependent and independent data
+LIBDIR = $(WXLIBDIR) $(XLIBDIR)
+INCDIR = $(WXINCDIR) $(XINCDIR)
+GUILIBS = $(WXLIB) $(XLIB)
+
+GUIOBJECTS= pxi.o axis.o pxicanvs.o wxmisc.o
+
+GENOBJECTS= general.o gambitio.o gmisc.o gstring.o
+
+DATOBJECTS= onedot.o equtrac.o equdata.o normequs.o ncalcset.o \
+	probvect.o expdata.o
+
+ALLOBJECTS= $(GUIOBJECTS) $(GENOBJECTS) $(DATOBJECTS)
+
+ALLSOURCES= $(ALLOBJECTS:.o=.cc)
+
+include	$(ALLSOURCES:.cc=.d)
+
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+pxi_$(GUI)_$(SYSNAME): $(OBJDIR) $(ALLOBJECTS)
+	cd $(OBJDIR); $(CC) $(ALLOBJECTS) $(LIBDIR) $(GUILIBS) -o ../pxi_$(GUI)_$(SYSNAME); cd ..
+
+pxi: pxi_$(GUI)_$(SYSNAME);
+
+distrib:
+	-strip pxi_$(GUI)_$(SYSNAME)
+	zip pxi_$(GUI)_$(SYSNAME) pxi_$(GUI)_$(SYSNAME) ./samples/sample.out \
+	./samples/sample.exp 
+	ftp_put pxi_$(GUI)_$(SYSNAME).zip
+
+clean:	
+	rm -f $(OBJDIR)/*.o
+
+
