@@ -699,8 +699,8 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
     {
       same_params = true;
       for( index = 0; 
-	  index < _FuncInfo[ f_index ].NumParams &&
-	  index < newfunc->_FuncInfo[ i ].NumParams; 
+	  (index < _FuncInfo[ f_index ].NumParams) &&
+	  (index < newfunc->_FuncInfo[ i ].NumParams); 
 	  index++ )
       {
 	if(
@@ -711,7 +711,7 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Type &
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) &&
 	   (( _FuncInfo[ f_index ].ParamInfo[ index ].Type & 
-	     ( newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) != porLIST ))
+	     newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) != porLIST )
 	   )
 	{
 	  same_params = same_params & true;
