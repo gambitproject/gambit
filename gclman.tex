@@ -893,10 +893,7 @@ GCL3: a+Transpose[a]
 
 While most functions in the GCL are listable, there are some
 exceptions.  Built in functions that are not listable are noted as
-such in the Function Reference section of this document.  In addition,
-user defined functions which have at least one argument which is of
-type \verb+LIST(T)+ are not currently listable.  All other user
-defined functions are listable.
+such in the Function Reference section of this document.  
 
 Listability of functions is a powerful tool of the GCL. Many GCL
 programs using flow control statements can be written using listable
@@ -909,33 +906,68 @@ code, while flow control statements are executed in interpreted code.
 
 \subsection{Input and Output}
 
-Data can be read from an input stream by the use of the Read[]
-function.  Thus, the following commands 
-
-\begin{verbatim}
-in:=Input["file.dat"]
-x:=0/1;y:={0.0,0.0}
-Read[in,x]
-Read[in,y]
-\end{verbatim}
-
-creates an input stream, \verb+in+, and then reads in a RATIONAL
-number, followed by a list of two FLOATs.  The second argument is
-passed by reference, but currently Read[] only works when the second
-argument is a defined variable.  Thus the assignments before the
-Read[] statements are needed to define \verb+x+ and \verb+y+.  If the
-data encountered in the input stream is not of the correct type, a run
-time error is returned.  \verb+Read[in,x]+ has the short form \verb+in
->> x+.  Since the return value of Read[] is \verb+in+, these commands
-can be chained.  So the two lines reading in \verb+x+ and \verb+y+ in
-the above example could be written instead
+Data can be read from an input stream by the Read[] function.  So if
+\verb+in+ is an input stream (i. e., of type INPUT) then a successful
+call of \verb+Read[in,x]+ will read the exposed data (see function
+reference for definition of ``exposed data'') from the input stream,
+\verb+in+, assign \verb+x+ to have that type and value, and position
+the file pointer at the end of the exposed data, to be ready for the
+next call of Read[].  \verb+Read[in,x]+ has the short form \verb+in >>
+x+.  Since the return value of \verb+Read[in,x]+ is \verb+in+, these
+commands can be chained.  In other words,
 
 \begin{verbatim}
 in >> x >> y
 \end{verbatim}
  
+\noindent
+is equivalent to 
+
+\begin{verbatim}
+Read[in,x]
+Read[in,y]
+\end{verbatim}
+
+\noindent
+In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
+data type is determined from the exposed data in the input stream.  On
+the other hand if \verb+x+ is previously defined, then the Read[]
+function will expect to find the corresponding data type in the input
+stream, and a file read error will be generated if the exposed data is
+of the wrong data type.  If \verb+x+ is previously defined to be a
+LIST(T), then \verb+Read[in,x]+ will successively read elements into
+each element of the list.  If the wrong data type is found for any
+element of the list, a file read error will be returned.  Thus, if the
+file \verb+"file.out"+ contains the following data
+
+\begin{verbatim}
+25 1/3 "This is a text string!" False 3.14159 
+{{1, 0},{0, 1}}
+1 2 3 4 5
+\end{verbatim}
+
+then the following GCL code
+
+\begin{verbatim}
+in:=Input["file.dat"]
+x:=List[0,5]
+in >> i >> r >> t >> b >> f >> l >> x
+\end{verbatim}
+
+\noindent
+opens an input stream, consisting of the file \verb+"file.dat"+, and
+then reads data from the input stream into the corresponding
+variables.  After the last statement, 
+\verb+i+ is an INTEGER with value \verb+25+, 
+\verb+r+ is a RATIONAL with value \verb+1/3+, 
+\verb+t+ is a TEXT with value \verb+"This is a text string!"+, 
+\verb+b+ is a BOOL with value \verb+False+, 
+\verb+f+ is a FLOAT with value \verb+3.14159+, 
+\verb+l+ is a LIST(LIST(INTEGER)) with value \verb+{{1,0},{0,1}}+, and 
+\verb+x+ is a LIST(INTEGER) with value \verb+{1,2,3,4,5}+.  
+
 Data can be written to an output stream by the use of the Write[]
-function.  Thus, the following commands 
+function.  Thus, the following commands
 
 \begin{verbatim}
 out:=Output["file.out"]
@@ -3688,10 +3720,23 @@ Read[input->INPUT, x<->T] =: INPUT
               RATIONAL,TEXT,LIST(T)
 \end{verbatim}\normalsize
 
-\bd
-Reads data of type T from the input stream and assigns it to \verb+x+.
-Causes a run time error if the data at the input stream is of the
-incorrect type. 
+\bd Reads data of type T from the input stream and assigns it to
+\verb+x+.  If \verb+x+ is undefined, then its data type is determined
+from the exposed data in the input stream.  If \verb+x+ is previously
+defined, then the Read[] function will expect to find the
+corresponding data type in the input stream, and a file read error
+will be generated if the exposed data is of the wrong data type.  If
+\verb+x+ is previously defined to be a LIST(T), then \verb+Read[in,x]+
+will successively read elements into each element of the list.  If the
+wrong data type is found for any element of the list, a file read
+error will be returned.
+
+The ``exposed data'' in the input stream consists of the following: If
+first character is a double quote (\verb+"+), then the exposed data
+consists of all characters up until the next double quote.  If the
+first character is a \verb+{+, then the exposed data consists of all
+the characters up until the next matching \verb+}+.  Otherwise, the
+exposed data consists of all characters until the next whitespace.
 \item
 [Short form:] \verb+input >> x+
 \item
