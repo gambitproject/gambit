@@ -27,6 +27,7 @@ Text[x->TEXT] =: TEXT
 <para>
 <function>Text</function>
 converts <parameter>x</parameter> into a text string.
+</para>
 </refsect1>
 
 </refentry>

@@ -1,0 +1,42 @@
+<refentry id="bif.While" xreflabel="While">
+
+<refmeta>
+<indexterm>
+<primary>While</primary>
+</indexterm>
+
+<refentrytitle>While</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>While</refname>
+<refpurpose>
+Iterates over expressions while a condition is true
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+While[boolean-expression, statement-list]
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>While</function>
+defines a block of statements to be executed repeatedly.
+See the section on control structures for complete information.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.For">.
+</para>
+</refsect1>
+
+</refentry>
+
+

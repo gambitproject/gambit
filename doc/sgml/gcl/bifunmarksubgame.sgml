@@ -1,0 +1,46 @@
+<refentry id="bif.UnMarkSubgame" xreflabel="UnMarkSubgame">
+
+<refmeta>
+<indexterm>
+<primary>UnMarkSubgame</primary>
+</indexterm>
+
+<refentrytitle>UnMarkSubgame</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>UnMarkSubgame</refname>
+<refpurpose>
+Removes a subgame from the list used by Nash equilibrium algorithms
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+UnMarkSubgame[node->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>UnMarkSubgame</function>
+unmarks <parameter>node</parameter> as being the root of a subgame for use in later
+computation.  If <parameter>node</parameter> is not marked as a subgame root, or if
+<parameter>node</parameter> is the root node, this function has no effect.  Returns
+the <parameter>node</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.MarkSubgame">,
+<xref linkend="bif.MarkedSubgame">,
+<xref linkend="bif.Subgames">.
+</para>
+</refsect1>
+
+</refentry>
+
+

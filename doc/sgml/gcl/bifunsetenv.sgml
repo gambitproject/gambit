@@ -1,0 +1,42 @@
+<refentry id="bif.UnSetEnv" xreflabel="UnSetEnv">
+
+<refmeta>
+<indexterm>
+<primary>UnSetEnv</primary>
+</indexterm>
+
+<refentrytitle>UnSetEnv</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>UnSetEnv</refname>
+<refpurpose>
+Unsets an environment variable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+UnSetEnv[name->TEXT] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>UnSetEnv</function>
+unsets the environment variable <parameter>name</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.GetEnv">,
+<xref linkend="bif.SetEnv">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -199,6 +199,14 @@ for a listing of functions by category.
 &biftext;
 &biftimes;
 &biftranspose;
+&bifunassign;
+&bifundominated;
+&bifunmarksubgame;
+&bifunsetenv;
+&bifversion;
+&bifwhile;
+&bifwrite;
+&bifwritesequenceform;
 
 </sect1>
 

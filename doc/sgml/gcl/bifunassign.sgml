@@ -1,0 +1,52 @@
+<refentry id="bif.UnAssign" xreflabel="UnAssign">
+
+<refmeta>
+<indexterm>
+<primary>UnAssign</primary>
+</indexterm>
+
+<refentrytitle>UnAssign</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>UnAssign</refname>
+<refpurpose>
+Undefines a variable
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+UnAssign[name->TEXT] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>UnAssign</function>
+undefines the variable with name <parameter>name</parameter>.  Returns 
+<literal>True</literal> if the variable was defined, and 
+<literal>False</literal> if the
+variable was not defined, at the time of the call.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x :=</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Assign">,
+<xref linkend="bif.Clear">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,77 @@
+<refentry id="bif.UnDominated" xreflabel="UnDominated">
+
+<refmeta>
+<indexterm>
+<primary>UnDominated</primary>
+</indexterm>
+
+<refentrytitle>UnDominated</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>UnDominated</refname>
+<refpurpose>
+Computes the undominated actions or strategies in a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+UnDominated[support->NFSUPPORT, {strong->False}, 
+            {mixed->False}, {precision->Rational}, {time<->0.000000}, 
+            {traceFile<->(Output)}, {traceLevel->0}] =: NFSUPPORT 
+UnDominated[support->EFSUPPORT, {strong->False}, {conditional->False}, 
+            {time<->0.000000}, {traceFile<->(Output)}, 
+            {traceLevel->0}] =: EFSUPPORT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>UnDominated</function>
+finds dominated strategies, or actions, as appropriate, in a 
+<parameter>support</parameter>.  The returned support contains only the undominated
+strategies or actions; if this support is identical to the input support,
+no strategies or actions were found to be dominated.  The following
+optional parameters may be specified to modify the behavior of
+the elimination:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>strong</parameter> By default, all weakly dominated strategies or actions
+are eliminated.  If this is specified <literal>True</literal>, elimination is based
+on strict dominance.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>mixed</parameter>: By default, elimination is done in pure strategies or
+actions.  If this is specified <literal>True</literal>, elimination is done by
+examining mixtures over other strategies or actions.  Note that mixed 
+elimination is only implemented for normal form games.  
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>conditional</parameter>: Dominance computations are conditional on
+reaching infoset containing the action.  For example, a behavior
+strategy may be strongly dominated conditional on reaching its
+information set, but only weakly dominated in the entire game.  Only
+relevant for extensive form games.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Default precision is rational.  Note that the precision
+parameter is only applicable for mixed domination.  Pure strategy
+domination always uses rational precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,46 @@
+<refentry id="bif.Write" xreflabel="Write">
+
+<refmeta>
+<indexterm>
+<primary>Write</primary>
+</indexterm>
+
+<refentrytitle>Write</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Write</refname>
+<refpurpose>
+Writes an object to a text stream
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Write[output<->OUTPUT, x->T] =: OUTPUT  
+Write[output<->OUTPUT, x->LIST(T)] =: OUTPUT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Write</function>
+does a formatted write of <parameter>x</parameter> to
+<parameter>output</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Format">,
+<xref linkend="bif.ListFormat">,
+<xref linkend="bif.Output">,
+<xref linkend="bif.Read">.
+</para>
+</refsect1>
+
+</refentry>
+
+

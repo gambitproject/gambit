@@ -200,6 +200,14 @@
 <!ENTITY biftext SYSTEM "gcl/biftext.sgml">
 <!ENTITY biftimes SYSTEM "gcl/biftimes.sgml">
 <!ENTITY biftranspose SYSTEM "gcl/biftranspose.sgml">
+<!ENTITY bifunassign SYSTEM "gcl/bifunassign.sgml">
+<!ENTITY bifundominated SYSTEM "gcl/bifundominated.sgml">
+<!ENTITY bifunmarksubgame SYSTEM "gcl/bifunmarksubgame.sgml">
+<!ENTITY bifunsetenv SYSTEM "gcl/bifunsetenv.sgml">
+<!ENTITY bifversion SYSTEM "gcl/bifversion.sgml">
+<!ENTITY bifwhile SYSTEM "gcl/bifwhile.sgml">
+<!ENTITY bifwrite SYSTEM "gcl/bifwrite.sgml">
+<!ENTITY bifwritesequenceform SYSTEM "gcl/bifwritesequenceform.sgml">
 <!ENTITY algref SYSTEM "algref.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 

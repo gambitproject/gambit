@@ -1,0 +1,43 @@
+<refentry id="bif.WriteSequenceForm" xreflabel="WriteSequenceForm">
+
+<refmeta>
+<indexterm>
+<primary>WriteSequenceForm</primary>
+</indexterm>
+
+<refentrytitle>WriteSequenceForm</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>WriteSequenceForm</refname>
+<refpurpose>
+Writes the sequence form for an extensive form game to a stream
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+WriteSequenceForm[output<->OUTPUT, efg->EFG] =: OUTPUT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>WriteSequenceForm</function>
+writes the sequence form for the game <parameter>efg</parameter> to output.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SequenceForm">,
+<xref linkend="bif.SequenceFormConstraints">,
+<xref linkend="bif.SequenceFormStrats">.
+</para>
+</refsect1>
+
+</refentry>
+
+

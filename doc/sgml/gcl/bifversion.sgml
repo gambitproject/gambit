@@ -1,0 +1,34 @@
+<refentry id="bif.Version" xreflabel="Version">
+
+<refmeta>
+<indexterm>
+<primary>Version</primary>
+</indexterm>
+
+<refentrytitle>Version</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Version</refname>
+<refpurpose>
+Returns the version of Gambit
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Version[] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Version</function>
+returns the version number of Gambit as a text string.
+</para>
+</refsect1>
+
+</refentry>
+
+
