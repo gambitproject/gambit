@@ -62,6 +62,9 @@ dialogAbout::dialogAbout(wxWindow *p_parent,
 		0, wxTOP | wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, -1, "The Gambit Project"),
 		0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1,
+				 "Theodore Turocy, Project Maintainer"),
+		0, wxALIGN_CENTER, 5);
 
   topSizer->Add(new wxStaticText(this, -1, "This program is free software,"),
 		0, wxTOP | wxALIGN_CENTER, 5);
