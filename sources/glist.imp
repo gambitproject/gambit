@@ -1,7 +1,7 @@
 //#
 //# FILE: glist.imp -- Implementation of a generic array container class
 //#
-//# $Id$
+//# @(#)glist.imp	1.6 12/19/95
 //#
 
 #include "glist.h"
@@ -135,13 +135,16 @@ template <class T> gList<T> &gList<T>::operator=(const gList<T> &b)
   if (this != &b)   {
     Flush();
     length = b.length;
+    CurrIndex = b.CurrIndex;
     if (length)   {
       gNode<T> *n = b.head;
       head = new gNode<T>(n->data, 0, 0);
+      if (b.CurrNode == n) CurrNode = head;
       n = n->next;
       tail = head;
       while (n)  {
 	tail->next = new gNode<T>(n->data, tail, 0);
+	if (b.CurrNode == n) CurrNode = tail->next;
 	n = n->next;
 	tail = tail->next;
       }
