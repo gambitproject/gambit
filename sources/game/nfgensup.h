@@ -120,7 +120,7 @@ public:
   // Information
   const Strategy *GetStrategy() const;
   int StrategyIndex() const;
-  const NFPlayer *GetPlayer() const;
+  gbtNfgPlayer GetPlayer(void) const;
   int PlayerIndex() const;
 
   bool IsLast() const;

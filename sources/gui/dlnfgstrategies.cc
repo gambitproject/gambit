@@ -30,7 +30,6 @@
 #endif  // WX_PRECOMP
 
 #include "game/nfg.h"
-#include "game/nfplayer.h"
 #include "game/nfstrat.h"
 #include "dlnfgstrategies.h"
 
@@ -60,12 +59,12 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
 		   0, wxALL, 5);
   m_player = new wxChoice(this, idCHOICE_PLAYER);
   for (int pl = 1; pl <= p_nfg.NumPlayers(); pl++) {
-    NFPlayer *player = p_nfg.Players()[pl];
+    gbtNfgPlayer player = p_nfg.GetPlayer(pl);
     m_player->Append(wxString::Format("%d: %s", pl,
-				      (char *) player->GetName())); 
-    m_strategyNames.Append(gArray<gText>(player->NumStrats()));
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      m_strategyNames[pl][st] = player->Strategies()[st]->Name();
+				      (char *) player.GetLabel())); 
+    m_strategyNames.Append(gArray<gText>(player.NumStrategies()));
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      m_strategyNames[pl][st] = player.GetStrategy(st)->Name();
     }
   } 
   m_player->SetSelection(0);
@@ -76,7 +75,7 @@ dialogStrategies::dialogStrategies(wxWindow *p_parent, const Nfg &p_nfg)
     new wxStaticBoxSizer(new wxStaticBox(this, -1, "Strategies"),
 			 wxHORIZONTAL);
   m_strategyList = new wxListBox(this, idLISTBOX_STRATEGIES);
-  for (int st = 1; st <= m_nfg.Players()[1]->NumStrats(); st++) {
+  for (int st = 1; st <= m_nfg.GetPlayer(1).NumStrategies(); st++) {
     m_strategyList->Append(wxString::Format("%d: %s", st,
 					    (char *) m_strategyNames[1][st]));
   }

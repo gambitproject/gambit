@@ -248,8 +248,8 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
     StrategyCursorForSupport c_copy(*c);
     do {
       Strategy *str_ptr = (Strategy *)c_copy.GetStrategy();
-      if ( sact->StrategyIsActive(str_ptr) &&
-	   sact->NumStrats(str_ptr->Player()) > 1 ) {
+      if (sact->StrategyIsActive(str_ptr) &&
+	  sact->NumStrats(str_ptr->GetPlayer()) > 1 ) {
 	sact->RemoveStrategy(str_ptr); 
 	PossibleNashSubsupportsRECURSIVE(s,sact,&c_copy,list,status);
 	sact->AddStrategy(str_ptr);
@@ -326,8 +326,8 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
     do {
       Strategy *strat = (Strategy *)crsr.GetStrategy();
       if (current.StrategyIsActive(strat)) 
-	for (int j = 1; j <= strat->Player()->NumStrats(); j++) {
-	  Strategy *other_strat = strat->Player()->GetStrategy(j);
+	for (int j = 1; j <= strat->GetPlayer().NumStrategies(); j++) {
+	  Strategy *other_strat = strat->GetPlayer().GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.StrategyIsActive(other_strat)) {
 	      if (current.Dominates(other_strat,strat,false)) 
@@ -414,7 +414,7 @@ int StrategyCursorForSupport::StrategyIndex() const
   return strat;
 }
 
-const NFPlayer *StrategyCursorForSupport::GetPlayer() const
+gbtNfgPlayer StrategyCursorForSupport::GetPlayer() const
 {
   return support->Game().GetPlayer(pl);
 }
@@ -436,13 +436,18 @@ StrategyCursorForSupport::IsLast() const
 bool 
 StrategyCursorForSupport::IsSubsequentTo(const Strategy *s) const
 {
-  if (pl > s->Player()->GetNumber())
+  if (pl > s->GetPlayer().GetId()) {
     return true; 
-  else if (pl < s->Player()->GetNumber())
+  }
+  else if (pl < s->GetPlayer().GetId()) {
     return false;
-  else
-    if (strat > s->Number())
+  }
+  else {
+    if (strat > s->Number()) {
       return true;
-    else
+    }
+    else {
       return false;
+    }
+  }
 }

@@ -30,9 +30,8 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "math/gnumber.h"
-#include "nfplayer.h"
+#include "player.h"
 
-class NFPlayer;
 class Nfg;
 class Strategy;
 
@@ -93,8 +92,8 @@ public:
   int GetNumber(const Strategy *s) const;
 
   int NumStrats(int pl) const;
-  inline int NumStrats(const NFPlayer* p) const 
-    { return NumStrats(p->GetNumber()); }
+  int NumStrats(const gbtNfgPlayer &p_player) const 
+    { return NumStrats(p_player.GetId()); }
   const gArray<int> NumStrats(void) const;
   int TotalNumStrats(void) const;
 

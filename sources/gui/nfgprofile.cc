@@ -71,8 +71,8 @@ void NfgProfileList::UpdateValues(void)
   int maxColumn = 5;
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    NFPlayer *player = nfg.Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
+    gbtNfgPlayer player = nfg.GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
       InsertColumn(++maxColumn,
 		   wxString::Format("%d:%d", pl, st));
     }
@@ -94,10 +94,10 @@ void NfgProfileList::UpdateValues(void)
 
     int column = 5;
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-      NFPlayer *player = nfg.Players()[pl];
-      for (int st = 1; st <= player->NumStrats(); st++) {
+      gbtNfgPlayer player = nfg.GetPlayer(pl);
+      for (int st = 1; st <= player.NumStrategies(); st++) {
 	SetItem(i - 1, ++column,
-		(char *) ToText(profile(player->Strategies()[st])));
+		(char *) ToText(profile(player.GetStrategy(st))));
       }
     }    
   }
@@ -178,12 +178,12 @@ wxString NfgProfileList::GetReport(void) const
     report += "\n\n";
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-      NFPlayer *player = nfg.Players()[pl];
-      report += wxString::Format("%s\n", (const char *) player->GetName());
+      gbtNfgPlayer player = nfg.GetPlayer(pl);
+      report += wxString::Format("%s\n", (const char *) player.GetLabel());
 
-      for (int st = 1; st <= player->NumStrats(); st++) {
+      for (int st = 1; st <= player.NumStrategies(); st++) {
 	report += wxString::Format("%2d: %-6s", st,
-				   (const char *) player->Strategies()[st]->Name());
+				   (const char *) player.GetStrategy(st)->Name());
 
 	for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
 	  report += wxString::Format("%-15s ", 

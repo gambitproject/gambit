@@ -334,28 +334,27 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
+#include "game/player.h"
 
 //------------
 // NfPlayer
 //------------
 
-class NFPlayer;
-
 class NfPlayerPortion : public Portion  {
 protected:
-  NFPlayer** _Value;
-  bool _ref;
+  gbtNfgPlayer *m_value;
+  bool m_ref;
 
   static gPool pool;
 
-  NfPlayerPortion(NFPlayer *&, bool);
+  NfPlayerPortion(gbtNfgPlayer *&, bool);
 
 public:
-  NfPlayerPortion(NFPlayer *); 
+  NfPlayerPortion(gbtNfgPlayer); 
   virtual ~NfPlayerPortion();
 
-  NFPlayer *Value(void) const;
-  void SetValue(NFPlayer *); 
+  gbtNfgPlayer Value(void) const;
+  void SetValue(gbtNfgPlayer); 
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

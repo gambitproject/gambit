@@ -25,10 +25,7 @@
 //
 
 #include "nfg.h"
-#include "nfplayer.h"
 #include "nfstrat.h"
-
-
 #include "math/gpvector.h"
 #include "mixed.h"
 
@@ -180,7 +177,7 @@ template <class T> T
 MixedProfile<T>::Payoff(int pl, Strategy *strategy) const
 {
   T value = (T) 0;
-  PPayoff(pl, strategy->Player()->GetNumber(), strategy->Number(), 1,
+  PPayoff(pl, strategy->GetPlayer().GetId(), strategy->Number(), 1,
 	  strategy->Index() + 1, (T) 1, value);
   return value;
 }

@@ -28,7 +28,7 @@
 #define NFGCITER_H
 
 #include "base/base.h"
-#include "nfplayer.h"
+#include "player.h"
 
 class StrategyProfile;
 
@@ -59,7 +59,7 @@ public:
   
   void Freeze(const gBlock<int> &);
   void Freeze(int);
-  inline void Freeze(const NFPlayer* p) { Freeze(p->GetNumber()); }
+  void Freeze(gbtNfgPlayer p_player) { Freeze(p_player.GetId()); }
   void Thaw(int);
   
   // These next two only work on frozen strategies

@@ -140,7 +140,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
       Nfg *nfg = new Nfg(dialog.NumStrategies());
       nfg->SetTitle("Untitled Normal Form Game");
       for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-	nfg->Players()[pl]->SetName(gText("Player") + ToText(pl));
+	nfg->GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
 	NFSupport support(*nfg);

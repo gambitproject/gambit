@@ -28,7 +28,6 @@
 #include "efg.h"
 #include "efstrat.h"
 #include "nfg.h"
-#include "nfplayer.h"
 #include "nfstrat.h"
 #include "mixed.h"
 #include "nfgiter.h"
@@ -150,7 +149,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
   L->N->SetTitle(E.GetTitle());
 
   for (i = 1; i <= E.NumPlayers(); i++)   {
-    L->N->Players()[i]->SetName(E.Players()[i]->GetName());
+    L->N->GetPlayer(i).SetLabel(E.Players()[i]->GetName());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gText name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
@@ -158,7 +157,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
 	  name += ToText((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->Players()[i]->Strategies()[j]->SetName(name);
+      L->N->GetPlayer(i).Strategies()[j]->SetName(name);
     }
   }
 

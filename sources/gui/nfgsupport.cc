@@ -155,10 +155,10 @@ void NfgSupportWindow::UpdateValues(void)
 
   m_strategyTree->AddRoot((char *) m_parent->GetSupport()->GetName());
   for (int pl = 1; pl <= m_parent->Game().NumPlayers(); pl++) {
-    NFPlayer *player = m_parent->Game().Players()[pl];
+    gbtNfgPlayer player = m_parent->Game().GetPlayer(pl);
 
     wxTreeItemId id = m_strategyTree->AppendItem(m_strategyTree->GetRootItem(),
-					       (char *) player->GetName());
+					       (char *) player.GetLabel());
     
     for (int st = 1; st <= m_parent->Game().NumStrats(pl); st++) {
       Strategy *strategy = m_parent->Game().Strategies(pl)[st];
@@ -209,7 +209,7 @@ void NfgSupportWindow::ToggleItem(wxTreeItemId p_id)
   }
 
   if (m_parent->GetSupport()->Find(strategy) &&
-      m_parent->GetSupport()->NumStrats(strategy->Player()) > 1) {
+      m_parent->GetSupport()->NumStrats(strategy->GetPlayer()) > 1) {
     m_parent->GetSupport()->RemoveStrategy(strategy);
     m_strategyTree->SetItemTextColour(p_id, *wxLIGHT_GREY);
   }

@@ -217,8 +217,8 @@ bool IsMixedDominated(const NFSupport &S,Strategy *str,
 			   bool strong, T /*junk*/,
 			   gOutput &tracefile)
 {
-  int pl = str->Player()->GetNumber();
-  Nfg nfg = str->Player()->Game();
+  int pl = str->GetPlayer().GetId();
+  Nfg &nfg = *str->GetPlayer().GetGame();
   int whichstrat = str->Number();
   int strats = S.NumStrats(pl);
 

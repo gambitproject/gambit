@@ -27,7 +27,7 @@
 #include "math/rational.h"
 #include "nfg.h"
 #include "nfstrat.h"
-#include "nfplayer.h"
+#include "player.h"
 
 //----------------------------------------------------------------------
 //                gbt_nfg_outcome_rep: Declaration
@@ -141,11 +141,138 @@ gOutput &operator<<(gOutput &p_stream, const gbtNfgOutcome &)
   return p_stream;
 }
 
+//----------------------------------------------------------------------
+//                 gbt_nfg_player_rep: Declaration
+//----------------------------------------------------------------------
+
+struct gbt_nfg_player_rep {
+  int m_id;
+  Nfg *m_nfg;
+  bool m_deleted;
+  gText m_label;
+  gArray<Strategy *> m_strategies;
+  int m_refCount;
+
+  gbt_nfg_player_rep(Nfg *, int, int);
+};
+
+gbt_nfg_player_rep::gbt_nfg_player_rep(Nfg *p_nfg, int p_id, int p_strats)
+  : m_id(p_id), m_nfg(p_nfg), m_deleted(false), m_strategies(p_strats),
+    m_refCount(1)
+{
+  for (int i = 1; i <= p_strats; i++) {
+    m_strategies[i] = new Strategy(this);
+  }
+}
+
+gbtNfgPlayer::gbtNfgPlayer(void)
+  : rep(0)
+{ }
+
+gbtNfgPlayer::gbtNfgPlayer(gbt_nfg_player_rep *p_rep)
+  : rep(p_rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgPlayer::gbtNfgPlayer(const gbtNfgPlayer &p_outcome)
+  : rep(p_outcome.rep)
+{
+  if (rep) {
+    rep->m_refCount++;
+  }
+}
+
+gbtNfgPlayer::~gbtNfgPlayer()
+{
+  if (rep) {
+    if (--rep->m_refCount == 0) {
+      delete rep;
+    }
+  }
+}
+
+gbtNfgPlayer &gbtNfgPlayer::operator=(const gbtNfgPlayer &p_outcome)
+{
+  if (this == &p_outcome) {
+    return *this;
+  }
+
+  if (rep && --rep->m_refCount == 0) {
+    delete rep;
+  }
+
+  if ((rep = p_outcome.rep) != 0) {
+    rep->m_refCount++;
+  }
+  return *this;
+}
+
+bool gbtNfgPlayer::operator==(const gbtNfgPlayer &p_outcome) const
+{
+  return (rep == p_outcome.rep);
+} 
+
+bool gbtNfgPlayer::operator!=(const gbtNfgPlayer &p_outcome) const
+{
+  return (rep != p_outcome.rep);
+} 
+
+int gbtNfgPlayer::GetId(void) const
+{
+  return (rep) ? rep->m_id : 0;
+}
+
+bool gbtNfgPlayer::IsNull(void) const
+{
+  return (rep == 0);
+}
+
+Nfg *gbtNfgPlayer::GetGame(void) const
+{
+  return (rep) ? rep->m_nfg : 0;
+}
+
+gText gbtNfgPlayer::GetLabel(void) const
+{
+  if (rep) {
+    return rep->m_label;
+  }
+  else {
+    return "";
+  }
+}
+
+void gbtNfgPlayer::SetLabel(const gText &p_label)
+{
+  if (rep) {
+    rep->m_label = p_label;
+  }
+}
+
+int gbtNfgPlayer::NumStrategies(void) const
+{
+  return (rep) ? rep->m_strategies.Length() : 0;
+}
+
+const gArray<Strategy *> &gbtNfgPlayer::Strategies(void) const
+{
+  return rep->m_strategies;
+}
+
+Strategy *gbtNfgPlayer::GetStrategy(int st) const
+{
+  return (rep) ? rep->m_strategies[st] : 0;
+}
+
 //--------------------------------------
 // Strategy:  Constructors, Destructors
 //--------------------------------------
 
-Strategy::Strategy(NFPlayer *p) : m_number(0), m_player(p), m_index(0L)
+Strategy::Strategy(gbt_nfg_player_rep *p) 
+  : m_number(0), m_player(p), m_index(0L)
 { }
 
 Strategy::Strategy(const Strategy &s) : m_player(s.m_player), m_name(s.m_name)
@@ -160,6 +287,9 @@ Strategy &Strategy::operator=(const Strategy &s)
 
 Strategy::~Strategy()
 { }
+
+gbtNfgPlayer Strategy::GetPlayer(void) const
+{ return m_player; }
 
 
 //----------------------------------------------------
@@ -180,10 +310,10 @@ Nfg::Nfg(const gArray<int> &dim)
     results(Product(dim)), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new NFPlayer(pl, this, dim[pl]);
-	  players[pl]->name = ToText(pl);
-    for (int st = 1; st <= players[pl]->NumStrats(); st++)
-      players[pl]->strategies[st]->m_name = ToText(st);
+    players[pl] = new gbt_nfg_player_rep(this, pl, dim[pl]);
+    players[pl]->m_label = ToText(pl);
+    for (int st = 1; st <= dim[pl]; st++)
+      players[pl]->m_strategies[st]->m_name = ToText(st);
   }
   IndexStrategies();
 
@@ -199,11 +329,11 @@ Nfg::Nfg(const Nfg &b)
     results(b.results.Length()), efg(0)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
-    players[pl] = new NFPlayer(pl, this, dimensions[pl]);
-    players[pl]->name = b.players[pl]->name;
-    for (int st = 1; st <= players[pl]->NumStrats(); st++)  {
-      *(players[pl]->strategies[st]) = *(b.players[pl]->strategies[st]);
-      players[pl]->strategies[st]->m_player = players[pl];
+    players[pl] = new gbt_nfg_player_rep(this, pl, dimensions[pl]);
+    players[pl]->m_label = b.players[pl]->m_label;
+    for (int st = 1; st <= dimensions[pl]; st++)  {
+      *(players[pl]->m_strategies[st]) = *(b.players[pl]->m_strategies[st]);
+      players[pl]->m_strategies[st]->m_player = players[pl];
     }
   }
   IndexStrategies();
@@ -267,16 +397,17 @@ void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
     p_file << "NFG 1 R";
     p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
 
-    for (int i = 1; i <= NumPlayers(); i++)
-      p_file << '"' << EscapeQuotes(Players()[i]->GetName()) << "\" ";
+    for (int i = 1; i <= NumPlayers(); i++) {
+      p_file << '"' << EscapeQuotes(GetPlayer(i).GetLabel()) << "\" ";
+    }
 
     p_file << "}\n\n{ ";
   
     for (int i = 1; i <= NumPlayers(); i++)   {
-      NFPlayer *player = Players()[i];
+      gbtNfgPlayer player = GetPlayer(i);
       p_file << "{ ";
-      for (int j = 1; j <= player->NumStrats(); j++)
-	p_file << '"' << EscapeQuotes(player->Strategies()[j]->Name()) << "\" ";
+      for (int j = 1; j <= player.NumStrategies(); j++)
+	p_file << '"' << EscapeQuotes(player.Strategies()[j]->Name()) << "\" ";
       p_file << "}\n";
     }
   
@@ -351,7 +482,7 @@ void Nfg::DeleteOutcome(gbtNfgOutcome p_outcome)
 
 const gArray<Strategy *> &Nfg::Strategies(int p) const
 {
-  return (players[p]->Strategies());
+  return players[p]->m_strategies;
 }
 
 void Nfg::SetTitle(const gText &s) 
@@ -380,22 +511,22 @@ int Nfg::NumPlayers(void) const
   return (players.Length()); 
 }
 
-const gArray<NFPlayer *> &Nfg::Players(void) const
+gbtNfgPlayer Nfg::GetPlayer(int pl) const
 {
-  return players;
+  return players[pl];
 }
 
 int Nfg::NumStrats(int pl) const
 {
   return ((pl > 0 && pl <= NumPlayers()) ? 
-	  (players[pl])->strategies.Length() : 0);
+	  players[pl]->m_strategies.Length() : 0);
 }
 
 int Nfg::ProfileLength(void) const
 {
   int nprof = 0;
   for (int i = 1; i <= players.Length(); i++)
-    nprof += players[i]->strategies.Length();
+    nprof += players[i]->m_strategies.Length();
   return nprof;
 }
 
@@ -410,12 +541,13 @@ void Nfg::SetLabel(gbtNfgOutcome p_outcome, const gText &p_label)
     p_outcome.rep->m_label = p_label;
   }
 }
+
 void Nfg::SetOutcome(const gArray<int> &p_profile,
 		     const gbtNfgOutcome &p_outcome)
 {
   int index = 1;
   for (int i = 1; i <= p_profile.Length(); i++) {
-    index += players[i]->strategies[p_profile[i]]->m_index;
+    index += players[i]->m_strategies[p_profile[i]]->m_index;
   }
   results[index] = p_outcome.rep;
   m_dirty = true;
@@ -441,7 +573,7 @@ gbtNfgOutcome Nfg::GetOutcome(const gArray<int> &profile) const
 {
   int index = 1;
   for (int i = 1; i <= profile.Length(); i++) {
-    index += players[i]->strategies[profile[i]]->m_index;
+    index += players[i]->m_strategies[profile[i]]->m_index;
   }
   return results[index];
 }
@@ -482,55 +614,12 @@ void Nfg::IndexStrategies(void)
   for (int i = 1; i <= NumPlayers(); i++)  {
     int j;
     for (j = 1; j <= NumStrats(i); j++)  {
-      Strategy *s = (players[i])->strategies[j];
+      Strategy *s = players[i]->m_strategies[j];
       s->m_number = j;
       s->m_index = (j - 1) * offset;
     }
     offset *= (j - 1);
   }
-}
-
-// --------------------------
-// NFPlayer: Member functions 
-// --------------------------
-
-NFPlayer::NFPlayer(int n, Nfg *N, int num)
-: number(n), N(N), strategies(num)
-{ 
-  for (int j = 1; j <= num; j++)
-    strategies[j] = new Strategy(this);
-}
-
-NFPlayer::~NFPlayer()
-{ 
-  for (int j = 1; j <= strategies.Length(); j++)
-    delete strategies[j];
-}
-
-Nfg &NFPlayer::Game(void) const
-{
-  return *N;
-}
-
-const gText &NFPlayer::GetName(void) const
-{
-  return name;
-}
-
-void NFPlayer::SetName(const gText &s)
-{
-  name = s;
-}
-
-int NFPlayer::NumStrats(void) const 
-{
-  return strategies.Length();
-}
-
-
-const gArray<Strategy *> &NFPlayer::Strategies(void) const
-{
-  return strategies;
 }
 
 void Nfg::InitPayoffs(void) const 

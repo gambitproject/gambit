@@ -46,7 +46,6 @@
 #include "game/efg.h"
 #include "game/efgutils.h"
 #include "nash/behavsol.h"
-#include "game/nfplayer.h"
 #include "game/nfgciter.h"
 
 #include "gambit.h"
@@ -641,9 +640,9 @@ void NfgShow::OnEditStrategies(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-      NFPlayer *player = m_nfg.Players()[pl];
-      for (int st = 1; st <= player->NumStrats(); st++) {
-	player->Strategies()[st]->SetName(dialog.GetStrategyName(pl, st));
+      gbtNfgPlayer player = m_nfg.GetPlayer(pl);
+      for (int st = 1; st <= player.NumStrategies(); st++) {
+	player.GetStrategy(st)->SetName(dialog.GetStrategyName(pl, st));
       }
     }
     m_table->RefreshTable();
@@ -674,7 +673,7 @@ void NfgShow::OnEditGame(wxCommandEvent &)
     SetFilename(Filename());
     m_nfg.SetComment(dialog.GetComment().c_str());
     for (int pl = 1; pl <= dialog.NumPlayers(); pl++) {
-      m_nfg.Players()[pl]->SetName(dialog.GetPlayerName(pl).c_str());
+      m_nfg.GetPlayer(pl).SetLabel(dialog.GetPlayerName(pl).c_str());
     }
     m_navigateWindow->UpdateLabels();
     m_outcomeWindow->UpdateValues();
@@ -837,7 +836,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_nfg.NumPlayers());
   for (int pl = 1; pl <= playerNames.Length(); pl++) {
-    playerNames[pl] = m_nfg.Players()[pl]->GetName();
+    playerNames[pl] = m_nfg.GetPlayer(pl).GetLabel();
   }
   dialogElimMixed dialog(this, playerNames);
 

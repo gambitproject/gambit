@@ -32,7 +32,6 @@
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
-#include "nfplayer.h"
 #include "mixed.h"
 
 bool IsMixedDominated(const NFSupport &S,Strategy *str,

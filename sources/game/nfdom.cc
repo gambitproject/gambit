@@ -32,17 +32,17 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
 
   NfgContIter A(*this), B(*this);
 
-  A.Freeze(s->Player());
+  A.Freeze(s->GetPlayer());
   A.Set(s);
-  B.Freeze(s->Player());
+  B.Freeze(s->GetPlayer());
   B.Set(t);  
 
   if (strong)  {
     do  {
       gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		    n.Payoff(A.GetOutcome(), s->Player()) : gNumber(0));
+		    n.Payoff(A.GetOutcome(), s->GetPlayer()) : gNumber(0));
       gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		    n.Payoff(B.GetOutcome(), s->Player()) : gNumber(0));
+		    n.Payoff(B.GetOutcome(), s->GetPlayer()) : gNumber(0));
 
       if (ap <= bp)  {
 	return false;
@@ -57,9 +57,9 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
   
   do   {
     gNumber ap = ((!A.GetOutcome().IsNull()) ? 
-		  n.Payoff(A.GetOutcome(), s->Player()) : gNumber(0));
+		  n.Payoff(A.GetOutcome(), s->GetPlayer()) : gNumber(0));
     gNumber bp = ((!B.GetOutcome().IsNull()) ? 
-		  n.Payoff(B.GetOutcome(), s->Player()) : gNumber(0));
+		  n.Payoff(B.GetOutcome(), s->GetPlayer()) : gNumber(0));
 
     if (ap < bp)   { 
       return false;
@@ -75,9 +75,9 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
 
 bool NFSupport::IsDominated(Strategy *s, bool strong) const
 {
-  for (int i = 1; i <= NumStrats(s->Player()->GetNumber()); i++) {
+  for (int i = 1; i <= NumStrats(s->GetPlayer().GetId()); i++) {
     if (i != s->Number()) {
-      if (Dominates(Strategies(s->Player()->GetNumber())[i], s, strong)) {
+      if (Dominates(Strategies(s->GetPlayer().GetId())[i], s, strong)) {
 	return true;
       }
     }

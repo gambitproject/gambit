@@ -31,7 +31,6 @@
 #include "base/glist.h"
 #include "math/rational.h"
 #include "nfg.h"
-#include "nfplayer.h"
 #include "nfstrat.h"
 
 static gInput *infile;
@@ -264,7 +263,7 @@ bool CreateNfg(const gList<gText> &players,
   N = new Nfg(dim);
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
-    N->Players()[i]->SetName(players[i]);
+    N->GetPlayer(i).SetLabel(players[i]);
     if (strats.Length() > 0)
       for (int j = 1; j <= dim[i]; j++)
 	N->Strategies(i)[j]->SetName(strats[strat++]);

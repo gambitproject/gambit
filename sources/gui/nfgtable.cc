@@ -256,12 +256,12 @@ wxString NfgGridTable::GetValue(int row, int col)
   else if (row < numRowStrats && 
 	   col == numColStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1) {
     Strategy *strategy = support.GetStrategy(rowPlayer, row + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->Player(), strategy)));
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->GetPlayer(), strategy)));
   }
   else if (row == numRowStrats + m_table->ShowDominance() + m_table->ShowProbs() + m_table->ShowValues() - 1 && 
 	   col < numColStrats) {
     Strategy *strategy = support.GetStrategy(colPlayer, col + 1);
-    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->Player(), strategy)));
+    return ((char *) ToText(m_table->GetProfile().Payoff(strategy->GetPlayer(), strategy)));
   }
 
   return "";

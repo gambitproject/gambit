@@ -26,7 +26,6 @@
 
 #include "base/gmisc.h"
 #include "nfg.h"
-#include "nfplayer.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
 
@@ -38,10 +37,11 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
   N->SetTitle(nfg.GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
-    NFPlayer *player = N->Players()[pl];
-    player->SetName(nfg.Players()[pl]->GetName());
-    for (int st = 1; st <= N->NumStrats(pl); st++) 
-      player->Strategies()[st]->SetName(S.Strategies(pl)[st]->Name());
+    gbtNfgPlayer player = N->GetPlayer(pl);
+    player.SetLabel(nfg.GetPlayer(pl).GetLabel());
+    for (int st = 1; st <= N->NumStrats(pl); st++) {
+      player.GetStrategy(st)->SetName(S.GetStrategy(pl, st)->Name());
+    }
   }
 
   for (int outc = 1; outc <= nfg.NumOutcomes(); outc++)  {

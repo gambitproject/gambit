@@ -33,8 +33,6 @@
 #include "nash/behavsol.h"
 #include "nash/mixedsol.h"
 
-#include "game/nfplayer.h"
-
 #include "game/efgutils.h"
 
 //
@@ -365,13 +363,13 @@ static Portion *GSM_Regret_Mixed(GSM &, Portion **param)
 {
   MixedProfile<gNumber> P(*(*((MixedPortion*) param[0])->Value()).Profile());
   Strategy* s = ((StrategyPortion*) param[1])->Value();
-  NFPlayer* p = s->Player();
-  Nfg &n = p->Game();
+  gbtNfgPlayer player = s->GetPlayer();
+  Nfg &n = *player.GetGame();
 
   gPVector<gNumber> v(n.NumStrats());
   P.Regret(v);
 
-  return new NumberPortion(v(p->GetNumber(), s->Number()));
+  return new NumberPortion(v(player.GetId(), s->Number()));
 }
 
 static Portion *GSM_Regret_Behav(GSM &, Portion **param)
@@ -527,16 +525,16 @@ static Portion *GSM_SetStrategyProb(GSM &, Portion **param)
 
 static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
 {
-  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
+  gbtNfgPlayer player = ((NfPlayerPortion *) param[1])->Value();
 
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   
-  if (((ListPortion*) param[2])->Length() != player->NumStrats()) {
+  if (((ListPortion*) param[2])->Length() != player.NumStrategies()) {
     delete P;
     throw gclRuntimeError("Mismatching number of strategies");
   }
 
-  for (int st = 1; st <= player->NumStrats(); st++) {
+  for (int st = 1; st <= player.NumStrategies(); st++) {
     Portion *p2 = ((ListPortion*) param[2])->SubscriptCopy(st);
     if (p2->Spec().ListDepth > 0) {
       delete p2;
@@ -544,7 +542,7 @@ static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
       throw gclRuntimeError("Mismatching dimensionality");
     }
 
-    P->Set(player->Strategies()[st], ((NumberPortion*) p2)->Value());
+    P->Set(player.Strategies()[st], ((NumberPortion*) p2)->Value());
     delete p2;
   }
 
@@ -574,11 +572,11 @@ static Portion *GSM_StrategyProbs(GSM &, Portion **param)
 
   ListPortion *por = new ListPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
-    NFPlayer *player = nfg.Players()[pl];
+    gbtNfgPlayer player = nfg.GetPlayer(pl);
     ListPortion *p1 = new ListPortion;
 
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      Strategy *strategy = player->Strategies()[st];
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      Strategy *strategy = player.Strategies()[st];
       p1->Append(new NumberPortion((*profile)(strategy)));
     }
 
@@ -599,7 +597,7 @@ static Portion *GSM_StrategyValue(GSM &, Portion **param)
   MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy *strategy = ((StrategyPortion*) param[1])->Value();
 
-  return new NumberPortion(profile->Payoff(strategy->Player(), strategy));
+  return new NumberPortion(profile->Payoff(strategy->GetPlayer(), strategy));
 }
 
 //---------------

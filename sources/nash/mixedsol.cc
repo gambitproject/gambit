@@ -178,9 +178,9 @@ void MixedSolution::LevelPrecision(void)
   m_epsilon = 0;
   for (int pl = 1; m_precision == precRATIONAL && pl <= Game().NumPlayers();
        pl++) {
-    NFPlayer *player = Game().Players()[pl];  
+    gbtNfgPlayer player = Game().GetPlayer(pl);
     for (int st = 1; (m_precision == precRATIONAL && 
-		      st <= player->NumStrats()); st++) {
+		      st <= player.NumStrategies()); st++) {
       if (m_profile(pl, st).Precision() == precDOUBLE) {
 	m_precision = precDOUBLE;
 	m_epsilon = 0.0;
@@ -191,8 +191,8 @@ void MixedSolution::LevelPrecision(void)
 
   if (m_precision == precDOUBLE) {
     for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-      NFPlayer *player = Game().Players()[pl];  
-      for (int st = 1; st <= player->NumStrats(); st++) 
+      gbtNfgPlayer player = Game().GetPlayer(pl);
+      for (int st = 1; st <= player.NumStrategies(); st++) 
 	m_profile(pl, st) = (double) m_profile(pl, st);
     }
   }
@@ -222,15 +222,15 @@ bool MixedSolution::operator==(const MixedSolution &p_solution) const
 void MixedSolution::Set(Strategy *p_strategy, const gNumber &p_value)
 { 
   Invalidate();
-  m_profile(p_strategy->Player()->GetNumber(), p_strategy->Number()) = p_value;
+  m_profile(p_strategy->GetPlayer().GetId(), p_strategy->Number()) = p_value;
   if (p_value.Precision() != m_precision)
     LevelPrecision();
 }
 
 const gNumber &MixedSolution::operator()(Strategy *p_strategy) const
 {
-  NFPlayer *player = p_strategy->Player();
-  return m_profile(player->GetNumber(), p_strategy->Number()); 
+  gbtNfgPlayer player = p_strategy->GetPlayer();
+  return m_profile(player.GetId(), p_strategy->Number()); 
 }
 
 MixedSolution &MixedSolution::operator+=(const MixedSolution &p_solution)
@@ -332,8 +332,9 @@ void MixedSolution::Invalidate(void) const
 // Payoff computation
 //---------------------
 
-gNumber MixedSolution::Payoff(NFPlayer *p_player, Strategy *p_strategy) const
-{ return m_profile.Payoff(p_player->GetNumber(), p_strategy); }
+gNumber MixedSolution::Payoff(gbtNfgPlayer p_player, 
+			      Strategy *p_strategy) const
+{ return m_profile.Payoff(p_player.GetId(), p_strategy); }
 
 
 //----------

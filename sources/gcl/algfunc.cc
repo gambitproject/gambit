@@ -33,7 +33,6 @@
 #include "math/rational.h"
 
 #include "game/nfg.h"
-#include "game/nfplayer.h"
 #include "game/efg.h"
 
 #include "nash/subsolve.h"
@@ -834,10 +833,11 @@ Portion* GSM_Payoff_Behav(GSM &, Portion** param)
 Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 {
   MixedProfile<gNumber> mp(*(*((MixedPortion*) param[0])->Value()).Profile());
-  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
+  gbtNfgPlayer player = ((NfPlayerPortion *) param[1])->Value();
 
-  return new NumberPortion(mp.Payoff(player->GetNumber()));
+  return new NumberPortion(mp.Payoff(player.GetId()));
 }
+
 //------------------
 // QreGridSolve
 //------------------

@@ -581,52 +581,51 @@ bool EfOutcomePortion::IsReference(void) const
 // NfPlayer
 //-----------
 
-#include "game/nfplayer.h"
-
 gPool NfPlayerPortion::pool(sizeof(NfPlayerPortion));
 
-NfPlayerPortion::NfPlayerPortion(NFPlayer *value)
-  : _Value(new NFPlayer *(value)), _ref(false)
+NfPlayerPortion::NfPlayerPortion(gbtNfgPlayer p_value)
+  : m_value(new gbtNfgPlayer(p_value)), m_ref(false)
 {
-  SetGame(&value->Game());
+  SetGame(p_value.GetGame());
 }
 
-NfPlayerPortion::NfPlayerPortion(NFPlayer *&value, bool ref)
-  : _Value(&value), _ref(ref)
+NfPlayerPortion::NfPlayerPortion(gbtNfgPlayer *&p_value, bool p_ref)
+  : m_value(p_value), m_ref(p_ref)
 {
-  if (!_ref) {
-    SetGame(&value->Game());
+  if (!p_ref) {
+    SetGame(p_value->GetGame());
   }
 }
 
 NfPlayerPortion::~NfPlayerPortion()
 {
-  if (!_ref)   delete _Value;
+  if (!m_ref) {
+    delete m_value;
+  }
 }
 
-NFPlayer *NfPlayerPortion::Value(void) const
-{ return *_Value; }
+gbtNfgPlayer NfPlayerPortion::Value(void) const
+{ return *m_value; }
 
-void NfPlayerPortion::SetValue(NFPlayer *value)
+void NfPlayerPortion::SetValue(gbtNfgPlayer p_value)
 {
-  if (_ref) {
-    ((NfPlayerPortion *) Original())->SetValue(value);
+  if (m_ref) {
+    ((NfPlayerPortion *) Original())->SetValue(p_value);
   }
   else {
-    SetGame(&value->Game());
-    *_Value = value;
+    SetGame(p_value.GetGame());
+    *m_value = p_value;
   }
 }
 
 PortionSpec NfPlayerPortion::Spec(void) const
-{ return PortionSpec(porNFPLAYER); }
+{ return porNFPLAYER; }
 
 void NfPlayerPortion::Output(gOutput& s) const
 {
   Portion::Output(s);
-  s << "(NfPlayer) " << *_Value;
-  if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\""; 
+  s << "(NfPlayer) ";
+  s << " \"" << (*m_value).GetLabel() << "\""; 
 }
 
 gText NfPlayerPortion::OutputString(void) const
@@ -636,18 +635,18 @@ gText NfPlayerPortion::OutputString(void) const
 
 Portion* NfPlayerPortion::ValCopy(void) const
 {
-  return new NfPlayerPortion(*_Value); 
+  return new NfPlayerPortion(*m_value); 
 }
 
 Portion* NfPlayerPortion::RefCopy(void) const
 {
-  Portion* p = new NfPlayerPortion(*_Value, true); 
+  Portion *p = new NfPlayerPortion((gbtNfgPlayer *) m_value, true); 
   p->SetOriginal(Original());
   return p;
 }
 
 bool NfPlayerPortion::IsReference(void) const
-{ return _ref; }
+{ return m_ref; }
 
 
 //------------
@@ -659,14 +658,14 @@ gPool StrategyPortion::pool(sizeof(StrategyPortion));
 StrategyPortion::StrategyPortion(Strategy *value)
   : _Value(new Strategy *(value)), _ref(false)
 {
-  SetGame(&value->Player()->Game());
+  SetGame(value->GetPlayer().GetGame());
 }
 
 StrategyPortion::StrategyPortion(Strategy *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
   if (!_ref) {
-    SetGame(&value->Player()->Game());
+    SetGame(value->GetPlayer().GetGame());
   }
 }
 
@@ -684,7 +683,7 @@ void StrategyPortion::SetValue(Strategy *value)
     ((StrategyPortion *) Original())->SetValue(value);
   }
   else {
-    SetGame(&value->Player()->Game());
+    SetGame(value->GetPlayer().GetGame());
     *_Value = value;
   }
 }
@@ -1392,9 +1391,9 @@ void MixedPortion::Output(gOutput& s) const
 
   for (int pl = 1; pl <= rep->value->Game().NumPlayers(); pl++)  {
     s << "{ ";
-    NFPlayer *player = rep->value->Game().Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      Strategy *strategy = player->Strategies()[st];
+    gbtNfgPlayer player = rep->value->Game().GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      Strategy *strategy = player.Strategies()[st];
       if (_WriteSolutionLabels == triTRUE) {
 	if ((*rep->value)(strategy) > gNumber(0)) {
 	  s << strategy->Name() << '=';

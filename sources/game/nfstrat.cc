@@ -26,7 +26,6 @@
 
 #include "base/base.h"
 #include "nfstrat.h"
-#include "nfplayer.h"
 #include "nfg.h"
 
 //--------------------------------------------------------
@@ -92,12 +91,12 @@ void StrategyProfile::Set(int p, const Strategy *const s)
 
 class nfgSupportPlayer  {
 protected:
-  NFPlayer *nfp;
+  gbtNfgPlayer m_player;
   gBlock<Strategy *> strategies;
   
 public:
   nfgSupportPlayer(const nfgSupportPlayer &s); 
-  nfgSupportPlayer(NFPlayer &p);
+  nfgSupportPlayer(gbtNfgPlayer);
   
   nfgSupportPlayer &operator=(const nfgSupportPlayer &s); 
   bool operator==(const nfgSupportPlayer &s);
@@ -123,15 +122,16 @@ public:
 // nfgSupportPlayer: Constructors, Destructors, Operators
 //-----------------------------------------------
 
-nfgSupportPlayer::nfgSupportPlayer(NFPlayer &p)
-  : nfp(&p), strategies(p.NumStrats())
+nfgSupportPlayer::nfgSupportPlayer(gbtNfgPlayer p_player)
+  : m_player(p_player), strategies(p_player.NumStrategies())
 {
-  for (int st = 1; st <= p.NumStrats(); st++)
-    strategies[st] = p.Strategies()[st];  
+  for (int st = 1; st <= p_player.NumStrategies(); st++) {
+    strategies[st] = p_player.GetStrategy(st);
+  }
 }
 
 nfgSupportPlayer::nfgSupportPlayer(const nfgSupportPlayer &s)
-  : nfp(s.nfp), strategies(s.strategies)
+  : m_player(s.m_player), strategies(s.strategies)
 { }
 
 nfgSupportPlayer::~nfgSupportPlayer()
@@ -140,7 +140,7 @@ nfgSupportPlayer::~nfgSupportPlayer()
 nfgSupportPlayer &nfgSupportPlayer::operator=(const nfgSupportPlayer &s)
 {
   if (this != &s) {
-    nfp = s.nfp;
+    m_player = s.m_player;
     strategies = s.strategies;
   }
   return *this;
@@ -163,7 +163,7 @@ bool nfgSupportPlayer::operator==(const nfgSupportPlayer &s)
 // Add a strategy to the nfgSupportPlayer
 void nfgSupportPlayer::AddStrategy(Strategy *s)
 { 
-  if (nfp == s->Player() && !strategies.Find(s)) {
+  if (m_player == s->GetPlayer() && !strategies.Find(s)) {
     int index;
     for (index = 1; (index <= strategies.Length() &&
 		     strategies[index]->Number() < s->Number()); index++);
@@ -175,7 +175,7 @@ void nfgSupportPlayer::AddStrategy(Strategy *s)
 // removed, false otherwise.
 bool nfgSupportPlayer::RemoveStrategy(Strategy *s) 
 { 
-  if (nfp != s->Player())  return false;
+  if (m_player != s->GetPlayer())  return false;
   int t = strategies.Find(s); 
   if (t > 0) 
     strategies.Remove(t); 
@@ -198,10 +198,12 @@ const gBlock<Strategy *> &nfgSupportPlayer::Strategies(void) const
 // NFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-NFSupport::NFSupport(const Nfg &N) : bnfg(&N), sups(N.NumPlayers())
+NFSupport::NFSupport(const Nfg &N) : 
+  bnfg(&N), sups(N.NumPlayers())
 { 
-  for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new nfgSupportPlayer(*(N.Players()[i]));
+  for (int i = 1; i <= sups.Length(); i++) {
+    sups[i] = new nfgSupportPlayer(N.GetPlayer(i));
+  }
 }
 
 NFSupport::NFSupport(const NFSupport &s)
@@ -254,7 +256,7 @@ const gBlock<Strategy *> &NFSupport::Strategies(int pl) const
 
 int NFSupport::GetNumber(const Strategy *s) const
 {
-  int pl = s->Player()->GetNumber();
+  int pl = s->GetPlayer().GetId();
   gBlock<Strategy *> strats = Strategies(pl);
   for (int i = 1; i <= strats.Length(); i++)
     if (strats[i] == s)
@@ -288,7 +290,7 @@ int NFSupport::TotalNumStrats(void) const
 
 int NFSupport::Find(Strategy *s) const
 {
-  return sups[s->Player()->GetNumber()]->Strategies().Find(s);
+  return sups[s->GetPlayer().GetId()]->Strategies().Find(s);
 }
 
 bool NFSupport::StrategyIsActive(Strategy *s) const
@@ -301,12 +303,12 @@ bool NFSupport::StrategyIsActive(Strategy *s) const
 
 void NFSupport::AddStrategy(Strategy *s)
 {
-  sups[s->Player()->GetNumber()]->AddStrategy(s);
+  sups[s->GetPlayer().GetId()]->AddStrategy(s);
 }
 
 bool NFSupport::RemoveStrategy(Strategy *s)
 {
-  return sups[s->Player()->GetNumber()]->RemoveStrategy(s);
+  return sups[s->GetPlayer().GetId()]->RemoveStrategy(s);
 }
 
 

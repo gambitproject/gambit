@@ -27,7 +27,6 @@
 #include "nfgiter.h"
 #include "nfg.h"
 #include "nfstrat.h"
-#include "nfplayer.h"
 #include "nfgciter.h"
 
 //--------------------------------------------------------------------------
@@ -179,10 +178,10 @@ void NfgContIter::Set(int pl, int num)
 
 void NfgContIter::Set(const Strategy *s)
 {
-  if (!frozen.Contains(s->Player()->GetNumber()))   return;
+  if (!frozen.Contains(s->GetPlayer().GetId()))   return;
 
-  profile.Set(s->Player()->GetNumber(), s);
-  current_strat[s->Player()->GetNumber()] = s->Number();
+  profile.Set(s->GetPlayer().GetId(), s);
+  current_strat[s->GetPlayer().GetId()] = s->Number();
 }
 
 void NfgContIter::Freeze(const gBlock<int> &freeze)

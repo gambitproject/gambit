@@ -45,7 +45,6 @@
 #include "base/glist.h"
 #include "math/rational.h"
 #include "nfg.h"
-#include "nfplayer.h"
 #include "nfstrat.h"
 
 static gInput *infile;
@@ -147,11 +146,11 @@ static const short yyrhs[] = {    -1,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    70,    75,    77,    78,    80,    82,    83,    85,    87,    88,
-    90,    92,    93,    95,    95,    97,    98,   100,   102,   103,
-   106,   108,   109,   111,   113,   113,   116,   120,   120,   121,
-   123,   133,   135,   135,   136,   138,   139,   141,   144,   146,
-   147,   149,   153,   153,   156,   157,   159
+    69,    74,    76,    77,    79,    81,    82,    84,    86,    87,
+    89,    91,    92,    94,    94,    96,    97,    99,   101,   102,
+   105,   107,   108,   110,   112,   112,   115,   119,   119,   120,
+   122,   132,   134,   134,   135,   137,   138,   140,   143,   145,
+   146,   148,   152,   152,   155,   156,   158
 };
 #endif
 
@@ -779,47 +778,47 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 71 "readnfg.yy"
+#line 70 "readnfg.yy"
 { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
 	        N->SetTitle(title); N->SetComment(comment);
               ;
     break;}
 case 2:
-#line 75 "readnfg.yy"
+#line 74 "readnfg.yy"
 { return 0; ;
     break;}
 case 3:
-#line 77 "readnfg.yy"
+#line 76 "readnfg.yy"
 { title = last_name; pl = 0; ;
     break;}
 case 8:
-#line 85 "readnfg.yy"
+#line 84 "readnfg.yy"
 { names.Append(last_name); ;
     break;}
 case 14:
-#line 95 "readnfg.yy"
+#line 94 "readnfg.yy"
 { pl++; numbers.Append(0); ;
     break;}
 case 18:
-#line 100 "readnfg.yy"
+#line 99 "readnfg.yy"
 { stratnames.Append(last_name); numbers[pl] += 1; ;
     break;}
 case 20:
-#line 103 "readnfg.yy"
+#line 102 "readnfg.yy"
 { comment = last_name; ;
     break;}
 case 24:
-#line 111 "readnfg.yy"
+#line 110 "readnfg.yy"
 { numbers.Append(last_number); ;
     break;}
 case 27:
-#line 116 "readnfg.yy"
+#line 115 "readnfg.yy"
 { cont = 1;
                 pl = 1; ;
     break;}
 case 31:
-#line 124 "readnfg.yy"
+#line 123 "readnfg.yy"
 {  if (pl > N->NumPlayers())   {
 		    cont++;
 		    pl = 1;
@@ -830,21 +829,21 @@ case 31:
 	      ;
     break;}
 case 32:
-#line 133 "readnfg.yy"
+#line 132 "readnfg.yy"
 { cont = 1; ;
     break;}
 case 38:
-#line 142 "readnfg.yy"
+#line 141 "readnfg.yy"
 { outcome = N->NewOutcome();
                    N->SetLabel(outcome, last_name);  pl = 1; ;
     break;}
 case 42:
-#line 150 "readnfg.yy"
+#line 149 "readnfg.yy"
 { if (pl > N->NumPlayers())  YYERROR;
                    N->SetPayoff(outcome, pl++, last_number);  ;
     break;}
 case 47:
-#line 160 "readnfg.yy"
+#line 159 "readnfg.yy"
 { if (cont > ncont)  YYERROR;
                   if (last_number != gNumber(0)) {
                     N->SetOutcome(cont++, N->GetOutcomeId(last_number)); 
@@ -1076,7 +1075,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 169 "readnfg.yy"
+#line 168 "readnfg.yy"
 
 
 void nfg_yyerror(char *)    { }
@@ -1175,7 +1174,7 @@ bool CreateNfg(const gList<gText> &players,
   N = new Nfg(dim);
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
-    N->Players()[i]->SetName(players[i]);
+    N->GetPlayer(i).SetLabel(players[i]);
     if (strats.Length() > 0)
       for (int j = 1; j <= dim[i]; j++)
 	N->Strategies(i)[j]->SetName(strats[strat++]);

@@ -29,19 +29,19 @@
 
 #include "base/base.h"
 #include "math/gnumber.h"
-#include "nfplayer.h"
+#include "player.h"
 #include "outcome.h"
 
 class Strategy   {
 friend class Nfg;
-friend class NFPlayer;
+friend struct gbt_nfg_player_rep;
 private:
   int m_number;
-  NFPlayer *m_player;
+  gbt_nfg_player_rep *m_player;
   long m_index;
   gText m_name;
 
-  Strategy(NFPlayer *);
+  Strategy(gbt_nfg_player_rep *);
   Strategy(const Strategy &);
   Strategy &operator=(const Strategy &);
   ~Strategy();
@@ -50,7 +50,7 @@ public:
   const gText &Name(void) const { return m_name; }
   void SetName(const gText &s)  { m_name = s; }
 
-  NFPlayer *Player(void) const  { return m_player; }
+  gbtNfgPlayer GetPlayer(void) const;
   int Number(void) const        { return m_number; }
   long Index(void) const        { return m_index; }
 };
@@ -70,7 +70,7 @@ protected:
   gText title, comment;
   gArray<int> dimensions;
 
-  gArray<NFPlayer *> players;
+  gArray<gbt_nfg_player_rep *> players;
   gBlock<gbt_nfg_outcome_rep *> outcomes;
 
   gArray<gbt_nfg_outcome_rep *> results;
@@ -105,8 +105,7 @@ public:
 
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;
-  const gArray<NFPlayer *> &Players(void) const;
-  inline NFPlayer *GetPlayer(const int i) const { return Players()[i]; }
+  gbtNfgPlayer GetPlayer(int i) const;
 
   int NumStrats(int pl) const;
   const gArray<int> &NumStrats(void) const  { return dimensions; }
@@ -133,8 +132,8 @@ public:
 
   void SetPayoff(gbtNfgOutcome, int pl, const gNumber &value);
   gNumber Payoff(gbtNfgOutcome, int pl) const;
-  gNumber Payoff(gbtNfgOutcome p_outcome, NFPlayer *p) const 
-    { return Payoff(p_outcome ,p->GetNumber()); }
+  gNumber Payoff(gbtNfgOutcome p_outcome, gbtNfgPlayer p_player) const 
+    { return Payoff(p_outcome, p_player.GetId()); }
 
   void InitPayoffs(void) const;
 

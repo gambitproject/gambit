@@ -30,7 +30,6 @@
 #include "base/base.h"
 #include "math/gnumber.h"
 #include "game/mixed.h"
-#include "game/nfplayer.h"
 #include "game/nfg.h"
 #include "algutils.h"  // needed for gFact
 
@@ -111,7 +110,7 @@ public:
   const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
-  gNumber Payoff(NFPlayer *, Strategy *) const;
+  gNumber Payoff(gbtNfgPlayer, Strategy *) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

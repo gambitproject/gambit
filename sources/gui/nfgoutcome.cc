@@ -101,14 +101,14 @@ void NfgOutcomeWindow::UpdateValues(void)
     SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-      SetCellValue((char *) ToText(nfg.Payoff(outcome, nfg.Players()[pl])),
+      SetCellValue((char *) ToText(nfg.Payoff(outcome, nfg.GetPlayer(pl))),
 		   outc - 1, pl);
     }
   }
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
-    if (nfg.Players()[pl]->GetName() != "") {
-      SetLabelValue(wxHORIZONTAL, (char *) nfg.Players()[pl]->GetName(), pl);
+    if (nfg.GetPlayer(pl).GetLabel() != "") {
+      SetLabelValue(wxHORIZONTAL, (char *) nfg.GetPlayer(pl).GetLabel(), pl);
     }
     else {
       SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);

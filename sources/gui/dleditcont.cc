@@ -48,17 +48,17 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, "Contingency"),
 			 wxVERTICAL);
   for (int pl = 1; pl <= p_cont.Length(); pl++) {
-    NFPlayer *player = p_nfg.Players()[pl];
+    gbtNfgPlayer player = p_nfg.GetPlayer(pl);
     wxString text;
-    if (player->GetName() != "") {
-      text += wxString::Format("%s: ", (const char *) player->GetName());
+    if (player.GetLabel() != "") {
+      text += wxString::Format("%s: ", (const char *) player.GetLabel());
     }
     else {
       text += wxString::Format("Player %d: ", pl);
     }
 
-    if (player->Strategies()[p_cont[pl]]->Name() != "") {
-      text += (const char *) player->Strategies()[p_cont[pl]]->Name();
+    if (player.GetStrategy(p_cont[pl])->Name() != "") {
+      text += (const char *) player.GetStrategy(p_cont[pl])->Name();
     }
     else {
       text += wxString::Format("Strategy %d", p_cont[pl]);
@@ -82,10 +82,10 @@ dialogEditContingency::dialogEditContingency(wxWindow *p_parent,
       item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(p_nfg.Payoff(outcome, p_nfg.Players()[1])) + ", " +
-	     ToText(p_nfg.Payoff(outcome, p_nfg.Players()[2])));
+    item += (" (" + ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(1))) + ", " +
+	     ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(2))));
     if (p_nfg.NumPlayers() > 2) {
-      item += ", " + ToText(p_nfg.Payoff(outcome, p_nfg.Players()[3]));
+      item += ", " + ToText(p_nfg.Payoff(outcome, p_nfg.GetPlayer(3)));
       if (p_nfg.NumPlayers() > 3) {
 	item += ",...)";
       }

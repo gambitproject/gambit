@@ -65,7 +65,7 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
     wxString playerName = (char *) (ToText(pl) + ": " +
-				    nfg.Players()[pl]->GetName());
+				    nfg.GetPlayer(pl).GetLabel());
     m_rowChoice->Append(playerName);
     m_colChoice->Append(playerName);
   }
@@ -85,17 +85,17 @@ NfgNavigateWindow::NfgNavigateWindow(NfgShow *p_nfgShow, wxWindow *p_parent)
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
     m_stratProfile[pl-1] = new wxChoice(this, idSTRATEGY_CHOICE);
     
-    NFPlayer *player = nfg.Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
+    gbtNfgPlayer player = nfg.GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
       m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					     player->Strategies()[st]->Name()));
+					     player.GetStrategy(st)->Name()));
     }
     m_stratProfile[pl-1]->SetSelection(0);
 
     wxBoxSizer *stratSizer = new wxBoxSizer(wxHORIZONTAL);
-    if (player->GetName() != "") {
+    if (player.GetLabel() != "") {
       m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
-					     (char *) player->GetName());
+					     (char *) player.GetLabel());
     }
     else {
       m_playerNames[pl-1] = new wxStaticText(this, wxID_STATIC,
@@ -160,11 +160,11 @@ void NfgNavigateWindow::SetSupport(const NFSupport &p_support)
 
   for (int pl = 1; pl <= m_support.Game().NumPlayers(); pl++) {
     m_stratProfile[pl-1]->Clear();
-    NFPlayer *player = m_support.Game().Players()[pl];
-    for (int st = 1; st <= player->NumStrats(); st++) {
-      if (m_support.Find(player->Strategies()[st])) {
+    gbtNfgPlayer player = m_support.Game().GetPlayer(pl);
+    for (int st = 1; st <= player.NumStrategies(); st++) {
+      if (m_support.Find(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
-					       player->Strategies()[st]->Name()));
+					       player.GetStrategy(st)->Name()));
       }
     }
     m_stratProfile[pl-1]->SetSelection(0);
@@ -224,11 +224,11 @@ void NfgNavigateWindow::UpdateLabels(void)
   
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++) {
     wxString playerName = (char *) (ToText(pl) + ": " +
-				    nfg.Players()[pl]->GetName());
+				    nfg.GetPlayer(pl).GetLabel());
     m_rowChoice->Append(playerName);
     m_colChoice->Append(playerName);
-    if (nfg.Players()[pl]->GetName() != "") {
-      m_playerNames[pl-1]->SetLabel((char *) nfg.Players()[pl]->GetName());
+    if (nfg.GetPlayer(pl).GetLabel() != "") {
+      m_playerNames[pl-1]->SetLabel((char *) nfg.GetPlayer(pl).GetLabel());
     }
     else {
       m_playerNames[pl-1]->SetLabel(wxString::Format("Player %d", pl));

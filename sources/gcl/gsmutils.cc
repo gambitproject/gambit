@@ -98,15 +98,6 @@ Portion *ArrayToList(const gArray<Node *> &A)
 }
 
 template<>
-Portion *ArrayToList(const gArray<NFPlayer *> &A)
-{
-  ListPortion *ret = new ListPortion;
-  for (int i = 1; i <= A.Length(); i++)
-    ret->Append(new NfPlayerPortion(A[i]));
-  return ret;
-}
-
-template<>
 Portion *ArrayToList(const gArray<Strategy *> &A)
 {
   ListPortion *ret = new ListPortion;
