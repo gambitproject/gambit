@@ -37,6 +37,8 @@ dnl AC_FUNC_MEMCMP
 dnl AC_TYPE_SIGNAL
 dnl AC_CHECK_FUNCS(ftime putenv strdup strstr strtod strtol)
 
+CXXFLAGS="$CXXFLAGS -Wall"
+
 dnl------------------------
 dnl Checking for wxWindows
 dnl------------------------
