@@ -657,17 +657,175 @@ always 13, regardless of the value of \verb+i+ outside of the function.
 
 \subsubsection{Creating a new extensive form}
 
+The function NewEfg[] can be used to create a new extensive form game.
+In order to do anything with it, a variable should be created to be
+the new extensive form game.  Thus, the command
+
+\begin{verbatim}
+e := NewEfg[]
+\end{verbatim}
+
+will create a new extensive form game \verb+e+.  The game is a trivial
+game with only one node, a \verb+root node+, and one player,
+\verb+chance+.  By default, the game will have its data stored in
+\verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+,
+and which has two players, named \verb+Fred+ and \verb+Alice+  by
+specifying 
+
+
+\begin{verbatim}
+e := NewEfg[True, {"Fred", "Alice"} ] =: EFG
+\end{verbatim}
+
 \subsubsection{Modifying an extensive form}
 
+The extensive form game editing functions can be used to build up any
+valid extensive form game from a trivial game.  The following sequence
+of commands builds the game tree for a simple poker game as described
+in \cite{Mye:91}
+
+\begin{verbatim}
+e := NewEfg[];
+n := RootNode[e];
+deal := NewInfoset[ Chance[e], {"Red", "Black"}]
+AppendNode[n, deal];
+fred := NewPlayer[e,"Fred"];
+fredred := NewInfoset[ fred , {"Raise", "Fold"} ];
+fredblack := NewInfoset[ fred , {"Raise", "Fold"} ];
+AppendNode[n#1, fredred];
+AppendNode[n#2, fredblack];
+alice := NewPlayer[e,"Alice"];
+alicemove := NewInfoset[ alice , {"Meet", "Pass"} ];
+AppendNode[n#1#1, alicemove]; 
+AppendNode[n#2#1, alicemove]; 
+\end{verbatim}
+
+Outcomes can be defined and attached:
+
+\begin{verbatim}
+ante := 1.00
+raise := 1.00
+win := SetPayoff[NewOutcome[e, "Win"],{ante,-ante}]
+winbig := SetPayoff[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}]
+lose := SetPayoff[NewOutcome[e, "Lose"],{-ante,ante}]
+losebig := SetPayoff[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}]
+AttachOutcome[n#1#1#1,winbig];
+AttachOutcome[n#1#1#2,win];
+AttachOutcome[n#1#2,lose];
+AttachOutcome[n#2#1#1,losebig];
+AttachOutcome[n#2#1#2,win];
+AttachOutcome[n#2#2,lose];
+\end{verbatim}
+
 \subsubsection{Saving and loading extensive forms}
+
+Once an extensive form game has been constructed, it can be saved by
+the command 
+
+\begin{verbatim}
+SaveEfg[e, "filename.efg" ]
+\end{verbatim}
+
+where \verb+e+ is the extensive form game, and \verb+filename.efg+ is
+the filename of the file to be created.  It is recommended that the
+filename extension \verb+.efg+ be used when saving extensive form games, as
+the Gambit Graphics user interface recognizes this extension as
+containing extensive form games.  Once an extensive form game has been
+saved to an external file, it can be loaded by the command
+\verb+LoadEfg+, as follows:
+
+\begin{verbatim}
+e := LoadEfg["filename.efg" ]
+\end{verbatim}
 
 \subsection{Normal forms}
 
 \subsubsection{Creating a new normal form}
 
+The function NewNfg[] can be used to create a new normal form game.
+In order to do anything with it, a variable should be created to be
+the new extensive form game.  Thus, the command
+
+\begin{verbatim}
+n := NewNfg[{3,2,2}]
+\end{verbatim}
+
+will create a new normal form game \verb+n+, with three players, where
+the first player has three strategies, and the second and third
+players each have two strategies.   The game has zero payoffs in each
+strategy profile.  By default, the game will have its data stored in
+\verb+FLOAT+.  You can create a game whose data is \verb+RATIONAL+
+by specifying the parameter \verb+rational+ to be \verb+True+.
+
+\subsubsection{Creationg a normal form from an extensive form}
+
+A normal form game can also be created from an extensive form game.
+If \verb+e+ is an extensive form game, then the command 
+
+\begin{verbatim}
+n := Nfg[e]
+\end{verbatim}
+
+will create a normal form game \verb+n+ which is the reduced normal
+form game associated with the extensive form game \verb+e+.  As long
+as the game \verb+n+ is not edited, then the GCL will ``remember'' the
+extensive form game that \verb+n+ is associated with.  Any mixed
+strategy solutions computed on the normal form game \verb+n+ can be
+converted back to a behavior strategy of the game \verb+e+ by using
+the command \verb+Behav+.  Thus
+
+\begin{verbatim}
+n := Nfg[e];
+m := LCPSolve[n];
+i :=1;
+b := {};
+While[ i<=Length[m],
+  b := b +{ Behav[m[[i]],e] };
+  i:=i+1;
+  ];
+b
+\end{verbatim}
+
+will convert the game \verb+e+ to reduced normal form, solve it using
+the LCPSolve algorithm, and then convert all mixed profiles found back
+to behavior profiles, and display the list, \verb+b+ of behavior
+profiles found. 
+  
 \subsubsection{Modifying a normal form}
 
+The normal form game payoff editing functions can be used to build up any
+valid normal form game from a trivial game.  Thus, the command
+
+\begin{verbatim}
+SetPayoff[n,{2,1,2},{3.0,4.0,1.5}]
+\end{verbatim}
+
+changes the payoff for the strategy profile in which player one adopts
+his second strategy, player 2 adopts her first strategy and player
+three adopts his second strategy to the vector \verb+(3.0,4.0,1.5)+,
+meaning that player one's payoff is \verb+3.0+, the second player's
+payoff is \verb+4.0+ and the third player's payoff is \verb+1.5+.
+
 \subsubsection{Saving and loading normal forms}
+
+Once an normal form game has been constructed, it can be saved in a
+similar way to an extensive form game.  The command 
+
+\begin{verbatim}
+SaveNfg[n, "filename.nfg" ]
+\end{verbatim}
+
+will save the normal form game \verb+n+ to the file
+\verb+filename.nfg+.  It is recommended that the
+filename extension \verb+.nfg+ be used when saving normal form games, as
+the Gambit Graphics user interface recognizes this extension as
+containing normal form games.  Once a noirmal form game has been
+saved to an external file, it can be loaded by the command
+\verb+LoadNfg+, as follows:
+
+\begin{verbatim}
+n := LoadNfg["filename.nfg" ]
+\end{verbatim}
 
 \section{Solving games}
 
@@ -876,8 +1034,8 @@ Plus[x->TEXT, y->TEXT] =: TEXT
 LoadEfg[file->TEXT] =: EFG
 LoadNfg[file->TEXT] =: NFG
 Output[file->TEXT] =: OUTPUT
-SaveEfg[file->TEXT] =: BOOL
-SaveNfg[file->TEXT] =: BOOL
+SaveEfg[efg<->EFG,file->TEXT] =: BOOL
+SaveNfg[nfg<->NFG,file->TEXT] =: BOOL
 SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->BEHAV] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
@@ -3449,4 +3607,27 @@ ArgumentName: Name
 
 
 
+
+\begin{verbatim}
+e := NewEfg[];
+n := RootNode[e];
+ent := NewPlayer[e,"Entrant"];
+entiset := NewInfoset[ ent , {"Enter", "Out"} ];
+AppendNode[n, entiset];
+inc := NewPlayer[e,"Incumbent"];
+inciset := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
+AppendNode[n#1, inciset]; 
+\end{verbatim}
+
+can be used to build up the game tree for one stage of a chain store
+game.  One can then attach outcomes and set payoffs as follows:
+
+\begin{verbatim}
+o1:=AttachOutcome[node#1#1,NewOutcome[efg]];
+o2:=AttachOutcome[node#1#2,NewOutcome[efg]];
+o3:=AttachOutcome[node#2,NewOutcome[efg]];
+SetPayoff[o1, {-0.5,-1.0}];
+SetPayoff[o2, {0.5,0.0}];
+SetPayoff[o3, {0.0,0.5}];
+\end{verbatim}
 
