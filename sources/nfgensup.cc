@@ -185,6 +185,8 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
 				            gList<const NFSupport> *list,
 				      gStatus &status)
 { 
+  status.Get();
+
   bool abort = false;
   bool no_deletions = true;
 
