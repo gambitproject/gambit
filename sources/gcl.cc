@@ -19,8 +19,13 @@
 #include "gpreproc.h"
 
 
-typedef void (*fptr)(int);
+void gclNewHandler(void)
+{
+  throw gNewFailed();
+}
 
+
+typedef void (*fptr)(int);
 
 void SigFPEHandler(int a)
 {
@@ -102,6 +107,8 @@ int main( int /*argc*/, char* argv[] )
 #endif // __BORLANDC__
 
 {
+  set_new_handler(gclNewHandler);
+
   try {
     _ExePath = new char[strlen(argv[0]) + 2];
     strcpy(_ExePath, argv[0]);
