@@ -509,7 +509,7 @@ TEMPLATE class ZSumG<gRational>;
 // Efg Csum
 #include "efgcsum.h"
 template <class T> class EfgCSumBySubgameG:
-													public EfgCSumBySubgame<T>,public BaseBySubgameG<T>
+													public CSSeqFormBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
 void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
@@ -517,7 +517,7 @@ void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 public:
 EfgCSumBySubgameG(const Efg<T> &E,const CSSeqFormParams &P,
 													int max = 0,ExtensiveShowInterf<T> *parent_=0):
-													EfgCSumBySubgame<T>(E,P,max),BaseBySubgameG<T>(parent_,E)
+													CSSeqFormBySubgame<T>(E,P,max),BaseBySubgameG<T>(parent_,E)
 {Solve();}
 };
 
