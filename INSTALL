@@ -38,20 +38,15 @@ user account, you might do
 The graphical interface would then be in /home/mylogin/gambit/bin/gambit,
 and so forth.  (Obviously, you can omit the 'su' in this case.)
 
-Gambit requires wxWindows 2.3.2 or higher to build.  However, we recommend
-building with wxWindows 2.3.3, since it improves a number of things with
-regard to using the grids for editing.  This primarily affects the outcomes
-window and profile editing dialogs.
+Gambit requires wxWindows 2.4.0 or higher to build.  In theory, it will
+probably work with wxWindows as early as 2.3.2; if you're really insistent,
+you'll have to modify the version the configure script looks for.
 
 If wxWindows it isn't installed in a standard place (e.g., /usr or
 /usr/local), you'll need to tell configure where to find it with the
 --with-wx-prefix=PREFIX option, for example:
 
 ./configure --with-wx-prefix=/home/mylogin/wx
-
-Technically, wxWindows 2.3.x is "unstable"; however, the features used
-by Gambit seem to be stable enough to justify its use.  A new microversion
-of Gambit will be released when wxWindows goes to 2.4.x (stable).
 
 Finally, note that we work almost exclusively with the wxGTK version of
 wxWindows.  There's no reason why one couldn't use the Motif/Lesstif version
@@ -87,10 +82,42 @@ makefiles in the subdirectories.  Assuming everything builds OK, the
 graphical interface will be in sources/gui/gambit.exe, and wxGCL will
 be in sources/wxgcl/wxgcl.exe.
 
+Note that beginning with wxWindows 2.4, the convention for naming the
+libraries built by wxWindows has changed.  The makefiles are set up assuming
+the static "final" library of wxWindows was built (using the command
+make -f makefile.b32 FINAL=1 as documented in the wxWindows install 
+directions), named wx24s_bcc.  If you build a debugging or hybrid version
+of this library, you will need to replace the reference to that library
+to the correct alternative in both sources/gui/borland.mak and
+sources/wxgcl/borland.mak for a successful link.  Linking against a DLL
+version of wxWindows should also work, but we haven't tested that.
+
 We don't know if Gambit will build with other compilers, though we
 would graciously accept a contribution of makefiles and/or fixes for
 other compilers.
 
 
+Building the Python extension
+-----------------------------
+
+The (alpha version) Python API can be found in sources/python in the
+source distributions.  Since it's alpha, it's not integrated into the
+usual build chain yet.  To build it, cd to sources/python and issue a
+
+python setup.py build
+
+Hopefully, assuming Python is correctly installed on your system, this 
+should build without a problem.  (Windows users will probably need to
+specify an extra flag indicating the compiler to use.)  You can then try
+
+python setup.py install
+
+to install it to the appropriate directories for Python to find it.
+(Unix users will probably want to 'su' before doing this.)  
+
+Note that this is an initial release of the Python API, and as such all
+manner of problems may arise.  We'd *really* like to get reports and
+suggestions regarding this; we want this to be more-or-less "production"
+quality by the release of 0.97.2 sometime in fall 2003.
 
  

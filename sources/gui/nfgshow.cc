@@ -130,7 +130,7 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetIcon(wxIcon(nfg_bits, nfg_width, nfg_height));
 #endif  // __WXMSW__
 
-  MakeMenus();
+  CreateStatusBar();
 
   wxAcceleratorEntry entries[5];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
@@ -141,8 +141,7 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   wxAcceleratorTable accel(5, entries);
   SetAcceleratorTable(accel);
 
-  CreateStatusBar();
-
+  MakeMenus();
   if (!m_doc->HasEfg()) {
     MakeToolbar();
     (void) new gbtProfileFrame(m_doc, this);
@@ -307,7 +306,7 @@ void NfgShow::MakeMenus(void)
 		    "Compute quantal response equilibria");
   toolsMenu->Append(GBT_MENU_TOOLS_CH, "&CH",
 		    "Compute cognitive hierarchy correspondence");
-  
+
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(wxID_ABOUT, "&About", "About Gambit");
 
@@ -320,6 +319,7 @@ void NfgShow::MakeMenus(void)
   menuBar->Append(helpMenu, "&Help");
 
   SetMenuBar(menuBar);
+
   wxGetApp().GetFileHistory().UseMenu(menuBar->GetMenu(0));
   wxGetApp().GetFileHistory().AddFilesToMenu(menuBar->GetMenu(0));
 }
@@ -968,9 +968,12 @@ void NfgShow::OnSize(wxSizeEvent &)
 {
   wxSize size = GetClientSize();
 
-  m_nav->SetSize(0, 0, m_nav->GetBestSize().GetWidth() + 2, size.GetHeight());
-  m_table->SetSize(m_nav->GetSize().GetWidth() + 2,
-		   0,
-		   size.GetWidth() - m_nav->GetSize().GetWidth(),
-		   size.GetHeight());
+  if (m_nav && m_table) {
+    m_nav->SetSize(0, 0, 
+		   m_nav->GetBestSize().GetWidth() + 2, size.GetHeight());
+    m_table->SetSize(m_nav->GetSize().GetWidth() + 2,
+		     0,
+		     size.GetWidth() - m_nav->GetSize().GetWidth(),
+		     size.GetHeight());
+  }
 }

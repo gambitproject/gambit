@@ -110,7 +110,6 @@ private:
   void OnProfilesDelete(wxCommandEvent &);
   void OnProfilesProperties(wxCommandEvent &);
   void OnProfilesReport(wxCommandEvent &);
-  void OnProfileSelected(wxListEvent &);
 
   // OVERRIDING DOCUMENT MEMBERS
   bool IsEfgView(void) const { return true; }

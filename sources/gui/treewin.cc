@@ -68,6 +68,8 @@ TreeWindow::TreeWindow(gbtGameDocument *p_doc, wxWindow *p_parent)
 {
   SetBackgroundColour(*wxWHITE);
   MakeMenus();
+  // Force a build of the node list, etc.
+  OnUpdate(0);
 }
 
 TreeWindow::~TreeWindow()

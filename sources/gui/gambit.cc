@@ -57,6 +57,7 @@ bool GambitApp::OnInit(void)
   m_fileHistory.Load(config);
   config.Read("/General/CurrentDirectory", &m_currentDir, "");
 
+#ifdef UNUSED
   wxBitmap bitmap(wxBITMAP(gambit));
   wxSplashScreen *splash =
     new wxSplashScreen(bitmap,
@@ -70,6 +71,7 @@ bool GambitApp::OnInit(void)
     wxYield();
   }
 #endif  // !__WXMSW__
+#endif  // UNUSED
 
   // Process command line arguments, if any.
   if (argc > 1) {

@@ -174,14 +174,14 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   MakeToolbar();
   
   m_treeWindow = new TreeWindow(m_doc, this);
+  m_treeWindow->SetSize(GetClientSize());
+  m_treeWindow->FitZoom();
 
   (void) new gbtEfgNavigateFrame(m_doc, this);
   (void) new gbtOutcomeFrame(m_doc, this);
   (void) new gbtEfgSupportFrame(m_doc, this);
   
   (void) new gbtProfileFrame(m_doc, this);
-
-  m_treeWindow->FitZoom();
 
   (void) new NfgShow(m_doc, this);
 
@@ -1254,11 +1254,6 @@ void EfgShow::OnProfilesReport(wxCommandEvent &)
   // dialog.ShowModal();
 }
 
-void EfgShow::OnProfileSelected(wxListEvent &p_event)
-{
-  m_doc->SetCurrentProfile(p_event.GetIndex() + 1);
-}
-
 //----------------------------------------------------------------------
 //                  EfgShow: Non-menu event handlers
 //----------------------------------------------------------------------
@@ -1279,7 +1274,9 @@ void EfgShow::OnCloseWindow(wxCloseEvent &p_event)
 
 void EfgShow::OnFocus(wxFocusEvent &)
 {
-  m_treeWindow->SetFocus();
+  if (m_treeWindow) {
+    m_treeWindow->SetFocus();
+  }
 }
 
 
