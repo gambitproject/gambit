@@ -1,7 +1,7 @@
 //
 // FILE: nfdommix.cc -- Elimination of dominated strategies in nfg
 //
-//# $Id$
+// $Id$
 //
 
 #include "gambitio.h"
@@ -21,7 +21,6 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
   NFStrategySet *newS = new NFStrategySet(*S.GetNFStrategySet(pl));
   gArray<bool> dom(S.NumStrats(pl));
-  dom = false;
   
   if (strong)   {
     T COpt;
@@ -42,7 +41,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       A(n,k)=(T)1;
     }
     B[n]=(T)1;
-    C[k]=(T)(-1);A(n,k)=(T)1;
+    C[k]=(T)1;  A(n,k)=(T)1;
   
     s.First();
     for(n=1;n<=contingencies;n++) {
@@ -67,7 +66,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       gout << " F = " << Tab.IsFeasible();
       gout << " Obj = " <<  - COpt;
     
-      if(Tab.IsFeasible() && COpt<(T)0) { 
+      if(Tab.IsFeasible() && COpt>(T)0) { 
 	gout << " Strongly Dominated";
 	ret = true;
 	dom[k] = true;
@@ -88,8 +87,9 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 
     return newS;
   }
-  else  {
-    T C0 = (T) 0, COpt,TmpC;
+
+  else  {    // look for weak domination
+    T C0 = (T) 0, COpt, TmpC;
     int k,n;
     bool ret = false;
     int strats = S.NumStrats(pl);
@@ -110,32 +110,31 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
   
     s.First();
     for(n=1;n<=contingencies;n++) {
+      s.Dump();  gout << '\n';
       s.Set(pl, 1);
-      B[n]= s.Payoff(pl);
-      C0 += B[n];
+      B[n]=-s.Payoff(pl);
+      C0 -= B[n];
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
-	A(n,k-1)= s.Payoff(pl);
+	A(n,k-1)=-s.Payoff(pl);
+	gout << n << ' ' << k-1 << ' ' << -s.Payoff(pl) << '\n';
 	C[k-1]+=A(n,k-1);
       }
       s.NextContingency();
     }
-  
+
     for (k = 1; k <= strats; k++)	{
-//    gout << "\n\nA=\n " << A;
-//    gout << "\nB= " << B;
-//    gout << "\nC= " << C;
       gout << A << '\n';
       gout << B << '\n';
       gout << C << '\n';
 
       LPSolve<T> Tab(A, B, C, 1);
-      gout << Tab.IsWellFormed() << '\n';
       gout << "\nPlayer = " << pl << " Strat = "<< k;
       gout << " F = " << Tab.IsFeasible();
-      COpt = Tab.OptimumCost();
       gout << " x = " << Tab.OptimumVector();
+      COpt = Tab.OptimumCost();
       gout << " Obj = " << COpt;
+      dom[k] = false;
       if(Tab.IsFeasible() && COpt == C0) gout << " Duplicated strategy?\n\n";
       else if(Tab.IsFeasible() && COpt > C0) { 
 	gout << " Weakly Dominated\n\n";
@@ -145,11 +144,10 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       else  gout << "\n\n";
       if(k<strats) {
 	A.SwitchColumn(k,B);
-	TmpC=C0; C0=C[k]; C[k]=TmpC;
+	TmpC=C0; C0=-C[k]; C[k]=-TmpC;
       }
     
     }
-    gout << "\n";
     
     if (!ret)  {
       delete newS;
