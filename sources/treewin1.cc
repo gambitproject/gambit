@@ -919,8 +919,8 @@ void TreeWindow::action_probs(void)
 //                       TREE-LABEL MENU HANDLER
 //***********************************************************************
 
-static Bool LongStringConstraint(int type, char *value, char *label,
-				 char *msg_buffer)
+Bool LongStringConstraint(int type, char *value, char *label,
+			  char *msg_buffer)
 {
   if (value && (strlen(value) >= 255) && (type == wxFORM_STRING)) {
     sprintf(msg_buffer, "Value for %s should be %d characters or less\n",

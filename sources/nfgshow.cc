@@ -8,8 +8,11 @@
 #include "nfgshow.h"
 #include "nfgsoln.h"
 #include "nfgconst.h"
-#include "nfplayer.h" // need this for player->GetName
+#include "nfplayer.h" 
 #include "nfgoutcd.h"
+
+extern Bool LongStringConstraint(int type, char *value, char *label,
+				 char *msg_buffer);
 
 //======================================================================
 //                 NfgShow: Constructor and destructor
@@ -429,25 +432,45 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 
 void NfgShow::Save(void)
 {
-    gText filename = Filename();
-    gText s = wxFileSelector("Save data file", wxPathOnly(filename), 
-                             wxFileNameFromPath(filename), ".nfg", "*.nfg", 
-                             wxSAVE|wxOVERWRITE_PROMPT);
+  static int s_nDecimals = 6;
+  gText filename = Filename();
+  gText s = wxFileSelector("Save data file", wxPathOnly(filename), 
+			   wxFileNameFromPath(filename), ".nfg", "*.nfg", 
+			   wxSAVE | wxOVERWRITE_PROMPT);
 
-    if (s != "")
-    {
-        // Change description if saving under a different filename
-        if (filename != "untitled.nfg" && s != filename)
-            SetLabels(0);
+  if (s != "") {
+    // Change description if saving under a different filename
+    if (filename != "untitled.nfg" && s != filename) {
+      char *label = new char[256];
 
-        gFileOutput out(s);
+      strcpy(label, nf.GetTitle());
+      MyDialogBox *nfg_edit_dialog = 
+	new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
+      nfg_edit_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+					    new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
+      nfg_edit_dialog->Add(wxMakeFormNewLine());
+      nfg_edit_dialog->Add(wxMakeFormShort("Decimals", &s_nDecimals,
+					   wxFORM_DEFAULT,
+					   new wxList(wxMakeConstraintRange(0, 25), 0)));
+      nfg_edit_dialog->Go();
+      
+      if (nfg_edit_dialog->Completed() == wxOK) {
+	nf.SetTitle(label);
+	SetFileName(Filename()); // updates the title
+      }
 
-        // Compress the nfg to the current support
-        Nfg *N = CompressNfg(nf, *cur_sup);
-        N->WriteNfgFile(out);
-        delete N;
-        SetFileName(s);
+      delete nfg_edit_dialog;
+      delete [] label;
     }
+
+    gFileOutput out(s);
+
+    // Compress the nfg to the current support
+    Nfg *N = CompressNfg(nf, *cur_sup);
+    N->WriteNfgFile(out, 6);
+    delete N;
+    SetFileName(s);
+  }
 }
 
 
@@ -1347,21 +1370,6 @@ void NfgShow::Print(void)
 
 #define LABEL_LENGTH    20
 #define ENTRIES_PER_ROW 3
-
-static Bool LongStringConstraint(int type, char *value, char *label, char *msg_buffer)
-{
-    if (value && (strlen(value) >= 255) && (type == wxFORM_STRING))
-    {
-        sprintf(msg_buffer, "Value for %s should be %d characters or less\n",
-                label, 255);
-        return FALSE;
-    }
-    else 
-    {
-        return TRUE;
-    }
-}
-
 
 // Call Spread->SetLabels afterwards to update the display
 void NfgShow::SetLabels(int what)

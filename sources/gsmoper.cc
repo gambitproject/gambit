@@ -47,6 +47,7 @@ NumberPortion _WriteListLF(0);
 NumberPortion _WriteListIndent(2);
 BoolPortion _WriteSolutionInfo(triFALSE);
 BoolPortion _WriteSolutionLabels(triFALSE);
+NumberPortion _WriteGameDecimals(6);
 
 static void GSM_SetWriteOptions(void)
 {
@@ -1452,7 +1453,7 @@ static Portion* GSM_Write_Nfg(Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
   Nfg *nfg = ((NfgPortion *) param[1])->Value();
-  nfg->WriteNfgFile(s);
+  nfg->WriteNfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }
 
@@ -1461,7 +1462,7 @@ static Portion* GSM_Write_Efg(Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
   Efg *efg = ((EfgPortion*) param[1])->Value();
-  efg->WriteEfgFile(s);
+  efg->WriteEfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }
 
@@ -1470,7 +1471,6 @@ static Portion* GSM_Write_Efg(Portion** param)
 //---------------------
 // Formatting
 //---------------------
-
 
 //----------
 // *Format
@@ -1498,7 +1498,7 @@ static Portion* GSM_GetListFormat(Portion** param)
   return new BoolPortion(triTRUE);
 }
 
-static Portion* GSM_FloatFormat(Portion** param)
+static Portion* GSM_NumberFormat(Portion** param)
 {
   _WriteWidth.SetValue(((NumberPortion*) param[1])->Value());
   _WritePrecis.SetValue(((NumberPortion*) param[2])->Value());
@@ -1509,7 +1509,7 @@ static Portion* GSM_FloatFormat(Portion** param)
   return param[0]->ValCopy();
 }
 
-static Portion* GSM_GetFloatFormat(Portion** param)
+static Portion* GSM_GetNumberFormat(Portion** param)
 {
   ((NumberPortion*) param[1])->SetValue(_WriteWidth.Value());
   ((NumberPortion*) param[2])->SetValue(_WritePrecis.Value());
@@ -1551,6 +1551,18 @@ static Portion* GSM_GetSolutionFormat(Portion** param)
   return param[0]->ValCopy();
 }
 
+static Portion *GSM_GameFormat(Portion **param)
+{
+  _WriteGameDecimals.SetValue(((NumberPortion *) param[1])->Value());
+  GSM_SetWriteOptions();
+  return param[0]->ValCopy();
+}
+
+static Portion *GSM_GetGameFormat(Portion **param)
+{
+  ((NumberPortion *) param[1])->SetValue(_WriteGameDecimals.Value());
+  return param[0]->ValCopy();
+}
 
 //--------------
 // Environment
@@ -1887,8 +1899,8 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new gclFunction("Format", 3);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_FloatFormat, porNUMBER, 4));
+  FuncObj = new gclFunction("Format", 4);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_NumberFormat, porNUMBER, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, gclParameter
 			("width", porNUMBER, 
@@ -1914,10 +1926,16 @@ void Init_gsmoper(GSM* gsm)
 			 _WriteSolutionInfo.RefCopy(), BYREF));
   FuncObj->SetParamInfo(2, 2, gclParameter("names", porBOOLEAN,
 					   _WriteSolutionLabels.RefCopy(), BYREF));
+
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_GameFormat,
+				       porEFG | porNFG, 2));
+  FuncObj->SetParamInfo(3, 0, gclParameter("x", porEFG | porNFG));
+  FuncObj->SetParamInfo(3, 1, gclParameter("nDecimals", porNUMBER,
+					   _WriteGameDecimals.RefCopy(), BYREF));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("GetFormat", 3);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetFloatFormat, porNUMBER, 4));
+  FuncObj = new gclFunction("GetFormat", 4);
+  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetNumberFormat, porNUMBER, 4));
   FuncObj->SetParamInfo(0, 0, gclParameter("x", porNUMBER) );
   FuncObj->SetParamInfo(0, 1, gclParameter
 			("width", porNUMBER, 
@@ -1943,6 +1961,13 @@ void Init_gsmoper(GSM* gsm)
 			 _WriteSolutionInfo.RefCopy(), BYREF));
   FuncObj->SetParamInfo(2, 2, gclParameter("names", porBOOLEAN,
 					   _WriteSolutionLabels.RefCopy(), BYREF));
+
+  FuncObj->SetFuncInfo(3, gclSignature(GSM_GetGameFormat,
+				       porEFG | porNFG, 2));
+  FuncObj->SetParamInfo(3, 0, gclParameter("x", porEFG | porNFG));
+  FuncObj->SetParamInfo(3, 1, gclParameter("nDecimals", porNUMBER,
+					   _WriteGameDecimals.RefCopy(),
+					   BYREF));
   gsm->AddFunction(FuncObj);
 
 

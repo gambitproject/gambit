@@ -22,7 +22,7 @@
 // ----------------------------
 
 class EfgSolnShow;
-class EfgShowToolBar;
+class guiEfgShowToolBar;
 class EFSupportInspectDialog;
 class EfgOutcomeDialog;
 class NodeSolnShow;
@@ -76,7 +76,7 @@ private:
     gList<Accel>    accelerators;
     gText   filename;
     int zoom_win_item;    // menu items of checkable menus
-    EfgShowToolBar *toolbar;
+    guiEfgShowToolBar *toolbar;
 
     // Private functions
     gArray<AccelEvent> MakeEventNames(void);
@@ -101,16 +101,14 @@ private:
     void MakeMenus(void);
 
 public:
-    TreeWindow *tw;
+  TreeWindow *tw;
 
-    // Constructor.  You need only supply the Efg
-    EfgShow(Efg &ef, EfgNfgInterface *nfg = 0, int subgame = 1, 
-            wxFrame *frame = 0, const char *title = 0, 
-            int x = -1, int y = -1, int w = 600,
-            int h = 400, int type = wxDEFAULT_FRAME);
-
-    // Destructor
-    ~EfgShow();
+  // CONSTRUCTOR AND DESTRUCTOR
+  EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg = 0, int p_subgame = 1, 
+	  wxFrame *p_frame = 0, char *p_title = 0, 
+	  int p_x = -1, int p_y = -1, int p_w = 600,
+	  int p_h = 400, int p_type = wxDEFAULT_FRAME);
+  ~EfgShow();
 
     // Event handlers
     Bool        OnClose(void);

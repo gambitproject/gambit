@@ -108,7 +108,7 @@ protected:
     const gText &GetComment(void) const;
 
        //# WRITING DATA FILES
-    void WriteEfgFile(gOutput &f) const;
+    void WriteEfgFile(gOutput &p_file, int p_nDecimals) const;
 
        //# DATA ACCESS -- GENERAL INFORMATION
     bool    IsConstSum(void)      const; 

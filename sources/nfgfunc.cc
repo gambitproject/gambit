@@ -358,13 +358,15 @@ static Portion *GSM_RemoveStrategy(Portion **param)
 // SaveNfg
 //------------
 
+extern NumberPortion _WriteGameDecimals;
+
 static Portion *GSM_SaveNfg(Portion **param)
 {
   Nfg *N = ((NfgPortion *) param[0])->Value();
   gText file = ((TextPortion *) param[1])->Value();
   try {
     gFileOutput f(file);
-    N->WriteNfgFile(f);
+    N->WriteNfgFile(f, _WriteGameDecimals.Value());
   }
   catch (gFileOutput::OpenFailed &)  {
     throw gclRuntimeError("Unable to open file " + file + " for output");

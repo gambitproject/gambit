@@ -50,6 +50,9 @@ wxCursor *scissor_cursor;
 //                    MISCELLANEOUS FUNCTIONS
 //-----------------------------------------------------------------------
 
+extern Bool LongStringConstraint(int type, char *value, char *label,
+				 char *msg_buffer);
+
 //
 // Draw Line.  A quick and dirty way of easily drawing lines with a set color.
 // If the color is == -1, the current color is used.
@@ -2639,36 +2642,72 @@ Efg *CompressEfg(const Efg &, const EFSupport &);
 
 void TreeWindow::file_save(void)
 {
-    gText filename = frame->Filename();
-
-    gText s = wxFileSelector("Save data file", wxPathOnly(filename),
-                             wxFileNameFromPath(filename), ".efg", "*.efg",
-                             wxSAVE|wxOVERWRITE_PROMPT);
+  static int s_nDecimals = 6;
+  gText filename = frame->Filename();
+  gText s = wxFileSelector("Save data file", wxPathOnly(filename),
+			   wxFileNameFromPath(filename), ".efg", "*.efg",
+			   wxSAVE | wxOVERWRITE_PROMPT);
 
 #ifdef __GNUG__
     // Overwrite protection doesn't work in Unix, so we
     // have to check explicitly.
 
-    if (wxFileExists((char *)s))  // Ask for confirmation.
-    {
-        if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK|wxCANCEL) 
-            != wxOK)
-        {
-            return;
-        }
+    if (wxFileExists((char *) s))  {  // Ask for confirmation.
+      if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK | wxCANCEL) 
+	  != wxOK) {
+	return;
+      }
     }
-#endif
+#endif  // __GNUG__
 
-    if (s != "")
-    {
-        // Change description if saving under a different filename
-        if (filename != "untitled.efg" && s != filename) tree_label();
-        gFileOutput out((const char *)s);
-        // Compress the efg to the current support
-        Efg *E = CompressEfg(ef, *frame->GetSupport(0));
-        E->WriteEfgFile(out);
-        delete E;
-        frame->SetFileName(s);
+    if (s != "") {
+      // Change description if saving under a different filename
+      if (filename != "untitled.efg" && s != filename) {
+	char *label = 0;
+	MyDialogBox *tree_label_dialog = 0;
+
+	try {
+	  label = new char[256];
+	  strcpy(label, ef.GetTitle());
+
+	  tree_label_dialog = new MyDialogBox(pframe, "Label Tree",
+					      EFG_TREE_HELP);
+	  wxFormItem *label_item = 
+	    wxMakeFormString("Label", &label, wxFORM_DEFAULT,
+			     new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 
+			     0, 0, 350);
+	  tree_label_dialog->Add(label_item);
+	  tree_label_dialog->Add(wxMakeFormNewLine());
+	  wxFormItem *decimals_item =
+	    wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
+			    new wxList(wxMakeConstraintRange(0, 25), 0));
+          tree_label_dialog->Add(decimals_item);
+	  tree_label_dialog->AssociatePanel();
+	  ((wxText *)label_item->PanelItem)->SetFocus();
+	  tree_label_dialog->Go1();
+    
+	  if (tree_label_dialog->Completed() == wxOK)
+	    ef.SetTitle(label);
+    
+	  delete tree_label_dialog;
+	  delete [] label;
+	}
+	catch (gException &E) {
+	  if (label)
+	    delete [] label;
+	  if (tree_label_dialog)
+	    delete tree_label_dialog;
+    
+	  guiExceptionDialog(E.Description(), pframe);
+	  return;
+	}
+      }
+      gFileOutput out((const char *)s);
+      // Compress the efg to the current support
+      Efg *E = CompressEfg(ef, *frame->GetSupport(0));
+      E->WriteEfgFile(out, s_nDecimals);
+      delete E;
+      frame->SetFileName(s);
     }
 }
 

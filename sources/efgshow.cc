@@ -1,5 +1,5 @@
 //
-// FILE: efgshow.cc -- type dependent extensive form gui stuff
+// FILE: efgshow.cc -- Implementation of class EfgShow
 //
 //  $Id$
 //
@@ -7,23 +7,19 @@
 #include "wx.h"
 #include "wxmisc.h"
 #include "efg.h"
+#include "efgutils.h"
+#include "behavsol.h"
+
 #include "efgconst.h"
 #include "treewin.h"
 #include "efgshow.h"
 #include "efgsoln.h"
 #include "nfggui.h"
 #include "efgnfgi.h"
-#include "behavsol.h"
-
 
 //=====================================================================
-//                   EfgShow MEMBER FUNCTIONS
+//                       class EfgShowToolBar
 //=====================================================================
-
-//---------------------------------------------------------------------
-//             EfgShow: CONSTRUCTOR AND DESTRUCTOR
-//---------------------------------------------------------------------
-void Nodes (const Efg &befg, gList <Node *> &list);
 
 #ifdef wx_msw
 #include "wx_bbar.h"
@@ -31,76 +27,149 @@ void Nodes (const Efg &befg, gList <Node *> &list);
 #include "wx_tbar.h"
 #endif
 
-class EfgShowToolBar:
 #ifdef wx_msw
-    public wxButtonBar
+class guiEfgShowToolBar : public wxButtonBar {
 #else
-public wxToolBar
-#endif
-{
+class guiEfgShowToolBar : public wxToolBar {
+#endif   // wx_msw
+
 private:
-    wxFrame *parent;
+  wxFrame *m_parent;
+
 public:
-    EfgShowToolBar(wxFrame *frame);
-    Bool OnLeftClick(int toolIndex, Bool toggled);
-    void OnMouseEnter(int toolIndex);
+  guiEfgShowToolBar(wxFrame *p_frame);
+  ~guiEfgShowToolBar() { }
+  Bool OnLeftClick(int p_toolIndex, Bool p_toggled);
+  void OnMouseEnter(int p_toolIndex);
 };
 
-EfgShow::EfgShow(Efg &ef_, EfgNfgInterface *nfg, int , wxFrame *frame,
-                 const char *title, int x, int y, int w, int h, int type)
-    : wxFrame(frame, (char *)title, x, y, w, h, type), 
-      EfgNfgInterface(gEFG, nfg), 
-      GuiObject(gText("EfgShow")),
-      parent(frame), ef(ef_), tw(0)
-{
-    Show(FALSE);
-
-
-    //--------------Define all the menus----------------------------
-    // Give the frame an icon
-    wxIcon *frame_icon;
-
+guiEfgShowToolBar::guiEfgShowToolBar(wxFrame *p_frame)
 #ifdef wx_msw
-    frame_icon = new wxIcon("efg_icn");
+  : wxButtonBar(p_frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30),
 #else
-#include "efg.xbm"
-    frame_icon = new wxIcon(efg_bits, efg_width, efg_height);
-#endif
-
-    SetIcon(frame_icon);
-    // No support dialog yet
-    support_dialog = 0;
-    outcome_dialog = 0;
-    // No solution inspect window yet
-    soln_show = 0;
-    // Create the status bar
-    CreateStatusLine();
-    // Create the menu bar
-    MakeMenus();
-    // Create the accelerators (to add an accelerator, see const.h)
-    ReadAccelerators(accelerators, "EfgAccelerators");
+  : wxToolBar(p_frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30),
+#endif  // wx_msw
+    m_parent(p_frame)
+{
+    // Load palette bitmaps
+#include "bitmaps/save.xpm"
+#include "bitmaps/print.xpm"
+#include "bitmaps/delete.xpm"
+#include "bitmaps/solve.xpm"
+#include "bitmaps/zoomin.xpm"
+#include "bitmaps/zoomout.xpm"
+#include "bitmaps/help.xpm"
+#include "bitmaps/add.xpm"
+#include "bitmaps/options.xpm"
+#include "bitmaps/makenf.xpm"
+#include "bitmaps/inspect.xpm"
+#include "bitmaps/payoff.xpm"
+  wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
+  wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
+  wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
+  wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
+  wxBitmap *ToolbarZoominBitmap = new wxBitmap(zoomin_xpm);
+  wxBitmap *ToolbarZoomoutBitmap = new wxBitmap(zoomout_xpm);
+  wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
+  wxBitmap *ToolbarAddBitmap = new wxBitmap(add_xpm);
+  wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
+  wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
+  wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
+  wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
     
-    // Create the canvas(TreeWindow) on which to draw the tree
-    tw = new TreeWindow(ef, disp_sup, this);
-    // Create the toolbar (must be after the status bar creation)
-    toolbar = new EfgShowToolBar(this);
-    // Create the all_nodes list.
-    Nodes(ef, all_nodes);
-    // Now take care of the solution stuff
-    cur_soln = 0;
-    node_inspect = 0;
-    OnSize(-1, -1);
-    // now zoom in/out to show the full tree
-    tw->display_zoom_fit();
+  // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF |
+  // ZoomIn, ZoomOut, Options | Help
+  // Create the toolbar
+  SetMargins(2, 2);
+#ifdef wx_msw
+  SetDefaultSize(33, 30);
+#endif  // wx_msw
+  GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
     
-    Show(TRUE);
+  AddTool(FILE_SAVE, ToolbarSaveBitmap);
+  AddTool(FILE_OUTPUT, ToolbarPrintBitmap);
+  AddSeparator();
+  AddTool(NODE_ADD, ToolbarAddBitmap);
+  AddTool(NODE_DELETE, ToolbarDeleteBitmap);
+  AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
+  AddSeparator();
+  AddTool(SOLVE_STANDARD, ToolbarSolveBitmap);
+  AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);
+  AddTool(SOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
+  AddSeparator();
+  AddTool(DISPLAY_INC_ZOOM, ToolbarZoominBitmap);
+  AddTool(DISPLAY_DEC_ZOOM, ToolbarZoomoutBitmap);
+  AddTool(DISPLAY_SET_OPTIONS, ToolbarOptionsBitmap);
+  AddSeparator();
+  AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap);
+  Layout();
 }
 
+Bool guiEfgShowToolBar::OnLeftClick(int p_toolIndex, Bool /*p_toggled*/)
+{
+  m_parent->OnMenuCommand(p_toolIndex);
+  return TRUE;
+}
 
-// Destructor
+void guiEfgShowToolBar::OnMouseEnter(int p_toolIndex)
+{
+  m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_toolIndex));
+}
+
+//=====================================================================
+//                     EfgShow MEMBER FUNCTIONS
+//=====================================================================
+
+//---------------------------------------------------------------------
+//               EfgShow: Constructor and destructor
+//---------------------------------------------------------------------
+
+EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
+                 char *p_title, int p_x, int p_y, int p_w, int p_h, int p_type)
+  : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
+    EfgNfgInterface(gEFG, p_nfg), 
+    GuiObject(gText("EfgShow")),
+    parent(p_frame), ef(p_efg), support_dialog(0), outcome_dialog(0),
+    soln_show(0), cur_soln(0), node_inspect(0), tw(0)
+{
+  Show(FALSE);
+
+  // Give the frame an icon
+#ifdef wx_msw
+  wxIcon *frame_icon = new wxIcon("efg_icn");
+#else
+#include "efg.xbm"
+  wxIcon *frame_icon = new wxIcon(efg_bits, efg_width, efg_height);
+#endif
+
+  SetIcon(frame_icon);
+  // Create the status bar
+  CreateStatusLine();
+  // Create the menu bar
+  MakeMenus();
+  // Create the accelerators (to add an accelerator, see const.h)
+  ReadAccelerators(accelerators, "EfgAccelerators");
+    
+  // Create the canvas(TreeWindow) on which to draw the tree
+  tw = new TreeWindow(ef, disp_sup, this);
+  // Create the toolbar (must be after the status bar creation)
+  toolbar = new guiEfgShowToolBar(this);
+  // Create the all_nodes list.
+  Nodes(ef, all_nodes);
+
+  OnSize(-1, -1);
+  // now zoom in/out to show the full tree
+  tw->display_zoom_fit();
+    
+  Show(TRUE);
+}
+
 EfgShow::~EfgShow(void)
 {
-    Show(FALSE); delete &ef; delete toolbar; toolbar = 0; delete tw;
+  Show(FALSE);
+  delete &ef;
+  delete toolbar;
+  delete tw;
 }
 
 #include "elimdomd.h"
@@ -612,81 +681,22 @@ BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
     return start;
 }
 
+void EfgShow::OnSize(int , int )
+{
+    if (!tw) 
+        return;
+
+    int toolbar_height = 40;
+    int frame_w, frame_h;
+    GetClientSize(&frame_w, &frame_h);
+    toolbar->SetSize(0, 0, frame_w, toolbar_height);
+    tw->SetSize(0, toolbar_height, frame_w, frame_h-toolbar_height);
+    tw->SetFocus();
+}
+
+
 template class SolutionList<BehavSolution>;
-//***************************************************************************
-//                EXTENSIVE FORM TOOLBAR
-//***************************************************************************
 
-EfgShowToolBar::EfgShowToolBar(wxFrame *frame):
-#ifdef wx_msw
-    wxButtonBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
-#else
-    wxToolBar(frame, 0, 0, -1, -1, 0, wxHORIZONTAL, 30)
-#endif
-{
-    parent = frame;
-    // Load palette bitmaps
-#include "bitmaps/save.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/delete.xpm"
-#include "bitmaps/solve.xpm"
-#include "bitmaps/zoomin.xpm"
-#include "bitmaps/zoomout.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/add.xpm"
-#include "bitmaps/options.xpm"
-#include "bitmaps/makenf.xpm"
-#include "bitmaps/inspect.xpm"
-#include "bitmaps/payoff.xpm"
-    wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
-    wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
-    wxBitmap *ToolbarDeleteBitmap = new wxBitmap(delete_xpm);
-    wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
-    wxBitmap *ToolbarZoominBitmap = new wxBitmap(zoomin_xpm);
-    wxBitmap *ToolbarZoomoutBitmap = new wxBitmap(zoomout_xpm);
-    wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
-    wxBitmap *ToolbarAddBitmap = new wxBitmap(add_xpm);
-    wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
-    wxBitmap *ToolbarMakenfBitmap = new wxBitmap(makenf_xpm);
-    wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
-    wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
-    
-    // Save, Print | Add, Delete, Outcomes | Solve, Inspect, MakeNF | ZoomIn, ZoomOut, Options | Help
-    // Create the toolbar
-    SetMargins(2, 2);
-#ifdef wx_msw
-    SetDefaultSize(33, 30);
-#endif
-    GetDC()->SetBackground(wxLIGHT_GREY_BRUSH);
-    
-    AddTool(FILE_SAVE, ToolbarSaveBitmap);
-    AddTool(FILE_OUTPUT, ToolbarPrintBitmap);
-    AddSeparator();
-    AddTool(NODE_ADD, ToolbarAddBitmap);
-    AddTool(NODE_DELETE, ToolbarDeleteBitmap);
-    AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
-    AddSeparator();
-    AddTool(SOLVE_STANDARD, ToolbarSolveBitmap);
-    AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);
-    AddTool(SOLVE_NFG_REDUCED, ToolbarMakenfBitmap);
-    AddSeparator();
-    AddTool(DISPLAY_INC_ZOOM, ToolbarZoominBitmap);
-    AddTool(DISPLAY_DEC_ZOOM, ToolbarZoomoutBitmap);
-    AddTool(DISPLAY_SET_OPTIONS, ToolbarOptionsBitmap);
-    AddSeparator();
-    AddTool(GAMBIT_HELP_CONTENTS, ToolbarHelpBitmap);
-    Layout();
-}
-
-Bool EfgShowToolBar::OnLeftClick(int tool, Bool )
-{
-    parent->OnMenuCommand(tool); return TRUE;
-}
-
-void EfgShowToolBar::OnMouseEnter(int tool)
-{
-    parent->SetStatusText(parent->GetMenuBar()->GetHelpString(tool));
-}
 
 
 // Gui playback code:

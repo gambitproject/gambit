@@ -951,6 +951,8 @@ static Portion *GSM_RootNode(Portion **param)
 // SaveEfg
 //-------------
 
+extern NumberPortion _WriteGameDecimals;
+
 static Portion *GSM_SaveEfg(Portion **param)
 {
   Efg* E = ((EfgPortion *) param[0])->Value();
@@ -958,7 +960,7 @@ static Portion *GSM_SaveEfg(Portion **param)
 
   try { 
     gFileOutput f(text);
-    E->WriteEfgFile(f);
+    E->WriteEfgFile(f, _WriteGameDecimals.Value());
   }
   catch (gFileOutput::OpenFailed &)  {
     throw gclRuntimeError("Cannot open file " + text + " for writing");

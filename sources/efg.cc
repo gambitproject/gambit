@@ -548,16 +548,26 @@ void Efg::WriteEfgFile(gOutput &f, Node *n) const
     WriteEfgFile(f, n->children[i]);
 }
 
-void Efg::WriteEfgFile(gOutput &f) const
+void Efg::WriteEfgFile(gOutput &p_file, int p_nDecimals) const
 {
-  f << "EFG 2 R";
-  f << " \"" << EscapeQuotes(title) << "\" { ";
-  for (int i = 1; i <= players.Length(); i++)
-    f << '"' << EscapeQuotes(players[i]->name) << "\" ";
-  f << "}\n";
-  f << "\"" << EscapeQuotes(comment) << "\"\n\n";
+  int oldPrecision = p_file.GetPrec();
+  p_file.SetPrec(p_nDecimals);
 
-  WriteEfgFile(f, root);
+  try {
+    p_file << "EFG 2 R";
+    p_file << " \"" << EscapeQuotes(title) << "\" { ";
+    for (int i = 1; i <= players.Length(); i++)
+      p_file << '"' << EscapeQuotes(players[i]->name) << "\" ";
+    p_file << "}\n";
+    p_file << "\"" << EscapeQuotes(comment) << "\"\n\n";
+
+    WriteEfgFile(p_file, root);
+    p_file.SetPrec(oldPrecision);
+  }
+  catch (...) {
+    p_file.SetPrec(oldPrecision);
+    throw;
+  }
 }
 
 

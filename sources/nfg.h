@@ -83,7 +83,7 @@ public:
   void SetComment(const gText &);
   const gText &GetComment(void) const;
 
-  void WriteNfgFile(gOutput &) const;
+  void WriteNfgFile(gOutput &, int) const;
 
   // PLAYERS AND STRATEGIES
   int NumPlayers(void) const;

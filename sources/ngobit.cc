@@ -146,7 +146,7 @@ static void WritePXIHeader(gOutput &pxifile, const Nfg &N,
   for (int pl = 1; pl <= N.NumPlayers(); pl++)
     pxifile << N.NumStrats(pl) << " ";
   pxifile << "\n";
-  N.WriteNfgFile(pxifile);
+  N.WriteNfgFile(pxifile, 6);
 
   pxifile << "Settings:\n" << params.minLam;
   pxifile << "\n" << params.maxLam << "\n" << params.delLam;

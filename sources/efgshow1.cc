@@ -27,23 +27,6 @@
 // ----------------------------
 
 
-class EfgShowToolBar:
-#ifdef wx_msw
-    public wxButtonBar
-#else
-    public wxToolBar
-#endif
-{
-private:
-    wxFrame *parent;
-
-public:
-    EfgShowToolBar(wxFrame *frame);
-    Bool OnLeftClick(int toolIndex, Bool toggled);
-    void OnMouseEnter(int toolIndex);
-};
-
-
 //*********************************************************************
 //                  EXTENSIVE FORM GAME SHOW
 //*********************************************************************
@@ -217,20 +200,6 @@ void EfgShow::OnSetFocus(void)
 {
     tw->SetFocus();
 }
-
-void EfgShow::OnSize(int , int )
-{
-    if (!tw) 
-        return;
-
-    int toolbar_height = 40;
-    int frame_w, frame_h;
-    GetClientSize(&frame_w, &frame_h);
-    toolbar->SetSize(0, 0, frame_w, toolbar_height);
-    tw->SetSize(0, toolbar_height, frame_w, frame_h-toolbar_height);
-    tw->SetFocus();
-}
-
 
 #define     SOLVE_SETUP_CUSTOM      0
 #define     SOLVE_SETUP_STANDARD    1

@@ -130,56 +130,63 @@ void Nfg::BreakLink(void)
 
 #include "nfgiter.h"
 
-void Nfg::WriteNfgFile(gOutput &f) const
-{
-  int i;
+void Nfg::WriteNfgFile(gOutput &p_file, int p_nDecimals) const
+{ 
+  int oldDecimals = p_file.GetPrec();
+  p_file.SetPrec(p_nDecimals);
 
+  try {
+    p_file << "NFG 1 R";
+    p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
 
-  f << "NFG 1 R";
-  f << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+    for (int i = 1; i <= NumPlayers(); i++)
+      p_file << '"' << EscapeQuotes(Players()[i]->GetName()) << "\" ";
 
-  for (i = 1; i <= NumPlayers(); i++)
-    f << '"' << EscapeQuotes(Players()[i]->GetName()) << "\" ";
-
-  f << "}\n\n{ ";
+    p_file << "}\n\n{ ";
   
-  for (i = 1; i <= NumPlayers(); i++)   {
-    NFPlayer *player = Players()[i];
-    f << "{ ";
-    for (int j = 1; j <= player->NumStrats(); j++)
-      f << '"' << EscapeQuotes(player->Strategies()[j]->Name()) << "\" ";
-    f << "}\n";
-  }
-  
-  f << "}\n";
-
-  f << "\"" << EscapeQuotes(comment) << "\"\n\n";
-
-  int ncont = 1;
-  for (i = 1; i <= NumPlayers(); i++)
-    ncont *= NumStrats(i);
-
-  f << "{\n";
-  for (int outc = 1; outc <= outcomes.Length(); outc++)   {
-    f << "{ \"" << EscapeQuotes(outcomes[outc]->name) << "\" ";
-    for (int pl = 1; pl <= players.Length(); pl++)  {
-      f << outcomes[outc]->payoffs[pl];
-      if (pl < players.Length())
-	f << ", ";
-      else
-	f << " }\n";
+    for (int i = 1; i <= NumPlayers(); i++)   {
+      NFPlayer *player = Players()[i];
+      p_file << "{ ";
+      for (int j = 1; j <= player->NumStrats(); j++)
+	p_file << '"' << EscapeQuotes(player->Strategies()[j]->Name()) << "\" ";
+      p_file << "}\n";
     }
-  }
-  f << "}\n";
   
-  for (int cont = 1; cont <= ncont; cont++)  {
-    if (results[cont] != 0)
-      f << results[cont]->number << ' ';
-    else
-      f << "0 ";
-  }
+    p_file << "}\n";
 
-  f << '\n';
+    p_file << "\"" << EscapeQuotes(comment) << "\"\n\n";
+
+    int ncont = 1;
+    for (int i = 1; i <= NumPlayers(); i++)
+      ncont *= NumStrats(i);
+
+    p_file << "{\n";
+    for (int outc = 1; outc <= outcomes.Length(); outc++)   {
+      p_file << "{ \"" << EscapeQuotes(outcomes[outc]->name) << "\" ";
+      for (int pl = 1; pl <= players.Length(); pl++)  {
+	p_file << outcomes[outc]->payoffs[pl];
+	if (pl < players.Length())
+	  p_file << ", ";
+	else
+	  p_file << " }\n";
+      }
+    }
+    p_file << "}\n";
+  
+    for (int cont = 1; cont <= ncont; cont++)  {
+      if (results[cont] != 0)
+	p_file << results[cont]->number << ' ';
+      else
+	p_file << "0 ";
+    }
+
+    p_file << '\n';
+    p_file.SetPrec(oldDecimals);
+  }
+  catch (...) {
+    p_file.SetPrec(oldDecimals);
+    throw;
+  }
 }
 
 NFOutcome *Nfg::NewOutcome(void)
