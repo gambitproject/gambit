@@ -1260,25 +1260,18 @@ BaseMixedProfile*& MixedPortion::Value(void) const
 
 PortionSpec MixedPortion::Spec(void) const
 { 
-  static unsigned long _DataType = porMIXED;
-  if(_DataType == porMIXED)
-    if(!*_Value)
+  unsigned long _DataType = porMIXED;
+  if(*_Value)
+    switch((*_Value)->Type())
     {
-      _DataType = porMIXED;
-    }
-    else
-    {
-      switch((*_Value)->Type())
-      {
-      case DOUBLE:
-	_DataType = porMIXED_FLOAT;
-	break;
-      case RATIONAL:
-	_DataType = porMIXED_RATIONAL;
-	break;
-      default:
-	assert(0);
-      }
+    case DOUBLE:
+      _DataType = porMIXED_FLOAT;
+      break;
+    case RATIONAL:
+      _DataType = porMIXED_RATIONAL;
+      break;
+    default:
+      assert(0);
     }
   return PortionSpec(_DataType);
 }
@@ -1396,25 +1389,18 @@ BaseBehavProfile*& BehavPortion::Value(void) const
 
 PortionSpec BehavPortion::Spec(void) const
 { 
-  static unsigned long _DataType = porBEHAV;
-  if(_DataType == porBEHAV)
-    if(!*_Value)
+  unsigned int _DataType = porBEHAV;
+  if(*_Value)
+    switch((*_Value)->Type())
     {
-      _DataType = porBEHAV;
-    }
-    else
-    {
-      switch((*_Value)->Type())
-      {
-      case DOUBLE:
-	_DataType = porBEHAV_FLOAT;
-	break;
-      case RATIONAL:
-	_DataType = porBEHAV_RATIONAL;
-	break;
-      default:
-	assert(0);
-      }
+    case DOUBLE:
+      _DataType = porBEHAV_FLOAT;
+      break;
+    case RATIONAL:
+      _DataType = porBEHAV_RATIONAL;
+      break;
+    default:
+      assert(0);
     }
   return PortionSpec(_DataType);
 }
