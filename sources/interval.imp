@@ -35,7 +35,7 @@ template<class T> gInterval<T>&
 {
   gout << "For const'ness, operator = not allowed for gIntervals\n";
   exit (0);
-
+  gout << rhs.upper_bd; // suppresses warnings compiling with -Wall
 /*
   if (*this == rhs) return *this;
   lower_bd = rhs.lower_bd;
