@@ -308,10 +308,10 @@ named_args:   named_arg
           |   named_args COMMA named_arg
 
 named_arg:    NAME RARROW { formalstack.Push(tval); } expression
-                           { emit(new Bind(formalstack.Pop())); }
+                           { emit(new BindVal(formalstack.Pop())); }
          |    NAME DBLARROW  { formalstack.Push(tval); } NAME
                            { emit(new PushRef(tval));
-                             emit(new Bind(formalstack.Pop())); }
+                             emit(new BindRef(formalstack.Pop())); }
 
 list:         LBRACE { listlen.Push(0); } listels RBRACE
     |         LBRACE { listlen.Push(0); }  RBRACE
