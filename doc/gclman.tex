@@ -6690,12 +6690,12 @@ error if \verb+file+ cannot be opened for writing.  Returns \verb+nfg+.
 
 \item\lex{SequenceForm}
 \protect \large \begin{verbatim} 
-SequenceForm[support->EFSUPPORT] =: NLIST(NUMBER)
+SequenceForm[efg->EFG] =: NLIST(NUMBER)
 \end{verbatim}\normalsize
 
 \bd
-Returns the sequence form of an extensive form game over
-\verb+support+, where the sequence form is as defined in Koller,
+Returns the sequence form of an extensive form game 
+\verb+efg+, where the sequence form is as defined in Koller,
 Megiddo and von Stengel (\cite{KolMegSte:94}.
 \item [See also:] \verb+SequenceFormStrats+,
 \verb+SequenceFormConstraints+, \verb+WriteSequenceForm+.
@@ -6703,12 +6703,12 @@ Megiddo and von Stengel (\cite{KolMegSte:94}.
 
 \item\lex{SequenceFormConstraints}
 \protect \large \begin{verbatim} 
-SequenceFormConstraints[support->EFSUPPORT, 
+SequenceFormConstraints[efg->EFG, 
                         player->EFPLAYER] =: LIST(LIST(NUMBER))
 \end{verbatim}\normalsize
 
 \bd Returns the matrix of constraints on the strategies for
-\verb+player+ in the sequence form game over \verb+support+.  Each row
+\verb+player+ in the sequence form game for \verb+efg+.  Each row
 represents a separate constraint, and each column represents the
 corresponding sequence for that player.
 \item [See also:] \verb+SequenceForm+,
@@ -6717,13 +6717,13 @@ corresponding sequence for that player.
 
 \item\lex{SequenceFormStrats}
 \protect \large \begin{verbatim} 
-SequenceFormStrats[support->EFSUPPORT, 
+SequenceFormStrats[efg->EFG, 
                    player->EFPLAYER] =: LIST(LIST(ACTION))
 \end{verbatim}\normalsize
 
 \bd 
 Returns the sequence form strategies (or sequences) for
-\verb+player+ for the sequence form game over \verb+support+. Each
+\verb+player+ for the sequence form game for \verb+efg+. Each
 sequence form strategy is represented by a row in the matrix, which is
 a list of actions for that player corresponding to the sequence.  
 \item [See also:] \verb+SequenceForm+,
@@ -7263,11 +7263,11 @@ Does a formatted write of \verb+x+ to \verb+output+.
 
 \item\lex{WriteSequenceForm}
 \protect \large \begin{verbatim} 
-WriteSequenceForm[output<->OUTPUT, support->EFSUPPORT] =: OUTPUT
+WriteSequenceForm[output<->OUTPUT, efg->EFG] =: OUTPUT
 \end{verbatim}\normalsize
 
 \bd 
-Writes the sequence form game over \verb+support+ to output.  
+Writes the sequence form for the game \verb+efg+ to output.  
 \item [See also:] \verb+SequenceForm+,
 \verb+SequenceFormConstraints+, \verb+SequenceFormStrats+.
 \ed
