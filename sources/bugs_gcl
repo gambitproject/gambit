@@ -256,6 +256,31 @@ Note, this is also leading to problems in the GUI (not surprisingly):
 Load poker.efg, and do Supports->ElimDom, and check Weak and
 PureStrat, then OK.  Gives internal error in Gambit
 
+//------------------------------
+
+Bug C31:  Format[] and ListFormat [] revert to old default settings.  
+
+When you change one parameter in Format[], all other parameters change
+back to their default values.  Eg.,
+
+  GCL1:= << Format[1.0,width->10,precis->4]
+      1.0000
+  GCL2:= << Format[1.0,width->8]           
+  1.000000
+
+Same problem for ListFormat[]:
+
+  GCL1:= << a:={{1,2,3,4},{5,6,7,8}}
+  { { 1, 2, 3, 4 },
+    { 5, 6, 7, 8 } }
+  GCL2:= << ListFormat[braces->False]
+  True
+  GCL3:= << a
+      1, 2, 3, 4  ,   5, 6, 7, 8    
+  GCL4:= << ListFormat[commas->False]
+  True
+  GCL5:= << a
+  { { 1  2  3  4 }  { 5  6  7  8 } }
 
 
 //---------------  These are not bugs but suggested improvements ------------
