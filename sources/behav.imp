@@ -218,6 +218,8 @@ public:
 
   BehavNode(Node *n, int pl);
   ~BehavNode();
+
+  void ClearNodeProbs(void);
 };
 
 template <class T> BehavNode<T>::BehavNode(Node *n, int pl)
@@ -1289,6 +1291,13 @@ void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
   }
 }
 
+template <class T> void BehavNode<T>::ClearNodeProbs(void)
+{
+  nval = (T) 0;
+  for (int i = 1; i <= children.Length(); i++)
+    children[i]->ClearNodeProbs();
+}
+
 template <class T>
 BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
   : gDPVector<T>(p_profile.Game().AssociatedEfg()->NumActions()), 
@@ -1310,6 +1319,8 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
   const Nfg &nfg = p_profile.Game();
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)   {
+    n->ClearNodeProbs();
+
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       int snum = support.Strategies(pl)[st]->Number();
       if (p_profile(pl, st) > (T) 0)  {
