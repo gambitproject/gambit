@@ -329,6 +329,50 @@ void Bind::Output( gOutput& s ) const
 }
 
 
+BindRef::BindRef( void )
+{ _FuncName = ""; }
+BindRef::BindRef( const gString& func_name )
+{ _FuncName = func_name; }
+Opcode BindRef::Type( void ) const
+{ return iBINDREF; }
+bool BindRef::Execute( GSM& gsm ) const
+{ 
+  if( _FuncName == "" )
+    return gsm.BindRef();
+  else
+    return gsm.BindRef( _FuncName );
+}
+void BindRef::Output( gOutput& s ) const
+{
+  if( _FuncName == "" )
+    s << "BindRef"; 
+  else
+    s << "BindRef( " << _FuncName << " )";
+}
+
+
+BindVal::BindVal( void )
+{ _FuncName = ""; }
+BindVal::BindVal( const gString& func_name )
+{ _FuncName = func_name; }
+Opcode BindVal::Type( void ) const
+{ return iBINDVAL; }
+bool BindVal::Execute( GSM& gsm ) const
+{ 
+  if( _FuncName == "" )
+    return gsm.BindVal();
+  else
+    return gsm.BindVal( _FuncName );
+}
+void BindVal::Output( gOutput& s ) const
+{
+  if( _FuncName == "" )
+    s << "BindVal"; 
+  else
+    s << "BindVal( " << _FuncName << " )";
+}
+
+
 Opcode CallFunction::Type( void ) const
 { return iCALL_FUNCTION; }
 bool CallFunction::Execute( GSM& gsm ) const

@@ -41,7 +41,7 @@ typedef enum
 
   iAND, iOR, iNOT,
 
-  iINIT_CALL_FUNCTION, iBIND, iCALL_FUNCTION,
+  iINIT_CALL_FUNCTION, iBIND, iBINDREF, iBINDVAL, iCALL_FUNCTION,
 
   iPOP, iOUTPUT, iDUMP, iFLUSH
 } Opcode;
@@ -358,6 +358,32 @@ class Bind : public Instruction
  public:
   Bind( void );
   Bind( const gString& func_name );
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+
+class BindRef : public Instruction
+{
+ private:
+  gString _FuncName;
+ public:
+  BindRef( void );
+  BindRef( const gString& func_name );
+  Opcode Type( void ) const;
+  bool Execute( GSM& gsm ) const;
+  void Output( gOutput& s ) const;
+};
+
+
+class BindVal : public Instruction
+{
+ private:
+  gString _FuncName;
+ public:
+  BindVal( void );
+  BindVal( const gString& func_name );
   Opcode Type( void ) const;
   bool Execute( GSM& gsm ) const;
   void Output( gOutput& s ) const;
