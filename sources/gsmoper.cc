@@ -3167,7 +3167,7 @@ void Init_gsmoper(GSM* gsm)
 
   //----------------------- Times ----------------------------
 
-  FuncObj = new FuncDescObj("Times", 11);
+  FuncObj = new FuncDescObj("Times", 7);
 
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Multiply_double, 
 				       porFLOAT, 2, xy_Float));
@@ -3594,14 +3594,14 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(4, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
-					    REQUIRED, BYREF));
+					    REQUIRED ));
   
   FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_Efg, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG,
-					    REQUIRED, BYREF));
+					    REQUIRED ));
   
   FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
