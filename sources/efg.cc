@@ -374,6 +374,10 @@ Infoset *BaseEfg::AppendNode(Node *n, Infoset *s)
 {
   assert(n && s);
   
+  // Can't bridge subgames...
+  if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
+    return 0;
+
   if (n->children.Length() == 0)   {
     n->infoset = s;
     s->members.Append(n);
@@ -431,6 +435,10 @@ Infoset *BaseEfg::InsertNode(Node *n, EFPlayer *p, int count)
 Infoset *BaseEfg::InsertNode(Node *n, Infoset *s)
 {
   assert(n && s);
+
+  // can't bridge subgames
+  if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
+    return 0;
   
   Node *m = CreateNode(n->parent);
   m->infoset = s;
@@ -454,6 +462,10 @@ Infoset *BaseEfg::JoinInfoset(Infoset *s, Node *n)
 {
   assert(n && s);
 
+  // can't bridge subgames
+  if (s->members.Length() > 0 && n->gameroot != s->members[1]->gameroot)
+    return 0;
+  
   if (!n->infoset)   return 0; 
   if (n->infoset == s)   return s;
   if (s->actions.Length() != n->children.Length())  return n->infoset;
@@ -502,6 +514,9 @@ Infoset *BaseEfg::MergeInfoset(Infoset *to, Infoset *from)
 
   if (to == from ||
       to->actions.Length() != from->actions.Length())   return from;
+
+  if (to->members[1]->gameroot != from->members[1]->gameroot) 
+    return from;
 
   to->members += from->members;
   for (int i = 1; i <= from->members.Length(); i++)
@@ -597,6 +612,7 @@ Node *BaseEfg::CopyTree(Node *src, Node *dest)
 {
   assert(src && dest);
   if (src == dest || dest->children.Length())   return src;
+  if (src->gameroot != dest->gameroot)  return src;
 
   CopySubtree(src, dest, dest);
 
@@ -610,6 +626,7 @@ Node *BaseEfg::MoveTree(Node *src, Node *dest)
   assert(src && dest);
   if (src == dest || dest->children.Length() || IsPredecessor(src, dest))
     return src;
+  if (src->gameroot != dest->gameroot)  return src;
 
   Node *parent = src->parent;    // cannot be null, saves us some problems
 
