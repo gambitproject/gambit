@@ -1,31 +1,32 @@
 //
-// FILE: nfgprint.h -- Declaration of printout class for normal forms
+// $Source$
+// $Date$
+// $Revision$
 //
-// $Id$
+// DESCRIPTION:
+// Interface to printouts for normal forms
 //
 
 #ifndef NFGPRINT_H
 #define NFGPRINT_H
 
-#include "wx/print.h"
-
+#include "wx/html/htmprint.h"
 #include "nfgshow.h"
 #include "nfgtable.h"
 
-class NfgPrintout : public wxPrintout {
+//
+// For normal forms, we will print grids by creating corresponding HTML.
+// 
+class NfgPrintout : public wxHtmlPrintout {
 private:
   NfgTable *m_table;
-  int m_numPages;
     
-public:
-  NfgPrintout(NfgTable *, const char *title = "Normal form printout");
-  virtual ~NfgPrintout() { }
+  // Create HTML for game
+  wxString BuildHtml(const Nfg &, int, int);
 
-  bool OnPrintPage(int page);
-  bool HasPage(int page);
-  bool OnBeginDocument(int startPage, int endPage);
-  void GetPageInfo(int *minPage, int *maxPage,
-		   int *selPageFrom, int *selPageTo);
+public:
+  NfgPrintout(const Nfg &, int, int, const wxString &);
+  virtual ~NfgPrintout() { }
 };
 
 #endif  // NFGPRINT_H

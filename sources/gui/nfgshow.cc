@@ -504,9 +504,16 @@ void NfgShow::OnFilePageSetup(wxCommandEvent &)
 void NfgShow::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
-  wxPrintPreview *preview = new wxPrintPreview(new NfgPrintout(m_table),
-					       new NfgPrintout(m_table),
-					       &data);
+  wxPrintPreview *preview = 
+    new wxPrintPreview(new NfgPrintout(m_nfg, 
+				       m_table->GetRowPlayer(), 
+				       m_table->GetColPlayer(),
+				       (char *) m_nfg.GetTitle()),
+		       new NfgPrintout(m_nfg,
+				       m_table->GetRowPlayer(),
+				       m_table->GetColPlayer(),
+				       (char *) m_nfg.GetTitle()),
+		       &data);
 
   if (!preview->Ok()) {
     delete preview;
@@ -525,10 +532,14 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
-  NfgPrintout printout(m_table);
+  NfgPrintout printout(m_nfg, m_table->GetRowPlayer(), m_table->GetColPlayer(),
+		       (char *) m_nfg.GetTitle());
 
   if (!printer.Print(this, &printout, true)) {
-    wxMessageBox("There was an error in printing", "Error", wxOK);
+    if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
+      wxMessageBox("There was an error in printing", "Error", wxOK);
+    }
+    // Otherwise, user hit "cancel"; just be quiet and return.
     return;
   }
   else {
