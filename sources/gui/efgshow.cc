@@ -692,8 +692,10 @@ void EfgShow::MakeMenus(void)
   inspectMenu->Check(efgmenuINSPECT_CURSOR, true);
   inspectMenu->Append(efgmenuINSPECT_OUTCOMES, "&Outcomes",
 		      "Display and edit outcomes", true);
+  inspectMenu->Check(efgmenuINSPECT_OUTCOMES, false);
   inspectMenu->Append(efgmenuINSPECT_SUPPORTS, "&Supports",
 		      "Display and edit supports", true);
+  inspectMenu->Check(efgmenuINSPECT_SUPPORTS, false);
   inspectMenu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
 		      "Inspect information sets", true);
   inspectMenu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",

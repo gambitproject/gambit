@@ -140,7 +140,6 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_parent(p_efgShow)
 {
-  Show(false);
   CreateGrid(p_efgShow->Game()->NumOutcomes(),
 	     p_efgShow->Game()->NumPlayers() + 1);
   for (int row = 0; row < GetRows(); row++) {
@@ -160,6 +159,7 @@ EfgOutcomeWindow::EfgOutcomeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   SetLabelSize(wxVERTICAL, 0);
   SetDefaultCellAlignment(wxCENTER, wxCENTER);
   AdjustScrollbars();
+  Show(true);
 }
 
 void EfgOutcomeWindow::UpdateValues(void)

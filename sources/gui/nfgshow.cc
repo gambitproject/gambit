@@ -935,11 +935,11 @@ void NfgShow::OnSolveCustom(wxCommandEvent &p_event)
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddSolution(solutions[soln], true);
     }
+    ChangeSolution(m_solutionTable->Length());
 
     if (solutions.Length() > 0 && !m_table->ShowProbs()) {
       m_table->ToggleProbs();
       GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-      ChangeSolution(m_solutionTable->Length());
     }
 
     wxEndBusyCursor();

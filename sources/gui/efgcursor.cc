@@ -21,7 +21,6 @@ EfgCursorWindow::EfgCursorWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
     m_parent(p_efgShow)
 {
-  Show(false);
   CreateGrid(s_numFeatures, 1);
   SetEditable(false);
 
@@ -32,6 +31,7 @@ EfgCursorWindow::EfgCursorWindow(EfgShow *p_efgShow, wxWindow *p_parent)
   SetLabelSize(wxHORIZONTAL, 0);
   SetLabelSize(wxVERTICAL, 100);
   AdjustScrollbars();
+  Show(true);
 }
 
 void EfgCursorWindow::Set(const Node *p_cursor) 
