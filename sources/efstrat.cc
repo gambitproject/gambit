@@ -129,6 +129,7 @@ public:
 
   // checks for a valid EFActionSet
   bool IsValid(void) const;
+  bool IsValidAt(const int &iset) const;
 
 };
 
@@ -266,6 +267,17 @@ bool EFActionSet::IsValid(void) const
 
   return true;
 }
+
+// checks for a valid EFActionSet
+bool EFActionSet::IsValidAt(const int &iset) const
+{
+  if (iset > efp->NumInfosets())   return false;
+
+  if (infosets[iset]->acts.Length() == 0)   return false;
+
+  return true;
+}
+
 
 //--------------------------------------------------
 // EFSupport: Constructors, Destructors, Operators
@@ -406,6 +418,16 @@ EFSupport::AllActionsInSupportAtInfosetAreActive(const EFSupport &S,
     if (!ActionIsActive(support_actions[i]))
       return false;
   }
+  return true;
+}
+
+bool EFSupport::IsValidAt(const Infoset *infoset) const
+{
+  if 
+    ( !m_players[infoset->GetPlayer()->GetNumber()]->
+      IsValidAt(infoset->GetNumber()) )
+    return false;
+
   return true;
 }
 
