@@ -914,9 +914,12 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
     long nevals;
     double time;
     PolEnum(*S, params, solutions, nevals, time, is_singular);
-
     ((NumberPortion *) param[3])->SetValue(nevals);
     ((NumberPortion *) param[4])->SetValue(time);
+    if (is_singular)
+      ((BoolPortion *) param[7])->SetValue(triTRUE);
+    else
+      ((BoolPortion *) param[7])->SetValue(triFALSE);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -1592,7 +1595,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("PolEnumSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnum_Nfg, 
-				       PortionSpec(porMIXED, 1), 7));
+				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
@@ -1607,6 +1610,8 @@ void Init_algfunc(GSM *gsm)
 					    BYREF));
   FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
+  FuncObj->SetParamInfo(0, 7, gclParameter("issingular", porBOOLEAN,
+					    new BoolPortion(false), BYREF));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnum_Efg, 
 				       PortionSpec(porBEHAV, 1), 8));
