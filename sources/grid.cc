@@ -83,7 +83,7 @@ int num_columns=st1+st2+2;
 for (i=1;i<=st1;i++) *params.pxifile<<i<<' ';
 for (i=1;i<=st2;i++) *params.pxifile<<st1+i<<' ';
 *params.pxifile<<'\n';
-*params.pxifile<<'Data:\n';
+*params.pxifile<<"Data:\n";
 }
 
 template <class T>
@@ -146,7 +146,7 @@ return (ok);
 template <class T> int GridSolveModule<T>::GridSolve(void)
 {
 int i,j;
-if (!params.Ok()) {wxMessageBox("Invalid parameters!");return 0;}
+if (!params.Ok()) {if (params.errfile) *params.errfile<<"Param Error\n";return 0;}
 
 NormalIter<T> iter(nf);
 int	st1=nf.NumStrats(1),st2=nf.NumStrats(2);
