@@ -96,10 +96,8 @@ Portion *GSM_DetachOutcome(Portion **param);
 
 Portion *GSM_AttachOutcome(Portion **param)
 {
-  if( param[1]->Spec().Type == porNULL )
-  {
-    return GSM_DetachOutcome( param );
-  }
+  if (param[1]->Spec().Type == porNULL)
+    return GSM_DetachOutcome(param);
 
   Node *n = ((NodePortion *) param[0])->Value();
   Outcome *c = ((OutcomePortion *) param[1])->Value();
@@ -138,8 +136,7 @@ Portion *GSM_ChanceProb(Portion **param)
   Action *action = ((ActionPortion *) param[0])->Value();
   Infoset *infoset = action->BelongsTo();
   if (!infoset->GetPlayer()->IsChance()) 
-    return new NullPortion
-      ((infoset->BelongsTo()->Type() == DOUBLE) ? porFLOAT : porRATIONAL);
+    return new ErrorPortion("Action must belong to the chance player");
 
   switch (infoset->BelongsTo()->Type())   {
     case DOUBLE:
@@ -277,11 +274,23 @@ Portion *GSM_DeleteNode(Portion **param)
 Portion *GSM_DeleteOutcome(Portion **param)
 {
   Outcome *outc = ((OutcomePortion *) param[0])->Value();
-  outc->BelongsTo()->DeleteOutcome(outc);
 
+  gList<Node *> nodes;
+  Nodes(*outc->BelongsTo(), nodes);
+  for (int i = 1; i <= nodes.Length(); )
+    if (nodes[i]->GetOutcome() != outc) 
+      nodes.Remove(i);
+    else
+      i++;
+    
   _gsm->InvalidateGameProfile(outc->BelongsTo(), true);
   _gsm->UnAssignEfgElement(outc->BelongsTo(), porOUTCOME, outc);
-  return new BoolValPortion(true);
+
+  outc->BelongsTo()->DeleteOutcome(outc);
+
+  Portion *por = ArrayToList(nodes);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
 }
 
 //----------------
@@ -394,9 +403,7 @@ Portion* GSM_Game_EfgElements(Portion** param)
 Portion *GSM_Infoset_Node(Portion **param)
 {
   if( param[0]->Spec().Type == porNULL )
-  {
     return new NullPortion( porINFOSET );
-  }
 
   Node *n = ((NodePortion *) param[0])->Value();
 
@@ -520,23 +527,6 @@ Portion *GSM_IsSuccessor(Portion **param)
 
 
 //-----------
-// LegalSubgames
-//-----------
-
-Portion *GSM_LegalSubgames_Efg(Portion **param)
-{
-  BaseEfg& E = *((EfgPortion*) param[0])->Value();
-  gList<Node *> list;
-  LegalSubgameRoots(E, list);
-
-  Portion *por = ArrayToList(list);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;  
-}
-
-
-
-//-----------
 // LoadEfg
 //-----------
 
@@ -581,42 +571,6 @@ Portion *GSM_LoadEfg(Portion **param)
     return new ErrorPortion("Unable to open file for reading");
 }
 
-//---------------
-// MarkSubgames
-//---------------
-
-Portion *GSM_MarkSubgames_Efg(Portion **param)
-{
-  BaseEfg &E = *((EfgPortion*) param[0])->Value();
-
-  gList<Node *> roots;
-  LegalSubgameRoots(E, roots);
-
-  E.MarkSubgames(roots);
-
-  MarkedSubgameRoots(E, roots);
-
-  Portion *por = ArrayToList(roots);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-Portion *GSM_MarkSubgames_Node(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-
-  gList<Node *> roots;
-  LegalSubgameRoots(n, roots);
-
-  n->BelongsTo()->MarkSubgames(roots);
-  
-  MarkedSubgameRoots(*n->BelongsTo(), roots);
-  
-  Portion *por = ArrayToList(roots);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
 //-------------------
 // IsPerfectRecall
 //-------------------
@@ -628,15 +582,26 @@ Portion *GSM_IsPerfectRecall(Portion **param)
   return new BoolValPortion(IsPerfectRecall(efg, s1, s2));
 }
 
-//--------------------
-// MarkThisSubgame
-//--------------------
+//-----------------
+// MarkSubgame
+//-----------------
 
-Portion *GSM_MarkThisSubgame(Portion **param)
+Portion *GSM_MarkSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
   return new BoolValPortion(n->BelongsTo()->DefineSubgame(n));
+}
+
+//------------------
+// MarkedSubgame
+//------------------
+
+Portion *GSM_MarkedSubgame(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+
+  return new BoolValPortion(n->GetSubgameRoot() == n);
 }
 
 //------------
@@ -645,10 +610,8 @@ Portion *GSM_MarkThisSubgame(Portion **param)
 
 Portion *GSM_Members(Portion **param)
 {
-  if( param[0]->Spec().Type == porNULL )
-  {
+  if (param[0]->Spec().Type == porNULL)
     return new ListValPortion();
-  }
 
   Infoset *s = ((InfosetPortion *) param[0])->Value();
 
@@ -764,7 +727,6 @@ Portion *GSM_NewEfg(Portion **param)
   
   if (rat)   {
     Efg<gRational> *E = new Efg<gRational>;
-    E->SetTitle( ((TextPortion*) param[2])->Value() );
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
       E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
@@ -772,7 +734,6 @@ Portion *GSM_NewEfg(Portion **param)
   }
   else  {
     Efg<double> *E = new Efg<double>;
-    E->SetTitle( ((TextPortion*) param[2])->Value() );
     ListPortion *players = (ListPortion *) param[1];
     for (int i = 1; i <= players->Length(); i++)
       E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
@@ -1283,14 +1244,14 @@ Portion *GSM_SetPayoff_Rational(Portion **param)
 }
 
 //----------------
-// SubgameRoots
+// Subgames
 //----------------
 
-Portion *GSM_SubgameRoots(Portion **param)
+Portion *GSM_Subgames(Portion **param)
 {
   BaseEfg& E = *((EfgPortion*) param[0])->Value();
   gList<Node *> list;
-  MarkedSubgameRoots(E, list);
+  LegalSubgameRoots(E, list);
 
   Portion *por = ArrayToList(list);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -1310,42 +1271,10 @@ Portion *GSM_Support_Efg(Portion **param)
 }
 
 //-----------------
-// UnmarkSubgames
+// UnmarkSubgame
 //-----------------
 
-Portion *GSM_UnmarkSubgames_Efg(Portion **param)
-{
-  BaseEfg &E = *((EfgPortion*) param[0])->Value();
-
-  E.UnmarkSubgames(E.RootNode());
-
-  gList<Node *> roots;
-  MarkedSubgameRoots(E, roots);
-
-  Portion *por = ArrayToList(roots);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-Portion *GSM_UnmarkSubgames_Node(Portion **param)
-{
-  Node *n = ((NodePortion *) param[0])->Value();
-
-  n->BelongsTo()->UnmarkSubgames(n);
-  
-  gList<Node *> roots;
-  MarkedSubgameRoots(*n->BelongsTo(), roots);
-  
-  Portion *por = ArrayToList(roots);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//---------------------
-// UnmarkThisSubgame
-//---------------------
-
-Portion *GSM_UnmarkThisSubgame(Portion **param)
+Portion *GSM_UnmarkSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
@@ -1405,9 +1334,8 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("ChanceProb", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ChanceProb, 
-				       PortionSpec(porFLOAT | porRATIONAL),
-				       1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ChanceProb,
+				       porFLOAT | porRATIONAL, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("action", porACTION));
   gsm->AddFunction(FuncObj);
 
@@ -1451,7 +1379,8 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("DeleteOutcome", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteOutcome, porBOOL, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_DeleteOutcome,
+				       PortionSpec(porNODE, 1), 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porOUTCOME));
   gsm->AddFunction(FuncObj);
 
@@ -1565,19 +1494,14 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("MarkSubgames", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MarkSubgames_Efg, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_MarkSubgames_Node, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
+  FuncObj = new FuncDescObj("MarkSubgame", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MarkSubgame, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("MarkSubgame", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MarkThisSubgame, porBOOL, 1));
+  FuncObj = new FuncDescObj("MarkedSubgame", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_MarkedSubgame, porBOOL, 1)); 
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
 
@@ -1622,13 +1546,11 @@ void Init_efgfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("NewEfg", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewEfg, porEFG, 3));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewEfg, porEFG, 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("rational", porBOOL,
 					    new BoolValPortion(false)));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("players", PortionSpec(porTEXT,1),
 					    new ListValPortion));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("name", porTEXT,
-					    new TextValPortion("")));  
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewInfoset", 1);
@@ -1816,16 +1738,10 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("MarkedSubgames", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SubgameRoots, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-
   FuncObj = new FuncDescObj("Subgames", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LegalSubgames_Efg, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Subgames,
 				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG));
   gsm->AddFunction(FuncObj);
 
 
@@ -1835,21 +1751,11 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("UnmarkSubgames", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnmarkSubgames_Efg, 
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG, REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_UnmarkSubgames_Node,
-				       PortionSpec(porNODE, 1), 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-
   FuncObj = new FuncDescObj("UnmarkSubgame", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnmarkThisSubgame, porNODE, 1));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnmarkSubgame, porNODE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("node", porNODE));
   gsm->AddFunction(FuncObj);
-
 }
+
+
 

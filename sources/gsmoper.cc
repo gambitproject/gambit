@@ -2,7 +2,7 @@
 // FILE: gsmoper.cc -- implementations for GSM operator functions
 //                     companion to GSM
 //
-// @(#)gsmoper.cc	1.113 12/30/96
+// $Id$
 //
 
 #include <stdlib.h>
@@ -1341,15 +1341,7 @@ Portion* GSM_NewOutputStream(Portion** param)
   gString filename = ((TextPortion*) param[0])->Value();
   bool append = ((BoolPortion*) param[1])->Value();
 
-  if( !append )
-  {
-    g = new gFileOutput( filename );
-  }
-  else
-  {
-    FILE* f = fopen( filename, "a" );
-    g = new gFileOutput( f );
-  }
+  g = new gFileOutput(filename, append);
   
   if(g->IsValid())
     result = new OutputValPortion(*g);    
@@ -1410,28 +1402,6 @@ void GSM_SetWriteOptions(void)
 }
 
 
-Portion* GSM_SetFormat(Portion** param)
-{
-  _WriteWidth = ((IntPortion*) param[0])->Value();
-  _WritePrecis = ((IntPortion*) param[1])->Value();
-  _WriteExpmode = ((BoolPortion*) param[2])->Value();
-  _WriteQuoted = ((BoolPortion*) param[3])->Value();
-  _WriteListBraces = ((BoolPortion*) param[4])->Value();
-  _WriteListCommas = ((BoolPortion*) param[5])->Value();
-  _WriteListLF = ((IntPortion*) param[6])->Value();
-  _WriteListIndent = ((IntPortion*) param[7])->Value();
-  _WriteSolutionInfo = ((IntPortion*) param[8])->Value();
-
-  GSM_SetWriteOptions();
-
-  return new BoolValPortion(true);
-}
-
-
-
-
-
-
 Portion* GSM_SetListFormat(Portion** param)
 {
   _WriteListBraces = ((BoolPortion*) param[0])->Value();
@@ -1443,8 +1413,6 @@ Portion* GSM_SetListFormat(Portion** param)
 
   return new BoolValPortion(true);
 }
-
-
 
 Portion* GSM_SetNumericFormat(Portion** param)
 {
@@ -1458,7 +1426,6 @@ Portion* GSM_SetNumericFormat(Portion** param)
 }
 
 
-
 Portion* GSM_SetTextFormat(Portion** param)
 {
   _WriteQuoted = ((BoolPortion*) param[0])->Value();
@@ -1469,7 +1436,6 @@ Portion* GSM_SetTextFormat(Portion** param)
 }
 
 
-
 Portion* GSM_SetSolutionFormat(Portion** param)
 {
   _WriteSolutionInfo = ((IntPortion*) param[0])->Value();
@@ -1478,11 +1444,6 @@ Portion* GSM_SetSolutionFormat(Portion** param)
 
   return new BoolValPortion(true);
 }
-
-
-
-
-
 
 
 
@@ -2697,7 +2658,8 @@ Portion* GSM_Manual(Portion** param)
 
   // End bad section
 
-
+  if (f == NULL)
+    return new BoolValPortion(false);
 
 
   gString line;
@@ -3578,7 +3540,7 @@ void Init_gsmoper(GSM* gsm)
 
 
 
-  FuncObj = new FuncDescObj("Parenthesis", 1);
+  FuncObj = new FuncDescObj("Paren", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Paren, porANYTYPE, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
@@ -3670,41 +3632,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
 
   gsm->AddFunction(FuncObj);
-
-
-
-/*
-  FuncObj = new FuncDescObj("SetFormat", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 9));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType
-			("width", porINTEGER, 
-			 new IntRefPortion(_WriteWidth)));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType
-			("precis", porINTEGER,
-			 new IntRefPortion(_WritePrecis)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType
-			("expmode", porBOOL,
-			 new BoolRefPortion(_WriteExpmode)));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType
-			("quote", porBOOL,
-			 new BoolRefPortion(_WriteQuoted)));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType
-			("listBraces", porBOOL,
-			 new BoolRefPortion(_WriteListBraces)));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType
-			("listCommas", porBOOL,
-			 new BoolRefPortion(_WriteListCommas)));
-  FuncObj->SetParamInfo(0, 6, ParamInfoType
-			("listLF", porINTEGER,
-			 new IntRefPortion(_WriteListLF)));
-  FuncObj->SetParamInfo(0, 7, ParamInfoType
-			("listIndent", porINTEGER,
-			 new IntRefPortion(_WriteListIndent)));
-  FuncObj->SetParamInfo(0, 8, ParamInfoType
-			("solutionInfo", porINTEGER,
-			 new IntRefPortion(_WriteSolutionInfo)));
-  gsm->AddFunction(FuncObj);
-*/
 
 
 
@@ -4009,7 +3936,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(0, 1, ParamInfoType("path", porBOOL,
 					    new BoolValPortion( true ) ) );
   gsm->AddFunction(FuncObj);
-
 }
 
 
