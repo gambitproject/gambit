@@ -1,7 +1,7 @@
 //
 // FILE: gmap.h -- Declaration of Map container type
 //
-// $Id$
+// @(#)gmap.h	1.10 7/20/94
 //
 
 #ifndef GMAP_H
@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <string.h>
 #include "basic.h"
-#include "gambitio.h"
+#include "output.h"
 
 #ifdef __GNUC__
 #define INLINE inline
@@ -289,7 +289,8 @@ template <class T> INLINE void gMap<T>::Dump(output& to) const
 //
 // This is the abstract class from which all Map classes are derived
 //
-template <class K, class T> class gBaseMap   {
+template <class K, class T> class gBaseMap : public gSender {
+  friend class gBaseMapIter<K,T>;
   protected:
     int length;
     T _default;
@@ -298,6 +299,8 @@ template <class K, class T> class gBaseMap   {
 
     T &Insert(const K &key, int where, const T &value);
     T Delete(int where);
+
+    void Send(const MapMessage<K,T> &);
 
   public:
 //
@@ -406,6 +409,8 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
     delete values;
     keys = 0;
     values = 0;
+    MapMessage<K,T> M(MapMessage<K,T>::EMPTY);
+    Send(M);
     return ret;
   }
 
@@ -429,6 +434,8 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
   values = new_values;
 
   length--;
+  MapMessage<K,T> M(MapMessage<K,T>::SUBTRACTED);
+  Send(M);
   return ret;
 }
 
@@ -438,6 +445,26 @@ template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
     f << keys[i] << " --> " << values[i] << '\n';
 }
 
+//
+// MapMessage is a message being passed back and forth by the various g...Map
+// classes and g...MapIter classes.
+//
+// <note> This class is derived from the gMessage class found in "gmessage.h"
+//
+template <class K, class T> class MapMessage : public gMessage {
+  friend class gBaseMap<K,T>;
+  friend class gBaseMapIter<K,T>;
+ private:
+  enum MessageType {DELETE,ADDED,SUBTRACTED,EMPTY} changeType;
+ public:
+  MapMessage(const MessageType type) : changeType(type) {}
+  uint Type() const { return changeType; }
+  int operator==(const MapMessage<K,T> &m) const
+    {
+      if(Type() == m.Type()) return 1;
+      else return 0;
+    }
+};
   
 
 //
@@ -448,6 +475,7 @@ template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
 // when using keys which are costly to compare
 //
 template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
+  friend class gOrdMapIter<K,T>;
   private:
     int Locate(const K &key) const;
 
