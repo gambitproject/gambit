@@ -191,7 +191,9 @@ s=copystring(s);
 if (strcmp(s,"")!=0)
 {     
 	char *filename=copystring(FileNameFromPath(s));
+#ifdef wx_msw
 	filename=strlwr(filename); // ignore case
+#endif
 #ifndef EFG_ONLY
 	if (strstr(filename,".nfg"))		// This must be a normal form
 		{NfgGUI(0,s,0,this);return;}
