@@ -116,7 +116,7 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
   }
 }
 
-template <class T> void BehavSolution<T>::Id(void) const
+template <class T> int BehavSolution<T>::Id(void) const
 {return _Id;}
 
 template <class T> void BehavSolution<T>::SetCreator(EfgAlgType c)
