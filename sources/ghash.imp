@@ -1,0 +1,122 @@
+
+#include "glist.imp"
+#include "hash.h"
+
+
+
+template <class K, class T> HashTable<K,T>::HashTable()
+{
+  num_of_buckets = 0;
+}
+
+
+template <class K, class T> HashTable<K,T>::~HashTable()
+{
+  delete[] key_bucket;
+  delete[] value_bucket;
+}
+
+
+template <class K, class T> int HashTable<K,T>::ValidatedHash( K key ) const
+{
+  int i;
+  i = Hash( key );
+  if( i < 0 || i >= num_of_buckets )
+    printf("** HashTable Error: Hash() generated an illegal index\n");
+  
+  return i;
+}
+
+
+template <class K, class T> int HashTable<K,T>::IsDefined( K key ) const
+{
+  int i;
+  i = ValidatedHash( key );
+  return key_bucket[i].Find( key );
+}
+
+
+template <class K, class T> int HashTable<K,T>::Define( K key, T value )
+{
+  int i, position;
+  int return_value;
+
+  if( num_of_buckets == 0 )
+  {
+    num_of_buckets = NumBuckets();
+    key_bucket = new gList<K>[ num_of_buckets ];
+    value_bucket = new gList<T>[ num_of_buckets ];
+  }
+
+  i = ValidatedHash( key );
+  position = IsDefined( key );  //ok because IsDefined returns the position
+                                //of the key in the list if it is found
+  if( position == 0 )           //not previously defined
+  {
+    key_bucket[i].Append( key );
+    value_bucket[i].Append( value );
+    return_value = SUCCESS;
+  }
+  else
+  {
+    return_value = FAIL;
+  }
+  return return_value;
+}
+
+template <class K, class T> void HashTable<K,T>::Remove( K key )
+{
+  int i, position;
+  K removed_key;
+  
+  position = IsDefined( key );
+  if( position != 0 )
+  {
+    i = ValidatedHash( key );
+    removed_key = key_bucket[i].Remove( position );
+    value_bucket[i].Remove( position );
+    assert( key == removed_key );
+  }
+}
+
+  
+template <class K, class T> T HashTable<K,T>::operator()( K key ) const
+{
+  int i, position;
+  T return_value;
+
+  position = IsDefined( key );
+  if( position != 0 )
+  {
+    i = ValidatedHash( key );
+    return_value = (value_bucket[i])[position];    
+  }
+  else
+  {
+    printf("** HashTable Error: attempted to query the value of a non-existent key\n");
+    printf("                    The return value should be ignored.\n");
+    return_value = illegal_value;
+  }
+  return return_value;
+}
+
+  
+template <class K, class T> T& HashTable<K,T>::operator()( K key )
+{
+  int i, position;
+  T return_value;
+
+  position = IsDefined( key );
+  if( position != 0 )
+  {
+    i = ValidatedHash( key );
+    return (value_bucket[i])[position];    
+  }
+  else
+  {
+    printf("** HashTable Error: attempted to modify the value of a non-existent key\n");
+    return illegal_value;
+  }
+}
+
+
