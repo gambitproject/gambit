@@ -149,6 +149,8 @@ IMPLEMENT_APP(GambitApp)
 //                       class GambitFrame
 //=====================================================================
 
+const int idGAMELISTCTRL = 1300;
+
 GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
 			 const wxPoint &p_position, const wxSize &p_size)
   : wxFrame(p_parent, -1, p_title, p_position, p_size),
@@ -191,12 +193,30 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
 
   CreateStatusBar();
   MakeToolbar();
+
+  m_gameListCtrl = new wxListCtrl(this, idGAMELISTCTRL, wxDefaultPosition,
+				  wxDefaultSize,
+				  wxLC_REPORT | wxLC_SINGLE_SEL);
+  m_gameListCtrl->InsertColumn(0, "Title");
+  m_gameListCtrl->InsertColumn(1, "Filename");
+  m_gameListCtrl->InsertColumn(2, "Efg");
+  m_gameListCtrl->InsertColumn(3, "Nfg");
 }
 
 GambitFrame::~GambitFrame()
 {
   wxConfig config("Gambit");
   m_fileHistory.Save(config);
+
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_nfg != 0) {
+      delete m_gameList[i]->m_nfg;
+    }
+    if (m_gameList[i]->m_efg != 0) {
+      delete m_gameList[i]->m_efg;
+    }
+    delete m_gameList[i];
+  }
 }
 
 #include "bitmaps/new.xpm"
@@ -466,16 +486,18 @@ void GambitFrame::OnNew(wxCommandEvent &)
       for (int pl = 1; pl <= efgPage->NumPlayers(); pl++) {
 	efg->NewPlayer()->SetName(efgPage->GetName(pl));
       }
-      EfgShow *efgShow = new EfgShow(*efg, 0, this);
+      EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName("");
+      AddGame(efg, efgShow);
     }
     else {
       Nfg *nfg = new Nfg(nfgPage->NumStrats());
       for (int pl = 1; pl <= nfgPage->NumPlayers(); pl++) {
 	nfg->Players()[pl]->SetName(nfgPage->GetName(pl));
       }
-      NfgShow *nfgShow = new NfgShow(*nfg, 0, this);
+      NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName("");
+      AddGame(nfg, nfgShow);
     }
   }
 
@@ -533,8 +555,9 @@ void GambitFrame::LoadFile(const gText &p_filename)
       else {
 	m_fileHistory.AddFileToHistory((char *) p_filename);
       }
-      NfgShow *nfgShow = new NfgShow(*nfg, 0, this);
+      NfgShow *nfgShow = new NfgShow(*nfg, this);
       nfgShow->SetFileName(p_filename);
+      AddGame(nfg, nfgShow);
       return;
     }
     catch (gFileInput::OpenFailed &) {
@@ -555,8 +578,9 @@ void GambitFrame::LoadFile(const gText &p_filename)
 	m_fileHistory.AddFileToHistory((char *) p_filename);
       }
 
-      EfgShow *efgShow = new EfgShow(*efg, 0, this);
+      EfgShow *efgShow = new EfgShow(*efg, this);
       efgShow->SetFileName(filename);
+      AddGame(efg, efgShow);
       return;
     }
     catch (gFileInput::OpenFailed &) { 
@@ -570,11 +594,111 @@ void GambitFrame::LoadFile(const gText &p_filename)
 
 void GambitFrame::OnCloseWindow(wxCloseEvent &)
 {
+  while (m_gameList.Length() > 0) {
+    if (m_gameList[1]->m_efgShow && m_gameList[1]->m_nfgShow) {
+      delete m_gameList[1]->m_nfgShow;
+      delete m_gameList[1]->m_efgShow;
+    }
+    else if (m_gameList[1]->m_nfgShow) {
+      delete m_gameList[1]->m_nfgShow;
+    }
+    else {
+      delete m_gameList[1]->m_efgShow;
+    }
+  }
+
   wxKillHelp();
   //  wout->OnClose(); werr->OnClose();
   Destroy();
 }
 
+void GambitFrame::UpdateGameList(void)
+{
+  m_gameListCtrl->DeleteAllItems();
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    Game *game = m_gameList[i];
+    if (game->m_efg != 0) {
+      m_gameListCtrl->InsertItem(i - 1, (char *) game->m_efg->GetTitle());
+    }
+    else {
+      m_gameListCtrl->InsertItem(i - 1, (char *) game->m_nfg->GetTitle());
+    }
+    m_gameListCtrl->SetItem(i - 1, 2, (game->m_efg != 0) ? "Yes" : "No");
+    m_gameListCtrl->SetItem(i - 1, 3, (game->m_nfg != 0) ? "Yes" : "No");
+  }
+}
+
+void GambitFrame::AddGame(Efg *p_efg, EfgShow *p_efgShow)
+{
+  Game *game = new Game(p_efg);
+  game->m_efgShow = p_efgShow;
+  m_gameList.Append(game);
+  UpdateGameList();
+}
+
+void GambitFrame::AddGame(Nfg *p_nfg, NfgShow *p_nfgShow)
+{
+  Game *game = new Game(p_nfg);
+  game->m_nfgShow = p_nfgShow;
+  m_gameList.Append(game);
+  UpdateGameList();
+}
+
+void GambitFrame::AddGame(Efg *p_efg, Nfg *p_nfg, NfgShow *p_nfgShow)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_efg == p_efg) {
+      m_gameList[i]->m_nfg = p_nfg;
+      m_gameList[i]->m_nfgShow = p_nfgShow;
+      break;
+    }
+  }
+  UpdateGameList();
+}
+
+void GambitFrame::RemoveGame(Efg *p_efg)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_efg == p_efg) {
+      delete m_gameList.Remove(i);
+      delete p_efg;
+      break;
+    }
+  }
+  UpdateGameList();
+}
+
+void GambitFrame::RemoveGame(Nfg *p_nfg)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_nfg == p_nfg) {
+      if (m_gameList[i]->m_efg == 0) {
+	delete m_gameList.Remove(i);
+      }
+      else {
+	m_gameList[i]->m_nfg = 0;
+	m_gameList[i]->m_nfgShow = 0;
+      }
+      delete p_nfg;
+    }
+  }
+  UpdateGameList();
+}
+
+void GambitFrame::SetActiveWindow(EfgShow *p_efgShow)
+{
+  for (int i = 1; i <= m_gameList.Length(); i++) {
+    if (m_gameList[i]->m_efgShow == p_efgShow) {
+      wxListItem item;
+      item.m_mask = wxLIST_MASK_STATE;
+      item.m_itemId = i - 1;
+      item.m_state = wxLIST_STATE_SELECTED;
+      item.m_stateMask = wxLIST_STATE_SELECTED;
+      m_gameListCtrl->SetItem(item);
+      return;
+    }
+  }
+}
 
 //
 // A general-purpose dialog box to display the description of the exception
@@ -586,4 +710,8 @@ void guiExceptionDialog(const gText &p_message, wxWindow *p_parent,
   wxMessageBox((char *) message, "Gambit Error", p_style, p_parent);
 }
 
+#include "base/garray.imp"
+#include "base/gblock.imp"
 
+template class gArray<GambitFrame::Game *>;
+template class gBlock<GambitFrame::Game *>;

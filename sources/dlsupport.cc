@@ -8,6 +8,7 @@
 #include "wxmisc.h"
 
 #include "base/base.h"
+#include "efstrat.h"
 #include "gambit.h"
 #include "nfgshow.h"
 #include "dlelim.h"

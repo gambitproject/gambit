@@ -31,9 +31,28 @@ public:
 
 DECLARE_APP(GambitApp)
 
+class Efg;
+class EfgShow;
+class Nfg;
+class NfgShow;
+
 class GambitFrame : public wxFrame {
 private:
   wxFileHistory m_fileHistory;
+  wxListCtrl *m_gameListCtrl;
+
+  class Game {
+  public:
+    Efg *m_efg;
+    EfgShow *m_efgShow;
+    Nfg *m_nfg;
+    NfgShow *m_nfgShow;
+
+    Game(Efg *p_efg) : m_efg(p_efg), m_efgShow(0), m_nfg(0), m_nfgShow(0) { }
+    Game(Nfg *p_nfg) : m_efg(0), m_efgShow(0), m_nfg(p_nfg), m_nfgShow(0) { }
+  };
+
+  gBlock<Game *> m_gameList;
 
   // Menu event handlers
   void OnNew(wxCommandEvent &);
@@ -46,13 +65,23 @@ private:
   void OnCloseWindow(wxCloseEvent &);
 
   void MakeToolbar(void);
-  
+  void UpdateGameList(void);
+
 public:
   GambitFrame(wxFrame *p_parent, const wxString &p_title,
 	      const wxPoint &p_position, const wxSize &p_size);
   virtual ~GambitFrame();
 
   void LoadFile(const gText &);
+
+  void AddGame(Efg *, EfgShow *);
+  void AddGame(Nfg *, NfgShow *);
+  void AddGame(Efg *, Nfg *, NfgShow *);
+  void RemoveGame(Efg *);
+  void RemoveGame(Nfg *);
+
+  void SetActiveWindow(EfgShow *);
+  void SetActiveWindow(NfgShow *);
 
   DECLARE_EVENT_TABLE()
 };

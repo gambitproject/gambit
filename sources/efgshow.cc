@@ -32,7 +32,6 @@
 #include "efgcursor.h"
 #include "efgsoln.h"
 #include "efgsolng.h"
-#include "efgnfgi.h"
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
@@ -176,10 +175,10 @@ END_EVENT_TABLE()
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
+EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    EfgNfgInterface(gEFG, p_nfg), EfgClient(&p_efg),
-    parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
+    EfgClient(&p_efg),
+    m_parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
     m_solutionTable(0), m_solutionSashWindow(0), m_cursorWindow(0)
 {
@@ -261,7 +260,7 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
 
 EfgShow::~EfgShow()
 {
-  delete &m_efg;
+  m_parent->RemoveGame(&m_efg);
 }
 
 void EfgShow::OnSelectedMoved(const Node *n)
@@ -379,7 +378,6 @@ void EfgShow::OnProfilesDelete(wxCommandEvent &)
 
 void EfgShow::SolutionToEfg(const BehavProfile<gNumber> &s, bool set)
 {
-  assert(Interface());    // we better have someone to get a solution from!
   m_solutionTable->Append(s);
 
   if (set) {
@@ -1788,9 +1786,18 @@ void EfgShow::OnSolveNormalReduced(wxCommandEvent &)
     }
   }
     
-  Nfg *N = MakeReducedNfg(*m_currentSupport);
-  if (N) {
-    (void) new NfgShow(*N, (EfgNfgInterface *) this, this);
+  if (m_efg.AssociatedNfg() != 0) {
+    return;
+  }
+
+  Nfg *nfg = MakeReducedNfg(*m_currentSupport);
+  if (nfg) {
+    NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
+    m_parent->AddGame(&m_efg, nfg, nfgShow);
+  }
+  else {
+    wxMessageBox("Could not create normal form game.\n",
+		 "Reduced normal form", wxOK);
   }
 }
 
@@ -1808,7 +1815,7 @@ void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
     
   Nfg *N = MakeAfg(m_efg);
   if (N) {
-    (void) new NfgShow(*N, (EfgNfgInterface *) this, this);
+    (void) new NfgShow(*N, m_parent);
   }
 }
 

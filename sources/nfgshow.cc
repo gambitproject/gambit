@@ -95,10 +95,9 @@ END_EVENT_TABLE()
 //                      class NfgShow: Lifecycle
 //----------------------------------------------------------------------
 
-NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
-  : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
-    EfgNfgInterface(gNFG, efg),
-    m_nfg(p_nfg),
+NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
+  : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
+    m_parent(p_parent), m_nfg(p_nfg),
     m_table(0), m_solutionTable(0), m_solutionSashWindow(0)
 {
 #ifdef __WXMSW__
@@ -147,8 +146,8 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
 }
 
 NfgShow::~NfgShow()
-{ 
-  delete &m_nfg;
+{
+  m_parent->RemoveGame(&m_nfg);
 }
 
 //----------------------------------------------------------------------
@@ -386,7 +385,6 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
     }
   }
 
-  InterfaceDied();
   Show(false);
   Destroy();
 }
@@ -554,7 +552,6 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
     
   if (dialog.ShowModal() == wxID_OK) {
     m_nfg.SetOutcome(m_table->GetProfile(), dialog.GetOutcome());
-    InterfaceDied();
     m_table->OnChangeValues();
   }
 }
@@ -562,7 +559,6 @@ void NfgShow::OnEditOutcomeAttach(wxCommandEvent &)
 void NfgShow::OnEditOutcomeDetach(wxCommandEvent &)
 {
   m_nfg.SetOutcome(m_table->GetProfile(), 0);
-  InterfaceDied();
   m_table->OnChangeValues();
 }
 
@@ -577,7 +573,6 @@ void NfgShow::OnEditOutcomeNew(wxCommandEvent &)
     for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++)
       m_nfg.SetPayoff(outc, pl, payoffs[pl]);
     outc->SetName(dialog.Name());
-    InterfaceDied();
   }
 }
 
@@ -590,7 +585,6 @@ void NfgShow::OnEditOutcomeDelete(wxCommandEvent &)
     
   if (dialog.ShowModal() == wxID_OK) {
     m_nfg.DeleteOutcome(dialog.GetOutcome());
-    InterfaceDied();
     m_table->OnChangeValues();
   }
 }
@@ -1159,10 +1153,7 @@ void NfgShow::SetFileName(const gText &p_fileName)
 
 void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
 {
-  if (!InterfaceOk()) {  // we better have someone to send solutions to
-    return;
-  }
-  
+#ifdef NOT_PORTED_YET
   const Efg *efg = InterfaceObjectEfg();
 
   if (efg->AssociatedNfg() != &m_nfg) 
@@ -1180,6 +1171,7 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
   EFSupport S(*InterfaceObjectEfg());
   BehavProfile<gNumber> bp(mp);
   SolutionToEfg(bp, set);
+#endif  // NOT_PORTED_YET
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
@@ -1204,7 +1196,6 @@ void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
     outc->SetName(dialog.Name());
 
     m_table->OnChangeValues();
-    InterfaceDied();
   }
 }
 

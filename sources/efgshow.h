@@ -11,7 +11,6 @@
 #include "wx/sashwin.h"
 #include "wx/printdlg.h"
 
-#include "efgnfgi.h"
 #include "gambit.h"
 #include "efgconst.h"
 #include "behavsol.h"
@@ -23,9 +22,9 @@ class TreeZoomWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame, public EfgNfgInterface, public EfgClient {
+class EfgShow : public wxFrame, public EfgClient {
 private:
-  wxFrame *parent;
+  GambitFrame *m_parent;
   FullEfg &m_efg;
   TreeWindow *m_treeWindow;
   TreeZoomWindow *m_treeZoomWindow;
@@ -163,7 +162,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent);
+  EfgShow(FullEfg &p_efg, GambitFrame *p_parent);
   virtual ~EfgShow();
 
   // Solution routines

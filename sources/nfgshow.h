@@ -19,7 +19,7 @@
 #include "nfgiter.h"
 #include "mixedsol.h"
 
-#include "efgnfgi.h"
+#include "gambit.h"
 
 const int idNFG_SOLUTION_LIST = 1900;
 
@@ -27,8 +27,9 @@ class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
-class NfgShow : public wxFrame, public EfgNfgInterface {
+class NfgShow : public wxFrame {
 private:
+  GambitFrame *m_parent;
   Nfg &m_nfg;
 
   NfgTable *m_table;
@@ -105,7 +106,7 @@ private:
   void OnSolutionSelected(wxListEvent &);
 
 public:
-  NfgShow(Nfg &N, EfgNfgInterface *efg = 0, wxFrame *pframe = 0);
+  NfgShow(Nfg &N, GambitFrame *p_frame);
   virtual ~NfgShow();
 
   NFSupport *CurrentSupport(void) const { return m_currentSupport; }
