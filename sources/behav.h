@@ -12,6 +12,8 @@
 #include "efstrat.h"
 
 #include "gdpvect.h"
+#include "rectangl.h"
+#include "ineqsolv.h"
 
 class Infoset;
 template <class T> class BehavNode;
@@ -38,7 +40,7 @@ protected:
   void CondPayoff(BehavNode<T> *, T, gPVector<T> &, gDPVector<T> &) const;
   void NodeRealizProbs(BehavNode<T> *, T, int &, gArray<T> &) const;
   void Beliefs(Node *, T, gDPVector<T> &, gPVector<T> &) const;
-  
+
 public:
   // CONSTRUCTORS, DESTRUCTOR, CONSTRUCTIVE OPERATORS
   BehavProfile(const EFSupport &);
@@ -51,10 +53,12 @@ public:
   // GENERAL DATA ACCESS
   Efg &Game(void) const   { return const_cast<Efg &>(*m_efg); }
   const EFSupport &Support(void) const   { return m_support; }
+  const EFSupport *SupportPtr(void) const   { return &m_support; }
 
   virtual bool IsAssessment(void) const { return false; }
 
   const T &GetValue(Infoset *, int) const;
+  const T &GetValue(const Action *)       const; 
 
   T LiapValue(void) const;
   void Gripe(gDPVector<T> &value) const;
