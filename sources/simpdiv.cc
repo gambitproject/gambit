@@ -33,8 +33,8 @@ template <class T> SimpdivModule<T>::SimpdivModule(const Nfg<T> &n,
 						   const SimpdivParams &p,
 						   const NFSupport &s)
   : N(n), params(p), support(s), 
-    y(n, s),
-    nevals(0), nits(0), nstrats(s.SupportDimensions()),
+    y(n, s), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
+    ibar(1), nevals(0), nits(0), nstrats(s.SupportDimensions()),
     ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
     U(s.SupportDimensions()), TT(s.SupportDimensions()),
     ab(s.SupportDimensions()), besty(s.SupportDimensions()),
@@ -402,7 +402,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 
   gWatch watch;
 
-  if(leash==0)leash=32000;
+  if(leash==0)leash=32000;  // not the best way to do this.  Change this!
   bestz=(T)1.0e30;
   mingrid=(T)(2);
   for(i=1;i<=params.nRestarts;i++)mingrid=mingrid*(T)(2);
@@ -410,7 +410,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 //  *params.tracefile << "\nleash = " << leash << " ndivs = " << ndivs;
 //  *params.tracefile << " mingrid = " << mingrid;
   
-  nplayers=N.NumPlayers();
+//   nplayers=N.NumPlayers();
   
   ((gVector<T> &) y).operator=((T) 0);
 //  *params.tracefile << "\nnplayers =" << nplayers;

@@ -34,7 +34,7 @@ template <class T> class SimpdivModule  {
     T pay,d,maxz,bestz,mingrid;
     double time;
     gArray<int> nstrats,ylabel;
-    gVector<T> M;
+//    gVector<T> M;
     gRectArray<int> labels,pi;
     gPVector<int> U,TT;
     gPVector<T> ab,besty,v;
