@@ -2489,6 +2489,4 @@ TEMPLATE class gSortList<gString>;
 TEMPLATE class gListSorter<gString>;
 
 
-GSM __gsm__(256);
-GSM& _gsm = __gsm__;
 

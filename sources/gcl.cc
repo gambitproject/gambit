@@ -67,15 +67,19 @@ return 1;
 return 1;	// we did not really fix anything, but want no more warnings
 }
 
+GSM* _gsm;
+
 int main(int ,char **)
 {
-	// Set up the error handling functions:
-	signal(SIGFPE, (fptr)SigFPEHandler);
+  // Set up the error handling functions:
+  signal(SIGFPE, (fptr)SigFPEHandler);
+  
+  _gsm = new GSM(256);
 
-	GCLCompiler C;
-
-	C.Parse();
-
-	return 0;
+  GCLCompiler C;
+  
+  C.Parse();
+  
+  return 0;
 }
 

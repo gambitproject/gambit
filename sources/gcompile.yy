@@ -22,7 +22,7 @@
 #include "gsmfunc.h"
 #include "portion.h"
 
-extern GSM& _gsm;  // defined at the end of gsm.cc
+extern GSM* _gsm;  // defined at the end of gsm.cc
 
 %}
 
@@ -65,7 +65,7 @@ extern GSM& _gsm;  // defined at the end of gsm.cc
                                labels(4), \
                                listlen(4), matching(4), \
                                filenames(4), lines(4), \
-                               gsm(_gsm), quit(false)
+                               gsm(*_gsm), quit(false)
 
 %define CONSTRUCTOR_CODE       filenames.Push("stdin"); lines.Push(1); \
                                inputs.Push(new gFileInput("gclini.gcl")); \

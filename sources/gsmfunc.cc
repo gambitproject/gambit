@@ -664,14 +664,46 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name) &&
 	   (_FuncInfo[ f_index ].ParamInfo[ index ].Spec ==
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Spec))
+	{
 	  same_params = same_params & true;
+	}
 	else
 	{
 	  same_params = false;
 	  break;
 	}
       }
-      
+
+      if(same_params)
+      {
+	if(_FuncInfo[f_index].NumParams < newfunc->_FuncInfo[i].NumParams)
+	{
+	  for( index = _FuncInfo[ f_index ].NumParams;
+	      index < newfunc->_FuncInfo[ i ].NumParams; 
+	      index++ )
+	  {
+	    if(newfunc->_FuncInfo[i].ParamInfo[index].DefaultValue==0)
+	    {
+	      same_params = false;
+	      break;
+	    }
+	  }
+	}
+	else if(_FuncInfo[f_index].NumParams > newfunc->_FuncInfo[i].NumParams)
+	{
+	  for( index = newfunc->_FuncInfo[ i ].NumParams; 
+	      index < _FuncInfo[ f_index ].NumParams;
+	      index++ )
+	  {
+	    if(_FuncInfo[f_index].ParamInfo[index].DefaultValue==0)
+	    {
+	      same_params = false;
+	      break;
+	    }
+	  }
+	}
+      }
+
       if(same_params)
       {
 	result = false;

@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "gmisc.h"
 #include "gsm.h"
 #include "portion.h"
 #include "gsmfunc.h"
@@ -20,22 +21,71 @@
 
 #include "nfg.h"
 
-extern GSM& _gsm;
+extern GSM* _gsm;
+
+
+//---------------------------------------
+//           Randomize
+//---------------------------------------
+
+long _idum = -1;
+
+Portion* GSM_Randomize_Integer(Portion** param)
+{
+  long _RandomSeed = ((IntPortion*) param[1])->Value();
+  if(_RandomSeed > 0)
+    _RandomSeed = -_RandomSeed;
+  long v;
+  if(_RandomSeed != 0)
+    _idum = _RandomSeed;
+  v = ran1(&_idum);
+  return new IntValPortion(v);
+}
+
+Portion* GSM_Randomize_Float(Portion** param)
+{
+  long _RandomSeed = ((IntPortion*) param[1])->Value();
+  if(_RandomSeed > 0)
+    _RandomSeed = -_RandomSeed;
+  double v;
+  if(_RandomSeed != 0)
+    _idum = _RandomSeed;
+  v = (double) ran1(&_idum) / IM;
+  return new FloatValPortion(v);
+}
+
+Portion* GSM_Randomize_Rational(Portion** param)
+{
+  long _RandomSeed = ((IntPortion*) param[1])->Value();
+  if(_RandomSeed > 0)
+    _RandomSeed = -_RandomSeed;
+  gRational v;
+  if(_RandomSeed != 0)
+    _idum = _RandomSeed;
+  v = (gRational) ran1(&_idum) / IM; 
+  return new RationalValPortion(v);
+}
+
+
+
+//-------------------------------------------
+//              Assign
+//-------------------------------------------
 
 
 Portion* GSM_Assign(Portion** param)
 {
-  _gsm.PushRef(((TextPortion*) param[0])->Value());
+  _gsm->PushRef(((TextPortion*) param[0])->Value());
   Portion* p = param[1]->ValCopy();
-  _gsm.Push(p);
-  _gsm.Assign();
+  _gsm->Push(p);
+  _gsm->Assign();
   return p->RefCopy();
 }
 
 Portion* GSM_UnAssign(Portion** param)
 {
-  _gsm.PushRef(((TextPortion*) param[0])->Value());
-  return _gsm.UnAssignExt();
+  _gsm->PushRef(((TextPortion*) param[0])->Value());
+  return _gsm->UnAssignExt();
 }
 
 Portion* GSM_Fake(Portion**)
@@ -2004,7 +2054,7 @@ Portion *GSM_Version(Portion **)
 
 Portion* GSM_Help(Portion** param)
 {
-  return _gsm.Help(((TextPortion*) param[0])->Value());
+  return _gsm->Help(((TextPortion*) param[0])->Value());
 }
 
 gString GetLine(gInput& f)
@@ -2028,7 +2078,7 @@ Portion* GSM_Manual(Portion** param)
 {
   gString txt = ((TextPortion*) param[0])->Value();
   gOutput& s = ((OutputPortion*) param[1])->Value();
-  ListPortion* Prototypes = (ListPortion*) _gsm.Help(txt);
+  ListPortion* Prototypes = (ListPortion*) _gsm->Help(txt);
   int i;
   int body;
 
@@ -2134,12 +2184,12 @@ Portion* GSM_Manual(Portion** param)
 
 Portion* GSM_HelpVars(Portion** param)
 {
-  return _gsm.HelpVars(((TextPortion*) param[0])->Value());
+  return _gsm->HelpVars(((TextPortion*) param[0])->Value());
 }
 
 Portion* GSM_Clear(Portion**)
 {
-  _gsm.Clear();
+  _gsm->Clear();
   return new BoolValPortion(true);
 }
 
@@ -2816,6 +2866,22 @@ void Init_gsmoper( GSM* gsm )
 
   FuncObj = new FuncDescObj( (gString) "Date" );
   FuncObj->SetFuncInfo( GSM_Date, 0 );
+  gsm->AddFunction( FuncObj );
+
+
+  FuncObj = new FuncDescObj( (gString) "Randomize" );
+  FuncObj->SetFuncInfo( GSM_Randomize_Integer, 2 );
+  FuncObj->SetParamInfo( GSM_Randomize_Integer, 0, "x", porINTEGER );
+  FuncObj->SetParamInfo( GSM_Randomize_Integer, 1, "seed", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetFuncInfo( GSM_Randomize_Float, 2 );
+  FuncObj->SetParamInfo( GSM_Randomize_Float, 0, "x", porFLOAT );
+  FuncObj->SetParamInfo( GSM_Randomize_Float, 1, "seed", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetFuncInfo( GSM_Randomize_Rational, 2 );
+  FuncObj->SetParamInfo( GSM_Randomize_Rational, 0, "x", porRATIONAL );
+  FuncObj->SetParamInfo( GSM_Randomize_Rational, 1, "seed", porINTEGER,
+			new IntValPortion(0));
   gsm->AddFunction( FuncObj );
 
 }

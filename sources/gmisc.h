@@ -53,6 +53,11 @@ void SetSeed(unsigned int);
 // Generate a random variable from the distribution U[0..1]
 double Uniform(void);
 
+// Generates a random number between 0 and IM exclusive of endpoints
+// Adapted from _Numerical_Recipes_for_C_
+#define IM 2147483647
+long ran1(long* idum);
+
 
 //
 // Converting between strings and other datatypes

@@ -137,3 +137,7 @@ void PrintPortionSpec( gOutput& s, PortionSpec type )
   s << PortionSpecToText( type );
 }
 
+gOutput& operator << ( gOutput& s, PortionSpec spec )
+{
+  PrintPortionSpec( s, spec );
+}

@@ -116,7 +116,7 @@ bool PortionSpecMatch( const PortionSpec& t1, const PortionSpec& t2 );
 gString PortionSpecToText( const PortionSpec& type );
 PortionSpec TextToPortionSpec( const gString& text );
 void PrintPortionSpec( gOutput& s, PortionSpec type );
-
+gOutput& operator << ( gOutput& s, PortionSpec spec );
 
 #endif // GSMINCL_H
 
