@@ -13,15 +13,24 @@ template <class K, class T> class HashTable
   gList<T> *value_bucket;
   int num_of_buckets;
   T illegal_value;
+  int ValidatedHash( K key ) const;
   virtual int NumBuckets() const = 0;
   virtual int Hash( K key ) const = 0;
-  int ValidatedHash( K key ) const;
+
+  //The derived classes need to define this function to do clean ups when
+  //a T type member is being removed.
+  virtual void DeleteAction( T value ) { return; }
+
+ protected:
+  //This function should be called in the constructor of the decendents
+  //because the constructor cannot call virtual function NumBuckets()
+  void Init( void );
 
  public:
   HashTable();
-  virtual ~HashTable();
+  ~HashTable();
   int IsDefined( K key ) const;
-  int Define( K key, T value );
+  void Define( K key, T value );
   void Remove( K key );
   T operator()( K key ) const;
   T& operator()( K key );

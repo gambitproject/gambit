@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include "gsm.h"
 #include "rational.h"
+#include "gstring.h"
 
 
 int main( void )
@@ -17,6 +18,11 @@ int main( void )
   gRational r_1 = (gRational) 19/3;
   gRational r_2 = (gRational) 23/7;
   gRational r_temp;
+  gString x = "x";
+  gString y = "y";
+  gString z = "z";
+
+
   GSM *machine = new GSM( 256 );
   
 
@@ -57,9 +63,6 @@ int main( void )
   machine->Negate();
   machine->Dump();
 
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
   gout << "Attempt to add different types()\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -67,84 +70,113 @@ int main( void )
   machine->Add();
   machine->Dump();
 
-  gout << "Testing Pop() functions\n";
-  machine->Push( d_1 );
-  machine->Push( i_1 );
-  machine->Push( r_1 );
-  gout << "Initial Depth(): " << machine->Depth() << "\n";
-  machine->Pop( r_temp );
-  machine->Pop( i_temp );
-  machine->Pop( d_temp );
-  gout << r_temp << "\n";
-  gout << i_temp << "\n";
-  gout << d_temp << "\n";
-  gout << "Final Depth(): " << machine->Depth() << "\n\n";
- 
+
   gout << "*********************** press return to continue ************";
   gin >> cont;
- 
-  d_temp = (double) 0;
-  i_temp = (gInteger) 0;
-  r_temp = (gRational) 0;
-  gout << "Initial d_temp :" << d_temp << "\n";
-  gout << "Initial i_temp :" << i_temp << "\n";
-  gout << "Initial r_temp :" << r_temp << "\n";
-  gout << "\n";
-  gout << "Testing: attempt to Pop() with the wrong type\n";
-  gout << "Push() double:    " << d_1 << "\n";
-  gout << "Push() gInteger:  " << i_1 << "\n";
-  gout << "Push() gRational: " << r_1 << "\n";
-  machine->Push( d_1 );
-  machine->Push( i_1 );
-  machine->Push( r_1 );
-  gout << "Pop( double d_temp )\n";
-  machine->Pop( d_temp );
-  gout << "Pop( gInteger i_temp )\n";
-  machine->Pop( i_temp );
-  gout << "Pop( gRational r_temp )\n";
-  machine->Pop( r_temp );
-  gout << "resulting d_temp: " << d_temp << "\n";
-  gout << "resulting i_temp: " << i_temp << "\n";
-  gout << "resulting r_temp: " << r_temp << "\n";
-  gout << "\n";
-  gout << "Dumping stack:\n";
+
+
+  gout << "Testing PushRef()\n";   // Push() and PushRef() are interchangeable
+  machine->Push( x );              // for gStrings
+  machine->Push( y );
+  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
   machine->Dump();
-
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
-  d_temp = (double) 0;
-  i_temp = (gInteger) 0;
-  r_temp = (gRational) 0;
-  gout << "Initial d_temp :" << d_temp << "\n";
-  gout << "Initial i_temp :" << i_temp << "\n";
-  gout << "Initial r_temp :" << r_temp << "\n";
-  gout << "\n";
-  gout << "Testing Peek()\n";
-  gout << "Pushing double:    " << d_1 << "\n";
-  machine->Push( d_1 );
-  gout << "Pushing gInteger:  " << i_1 << "\n";
-  machine->Push( i_1 );
-  gout << "Pushing gRational: " << r_1 << "\n";
-  machine->Push( r_1 );
-  gout << "Attempt to Peek() with double\n";
-  machine->Peek( d_temp );
-  gout << "Attempt to Peek() with gInteger\n";
-  machine->Peek( i_temp );
-  gout << "Attempt to Peek() with gRational\n";
-  machine->Peek( r_temp );
-  gout << "\n";
-  gout << "Dumping stack:\n";
-  machine->Dump();
-  gout << "Resulting d_temp :" << d_temp << "\n";
-  gout << "Resulting i_temp :" << i_temp << "\n";
-  gout << "Resulting r_temp :" << r_temp << "\n";
-
-  gout << "*********************** press return to continue ************";
-  gin >> cont;
-
   
+  gout << "Assigning x = (double)7\n";
+  machine->Assign( x, (double)7 );
+  gout << "Assigning y = (double)11\n";
+  machine->Assign( y, (double)11 );
+  gout << "Assigning z = (double)13\n";
+  machine->Assign( z, (double)13 );
+  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
+  machine->Push( x );
+  machine->Push( y );
+  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  machine->Negate();
+  machine->Subtract();
+  machine->Multiply();
+  machine->Subtract();
+  machine->Divide();
+  machine->Add();
+  machine->Dump();
+
+  gout << "Assigning x = (gInteger)5\n";
+  machine->Assign( x, (gInteger)5 );
+  gout << "Assigning y = (gInteger)7\n";
+  machine->Assign( y, (gInteger)7 );
+  gout << "Assigning z = (gInteger)11\n";
+  machine->Assign( z, (gInteger)11 );
+  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
+  machine->Push( x );
+  machine->Push( y );
+  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  machine->Negate();
+  machine->Subtract();
+  machine->Multiply();
+  machine->Subtract();
+  machine->Divide();
+  machine->Add();
+  machine->Dump();
+
+  gout << "Assigning y = (gRational)7\n";
+  machine->Assign( y, (gRational)7 );
+  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
+  machine->Push( x );
+  machine->Push( y );
+  machine->Push( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  machine->Negate();
+  machine->Subtract();
+  machine->Multiply();
+  machine->Subtract();
+  machine->Divide();
+  machine->Add();
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+
+  gout << "Testing PushVal()\n";
+  machine->UnAssign( x );
+  machine->UnAssign( y );
+  machine->UnAssign( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  machine->PushRef( x );
+  machine->PushRef( y );
+  machine->PushRef( z );
+  gout << "PushVal (gRational)11 into z\n";
+  machine->PushVal( (gRational)11 );
+  gout << "PushVal (gRational)7 into y\n";
+  machine->PushVal( (gRational)7 );
+  gout << "PushVal (gRational)5 into x\n";
+  machine->PushVal( (gRational)5 );
+  gout << "\nTesting x + y / ( z - x * ( y - ( -z ) ) )\n";
+  machine->Negate();
+  machine->Subtract();
+  machine->Multiply();
+  machine->Subtract();
+  machine->Divide();
+  machine->Add();
+  machine->Dump();
+
+  gout << "Attempt to do additional (illegal) PushVals\n";
+  machine->PushVal( (gRational)13 );
+
+
+
   delete machine;
 
   return 0;

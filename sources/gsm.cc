@@ -9,6 +9,18 @@
 #include <stdio.h>
 
 
+#include "hash.imp"
+
+
+class RefHashTable : public HashTable<gString, Portion *>
+{
+ private:
+  int NumBuckets( void ) const { return 1; }
+  int Hash( gString ref ) const { return 0; }
+ public:
+  RefHashTable() { Init(); }
+};
+
 
 
 //--------------------------------------------------------------------
@@ -64,6 +76,19 @@ gRational& gRational_Portion::Value( void )
 { return value; }
 
 
+//------------------------- Reference type ------------------------------
+Reference_Portion::Reference_Portion( const gString new_value )
+     : value( new_value )
+{
+  type = porREFERENCE;
+}
+
+gString Reference_Portion::Value( void ) const
+{ return value; }
+gString& Reference_Portion::Value( void )
+{ return value; }
+
+
 
 
 
@@ -75,11 +100,14 @@ GSM::GSM( int size )
 {
   assert( size > 0 );
   stack = new gStack<Portion *>( size );
+  RefStack = new gStack<gString>( size );
+  RefTable = new RefHashTable;
   assert( stack != 0 );
 }
 
 GSM::~GSM()
 {
+  delete RefTable;
   delete stack;
 }
 
@@ -95,10 +123,79 @@ int GSM::MaxDepth( void ) const
 }
 
 
+//-------------------------------------------------------
+  //  Assign & UnAssign functions 
+//-------------------------------------------------------
+void GSM::Assign( const gString ref, const double data )
+{
+  Portion *data_portion;
+
+  if( !RefTable->IsDefined( ref ) )
+  {
+    data_portion = new double_Portion( data );
+    RefTable->Define( ref, data_portion );
+  }
+  else
+  {
+    data_portion = (*RefTable)( ref );
+    delete data_portion;
+    data_portion = new double_Portion( data );
+    (*RefTable)( ref ) = data_portion;
+  }
+}
+
+void GSM::Assign( const gString ref, const gInteger data )
+{
+  Portion *data_portion;
+
+  if( !RefTable->IsDefined( ref ) )
+  {
+    data_portion = new gInteger_Portion( data );
+    RefTable->Define( ref, data_portion );
+  }
+  else
+  {
+    data_portion = (*RefTable)( ref );
+    delete data_portion;
+    data_portion = new gInteger_Portion( data );
+    (*RefTable)( ref ) = data_portion;
+  }
+}
+
+void GSM::Assign( const gString ref, const gRational data )
+{
+  Portion *data_portion;
+
+  if( !RefTable->IsDefined( ref ) )
+  {
+    data_portion = new gRational_Portion( data );
+    RefTable->Define( ref, data_portion );
+  }
+  else
+  {
+    data_portion = (*RefTable)( ref );
+    delete data_portion;
+    data_portion = new gRational_Portion( data );
+    (*RefTable)( ref ) = data_portion;
+  }
+}
+
+
+void GSM::UnAssign( const gString ref )
+{
+  if( RefTable->IsDefined( ref ) )
+  {
+    RefTable->Remove( ref );
+  }
+}
+
+
+
 
 //------------------------------------------------------------------------
   // Push() functions
 //------------------------------------------------------------------------
+
 void GSM::Push( const double data )
 {
   Portion *p;
@@ -120,88 +217,74 @@ void GSM::Push( const gRational data )
   stack->Push( p );
 }
 
-
-
-//-------------------------------------------------------------------------
-  // Pop() functions
-//-------------------------------------------------------------------------
-void GSM::Pop( double &data )
+void GSM::Push( const gString data )
 {
   Portion *p;
-  p = stack->Pop();
-  if( p->Type() == porDOUBLE )
-    data = ((double_Portion *)p)->Value();
-  else
+  p = new Reference_Portion( data );
+  stack->Push( p );
+  RefStack->Push( data );
+}
+
+void GSM::PushRef( const gString data )
+{
+  Push( data );
+}
+
+
+
+
+//------------------------------------------------------------------
+  // PushVal() functions
+//------------------------------------------------------------------
+
+void GSM::PushVal( const double data )
+{
+  gString ref;
+  while( RefStack->Depth() > 0 )
   {
-    stack->Push( p );
-    gout << "** GSM Error: attempted to Pop() the wrong data type; data unchanged\n";
+    ref = RefStack->Pop();
+    if( !RefTable->IsDefined( ref ) )
+    {
+      Assign( ref, data );
+      break;
+    }
   }
-  delete p;
+  if( RefStack->Depth() <= 0 )
+    gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
 }
 
-void GSM::Pop( gInteger &data )
+void GSM::PushVal( const gInteger data )
 {
-  Portion *p;
-  p = stack->Pop();
-  if( p->Type() == porINTEGER )
-    data = ((gInteger_Portion *)p)->Value();
-  else
+  gString ref;
+  while( RefStack->Depth() > 0 )
   {
-    stack->Push( p );
-    gout << "** GSM Error: attempted to Pop() the wrong data type; data unchanged\n";
-  }  
-  delete p;
-}
-
-void GSM::Pop( gRational &data )
-{
-  Portion *p;
-  p = stack->Pop();
-  if( p->Type() == porRATIONAL )
-    data = ((gRational_Portion *)p)->Value();
-  else
-  {
-    stack->Push( p );
-    gout << "** GSM Error: attempted to Pop() the wrong data type; data unchanged\n";
+    ref = RefStack->Pop();
+    if( !RefTable->IsDefined( ref ) )
+    {
+      Assign( ref, data );
+      break;
+    }
   }
-  delete p;
+  if( RefStack->Depth() <= 0 )
+    gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
 }
 
-
-
-//---------------------------------------------------------------------
-  // Peek() functions
-//---------------------------------------------------------------------
-
-void GSM::Peek( double &data )
+void GSM::PushVal( const gRational data )
 {
-  Portion *p;
-  p = stack->Peek();
-  if( p->Type() == porDOUBLE )
-    data = ((double_Portion *)p)->Value();
-  else
-    gout << "** GSMError: attempted to Peek() the wrong data type; data unchanged\n";
+  gString ref;
+  while( RefStack->Depth() > 0 )
+  {
+    ref = RefStack->Pop();
+    if( !RefTable->IsDefined( ref ) )
+    {
+      Assign( ref, data );
+      break;
+    }
+  }
+  if( RefStack->Depth() <= 0 )
+    gerr << "** GSM Error: no undefined variable to assign PushVal()\n";
 }
 
-void GSM::Peek( gInteger &data )
-{
-  Portion *p;
-  p = stack->Peek();
-  if( p->Type() == porINTEGER )
-    data = ((gInteger_Portion *)p)->Value();
-  else
-    gout << "** GSM Error: attempted to Peek() the wrong data type; data unchanged\n";
-}
-
-void GSM::Peek( gRational &data )
-{
-  Portion *p;
-  p = stack->Peek();
-  if( p->Type() == porRATIONAL )
-    data = ((gRational_Portion *)p)->Value();
-  else
-    gout << "** GSM Error: attempted to Peek() the wrong data type; data unchanged\n";
-}
 
 
 
@@ -210,13 +293,60 @@ void GSM::Peek( gRational &data )
   // operation functions
 //---------------------------------------------------------------------
 
+Portion *GSM::resolve_ref( Reference_Portion *p )
+{
+  Portion *data, *result;
+  gString ref;
+
+  ref = p->Value();
+  if( RefTable->IsDefined( ref ) )
+  {
+    data = (*RefTable)( ref );
+
+    // A new Portion is allocated because the operations will free it;
+    // and we do not want the Portion stored in the hash table to be freed.
+    switch( data->Type() )
+    {
+    case porDOUBLE:
+      result = new double_Portion( ((double_Portion *)data)->Value() );
+      break;
+    case porINTEGER:
+      result = new gInteger_Portion( ((gInteger_Portion *)data)->Value() );
+      break;
+    case porRATIONAL:
+      result = new gRational_Portion( ((gRational_Portion *)data)->Value() );
+      break;
+    default:     
+      gerr << "** GSM Error: a variable refered to an unknown type\n";
+      assert(0);
+      result = 0;
+    }
+  }
+  else
+  {
+    gerr << "** GSM Error: attempted to operate with an undefined variable\n";
+    assert(0);
+    result = 0;
+  }
+  return result;
+}
+
+
+
+
 void GSM::operation( OperationMode mode )
 {
   Portion *p2, *p1;
   if( stack->Depth() > 1 )
-  {    
+  {
     p2 = stack->Pop();
     p1 = stack->Pop();
+    
+    if( p2->Type() == porREFERENCE )
+      p2 = resolve_ref( (Reference_Portion *)p2 );
+    if( p1->Type() == porREFERENCE )
+      p1 = resolve_ref( (Reference_Portion *)p1 );
+
     if( p1->Type() == p2->Type() )
     {
       switch( p2->Type() )
@@ -259,8 +389,8 @@ void GSM::operation( OperationMode mode )
 
 
 void GSM::double_operation( double_Portion *p1, 
-				      double_Portion *p2, 
-				      OperationMode mode )
+			   double_Portion *p2, 
+			   OperationMode mode )
 {
   switch( mode )
   {
@@ -279,7 +409,8 @@ void GSM::double_operation( double_Portion *p1,
   default:
     stack->Push( p1 );
     stack->Push( p2 );
-    gout << "** GSM Error: attempted an unsupported operation\n";
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
     return;
   }
   stack->Push( p1 );
@@ -307,7 +438,8 @@ void GSM::gInteger_operation( gInteger_Portion *p1,
   default:
     stack->Push( p1 );
     stack->Push( p2 );
-    gout << "** GSM Error: attempted an unsupported operation\n";
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
     return;
   }
   stack->Push( p1 );
@@ -335,7 +467,8 @@ void GSM::gRational_operation( gRational_Portion *p1,
   default:
     stack->Push( p1 );
     stack->Push( p2 );
-    gout << "** GSM Error: attempted an unsupported operation\n";
+    gerr << "** GSM Error: attempted an unsupported operation\n";
+    assert(0);
     return;
   }
   stack->Push( p1 );
@@ -377,6 +510,9 @@ void GSM::Negate( void )
   if( stack->Depth() > 0 )
   {
     p = stack->Pop();
+    if( p->Type() == porREFERENCE )
+      p = resolve_ref( (Reference_Portion*)p );
+
     switch( p->Type() )
     {
     case porDOUBLE:
@@ -389,7 +525,7 @@ void GSM::Negate( void )
       ((gRational_Portion *)p)->Value() = - ((gRational_Portion *)p)->Value() ;
       break;
     default:
-      gout << "** GSM Error: attempted to negate an unknown type\n";
+      gerr << "** GSM Error: attempted to negate an supported type\n";
     }
     stack->Push( p );
   }
@@ -415,10 +551,14 @@ void GSM::Dump( void )
     case porRATIONAL:
       gout << ((gRational_Portion *)p)->Value() << "    type: gRational\n" ;
       break;
+    case porREFERENCE:
+      gout << ((Reference_Portion *)p)->Value() << "    type: Reference\n" ;
+      break;
     default:
-      gout << "** GSM Error: unknown type found in stack\n";
+      gerr << "** GSM Error: unknown type found in stack\n";
     }
   }
   gout << "\n";
   assert( stack->Depth() == 0 );
 }
+

@@ -1,14 +1,14 @@
 //
-//  File: implementation of Portion class, campanion to GSM
+//  File:  header file for Portion class, campanion to GSM
 //
 //
 
 
 #include "rational.h"
+#include "gstring.h"
 
 
-
-typedef enum { porERROR, porDOUBLE, porINTEGER, porRATIONAL } PortionType;
+typedef enum { porERROR, porDOUBLE, porINTEGER, porRATIONAL, porREFERENCE } PortionType;
 
 class GSM;
 
@@ -32,7 +32,6 @@ class double_Portion : public Portion
   double_Portion( const double new_value );
   double Value( void ) const;
   double& Value( void );
-//  operator double&( void );
 };
 
 class gInteger_Portion : public Portion
@@ -44,7 +43,6 @@ class gInteger_Portion : public Portion
   gInteger_Portion( const gInteger new_value );
   gInteger Value( void ) const;
   gInteger& Value( void );
-// operator gInteger&( void );
 };
 
 class gRational_Portion : public Portion
@@ -56,6 +54,22 @@ class gRational_Portion : public Portion
   gRational_Portion( const gRational new_value );
   gRational Value( void ) const;
   gRational& Value( void );
-//  operator gRational&( void );
 };
+
+class Reference_Portion : public Portion
+{
+ private:
+  gString value;
+//  PortionType ref_data_type;
+
+ public:
+  Reference_Portion( const gString new_value );
+  gString Value( void ) const;
+  gString& Value( void );
+//  PortionType RefDataType( void );
+};
+
+
+
+
 

@@ -1,7 +1,7 @@
 
 #include "glist.imp"
 #include "hash.h"
-
+#include "gambitio.h"
 
 
 template <class K, class T> HashTable<K,T>::HashTable()
@@ -10,8 +10,37 @@ template <class K, class T> HashTable<K,T>::HashTable()
 }
 
 
+template <class K, class T> void HashTable<K,T>::Init( void )
+{
+  if( num_of_buckets == 0 )
+  {
+    if( NumBuckets() > 0 )
+    {
+      num_of_buckets = NumBuckets();
+      key_bucket = new gList<K>[ num_of_buckets ];
+      value_bucket = new gList<T>[ num_of_buckets ];
+    }
+    else
+    {
+      gerr << "** HashTable Error: NumBuckets() returned an illegal number\n";
+      assert(0);
+    }
+  }
+}
+
 template <class K, class T> HashTable<K,T>::~HashTable()
 {
+  int i;
+  T removed_value;
+
+  for( i = 0; i < num_of_buckets; i++ )
+  {
+    while( value_bucket[i].Length() > 0 )
+    {
+      removed_value = value_bucket[i].Remove( 1 );
+      DeleteAction( removed_value );
+    }
+  }
   delete[] key_bucket;
   delete[] value_bucket;
 }
@@ -21,9 +50,12 @@ template <class K, class T> int HashTable<K,T>::ValidatedHash( K key ) const
 {
   int i;
   i = Hash( key );
+
   if( i < 0 || i >= num_of_buckets )
-    printf("** HashTable Error: Hash() generated an illegal index\n");
-  
+  {
+    gerr << "** HashTable Error: Hash() generated an illegal index\n";
+    assert(0);
+  }  
   return i;
 }
 
@@ -36,45 +68,38 @@ template <class K, class T> int HashTable<K,T>::IsDefined( K key ) const
 }
 
 
-template <class K, class T> int HashTable<K,T>::Define( K key, T value )
+template <class K, class T> void HashTable<K,T>::Define( K key, T value )
 {
   int i, position;
-  int return_value;
-
-  if( num_of_buckets == 0 )
-  {
-    num_of_buckets = NumBuckets();
-    key_bucket = new gList<K>[ num_of_buckets ];
-    value_bucket = new gList<T>[ num_of_buckets ];
-  }
 
   i = ValidatedHash( key );
   position = IsDefined( key );  //ok because IsDefined returns the position
                                 //of the key in the list if it is found
-  if( position == 0 )           //not previously defined
+  if( position == 0 )           // == 0 means not previously defined
   {
     key_bucket[i].Append( key );
     value_bucket[i].Append( value );
-    return_value = SUCCESS;
   }
   else
   {
-    return_value = FAIL;
+    DeleteAction( operator()( key ) );
+    operator()( key ) = value;
   }
-  return return_value;
 }
 
 template <class K, class T> void HashTable<K,T>::Remove( K key )
 {
   int i, position;
   K removed_key;
-  
+  T removed_value;
+
   position = IsDefined( key );
   if( position != 0 )
   {
     i = ValidatedHash( key );
     removed_key = key_bucket[i].Remove( position );
-    value_bucket[i].Remove( position );
+    removed_value = value_bucket[i].Remove( position );
+    DeleteAction( removed_value );
     assert( key == removed_key );
   }
 }
@@ -93,8 +118,8 @@ template <class K, class T> T HashTable<K,T>::operator()( K key ) const
   }
   else
   {
-    printf("** HashTable Error: attempted to query the value of a non-existent key\n");
-    printf("                    The return value should be ignored.\n");
+    gerr << "** HashTable Error: attempted to query the value of a non-existent key\n";
+    gerr << "                    The return value should be ignored.\n";
     return_value = illegal_value;
   }
   return return_value;
@@ -114,9 +139,7 @@ template <class K, class T> T& HashTable<K,T>::operator()( K key )
   }
   else
   {
-    printf("** HashTable Error: attempted to modify the value of a non-existent key\n");
+    gerr << "** HashTable Error: attempted to modify the value of a non-existent key\n";
     return illegal_value;
   }
 }
-
-
