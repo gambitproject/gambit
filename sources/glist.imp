@@ -22,7 +22,6 @@ template <class T> class gNode   {
 
   public:
     // Constructors
-    gNode(void);
     gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next);
     gNode(const gNode<T> &n);
     ~gNode();
@@ -31,10 +30,6 @@ template <class T> class gNode   {
 //--------------------------------------------------------------------------
 //                 gNode<T>: Member function implementations
 //--------------------------------------------------------------------------
-
-template <class T> gNode<T>::gNode(void)
-  : prev(0), next(0)
-{ }
 
 template <class T>
 gNode<T>::gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next)
@@ -74,10 +69,8 @@ template <class T> int gList<T>::InsertAt(const T &t, int num)
   return num;
 }
 
-template <class T> gList<T>::gList(int len) : head(0), tail(0), length(0)
-{
-  for (int i = 1; i <= len; i++)  Append(T());
-}
+template <class T> gList<T>::gList(void) : head(0), tail(0), length(0)
+{ }
 
 template <class T> gList<T>::gList(const gList<T> &b)
  : length(b.length)

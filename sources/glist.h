@@ -40,10 +40,9 @@ template <class T> class gList  {
 
   public:
 //
-// Constructs the a block of the given length.  All elements of the block
-// are constructed according to the default constructor for type T.
+// Constructs the empty list
 //
-    gList(int len = 0);
+    gList(void);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
