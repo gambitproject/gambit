@@ -15,41 +15,32 @@
 
 #include "nfdommix.imp"
 
-NFSupport *NFSupport::MixedUndominated(bool strong, gPrecision precision,
-				       const gArray<int> &players,
-				       gOutput &tracefile,
-				       gStatus &status) const
+NFSupport NFSupport::MixedUndominated(bool strong, gPrecision precision,
+				      const gArray<int> &players,
+				      gOutput &tracefile,
+				      gStatus &status) const
 {
-  NFSupport *newS = new NFSupport(*this);
+  NFSupport newS(*this);
   bool any = false;
   
-  if(precision == precRATIONAL) {
-    
+  if (precision == precRATIONAL) {
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
-      
-      any |= ComputeMixedDominated(*this, *newS, pl, strong,
-				  (gRational)0, tracefile, status);
+      ComputeMixedDominated(*this, newS, pl, strong,
+			    (gRational)0, tracefile, status);
     }
   }
   else if (precision == precDOUBLE) {
     for (int i = 1; i <= players.Length(); i++)   {
       status.Get();
       int pl = players[i];
-      
-      any |= ComputeMixedDominated(*this, *newS, pl, strong,
-				  (double)0, tracefile, status);
+      ComputeMixedDominated(*this, newS, pl, strong,
+			    (double)0, tracefile, status);
     }
   }
 
-
   tracefile << "\n";
-  if (!any)  {
-    delete newS;
-    return 0;
-  }
-  
   return newS;
 }
 

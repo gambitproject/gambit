@@ -93,11 +93,11 @@ public:
   bool Dominates(Strategy *s, Strategy *t, bool strong) const;
   bool IsDominated(Strategy *s, bool strong) const; 
 
-  NFSupport *Undominated(bool strong, const gArray<int> &players,
-			 gOutput &tracefile, gStatus &status) const;
-  NFSupport *MixedUndominated(bool strong, gPrecision precision,
-			      const gArray<int> &players,
-			      gOutput &, gStatus &status) const;
+  NFSupport Undominated(bool strong, const gArray<int> &players,
+			gOutput &tracefile, gStatus &status) const;
+  NFSupport MixedUndominated(bool strong, gPrecision precision,
+			     const gArray<int> &players,
+			     gOutput &, gStatus &status) const;
 
   void Dump(gOutput &) const;
 };

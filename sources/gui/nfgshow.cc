@@ -790,48 +790,43 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
   dialogElimMixed dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    NFSupport *sup = m_currentSupport;
+    NFSupport support(*m_currentSupport);
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      if (!dialog.DomMixed()) {
-	if (dialog.Iterative()) {
-	  while ((sup = sup->Undominated(dialog.DomStrong(), 
-					 dialog.Players(), gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    m_supports.Append(sup);
-	  }
+      NFSupport newSupport(support);
+
+      while (true) {
+	if (dialog.DomMixed()) {
+	  newSupport = support.MixedUndominated(dialog.DomStrong(),
+						precRATIONAL,
+						dialog.Players(),
+						gnull, status);
 	}
 	else {
-	  if ((sup = sup->Undominated(dialog.DomStrong(), 
-				      dialog.Players(), gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    m_supports.Append(sup);
-	  }
-	}
-      }
-      else {
-	if (dialog.Iterative()) {
-	  while ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
-					      dialog.Players(),
-					      gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    m_supports.Append(sup);
-	  }
-	}
-	else {
-	  if ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
+	  newSupport = support.Undominated(dialog.DomStrong(), 
 					   dialog.Players(),
-					   gnull, status)) != 0) {
-	    sup->SetName(UniqueSupportName());
-	    m_supports.Append(sup);
-	  }
+					   gnull, status);
+	}
+
+	if (newSupport == support) {
+	  break;
+	}
+	else {
+	  newSupport.SetName(UniqueSupportName());
+	  m_supports.Append(new NFSupport(newSupport));
+	  support = newSupport;
+	}
+
+	if (!dialog.Iterative()) {
+	  // Bit of a kludge: short-circuit loop if iterative not requested
+	  break;
 	}
       }
     }
     catch (gSignalBreak &) { }
 
-    if (m_currentSupport != sup) {
+    if (*m_currentSupport != support) {
       m_currentSupport = m_supports[m_supports.Length()];
       if (!m_table->ShowDominance()) {
 	m_table->ToggleDominance();

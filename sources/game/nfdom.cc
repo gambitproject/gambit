@@ -128,11 +128,10 @@ bool NFSupport::Undominated(NFSupport &newS, int pl, bool strong,
     return false;
 }
 
-NFSupport *NFSupport::Undominated(bool strong, const gArray<int> &players,
+NFSupport NFSupport::Undominated(bool strong, const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status) const
 {
-  NFSupport *newS = new NFSupport(*this);
-  bool any = false;
+  NFSupport newS(*this);
   
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();
@@ -140,13 +139,9 @@ NFSupport *NFSupport::Undominated(bool strong, const gArray<int> &players,
 			   ToText(players[i])));
     int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
-    any |= Undominated(*newS, pl, strong, tracefile, status);
+    Undominated(newS, pl, strong, tracefile, status);
   }
 
-  if (!any)  {
-    delete newS;
-    return 0;
-  }
   return newS;
 }
 

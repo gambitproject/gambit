@@ -14,6 +14,7 @@
 #include "wx/spinctrl.h"
 #include "dlnfgnash.h"
 
+#include "base/gnullstatus.h"
 #include "nash/nfgpure.h"
 #include "nash/enum.h"
 #include "nash/lemke.h"
@@ -32,6 +33,456 @@ public:
 
   virtual nfgNashAlgorithm *GetAlgorithm(void) const = 0;
 };
+
+//========================================================================
+//                         class nfgOneNash
+//========================================================================
+
+class nfgOneNash : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "OneNash"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgOneNash::Solve(const NFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    NFSupport support = p_support.Undominated(false, players, gnull, status);
+
+    if (p_support.Game().NumPlayers() == 2) {
+      if (IsConstSum(p_support.Game())) {
+	nfgLp<double> algorithm;
+	return algorithm.Solve(support, p_status);
+      }
+      else {
+	nfgLcp<double> algorithm;
+	algorithm.SetStopAfter(1);
+	return algorithm.Solve(support, p_status);
+      }
+    }
+    else {
+      nfgSimpdiv<double> algorithm;
+      return algorithm.Solve(support, p_status);
+    }
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelNfgOneNash
+//========================================================================
+
+class panelNfgOneNash : public panelNfgNashAlgorithm {
+public:
+  panelNfgOneNash(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgOneNash::panelNfgOneNash(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
+{
+  return new nfgOneNash;
+}
+
+//========================================================================
+//                         class nfgTwoNash
+//========================================================================
+
+class nfgTwoNash : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "TwoNash"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgTwoNash::Solve(const NFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    NFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      NFSupport newSupport = support.Undominated(true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    if (p_support.Game().NumPlayers() == 2) {
+      nfgEnumMixed<double> algorithm;
+      algorithm.SetStopAfter(2);
+      return algorithm.Solve(support, p_status);
+    }
+    else {
+      nfgPolEnum algorithm;
+      algorithm.SetStopAfter(2);
+      return algorithm.Solve(support, p_status);
+    }
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelNfgTwoNash
+//========================================================================
+
+class panelNfgTwoNash : public panelNfgNashAlgorithm {
+public:
+  panelNfgTwoNash(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgTwoNash::panelNfgTwoNash(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
+{
+  return new nfgTwoNash;
+}
+
+//========================================================================
+//                         class nfgAllNash
+//========================================================================
+
+class nfgAllNash : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "AllNash"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgAllNash::Solve(const NFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    NFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      NFSupport newSupport = support.Undominated(true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    if (p_support.Game().NumPlayers() == 2) {
+      nfgEnumMixed<double> algorithm;
+      algorithm.SetStopAfter(0);
+      return algorithm.Solve(support, p_status);
+    }
+    else {
+      nfgPolEnum algorithm;
+      algorithm.SetStopAfter(0);
+      return algorithm.Solve(support, p_status);
+    }
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelNfgAllNash
+//========================================================================
+
+class panelNfgAllNash : public panelNfgNashAlgorithm {
+public:
+  panelNfgAllNash(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgAllNash::panelNfgAllNash(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
+{
+  return new nfgAllNash;
+}
+
+//========================================================================
+//                         class nfgOnePerfect
+//========================================================================
+
+class nfgOnePerfect : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "OnePerfect"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgOnePerfect::Solve(const NFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    NFSupport support = p_support.Undominated(false, players, gnull, status);
+
+    nfgLcp<double> algorithm;
+    algorithm.SetStopAfter(1);
+    return algorithm.Solve(support, p_status);
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelNfgOnePerfect
+//========================================================================
+
+class panelNfgOnePerfect : public panelNfgNashAlgorithm {
+public:
+  panelNfgOnePerfect(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgOnePerfect::panelNfgOnePerfect(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
+{
+  return new nfgOnePerfect;
+}
+
+//========================================================================
+//                         class nfgTwoPerfect
+//========================================================================
+
+class nfgTwoPerfect : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "TwoPerfect"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgTwoPerfect::Solve(const NFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    NFSupport support = p_support.Undominated(false, players, gnull, status);
+
+    nfgEnumMixed<double> algorithm;
+    algorithm.SetStopAfter(2);
+    return algorithm.Solve(support, p_status);
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelNfgTwoPerfect
+//========================================================================
+
+class panelNfgTwoPerfect : public panelNfgNashAlgorithm {
+public:
+  panelNfgTwoPerfect(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgTwoPerfect::panelNfgTwoPerfect(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
+{
+  return new nfgTwoPerfect;
+}
+
+//========================================================================
+//                         class nfgAllPerfect
+//========================================================================
+
+class nfgAllPerfect : public nfgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "AllPerfect"; }
+  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+};
+
+gList<MixedSolution> nfgAllPerfect::Solve(const NFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.Game().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    NFSupport support = p_support.Undominated(false, players, gnull, status);
+
+    nfgEnumMixed<double> algorithm;
+    algorithm.SetStopAfter(0);
+    return algorithm.Solve(support, p_status);
+  }
+  catch (...) {
+    return gList<MixedSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelNfgAllPerfect
+//========================================================================
+
+class panelNfgAllPerfect : public panelNfgNashAlgorithm {
+public:
+  panelNfgAllPerfect(wxWindow *);
+
+  nfgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelNfgAllPerfect::panelNfgAllPerfect(wxWindow *p_parent)
+  : panelNfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+nfgNashAlgorithm *panelNfgAllPerfect::GetAlgorithm(void) const
+{
+  return new nfgAllPerfect;
+}
 
 //========================================================================
 //                      class panelNfgEnumPure
@@ -767,22 +1218,36 @@ dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const NFSupport &p_support)
 
 void dialogNfgNash::LoadAlgorithms(const Nfg &p_nfg)
 {
+  wxTreeItemId id;
+
   // Eventually, these should be loaded from wxConfig; for now,
   // I am going to hard-code them
   wxTreeItemId root = m_algorithmTree->AddRoot("Algorithms");
   wxTreeItemId standard = m_algorithmTree->AppendItem(root,
 						      "Standard algorithms");
-  m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
-  m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
-  m_algorithmTree->AppendItem(standard, "All Nash equilibria");
+
+  id = m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
+  m_algorithms.Define(id, new panelNfgOneNash(this));
+  
+  id = m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
+  m_algorithms.Define(id, new panelNfgTwoNash(this));
+
+  id = m_algorithmTree->AppendItem(standard, "All Nash equilibria");
+  m_algorithms.Define(id, new panelNfgAllNash(this));
+
   if (p_nfg.NumPlayers() == 2) {
-    m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
-    m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
-    m_algorithmTree->AppendItem(standard, "All perfect equilibria");
+    id = m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
+    m_algorithms.Define(id, new panelNfgOnePerfect(this));
+
+    id = m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
+    m_algorithms.Define(id, new panelNfgTwoPerfect(this));
+
+    id = m_algorithmTree->AppendItem(standard, "All perfect equilibria");
+    m_algorithms.Define(id, new panelNfgAllPerfect(this));
   }
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
-  wxTreeItemId id;
+
   id = m_algorithmTree->AppendItem(custom, "EnumPureSolve");
   m_algorithms.Define(id, new panelNfgEnumPure(this));
 
