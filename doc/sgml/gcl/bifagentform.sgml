@@ -1,0 +1,41 @@
+<refentry id="bif.AgentForm" xreflabel="AgentForm">
+
+<refmeta>
+<indexterm>
+<primary>AgentForm</primary>
+</indexterm>
+
+<refentrytitle>AgentForm</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>AgentForm</refname>
+<refpurpose>
+Creates the agent normal form for an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+AgentForm[efg->EFG, {time<->0}] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>AgentForm</function> creates and returns the agent normal
+form representation of <parameter>efg</parameter>.  The optional
+parameter <parameter>time</parameter>, if specified, returns the
+amount of time consumed by the conversion.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.Nfg">.
+</para>
+</refsect1>
+
+</refentry>
+

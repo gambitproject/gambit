@@ -1,0 +1,51 @@
+<refentry id="bif.ActionValue" xreflabel="ActionValue">
+
+<refmeta>
+<indexterm>
+<primary>ActionValue</primary>
+</indexterm>
+
+<refentrytitle>ActionValue</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ActionValue</refname>
+<refpurpose>
+Returns the expected payoff to playing an action, given a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ActionValue[profile->BEHAV, action->ACTION] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ActionValue</function> returns the expected payoff to a 
+player (who is in control of the
+information set including <parameter>action</parameter>) 
+of choosing <parameter>action</parameter> when
+all players are following <parameter>profile</parameter>.  If the value is not
+well-defined, the null value is returned.  It is an error if
+<parameter>profile</parameter> and <parameter>action</parameter> 
+are not from the same extensive form
+game, or if <parameter>action</parameter> is an action at an information set owned by
+the chance player.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="udf.ActionValues">,
+<xref linkend="bif.Belief">,
+<xref linkend="bif.InfosetProb">,
+<xref linkend="bif.NodeValue">,
+<xref linkend="bif.RealizProb">.
+</para>
+</refsect1>
+
+</refentry>
+

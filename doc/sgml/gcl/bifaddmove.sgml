@@ -1,0 +1,49 @@
+<refentry id="bif.AddMove" xreflabel="AddMove">
+
+<refmeta>
+<indexterm>
+<primary>AddMove</primary>
+</indexterm>
+
+<refentrytitle>AddMove</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>AddMove</refname>
+<refpurpose>
+Adds a move to a game at a terminal node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+AddMove[infoset->INFOSET, node->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>AddMove</function> places a terminal <parameter>node</parameter>
+into the information set
+<parameter>infoset</parameter>.
+The result is <parameter>node</parameter> becomes a decision node,
+with number of branches equal to the number of actions in 
+<parameter>infoset</parameter>.
+New child nodes are created as successor nodes to the actions in the
+information set.  The child which succeeds the first action is returned.
+It is an error if <parameter>node</parameter> and <parameter>infoset</parameter> are not from the same
+extensive form game, or if <parameter>node</parameter> is not a terminal node.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.DeleteMove">,
+<xref linkend="bif.InsertMove">,
+<xref linkend="bif.NewInfoset">.
+</para>
+</refsect1>
+
+</refentry>
+

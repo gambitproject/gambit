@@ -9,7 +9,14 @@ for a listing of functions by category.
 
 &bifaccuracy;
 &bifactionnumber;
+&bifactionprob;
 &bifactions;
+&bifactionvalue;
+&bifaddaction;
+&bifaddmove;
+&bifaddnode;
+&bifaddstrategy;
+&bifagentform;
 
 </sect1>
 

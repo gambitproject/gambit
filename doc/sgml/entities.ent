@@ -10,7 +10,14 @@
 <!ENTITY gclbifcat SYSTEM "gclbifcat.sgml">
 <!ENTITY bifaccuracy SYSTEM "gcl/bifaccuracy.sgml">
 <!ENTITY bifactionnumber SYSTEM "gcl/bifactionnumber.sgml">
+<!ENTITY bifactionprob SYSTEM "gcl/bifactionprob.sgml">
 <!ENTITY bifactions SYSTEM "gcl/bifactions.sgml">
+<!ENTITY bifactionvalue SYSTEM "gcl/bifactionvalue.sgml">
+<!ENTITY bifaddaction SYSTEM "gcl/bifaddaction.sgml">
+<!ENTITY bifaddmove SYSTEM "gcl/bifaddmove.sgml">
+<!ENTITY bifaddnode SYSTEM "gcl/bifaddnode.sgml">
+<!ENTITY bifaddstrategy SYSTEM "gcl/bifaddstrategy.sgml">
+<!ENTITY bifagentform SYSTEM "gcl/bifagentform.sgml">
 <!ENTITY algref SYSTEM "algref.sgml">
 <!ENTITY biblio SYSTEM "biblio.sgml">
 

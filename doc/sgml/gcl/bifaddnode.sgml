@@ -1,0 +1,37 @@
+<refentry id="bif.AddNode" xreflabel="AddNode">
+
+<refmeta>
+<indexterm>
+<primary>AddNode</primary>
+</indexterm>
+
+<refentrytitle>AddNode</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>AddNode</refname>
+<refpurpose>
+Adds a node to a basis
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+AddNode[basis->EFBASIS, node->NODE] =: EFBASIS
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>AddNode</function> adds the node <parameter>node</parameter>
+to the basis <parameter>basis</parameter>.  If
+<parameter>node</parameter> is already in
+<parameter>basis</parameter>, no change is made.  A copy of the
+modified basis is returned.  It is an error if
+<parameter>basis</parameter> and <parameter>node</parameter> are not
+from the same extensive form game.  
+</para>
+</refsect1>
+</refentry>
+

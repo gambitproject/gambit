@@ -5,16 +5,6 @@ refer to the following, alphabetically organized, section.
 </para>
 
 <para>
-In the following list, functions preceded by a <literal>#</literal> are {\it user
-defined functions} (UDFs) which are defined in the file
-\verb+stdudfs.gcl+.  All the remaining functions are {\it built-in
-functions} (BIFs).  Among the built-in functions, a small subset,
-those preceeded by a \verb+*+ are ``special'' functions, which do not
-necessarily follow all of the rules of GCL functions.  These functions
-are also not documented by the GCL \verb+Help+ function.  
-</para>
-
-<para>
 In the GCL, we have tried to minimize the number of built-in functions
 to include only those that are essential.  The idea is that any other
 function can be built up as a user defined function from the built-in
@@ -718,20 +708,20 @@ appreciate getting feedback on this.
 <tgroup cols="2">
 <tbody>
 <row>
-<entry><function>AddAction</function></entry>
-<entry></entry>
+<entry><xref linkend="bif.AddAction"></entry>
+<entry>Adds an action to a support</entry>
 </row>
 <row>
-<entry><function>AddMove</function></entry>
-<entry></entry>
+<entry><xref linkend="bif.AddMove"></entry>
+<entry>Adds a move to a game at a terminal node</entry>
 </row>
 <row>
 <entry><function>AddMove</function> (user-defined)</entry>
 <entry></entry>
 </row>
 <row>
-<entry><function>AddNode</function></entry>
-<entry></entry>
+<entry><xref linkend="bif.AddNode"></entry>
+<entry>Adds a node to a basis</entry>
 </row>
 <row>
 <entry><function>Basis</function></entry>
@@ -887,12 +877,12 @@ appreciate getting feedback on this.
 <tgroup cols="2">
 <tbody>
 <row>
-<entry><function>AddStrategy</function></entry>
-<entry></entry>
+<entry><xref linkend="bif.AddStrategy"></entry>
+<entry>Adds a strategy to a support</entry>
 </row>
 <row>
-<entry><function>AgentForm</function></entry>
-<entry></entry>
+<entry><xref linkend="bif.AgentForm"></entry>
+<entry>Creates the agent normal form for an extensive form game</entry>
 </row>
 <row>
 <entry><function>CompressNfg</function></entry>

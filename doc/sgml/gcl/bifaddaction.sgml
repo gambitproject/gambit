@@ -1,0 +1,46 @@
+<refentry id="bif.AddAction" xreflabel="AddAction">
+
+<refmeta>
+<indexterm>
+<primary>AddAction</primary>
+</indexterm>
+
+<refentrytitle>AddAction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>AddAction</refname>
+<refpurpose>
+Adds an action to a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
+AddAction[basis->EFBASIS, action->ACTION] =: EFSUPPORT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>AddAction</function> adds the action <parameter>action</parameter>
+to <parameter>support</parameter> (or <parameter>basis</parameter>).
+If the action is already in
+the support, no change is made.  A copy of the modified support is
+returned.  It is an error if <parameter>support</parameter> (or
+<parameter>basis</parameter>) and <parameter>action</parameter> are not from the
+same extensive form game.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.RemoveAction">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
+</refentry>
+

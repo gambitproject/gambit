@@ -138,4 +138,6 @@ therein and the <xref linkend="bib"> of this manual for more information.
 
 &biblio;
 
+<index id="index"></index>
+
 </book>

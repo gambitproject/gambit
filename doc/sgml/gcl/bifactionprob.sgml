@@ -1,0 +1,46 @@
+<refentry id="bif.ActionProb" xreflabel="ActionProb">
+
+<refmeta>
+<indexterm>
+<primary>ActionProb</primary>
+</indexterm>
+
+<refentrytitle>ActionProb</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ActionProb</refname>
+<refpurpose>
+Returns the probability an action is chosen in a behavior profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ActionProb[profile->BEHAV, action->ACTION] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ActionProb</function> returns the probability that
+<parameter>action</parameter> is chosen at its information set when
+all players are following <parameter>profile</parameter>.  If
+<parameter>action</parameter> is a chance action, the probability of
+chance selecting the action is returned.  If the probability is not
+specified by the profile, the null value is returned.  It is an error
+if <parameter>profile</parameter> and <parameter>action</parameter>
+are not from the same extensive form game.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="udf.actionprobs">,
+<xref linkend="bif.setactionprobs">.
+</para>
+</refsect1>
+
+</refentry>
+

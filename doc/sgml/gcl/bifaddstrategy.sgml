@@ -1,0 +1,44 @@
+<refentry id="bif.AddStrategy" xreflabel="AddStrategy">
+
+<refmeta>
+<indexterm>
+<primary>AddStrategy</primary>
+</indexterm>
+
+<refentrytitle>AddStrategy</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>AddStrategy</refname>
+<refpurpose>
+Adds a strategy to a support
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+AddStrategy[support->NFSUPPORT, strategy->STRATEGY] =: NFSUPPORT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>AddStrategy</function> adds <parameter>strategy</parameter>
+to the <parameter>support</parameter>.  If the strategy is already in
+the support, no change is made.  A copy of the modified support is
+returned.  It is an error if <parameter>support</parameter> and
+<parameter>strategy</parameter> are not from the same normal form
+game.
+</para>
+</refsect1>
+
+<refsect1><title>See also</title>
+<para>
+<xref linkend="bif.RemoveStrategy">,
+<xref linkend="bif.Support">.
+</para>
+</refsect1>
+
+</refentry>
+

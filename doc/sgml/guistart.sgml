@@ -4,6 +4,7 @@
 This chapter takes a high-level tour of the Gambit graphical interface using
 as an example the simple one-card poker game appearing in
 <citation><xref linkend="Mye91"></citation>.
+<indexterm><primary>Poker</primary></indexterm>
 This game is included in the Gambit distribution
 as <filename>poker.efg</filename>,
 and can be found in the <filename class="directory">efg</filename>
