@@ -6,7 +6,6 @@
 
 #include "gambitio.h"
 #include "normal.h"
-#include "nfrep.h"
 #include "normiter.h"
 #include "gtableau.h"
 #include "rational.h"
@@ -47,7 +46,7 @@ class BaseLemke    {
 template <class T> class LemkeTableau
   : public gTableau<T>, public BaseLemke, public SolutionModule  {
   private:
-    const NFRep<T> &rep;
+    const NormalForm<T> &rep;
     int num_strats;
     BFS_List List;
    
@@ -58,7 +57,7 @@ template <class T> class LemkeTableau
     void Pivot(int, int);
  
   public:
-    LemkeTableau(const NFRep<T> &, gOutput &ofile, gOutput &efile, int plev);
+    LemkeTableau(const NormalForm<T> &, gOutput &ofile, gOutput &efile, int plev);
     virtual ~LemkeTableau()   { }
 
     int Lemke(int);
@@ -337,7 +336,7 @@ template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
 }
 
 template <class T>
-LemkeTableau<T>::LemkeTableau(const NFRep<T> &r,
+LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
 			      gOutput &ofile, gOutput &efile, int plev)
      : gTableau<T>(1, r.NumStrats(1) + r.NumStrats(2),
 		   r.NumStrats(1) + r.NumStrats(2),
@@ -407,14 +406,14 @@ int LemkeSolver::Lemke(void)
   if (params.errfile != "" && params.errfile == params.outfile)
     errfile = outfile;
  
-  switch (Type())   {
+  switch (nf.Type())   {
     case DOUBLE:
-      T = new LemkeTableau<double>((NFRep<double> &) *GetRep(),
+      T = new LemkeTableau<double>((NormalForm<double> &) nf,
 				   *outfile, *errfile, params.plev);
       break;
 
     case RATIONAL:
-      T = new LemkeTableau<gRational>((NFRep<gRational> &) *GetRep(),
+      T = new LemkeTableau<gRational>((NormalForm<gRational> &) nf,
 				      *outfile, *errfile, params.plev);
       break;
   }
