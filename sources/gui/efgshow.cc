@@ -77,12 +77,16 @@ const int idSOLUTIONWINDOW = 996;
 const int idINFONOTEBOOK = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
+  EVT_MENU(wxID_NEW, EfgShow::OnFileNew)
+  EVT_MENU(wxID_OPEN, EfgShow::OnFileOpen)
+  EVT_MENU(wxID_CLOSE, EfgShow::Close)
   EVT_MENU(wxID_SAVE, EfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, EfgShow::OnFileSave)
   EVT_MENU(wxID_PRINT_SETUP, EfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, EfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, EfgShow::OnFilePrint)
-  EVT_MENU(wxID_CLOSE, EfgShow::Close)
+  EVT_MENU(wxID_EXIT, EfgShow::OnFileExit)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, EfgShow::OnFileMRUFile)
   EVT_MENU(efgmenuEDIT_NODE_ADD, EfgShow::OnEditNodeAdd)
   EVT_MENU(efgmenuEDIT_NODE_DELETE, EfgShow::OnEditNodeDelete)
   EVT_MENU(efgmenuEDIT_NODE_INSERT, EfgShow::OnEditNodeInsert)
@@ -188,6 +192,9 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
 	   EfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
   EVT_MENU(efgmenuTOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
+  EVT_MENU(wxID_HELP_CONTENTS, EfgShow::OnHelpContents)
+  EVT_MENU(wxID_HELP_INDEX, EfgShow::OnHelpIndex)
+  EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
   EVT_MENU(efgmenuPROFILES_NEW, EfgShow::OnProfilesNew)
   EVT_MENU(efgmenuPROFILES_CLONE, EfgShow::OnProfilesClone)
   EVT_MENU(efgmenuPROFILES_RENAME, EfgShow::OnProfilesRename)
@@ -198,7 +205,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_SIZE(EfgShow::OnSize)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
-  EVT_ACTIVATE(EfgShow::OnActivate)
   EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, EfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
@@ -206,10 +212,10 @@ END_EVENT_TABLE()
 //               EfgShow: Constructor and destructor
 //---------------------------------------------------------------------
 
-EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
+EfgShow::EfgShow(FullEfg &p_efg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
     EfgClient(&p_efg),
-    m_parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
+    m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), m_currentProfile(0),
     m_profileTable(0), m_solutionSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
@@ -297,7 +303,7 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
 
 EfgShow::~EfgShow()
 {
-  m_parent->RemoveGame(&m_efg);
+  wxGetApp().RemoveGame(&m_efg);
 }
 
 
@@ -335,7 +341,7 @@ void EfgShow::AddProfile(const BehavSolution &p_profile, bool p_map)
   m_profileTable->Append(p_profile);
 
   if (m_efg.AssociatedNfg() && p_map) {
-    m_parent->GetWindow(m_efg.AssociatedNfg())->AddSolution(MixedProfile<gNumber>(p_profile), false);
+    wxGetApp().GetWindow(m_efg.AssociatedNfg())->AddSolution(MixedProfile<gNumber>(p_profile), false);
   }
 
   m_profileTable->UpdateValues();
@@ -542,13 +548,13 @@ void EfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
   if (m_filename != "") {
-    SetTitle(wxString::Format("[%s] %s ", m_filename.c_str(), 
+    SetTitle(wxString::Format("Gambit - [%s] %s", m_filename.c_str(), 
 			      (char *) m_efg.GetTitle()));
   }
   else {
-    SetTitle((char *) m_efg.GetTitle());
+    SetTitle(wxString::Format("Gambit - %s", (char *) m_efg.GetTitle()));
   }
-  m_parent->SetFilename(this, p_name.c_str());
+  wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 EFSupport *EfgShow::GetSupport(void)
@@ -1025,6 +1031,16 @@ void EfgShow::MakeToolbar(void)
 //               EfgShow: Menu handlers - File menu
 //----------------------------------------------------------------------
 
+void EfgShow::OnFileNew(wxCommandEvent &)
+{
+  wxGetApp().OnFileNew(this);
+}
+
+void EfgShow::OnFileOpen(wxCommandEvent &)
+{
+  wxGetApp().OnFileOpen(this);
+}
+
 void EfgShow::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_filename == "") {
@@ -1112,6 +1128,17 @@ void EfgShow::OnFilePrint(wxCommandEvent &)
   }
 }
 
+void EfgShow::OnFileExit(wxCommandEvent &)
+{
+  while (wxGetApp().GetTopWindow()) {
+    delete wxGetApp().GetTopWindow();
+  }
+}
+
+void EfgShow::OnFileMRUFile(wxCommandEvent &p_event)
+{
+  wxGetApp().OnFileMRUFile(p_event);
+}
 
 //----------------------------------------------------------------------
 //             EfgShow: Menu handlers - Edit->Node menu
@@ -2365,7 +2392,7 @@ void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
   if (nfg) {
     NfgShow *nfgShow = new NfgShow(*nfg, m_parent);
     nfgShow->SetFilename("");
-    m_parent->AddGame(&m_efg, nfg, nfgShow);
+    wxGetApp().AddGame(&m_efg, nfg, nfgShow);
 
     for (int i = 1; i <= m_profileTable->Length(); i++) {
       nfgShow->AddSolution(MixedProfile<gNumber>((*m_profileTable)[i]), false);
@@ -2393,6 +2420,25 @@ void EfgShow::OnToolsNormalAgent(wxCommandEvent &)
   if (N) {
     (void) new NfgShow(*N, m_parent);
   }
+}
+
+//----------------------------------------------------------------------
+//                 EfgShow: Menu handlers - Help menu
+//----------------------------------------------------------------------
+
+void EfgShow::OnHelpContents(wxCommandEvent &)
+{
+  wxGetApp().OnHelpContents();
+}
+
+void EfgShow::OnHelpIndex(wxCommandEvent &)
+{
+  wxGetApp().OnHelpIndex();
+}
+
+void EfgShow::OnHelpAbout(wxCommandEvent &)
+{
+  wxGetApp().OnHelpAbout(this);
 }
 
 //----------------------------------------------------------------------
@@ -2502,13 +2548,6 @@ void EfgShow::OnFocus(wxFocusEvent &)
 void EfgShow::OnSize(wxSizeEvent &)
 {
   AdjustSizes();
-}
-
-void EfgShow::OnActivate(wxActivateEvent &p_event)
-{
-  if (p_event.GetActive()) {
-    m_parent->SetActiveWindow(this);
-  }
 }
 
 void EfgShow::OnSashDrag(wxSashEvent &p_event)

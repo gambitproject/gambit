@@ -29,7 +29,6 @@ const int idEFG_SOLUTION_LIST = 900;
 
 class EfgShow : public wxFrame, public EfgClient {
 private:
-  GambitFrame *m_parent;
   FullEfg &m_efg;
   TreeWindow *m_treeWindow;
   TreeZoomWindow *m_treeZoomWindow;
@@ -67,13 +66,16 @@ private:
   void OnFocus(wxFocusEvent &);
   void OnSize(wxSizeEvent &);
   void OnSashDrag(wxSashEvent &);
-  void OnActivate(wxActivateEvent &);
 
   // Menu event handlers
+  void OnFileNew(wxCommandEvent &);
+  void OnFileOpen(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);
   void OnFilePrint(wxCommandEvent &);
+  void OnFileExit(wxCommandEvent &);
+  void OnFileMRUFile(wxCommandEvent &);
 
   void OnEditNodeAdd(wxCommandEvent &);
   void OnEditNodeDelete(wxCommandEvent &);
@@ -157,6 +159,10 @@ private:
   void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);
 
+  void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);
   void OnProfilesRename(wxCommandEvent &);
@@ -170,7 +176,7 @@ private:
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  EfgShow(FullEfg &p_efg, GambitFrame *p_parent);
+  EfgShow(FullEfg &p_efg, wxWindow *p_parent);
   virtual ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION

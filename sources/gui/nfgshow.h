@@ -32,7 +32,6 @@ class dialogNfgSupportInspect;
 
 class NfgShow : public wxFrame {
 private:
-  GambitFrame *m_parent;
   Nfg &m_nfg;
 
   NfgTable *m_table;
@@ -60,10 +59,14 @@ private:
   void AdjustSizes(void);
 
   // Menu event handlers
+  void OnFileNew(wxCommandEvent &);
+  void OnFileOpen(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
   void OnFilePageSetup(wxCommandEvent &);
   void OnFilePrintPreview(wxCommandEvent &);
   void OnFilePrint(wxCommandEvent &);
+  void OnFileExit(wxCommandEvent &);
+  void OnFileMRUFile(wxCommandEvent &);
 
   void OnEditLabel(wxCommandEvent &);
   void OnEditPlayers(wxCommandEvent &);
@@ -105,6 +108,10 @@ private:
   void OnToolsEquilibriumCustomQre(wxCommandEvent &);
   void OnToolsEquilibriumCustomYamamoto(wxCommandEvent &);
 
+  void OnHelpContents(wxCommandEvent &);
+  void OnHelpIndex(wxCommandEvent &);
+  void OnHelpAbout(wxCommandEvent &);
+
   void OnProfilesNew(wxCommandEvent &);
   void OnProfilesClone(wxCommandEvent &);
   void OnProfilesRename(wxCommandEvent &);
@@ -119,10 +126,9 @@ private:
   void OnSashDrag(wxSashEvent &);
   void OnSetFocus(wxFocusEvent &);
   void OnSolutionSelected(wxListEvent &);
-  void OnActivate(wxActivateEvent &);
 
 public:
-  NfgShow(Nfg &N, GambitFrame *p_frame);
+  NfgShow(Nfg &N, wxWindow *p_window);
   virtual ~NfgShow();
 
   NFSupport *CurrentSupport(void) const { return m_currentSupport; }

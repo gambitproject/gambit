@@ -59,12 +59,16 @@ const int idINFONOTEBOOK = 3003;
 const int idINFOWINDOW = 3004;
 
 BEGIN_EVENT_TABLE(NfgShow, wxFrame)
+  EVT_MENU(wxID_NEW, NfgShow::OnFileNew)
+  EVT_MENU(wxID_OPEN, NfgShow::OnFileOpen)
+  EVT_MENU(wxID_CLOSE, NfgShow::Close)
   EVT_MENU(wxID_SAVE, NfgShow::OnFileSave)
   EVT_MENU(wxID_SAVEAS, NfgShow::OnFileSave)
   EVT_MENU(wxID_PRINT_SETUP, NfgShow::OnFilePageSetup)
   EVT_MENU(wxID_PREVIEW, NfgShow::OnFilePrintPreview)
   EVT_MENU(wxID_PRINT, NfgShow::OnFilePrint)
-  EVT_MENU(wxID_CLOSE, NfgShow::Close)
+  EVT_MENU(wxID_EXIT, NfgShow::OnFileExit)
+  EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, NfgShow::OnFileMRUFile)
   EVT_MENU(NFG_EDIT_LABEL, NfgShow::OnEditLabel)
   EVT_MENU(NFG_EDIT_PLAYERS, NfgShow::OnEditPlayers)
   EVT_MENU(NFG_EDIT_STRATS, NfgShow::OnEditStrategies)
@@ -106,6 +110,9 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU_RANGE(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
 		 NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
 		 NfgShow::OnToolsEquilibriumCustom)
+  EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
+  EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
+  EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
   EVT_MENU(NFG_PROFILES_NEW, NfgShow::OnProfilesNew)
   EVT_MENU(NFG_PROFILES_CLONE, NfgShow::OnProfilesClone)
   EVT_MENU(NFG_PROFILES_RENAME, NfgShow::OnProfilesRename)
@@ -116,7 +123,6 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_CLOSE(NfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED(idSOLUTIONWINDOW, NfgShow::OnSashDrag)
   EVT_SET_FOCUS(NfgShow::OnSetFocus)
-  EVT_ACTIVATE(NfgShow::OnActivate)
   EVT_LIST_ITEM_SELECTED(idNFG_SOLUTION_LIST, NfgShow::OnSolutionSelected)
   EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, NfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
@@ -125,9 +131,9 @@ END_EVENT_TABLE()
 //               NfgShow: Constructor and destructor
 //----------------------------------------------------------------------
 
-NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
+NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
   : wxFrame(p_parent, -1, "", wxDefaultPosition, wxSize(500, 500)),
-    m_parent(p_parent), m_nfg(p_nfg),
+    m_nfg(p_nfg),
     m_table(0), m_solutionTable(0),
     m_solutionSashWindow(0), m_infoSashWindow(0),
     m_navigateWindow(0), m_outcomeWindow(0), m_supportWindow(0)
@@ -206,7 +212,7 @@ NfgShow::NfgShow(Nfg &p_nfg, GambitFrame *p_parent)
 
 NfgShow::~NfgShow()
 {
-  m_parent->RemoveGame(&m_nfg);
+  wxGetApp().RemoveGame(&m_nfg);
 }
 
 //----------------------------------------------------------------------
@@ -217,7 +223,7 @@ void NfgShow::AddSolution(const MixedSolution &p_profile, bool p_map)
 {
   m_solutionTable->Append(p_profile);
   if (m_nfg.AssociatedEfg() && p_map) {
-    m_parent->GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
+    wxGetApp().GetWindow(m_nfg.AssociatedEfg())->AddProfile(BehavProfile<gNumber>(p_profile), false);
   }
   m_solutionTable->UpdateValues();
   UpdateMenus();
@@ -511,6 +517,16 @@ void NfgShow::UpdateMenus(void)
 //               NfgShow: Menu handlers - File menu
 //----------------------------------------------------------------------
 
+void NfgShow::OnFileNew(wxCommandEvent &)
+{
+  wxGetApp().OnFileNew(this);
+}
+
+void NfgShow::OnFileOpen(wxCommandEvent &)
+{
+  wxGetApp().OnFileOpen(this);
+}
+
 void NfgShow::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_filename == "") {
@@ -595,6 +611,18 @@ void NfgShow::OnFilePrint(wxCommandEvent &)
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
   }
+}
+
+void NfgShow::OnFileExit(wxCommandEvent &)
+{
+  while (wxGetApp().GetTopWindow()) {
+    delete wxGetApp().GetTopWindow();
+  }
+}
+
+void NfgShow::OnFileMRUFile(wxCommandEvent &p_event)
+{
+  wxGetApp().OnFileMRUFile(p_event);
 }
 
 //----------------------------------------------------------------------
@@ -1389,6 +1417,25 @@ void NfgShow::OnToolsEquilibriumCustomYamamoto(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
+//                EfgShow: Menu handlers - Help menu
+//----------------------------------------------------------------------
+
+void NfgShow::OnHelpContents(wxCommandEvent &)
+{
+  wxGetApp().OnHelpContents();
+}
+
+void NfgShow::OnHelpIndex(wxCommandEvent &)
+{
+  wxGetApp().OnHelpIndex();
+}
+
+void NfgShow::OnHelpAbout(wxCommandEvent &)
+{
+  wxGetApp().OnHelpAbout(this);
+}
+
+//----------------------------------------------------------------------
 //              EfgShow: Menu handlers - Profiles menu
 //----------------------------------------------------------------------
 
@@ -1538,13 +1585,6 @@ void NfgShow::OnSetFocus(wxFocusEvent &)
   m_table->SetFocus();
 }
 
-void NfgShow::OnActivate(wxActivateEvent &p_event)
-{
-  if (p_event.GetActive()) {
-    m_parent->SetActiveWindow(this);
-  }
-}
-
 void NfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
 {
   GetMenuBar()->Check(NFG_VIEW_NAVIGATION, p_event.GetSelection() == 0);
@@ -1578,13 +1618,13 @@ void NfgShow::SetFilename(const wxString &p_name)
 {
   m_filename = p_name;
   if (m_filename != "") {
-    SetTitle(wxString::Format("[%s] %s ", m_filename.c_str(), 
+    SetTitle(wxString::Format("Gambit - [%s] %s", m_filename.c_str(), 
 			      (char *) m_nfg.GetTitle()));
   }
   else {
-    SetTitle((char *) m_nfg.GetTitle());
+    SetTitle(wxString::Format("Gambit - %s", (char *) m_nfg.GetTitle()));
   }
-  m_parent->SetFilename(this, p_name.c_str());
+  wxGetApp().SetFilename(this, p_name.c_str());
 }
 
 void NfgShow::OutcomePayoffs(int st1, int st2, bool next)
