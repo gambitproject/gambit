@@ -812,6 +812,203 @@ gArray<EFPlayer *> dialogInfosetReveal::GetPlayers(void) const
 }
 
 //=========================================================================
+//                    dialogInfosets: Member functions
+//=========================================================================
+
+#include "dlinfosets.h"
+
+dialogInfosets::dialogInfosets(Efg &p_efg, wxFrame *p_parent)
+  : wxDialogBox(p_parent, "Infoset Information", TRUE), m_efg(p_efg),
+    m_prevInfoset(0), m_gameChanged(false)
+{
+  SetLabelPosition(wxVERTICAL);
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",
+			       wxSINGLE, 11, 3, 104, 125, 0, NULL, 0,
+			       "player_item");
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
+  m_infosetItem = new wxListBox(this, (wxFunction) CallbackInfoset, "Infoset",
+				wxSINGLE, 130, 4, 100, 125, 0, NULL, 0,
+				"iset_item");
+  m_infosetItem->wxEvtHandler::SetClientData((char *) this);
+  m_infosetNameItem = new wxText(this, 0, "Infoset Name", "",
+				 251, 12, 174, 58, 0, "iset_name_item");
+  m_actionsItem = new wxText(this, 0, "Actions", "", 330, 76, 80, 54,
+			     wxTE_READONLY, "branches_item");
+  m_membersItem = new wxText(this, 0, "Members", "", 253, 77, 51, 53,
+			     wxTE_READONLY, "nodes_item");
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "Ok",
+				    13, 162, -1, -1, 0, "ok_button");
+  okButton->SetClientData((char *) this);
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel", 71, 163, -1, -1, 0,
+					"cancel_button");
+  cancelButton->SetClientData((char *) this);
+  wxButton *newButton = new wxButton(this, (wxFunction) CallbackNew, "New",
+				     162, 164, -1, -1, 0, "new_button");
+  newButton->SetClientData((char *) this);
+  wxButton *removeButton = new wxButton(this, (wxFunction) CallbackRemove,
+					"Remove", 234, 165, -1, -1, 0,
+					"remove_button");
+  removeButton->SetClientData((char *) this);
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help",
+				      342, 164, -1, -1, 0, "help_button");
+  helpButton->SetClientData((char *) this);
+
+  for (int pl = 1; pl <= m_efg.NumPlayers(); pl++) {
+    if (m_efg.Players()[pl]->GetName() != "")
+      m_playerItem->Append(m_efg.Players()[pl]->GetName());
+    else
+      m_playerItem->Append("Player " + ToText(pl));
+  }
+
+  OnPlayer(0);
+  Fit(); 
+  Show(TRUE);
+}
+
+void dialogInfosets::OnPlayer(int p_number)
+{
+  if (m_efg.NumPlayers() == 0) {
+    if (m_playerItem->Number() == 0)
+      m_playerItem->Append("None");
+    return;
+  }
+
+  m_playerItem->SetSelection(p_number);
+  EFPlayer *player = m_efg.Players()[p_number+1];
+  m_infosetItem->Clear();
+  for (int iset = 1; iset <= player->NumInfosets(); iset++)
+    m_infosetItem->Append(ToText(iset));
+  OnInfoset(0);
+}
+
+void dialogInfosets::OnInfoset(int p_number)
+{
+  if (m_prevInfoset)
+    if (strcmp(m_prevInfoset->GetName(),m_infosetNameItem->GetValue())!=0)
+      m_prevInfoset->SetName(m_infosetNameItem->GetValue());
+
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
+  if (player->NumInfosets() == 0) { // can have players w/ no infosets
+    if (m_infosetItem->Number() == 0)
+      m_infosetItem->Append("None");
+    return;
+  }
+
+  m_infosetItem->SetSelection(p_number);
+  Infoset *infoset = player->Infosets()[p_number+1];
+  m_infosetNameItem->SetValue(infoset->GetName());
+  m_actionsItem->SetValue(ToText(infoset->NumActions()));
+  m_membersItem->SetValue(ToText(infoset->NumMembers()));
+  m_prevInfoset = infoset;
+}
+
+void dialogInfosets::NewInfoset(void)
+{
+  static int s_numActions = 2;
+
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
+
+  gText prompt = "Number of actions at new information set for ";
+  if (player->GetName() != "")
+    prompt += player->GetName();
+  else
+    prompt += "Player " + ToText(player->GetNumber());
+
+  gText reply = wxGetTextFromUser(prompt, "New Infoset",
+				  ToText(s_numActions));
+  int numActions = atoi(reply);
+
+  if (numActions > 0) {
+    s_numActions = numActions;
+    m_efg.CreateInfoset(player, numActions);
+    m_gameChanged = true;
+    m_infosetItem->Append(ToText(player->NumInfosets()));
+  }
+}
+
+void dialogInfosets::RemoveInfoset(void)
+{
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
+  Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection()+1];
+  if (infoset->NumMembers() != 0) {
+    wxMessageBox("This infoset is not empty.\n"
+		 "Only empty infosets can be deleted");
+    return;
+  }
+  m_efg.DeleteEmptyInfoset(infoset);
+  m_gameChanged = true;
+}
+
+void dialogInfosets::OnOk(void)
+{
+  EFPlayer *player = m_efg.Players()[m_playerItem->GetSelection()+1];
+  Infoset *infoset = player->Infosets()[m_infosetItem->GetSelection()+1];
+  infoset->SetName(m_infosetNameItem->GetValue());
+
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogInfosets::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogInfosets::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void dialogInfosets::OnHelp(void)
+{wxHelpContents("");}
+
+
+void dialogInfosets::CallbackPlayer(wxListBox &p_object,
+				    wxCommandEvent &p_event)
+{
+  ((dialogInfosets *) p_object.wxEvtHandler::GetClientData())->
+    OnPlayer(p_event.commandInt);
+}
+
+void dialogInfosets::CallbackInfoset(wxListBox &p_object, 
+				     wxCommandEvent &p_event)
+{
+  ((dialogInfosets *) p_object.wxEvtHandler::GetClientData())->
+    OnInfoset(p_event.commandInt);
+}
+
+void dialogInfosets::CallbackNew(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.GetClientData())->NewInfoset();
+}
+
+void dialogInfosets::CallbackRemove(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.GetClientData())->RemoveInfoset();
+}
+
+void dialogInfosets::CallbackOk(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.GetClientData())->OnOk();
+}
+
+void dialogInfosets::CallbackCancel(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.GetClientData())->OnCancel();
+}
+
+void dialogInfosets::CallbackHelp(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogInfosets *) p_object.GetClientData())->OnHelp();
+}
+
+
+//=========================================================================
 //                dialogEfgOutcomeSelect: Member functions
 //=========================================================================
 

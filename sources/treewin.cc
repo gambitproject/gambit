@@ -19,7 +19,7 @@
 #include "treedrag.h"
 
 #include "dlmoveadd.h"
-#include "infosetd.h"
+#include "dlinfosets.h"
 #include "dlefgsave.h"
 #include "dlnodedelete.h"
 #include "dlactionlabel.h"
@@ -2120,10 +2120,12 @@ void TreeWindow::tree_players(void)
 
 void TreeWindow::tree_infosets(void)
 {
-  InfosetDialog ID(ef, pframe);
+  dialogInfosets dialog(ef, pframe);
 
-  if (ID.GameChanged()) 
-    infosets_changed = true;
+  if (dialog.Completed() == wxOK) {
+    if (dialog.GameChanged()) 
+      infosets_changed = true;
+  }
 }
 
 //-----------------------------------------------------------------------
