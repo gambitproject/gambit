@@ -561,6 +561,10 @@ int efgTreeLayout::LayoutSubtree(const gbtEfgNode &p_node,
     entry->SetSubgameRoot(true);
     entry->SetSubgameMarked(p_node.GetSubgameRoot() == p_node);
   }
+  else {
+    entry->SetSubgameRoot(false);
+    entry->SetSubgameMarked(p_node.GetSubgameRoot() == p_node);
+  }
   p_maxy = gmax(entry->Y(), p_maxy);
   p_miny = gmin(entry->Y(), p_miny);
     
