@@ -172,6 +172,8 @@ necessary).  Now check OK to run algorithm. When algorithm completes,
 the gui crashes with notice that program has performed an illegal
 operation.
 
+This now appears to be fixed, RDM 12/27/98
+
 //------------------------------
 
 Bug D19: Problems with Standard Solution output.  
@@ -182,7 +184,7 @@ There are numerous problems with the GUI Standard Solutions output:
 
   AllNash finds none on 2x2x2.efg
 
-  AllNash crashes the GUI on 2x2x2.nfg
+  AllNash crashes the GUI on 2x2x2.nfg  (fixed, RDM 12/27/98)
 
   TwoNash only finds one on 2x2x2.nfg also on winkels.nfg
 
@@ -276,6 +278,17 @@ Bug D27: Solution Numbering
 Numbering of solutions should begin afresh when solutions are deleted
 in the solution display windows
 
+//------------------------------
+
+Bug D28: Problems in converting to normal form in the gui
+
+This problem only occurs under MS-Win version.  
+
+Load poker.efg, convert it to reduced normal form, and then try to
+save this as a normal form game (junk.nfg).  The gui crashes.
+Similarly, if you try to solve the game with the QRE algorithm, the
+gui crashes.
+
 -------------  older bugs that still remain ---------------
 
 //------------------------------
@@ -289,6 +302,9 @@ RDM: Problem still exists (9/3/98).  Also, the Label->Strats dialog
 box (and perhaps others as well) can not be gotten rid of in any way,
 even after the main Gambit window has been dismissed (on Linux).
 N.B. the "close" button here refers to the window manager close button.
+
+RDM: 12/27/98 This bug is now fixed for most windows, but there are
+still a few with the problem -- especially in the elimdom menu.
 
 //------------------------------
 

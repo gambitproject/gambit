@@ -95,7 +95,30 @@ Bug C17  Bad line numbers for parse errors.
   True
   parse error at line 56 in file bcp.gcl: identifier size
 
-but line 56 is a comment.  
+but line 56 is a comment.  Here is a simpler example (RDM 12/27/98)
+
+ Here is the file junk3.gcl:
+ 
+ -----------------------------  cut here --------------------------
+ i:=0;
+ While[i<3,
+   // This is a comment
+   i:=i+1;
+   // this is a parse error:
+   Help["help",udf->];
+   StdOut << "\n" << i;
+ ];  
+ ------------------------------ cut here -----------------------------
+ 
+ and here is the error message:
+ 
+   GCL1:= << Include["junk3.gcl"]
+   True
+   parse error at line 4 in file junk3.gcl: ]
+ 
+ But the error is actually on line 6 (missing value for udf).  I am
+ guessing it is getting screwed up by the comments inside the while
+ While loop.
 
 //------------------------------
 
@@ -193,6 +216,47 @@ Bug C30:  ElimDom on efg not working:
 Note, this is also leading to problems in the GUI (not surprisingly):
 Load poker.efg, and do Supports->ElimDom, and check Weak and
 PureStrat, then OK.  Gives internal error in Gambit
+
+//------------------------------
+
+Bug C31:  Include file names not printable:
+
+These problems occur under MS-Win version.  
+
+Here, the GCL is being run from the directory c:\gambit96, and the
+gclini.gcl and stdudfs.gcl files are in c:\gambit96\bin.
+
+  Include["C:\gambit9in\gclini.gcl"]
+  Include["C:\gambit9in\stdudfs.gcl"]
+  GCL1: << Include["gcl\nqre.gcl"]
+  True
+  Include["gcl
+  qre.gcl"]
+
+Note that it does not print the names of the included files correctly,
+even though it locates and loads them all correctly.  Evidently it is
+treating the "\n" in the pathname "gcl\nqre.gcl" as a new line
+character when it prints it even though it actually loads the file OK.
+This is probably what is happening with the "\b" in "c:\gambit96\bin"
+also.
+
+//------------------------------
+
+Bug C32:  Problems with the MFC interface to the GCL
+
+1. File->Exit brings up a dialog box with no message.  The message should
+say "Save work to a log file?"
+
+2.  Re-display of the command line after using the editing functions,
+like the up arrow and down arrow is much too slow.  This needs to be
+speeded up.
+
+3. Right now, the OnContextMenu() function is overridden to paste text
+into the command line.  It would be better if after highlighting text
+in the GCL window, the right mouse button would bring up the context
+menu (as in Notepad) to allow to cut or paste text into the GCL window in the standard MS-windows way. 
+
+
 
 //---------------  These are not bugs but suggested improvements ------------
 
