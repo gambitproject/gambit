@@ -96,7 +96,7 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
   Portion* result;
   int NumParams = _FuncInfo[_FuncIndex].NumParams;
   Portion** CurrParam;
-  bool Listed[NumParams];
+  bool *Listed=new bool[NumParams];
   ListPortion* Source = 0;  // source to look at to create dimensionality
   bool recurse;
 

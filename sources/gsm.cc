@@ -1,7 +1,7 @@
 //#
 //# FILE: gsm.cc  implementation of GSM (Stack machine)
 //#
-//# @(#)gsm.cc	1.162 8/5/96
+//# $Id$
 //#
 
 
@@ -408,7 +408,7 @@ bool GSM::Assign( void )
   {
     if(varname != "")
     {
-      if(p2->IsReference)
+      if(p2->IsReference())
       {
 	_VarDefine(varname, p2->ValCopy());
 	delete p2;
@@ -1010,7 +1010,7 @@ bool GSM::Divide ( void )
     }
     else if(p->Spec().Type==porFLOAT && ((FloatPortion*) p2)->Value() != 0)
       ((FloatPortion*) p)->Value() /= ((FloatPortion*) p2)->Value();
-    else if(p->Spec().Type==porRATIONAL && ((RationalPortion*) p2)->Value() != 0)
+    else if(p->Spec().Type==porRATIONAL && ((RationalPortion*) p2)->Value() != (gRational)0)
       ((RationalPortion*) p)->Value() /= ((RationalPortion*) p2)->Value();
     else
       result = false;
