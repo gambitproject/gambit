@@ -122,17 +122,17 @@ bool gbtAllActionIterator::IsLast(void) const
 
 bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 {
-  if (pl > p_action->GetInfoset().GetPlayer()->GetId()) {
+  if (pl > p_action->GetInfoset()->GetPlayer()->GetId()) {
     return true; 
   }
-  else if (pl < p_action->GetInfoset().GetPlayer()->GetId()) {
+  else if (pl < p_action->GetInfoset()->GetPlayer()->GetId()) {
     return false;
   }
   else {
-    if (iset > p_action->GetInfoset().GetId()) {
+    if (iset > p_action->GetInfoset()->GetId()) {
       return true; 
     }
-    else if (iset < p_action->GetInfoset().GetId()) {
+    else if (iset < p_action->GetInfoset()->GetId()) {
       return false;
     }
     else {
@@ -147,8 +147,8 @@ bool gbtAllActionIterator::IsSubsequentTo(const gbtEfgAction &p_action) const
 
 gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
 				     gbtEfgInfoset p_infoset)
-  : m_support(p_support), pl(p_infoset.GetPlayer()->GetId()),
-    iset(p_infoset.GetId()), act(1)
+  : m_support(p_support), pl(p_infoset->GetPlayer()->GetId()),
+    iset(p_infoset->GetId()), act(1)
 { }
 
 gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,

@@ -63,30 +63,30 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
 		  0, wxALL | wxCENTER, 5);
   m_infosetName = new wxTextCtrl(this, -1,
 				 wxString::Format(wxT("%s"),
-						  (const char *) p_infoset.GetLabel()));
+						  (const char *) p_infoset->GetLabel()));
   labelSizer->Add(m_infosetName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
 				 wxString::Format(_("Number of members: %d"),
-						  p_infoset.NumMembers())),
+						  p_infoset->NumMembers())),
 		0, wxALL, 5);
 
   wxBoxSizer *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")),
 		   0, wxALL, 5);
   m_player = new wxChoice(this, -1);
-  if (p_infoset.IsChanceInfoset()) {
+  if (p_infoset->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset.GetGame().NumPlayers(); pl++) {
+    for (int pl = 1; pl <= p_infoset->GetGame().NumPlayers(); pl++) {
       m_player->Append(wxString::Format(wxT("%d: %s"), pl,
 					(char *) 
-					p_infoset.GetGame().GetPlayer(pl)->GetLabel()));
+					p_infoset->GetGame().GetPlayer(pl)->GetLabel()));
     } 
-    m_player->SetSelection(p_infoset.GetPlayer()->GetId() - 1);
+    m_player->SetSelection(p_infoset->GetPlayer()->GetId() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
@@ -98,16 +98,16 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
   m_actionList = new wxListBox(this, idLISTBOX_ACTIONS,
 			       wxDefaultPosition, wxDefaultSize,
 			       0, 0, wxLB_SINGLE);
-  for (int act = 1; act <= p_infoset.NumActions(); act++) {
+  for (int act = 1; act <= p_infoset->NumActions(); act++) {
     m_actionList->Append(wxString::Format(wxT("%s"),
 					  (const char *)
 					  (ToText(act) + ": " + 
-					   p_infoset.GetAction(act)->GetLabel())));
-    m_actionNames.Append(p_infoset.GetAction(act)->GetLabel());
-    if (p_infoset.IsChanceInfoset()) {
-      m_actionProbs.Append(p_infoset.GetChanceProb(act));
+					   p_infoset->GetAction(act)->GetLabel())));
+    m_actionNames.Append(p_infoset->GetAction(act)->GetLabel());
+    if (p_infoset->IsChanceInfoset()) {
+      m_actionProbs.Append(p_infoset->GetChanceProb(act));
     }
-    m_actions.Append(p_infoset.GetAction(act));
+    m_actions.Append(p_infoset->GetAction(act));
   }
   m_actionList->SetSelection(0);
   m_lastSelection = 0;
@@ -126,12 +126,12 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
 					  (const char *) m_actionNames[1]));
   editSizer->Add(editNameSizer, 0, wxALL, 5);
 
-  if (p_infoset.IsChanceInfoset()) {
+  if (p_infoset->IsChanceInfoset()) {
     wxBoxSizer *editProbSizer = new wxBoxSizer(wxVERTICAL);
     editProbSizer->Add(new wxStaticText(this, wxID_STATIC, _("Probability")),
 		       0, wxTOP | wxCENTER, 5);
     m_actionProbValue = wxString::Format(wxT("%s"),
-					 (char *) ToText(p_infoset.GetChanceProb(1)));
+					 (char *) ToText(p_infoset->GetChanceProb(1)));
     m_actionProb = new wxTextCtrl(this, -1, wxT(""),
 				  wxDefaultPosition, wxDefaultSize,
 				  0, gbtNumberValidator(&m_actionProbValue,
@@ -176,7 +176,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
 void dialogEditMove::OnActionChanged(wxCommandEvent &)
 { 
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
   gbtEfgAction action = m_actions[m_lastSelection+1];
@@ -193,7 +193,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
   m_actionName->SetValue(wxString::Format(wxT("%s"),
 					  (const char *)
 					  m_actionNames[m_actionList->GetSelection() + 1]));
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProb->SetValue(wxString::Format(wxT("%s"),
 					    (const char *)
 					    ToText(m_actionProbs[m_actionList->GetSelection()+1])));
@@ -204,7 +204,7 @@ void dialogEditMove::OnActionChanged(wxCommandEvent &)
 void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
 {
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
@@ -220,7 +220,7 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
   }
   
   m_actionNames.Insert("NewAction", m_lastSelection + 1);
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs.Insert(0, m_lastSelection + 1);
   }
   m_actions.Insert(0, m_lastSelection + 1);
@@ -233,7 +233,7 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
   m_actionList->SetSelection(m_lastSelection);
   m_actionName->SetValue(wxString::Format(wxT("%s"),
 					  (const char *) m_actionNames[m_lastSelection + 1]));
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProb->SetValue(wxString::Format(wxT("%s"),
 					    (const char *) 
 					    ToText(m_actionProbs[m_lastSelection + 1])));
@@ -244,7 +244,7 @@ void dialogEditMove::OnAddActionBefore(wxCommandEvent &)
 void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
 {
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
@@ -260,7 +260,7 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
   }
   
   m_actionNames.Insert("NewAction", m_lastSelection + 2);
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs.Insert(0, m_lastSelection + 2);
   }
   m_actions.Insert(0, m_lastSelection + 2);
@@ -274,7 +274,7 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
   m_actionName->SetValue(wxString::Format(wxT("%s"),
 					  (const char *)
 					  m_actionNames[m_lastSelection + 1]));
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProb->SetValue(wxString::Format(wxT("%s"),
 					    (const char *) 
 					    ToText(m_actionProbs[m_lastSelection + 1])));
@@ -285,7 +285,7 @@ void dialogEditMove::OnAddActionAfter(wxCommandEvent &)
 void dialogEditMove::OnDeleteAction(wxCommandEvent &)
 {
   m_actionNames.Remove(m_actionList->GetSelection() + 1);
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs.Remove(m_actionList->GetSelection() + 1);
   }
   m_actions.Remove(m_actionList->GetSelection() + 1);
@@ -297,7 +297,7 @@ void dialogEditMove::OnDeleteAction(wxCommandEvent &)
   m_actionName->SetValue(wxString::Format(wxT("%s"),
 					  (const char *)
 					  m_actionNames[m_actionList->GetSelection() + 1]));
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProb->SetValue(wxString::Format(wxT("%s"),
 					    (const char *) 
 					    ToText(m_actionProbs[m_lastSelection + 1])));
@@ -309,7 +309,7 @@ void dialogEditMove::OnOK(wxCommandEvent &p_event)
 {
   // Copy any edited data into the blocks
   m_actionNames[m_lastSelection+1] = m_actionName->GetValue().mb_str();
-  if (m_infoset.IsChanceInfoset()) {
+  if (m_infoset->IsChanceInfoset()) {
     m_actionProbs[m_lastSelection+1] = 
       ToNumber(gbtText(m_actionProb->GetValue().mb_str()));
   }
@@ -350,16 +350,16 @@ public:
 
 void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
 {
-  m_infoset.SetLabel(m_infosetLabel);
+  m_infoset->SetLabel(m_infosetLabel);
     
-  if (!m_infoset.IsChanceInfoset() && 
-      m_infosetPlayer != m_infoset.GetPlayer()->GetId()) {
-    m_infoset.SetPlayer(p_doc->GetEfg().GetPlayer(m_infosetPlayer));
+  if (!m_infoset->IsChanceInfoset() && 
+      m_infosetPlayer != m_infoset->GetPlayer()->GetId()) {
+    m_infoset->SetPlayer(p_doc->GetEfg().GetPlayer(m_infosetPlayer));
   }
 
-  for (int act = 1; act <= m_infoset.NumActions(); act++) {
-    if (!m_actions.Find(m_infoset.GetAction(act))) {
-      m_infoset.GetAction(act)->DeleteAction();
+  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+    if (!m_actions.Find(m_infoset->GetAction(act))) {
+      m_infoset->GetAction(act)->DeleteAction();
       act--;
     }
   }
@@ -369,17 +369,17 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
     gbtEfgAction action = m_actions[act];
     if (!action.IsNull()) {
       action->SetLabel(m_actionLabels[act]);
-      if (m_infoset.IsChanceInfoset()) {
+      if (m_infoset->IsChanceInfoset()) {
 	p_doc->GetEfg().SetChanceProb(m_infoset, action->GetId(),
 				      m_actionProbs[act]);
       }
       insertAt = m_actions[act]->GetId() + 1;
     }
-    else if (insertAt > m_infoset.NumActions()) {
+    else if (insertAt > m_infoset->NumActions()) {
       gbtEfgAction newAction = p_doc->GetEfg().InsertAction(m_infoset);
       insertAt++;
       newAction->SetLabel(m_actionLabels[act]);
-      if (m_infoset.IsChanceInfoset()) {
+      if (m_infoset->IsChanceInfoset()) {
 	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }
@@ -387,9 +387,9 @@ void gbtCmdEditMove::Do(gbtGameDocument *p_doc)
     else {
       gbtEfgAction newAction =
 	p_doc->GetEfg().InsertAction(m_infoset,
-				     m_infoset.GetAction(insertAt++));
+				     m_infoset->GetAction(insertAt++));
       newAction->SetLabel(m_actionLabels[act]);
-      if (m_infoset.IsChanceInfoset()) {
+      if (m_infoset->IsChanceInfoset()) {
 	p_doc->GetEfg().SetChanceProb(m_infoset, newAction->GetId(), 
 				      m_actionProbs[act]);
       }

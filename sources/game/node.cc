@@ -313,8 +313,8 @@ int gbtEfgNode::GetMemberId(void) const
     return 0;
   }
 
-  for (int i = 1; i <= GetInfoset().NumMembers(); i++) {
-    if (GetInfoset().GetMember(i) == *this) {
+  for (int i = 1; i <= GetInfoset()->NumMembers(); i++) {
+    if (GetInfoset()->GetMember(i) == *this) {
       return i;
     }
   }
@@ -353,9 +353,9 @@ gbtEfgAction gbtEfgNode::GetPriorAction(void) const
   }
   
   gbtEfgInfoset infoset = GetParent().GetInfoset();
-  for (int i = 1; i <= infoset.NumActions(); i++) {
-    if (*this == GetParent().GetChild(infoset.GetAction(i))) {
-      return infoset.GetAction(i);
+  for (int i = 1; i <= infoset->NumActions(); i++) {
+    if (*this == GetParent().GetChild(infoset->GetAction(i))) {
+      return infoset->GetAction(i);
     }
   }
 
@@ -396,13 +396,14 @@ gbtEfgNode gbtEfgNode::InsertMove(gbtEfgInfoset p_infoset)
     throw gbtEfgNullObject();
   }
 
+  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(p_infoset.Get());
   // FIXME: For the moment, can't bridge subgames
-  if (p_infoset.rep->m_members.Length() > 0 &&
-      rep->m_gameroot != p_infoset.rep->m_members[1]->m_gameroot) {
+  if (infoset->m_members.Length() > 0 &&
+      rep->m_gameroot != infoset->m_members[1]->m_gameroot) {
     return 0;
   }  
 
-  rep->m_efg->InsertMove(rep, p_infoset.rep);
+  rep->m_efg->InsertMove(rep, infoset);
   return GetParent();
 }
 
@@ -440,19 +441,20 @@ void gbtEfgNode::JoinInfoset(gbtEfgInfoset p_infoset)
     throw gbtEfgNullObject();
   }
 
+  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(p_infoset.Get());
   // FIXME: can't bridge subgames
-  if (p_infoset.rep->m_members.Length() > 0 &&
-      rep->m_gameroot != p_infoset.rep->m_members[1]->m_gameroot) {
+  if (infoset->m_members.Length() > 0 &&
+      rep->m_gameroot != infoset->m_members[1]->m_gameroot) {
     return;
   }
   
   if (!rep->m_infoset ||
-      rep->m_infoset == p_infoset.rep ||
-      p_infoset.rep->m_actions.Length() != rep->m_children.Length())  {
+      rep->m_infoset == infoset ||
+      infoset->m_actions.Length() != rep->m_children.Length())  {
     return;
   }
 
-  rep->m_efg->JoinInfoset(p_infoset.rep, rep);
+  rep->m_efg->JoinInfoset(infoset, rep);
 }
 
 gbtEfgInfoset gbtEfgNode::LeaveInfoset(void)

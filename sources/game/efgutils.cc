@@ -182,7 +182,7 @@ LastAction(const gbtEfgGame & e, const gbtEfgNode &node)
     return 0;
   for (int i = 1; i <= node.NumChildren(); i++)
     if (parent.GetChild(i) == node)
-      return parent.GetInfoset().GetAction(i);
+      return parent.GetInfoset()->GetAction(i);
   return 0;
 }
 
@@ -195,11 +195,11 @@ CompressEfg(const gbtEfgGame & efg, const gbtEfgSupport & S)
     gbtEfgPlayer player = newefg.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
-      for (int act = infoset.NumActions(); act >= 1; act--) {
+      for (int act = infoset->NumActions(); act >= 1; act--) {
         gbtEfgAction oldact =
-          efg.GetPlayer(pl)->GetInfoset(iset).GetAction(act);
+          efg.GetPlayer(pl)->GetInfoset(iset)->GetAction(act);
         if (!S.Contains(oldact)) {
-          infoset.GetAction(act)->DeleteAction();
+          infoset->GetAction(act)->DeleteAction();
         }
       }
     }
@@ -218,8 +218,8 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
     gbtEfgPlayer player = p_efg.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
-      for (int act = 1; act <= infoset.NumActions(); act++) {
-	if (p_support.Contains(infoset.GetAction(act))) {
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	if (p_support.Contains(infoset->GetAction(act))) {
 	  support(pl, iset, act) = 1;
 	}
       }
@@ -230,9 +230,9 @@ void CompressEfgInPlace(gbtEfgGame p_efg, const gbtEfgSupport &p_support)
     gbtEfgPlayer player = p_efg.GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
-      for (int act = infoset.NumActions(); act >= 1; act--) {
+      for (int act = infoset->NumActions(); act >= 1; act--) {
 	if (!support(pl, iset, act)) {
-          infoset.GetAction(act)->DeleteAction();
+          infoset->GetAction(act)->DeleteAction();
         }
       }
     }

@@ -136,9 +136,9 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID = AppendItem(id, 
-				       wxString::Format(wxT("%s"), (char *) infoset.GetLabel()));
-      for (int act = 1; act <= infoset.NumActions(); act++) {
-	gbtEfgAction action = infoset.GetAction(act);
+				       wxString::Format(wxT("%s"), (char *) infoset->GetLabel()));
+      for (int act = 1; act <= infoset->NumActions(); act++) {
+	gbtEfgAction action = infoset->GetAction(act);
 	wxTreeItemId actID = AppendItem(isetID,
 					wxString::Format(wxT("%s"), (char *) action->GetLabel()));
 	if (p_support.Contains(action)) {
@@ -147,7 +147,7 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
 	else {
 	  SetItemTextColour(actID, *wxLIGHT_GREY);
 	}
-	m_map.Define(actID, infoset.GetAction(act));
+	m_map.Define(actID, infoset->GetAction(act));
       }
 
       Expand(isetID);

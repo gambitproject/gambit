@@ -384,7 +384,7 @@ wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
     }
     else {
       return wxString::Format(wxT("%s"),
-			      (const char *) n.GetInfoset().GetLabel());
+			      (const char *) n.GetInfoset()->GetLabel());
     }
   case GBT_NODE_LABEL_ISETID:
     if (n.GetInfoset().IsNull()) {
@@ -392,7 +392,7 @@ wxString gbtEfgLayout::CreateNodeLabel(const gbtEfgLayoutNode *p_entry,
     }
     else {
       return wxString::Format(wxT("(%d,%d)"),
-			      n.GetPlayer()->GetId(), n.GetInfoset().GetId());
+			      n.GetPlayer()->GetId(), n.GetInfoset()->GetId());
     }
   case GBT_NODE_LABEL_OUTCOME:
     return OutcomeAsString(n, m_doc->GetPreferences().NumDecimals());
@@ -432,7 +432,7 @@ wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
     return wxT("");
   case GBT_BRANCH_LABEL_LABEL:
     return wxString::Format(wxT("%s"),
-			    (const char *) parent.GetInfoset().GetAction(p_entry->GetChildNumber())->GetLabel());
+			    (const char *) parent.GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel());
   case GBT_BRANCH_LABEL_PROBS:
     return wxString::Format(wxT("%s"),
 			    (const char *) m_doc->GetActionProb(parent,
@@ -499,7 +499,7 @@ int gbtEfgLayout::LayoutSubtree(const gbtEfgNode &p_node,
       }
 
       if (!p_node.GetPlayer()->IsChance() &&
-	  !p_support.Contains(p_node.GetInfoset().GetAction(i))) {
+	  !p_support.Contains(p_node.GetInfoset()->GetAction(i))) {
 	m_nodeList[p_node.GetChild(i).GetId()]->SetInSupport(false);
       }
     }
@@ -634,7 +634,7 @@ void gbtEfgLayout::FillInfosetTable(const gbtEfgNode &n,
     for (int i = 1; i <= n.NumChildren(); i++) {
       bool in_sup = true;
       if (n.GetPlayer()->GetId()) {
-	in_sup = cur_sup.Contains(n.GetInfoset().GetAction(i));
+	in_sup = cur_sup.Contains(n.GetInfoset()->GetAction(i));
       }
             
       if (in_sup || !prefs.RootReachable()) {

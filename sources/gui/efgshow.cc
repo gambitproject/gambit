@@ -156,7 +156,7 @@ public:
 
 void gbtCmdReveal::Do(gbtGameDocument *p_doc)  
 {
-  m_infoset.Reveal(m_player);
+  m_infoset->Reveal(m_player);
 }
 
 //---------------------------------------------------------------------

@@ -49,14 +49,14 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
       ("Dominates(..) needs actions in same infoset.\n");
 
   const gbtEfgSupportWithActiveInfo SAct(*this);
-  gbtEfgPlayer player = infoset.GetPlayer();
+  gbtEfgPlayer player = infoset->GetPlayer();
   int pl = player->GetId();
   bool equal = true;
 
   if (!conditional) {
     gbtEfgContIterator A(*this), B(*this);
-    A.Freeze(player->GetId(), infoset.GetId()); 
-    B.Freeze(player->GetId(), infoset.GetId());
+    A.Freeze(player->GetId(), infoset->GetId()); 
+    B.Freeze(player->GetId(), infoset->GetId());
     A.Set(a);
     B.Set(b);
 
@@ -77,8 +77,8 @@ bool gbtEfgSupport::Dominates(const gbtEfgAction &a, const gbtEfgAction &b,
     if (nodelist.Length() == 0) {
       // This may not be a good idea; I suggest checking for this 
       // prior to entry
-      for (int i = 1; i <= infoset.NumMembers(); i++) {
-	nodelist.Append(infoset.GetMember(i));
+      for (int i = 1; i <= infoset->NumMembers(); i++) {
+	nodelist.Append(infoset->GetMember(i));
       }
     }
     

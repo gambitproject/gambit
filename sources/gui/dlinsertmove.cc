@@ -138,7 +138,7 @@ dialogInsertMove::dialogInsertMove(wxWindow *p_parent,
   for (int iset = 1; iset <= player->NumInfosets(); iset++) {
     m_infosetItem->Append(wxString::Format(wxT("%s"),
 					   (char *) (ToText(iset) + ": " +
-						     player->GetInfoset(iset).GetLabel())));
+						     player->GetInfoset(iset)->GetLabel())));
   }
   m_infosetItem->SetSelection(0);
 
@@ -200,7 +200,7 @@ void dialogInsertMove::OnPlayer(wxCommandEvent &)
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       m_infosetItem->Append(wxString::Format(wxT("%s"),
 					     (char *) (ToText(iset) + ": " +
-						       player->GetInfoset(iset).GetLabel())));
+						       player->GetInfoset(iset)->GetLabel())));
     }
   }
   m_infosetItem->SetSelection(0);
@@ -220,7 +220,7 @@ void dialogInsertMove::OnInfoset(wxCommandEvent &)
     else
       infoset = m_doc->GetEfg().GetPlayer(playerNumber)->GetInfoset(infosetNumber);
     m_actions->Enable(false);
-    m_actions->SetValue(infoset.NumActions());
+    m_actions->SetValue(infoset->NumActions());
   }
   else {
     m_actions->Enable(true);

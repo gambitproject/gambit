@@ -36,8 +36,8 @@ class ChanceInfoset;
 template class gbtArray<gbtEfgPlayerBase *>;
 template class gbtBlock<gbtEfgPlayerBase *>;
 
-template class gbtArray<gbt_efg_infoset_rep *>;
-template class gbtBlock<gbt_efg_infoset_rep *>;
+template class gbtArray<gbtEfgInfosetBase *>;
+template class gbtBlock<gbtEfgInfosetBase *>;
 
 template class gbtArray<gbtEfgInfoset>;
 template class gbtBlock<gbtEfgInfoset>;

@@ -131,7 +131,7 @@ int gbtProfileTable::GetPlayerNumber(int p_col) const
       for (int iset = 1; iset <= m_doc->GetEfg().GetPlayer(pl)->NumInfosets();
 	   iset++) {
 	if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
-	  if ((col += m_doc->GetEfg().GetPlayer(pl)->GetInfoset(iset).NumActions()) > p_col) {
+	  if ((col += m_doc->GetEfg().GetPlayer(pl)->GetInfoset(iset)->NumActions()) > p_col) {
 	    return pl;
 	  }
 	}
@@ -181,12 +181,12 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
       if (m_doc->GetPreferences().ProfileStyle() == GBT_PROFILES_GRID) {
 	for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	  gbtEfgInfoset infoset = player->GetInfoset(iset);
-	  for (int act = 1; act <= infoset.NumActions(); col++, act++) {
+	  for (int act = 1; act <= infoset->NumActions(); col++, act++) {
 	    if (col == p_col) {
 	      return wxString::Format(wxT("%s:%s:%s"),
 				      (char *) player->GetLabel(),
-				      (char *) infoset.GetLabel(),
-				      (char *) infoset.GetAction(act)->GetLabel());
+				      (char *) infoset->GetLabel(),
+				      (char *) infoset->GetAction(act)->GetLabel());
 	    }
 	  }
 	}
@@ -196,7 +196,7 @@ wxString gbtProfileTable::GetColLabelValue(int p_col)
 	  if (col == p_col) {
 	    return wxString::Format(wxT("%s:%s"),
 				    (char *) player->GetLabel(),
-				    (char *) player->GetInfoset(iset).GetLabel());
+				    (char *) player->GetInfoset(iset)->GetLabel());
 	  }
 	}
       }
@@ -310,16 +310,16 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 	    if (col == p_col) {
 	      gbtEfgInfoset infoset = player->GetInfoset(iset);
 	      wxString ret;
-	      for (int act = 1; act <= infoset.NumActions(); act++) {
-		if ((*behav)(infoset.GetAction(act)) > gbtNumber(0)) {
+	      for (int act = 1; act <= infoset->NumActions(); act++) {
+		if ((*behav)(infoset->GetAction(act)) > gbtNumber(0)) {
 		  if (ret != wxT("")) {
 		    ret += wxT("+");
 		  }
 		  ret += wxString::Format(wxT("%s"),
-					  (char *) ToText((*behav)(infoset.GetAction(act)),
+					  (char *) ToText((*behav)(infoset->GetAction(act)),
 							  m_doc->GetPreferences().NumDecimals()));
-		  if (infoset.GetAction(act)->GetLabel() != "") {
-		    ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) infoset.GetAction(act)->GetLabel()) + wxT("]");
+		  if (infoset->GetAction(act)->GetLabel() != "") {
+		    ret += wxT("*[") + wxString::Format(wxT("%s"), (char *) infoset->GetAction(act)->GetLabel()) + wxT("]");
 		  }
 		  else {
 		    ret += wxString::Format(wxT("*[#%d]"), act);

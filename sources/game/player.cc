@@ -41,6 +41,10 @@
 gbtEfgPlayer gbtEfgStrategyBase::GetPlayer(void) const
 { return m_player; }
 
+gbtEfgAction
+gbtEfgStrategyBase::GetAction(const gbtEfgInfoset &p_infoset) const
+{ return p_infoset->GetAction(m_actions[p_infoset->GetId()]); }
+
 //----------------------------------------------------------------------
 //           class gbtEfgPlayerBase: Member functions
 //----------------------------------------------------------------------
@@ -69,6 +73,8 @@ gbtEfgInfoset gbtEfgPlayerBase::NewInfoset(int p_actions)
   return m_efg->NewInfoset(this, this->m_infosets.Length() + 1, p_actions);
 }
 
+gbtEfgInfoset gbtEfgPlayerBase::GetInfoset(int p_index) const
+{ return m_infosets[p_index]; }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgPlayer &)
 { 

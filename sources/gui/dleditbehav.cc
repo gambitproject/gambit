@@ -94,10 +94,10 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtEfgInfoset infoset = player->GetInfoset(iset);
       wxTreeItemId isetID;
-      if (infoset.GetLabel() != "") {
+      if (infoset->GetLabel() != "") {
 	isetID = m_infosetTree->AppendItem(id,
 					   wxString::Format(wxT("%s"),
-							    (char *) infoset.GetLabel()));
+							    (char *) infoset->GetLabel()));
       }
       else {
 	isetID = m_infosetTree->AppendItem(id,
@@ -116,17 +116,17 @@ dialogEditBehav::dialogEditBehav(wxWindow *p_parent,
 
   m_probGrid = new wxGrid(this, GBT_PROB_GRID,
 			  wxDefaultPosition, wxDefaultSize);
-  m_probGrid->CreateGrid(m_lastInfoset.NumActions(), 1);
+  m_probGrid->CreateGrid(m_lastInfoset->NumActions(), 1);
   m_probGrid->SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   m_probGrid->SetDefaultEditor(new gbtNumberEditor);
   m_probGrid->SetLabelValue(wxHORIZONTAL, _("Probability"), 0);
-  for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
+  for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
     m_probGrid->SetLabelValue(wxVERTICAL,
 			      wxString::Format(wxT("%s"),
-					       (char *) m_lastInfoset.GetAction(act)->GetLabel()),
+					       (char *) m_lastInfoset->GetAction(act)->GetLabel()),
 			      act - 1);
     m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
-					      (char *) ToText(p_profile(m_lastInfoset.GetAction(act)))),
+					      (char *) ToText(p_profile(m_lastInfoset->GetAction(act)))),
 			     act - 1, 0);
     if (act % 2 == 0) {
       m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(200, 200, 200));
@@ -187,8 +187,8 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
   }
 
   if (!m_lastInfoset.IsNull()) {
-    for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
-      m_profile.SetActionProb(m_lastInfoset.GetAction(act),
+    for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
+      m_profile.SetActionProb(m_lastInfoset->GetAction(act),
 			      ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
     }
   }
@@ -196,22 +196,22 @@ void dialogEditBehav::OnSelChanged(wxTreeEvent &p_event)
   m_lastInfoset = m_map.Lookup(p_event.GetItem());
 
   if (!m_lastInfoset.IsNull()) {
-    if (m_lastInfoset.NumActions() < m_probGrid->GetRows()) {
+    if (m_lastInfoset->NumActions() < m_probGrid->GetRows()) {
       m_probGrid->DeleteRows(0,
-			     m_probGrid->GetRows() - m_lastInfoset.NumActions());
+			     m_probGrid->GetRows() - m_lastInfoset->NumActions());
     }
-    else if (m_lastInfoset.NumActions() > m_probGrid->GetRows()) {
+    else if (m_lastInfoset->NumActions() > m_probGrid->GetRows()) {
       m_probGrid->InsertRows(0,
-			     m_lastInfoset.NumActions() - m_probGrid->GetRows());
+			     m_lastInfoset->NumActions() - m_probGrid->GetRows());
     }
 
-    for (int act = 1; act <= m_lastInfoset.NumActions(); act++) {
+    for (int act = 1; act <= m_lastInfoset->NumActions(); act++) {
       m_probGrid->SetLabelValue(wxVERTICAL,
 				wxString::Format(wxT("%s"),
-						 (char *) m_lastInfoset.GetAction(act)->GetLabel()),
+						 (char *) m_lastInfoset->GetAction(act)->GetLabel()),
 				act - 1);
       m_probGrid->SetCellValue(wxString::Format(wxT("%s"),
-						(char *) ToText(m_profile(m_lastInfoset.GetAction(act)))),
+						(char *) ToText(m_profile(m_lastInfoset->GetAction(act)))),
 			       act - 1, 0);
       if (act % 2 == 0) {
 	m_probGrid->SetCellBackgroundColour(act - 1, 0, wxColour(200, 200, 200));
@@ -244,8 +244,8 @@ void dialogEditBehav::OnOK(wxCommandEvent &p_event)
     }
   }
 
-  for (int act = 1; act <= infoset.NumActions(); act++) {
-    m_profile.SetActionProb(infoset.GetAction(act),
+  for (int act = 1; act <= infoset->NumActions(); act++) {
+    m_profile.SetActionProb(infoset->GetAction(act),
 			    ToNumber(gbtText(m_probGrid->GetCellValue(act - 1, 0).mb_str())));
   }
 

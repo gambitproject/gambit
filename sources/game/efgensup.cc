@@ -40,16 +40,16 @@ DeletionsViolateActiveCommitments(gbtAllActionIterator &cursor,
 {
   for (int i = 1; i <= infosetlist->Length(); i++) {
     gbtEfgInfoset infoset = (*infosetlist)[i];
-    if (infoset.GetPlayer()->GetId() < cursor.GetPlayerId() ||
-	( infoset.GetPlayer()->GetId() == cursor.GetPlayerId() &&
-	  infoset.GetId() < cursor.GetInfosetId()) )
+    if (infoset->GetPlayer()->GetId() < cursor.GetPlayerId() ||
+	( infoset->GetPlayer()->GetId() == cursor.GetPlayerId() &&
+	  infoset->GetId() < cursor.GetInfosetId()) )
       if (S->NumActions(infoset) > 0)
 	return true;
-    if (infoset.GetPlayer()->GetId() == cursor.GetPlayerId() &&
-	infoset.GetId() == cursor.GetInfosetId() )
+    if (infoset->GetPlayer()->GetId() == cursor.GetPlayerId() &&
+	infoset->GetId() == cursor.GetInfosetId() )
       for (int act = 1; act < cursor.GetActionId(); act++)
-	if ( S->Contains(infoset.GetPlayer()->GetId(),
-			 infoset.GetId(),
+	if ( S->Contains(infoset->GetPlayer()->GetId(),
+			 infoset->GetId(),
 			 act) )
 	  return true;
   }
@@ -62,8 +62,8 @@ InfosetGuaranteedActiveByPriorCommitments(gbtAllActionIterator &cursor,
 					  const gbtEfgSupportWithActiveInfo *S,
 					  gbtEfgInfoset infoset)
 {
-  for (int i = 1; i <= infoset.NumMembers(); i++) {
-    gbtEfgNode current = infoset.GetMember(i);
+  for (int i = 1; i <= infoset->NumMembers(); i++) {
+    gbtEfgNode current = infoset->GetMember(i);
     if (current == S->GetRoot()) {
       return true;
     }
@@ -422,8 +422,8 @@ gbtList<const gbtEfgSupport> PossibleNashSubsupports(const gbtEfgSupport &S,
     do {
       gbtEfgAction act = crsr.GetAction();
       if (current.Contains(act)) 
-	for (int j = 1; j <= act->GetInfoset().NumActions(); j++) {
-	  gbtEfgAction other_act = act->GetInfoset().GetAction(j);
+	for (int j = 1; j <= act->GetInfoset()->NumActions(); j++) {
+	  gbtEfgAction other_act = act->GetInfoset()->GetAction(j);
 	  if (other_act != act)
 	    if (current.Contains(other_act)) {
 	      if (current.Dominates(other_act,act,false,true) ||

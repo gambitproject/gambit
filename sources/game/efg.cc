@@ -98,7 +98,7 @@ void gbt_efg_game_rep::SortInfosets(void)
     i = 1;
     while (i < foo)   {
       if (player->m_infosets[i]->m_members.Length() == 0)  {
-	gbt_efg_infoset_rep *bar = player->m_infosets[i];
+	gbtEfgInfosetBase *bar = player->m_infosets[i];
 	player->m_infosets[i] = player->m_infosets[foo];
 	player->m_infosets[foo--] = bar;
       }
@@ -116,7 +116,7 @@ void gbt_efg_game_rep::SortInfosets(void)
   
     for (i = 1; i <= nodes.Length(); i++)  {
       gbtEfgNode n = nodes[i];
-      if (n.GetPlayer() == player && n.GetInfoset().GetId() == 0)  {
+      if (n.GetPlayer() == player && n.GetInfoset()->GetId() == 0)  {
 	n.rep->m_infoset->m_id = ++isets;
 	player->m_infosets[isets] = n.rep->m_infoset;
       }
@@ -132,7 +132,7 @@ void gbt_efg_game_rep::SortInfosets(void)
     gbtEfgPlayerBase *player = (pl) ? players[pl] : chance;
 
     for (int iset = 1; iset <= player->m_infosets.Length(); iset++)  {
-      gbt_efg_infoset_rep *s = player->m_infosets[iset];
+      gbtEfgInfosetBase *s = player->m_infosets[iset];
       for (int i = 1, j = 1; i <= nodes.Length(); i++)  {
 	if (nodes[i].rep->m_infoset == s)
 	  s->m_members[j++] = nodes[i].rep;
@@ -150,7 +150,7 @@ void gbt_efg_game_rep::SortInfosets(void)
 // of the new node.  Assumes node and infoset are valid.
 //
 void gbt_efg_game_rep::InsertMove(gbt_efg_node_rep *p_node,
-				  gbt_efg_infoset_rep *p_infoset)
+				  gbtEfgInfosetBase *p_infoset)
 {
   gbt_efg_node_rep *parent = p_node->m_parent;
   gbt_efg_node_rep *node = new gbt_efg_node_rep(this, parent);
@@ -241,16 +241,16 @@ void gbt_efg_game_rep::DeleteTree(gbt_efg_node_rep *p_node)
 // Create a new information set with id 'p_id' for player 'p_player'.
 // Assumes player is not null, number of actions positive.
 //  
-gbt_efg_infoset_rep *gbt_efg_game_rep::NewInfoset(gbtEfgPlayerBase *p_player,
+gbtEfgInfosetBase *gbt_efg_game_rep::NewInfoset(gbtEfgPlayerBase *p_player,
 						  int p_id, int p_actions)
 {
-  gbt_efg_infoset_rep *s = new gbt_efg_infoset_rep(p_player, p_id, p_actions);
+  gbtEfgInfosetBase *s = new gbtEfgInfosetBase(p_player, p_id, p_actions);
   p_player->m_infosets.Append(s);
   m_revision++;
   return s;
 }
 
-void gbt_efg_game_rep::DeleteInfoset(gbt_efg_infoset_rep *p_infoset)
+void gbt_efg_game_rep::DeleteInfoset(gbtEfgInfosetBase *p_infoset)
 {
   gbtEfgPlayerBase *player = p_infoset->m_player;
   player->m_infosets.Remove(player->m_infosets.Find(p_infoset));
@@ -291,7 +291,7 @@ void gbt_efg_game_rep::DeleteOutcome(gbtEfgOutcomeBase *p_outcome)
 // Assumes 'p_node' and 'p_infoset' are not null, and the move at
 // 'p_node' is compatible with 'p_infoset' (i.e., same number of actions)
 //
-void gbt_efg_game_rep::JoinInfoset(gbt_efg_infoset_rep *p_infoset,
+void gbt_efg_game_rep::JoinInfoset(gbtEfgInfosetBase *p_infoset,
 				   gbt_efg_node_rep *p_node)
 {
   if (!p_node->m_infoset ||
@@ -300,7 +300,7 @@ void gbt_efg_game_rep::JoinInfoset(gbt_efg_infoset_rep *p_infoset,
     return;
   }
 
-  gbt_efg_infoset_rep *t = p_node->m_infoset;
+  gbtEfgInfosetBase *t = p_node->m_infoset;
   t->m_members.Remove(t->m_members.Find(p_node));
   p_infoset->m_members.Append(p_node);
   p_node->m_infoset = p_infoset;
@@ -314,13 +314,13 @@ void gbt_efg_game_rep::JoinInfoset(gbt_efg_infoset_rep *p_infoset,
 // Breaks 'p_node' out of its information set to a new singleton.
 // Assumes 'p_node' is not null.  Returns the new information set.
 //
-gbt_efg_infoset_rep *gbt_efg_game_rep::LeaveInfoset(gbt_efg_node_rep *p_node)
+gbtEfgInfosetBase *gbt_efg_game_rep::LeaveInfoset(gbt_efg_node_rep *p_node)
 {
   if (!p_node->m_infoset)  {
     return 0;
   }
 
-  gbt_efg_infoset_rep *infoset = p_node->m_infoset;
+  gbtEfgInfosetBase *infoset = p_node->m_infoset;
   if (infoset->m_members.Length() == 1)  {
     return infoset;
   }
@@ -345,8 +345,8 @@ gbt_efg_infoset_rep *gbt_efg_game_rep::LeaveInfoset(gbt_efg_node_rep *p_node)
 // Takes all nodes in infoset 'p_from' and places them in 'p_to'.
 // Assumes the infosets are not null, and are compatible.
 //
-void gbt_efg_game_rep::MergeInfoset(gbt_efg_infoset_rep *p_to,
-				    gbt_efg_infoset_rep *p_from)
+void gbt_efg_game_rep::MergeInfoset(gbtEfgInfosetBase *p_to,
+				    gbtEfgInfosetBase *p_from)
 {
   p_to->m_members += p_from->m_members;
   for (int i = 1; i <= p_from->m_members.Length(); i++) {
@@ -364,7 +364,7 @@ void gbt_efg_game_rep::MergeInfoset(gbt_efg_infoset_rep *p_to,
 // Reveals the actions in 'p_where' to the player 'p_who'.
 // Assumes information set and player are both non-null.
 //
-void gbt_efg_game_rep::Reveal(gbt_efg_infoset_rep *p_where,
+void gbt_efg_game_rep::Reveal(gbtEfgInfosetBase *p_where,
 			      gbtEfgPlayerBase *p_who)
 {
   if (p_where->m_actions.Length() <= 1)  {
@@ -384,7 +384,7 @@ void gbt_efg_game_rep::Reveal(gbt_efg_infoset_rep *p_where,
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
       gbtArray<gbt_efg_node_rep *> members = p_who->m_infosets[k]->m_members;
-      gbt_efg_infoset_rep *newiset = 0;
+      gbtEfgInfosetBase *newiset = 0;
       
       for (int m = 1; m <= members.Length(); m++) {
 	gbt_efg_node_rep *n = members[m];
@@ -407,7 +407,7 @@ void gbt_efg_game_rep::Reveal(gbt_efg_infoset_rep *p_where,
   SortInfosets();
 }
 
-void gbt_efg_game_rep::SetPlayer(gbt_efg_infoset_rep *p_infoset,
+void gbt_efg_game_rep::SetPlayer(gbtEfgInfosetBase *p_infoset,
 				 gbtEfgPlayerBase *p_player)
 {
   gbtEfgPlayerBase *oldPlayer = p_infoset->m_player;
@@ -420,7 +420,7 @@ void gbt_efg_game_rep::SetPlayer(gbt_efg_infoset_rep *p_infoset,
   SortInfosets();
 }
 
-void gbt_efg_game_rep::DeleteAction(gbt_efg_infoset_rep *p_infoset,
+void gbt_efg_game_rep::DeleteAction(gbtEfgInfosetBase *p_infoset,
 				    gbtEfgActionBase *p_action)
 {
   p_infoset->m_actions.Remove(p_action->m_id);
@@ -521,7 +521,7 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   for (int i = 1; i <= rep->players.Length(); i++)  {
     (efg.rep->players[i] = new gbtEfgPlayerBase(efg.rep, i))->m_label = rep->players[i]->m_label;
     for (int j = 1; j <= rep->players[i]->m_infosets.Length(); j++)   {
-      gbt_efg_infoset_rep *s = new gbt_efg_infoset_rep(efg.rep->players[i], j,
+      gbtEfgInfosetBase *s = new gbtEfgInfosetBase(efg.rep->players[i], j,
 						       rep->players[i]->m_infosets[j]->m_actions.Length());
       s->m_label = rep->players[i]->m_infosets[j]->m_label;
       for (int k = 1; k <= s->m_actions.Length(); k++) {
@@ -532,8 +532,8 @@ gbtEfgGame gbtEfgGame::Copy(gbtEfgNode n /* = null */) const
   }
 
   for (int i = 1; i <= GetChance()->NumInfosets(); i++)   {
-    gbt_efg_infoset_rep *t = rep->chance->m_infosets[i];
-    gbt_efg_infoset_rep *s = new gbt_efg_infoset_rep(efg.rep->chance, i, 
+    gbtEfgInfosetBase *t = rep->chance->m_infosets[i];
+    gbtEfgInfosetBase *s = new gbtEfgInfosetBase(efg.rep->chance, i, 
 						     t->m_actions.Length());
     s->m_label = t->m_label;
     for (int act = 1; act <= s->m_chanceProbs.Length(); act++) {
@@ -629,7 +629,7 @@ void gbtEfgGame::CopySubtree(gbt_efg_game_rep *p_newEfg,
       p = p_newEfg->chance;
     }
 
-    gbt_efg_infoset_rep *s = p->m_infosets[m->m_infoset->m_id];
+    gbtEfgInfosetBase *s = p->m_infosets[m->m_infoset->m_id];
     p_newEfg->InsertMove(n, s);
 
     // This is because of the semantics of InsertMove();
@@ -868,15 +868,15 @@ bool gbtEfgGame::IsPerfectRecall(gbtEfgInfoset &s1, gbtEfgInfoset &s2) const
         bool precedes = false;
         int action = 0;
 
-        for (int m = 1; m <= iset2.NumMembers(); m++) {
+        for (int m = 1; m <= iset2->NumMembers(); m++) {
           int n;
-          for (n = 1; n <= iset1.NumMembers(); n++) {
-            if (iset1.GetMember(n).IsPredecessorOf(iset2.GetMember(m))
-                && iset1.GetMember(n) != iset2.GetMember(m)) {
+          for (n = 1; n <= iset1->NumMembers(); n++) {
+            if (iset1->GetMember(n).IsPredecessorOf(iset2->GetMember(m))
+                && iset1->GetMember(n) != iset2->GetMember(m)) {
               precedes = true;
-              for (int act = 1; act <= iset1.NumActions(); act++) {
-                if (iset1.GetMember(n).GetChild(act).
-                    IsPredecessorOf(iset2.GetMember(m))) {
+              for (int act = 1; act <= iset1->NumActions(); act++) {
+                if (iset1->GetMember(n).GetChild(act).
+                    IsPredecessorOf(iset2->GetMember(m))) {
                   if (action != 0 && action != act) {
                     s1 = iset1;
                     s2 = iset2;
@@ -895,7 +895,7 @@ bool gbtEfgGame::IsPerfectRecall(gbtEfgInfoset &s1, gbtEfgInfoset &s2) const
             return false;
           }
 
-          if (n > iset1.NumMembers() && precedes) {
+          if (n > iset1->NumMembers() && precedes) {
             s1 = iset1;
             s2 = iset2;
             return false;
@@ -976,7 +976,7 @@ void gbtEfgGame::DeleteEmptyInfosets(void)
 {
   for (int pl = 1; pl <= NumPlayers(); pl++) {
     for (int iset = 1; iset <= NumInfosets()[pl]; iset++) {
-      gbt_efg_infoset_rep *infoset = rep->players[pl]->m_infosets[iset];
+      gbtEfgInfosetBase *infoset = rep->players[pl]->m_infosets[iset];
       if (infoset->m_members.Length() == 0) {
 	rep->DeleteInfoset(infoset);
         iset--;
@@ -1069,10 +1069,11 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s)
   }
 
   rep->m_revision++;
-  gbtEfgAction action = s.InsertAction(s.NumActions() + 1);
-  for (int i = 1; i <= s.NumMembers(); i++) {
-    s.rep->m_members[i]->m_children.Append(new gbt_efg_node_rep(rep,
-								s.rep->m_members[i]));
+  gbtEfgAction action = s->InsertAction(s->NumActions() + 1);
+  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(s.Get());
+  for (int i = 1; i <= s->NumMembers(); i++) {
+    infoset->m_members[i]->m_children.Append(new gbt_efg_node_rep(rep,
+								  infoset->m_members[i]));
   }
   rep->DeleteLexicon();
   rep->SortInfosets();
@@ -1087,14 +1088,15 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
 
   rep->m_revision++;
 
+  gbtEfgInfosetBase *infoset = dynamic_cast<gbtEfgInfosetBase *>(s.Get());
   int where;
-  for (where = 1; (where <= s.rep->m_actions.Length() &&
-		   s.rep->m_actions[where] != a.m_rep);
+  for (where = 1; (where <= infoset->m_actions.Length() &&
+		   infoset->m_actions[where] != a.m_rep);
        where++);
-  if (where > s.rep->m_actions.Length())   return 0;
-  gbtEfgAction action = s.InsertAction(where);
-  for (int i = 1; i <= s.NumActions(); i++)
-    s.rep->m_members[i]->m_children.Insert(new gbt_efg_node_rep(rep, s.rep->m_members[i]), where);
+  if (where > infoset->m_actions.Length())   return 0;
+  gbtEfgAction action = s->InsertAction(where);
+  for (int i = 1; i <= s->NumActions(); i++)
+    infoset->m_members[i]->m_children.Insert(new gbt_efg_node_rep(rep, infoset->m_members[i]), where);
 
   rep->DeleteLexicon();
   rep->SortInfosets();
@@ -1102,11 +1104,11 @@ gbtEfgAction gbtEfgGame::InsertAction(gbtEfgInfoset s, const gbtEfgAction &a)
 }
 
 void gbtEfgGame::SetChanceProb(gbtEfgInfoset infoset,
-			    int act, const gbtNumber &value)
+			       int act, const gbtNumber &value)
 {
-  if (infoset.IsChanceInfoset()) {
+  if (infoset->IsChanceInfoset()) {
     rep->m_revision++;
-    infoset.SetChanceProb(act, value);
+    infoset->SetChanceProb(act, value);
   }
 }
 

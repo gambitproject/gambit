@@ -40,6 +40,7 @@ template <class T> class gbtBehavAssessment;
 
 class gbtEfgNode {
 friend class gbtEfgGame;
+friend class gbtEfgInfosetBase;
 friend struct gbt_efg_game_rep;
 friend class Lexicon;
 protected:

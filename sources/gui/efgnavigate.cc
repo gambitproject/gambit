@@ -102,7 +102,7 @@ void gbtEfgNavigateWindow::OnUpdate(void)
 	tmpstr = "CHANCE";
       else
 	tmpstr = ("(" + ToText(cursor.GetPlayer()->GetId()) + "," +
-		  ToText(cursor.GetInfoset().GetId()) + ")");
+		  ToText(cursor.GetInfoset()->GetId()) + ")");
     }
 	  
     SetCellValue(wxString::Format(wxT("%s"), (char *) tmpstr), 3, 0);

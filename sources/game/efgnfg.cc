@@ -44,8 +44,8 @@ static void MakeStrategy(gbt_nfg_game_rep *p_nfg, gbtEfgPlayerBase *p_player)
 
   // FIXME: This is a rather lame labeling scheme.
   for (int iset = 1; iset <= p_player->NumInfosets(); iset++)  {
-    if (p_player->GetInfoset(iset).GetFlag()) {
-      behav[iset] = p_player->GetInfoset(iset).GetWhichBranch();
+    if (p_player->GetInfoset(iset)->GetFlag()) {
+      behav[iset] = p_player->GetInfoset(iset)->GetWhichBranch();
       label += ToText(behav[iset]);
     }
     else {

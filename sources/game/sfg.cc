@@ -124,12 +124,12 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
     if (n.GetPlayer()->IsChance()) {
       for(i=1;i<=n.NumChildren();i++)
 	MakeSequenceForm(n.GetChild(i),
-		     prob * n.GetInfoset().GetChanceProb(i), seq,iset,parent);
+		     prob * n.GetInfoset()->GetChanceProb(i), seq,iset,parent);
     }
     else {
       int pl = n.GetPlayer()->GetId();
       iset[pl]=n.GetInfoset();
-      int isetnum = iset[pl].GetId();
+      int isetnum = iset[pl]->GetId();
       gbtArray<int> snew(seq);
       snew[pl]=1;
       for(i=1;i<isetnum;i++)
@@ -145,11 +145,11 @@ gbtSfgGame::MakeSequenceForm(const gbtEfgNode &n, gbtNumber prob,gbtArray<int>se
 	flag =true;
       }
       for(i=1;i<=n.NumChildren();i++) {
-	if(efsupp.Contains(n.GetInfoset().GetAction(i))) {
+	if(efsupp.Contains(n.GetInfoset()->GetAction(i))) {
 	  snew[pl]+=1;
 	  if(flag) {
 	    gbtSfgSequence* child;
-	    child = new gbtSfgSequence(n.GetPlayer(), n.GetInfoset().GetAction(i), 
+	    child = new gbtSfgSequence(n.GetPlayer(), n.GetInfoset()->GetAction(i), 
 				 myparent,snew[pl]);
 	    parent[pl]=child;
 	    ((*sequences)[pl])->AddSequence(child);
@@ -176,7 +176,7 @@ void gbtSfgGame::GetSequenceDims(const gbtEfgNode &n)
     }
     else {
       int pl = n.GetPlayer()->GetId();
-      int isetnum = n.GetInfoset().GetId();
+      int isetnum = n.GetInfoset()->GetId();
     
       bool flag = false;
       if(!isetFlag(pl,isetnum)) {   // on first visit to iset, create new sequences
@@ -186,7 +186,7 @@ void gbtSfgGame::GetSequenceDims(const gbtEfgNode &n)
 	flag =true;
       }
       for(i=1;i<=n.NumChildren();i++) {
-	if(efsupp.Contains(n.GetInfoset().GetAction(i))) {
+	if(efsupp.Contains(n.GetInfoset()->GetAction(i))) {
 	  if(flag) {
 	    seq[pl]++;
 	  }
@@ -232,7 +232,7 @@ int gbtSfgGame::NumPlayerInfosets() const
 int gbtSfgGame::InfosetRowNumber(int pl, int j) const 
 {
   if(j==1) return 0;
-  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset().GetId();
+  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetId();
   return isetRow(pl,isetnum);
 }
 
@@ -279,7 +279,7 @@ gbtBehavProfile<gbtNumber> gbtSfgGame::ToBehav(const gbtPVector<double> &x) cons
       else
 	value = (gbtNumber)0;
 
-      b(i,sij->GetInfoset().GetId(),efsupp.GetIndex(sij->GetAction()))= value;
+      b(i,sij->GetInfoset()->GetId(),efsupp.GetIndex(sij->GetAction()))= value;
     }
   return b;
 }

@@ -91,62 +91,89 @@ public:
   bool IsNull(void) const { return (m_rep == 0); }
 };
 
-
 gbtOutput &operator<<(gbtOutput &, const gbtEfgAction &);
 
-class gbtEfgInfoset : public gbtGameInfoset {
+//-----------------------------------------------------------------------
+
+
+class gbtEfgInfosetRep : public gbtGameObject {
+friend class gbtEfgInfoset;
+public:
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+  virtual int GetId(void) const = 0;
+  virtual gbtEfgGame GetGame(void) const = 0;
+
+  virtual void DeleteInfoset(void) = 0;
+
+  virtual bool IsChanceInfoset(void) const = 0;
+
+  virtual gbtEfgPlayer GetPlayer(void) const = 0;
+  virtual void SetPlayer(gbtEfgPlayer) = 0;
+  
+  virtual void SetChanceProb(int act, const gbtNumber &value) = 0; 
+  virtual gbtNumber GetChanceProb(int act) const = 0;
+
+  virtual gbtEfgAction InsertAction(int where) = 0;
+
+  virtual gbtEfgAction GetAction(int act) const = 0;
+  virtual int NumActions(void) const = 0;
+
+  virtual gbtEfgNode GetMember(int m) const = 0;
+  virtual int NumMembers(void) const = 0;
+
+  virtual bool Precedes(gbtEfgNode) const = 0;
+
+  virtual void MergeInfoset(gbtEfgInfoset from) = 0;
+  virtual void Reveal(gbtEfgPlayer) = 0;
+
+  virtual bool GetFlag(void) const = 0;
+  virtual void SetFlag(bool) = 0;
+
+  virtual int GetWhichBranch(void) const = 0;
+  virtual void SetWhichBranch(int) = 0;
+};
+
+class gbtEfgNullInfoset { };
+
+class gbtEfgInfoset {
 friend class gbtEfgGame;
-friend class gbtEfgNode;
-protected:
-  struct gbt_efg_infoset_rep *rep;
+private:
+  gbtEfgInfosetRep *m_rep;
 
 public:
-  gbtEfgInfoset(void);
-  gbtEfgInfoset(gbt_efg_infoset_rep *);
-  gbtEfgInfoset(const gbtEfgInfoset &);
-  ~gbtEfgInfoset();
+  gbtEfgInfoset(void) : m_rep(0) { }
+  gbtEfgInfoset(gbtEfgInfosetRep *p_rep)
+    : m_rep(p_rep) { if (m_rep) m_rep->Reference(); }
+  gbtEfgInfoset(const gbtEfgInfoset &p_player)
+    : m_rep(p_player.m_rep) { if (m_rep) m_rep->Reference(); }
+  ~gbtEfgInfoset() { if (m_rep && m_rep->Dereference()) delete m_rep; }
 
-  gbtEfgInfoset &operator=(const gbtEfgInfoset &);
+  gbtEfgInfoset &operator=(const gbtEfgInfoset &p_player) {
+    if (this != &p_player) {
+      if (m_rep && m_rep->Dereference()) delete m_rep;
+      m_rep = p_player.m_rep;
+      if (m_rep) m_rep->Reference();
+    }
+    return *this;
+  }
 
-  bool operator==(const gbtEfgInfoset &) const;
-  bool operator!=(const gbtEfgInfoset &) const;
+  bool operator==(const gbtEfgInfoset &p_player) const
+  { return (m_rep == p_player.m_rep); }
+  bool operator!=(const gbtEfgInfoset &p_player) const
+  { return (m_rep != p_player.m_rep); }
 
-  bool IsNull(void) const;
-  int GetId(void) const;
-  gbtEfgGame GetGame(void) const;
-  gbtText GetLabel(void) const;
-  void SetLabel(const gbtText &);
-
-  void DeleteInfoset(void);
-
-  bool IsChanceInfoset(void) const;
-
-  gbtEfgPlayer GetPlayer(void) const;
-  void SetPlayer(gbtEfgPlayer);
+  gbtEfgInfosetRep *operator->(void) 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
+  const gbtEfgInfosetRep *operator->(void) const 
+  { if (!m_rep) throw gbtEfgNullAction(); return m_rep; }
   
-  void SetChanceProb(int act, const gbtNumber &value);
-  gbtNumber GetChanceProb(int act) const;
+  gbtEfgInfosetRep *Get(void) const { return m_rep; }
 
-  gbtEfgAction InsertAction(int where);
-
-  gbtEfgAction GetAction(int act) const;
-  int NumActions(void) const;
-
-  gbtEfgNode GetMember(int m) const;
-  int NumMembers(void) const;
-
-  bool Precedes(gbtEfgNode) const;
-
-  void MergeInfoset(gbtEfgInfoset from);
-  void Reveal(gbtEfgPlayer);
-
-  bool GetFlag(void) const;
-  void SetFlag(bool);
-
-  int GetWhichBranch(void) const;
-  void SetWhichBranch(int);
+  // Questionable whether this should be provided
+  bool IsNull(void) const { return (m_rep == 0); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtEfgInfoset &);
 
-#endif   //# INFOSET_H
+#endif   // INFOSET_H

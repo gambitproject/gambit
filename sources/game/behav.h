@@ -93,12 +93,12 @@ protected:
   T &IsetValue(const gbtEfgInfoset &iset);
 
   const T &ActionValue(const gbtEfgAction &act) const 
-    { return m_actionValues(act->GetInfoset().GetPlayer()->GetId(),
-			    act->GetInfoset().GetId(),
+    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetId(),
+			    act->GetInfoset()->GetId(),
 			    act->GetId()); }
   T &ActionValue(const gbtEfgAction &act)
-    { return m_actionValues(act->GetInfoset().GetPlayer()->GetId(),
-			    act->GetInfoset().GetId(),
+    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetId(),
+			    act->GetInfoset()->GetId(),
 			    act->GetId()); }
   
   T ActionProb(const gbtEfgAction &act) const;

@@ -49,8 +49,8 @@
 //              gbtEfgActionBase: Member functions
 //----------------------------------------------------------------------
 
-gbtEfgActionBase::gbtEfgActionBase(gbt_efg_infoset_rep *p_infoset,
-				       int p_id)
+gbtEfgActionBase::gbtEfgActionBase(gbtEfgInfosetBase *p_infoset,
+				   int p_id)
   : m_id(p_id), m_infoset(p_infoset), m_deleted(false), 
     m_refCount(0)
 { }
@@ -82,17 +82,19 @@ void gbtEfgActionBase::DeleteAction(void)
   m_infoset->m_player->m_efg->DeleteAction(m_infoset, this);
 }
 
+gbtEfgInfoset gbtEfgActionBase::GetInfoset(void) const { return m_infoset; }
+
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgAction &)
 { 
   return p_stream;
 }
 
 //----------------------------------------------------------------------
-//           struct gbt_efg_infoset_rep: Member functions
+//           class gbtEfgInfosetBase: Member functions
 //----------------------------------------------------------------------
 
-gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbtEfgPlayerBase *p_player,
-					 int p_id, int p_br)
+gbtEfgInfosetBase::gbtEfgInfosetBase(gbtEfgPlayerBase *p_player,
+				     int p_id, int p_br)
   : m_id(p_id), m_player(p_player), m_deleted(false), 
     m_refCount(0), m_actions(p_br),
     m_chanceProbs((p_player->m_id == 0) ? p_br : 0),
@@ -106,7 +108,7 @@ gbt_efg_infoset_rep::gbt_efg_infoset_rep(gbtEfgPlayerBase *p_player,
   }
 }
 
-gbt_efg_infoset_rep::~gbt_efg_infoset_rep()
+gbtEfgInfosetBase::~gbtEfgInfosetBase()
 {
   for (int act = 1; act <= m_actions.Length(); act++) {
     if (m_actions[act]->m_refCount == 0) {
@@ -118,7 +120,7 @@ gbt_efg_infoset_rep::~gbt_efg_infoset_rep()
   }
 }
 
-void gbt_efg_infoset_rep::PrintActions(gbtOutput &f) const
+void gbtEfgInfosetBase::PrintActions(gbtOutput &f) const
 { 
   f << "{ ";
   for (int i = 1; i <= m_actions.Length(); i++) {
@@ -131,171 +133,42 @@ void gbt_efg_infoset_rep::PrintActions(gbtOutput &f) const
 }
 
 
-//----------------------------------------------------------------------
-//              class gbtEfgInfoset: Member functions
-//----------------------------------------------------------------------
-
-gbtEfgInfoset::gbtEfgInfoset(void)
-  : rep(0)
-{ }
-
-gbtEfgInfoset::gbtEfgInfoset(gbt_efg_infoset_rep *p_rep)
-  : rep(p_rep)
+void gbtEfgInfosetBase::DeleteInfoset(void)
 {
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_player->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgInfoset::gbtEfgInfoset(const gbtEfgInfoset &p_action)
-  : rep(p_action.rep)
-{
-  if (rep) {
-    rep->m_refCount++;
-    rep->m_player->m_efg->m_refCount++;
-  }
-}
-
-gbtEfgInfoset::~gbtEfgInfoset()
-{
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
-    }
-    else if (--rep->m_player->m_efg->m_refCount == 0) {
-      // delete rep->m_player->m_efg;
-    }
-  }
-}
-
-gbtEfgInfoset &gbtEfgInfoset::operator=(const gbtEfgInfoset &p_infoset)
-{
-  if (this == &p_infoset) {
-    return *this;
-  }
-
-  if (rep) {
-    if (--rep->m_refCount == 0 && rep->m_deleted) {
-      // delete rep;
-    }
-    else if (--rep->m_player->m_efg->m_refCount == 0) {
-      // delete rep->m_player->m_efg;
-    }
-  }
-
-  if ((rep = p_infoset.rep) != 0) {
-    rep->m_refCount++;
-    rep->m_player->m_efg->m_refCount++;
-  }
-  return *this;
-}
-
-bool gbtEfgInfoset::operator==(const gbtEfgInfoset &p_infoset) const
-{
-  return (rep == p_infoset.rep);
-} 
-
-bool gbtEfgInfoset::operator!=(const gbtEfgInfoset &p_infoset) const
-{
-  return (rep != p_infoset.rep);
-} 
-
-bool gbtEfgInfoset::IsNull(void) const
-{
-  return (rep == 0);
-}
-
-int gbtEfgInfoset::GetId(void) const
-{
-  return (rep) ? rep->m_id : -1;
-}
-
-gbtText gbtEfgInfoset::GetLabel(void) const
-{
-  if (rep) {
-    return rep->m_label;
-  }
-  else {
-    return "";
-  }
-}
-
-void gbtEfgInfoset::SetLabel(const gbtText &p_label)
-{
-  if (rep) {
-    rep->m_label = p_label;
-  }
-}
-
-void gbtEfgInfoset::DeleteInfoset(void)
-{
-  if (IsNull())  {
-    throw gbtEfgNullObject();
-  }
-
   if (NumMembers() > 0)  {
     return;
   }
 
-  rep->m_player->m_efg->DeleteInfoset(rep);
+  m_player->m_efg->DeleteInfoset(this);
 }
 
-gbtEfgAction gbtEfgInfoset::GetAction(int p_index) const
+gbtEfgAction gbtEfgInfosetBase::GetAction(int p_index) const
 {
-  if (rep) {
-    return rep->m_actions[p_index];
-  }
-  else {
-    return 0;
-  }
+  return m_actions[p_index];
 }
 
-int gbtEfgInfoset::NumActions(void) const
+int gbtEfgInfosetBase::NumActions(void) const
 {
-  if (rep) {
-    return rep->m_actions.Length();
-  }
-  else {
-    return 0;
-  }
+  return m_actions.Length();
 }
 
-gbtEfgNode gbtEfgInfoset::GetMember(int p_index) const
+gbtEfgNode gbtEfgInfosetBase::GetMember(int p_index) const
 {
-  if (rep) {
-    return rep->m_members[p_index];
-  }
-  else {
-    return 0;
-  }
+  return m_members[p_index];
 }
 
-int gbtEfgInfoset::NumMembers(void) const
+int gbtEfgInfosetBase::NumMembers(void) const
 {
-  if (rep) {
-    return rep->m_members.Length();
-  }
-  else {
-    return 0;
-  }
+  return m_members.Length();
 }
 
-gbtEfgPlayer gbtEfgInfoset::GetPlayer(void) const
+gbtEfgPlayer gbtEfgInfosetBase::GetPlayer(void) const
 {
-  if (rep) {
-    return rep->m_player;
-  }
-  else {
-    return 0;
-  }
+  return m_player;
 }
 
-void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
+void gbtEfgInfosetBase::SetPlayer(gbtEfgPlayer p_player)
 {
-  if (IsNull() || p_player.IsNull()) {
-    throw gbtEfgNullObject();
-  }
   if (GetPlayer()->IsChance() || p_player->IsChance()) {
     throw gbtEfgbtException();
   }
@@ -304,115 +177,98 @@ void gbtEfgInfoset::SetPlayer(gbtEfgPlayer p_player)
     return;
   }
 
-  rep->m_player->m_efg->SetPlayer(rep, dynamic_cast<gbtEfgPlayerBase *>(p_player.Get()));
+  m_player->m_efg->SetPlayer(this, dynamic_cast<gbtEfgPlayerBase *>(p_player.Get()));
 }
 
-bool gbtEfgInfoset::IsChanceInfoset(void) const
+bool gbtEfgInfosetBase::IsChanceInfoset(void) const
 {
-  return (rep && rep->m_player->m_id == 0);
+  return (m_player->m_id == 0);
 }
 
-gbtEfgGame gbtEfgInfoset::GetGame(void) const
+gbtEfgGame gbtEfgInfosetBase::GetGame(void) const
 {
-  if (rep) {
-    return rep->m_player->m_efg;
-  }
-  else {
-    return 0;
-  }
+  return m_player->m_efg;
 }
 
-bool gbtEfgInfoset::Precedes(gbtEfgNode p_node) const
+bool gbtEfgInfosetBase::Precedes(gbtEfgNode p_node) const
 {
-  while (p_node != p_node.GetGame().GetRoot()) {
-    if (p_node.GetInfoset() == *this) {
+  gbt_efg_node_rep *node = p_node.rep;
+  while (node) {
+    if (node->m_infoset == this) {
       return true;
     }
     else {
-      p_node = p_node.GetParent();
+      node = node->m_parent;
     }
   }
   return false;
 }
 
-void gbtEfgInfoset::Reveal(gbtEfgPlayer p_who)
+void gbtEfgInfosetBase::Reveal(gbtEfgPlayer p_who)
 {
-  if (IsNull() || p_who.IsNull()) {
-    return;
-  }
-
-  rep->m_player->m_efg->Reveal(rep,
-			       dynamic_cast<gbtEfgPlayerBase *>(p_who.Get()));
+  m_player->m_efg->Reveal(this,
+			  dynamic_cast<gbtEfgPlayerBase *>(p_who.Get()));
 }
 
-void gbtEfgInfoset::MergeInfoset(gbtEfgInfoset p_from)
+void gbtEfgInfosetBase::MergeInfoset(gbtEfgInfoset p_from)
 {
-  if (IsNull() || p_from.IsNull()) {
-    throw gbtEfgNullObject();
-  }
-
-  if (rep == p_from.rep ||
-      rep->m_actions.Length() != p_from.rep->m_actions.Length())  {
+  gbtEfgInfosetBase *from = dynamic_cast<gbtEfgInfosetBase *>(p_from.Get());
+  if (this == from ||
+      m_actions.Length() != from->m_actions.Length())  {
     return;
   }
 
   // FIXME: Can't bridge subgames
-  if (rep->m_members[1]->m_gameroot != p_from.rep->m_members[1]->m_gameroot) {
+  if (m_members[1]->m_gameroot != from->m_members[1]->m_gameroot) {
     return;
   }
 
-  rep->m_player->m_efg->MergeInfoset(rep, p_from.rep);
+  m_player->m_efg->MergeInfoset(this, from);
 }
 
-gbtEfgAction gbtEfgInfoset::InsertAction(int where)
+gbtEfgAction gbtEfgInfosetBase::InsertAction(int where)
 {
-  gbtEfgActionBase *action = new gbtEfgActionBase(rep, where);
-  rep->m_actions.Insert(action, where);
-  if (rep->m_player->m_id == 0) {
-    rep->m_chanceProbs.Insert(0, where);
+  gbtEfgActionBase *action = new gbtEfgActionBase(this, where);
+  m_actions.Insert(action, where);
+  if (m_player->m_id == 0) {
+    m_chanceProbs.Insert(0, where);
   }
-  for (; where <= rep->m_actions.Length(); where++) {
-    rep->m_actions[where]->m_id = where;
+  for (; where <= m_actions.Length(); where++) {
+    m_actions[where]->m_id = where;
   }
   return action;
 }
 
-void gbtEfgInfoset::SetChanceProb(int p_action, const gbtNumber &p_value)
+void gbtEfgInfosetBase::SetChanceProb(int p_action, const gbtNumber &p_value)
 {
-  rep->m_chanceProbs[p_action] = p_value;
+  m_chanceProbs[p_action] = p_value;
 }
 
-gbtNumber gbtEfgInfoset::GetChanceProb(int p_action) const
+gbtNumber gbtEfgInfosetBase::GetChanceProb(int p_action) const
 {
-  if (rep) {
-    return rep->m_chanceProbs[p_action];
-  }
-  else {
-    return 0;
-  }
+  return m_chanceProbs[p_action];
 }
 
-bool gbtEfgInfoset::GetFlag(void) const
+bool gbtEfgInfosetBase::GetFlag(void) const
 { 
-  return rep->m_flag;
+  return m_flag;
 }
 
-void gbtEfgInfoset::SetFlag(bool p_flag)
+void gbtEfgInfosetBase::SetFlag(bool p_flag)
 {
-  rep->m_flag = p_flag;
+  m_flag = p_flag;
 }
 
-int gbtEfgInfoset::GetWhichBranch(void) const
+int gbtEfgInfosetBase::GetWhichBranch(void) const
 {
-  return rep->m_whichbranch;
+  return m_whichbranch;
 }
 
-void gbtEfgInfoset::SetWhichBranch(int p_branch) 
+void gbtEfgInfosetBase::SetWhichBranch(int p_branch) 
 {
-  rep->m_whichbranch = p_branch;
+  m_whichbranch = p_branch;
 }
 
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtEfgInfoset &)
-{ 
-  return p_stream;
-}
+{ return p_stream; }
+ 

@@ -169,7 +169,7 @@ void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
     if (n.GetPlayer()->IsChance()) {
       for(i=1;i<=n.NumChildren();i++)
 	FillTableau(p_support, A, n.GetChild(i),
-		    gbtNumber(prob) * n.GetInfoset().GetChanceProb(i),
+		    gbtNumber(prob) * n.GetInfoset()->GetChanceProb(i),
 		    s1,s2,i1,i2);
     }
     int pl = n.GetPlayer()->GetId();
