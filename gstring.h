@@ -78,6 +78,7 @@ class gString   {
     char* operator+(int n)       { return storage + n; }
 
 	// CONVERSIONS
+    operator char*() const   { return storage; }
     operator const char*() const { return storage; }
 
 	// DESTRUCTOR
