@@ -36,7 +36,6 @@ dependencies on the rest of the code.
 #include <string.h>
 #include <math.h>
 #include <time.h>
-#include <malloc.h>
 
 /*
 #define Pel_Out stdout
