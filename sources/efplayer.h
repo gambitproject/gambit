@@ -9,13 +9,14 @@
 
 #include "gstring.h"
 #include "gset.h"
+#include "gmapset.h"
 
 #include "infoset.h"
 
 class Player   {
   private:
     gString name;
-    gSet<Infoset *> infosets;
+    gMapSet<Infoset *> infosets;
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
@@ -32,49 +33,69 @@ class Player   {
 	// assignment operator
     Player &operator=(const Player &);
 
+	// GAME-RELATED OPERATIONS
+	// add a group of information sets for a subgame
+    int AppendGame(int game)
+      { return infosets.CreatePartition(); }
+	// add a group of information sets for a subgame game
+    int CreateGame(int game)
+      { return infosets.CreatePartition(game); }
+	// remove a group of information sets for a subgame
+    void RemoveGame(int game)
+      { infosets.RemovePartition(game); }
+	// returns the number of games
+    int NumGames(void) const
+      { return infosets.NumPartitions(); }
+    int GetNthGameNumber(int n) const
+      { return infosets.GetNthPartition(n); }
+
 	// OPERATIONS ON INFOSETS
 	// create a new infoset at which the player has the decision
 	//  returns the number of the newly-created infoset
-    int CreateInfoset(int branches)
-      { return infosets.Append(new Infoset(branches)); }
+    int CreateInfoset(int game, int branches)
+      { return infosets.AddElement(new Infoset(branches), game); }
 
 	// remove an infoset
-    void RemoveInfoset(int iset)
-      { delete infosets.Remove(iset); }
+    void RemoveInfoset(int game, int iset)
+      { delete infosets.RemoveElement(game, iset); }
 
 	// returns the name of an infoset
-    gString GetInfosetName(int iset) const
-      { return infosets[iset]->GetInfosetName(); }
+    gString GetInfosetName(int game, int iset) const
+      { return infosets(game, iset)->GetInfosetName(); }
 
 	// set the name of an infoset
-    void SetInfosetName(int iset, const gString &name)
-      { infosets[iset]->SetInfosetName(name); }
+    void SetInfosetName(int game, int iset, const gString &name)
+      { infosets(game, iset)->SetInfosetName(name); }
+
+	// return the total number of infosets at which player has the decision
+    int NumInfosets(void) const
+      { return infosets.NumElements(); }
 
 	// return the number of infosets at which player has the decision
-    int NumInfosets(void) const
-      { return infosets.Length(); }
+	// in a game
+    int NumInfosets(int game) const
+      { return infosets.NumElements(game); }
 
 	// OPERATIONS ON BRANCHES
 	// returns the number of branches in an infoset
-    int NumBranches(int iset) const
-      { return infosets[iset]->NumBranches(); }
+    int NumBranches(int game, int iset) const
+      { return infosets(game, iset)->NumBranches(); }
 
 	// set the name of a branch in an infoset
-    void SetBranchName(int iset, int br, const gString &name)
-      { infosets[iset]->SetBranchName(br, name); }
+    void SetBranchName(int game, int iset, int br, const gString &name)
+      { infosets(game, iset)->SetBranchName(br, name); }
 
 	// returns the name of a branch in an infoset
-    gString GetBranchName(int iset, int br) const
-      { return infosets[iset]->GetBranchName(br); }
+    gString GetBranchName(int game, int iset, int br) const
+      { return infosets(game, iset)->GetBranchName(br); }
 
 	// remove a branch from an infoset
-    void RemoveBranch(int iset, int br)
-      { infosets[iset]->RemoveBranch(br); }
+    void RemoveBranch(int game, int iset, int br)
+      { infosets(game, iset)->RemoveBranch(br); }
 
 	// insert a branch in an infoset
-    void InsertBranch(int iset, int br)
-      { infosets[iset]->InsertBranch(br); }
-
+    void InsertBranch(int game, int iset, int br)
+      { infosets(game, iset)->InsertBranch(br); }
 
 	// NAMING OPERATIONS
 	// set the player's name
@@ -128,51 +149,65 @@ class PlayerSet   {
     gString GetPlayerName(int p) const
       { return players[p + 2]->GetPlayerName(); }
 
-    	// OPERATIONS ON INFOSETS
-	// create a new infoset for player p
-	//  returns the number of the new infoset
-    int CreateInfoset(int p, int branches) 
-      { return players[p + 2]->CreateInfoset(branches); }
+	// OPERATIONS ON GAMES
+	// create game number game in all players in the PlayerSet
+    void CreateGame(int game);
 
-	// remove an infoset for player p
-    void RemoveInfoset(int p, int iset)
-      { players[p + 2]->RemoveInfoset(iset); }
+	// remove game number game from all players in the PlayerSet
+    void RemoveGame(int game);
+
+    	// OPERATIONS ON INFOSETS
+	// create a new infoset for player p in game game
+	//  returns the number of the new infoset
+    int CreateInfoset(int p, int game, int branches) 
+      { return players[p + 2]->CreateInfoset(game, branches); }
+
+	// remove an infoset for player p in game game
+    void RemoveInfoset(int p, int game, int iset)
+      { players[p + 2]->RemoveInfoset(game, iset); }
 
 	// returns the name of an infoset
-    gString GetInfosetName(int p, int iset) const
-      { return players[p + 2]->GetInfosetName(iset); }
+    gString GetInfosetName(int p, int game, int iset) const
+      { return players[p + 2]->GetInfosetName(game, iset); }
 
 	// set the name of an infoset
-    void SetInfosetName(int p, int iset, const gString &s)
-      { players[p + 2]->SetInfosetName(iset, s); }
+    void SetInfosetName(int p, int game, int iset, const gString &s)
+      { players[p + 2]->SetInfosetName(game, iset, s); }
 
 	// returns the total number of infosets
     int NumInfosets(void) const;
+
+	// returns the total number of infosets in a game
+    int NumInfosetsInGame(int game) const;
 
 	// returns the number of infosets for a player
     int NumInfosets(int p) const
       { return players[p + 2]->NumInfosets(); }
 
+	// returns the number of infosets for a player in a game
+    int NumInfosets(int p, int game) const
+      { return players[p + 2]->NumInfosets(game); }
+
 	// OPERATIONS ON BRANCHES
 	// returns the number of branches in an infoset
-    int NumBranches(int p, int iset) const
-      { return players[p + 2]->NumBranches(iset); }
+    int NumBranches(int p, int game, int iset) const
+      { return players[p + 2]->NumBranches(game, iset); }
 
 	// set the name of a branch
-    void SetBranchName(int p, int iset, int br, const gString &name)
-      { players[p + 2]->SetBranchName(iset, br, name); }
+    void SetBranchName(int p, int game, int iset, int br, const gString &name)
+      { players[p + 2]->SetBranchName(game, iset, br, name); }
 
 	// returns the name of a branch
-    gString GetBranchName(int p, int iset, int br) const
-      { return players[p + 2]->GetBranchName(iset, br); }
+    gString GetBranchName(int p, int game, int iset, int br) const
+      { return players[p + 2]->GetBranchName(game, iset, br); }
 
 	// remove a branch from an infoset
-    void RemoveBranch(int p, int iset, int br)
-      { players[p + 2]->RemoveBranch(iset, br); }
+    void RemoveBranch(int p, int game, int iset, int br)
+      { players[p + 2]->RemoveBranch(game, iset, br); }
 
 	// insert a branch in an infoset
-    void InsertBranch(int p, int iset, int br)
-      { players[p + 2]->InsertBranch(iset, br); }
+    void InsertBranch(int p, int game, int iset, int br)
+      { players[p + 2]->InsertBranch(game, iset, br); }
 
 	// FILE OPERATIONS
     void WriteToFile(FILE *f) const;

@@ -34,6 +34,8 @@ template <class T> class gMap  {
     gMap<T> &operator=(const gMap<T> &);
 	// returns the element with index number 'index'
     T operator[](uint index) const;
+	// returns the indexth entry in the gMap
+    T operator()(uint index) const;
 	// determines the equality of two gMaps
     int operator==(const gMap<T> &) const;
     int operator!=(const gMap<T> &) const;
@@ -43,12 +45,12 @@ template <class T> class gMap  {
 	//  returns the index at which the element is stored
     int Append(const T &new_member);
 	// add a new element to the map at a specified index
-    void Insert(const T &new_member, uint as_number);
+    int Insert(const T &new_member, uint as_number);
 	// remove element number 'number' from the map
 	//  returns the element which was removed
     T Remove(uint number);
 	// remove element from the map
-    void Remove(const T &p);
+    T Remove(const T &p);
 
 	// GENERAL INFORMATION
 	// returns the number of elements in the map
@@ -60,6 +62,10 @@ template <class T> class gMap  {
     int Contains(int number) const;
 	// returns nonzero if the element is in the map
     int Contains(const T &p) const  { return ElNumber(p); }
+	// returns lowest unused index greater than zero
+    int GetFirstVacancy(void) const;
+	// returns index number of the ith element
+    int GetIndex(int i) const;
 };
 
 
@@ -105,6 +111,11 @@ template <class T> inline T gMap<T>::operator[](uint index) const
   return contents[Contains(index) - 1];
 }
 
+template <class T> inline T gMap<T>::operator()(uint index) const
+{
+  return contents[index - 1];
+}
+
 template <class T> INLINE int gMap<T>::operator==(const gMap<T> &m) const
 {
   if (length != m.length)   return 0;
@@ -121,11 +132,11 @@ template <class T> inline int gMap<T>::operator!=(const gMap<T> &m) const
 }
 
 template <class T>
-INLINE void gMap<T>::Insert(const T &new_member, uint as_number)
+INLINE int gMap<T>::Insert(const T &new_member, uint as_number)
 {
   if (Contains(as_number))  {
     contents[Contains(as_number) - 1] = new_member;
-    return;
+    return as_number;
   }
 
   T *new_contents = new T[++length];
@@ -136,7 +147,7 @@ INLINE void gMap<T>::Insert(const T &new_member, uint as_number)
     new_numbers[0] = as_number;
     contents = new_contents;
     numbers = new_numbers;
-    return;
+    return as_number;
   }
 
   for (uint i = 0; numbers[i] < as_number; i++)  {
@@ -157,10 +168,17 @@ INLINE void gMap<T>::Insert(const T &new_member, uint as_number)
 
   contents = new_contents;
   numbers = new_numbers;
+
+  return as_number;
 }
 
 template <class T> INLINE int gMap<T>::Append(const T &new_member)
 {
+  if (length == 0)   {
+    Insert(new_member, 1);
+    return 1;
+  }
+
   for (uint i = 1; numbers[i] == i; i++);
   Insert(new_member, i);
   return i;
@@ -203,9 +221,9 @@ template <class T> INLINE T gMap<T>::Remove(uint number)
   return return_value;
 }
 
-template <class T> inline void gMap<T>::Remove(const T &p)
+template <class T> inline T gMap<T>::Remove(const T &p)
 {
-  Remove(ElNumber(p));
+  return Remove(ElNumber(p));
 }
 
 template <class T> INLINE uint gMap<T>::ElNumber(const T &p) const
@@ -220,6 +238,18 @@ template <class T> INLINE int gMap<T>::Contains(int number) const
   for (uint i = 0; i < length; i++)
     if (numbers[i] == number)  return i + 1;
   return 0;
+}
+
+template <class T> INLINE int gMap<T>::GetFirstVacancy(void) const
+{
+  for (uint i = 0; i < length; i++)
+    if (numbers[i] != i + 1)   return ++i;
+  return length + 1;
+}
+
+template <class T> inline int gMap<T>::GetIndex(int i) const
+{
+  return numbers[i - 1];
 }
 
 

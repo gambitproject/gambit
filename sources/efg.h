@@ -13,17 +13,19 @@
 
 class ExtForm    {
   private:
+    int efg_no;
     NodeSet nodes;
     PlayerSet &players;
 
     void AddPlayer(int);
-    int CreateInfoset(int, int);
+    int CreateInfoset(int, int, int);
     Node DeleteSubtree(Node);
     Node DeleteTerminalNode(const Node &);
 
   public:
 	// CONSTRUCTORS AND DESTRUCTOR
-    ExtForm(PlayerSet &p) : players(p)   { }
+    ExtForm(int number, PlayerSet &p) : 
+      efg_no(number), players(p), nodes(number)   { }
     ExtForm(const ExtForm &ef) : nodes(ef.nodes), players(ef.players)  { }
     ~ExtForm()  { }
 
@@ -41,7 +43,7 @@ class ExtForm    {
     Node LeaveInfoset(const Node &n);
     Node MergeInfoset(const Node &from, const Node &into);
     void LabelInfoset(const Node &n, const gString &label)
-      { players.SetInfosetName(n[1], n[2], label); }
+      { players.SetInfosetName(n[1], n[0], n[2], label); }
 
     void InsertBranch(const Node &n, int where, int number);
     Node DeleteBranch(const Node &n, int which);
