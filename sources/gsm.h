@@ -26,7 +26,7 @@ class gString;
 class gRational;
 
 template <class T> class gList;
-template <class T> class gGrowableStack;
+template <class T> class gStack;
 
 #define GCL_VERSION   0.93
 
@@ -43,9 +43,9 @@ private:
   Portion* _INPUT;
   Portion* _NULL;
 
-  gGrowableStack< gGrowableStack< Portion* >* >* _StackStack;
-  gGrowableStack< CallFuncObj* >*                _CallFuncStack;
-  gGrowableStack< RefHashTable* >*               _RefTableStack;
+  gStack< gStack< Portion* >* >* _StackStack;
+  gStack< CallFuncObj* >*                _CallFuncStack;
+  gStack< RefHashTable* >*               _RefTableStack;
   FunctionHashTable*                             _FuncTable;
 
   Portion* _ResolveRef             ( Portion* p );

@@ -16,7 +16,7 @@
 #include "gstring.h"
 #include "rational.h"
 #include "glist.h"
-#include "ggrstack.h"
+#include "gstack.h"
 #include "gsm.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"
@@ -38,12 +38,12 @@
   gList<gString> formals, types; \
   gList<bool> refs; \
   gList<Portion*> portions; \
-  gGrowableStack<gString> formalstack; \
-  gGrowableStack<int> labels, listlen; \
-  gGrowableStack<char> matching; \
-  gGrowableStack<gInput *> inputs; \
-  gGrowableStack<gString> filenames; \
-  gGrowableStack<int> lines; \
+  gStack<gString> formalstack; \
+  gStack<int> labels, listlen; \
+  gStack<char> matching; \
+  gStack<gInput *> inputs; \
+  gStack<gString> filenames; \
+  gStack<int> lines; \
   GSM gsm; \
   bool quit; \
   \

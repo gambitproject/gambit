@@ -12,7 +12,7 @@
 class Portion;
 class CallFuncObj;
 class RefHashTable;
-template <class T> class gGrowableStack;
+template <class T> class gStack;
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
@@ -23,16 +23,16 @@ template <class T> class gGrowableStack;
 #include "gstack.imp"
 
 TEMPLATE class gStack< Portion* >;
-TEMPLATE class gStack< gGrowableStack< Portion* >* >;
+TEMPLATE class gStack< gStack< Portion* >* >;
 TEMPLATE class gStack< CallFuncObj* >;
 TEMPLATE class gStack< RefHashTable* >;
 
 #include "ggrstack.imp"
 
-TEMPLATE class gGrowableStack< Portion* >;
-TEMPLATE class gGrowableStack< gGrowableStack< Portion* >* >;
-TEMPLATE class gGrowableStack< CallFuncObj* >;
-TEMPLATE class gGrowableStack< RefHashTable* >;
+TEMPLATE class gStack< Portion* >;
+TEMPLATE class gStack< gStack< Portion* >* >;
+TEMPLATE class gStack< CallFuncObj* >;
+TEMPLATE class gStack< RefHashTable* >;
 
 #ifdef __BORLANDC__
 #pragma option -Jgx
@@ -43,7 +43,7 @@ TEMPLATE class gGrowableStack< RefHashTable* >;
 #include <assert.h>
 
 #include "glist.h"
-#include "ggrstack.h"
+#include "gstack.h"
 
 #include "portion.h"
 #include "gsmfunc.h"
@@ -82,10 +82,10 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
   }
   */
 
-  _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
-  _StackStack->Push( new gGrowableStack< Portion* >( size ) );
-  _CallFuncStack = new gGrowableStack< CallFuncObj* >( 1 );
-  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
+  _StackStack    = new gStack< gStack< Portion* >* >( 1 );
+  _StackStack->Push( new gStack< Portion* >( size ) );
+  _CallFuncStack = new gStack< CallFuncObj* >( 1 );
+  _RefTableStack = new gStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
 
   _FuncTable     = new FunctionHashTable;
@@ -966,7 +966,7 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
   int i;
 
   _RefTableStack->Push( new RefHashTable );
-  _StackStack->Push( new gGrowableStack< Portion* > );
+  _StackStack->Push( new gStack< Portion* > );
 
 
   for( i = 0; i < func_info.NumParams; i++ )
@@ -1160,7 +1160,7 @@ void GSM::Clear( void )
   delete _RefTableStack->Pop();
   delete _RefTableStack;
 
-  _RefTableStack = new gGrowableStack< RefHashTable* >( 1 );
+  _RefTableStack = new gStack< RefHashTable* >( 1 );
   _RefTableStack->Push( new RefHashTable );
 
 }

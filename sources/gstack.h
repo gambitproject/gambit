@@ -24,7 +24,7 @@ template <class T> class gStack
 
  public:
           // CONSTRUCTORS AND DESTRUCTOR
-  gStack(int md);       // initialize stack of maximum depth 'md'
+  gStack(int md = 10);       // initialize stack of maximum depth 'md'
   virtual ~gStack();    // destruct gStack
 
           // GENERAL DATA ACCESS
@@ -32,21 +32,20 @@ template <class T> class gStack
   int MaxDepth(void) const;
     
           // STACK OPERATIONS
-          // Note: Push() assumes that depth < max_depth
           //       Peek() and Pop() assume that depth > 0
           // Failure to maintain these assertions on entry will
           // cause a failed assert() call...
 
-  virtual void Push (T new_el);    // push an element onto top of stack
-  T            Pop  (void);            // pop the top element off the stack
-  T            Peek (void) const;     // get the top element without popping
-  T&           Peek (void);          // also get the top element w/o popping
+  void Push (T new_el);    // push an element onto top of stack
+  T    Pop  (void);        // pop the top element off the stack
+  T    Peek (void) const;  // get the top element without popping
+  T&   Peek (void);        // also get the top element w/o popping
                             // (the const version is used to just examine
                             //  the data without modifying it; the non-const
                             //  version allows the TOS to be modified
                             //  without the overhead of a push+pop --
                             //  use this with care!)
-
+  void Resize( int new_max_depth );
   void Flush (void);       // empty the stack in one fell swoop
 };
 

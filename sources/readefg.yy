@@ -6,7 +6,7 @@
 #include "gambitio.h"
 #include "gstring.h"
 #include "rational.h"
-#include "ggrstack.h"
+#include "gstack.h"
 #include "glist.h"
 #include "efg.h"
 
@@ -18,7 +18,7 @@
                    gString last_name;  gRational last_rational;  \
                    int last_int, iset_idx; \
                    BaseEfg *& E; \
-                   gGrowableStack<Node *> path; \
+                   gStack<Node *> path; \
                    gList<gString> actions; \
                    gList<gRational> values; \
                    EFPlayer *player; Infoset *infoset; Outcome *outcome; \
@@ -310,8 +310,6 @@ void EfgFileType(gInput &f, bool &valid, DataType &type)
 #endif   // __GNUG__, __BORLANDC__
 
 #include "gstack.imp"
-#include "ggrstack.imp"
 
 TEMPLATE class gStack<Node *>;
-TEMPLATE class gGrowableStack<Node *>;
 

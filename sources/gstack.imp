@@ -27,7 +27,9 @@ template <class T> int gStack<T>::MaxDepth(void) const
 
 template <class T> void gStack<T>::Push(T new_el)
 {
-  assert(depth < max_depth);
+  if (depth >= max_depth)
+    Resize(max_depth + 10);
+
   contents[depth++] = new_el;
 }
 
@@ -53,3 +55,22 @@ template <class T> void gStack<T>::Flush(void)
 {
   depth = 0;
 }
+
+template <class T> void gStack<T>::Resize( int new_max_depth )
+{
+  int i;
+  T*  new_contents;
+
+  if( new_max_depth > depth )
+  {
+    new_contents = new T[ new_max_depth ];
+    for( i = 0; i < depth; i++ )
+    {
+      new_contents[ i ] = contents[ i ];
+    }
+    delete[] contents;
+    contents = new_contents;
+    max_depth = new_max_depth;
+  }
+}
+
