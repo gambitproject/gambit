@@ -192,7 +192,7 @@ ErrorPortion::ErrorPortion(const gString& value)
 ErrorPortion::~ErrorPortion()
 { }
 
-gString ErrorPortion::Value(void)
+gString ErrorPortion::Value(void) const
 { return _Value; }
 
 PortionSpec ErrorPortion::Spec(void) const
@@ -213,11 +213,42 @@ Portion* ErrorPortion::ValCopy(void) const
 Portion* ErrorPortion::RefCopy(void) const
 { return new ErrorPortion(_Value); }
 
-bool ErrorPortion::IsNull(void) const
-{ return false; }
-
 bool ErrorPortion::IsReference(void) const
 { return false; }
+
+
+//---------------------------------------------------------------------
+//                          Null class
+//---------------------------------------------------------------------
+
+NullPortion::NullPortion(const unsigned long datatype)
+: _DataType(datatype)
+{ }
+
+NullPortion::~NullPortion()
+{ }
+
+unsigned long NullPortion::DataType(void) const
+{ return _DataType; }
+
+PortionSpec NullPortion::Spec(void) const
+{ return PortionSpec(porNULL); }
+
+void NullPortion::Output(gOutput& s) const
+{
+  Portion::Output(s);
+  s << "Null(" << PortionSpecToText(_DataType) << ')';
+}
+
+Portion* NullPortion::ValCopy(void) const
+{ return new NullPortion(_DataType); }
+
+Portion* NullPortion::RefCopy(void) const
+{ return new NullPortion(_DataType); }
+
+bool NullPortion::IsReference(void) const
+{ return false; }
+
 
 //---------------------------------------------------------------------
 //                          Reference class
@@ -248,9 +279,6 @@ Portion* ReferencePortion::ValCopy(void) const
 Portion* ReferencePortion::RefCopy(void) const
 { return new ReferencePortion(_Value); }
 
-bool ReferencePortion::IsNull(void) const
-{ return false; }
-
 bool ReferencePortion::IsReference(void) const
 { return false; }
 
@@ -260,9 +288,7 @@ bool ReferencePortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 IntPortion::IntPortion(void)
-{
-  _IsNull = false;
-}
+{ }
 
 IntPortion::~IntPortion()
 { }
@@ -288,12 +314,6 @@ Portion* IntPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool IntPortion::IsNull(void) const
-{ return _IsNull; }
-
-void IntPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 IntValPortion::IntValPortion(long value)
@@ -321,9 +341,7 @@ bool IntRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 FloatPortion::FloatPortion(void)
-{
-  _IsNull = false;
-}
+{ }
 
 FloatPortion::~FloatPortion()
 { }
@@ -349,12 +367,6 @@ Portion* FloatPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool FloatPortion::IsNull(void) const
-{ return _IsNull; }
-
-void FloatPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 FloatValPortion::FloatValPortion(double value)
@@ -384,9 +396,7 @@ bool FloatRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 RationalPortion::RationalPortion(void)
-{
-  _IsNull = false;
-}
+{ }
 
 RationalPortion::~RationalPortion()
 { }
@@ -412,12 +422,6 @@ Portion* RationalPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool RationalPortion::IsNull(void) const
-{ return _IsNull; }
-
-void RationalPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 
@@ -448,9 +452,7 @@ bool RationalRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 TextPortion::TextPortion(void)
-{
-  _IsNull = false;
-}
+{ }
 
 TextPortion::~TextPortion()
 { }
@@ -488,11 +490,6 @@ Portion* TextPortion::RefCopy(void) const
   return p;
 }
 
-bool TextPortion::IsNull(void) const
-{ return _IsNull; }
-
-void TextPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 
@@ -526,9 +523,7 @@ bool TextRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 BoolPortion::BoolPortion(void)
-{ 
-  _IsNull = false;
-}
+{ }
 
 BoolPortion::~BoolPortion()
 { }
@@ -554,12 +549,6 @@ Portion* BoolPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool BoolPortion::IsNull(void) const
-{ return _IsNull; }
-
-void BoolPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 
@@ -645,9 +634,6 @@ Portion* OutcomePortion::RefCopy(void) const
   return p;
 }
 
-bool OutcomePortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 OutcomeValPortion::OutcomeValPortion(Outcome* value)
 { _Value = new Outcome*(value); }
@@ -717,9 +703,6 @@ Portion* NfPlayerPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool NfPlayerPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 NfPlayerValPortion::NfPlayerValPortion(NFPlayer* value)
@@ -800,9 +783,6 @@ Portion* StrategyPortion::RefCopy(void) const
   return p;
 }
 
-bool StrategyPortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 StrategyValPortion::StrategyValPortion(Strategy* value)
 { _Value = new Strategy*(value); }
@@ -874,9 +854,6 @@ Portion* NfSupportPortion::RefCopy(void) const
   return p;
 }
 
-bool NfSupportPortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 NfSupportValPortion::NfSupportValPortion(NFSupport* value)
 { _Value = new NFSupport*(value); }
@@ -945,9 +922,6 @@ Portion* EfSupportPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool EfSupportPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 EfSupportValPortion::EfSupportValPortion(EFSupport* value)
@@ -1018,9 +992,6 @@ Portion* EfPlayerPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool EfPlayerPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 EfPlayerValPortion::EfPlayerValPortion(EFPlayer* value)
@@ -1099,9 +1070,6 @@ Portion* InfosetPortion::RefCopy(void) const
   return p;
 }
 
-bool InfosetPortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 InfosetValPortion::InfosetValPortion(Infoset* value)
 { _Value = new Infoset*(value); }
@@ -1179,9 +1147,6 @@ Portion* NodePortion::RefCopy(void) const
   return p;
 }
 
-bool NodePortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 NodeValPortion::NodeValPortion(Node* value)
 { _Value = new Node*(value); }
@@ -1252,9 +1217,6 @@ Portion* ActionPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool ActionPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 ActionValPortion::ActionValPortion(Action* value)
@@ -1393,9 +1355,6 @@ Portion* MixedPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool MixedPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 MixedValPortion::MixedValPortion(BaseMixedProfile* value)
@@ -1537,9 +1496,6 @@ Portion* BehavPortion::RefCopy(void) const
   return p;
 }
 
-bool BehavPortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 BehavValPortion::BehavValPortion(BaseBehavProfile* value)
 { _Value = new BaseBehavProfile*(value); }
@@ -1635,9 +1591,6 @@ Portion* NfgPortion::RefCopy(void) const
   p->SetOwner(Owner());
   return p;
 }
-
-bool NfgPortion::IsNull(void) const
-{ return (*_Value == 0); }
 
 
 void NfgPortion::RemoveAllDependents(void)
@@ -1767,9 +1720,6 @@ Portion* EfgPortion::RefCopy(void) const
   return p;
 }
 
-bool EfgPortion::IsNull(void) const
-{ return (*_Value == 0); }
-
 
 void EfgPortion::RemoveAllDependents(void)
 {
@@ -1830,9 +1780,7 @@ bool EfgRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 OutputPortion::OutputPortion(void)
-{ 
-  _IsNull = false;
-}
+{ }
 
 OutputPortion::~OutputPortion()
 { }
@@ -1858,12 +1806,6 @@ Portion* OutputPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool OutputPortion::IsNull(void) const
-{ return _IsNull; }
-
-void OutputPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 
@@ -1894,9 +1836,7 @@ bool OutputRefPortion::IsReference(void) const
 //---------------------------------------------------------------------
 
 InputPortion::InputPortion(void)
-{
-  _IsNull = false;
-}
+{ }
 
 InputPortion::~InputPortion()
 { }
@@ -1922,12 +1862,6 @@ Portion* InputPortion::RefCopy(void) const
   p->SetOriginal(Original());
   return p;
 }
-
-bool InputPortion::IsNull(void) const
-{ return _IsNull; }
-
-void InputPortion::SetNull(void)
-{ _IsNull = true; }
 
 
 
@@ -2055,9 +1989,6 @@ Portion* ListPortion::RefCopy(void) const
   // p->SetOwner(Owner());
   return p;
 }
-
-bool ListPortion::IsNull(void) const
-{ return false; }
 
 
 void ListPortion::AssignFrom(Portion* p)
@@ -2295,12 +2226,12 @@ int ListPortion::Insert(Portion* item, int index)
   }
 
 
-  if(item->IsNull()) // inserting a null object
+  if(item->Spec().Type == porNULL) // inserting a null object
   {
     if(_DataType == porUNDEFINED)
     {
-      _DataType = item_type.Type;
-      ((ListPortion*) Original())->_DataType = item_type.Type;
+      _DataType = ((NullPortion*) item)->DataType();
+      ((ListPortion*) Original())->_DataType = _DataType;
     }
     delete item;
     result = -1;
@@ -2492,3 +2423,5 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
     type_found = false;
   return b;
 }
+
+

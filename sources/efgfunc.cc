@@ -1067,10 +1067,8 @@ Portion *GSM_Outcomes(Portion **param)
 Portion *GSM_Parent(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
-  /*
   if (!n->GetParent())
-    return new ErrorPortion("Node is the root node");
-    */
+    return new NullPortion(porNODE);
 
   Portion* por = new NodeValPortion(n->GetParent());
   por->SetOwner( param[ 0 ]->Owner() );

@@ -88,6 +88,8 @@ typedef enum
 #define  porNF_SUPPORT ( 0x04000000 )
 #define  porEF_SUPPORT ( 0x08000000 )
 
+#define  porNULL       ( 0x10000000 )
+
 #define  porANYTYPE    ( 0xFFFFFFFF )
 
 

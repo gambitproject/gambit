@@ -688,13 +688,15 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   if(p == 0 && ExpectedSpec.Type == porUNDEFINED)
     return true;
 
-  if(ExpectedSpec.Type == porANYTYPE && ExpectedSpec.ListDepth == 0 && 
-     return_type_check)
-    return true;
+  if(ExpectedSpec.Type == porANYTYPE && return_type_check)
+    return true;  
 
   assert(p != 0);
   CalledSpec = p->Spec();
 
+  if(p->Spec().Type == porNULL)
+    CalledSpec = ((NullPortion*) p)->DataType();
+  
 
   if(CalledSpec.Type & ExpectedSpec.Type)
   {
@@ -704,9 +706,6 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
       result = true;
     else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
 	    !Listable)
-      result = true;
-    else if(CalledSpec.ListDepth >= ExpectedSpec.ListDepth && 
-	    !Listable && return_type_check)
       result = true;
   }
   else if(CalledSpec.Type == porUNDEFINED && CalledSpec.ListDepth > 0)
@@ -1270,7 +1269,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
   if(!_ErrorOccurred)
   {
     for(i = 0; i < _FuncInfo[_FuncIndex].NumParams; i++)
-      if(_Param[i]->IsNull())
+      if(_Param[i]->Spec().Type == porNULL)
       {
 	null_call = true;
 	break;
@@ -1298,76 +1297,7 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
       }
       else
       {
-	switch(_FuncInfo[_FuncIndex].ReturnSpec.Type)
-	{
-	case porBOOL:
-	  result = new BoolValPortion(0); 
-	  ((BoolPortion*) result)->SetNull(); 
-	  break;
-	case porFLOAT:
-	  result = new FloatValPortion(0); 
-	  ((FloatPortion*) result)->SetNull(); 
-	  break;
-	case porINTEGER:
-	  result = new IntValPortion(0); 
-	  ((IntPortion*) result)->SetNull(); 
-	  break;
-	case porRATIONAL:
-	  result = new RationalValPortion(0);
-	  ((RationalPortion*) result)->SetNull(); 
-	  break;
-	case porTEXT:
-	  result = new TextValPortion(""); 
-	  ((TextPortion*) result)->SetNull(); 
-	  break;
-	  
-	case porNFG_FLOAT:
-	case porNFG_RATIONAL:
-	  result = new NfgValPortion(0); break;
-	case porEFG_FLOAT:
-	case porEFG_RATIONAL:
-	  result = new EfgValPortion(0); break;
-	case porMIXED_FLOAT:
-	case porMIXED_RATIONAL:
-	  result = new MixedValPortion(0); break;
-	case porBEHAV_FLOAT:
-	case porBEHAV_RATIONAL:
-	  result = new BehavValPortion(0); break;
-	  
-	case porOUTCOME_FLOAT:
-	case porOUTCOME_RATIONAL:
-	  result = new OutcomeValPortion(0); break;
-	case porPLAYER_NFG:
-	  result = new NfPlayerValPortion(0); break;
-	case porPLAYER_EFG:
-	  result = new EfPlayerValPortion(0); break;
-	case porNF_SUPPORT:
-	  result = new NfSupportValPortion(0); break;
-	case porEF_SUPPORT:
-	  result = new EfSupportValPortion(0); break;
-	case porINFOSET:
-	  result = new InfosetValPortion(0); break;
-	case porNODE:
-	  result = new NodeValPortion(0); break;
-	case porACTION:
-	  result = new ActionValPortion(0); break;
-	case porSTRATEGY:
-	  result = new StrategyValPortion(0); break;
-	  
-	case porREFERENCE:
-	  assert(0); break;
-	  
-	case porOUTPUT:
-	  result = new OutputRefPortion(gout); 
-	  ((OutputPortion*) result)->SetNull(); 
-	  break;
-	case porINPUT:
-	  result = new InputRefPortion(gin); 
-	  ((InputPortion*) result)->SetNull(); 
-	  break;
-	default:
-	  result = new ErrorPortion();
-	}
+	result = new NullPortion(_FuncInfo[_FuncIndex].ReturnSpec.Type);
       }
     }
     else if(!list_op || !_FuncInfo[_FuncIndex].Listable) // normal func call
