@@ -13,38 +13,28 @@
 template <class T> gArray<T>::gArray(int len) : length(len)	
 {
   assert(len >= 0);
-  data = (len > 0) ? new T[len] - 1 : 0;
+  data = (len) ? new T[len] - 1 : 0;
 }
 
 template <class T> gArray<T>::gArray(const gArray<T> &a) : length(a.length)
 {
-  if (length > 0)	{
-    data = new T[length] - 1;
-    for (int i = 0; i < length; i++)
-      data[i] = a.data[i];
-  }
-  else if (length == 0)
-    data = 0;
+  data = (length) ? new T[length] - 1 : 0;
+  for (int i = 1; i <= length; i++)
+    data[i] = a.data[i];
 }
 
 template <class T> gArray<T>::~gArray()
 {
-  if (length > 0)  delete [] (data + 1);
+  if (length)  delete [] (data + 1);
 }
 
 template <class T> gArray<T> & gArray<T>::operator=(const gArray<T> &a)
 {
   if (this != &a) {
     if (data)   delete [] (data + 1);
-
-    length = a.length;
-    if (length)   {
-      data = new T[length];
-      for (int i = 0; i < length; i++)
-	data[i] = a.data[i];
-    }
-    else
-      data = 0;
+    data = (length = a.length) ? new T[length] - 1 : 0;
+    for (int i = 1; i <= length; i++)
+      data[i] = a.data[i];
   }
   return *this;
 }

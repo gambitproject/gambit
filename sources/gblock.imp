@@ -23,7 +23,7 @@ template <class T> gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
 template <class T> int gBlock<T>::operator==(const gBlock<T> &b) const
 {
   if (length != b.length) return 0;
-  for (int i = 0; i < length; i++) 
+  for (int i = 1; i <= length; i++) 
     if (data[i] != b.data[i]) return 0;
   return 1;
 }
@@ -62,13 +62,13 @@ template <class T> gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
 
 template <class T> int gBlock<T>::InsertAt(const T &t, int n)
 {
-  T *new_data = new T[++length];
+  T *new_data = new T[++length] - 1;
 
-  for (int i = 0; i < n - 1; i++)       new_data[i] = data[i];
+  for (int i = 1; i <= n - 1; i++)       new_data[i] = data[i];
   new_data[i++] = t;
-  for (; i < length; i++)       new_data[i] = data[i - 1];
+  for (; i <= length; i++)       new_data[i] = data[i - 1];
 
-  if (data)   delete [] data;
+  if (data)   delete [] (data + 1);
   data = new_data;
 
   return n;
@@ -88,14 +88,14 @@ template <class T> T gBlock<T>::Remove(int n)
 {
   assert(n >= 1 && n <= length);
 
-  T ret(data[--n]);
+  T ret(data[n]);
 
-  T *new_data = (--length) ? new T[length] : 0;
+  T *new_data = (--length) ? new T[length] - 1 : 0;
 
-  for (int i = 0; i < n; i++)     new_data[i] = data[i];
-  for (; i < length; i++)         new_data[i] = data[i + 1];
+  for (int i = 1; i < n; i++)      new_data[i] = data[i];
+  for (; i <= length; i++)         new_data[i] = data[i + 1];
 
-  delete [] data;
+  delete [] (data + 1);
   data = new_data;
 
   return ret;
@@ -103,15 +103,15 @@ template <class T> T gBlock<T>::Remove(int n)
 
 template <class T> int gBlock<T>::Find(const T &t) const
 {
-  for (int i = 0; i < length && data[i] != t; i++);
-  return (i < length) ? ++i : 0;
+  for (int i = 1; i <= length && data[i] != t; i++);
+  return (i <= length) ? i : 0;
 }
 
 template <class T> int gBlock<T>::Contains(const T &t) const
 { return Find(t); }
 
 template <class T> void gBlock<T>::Flush(void)
-{ length = 0;  delete [] data;  data = 0; }
+{ length = 0;  delete [] (data + 1);  data = 0; }
 
 //
 // Uses the Dump function to output the gBlock.  Uses the << operator
@@ -121,3 +121,5 @@ template <class T> gOutput &operator<<(gOutput &f, const gBlock<T> &b)
 {
   b.Dump(f);   return f;
 }
+
+
