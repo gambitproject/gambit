@@ -132,7 +132,7 @@ template <class T> T gSquareMatrix<T>::Determinant(void) const
     // below the diagonal
     for (int row1 = row+1; row1 <= maxrow; row1++)
       {
-	T factor = -M.data[row1][row]/M.data[row][row];
+	factor = -M.data[row1][row]/M.data[row][row];
 	for (int i = mincol; i <= maxcol; i++)
 	  M.data[row1][i] += M.data[row][i]*factor;
       }
