@@ -18,7 +18,7 @@ template <class T> gArray<T>::gArray(int len) : mindex(1), maxdex(len)
 
 template <class T> gArray<T>::gArray(int lo, int hi) : mindex(lo), maxdex(hi)
 {
-  assert(maxdex>=mindex);
+  assert(maxdex + 1 >= mindex);
   data = (maxdex>=mindex) ? new T[maxdex-mindex+1] - mindex : 0;
 }
 
