@@ -1,35 +1,31 @@
 %
 % FILE: guiman.tex -- sourc for GUI manual
 %
-% @(#)guiman.tex	1.10 8/18/96
+% $Id$
 %
-\documentstyle[a4,makeindex,verbatim,texhelp,fancyhea,mysober,mytitle]{report}%
-\input psbox.tex
-%\newcommand{\bd}{\begin{description}}
-%\newcommand{\ed}{\end{description}}
+\documentclass[12pt]{report}
+\usepackage{texhelp}
+\usepackage{makeindex}
+\usepackage{verbatim}
+\usepackage{fancyhea}
+\usepackage{mysober}
+\usepackage{mytitle}
+%\input psbox.tex
 \parskip=10pt%
 \parindent=0pt%
-\itemsep{0pt}
-\helpfontsize{11}
-\title{Gambit Graphics User Interface:\\
-$$\image{1cm;0cm}{gamblogo}$$\\
-\centerline{An Interactive Extensive Form Game Program}}
-\author{Version 0.96\\
- \\
-%Developed by: Richard D. McKelvey\\
-%Main Programmer: Theodore Turocy\\
-%Polynomial Code: Andrew McLennan\\
-%Front End: Eugene Grayver\\
-% \\
-Part of the \helpref{Gambit Project}{gambitproject}\\
-California Institute of Technology\\ \today.\\
-Funding provided by the National Science Foundation\\
- \\}
+\itemsep=0pt
+%\helpfontsize{11}
+\title{Gambit Graphical User Interface:\\
+An Interactive Program for Constructing and Analyzing Finite Games \\
+Version 0.97\thanks{Funding provided by
+the National Science Foundation.}}
+\author{Richard D. McKelvey, California Institute of Technology \\
+Andrew M. McLennan, University of Minnesota \\
+Theodore L. Turocy, Texas A\&M University}
 
 \makeindex%
 \begin{document}%
-\maketitle%
-
+\maketitle
 %\pagestyle{fancyplain}
 \bibliographystyle{plain}
 %\pagenumbering{roman}
@@ -41,7 +37,7 @@ Funding provided by the National Science Foundation\\
 %\setheader{{\it COPYRIGHT}}{}{}{}{}{{\it COPYRIGHT}}%
 %\setfooter{\thepage}{}{}{}{}{\thepage}
 
-Copyright (c) 2000, The Gambit Project, at California Institute of
+Copyright (c) 1995--2002, The Gambit Project, at California Institute of
 Technology and University of Minnesota.
 
 Permission to use, copy, modify, and distribute this software and its
@@ -75,7 +71,7 @@ to the University of Minnesota.
 The Gambit Project is an ongoing project, where the set of active
 participants has changed over time, and will be expected to change
 further in the future.  The main contributors to this release are
-Richard D. McKelvey, Andrew McLennan and Ted L. Turocy.  However, this
+Richard D. McKelvey, Andrew McLennan and Theodore Turocy.  However, this
 release builds heavily on the previous releases, and we would be
 remiss not to acknowledge the significant contributions of those
 involved in those previous releases.
@@ -93,7 +89,7 @@ grants for the Gambit Project.  He designed the original GUI, was
 involved in the design of the GCL (1993), and has been responsible for
 implementation of many of the algorithms in gambit.
 
-Andrew Mclennan has worked on the project since 1993, and was one of
+Andrew McLennan has worked on the project since 1993, and was one of
 the principal investigators on the NSF grants for the Gambit project.
 Andy was involved in the original design of the GCL (1993).  He has
 been responsible for the implementation of the polynomial solution
@@ -115,16 +111,16 @@ first mention Eugene Grayver and Gary Wu, each of whom worked
 for at least four years on the project, making major contributions:
 
 Eugene Grayver worked on the project from 1994 through 1997.
-He wrote the code for the wxwin implementation of the GUI for versions
-.92 through .94, developed our Web page, handled the software
-distributions, and implemented the console interface for version .94
+He wrote the code for the wxWindows implementation of the GUI for versions
+0.92 through 0.94, developed the initial Gambit webpage, handled the software
+distributions, and implemented the console interface for version 0.94
 of the GCL.
 
 Gary Wu worked from 1995 through 1998 on the project.  He was
 responsible for large portions of the GCL implementation, including
 the implementation of ``listability'', implementation of many of the
 built in functions, the command line editor, the original stack
-machine, and the Windows MFC interface for the GCL.
+machine, and the Windows MFC interface used through version 0.96 for the GCL.
 
 Numerous additional students at Caltech and the University of Minnesota
 have contributed to the Gambit Project:
@@ -163,7 +159,7 @@ Gambit is a library of computer programs, written
 in \verb$C++$, for building, analyzing, and solving n-person games, in
 either extensive or normal form.
 
-The Gambit Graphics User Interface (Gambit \popref{GUI}{guigloss}) is an
+The Gambit Graphical User Interface (GUI) is an
 interactive, menu driven program for accessing this library of programs.
 The Gambit GUI allows for the interactive building and solving of
 extensive and normal form games.  It consists of two separate modules, one
@@ -171,7 +167,7 @@ for extensive and the other for normal form games.   In each module, you
 can build, save load and solve a game, and convert back and forth from one
 form of game to the other.
 
-Despite it's ease of use, the Gambit GUI is not suitable for repetitive or
+The Gambit GUI is not suitable for repetitive or
 computer intensive  operations.  A separate program, the Gambit Command
 Language (\popref{GCL}{gclgloss}) is designed to be used for such operations 
 on games.  The
@@ -183,36 +179,142 @@ underlying library of functions.
 
 
 \chapter{Hardware and Installation}
-\section{Platforms}
-The gambit \popref{GUI}{guigloss}\ is developed and tested primarily
-on the following platforms:
+\section{Operating systems}
+The Gambit \popref{GUI}{guigloss}\ is developed and tested primarily
+on the following operating systems:
 \begin{itemize}
-\item IBM PC and compatibles running MS Windows 95/98 or NT.
-\item Linux operating systems using Motif. 
+\item Microsoft Windows 95, 98, 2000 or NT.  The binaries should also
+work on other compatible flavors of Windows, but are generally not tested
+extensively there.
+\item Linux, using the GTK+ (Gnome) toolkit.  
 \end{itemize}
 
 Executable code for the above platforms as well as certain other
-platforms is available at the Gambit web site (check the gambit web
+platforms is available at the Gambit web site (check the Gambit web
 page for current information).
 
-For platforms that are not currently supported, the gambit source code
-is available at our web site.  The gambit GUI relies on the wxWin
-library, and versions could be compiled for any platform that is
-supported by wxWin.  See the gambit and wxWin web sites for more
-details
+For platforms that are not currently supported, the Gambit source code
+is available at our web site.  The Gambit GUI, and the windowed interface 
+to the command language, are built on top of the wxWindows\footnote{The
+wxWindows home page is \texttt{http://www.wxwindows.org}.} cross-platform
+windowing library, and versions could be compiled for any platform currently
+supported by wxWindows.
 
 \section{Installation}
-All of the gambit files can be found at the Gambit World Wide Web site
+All of the Gambit files can be found at the Gambit World Wide Web site
 at 
 
 \begin{verbatim}
-http://hss.caltech.edu/~gambit/Gambit.html
+http://hss.caltech.edu/gambit
 \end{verbatim}
-
-You will need a Web browser such as Netscape to download the files.  Follow the 
-instructions there for installation.  
  
-\chapter{Representation of Games in GAMBIT}
+
+\chapter{Quick Start: A Poker Example}
+
+This chapter takes a high-level tour of the Gambit interface using
+as an example the simple one-card poker game appearing in
+Myerson \cite{Mye:91}.  This game is included in the Gambit distribution
+as \texttt{poker.efg}, and can be found in the \texttt{efg} subdirectory
+of the directory in which Gambit is installed.  (For example, in the
+standard installation under Microsoft Windows, this would be
+\texttt{c:/gambit/efg/poker.efg}.)  By convention, files ending in
+\texttt{.efg} store extensive form games, and files ending in
+\texttt{.nfg} store normal form games. 
+
+When launched, Gambit displays a window similar to that displayed in
+Figure XX.\footnote{All the screenshots contained in this manual were
+taken on a system running XXXXX.  If you use a different operating system,
+your windows may appear slightly differently.}  This window contains
+a trivial extensive form game, containing exactly one node, which is both
+root and terminal.  Chapter XX describes how to use the extensive form
+window to construct and edit extensive form games.
+
+There are three equivalent ways to open a saved game from any window in Gambit:
+\begin{enumerate}
+\item Select the \textbf{Open} menu item from the \textbf{File} menu;
+\item Use the shortcut key combination \textbf{[Ctrl]-O};
+\item Click on the file folder icon on the toolbar.
+\end{enumerate}
+Any of these actions leads to a dialog box for selecting a file to
+load.  Use the dialog to locate and select the \texttt{poker.efg}
+file.  After doing so, Gambit will display the opened game in a new
+window, as shown in Figure XXX.  The screenshot in Figure XXX shows
+the game as rendered by Gambit using the default settings.  Many
+display options are available to customize the appearance of games;
+see Section XXX for details.
+
+The extensive form game tree is drawn with the root node at far left,
+with branches going from left to right, and successive nodes to the
+right of their predecessors.  Each node is represented as a horizontal
+line.  Every non-terminal node is a decision node and is represented
+by the color of the player who makes a decision at that node.  Nodes
+are connected by branches, which are represented by two connected line
+segments, which can be thought of as the ``fork'' and the ``tine''.
+The fork is used in the graphics display to indicate graphically the
+probabilities of taking each branch.  The tine is used as a location
+at which to display textual information about the branch.
+
+The poker game begins with Chance selecting either a Red card or
+a Black card to deal to Player~1.  This is represented in the tree
+by the grey node and subsequent branches labeled ``Red'' and ``Black''.
+The forks of the branches have superimposed black lines stretching
+halfway along the fork, indicating a probability of one-half that
+each card is chosen.  After each of the two possible draws, Player~1,
+whose nodes are colored in red, has the option to either ``Raise'' or
+``Fold''.  If Player~1 folds, the game ends; if he raises, Player~2,
+with nodes colored in green,
+then has the option to either ``Meet'' or ``Pass''; in either case,
+the game ends after Player~2's choice.   All terminal nodes are drawn
+in black.
+
+In this game, outcomes are attached to each of the six terminal
+nodes, and payoffs to the two players are indicated to the right
+of the corresponding node, with Player~1's payoff listed first, then
+Player~2's.  Outcomes are indicated to the right of nodes, but may
+be attached to nonterminal nodes, in which case their payoffs are 
+interpreted as incremental payoffs.   Outcomes may also be displayed
+by textual name rather than by their payoff vector.
+
+Information sets are identified by a pair of numbers.  The first
+number indicates the number of the player who has the choice at the information
+set.  The second number provides an identifying number for the
+information set which is unique among that player's information sets.
+Whenever possible, information sets are also
+represented by vertical lines connecting the nodes that are members of
+the same information set.\footnote{Eventually discuss somewhere
+``lagged'' information sets.}  In this game, Player~1 observes which
+card he has drawn prior to making his choice to ``Raise'' or ``Fold'';
+therefore, the node following Chance's ``Red'' move is in a separate
+information set, numbered (1,1), from the node following Chance's
+``Black'' move, which is in information set (1,2).  Player~2, on the
+other hand, does not observe Player~1's card, and so Player~2 has one
+information set, numbered (2,1), with two member nodes connected by
+a vertical line.
+
+The analytical features of Gambit are located on the \textbf{Tools}
+menu.  These are grouped into four submenus:
+\begin{itemize}
+\item \textbf{Subgames}, which contains items for the identification
+and manipulation of subgames of the tree.  Since Player~2 does not
+observe the card drawn by Player~1, this game has no proper subgames,
+and so this menu will not be explored further in this introduction.
+\item \textbf{Supports}, which contains items dealing with sets of
+actions.  Of most immediate interest in this menu is the
+\textbf{Undominated} item, which determines which actions are not
+dominated by other actions.
+\item \textbf{Equilibrium}, which contains items interfacing to the
+various algorithms provided by Gambit to compute Nash equilibria of
+the game.
+\item \textbf{Normal form}, which contains items to compute normal
+forms corresponding to the extensive form game.
+\end{itemize}
+In the following analysis, each of the latter three submenus will
+be visited.
+
+The analysis begins by searching for actions which might be dominated
+by other actions at the same move.     
+
+\chapter{Representation of Games in Gambit}
 
 This chapter describes some notation and concepts from game theory
 that are necessary to understand how Gambit represents and solves
@@ -230,37 +332,12 @@ shows how the extensive form of a simple
  in the Gambit GUI.  
 
 \begin{figure}\label{fig_samp1}
-$$\image{1cm;0cm}{poker_ef}$$
-\caption{GAMBIT Display of Extensive Form of
+%$$\image{1cm;0cm}{poker_ef}$$
+\caption{Gambit Display of Extensive Form of
 		a Simple Two Player Poker Game}\label{fig_samp1}
 \end{figure}
 
-In Gambit, the extensive form \popref{game tree}{toptreegloss}, is drawn with the 
-\popref{root node}{rootnodegloss} being the node furthest to the left,
-branches going from left to right, and successive 
-nodes to the right of 
-their predecessors.  So nodes further to the right represent decisions 
-that occur later in time.  Each player, (including chance) is represented by a color.  
-
-A \popref{node}{nodegloss} is represented as a horizontal line.  Every
-non-terminal node is a \popref{decision node}{decnodegloss} and is
-represented by the color of the player who makes a decision at that
-node.  Nodes are connected by \popref{branches}{branchgloss}, which
-are represented by two connected line segments, the ``fork'' and the
-``tine''.  The fork is used in the graphics display to indicate
-graphically the probabilities of taking each branch.  The tine is used
-as a location at which to display textual information about the
-branch.  In gambit \popref{Outcomes}{outcomegloss} can be attached to
-either non terminal or terminal nodes and can be displayed either by
-label or by payoff next to the node to which they are attached.
-
-\popref{Information sets}{infosetgloss} in Gambit are identified by a
-pair of numbers, the first representing the player number and the
-second representing the information set number.  This information can
-be displayed on the extensive form next to each node to identify which
-nodes are in which information sets.  Whenever possible information
-sets are also represented by vertical lines connecting the nodes that
-are members of the same information set.  It is only possible to do
+It is only possible to do
 this when nodes in the same information set are at the same level of
 the tree.  When two member nodes of the same information set are not
 at the same level, the information set is indicated by a ``lagged''
@@ -268,8 +345,8 @@ line, the end of which points in the direction of the next node, as
 illustrated in Figure~\ref{fig_lag_iset}.
 
 \begin{figure}\label{fig_lag_iset}
-$$\image{1cm;0cm}{lag_iset}$$
-\caption{GAMBIT Display of information set when member nodes are at different levels}\label{fig_lag_iset}
+%$$\image{1cm;0cm}{lag_iset}$$
+\caption{Gambit Display of information set when member nodes are at different levels}\label{fig_lag_iset}
 \end{figure}
 
 \subsection{Labeling}
@@ -308,7 +385,7 @@ The normal form for a game is a mapping which associates with each pure
 strategy $n$--tuple, an expected payoff to each player from 
 playing that strategy. 
 
-In the extensive form of the game in GAMBIT, the information sets for a 
+In the extensive form of the game in Gambit, the information sets for a 
 player are numbered from \verb+1+ to \verb+J+, where \verb+J+ is the number of information 
 sets that player \verb+i+ has.  We denote the pure strategy in which player \verb+i+ 
 adopts strategy \verb+a+ in its first information set, \verb+b+ in its second, and 
@@ -335,9 +412,9 @@ if a player has three choices at its second information set, then the
 notation {\tt 3*2} is used to represent the collection of strategies, 
 {\tt \{312, 322, 332\}}.  
 
-The {\tt *} notation in GAMBIT serves the same purpose as the ``wildcard'' 
+The {\tt *} notation in Gambit serves the same purpose as the ``wildcard'' 
 character in DOS file specifications.  To get a good appreciation for how 
-the wildcard works, you should exit GAMBIT and WINDOWS, go to the root 
+the wildcard works, you should exit Gambit and WINDOWS, go to the root 
 directory of your hard drive, and type \verb+del *.*[RET]+.
 
 \subsection{\index{normal form}{Normal Form}}\label{normformsec}
@@ -354,8 +431,8 @@ form are simply the expected payoff to each player from the given strategy
  profile.  
 
 \begin{figure}
-$$\image{1cm;0cm}{poker_nf}$$
-\caption{GAMBIT Graphics Display of Normal Form of
+%$$\image{1cm;0cm}{poker_nf}$$
+\caption{Gambit Graphics Display of Normal Form of
 		Simple Two Player Poker Game}\label{fig_samp2}
 \end{figure}
 
@@ -382,11 +459,11 @@ an information set, one of whose nodes follows a choice by the same player
 at a previous information set, then all of the members of that information
 set must follow the same choice.
 
-GAMBIT does not enforce perfect recall on the extensive form games that
-you build.  However, certain algorithms in GAMBIT only work on games of 
+Gambit does not enforce perfect recall on the extensive form games that
+you build.  However, certain algorithms in Gambit only work on games of 
 perfect recall.  
 To find out if a game is perfect recall, you can go to the {\tt Inspect->GameInfo} 
-menu.  GAMBIT will allow you to convert a game without perfect recall 
+menu.  Gambit will allow you to convert a game without perfect recall 
 to normal form and solve for optimal 
 mixed strategies.  The problem comes in converting the mixed strategy back
 to a behavioral strategy.  If the game has perfect recall, then by Kuhn's 
@@ -408,12 +485,12 @@ prior distribution over the joint distribution of characteristics, and
  then individuals observe their own type, but not that of the other players 
 in the game.  
 
-Games of incomplete information can be modeled in GAMBIT by having an
+Games of incomplete information can be modeled in Gambit by having an
 initial chance move determine the distribution of types, and then
 defining information sets so each individual observes only their own
 type.
 
-\chapter{GAMBIT GUI}
+\chapter{Gambit GUI}
 
 The Gambit GUI consists of two self-contained modules for
 representing, displaying and manipulating games.  A game can be viewed
@@ -423,11 +500,11 @@ in the normal form while viewing it in the extensive.  It is also
 possible to go from the extensive form representation to the normal
 form (but not vice versa at the present).  
 
-When you first launch the gambit GUI, you will see a screen as in
+When you first launch the Gambit GUI, you will see a screen as in
 Figure~\ref{fig_gamgui}
 
 \begin{figure}
-$$\image{3cm;3cm}{gamgui}$$
+%$$\image{3cm;3cm}{gamgui}$$
 \caption{Gambit GUI Introductory window}\label{fig_gamgui}
 \end{figure}
 
@@ -445,7 +522,7 @@ extensive or normal form.
 
 \section{File menu}
 
-The {\bf File} menu is used to launch gambit, by either loading a new
+The {\bf File} menu is used to launch Gambit, by either loading a new
 game or loading a previously saved game.
 
 \begin{description}
@@ -580,7 +657,7 @@ is accessed through the {\bf View->Solution} selection in the normal
 form menu.  
 
 \begin{figure}
-$$\image{3cm;3cm}{nfgsoln}$$
+%$$\image{3cm;3cm}{nfgsoln}$$
 \caption{Normal Form Solution Inspect Window}\label{fig_nfgsoln}
 \end{figure}
 
@@ -608,7 +685,7 @@ is accessed through the {\bf Inspect->Solution} selection in the
 extensive form menu.
 
 \begin{figure}
-$$\image{3cm;3cm}{efgsoln}$$
+%$$\image{3cm;3cm}{efgsoln}$$
 \caption{Extensive Form Solution Inspect Window}\label{fig_efgsoln}
 \end{figure}
 
@@ -644,7 +721,7 @@ the generic \helprefn{Table Window}{TableWindow} description.}
 
 \subsection{Sorting and Filtering Solutions}\label{SolnSortFilt}
 \begin{figure}
-$$\image{1cm;0cm}{sortfilt}$$
+%$$\image{1cm;0cm}{sortfilt}$$
 \caption{Sort/Filter Dialog Box}\label{fig_nfgsortfilt}
 \end{figure}
 
@@ -664,7 +741,7 @@ confusion if newly generated solutions are automatically filtered out.
 
 \subsection{Adding and Editing Solutions}\label{SolnAddEdit}
 \begin{figure}
-$$\image{1cm;0cm}{editmix}$$
+%$$\image{1cm;0cm}{editmix}$$
 \caption{Edit Mixed Solution Dialog Box}\label{fig_nfgsortfilt}
 \end{figure}
 
@@ -690,7 +767,7 @@ option, you will get a dialog box which will ask the medium to which the
 output is to be generated.  
 
 \begin{figure}
-$$\image{3cm;3cm}{output}$$
+%$$\image{3cm;3cm}{output}$$
 \caption{Output Media dialog}\label{fig_outputmedia}
 \end{figure}
 
@@ -722,13 +799,13 @@ normal form or \helpref{EFG Standard Solutions}{EFGStandardSolutions}
 for the extensive form.
 
 \begin{figure}
-$$\image{3cm;3cm}{stdsolnf}$$
+%$$\image{3cm;3cm}{stdsolnf}$$
 \caption{Standard Solution dialog for normal form
 games}\label{fig_standardsolnf}
 \end{figure}
 
 \begin{figure}
-$$\image{3cm;3cm}{stdsolef}$$
+%$$\image{3cm;3cm}{stdsolef}$$
 \caption{Standard Solution dialog for extensive form
 games}\label{fig_standardsolef}
 \end{figure}
@@ -749,7 +826,7 @@ double clicking on either a cell of the normal form, or an outcome in
 the extensive form. 
 
 \begin{figure}
-$$\image{3cm;3cm}{chngpay}$$
+%$$\image{3cm;3cm}{chngpay}$$
 \caption{Change Payoffs dialog}\label{fig_changepay}
 \end{figure}
 
@@ -762,7 +839,7 @@ normal form. It is accessible through the {\bf Edit->Outcome->Delete} or
 Extensive Form GUI. 
 
 \begin{figure}
-$$\image{3cm;3cm}{slctout}$$
+%$$\image{3cm;3cm}{slctout}$$
 \caption{Select Outcome dialog}\label{fig_selectout}
 \end{figure}
 
@@ -773,7 +850,7 @@ tree.  It is accessible through the {\bf Prefs->Display->Layout} menu
 selection in either the Extensive Form GUI.
 
 \begin{figure}
-$$\image{3cm;3cm}{drawopts}$$
+%$$\image{3cm;3cm}{drawopts}$$
 \caption{Draw Options dialog}\label{fig_drawopts}
 \end{figure}
 
@@ -794,7 +871,7 @@ continually updated as the game is navigated.  This dialog is
 accessible through the {\bf Inspect->Cursor} menu item.  
 
 \begin{figure}
-$$\image{3cm;3cm}{inspnode}$$
+%$$\image{3cm;3cm}{inspnode}$$
 \caption{Inspect Node dialog}\label{fig_inspectnode}
 \end{figure}
 
@@ -808,7 +885,7 @@ selected node of the extensive form game.  This dialog is accessible
 through the {\bf Inspect->ZoomWindow} menu item. 
 
 \begin{figure}
-$$\image{3cm;3cm}{zoomwin}$$
+%$$\image{3cm;3cm}{zoomwin}$$
 \caption{Zoom Window display}\label{fig_zoomwin}
 \end{figure}
 
@@ -829,7 +906,7 @@ accelerator key setting is accessed through the {\bf Prefs->Accel}
 menu item.
 
 \begin{figure}
-$$\image{3cm;3cm}{accel}$$
+%$$\image{3cm;3cm}{accel}$$
 \caption{Accelerators dialog}\label{fig_accel}
 \end{figure}
 
@@ -840,7 +917,7 @@ left, otherwise, the entries in the box will be blank.  A new key
 combo can be assigned by selecting the combo in the box and pressing 
 {\bf Set}.  The association can be removed by selecting {\bf None}.
 
-GAMBIT comes with a pre-defined set of accelerator keys described in
+Gambit comes with a pre-defined set of accelerator keys described in
 the corresponding \helpref{extensive}{ExtFormDefAccl} and
 \helpref{normal}{NormFormDefAccl} sections.  Any of these default
 command-key associations can be edited or removed.  
@@ -853,7 +930,7 @@ undominated strategies.  It is accessed via the {\bf
 Supports->UnDominated} menu item.
 
 \begin{figure}
-$$\image{3cm;3cm}{elimdomd}$$
+%$$\image{3cm;3cm}{elimdomd}$$
 \caption{Dominance elimination dialog}\label{fig_elimdomd}
 \end{figure}
 
@@ -891,7 +968,7 @@ Supports->Edit} menu item.  Only the normal form version is shown, as
 the functionality for the extensive form is similar.
 
 \begin{figure}
-$$\image{3cm;3cm}{support}$$
+%$$\image{3cm;3cm}{support}$$
 \caption{Support Selection dialog}\label{fig_support}
 \end{figure}
 
@@ -910,7 +987,7 @@ accessed through the {\bf Edit->Node->AddMove} or {\bf
 Edit->Node->InsertMove} menu items in the extensive form GUI.  
 
 \begin{figure}
-$$\image{3cm;3cm}{addmove}$$
+%$$\image{3cm;3cm}{addmove}$$
 \caption{Add Move dialog}\label{fig_addmove}
 \end{figure}
 
@@ -931,7 +1008,7 @@ by double clicking (or Ctrl-RightClick) the right mouse button on the
 extensive form display.
 
 \begin{figure}
-$$\image{3cm;3cm}{legend}$$
+%$$\image{3cm;3cm}{legend}$$
 \caption{Legend dialog}\label{fig_legend}
 \end{figure}
 
@@ -950,7 +1027,7 @@ reserved for information relating to outcomes, and here you can select
 to display the outcome name or outcome vector.
 
 \subsection{Table Window}\label{TableWindow}
-The table window is used several places in GAMBIT.  It offers a large
+The table window is used several places in Gambit.  It offers a large
 number of possible configuration options.  Gambit will attempt to
 choose the most suitable settings for each use, but Since Gambit runs
 on many different platforms, the default settings may not be suitable
@@ -984,7 +1061,7 @@ slider.  Note that this setting does not in any way effect the actual
 precision of the calculations.
 \end{description}
 
-All of these features can be saved to a defaults file (gambit.ini).  They
+All of these features can be saved to a defaults file (Gambit.ini).  They
 will be taken into account the next time the table window is used, as long
 as they are not overridden by the program.
 
@@ -1013,12 +1090,12 @@ The following is an example of the Normal form display of the sample
 poker game.
 
 \begin{figure}
-$$\image{0cm;0cm}{nfg}$$
+%$$\image{0cm;0cm}{nfg}$$
 \caption{A 2 player normal form}\label{fig_nfg}
 \end{figure}
 
 \begin{figure}
-$$\image{6cm;2cm}{nfgtools}$$
+%$$\image{6cm;2cm}{nfgtools}$$
 \caption{NF GUI toolbar}\label{fig_nfgtools}
 \end{figure}
 
@@ -1246,7 +1323,7 @@ Gambit will take care of all the details.
 The standard solution settings are accessed via the {\bf 
 Solve->Standard} menu, or pressing the
 \begin{figure}
-\image{.5cm;.5cm}{solvtool}
+%\image{.5cm;.5cm}{solvtool}
 \end{figure}
  button on the toolbar.
 
@@ -1377,12 +1454,12 @@ form.
 \chapter{Extensive Form GUI}\label{EFGUI}
 
 \begin{figure}
-$$\image{0cm;0cm}{efg}$$
+%$$\image{0cm;0cm}{efg}$$
 \caption{A 3 player extensive form}\label{fig_efg}
 \end{figure}
 
 \begin{figure}
-$$\image{6cm;2cm}{efgtools}$$
+%$$\image{6cm;2cm}{efgtools}$$
 \caption{EF GUI toolbar}\label{fig_efgtools}
 \end{figure}
 
@@ -1425,7 +1502,7 @@ Many of the editing functions can be executed by drag-and-dropping
 with the mouse.  
 
 \begin{figure}
-\image{0cm;0cm}{dragdrop}
+%\image{0cm;0cm}{dragdrop}
 \caption{Sample Drag n' Drop operations}
 \end{figure}
 
@@ -1457,7 +1534,7 @@ child windows that depend on it.
 \subsection{Edit Menu (efg)}\label{efedit}
 This menu item is used to build or modify the extensive form game.
 This section assumes a working knowledge of the conventions used in
-the GAMBIT extensive form display (discussed in the \helpref{Extensive
+the Gambit extensive form display (discussed in the \helpref{Extensive
 Form}{extformsec} section).  Note that any structural changes to the
 tree structure will invalidate all existing solutions.  The solutions
 list will be cleared and solutions removed.
@@ -1467,7 +1544,7 @@ mouse button causing the menu to pop up at the current mouse cursor
 position.
 
 \begin{figure}
-\image{0cm;0cm}{popup}
+%\image{0cm;0cm}{popup}
 \caption{Popup Edit menu}
 \end{figure}
 
@@ -1862,7 +1939,7 @@ example of subgame structures.
 
 
 \begin{figure}
-$$\image{0cm;0cm}{subgame}$$
+%$$\image{0cm;0cm}{subgame}$$
 \caption{Simple efg with nontrivial subgames}\label{fig_subgames}
 \end{figure}
 
@@ -2064,7 +2141,7 @@ Ctrl-clicking} on the corresponding solution number.  At least one
 solution must be selected for each subgame.
 
 \begin{figure}
-$$\image{0cm;0cm}{efgpick}$$
+%$$\image{0cm;0cm}{efgpick}$$
 \caption{Subgame solution picking dialog w/ all solns selected}\label{fig_efgpick}
 \end{figure}
 
@@ -2383,7 +2460,7 @@ person games.  \cite{Wilson:1971} and \cite{Rosenmuller:1971} have
 suggested ways in which the Lemke-Howson Algorithm can be extended to
 general $n$-player games, but these extensions require methods of
 tracing the solution to a set of non linear simultaneous equations,
-and have not been implemented in GAMBIT.  Also, on some problems with
+and have not been implemented in Gambit.  Also, on some problems with
 data type of Double, the current implementation can exhibit numerical
 instability which in extreme cases can even lead to incorrect
 solutions.  Solving the same problem with Rationals will resolve any
@@ -2547,22 +2624,22 @@ To display this data we created a specialized data plotting program {\em PXI}.
 
 
 \begin{figure}
-$$\image{3cm;3cm}{pxibig}$$
+%$$\image{3cm;3cm}{pxibig}$$
 \caption{Sample PXI screenshot}\label{fig_pxibig}
 \end{figure}
 
-{\em PXI} was not funded from the same source as gambit itself, but was 
+{\em PXI} was not funded from the same source as Gambit itself, but was 
 developed largely independently by Eugene Grayver.  PXI is not limited to
-plotting data generated by gambit, but can be used to visualize a wide range
+plotting data generated by Gambit, but can be used to visualize a wide range
 of econometric data.  It features four unique chart types, publication quality
 graphics output, and an easy to use graphical interface.  PXI is available on
-most platforms supported by gambit.  We strongly recommend using PXI if
+most platforms supported by Gambit.  We strongly recommend using PXI if
 either \helpref{QRE}{QRE} or \helpref{QREAll}{QREAll} algorithms are used.
 
 \normalboxd{ PXI is being released as {\em shareware} and its source code is available
 upon request.
 For more information on PXI 
-see \verb+http://www.cco.caltech.edu/~egrayver/pxi.html+}
+see \texttt{http://www.cco.caltech.edu/~egrayver/pxi.html}}
 
 
 
@@ -2773,3 +2850,7 @@ chronological order that they occur.
 
 2.  Selecting multiple actions in Edit->Actions->Delete causes internal error.  
 3.  Edit->Actions->Insert does not work.  
+
+
+
+\end{document}
