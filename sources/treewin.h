@@ -211,7 +211,7 @@ public:
 
 	gString Title(void) const;
 
-	void Render(wxDC &dc,int ox=0,int oy=0);
+	virtual void Render(wxDC &dc,int ox=0,int oy=0);
 	void HilightInfoset(int pl,int iset);
 	// Used by parent BaseExtensiveShow when disp_sup changes
 	void SupportChanged(void);
