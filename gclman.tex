@@ -49,16 +49,33 @@ control statements allow for repetitive operations (such as
 investigating games as one changes various parameters) or conditional
 operations.
 
-\section{Installing and Running the GCL}
+\section{Installation}
 
-[TED: add some stuff here on installation?]
+\subsection{Unix}
 
-Typing 'gcl [CR]' at the unix prompt will start the GCL (in
-interpreted mode.)  You will get the
-GCL prompt:
+\subsection{MS-DOS, Microsoft Windows}
+
+
+\section{Getting Started}
+
+There are small differences in the versions of the GCL between different
+operating systems and platforms; however, the use and interface is
+essentially the same in the main.  This manual is written for all platforms,
+and any special notes pertaining to some particular platforms will be mentioned
+at the appropriate time.
+
+There are two ``modes'' in which you will use the GCL: interactive and batch.
+First, we discuss batch mode.
+
+Typing 'gcl [CR]' at your shell prompt (either in Unix or MS-DOS) will start
+the GCL in batch mode.  After some preliminaries, you will get the GCL
+prompt:
 \begin{verbatim}
-GCL>
+GCL1:
 \end{verbatim}
+
+which indicates that the program is ready to accept your input.  The prompt
+number labels your input lines for later reference.
 
 A GCL program consists of a series of statements, each ending in a
 semi-colon or carriage return. A carriage return will not be
@@ -67,20 +84,28 @@ parentheses or brackets.  For example, the following two lines are
 interpreted as one statement:
 
 \begin{verbatim}
-	Output[1, 
-	2]
+	Plus[x->1, 
+	y->2]
 \end{verbatim}
 
 If both lines are followed by a carriage return, the statement will
 generate the line of output:
 
 \begin{verbatim}
-	1, 2
+	3
 \end{verbatim}
+
+The function \verb+Plus+ is defined to return the sum of two integers,
+so the command language evaluates the function and returns the value of
+$1 + 2$, which is 3.  A more complete description of functions follows in
+a later section.
+
+[NOTE: There will be better batch mode support soon.]
 
 The user has the option of creating a text file containing a series of
 commands which can then be run together, as a program, by the
-language.  The output of such a program can be directed either to the
+language.  This is referred to as ``batch mode''.
+The output of such a program can be directed either to the
 screen or to a file specified by the user.  A text file can be read by
 the language as a program by placing an input file command {\tt "<"}
 followed by the name of the file, following the command which enters
@@ -97,8 +122,9 @@ command language to an external text file.  For example, at the unix prompt:
 \subsection{Grammar and syntax}
 
 The central pardigm of the GCL is that we can think of every legal
-statement as a function call.  The function may return a value, and
-may or may not have some special short form format.
+statement as a function call, which operates on some set of parameters and
+returns a value.  Many commonly used functions have a more convenient
+``short form'' format for additional terseness and readability.
 
 At any point in time, there is a set of ``visible functions.''
 Functions can be either built-in functions, or user created functions.
@@ -192,33 +218,22 @@ ArgumentName: Name
 
 \subsection{Variables}
 
-The simplest kind of function is a ``variable''.  A ``variable'' is a
+The simplest kind of function is a $variable$.  A variable is a
 constant function with no arguments.  A variable stores one object of
 the corresponding data type, and returns it when called.  To create a
-user defined variable, one can use the built-in function,
+user defined variable, or to give a new value to an existing variable,
+one can use the built-in function,
 \verb+Assign+, which has the syntax:
 \begin{verbatim}
-Assign[name->varname, expression->statement,scope->bool]
+Assign[x<->T, y->T]
 \end{verbatim}
-where \verb+varname+ is a name that is different from any previously
-defined function.  This creates a variable with name \verb+varname+
-which stores the value returned by the expression \verb+statement+.
-The variable \verb+varname+ has the same return data type as
-\verb+statement+.  The \verb+Assign+ function returns a boolean data
-type indicating if it was successful (1 for success, 0 for failure.)
-On success, it adds the variable \verb+varname+, along with it's
-scope and data type, to the list of currently visible functions.  The
-argument \verb+scope+ determines the scope of the new variable.  The
-scope can be either global (if bool evaluates to 1) or local (if bool
-evaluates to 0.) A variable with local socpe is not visible to the
-body of any function that is called.  A variable with golbal scope is
-visible to functions that are called.  Note that if a 
 
-If \verb+Assign+ is called with an argument \verb+varname+ which is a
-currently visible function. it results in an error if the data type
-which \verb+expression+ evaluates to is different that the current
-data type of \verb+varname+.  [TED: I don't recall why we had this
-restriction.  Do we want to get rid of it?] On the other hand, if the
+If the \verb+x+ parameter is previously undefined variable name, a new
+variable of the type is created and the value of the expression passed
+to \verb+y+ is ``assigned'' to \verb+x+.  If \verb+Assign+ is called with
+an argument \verb+varname+ which is a currently visible function, it results
+in an error if the data type which \verb+y+ evaluates to is different that the
+current data type of \verb+x+.  On the other hand, if the
 data types match, then \verb+varname+ is ``modified:'' \verb+varname+
 is first deleted from the list of visible functions and then
 \verb+Assign+ is executed.  
@@ -226,7 +241,7 @@ is first deleted from the list of visible functions and then
 The Assign function is used so frequently, it has the following short form
 representation:
 \begin{verbatim}
-varname := statement
+name := expression
 \end{verbatim}
 
 \subsection{User defined functions}
@@ -325,6 +340,9 @@ form problem) \\
 DATATYPE & Defines precision (constants: Float or
 Rational) \\ 
 
+STRATEGY & In a normal form game, one of the options a player may adopt.
+This may only be a subvariable of a NFG \\
+
 MIXED	& {Profile of mixed strategies.  Can only be a
 subvariable of a normal form problem.  That is, if n is a problem in
 normal form, a variable of type MIXED can only be assigned to a
@@ -336,29 +354,31 @@ That is, if e is a problem in extensive form, a variable of type BEHAV
 can only be assigned to a subvariable of the form e.x. \\
 \end{tabular}
 
+
+
 \medskip
 
 \noindent
-Additionally, variables of type BEHAV, BOOLEAN, INTEGER, MIXED,
-RATIONAL, and TEXT can be contained in lists of arbitrary length.
+Additionally, variables of any type can be contained in lists of arbitrary
+length.
 Variables of type LIST are defined similarly to the above variables,
 except that the expression to the right of the {\tt ":="} symbol
-contains a vector of variables of the same type enclosed in brackets
+contains a vector of variables of the same type enclosed in curly braces
 and separated by commas.  For example:
 
 \begin{verbatim}
 	LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
 \end{verbatim}
 
-The elements of a list are indexed sequentially.  Therefore, the ith
+The elements of a list are indexed sequentially, with the first element
+defined to have index 1.  Therefore, the ith
 element of a list is defined as:
 
 \begin{verbatim}
-	LIST(BOOLEAN)[[i]]	which evaluates to a single variable
-of type 				BOOLEAN.
+	LIST(BOOLEAN)[[i]]
 \end{verbatim}
 
-\noindent
+\noindent which evaluates to a single variable of type \verb+BOOLEAN+.
 In the same manner, lists of any type may be created and manipulated.
 Lists may be nested to any depth; however, the type of all the elements
 of the list and any sublists must always be the same.  Hence
@@ -367,13 +387,13 @@ of the list and any sublists must always be the same.  Hence
 	{ 3, { 4, 6 }, 23 }
 \end{verbatim}
 
-is a legal list, since all the elements are of type INTEGER, but
+is a legal list, since all the elements are of type \verb+INTEGER+, but
 
 \begin{verbatim}
 	{ 3, { 4.2, 5.7 }, 23 }
 \end{verbatim}
 
-is not, since the second element is a LIST(FLOAT).
+is not, since the second element is a \verb+LIST(FLOAT)+.
 
 \subsubsection{Boolean}
 
@@ -383,7 +403,8 @@ The BOOLEAN data type is used for logical operations
 \item
 Variables:
 
-There are two built-in BOOLEAN variables, \verb+True+  and \verb+False+.  
+There are two built-in BOOLEAN variables, \verb+True+  and \verb+False+, which
+may not be modified: 
 
 \bd
 \item
@@ -432,6 +453,10 @@ There are two built-in INTEGER variables, \verb+Zero+, and \verb+One+.
 \verb+One+ returns 1
 \ed
 
+The INTEGER type may contain arbitrarily large (positive or negative)
+values.  It is not limited by the default integer size on any particular
+computer.
+
 \item
 Operators:
 Let \verb+a+ and \verb+b+ be statements evaluating to INTEGER. Then
@@ -465,8 +490,6 @@ short form \verb+a DIV b+.
 \verb+Times[b,Div[a,b]]+, yields \verb+a+.  It has the short form 
 \verb+a MOD b+.
 \item
-\verb+Power[a,b]+ returns the \verb+a+ raised to the power \verb+b+.  
-It has the short form \verb+a ^ b+.
 
 \ed
 \item
@@ -1003,7 +1026,7 @@ first element.
 Contains[e->T, l->LIST(T)] =: BOOLEAN
 \end{verbatim}\normalsize
 
-For T = BEHAV, BOOLEAN, INTEGER, MIXTRAT, RATIONAL, or TEXT
+For all types T.
 
 \bd
 \item
@@ -1192,7 +1215,7 @@ problem in outline form.
 
 \bd
 \item
-[E:] The problem in extensive form which is to be displayed.
+[E:] The game in extensive form which is to be displayed.
 \ed
 
 \item
@@ -1216,7 +1239,7 @@ strategy set unless otherwise specified.
 
 \bd	
 \item
-[N:] The problem in normal form which is to be displayed.
+[N:] The game in normal form which is to be displayed.
 \ed
 
 \item
@@ -1277,6 +1300,8 @@ Divide[x->INTEGER, y->INTEGER] =: INTEGER
 \ed
 \item
 [Optional parameters:] None.
+\item
+[See also:] \verb+Modulus+.
 \ed
 
 %--E--
@@ -1750,7 +1775,7 @@ the title has not been assigned, the empty string is returned.
 
 \item
 \protect \large \begin{verbatim}
-Gobit[N->NFG, E->EFG, {plev->INTEGER}, {nequilib->INTEGER},
+Gobit[N->NFG, E->EFG, {trace->INTEGER}, {nequilib->INTEGER},
 {minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL},
 {type->INTEGER}, {start-> MIXED or BEHAV} ,
 {maxitsOpt->INTEGER}, {maxitsBrent->INTEGER},
@@ -1795,7 +1820,7 @@ be found.
 
 \bd
 \item
-[plev:] Sets the print level.  Higher values generate more output.
+[trace:] Sets the print level.  Higher values generate more output.
 The default value is 0.
 \item
 [nequilib:] Sets the number of equilibria to find for each value of
@@ -1898,8 +1923,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-GridSolve[N->NFG, {plev->INTEGER}, {output->TEXT},
-{errors->TEXT},
+GridSolve[N->NFG, {trace->INTEGER}, {output->TEXT},
 {minLam->RATIONAL}, {maxLam->RATIONAL}, {delLam->RATIONAL},
 {type->INTEGER}, {delp->RATIONAL}, {tol->RATIONAL},
 {time<->RATIONAL}] =: INTEGER
@@ -1941,15 +1965,12 @@ of the probabilities are evaluated on a grid of mesh 'delp.'
 
 \bd
 \item	
- [plev:] Sets the print level.  Higher values generate more output.
+ [trace:] Sets the print level.  Higher values generate more output.
 The default value is 0.
 \item
 [output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
-\item
-[errors:] Can be used to redirect the error stream of this procedure
-to a file.  By default, output is directed to the screen.
 \item
 [minLam:] Sets $\underline\lambda,$ the minimum value of $\lambda.$
 Default is $\underline\lambda = $ XXXX.
@@ -2342,8 +2363,8 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 
 \item
 \protect \large \begin{verbatim}
-Liap[{N->NFG|E->EFG}, {plev->INTEGER},
-{output->TEXT}, {errors->TEXT},
+Liap[{N->NFG|E->EFG}, {trace->INTEGER},
+{output->TEXT},
 {ntries->INTEGER}, {nequilib->INTEGER},
 {start->MIXED|BEHAV},
 {maxitsOpt->RATIONAL}, {maxitsBrent->RATIONAL}, 
@@ -2391,15 +2412,12 @@ to be found.
 [start:] Sets the starting profile for the descent algorithm.  The
 default is the centroid.
 \item
-[plev:] Sets the print level.  Higher values generate more output.
+[trace:] Sets the print level.  Higher values generate more output.
 The default value is 0.
 \item
 [output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
-\item
-[errors:] Can be used to redirect the error stream of this procedure
-to a file.  By default, output is directed to the screen.
 \item
 [ntries:] Sets the maximum number of attempts at finding each
 equilibrium. Default is 10
@@ -2532,6 +2550,35 @@ vector of behavioral profiles.
 
 \item
 \protect \large \begin{verbatim}
+Modulus[x->INTEGER, y->INTEGER] =: INTEGER
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Short form:] \verb+x MOD y+
+\item
+[Description:] Computes the remainder from dividing \verb+y+ into \verb+x+.
+\item
+[Return value:] Returns the remainder of $x / y$.
+\item
+[Required parameters:]\hfil\null
+
+\bd
+\item
+[x:] The dividend
+\item
+[y:] The divisor
+\ed
+
+\item
+[Optional parameters:] None.
+\item
+[See also:] \verb+Divide+.
+\ed
+
+
+\item
+\protect \large \begin{verbatim}
 MoveTree[n->NODE, to->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -2631,6 +2678,45 @@ than all function names in current scope.
 \item
 [type:] Specifies the type (Float or Rational) of the new extensive
 form problem.
+\ed
+\ed
+
+\item
+
+\protect \large \begin{verbatim}
+NewNfg[dim->LIST(INTEGER), {seed->INTEGER},
+{type->DATATYPE}] =: NFG
+\end{verbatim}\normalsize
+
+\bd
+\item
+[Description:] Constructs a new game in normal form with the
+specified dimensionality.  The \verb+seed+ parameter allows the creation
+of a random normal form game with entries between 0 and 1.
+
+\item
+[Return value:] Returns the new game in normal form.
+\item
+[Required parameters:]\hfil\null
+	
+\bd
+\item
+[dim:] The desired dimensionality of the new game.
+\ed
+
+\item
+[Optional parameters:]\hfil\null
+	
+\bd
+\item
+[seed:] Reseeds the random number generator with the given integer.  If the
+\verb+seed+ is unspecified, or is specified as 0, the created normal form
+has all zero entries.  Specifying the \verb+seed+ seeds the random number
+generator and generates a game with random payoffs.
+\item
+
+[type:] Specifies the type (Float or Rational) of the new normal form
+game.  This parameter defaults to \verb+Float+.
 \ed
 \ed
 
@@ -2993,10 +3079,34 @@ attached, a value of zero is returned.
 [Optional parameters:] None.
 \ed
 
-\item
-
 %--P--
 
+\item
+\protect \large \begin{verbatim}
+Paren[x->T] =: T
+\end{verbatim}\normalsize
+
+for all types T.
+
+\bd
+\item
+[Short form:] \verb+(x)+
+\item
+[Description:] The identity mapping.  Used to control the order of evaluation
+of expressions.
+\item
+[Return value:] The value of the expression \verb+x+.
+\item
+[Required parameters:]\hfil\null
+\bd
+\item
+[x:] The expression to be evaluated.
+\ed
+\item
+[Optional parameters:] None.
+\ed
+
+\item
 \protect \large \begin{verbatim}
 ParentOf[n->NODE] =: NODE
 \end{verbatim}\normalsize
@@ -3152,40 +3262,6 @@ Quit
 \ed
 
 %--R--
-
-\item
-
-\protect \large \begin{verbatim}
-RandomNfg[dim->LIST(INTEGER), {seed->INTEGER},
-{type->DATATYPE}] =: NFG
-\end{verbatim}\normalsize
-
-\bd
-\item
-[Description:] Constructs a random new problem in normal form with the
-specified dimensionality
-\item
-[Return value:] Returns the new problem in normal form.
-\item
-[Required parameters:]\hfil\null
-	
-\bd
-\item
-[dim:] The desired dimensionality of the new problem.
-\ed
-
-\item
-[Optional parameters:]\hfil\null
-	
-\bd
-\item
-[seed:] Reseeds the random number generator with the given integer.
-\item
-
-[type:] Specifies the type (Float or Rational) of the new normal form
-problem.
-\ed
-\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -3637,10 +3713,10 @@ extensive form.
 
 \item
 \protect \large \begin{verbatim}
-SimpDiv[N->NFG, {plev->INTEGER},
-{output->TEXT}, {errors->TEXT},
+SimpDiv[N->NFG, {trace->INTEGER},
+{output->TEXT},
 {number->INTEGER}, {ndivs->INTEGER}, {leash->INTEGER},
-{nevals->INTEGER}, {time<->RATIONAL}] =: INTEGER
+{nevals->INTEGER}, {time<->RATIONAL}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
@@ -3682,7 +3758,7 @@ generally do not destroy convergence, and yield much faster
 convergence.
 
 \item
-[Return value:] XXXX .
+[Return value:] The list of equilibria found.
 \item
 [Required parameters:]\hfil\null
 
@@ -3697,17 +3773,14 @@ performed.
 	
 \bd
 \item
-[plev:] Sets the print level.  Higher values generate more output.
+[trace:] Sets the print level.  Higher values generate more output.
 The default value is 0.
 \item
 [output:] Can be used to redirect the output of this procedure to a
 file.  Directing output to ``/dev/null'' under Unix turns output off.
 By default, output is directed to the screen.
 \item
-[errors:] Can be used to redirect the error stream of this procedure
-to a file.  By default, output is directed to the screen.
-\item
-[number:] Maximum number of equilibri to find. Default is 1.  
+[number:] Maximum number of equilibria to find. Default is 1.  
 \item 
 [ndivs:] Number of restarts.  At each restart the mesh of the
 triangulation is halved.  So this parameter determines the final mesh
