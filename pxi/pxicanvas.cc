@@ -177,25 +177,29 @@ void PxiCanvas::PlotData_X(wxDC& dc, const PlotInfo &thisplot, int x0, int y0,
     (*prev_point)=probs;
   
   if (true) {
-    wxString title;
-    title.Printf("Plot %d",thisplot.GetPlotNumber());
     wxCoord tw,th;
-    dc.GetTextExtent(title,&tw,&th);
-    dc.DrawText(title, x0+cw/2-tw/2, y0-ch-th);
-    int lev=0;
+    dc.SetFont(m_titleProp.m_font);
+    dc.SetTextForeground(m_titleProp.m_color);
+    dc.GetTextExtent(m_titleProp.m_title, &tw, &th);
+    dc.DrawText(m_titleProp.m_title, x0+cw/2-tw/2, y0-ch-th);
 
-    for (int st=1; st <= f_header.NumStrategies(m_page); st++) {
-      if (thisplot.GetStrategyShow(m_page, st)) {
-	wxString key;
-	key.Printf("Strategy %d",st);
-	wxCoord tw,th;
-	dc.GetTextExtent(key,&tw,&th);
-	if (m_drawSettings.GetColorMode()==COLOR_PROB) 
-	  dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
-	dc.DrawLine(x0+cw-tw-cw/20,   y0-ch+3*th*lev/2+th/2,
-		    x0+cw-tw,         y0-ch+3*th*lev/2+th/2);
-	dc.DrawText(key, x0+cw-tw, y0-ch+3*th*lev/2);
-	lev++;
+    if (m_legendProp.m_showLegend) {
+      int lev = 0;
+
+      for (int st = 1; st <= f_header.NumStrategies(m_page); st++) {
+	if (thisplot.GetStrategyShow(m_page, st)) {
+	  wxString key = wxString::Format("Strategy %d", st);
+	  dc.SetFont(m_legendProp.m_font);
+	  dc.SetTextForeground(m_legendProp.m_color);
+	  wxCoord tw,th;
+	  dc.GetTextExtent(key,&tw,&th);
+	  if (m_drawSettings.GetColorMode()==COLOR_PROB) 
+	    dc.SetPen(*(wxThePenList->FindOrCreatePen(equ_colors[(st+color_start)%NUM_COLORS+1],1,wxSOLID)));
+	  dc.DrawLine(x0+cw-tw-cw/20,   y0-ch+3*th*lev/2+th/2,
+		      x0+cw-tw,         y0-ch+3*th*lev/2+th/2);
+	  dc.DrawText(key, x0+cw-tw, y0-ch+3*th*lev/2);
+	  lev++;
+	}
       }
     }
   }
@@ -686,6 +690,14 @@ PxiCanvas::PxiCanvas(wxWindow *p_parent, const wxPoint &p_position,
   m_probAxisProp.m_scale.m_divisions = 10;
   m_probAxisProp.m_scale.m_useLog = false;
   m_probAxisProp.m_scale.m_canUseLog = false;
+
+  m_titleProp.m_title = wxString::Format("Plot %d", p_page);
+  m_titleProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_titleProp.m_color = *wxBLUE;
+
+  m_legendProp.m_showLegend = true;
+  m_legendProp.m_font = wxFont(10, wxSWISS, wxNORMAL, wxBOLD);
+  m_legendProp.m_color = *wxBLUE;
 
   // fit to 8 1/2 x 11 inch  
   SetScale(1.0);

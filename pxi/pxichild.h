@@ -39,7 +39,8 @@ private:
 
   void OnFormatLambdaAxis(wxCommandEvent &);
   void OnFormatProfileAxis(wxCommandEvent &);
-  void OnFormatLabel(wxCommandEvent &);
+  void OnFormatTitle(wxCommandEvent &);
+  void OnFormatLegend(wxCommandEvent &);
   void OnFormatOverlay(wxCommandEvent &);
   void OnFormatColors(wxCommandEvent &);
 

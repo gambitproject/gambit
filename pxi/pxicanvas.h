@@ -44,6 +44,20 @@ public:
   PxiAxisScaleProperties m_scale;
 };
 
+class PxiTitleProperties {
+public:
+  wxString m_title;
+  wxFont m_font;
+  wxColour m_color;
+};
+
+class PxiLegendProperties {
+public:
+  bool m_showLegend;
+  wxFont m_font;
+  wxColour m_color;
+};
+
 class PxiCanvas : public wxScrolledWindow {
 friend class PxiChild;
 public:
@@ -75,6 +89,8 @@ private:
   wxMemoryDC *m_dc;        // stored DC
   int m_page;
   PxiAxisProperties m_lambdaAxisProp, m_probAxisProp;
+  PxiTitleProperties m_titleProp;
+  PxiLegendProperties m_legendProp;
 
   int Width(void) const 
     {if(m_landscape) return m_height; return m_width;}
@@ -150,6 +166,8 @@ public:
   PxiDrawSettings &DrawSettings(void) { return m_drawSettings; }
   PxiAxisProperties &GetLambdaAxisProperties(void) { return m_lambdaAxisProp; }
   PxiAxisProperties &GetProbAxisProperties(void) { return m_probAxisProp; }
+  PxiTitleProperties &GetTitleProperties(void) { return m_titleProp; }
+  PxiLegendProperties &GetLegendProperties(void) { return m_legendProp; }
 
   DECLARE_EVENT_TABLE()
 };

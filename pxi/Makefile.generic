@@ -62,7 +62,8 @@ INCDIR = -I. -I../include -I../base -I../math -I../sources $(WXINCDIR) $(XINCDIR
 GUILIBS = $(WXLIB) $(XLIB)
 
 GUISOURCES = pxi.cc axis.cc pxicanvas.cc wxmisc.cc dlabout.cc pxichild.cc \
-             pxiconf.cc valinteger.cc valnumber.cc dlformataxis.cc
+             pxiconf.cc valinteger.cc valnumber.cc \
+             dlformataxis.cc dlformattitle.cc dlformatlegend.cc
 
 DATASOURCES = equtrac.cc equdata.cc probvect.cc expdata.cc dlgpxi.cc
 

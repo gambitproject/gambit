@@ -43,8 +43,9 @@ const int PXI_VIEW_ZOOM_OUT = 151;
 
 const int PXI_FORMAT_LAMBDA_AXIS = 130;
 const int PXI_FORMAT_PROFILE_AXIS = 131;
+const int PXI_FORMAT_TITLE = 133;
+const int PXI_FORMAT_LEGEND = 134;
 const int PXI_FORMAT_OVERLAY = 132;
-const int PXI_FORMAT_LABEL = 133;
 const int PXI_FORMAT_COLORS = 124;
 
 #define	PXI_NEW_WINDOW	      117

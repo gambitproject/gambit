@@ -22,6 +22,8 @@
 #include "pxichild.h"
 #include "dlgpxi.h"
 #include "dlformataxis.h"
+#include "dlformattitle.h"
+#include "dlformatlegend.h"
 
 //
 // wxWindows is "supposed to" pass unhandled menu commands on to
@@ -45,7 +47,8 @@ BEGIN_EVENT_TABLE(PxiChild, wxFrame)
   EVT_MENU(PXI_DATA_OVERLAY_FILE, PxiChild::OnDataOverlayFile)
   EVT_MENU(PXI_FORMAT_LAMBDA_AXIS, PxiChild::OnFormatLambdaAxis)
   EVT_MENU(PXI_FORMAT_PROFILE_AXIS, PxiChild::OnFormatProfileAxis)
-  EVT_MENU(PXI_FORMAT_LABEL, PxiChild::OnFormatLabel)
+  EVT_MENU(PXI_FORMAT_TITLE, PxiChild::OnFormatTitle)
+  EVT_MENU(PXI_FORMAT_LEGEND, PxiChild::OnFormatLegend)
   EVT_MENU(PXI_FORMAT_OVERLAY, PxiChild::OnFormatOverlay)
   EVT_MENU(wxID_HELP_CONTENTS, PxiChild::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, PxiChild::OnHelpIndex)
@@ -130,7 +133,8 @@ void PxiChild::MakeMenus(void)
 		     "Format lambda (horizontal) axis");
   formatMenu->Append(PXI_FORMAT_PROFILE_AXIS, "&Profile axis",
 		     "Format profile (vertical) axis");
-  formatMenu->Append(PXI_FORMAT_LABEL,"&Label", "Format label");
+  formatMenu->Append(PXI_FORMAT_TITLE, "&Title", "Format graph title");
+  formatMenu->Append(PXI_FORMAT_LEGEND, "&Legend", "Format graph legend");
   formatMenu->Append(PXI_FORMAT_OVERLAY,"&Overlay", "Format overlay");
   formatMenu->AppendSeparator();
   formatMenu->Append(PXI_FORMAT_COLORS, "&Colors", "Change Colors");
@@ -429,20 +433,6 @@ void PxiChild::OnFormatColors(wxCommandEvent &)
   }
 }
 
-void PxiChild::OnFormatLabel(wxCommandEvent &)
-{
-#ifdef NOT_PORTED_YET
-  wxFontData data;
-  data.SetInitialFont(canvas->draw_settings->GetLabelFont());  
-  wxFontDialog dialog(this, &data);
-  
-  if (dialog.ShowModal() == wxID_OK) {
-    canvas->draw_settings->SetLabelFont(dialog.GetFontData().GetChosenFont());
-    canvas->Render();
-  }
-#endif  // NOT_PORTED_YET
-}
-
 void PxiChild::OnFormatLambdaAxis(wxCommandEvent &)
 {
   PxiCanvas *canvas = GetShownCanvas();
@@ -461,6 +451,28 @@ void PxiChild::OnFormatProfileAxis(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     canvas->GetProbAxisProperties() = dialog.GetProperties();
+    canvas->Render();
+  }
+}
+
+void PxiChild::OnFormatTitle(wxCommandEvent &)
+{
+  PxiCanvas *canvas = GetShownCanvas();
+  dialogFormatTitle dialog(this, canvas->GetTitleProperties());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->GetTitleProperties() = dialog.GetProperties();
+    canvas->Render();
+  }
+}
+
+void PxiChild::OnFormatLegend(wxCommandEvent &)
+{
+  PxiCanvas *canvas = GetShownCanvas();
+  dialogFormatLegend dialog(this, canvas->GetLegendProperties());
+  
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas->GetLegendProperties() = dialog.GetProperties();
     canvas->Render();
   }
 }
