@@ -13,7 +13,7 @@
 #endif
 #include <stdio.h>
 #include "wx_timer.h"
-
+#include "wx_form.h"
 class MyForm: public wxForm
 {
 private:
@@ -30,7 +30,7 @@ class MyDialogBox: public wxDialogBox
 private:
 	MyForm *form;
 public:
-	MyDialogBox(wxFrame *parent,char *title):wxDialogBox(parent,title,TRUE)
+	MyDialogBox(wxWindow *parent,char *title):wxDialogBox(parent,title,TRUE)
 	{ form=new MyForm(wxFORM_BUTTON_OK | wxFORM_BUTTON_CANCEL,wxFORM_BUTTON_AT_BOTTOM);}
   ~MyDialogBox(void){delete form;}
 	int			Completed(void) {return form->Completed();}
@@ -56,7 +56,7 @@ private:
 
 
 public:
-	FontDialogBox(wxFrame *frame,wxFont *def=NULL);
+	FontDialogBox(wxWindow *parent,wxFont *def=NULL);
 	~FontDialogBox(void);
 
 	int 		FontName(void) {return f_name;}
@@ -66,6 +66,25 @@ public:
 	int			FontUnder(void) {return f_under;}
 	wxFont 	*MakeFont(void);
 };
+
+//**************************** Output Dialog ************************
+// use the following constants to determine return times
+#define wxMEDIA_PRINTER			0
+#define wxMEDIA_PS					1
+#define wxMEDIA_CLIPBOARD		2
+#define wxMEDIA_METAFILE		3
+class wxOutputDialogBox : public MyDialogBox
+{
+private:
+	wxRadioBox *media_box;
+	wxRadioBox *option_box;
+public:
+	wxOutputDialogBox(wxStringList *extra_media=0,wxWindow *parent=0);
+	int GetSelection();
+	int GetOption();
+};
+
+
 //***************************** Progress Indicator ***********************
 class wxProgressIndicator:public wxTimer
 {
@@ -99,8 +118,28 @@ public:
 	void	Update(void);
 };
 
-
+// Returns the position of s in the list l.  This is useful for finding
+// the selection # in a String form item w/ a list constraint
 int wxListFindString(wxList *l,char *s);
+// Returns a wxStringList containing num strings representing integers
+// from 1 to n (i.e. "1","2",.."n").  If l is NULL, a new list is created
+// otherwise, the nums are appended to l.
+wxStringList* wxStringListInts(int num,wxStringList *l=0);
+// Converts a font into a string format that can be used to save it in a data file
 char *wxFontToString(wxFont *f);
+// Converts an encoded string back into a font. see wxFontToString
 wxFont *wxStringToFont(char *s);
+// Some basic keyboard stuff...
+Bool	IsCursor(wxKeyEvent &ev);
+Bool	IsEnter(wxKeyEvent &ev);
+Bool	IsNumeric(wxKeyEvent &ev);
+Bool	IsAlphaNum(wxKeyEvent &ev);
+Bool	IsDelete(wxKeyEvent &ev);
+// gDrawText is an extension of the wxWindow's wxDC::DrawText function
+// Besides providing the same features, it also supports imbedded codes
+// to change the color of the output text.  The codes have the format
+// of: "text[/C{#}]", where # is the number of the color to select
+// from the gambit_color_list.  Note: uses gString
+#include "gstring.h"
+void gDrawText(wxDC &dc,const gString &s,float x,float y);
 #endif //WXMISC_H
