@@ -35,12 +35,12 @@ template <class T> class gBlock    {
     int InsertAt(const T &t, int where);
 
   public:
-    gBlock(void) : length(0), data(0)  { }
+    gBlock(void);
 //
 // Constructs the a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
-    gBlock(int len) : length(len), data((len) ? new T[len] : 0)  { }
+    gBlock(int len);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
@@ -142,6 +142,14 @@ template <class T> class gBlock    {
 #else
 #error Unsupported compiler type
 #endif   //# __GNUG__, __BORLANDC__
+
+template <class T> INLINE gBlock<T>::gBlock(void)
+  : length(0), data(0)
+{ }
+
+template <class T> INLINE gBlock<T>::gBlock(int len)
+  : length(len), data((len) ? new T[len] : 0)
+{ }
 
 template <class T> INLINE gBlock<T>::gBlock(const gBlock<T> &b)
  : length(b.length)

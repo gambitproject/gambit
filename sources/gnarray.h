@@ -43,17 +43,10 @@ template <class T> class gNArray   {
     T operator[](const gVector<int> &) const;
     T &operator[](const gVector<int> &);
 
-    T operator[](long l) const
-      { assert(l >= 0 && l < storage_size);
-	return storage[l];
-      }
+    const T &operator[](long l) const;
+    T &operator[](long l);
 
-    T &operator[](long l)
-      { assert(l >= 0 && l < storage_size);
-	return storage[l];
-      }
-
-    const gVector<int> &Dimensionality(void) const   { return dim; }
+    const gVector<int> &Dimensionality(void) const;
 
     void Input(gInput &, const gVector<int> &, int);
     void Output(gOutput &) const;

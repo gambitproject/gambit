@@ -129,6 +129,22 @@ void gNArray<T>::ReadFrom(gInput &f, const gVector<int> &norder,
   }
 }
 
+template <class T> const T &gNArray<T>::operator[](long l) const
+{
+  assert(l >= 0 && l < storage_size);
+  return storage[l];
+}
+
+template <class T> T &gNArray<T>::operator[](long l) 
+{
+  assert(l >= 0 && l < storage_size);
+  return storage[l];
+}
+
+template <class T> const gVector<int> &gNArray<T>::Dimensionality(void) const
+{
+  return dim;
+}
 
 
 //-------------------------------------------
@@ -211,5 +227,7 @@ T &gIndexedNArray<T>::operator=(const gVector<int> &v)
 
   return storage[location];
 }
+
+
 
 #endif   // UNUSED

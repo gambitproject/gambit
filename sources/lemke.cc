@@ -40,6 +40,8 @@ template <class T> class LemkeSolution : public MixedSolution<T>   {
 class BaseLemke    {
   protected:
     int num_pivots;
+    
+    BaseLemke(void) : num_pivots(0)  { }
 
   public:
     virtual int Lemke(int) = 0;
@@ -345,8 +347,7 @@ LemkeTableau<T>::LemkeTableau(const NormalForm<T> &r,
 		   0, r.NumStrats(1) + r.NumStrats(2) + 1,
 		   r.NumStrats(1) + r.NumStrats(2)), 
        SolutionModule(ofile, efile, plev), rep(r),
-       num_strats(r.NumStrats(1) + r.NumStrats(2)),
-       num_pivots(0)
+       num_strats(r.NumStrats(1) + r.NumStrats(2))
 {
   NormalIter<T> iter(r);
   T min = (T) 0, x;

@@ -77,6 +77,7 @@ class gString   {
 
 	// SUBSCRIPTORS
     char& operator[](int n)       { return *(storage + n); }
+    char operator[](int n) const  { return *(storage + n); }
     char* operator+(int n)       { return storage + n; }
 
 	// CONVERSIONS
