@@ -797,7 +797,8 @@ TreeZoomWindow::TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
                                const NodeEntry *cursor_entry)
     : TreeRender(new TreeZoomFrame(frame, parent), parent,
                  node_list_, hilight_infoset_, hilight_infoset1_,
-                 mark_node_, cursor_, subgame_node_, draw_settings_)
+                 mark_node_, cursor_, subgame_node_, draw_settings_),
+      m_parent(parent)
 {
     MakeFlasher();
     UpdateCursor(cursor_entry);
@@ -831,6 +832,11 @@ void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
     TreeRender::UpdateCursor(entry);
     flasher->GetFlashNode(xs, ys, xe, ye);
     Render(*GetDC());
+}
+
+void TreeZoomWindow::OnChar(wxKeyEvent &p_event)
+{
+  m_parent->OnChar(p_event);
 }
 
 //----------------------------------------------------------------------

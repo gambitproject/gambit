@@ -103,6 +103,7 @@ private:
   // Need this if we repaint due to events other than cursor movement.  
   // See ::Render()
   int xs, ys, xe, ye;
+  TreeWindow *m_parent;
 
 public:
   TreeZoomWindow(wxFrame *frame, TreeWindow *parent,
@@ -116,6 +117,8 @@ public:
   virtual void Render(wxDC &dc);
   // Makes sure the cursor is always in the center of the window
   virtual void UpdateCursor(const NodeEntry *entry);
+
+  void OnChar(wxKeyEvent &);
 };
 
 
