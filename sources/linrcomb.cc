@@ -9,7 +9,6 @@
 #include "math/gmatrix.imp"
 #include "math/double.h"
 
-template gOutput & operator<< (gOutput&, const gMatrix<gDouble>&);
 template gVector<gDouble> operator* (const gVector<gDouble>&,
 			  	     const gMatrix<gDouble>&);
 
