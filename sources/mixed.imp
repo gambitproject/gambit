@@ -90,10 +90,10 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
   int i;
 
   f << "NFG 1 " << ((Type() == DOUBLE) ? 'D' : 'R');
-  f << " \"" << gameform->GetTitle() << "\" { ";
+  f << " \"" << EscapeQuotes(gameform->GetTitle()) << "\" { ";
 
   for (i = 1; i <= gameform->NumPlayers(); i++)
-    f << '"' << gameform->Players()[i]->GetName() << "\" ";
+    f << '"' << EscapeQuotes(gameform->Players()[i]->GetName()) << "\" ";
   
   f << "}\n\n{ ";
   
@@ -101,7 +101,7 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
     NFPlayer *player = gameform->Players()[i];
     f << "{ ";
     for (int j = 1; j <= player->NumStrats(); j++)
-      f << '"' << player->Strategies()[j]->name << "\" ";
+      f << '"' << EscapeQuotes(player->Strategies()[j]->name) << "\" ";
     f << "}\n";
   }
   

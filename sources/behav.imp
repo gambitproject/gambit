@@ -411,9 +411,10 @@ template <class T> T Efg<T>::MaxPayoff(int pl) const
 template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
 {
   if (n->children.Length() == 0)   {
-    f << "t \"" << n->name << "\" ";
+    f << "t \"" << EscapeQuotes(n->name) << "\" ";
     if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << n->outcome->GetNumber() << " \"" <<
+	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)
 	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
@@ -424,12 +425,15 @@ template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
   }
   
   else if (n->infoset->player->number)   {
-    f << "p \"" << n->name << "\" " << n->infoset->player->number << ' ';
-    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
+    f << "p \"" << EscapeQuotes(n->name) << "\" " <<
+      n->infoset->player->number << ' ';
+    f << n->infoset->number << " \"" <<
+      EscapeQuotes(n->infoset->name) << "\" ";
     n->infoset->PrintActions(f);
     f << " ";
     if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << n->outcome->GetNumber() << " \"" <<
+	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)
 	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
@@ -441,11 +445,13 @@ template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
   
   else   {    // chance node
     f << "c \"" << n->name << "\" ";
-    f << n->infoset->number << " \"" << n->infoset->name << "\" ";
+    f << n->infoset->number << " \"" <<
+      EscapeQuotes(n->infoset->name) << "\" ";
     n->infoset->PrintActions(f);
     f << " ";
     if (n->outcome)  {
-      f << n->outcome->GetNumber() << " \"" << n->outcome->GetName() << "\" ";
+      f << n->outcome->GetNumber() << " \"" <<
+	EscapeQuotes(n->outcome->GetName()) << "\" ";
       f << "{ ";
       for (int pl = 1; pl <= NumPlayers(); pl++)
 	f << payoffs(n->outcome->GetNumber(), pl) << ' ';
@@ -462,9 +468,9 @@ template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
 template <class T> void Efg<T>::WriteEfgFile(gOutput &f) const
 {
   f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
-  f << " \"" << title << "\" { ";
+  f << " \"" << EscapeQuotes(title) << "\" { ";
   for (int i = 1; i <= players.Length(); i++)
-    f << '"' << players[i]->name << "\" ";
+    f << '"' << EscapeQuotes(players[i]->name) << "\" ";
   f << "}\n\n";
 
   WriteEfgFile(f, root);
