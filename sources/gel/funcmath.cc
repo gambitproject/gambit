@@ -230,7 +230,7 @@ gText gelfuncNthElement::Evaluate(gelVariableTable *vt) const
   gText lhs = op1->Evaluate(vt);
   gNumber index = op2->Evaluate(vt);
   if (!index.IsInteger())   throw gelExceptionNonInteger();
-  return lhs[index - 1];
+  return lhs[index - gNumber(1)];
 }
 
 

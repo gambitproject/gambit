@@ -1,7 +1,7 @@
 //
 // FILE: gel.cc -- Supplies main() for the GEL standalone
 //
-// @(#)gelmain.cc	1.1 02/06/98
+//$Id$
 //
 
 #include <signal.h>
@@ -40,7 +40,7 @@ void SigSegFaultHandler(int)
   gCmdLineInput::RestoreTermAttr();
   exit(1);
 }
-
+/*
 #define MATH_CONTINUE    0
 #define	MATH_IGNORE	 1
 #define	MATH_QUIT	 2
@@ -90,7 +90,7 @@ int matherr(struct exception *e)
 
   return 1;	// we did not really fix anything, but want no more warnings
 }
-
+*/
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 

@@ -323,7 +323,7 @@ gNumber &gNumber::operator/=(const gNumber& y)
     }
     else   {   // if (y.rep == precRATIONAL)
 #ifdef USE_EXCEPTIONS
-      if (*y.rval == 0)     throw DivideByZero();
+      if (*y.rval == gRational(0))     throw DivideByZero();
 #endif   // USE_EXCEPTIONS
       dval /= double(*y.rval);
     }
@@ -340,7 +340,7 @@ gNumber &gNumber::operator/=(const gNumber& y)
     }
     else   {  // if (y.rep == precRATIONAL)
 #ifdef USE_EXCEPTIONS
-      if (*y.rval == 0)    throw DivideByZero();
+      if (*y.rval == gRational(0))    throw DivideByZero();
 #endif   // USE_EXCEPTIONS
       *rval /= *y.rval;
     }
@@ -407,7 +407,7 @@ gNumber operator/(const gNumber& x, const gNumber& y)
     }
     else  {   // if (y.rep == precRATIONAL)
 #ifdef USE_EXCEPTIONS
-      if (*y.rval == 0)    throw gNumber::DivideByZero();
+      if (*y.rval == gRational(0))    throw gNumber::DivideByZero();
 #endif   // USE_EXCEPTIONS
       return gNumber(x.dval / double(*y.rval));
     }
@@ -421,7 +421,7 @@ gNumber operator/(const gNumber& x, const gNumber& y)
     }
     else  { // if (y.rep == precRATIONAL)
 #ifdef USE_EXCEPTIONS
-      if (*y.rval == 0)   throw gNumber::DivideByZero();
+      if (*y.rval == gRational(0))   throw gNumber::DivideByZero();
 #endif   // USE_EXCEPTIONS
       return gNumber(*x.rval / *y.rval);
     }
