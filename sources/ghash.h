@@ -20,8 +20,8 @@ template <class K, class T> class HashTable
   int num_of_buckets;
   T illegal_value;
   int ValidatedHash( K key ) const;
-  virtual int NumBuckets() const = 0;
-  virtual int Hash( K key ) const = 0;
+  virtual int NumBuckets( void ) const = 0;
+  virtual int Hash( const K& key ) const = 0;
 
   //The derived classes need to define this function to do clean ups when
   //a T type member is being removed.
