@@ -741,7 +741,7 @@ bool BaseEfg::CheckTree(Node *n, Node *base)
   return true;
 }
 
-bool BaseEfg::Decompose(Node *n)
+bool BaseEfg::IsLegalSubgame(Node *n)
 {
   if (n->NumChildren() == 0 || n->GetPlayer()->IsChance())  
     return false;
@@ -749,6 +749,24 @@ bool BaseEfg::Decompose(Node *n)
   MarkTree(n, n);
   return CheckTree(n, n);
 }
+
+bool BaseEfg::DefineSubgame(Node *n)
+{
+  if (n->gameroot != n && IsLegalSubgame(n))  {
+    n->gameroot = 0;
+    MarkSubgame(n, n);
+    return true;
+  }
+
+  return false;
+}
+
+void BaseEfg::RemoveSubgame(Node *n)
+{
+  if (n->gameroot == n && n->parent)
+    MarkSubgame(n, n->parent->gameroot);
+}
+  
 
 void BaseEfg::MarkSubgame(Node *n, Node *base)
 {
@@ -765,7 +783,7 @@ void BaseEfg::FindSubgames(Node *n)
   for (int i = 1; i <= n->NumChildren(); i++)
     FindSubgames(n->GetChild(i));
   
-  if (Decompose(n)) {
+  if (IsLegalSubgame(n)) {
     n->gameroot = 0;
     MarkSubgame(n, n);
   }

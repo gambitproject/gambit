@@ -65,6 +65,9 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 
     Infoset *s = p->infosets[m->infoset->number];
     AppendNode(n, s);
+    
+    n->gameroot = (m->gameroot == m) ? n : n->parent->gameroot;
+
     for (int i = 1; i <= n->children.Length(); i++)
       CopySubtree(n->children[i], m->children[i]);
   }
