@@ -46,6 +46,8 @@ private:
 
   static RefCountHashTable< void* > _GameRefCount;
 
+  bool _Verbose;
+
   gInput&  _StdIn;
   gOutput& _StdOut;
   gOutput& _StdErr;
@@ -190,6 +192,11 @@ public:
 
   // This function will unassign the subtree rooted by the given node
   void UnAssignEfgSubTree( BaseEfg* game, Node* node ); 
+
+
+  void SetVerbose( bool verbose ) { _Verbose = verbose; }
+  bool Verbose( void ) const { return _Verbose; }
+
 };
 
 

@@ -134,7 +134,7 @@ public:
 int GSM::_NumObj = 0;
 
 GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
-:_StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
+:_Verbose(false), _StdIn(s_in), _StdOut(s_out), _StdErr(s_err)
 {
 #ifndef NDEBUG
   if(size <= 0)
@@ -2179,8 +2179,18 @@ bool GSM::Pop(void)
 
   if(_Depth() > 0)
   {
+#ifdef NEW_OUTPUT
+    if( _Verbose )
+      Output();
+    else
+    {
+      p = _Pop();
+      delete p;
+    }
+#else
     p = _Pop();
     delete p;
+#endif
     result = true;
   }
   else

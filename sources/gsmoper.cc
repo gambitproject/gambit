@@ -1457,6 +1457,12 @@ Portion* GSM_GetSolutionFormat(Portion** param)
 
 
 
+Portion* GSM_SetVerbose(Portion** param)
+{
+  _gsm->SetVerbose( ((BoolPortion*) param[0])->Value() );
+  return new BoolValPortion( _gsm->Verbose() );
+}
+
 
 
 
@@ -3746,6 +3752,15 @@ void Init_gsmoper(GSM* gsm)
 			 BYREF ));
   gsm->AddFunction(FuncObj);
 
+
+
+
+
+
+  FuncObj = new FuncDescObj("SetVerbose", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetVerbose, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porBOOL) );
+  gsm->AddFunction(FuncObj);
 
 
 
