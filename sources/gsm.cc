@@ -477,7 +477,7 @@ bool GSM::Assign(void)
     delete p1;
     _Push(p2->RefCopy());
   }
-  else if(p1Spec == p2Spec)
+  else if(p1Spec == p2Spec && p1Spec.Type != porNULL)
   {
     if(p1Spec.ListDepth == 0) // not a list
     {
@@ -2269,11 +2269,11 @@ void GSM::Clear(void)
 {
   Flush();
 
-  assert(_RefTableStack->Depth() == 1);
+  assert(_RefTableStack->Depth() > 0);
   delete _RefTableStack->Pop();
-  delete _RefTableStack;
+  //delete _RefTableStack;
 
-  _RefTableStack = new gStack< RefHashTable* >(1);
+  //_RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
 
 }

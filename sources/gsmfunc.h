@@ -33,8 +33,6 @@ class gOutput;
 #define NON_LISTABLE         false
 #define LISTABLE             true
 
-#define NULL_ARGS            true
-
 #define NO_PREDEFINED_PARAMS ( (ParamInfoType*) 0 )
 
 
@@ -86,7 +84,6 @@ public:
   };
   PortionSpec          ReturnSpec;
   bool                 Listable;
-  bool                 NullArgs;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
 
@@ -98,8 +95,7 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE,
-     bool null_args = !NULL_ARGS
+     bool listable = LISTABLE
      );
   FuncInfoType
     (
@@ -107,8 +103,7 @@ public:
      PortionSpec returnspec,
      int numparams,
      ParamInfoType* paraminfo = 0,
-     bool listable = LISTABLE,
-     bool null_args = !NULL_ARGS
+     bool listable = LISTABLE
      );
   ~FuncInfoType();
 };

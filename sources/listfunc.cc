@@ -601,7 +601,7 @@ Portion* GSM_ArgMax_Integer( Portion** param )
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Spec().Type == porINTEGER )
+    if( p->Spec() == porINTEGER )
     {
       if( ((IntPortion*) p)->Value() >= max ||
 	 i == ((ListPortion*) param[0])->Length() )
@@ -626,7 +626,7 @@ Portion* GSM_ArgMax_Float( Portion** param )
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Spec().Type == porFLOAT )
+    if( p->Spec() == porFLOAT )
     {
       if( ((FloatPortion*) p)->Value() >= max || 
 	 i == ((ListPortion*) param[0])->Length() )
@@ -651,7 +651,7 @@ Portion* GSM_ArgMax_Rational( Portion** param )
   for( i = ((ListPortion*) param[0])->Length(); i >= 1; i-- )
   {
     p = (*(ListPortion*) param[0])[i];
-    if( p->Spec().Type == porRATIONAL )
+    if( p->Spec() == porRATIONAL )
     {
       if( ((RationalPortion*) p)->Value() >= max ||
 	 i == ((ListPortion*) param[0])->Length() )

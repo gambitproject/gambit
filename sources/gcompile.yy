@@ -540,7 +540,7 @@ static struct tokens toktable[] =
       gerr << "StdOut\n";
       break;
     case gNULL:
-      gerr << "Null\n";
+      gerr << "NullOut\n";
       break;
     default:
       gerr << yychar << '\n';
@@ -612,7 +612,7 @@ I_dont_believe_Im_doing_this:
     }
     else if (s == "StdIn")  return STDIN;
     else if (s == "StdOut") return STDOUT;
-    else if (s == "Null")   return gNULL;
+    else if (s == "NullOut")   return gNULL;
     else if (s == "AND")    return LAND;
     else if (s == "OR")     return LOR;
     else if (s == "NOT")    return LNOT;

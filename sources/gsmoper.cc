@@ -37,6 +37,17 @@ Portion* GSM_IsNull(Portion** param)
 
 
 //---------------------------------------
+//           Null
+//---------------------------------------
+
+Portion* GSM_Null(Portion** param)
+{
+  return new NullPortion(param[0]->Spec().Type);
+}
+
+
+
+//---------------------------------------
 //           Randomize
 //---------------------------------------
 
@@ -2936,9 +2947,18 @@ void Init_gsmoper(GSM* gsm)
 
 
   FuncObj = new FuncDescObj("IsNull", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, 
-				       LISTABLE, NULL_ARGS));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNull, porBOOL, 1, 0, LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, 0, true)));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Null", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Null, 
+				       PortionSpec(porANYTYPE, 0, true),
+				       1, 0, LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", 
+					    PortionSpec(porANYTYPE, 0, true)));
   gsm->AddFunction(FuncObj);
 
 }

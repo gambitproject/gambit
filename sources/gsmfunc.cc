@@ -174,9 +174,6 @@ CallListFunction(GSM* gsm, Portion** ParamIn)
 	  null_call = true;
 	  break;
 	}
-      if(_FuncInfo[_FuncIndex].NullArgs)
-	null_call = false;
-
 
       if(!error_call && !null_call)
 	if(!_FuncInfo[_FuncIndex].UserDefined)
@@ -277,7 +274,6 @@ FuncInfoType::FuncInfoType(void)
  FuncPtr(0),
  ReturnSpec(PortionSpec(porERROR)),
  Listable(LISTABLE),
- NullArgs(!NULL_ARGS),
  NumParams(0),
  ParamInfo(0)
 {}
@@ -287,7 +283,6 @@ FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
  UserDefined(funcinfo.UserDefined),
  ReturnSpec(funcinfo.ReturnSpec),
  Listable(funcinfo.Listable),
- NullArgs(funcinfo.NullArgs),
  NumParams(funcinfo.NumParams)
 {
   int i;
@@ -307,15 +302,13 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable,
- bool null_args
+ bool listable
 )
 :
  UserDefined(false),
  FuncPtr(funcptr),
  ReturnSpec(returnspec),
  Listable(listable),
- NullArgs(null_args),
  NumParams(numparams)
 {
   int i;
@@ -331,15 +324,13 @@ FuncInfoType::FuncInfoType
  PortionSpec returnspec,
  int numparams,
  ParamInfoType* paraminfo,
- bool listable,
- bool null_args
+ bool listable
 )
 :
  UserDefined(true),
  FuncInstr(funcinstr),
  ReturnSpec(returnspec),
  Listable(listable),
- NullArgs(null_args),
  NumParams(numparams)
 {
   int i;
@@ -372,7 +363,6 @@ FuncDescObj::FuncDescObj(FuncDescObj& func)
   {
     _FuncInfo[f_index].UserDefined = func._FuncInfo[f_index].UserDefined;
     _FuncInfo[f_index].Listable    = func._FuncInfo[f_index].Listable;
-    _FuncInfo[f_index].NullArgs    = func._FuncInfo[f_index].NullArgs;
     _FuncInfo[f_index].ReturnSpec  = func._FuncInfo[f_index].ReturnSpec;
 
     if(!_FuncInfo[f_index].UserDefined)
@@ -508,8 +498,10 @@ bool FuncDescObj::Combine(FuncDescObj* newfunc)
 	    */
 	if((_FuncInfo[f_index].ParamInfo[index].Name ==
 	    newfunc->_FuncInfo[i].ParamInfo[index].Name) &&
-	   (_FuncInfo[f_index].ParamInfo[index].Spec ==
-	    newfunc->_FuncInfo[i].ParamInfo[index].Spec))
+	   (_FuncInfo[f_index].ParamInfo[index].Spec.Type ==
+	    newfunc->_FuncInfo[i].ParamInfo[index].Spec.Type) &&
+	   (_FuncInfo[f_index].ParamInfo[index].Spec.ListDepth ==
+	    newfunc->_FuncInfo[i].ParamInfo[index].Spec.ListDepth))
 	{
 	  same_params = same_params & true;
 	}
@@ -1380,8 +1372,6 @@ Portion* CallFuncObj::CallFunction(GSM* gsm, Portion **param)
 	  break;
 	}
   }
-  if(_FuncInfo[_FuncIndex].NullArgs)
-    null_call = false;
   
   bool list_op;
   list_op = false;  
