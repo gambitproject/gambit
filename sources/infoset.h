@@ -111,9 +111,7 @@ template <class T> class ChanceInfoset : public Infoset  {
 
     ChanceInfoset(BaseEfg *E, int n, EFPlayer *p, int br)
       : Infoset(E, n, p, br), probs(br)
-      { probs[1] = (T) 1.0;
-	for (int i = 2; i <= br; probs[i++] = (T) 0.0);
-      }
+      { for (int i = 1; i <= br; probs[i++] = (T) 1 / (T) br); }
     ~ChanceInfoset()    { }
 
     void PrintActions(gOutput &f) const
