@@ -191,7 +191,7 @@ static Portion *GSM_ActionValues(Portion **param)
 // Behav
 //--------------
 
-static Portion *GSM_Behav_EFSupport(Portion **param)
+static Portion *GSM_Behav(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
   const Efg &E = S->Game();
@@ -390,7 +390,7 @@ static Portion *GSM_IsKnownNotNash_Mixed(Portion **param)
 // IsKnownNotPerfect
 //--------------------
 
-static Portion *GSM_IsKnownNotPerfect_Mixed(Portion **param)
+static Portion *GSM_IsKnownNotPerfect(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new BoolPortion(P->IsPerfect() == T_NO);
@@ -400,7 +400,7 @@ static Portion *GSM_IsKnownNotPerfect_Mixed(Portion **param)
 // IsKnownNotSequential
 //-----------------------
 
-static Portion *GSM_IsKnownNotSequential_Behav(Portion **param)
+static Portion *GSM_IsKnownNotSequential(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSequential() == T_NO);
@@ -410,7 +410,7 @@ static Portion *GSM_IsKnownNotSequential_Behav(Portion **param)
 // IsKnownNotSubgamePerfect
 //---------------------------
 
-static Portion *GSM_IsKnownNotSubgamePerfect_Behav(Portion **param)
+static Portion *GSM_IsKnownNotSubgamePerfect(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSubgamePerfect() == T_NO);
@@ -420,7 +420,7 @@ static Portion *GSM_IsKnownNotSubgamePerfect_Behav(Portion **param)
 // IsKnownPerfect
 //-------------------
 
-static Portion *GSM_IsKnownPerfect_Mixed(Portion **param)
+static Portion *GSM_IsKnownPerfect(Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
   return new BoolPortion(P->IsPerfect() == T_YES);
@@ -430,7 +430,7 @@ static Portion *GSM_IsKnownPerfect_Mixed(Portion **param)
 // IsKnownSequential
 //--------------------
 
-static Portion *GSM_IsKnownSequential_Behav(Portion **param)
+static Portion *GSM_IsKnownSequential(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSequential() == T_YES);
@@ -441,7 +441,7 @@ static Portion *GSM_IsKnownSequential_Behav(Portion **param)
 // IsKnownSubgamePerfect
 //------------------------
 
-static Portion *GSM_IsKnownSubgamePerfect_Behav(Portion **param)
+static Portion *GSM_IsKnownSubgamePerfect(Portion **param)
 {
   BehavSolution *P = ((BehavPortion *) param[0])->Value();
   return new BoolPortion(P->IsSubgamePerfect() == T_YES);
@@ -467,7 +467,7 @@ static Portion *GSM_LiapValue_Mixed(Portion **param)
 // Mixed
 //----------
 
-Portion* GSM_Mixed_NFSupport(Portion** param)
+Portion* GSM_Mixed(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   gArray<gNumber> values(S->Game().Parameters()->Dmnsn());
@@ -786,268 +786,78 @@ static Portion *GSM_Support_Mixed(Portion** param)
 
 void Init_solfunc(GSM *gsm)
 {
-  FuncDescObj *FuncObj;
+  static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
+    { { "ActionProb[profile->BEHAV, action->ACTION] =: NUMBER",
+ 	GSM_ActionProb },
+      { "ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
+	GSM_ActionProbs },
+      { "ActionValue[profile->BEHAV, action->ACTION] =: NUMBER",
+	GSM_ActionValue },
+      { "ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))",
+	GSM_ActionValues },
+      { "Behav[support->EFSUPPORT] =: BEHAV", GSM_Behav },
+      { "Belief[profile->BEHAV, node->NODE] =: NUMBER", GSM_Belief },
+      { "Beliefs[profile->BEHAV] =: LIST(NUMBER)", GSM_Beliefs },
+      { "Game[profile->MIXED] =: NFG", GSM_Game_Mixed },
+      { "Game[profile->BEHAV] =: EFG", GSM_Game_EfgTypes },
+      { "Game[support->NFSUPPORT] =: NFG", GSM_Game_NfSupport },
+      { "Game[support->EFSUPPORT] =: EFG", GSM_Game_EfgTypes },
+      { "GobitLambda[profile->MIXED] =: NUMBER", GSM_GobitLambda_Mixed },
+      { "GobitLambda[profile->BEHAV] =: NUMBER", GSM_GobitLambda_Behav },
+      { "GobitValue[profile->MIXED] =: NUMBER", GSM_GobitValue_Mixed },
+      { "GobitValue[profile->BEHAV] =: NUMBER", GSM_GobitValue_Behav },
+      { "InfosetProb[profile->BEHAV, infoset->INFOSET*] =: NUMBER",
+	GSM_InfosetProb },
+      { "InfosetProbs[profile->BEHAV] =: LIST(LIST(NUMBER))", 
+	GSM_InfosetProbs },
+      { "IsKnownNash[profile->BEHAV] =: BOOLEAN", GSM_IsKnownNash_Behav },
+      { "IsKnownNash[profile->MIXED] =: BOOLEAN", GSM_IsKnownNash_Mixed },
+      { "IsKnownNotNash[profile->BEHAV] =: BOOLEAN", 
+	GSM_IsKnownNotNash_Behav },
+      { "IsKnownNotNash[profile->MIXED] =: BOOLEAN",
+	GSM_IsKnownNotNash_Mixed },
+      { "IsKnownNotPerfect[profile->MIXED] =: BOOLEAN", 
+	GSM_IsKnownNotPerfect },
+      { "IsKnownNotSequential[profile->BEHAV] =: BOOLEAN",
+	GSM_IsKnownNotSequential },
+      { "IsKnownNotSubgamePerfect[profile->BEHAV] =: BOOLEAN",
+	GSM_IsKnownNotSubgamePerfect },
+      { "IsKnownPerfect[profile->MIXED] =: BOOLEAN", GSM_IsKnownPerfect },
+      { "IsKnownSequential[profile->BEHAV] =: BOOLEAN",
+	GSM_IsKnownSequential },
+      { "IsKnownSubgamePerfect[profile->BEHAV] =: BOOLEAN",
+	GSM_IsKnownSubgamePerfect },
+      { "LiapValue[profile->BEHAV] =: NUMBER", GSM_LiapValue_Behav },
+      { "LiapValue[profile->MIXED] =: NUMBER", GSM_LiapValue_Mixed },
+      { "Mixed[support->NFSUPPORT] =: MIXED", GSM_Mixed },
+      { "NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER",
+	GSM_NodeValue },
+      { "NodeValues[profile->BEHAV, player->EFPLAYER] =: LIST(NUMBER)",
+	GSM_NodeValues },
+      { "RealizProb[profile->BEHAV, node->NODE] =: NUMBER", GSM_RealizProb },
+      { "RealizProbs[profile->BEHAV] =: LIST(NUMBER)", GSM_RealizProbs },
+      { "Regret[profile->BEHAV, action->ACTION] =: NUMBER",
+	GSM_Regret_Behav },
+      { "Regret[profile->MIXED, strategy->STRATEGY] =: NUMBER",
+	GSM_Regret_Mixed },
+      { "Regrets[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))", 
+	GSM_Regrets_Behav },
+      { "Regrets[profile->MIXED] =: LIST(LIST(NUMBER))", GSM_Regrets_Mixed },
+      { "SetActionProbs[profile<->BEHAV, infoset->INFOSET, value->LIST(NUMBER) =: BEHAV", GSM_SetActionProbs },
+      { "SetStrategyProbs[profile<->MIXED, player->NFPLAYER, value->LIST(NUMBER) =: MIXED", GSM_SetStrategyProbs },
+      { "StrategyProb[profile->MIXED, strategy->STRATEGY] =: NUMBER",
+	GSM_StrategyProb },
+      { "StrategyProbs[profile->MIXED] =: LIST(LIST(NUMBER))",
+	GSM_StrategyProbs },
+      { "StrategyValue[profile->MIXED, strategy->STRATEGY] =: NUMBER",
+	GSM_StrategyValue },
+      { "Support[profile->BEHAV] =: EFSUPPORT", GSM_Support_Behav },
+      { "Support[profile->MIXED] =: NFSUPPORT", GSM_Support_Mixed },
+      { 0, 0 }
+    };
 
-  FuncObj = new FuncDescObj("ActionProb", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionProb, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ActionProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionProbs,
-				       PortionSpec(porNUMBER, 3), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("StrategyValue", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyValue, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ActionValue", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValue, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("ActionValues", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValues,
-				       PortionSpec(porNUMBER, 3), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Behav", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_EFSupport, 
-				       porBEHAV, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porEFSUPPORT));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Belief", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Belief, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Beliefs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Beliefs,
-				       PortionSpec(porNUMBER, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Game", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_Mixed, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV));
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NfSupport, porNFG, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEFSUPPORT));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("GobitLambda", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitLambda_Mixed,
-				       porNUMBER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GobitLambda_Behav,
-				       porNUMBER, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("GobitValue", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitValue_Mixed,
-				       porNUMBER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GobitValue_Behav,
-				       porNUMBER, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("InfosetProb", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProb, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", 
-                              PortionSpec(porINFOSET, 0, porNULLSPEC) ));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("InfosetProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProbs,
-				       PortionSpec(porNUMBER, 2), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownNash", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownNash_Behav, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsKnownNash_Mixed, porBOOL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownNotNash", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownNotNash_Behav, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsKnownNotNash_Mixed, porBOOL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownNotPerfect", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownNotPerfect_Mixed, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownNotSequential", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownNotSequential_Behav, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownNotSubgamePerfect", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownNotSubgamePerfect_Behav,
-				       porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownPerfect", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownPerfect_Mixed, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownSequential", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownSequential_Behav, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("IsKnownSubgamePerfect", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsKnownSubgamePerfect_Behav,
-				       porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("LiapValue", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LiapValue_Behav, porNUMBER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_LiapValue_Mixed, porNUMBER, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Mixed", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Mixed_NFSupport, porMIXED, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("NodeValue", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValue, porNUMBER, 3,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("NodeValues", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValues,
-				       PortionSpec(porNUMBER, 1), 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("RealizProb", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProb, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("node", porNODE));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("RealizProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProbs,
-				       PortionSpec(porNUMBER, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Regret", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Regret_Behav, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("action", porACTION));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Regret_Mixed, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strategy", porSTRATEGY));
- gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Regrets", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Regrets_Behav,
-				       PortionSpec(porNUMBER, 3), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Regrets_Mixed,
-				       PortionSpec(porNUMBER, 2), 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("SetActionProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetActionProbs, porBEHAV, 3,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("value", PortionSpec(porNUMBER, 1)));
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("SetStrategyProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetStrategyProbs, porMIXED, 3,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED, REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("value", PortionSpec(porNUMBER,1)));
- gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("StrategyProb", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyProb, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("StrategyProbs", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyProbs,
-				       PortionSpec(porNUMBER, 2), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("Support", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Behav, porEFSUPPORT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_Mixed, porNFSUPPORT, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
-  gsm->AddFunction(FuncObj);
+  for (int i = 0; ftable[i].sig != 0; i++) 
+    gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func,
+				     funcLISTABLE | funcGAMEMATCH));
 }
 
