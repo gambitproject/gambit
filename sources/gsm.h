@@ -13,6 +13,7 @@
 #include "gstring.h"
 #include "gsmincl.h"
 #include "gsminstr.h"
+#include "gsmhash.h"
 
 class FuncDescObj;
 class CallFuncObj;
@@ -56,9 +57,9 @@ private:
   Portion* _NULL;
 
   gStack< gStack< Portion* >* >* _StackStack;
-  gStack< CallFuncObj* >*                _CallFuncStack;
-  gStack< RefHashTable* >*               _RefTableStack;
-  FunctionHashTable*                             _FuncTable;
+  gStack< RefHashTable* >*       _RefTableStack;
+  RefHashTable                   _GlobalRefTable;
+  FunctionHashTable*             _FuncTable;
 
   void _BindCheck ( void ) const;
   bool _Bind ( const gString& param_name ) const;
@@ -124,6 +125,17 @@ public:
 
   // This function will unassign the subtree rooted by the given node
   void UnAssignEfgSubTree( Efg* game, Node* node ); 
+
+
+
+
+
+
+  void GlobalVarDefine     ( const gString& var_name, Portion* p );
+  bool GlobalVarIsDefined  ( const gString& var_name ) const;
+  Portion* GlobalVarValue  ( const gString& var_name ) const;
+  void GlobalVarRemove     ( const gString& var_name );
+
 };
 
 

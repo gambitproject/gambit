@@ -140,7 +140,6 @@ GSM::GSM(int size, gInput& s_in, gOutput& s_out, gOutput& s_err)
 
   _StackStack    = new gStack< gStack< Portion* >* >(1);
   _StackStack->Push(new gStack< Portion* >(size));
-  _CallFuncStack = new gStack< CallFuncObj* >(1);
   _RefTableStack = new gStack< RefHashTable* >(1);
   _RefTableStack->Push(new RefHashTable);
 
@@ -155,9 +154,6 @@ GSM::~GSM()
 {
   _NumObj--;
 
-  assert(_CallFuncStack->Depth() == 0);
-  delete _CallFuncStack;
-
   delete _FuncTable;
 
   assert(_RefTableStack->Depth() == 1);
@@ -167,6 +163,7 @@ GSM::~GSM()
   assert(_StackStack->Depth() == 1);
   delete _StackStack->Pop();
   delete _StackStack;
+
 
 }
 
@@ -624,14 +621,12 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
 			      const FuncInfoType& func_info,
 			      Portion** param)
 {
-  int rc_result;
   Portion* result;
   Portion* result_copy;
   int i;
 
   _RefTableStack->Push(new RefHashTable);
   _StackStack->Push(new gStack< Portion* >);
-
 
   for(i = 0; i < func_info.NumParams; i++)
   {
@@ -1223,3 +1218,29 @@ void GSM::_ErrorMessage
 
 
 
+
+
+
+
+void GSM::GlobalVarDefine     ( const gString& var_name, Portion* p )
+{
+  assert(var_name != "");
+  if( GlobalVarIsDefined( var_name ) )
+    GlobalVarRemove( var_name );
+  _GlobalRefTable.Define(var_name, p);
+}
+bool GSM::GlobalVarIsDefined  ( const gString& var_name ) const
+{
+  assert(var_name != "");
+  return _GlobalRefTable.IsDefined(var_name);
+}
+Portion* GSM::GlobalVarValue  ( const gString& var_name ) const
+{
+  assert(var_name != "");
+  return _GlobalRefTable(var_name);
+}
+void GSM::GlobalVarRemove     ( const gString& var_name )
+{
+  assert(var_name != "");
+  delete _GlobalRefTable.Remove(var_name);
+}
