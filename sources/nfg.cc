@@ -26,7 +26,7 @@ int Nfg::Product(const gArray<int> &dim)
   
 Nfg::Nfg(const gArray<int> &dim)
   : dimensions(dim), players(dim.Length()), results(Product(dim)),
-    parameters(new gSpace), efg(0)
+    parameters(new gSpace)
 {
   ORD_PTR ord = &lex;
   paramorder = new term_order(parameters, ord);
@@ -45,7 +45,7 @@ Nfg::Nfg(const gArray<int> &dim)
 Nfg::Nfg(const Nfg &b)
   : title(b.title), dimensions(b.dimensions),
     players(b.players.Length()), outcomes(b.outcomes.Length()),
-    results(b.results.Length()), efg(0),
+    results(b.results.Length()),
     parameters(b.parameters), paramorder(b.paramorder)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
@@ -333,3 +333,12 @@ template class gBlock<Strategy *>;
 
 template class gArray<NFOutcome *>;
 template class gBlock<NFOutcome *>;
+
+#include "nfg.imp"
+template class MixedProfile<gNumber>;
+template gOutput &operator<<(gOutput &, const MixedProfile<gNumber> &);
+
+#include "mixedsol.imp"
+template class MixedSolution<gNumber>;
+template gOutput &operator<<(gOutput &, const MixedSolution<gNumber> &);
+

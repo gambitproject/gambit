@@ -30,9 +30,9 @@ void DisplayTriState(gOutput& o, TriState i);
 template <class T> T gmin(const T &a, const T &b);
 template <class T> T gmax(const T &a, const T &b);
 
-//#ifndef hpux
+class gNumber;
 double abs(double a);
-//#endif   // hpux
+gNumber abs(const gNumber &);
 
 int sign(const double &a);
 
@@ -62,8 +62,6 @@ void ToStringWidth(int); // Set # of decimal places for floating point
 int  ToStringWidth(void); // Get the current value of the above
 void ToStringPrecision(int); // Set # of decimal places for floating point
 int  ToStringPrecision(void); // Get the current value of the above
-
-class gNumber;
 
 gString ToString(int);
 gString ToString(long);

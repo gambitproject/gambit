@@ -15,7 +15,7 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
     int nevals, subgame_number;
     gPVector<int> infoset_subgames;
     NFLiapParams params;
-    BehavProfile<double> start;
+    BehavProfile<gNumber> start;
 
     int SolveSubgame(const Efg &, const EFSupport &,
 		      gList<BehavSolution<double> > &);
@@ -23,7 +23,7 @@ class NFLiapBySubgame : public SubgameSolver<double>  {
 
   public:
     NFLiapBySubgame(const Efg &E, const NFLiapParams &,
-		    const BehavProfile<double> &, int max = 0);
+		    const BehavProfile<gNumber> &, int max = 0);
     virtual ~NFLiapBySubgame();
 
     int NumEvals(void) const   { return nevals; }

@@ -1,7 +1,7 @@
 //
 // FILE: egobit.cc -- Implementation of gobit on extensive form games
 //
-// @(#)egobit.cc	2.3 4/2/97
+// $Id$
 //
 
 #include <math.h>
@@ -39,7 +39,7 @@ class EFGobitFunc : public gFunction<double>   {
     double Value(const gVector<double> &);
 
   public:
-    EFGobitFunc(const Efg &, const BehavProfile<double> &);
+    EFGobitFunc(const Efg &, const BehavProfile<gNumber> &);
     virtual ~EFGobitFunc();
     
     void SetLambda(double l)   { _Lambda = l; }
@@ -48,14 +48,15 @@ class EFGobitFunc : public gFunction<double>   {
 };
 
 EFGobitFunc::EFGobitFunc(const Efg &E,
-			 const BehavProfile<double> &start)
+			 const BehavProfile<gNumber> &start)
   : _nevals(0L), _domain_err(false), _efg(E), _probs(E.NumInfosets()),
-    _p(start), _cpay(E)
+    _p(start.Game(), start.Support()), _cpay(E)
 {
-  int pl;
+  for (int i = 1; i <= _p.Length(); i++)
+    _p[i] = start[i];
 
   _scratch = new gVector<double> **[_efg.NumPlayers()] - 1;
-  for (pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
     int nisets = (_efg.Players()[pl])->NumInfosets();
     _scratch[pl] = new gVector<double> *[nisets + 1] - 1;
     for (int iset = 1; iset <= nisets; iset++)
@@ -188,7 +189,7 @@ extern bool Powell(gPVector<double> &p, gMatrix<double> &xi,
 
 
 void Gobit(const Efg &E, EFGobitParams &params,
-	   const BehavProfile<double> &start,
+	   const BehavProfile<gNumber> &start,
 	   gList<BehavSolution<double> > &solutions,
 	   long &nevals, long &nits)
 {
@@ -210,8 +211,10 @@ void Gobit(const Efg &E, EFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  BehavProfile<double> p(start);
-  BehavProfile<double> pold(start);
+  BehavProfile<double> p(start.Game(), start.Support());
+  for (int i = 1; i <= p.Length(); i++)
+    p[i] = start[i];
+  BehavProfile<double> pold(p);
   gMatrix<double> xi(p.Length(), p.Length());
 
   InitMatrix(xi, p.Lengths());

@@ -1,7 +1,7 @@
 //
 // FILE: algfunc.cc -- Solution algorithm functions for GCL
 //
-// $Id$
+// @(#)algfunc.cc	2.26 30 Jul 1997
 //
 
 #include "gsm.h"
@@ -40,16 +40,16 @@ template <class T> class Mixed_ListPortion : public ListValPortion   {
 
 Mixed_ListPortion<double>::Mixed_ListPortion(const gList<MixedSolution<double> > &list)
 {
-  _DataType = porMIXED_FLOAT;
+  _DataType = porMIXED;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedPortion<double>(new MixedSolution<double>(list[i])));
+    Append(new MixedPortion(new MixedSolution<double>(list[i])));
 }
 
 Mixed_ListPortion<gRational>::Mixed_ListPortion(const gList<MixedSolution<gRational> > &list)
 {
-  _DataType = porMIXED_RATIONAL;
+  _DataType = porMIXED;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new MixedPortion<gRational>(new MixedSolution<gRational>(list[i])));
+    Append(new MixedPortion(new MixedSolution<gRational>(list[i])));
 }
 
 
@@ -62,17 +62,17 @@ template <class T> class Behav_ListPortion : public ListValPortion   {
 Behav_ListPortion<double>::Behav_ListPortion(
 			   const gList<BehavSolution<double> > &list)
 {
-  _DataType = porBEHAV_FLOAT;
+  _DataType = porBEHAV;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavPortion<double>(new BehavSolution<double>(list[i])));
+    Append(new BehavPortion(new BehavSolution<double>(list[i])));
 }
 
 Behav_ListPortion<gRational>::Behav_ListPortion(
 			      const gList<BehavSolution<gRational> > &list)
 {
-  _DataType = porBEHAV_RATIONAL;
+  _DataType = porBEHAV;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new BehavPortion<gRational>(new BehavSolution<gRational>(list[i])));
+    Append(new BehavPortion(new BehavSolution<gRational>(list[i])));
 }
 
 
@@ -100,32 +100,19 @@ static Portion *GSM_AgentForm(Portion **param)
 // Behav
 //------------
 
-static Portion *GSM_Behav_Float(Portion **param)
+static Portion *GSM_Behav(Portion **param)
 {
-  MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
+  MixedSolution<gNumber> &mp = * (MixedSolution<gNumber>*) ((MixedPortion*) param[0])->Value();
 
   Nfg &N = mp.Game();
   const Efg &E = *(const Efg *) N.AssociatedEfg();
 
-  BehavSolution<double> *bp = new BehavSolution<double>(E);
+  BehavSolution<gNumber> *bp = new BehavSolution<gNumber>(E);
   MixedToBehav(N, mp, E, *bp);
 
-  return new BehavPortion<double>(bp);
+  return new BehavPortion(bp);
 }
 
-static Portion *GSM_Behav_Rational(Portion **param)
-{
-  MixedSolution<gRational> &mp = 
-    * (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
-
-  Nfg &N = mp.Game();
-  const Efg &E = *N.AssociatedEfg();
-
-  BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
-  MixedToBehav(N, mp, E, *bp);
-
-  return new BehavPortion<gRational>(bp);
-}
 
 //------------------
 // EnumMixedSolve
@@ -312,9 +299,9 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 
 static Portion *GSM_Gobit_Start(Portion **param)
 {
-  if (param[0]->Spec().Type == porMIXED_FLOAT)  {
-    MixedSolution<double> &start = 
-      * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
+  if (param[0]->Spec().Type == porMIXED)  {
+    MixedSolution<gNumber> &start =
+      * (MixedSolution<gNumber> *) ((MixedPortion *) param[0])->Value();
     Nfg &N = start.Game();
 
     NFGobitParams NP;
@@ -350,8 +337,8 @@ static Portion *GSM_Gobit_Start(Portion **param)
     return por;
   }
   else  {     // BEHAV_FLOAT  
-    BehavSolution<double>& start = 
-      * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
+    BehavSolution<gNumber>& start =
+      * (BehavSolution<gNumber> *) ((BehavPortion *) param[0])->Value();
     Efg &E = start.Game();
   
     EFGobitParams EP;
@@ -496,10 +483,9 @@ static Portion *GSM_Lcp_Efg(Portion **param)
 #include "liapsub.h"
 #include "eliap.h"
 
-static Portion *GSM_Liap_BehavFloat(Portion **param)
+static Portion *GSM_Liap_Behav(Portion **param)
 {
-  BehavSolution<double> &start = 
-    * (BehavSolution<double> *) ((BehavPortion<double> *) param[0])->Value();
+  BehavProfile<gNumber> &start = *((BehavPortion *) param[0])->Value();
   Efg &E = start.Game();
   
   if (((BoolPortion *) param[1])->Value())   {
@@ -524,8 +510,7 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
     ((NumberPortion *) param[8])->Value() = watch.Elapsed();
     ((IntPortion *) param[9])->Value() = M.NumEvals();
 
-    Portion *por = new Behav_ListPortion<double>(M.GetSolutions());
-    return por;
+    return new Behav_ListPortion<double>(M.GetSolutions());
   }
   else  {
     EFLiapParams LP;
@@ -556,10 +541,9 @@ static Portion *GSM_Liap_BehavFloat(Portion **param)
 
 #include "nliap.h"
 
-static Portion *GSM_Liap_MixedFloat(Portion **param)
+static Portion *GSM_Liap_Mixed(Portion **param)
 {
-  MixedSolution<double> &start = 
-    * (MixedSolution<double> *) ((MixedPortion<double> *) param[0])->Value();
+  MixedProfile<gNumber> &start = *((MixedPortion *) param[0])->Value();
   Nfg &N = start.Game();
 
   NFLiapParams params;
@@ -579,13 +563,11 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
   gWatch watch;
   gList<MixedSolution<double> > solutions;
   Liap(N, params, start, solutions,
-       ((IntPortion *) param[8])->Value(),
-       niters);
+       ((IntPortion *) param[8])->Value(), niters);
 
   ((NumberPortion *) param[7])->Value() = watch.Elapsed();
 
-  Portion *por = new Mixed_ListPortion<double>(solutions);
-  return por;
+  return new Mixed_ListPortion<double>(solutions);
 }
 
 //------------
@@ -765,37 +747,17 @@ static Portion *GSM_Nfg(Portion **param)
 // Payoff
 //----------
 
-Portion* GSM_Payoff_BehavFloat(Portion** param)
+Portion* GSM_Payoff_Behav(Portion** param)
 {
-  BehavSolution<double>* bp =
-    (BehavSolution<double>*) ((BehavPortion<double>*) param[0])->Value();
+  BehavProfile<gNumber>* bp = ((BehavPortion*) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
 
   return new NumberPortion(bp->Payoff(player->GetNumber()));
 }
 
-Portion* GSM_Payoff_BehavRational(Portion** param)
+Portion* GSM_Payoff_Mixed(Portion** param)
 {
-  BehavSolution<gRational>* bp =
-    (BehavSolution<gRational>*) ((BehavPortion<gRational>*) param[0])->Value();
-  EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
-
-  return new NumberPortion(bp->Payoff(player->GetNumber()));
-}
-
-Portion* GSM_Payoff_MixedFloat(Portion** param)
-{
-  MixedSolution<double>* mp =
-    (MixedSolution<double>*) ((MixedPortion<double>*) param[0])->Value();
-  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
-
-  return new NumberPortion(mp->Payoff(player->GetNumber()));
-}
-
-Portion* GSM_Payoff_MixedRational(Portion** param)
-{
-  MixedSolution<gRational>* mp =
-    (MixedSolution<gRational>*) ((MixedPortion<gRational>*) param[0])->Value();
+  MixedProfile<gNumber>* mp = ((MixedPortion*) param[0])->Value();
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   return new NumberPortion(mp->Payoff(player->GetNumber()));
@@ -951,13 +913,9 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Behav", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_Float, porBEHAV_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED_FLOAT));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Behav_Rational, 
-				       porBEHAV_RATIONAL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
+  FuncObj = new FuncDescObj("Behav", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav, porBEHAV, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("mixed", porMIXED));
   gsm->AddFunction(FuncObj);
 
 
@@ -1073,10 +1031,9 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("GobitSolve", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Gobit_Start, 
-				       PortionSpec(porMIXED_FLOAT |
-						   porBEHAV_FLOAT, 1), 16));
+				       PortionSpec(porMIXED | porBEHAV, 1), 16));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("start",
-					    porMIXED_FLOAT | porBEHAV_FLOAT));
+					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("pxifile", porTEXT,
 					    new TextPortion("")));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("minLam", porNUMBER,
@@ -1167,9 +1124,9 @@ void Init_algfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("LiapSolve", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Liap_BehavFloat, 
-				       PortionSpec(porBEHAV_FLOAT, 1), 12));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("start", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Liap_Behav,
+				       PortionSpec(porBEHAV, 1), 12));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("start", porBEHAV));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 2, ParamInfoType("stopAfter", porINTEGER,
@@ -1194,9 +1151,9 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 11, ParamInfoType("traceLevel", porINTEGER,
 					     new IntPortion(0)));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Liap_MixedFloat, 
-				       PortionSpec(porMIXED_FLOAT, 1), 11));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("start", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Liap_Mixed,
+				       PortionSpec(porMIXED, 1), 11));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("start", porMIXED));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("stopAfter", porINTEGER,
 					    new IntPortion(1)));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("nTries", porINTEGER,
@@ -1282,29 +1239,16 @@ void Init_algfunc(GSM *gsm)
 
 
 
-  FuncObj = new FuncDescObj("Payoff", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_BehavFloat, porNUMBER, 2,
+  FuncObj = new FuncDescObj("Payoff", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_Behav, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porEFPLAYER));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_BehavRational,
-				       porNUMBER, 2,
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Payoff_Mixed, porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV_RATIONAL));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porEFPLAYER));
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Payoff_MixedFloat, porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("profile", porMIXED_FLOAT));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("player", porNFPLAYER));
-
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Payoff_MixedRational,
-				       porNUMBER, 2,
-				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("profile", porMIXED_RATIONAL));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("player", porNFPLAYER));
-
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porMIXED));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porNFPLAYER));
   gsm->AddFunction(FuncObj);
 
 

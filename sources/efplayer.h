@@ -15,6 +15,7 @@ class EFPlayer   {
   friend class Efg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
+  friend class BehavProfile<gNumber>;
   private:
     int number;
     gString name;

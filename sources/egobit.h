@@ -29,7 +29,7 @@ class EFGobitParams   {
 
 
 void Gobit(const Efg &, EFGobitParams &,
-	   const BehavProfile<double> &, gList<BehavSolution<double> > &,
+	   const BehavProfile<gNumber> &, gList<BehavSolution<double> > &,
 	   long &nevals, long &nits);
 
 

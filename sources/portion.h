@@ -634,21 +634,23 @@ public:
 //                           Mixed class
 //---------------------------------------------------------------------
 #include "mixed.h"
-template <class T> class MixedPortion : public Portion  {
+
+class MixedPortion : public Portion  {
 protected:
-  MixedProfile<T> ** _Value;
+  MixedProfile<gNumber> ** _Value;
   bool _ref;
 
-  MixedPortion(MixedProfile<T> *&, bool);
+  MixedPortion(MixedProfile<gNumber> *&, bool);
 
 public:
-  MixedPortion(MixedProfile<T> *);
+  MixedPortion(MixedProfile<gNumber> *);
+  MixedPortion(MixedProfile<double> *);
+  MixedPortion(MixedProfile<gRational> *);
   virtual ~MixedPortion();
 
-  MixedProfile<T> *Value(void) const;
-  void SetValue(MixedProfile<T> *);
+  MixedProfile<gNumber> *Value(void) const;
+  void SetValue(MixedProfile<gNumber> *);
   PortionSpec Spec(void) const;
-  Precision SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;
@@ -665,21 +667,23 @@ public:
 //                            Behav class
 //---------------------------------------------------------------------
 #include "behav.h"
-template <class T> class BehavPortion : public Portion  {
+
+class BehavPortion : public Portion  {
 protected:
-  BehavProfile<T> ** _Value;
+  BehavProfile<gNumber> ** _Value;
   bool _ref;
 
-  BehavPortion(BehavProfile<T> *&, bool);
+  BehavPortion(BehavProfile<gNumber> *&, bool);
 
 public:
-  BehavPortion(BehavProfile<T> *);
+  BehavPortion(BehavProfile<gNumber> *);
+  BehavPortion(BehavProfile<double> *);
+  BehavPortion(BehavProfile<gRational> *);
   virtual ~BehavPortion();
 
-  BehavProfile<T> *Value(void) const;
-  void SetValue(BehavProfile<T> *);
+  BehavProfile<gNumber> *Value(void) const;
+  void SetValue(BehavProfile<gNumber> *);
   PortionSpec Spec(void) const;
-  Precision SubType(void) const;
 
   void Output(gOutput& s) const;
   gString OutputString( void ) const;

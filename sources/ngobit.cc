@@ -1,7 +1,7 @@
 //
 // FILE: ngobit.cc -- Implementation of gobit on normal form games
 //
-// @(#)ngobit.cc	2.3.1.1 7/16/97
+// $Id$
 //
 
 #include <math.h>
@@ -41,7 +41,7 @@ class NFGobitFunc : public gC2Function<double>  {
     bool Hessian(const gVector<double> &, gMatrix<double> &);
 
   public:
-    NFGobitFunc(const Nfg &, const MixedProfile<double> &);
+    NFGobitFunc(const Nfg &, const MixedProfile<gNumber> &);
     virtual ~NFGobitFunc();
     
     void SetLambda(double l)   { _Lambda = l; }
@@ -50,9 +50,12 @@ class NFGobitFunc : public gC2Function<double>  {
 
 
 NFGobitFunc::NFGobitFunc(const Nfg &N,
-			 const MixedProfile<double> &start)
-  : _nevals(0L), _nfg(N), _p(start)
+			 const MixedProfile<gNumber> &start)
+  : _nevals(0L), _nfg(N), _p(N, start.Support())
 {
+  for (int i = 1; i <= _p.Length(); i++)
+    _p[i] = start[i];
+    
   _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
   for (int i = 1; i <= _nfg.NumPlayers(); i++)  
     _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
@@ -164,7 +167,7 @@ extern bool DFP(gPVector<double> &p, gC2Function<double> &func,
 
 
 void Gobit(const Nfg &N, NFGobitParams &params,
-	   const MixedProfile<double> &start,
+	   const MixedProfile<gNumber> &start,
 	   gList<MixedSolution<double> > &solutions,
 	   long &nevals, long &nits)
 {
@@ -185,7 +188,9 @@ void Gobit(const Nfg &N, NFGobitParams &params,
     num_steps = (int) (log(params.maxLam / params.minLam) /
 		       log(params.delLam + 1.0));
 
-  MixedProfile<double> p(start);
+  MixedProfile<double> p(start.Game(), start.Support());
+  for (int j = 1; j <= p.Length(); j++)
+    p[j] = start[j];
 
   for (nit = 1; !params.status.Get() &&
        Lambda <= params.maxLam &&

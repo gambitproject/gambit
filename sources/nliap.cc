@@ -161,13 +161,15 @@ extern bool DFP(gPVector<double> &p,
 
 
 bool Liap(const Nfg &N, NFLiapParams &params,
-	  const MixedProfile<double> &start,
+	  const MixedProfile<gNumber> &start,
 	  gList<MixedSolution<double> > &solutions,
 	  long &nevals, long &niters)
 {
-  NFLiapFunc F(N, start);
+  MixedProfile<double> p(start.Game(), start.Support());
+  for (int i = 1; i <= p.Length(); i++)
+    p[i] = start[i];
 
-  MixedProfile<double> p(start);
+  NFLiapFunc F(N, p);
 
   double value;
   int iter;

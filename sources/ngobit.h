@@ -29,7 +29,7 @@ class NFGobitParams  {
 
 
 void Gobit(const Nfg &, NFGobitParams &,
-	   const MixedProfile<double> &, gList<MixedSolution<double> > &,
+	   const MixedProfile<gNumber> &, gList<MixedSolution<double> > &,
 	   long &nevals, long &nits);
 
 

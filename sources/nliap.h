@@ -27,7 +27,7 @@ class NFLiapParams   {
 
 
 bool Liap(const Nfg &, NFLiapParams &,
-	  const MixedProfile<double> &, gList<MixedSolution<double> > &,
+	  const MixedProfile<gNumber> &, gList<MixedSolution<double> > &,
 	  long &nevals, long &niters);
 
 #endif   // NLIAP_H

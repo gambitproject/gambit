@@ -1,7 +1,7 @@
 //
 // FILE: gsm.cc  implementation of GSM (Stack machine)
 //
-// $Id$
+// @(#)gsm.cc	2.19 30 Jul 1997
 //
 
 
@@ -1614,35 +1614,13 @@ void GSM::InvalidateGameProfile( void* game, bool IsEfg )
       {
 	if( !IsEfg && varslist[i]->Spec() == porMIXED )
 	{
-	  switch(varslist[i]->Spec().Type)
-	  {
-	  case porMIXED_FLOAT:
-	    ((MixedSolution<double>*) ((MixedPortion<double> *) 
+	    ((MixedSolution<gNumber>*) ((MixedPortion *)
 				       varslist[i])->Value())->Invalidate();
-	    break;
-	  case porMIXED_RATIONAL:
-	    ((MixedSolution<gRational>*) ((MixedPortion<gRational> *) 
-					  varslist[i])->Value())->Invalidate();
-	    break;
-	  default:
-	    assert( 0 );
-	  }
 	}
 	else if( IsEfg && varslist[i]->Spec() == porBEHAV )
 	{
-	  switch(varslist[i]->Spec().Type)
-	  {
-	  case porBEHAV_FLOAT:
-	    ((BehavSolution<double>*) ((BehavPortion<double> *)
+	    ((BehavSolution<gNumber>*) ((BehavPortion *)
 				       varslist[i])->Value())->Invalidate();
-	    break;
-	  case porBEHAV_RATIONAL:
-	    ((BehavSolution<gRational>*) ((BehavPortion<gRational> *) 
-					  varslist[i])->Value())->Invalidate();
-	    break;
-	  default:
-	    assert( 0 );
-	  }
 	}
       }
     }

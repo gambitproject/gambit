@@ -34,6 +34,14 @@ Portion *ArrayToList(const gArray<gRational> &A)
   return ret;
 }
 
+Portion *ArrayToList(const gArray<gNumber> &A)
+{
+  ListPortion *ret = new ListValPortion;
+  for (int i = 1; i <= A.Length(); i++)
+    ret->Append(new NumberPortion(A[i]));
+  return ret;
+}
+
 Portion *ArrayToList(const gArray<Action *> &A)
 {
   ListPortion *ret = new ListValPortion;
@@ -128,6 +136,27 @@ Portion *gDPVectorToList(const gDPVector<double> &A)
 }
 
 Portion* gDPVectorToList(const gDPVector<gRational> &A)
+{
+  ListPortion* p;
+  ListPortion* s1;
+  ListPortion* s2;
+  p = new ListValPortion();
+  int l = 1;
+  for (int i = 1; i <= A.DPLengths().Length(); i++)  {
+    s1 = new ListValPortion();
+    for (int j = 1; j <= A.DPLengths()[i]; j++)  {
+      s2 = new ListValPortion();
+      for (int k = 1; k <= A.Lengths()[l]; k++)
+	s2->Append(new NumberPortion(A(i, j, k)));
+      l++;
+      s1->Append(s2);
+    }
+    p->Append(s1);
+  }
+  return p;
+}
+
+Portion* gDPVectorToList(const gDPVector<gNumber> &A)
 {
   ListPortion* p;
   ListPortion* s1;

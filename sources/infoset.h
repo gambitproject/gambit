@@ -46,6 +46,7 @@ class Infoset   {
   friend class EFPlayer;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
+  friend class BehavProfile<gNumber>;
   friend class Lexicon;
 
   protected:

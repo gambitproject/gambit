@@ -1355,4 +1355,13 @@ void Efg::Payoff(const gArray<gArray<int> *> &profile,
 }
 
 
+#include "efg.imp"
+template class BehavNode<gNumber>;
+template class BehavProfile<gNumber>;
+template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 
+#include "behavsol.imp"
+template class BehavSolution<gNumber>;
+template gOutput &operator<<(gOutput &, const BehavSolution<gNumber> &);
+
+template class gArray<BehavNode<gNumber> *>;

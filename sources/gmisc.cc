@@ -51,6 +51,11 @@ double abs(double a)
 }
 #endif   //# hpux
 
+gNumber abs(const gNumber &a)
+{
+  if (a > gNumber(0))  return a;  else return -a;
+}
+
 //
 // Nasty little hack to make Borland C happy
 #ifdef __BORLANDC__
@@ -173,7 +178,7 @@ gString ToString(double d)
 
 gString ToString(const gNumber &n)
 {
-  if (n.GetRep() == gDOUBLE)
+  if (n.GetRep() == precDOUBLE)
     return ToString((double) n);
   else
     return ToString((gRational) n);
@@ -367,7 +372,7 @@ void gEpsilon(gRational &v, int /* i */)
 
 void gEpsilon(gNumber &n, int i)
 {
-  if (n.GetRep() == gRATIONAL)
+  if (n.GetRep() == precRATIONAL)
     n = (gRational)0;
   else
     n = pow(10.0,-i);

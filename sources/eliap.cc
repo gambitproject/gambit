@@ -240,7 +240,7 @@ int EFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 extern void MarkedSubgameRoots(const Efg &, gList<Node *> &);
 
 EFLiapBySubgame::EFLiapBySubgame(const Efg &E, const EFLiapParams &p,
-				 const BehavProfile<double> &s, int max)
+				 const BehavProfile<gNumber> &s, int max)
   : SubgameSolver<double>(E, s.Support(), max),
     nevals(0), subgame_number(0),
     infoset_subgames(E.NumInfosets()), params(p), start(s)

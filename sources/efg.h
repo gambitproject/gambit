@@ -205,6 +205,10 @@ protected:
 		             const Efg &E, BehavProfile<gRational> &bp);
     friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
 			     const Nfg &, MixedProfile<gRational> &);
+    friend void MixedToBehav(const Nfg &N, const MixedProfile<gNumber> &mp,
+		             const Efg &E, BehavProfile<gNumber> &bp);
+    friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
+			     const Nfg &, MixedProfile<gNumber> &);
 #endif   // EFG_ONLY
 };
 
