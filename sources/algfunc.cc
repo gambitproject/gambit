@@ -711,6 +711,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 {
   BehavProfile<gNumber> start(*((BehavPortion *) param[0])->Value());
   Efg &E = start.Game();
+  const EFSupport &supp = (*((BehavPortion *) param[0])->Value()).Support();
   
   if (((BoolPortion *) param[1])->Value())   {
     NFLiapParams LP;
@@ -729,7 +730,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     try {
       efgLiapNfgSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(EFSupport(E));
+      solutions = algorithm.Solve(supp);
       ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
@@ -760,7 +761,7 @@ static Portion *GSM_Liap_Behav(Portion **param)
 
     try {
       efgLiapSolve algorithm(E, LP, start);
-      solutions = algorithm.Solve(EFSupport(E));
+      solutions = algorithm.Solve(supp);
       ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
       ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
