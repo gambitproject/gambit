@@ -115,16 +115,16 @@ widgetActionTree::widgetActionTree(EfgSupportWindow *p_parent)
   : wxTreeCtrl(p_parent, idACTIONTREE), m_parent(p_parent)
 { 
   m_menu = new wxMenu;
-  m_menu->Append(efgmenuSUPPORT_DUPLICATE, "Duplicate support",
+  m_menu->Append(GBT_EFG_SUPPORT_DUPLICATE, "Duplicate support",
 		 "Duplicate this support");
-  m_menu->Append(efgmenuSUPPORT_DELETE, "Delete support",
+  m_menu->Append(GBT_EFG_SUPPORT_DELETE, "Delete support",
 		 "Delete this support");
 }
 
 void widgetActionTree::OnRightClick(wxTreeEvent &p_event)
 {
   // Cannot delete the "full support"
-  m_menu->Enable(efgmenuSUPPORT_DELETE, (m_parent->GetSupport() > 0));
+  m_menu->Enable(GBT_EFG_SUPPORT_DELETE, (m_parent->GetSupport() > 0));
   PopupMenu(m_menu, p_event.GetPoint());
 }
 

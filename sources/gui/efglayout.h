@@ -29,7 +29,6 @@
 
 #include "base/base.h"
 #include "treedraw.h"
-#include "efgconst.h"
 #include "gamedoc.h"
 
 class NodeEntry {

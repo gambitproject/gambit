@@ -30,8 +30,10 @@
 #include "wx/grid.h"
 #include "gamedoc.h"
 
-class EfgNavigateWindow : public wxGrid, public gbtGameView {
+class EfgNavigateWindow : public wxPanel, public gbtGameView {
 private:
+  wxGrid *m_grid;
+
   virtual void OnUpdate(gbtGameView *);
 
 public:

@@ -36,7 +36,7 @@ const int idPOPUP_DELETE = 2002;
 const int idPOPUP_ATTACH = 2003;
 const int idPOPUP_DETACH = 2004;
 
-BEGIN_EVENT_TABLE(EfgOutcomeWindow, wxGrid)
+BEGIN_EVENT_TABLE(EfgOutcomeWindow, wxPanel)
   EVT_KEY_DOWN(EfgOutcomeWindow::OnChar)
   EVT_GRID_CELL_CHANGE(EfgOutcomeWindow::OnCellChanged)
   EVT_GRID_CELL_RIGHT_CLICK(EfgOutcomeWindow::OnCellRightClick)
@@ -49,26 +49,28 @@ END_EVENT_TABLE()
 
 EfgOutcomeWindow::EfgOutcomeWindow(gbtGameDocument *p_game,
 				   EfgShow *p_efgShow, wxWindow *p_parent)
-  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
-    gbtGameView(p_game),
+  : wxPanel(p_parent, -1), gbtGameView(p_game),
     m_parent(p_efgShow)
 {
-  CreateGrid(m_game->m_efg->NumOutcomes(),
-	     m_game->m_efg->NumPlayers() + 1);
-  for (int row = 0; row < GetRows(); row++) {
-    for (int col = 1; col < GetCols(); col++) {
-      SetCellEditor(row, col, new NumberEditor);
+  SetAutoLayout(true);
+
+  m_grid = new wxGrid(this, -1, wxDefaultPosition, wxSize(200, 200));
+
+  m_grid->CreateGrid(m_game->m_efg->NumOutcomes(),
+		     m_game->m_efg->NumPlayers() + 1);
+  for (int row = 0; row < m_grid->GetRows(); row++) {
+    for (int col = 1; col < m_grid->GetCols(); col++) {
+      m_grid->SetCellEditor(row, col, new NumberEditor);
     }
   }
       
-  EnableEditing(true);
-  SetSelectionMode(wxGridSelectRows);
-  SetLabelSize(wxVERTICAL, 0);
-  SetLabelValue(wxHORIZONTAL, "Name", 0);
-  SetDefaultCellAlignment(wxCENTER, wxCENTER);
-  EnableDragRowSize(false);
-
-  AdjustScrollbars();
+  m_grid->EnableEditing(true);
+  m_grid->SetSelectionMode(m_grid->wxGridSelectRows);
+  m_grid->SetLabelSize(wxVERTICAL, 0);
+  m_grid->SetLabelValue(wxHORIZONTAL, "Name", 0);
+  m_grid->SetDefaultCellAlignment(wxCENTER, wxCENTER);
+  m_grid->EnableDragRowSize(false);
+  m_grid->AdjustScrollbars();
 
   m_menu = new wxMenu("Outcomes");
   m_menu->Append(idPOPUP_NEW, "New outcome", "Create a new outcome");
@@ -79,6 +81,13 @@ EfgOutcomeWindow::EfgOutcomeWindow(gbtGameDocument *p_game,
   m_menu->Append(idPOPUP_DETACH, "Detach outcome",
 		 "Detach the outcome at the cursor");
 
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_grid, 1, wxALL | wxEXPAND, 0);
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
   Show(true);
 }
 
@@ -86,23 +95,23 @@ void EfgOutcomeWindow::UpdateValues(void)
 {
   const efgGame &efg = *m_game->m_efg;
 
-  if (GetCols() < efg.NumPlayers() + 1) {
-    AppendCols(efg.NumPlayers() + 1 - GetCols());
+  if (m_grid->GetCols() < efg.NumPlayers() + 1) {
+    m_grid->AppendCols(efg.NumPlayers() + 1 - m_grid->GetCols());
 
-    for (int row = 0; row < GetRows(); row++) {
-      for (int col = 1; col < GetCols(); col++) {
-	SetCellEditor(row, col, new NumberEditor);
+    for (int row = 0; row < m_grid->GetRows(); row++) {
+      for (int col = 1; col < m_grid->GetCols(); col++) {
+	m_grid->SetCellEditor(row, col, new NumberEditor);
       }
     }
   }
 
-  if (GetRows() != efg.NumOutcomes()) {
-    DeleteRows(0, GetRows());
-    AppendRows(efg.NumOutcomes());
+  if (m_grid->GetRows() != efg.NumOutcomes()) {
+    m_grid->DeleteRows(0, m_grid->GetRows());
+    m_grid->AppendRows(efg.NumOutcomes());
 
-    for (int row = 0; row < GetRows(); row++) {
-      for (int col = 1; col < GetCols(); col++) {
-	SetCellEditor(row, col, new NumberEditor);
+    for (int row = 0; row < m_grid->GetRows(); row++) {
+      for (int col = 1; col < m_grid->GetCols(); col++) {
+	m_grid->SetCellEditor(row, col, new NumberEditor);
       }
     }
   }
@@ -110,24 +119,27 @@ void EfgOutcomeWindow::UpdateValues(void)
   for (int outc = 1; outc <= efg.NumOutcomes(); outc++) {
     gbtEfgOutcome outcome = efg.GetOutcome(outc);
 
-    SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
+    m_grid->SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      SetCellValue((char *) ToText(efg.Payoff(outcome, efg.Players()[pl])),
-		   outc - 1, pl);
+      m_grid->SetCellValue((char *) ToText(efg.Payoff(outcome,
+						      efg.Players()[pl])),
+			   outc - 1, pl);
     }
   }
 
   for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
     if (efg.Players()[pl]->GetName() != "") {
-      SetLabelValue(wxHORIZONTAL, (char *) efg.Players()[pl]->GetName(), pl);
+      m_grid->SetLabelValue(wxHORIZONTAL,
+			    (char *) efg.Players()[pl]->GetName(), pl);
     }
     else {
-      SetLabelValue(wxHORIZONTAL, wxString::Format("Player %d", pl), pl);
+      m_grid->SetLabelValue(wxHORIZONTAL,
+			    wxString::Format("Player %d", pl), pl);
     }
   }
 
-  AdjustScrollbars();
+  m_grid->AdjustScrollbars();
 }
 
 //
@@ -136,12 +148,12 @@ void EfgOutcomeWindow::UpdateValues(void)
 //
 void EfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
 {
-  if (GetCursorRow() == GetRows() - 1 &&
+  if (m_grid->GetCursorRow() == m_grid->GetRows() - 1 &&
       (p_event.GetKeyCode() == WXK_DOWN ||
        p_event.GetKeyCode() == WXK_RETURN)) {
-    if (IsCellEditControlEnabled()) {
-      SaveEditControlValue();
-      HideCellEditControl();
+    if (m_grid->IsCellEditControlEnabled()) {
+      m_grid->SaveEditControlValue();
+      m_grid->HideCellEditControl();
     }
     gText outcomeName = m_game->UniqueEfgOutcomeName();
     gbtEfgOutcome outcome = m_game->m_efg->NewOutcome();
@@ -149,13 +161,13 @@ void EfgOutcomeWindow::OnChar(wxKeyEvent &p_event)
     for (int pl = 1; pl <= m_game->m_efg->NumPlayers(); pl++) {
       m_game->m_efg->SetPayoff(outcome, pl, gNumber(0));
     }
-    AppendRows();
+    m_grid->AppendRows();
     for (int pl = 1; pl <= m_game->m_efg->NumPlayers(); pl++) {
-      SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+      m_grid->SetCellEditor(m_grid->GetRows() - 1, pl, new NumberEditor);
     }
     m_parent->OnOutcomesEdited();
     UpdateValues();
-    SetGridCursor(GetRows() - 1, 0);
+    m_grid->SetGridCursor(m_grid->GetRows() - 1, 0);
   }
   else {
     p_event.Skip();
@@ -170,12 +182,12 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
   if (col == 0) { 
     // Edited cell label
     gbtEfgOutcome outcome = m_game->m_efg->GetOutcome(row + 1);
-    m_game->m_efg->SetLabel(outcome, GetCellValue(row, col).c_str());
+    m_game->m_efg->SetLabel(outcome, m_grid->GetCellValue(row, col).c_str());
   }
   else {
     // Edited payoff
     m_game->m_efg->SetPayoff(m_game->m_efg->GetOutcome(row + 1), col,
-				ToNumber(GetCellValue(row, col).c_str()));
+			     ToNumber(m_grid->GetCellValue(row, col).c_str()));
   }
 
   m_parent->OnOutcomesEdited();
@@ -201,10 +213,10 @@ void EfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
   gbtEfgOutcome outcome = m_game->m_efg->NewOutcome();
   m_game->m_efg->SetLabel(outcome, outcomeName);
   // Appending the row here keeps currently selected row selected
-  AppendRows();
+  m_grid->AppendRows();
   for (int pl = 1; pl <= m_game->m_efg->NumPlayers(); pl++) {
     m_game->m_efg->SetPayoff(outcome, pl, gNumber(0));
-    SetCellEditor(GetRows() - 1, pl, new NumberEditor);
+    m_grid->SetCellEditor(m_grid->GetRows() - 1, pl, new NumberEditor);
   }
   m_parent->OnOutcomesEdited();
   UpdateValues();
@@ -212,8 +224,9 @@ void EfgOutcomeWindow::OnPopupOutcomeNew(wxCommandEvent &)
 
 void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 {
-  if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
-    gbtEfgOutcome outcome = m_game->m_efg->GetOutcome(GetGridCursorRow() + 1);
+  if (m_grid->GetGridCursorRow() >= 0 && 
+      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
+    gbtEfgOutcome outcome = m_game->m_efg->GetOutcome(m_grid->GetGridCursorRow() + 1);
     m_game->m_efg->DeleteOutcome(outcome);
     m_parent->OnOutcomesEdited();
   }
@@ -222,9 +235,10 @@ void EfgOutcomeWindow::OnPopupOutcomeDelete(wxCommandEvent &)
 
 void EfgOutcomeWindow::OnPopupOutcomeAttach(wxCommandEvent &)
 {
-  if (GetGridCursorRow() >= 0 && GetGridCursorRow() < GetRows()) {
+  if (m_grid->GetGridCursorRow() >= 0 && 
+      m_grid->GetGridCursorRow() < m_grid->GetRows()) {
     m_game->m_efg->SetOutcome(m_game->Cursor(),
-			      m_game->m_efg->GetOutcome(GetGridCursorRow() + 1));
+			      m_game->m_efg->GetOutcome(m_grid->GetGridCursorRow() + 1));
     m_parent->OnOutcomesEdited();
   }
 }

@@ -30,8 +30,9 @@
 #include "wx/grid.h"
 #include "efgshow.h"
 
-class EfgOutcomeWindow : public wxGrid, public gbtGameView {
+class EfgOutcomeWindow : public wxPanel, public gbtGameView {
 private:
+  wxGrid *m_grid;
   EfgShow *m_parent;
   wxMenu *m_menu;
 

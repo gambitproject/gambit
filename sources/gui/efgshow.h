@@ -28,7 +28,6 @@
 #define EFGSHOW_H
 
 #include "wx/listctrl.h"
-#include "wx/sashwin.h"
 #include "wx/printdlg.h"
 #include "wx/notebook.h"
 
@@ -37,9 +36,7 @@
 #include "nash/behavsol.h"
 
 class EfgProfileList;
-class EfgNavigateWindow;
 class EfgOutcomeWindow;
-class EfgSupportWindow;
 class TreeWindow;
 
 const int idEFG_SOLUTION_LIST = 900;
@@ -49,26 +46,18 @@ private:
   TreeWindow *m_treeWindow;
 
   EfgProfileList *m_profileTable;
-  wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
-  wxSashWindow *m_solutionSashWindow;
-
   wxNotebook *m_infoNotebook;
-  EfgNavigateWindow *m_navigateWindow;
   EfgOutcomeWindow *m_outcomeWindow;
-  EfgSupportWindow *m_supportWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
 
   void MakeMenus(void);
   void MakeToolbar(void);
-  void AdjustSizes(void);
   
   // Event handlers
   void OnCloseWindow(wxCloseEvent &);
   void OnFocus(wxFocusEvent &);
-  void OnSize(wxSizeEvent &);
-  void OnSashDrag(wxSashEvent &);
 
   // Menu event handlers
   void OnFileNew(wxCommandEvent &);
@@ -141,7 +130,7 @@ private:
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(gbtGameDocument *p_game, wxWindow *p_parent);
-  virtual ~EfgShow();
+  ~EfgShow();
 
   // PROFILE ACCESS AND MANIPULATION
   void AddProfile(const BehavSolution &, bool map);
@@ -151,7 +140,6 @@ public:
   gText UniqueProfileName(void) const;
 
   void UpdateMenus(void);
-  int NumDecimals(void) const;
 
   void OnOutcomesEdited(void);
 

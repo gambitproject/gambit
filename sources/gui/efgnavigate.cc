@@ -32,27 +32,41 @@
 
 EfgNavigateWindow::EfgNavigateWindow(gbtGameDocument *p_game,
 				     wxWindow *p_parent)
-  : wxGrid(p_parent, -1, wxDefaultPosition, wxDefaultSize),
+  : wxPanel(p_parent, -1, wxDefaultPosition, wxSize(200, 200)),
     gbtGameView(p_game)
 {
-  CreateGrid(10, 1);
-  SetEditable(false);
-  SetDefaultCellAlignment(wxCENTER, wxCENTER);
+  SetAutoLayout(true);
 
-  SetLabelValue(wxVERTICAL, "Node label", 0);
-  SetLabelValue(wxVERTICAL, "Pr(node reached)", 1);
-  SetLabelValue(wxVERTICAL, "Node value", 2);
-  SetLabelValue(wxVERTICAL, "Information set", 3);
-  SetLabelValue(wxVERTICAL, "Pr(infoset reached)", 4);
-  SetLabelValue(wxVERTICAL, "Belief", 5);
-  SetLabelValue(wxVERTICAL, "Information set value", 6);
-  SetLabelValue(wxVERTICAL, "Incoming action label", 7);
-  SetLabelValue(wxVERTICAL, "Pr(incoming action)", 8);
-  SetLabelValue(wxVERTICAL, "Incoming action value", 9);
+  m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
+  m_grid->CreateGrid(10, 1);
+  m_grid->SetEditable(false);
+  m_grid->SetMargins(0, 0);
+  m_grid->SetDefaultCellAlignment(wxCENTER, wxCENTER);
 
-  SetLabelSize(wxHORIZONTAL, 0);
-  SetLabelSize(wxVERTICAL, 150);
-  AdjustScrollbars();
+  m_grid->SetLabelValue(wxVERTICAL, "Node label", 0);
+  m_grid->SetLabelValue(wxVERTICAL, "Pr(node reached)", 1);
+  m_grid->SetLabelValue(wxVERTICAL, "Node value", 2);
+  m_grid->SetLabelValue(wxVERTICAL, "Information set", 3);
+  m_grid->SetLabelValue(wxVERTICAL, "Pr(infoset reached)", 4);
+  m_grid->SetLabelValue(wxVERTICAL, "Belief", 5);
+  m_grid->SetLabelValue(wxVERTICAL, "Information set value", 6);
+  m_grid->SetLabelValue(wxVERTICAL, "Incoming action label", 7);
+  m_grid->SetLabelValue(wxVERTICAL, "Pr(incoming action)", 8);
+  m_grid->SetLabelValue(wxVERTICAL, "Incoming action value", 9);
+
+  m_grid->SetLabelSize(wxHORIZONTAL, 0);
+  m_grid->SetLabelSize(wxVERTICAL, 150);
+  m_grid->SetSize(m_grid->GetLabelSize(wxVERTICAL) +
+		  m_grid->GetColumnWidth(0), 200);
+  m_grid->AdjustScrollbars();
+  
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+  topSizer->Add(m_grid, 1, wxALL | wxEXPAND, 0);
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+  
   Show(true);
 }
 
@@ -61,17 +75,17 @@ void EfgNavigateWindow::OnUpdate(gbtGameView *)
   Node *cursor = m_game->m_cursor;
   
   if (!cursor) { // no data available
-    for (int i = 0; i < GetRows(); i++) { 
-      SetCellValue("", i, 0);
+    for (int i = 0; i < m_grid->GetRows(); i++) { 
+      m_grid->SetCellValue("", i, 0);
     }
     return;
   }
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) cursor->GetName(), 0, 0);
-    SetCellValue((char *) m_game->GetRealizProb(cursor), 1, 0);
-    SetCellValue((char *) m_game->GetNodeValue(cursor), 2, 0);
+    m_grid->SetCellValue((char *) cursor->GetName(), 0, 0);
+    m_grid->SetCellValue((char *) m_game->GetRealizProb(cursor), 1, 0);
+    m_grid->SetCellValue((char *) m_game->GetNodeValue(cursor), 2, 0);
 
     gText tmpstr;
   
@@ -86,10 +100,10 @@ void EfgNavigateWindow::OnUpdate(gbtGameView *)
 		  ToText(cursor->GetInfoset()->GetNumber()) + ")");
     }
 	  
-    SetCellValue((char *) tmpstr, 3, 0);
-    SetCellValue((char *) m_game->GetInfosetProb(cursor), 4, 0);
-    SetCellValue((char *) m_game->GetBeliefProb(cursor), 5, 0);
-    SetCellValue((char *) m_game->GetInfosetValue(cursor), 6, 0);
+    m_grid->SetCellValue((char *) tmpstr, 3, 0);
+    m_grid->SetCellValue((char *) m_game->GetInfosetProb(cursor), 4, 0);
+    m_grid->SetCellValue((char *) m_game->GetBeliefProb(cursor), 5, 0);
+    m_grid->SetCellValue((char *) m_game->GetInfosetValue(cursor), 6, 0);
 	
     Node *p = cursor->GetParent();
 
@@ -97,14 +111,14 @@ void EfgNavigateWindow::OnUpdate(gbtGameView *)
       int branch = 0;
       for (branch = 1; p->GetChild(branch) != cursor; branch++);
 
-      SetCellValue((char *) cursor->GetAction()->GetName(), 7, 0);
-      SetCellValue((char *) m_game->GetActionProb(p, branch), 8, 0);
-      SetCellValue((char *) m_game->GetActionValue(p, branch), 9, 0);
+      m_grid->SetCellValue((char *) cursor->GetAction()->GetName(), 7, 0);
+      m_grid->SetCellValue((char *) m_game->GetActionProb(p, branch), 8, 0);
+      m_grid->SetCellValue((char *) m_game->GetActionValue(p, branch), 9, 0);
     }
     else {
-      SetCellValue("N/A (root)", 7, 0);
-      SetCellValue("1", 8, 0);
-      SetCellValue("N/A", 9, 0);
+      m_grid->SetCellValue("N/A (root)", 7, 0);
+      m_grid->SetCellValue("1", 8, 0);
+      m_grid->SetCellValue("N/A", 9, 0);
     }
   }	
   catch (gException &) { }

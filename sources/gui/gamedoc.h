@@ -68,6 +68,7 @@ public:
 
   gbtGameDocument(efgGame *p_efg);
   gbtGameDocument(Nfg *p_nfg);
+  ~gbtGameDocument();
   
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);

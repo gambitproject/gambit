@@ -40,18 +40,18 @@ END_EVENT_TABLE()
 
 EfgProfileList::EfgProfileList(gbtGameDocument *p_game, wxWindow *p_parent)
   : wxListCtrl(p_parent, idEFG_SOLUTION_LIST, wxDefaultPosition,
-	       wxDefaultSize, wxLC_REPORT | wxLC_SINGLE_SEL),
+	       wxSize(150, 100), wxLC_REPORT | wxLC_SINGLE_SEL),
     gbtGameView(p_game)
 {
   m_menu = new wxMenu("Profiles");
-  m_menu->Append(efgmenuPROFILES_NEW, "New profile", "Create a new profile");
-  m_menu->Append(efgmenuPROFILES_DUPLICATE, "Duplicate profile",
+  m_menu->Append(GBT_EFG_PROFILES_NEW, "New profile", "Create a new profile");
+  m_menu->Append(GBT_EFG_PROFILES_DUPLICATE, "Duplicate profile",
 		 "Duplicate this profile");
-  m_menu->Append(efgmenuPROFILES_DELETE, "Delete profile", 
+  m_menu->Append(GBT_EFG_PROFILES_DELETE, "Delete profile", 
 		 "Delete this profile");
-  m_menu->Append(efgmenuPROFILES_PROPERTIES, "Properties",
+  m_menu->Append(GBT_EFG_PROFILES_PROPERTIES, "Properties",
 		 "View and edit properties of this profile");
-  m_menu->Append(efgmenuPROFILES_REPORT, "Report",
+  m_menu->Append(GBT_EFG_PROFILES_REPORT, "Report",
 		 "Generate a report with information on profiles");
 }
 
@@ -123,10 +123,10 @@ void EfgProfileList::OnUpdate(gbtGameView *)
 
 void EfgProfileList::OnRightClick(wxMouseEvent &p_event)
 {
-  m_menu->Enable(efgmenuPROFILES_DUPLICATE, m_game->m_currentProfile > 0);
-  m_menu->Enable(efgmenuPROFILES_DELETE, m_game->m_currentProfile > 0);
-  m_menu->Enable(efgmenuPROFILES_PROPERTIES, m_game->m_currentProfile > 0);
-  m_menu->Enable(efgmenuPROFILES_REPORT, m_game->m_currentProfile > 0);
+  m_menu->Enable(GBT_EFG_PROFILES_DUPLICATE, m_game->m_currentProfile > 0);
+  m_menu->Enable(GBT_EFG_PROFILES_DELETE, m_game->m_currentProfile > 0);
+  m_menu->Enable(GBT_EFG_PROFILES_PROPERTIES, m_game->m_currentProfile > 0);
+  m_menu->Enable(GBT_EFG_PROFILES_REPORT, m_game->m_currentProfile > 0);
   PopupMenu(m_menu, p_event.m_x, p_event.m_y);
 }
 

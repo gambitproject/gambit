@@ -44,6 +44,16 @@ gbtGameDocument::gbtGameDocument(Nfg *p_nfg)
     m_numDecimals(2)
 { }
 
+gbtGameDocument::~gbtGameDocument()
+{
+  if (m_nfg) {
+    delete m_nfg;
+  }
+  if (m_efg) {
+    delete m_efg;
+  }
+}
+
 void gbtGameDocument::AddView(gbtGameView *p_view)
 {
   m_views.Append(p_view);
@@ -252,7 +262,7 @@ void gbtGameView::OnUpdate(gbtGameView *)
 
 #include "base/glist.imp"
 template class gList<gbtGameView *>;
-
+template class gList<EFSupport *>;
 
 
 
