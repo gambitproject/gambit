@@ -29,6 +29,13 @@ if (a==SIGFPE)
 signal(SIGFPE, (fptr)SigFPEHandler);  //  reinstall signal handler
 }
 
+void SigSegFaultHandler(int)
+{
+  gerr << "A segmentation fault has occurred\n";
+  gCmdLineInput::RestoreTermAttr();
+  exit(1);
+}
+
 #define MATH_CONTINUE	0
 #define	MATH_IGNORE		1
 #define	MATH_QUIT			2
@@ -109,6 +116,10 @@ int main( int /*argc*/, char* argv[] )
   // Set up the error handling functions:
 #ifndef __BORLANDC__
   signal(SIGFPE, (fptr)SigFPEHandler);
+
+  signal(SIGSEGV, (fptr) SigSegFaultHandler);
+  signal(SIGABRT, (fptr) SigSegFaultHandler);
+  signal(SIGBUS,  (fptr) SigSegFaultHandler);
 #endif  
 
   _gsm = new GSM(256);
