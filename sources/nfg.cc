@@ -23,8 +23,9 @@ int BaseNfg::Product(const gArray<int> &dim)
   return accum;
 }
   
-BaseNfg::BaseNfg(const gArray<int> &dim)
-  : dimensions(dim), players(dim.Length()), results(Product(dim))
+BaseNfg::BaseNfg(const NfgPayoffs &pay, const gArray<int> &dim)
+  : dimensions(dim), players(dim.Length()), results(Product(dim)),
+    paytable((NfgPayoffs *) &pay)
 {
   for (int pl = 1; pl <= players.Length(); pl++)  {
     players[pl] = new NFPlayer(pl, this, dim[pl]);
@@ -41,7 +42,7 @@ BaseNfg::BaseNfg(const gArray<int> &dim)
 
 BaseNfg::BaseNfg (const BaseNfg &b)
   : title(b.title), dimensions(b.dimensions),
-    players(b.players.Length())
+    players(b.players.Length()), paytable(b.paytable)
 {
   for (int i = 1; i <= players.Length(); i++){
     players[i] = new NFPlayer(i, this, dimensions[i]);
@@ -127,14 +128,14 @@ void BaseNfg::SetOutcome(const gArray<int> &profile, NFOutcome *outcome)
   for (int i = 1; i <= profile.Length(); i++)
     index += players[i]->strategies[profile[i]]->index;
   results[index] = outcome;
-  BreakLink();
+//  BreakLink();
 }
 
 
 void BaseNfg::SetOutcome(const StrategyProfile &p, NFOutcome *outcome)
 {
   results[p.index + 1] = outcome;
-  BreakLink();
+//  BreakLink();
 }
 
 NFOutcome *BaseNfg::GetOutcome(const gArray<int> &profile) const 

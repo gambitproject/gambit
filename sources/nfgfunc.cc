@@ -99,8 +99,8 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
       T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
-    por = (T) ? new NfSupportValPortion(T, N, DOUBLE) :
-                new NfSupportValPortion(S, N, DOUBLE);
+    por = (T) ? new NfSupportValPortion(T, N) :
+                new NfSupportValPortion(S, N);
   }
   else  {
     Nfg<gRational> *N = (Nfg<gRational> *) ((NfSupportPortion *) param[0])->PayoffTable();
@@ -111,8 +111,8 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
       T = ComputeDominated(*N, *S, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
 
-    por = (T) ? new NfSupportValPortion(T, N, RATIONAL) :
-                new NfSupportValPortion(S, N, RATIONAL);
+    por = (T) ? new NfSupportValPortion(T, N) :
+                new NfSupportValPortion(S, N);
   }
 
   ((FloatPortion *) param[3])->Value() = watch.Elapsed();
@@ -141,13 +141,13 @@ static Portion *GSM_Float_Nfg(Portion **param)
 //----------
 // Game
 //----------
-
+/*
 static Portion* GSM_Game_NfgElements(Portion** param)
 {
   if (param[0]->Game())  {
     assert(!param[0]->GameIsEfg());
     BaseNfg *nfg = (BaseNfg *) param[0]->Game();
-    if (nfg->Type() == DOUBLE)
+    if (nfg->PayoffTable()->Type() == DOUBLE)
       return new NfgValPortion<double>((Nfg<double> *) nfg);
     else
       return new NfgValPortion<gRational>((Nfg<gRational> *) nfg);
@@ -155,6 +155,7 @@ static Portion* GSM_Game_NfgElements(Portion** param)
   else
     return 0;
 }
+*/
 
 //--------------
 // IsConstSum
@@ -176,42 +177,25 @@ static Portion *GSM_IsConstSum_Nfg(Portion **param)
 // LoadNfg
 //-----------
 
+extern int ReadNfgFile(gInput &f, Nfg<double> *& Ndbl, Nfg<gRational> *& Nrat);
+
 static Portion *GSM_LoadNfg(Portion **param)
 {
   gString file = ((TextPortion *) param[0])->Value();
 
   gFileInput f(file);
 
+  Nfg<double> *Ndbl = 0;
+  Nfg<gRational> *Nrat = 0;
+
   if (f.IsValid())   {
-    DataType type;
-    bool valid;
+    if (!ReadNfgFile(f, Ndbl, Nrat))  
+      return new ErrorPortion("Not a valid .nfg file");
 
-    NfgFileType(f, valid, type);
-    if (!valid)   return new ErrorPortion("Not a valid .nfg file");
-    
-    switch (type)   {
-      case DOUBLE:  {
-	Nfg<double> *N = 0;
-	ReadNfgFile((gInput &) f, N);
-
-	if (N)
-	  return new NfgValPortion<double>(N);
-	else
-	  return new ErrorPortion("Not a valid .nfg file");
-      }
-      case RATIONAL:   {
-	Nfg<gRational> *N = 0;
-	ReadNfgFile((gInput &) f, N);
-	
-	if (N)
-	  return new NfgValPortion<gRational>(N);
-	else
-	  return new ErrorPortion("Not a valid .nfg file");
-      }
-      default:
-	assert(0);
-	return 0;
-    }
+    if (Ndbl)
+      return new NfgValPortion<double>(Ndbl);
+    else
+      return new NfgValPortion<gRational>(Nrat);
   }
   else
     return new ErrorPortion("Unable to open file for reading");
@@ -777,14 +761,14 @@ static Portion *GSM_Support_Nfg(Portion **param)
 {
   if (param[0]->Spec().Type == porNFG_FLOAT)  {
     Nfg<double> &N = * ((NfgPortion<double> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N, DOUBLE);
+    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
   }
   else  {
     Nfg<gRational> &N = * ((NfgPortion<gRational> *) param[0])->Value();
-    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N, RATIONAL);
+    Portion *por = new NfSupportValPortion(new NFSupport(N.GameForm()), &N);
 
     por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
     return por;
@@ -835,12 +819,14 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
+/*
   FuncObj = new FuncDescObj("Game", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
+  */
 
   FuncObj = new FuncDescObj("IsConstSum", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSum_Nfg, porBOOL, 1));

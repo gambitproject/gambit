@@ -520,12 +520,13 @@ static Portion *GSM_CentroidEFSupport(Portion **param)
 static Portion *GSM_CentroidNFSupport(Portion **param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion *por;
 
-  if (S->BelongsTo().Type() == DOUBLE)
-    por = new MixedValPortion<double>(new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S));
+  if (N->Type() == DOUBLE)
+    por = new MixedValPortion<double>(new MixedSolution<double>((Nfg<double> &) *N, *S));
   else
-    por = new MixedValPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S));
+    por = new MixedValPortion<gRational>(new MixedSolution<gRational>((Nfg<gRational> &) *N, *S));
 
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
@@ -536,6 +537,7 @@ static Portion *GSM_CentroidNFSupport(Portion **param)
 // Game
 //-------
 
+/*
 static Portion* GSM_Game_NfgTypes(Portion** param)
 {
   if (param[0]->Game())  {
@@ -549,6 +551,7 @@ static Portion* GSM_Game_NfgTypes(Portion** param)
   else
     return 0;
 }
+*/
 
 static Portion* GSM_Game_EfgTypes(Portion** param)
 {
@@ -911,6 +914,7 @@ static Portion *GSM_LiapValue_MixedRational(Portion **param)
 Portion* GSM_Mixed_NFSupport(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   gArray<int> dim = S->NumStrats();
   Portion* por;
   MixedSolution<double> *Pd = 0;
@@ -921,14 +925,14 @@ Portion* GSM_Mixed_NFSupport(Portion** param)
   Portion* p1;
   Portion* p2;
 
-  switch(S->BelongsTo().Type())
+  switch (N->Type())
   {
   case DOUBLE:
-    Pd = new MixedSolution<double>((Nfg<double> &) S->BelongsTo(), *S);
+    Pd = new MixedSolution<double>((Nfg<double> &) *N, *S);
     datatype = porFLOAT;
     break;
   case RATIONAL:
-    Pr = new MixedSolution<gRational>((Nfg<gRational> &) S->BelongsTo(), *S);
+    Pr = new MixedSolution<gRational>((Nfg<gRational> &) *N, *S);
     datatype = porRATIONAL;
     break;
   default:
@@ -1559,14 +1563,14 @@ static Portion *GSM_Support_MixedFloat(Portion** param)
 {
   MixedProfile<double> *P = ((MixedPortion<double> *) param[0])->Value();
   return new NfSupportValPortion(new NFSupport(P->Support()),
-			         &P->BelongsTo(), DOUBLE);
+			         &P->BelongsTo());
 }
 
 static Portion *GSM_Support_MixedRational(Portion** param)
 {
   MixedProfile<gRational> *P = ((MixedPortion<gRational> *) param[0])->Value();
   return new NfSupportValPortion(new NFSupport(P->Support()),
-                                 &P->BelongsTo(), RATIONAL);
+                                 &P->BelongsTo());
 }
 
 
@@ -1669,16 +1673,18 @@ void Init_solfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Game", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("profile", porBEHAV));
+//  FuncObj = new FuncDescObj("Game", 4);
+  FuncObj = new FuncDescObj("Game", 2);
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("support", porEFSUPPORT));
+//  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
+//  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porMIXED));
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("profile", porBEHAV));
+
+//  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_NfgTypes, porNFG, 1));
+//  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNFSUPPORT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgTypes, porEFG, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   gsm->AddFunction(FuncObj);
 
 

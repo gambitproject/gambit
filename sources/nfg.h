@@ -38,6 +38,7 @@ class NFOutcome   {
 class NFPlayer;
 class Strategy;
 class StrategyProfile;
+class NfgPayoffs;
 
 template <class T> class Lexicon;
 template <class T> class Efg;
@@ -52,12 +53,11 @@ protected:
 
   gArray<NFOutcome *> results;
 
+  NfgPayoffs *paytable;
+
   void IndexStrategies(void);
-  virtual void BreakLink(void) = 0;
 
   int Product(const gArray<int> &);
-
-  NFOutcome *NewOutcome(void);
 
 public:
   
@@ -65,7 +65,7 @@ public:
   // Constructors, Destructors, Operators
   // ------------------------------------
   
-  BaseNfg(const gArray<int> &dim);
+  BaseNfg(const NfgPayoffs &p, const gArray<int> &dim);
   BaseNfg(const BaseNfg &b);
   virtual ~BaseNfg();
   
@@ -76,9 +76,6 @@ public:
   
   void SetTitle(const gString &s);
   const gString &GetTitle(void) const;
-
-  virtual DataType Type(void) const = 0;
-  virtual bool IsConstSum(void) const = 0;
 
   int NumPlayers(void) const;
   const gArray<NFPlayer *> &Players(void) const;
@@ -91,6 +88,10 @@ public:
   const gList<NFOutcome *> &Outcomes(void) const  { return outcomes; }
   int NumOutcomes(void) const   { return outcomes.Length(); }
 
+  NfgPayoffs *PayoffTable(void) const   { return paytable; }
+
+  NFOutcome *NewOutcome(void);
+
   void SetOutcome(const gArray<int> &profile, NFOutcome *outcome);
   NFOutcome *GetOutcome(const gArray<int> &profile) const;
   void SetOutcome(const StrategyProfile &p, NFOutcome *outcome);
@@ -100,10 +101,14 @@ public:
   NFOutcome *GetOutcome(int index) const   { return results[index]; }
 
   const gArray<Strategy *> &Strategies(int p) const;
-
-  virtual void WriteNfgFile(gOutput &) const = 0;
 };
 
+
+class NfgPayoffs   {
+  public:
+    virtual ~NfgPayoffs()  { }
+    virtual DataType Type(void) const = 0;
+};
 
 template <class T> class MixedProfile;
 template <class T> class NfgFile;
@@ -112,13 +117,14 @@ template <class T> class NfgFile;
 
 #include "grblock.h"
 
-template <class T> class Nfg : private BaseNfg {
+template <class T> class Nfg : public NfgPayoffs  {
 
 friend class MixedProfile<T>;
 friend class NfgFile<T>;
 friend class Lexicon<T>;
 friend void SetEfg(Nfg<T> *, Efg<T> *);
 private:
+  BaseNfg *gameform;
   Efg<T> *efg;
   gRectBlock<T> payoffs;
 
@@ -135,18 +141,18 @@ public:
   T MinPayoff(int pl = 0) const;
   T MaxPayoff(int pl = 0) const;
 
-  BaseNfg &GameForm(void) const   { return (BaseNfg &) *this; }
+  BaseNfg &GameForm(void) const   { return *gameform; }
 
-  int NumPlayers(void) const   { return BaseNfg::NumPlayers(); }
+  int NumPlayers(void) const   { return gameform->NumPlayers(); }
   const gArray<NFPlayer *> &Players(void) const
-    { return BaseNfg::Players(); }
+    { return gameform->Players(); }
 
-  int NumStrats(int pl) const  { return BaseNfg::NumStrats(pl); }
-  const gArray<int> &NumStrats(void) const  { return BaseNfg::NumStrats(); }
+  int NumStrats(int pl) const  { return gameform->NumStrats(pl); }
+  const gArray<int> &NumStrats(void) const  { return gameform->NumStrats(); }
 
   const gList<NFOutcome *> &Outcomes(void) const 
-    { return BaseNfg::Outcomes(); }
-  int NumOutcomes(void) const   { return BaseNfg::NumOutcomes(); }
+    { return gameform->Outcomes(); }
+  int NumOutcomes(void) const   { return gameform->NumOutcomes(); }
 
   NFOutcome *NewOutcome(void);
 
@@ -161,7 +167,7 @@ public:
   friend void RandomNfg(Nfg<T> &);
 };
 
-template <class T> int ReadNfgFile(gInput &, Nfg<T> *&);
-void NfgFileType(gInput &f, bool &valid, DataType &type);
+int ReadNfgFile(gInput &, Nfg<double> *&, Nfg<gRational> *&);
+//void NfgFileType(gInput &f, bool &valid, DataType &type);
 
 #endif    // NFG_H

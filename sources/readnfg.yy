@@ -15,7 +15,8 @@
 %define MEMBERS      gInput &infile;  \
                      gString last_name;  gRational last_rational; \
                      gString title; \
-                     BaseNfg *& N; \
+                     Nfg<double> *& Ndbl;  \
+                     Nfg<gRational> *& Nrat; \
                      int ncont, pl, cont; \
                      gList<gString> names; \
                      gList<gRational> numbers; \
@@ -28,9 +29,9 @@
 					    const gRational &) = 0; \
                      virtual ~NfgFileReader();
 
-%define CONSTRUCTOR_PARAM     gInput &f, BaseNfg *& n
+%define CONSTRUCTOR_PARAM     gInput &f, Nfg<double> *& Nd, Nfg<gRational> *& Nr
 
-%define CONSTRUCTOR_INIT      : infile(f), N(n)
+%define CONSTRUCTOR_INIT      : infile(f), Ndbl(Nd), Nrat(Nr)
 
 %token LBRACE
 %token RBRACE
@@ -43,7 +44,10 @@
 nfgfile:      header 
               { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
-	        N->SetTitle(title);
+	        if (Ndbl)
+                  Ndbl->GameForm().SetTitle(title);
+                else
+                  Nrat->GameForm().SetTitle(title);
               }              
               body  { return 0; }
 
@@ -88,15 +92,22 @@ payofflist:   payoff
           |   payofflist payoff
 
 payoff:       NUMBER
-              { if (pl > N->NumPlayers())   {
-		  cont++;
-		  if (cont <= ncont)  
-	            if (N->Type() == DOUBLE)
-                      ((Nfg<double> *) N)->NewOutcome();
-	            else
-                      ((Nfg<gRational> *) N)->NewOutcome();
-		  pl = 1;
-		}
+              { if (Ndbl)   {
+                  if (pl > Ndbl->NumPlayers())   {
+		    cont++;
+		    if (cont <= ncont)  
+	              Ndbl->NewOutcome();
+		    pl = 1;
+                  }
+                }
+                else  {
+                  if (pl > Nrat->NumPlayers())   {
+		    cont++;
+		    if (cont <= ncont)  
+	              Nrat->NewOutcome();
+		    pl = 1;
+		  }
+                } 
 		if (cont > ncont)  YYERROR;
 		SetPayoff(cont, pl, last_rational);
 		pl++;
@@ -194,4 +205,36 @@ void NfgFileType(gInput &f, bool &valid, DataType &type)
   }
 }
 
+// for NfgFile<T>
+#include "readnfg.imp"
+
+int ReadNfgFile(gInput &f, Nfg<double> *& Ndbl, Nfg<gRational> *& Nrat)
+{
+  assert(!Ndbl && !Nrat);
+
+  bool valid;
+  DataType type;
+  NfgFileType(f, valid, type);
+
+  if (!valid)   return 0;
+
+  if (type == DOUBLE)   {
+    NfgFile<double> R(f, Ndbl);
+
+    if (R.Parse())   {
+      if (Ndbl)   { delete Ndbl;  Ndbl = 0; }
+      return 0;
+    }
+  }
+  else  {
+    NfgFile<gRational> R(f, Nrat);
+
+    if (R.Parse())   {
+      if (Nrat)   { delete Nrat;  Nrat = 0; }
+      return 0;
+    }
+  }
+   
+  return 1;
+}
 

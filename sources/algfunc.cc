@@ -152,7 +152,7 @@ static Portion *GSM_Behav_Rational(Portion **param)
 static Portion *GSM_EnumMixed_Nfg(Portion **param)
 {
   NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
+  NfgPayoffs *N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   EnumParams EP;
@@ -161,9 +161,8 @@ static Portion *GSM_EnumMixed_Nfg(Portion **param)
 
   EP.tracefile = &((OutputPortion *) param[4])->Value();
   EP.trace = ((IntPortion *) param[5])->Value();
-
-  switch(N->Type())
-  {
+  
+  switch(N->Type())   {
   case DOUBLE:
     {
       EnumModule<double> EM(* (Nfg<double>*) N, EP, *S);
@@ -254,8 +253,8 @@ static Portion *GSM_EnumMixed_Efg(Portion **param)
 
 static Portion *GSM_EnumPure_Nfg(Portion **param)
 {
-  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S->BelongsTo());
+//  NFSupport* S = ((NfSupportPortion*) param[0])->Value();
+  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por;
 
   gWatch watch;
@@ -353,7 +352,7 @@ static Portion *GSM_EnumPure_Efg(Portion **param)
 static Portion *GSM_GobitGrid_Support(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   GridParams GP;
@@ -374,11 +373,9 @@ static Portion *GSM_GobitGrid_Support(Portion **param)
 
   GP.multi_grid = 0;
   if(GP.delp2 > 0.0 && GP.tol2 > 0.0)GP.multi_grid = 1;
-
-  switch(N->Type())
-    {
-    case DOUBLE:
-      {
+  
+  switch(N->Type())  {
+    case DOUBLE:  {
 	GridSolveModule GM(* (Nfg<double>*) N, GP, S);
 	GM.GridSolve();
 	// ((IntPortion *) param[10])->Value() = GM.NumEvals();
@@ -498,7 +495,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
 static Portion *GSM_Lcp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   LemkeParams LP;
@@ -506,9 +503,8 @@ static Portion *GSM_Lcp_Nfg(Portion **param)
 
   LP.tracefile = &((OutputPortion *) param[4])->Value();
   LP.trace = ((IntPortion *) param[5])->Value();
-
-  switch(N->Type())
-  {
+  
+  switch(N->Type())  {
   case DOUBLE:
     {
       LemkeModule<double> LS(* (Nfg<double>*) N, LP, S);
@@ -741,11 +737,8 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
 static Portion *GSM_Lp_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
-
-  if (N->NumPlayers() > 2 || !N->IsConstSum())
-    return new ErrorPortion("Only valid for two-person zero-sum games");
 
   ZSumParams ZP;
 
@@ -755,6 +748,10 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   switch(N->Type())  {
   case DOUBLE:
     {
+      if (((Nfg<double> *) N)->NumPlayers() > 2 ||
+	  !((Nfg<double> *) N)->IsConstSum())
+	return new ErrorPortion("Only valid for two-person zero-sum games");
+
       ZSumModule<double> ZM(* (Nfg<double>*) N, ZP, S);
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
@@ -765,6 +762,10 @@ static Portion *GSM_Lp_Nfg(Portion **param)
     break;
   case RATIONAL:
     {
+      if (((Nfg<gRational> *) N)->NumPlayers() > 2 ||
+	  !((Nfg<gRational> *) N)->IsConstSum())
+	return new ErrorPortion("Only valid for two-person zero-sum games");
+
       ZSumModule<gRational> ZM(*(Nfg<gRational>*) N, ZP, S);
       ZM.ZSum();
       ((IntPortion *) param[1])->Value() = ZM.NumPivots();
@@ -1020,7 +1021,7 @@ Portion* GSM_Payoff_MixedRational(Portion** param)
 static Portion *GSM_Simpdiv_Nfg(Portion **param)
 {
   NFSupport& S = * ((NfSupportPortion*) param[0])->Value();
-  BaseNfg* N = (BaseNfg*) &(S.BelongsTo());
+  NfgPayoffs* N = ((NfSupportPortion *) param[0])->PayoffTable();
   Portion* por = 0;
 
   SimpdivParams SP;

@@ -35,7 +35,19 @@ TEMPLATE class Nfg<gRational>;
 DataType Nfg<gRational>::Type(void) const { return RATIONAL; }
 
 TEMPLATE class NfgFile<gRational>;
-TEMPLATE int ReadNfgFile(gInput &, Nfg<gRational> *&);
+
+NfgFile<gRational>::NfgFile(gInput &f, Nfg<gRational> *& N)
+  : NfgFileReader(f, fooD, N), type(RATIONAL), fooD(0)
+{ }
+
+void NfgFile<gRational>::SetPayoff(int cont, int pl,
+				   const gRational &value)
+{
+  if (pl == 1)
+    Nrat->GameForm().SetOutcome(cont, Nrat->Outcomes()[cont]);
+  Nrat->payoffs(cont, pl) = value;
+}
+
 
 TEMPLATE class MixedProfile<gRational>;
 TEMPLATE gOutput &operator<<(gOutput &, const MixedProfile<gRational> &);

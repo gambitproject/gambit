@@ -8,6 +8,11 @@
 #include "readnfg.h"
 
 template <class T> class NfgFile : public NfgFileReader   {
+  private:
+    DataType type;
+    Nfg<double> *fooD;
+    Nfg<gRational> *fooR;
+
   public:
     NfgFile(gInput &, Nfg<T> *&);
     virtual ~NfgFile();
@@ -18,10 +23,6 @@ template <class T> class NfgFile : public NfgFileReader   {
     void SetPayoff(int cont, int pl, const gRational &);
     DataType Type(void) const;
 };
-
-template <class T> NfgFile<T>::NfgFile(gInput &f, Nfg<T> *& N)
-  : NfgFileReader(f, (BaseNfg *&) N)
-{ }
 
 template <class T> NfgFile<T>::~NfgFile()
 { }
@@ -40,24 +41,44 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
     ncont *= dim[i];
     if (dim[i] <= 0)   return false;
   }
-
-  N = new Nfg<T>(dim);
-  int strat = 1;
-  for (i = 1; i <= dim.Length(); i++)  {
-    N->Players()[i]->SetName(players[i]);
-    if (strats.Length() > 0)
-      for (int j = 1; j <= dim[i]; j++)
-	N->Strategies(i)[j]->name = strats[strat++];
+  
+  if (type == DOUBLE)   {
+    Ndbl = new Nfg<double>(dim);
+    int strat = 1;
+    for (i = 1; i <= dim.Length(); i++)  {
+      Ndbl->Players()[i]->SetName(players[i]);
+      if (strats.Length() > 0)
+        for (int j = 1; j <= dim[i]; j++)
+  	  Ndbl->GameForm().Strategies(i)[j]->name = strats[strat++];
+    }
   }
+  else  {
+    Nrat = new Nfg<gRational>(dim);
+    int strat = 1;
+    for (i = 1; i <= dim.Length(); i++)  {
+      Nrat->Players()[i]->SetName(players[i]);
+      if (strats.Length() > 0)
+        for (int j = 1; j <= dim[i]; j++)
+  	  Nrat->GameForm().Strategies(i)[j]->name = strats[strat++];
+    }
+  }
+
   return true;
 }
 
 template <class T> void NfgFile<T>::SetPayoff(int cont, int pl,
 					      const gRational &value)
 {
-  if (pl == 1)
-    N->SetOutcome(cont, N->Outcomes()[cont]);
-  ((Nfg<T> *) N)->payoffs(cont, pl) = (T) value;
+  if (type == DOUBLE)  {
+    if (pl == 1)
+      Ndbl->GameForm().SetOutcome(cont, Ndbl->Outcomes()[cont]);
+    Ndbl->payoffs(cont, pl) = (T) value;
+  }
+  else  {
+    if (pl == 1)
+      Nrat->GameForm().SetOutcome(cont, Nrat->Outcomes()[cont]);
+    Nrat->payoffs(cont, pl) = (T) value;
+  }
 }
 
 template <class T> int NfgFile<T>::Parse(void)
@@ -82,20 +103,6 @@ template <class T> int NfgFile<T>::Parse(void)
   return yyparse();
 }
 
-template <class T> int ReadNfgFile(gInput &f, Nfg<T> *& N)
-{
-  assert(!N);
-
-  NfgFile<T> R(f, N);
-  
-  if (R.Parse())   {
-    gout << "parse error :(\n";
-    if (N)   { delete N;  N = 0; }
-    return 0;
-  }
-
-  return 1;
-}
 
 
 
