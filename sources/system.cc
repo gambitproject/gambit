@@ -9,9 +9,9 @@
 
 
 #include <stdlib.h>
-#include <iostream.h>
 #include <assert.h>
 #include <string.h>
+
 
 #ifdef __GNUG__
   #include <unistd.h>
@@ -20,6 +20,7 @@
 #endif   // __GNUG__, __BORLANDC__
 
 
+#include "gambitio.h"
 #include "system.h"
 
 
@@ -57,8 +58,8 @@ int System::Shell( const char* command )
   int result = -1;
   if( command == NULL )
   {
-    cerr << "System::Shell: Command interpreter not found or\n";
-    cerr << "               feature not implemented for this compiler.\n";
+    gerr << "System::Shell: Command interpreter not found or\n";
+    gerr << "               feature not implemented for this compiler.\n";
   }
   else
   {
@@ -100,7 +101,7 @@ int System::Spawn( const char* command )
       arg[ i ] = strtok( NULL, " " );
     
     execvp( exe, arg );
-    cerr << "System::Spawn: Error executing \"" << command << "\"\n";
+    gerr << "System::Spawn: Error executing \"" << command << "\"\n";
     delete[] arg[ 0 ];
     exit( 1 );
     // assert( 0 );
@@ -112,7 +113,7 @@ int System::Spawn( const char* command )
   int result = WinExec( command, SW_SHOW );  
   if( 0 <= result && result < 32 )
   {
-    cerr << "System::Spawn: Error executing \"" << command << "\"\n";
+    gerr << "System::Spawn: Error executing \"" << command << "\"\n";
     return -1;
   }
   else
