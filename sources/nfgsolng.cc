@@ -70,8 +70,12 @@ NfgEnumPureG::NfgEnumPureG(const Nfg &N, const NFSupport &sup, NfgShowInterface 
 gList<MixedSolution> NfgEnumPureG::Solve(void) const
 {
   wxStatus status(parent->Frame(), "EnumPure Algorithm");
+  
+  PureNashParamsSettings PNS;
+  int stopAfter;
+  PNS.GetParams(stopAfter);
   try {
-    FindPureNash(sup, 0, status, (gList<MixedSolution> &)solns);
+    FindPureNash(sup, stopAfter, status, (gList<MixedSolution> &)solns);
   }
   catch (gSignalBreak &) { }
   return solns;
