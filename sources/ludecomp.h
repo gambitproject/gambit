@@ -29,9 +29,9 @@ protected:
   const gMatrix<T> *A;
   gBlock<int> label;
   gBlock<int> cols;
-  gBlock<int> rows;
+  gBlock<int> slacks;
   gBlock<int> arts;
-  gBlock<int> artificial;
+  gBlock<int> artUnitEntry;
   gArray<bool> colBlocked;
   gArray<bool> rowBlocked;
   bool IsBasisIdent;
@@ -87,21 +87,21 @@ public:
   bool IsIdent();
 
   // returns true if the column is special in some way
-  bool IsSpecialColumn( int col );
+  bool IsSpecialColumn( int col ) const; 
   
   // returns a column from the matrix  
-  void GetColumn( int col, gVector<T> & );
+  void GetColumn( int col, gVector<T> & ) const;
   
-  // Insert an artificial variable.  Returns the index where it was inserted
-  int InsertArtificial( int art, int col );
+  // Insert an artificial variable at column col
+  void InsertArtificial( int art, int col );
 
-  // Append an artificial variable.  Returns the index to the highest index
+  // Append an artificial variable.  Returns the last col index
   // ( ie where the artificial variable was appended ).
   int AppendArtificial( int art );
 
   // Remove an artificial variable, returns which artificial variable
   // was removed.
-  int RemoveArtificial( int col );
+  void RemoveArtificial( int col );
   
   // Clears out all the artificial variables
   void FlushArtificial();

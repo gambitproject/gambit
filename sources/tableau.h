@@ -1,8 +1,8 @@
-//#
-//# FILE: tableau.h:  tableau classes
-//#
-//# $Id$
-//#
+//
+// FILE: tableau.h:  tableau classes
+//
+// $Id$
+//
 
 #ifndef TABLEAU_H
 #define TABLEAU_H
@@ -47,8 +47,6 @@ public:
       // perform pivot operation -- outgoing is row, incoming is column
   void CompPivot(int outlabel,int col);
   virtual long NumPivots() const = 0;
-
-  
   
       // raw Tableau functions
   virtual void Refactor() = 0;
@@ -106,7 +104,8 @@ public:
   void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
   void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
-  void SolveColumn(int, gVector<T> &);
+  void GetColumn( int , gVector<T> &) const;  // raw column
+  void SolveColumn(int, gVector<T> &);  // column in new basis 
   void SetConst(const gVector<T> &bnew);
   void SetBasis( const Basis<T> &); // set new Tableau
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
@@ -130,6 +129,8 @@ private:
   gVector<T> dual;
   gVector<T> unitcost;
   gVector<T> cost;
+  gBlock<bool> UB,LB;  // does col have upper/lower bound?
+  gBlock<T> ub,lb;   // upper/lower bound
   
   void SolveDual();
 public:
@@ -157,18 +158,14 @@ public:
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 
-  // Inserts an artificial variable
-  // valid column numbers are from A->MaxCol() + 1 A->MaxCol + number of
-  // artificial variables already added.
-  int InsertArtificial( int art, int col );
+  // Inserts an artificial variable in column col
+  void InsertArtificial( int art, int col );
 
   // Appends an artificial variable
   int AppendArtificial( int art );
 
   // Removes an artificial variable located at col.
-  // valid column numbers are from A->MaxCol() + 1 A->MaxCol + number of
-  // artificial variables there.
-  int RemoveArtificial( int col );
+  void RemoveArtificial( int col );
 
   // returns the index of the last artificial variable
   int LastArtificial( void );

@@ -12,7 +12,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
 		    const gVector<T> &c, int nequals, gStatus &s) 
   : well_formed(1), feasible(1), bounded(1), aborted(0), 
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),total_cost(0),tmin(0),
-     opt_bfs((T)0),  dual_bfs((T)0) ,A(A), b(b), c(c), AA(0),tab(0), 
+     opt_bfs((T)0),  dual_bfs((T)0) ,A(A), b(b), c(c), tab(0), 
      UB(0),LB(0),ub(0),lb(0),xx(0), cost(0),
      y(b.Length()),x(b.Length()),d(b.Length()), status(s)
 {
@@ -32,7 +32,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   // initialize data
   int i,j,num_inequals,xlab,num_artific,index;
   
-  num_inequals = A.NumRows()-nequals;
+  num_inequals = A.NumRows() - nequals;
    // gout << "\nnvars = " << nvars;
    // gout << " neqns = " << neqns;
    // gout << " Num inequalities = " << num_inequals;
@@ -60,19 +60,24 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   lb = new gVector<T>(nvars+neqns);
   xx = new gVector<T>(nvars+neqns);
   cost = new gVector<T>(nvars+neqns);
-  AA = new gMatrix<T>(neqns,nvars);
+
+//  AA = new gMatrix<T>(neqns,nvars);
   
-  for(i=A.MinRow();i<=A.MaxRow();i++)  
-    for(j=A.MinCol();j<=A.MaxCol();j++)
-      (*AA)(i,j)=A(i,j);
+//  for(i=A.MinRow();i<=A.MaxRow();i++)  
+//    for(j=A.MinCol();j<=A.MaxCol();j++)
+//      (*AA)(i,j)=A(i,j);
+
+  tab = new LPTableau<T>(A,b);
+
   index=1;
   for(j=b.First();j<=b.Last();j++)  // insert artificial variables for b[j]<0
     if(b[j]<(T)0) {
-      for(i=A.MinRow();i<=A.MaxRow();i++)
-	if (i==j)
-	  (*AA)(i,A.MaxCol()+index) = (T)1;
-	else
-	  (*AA)(i,A.MaxCol()+index) = (T)0;
+      tab->AppendArtificial(j);
+//      for(i=A.MinRow();i<=A.MaxRow();i++)
+//	if (i==j)
+//	  (*AA)(i,A.MaxCol()+index) = (T)1;
+//	else
+//	  (*AA)(i,A.MaxCol()+index) = (T)0;
       index++;
     }
   *UB = 0; *LB = 0;
@@ -115,7 +120,7 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
    // gout << "\ncost: ";
    // (*cost).Dump(gout);
   
-  tab = new LPTableau<T>((*AA),b);
+//  tab = new LPTableau<T>((*AA),b);
   tab->SetCost((*cost));
   
    // gout << "\nInitial Tableau = \n";
@@ -259,11 +264,14 @@ template <class T> void LPSolve<T>::Solve(int phase)
       in = Enter();            // step 2: Choose entering variable 
       // gout << "\nstep 2, in: " << in;
       if(in) {
+	tab->GetColumn(in,a);
+	/*
 	if(in>0) 
 	  (*AA).GetColumn(in,a);
 	else {
 	  a=(T)0;a[-in]=(T)1;
 	}
+	*/
 	tab->Solve(a,d);    // step 3: Solve B d = a
 	out = Exit(in);          // step 4: Choose leaving variable
 	if(out==0) {
@@ -324,7 +332,8 @@ template <class T> int LPSolve<T>::Enter()
     if(i>nvars)lab=nvars-i;
     if(!tab->Member(lab)) {
       if(i<=nvars) {
-	(*AA).GetColumn(i,tmp);
+//	(*AA).GetColumn(i,tmp);
+	tab->GetColumn(i,tmp);
 	z = y * tmp;
       }
       else 
@@ -426,28 +435,61 @@ template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
   gout << "\nc: " << c;
   gout << "\nuc: " << uc;
 
+  gVector<T> x(b.Length());
+  tab->BasisVector(x);
+
   int i;
   for(i=c.First();i<=c.Last();i++) {
     gout << "\ncol: " << i << " cost: " << tab->RelativeCost(i);
-    if(tab->RelativeCost(i) < -eps2) tab->Mark(i);
+    gout  << " label: " << tab->Label(i) << " x: " << x[tab->Label(i)];
+    if(tab->RelativeCost(i) < -eps2 && x[tab->Label(i)]>eps2) {
+      gout << " mark";
+      tab->Mark(i);
+    }
   }
   for(i=uc.First();i<=uc.Last();i++) {
     gout << "\nrow: " << i << " cost: " << tab->RelativeCost(-i);
-    if(tab->RelativeCost(-i) < -eps2) tab->Mark(-i);
+    gout << " label: " << tab->Label(-i) << " x: " << x[tab->Label(-i)];
+    if(tab->RelativeCost(-i) < -eps2 && x[tab->Label(-i)]>eps2) {
+      gout << " mark";
+      tab->Mark(-i);
+    }
   }
 
   VertEnum<T> AllSolutions(*tab,status);
+  gList<gVector<T> > verts;
 
-  gList<BFS<T> > *verts = new gList<BFS<T> >(AllSolutions.VertexList());
+  gList<BFS<T> > *bfs = new gList<BFS<T> >(AllSolutions.VertexList());
+  gList<BFS<T> > *dual_bfs = new gList<BFS<T> >(AllSolutions.DualVertexList());
+  AllSolutions.Vertices(verts);
 
-  gout << "\nHere are the vertices: \n";
-  for(int i=1;i<=(*verts).Length();i++) {
+  gout << "\nHere are the BFSs: \n";
+  for(int i=1;i<=(*bfs).Length();i++) {
     gout << "\n" << i << ": ";
-    (*verts)[i].Dump(gout);
+    (*bfs)[i].Dump(gout);
   }
-  gout << "\n";
+  gout << "\nHere are the Dual BFSs: \n";
+  for(int i=1;i<=(*dual_bfs).Length();i++) {
+    gout << "\n" << i << ": ";
+    (*dual_bfs)[i].Dump(gout);
+  }
+  gout << "\nHere are the vertices:\n";
+
+  for(int i=1;i<=verts.Length();i++)
+    gout << "\n" << i << ": " << verts[i];
   
-  return (*verts);
+  for(int i=1;i<=(*bfs).Length();i++)
+    for(int j=1;j<=neqns;j++)
+      if((*dual_bfs)[i].IsDefined(-j))
+	(*bfs)[i].Define(-j,(*dual_bfs)[i](-j));
+
+  gout << "\nHere are the BFSs: \n";
+  for(int i=1;i<=(*bfs).Length();i++) {
+    gout << "\n" << i << ": ";
+    (*bfs)[i].Dump(gout);
+  }
+
+  return *bfs;
 }
 
 template <class T> int LPSolve<T>::IsFeasible(void) const
@@ -482,7 +524,7 @@ template <class T> void LPSolve<T>::OptBFS(BFS<T> &b) const
 
 template <class T> LPSolve<T>::~LPSolve()
 { 
-  if(AA) delete AA; 
+//  if(AA) delete AA; 
   if(tab) delete tab; 
   if(UB) delete UB; 
   if(LB) delete LB; 

@@ -1,8 +1,8 @@
-//#
-//# FILE: tableau.imp: implementation of tableau and Tableau classes
-//#
-//# $Id$
-//#
+//
+// FILE: tableau.imp: implementation of tableau and Tableau classes
+//
+// $Id$
+//
 
 #include "tableau.h"
 
@@ -203,13 +203,23 @@ void Tableau<T>::SolveColumn(int col, gVector<T> &out)
 //  gout << "\nTableau<T>::SolveColumn  " << MinRow() << " " << MaxRow(); 
 //  gout << " col: " << col;
   gVector<T> tmpcol2(MinRow(),MaxRow());
+  basis.GetColumn(col,tmpcol2);
+/*
   if( col<0 ) {
     tmpcol2= (T)0;
     tmpcol2[-col]=1;
   }
   else
     A->GetColumn(col,tmpcol2);
+*/
   B.solve(tmpcol2,out);
+}
+
+
+template <class T>
+void Tableau<T>::GetColumn(int col, gVector<T> &out) const
+{
+  basis.GetColumn(col,out);
 }
 
 
@@ -439,7 +449,8 @@ T LPTableau<T>::RelativeCost(int col) const
   }
   else {
 //      gVector<T> tmpcol(MinRow(),MaxRow());
-    A->GetColumn(col, (gArray<T> &)tmpcol);
+//    A->GetColumn(col, (gArray<T> &)tmpcol);
+    basis.GetColumn(col, (gVector<T> &)tmpcol);
     return cost[col] - dual*tmpcol;
   }
 }
@@ -564,11 +575,12 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
       tmpcol[BestSet[i]]=(T)1;
       B.solveT(tmpcol,tmpdual);
       
-      if( j<0 )
+/*      if( j<0 )
 	{ tmpcol=(T)0; tmpcol[-j]=(T)1; }
       else
 	A->GetColumn(j,tmpcol);
-      
+*/
+      basis.GetColumn(j,tmpcol);      
       // gout << "\ncol j = " << tmpcol;
       a_ij = tmpdual*tmpcol;
       c_j = RelativeCost(j);
@@ -582,7 +594,8 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	if(enter<0) 
 	  a_ik = tmpdual[-enter];
 	else {
-	  A->GetColumn(enter,tmpcol);
+	  basis.GetColumn(enter,tmpcol);
+//	  A->GetColumn(enter,tmpcol);
 	  a_ik = tmpdual*tmpcol;
 	}
 	c_k = RelativeCost(enter);
@@ -604,7 +617,8 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
 	    if(k<0) 
 	      a_ik=tmpdual[-k];
 	    else {
-	      A->GetColumn(k,tmpcol);
+//	      A->GetColumn(k,tmpcol);
+	      basis.GetColumn(k,tmpcol);
 	      a_ik = tmpdual*tmpcol;
 	    }
 	    c_k = RelativeCost(k);
@@ -692,10 +706,13 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   tmpcol[i]=(T)1;
   B.solveT(tmpcol,tmpdual);
 
+/*
   if( j<0 )
     { tmpcol=(T)0; tmpcol[-j]=(T)1; }
   else
     A->GetColumn(j,tmpcol);
+*/
+    basis.GetColumn(j,tmpcol);
   
   // gout << "\ncol j = " << tmpcol;
   a_ij = tmpdual*tmpcol;
@@ -710,7 +727,8 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   if(enter<0) 
     a_ik = tmpdual[-enter];
   else {
-    A->GetColumn(enter,tmpcol);
+//    A->GetColumn(enter,tmpcol);
+    basis.GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   c_k = RelativeCost(enter);
@@ -725,7 +743,8 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
     if(k<0) 
       a_ik=tmpdual[-k];
     else {
-      A->GetColumn(k,tmpcol);
+//      A->GetColumn(k,tmpcol);
+      basis.GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
@@ -761,10 +780,13 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
   T a_ij,a_ik,c_j,c_k,ratio;
 
-  if( j<0 )
+/*  if( j<0 )
     { tmpcol=(T)0; tmpcol[-j]=(T)1; }
   else
     A->GetColumn(j,tmpcol);
+  */
+
+    basis.GetColumn(j,tmpcol);
   
   a_ij = tmpdual*tmpcol;
   c_j = RelativeCost(j);
@@ -779,7 +801,8 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     if(k<0) 
       a_ik=tmpdual[-k];
     else {
-      A->GetColumn(k,tmpcol);
+//      A->GetColumn(k,tmpcol);
+      basis.GetColumn(k,tmpcol);
       a_ik = tmpdual*tmpcol;
     }
     c_k = RelativeCost(k);
@@ -799,7 +822,8 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   if(enter<0) 
     a_ik = tmpdual[-enter];
   else {
-    A->GetColumn(enter,tmpcol);
+//    A->GetColumn(enter,tmpcol);
+    basis.GetColumn(enter,tmpcol);
     a_ik = tmpdual*tmpcol;
   }
   a_ik = a_ik/a_ij;
@@ -817,7 +841,8 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
     if(k<0) 
       a_ik=tmpdual[-k];
     else {
-    A->GetColumn(k,tmpcol);
+//    A->GetColumn(k,tmpcol);
+    basis.GetColumn(k,tmpcol);
     a_ik = tmpdual*tmpcol;
     }
     a_ik = a_ik/a_ij;
@@ -876,9 +901,9 @@ BFS<T> LPTableau<T>::DualBFS() const
 }
 
 template <class T>
-int LPTableau<T>::InsertArtificial( int art, int col )
+void LPTableau<T>::InsertArtificial( int art, int col )
 {
-  return basis.InsertArtificial( art, col );
+  basis.InsertArtificial( art, col );
 }
 
 template <class T>
@@ -888,9 +913,9 @@ int LPTableau<T>::AppendArtificial( int art )
 }
 
 template <class T>
-int LPTableau<T>::RemoveArtificial( int col )
+void LPTableau<T>::RemoveArtificial( int col )
 {
-  return basis.RemoveArtificial( col );
+  basis.RemoveArtificial( col );
 }
 
 template <class T>

@@ -35,7 +35,7 @@ private:
   BFS<T> opt_bfs,dual_bfs;
   const gMatrix<T> &A;   // needed?
   const gVector<T> &b, &c;  // needed?
-  gMatrix<T> *AA;
+//  gMatrix<T> *AA;
   LPTableau<T> *tab;
   gVector<int> *UB, *LB;
   gVector<T> *ub, *lb, *xx, *cost; 
