@@ -82,7 +82,7 @@ double EFGobitFunc::Value(const gVector<double> &v)
   _nevals++;
   _domain_err = false;
  ((gVector<double> &) _p).operator=(v);
-  double val = 0.0, prob, psum, z,rem;
+  double val = 0.0, prob, psum, z,factor;
  
   _p.CondPayoff(_cpay, _probs);
   
@@ -97,10 +97,10 @@ double EFGobitFunc::Value(const gVector<double> &v)
       
       for (act = 1; act <= _p.GetEFSupport().NumActions(pl, iset); act++)  {
 	z = _Lambda * _cpay(pl, iset, act);
-	rem=0.0;
-	if(z>500.0) {rem=z-500.0;z=500.0;_domain_err=true;}
-	if(z<-500.0) {rem=z+500.0;z=-500.0;_domain_err=true;}
-	z = exp(z)+rem;
+	factor=1.0;
+	if(z>500.0) {factor+=z-500.0;z=500.0;_domain_err=true;}
+	if(z<-500.0) {factor+=z+500.0;z=-500.0;_domain_err=true;}
+	z = exp(z)*factor;
 	psum += z;
 	_cpay(pl, iset, act) = z;
       }
