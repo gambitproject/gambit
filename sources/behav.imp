@@ -142,7 +142,10 @@ void PureBehavProfile<T>::IndPayoff(const Node *n,
 template <class T>
 const T PureBehavProfile<T>::Payoff(const EFOutcome *o, const int &pl) const
 {
-  return (*payoffs)(o->GetNumber(), pl);
+  if (o)
+    return (*payoffs)(o->GetNumber(), pl);
+  else
+    return (T) 0.0;
 }
 
 template <class T>
