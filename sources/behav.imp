@@ -600,6 +600,8 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
     *((TypedNode<T> *) n->children[i])->scratch = *((TypedNode<T> *) n)->scratch;
   
   T newprob((T) 0);
+  gVector<T> tmp(E->NumPlayers());
+  tmp = (T) 0;
   
   if (nc == 0)   return;
 
@@ -610,10 +612,11 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
 		 probs, payoff);
       
       for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
-	(*((TypedNode<T> *) n)->scratch)[j] += 
+	tmp[j] += 
 	((ChanceInfoset<T> *) n->infoset)->probs[i] *
 	(*((TypedNode<T> *) n->children[i])->scratch)[j];
     }
+    (*((TypedNode<T> *) n)->scratch) = tmp;
   }
   else  {    // player decision node
     int act;
@@ -627,11 +630,12 @@ void BehavProfile<T>::CondPayoff(Node *n, T prob, gPVector<T> &probs,
       CondPayoff(n->children[childno], prob * newprob, probs, payoff);
       
       for (int j = 1; j <= ((TypedNode<T> *) n)->scratch->Length(); j++)
-	(*((TypedNode<T> *) n)->scratch)[j] += 
+	tmp[j] +=
 	newprob * (*((TypedNode<T> *) n->children[childno])->scratch)[j];
 
       payoff(pl, iset, childno) += 
 	prob * (*((TypedNode<T> *) n->children[childno])->scratch)[pl];
+      (*((TypedNode<T> *) n)->scratch) = tmp;
     }
   }
   
