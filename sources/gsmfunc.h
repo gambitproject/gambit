@@ -143,7 +143,8 @@ public:
   void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
   void SetFuncInfo(int funcindex, const gString& s);
   void SetFuncInfo(int funcindex, const gString& s, 
-                   Portion* (*funcptr)(Portion**)  );
+                   Portion* (*funcptr)(Portion**), 
+                   FuncFlagType = funcLISTABLE  );
   void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
   void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
   
