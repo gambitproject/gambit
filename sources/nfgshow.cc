@@ -380,7 +380,6 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
 { 
   const NFSupport &support = *m_parent->CurrentSupport();
 
-  SetEditable(true);
   if (support.NumStrats(p_rowPlayer) > GetRows()) {
     InsertRows(0, support.NumStrats(p_rowPlayer) - GetRows() + features.dom);
   }
@@ -394,7 +393,6 @@ void NfgTable::SetPlayers(int p_rowPlayer, int p_colPlayer)
   else if (support.NumStrats(p_colPlayer) < GetCols()) {
     DeleteCols(0, GetCols() - support.NumStrats(p_colPlayer) - features.dom);
   }
-  SetEditable(false);
 
   AdjustScrollbars();
   OnChangeValues();
