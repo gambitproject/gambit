@@ -1378,8 +1378,22 @@ Portion* GSM_Write_numerical( Portion** param )
 
 Portion* GSM_Write_gString( Portion** param )
 {
+  int i = 0;
+
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
-  s << param[1];
+
+  gString text = ( (TextPortion*) param[ 1 ] )->Value();
+
+  for( i = 0; i < text.length(); i++ )
+  {
+    if( text[ i ] == '\\' && text[ i + 1 ] == 'n' )
+    {
+      text.remove( i );
+      text[ i ] = '\n';
+    }
+  }
+
+  s << text;
   return param[0]->RefCopy();
 }
 
@@ -2045,7 +2059,7 @@ Portion *GSM_Version(Portion **)
   return new FloatValPortion(GCL_VERSION);
 }
 
-/*
+
 extern GSM& _gsm;
 
 Portion* GSM_Help(Portion** param)
@@ -2058,7 +2072,6 @@ Portion* GSM_Clear(Portion**)
   _gsm.Clear();
   return new BoolValPortion(true);
 }
-*/
 
 
 void Init_gsmoper( GSM* gsm )
@@ -2695,7 +2708,6 @@ void Init_gsmoper( GSM* gsm )
 
   //---------------- faked functions -----------------//
 
-/*
   FuncObj = new FuncDescObj( (gString) "Help" );
   FuncObj->SetFuncInfo( GSM_Help, 1 );
   FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
@@ -2704,7 +2716,6 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj( (gString) "Clear" );
   FuncObj->SetFuncInfo( GSM_Clear, 0 );
   gsm->AddFunction( FuncObj );
-*/
 
 
   FuncObj = new FuncDescObj( (gString) "Assign" );
