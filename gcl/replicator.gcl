@@ -1,0 +1,17 @@
+NewFunction[ReplicatorGradient[profile->MIXED] =: LIST(LIST(NUMBER)),
+(StrategyValue[profile, Strategies[Support[profile]]] - Payoff[profile, Players[Game[profile]]]) * StrategyProb[profile, Strategies[Support[profile]]];
+];
+
+// Perform one step of replicator dynamics with time step 'tstep'
+NewFunction[Replicator[profile->MIXED, tstep->NUMBER] =: MIXED,
+   profile + Mixed[Game[profile],
+                   (StrategyValue[profile, Strategies[Support[profile]]] - Payoff[profile, Players[Game[profile]]]) * StrategyProb[profile, Strategies[Support[profile]]] * tstep];
+];
+
+NewFunction[Replicator[profile->MIXED, tstep->NUMBER, tmax->NUMBER] =: MIXED,
+  time := 0.0;
+  While[time <= tmax, 
+    profile := Replicator[profile, tstep]; time := time + tstep];
+  profile;
+];
+
