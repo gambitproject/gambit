@@ -107,7 +107,7 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
       
       for (int act = 1; act <= E.NumActions(1, pl, iset); act++)  {
 	z = probs(pl,iset) * Lambda * cpay(pl, iset, act);
-	assert(z < (T) 600);
+//	assert(z < (T) 600);
 	z = exp(z);
 	psum += z;
 	cpay(pl, iset, act) = z;
@@ -200,6 +200,19 @@ template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
     return new EFGobitFunc<T>(E, params, s); 
   }
   return new EFGobitFunc<T>(E, params);
+}
+
+#include <values.h>
+
+int matherr (struct exception *a)
+{
+  if (a->type == SING)
+    if (!strcmp(a->name,"log"))
+      if(a->arg1 == 0.0) {
+	a->retval = LN_MINDOUBLE;
+	return 1;
+      }
+  return 0;
 }
 
 

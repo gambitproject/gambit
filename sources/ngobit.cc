@@ -137,8 +137,8 @@ T NFGobitFunc<T>::GobitDerivValue(int i, int j, const gPVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, v, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-//      dv = log(v(pl, 1)) - log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
-      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      dv = log(v(pl, 1)) - log(v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+//      dv = log(v(pl, 1)/v(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
 	if (j == 1)              x += dv / v(pl, 1);
 	else if (j == st)        x -= dv / v(pl, st);
@@ -161,8 +161,8 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
     gVector<T> &payoff = *scratch1[pl];
     N.Payoff(pl, pl, p, payoff);
     for (int st = 2; st <= N.NumStrats(pl); st++)  {
-//      z = log(p(pl, 1)) - log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
-      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+      z = log(p(pl, 1)) - log(p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
+//      z = log(p(pl, 1)/p(pl, st)) - Lambda * (payoff[1] - payoff[st]);
       val += z * z;
     }
   }
@@ -230,6 +230,20 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
   }
   return new NFGobitFunc<T>(N, params);
 
+}
+
+#define BIGNUM 1.0e100
+#include <values.h>
+
+int matherr (struct exception *a)
+{
+  if (a->type == SING)
+    if (!strcmp(a->name,"log"))
+      if(a->arg1 == 0.0) {
+	a->retval = LN_MINDOUBLE;
+	return 1;
+      }
+  return 0;
 }
 
 
