@@ -88,7 +88,7 @@ template <class T> void gArray<T>::Dump(gOutput &f) const
     f << data[i] << ' ';
   f << '}';
 }
-
+#ifndef __BORLANDC__
 template <class T> bool operator==(const gArray<T> &a, const gArray<T> &b)
 {
   if (a.mindex != b.mindex || a.maxdex != b.maxdex)   return false;
@@ -101,7 +101,7 @@ template <class T> bool operator!=(const gArray<T> &a, const gArray<T> &b)
 {
   return !(a == b);
 }
-
+#endif
 template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
 {
   a.Dump(f);

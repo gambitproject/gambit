@@ -252,7 +252,7 @@ template <class T>
 void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		  const Efg<T> &E, BehavProfile<T> &bp)
 {
-  if (!E.lexicon || E.lexicon->N != &N)   return;
+  if (!E.lexicon || E.lexicon->N !=(BaseEfg *) &N)   return;
 
   Node *n = E.RootNode();
 
