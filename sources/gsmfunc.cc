@@ -782,6 +782,14 @@ PortionSpec ToSpec(gString &str, int num=0)
     return PortionSpec(porSTRATEGY, num);
   else if (str == "ACTION")
     return PortionSpec(porACTION, num);
+  else if (str == "EFSUPPORT")
+    return PortionSpec(porEFSUPPORT, num);
+  else if (str == "NFSUPPORT")
+    return PortionSpec(porNFSUPPORT, num);
+  else if (str == "INPUT")
+    return PortionSpec(porINPUT, num);
+  else if (str == "OUTPUT")
+    return PortionSpec(porOUTPUT, num);
   else
   {
     gout << "ERROR: incorrect type, " << str << ", in function definition\n\n";
