@@ -24,7 +24,7 @@ Minnesota
 Theodore Turocy\\Northwestern University
 }
 
-\date{Version 0.91\\ \today\\ \jobname.tex}
+\date{Version 0.92\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -518,6 +518,7 @@ And[x, y]		& x \&\& y, x AND y \\
 Assign[x, y]		& x := y \\
 Concat[x, y]            & x \& y \\
 Divide[x, y]		& x / y or x DIV y \\
+Dot[x, y]		& x . y \\
 Equal[x, y]		& x = y \\
 Greater[x, y]		& x > y \\
 GreaterEqual[x, y]	& x >= y \\
@@ -1183,6 +1184,7 @@ Or[x->BOOL, y->BOOL] =: BOOL
 \begin{verbatim}
 Divide[x->FLOAT, y->FLOAT] =: FLOAT
 Divide[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Dot[x->LIST(T), y->LIST(T)] =: T
 Exp[x->FLOAT] =: FLOAT
 Greater[x->FLOAT, y->FLOAT] =: BOOL
 Greater[x->INTEGER, y->INTEGER] =: BOOL
@@ -1200,7 +1202,6 @@ LessEqual[x->RATIONAL, y->RATIONAL] =: BOOL
 Log[x->FLOAT] =: FLOAT
 Minus[x->FLOAT, y->FLOAT] =: FLOAT
 Minus[x->INTEGER, y->INTEGER] =: INTEGER
-Minus[x->LIST(T), y->LIST(T)] =: LIST(T)
 Minus[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Minus[x->MIXED, y->MIXED] =: MIXED
 Minus[x->BEHAV, y->BEHAV] =: BEHAV
@@ -1211,13 +1212,11 @@ Negate[x->RATIONAL] =: RATIONAL
 Paren[x->T] =: T
 Plus[x->FLOAT, y->FLOAT] =: FLOAT
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
-Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
 Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV
 Times[x->FLOAT, y->FLOAT] =: FLOAT
 Times[x->INTEGER, y->INTEGER] =: INTEGER
-Times[x->LIST(T), y->LIST(T)] =: T
 Times[x->RATIONAL, y->RATIONAL] =: RATIONAL
 Times[x->FLOAT, y->MIXED] =: MIXED
 Times[x->MIXED, y->FLOAT] =: MIXED
@@ -1746,22 +1745,6 @@ having no outcome attached; this is equivalent to an implicit call to
 
 \item
 \protect \large \begin{verbatim}
-DeleteSubgame[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-If \verb+node+ is the root of a defined subgame in its extensive form,
-that subgame is undefined.  It is not permitted to undefine the root
-subgame.  If \verb+node+ is not the root of a subgame, no action is
-taken.  The node rooting the subgame to which \verb+node+ belongs after
-the operation is returned.
-\item
-[See also:] {\tt FindSubgames}, {\tt NewSubgame}, {\tt SubgameRoots}
-\ed
-
-\item
-\protect \large \begin{verbatim}
 DeleteTree[node->NODE] =: NODE
 \end{verbatim}\normalsize
 
@@ -1797,6 +1780,20 @@ Returns the quotient $x / y$.
 [Short form:] \verb+x / y+
 \item
 [See also:] {\tt IntegerDivide}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+Dot[x->LIST(T), y->LIST(T)] =: T
+\end{verbatim}\normalsize
+
+\marginpar{This function is pending.}
+\bd
+Returns the dot product of $x$ and $y$, where the lists are treated as vectors.
+It is a run-time error to attempt to multiply two lists of different
+lengths.
+\item
+[Short form:] \verb%x . y%
 \ed
 
 %--E--
@@ -1896,23 +1893,6 @@ value \verb+x+.
 
 
 %--F--
-
-\item
-\protect \large \begin{verbatim}
-FindSubgames[efg<->EFG] =: LIST(NODE)
-FindSubgames[node->NODE] =: LIST(NODE)
-\end{verbatim} \normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-Defines all legal game theoretic subgames in a subtree of an extensive
-form.  The first version finds all subgames in the entire tree; the
-second version finds subgames only in the subtree rooted in \verb+node+.
-Both versions return the list of nodes which are roots of newly-defined
-subgames.
-\item
-[See also:] {\tt DeleteSubgame}, {\tt NewSubgame}, {\tt SubgameRoots}
-\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2022,13 +2002,13 @@ the profile for the last value of $\lambda$ computed is returned.
 optimization routine.  The default value is $200$.
 \item
 [tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
-The default is $1.0^{-10}$.
+The default is 1.0e-10.
 \item
 [maxits1:] Sets the maximum number of iterations for the 1-dimensional
 optimization routine.  The default is $100$.
 \item
 [tol1:] Sets the tolerance for the 1-dimensional optimization routine.
-The default is $2.0^{-10}$.
+The default is 2.0e-10.
 \item
 [time:] Upon completion, contains the amount of time consumed by the
 algorithm.
@@ -2039,6 +2019,10 @@ performed by the algorithm.
 [nIters:] Upon completion, contains the number of iterations performed
 by the algorithm.
 \ed
+
+\item
+[Note:] The extensive form version does not pay attention to any marked
+subgames.
 \ed
 
 \item
@@ -2212,6 +2196,20 @@ becomes the first child of the new node.  Returns the new node.
 [See also:] {\tt AppendNode}, {\tt NewInfoset}.
 \ed
 
+\item
+\protect \large \begin{verbatim}
+Integer[x->NUMBER] =: INTEGER
+Integer[x->LIST(NUMBER)] =: LIST(INTEGER)
+\end{verbatim} \normalsize
+
+\marginpar{This prototype is a proposed change to the pseudotype {\tt NUMBER}}
+\bd
+Converts \verb+x+ into a value of type \verb+INTEGER+, or a list of
+numbers \verb+x+ into a list of \verb+INTEGER+s componentwise.
+\item
+[See also:] {\tt Float}, {\tt Rational}.
+\ed
+
 \item 
 \protect \large \begin{verbatim}
 IntegerDivide[x->INTEGER, y->INTEGER] =: INTEGER
@@ -2223,7 +2221,7 @@ towards zero.
 \item
 [Short form:] \verb%x DIV y%
 \item
-[See also:] \verb+Modulus+.
+[See also:] \verb+Divide+, \verb+Modulus+.
 \ed
 
 \item
@@ -2311,7 +2309,7 @@ the root node of the tree and thus has no such action.
 
 \item
 \protect \large \begin{verbatim}
-LcpSolve[efg<->EFG | support->EFSUPPORT, {stopAfter->INTEGER},
+LcpSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LcpSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER},
          {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
@@ -2322,9 +2320,16 @@ Solves the game as a linear complementarity problem, using the
 Lemke-Howson algorithm for normal form games, and the
 Koller-Meggiddo-Stengel sequence form for extensive form games.  
 
+
 The behavior of the algorithm may be modified by the following
 optional parameters:
 \bd
+\item
+[asNfg:] By default, extensive forms are solved by the sequence form.
+By setting this parameter to \verb+True+, each marked subgame of the extensive
+form is converted to its corresponding reduced normal form, solved
+via Lemke-Howson, and the mixed strategy solutions converted back into
+behavioral profiles.
 \item
 [stopAfter:] Specifies the maximum number of equilibria to find.  If
 not specified, the default value is zero, which means that all
@@ -2436,7 +2441,7 @@ the string \verb+y+, using the native character set of the machine.
 
 \item
 \protect \large \begin{verbatim}
-LiapSolve[efg<->EFG | start->BEHAV, 
+LiapSolve[efg<->EFG | start->BEHAV, {asNfg->BOOLEAN},
           {stopAfter->INTEGER}, {nTries->INTEGER},
           {maxitsN->INTEGER}, {tolN->FLOAT},
           {maxits1->INTEGER}, {tol1->FLOAT},
@@ -2464,11 +2469,18 @@ The behavior of the algorithm may be modified by specifying the following
 optional parameters:
 \bd
 \item
+[asNfg:] By default, extensive forms are solved in the extensive form.
+By setting this parameter to \verb+True+, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form game,
+solved, and the overall behavioral profile reconstructed from these
+solutions.
+\item
 [start:] Sets the starting profile for the descent algorithm.  The
-default is the centroid.
+default (that is, when the game is passed instead of a strategy
+profile) is the centroid.
 \item
 [nTries:] Sets the maximum number of attempts at finding each
-equilibrium. Default is 10
+equilibrium. Default is 10.
 \item
 [stopAfter:] Sets the number of equilibria to find.  Has a default
 value of 1.  
@@ -2489,6 +2501,10 @@ Default is 2.0e-10.
 \item
 [nEvals:] Returns the number of function evaluations for the operation.
 \ed
+
+\item
+[Note:] If \verb+start->BEHAV+ is specified, subgame markings are ignored,
+and solution by normal form is not available in the current version.
 \ed
 
 
@@ -2547,6 +2563,8 @@ Computes the natural logarithm of \verb+x+.
 
 \item
 \protect \large \begin{verbatim}
+LpSolve[efg<->EFG, {asNfg->BOOLEAN},
+        {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 LpSolve[nfg<->NFG | support->NFSUPPORT, {nPivots<->INTEGER},
         {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
@@ -2563,6 +2581,38 @@ contains the time elapsed in computing the solution.
 \ed
 
 %--M--
+
+\item
+\protect \large \begin{verbatim}
+MarkSubgames[efg<->EFG] =: LIST(NODE)
+MarkSubgames[node->NODE] =: LIST(NODE)
+\end{verbatim} \normalsize
+
+\bd
+Defines all legal game theoretic subgames in a subtree of an extensive
+form.  The first version finds all subgames in the entire tree; the
+second version finds subgames only in the subtree rooted in \verb+node+.
+Both versions return the list of nodes which are roots of defined
+subgames after the operation.
+\item
+[See also:] {\tt MarkThisSubgame}, {\tt SubgameRoots}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+MarkThisSubgame[node->NODE] =: BOOL
+\end{verbatim}\normalsize
+
+\bd
+If \verb+node+ is the root node of a subgame in the game theoretic
+sense, defines a new subgame rooted at \verb+node+ in its extensive
+form game.  If \verb+node+ is not a subgame root, this function has
+no effect.  Returns \verb+True+ if \verb+node+ is marked after termination.
+\item
+[See also:] {\tt MarkSubgames}, {\tt SubgameRoots}, {\tt UnmarkSubgames},
+{\tt UnmarkThisSubgame}
+\ed
 
 \item
 \protect \large \begin{verbatim}
@@ -2601,23 +2651,6 @@ Returns the difference $x - y$.
 \item
 [Short form:] \verb+x - y+
 \ed
-
-
-\item
-\protect \large \begin{verbatim}
-Minus[x->LIST(T), y->LIST(T)] =: LIST(T)
-\end{verbatim} \normalsize
-
-\marginpar{This function is pending}
-\bd
-Returns the difference of $x$ and $y$, where the lists are treated
-as vectors.  Lists of any dimensionality may be added; but it is a
-run-time error if the lists do not have exactly the same
-dimensionality.
-\item
-[Short form:] \verb%x - y%
-\ed
-
 
 \item
 \protect \large \begin{verbatim}
@@ -2780,21 +2813,6 @@ Defines a new player in the extensive form game \verb+efg+.
 By default the player is named with the empty string; the optional parameter
 \verb+name+, if specified, gives the name of the new player.  Returns the
 newly created player.
-\ed
-
-\item
-\protect \large \begin{verbatim}
-NewSubgame[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\marginpar{This function is part of the proposed subgame interface.}
-\bd
-If \verb+node+ is the root node of a subgame in the game theoretic
-sense, defines a new subgame rooted at \verb+node+ in its extensive
-form game.  If \verb+node+ is not a subgame root, this function has
-no effect.
-\item
-[See also:] {\tt DeleteSubgame}, {\tt FindSubgames}, {\tt SubgameRoots}
 \ed
 
 \item
@@ -3240,23 +3258,6 @@ Returns the sum of \verb+x+ and \verb+y+.
 
 \item
 \protect \large \begin{verbatim}
-Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
-\end{verbatim}\normalsize
-
-\marginpar{This function is pending.}
-\bd
-Returns the sum of $x$ and $y$, where the lists are treated as vectors.
-Lists of any dimensionality may be added; but it is a run-time error
-if the lists do not have exactly the same dimensionality.
-\item
-[Short form:] \verb%x + y%
-\item
-[Note:] This function is new in version 0.92.  The function {\tt Plus}
-from earlier versions has been renamed {\tt Concat}.
-\ed
-
-\item
-\protect \large \begin{verbatim}
 Plus[x->TEXT, y->TEXT] =: TEXT
 \end{verbatim} \normalsize
 
@@ -3577,20 +3578,30 @@ strategies in \verb+list+ are defined.  Returns \verb+list+.
 
 \item
 \protect \large \begin{verbatim}
+SimpDivSolve[efg<->EFG, {asNfg->BOOLEAN}, {stopAfter->INTEGER},
+             {nRestarts->INTEGER}, {leashLength->INTEGER},
+             {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
 SimpDivSolve[nfg<->NFG | support->NFSUPPORT, {stopAfter->INTEGER}, 
              {nRestarts->INTEGER}, {leashLength->INTEGER},
              {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
 \end{verbatim}\normalsize
 
 \bd
-Computes a Nash equilibrium to a the normal form game \verb+nfg+, or the
-game associated with \verb+support+, based on a simplicial subdivision
+Computes a Nash equilibrium for a game using a simplicial subdivision
 algorithm.  The list of solutions found is returned.
 
 The behavior of the algorithm may be modified by several optional
 parameters:
 
 \bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavioral profile.  {\it Note that currently simplicial
+subdivision is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.  Future versions will include
+a simplicial subdivision algorithm on extensive forms.}
 \item
 [stopAfter:] Maximum number of equilibria to find. Default is 1.  
 \item 
@@ -3709,20 +3720,6 @@ type, it computes the scalar product of the scalar and the profile.
 [Short form:] \verb+x * y+
 \ed
 
-\item
-\protect \large \begin{verbatim}
-Times[x->LIST(T), y->LIST(T)] =: T
-\end{verbatim}\normalsize
-
-\marginpar{This function is pending.}
-\bd
-Returns the dot product of $x$ and $y$, where the lists are treated as vectors.
-It is a run-time error to attempt to multiply two lists of different
-lengths.
-\item
-[Short form:] \verb%x * y%
-\ed
-
 
 %--U--
 
@@ -3736,6 +3733,39 @@ Undefines the variable referenced by \verb+x+.  Returns the
 last value of the variable.
 \item
 [See also:] {\tt Assign}.
+\ed
+
+\item
+\protect \large \begin{verbatim}
+UnmarkSubgames[efg<->EFG] =: LIST(NODE)
+UnmarkSubgames[node->NODE] =: LIST(NODE)
+\end{verbatim}\normalsize
+
+\bd
+Unmarks all subgames in a subtree.  If \verb+efg+ is given, unmarks all
+subgames in the extensive form (except the root subgame, which is always
+marked).  If \verb+node+ is given, unmarks all subgames in the subtree
+rooted at \verb+node+.  Returns the list of subgames marked at the
+end of the operation.
+\item
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt SubgameRoots},
+{\tt UnmarkThisSubgame}
+\ed
+
+\item
+\protect \large \begin{verbatim}
+UnmarkThisSubgame[node->NODE] =: NODE
+\end{verbatim}\normalsize
+
+\bd
+If \verb+node+ is the root of a defined subgame in its extensive form,
+that subgame is undefined.  It is not permitted to undefine the root
+subgame.  If \verb+node+ is not the root of a subgame, no action is
+taken.  The node rooting the subgame to which \verb+node+ belongs after
+the operation is returned.
+\item
+[See also:] {\tt MarkSubgames}, {\tt MarkThisSubgame}, {\tt SubgameRoots},
+{\tt UnmarkSubgames}
 \ed
 
 %--V--
@@ -3785,130 +3815,4 @@ output stream \verb+output+.
 \addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{gambit}
 \end{document}
-
-
-
-\section{Language Description}
-
-\subsection{Grammar and syntax}
-
-The central paradigm of the GCL is that we can think of every legal
-statement as a function call, which operates on some set of parameters and
-returns a value.  Many commonly used functions have a more convenient
-``short form'' format for additional terseness and readability.
-
-Each function is identified by its \verb+FunctionName+, which is a
-unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
-case letters or numbers beginning with a letter.  The set of all
-built-in functions is listed in the Function Reference section of this
-manual.
-
-A statement in the GCL has the
-following syntax
-\begin{verbatim}
-FunctionName[ArgumentList]
-\end{verbatim}
-where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
-a sequence of arguments, separated by commas, each of which takes one
-of the following two forms:
-\begin{verbatim}
-ArgumentName->argval
-\end{verbatim}
-or
-\begin{verbatim}
-ArgumentName<->argref
-\end{verbatim}
-
-Each function, when originally created, is given a list of formal
-argument names, and each formal argument is assigned a data type,
-which is one of the allowable data types listed in the section below
-on data types.  For each of the built in functions, the formal
-arguments and their data types are listed in the entry for that
-function in the Function Reference section.  In the above syntax,
-\verb+ArgumentName+, must be one of the list of possible formal
-arguments for the given function, and \verb+argval+ or \verb+argref+
-is any function that evaluates to correct data type for the
-corresponding argument. 
-
-The arguments to a function can be either optional or required.
-Required arguments must be specified in \verb+ArgumentList+ when the
-function is called.  Each optional argument has a default value, which
-is also determined when the function is created.  Optional arguments
-need only be specified when the default is to be changed.
-
-The arguments to a function can be specified in any order, as long as
-the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function can also be called without specifying the 
-prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as the 
-arguments are specified in the correct order.  In fact a mixture is 
-allowed in which the prefix is specified for some arguments and not
-specified for others as long as all of the arguments which do not
-include the prefix preceed those that do.  In this case, it is assumed
-that those that do not include a prefix are in the correct order.  
-
-Arguments can be passed in one of two ways, either by value or by
-reference.  To pass an argument by value, the syntax is
-\verb+ArgumentName->argval+.  If an argument is passed by value, then the
-function whose name is specified in \verb+argval+ cannot be called
-or changed by the function \verb+FunctionName+ unless it is in some
-other way made visible to the function (specifically, if it is called
-by reference in a different argument to the same function, or if it is a
-funcion of global scope -- described below).  To pass by reference,
-the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
-by reference, then the function whose name is specified in
-\verb+argref+ can be called and changed by the function
-\verb+FunctionName+.  
-
-Finally, a function with no required arguments can be called by just
-specifying the function name.  That function is then called with
-default values for all optional arguments (if there are any.)
-
-Summarizing, a rough description of the formal grammar of the GCL
-follows:
-
-\begin{verbatim}
-Name: [A-Za-z]([A-Za-z0-9_])
-
-Statement: FunctionName
-        | FunctionName[ArgumentList]
-
-FunctionName: Name
-
-ArgumentList: Argument
-        | Argument, Argumentlist
-
-Argument: ArgumentName -> Statement
-        | ArgumentName <-> Statement
-        | Statement
-
-ArgumentName: Name
-\end{verbatim}
-
-\subsection{Variables}
-
-
-
-
-\begin{verbatim}
-e := NewEfg[];
-n := RootNode[e];
-ent := NewPlayer[e,"Entrant"];
-entiset := NewInfoset[ ent , {"Enter", "Out"} ];
-AppendNode[n, entiset];
-inc := NewPlayer[e,"Incumbent"];
-inciset := NewInfoset[ inc , {"Fight", "Aquiesce"} ];
-AppendNode[n#1, inciset]; 
-\end{verbatim}
-
-can be used to build up the game tree for one stage of a chain store
-game.  One can then attach outcomes and set payoffs as follows:
-
-\begin{verbatim}
-o1:=AttachOutcome[node#1#1,NewOutcome[efg]];
-o2:=AttachOutcome[node#1#2,NewOutcome[efg]];
-o3:=AttachOutcome[node#2,NewOutcome[efg]];
-SetPayoff[o1, {-0.5,-1.0}];
-SetPayoff[o2, {0.5,0.0}];
-SetPayoff[o3, {0.0,0.5}];
-\end{verbatim}
 
