@@ -34,6 +34,120 @@
 #include "nfgconst.h"
 
 //---------------------------------------------------------------------
+//                   class gbtPayoffVectorRenderer
+//---------------------------------------------------------------------
+
+class gbtPayoffVectorRenderer : public wxGridCellRenderer {
+private:
+  gbtGameDocument *m_doc;
+
+protected:
+  // set the text colours before drawing
+  void SetTextColoursAndFont(wxGrid &grid, wxGridCellAttr &attr,
+			     wxDC &dc, bool isSelected);
+
+  // calc the string extent for given string/font
+  wxSize DoGetBestSize(wxGridCellAttr &attr, wxDC &dc,
+		       const wxString &text);
+public:
+  gbtPayoffVectorRenderer(gbtGameDocument *p_doc)
+    : m_doc(p_doc) { }
+
+  // draw the string
+  virtual void Draw(wxGrid &grid, wxGridCellAttr &attr,
+		    wxDC &dc, const wxRect &rect,
+		    int row, int col, bool isSelected);
+
+  // return the string extent
+  virtual wxSize GetBestSize(wxGrid &grid, wxGridCellAttr &attr,
+			     wxDC &dc, int row, int col);
+
+  virtual wxGridCellRenderer *Clone() const
+    { return new gbtPayoffVectorRenderer(m_doc); }
+};
+
+void gbtPayoffVectorRenderer::SetTextColoursAndFont(wxGrid &p_grid,
+						    wxGridCellAttr &p_attr,
+						    wxDC &p_dc,
+						    bool p_isSelected)
+{
+  p_dc.SetBackgroundMode(wxTRANSPARENT);
+
+  if (p_isSelected) {
+    p_dc.SetTextBackground(p_grid.GetSelectionBackground());
+    p_dc.SetTextForeground(p_grid.GetSelectionForeground());
+  }
+  else {
+    p_dc.SetTextBackground(p_attr.GetBackgroundColour());
+    p_dc.SetTextForeground(p_attr.GetTextColour());
+  }
+
+  p_dc.SetFont(p_attr.GetFont());
+}
+
+wxSize gbtPayoffVectorRenderer::DoGetBestSize(wxGridCellAttr &p_attr,
+					      wxDC &p_dc,
+					      const wxString &p_text)
+{
+  wxCoord x = 0, y = 0;
+  p_dc.SetFont(p_attr.GetFont());
+  p_dc.GetTextExtent(p_text, &x, &y);
+  return wxSize(x, y);
+}
+
+wxSize gbtPayoffVectorRenderer::GetBestSize(wxGrid &p_grid,
+					    wxGridCellAttr &p_attr,
+					    wxDC &p_dc, int p_row, int p_col)
+{
+  return DoGetBestSize(p_attr, p_dc,
+		       _T("(") + p_grid.GetCellValue(p_row, p_col) + _T(")"));
+}
+
+void gbtPayoffVectorRenderer::Draw(wxGrid &p_grid, wxGridCellAttr &p_attr,
+				   wxDC &p_dc, const wxRect &p_rectCell,
+				   int p_row, int p_col, bool p_isSelected)
+{
+  wxGridCellRenderer::Draw(p_grid, p_attr, p_dc, p_rectCell,
+			   p_row, p_col, p_isSelected);
+
+  // now we only have to draw the text
+  SetTextColoursAndFont(p_grid, p_attr, p_dc, p_isSelected);
+
+  wxString text = p_grid.GetCellValue(p_row, p_col);
+
+  wxRect rect = p_rectCell;
+  wxCoord x, y;
+  p_dc.GetTextExtent(_T("(") + text + _T(")"), &x, &y);
+  rect.x = rect.x + (rect.width - x) / 2;
+
+  rect.Inflate(-1);
+  p_grid.DrawTextRectangle(p_dc, wxString("("), rect);
+  p_dc.GetTextExtent("(", &x, &y);
+  rect.x += x;
+
+  int pl = 1;
+  p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(pl));
+  for (unsigned int i = 0; i < text.Length(); i++) {
+    if (text[i] == ',') {
+      p_dc.SetTextForeground(*wxBLACK);
+      p_grid.DrawTextRectangle(p_dc, wxString(","), rect);
+      p_dc.GetTextExtent(",", &x, &y);
+      rect.x += x;
+
+      p_dc.SetTextForeground(m_doc->GetPreferences().PlayerColor(++pl));
+    }
+    else {
+      p_grid.DrawTextRectangle(p_dc, wxString(text[i]), rect);
+      p_dc.GetTextExtent(text[i], &x, &y);
+      rect.x += x;
+    }
+  }
+  
+  p_dc.SetTextForeground(*wxBLACK);
+  p_grid.DrawTextRectangle(p_dc, wxString(")"), rect); 
+}
+
+//---------------------------------------------------------------------
 //                       class NfgGridTable
 //---------------------------------------------------------------------
 
@@ -139,7 +253,7 @@ wxString NfgGridTable::GetValue(int row, int col)
 
     gbtNfgOutcome outcome = m_doc->GetNfg().GetOutcome(profile);
     if (m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_PAYOFFS) {
-      wxString ret = "(";
+      wxString ret = "";
       for (int pl = 1; pl <= strategy.Length(); pl++) {
 	ret += wxString::Format("%s",
 				(char *) ToText(outcome.GetPayoff(m_doc->GetNfg().GetPlayer(pl)),
@@ -148,7 +262,7 @@ wxString NfgGridTable::GetValue(int row, int col)
 	  ret += wxString(",");
 	}
       }
-      ret += ")";
+      ret += "";
       return ret;
     }
     else {
@@ -284,133 +398,12 @@ wxGridCellAttr *NfgGridTable::GetAttr(int row, int col,
     attr->SetBackgroundColour(*wxLIGHT_GREY);
   }
   else {
-    attr->SetBackgroundColour(*wxWHITE);
+    attr->SetRenderer(new gbtPayoffVectorRenderer(m_doc));
   }
 
   attr->SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
 
   return attr;
-}
-
-class ColoredStringRenderer : public wxGridCellRenderer {
-public:
-  // draw the string
-  virtual void Draw(wxGrid& grid,
-		    wxGridCellAttr& attr,
-		    wxDC& dc,
-		    const wxRect& rect,
-		    int row, int col,
-		    bool isSelected);
-
-  // return the string extent
-  virtual wxSize GetBestSize(wxGrid& grid,
-			     wxGridCellAttr& attr,
-			     wxDC& dc,
-			     int row, int col);
-
-  virtual wxGridCellRenderer *Clone() const
-    { return new ColoredStringRenderer; }
-
-protected:
-  // set the text colours before drawing
-  void SetTextColoursAndFont(wxGrid& grid,
-			     wxGridCellAttr& attr,
-			     wxDC& dc,
-			     bool isSelected);
-
-  // calc the string extent for given string/font
-  wxSize DoGetBestSize(wxGridCellAttr& attr,
-		       wxDC& dc,
-		       const wxString& text);
-};
-
-void ColoredStringRenderer::SetTextColoursAndFont(wxGrid& grid,
-                                                     wxGridCellAttr& attr,
-                                                     wxDC& dc,
-                                                     bool isSelected)
-{
-    dc.SetBackgroundMode( wxTRANSPARENT );
-
-    // TODO some special colours for attr.IsReadOnly() case?
-
-    if ( isSelected )
-    {
-        dc.SetTextBackground( grid.GetSelectionBackground() );
-        dc.SetTextForeground( grid.GetSelectionForeground() );
-    }
-    else
-    {
-        dc.SetTextBackground( attr.GetBackgroundColour() );
-        dc.SetTextForeground( attr.GetTextColour() );
-    }
-
-    dc.SetFont( attr.GetFont() );
-}
-
-wxSize ColoredStringRenderer::DoGetBestSize(wxGridCellAttr& attr,
-					    wxDC& dc,
-					    const wxString& text)
-{
-  wxCoord x = 0, y = 0;
-  dc.SetFont(attr.GetFont());
-  dc.GetTextExtent(text, &x, &y);
-  return wxSize(x, y);
-}
-
-wxSize ColoredStringRenderer::GetBestSize(wxGrid& grid,
-                                             wxGridCellAttr& attr,
-                                             wxDC& dc,
-                                             int row, int col)
-{
-  return DoGetBestSize(attr, dc, grid.GetCellValue(row, col));
-}
-
-void ColoredStringRenderer::Draw(wxGrid& grid,
-                                    wxGridCellAttr& attr,
-                                    wxDC& dc,
-                                    const wxRect& rectCell,
-                                    int row, int col,
-                                    bool isSelected)
-{
-  wxGridCellRenderer::Draw(grid, attr, dc, rectCell, row, col, isSelected);
-
-  // now we only have to draw the text
-  SetTextColoursAndFont(grid, attr, dc, isSelected);
-
-  wxRect rect = rectCell;
-  rect.Inflate(-1);
-
-  wxCoord x, y;
-  grid.DrawTextRectangle(dc, wxString("("), rect);
-  dc.GetTextExtent("(", &x, &y);
-  rect.x += x;
-
-  wxString text = grid.GetCellValue(row, col);
-  dc.SetTextForeground(*wxRED);
-  for (unsigned int i = 0; i < text.Length(); i++) {
-    if (text[i] == ',') {
-      wxColour color = dc.GetTextForeground();
-      dc.SetTextForeground(*wxBLACK);
-      grid.DrawTextRectangle(dc, wxString(","), rect);
-      dc.GetTextExtent(",", &x, &y);
-      rect.x += x;
-
-      if (color == *wxRED) {
-	dc.SetTextForeground(*wxBLUE);
-      }
-      else {
-	dc.SetTextForeground(*wxRED);
-      }
-    }
-    else {
-      grid.DrawTextRectangle(dc, wxString(text[i]), rect);
-      dc.GetTextExtent(text[i], &x, &y);
-      rect.x += x;
-    }
-  }
-  
-  dc.SetTextForeground(*wxBLACK);
-  grid.DrawTextRectangle(dc, wxString(")"), rect); 
 }
 
 //======================================================================

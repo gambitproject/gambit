@@ -95,6 +95,7 @@ private:
   void OnViewValues(wxCommandEvent &);
   void OnViewOutcomeLabels(wxCommandEvent &);
 
+  void OnFormatDisplayColors(wxCommandEvent &);
   void OnFormatDisplayDecimals(wxCommandEvent &);
   void OnFormatFontData(wxCommandEvent &);
   void OnFormatFontLabels(wxCommandEvent &);

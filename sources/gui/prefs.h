@@ -221,9 +221,10 @@ public:
   const wxColour &TerminalColor(void) const { return m_terminalColor; }
   void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
 
-  const wxColour &PlayerColor(long pl) const { return m_playerColor[pl-1]; }
+  const wxColour &PlayerColor(long pl) const 
+    { return m_playerColor[(pl-1) % 8]; }
   void SetPlayerColor(long pl, const wxColour &p_color)
-  { m_playerColor[pl-1] = p_color; }
+  { m_playerColor[(pl-1) % 8] = p_color; }
 
   // Decimals
   long NumDecimals(void) const { return m_numDecimals; }

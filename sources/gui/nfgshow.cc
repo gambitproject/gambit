@@ -50,6 +50,7 @@
 
 #include "gambit.h"
 #include "efgshow.h"
+#include "dlefgcolor.h"
 #include "dlnfgstrategies.h"
 #include "dleditcont.h"
 #include "dlnfgproperties.h"
@@ -97,7 +98,9 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
   EVT_MENU(GBT_NFG_MENU_VIEW_PROBABILITIES, NfgShow::OnViewProbabilities)
   EVT_MENU(GBT_NFG_MENU_VIEW_VALUES, NfgShow::OnViewValues)
   EVT_MENU(GBT_NFG_MENU_VIEW_OUTCOME_LABELS, NfgShow::OnViewOutcomeLabels)
-  EVT_MENU(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS, NfgShow::OnFormatDisplayDecimals)
+  EVT_MENU(GBT_NFG_MENU_FORMAT_DISPLAY_COLORS, NfgShow::OnFormatDisplayColors)
+  EVT_MENU(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS, 
+	   NfgShow::OnFormatDisplayDecimals)
   EVT_MENU(GBT_NFG_MENU_FORMAT_FONT_DATA, NfgShow::OnFormatFontData)
   EVT_MENU(GBT_NFG_MENU_FORMAT_FONT_LABELS, NfgShow::OnFormatFontLabels)
   EVT_MENU(GBT_NFG_MENU_TOOLS_DOMINANCE, NfgShow::OnToolsDominance)
@@ -307,7 +310,10 @@ void NfgShow::MakeMenus(void)
   
   wxMenu *formatMenu = new wxMenu;
   wxMenu *formatDisplayMenu = new wxMenu;
-  formatDisplayMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS, "&Decimal Places",
+  formatDisplayMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY_COLORS,
+			    "&Colors", "Set colors");
+  formatDisplayMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY_DECIMALS,
+			    "&Decimal Places",
 			   "Set number of decimal places to display");
 
   formatMenu->Append(GBT_NFG_MENU_FORMAT_DISPLAY, "&Display", formatDisplayMenu,
@@ -724,6 +730,21 @@ void NfgShow::OnViewOutcomeLabels(wxCommandEvent &)
 //----------------------------------------------------------------------
 //               NfgShow: Menu handlers - Format menu
 //----------------------------------------------------------------------
+
+void NfgShow::OnFormatDisplayColors(wxCommandEvent &)
+{
+  dialogEfgColor dialog(this, m_doc->GetPreferences());
+
+  if (dialog.ShowModal() == wxID_OK) {
+    m_doc->GetPreferences().SetChanceColor(dialog.GetChanceColor());
+    m_doc->GetPreferences().SetTerminalColor(dialog.GetTerminalColor());
+    for (int pl = 1; pl <= 8; pl++) {
+      m_doc->GetPreferences().SetPlayerColor(pl, dialog.GetPlayerColor(pl));
+    }
+    m_doc->GetPreferences().SaveOptions();
+    m_doc->UpdateViews(this, true, true);
+  }
+}
 
 void NfgShow::OnFormatDisplayDecimals(wxCommandEvent &)
 {

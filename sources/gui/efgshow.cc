@@ -1146,11 +1146,10 @@ void EfgShow::OnFormatDisplayColors(wxCommandEvent &)
     m_doc->GetPreferences().SetChanceColor(dialog.GetChanceColor());
     m_doc->GetPreferences().SetTerminalColor(dialog.GetTerminalColor());
     for (int pl = 1; pl <= 8; pl++) {
-      m_doc->GetPreferences().SetPlayerColor(pl,
-						  dialog.GetPlayerColor(pl));
+      m_doc->GetPreferences().SetPlayerColor(pl, dialog.GetPlayerColor(pl));
     }
     m_doc->GetPreferences().SaveOptions();
-    m_doc->UpdateViews(this, true, false);
+    m_doc->UpdateViews(this, true, true);
   }
 }
 
