@@ -22,7 +22,7 @@ GSM::GSM( int size, gOutput& s_out, gOutput& s_err )
   
 #ifndef NDEBUG
   if( size <= 0 )
-    _ErrorMessage( 1, size );
+    _ErrorMessage( _StdErr, 1, size );
 #endif // NDEBUG
   
   _Stack         = new gGrowableStack< Portion* >( size );
@@ -44,12 +44,6 @@ GSM::~GSM()
 }
 
 
-gOutput& GSM::StdErr( void ) const
-{
-  return _StdErr;
-}
-
-
 int GSM::Depth( void ) const
 {
   return _Stack->Depth();
@@ -62,12 +56,6 @@ int GSM::MaxDepth( void ) const
 }
 
 
-void GSM::_StackPush( Portion* p )
-{
-  p->SetGSM( this );
-  _Stack->Push( p );
-}
-
 
 //------------------------------------------------------------------------
 //                           Push() functions
@@ -75,35 +63,35 @@ void GSM::_StackPush( Portion* p )
 
 bool GSM::Push( const bool& data )
 {
-  _StackPush( new bool_Portion( data ) );
+  _Stack->Push( new bool_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( const double& data )
 {
-  _StackPush( new numerical_Portion<double>( data ) );
+  _Stack->Push( new numerical_Portion<double>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gInteger& data )
 {
-  _StackPush( new numerical_Portion<gInteger>( data ) );
+  _Stack->Push( new numerical_Portion<gInteger>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gRational& data )
 {
-  _StackPush( new numerical_Portion<gRational>( data ) );
+  _Stack->Push( new numerical_Portion<gRational>( data ) );
   return true;
 }
 
 
 bool GSM::Push( const gString& data )
 {
-  _StackPush( new gString_Portion( data ) );
+  _Stack->Push( new gString_Portion( data ) );
   return true;
 }
 
@@ -112,35 +100,35 @@ bool GSM::Push( const gString& data )
 #if 0
 bool GSM::Push( Outcome* data )
 {
-  _StackPush( Outcome_Portion( data ) );
+  _Stack->Push( Outcome_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Player* data )
 {
-  _StackPush( new Player_Portion( data ) );
+  _Stack->Push( new Player_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Infoset* data )
 {
-  _StackPush( new Infoset_Portion( data ) );
+  _Stack->Push( new Infoset_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Action* data )
 {
-  _StackPush( new Action_Portion( data ) );
+  _Stack->Push( new Action_Portion( data ) );
   return true;
 }
 
 
 bool GSM::Push( Node* data )
 {
-  _StackPush( new Node_Portion( data ) );
+  _Stack->Push( new Node_Portion( data ) );
   return true;
 }
 #endif
@@ -148,7 +136,7 @@ bool GSM::Push( Node* data )
 
 bool GSM::PushStream( const gString& data )
 {
-  _StackPush( new Stream_Portion( data ) );
+  _Stack->Push( new Stream_Portion( data ) );
   return true;
 }
 
@@ -158,29 +146,34 @@ bool GSM::PushList( const int num_of_elements )
   int            i;
   Portion*       p;
   List_Portion*  list;
+  Portion*       insert_result;
   bool           result = true;
 
 #ifndef NDEBUG
   if( num_of_elements <= 0 )
-    _ErrorMessage( 2, num_of_elements );
+    _ErrorMessage( _StdErr, 2, num_of_elements );
 
   if( num_of_elements > _Stack->Depth() )
-    _ErrorMessage( 3, num_of_elements, _Stack->Depth() );
+    _ErrorMessage( _StdErr, 3, num_of_elements, _Stack->Depth() );
 #endif // NDEBUG
 
   list = new List_Portion;
-  list->SetGSM( this );
   for( i = 1; i <= num_of_elements; i++ )
   {
     p = _Stack->Pop();
     if( p->Type() == porREFERENCE )
       p = _ResolveRef( (Reference_Portion*) p );
-    if( list->Insert( p, 1 ) == 0 )
+
+    insert_result = list->Insert( p, 1 );
+    if( insert_result != 0 )
     {
+      assert( insert_result->Type() == porERROR );
+      insert_result->Output( _StdErr );
+      delete insert_result;
       result = false;
     }
   }
-  _StackPush( list );
+  _Stack->Push( list );
 
   return result;
 }
@@ -194,7 +187,7 @@ bool GSM::PushList( const int num_of_elements )
 
 bool GSM::PushRef( const gString& ref, const gString& subref )
 {
-  _StackPush( new Reference_Portion( ref, subref ) );
+  _Stack->Push( new Reference_Portion( ref, subref ) );
   return true;
 }
 
@@ -207,11 +200,12 @@ bool GSM::Assign( void )
   Portion*  p;
   Portion*  primary_ref;
   gString   p1_subvalue;
+  Portion*  por_result;
   bool      result = true;
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 2 )
-    _ErrorMessage( 4 );
+    _ErrorMessage( _StdErr, 4 );
 #endif // NDEBUG
 
   p2 = _Stack->Pop();
@@ -235,12 +229,11 @@ bool GSM::Assign( void )
       }
       p2_copy->Temporary() = false;
       p2->Temporary() = true;
-      p2_copy->SetGSM( this );
       _RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2_copy );
       delete p2;
       
       p1 = _ResolveRef( (Reference_Portion*) p1 );
-      _StackPush( p1 );
+      _Stack->Push( p1 );
     }
 
     else // ( p1_subvalue != "" )
@@ -274,7 +267,7 @@ bool GSM::Assign( void )
 	  break;
 	  
 	default:
-	  _ErrorMessage( 5 );
+	  _ErrorMessage( _StdErr, 5 );
 	}
 
 	delete p2;
@@ -282,7 +275,7 @@ bool GSM::Assign( void )
       }
       else // ( !( primary_ref->Type() & porALLOWS_SUBVARIABLES ) )
       {
-	_ErrorMessage( 6 );
+	_ErrorMessage( _StdErr, 6 );
 	if( primary_ref->Type() == porERROR )
 	{
 	  delete primary_ref;
@@ -291,7 +284,7 @@ bool GSM::Assign( void )
 	delete p1;
 	p1 = new Error_Portion;
       }
-      _StackPush( p1 );
+      _Stack->Push( p1 );
     }
   }
   else // ( p1->Type() != porREFERENCE )
@@ -299,22 +292,28 @@ bool GSM::Assign( void )
     int index = 0;
     if( p1->ShadowOf() != 0 )
     {
-      p1->ShadowOf()->ParentList()->SetGSM( this );
       index = p1->ShadowOf()->ParentList()->Value().Find( p1->ShadowOf() );
     }
     if( index > 0 )
     {
-      p1->ShadowOf()->ParentList()->SetSubscript( index, p2 );
+      por_result = p1->ShadowOf()->ParentList()->SetSubscript( index, p2 );
+
+      if( por_result != 0 )
+      {
+	por_result->Output( _StdErr );
+	delete por_result;
+      }
+
       delete p1;
-      _StackPush( p2->Copy() );
+      _Stack->Push( p2->Copy() );
       result = true;
     }
     else
     {
-      _ErrorMessage( 7 );
+      _ErrorMessage( _StdErr, 7 );
       delete p1;
       delete p2;
-      _StackPush( new Error_Portion );
+      _Stack->Push( new Error_Portion );
       result = false;
     }
   }
@@ -333,7 +332,7 @@ bool GSM::UnAssign( void )
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 1 )
-    _ErrorMessage( 8 );
+    _ErrorMessage( _StdErr, 8 );
 #endif // NDEBUG
 
   p1 = _Stack->Pop();
@@ -366,12 +365,12 @@ bool GSM::UnAssign( void )
 	  break;
 	  
 	default:
-	  _ErrorMessage( 9 );
+	  _ErrorMessage( _StdErr, 9 );
 	}
       }
       else
       {
-	_ErrorMessage( 10 );
+	_ErrorMessage( _StdErr, 10 );
 	if( primary_ref->Type() == porERROR )
 	{
 	  delete primary_ref;
@@ -384,7 +383,7 @@ bool GSM::UnAssign( void )
   }
   else // ( p1->Type() != porREFERENCE )
   {
-    _ErrorMessage( 11 );
+    _ErrorMessage( _StdErr, 11 );
     result = false;
   }
   return result;
@@ -423,7 +422,7 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
 	break;
 
       default:
-	_ErrorMessage( 12 );
+	_ErrorMessage( _StdErr, 12 );
 	result = new Error_Portion;
       }
       if( result != 0 )
@@ -439,13 +438,11 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
   }
   else
   {
-    _ErrorMessage( 13, 0, 0, ref );
+    _ErrorMessage( _StdErr, 13, 0, 0, ref );
     result = new Error_Portion;
   }
   delete p;
 
-  if( result != 0 )
-    result->SetGSM( this );
   return result;
 }
 
@@ -491,7 +488,7 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
 	break;
 
       default:
-	_ErrorMessage( 14 );
+	_ErrorMessage( _StdErr, 14 );
 	result = new Error_Portion;
       }
     }
@@ -502,8 +499,6 @@ Portion* GSM::_ResolveRefWithoutError( Reference_Portion* p )
   }
   delete p;
 
-  if( result != 0 )
-    result->SetGSM( this );
   return result;
 }
 
@@ -520,12 +515,10 @@ Portion* GSM::_ResolvePrimaryRefOnly( Reference_Portion* p )
   }
   else
   {
-    _ErrorMessage( 15, 0, 0, ref );
+    _ErrorMessage( _StdErr, 15, 0, 0, ref );
     result = new Error_Portion;
   }
 
-  if( result != 0 )
-    result->SetGSM( this );
   return result;
 }
 
@@ -548,11 +541,11 @@ bool GSM::_BinaryOperation( OperationMode mode )
   Portion*   p2;
   Portion*   p1;
   Portion*   p;
-  bool       result = true;
+  Portion*   result = 0;
 
 #ifndef NDEBUG
   if( _Stack->Depth() < 2 )
-    _ErrorMessage( 16 );
+    _ErrorMessage( _StdErr, 16 );
 #endif // NDEBUG
   
   p2 = _Stack->Pop();
@@ -586,33 +579,35 @@ bool GSM::_BinaryOperation( OperationMode mode )
     }
 
     // SPECIAL CASE HANDLING - Boolean operators
-    if(
-       mode == opEQUAL_TO ||
-       mode == opNOT_EQUAL_TO ||
-       mode == opGREATER_THAN ||
-       mode == opLESS_THAN ||
-       mode == opGREATER_THAN_OR_EQUAL_TO ||
-       mode == opLESS_THAN_OR_EQUAL_TO 
-       )
+    if( result != 0 && result->Type() == porBOOL )
     {
       delete p1;
-      p1 = new bool_Portion( result );
-      result = true;
+      p1 = result;
+      result = 0;
     }
   }
 
   else // ( p1->Type() != p2->Type() )
   {
-    _ErrorMessage( 17, (int) p1->Type(), (int) p2->Type() );
+    _ErrorMessage( _StdErr, 17, (int) p1->Type(), (int) p2->Type() );
     delete p1;
     delete p2;
     p1 = new Error_Portion;
-    result = false;
+    result = new Error_Portion;
   }
 
-  _StackPush( p1 );
+  _Stack->Push( p1 );
 
-  return result;
+  if( result == 0 )
+    return true;
+  else
+  {
+    assert( result->Type() == porERROR );
+    if( ( (Error_Portion*) result )->Value() != "" )
+      result->Output( _StdErr );
+    delete result;
+    return false;
+  }
 }
 
 
@@ -625,7 +620,7 @@ bool GSM::_BinaryOperation( OperationMode mode )
 bool GSM::_UnaryOperation( OperationMode mode )
 {
   Portion*  p1;
-  bool      result = true;
+  Portion*  result = 0;
 
   if( _Stack->Depth() >= 1 )
   {
@@ -634,16 +629,25 @@ bool GSM::_UnaryOperation( OperationMode mode )
     if( p1->Type() == porREFERENCE )
       p1 = _ResolveRef( (Reference_Portion*) p1 );
 
-    p1->Operation( 0, mode );
-    _StackPush( p1 );
+    result = p1->Operation( 0, mode );
+    _Stack->Push( p1 );
   }
   else
   {
-    _ErrorMessage( 18 );
-    result = false;
+    _ErrorMessage( _StdErr, 18 );
+    result = new Error_Portion;
   }
 
-  return result;
+  if( result == 0 )
+    return true;
+  else
+  {
+    assert( result->Type() == porERROR );
+    if( ( (Error_Portion*) result )->Value() != "" )
+      result->Output( _StdErr );
+    delete result;
+    return false;
+  }
 }
 
 
@@ -756,29 +760,32 @@ bool GSM::Subscript ( void )
       }
       element = ( (List_Portion* ) real_list )->
 	GetSubscript( ((numerical_Portion<gInteger>*)p2 )->Value().as_long() );
-      if( element != 0 )
+      assert( element != 0 );
+      if( element->Type() != porERROR )
       {
 	shadow = element->Copy();
 	shadow->ShadowOf() = element;
-	_StackPush( shadow );
+	_Stack->Push( shadow );
       }
       else
       {
-	_StackPush( new Error_Portion );
+	element->Output( _StdErr );
+	delete element;
+	_Stack->Push( new Error_Portion );
       }
     }
     else
     {
-      _ErrorMessage( 19 );
-      _StackPush( new Error_Portion );
+      _ErrorMessage( _StdErr, 19 );
+      _Stack->Push( new Error_Portion );
       result = false;
     }
   }
   else
   {
-    _ErrorMessage( 20 );
+    _ErrorMessage( _StdErr, 20 );
     delete p1;
-    _StackPush( new Error_Portion );
+    _Stack->Push( new Error_Portion );
     result = false;
   }
 
@@ -802,10 +809,10 @@ void GSM::AddFunction( FuncDescObj* func )
 void GSM::_BindCheck( void ) const
 {
   if( _CallFuncStack->Depth() <= 0 )
-    _ErrorMessage( 21 );
+    _ErrorMessage( _StdErr, 21 );
 
   if( _Stack->Depth() <= 0 )
-    _ErrorMessage( 22 );
+    _ErrorMessage( _StdErr, 22 );
 }
 #endif // NDEBUG
 
@@ -829,12 +836,12 @@ bool GSM::_BindCheck( const gString& param_name ) const
   }
   else if ( new_index == PARAM_NOT_FOUND )
   {
-    _ErrorMessage( 23, 0, 0, param_name, func->FuncName() );
+    _ErrorMessage( _StdErr, 23, 0, 0, param_name, func->FuncName() );
     result = false;
   }
   else // ( new_index == PARAM_AMBIGUOUS )
   {
-    _ErrorMessage( 24, 0, 0, param_name, func->FuncName() );
+    _ErrorMessage( _StdErr, 24, 0, 0, param_name, func->FuncName() );
     result = false;
   }
   return result;
@@ -853,7 +860,7 @@ bool GSM::InitCallFunction( const gString& funcname )
   }
   else // ( !_FuncTable->IsDefined( funcname ) )
   {
-    _ErrorMessage( 25, 0, 0, funcname );
+    _ErrorMessage( _StdErr, 25, 0, 0, funcname );
     result = false;
   }
   return result;
@@ -941,7 +948,7 @@ bool GSM::BindRef( void )
     if( param->ShadowOf() == 0 )
     {
       _CallFuncStack->Push( func );
-      _StackPush( param );
+      _Stack->Push( param );
       result = BindVal();
       return result;
     }
@@ -1013,11 +1020,12 @@ bool GSM::CallFunction( void )
   Portion*            return_value;
   Portion*            p;
   Portion*            shadowof;
+  Portion*            por_result;
   bool                result = true;
 
 #ifndef NDEBUG
   if( _CallFuncStack->Depth() <= 0 )
-    _ErrorMessage( 26 );
+    _ErrorMessage( _StdErr, 26 );
 #endif // NDEBUG
 
   func = _CallFuncStack->Pop();
@@ -1029,13 +1037,13 @@ bool GSM::CallFunction( void )
 
   if( return_value == 0 )
   {
-    _ErrorMessage( 27, 0, 0, func->FuncName() );
+    _ErrorMessage( _StdErr, 27, 0, 0, func->FuncName() );
     return_value = new Error_Portion;
     result = false;
   }
 
 
-  _StackPush( return_value );
+  _Stack->Push( return_value );
 
 
   for( index = 0; index < num_params; index++ )
@@ -1049,7 +1057,6 @@ bool GSM::CallFunction( void )
       {
 	if( refp->SubValue() == "" )
 	{
-	  param[ index ]->SetGSM( this );
 	  _RefTable->Define( refp->Value(), param[ index ] );
 	}
 	else // ( refp->SubValue != "" )
@@ -1069,14 +1076,14 @@ bool GSM::CallFunction( void )
 	      break;
 
 	    default:
-	      _ErrorMessage( 28 );
+	      _ErrorMessage( _StdErr, 28 );
 	      result = false;
 	    }
 	    delete param[ index ];
 	  }
 	  else // ( !_RefTable->IsDefined( refp->Value() ) )
 	  {
-	    _ErrorMessage( 29 );
+	    _ErrorMessage( _StdErr, 29 );
 	    delete param[ index ];
 	    result = false;
 	  }
@@ -1091,17 +1098,22 @@ bool GSM::CallFunction( void )
 	  shadowof = func->GetCurrParamShadowOf();
 	  if( shadowof != 0 )
 	  {
-	    shadowof->ParentList()->SetGSM( this );
 	    listindex = shadowof->ParentList()->Value().Find( shadowof );
 	    if( listindex > 0 )
 	    {
-	      shadowof->ParentList()->SetSubscript( listindex, 
-						   param[index]->Copy() );
+	      por_result = shadowof->ParentList()->
+		SetSubscript( listindex, param[index]->Copy() );
+
+	      if( por_result != 0 )
+	      {
+		por_result->Output( _StdErr );
+		delete por_result;
+	      }
 	    }
 #ifndef NDEBUG
 	    else
 	    {
-	      _ErrorMessage( 30 );
+	      _ErrorMessage( _StdErr, 30 );
 	    }
 #endif // NDEBUG
 	  }
@@ -1110,7 +1122,7 @@ bool GSM::CallFunction( void )
 #ifndef NDEBUG
 	else if( ( refp != 0 ) && ( param[ index ] == 0 ) )
 	{
-	  _ErrorMessage( 31, index, 0, func->FuncName(), "", refp );
+	  _ErrorMessage( _StdErr, 31, index, 0, func->FuncName(), "", refp );
 	}
 #endif // NDEBUG
       }
@@ -1169,8 +1181,8 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
       }
       else
       {
-	_ErrorMessage( 32 );
-	_StackPush( p );
+	_ErrorMessage( _StdErr, 32 );
+	_Stack->Push( p );
 	program_counter++;
 	instr_success = false;
       }
@@ -1189,7 +1201,7 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
 
     if( !instr_success )
     {
-      _ErrorMessage( 33, program_counter, 0, "", "", 0, instruction );
+      _ErrorMessage( _StdErr, 33, program_counter, 0, "", "", 0, instruction );
       result = rcFAIL;
       break;
     }
@@ -1223,7 +1235,7 @@ bool GSM::Pop( void )
   }
   else
   {
-    _ErrorMessage( 34 );
+    _ErrorMessage( _StdErr, 34 );
   }
   return result;
 }
@@ -1297,6 +1309,7 @@ void GSM::Flush( void )
 
 void GSM::_ErrorMessage
 (
+ gOutput&        s,
  const int       error_num,
  const gInteger& num1, 
  const gInteger& num2,
@@ -1304,157 +1317,161 @@ void GSM::_ErrorMessage
  const gString&  str2,
  Portion*        por,
  Instruction*    instr
- ) const
+ )
 {
-  _StdErr << "GSM Error " << error_num << " :\n";
+  s << "GSM Error " << error_num << " :\n";
 
   switch( error_num )
   {
   case 1:
-    _StdErr << "  Illegal stack size specified during initialization\n";
-    _StdErr << "  Stack size requested: " << num1 << "\n";
+    s << "  Illegal stack size specified during initialization\n";
+    s << "  Stack size requested: " << num1 << "\n";
     assert( 0 );
     break;
   case 2:
-    _StdErr << "  Illegal number of elements requested to PushList()\n";
-    _StdErr << "  Elements requested: " << num1 << "\n";
+    s << "  Illegal number of elements requested to PushList()\n";
+    s << "  Elements requested: " << num1 << "\n";
     assert( 0 );
     break;
   case 3:
-    _StdErr << "  Not enough elements in GSM to PushList()\n";
-    _StdErr << "  Elements requested: " << num1 << "\n";
-    _StdErr << "  Elements available: " << num2 << "\n";
+    s << "  Not enough elements in GSM to PushList()\n";
+    s << "  Elements requested: " << num1 << "\n";
+    s << "  Elements available: " << num2 << "\n";
     assert( 0 );
     break;
   case 4:
-    _StdErr << "  Not enough operands to execute Assign()\n";
+    s << "  Not enough operands to execute Assign()\n";
     assert( 0 );
     break;
   case 5:
-    _StdErr << "  Unknown type supports subvariables\n";
+    s << "  Unknown type supports subvariables\n";
     assert(0);
     break;
   case 6:
-    _StdErr << "  Attempted to assign a sub-reference to a type\n";
-    _StdErr << "  that doesn't support such structures\n";
+    s << "  Attempted to assign a sub-reference to a type\n";
+    s << "  that doesn't support such structures\n";
     break;
   case 7:
-    _StdErr << "  No reference found to be assigned\n";
+    s << "  No reference found to be assigned\n";
     break;
   case 8:
-    _StdErr << "  Not enough operands to execute UnAssign()\n";
+    s << "  Not enough operands to execute UnAssign()\n";
     assert( 0 );
     break;
   case 9:
-    _StdErr << "  Unknown type supports subvariables\n";
+    s << "  Unknown type supports subvariables\n";
     assert(0);
     break;
   case 10:
-    _StdErr << "  Attempted to unassign a sub-reference of a type\n";
-    _StdErr << "  that doesn't support such structures\n";
+    s << "  Attempted to unassign a sub-reference of a type\n";
+    s << "  that doesn't support such structures\n";
     break;
   case 11:
-    _StdErr << "  No reference found to be unassigned\n";
+    s << "  No reference found to be unassigned\n";
     break;
   case 12:
-    _StdErr << "  Attempted to resolve a subvariable of a type\n";
-    _StdErr << "  that does not support subvariables\n";
+    s << "  Attempted to resolve a subvariable of a type\n";
+    s << "  that does not support subvariables\n";
     break;
   case 13:
-    _StdErr << "  Attempted to resolve an undefined reference\n";
-    _StdErr << "  \"" << str1 << "\"\n";
+    s << "  Attempted to resolve an undefined reference";
+    s << " \"" << str1 << "\"\n";
     break;
   case 14:
-    _StdErr << "  Attempted to resolve the subvariable of a type\n";
-    _StdErr << "  that does not support subvariables\n";
+    s << "  Attempted to resolve the subvariable of a type\n";
+    s << "  that does not support subvariables\n";
     break;
   case 15:
-    _StdErr << "  Attempted to resolve an undefined reference\n";
-    _StdErr << "  \"" << str1 << "\"\n";
+    s << "  Attempted to resolve an undefined reference\n";
+    s << "  \"" << str1 << "\"\n";
     break;
   case 16:
-    _StdErr << "  Not enough operands to perform binary operation\n";
+    s << "  Not enough operands to perform binary operation\n";
     assert( 0 );
     break;
   case 17:
-    _StdErr << "  Attempted operating on different types\n";
-    _StdErr << "  Type of Operand 1: " << num1 << "\n";
-    _StdErr << "  Type of Operand 2: " << num2 << "\n";
+    s << "  Attempted operating on different types\n";
+    s << "  Type of Operand 1: ";
+    PrintPortionTypeSpec( s, (PortionType) num1.as_long() );
+    s << "  Type of Operand 2: ";
+    PrintPortionTypeSpec( s, (PortionType) num2.as_long() );
     break;
   case 18:
-    _StdErr << "  Not enough operands to perform unary operation\n";
+    s << "  Not enough operands to perform unary operation\n";
     break;
   case 19:
-    _StdErr << "  A non-integer element number passed as the\n";
-    _StdErr << "  subscript of a List\n";
+    s << "  A non-integer element number passed as the\n";
+    s << "  subscript of a List\n";
     break;
   case 20:
-    _StdErr << "  Attempted to take the subscript of a non-List\n";
-    _StdErr << "  Portion type\n";
+    s << "  Attempted to take the subscript of a non-List\n";
+    s << "  Portion type\n";
     break;
   case 21:
-    _StdErr << "  The CallFunction() subsystem was not initialized by\n";
-    _StdErr << "  calling InitCallFunction() first\n";
+    s << "  The CallFunction() subsystem was not initialized by\n";
+    s << "  calling InitCallFunction() first\n";
     assert( 0 );
     break;
   case 22:
-    _StdErr << "  No value found to assign to a function parameter\n";
+    s << "  No value found to assign to a function parameter\n";
     assert( 0 );
     break;
   case 23:
-    _StdErr << "  Parameter \"" << str1 << "\" is not defined for\n";
-    _StdErr << "  the function \"" << str2 << "\"\n";
+    s << "  Parameter \"" << str1 << "\" is not defined for\n";
+    s << "  the function \"" << str2 << "\"\n";
     break;
   case 24:
-    _StdErr << "  Parameter \"" << str1 << "\" is ambiguous in\n";
-    _StdErr << "  the function \"" << str2 << "\"\n";
+    s << "  Parameter \"" << str1 << "\" is ambiguous in\n";
+    s << "  the function \"" << str2 << "\"\n";
     break;
   case 25:
-    _StdErr << "  Undefined function name:\n";
-    _StdErr << "  InitCallFunction( \"" << str1 << "\" )\n";
+    s << "  Undefined function name:\n";
+    s << "  InitCallFunction( \"" << str1 << "\" )\n";
     break;
   case 26:
-    _StdErr << "  The CallFunction() subsystem was not initialized by\n";
-    _StdErr << "  calling InitCallFunction() first\n";
+    s << "  The CallFunction() subsystem was not initialized by\n";
+    s << "  calling InitCallFunction() first\n";
     assert( 0 );
     break;
   case 27:
-    _StdErr << "  An error occurred while attempting to execute\n";
-    _StdErr << "  CallFunction( \"" << str1 << "\", ... )\n";
+    s << "  An error occurred while attempting to execute\n";
+    s << "  CallFunction( \"" << str1 << "\", ... )\n";
     break;
   case 28:
-    _StdErr << "  Attempted to assign the subvariable of a\n";
-    _StdErr << "  type that does not support subvariables\n";
+    s << "  Attempted to assign the subvariable of a\n";
+    s << "  type that does not support subvariables\n";
     break;
   case 29:
-    _StdErr << "  Attempted to assign the sub-variable of\n";
-    _StdErr << "  an undefined variable\n";
+    s << "  Attempted to assign the sub-variable of\n";
+    s << "  an undefined variable\n";
     break;
   case 30:
-    _StdErr << "  Fatal Error:\n";
-    _StdErr << "    Returning function parameter information\n";
-    _StdErr << "    (regarding lists) is invalid\n";
+    s << "  Fatal Error:\n";
+    s << "    Returning function parameter information\n";
+    s << "    (regarding lists) is invalid\n";
     assert(0);
     break;
   case 31:
-    _StdErr << "  Fatal Error:\n";
-    _StdErr << "    Attempting to assign a null Portion to a reference\n";
-    _StdErr << "    Function: \"" << str1 << "\"\n";
-    _StdErr << "    Parameter index: " << num1 << "\n";
-    _StdErr << "    Reference: " << por << "\n";
+    s << "  Fatal Error:\n";
+    s << "    Attempting to assign a null Portion to a reference\n";
+    s << "    Function: \"" << str1 << "\"\n";
+    s << "    Parameter index: " << num1 << "\n";
+    s << "    Reference: " << por << "\n";
     assert(0);
     break;
   case 32:
-    _StdErr << "  Instruction IfGoto called on a non-boolean data type\n";
+    s << "  Instruction IfGoto called on a non-boolean data type\n";
     break;
   case 33:
-    _StdErr << "  Instruction #" << num1 << ": " << instr << "\n";
-    _StdErr << "           was not executed successfully\n";
-    _StdErr << "           Program abnormally terminated.\n";
+    s << "  Instruction #" << num1 << ": " << instr << "\n";
+    s << "  was not executed successfully\n";
+    s << "  Program abnormally terminated.\n";
     break;
   case 34:
-    _StdErr << "GSM Error: Pop() called on an empty stack\n";
+    s << "  Pop() called on an empty stack\n";
     break;
+  default:
+    s << "  General error\n";
   }
 }
 

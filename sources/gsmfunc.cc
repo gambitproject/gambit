@@ -358,7 +358,7 @@ int CallFuncObj::FindParamName( const gString& param_name )
     }
     else if( _FuncIndex != TempFuncIndex )
     {
-      _StdErr << "CallFuncObj Error: conflicting variable name specification\n";
+      _ErrorMessage( _StdErr, 1 );
       _FuncIndex = -1;
       _ErrorOccurred = true;
     }
@@ -420,27 +420,21 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 	}
 	else
 	{
-	  _StdErr << "CallFuncObj Error: parameter #" << _CurrParamIndex;
-	  _StdErr << " type mismatch while calling\n";
-	  _StdErr << "                   function \"" << _FuncName << "\"\n";
+	  _ErrorMessage( _StdErr, 2, _CurrParamIndex, _FuncName );
 	  result = false;
 	}
       }
       else
       {
-	_StdErr << "CalFuncObj Error: multiple definitions found for ";
-	_StdErr << "parameter \"";
-	_StdErr <<  _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name;
-	_StdErr << "\"\n";
-	_StdErr << "                  while executing CallFunction() on\n";
-	_StdErr << "                  function \"" << _FuncName << "\" )\n";
+	_ErrorMessage( _StdErr, 3, 0, 
+		      _FuncInfo[_FuncIndex].ParamInfo[_CurrParamIndex].Name,
+		      _FuncName );
 	result = false;
       }
     }
     else // ( _CurrParamIndex >= _NumParams )
     {
-      _StdErr << "CallFuncObj Error: too many parameters specified for\n";
-      _StdErr << "                   function \"" << _FuncName << "\"\n";
+      _ErrorMessage( _StdErr, 4, 0, _FuncName );
       result = false;
     }
   }
@@ -462,6 +456,7 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 }
 
 
+/*
 Reference_Portion* CallFuncObj::GetParamRef( const int index ) const
 {
   return _RunTimeParamInfo[ index ].Ref;
@@ -494,6 +489,7 @@ bool CallFuncObj::GetCurrParamPassByRef( void ) const
 	 _CurrParamIndex < _FuncInfo[ _FuncIndex ].NumParams );
   return _FuncInfo[ _FuncIndex ].ParamInfo[ _CurrParamIndex ].PassByReference;
 }
+*/
 
 
 Reference_Portion* CallFuncObj::GetCurrParamRef( void ) const
@@ -563,16 +559,13 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       }
       if ( param_sets_matched > 1 )
       {
-	_StdErr << "CallFuncObj Error: function \"" << _FuncName << "\" called";
-	_StdErr << " with ambiguous parameters\n";
+	_ErrorMessage( _StdErr, 5, 0, _FuncName );
 	_ErrorOccurred = true;
       }
     }
     else // ( !params_defined )
     {
-      _StdErr << "CallFuncObj Error: no defined parameters; function call\n";
-      _StdErr << "                   ambiguous for function \"" << _FuncName;
-      _StdErr << "\"\n";
+      _ErrorMessage( _StdErr, 6, 0, _FuncName );
       _ErrorOccurred = true;
     }
   }
@@ -587,9 +580,7 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	if( !_TypeMatch( _Param[ index ], 
 			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Type ) )
 	{
-	  _StdErr << "CallFuncObj Error: parameter #" << index;
-	  _StdErr << " type mismatch while calling\n";
-	  _StdErr << "                   function \"" << _FuncName << "\"\n";
+	  _ErrorMessage( _StdErr, 7, index, _FuncName );
 	  _ErrorOccurred = true;
 	}	  
       }
@@ -601,8 +592,7 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   { 
     if( _FuncIndex < 0 || _FuncIndex >= _NumFuncs )
     {
-      _StdErr << "CallFuncObj Error: no matching parameter list found for\n";
-      _StdErr << "                   function \"" + _FuncName + "\"\n";
+      _ErrorMessage( _StdErr, 8, 0, _FuncName );
       _ErrorOccurred = true;
     }
   }
@@ -622,10 +612,9 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	}
 	else
 	{
-	  _StdErr << "GSM Error: required parameter \"" << 
-	    _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
-	  _StdErr << "\"" << " not found while executing CallFunction()\n";
-	  _StdErr << "           on function \"" << _FuncName << "\"\n";
+	  _ErrorMessage( _StdErr, 9, 0, 
+			_FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			_FuncName );
 	  _ErrorOccurred = true;
 	}
       }
@@ -635,10 +624,9 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	{
 	  if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference )
 	  {
-	    _StdErr << "GSM Error: required parameter \"" << 
-	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
-	    _StdErr << "\"" << " undefined while executing CallFunction()\n";
-	    _StdErr << "           on function \"" << _FuncName << "\"\n";
+	    _ErrorMessage( _StdErr, 10, 0,
+			  _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name,
+			  _FuncName );
 	    _ErrorOccurred = true;
 	  }
 	  else if( _RunTimeParamInfo[ index ].Ref != 0 )
@@ -715,3 +703,65 @@ bool CallFuncObj::ParamPassByReference( const int index ) const
 
   return false;
 }
+
+
+
+
+
+void CallFuncObj::_ErrorMessage
+( 
+ gOutput& s,
+ const int error_num, 
+ const gInteger& num1,
+ const gString& str1,
+ const gString& str2
+ )
+{
+  s << "CallFuncObj Error " << error_num << " : \n";
+  switch( error_num )
+  {
+  case 1:
+    s << "  Conflicting variable name specification\n";
+    break;
+  case 2:
+    s << "  Parameter #" << num1 << " type mismatch while calling\n";
+    s << "  function \"" << str1 << "\"\n";
+    break;
+  case 3:
+    s << "  Multiple definitions found for parameter \"" <<  str1 << "\"\n";
+    s << "  while executing CallFunction() on\n";
+    s << "  function \"" << str2 << "\"\n";
+    break;
+  case 4:
+    s << "  Too many parameters specified for\n";
+    s << "  function \"" << str1 << "\"\n";
+    break;
+  case 5:
+    s << "  Function \"" << str1 << "\" called with ambiguous parameters\n";
+    break;
+  case 6:
+    s << "  No defined parameters;\n";
+    s << "  function call ambiguous for function \"" << str1 << "\"\n";
+    break;
+  case 7:
+    s << "  Parameter #" << num1 << " type mismatch while calling\n";
+    s << "  function \"" << str1 << "\"\n";
+    break;
+  case 8:
+    s << "  No matching parameter list found for\n";
+    s << "  function \"" + str1 + "\"\n";
+    break;
+  case 9:
+    s << "  Required parameter \"" << str1 << "\" not found while executing\n";
+    s << "  CallFunction() on function \"" << str2 << "\"\n";
+    break;
+  case 10:
+    s << "  Required parameter \"" << str1 << "\" undefined while executing\n";
+    s << "  CallFunction() on function \"" << str2 << "\"\n";
+    break;
+  default:
+    s << "  General error\n";
+  }
+}
+
+ 

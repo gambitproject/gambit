@@ -48,10 +48,9 @@ private:
   void _BindCheck ( void ) const;
   bool _BindCheck ( const gString& param_name ) const;
 
-  void _StackPush ( Portion* p );
-
-  void _ErrorMessage
+  static void _ErrorMessage
     (
+     gOutput&        s,
      const int       error_num = 0,
      const gInteger& num1      = 0, 
      const gInteger& num2      = 0,
@@ -59,7 +58,7 @@ private:
      const gString&  str2      = "",
      Portion*        por       = 0,
      Instruction*    instr     = 0
-     ) const;
+     );
 
   // This function is located in gsmfunc.cc
   void InitFunctions( void );
@@ -68,8 +67,6 @@ private:
 public:
   GSM( int size, gOutput& s_out = gout, gOutput& s_err = gerr );
   ~GSM();
-
-  gOutput& StdErr( void ) const;
 
   int Depth    ( void ) const;
   int MaxDepth ( void ) const;

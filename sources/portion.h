@@ -129,14 +129,11 @@ class Portion
   Portion*       _ShadowOf;
   List_Portion*  _ParentList;
 
-  void Error( const char* string ) const;
-  void Error( const int integer ) const;
+  static gString _ErrorMessage( const int error_num, const gString& str = "" );
 
  public:
   Portion();
   virtual ~Portion();
-
-  void SetGSM ( GSM* gsm );
 
   bool&               Temporary      ( void );
   Portion*&           ShadowOf       ( void );
@@ -144,7 +141,7 @@ class Portion
   virtual PortionType Type           ( void ) const = 0;
   virtual Portion*    Copy           ( void ) const = 0;
   virtual void        MakeCopyOfData ( Portion* p );
-  virtual bool        Operation      ( Portion* p, OperationMode mode );
+  virtual Portion*    Operation      ( Portion* p, OperationMode mode );
   virtual void        Output         ( gOutput& s ) const = 0;
 };
 
@@ -182,7 +179,7 @@ template <class T> class numerical_Portion : public Portion
   T           Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
+  Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -199,7 +196,7 @@ class bool_Portion : public Portion
   bool        Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
+  Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -216,7 +213,7 @@ class gString_Portion : public Portion
   gString     Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
+  Portion*    Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -260,17 +257,16 @@ class List_Portion : public Portion
   Portion*          Copy      ( void ) const;
   PortionType       Type      ( void ) const;
   PortionType       DataType  ( void ) const;
-  bool              Operation ( Portion* p, OperationMode mode );
   void              Output    ( gOutput& s ) const;
 
-  int      Append     ( Portion* item );
-  int      Insert     ( Portion* item, int index );
+  Portion* Append     ( Portion* item );
+  Portion* Insert     ( Portion* item, int index );
   Portion* Remove     ( int index );
   int      Length     ( void ) const;
   void     Flush      ( void );
 
   Portion* GetSubscript( int index ) const;
-  bool     SetSubscript( int index, Portion* p );
+  Portion* SetSubscript( int index, Portion* p );
 };
 
 
@@ -293,7 +289,6 @@ template <class T> class Mixed_Portion : public Portion
   MixedProfile<T>  Value     ( void ) const;
   Portion*         Copy      ( void ) const;
   PortionType      Type      ( void ) const;
-  bool             Operation ( Portion* p, OperationMode mode );
   void             Output    ( gOutput& s ) const;
 };
 
@@ -316,7 +311,6 @@ template <class T> class Behav_Portion : public Portion
   BehavProfile<T>  Value     ( void ) const;
   Portion*         Copy      ( void ) const;
   PortionType      Type      ( void ) const;
-  bool             Operation ( Portion* p, OperationMode mode );
   void             Output    ( gOutput& s ) const;
 };
 
@@ -343,7 +337,6 @@ template <class T> class Nfg_Portion : public Portion
   Portion*       Copy           ( void ) const;
   void           MakeCopyOfData ( Portion* p );
   PortionType    Type           ( void ) const;
-  bool           Operation      ( Portion* p, OperationMode mode );
   void           Output         ( gOutput& s ) const;
 
   bool        Assign     ( const gString& ref, Portion* data );
@@ -375,7 +368,6 @@ template <class T> class Efg_Portion : public Portion
   Portion*       Copy           ( void ) const;
   void           MakeCopyOfData ( Portion* p );
   PortionType    Type           ( void ) const;
-  bool           Operation      ( Portion* p, OperationMode mode );
   void           Output         ( gOutput& s ) const;
 
   bool        Assign     ( const gString& ref, Portion* data );
@@ -401,7 +393,6 @@ class Outcome_Portion : public Portion
   Outcome*    Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -421,7 +412,6 @@ class Player_Portion : public Portion
   Player*     Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -441,7 +431,6 @@ class Infoset_Portion : public Portion
   Infoset*    Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -458,7 +447,6 @@ class Action_Portion : public Portion
   Action*     Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -478,7 +466,6 @@ class Node_Portion : public Portion
   Node*       Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -498,7 +485,6 @@ class Stream_Portion : public Portion
   gFileOutput&  Value          ( void );
   Portion*      Copy           ( void ) const;
   PortionType   Type           ( void ) const;
-  bool          Operation      ( Portion* p, OperationMode mode );
   void          Output         ( gOutput& s ) const;
 };
 

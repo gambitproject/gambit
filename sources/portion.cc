@@ -7,6 +7,7 @@
 
 
 #include <assert.h>
+#include <stdio.h>
 #include "basic.h"
 
 #include "portion.h"
@@ -75,30 +76,6 @@ Portion::~Portion()
 }
 
 
-void Portion::Error( const char* string ) const
-{
-  if( _GSM != 0 )
-    _GSM->StdErr() << string;
-  else
-    gerr << string;
-}
-
-
-void Portion::Error( const int integer ) const
-{
-  if( _GSM != 0 )
-    _GSM->StdErr() << integer;
-  else
-    gerr << integer;
-}
-
-
-void Portion::SetGSM( GSM* gsm )
-{
-  _GSM = gsm;
-}
-
-
 bool& Portion::Temporary( void )
 { return _Temporary; }
 
@@ -116,8 +93,8 @@ void Portion::MakeCopyOfData( Portion* p )
 #ifndef NDEBUG
   if( this->Type() != p->Type() )
   {
-    Error( "Portion Error: attempting to MakeCopyOfData() from a\n" );
-    Error( "               different Portion type\n" );
+    gerr << "Portion Error:\n";
+    gerr << "  Attempting to MakeCopyOfData() from a different Portion type\n";
   }
   assert( this->Type() == p->Type() );
 #endif // NDEBUG
@@ -125,14 +102,13 @@ void Portion::MakeCopyOfData( Portion* p )
 }
 
 
-bool Portion::Operation( Portion* p, OperationMode mode )
+Portion* Portion::Operation( Portion* p, OperationMode mode )
 {
-  Error( "Portion Error: attempted to execute an unsupported operation\n" );
   if( p !=0 )
   {
     delete p;
   }
-  return false;
+  return new Error_Portion( _ErrorMessage( 1 ) );
 }
 
 
@@ -164,9 +140,10 @@ Portion* Error_Portion::Copy( void ) const
 
 void Error_Portion::Output( gOutput& s ) const
 {
-  s << " Error";
-  if( _Value != "" )
-    s << ": " << _Value;
+  if( _Value == "" )
+    s << " (Error)";
+  else
+    s << _Value;
 }
 
 
@@ -195,9 +172,9 @@ template <class T> Portion* numerical_Portion<T>::Copy( void ) const
 
 
 template <class T> 
-  bool numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
+Portion* numerical_Portion<T>::Operation( Portion* p, OperationMode mode )
 {
-  bool  result = true;
+  Portion*  result = 0;
   T&    p_value = ( (numerical_Portion<T>*) p )->_Value;
 
   if( p == 0 )      // unary operations
@@ -231,9 +208,8 @@ template <class T>
       }
       else
       {
-	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
-	result = false;
+	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
 
@@ -251,9 +227,8 @@ template <class T>
       }
       else
       {
-	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
-	result = false;
+	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
 
@@ -275,29 +250,28 @@ template <class T>
       }
       else
       {
-	Error( "Portion Error: division by zero\n" );
 	_Value = 0;
-	result = false;
+	result = new Error_Portion( _ErrorMessage( 2 ) );
       }
       break;
 
     case opEQUAL_TO:
-      result = ( _Value == p_value );
+      result = new bool_Portion( _Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = ( _Value != p_value );
+      result = new bool_Portion( _Value != p_value );
       break;
     case opGREATER_THAN:
-      result = ( _Value > p_value );
+      result = new bool_Portion( _Value > p_value );
       break;
     case opLESS_THAN:
-      result = ( _Value < p_value );
+      result = new bool_Portion( _Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = ( _Value >= p_value );
+      result = new bool_Portion( _Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = ( _Value <= p_value );
+      result = new bool_Portion( _Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -337,9 +311,9 @@ Portion* bool_Portion::Copy( void ) const
 { return new bool_Portion( _Value ); }
 
 
-bool bool_Portion::Operation( Portion* p, OperationMode mode )
+Portion* bool_Portion::Operation( Portion* p, OperationMode mode )
 {
-  bool   result = true;
+  Portion* result = 0;
   bool&  p_value = ( (bool_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
@@ -358,17 +332,17 @@ bool bool_Portion::Operation( Portion* p, OperationMode mode )
     switch( mode )
     {
     case opEQUAL_TO:
-      result = ( _Value == p_value );
+      result = new bool_Portion( _Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = ( _Value != p_value );
+      result = new bool_Portion( _Value != p_value );
       break;
 
     case opLOGICAL_AND:
-      _Value = ( _Value && p_value );
+      _Value = _Value && p_value;
       break;
     case opLOGICAL_OR:
-      _Value = ( _Value || p_value );
+      _Value = _Value || p_value;
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -410,9 +384,9 @@ Portion* gString_Portion::Copy( void ) const
 { return new gString_Portion( _Value ); }
 
 
-bool gString_Portion::Operation( Portion* p, OperationMode mode )
+Portion* gString_Portion::Operation( Portion* p, OperationMode mode )
 {
-  bool      result = true;
+  Portion*  result = 0;
   gString&  p_value = ( (gString_Portion*) p )->_Value;
 
   if( p == 0 )      // unary operations
@@ -431,22 +405,22 @@ bool gString_Portion::Operation( Portion* p, OperationMode mode )
       _Value += p_value;
       break;
     case opEQUAL_TO:
-      result = ( _Value == p_value );
+      result = new bool_Portion( _Value == p_value );
       break;
     case opNOT_EQUAL_TO:
-      result = ( _Value != p_value );
+      result = new bool_Portion( _Value != p_value );
       break;
     case opGREATER_THAN:
-      result = ( _Value > p_value );
+      result = new bool_Portion( _Value > p_value );
       break;
     case opLESS_THAN:
-      result = ( _Value < p_value );
+      result = new bool_Portion( _Value < p_value );
       break;
     case opGREATER_THAN_OR_EQUAL_TO:
-      result = ( _Value >= p_value );
+      result = new bool_Portion( _Value >= p_value );
       break;
     case opLESS_THAN_OR_EQUAL_TO:
-      result = ( _Value <= p_value );
+      result = new bool_Portion( _Value <= p_value );
       break;
     default:
       result = Portion::Operation( p, mode );
@@ -499,34 +473,6 @@ template <class T> PortionType Mixed_Portion<T>::Type( void ) const
 template <class T> Portion* Mixed_Portion<T>::Copy( void ) const
 { return new Mixed_Portion<T>( _Value ); }
 
-
-template <class T>
-  bool Mixed_Portion<T>::Operation( Portion* p, OperationMode mode )
-{
-  bool      result = true;
-  MixedProfile<T>&  p_value = ( (Mixed_Portion<T>*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 template <class T> void Mixed_Portion<T>::Output( gOutput& s ) const
 {
   _Value.Dump( s );
@@ -568,34 +514,6 @@ template <class T> PortionType Behav_Portion<T>::Type( void ) const
 
 template <class T> Portion* Behav_Portion<T>::Copy( void ) const
 { return new Behav_Portion<T>( _Value ); }
-
-
-template <class T>
-  bool Behav_Portion<T>::Operation( Portion* p, OperationMode mode )
-{
-  bool      result = true;
-  BehavProfile<T>&  p_value = ( (Behav_Portion<T>*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
 
 template <class T> void Behav_Portion<T>::Output( gOutput& s ) const
 {
@@ -705,32 +623,6 @@ int List_Portion::TypeCheck( Portion* item )
 }
 
 
-bool List_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool               result = true;
-  gBlock<Portion*>&  p_value = ( (List_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 void List_Portion::Output( gOutput& s ) const
 {
   int i;
@@ -754,22 +646,24 @@ void List_Portion::Output( gOutput& s ) const
 
 
 
-int List_Portion::Append( Portion* item )
+Portion* List_Portion::Append( Portion* item )
 { return Insert( item, _Value.Length() + 1 ); }
 
 
-int List_Portion::Insert( Portion* item, int index )
+Portion* List_Portion::Insert( Portion* item, int index )
 {
-  int result = 0;
+  Portion* result = 0;
   int type_match;
 
+#ifndef NDEBUG
   if( item->Type() == porREFERENCE )
   {
-    Error( "Portion Error: attempted to insert a Reference_Portion into\n" );
-    Error( "               a List_Portion\n" );
-    result = 0;
+    gerr << "Portion Error:\n";
+    gerr << "  Attempted to insert a Reference_Portion into\n";
+    gerr << "  a List_Portion\n";
   }
   assert( item->Type() != porREFERENCE );
+#endif
   
   if( _Value.Length() == 0 )  // creating a new list
   {
@@ -780,15 +674,12 @@ int List_Portion::Insert( Portion* item, int index )
       else
 	_DataType = item->Type();
       item->ParentList() = this;
-      item->SetGSM( _GSM );
-      result = _Value.Insert( item, index );
+      _Value.Insert( item, index );
     }
     else
     {
-      Error( "Portion Error: attempted to insert an Error_Portion\n" );
-      Error( "               into a List_Portion.\n" );
       delete item;
-      result = 0;
+      result = new Error_Portion( _ErrorMessage( 4 ) );
     }
   }
   else  // inserting into an existing list
@@ -796,16 +687,13 @@ int List_Portion::Insert( Portion* item, int index )
     type_match = TypeCheck( item );
     if( !type_match )
     {
-      Error( "Portion Error: attempted to insert conflicting Portion\n" );
-      Error( "               types into a List_Portion.\n" );
       delete item;
-      result = 0;
+      result = new Error_Portion( _ErrorMessage( 5 ) );
     }
     else
     {
       item->ParentList() = this;
-      item->SetGSM( _GSM );
-      result = _Value.Insert( item, index );
+      _Value.Insert( item, index );
     }
   }
 
@@ -835,10 +723,10 @@ void List_Portion::Flush( void )
 }
 
 
-bool List_Portion::SetSubscript( int index, Portion *p )
+Portion* List_Portion::SetSubscript( int index, Portion *p )
 {
   bool type_match;
-  bool result = false;
+  Portion* result = 0;
 
   type_match = TypeCheck( p );
   if( type_match )
@@ -848,22 +736,15 @@ bool List_Portion::SetSubscript( int index, Portion *p )
       delete _Value[ index ];
       p->ParentList() = this;
       _Value[ index ] = p;
-      result = true;
     }
     else
     {
-      Error( "List_Portion Error: an out-of-range subscript specified\n" );
-      Error( "       Valid range:  1 to " );
-      Error( _Value.Length() );
-      Error( "\n       Subscript specified: " );
-      Error( index );
-      Error( "\n" );
+      result = new Error_Portion( _ErrorMessage( 6 ) );
     }
   }
   else
   {
-    Error( "Portion Error: attempted to set an element of a List_Portion\n" );
-    Error( "               to one with a conflicting Portion type\n" );
+    result = new Error_Portion( _ErrorMessage( 7 ) );
     delete p;
   }
   return result;
@@ -878,12 +759,7 @@ Portion* List_Portion::GetSubscript( int index ) const
   }
   else
   {
-    Error( "List_Portion Error: an out-of-range subscript specified\n" );
-    Error( "       Valid range:  1 to " );
-    Error( _Value.Length() );
-    Error( "\n       Subscript specified: " );
-    Error( index );
-    Error( "\n" );
+    return new Error_Portion( _ErrorMessage( 6 ) );
   }
 }
 
@@ -937,33 +813,6 @@ template <class T> void Nfg_Portion<T>::MakeCopyOfData( Portion* p )
 }
 
 
-template <class T> 
-  bool Nfg_Portion<T>::Operation( Portion* p, OperationMode mode )
-{
-  bool result = true;
-  NormalForm<T>& p_value = *( ( (Nfg_Portion<T>*) p )->_Value );
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 template <class T> void Nfg_Portion<T>::Output( gOutput& s ) const
 { s << "NormalForm[ "; _Value->GetTitle(); s << ']'; }
 
@@ -975,13 +824,13 @@ template <class T>
 #ifndef NDEBUG
   if( p->Type() == porREFERENCE )
   {
-    Error( "Portion Error: attempted to Assign a Reference_Portion as the\n" );
-    Error( "               value of a sub-reference in a Nfg_Portion type\n" );
+    gerr << "Portion Error:\n";
+    gerr << "  Attempted to Assign a Reference_Portion as the\n";
+    gerr << "  value of a sub-reference in a Nfg_Portion type\n";
   }
   assert( p->Type() != porREFERENCE );
 #endif // NDEBUG
 
-  p->SetGSM( _GSM );
   _RefTable->Define( ref, p );
 
   return true;
@@ -1015,10 +864,7 @@ template <class T>
   }
   else
   {
-    Error( "Portion Error: attempted to access an undefined reference\n" );
-    Error( "               \"" );
-    Error( ref );
-    Error( "\"\n" );
+    result = new Error_Portion( _ErrorMessage( 3 ) );
   }
 
   return result;
@@ -1076,32 +922,6 @@ template <class T> void Efg_Portion<T>::MakeCopyOfData( Portion* p )
 }
 
 
-template <class T> 
-  bool Efg_Portion<T>::Operation( Portion* p, OperationMode mode )
-{
-  bool result = true;
-  ExtForm<T>& p_value = *( ( (Efg_Portion<T>*) p )->_Value );
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
 
 template <class T> void Efg_Portion<T>::Output( gOutput& s ) const
 { s << "ExtForm[ "; _Value->GetTitle(); s << ']'; }
@@ -1114,13 +934,13 @@ template <class T>
 #ifndef NDEBUG
   if( p->Type() == porREFERENCE )
   {
-    Error( "Portion Error: attempted to Assign a Reference_Portion as the\n" );
-    Error( "               value of a sub-reference in a Efg_Portion type\n" );
+    gerr << "Portion Error:\n";
+    gerr << "  Attempted to Assign a Reference_Portion as the\n";
+    gerr << "  value of a sub-reference in a Efg_Portion type\n";
   }
   assert( p->Type() != porREFERENCE );
 #endif // NDEBUG
 
-  p->SetGSM( _GSM );
   _RefTable->Define( ref, p );
 
   return true;
@@ -1154,10 +974,7 @@ template <class T>
   }
   else
   {
-    Error( "Portion Error: attempted to access an undefined reference\n" );
-    Error( "               \"" );
-    Error( ref );
-    Error( "\"\n" );
+    result = new Error_Portion( _ErrorMessage( 3 ) );
   }
 
   return result;
@@ -1187,33 +1004,6 @@ PortionType Outcome_Portion::Type( void ) const
 Portion* Outcome_Portion::Copy( void ) const
 { return new Outcome_Portion( _Value ); }
 
-
-bool Outcome_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  Outcome*&  p_value = ( (Outcome_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 void Outcome_Portion::Output( gOutput& s ) const
 {
   s << " (Outcome) ";
@@ -1240,33 +1030,6 @@ PortionType Player_Portion::Type( void ) const
 
 Portion* Player_Portion::Copy( void ) const
 { return new Player_Portion( _Value ); }
-
-
-bool Player_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  Player*&  p_value = ( (Player_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
 
 void Player_Portion::Output( gOutput& s ) const
 {
@@ -1295,33 +1058,6 @@ PortionType Infoset_Portion::Type( void ) const
 Portion* Infoset_Portion::Copy( void ) const
 { return new Infoset_Portion( _Value ); }
 
-
-bool Infoset_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  Infoset*&  p_value = ( (Infoset_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 void Infoset_Portion::Output( gOutput& s ) const
 {
   s << " (Infoset) ";
@@ -1348,33 +1084,6 @@ PortionType Action_Portion::Type( void ) const
 
 Portion* Action_Portion::Copy( void ) const
 { return new Action_Portion( _Value ); }
-
-
-bool Action_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  Action*&  p_value = ( (Action_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
 
 void Action_Portion::Output( gOutput& s ) const
 {
@@ -1403,33 +1112,6 @@ PortionType Node_Portion::Type( void ) const
 Portion* Node_Portion::Copy( void ) const
 { return new Node_Portion( _Value ); }
 
-
-bool Node_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  Node*&  p_value = ( (Node_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 void Node_Portion::Output( gOutput& s ) const
 {
   s << " (Node) ";
@@ -1442,6 +1124,7 @@ void Node_Portion::Output( gOutput& s ) const
 //---------------------------------------------------------------------
 //                            Stream type
 //---------------------------------------------------------------------
+
 
 
 Stream_Portion::Stream_Portion( const gString& filename )
@@ -1473,33 +1156,6 @@ Portion* Stream_Portion::Copy( void ) const
 { return new Stream_Portion( *_Value ); }
 
 
-
-bool Stream_Portion::Operation( Portion* p, OperationMode mode )
-{
-  bool   result = true;
-  gFileOutput*  p_value = ( (Stream_Portion*) p )->_Value;
-
-  if( p == 0 )      // unary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );      
-    }
-  }
-  else               // binary operations
-  {
-    switch( mode )
-    {
-    default:
-      result = Portion::Operation( p, mode );
-    }
-    delete p;
-  }
-  return result;
-}
-
-
 void Stream_Portion::Output( gOutput& s ) const
 {
   s << " (Stream) ";
@@ -1510,13 +1166,53 @@ void Stream_Portion::Output( gOutput& s ) const
 
 
 
+//--------------------------------------------------------------------
+//                      _ErrorMessage
+//--------------------------------------------------------------------
 
+
+gString Portion::_ErrorMessage( const int error_num, const gString& str )
+{
+  gString result = "Portion Error:\n";
+  switch( error_num )
+  {
+  case 1:
+    result += "  Attempted to execute an unsupported operation\n";
+    break;
+  case 2:
+    result += "  Division by zero\n";
+    break;
+  case 3:
+    result += "  Attempted to access an undefined reference \"";
+    result += str;
+    result += "\"\n";
+    break;
+  case 4:
+    result += "  Attempted to insert an Error_Portion\n";
+    result += "  into a List_Portion.\n";
+    break;
+  case 5:
+    result += "  Attempted to insert conflicting Portion\n";
+    result += "  types into a List_Portion.\n";
+    break;
+  case 6:
+    result += "  An out-of-range list subscript specified\n";
+    break;
+  case 7:
+    result += "  Attempted to set an element of a List_Portion\n";
+    result += "  to one with a conflicting Portion type\n";
+    break;
+  }
+  return result;
+}
 
 
 
 //--------------------------------------------------------------------
 //             miscellaneous PortionType functions
 //--------------------------------------------------------------------
+
+
 
 void PrintPortionTypeSpec( gOutput& s, PortionType type )
 {
@@ -1538,14 +1234,38 @@ void PrintPortionTypeSpec( gOutput& s, PortionType type )
       s << "porSTRING ";
     if( type & porLIST )
       s << "porLIST ";
-    if( type & porNFG )
-      s << "porNFG ";
-    if( type & porEFG )
-      s << "porEFG ";
-    if( type & porMIXED )
-      s << "porMIXED ";
-    if( type & porBEHAV )
-      s << "porBEHAV ";
+
+    if( type & porNFG_DOUBLE )
+      s << "porNFG_DOUBLE ";
+    if( type & porNFG_RATIONAL )
+      s << "porNFG_RATIONAL ";
+    if( type & porEFG_DOUBLE )
+      s << "porEFG_DOUBLE ";
+    if( type & porEFG_RATIONAL )
+      s << "porEFG_RATIONAL ";
+    if( type & porMIXED_DOUBLE )
+      s << "porMIXED_DOUBLE ";
+    if( type & porMIXED_RATIONAL )
+      s << "porMIXED_RATIONAL ";
+    if( type & porBEHAV_DOUBLE )
+      s << "porBEHAV_DOUBLE ";
+    if( type & porBEHAV_RATIONAL )
+      s << "porBEHAV_RATIONAL ";
+
+    if( type & porOUTCOME )
+      s << "porOUTCOME ";
+    if( type & porPLAYER )
+      s << "porPLAYER ";
+    if( type & porINFOSET )
+      s << "porINFOSET ";
+    if( type & porNODE )
+      s << "porNODE ";
+    if( type & porACTION )
+      s << "porACTION ";
+
+    if( type & porSTREAM )
+      s << "porSTREAM ";
+
     if( type & porREFERENCE )
       s << "porREFERENCE ";
   }

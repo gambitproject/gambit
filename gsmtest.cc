@@ -9,7 +9,8 @@
 
 
 
-// #define CRASHTEST
+#define CRASHTEST
+// #define INTERACTIVE
 
 
 int main( void )
@@ -41,8 +42,11 @@ int main( void )
 
 
   gout << "Machine setup done\n";
+
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -84,8 +88,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   gout << "Assigning x = (double)7\n";
@@ -135,8 +141,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   gout << "Testing boolean operations:\n";
@@ -161,8 +169,10 @@ int main( void )
   machine->NOT();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   gout << "Testing string concatenation:\n";
   gout << "Pushing \'Test1 \'\n";
@@ -173,8 +183,10 @@ int main( void )
   machine->Add();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   gout << "Testing relational operators:\n";
   machine->Push( d_1 );
@@ -262,8 +274,10 @@ int main( void )
   machine->Flush();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->Flush();
   machine->PushRef( (gString) "c" );
@@ -276,8 +290,10 @@ int main( void )
   machine->AND();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->Flush();
   gout << "Assigning x = (double) 7\n";
@@ -328,8 +344,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
   
   gout << "\nCrash testing CallFunction()\n\n";
 
@@ -343,8 +361,10 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->Push( (double) 7 );
   machine->Push( (double) 8 );
@@ -355,8 +375,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
   
   gout << "Testing nested List structures\n";
   machine->Push( (double) 1 );
@@ -376,8 +398,10 @@ int main( void )
   machine->PushList( 4 );
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->Flush();
   machine->Push( (gInteger) 1 );
@@ -394,8 +418,10 @@ int main( void )
   machine->PushList( 1 );
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   gout << "General testing:\n";
   machine->Flush();
@@ -465,8 +491,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   gout << "\n\nTesting the instruction memory\n";
@@ -530,8 +558,10 @@ int main( void )
   gout << "Program Status: " << result << "\n";
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   gout << "\n\nTesting the instruction memory\n";
   gout << "Huge general test\n";
@@ -611,8 +641,10 @@ int main( void )
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -699,8 +731,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -759,8 +793,10 @@ int main( void )
   machine->Execute( program );
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   gout << "Testing Loops:\n";
@@ -818,8 +854,10 @@ int main( void )
 
   machine->Execute( program );
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   
   machine->InitCallFunction( "Plus" );
@@ -863,8 +901,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -909,8 +949,10 @@ int main( void )
 
 #ifdef CRASHTEST
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->Push( (double) 10 );
   machine->Push( (double) 11 );
@@ -923,8 +965,10 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
@@ -943,8 +987,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   machine->PushRef( "x" );
@@ -957,8 +1003,10 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->PushRef( "x" );
   machine->Push( (gInteger) 3 );
@@ -980,8 +1028,10 @@ int main( void )
 
 
 #ifdef CRASHTEST
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->PushRef( "x" );
   machine->Push( (double) 10 );
@@ -996,7 +1046,6 @@ int main( void )
   machine->PushRef( "x" );
   machine->Push( (gInteger) 3 );
   machine->Subscript();
-  gout << "1.2\n";
   machine->Dump();
 
   machine->PushRef( "x" );
@@ -1016,8 +1065,10 @@ int main( void )
 
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   machine->InitCallFunction( "Assign" );
@@ -1157,8 +1208,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1198,8 +1251,11 @@ int main( void )
 #endif  // CRASHTEST
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
+
 
 
 
@@ -1221,9 +1277,7 @@ int main( void )
 
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x", "a" );
-  gout << "1\n";
   machine->Bind();
-  gout << "2\n";
   machine->Push( (double) 1 );
   machine->Bind();
   machine->CallFunction();
@@ -1273,8 +1327,10 @@ int main( void )
 
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1325,8 +1381,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1378,8 +1436,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 #endif
 
 
@@ -1447,8 +1507,10 @@ int main( void )
   machine->PushRef( "x" );
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1500,8 +1562,10 @@ int main( void )
   machine->Dump();
 #endif // CRASHTEST
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1626,8 +1690,10 @@ int main( void )
 
 
 #ifdef CRASHTEST
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->InitCallFunction( "Times" );
   machine->Push( (gRational) 3 );
@@ -1637,8 +1703,10 @@ int main( void )
 #endif // CRASHTEST
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1661,8 +1729,10 @@ int main( void )
   machine->Output();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
 
@@ -1731,6 +1801,8 @@ int main( void )
 
 #endif // CRASHTEST
 
+
+#if 0
   machine->InitCallFunction( "GobitNfg" );
   machine->PushRef( "N" );
   machine->Bind( "N" );
@@ -1740,13 +1812,15 @@ int main( void )
   machine->Bind( "time" );
   machine->CallFunction();
   machine->Output();
-
+#endif
 
 
 
 #ifdef CRASHTEST
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
   machine->InitCallFunction( "GobitEfg" );
   machine->PushRef( "E" );
@@ -1763,8 +1837,10 @@ int main( void )
 #endif // CRASHTEST
 
 
+#ifdef INTERACTIVE
   gout << "*********************** press return to continue ************";
   gin >> cont;
+#endif
 
 
   machine->PushRef( "x1" );
@@ -1789,8 +1865,10 @@ int main( void )
   machine->Dump();
 
 
+#ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
+#endif
 
 
   machine->InitCallFunction( "Assign" );
@@ -1813,9 +1891,10 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+#ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
-
+#endif
 
 
   machine->InitCallFunction( "ListTest" );
@@ -1841,8 +1920,10 @@ int main( void )
   machine->Dump();
 #endif // CRASHTEST
 
+#ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
+#endif
 
 
   gout << "\nDeleting machine\n";

@@ -95,6 +95,15 @@ class CallFuncObj : public FuncDescObj
 
   bool _TypeMatch( Portion* p, PortionType ExpectedType ) const;
 
+  static void _ErrorMessage
+    (
+     gOutput& s,
+     const int error_num, 
+     const gInteger& num1 = 0,
+     const gString& str1 = "",
+     const gString& str2 = ""
+     );
+
  public:
   CallFuncObj( FuncDescObj* func, gOutput& s_err );
   ~CallFuncObj();
@@ -109,11 +118,13 @@ class CallFuncObj : public FuncDescObj
 
   void        SetErrorOccurred ( void );
 
+/*
   Reference_Portion* GetParamRef ( const int index ) const;
-
   int         GetCurrParamIndex           ( void ) const;
   PortionType GetCurrParamType            ( void ) const;
   bool        GetCurrParamPassByRef ( void ) const;
+*/
+
   Reference_Portion* GetCurrParamRef ( void ) const;
   Portion*    GetCurrParamShadowOf ( void ) const;
 
@@ -123,4 +134,5 @@ class CallFuncObj : public FuncDescObj
 
 
 #endif  // GSMFUNC_H
+
 
