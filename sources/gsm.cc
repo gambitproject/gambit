@@ -422,8 +422,9 @@ bool GSM::Assign( void )
       switch( p1->Type() )
       {
       case porLIST:
-	if( ( (ListPortion*) p1 )->DataType() == 
-	   ( (ListPortion*) p2 )->DataType() )
+	if( ( ( (ListPortion*) p1 )->DataType() == 
+	     ( (ListPortion*) p2 )->DataType() ) ||
+	   ( (ListPortion*) p1 )->DataType() == porUNKNOWN )
 	{
 	  p1->AssignFrom( p2 );
 	  delete p2;
@@ -431,7 +432,7 @@ bool GSM::Assign( void )
 	}
 	else
 	{
-	  _ErrorMessage( _StdErr, 48 );
+	  _ErrorMessage( _StdErr, 56 );
 	  _Push( p2 );
 	  result = false;
 	  delete p1;
@@ -1267,11 +1268,11 @@ Portion* GSM::ExecuteUserFunc( gList< Instruction* >& program,
   {
     if( func_info.ParamInfo[ i ].PassByReference )
     {
-      delete param[ i ];
       if( _VarIsDefined( func_info.ParamInfo[ i ].Name ) )
       {
 	assert( _VarValue( func_info.ParamInfo[ i ].Name ) != 0 );
-	param[ i ] = _VarValue( func_info.ParamInfo[ i ].Name )->RefCopy();
+	delete param[ i ];
+	param[ i ] = _VarRemove( func_info.ParamInfo[ i ].Name );
       }
     }
   }
@@ -1345,7 +1346,7 @@ bool GSM::Pop( void )
   Portion* p;
   bool result = false;
 
-  if( _Depth() > 0 )
+  if( _Depth() >= 0 )
   {
     p = _Pop();
     delete p;
@@ -1604,6 +1605,8 @@ void GSM::_ErrorMessage
   case 55:
     s << "  Attempted to remove read-only variable \"" + str1 + "\"\n";
     break;
+  case 56:
+    s << "  Attempted to change the type of a List\n";
   default:
     s << "  General error\n";
   }
