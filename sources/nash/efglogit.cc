@@ -246,7 +246,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
 
   gbtMatrix<double> b(p_start.Length() + 1, p_start.Length());
   gbtSquareMatrix<double> q(p_start.Length() + 1);
-  QreJacobian(p_start.Support(), x, b);
+  QreJacobian(p_start.GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -256,7 +256,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     if (x[i] < 1.0e-10) {
       // Drop this strategy from the support, then recursively call
       // to continue tracing
-      gbtEfgSupport newSupport(p_start.Support());
+      gbtEfgSupport newSupport(p_start.GetSupport());
       int index = 1;
       for (int pl = 1; pl <= newSupport.NumPlayers(); pl++) {
 	gbtGamePlayer player = newSupport.GetPlayer(pl);
@@ -318,7 +318,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     }
 
     double decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.Support(), u, b);
+    QreJacobian(p_start.GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -326,7 +326,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
     while (true) {
       double dist;
 
-      QreLHS(p_start.Support(), u, y);
+      QreLHS(p_start.GetSupport(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -381,7 +381,7 @@ static void TracePath(const gbtBehavProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtEfgSupport newSupport(p_start.Support());
+	gbtEfgSupport newSupport(p_start.GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.NumPlayers(); pl++) {
 	  gbtGamePlayer player = newSupport.GetPlayer(pl);

@@ -133,7 +133,7 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p.Support().NumActions(pl, iset); act++)  {
+      for (act = 1; act < p.GetSupport().NumActions(pl, iset); act++)  {
 	do
 	  tmp = Uniform();
 	while (tmp + sum > 1.0);

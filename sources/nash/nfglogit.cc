@@ -317,7 +317,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
 
   gbtMatrix<T> b(p_start.Length() + 1, p_start.Length());
   gbtSquareMatrix<T> q(p_start.Length() + 1);
-  QreJacobian(p_start.Support(), x, b);
+  QreJacobian(p_start.GetSupport(), x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
   
@@ -356,7 +356,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     }
 
     T decel = 1.0 / c_maxDecel;  // initialize deceleration factor
-    QreJacobian(p_start.Support(), u, b);
+    QreJacobian(p_start.GetSupport(), u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -364,7 +364,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
     while (true) {
       T dist;
 
-      QreLHS(p_start.Support(), u, y);
+      QreLHS(p_start.GetSupport(), u, y);
       NewtonStep(q, b, u, y, dist); 
       if (dist >= c_maxDist) {
 	accept = false;
@@ -419,7 +419,7 @@ static void TracePath(const gbtMixedProfile<T> &p_start,
       if (u[i] < (T) 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	gbtNfgSupport newSupport(p_start.Support());
+	gbtNfgSupport newSupport(p_start.GetSupport());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.GetGame()->NumPlayers(); pl++) {
 	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {

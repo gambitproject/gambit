@@ -97,13 +97,13 @@ bool IsMixedDominated(const gbtMixedProfile<gbtNumber> &sol, int pl,
   bool ret = false;
 
   if(precision == GBT_PREC_RATIONAL) {
-    gbtMixedProfile<gbtRational> p(sol.Support());
+    gbtMixedProfile<gbtRational> p(sol.GetSupport());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     ret =  IsMixedDominated(p, pl, strong, tracefile);
   }
   else if (precision == GBT_PREC_DOUBLE) {
-    gbtMixedProfile<double> p(sol.Support());
+    gbtMixedProfile<double> p(sol.GetSupport());
     for (int i = 1; i <= p.Length(); i++)
       p[i] = sol[i];
     

@@ -379,7 +379,7 @@ template <class T>
 bool IsMixedDominated(const gbtMixedProfile<T> &pr, int pl,
 		      bool strong, gbtOutput &tracefile)
 {
-  gbtNfgSupport S = pr.Support();
+  gbtNfgSupport S = pr.GetSupport();
   gbtGame nfg = pr.GetGame();
   int strats = S.NumStrats(pl);
   gbtVector<T> prob = pr.GetRow(pl);

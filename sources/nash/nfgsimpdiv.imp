@@ -62,9 +62,10 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 {
   gbtArray<int> ylabel(2);
   gbtRectArray<int> labels(y.Length(), 2), pi(y.Length(), 2);
-  gbtPVector<int> U(y.Support().NumStrategies()), TT(y.Support().NumStrategies());
-  gbtPVector<T> ab(y.Support().NumStrategies());
-  gbtPVector<T> besty(y.Support().NumStrategies());
+  gbtPVector<int> U(y.NumStrategies());
+  gbtPVector<int> TT(y.NumStrategies());
+  gbtPVector<T> ab(y.NumStrategies());
+  gbtPVector<T> besty(y.NumStrategies());
   gbtPVector<T> v(y);
 
   int i = 0;
@@ -76,7 +77,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   ibar=1;
   t=0;
   for (j = 1; j <= y.GetGame()->NumPlayers(); j++) {
-      for(h=1;h<=y.Support().NumStrats(j);h++)
+      for(h=1;h<=y.GetSupport().NumStrats(j);h++)
 	{
 	  TT(j,h)=0;
 	  U(j,h)=0;
@@ -98,9 +99,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
 // case1a:;
   if(TT(j,h)==0 && U(j,h)==0)
     {
-      for(hh=1,tot=0;hh<=y.Support().NumStrats(j);hh++)
+      for(hh=1,tot=0;hh<=y.GetSupport().NumStrats(j);hh++)
 	if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-      if(tot==y.Support().NumStrats(j)-1)goto end;
+      if(tot==y.GetSupport().NumStrats(j)-1)goto end;
       else {
 	i=t+1;
 	goto step2;
@@ -117,7 +118,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   else if(U(j,h))
     {
       k=h;
-      while(U(j,k)){k++;if(k>y.Support().NumStrats(j))k=1;}
+      while(U(j,k)){k++;if(k>y.GetSupport().NumStrats(j))k=1;}
       if(TT(j,k)==0)i=t+1;
       else {
 	i=1;
@@ -145,8 +146,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   j=pi(ii,1);
   h=pi(ii,2);
   k=h;
-  if(i<t+1)k=get_b(j,h,y.Support().NumStrats(j),U);
-  kk=get_c(j,h,y.Support().NumStrats(j),U);
+  if(i<t+1)k=get_b(j,h,y.GetSupport().NumStrats(j),U);
+  kk=get_c(j,h,y.GetSupport().NumStrats(j),U);
   if(i==1)ii=t+1;
   else if(i==t+1)ii=1;
   else ii=i-1;
@@ -154,9 +155,9 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   
       /* case3a */
   if(i==1 && (y(j,k)<=(T)0 || (v(j,k)-y(j,k))>=((T)(m_leashLength))*d)) {
-    for(hh=1,tot=0;hh<=y.Support().NumStrats(j);hh++)
+    for(hh=1,tot=0;hh<=y.GetSupport().NumStrats(j);hh++)
       if(TT(j,hh)==1 || U(j,hh)==1)tot++;
-    if(tot==y.Support().NumStrats(j)-1) {
+    if(tot==y.GetSupport().NumStrats(j)-1) {
       U(j,k)=1;
       goto end;
     }
@@ -180,10 +181,10 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
       while(ab(j,kk)==(T)(0) && k==0) {
 	if(kk==h)k=1;
 	kk++;
-	if(kk>y.Support().NumStrats(j))kk=1;
+	if(kk>y.GetSupport().NumStrats(j))kk=1;
       }
       kk--;
-      if(kk==0)kk=y.Support().NumStrats(j);
+      if(kk==0)kk=y.GetSupport().NumStrats(j);
       if(kk==h)goto step4;
       else goto step5;
     }
@@ -194,7 +195,7 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
       else if(i==t+1) {
 	j=pi(t,1);
 	h=pi(t,2);
-	hh=get_b(j,h,y.Support().NumStrats(j),U);
+	hh=get_b(j,h,y.GetSupport().NumStrats(j),U);
 	y(j,h)-=d;
 	y(j,hh)+=d;
       }
@@ -223,24 +224,24 @@ template <class T> T gbtNfgNashSimpdiv<T>::Simplex(gbtMixedProfile<T> &y)
   U(j,k)=0;
   jj=pi(1,1);
   hh=pi(1,2);
-  kk=get_b(jj,hh,y.Support().NumStrats(jj),U);
+  kk=get_b(jj,hh,y.GetSupport().NumStrats(jj),U);
   y(jj,hh)-=d;
   y(jj,kk)+=d;
   
-  k=get_c(j,h,y.Support().NumStrats(j),U);
+  k=get_c(j,h,y.GetSupport().NumStrats(j),U);
   kk=1;
   while(kk){
     if(k==h)kk=0;
     ab(j,k)=(ab(j,k)-((T)(1)));
     k++;
-    if(k>y.Support().NumStrats(j))k=1;
+    if(k>y.GetSupport().NumStrats(j))k=1;
   }
   goto step1;
 
  end:;
   maxz=bestz;
   for(i=1;i<=y.GetGame()->NumPlayers();i++)
-    for(j=1;j<=y.Support().NumStrats(i);j++)
+    for(j=1;j<=y.GetSupport().NumStrats(i);j++)
       y(i,j)=besty(i,j);
   return maxz;
 }
@@ -302,15 +303,15 @@ template <class T> void gbtNfgNashSimpdiv<T>::getY(gbtMixedProfile<T> &x,
 {
   int j, h, i,hh;
   
-  for(j=1;j<=x.GetGame()->NumPlayers();j++)
-    for(h=1;h<=x.Support().NumStrats(j);h++)
+  for(j=1;j<=x.NumPlayers();j++)
+    for(h=1;h<=x.GetSupport().NumStrats(j);h++)
       x(j,h)=v(j,h);
-  for(j=1;j<=x.GetGame()->NumPlayers();j++)
-    for(h=1;h<=x.Support().NumStrats(j);h++)
+  for(j=1;j<=x.NumPlayers();j++)
+    for(h=1;h<=x.GetSupport().NumStrats(j);h++)
       if(TT(j,h)==1 || U(j,h)==1) {
 	x(j,h)+=(d*ab(j,h));
 	hh=h-1;
-	if(hh==0)hh=x.Support().NumStrats(j);
+	if(hh==0)hh=x.GetSupport().NumStrats(j);
 	x(j,hh)-=(d*ab(j,h));
       }
   i=2;
@@ -331,7 +332,7 @@ template <class T> void gbtNfgNashSimpdiv<T>::getnexty(gbtMixedProfile<T> &x,
   j=pi(i,1);
   h=pi(i,2);
   x(j,h)+=d;
-  hh=get_b(j,h,x.Support().NumStrats(j),U);
+  hh=get_b(j,h,x.GetSupport().NumStrats(j),U);
   x(j,hh)-=d;
 }
 
@@ -376,8 +377,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
     payoff=(T)(0);
     maxval=((T)(-1000000));
     jj=0;
-    for(j=1;j<=yy.Support().NumStrats(i);j++) {
-      pay=yy.Payoff(i, yy.Support().GetStrategy(i,j));
+    for(j=1;j<=yy.GetSupport().NumStrats(i);j++) {
+      pay=yy.Payoff(i, yy.GetSupport().GetStrategy(i,j));
       payoff+=(yy(i,j)*pay);
       if(pay>maxval) {
 	maxval=pay;
@@ -393,8 +394,8 @@ template <class T> T gbtNfgNashSimpdiv<T>::getlabel(gbtMixedProfile<T> &yy,
   }
   if(maxz<bestz) {
     bestz=maxz;
-    for(i=1;i<=yy.GetGame()->NumPlayers();i++)
-      for(j=1;j<=yy.Support().NumStrats(i);j++)
+    for(i=1;i<=yy.NumPlayers();i++)
+      for(j=1;j<=yy.GetSupport().NumStrats(i);j++)
 	besty(i,j)=yy(i,j);
   }
   return maxz;

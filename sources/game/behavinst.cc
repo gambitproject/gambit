@@ -32,20 +32,20 @@ template<>
 gbtNumber gbtBehavProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
 				      int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtBehavProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome,
 					  int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 template<>
 double gbtBehavProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 #if GBT_WITH_MP_FLOAT
@@ -53,7 +53,7 @@ template<>
 gbtMPFloat gbtBehavProfile<gbtMPFloat>::Payoff(const gbtGameOutcome &p_outcome,
 					       int pl) const
 {
-  return p_outcome->GetPayoff(m_efg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 #endif // GBT_WITH_MP_FLOAT
 
@@ -90,19 +90,19 @@ template<>
 gbtNumber gbtMixedProfile<gbtNumber>::Payoff(const gbtGameOutcome &p_outcome,
 					     int pl) const
 { 
-  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 template<>
 gbtRational gbtMixedProfile<gbtRational>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 template<>
 double gbtMixedProfile<double>::Payoff(const gbtGameOutcome &p_outcome, int pl) const
 { 
-  return p_outcome->GetPayoff(m_nfg->GetPlayer(pl));
+  return p_outcome->GetPayoff(m_support.GetPlayer(pl));
 }
 
 template class gbtMixedProfile<double>;

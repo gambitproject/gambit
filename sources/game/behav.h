@@ -27,30 +27,27 @@
 #ifndef BEHAV_H
 #define BEHAV_H
 
-#include "base/base.h"
-#include "math/gdpvect.h"
-#include "math/gmatrix.h"
+#include "game.h"
 #include "efgsupport.h"
 
-class gbtGame;
 template <class T> class gbtMixedProfile;
-template <class T> class gbtPVector;
-template <class T> class gbtRectArray;
 
 //
-//  gbtBehavProfile<T> implements a behavior profile on an Efg.  
+//  gbtBehavProfile<T> implements a behavior profile on a game.
 //
-//  The class assumes that the underlying Efg does not change during the 
+//  The class assumes that the underlying game does not change during the 
 //  life of the profile, and will not correctly invalidate itself if 
 //  the game does change.  
 // 
-//  The BehavSolution class should be used For interactive use, where 
+//  The BehavSolution class should be used for interactive use, where 
 //  the game payoffs or probabilities may change.  
 // 
 
-template <class T> class gbtBehavProfile : private gbtDPVector<T>  {
+template <class T> 
+class gbtBehavProfile : private gbtDPVector<T>,
+                        public gbtConstGameRep,
+                        public gbtConstEfgRep {
 protected:
-  gbtGame m_efg;
   gbtEfgSupport m_support;
   mutable bool m_cached_data;
 
@@ -116,7 +113,7 @@ protected:
   void ComputeSolutionData(void);
 
   void BehaviorStrat(const gbtGame &, int, const gbtGameNode &);
-  void RealizationProbs(const gbtMixedProfile<T> &, const gbtGame &,
+  void RealizationProbs(const gbtMixedProfile<T> &,
 			int pl, const gbtArray<int> &, const gbtGameNode &);
 
 public:
@@ -150,8 +147,8 @@ public:
 
   // GENERAL DATA ACCESS
 
-  gbtGame GetGame(void) const   { return m_efg; }
-  const gbtEfgSupport &Support(void) const   { return m_support; }
+  gbtGame GetGame(void) const   { return m_support.GetTree(); }
+  const gbtEfgSupport &GetSupport(void) const   { return m_support; }
   
   const T &GetRealizProb(const gbtGameNode &node);
   const T &GetBeliefProb(const gbtGameNode &node);
@@ -218,6 +215,31 @@ public:
   const gbtPVector<T> &GetPVector(void) const { return *this; }
   const gbtDPVector<T> &GetDPVector(void) const { return *this; }
   gbtDPVector<T> &GetDPVector(void) { Invalidate(); return *this; }
+
+  // IMPLEMENTATION OF gbtGameObject INTERFACE
+  gbtText GetLabel(void) const { return ""; }
+  void SetLabel(const gbtText &) { }
+
+  // IMPLEMENTATION OF gbtConstGameRep INTERFACE
+  bool IsTree(void) const { return m_support.IsTree(); }
+  bool IsMatrix(void) const { return m_support.IsMatrix(); }
+  
+  int NumPlayers(void) const { return m_support.NumPlayers(); }
+  gbtGamePlayer GetPlayer(int index) const { return m_support.GetPlayer(index); }
+  
+  int NumOutcomes(void) const { return m_support.NumOutcomes(); }
+  gbtGameOutcome GetOutcome(int index) const 
+  { return m_support.GetOutcome(index); }
+
+  bool IsConstSum(void) const { return m_support.IsConstSum(); }
+  gbtNumber MaxPayoff(int pl = 0) const { return m_support.MaxPayoff(pl); }
+  gbtNumber MinPayoff(int pl = 0) const { return m_support.MinPayoff(pl); }
+
+  // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
+  gbtPVector<int> NumActions(void) const { return m_support.NumActions(); }
+  int BehavProfileLength(void) const { return m_support.BehavProfileLength(); }
+
+  gbtArray<int> NumInfosets(void) const { return m_support.NumInfosets(); }
 };
 
 

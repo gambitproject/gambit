@@ -280,11 +280,11 @@ double QreNfgGrid::Distance(const gbtVector<double> &a,
 gbtVector<double> QreNfgGrid::UpdateFunc(const gbtMixedProfile<double> &p_profile,
 				       int p_player, double p_lambda) const
 {
-  gbtVector<double> r(p_profile.Support().NumStrats(p_player));
-  gbtVector<double> tmp(p_profile.Support().NumStrats(p_player));
+  gbtVector<double> r(p_profile.GetSupport().NumStrats(p_player));
+  gbtVector<double> tmp(p_profile.GetSupport().NumStrats(p_player));
   double denom = 0.0;
   for (int st = 1; st <= r.Length(); st++) {
-    double p = p_profile.Payoff(p_player, p_profile.Support().GetStrategy(p_player, st));
+    double p = p_profile.Payoff(p_player, p_profile.GetSupport().GetStrategy(p_player, st));
     tmp[st] = exp(p_lambda * p);
     denom += tmp[st];
   }
@@ -326,8 +326,8 @@ static void Jacobian(gbtVector<double> &p_vector,
 {
   gbtPVector<double> logitterms(p_profile.Lengths());
   for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
-    for (int st = 1; st <= p_profile.Support().NumStrats(pl); st++) {
-      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, p_profile.Support().GetStrategy(pl, st)));
+    for (int st = 1; st <= p_profile.GetSupport().NumStrats(pl); st++) {
+      logitterms(pl, st) = exp(p_lambda * p_profile.Payoff(pl, p_profile.GetSupport().GetStrategy(pl, st)));
     }
   }
 
@@ -335,18 +335,18 @@ static void Jacobian(gbtVector<double> &p_vector,
 
   for (int pl1 = 1; pl1 <= p_profile.GetGame()->NumPlayers(); pl1++) {
     double logitsum = 0.0;
-    for (int st = 1; st <= p_profile.Support().NumStrats(pl1); st++) {
+    for (int st = 1; st <= p_profile.GetSupport().NumStrats(pl1); st++) {
       logitsum += logitterms(pl1, st);
     }
 
-    for (int st1 = 1; st1 <= p_profile.Support().NumStrats(pl1); st1++) {
+    for (int st1 = 1; st1 <= p_profile.GetSupport().NumStrats(pl1); st1++) {
       rowno++;
 
       p_vector[rowno] = p_profile(pl1, st1) * logitsum - logitterms(pl1, st1);
 
       int colno = 0;
       for (int pl2 = 1; pl2 <= p_profile.GetGame()->NumPlayers(); pl2++) {
-	for (int st2 = 1; st2 <= p_profile.Support().NumStrats(pl2); st2++) {
+	for (int st2 = 1; st2 <= p_profile.GetSupport().NumStrats(pl2); st2++) {
 	  colno++;
 
 	  if (pl1 == pl2) {
@@ -359,7 +359,7 @@ static void Jacobian(gbtVector<double> &p_vector,
 	  }
 	  else {
 	    p_matrix(rowno, colno) = 0.0;
-	    for (int st = 1; st <= p_profile.Support().NumStrats(pl1); st++) {
+	    for (int st = 1; st <= p_profile.GetSupport().NumStrats(pl1); st++) {
 	      p_matrix(rowno, colno) += p_profile.Payoff(pl1, pl1, st, pl2, st2) * logitterms(pl1, st);
 	    }
 	    p_matrix(rowno, colno) *= p_profile(pl1, st1);
