@@ -634,7 +634,10 @@ bool GSM::_BinaryOperation( const gString& funcname )
 
   else // ( p1->Type() != p2->Type() )
   {
-    _ErrorMessage( _StdErr, 17 );
+    if( p1->Type() == porREFERENCE || p2->Type() == porREFERENCE )
+      _ErrorMessage( _StdErr, 16 );
+    else
+      _ErrorMessage( _StdErr, 17 );
     delete p1;
     delete p2;
     p1 = new ErrorPortion;
@@ -898,6 +901,7 @@ bool GSM::Child ( void )
 bool GSM::AddFunction( FuncDescObj* func )
 {
   FuncDescObj *old_func;
+  bool result;
   if( !_FuncTable->IsDefined( func->FuncName() ) )
   {
     _FuncTable->Define( func->FuncName(), func );
@@ -906,8 +910,10 @@ bool GSM::AddFunction( FuncDescObj* func )
   else
   {
     old_func = (*_FuncTable)( func->FuncName() );
-    old_func->Combine( func );
-    return true;
+    result = old_func->Combine( func );
+    if( !result )
+      _ErrorMessage( _StdErr, 60 );
+    return result;
   }
 }
 
@@ -1446,6 +1452,9 @@ void GSM::_ErrorMessage
   case 13:
     s << "  Attempted to resolve undefined reference \"" << str1 << "\"\n";
     break;
+  case 16:
+    s << "  Attempted binary operation on an undefined variable\n";
+    break;
   case 17:
     s << "  Attempted binary operation on incompatible types\n";
     break;
@@ -1533,6 +1542,9 @@ void GSM::_ErrorMessage
     break;
   case 59:
     s << "  Attempted to pass an undefined reference to a function\n";
+    break;
+  case 60:
+    s << "  New function parameters are ambiguous with an existing function\n";
     break;
   default:
     s << "  General error\n";

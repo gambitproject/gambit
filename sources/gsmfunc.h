@@ -166,7 +166,7 @@ public:
      const ParamInfoType param_info[]
      );
   
-  void Combine( FuncDescObj* newfunc );
+  bool Combine( FuncDescObj* newfunc );
 
   gString FuncName ( void ) const;
 };

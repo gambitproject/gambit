@@ -513,31 +513,76 @@ void FuncDescObj::SetParamInfo
 
 
 
-void FuncDescObj::Combine( FuncDescObj* newfunc )
+bool FuncDescObj::Combine( FuncDescObj* newfunc )
 {
+  bool result = true;
+  bool same_params;
   int i;
   int j;
+  int f_index;
+  int index;
+
   for( i = 0; i < newfunc->_NumFuncs; i++ )
   {
-    if( newfunc->_FuncInfo[ i ].UserDefined )
+    for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
-      SetFuncInfo( newfunc->_FuncInfo[ i ].FuncInstr, 
-		  newfunc->_FuncInfo[ i ].NumParams,
-		  newfunc->_FuncInfo[ i ].ParamInfo );
-    }
-    else
-    {
-      SetFuncInfo( newfunc->_FuncInfo[ i ].FuncPtr, 
-		  newfunc->_FuncInfo[ i ].NumParams,
-		  newfunc->_FuncInfo[ i ].ParamInfo );
+      same_params = true;
+      for( index = 0; 
+	  index < _FuncInfo[ f_index ].NumParams &&
+	  index < newfunc->_FuncInfo[ i ].NumParams; 
+	  index++ )
+      {
+	if(
+	   ( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 && 
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].DefaultValue == 0 ) &&
+	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Name ==
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name ) &&
+	   PortionTypeMatch( _FuncInfo[ f_index ].ParamInfo[ index ].Type,
+			    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) 
+	   )
+	{
+	  same_params = same_params & true;
+	}
+	else
+	{
+	  same_params = false;
+	  break;
+	}
+      }
+      
+      if( same_params )
+      {
+	result = false;
+	break;
+      }
     }
 
+    if( result )
+    {
+      if( newfunc->_FuncInfo[ i ].UserDefined )
+      {
+	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncInstr, 
+		    newfunc->_FuncInfo[ i ].NumParams,
+		    newfunc->_FuncInfo[ i ].ParamInfo );
+      }
+      else
+      {
+	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncPtr, 
+		    newfunc->_FuncInfo[ i ].NumParams,
+		    newfunc->_FuncInfo[ i ].ParamInfo );
+      } 
+    }
+    
     for( j = 0; j < newfunc->_FuncInfo[ i ].NumParams; j++ )
     {
       newfunc->_FuncInfo[ i ].ParamInfo[ j ].DefaultValue = 0;
     }
+    
+    if( !result )
+      break;
   }
   delete newfunc;
+  return result;
 }
 
 
@@ -800,6 +845,14 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 			 _FuncInfo[ f_index ].ParamInfo[ index ].Type ) )
 	    params_matched++;
 	}
+	else
+	{
+	  if( _FuncInfo[ f_index ].ParamInfo[ index ].PassByReference )
+	    params_matched++;
+	}
+
+	if( _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue == 0 )
+	  params_to_match++;
       }
 
       if( params_matched >= params_to_match && 
@@ -814,9 +867,12 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     {
       _FuncIndex = curr_f_index;
     }
-    if ( param_sets_matched > 1 )
+    else 
     {
-      _ErrorMessage( _StdErr, 5, 0, _FuncName );
+      if( param_sets_matched > 1 )
+	_ErrorMessage( _StdErr, 5, 0, _FuncName );
+      else
+	_ErrorMessage( _StdErr, 11, 0, _FuncName );
       _ErrorOccurred = true;
     }
   }
@@ -838,7 +894,8 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
     }
   }
 
-  
+
+
   if( !_ErrorOccurred )
   {
     for( index = 0; index < _FuncInfo[ _FuncIndex ].NumParams; index++ )
@@ -882,8 +939,6 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       }
     }
   }
-
-
 
 
 
@@ -996,7 +1051,7 @@ void CallFuncObj::_ErrorMessage
     s << "  Function " << str1 << "[] called with ambiguous parameters\n";
     break;
   case 7:
-    s << "  Function " << str1 << "[] " << " parameter #" << num1;
+    s << "  Function " << str1 << "[] parameter #" << num1;
     s << " type mismatch\n";
     break;
   case 8:
@@ -1009,6 +1064,9 @@ void CallFuncObj::_ErrorMessage
   case 10:
     s << "  Undefined variable passed for parameter \"" << str1 << "\"\n";
     s << "  while executing function " << str2 << "[]\n";
+    break;
+  case 11:
+    s << "  Insufficient parameter type information given\n";
     break;
   default:
     s << "  General error\n";
