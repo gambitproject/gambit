@@ -31,7 +31,7 @@
 
 # define compiler and flags
 
-CC = g++ 
+CC = /software/stow/gcc-2.95.1/bin/g++ 
 CFLAGS = -O2 -Wall -DGDOUBLE -D__NO_MATH_INLINES $(DEFINES) -Dwx_motif \
 	 -fguiding-decls -fno-implicit-templates $(INCDIR) 
 

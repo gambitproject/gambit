@@ -15,7 +15,9 @@
 #include "wx_tbar.h"
 #endif
 
+#ifdef __BORLANDC__
 #pragma hdrstop
+#endif // __BORLANDC__
 
 #include "wxio.h"
 #include "gambit.h"

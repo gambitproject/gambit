@@ -6,7 +6,11 @@
 
 #include "wx.h"
 #include "wx_form.h"
+
+#ifdef __BORLANDC__
 #pragma hdrstop
+#endif // __BORLANDC__
+
 #include "wxmisc.h"
 #include "treedraw.h"
 #include "legendc.h"
@@ -76,7 +80,7 @@ void TreeDrawSettings::SetOptions(void)
 // font it will be displayed
 void TreeDrawSettings::draw_params_legends_func(wxButton &ob, wxCommandEvent &)
 {
-    FontDialogBox *f;
+    FontDialogBox *f = 0;
     draw_params_legend_struct *dpls = (draw_params_legend_struct *)ob.GetClientData();
 
     // The following case makes sure that the currently set font comes up first.
@@ -387,7 +391,7 @@ void TreeDrawSettings::SetLegends(int what)
 // draw_settings.  The file is ASCII and can be edited by hand if necessary.
 void TreeDrawSettings::SaveOptions(char *s)
 {
-    char *file_name = (s) ? s : INIFILE;
+    char *file_name = (s) ? s : (char *) INIFILE;
     wxWriteResource("Gambit", "Branch-Length",    branch_length,    file_name);
     wxWriteResource("Gambit", "Node-Length",      node_length,      file_name);
     wxWriteResource("Gambit", "Fork-Length",      fork_length,      file_name);

@@ -12,7 +12,9 @@
 #else
 #include "wx_tbar.h"
 #endif
-#pragma     hdr_stop
+#ifdef __BORLANDC__
+#pragma hdr_stop
+#endif // __BORLANDC__
 #include    "wxmisc.h"
 #include    "spread.h"
 #include    "gmisc.h"

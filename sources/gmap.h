@@ -59,7 +59,7 @@ template <class K, class T> class gBaseMap  {
     virtual T operator()(const K &key) const = 0;
 //-grp
 
-    virtual T *const Lookup(const K &key) = 0;
+    virtual T &Lookup(const K &key) = 0;
 
 //
 // These are the equality and assignment operators for this and all derived
@@ -140,7 +140,7 @@ template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
     T operator()(const K &key) const;
 //-grp
 
-    T *const Lookup(const K &key);
+    T &Lookup(const K &key);
 
 //
 // Return nonzero exactly when the key has a defined mapping in the map

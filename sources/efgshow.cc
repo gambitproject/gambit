@@ -209,7 +209,7 @@ void EfgShow::SolveStandard(void)
   dialogEfgSolveStandard dialog(ef, this);
   if (dialog.Completed() != wxOK)  return;
 
-  guiEfgSolution *solver;
+  guiEfgSolution *solver = 0;
 
   wxBeginBusyCursor();
 

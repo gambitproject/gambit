@@ -7,7 +7,9 @@
 #include "wx.h"
 #include "wx_form.h"
 #include "wx_help.h"
+#ifdef __BORLANDC__
 #pragma hdr_stop
+#endif  // __BORLANDC__
 #define WXMISC_C
 #include "wxmisc.h"
 

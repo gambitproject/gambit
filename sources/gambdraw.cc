@@ -7,7 +7,9 @@
 
 #include "wx.h"
 #include "wxmisc.h"
+#ifdef __BORLANDC__
 #pragma hdrstop
+#endif  // __BORLANDC__
 #include "gambdraw.h"
 
 gBlock<int> GambitDrawSettings::player_colors = gBlock<int>();
@@ -86,7 +88,7 @@ void GambitDrawSettings::LoadOptions(char *file_name)
 // SaveOptions: used to store the player colors to a config file
 void GambitDrawSettings::SaveOptions(char *s) const
 {
-    char *file_name = (s) ? s : INIFILE;
+    char *file_name = (s) ? s : (char *) INIFILE;
 
     // Save the player color settings
     wxWriteResource("Gambit", "Num-Player-Colors", player_colors.Length(), file_name);

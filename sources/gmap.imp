@@ -210,13 +210,13 @@ template <class K, class T> T &gOrdMap<K, T>::operator()(const K &key)
 		    _default);
 }
 
-template <class K, class T> T *const gOrdMap<K, T>::Lookup(const K &key)
+template <class K, class T> T &gOrdMap<K, T>::Lookup(const K &key)
 {
   int where = Locate(key);
 
-  if (length > 0 && keys[where] == key)    return &(values[where]);
-  else return &(Insert(key, ((key < keys[where]) ? where : where + 1),
-		       _default));
+  if (length > 0 && keys[where] == key)    return values[where];
+  else return Insert(key, ((key < keys[where]) ? where : where + 1),
+		     _default);
 }
 
 template <class K, class T> T gOrdMap<K, T>::operator()(const K &key) const

@@ -544,7 +544,7 @@ void NfgShow::SolveStandard(void)
 
   int old_max_soln = solns.Length();  // used for extensive update
 
-  guiNfgSolution *solver;
+  guiNfgSolution *solver = 0;
 
   switch (dialog.Number()) {
   case nfgSTANDARD_ONE:
