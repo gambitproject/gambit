@@ -9,6 +9,7 @@
 #include "double.h"
 #include "gsimplex.imp"
 
+/*
 template class gSimplex<gRational>;
 template class gList< gSimplex<gRational> >;
 template class gNode< gSimplex<gRational> >;
@@ -20,6 +21,7 @@ template class gList< gSimplex<double> >;
 template class gNode< gSimplex<double> >;
 template gOutput& operator << (gOutput& output, const gSimplex<double>& x);
 template gSimplex<gDouble> TogDouble(const gSimplex<double>&);
+*/
 
 template class gSimplex<gDouble>;
 template class gList< gSimplex<gDouble> >;

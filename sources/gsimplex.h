@@ -8,27 +8,29 @@
 #define GSIMPLEX_H
 
 #include "interval.h"
+#include "rectangl.h"
 #include "odometer.h"
 #include "gvector.h"
+#include "glpsolv3.h"
+#include "gsmatrix.h"
 
 /* This file provides the template class
 
    gSimplex
 
-which models the concept of a nonempty compact interval.
-Since boundary points can be identified, open and half 
-open (bounded) intervals can be effected, but less directly.
 */
 
 template<class T> class gSimplex {
 private:
+    gList<gVector<T> > vertices;
     gList<gInterval<T> > sides;
 
 public:
     // constructors
     gSimplex(const gSimplex<T>&);
-    gSimplex(const gList<gInterval<T> >&);
-    gSimplex(const gVector<T>, const gVector<T>);
+//    gSimplex(const gList<gInterval<T> >&);
+    gSimplex(const gList<gVector<T> >&);
+//    gSimplex(const gVector<T>, const gVector<T>);
     ~gSimplex();
 
     // operators
@@ -37,22 +39,23 @@ public:
     bool          operator != (const gSimplex<T>& y) const;
 
     // information
-    const int                Dmnsn()                          const;
-    const gVector<T>         LowerBound()                     const;
-    const gVector<T>         UpperBound()                     const;
+    const int                AmbientDmnsn()                   const;
+    const int                NumberOfVertices()               const;
+//    const gVector<T>         LowerBound()                     const;
+//    const gVector<T>         UpperBound()                     const;
     const T                  LowerBoundOfCoord(const int&)    const;
     const T                  UpperBoundOfCoord(const int&)    const;
     const T                  HeightInCoord(const int&)        const;
-    const gInterval<T>       CartesianFactor(const int&)      const;
     const gSimplex<T>      SameCenterDoubleSideLengths()    const;
     const gSimplex<T>      Orthant(const gArray<int>&)      const;
-    const gVector<T>         SideLengths()                    const;
+//    const gVector<T>         SideLengths()                    const;
     bool                     Contains(const gVector<T> &)     const;
     bool                     Contains(const gSimplex<T> &)  const;
     const T                  Volume()                         const;
     const gVector<T>         Center()                         const;
-    const gSimplex<T>      BoundingSimplex()              const;
+    const gRectangle<T>      BoundingRectangle()              const;
     const gList<gVector<T> > VertexList()                     const;
+    const gVector<T>         Vertex(const int&)               const;
     const int                NumberOfCellsInSubdivision()     const;
     const gSimplex<T>      SubdivisionCell(const int&)      const;
 

@@ -12,18 +12,26 @@
 //--------------------------------------------------------------------------
 
 template<class T> gSimplex<T>::gSimplex(const gSimplex<T>& given) 
-: sides(given.sides)
+: vertices(given.vertices), sides(given.sides)
 {
 }
 
+/*
 template<class T> gSimplex<T>::gSimplex(const gList< gInterval<T> >& given)
-: sides(given)
+: vertices(), sides(given)
+{
+}
+*/
+
+template<class T> gSimplex<T>::gSimplex(const gList< gVector<T> >& given)
+: vertices(given), sides()
 {
 }
 
+/*
 template<class T> gSimplex<T>::gSimplex(const gVector<T> lower_bd, 
                                             const gVector<T> upper_bd) 
-: sides()
+: vertices(), sides()
 { 
   assert (lower_bd.Check(upper_bd));
   for (int i = 1; i <= upper_bd.Length(); i++) {
@@ -31,7 +39,7 @@ template<class T> gSimplex<T>::gSimplex(const gVector<T> lower_bd,
     sides += side;
   }
 }
-
+*/
 
 template<class T> gSimplex<T>::~gSimplex() 
 {
@@ -45,7 +53,7 @@ template<class T> gSimplex<T>::~gSimplex()
 template<class T> gSimplex<T>& 
 gSimplex<T>::operator = (const gSimplex<T>& /* rhs */)
 {
-  gout << "For const'ness, operator = not allowed for gSimplexs\n";
+  gout << "For const'ness, operator = not allowed for gSimplex\n";
   exit (0);
   return *this;
 }
@@ -54,8 +62,30 @@ gSimplex<T>::operator = (const gSimplex<T>& /* rhs */)
 template<class T> bool gSimplex<T>::operator == (const gSimplex<T>& rhs)
      const
 {
-  for (int i = 1; i <= Dmnsn(); i++)
-    if (sides[i] != rhs.sides[i]) return false;
+  for (int i = 1; i <= NumberOfVertices(); i++) {
+    bool match = false;
+    int j = 1;
+    while (!match && j <= rhs.NumberOfVertices()) {
+      if (vertices[i] == rhs.vertices[j])
+	match = true;
+      j++;
+    }
+    if (!match) 
+      return false;
+  }
+
+  for (int j = 1; j <= NumberOfVertices(); j++) {
+    bool match = false;
+    int i = 1;
+    while (!match && j <= rhs.NumberOfVertices()) {
+      if (rhs.vertices[j] == vertices[i])
+	match = true;
+      j++;
+    }
+    if (!match) 
+      return false;
+  }
+
   return true;
 }
 
@@ -66,156 +96,180 @@ template<class T> bool gSimplex<T>::operator != (const gSimplex<T>& rhs)
 }
 
 //--------------------------------------------------------------------------
-//                             interval -- information
+//                             gSimplex -- information
 //--------------------------------------------------------------------------
 
-template<class T> const int gSimplex<T>::Dmnsn() const 
+template<class T> const int gSimplex<T>::AmbientDmnsn() const 
 { 
-  return sides.Length();
+  return vertices[1].Length();
 }
 
+template<class T> const int gSimplex<T>::NumberOfVertices() const 
+{ 
+  return vertices.Length();
+}
+
+/*
 template<class T> const gVector<T> gSimplex<T>::LowerBound() const 
 { 
-  gVector<T> answer(Dmnsn());
+  gVector<T> answer(AmbientDmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
+*/
 
+/*
 template<class T> const gVector<T> gSimplex<T>::UpperBound() const 
 { 
   gVector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
   return answer;
 }
+*/
 
 template<class T> const T gSimplex<T>::LowerBoundOfCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
-  return sides[i].LowerBound();
+  assert (1 <= i && i <= AmbientDmnsn());
+  T answer = vertices[1][i];
+  for (int j = 2; j <= NumberOfVertices(); j++)
+    if (vertices[j][i] < answer) answer = vertices[j][i];
+  return answer;
 }
 
 template<class T> const T gSimplex<T>::UpperBoundOfCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
-  return sides[i].UpperBound();
+  assert (1 <= i && i <= AmbientDmnsn());
+  T answer = vertices[1][i];
+  for (int j = 2; j <= NumberOfVertices(); j++)
+    if (vertices[j][i] > answer) answer = vertices[j][i];
+  return answer;
 }
 
 template<class T> const T gSimplex<T>::HeightInCoord(const int& i) const 
 { 
-  assert (1 <= i && i <= Dmnsn());
-  return sides[i].Length();
-}
-
-template<class T> 
-const gInterval<T> gSimplex<T>::CartesianFactor(const int& i) const 
-{ 
-  return sides[i];
+  return UpperBoundOfCoord(i) - LowerBoundOfCoord(i);
 }
 
 template<class T> 
 const gSimplex<T> gSimplex<T>::SameCenterDoubleSideLengths() const 
 { 
-  gList<gInterval<T> > new_sides;
-  for (int i = 1; i <= Dmnsn(); i++)
-    new_sides += CartesianFactor(i).SameCenterTwiceLength();
-  return gSimplex<T>(new_sides);
-}
-
-template<class T> 
-const gSimplex<T> 
-gSimplex<T>::Orthant(const gArray<int>& top_or_bot) const 
-{ 
-  gList<gInterval<T> > new_sides;
-  for (int i = 1; i <= Dmnsn(); i++)
-    if (top_or_bot[i] == 0)
-    new_sides += CartesianFactor(i).LeftHalf();
-  else
-    new_sides += CartesianFactor(i).RightHalf();
-  return gSimplex<T>(new_sides);
-}
-
-template<class T> const gVector<T> gSimplex<T>::SideLengths() const 
-{ 
-  gVector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) 
-    answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
-  return answer;
+  gVector<T> center(Center());
+  gList<gVector<T> > new_vertices;
+  for (int i = 1; i <= NumberOfVertices()+1; i++) {
+    gVector<T> new_vertex(vertices[i]);
+    new_vertex += vertices[i];
+    new_vertex -= center;
+    new_vertices += new_vertex;
+  }
+  return gSimplex<T>(new_vertices);
 }
 
 template<class T> bool gSimplex<T>::Contains(const gVector<T>& point) const 
-{ 
-  assert (point.Length() == Dmnsn());
+{   
+  assert (point.Length() == AmbientDmnsn());
 
-  for (int i = 1; i <= Dmnsn(); i++)
-    if (point[i] < sides[i].LowerBound() || sides[i].UpperBound() < point[i])
-      return false;
-  return true;
+  gMatrix<T> A(AmbientDmnsn()+1,NumberOfVertices());
+  for (int j = 1; j <= NumberOfVertices(); j++) {
+    for (int i = 1; i <= AmbientDmnsn(); i++)
+      A(i,j) = vertices[j][i];
+    A(AmbientDmnsn()+1,j) = (T)1;
+  }
+
+  gVector<T> B(AmbientDmnsn()+1);
+  for (int i = 1; i <= AmbientDmnsn(); i++)
+    B[i] = point[i];
+  B[AmbientDmnsn()+1] = (T)1;
+  
+  gVector<T> C(NumberOfVertices());
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    C[i] = (T)0;
+
+  gLPTableau3<T> TestFeasible(A,B,C);
+
+  if (TestFeasible.IsFeasible())
+    return true;
+  else
+    return false;
 }
 
-template<class T> bool gSimplex<T>::Contains(const gSimplex<T>& R) const 
+template<class T> bool gSimplex<T>::Contains(const gSimplex<T>& S) const 
 { 
-  assert (R.Dmnsn() == Dmnsn());
+  assert (S.AmbientDmnsn() == AmbientDmnsn());
 
-  for (int i = 1; i <= Dmnsn(); i++)
-    if ( !sides[i].Contains(R.sides[i]) )
+  for (int i = 1; i <= NumberOfVertices(); i++)
+    if ( !Contains(S.vertices[i]) )
       return false;
   return true;
 }
 
 template<class T> const T gSimplex<T>::Volume() const 
 { 
-  T answer = (T)1;
-  for (int i = 1; i <= Dmnsn(); i++)
-    answer *= ( sides[i].UpperBound() - sides[i].LowerBound() );
+  assert(NumberOfVertices() == AmbientDmnsn() + 1);
+
+  gSquareMatrix<T> edges(AmbientDmnsn());
+  for (int i = 1; i <= AmbientDmnsn(); i++)
+    for (int j = 1; j <= AmbientDmnsn(); j++)
+      edges(i,j) = vertices[i][j] - vertices[AmbientDmnsn()+1][j];
+  T answer = fabs(edges.Determinant());
+
+  for (int i = 2; i <= AmbientDmnsn(); i++)
+    answer /= (T)i;
+
   return answer;
 }
 
 template<class T> const gVector<T> gSimplex<T>::Center() const 
 { 
-  gVector<T> answer(Dmnsn());
+// The following is complex and time consuming, but necessary to prevent
+// "splintering" in which the longest dimension shrinks by only
+// n/(n+1) on each subdivision.
+
+  gArray<T> 
+
+  gVector<T> answer(AmbientDmnsn());
+/*
   for (int i = 1; i <= Dmnsn(); i++) 
     answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
 		                     / ((T)2);
+*/
   return answer;
 }
 
-template<class T> const gSimplex<T> gSimplex<T>::BoundingSimplex() const 
+template<class T> const gRectangle<T> gSimplex<T>::BoundingRectangle() const 
 { 
-  return *this;
+  gVector<T> bottoms(AmbientDmnsn());
+  gVector<T> tops(AmbientDmnsn());
+  for (int i = 1; i <= AmbientDmnsn(); i++) {
+    bottoms[i] = LowerBoundOfCoord(i);
+    tops[i]    = UpperBoundOfCoord(i);
+  }
+  return gRectangle<T>(bottoms,tops);
 }
 
 template<class T> const gList<gVector<T> > gSimplex<T>::VertexList() const 
 { 
-  gList<gVector<T> > answer;
+  return vertices;
+}
 
-  gArray<int> ListOfTwos(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) ListOfTwos[i] = 2;
-  gIndexOdometer ListOfTopBottoms(ListOfTwos);
-
-  while (ListOfTopBottoms.Turn()) {
-    gVector<T> next(Dmnsn());
-    for (int i = 1; i <= Dmnsn(); i++)
-      if (ListOfTopBottoms[i] == 1)
-	next[i] = LowerBoundOfCoord(i);
-      else 
-	next[i] = UpperBoundOfCoord(i);
-    answer += next;
-  }
-  return answer;
+template<class T> const gVector<T> gSimplex<T>::Vertex(const int& i) const 
+{ 
+  return vertices[i];
 }
 
 template<class T> 
 const int gSimplex<T>::NumberOfCellsInSubdivision() const 
 { 
   int answer = 1;
-  for (int i = 1; i <= Dmnsn(); i++)
-    answer *= 2;
+  for (int i = 2; i <= NumberOfVertices(); i++)
+    answer *= i;
   return answer;
 }
 
 template<class T> 
 const gSimplex<T> gSimplex<T>::SubdivisionCell(const int& index) const 
 { 
+  return *this; // Dummy to allow compilation
+/*
   int tmp = index;
   gArray<int> updowns(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) {
@@ -227,6 +281,7 @@ const gSimplex<T> gSimplex<T>::SubdivisionCell(const int& index) const
   tmp /= 2;
   }
   return Orthant(updowns);
+*/
 }
 
 //----------------------------------
@@ -236,11 +291,10 @@ const gSimplex<T> gSimplex<T>::SubdivisionCell(const int& index) const
 template<class T>  
 gSimplex<gDouble>  TogDouble(const gSimplex<T>& given) 
 {
-  gList<gInterval<gDouble> > cartesian_factors;
-  for (int i = 1; i <= given.Dmnsn(); i++) 
-    cartesian_factors += gInterval<gDouble>((gDouble)given.LowerBound()[i],
-					    (gDouble)given.UpperBound()[i]);
-  return gSimplex<gDouble>(cartesian_factors);
+  gList<gVector<gDouble> > vertices_in_gDouble;
+  for (int i = 1; i <= given.NumberOfVertices(); i++) 
+    vertices_in_gDouble += TogDouble(given.Vertex(i));
+  return gSimplex<gDouble>(vertices_in_gDouble);
 }
 
 //--------------------------------------------------------------------------
@@ -248,11 +302,10 @@ gSimplex<gDouble>  TogDouble(const gSimplex<T>& given)
 //--------------------------------------------------------------------------
 
 template<class T> gOutput& operator << (gOutput& output, 
-					const gSimplex<T>& x)
+					const gSimplex<T>& S)
 {
-  for (int i = 1; i <= x.Dmnsn() - 1; i++)
-    output << x.sides[i] << "x";
-  if (x.Dmnsn() > 0) 
-    output << x.sides[x.Dmnsn()];
+  output << "ConvexHull( ";
+  for (int i = 1; i <= S.NumberOfVertices() - 1; i++)
+    output << S.Vertex(i);
   return output;
 }
