@@ -372,7 +372,7 @@ is subject to rounding of least significant digits, and hence these
 numbers can be imprecise; for example, operations usually associated
 with being inverses of each other may not be with floating point
 numbers. However, since arithmetic operations on floating point
-numbers are typically implemented in hardware, the {\tt Machine}
+numbers are typically implemented in hardware, the {\tt Float}
 precision is frequently used when speed is important.
 
 Rational numbers are implemented as the ratios of two arbitrary-length
@@ -638,7 +638,7 @@ Data Type & Constant \\
 \hline
 \verb+BOOLEAN+  & \tindex{True},  \tindex{False} \\
 \verb+NUMBER+ (rational precision) & \verb+1+, \verb+-1234567/563+ \\
-\verb+NUMBER+ (machine precision)  & \verb+1.+,  \verb+-1.234567+ \\
+\verb+NUMBER+ (float precision)  & \verb+1.+,  \verb+-1.234567+ \\
 \verb+TEXT+  & \verb+"Help"+ \\
 \verb+OUTPUT+  & \tindex{StdOut}, \tindex{NullOut} \\
 \verb+INPUT+  & \tindex{StdIn} \\
@@ -1915,7 +1915,6 @@ For example to create a random two person $2\times 2$ normal form
 game, with a seed of \verb+34+ for the random number generator, you can
 use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
-\marginpar{Change Randomize[] to generate uniform (0,1) rv}
 
 \begin{verbatim}
 GCL2:= Randomize[NewNfg[{2,2},True],34]
@@ -3224,7 +3223,7 @@ appreciate getting feedback on this.
 \begin{verbatim}
   ExePath 
   GetEnv 
-  GetPath 
+* GetPath 
   Platform 
   SetEnv 
   Shell 
@@ -3581,14 +3580,10 @@ appreciate getting feedback on this.
   QreValue 
   InfosetProb 
   InfosetProbs 
-  IsKnownNash 
-  IsKnownNotNash 
-  IsKnownNotPerfect 
-  IsKnownNotSequential 
-  IsKnownNotSubgamePerfect 
-  IsKnownPerfect 
-  IsKnownSequential 
-  IsKnownSubgamePerfect 
+  IsNash 
+  IsPerfect 
+  IsSequential 
+  IsSubgamePerfect 
   LiapValue 
   Mixed
 # Mixed
@@ -3620,6 +3615,22 @@ appreciate getting feedback on this.
 
 %--A--
 
+
+\item\lex{ActionNumber}
+\protect \large \begin{verbatim}
+ActionNumber[action->ACTION, sup->EFSUPPORT] =: NUMBER 
+ActionNumber[action->ACTION, basis->EFBASIS] =: NUMBER 
+\end{verbatim}\normalsize
+
+\bd
+Returns the number
+assigned to \verb+action+ in the support \verb+sup+ (or basis
+\verb+basis+).  For each information set, actions are numbered from 1
+to the number of actions at the information set.  If an action is not
+in the corresponding support or basis, it is assigned a number of \verb+0+.  
+
+\item [See also:] \verb+Actions+.
+\ed
 
 \item\lex{ActionProb}
 \protect \large \begin{verbatim}
@@ -3691,13 +3702,15 @@ action \verb+k+, where the index numbers correspond to the output of
 \item\lex{Actions}
 \protect \large \begin{verbatim} 
 Actions[infoset->INFOSET*, support->EFSUPPORT] =: LIST(ACTION) 
+Actions[infoset->INFOSET*, basis->EFBASIS] =: LIST(ACTION) 
 \end{verbatim}\normalsize
 
 \bd
 Returns the list of actions available at \verb+infoset+ in
-\verb+support+.  If \verb+infoset+ is the null information set, the
-empty list of actions is returned.  It is an error if \verb+infoset+
-and \verb+support+ are not from the same extensive form game.
+\verb+support+ or \verb+EFSUPPORT.  If \verb+infoset+ is the null
+information set, the empty list of actions is returned.  It is an
+error if \verb+infoset+ and \verb+support+ are not from the same
+extensive form game.
 
 \item [See also:] \verb+DeleteAction+, \verb+InsertAction+.
 \ed
@@ -3705,10 +3718,10 @@ and \verb+support+ are not from the same extensive form game.
 \item\lex{AddAction}
 \protect \large \begin{verbatim} 
 AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
+AddAction[basis->EFBASIS, action->ACTION] =: EFSUPPORT 
 \end{verbatim}\normalsize
 
 \bd 
-\marginpar{This implementation should cover {\tt EFBASIS} also}
 Adds \verb+action+ to the \verb+support+.  If the action is already in
 the support, no change is made.  A copy of the modified support is
 returned.  It is an error if \verb+support+ and \verb+action+ are not from the
@@ -3987,16 +4000,6 @@ Returns the concatenation of the lists \verb+x+ and \verb+y+.
 [Short form:] \verb%x & y%
 \ed
 
-\item\lex{Concat}
-\protect \large \begin{verbatim}
-Concat[x->TEXT, y->TEXT] =: TEXT 
-\end{verbatim} \normalsize
-
-\bd
-Returns the concatenation of \verb+x+ and \verb+y+.
-\item [Short form:] \verb%x & y%
-\ed
-
 \item\lex{Contains}
 \protect \large \begin{verbatim}
 Contains[list->NLIST(T), x->T] =: BOOLEAN 
@@ -4064,19 +4067,6 @@ may be deleted only when it has no members; otherwise, this function has
 no effect.  Returns \verb+True+ when the information set was successfully
 deleted.
 \item [See also:] \verb+Members+, \verb+NewInfoset+.
-\ed
-
-\item\lex{DeleteFunction}
-\protect \large \begin{verbatim}
-*DeleteFunction[function-name[argument-list]]
-\end{verbatim}\normalsize
-
-\bd
-Removes the function with the given signature
-from the list of user-defined functions.
-\item [Note:] Special function. Not listable; cannot be called inside
-a user defined function; not documented in \verb+Help+ or \verb+Manual+.  
-\item [See also:] \verb+NewFunction+.
 \ed
 
 \item\lex{DeleteMove}
@@ -4207,15 +4197,15 @@ at all.
 \item\lex{EnumMixedSolve}
 \protect \large \begin{verbatim}
 EnumMixedSolve[support->NFSUPPORT, {stopAfter->0}, 
-               {precision->Machine}, {nPivots<->0}, 
+               {precision->Float}, {nPivots<->0}, 
                {time<->0.000000}, {traceFile<->(Output)}, 
-               {traceLevel->0}] =: LIST(MIXED) 
+               {traceLevel->0}, {cliques->False}] =: LIST(MIXED) 
 EnumMixedSolve[support->EFSUPPORT, {asNfg->False}, 
-               {stopAfter->0}, {precision->Machine}, 
+               {stopAfter->0}, {precision->Float}, 
                {nPivots<->0}, {time<->0.000000}, 
-               {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+               {traceFile<->(Output)}, {traceLevel->0},
+               {cliques->False}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
-\marginpar{Add new options.}
 \bd
 Returns the extreme points of the set of all Nash equilibria (pure or
 mixed) for a two person game using \verb+support+.
@@ -4235,7 +4225,7 @@ must always be specified and {\tt True}.}
 be used to specify a maximum number of equilibria to be found.
 \item
 [precision:] Determines the precision of the computation. Default is
-machine precision (floating point). 
+floating point precision (\verb+Float+). 
 \item
 [nPivots:] Returns the number of pivots done by the
 algorithm.
@@ -4249,6 +4239,9 @@ execution of the algorithm.  By default, no logging is done.
 [traceLevel:] An integer specifying the level of detail in logging.
 Higher integers correspond to more detail; zero corresponds to no output
 at all.
+\item
+[cliques:] If true, then the connected components and their maximal
+cliques are computed.  The output is printed to the console.
 \ed
 \item [See also:] \verb+EnumPureSolve+.
 \ed
@@ -4259,8 +4252,8 @@ EnumPureSolve[support->NFSUPPORT, {stopAfter->0},
               {time<->0.000000}, {traceFile<->(Output)},
               {traceLevel->0}] =: LIST(MIXED) 
 EnumPureSolve[support->EFSUPPORT, {asNfg->False}, 
-              {stopAfter->0}, {time<->0.000000},
-              {traceFile<->(Output)}, 
+              {stopAfter->0}, {precision->Float}, 
+              {time<->0.000000}, {traceFile<->(Output)}, 
               {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
@@ -4279,7 +4272,7 @@ solution as a behavior profile.
 be used to specify a maximum number of equilibria to be found.
 \item
 [precision:] Determines the precision of the computation. Default is
-machine precision (floating point). 
+floating point precision (\verb+Float+). 
 \item
 [time:] Returns the time elapsed during the execution
 of the algorithm.
@@ -4334,7 +4327,7 @@ Exp[x->NUMBER] =: NUMBER
 
 \bd
 Returns the value of the function ${\rm e}^{x}$.
-\item [Note:] Result is returned in \verb+Machine+ precision, regardless
+\item [Note:] Result is returned in \verb+Float+ precision, regardless
 of the precision of \verb+x+.
 \item [See also:] \verb+Log+, \verb+Power+.
 \ed
@@ -4394,23 +4387,6 @@ data types; not documented in \verb+Help+ or \verb+Manual+.
 \item
 [See also:] \verb+While+.
 \ed
-
-\item\lex{Format}
-\protect \large \begin{verbatim}
-Format[x->INTEGER, {width<->0}] =: INTEGER 
-\end{verbatim} \normalsize
-
-\bd 
-Sets the formatting style for output of integer values on
-output streams.
-\bd
-\item [width:] The width for a numeric field.  If the width of the
-data is greater than \verb+width+, the width is overridden.  (The
-default is 0.)
-\ed
-\item [See also:] \verb+Write+, \verb+ListFormat+.
-\ed
-
 
 \item\lex{Format}
 \protect \large \begin{verbatim}
@@ -4497,6 +4473,7 @@ Game[profile->MIXED] =: NFG
 Game[profile->BEHAV] =: EFG 
 Game[support->NFSUPPORT] =: NFG 
 Game[support->EFSUPPORT] =: EFG 
+Game[support->EFBASIS] =: EFG 
 \end{verbatim} \normalsize
 
 \bd
@@ -4511,21 +4488,6 @@ GetEnv[name->TEXT] =: TEXT
 \bd
 Returns the string associated with environment variable \verb+name+.
 \item [See also:] \verb+SetEnv+, \verb+UnSetEnv+.
-\ed
-
-
-\item\lex{GetFormat}
-\protect \large \begin{verbatim}
-GetFormat[x->INTEGER, {width<->0}] =: INTEGER 
-\end{verbatim} \normalsize
-
-\bd 
-Gets the current formatting style for output of integers on
-output streams.
-\bd
-\item [width:] The width for a numeric field.  
-\ed
-\item [See also:] \verb+Format+.
 \ed
 
 
@@ -4597,7 +4559,7 @@ floating-point numbers.
 \item\lex{GetListFormat}
 \protect \large \begin{verbatim}
 GetListFormat[{braces<->True}, {commas<->True},
-              {lf<->1}, {indent<->2}] =: BOOLEAN 
+              {lf<->2}, {indent<->2}] =: BOOLEAN 
 \end{verbatim} \normalsize
 
 \bd
@@ -4611,168 +4573,17 @@ Gets the current formatting style for output of lists on output streams.
 \item [See also:] \verb+Write+, \verb+Format+.
 \ed
 
-
 \item\lex{GetPath}
 \protect \large \begin{verbatim}
-GetPath[] =: TEXT 
+*GetPath[] =: TEXT 
 \end{verbatim} \normalsize
 
 \bd
 Returns the path to the file in which the command is included.  Can be
 used to identify \verb+Include[]+ files. 
+\item [Note:] Special function.  Not listable; not documented in
+\verb+Help+ or \verb+Manual+.
 \item [See also:] \verb+ExePath+, \verb+Include+.
-\ed
-
-\item\lex{QreGridSolve}
-\protect \large \begin{verbatim}
-QreGridSolve[support->NFSUPPORT, {pxifile->}, 
-               {minLam->0.001000}, {maxLam->500.000000}, 
-               {delLam->0.020000}, {powLam->1},{fullGraph->False}, 
-               {delp1->0.100000}, {tol1->0.100000}, 
-               {delp2->0.010000}, {tol2->0.010000}, 
-               {nEvals<->0}, {time<->0.000000}, 
-               {traceFile<->(Output)}, 
-               {traceLevel->0}] =: LIST(MIXED) 
-\end{verbatim}\normalsize
-
-\bd
-Computes the complete logistic quantal response correspondence for
-a (small) two-person normal form game on the \verb+support+, for values of
-$\lambda$ between $\underline{\lambda}$ and $\bar{\lambda}.$ Returns
-the list of mixed profiles computed, one profile for each value of
-$\lambda_t$ from lowest to highest.
-
-The operation of the algorithm may be modified by specifying optional
-parameters.  See \verb+QreSolve+ for a description of parameters
-not listed here:
-\bd
-\item
-[delp1:] Grid size for course search over probability space.  Default
-is $0.1$ .
-\item
-[tol1:] The tolerance on the objective function for course search.
-Values of $p$ for which the objective function is less this value are
-searched further on a finer grid.  The default is $0.1$.
-\item
-[delp2:] Grid size for fine search over probability space.  Default is
-$0.01$ .
-\item
-[tol2:] The tolerance on the objective function for fine search.
-Values of $p$ for which the objective function is less this value are
-kept.  The default is $0.01$.  
-\ed
-\item [See also:] \verb+QreSolve+.
-\ed
-
-\item\lex{QreLambda}
-\protect \large \begin{verbatim}
-QreLambda[profile->MIXED] =: NUMBER 
-QreLambda[profile->BEHAV] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd
-Returns the value of \verb+lambda+ for mixed or behavior profiles
-computed by \verb+QreSolve+ or \verb+QreGridSolve+.  Profiles not
-created by one of these algorithms have a null lambda value.
-\item
-[See also:] \verb+QreGridSolve+, \verb+QreSolve+, \verb+QreValue+.
-\ed
-
-\item\lex{QreSolve}
-\protect \large \begin{verbatim}
-QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(MIXED) 
-QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(BEHAV) 
-\end{verbatim}\normalsize
-
-\bd 
-Computes a branch of the logistic quantal response equilibrium
-correspondence for a game. \verb+start+ is
-used as the starting point for the computation of $\lambda_{0}$, and
-the support over which \verb+start+ is defined is the support over
-which the correspondence is computed.
-
-The behavior of the algorithm may be modified by specifying some of the
-following optional parameters:
-\bd
-\item
-[pxifile:] Generate output to this file for later retrieval and viewing by
-the PXI program.  By default no output file is generated.
-\item
-[minLam:] Sets $\underline{\lambda}$, the minimum value of $\lambda$.  The 
-default value is $\underline{\lambda}=0.001$.
-\item
-[maxLam:] Sets $\overline{\lambda}$, the maximum value of $\lambda$.  The
-default value is $\overline{\lambda}=500.0$.
-\item
-[delLam:] Sets the constant $\delta$ used in incrementing $\lambda$.  The
-default value is $\delta=0.02$.
-\item
-[powLam:] Sets the exponent $a$ used in incrementing $\lambda$.  The default
-value is $a=1$, producing geometric incrementing.  Setting $a=0$ corresponds
-to linear incrementing.
-\item
-[fullGraph:] If \verb+True+, the list of behavior strategy profiles
-returned contains the full sequence of profiles computed from each successive
-value of $\lambda$.  The default value is \verb+False+, in which case only
-the profile for the last value of $\lambda$ computed is returned.
-\item
-[maxitsN:] Sets the maximum number of iterations for the $n$-dimensional
-optimization routine.  The default value is $200$.
-\item
-[tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
-The default is 1.0e-10.
-\item
-[maxits1:] Sets the maximum number of iterations for the one-dimensional
-optimization routine.  The default is $100$.
-\item
-[tol1:] Sets the tolerance for the one-dimensional optimization routine.
-The default is 2.0e-10.
-\item
-[time:] Returns the amount of time consumed by the
-algorithm.
-\item
-[nEvals:] Returns the number of function evaluations
-performed by the algorithm.
-\item
-[nIters:] Returns the number of iterations performed
-by the algorithm.
-\item
-[traceFile:] A file containing a log of more detailed information on
-the execution of the algorithm.  By default, no logging is done.
-\item
-[traceLevel:] An integer specifying the level of detail in logging.
-Higher integers correspond to more detail; zero corresponds to
-no output at all.
-\ed
-
-\item
-[Note:] The extensive form version disregards any marked
-subgames.
-\item [See also:] \verb+QreGridSolve+.
-\ed
-
-\item\lex{QreValue}
-\protect \large \begin{verbatim}
-QreValue[profile->MIXED] =: NUMBER 
-QreValue[profile->BEHAV] =: NUMBER 
-\end{verbatim}\normalsize
-
-\bd
-Returns the value of the QRE objective function for mixed or behavior
-profiles computed by \verb+QreSolve+ or \verb+QreGridSolve+.  The QRE
-value for profiles not created by these algorithms is null.
-\item
-[See also:] \verb+QreGridSolve+, \verb+QreLambda+, \verb+QreSolve+.
 \ed
 
 \item\lex{Greater}
@@ -5058,7 +4869,8 @@ Inverse[x->LIST(LIST(NUMBER))] =: LIST(LIST(NUMBER))
 \end{verbatim} \normalsize
 
 \bd
-Describe me!
+Returns the inverse of the matrix \verb+x+.  It is an error if the
+matrix is not square or is singular.
 \ed
 
 \item\lex{IsConsistent}
@@ -5067,7 +4879,9 @@ IsConsistent[basis->EFBASIS] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
-Describe me!
+Returns true if \verb+basis+ is a ``consistent'' basis -- i. e., if it
+is a basis which could be a support for a sequential
+equilibrium.\marginpar{give cite here.}  
 \ed
 
 \item\lex{IsConstSum}
@@ -5083,10 +4897,9 @@ Returns \verb+True+ when the game \verb+efg+ or \verb+nfg+ is constant sum.
 \item\lex{IsDefined}
 \protect \large \begin{verbatim}
 IsDefined[x->T] =: BOOLEAN
-\end{varbatim}\normalsize
+\end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
-\marginpar{Better description?}
 \bd
 Returns \verb+True+ if \verb+x+ has been defined.  Useful for testing
 the existence of static variables.
@@ -5123,18 +4936,16 @@ IsNash[profile->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-\marginpar{Update description}
-Returns \verb+True+ when \verb+profile+
-is known by Gambit to be a Nash equilibrium of the
-corresponding game.  If \verb+profile+ is complete (probabilities sum to
-one for every player, and every information set), then there is a
+Returns \verb+True+ when \verb+profile+ is known by Gambit to be a
+Nash equilibrium of the corresponding game, and \verb+False+ if
+\verb+profile+ is known to not be Nash.  Otherwise, the return value
+is \verb+Unknown+.  If \verb+profile+ is complete (probabilities sum
+to one for every player, and every information set), then there is a
 definitive test for Nash equilibrium.  However if the profile is
 incomplete (i. e., it does not specify actions at off the equilibrium
-path information sets), then it is possible that a profile (or set
-of all completions of the profile) may be Nash, but \verb+IsKnownNash+
-returns \verb+False+, because it is not known by Gambit to be Nash.
-If the answer is not known to Gambit, then \verb+IsKnownNotNash+ will also
-return \verb+False+.
+path information sets), then it is possible that a profile (or set of
+all completions of the profile) may be Nash, but is not known by
+Gambit to be Nash.
 \ed
 
 \item\lex{IsNull}
@@ -5153,14 +4964,12 @@ IsPerfect[profile->MIXED] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd 
-\marginpar{Update description}
-Returns \verb+True+ if \verb+profile+
-is known by Gambit to be a perfect Nash equilibrium, and \verb+False+
-otherwise.  There is currently no definitive test in Gambit for
-whether an arbitrary profile is perfect, so it is possible for a
-perfect equilibrium to return \verb+False+.  However some of the
-algorithms (notably \verb+LcpSolve+) will only return perfect
-equilibria, which are marked as such.  
+Returns \verb+True+ if \verb+profile+ is known by Gambit to be a
+perfect Nash equilibrium, \verb+False+ if it is known to not be
+perfect, and \verb+Unknown+ otherwise.  There is currently no
+definitive test in Gambit for whether an arbitrary profile is perfect.
+However some of the algorithms (notably \verb+LcpSolve+) will only
+return perfect equilibria, which are marked as such.   
 \ed
 
 \item\lex{IsPerfectRecall}
@@ -5169,7 +4978,8 @@ IsPerfectRecall[efg->EFG] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd 
-Returns \verb+True+ if \verb+efg+ is a game of perfect recall.
+Returns \verb+True+ if \verb+efg+ is a game of perfect recall, and
+\verb+False+ otherwise 
 \ed
 
 
@@ -5190,10 +5000,9 @@ IsSequential[profile->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd 
-\marginpar{Update description}
 Returns \verb+True+ if \verb+profile+
 is known by Gambit to be an approximation to a
-sequential Nash equilibrium, and \verb+False+ otherwise.  There is
+sequential Nash equilibrium, \verb+False+ if it is not, and \verb+Unknown+ if the answer is not known.  There is
 currently no definitive test in Gambit for whether an arbitrary
 profile is sequential.  However any Nash equilibrium of an extensive
 form game which is computed via the \verb+LiapSolve+ or
@@ -5206,10 +5015,9 @@ IsSubgamePerfect[profile->BEHAV] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-\marginpar{Update description}
 Returns \verb+True+ if \verb+profile+
 is known by Gambit to be a subgame perfect Nash
-equilibrium.  There is currently no
+equilibrium, \verb+False+ if it is known not to be a subgame perfect equilibrium, and \verb+Unknown+ otherwise.  There is currently no
 definitive test in Gambit for whether an arbitrary profile is subgame
 perfect.  However, any Nash equilibrium of an extensive form game which
 is computed when all subgames are marked will only return a subgame
@@ -5249,11 +5057,11 @@ Returns \verb+True+ when the system stopwatch is currently running.
 
 \item\lex{LcpSolve}
 \protect \large \begin{verbatim}
-LcpSolve[support->NFSUPPORT, {stopAfter->1}, {precision->Machine}, 
+LcpSolve[support->NFSUPPORT, {stopAfter->1}, {precision->Float}, 
          {nPivots<->0}, {time<->0}, {traceFile<->(Output)}, 
          {traceLevel->0}] =: LIST(MIXED) 
 LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->1}, 
-         {precision->Machine}, {nPivots<->0}, {time<->0.000000}, 
+         {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
@@ -5278,7 +5086,7 @@ default is one. If set to zero then all equilibria reachable by the
 algorithm will be found.
 \item
 [precision:] Determines the precision of the computation. Default is
-machine precision (floating point). 
+floating point precision (\verb+Float+). 
 \item
 [nPivots:] Returns the total number of pivots. 
 \item
@@ -5296,7 +5104,7 @@ logging at all.
 
 \item\lex{Length}
 \protect \large \begin{verbatim}
-Length[list->LIST(T*)] =: INTEGER 
+Length[list->LIST(T*)] =: NUMBER
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -5457,7 +5265,7 @@ it defaults to 1; if \verb+delta+ is unspecified, it defaults to 0.
 \item\lex{ListFormat}
 \protect \large \begin{verbatim}
 ListFormat[{braces<->True}, {commas<->True},
-           {lf<->1}, {indent<->2}] =: BOOLEAN
+           {lf<->2}, {indent<->2}] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \marginpar{Mention it gets old settings!}
@@ -5504,7 +5312,7 @@ Log[x->NUMBER] =: NUMBER
 \bd
 Computes the natural logarithm of \verb+x+.  It is an error if
 \verb+x+ is nonpositive.
-\item [Note:] Result is returned in \verb+Machine+ precision, regardless of
+\item [Note:] Result is returned in \verb+Float+ precision, regardless of
 the precision of \verb+x+.
 \item [See also:] \verb+Exp+, \verb+Power+.
 \ed
@@ -5512,11 +5320,11 @@ the precision of \verb+x+.
 \item\lex{LpSolve}
 \protect \large \begin{verbatim}
 LpSolve[support->NFSUPPORT, {stopAfter->1}, 
-        {precision->Machine}, {nPivots<->0}, 
+        {precision->Float}, {nPivots<->0}, 
         {time<->0.000000}, {traceFile<->(Output)}, 
         {traceLevel->0}] =: LIST(MIXED) 
 LpSolve[support->EFSUPPORT, {asNfg->False}, 
-        {stopAfter->1}, {precision->Machine}, 
+        {stopAfter->1}, {precision->Float}, 
         {nPivots<->0}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -5540,7 +5348,7 @@ into behavior profiles.
 [stopAfter:] Maximum number of equilibria to find.  
 \item
 [precision:] Determines the precision of the computation. Default is
-machine precision (floating point). 
+floating point precision (\verb+Float+). 
 \item
 [nPivots:] Returns the total number of pivots.
 \item
@@ -6255,6 +6063,158 @@ no prior sibling, the null node is returned.
 
 %--Q--
 
+\item\lex{QreGridSolve}
+\protect \large \begin{verbatim}
+QreGridSolve[support->NFSUPPORT, {pxifile->}, 
+               {minLam->0.001000}, {maxLam->500.000000}, 
+               {delLam->0.020000}, {powLam->1},{fullGraph->False}, 
+               {delp1->0.100000}, {tol1->0.100000}, 
+               {delp2->0.010000}, {tol2->0.010000}, 
+               {nEvals<->0}, {time<->0.000000}, 
+               {traceFile<->(Output)}, 
+               {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}\normalsize
+
+\bd
+Computes the complete logistic quantal response correspondence for
+a (small) two-person normal form game on the \verb+support+, for values of
+$\lambda$ between $\underline{\lambda}$ and $\bar{\lambda}.$ Returns
+the list of mixed profiles computed, one profile for each value of
+$\lambda_t$ from lowest to highest.
+
+The operation of the algorithm may be modified by specifying optional
+parameters.  See \verb+QreSolve+ for a description of parameters
+not listed here:
+\bd
+\item
+[delp1:] Grid size for course search over probability space.  Default
+is $0.1$ .
+\item
+[tol1:] The tolerance on the objective function for course search.
+Values of $p$ for which the objective function is less this value are
+searched further on a finer grid.  The default is $0.1$.
+\item
+[delp2:] Grid size for fine search over probability space.  Default is
+$0.01$ .
+\item
+[tol2:] The tolerance on the objective function for fine search.
+Values of $p$ for which the objective function is less this value are
+kept.  The default is $0.01$.  
+\ed
+\item [See also:] \verb+QreSolve+.
+\ed
+
+\item\lex{QreLambda}
+\protect \large \begin{verbatim}
+QreLambda[profile->MIXED] =: NUMBER 
+QreLambda[profile->BEHAV] =: NUMBER 
+\end{verbatim}\normalsize
+
+\bd
+Returns the value of \verb+lambda+ for mixed or behavior profiles
+computed by \verb+QreSolve+ or \verb+QreGridSolve+.  Profiles not
+created by one of these algorithms have a null lambda value.
+\item
+[See also:] \verb+QreGridSolve+, \verb+QreSolve+, \verb+QreValue+.
+\ed
+
+\item\lex{QreSolve}
+\protect \large \begin{verbatim}
+QreSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
+           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
+           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
+           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+           {traceLevel->0}] =: LIST(MIXED) 
+QreSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
+           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
+           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
+           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+           {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}\normalsize
+
+\bd 
+Computes a branch of the logistic quantal response equilibrium
+correspondence for a game. \verb+start+ is
+used as the starting point for the computation of $\lambda_{0}$, and
+the support over which \verb+start+ is defined is the support over
+which the correspondence is computed.
+
+The behavior of the algorithm may be modified by specifying some of the
+following optional parameters:
+\bd
+\item
+[pxifile:] Generate output to this file for later retrieval and viewing by
+the PXI program.  By default no output file is generated.
+\item
+[minLam:] Sets $\underline{\lambda}$, the minimum value of $\lambda$.  The 
+default value is $\underline{\lambda}=0.001$.
+\item
+[maxLam:] Sets $\overline{\lambda}$, the maximum value of $\lambda$.  The
+default value is $\overline{\lambda}=500.0$.
+\item
+[delLam:] Sets the constant $\delta$ used in incrementing $\lambda$.  The
+default value is $\delta=0.02$.
+\item
+[powLam:] Sets the exponent $a$ used in incrementing $\lambda$.  The default
+value is $a=1$, producing geometric incrementing.  Setting $a=0$ corresponds
+to linear incrementing.
+\item
+[fullGraph:] If \verb+True+, the list of behavior strategy profiles
+returned contains the full sequence of profiles computed from each successive
+value of $\lambda$.  The default value is \verb+False+, in which case only
+the profile for the last value of $\lambda$ computed is returned.
+\item
+[maxitsN:] Sets the maximum number of iterations for the $n$-dimensional
+optimization routine.  The default value is $200$.
+\item
+[tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
+The default is 1.0e-10.
+\item
+[maxits1:] Sets the maximum number of iterations for the one-dimensional
+optimization routine.  The default is $100$.
+\item
+[tol1:] Sets the tolerance for the one-dimensional optimization routine.
+The default is 2.0e-10.
+\item
+[time:] Returns the amount of time consumed by the
+algorithm.
+\item
+[nEvals:] Returns the number of function evaluations
+performed by the algorithm.
+\item
+[nIters:] Returns the number of iterations performed
+by the algorithm.
+\item
+[traceFile:] A file containing a log of more detailed information on
+the execution of the algorithm.  By default, no logging is done.
+\item
+[traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to
+no output at all.
+\ed
+
+\item
+[Note:] The extensive form version disregards any marked
+subgames.
+\item [See also:] \verb+QreGridSolve+.
+\ed
+
+\item\lex{QreValue}
+\protect \large \begin{verbatim}
+QreValue[profile->MIXED] =: NUMBER 
+QreValue[profile->BEHAV] =: NUMBER 
+\end{verbatim}\normalsize
+
+\bd
+Returns the value of the QRE objective function for mixed or behavior
+profiles computed by \verb+QreSolve+ or \verb+QreGridSolve+.  The QRE
+value for profiles not created by these algorithms is null.
+\item
+[See also:] \verb+QreGridSolve+, \verb+QreLambda+, \verb+QreSolve+.
+\ed
+
 \item\lex{Quit}
 \protect \large \begin{verbatim}
 Quit
@@ -6274,10 +6234,11 @@ are not present, it is treated as \verb+Quit[0]+.
 Randomize[x->NUMBER, {seed->0}] =: NUMBER
 \end{verbatim}\normalsize
 
-\marginpar{Change to uniform on $[0,1]$}
 \bd 
-Returns a random number of type \verb+INTEGER+.  The return value
-is uniform between 1 and \verb+MAXINT=214748367+.  
+Returns a random number distributed uniformly between \verb+0+ and
+\verb+1+.  The result is of \verb+Rational+ precision.  The
+denominator is equal to \verb+MAXINT=214748367+, and the numerator is
+a uniformly distributed integer between \verb+0+ and \verb+MAXINT+.
 \ed
 
 \item\lex{Rational}
@@ -6629,12 +6590,12 @@ background.  Default is to run in the background.
 \protect \large \begin{verbatim}
 SimpDivSolve[support->NFSUPPORT, {stopAfter->1}, 
              {nRestarts->1}, {leashLength->0}, 
-             {precision->Machine}, {nEvals<->0}, 
+             {precision->Float}, {nEvals<->0}, 
              {time<->0.000000}, {traceFile<->(Output)}, 
              {traceLevel->0}] =: LIST(MIXED) 
 SimpDivSolve[support->EFSUPPORT, {asNfg->False}, 
              {stopAfter->1}, {nRestarts->1}, {leashLength->0}, 
-             {precision->Machine}, {nEvals<->0}, 
+             {precision->Float}, {nEvals<->0}, 
              {time<->0.000000}, {traceFile<->(Output)}, 
              {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -6658,7 +6619,7 @@ must always be specified and {\tt True}.}
 [stopAfter:] Maximum number of equilibria to find. Default is 1.  
 \item
 [precision:] Determines the precision of the computation. Default is
-machine precision (floating point). 
+floating point precision (\verb+float+). 
 \item 
 [nRestarts:] Number of restarts.  At each restart the mesh of the
 triangulation is halved.  So this parameter determines the final mesh
@@ -7073,7 +7034,7 @@ Infosets[{Chance[efg]}&Players[efg]]
 \item\lex{AllNash}
 \protect \large \begin{verbatim}
 AllNash[e->EFG, {stopAfter->0}, {nTries->0}, 
-        {precision->Machine}] =: LIST(BEHAV) 
+        {precision->Float}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7095,7 +7056,7 @@ MarkSubgames[ms];Behav[m]
 \item\lex{AllNash}
 \protect \large \begin{verbatim}
 AllNash[n->NFG, {stopAfter->0}, {nTries->0}, 
-        {precision->Machine}] =: LIST(MIXED) 
+        {precision->Float}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7128,7 +7089,7 @@ Members[AllInfosets[efg]]
 \item\lex{AllPerfect}
 \protect \large \begin{verbatim}
 AllPerfect[n->NFG, {stopAfter->0}, {nTries->0}, 
-           {precision->Machine}] =: LIST(MIXED) 
+           {precision->Float}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7165,7 +7126,7 @@ MarkSubgames[ms];b
 \item\lex{AllSubgamePerfect}
 \protect \large \begin{verbatim}
 AllSubgamePerfect[e->EFG, {stopAfter->0}, {nTries->0}, 
-                  {precision->Machine}] =: LIST(BEHAV) 
+                  {precision->Float}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -7436,7 +7397,7 @@ ElimDom[Support[efg],strong,mixed,time,traceFile,traceLevel]
 
 \item\lex{EnumMixedSolve}
 \protect \large \begin{verbatim}
-EnumMixedSolve[nfg->NFG, {stopAfter->0}, {precision->Machine}, 
+EnumMixedSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, 
                {nPivots<->0}, {time<->0.000000}, 
                {traceFile<->(Output)}, 
                {traceLevel->0}] =: LIST(MIXED) 
@@ -7455,7 +7416,7 @@ EnumMixedSolve[Support[nfg], stopAfter, precision, nPivots, time,
 \item\lex{EnumMixedSolve}
 \protect \large \begin{verbatim}
 EnumMixedSolve[efg->EFG, {asNfg->False}, {stopAfter->0}, 
-               {precision->Machine}, {nPivots<->0}, 
+               {precision->Float}, {nPivots<->0}, 
                {time<->0.000000}, {traceFile<->(Output)}, 
                {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -7472,7 +7433,7 @@ EnumMixedSolve[Support[efg], asNfg,stopAfter, precision, nPivots, time,
 
 \item\lex{EnumPureSolve}
 \protect \large \begin{verbatim}
-EnumPureSolve[nfg->NFG, {stopAfter->0}, {precision->Machine}, 
+EnumPureSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, 
               {time<->0.000000}, {traceFile<->(Output)}, 
               {traceLevel->0}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
@@ -7489,7 +7450,7 @@ EnumPureSolve[Support[nfg], stopAfter, precision, time, traceFile,
 
 \item\lex{EnumPureSolve}
 \protect \large \begin{verbatim}
-EnumPureSolve[efg->EFG, {stopAfter->0}, {precision->Machine}, 
+EnumPureSolve[efg->EFG, {stopAfter->0}, {precision->Float}, 
               {time<->0.000000}, {traceFile<->(Output)}, 
               {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -7635,48 +7596,6 @@ True
 \end{verbatim} 
 \ed
 
-\item\lex{QreSolve}
-\protect \large \begin{verbatim}
-QreSolve[efg->EFG, {pxifile->}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(BEHAV) 
-\end{verbatim}\normalsize
-
-\bd 
-A version of \verb+QreSolve+ that takes an extensive form
-game instead of a support.  See the built-in function,
-\verb+QreSolve+ for a description of the parameters.
-\begin{verbatim}
-QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
-  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
-  traceLevel]
-\end{verbatim} 
-\ed
-
-\item\lex{QreSolve}
-\protect \large \begin{verbatim}
-QreSolve[nfg->NFG, {pxifile->}, {minLam->0.001000}, 
-           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
-           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
-           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
-           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(MIXED) 
-\end{verbatim}\normalsize
-
-\bd 
-A version of \verb+QreSolve+ that takes a normal form
-game instead of a support.  See the built-in function,
-\verb+QreSolve+ for a description of the parameters.
-\begin{verbatim}
-QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
-  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
-  traceLevel]
-\end{verbatim} 
-\ed
-
 %--H--
 
 \item\lex{History}
@@ -7747,7 +7666,7 @@ IsNull[Parent[n]]
 
 \item\lex{LcpSolve}
 \protect \large \begin{verbatim}
-LcpSolve[nfg->NFG, {stopAfter->0}, {precision->Machine}, 
+LcpSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, 
          {nPivots<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
          {traceLevel->0}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
@@ -7765,7 +7684,7 @@ LcpSolve[Support[nfg], stopAfter, precision, nPivots,
 \item\lex{LcpSolve}
 \protect \large \begin{verbatim}
 LcpSolve[efg->EFG, {asNfg->False}, {stopAfter->0}, 
-        {precision->Machine}, {nPivots<->0}, {time<->0.000000}, 
+        {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
@@ -7845,7 +7764,7 @@ StrategyProb[mixed,Strategies[Game[mixed]]]
 
 \item\lex{LpSolve}
 \protect \large \begin{verbatim}
-LpSolve[nfg->NFG, {stopAfter->1}, {precision->Machine}, 
+LpSolve[nfg->NFG, {stopAfter->1}, {precision->Float}, 
         {nPivots<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
         {traceLevel->0}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
@@ -7863,7 +7782,7 @@ LpSolve[Support[nfg], stopAfter, precision, nPivots, time, traceFile,
 \item\lex{LpSolve}
 \protect \large \begin{verbatim}
 LpSolve[efg->EFG, {asNfg->False}, {stopAfter->1},
-        {precision->Machine}, {nPivots<->0}, {time<->0.000000}, 
+        {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
@@ -8279,7 +8198,7 @@ Length[Strategies[player,support]]
 
 \item\lex{OneNash}
 \protect \large \begin{verbatim}
-OneNash[e->EFG, {precision->Machine}] =: LIST(BEHAV) 
+OneNash[e->EFG, {precision->Float}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -8302,7 +8221,7 @@ MarkSubgames[ms];b
 
 \item\lex{OneNash}
 \protect \large \begin{verbatim}
-OneNash[n->NFG, {precision->Machine}] =: LIST(MIXED) 
+OneNash[n->NFG, {precision->Float}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -8320,7 +8239,7 @@ If[NumPlayers[n] = 2,
 
 \item\lex{OnePerfect}
 \protect \large \begin{verbatim}
-OnePerfect[n->NFG, {precision->Machine}] =: LIST(MIXED) 
+OnePerfect[n->NFG, {precision->Float}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -8358,7 +8277,7 @@ MarkSubgames[ms];b
 
 \item\lex{OneSubgamePerfect}
 \protect \large \begin{verbatim}
-OneSubgamePerfect[e->EFG, {precision->Machine}] =: LIST(BEHAV) 
+OneSubgamePerfect[e->EFG, {precision->Float}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -8547,6 +8466,48 @@ Profiles[Support[nfg]]
 \ed
 
 %--Q--
+
+\item\lex{QreSolve}
+\protect \large \begin{verbatim}
+QreSolve[efg->EFG, {pxifile->}, {minLam->0.001000}, 
+           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
+           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
+           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+           {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim}\normalsize
+
+\bd 
+A version of \verb+QreSolve+ that takes an extensive form
+game instead of a support.  See the built-in function,
+\verb+QreSolve+ for a description of the parameters.
+\begin{verbatim}
+QreSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+\end{verbatim} 
+\ed
+
+\item\lex{QreSolve}
+\protect \large \begin{verbatim}
+QreSolve[nfg->NFG, {pxifile->}, {minLam->0.001000}, 
+           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
+           {maxits1->100}, {tol1->0.000000}, {time<->0.000000}, 
+           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+           {traceLevel->0}] =: LIST(MIXED) 
+\end{verbatim}\normalsize
+
+\bd 
+A version of \verb+QreSolve+ that takes a normal form
+game instead of a support.  See the built-in function,
+\verb+QreSolve+ for a description of the parameters.
+\begin{verbatim}
+QreSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+\end{verbatim} 
+\ed
 
 %--R--
 
@@ -8755,7 +8716,7 @@ See \verb+Format+ for definitions of the parameters.
 \item\lex{SimpDivSolve}
 \protect \large \begin{verbatim}
 SimpDivSolve[nfg->NFG, {stopAfter->1}, {nRestarts->16}, 
-             {leashLength->0}, {precision->Machine}, {nEvals<->0}, 
+             {leashLength->0}, {precision->Float}, {nEvals<->0}, 
              {time<->0.000000}, {traceFile<->(Output)}, 
              {traceLevel->0}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
@@ -8773,7 +8734,7 @@ SimpDivSolve[Support[nfg], stopAfter, nRestarts, leashLength,
 \item\lex{SimpDivSolve}
 \protect \large \begin{verbatim}
 SimpDivSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, 
-             {nRestarts->16}, {leashLength->0}, {precision->Machine}, 
+             {nRestarts->16}, {leashLength->0}, {precision->Float}, 
              {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
              {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
