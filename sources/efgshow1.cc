@@ -743,11 +743,7 @@ void EfgShow::GameChanged(void)
 
 void EfgShow::SetFileName(void)
 {
-#ifdef __BORLANDC__
   SetTitle("[" + filename + "] " + ef.GetTitle());
-#else if !defined(_HPUX_SOURCE)
-  SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
-#endif
 }
 
 void EfgShow::SetFileName(const gText &p_name)
@@ -757,11 +753,7 @@ void EfgShow::SetFileName(const gText &p_name)
   else
     filename = "untitled.efg";
 
-#ifdef __BORLANDC__
   SetTitle("[" + filename + "] " + ef.GetTitle());
-#else if !defined(_HPUX_SOURCE)
-  SetTitle("[" + gText(wxFileNameFromPath(filename)) + "] " + ef.GetTitle());
-#endif
 }
 
 
