@@ -86,9 +86,8 @@ gText gFileNameFromPath(const char *path);
 gText gPathOnly(const char *name);
 
 // Functions to implement online help system.
-void wxInitHelp(const char *file_name, const char *help_about_str = 0);
+void wxInitHelp(const char *file_name);
 void wxHelpContents(const char *name);
-void wxHelpAbout(const char *help_str = 0);
 void wxKillHelp(void);
 
 // in efgsolvd.cc, nfgsolvd.cc

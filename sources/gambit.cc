@@ -121,16 +121,7 @@ bool GambitApp::OnInit(void)
   wxString helpDir = wxGetWorkingDirectory();
   config.Read("Help-Directory", &helpDir);
 
-  wxInitHelp(gText(helpDir.c_str()) + "/gambit", 
-	     "Gambit Graphics User Interface, Version 0.96.3\n"
-	     "Built with " wxVERSION_STRING "\n\n"
-	     "Part of the Gambit Project\n"
-	     "www.hss.caltech.edu/~gambit/Gambit.html\n"
-	     "gambit@hss.caltech.edu\n\n"
-	     "Copyright (C) 1999-2000\n"
-	     "California Institute of Technology\n"
-	     "Funding provided by the National Science Foundation");
-  
+  wxInitHelp(gText(helpDir.c_str()) + "/gambit"); 
   gambitFrame->Show(true);
 
   // Set up the error handling functions.
@@ -549,9 +540,60 @@ void GambitFrame::OnMRUFile(wxCommandEvent &p_event)
   LoadFile(m_fileHistory.GetHistoryFile(p_event.GetId() - wxID_FILE1).c_str());
 }
 
+class dialogAbout : public wxDialog {
+public:
+  dialogAbout(wxWindow *p_parent);
+  virtual ~dialogAbout() { }
+};
+
+#include "bitmaps/gambit.xpm"
+
+dialogAbout::dialogAbout(wxWindow *p_parent)
+  : wxDialog(p_parent, -1, "About Gambit...", wxDefaultPosition, wxDefaultSize)
+{
+  SetAutoLayout(true);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticBitmap(this, -1, wxBITMAP(gambit)), 0, wxALL, 5);
+  topSizer->Add(new wxStaticText(this, -1,
+				 "Gambit Graphical User Interface"),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "Version 0.97 (alpha)"),
+		0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "Part of the Gambit Project"),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "http://www.hss.caltech.edu/gambit"),
+		0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "gambit@hss.caltech.edu"),
+		0, wxALIGN_CENTER, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, "Built with " wxVERSION_STRING),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "http://www.wxwindows.org"),
+		0, wxALIGN_CENTER, 5);
+
+  topSizer->Add(new wxStaticText(this, -1, "Copyright (C) 1999-2001"),
+		0, wxTOP | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "California Institute of Technology"),
+		0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, -1, "Funding provided by the National Science Foundation"),
+		0, wxALL | wxALIGN_CENTER, 5);
+
+  wxButton *okButton = new wxButton(this, wxID_OK, "OK");
+  okButton->SetDefault();
+  topSizer->Add(okButton, 0, wxALL | wxALIGN_CENTER, 10);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
+  Layout();
+}
+
 void GambitFrame::OnHelpAbout(wxCommandEvent &)
 {
-  wxHelpAbout(); 
+  dialogAbout dialog(this);
+  dialog.ShowModal();
 }
 
 void GambitFrame::OnHelpContents(wxCommandEvent &)

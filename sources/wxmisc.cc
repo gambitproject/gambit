@@ -26,15 +26,11 @@
 
 wxHelpController *s_helpController = 0;
 
-void wxInitHelp(const char *name, const char *help_about_str)
+void wxInitHelp(const char *name)
 {
   if (!s_helpController) {
     s_helpController = new wxHelpController;
     s_helpController->Initialize((char *) name);
-  }
-
-  if (help_about_str) {
-    wxHelpAbout(help_about_str);
   }
 }
 
@@ -78,18 +74,6 @@ void wxHelpContents(const char *section)
   s_helpController->LoadFile();
 #endif  // __GNUG__
 #endif  // NOT_PORTED_YET
-}
-
-void wxHelpAbout(const char *helpstr)
-{
-  static char *help_str = "Product based on wxWin";
-    
-  if (helpstr) {    // init with a new string
-    help_str = strdup(helpstr);
-  }
-  else {
-    wxMessageBox(help_str, "Help About");
-  }
 }
 
 void wxKillHelp(void)
