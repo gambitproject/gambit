@@ -147,6 +147,7 @@ private:
 friend class EfgFileReader;
 friend class EfgFile;
 friend class Nfg;
+friend class Node;
 
 protected:
   class Outcome; 
