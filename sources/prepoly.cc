@@ -1,7 +1,7 @@
 //
 // FILE: prepoly.cc  -- Implementation of supporting classes for polynomials
 //
-// $Id$
+// @(#)prepoly.cc	2.1 3/27/97
 //
 
 #ifdef __GNUG__
@@ -457,6 +457,12 @@ void  exp_vect::SetExp(int varno, int pow)
   assert (1 <= varno && varno <= Dmnsn() && 0 <= pow);
 
   components[varno] = pow;
+}
+
+void  exp_vect::ToZero()
+{
+  for (int i = 1; i <= Dmnsn(); i++)
+    components[i] = 0;
 }
 
 //--------------------------

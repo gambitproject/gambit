@@ -2,7 +2,7 @@
 // FILE: prepoly.h  --  Declaration of classes supporting 
 //                      multivariate polynomials.
 //
-// $Id$
+// @(#)prepoly.h	2.1 3/27/97
 //
 
 #ifndef PREPOLY_H
@@ -133,6 +133,7 @@ public:
 
 // Manipulation
   void SetExp(int varno, int pow);
+  void ToZero();
 
   friend gOutput& operator<<(gOutput&, const exp_vect&);
 };
