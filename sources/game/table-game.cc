@@ -77,10 +77,10 @@ gbtTableGameRep::gbtTableGameRep(gbtTableGameRep *p_unrestrictedGame,
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (!p_list.Contains(player->m_infosets[1]->m_actions[st])) {
 	gbtTableStrategyRep *strategy = 
-	  new gbtTableStrategyRep(m_players[pl]->m_infosets[1], st);
+	  new gbtTableStrategyRep(m_players[pl]->m_infosets[1],
+				  ++m_dimensions[pl]);
 	strategy->m_index = player->m_infosets[1]->m_actions[st]->m_index;
 	m_players[pl]->m_infosets[1]->m_actions.Append(strategy);
-	m_dimensions[pl]++; 
       }
     }
   }
