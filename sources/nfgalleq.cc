@@ -70,6 +70,8 @@ AllNashSolveModule::AllNashSolveModule(const NFSupport &S,
 void AllNashSolveModule::NashEnum(void)
 {
   for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
+    params.status.Get();
+    params.status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
     long newevals = 0;
     double newtime = 0.0;
     gList<MixedSolution> newsolns;
