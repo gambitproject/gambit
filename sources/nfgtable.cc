@@ -10,6 +10,50 @@
 #include "nfgtable.h"
 #include "nfgconst.h"
 
+class NfgGridTable : public wxGridTableBase {
+private:
+  Nfg *m_nfg;
+
+public:
+  NfgGridTable(Nfg *p_nfg);
+  virtual ~NfgGridTable() { }
+
+  int GetNumberRows(void) { return m_nfg->NumStrats(1); }
+  int GetNumberCols(void) { return m_nfg->NumStrats(2); }
+  wxString GetValue(int row, int col) {
+    gArray<int> strategy(m_nfg->NumPlayers());
+    for (int pl = 1; pl <= strategy.Length(); pl++) {
+      strategy[pl] = 1;
+    }
+    strategy[1] = row + 1;
+    strategy[2] = col + 1;
+
+    NFOutcome *outcome = m_nfg->GetOutcome(strategy);
+    return wxString::Format("%s,%s",
+			    (char *) ToText(m_nfg->Payoff(outcome, 1)),
+			    (char *) ToText(m_nfg->Payoff(outcome, 2)));
+  }
+
+  wxString GetRowLabelValue(int);
+  wxString GetColLabelValue(int);
+  void SetValue(int, int, const wxString &) { /* ignore */ }
+  bool IsEmptyCell(int, int) { return false; }
+};
+
+NfgGridTable::NfgGridTable(Nfg *p_nfg)
+  : m_nfg(p_nfg)
+{ }
+
+wxString NfgGridTable::GetRowLabelValue(int p_row)
+{
+  return (char *) m_nfg->Strategies(1)[p_row+1]->Name();
+}
+
+wxString NfgGridTable::GetColLabelValue(int p_col)
+{
+  return (char *) m_nfg->Strategies(2)[p_col+1]->Name();
+}
+
 class ColoredStringRenderer : public wxGridCellRenderer {
 public:
   // draw the string
@@ -209,12 +253,14 @@ NfgTable::NfgTable(Nfg &p_nfg, wxWindow *p_parent)
   navPanelSizer->Add(contViewSizer, 0, wxALL | wxEXPAND, 10);
 
   m_grid = new wxGrid(this, -1, wxDefaultPosition, wxDefaultSize);
+  //  m_grid->SetTable(new NfgGridTable(&m_nfg), true);
   m_grid->CreateGrid(m_support.NumStrats(1),
-		     m_support.NumStrats(2));
+  		     m_support.NumStrats(2));
   m_grid->SetGridCursor(0, 0);
   m_grid->SetEditable(false);
   m_grid->DisableDragRowSize();
   m_grid->AdjustScrollbars();
+  m_grid->SetDefaultRenderer(new ColoredStringRenderer);
 
   wxBoxSizer *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(navPanelSizer, 0, wxALL, 5);
@@ -376,9 +422,7 @@ void NfgTable::OnChangeValues(void)
       }
 
       m_grid->SetCellValue((char *) pay_str, i - 1, j - 1);
-      m_grid->SetCellRenderer(i - 1, j - 1, new ColoredStringRenderer);
     }
-
     if (ShowDominance()) { 
       int dom_pos = m_grid->GetCols() - ShowValues();
       Strategy *strategy = m_support.Strategies(GetRowPlayer())[i];
@@ -393,7 +437,7 @@ void NfgTable::OnChangeValues(void)
       }
     }
   }
-   
+
   if (ShowDominance()) {
     int dom_pos = m_grid->GetRows() - ShowValues();
 
