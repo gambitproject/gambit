@@ -45,10 +45,6 @@ Portion::~Portion()
 }
 
 
-PortionType Portion::SubType( void ) const
-{ return porERROR; }
-
-
 bool& Portion::Temporary( void )
 { return _Temporary; }
 
@@ -909,29 +905,21 @@ PortionType numerical_Portion<gRational>::Type( void ) const
 
 TEMPLATE class Mixed_Portion<double>;
 PortionType Mixed_Portion<double>::Type( void ) const
-{ return porMIXED; }
-PortionType Mixed_Portion<double>::SubType( void ) const
-{ return porDOUBLE; }
+{ return porMIXED_DOUBLE; }
 
 TEMPLATE class Mixed_Portion<gRational>;
 PortionType Mixed_Portion<gRational>::Type( void ) const
-{ return porMIXED; }
-PortionType Mixed_Portion<gRational>::SubType( void ) const
-{ return porRATIONAL; }
+{ return porMIXED_RATIONAL; }
 
 
 
 TEMPLATE class Nfg_Portion<double>;
 PortionType Nfg_Portion<double>::Type( void ) const
-{ return porNFG; }
-PortionType Nfg_Portion<double>::SubType( void ) const
-{ return porDOUBLE; }
+{ return porNFG_DOUBLE; }
 
 TEMPLATE class Nfg_Portion<gRational>;
 PortionType Nfg_Portion<gRational>::Type( void ) const
-{ return porNFG; }
-PortionType Nfg_Portion<gRational>::SubType( void ) const
-{ return porRATIONAL; }
+{ return porNFG_RATIONAL; }
 
 
 #include "garray.imp"

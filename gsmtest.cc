@@ -1233,7 +1233,6 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-*/
 
 
   machine->InitCallFunction( "Test" );
@@ -1255,7 +1254,7 @@ int main( void )
   machine->PushRef( "x" );
   machine->PushRef( "y" );
   machine->Dump();
-/*
+
   machine->InitCallFunction( "Test" );
   machine->PushRef( "x" );
   machine->BindVal();
@@ -1263,7 +1262,38 @@ int main( void )
   machine->BindVal();
   machine->CallFunction();
   machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 */
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 1 );
+  machine->Push( (double) 2 );
+  machine->Push( (double) 3 );
+  machine->PushList( 3 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+  
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 2 );
+  machine->Subscript();
+  machine->Dump();
+  
+  machine->PushRef( "x" );
+  machine->Push( (gInteger) 2 );
+  machine->Subscript();
+  machine->Push( (double) 5 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+  
 
   gout << "Deleting machine\n";
   delete machine;

@@ -41,9 +41,17 @@ typedef unsigned int PortionType;
 #define  porRATIONAL   ( 0x0008 )
 #define  porSTRING     ( 0x0010 )
 #define  porLIST       ( 0x0020 )
-#define  porNFG        ( 0x0040 )
-#define  porEFG        ( 0x0080 )
-#define  porMIXED      ( 0x0100 )
+
+#define  porNFG_DOUBLE     ( 0x0040 )
+#define  porNFG_RATIONAL   ( 0x0080 )
+#define  porNFG            ( porNFG_DOUBLE | porNFG_RATIONAL )
+#define  porEFG_DOUBLE     ( 0x0100 )
+#define  porEFG_RATIONAL   ( 0x0200 )
+#define  porEFG            ( porEFG_DOUBLE | porEFG_RATIONAL )
+#define  porMIXED_DOUBLE   ( 0x0400 )
+#define  porMIXED_RATIONAL ( 0x0800 )
+#define  porMIXED          ( porMIXED_DOUBLE | porMIXED_RATIONAL )
+
 #define  porREFERENCE  ( 0x1000 )
 
 #define  porALLOWS_SUBVARIABLES ( porNFG | porEFG )
@@ -74,7 +82,6 @@ class Portion
 
   bool&               Temporary      ( void );
   virtual PortionType Type           ( void ) const = 0;
-  virtual PortionType SubType        ( void ) const;
   virtual Portion*    Copy           ( void ) const = 0;
   virtual void        MakeCopyOfData ( Portion* p );
   virtual bool        Operation      ( Portion* p, OperationMode mode );
@@ -216,7 +223,6 @@ template <class T> class Mixed_Portion : public Portion
   MixedProfile<T>  Value     ( void ) const;
   Portion*         Copy      ( void ) const;
   PortionType      Type      ( void ) const;
-  PortionType      SubType   ( void ) const;
   bool             Operation ( Portion* p, OperationMode mode );
   void             Output    ( gOutput& s ) const;
 };
@@ -244,7 +250,6 @@ template <class T> class Nfg_Portion : public Portion
   Portion*       Copy           ( void ) const;
   void           MakeCopyOfData ( Portion* p );
   PortionType    Type           ( void ) const;
-  PortionType    SubType        ( void ) const;
   bool           Operation      ( Portion* p, OperationMode mode );
   void           Output         ( gOutput& s ) const;
 

@@ -274,21 +274,13 @@ bool GSM::Assign( void )
 
 	switch( primary_ref->Type() )
 	{
-	case porNFG:
-	  switch( primary_ref->SubType() )
-	  {
-	  case porDOUBLE:
-	    ( (Nfg_Portion<double>*) primary_ref )->
-	      Assign( p1_subvalue, p2_copy );
-	    break;
-	  case porRATIONAL:
-	    ( (Nfg_Portion<gRational>*) primary_ref )->
-	      Assign( p1_subvalue, p2_copy );
-	    break;
-	  default:
-	    gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
-	    assert(0);
-	  }
+	case porNFG_DOUBLE:
+	  ( (Nfg_Portion<double>*) primary_ref )->
+	    Assign( p1_subvalue, p2_copy );
+	  break;
+	case porNFG_RATIONAL:
+	  ( (Nfg_Portion<gRational>*) primary_ref )->
+	    Assign( p1_subvalue, p2_copy );
 	  break;
 	  
 	default:
@@ -364,19 +356,11 @@ bool GSM::UnAssign( void )
       {
 	switch( primary_ref->Type() )
 	{
-	case porNFG:
-	  switch( primary_ref->SubType() )
-	  {
-	  case porDOUBLE:
-	    ( (Nfg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
-	    break;
-	  case porRATIONAL:
-	    ( (Nfg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
-	    break;
-	  default:
-	    gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
-	    assert(0);
-	  }
+	case porNFG_DOUBLE:
+	  ( (Nfg_Portion<double>*) primary_ref )->UnAssign( p1_subvalue );
+	  break;
+	case porNFG_RATIONAL:
+	  ( (Nfg_Portion<gRational>*) primary_ref )->UnAssign( p1_subvalue );
 	  break;
 	  
 	default:
@@ -432,33 +416,24 @@ Portion* GSM::_ResolveRef( Reference_Portion* p )
       result = (*_RefTable)( ref );
       switch( result->Type() )
       {
-      case porNFG:
-	switch( result->SubType() )
-	{
-	case porDOUBLE:
-	  result = ((Nfg_Portion<double>*) result )->operator()( subvalue );
-	  break;
-	case porRATIONAL:
-	  result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
-	  break;
-	default:
-	  gerr << "GSM Error: unknown Nfg_Portion subtype\n";
-	  assert(0);
-	  break;
-	}
-	if( result != 0 )
-	{
-	  result = result->Copy();
-	}
-	else
-	{
-	  result = new Error_Portion;
-	}
+      case porNFG_DOUBLE:
+	result = ((Nfg_Portion<double>*) result )->operator()( subvalue );
+	break;
+      case porNFG_RATIONAL:
+	result = ((Nfg_Portion<gRational>*) result )->operator()( subvalue );
 	break;
 	
       default:
 	gerr << "GSM Error: attempted to resolve a subvariable of a type\n";
 	gerr << "           that does not support subvariables\n";
+	result = new Error_Portion;
+      }
+      if( result != 0 )
+      {
+	result = result->Copy();
+      }
+      else
+      {
 	result = new Error_Portion;
       }
     }
@@ -493,34 +468,26 @@ Portion* GSM::_ResolveRefWithoutCopy( Reference_Portion* p )
       result = (*_RefTable)( ref );
       switch( result->Type() )
       {
-      case porNFG:
-	switch( result->SubType() )
+      case porNFG_DOUBLE:
+	if( ((Nfg_Portion<double>*) result )->IsDefined( subvalue ) )
 	{
-	case porDOUBLE:
-	  if( ((Nfg_Portion<double>*) result )->IsDefined( subvalue ) )
-	  {
-	    result = ((Nfg_Portion<double>*) result )->
-	      operator()( subvalue )->Copy();
-	  }
-	  else
-	  {
-	    result = 0;
-	  }
-	case porRATIONAL:
-	  if( ((Nfg_Portion<gRational>*) result )->IsDefined( subvalue ) )
-	  {
-	    result = ((Nfg_Portion<gRational>*) result )
-	      ->operator()( subvalue )->Copy();
-	  }
-	  else
-	  {
-	    result = 0;
-	  }
-	default:
-	  gerr << "GSM Error: unknown subtype of Nfg_Portion\n";
-	  assert(0);
+	  result = ((Nfg_Portion<double>*) result )->
+	    operator()( subvalue )->Copy();
 	}
-	break;
+	else
+	{
+	  result = 0;
+	}
+      case porNFG_RATIONAL:
+	if( ((Nfg_Portion<gRational>*) result )->IsDefined( subvalue ) )
+	{
+	  result = ((Nfg_Portion<gRational>*) result )
+	    ->operator()( subvalue )->Copy();
+	}
+	else
+	{
+	  result = 0;
+	}
 
       default:
 	gerr << "GSM Error: attempted to resolve the subvariable of a type\n";
@@ -1097,30 +1064,21 @@ bool GSM::CallFunction( void )
 	    p = ( *_RefTable )( refp->Value() );
 	    switch( p->Type() )
 	    {
-	    case porNFG:
-	      switch( p->SubType() )
-	      {
-	      case porDOUBLE:
-		( (Nfg_Portion<double>*) p )->
-		  Assign( refp->SubValue(), param[ index ]->Copy() );
-		break;
-	      case porRATIONAL:
-		( (Nfg_Portion<gRational>*) p )->
-		  Assign( refp->SubValue(), param[ index ]->Copy() );
-		break;
-	      default:
-		gerr << "GSM Error: unknown Nfg_Portion subtype\n";
-		assert(0);
-	      }
+	    case porNFG_DOUBLE:
+	      ( (Nfg_Portion<double>*) p )->
+		Assign( refp->SubValue(), param[ index ]->Copy() );
 	      break;
-	      delete param[ index ];
-	      
+	    case porNFG_RATIONAL:
+	      ( (Nfg_Portion<gRational>*) p )->
+		Assign( refp->SubValue(), param[ index ]->Copy() );
+	      break;
+
 	    default:
 	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
 	      gerr << "           type that does not support subvariables\n";
-	      delete param[ index ];
 	      result = false;
 	    }
+	    delete param[ index ];
 	  }
 	  else
 	  {
