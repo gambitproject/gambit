@@ -118,7 +118,7 @@
 
 // sections in the defaults file(s)
 #define		SOLN_SECT				"Soln-Defaults"
-
+#define		BSOLN_SHOW_SECT	"Behav-Soln-Show"
 // Different type-dependent values that need to be displayable in the
 // tree window.  These are accessed through the BaseTreeWindow->
 // TreeWindow->ExtensiveShow.  Also used in NodeInspect window.

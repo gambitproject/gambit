@@ -7,7 +7,7 @@
 #include "wxmisc.h"
 #include "wxstatus.h"
 #include "subsolve.h"
-#include "gfunct.h"
+#include "gfunc.h"
 #pragma hdrstop
 #include "efgsolng.h"
 #include "nfgconst.h"
@@ -23,11 +23,11 @@
 #endif   // __GNUG__, __BORLANDC__
 // Need this to return a type dependent empty list if no solutions were generated
 
-gList<BehavProfile<double> > empty_behav_list_d;
-gList<BehavProfile<double> > &EmptyBehavList(double )
+gList<BehavSolution<double> > empty_behav_list_d;
+gList<BehavSolution<double> > &EmptyBehavList(double )
 {return empty_behav_list_d;}
-gList<BehavProfile<gRational> > empty_behav_list_r;
-gList<BehavProfile<gRational> > &EmptyBehavList(gRational )
+gList<BehavSolution<gRational> > empty_behav_list_r;
+gList<BehavSolution<gRational> > &EmptyBehavList(gRational )
 {return empty_behav_list_r;}
 
 void doubles_only(void)
@@ -54,7 +54,7 @@ protected:
 	ExtensiveShowInterf<T> *parent;
 	Bool pick_soln;
 	gList<Node *> subgame_roots;
-	void BaseSelectSolutions(int subg_num,const Efg<T> &ef,gList<BehavProfile<T> > &solns);
+	void BaseSelectSolutions(int subg_num,const Efg<T> &ef,gList<BehavSolution<T> > &solns);
 	void BaseViewNormal(const Nfg<T> &N, NFSupport *&sup);
 public:
 	BaseBySubgameG(ExtensiveShowInterf<T> *parent_,const BaseEfg &ef);
@@ -75,7 +75,7 @@ wxGetResource(SOLN_SECT,"Efg-Interactive-Solns",&pick_soln,"gambit.ini");
 // include the entire extshow.h header.  Thus, ExtensiveShow 's OnMenuCommand
 // must process menu id's > SELECT_SUBGAME_NUM appropriately.
 template <class T>
-void BaseBySubgameG<T>::BaseSelectSolutions(int subg_num,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void BaseBySubgameG<T>::BaseSelectSolutions(int subg_num,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 {
 if (!pick_soln) return;
 parent->SetPickSubgame(subgame_roots[subg_num]);
@@ -127,17 +127,17 @@ TEMPLATE class BaseBySubgameG<gRational>;
 /******************************* ALL THE SPECIFIC ALGORITHMS ****************/
 #define LIAP_PRM_INST
 #include "liapprm.h"
-// Extensive Form Liap
+// Extensive Form Liap... note that it is not implemented for gRationals
 template <class T> class EFLiapBySubgameG:
-						public EFLiapBySubgame<T>,public BaseBySubgameG<T>
+						public EFLiapBySubgame,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 {BaseSelectSolutions(n,ef,solns);}
 public:
 EFLiapBySubgameG(const Efg<T> &E, const EFLiapParams &p,
-			const BehavProfile<T> &s, int max = 0,ExtensiveShowInterf<T> *parent_=0)
-			:EFLiapBySubgame<T>(E,p,s,max),BaseBySubgameG<T>(parent_,E)
+			const BehavSolution<T> &s, int max = 0,ExtensiveShowInterf<T> *parent_=0)
+			:EFLiapBySubgame(E,p,s,max),BaseBySubgameG<T>(parent_,E)
 {Solve();}
 };
 
@@ -148,14 +148,14 @@ EFLiapG<T>::EFLiapG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSol
 { }
 
 template <class T>
-gList<BehavProfile<T> > EFLiapG<T>::Solve(void) const
+gList<BehavSolution<T> > EFLiapG<T>::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
 BehavProfile<T> start(ef);
 start.Centroid();
 EFLiapParams P(status);
-LPS.GetParams(P);
+LPS.GetParams(&P);
 EFLiapBySubgameG<T> M(ef,P,start,LPS.MaxSolns(),parent);
 return M.GetSolutions();
 }
@@ -170,23 +170,24 @@ EFLiapG<gRational>::EFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRationa
 { }
 void EFLiapG<gRational>::SolveSetup(void) const
 {doubles_only();}
-gList<BehavProfile<gRational> > EFLiapG<gRational>::Solve(void) const
+gList<BehavSolution<gRational> > EFLiapG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
 
 TEMPLATE class EFLiapG<gRational>;
-// Normal Form Liap
+
+// Normal Form Liap... note that it is not implemented for gRationals
 template <class T> class NFLiapBySubgameG:
-						public NFLiapBySubgame<T>,public BaseBySubgameG<T>
+						public NFLiapBySubgame,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
 public:
 NFLiapBySubgameG(const Efg<T> &E, const NFLiapParams &p,
-			const BehavProfile<T> &s, int max = 0,ExtensiveShowInterf<T> *parent_=0)
-			:NFLiapBySubgame<T>(E,p,s,max),BaseBySubgameG<T>(parent_,E)
+			const BehavSolution<T> &s, int max = 0,ExtensiveShowInterf<T> *parent_=0)
+			:NFLiapBySubgame(E,p,s,max),BaseBySubgameG<T>(parent_,E)
 {Solve();}
 };
 
@@ -197,14 +198,14 @@ NFLiapG<T>::NFLiapG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSol
 { }
 
 template <class T>
-gList<BehavProfile<T> > NFLiapG<T>::Solve(void) const
+gList<BehavSolution<T> > NFLiapG<T>::Solve(void) const
 {
 LiapParamsSettings LPS;
 wxStatus status(parent->Frame(),"Liap Algorithm");
 BehavProfile<T> start(ef);
 start.Centroid();
 NFLiapParams P(status);
-LPS.GetParams(P);
+LPS.GetParams(&P);
 NFLiapBySubgameG<T> M(ef,P,start,LPS.MaxSolns(),parent);
 return M.GetSolutions();
 }
@@ -219,7 +220,7 @@ NFLiapG<gRational>::NFLiapG(const Efg<gRational> &E,ExtensiveShowInterf<gRationa
 { }
 void NFLiapG<gRational>::SolveSetup(void) const
 {doubles_only();}
-gList<BehavProfile<gRational> > NFLiapG<gRational>::Solve(void) const
+gList<BehavSolution<gRational> > NFLiapG<gRational>::Solve(void) const
 {doubles_only();return empty_behav_list_r;}
 
 TEMPLATE class NFLiapG<gRational>;
@@ -231,7 +232,7 @@ template <class T> class SeqFormBySubgameG:
 													public SeqFormBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 public:
 SeqFormBySubgameG(const Efg<T> &E, const SeqFormParams &P,
@@ -248,7 +249,7 @@ SeqFormG<T>::SeqFormG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveS
 { }
 
 template <class T>
-gList<BehavProfile<T> > SeqFormG<T>::Solve(void) const
+gList<BehavSolution<T> > SeqFormG<T>::Solve(void) const
 {
 wxStatus status(parent->Frame(),"LCP Algorithm");
 SeqFormParamsSettings SFPS;
@@ -272,7 +273,7 @@ template <class T> class LemkeBySubgameG:
 													public LemkeBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -291,7 +292,7 @@ LemkeG<T>::LemkeG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSolut
 { }
 
 template <class T>
-gList<BehavProfile<T> > LemkeG<T>::Solve(void) const
+gList<BehavSolution<T> > LemkeG<T>::Solve(void) const
 {
 wxStatus status(parent->Frame(),"LCP Algorithm");
 if (ef.NumPlayers()!=2)
@@ -322,7 +323,7 @@ template <class T> class PureNashBySubgameG:
 													public PureNashBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -341,7 +342,7 @@ PureNashG<T>::PureNashG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):Extensiv
 { }
 
 template <class T>
-gList<BehavProfile<T> > PureNashG<T>::Solve(void) const
+gList<BehavSolution<T> > PureNashG<T>::Solve(void) const
 {
 PureNashParamsSettings PNPS;
 wxStatus status(parent->Frame(),"EnumPure Algorithm");
@@ -364,7 +365,7 @@ template <class T> class EnumBySubgameG:
 													public EnumBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -384,7 +385,7 @@ EnumG<T>::EnumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSolutio
 { }
 
 template <class T>
-gList<BehavProfile<T> > EnumG<T>::Solve(void) const
+gList<BehavSolution<T> > EnumG<T>::Solve(void) const
 {
 EnumParamsSettings EPS;
 wxEnumStatus status(parent->Frame());
@@ -408,7 +409,7 @@ template <class T> class ZSumBySubgameG:
 													public ZSumBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -428,7 +429,7 @@ ZSumG<T>::ZSumG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveSolutio
 { }
 
 template <class T>
-gList<BehavProfile<T> > ZSumG<T>::Solve(void) const
+gList<BehavSolution<T> > ZSumG<T>::Solve(void) const
 {
 if (ef.NumPlayers() > 2 || !ef.IsConstSum())
 {
@@ -459,7 +460,7 @@ template <class T> class SimpdivBySubgameG:
 													public SimpdivBySubgame<T>,public BaseBySubgameG<T>
 {
 protected:
-void SelectSolutions(int n,const Efg<T> &ef,gList<BehavProfile<T> > &solns)
+void SelectSolutions(int n,const Efg<T> &ef,gList<BehavSolution<T> > &solns)
 { BaseSelectSolutions(n,ef,solns);}
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -478,7 +479,7 @@ SimpdivG<T>::SimpdivG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):ExtensiveS
 { }
 
 template <class T>
-gList<BehavProfile<T> > SimpdivG<T>::Solve(void) const
+gList<BehavSolution<T> > SimpdivG<T>::Solve(void) const
 {
 SimpdivParamsSettings SPS;
 wxStatus status(parent->Frame(),"Simpdiv Algorithm");
@@ -508,7 +509,7 @@ template <class T> class NGobitBySubgameG:
 													public BaseBySubgameG<T>
 {
 private:
-	gList<BehavProfile<T> > solns;
+	gList<BehavSolution<T> > solns;
 protected:
 void ViewNormal(const Nfg<T> &N, NFSupport *&sup)
 {BaseViewNormal(N,sup);}
@@ -516,10 +517,10 @@ public:
 NGobitBySubgameG(const Efg<T> &E,ExtensiveShowInterf<T> *parent_=0):
 													BaseBySubgameG<T>(parent_,E)
 {
-GobitParamsSettings<T> GSPD(parent->Filename());
+GobitParamsSettings GSPD(parent->Filename());
 wxStatus status(parent->Frame(),"Gobit Algorithm");
-NFGobitParams<T> P(status);
-GSPD.GetParams(P);
+NFGobitParams P(status);
+GSPD.GetParams(&P);
 
 Nfg<T> *N = MakeReducedNfg((Efg<T> &)E);
 NFSupport *S=new NFSupport(*N);
@@ -527,21 +528,22 @@ ViewNormal(*N,S);
 
 MixedProfile<T> start(*N,*S);
 start.Centroid();
-NFGobitModule<T> M(*N,P,start);
-M.Gobit(1/*P.nequilib*/);
+long nevals,nits;
+gList<MixedSolution<double> > nfg_solns;
+Gobit(*N,P,start,nfg_solns,nevals,nits);
 GSPD.RunPxi();
 
-for (int i = 1; i <= M.GetSolutions().Length(); i++)
+for (int i = 1; i <= nfg_solns.Length(); i++)
 {
-	BehavProfile<T> bp(E);
-	MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+	BehavSolution<T> bp(E);
+	MixedToBehav(*N, nfg_solns[i], E, bp);
 	solns.Append(bp);
 }
 delete N;
 delete S;
 }
 
-gList<BehavProfile<T> > GetSolutions(void) const {return solns;}
+gList<BehavSolution<T> > GetSolutions(void) const {return solns;}
 };
 
 TEMPLATE class NGobitBySubgameG<double>;
@@ -550,21 +552,21 @@ TEMPLATE class NGobitBySubgameG<double>;
 NGobitG<double>::NGobitG(const Efg<double> &E,ExtensiveShowInterf<double> *parent):ExtensiveSolutionG<double>(E,parent)
 { }
 
-gList<BehavProfile<double> > NGobitG<double>::Solve(void) const
+gList<BehavSolution<double> > NGobitG<double>::Solve(void) const
 {
 NGobitBySubgameG<double> M(ef,parent);
 return M.GetSolutions();
 }
 
 void NGobitG<double>::SolveSetup(void) const
-{GobitSolveParamsDialog<double> GSPD(parent->Frame(),parent->Filename());}
+{GobitSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
 
 
 NGobitG<gRational>::NGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 void NGobitG<gRational>::SolveSetup(void) const
 {doubles_only();}
-gList<BehavProfile<gRational> > NGobitG<gRational>::Solve(void) const
+gList<BehavSolution<gRational> > NGobitG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
 
 TEMPLATE class NGobitG<double>;
@@ -576,29 +578,30 @@ TEMPLATE class NGobitG<gRational>;
 EGobitG<double>::EGobitG(const Efg<double> &E,ExtensiveShowInterf<double> *parent):ExtensiveSolutionG<double>(E,parent)
 { }
 
-gList<BehavProfile<double> > EGobitG<double>::Solve(void) const
+gList<BehavSolution<double> > EGobitG<double>::Solve(void) const
 {
-GobitParamsSettings<double> GSPD(parent->Filename());
+GobitParamsSettings GSPD(parent->Filename());
 wxStatus status(parent->Frame(),"Gobit Algorithm");
 BehavProfile<double> start(ef);
 start.Centroid();
-EFGobitParams<double> P(status);
-GSPD.GetParams(P);
-EFGobitModule<double> M(ef,P,start);
-M.Gobit(1);
+EFGobitParams P(status);
+GSPD.GetParams(&P);
+long nevals,nits;
+gList<BehavSolution<double> > solns;
+Gobit(ef,P,start,solns,nevals,nits);
 GSPD.RunPxi();
-return M.GetSolutions();
+return solns;
 }
 
 void EGobitG<double>::SolveSetup(void) const
-{GobitSolveParamsDialog<double> GSPD(parent->Frame(),parent->Filename());}
+{GobitSolveParamsDialog GSPD(parent->Frame(),parent->Filename());}
 
 
 EGobitG<gRational>::EGobitG(const Efg<gRational> &E,ExtensiveShowInterf<gRational> *parent):ExtensiveSolutionG<gRational>(E,parent)
 { }
 void EGobitG<gRational>::SolveSetup(void) const
 {doubles_only();}
-gList<BehavProfile<gRational> > EGobitG<gRational>::Solve(void) const
+gList<BehavSolution<gRational> > EGobitG<gRational>::Solve(void) const
 {doubles_only();return empty_behav_list_r;}
 
 TEMPLATE class EGobitG<double>;
@@ -648,7 +651,7 @@ GobitAllG<T>::GobitAllG(const Efg<T> &E,ExtensiveShowInterf<T> *parent):Extensiv
 
 
 template <class T>
-gList<BehavProfile<T> > GobitAllG<T>::Solve(void) const
+gList<BehavSolution<T> > GobitAllG<T>::Solve(void) const
 {
 GobitAllBySubgameG<T> M(ef,parent);
 return EmptyBehavList((T)1);;
@@ -664,7 +667,7 @@ GobitAllG<gRational>::GobitAllG(const Efg<gRational> &E,ExtensiveShowInterf<gRat
 { }
 void GobitAllG<gRational>::SolveSetup(void) const
 {doubles_only();}
-gList<BehavProfile<gRational> > GobitAllG<gRational>::Solve(void) const
+gList<BehavSolution<gRational> > GobitAllG<gRational>::Solve(void) const
 {doubles_only(); return empty_behav_list_r;}
 
 TEMPLATE class GobitAllG<gRational>;

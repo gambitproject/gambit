@@ -148,7 +148,7 @@ private:
 	SpreadSheet3D *parent;
 	int 		row_height,default_col_width;
 	int			tw,th;
-  int			num_prec;
+	int			num_prec;
 	gBlock<int> col_width;
 	int			total_height,total_width,real_height,real_width;
 	int			x_scroll,y_scroll;
@@ -176,9 +176,10 @@ public:
 	static void spread_options_dfont_func(wxButton &ob,wxEvent &ev);
 	// Allows to use a previously created settings w/ this parent
 	void SetParent(SpreadSheet3D *_parent) {parent=_parent;}
-	// Inform the class that a new column was added.
-  void SetDimensions(int rows,int cols); // only the col info is used now.
+	// Inform the class that dimensionality has changed.
+	void SetDimensions(int rows,int cols); // only the col info is used now.
 	void AddCol(int col=0) {col_width.Insert(DEFAULT_COL_WIDTH,((col) ? col :col_width.Length()+1));}
+	void DelCol(int col) {col_width.Remove(col);}
 	// Data Access, Get* functions
 		// These functions control the dimentions of each cell i.e. Width X Height
 	int	GetRowHeight(void)	{return ((vert_fit) ? (th+2*TEXT_OFF) : row_height);}
@@ -472,6 +473,8 @@ public:
 	// Destructor
 	~SpreadSheet3D(void)
 	{
+  	Show(FALSE);
+  	if (toolbar) {delete toolbar; toolbar=0;}
 		if (--draw_settings->ref_cnt==0) delete draw_settings;
 		if (--data_settings->ref_cnt==0) delete data_settings;
 	}
@@ -523,7 +526,7 @@ public:
 	void AddCol(int col=0){for(int i=1;i<=levels;i++) data[i].AddCol(col);DrawSettings()->AddCol(col);}
 	void AddLevel(int level=0);
 	void DelRow(int row=0) {for(int i=1;i<=levels;i++) data[i].DelRow(row);}
-	void DelCol(int col=0) {for(int i=1;i<=levels;i++) data[i].DelCol(col);}
+	void DelCol(int col=0) {for(int i=1;i<=levels;i++) data[i].DelCol(col);DrawSettings()->DelCol(col);}
 	void DelLevel(void);
 	// Row/Column labeling
 	void		SetLabelRow(int row,const gString &s,int level=0);

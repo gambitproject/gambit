@@ -3,7 +3,7 @@
 
 #ifndef NFGCONST_H
 #define NFGCONST_H
-// must make sure it none of the menus are a power of two
+// must make sure that none of the menus are a power of two
 #define NFG_SOLVE_SOLVE_MENU				100
 #define NFG_SOLVE_INSPECT_MENU			101
 #define	NFG_SOLVE_REMOVE_MENU				103
@@ -48,4 +48,7 @@
 #define SIMPDIV_HELP						"SimpDiv"
 #define LIAP_HELP								"Liap"
 #define GOBIT_HELP							"Gobit"
+
+// Section names for the defaults file
+#define	MSOLN_SHOW_SECT			"Mixed-Soln-Show"
 #endif

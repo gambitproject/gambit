@@ -5,21 +5,22 @@
 #include "algdlgs.h"
 
 #define DATA_TYPE_LOG 1
-template <class T>
+class EFGobitParams;
+class NFGobitParams;
 class GobitParamsSettings: public virtual PxiParamsSettings
 {
 protected:
-	float minLam, maxLam, delLam, tolOpt, tolBrent;
-	int maxitsOpt,maxitsBrent;
+	float minLam, maxLam, delLam, tol1, tolN;
+	int maxits1,maxitsN;
 	void SaveDefaults(void);
 public:
 	GobitParamsSettings(const char *fn);
 	~GobitParamsSettings();
-	void GetParams(GobitParams<T> &P);
+	void GetParams(EFGobitParams *P);
+	void GetParams(NFGobitParams *P);
 };
 
-template <class T>
-class GobitSolveParamsDialog : public PxiParamsDialog,public GobitParamsSettings<T>
+class GobitSolveParamsDialog : public PxiParamsDialog,public GobitParamsSettings
 {
 public:
 	GobitSolveParamsDialog(wxWindow *parent,const gString filename);
@@ -28,81 +29,73 @@ public:
 
 #ifdef GOBIT_PRM_INST    // instantiate only once
 // Constructor
-template <class T>
-GobitParamsSettings<T>::GobitParamsSettings(const char *fn)
+GobitParamsSettings::GobitParamsSettings(const char *fn)
 												:PxiParamsSettings("gobit",fn)
 {
 wxGetResource(PARAMS_SECTION,"Gobit-minLam",&minLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Gobit-maxLam",&maxLam,defaults_file);
 wxGetResource(PARAMS_SECTION,"Gobit-delLam",&delLam,defaults_file);
-wxGetResource(PARAMS_SECTION,"Func-tolN",&tolOpt,defaults_file);
-wxGetResource(PARAMS_SECTION,"Func-tolBrent",&tolBrent,defaults_file);
-wxGetResource(PARAMS_SECTION,"Func-maxitsBrent",&maxitsBrent,defaults_file);
-wxGetResource(PARAMS_SECTION,"Func-maxitsOpt",&maxitsOpt,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-tolN",&tolN,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-tol1",&tol1,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-maxitsN",&maxitsN,defaults_file);
+wxGetResource(PARAMS_SECTION,"Func-maxits1",&maxits1,defaults_file);
 }
 
 // Save Defaults
-template <class T>
-void GobitParamsSettings<T>::SaveDefaults(void)
+void GobitParamsSettings::SaveDefaults(void)
 {
 wxWriteResource(PARAMS_SECTION,"Gobit-minLam",minLam,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Gobit-maxLam",maxLam,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Gobit-delLam",delLam,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolN",tolOpt,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-tolBrent",tolBrent,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Func-maxitsOpt",maxitsOpt,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tolN",tolN,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-tol1",tol1,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-maxitsN",maxitsN,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Func-maxits1",maxits1,defaults_file);
 }
 
-template <class T>
-GobitParamsSettings<T>::~GobitParamsSettings(void)
+GobitParamsSettings::~GobitParamsSettings(void)
 {SaveDefaults();}
 
-template <class T>
-void GobitParamsSettings<T>::GetParams(GobitParams<T> &P)
+void GobitParamsSettings::GetParams(EFGobitParams *P)
 {
 // Gobit stuff
-P.minLam=minLam;P.maxLam=maxLam;P.delLam=delLam;
-Funct_tolBrent=tolBrent;Funct_maxitsBrent=maxitsBrent;
-Funct_tolN=tolOpt;Funct_maxitsN=maxitsOpt;
+P->minLam=minLam;P->maxLam=maxLam;P->delLam=delLam;
+P->tol1=tol1;P->tolN=tolN;P->maxits1=maxits1;P->maxitsN=maxitsN;
 // Pxi stuff
-P.powLam=PxiType();P.pxifile=PxiFile();
+P->powLam=PxiType();P->pxifile=PxiFile();
 // Output stuff
-P.trace=TraceLevel();P.tracefile=OutFile();
+P->trace=TraceLevel();P->tracefile=OutFile();
 }
 
+void GobitParamsSettings::GetParams(NFGobitParams *P)
+{
+// Gobit stuff
+P->minLam=minLam;P->maxLam=maxLam;P->delLam=delLam;
+P->tol1=tol1;P->tolN=tolN;P->maxits1=maxits1;P->maxitsN=maxitsN;
+// Pxi stuff
+P->powLam=PxiType();P->pxifile=PxiFile();
+// Output stuff
+P->trace=TraceLevel();P->tracefile=OutFile();
+}
 //******************************** Constructor ************************
-template <class T>
-GobitSolveParamsDialog<T>::GobitSolveParamsDialog(wxWindow *parent,const gString filename)
+GobitSolveParamsDialog::GobitSolveParamsDialog(wxWindow *parent,const gString filename)
 												:PxiParamsDialog("gobit","Gobit Params",filename,parent,GOBIT_HELP),
-													GobitParamsSettings<T>(filename),PxiParamsSettings("gobit",filename)
+													GobitParamsSettings(filename),PxiParamsSettings("gobit",filename)
 {
 Form()->Add(wxMakeFormFloat("minLam",&minLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("maxLam",&maxLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("delLam",&delLam,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormFloat("Tolerance n-D",&tolOpt,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-Form()->Add(wxMakeFormFloat("Tolerance 1-D",&tolBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("Tolerance n-D",&tolN,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormFloat("Tolerance 1-D",&tol1,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormShort("Iterations n-D",&maxitsOpt,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
-Form()->Add(wxMakeFormShort("Iterations 1-D",&maxitsBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormShort("Iterations n-D",&maxitsN,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
+Form()->Add(wxMakeFormShort("Iterations 1-D",&maxits1,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 // Now add the basic stuff
 MakePxiFields();
 MakeOutputFields();
 Go();
 }
-
-#ifdef __GNUG__
-	#define TEMPLATE template
-#elif defined __BORLANDC__
-	#pragma option -Jgd
-	#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
-TEMPLATE class GobitSolveParamsDialog<double> ;
-TEMPLATE class GobitParamsSettings<double> ;
-#ifdef __BORLANDC__
-	#pragma option -Jgx
-#endif
 
 #endif
 

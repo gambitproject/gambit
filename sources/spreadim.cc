@@ -1,6 +1,6 @@
 // File: spreadim.cc -- template instantiations for classes that for some
 // reason did not fit anywhere.
-// $Id$
+// @(#)spreadim.cc	1.11 5/14/96
 #include "wx.h"
 #include "wxmisc.h"
 #pragma		hdr_stop
@@ -30,6 +30,10 @@ class BaseExtSolnShow;
 TEMPLATE class gList<BaseExtSolnShow *>;
 TEMPLATE class gNode<BaseExtSolnShow *>;
 
+class BaseNormSolnShow;
+TEMPLATE class gNode<BaseNormSolnShow *>;
+TEMPLATE class gList<BaseNormSolnShow *>;
+
 class NFSupport;
 TEMPLATE class gList<NFSupport *>;
 TEMPLATE class gNode<NFSupport *>;
@@ -38,14 +42,6 @@ class EFSupport;
 TEMPLATE class gList<EFSupport *>;
 TEMPLATE class gNode<EFSupport *>;
 
-
-template <class T> class SolnShow;
-TEMPLATE class gNode<SolnShow<double> *>;
-TEMPLATE class gList<SolnShow<double> *>;
-#ifdef GRATIONAL
-	TEMPLATE class gNode<SolnShow<gRational> *>;
-	TEMPLATE class gList<SolnShow<gRational> *>;
-#endif
 
 #include "grarray.imp"
 TEMPLATE class gRectArray<SpreadDataCell> ;

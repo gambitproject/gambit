@@ -1,7 +1,7 @@
 //*************************************************************************
 //* Treewin.cc: This file contains the type-specific (templated) portion of
 //* the extensive form rendering code.
-// $Id$
+// @(#)treewin.cc	1.31 6/28/96
 //
 #pragma hdrstop
 #include "wx.h"

@@ -1,7 +1,7 @@
 //
 // FILE: gambit.cc -- Main program for Gambit GUI
 //
-// $Id$
+// @(#)gambit.cc	1.35 6/18/96
 //
 #include <assert.h>
 #include <string.h>
@@ -174,11 +174,13 @@ void GambitToolBar::OnMouseEnter(int tool)
 //---------------------------------------------------------------------
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
+extern int   memory_trace(int warnonly = 0);	// activate tracing of mem blocks
 
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 wxFrame *GambitApp::OnInit(void)
 {
+memory_trace(1);
 // First check if we have a current settings file (gambit.ini).  If not, exit!
 int ver;
 wxGetResource("Gambit","Gambit-Version",&ver,"gambit.ini");
@@ -302,10 +304,11 @@ extern void wxFlushResources(void);
 
 Bool GambitFrame::OnClose()
 {
+Show(FALSE);
 #ifdef wx_x
 	wxFlushResources();
 #endif
-	wxKillHelp();
-	wout->OnClose();werr->OnClose();
-	return TRUE;
+wxKillHelp();
+wout->OnClose();werr->OnClose();
+return TRUE;
 }
