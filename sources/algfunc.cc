@@ -583,9 +583,10 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   const Nfg *N = &S.Game();
 
   ZSumParams params;
-  params.precision = ((PrecisionPortion *) param[1])->Value();
-  params.tracefile = &((OutputPortion *) param[4])->Value();
-  params.trace = ((IntPortion *) param[5])->Value();
+  params.stopAfter = ((IntPortion *) param[1])->Value();
+  params.precision = ((PrecisionPortion *) param[2])->Value();
+  params.tracefile = &((OutputPortion *) param[5])->Value();
+  params.trace = ((IntPortion *) param[6])->Value();
 
   if (N->NumPlayers() > 2 || !IsConstSum(*N))
 	  return new ErrorPortion("Only valid for two-person zero-sum games");
@@ -596,8 +597,8 @@ static Portion *GSM_Lp_Nfg(Portion **param)
   double time;
   int npivots;
   ZSum(S, params, values, solutions, npivots, time);
-  ((IntPortion *) param[2])->Value() = npivots;
-  ((NumberPortion *) param[3])->Value() = time;
+  ((IntPortion *) param[3])->Value() = npivots;
+  ((NumberPortion *) param[4])->Value() = time;
   return new Mixed_ListPortion(solutions);
 }
 
@@ -668,9 +669,10 @@ static Portion *GSM_Lp_Efg(Portion **param)
 
   if (((BoolPortion *) param[1])->Value())   {
     ZSumParams params;
-    params.precision = ((PrecisionPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((IntPortion *) param[6])->Value();
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
 
     gArray<gNumber> values(support.Game().Parameters()->Dmnsn());
     for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
@@ -678,23 +680,24 @@ static Portion *GSM_Lp_Efg(Portion **param)
     double time;
     int npivots;
     ZSum(support, params, values, solutions, npivots, time);
-    ((IntPortion *) param[3])->Value() = npivots;
-    ((NumberPortion *) param[4])->Value() = time;
+    ((IntPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[5])->Value() = time;
     return new Behav_ListPortion(solutions);
   }
   else  {
     CSSeqFormParams params;
-    params.precision = ((PrecisionPortion *) param[2])->Value();
-    params.tracefile = &((OutputPortion *) param[5])->Value();
-    params.trace = ((IntPortion *) param[6])->Value();
+    params.stopAfter = ((IntPortion *) param[2])->Value();
+    params.precision = ((PrecisionPortion *) param[3])->Value();
+    params.tracefile = &((OutputPortion *) param[6])->Value();
+    params.trace = ((IntPortion *) param[7])->Value();
 
     gList<BehavSolution> solutions;
     gArray<gNumber> values(E.Parameters()->Dmnsn());
     double time;
     int npivots;
     CSSeqForm(support, values, params, solutions, npivots, time);
-    ((IntPortion *) param[3])->Value() = npivots;
-    ((NumberPortion *) param[4])->Value() = time;
+    ((IntPortion *) param[4])->Value() = npivots;
+    ((NumberPortion *) param[5])->Value() = time;
     return new Behav_ListPortion(solutions);
   }
 }
@@ -1158,35 +1161,39 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("LpSolve", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Lp_Nfg, 
-				       PortionSpec(porMIXED, 1), 6));
+				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNFSUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("stopAfter", porINTEGER,
+					    new IntPortion(1)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("nPivots", porINTEGER,
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("nPivots", porINTEGER,
 					    new IntPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputPortion(gnull),
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(0, 6, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
 
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Lp_Efg, 
-				       PortionSpec(porBEHAV, 1), 7));
+				       PortionSpec(porBEHAV, 1), 8));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("asNfg", porBOOL,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("precision", porPRECISION,
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("stopAfter", porINTEGER,
+					    new IntPortion(1)));
+  FuncObj->SetParamInfo(1, 3, ParamInfoType("precision", porPRECISION,
               new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("nPivots", porINTEGER,
+  FuncObj->SetParamInfo(1, 4, ParamInfoType("nPivots", porINTEGER,
 					    new IntPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 5, ParamInfoType("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 5, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 6, ParamInfoType("traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(1, 7, ParamInfoType("traceLevel", porINTEGER,
 					    new IntPortion(0)));
 
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Lp_List, 
