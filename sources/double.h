@@ -87,9 +87,9 @@ public:
 // The following are facilities that are required of all arithmetic types.
 // For other types they are given in gmisc.h
 
-class gString;
-gString         ToString(gDouble);
-gDouble         TOgDouble(const gString &);
+class gText;
+gText         ToText(gDouble);
+gDouble         TOgDouble(const gText &);
 
 #endif
 

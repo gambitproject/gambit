@@ -228,22 +228,22 @@ gDouble pow(const gDouble& x, const gDouble& y)
 }
 
 #include <stdio.h>
-#include "gstring.h"
+#include "gtext.h"
 
 
 #define MYGCONVERT_BUFFER_LENGTH     64
 char mygconvert_buffer[MYGCONVERT_BUFFER_LENGTH];
 int myprecision = 2;
 
-gString ToString(gDouble d)
+gText ToText(gDouble d)
 {
   sprintf(mygconvert_buffer, "%.*f", myprecision, d.ToDouble());
-  return gString(mygconvert_buffer);
+  return gText(mygconvert_buffer);
 }
 
 // conversions from strings to numbers
 
-gDouble TOgDouble(const gString &s)
+gDouble TOgDouble(const gText &s)
 { 
   double d = strtod(s, NULL);
   gDouble answer(d);
