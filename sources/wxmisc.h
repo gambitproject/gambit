@@ -171,8 +171,9 @@ int wxListFindString(wxList *l, char *s);
 
 // Returns a wxStringList containing num strings representing integers
 // from 1 to n (i.e. "1", "2", .."n").  If l is NULL, a new list is created
-// otherwise, the nums are appended to l.
-wxStringList* wxStringListInts(int num, wxStringList *l = 0);
+// otherwise, the nums are appended to l.  If "start" is supplied, it
+// starts from that value.
+wxStringList* wxStringListInts(int num, wxStringList *l = 0, int start = 1);
 
 // Converts a font into a string format that can be used to save it in a data file
 char *wxFontToString(wxFont *f);

@@ -39,13 +39,16 @@ int FindIntArray(int *array, int num, int what)
 }
 
 
-// Returns an wxStringList w/ string reps for integers 1..n
-wxStringList* wxStringListInts(int num, wxStringList *l)
+// Returns a wxStringList with string representations
+// for integers 1..n, or m..n if the start value is supplied.
+// It creates a new list if l == NULL; otherwise it appends to
+// the list supplied.
+wxStringList* wxStringListInts(int num, wxStringList *l, int start)
 {
     wxStringList *tmp = (l) ? l : new wxStringList;
     char tmp_str[10];
 
-    for (int i = 1; i <= num; i++)
+    for (int i = start; i <= num; i++)
     {
         sprintf(tmp_str, "%d", i);
         tmp->Add(tmp_str);
@@ -920,9 +923,9 @@ gGetTextCanvas::gGetTextCanvas(gGetTextFrame *parent_, const gText s0):
 
 void gGetTextCanvas::OnChar(wxKeyEvent &ev)
 {
-	float h;
-	int cur_w, cur_h;
-	
+    float h;
+    int cur_w, cur_h;
+    
     switch(ev.KeyCode())
     {
     case WXK_ESCAPE: 
