@@ -74,7 +74,7 @@ static void efgEnumPureSolve(const EFSupport &p_support,
       p_solutions[index].SetIsNash((isPerfectRecall) ? triTRUE : triUNKNOWN);
     }
     contNumber++;
-  }  while (p_solutions.Length() <= p_stopAfter &&
+  }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&
 	    citer.NextContingency());
 }
 

@@ -56,7 +56,7 @@ void FindPureNash(const NFSupport &p_support, int p_stopAfter,
 	p_solutions[index].SetIsNash(triFALSE);
     }
     contNumber++;
-  }  while ((p_stopAfter == 0 || p_solutions.Length() <= p_stopAfter) &&
+  }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&
 	    citer.NextContingency());
 }
 
