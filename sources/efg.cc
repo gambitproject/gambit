@@ -791,6 +791,18 @@ void BaseEfg::FindSubgames(Node *n)
   }
 }
 
+void BaseEfg::UnmarkSubgames(Node *n)
+{
+  if (n->NumChildren() == 0)   return;
+
+  for (int i = 1; i <= n->NumChildren(); i++)
+    UnmarkSubgames(n->GetChild(i));
+  
+  if (n->gameroot == n && n->parent)  {
+    n->gameroot = 0;
+    MarkSubgame(n, n->parent->gameroot);
+  }
+}
 
 
 //========================================================================

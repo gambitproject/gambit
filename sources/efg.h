@@ -134,7 +134,8 @@ protected:
 
     // Find all subgames in the subtree rooted at 'n'
     void FindSubgames(Node *n);
-    bool IsLegalSubgame(Node *);
+    void UnmarkSubgames(Node *n);
+    bool IsLegalSubgame(Node *n);
 
     bool DefineSubgame(Node *n);
     void RemoveSubgame(Node *n);

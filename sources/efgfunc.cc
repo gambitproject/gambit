@@ -163,7 +163,7 @@ Portion *GSM_DeleteOutcome(Portion **param)
   return new BoolValPortion(true);
 }
 
-Portion *GSM_UnmarkSubgame(Portion **param)
+Portion *GSM_UnmarkThisSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
@@ -197,7 +197,7 @@ Portion *GSM_DetachOutcome(Portion **param)
   return por;
 }
 
-Portion *GSM_MarkAllSubgamesEfg(Portion **param)
+Portion *GSM_MarkSubgamesEfg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
@@ -212,11 +212,41 @@ Portion *GSM_MarkAllSubgamesEfg(Portion **param)
   return por;
 }
 
-Portion *GSM_MarkAllSubgamesNode(Portion **param)
+Portion *GSM_MarkSubgamesNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
   n->BelongsTo()->FindSubgames(n);
+  
+  gList<Node *> roots;
+  SubgameRoots(*n->BelongsTo(), roots);
+  
+  Portion *por = ArrayToList(roots);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_UnmarkSubgamesEfg(Portion **param)
+{
+  BaseEfg &E = *((EfgPortion*) param[0])->Value();
+
+  E.UnmarkSubgames(E.RootNode());
+
+  gList<Node *> roots;
+  SubgameRoots(E, roots);
+
+  Portion *por = ArrayToList(roots);
+  por->SetOwner(param[0]->Original());
+  por->AddDependency();
+  return por;
+}
+
+Portion *GSM_UnmarkSubgamesNode(Portion **param)
+{
+  Node *n = ((NodePortion *) param[0])->Value();
+
+  n->BelongsTo()->UnmarkSubgames(n);
   
   gList<Node *> roots;
   SubgameRoots(*n->BelongsTo(), roots);
@@ -401,13 +431,11 @@ Portion *GSM_NewPlayer(Portion **param)
   return por;
 }
 
-Portion *GSM_MarkSubgame(Portion **param)
+Portion *GSM_MarkThisSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  n->BelongsTo()->DefineSubgame(n);
-
-  return new NodeValPortion(n);
+  return new BoolValPortion(n->BelongsTo()->DefineSubgame(n));
 }
 
 Portion *GSM_RandomEfgFloat(Portion **param)
@@ -1874,9 +1902,9 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_DeleteOutcome, 0, "outcome", porOUTCOME);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("UnmarkSubgame");
-  FuncObj->SetFuncInfo(GSM_UnmarkSubgame, 1);
-  FuncObj->SetParamInfo(GSM_UnmarkSubgame, 0, "node", porNODE);
+  FuncObj = new FuncDescObj("UnmarkThisSubgame");
+  FuncObj->SetFuncInfo(GSM_UnmarkThisSubgame, 1);
+  FuncObj->SetParamInfo(GSM_UnmarkThisSubgame, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("DeleteTree");
@@ -1889,13 +1917,22 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_DetachOutcome, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("MarkAllSubgames");
-  FuncObj->SetFuncInfo(GSM_MarkAllSubgamesEfg, 1);
-  FuncObj->SetParamInfo(GSM_MarkAllSubgamesEfg, 0, "efg", porEFG,
+  FuncObj = new FuncDescObj("MarkSubgames");
+  FuncObj->SetFuncInfo(GSM_MarkSubgamesEfg, 1);
+  FuncObj->SetParamInfo(GSM_MarkSubgamesEfg, 0, "efg", porEFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_MarkAllSubgamesNode, 1);
-  FuncObj->SetParamInfo(GSM_MarkAllSubgamesNode, 0, "node", porNODE);
+  FuncObj->SetFuncInfo(GSM_MarkSubgamesNode, 1);
+  FuncObj->SetParamInfo(GSM_MarkSubgamesNode, 0, "node", porNODE);
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("UnmarkSubgames");
+  FuncObj->SetFuncInfo(GSM_UnmarkSubgamesEfg, 1);
+  FuncObj->SetParamInfo(GSM_UnmarkSubgamesEfg, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_UnmarkSubgamesNode, 1);
+  FuncObj->SetParamInfo(GSM_UnmarkSubgamesNode, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("HasOutcome");
@@ -1975,9 +2012,9 @@ void Init_efgfunc(GSM *gsm)
 			new TextValPortion(""));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("MarkSubgame");
-  FuncObj->SetFuncInfo(GSM_MarkSubgame, 1);
-  FuncObj->SetParamInfo(GSM_MarkSubgame, 0, "node", porNODE);
+  FuncObj = new FuncDescObj("MarkThisSubgame");
+  FuncObj->SetFuncInfo(GSM_MarkThisSubgame, 1);
+  FuncObj->SetParamInfo(GSM_MarkThisSubgame, 0, "node", porNODE);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RandomEfg");
