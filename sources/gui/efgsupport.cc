@@ -54,7 +54,7 @@ public:
 
 void gbtCmdAddAction::Do(gbtGameDocument *p_doc)
 {
-  p_doc->GetEfgSupportList().GetCurrent().AddAction(m_action);
+  p_doc->GetEfgSupportList().GetCurrent()->AddAction(m_action);
 }
 
 //==========================================================================
@@ -80,7 +80,7 @@ public:
 
 void gbtCmdRemoveAction::Do(gbtGameDocument *p_doc)
 {
-  p_doc->GetEfgSupportList().GetCurrent().RemoveAction(m_action);
+  p_doc->GetEfgSupportList().GetCurrent()->RemoveAction(m_action);
 }
 
 //==========================================================================
@@ -125,9 +125,9 @@ gbtEfgSupportWidget::gbtEfgSupportWidget(wxWindow *p_parent,
 void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
 {
   DeleteAllItems();
-  AddRoot(wxString::Format(wxT("%s"), (char *) p_support.GetLabel()));
-  for (int pl = 1; pl <= p_support.NumPlayers(); pl++) {
-    gbtGamePlayer player = p_support.GetPlayer(pl);
+  AddRoot(wxString::Format(wxT("%s"), (char *) p_support->GetLabel()));
+  for (int pl = 1; pl <= p_support->NumPlayers(); pl++) {
+    gbtGamePlayer player = p_support->GetPlayer(pl);
 
     wxTreeItemId id = AppendItem(GetRootItem(),
 				 wxString::Format(wxT("%s"),
@@ -141,7 +141,7 @@ void gbtEfgSupportWidget::SetSupport(const gbtEfgSupport &p_support)
 	gbtGameAction action = infoset->GetAction(act);
 	wxTreeItemId actID = AppendItem(isetID,
 					wxString::Format(wxT("%s"), (char *) action->GetLabel()));
-	if (p_support.Contains(action)) {
+	if (p_support->Contains(action)) {
 	  SetItemTextColour(actID, *wxBLACK);
 	}
 	else {
@@ -259,7 +259,7 @@ void gbtEfgSupportWindow::OnUpdate(void)
     const gbtEfgSupport &support = supports.Get(i);
     m_supportList->Append(wxString::Format(wxT("%s"),
 					   (char *)
-					   (ToText(i) + ": " + support.GetLabel())));
+					   (ToText(i) + ": " + support->GetLabel())));
   }
 
   int supportIndex = supports.GetCurrentIndex();
@@ -307,8 +307,8 @@ void gbtEfgSupportWindow::ToggleAction(wxTreeItemId p_id)
   }
 
   const gbtEfgSupport &support = m_doc->GetEfgSupportList().GetCurrent();
-  if (support.Contains(action) &&
-      support.NumActions(action->GetInfoset()) > 1) {
+  if (support->Contains(action) &&
+      support->NumActions(action->GetInfoset()) > 1) {
     m_doc->Submit(new gbtCmdRemoveAction(action));
   }
   else {

@@ -60,15 +60,15 @@ bool gbtAllActionIterator::operator==(const gbtAllActionIterator &p_iter) const
 
 bool gbtAllActionIterator::GoToNext(void)
 {
-  while (iset > m_support.GetPlayer(pl)->NumInfosets()) {
+  while (iset > m_support->GetPlayer(pl)->NumInfosets()) {
     pl++;
     iset = 1;
-    if (pl > m_support.NumPlayers()) {
+    if (pl > m_support->NumPlayers()) {
       return false;
     }
   }
 
-  if (act != m_support.NumActions(pl,iset)) {
+  if (act != m_support->NumActions(pl,iset)) {
     act++; 
     return true;
   }
@@ -76,9 +76,9 @@ bool gbtAllActionIterator::GoToNext(void)
   int temppl = pl;
   int tempiset = iset + 1;
 
-  while (temppl <= m_support.NumPlayers()) {
-    while (tempiset <= m_support.GetPlayer(temppl)->NumInfosets()) {
-      if (m_support.NumActions(temppl,tempiset) > 0) {
+  while (temppl <= m_support->NumPlayers()) {
+    while (tempiset <= m_support->GetPlayer(temppl)->NumInfosets()) {
+      if (m_support->NumActions(temppl,tempiset) > 0) {
 	pl = temppl;
 	iset = tempiset;
 	act = 1;
@@ -100,24 +100,24 @@ bool gbtAllActionIterator::GoToNext(void)
 
 gbtGameAction gbtAllActionIterator::GetAction(void) const
 {
-  return m_support.GetAction(pl, iset, act);
+  return m_support->GetAction(pl, iset, act);
 }
 
 gbtGameInfoset gbtAllActionIterator::GetInfoset(void) const
 {
-  return m_support.GetPlayer(pl)->GetInfoset(iset);
+  return m_support->GetPlayer(pl)->GetInfoset(iset);
 }
 
 gbtGamePlayer gbtAllActionIterator::GetPlayer(void) const
 {
-  return m_support.GetPlayer(pl);
+  return m_support->GetPlayer(pl);
 }
 
 bool gbtAllActionIterator::IsLast(void) const
 {
-  return (pl == m_support.NumPlayers() &&
-	  iset == m_support.GetPlayer(pl)->NumInfosets() &&
-	  act == m_support.NumActions(pl, iset));
+  return (pl == m_support->NumPlayers() &&
+	  iset == m_support->GetPlayer(pl)->NumInfosets() &&
+	  act == m_support->NumActions(pl, iset));
 }
 
 bool gbtAllActionIterator::IsSubsequentTo(const gbtGameAction &p_action) const
@@ -157,7 +157,7 @@ gbtActionIterator::gbtActionIterator(const gbtEfgSupport &p_support,
 { }
 
 gbtGameAction gbtActionIterator::operator*(void) const
-{ return m_support.GetAction(pl, iset, act); }
+{ return m_support->GetAction(pl, iset, act); }
 
 gbtActionIterator &gbtActionIterator::operator++(int)
 { act++; return *this; }
@@ -166,4 +166,4 @@ bool gbtActionIterator::Begin(void)
 { act = 1; return true; }
 
 bool gbtActionIterator::End(void) const
-{ return act > m_support.NumActions(pl, iset); }
+{ return act > m_support->NumActions(pl, iset); }

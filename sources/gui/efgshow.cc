@@ -1243,15 +1243,15 @@ void gbtEfgFrame::OnToolsDominance(wxCommandEvent &)
 
       while (true) {
 	gbtNullOutput gnull;
-	newSupport = support.Undominated(dialog.DomStrong(),
-					 dialog.DomConditional(),
-					 dialog.Players(), gnull, status);
+	newSupport = support->Undominated(dialog.DomStrong(),
+					  dialog.DomConditional(),
+					  dialog.Players(), gnull, status);
 
 	if (newSupport == support) {
 	  break;
 	}
 	else {
-	  newSupport.SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
+	  newSupport->SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
 	  m_doc->Submit(new gbtCmdAddEfgSupport(newSupport));
 	  support = newSupport;
 	}
@@ -1375,7 +1375,7 @@ void gbtEfgFrame::OnHelpAbout(wxCommandEvent &)
 void gbtEfgFrame::OnSupportDuplicate(wxCommandEvent &)
 {
   gbtEfgSupport newSupport(m_doc->GetEfgSupportList().GetCurrent());
-  newSupport.SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
+  newSupport->SetLabel(m_doc->GetEfgSupportList().GenerateUniqueLabel());
   m_doc->Submit(new gbtCmdAddEfgSupport(newSupport));
 }
 

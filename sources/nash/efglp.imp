@@ -40,16 +40,16 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
 {
   gbtBasicFeasibleSolution<T> cbfs((T) 0);
   
-  ns1 = p_support.NumSequences(1);
-  ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetPlayer(1)->NumInfosets()+1;  
-  ni2 = p_support.GetPlayer(2)->NumInfosets()+1; 
-  isets1 = p_support.ReachableInfosets(p_support.GetPlayer(1));
-  isets2 = p_support.ReachableInfosets(p_support.GetPlayer(2)); 
+  ns1 = p_support->NumSequences(1);
+  ns2 = p_support->NumSequences(2);
+  ni1 = p_support->GetPlayer(1)->NumInfosets()+1;  
+  ni2 = p_support->GetPlayer(2)->NumInfosets()+1; 
+  isets1 = p_support->ReachableInfosets(p_support->GetPlayer(1));
+  isets2 = p_support->ReachableInfosets(p_support->GetPlayer(2)); 
 
-  if (p_support.NumPlayers() != 2 ||
-      !p_support.IsConstSum() ||
-      !p_support.IsPerfectRecall()) {
+  if (p_support->NumPlayers() != 2 ||
+      !p_support->IsConstSum() ||
+      !p_support->IsPerfectRecall()) {
     return gbtList<BehavSolution>();
   }
   
@@ -59,12 +59,12 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
   gbtVector<T> b(1,ns1+ni2);
   gbtVector<T> c(1,ns2+ni1);
 
-  maxpay = p_support.MaxPayoff() + gbtNumber(1);
-  minpay = p_support.MinPayoff() - gbtNumber(1);
+  maxpay = p_support->MaxPayoff() + gbtNumber(1);
+  minpay = p_support->MinPayoff() - gbtNumber(1);
 
   A = (T)0;
   T prob = (T)1;
-  FillTableau(p_support, A, p_support.GetRoot(),prob,1,1,0,0);
+  FillTableau(p_support, A, p_support->GetRoot(),prob,1,1,0,0);
   A(1,ns2+1) = -(T)1;
   A(ns1+1,1) = (T)1;
 
@@ -119,8 +119,8 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_suppo
     inf= isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets2[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support->NumActions(isets2[i]); 
+      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(s1)) {
 	  if(sol(s1)>eps) {
@@ -130,15 +130,15 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_suppo
 	    }
 	  } 
 	} 
-	GetProfile(p_support,v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetId()),snew+i,s2);
+	GetProfile(p_support,v,sol,n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),snew+i,s2);
       }
     }
     if(pl==1) {
     inf= isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<inf;i++)
-	snew+=p_support.NumActions(isets1[i]); 
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+	snew+=p_support->NumActions(isets1[i]); 
+      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
 	v(pl,inf,i) = (T)0;
 	if(sol.IsDefined(-s2)) {
 	  if(sol(-s2)>eps) {
@@ -148,7 +148,7 @@ template <class T> void gbtEfgNashLp<T>::GetProfile(const gbtEfgSupport &p_suppo
 	    }
 	  } 
 	} 
-	GetProfile(p_support,v,sol,n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetId()),s1,snew+i);
+	GetProfile(p_support,v,sol,n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),s1,snew+i);
       }
     }
   }
@@ -177,22 +177,22 @@ void gbtEfgNashLp<T>::FillTableau(const gbtEfgSupport &p_support,
       i1=isets1.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i1;i++)
-	snew+=p_support.NumActions(isets1[i]);
+	snew+=p_support->NumActions(isets1[i]);
       A(s1,ns2+i1+1) = (T) +1;
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
 	A(snew+i,ns2+i1+1) = (T) -1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetId()),prob,snew+i,s2,i1,i2);
+	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,snew+i,s2,i1,i2);
       }
     }
     if(pl==2) {
       i2=isets2.Find(n->GetInfoset());
       snew=1;
       for(i=1;i<i2;i++)
-	snew+=p_support.NumActions(isets2[i]);
+	snew+=p_support->NumActions(isets2[i]);
       A(ns1+i2+1,s2) = (T) -1;
-      for(i=1;i<=p_support.NumActions(n->GetInfoset());i++) {
+      for(i=1;i<=p_support->NumActions(n->GetInfoset());i++) {
 	A(ns1+i2+1,snew+i) = (T) +1;
-	FillTableau(p_support, A, n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetId()),prob,s1,snew+i,i1,i2);
+	FillTableau(p_support, A, n->GetChild(p_support->GetAction(n->GetInfoset(), i)->GetId()),prob,s1,snew+i,i1,i2);
       }
     }
   }
@@ -203,9 +203,9 @@ void gbtEfgNashLp<T>::GetSolutions(const gbtEfgSupport &p_support,
 				   gbtList<BehavSolution> &solutions) const
 {
   for (int i = 1; i <= List.Length(); i++)    {
-    gbtBehavProfile<T> profile = p_support.NewBehavProfile((T) 0);
+    gbtBehavProfile<T> profile = p_support->NewBehavProfile((T) 0);
     GetProfile(p_support, profile->GetDPVector(), List[i],
-	       p_support.GetRoot(), 1, 1);
+	       p_support->GetRoot(), 1, 1);
     solutions.Append(BehavSolution(profile, "Lp[EFG]"));
   }
 

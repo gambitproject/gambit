@@ -497,7 +497,7 @@ int gbtEfgLayout::LayoutSubtree(const gbtGameNode &p_node,
       }
 
       if (!p_node->GetPlayer()->IsChance() &&
-	  !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
+	  !p_support->Contains(p_node->GetInfoset()->GetAction(i))) {
 	m_nodeList[p_node->GetChild(i)->GetId()]->SetInSupport(false);
       }
     }
@@ -632,7 +632,7 @@ void gbtEfgLayout::FillInfosetTable(const gbtGameNode &n,
     for (int i = 1; i <= n->NumChildren(); i++) {
       bool in_sup = true;
       if (n->GetPlayer()->GetId()) {
-	in_sup = cur_sup.Contains(n->GetInfoset()->GetAction(i));
+	in_sup = cur_sup->Contains(n->GetInfoset()->GetAction(i));
       }
             
       if (in_sup || !prefs.RootReachable()) {

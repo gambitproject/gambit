@@ -769,7 +769,7 @@ gbtGameOutcome gbtGameBase::GetOutcome(int p_index) const
 
 gbtEfgSupport gbtGameBase::NewEfgSupport(void) const
 {
-  return gbtEfgSupport(gbtGame(const_cast<gbtGameBase *>(this)));
+  return new gbtEfgSupportBase(gbtGame(const_cast<gbtGameBase *>(this)));
 }
 
 bool gbtGameBase::IsConstSum(void) const

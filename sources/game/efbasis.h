@@ -30,6 +30,7 @@
 #include "game/game.h"
 #include "game/efgsupport.h"
 
+#ifdef UNUSED
 class gbtGameNodeSet;
 
 class gbtEfgBasis : public gbtEfgSupport {
@@ -85,5 +86,6 @@ public:
 };
 
 gbtOutput &operator<<(gbtOutput &f, const gbtEfgBasis &);
+#endif // UNUSED
 
 #endif // EFBASIS_H

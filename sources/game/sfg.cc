@@ -38,15 +38,15 @@
 
 
 gbtSfgGame::gbtSfgGame(const gbtEfgSupport &S)
-  : m_efg(S.GetTree()), efsupp(S), seq(m_efg->NumPlayers()),
-    isetFlag(S.NumInfosets()),
-    isetRow(S.NumInfosets()), infosets(m_efg->NumPlayers())
+  : m_efg(S->GetTree()), efsupp(S), seq(m_efg->NumPlayers()),
+    isetFlag(S->NumInfosets()),
+    isetRow(S->NumInfosets()), infosets(m_efg->NumPlayers())
 { 
   int i;
   gbtArray<gbtGameInfoset> zero(m_efg->NumPlayers());
   gbtArray<int> one(m_efg->NumPlayers());
 
-  gbtEfgSupport support(m_efg);
+  gbtEfgSupport support = m_efg->NewEfgSupport();
 
   for(i=1;i<=m_efg->NumPlayers();i++) {
     seq[i]=1;
@@ -134,7 +134,7 @@ gbtSfgGame::MakeSequenceForm(const gbtGameNode &n, gbtNumber prob,gbtArray<int>s
       snew[pl]=1;
       for(i=1;i<isetnum;i++)
 	if(isetRow(pl,i)) 
-	  snew[pl]+=efsupp.NumActions(pl,i);
+	  snew[pl]+=efsupp->NumActions(pl,i);
 
       (*(*E)[pl])(isetRow(pl,isetnum),seq[pl]) = (gbtNumber)1;
       gbtSfgSequence *myparent(parent[pl]);
@@ -145,7 +145,7 @@ gbtSfgGame::MakeSequenceForm(const gbtGameNode &n, gbtNumber prob,gbtArray<int>s
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+	if(efsupp->Contains(n->GetInfoset()->GetAction(i))) {
 	  snew[pl]+=1;
 	  if(flag) {
 	    gbtSfgSequence* child;
@@ -186,7 +186,7 @@ void gbtSfgGame::GetSequenceDims(const gbtGameNode &n)
 	flag =true;
       }
       for(i=1;i<=n->NumChildren();i++) {
-	if(efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+	if(efsupp->Contains(n->GetInfoset()->GetAction(i))) {
 	  if(flag) {
 	    seq[pl]++;
 	  }
@@ -239,7 +239,7 @@ int gbtSfgGame::InfosetRowNumber(int pl, int j) const
 int gbtSfgGame::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
-  return efsupp.GetIndex(GetAction(pl,j));
+  return efsupp->GetIndex(GetAction(pl,j));
 }
 
 gbtGameInfoset gbtSfgGame::GetInfoset(int pl, int j) const 
@@ -256,7 +256,7 @@ gbtGameAction gbtSfgGame::GetAction(int pl, int j) const
 
 gbtBehavProfile<gbtNumber> gbtSfgGame::ToBehav(const gbtPVector<double> &x) const
 {
-  gbtBehavProfile<gbtNumber> b = efsupp.NewBehavProfile(gbtNumber(0));
+  gbtBehavProfile<gbtNumber> b = efsupp->NewBehavProfile(gbtNumber(0));
 
   gbtSfgSequence *sij;
   const gbtSfgSequence *parent;
@@ -277,7 +277,7 @@ gbtBehavProfile<gbtNumber> gbtSfgGame::ToBehav(const gbtPVector<double> &x) cons
       else
 	value = (gbtNumber)0;
 
-      b(i,sij->GetInfoset()->GetId(),efsupp.GetIndex(sij->GetAction()))= value;
+      b(i,sij->GetInfoset()->GetId(),efsupp->GetIndex(sij->GetAction()))= value;
     }
   return b;
 }

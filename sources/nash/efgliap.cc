@@ -133,7 +133,7 @@ static void PickRandomProfile(gbtBehavProfile<double> &p)
       sum = 0.0;
       int act;
     
-      for (act = 1; act < p->GetSupport().NumActions(pl, iset); act++)  {
+      for (act = 1; act < p->GetSupport()->NumActions(pl, iset); act++)  {
 	do
 	  tmp = Uniform();
 	while (tmp + sum > 1.0);
@@ -157,14 +157,14 @@ gbtList<BehavSolution> gbtEfgNashLiap::Solve(const gbtEfgSupport &p_support,
 {
   static const double ALPHA = .00000001;
 
-  gbtBehavProfile<double> p = p_support.NewBehavProfile(0.0);
-  EFLiapFunc F(p_support.GetTree(), p);
+  gbtBehavProfile<double> p = p_support->NewBehavProfile(0.0);
+  EFLiapFunc F(p_support->GetTree(), p);
 
   // if starting vector not interior, perturb it towards centroid
   int kk = 0;
   for (int kk = 1; kk <= p->BehavProfileLength() && p[kk] > ALPHA; kk++);
   if (kk <= p->BehavProfileLength()) {
-    gbtBehavProfile<double> c = p_support.NewBehavProfile(0.0);
+    gbtBehavProfile<double> c = p_support->NewBehavProfile(0.0);
     for (int k = 1; k <= p->BehavProfileLength(); k++) {
       p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
     }

@@ -72,7 +72,7 @@ BehavSolution::BehavSolution(const gbtBehavProfile<double> &p_profile,
   for (gbtGamePlayerIterator player(GetGame()); !player.End(); player++) {
     for (gbtGameInfosetIterator infoset(*player); !infoset.End(); infoset++) {
       for (int act = 1; act <= (*infoset)->NumActions(); act++) {
-	int index = p_profile->GetSupport().GetIndex((*infoset)->GetAction(act));
+	int index = p_profile->GetSupport()->GetIndex((*infoset)->GetAction(act));
 	if (index > 0) {
 	  m_profile((*player)->GetId(), (*infoset)->GetId(), act) =
 	    p_profile((*player)->GetId(), (*infoset)->GetId(), index);
@@ -102,7 +102,7 @@ BehavSolution::BehavSolution(const gbtBehavProfile<gbtRational> &p_profile,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile->GetSupport().GetIndex(infoset->GetAction(act));
+	int index = p_profile->GetSupport()->GetIndex(infoset->GetAction(act));
 	if (index > 0) {
 	  m_profile(pl, iset, act) = p_profile(pl, iset, index);
 	}
@@ -128,7 +128,7 @@ BehavSolution::BehavSolution(const gbtBehavProfile<gbtNumber> &p_profile,
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	int index = p_profile->GetSupport().GetIndex(infoset->GetAction(act));
+	int index = p_profile->GetSupport()->GetIndex(infoset->GetAction(act));
 	if (index > 0) {
 	  m_profile(pl, iset, act) = p_profile(pl, iset, index);
 	}
@@ -490,7 +490,7 @@ void BehavSolution::Invalidate(void) const
   // we depend on GCL or GUI to deallocate if there are structural 
   // changes in m_efg.  This only deals with changes in action probs of 
   // m_profile, and changes to outcome payoffs or chance probs of m_efg
-  m_support = gbtEfgSupport(m_profile->GetGame());
+  m_support = m_profile->GetGame()->NewEfgSupport();
   m_creator = "User";
   m_ANFNash.Invalidate();
   m_Nash.Invalidate();
@@ -523,7 +523,7 @@ gbtPVector<gbtNumber> BehavSolution::GetRNFRegret(void) const
       const gbtArray<int> &actions = player->GetStrategy(st)->GetBehavior();
       for (int j = 1; j <= actions.Length(); j++) {
 	int a = actions[j];
-	for (int k = 1; k <= scratch->GetSupport().NumActions(pl,j); k++) {
+	for (int k = 1; k <= scratch->GetSupport()->NumActions(pl,j); k++) {
 	  scratch(pl, j, k) = (gbtNumber) 0;
 	}
 	if (a > 0) {
@@ -626,7 +626,7 @@ void SubgamePerfectChecker::SolveSubgame(const gbtGame &p_efg,
 					 gbtList<BehavSolution> &solns,
 					 gbtStatus &p_status)
 {
-  gbtBehavProfile<gbtNumber> bp = sup.NewBehavProfile(gbtNumber(0));
+  gbtBehavProfile<gbtNumber> bp = sup->NewBehavProfile(gbtNumber(0));
   
   subgame_number++;
   
@@ -636,7 +636,7 @@ void SubgamePerfectChecker::SolveSubgame(const gbtGame &p_efg,
     int niset = 1;
     for (int iset = 1; iset <= infosets[pl]; iset++)  {
       if (infoset_subgames(pl, iset) == subgame_number)  {
-	for (int act = 1; act <= bp->GetSupport().NumActions(pl, niset); act++)
+	for (int act = 1; act <= bp->GetSupport()->NumActions(pl, niset); act++)
 	  bp(pl, niset, act) = start(pl, iset, act);
 	niset++;
       }

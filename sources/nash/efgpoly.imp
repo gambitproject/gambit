@@ -114,8 +114,8 @@ public:
 template <class T>
 EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S,
 				      const EfgPolEnumParams &p)
-  : m_efg(S.GetTree()), support(S), params(p), count(0), nevals(0), SF(S),
-    is_singular(false), var(S.NumPlayers())
+  : m_efg(S->GetTree()), support(S), params(p), count(0), nevals(0), SF(S),
+    is_singular(false), var(S->NumPlayers())
 { 
 //  gEpsilon(eps,12);
 
@@ -132,7 +132,7 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const gbtEfgSupport &S,
     (*(var[i]))[1] = 0;
     for(int seq = 2;seq<=SF.NumSequences(i);seq++) {
       int act  = SF.ActionNumber(i,seq);
-      if(act < support.NumActions(SF.GetInfoset(i,seq)))
+      if(act < support->NumActions(SF.GetInfoset(i,seq)))
 	(*(var[i]))[seq] = ++tnv;
       else
 	(*(var[i]))[seq] = 0;
@@ -170,7 +170,7 @@ gbtPolyMulti<T> EfgPolEnumModule<T>::ProbOfSequence(int p, int seq) const
     gbtPolyMulti<T> new_term(Space,const_term,Lex);
     equation+=new_term;
   }
-  else if(act<support.NumActions(SF.GetInfoset(p,seq))) { 
+  else if(act<support->NumActions(SF.GetInfoset(p,seq))) { 
     assert (varno>=exps.First());
     assert (varno<=exps.Last());
     exps=0;
@@ -236,7 +236,7 @@ gbtPolyMultiList<T> EfgPolEnumModule<T>::LastActionProbPositiveInequalities() co
   for (int i = 1; i <= SF.NumPlayers(); i++) 
     for (int j = 2; j <= SF.NumSequences(i); j++) {
       int act_num = SF.ActionNumber(i,j);
-      if ( act_num == support.NumActions(SF.GetInfoset(i,j)) && act_num > 1 ) 
+      if ( act_num == support->NumActions(SF.GetInfoset(i,j)) && act_num > 1 ) 
 	equations += ProbOfSequence(i,j);
     }
 
@@ -399,7 +399,7 @@ NumProbOfSequence(int p,int seq, const gbtVector<gbtDouble> &x) const
 
   if(seq==1)
     return (double)1;
-  else if(act<support.NumActions(SF.GetInfoset(p,seq)))
+  else if(act<support->NumActions(SF.GetInfoset(p,seq)))
     return x[varno].ToDouble();
   else {    
     for(j=1;j<seq;j++) {
@@ -434,8 +434,8 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
     gbtGamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtGameInfoset infoset = player->GetInfoset(iset);
-      if ( support.MayReach(infoset) )
-	numvars += support.NumActions(infoset) - 1;
+      if ( support->MayReach(infoset) )
+	numvars += support->NumActions(infoset) - 1;
     }
   }
 
@@ -446,10 +446,10 @@ EfgPolEnumModule<T>::SolVarsFromBehavProfile(const gbtBehavProfile<gbtNumber> &s
     gbtGamePlayer player = m_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtGameInfoset infoset = player->GetInfoset(iset);
-      if ( support.MayReach(infoset) ) {
-	for (int act = 1; act <= support.NumActions(infoset) - 1; act++) {
+      if ( support->MayReach(infoset) ) {
+	for (int act = 1; act <= support->NumActions(infoset) - 1; act++) {
 	  count++;
-	  answer[count] = (gbtDouble)sol->GetActionProb(support.GetAction(infoset, act));
+	  answer[count] = (gbtDouble)sol->GetActionProb(support->GetAction(infoset, act));
 	}
       }
     }
@@ -468,7 +468,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
   for(int pl=1;pl<=m_efg->NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
-      if(act<support.NumActions(SF.GetInfoset(pl,seq))) 
+      if(act<support->NumActions(SF.GetInfoset(pl,seq))) 
 	numvars++;
     }
   gbtVector<gbtDouble> v(numvars);
@@ -478,7 +478,7 @@ EfgPolEnumModule<T>::SolVarsFromSeqFormProbs(const gbtPVector<double> &x) const
   for(int pl=1;pl<=m_efg->NumPlayers();pl++) 
     for(int seq=2;seq<=SF.NumSequences()[pl];seq++) {
       int act  = SF.ActionNumber(pl,seq);
-      if(act<support.NumActions(SF.GetInfoset(pl,seq))) {
+      if(act<support->NumActions(SF.GetInfoset(pl,seq))) {
 	count++;
 	int varno = (*(var[pl]))[seq];
 	v[count] = (gbtDouble)x[varno];

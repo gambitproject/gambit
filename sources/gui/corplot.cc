@@ -745,11 +745,11 @@ void gbtEfgCorPlotSupportDialog::ToggleStrategy(wxTreeItemId p_id)
     return;
   }
 
-  if (m_support.Contains(action)) {
-    m_support.RemoveAction(action);
+  if (m_support->Contains(action)) {
+    m_support->RemoveAction(action);
   }
   else {
-    m_support.AddAction(action);
+    m_support->AddAction(action);
   }
   m_supportWidget->SetSupport(m_support);
 }
@@ -789,15 +789,15 @@ void gbtEfgCorPlotFrame::OnEditSupport(wxCommandEvent &)
 
     int index = 1;
 
-    for (int pl = 1; pl <= m_support.NumPlayers(); pl++) {
-      gbtGamePlayer player = m_support.GetPlayer(pl);
+    for (int pl = 1; pl <= m_support->NumPlayers(); pl++) {
+      gbtGamePlayer player = m_support->GetPlayer(pl);
 
       for (int iset = 1; iset <= player->NumInfosets(); iset++) {
 	gbtGameInfoset infoset = player->GetInfoset(iset);
 
 	for (int act = 1; act <= infoset->NumActions(); act++) {
 	  GetCorrespondence()->ShowDimension(index++, 
-					     m_support.Contains(infoset->GetAction(act)));
+					     m_support->Contains(infoset->GetAction(act)));
 	}
       }
     }

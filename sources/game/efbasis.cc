@@ -24,6 +24,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+
+#ifdef UNUSED
+
 #include "efbasis.h"
 #include "base/garray.imp"
 #include "math/gvector.h"
@@ -670,3 +673,5 @@ template class gbtDPVector<int>;
 #ifndef __BCC55__
 template gbtOutput & operator<< (gbtOutput&, const gbtDPVector<int>&);
 #endif  // __BCC55__
+
+#endif  // UNUSED

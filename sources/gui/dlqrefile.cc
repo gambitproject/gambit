@@ -115,9 +115,9 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent, gbtGameDocument *p_doc,
 
   int maxColumn = 0;
   const gbtEfgSupport &support = p_profiles[1].Support();
-  for (int pl = 1; pl <= support.NumPlayers(); pl++) {
-    for (int iset = 1; iset <= support.GetPlayer(pl)->NumInfosets(); iset++) {
-      for (int act = 1; act <= support.NumActions(pl, iset); act++) {
+  for (int pl = 1; pl <= support->NumPlayers(); pl++) {
+    for (int iset = 1; iset <= support->GetPlayer(pl)->NumInfosets(); iset++) {
+      for (int act = 1; act <= support->NumActions(pl, iset); act++) {
 	m_qreList->InsertColumn(++maxColumn,
 				wxString::Format(wxT("%d:(%d,%d)"),
 						 pl, iset, act));
@@ -220,7 +220,7 @@ void dialogQreFile::OnFileExportPxi(wxCommandEvent &)
 	for (int pl = 1; pl <= m_behavProfiles[1].GetGame()->NumPlayers(); pl++) {
 	  gbtGamePlayer player = m_behavProfiles[1].GetGame()->GetPlayer(pl);
 	  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-	    file << m_behavProfiles[1].Support().NumActions(pl, iset) << ' ';
+	    file << m_behavProfiles[1].Support()->NumActions(pl, iset) << ' ';
 	  }
 	}
 	file << "\n";
@@ -268,8 +268,8 @@ void dialogQreFile::OnToolsPlot(wxCommandEvent &)
     plotFrame->SetCorrespondence(new gbtCorBranchMixed(m_mixedProfiles));
   }
   else {
-    gbtEfgSupport support(m_behavProfiles[1].GetGame());
-    support.SetLabel("Displayed support");
+    gbtEfgSupport support = m_behavProfiles[1].GetGame()->NewEfgSupport();
+    support->SetLabel("Displayed support");
     gbtEfgCorPlotFrame *plotFrame = 
       new gbtEfgCorPlotFrame(support, this, wxDefaultPosition,
 			     wxSize(500, 300));

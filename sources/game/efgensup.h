@@ -34,10 +34,10 @@
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const gbtEfgSupport *s,
-			     gbtEfgSupport *sact,
-			     gbtAllActionIterator *c,
-			     gbtList<gbtEfgSupport> *list);
+void AllSubsupportsRECURSIVE(const gbtEfgSupport &s,
+			     gbtEfgSupport &sact,
+			     gbtAllActionIterator &c,
+			     gbtList<gbtEfgSupport> &list);
 
 gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 
@@ -48,10 +48,10 @@ gbtList<gbtEfgSupport> AllSubsupports(const gbtEfgSupport &S);
 // class by outputting only those subsupports with _no_ active 
 // actions at each unreached infoset.  
 
-void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					 gbtEfgSupport *sact,
-					 gbtAllActionIterator *c,
-					 gbtList<gbtEfgSupport> *list);
+void AllInequivalentSubsupportsRECURSIVE(const gbtEfgSupport &s,
+					 gbtEfgSupport &sact,
+					 gbtAllActionIterator &c,
+					 gbtList<gbtEfgSupport> &list);
 
 gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 
@@ -64,13 +64,13 @@ gbtList<gbtEfgSupport> AllInequivalentSubsupports(const gbtEfgSupport &S);
 // process, when, after more truncations, it might be no longer weakly
 // dominated, and thus part of an allowed subsupport.
 
-void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					gbtEfgSupport *sact,
-					gbtAllActionIterator *c,
+void AllUndominatedSubsupportsRECURSIVE(const gbtEfgSupport &s,
+					gbtEfgSupport &sact,
+					gbtAllActionIterator &c,
 					bool strong,
 					bool conditional,
-					gbtList<gbtEfgSupport> *list,
-					 const gbtStatus &status);
+					gbtList<gbtEfgSupport> &list,
+					const gbtStatus &status);
   
 gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 						 bool strong,
@@ -88,10 +88,10 @@ gbtList<gbtEfgSupport> AllUndominatedSubsupports(const gbtEfgSupport &S,
 // of having active actions at all active infosets, and not at other
 // infosets.
 
-void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport *s,
-					    gbtEfgSupport *sact,
-				            gbtAllActionIterator *c,
-					    gbtList<gbtEfgSupport> *list,
+void PossibleNashSubsupportsRECURSIVE(const gbtEfgSupport &s,
+				      gbtEfgSupport &sact,
+				      gbtAllActionIterator &c,
+				      gbtList<gbtEfgSupport> &list,
 				      const gbtStatus &status);
 
 gbtList<gbtEfgSupport> SortSupportsBySize(gbtList<gbtEfgSupport> &);

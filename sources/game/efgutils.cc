@@ -186,7 +186,7 @@ CompressEfg(const gbtGame & efg, const gbtEfgSupport & S)
       for (int act = infoset->NumActions(); act >= 1; act--) {
         gbtGameAction oldact =
           efg->GetPlayer(pl)->GetInfoset(iset)->GetAction(act);
-        if (!S.Contains(oldact)) {
+        if (!S->Contains(oldact)) {
           infoset->GetAction(act)->DeleteAction();
         }
       }
@@ -200,14 +200,14 @@ void CompressEfgInPlace(gbtGame p_efg, const gbtEfgSupport &p_support)
 {
   // Do this to avoid problems with p_efg and p_support being incompatible
   // after deletions
-  gbtDPVector<int> support(p_support.NumActions());
+  gbtDPVector<int> support(p_support->NumActions());
   support = 0;
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
     gbtGamePlayer player = p_efg->GetPlayer(pl);
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       gbtGameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (p_support.Contains(infoset->GetAction(act))) {
+	if (p_support->Contains(infoset->GetAction(act))) {
 	  support(pl, iset, act) = 1;
 	}
       }

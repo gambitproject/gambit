@@ -29,10 +29,12 @@
 #include "math/gnumber.h"
 #include "math/mpfloat.h"
 
+template class gbtDPVector<int>;
 template class gbtDPVector<double>;
 template class gbtDPVector<gbtRational>;
 template class gbtDPVector<gbtNumber>;
 
+template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<int> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<double> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<gbtRational> &);
 template gbtOutput &operator<<(gbtOutput &, const gbtDPVector<gbtNumber> &);
