@@ -57,7 +57,7 @@ class Portion
 
   virtual PortionType Type      ( void ) const = 0;
   virtual Portion*    Copy      ( void ) const = 0;
-  virtual int         Operation ( Portion* p, OperationMode mode );
+  virtual bool        Operation ( Portion* p, OperationMode mode );
   virtual void        Output    ( gOutput& s ) const = 0;
 };
 
@@ -76,7 +76,7 @@ template <class T> class numerical_Portion : public Portion
   T           Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  int         Operation ( Portion* p, OperationMode mode );
+  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -93,7 +93,7 @@ class bool_Portion : public Portion
   bool        Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  int         Operation ( Portion* p, OperationMode mode );
+  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -110,7 +110,7 @@ class gString_Portion : public Portion
   gString     Value     ( void ) const;
   Portion*    Copy      ( void ) const;
   PortionType Type      ( void ) const;
-  int         Operation ( Portion* p, OperationMode mode );
+  bool        Operation ( Portion* p, OperationMode mode );
   void        Output    ( gOutput& s ) const;
 };
 
@@ -149,7 +149,7 @@ class List_Portion : public Portion
   Portion*          Copy      ( void ) const;
   PortionType       Type      ( void ) const;
   PortionType       DataType  ( void ) const;
-  int               Operation ( Portion* p, OperationMode mode );
+  bool              Operation ( Portion* p, OperationMode mode );
   void              Output    ( gOutput& s ) const;
 
   Portion* operator[] ( int index );

@@ -38,11 +38,11 @@ Portion::~Portion()
 }
 
 
-int Portion::Operation( Portion *p, OperationMode mode )
+bool Portion::Operation( Portion *p, OperationMode mode )
 {
   gerr << "Portion Error: attempted to execute an unsupported operation\n";
   assert(0);
-  return 0;
+  return false;
 }
 
 
@@ -69,14 +69,14 @@ template <class T> Portion* numerical_Portion<T>::Copy( void ) const
 { return new numerical_Portion<T>( value ); }
 
 
-template <class T> int numerical_Portion<T>::Operation
+template <class T> bool numerical_Portion<T>::Operation
   ( 
    Portion* p, 
    OperationMode mode 
    )
 {
-  int result = 0;
-  T& p_value = ( (numerical_Portion<T>*) p )->Value();
+  bool  result = true;
+  T&    p_value = ( (numerical_Portion<T>*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -176,10 +176,10 @@ Portion* bool_Portion::Copy( void ) const
 { return new bool_Portion( value ); }
 
 
-int bool_Portion::Operation( Portion* p, OperationMode mode )
+bool bool_Portion::Operation( Portion* p, OperationMode mode )
 {
-  int result = 0;
-  bool& p_value = ( (bool_Portion*) p )->Value();
+  bool   result = true;
+  bool&  p_value = ( (bool_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -244,10 +244,10 @@ Portion* gString_Portion::Copy( void ) const
 { return new gString_Portion( value ); }
 
 
-int gString_Portion::Operation( Portion* p, OperationMode mode )
+bool gString_Portion::Operation( Portion* p, OperationMode mode )
 {
-  int result = 0;
-  gString& p_value = ( (gString_Portion*) p )->Value();
+  bool      result = 0;
+  gString&  p_value = ( (gString_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {
@@ -397,10 +397,10 @@ int List_Portion::TypeCheck( Portion* item )
 }
 
 
-int List_Portion::Operation( Portion* p, OperationMode mode )
+bool List_Portion::Operation( Portion* p, OperationMode mode )
 {
-  int result = 0;
-  gBlock<Portion*>& p_value = ( (List_Portion*) p )->Value();
+  bool               result = true;
+  gBlock<Portion*>&  p_value = ( (List_Portion*) p )->Value();
 
   if( p == 0 )      // unary operations
   {

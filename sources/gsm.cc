@@ -51,9 +51,6 @@ class FunctionHashTable : public HashTable<gString, FuncDescObj*>
 };
 
 
-int GSM::FunctionsInitialized = false;
-FunctionHashTable* GSM::FuncTable = new FunctionHashTable;
-
 
 
 class RefHashTable : public HashTable<gString, Portion*>
@@ -96,16 +93,20 @@ class RefHashTable : public HashTable<gString, Portion*>
 
 GSM::GSM( int size )
 {
+#ifndef NDEBUG
+  if( size <= 0 )
+  {
+    gerr << "GSM Error: illegal stack size specified during initialization\n";
+    gerr << "           stack size requested: " << size << "\n";
+  }
   assert( size > 0 );
+#endif // NDEBUG
 
   stack = new gStack<Portion*>( size );
   RefTable = new RefHashTable;
 
-  if( !FunctionsInitialized )
-  {
-    InitFunctions();           // This function is located in gsmfunc.cc
-    FunctionsInitialized = true;
-  }
+  FuncTable = new FunctionHashTable;
+  InitFunctions();           // This function is located in gsmfunc.cc
 }
 
 
@@ -136,62 +137,116 @@ int GSM::MaxDepth( void ) const
 //                           Push() functions
 //------------------------------------------------------------------------
 
-void GSM::Push( const bool& data )
+bool GSM::Push( const bool& data )
 {
   Portion*  p;
-
-  p = new bool_Portion( data );
-  stack->Push( p );
+  bool      result = true;
+  
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new bool_Portion( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-void GSM::Push( const double& data )
+bool GSM::Push( const double& data )
 {
   Portion*  p;
-
-  p = new numerical_Portion<double>( data );
-  stack->Push( p );
+  bool      result = true;
+  
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new numerical_Portion<double>( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-void GSM::Push( const gInteger& data )
+bool GSM::Push( const gInteger& data )
 {
   Portion*  p;
+  bool      result = true;
 
-  p = new numerical_Portion<gInteger>( data );
-  stack->Push( p );
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new numerical_Portion<gInteger>( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-void GSM::Push( const gRational& data )
+bool GSM::Push( const gRational& data )
 {
   Portion*  p;
-
-  p = new numerical_Portion<gRational>( data );
-  stack->Push( p );
+  bool      result = true;
+  
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new numerical_Portion<gRational>( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-void GSM::Push( const gString& data )
+bool GSM::Push( const gString& data )
 {
   Portion*  p;
-
-  p = new gString_Portion( data );
-  stack->Push( p );
+  bool      result = true;
+  
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new gString_Portion( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-void GSM::PushList( const int num_of_elements )
+bool GSM::PushList( const int num_of_elements )
 { 
   int            i;
   Portion*       p;
   List_Portion*  list;
-
-  assert( num_of_elements > 0 );
-
-  list = new List_Portion;
+  bool           result = true;
 
 #ifndef NDEBUG
+  if( num_of_elements <= 0 )
+  {
+    gerr << "GSM Error: illegal number of elements requested to PushList()\n";
+    gerr << "           elements requested: " << num_of_elements << "\n";
+  }
+  assert( num_of_elements > 0 );
+
   if( num_of_elements > stack->Depth() )
   {
     gerr << "GSM Error: not enough elements in GSM to PushList()\n";
@@ -201,34 +256,47 @@ void GSM::PushList( const int num_of_elements )
   assert( num_of_elements <= stack->Depth() );
 #endif // NDEBUG
 
+  list = new List_Portion;
   for( i = 1; i <= num_of_elements; i++ )
   {
     p = stack->Pop();
     list->Insert( p, 1 );
   }
   stack->Push( list );
+
+  return result;
 }
 
 
 
-//----------------------------------------------------------------------
+//---------------------------------------------------------------------
 //     Reference related functions: PushRef(), Assign(), UnAssign()
 //---------------------------------------------------------------------
 
-void GSM::PushRef( const gString& data )
+bool GSM::PushRef( const gString& data )
 {
   Portion*  p;
-
-  p = new Reference_Portion( data );
-  stack->Push( p );
+  bool      result = true;
+  
+  if( stack->Depth() < stack->MaxDepth() )
+  {
+    p = new Reference_Portion( data );
+    stack->Push( p );
+  }
+  else
+  {
+    gerr << "GSM Error: out of stack space\n";
+    result = false;
+  }
+  return result;
 }
 
 
-
-void GSM::Assign( void )
+bool GSM::Assign( void )
 {
   Portion*  p2;
   Portion*  p1;
+  bool      result = true;
 
 #ifndef NDEBUG
   if( stack->Depth() < 2 )
@@ -241,31 +309,40 @@ void GSM::Assign( void )
   p2 = stack->Pop();
   p1 = stack->Pop();
 
-#ifndef NDEBUG
-  if ( p1->Type() != porREFERENCE )
+  if ( p1->Type() == porREFERENCE )
+  {
+    if( p2->Type() == porREFERENCE )
+      p2 = resolve_ref( (Reference_Portion*) p2 );
+    
+    RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
+    delete p2;
+    
+    p1 = resolve_ref( (Reference_Portion*) p1 );
+    stack->Push( p1 );
+  }
+  else // ( p1->Type() != porREFERENCE )
   {
     gerr << "GSM Error: no reference found to be assigned\n";
+    result = false;
   }
-  assert( p1->Type() == porREFERENCE );
-#endif // NDEBUG
 
-  if( p2->Type() == porREFERENCE )
-    p2 = resolve_ref( (Reference_Portion*) p2 );
-  
-  RefTable->Define( ( (Reference_Portion*) p1 )->Value(), p2->Copy() );
-  delete p2;
-  
-  p1 = resolve_ref( (Reference_Portion*) p1 );
-  stack->Push( p1 );
+  return result;
 }
 
 
-void GSM::UnAssign( const gString& ref )
+bool GSM::UnAssign( const gString& ref )
 {
+  bool  result = true;
+
   if( RefTable->IsDefined( ref ) )
   {
     RefTable->Remove( ref );
   }
+  else
+  {
+    result = false;
+  }
+  return result;
 }
 
 
@@ -302,20 +379,21 @@ Portion* GSM::resolve_ref( Reference_Portion* p )
 //                       binary operations
 //------------------------------------------------------------------------
 
-void GSM::binary_operation( OperationMode mode )
+bool GSM::binary_operation( OperationMode mode )
 {
   Portion*   p2;
   Portion*   p1;
-  int        result = 0;
+  bool       result = true;
 
 #ifndef NDEBUG
   if( stack->Depth() < 2 )
   {
     gerr << "GSM Error: not enough operands to perform binary operation\n";
+    result = false;
   }
   assert( stack->Depth() >= 2 );
 #endif // NDEBUG
-
+  
   p2 = stack->Pop();
   p1 = stack->Pop();
   
@@ -324,28 +402,31 @@ void GSM::binary_operation( OperationMode mode )
   if( p1->Type() == porREFERENCE )
     p1 = resolve_ref( (Reference_Portion*) p1 );
 
-#ifndef NDEBUG
-  if( p1->Type() != p2->Type() )
+  if( p1->Type() == p2->Type() )
+  {
+    result = p1->Operation( p2, mode );
+    if(mode == opEQUAL_TO ||
+       mode == opNOT_EQUAL_TO ||
+       mode == opGREATER_THAN ||
+       mode == opLESS_THAN ||
+       mode == opGREATER_THAN_OR_EQUAL_TO ||
+       mode == opLESS_THAN_OR_EQUAL_TO )
+    {
+      delete p1;
+      p1 = new bool_Portion( result );
+      result = true;
+    }
+    stack->Push( p1 );
+  }
+  else // ( p1->Type() != p2->Type() )
   {
     gerr << "GSM Error: attempted operating on different types\n";
     gerr << "           Type of Operand 1: " << p1->Type() << "\n";
     gerr << "           Type of Operand 2: " << p2->Type() << "\n";
+    result = false;
   }
-  assert( p1->Type() == p2->Type() );
-#endif // NDEBUG
 
-  result = p1->Operation( p2, mode );
-  if(mode == opEQUAL_TO ||
-     mode == opNOT_EQUAL_TO ||
-     mode == opGREATER_THAN ||
-     mode == opLESS_THAN ||
-     mode == opGREATER_THAN_OR_EQUAL_TO ||
-     mode == opLESS_THAN_OR_EQUAL_TO )
-  {
-    delete p1;
-    p1 = new bool_Portion( (bool) result );
-  }
-  stack->Push( p1 );
+  return result;
 }
 
 
@@ -355,25 +436,28 @@ void GSM::binary_operation( OperationMode mode )
 //                        unary operations
 //-----------------------------------------------------------------------
 
-void GSM::unary_operation( OperationMode mode )
+bool GSM::unary_operation( OperationMode mode )
 {
   Portion*  p1;
+  bool      result = true;
 
-#ifndef NDEBUG
-  if( stack->Depth() < 1 )
+  if( stack->Depth() >= 1 )
+  {
+    p1 = stack->Pop();
+    
+    if( p1->Type() == porREFERENCE )
+      p1 = resolve_ref( (Reference_Portion*) p1 );
+    
+    p1->Operation( 0, mode );
+    stack->Push( p1 );
+  }
+  else
   {
     gerr << "GSM Error: not enough operands to perform unary operation\n";
+    result = false;
   }
-  assert( stack->Depth() >= 1 );
-#endif // NDEBUG
 
-  p1 = stack->Pop();
-  
-  if( p1->Type() == porREFERENCE )
-    p1 = resolve_ref( (Reference_Portion*) p1 );
-  
-  p1->Operation( 0, mode );
-  stack->Push( p1 );
+  return result;
 }
 
 
@@ -383,54 +467,54 @@ void GSM::unary_operation( OperationMode mode )
 //                      built-in operations
 //-----------------------------------------------------------------
 
-void GSM::Add ( void )
-{ binary_operation( opADD ); }
+bool GSM::Add ( void )
+{ return binary_operation( opADD ); }
 
-void GSM::Subtract ( void )
-{ binary_operation( opSUBTRACT ); }
+bool GSM::Subtract ( void )
+{ return binary_operation( opSUBTRACT ); }
 
-void GSM::Multiply ( void )
-{ binary_operation( opMULTIPLY ); }
+bool GSM::Multiply ( void )
+{ return binary_operation( opMULTIPLY ); }
 
-void GSM::Divide ( void )
-{ binary_operation( opDIVIDE ); }
+bool GSM::Divide ( void )
+{ return binary_operation( opDIVIDE ); }
 
-void GSM::Negate( void )
-{ unary_operation( opNEGATE ); }
-
-
-
-void GSM::EqualTo ( void )
-{ binary_operation( opEQUAL_TO ); }
-
-void GSM::NotEqualTo ( void )
-{ binary_operation( opNOT_EQUAL_TO ); }
-
-void GSM::GreaterThan ( void )
-{ binary_operation( opGREATER_THAN ); }
-
-void GSM::LessThan ( void )
-{ binary_operation( opLESS_THAN ); }
-
-void GSM::GreaterThanOrEqualTo ( void )
-{ binary_operation( opGREATER_THAN_OR_EQUAL_TO ); }
-
-void GSM::LessThanOrEqualTo ( void )
-{ binary_operation( opLESS_THAN_OR_EQUAL_TO ); }
+bool GSM::Negate( void )
+{ return unary_operation( opNEGATE ); }
 
 
-void GSM::AND ( void )
-{ binary_operation( opLOGICAL_AND ); }
 
-void GSM::OR ( void )
-{ binary_operation( opLOGICAL_OR ); }
+bool GSM::EqualTo ( void )
+{ return binary_operation( opEQUAL_TO ); }
 
-void GSM::NOT ( void )
-{ unary_operation( opLOGICAL_NOT ); }
+bool GSM::NotEqualTo ( void )
+{ return binary_operation( opNOT_EQUAL_TO ); }
+
+bool GSM::GreaterThan ( void )
+{ return binary_operation( opGREATER_THAN ); }
+
+bool GSM::LessThan ( void )
+{ return binary_operation( opLESS_THAN ); }
+
+bool GSM::GreaterThanOrEqualTo ( void )
+{ return binary_operation( opGREATER_THAN_OR_EQUAL_TO ); }
+
+bool GSM::LessThanOrEqualTo ( void )
+{ return binary_operation( opLESS_THAN_OR_EQUAL_TO ); }
 
 
-void GSM::Concatenate( void )
-{ binary_operation( opCONCATENATE ); }
+bool GSM::AND ( void )
+{ return binary_operation( opLOGICAL_AND ); }
+
+bool GSM::OR ( void )
+{ return binary_operation( opLOGICAL_OR ); }
+
+bool GSM::NOT ( void )
+{ return unary_operation( opLOGICAL_NOT ); }
+
+
+bool GSM::Concatenate( void )
+{ return binary_operation( opCONCATENATE ); }
 
 
 
@@ -467,159 +551,7 @@ int GSM::FuncParamCheck( const PortionType stack_param_type,
 }
 
 
-void GSM::CallFunction( const gString& funcname )
-{
-  FuncDescObj*  func;
-  Portion**     param;
-  Portion*      result;
-  int           i;
-  int           num_of_params;
-  int           type_match;
-
-#ifndef NDEBUG
-  if( !FuncTable->IsDefined( funcname ) )
-  {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-    gerr << "           CallFunction( \"" << funcname << "\" )\n";
-  }
-  assert( FuncTable->IsDefined( funcname ) );
-#endif // NDEBUG
-
-  func = (*FuncTable)( funcname );
-  num_of_params = func->NumParams();
-  param = new Portion* [ num_of_params ];
-
-  for( i = num_of_params - 1; i >= 0; i-- )
-  {
-    param[ i ] = stack->Pop();
-    
-    if( param[ i ]->Type() == porREFERENCE )
-      param[ i ] = resolve_ref( (Reference_Portion*) param[ i ] );
-
-#ifndef NDEBUG
-    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
-    if( !type_match )
-    {
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
-      gerr << "    Error at Parameter #: " << i << "\n";
-      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-      gerr << "           Type found:    " << param[i]->Type() << "\n";
-    }
-    assert( type_match );
-#endif // NDEBUG
-  }
-  
-  result = func->CallFunction( param );
-  
-#ifndef NDEBUG
-  if( result == 0 )
-  {
-    gerr << "GSM Error: an error occurred while attempting to execute\n";
-    gerr << "           CallFunction( \"" << funcname << "\" )\n";
-  }
-  assert( result != 0 );
-#endif // NDEBUG
-
-  stack->Push( result );
-}
-
-
-void GSM::CallFunction3
-  ( 
-   const gString& funcname,    // name of the function to be called
-   const gString* name,        // the formal names of all parameters passed in
-   const int num_of_names      // the number of parameters passed in
-   )
-{
-  FuncDescObj*  func;          // Function Descriptor Object
-  Portion*      result;        // stores the function return value
-  Portion**     param;         // parameter list to pass to the function
-  int           i;             // index to the parameter list
-  int           name_i;        // index to the formal names passed in
-  int           num_of_params; // actual number of parameters of the function
-  int           type_match;    // status variable
-
-#ifndef NDEBUG
-  if( !FuncTable->IsDefined( funcname ) )
-  {
-    gerr << "GSM Error: CallFunction() called with an undefined function\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-  }
-  assert( FuncTable->IsDefined( funcname ) );
-#endif // NDEBUG
-
-  func = (*FuncTable)( funcname );
-  num_of_params = func->NumParams();
-  param = new Portion* [ num_of_params ];
-  
-  for( i = 0; i < num_of_params; i++ )
-  {
-    param[ i ] = func->ParamDefaultValue( i );
-  }
-  
-  for( name_i = num_of_names - 1; name_i >= 0; name_i-- )
-  {
-    i = func->FindParamName( name[ name_i ] );
-
-#ifndef NDEBUG
-    if( i == -1 )
-    {
-      gerr << "FuncDescObj Error: parameter \"" << name[ name_i ];
-      gerr << "\" is not defined for\n";
-      gerr << "                   the function \"" << funcname << "\"\n"; 
-    }
-    assert( i >= 0 );
-#endif // NDEBUG
-    
-    param[ i ] = stack->Pop();
-    
-    if( param[ i ]->Type() == porREFERENCE )
-      param[ i ] = resolve_ref( (Reference_Portion*) param[ i ] );
-    
-#ifndef NDEBUG
-    type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
-    if( !type_match )
-    {
-      gerr << "GSM Error: mismatched parameter type found while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\", ... )\n\n";
-      gerr << "    Error at Parameter #: " << i << "\n";
-      gerr << "           Expected type: " << func->ParamType( i ) << "\n";
-      gerr << "           Type found:    " << param[ i ]->Type() << "\n";
-    }
-    assert( type_match );
-#endif // NDEBUG
-  }
-  
-#ifndef NDEBUG
-  for( i = 0; i < num_of_params; i++ )
-  {
-    if( param[ i ] == 0 )
-    {
-      gerr << "GSM Error: required parameter found missing while executing\n";
-      gerr << "           CallFunction( \"" << funcname << "\" )\n\n";
-      gerr << "   Missing Parameter: \"" << func->ParamName( i ) << "\"\n";
-    }
-    assert( param[ i ] != 0 );
-  }
-#endif // NDEBUG
-  
-  result = func->CallFunction( param );
-
-#ifndef NDEBUG
-  if( result == 0 )
-  {
-    gerr << "GSM Error: an error occurred while attempting to execute\n";
-    gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
-  }
-  assert( result != 0 );
-#endif // NDEBUG
-
-  stack->Push( result );
-}
-
-
-void GSM::CallFunction4
+bool GSM::CallFunction
   ( 
    const gString&  funcname,             // name of the function to be called
    const int       num_of_params_passed, // number of parameters passed in
@@ -627,7 +559,7 @@ void GSM::CallFunction4
    )
 {
   FuncDescObj*  func;          // Function Descriptor Object
-  Portion*      result;        // stores the function return value
+  Portion*      return_value;  // stores the function return value
   Portion**     param;         // parameter list to pass to the function
   int           i;             // index to the parameter list
   int           old_i;         // used to check parameter redefinitions
@@ -635,90 +567,84 @@ void GSM::CallFunction4
   int           passed_i;      // index to the parameter list received
   int           num_of_params; // actual number of paramater of the function
   int           type_match;    // status variable
+  int           result = true;
+
 
   func = (*FuncTable)( funcname );
   num_of_params = func->NumParams();
 
-#ifndef NDEBUG
+
   if( !FuncTable->IsDefined( funcname ) )
   {
     gerr << "GSM Error: CallFunction() called with an undefined function\n";
     gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+    return false;
   }
-  assert( FuncTable->IsDefined( funcname ) );
-#endif // NDEBUG
 
   param = new Portion* [ num_of_params ];
   for( i = 0; i < num_of_params; i++ )
   {
     param[ i ] = func->ParamDefaultValue( i );
   }
-
+  
   passed_param = new Portion* [ num_of_params_passed ];
   for( passed_i = num_of_params_passed - 1; passed_i >= 0; passed_i-- )
   {
     passed_param[ passed_i ] = stack->Pop();
   }
-
+  
   // Maps the parameters into their correct positions in the parameter list
   i = 0;
   for( passed_i = 0; passed_i < num_of_params_passed; passed_i++ )
   {
-#ifndef NDEBUG
     if( i >= num_of_params )
     {
       gerr << "FuncDescObj Error: CallFunction( \"" << funcname;
       gerr << "\", ... ) executed with\n";
-      gerr << "                   too many function parameters\n"; 
+      gerr << "                   too many function parameters\n";
+      return false;
     }
-    assert( i < num_of_params );
-#endif // NDEBUG
-
+    
     if( ( func->ParamName( i ) != name[ passed_i ] ) &&
        ( name[ passed_i ] != "" ) )
     {
       old_i = i;
       i = func->FindParamName( name[ passed_i ] );
-
-#ifndef NDEBUG
+      
       if( i <= old_i )
       {
 	gerr << "GSM Error: multiple definitions found for parameter \"";
 	gerr << name[ passed_i ] << "\" while executing\n";
 	gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
+	return false;
       }
-      assert( i > old_i );
-
+      
       if( i == -1 )
       {
 	gerr << "FuncDescObj Error: parameter \"" << name[ passed_i ];
 	gerr << "\" is not defined for\n";
-	gerr << "                   the function \"" << funcname << "\"\n"; 
+	gerr << "                   the function \"" << funcname << "\"\n";
+	return false;
       }
-      assert( i >= 0 );
-#endif // NDEBUG
     }
-
+    
     param[ i ] = passed_param[ passed_i ];
     i++;
   }
-
+  
   for( i = 0; i < num_of_params; i++ )
   {
-#ifndef NDEBUG
     if( param[ i ] == 0 )
     {
       gerr << "GSM Error: required parameter found missing while executing\n";
       gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
       gerr << "   Missing Parameter: \"" << func->ParamName( i ) << "\"\n";
+      return false;
     }
-    assert( param[ i ] != 0 );
-#endif // NDEBUG
-
+    
     if( param[ i ]->Type() == porREFERENCE )
       param[ i ] = resolve_ref( (Reference_Portion *)param[ i ] );
     
-#ifndef NDEBUG
     type_match = FuncParamCheck( param[ i ]->Type(), func->ParamType( i ) );
     if( !type_match )
     {
@@ -727,23 +653,24 @@ void GSM::CallFunction4
       gerr << "    Error at Parameter #: " << i << "\n";
       gerr << "           Expected type: " << func->ParamType( i ) << "\n";
       gerr << "           Type found:    " << param[ i ]->Type() << "\n";
+      return false;
     }
-    assert( type_match );
-#endif // NDEBUG
   }
   
-  result = func->CallFunction( param );
+  return_value = func->CallFunction( param );
   
 #ifndef NDEBUG
-  if( result == 0 )
+  if( return_value == 0 )
   {
     gerr << "GSM Error: an error occurred while attempting to execute\n";
     gerr << "           CallFunction( \"" << funcname << "\", ... )\n";
   }
-  assert( result != 0 );
+  assert( return_value != 0 );
 #endif // NDEBUG
+  
+  stack->Push( return_value );
 
-  stack->Push( result );
+  return result;
 }
 
 
@@ -805,24 +732,34 @@ void GSM::Flush( void )
 //                       Template instantiations
 //-----------------------------------------------------------------------
 
+
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+
 #include "hash.imp"
 
-template class HashTable<gString, Portion*>;
-template class HashTable<gString, FuncDescObj*>;
+TEMPLATE class HashTable<gString, Portion*>;
+TEMPLATE class HashTable<gString, FuncDescObj*>;
 
 
 #include "glist.imp"
 
-template class gList<Portion*>;
-template class gNode<Portion*>;
+TEMPLATE class gList<Portion*>;
+TEMPLATE class gNode<Portion*>;
 
-template class gList<gString>;
-template class gNode<gString>;
+TEMPLATE class gList<gString>;
+TEMPLATE class gNode<gString>;
 
-template class gList<FuncDescObj*>;
-template class gNode<FuncDescObj*>;
+TEMPLATE class gList<FuncDescObj*>;
+TEMPLATE class gNode<FuncDescObj*>;
 
 
 #include "gstack.imp"
 
-template class gStack<Portion*>;
+TEMPLATE class gStack<Portion*>;

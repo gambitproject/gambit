@@ -82,7 +82,7 @@
 
 void GSM::InitFunctions( void )
 {
-  Init_gclmath();
+  Init_gclmath( this );
 }
 
 
