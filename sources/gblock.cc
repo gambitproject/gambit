@@ -5,7 +5,6 @@
 //#
 
 #include "basic.h"
-#include "garray.imp"
 #include "gblock.imp"
 #include "gstring.h"
 #include "rational.h"
@@ -13,6 +12,14 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+
+class gArray<bool>;
+class gArray<int>;
+class gArray<long>;
+class gArray<float>;
+class gArray<double>;
+class gArray<gRational>;
+class gArray<gString>;
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
@@ -24,6 +31,8 @@ TEMPLATE class gBlock<float>;
 TEMPLATE class gBlock<double>;
 TEMPLATE class gBlock<gRational>;
 TEMPLATE class gBlock<gString>;
+
+#include "garray.imp"
 TEMPLATE class gArray<gBlock<int> >;
 TEMPLATE class gArray<gBlock<double> >;
 TEMPLATE class gBlock<gBlock<int> >;
