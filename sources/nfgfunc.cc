@@ -564,6 +564,22 @@ static Portion* GSM_Payoff_NFOutcome_Rational(Portion** param)
 
 
 //------------
+// Player
+//------------
+
+static Portion *GSM_Player(Portion **param)
+{
+  if (param[0]->Spec().Type == porNULL)
+    return new NullPortion(porNFPLAYER);
+
+  Strategy *s = ((StrategyPortion *) param[0])->Value();
+
+  Portion* por = new NfPlayerValPortion(s->nfp);
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
+//------------
 // Players
 //------------
 
@@ -974,6 +990,13 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL));
   FuncObj->SetParamInfo(1, 1, ParamInfoType("outcome", porNFOUTCOME));
   FuncObj->SetParamInfo(1, 2, ParamInfoType("player", porNFPLAYER));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Player", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Player, porNFPLAYER, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", 
+			      PortionSpec(porSTRATEGY, 0, porNULLSPEC) ));
   gsm->AddFunction(FuncObj);
 
 
