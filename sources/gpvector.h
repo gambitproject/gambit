@@ -20,7 +20,7 @@
 
 template <class T> class gPVector: public gVector<T> {
  private:
-  int sum( gTuple<int> V )
+  int sum( gTuple<int> &V )
     {
       int total= 0;
       for(int i= V.First(); i<=V.Last(); i++)
@@ -75,8 +75,7 @@ template <class T> class gPVector: public gVector<T> {
       setindex();
     }
 
-  virtual ~gPVector()
-    { }
+  virtual ~gPVector();
 
 
   // element access operators
@@ -134,6 +133,16 @@ template <class T> class gPVector: public gVector<T> {
       gVector<T>::operator=(v);
       return (*this);
     }
+  gPVector<T>& operator=(const gVector<T> &v)
+    {
+      gVector<T>::operator=(v);
+      return (*this);
+    }
+  gPVector<T>& operator=(T c)
+    {
+      gVector<T>::operator=(c);
+      return (*this);
+    }
 
   gPVector<T> operator+(const gPVector<T> &v) const
     {
@@ -147,6 +156,13 @@ template <class T> class gPVector: public gVector<T> {
       assert( svlen==v.svlen );
       gVector<T>::operator+=(v);
       return (*this);
+    }
+  gPVector<T> operator-(void) const
+    {
+      gPVector<T> tmp(*this);
+      for(int i=First(); i<=Last(); i++)
+	tmp[i]= -tmp[i];
+      return tmp;
     }
   gPVector<T> operator-(const gPVector<T> &v) const
     {
@@ -165,6 +181,17 @@ template <class T> class gPVector: public gVector<T> {
     {
       assert( svlen==v.svlen );
       return (*this).gVector<T>::operator*(v);
+    }
+  gPVector<T>& operator*=(const T c)
+    {
+      gVector<T>::operator*=(c);
+      return (*this);
+    }
+  gPVector<T> operator/(T c)
+    {
+      gPVector<T> tmp(*this);
+      tmp= tmp.gVector<T>::operator/(c);
+      return tmp;
     }
   gPVector<T> operator/(const gPVector<T> &v) const
     {
@@ -195,6 +222,11 @@ template <class T> class gPVector: public gVector<T> {
   void Dump(gOutput &) const;
 };
 
+
+// virtual destructor
+template <class T>
+gPVector<T>::~gPVector()
+{ }
 
 // method implementations
 
