@@ -7,9 +7,9 @@
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = C:\WX2
-BCCDIR = C:\BORLAND\BCC55
-BISON = C:\GAMBIT\BISONDOS\BISON
+WXDIR = C:\WXWIN2
+BCCDIR = C:\BCC55
+BISON = C:\GAMBIT97\BISONDOS\BISON
 	
 SOURCE_SUFFIX = .cc
 OBJECT_SUFFIX = .obj
@@ -25,7 +25,7 @@ WXLIBDIR = $(WXDIR)\lib
 WXLIB = wx32 xpm tiff jpeg winpng zlib
 WXINC = -I$(WXDIR)\include
 
-.path.cc = .;base;math;guishae;gui;pxi
+.path.cc = .;base;math;guishare;gui;pxi
 
 $(SOURCE_SUFFIX).obj:
 	bcc32 $(CPPFLAGS) -P -c {$< }
