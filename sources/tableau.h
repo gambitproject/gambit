@@ -101,8 +101,6 @@ public:
   
       // raw Tableau functions
   void Refactor();
-  void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
-  void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
   void BasisVector(gVector<T> &x) const; // solve M x = (*b)
   void GetColumn( int , gVector<T> &) const;  // raw column
   void SolveColumn(int, gVector<T> &);  // column in new basis 
@@ -152,6 +150,8 @@ public:
       // Redefined functions
   void Refactor();
   void Pivot(int outrow,int col);
+  void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
+  void SolveT(const gVector<T> &c, gVector<T> &y) const;  // solve y M = c
   void ReversePivots(gList<gArray<int> > &);
   bool IsReversePivot(int i, int j);
   void DualReversePivots(gList<gArray<int> > &);

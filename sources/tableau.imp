@@ -177,20 +177,6 @@ template <class T> void Tableau<T>::Refactor()
   B.solve(*b, solution);
 }
 
-    // solve A x = b 
-template <class T>
-void Tableau<T>::Solve(const gVector<T> &b, gVector<T> &x) const
-{
-  B.solve(b,x);
-}
-
-    // solve y A = c 
-template <class T>
-void Tableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
-{
-  B.solveT(c,y);
-}
-
 template <class T>
 void Tableau<T>::BasisVector(gVector<T> &out) const
 {
@@ -491,6 +477,20 @@ void LPTableau<T>::Pivot(int outrow,int col)
 {
   Tableau<T>::Pivot(outrow,col);
   SolveDual();
+}
+
+    // solve A x = b 
+template <class T>
+void LPTableau<T>::Solve(const gVector<T> &b, gVector<T> &x) const
+{
+  B.solve(b,x);
+}
+
+    // solve y A = c 
+template <class T>
+void LPTableau<T>::SolveT(const gVector<T> &c, gVector<T> &y) const
+{
+  B.solveT(c,y);
 }
 
 template <class T>
