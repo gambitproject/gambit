@@ -1414,7 +1414,7 @@ void CallFuncObj::ComputeFuncIndex(void)
     m_funcIndex = 0;
   
   if (m_funcIndex == -1) {
-    int param_upper_bound = 0;
+    int param_upper_bound = -1;
     for (int index = 0; index < m_numParams; index++) {
       if (m_params[index] != 0 || m_runTimeParamInfo[index].Ref != 0)
 	param_upper_bound = index;

@@ -162,22 +162,6 @@ BehavProfile<T> and BehavSolution to be smart enough to realize when
 action probabilities at certain information sets are not specified.
 (This bug affects the GUI as well, of course.)
 
-//-----------------------------
-
-Bug C28: Fails to resolve zero-parameter function calls to overloaded function:
-
-GCL1:= << NewFunction[Foo[], 1]
-True
-GCL2:= << Foo[]
-1
-GCL3:= << NewFunction[Foo[x->NUMBER], 1]
-True
-GCL4:= << Foo[]
-ERROR: No matching parameter specifications found for Foo[]
-GCL5:= << Foo[1]
-1
-
-
 //---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
