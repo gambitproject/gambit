@@ -309,7 +309,10 @@ void DisplayTriState(gOutput& o, TriState i)
 void gEpsilon(double &v, int i)
 { v=pow(10.0,-i); }
 
-void gEpsilon(gRational &v, int i) { v = (gRational)0;}
+
+void gEpsilon(gRational &v, int i) 
+{ v = (gRational)0*(gRational)i;} 
+  // Note:  multiply by i just to avoid unused param warning
 
 
 
