@@ -209,7 +209,9 @@ template <class T> class Efg : public BaseEfg   {
     friend Nfg<T> *MakeAfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		             const Efg<T> &E, BehavProfile<T> &bp);
-
+    friend void BehavToMixed(const Efg<T> &, const BehavProfile<T> &,
+			     const Nfg<T> &, MixedProfile<T> &);
+    
     // defined in efgutils.cc
     friend void RandomEfg(Efg<T> &);
 };

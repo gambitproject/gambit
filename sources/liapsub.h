@@ -12,7 +12,8 @@
 
 class NFLiapBySubgame : public SubgameSolver<double>  {
   private:
-    int nevals;
+    int nevals, subgame_number;
+    gPVector<int> infoset_subgames;
     NFLiapParams params;
     BehavProfile<double> start;
 

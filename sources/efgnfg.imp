@@ -169,6 +169,30 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
   }
 }
 
+template <class T>
+void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
+		  const Nfg<T> &N, MixedProfile<T> &mp)
+{
+  if ((Nfg<T> *) E.afg == &N)   {
+    ((gVector<T> &) mp).operator=((gVector<T> &) bp);
+    return;
+  }
+
+  if (!E.lexicon || (const Nfg<T> *) E.lexicon->N != &N)  return;
+  
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
+    for (int st = 1; st <= N.PlayerList()[pl]->NumStrats(); st++)  {
+      T prob = (T) 1.0;
+
+      for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++) {
+	if ((*E.lexicon->strategies[pl][st])[iset] > 0)
+	  prob *= bp(pl, iset, (*E.lexicon->strategies[pl][st])[iset]);
+      }
+      mp(pl, st) = prob;
+    }
+  }
+}
+
 
 
 template <class T> Nfg<T> *MakeAfg(Efg<T> &E)

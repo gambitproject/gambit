@@ -18,6 +18,9 @@ TEMPLATE void ClearNodeProbs(TypedNode<double> *);
 TEMPLATE void MixedToBehav(const Nfg<double> &,const MixedProfile<double> &,
 			   const Efg<double> &, BehavProfile<double> &);
 
+TEMPLATE void BehavToMixed(const Efg<double> &, const BehavProfile<double> &,
+			   const Nfg<double> &, MixedProfile<double> &);
+
 TEMPLATE void RealizationProbs(const Nfg<double> &N, const MixedProfile<double> &mp,
 			       const Efg<double> &E, BehavProfile<double> &bp,
 			       int pl, const gArray<int> *const actions, Node *);
