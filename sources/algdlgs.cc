@@ -12,6 +12,9 @@
 #include "algdlgs.h"
 #include "wxmisc.h"
 
+#include "valnumber.h"
+#include "valinteger.h"
+
 #include "nfgconst.h"
 
 #include "dlenumpure.h"
@@ -168,7 +171,8 @@ void dialogAlgorithm::OnOK(wxCommandEvent &p_event)
       config.Write("Solutions/StopAfter", 0l);
     }
     else {
-      config.Write("Solutions/StopAfter", (long) m_stopAfter->GetInteger());
+      config.Write("Solutions/StopAfter", 
+		   (long) ToNumber(m_stopAfter->GetValue().c_str()));
     }
   }
 
@@ -299,11 +303,12 @@ void dialogAlgorithm::StopAfterField(void)
   long stopAfter = 0;
   wxConfig config("Gambit");
   config.Read("Solutions/StopAfter", &stopAfter);
+  m_stopAfterValue = (char *) ToText(stopAfter);
 
   m_findAll = new wxCheckBox(this, idALL_CHECKBOX, "Find all");
-  m_stopAfter = new wxIntegerItem(this, "Stop after",
-				  (stopAfter > 0) ? stopAfter : 1,
-				  1, 1, -1, -1);
+  m_stopAfter = new wxTextCtrl(this, -1, "",
+			       wxDefaultPosition, wxDefaultSize, 0,
+			       gIntegerValidator(&m_stopAfterValue));
 
   if (stopAfter == 0) {
     m_findAll->SetValue(true);
@@ -379,7 +384,7 @@ int dialogEnumPure::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -409,7 +414,7 @@ int dialogEnumMixed::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -460,7 +465,7 @@ int dialogLcp::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -499,20 +504,27 @@ void dialogLiap::AlgorithmFields(void)
 
   long nTries = 0;
   config.Read("Solutions/Liap-nTries", &nTries);
+  m_nTriesValue = (char *) ToText(nTries);
+
   wxBoxSizer *nTriesSizer = new wxBoxSizer(wxHORIZONTAL);
   nTriesSizer->Add(new wxStaticText(this, -1, "# Tries"),
 		   0, wxALL | wxCENTER, 5);
-  m_nTries = new wxIntegerItem(this, "nTries", nTries, 1, 1);
+  m_nTries = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gIntegerValidator(&m_nTriesValue));
   nTriesSizer->Add(m_nTries, 0, wxALL, 5);
   m_algorithmBox->Add(nTriesSizer, 0, wxALL, 5);
 
   long accuracy = 4;
   config.Read("Solutions/Liap-accuracy", &accuracy);
+  m_accuracyValue = (char *) ToText(accuracy);
+
   wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
   accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
 		     0, wxALL | wxCENTER, 5);
-  m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy,
-				 1, 1, 150, -1);
+  m_accuracy = new wxTextCtrl(this, -1, "",
+			      wxDefaultPosition, wxDefaultSize, 0,
+			      gIntegerValidator(&m_accuracyValue));
   accuracySizer->Add(m_accuracy, 0, wxALL, 5);
   m_algorithmBox->Add(accuracySizer, 0, wxALL, 5);
 
@@ -532,7 +544,7 @@ int dialogLiap::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -572,21 +584,27 @@ void dialogSimpdiv::AlgorithmFields(void)
 
   long nRestarts = 0;
   config.Read("Solutions/Simpdiv-nRestarts", &nRestarts);
+  m_nRestartsValue = (char *) ToText(nRestarts);
+
   wxBoxSizer *restartSizer = new wxBoxSizer(wxHORIZONTAL);
   restartSizer->Add(new wxStaticText(this, -1, "# restarts"),
 		    0, wxALL | wxCENTER, 5);
-  m_nRestarts = new wxIntegerItem(this, "# restarts", nRestarts,
-				  -1, -1, 150, -1);
+  m_nRestarts = new wxTextCtrl(this, -1, "",
+			       wxDefaultPosition, wxDefaultSize, 0,
+			       gIntegerValidator(&m_nRestartsValue));
   restartSizer->Add(m_nRestarts, 0, wxALL, 5);
   m_algorithmBox->Add(restartSizer, 0, wxALL, 5);
 
   long leashLength = 0;
   config.Read("Solutions/Simpdiv-leashLength", &leashLength);
+  m_leashLengthValue = (char *) ToText(leashLength);
+
   wxBoxSizer *leashSizer = new wxBoxSizer(wxHORIZONTAL);
   leashSizer->Add(new wxStaticText(this, -1, "Leash length"),
 		  0, wxALL | wxCENTER, 5);
-  m_leashLength = new wxIntegerItem(this, "Leash length", leashLength,
-				    -1, -1, 150, -1);
+  m_leashLength = new wxTextCtrl(this, -1, "",
+				 wxDefaultPosition, wxDefaultSize, 0,
+				 gIntegerValidator(&m_leashLengthValue));
   leashSizer->Add(m_leashLength, 0, wxALL, 5);
   m_algorithmBox->Add(leashSizer, 0, wxALL, 5);
 }
@@ -596,7 +614,7 @@ int dialogSimpdiv::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -626,7 +644,7 @@ int dialogPolEnum::StopAfter(void) const
   if (m_findAll->GetValue())
     return 0;
   else
-    return m_stopAfter->GetInteger(); 
+    return ToNumber(m_stopAfter->GetValue().c_str());
 }
 
 //=======================================================================
@@ -755,7 +773,7 @@ void dialogQre::OnOK(wxCommandEvent &p_event)
   config.Write("Solutions/Qre-minLam", m_minLam->GetValue());
   config.Write("Solutions/Qre-maxLam", m_maxLam->GetValue());
   config.Write("Solutions/Qre-delLam", m_delLam->GetValue());
-  config.Write("Solutions/Qre-accuracy", (long) m_accuracy->GetInteger());
+  config.Write("Solutions/Qre-accuracy", (long) Accuracy());
   config.Write("Solutions/Qre-startOption",
 	       (long) m_startOption->GetSelection());
   p_event.Skip();
@@ -767,34 +785,43 @@ void dialogQre::AlgorithmFields(void)
     (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
   m_topSizer->Add(m_algorithmBox, 0, wxALL, 5);
 
-  wxString minLam, maxLam, delLam;
+  m_minLamValue = ".01";
+  m_maxLamValue = "30";
+  m_delLamValue = ".01";
   long accuracy = 4;
   wxConfig config("Gambit");
-  config.Read("Solutions/Qre-minLam", &minLam);
-  config.Read("Solutions/Qre-maxLam", &maxLam);
-  config.Read("Solutions/Qre-delLam", &delLam);
+  config.Read("Solutions/Qre-minLam", &m_minLamValue);
+  config.Read("Solutions/Qre-maxLam", &m_maxLamValue);
+  config.Read("Solutions/Qre-delLam", &m_delLamValue);
   config.Read("Solutions/Qre-accuracy", &accuracy);
+  m_accuracyValue = (char *) ToText(accuracy);
 
   wxBoxSizer *lambdaSizer = new wxBoxSizer(wxVERTICAL);
 
   wxBoxSizer *minLamSizer = new wxBoxSizer(wxHORIZONTAL);
   minLamSizer->Add(new wxStaticText(this, -1, "minLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_minLam = new wxNumberItem(this, "minLam", minLam.c_str());
+  m_minLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_minLamValue));
   minLamSizer->Add(m_minLam, 0, wxALL, 5);
   lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
   wxBoxSizer *maxLamSizer = new wxBoxSizer(wxHORIZONTAL);
   maxLamSizer->Add(new wxStaticText(this, -1, "maxLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_maxLam = new wxNumberItem(this, "maxLam", maxLam.c_str());
+  m_maxLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_maxLamValue));
   maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
   lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
 
   wxBoxSizer *delLamSizer = new wxBoxSizer(wxHORIZONTAL);
   delLamSizer->Add(new wxStaticText(this, -1, "delLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_delLam = new wxNumberItem(this, "delLam", delLam.c_str());
+  m_delLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_delLamValue));
   delLamSizer->Add(m_delLam, 0, wxALL, 5);
   lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
 
@@ -803,7 +830,9 @@ void dialogQre::AlgorithmFields(void)
   wxBoxSizer *accuracySizer = new wxBoxSizer(wxHORIZONTAL);
   accuracySizer->Add(new wxStaticText(this, -1, "Accuracy: 1.0 e -"),
 		     0, wxALL | wxCENTER, 5);
-  m_accuracy = new wxIntegerItem(this, "Accuracy: 1.0 e -", accuracy, -1, -1, -1, -1);
+  m_accuracy = new wxTextCtrl(this, -1, "Accuracy: 1.0 e -",
+			      wxDefaultPosition, wxDefaultSize, 0,
+			      gIntegerValidator(&m_accuracyValue));
   accuracySizer->Add(m_accuracy, 0, wxALL, 5);
   otherSizer->Add(accuracySizer, 0, wxALL, 5);
 
@@ -874,16 +903,22 @@ void dialogQreGrid::OnOK(wxCommandEvent &p_event)
 
 void dialogQreGrid::AlgorithmFields(void)
 {
-  wxString minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
-
+  m_minLamValue = ".01";
+  m_maxLamValue = "30";
+  m_delLamValue = ".01";
+  m_delp1Value = ".01";
+  m_delp2Value = ".01";
+  m_tol1Value = ".01";
+  m_tol2Value = ".01";
+  
   wxConfig config("Gambit");
-  config.Read("Solutions/QreGrid-minLam", &minLam);
-  config.Read("Solutions/QreGrid-maxLam", &maxLam);
-  config.Read("Solutions/QreGrid-delLam", &delLam);
-  config.Read("Solutions/QreGrid-delp1", &delp1);
-  config.Read("Solutions/QreGrid-delp2", &delp2);
-  config.Read("Solutions/QreGrid-tol1", &tol1);
-  config.Read("Solutions/QreGrid-tol2", &tol2);
+  config.Read("Solutions/QreGrid-minLam", &m_minLamValue);
+  config.Read("Solutions/QreGrid-maxLam", &m_maxLamValue);
+  config.Read("Solutions/QreGrid-delLam", &m_delLamValue);
+  config.Read("Solutions/QreGrid-delp1", &m_delp1Value);
+  config.Read("Solutions/QreGrid-delp2", &m_delp2Value);
+  config.Read("Solutions/QreGrid-tol1", &m_tol1Value);
+  config.Read("Solutions/QreGrid-tol2", &m_tol2Value);
 
   m_algorithmBox = new wxStaticBoxSizer
     (new wxStaticBox(this, -1, "Algorithm parameters"), wxVERTICAL);
@@ -894,21 +929,27 @@ void dialogQreGrid::AlgorithmFields(void)
   wxBoxSizer *minLamSizer = new wxBoxSizer(wxHORIZONTAL);
   minLamSizer->Add(new wxStaticText(this, -1, "minLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_minLam = new wxNumberItem(this, "minLam", minLam.c_str());
+  m_minLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_minLamValue));
   minLamSizer->Add(m_minLam, 0, wxALL, 5);
   lambdaSizer->Add(minLamSizer, 0, wxALL, 5);
 
   wxBoxSizer *maxLamSizer = new wxBoxSizer(wxHORIZONTAL);
   maxLamSizer->Add(new wxStaticText(this, -1, "maxLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_maxLam = new wxNumberItem(this, "maxLam", maxLam.c_str());
+  m_maxLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_maxLamValue));
   maxLamSizer->Add(m_maxLam, 0, wxALL, 5);
   lambdaSizer->Add(maxLamSizer, 0, wxALL, 5);
 
   wxBoxSizer *delLamSizer = new wxBoxSizer(wxHORIZONTAL);
   delLamSizer->Add(new wxStaticText(this, -1, "delLam"),
 		   0, wxALL | wxCENTER, 5);
-  m_delLam = new wxNumberItem(this, "delLam", delLam.c_str());
+  m_delLam = new wxTextCtrl(this, -1, "",
+			    wxDefaultPosition, wxDefaultSize, 0,
+			    gNumberValidator(&m_delLamValue));
   delLamSizer->Add(m_delLam, 0, wxALL, 5);
   lambdaSizer->Add(delLamSizer, 0, wxALL, 5);
 
@@ -917,28 +958,36 @@ void dialogQreGrid::AlgorithmFields(void)
   wxBoxSizer *delp1Sizer = new wxBoxSizer(wxHORIZONTAL);
   delp1Sizer->Add(new wxStaticText(this, -1, "Grid 1 Del"),
 		  0, wxALL | wxCENTER, 5);
-  m_delp1 = new wxNumberItem(this, "Grid 1 Del", delp1.c_str());
+  m_delp1 = new wxTextCtrl(this, -1, "",
+			   wxDefaultPosition, wxDefaultSize, 0,
+			   gNumberValidator(&m_delp1Value));
   delp1Sizer->Add(m_delp1, 0, wxALL, 5);
   tolSizer->Add(delp1Sizer, 0, wxALL, 5);
 
   wxBoxSizer *tol1Sizer = new wxBoxSizer(wxHORIZONTAL);
   tol1Sizer->Add(new wxStaticText(this, -1, "Grid 1 Tol"),
 		 0, wxALL | wxCENTER, 5);
-  m_tol1 = new wxNumberItem(this, "Grid 1 Tol", tol1.c_str());
+  m_tol1 = new wxTextCtrl(this, -1, "",
+			  wxDefaultPosition, wxDefaultSize, 0,
+			  gNumberValidator(&m_tol1Value));
   tol1Sizer->Add(m_tol1, 0, wxALL, 5);
   tolSizer->Add(tol1Sizer, 0, wxALL, 5);
 
   wxBoxSizer *delp2Sizer = new wxBoxSizer(wxHORIZONTAL);
   delp2Sizer->Add(new wxStaticText(this, -1, "Grid 2 Del"),
 		  0, wxALL | wxCENTER, 5);
-  m_delp2 = new wxNumberItem(this, "Grid 2 Del", delp2.c_str());
+  m_delp2 = new wxTextCtrl(this, -1, "",
+			   wxDefaultPosition, wxDefaultSize, 0,
+			   gNumberValidator(&m_delp2Value));
   delp2Sizer->Add(m_delp2, 0, wxALL, 5);
   tolSizer->Add(delp2Sizer, 0, wxALL, 5);
 
   wxBoxSizer *tol2Sizer = new wxBoxSizer(wxHORIZONTAL);
   tol2Sizer->Add(new wxStaticText(this, -1, "Grid 2 Tol"),
 		 0, wxALL | wxCENTER, 5);
-  m_tol2 = new wxNumberItem(this, "Grid 2 Tol", tol2.c_str());
+  m_tol2 = new wxTextCtrl(this, -1, "",
+			  wxDefaultPosition, wxDefaultSize, 0,
+			  gNumberValidator(&m_tol2Value));
   tol2Sizer->Add(m_tol2, 0, wxALL, 5);
   tolSizer->Add(tol2Sizer, 0, wxALL, 5);
 

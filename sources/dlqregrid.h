@@ -11,10 +11,13 @@
 
 class dialogQreGrid : public dialogPxi {
 private:
-  wxNumberItem *m_minLam, *m_maxLam, *m_delLam;
-  wxNumberItem *m_delp1, *m_tol1, *m_delp2, *m_tol2;
+  wxTextCtrl *m_minLam, *m_maxLam, *m_delLam;
+  wxTextCtrl *m_delp1, *m_tol1, *m_delp2, *m_tol2;
   wxCheckBox *m_multiGrid;
   wxRadioBox *m_startOption;
+
+  wxString m_minLamValue, m_maxLamValue, m_delLamValue;
+  wxString m_delp1Value, m_tol1Value, m_delp2Value, m_tol2Value;
 
   const char *HelpString(void) const  { return "QRE Grid"; }
 
@@ -28,19 +31,19 @@ public:
   virtual ~dialogQreGrid();
 
   double MinLam(void) const
-    { return m_minLam->GetNumber(); }
+    { return ToNumber(m_minLam->GetValue().c_str()); }
   double MaxLam(void) const
-    { return m_maxLam->GetNumber(); }
+    { return ToNumber(m_maxLam->GetValue().c_str()); }
   double DelLam(void) const
-    { return m_delLam->GetNumber(); }
+    { return ToNumber(m_delLam->GetValue().c_str()); }
   double Tol1(void) const
-    { return m_tol1->GetNumber(); }
+    { return ToNumber(m_tol1->GetValue().c_str()); }
   double DelP1(void) const
-    { return m_delp1->GetNumber(); }
+    { return ToNumber(m_delp1->GetValue().c_str()); }
   double Tol2(void) const
-    { return m_tol2->GetNumber(); }
+    { return ToNumber(m_tol2->GetValue().c_str()); }
   double DelP2(void) const
-    { return m_delp2->GetNumber(); }
+    { return ToNumber(m_delp2->GetValue().c_str()); }
 
   bool MultiGrid(void) const
     { return m_multiGrid->GetValue(); }

@@ -11,8 +11,10 @@
 
 class dialogLiap : public dialogAlgorithm {
 private:
-  wxIntegerItem *m_accuracy, *m_nTries;
+  wxTextCtrl *m_accuracy, *m_nTries;
   wxRadioBox *m_startOption;
+  
+  wxString m_accuracyValue, m_nTriesValue;
 
   const char *HelpString(void) const { return "Liap"; }
 
@@ -28,8 +30,10 @@ public:
 
   int StopAfter(void) const;
 
-  int Accuracy(void) const { return m_accuracy->GetInteger(); }
-  int NumTries(void) const  { return m_nTries->GetInteger(); }
+  int Accuracy(void) const 
+    { return ToNumber(m_accuracy->GetValue().c_str()); }
+  int NumTries(void) const 
+    { return ToNumber(m_nTries->GetValue().c_str()); }
 
   int StartOption(void) const { return m_startOption->GetSelection(); }
 

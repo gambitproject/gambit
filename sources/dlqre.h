@@ -11,9 +11,10 @@
 
 class dialogQre : public dialogPxi {
 private:
-  wxNumberItem *m_minLam, *m_maxLam, *m_delLam;
-  wxIntegerItem *m_accuracy;
+  wxTextCtrl *m_minLam, *m_maxLam, *m_delLam, *m_accuracy;
   wxRadioBox *m_startOption;
+
+  wxString m_minLamValue, m_maxLamValue, m_delLamValue, m_accuracyValue;
 
   const char *HelpString(void) const  { return "QRE"; }
   
@@ -27,13 +28,13 @@ public:
   virtual ~dialogQre();
 
   double MinLam(void) const
-    { return m_minLam->GetNumber(); }
+    { return ToNumber(m_minLam->GetValue().c_str()); }
   double MaxLam(void) const
-    { return m_maxLam->GetNumber(); }
+    { return ToNumber(m_maxLam->GetValue().c_str()); }
   double DelLam(void) const
-    { return m_delLam->GetNumber(); }
+    { return ToNumber(m_delLam->GetValue().c_str()); }
   int Accuracy(void) const
-    { return m_accuracy->GetInteger(); }
+    { return ToNumber(m_accuracy->GetValue().c_str()); }
 
   int StartOption(void) const
     { return m_startOption->GetSelection(); }

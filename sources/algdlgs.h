@@ -34,9 +34,11 @@ protected:
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
   wxCheckBox *m_markSubgames, *m_selectSolutions;
 
-  wxIntegerItem *m_stopAfter;
+  wxTextCtrl *m_stopAfter;
   wxCheckBox *m_findAll;
   wxRadioBox *m_precision;
+
+  wxString m_stopAfterValue;
 
   void DominanceFields(bool p_mixed);
   void SubgameFields(void);

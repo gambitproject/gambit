@@ -126,38 +126,6 @@ void wxKillHelp(void);
 #define DESTROY_DIALOG      1
 #define UPDATE_DIALOG       2
 
-
-//
-// Some specialized panel items that implement constraints
-//
-class wxIntegerItem : public wxTextCtrl {
-private:
-  int m_value;
-  wxString m_data;
-
-public:
-  wxIntegerItem(wxPanel *p_parent, char *p_label, int p_default = 0,
-		int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
-  virtual ~wxIntegerItem() { }
-
-  void SetInteger(int p_value);
-  int GetInteger(void) const { return m_value; }
-};
-
-class wxNumberItem : public wxTextCtrl {
-private:
-  gNumber m_value;
-  wxString m_data;
-
-public:
-  wxNumberItem(wxPanel *p_parent, char *p_label, const gText &p_default,
-	       int p_x = -1, int p_y = -1, int p_w = -1, int p_h = -1);
-  virtual ~wxNumberItem() { }
-
-  void SetNumber(const gNumber &p_value);
-  gNumber GetNumber(void) const { return m_value; }
-};
-
 // in efgsolvd.cc, nfgsolvd.cc
 const int idTYPE_RADIOBOX = 501;
 const int idNUM_RADIOBOX = 502;
