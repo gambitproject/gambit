@@ -318,7 +318,7 @@ dialogActionLabel::dialogActionLabel(Infoset *p_infoset, wxWindow *p_parent)
     NewLine();
   }
 
-  if (m_infoset->NumActions() >= s_actionsPerDialog) {
+  if (m_infoset->NumActions() > s_actionsPerDialog) {
     m_backButton = new wxButton(this, (wxFunction) CallbackBack,
 					"<< Back");
     m_backButton->SetClientData((char *) this);
@@ -490,7 +490,7 @@ dialogActionProbs::dialogActionProbs(Infoset *p_infoset, wxWindow *p_parent)
     NewLine();
   }
 
-  if (m_infoset->NumActions() >= s_actionsPerDialog) {
+  if (m_infoset->NumActions() > s_actionsPerDialog) {
     m_backButton = new wxButton(this, (wxFunction) CallbackBack,
 					"<< Back");
     m_backButton->SetClientData((char *) this);
@@ -625,7 +625,8 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
     NewLine();
   }
 
-  m_outcomePayoffs = new wxNumberItem *[m_efg.NumPlayers()];
+  m_outcomePayoffs = new wxNumberItem *[gmin(m_efg.NumPlayers(),
+					     s_payoffsPerDialog)];
 
   for (int pl = 1; pl <= gmin(m_efg.NumPlayers(),
 			      s_payoffsPerDialog); pl++) {
@@ -641,7 +642,7 @@ dialogEfgPayoffs::dialogEfgPayoffs(const Efg &p_efg, EFOutcome *p_outcome,
 #endif
 
   NewLine();
-  if (m_efg.NumPlayers() >= s_payoffsPerDialog) {
+  if (m_efg.NumPlayers() > s_payoffsPerDialog) {
     m_backButton = new wxButton(this, (wxFunction) CallbackBack,
 					"<< Back");
     m_backButton->SetClientData((char *) this);
