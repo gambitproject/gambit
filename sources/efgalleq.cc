@@ -75,7 +75,7 @@ AllEFNashSolveModule::AllEFNashSolveModule(const EFSupport &S,
 
 void AllEFNashSolveModule::NashEnum(gStatus &p_status)
 {
-  for (int i = possiblenashsubsupports.Length(); i>= 1; i--) {
+  for (int i = 1; i <= possiblenashsubsupports.Length(); i++) {
     p_status.Get();
     p_status.SetProgress((double) (i-1) / (double) possiblenashsubsupports.Length());
     long newevals = 0;
