@@ -1,0 +1,88 @@
+//
+// A gcl program to check theoretical results from McKelvey Palfrey 
+// paper "Endogeneity of Alternating Offers,"  forthcoming JET.  
+//
+
+// Create seven stage holdout game (or read in previously
+// saved game to save time). 
+
+b:=.5;
+del:=.9;
+
+// Include["holdout.gcl"]
+// e:= HoldoutGame[7, .5, .5, del, b]
+// SaveEfg[e,"holdout.efg"]
+
+e:=LoadEfg["holdout.efg"]
+
+// set variables to refer to the chance moves, 
+
+n:=RootNode[e];
+i1:=Infoset[n];
+i2:=Infoset[n#1];
+
+// open outfile 
+o:=Output["eaotest.out"];
+SetListFormat[lf->0,commas->False,braces->False];
+SetNumericFormat[precis->3];
+
+// define the constants demarcating the regions of equilibria
+
+R := (1.0-b)/(1.0-del*b);
+Q := (del-b) / (del*(1.0-del*b));
+
+o << "\nb: " << b << " del: " << del;
+o << " R: " << R << " Q: " << Q << "\n";
+
+// define variable, g,  for actions where players give in.  
+
+a:=Actions[e]
+g:=Filter[a,Name[a]="G"]
+g:={Flatten[g_1],Flatten[g_2]}
+
+// Now, check various regions to make sure they have the right 
+// kinds of equilibria predicted by the theorems.  
+
+o << "\nProbabilities of Giving in by player and move:\n\n"
+
+o << "\nIn these regions there should be just one equilibrium, with";
+o << "\nfull alternating offers, lasting J innings (2 J moves)\n ";
+
+For[J:=1,J<=4,J:=J+1,
+  r1:=(Q^J+Q^(J-1))/2.0;
+  r2:=(R*Q^(J-1))/2.0;
+  SetChanceProbs[i1,{1.0-r1,r1}];
+  SetChanceProbs[i2,{1.0-r2,r2}];
+  s:=AllNash[e];
+  o << "\nJ: " << J << " r1: " << r1 << "  r2: " << r2;
+  o << "\n                        move";
+  o << "\nplayer    1      2      3      4      5      6      7  \n"; 
+  For[k:=1,k<=Length[s],k:=k+1,
+    o << "   1: " << Float[ActionProb[s_k,g]_1] << "\n";
+    o << "   2: " << Float[ActionProb[s_k,g]_2] << "\n\n"
+  ]
+];
+
+o << "\n\nIn these regions there may be multiple equilibria. At least ";
+o << "\none should be full simultaneous offer, lasting M moves:\n";
+
+For[M:=1,M<=4,M:=M+1,
+  r1:=(R^(M+1)+R^M)/2.0;
+  r2:=r1;
+  SetChanceProbs[i1,{1.0-r1,r1}];
+  SetChanceProbs[i2,{1.0-r2,r2}];
+  s:=AllNash[e];
+  o << "\nM: " << M << " r1: " << r1 << "  r2: " << r2;
+  o << "\n                        move";
+  o << "\nplayer    1      2      3      4      5      6      7  \n"; 
+  For[k:=1,k<=Length[s],k:=k+1,
+    o << "   1: " << Float[ActionProb[s_k,g]_1] << "\n";
+    o << "   2: " << Float[ActionProb[s_k,g]_2] << "\n\n"
+  ]
+];
+
+// close file
+
+o:=;
+
+

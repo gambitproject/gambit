@@ -1,0 +1,24 @@
+//
+// A gcl script to test extensive form game building 
+//
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+Include["holdout.gcl"]
+e:= HoldoutGame[7,0.5, 0.6, 0.9,0.5];
+SetName[e,"McKelvey-Palfrey (JET 77), 7 stage version of holdout game"];
+<< SaveEfg[e,"holdout.efg"];
+
+Include["condjury.gcl"]
+e:=CondorcetJuryGame[3, 2, .5, .75, .75];
+SetName[e,"Feddersen-Pesendorfer, three person Condorcet jury game"];
+<< SaveEfg[e,"condjury.efg"];
+
+Include["chainst.gcl"]
+e:= ChainStoreGame[3,0.5];
+SetName[e,"Chain store paradox, with three entrants"];
+<< SaveEfg[e,"chainst.efg"]
+<< "Finished gcltest.gcl"
+
+
+
