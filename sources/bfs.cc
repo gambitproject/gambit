@@ -69,6 +69,8 @@ TEMPLATE class gList<BFS<double> >;
 TEMPLATE class gList<BFS<gRational> >;
 TEMPLATE class gNode<BFS<double> >;
 TEMPLATE class gNode<BFS<gRational> >;
+TEMPLATE class gListIter<BFS<double> >;
+TEMPLATE class gListIter<BFS<gRational> >;
 
 TEMPLATE class gBaseMap<int, double>;
 TEMPLATE class gOrdMap<int, double>;

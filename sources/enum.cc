@@ -9,6 +9,7 @@
 #include "nfgiter.h"
 
 #include "enum.h"
+#include "glistit.h"
 
 void Epsilon_T(double &v, int i);
 void Epsilon_T(gRational &v, int i);
@@ -124,18 +125,25 @@ template <class T> int EnumModule<T>::Enum(void)
   T sum;
   bool nash;
 
-  for(i=2;i<=v2 && !params.status.Get();i++) {
+  gListIter< BFS<T> > iter1((gList< BFS<T> > &) verts1);
+  gListIter< BFS<T> > iter2((gList< BFS<T> > &) verts2);
+
+  for( iter2.GoFirst(),iter2++; ! iter2.PastEnd(); iter2++ ) {
+    bfs1 = iter2.GetValue();
+//  for(i=2;i<=v2 && !params.status.Get();i++) {
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
-    bfs1 = verts2[i];
+//    bfs1 = verts2[i];
 //    bfs1 = poly2.VertexList()[i];
-    for(j=2;j<=v1;j++) {
-      bfs2 = verts1[j];
+    for( iter1.GoFirst(),iter1++; ! iter1.PastEnd(); iter1++ ) {
+      bfs2 = iter1.GetValue();
+//    for(j=2;j<=v1;j++) {
+//      bfs2 = verts1[j];
 //      bfs2 = poly1.VertexList()[j];
-
+      
       // check if solution is nash 
       // need only check complementarity, since it is feasible
-
+      
       nash=1;
       for(k=1;k<=n1 && nash==1;k++)
 	if(bfs1.IsDefined(k) && bfs2.IsDefined(-k))
