@@ -257,9 +257,6 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	    break;
 	  }
 
-	  gStandardOutput gout;
-	  gout << p << '\n';
-
 	  if (sqrt(gradient.NormSquared()) < .001 &&
 	      fval < 1.0e-8) {
 	    solutions.Append(MixedSolution(p, "Liap[NFG]"));
