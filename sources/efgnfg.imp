@@ -102,7 +102,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
     for (int st = 1; st <= support.NumStrats(pl); st++)  {
       int snum = support.Strategies(pl)[st]->Number();
       if (mp(pl, st) > (T) 0)  {
-	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
+	const gArray<int> *const actions = ((FullEfg &) E).lexicon->strategies[pl][snum];
 
 	n->bval = mp(pl, st);
 
@@ -119,20 +119,20 @@ template <class T>
 void BehavToMixed(const Efg &E, const BehavProfile<T> &bp, 
 		  const Nfg &N, MixedProfile<T> &mp)
 {
-  if (E.afg == &N)   {
+  if (((FullEfg &) E).afg == &N)   {
     ((gVector<T> &) mp).operator=((gVector<T> &) bp);
     return;
   }
 
-  if (!E.lexicon || E.lexicon->N != &N)  return;
+  if (!((FullEfg &) E).lexicon || ((FullEfg &) E).lexicon->N != &N)  return;
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     for (int st = 1; st <= N.NumStrats(pl); st++)  {
       T prob = (T) 1;
 
       for (int iset = 1; iset <= E.Players()[pl]->NumInfosets(); iset++) {
-	if ((*E.lexicon->strategies[pl][st])[iset] > 0)
-	  prob *= bp(pl, iset, (*E.lexicon->strategies[pl][st])[iset]);
+	if ((*((FullEfg &) E).lexicon->strategies[pl][st])[iset] > 0)
+	  prob *= bp(pl, iset, (*((FullEfg &) E).lexicon->strategies[pl][st])[iset]);
       }
       mp(pl, st) = prob;
     }

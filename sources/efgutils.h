@@ -52,7 +52,7 @@ bool IsPerfectRecall(const Efg &);
 bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
 
-Efg *CompressEfg(const Efg &, const EFSupport &);
+FullEfg *CompressEfg(const FullEfg &, const EFSupport &);
 
 #endif // EFGUTILS_H
 

@@ -36,7 +36,7 @@ int _SeqForm(const EFSupport &support, const SeqFormParams &params,
   return 1;
 }
 
-void efgLcpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+void efgLcpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
 			       gList<BehavSolution> &solns)
 {
   int npiv;

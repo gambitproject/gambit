@@ -16,7 +16,7 @@ private:
   int nevals;
   PolEnumParams params;
 
-  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_POLENUM_NFG; }
 
 public:

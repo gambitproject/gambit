@@ -215,9 +215,9 @@ bool IsPerfectRecall(const Efg &efg, Infoset *&s1, Infoset *&s2)
   return true;
 }
 
-Efg *CompressEfg(const Efg &efg, const EFSupport &S)
+FullEfg *CompressEfg(const FullEfg &efg, const EFSupport &S)
 {
-  Efg *newefg = new Efg(efg);
+  FullEfg *newefg = new FullEfg(efg);
 
   for (int pl = 1; pl <= newefg->NumPlayers(); pl++)   { 
     EFPlayer *player = newefg->Players()[pl];
@@ -238,7 +238,7 @@ Efg *CompressEfg(const Efg &efg, const EFSupport &S)
 #include "rational.h"
 // prototype in efg.h
 
-void RandomEfg(Efg &efg)
+void RandomEfg(FullEfg &efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)

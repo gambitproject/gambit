@@ -27,8 +27,65 @@ template <class T> class BehavProfile;
 template <class T> class MixedProfile;
 template <class T> class PureBehavProfile;
 
-class Efg     {
+class Efg {
+public:
+  class Exception : public gException   {
+  public:
+    virtual ~Exception()   { }
+    gText Description(void) const    { return "Efg error"; }
+  };
 
+  virtual ~Efg() { }
+
+  virtual const gText &GetTitle(void) const = 0;
+  virtual long RevisionNumber(void) const = 0;
+
+  virtual int NumPlayers(void) const = 0;
+  virtual const EFPlayer *GetPlayer(const int pl) const = 0;
+  virtual const gArray<EFPlayer *> &Players(void) const = 0; 
+
+  virtual int ProfileLength(void) const = 0;
+  virtual int TotalNumInfosets(void) const = 0;
+
+  virtual gArray<int> NumInfosets(void) const = 0;
+  virtual int NumPlayerInfosets(void) const = 0;
+  virtual int NumChanceInfosets(void) const = 0;
+  virtual int NumPlayersInfosets(const int pl) const = 0;
+  virtual gPVector<int> NumActions(void) const = 0;
+  virtual int NumPlayerActions(void) const = 0;
+  virtual int NumChanceActions(void) const = 0;
+  virtual int NumActionsAtInfoset(const int pl, const int iset) const = 0;
+  virtual int NumNodesInInfoset(const int pl, const int iset) const = 0;
+  virtual gPVector<int> NumMembers(void) const = 0;
+  virtual Infoset *GetInfosetByIndex(const int&, const int&) const = 0;
+
+  virtual gNumber GetChanceProb(Infoset *, int) const = 0;
+  virtual gNumber GetChanceProb(const Action *) const = 0;
+
+  virtual Node *RootNode(void) const = 0;
+  virtual bool IsSuccessor(const Node *n, const Node *from) const = 0;
+  virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
+  virtual gList<const Node*> TerminalNodes(void) const = 0;  
+
+  virtual void UnmarkSubgames(Node *n) = 0;
+  virtual bool IsLegalSubgame(Node *n) = 0;
+  virtual void MarkSubgames(const gList<Node *> &list) = 0;
+  virtual bool DefineSubgame(Node *n) = 0;
+  virtual void RemoveSubgame(Node *n) = 0;
+
+  virtual gNumber MinPayoff(int pl = 0) const = 0;
+  virtual gNumber MaxPayoff(int pl = 0) const = 0;
+  virtual bool IsConstSum(void) const = 0;
+  virtual void InitPayoffs(void) const = 0;
+  virtual gNumber Payoff(const EFOutcome *, int pl) const = 0;
+  virtual gArray<gNumber> Payoff(const EFOutcome *) const = 0;
+  virtual void Payoff(const gPVector<int> &profile,
+		      gVector<gNumber> &payoff) const = 0;
+  virtual void Payoff(const gArray<gArray<int> *> &profile,
+		      gArray<gNumber> &payoff) const = 0;
+};
+
+class FullEfg : public Efg  {
 private:
   // this is used to track memory leakage; #define MEMCHECK to use it
 #ifdef MEMCHECK
@@ -40,211 +97,203 @@ friend class EfgFile;
 friend class Nfg;
 
 protected:
-    bool sortisets;
-    mutable bool m_dirty;
-    mutable long m_revision;
-    mutable long m_outcome_revision;
-    gText title, comment;
-    gBlock<EFPlayer *> players;
-    gBlock<EFOutcome *> outcomes;
-    Node *root;
-    EFPlayer *chance;
-    mutable Nfg *afg;
-    mutable Lexicon *lexicon;
+  bool sortisets;
+  mutable bool m_dirty;
+  mutable long m_revision;
+  mutable long m_outcome_revision;
+  gText title, comment;
+  gBlock<EFPlayer *> players;
+  gBlock<EFOutcome *> outcomes;
+  Node *root;
+  EFPlayer *chance;
+  mutable Nfg *afg;
+  mutable Lexicon *lexicon;
 
-    // this is for use with the copy constructor
-    void CopySubtree(Node *, Node *);
+  // this is for use with the copy constructor
+  void CopySubtree(Node *, Node *);
 
-    void CopySubtree(Node *, Node *, Node *);
-    void MarkSubtree(Node *);
-    void UnmarkSubtree(Node *);
+  void CopySubtree(Node *, Node *, Node *);
+  void MarkSubtree(Node *);
+  void UnmarkSubtree(Node *);
 
-    Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
-
-    void SortInfosets(void);
-    void NumberNodes(Node *, int &);
+  Infoset *CreateInfoset(int n, EFPlayer *pl, int br);
+  
+  void SortInfosets(void);
+  void NumberNodes(Node *, int &);
   
 // These are auxiliary functions used by the .efg file reader code
-    Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
-    Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
-    EFOutcome *GetOutcomeByIndex(int index) const;
-    EFOutcome *CreateOutcomeByIndex(int index);
-    void Reindex(void);
+  Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
+  Infoset *CreateInfosetByIndex(EFPlayer *p, int index, int br);
+  EFOutcome *GetOutcomeByIndex(int index) const;
+  EFOutcome *CreateOutcomeByIndex(int index);
+  void Reindex(void);
 
-    void DeleteLexicon(void) const;
+  void DeleteLexicon(void) const;
 
-    EFOutcome *NewOutcome(int index);
+  EFOutcome *NewOutcome(int index);
 
-    void WriteEfgFile(gOutput &, Node *) const;
+  void WriteEfgFile(gOutput &, Node *) const;
 
-    void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
-    void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gArray<gNumber> &) const;
-
-    void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
+  void Payoff(Node *n, gNumber, const gPVector<int> &, gVector<gNumber> &) const;
+  void Payoff(Node *n, gNumber, const gArray<gArray<int> *> &, gArray<gNumber> &) const;
+  
+  void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
 
 
 // These are used in identification of subgames
-    void MarkTree(Node *, Node *);
-    bool CheckTree(Node *, Node *);
-    void MarkSubgame(Node *, Node *);
+  void MarkTree(Node *, Node *);
+  bool CheckTree(Node *, Node *);
+  void MarkSubgame(Node *, Node *);
 
-  public:
-    class Exception : public gException   {
-    public:
-      virtual ~Exception()   { }
-      gText Description(void) const    { return "Efg error"; }
-    };
+public:
+  FullEfg(void);
+  FullEfg(const FullEfg &, Node * = 0);
+  virtual ~FullEfg();
 
-    Efg(void);
-    Efg(const Efg &, Node * = 0);
+  // TITLE ACCESS AND MANIPULATION
+  void SetTitle(const gText &s);
+  const gText &GetTitle(void) const;
 
-       //# DESTRUCTOR
-    ~Efg();
+  void SetComment(const gText &);
+  const gText &GetComment(void) const;
 
-       //# TITLE ACCESS AND MANIPULATION
-    void SetTitle(const gText &s);
-    const gText &GetTitle(void) const;
+  // WRITING DATA FILES
+  void WriteEfgFile(gOutput &p_file, int p_nDecimals) const;
 
-    void SetComment(const gText &);
-    const gText &GetComment(void) const;
-
-       //# WRITING DATA FILES
-    void WriteEfgFile(gOutput &p_file, int p_nDecimals) const;
-
-       //# DATA ACCESS -- GENERAL INFORMATION
-    bool IsConstSum(void) const; 
-    long RevisionNumber(void) const { return m_revision; }
-    bool IsDirty(void) const { return m_dirty; }
-    void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
-    gNumber MinPayoff(int pl = 0) const;
-    gNumber MaxPayoff(int pl = 0) const;
-
-    Node *RootNode(void) const;
-    bool IsSuccessor(const Node *n, const Node *from) const;
-    bool IsPredecessor(const Node *n, const Node *of) const;
+  // DATA ACCESS -- GENERAL INFORMATION
+  bool IsConstSum(void) const; 
+  long RevisionNumber(void) const { return m_revision; }
+  bool IsDirty(void) const { return m_dirty; }
+  void SetIsDirty(bool p_dirty) { m_dirty = p_dirty; }
+  gNumber MinPayoff(int pl = 0) const;
+  gNumber MaxPayoff(int pl = 0) const;
+  
+  Node *RootNode(void) const;
+  bool IsSuccessor(const Node *n, const Node *from) const;
+  bool IsPredecessor(const Node *n, const Node *of) const;
   //    const Node* Consequence(const Node&, Action&) const;
-    gList<Node*> Children(const Node&) const;
-    void DescendantNodesRECURSION(const Node*, 
-				  const EFSupport&, 
-				  gList<const Node*>&) const;
-    void NonterminalDescendantsRECURSION(const Node*, 
-					 const EFSupport&, 
-					 gList<const Node*>&) const;
-    void TerminalDescendantsRECURSION(const Node*, 
-				      const EFSupport&, 
-				      gList<const Node*>&) const;
-    gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
-    gList<const Node*> NonterminalDescendants(const Node&, 
-					      const EFSupport&) const;
-    gList<const Node*> TerminalDescendants(const Node&, 
-					   const EFSupport&) const;
-    gList<const Node*> TerminalNodes() const;
-    gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
+  gList<Node*> Children(const Node&) const;
+  void DescendantNodesRECURSION(const Node*, 
+				const EFSupport&, 
+				gList<const Node*>&) const;
+  void NonterminalDescendantsRECURSION(const Node*, 
+				       const EFSupport&, 
+				       gList<const Node*>&) const;
+  void TerminalDescendantsRECURSION(const Node*, 
+				    const EFSupport&, 
+				    gList<const Node*>&) const;
+  gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
+  gList<const Node*> NonterminalDescendants(const Node&, 
+					    const EFSupport&) const;
+  gList<const Node*> TerminalDescendants(const Node&, 
+					 const EFSupport&) const;
+  gList<const Node*> TerminalNodes(void) const;
+  gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
 
-       //# DATA ACCESS -- PLAYERS
-    int NumPlayers(void) const;
-    EFPlayer *GetChance(void) const;
-    EFPlayer *NewPlayer(void);
-    const EFPlayer *GetPlayer(const int pl) const { return players[pl]; }
-    const gArray<EFPlayer *> &Players(void) const  { return players; }
+  // DATA ACCESS -- PLAYERS
+  int NumPlayers(void) const;
+  EFPlayer *GetChance(void) const;
+  EFPlayer *NewPlayer(void);
+  const EFPlayer *GetPlayer(const int pl) const { return players[pl]; }
+  const gArray<EFPlayer *> &Players(void) const  { return players; }
 
-       //# DATA ACCESS -- INFOSETS
-    Infoset *GetInfosetByIndex(const int&, const int&) const;
-    gBlock<Infoset *> Infosets() const;
+  // DATA ACCESS -- INFOSETS
+  Infoset *GetInfosetByIndex(const int&, const int&) const;
+  gBlock<Infoset *> Infosets() const;
 
-       //# DATA ACCESS -- OUTCOMES
-    int NumOutcomes(void) const;
-    const gArray<EFOutcome *> &Outcomes(void) const  { return outcomes; }
-    EFOutcome *NewOutcome(void);
-    void DeleteOutcome(EFOutcome *c);
+  // DATA ACCESS -- OUTCOMES
+  int NumOutcomes(void) const;
+  const gArray<EFOutcome *> &Outcomes(void) const  { return outcomes; }
+  EFOutcome *NewOutcome(void);
+  void DeleteOutcome(EFOutcome *c);
  
-       //# EDITING OPERATIONS
-    Infoset *AppendNode(Node *n, EFPlayer *p, int br);
-    Infoset *AppendNode(Node *n, Infoset *s);
-    Node *DeleteNode(Node *n, Node *keep);
-    Infoset *InsertNode(Node *n, EFPlayer *p, int br);
-    Infoset *InsertNode(Node *n, Infoset *s);
+  // EDITING OPERATIONS
+  Infoset *AppendNode(Node *n, EFPlayer *p, int br);
+  Infoset *AppendNode(Node *n, Infoset *s);
+  Node *DeleteNode(Node *n, Node *keep);
+  Infoset *InsertNode(Node *n, EFPlayer *p, int br);
+  Infoset *InsertNode(Node *n, Infoset *s);
 
-    Infoset *CreateInfoset(EFPlayer *pl, int br);
-    bool DeleteEmptyInfoset(Infoset *);
-    Infoset *JoinInfoset(Infoset *s, Node *n);
-    Infoset *LeaveInfoset(Node *n);
-    Infoset *SplitInfoset(Node *n);
-    Infoset *MergeInfoset(Infoset *to, Infoset *from);
+  Infoset *CreateInfoset(EFPlayer *pl, int br);
+  bool DeleteEmptyInfoset(Infoset *);
+  Infoset *JoinInfoset(Infoset *s, Node *n);
+  Infoset *LeaveInfoset(Node *n);
+  Infoset *SplitInfoset(Node *n);
+  Infoset *MergeInfoset(Infoset *to, Infoset *from);
 
-    Infoset *SwitchPlayer(Infoset *s, EFPlayer *p);
+  Infoset *SwitchPlayer(Infoset *s, EFPlayer *p);
+  
+  Node *CopyTree(Node *src, Node *dest);
+  Node *MoveTree(Node *src, Node *dest);
+  Node *DeleteTree(Node *n);
 
-    Node *CopyTree(Node *src, Node *dest);
-    Node *MoveTree(Node *src, Node *dest);
-    Node *DeleteTree(Node *n);
+  const Action *InsertAction(Infoset *s);
+  const Action *InsertAction(Infoset *s, const Action *at);
+  Infoset *DeleteAction(Infoset *s, const Action *a);
 
-    const Action *InsertAction(Infoset *s);
-    const Action *InsertAction(Infoset *s, const Action *at);
-    Infoset *DeleteAction(Infoset *s, const Action *a);
+  void Reveal(Infoset *, const gArray<EFPlayer *> &);
 
-    void Reveal(Infoset *, const gArray<EFPlayer *> &);
+  void SetChanceProb(Infoset *, int, const gNumber &);
+  gNumber GetChanceProb(Infoset *, int) const;
+  gNumber GetChanceProb(const Action *) const;
+  gArray<gNumber> GetChanceProbs(Infoset *) const;
 
-    void SetChanceProb(Infoset *, int, const gNumber &);
-    gNumber GetChanceProb(Infoset *, int) const;
-    gNumber GetChanceProb(const Action *) const;
-    gArray<gNumber> GetChanceProbs(Infoset *) const;
+  void SetPayoff(EFOutcome *, int pl, const gNumber &value);
+  gNumber Payoff(const EFOutcome *, int pl) const;
+  gArray<gNumber> Payoff(const EFOutcome *) const;
 
-    void SetPayoff(EFOutcome *, int pl, const gNumber &value);
-    gNumber Payoff(const EFOutcome *, int pl) const;
-    gArray<gNumber> Payoff(const EFOutcome *) const;
+  void InitPayoffs(void) const;
+  
+  // Unmarks all subgames in the subtree rooted at n
+  void UnmarkSubgames(Node *n);
+  bool IsLegalSubgame(Node *n);
 
-    void InitPayoffs(void) const;
+  // Mark all the (legal) subgames in the list
+  void MarkSubgames(const gList<Node *> &list);
+  bool DefineSubgame(Node *n);
+  void RemoveSubgame(Node *n);
 
-    // Unmarks all subgames in the subtree rooted at n
-    void UnmarkSubgames(Node *n);
-    bool IsLegalSubgame(Node *n);
+  int ProfileLength(void) const;
+  int TotalNumInfosets(void) const;
 
-    // Mark all the (legal) subgames in the list
-    void MarkSubgames(const gList<Node *> &list);
-    bool DefineSubgame(Node *n);
-    void RemoveSubgame(Node *n);
+  gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
+  int           NumPlayerInfosets(void) const;
+  int           NumChanceInfosets(void) const;
+  int           NumPlayersInfosets(const int pl) const; // pl ==0 is chance
+  gPVector<int> NumActions(void) const;
+  int           NumPlayerActions(void) const;
+  int           NumChanceActions(void) const;
+  int           NumActionsAtInfoset(const int pl, const int iset) const;
+  int           NumNodesInInfoset(const int pl, const int iset) const;
+  gPVector<int> NumMembers(void) const;
+  
+  //# COMPUTING VALUES OF PROFILES
+  void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
+  void Payoff(const gArray<gArray<int> *> &profile,
+	      gArray<gNumber> &payoff) const;
 
-    int ProfileLength(void) const;
-    int TotalNumInfosets(void) const;
+  void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
 
-    gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
-    int           NumPlayerInfosets(void) const;
-    int           NumChanceInfosets(void) const;
-    int           NumPlayersInfosets(const int pl) const; // pl ==0 is chance
-    gPVector<int> NumActions(void) const;
-    int           NumPlayerActions(void) const;
-    int           NumChanceActions(void) const;
-    int           NumActionsAtInfoset(const int pl, const int iset) const;
-    int           NumNodesInInfoset(const int pl, const int iset) const;
-    gPVector<int> NumMembers(void) const;
+  // defined in efgutils.cc
+  friend void RandomEfg(FullEfg &);
+  // This function put in to facilitate error-detection in MixedToBehav[]
+  friend Nfg *AssociatedNfg(const Efg *E);
+  friend Nfg *AssociatedAfg(const Efg *E);
 
-        //# COMPUTING VALUES OF PROFILES
-    void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
-    void Payoff(const gArray<gArray<int> *> &profile,
-		gArray<gNumber> &payoff) const;
-
-    void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
-
-    // defined in efgutils.cc
-    friend void RandomEfg(Efg &);
-    // This function put in to facilitate error-detection in MixedToBehav[]
-    friend Nfg *AssociatedNfg(const Efg *E);
-    friend Nfg *AssociatedAfg(const Efg *E);
-
-    friend Nfg *MakeReducedNfg(const EFSupport &);
-    friend Nfg *MakeAfg(const Efg &);
-    friend void MixedToBehav(const Nfg &, const MixedProfile<double> &mp,
-		             const Efg &, BehavProfile<double> &bp);
-    friend void BehavToMixed(const Efg &, const BehavProfile<double> &,
-			     const Nfg &, MixedProfile<double> &);
-    friend void MixedToBehav(const Nfg &, const MixedProfile<gRational> &mp,
-		             const Efg &, BehavProfile<gRational> &bp);
-    friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
-			     const Nfg &, MixedProfile<gRational> &);
-    friend void MixedToBehav(const Nfg &, const MixedProfile<gNumber> &mp,
-		             const Efg &, BehavProfile<gNumber> &bp);
-    friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
-			     const Nfg &, MixedProfile<gNumber> &);
+  friend Nfg *MakeReducedNfg(const EFSupport &);
+  friend Nfg *MakeAfg(const Efg &);
+  friend void MixedToBehav(const Nfg &, const MixedProfile<double> &mp,
+			   const Efg &, BehavProfile<double> &bp);
+  friend void BehavToMixed(const Efg &, const BehavProfile<double> &,
+			   const Nfg &, MixedProfile<double> &);
+  friend void MixedToBehav(const Nfg &, const MixedProfile<gRational> &mp,
+			   const Efg &, BehavProfile<gRational> &bp);
+  friend void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
+			   const Nfg &, MixedProfile<gRational> &);
+  friend void MixedToBehav(const Nfg &, const MixedProfile<gNumber> &mp,
+			   const Efg &, BehavProfile<gNumber> &bp);
+  friend void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
+			   const Nfg &, MixedProfile<gNumber> &);
 };
 
 #include "behav.h"
@@ -255,7 +304,7 @@ protected:
 #include "outcome.h"
 
 // These functions are provided in readefg.y/readefg.cc
-int ReadEfgFile(gInput &, Efg *&);
+int ReadEfgFile(gInput &, FullEfg *&);
 
 template <class T> class PureBehavProfile   {
   protected:

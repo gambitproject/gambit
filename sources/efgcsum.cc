@@ -42,7 +42,7 @@ static int _CSSeqForm(const EFSupport &support, const CSSeqFormParams &params,
   return 1;
 }    
 
-void efgLpSolve::SolveSubgame(const Efg &/*E*/, const EFSupport &sup,
+void efgLpSolve::SolveSubgame(const FullEfg &/*E*/, const EFSupport &sup,
 			      gList<BehavSolution> &solns)
 {
   int npiv;

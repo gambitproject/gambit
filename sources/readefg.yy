@@ -22,7 +22,7 @@ template class gStack<Node *>;
                    gText last_name, last_poly;  gNumber last_number;  \
                    int last_int, iset_idx; \
 		   bool polymode; \
-                   Efg *& E; \
+                   FullEfg *& E; \
 		   gText title, comment; \
                    gStack<Node *> path; \
                    gList<gText> actions, players, params; \
@@ -43,7 +43,7 @@ template class gStack<Node *>;
                    void CreateEfg(void);
 
 
-%define CONSTRUCTOR_PARAM    gInput &f, Efg *& e
+%define CONSTRUCTOR_PARAM    gInput &f, FullEfg *& e
 
 %define CONSTRUCTOR_INIT     : infile(f), polymode(false), E(e), path(32)
 
@@ -368,7 +368,7 @@ int EfgFileReader::Parse(void)
 
 void EfgFileReader::CreateEfg(void)
 {
-  E = new Efg;
+  E = new FullEfg;
 
   E->SetTitle(title);
   E->SetComment(comment);
@@ -376,7 +376,7 @@ void EfgFileReader::CreateEfg(void)
     E->NewPlayer()->SetName(players[pl]);
 }	
 
-int ReadEfgFile(gInput &f, Efg *& E)
+int ReadEfgFile(gInput &f, FullEfg *& E)
 {
   assert(!E);
 

@@ -12,7 +12,7 @@
 #endif   // __GNUG__
 
 class EFOutcome   {
-  friend class Efg;
+  friend class FullEfg;
   friend class BehavProfile<double>;
   friend class BehavProfile<gRational>;
   friend class BehavProfile<gNumber>;
@@ -22,16 +22,16 @@ class EFOutcome   {
   protected:
     int number;
     gText name;
-    Efg *E;
+    FullEfg *E;
     gBlock<gNumber> payoffs;
     gBlock<double> double_payoffs;
 
-    EFOutcome(Efg *e, int n) : number(n), E(e),
+    EFOutcome(FullEfg *e, int n) : number(n), E(e),
               payoffs(e->NumPlayers()),double_payoffs(e->NumPlayers())   { }
     ~EFOutcome()   { }
   
   public:
-    Efg *BelongsTo(void) const   { return E; }
+    FullEfg *BelongsTo(void) const   { return E; }
 
     const gText &GetName(void) const   { return name; }
     void SetName(const gText &s)       { name = s; }

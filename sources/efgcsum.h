@@ -25,7 +25,7 @@ private:
   long npivots;
   CSSeqFormParams params;
 
-  void SolveSubgame(const Efg &, const EFSupport &,
+  void SolveSubgame(const FullEfg &, const EFSupport &,
 		    gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LP_EFG; }    
 

@@ -6,7 +6,7 @@
 
 #include "polensub.h"
 
-void efgPolEnumNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+void efgPolEnumNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);

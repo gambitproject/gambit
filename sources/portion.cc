@@ -83,7 +83,7 @@ Portion::Portion(void)
 Portion::~Portion()
 { 
   if (_Game && _GameIsEfg) 
-    SetGame((Efg *) 0);
+    SetGame((FullEfg *) 0);
   else if (_Game)
     SetGame((Nfg *) 0);
 
@@ -150,7 +150,7 @@ void Portion::SetGame(const Nfg *game)
   }
 }
 
-void Portion::SetGame(const Efg *game)
+void Portion::SetGame(const FullEfg *game)
 {
   if (game != _Game)  {
     if (_Game)  {
@@ -875,13 +875,13 @@ EfSupportPortion::rep::~rep()
 EfSupportPortion::EfSupportPortion(EFSupport *value)
   : m_rep(new struct rep(value)), m_ref(false)
 {
-  SetGame(&m_rep->value->Game());
+  SetGame((FullEfg *) &m_rep->value->Game());
 }
 
 EfSupportPortion::EfSupportPortion(EFSupport &value)
   : m_rep(new struct rep(new EFSupport(value))), m_ref(false)
 {
-  SetGame(&m_rep->value->Game());
+  SetGame((FullEfg *) &m_rep->value->Game());
 }
 
 EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
@@ -889,7 +889,7 @@ EfSupportPortion::EfSupportPortion(const EfSupportPortion *p, bool ref)
 {
   m_rep->nref++;
   if (!m_ref) {
-    SetGame(&m_rep->value->Game());
+    SetGame((FullEfg *) &m_rep->value->Game());
   }
 }
 
@@ -911,7 +911,7 @@ void EfSupportPortion::SetValue(EFSupport *value)
   else {
     if (--m_rep->nref == 0)  delete m_rep;
     m_rep = new rep(value);
-    SetGame(&value->Game());
+    SetGame((FullEfg *) &value->Game());
   }
 }
 
@@ -960,14 +960,14 @@ gPool EfBasisPortion::pool(sizeof(EfBasisPortion));
 EfBasisPortion::EfBasisPortion(EFBasis *value)
   : _Value(new EFBasis *(value)), _ref(false)
 {
-  SetGame(&value->Game());
+  SetGame((FullEfg *) &value->Game());
 }
 
 EfBasisPortion::EfBasisPortion(EFBasis *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
   if (!_ref) {
-    SetGame(&value->Game());
+    SetGame((FullEfg *) &value->Game());
   }
 }
 
@@ -988,7 +988,7 @@ void EfBasisPortion::SetValue(EFBasis *value)
     ((EfBasisPortion *) Original())->SetValue(value);
   }
   else {
-    SetGame(&value->Game());
+    SetGame((FullEfg *) &value->Game());
     delete *_Value;
     *_Value = value;
   }
@@ -1424,7 +1424,7 @@ gPool BehavPortion::pool(sizeof(BehavPortion));
 BehavPortion::BehavPortion(BehavSolution *value)
   : rep(new struct behavrep(value)), _ref(false)
 {
-  SetGame(&rep->value->Game());
+  SetGame((FullEfg *) &rep->value->Game());
 }
 
 BehavPortion::BehavPortion(const BehavPortion *p, bool ref)
@@ -1432,7 +1432,7 @@ BehavPortion::BehavPortion(const BehavPortion *p, bool ref)
 {
   rep->nref++;
   if (!_ref) {
-    SetGame(&rep->value->Game());
+    SetGame((FullEfg *) &rep->value->Game());
   }
 }
 
@@ -1454,7 +1454,7 @@ void BehavPortion::SetValue(BehavSolution *value)
   else  {
     if (--rep->nref == 0)  delete rep;
     rep = new behavrep(value);
-    SetGame(&value->Game());
+    SetGame((FullEfg *) &value->Game());
   }
 }
 
@@ -1591,13 +1591,13 @@ bool NfgPortion::IsReference(void) const
 
 gPool EfgPortion::pool(sizeof(EfgPortion));
 
-EfgPortion::EfgPortion(Efg *value)
-  : _Value(new Efg *(value)), _ref(false)
+EfgPortion::EfgPortion(FullEfg *value)
+  : _Value(new FullEfg *(value)), _ref(false)
 {
   SetGame(*_Value);
 }
 
-EfgPortion::EfgPortion(Efg *&value, bool ref)
+EfgPortion::EfgPortion(FullEfg *&value, bool ref)
   : _Value(&value), _ref(ref)
 { 
   // for games, only call SetGame for ValPortions, not RefPortions!
@@ -1612,10 +1612,10 @@ EfgPortion::~EfgPortion()
   }
 }
 
-Efg *EfgPortion::Value(void) const
+FullEfg *EfgPortion::Value(void) const
 { return *_Value; }
 
-void EfgPortion::SetValue(Efg *value)
+void EfgPortion::SetValue(FullEfg *value)
 {
   // for games, only call SetGame for ValPortions, not RefPortions!
   ((EfgPortion*) Original())->SetGame( value );

@@ -6,7 +6,7 @@
 
 #include "lemkesub.h"
 
-void efgLcpNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+void efgLcpNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				  gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);

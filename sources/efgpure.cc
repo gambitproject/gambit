@@ -73,7 +73,7 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 	    citer.NextContingency());
 }
 
-void efgEnumPure::SolveSubgame(const Efg &, const EFSupport &p_support,
+void efgEnumPure::SolveSubgame(const FullEfg &, const EFSupport &p_support,
 			       gList<BehavSolution> &p_solutions)
 {
   efgEnumPureSolve(p_support, p_solutions, m_stopAfter, m_status);

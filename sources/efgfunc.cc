@@ -164,7 +164,7 @@ static Portion *GSM_AddMove(Portion **param)
 
 static Portion *GSM_Chance(Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  FullEfg &E = *((EfgPortion*) param[0])->Value();
 
   return new EfPlayerPortion(E.GetChance());
 }
@@ -200,7 +200,7 @@ static Portion *GSM_Children(Portion **param)
 
 static Portion *GSM_Comment(Portion **param)
 {
-  Efg *efg = ((EfgPortion *) param[0])->Value();
+  FullEfg *efg = ((EfgPortion *) param[0])->Value();
   return new TextPortion(efg->GetComment());
 }
 
@@ -208,13 +208,11 @@ static Portion *GSM_Comment(Portion **param)
 // CompressEfg
 //---------------
 
-Efg *CompressEfg(const Efg &, const EFSupport &);
-
 static Portion *GSM_CompressEfg(Portion **param)
 {
   EFSupport *S = ((EfSupportPortion *) param[0])->Value();
 
-  return new EfgPortion(CompressEfg(S->Game(), *S));
+  return new EfgPortion(CompressEfg((FullEfg &) S->Game(), *S));
 }
 
 //---------------
@@ -358,7 +356,7 @@ static Portion *GSM_IsDominated_Efg(Portion **param)
 Portion* GSM_Game_EfgElements(Portion** param)
 {
   if (param[0]->Game())
-    return new EfgPortion((Efg*) param[0]->Game());
+    return new EfgPortion((FullEfg*) param[0]->Game());
   else
     return 0;
 }
@@ -500,7 +498,7 @@ static Portion *GSM_LoadEfg(Portion **param)
   
   try  {
     gFileInput f(file);
-    Efg *E = 0;
+    FullEfg *E = 0;
     ReadEfgFile((gInput &) f, E);
     
     if (E)
@@ -650,7 +648,7 @@ static Portion *GSM_Name(Portion **param)
 
 static Portion *GSM_NewEfg(Portion **param)
 {
-  Efg *E = new Efg;
+  FullEfg *E = new FullEfg;
   ListPortion *players = (ListPortion *) param[0];
   for (int i = 1; i <= players->Length(); i++)
     E->NewPlayer()->SetName(((TextPortion *) (*players)[i])->Value());
@@ -683,7 +681,7 @@ static Portion *GSM_NewInfoset(Portion **param)
 
 static Portion *GSM_NewOutcome(Portion **param)
 {
-  Efg *efg = ((EfgPortion *) param[0])->Value();
+  FullEfg *efg = ((EfgPortion *) param[0])->Value();
   EFOutcome *c = efg->NewOutcome();
 
   return new EfOutcomePortion(c);
@@ -695,7 +693,7 @@ static Portion *GSM_NewOutcome(Portion **param)
 
 static Portion *GSM_NewPlayer(Portion **param)
 {
-  Efg &E = *((EfgPortion*) param[0])->Value();
+  FullEfg &E = *((EfgPortion*) param[0])->Value();
   EFPlayer *p = E.NewPlayer();
 
   _gsm->UnAssignGameElement(&E, true, porBEHAV | porEFSUPPORT);
@@ -769,7 +767,7 @@ static Portion *GSM_Outcome(Portion **param)
 
 static Portion *GSM_Outcomes(Portion **param)
 {
-  Efg *E = ((EfgPortion*) param[0])->Value();
+  FullEfg *E = ((EfgPortion*) param[0])->Value();
   
   Portion* por = ArrayToList(E->Outcomes());
   return por;
@@ -960,7 +958,7 @@ extern NumberPortion _WriteGameDecimals;
 
 static Portion *GSM_SaveEfg(Portion **param)
 {
-  Efg* E = ((EfgPortion *) param[0])->Value();
+  FullEfg* E = ((EfgPortion *) param[0])->Value();
   gText text = ((TextPortion *) param[1])->Value();
 
   try { 
@@ -1103,7 +1101,7 @@ static Portion *GSM_SetChanceProbs(Portion **param)
 {
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   ListPortion *p = (ListPortion *) param[1];
-  Efg *efg = s->Game();
+  FullEfg *efg = s->Game();
 
   if (!s->GetPlayer()->IsChance())
     throw gclRuntimeError("Information set does not belong to chance player");
@@ -1121,7 +1119,7 @@ static Portion *GSM_SetChanceProbs(Portion **param)
 
 static Portion *GSM_SetComment(Portion **param)
 {
-  Efg *efg = ((EfgPortion *) param[0])->Value();
+  FullEfg *efg = ((EfgPortion *) param[0])->Value();
   gText comment = ((TextPortion *) param[1])->Value();
   efg->SetComment(comment);
   return param[0]->ValCopy();
@@ -1194,7 +1192,7 @@ static Portion *GSM_SetPayoff(Portion **param)
 {
   EFOutcome *c = ((EfOutcomePortion *) param[0])->Value();
   EFPlayer *player = ((EfPlayerPortion *) param[1])->Value();
-  Efg *efg = player->Game();
+  FullEfg *efg = player->Game();
   gNumber value = ((NumberPortion *) param[2])->Value();
 
   efg->SetPayoff(c, player->GetNumber(), value);

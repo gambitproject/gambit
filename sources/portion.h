@@ -21,7 +21,7 @@
 // Portion
 //-------------
 
-class Efg;
+class FullEfg;
 class Nfg;
 
 class Portion
@@ -48,7 +48,7 @@ protected:
   static gTriState _WriteSolutionInfo;
   static gTriState _WriteSolutionLabels;
 
-  void SetGame(const Efg *game);
+  void SetGame(const FullEfg *game);
   void SetGame(const Nfg *game);
 
 public:
@@ -825,19 +825,19 @@ public:
 
 class EfgPortion : public Portion   {
 protected:
-  Efg** _Value;
+  FullEfg** _Value;
   bool _ref;
 
   static gPool pool;
 
-  EfgPortion(Efg *&, bool);
+  EfgPortion(FullEfg *&, bool);
 
 public:
-  EfgPortion(Efg *value);
+  EfgPortion(FullEfg *value);
   virtual ~EfgPortion();
 
-  Efg *Value(void) const;
-  void SetValue(Efg *);
+  FullEfg *Value(void) const;
+  void SetValue(FullEfg *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;

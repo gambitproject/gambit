@@ -11,8 +11,8 @@
 // this function
 Nfg *AssociatedNfg(const Efg *E)
 {
-  if (E->lexicon)
-    return E->lexicon->N;
+  if (((FullEfg *) E)->lexicon)
+    return ((FullEfg *) E)->lexicon->N;
   else
     return 0;
 }
@@ -20,7 +20,7 @@ Nfg *AssociatedNfg(const Efg *E)
 
 Nfg *AssociatedAfg(const Efg *E)
 {
-  return E->afg;
+  return ((FullEfg *) E)->afg;
 }
 
 template void ClearNodeProbs(BehavNode<gRational> *);

@@ -99,10 +99,10 @@ Nfg::~Nfg()
     delete outcomes[outc];
 
   if (efg)  {
-    const Efg *tmp = efg;
+    const FullEfg *tmp = (FullEfg *) efg;
     // note that Lexicon dtor unsets the efg member...
 
-    delete efg->lexicon;
+    delete ((FullEfg *) efg)->lexicon;
     tmp->lexicon = 0;
   }
   efg = 0;
@@ -111,10 +111,10 @@ Nfg::~Nfg()
 void Nfg::BreakLink(void)
 {
   if (efg)  {
-    const Efg *tmp = efg;
+    const FullEfg *tmp = (FullEfg *) efg;
     // note that Lexicon dtor unsets the efg member...
 
-    delete efg->lexicon;
+    delete ((FullEfg *) efg)->lexicon;
     tmp->lexicon = 0;
   }
   efg = 0;

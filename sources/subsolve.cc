@@ -19,7 +19,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 				 gList<EFOutcome *> &values)
 {
   int i;
-  Efg &efg = (Efg &) p_support.Game();
+  FullEfg &efg = (FullEfg &) p_support.Game();
   
   gList<BehavProfile<gNumber> > thissolns;
   thissolns.Append(*solution);
@@ -78,7 +78,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
     for (i = 1; i <= subroots.Length(); i++)
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     
-    Efg foo(efg, n);
+    FullEfg foo(efg, n);
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
     foo.RootNode()->SetOutcome(0);
@@ -208,7 +208,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 // This is called immediately after the subgame is constructed in the
 // solution process. 
 
-void SubgameSolver::ViewSubgame(int, const Efg &, EFSupport &)
+void SubgameSolver::ViewSubgame(int, const FullEfg &, EFSupport &)
 { }
 
 // This is called in the normal-form solution modules after the normal
@@ -225,7 +225,7 @@ void SubgameSolver::ViewNormal(const Nfg &, NFSupport &)
 // muck about with the solution list in "bad" ways using this.
 // Caveat utor!
 
-void SubgameSolver::SelectSolutions(int, const Efg &,
+void SubgameSolver::SelectSolutions(int, const FullEfg &,
 				       gList<BehavSolution> &)
 { }
 
@@ -248,7 +248,7 @@ gList<BehavSolution> SubgameSolver::Solve(const EFSupport &p_support)
   solution = new BehavProfile<gNumber>(p_support);
   ((gVector<gNumber> &) *solution).operator=(gNumber(0));
 
-  Efg efg(p_support.Game());
+  FullEfg efg((const FullEfg &) p_support.Game());
   infosets = gArray<gArray<Infoset *> *>(efg.NumPlayers());
 
   for (int i = 1; i <= efg.NumPlayers(); i++)

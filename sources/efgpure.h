@@ -18,7 +18,7 @@ private:
   int m_stopAfter;
   gStatus &m_status;
 
-  void SolveSubgame(const Efg &, const EFSupport &,
+  void SolveSubgame(const FullEfg &, const EFSupport &,
 		    gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_ENUMPURE_EFG; }
 

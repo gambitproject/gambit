@@ -20,7 +20,7 @@ private:
   BehavProfile<gNumber> start;
   gList<Node *> oldroots;
   
-  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
   
 public:
@@ -1232,7 +1232,7 @@ SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gN
   }   
 }
 
-void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
+void SubgamePerfectChecker::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 					 gList<BehavSolution> &solns)
 {
   BehavProfile<gNumber> bp(sup);

@@ -496,10 +496,10 @@ Portion* GSM_List_Efg( Portion** param )
   p = new ListPortion();
   p->SetDataType( param[0]->Spec().Type );
 
-  Efg& efg =
+  FullEfg& efg =
       *(((EfgPortion*) param[0])->Value());
-    for( i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++ )
-      p->Append( new EfgPortion( new Efg( efg ) ) );  
+  for( i = 1; i <= (double) ((NumberPortion*) param[1])->Value(); i++ )
+    p->Append( new EfgPortion( new FullEfg( efg ) ) );  
 
   return p;
 }

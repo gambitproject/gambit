@@ -217,7 +217,7 @@ static Portion* GSM_Game_EfgTypes(Portion** param)
 {
   if(param[0]->Game())  {
     assert(param[0]->GameIsEfg());
-    return new EfgPortion((Efg*) param[0]->Game());
+    return new EfgPortion((FullEfg*) param[0]->Game());
   }
   else
     return 0;

@@ -6,7 +6,7 @@
 
 #include "simpsub.h"
 
-void efgSimpDivNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+void efgSimpDivNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				      gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);

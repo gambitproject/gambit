@@ -15,7 +15,7 @@ private:
   int npivots;
   LemkeParams params;
 
-  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_LCP_NFG; }    
 
 public:

@@ -15,7 +15,7 @@ private:
   int nevals;
   SimpdivParams params;
 
-  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  void SolveSubgame(const FullEfg &, const EFSupport &, gList<BehavSolution> &);
   EfgAlgType AlgorithmID(void) const { return algorithmEfg_SIMPDIV_NFG; }    
 
 public:

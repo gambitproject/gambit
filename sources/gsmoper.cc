@@ -1520,7 +1520,7 @@ static Portion* GSM_Write_Nfg(Portion** param)
 static Portion* GSM_Write_Efg(Portion** param)
 {
   gOutput &s = ((OutputPortion*) param[0])->Value();
-  Efg *efg = ((EfgPortion*) param[1])->Value();
+  FullEfg *efg = ((EfgPortion*) param[1])->Value();
   efg->WriteEfgFile(s, _WriteGameDecimals.Value());
   return param[0]->ValCopy();
 }

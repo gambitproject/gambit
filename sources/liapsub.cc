@@ -6,7 +6,7 @@
 
 #include "liapsub.h"
 
-void efgLiapNfgSolve::SolveSubgame(const Efg &E, const EFSupport &sup,
+void efgLiapNfgSolve::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				   gList<BehavSolution> &solns)
 {
   BehavProfile<double> bp(sup);

@@ -170,9 +170,9 @@ Nfg *MakeReducedNfg(const EFSupport &support)
     pl = E.NumPlayers();
   }
 
-  E.lexicon = L;
-  SetEfg(E.lexicon->N, &E);
-  return E.lexicon->N;
+  ((FullEfg &) E).lexicon = L;
+  SetEfg(((FullEfg &) E).lexicon->N, &E);
+  return ((FullEfg &) E).lexicon->N;
 }
 
 Nfg *MakeAfg(const Efg &E)
@@ -181,7 +181,7 @@ Nfg *MakeAfg(const Efg &E)
 
   if (!afg)   return 0;
 
-  E.afg = afg;
+  ((FullEfg &) E).afg = afg;
   afg->SetTitle(E.GetTitle() + " (Agent Form)");
 
   for (int epl = 1, npl = 1; epl <= E.NumPlayers(); epl++)   {

@@ -6,7 +6,7 @@
 
 #include "enumsub.h"
 
-void EnumBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
+void EnumBySubgame::SolveSubgame(const FullEfg &E, const EFSupport &sup,
 				 gList<BehavSolution> &solns)
 {
   Nfg *N = MakeReducedNfg(sup);
