@@ -403,6 +403,7 @@ Infoset *BaseExtForm::LeaveInfoset(Node *n)
   s->members.Remove(s->members.Find(n));
   n->infoset = CreateInfoset(p->infosets.Length() + 1, p,
 			     n->children.Length());
+  n->infoset->name = s->name;
   n->infoset->members.Append(n);
   for (int i = 1; i <= s->actions.Length(); i++)
     n->infoset->actions[i]->name = s->actions[i]->name;
@@ -426,12 +427,15 @@ Infoset *BaseExtForm::MergeInfoset(Infoset *to, Infoset *from)
 
 Infoset *BaseExtForm::SwitchPlayer(Infoset *s, Player *p)
 {
-  return s;
-}
+  assert(s && p);
+  
+  if (s->player == p)   return s;
 
-Infoset *BaseExtForm::SwitchPlayer(Node *n, Player *p)
-{
-  return n->infoset;
+  s->player->infosets.Remove(s->players->infosets.Find(s));
+  s->player = p;
+  p->infosets.Append(s);
+
+  return s;
 }
 
 void BaseExtForm::CopySubtree(Node *src, Node *dest, Node *stop)

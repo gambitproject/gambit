@@ -96,7 +96,6 @@ class BaseExtForm     {
     Infoset *MergeInfoset(Infoset *to, Infoset *from);
 
     Infoset *SwitchPlayer(Infoset *s, Player *p);
-    Infoset *SwitchPlayer(Node *n, Player *p);
 
     Node *CopyTree(Node *src, Node *dest);
     Node *MoveTree(Node *src, Node *dest);
