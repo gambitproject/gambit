@@ -131,6 +131,7 @@ newstrategyobject(void)
 static void                   
 strategy_dealloc(strategyobject *self) 
 {                            
+  delete self->m_strategy;
   PyMem_DEL(self);           
 }
 
@@ -298,6 +299,7 @@ newnfgcontingencyobject(void)
 static void                   
 nfgcontingency_dealloc(nfgcontingencyobject *self) 
 {                            
+  delete self->m_contingency;
   PyMem_DEL(self);           
 }
 

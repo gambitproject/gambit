@@ -265,6 +265,7 @@ newnfgobject(void)
 static void                   
 nfg_dealloc(nfgobject *self) 
 {                            
+  delete self->m_nfg;
   PyMem_DEL(self);           
 }
 

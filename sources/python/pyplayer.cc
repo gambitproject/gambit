@@ -205,6 +205,7 @@ newefplayerobject(void)
 static void                   
 efplayer_dealloc(efplayerobject *self) 
 {                            
+  delete self->m_efplayer;
   PyMem_DEL(self);           
 }
 
@@ -381,6 +382,7 @@ newnfplayerobject(void)
 static void                   
 nfplayer_dealloc(nfplayerobject *self) 
 {                            
+  delete self->m_nfplayer;
   PyMem_DEL(self);           
 }
 

@@ -68,6 +68,7 @@ gbt_nash_enummixed(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -101,6 +102,7 @@ gbt_nash_enumpoly(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -116,6 +118,7 @@ gbt_nash_enumpoly(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -146,6 +149,7 @@ gbt_nash_enumpure(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -162,6 +166,7 @@ gbt_nash_enumpure(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -192,6 +197,7 @@ gbt_nash_lcp(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -208,6 +214,7 @@ gbt_nash_lcp(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -242,6 +249,7 @@ gbt_nash_liap(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -260,6 +268,7 @@ gbt_nash_liap(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -295,6 +304,7 @@ gbt_nash_logit(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -313,6 +323,7 @@ gbt_nash_logit(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -342,6 +353,7 @@ gbt_nash_lp(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -357,6 +369,7 @@ gbt_nash_lp(PyObject */*self*/, PyObject *args)
       behavobject *p = newbehavobject();
       p->m_profile = new BehavSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -386,6 +399,7 @@ gbt_nash_simpdiv(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;
@@ -419,6 +433,7 @@ gbt_nash_yamamoto(PyObject */*self*/, PyObject *args)
       mixedobject *p = newmixedobject();
       p->m_profile = new MixedSolution(solutions[i]);
       PyList_Append(list, (PyObject *) p);
+      Py_DECREF(p);
     }  
 
     return list;

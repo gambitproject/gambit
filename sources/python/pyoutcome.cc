@@ -186,6 +186,7 @@ newefoutcomeobject(void)
 static void                   
 efoutcome_dealloc(efoutcomeobject *self) 
 {                            
+  delete self->m_efoutcome;
   PyMem_DEL(self);           
 }
 
@@ -373,6 +374,7 @@ newnfoutcomeobject(void)
 static void                   
 nfoutcome_dealloc(nfoutcomeobject *self) 
 {                            
+  delete self->m_nfoutcome;
   PyMem_DEL(self);           
 }
 

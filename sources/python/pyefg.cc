@@ -343,6 +343,7 @@ newefgobject(void)
 static void                   
 efg_dealloc(efgobject *self) 
 {                            
+  delete self->m_efg;
   PyMem_DEL(self);           
 }
 

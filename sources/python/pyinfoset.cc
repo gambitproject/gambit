@@ -181,6 +181,7 @@ newactionobject(void)
 static void                   
 action_dealloc(actionobject *self) 
 {                            
+  delete self->m_action;
   PyMem_DEL(self);           
 }
 
@@ -390,6 +391,7 @@ newinfosetobject(void)
 static void                   
 infoset_dealloc(infosetobject *self) 
 {                            
+  delete self->m_infoset;
   PyMem_DEL(self);           
 }
 

@@ -328,6 +328,7 @@ newnodeobject(void)
 static void                   
 node_dealloc(nodeobject *self) 
 {                            
+  delete self->m_node;
   PyMem_DEL(self);           
 }
 
