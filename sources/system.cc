@@ -62,7 +62,7 @@ int System::Shell( const char* command )
   }
   else
   {
-    assert( *command != NULL );
+    assert( command != NULL );
     result = system( command );
   }
   return result;
