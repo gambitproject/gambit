@@ -217,7 +217,7 @@ void SubgameSolver<T>::SelectSolutions(int, const Efg<T> &,
 
 template <class T> 
 SubgameSolver<T>::SubgameSolver(const Efg<T> &E, const EFSupport &S, int max)
-  : max_solns(max), efg(E), support(S), solution(E), infosets(E.NumPlayers())
+  : max_solns(max), efg(E), support(S), solution(S), infosets(E.NumPlayers())
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     infosets[i] = new gArray<Infoset *>(efg.PlayerList()[i]->InfosetList());
