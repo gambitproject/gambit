@@ -366,8 +366,10 @@ Portion *GSM_GobitGrid_Support(Portion **param)
 	GP.maxLam = ((FloatPortion *) param[3])->Value();
 	GP.delLam = ((FloatPortion *) param[4])->Value();
 	GP.powLam = ((IntPortion *) param[5])->Value();
-	GP.delp = ((FloatPortion *) param[6])->Value();
-	GP.tol = ((FloatPortion *) param[7])->Value();
+	GP.delp1 = ((FloatPortion *) param[6])->Value();
+	GP.tol1 = ((FloatPortion *) param[7])->Value();
+//	GP.delp2 = ((FloatPortion *) param[8])->Value();
+//	GP.tol2 = ((FloatPortion *) param[9])->Value();
 
 	switch(N->Type())
 	{
