@@ -3123,7 +3123,6 @@ player \verb+p+ to \verb+v+\\
 
 \chapter{Function Reference, by Category}
 
-\marginpar{This section has not been updated}
 This section contains a list of functions organized by
 category.  For a description of each function and its arguments,
 refer to the following, alphabetically organized, section.  
@@ -3174,13 +3173,10 @@ appreciate getting feedback on this.
 \begin{verbatim}
 * Assign 
 * UnAssign 
-
 * NewFunction
-* DeleteFunction
-
   Clear 
 * Include
-* Quit
+  Quit
 \end{verbatim}
 \end{multicols}
 
@@ -3200,6 +3196,7 @@ appreciate getting feedback on this.
 \begin{verbatim}
   Help 
   HelpVars 
+  IsDefined
   Manual 
   Version 
 \end{verbatim}
@@ -3224,7 +3221,6 @@ appreciate getting feedback on this.
 \begin{verbatim}
   ExePath 
   GetEnv 
-* GetPath 
   Platform 
   SetEnv 
   Shell 
@@ -3264,9 +3260,12 @@ appreciate getting feedback on this.
 \begin{verbatim}
   Divide 
   Exp 
+  Float
   IntegerDivide 
+  Inverse
   Log 
 # Max
+# MaxInt
 # Min
   Minus 
   Modulus 
@@ -3274,8 +3273,10 @@ appreciate getting feedback on this.
   Parentheses 
   Plus 
   Power 
-# Power 
+  Precision
   Randomize 
+# Randomize 
+  Rational
   Times 
 \end{verbatim}
 \end{multicols}
@@ -3329,9 +3330,14 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
+  Float 
 # Float 
   Integer 
 # ListForm 
+  Null
+  Precision
+  Rational
+# Rational
   Text 
 \end{verbatim}
 \end{multicols}
@@ -3349,6 +3355,7 @@ appreciate getting feedback on this.
 # GetSolutionFormat 
 # GetTextFormat 
   Input 
+  IsEof
   ListFormat
   LoadEfg 
   LoadNfg 
@@ -3363,7 +3370,6 @@ appreciate getting feedback on this.
 # SetNumericFormat 
 # SetSolutionFormat 
 # SetTextFormat 
-  SetVerbose
   Write   
 \end{verbatim}
 \end{multicols}
@@ -3377,6 +3383,8 @@ appreciate getting feedback on this.
   AddAction
   AddMove 
 # AddMove 
+  AddNode
+  Basis
   CompressEfg 
   CopyTree 
   DeleteAction 
@@ -3399,8 +3407,10 @@ appreciate getting feedback on this.
 # NewPlayer 
 # Randomize 
   RemoveAction 
+  RemoveNode
   Reveal 
   SetChanceProbs 
+  SetComment
   SetName 
   SetOutcome 
   SetPayoff 
@@ -3421,11 +3431,15 @@ appreciate getting feedback on this.
   NewNfg 
 # NewNfg 
   NewOutcome
+# NewOutcome
   NewPlayer 
+# NewPlayer 
   Nfg 
 # Nfg
+# OutcomeForm
 # Randomize 
   RemoveStrategy 
+  SetComment
   SetName 
   SetOutcome
   SetPayoff 
@@ -3438,6 +3452,7 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
+  ActionNumber 
 # ActionNumber 
   Actions 
 # Actions 
@@ -3449,12 +3464,14 @@ appreciate getting feedback on this.
   Chance 
   ChanceProb 
   Children 
+  Comment
 # Descendants 
   Game 
 # History
   Infoset 
   Infosets 
 # Infosets 
+  IsConsistent
   IsConstSum 
   IsNull 
   IsPerfectRecall 
@@ -3467,7 +3484,9 @@ appreciate getting feedback on this.
 # Mixed
   Name 
   NextSibling 
+  NodeNumber
   Nodes 
+# NodeTree
 # NonterminalNodes 
   NthChild 
 # NumActions 
@@ -3489,6 +3508,7 @@ appreciate getting feedback on this.
   RootNode 
   Strategies 
 # Strategies 
+  StrategyNumber
 # TerminalNodes 
 \end{verbatim}
 \end{multicols}
@@ -3517,9 +3537,12 @@ appreciate getting feedback on this.
 # Actions
   AddAction
   AddStrategy
+  Basis
 # ElimAllDom 
   ElimDom 
 # ElimDom 
+# NthElement
+  PossibleNashSupports
   RemoveAction
   RemoveStrategy
   Strategies 
@@ -3545,6 +3568,7 @@ appreciate getting feedback on this.
 # LiapSolve 
   LpSolve 
 # LpSolve 
+  PolEnumSolve
   SimpDivSolve 
 # SimpDivSolve 
 \end{verbatim}
@@ -3588,8 +3612,9 @@ appreciate getting feedback on this.
   LiapValue 
   Mixed
 # Mixed
-# NodeValue 
+  NodeValue 
   NodeValues 
+# NodeValues 
   Payoff 
 # Payoffs 
   RealizProb 
@@ -3597,6 +3622,7 @@ appreciate getting feedback on this.
   Regret
   Regrets
   SetActionProbs 
+  SetStrategyProb 
   SetStrategyProbs 
 # SetProbs
   StrategyProb 
@@ -8504,7 +8530,7 @@ found.
 
 \item\lex{OutcomeForm}
 \protect \large \begin{verbatim}
-OutcomeForm[n->NFG(NUMBER)]=:NLIST(NFOUTCOME)
+OutcomeForm[n->NFG]=:NLIST(NFOUTCOME)
 \end{verbatim}\normalsize
 
 \bd 
