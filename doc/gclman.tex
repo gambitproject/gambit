@@ -40,10 +40,10 @@
 
 \title{GAMBIT COMMAND LANGUAGE\thanks{This is part of the Gambit
 Project, which was funded in part by National Science Foundation
-grants SBR-9308637 to the California Institute of Technology and
-SBR-9308862 to the University of Minnesota.  We are also grateful to
-the Intel Corporation for computer equipment grants to California
-Institute of Technology that facilitated this project}}
+grants SBR-9308637 and SBR-9617854 to the California Institute of
+Technology and SBR-9308862 to the University of Minnesota.  We are
+also grateful to the Intel Corporation for computer equipment grants
+to California Institute of Technology that facilitated this project}}
 
 \author{Richard D. McKelvey\\California Institute of
 Technology
@@ -78,10 +78,10 @@ Numerous students at Caltech and the University of Minnesota have
 contributed to the Gambit Command Language and to the Gambit Project
 more generally: Among these are Bruce Bell, Anand Chelian, Matthew
 Derer, Nelson Escobar, Ben Freeman, Eugene Grayver, Todd Kaplan, Geoff
-Matters, Brian Trotter, and Rob Weber. We are particularly grateful to
-Eugene Grayver for setting up and maintaining our Web site, for
-compiling the DOS/WINDOWS version of the GCL, and for his extensive
-work on the related GUI and PXI programs.
+Matters, Brian Trotter, Michael Vanier, and Rob Weber. We are
+particularly grateful to Eugene Grayver for setting up and maintaining
+our Web site, and for his extensive work on the related GUI and PXI
+programs.  
 
 \chapter{Introduction}
 \pagestyle{headings}
@@ -153,7 +153,8 @@ recall previous lines.
 The GCL prompt is of the form \verb+GCLnn:= <<+.  The prompt is
 actually part of the GCL command, and can be deleted or modified by
 the command line editor if so desired.  The \verb+<<+ part of the
-command causes the evaluation of the command line to be echoed to the
+command is the short form of the \verb+Print+ command, which causes
+the evaluation of the command line to be echoed to the
 console. Backspacing over this part of the command will supress
 output.  The \verb+GCLnn:=+ part of the command saves the evaluation
 of the command line to the variable \verb+GCLnn+.  Backspacing over
@@ -349,7 +350,6 @@ The \tindex{BOOLEAN} type is implemented in tri-state logic,
 and has the three values ``true'' and ``false'' and ``unknown''.  The
 command language predefines three constants to represent these,
 \tindex{True} and \tindex{False}, and \tindex{Unknown}
-\marginpar{will this change to Unknown?}
 
 \subsection{Numeric Data types}
 
@@ -386,7 +386,7 @@ Floating point constants are represented in the GCL by any string of
 digits (where a digit is an element of \verb+{0,1,2,3,4,5,6,7,8,9}+)
 containing exactly one decimal point (\verb+.+).  Rational constants
 are represented in the GCL by andy string of digits containing at most
-one division sign (\verb+/+).  Any \verb+NUMBER+ in the gcl is assumed
+one division sign (\verb+/+).  Any \verb+NUMBER+ in the GCL is assumed
 to be in base ten representation.
 
 \item \bindex{Integer}
@@ -523,6 +523,7 @@ elements are of type {\tt NUMBER}, and
 
 \begin{verbatim}
 { { 2.0, 3/2 }, 1, 4 }
+\end{verbatim}
 
 \noindent 
 is a legal list of type \verb+LIST(LIST(NUMBER))+.  On the other
@@ -648,7 +649,6 @@ Data Type & Constant \\
 
 You typically don't think of a constant as a function, but it is.  It
 is a function with no arguments, whose name is the constant itself.
-
 You can ``execute'' a constant by simply typing its name.  When you do
 so, it returns a value, corresponding to the object that the constant
 represents.  
@@ -742,6 +742,47 @@ the variable to be of any type.  \verb+UnAssign+ has a short form of
 y:=
 y:= 3.0
 \end{verbatim}  
+
+\subsubsection{\rindex{Global and Static Variables}}\index{Variables!Scope}
+
+Variables in the GCL are by default only visible in the the part of
+the program in which they are defined.  In otherwords, a variable
+defined outside of a function will not be visible inside a GCL
+function (unless it is passed by reference), and a variable defined in
+a function will not be visible from outside the function.  Secondly,
+variables defined inside a function are deallocated when control
+leaves the function.  Thus, when a function is called a second time,
+variables defined within that function will not ``remember'' the
+values they were assigned in the last call to the function.  
+
+To modify the default scope and visibility of variables, the GCL uses
+the prefix \verb+$+ in a variable name to represent a ``static''
+variable\index{Variables!Static} and the prefix \verb+$$+ to represent
+a global variable\index{Variables!Global}.  A static variable
+is only visible in the function in which it is defined, but remains
+allocated after program control leaves the function, and retains its
+last value when the function is called again.  A global variable
+remains allocated and visible when control passes to any function.  The
+following example illustrates the use of static variables:
+
+\begin{verbatim}
+NewFunction[Foo[x->NUMBER]=:NUMBER,If[!IsDefined[$y],$y:=x];$y;];
+GCL2:= << Foo[3]
+3
+GCL3:= << Foo[2]
+3
+\end{verbatim}
+
+\noindent
+and the following illustrates the use of global variables:
+
+\begin{verbatim}
+$$x:=5
+NewFunction[Foo[],$$x;];
+GCL1:= << Foo[]
+5
+\end{verbatim}
+
 
 \subsection{\rindex{Built-In Functions}}\index{Functions!Built-In}
 
@@ -853,6 +894,7 @@ variations listed in the function reference:
 
 \begin{verbatim}
 Plus[x->NUMBER, y->NUMBER] =: NUMBER
+Plus[x->TEXT, y->TEXT] =: TEXT
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV 
 \end{verbatim}
@@ -4285,26 +4327,6 @@ Returns the path of the GCL executable.
 \item [See also:] \verb+GetPath+.
 \ed
 
-\item\lex{ExistsGlobalVar}
-\protect \large \begin{verbatim}
-ExistsGlobalVar[name->TEXT] =: BOOLEAN
-\end{verbatim} \normalsize
-
-\bd
-Describe me!
-\item [See also:] \verb+LoadGlobalVar+, \verb+SaveGlobalVar+.
-\ed
-
-\item\lex{ExistsLocalVar}
-\protect \large \begin{verbatim}
-ExistsLocalVar[name->TEXT] =: BOOLEAN
-\end{verbatim} \normalsize
-
-\bd
-Describe me!
-\item [See also:] \verb+LoadLocalVar+, \verb+SaveLocalVar+.
-\ed
-
 \item\lex{Exp}
 \protect \large \begin{verbatim}
 Exp[x->NUMBER] =: NUMBER 
@@ -5462,30 +5484,6 @@ not contain a valid extensive form savefile.
 \item [See also:] \verb+SaveEfg+.
 \ed
 
-\item\lex{LoadGlobalVar}
-\protect \large \begin{verbatim}
-LoadGlobalVar[name->TEXT, var->T] =: T
-\end{verbatim}\normalsize
-
-{\it for all types} {\tt T}
-\bd
-Loads a variable from memory that was previously saved with 
-\verb+SaveGlobalVar+. 
-\item [See also:] \verb+ExistsGlobalVar+, \verb+SaveGlobalVar+.
-\ed
-
-\item\lex{LoadLocalVar}
-\protect \large \begin{verbatim}
-LoadLocalVar[name->TEXT, var->T] =: T
-\end{verbatim}\normalsize
-
-{\it for all types} {\tt T}
-\bd
-Loads a variable from memory that was previously saved with 
-\verb+SaveLocalVar+. 
-\item [See also:] \verb+ExistsLocalVar+, \verb+SaveLocalVar+.
-\ed
-
 \item\lex{LoadNfg}
 \protect \large \begin{verbatim}
 LoadNfg[file->TEXT] =: NFG 
@@ -6464,39 +6462,6 @@ SaveEfg[efg->EFG, file->TEXT] =: EFG
 Writes \verb+efg+ to an external savefile \verb+file+.  It is an error
 if \verb+file+ cannot be opened for writing.  Returns \verb+efg+.
 \item [See also:] \verb+LoadEfg+.
-\ed
-
-\item\lex{SaveGlobalVar}
-\protect \large \begin{verbatim}
-SaveGlobalVar[name->TEXT, var->T] =: T
-\end{verbatim}\normalsize
-
-{\it for all types} {\tt T}
-\bd
-Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
-text string to identify it so it can later be retrieved with
-\verb+LoadGlobalVar+.  Variables saved with this function can be
-retreived outside of the function in which they are saved.  So this
-function can be used to create variables that are shared in common by
-user defined functions.   
-\item [See also:] \verb+ExistsGlobalVar+, \verb+LoadGlobalVar+,
-\verb+SaveLocalVar+.
-\ed
-
-\item\lex{SaveLocalVar}
-\protect \large \begin{verbatim}
-SaveLocalVar[name->TEXT, var->T] =: T
-\end{verbatim}\normalsize
-
-{\it for all types} {\tt T}
-\bd
-Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
-text string to identify it so it can later be retrieved with
-\verb+LoadLocalVar+.  Variables saved with this function can only be
-retrieved in the scope in which they are saved.  So this function can
-be used to create ``static'' variables within a user defined function.   
-\item [See also:] \verb+ExistsLocalVar+, \verb+LoadLocalVar+,
-\verb+SaveGlobalVar+.
 \ed
 
 \item\lex{SaveNfg}
