@@ -79,7 +79,6 @@ private:
   
   // Private functions
   void UpdateSoln(void);
-  void UpdateDom(void);
   void UpdateContingencyProb(const gArray<int> &profile);
   void DumpAscii(Bool all_cont);
 
@@ -148,7 +147,7 @@ public:
 
   // Filename support
   void SetFileName(const gText &s);
-  const gText &Filename(void) const;
+  const gText &Filename(void) const { return filename; }
   
   // Display some inherent game properties
   void ShowGameInfo(void);
@@ -159,7 +158,7 @@ public:
   int  CheckAccelerators(wxKeyEvent &ev);
 
   // Access to the actual window
-  wxFrame *Frame(void);
+  wxFrame *Frame(void) { return pframe; }
 
   // Access to the draw settings.
   const NormalDrawSettings& getNormalDrawSettings() { return draw_settings; }

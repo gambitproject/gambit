@@ -44,61 +44,49 @@ NfgShow::NfgShow(Nfg &N, EfgNfgInterface *efg, wxFrame *pframe_)
   nf.SetIsDirty(false);
 }
 
-
-// ****************************** NORM SHOW::UPDATE Vals
-
 void NfgShow::UpdateVals(void)
 {
-    int i, j;
+  if (!(nf_iter.Support() == *disp_sup)) 
+    nf_iter = NfgIter(*disp_sup);
 
-    if (!(nf_iter.Support() == *disp_sup)) 
-        nf_iter = NfgIter(*disp_sup);
+  for (int i = 1; i <= rows; i++) {
+    for (int j = 1; j <= cols; j++) {
+      nf_iter.Set(pl1, i);
+      nf_iter.Set(pl2, j);
+      gText pay_str;
+      NFOutcome *outcome = nf_iter.GetOutcome();
+      bool hilight = false;
 
-    for (i = 1; i <= rows; i++)
-    {
-        for (j = 1; j <= cols; j++)
-        {
-            nf_iter.Set(pl1, i);
-            nf_iter.Set(pl2, j);
-            gText pay_str;
-            NFOutcome *outcome = nf_iter.GetOutcome();
-            bool hilight = false;
+      if (draw_settings.OutcomeDisp() == OUTCOME_VALUES) {
+	for (int k = 1; k <= nf.NumPlayers(); k++) {
+	  pay_str += ("\\C{"+ToText(draw_settings.GetPlayerColor(k))+"}");
+	  pay_str += ToText(nf.Payoff(outcome, k));
+	  
+	  if (k != nf.NumPlayers())
+	    pay_str += ',';
+	}
+      }
+      else {
+	if (outcome) {
+	  pay_str = outcome->GetName();
 
-            if (draw_settings.OutcomeDisp() == OUTCOME_VALUES)
-            {
-                for (int k = 1; k <= nf.NumPlayers(); k++)
-                {
-                    pay_str += ("\\C{"+ToText(draw_settings.GetPlayerColor(k))+"}");
-                    pay_str += ToText(nf.Payoff(outcome, k));
+	  if (pay_str == "")
+	    pay_str = "Outcome"+ToText(outcome->GetNumber());
+	}
+	else {
+	  pay_str = "Outcome 0";
+	}
+      }
 
-                    if (k != nf.NumPlayers())
-                        pay_str += ',';
-                }
-            }
-            else
-            {
-                if (outcome)
-                {
-                    pay_str = outcome->GetName();
-
-                    if (pay_str == "")
-                        pay_str = "Outcome"+ToText(outcome->GetNumber());
-                }
-                else
-                {
-                    pay_str = "Outcome 0";
-                }
-            }
-
-            spread->SetCell(i, j, pay_str);
-            spread->HiLighted(i, j, 0, hilight);
-        }
+      spread->SetCell(i, j, pay_str);
+      spread->HiLighted(i, j, 0, hilight);
     }
+  }
 
-    nf_iter.Set(pl1, 1);
-    nf_iter.Set(pl2, 1);
+  nf_iter.Set(pl1, 1);
+  nf_iter.Set(pl2, 1);
 
-    spread->Repaint();
+  spread->Repaint();
 }
 
 
@@ -205,9 +193,9 @@ void NfgShow::UpdateContingencyProb(const gArray<int> &profile)
 
 void NfgShow::UpdateProfile(gArray<int> &profile)
 {
-    nf_iter.Set(profile);
-    UpdateContingencyProb(profile);
-    UpdateVals();
+  nf_iter.Set(profile);
+  UpdateContingencyProb(profile);
+  UpdateVals();
 }
 
 extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
@@ -260,179 +248,155 @@ Bool NfgShow::Save(void)
 
 void NfgShow::DumpAscii(Bool all_cont)
 {
-    char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
+  char *s = wxFileSelector("Save", NULL, NULL, NULL, "*.asc", wxSAVE);
 
-    if (s)
-    {
-        gFileOutput outfilef(s);
+  if (s) {
+    gFileOutput outfilef(s);
 
-        // I have no idea why this works, but otherwise we get ambiguities:
-        gOutput &outfile = outfilef;  
+    // I have no idea why this works, but otherwise we get ambiguities:
+    gOutput &outfile = outfilef;  
   
-        gArray<int> profile(nf.NumPlayers());
+    gArray<int> profile(nf.NumPlayers());
 
-        if (all_cont)       // if we need to save ALL the contingencies
-        {
-            NfgContIter nf_citer(*cur_sup);
-            gBlock<int> hold_const(2);
-            hold_const[1] = pl1;
-            hold_const[2] = pl2;
-            nf_citer.Freeze(hold_const);
+    if (all_cont) {       // if we need to save ALL the contingencies
+      NfgContIter nf_citer(*cur_sup);
+      gBlock<int> hold_const(2);
+      hold_const[1] = pl1;
+      hold_const[2] = pl2;
+      nf_citer.Freeze(hold_const);
 
-            do
-            {
-                outfile << nf_citer.Get() << '\n';
+      do {
+	outfile << nf_citer.Get() << '\n';
 
-                for (int i = 1; i <= rows; i++)
-                {
-                    for (int j = 1; j <= cols; j++)
-                    {
-                        nf_citer.Set(pl1, i);
-                        nf_citer.Set(pl2, j);
-                        outfile << "{ ";
+	for (int i = 1; i <= rows; i++) {
+	  for (int j = 1; j <= cols; j++) {
+	    nf_citer.Set(pl1, i);
+	    nf_citer.Set(pl2, j);
+	    outfile << "{ ";
 
-                        for (int k = 1; k <= nf.NumPlayers(); k++)
-                            outfile << nf.Payoff(nf_iter.GetOutcome(), k) << ' ';
-                        outfile << " }  ";
-                    }
-                    outfile << "\n";
-                }
-            } while (nf_citer.NextContingency()) ;
-        }
-        else    // if we only need to save the contingency currently displayed
-        {
-            nf_iter.Get(profile);
-            outfile << profile << '\n';
-
-            for (int i = 1; i <= rows; i++)
-            {
-                for (int j = 1; j <= cols; j++)
-                {
-                    nf_iter.Set(pl1, i);
-                    nf_iter.Set(pl2, j);
-                    outfile << "{ ";
-
-                    for (int k = 1; k <= nf.NumPlayers(); k++)
-                        outfile << nf.Payoff(nf_iter.GetOutcome(), k) << ' ';
-                    outfile << "}\n";
-                }
-            }
-        }
+	    for (int k = 1; k <= nf.NumPlayers(); k++)
+	      outfile << nf.Payoff(nf_iter.GetOutcome(), k) << ' ';
+	    outfile << " }  ";
+	  }
+	  outfile << "\n";
+	}
+      } while (nf_citer.NextContingency());
     }
+    else  {   // if we only need to save the contingency currently displayed
+      nf_iter.Get(profile);
+      outfile << profile << '\n';
+
+      for (int i = 1; i <= rows; i++) {
+	for (int j = 1; j <= cols; j++) {
+	  nf_iter.Set(pl1, i);
+	  nf_iter.Set(pl2, j);
+	  outfile << "{ ";
+
+	  for (int k = 1; k <= nf.NumPlayers(); k++)
+	    outfile << nf.Payoff(nf_iter.GetOutcome(), k) << ' ';
+	  outfile << "}\n";
+	}
+      }
+    }
+  }
 }
 
 
 // Clear solutions-just updates the spreadsheet to remove any hilights
-
 void NfgShow::ClearSolutions(void)
 {
-    int i, j;
+  if (cur_soln)  {
+    // if there are solutions to clear, and they are displayed
+    for (int i = 1; i <= rows; i++)
+      for (int j = 1; j <= cols; j++)
+	spread->HiLighted(i, j, 0, FALSE);
+  }
 
-    if (cur_soln)       // if there are solutions to clear, and they are displayed
-    {
-        for (i = 1; i <= rows; i++)
-            for (j = 1; j <= cols; j++)
-                spread->HiLighted(i, j, 0, FALSE);
-    }
+  if (spread->HaveProbs()) {
+    for (int i = 1; i <= cols; i++) spread->SetCell(rows+1, i, "");
 
-    if (spread->HaveProbs())
-    {
-        for (i = 1; i <= cols; i++) spread->SetCell(rows+1, i, "");
+    for (int i = 1; i <= rows; i++)
+      spread->SetCell(i, cols+1, "");
+    
+    spread->SetCell(rows+1, cols+1, "");
+  }
 
-        for (i = 1; i <= rows; i++)
-            spread->SetCell(i, cols+1, "");
+  if (spread->HaveDom()) {  // if there exist the dominance row/col
+    int dom_pos = 1+spread->HaveProbs();
+    for (int i = 1; i <= cols; i++)
+      spread->SetCell(rows+dom_pos, i, "");
 
-        spread->SetCell(rows+1, cols+1, "");
-    }
+    for (int i = 1; i <= rows; i++)
+      spread->SetCell(i, cols+dom_pos, "");
+  }
 
-    if (spread->HaveDom())  // if there exist the dominance row/col
-    {
-        int dom_pos = 1+spread->HaveProbs();
-        for (i = 1; i <= cols; i++)
-            spread->SetCell(rows+dom_pos, i, "");
+  if (spread->HaveVal()) {
+    int val_pos = 1+spread->HaveProbs()+spread->HaveDom();
+    for (int i = 1; i <= cols; i++)
+      spread->SetCell(rows+val_pos, i, "");
 
-        for (i = 1; i <= rows; i++)
-            spread->SetCell(i, cols+dom_pos, "");
-    }
-
-    if (spread->HaveVal())
-    {
-        int val_pos = 1+spread->HaveProbs()+spread->HaveDom();
-        for (i = 1; i <= cols; i++)
-            spread->SetCell(rows+val_pos, i, "");
-
-        for (i = 1; i <= rows; i++)
-            spread->SetCell(i, cols+val_pos, "");
-    }
+    for (int i = 1; i <= rows; i++)
+      spread->SetCell(i, cols+val_pos, "");
+  }
 }
-
-
-// ****************************** NORM SHOW::CHANGE Solution
 
 void NfgShow::ChangeSolution(int sol)
 {
-    ClearSolutions();
+  ClearSolutions();
 
-    if (sol)
-    {
-        if (solns[sol].Support().IsSubset(*disp_sup))
-        {
-            cur_soln = sol;
+  if (sol) {
+    if (solns[sol].Support().IsSubset(*disp_sup)) {
+      cur_soln = sol;
 
-            if (cur_soln)
-                UpdateSoln();
-        }
-        else
-        {
-            int ok = wxMessageBox("This solution was created in a support that is not\n "
-                                  "a subset of the currently displayed support.\n"
-                                  "Displayed probabilities may not add up to 1.\n"
-                                  "Are you sure you want to display this solution?", 
-                                  "Not a subset", wxYES_NO | wxCENTRE);
-
-            if (ok == wxYES)
-            {
-                cur_soln = sol;
-
-                if (cur_soln)
-                    UpdateSoln();
-            }
-        }
+      if (cur_soln)
+	UpdateSoln();
     }
-    else
-    {
-        cur_soln = 0;
-        spread->Repaint();
+    else {
+      int ok = wxMessageBox("This solution was created in a support that is not\n "
+			    "a subset of the currently displayed support.\n"
+			    "Displayed probabilities may not add up to 1.\n"
+			    "Are you sure you want to display this solution?", 
+			    "Not a subset", wxYES_NO | wxCENTRE);
+
+      if (ok == wxYES) {
+	cur_soln = sol;
+
+	if (cur_soln)
+	  UpdateSoln();
+      }
     }
+  }
+  else {
+    cur_soln = 0;
+    spread->Repaint();
+  }
 }
 
 
 // Remove solutions-permanently removes any solutions
-
 void NfgShow::RemoveSolutions(void)
 {
-    if (soln_show)
-    {
-        soln_show->Show(FALSE);
-        delete soln_show;
-        soln_show = 0;
-    }
+  if (soln_show) {
+    soln_show->Show(FALSE);
+    delete soln_show;
+    soln_show = 0;
+  }
 
-    ClearSolutions();
+  ClearSolutions();
 
-    if (cur_soln)
-        spread->Repaint();
+  if (cur_soln)
+    spread->Repaint();
 
-    cur_soln = 0;
-    solns.Flush();
-    spread->EnableInspect(FALSE);
+  cur_soln = 0;
+  solns.Flush();
+  spread->EnableInspect(FALSE);
 }
 
 
 
 MixedSolution NfgShow::CreateSolution(void)
 {
-    return MixedSolution(MixedProfile<gNumber>(*cur_sup));
+  return MixedSolution(MixedProfile<gNumber>(*cur_sup));
 }
 
 
@@ -451,30 +415,26 @@ void NfgShow::OnOk(void)
 
 void NfgShow::InspectSolutions(int what)
 {
-    if (what == CREATE_DIALOG)
-    {
-        if (solns.Length() == 0)
-        {
-            wxMessageBox("Solution list currently empty");
-            return;
-        }
-
-        if (soln_show)
-        {
-            soln_show->Show(FALSE);
-            delete soln_show;
-        }
-
-        soln_show = new NfgSolnShow(solns, nf.NumPlayers(), 
-                                    gmax(nf.NumStrats()), 
-                                    cur_soln, draw_settings, 
-                                    sf_options, this, spread);
+  if (what == CREATE_DIALOG) {
+    if (solns.Length() == 0) {
+      wxMessageBox("Solution list currently empty");
+      return;
     }
 
-    if (what == DESTROY_DIALOG && soln_show)
-    {
-        soln_show = 0;
+    if (soln_show) {
+      soln_show->Show(FALSE);
+      delete soln_show;
     }
+
+    soln_show = new NfgSolnShow(solns, nf.NumPlayers(), 
+				gmax(nf.NumStrats()), 
+				cur_soln, draw_settings, 
+				sf_options, this, spread);
+  }
+
+  if (what == DESTROY_DIALOG && soln_show) {
+    soln_show = 0;
+  }
 }
 
 
@@ -572,11 +532,9 @@ void NfgShow::Solve(int id)
 
 void NfgShow::SolveStandard(void)
 { 
-
   try {
-    NfgSolveStandardDialog *NSSD = new NfgSolveStandardDialog(nf, (wxWindow *) spread);
-    if (NSSD->Completed() != wxOK)  return;
-    delete NSSD;
+    if (NfgSolveStandardDialog(nf, (wxWindow *) spread).Completed() != wxOK)
+      return;
   }
   catch (guiBadStandardSolve &E) {
     wxMessageBox((char *) E.Description(), "Standard Solution");
@@ -659,72 +617,58 @@ void NfgShow::SolveStandard(void)
 
 void NfgShow::SetFileName(const gText &s)
 {
-    if (s != "")
-        filename = s;
-    else 
-        filename = "untitled.nfg";
+  if (s != "")
+    filename = s;
+  else 
+    filename = "untitled.nfg";
 
-    // Title the window
-    spread->SetTitle("[" + filename + "] " + nf.GetTitle());
+  // Title the window
+  spread->SetTitle("[" + filename + "] " + nf.GetTitle());
 }
-
-
-const gText &NfgShow::Filename(void) const
-{ return filename; }
-
-wxFrame *NfgShow::Frame(void)
-{ return spread; }
-
 
 // how: 0-default, 1-saved, 2-query
-
 MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 {
-    MixedProfile<gNumber> start(*cur_sup);
+  MixedProfile<gNumber> start(*cur_sup);
 
-    if (how == 0)
-        start.Centroid();
+  if (how == 0)
+    start.Centroid();
 
-    if (how == 1 || how == 2)
-    {
-        if (starting_points.last == -1 || how == 2)
-        {
-            MSolnSortFilterOptions sf_opts; // no sort, filter
+  if (how == 1 || how == 2) {
+    if (starting_points.last == -1 || how == 2) {
+      MSolnSortFilterOptions sf_opts; // no sort, filter
 
-            if (starting_points.profiles.Length() == 0)
-                starting_points.profiles += start;
+      if (starting_points.profiles.Length() == 0)
+	starting_points.profiles += start;
 
-            Nfg1SolnPicker *start_dialog = 
-                new Nfg1SolnPicker(starting_points.profiles, 
-                                   nf.NumPlayers(), 
-                                   gmax(nf.NumStrats()), 0, 
-                                   draw_settings, sf_opts, this, spread);
-
-            spread->Enable(FALSE);  // disable this window until the edit window is closed
-
-            while (start_dialog->Completed() == wxRUNNING) 
-                wxYield();
-
-            spread->Enable(TRUE);
-            starting_points.last = start_dialog->Picked();
-            delete start_dialog;
-        }
-
-        if (starting_points.last)
-            start = starting_points.profiles[starting_points.last];
+      Nfg1SolnPicker *start_dialog = 
+	new Nfg1SolnPicker(starting_points.profiles, 
+			   nf.NumPlayers(), 
+			   gmax(nf.NumStrats()), 0, 
+			   draw_settings, sf_opts, this, spread);
+      
+      spread->Enable(FALSE);  // disable this window until the edit window is closed
+      
+      while (start_dialog->Completed() == wxRUNNING) 
+	wxYield();
+      
+      spread->Enable(TRUE);
+      starting_points.last = start_dialog->Picked();
+      delete start_dialog;
     }
 
-    return start;
+    if (starting_points.last)
+      start = starting_points.profiles[starting_points.last];
+  }
+
+  return start;
 }
 
-//****************************************************************************
-//                           NORMAL SOLUTIONS
-//****************************************************************************
-
 #include "gstatus.h"
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
-                            const gArray<int> &players, gOutput &tracefile, 
-                            gStatus &status); // in nfdom.cc
+extern NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
+				   const gArray<int> &players,
+				   gOutput &tracefile, 
+				   gStatus &status); // in nfdom.cc
 
 
 NFSupport *NfgShow::MakeSolnSupport(void)
@@ -788,168 +732,149 @@ void NfgShow::SolutionToExtensive(const MixedSolution &mp, bool set)
 
 void NfgShow::SetPlayers(int _pl1, int _pl2, bool first_time)
 {
-    int num_players = nf.NumPlayers();
+  int num_players = nf.NumPlayers();
 
-    if (_pl1 == _pl2)
-    {
-        if (num_players != 2)   // do nothing
-        {
-            wxMessageBox("Can not use the same player for both row and col!");
-            spread->SetRowPlayer(pl1);
-            spread->SetColPlayer(pl2);
-            return;
-        }
-        else    // switch row/col
-        {
-            _pl1 = pl2;
-            _pl2 = pl1;
-        }
+  if (_pl1 == _pl2) {
+    if (num_players != 2) {  // do nothing
+      wxMessageBox("Can not use the same player for both row and col!");
+      spread->SetRowPlayer(pl1);
+      spread->SetColPlayer(pl2);
+      return;
     }
-
-    pl1 = _pl1;
-    pl2 = _pl2;
-
-    rows = disp_sup->NumStrats(pl1);
-    cols = disp_sup->NumStrats(pl2);
-
-    int features = spread->HaveDom() + spread->HaveProbs() + spread->HaveVal();
-    spread->SetDimensions(rows + features, cols + features, 1);
-
-    // Must set dimensionality in case it changed due to elim dom
-    spread->SetDimensionality(disp_sup);
-
-    if (spread->HaveProbs()) 
-        spread->MakeProbDisp();
-
-    if (spread->HaveDom()) 
-        spread->MakeDomDisp();
-
-    if (spread->HaveVal()) 
-        spread->MakeValDisp();
-
-    // Set new title
-    spread->SetTitle(nf.GetTitle() + " : " + 
-                     nf.Players()[pl1]->GetName() +
-                     " x " + nf.Players()[pl2]->GetName());
-
-    // Set new labels
-    gText label;
-    int i;
-
-    for (i = 1; i <= rows; i++)
-    {
-        label = disp_sup->Strategies(pl1)[i]->Name();
-
-        if (label == "") 
-            label = ToText(i);
-
-        spread->SetLabelRow(i, label);
+    else {    // switch row/col
+      _pl1 = pl2;
+      _pl2 = pl1;
     }
+  }
 
-    for (i = 1; i <= cols; i++)
-    {
-        label = disp_sup->Strategies(pl2)[i]->Name();
+  pl1 = _pl1;
+  pl2 = _pl2;
+  
+  rows = disp_sup->NumStrats(pl1);
+  cols = disp_sup->NumStrats(pl2);
 
-        if (label == "") 
-            label = ToText(i);
+  int features = spread->HaveDom() + spread->HaveProbs() + spread->HaveVal();
+  spread->SetDimensions(rows + features, cols + features, 1);
 
-        spread->SetLabelCol(i, label);
-    }
+  // Must set dimensionality in case it changed due to elim dom
+  spread->SetDimensionality(disp_sup);
 
-    // Update the sheet's players.
-    spread->SetRowPlayer(pl1);
-    spread->SetColPlayer(pl2);
+  if (spread->HaveProbs()) 
+    spread->MakeProbDisp();
+  
+  if (spread->HaveDom()) 
+    spread->MakeDomDisp();
 
-    // This is really odd.  If I call UpdateVals during construction, the
-    // virtual function table is not yet created causing a crash.  Thus, we
-    // can only call it if this is NOT the first time this is called
+  if (spread->HaveVal()) 
+    spread->MakeValDisp();
 
-    if (!first_time)
-    {
-        UpdateVals();
-        UpdateSoln();
-        UpdateDom();
-        spread->Redraw();
-        spread->Repaint();
-    }
+  // Set new title
+  spread->SetTitle(nf.GetTitle() + " : " + 
+		   nf.Players()[pl1]->GetName() +
+		   " x " + nf.Players()[pl2]->GetName());
+
+  // Set new labels
+  gText label;
+  
+  for (int i = 1; i <= rows; i++) {
+    label = disp_sup->Strategies(pl1)[i]->Name();
+
+    if (label == "") 
+      label = ToText(i);
+
+    spread->SetLabelRow(i, label);
+  }
+
+  for (int i = 1; i <= cols; i++) {
+    label = disp_sup->Strategies(pl2)[i]->Name();
+
+    if (label == "") 
+      label = ToText(i);
+
+    spread->SetLabelCol(i, label);
+  }
+
+  // Update the sheet's players.
+  spread->SetRowPlayer(pl1);
+  spread->SetColPlayer(pl2);
+
+  // This is really odd.  If I call UpdateVals during construction, the
+  // virtual function table is not yet created causing a crash.  Thus, we
+  // can only call it if this is NOT the first time this is called
+
+  if (!first_time) {
+    UpdateVals();
+    UpdateSoln();
+    spread->Redraw();
+    spread->Repaint();
+  }
 }
-
-
-//******************* NFSUPPORTS CODE ***************
-// MakeSupport -- build a new support
 
 NFSupport *NfgShow::MakeSupport(void)
 {
-    MyDialogBox *support = new MyDialogBox(spread, 
-                                           "Create Support", 
-                                           NFG_MAKE_SUPPORT_HELP);
+  MyDialogBox *support = new MyDialogBox(spread, 
+					 "Create Support", 
+					 NFG_MAKE_SUPPORT_HELP);
 
-    support->SetLabelPosition(wxVERTICAL);
-    wxListBox **players = new wxListBox*[nf.NumPlayers() + 1];
+  support->SetLabelPosition(wxVERTICAL);
+  wxListBox **players = new wxListBox*[nf.NumPlayers() + 1];
 
-    for (int i = 1; i <= nf.NumPlayers(); i++)
-    {
-        int num_strats = nf.NumStrats(i);
-        char **strats = new char *[num_strats];
-        int j;
+  for (int i = 1; i <= nf.NumPlayers(); i++) {
+    int num_strats = nf.NumStrats(i);
+    char **strats = new char *[num_strats];
 
-        for (j = 0; j < num_strats; j++) 
-            strats[j] = copystring(nf.Strategies(i)[j+1]->Name());
+    for (int j = 0; j < num_strats; j++) 
+      strats[j] = copystring(nf.Strategies(i)[j+1]->Name());
 
-        players[i] = new wxListBox(support, 0, nf.Players()[i]->GetName(), 
-                                   TRUE, -1, -1, 80, 100,
-                                   num_strats, strats);
+    players[i] = new wxListBox(support, 0, nf.Players()[i]->GetName(), 
+			       TRUE, -1, -1, 80, 100,
+			       num_strats, strats);
 
 #ifndef LINUX_WXXT
-        for (j = 0; j < num_strats; j++) 
-            players[i]->SetSelection(j, TRUE);
+    for (int j = 0; j < num_strats; j++) 
+      players[i]->SetSelection(j, TRUE);
 #endif
 
-        for (j = 0; j < num_strats; j++) 
-            delete [] strats[j];
+    for (int j = 0; j < num_strats; j++) 
+      delete [] strats[j];
 
-        delete [] strats;
-    }
+    delete [] strats;
+  }
 
-    support->Go();
+  support->Go();
 
-    if (support->Completed() == wxOK)
-    {
-        NFSupport *sup = new NFSupport(nf);
-        bool failed = false;
+  if (support->Completed() == wxOK) {
+    NFSupport *sup = new NFSupport(nf);
+    bool failed = false;
 
-        for (int i = 1; i <= nf.NumPlayers(); i++)
-        {
-            int num_strats = sup->NumStrats(i);
+    for (int i = 1; i <= nf.NumPlayers(); i++) {
+      int num_strats = sup->NumStrats(i);
 
-            for (int j = num_strats; j >= 1; j--)
-            {
-                if (!players[i]->Selected(j - 1))
-                    sup->RemoveStrategy(nf.Players()[i]->Strategies()[j]);
-            }
+      for (int j = num_strats; j >= 1; j--) {
+	if (!players[i]->Selected(j - 1))
+	  sup->RemoveStrategy(nf.Players()[i]->Strategies()[j]);
+      }
 
-            // Check that each player has at least one strategy.
-            if (sup->NumStrats(i) == 0) 
-                failed = true; 
-        }
-
-        delete support;
-
-        if (!failed)
-        {
-            supports.Append(sup);
-            return sup;
-        }
-        else
-        {
-            wxMessageBox("This support is invalid!\n"
-                         "Each player must have at least one strategy");
-            return 0;
-        }
+      // Check that each player has at least one strategy.
+      if (sup->NumStrats(i) == 0) 
+	failed = true; 
     }
 
     delete support;
-    return 0;
+
+    if (!failed) {
+      supports.Append(sup);
+      return sup;
+    }
+    else {
+      wxMessageBox("This support is invalid!\n"
+		   "Each player must have at least one strategy");
+      return 0;
+    }
+  }
+  
+  delete support;
+  return 0;
 }
 
 
@@ -1079,8 +1004,6 @@ void NfgShow::OutcomeLabel(void)
   UpdateVals();
 }
 
-//**************************** DOMINATED STRATEGY STUFF ************************
-// SolveElimDom
 #include "wxstatus.h"
 NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
                             const gArray<int> &players,
@@ -1140,7 +1063,6 @@ int NfgShow::SolveElimDom(void)
       spread->Redraw();
     }
 
-    UpdateDom();
     UpdateSoln();
     return 1;
   }
@@ -1158,79 +1080,46 @@ void NfgShow::DominanceSetup(void)
 // Support Inspect
 void NfgShow::ChangeSupport(int what)
 {
-    if (what == CREATE_DIALOG && !support_dialog)
-    {
-        int disp = supports.Find(disp_sup), cur = supports.Find(cur_sup);
-        support_dialog = new NFSupportInspectDialog(supports, cur, disp, this, spread);
+  if (what == CREATE_DIALOG && !support_dialog) {
+    int disp = supports.Find(disp_sup), cur = supports.Find(cur_sup);
+    support_dialog = new NFSupportInspectDialog(supports, cur, disp, this, spread);
     }
+  
+  if (what == DESTROY_DIALOG && support_dialog) {
+    delete support_dialog;
+    support_dialog = 0;
+  }
 
-    if (what == DESTROY_DIALOG && support_dialog)
-    {
-        delete support_dialog;
-        support_dialog = 0;
+  if (what == UPDATE_DIALOG) {
+    assert(support_dialog);
+    cur_sup = supports[support_dialog->CurSup()];
+
+    if (supports[support_dialog->DispSup()] != disp_sup) {
+      ChangeSolution(0);  // chances are, the current solution will not work.
+      disp_sup = supports[support_dialog->DispSup()];
+      SetPlayers(pl1, pl2);
     }
-
-    if (what == UPDATE_DIALOG)
-    {
-        assert(support_dialog);
-        cur_sup = supports[support_dialog->CurSup()];
-
-        if (supports[support_dialog->DispSup()] != disp_sup)
-        {
-            ChangeSolution(0);  // chances are, the current solution will not work.
-            disp_sup = supports[support_dialog->DispSup()];
-            SetPlayers(pl1, pl2);
-        }
-    }
+  }
 }
 
-
-// Update Dominated Strategy info
-void NfgShow::UpdateDom(void)
-{
-/* DOM
-   if (spread->HaveDom()) // Display the domination info, if its turned on
-   {
-   int rows = nf.NumStrats(pl1,disp_sset);
-   int cols = nf.NumStrats(pl2,disp_sset);
-   int dom_pos = spread->HaveProbs() + 1;
-   for (int i = 1; i <= rows; i++)
-   if (nf.IsDominated(pl1,i,disp_sset))
-   spread->SetCell(i,cols + dom_pos,ToText(nf.GetDominator(pl1,i,disp_sset)));
-   for (i = 1; i <= cols; i++)
-   if (nf.IsDominated(pl2,i,disp_sset))
-   spread->SetCell(rows + dom_pos,i,ToText(nf.GetDominator(pl2,i,disp_sset)));
-   }
-   spread->Repaint();
-   */
-}
-
-
-// Print
 void NfgShow::Print(void)
 {
-    wxStringList extras("ASCII", 0);
-    wxOutputDialogBox print_dialog(&extras, spread);
+  wxStringList extras("ASCII", 0);
+  wxOutputDialogBox print_dialog(&extras, spread);
 
-    if (print_dialog.Completed() == wxOK)
-    {
-        if (!print_dialog.ExtraMedia())
-        {
-            spread->Print(print_dialog.GetMedia(), print_dialog.GetOption());
-        }
-        else    // must be dump_ascii
-        {
-            Bool all_cont = FALSE;
-            MyDialogBox cont_dialog(spread, "Continencies");
-            cont_dialog.Add(wxMakeFormBool("All Contingencies", &all_cont));
-            cont_dialog.Go();
-            DumpAscii(all_cont);
-        }
+  if (print_dialog.Completed() == wxOK) {
+    if (!print_dialog.ExtraMedia()) {
+      spread->Print(print_dialog.GetMedia(), print_dialog.GetOption());
     }
+    else {    // must be dump_ascii
+      Bool all_cont = FALSE;
+      MyDialogBox cont_dialog(spread, "Continencies");
+      cont_dialog.Add(wxMakeFormBool("All Contingencies", &all_cont));
+      cont_dialog.Go();
+      DumpAscii(all_cont);
+    }
+  }
 }
-
-
-//**********************************LABELING CODE**************************
 
 void NfgShow::EditLabel(void)
 {
@@ -1326,119 +1215,92 @@ void NfgShow::SetLabels(int what)
 
 void NfgShow::ShowGameInfo(void)
 {
-    gText tmp;
-    char tempstr[200];
-    sprintf(tempstr, "Number of Players: %d", nf.NumPlayers());
-    tmp += tempstr;
-    tmp += "\n";
-    sprintf(tempstr, "Is %sconstant sum", (IsConstSum(nf)) ? "" : "NOT ");
-    tmp += tempstr;
-    tmp += "\n";
-    wxMessageBox(tmp, "Nfg Game Info", wxOK, spread);
+  gText tmp;
+  char tempstr[200];
+  sprintf(tempstr, "Number of Players: %d", nf.NumPlayers());
+  tmp += tempstr;
+  tmp += "\n";
+  sprintf(tempstr, "Is %sconstant sum", (IsConstSum(nf)) ? "" : "NOT ");
+  tmp += tempstr;
+  tmp += "\n";
+  wxMessageBox(tmp, "Nfg Game Info", wxOK, spread);
 }
 
 
-//********************************* CONFIGURATION STUFF ********************
-// SetColors
-
 void NfgShow::SetColors(void)
 {
-    gArray<gText> names(nf.NumPlayers());
+  gArray<gText> names(nf.NumPlayers());
 
-    for (int i = 1; i <= names.Length(); i++) 
-        names[i] = ToText(i);
+  for (int i = 1; i <= names.Length(); i++) 
+    names[i] = ToText(i);
 
-    draw_settings.PlayerColorDialog(names);
-    UpdateVals();
-    spread->Repaint();
+  draw_settings.PlayerColorDialog(names);
+  UpdateVals();
+  spread->Repaint();
 }
 
 
 void NfgShow::SetOptions(void)
 {
-    Bool disp_probs = spread->HaveProbs();
-    Bool disp_dom   = spread->HaveDom();
-    Bool disp_val   = spread->HaveVal();
+  Bool disp_probs = spread->HaveProbs();
+  Bool disp_dom   = spread->HaveDom();
+  Bool disp_val   = spread->HaveVal();
 
-    MyDialogBox *norm_options = 
-        new MyDialogBox(spread, "Normal GUI Options", NFG_FEATURES_HELP);
-    wxFormItem *prob_fitem = 
+  MyDialogBox *norm_options = 
+    new MyDialogBox(spread, "Normal GUI Options", NFG_FEATURES_HELP);
+  wxFormItem *prob_fitem = 
         norm_options->Add(wxMakeFormBool("Display strategy probs", &disp_probs));
-    norm_options->Add(wxMakeFormNewLine());
-    wxFormItem *val_fitem = 
-        norm_options->Add(wxMakeFormBool("Display strategy values", &disp_val));
-    norm_options->Add(wxMakeFormNewLine());
+  norm_options->Add(wxMakeFormNewLine());
+  wxFormItem *val_fitem = 
+    norm_options->Add(wxMakeFormBool("Display strategy values", &disp_val));
+  norm_options->Add(wxMakeFormNewLine());
+  
+  norm_options->Add(wxMakeFormBool("Display dominance", &disp_dom));
+  norm_options->AssociatePanel();
 
-    //wxFormItem *dom_fitem = 
-    norm_options->Add(wxMakeFormBool("Display dominance", &disp_dom));
-    norm_options->AssociatePanel();
+  if (!cur_soln && !disp_probs) 
+    ((wxCheckBox *)prob_fitem->GetPanelItem())->Enable(FALSE);
 
-    if (!cur_soln && !disp_probs) 
-        ((wxCheckBox *)prob_fitem->GetPanelItem())->Enable(FALSE);
+  if (!cur_soln && !disp_val) 
+    ((wxCheckBox *)val_fitem->GetPanelItem())->Enable(FALSE);
 
-    if (!cur_soln && !disp_val) 
-        ((wxCheckBox *)val_fitem->GetPanelItem())->Enable(FALSE);
-
-    // DOM if (nf.NumStratSets() == 1 && !disp_dom) 
-    //       ((wxCheckBox *)dom_fitem->GetPanelItem())->Enable(FALSE);
-
-    norm_options->Go1();
-
-    if (norm_options->Completed() == wxOK)
-    {
-        bool change = false;
-
-        if (!disp_probs && spread->HaveProbs())
-        {
-            spread->RemoveProbDisp();
-            change = true;
-        }
-
-        if (!disp_dom && spread->HaveDom())
-        {
-            spread->RemoveDomDisp();
-            change = true;
-        }
-
-        if (!disp_val && spread->HaveVal())
-        {
-            spread->RemoveValDisp();
-            change = true;
-        }
-
-        if (disp_probs && !spread->HaveProbs() && cur_soln)
-        {
-            spread->MakeProbDisp();
-            change = true;
-        }
-
-        /* DOM
-           if (disp_dom && !spread->HaveDom() && disp_sset != 1)
-           {
-           spread->MakeDomDisp();
-           change = true;
-           }
-           */
-
-        if (disp_val && !spread->HaveVal() && cur_soln)
-        {
-            spread->MakeValDisp();
-            change = true;
-        }
-
-        if (change)
-        {
-            UpdateSoln();
-            UpdateDom();
-            spread->Redraw();
-        }
+  norm_options->Go1();
+  
+  if (norm_options->Completed() == wxOK) {
+    bool change = false;
+    if (!disp_probs && spread->HaveProbs()) {
+      spread->RemoveProbDisp();
+      change = true;
     }
 
-    delete norm_options;
+    if (!disp_dom && spread->HaveDom()) {
+      spread->RemoveDomDisp();
+      change = true;
+    }
+
+    if (!disp_val && spread->HaveVal()) {
+      spread->RemoveValDisp();
+      change = true;
+    }
+
+    if (disp_probs && !spread->HaveProbs() && cur_soln) {
+      spread->MakeProbDisp();
+      change = true;
+    }
+
+    if (disp_val && !spread->HaveVal() && cur_soln) {
+      spread->MakeValDisp();
+      change = true;
+    }
+
+    if (change) {
+      UpdateSoln();
+      spread->Redraw();
+    }
+  }
+  
+  delete norm_options;
 }
-
-
-// Process Accelerators
 
 #include "nfgaccl.h"
 #include "sprdaccl.h"
@@ -1446,34 +1308,32 @@ void NfgShow::SetOptions(void)
 // These events include those for NormShow and those for SpreadSheet3D
 gArray<AccelEvent> NfgShow::MakeEventNames(void)
 {
-    gArray<AccelEvent> events(NUM_NFG_EVENTS + NUM_SPREAD_EVENTS);
-    int i;
+  gArray<AccelEvent> events(NUM_NFG_EVENTS + NUM_SPREAD_EVENTS);
 
-    for (i = 0; i < NUM_SPREAD_EVENTS; i++) 
-        events[i+1] = spread_events[i];
+  for (int i = 0; i < NUM_SPREAD_EVENTS; i++) 
+    events[i+1] = spread_events[i];
 
-    for (i = NUM_SPREAD_EVENTS; i < NUM_NFG_EVENTS + NUM_SPREAD_EVENTS; i++)
-        events[i+1] = nfg_events[i - NUM_SPREAD_EVENTS];
+  for (int i = NUM_SPREAD_EVENTS; i < NUM_NFG_EVENTS + NUM_SPREAD_EVENTS; i++)
+    events[i+1] = nfg_events[i - NUM_SPREAD_EVENTS];
 
-    return events;
+  return events;
 }
 
 
-// Check Accelerators
 int NfgShow::CheckAccelerators(wxKeyEvent &ev)
 {
-    int id = ::CheckAccelerators(accelerators, ev);
+  int id = ::CheckAccelerators(accelerators, ev);
 
-    if (id) 
-        spread->OnMenuCommand(id);
+  if (id) 
+    spread->OnMenuCommand(id);
 
-    return id;
+  return id;
 }
 
 void NfgShow::EditAccelerators(void)
 {
-    ::EditAccelerators(accelerators, MakeEventNames());
-    WriteAccelerators(accelerators, "NfgAccelerators");
+  ::EditAccelerators(accelerators, MakeEventNames());
+  WriteAccelerators(accelerators, "NfgAccelerators");
 }
 
 
@@ -1538,75 +1398,71 @@ NfgGUI::NfgGUI(Nfg *nf, const gText infile_name, EfgNfgInterface *inter,
 #define NUM_PLAYERS_PER_LINE 8
 int NfgGUI::GetNFParams(gArray<int> &dimensionality, gArray<gText> &names, wxFrame *parent)
 {
+  int num_players = 2;
+  // Get the number of players first
+  MyDialogBox *make_nf_p = new MyDialogBox(parent, "Normal Form Parameters");
+  make_nf_p->Form()->Add(wxMakeFormShort("How many players", &num_players, wxFORM_TEXT,
+					 new wxList(wxMakeConstraintRange(2, MAX_PLAYERS), 0), 
+					 NULL, 0, 220));
+  make_nf_p->Go();
+  int ok = make_nf_p->Completed();
+  delete make_nf_p;
+  
+  if (ok != wxOK || num_players < 1)
+    return 0;
+  
+  // if we got a valid # of players, go on to get the dimensionality
+  MyDialogBox *make_nf_dim = new MyDialogBox(parent, "Normal Form Parameters");
+  make_nf_dim->Add(wxMakeFormMessage("How many strategies for\neach player?"));
+  dimensionality = gArray<int>(num_players);
+  
+  for (int i = 1; i <= num_players; i++) {
+    dimensionality[i] = 2;  // Why 2?  why not?
+    make_nf_dim->Add(wxMakeFormShort(ToText(i), &dimensionality[i], wxFORM_TEXT,
+				     new wxList(wxMakeConstraintRange(1, MAX_STRATEGIES), 0), 
+				     NULL, 0, 70));
+    
+    if (i % NUM_PLAYERS_PER_LINE == 0)
+      make_nf_dim->Add(wxMakeFormNewLine());
+  }
+  
+  make_nf_dim->Go();
+  ok = make_nf_dim->Completed();
+  delete make_nf_dim;
+  
+  if (ok != wxOK)
+    return 0;
 
-    int num_players = 2;
-    // Get the number of players first
-    MyDialogBox *make_nf_p = new MyDialogBox(parent, "Normal Form Parameters");
-    make_nf_p->Form()->Add(wxMakeFormShort("How many players", &num_players, wxFORM_TEXT,
-                                           new wxList(wxMakeConstraintRange(2, MAX_PLAYERS), 0), 
-                                           NULL, 0, 220));
-    make_nf_p->Go();
-    int ok = make_nf_p->Completed();
-    delete make_nf_p;
+  // Now get player names
+  MyDialogBox *make_nf_names = new MyDialogBox(parent, "Player Names");
+  names = gArray<gText>(num_players);
+  char **names_str = new char*[num_players+1];
 
-    if (ok != wxOK || num_players < 1)
-        return 0;
+  for (int i = 1; i <= num_players; i++) {
+    names_str[i] = new char[20];
+    strcpy(names_str[i], "Player"+ToText(i));
+    make_nf_names->Add(wxMakeFormString(ToText(i), &names_str[i], wxFORM_TEXT,
+					NULL, NULL, 0, 140));
+    
+    if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
+      make_nf_names->Add(wxMakeFormNewLine());
+  }
 
-    // if we got a valid # of players, go on to get the dimensionality
-    MyDialogBox *make_nf_dim = new MyDialogBox(parent, "Normal Form Parameters");
-    make_nf_dim->Add(wxMakeFormMessage("How many strategies for\neach player?"));
-    dimensionality = gArray<int>(num_players);
+  make_nf_names->Go();
+  ok = make_nf_names->Completed();
+  delete make_nf_names;
+    
+  if (ok != wxOK)
+    return 0;
 
-    for (int i = 1; i <= num_players; i++)
-    {
-        dimensionality[i] = 2;  // Why 2?  why not?
-        make_nf_dim->Add(wxMakeFormShort(ToText(i), &dimensionality[i], wxFORM_TEXT,
-                                         new wxList(wxMakeConstraintRange(1, MAX_STRATEGIES), 0), 
-                                         NULL, 0, 70));
+  for (int i = 1; i <= num_players; i++) {
+    names[i] = names_str[i];
+    delete [] names_str[i];
+  }
 
-        if (i % NUM_PLAYERS_PER_LINE == 0)
-            make_nf_dim->Add(wxMakeFormNewLine());
-    }
-
-    make_nf_dim->Go();
-    ok = make_nf_dim->Completed();
-    delete make_nf_dim;
-
-    if (ok != wxOK)
-        return 0;
-
-    // Now get player names
-    MyDialogBox *make_nf_names = new MyDialogBox(parent, "Player Names");
-    names = gArray<gText>(num_players);
-    char **names_str = new char*[num_players+1];
-
-    for (int i = 1; i <= num_players; i++)
-    {
-        names_str[i] = new char[20];
-        strcpy(names_str[i], "Player"+ToText(i));
-        make_nf_names->Add(wxMakeFormString(ToText(i), &names_str[i], wxFORM_TEXT,
-                                            NULL, NULL, 0, 140));
-
-        if (i%(NUM_PLAYERS_PER_LINE/2) == 0) 
-            make_nf_names->Add(wxMakeFormNewLine());
-    }
-
-    make_nf_names->Go();
-    ok = make_nf_names->Completed();
-    delete make_nf_names;
-
-    if (ok != wxOK)
-        return 0;
-
-    for (int i = 1; i <= num_players; i++)
-    {
-        names[i] = names_str[i];
-        delete [] names_str[i];
-    }
-
-    delete [] names_str;
-
-    return 1;
+  delete [] names_str;
+  
+  return 1;
 }
 
 //**********************************************************************
@@ -1614,42 +1470,39 @@ int NfgGUI::GetNFParams(gArray<int> &dimensionality, gArray<gText> &names, wxFra
 //**********************************************************************
 
 NormalDrawSettings::NormalDrawSettings(void)
-    : output_precision(2)
+  : output_precision(2)
 {
-    char *defaults_file = "gambit.ini";
-    wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, defaults_file);
+  char *defaults_file = "gambit.ini";
+  wxGetResource("Gambit", "NFOutcome-Display", &outcome_disp, defaults_file);
 }
 
 
 void NormalDrawSettings::OutcomeOptions(void)
 {
-    MyDialogBox *options_dialog = new MyDialogBox(0, "Outcome Display");
-    wxStringList *opt_list = new wxStringList("Payoff Values", "Outcome Name", 0);
-    char *opt_str = new char[25];
-
-    if (opt_list->Nth(outcome_disp) == NULL)
-    {
-        guiExceptionDialog("Invalid value for NFOutcome-Display; check \"gambit.ini\" file.\n",
-                           main_gambit_frame);
+  MyDialogBox *options_dialog = new MyDialogBox(0, "Outcome Display");
+  wxStringList *opt_list = new wxStringList("Payoff Values", "Outcome Name", 0);
+  char *opt_str = new char[25];
+    
+  if (opt_list->Nth(outcome_disp) == NULL) {
+    guiExceptionDialog("Invalid value for NFOutcome-Display; check \"gambit.ini\" file.\n",
+		       main_gambit_frame);
+  }
+  else {
+    strcpy(opt_str, (char *)opt_list->Nth(outcome_disp)->Data());
+    options_dialog->Add(wxMakeFormString("Display as", &opt_str, wxFORM_RADIOBOX,
+					 new wxList(wxMakeConstraintStrings(opt_list), 0)));
+    options_dialog->Go();
+    
+    if (options_dialog->Completed() == wxOK) {
+      char *defaults_file = "gambit.ini";
+      outcome_disp = wxListFindString(opt_list, opt_str);
+      wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
     }
-    else
-    {
-        strcpy(opt_str, (char *)opt_list->Nth(outcome_disp)->Data());
-        options_dialog->Add(wxMakeFormString("Display as", &opt_str, wxFORM_RADIOBOX,
-                                             new wxList(wxMakeConstraintStrings(opt_list), 0)));
-        options_dialog->Go();
-        
-        if (options_dialog->Completed() == wxOK)
-        {
-            char *defaults_file = "gambit.ini";
-            outcome_disp = wxListFindString(opt_list, opt_str);
-            wxWriteResource("Gambit", "NFOutcome-Display", outcome_disp, defaults_file);
-        }
-    }
+  }
 
-    delete options_dialog;
-    delete opt_str;
-    delete opt_list;
+  delete options_dialog;
+  delete opt_str;
+  delete opt_list;
 }
 
 
@@ -2279,7 +2132,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     // Load palette bitmaps
 #include "bitmaps/save.xpm"
 #include "bitmaps/print.xpm"
-    //#include "bitmaps/payoff.xpm"
 #include "bitmaps/solve.xpm"
 #include "bitmaps/help.xpm"
 #include "bitmaps/options.xpm"
@@ -2287,7 +2139,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
     wxBitmap *ToolbarSaveBitmap = new wxBitmap(save_xpm);
     wxBitmap *ToolbarPrintBitmap = new wxBitmap(print_xpm);
     wxBitmap *ToolbarSolveBitmap = new wxBitmap(solve_xpm);
-    //    wxBitmap *ToolbarPayoffBitmap = new wxBitmap(payoff_xpm);
     wxBitmap *ToolbarHelpBitmap = new wxBitmap(help_xpm);
     wxBitmap *ToolbarOptionsBitmap = new wxBitmap(options_xpm);
     wxBitmap *ToolbarInspectBitmap = new wxBitmap(inspect_xpm);
@@ -2302,8 +2153,6 @@ NfgShowToolBar::NfgShowToolBar(wxFrame *frame):
 
     AddTool(NFG_FILE_SAVE, ToolbarSaveBitmap);
     AddTool(OUTPUT_MENU, ToolbarPrintBitmap);
-    AddSeparator();
-    //    AddTool(NFG_EDIT_OUTCOMES, ToolbarPayoffBitmap);
     AddSeparator();
     AddTool(NFG_SOLVE_STANDARD_MENU, ToolbarSolveBitmap);
     AddTool(NFG_SOLVE_INSPECT_MENU, ToolbarInspectBitmap);
