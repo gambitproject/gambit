@@ -128,7 +128,7 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(void)
   gWatch timer;
   timer.Start();
 
-  QuikSolv<T> quickie(equations);
+  QuikSolv<T> quickie(equations, params.status);
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;

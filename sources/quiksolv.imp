@@ -15,49 +15,53 @@
 // Constructors / Destructors
 //---------------------------
 
-template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given) 
-: System(given), 
-  gDoubleSystem(given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()),
-  NoEquations( gmin(System.Dmnsn(),System.Length()) ),
-  NoInequalities( gmax(System.Length() - System.Dmnsn(),0) ),
-  TreesOfPartials(gDoubleSystem),
-  HasBeenSolved(false), 
-  Roots(),
-  isMultiaffine(System.IsMultiaffine()),
-  Equation_i_uses_var_j(Eq_i_Uses_j())
-{
-}
+template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given,
+					 gStatus &p_status) 
+  : System(given), 
+    gDoubleSystem(given.AmbientSpace(),given.TermOrder(),
+		  given.ListTogDouble()),
+    NoEquations( gmin(System.Dmnsn(),System.Length()) ),
+    NoInequalities( gmax(System.Length() - System.Dmnsn(),0) ),
+    TreesOfPartials(gDoubleSystem),
+    HasBeenSolved(false), 
+    Roots(),
+    isMultiaffine(System.IsMultiaffine()),
+    Equation_i_uses_var_j(Eq_i_Uses_j()),
+    m_status(p_status)
+{ }
 
 template <class T> QuikSolv<T>::QuikSolv(const gPolyList<T>& given,
-					 const int&          no_eqs) 
-: System(given), 
-  gDoubleSystem(given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()),
-  NoEquations(no_eqs),
-  NoInequalities(System.Length() - no_eqs),
-  TreesOfPartials(gDoubleSystem),
-  HasBeenSolved(false), 
-  Roots(),
-  isMultiaffine(System.IsMultiaffine()),
-  Equation_i_uses_var_j(Eq_i_Uses_j())
-{
-}
+					 const int&          no_eqs,
+					 gStatus &p_status) 
+  : System(given), 
+    gDoubleSystem(given.AmbientSpace(),given.TermOrder(),
+		  given.ListTogDouble()),
+    NoEquations(no_eqs),
+    NoInequalities(System.Length() - no_eqs),
+    TreesOfPartials(gDoubleSystem),
+    HasBeenSolved(false), 
+    Roots(),
+    isMultiaffine(System.IsMultiaffine()),
+    Equation_i_uses_var_j(Eq_i_Uses_j()),
+    m_status(p_status)
+{ }
 
 template<class T> QuikSolv<T>::QuikSolv(const QuikSolv& qs)
-: System(qs.System), 
-  gDoubleSystem(qs.gDoubleSystem),
-  NoEquations(qs.NoEquations),
-  NoInequalities(qs.NoEquations),
-  TreesOfPartials(qs.TreesOfPartials), 
-  HasBeenSolved(qs.HasBeenSolved), 
-  Roots(qs.Roots),
-  isMultiaffine(qs.isMultiaffine),
-  Equation_i_uses_var_j(qs.Equation_i_uses_var_j)
-{
-}
+  : System(qs.System), 
+    gDoubleSystem(qs.gDoubleSystem),
+    NoEquations(qs.NoEquations),
+    NoInequalities(qs.NoEquations),
+    TreesOfPartials(qs.TreesOfPartials), 
+    HasBeenSolved(qs.HasBeenSolved), 
+    Roots(qs.Roots),
+    isMultiaffine(qs.isMultiaffine),
+    Equation_i_uses_var_j(qs.Equation_i_uses_var_j),
+    m_status(qs.m_status)
+  
+{ }
 
 template<class T> QuikSolv<T>::~QuikSolv()
-{
-}
+{ }
 
 //-------------------------------------------------------
 //      Supporting Calculations for the Constructors
@@ -404,6 +408,10 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
 				      int* roots_found)    const
 {
   assert (NoEquations == System.Dmnsn());
+
+  // Check for user interrupt
+  m_status.SetProgress(50.0);
+  m_status.Get();
 
   if ( SystemHasNoRootsIn(r, precedence) ) 
     return; // newlist; 

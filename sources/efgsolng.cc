@@ -1136,6 +1136,7 @@ gList<BehavSolution> guiPolEnumEfgNfg::Solve(void) const
 {
   guiPolEnumParamsSettings PES;
   wxStatus status(parent->Frame(), "PolEnum Algorithm");
+  status.SetProgress(0.0);
   PolEnumParams P(status);
   PES.GetParams(P);
 

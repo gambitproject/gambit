@@ -7,6 +7,8 @@
 #ifndef QUIKSOLV_H
 #define QUIKSOLV_H
 
+#include "gstatus.h"
+
 #include "gsolver.h"
 #include "odometer.h"
 #include "rectangl.h"
@@ -56,6 +58,7 @@ template <class T> class QuikSolv {
         gList<gVector<gDouble> >     Roots;
   const bool                         isMultiaffine;
   const gRectArray<bool>             Equation_i_uses_var_j;
+  gStatus &m_status;
 
   // Supporting routines for the constructors
 
@@ -109,8 +112,8 @@ template <class T> class QuikSolv {
 					        gArray<int>&)        const;
 
  public:
-   QuikSolv(const gPolyList<T> &);  
-   QuikSolv(const gPolyList<T> &, const int &);  
+   QuikSolv(const gPolyList<T> &, gStatus &);  
+   QuikSolv(const gPolyList<T> &, const int &, gStatus &);  
    QuikSolv(const QuikSolv<T> &);
    ~QuikSolv();
 

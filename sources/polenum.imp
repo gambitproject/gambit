@@ -90,22 +90,30 @@ template <class T> int PolEnumModule<T>::PolEnum(void)
   gWatch timer;
   timer.Start();
 
-  QuikSolv<T> quickie(equations);
-  if(params.trace>0) {
+  
+  QuikSolv<T> quickie(equations, params.status);
+  params.status.SetProgress(50.0);
+
+  if (params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;
   }  
-  if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
-    if(params.trace>0) {
-      (*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-	<< num_vars << " :\n" << quickie.RootList();
+
+  try {
+    if (quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
+      if (params.trace>0) {
+	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
+			    << num_vars << " :\n" << quickie.RootList();
+      }
     }
+    else
+      if (params.trace>0) {
+	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
+			    << " could not be resolved by FindRoots.\n";
+      }
   }
-  else
-    if(params.trace>0) {
-      (*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
-	<< " could not be resolved by FindRoots.\n";
-    }
+  catch (gSignalBreak &) { }
+
   timer.Stop();
   if(params.trace>0) {
     (*params.tracefile)  << "The QuikSolv computation of roots took " 
@@ -232,5 +240,10 @@ PolEnumModule<T>::Equation(int i, int strat1, int strat2) const
   } while (B.NextContingency());
   return equation;
 }
+
+
+
+
+
 
 
