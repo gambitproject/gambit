@@ -59,9 +59,6 @@ const gNumber PureBehavProfile<gNumber>
   return t->probs[act];
 }
 
-template class BehavNode<double>;
-template class BehavInfoset<double>;
-template class BehavAction<double>;
 template class BehavProfile<double>;
 template class BehavAssessment<double>;
 template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
@@ -69,13 +66,10 @@ template gOutput &operator<<(gOutput &, const BehavAssessment<double> &);
 
 template void RealizationProbs(const MixedProfile<double> &mp,
 			       const Efg &E, BehavProfile<double> &bp,
-			       int pl, const gArray<int> *const actions, BehavNode<double> *);
+			       int pl, const gArray<int> *const actions, BehavProfile<double>::BehavNode *);
 
-template void BehaviorStrat(const Efg &E, BehavProfile<double> &bp, int pl, BehavNode<double> *);
+template void BehaviorStrat(const Efg &E, BehavProfile<double> &bp, int pl, BehavProfile<double>::BehavNode *);
 
-template class BehavNode<gRational>;
-template class BehavInfoset<gRational>;
-template class BehavAction<gRational>;
 template class BehavProfile<gRational>;
 template class BehavAssessment<gRational>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gRational> &);
@@ -83,21 +77,18 @@ template gOutput &operator<<(gOutput &, const BehavAssessment<gRational> &);
 
 template void RealizationProbs(const MixedProfile<gRational> &mp,
 			       const Efg &E, BehavProfile<gRational> &bp,
-			       int pl, const gArray<int> *const actions, BehavNode<gRational> *);
-template void BehaviorStrat(const Efg &E, BehavProfile<gRational> &bp, int pl, BehavNode<gRational> *n);
+			       int pl, const gArray<int> *const actions, BehavProfile<gRational>::BehavNode *);
+template void BehaviorStrat(const Efg &E, BehavProfile<gRational> &bp, int pl, BehavProfile<gRational>::BehavNode *n);
 
-template class BehavNode<gNumber>;
-template class BehavInfoset<gNumber>;
-template class BehavAction<gNumber>;
 template class BehavProfile<gNumber>;
 template class BehavAssessment<gNumber>;
 template gOutput &operator<<(gOutput &, const BehavProfile<gNumber> &);
 template gOutput &operator<<(gOutput &, const BehavAssessment<gNumber> &);
 
-template void BehaviorStrat(const Efg &E, BehavProfile<gNumber> &bp, int pl, BehavNode<gNumber> *n);
+template void BehaviorStrat(const Efg &E, BehavProfile<gNumber> &bp, int pl, BehavProfile<gNumber>::BehavNode *n);
 template void RealizationProbs(const MixedProfile<gNumber> &mp,
 			       const Efg &E, BehavProfile<gNumber> &bp,
-			       int pl, const gArray<int> *const actions, BehavNode<gNumber> *);
+			       int pl, const gArray<int> *const actions, BehavProfile<gNumber>::BehavNode *);
 
 
 /*
@@ -141,17 +132,17 @@ template class PureBehavProfile<gNumber>;
 #include "garray.imp"
 #include "gblock.imp"
 
-template class gArray<BehavNode<double> *>;
-template class gArray<BehavNode<gRational> *>;
-template class gArray<BehavNode<gNumber> *>;
+template class gArray<BehavProfile<double>::BehavNode *>;
+template class gArray<BehavProfile<gRational>::BehavNode *>;
+template class gArray<BehavProfile<gNumber>::BehavNode *>;
 
-template class gArray<BehavAction<double> *>;
-template class gArray<BehavAction<gRational> *>;
-template class gArray<BehavAction<gNumber> *>;
+template class gArray<BehavProfile<double>::BehavAction *>;
+template class gArray<BehavProfile<gRational>::BehavAction *>;
+template class gArray<BehavProfile<gNumber>::BehavAction *>;
 
-template class gArray<BehavInfoset<double> *>;
-template class gArray<BehavInfoset<gRational> *>;
-template class gArray<BehavInfoset<gNumber> *>;
+template class gArray<BehavProfile<double>::BehavInfoset *>;
+template class gArray<BehavProfile<gRational>::BehavInfoset *>;
+template class gArray<BehavProfile<gNumber>::BehavInfoset *>;
 
 #include "glist.imp"
 

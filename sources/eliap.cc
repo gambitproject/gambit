@@ -48,11 +48,10 @@ double EFLiapFunc::Value(const gVector<double> &v)
 
 
   ((gVector<double> &) _p).operator=(v);
-  BehavProfile<double> tmp(_p);
   double x, result = 0.0, avg, sum;
 
   gPVector<double> probs(_efg.NumInfosets());  
-  tmp.CondPayoff(_cpay, probs);
+  _p.CondPayoff(_cpay, probs);
 
   for (int i = 1; i <= _efg.NumPlayers(); i++) {
     EFPlayer *player = _efg.Players()[i];
