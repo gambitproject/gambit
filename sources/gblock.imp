@@ -91,7 +91,8 @@ template <class T> int gBlock<T>::Insert(const T &t, int n)
 template <class T> T gBlock<T>::Remove(int n)
 {
 #ifdef USE_EXCEPTIONS
-  if (n < mindex || n > maxdex)    throw BadIndex();
+  if (n < mindex || n > maxdex)   
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(n >= mindex && n <= maxdex);
 #endif   // USE_EXCEPTIONS

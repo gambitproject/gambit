@@ -128,9 +128,12 @@ template <class T> gDPVector<T> &gDPVector<T>::operator=(T c)
 template <class T> T &gDPVector<T>::operator()(int a, int b, int c)
 {
 #ifdef USE_EXCEPTIONS
-  if (dvlen.First() > a || a > dvlen.Last())   throw BadIndex();
-  if (1 > b || b > dvlen[a])                 throw BadIndex();
-  if (1 > c || c > svlen[dvidx[a] + b - 1])  throw BadIndex();
+  if (dvlen.First() > a || a > dvlen.Last())
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > b || b > dvlen[a])         
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > c || c > svlen[dvidx[a] + b - 1])
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(dvlen.First() <= a && a <= dvlen.Last());
   assert(1 <= b && b <= dvlen[a]);
@@ -143,9 +146,12 @@ template <class T> T &gDPVector<T>::operator()(int a, int b, int c)
 template <class T> const T &gDPVector<T>::operator()(int a, int b, int c) const
 {
 #ifdef USE_EXCEPTIONS
-  if (dvlen.First() > a || a > dvlen.Last())   throw BadIndex();
-  if (1 > b || b > dvlen[a])                 throw BadIndex();
-  if (1 > c || c > svlen[dvidx[a] + b - 1])  throw BadIndex();
+  if (dvlen.First() > a || a > dvlen.Last()) 
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > b || b > dvlen[a])         
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > c || c > svlen[dvidx[a] + b - 1]) 
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(dvlen.First() <= a && a <= dvlen.Last());
   assert(1 <= b && b <= dvlen[a]);
@@ -265,8 +271,10 @@ void gDPVector<T>::CopySubRow(int row, int col, const gDPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
   if (!Check(v))   throw BadDim();
-  if (dvlen.First() > row || row > dvlen.Last())   throw BadIndex();
-  if (1 > col || col > dvlen[row])   throw BadIndex();
+  if (dvlen.First() > row || row > dvlen.Last())
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > col || col > dvlen[row])   
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(Check(v));
   assert(dvlen.First() <= row && row <= dvlen.Last());

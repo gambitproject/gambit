@@ -108,8 +108,10 @@ template <class T> gPVector<T>& gPVector<T>::operator=(T c)
 template <class T> T& gPVector<T>::operator()(int a, int b)
 {
 #ifdef USE_EXCEPTIONS
-  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
-  if (1 > b || b > svlen[a])   throw BadIndex();
+  if (svlen.First() > a || a > svlen.Last())  
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > b || b > svlen[a])   
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert( svlen.First()<=a && a<=svlen.Last() );
   assert( 1<=b && b<=svlen[a] );
@@ -121,8 +123,10 @@ template <class T> T& gPVector<T>::operator()(int a, int b)
 template <class T> const T& gPVector<T>::operator()(int a, int b) const
 {
 #ifdef USE_EXCEPTIONS
-  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
-  if (1 > b || b > svlen[a])   throw BadIndex();
+  if (svlen.First() > a || a > svlen.Last())
+    throw BadIndex(__LINE__, __FILE__);
+  if (1 > b || b > svlen[a])   
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert( svlen.First()<=a && a<=svlen.Last() );
   assert( 1<=b && b<=svlen[a] );
@@ -236,7 +240,8 @@ template <class T> int gPVector<T>::operator!=(const gPVector<T> &v) const
 template <class T> gVector<T> gPVector<T>::GetRow(int row) const
 {
 #ifdef USE_EXCEPTIONS
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (svlen.First() > row || row > svlen.Last())
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert( svlen.First()<=row && row<=svlen.Last() );
 #endif   // USE_EXCEPTIONS
@@ -251,7 +256,8 @@ template <class T> gVector<T> gPVector<T>::GetRow(int row) const
 template <class T> void gPVector<T>::GetRow(int row, gVector<T> &v) const
 {
 #ifdef USE_EXCEPTIONS
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (svlen.First() > row || row > svlen.Last())
+    throw BadIndex(__LINE__, __FILE__);
   if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim();
 #else
   assert( svlen.First()<=row && row<=svlen.Last() );
@@ -265,7 +271,8 @@ template <class T> void gPVector<T>::GetRow(int row, gVector<T> &v) const
 template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (svlen.First() > row || row > svlen.Last())   
+    throw BadIndex(__LINE__, __FILE__);
   if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim();
 #else
   assert( svlen.First()<=row && row<=svlen.Last() );
@@ -280,7 +287,8 @@ template <class T> void gPVector<T>::CopyRow(int row, const gPVector<T> &v)
 {
 #ifdef USE_EXCEPTIONS
   if (!Check(v))   throw BadDim();
-  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (svlen.First() > row || row > svlen.Last())  
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(Check(v));
   assert(svlen.First() <= row && row <= svlen.Last());

@@ -17,7 +17,7 @@ template <class T> gArray<T>::gArray(int lo, int hi)
   : mindex(lo), maxdex(hi)
 {
 #ifdef USE_EXCEPTIONS
-  if (maxdex + 1 < mindex)   throw BadRange();
+  if (maxdex + 1 < mindex)   throw BadRange(__LINE__, __FILE__);
 #else
   assert(maxdex + 1 >= mindex);
 #endif   // USE_EXCEPTIONS
@@ -77,7 +77,8 @@ template <class T> int gArray<T>::Last(void) const
 template <class T> const T &gArray<T>::operator[](int index) const
 {
 #ifdef USE_EXCEPTIONS
-  if (index < mindex || index > maxdex)   throw BadIndex();
+  if (index < mindex || index > maxdex) 
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(index >= mindex && index <= maxdex);
 #endif   // USE_EXCEPTIONS
@@ -88,7 +89,8 @@ template <class T> const T &gArray<T>::operator[](int index) const
 template <class T> T &gArray<T>::operator[](int index)
 {
 #ifdef USE_EXCEPTIONS
-  if (index < mindex || index > maxdex)   throw BadIndex();
+  if (index < mindex || index > maxdex)
+    throw BadIndex(__LINE__, __FILE__);
 #else
   assert(index >= mindex && index <= maxdex);
 #endif   // USE_EXCEPTIONS
@@ -122,3 +124,33 @@ template <class T> gOutput &operator<<(gOutput &f, const gArray<T> &a)
   a.Dump(f);
   return f;
 }
+
+
+#ifdef USE_EXCEPTIONS
+template <class T> gArray<T>::BadIndex::BadIndex(int line, char *file)
+  : gException(line, file)
+{ }
+
+template <class T> gArray<T>::BadIndex::~BadIndex()
+{ }
+
+template <class T> gText gArray<T>::BadIndex::Description(void) const
+{
+  return "Bad index in gArray";
+}
+
+template <class T> gArray<T>::BadRange::BadRange(int line, char *file)
+  : gException(line, file)
+{ }
+
+template <class T> gArray<T>::BadRange::~BadRange()
+{ }
+
+template <class T> gText gArray<T>::BadRange::Description(void) const
+{
+  return "Bad range in gArray";
+}
+
+
+#endif   // USE_EXCEPTIONS
+
