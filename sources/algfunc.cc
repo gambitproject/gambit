@@ -48,13 +48,181 @@ Portion *GSM_BehavRational(Portion **param)
 
 
 
-Portion *GSM_Payoff(Portion **param)
-{
-  BehavProfile<double> bp = * (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
-  int pl = ((IntPortion *) param[1])->Value();
 
-  return new FloatValPortion(bp.Payoff(pl));
+//---------------------------- Payoff ----------------------------//
+
+
+Portion* GSM_Payoff_BehavFloat( Portion** param )
+{
+  int i;
+  Portion* por = new ListValPortion;
+  BehavProfile<double>* bp = 
+    (BehavProfile<double>*) ((BehavPortion*) param[0])->Value();
+  for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
+  {
+    ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
+  }
+  return por;
 }
+
+ Portion* GSM_Payoff_BehavRational( Portion** param )
+{
+  int i;
+  Portion* por = new ListValPortion;
+  BehavProfile<gRational>* bp = 
+    (BehavProfile<gRational>*) ((BehavPortion*) param[0])->Value();
+  for( i = 1; i <= bp->BelongsTo()->PlayerList().Length(); i++ )
+  {
+    ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
+  }
+  return por;
+}
+
+
+Portion* GSM_Payoff_MixedFloat( Portion** param )
+{
+  int i;
+  Portion* por = new ListValPortion;
+  MixedProfile<double>* bp = 
+    (MixedProfile<double>*) ((MixedPortion*) param[0])->Value();
+  for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
+  {
+    ( (ListValPortion*) por )->Append( new FloatValPortion( bp->Payoff( i ) ));
+  }
+  return por;
+}
+
+Portion* GSM_Payoff_MixedRational( Portion** param )
+{
+  int i;
+  Portion* por = new ListValPortion;
+  MixedProfile<gRational>* bp = 
+    (MixedProfile<gRational>*) ((MixedPortion*) param[0])->Value();
+  for( i = 1; i <= bp->BelongsTo()->NumPlayers(); i++ )
+  {
+    ((ListValPortion*) por)->Append( new RationalValPortion( bp->Payoff( i )));
+  }
+  return por;
+}
+
+
+Portion* GSM_Payoff_NfgFloat( Portion** param )
+{
+  int i;
+  Portion* p;
+  Portion* por = new ListValPortion;
+  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
+  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  
+  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  
+  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  {
+    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
+    assert( p->Type() == porINTEGER );
+    profile[ i ] = ( (IntPortion*) p )->Value();
+    delete p;
+  }
+  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  {
+    ( (ListValPortion*) por )->
+      Append( new FloatValPortion( nfg->Payoff( i, profile ) ) );
+  }
+  return por;
+}
+
+Portion* GSM_Payoff_NfgRational( Portion** param )
+{
+  int i;
+  Portion* p;
+  Portion* por = new ListValPortion;
+  Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
+  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  
+  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  
+  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  {
+    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
+    assert( p->Type() == porINTEGER );
+    profile[ i ] = ( (IntPortion*) p )->Value();
+    delete p;
+  }
+  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  {
+    ( (ListValPortion*) por )->
+      Append( new RationalValPortion( nfg->Payoff( i, profile ) ) );
+  }
+  return por;
+}
+
+
+
+//-------------------------------- SetPayoff ---------------------------//
+
+Portion* GSM_SetPayoff_NfgFloat( Portion** param )
+{
+  int i;
+  Portion* p;
+  Nfg<double>* nfg = (Nfg<double>*) ( (NfgPortion*) param[0] )->Value();
+  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  
+  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
+  
+  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  {
+    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
+    assert( p->Type() == porINTEGER );
+    profile[ i ] = ( (IntPortion*) p )->Value();
+    delete p;
+  }
+  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  {
+    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
+    assert( p->Type() == porFLOAT );
+    nfg->SetPayoff( i, profile, ( (FloatPortion*) p )->Value() );
+    delete p;
+  }
+  return param[ 1 ]->ValCopy();
+}
+
+Portion* GSM_SetPayoff_NfgRational( Portion** param )
+{
+  int i;
+  Portion* p;
+  Nfg<gRational>* nfg = (Nfg<gRational>*) ( (NfgPortion*) param[0] )->Value();
+  gArray<int> profile( ( (ListPortion*) param[ 1 ] )->Length() );
+  
+  if( ( (ListPortion*) param[ 1 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"list\"");
+  if( ( (ListPortion*) param[ 2 ] )->Length() != nfg->NumPlayers() )
+    return new ErrorPortion("Invalid number of players specified in \"payoff\"");
+  
+  for( i = 1; i <= nfg->NumPlayers() ; i++ )
+  {
+    p = ( (ListPortion*) param[ 1 ] )->Subscript( i );
+    assert( p->Type() == porINTEGER );
+    profile[ i ] = ( (IntPortion*) p )->Value();
+    delete p;
+  }
+  for( i = 1; i <= nfg->NumPlayers(); i++ )
+  {
+    p = ( (ListPortion*) param[ 2 ] )->Subscript( i );
+    assert( p->Type() == porRATIONAL );
+    nfg->SetPayoff( i, profile, ( (RationalPortion*) p )->Value() );
+    delete p;
+  }
+  return param[ 1 ]->ValCopy();
+}
+
+
+
+
 
 Portion *GSM_NfgFloat(Portion **param)
 {
@@ -569,11 +737,63 @@ void Init_algfunc(GSM *gsm)
 			new FloatValPortion(0), PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 
+
+  //------------------------- Payoff -----------------------------//
+
   FuncObj = new FuncDescObj("Payoff");
-  FuncObj->SetFuncInfo(GSM_Payoff, 2);
-  FuncObj->SetParamInfo(GSM_Payoff, 0, "behav", porBEHAV_FLOAT);
-  FuncObj->SetParamInfo(GSM_Payoff, 1, "player", porINTEGER);
+  FuncObj->SetFuncInfo(GSM_Payoff_BehavFloat, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_BehavFloat, 
+			0, "strategy", porBEHAV_FLOAT);
+  FuncObj->SetFuncInfo(GSM_Payoff_BehavRational, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_BehavRational, 
+			0, "strategy", porBEHAV_RATIONAL);
+
+  FuncObj->SetFuncInfo(GSM_Payoff_MixedFloat, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_MixedFloat, 
+			0, "strategy", porMIXED_FLOAT);
+  FuncObj->SetFuncInfo(GSM_Payoff_MixedRational, 1);
+  FuncObj->SetParamInfo(GSM_Payoff_MixedRational, 
+			0, "strategy", porMIXED_RATIONAL);
+
+  FuncObj->SetFuncInfo(GSM_Payoff_NfgFloat, 2);
+  FuncObj->SetParamInfo(GSM_Payoff_NfgFloat, 
+			0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Payoff_NfgFloat,
+			1, "list", porLIST | porINTEGER );
+  FuncObj->SetFuncInfo(GSM_Payoff_NfgRational, 2);
+  FuncObj->SetParamInfo(GSM_Payoff_NfgRational, 
+			0, "nfg", porNFG_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_Payoff_NfgRational,
+			1, "list", porLIST | porINTEGER );
   gsm->AddFunction(FuncObj);
+
+
+  //-------------------------- SetPayoff ---------------------------//
+
+  FuncObj = new FuncDescObj( "SetPayoff" );
+  FuncObj->SetFuncInfo(GSM_SetPayoff_NfgFloat, 3);
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgFloat, 
+			0, "nfg", porNFG_FLOAT, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgFloat,
+			1, "list", porLIST | porINTEGER );
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgFloat,
+			2, "payoff", porLIST | porFLOAT );
+
+  FuncObj->SetFuncInfo(GSM_SetPayoff_NfgRational, 3);
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational, 
+			0, "nfg", porNFG_RATIONAL, 
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational,
+			1, "list", porLIST | porINTEGER );
+  FuncObj->SetParamInfo(GSM_SetPayoff_NfgRational,
+			2, "payoff", porLIST | porRATIONAL );
+  gsm->AddFunction(FuncObj);
+
+
+
 
   FuncObj = new FuncDescObj("ActionValues");
   FuncObj->SetFuncInfo(GSM_ActionValuesFloat, 2);

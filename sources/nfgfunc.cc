@@ -129,13 +129,63 @@ Portion *GSM_SetNameNfg(Portion **param)
   return param[0]->ValCopy();
 }
 
+
+Portion *GSM_NumStrats( Portion** param )
+{
+  int i;
+  gArray< int > dim;
+
+  NFPlayer* P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
+
+  if( s == 0 )
+    return new IntValPortion( P->StrategyList().Length() );
+  else
+  {
+    dim = s->SupportDimensions();
+    for( i = 1; i <= dim.Length(); i++ )
+    {
+      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
+	return new IntValPortion( s->NumStrats( i ) );
+    }
+  }
+  return new ErrorPortion( "Specified player is not found in the support" );
+}
+
+
 Portion *GSM_Strategies(Portion **param)
 {
-  NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+  int i;
+  gArray< int > dim;
+  Portion* por = 0;
 
-  Portion *por = ArrayToList(P->StrategyList());
-  por->SetOwner(param[0]->Owner());
-  por->AddDependency();
+  NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
+  NFSupport* s = ( (NfSupportPortion*) param[ 1 ] )->Value();
+
+  if( s == 0 )
+    por = ArrayToList(P->StrategyList());
+  else
+  {
+    dim = s->SupportDimensions();
+    for( i = 1; i <= dim.Length(); i++ )
+    {
+      if( &( s->GetNFStrategySet( i )->GetPlayer() ) == P )
+      {
+	por = ArrayToList( s->GetStrategy( i ) );
+	break;
+      }
+    }
+  }
+
+  if( por != 0 )
+  {
+    por->SetOwner(param[0]->Owner());
+    por->AddDependency();
+  }
+  else
+  {
+    por = new ErrorPortion( "Specified player is not found in the support" );
+  }
   return por;
 }
 
@@ -630,16 +680,16 @@ Portion *GSM_NewSupport(Portion **param)
 
 Portion *GSM_SaveNfg(Portion **param)
 {
+  BaseNfg* N = ((NfgPortion*) param[0])->Value();
   gString file = ((TextPortion *) param[1])->Value();
-  BaseNfg &N = * ((NfgPortion*) param[1])->Value();
-
   gFileOutput f(file);
 
   if (!f.IsValid())
     return new ErrorPortion("Unable to open file for output");
 
-  N.WriteNfgFile(f);
-  return new OutputRefPortion(f);
+  N->WriteNfgFile(f);
+
+  return param[0]->RefCopy();
 }
 
 //---------------------------------------------------------------------
@@ -847,9 +897,18 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_RemoveStrategy, 1, "strategy", porSTRATEGY);
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("NumStrats");
+  FuncObj->SetFuncInfo(GSM_NumStrats, 2);
+  FuncObj->SetParamInfo(GSM_NumStrats, 0, "player", porPLAYER_NFG);
+  FuncObj->SetParamInfo(GSM_NumStrats, 1, "support", porNF_SUPPORT, 
+			new NfSupportValPortion( 0 ) );
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("Strategies");
-  FuncObj->SetFuncInfo(GSM_Strategies, 1);
+  FuncObj->SetFuncInfo(GSM_Strategies, 2);
   FuncObj->SetParamInfo(GSM_Strategies, 0, "player", porPLAYER_NFG);
+  FuncObj->SetParamInfo(GSM_Strategies, 1, "support", porNF_SUPPORT, 
+			new NfSupportValPortion( 0 ) );
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LoadNfg");

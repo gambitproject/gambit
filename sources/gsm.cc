@@ -856,7 +856,7 @@ bool GSM::AddFunction( FuncDescObj* func )
     old_func = (*_FuncTable)( func->FuncName() );
     result = old_func->Combine( func );
     if( !result )
-      _ErrorMessage( _StdErr, 60 );
+      _ErrorMessage( _StdErr, 60, 0, 0, old_func->FuncName() );
     return result;
   }
 }
@@ -1484,7 +1484,7 @@ void GSM::_ErrorMessage
     s << "Attempted to pass an undefined reference to a function\n";
     break;
   case 60:
-    s << "New function parameters are ambiguous with an existing function\n";
+    s << "New " << str1 << "[] parameters ambiguous with existing function\n";
     break;
   default:
     s << "General error\n";

@@ -537,8 +537,10 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].DefaultValue == 0 ) &&
 	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Name ==
 	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Name ) &&
-	   PortionTypeMatch( _FuncInfo[ f_index ].ParamInfo[ index ].Type,
-			    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) 
+	   ( _FuncInfo[ f_index ].ParamInfo[ index ].Type &
+	    newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type )
+	   // PortionTypeMatch( _FuncInfo[ f_index ].ParamInfo[ index ].Type,
+	   // newfunc->_FuncInfo[ i ].ParamInfo[ index ].Type ) 
 	   )
 	{
 	  same_params = same_params & true;
@@ -850,7 +852,6 @@ bool CallFuncObj::SetCurrParam( Portion *param, bool auto_val_or_ref )
       funcs_matched++;
     }
   }
-  assert( funcs_matched > 0 );
   if( funcs_matched == 1 )
     _FuncIndex = last_match;
 

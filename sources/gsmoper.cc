@@ -955,8 +955,11 @@ Portion* GSM_Write_Nfg( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   BaseNfg* nfg = ( (NfgPortion*) param[ 1 ] )->Value();
-  s << "Write[] is still waiting for DisplayNfg() and not yet completed\n";
   // nfg->DisplayNfg( s );
+
+  s << "Temporary hack; still waiting for DisplayNfg() to finish\n";
+  nfg->WriteNfgFile( s );
+
   return new OutputRefPortion( s );  
 }
 
@@ -965,8 +968,11 @@ Portion* GSM_Write_Efg( Portion** param )
 {
   gOutput& s = ( (OutputPortion*) param[ 0 ] )->Value();
   BaseEfg* efg = ( (EfgPortion*) param[ 1 ] )->Value();
-  s << "Write[] is still waiting for DisplayEfg() and not yet completed\n";
   // efg->DisplayEfg( s );
+
+  s << "Temporary hack; still waiting for DisplayEfg() to finish\n";
+  efg->WriteEfgFile( s );
+
   return new OutputRefPortion( s );  
 }
 

@@ -19,14 +19,14 @@ void TNDoChild (Node *n, gList <Node *> &list)
 {
   if (n->NumChildren() == 0) list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
-    NDoChild ( n->GetChild(i), list);
+    TNDoChild ( n->GetChild(i), list);
 }
 
 void NTNDoChild (Node *n, gList <Node *> &list)
 {
   if (n->NumChildren() != 0) list.Append(n);
   for (int i = 1; i <= n->NumChildren(); i++)
-    NDoChild ( n->GetChild(i), list);
+    NTNDoChild ( n->GetChild(i), list);
 }
 
 int CountChildren (Node *n)
