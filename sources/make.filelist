@@ -14,7 +14,7 @@ GPOLY_SOURCES = prepoly.cc gpoly.cc monomial.cc interval.cc double.cc \
                 odometer.cc rectangl.cc gtree.cc ideal.cc gpolylst.cc \
                 linrcomb.cc 
 
-GPOLY_OBJECTS = $(GPOLY_OBJECTS:.cc=.o)
+GPOLY_OBJECTS = $(GPOLY_SOURCES:.cc=.o)
 
 
 GAME_SOURCES = readnfg.cc nfstrat.cc nfg.cc nfginst.cc nfgutils.cc \
