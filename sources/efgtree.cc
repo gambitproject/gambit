@@ -136,6 +136,8 @@ void NodeEntry::OnSelected(bool p_selected)
     dc.DrawLine(m_x, m_y, m_x + m_length, m_y);
     dc.DrawEllipse(m_x - 3, m_y - 3, 6, 6);
   }
+
+  m_window->OnSelectedNode(m_node, p_selected);
 }
 
 bool NodeEntry::HitTest(int p_x, int p_y,
@@ -308,6 +310,8 @@ void OutcomeEntry::OnSelected(bool p_selected)
     dc.SetPen(wxPen(wxColour("WHITE"), 2, wxSOLID));
   }
   dc.DrawLines(5, points);
+
+  m_window->OnSelectedOutcome(m_node->GetOutcome(), p_selected);
 }
 
 
@@ -493,8 +497,10 @@ TreeObject *guiEfgTree::HitTest(int p_x, int p_y) const
 {
   int scrollX, scrollY;
   ViewStart(&scrollX, &scrollY);
-  scrollX *= (m_maxX / 15);
-  scrollY *= (m_maxY / 15);
+  int unitsX, unitsY;
+  GetScrollPixelsPerUnit(&unitsX, &unitsY);
+  scrollX *= unitsX;
+  scrollY *= unitsY;
 
   for (int i = 1; i <= m_objects.Length(); i++) {
     if (m_objects[i]->HitTest((p_x + scrollX) / m_zoomFactor,
@@ -534,6 +540,7 @@ void guiEfgTree::OnLeftClick(wxMouseEvent &p_event)
 
 void guiEfgTree::OnLeftUp(wxMouseEvent &p_event)
 {
+  SetCursor(*wxSTANDARD_CURSOR);
   TreeObject *object = HitTest(p_event.GetX(), p_event.GetY());
   if (object && object->Type() == treeNODE) {
     NodeEntry *nodeEntry = (NodeEntry *) object;
@@ -608,6 +615,16 @@ Action *guiEfgTree::SelectedAction(void) const
   return ((BranchEntry *) m_selection)->GetAction();
 }
 
+void guiEfgTree::OnSelectedOutcome(EFOutcome *p_outcome, bool p_selected)
+{
+  m_parent->OnSelectedOutcome(p_outcome, p_selected);
+}
+
+void guiEfgTree::OnSelectedNode(Node *p_node, bool p_selected)
+{
+  m_parent->OnSelectedNode(p_node, p_selected);
+}
+
 void guiEfgTree::OnTreeChanged(void)
 {
   for (int i = 1; i <= m_objects.Length(); i++) {
@@ -617,6 +634,16 @@ void guiEfgTree::OnTreeChanged(void)
 
   LayoutTree();
   m_selection = 0;
+  OnDraw();
+}
+
+void guiEfgTree::OnOutcomeChanged(EFOutcome *)
+{
+  OnDraw();
+}
+
+void guiEfgTree::OnNodeChanged(Node *)
+{
   OnDraw();
 }
 

@@ -16,6 +16,7 @@
 #endif
 
 #include "wx/splitter.h"
+#include "wx/colordlg.h"
 
 #include "efg.h"
 #include "behavsol.h"
@@ -64,6 +65,7 @@ const int EFG_SOLVE_CUSTOM_NFG_QRE = 2428;
 const int EFG_SOLVE_CUSTOM_NFG_QREGRID = 2429;
 const int EFG_VIEW_SOLUTIONS = 2429;
 const int EFG_VIEW_NFG = 2430;
+const int EFG_VIEW_COLOR = 2431;
 const int EFG_EDIT_DELETE = 2500;
 const int EFG_EDIT_COPY = 2501;
 const int EFG_EDIT_PASTE = 2502;
@@ -81,6 +83,7 @@ BEGIN_EVENT_TABLE(guiEfgFrame, gambitGameView)
   EVT_MENU(EFG_VIEW_SOLUTIONS, OnViewSolutions)
   EVT_MENU(EFG_VIEW_ZOOM_IN, OnViewZoomIn)
   EVT_MENU(EFG_VIEW_ZOOM_OUT, OnViewZoomOut)
+  EVT_MENU(EFG_VIEW_COLOR, OnViewColor)
   EVT_MENU(EFG_VIEW_NFG, OnSolveEfgNfg)
 END_EVENT_TABLE()
 
@@ -161,6 +164,7 @@ guiEfgFrame::guiEfgFrame(wxMDIParentFrame *p_parent, FullEfg *p_efg,
   viewMenu->AppendSeparator();
   viewMenu->Append(EFG_VIEW_ZOOM_IN, "Zoom &In");
   viewMenu->Append(EFG_VIEW_ZOOM_OUT, "Zoom &Out");
+  viewMenu->Append(EFG_VIEW_COLOR, "&Color");
 
   wxMenu *helpMenu = new wxMenu;
   helpMenu->Append(GAMBIT_ABOUT, "&About");
@@ -239,6 +243,15 @@ void guiEfgFrame::OnViewZoomIn(wxCommandEvent &)
 void guiEfgFrame::OnViewZoomOut(wxCommandEvent &)
 {
   m_efgView->SetZoom(m_efgView->GetZoom() * 0.75);
+}
+
+void guiEfgFrame::OnViewColor(wxCommandEvent &)
+{
+  wxColourDialog dialog(this);
+
+  if (dialog.ShowModal() == wxID_OK) {
+
+  }
 }
 
 void guiEfgFrame::OnSolveEfgStandard(wxCommandEvent &)

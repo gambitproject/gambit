@@ -40,11 +40,16 @@ public:
   guiEfgTree(guiEfgView *p_parent, Efg &p_efg);
   virtual ~guiEfgTree();
 
+  void OnSelectedOutcome(EFOutcome *, bool);
+  void OnSelectedNode(Node *, bool);
+
   Node *SelectedNode(void) const;
   EFOutcome *SelectedOutcome(void) const;
   Action *SelectedAction(void) const;
   void OnTreeChanged(void);
-
+  void OnOutcomeChanged(EFOutcome *);
+  void OnNodeChanged(Node *);
+  
   double GetZoom(void) const { return m_zoomFactor; }
   void SetZoom(double);
 

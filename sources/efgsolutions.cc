@@ -29,7 +29,7 @@ END_EVENT_TABLE()
 guiEfgSolutions::guiEfgSolutions(guiEfgFrame *p_parent, wxWindow *p_window,
 				 Efg &p_efg)
   : wxListCtrl(p_window, idSOLUTION_WINDOW,
-	       wxPoint(-1, -1), wxDefaultSize, wxLC_REPORT),
+	       wxPoint(-1, -1), wxDefaultSize, wxLC_LIST),
     m_efg(p_efg), m_parent(p_parent)
 {
   SetSingleStyle(wxLC_REPORT);

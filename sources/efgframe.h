@@ -25,6 +25,7 @@ private:
   void OnFileSave(wxCommandEvent &);
 
   void OnViewSolutions(wxCommandEvent &);
+  void OnViewColor(wxCommandEvent &);
 
   void OnEditCopy(wxCommandEvent &);
   void OnEditPaste(wxCommandEvent &);
