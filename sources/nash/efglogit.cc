@@ -230,7 +230,7 @@ static void QreJacobian(const gbtGame &p_efg,
 		  p_matrix(colno, rowno) = 0;
 		}
 		else {
-		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(act1), p_efg->GetPlayer(pl2)->GetInfoset(pl2)->GetAction(act2)) - profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(1)));
+		  p_matrix(colno, rowno) = -lambda * profile(pl1, iset1, 1) * profile(pl1, iset1, act1) * (profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(act1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(act2)) - profile->DiffActionValue(p_efg->GetPlayer(pl1)->GetInfoset(iset1)->GetAction(1), p_efg->GetPlayer(pl2)->GetInfoset(iset2)->GetAction(1)));
 		}
 	      }
 	    }
