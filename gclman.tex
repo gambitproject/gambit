@@ -8132,7 +8132,7 @@ in the normal form game under the pure strategy represented by \verb+profile+.
 It is an error if \verb+profile+ does not contain a list of
 strategies, one for each player, in order.  
 \begin{verbatim}
-Payoff[profile,Players[Game[profile_1]]];
+Payoff[Game[profile_1],Outcome[profile],Players[Game[profile_1]]];
 \end{verbatim} 
 \ed
 
@@ -8227,7 +8227,10 @@ SetPayoff[profile,Players[Game[profile]],payoff];
 
 \item\lex{SetPayoffs}
 \protect \large \begin{verbatim}
-SetPayoffs[outcome->OUTCOME(T), payoff->LIST(T)]=:OUTCOME(T)
+g:=Game[profile_1];
+o:=NewOutcome[g];
+SetPayoff[g, o , Players[g],payoff];
+SetOutcome[profile, o];
 \end{verbatim}\normalsize
  
 {\it for} {\tt T = FLOAT, RATIONAL}
