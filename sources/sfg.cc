@@ -8,6 +8,7 @@
 #include "sfstrat.h"
 #include "garray.imp"
 #include "gnarray.imp"
+#include "grarray.imp"
 
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators
