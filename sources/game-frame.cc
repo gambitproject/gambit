@@ -429,7 +429,7 @@ void gbtGameFrame::OnFileExportBMP(wxCommandEvent &)
   if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
       m_treeDisplay->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
-			   _("Game mage too large to export to graphics file"),
+			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
     dialog.ShowModal();
     return;
@@ -460,7 +460,7 @@ void gbtGameFrame::OnFileExportJPG(wxCommandEvent &)
   if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
       m_treeDisplay->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
-			   _("Game mage too large to export to graphics file"),
+			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
     dialog.ShowModal();
     return;
@@ -492,7 +492,7 @@ void gbtGameFrame::OnFileExportPNG(wxCommandEvent &)
   if (m_treeDisplay->GetLayout().GetMaxX() > 65000 ||
       m_treeDisplay->GetLayout().GetMaxY() > 65000) {
     wxMessageDialog dialog(this,
-			   _("Game mage too large to export to graphics file"),
+			   _("Game image too large to export to graphics file"),
 			   _("Error"), wxOK);
     dialog.ShowModal();
     return;
