@@ -13,7 +13,7 @@
 #include "normiter.h"
 #include "gtableau.h"
 #include "rational.h"
-#include "mixed.h"
+#include "gpvector.h"
 #include "solution.h"
 #include "lemke.h"
 
@@ -43,7 +43,7 @@ class BaseLemke    {
 
   public:
     virtual int Lemke(int) = 0;
-    virtual gBlock<Solution *> GetSolutions(void) const = 0;
+    virtual void GetSolutions(void) const = 0;
     virtual ~BaseLemke()   { }
     
     int NumPivots(void) const   { return num_pivots; }
@@ -67,7 +67,7 @@ template <class T> class LemkeTableau
     virtual ~LemkeTableau()   { }
 
     int Lemke(int);
-    gBlock<Solution *> GetSolutions(void) const;
+    void GetSolutions(void) const;
 };
 
 //
@@ -300,14 +300,14 @@ template <class T> int LemkeTableau<T>::Exit_Row(int col)
   return BestSet[1];
 }
 
-template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
+template <class T> void LemkeTableau<T>::GetSolutions(void) const
 {
-  gBlock<Solution *> solutions;
-  
   for (int i = 1; i <= List.Length(); i++)    {
-    MixedProfile<T> prof(rep);
+    gTuple<int> dim(2);
+    dim[1] = rep.NumStrats(1);
+    dim[2] = rep.NumStrats(2);
 
-    gVector<T> strat1(1, rep.NumStrats(1)), strat2(1, rep.NumStrats(2));
+    gPVector<T> profile(dim);
     T sum = (T) 0;
 
     for (int j = 1; j <= rep.NumStrats(1); j++)
@@ -316,8 +316,8 @@ template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
     if (sum == (T) 0)  continue;
 
     for (j = 1; j <= rep.NumStrats(1); j++) 
-      if (List[i].IsDefined(j))   strat1[j] = List[i](j) / sum;
-      else  strat1[j] = (T) 0;
+      if (List[i].IsDefined(j))   profile(1, j) = List[i](j) / sum;
+      else  profile(1, j) = (T) 0;
 
     sum = (T) 0;
 
@@ -329,16 +329,12 @@ template <class T> gBlock<Solution *> LemkeTableau<T>::GetSolutions(void) const
 
     for (j = 1; j <= rep.NumStrats(2); j++)
       if (List[i].IsDefined(rep.NumStrats(1) + j))
-	strat2[j] = List[i](rep.NumStrats(1) + j) / sum;
+	profile(2, j) = List[i](rep.NumStrats(1) + j) / sum;
       else
-	strat2[j] = (T) 0;
+	profile(2, j) = (T) 0;
 
-    prof.SetMixedStrategy(1, strat1);
-    prof.SetMixedStrategy(2, strat2);
-    solutions.Append(new LemkeSolution<T>(prof));
+    gout << "Lemke solution:\n" << profile << '\n';
   }
-
-  return solutions;
 }
 
 template <class T>
@@ -426,16 +422,12 @@ int LemkeSolver::Lemke(void)
 
   T->Lemke(params.dup_strat);
   npivots = T->NumPivots();
+  T->GetSolutions();
 
   if (params.outfile != "")
     delete outfile;
   if (params.errfile != "" && params.errfile != params.outfile)
     delete errfile;
-
-  gBlock<Solution *> solutions(T->GetSolutions());
-
-  for (int i = 1; i <= solutions.Length(); i++)
-    gout << *solutions[i] << '\n';
 
   delete T;
   return 1;
