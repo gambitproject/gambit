@@ -105,6 +105,34 @@ all game types, not just EFPLAYER.
 
 ---------------
 
+ITEM 0020:  Field width on dialog boxes
+
+DATE:     9/8/1999 by TLT (was Bug D35 in bugs_gui)
+AFFECTS:  GUI, all platforms
+STATUS:   CLOSED 9/10/1999 by TLT
+SEVERITY: CRUCIAL
+DETAILS:
+
+Examples:
+
+1. On Solve->Custom->NFG->SimpDiv, the #restarts field is too narrow
+on MSWin.  
+
+2. On File Save, the field for the decimal places is too narrow to see
+the number.  There were other dialogs with similar problems.  Can't
+recall them now.
+
+COMMENTS:
+TLT 9/8/1999.  These are fine on my display under Win95.  I have experienced
+similar problems when running the X version remotely on my display, however.
+We need to experiment across several displays to determine what causes
+this and how to deal with it in as system-independent a way as possible.
+
+TLT 9/10/1999.  These are being solved by the use of the layout constraints
+feature of wxWindows.
+
+---------------
+
 ITEM 0021:  Bug in interactive selection of subgame solutions
 
 DATE:     9/8/1999 by TLT (was Bug D37 in bugs_gui)
@@ -146,6 +174,37 @@ shortly, and the GUI modified to take advantage.
 
 COMMENTS:
 TLT 9/9/1999.  Fixed.
+
+---------------
+
+ITEM 0023:  Windows don't dismiss via window manager close control
+
+DATE:     9/8/1999 by TLT (was Bug 5.2 in bugs_gui)
+AFFECTS:  GUI (all platforms)
+STATUS:   CLOSED 9/10/1999 by TLT
+SEVERITY: CRUCIAL
+DETAILS:
+
+> 2. Why the solution list window does not vanish from the upper right
+> close button?
+
+COMMENTS:
+RDM 8/20/1999.  Solution list window is fixed, but there are still a few
+with the problem -- i.e, in the inspect solution window, the edit
+mixed window cannot be deleted.  Also, the Edit->Strats->Label dialog
+box (and perhaps others as well) can not be gotten rid of.  Also,
+after this window has been created, the main Gambit window can be
+dismissed and the child windows do not get dismissed.  (this is on
+Linux) N.B. the "close" button here refers to the window manager close
+button.
+
+TLT 9/8/1999.  Mixed strategy edit window should now be fixed (works on
+Windows, untested on unix.)  There is no such dialog as Edit->Strats->Label;
+all the dialogs on the Edit menu on the normal form seem just fine to me.
+This sounds like it might be an outdated problem; I replaced a spreadsheet
+version of that dialog months ago which did have a similar problem.
+
+TLT 9/10/1999.  These will be checked as we finalize dialog boxes. 
 
 ---------------
 
