@@ -3,7 +3,7 @@
 // Update: this dialog box now also includes the NormalForm solution
 // efg_algorithms.  They are enabled by selecting the 'Use NF' box.  This is
 // why "nfgsolvd.h" is included here
-// @(#)efgsolvd.h	1.23 8/5/96
+// $Id$
 
 #define NFG_ALGORITHM_LIST	// we do not need all of nfgsolvd.h
 #include "nfgsolvd.h"
@@ -16,7 +16,7 @@
 #define	STANDARD_ALL				2
 
 #define PARAMS_SECTION	"Algorithm Params"		// section in .ini file
-
+bool IsPerfectRecall(const BaseEfg &, Infoset *&, Infoset *&);
 class EfgSolveSettings
 {
 protected:
@@ -34,11 +34,19 @@ protected:
 	{
 	int stopAfter,max_solns,dom_type;
 	bool use_elimdom,all;
+	bool csum=ef.IsConstSum();
+	Infoset *bad1,*bad2;
+	bool perf=IsPerfectRecall(ef,bad1,bad2);
+
 	// a separate case for each of the possible alg/num/game combinations
 	// One Nash for 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && ef.NumPlayers()==2)
 	{
-	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
+	use_nfg=FALSE;
+	if (perf)
+		algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
+	else
+		algorithm=EFG_GOBIT_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
 	subgames=TRUE;
@@ -90,7 +98,11 @@ protected:
 	// One Subgame Perfect for 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && ef.NumPlayers()==2)
 	{
-	use_nfg=FALSE;algorithm=EFG_LCP_SOLUTION;
+	use_nfg=FALSE;
+	if (perf)
+		algorithm=(ef.IsConstSum()) ? EFG_CSUM_SOLUTION : EFG_LCP_SOLUTION;
+	else
+		algorithm=EFG_GOBIT_SOLUTION;
 	stopAfter=1;max_solns=1;
 	use_elimdom=true;all=true;dom_type=DOM_WEAK;
 	subgames=TRUE;
@@ -277,7 +289,7 @@ public:
 		efg_algorithm_list[EFG_LIAP_SOLUTION]="Liap";
 		efg_algorithm_list[EFG_LCP_SOLUTION]="LCP";
 		efg_algorithm_list[EFG_PURENASH_SOLUTION]="PureNash";
-		efg_algorithm_list[EFG_CSUM_SOLUTION]="Csum";
+		efg_algorithm_list[EFG_CSUM_SOLUTION]="LP";
 		efg_algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Efg Algorithms",-1,-1,-1,-1,EFG_NUM_SOLUTIONS,efg_algorithm_list,2);
 		efg_algorithm_box->SetClientData((char *)this);
 		d->NewLine();
@@ -302,13 +314,24 @@ public:
 		cancel_button=new wxButton(d,(wxFunction)cancel_button_func,"Cancel");
 		cancel_button->SetClientData((char *)this);
 		(void)new wxButton(d,(wxFunction)help_button_func,"?");
-		if (ef.NumPlayers()!=2) // disable algorithms that can not work w/ this game
+		// disable algorithms that can not work w/ this game
+		if (ef.NumPlayers()!=2)
 		{
 			efg_algorithm_box->Enable(EFG_LCP_SOLUTION,FALSE);
 			nfg_algorithm_box->Enable(NFG_LCP_SOLUTION,FALSE);
 			nfg_algorithm_box->Enable(NFG_LP_SOLUTION,FALSE);
 			nfg_algorithm_box->Enable(NFG_ENUMMIXED_SOLUTION,FALSE);
 		}
+		if (ef.NumPlayers()==2)
+		{
+			Infoset *bad1,*bad2;
+			if (!IsPerfectRecall(ef,bad1,bad2))
+			{
+				efg_algorithm_box->Enable(EFG_LCP_SOLUTION,FALSE);
+				efg_algorithm_box->Enable(EFG_CSUM_SOLUTION,FALSE);
+			}
+		}
+
 		// set the defaults
 		nfg_algorithm_box->wxWindow::Enable(use_nfg);
 		efg_algorithm_box->wxWindow::Enable(!use_nfg);

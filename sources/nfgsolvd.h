@@ -86,7 +86,8 @@ protected:
 	// a separate case for each of the possible alg/num/game combinations
 	// One Nash 2 person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
-	{algorithm=NFG_LCP_SOLUTION;stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=(nf.IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	 stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// One Nash n person
 	if (standard_type==STANDARD_NASH && standard_num==STANDARD_ONE && nf.NumPlayers()!=2)
 	{algorithm=NFG_SIMPDIV_SOLUTION;stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
@@ -107,19 +108,22 @@ protected:
 	 wxWriteResource(PARAMS_SECTION,"Liap-Ntries",2*stopAfter,defaults_file);}
 	// One Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()==2)
-	{algorithm=NFG_LCP_SOLUTION;stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=(nf.IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	 stopAfter=1;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// One Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ONE && nf.NumPlayers()!=2)
 	{Warn("One Perfect not implemented for n person games\nUsing current settings\n");}
 	// Two Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()==2)
-	{algorithm=NFG_LCP_SOLUTION;stopAfter=2;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
+	{algorithm=(nf.IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	 stopAfter=2;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;}
 	// Two Perfect n person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_TWO && nf.NumPlayers()!=2)
 	{Warn("Two Perfect not implemented for n person games\nUsing current settings\n");}
 	// All Perfect 2 person
 	if (standard_type==STANDARD_PERFECT && standard_num==STANDARD_ALL && nf.NumPlayers()==2)
-	{algorithm=NFG_LCP_SOLUTION;stopAfter=0;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;
+	{algorithm=(nf.IsConstSum()) ? NFG_LP_SOLUTION : NFG_LCP_SOLUTION;
+	 stopAfter=0;dom_type=DOM_WEAK;all=TRUE;use_elimdom=TRUE;
 	 Warn("Not guaranteed to find all solutions for 'All Perfect' 2-person games\n");}
 
 	// All Perfect n person
