@@ -266,8 +266,6 @@ void Tableau<T>::Pivot(int outrow,int inlabel)
   
   B.solve(*b, solution);
   npivots++;
-//  if( costdefined )
-//    SolveDual();
 }
 
 template <class T>
@@ -291,8 +289,6 @@ template <class T> void Tableau<T>::Refactor()
 {
   B.refactor(*A, basis.label);
   B.solve(*b, solution);
-//  if( costdefined )
-//    SolveDual();
 }
 
     // solve A x = b 
@@ -391,7 +387,7 @@ template <class T>
 BFS<T> Tableau<T>::GetBFS() const
 {
   BFS<T> cbfs((T) 0);
-  for(int i=basis.label.First();i<=basis.label.Last();i++) {
+  for(int i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
       cbfs.Define(i,solution[basis.Find(i)]);
   }
@@ -462,11 +458,19 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 template <class T>
 void LPTableau<T>::SetCost(const gVector<T>& c)
 {
-  assert(cost.Check(c));
-  unitcost= (T)0;
-  cost= c;
-//   costdefined= 1;
-  
+  int i;
+  if(cost.Check(c)) {
+    unitcost= (T)0;
+    cost= c;
+    return;
+  }
+  assert(c.First()==cost.First());
+  assert(c.Last()==(cost.Last()+unitcost.Length()));
+  for(i=c.First();i<=cost.Last();i++)
+    cost[i]=c[i];
+  for(i=unitcost.First();i<=unitcost.Last();i++)
+    unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
+
   SolveDual();
 }
 
@@ -476,8 +480,6 @@ void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
   assert(unitcost.Check(uc) && cost.Check(c));
   unitcost= uc;
   cost= c;
-//  costdefined= 1;
-  
   SolveDual();
 }
 
@@ -485,7 +487,6 @@ void LPTableau<T>::SetCost(const gVector<T> &uc, const gVector<T> &c)
 template <class T>
 void LPTableau<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
 {
-//  assert(costdefined);
   uc= unitcost;
   c=cost;
 }
@@ -493,7 +494,6 @@ void LPTableau<T>::GetCost(gVector<T> &uc, gVector<T> &c) const
 template <class T>
 T LPTableau<T>::TotalCost()
 {
-//  assert(costdefined);
 //  gVector<T> tmpcol(MinRow(),MaxRow());
   basis.BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
@@ -502,32 +502,26 @@ T LPTableau<T>::TotalCost()
 template <class T>
 void LPTableau<T>::DualVector(gVector<T> &L) const
 {
-//  assert(costdefined);
   L= dual;
 }
 
 template <class T>
 T LPTableau<T>::RelativeCost(int col)
 {
-//  assert(costdefined);
-  
-  if( col<0 )
-    {
-      return cost[-col] - dual[-col];
-    }
-  else
-    {
+  if( col<0 ) {
+    return cost[-col] - dual[-col];
+  }
+  else {
 //      gVector<T> tmpcol(MinRow(),MaxRow());
-      A->GetColumn(col, tmpcol);
-      return cost[col] - dual*tmpcol;
-    }
+    A->GetColumn(col, tmpcol);
+    return cost[col] - dual*tmpcol;
+  }
 }
 /*
 template <class T>
 void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 				      gVector<T> &relcost) const
 {
-//  assert(costdefined);
   assert(A->CheckColumn(relunitcost));
   assert(A->CheckRow(relcost));
   
@@ -539,13 +533,37 @@ void LPTableau<T>::RelativeCostVector(gVector<T> &relunitcost,
 template <class T>
 void LPTableau<T>::SolveDual()
 {
-//  assert(costdefined);
-//  gVector<T> tmpcol(MinRow(),MaxRow());
-  basis.BasisSelect(unitcost,cost,tmpcol);
-  B.solveT(tmpcol,dual);
+  gVector<T> tmpcol1(MinRow(),MaxRow());
+  basis.BasisSelect(unitcost,cost,tmpcol1);
+  B.solveT(tmpcol1,dual);
+}
+
+    // Redefined functions
+template <class T> void LPTableau<T>::Refactor()
+{
+  Tableau<T>::Refactor();
+  SolveDual();
+}
+
+template <class T>
+void LPTableau<T>::Pivot(int outrow,int inlabel)
+{
+  Tableau<T>::Pivot(outrow,inlabel);
+  SolveDual();
 }
 
 
+template <class T>
+BFS<T> LPTableau<T>::DualBFS() const
+{
+  BFS<T> cbfs((T) 0);
+  for(int i=MinRow();i<=MaxRow();i++) {
+    if(!Member(-i)) 
+      cbfs.Define(-i,dual[i]);
+  }
+  return cbfs;
+}
 
 
   
+

@@ -25,7 +25,7 @@ public:
   Basis(const gMatrix<T> &A);
   Basis(const Basis<T> &);
   ~Basis();
-
+  
   Basis<T>& operator=(const Basis<T>&);
   
 //  void NewBasis(const gBlock<int> &);
@@ -68,7 +68,7 @@ public:
   virtual ~Tableau();
   
   Tableau<T>& operator=(const Tableau<T>&);
-
+  
       // information
   int MinRow() const;
   int MaxRow() const;
@@ -78,7 +78,7 @@ public:
   bool Member(int i) const;
   int Label(int i) const;   // return variable in i'th position of Tableau
   int Find(int i) const;  // return Tableau position of variable i
-
+  
       // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int inlabel);
@@ -86,8 +86,8 @@ public:
   void CompPivot(int outlabel,int inlabel);
   long NumPivots() const;
   long &NumPivots();
-
-
+  
+  
       // raw Tableau functions
   void Refactor();
   void Solve(const gVector<T> &b, gVector<T> &x) const;  // solve M x = b
@@ -100,7 +100,7 @@ public:
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
   
       // miscellaneous functions
-  bool IsNash(void) const;
+  bool IsNash(void) const; // this does not belong here
   BFS<T> GetBFS(void) const;
   void Dump(gOutput &) const;
 };
@@ -110,7 +110,7 @@ private:
   gVector<T> dual;
   gVector<T> unitcost;
   gVector<T> cost;
-
+  
   void SolveDual();
 public:
   LPTableau(const gMatrix<T> &A, const gVector<T> &b); 
@@ -118,15 +118,19 @@ public:
   virtual ~LPTableau();
   
   LPTableau<T>& operator=(const LPTableau<T>&);
-
+  
+      // cost information
   void SetCost(const gVector<T>& ); // unit column cost := 0
   void SetCost(const gVector<T>&, const gVector<T>& );
   void GetCost(gVector<T>&, gVector<T>& ) const;
   T TotalCost(); // cost of current solution
   T RelativeCost(int) const; // negative index convention
   void RelativeCostVector(gVector<T> &, gVector<T> &); 
-      // DumbTableau row
   void DualVector(gVector<T> &) const; // column vector
+      // Redefined functions
+  void Refactor();
+  void Pivot(int outrow,int inlabel);
+  BFS<T> DualBFS(void) const;
 };
 
 #ifdef __GNUG__
