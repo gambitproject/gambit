@@ -92,16 +92,6 @@ static Portion *GSM_Clear(Portion **)
   return new BoolPortion(true);
 }
 
-//---------
-// Concat
-//---------
-
-static Portion* GSM_Concat_Text(Portion** param)
-{
-  return new TextPortion(((TextPortion*) param[0])->Value() +
-			 ((TextPortion*) param[1])->Value());
-}
-
 //----------
 // Divide
 //----------
@@ -913,6 +903,12 @@ static Portion *GSM_Plus_Number(Portion** param)
 {
   return new NumberPortion(((NumberPortion*) param[0])->Value() +
                            ((NumberPortion*) param[1])->Value());
+}
+
+static Portion* GSM_Plus_Text(Portion** param)
+{
+  return new TextPortion(((TextPortion*) param[0])->Value() +
+			 ((TextPortion*) param[1])->Value());
 }
 
 static Portion* GSM_Plus_Mixed(Portion** param)
@@ -1793,6 +1789,7 @@ void Init_gsmoper(GSM* gsm)
       { "Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN", GSM_Or },
       { "Parentheses[x->ANYTYPE*] =: ANYTYPE", GSM_Parentheses },
       { "Plus[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Plus_Number },
+      { "Plus[x->TEXT, y->TEXT] =: TEXT", GSM_Plus_Text }, 
       { "Plus[x->MIXED, y->MIXED] =: MIXED", GSM_Plus_Mixed },
       { "Plus[x->BEHAV, y->BEHAV] =: BEHAV", GSM_Plus_Behav },
       { "Power[x->NUMBER, y->NUMBER] =: NUMBER", GSM_Power },
@@ -1806,12 +1803,6 @@ void Init_gsmoper(GSM* gsm)
   for (int i = 0; ftable[i].sig != 0; i++)
     gsm->AddFunction(new FuncDescObj(ftable[i].sig, ftable[i].func));
 
-
-  FuncObj = new FuncDescObj("Concat", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_Concat_Text, porTEXT, 2)); 
-  FuncObj->SetParamInfo(0, 0, gclParameter("x", porTEXT));
-  FuncObj->SetParamInfo(0, 1, gclParameter("y", porTEXT));
-  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Quit", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Quit, porBOOLEAN, 1, 0,
