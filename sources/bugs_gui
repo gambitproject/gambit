@@ -172,16 +172,6 @@ necessary).  Now check OK to run algorithm. When algorithm completes,
 the gui crashes with notice that program has performed an illegal
 operation.
 
-//------------------------------
-
-Bug D19: Converting to NFG and solving by QRE
-
-On Win95 version, load poker.efg, Convert to normal form via
-Solve->Normal->Reduced, and then run Solve->Custom->QRE.  The GUI
-crashes with a notice that program has performed an illegal operation.
-
-
-
 -------------  older bugs that still remain ---------------
 
 //------------------------------

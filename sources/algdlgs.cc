@@ -259,53 +259,49 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 
 int PxiParamsSettings::naming_option = 0;
 
-PxiParamsSettings::PxiParamsSettings(const char *alg, const char *fn):
-    OutputParamsSettings()
+PxiParamsSettings::PxiParamsSettings(const char *alg, const char *fn)
 {
-    algname = new char[20];
-    strcpy(algname, ((alg) ? alg : "Pxi"));
-    filename = new char[250];
-    strcpy(filename, fn);
-    type_str = new char[20];
-    char tmp_str[100];
-    sprintf(tmp_str, "%s-Plot-Type", algname);
-    wxGetResourceStr(PARAMS_SECTION, tmp_str, type_str, defaults_file);
-    pxiname = new char[250];
+  algname = new char[20];
+  strcpy(algname, ((alg) ? alg : "Pxi"));
+  filename = new char[250];
+  strcpy(filename, fn);
+  type_str = new char[20];
+  char tmp_str[100];
+  sprintf(tmp_str, "%s-Plot-Type", algname);
+  wxGetResourceStr(PARAMS_SECTION, tmp_str, type_str, defaults_file);
+  pxiname = new char[250];
+  
+  if (naming_option == SAVED_NAME)
+    wxGetResourceStr(PARAMS_SECTION, "Pxi-Saved-Name", pxiname, defaults_file);
+  
+  if (naming_option == DEFAULT_NAME)
+    strcpy(pxiname, filename);
 
-    if (naming_option == SAVED_NAME)
-        wxGetResourceStr(PARAMS_SECTION, "Pxi-Saved-Name", pxiname, defaults_file);
-
-    if (naming_option == DEFAULT_NAME)
-        strcpy(pxiname, wxOutputFile(filename));
-
-    if (naming_option == PROMPT_NAME)
-    {
-        if (FromDialog()) // will be set later.  this is just the dialog settings
-        {
-            strcpy(pxiname, "PROMPT");
-        }
-        else
-        {
-            char *s = wxGetTextFromUser("Pxi data output file", 
-                                        "Enter File Name", wxOutputFile(filename));
-
-            if (!s) 
-                s = "pxi.out";
-
-            strcpy(pxiname, s);
-        }
+  if (naming_option == PROMPT_NAME) {
+    if (FromDialog()) { // will be set later.  this is just the dialog settings
+      strcpy(pxiname, "PROMPT");
     }
+    else {
+      char *s = wxGetTextFromUser("Pxi data output file", 
+				  "Enter File Name", filename);
+      
+      if (!s) 
+	s = "pxi.out";
 
-    name_option_str = new char[20];
-    pxi_command = new char[250];
-    wxGetResourceStr(PARAMS_SECTION, "Pxi-Command", pxi_command, defaults_file);
-    wxGetResource(PARAMS_SECTION, "Run-Pxi", &run_pxi, defaults_file);
+      strcpy(pxiname, s);
+    }
+  }
 
-    type_list = new wxStringList("Lin", "Log", 0);
-    name_option_list = new wxStringList("Default", "Saved", "Prompt", 0);
-    strcpy(name_option_str, (char *)name_option_list->Nth(naming_option)->Data());
-
-    pxifile = 0;
+  name_option_str = new char[20];
+  pxi_command = new char[250];
+  wxGetResourceStr(PARAMS_SECTION, "Pxi-Command", pxi_command, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Run-Pxi", &run_pxi, defaults_file);
+  
+  type_list = new wxStringList("Lin", "Log", 0);
+  name_option_list = new wxStringList("Default", "Saved", "Prompt", 0);
+  strcpy(name_option_str, (char *)name_option_list->Nth(naming_option)->Data());
+  
+  pxifile = 0;
 }
 
 
