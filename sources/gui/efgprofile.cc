@@ -70,7 +70,9 @@ EfgProfileList::~EfgProfileList()
 
 void EfgProfileList::UpdateValues(void)
 {
-  DeleteRows(0, GetRows());
+  if (GetRows() > 0) {
+    DeleteRows(0, GetRows());
+  }
   if (!m_options.FilterNash()[1] || !m_options.FilterNash()[2] ||
       !m_options.FilterNash()[3]) {
     SetCellTextColour(*wxGREEN, -1, 2);

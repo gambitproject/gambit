@@ -17,6 +17,7 @@
 
 class EfgProfileList;
 class EfgCursorWindow;
+class EfgOutcomeWindow;
 class TreeWindow;
 class TreeZoomWindow;
 
@@ -39,7 +40,9 @@ private:
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
+  wxNotebook *m_infoNotebook;
   EfgCursorWindow *m_cursorWindow;
+  EfgOutcomeWindow *m_outcomeWindow;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
@@ -138,6 +141,8 @@ private:
 
   void OnInspectSolutions(wxCommandEvent &);
   void OnInspectCursor(wxCommandEvent &);
+  void OnInspectOutcomes(wxCommandEvent &);
+  void OnInspectSupports(wxCommandEvent &);
   void OnInspectInfosets(wxCommandEvent &);
   void OnInspectZoom(wxCommandEvent &);
   void OnInspectGameInfo(wxCommandEvent &);
@@ -162,6 +167,8 @@ private:
   void OnProfilesRename(wxCommandEvent &);
   void OnProfilesEdit(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
+
+  void OnInfoNotebookPage(wxNotebookEvent &);
 
   // EfgClient members
   void OnTreeChanged(bool, bool);
@@ -201,6 +208,8 @@ public:
   
   void UpdateMenus(void);
   int NumDecimals(void) const;
+
+  void OnOutcomesEdited(void);
 
   // File name
   void SetFileName(const gText &s);

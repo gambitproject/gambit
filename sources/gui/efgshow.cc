@@ -33,6 +33,7 @@
 #include "efgshow.h"
 #include "efgprofile.h"
 #include "efgcursor.h"
+#include "efgoutcome.h"
 #include "efgsoln.h"
 #include "efgsolng.h"
 #include "nfgshow.h"
@@ -69,6 +70,7 @@ const int idTREEWINDOW = 999;
 const int idNODEWINDOW = 998;
 const int idTOOLWINDOW = 997;
 const int idSOLUTIONWINDOW = 996;
+const int idINFONOTEBOOK = 995;
 
 BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuFILE_SAVE, EfgShow::OnFileSave)
@@ -147,6 +149,8 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSOLVE_WIZARD, EfgShow::OnSolveWizard)
   EVT_MENU(efgmenuINSPECT_SOLUTIONS, EfgShow::OnInspectSolutions)
   EVT_MENU(efgmenuINSPECT_CURSOR, EfgShow::OnInspectCursor)
+  EVT_MENU(efgmenuINSPECT_OUTCOMES, EfgShow::OnInspectOutcomes)
+  EVT_MENU(efgmenuINSPECT_SUPPORTS, EfgShow::OnInspectSupports)
   EVT_MENU(efgmenuINSPECT_INFOSETS, EfgShow::OnInspectInfosets)
   EVT_MENU(efgmenuINSPECT_ZOOM_WIN, EfgShow::OnInspectZoom)
   EVT_MENU(efgmenuINSPECT_GAMEINFO, EfgShow::OnInspectGameInfo)
@@ -175,6 +179,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_CLOSE(EfgShow::OnCloseWindow)
   EVT_SASH_DRAGGED_RANGE(idSOLUTIONWINDOW, idTREEWINDOW, EfgShow::OnSashDrag)
   EVT_ACTIVATE(EfgShow::OnActivate)
+  EVT_NOTEBOOK_PAGE_CHANGED(idINFONOTEBOOK, EfgShow::OnInfoNotebookPage)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
@@ -186,7 +191,8 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
     EfgClient(&p_efg),
     m_parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
-    m_solutionTable(0), m_solutionSashWindow(0), m_cursorWindow(0)
+    m_solutionTable(0), m_solutionSashWindow(0), m_cursorWindow(0),
+    m_outcomeWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -228,26 +234,27 @@ EfgShow::EfgShow(FullEfg &p_efg, GambitFrame *p_parent)
   m_treeWindow = new TreeWindow(this, this);
   m_treeWindow->SetSize(200, 40, 200, 200);
 
-  wxNotebook *notebook = new wxNotebook(m_nodeSashWindow, -1);
+  m_infoNotebook = new wxNotebook(m_nodeSashWindow, idINFONOTEBOOK);
 
-  m_cursorWindow = new EfgCursorWindow(this, notebook);
+  m_cursorWindow = new EfgCursorWindow(this, m_infoNotebook);
   m_cursorWindow->Set(m_treeWindow->Cursor());
   m_cursorWindow->SetSize(200, 200);
-  notebook->AddPage(m_cursorWindow, "Cursor");
+  m_infoNotebook->AddPage(m_cursorWindow, "Cursor");
 
-  wxPanel *outcomePanel = new wxPanel(notebook, -1);
-  (void) new wxStaticText(outcomePanel, -1, 
-			  "Hi!  I'm going to be the outcome window");
-  notebook->AddPage(outcomePanel, "Outcomes");
+  m_outcomeWindow = new EfgOutcomeWindow(this, m_infoNotebook);
+  m_outcomeWindow->UpdateValues();
+  m_cursorWindow->SetSize(200, 200);
+  m_infoNotebook->AddPage(m_outcomeWindow, "Outcomes");
 
-  wxPanel *supportPanel = new wxPanel(notebook, -1);
+  wxPanel *supportPanel = new wxPanel(m_infoNotebook, -1);
   (void) new wxStaticText(supportPanel, -1,
 			  "Hi!  I'm going to be the support window");
-  notebook->AddPage(supportPanel, "Supports");
-  notebook->SetSelection(0);
+  m_infoNotebook->AddPage(supportPanel, "Supports");
+  m_infoNotebook->SetSelection(0);
 
-  m_nodeSashWindow->Show(false);
-
+  m_nodeSashWindow->Show(true);
+  m_nodeSashWindow->SetSashVisible(wxSASH_LEFT, true);
+  
   m_solutionSashWindow = new wxSashWindow(this, idSOLUTIONWINDOW,
 					  wxDefaultPosition,
 					  wxSize(600, 100));
@@ -679,19 +686,24 @@ void EfgShow::MakeMenus(void)
   solve_menu->Append(efgmenuSOLVE_WIZARD, "&Wizard",
 		     "Experimental wizard for algorithms");
   
-  wxMenu *inspect_menu = new wxMenu;
-  inspect_menu->Append(efgmenuINSPECT_SOLUTIONS, "&Solutions",
-		       "Inspect existing solutions", true);
-  inspect_menu->Append(efgmenuINSPECT_CURSOR, "&Cursor",
-		       "Information about the node at cursor", true);
-  inspect_menu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
-		       "Inspect information sets", true);
-  inspect_menu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",
-		       "Open zoom window", true);
-  inspect_menu->AppendSeparator();
-  inspect_menu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
-		       "Information about this game");
-  inspect_menu->Append(efgmenuINSPECT_SCRIPT, "Scri&pt",
+  wxMenu *inspectMenu = new wxMenu;
+  inspectMenu->Append(efgmenuINSPECT_SOLUTIONS, "&Solutions",
+		      "Inspect existing solutions", true);
+  inspectMenu->Append(efgmenuINSPECT_CURSOR, "&Cursor",
+		      "Information about the node at cursor", true);
+  inspectMenu->Check(efgmenuINSPECT_CURSOR, true);
+  inspectMenu->Append(efgmenuINSPECT_OUTCOMES, "&Outcomes",
+		      "Display and edit outcomes", true);
+  inspectMenu->Append(efgmenuINSPECT_SUPPORTS, "&Supports",
+		      "Display and edit supports", true);
+  inspectMenu->Append(efgmenuINSPECT_INFOSETS, "&Infosets",
+		      "Inspect information sets", true);
+  inspectMenu->Append(efgmenuINSPECT_ZOOM_WIN, "Zoom &Window",
+		      "Open zoom window", true);
+  inspectMenu->AppendSeparator();
+  inspectMenu->Append(efgmenuINSPECT_GAMEINFO, "Game&Info",
+		      "Information about this game");
+  inspectMenu->Append(efgmenuINSPECT_SCRIPT, "Scri&pt",
 		       "View GCL script log");
   
   wxMenu *prefsMenu = new wxMenu;
@@ -742,7 +754,7 @@ void EfgShow::MakeMenus(void)
   menu_bar->Append(subgame_menu,  "Sub&games");
   menu_bar->Append(supports_menu, "S&upports");
   menu_bar->Append(solve_menu,    "&Solve");
-  menu_bar->Append(inspect_menu,  "&Inspect");
+  menu_bar->Append(inspectMenu,   "&Inspect");
   menu_bar->Append(prefsMenu,     "&Prefs");
   menu_bar->Append(helpMenu,      "&Help");
 
@@ -1145,9 +1157,15 @@ void EfgShow::OnEditOutcomesLabel(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     m_efg.SetOutcomeName(outcome, dialog.GetValue().c_str());
-    m_treeWindow->OutcomeChange();
-    m_treeWindow->Refresh();
+    OnOutcomesEdited();
   }
+}
+
+void EfgShow::OnOutcomesEdited(void)
+{
+  m_treeWindow->OutcomeChange();
+  m_treeWindow->Refresh();
+  m_outcomeWindow->UpdateValues();
 }
 
 void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
@@ -1170,6 +1188,7 @@ void EfgShow::OnEditOutcomesPayoffs(wxCommandEvent &)
 
     m_treeWindow->OutcomeChange();
     m_treeWindow->Refresh();
+    m_outcomeWindow->UpdateValues();
     UpdateMenus();
   }
 }
@@ -1190,6 +1209,7 @@ void EfgShow::OnEditOutcomesNew(wxCommandEvent &)
       
       m_treeWindow->OutcomeChange();
       m_treeWindow->Refresh();
+      m_outcomeWindow->UpdateValues();
       UpdateMenus();
     }
     catch (gException &ex) {
@@ -2046,19 +2066,86 @@ void EfgShow::OnInspectSolutions(wxCommandEvent &)
 
 void EfgShow::OnInspectCursor(wxCommandEvent &)
 {
-  if (m_cursorWindow->IsShown()) {
-    m_cursorWindow->Show(false);
+  if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 0) {
+    m_infoNotebook->SetSelection(0);
+    m_cursorWindow->Show(true);
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, false);
+  }
+  else if (m_nodeSashWindow->IsShown()) {
     m_nodeSashWindow->Show(false);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
   }
   else {
-    m_cursorWindow->Set(m_treeWindow->Cursor());
-    m_cursorWindow->Show(true);
     m_nodeSashWindow->Show(true);
+    m_infoNotebook->SetSelection(0);
     GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
   }
 
   AdjustSizes();
+}
+
+void EfgShow::OnInspectOutcomes(wxCommandEvent &)
+{
+  if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 1) {
+    m_infoNotebook->SetSelection(1);
+    m_cursorWindow->Show(true);
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, true);
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
+  }
+  else if (m_nodeSashWindow->IsShown()) {
+    m_nodeSashWindow->Show(false);
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, false);
+  }
+  else {
+    m_nodeSashWindow->Show(true);
+    m_infoNotebook->SetSelection(1);
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, true);
+  }
+
+  AdjustSizes();
+}
+
+void EfgShow::OnInspectSupports(wxCommandEvent &)
+{
+  if (m_nodeSashWindow->IsShown() && m_infoNotebook->GetSelection() != 2) {
+    m_infoNotebook->SetSelection(2);
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, false);
+    GetMenuBar()->Check(efgmenuINSPECT_SUPPORTS, true);
+  }
+  else if (m_nodeSashWindow->IsShown()) {
+    m_nodeSashWindow->Show(false);
+    GetMenuBar()->Check(efgmenuINSPECT_SUPPORTS, false);
+  }
+  else {
+    m_nodeSashWindow->Show(true);
+    m_infoNotebook->SetSelection(2);
+    GetMenuBar()->Check(efgmenuINSPECT_SUPPORTS, true);
+  }
+
+  AdjustSizes();
+}
+
+void EfgShow::OnInfoNotebookPage(wxNotebookEvent &p_event)
+{
+  GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, false);
+  GetMenuBar()->Check(efgmenuINSPECT_CURSOR, false);
+  GetMenuBar()->Check(efgmenuINSPECT_SUPPORTS, false);
+
+  switch (p_event.GetSelection()) {
+  case 0:
+    GetMenuBar()->Check(efgmenuINSPECT_CURSOR, true);
+    break;
+  case 1:
+    GetMenuBar()->Check(efgmenuINSPECT_OUTCOMES, true);
+    break;
+  case 2:
+    GetMenuBar()->Check(efgmenuINSPECT_SUPPORTS, true);
+    break;
+  default:
+    break;
+  }
 }
 
 void EfgShow::OnInspectInfosets(wxCommandEvent &)
