@@ -42,7 +42,7 @@ class MathErrHandl : public wxDialogBox
 private:
 	wxRadioBox *opt_box;
 	int opt;
-	static void ok_func(wxButton &ob,wxEvent &ev)
+	static void ok_func(wxButton &ob,wxEvent &)
 	{((MathErrHandl *)ob.GetClientData())->OnOk();}
 	void OnOk(void)
 	{opt=opt_box->GetSelection();Show(FALSE);}
@@ -50,7 +50,7 @@ public:
 	MathErrHandl(const char *err):wxDialogBox(0,"Numerical Error",TRUE)
 	{
 	char *options[3]={"Continue","Ignore","Quit"};
-	new wxMessage(this,err);
+	new wxMessage(this,(char *)err);
 	this->NewLine();
 	opt_box=new wxRadioBox(this,0,"What now?",-1,-1,-1,-1,3,options,1,wxVERTICAL);
 	this->NewLine();

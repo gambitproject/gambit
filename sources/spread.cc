@@ -203,7 +203,7 @@ tw=(int)x;th=(int)y;
 }
 
 // We need to know how many columns there are ...
-void SpreadSheetDrawSettings::SetDimensions(int rows,int cols)
+void SpreadSheetDrawSettings::SetDimensions(int /*rows*/,int cols)
 {
 int old_cols=col_width.Length();
 if (cols>old_cols)

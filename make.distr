@@ -13,7 +13,7 @@ gui:
 #	-strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
 	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
-		./efg/*.efg ./nfg/*.nfg
+		./efg/*.efg ./nfg/*.nfg gambit.ini
 	ftp_put gambit_$(GUI)_$(HOST).zip
 	rm gambit_$(GUI)_$(HOST).zip
 gcl:	

@@ -7,6 +7,7 @@ class GambitApp: public wxApp
 {
 	public:
 		wxFrame *OnInit(void);
+    int OnExit(void);
 };
 
 class GambitFrame : public wxFrame
