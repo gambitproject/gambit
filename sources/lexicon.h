@@ -19,7 +19,7 @@ class Lexicon   {
     ~Lexicon();
 
     void MakeStrategy(EFPlayer *p);
-    void MakeReducedStrats(EFPlayer *, Node *, Node *);
+    void MakeReducedStrats(const EFSupport &, EFPlayer *, Node *, Node *);
 };
 
 

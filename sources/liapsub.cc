@@ -29,7 +29,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg<double> &E,
     }
   }
 
-  Nfg<double> *N = MakeReducedNfg((Efg<double> &) E);
+  Nfg<double> *N = MakeReducedNfg((Efg<double> &) E, EFSupport(E));
 
   NFSupport *S=new NFSupport(*N);
 

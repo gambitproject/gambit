@@ -27,7 +27,7 @@ TEMPLATE void RealizationProbs(const Nfg<double> &N, const MixedProfile<double> 
 
 TEMPLATE void BehaviorStrat(const Efg<double> &E, BehavProfile<double> &bp, int pl, Node *n);
 
-TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &);
+TEMPLATE Nfg<double> *MakeReducedNfg(Efg<double> &, const EFSupport &);
 
 TEMPLATE Nfg<double> *MakeAfg(Efg<double> &);
 

@@ -14,13 +14,13 @@
 #include "mixed.h"
 #include "lexicon.h"
 
-template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E)
+template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 {
   int i;
 
   Lexicon *L = new Lexicon(E);
   for (i = 1; i <= E.NumPlayers(); i++)  {
-    L->MakeReducedStrats(E.PlayerList()[i], E.RootNode(), NULL);
+    L->MakeReducedStrats(support, E.PlayerList()[i], E.RootNode(), NULL);
   }
   gArray<int> dim(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)

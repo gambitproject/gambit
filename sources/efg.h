@@ -207,7 +207,7 @@ template <class T> class Efg : public BaseEfg   {
     void Payoff(const gArray<gArray<int> *> &profile, 
 		gVector<T> &payoff) const;
 
-    friend Nfg<T> *MakeReducedNfg(Efg<T> &);
+    friend Nfg<T> *MakeReducedNfg(Efg<T> &, const EFSupport &);
     friend Nfg<T> *MakeAfg(Efg<T> &);
     friend void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
 		             const Efg<T> &E, BehavProfile<T> &bp);
