@@ -322,12 +322,14 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     if (r.Contains(point)) return true;
     else                   return false;
 
+  gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
+
   while (true) {
     gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
     if (Df.Determinant() == (gDouble)0) return false;
     gVector<gDouble> Del = - (Df.Inverse() * oldevals);
 
-    if ( !r.SameCenterDoubleSideLengths().Contains(point + Del) ) return false;
+    if ( !bigr.Contains(point + Del) ) return false;
     point += Del;
 
     gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point);
