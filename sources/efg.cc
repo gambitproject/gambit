@@ -17,6 +17,9 @@ class Outcome;
 class gArray<int>;
 class gArray<double>;
 class gArray<gRational>;
+template <class T> class gBlock;
+class gBlock<double>;
+class gBlock<gRational>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__

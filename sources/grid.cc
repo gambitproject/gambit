@@ -194,7 +194,7 @@ return !params.status.Get();
 #elif defined __BORLANDC__
 class gRectArray<double>;
 class gRectArray<gRational>;
-
+class gArray<long>;
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
