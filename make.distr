@@ -1,5 +1,5 @@
 # Makefile to create distribution time items.
-# $Id$
+# @(#)make.distr	1.21 2/14/97
 # edit these!
 WXDIR=/home/ironbark/gambit/wxwin
 GUI=none
@@ -12,16 +12,15 @@ gui:
 	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 	-strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp2/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
-	cp /home/ironbark/rdm/.gambit.ini .
-	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
-		./efg/*.efg ./nfg/*.nfg .gambit.ini
+	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp ./manual/* \
+		./efg/*.efg ./nfg/*.nfg gambit.ini gui-init
 	ftp_put gambit_$(GUI)_$(HOST).zip
 	rm gambit_$(GUI)_$(HOST).zip
 gcl:	
 	@echo Updating gcl_$(HOST) on ftp server
 	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 	-strip gcl_$(HOST)
-	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
+	zip gcl_$(HOST) gcl_$(HOST) *.gcl ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
 	ftp_put gcl_$(HOST).zip
 	rm gcl_$(HOST).zip
 src:
