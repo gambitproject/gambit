@@ -4,6 +4,8 @@
 // $Id$
 //
 
+#include <ctype.h>
+
 #include "wx.h"
 #include "wxmisc.h"
 #include "gmisc.h"

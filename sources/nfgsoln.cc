@@ -51,7 +51,7 @@ dialogMixedSortFilter::dialogMixedSortFilter(MSolnSortFilterOptions &options_)
   m_filterCreator = new wxListBox(this, 0, "Creator", wxMULTIPLE,
 				  1, 1, -1, -1, 
 				  NUM_MCREATORS, options.filter_cr_str + 1);
-  int listWidth = m_filterCreator->GetCharWidth() * 14;
+  int listWidth = (int) m_filterCreator->GetCharWidth() * 14;
   for (int i = 1; i <= NUM_MCREATORS; i++)
     m_filterCreator->SetSelection(i - 1, options.FilterCr()[i]);
   m_filterCreator->SetConstraints(new wxLayoutConstraints);
