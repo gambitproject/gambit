@@ -80,8 +80,8 @@ ifneq ($(SYSNAME), Linux)
 @echo Error! Xt interface only works with Linux!
 else
 WXDIR = /home/mill/gambit/wxxt/wxxt-1.67
-WXLIBDIR = -L$(WXDIR)/lib/Linux
-WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/Linux -I$(WXDIR)/src/xt-widgets \
+WXLIBDIR = -L$(WXDIR)/lib/linux
+WXINCDIR = -I$(WXDIR)/wx -I$(WXDIR)/setup/linux -I$(WXDIR)/src/xt-widgets \
            -DLINUX_WXXT
 WXLIB = -lwx_xt -lwx_xtwidgets
 endif
