@@ -31,7 +31,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     for(k=1;k<=nfg.NumPlayers();k++)
       if(k!=pl) contingencies*=S.NumStrats(k);
   
-    gMatrix<T> A(1,contingencies+1,1,strats);
+		gMatrix<T> A(1,contingencies+1,1,strats);
     gVector<T> B(1,contingencies+1);
     gVector<T> C(1,strats);
   
@@ -59,9 +59,9 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     for (k = 1; k <= strats; k++)	{
       LPSolve<T> Tab(A, B, C, 1);
 
-      tracefile << '\n' << A << '\n';
+      tracefile << '\n' << (gRectArray<T> &)A << '\n';
       tracefile << B << '\n';
-      tracefile << C << '\n';
+			tracefile << C << '\n';
     
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
@@ -121,7 +121,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
 	s.Set(pl,k);
 	A(n,k-1)=-s.Payoff(pl);
 	C[k-1]+=A(n,k-1);
-      }
+			}
       s.NextContingency();
     }
 
@@ -151,7 +151,7 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     if (!ret)  {
       delete newS;
       return 0;
-    }
+		}
 
     for (k = 1; k <= strats; k++)
       if (dom[k])
@@ -160,14 +160,28 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     return newS;
   }
 }
- 
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#pragma option -Jgd
+#define TEMPLATE
+#endif   // __GNUG__, __BORLANDC__
+#include "rational.h"
+TEMPLATE NFStrategySet *ComputeMixedDominated(const Nfg<double> &,
+								const NFSupport &,
+								int, bool, gOutput &);
+TEMPLATE NFStrategySet *ComputeMixedDominated(const Nfg<gRational> &,
+								const NFSupport &,
+								int, bool, gOutput &);
+#pragma option -Jgx
 
 NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile)
 {
-  NFSupport *T = new NFSupport(S);
-  bool any = false;
+	NFSupport *T = new NFSupport(S);
+	bool any = false;
   
   for (int i = 1; i <= players.Length(); i++)   {
     int pl = players[i];
@@ -179,32 +193,23 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
       SS = ComputeMixedDominated((Nfg<gRational> &) S.BelongsTo(),
 				 S, pl, strong, tracefile);
 
-    if (SS)  {
-      delete T->GetNFStrategySet(pl);
-      T->SetNFStrategySet(pl, SS);
-      any = true;
-    }
-  }
+		if (SS)  {
+			delete T->GetNFStrategySet(pl);
+			T->SetNFStrategySet(pl, SS);
+			any = true;
+		}
+	}
 
-  if (!any)  {
-    delete T;
-    return 0;
-  }
-  
-  return T;
+	if (!any)  {
+		delete T;
+		return 0;
+	}
+
+	return T;
 }
 
-  
 
 
-#include "rational.h"
 
-
-template NFStrategySet *ComputeMixedDominated(const Nfg<double> &,
-					      const NFSupport &,
-					      int, bool, gOutput &);
-template NFStrategySet *ComputeMixedDominated(const Nfg<gRational> &,
-					      const NFSupport &,
-					      int, bool, gOutput &);
 
 
