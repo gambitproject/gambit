@@ -1,7 +1,7 @@
 //#
 //# FILE: gmatrix.imp -- Implementation of gMatrix method functions
 //#
-//# @(#)gmatrix.imp	1.22 7/17/96
+//# $Id$
 //#
 
 #include "gmatrix.h"
@@ -25,10 +25,6 @@ template <class T> gMatrix<T>::gMatrix(int rl, int rh, int cl, int ch)
   : gRectArray<T>(rl, rh, cl, ch)
 { }
 
-template <class T> gMatrix<T>::gMatrix(const gRectArray<T> &M)
-  : gRectArray<T>(M)
-{ }
-
 template <class T> gMatrix<T>::gMatrix(const gMatrix<T> &M)
   : gRectArray<T>(M)
 { }
@@ -46,17 +42,6 @@ template <class T> gMatrix<T> &gMatrix<T>::operator=(const gMatrix<T> &M)
 //-------------------------------------------------------------------------
 //                     gMatrix<T>: Additive operators
 //-------------------------------------------------------------------------
-
-
-template <class T> gMatrix<T>& 
-gMatrix<T>::operator=(T c)
-{
-  for(int i=minrow;i<=maxrow;i++) 
-    for(int j=mincol;j<=maxcol;j++) 
-      (*this)(i,j) = c;
-  return (*this);
-}
-
 
 template <class T> gMatrix<T> gMatrix<T>::operator+(const gMatrix<T> &M) const
 {
@@ -280,12 +265,18 @@ template <class T> gMatrix<T> gMatrix<T>::operator&(const gMatrix<T> &M) const
 }
 
 //-------------------------------------------------------------------------
-//                  gMatrix<T>: Transpose
+//                         gMatrix<T>: Transpose
 //-------------------------------------------------------------------------
 
 template <class T> gMatrix<T> gMatrix<T>::Transpose() const
 {
-  return gMatrix(gRectArray<T>::Transpose());
+  gMatrix<T> tmp(mincol, maxcol, minrow, maxrow);
+ 
+  for (int i = minrow; i <= maxrow; i++)
+    for (int j = mincol; j <= maxcol; j++)
+      tmp(j,i) = (*this)(i,j);
+
+  return tmp;
 }
 
 //-------------------------------------------------------------------------

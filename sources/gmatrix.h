@@ -1,7 +1,7 @@
 //#
 //# FILE: gmatrix.h -- Implementation of matrix classes
 //#
-//# @(#)gmatrix.h	1.38 7/17/96
+//# $Id$
 //#
 
 #ifndef GMATRIX_H
@@ -11,6 +11,7 @@
 #include "grarray.h"
 #include "gblock.h"
 #include "gvector.h"
+#include "gsmatrix.h"
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:
@@ -19,12 +20,10 @@ template <class T> class gMatrix : public gRectArray<T>  {
     gMatrix(int rows, int cols);
     gMatrix(int rows, int cols, int minrows);
     gMatrix(int rl, int rh, int cl, int ch);
-    gMatrix(const gRectArray<T> &);
     gMatrix(const gMatrix<T> &);
     virtual ~gMatrix();
 
     gMatrix<T> &operator=(const gMatrix<T> &);
-    gMatrix<T> & operator=(T c);
 
        // ADDITIVE OPERATORS
     gMatrix<T> operator+(const gMatrix<T> &) const;
@@ -51,7 +50,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
        // KRONECKER PRODUCT
     gMatrix<T> operator&(const gMatrix<T> &) const;
 
-       // TRANSPOSE
+      // TRANSPOSE
     gMatrix<T>       Transpose()         const;
 
        // COMPARISON OPERATORS
