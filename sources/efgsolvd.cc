@@ -143,9 +143,15 @@ void dialogEfgSolveStandard::OnChanged(void)
       }
       break;
     case 2:
-      m_description->SetValue("PolEnumSolve[EFG]");
-      m_precision->SetSelection(1);
-      m_precision->Enable(FALSE);
+      if (m_efg.NumPlayers() == 2) {
+	m_description->SetValue("EnumMixedSolve[NFG]");
+	m_precision->Enable(TRUE);
+      }
+      else {
+	m_description->SetValue("PolEnumSolve[EFG]");
+	m_precision->SetSelection(1);
+	m_precision->Enable(FALSE);
+      }
       break;
     }
     break;
@@ -190,8 +196,8 @@ void dialogEfgSolveStandard::OnChanged(void)
 	m_precision->Enable(TRUE);
       }
       else {
-	m_description->SetValue("LiapSolve[EFG]");
-	m_precision->SetSelection(0);
+	m_description->SetValue("PolEnumSolve[EFG]");
+	m_precision->SetSelection(1);
 	m_precision->Enable(FALSE);
       }
       break;

@@ -259,7 +259,13 @@ void EfgShow::SolveStandard(void)
       }
       break;
     case efgSTANDARD_ALL:
-      solver = new guiefgPolEnumEfg(*cur_sup, this, 0);
+      if (ef.NumPlayers() == 2) {
+	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
+					dialog.Precision(), false);
+      }
+      else  {
+	solver = new guiefgPolEnumEfg(*cur_sup, this, 0);
+      }
       break;
     }
     break;
@@ -294,8 +300,7 @@ void EfgShow::SolveStandard(void)
 	solver = new guiefgEnumMixedNfg(*cur_sup, this, 0,
 					dialog.Precision(), false);
       else {
-	wxMessageBox("Not guaranteed to find all solutions", "Warning");
-	solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
+	solver = new guiefgPolEnumEfg(*cur_sup, this, 0);
       }
       break;
     }
