@@ -1763,9 +1763,10 @@ Portion* GSM_IsList( Portion** p )
 
 Portion* GSM_SaveGlobalVar( Portion** param )
 {
-  _gsm->GlobalVarDefine( ((TextPortion*) param[0])->Value(), 
+  gString& varname = ((TextPortion*) param[0])->Value();
+  _gsm->GlobalVarDefine( varname, 
 			 param[1]->ValCopy() );
-  return param[1]->RefCopy();
+  return _gsm->GlobalVarValue( varname )->RefCopy();
 }
 
 Portion* GSM_LoadGlobalVar( Portion** param )
@@ -2290,10 +2291,20 @@ void Init_gsmoper(GSM* gsm)
 
 
 
-  FuncObj = new FuncDescObj("SaveGlobalVar", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveGlobalVar, porANYTYPE, 2));
+  FuncObj = new FuncDescObj("SaveGlobalVar", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveGlobalVar, porANYTYPE, 2,
+				       NO_PREDEFINED_PARAMS,
+				       funcNONLISTABLE ));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("name", porTEXT) );
   FuncObj->SetParamInfo(0, 1, ParamInfoType("var", porANYTYPE) );
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SaveGlobalVar, 
+				       PortionSpec(porANYTYPE, NLIST), 2,
+				       NO_PREDEFINED_PARAMS,
+				       funcNONLISTABLE ));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("name", porTEXT) );
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("var", 
+					    PortionSpec(porANYTYPE, NLIST)) );
   gsm->AddFunction(FuncObj);
 
 

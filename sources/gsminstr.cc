@@ -371,14 +371,26 @@ void gclListConstant::Append(gclExpression *expr)
 Portion *gclListConstant::Evaluate(void)
 {
   ListPortion *ret = new ListPortion;
-  
-  for (int i = 1; i <= values.Length(); i++)  {
+  int index = 0;
+  bool ErrorOccurred = false;
+
+  for (int i = 1; i <= values.Length(); i++)  
+  {
     Portion *v = values[i]->Evaluate();
-    if (v->Spec().Type == porERROR)   return v;
-    ret->Append(_gsm._ResolveRef(v));
+    if (v->Spec().Type == porERROR)
+      ErrorOccurred = true;
+    index = ret->Append(_gsm._ResolveRef(v));
+    if( index == 0 )
+      ErrorOccurred = true;
   }
 
-  return ret;
+  if( !ErrorOccurred )
+    return ret;
+  else
+  {
+    delete ret;
+    return new ErrorPortion;
+  }
 }
 
 

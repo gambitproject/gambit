@@ -311,7 +311,7 @@ list:            LBRACE RBRACE  { $$ = new gclListConstant; }
     ;
 
 listels:         expression   { $$ = new gclListConstant($1); }
-       |         listels COMMA expression  { $1->Append($3); }
+       |         listels COMMA expression { $1->Append($3); }
        ;
 
 
@@ -366,7 +366,7 @@ const char CR = (char) 10;
 char GCLCompiler::nextchar(void)
 {
   char c = current_expr[current_char];
-  if( c == 'r' || c == '\n' )
+  if( c == '\r' || c == '\n' )
     ++current_line;
   ++current_char;
   return c;
@@ -375,7 +375,7 @@ char GCLCompiler::nextchar(void)
 void GCLCompiler::ungetchar(char /*c*/)
 {
   char c = current_expr[current_char-1];
-  if( (current_char > 0) && (c == 'r' || c == '\n') )
+  if( (current_char > 0) && (c == '\r' || c == '\n') )
     --current_line;
   --current_char;
 }
