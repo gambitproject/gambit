@@ -1,7 +1,7 @@
 //
 // FILE: gnumber.h -- Number class for Gambit project. 
 //
-// @(#)gnumber.h	2.2 01/18/98
+// $Id$
 //
 
 #ifndef GNUMBER_H
@@ -13,15 +13,18 @@
 
 class gOutput;
 
-class gNumber
-{
+class gNumber  {
 protected:
   Precision rep;
   gRational *rval;
   double dval;
 
 public:
-  gNumber();
+#ifdef USE_EXCEPTIONS
+  class DivideByZero   { };
+#endif   // USE_EXCEPTIONS
+
+  gNumber(void);
   gNumber(double);
   gNumber(int n);
   gNumber(long n);
@@ -55,11 +58,8 @@ public:
   friend gOutput&    operator << (gOutput& s, const gNumber& y);
   friend gInput&     operator >> (gInput& s, gNumber& y);
 
-  void             error(const char* msg) const;
   operator double() const;
   operator gRational() const;
-  gRational TogRational() const;
-  double ToDouble() const;
   Precision GetPrecision(void) const;
 };
 
