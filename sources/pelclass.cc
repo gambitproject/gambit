@@ -414,7 +414,9 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
       gout << "\n Step 12 \n";
 #endif
       solutionsarecorrect = CheckSolutions(G_Verify(Link(pel_system,sols)));
-      if (solutionsarecorrect) done = true;
+      if (solutionsarecorrect && 
+	  !GambitRootsFromPelRoots(sols).HasARedundancy()) 
+	done = true;
       if (!done) free_Gen_list(sols);
 #ifdef PELVIEW_DEBUG
       gout << "The solutions are ";
