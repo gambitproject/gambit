@@ -373,6 +373,14 @@ Portion *GSM_TextText(Portion **param)
 }
 
 
+//------------------------ Integer --------------------------
+
+Portion *GSM_IntegerNumber(Portion **param)
+{
+  return new NumberPortion((long) ((NumberPortion *) param[0])->Value());
+}
+
+
 //----------------------------- Stop Watch ----------------------
 
 #include "gwatch.h"
@@ -774,6 +782,13 @@ void Init_listfunc(GSM *gsm)
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porTEXT));
   gsm->AddFunction(FuncObj);
   
+
+  //-------------------------- Integer ------------------------
+
+  FuncObj = new FuncDescObj("Integer", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IntegerNumber, porNUMBER,
+				       1, x_Number));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("StartWatch", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StartWatch, porNUMBER, 0));
