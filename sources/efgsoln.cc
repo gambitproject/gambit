@@ -909,6 +909,14 @@ void EfgSolnShow::SolutionToNormal(void)
 }
 
 
+// OnClose -- Close the window, as if OK was pressed
+Bool EfgSolnShow:: OnClose(void)
+{
+  OnOk();
+  return False;
+}
+
+
 void EfgSolnShow::OnDoubleClick(int row, int col, int , const gText &)
 {
     if (col == FeaturePos(BSOLN_ID))

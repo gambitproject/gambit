@@ -129,8 +129,8 @@ EfgShow::EfgShow(Efg &p_efg, EfgNfgInterface *p_nfg, int, wxFrame *p_frame,
   : wxFrame(p_frame, p_title, p_x, p_y, p_w, p_h, p_type), 
     EfgNfgInterface(gEFG, p_nfg), 
     GuiObject(gText("EfgShow")),
-    parent(p_frame), ef(p_efg), support_dialog(0), outcome_dialog(0),
-    soln_show(0), cur_soln(0), node_inspect(0), tw(0)
+    parent(p_frame), ef(p_efg), cur_soln(0), outcome_dialog(0), 
+    support_dialog(0), soln_show(0), node_inspect(0), tw(0)
 {
   Show(FALSE);
 

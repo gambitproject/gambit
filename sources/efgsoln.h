@@ -109,6 +109,8 @@ public:
     void OnOk(void);
     // Send one BehavProfile to a MixedProfile NF (Not implemented)
     void SolutionToNormal(void);
+  // OnClose calls OnOk
+  virtual Bool OnClose(void); 
 };
 
 //****************************************************************************

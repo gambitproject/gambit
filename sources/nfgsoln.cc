@@ -562,6 +562,12 @@ void NfgSolnShow::OnOptionsChanged(unsigned int options)
     }
 }
 
+// OnClose -- Close the window, as if OK was pressed
+Bool NfgSolnShow:: OnClose(void)
+{
+  OnOk();
+  return False;
+}
 
 void NfgSolnShow::UpdateValues(void)
 {
