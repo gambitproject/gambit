@@ -71,15 +71,16 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
       psum += p(i,j);
       x1 = p.Payoff(i, i, j) - p.Payoff(i);
       if (i1 == i) {
-	if (x1 > 0.0)
+	if (x1 > 0.0) {
 	  x -= x1 * p.Payoff(i, i1, j1);
+	}
       }
       else {
-	if (x1> 0.0)
+	if (x1 > 0.0) {
 	  x += x1 * (p.Payoff(i, i, j, i1, j1) - p.Payoff(i, i1, j1));
+	}
       }
     }
-    if (i == i1)  x += 100.0 * (psum - 1.0);
   }
   if (p(i1, j1) < 0.0)   x += p(i1, j1);
   return 2.0 * x;
@@ -89,21 +90,35 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 // This function projects a gradient into the plane of the simplex.
 // (Actually, it works by computing the projection of 'x' onto the
 // vector perpendicular to the plane, then subtracting to compute the
-// component parallel to the plane.)
+// component parallel to the plane.)  Also imposes binding nonnegativity
+// constraints as appropriate.
 //
-static void Project(gVector<double> &x, const gArray<int> &lengths)
+static void Project(gVector<double> &grad, const gVector<double> &x,
+		    const gArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
     double avg = 0.0;
+    int nactive = 0;
     int j;
     for (j = 1; j <= lengths[part]; j++, index++)  {
-      avg += x[index];
+      // If x[index] is small, assume nonnegativity is binding.
+      // On the other hand, if gradient suggests that the minimizing
+      // direction is towards the interior, let it go (relax constraint).
+      if (x[index] > 1.0e-7 || grad[index] < 0.0) {
+	avg += grad[index];
+	nactive++;
+      }
     }
-    avg /= (double) lengths[part];
+    avg /= (double) nactive;
     index -= lengths[part];
     for (j = 1; j <= lengths[part]; j++, index++)  {
-      x[index] -= avg;
+      if (x[index] > 1.0e-7 || grad[index] < 0.0) {
+	grad[index] -= avg;
+      }
+      else {
+	grad[index] = 0.0;
+      }
     }
   }
 }
@@ -119,7 +134,8 @@ bool NFLiapFunc::Gradient(const gVector<double> &v, gVector<double> &d) const
     }
   }
 
-  Project(d, _p.Lengths());
+  // Project for constraints
+  Project(d, v, _p.Lengths());
   return true;
 }
   
@@ -241,15 +257,19 @@ gList<MixedSolution> gbtNfgNashLiap::Solve(const gbtNfgSupport &p_support,
 	    break;
 	  }
 
-	  if (sqrt(gradient.NormSquared()) < .001) {
+	  gStandardOutput gout;
+	  gout << p << '\n';
+
+	  if (sqrt(gradient.NormSquared()) < .001 &&
+	      fval < 1.0e-8) {
 	    solutions.Append(MixedSolution(p, "Liap[NFG]"));
 	    break;
 	  }
 	}
       }
       catch (gFuncMinException &) { }
+      PickRandomProfile(p);
     }
-    PickRandomProfile(p);
   }
   catch (gSignalBreak &) {
     // Just stop and return any solutions found so far

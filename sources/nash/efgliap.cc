@@ -59,28 +59,45 @@ double EFLiapFunc::Value(const gVector<double> &v) const
   _nevals++;
   ((gVector<double> &) _p).operator=(v);
     //_p = v;
-  return _p.LiapValue();
+  // Don't impose penalties in Lyapunov function; avoid this as
+  // we go out of the feasible set in numerically computing the
+  // derivative of the function.
+  return _p.LiapValue(false);
 }
 
 //
 // This function projects a gradient into the plane of the simplex.
 // (Actually, it works by computing the projection of 'x' onto the
 // vector perpendicular to the plane, then subtracting to compute the
-// component parallel to the plane.)
+// component parallel to the plane.)  Also imposes binding nonnegativity
+// constraints as appropriate.
 //
-static void Project(gVector<double> &x, const gArray<int> &lengths)
+static void Project(gVector<double> &grad, const gVector<double> &x,
+		    const gArray<int> &lengths)
 {
   int index = 1;
   for (int part = 1; part <= lengths.Length(); part++)  {
     double avg = 0.0;
+    int nactive = 0;
     int j;
     for (j = 1; j <= lengths[part]; j++, index++)  {
-      avg += x[index];
+      // If x[index] is small, assume nonnegativity is binding.
+      // On the other hand, if gradient suggests that the minimizing
+      // direction is towards the interior, let it go (relax constraint).
+      if (x[index] > 1.0e-7 || grad[index] < 0.0) {
+	avg += grad[index];
+	nactive++;
+      }
     }
-    avg /= (double) lengths[part];
+    avg /= (double) nactive;
     index -= lengths[part];
     for (j = 1; j <= lengths[part]; j++, index++)  {
-      x[index] -= avg;
+      if (x[index] > 1.0e-7 || grad[index] < 0.0) {
+	grad[index] -= avg;
+      }
+      else {
+	grad[index] = 0.0;
+      }
     }
   }
 }
@@ -100,7 +117,8 @@ bool EFLiapFunc::Gradient(const gVector<double> &x,
     grad[i] = value / (2.0 * DELTA);
   }
 
-  Project(grad, _p.GetPVector().Lengths());
+  // Project for constraints
+  Project(grad, x, _p.GetPVector().Lengths());
 
   return true;
 }
@@ -180,16 +198,16 @@ gList<BehavSolution> gbtEfgNashLiap::Solve(const EFSupport &p_support,
 	    break;
 	  }
 
-	  if (sqrt(gradient.NormSquared()) < .001) {
+	  if (sqrt(gradient.NormSquared()) < .001 &&
+	      fval < 1.0e-8) {
 	    solutions.Append(BehavSolution(p, "Liap[EFG]"));
 	    break;
 	  }
 	}
       }
       catch (gFuncMinException &) { }
+      PickRandomProfile(p);
     }
-
-    PickRandomProfile(p);
   }
   catch (gSignalBreak &) {
     // Just stop and return any solutions found so far

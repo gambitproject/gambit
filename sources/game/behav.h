@@ -168,7 +168,7 @@ public:
 
   T Payoff(int p_player) const;
   gDPVector<T> Beliefs(void);
-  T LiapValue(void);
+  T LiapValue(bool p_penalty = true);
   T QreValue(const gVector<T> &lambda, bool &);
   T MaxRegret(void);
 

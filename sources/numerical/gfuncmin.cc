@@ -297,6 +297,18 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
   pg = p * gradient;
   dir = (pg >= 0.0) ? +1.0 : -1.0;
 
+  /* Check to make sure stepc doesn't take us outside the simplotope */
+  bool restrict = false;
+  for (int i = 1; i <= x.Length(); i++) {
+    if (x[i] > 1.0e-7 && p[i] * dir / pnorm != 0.0) {
+      double foo = x[i] / (p[i] * dir / pnorm);
+      if (foo > 0.0 && foo < stepc) {
+	stepc = foo;
+	restrict = true;
+      }
+    }
+  }
+
   /* Compute new trial point at x_c= x - step * p, where p is the
      current direction */
   TakeStep(x, p, stepc, dir / pnorm, x1, dx);
@@ -306,11 +318,24 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
 
   if (fc < fa) {
     /* Success, reduced the function value */
-    step = stepc * 2.0;
+    /* If xc is on the boundary, restart step sizing */
+    if (restrict) {
+      step = 0.0001;
+    }
+    else {
+      step = stepc * 2.0;
+    }
     f = fc;
     x = x1;
     fdf.Gradient(x1, gradient);
     g0norm = sqrt(gradient.NormSquared());
+    /* Added by TLT: Restart conjugate gradient direction as well.
+       Not sure this is in general necessary, but useful for when we
+       jump onto / off of subspaces with various nonnegativity constraints
+       binding or not */
+    p = gradient;
+    pnorm = g0norm;
+    iter = 0;
     return true;
   }
 
@@ -345,6 +370,12 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
 
     p *= -beta;
     AlphaXPlusY(1.0, gradient, p);
+    // Project onto subspace of binding zero constraints
+    for (int i = 1; i <= x.Length(); i++) {
+      if (x[i] < 1.0e-7) {
+	p[i] = 0.0;
+      }
+    }
     pnorm = sqrt(p.NormSquared());
   }
 
@@ -353,3 +384,5 @@ bool gConjugatePR::Iterate(const gC1Function<double> &fdf,
 
   return true;
 }
+
+

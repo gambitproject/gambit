@@ -801,7 +801,7 @@ template <class T> gDPVector<T> BehavProfile<T>::Beliefs(void)
   return bprobs;
 }
 
-template <class T> T BehavProfile<T>::LiapValue(void)
+template <class T> T BehavProfile<T>::LiapValue(bool p_penalty)
 {
   static const T BIG1 = (T) 10000;
   static const T BIG2 = (T) 100;
@@ -824,7 +824,10 @@ template <class T> T BehavProfile<T>::LiapValue(void)
 	avg += x * ActionValue(acts[act]);
 	sum += x;
 	if (x > (T)0)  x = (T)0;
-	result += BIG1 * x * x;         // add penalty for neg probabilities
+	if (p_penalty) {
+	  // add penalty for negative probabilities
+	  result += BIG1 * x * x;
+	}
       }
 
       for (int act = 1; act <= acts.Length(); act++) {
@@ -833,7 +836,10 @@ template <class T> T BehavProfile<T>::LiapValue(void)
 	result += x * x;          // add penalty if not best response
       }
       x = sum - (T)1;
-      result += BIG2 * x * x;       // add penalty for sum not equal to 1
+      if (p_penalty) {
+	// add penalty for sum not equal to 1
+	result += BIG2 * x * x;      
+      }
     }
   }
   return result;
