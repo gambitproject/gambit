@@ -72,35 +72,34 @@ double PxiPlot3::CalcY_3(double p1,int x0, int y0, int cw,int ch)
 // Draws a little # or a cirlce corresponding to the point # in the experimental
 // data overlay
 
-void PxiPlot3::DrawExpPoint_3(wxDC &dc,const PlotInfo &thisplot,double cur_e,int iset,int st1,int st2,
-				 int x0, int y0, int cw,int ch)
+void PxiPlot3::DrawExpPoint_3(wxDC &dc, const PlotInfo &thisplot,
+			      double p_lambda, int iset, int st1, int st2,
+			      int x0, int y0, int cw, int ch)
 {
-  exp_data_struct *s=0;
-  double x,y;
-  gBlock<int> point_nums;
-  
-  point_nums = m_expData.HaveL(cur_e);
-  for (int i=1;i<=point_nums.Length();i++) {
-    s = m_expData[point_nums[i]];
-    
-    y=CalcY_3((*s).probs[iset][st1],x0,y0,cw,ch);
-    x=CalcX_3((*s).probs[iset][st1],(*s).probs[iset][st2],x0,y0,ch,cw,thisplot);
-    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
-      int ts=m_drawSettings.GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(m_drawSettings.GetDataBrush());
-      dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
+  try {
+    gBlock<int> points(m_expData.FitPoints(p_lambda));
+    for (int i = 1; i <= points.Length(); i++) {
+      double y = CalcY_3(m_expData.GetDataPoint(points[i], iset, st1),
+			 x0, y0, cw, ch);
+      double x = CalcX_3(m_expData.GetDataPoint(points[i], iset, st1),
+			 m_expData.GetDataPoint(points[i], iset, st2),
+			 x0, y0, ch, cw, thisplot);
+      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+	int ts = m_drawSettings.GetTokenSize();
+	dc.SetBrush(m_drawSettings.GetDataBrush());
+	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
+      }
+      else {
+	wxString tmp = wxString::Format("%d", points[i]);
+	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetTextForeground(*wxBLACK);
+	wxCoord tw,th;
+	dc.GetTextExtent(tmp,&tw,&th);
+	dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
+      }
     }
-    else {
-      wxString tmp;
-      tmp.Printf("%d",point_nums[i]);
-      dc.SetFont(m_drawSettings.GetOverlayFont());
-      dc.SetTextForeground(*wxBLACK);
-      wxCoord tw,th;
-      dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
-    }
-    delete s;
   }
+  catch (...) { }
 }
 
 /**************************** PLOT DATA 3 *********************************/

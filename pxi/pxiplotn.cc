@@ -155,39 +155,36 @@ double PxiPlotN::CalcX_X(double x,int x0, int cw, const PlotInfo &thisplot)
 
 // Draws a little # or a token corresponding to the point # in the experimental
 // data overlay
-void PxiPlotN::DrawExpPoint_X(wxDC &dc,const PlotInfo &thisplot,double cur_e,int iset,int st,int x0, int y0, int cw,int ch)
+void PxiPlotN::DrawExpPoint_X(wxDC &dc, const PlotInfo &thisplot,
+			      double p_lambda, int iset, int st,
+			      int x0, int y0, int cw, int ch)
 {
   try {
-  exp_data_struct	*s=0;
-  double x,y;
-  gBlock<int> point_nums;  
-  point_nums = m_expData.HaveL(cur_e);
-  for (int i=1;i<=point_nums.Length();i++) {
-    s= m_expData[point_nums[i]];
-    
-    y=CalcY_X((*s).probs[iset][st],y0,ch,thisplot);
-    x=CalcX_X(s->e,x0,cw,thisplot);
-    dc.SetBrush(m_drawSettings.GetDataBrush());
-    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
-      DrawToken(dc, (int) x, (int) y, st);
+    gBlock<int> points(m_expData.FitPoints(p_lambda)); 
+    for (int i = 1; i <= points.Length(); i++) {
+      double y = CalcY_X(m_expData.GetDataPoint(points[i], iset, st),
+			 y0, ch, thisplot);
+      double x = CalcX_X(m_expData.MLELambda(points[i]), x0, cw, thisplot);
+      dc.SetBrush(m_drawSettings.GetDataBrush());
+      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+	DrawToken(dc, (int) x, (int) y, st);
+      }
+      else {
+	wxString tmp = wxString::Format("%d", points[i]);
+	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetTextForeground(*wxBLACK);
+	wxCoord tw,th;
+	dc.GetTextExtent(tmp,&tw,&th);
+	dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
+	//      dc.DrawText(tmp,x-3,y-6);
+      }
+      if (m_drawSettings.GetOverlayLines() && st!=1) {
+	dc.SetBrush(*wxBLACK_BRUSH);
+	int y1 = (int) CalcY_X(m_expData.GetDataPoint(points[i], iset, st-1),
+			       y0, ch, thisplot);
+	dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
+      }
     }
-    else {
-      char tmp[10];
-      sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(m_drawSettings.GetOverlayFont());
-      dc.SetTextForeground(*wxBLACK);
-      wxCoord tw,th;
-      dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
-      //      dc.DrawText(tmp,x-3,y-6);
-    }
-    if (m_drawSettings.GetOverlayLines() && st!=1) {
-      dc.SetBrush(*wxBLACK_BRUSH);
-      int y1=(int)CalcY_X((*s).probs[iset][st-1],y0,ch,thisplot);
-      dc.DrawLine((int) x, (int) y, (int) x, (int) y1);
-    }
-    delete s;
-  }
   }
   catch (...) { }
 }

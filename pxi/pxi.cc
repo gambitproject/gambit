@@ -567,9 +567,6 @@ template class gArray<PlotInfo>;
 template class gArray<FileHeader>;
 template class gBlock<FileHeader>;
 
-template class gArray<ExpData::BEST_POINT>;
-template class gBlock<ExpData::BEST_POINT>;
-
 template class gArray<PxiPlot::LABELSTRUCT>;
 template class gBlock<PxiPlot::LABELSTRUCT>;
 

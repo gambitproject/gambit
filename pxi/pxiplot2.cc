@@ -45,38 +45,34 @@ void PxiPlot2::PlotLabels(wxDC &dc, int ch,int cw)
   }
 }
 
-void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, double cur_e, 
-			       int pl1,int st1,int pl2,int st2,
-			       int x0, int y0, int cw, int ch)
+void PxiPlot2::DrawExpPoint_2(wxDC &dc, const PlotInfo &thisplot, 
+			      double p_lambda,
+			      int pl1,int st1,int pl2,int st2,
+			      int x0, int y0, int cw, int ch)
 {
-  exp_data_struct	*s=0;
-  double x,y;
-  gBlock<int> point_nums;
-  
-  point_nums = m_expData.HaveL(cur_e);
-  for (int i=1;i<=point_nums.Length();i++) {
-    s= m_expData[point_nums[i]];
+  try {
+    gBlock<int> points(m_expData.FitPoints(p_lambda));
+    for (int i = 1; i <= points.Length(); i++) {
+      double x = x0 + m_expData.GetDataPoint(points[i], pl1, st1) * cw;
+      double y = y0 - m_expData.GetDataPoint(points[i], pl2, st2) * ch;
     
-    x=x0+(*s).probs[pl1][st1]*cw;
-    y=y0-(*s).probs[pl2][st2]*ch;
-    
-    if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
-      int ts=m_drawSettings.GetTokenSize();	// token dimentions are 2ts x 2ts
-      dc.SetBrush(m_drawSettings.GetDataBrush());
-      dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
+      if (m_drawSettings.GetOverlaySym()==OVERLAY_TOKEN) {
+	int ts = m_drawSettings.GetTokenSize();
+	dc.SetBrush(m_drawSettings.GetDataBrush());
+	dc.DrawEllipse((int) (x-ts), (int) (y-ts), 2*ts, 2*ts);
+      }
+      else {
+	wxString tmp = wxString::Format("%d", points[i]);
+	dc.SetFont(m_drawSettings.GetOverlayFont());
+	dc.SetTextForeground(*wxBLACK);
+	wxCoord tw,th;
+	dc.GetTextExtent(tmp,&tw,&th);
+	dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
+	//      dc.DrawText(tmp,x-3,y-6);
+      }
     }
-    else {
-      char tmp[10];
-      sprintf(tmp,"%d",point_nums[i]);
-      dc.SetFont(m_drawSettings.GetOverlayFont());
-      dc.SetTextForeground(*wxBLACK);
-      wxCoord tw,th;
-      dc.GetTextExtent(tmp,&tw,&th);
-      dc.DrawText(tmp, (int) (x-tw/2), (int) (y-th/2));
-      //      dc.DrawText(tmp,x-3,y-6);
-    }
-    delete s;
   }
+  catch (...) { }
 }
 
 void PxiPlot2::PlotData_2(wxDC& dc,const PlotInfo &thisplot,int x0, int y0, int cw,int ch,

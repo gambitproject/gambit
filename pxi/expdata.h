@@ -38,64 +38,24 @@
 #include "base/grarray.h"
 #include "pxifile.h"
 
-typedef struct EXPDATASTRUCT
-{
-  gBlock<gBlock<double> > probs;
-  double e;
-  EXPDATASTRUCT(const gBlock<gBlock<double> > &_probs,double _e)
-    {probs=_probs;e=_e;}
-  EXPDATASTRUCT(void) {;}
-  EXPDATASTRUCT(const EXPDATASTRUCT &A):probs(A.probs),e(A.e)	{;}
-  ~EXPDATASTRUCT(void) {;}
-  int operator==(const EXPDATASTRUCT &A) {return (e==A.e && probs==A.probs);}
-  int operator!=(const EXPDATASTRUCT &A) {return !(*this==A);}
-  EXPDATASTRUCT &operator=(const EXPDATASTRUCT &A)
-    {probs=A.probs;e=A.e; return (*this);}
-} exp_data_struct;
-
-gOutput &operator<<(gOutput &op,const EXPDATASTRUCT &e);
 gOutput &operator<<(gOutput &op,const gBlock<double> &d);
 
 class ExpData {
-public:
-  typedef struct BEST_POINT {
-    friend gOutput &operator<<(gOutput &op,const BEST_POINT &e);
-    double e;
-    double like;
-    BEST_POINT(void):e(-1.0),like(-1.0) {;}
-    BEST_POINT(const BEST_POINT &P):e(P.e),like(P.like) {;}
-    BEST_POINT &operator=(const BEST_POINT &p)
-      {e=p.e;like=p.like;return (*this);}
-    int operator==(const BEST_POINT &p) {return (e==p.e && like==p.like);}
-    int operator!=(const BEST_POINT &p) {return !(*this==p);}
-  } best_point_struct;
-
 private:
   bool m_solved;
-  int num_points;
-  gBlock<best_point_struct> points;
-  gRectArray<gBlock<double> > probs;
-
-  // functions
-  void OutputLikeHeader(gOutput &);
-  void OutputLikeData(gOutput &, gBlock<double> &like_m,
-		      double cur_e,double &like_min,double &like_max);
+  gBlock<double> m_fitLambdas, m_fitLikes;
+  gRectArray<gBlock<double> > m_probs;
 
 public:
   ExpData(void);
-  ~ExpData() { }
 
-  int NumPoints(void) {return num_points;}
-  gBlock<int> HaveL(double l) const;
-  // Accessing the calculated results
-  exp_data_struct *operator[](int i) const
-    {
-      assert(i>0 && i<=num_points);
-      assert(m_solved);
-      gBlock<gBlock<double> > row(probs.NumColumns());
-      probs.GetRow(i, row);
-      return (new exp_data_struct(row,points[i].e));
-    }
+  int NumPoints(void) const { return m_probs.NumRows(); }
+  gBlock<int> FitPoints(double p_lambda) const;
+  
+  double MLELambda(int i) const { return m_fitLambdas[i]; }
+  double MLEValue(int i) const { return m_fitLikes[i]; } 
+  double GetDataPoint(int i, int iset, int act) const
+    { return m_probs(i, iset)[act]; }
 
   bool HaveMLEs(void) const { return m_solved; }
   void ComputeMLEs(FileHeader &, gOutput &p_likeFile);
@@ -103,6 +63,6 @@ public:
   bool LoadData(gInput &);
 };
 
-#endif
+#endif  // EXPDATA_H
 
 
