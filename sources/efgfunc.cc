@@ -584,7 +584,7 @@ static Portion *GSM_MoveToInfoset(GSM &gsm, Portion **param)
   
   gsm.UnAssignGameElement(s->Game(), true, porBEHAV | porEFSUPPORT);
 
-  return new InfosetPortion(s);
+  return new NodePortion(n);
 }
 
 //-------------
