@@ -495,17 +495,9 @@ ITEM 0021:  Bug in interactive selection of subgame solutions
 
 DATE:     9/8/1999 by TLT (was Bug D37 in bugs_gui)
 AFFECTS:  GUI (all platforms?)
-STATUS:   OPEN
+STATUS:   CLOSED 9/9/1999 by TLT
 SEVERITY: CRUCIAL
 DETAILS:
-
-The following causes a crash:
-
-Load coord2ts.efg, and solve via Solve->Custom->Efg->LCP (noDomElim,
-Interactive selection, findAll)
-
-COMMENTS:
-TLT 9/8/1999.  I cannot reproduce this on my machine.
 
 ---------------
 

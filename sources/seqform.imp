@@ -196,7 +196,7 @@ SeqFormModule<T>::All_Lemke(int j, LTableau<T> &B,long &np, int depth)
     params.status.Get();
     
     if (i != j)  {
-      len=List.Length()-1;
+      len=List.Length();  
       p1=(double)len/(double)(len+1);
       p2=(double)(len+1)/(double)(len+2);
       int num_strats = B.MaxCol()-B.MinCol()-1;
