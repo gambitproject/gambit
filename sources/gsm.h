@@ -74,7 +74,8 @@ private:
      const long& num1      = 0, 
      const long& num2      = 0,
      const gString&  str1      = "",
-     const gString&  str2      = ""
+     const gString&  str2      = "",
+     const gString&  str3      = ""
      );
 
   // This function is located in gsmfunc.cc

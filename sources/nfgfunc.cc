@@ -565,250 +565,289 @@ void Init_nfgfunc(GSM *gsm)
   FuncDescObj *FuncObj;
 
 
-  FuncObj = new FuncDescObj("AddStrategy");
-  FuncObj->SetFuncInfo(GSM_AddStrategy, 2);
-  FuncObj->SetParamInfo(GSM_AddStrategy, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_AddStrategy, 1, "strategy", porSTRATEGY);
+  FuncObj = new FuncDescObj("AddStrategy", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNF_SUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("ElimAllDom");
-  FuncObj->SetFuncInfo(GSM_ElimAllDom_NfSupport, 5);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_NfSupport, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimAllDom_Nfg, 5);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimAllDom_Nfg, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
+  FuncObj = new FuncDescObj("ElimAllDom", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimAllDom_NfSupport, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimAllDom_Nfg, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("ElimDom");
-  FuncObj->SetFuncInfo(GSM_ElimDom_NfSupport, 5);
-  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_NfSupport, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimDom_Nfg, 5);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimDom_Nfg, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
+  FuncObj = new FuncDescObj("ElimDom", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_NfSupport, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimDom_Nfg, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("ElimMixedDom");
-  FuncObj->SetFuncInfo(GSM_ElimMixedDom_NfSupport, 5);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_NfSupport, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
 
-  FuncObj->SetFuncInfo(GSM_ElimMixedDom_Nfg, 5);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 1, "strong", porBOOL,
-			new BoolValPortion(false));
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 2, "time", porFLOAT,
-			new FloatValPortion(0.0), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 3, "traceFile", porOUTPUT,
-			new OutputRefPortion(gnull), PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_ElimMixedDom_Nfg, 4, "traceLevel", porINTEGER,
-			new IntValPortion(0));
+  FuncObj = new FuncDescObj("ElimMixedDom", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimMixedDom_NfSupport, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimMixedDom_Nfg, 
+				       porNF_SUPPORT, 5));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
+					    new BoolValPortion(false)));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
+					    new FloatValPortion(0.0), BYREF));
+  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
+					    new OutputRefPortion(gnull), 
+					    BYREF));
+  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
+					    new IntValPortion(0)));
 
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Float");
-  FuncObj->SetFuncInfo(GSM_Float_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_Float_Nfg, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+
+  FuncObj = new FuncDescObj("Float", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Float_Nfg, 
+				       porNFG_FLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsConstSum");
-  FuncObj->SetFuncInfo(GSM_IsConstSum_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_IsConstSum_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("IsConstSum", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSum_Nfg, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LoadNfg");
-  FuncObj->SetFuncInfo(GSM_LoadNfg, 1);
-  FuncObj->SetParamInfo(GSM_LoadNfg, 0, "file", porTEXT);
+
+  FuncObj = new FuncDescObj("LoadNfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadNfg, porNFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Name");
-  FuncObj->SetFuncInfo(GSM_Name_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_Name_Nfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE );
 
-  FuncObj->SetFuncInfo(GSM_Name_NfPlayer, 1);
-  FuncObj->SetParamInfo(GSM_Name_NfPlayer, 0, "x", porPLAYER_NFG);
+  FuncObj = new FuncDescObj("Name", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg, porTEXT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG, REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_Name_Strategy, 1);
-  FuncObj->SetParamInfo(GSM_Name_Strategy, 0, "x", porSTRATEGY);
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Name_NfPlayer, porTEXT, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porPLAYER_NFG));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Name_Strategy, porTEXT, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("NewNfg");
-  FuncObj->SetFuncInfo(GSM_NewNfg, 2);
-  FuncObj->SetParamInfo(GSM_NewNfg, 0, "dim", PortionSpec(porINTEGER,1));
-  FuncObj->SetParamInfo(GSM_NewNfg, 1, "rational", porBOOL,
-			new BoolValPortion(false));
+
+  FuncObj = new FuncDescObj("NewNfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewNfg, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("dim", PortionSpec(porINTEGER,1)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("rational", porBOOL,
+					    new BoolValPortion(false)));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Support");
-  FuncObj->SetFuncInfo(GSM_NewSupport_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_NewSupport_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("Support", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewSupport_Nfg, porNF_SUPPORT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("NumPlayers");
-  FuncObj->SetFuncInfo(GSM_NumPlayers_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_NumPlayers_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("NumPlayers", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumPlayers_Nfg, porINTEGER, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("NumStrats");
-  FuncObj->SetFuncInfo(GSM_NumStrats, 2);
-  FuncObj->SetParamInfo(GSM_NumStrats, 0, "player", porPLAYER_NFG);
-  FuncObj->SetParamInfo(GSM_NumStrats, 1, "support", porNF_SUPPORT, 
-			new NfSupportValPortion( 0 ) );
+
+  FuncObj = new FuncDescObj("NumStrats", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumStrats, porINTEGER, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
+					    new NfSupportValPortion( 0 )));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Players");
-  FuncObj->SetFuncInfo(GSM_Players_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_Players_Nfg, 0, "nfg", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("Players", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Players_Nfg, 
+				       PortionSpec(porPLAYER_NFG, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
+					    REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+  
+  
+
+  FuncObj = new FuncDescObj("Randomize", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomNfg_Float, 
+				       porNFG_FLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT,
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomNfg_Rational, 
+				       porNFG_RATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomNfg_SeedFloat, 
+				       porNFG_FLOAT, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomNfg_SeedRational, 
+				       porNFG_RATIONAL, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Randomize");
-  FuncObj->SetFuncInfo(GSM_RandomNfg_Float, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfg_Float, 0, "x", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_RandomNfg_Rational, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfg_Rational, 0, "x", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("RandomNfg", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomNfg_Float, 
+				       porNFG_FLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedFloat, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 0, "x", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 1, "seed", porINTEGER);
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomNfg_Rational, 
+				       porNFG_RATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedRational, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 0, "x", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 1, "seed", porINTEGER);
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomNfg_SeedFloat, 
+				       porNFG_FLOAT, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomNfg_SeedRational, 
+				       porNFG_RATIONAL, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("RandomNfg");
-  FuncObj->SetFuncInfo(GSM_RandomNfg_Float, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfg_Float, 0, "x", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_RandomNfg_Rational, 1);
-  FuncObj->SetParamInfo(GSM_RandomNfg_Rational, 0, "x", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-
-  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedFloat, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 0, "x", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedFloat, 1, "seed", porINTEGER);
-
-  FuncObj->SetFuncInfo(GSM_RandomNfg_SeedRational, 2);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 0, "x", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_RandomNfg_SeedRational, 1, "seed", porINTEGER);
+  FuncObj = new FuncDescObj("Rational", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Rational_Nfg, 
+				       porNFG_RATIONAL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Rational");
-  FuncObj->SetFuncInfo(GSM_Rational_Nfg, 1);
-  FuncObj->SetParamInfo(GSM_Rational_Nfg, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("RemoveStrategy", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
+				       porNF_SUPPORT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("RemoveStrategy");
-  FuncObj->SetFuncInfo(GSM_RemoveStrategy, 2);
-  FuncObj->SetParamInfo(GSM_RemoveStrategy, 0, "support", porNF_SUPPORT);
-  FuncObj->SetParamInfo(GSM_RemoveStrategy, 1, "strategy", porSTRATEGY);
+
+  FuncObj = new FuncDescObj("SaveNfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveNfg, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("SaveNfg");
-  FuncObj->SetFuncInfo(GSM_SaveNfg, 2);
-  FuncObj->SetParamInfo(GSM_SaveNfg, 0, "nfg", porNFG, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_SaveNfg, 1, "file", porTEXT);
+
+  FuncObj = new FuncDescObj("SetName", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetName_Nfg, porNFG, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("name", porTEXT));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetName_NfPlayer, 
+				       porPLAYER_NFG, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porPLAYER_NFG));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("name", porTEXT));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetName_Strategy, 
+				       porSTRATEGY, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("SetName");
-  FuncObj->SetFuncInfo(GSM_SetName_Nfg, 2);
-  FuncObj->SetParamInfo(GSM_SetName_Nfg, 0, "x", porNFG, NO_DEFAULT_VALUE,
-			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_SetName_Nfg, 1, "name", porTEXT);
 
-  FuncObj->SetFuncInfo(GSM_SetName_NfPlayer, 2);
-  FuncObj->SetParamInfo(GSM_SetName_NfPlayer, 0, "x", porPLAYER_NFG);
-  FuncObj->SetParamInfo(GSM_SetName_NfPlayer, 1, "name", porTEXT);
-
-  FuncObj->SetFuncInfo(GSM_SetName_Strategy, 2);
-  FuncObj->SetParamInfo(GSM_SetName_Strategy, 0, "x", porSTRATEGY);
-  FuncObj->SetParamInfo(GSM_SetName_Strategy, 1, "name", porTEXT);
-  gsm->AddFunction(FuncObj);
-
-
-  FuncObj = new FuncDescObj("Strategies");
-  FuncObj->SetFuncInfo(GSM_Strategies, 2);
-  FuncObj->SetParamInfo(GSM_Strategies, 0, "player", porPLAYER_NFG);
-  FuncObj->SetParamInfo(GSM_Strategies, 1, "support", porNF_SUPPORT, 
-			new NfSupportValPortion( 0 ) );
+  FuncObj = new FuncDescObj("Strategies", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Strategies, 
+				       PortionSpec(porSTRATEGY, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
+					    new NfSupportValPortion( 0 )));
   gsm->AddFunction(FuncObj);
 }
-
-
-
-
-

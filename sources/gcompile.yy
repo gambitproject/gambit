@@ -35,7 +35,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
   int statementcount; \
   gInteger ival; \
   double dval; \
-  gString tval, formal, funcname, paramtype;  \
+  gString tval, formal, funcname, paramtype, functype;  \
   Portion* por; \
   gList<NewInstr*> program, *function; \
   gList<gString> formals, types; \
@@ -117,6 +117,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 %token FOR
 %token QUIT
 %token DEFFUNC
+%token TYPEDEF
 %token INCLUDE
 
 %token NAME
@@ -156,9 +157,12 @@ sep:          SEMI    { semi = true; }
 funcdecl:     DEFFUNC LBRACK NAME
               { funcname = tval; function = new gList<NewInstr*>; 
                 statementcount = 0; }
-              LBRACK formallist RBRACK COMMA statements
+              LBRACK formallist RBRACK TYPEopt COMMA statements
               RBRACK   { if (!triv && !semi) emit(new NewInstr(iOUTPUT));
 			 if (!DefineFunction())  YYERROR; } 
+
+TYPEopt:      { functype = "ANYTYPE" }
+          |   TYPEDEF NAME { functype = tval; }
 		
 formallist:
           |   formalparams
@@ -457,7 +461,8 @@ static struct tokens toktable[] =
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
     { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
-    { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { INCLUDE, "Include" },
+    { QUIT, "Quit" }, { DEFFUNC, "NewFunction" }, { TYPEDEF, "=:" },
+    { INCLUDE, "Include" },
     { PERCENT, "%" }, { DIV, "DIV" }, { LPAREN, "(" }, { RPAREN, ")" },
     { CRLF, "carriage return" }, { EOC, "carriage return" }, { 0, 0 }
 };
@@ -653,7 +658,9 @@ I_dont_believe_Im_doing_this:
     case '*':   return STAR;
     case '/':   return SLASH;
     case '%':   return PERCENT;
-    case '=':   return EQU;
+    case '=':   c = nextchar();
+                if (c == ':')  return TYPEDEF;
+                else   { ungetchar(c);  return EQU; }  
     case '#':   return HASH;
     case '^':   return CARET;
     case '[':   matching.Push('[');
@@ -767,11 +774,24 @@ void GCLCompiler::RecoverFromError(void)
 
 bool GCLCompiler::DefineFunction(void)
 {
-  FuncDescObj *func = new FuncDescObj(funcname);
-  func->SetFuncInfo(function, formals.Length());
+  FuncDescObj *func = new FuncDescObj(funcname, 1);
+  bool error = false;
+
+  PortionSpec funcspec;
+
+  funcspec = TextToPortionSpec(functype);
+  if (funcspec.Type != porERROR) {
+    func->SetFuncInfo(0, FuncInfoType(function, funcspec, formals.Length()));
+  }
+  else {
+    error = true;
+    gerr << "Error: Unknown type " << functype << ", " << 
+      PortionSpecToText(funcspec) << " as return type in declaration of " << 
+      funcname << "[]\n";
+  }
+
 //  function->Dump(gout);
 
-  bool error = false;
   for (int i = 1; i <= formals.Length(); i++)   {
     PortionSpec spec;
     if(portions[i])
@@ -781,11 +801,13 @@ bool GCLCompiler::DefineFunction(void)
 
     if (spec.Type != porERROR)   {
       if (refs[i])
-	func->SetParamInfo(function, i - 1, formals[i], spec,
-			   portions[i], PASS_BY_REFERENCE);
+	func->SetParamInfo(0, i - 1, 
+                          ParamInfoType(formals[i], spec,
+			                portions[i], BYREF));
       else
-	func->SetParamInfo(function, i - 1, formals[i], spec,
-			   portions[i], PASS_BY_VALUE);
+	func->SetParamInfo(0, i - 1, 
+                          ParamInfoType(formals[i], spec,
+			                portions[i], BYVAL));
     }
     else   {
       error = true;

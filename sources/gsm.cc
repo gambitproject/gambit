@@ -613,9 +613,9 @@ bool GSM::Assign( void )
   }
   else
   {
-    gout << "spec1: " << PortionSpecToText(p1Spec) << '\n';
-    gout << "spec2: " << PortionSpecToText(p2Spec) << '\n';
-    _ErrorMessage(_StdErr, 66);
+    _ErrorMessage(_StdErr, 66, 0, 0, varname, 
+		  PortionSpecToText(p1Spec),
+		  PortionSpecToText(p2Spec));
     result = false;
   }
 
@@ -2380,10 +2380,11 @@ void GSM::_ErrorMessage
 (
  gOutput&        s,
  const int       error_num,
- const long& /*num1*/, 
- const long& /*num2*/,
+ const long&     /*num1*/, 
+ const long&     /*num2*/,
  const gString&  str1,
- const gString& /*str2*/
+ const gString&  str2,
+ const gString&  str3
  )
 {
 #if 0
@@ -2446,7 +2447,8 @@ void GSM::_ErrorMessage
     s << "Attempted to change the type of a list\n";
     break;
   case 66:
-    s << "Attempted to change the type of a variable\n";
+    s << "Cannot change the type of variable \"" << str1 << "\" from ";
+    s << str2 << " to " << str3 << '\n';
     break;
   case 67:
     s << "Assigning to an unknown type: " << str1 << "\n";

@@ -203,21 +203,21 @@ CallListFunction( GSM* gsm, Portion** ParamIn )
 //---------------------------------------------------------------
 
 
-ParamInfoType::ParamInfoType( void )
-{
-  Name = "";
-  Spec = PortionSpec(porERROR);
-  DefaultValue = NO_DEFAULT_VALUE;
-  PassByReference = 0;
-}
-
-ParamInfoType::ParamInfoType( const ParamInfoType& param_info )
+ParamInfoType::ParamInfoType(void)
 :
- Name( param_info.Name ),
- Spec( param_info.Spec ),
- DefaultValue( param_info.DefaultValue ),
- PassByReference( param_info.PassByReference )
-{ }
+ Name(""), 
+ Spec(PortionSpec(porERROR)), 
+ DefaultValue(NO_DEFAULT_VALUE), 
+ PassByReference(PASS_BY_VALUE)
+{}
+
+ParamInfoType::ParamInfoType(const ParamInfoType& paraminfo)
+:
+ Name(paraminfo.Name), 
+ Spec(paraminfo.Spec), 
+ DefaultValue(paraminfo.DefaultValue), 
+ PassByReference(paraminfo.PassByReference)
+{}
 
 ParamInfoType::ParamInfoType
 ( 
@@ -236,16 +236,84 @@ ParamInfoType::ParamInfoType
 ParamInfoType::~ParamInfoType()
 { }
 
-ParamInfoType& ParamInfoType::operator = ( const ParamInfoType& param_info )
+//---------------------------------------------------------------------
+//                     FuncInfoType
+//---------------------------------------------------------------------
+
+FuncInfoType::FuncInfoType(void)
+:
+ UserDefined(false),
+ FuncPtr(0),
+ ReturnSpec(PortionSpec(porERROR)),
+ Listable(LISTABLE),
+ NumParams(0),
+ ParamInfo(0)
+{}
+
+FuncInfoType::FuncInfoType(const FuncInfoType& funcinfo)
+:
+ UserDefined(funcinfo.UserDefined),
+ ReturnSpec(funcinfo.ReturnSpec),
+ Listable(funcinfo.Listable),
+ NumParams(funcinfo.NumParams)
 {
-  Name = param_info.Name;
-  Spec = param_info.Spec;
-  DefaultValue = param_info.DefaultValue;
-  PassByReference = param_info.PassByReference;
-  return *this;
+  int i;
+  if(!UserDefined)
+    FuncPtr = funcinfo.FuncPtr;
+  else
+    FuncInstr = funcinfo.FuncInstr;
+  assert(funcinfo.ParamInfo);
+  ParamInfo = new ParamInfoType[NumParams];
+  for(i=0; i<NumParams; i++)
+    ParamInfo[i] = funcinfo.ParamInfo[i];
 }
 
+FuncInfoType::FuncInfoType
+(
+ Portion* (*funcptr)(Portion**),
+ PortionSpec returnspec,
+ int numparams,
+ ParamInfoType* paraminfo,
+ bool listable
+ )
+:
+ UserDefined(false),
+ FuncPtr(funcptr),
+ ReturnSpec(returnspec),
+ Listable(listable),
+ NumParams(numparams)
+{
+  int i;
+  ParamInfo = new ParamInfoType[NumParams];
+  if(paraminfo)
+    for(i=0; i<NumParams; i++)
+      ParamInfo[i] = paraminfo[i];
+}
 
+FuncInfoType::FuncInfoType
+(
+ gList<NewInstr*>* funcinstr,
+ PortionSpec returnspec,
+ int numparams,
+ ParamInfoType* paraminfo,
+ bool listable
+ )
+:
+ UserDefined(true),
+ FuncInstr(funcinstr),
+ ReturnSpec(returnspec),
+ Listable(listable),
+ NumParams(numparams)
+{
+  int i;
+  ParamInfo = new ParamInfoType[NumParams];
+  if(paraminfo)
+    for(i=0; i<NumParams; i++)
+      ParamInfo[i] = paraminfo[i];
+}
+
+FuncInfoType::~FuncInfoType()
+{}
 
 //---------------------------------------------------------------------
 //                   Function descriptor objects
@@ -267,18 +335,19 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
   {
     _FuncInfo[ f_index ].UserDefined = func._FuncInfo[ f_index ].UserDefined;
     _FuncInfo[ f_index ].Listable    = func._FuncInfo[ f_index ].Listable;
-    _FuncInfo[ f_index ].FuncPtr     = func._FuncInfo[ f_index ].FuncPtr;
+    _FuncInfo[ f_index ].ReturnSpec  = func._FuncInfo[ f_index ].ReturnSpec;
 
-    _FuncInfo[ f_index ].FuncInstr   = func._FuncInfo[ f_index ].FuncInstr;
-    if( !_RefCountTable.IsDefined( _FuncInfo[ f_index ].FuncInstr ) )
-    {
-      _RefCountTable.Define( _FuncInfo[ f_index ].FuncInstr, 1 );
-    }
+    if(!_FuncInfo[f_index].UserDefined)
+      _FuncInfo[ f_index ].FuncPtr     = func._FuncInfo[ f_index ].FuncPtr;
     else
-    {
-      _RefCountTable( _FuncInfo[ f_index ].FuncInstr )++;
-    }
-
+      _FuncInfo[ f_index ].FuncInstr   = func._FuncInfo[ f_index ].FuncInstr;
+    
+    if(_FuncInfo[f_index].UserDefined)
+      if( !_RefCountTable.IsDefined( _FuncInfo[ f_index ].FuncInstr ) )
+	_RefCountTable.Define( _FuncInfo[ f_index ].FuncInstr, 1 );
+      else
+	_RefCountTable( _FuncInfo[ f_index ].FuncInstr )++;
+    
     _FuncInfo[ f_index ].NumParams = func._FuncInfo[ f_index ].NumParams;
     _FuncInfo[ f_index ].ParamInfo =
       new ParamInfoType[ _FuncInfo[ f_index ].NumParams ];
@@ -298,11 +367,10 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
 }
 
 
-FuncDescObj::FuncDescObj( const gString& func_name )
-: _FuncName  ( func_name )
-{ 
-  _NumFuncs = 0;
-  _FuncInfo = 0;
+FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
+: _FuncName(func_name), _NumFuncs(numfuncs)
+{
+  _FuncInfo = new FuncInfoType[_NumFuncs];
 }
 
 
@@ -335,306 +403,37 @@ FuncDescObj::~FuncDescObj()
 	delete _FuncInfo[ f_index ].FuncInstr;
       }
     }
-    delete [] _FuncInfo[ f_index ].ParamInfo;
+    delete[] _FuncInfo[ f_index ].ParamInfo;
   }
-  delete [] _FuncInfo;
+  delete[] _FuncInfo;
 }
 
 
-
-void FuncDescObj::SetFuncInfo
-(
- Portion*  (*func_ptr)(Portion**),
- const int  num_params,
- const ParamInfoType param_info[],
- const bool listable
- )
+void FuncDescObj::SetFuncInfo(int funcindex, FuncInfoType funcinfo)
 {
+  assert((funcindex >= 0) && (funcindex < _NumFuncs));
+  _FuncInfo[funcindex] = funcinfo;
+  if(funcinfo.UserDefined)
+    if( !_RefCountTable.IsDefined(funcinfo.FuncInstr))
+      _RefCountTable.Define(funcinfo.FuncInstr, 1);
+    else
+      _RefCountTable(funcinfo.FuncInstr)++;
+}
+
+void FuncDescObj::SetParamInfo(int funcindex, int index, 
+			       const ParamInfoType param)
+{
+  assert((funcindex >= 0) && (funcindex < _NumFuncs));
+  assert((index >= 0) && (index < _FuncInfo[funcindex].NumParams));
+  _FuncInfo[funcindex].ParamInfo[index] = param;
+}
+
+void FuncDescObj::SetParamInfo(int funcindex, const ParamInfoType params[])
+{
+  assert((funcindex >= 0) && (funcindex < _NumFuncs));
   int i;
-  int f_index = -1;
-
-  for( i = 0; i < _NumFuncs; i++ )
-    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
-    {
-      f_index = i;
-      break;
-    }
-
-  _SetFuncInfo( f_index, num_params, listable );
-  
-  _FuncInfo[ _NumFuncs - 1 ].UserDefined = false;
-  _FuncInfo[ _NumFuncs - 1 ].FuncPtr = func_ptr;
-
-  if( param_info != 0 )
-    SetParamInfo( func_ptr, param_info );
-}
-
-
-void FuncDescObj::SetFuncInfo
-(
- gList< NewInstr* >* func_instr,
- const int num_params,
- const ParamInfoType param_info[],
- const bool listable
- )
-{
-  int i;
-  int f_index = -1;
-
-  for( i = 0; i < _NumFuncs; i++ )
-    if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
-    {
-      f_index = i;
-      break;
-    }
-
-  _SetFuncInfo( f_index, num_params, listable );
-  
-  _FuncInfo[ _NumFuncs - 1 ].UserDefined = true;
-  _FuncInfo[ _NumFuncs - 1 ].FuncInstr = func_instr;
-
-  if( !_RefCountTable.IsDefined( _FuncInfo[ _NumFuncs - 1 ].FuncInstr ) )
-    _RefCountTable.Define( _FuncInfo[ _NumFuncs - 1 ].FuncInstr, 1 );
-  else
-    _RefCountTable( _FuncInfo[ _NumFuncs - 1 ].FuncInstr )++;
-
-  if( param_info != 0 )
-    SetParamInfo( func_instr, param_info );
-}
-
-
-void FuncDescObj::
-_SetFuncInfo( const int f_index, const int num_params, const bool listable )
-{
-  int i;
-  FuncInfoType* NewFuncInfo;
-
-  if( f_index == -1 )  // new function
-  {
-    _NumFuncs++;
-    NewFuncInfo = new FuncInfoType[ _NumFuncs ];
-    for( i = 0; i < _NumFuncs - 1; i++ )
-      NewFuncInfo[ i ] = _FuncInfo[ i ];
-    delete [] _FuncInfo;
-    _FuncInfo = NewFuncInfo;
-
-    _FuncInfo[ _NumFuncs - 1 ].FuncPtr   = 0;
-    _FuncInfo[ _NumFuncs - 1 ].FuncInstr = 0;
-    _FuncInfo[ _NumFuncs - 1 ].UserDefined = false;
-    _FuncInfo[ _NumFuncs - 1 ].Listable = listable;
-    _FuncInfo[ _NumFuncs - 1 ].NumParams = num_params;
-    _FuncInfo[ _NumFuncs - 1 ].ParamInfo = new ParamInfoType[ num_params ];
-  }
-#ifndef NDEBUG
-  else // function already defined
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  Attempted to initialize the same function\n";
-    gerr << "  multiple times as different overloaded\n";
-    gerr << "  versions while initializing function " << _FuncName << "[]\n";
-    assert( 0 );
-  }  
-#endif // NDEBUG
-}
-
-
-void FuncDescObj::SetParamInfo
-( 
- Portion*           (*func_ptr)(Portion**),
- const int          param_index,
- const gString&     param_name, 
- const PortionSpec  param_spec, 
- Portion*           param_default_value,
- const bool         param_pass_by_reference
- )
-{
-  int i;
-  int f_index = -1;
-  
-  for( i = 0; i < _NumFuncs; i++ )
-    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
-    {
-      f_index = i;
-      break;
-    }
-
-  _SetParamInfo
-    ( 
-     f_index,
-     param_index,
-     param_name, 
-     param_spec, 
-     param_default_value,
-     param_pass_by_reference
-     );
-}
-
-
-void FuncDescObj::SetParamInfo
-( 
- gList< NewInstr* >* func_instr,
- const int              param_index,
- const gString&         param_name, 
- const PortionSpec      param_spec, 
- Portion*               param_default_value,
- const bool             param_pass_by_reference
- )
-{
-  int i;
-  int f_index = -1;
-  
-  for( i = 0; i < _NumFuncs; i++ )
-    if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
-    {
-      f_index = i;
-      break;
-    }
-
-  _SetParamInfo
-    ( 
-     f_index,
-     param_index,
-     param_name, 
-     param_spec, 
-     param_default_value,
-     param_pass_by_reference
-     );
-}
-
-
-void FuncDescObj::_SetParamInfo
-(
- const int          f_index,
- const int          param_index,
- const gString&     param_name, 
- const PortionSpec  param_spec, 
- Portion*           param_default_value,
- const bool         param_pass_by_reference
- )
-{
-  int index;
-  int repeated_variable_declaration = false;
-  
-#ifndef NDEBUG
-  if( !( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams ) )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  An invalid parameter index specified\n";
-    gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function " << _FuncName << "[] for\n";
-    gerr << "  the parameter \"" << param_name << "\"\n";
-    gerr << "  Index specified: " << param_index << "\n";
-  }
-  assert( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams );
-
-  if( f_index == -1 )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  An undefined function pointer specified\n";
-    gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function " << _FuncName << "[]\n";
-  }
-  assert( f_index >= 0 && f_index < _NumFuncs );
-
-
-  for( index = 0; index < _FuncInfo[ f_index ].NumParams; index++ )
-    if( _FuncInfo[ f_index ].ParamInfo[ index ].Name == param_name )
-    {
-      repeated_variable_declaration = true;
-      break;
-    }
-
-  if( repeated_variable_declaration )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  Multiple parameters of a functions were\n";
-    gerr << "  declared with the same formal name \"" << param_name << "\"\n";
-    gerr << "  during initialization\n";
-  }
-  assert( !repeated_variable_declaration );
-  
-  if( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name != "" )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  Parameter #" << param_index << " of a\n";
-    gerr << "  function in " << _FuncName << "[] was\n";
-    gerr << "  declared multiple times\n";
-  }
-  assert( _FuncInfo[ f_index ].ParamInfo[ param_index ].Name == "" );
-#endif // NDEBUG
-  
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].Name = 
-    param_name;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].Spec = 
-    param_spec;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].DefaultValue = 
-    param_default_value;
-  _FuncInfo[ f_index ].ParamInfo[ param_index ].PassByReference = 
-    param_pass_by_reference;
-}
-
-
-void FuncDescObj::SetParamInfo
-( 
- Portion*          (*func_ptr)(Portion**),
- const ParamInfoType     param_info[]
- )
-{
-  int i;
-  int f_index = -1;
-
-  for( i = 0; i < _NumFuncs; i++ )
-    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
-    {
-      f_index = i;
-      break;
-    }
-
-#ifndef NDEBUG
-  if( f_index == -1 )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  An undefined function pointer specified\n";
-    gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function " << _FuncName << "[]\n";
-  }
-  assert( f_index >= 0 && f_index < _NumFuncs );
-#endif // NDEBUG
-
-  for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
-    _FuncInfo[ f_index ].ParamInfo[ i ] = ParamInfoType( param_info[ i ] );
-}
-
-
-void FuncDescObj::SetParamInfo
-( 
- gList< NewInstr* >* func_instr,
- const ParamInfoType     param_info[]
- )
-{
-  int i;
-  int f_index = -1;
-
-  for(i=0; i<_NumFuncs; i++)
-    if(_FuncInfo[i].UserDefined && (_FuncInfo[i].FuncInstr == func_instr))
-    {
-      f_index = i;
-      break;
-    }
-
-#ifndef NDEBUG
-  if( f_index == -1 )
-  {
-    gerr << "FuncDescObj Error:\n";
-    gerr << "  An undefined function pointer specified\n";
-    gerr << "  for SetParamInfo( ... ) while initializing\n";
-    gerr << "  the function " << _FuncName << "[]\n";
-  }
-  assert( f_index >= 0 && f_index < _NumFuncs );
-#endif // NDEBUG
-
-  for( i = 0; i < _FuncInfo[ f_index ].NumParams; i++ )
-    _FuncInfo[ f_index ].ParamInfo[ i ] = param_info[ i ];
+  for(i = 0; i < _FuncInfo[funcindex].NumParams; i++)
+    _FuncInfo[funcindex].ParamInfo[i] = params[i];
 }
 
 
@@ -642,6 +441,7 @@ void FuncDescObj::SetParamInfo
 bool FuncDescObj::Combine( FuncDescObj* newfunc )
 {
   bool result = true;
+  bool finalresult = true;
   bool same_params;
   int i;
   int j;
@@ -650,6 +450,7 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
 
   for( i = 0; i < newfunc->_NumFuncs; i++ )
   {
+    result = true;
     for( f_index = 0; f_index < _NumFuncs; f_index++ )
     {
       same_params = true;
@@ -712,25 +513,28 @@ bool FuncDescObj::Combine( FuncDescObj* newfunc )
     }
 
     if( result )
-      if( newfunc->_FuncInfo[ i ].UserDefined )
-	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncInstr, 
-		    newfunc->_FuncInfo[ i ].NumParams,
-		    newfunc->_FuncInfo[ i ].ParamInfo );
-      else
-	SetFuncInfo( newfunc->_FuncInfo[ i ].FuncPtr, 
-		    newfunc->_FuncInfo[ i ].NumParams,
-		    newfunc->_FuncInfo[ i ].ParamInfo );
-    
-    for( j = 0; j < newfunc->_FuncInfo[ i ].NumParams; j++ )
     {
-      newfunc->_FuncInfo[ i ].ParamInfo[ j ].DefaultValue = 0;
+      FuncInfoType* NewFuncInfo = new FuncInfoType[_NumFuncs+1];
+      for(j=0; j<_NumFuncs; j++)
+	NewFuncInfo[j] = _FuncInfo[j];
+      delete[] _FuncInfo;
+      _FuncInfo = NewFuncInfo;
+      _NumFuncs++;
+      
+      if( newfunc->_FuncInfo[i].UserDefined )
+	SetFuncInfo(_NumFuncs-1, newfunc->_FuncInfo[i]);
+      else
+	SetFuncInfo(_NumFuncs-1, newfunc->_FuncInfo[i]);
+      for( j = 0; j < newfunc->_FuncInfo[i].NumParams; j++ )
+      {
+	SetParamInfo(_NumFuncs-1, j, newfunc->_FuncInfo[i].ParamInfo[j]);
+	newfunc->_FuncInfo[i].ParamInfo[j].DefaultValue = 0;
+      }
     }
-    
-    if( !result )
-      break;
+    finalresult = finalresult & result;
   }
   delete newfunc;
-  return result;
+  return finalresult;
 }
 
 
@@ -796,7 +600,8 @@ gList<gString> FuncDescObj::FuncList(void) const
       if(_FuncInfo[i].ParamInfo[j].DefaultValue) 
 	f += '}';
     }
-    f += ']';
+    f += "] =: ";
+    f += PortionSpecToText(_FuncInfo[i].ReturnSpec);
     list.Append(f);
   }
   return list;
@@ -882,15 +687,48 @@ _TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable )
 
   if( p == 0 && ExpectedSpec.Type == porUNDEFINED )
     return true;
-  
+
+  if(ExpectedSpec.Type == porANYTYPE && ExpectedSpec.ListDepth == 0)
+    return true;
+
   assert(p != 0);
   CalledSpec = p->Spec();
-  
+
+
+  if(CalledSpec.Type & ExpectedSpec.Type)
+  {
+    if(CalledSpec.ListDepth == ExpectedSpec.ListDepth)
+      result = true;
+    else if(CalledSpec.ListDepth > ExpectedSpec.ListDepth && Listable)
+      result = true;
+    else if(CalledSpec.ListDepth > 0 && ExpectedSpec.ListDepth == 1 && 
+	    !Listable)
+      result = true;
+  }
+  else if(CalledSpec.Type == porUNDEFINED && CalledSpec.ListDepth > 0)
+  {
+    if(CalledSpec.ListDepth == 1 && ExpectedSpec.ListDepth > 0)
+    {
+      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
+      result = true;
+    }
+  }
+
+
+  /*
   if(CalledSpec == ExpectedSpec)
     result = true;
   else if((CalledSpec.Type & ExpectedSpec.Type) &&
 	  (CalledSpec.ListDepth == ExpectedSpec.ListDepth))
     result = true;
+  else if(CalledSpec.ListDepth == ExpectedSpec.ListDepth)
+    if(CalledSpec.Type & ExpectedSpec.Type)
+      result = true;
+    else if(CalledSpec.Type == porUNDEFINED && CallSpec.ListDepth > 0)
+    {
+      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
+      result = true;
+    }
   else if((CalledSpec.Type & ExpectedSpec.Type) &&
 	  (!Listable) &&
 	  (CalledSpec.ListDepth>0) &&
@@ -901,9 +739,11 @@ _TypeMatch( Portion* p, PortionSpec ExpectedSpec, bool Listable )
       result = true;
     else if(ExpectedSpec.ListDepth == 0 && CalledSpec.Type == porUNDEFINED)
     {
+      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
       result = true;
-      ( (ListPortion*) p )->SetDataType( ExpectedSpec.Type );
     }
+    */
+
   return result;
 }
 
@@ -1456,6 +1296,16 @@ Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
       delete result;
       result = new ErrorPortion;
       _ErrorOccurred = true;
+    }    
+    else if(!_TypeMatch(result, _FuncInfo[_FuncIndex].ReturnSpec, 
+			list_op && _FuncInfo[_FuncIndex].Listable))
+    {
+      _ErrorMessage(_StdErr, 28, 0, _FuncName, 
+		    PortionSpecToText(_FuncInfo[_FuncIndex].ReturnSpec),
+		    PortionSpecToText(result->Spec()));		    
+      delete result;
+      result = new ErrorPortion;
+      _ErrorOccurred = true;
     }
   }
 
@@ -1661,8 +1511,13 @@ void CallFuncObj::_ErrorMessage
     s << "Error occurred at element #" << num1;
     s << " during listed function call to " << str1 << "[]\n";
     break;
+  case 28:
+    s << "Function " << str1 << "[] return type does not match declaration;\n";
+    s << "Expected " << str2 << ", got " << str3 << "\n";
+    break;
   default:
-    s << "General error\n";
+    s << "General Error #" << error_num << '\n';
+    break;
   }
 }
 

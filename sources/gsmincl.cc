@@ -140,4 +140,5 @@ void PrintPortionSpec( gOutput& s, PortionSpec type )
 gOutput& operator << ( gOutput& s, PortionSpec spec )
 {
   PrintPortionSpec( s, spec );
+  return s;
 }

@@ -625,14 +625,14 @@ Portion *GSM_IsNash_BehavFloat(Portion **param)
 {
   BehavSolution<double> *P = 
     (BehavSolution<double>*) ( (BehavPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsNash());
+  return new BoolValPortion(P->IsNash() == T_YES);
 }
 
 Portion *GSM_IsNash_BehavRational(Portion **param)
 {
   BehavSolution<gRational> *P = 
     (BehavSolution<gRational>*) ( (BehavPortion*) param[ 0 ] )->Value();
-  return new IntValPortion(P->IsNash());
+  return new BoolValPortion(P->IsNash() == T_YES);
 }
 
 Portion *GSM_IsNash_MixedFloat(Portion **param)
@@ -1502,345 +1502,391 @@ void Init_solfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("ActionValues");
-  FuncObj->SetFuncInfo(GSM_ActionValuesFloat, 2);
-  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 0, "strategy",
-			porBEHAV_FLOAT);
-  FuncObj->SetParamInfo(GSM_ActionValuesFloat, 1, "infoset", porINFOSET);
+  FuncObj = new FuncDescObj("ActionValues", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ActionValuesFloat, 
+				       PortionSpec(porFLOAT, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
 
-  FuncObj->SetFuncInfo(GSM_ActionValuesRational, 2);
-  FuncObj->SetParamInfo(GSM_ActionValuesRational, 0, "strategy",
-			porBEHAV_RATIONAL);
-  FuncObj->SetParamInfo(GSM_ActionValuesRational, 1, "infoset", porINFOSET);
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ActionValuesRational, 
+				       PortionSpec(porRATIONAL, 1), 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj( "Behav" );
-  FuncObj->SetFuncInfo( GSM_Behav_EfgFloat, 2 );
-  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 0, "efg", porEFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Behav_EfgFloat, 
-			1, "list", PortionSpec(porFLOAT, 3),
-			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
-  FuncObj->SetFuncInfo( GSM_Behav_EfgRational, 2 );
-  FuncObj->SetParamInfo( GSM_Behav_EfgRational, 0, "efg", porEFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_Behav_EfgRational, 
-			1, "list", PortionSpec(porRATIONAL, 3),
-			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj = new FuncDescObj("Behav", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Behav_EfgFloat, 
+				       porBEHAV_FLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("list", PortionSpec(porFLOAT, 3),
+					    REQUIRED, BYVAL));
 
-  FuncObj->SetFuncInfo( GSM_Behav_EFSupport, 2 );
-  FuncObj->SetParamInfo( GSM_Behav_EFSupport, 0, "support", porEF_SUPPORT,
-			NO_DEFAULT_VALUE );
-  FuncObj->SetParamInfo( GSM_Behav_EFSupport, 
-			1, "list", PortionSpec(porFLOAT | porRATIONAL, 1) );
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Behav_EfgRational, 
+				       porBEHAV_RATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("list", 
+					    PortionSpec(porRATIONAL, 3),
+					    REQUIRED, BYVAL));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Behav_EFSupport, 
+				       porBEHAV, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porEF_SUPPORT,
+					    REQUIRED));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("list", 
+					    PortionSpec(porFLOAT | 
+							porRATIONAL, 1)));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Beliefs");
-  FuncObj->SetFuncInfo(GSM_BeliefsFloat, 1);
-  FuncObj->SetParamInfo(GSM_BeliefsFloat, 0, "strategy", 
-			porBEHAV_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("Beliefs", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_BeliefsFloat, 
+				       PortionSpec(porFLOAT, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_BeliefsRational, 1);
-  FuncObj->SetParamInfo(GSM_BeliefsRational, 0, "strategy",
-			porBEHAV_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_BeliefsRational, 
+				       PortionSpec(porRATIONAL, 1), 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Centroid");
-  FuncObj->SetFuncInfo(GSM_CentroidEfgFloat, 1);
-  FuncObj->SetParamInfo(GSM_CentroidEfgFloat, 0, "efg", porEFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("Centroid", 6);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CentroidEfgFloat, 
+				       porBEHAV_FLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_FLOAT,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_CentroidEfgRational, 1);
-  FuncObj->SetParamInfo(GSM_CentroidEfgRational, 0, "efg", porEFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_CentroidEfgRational, 
+				       porBEHAV_RATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("efg", porEFG_RATIONAL,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_CentroidEFSupport, 1);
-  FuncObj->SetParamInfo(GSM_CentroidEFSupport, 0, "support",
-			porEF_SUPPORT);
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_CentroidEFSupport, 
+				       porBEHAV, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porEF_SUPPORT));
 
-  FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_CentroidNfgFloat, 
+				       porMIXED_FLOAT, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("nfg", porNFG_FLOAT,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_CentroidNfgRational,
+				       porMIXED_RATIONAL, 1));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("nfg", porNFG_RATIONAL,
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
-			porNF_SUPPORT);
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_CentroidNFSupport,
+				       porMIXED, 1));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("support", porNF_SUPPORT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("GobitLambda");
-  FuncObj->SetFuncInfo(GSM_GobitLambda_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_GobitLambda_MixedFloat, 0, "x", porMIXED_FLOAT);
-  FuncObj->SetFuncInfo(GSM_GobitLambda_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_GobitLambda_MixedRational, 0, "x", 
-			porMIXED_RATIONAL);
+  FuncObj = new FuncDescObj("GobitLambda", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitLambda_MixedFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GobitLambda_MixedRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porMIXED_RATIONAL));
 
-  FuncObj->SetFuncInfo(GSM_GobitLambda_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_GobitLambda_BehavFloat, 0, "x", porBEHAV_FLOAT);
-  FuncObj->SetFuncInfo(GSM_GobitLambda_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_GobitLambda_BehavRational, 0, "x", 
-			porBEHAV_RATIONAL);
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GobitLambda_BehavFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_GobitLambda_BehavRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porBEHAV_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("GobitValue");
-  FuncObj->SetFuncInfo(GSM_GobitValue_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_GobitValue_MixedFloat, 0, "x", porMIXED_FLOAT);
-  FuncObj->SetFuncInfo(GSM_GobitValue_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_GobitValue_MixedRational, 0, "x", 
-			porMIXED_RATIONAL);
 
-  FuncObj->SetFuncInfo(GSM_GobitValue_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_GobitValue_BehavFloat, 0, "x", porBEHAV_FLOAT);
-  FuncObj->SetFuncInfo(GSM_GobitValue_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_GobitValue_BehavRational, 0, "x", 
-			porBEHAV_RATIONAL);
+  FuncObj = new FuncDescObj("GobitValue", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GobitValue_MixedFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GobitValue_MixedRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porMIXED_RATIONAL));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GobitValue_BehavFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_GobitValue_BehavRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porBEHAV_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("InfosetProbs");
-  FuncObj->SetFuncInfo(GSM_InfosetProbsFloat, 1);
-  FuncObj->SetParamInfo(GSM_InfosetProbsFloat, 0, "strategy", porBEHAV_FLOAT);
 
-  FuncObj->SetFuncInfo(GSM_InfosetProbsRational, 1);
-  FuncObj->SetParamInfo(GSM_InfosetProbsRational, 0, "strategy",
-			porBEHAV_RATIONAL);
+  FuncObj = new FuncDescObj("InfosetProbs", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_InfosetProbsFloat, 
+				       PortionSpec(porFLOAT, 2), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_InfosetProbsRational, 
+				       PortionSpec(porRATIONAL, 2), 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsNash");
-  FuncObj->SetFuncInfo(GSM_IsNash_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_BehavFloat, 0, "strategy",
-			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsNash_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_BehavRational, 0, "strategy",
-			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_IsNash_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsNash_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsNash_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("IsNash", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsNash_BehavFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsNash_BehavRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_IsNash_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("strategy", porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_IsNash_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("strategy", porMIXED_RATIONAL, 
+					    REQUIRED,BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsntPerfect");
-  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsntPerfect_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsntPerfect_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  
+  FuncObj = new FuncDescObj("IsntPerfect", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsntPerfect_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsntPerfect_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porMIXED_RATIONAL, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsntProper");
-  FuncObj->SetFuncInfo(GSM_IsntProper_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsntProper_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsntProper_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsntProper_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("IsntProper", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsntProper_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsntProper_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porMIXED_RATIONAL,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsPerfect");
-  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsPerfect_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsPerfect_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsPerfect_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("IsPerfect", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsPerfect_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsPerfect_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porMIXED_RATIONAL, 
+					    REQUIRED,BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsProper");
-  FuncObj->SetFuncInfo(GSM_IsProper_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsProper_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsProper_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_IsProper_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("IsProper", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsProper_MixedFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsProper_MixedRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porMIXED_RATIONAL,
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsSequential");
-  FuncObj->SetFuncInfo(GSM_IsSequential_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsSequential_BehavFloat, 0, "strategy",
-			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsSequential_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_IsSequential_BehavRational, 0, "strategy",
-			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("IsSequential", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsSequential_BehavFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porBEHAV_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsSequential_BehavRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("IsSubgamePerfect");
-  FuncObj->SetFuncInfo(GSM_IsSubgamePerfect_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_IsSubgamePerfect_BehavFloat, 0, "strategy",
-			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetFuncInfo(GSM_IsSubgamePerfect_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_IsSubgamePerfect_BehavRational, 0, "strategy",
-			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("IsSubgamePerfect", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsSubgamePerfect_BehavFloat, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porBEHAV_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_IsSubgamePerfect_BehavRational, 
+				       porBOOL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("LiapValue");
-  FuncObj->SetFuncInfo(GSM_LiapValue_BehavFloat, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_BehavFloat, 0, "strategy",
-			porBEHAV_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
-  FuncObj->SetFuncInfo(GSM_LiapValue_BehavRational, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_BehavRational, 0, "strategy",
-			porBEHAV_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj = new FuncDescObj("LiapValue", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LiapValue_BehavFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT, 
+					    REQUIRED, BYREF));  
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_LiapValue_BehavRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL, 
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(GSM_LiapValue_MixedFloat, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_MixedFloat, 0, "strategy",
-			porMIXED_FLOAT, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);  
-  FuncObj->SetFuncInfo(GSM_LiapValue_MixedRational, 1);
-  FuncObj->SetParamInfo(GSM_LiapValue_MixedRational, 0, "strategy",
-			porMIXED_RATIONAL, NO_DEFAULT_VALUE,PASS_BY_REFERENCE);
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_LiapValue_MixedFloat, 
+				       porFLOAT, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("strategy", porMIXED_FLOAT, 
+					    REQUIRED, BYREF));  
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_LiapValue_MixedRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("strategy",	porMIXED_RATIONAL, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
+
 
    
-  FuncObj = new FuncDescObj("ListForm");
-  FuncObj->SetFuncInfo( GSM_ListForm_BehavFloat, 1 );
-  FuncObj->SetParamInfo(GSM_ListForm_BehavFloat, 
-			0, "behav", porBEHAV_FLOAT );
-  FuncObj->SetFuncInfo( GSM_ListForm_BehavRational, 1 );
-  FuncObj->SetParamInfo(GSM_ListForm_BehavRational, 
-			0, "behav", porBEHAV_RATIONAL );
+  FuncObj = new FuncDescObj("ListForm", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ListForm_BehavFloat, 
+				       PortionSpec(porFLOAT, 3), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("behav", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ListForm_BehavRational, 
+				       PortionSpec(porRATIONAL, 3), 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("behav", porBEHAV_RATIONAL));
 
-  FuncObj->SetFuncInfo( GSM_ListForm_MixedFloat, 1 );
-  FuncObj->SetParamInfo(GSM_ListForm_MixedFloat, 
-			0, "mixed", porMIXED_FLOAT );
-  FuncObj->SetFuncInfo( GSM_ListForm_MixedRational, 1 );
-  FuncObj->SetParamInfo(GSM_ListForm_MixedRational, 
-			0, "mixed", porMIXED_RATIONAL );
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_ListForm_MixedFloat, 
+				       PortionSpec(porFLOAT, 2), 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("mixed", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_ListForm_MixedRational, 
+				       PortionSpec(porRATIONAL, 2), 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 
 
-  FuncObj = new FuncDescObj("Gripe");
-  FuncObj->SetFuncInfo( GSM_Gripe_BehavFloat, 1 );
-  FuncObj->SetParamInfo(GSM_Gripe_BehavFloat, 
-			0, "behav", porBEHAV_FLOAT );
-  FuncObj->SetFuncInfo( GSM_Gripe_BehavRational, 1 );
-  FuncObj->SetParamInfo(GSM_Gripe_BehavRational, 
-			0, "behav", porBEHAV_RATIONAL );
+  FuncObj = new FuncDescObj("Gripe", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Gripe_BehavFloat, 
+				       PortionSpec(porFLOAT, 3), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("behav", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Gripe_BehavRational, 
+				       PortionSpec(porRATIONAL, 3), 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("behav", porBEHAV_RATIONAL));
 
-  FuncObj->SetFuncInfo( GSM_Gripe_MixedFloat, 1 );
-  FuncObj->SetParamInfo(GSM_Gripe_MixedFloat, 
-			0, "mixed", porMIXED_FLOAT );
-  FuncObj->SetFuncInfo( GSM_Gripe_MixedRational, 1 );
-  FuncObj->SetParamInfo(GSM_Gripe_MixedRational, 
-			0, "mixed", porMIXED_RATIONAL );
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Gripe_MixedFloat, 
+				       PortionSpec(porFLOAT, 2), 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("mixed", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Gripe_MixedRational, 
+				       PortionSpec(porRATIONAL, 2), 1));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("mixed", porMIXED_RATIONAL));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj( "Mixed" );
-  FuncObj->SetFuncInfo( GSM_Mixed_NfgFloat, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 0, "nfg", porNFG_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Mixed_NfgFloat, 
-			1, "list", PortionSpec(porFLOAT, 2),
-			NO_DEFAULT_VALUE, PASS_BY_VALUE);
 
-  FuncObj->SetFuncInfo( GSM_Mixed_NfgRational, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 0, "nfg", porNFG_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(GSM_Mixed_NfgRational, 
-			1, "list", PortionSpec(porRATIONAL, 2),
-			NO_DEFAULT_VALUE, PASS_BY_VALUE);
+  FuncObj = new FuncDescObj("Mixed", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Mixed_NfgFloat, 
+				       porMIXED_FLOAT, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("list", 
+					    PortionSpec(porFLOAT, 2),
+					    REQUIRED, BYVAL));
 
-  FuncObj->SetFuncInfo( GSM_Mixed_NFSupport, 2 );
-  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 0, "support", porNF_SUPPORT );
-  FuncObj->SetParamInfo(GSM_Mixed_NFSupport, 
-			1, "list", PortionSpec(porFLOAT | porRATIONAL, 1) );
-  gsm->AddFunction( FuncObj );
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Mixed_NfgRational, 
+				       porMIXED_RATIONAL, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("list", 
+					    PortionSpec(porRATIONAL, 2),
+					    REQUIRED, BYVAL));
 
-
-  FuncObj = new FuncDescObj("NodeValues");
-  FuncObj->SetFuncInfo(GSM_NodeValuesFloat, 2);
-  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 0, "strategy", porBEHAV_FLOAT);
-  FuncObj->SetParamInfo(GSM_NodeValuesFloat, 1, "player", porPLAYER_EFG);
-
-  FuncObj->SetFuncInfo(GSM_NodeValuesRational, 2);
-  FuncObj->SetParamInfo(GSM_NodeValuesRational, 0, "strategy",
-			porBEHAV_RATIONAL);
-  FuncObj->SetParamInfo(GSM_NodeValuesRational, 1, "player", porPLAYER_EFG);
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Mixed_NFSupport, 
+				       porMIXED, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("list", 
+					    PortionSpec(porFLOAT | 
+							porRATIONAL, 1)));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("RealizProbs");
-  FuncObj->SetFuncInfo(GSM_RealizProbsFloat, 1);
-  FuncObj->SetParamInfo(GSM_RealizProbsFloat, 0, "strategy", porBEHAV_FLOAT);
 
-  FuncObj->SetFuncInfo(GSM_RealizProbsRational, 1);
-  FuncObj->SetParamInfo(GSM_RealizProbsRational, 0, "strategy",
-			porBEHAV_RATIONAL);
+  FuncObj = new FuncDescObj("NodeValues", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NodeValuesFloat, 
+				       PortionSpec(porFLOAT, 1), 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porPLAYER_EFG));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NodeValuesRational, 
+				       PortionSpec(porRATIONAL, 1), 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("player", porPLAYER_EFG));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj( "SetComponent" );
-  FuncObj->SetFuncInfo( GSM_SetComponent_BehavFloat, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
-			0, "behav", porBEHAV_FLOAT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
-			1, "infoset", porINFOSET );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavFloat,
-			2, "list", PortionSpec(porFLOAT, 1) );
 
-  FuncObj->SetFuncInfo( GSM_SetComponent_BehavRational, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
-			0, "behav", porBEHAV_RATIONAL,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
-			1, "infoset", porINFOSET );
-  FuncObj->SetParamInfo( GSM_SetComponent_BehavRational,
-			2, "list", PortionSpec(porRATIONAL,1) );
+  FuncObj = new FuncDescObj("RealizProbs", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RealizProbsFloat, 
+				       PortionSpec(porFLOAT, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porBEHAV_FLOAT));
 
-  FuncObj = new FuncDescObj( "SetComponent" );
-
-  FuncObj->SetFuncInfo( GSM_SetComponent_MixedFloat, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			0, "mixed", porMIXED_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			1, "player", porPLAYER_NFG );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedFloat, 
-			2, "list", PortionSpec(porFLOAT,1) );
-
-  FuncObj->SetFuncInfo( GSM_SetComponent_MixedRational, 3 );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			0, "mixed", porMIXED_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			1, "player", porPLAYER_NFG );
-  FuncObj->SetParamInfo( GSM_SetComponent_MixedRational, 
-			2, "list", PortionSpec(porRATIONAL,1) );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RealizProbsRational, 
+				       PortionSpec(porRATIONAL, 1), 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porBEHAV_RATIONAL));
+  gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Support");
-  FuncObj->SetFuncInfo(GSM_Support_Behav, 1);
-  FuncObj->SetParamInfo(GSM_Support_Behav, 0, "strategy",
-			porBEHAV, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_Support_Mixed, 1);
-  FuncObj->SetParamInfo(GSM_Support_Mixed, 0, "strategy",
-			porMIXED, NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj = new FuncDescObj("SetComponent", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetComponent_BehavFloat, 
+				       porBEHAV_FLOAT, 3));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("behav", porBEHAV_FLOAT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("list", PortionSpec(porFLOAT, 1)));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_SetComponent_BehavRational, 
+				       porBEHAV_RATIONAL, 3));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("behav", porBEHAV_RATIONAL,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("infoset", porINFOSET));
+  FuncObj->SetParamInfo(1, 2, ParamInfoType("list", 
+					    PortionSpec(porRATIONAL,1)));
+
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_SetComponent_MixedFloat, 
+				       porMIXED_FLOAT, 3));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("mixed", porMIXED_FLOAT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(2, 2, ParamInfoType("list", PortionSpec(porFLOAT,1)));
+
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_SetComponent_MixedRational, 
+				       porMIXED_RATIONAL, 3));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("mixed", porMIXED_RATIONAL, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetParamInfo(3, 2, ParamInfoType("list", 
+					    PortionSpec(porRATIONAL,1)));
+
+  gsm->AddFunction(FuncObj);
+
+
+
+
+  FuncObj = new FuncDescObj("Support", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Behav, 
+				       porEF_SUPPORT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy",	porBEHAV, 
+					    REQUIRED, BYREF));
+
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Support_Mixed, 
+				       porNF_SUPPORT, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy",	porMIXED, 
+					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 }
 

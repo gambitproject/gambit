@@ -12,22 +12,23 @@
 #define GSMFUNC_H
 
 
-//#include "gmisc.h"
 #include "gsmincl.h"
 
 #include "gstring.h"
 
-//#include "portion.h"
 
 class gOutput;
 
 #define NO_DEFAULT_VALUE  ( (Portion*)  0 )
+#define REQUIRED          NO_DEFAULT_VALUE
 #define PARAM_NOT_FOUND   ( (int)      -1 )
 #define PARAM_AMBIGUOUS   ( (int)      -2 )
 
 
 #define PASS_BY_REFERENCE    true
+#define BYREF                PASS_BY_REFERENCE
 #define PASS_BY_VALUE        false
+#define BYVAL                PASS_BY_VALUE
 
 #define AUTO_VAL_OR_REF      true
 
@@ -54,19 +55,14 @@ template <class T> class RefCountHashTable;
 
 class ParamInfoType
 {
-friend FuncDescObj;
-friend CallFuncObj;
-friend GSM;
-  
-private:
+public:
   gString      Name;
   PortionSpec  Spec;
   Portion*     DefaultValue;
   bool         PassByReference;
 
-public:
-  ParamInfoType( void );
-  ParamInfoType( const ParamInfoType& param_info );
+  ParamInfoType(void);
+  ParamInfoType(const ParamInfoType& paraminfo);
   ParamInfoType
     ( 
      const gString& name, 
@@ -75,8 +71,6 @@ public:
      const bool pass_by_ref = false
      );
   ~ParamInfoType();
-
-  ParamInfoType& operator = ( const ParamInfoType& param_info );
 };
 
 
@@ -84,12 +78,36 @@ public:
 class FuncInfoType
 {
 public:
-  Portion*             (*FuncPtr)(Portion **);
-  gList<NewInstr*>* FuncInstr;
   bool                 UserDefined;
+  union
+  {
+    Portion*             (*FuncPtr)(Portion **);
+    gList<NewInstr*>*    FuncInstr;
+  };
+  PortionSpec          ReturnSpec;
   bool                 Listable;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
+
+  FuncInfoType(void);
+  FuncInfoType(const FuncInfoType& funcinfo);
+  FuncInfoType
+    (
+     Portion* (*funcptr)(Portion**),
+     PortionSpec returnspec,
+     int numparams,
+     ParamInfoType* paraminfo = 0,
+     bool listable = LISTABLE
+     );
+  FuncInfoType
+    (
+     gList<NewInstr*>* funcinstr,
+     PortionSpec returnspec,
+     int numparams,
+     ParamInfoType* paraminfo = 0,
+     bool listable = LISTABLE
+     );
+  ~FuncInfoType();
 };
 
 
@@ -100,23 +118,6 @@ private:
 
   static RefCountHashTable< gList< NewInstr* >* > _RefCountTable;
 
-  void _SetFuncInfo
-    ( 
-     const int f_index, 
-     const int num_params,
-     const bool listable
-     );
-
-  void _SetParamInfo
-    ( 
-     const int         f_index, 
-     const int         index, 
-     const gString&    name,
-     const PortionSpec spec,
-     Portion*          default_value,
-     const bool        pass_by_reference
-     );
-
 protected:
   FuncDescObj( FuncDescObj& func );
 
@@ -126,56 +127,12 @@ protected:
 
   
 public:
-  FuncDescObj( const gString& func_name );
+  FuncDescObj(const gString& func_name, int numfuncs);
   virtual ~FuncDescObj();
 
-  void SetFuncInfo
-    (
-     Portion*        (*func_ptr)(Portion**),
-     const int       num_params = 0, 
-     const ParamInfoType param_info[] = 0,
-     const bool listable = LISTABLE
-     );
-
-  void SetFuncInfo
-    (
-     gList< NewInstr* >* func_instr,
-     const int       num_params = 0, 
-     const ParamInfoType param_info[] = 0,
-     const bool listable = LISTABLE
-     );
-
-  void SetParamInfo
-    ( 
-     Portion*          (*func_ptr)(Portion**),
-     const int         index, 
-     const gString&    name,
-     const PortionSpec spec,
-     Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE
-     );
-
-  void SetParamInfo
-    ( 
-     gList< NewInstr* >* func_instr,
-     const int         index, 
-     const gString&    name,
-     const PortionSpec spec,
-     Portion*          default_value = NO_DEFAULT_VALUE,
-     const bool        pass_by_reference = PASS_BY_VALUE
-     );
-  
-  void SetParamInfo
-    (
-     Portion* (*func_ptr)(Portion**),
-     const ParamInfoType param_info[]
-     );
-  
-  void SetParamInfo
-    (
-     gList< NewInstr* >* func_instr,
-     const ParamInfoType param_info[]
-     );
+  void SetFuncInfo(int funcindex, FuncInfoType funcinfo);
+  void SetParamInfo(int funcindex, int index, const ParamInfoType paraminfo);  
+  void SetParamInfo(int funcindex, const ParamInfoType paraminfo[]);
   
   bool Combine( FuncDescObj* newfunc );
 

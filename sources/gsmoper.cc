@@ -2214,8 +2214,8 @@ void Init_gsmoper( GSM* gsm )
 {
   FuncDescObj* FuncObj;
 
-  FuncObj = new FuncDescObj("Version");
-  FuncObj->SetFuncInfo(GSM_Version, 0, NO_PREDEFINED_PARAMS, NON_LISTABLE);
+  FuncObj = new FuncDescObj("Version", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Version, porFLOAT, 0));
   gsm->AddFunction(FuncObj);
 
   //---------------------- Assign ------------------------
@@ -2329,560 +2329,628 @@ void Init_gsmoper( GSM* gsm )
 
   //-------------------- Plus ----------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Plus" );
-
-  FuncObj->SetFuncInfo( GSM_Add_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_Add_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_Add_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_Add_MixedFloat, 2, xy_MixedFloat );
-  FuncObj->SetFuncInfo( GSM_Add_MixedRational, 2, xy_MixedRational );
-  FuncObj->SetFuncInfo( GSM_Add_BehavFloat, 2, xy_BehavFloat );
-  FuncObj->SetFuncInfo( GSM_Add_BehavRational, 2, xy_BehavRational );
+  FuncObj = new FuncDescObj("Plus", 7);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Add_double, 
+				       porFLOAT, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Add_int, 
+				       porINTEGER, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Add_gRational, 
+				       porRATIONAL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Add_MixedFloat, 
+				       porMIXED_FLOAT, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Add_MixedRational,
+				       porMIXED_RATIONAL, 2,xy_MixedRational));
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Add_BehavFloat, 
+				       porBEHAV_FLOAT, 2, xy_BehavFloat));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Add_BehavRational, 
+				       porBEHAV_RATIONAL, 2,xy_BehavRational));
   gsm->AddFunction( FuncObj );
 
   //-------------------- Concat -------------------------
   
-  FuncObj = new FuncDescObj("Concat");
-
-  FuncObj->SetFuncInfo( GSM_Concat_gString, 2, xy_Text );
-  FuncObj->SetFuncInfo( GSM_Concat_List, 2, xy_List, NON_LISTABLE );
+  FuncObj = new FuncDescObj("Concat", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Concat_gString, 
+				       porTEXT, 2, xy_Text));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Concat_List, 
+				       PortionSpec(porANYTYPE, 1), 
+				       2, xy_List, NON_LISTABLE));
   gsm->AddFunction(FuncObj);
 
   //----------------------- Minus ------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Minus" );
-  FuncObj->SetFuncInfo( GSM_Subtract_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_Subtract_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_Subtract_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_Subtract_MixedFloat, 2, xy_MixedFloat );
-  FuncObj->SetFuncInfo( GSM_Subtract_MixedRational, 2, xy_MixedRational );
-  FuncObj->SetFuncInfo( GSM_Subtract_BehavFloat, 2, xy_BehavFloat );
-  FuncObj->SetFuncInfo( GSM_Subtract_BehavRational, 2, xy_BehavRational );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Minus", 7);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Subtract_double, 
+				       porFLOAT, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Subtract_int, 
+				       porINTEGER, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Subtract_gRational, 
+				       porRATIONAL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Subtract_MixedFloat, 
+				       porMIXED_FLOAT, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Subtract_MixedRational, 
+				       porMIXED_RATIONAL, 2,xy_MixedRational));
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Subtract_BehavFloat, 
+				       porBEHAV_FLOAT, 2, xy_BehavFloat));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Subtract_BehavRational, 
+				       porBEHAV_RATIONAL, 2,xy_BehavRational));
+  gsm->AddFunction(FuncObj);
 
 
   //----------------------- Times ----------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Times" );
+  FuncObj = new FuncDescObj("Times", 11);
 
-  FuncObj->SetFuncInfo( GSM_Multiply_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_Multiply_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_Multiply_gRational, 2, xy_Rational );
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Multiply_double, 
+				       porFLOAT, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Multiply_int, 
+				       porINTEGER, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Multiply_gRational, 
+				       porRATIONAL, 2, xy_Rational));
 
-  FuncObj->SetFuncInfo( GSM_Multiply_MixedFloat1, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedFloat1, 0, "x", porFLOAT );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedFloat1, 1, "y", porMIXED_FLOAT );
-  FuncObj->SetFuncInfo( GSM_Multiply_MixedFloat2, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedFloat2, 0, "x", porMIXED_FLOAT );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedFloat2, 1, "y", porFLOAT );
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Multiply_MixedFloat1, 
+				       porMIXED_FLOAT, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("y", porMIXED_FLOAT));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Multiply_MixedFloat2, 
+				       porMIXED_FLOAT, 2));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porMIXED_FLOAT));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("y", porFLOAT));
 
-  FuncObj->SetFuncInfo( GSM_Multiply_MixedRational1, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedRational1, 0, "x", porRATIONAL );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedRational1, 
-			1, "y", porMIXED_RATIONAL );
-  FuncObj->SetFuncInfo( GSM_Multiply_MixedRational2, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedRational2, 
-			0, "x", porMIXED_RATIONAL );
-  FuncObj->SetParamInfo( GSM_Multiply_MixedRational2, 1, "y", porRATIONAL );
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Multiply_MixedRational1, 
+				       porMIXED_RATIONAL, 2));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("y", porMIXED_RATIONAL));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Multiply_MixedRational2, 
+				       porMIXED_RATIONAL, 2));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("x", porMIXED_RATIONAL));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("y", porRATIONAL));
 
-  FuncObj->SetFuncInfo( GSM_Multiply_BehavFloat1, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavFloat1, 0, "x", porFLOAT );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavFloat1, 1, "y", porBEHAV_FLOAT );
-  FuncObj->SetFuncInfo( GSM_Multiply_BehavFloat2, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavFloat2, 0, "x", porBEHAV_FLOAT );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavFloat2, 1, "y", porFLOAT );
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Multiply_BehavFloat1, 
+				       porBEHAV_FLOAT, 2));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("y", porBEHAV_FLOAT));
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Multiply_BehavFloat2, 
+				       porBEHAV_FLOAT, 2));
+  FuncObj->SetParamInfo(8, 0, ParamInfoType("x", porBEHAV_FLOAT));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("y", porFLOAT));
 
-  FuncObj->SetFuncInfo( GSM_Multiply_BehavRational1, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavRational1, 0, "x", porRATIONAL );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavRational1, 
-			1, "y", porBEHAV_RATIONAL );
-  FuncObj->SetFuncInfo( GSM_Multiply_BehavRational2, 2 );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavRational2, 
-			0, "x", porBEHAV_RATIONAL );
-  FuncObj->SetParamInfo( GSM_Multiply_BehavRational2, 1, "y", porRATIONAL );
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Multiply_BehavRational1, 
+				       porBEHAV_RATIONAL, 2));
+  FuncObj->SetParamInfo(9, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(9, 1, ParamInfoType("y", porBEHAV_RATIONAL));
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Multiply_BehavRational2, 
+					porBEHAV_RATIONAL, 2));
+  FuncObj->SetParamInfo(10, 0, ParamInfoType("x", porBEHAV_RATIONAL));
+  FuncObj->SetParamInfo(10, 1, ParamInfoType("y", porRATIONAL));
 
   gsm->AddFunction( FuncObj );
 
 
   //----------------------- Divide -------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Divide" );
-
-  FuncObj->SetFuncInfo( GSM_Divide_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_Divide_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_Divide_gRational, 2, xy_Rational );
-  gsm->AddFunction( FuncObj );
-
+  FuncObj = new FuncDescObj("Divide", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Divide_double, porFLOAT, 
+				       2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Divide_int, 
+				       porINTEGER, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Divide_gRational, 
+				       porRATIONAL, 2, xy_Rational));
+  gsm->AddFunction(FuncObj);  
 
   //----------------------- Power -------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Power" );
+  FuncObj = new FuncDescObj("Power", 6);
 
-  FuncObj->SetFuncInfo( GSM_Power_Int_Int, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Int_Int, 0, "x", porINTEGER );
-  FuncObj->SetParamInfo( GSM_Power_Int_Int, 1, "y", porINTEGER );
-  FuncObj->SetFuncInfo( GSM_Power_Float_Int, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Float_Int, 0, "x", porFLOAT );
-  FuncObj->SetParamInfo( GSM_Power_Float_Int, 1, "y", porINTEGER );
-  FuncObj->SetFuncInfo( GSM_Power_Rational_Int, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Rational_Int, 0, "x", porRATIONAL );
-  FuncObj->SetParamInfo( GSM_Power_Rational_Int, 1, "y", porINTEGER );
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Power_Int_Int, 
+				       porINTEGER, 2, xy_Int));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Power_Float_Int, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("y", porINTEGER));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Power_Rational_Int, 
+				       porRATIONAL, 2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("y", porINTEGER));
 
-  FuncObj->SetFuncInfo( GSM_Power_Int_Float, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Int_Float, 0, "x", porINTEGER );
-  FuncObj->SetParamInfo( GSM_Power_Int_Float, 1, "y", porFLOAT );
-  FuncObj->SetFuncInfo( GSM_Power_Float_Float, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Float_Float, 0, "x", porFLOAT );
-  FuncObj->SetParamInfo( GSM_Power_Float_Float, 1, "y", porFLOAT );
-  FuncObj->SetFuncInfo( GSM_Power_Rational_Float, 2 );
-  FuncObj->SetParamInfo( GSM_Power_Rational_Float, 0, "x", porRATIONAL );
-  FuncObj->SetParamInfo( GSM_Power_Rational_Float, 1, "y", porFLOAT );
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Power_Int_Float, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porINTEGER));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("y", porFLOAT));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Power_Float_Float, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("y", porFLOAT));
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Power_Rational_Float, 
+				       porFLOAT, 2));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("y", porFLOAT));
 
   gsm->AddFunction( FuncObj );
 
 
   //----------------------- Exp, Log ---------------------
 
-  FuncObj = new FuncDescObj("Exp");
-  FuncObj->SetFuncInfo(GSM_Exp, 1, x_Float);
+  FuncObj = new FuncDescObj("Exp", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Exp, porFLOAT, 1, x_Float));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Log");
-  FuncObj->SetFuncInfo(GSM_Log, 1, x_Float);
+  FuncObj = new FuncDescObj("Log", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Log, porFLOAT, 1, x_Float));
   gsm->AddFunction(FuncObj);
 
 
   //----------------------- Negate -----------------------
 
-  FuncObj = new FuncDescObj( (gString) "Negate" );
-
-  FuncObj->SetFuncInfo( GSM_Negate_double, 1, x_Float );
-
-  FuncObj->SetFuncInfo( GSM_Negate_int, 1 );
-  FuncObj->SetParamInfo( GSM_Negate_int, 0, "x", porINTEGER );
-
-  FuncObj->SetFuncInfo( GSM_Negate_gRational, 1 );
-  FuncObj->SetParamInfo( GSM_Negate_gRational, 0, "x", porRATIONAL );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Negate", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Negate_double, 
+				       porFLOAT, 1, x_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Negate_int, porINTEGER, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porINTEGER));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Negate_gRational, 
+				       porRATIONAL, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porRATIONAL));
+  gsm->AddFunction(FuncObj);
 
 
 
   //----------------------- IntegerDivide ------------------------
 
-  FuncObj = new FuncDescObj( (gString) "IntegerDivide" );
-  FuncObj->SetFuncInfo( GSM_IntegerDivide_int, 2, xy_Int );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("IntegerDivide", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IntegerDivide_int, 
+				       porINTEGER, 2, xy_Int));
+  gsm->AddFunction(FuncObj);
 
 
 
   //----------------------- Modulus ------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Modulus" );
-  FuncObj->SetFuncInfo( GSM_Modulus_int, 2, xy_Int );
-  gsm->AddFunction( FuncObj );
-
-
-
+  FuncObj = new FuncDescObj("Modulus", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Modulus_int, 
+				       porINTEGER, 2, xy_Int));
+  gsm->AddFunction(FuncObj);
 
 
   //-------------------------- Equal ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Equal" );
+  FuncObj = new FuncDescObj("Equal", 14);
 
-  FuncObj->SetFuncInfo( GSM_EqualTo_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_EqualTo_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_EqualTo_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_EqualTo_gString, 2, xy_Text );
-  FuncObj->SetFuncInfo( GSM_EqualTo_bool, 2, xy_Bool );
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_EqualTo_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_EqualTo_int, 
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_EqualTo_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_EqualTo_gString, 
+				       porBOOL, 2, xy_Text));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_EqualTo_bool, 
+				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo( GSM_EqualTo_EfPlayer, 2, xy_EfPlayer );
-  FuncObj->SetFuncInfo( GSM_EqualTo_Node, 2, xy_Node );
-  FuncObj->SetFuncInfo( GSM_EqualTo_Infoset, 2, xy_Infoset );
-  FuncObj->SetFuncInfo( GSM_EqualTo_Outcome, 2, xy_Outcome );
-  FuncObj->SetFuncInfo( GSM_EqualTo_Action, 2, xy_Action );
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_EqualTo_EfPlayer, 
+				       porBOOL, 2, xy_EfPlayer));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_EqualTo_Node, 
+				       porBOOL, 2, xy_Node));
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_EqualTo_Infoset, 
+				       porBOOL, 2, xy_Infoset));
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_EqualTo_Outcome, 
+				       porBOOL, 2, xy_Outcome));
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_EqualTo_Action, 
+				       porBOOL, 2, xy_Action));
 
-  FuncObj->SetFuncInfo( GSM_EqualTo_MixedFloat, 2, xy_MixedFloat );
-  FuncObj->SetFuncInfo( GSM_EqualTo_MixedRational, 2, xy_MixedRational );
-  FuncObj->SetFuncInfo( GSM_EqualTo_BehavFloat, 2, xy_BehavFloat );
-  FuncObj->SetFuncInfo( GSM_EqualTo_BehavRational, 2, xy_BehavRational );
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_EqualTo_MixedFloat, 
+					porBOOL, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_EqualTo_MixedRational, 
+					porBOOL, 2, xy_MixedRational));
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_EqualTo_BehavFloat, 
+					porBOOL, 2, xy_BehavFloat));
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_EqualTo_BehavRational, 
+					porBOOL, 2, xy_BehavRational));
 
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
 
 
   //-------------------------- NotEqual ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "NotEqual" ); 
+  FuncObj = new FuncDescObj("NotEqual", 14); 
 
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_gString, 2, xy_Text );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_bool, 2, xy_Bool );
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NotEqualTo_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_NotEqualTo_int, 
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_NotEqualTo_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_NotEqualTo_gString, 
+				       porBOOL, 2, xy_Text));
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_NotEqualTo_bool, 
+				       porBOOL, 2, xy_Bool));
 
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_EfPlayer, 2, xy_EfPlayer );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_Node, 2, xy_Node );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_Infoset, 2, xy_Infoset );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_Outcome, 2, xy_Outcome );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_Action, 2, xy_Action );
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_NotEqualTo_EfPlayer, 
+				       porBOOL, 2, xy_EfPlayer));
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_NotEqualTo_Node, 
+				       porBOOL, 2, xy_Node));
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_NotEqualTo_Infoset, 
+				       porBOOL, 2, xy_Infoset));
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_NotEqualTo_Outcome,
+				       porBOOL, 2, xy_Outcome));
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_NotEqualTo_Action, 
+				       porBOOL, 2, xy_Action));
 
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_MixedFloat, 2, xy_MixedFloat );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_MixedRational, 2, xy_MixedRational );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_BehavFloat, 2, xy_BehavFloat );
-  FuncObj->SetFuncInfo( GSM_NotEqualTo_BehavRational, 2, xy_BehavRational );
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_NotEqualTo_MixedFloat, 
+					porBOOL, 2, xy_MixedFloat));
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_NotEqualTo_MixedRational, 
+					porBOOL, 2, xy_MixedRational));
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_NotEqualTo_BehavFloat,
+					porBOOL, 2, xy_BehavFloat));
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_NotEqualTo_BehavRational, 
+					porBOOL, 2, xy_BehavRational));
 
-  gsm->AddFunction( FuncObj );
+  gsm->AddFunction(FuncObj);
 
 
   //-------------------------- Greater ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Greater" );
-
-  FuncObj->SetFuncInfo( GSM_GreaterThan_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_GreaterThan_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_GreaterThan_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_GreaterThan_gString, 2, xy_Text );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Greater", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GreaterThan_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GreaterThan_int, 
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GreaterThan_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_GreaterThan_gString, 
+				       porBOOL, 2, xy_Text));
+  gsm->AddFunction(FuncObj);
 
 
   //-------------------------- Less ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Less" );
-
-  FuncObj->SetFuncInfo( GSM_LessThan_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_LessThan_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_LessThan_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_LessThan_gString, 2, xy_Text );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Less", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LessThan_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_LessThan_int, 
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_LessThan_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_LessThan_gString, 
+				       porBOOL, 2, xy_Text));
+  gsm->AddFunction(FuncObj);
 
 
   //---------------------- GreaterThanOrEqualTo ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "GreaterEqual" );
-
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_GreaterThanOrEqualTo_gString, 2, xy_Text );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("GreaterEqual", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_GreaterThanOrEqualTo_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_GreaterThanOrEqualTo_int,
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_GreaterThanOrEqualTo_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_GreaterThanOrEqualTo_gString, 
+				       porBOOL, 2, xy_Text));
+  gsm->AddFunction(FuncObj);
 
 
   //----------------------- LessThanOrEqualTo ---------------------------
 
-  FuncObj = new FuncDescObj( (gString) "LessEqual" );
-
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_double, 2, xy_Float );
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_int, 2, xy_Int );
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gRational, 2, xy_Rational );
-  FuncObj->SetFuncInfo( GSM_LessThanOrEqualTo_gString, 2, xy_Text );
-
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("LessEqual", 4);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LessThanOrEqualTo_double, 
+				       porBOOL, 2, xy_Float));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_LessThanOrEqualTo_int, 
+				       porBOOL, 2, xy_Int));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_LessThanOrEqualTo_gRational, 
+				       porBOOL, 2, xy_Rational));
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_LessThanOrEqualTo_gString, 
+				       porBOOL, 2, xy_Text));
+  gsm->AddFunction(FuncObj);
 
 
 
 
   //--------------------- And -------------------------------
 
-  FuncObj = new FuncDescObj( (gString) "And" );
-  FuncObj->SetFuncInfo( GSM_AND, 2, xy_Bool );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("And", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AND, porBOOL, 2, xy_Bool));
+  gsm->AddFunction(FuncObj);
 
 
   //--------------------- Or -------------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Or" );
-  FuncObj->SetFuncInfo( GSM_OR, 2, xy_Bool );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Or", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_OR, porBOOL, 2, xy_Bool));
+  gsm->AddFunction(FuncObj);
 
 
   //--------------------- Not -------------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Not" );
-  FuncObj->SetFuncInfo( GSM_NOT, 1 );
-  FuncObj->SetParamInfo( GSM_NOT, 0, "x", porBOOL );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Not", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NOT, porBOOL, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porBOOL));
+  gsm->AddFunction(FuncObj);
 
 
 
-
-
-
-  FuncObj = new FuncDescObj("Paren");
-  FuncObj->SetFuncInfo(GSM_Paren, 1);
-  FuncObj->SetParamInfo(GSM_Paren, 0, "x", porANYTYPE);
+  FuncObj = new FuncDescObj("Paren", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Paren, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porANYTYPE));
   gsm->AddFunction(FuncObj);
 
   //-------------------- NewStream -------------------------
 
-  FuncObj = new FuncDescObj( (gString) "Output" );
-  FuncObj->SetFuncInfo( GSM_NewOutputStream, 1, file_Text );
-  gsm->AddFunction( FuncObj );
-
-  FuncObj = new FuncDescObj( (gString) "Input" );
-  FuncObj->SetFuncInfo( GSM_NewInputStream, 1, file_Text );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Output", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewOutputStream, 
+				       porOUTPUT, 1, file_Text));
+  gsm->AddFunction(FuncObj);
+  
+  FuncObj = new FuncDescObj("Input", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewInputStream, 
+				       porINPUT, 1, file_Text));
+  gsm->AddFunction(FuncObj);
 
   //------------------- Formatted Output -------------------
 
   GSM_SetWriteOptions();
 
-  FuncObj = new FuncDescObj( "Write" );
-  FuncObj->SetFuncInfo( GSM_Write_numerical, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_numerical, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_numerical, 1, "x", 
-			porBOOL | porINTEGER | porFLOAT | porRATIONAL );
+  FuncObj = new FuncDescObj("Write", 7);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write_numerical, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("x", porBOOL | porINTEGER | porFLOAT | porRATIONAL));
 
-  FuncObj->SetFuncInfo( GSM_Write_gString, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_gString, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_gString, 1, "x", porTEXT );
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Write_gString, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", porTEXT));
 
-  FuncObj->SetFuncInfo( GSM_Write_Mixed, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Mixed, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_Mixed, 1, "x", porMIXED );
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Write_Mixed, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porMIXED));
 
-  FuncObj->SetFuncInfo( GSM_Write_Behav, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Behav, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_Behav, 1, "x", porBEHAV );
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Write_Behav, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", porBEHAV));
+  
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Write_Nfg, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porNFG,
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Write_Efg, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", porEFG,
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Write_list, 
+				       porOUTPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType
+			("x", PortionSpec(porBOOL | porINTEGER | porFLOAT | 
+					  porTEXT | porRATIONAL | porMIXED |
+					  porBEHAV, 1)));
+  gsm->AddFunction(FuncObj);
 
-  FuncObj->SetFuncInfo( GSM_Write_Nfg, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
 
-  FuncObj->SetFuncInfo( GSM_Write_Efg, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Write_list, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Write_list, 0, "output", porOUTPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Write_list, 1, "x", 
-			PortionSpec(porBOOL | porINTEGER | porFLOAT | porTEXT |
-				    porRATIONAL | porMIXED | porBEHAV, 1) );
-
-  gsm->AddFunction( FuncObj );
-
-
-  FuncObj = new FuncDescObj( "SetFormat" );
-  FuncObj->SetFuncInfo( GSM_SetFormat, 9 );
-  FuncObj->SetParamInfo( GSM_SetFormat, 0, "width", porINTEGER, 
-			new IntRefPortion( _WriteWidth ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 1, "precis", porINTEGER,
-			new IntRefPortion( _WritePrecis ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 2, "expmode", porBOOL,
-			new BoolRefPortion( _WriteExpmode ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 3, "quote", porBOOL,
-			new BoolRefPortion( _WriteQuoted ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 4, "listBraces", porBOOL,
-			new BoolRefPortion( _WriteListBraces ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 5, "listCommas", porBOOL,
-			new BoolRefPortion( _WriteListCommas ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 6, "listLF", porINTEGER,
-			new IntRefPortion( _WriteListLF ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 7, "listIndent", porINTEGER,
-			new IntRefPortion( _WriteListIndent ) );
-  FuncObj->SetParamInfo( GSM_SetFormat, 8, "solutionInfo", porINTEGER,
-			new IntRefPortion( _WriteSolutionInfo ) );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("SetFormat", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetFormat, porBOOL, 9));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType
+			("width", porINTEGER, 
+			 new IntRefPortion(_WriteWidth)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType
+			("precis", porINTEGER,
+			 new IntRefPortion(_WritePrecis)));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType
+			("expmode", porBOOL,
+			 new BoolRefPortion(_WriteExpmode)));
+  FuncObj->SetParamInfo(0, 3, ParamInfoType
+			("quote", porBOOL,
+			 new BoolRefPortion(_WriteQuoted)));
+  FuncObj->SetParamInfo(0, 4, ParamInfoType
+			("listBraces", porBOOL,
+			 new BoolRefPortion(_WriteListBraces)));
+  FuncObj->SetParamInfo(0, 5, ParamInfoType
+			("listCommas", porBOOL,
+			 new BoolRefPortion(_WriteListCommas)));
+  FuncObj->SetParamInfo(0, 6, ParamInfoType
+			("listLF", porINTEGER,
+			 new IntRefPortion(_WriteListLF)));
+  FuncObj->SetParamInfo(0, 7, ParamInfoType
+			("listIndent", porINTEGER,
+			 new IntRefPortion(_WriteListIndent)));
+  FuncObj->SetParamInfo(0, 8, ParamInfoType
+			("solutionInfo", porINTEGER,
+			 new IntRefPortion( _WriteSolutionInfo)));
+  gsm->AddFunction(FuncObj);
 
 
 
   //-------------------- Read --------------------------
 
-  FuncObj = new FuncDescObj( "Read" );
+  FuncObj = new FuncDescObj("Read", 15);
 
-  FuncObj->SetFuncInfo( GSM_Read_Bool, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Bool, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Bool, 1, "x", porBOOL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Read_Bool, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("input", porINPUT, 
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("x", porBOOL, 
+					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo( GSM_Read_List_Bool, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Bool, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Bool, 1, "x", PortionSpec(porBOOL,1), 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-
-  FuncObj->SetFuncInfo( GSM_Read_Integer, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Integer, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Integer, 1, "x", porINTEGER, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Read_List_Integer, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Integer, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Integer, 1, "x", 
-			PortionSpec(porINTEGER,1), 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Read_List_Bool, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("x", PortionSpec(porBOOL,1), 
+					    REQUIRED, BYREF));
 
 
-  FuncObj->SetFuncInfo( GSM_Read_Float, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Float, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Float, 1, "x", porFLOAT,  
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Read_List_Float, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Float, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Float, 1, "x", PortionSpec(porFLOAT,1), 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-
-  FuncObj->SetFuncInfo( GSM_Read_Rational, 2,
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Rational, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Rational, 1, "x", porRATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Read_List_Rational, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Rational, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Rational, 1, "x", 
-			PortionSpec(porRATIONAL,1), 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-
-  FuncObj->SetFuncInfo( GSM_Read_Text, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Text, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Text, 1, "x", porTEXT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Read_List_Text, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_List_Text, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_List_Text, 1, "x", PortionSpec(porTEXT,1), 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-
-
-  FuncObj->SetFuncInfo( GSM_Read_MixedFloat, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_MixedFloat, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_MixedFloat, 1, "x", porMIXED_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-  FuncObj->SetFuncInfo( GSM_Read_MixedRational, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_MixedRational, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_MixedRational, 1, "x", porMIXED_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Read_Integer, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("x", porINTEGER, 
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Read_List_Integer, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(3, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(3, 1, ParamInfoType("x", PortionSpec(porINTEGER,1), 
+					    REQUIRED, BYREF));
+  
+  
+  FuncObj->SetFuncInfo(4, FuncInfoType(GSM_Read_Float, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(4, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(4, 1, ParamInfoType("x", porFLOAT,  
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(5, FuncInfoType(GSM_Read_List_Float, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(5, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(5, 1, ParamInfoType("x", PortionSpec(porFLOAT,1), 
+					    REQUIRED, BYREF));
+  
+  
+  FuncObj->SetFuncInfo(6, FuncInfoType(GSM_Read_Rational, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(6, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(6, 1, ParamInfoType("x", porRATIONAL, 
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(7, FuncInfoType(GSM_Read_List_Rational, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(7, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(7, 1, ParamInfoType("x", PortionSpec(porRATIONAL,1), 
+					    REQUIRED, BYREF));
+  
+  
+  FuncObj->SetFuncInfo(8, FuncInfoType(GSM_Read_Text, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(8, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(8, 1, ParamInfoType("x", porTEXT, 
+					    REQUIRED, BYREF));
+  
+  FuncObj->SetFuncInfo(9, FuncInfoType(GSM_Read_List_Text, 
+				       porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(9, 0, ParamInfoType("input", porINPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(9, 1, ParamInfoType("x", PortionSpec(porTEXT,1), 
+					    REQUIRED, BYREF));
 
 
-  FuncObj->SetFuncInfo( GSM_Read_BehavFloat, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_BehavFloat, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_BehavFloat, 1, "x", porBEHAV_FLOAT, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Read_MixedFloat, 
+					porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(10, 0, ParamInfoType("input", porINPUT,
+					     REQUIRED, BYREF));
+  FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porMIXED_FLOAT, 
+					     REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo( GSM_Read_BehavRational, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_BehavRational, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_BehavRational, 1, "x", porBEHAV_RATIONAL, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
+  FuncObj->SetFuncInfo(11, FuncInfoType(GSM_Read_MixedRational, 
+					porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(11, 0, ParamInfoType("input", porINPUT,
+					     REQUIRED, BYREF));
+  FuncObj->SetParamInfo(11, 1, ParamInfoType("x", porMIXED_RATIONAL, 
+					     REQUIRED, BYREF));
 
 
+  FuncObj->SetFuncInfo(12, FuncInfoType(GSM_Read_BehavFloat, 
+					porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(12, 0, ParamInfoType("input", porINPUT,
+					     REQUIRED, BYREF));
+  FuncObj->SetParamInfo(12, 1, ParamInfoType("x", porBEHAV_FLOAT, 
+					     REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo( GSM_Read_Undefined, 2, 
-		       NO_PREDEFINED_PARAMS, NON_LISTABLE );
-  FuncObj->SetParamInfo( GSM_Read_Undefined, 0, "input", porINPUT,
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo( GSM_Read_Undefined, 1, "x", porUNDEFINED, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  gsm->AddFunction( FuncObj );
+  FuncObj->SetFuncInfo(13, FuncInfoType(GSM_Read_BehavRational,
+					porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(13, 0, ParamInfoType("input", porINPUT,
+					     REQUIRED, BYREF));
+  FuncObj->SetParamInfo(13, 1, ParamInfoType("x", porBEHAV_RATIONAL, 
+					     REQUIRED, BYREF));
+
+
+  FuncObj->SetFuncInfo(14, FuncInfoType(GSM_Read_Undefined, 
+					porINPUT, 2, 0, NON_LISTABLE));
+  FuncObj->SetParamInfo(14, 0, ParamInfoType("input", porINPUT,
+					     REQUIRED, BYREF));
+  FuncObj->SetParamInfo(14, 1, ParamInfoType("x", porUNDEFINED, 
+					     REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
 
   
 
   //---------------- faked functions -----------------//
 
-  FuncObj = new FuncDescObj( (gString) "Help" );
-  FuncObj->SetFuncInfo( GSM_Help, 1 );
-  FuncObj->SetParamInfo( GSM_Help, 0, "x", porTEXT );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Help", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Help, PortionSpec(porTEXT, 1), 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj( (gString) "Manual" );
-  FuncObj->SetFuncInfo( GSM_Manual, 2 );
-  FuncObj->SetParamInfo( GSM_Manual, 0, "x", porTEXT );
-  FuncObj->SetParamInfo( GSM_Manual, 1, "y", porOUTPUT,
-			new OutputRefPortion(gout));
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Manual", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Manual, porBOOL, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("y", porOUTPUT,
+					    new OutputRefPortion(gout)));
+  gsm->AddFunction(FuncObj);
+  
+  FuncObj = new FuncDescObj("HelpVars", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_HelpVars, PortionSpec(porTEXT, 1),
+				       1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj( (gString) "HelpVars" );
-  FuncObj->SetFuncInfo( GSM_HelpVars, 1 );
-  FuncObj->SetParamInfo( GSM_HelpVars, 0, "x", porTEXT );
-  gsm->AddFunction( FuncObj );
-
-  FuncObj = new FuncDescObj( (gString) "Clear" );
-  FuncObj->SetFuncInfo( GSM_Clear, 0 );
-  gsm->AddFunction( FuncObj );
-
-
-  FuncObj = new FuncDescObj( (gString) "Assign" );
-  FuncObj->SetFuncInfo( GSM_Assign, 2 );
-  FuncObj->SetParamInfo( GSM_Assign, 0, "x", porTEXT );
-  FuncObj->SetParamInfo( GSM_Assign, 1, "v", porANYTYPE, 
-			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-  gsm->AddFunction( FuncObj );  
-
-  FuncObj = new FuncDescObj( (gString) "UnAssign" );
-  FuncObj->SetFuncInfo( GSM_UnAssign, 1 );
-  FuncObj->SetParamInfo( GSM_UnAssign, 0, "x", porTEXT );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Clear", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Clear, porBOOL, 0));
+  gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj( (gString) "Date" );
-  FuncObj->SetFuncInfo( GSM_Date, 0 );
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Assign", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Assign, porANYTYPE, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("v", porANYTYPE, 
+					    REQUIRED, BYREF));
+  gsm->AddFunction(FuncObj);
+
+  FuncObj = new FuncDescObj("UnAssign", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_UnAssign, porANYTYPE, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porTEXT));
+  gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj( (gString) "Randomize" );
-  FuncObj->SetFuncInfo( GSM_Randomize_Integer, 2 );
-  FuncObj->SetParamInfo( GSM_Randomize_Integer, 0, "x", porINTEGER );
-  FuncObj->SetParamInfo( GSM_Randomize_Integer, 1, "seed", porINTEGER,
-			new IntValPortion(0));
-  FuncObj->SetFuncInfo( GSM_Randomize_Float, 2 );
-  FuncObj->SetParamInfo( GSM_Randomize_Float, 0, "x", porFLOAT );
-  FuncObj->SetParamInfo( GSM_Randomize_Float, 1, "seed", porINTEGER,
-			new IntValPortion(0));
-  FuncObj->SetFuncInfo( GSM_Randomize_Rational, 2 );
-  FuncObj->SetParamInfo( GSM_Randomize_Rational, 0, "x", porRATIONAL );
-  FuncObj->SetParamInfo( GSM_Randomize_Rational, 1, "seed", porINTEGER,
-			new IntValPortion(0));
-  gsm->AddFunction( FuncObj );
+  FuncObj = new FuncDescObj("Date", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Date, porTEXT, 0));
+  gsm->AddFunction(FuncObj);
+
+
+  FuncObj = new FuncDescObj("Randomize", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_Integer, porINTEGER, 2));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porINTEGER));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("seed", porINTEGER,
+					    new IntValPortion(0)));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Randomize_Float, porFLOAT, 2));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porFLOAT));
+  FuncObj->SetParamInfo(1, 1, ParamInfoType("seed", porINTEGER,
+					    new IntValPortion(0)));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Randomize_Rational, porRATIONAL,2));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porRATIONAL));
+  FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER,
+					    new IntValPortion(0)));
+  gsm->AddFunction(FuncObj);
 
 }
+
+
+
 

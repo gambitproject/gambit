@@ -2113,7 +2113,7 @@ void ListPortion::Output( gOutput& s, long ListLF ) const
   }
   else
   {
-    s << " empty";
+    s << " (" << PortionSpecToText(_DataType) << ')';
   }
 
   s << ' ';
