@@ -2,7 +2,7 @@
 // FILE: nfgsolvd.h -- the main dialog for running NormalForm solution
 //                     algorithms.
 //
-// @(#)nfgsolvd.h	2.4 6/22/97
+// $Id$
 //
 
 // You must add an entry here for each new algorithm.
