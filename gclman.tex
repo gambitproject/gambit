@@ -111,7 +111,7 @@ the language as a program by placing an input file command {\tt "<"}
 followed by the name of the file, following the command which enters
 the command language.  By using an output file command {\tt ">"}
 followed by the name of a file, the user can direct the output of the
-command language to an external text file.  For example, at the unix prompt:
+command language to an external text file.  For example, at the Unix prompt:
 
 \begin{verbatim}
 > gcl < input.gcl > output.out
@@ -121,7 +121,7 @@ command language to an external text file.  For example, at the unix prompt:
 
 \subsection{Grammar and syntax}
 
-The central pardigm of the GCL is that we can think of every legal
+The central paradigm of the GCL is that we can think of every legal
 statement as a function call, which operates on some set of parameters and
 returns a value.  Many commonly used functions have a more convenient
 ``short form'' format for additional terseness and readability.
@@ -159,7 +159,7 @@ arguments for the given function, and \verb+argval+ or \verb+argref+
 is any function that evaluates to correct data type for the
 corresponding argument. 
 
-The arguments to a function can be either optional ar required.
+The arguments to a function can be either optional or required.
 Required arguments must be specified in \verb+ArgumentList+ when the
 function is called.  Each optional argument has a default value, which
 is also determined when the function is created.  Optional arguments
@@ -167,21 +167,21 @@ need only be specified when the default is to be changed.
 
 The arguments to a function can be specified in any order, as long as
 the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function can also be called with without specifying
-the prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as
-the arguments are specified in the correct order.  In fact a mixture
-is allowed in which the prefix is specified for some arguments and not
-sepecified for others as long as all of the arguments which do not
-include the prefix preceed those that to.  In this case, it is assumed
+argument list for a function can also be called without specifying the 
+prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as the 
+arguments are specified in the correct order.  In fact a mixture is 
+allowed in which the prefix is specified for some arguments and not
+specified for others as long as all of the arguments which do not
+include the prefix preceed those that do.  In this case, it is assumed
 that those that do not include a prefix are in the correct order.  
 
 Arguments can be passed in one of two ways, either by value or by
 reference.  To pass an argument by value, the syntax is
 \verb+ArgumentName->argval+.  If an argument is passed by value, then the
-function whose name is specified in \verb+argval+ cannot be be called
+function whose name is specified in \verb+argval+ cannot be called
 or changed by the function \verb+FunctionName+ unless it is in some
 other way made visible to the function (specifically, if it is called
-by reference in a different argument to the same function, or if is a
+by reference in a different argument to the same function, or if it is a
 funcion of global scope -- described below).  To pass by reference,
 the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
 by reference, then the function whose name is specified in
@@ -225,7 +225,7 @@ one can use the built-in function,
 Assign[x<->T, y->T]
 \end{verbatim}
 
-If the \verb+x+ parameter is previously undefined variable name, a new
+If the \verb+x+ parameter is a previously undefined variable name, a new
 variable of the type is created and the value of the expression passed
 to \verb+y+ is ``assigned'' to \verb+x+.  If \verb+Assign+ is called with
 an argument \verb+varname+ which is a currently visible function, it results
@@ -626,7 +626,7 @@ under addition or multiplication.  Neither addition or multiplication
 is associative (it is not always the case that
 \verb&(a+b)+c = a+(b+c)& or 
 \verb+(a*b)*c = a*(b*c)+).  Nor does multiplication
-distribute over addition (it is not always true that 
+distribute over addition (it is not always True that 
 \verb&a*(b+c) = a*b+a*c&.  Further, not all floating point numbers have
 multiplicative inverses.  This means that we can have such
 properties as \verb+b*(a/b) != a+ (if \verb+a = 1+ and
@@ -822,33 +822,33 @@ change.
 \begin{tabular}{lp{4in}}
 If[BOOLEAN, & \\
 \{series of commands\}] & Evaluates the BOOLEAN expression
-once. If it evaluates to TRUE, the series of commands are performed.
+once. If it evaluates to True, the series of commands are performed.
 Each command must be followed by a semi-colon or carriage return.  If
 the BOOLEAN evaluates to FALSE, none of the commands are performed.\\
 If[BOOLEAN, & \\
 \{series of commands\}, & \\
 \{series of commands\}] & Evaluates the BOOLEAN expression
-once. If it evaluates to TRUE, the first series of commands are
+once. If it evaluates to True, the first series of commands are
 performed.  Each command must be followed by a semi- colon or carriage
 return.  If the BOOLEAN evaluates to FALSE, the second series of
 commands are performed. \\
 While[BOOLEAN, &\\
 \{series of commands\}] & Evaluates the BOOLEAN
-expression or variable.  As long as it evaluates to TRUE, the series
+expression or variable.  As long as it evaluates to True, the series
 of commands are performed.  Each command must be followed by a
 semi-colon or carriage return.  If the BOOLEAN evaluates to FALSE, the
 loop ends without performing the commands.\\
 NOTE: & The While command functions as a
 loop.  That is, it continues to perform the series of commands as long
-as the expression evaluates to TRUE.  The If statement, however, only
+as the expression evaluates to True.  The If statement, however, only
 performs the series of commands once if the expression evaluates to
-TRUE.\\
+True.\\
 For[\{expressions\}, & \\
 \{expression\}, & \\
 \{expressions\}, & \\
 \{statements\}] & Evaluates the first set of expressions as initialization;
 afterwards, so long as the second parameter (which must evaluate to a 
-BOOLEAN value) remains true, executes the statement body followed by the
+BOOLEAN value) remains True, executes the statement body followed by the
 third parameter expressions in a fashion similar to the While command.
 \end{tabular}
 
@@ -1492,7 +1492,7 @@ For[start, test, incr, body]
 \bd
 \item
 [Description:] Executes $start$, then repeatedly evaluates $body$ and $incr$
-until $test$ fails to give $true$.
+until $test$ fails to give $True$.
 \item
 [See also:] \verb+While+.
 \ed
@@ -1898,7 +1898,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 \item
 [Short form:] \verb+x >= y+
 \item
-[Description:] Yields $true$ if $x$ is greater than or equal to $y$
+[Description:] Yields $True$ if $x$ is greater than or equal to $y$
 \item
 [Return value:] Returns the value of $x \geq y$.
 \item
@@ -1926,7 +1926,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 \item
 [Short form:] \verb+x > y+
 \item
-[Description:] Yields $true$ if $x$ is greater than $y$
+[Description:] Yields $True$ if $x$ is greater than $y$
 \item
 [Return value:] Returns the value of $x > y$.
 \item
@@ -2024,10 +2024,10 @@ If[condition, t, f]
   
 \bd
 \item
-[Description:] If antecedent is true, evaluates $t$.  If
+[Description:] If antecedent is True, evaluates $t$.  If
 antecedent is false, evaluates $f$. 
 \item
-[Return value:] If antecedent is true, returns value of $t$.  If
+[Return value:] If antecedent is True, returns value of $t$.  If
 antecedent is false, returns value of $f$.  
 \item
 [Required parameters:]\hfil\null
@@ -2035,7 +2035,7 @@ antecedent is false, returns value of $f$.
 \item
 [condition:] The boolean guard of the expression.
 \item
-[t:] Statements to be evaluated if antecedent is true. 
+[t:] Statements to be evaluated if antecedent is True. 
 \item
 [f:] Statements to be evaluated if antecedent is false. 
 \ed
@@ -2338,7 +2338,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 \item
 [Short form:] \verb+x <= y+
 \item
-[Description:] Yields $true$ if $x$ is less than or equal to $y$
+[Description:] Yields $True$ if $x$ is less than or equal to $y$
 \item
 [Return value:] Returns the value of $x \leq y$.
 \item
@@ -2366,7 +2366,7 @@ For T = INTEGER, FLOAT, RATIONAL, or TEXT.
 \item
 [Short form:] \verb+x < y+
 \item
-[Description:] Yields $true$ if $x$ is less than $y$
+[Description:] Yields $True$ if $x$ is less than $y$
 \item
 [Return value:] Returns the value of $x < y$.
 \item
@@ -3909,7 +3909,7 @@ While[test, statements]
   
 \bd
 \item
-[Description:] If test is true, evaluates the statement list consisting of
+[Description:] If test is True, evaluates the statement list consisting of
 \verb+do+ followed by itself.  If test fails, evaluates the empty
 statement list.
 \item
@@ -3922,7 +3922,7 @@ statement body, or NULL if the loop never executes.
 \item
 [antecedent:] Antecedent.  
 \item
-[then:] Statement list to be evaluated if antecedent is true. 
+[then:] Statement list to be evaluated if antecedent is True. 
 \item
 [else:] Statement list to be evaluated if antecedent is false. 
 \ed
