@@ -199,44 +199,6 @@ The following hangs the GCL:
   GCL2:= << n:=Randomize[NewNfg[{k,k},True],seed->142];
   GCL3:= << LcpSolve[n]
 
-
-//-----------------------------
-
-Bug C29:  Memory leak?  
-
-On koo, the script from the cron job, ~rdm/gambit/test/qretest.gcl
-leads to the following
-
-  35 koo:/home/mill/rdm/gambit/test newgcl
-  Include["gclini.gcl"]
-  Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-  GCL1:= << Include["eqre.gcl"]
-  True
-  Include["eqre.gcl"]
-  Include["eqreml.gcl"]
-  Include["loglike.gcl"]
-  GCL2:= << EQre["bhg3"]
-
-Here is a much simpler example that crashes on mill:
-
-  GCL1:= << For[j:=1,j>0,j:=j+1, << j;];
-
-If you run this, and then on a separate xterm, watch top on mill, you
-will see that the SIZE and RES columns gradually grow as the program
-continues, eventually reaching about 800M, at which point, the GCL
-segfaults.  The same thing happens with 
-
-  GCL1:= << While[True,<< True]
-
-COMMENT (magyar 9/29/98): I think this is fixed now.  At least, the simpler
-examples no longer leak memory.  This doesn't mean the more complicated
-one above is fixed; I haven't tested it.  So, I'm leaving it here until
-we can verify independently.
-
-COMMENT (magyar 10/28/98): Another fix, this one dealing with dereferencing
-variable names.  Still not 100% sure all leaks are patched, but it is looking
-like we have gotten (most of) the really major ones.
-
 //------------------------------
 
 Bug C30:  ElimDom on efg not working:
@@ -267,6 +229,18 @@ not in the working directory.
   GCL1:= << e:=LoadEfg["poker.efg"]
   In function LoadEfg[], in file "console" at line 1:
   A segmentation fault has occurred
+
+
+//------------------------------
+
+Bug C33:  ExePath[] includes quotes on Windows
+
+This works fine on unix, but on Win95, ExePath includes leading and
+trailing quotes
+
+  GCL6:= Format["",quote->True] 
+  GCL7:= << ExePath[]              
+  ""C:\GAMBIT\SOURCES\BIN32\GCL32.EXE""
 
 
 //---------------  These are not bugs but suggested improvements ------------

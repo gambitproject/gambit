@@ -135,6 +135,27 @@ associated with a given location in the EF/NF game.  We should
 have "in place" editing, where you can edit the outcome right on the
 normal or extensive form dislpay.
 
+//------------------------------
+
+Bug D18: Problems with PXI
+
+On Win95 version, load poker.efg, run Solve->Custom->Extensive->QRE
+with params minLam = .001, maxlam = 20 delLam = .1.  Check Run PXI
+box, and set PXI command to pxi32.exe (with appropriate path, if
+necessary).  Now check OK to run algorithm. When algorithm completes,
+the gui crashes with notice that program has performed an illegal
+operation.
+
+//------------------------------
+
+Bug D19: Converting to NFG and solving by QRE
+
+On Win95 version, load poker.efg, Convert to normal form via
+Solve->Normal->Reduced, and then run Solve->Custom->QRE.  The GUI
+crashes with a notice that program has performed an illegal operation.
+
+
+
 -------------  older bugs that still remain ---------------
 
 //------------------------------
