@@ -23,6 +23,7 @@ template <class T>
 class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
   private:
     T Lambda, tolPOW;
+    gPVector<T> probs;
     gDPVector<T> p, pp, cpay;
     gMatrix<T> xi;
     const ExtForm<T> &E;
@@ -47,9 +48,10 @@ template <class T>
 EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const T &tol)
   : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF.Dimensionality()),
     pp(EF.Dimensionality()), cpay(EF.Dimensionality()),
+    probs(EF.Dimensionality().Lengths()),
     xi(p.Length(), p.Length()), tolPOW(tol)
 {
-  constrained = 0;
+  constrained = 1;
   
   // This can later be replaced by ExtForm<T>::Centroid(), when written
   for (int i = 1; i <= E.NumPlayers(); i++)
@@ -78,8 +80,8 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
 
   p = v;
   T val((T) 0), prob, psum, z;
-  
-  E.CondPayoff(p, cpay);
+
+  E.CondPayoff(p, cpay,probs);
   
   for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
     for (int iset = 1; iset <= E.NumInfosets(1, pl); iset++)  {
@@ -87,7 +89,7 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
       psum = (T) 0;
       
       for (int act = 1; act <= E.NumActions(1, pl, iset); act++)  {
-	z = Lambda * cpay(pl, iset, act);
+	z = probs(pl,iset) * Lambda * cpay(pl, iset, act);
 	assert(z < (T) 600);
 	z = exp(z);
 	psum += z;
