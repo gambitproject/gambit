@@ -56,6 +56,8 @@ protected:
     void ScrapInfoset(Infoset *);
     void ScrapOutcome(Outcome *);
 
+    void SortInfosets(void);
+
   
 // These are auxiliary functions used by the .efg file reader code
     Infoset *GetInfosetByIndex(EFPlayer *p, int index) const;
@@ -65,6 +67,10 @@ protected:
     void Reindex(void);
     
     void DeleteLexicon(void);
+
+// These are used in identification of subgames
+    void MarkTree(Node *, Node *);
+    bool CheckTree(Node *, Node *);
 
   public:
        //# DESTRUCTOR
@@ -123,6 +129,8 @@ protected:
 
     // This function put in to facilitate error-detection in MixedToBehav[]
     friend BaseNfg* AssociatedNfg( BaseEfg* E );
+
+    bool Decompose(Node *);
 };
 
 

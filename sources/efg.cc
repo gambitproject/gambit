@@ -59,6 +59,7 @@ TEMPLATE class gNode<Node *>;
 #pragma -Jgx
 
 #include "efg.h"
+#include "efgutils.h"
 #include <assert.h>
 
 EFPlayer::~EFPlayer()
@@ -189,6 +190,31 @@ void BaseEfg::Reindex(void)
   for (i = 1; i <= outcomes.Length(); i++)
     outcomes[i]->number = i;
 }
+
+void BaseEfg::SortInfosets(void)
+{
+  for (int pl = 1; pl <= players.Length(); pl++)  {
+    gList<Node *> nodes;
+
+    Nodes(*this, nodes);
+
+    int i, isets = 0;
+
+    for (i = 1; i <= players[pl]->infosets.Length(); i++)
+      players[pl]->infosets[i]->number = 0;
+  
+    for (i = 1; i <= nodes.Length(); i++)  {
+      Node *n = nodes[i];
+      if (n->GetPlayer()->number == pl && n->GetInfoset()->number == 0)  {
+	n->GetInfoset()->number = ++isets;
+	players[pl]->infosets[isets] = n->GetInfoset();
+      }
+    }  
+
+    assert(isets == players[pl]->infosets.Length());
+  }
+}
+  
 
 //------------------------------------------------------------------------
 //               BaseEfg: Title access and manipulation
@@ -336,6 +362,7 @@ Infoset *BaseEfg::AppendNode(Node *n, EFPlayer *p, int count)
   }
 
   DeleteLexicon();
+  SortInfosets();
   return n->infoset;
 }  
 
@@ -351,6 +378,7 @@ Infoset *BaseEfg::AppendNode(Node *n, Infoset *s)
   }
 
   DeleteLexicon();
+  SortInfosets();
   return s;
 }
   
@@ -370,6 +398,7 @@ Node *BaseEfg::DeleteNode(Node *n, Node *keep)
 
   ScrapNode(n);
   DeleteLexicon();
+  SortInfosets();
 
   return keep;
 }
@@ -391,6 +420,7 @@ Infoset *BaseEfg::InsertNode(Node *n, EFPlayer *p, int count)
     m->children.Append(CreateNode(m));
 
   DeleteLexicon();
+  SortInfosets();
   return m->infoset;
 }
 
@@ -412,6 +442,7 @@ Infoset *BaseEfg::InsertNode(Node *n, Infoset *s)
     m->children.Append(CreateNode(m));
 
   DeleteLexicon();
+  SortInfosets();
   return m->infoset;
 }
 
@@ -434,6 +465,7 @@ Infoset *BaseEfg::JoinInfoset(Infoset *s, Node *n)
   n->infoset = s;
 
   DeleteLexicon();
+  SortInfosets();
   return s;
 }
 
@@ -456,6 +488,7 @@ Infoset *BaseEfg::LeaveInfoset(Node *n)
     n->infoset->actions[i]->name = s->actions[i]->name;
 
   DeleteLexicon();
+  SortInfosets();
   return n->infoset;
 }
 
@@ -472,6 +505,7 @@ Infoset *BaseEfg::MergeInfoset(Infoset *to, Infoset *from)
   dead_infosets.Append(from->player->infosets.Remove(from->player->infosets.Find(from)));
 
   DeleteLexicon();
+  SortInfosets();
   return to;
 }
 
@@ -486,6 +520,7 @@ Infoset *BaseEfg::SwitchPlayer(Infoset *s, EFPlayer *p)
   p->infosets.Append(s);
 
   DeleteLexicon();
+  SortInfosets();
   return s;
 }
 
@@ -562,6 +597,7 @@ Node *BaseEfg::CopyTree(Node *src, Node *dest)
   CopySubtree(src, dest, dest);
 
   DeleteLexicon();
+  SortInfosets();
   return dest;
 }
 
@@ -583,6 +619,7 @@ Node *BaseEfg::MoveTree(Node *src, Node *dest)
   dest->outcome = 0;
   
   DeleteLexicon();
+  SortInfosets();
   return dest;
 }
 
@@ -608,6 +645,7 @@ Node *BaseEfg::DeleteTree(Node *n)
   n->name = "";
 
   DeleteLexicon();
+  SortInfosets();
   return n;
 }
 
@@ -653,9 +691,9 @@ Infoset *BaseEfg::DeleteAction(Infoset *s, Action *a)
 //========================================================================
 
 #include "behav.h"
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 //                    BaseBehavProfile member functions
-//---------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 
 BaseBehavProfile::BaseBehavProfile(const BaseEfg &EF, bool trunc)
   : E(&EF), truncated(trunc), behavsupport(EF)  { }
