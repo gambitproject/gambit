@@ -557,12 +557,6 @@ void TreeWindow::OnLeftDoubleClick(wxMouseEvent &p_event)
   node = m_layout.SubgameHitTest(x, y);
   if (node) {
     SetCursorPosition(node);
-    for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
-      if (m_layout.SubgameList()[i].root == Cursor()) {
-	m_layout.SubgameList()[i].expanded = !m_layout.SubgameList()[i].expanded; 
-	RefreshLayout();
-      }
-    }
     Refresh();
     return;
   }
@@ -847,17 +841,9 @@ void TreeWindow::node_goto_mark(void)
 
 void TreeWindow::SubgameMarkAll(void)
 {
-  m_layout.SubgameList().Flush();
-  m_layout.SubgameList().Append(SubgameEntry(m_efg.RootNode()));
   gList<Node *> subgame_roots;
   LegalSubgameRoots(m_efg, subgame_roots);
   m_efg.MarkSubgames(subgame_roots);
-
-  for (int i = 1; i <= subgame_roots.Length(); i++) {
-    if (subgame_roots[i] != m_efg.RootNode())
-      m_layout.SubgameList().Append(SubgameEntry(subgame_roots[i], true));
-  }
-  
   RefreshLayout();
 }
 
@@ -874,7 +860,6 @@ void TreeWindow::SubgameMark(void)
   }
 
   m_efg.MarkSubgame(Cursor());
-  m_layout.SubgameList().Append(SubgameEntry(Cursor(), true)); // collapse
   RefreshLayout();
 }
 
@@ -885,74 +870,12 @@ void TreeWindow::SubgameUnmark(void)
     return;
     
   m_efg.UnmarkSubgame(Cursor());
-
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
-    if (m_layout.SubgameList()[i].root == Cursor())
-      m_layout.SubgameList().Remove(i);
-  }
-
   RefreshLayout();
 }
 
 void TreeWindow::SubgameUnmarkAll(void)
 {
   m_efg.UnmarkSubgames(m_efg.RootNode());
-  m_layout.SubgameList().Flush();
-  m_layout.SubgameList().Append(SubgameEntry(m_efg.RootNode()));
-  RefreshLayout();
-}
-
-void TreeWindow::SubgameCollapse(void)
-{
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
-    if (m_layout.SubgameList()[i].root == Cursor()) {
-      m_layout.SubgameList()[i].expanded = false;
-      RefreshLayout();
-      return;
-    }
-  }
-}
-
-void TreeWindow::SubgameCollapseAll(void)
-{
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++)
-    m_layout.SubgameList()[i].expanded = false;
-
-  RefreshLayout();
-}
-
-void TreeWindow::SubgameExpand(void)
-{
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
-    if (m_layout.SubgameList()[i].root == Cursor()) {
-      m_layout.SubgameList()[i].expanded = true;
-      RefreshLayout();
-      return;
-    }
-  }
-}
-
-void TreeWindow::SubgameExpandBranch(void)
-{
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++) {
-    if (m_layout.SubgameList()[i].root == Cursor()) {
-      for (int j = 1; j <= m_layout.SubgameList().Length(); j++) {
-	if (m_efg.IsSuccessor(m_layout.SubgameList()[j].root, Cursor())) {
-	  m_layout.SubgameList()[j].expanded = true;
-	  RefreshLayout();
-	}
-      }
-
-      return;
-    }
-  }
-}
-
-void TreeWindow::SubgameExpandAll(void)
-{
-  for (int i = 1; i <= m_layout.SubgameList().Length(); i++)
-    m_layout.SubgameList()[i].expanded = true;
-  
   RefreshLayout();
 }
 
@@ -989,7 +912,4 @@ void TreeWindow::OnSize(wxSizeEvent &p_event)
 }
 
 template class gList<NodeEntry *>;
-template class gList<SubgameEntry>;
-gOutput &operator<<(gOutput &p_stream, const SubgameEntry &)
-{ return p_stream; }
 

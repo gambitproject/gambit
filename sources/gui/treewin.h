@@ -77,11 +77,6 @@ public:
   void SubgameMark(void);
   void SubgameUnmarkAll(void);
   void SubgameUnmark(void);
-  void SubgameCollapse(void);
-  void SubgameCollapseAll(void);
-  void SubgameExpand(void);
-  void SubgameExpandBranch(void);
-  void SubgameExpandAll(void);
 
   EfgShow *Parent(void) const { return m_parent; }
   

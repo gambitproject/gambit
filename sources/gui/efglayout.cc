@@ -136,7 +136,12 @@ void NodeEntry::Draw(wxDC &p_dc) const
 		GetX() + GetSize() + 10, y - textHeight/2);
 
   if (m_subgameRoot) {
-    p_dc.SetPen(*((m_subgameMarked) ? wxBLACK_PEN : wxGREY_PEN));
+    if (m_subgameMarked) {
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxSOLID));
+    }
+    else {
+      p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxLIGHT_GREY, 2, wxSOLID));
+    }
     p_dc.DrawLine(GetX() - GetSize() / 2, y,
 		  GetX() + 2 * GetSize(), y + 2 * GetSize());
     p_dc.DrawLine(GetX() - GetSize() / 2, y,
@@ -278,9 +283,7 @@ bool NodeEntry::NodeHitTest(int p_x, int p_y) const
 efgTreeLayout::efgTreeLayout(FullEfg &p_efg, TreeWindow *p_parent)
   : m_efg(p_efg), m_parent(p_parent),
     c_leftMargin(20), c_topMargin(40)
-{
-  m_subgameList.Append(SubgameEntry(m_efg.RootNode()));
-}
+{ }
 
 Node *efgTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
@@ -298,20 +301,10 @@ Node *efgTreeLayout::SubgameHitTest(int p_x, int p_y) const
     NodeEntry *entry = m_nodeList[i];
 
     if (entry->GetNode()->GetSubgameRoot() == entry->GetNode())  {
-      if (entry->expanded &&
-	  p_x > entry->x &&
+      if (p_x > entry->x &&
 	  p_x < entry->x + SUBGAME_SMALL_ICON_SIZE &&
 	  p_y > entry->y - SUBGAME_SMALL_ICON_SIZE/2 &&
 	  p_y < entry->y + SUBGAME_SMALL_ICON_SIZE/2) {
-	return entry->GetNode();
-      }
-      else if (!entry->expanded && 
-	       p_x > (entry->x + m_parent->DrawSettings().NodeSize() +
-		      entry->nums*INFOSET_SPACING-SUBGAME_LARGE_ICON_SIZE) &&
-	       p_x < (entry->x + m_parent->DrawSettings().NodeSize() + 
-		      entry->nums*INFOSET_SPACING+SUBGAME_LARGE_ICON_SIZE) &&
-	       p_y > entry->y-SUBGAME_LARGE_ICON_SIZE/2 &&
-	       p_y < entry->y+SUBGAME_LARGE_ICON_SIZE/2) {
 	return entry->GetNode();
       }
     }
@@ -646,24 +639,11 @@ Node *efgTreeLayout::NextSameLevel(Node *p_node) const
   return 0;
 }
 
-SubgameEntry &efgTreeLayout::GetSubgameEntry(Node *p_node)
-{
-  for (int i = 1; i <= m_subgameList.Length(); i++) {
-    if (m_subgameList[i].root == p_node)  {
-      return m_subgameList[i];
-    }
-  }
-
-  return m_subgameList[1];  // root subgame
-}
-
 int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
 			   int &maxlev, int &maxy, int &miny, int &ycoord)
 {
   int y1 = -1, yn=0;
   const TreeDrawSettings &draw_settings = m_parent->DrawSettings();
-    
-  SubgameEntry &subgame_entry = GetSubgameEntry(n->GetSubgameRoot());
     
   NodeEntry *entry = new NodeEntry(n);
   if (n == m_efg.RootNode()) {
@@ -679,7 +659,7 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     }
   }
   m_nodeList += entry;
-  if (n->Game()->NumChildren(n)>0 && subgame_entry.expanded) {
+  if (n->Game()->NumChildren(n) > 0) {
     for (int i = 1; i <= n->Game()->NumChildren(n); i++) {
       bool in_sup = true;
       if (n->GetPlayer()->GetNumber())        // pn == 0 for chance nodes
@@ -734,7 +714,6 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
     entry->SetToken(draw_settings.TerminalToken());
   }  
   
-  entry->expanded = subgame_entry.expanded;
   entry->SetSize(draw_settings.NodeSize());
   entry->SetBranchStyle(draw_settings.BranchStyle());
   if (draw_settings.BranchStyle() == BRANCH_STYLE_LINE) {
@@ -743,9 +722,9 @@ int efgTreeLayout::FillTable(Node *n, const EFSupport &cur_sup, int level,
   entry->SetBranchLength(draw_settings.BranchLength());
 
   if (draw_settings.SubgameStyle() == SUBGAME_ARC &&
-      n->GetSubgameRoot() == n) {
+      n->Game()->IsLegalSubgame(n)) {
     entry->SetSubgameRoot(true);
-    entry->SetSubgameMarked(true);
+    entry->SetSubgameMarked(n->GetSubgameRoot() == n);
   }
   maxlev = gmax(level, maxlev);
   maxy = gmax(entry->y, maxy);

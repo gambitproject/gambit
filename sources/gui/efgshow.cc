@@ -142,13 +142,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_SUBGAME_MARK, EfgShow::OnToolsSubgamesMark)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARKALL, EfgShow::OnToolsSubgamesUnMarkAll)
   EVT_MENU(efgmenuTOOLS_SUBGAME_UNMARK, EfgShow::OnToolsSubgamesUnMark)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_COLLAPSEALL,
-	   EfgShow::OnToolsSubgamesCollapseAll) 
-  EVT_MENU(efgmenuTOOLS_SUBGAME_COLLAPSE, EfgShow::OnToolsSubgamesCollapse)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_EXPANDALL, EfgShow::OnToolsSubgamesExpandAll)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_EXPANDBRANCH,
-	   EfgShow::OnToolsSubgamesExpandBranch)
-  EVT_MENU(efgmenuTOOLS_SUBGAME_EXPAND, EfgShow::OnToolsSubgamesExpand)
   EVT_MENU(efgmenuTOOLS_SUBGAME_VIEW, EfgShow::OnToolsSubgamesView)
   EVT_MENU(efgmenuTOOLS_SUPPORT_UNDOMINATED,
 	   EfgShow::OnToolsSupportUndominated)
@@ -691,16 +684,6 @@ void EfgShow::MakeMenus(void)
 			   "Clear all subgame info");
   toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_UNMARK, "&UnMark",
 			   "Unmark node subgame");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_COLLAPSE, "Collapse &Level",
-			   "Collapse node subgame");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_COLLAPSEALL, "&Collapse All", 
-			   "Collapse all subgames");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_EXPAND, "&Expand Level",
-			   "Expand node subgame");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_EXPANDBRANCH, 
-			   "&Expand Branch", "Expand entire branch");
-  toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_EXPANDALL, "&Expand All",
-			   "Expand all subgames");
   toolsSubgameMenu->AppendSeparator();
   toolsSubgameMenu->Append(efgmenuTOOLS_SUBGAME_VIEW, "&View",
 			   "View all subgames");
@@ -1807,36 +1790,6 @@ void EfgShow::OnToolsSubgamesUnMarkAll(wxCommandEvent &)
 void EfgShow::OnToolsSubgamesUnMark(wxCommandEvent &)
 {
   m_treeWindow->SubgameUnmark();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesCollapseAll(wxCommandEvent &)
-{
-  m_treeWindow->SubgameCollapseAll();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesCollapse(wxCommandEvent &)
-{
-  m_treeWindow->SubgameCollapse();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesExpandAll(wxCommandEvent &)
-{
-  m_treeWindow->SubgameExpandAll();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesExpand(wxCommandEvent &)
-{
-  m_treeWindow->SubgameExpand();
-  m_treeWindow->Refresh();
-}
-
-void EfgShow::OnToolsSubgamesExpandBranch(wxCommandEvent &)
-{
-  m_treeWindow->SubgameExpandBranch();
   m_treeWindow->Refresh();
 }
 

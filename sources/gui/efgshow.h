@@ -135,11 +135,6 @@ private:
   void OnToolsSubgamesMark(wxCommandEvent &);
   void OnToolsSubgamesUnMarkAll(wxCommandEvent &);
   void OnToolsSubgamesUnMark(wxCommandEvent &);
-  void OnToolsSubgamesCollapseAll(wxCommandEvent &);
-  void OnToolsSubgamesCollapse(wxCommandEvent &);
-  void OnToolsSubgamesExpandAll(wxCommandEvent &);
-  void OnToolsSubgamesExpandBranch(wxCommandEvent &);
-  void OnToolsSubgamesExpand(wxCommandEvent &);
   void OnToolsSubgamesView(wxCommandEvent &);
 
   void OnToolsSupportUndominated(wxCommandEvent &);

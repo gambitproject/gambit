@@ -47,7 +47,6 @@ public:
   int child_number;   // what branch # is this node from the parent
   bool in_sup;        // is this node in cur_sup
   NodeEntry *parent;
-  bool expanded;      // Is this subgame root expanded or collapsed?
 
   NodeEntry(Node *);
 
@@ -125,20 +124,6 @@ public:
   void DrawIncomingBranch(wxDC &) const;
 };
 
-class SubgameEntry {
-public:
-  Node *root;
-  bool expanded;
-
-  SubgameEntry(Node *r = 0, bool e = true) : root(r), expanded(e) { }
-
-  // Need these to make a list:
-  bool operator==(const SubgameEntry &s) { return (s.root == root); }
-  bool operator!=(const SubgameEntry &s) { return (s.root != root); }
-  friend gOutput &operator<<(gOutput &, const SubgameEntry &);
-};
-
-
 class TreeWindow;
 
 class efgTreeLayout {
@@ -146,7 +131,6 @@ private:
   FullEfg &m_efg;
   TreeWindow *m_parent;
   gList<NodeEntry *> m_nodeList;
-  gList<SubgameEntry> m_subgameList;
   int m_maxX, m_maxY, m_maxlev;
 
   const int c_leftMargin, c_topMargin;
@@ -181,8 +165,6 @@ public:
   // The following member functions are for temporary compatibility only
   NodeEntry *GetNodeEntry(Node *p_node) const
     { return GetEntry(p_node); }
-  gList<SubgameEntry> &SubgameList(void) { return m_subgameList; }
-  SubgameEntry &GetSubgameEntry(Node *p_node);
   NodeEntry *GetValidParent(Node *);
   NodeEntry *GetValidChild(Node *);
 
