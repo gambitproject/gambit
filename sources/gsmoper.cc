@@ -1795,7 +1795,7 @@ void Init_gsmoper( GSM* gsm )
   FuncObj = new FuncDescObj("Concat");
 
   FuncObj->SetFuncInfo( GSM_Concat_gString, 2, xy_Text );
-  FuncObj->SetFuncInfo( GSM_Concat_List, 2, xy_List );
+  FuncObj->SetFuncInfo( GSM_Concat_List, 2, xy_List, NON_LISTABLE );
   gsm->AddFunction(FuncObj);
 
   //----------------------- Minus ------------------------

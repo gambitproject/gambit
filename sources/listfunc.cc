@@ -154,7 +154,110 @@ Portion *GSM_IsWatchRunning(Portion **)
 {
   return new BoolValPortion(_gcl_watch.IsRunning());
 }
-					   
+
+//--------------------------- List ------------------------------
+
+Portion* GSM_List( Portion** param )
+{
+  ListPortion* p;
+  int i;
+
+  if( ((IntPortion*) param[1])->Value() < 0 )
+    return new ErrorPortion( "Invalid list length" );
+
+  p = new ListValPortion();
+  for( i = 1; i <= ((IntPortion*) param[1])->Value(); i++ )
+    p->Append( param[0]->ValCopy() );
+  return p;
+}
+
+
+//------------------------ Dot --------------------------------
+
+
+Portion* GSM_Dot_Check( ListPortion* p1, ListPortion* p2 )
+{
+  int i;
+  if( p1->Length() != p2->Length() )
+    return new ErrorPortion( "Mismatched dimentionalities" );
+  for( i = 1; i <= p1->Length(); i++ )
+    if( (*p1)[ i ]->Type() == porLIST )
+      return new ErrorPortion("Can only operate on 1-D lists");
+  return 0;
+}
+
+
+Portion* GSM_Dot_Integer(Portion **param)
+{
+  int i;
+  Portion* p;
+  ListPortion* p1 = (ListPortion*) param[0];
+  ListPortion* p2 = (ListPortion*) param[1];
+
+  p = GSM_Dot_Check( p1, p2 );
+  if( p != 0 )
+    return p;
+
+  p = new IntValPortion( (long) 0 );
+  for( i = 1; i <= p1->Length(); i++ )
+  {
+    ((IntPortion*) p)->Value() += 
+      (((IntPortion*) (*p1)[i])->Value() * 
+       ((IntPortion*) (*p2)[i])->Value());
+  }
+  return p;
+}
+
+Portion* GSM_Dot_Float(Portion **param)
+{
+  int i;
+  Portion* p;
+  ListPortion* p1 = (ListPortion*) param[0];
+  ListPortion* p2 = (ListPortion*) param[1];
+
+  p = GSM_Dot_Check( p1, p2 );
+  if( p != 0 )
+    return p;
+
+  p = new FloatValPortion( (double) 0 );
+  for( i = 1; i <= p1->Length(); i++ )
+  {
+    ((FloatPortion*) p)->Value() += 
+      (((FloatPortion*) (*p1)[i])->Value() * 
+       ((FloatPortion*) (*p2)[i])->Value());
+  }
+  return p;
+}
+
+Portion* GSM_Dot_Rational(Portion **param)
+{
+  int i;
+  Portion* p;
+  ListPortion* p1 = (ListPortion*) param[0];
+  ListPortion* p2 = (ListPortion*) param[1];
+
+  p = GSM_Dot_Check( p1, p2 );
+  if( p != 0 )
+    return p;
+
+  p = new RationalValPortion( (gRational) 0 );
+  for( i = 1; i <= p1->Length(); i++ )
+  {
+    ((RationalPortion*) p)->Value() += 
+      (((RationalPortion*) (*p1)[i])->Value() * 
+       ((RationalPortion*) (*p2)[i])->Value());
+  }
+  return p;
+}
+
+
+
+
+
+
+
+
+//--------------------------- Init_listfunc ------------------------------
 
 void Init_listfunc(GSM *gsm)
 {
@@ -192,7 +295,7 @@ void Init_listfunc(GSM *gsm)
 
 
   FuncObj = new FuncDescObj("NthElement");
-  FuncObj->SetFuncInfo(GSM_NthElement, 2);
+  FuncObj->SetFuncInfo(GSM_NthElement, 2 );
   FuncObj->SetParamInfo(GSM_NthElement, 0, "list", porANYLIST | porLIST);
   FuncObj->SetParamInfo(GSM_NthElement, 1, "n", porINTEGER);
   gsm->AddFunction(FuncObj);
@@ -258,6 +361,33 @@ void Init_listfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("IsWatchRunning");
   FuncObj->SetFuncInfo(GSM_IsWatchRunning, 0);
+  gsm->AddFunction(FuncObj);
+
+
+  //-------------------------- List -----------------------------
+
+  FuncObj = new FuncDescObj("List");
+  FuncObj->SetFuncInfo(GSM_List, 2);
+  FuncObj->SetParamInfo(GSM_List, 0, "x", porANYTYPE);
+  FuncObj->SetParamInfo(GSM_List, 1, "length", porINTEGER, 
+			new IntValPortion(1));
+  gsm->AddFunction(FuncObj);
+
+  //--------------------------- Dot ----------------------------
+
+  FuncObj = new FuncDescObj("Dot");
+  
+  FuncObj->SetFuncInfo(GSM_Dot_Integer, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 0, "x", porLIST | porINTEGER);
+  FuncObj->SetParamInfo(GSM_Dot_Integer, 1, "y", porLIST | porINTEGER);
+
+  FuncObj->SetFuncInfo(GSM_Dot_Float, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Float, 0, "x", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_Dot_Float, 1, "y", porLIST | porFLOAT);
+  
+  FuncObj->SetFuncInfo(GSM_Dot_Rational, 2);
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 0, "x", porLIST | porRATIONAL);
+  FuncObj->SetParamInfo(GSM_Dot_Rational, 1, "y", porLIST | porRATIONAL);
   gsm->AddFunction(FuncObj);
 
 }

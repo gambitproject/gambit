@@ -24,12 +24,18 @@
 #define NO_DEFAULT_VALUE  ( (Portion*)  0 )
 #define PARAM_NOT_FOUND   ( (int)      -1 )
 #define PARAM_AMBIGUOUS   ( (int)      -2 )
-#define DEFAULT_NFG       ( (int) 1 )
-#define DEFAULT_EFG       ( (int) 2 )
 
 
-#define PASS_BY_REFERENCE true
-#define PASS_BY_VALUE     false
+#define PASS_BY_REFERENCE    true
+#define PASS_BY_VALUE        false
+
+#define AUTO_VAL_OR_REF      true
+
+#define NON_LISTABLE         false
+#define LISTABLE             true
+
+#define NO_PREDEFINED_PARAMS ( (Portion*) 0 )
+
 
 
 class FuncDescObj;
@@ -77,9 +83,10 @@ public:
 class FuncInfoType
 {
 public:
-  bool                 UserDefined;
   Portion*             (*FuncPtr)(Portion **);
   gList<Instruction*>* FuncInstr;
+  bool                 UserDefined;
+  bool                 Listable;
   int                  NumParams;
   ParamInfoType*       ParamInfo;
 };
@@ -95,7 +102,8 @@ private:
   void _SetFuncInfo
     ( 
      const int f_index, 
-     const int num_params
+     const int num_params,
+     const bool listable
      );
 
   void _SetParamInfo
@@ -124,14 +132,16 @@ public:
     (
      Portion*        (*func_ptr)(Portion**),
      const int       num_params = 0, 
-     const ParamInfoType param_info[] = 0
+     const ParamInfoType param_info[] = 0,
+     const bool listable = LISTABLE
      );
 
   void SetFuncInfo
     (
      gList< Instruction* >* func_instr,
      const int       num_params = 0, 
-     const ParamInfoType param_info[] = 0
+     const ParamInfoType param_info[] = 0,
+     const bool listable = LISTABLE
      );
 
   void SetParamInfo
@@ -196,9 +206,11 @@ class CallFuncObj : public FuncDescObj
   int                   _CurrParamIndex;
   bool                  _ErrorOccurred;
 
-  bool _TypeMatch( Portion* p, PortionType ExpectedType ) const;
-
   gString _ParamName( const int index ) const;
+
+  static bool _TypeMatch( Portion* p, PortionType ExpectedType, bool Listable);
+
+  static bool _ListDimMatch( ListPortion* p1, ListPortion* p2 );
 
   static void _ErrorMessage
     (
@@ -216,16 +228,16 @@ class CallFuncObj : public FuncDescObj
   ~CallFuncObj();
 
   int         NumParams ( void ) const;
-  int         FindParamName        ( const gString& param_name );
+  bool        SetCurrParamIndex ( const gString& param_name );
 
-  void  SetCurrParamIndex   ( const int index );
   bool  SetCurrParam ( Portion* param, bool auto_val_or_ref = false );
 
   void        SetErrorOccurred ( void );
 
-  ReferencePortion* GetCurrParamRef ( void ) const;
+  ReferencePortion* GetParamRef ( int index ) const;
 
-  Portion*    CallFunction      ( GSM*, Portion** param );
+  Portion* CallFunction      ( GSM*, Portion** param );
+  Portion* CallListFunction  ( GSM*, Portion** ParamIn );
 };
 
 

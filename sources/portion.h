@@ -998,14 +998,16 @@ template <class T> class gList;
 class ListPortion : public Portion
 {
 protected:
-  // gBlock< Portion* >* _Value;
   gList< Portion* >* _Value;
   ListPortion( void );
 
+  bool _ContainsListsOnly;
   PortionType      _DataType;
 
 public:
   virtual ~ListPortion();
+
+  bool ContainsListsOnly( void ) const;
 
   bool IsValid( void ) const;
 

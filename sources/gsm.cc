@@ -953,16 +953,8 @@ bool GSM::_BindCheck( const gString& param_name ) const
 #endif // NDEBUG
   
   func = _CallFuncStack->Peek();
-  new_index = func->FindParamName( param_name );
-  
-  if( new_index >= 0 )
-  {
-    func->SetCurrParamIndex( new_index );
-  }
-  else
-  {
-    result = false;
-  }
+  result = func->SetCurrParamIndex( param_name );
+    
   return result;
 }
 
@@ -1152,8 +1144,7 @@ bool GSM::CallFunction( void )
 
   for( index = 0; index < num_params; index++ )
   {
-    func->SetCurrParamIndex( index );
-    refp = func->GetCurrParamRef();
+    refp = func->GetParamRef( index );
 
     if( refp != 0 )
     {

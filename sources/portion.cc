@@ -2159,6 +2159,7 @@ bool InputRefPortion::IsReference( void ) const
 
 ListPortion::ListPortion( void )
 { 
+  _ContainsListsOnly = true;
   _DataType = porUNKNOWN;
 }
 
@@ -2166,7 +2167,6 @@ ListPortion::~ListPortion()
 { }
 
 
-// gBlock< Portion* >& ListPortion::Value( void ) const
 gList< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
 
@@ -2314,7 +2314,6 @@ ListValPortion::ListValPortion( void )
   _Value = new gList< Portion* >;
 }
 
-// ListValPortion::ListValPortion( gBlock< Portion* >& value )
 ListValPortion::ListValPortion( gList< Portion* >& value )
 { 
   int i;
@@ -2359,7 +2358,13 @@ bool ListRefPortion::IsReference( void ) const
 
 
 
-
+bool ListPortion::ContainsListsOnly( void ) const
+{
+  if( _Value->Length() == 0 )
+    return false;
+  else
+    return _ContainsListsOnly;
+}
 
 
 void ListPortion::SetDataType( PortionType data_type )
@@ -2422,7 +2427,10 @@ int ListPortion::Insert( Portion* item, int index )
   if( item->Type() == porLIST )
     item_type = ( (ListPortion*) item )->_DataType;
   else
+  {
     item_type = item->Type();
+    _ContainsListsOnly = false;
+  }
 
   if( _Value->Length() == 0 )  // creating a new list
   {
@@ -2470,10 +2478,14 @@ int ListPortion::Contains( Portion* item ) const
 
 Portion* ListPortion::Remove( int index )
 { 
+  Portion* result;
   if( index >= 1 && index <= _Value->Length() )
-    return _Value->Remove( index );
+    result = _Value->Remove( index );
   else
-    return 0;
+    result = 0;
+  if( _Value->Length() == 0 )
+    _ContainsListsOnly = true;
+  return result;
 }
 
 int ListPortion::Length( void ) const
