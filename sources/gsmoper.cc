@@ -677,6 +677,10 @@ Portion* GSM_NOT( Portion** param )
 }
 
 
+Portion *GSM_Paren(Portion **param)
+{
+  return param[0]->Copy();
+}
 
 //-----------------------------------------------------------------
 //    NewStream function - possibly belong somewhere else
@@ -1105,9 +1109,11 @@ void Init_gsmoper( GSM* gsm )
 			porBOOL, NO_DEFAULT_VALUE );
   gsm->AddFunction( FuncObj );
 
+  FuncObj = new FuncDescObj("Paren");
+  FuncObj->SetFuncInfo(GSM_Paren, 1);
+  FuncObj->SetParamInfo(GSM_Paren, 0, "x", porVALUE, NO_DEFAULT_VALUE);
+  gsm->AddFunction(FuncObj);
 
-
-  
   /*-------------------- NewStream -------------------------*/
 
   FuncObj = new FuncDescObj( (gString) "NewStream" );
