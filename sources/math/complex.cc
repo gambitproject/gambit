@@ -141,7 +141,7 @@ gComplex gComplex::operator - () const
 
 void gComplex::error(const char* msg) const
 {
-  gerr << "gComplex class error: " << msg << '\n';
+  //  gerr << "gComplex class error: " << msg << '\n';
   assert(0);
 }
 
@@ -152,8 +152,10 @@ void gComplex::error(const char* msg) const
 gOutput& operator << (gOutput& s, const gComplex& y)
 {
   s << y.re;
-  if (y.im >= 0.0) gout << "+";
-  gout << y.im << "i";
+  if (y.im >= 0.0) {
+    s << "+";
+  }
+  s << y.im << "i";
   return s;
 }
 
@@ -167,7 +169,7 @@ gInput &operator>>(gInput &f, gComplex &y)
   while (isspace(ch)) f >> ch;
 
   if (ch != '+' && ch != '-') { 
-    gout << "Error in input of complex.\n";
+    //    gout << "Error in input of complex.\n";
     exit(1);
   }
 
@@ -178,7 +180,7 @@ gInput &operator>>(gInput &f, gComplex &y)
   ch = ' '; while (isspace(ch)) f >> ch;
 
   if (ch != 'i') { 
-    gout << "Error in input of complex.\n";
+    //    gout << "Error in input of complex.\n";
     exit(1);
   }
 
@@ -223,8 +225,8 @@ gComplex pow(const gComplex& x, const long y)
 
 gText ToText(const gComplex /* d */)
 {
-  gout << "\nError: ToText(gComplex) must be defined for compilation,";
-  gout << " but is not functional.\n";
+  //  gout << "\nError: ToText(gComplex) must be defined for compilation,";
+  // gout << " but is not functional.\n";
   exit(0);
   return "";
 }
@@ -233,8 +235,8 @@ gText ToText(const gComplex /* d */)
 
 gComplex TOgComplex(const gText & /* s */)
 { 
-  gout << "\nError: TOgComplex must be defined for compilation,";
-  gout << " but is not functional.\n";
+  //  gout << "\nError: TOgComplex must be defined for compilation,";
+  // gout << " but is not functional.\n";
   exit(0);
   return gComplex(0, 0);
 }

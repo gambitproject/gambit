@@ -840,20 +840,26 @@ EFSupportWithActiveInfo::operator=(const EFSupportWithActiveInfo &s)
 bool 
 EFSupportWithActiveInfo::operator==(const EFSupportWithActiveInfo &s) const
 {
-  if ((EFSupport&) *this != (EFSupport&) s) 
-    {gout << "Underlying supports differ.\n"; return false; }
-  if (is_infoset_active != s.is_infoset_active)
-    {gout<< "Active infosets differ:\n"; 
+  if ((EFSupport&) *this != (EFSupport&) s) {
+    //  gout << "Underlying supports differ.\n"; 
+    return false; 
+  }
+  
+  if (is_infoset_active != s.is_infoset_active) {
+    //    gout<< "Active infosets differ:\n"; 
    
-    for(int i = 0; i < is_infoset_active.Length(); i++)
-      gout << "is_infoset_active[" << i << "] = " << is_infoset_active[i];
+    //  for(int i = 0; i < is_infoset_active.Length(); i++)
+    //  gout << "is_infoset_active[" << i << "] = " << is_infoset_active[i];
 
-    for(int i = 0; i < s.is_infoset_active.Length(); i++)
-      gout << "s.is_infoset_active[" << i << "] = " << s.is_infoset_active[i];
+    //for(int i = 0; i < s.is_infoset_active.Length(); i++)
+    //  gout << "s.is_infoset_active[" << i << "] = " << s.is_infoset_active[i];
 
-    return false;}
-  if (is_nonterminal_node_active != s.is_nonterminal_node_active)
-    {gout << "Active nodes differ.\n"; return false;}
+    return false;
+  }
+  if (is_nonterminal_node_active != s.is_nonterminal_node_active) {
+    // gout << "Active nodes differ.\n";
+    return false;
+  }
   return true;
 }
 

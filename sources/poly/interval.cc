@@ -14,7 +14,7 @@ template class gInterval<gRational>;
 template class gList< gInterval<gRational> >;
 #ifndef __BCC55__
 template gOutput& operator << (gOutput& output, const gInterval<gRational>& x);
-#endif  __BCC55__
+#endif  // __BCC55__
 
 template class gInterval<int>;
 template class gList< gInterval<int> >;

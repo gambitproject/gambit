@@ -1267,6 +1267,7 @@ void EfgShow::OnToolsDominance(wxCommandEvent &)
       EFSupport newSupport(support);
 
       while (true) {
+	gNullOutput gnull;
 	newSupport = support.Undominated(dialog.DomStrong(),
 					 dialog.DomConditional(),
 					 dialog.Players(), gnull, status);

@@ -35,7 +35,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 void gRational::error(const char* msg) const
 {
-  gerr << "gRational class error: " << msg << '\n';
+  //  gerr << "gRational class error: " << msg << '\n';
   assert(0);
 }
 

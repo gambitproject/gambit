@@ -400,8 +400,8 @@ bool EFBasis::IsConsistent()
   LPSolve<double> lp((*A),(*b),(*c),num_eqs, status);
 
   // gout << "\noptimum: " << lp.OptimumVector();
-  if(!lp.IsWellFormed()) gout << "\nLP not well formed";
-  if(!lp.IsBounded()) gout << "\nLP not bounded";
+  //  if(!lp.IsWellFormed()) gout << "\nLP not well formed";
+  //  if(!lp.IsBounded()) gout << "\nLP not bounded";
   bool flag = lp.IsFeasible();
   for (int i = 1; i <= num_act_vars; i++)
     if(lp.OptimumVector()[i]<=0.0) flag = false;
@@ -576,8 +576,8 @@ void EFBasis::GetConsistencySolution(const gVector<double> &x)
 	if((*nodeIndex)(i,j,k))
 	  nodes(i,j,k) = (int)x[(*nodeIndex)(i,j,k)];
     }
-  gout << "\nacts: " << acts;
-  gout << "\nnodes: " << nodes;
+  //  gout << "\nacts: " << acts;
+  //  gout << "\nnodes: " << nodes;
 }
 
 void EFBasis::Dump(gOutput& s) const

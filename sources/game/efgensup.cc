@@ -549,16 +549,3 @@ InfosetGuaranteedActiveByPriorCommitments(const EFSupportWithActiveInfo *S,
   return false;
 }
 
-//////////////////////Testing////////////////////
-
-void AndyTest(const EFSupport &S, gStatus &status)
-{
-  //  bool strong = true;
-  //  bool conditional = true;
-  gList<const EFSupport> list = PossibleNashSubsupports(S,
-							  //strong, 
-							  //conditional, 
-							  status);
-  for (int i = 1; i <= list.Length(); i++)
-    gout << list[i] << "\n";
-} 

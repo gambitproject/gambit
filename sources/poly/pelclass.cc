@@ -43,15 +43,15 @@ Pring PelView::MakePring(const int num) const
 
 void PelView::PrintPring(const Pring &ring) const
 {
-  gout << "The Pring has " << ring->n << " variables: ";
+  //  gout << "The Pring has " << ring->n << " variables: ";
   for (int i = 1; i <= ring->n; i++) {
-    gout << ring->vars[i-1];
-    if (i < ring->n) 
-      gout << ", ";
-    else
-      gout << ".\n";
+    //    gout << ring->vars[i-1];
+    //if (i < ring->n) 
+    //  gout << ", ";
+    //else
+    //  gout << ".\n";
   }
-  gout << "  The homotopy variable is " << ring->def << ".\n";
+  // gout << "  The homotopy variable is " << ring->def << ".\n";
 }
 
 void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node, 
@@ -395,7 +395,7 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
       Solve = G_Solve(Link(Genpoly, Qtrig), tweak);
 #ifdef PELVIEW_DEBUG
       print_Gen_list(Solve);
-      gout<< " \n Step 11 \n";
+      //      gout<< " \n Step 11 \n";
 #endif
 
       sols = SolutionsDerivedFromContinuation(ring,
@@ -404,7 +404,7 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 					      pel_system,
 					      tweak);
 #ifdef PELVIEW_DEBUG
-      gout<<" \n The solution list produced by Pelican is:\n";
+      //      gout<<" \n The solution list produced by Pelican is:\n";
       print_Gen_list(sols);
 #endif
       
@@ -412,7 +412,7 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
       pel_system->next= 0;
       
 #ifdef PELVIEW_DEBUG
-      gout << "\n Step 12 \n";
+      //      gout << "\n Step 12 \n";
 #endif
       solutionsarecorrect = CheckSolutions(G_Verify(Link(pel_system,sols)));
       if (solutionsarecorrect && 
@@ -420,10 +420,10 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
 	done = true;
       if (!done) free_Gen_list(sols);
 #ifdef PELVIEW_DEBUG
-      gout << "The solutions are ";
-      if (!solutionsarecorrect)
-	gout << "not ";
-      gout << "correct.\n";
+      //      gout << "The solutions are ";
+      //    if (!solutionsarecorrect)
+	//	gout << "not ";
+      //      gout << "correct.\n";
 #endif
     }
   
@@ -475,6 +475,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
 void PelView::DisplayComplexRootList(const gList<gVector<gComplex> > 
 				                       &complexroots) const
 {
+#ifdef UNUSED
   for (int k = 1; k <= complexroots.Length(); k++)
     for (int m = 1; m <= complexroots[k].Length(); m++) {
       if (m ==1) 
@@ -487,6 +488,7 @@ void PelView::DisplayComplexRootList(const gList<gVector<gComplex> >
       else
 	gout << " }\n";
     }
+#endif  // UNUSED
 }
 
 int PelView::Dmnsn() const
@@ -537,20 +539,20 @@ PelView::PelView(const gPolyList<gDouble> &mylist):input(mylist)
   InitializePelicanMemory();
   
 #ifdef PELVIEW_DEBUG
-  gout << "We begin with the polynomial list\n" << mylist << "\n";
+  //  gout << "We begin with the polynomial list\n" << mylist << "\n";
 #endif
 
   Pring ring = MakePring(input.Length());  
 
 #ifdef PELVIEW_DEBUG
-  gout<< " Step 1 \n";
+  //  gout<< " Step 1 \n";
   PrintPring(ring);
 #endif
 
   Gen_node vic = Set_Ring((CreateRing(input.Length()+1)));
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n Step 2 \n";
+  //  gout<< "\n Step 2 \n";
   print_Gen_node(vic);
 #endif
 
@@ -558,35 +560,35 @@ PelView::PelView(const gPolyList<gDouble> &mylist):input(mylist)
   Gen_node pel_system = CreatePelicanVersionOfSystem(input,ring); 
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n\n Step 3 \n";
-  gout << "The translated system is:\n";
+  //  gout<< "\n\n Step 3 \n";
+  //  gout << "The translated system is:\n";
   print_Gen_node(pel_system); 
 #endif
 
   Gen_node Atype= G_AType(pel_system); // Atype is the vector of numbers of
 
 #ifdef PELVIEW_DEBUG
-  gout<< " Step 4 \n";
+  //  gout<< " Step 4 \n";
   print_Gen_list(Atype);               // polys with each support type
 #endif
 
   Gen_node Aset = G_Aset(pel_system);
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n Step 5 \n";
-  gout << "The list of unlifted vertex tuples is:\n";
+  //  gout<< "\n Step 5 \n";
+  //  gout << "The list of unlifted vertex tuples is:\n";
   print_Gen_node(Aset);
 #endif
 
   Gen_node Randlift = G_RandLift(Aset);
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n\n Step 6 \n";
-  gout<< "After the random lift, the vertex tuples are:\n";
+  //  gout<< "\n\n Step 6 \n";
+  //  gout<< "After the random lift, the vertex tuples are:\n";
   print_Gen_list(Randlift);
 
-  gout << "\n\n Step 7 \n";
-  gout << "To see the cells in the subdivision, define ACTUALLY_PRINT in pelclqhl.cc:\n";
+  //  gout << "\n\n Step 7 \n";
+  //  gout << "To see the cells in the subdivision, define ACTUALLY_PRINT in pelclqhl.cc:\n";
 #endif
 
   Gen_node Qtrig = G_Qtrig(Link(Randlift, Atype));
@@ -594,56 +596,56 @@ PelView::PelView(const gPolyList<gDouble> &mylist):input(mylist)
   /* - There is a commented out error in node_push_local that was triggered 
 by this in various conditions.  In particular, commented out the final print 
 avoids the error, somehow!!
-  gout<< "\n Step 8 \n";
-  gout<< "Before Randlift is ";
-  gout << Randlift << "\n";
+//  gout<< "\n Step 8 \n";
+//  gout<< "Before Randlift is ";
+//  gout << Randlift << "\n";
   silent_print_Gen_list(Randlift);
-  gout<< "After Randlift is " << Randlift << "\n";
+//  gout<< "After Randlift is " << Randlift << "\n";
   */
 
   mixedvolume = GetMixedVolume(Randlift);
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n Step 8 \n";
-  gout << "The mixed volume is " << mixedvolume << ".\n";
+  //  gout<< "\n Step 8 \n";
+  //  gout << "The mixed volume is " << mixedvolume << ".\n";
 #endif
 
   Gen_node Genpoly = G_Gen_Poly(Randlift);
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n Step 9 \n";
-  gout << "The homotopy system is:\n";
+  //  gout<< "\n Step 9 \n";
+  //  gout << "The homotopy system is:\n";
   print_Gen_list(Genpoly);
 
-  gout<< "\n Step 10 \n";
-  gout << "The Gen_node Solve (solutions of start system) is: \n";
+  //  gout<< "\n Step 10 \n";
+  //  gout << "The Gen_node Solve (solutions of start system) is: \n";
 #endif
 
   Gen_node sols = SolveCheckMaybeTryAgain(ring, Genpoly, Qtrig, pel_system);
   complexroots = GambitRootsFromPelRoots(sols);
 
 #ifdef PELVIEW_DEBUG
-  gout << "\n Step 13 \n";
-  gout<<" After conversion to Gambit, the complex roots are...\n";
+  //  gout << "\n Step 13 \n";
+  //  gout<<" After conversion to Gambit, the complex roots are...\n";
   DisplayComplexRootList(complexroots);
 #endif
 
   realroots = RealRoots(complexroots);
 
 #ifdef PELVIEW_DEBUG
-  gout << "\n Step 14 \n";
-  gout<<" The real solutions are...\n";
-  for (int k = 1; k <= realroots.Length(); k++)
-    gout << realroots[k] << "\n";
-  gout<< "\n Step 15 \n";
-  gout<< "\n Memory testing \n";
+  //  gout << "\n Step 14 \n";
+  //  gout<<" The real solutions are...\n";
+  // for (int k = 1; k <= realroots.Length(); k++)
+  //    gout << realroots[k] << "\n";
+  //  gout<< "\n Step 15 \n";
+  //  gout<< "\n Memory testing \n";
   print_Gen_list(Genpoly); 
 #endif
   
   free_Gen_list(Genpoly);
 
 #ifdef PELVIEW_DEBUG
-  gout<< "\n Qtrig \n";  print_Gen_list(Qtrig);   
+  //  gout<< "\n Qtrig \n";  print_Gen_list(Qtrig);   
 #endif
 
   free_Gen_list(Qtrig);
@@ -651,7 +653,7 @@ avoids the error, somehow!!
   free_Gen_list(sols);
 
 #ifdef PELVIEW_DEBUG
-  gout << "And the memory should be clean...\n";
+  //  gout << "And the memory should be clean...\n";
 #endif
 }
 
@@ -670,7 +672,7 @@ PelView::~PelView()
 
 PelView& PelView::operator =(const PelView &rhs)
 {
-  gout << "For (eventual) const'ness, operator = not allowed for PelView\n";
+  //  gout << "For (eventual) const'ness, operator = not allowed for PelView\n";
   exit (0);
   return *this;  
 }

@@ -41,7 +41,6 @@ gambit_SOURCES = \
 	userprefs.cc \
         valinteger.cc \
         valnumber.cc \
-	wxio.cc \
         wxstatus.cc 
 
 

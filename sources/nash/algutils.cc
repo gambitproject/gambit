@@ -6,8 +6,7 @@
 #include <assert.h>
 
 AlgParams::AlgParams(void)
-  : m_accuracy(0), trace(0), stopAfter(0), precision(precDOUBLE), 
-    tracefile(&gnull)
+  : m_accuracy(0), trace(0), stopAfter(0), precision(precDOUBLE) 
 { }
 
 AlgParams::~AlgParams()

@@ -65,11 +65,10 @@ int System::Shell(const char *command)
   
   int result = -1;
   if (command == NULL) {
-    gerr << "System::Shell: Command interpreter not found or\n";
-    gerr << "               feature not implemented for this compiler.\n";
+    // gerr << "System::Shell: Command interpreter not found or\n";
+    // gerr << "               feature not implemented for this compiler.\n";
   }
   else {
-    assert(command != NULL);
     result = system(command);
   }
   return result;

@@ -375,26 +375,26 @@ template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
   gVector<T> c(tab.GetCost());
   gVector<T> uc(tab.GetUnitCost());
 
-  gout << "\nc: " << c;
-  gout << "\nuc: " << uc;
+  //  gout << "\nc: " << c;
+  //  gout << "\nuc: " << uc;
 
   gVector<T> x(tab.MinRow(),tab.MaxRow());
   tab.BasisVector(x);
 
   int i;
   for(i=c.First();i<=c.Last();i++) {
-    gout << "\ncol: " << i << " cost: " << tab.RelativeCost(i);
-    gout  << " label: " << tab.Label(i) << " x: " << x[tab.Label(i)];
+    //   gout << "\ncol: " << i << " cost: " << tab.RelativeCost(i);
+    //   gout  << " label: " << tab.Label(i) << " x: " << x[tab.Label(i)];
     if(tab.RelativeCost(i) < -eps2 && x[tab.Label(i)]>eps2) {
-      gout << " mark";
+      //    gout << " mark";
       tab.Mark(i);
     }
   }
   for(i=uc.First();i<=uc.Last();i++) {
-    gout << "\nrow: " << i << " cost: " << tab.RelativeCost(-i);
-    gout << " label: " << tab.Label(-i) << " x: " << x[tab.Label(-i)];
+    //    gout << "\nrow: " << i << " cost: " << tab.RelativeCost(-i);
+    //   gout << " label: " << tab.Label(-i) << " x: " << x[tab.Label(-i)];
     if(tab.RelativeCost(-i) < -eps2 && x[tab.Label(-i)]>eps2) {
-      gout << " mark";
+      //     gout << " mark";
       tab.Mark(-i);
     }
   }
@@ -406,30 +406,30 @@ template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
   gList<BFS<T> > *dual_bfs = new gList<BFS<T> >(AllSolutions.DualVertexList());
   AllSolutions.Vertices(verts);
 
-  gout << "\nHere are the BFSs: \n";
+  //  gout << "\nHere are the BFSs: \n";
   for( i=1;i<=(*bfs).Length();i++) {
-    gout << "\n" << i << ": ";
-    (*bfs)[i].Dump(gout);
+    //    gout << "\n" << i << ": ";
+    //  (*bfs)[i].Dump(gout);
   }
-  gout << "\nHere are the Dual BFSs: \n";
+  //  gout << "\nHere are the Dual BFSs: \n";
   for( i=1;i<=(*dual_bfs).Length();i++) {
-    gout << "\n" << i << ": ";
-    (*dual_bfs)[i].Dump(gout);
+    //    gout << "\n" << i << ": ";
+    //n   (*dual_bfs)[i].Dump(gout);
   }
-  gout << "\nHere are the vertices:\n";
+  //  gout << "\nHere are the vertices:\n";
 
-  for( i=1;i<=verts.Length();i++)
-    gout << "\n" << i << ": " << verts[i];
+  //  for( i=1;i<=verts.Length();i++)
+    //   gout << "\n" << i << ": " << verts[i];
   
   for( i=1;i<=(*bfs).Length();i++)
     for(int j=1;j<=neqns;j++)
       if((*dual_bfs)[i].IsDefined(-j))
 	(*bfs)[i].Define(-j,(*dual_bfs)[i](-j));
 
-  gout << "\nHere are the BFSs: \n";
+  //  gout << "\nHere are the BFSs: \n";
   for( i=1;i<=(*bfs).Length();i++) {
-    gout << "\n" << i << ": ";
-    (*bfs)[i].Dump(gout);
+    //  gout << "\n" << i << ": ";
+    //  (*bfs)[i].Dump(gout);
   }
 
   return *bfs;

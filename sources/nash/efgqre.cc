@@ -157,7 +157,7 @@ gList<BehavSolution> efgQre::Solve(const EFSupport &p_support,
   double lambda = 0.0;
   int numSteps = 0;
 
-  WritePXIHeader(gnull, efg);
+  //  WritePXIHeader(gnull, efg);
 
   // Pick the direction to follow the path so that lambda starts out
   // increasing

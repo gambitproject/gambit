@@ -138,6 +138,7 @@ gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
     InitMatrix(xi, p.Lengths());
     
     gPVector<double> pvect(p.GetPVector());
+    gNullOutput gnull;
     if (Powell(pvect, xi, F, value, iter,
 	       m_maxits1, m_tol1, m_maxitsN, 
 	       m_tolN, gnull, 0, true, 

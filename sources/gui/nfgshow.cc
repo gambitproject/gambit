@@ -800,6 +800,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
       NFSupport newSupport(support);
 
       while (true) {
+	gNullOutput gnull;
 	if (dialog.DomMixed()) {
 	  newSupport = support.MixedUndominated(dialog.DomStrong(),
 						precRATIONAL,
@@ -901,6 +902,7 @@ void NfgShow::OnToolsQre(wxCommandEvent &)
       algorithm.SetTol2(dialog.Tol2());
 
       wxStatus status(this, "QreGridSolve Progress");
+      gNullOutput gnull;
       algorithm.Solve(*m_currentSupport, gnull, status, solutions);
     }
     else {

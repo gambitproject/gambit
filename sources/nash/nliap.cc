@@ -196,6 +196,7 @@ gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
     double value;
     int iter;
 
+    gNullOutput gnull;
     if (DFP(p, F, value, iter, m_maxits1, m_tol1,
 	    m_maxitsN, m_tolN, gnull, 0, false, p_status)) {
       bool add = true;

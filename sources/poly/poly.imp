@@ -45,7 +45,10 @@ polynomial<T>::polynomial(const gVector<T>& coefficientvector)
 template <class T> polynomial<T>::polynomial(const int deg) 
 : coeflist()
 { 
-  if (deg >= 0) { gout << "Error is polynomial int constructor.\n"; exit(1); }
+  if (deg >= 0) { 
+    //gout << "Error is polynomial int constructor.\n"; 
+    exit(1);
+  }
 }
 
 template <class T> polynomial<T>::~polynomial()
@@ -539,7 +542,10 @@ complexpoly::complexpoly(const gList<gComplex>& coefficientlist)
 complexpoly::complexpoly(const int deg) 
 : coeflist()
 { 
-  if (deg >= 0) { gout << "Error is complexpoly int constructor.\n"; exit(1); }
+  if (deg >= 0) { 
+    //gout << "Error is complexpoly int constructor.\n"; 
+    exit(1);
+  }
 }
 
 complexpoly::~complexpoly()
@@ -799,7 +805,7 @@ gList<gComplex> complexpoly::Roots() const
 	else done = true;
       }
     if (count == 10) { 
-      gout << "Failure in complexpoly::Roots().\n";
+      //      gout << "Failure in complexpoly::Roots().\n";
       exit(1);
     }
 

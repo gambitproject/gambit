@@ -355,7 +355,7 @@ gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
 {
   gList<MixedSolution> solutions;
   MixedProfile<double> start(p_support);
-  WritePXIHeader(gnull, p_support.Game());
+  //  WritePXIHeader(gnull, p_support.Game());
 
   try {
     TracePath(start, 0.0, m_maxLam, p_status, solutions);

@@ -19,8 +19,6 @@ public:
   int trace, stopAfter;
   gPrecision precision;
   
-  gOutput *tracefile;
-  
   AlgParams(void);
   virtual ~AlgParams();
   

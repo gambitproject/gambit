@@ -173,11 +173,15 @@ gTriState MixedSolution::GetNash(void) const
 
 gTriState MixedSolution::GetPerfect(void) const
 {
-  if(IsNash())
-    if(IsMixedDominated(m_profile,false,m_precision,gnull))
+  if (IsNash()) {
+    gNullOutput gnull;
+    if (IsMixedDominated(m_profile,false,m_precision,gnull)) {
       return triFALSE;
-    else if(Game().NumPlayers()==2)
+    }
+    else if (Game().NumPlayers()==2) {
       return triTRUE;
+    }
+  }
   return triUNKNOWN;
 }
 

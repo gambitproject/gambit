@@ -173,7 +173,7 @@ gDouble gDouble::operator - () const
 
 void gDouble::error(const char* msg) const
 {
-  gerr << "gDouble class error: " << msg << '\n';
+  //  gerr << "gDouble class error: " << msg << '\n';
   assert(0);
 }
 

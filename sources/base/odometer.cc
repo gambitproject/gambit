@@ -229,7 +229,10 @@ bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
   for (int i = 1; i <= n; i++) 
     if (CurIndices[i] != rhs.CurIndices[i]) return false;
 
-  if (CurSign != rhs.CurSign) { gout << "Error in gPermutationOdometer\n"; exit(1); }
+  if (CurSign != rhs.CurSign) {
+    //gout << "Error in gPermutationOdometer\n"; 
+    exit(1);
+  }
 
   return true;
 }

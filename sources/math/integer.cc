@@ -2369,7 +2369,7 @@ int gInteger::OK() const
 void gInteger::error(const char* msg) const
 {
   // (*lib_error_handler)("gInteger", msg);
-  gerr << msg << '\n';
+  //  gerr << msg << '\n';
 }
 
 

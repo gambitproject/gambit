@@ -647,11 +647,3 @@ gOutput &gNullOutput::operator<<(const char *)  { return *this; }
 
 gOutput &gNullOutput::operator<<(const void *)  { return *this; }
 
-
-gNullInput _gzero;
-gInput &gzero = _gzero;
-
-gNullOutput _gnull;
-gOutput &gnull = _gnull;
-
-

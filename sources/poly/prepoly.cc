@@ -60,7 +60,8 @@ gSpace::~gSpace()
 //-----------------
 
 gSpace& gSpace::operator=(const gSpace & rhs)
-{gout<<"IF OK, ZAP ME:prepoly.cc7\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc7\n";//**
 
   if (*this == rhs) return *this;
 
@@ -79,7 +80,8 @@ Variable * gSpace::VariableWithNumber(int i) const
 }
 
 const gText & gSpace::GetVariableName(int i) const
-{gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
 
   return ((Variables[i])->Name);
 }
@@ -90,11 +92,13 @@ void gSpace::SetVariableName(int i, const gText &s)
 }
 
 void gSpace::CreateVariables (int nvars )
-{ gout<<"IF OK, ZAP ME:prepoly.cc12\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc12\n";//**
 
   Variable *var;
   int n = Variables.Length();
-  for (int i = 1; i <= nvars; i++){gout<<"IF OK, ZAP ME:prepoly.cc13\n";//**
+  for (int i = 1; i <= nvars; i++) {
+    // gout<<"IF OK, ZAP ME:prepoly.cc13\n";//**
 
     var = new Variable;
     var->Name = 'n';
@@ -104,7 +108,8 @@ void gSpace::CreateVariables (int nvars )
 }
 
 gSpace gSpace::WithVariableAppended() const
-{gout<<"IF OK, ZAP ME:prepoly.cc14\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc14\n";//**
  gSpace enlarged(*this);
  enlarged.CreateVariables(1);
  return enlarged;
@@ -116,7 +121,8 @@ Variable* gSpace::operator[](int i) const
 }
 
 bool gSpace::operator==(const gSpace & rhs) const
-{gout<<"IF OK, ZAP ME:prepoly.cc15\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc15\n";//**
 
   if (Variables.Length() == rhs.Variables.Length() && 
       Variables          == rhs.Variables)
@@ -126,7 +132,8 @@ bool gSpace::operator==(const gSpace & rhs) const
 }
 
 bool gSpace::operator!=(const gSpace & rhs) const
-{gout<<"IF OK, ZAP ME:prepoly.cc16\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc16\n";//**
 
   return !(*this == rhs);
 }
@@ -385,7 +392,8 @@ int exp_vect::Dmnsn() const
 }
 
 bool exp_vect::IsPositive() const
-{gout<<"IF OK, ZAP ME:prepoly.cc40\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc40\n";//**
 
   for (int i = 1; i <= Dmnsn(); i++)
     if (components[i] <= 0)
@@ -395,7 +403,8 @@ bool exp_vect::IsPositive() const
 }
 
 bool exp_vect::IsNonnegative() const
-{gout<<"IF OK, ZAP ME:prepoly.cc41\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc41\n";//**
 
   for (int i = 1; i <= Dmnsn(); i++)
     if (components[i] < 0)
@@ -595,7 +604,8 @@ term_order::~term_order()
 //-------------------------
 
 term_order& term_order::operator=(term_order & RHS) 
-{gout<<"IF OK, ZAP ME:prepoly.cc50\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc50\n";//**
 
   if (*this == RHS) return *this;
 
@@ -611,7 +621,8 @@ bool term_order::operator==(const term_order & RHS) const
 }
 
 bool term_order::operator!=(const term_order & RHS) const
-{gout<<"IF OK, ZAP ME:prepoly.cc52\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc52\n";//**
 
   return !(*this == RHS);
 }
@@ -638,7 +649,8 @@ bool term_order::Greater(const exp_vect & LHS, const exp_vect & RHS) const
 
 bool term_order::GreaterOrEqual(const exp_vect & LHS, 
 				const exp_vect & RHS) const
-{gout<<"IF OK, ZAP ME:prepoly.cc56\n";//**
+{
+  // gout<<"IF OK, ZAP ME:prepoly.cc56\n";//**
 
   return !(Less(LHS, RHS));
 }

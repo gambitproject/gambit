@@ -40,8 +40,8 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
       if (i1 < K) i1++;
       else { c++; i1 = i; }
     if (c > M.NumColumns()) {
-      gout << "First NumRows() rows not linearly independent in "
-	<< "LinearCombination(gMatrix<T> M).\n";
+      //      gout << "First NumRows() rows not linearly independent in "
+      //	<< "LinearCombination(gMatrix<T> M).\n";
       exit(1);
     }
 
@@ -70,10 +70,10 @@ LinearCombination<T>::LinearCombination(const gMatrix<T> &M)
     while ( PivotColumn[K] <= M.NumColumns() &&
 	   scrambled(PivotRow[K],PivotColumn[K]) == (T)0 ) PivotColumn[K]++;
     if (PivotColumn[K] > M.NumColumns()) {
-      gout << "First NumRows()-1 rows not linearly independent in "
-	<< "LinearCombination(gMatrix<T> M).\n";
-      gout << "At the time of failure, scrambled is \n"
-	<< scrambled << "\n";
+      //      gout << "First NumRows()-1 rows not linearly independent in "
+      //	<< "LinearCombination(gMatrix<T> M).\n";
+      // gout << "At the time of failure, scrambled is \n"
+      //	<< scrambled << "\n";
       exit(1);
     }
 

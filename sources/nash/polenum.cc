@@ -113,10 +113,6 @@ int PolEnumModule::PolEnum(gStatus &p_status)
 								   p_status);
 
   timer.Stop();
-  if(params.trace>0) {
-    (*params.tracefile)  << "The QuikSolv computation of roots took " 
-      << (int)timer.Elapsed() << " seconds.\n\n";
-  }
   int index = SaveSolutions(solutionlist);
   time = watch.Elapsed();
   return index;	 
@@ -280,23 +276,8 @@ PolEnumModule::NashOnSupportSolnVectors(const gPolyList<gDouble> &equations,
   QuikSolv<gDouble> quickie(equations, p_status);
   //  p_status.SetProgress(0);
 
-  if (params.trace>0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n" 
-      << quickie.UnderlyingEquations() ;
-  }  
-
   try {
-    if (quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
-      if (params.trace>0) {
-	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-			    << num_vars << " :\n" << quickie.RootList();
-      }
-    }
-    else
-      if (params.trace>0) {
-	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
-			    << " could not be resolved by FindRoots.\n";
-      }
+    quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter);
   }
   catch (gSignalBreak &) { }
   catch (gSquareMatrix<gDouble>::MatrixSingular) {

@@ -21,16 +21,15 @@ VertEnum<T>::VertEnum(LPTableau<T> &tab, gStatus &status_)
     btemp(tab.Get_b()), c(tab.GetCost()), 
     npivots(0), nodes(0), status(status_) 
 {
-
-  gout << "\nin VertEnum(tab)\n";
-  tab.Dump(gout);
+  //  gout << "\nin VertEnum(tab)\n";
+  //  tab.Dump(gout);
 
   int i;
   for(i=b.First();i<=b.Last();i++)
     if(b[i]==(T)0)
       mult_opt=1;
 
-  gout << "\nb: " << b;
+  //  gout << "\nb: " << b;
 
   // Is this stuff right?
   btemp = -(T)1;
@@ -45,8 +44,8 @@ VertEnum<T>::VertEnum(LPTableau<T> &tab, gStatus &status_)
   for(i=tab.MinCol();i<=tab.MaxCol();i++)
     if(tab.Member(i)) c[i]=(T)0;
 
-  gout << "\nc: " << c;
-  gout << "\nuc: " << uc;
+  //  gout << "\nc: " << c;
+  //  gout << "\nuc: " << uc;
 
   tab.SetCost(uc,c);
   DualSearch(tab);
@@ -283,10 +282,10 @@ template <class T> void DoubleVertEnum<T>::
 EnumerateComplementaryFace(LPTableau<T> &tab, Tableau<T> &tab2)
 {
   int i;
-  gout << "\ntab:";
-  tab.Dump(gout);
-  gout << "\ntab2:";
-  tab2.Dump(gout);
+  //  gout << "\ntab:";
+  //  tab.Dump(gout);
+  // gout << "\ntab2:";
+  // tab2.Dump(gout);
   gVector<T> x(tab.MinRow(),tab.MaxRow());
   tab.BasisVector(x);
   for(i=tab.MinRow();i<=tab.MaxRow();i++)

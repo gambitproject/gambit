@@ -33,7 +33,7 @@ template<class T> gInterval<T>::~gInterval()
 template <class T> 
 gInterval<T> &gInterval<T>::operator=(const gInterval<T> &)
 {
-  gout << "For const'ness, operator = not allowed for gIntervals\n";
+  //  gout << "For const'ness, operator = not allowed for gIntervals\n";
   assert(0);
   return *this;
 /*

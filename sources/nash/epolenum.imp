@@ -94,10 +94,6 @@ EfgPolEnumModule<T>::EfgPolEnumModule(const EFSupport &S,
 { 
 //  gEpsilon(eps,12);
 
-  if(params.trace>1) {
-    (*params.tracefile) << "\nNumSequences: " << support.TotalNumSequences();
-    SF.Dump(*(params.tracefile));
-  }
   num_vars = SF.TotalNumSequences()-SF.NumPlayerInfosets()-SF.NumPlayers();
 
   Space = new gSpace(num_vars);
@@ -187,8 +183,6 @@ EfgPolEnumModule<T>::Payoff(int pl) const
       equation+=term;
     }
   }
-  if(params.trace >1)
-    (*params.tracefile) << "\nPayoff( " << pl << "): " << equation;
   return equation;
 }
 
@@ -243,30 +237,38 @@ EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gPolyList<T> &equations,
 					      gStatus &p_status)
 {
   QuikSolv<T> quickie(equations, p_status);
+#ifdef UNUSED
   if(params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 
       << quickie.UnderlyingEquations() ;
   }  
+#endif  // UNUSED
 
   // 2147483647 = 2^31-1 = MaxInt
 
   try {
     if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
+#ifdef UNUSED
       if(params.trace>0) {
 	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
 			    << num_vars << " :\n" << quickie.RootList();
       }
+#endif  // UNUSED
     }
     else
+#ifdef UNUSED
       if(params.trace>0) {
 	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
 			    << " could not be resolved by FindRoots.\n";
       }
+#endif  // UNUSED
     timer.Stop();
+#ifdef UNUSED
     if(params.trace>0) {
       (*params.tracefile)  << "The QuikSolv computation of roots took " 
 			   << (int)timer.Elapsed() << " seconds.\n\n";
     }
+#endif  // UNUSED
   }
   catch (gSignalBreak &) { }
   catch (gSquareMatrix<gDouble>::MatrixSingular) {
@@ -331,9 +333,6 @@ EfgPolEnumModule<T>::SaveANFNashSolutions(const gList<gVector<gDouble> > &list,
   for (int k = 1; k <= list.Length(); k++) {
     gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
 
-    if(params.trace > 1) 
-      (*params.tracefile) << "\nk: " << k << " y: " << y;
-
     BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
 
     if (ExtendsToNash(sol,p_status)) { 
@@ -360,9 +359,6 @@ EfgPolEnumModule<T>::SaveNashSolutions(const gList<gVector<gDouble> > &list,
   int index=0;
   for (int k = 1; k <= list.Length(); k++) {
     gPVector<double> y = SeqFormVectorFromSolFormVector(list[k]);
-
-    if(params.trace > 1) 
-      (*params.tracefile) << "\nk: " << k << " y: " << y;
 
     BehavSolution sol(SF.ToBehav(y), algorithmEfg_POLENUM_EFG);
 

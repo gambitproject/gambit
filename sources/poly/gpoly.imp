@@ -472,7 +472,7 @@ template <class T> gList<gMono<T> > gPoly<T>::MonomialList() const
 
 template <class T> int gPoly<T>::No_Monomials() const
 {
-  gout << "Eliminate old code in No_monomials, if successful.\n";
+  //  gout << "Eliminate old code in No_monomials, if successful.\n";
 
   return Terms.Length();
 }
@@ -639,7 +639,7 @@ template <class T>
 exp_vect gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
 					       const exp_vect& /*expv*/)
 {
-  gout << "You have just tested OrderMaxMonomialDivisibleBy.\n";
+  //  gout << "You have just tested OrderMaxMonomialDivisibleBy.\n";
 
   exp_vect answer(Space); // constructs [0,..,0]
   for (int i = 1; i <= Terms.Length(); i++)

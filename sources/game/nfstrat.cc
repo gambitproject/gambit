@@ -239,7 +239,7 @@ int NFSupport::GetNumber(const Strategy *s) const
   for (int i = 1; i <= strats.Length(); i++)
     if (strats[i] == s)
       return i;
-  gout << "Looking for the number of a strategy not in the support.\n";
+  //  gout << "Looking for the number of a strategy not in the support.\n";
   exit(0);
   return 0;
 }

@@ -217,7 +217,11 @@ template <class T> gOutput &operator<<(gOutput &to, const LHTableau<T> &v)
 
 template <class T>
 void LHTableau<T>::Dump(gOutput &to) const
-{ T1.Dump(to);gout << "\n"; T2.Dump(to); }
+{
+  T1.Dump(to);
+  to << "\n"; 
+  T2.Dump(to);
+}
 
 
 template <class T> int LHTableau<T>::PivotIn(int inlabel)

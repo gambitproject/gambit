@@ -192,8 +192,8 @@ template <class T> void gTree<T>::RecursiveDump(gOutput& f,
 						const int level) const
 {
   int i;
-  for (i = 1; i <= level; i++) gout << "   ";
-  gout << n->data << "\n";
+  //  for (i = 1; i <= level; i++) gout << "   ";
+  //  gout << n->data << "\n";
 
   gList<gTreeNode<T>*> children = Children(n);
   for (i = 1; i <= children.Length(); i++) {

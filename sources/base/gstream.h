@@ -290,10 +290,6 @@ class gNullOutput : public gOutput  {
     gOutput &operator<<(const void *x);
 };
 
-
-extern gInput &gin, &gzero;
-extern gOutput &gout, &gerr, &gnull;
-
 #endif   // GSTREAM_H
 
 
