@@ -129,7 +129,7 @@ public:
 
   // checks for a valid EFActionSet
   bool IsValid(void) const;
-  bool IsValidAt(const int &iset) const;
+  bool HasActiveActionAt(const int &iset) const;
 
 };
 
@@ -269,7 +269,7 @@ bool EFActionSet::IsValid(void) const
 }
 
 // checks for a valid EFActionSet
-bool EFActionSet::IsValidAt(const int &iset) const
+bool EFActionSet::HasActiveActionAt(const int &iset) const
 {
   if (iset > efp->NumInfosets())   return false;
 
@@ -421,11 +421,11 @@ EFSupport::AllActionsInSupportAtInfosetAreActive(const EFSupport &S,
   return true;
 }
 
-bool EFSupport::IsValidAt(const Infoset *infoset) const
+bool EFSupport::HasActiveActionAt(const Infoset *infoset) const
 {
   if 
     ( !m_players[infoset->GetPlayer()->GetNumber()]->
-      IsValidAt(infoset->GetNumber()) )
+      HasActiveActionAt(infoset->GetNumber()) )
     return false;
 
   return true;

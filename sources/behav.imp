@@ -491,7 +491,7 @@ BehavProfile<T>::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
   for (pl = 1; pl <= Game().NumPlayers(); pl++) 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
-      if ( !big_supp.IsValidAt(current_infoset) ) {
+      if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
@@ -526,7 +526,7 @@ bool BehavProfile<T>::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (big_supp.IsValidAt(last_infoset)) {
+      if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
 	  if (j != last_action->GetNumber()) {
 
@@ -702,7 +702,7 @@ BehavProfile<T>::ExtendsToANFNash(const EFSupport &little_supp,
 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.IsValidAt(Game().GetInfosetByIndex(pl,i)) ) {
+      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
 	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
       }
     }
@@ -776,7 +776,7 @@ BehavProfile<T>::NashNodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (big_supp.IsValidAt(last_infoset)) {
+      if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
 	  if (j != last_action->GetNumber()) {
 
@@ -925,7 +925,7 @@ BehavProfile<T>::ExtendsToNash(const EFSupport &little_supp,
 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.IsValidAt(Game().GetInfosetByIndex(pl,i)) ) {
+      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
 	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
       }
     }

@@ -517,7 +517,7 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
   for (pl = 1; pl <= Game().NumPlayers(); pl++) 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
-      if ( !Support().IsValidAt(current_infoset) ) {
+      if ( !Support().HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
@@ -550,7 +550,7 @@ bool BehavSolution::NodeProbabilityPoly(      gPoly<gDouble> & node_prob,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
-      if (Support().IsValidAt(last_infoset)) {
+      if (Support().HasActiveActionAt(last_infoset)) {
 	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
 	  if (j != last_action->GetNumber()) {
 
@@ -706,7 +706,7 @@ bool BehavSolution::ExtendsToANFNash(gStatus &m_status) const
 
     for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
       list_for_pl += num_vars;
-      if ( !Support().IsValidAt(Game().GetInfosetByIndex(pl,i)) ) {
+      if ( !Support().HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
 	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
       }
     }
