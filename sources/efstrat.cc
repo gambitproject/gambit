@@ -289,7 +289,7 @@ bool EFActionSet::HasActiveActionAt(const int &iset) const
 //--------------------------------------------------
 
 EFSupport::EFSupport(const Efg::Game &p_efg) 
-  : m_efg(&p_efg), m_players(p_efg.NumPlayers())
+  : m_efg((Efg::Game *) &p_efg), m_players(p_efg.NumPlayers())
 {
   for (int pl = 1; pl <= m_players.Length(); pl++)
     m_players[pl] = new EFActionSet(*(p_efg.Players()[pl]));
