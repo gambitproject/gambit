@@ -10,7 +10,6 @@
 #include "wx_tbar.h"
 #endif
 #pragma		hdr_stop
-#include	"general.h"
 #include 	"wxmisc.h"
 #include	"spread.h"
 #include 	"gmisc.h"

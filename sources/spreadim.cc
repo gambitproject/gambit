@@ -1,6 +1,6 @@
 // File: spreadim.cc -- template instantiations for classes that for some
 // reason did not fit anywhere.
-// @(#)spreadim.cc	1.11 5/14/96
+// $Id$
 #include "wx.h"
 #include "wxmisc.h"
 #pragma		hdr_stop
@@ -11,7 +11,7 @@
 #define TEMPLATE template
 #elif defined __BORLANDC__
 class gArray<int>;
-class gString;                         
+class gString;
 class gArray<gString>;
 bool operator==(const gArray<int> &, const gArray<int> &);
 
@@ -25,14 +25,6 @@ bool operator==(const gArray<int> &, const gArray<int> &);
 #include "glist.imp"
 TEMPLATE class gNode<SpreadSheet> ;
 TEMPLATE class gList<SpreadSheet> ;
-
-class BaseExtSolnShow;
-TEMPLATE class gList<BaseExtSolnShow *>;
-TEMPLATE class gNode<BaseExtSolnShow *>;
-
-class BaseNormSolnShow;
-TEMPLATE class gNode<BaseNormSolnShow *>;
-TEMPLATE class gList<BaseNormSolnShow *>;
 
 class NFSupport;
 TEMPLATE class gList<NFSupport *>;
@@ -49,8 +41,9 @@ TEMPLATE class gRectArray<SpreadDataCell> ;
 TEMPLATE class gRectBlock<SpreadDataCell> ;
 #include "garray.imp"
 TEMPLATE class gArray<SpreadDataCell> ;
+class wxChoice;
+TEMPLATE class gArray<wxChoice *>;
 
 
 
 
-                                               
