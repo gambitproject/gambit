@@ -39,63 +39,63 @@ void SigFPEHandler(int a)
 void SigSegFaultHandler(int)
 {
   gerr << "A segmentation fault has occurred\n";
+#ifdef __BORLANDC__
   gCmdLineInput::RestoreTermAttr();
+#endif  // __BORLANDC__
   exit(1);
 }
 
-#ifdef UNUSED
-#ifdef __BORLANDC__ // this handler is defined differently windows
-#define MATH_CONTINUE    0
-#define	MATH_IGNORE	 1
-#define	MATH_QUIT	 2
-extern "C" int winio_ari(const char *msg);
-extern "C" void winio_closeall(void);
-int _RTLENTRY _matherr (struct exception *e)
-  /*
-#else
-#ifdef __linux__ // kludge to make it compile.  Seems linux does not support.
-  struct exception {int type;char *name;double arg1,arg2,retval; };
-#define LN_MINDOUBLE 1e-20
-#define SING 0
-#endif
-int matherr(struct exception *e)
-#endif
-  */
-{
-  char *whyS [] = { "argument domain error",
-		    "argument singularity ",
-		    "overflow range error ",
-		    "underflow range error",
-		    "total loss of significance",
-		    "partial loss of significance" };
-  static option = MATH_CONTINUE;
-  char errMsg[80];
-  if (option != MATH_IGNORE)  {
-    sprintf (errMsg, "%s (%8g,%8g): %s\n",
-	     e->name, e->arg1, e->arg2, whyS [e->type - 1]);
-    gerr << errMsg;
-// define this to pop up a dialog for math errors under windows. 
-// allows to quit.
-#if defined(__WIN32__) && defined(MATH_ERROR_DIALOG)
-    option = winio_ari(errMsg);
-    if (option == MATH_QUIT) {
-      winio_closeall(); 
-      exit(1);
-    }
-#endif
+#ifdef __BORLANDC__
+//
+// A "vanilla" command line for MSW console application, without
+// terminal-control-type features.
+//
+class VanillaCommandLine : public GCL::CommandLine {
+protected:
+  char GetNextChar(void);
+
+public:
+  VanillaCommandLine(int p_historyDepth) : GCL::CommandLine(p_historyDepth) { }
+
+  void SetPrompt(bool) { }
+
+  virtual gInput& operator>>(int &x);
+  virtual gInput& operator>>(unsigned int &x) { return *this; }
+  virtual gInput& operator>>(long &x) { return *this; }
+  virtual gInput& operator>>(char &x) { return *this; }
+  virtual gInput& operator>>(double &x) { return *this; }
+  virtual gInput& operator>>(float &x) { return *this; }
+  virtual gInput& operator>>(char *x) { return *this; }
+  
+  int get(char &c) {
+    c = GetNextChar();
+    return !eof(); 
   }
 
-  if (e->type == SING)
-    if (!strcmp(e->name,"log"))
-      if(e->arg1 == 0.0)  {
-	e->retval = LN_MINDOUBLE;
-	return 1;
-      }
+  virtual void unget(char c) { }
 
-  return 1;	// we did not really fix anything, but want no more warnings
+  virtual bool eof(void) const { return gin.eof(); }
+  virtual void seekp(long /* x */) const { }
+  virtual long getpos(void) const { return 0; }
+  virtual void setpos(long /* x */) const { }
+  
+  virtual bool IsValid(void) const { return !eof(); }
+};
+
+gInput &VanillaCommandLine::operator>>(int &x)
+{
+  gin >> x;
+  return *this;
 }
-#endif
-#endif  // UNUSED
+
+char VanillaCommandLine::GetNextChar(void)
+{
+  char c;
+  gin.get(c);
+  return c;
+}
+
+#endif  // __BORLANDC__
 
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
@@ -153,9 +153,14 @@ int main( int /*argc*/, char* argv[] )
     signal(SIGINT, gsmConsole::gclStatusHandler);
 #endif
 
-
+#ifdef __BORLANDC__
+    VanillaCommandLine gcmdline(20);
+#else
     gCmdLineInput gcmdline(20);
+#endif   // __BORLANDC__
+
     gPreprocessor P(*gsm, &gcmdline, "Include[\"gclini.gcl\"]");
+    
     while (!P.eof()) {
       gText line = P.GetLine();
       gText fileName = P.GetFileName();
@@ -168,16 +173,20 @@ int main( int /*argc*/, char* argv[] )
     delete gsm;
 
 
+#ifndef __BORLANDC__
     // this is normally done in destructor for gCmdLineInput,
     //   in gcmdline.cc, but apparently the destructors for
     //   global static objects are not called, hence this
     gCmdLineInput::RestoreTermAttr();
+#endif   // __BORLANDC__
   }
 
   // AIX has some problem with exception handling
 #ifndef _AIX
   catch (gclQuitOccurred &E) {
+#ifndef __BORLANDC__
     gCmdLineInput::RestoreTermAttr();
+#endif   // __BORLANDC__
     return E.Value();
   }
   // The last line of defense for exceptions:

@@ -1,13 +1,16 @@
 #
-# FILE: gambit32.mak -- Makefile for Gambit under Borland C++ 32-bit
+# FILE: console.mak -- Makefile for GCL console version
 #
 # $Id$
+#
+# NB: The accompanying console.cfg file sets flags for a console application
+# for compilation.  You should do a "make clean" prior to building the
+# GCL console version.
 #
 
 .AUTODEPEND
 
 # The following directories must be set or overriden for the target setup
-WXDIR = C:\WX2
 BCCDIR = C:\BORLAND\BCC55
 BISON = C:\GAMBIT\BISONDOS\BISON
 	
@@ -20,10 +23,7 @@ EXTRALINKFLAGS =
 
 !include make.filelist
 
-CFG = gambit32.cfg
-WXLIBDIR = $(WXDIR)\lib
-WXLIB = wx32 xpm tiff jpeg winpng zlib
-WXINC = -I$(WXDIR)\include
+CFG = console.cfg
 
 .path.cc = .;base;math
 
@@ -33,52 +33,24 @@ $(SOURCE_SUFFIX).obj:
 .c.obj:
 	bcc32 $(CPPFLAGS) -P- -c {$< }
 
-GUILIBS=$(WXLIB) cw32mt import32 ole2w32
-GCLLIBS=cw32mti import32 ole2w32 bfc40 bfcs40
-
-
-LINKFLAGS= /c /aa /L$(WXLIBDIR);$(BCCDIR)\lib $(EXTRALINKFLAGS)
+LINKFLAGS= /c /ap /L$(BCCDIR)\lib $(EXTRALINKFLAGS)
 OPT = -Od
 DEBUG_FLAGS=
 
 
 CPPFLAGS= $(WXINC) $(EXTRACPPFLAGS) $(OPT) @$(CFG)
 
-all: gambit gcl
+all: gcl
 
-gambit:	$(ALLGUI_OBJECTS) gambit.res
-  ilink32 $(LINKFLAGS) @&&!
-c0w32.obj $(ALLGUI_OBJECTS)
-gambit
-nul
-$(GUILIBS)
-
-gambit.res
-!
-
-gambit.res :      ..\winsrc\res\gambit.rc 
-    brc32 -r -fo.\gambit.res /i$(BCCDIR)\include /i$(WXDIR)\include ..\winsrc\res\gambit
-
+#
+# This is screwy; when I used the linker explicitly, I had problems with
+# stdin always returning eof.  When I build the program like this, it
+# works fine.  So I'll leave this hack in for now.  The explicit
+# gcl.obj in the list of objects is there to make sure the resulting
+# executable is gcl.exe. -- TLT
+#
 gcl:   $(MSWGCL_OBJECTS)
-  ilink32 $(LINKFLAGS) @&&!
-c0x32.obj $(MSWGCL_OBJECTS)
-gcl
-nul
-cw32mti import32
-!
-
-wxgcl:	$(WXGCL_OBJECTS)  wxgcl.res
-  ilink32 $(LINKFLAGS) @&&!
-c0w32.obj $(WXGCL_OBJECTS) 
-wxgcl
-nul
-$(GUILIBS)
-
-wxgcl.res
-!
-
-wxgcl.res :      ..\winsrc\res\wxgcl.rc 
-    brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
+  bcc32 /L$(BCCDIR)\lib gcl.obj $(MSWGCL_OBJECTS)
 
 #
 # Notes on building bison parsers on DOS

@@ -28,3 +28,4 @@ public:
 }  // namespace GCL
 
 #endif  // COMMAND_H
+

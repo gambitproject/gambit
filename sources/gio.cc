@@ -6,13 +6,13 @@
 
 #include "base/gstream.h"
 
-gFileInput _gin(stdin);
+gStandardInput _gin;
 gInput &gin = _gin;
 
-gStandardOutput _gout(stdout);
+gStandardOutput _gout;
 gOutput &gout = _gout;
 
-gStandardOutput _gerr(stderr);
+gStandardOutput _gerr;
 gOutput &gerr = _gerr;
 
 

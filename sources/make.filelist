@@ -79,6 +79,10 @@ TTYGCL_SOURCES = $(ALLGCL_SOURCES) gcmdline.cc gclstatus.cc gio.cc gcl.cc
 
 TTYGCL_OBJECTS = $(TTYGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
 
+MSWGCL_SOURCES = $(ALLGCL_SOURCES) gclstatus.cc gio.cc gcl.cc
+
+MSWGCL_OBJECTS = $(MSWGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
+
 WXGCL_SOURCES = $(ALLGCL_SOURCES) wxgcl.cc wxstatus.cc dlabout.cc gio.cc
 
 WXGCL_OBJECTS = $(WXGCL_SOURCES:.cc=$(OBJECT_SUFFIX))
