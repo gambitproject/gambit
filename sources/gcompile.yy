@@ -137,7 +137,7 @@ formallist:
           |   formalparams
 
 formalparams: formalparam
-            | formalparams COMMA formalparam
+            | formalparams CRLFopt COMMA CRLFopt formalparam
 
 formalparam:  NAME { formals.Append(tval); } binding 
               { paramtype = ""; } typename { types.Append(paramtype); } 
