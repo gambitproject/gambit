@@ -263,7 +263,7 @@ void Tableau<gRational>::SetBasis(const Basis<gRational> &in)
 }
 
  // solve M x = b
-void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &x) const
+void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &x)
 {
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)
@@ -273,7 +273,7 @@ void Tableau<gRational>::Solve(const gVector<gRational> &b, gVector<gRational> &
 }
 
  // solve y M = c
-void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> &y) const
+void Tableau<gRational>::SolveT(const gVector<gRational> &c, gVector<gRational> &y)
 {
   //** Note --- commenting this out breaks LP<gRational> for now
   //** need to add private GetInverse() function to get V = M^(-1) (M inverse)

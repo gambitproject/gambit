@@ -39,8 +39,8 @@ public:
 
   void SetConst(const gVector<gRational> &bnew);
   void SetBasis( const Basis<gRational> &); // set new Tableau
-  void Solve(const gVector<gRational> &b, gVector<gRational> &x) const;  // solve M x = b
-  void SolveT(const gVector<gRational> &c, gVector<gRational> &y) const;  // solve y M = c
+  void Solve(const gVector<gRational> &b, gVector<gRational> &x);  // solve M x = b
+  void SolveT(const gVector<gRational> &c, gVector<gRational> &y);  // solve y M = c
   
   bool IsFeasible();
   bool IsLexMin();
