@@ -14,13 +14,111 @@
 #include "mixed.h"
 #include "lexicon.h"
 
-void SetEfg(BaseNfg *, BaseEfg *);
+
+template <class T> Lexicon<T>::Lexicon(const Efg<T> &E)
+  : N(0), strategies(E.NumPlayers())
+{ }
+
+template <class T> Lexicon<T>::~Lexicon()
+{
+  for (int i = 1; i <= strategies.Length(); i++)
+    while (strategies[i].Length())  delete strategies[i].Remove(1);
+  if (N)
+    N->efg = 0;
+}
+
+template <class T> 
+void SetEfg(Nfg<T> *nfg, Efg<T> *efg)
+{
+  nfg->efg = efg;
+}
+
+template <class T>
+void Lexicon<T>::MakeLink(Efg<T> *efg, Nfg<T> *nfg)
+{
+  nfg->efg = efg;
+  N = nfg;
+}
+
+template <class T>
+void Lexicon<T>::MakeStrategy(EFPlayer *p)
+{
+  Correspondence *c = new Correspondence(p->NumInfosets());
+  
+  for (int i = 1; i <= p->NumInfosets(); i++)  {
+    if (p->InfosetList()[i]->flag == 1)
+      (*c)[i] = p->InfosetList()[i]->whichbranch;
+    else
+      (*c)[i] = 0;
+  }
+  strategies[p->GetNumber()].Append(c);
+}
+
+template <class T>
+void Lexicon<T>::MakeReducedStrats(const EFSupport &S,
+				   EFPlayer *p, Node *n, Node *nn)
+{
+  int i;
+  Node *m, *mm;
+
+  if (!n->parent)  n->ptr = 0;
+
+  if (n->NumChildren() > 0)  {
+    if (n->infoset->player == p)  {
+      if (n->infoset->flag == 0)  {
+	// we haven't visited this infoset before
+	n->infoset->flag = 1;
+	for (i = 1; i <= n->NumChildren(); i++)   {
+	  if (S.Find(n->infoset->GetActionList()[i]))  {
+	    Node *m = n->GetChild(i);
+	    n->whichbranch = m;
+	    n->infoset->whichbranch = i;
+	    MakeReducedStrats(S, p, m, nn);
+	  }
+	}
+	n->infoset->flag = 0;
+      }
+      else  {
+	// we have visited this infoset, take same action
+	MakeReducedStrats(S, p, n->children[n->infoset->whichbranch], nn);
+      }
+    }
+    else  {
+      n->ptr = NULL;
+      if (nn != NULL)
+	n->ptr = nn->parent;
+      n->whichbranch = n->children[1];
+      if (n->infoset)
+	n->infoset->whichbranch = 0;
+      MakeReducedStrats(S, p, n->children[1], n->children[1]);
+    }
+  }
+  else if (nn)  {
+    for (m = NULL; ; nn = nn->parent->ptr->whichbranch)  {
+      m = nn->NextSibling();
+      if (m || nn->parent->ptr == NULL)   break;
+    }
+    if (m)  {
+      mm = m->parent->whichbranch;
+      m->parent->whichbranch = m;
+      MakeReducedStrats(S, p, m, m);
+      m->parent->whichbranch = mm;
+    }
+    else 
+      MakeStrategy(p);
+  }
+  else
+    MakeStrategy(p);
+}
+
+
+
 
 template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 {
   int i;
 
-  Lexicon *L = new Lexicon(E);
+  Lexicon<T> *L = new Lexicon<T>(E);
   for (i = 1; i <= E.NumPlayers(); i++)  
     L->MakeReducedStrats(support, E.PlayerList()[i], E.RootNode(), NULL);
 
@@ -82,7 +180,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 
   E.lexicon = L;
   SetEfg(E.lexicon->N, &E);
-  return ((Nfg<T> *) E.lexicon->N);
+  return E.lexicon->N;
 }
 
 template <class T>
@@ -155,7 +253,7 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
     return;
   }
 
-  if (!E.lexicon || (const Nfg<T> *)E.lexicon->N != &N)   return;
+  if (!E.lexicon || E.lexicon->N != &N)   return;
 
   ((gVector<T> &) bp).operator=((T)0); 
 
@@ -190,7 +288,7 @@ void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
     return;
   }
 
-  if (!E.lexicon || (const Nfg<T> *) E.lexicon->N != &N)  return;
+  if (!E.lexicon || E.lexicon->N != &N)  return;
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
     for (int st = 1; st <= N.NumStrats(pl); st++)  {

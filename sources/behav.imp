@@ -84,7 +84,7 @@ template <class T> void ChanceInfoset<T>::PrintActions(gOutput &f) const
 //      Efg<T>: Constructor, destructors, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> Efg<T>::Efg(void)
+template <class T> Efg<T>::Efg(void) : lexicon(0)
 { root = new TypedNode<T>(this, 0, 0); }
 
 template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
@@ -113,7 +113,7 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 }
 
 template <class T> Efg<T>::Efg(const BaseEfg &E)
-  : BaseEfg(E)
+  : BaseEfg(E), lexicon(0)
 {
   int i;
   
@@ -142,7 +142,7 @@ template <class T> Efg<T>::Efg(const BaseEfg &E)
 }
 
 template <class T> Efg<T>::Efg(const Efg<T> &E)
-  : BaseEfg(E)
+  : BaseEfg(E), lexicon(0)
 {
   int i;
 
@@ -215,11 +215,22 @@ template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
 }
 
 template <class T> Efg<T>::~Efg()
-{ }
+{ 
+  if (lexicon)   delete lexicon;
+  lexicon = 0;
+}
 
 //------------------------------------------------------------------------
 //            Efg<T>: Private and protected member functions
 //------------------------------------------------------------------------
+
+#include "lexicon.h"
+
+template <class T> void Efg<T>::DeleteLexicon(void)
+{
+  if (lexicon)   delete lexicon;
+  lexicon = 0;
+}
 
 template <class T> Infoset *Efg<T>::CreateInfoset(int n, EFPlayer *p, int br)
 {
