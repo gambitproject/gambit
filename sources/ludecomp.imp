@@ -419,6 +419,7 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
   mat.GetColumn(max,temp); // temp is temp. storage for L column
   mat.SetColumn(max,Ucol); // insert new U column
 
+  if(column == mat.MaxCol()) return;
   // make U upper-diagonal
   LUupdate<T> updatev(column, mat.MaxCol()-1);
   T tmp, alpha;
