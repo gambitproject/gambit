@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class guiPolEnumParamsDialog : public OutputParamsDialog {
+class guiPolEnumParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_stopAfter;
 

@@ -19,8 +19,7 @@ public:
   virtual const gText &Filename(void) const = 0;
   virtual wxFrame *Frame(void) = 0;
 
-  virtual void PickSolutions(const Efg &, gList<BehavSolution> &) = 0;
-  virtual void SetPickSubgame(const Node *n) = 0;
+  virtual void PickSolutions(const Efg &, Node *, gList<BehavSolution> &) = 0;
 };
 
 

@@ -618,12 +618,6 @@ const gText &EfgShow::Filename(void) const
     return filename;
 }
 
-void EfgShow::SetPickSubgame(const Node *n)
-{
-    tw->SetSubgamePickNode(n);
-}
-
-
 wxFrame *EfgShow::Frame(void)
 {
     return (wxFrame *)this;
@@ -631,17 +625,27 @@ wxFrame *EfgShow::Frame(void)
 
 
 
-void EfgShow::PickSolutions(const Efg &p_ef, gList<BehavSolution> &p_solns)
+void EfgShow::PickSolutions(const Efg &p_efg, Node *p_rootnode,
+			    gList<BehavSolution> &p_solns)
 {
-    BehavSolutionList temp_solns;   // coerce the list into a sortable
-    temp_solns += p_solns;              // format, and automatically number id's
-    EfgSolnPicker *pick = new EfgSolnPicker(p_ef, temp_solns,
-                                            tw->DrawSettings(), sf_options, this);
+  try {
+    tw->SetSubgamePickNode(p_rootnode);
+    BehavSolutionList temp_solns;
+    temp_solns += p_solns;       
+    EfgSolnPicker *pick = new EfgSolnPicker(p_efg, temp_solns,
+					    tw->DrawSettings(),
+					    sf_options, this);
     Enable(FALSE);
     while (pick->Completed() == wxRUNNING) wxYield();
     Enable(TRUE);
-    p_solns = temp_solns;   // assign back to p_solns for changes to 'take'
+    p_solns = temp_solns; 
     delete pick;
+    tw->SetSubgamePickNode(0);
+  }
+  catch (...) {
+    tw->SetSubgamePickNode(0);
+    throw;
+  }
 }
 
 // how: 0-default, 1-saved, 2-query

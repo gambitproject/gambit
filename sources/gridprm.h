@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class GridSolveParamsDialog : public OutputParamsDialog {
+class GridSolveParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_minLam, *m_maxLam, *m_delLam, *m_delp1, *m_tol1, *m_delp2, *m_tol2;
   wxCheckBox *m_multiGrid;

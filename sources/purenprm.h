@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class PureNashSolveParamsDialog : public OutputParamsDialog {
+class PureNashSolveParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_stopAfter;
 

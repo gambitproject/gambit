@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class SimpdivSolveParamsDialog : public OutputParamsDialog {
+class SimpdivSolveParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_nRestarts, *m_leashLength, *m_stopAfter;
   wxRadioBox *m_precision;

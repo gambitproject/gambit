@@ -118,10 +118,9 @@ public:
     BehavSolution CreateSolution(void);
 
     // Solution interface to the algorithms
-    void        PickSolutions(const Efg &, gList<BehavSolution> &);
+    void PickSolutions(const Efg &, Node *, gList<BehavSolution> &);
     BehavProfile<gNumber> CreateStartProfile(int how);
     void        RemoveStartProfiles(void);
-    void        SetPickSubgame(const Node *n);
 
     // Solution interface to normal form
     void        SolutionToEfg(const BehavProfile<gNumber> &s, bool set = false);

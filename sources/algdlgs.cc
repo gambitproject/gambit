@@ -29,39 +29,39 @@ Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 #define SOLN_SECT           "Soln-Defaults"
 
 //========================================================================
-//            OutputParamsDialog: Member function definitions
+//            dialogAlgorithm: Member function definitions
 //========================================================================
 
-OutputParamsDialog::OutputParamsDialog(const gText &label,
+dialogAlgorithm::dialogAlgorithm(const gText &label,
                                        wxWindow *parent, 
                                        const char */*help_str*/)
   : wxDialogBox(parent, label, TRUE), m_depthChoice(0), m_typeChoice(0),
     m_methodChoice(0), m_markSubgames(0)
 { }
 
-OutputParamsDialog::~OutputParamsDialog(void)
+dialogAlgorithm::~dialogAlgorithm(void)
 { }
 
-void OutputParamsDialog::OnOK(void)
+void dialogAlgorithm::OnOK(void)
 {
   m_completed = wxOK;
   Show(FALSE);
 }
 
-void OutputParamsDialog::OnCancel(void)
+void dialogAlgorithm::OnCancel(void)
 {
   m_completed = wxCANCEL;
   Show(FALSE);
 }
 
-Bool OutputParamsDialog::OnClose(void)
+Bool dialogAlgorithm::OnClose(void)
 {
   m_completed = wxCANCEL;
   Show(FALSE);
   return FALSE;
 }
 
-void OutputParamsDialog::DominanceFields(bool p_mixed)
+void dialogAlgorithm::DominanceFields(bool p_mixed)
 {
   (void) new wxMessage(this, "Dominance elimination:");
   NewLine();
@@ -84,7 +84,7 @@ void OutputParamsDialog::DominanceFields(bool p_mixed)
   }
 }
 
-void OutputParamsDialog::SubgameFields(void)
+void dialogAlgorithm::SubgameFields(void)
 {
   (void) new wxMessage(this, "Subgames:");
   NewLine();
@@ -96,7 +96,7 @@ void OutputParamsDialog::SubgameFields(void)
   NewLine();
 }
 
-void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames,
+void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
 					  bool/* p_vianfg*/)
 {
   if (p_dominance)   DominanceFields(false);
@@ -110,59 +110,6 @@ void OutputParamsDialog::MakeCommonFields(bool p_dominance, bool p_subgames,
   cancelButton->SetClientData((char *) this);
 }
 
-void OutputParamsDialog::MakeOutputFields(unsigned int fields)
-{
-  /*
-  Add(wxMakeFormNewLine());
-  if (fields & PRECISION_FIELD) {
-    Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
-             new wxList(wxMakeConstraintStrings(m_precisionList),
-                    0), 
-             0, wxVERTICAL));
-    Add(wxMakeFormNewLine());
-  }
-
-  if ((fields & MAXSOLN_FIELD) && !(fields & SPS_FIELD)) {
-    Add(wxMakeFormShort("Max Ttl Solns", &m_stopAfter, wxFORM_DEFAULT,
-            NULL, NULL, wxVERTICAL, 100));
-    Add(wxMakeFormNewLine());
-    Add(wxMakeFormBool("Select Solutions", &m_select, wxFORM_DEFAULT,
-		       NULL, NULL, wxVERTICAL, 100));
-    Add(wxMakeFormNewLine());
-  }
-
-  if ((fields & MAXSOLN_FIELD) && (fields & SPS_FIELD)) {
-    Add(wxMakeFormShort("Solns/Subgame", &m_stopAfter, wxFORM_DEFAULT, 
-            NULL, NULL, wxVERTICAL, 100));
-    Add(wxMakeFormShort("Max Ttl Solns", &m_maxSolns, wxFORM_DEFAULT, 
-            NULL, NULL, wxVERTICAL, 100));
-    Add(wxMakeFormNewLine());
-    Add(wxMakeFormBool("Select Solutions", &m_select, wxFORM_DEFAULT,
-		       NULL, NULL, wxVERTICAL, 100));
-    Add(wxMakeFormNewLine());
-  }
-
-  if (fields & OUTPUT_FIELD) {
-    Add(wxMakeFormString("TraceFile", &outname, wxFORM_DEFAULT, 
-             NULL, NULL, wxVERTICAL));
-  }
-
-  if (fields & ERROR_FIELD) {
-    Add(wxMakeFormString("ErrFile", &errname, wxFORM_DEFAULT, 
-              NULL, NULL, wxVERTICAL));
-  }
-
-  if ((fields & ERROR_FIELD) && (fields & OUTPUT_FIELD)) { 
-    Add(wxMakeFormNewLine());
-  }
-
-  Add(wxMakeFormString("Trace Level", &trace_str, wxFORM_CHOICE,
-               new wxList(wxMakeConstraintStrings(trace_list), 0),
-               0, wxVERTICAL));
-  Add(wxMakeFormNewLine());
-  */
-}
-
 //=======================================================================
 //                class PxiParamsDialog: Member functions
 //=======================================================================
@@ -171,7 +118,7 @@ void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 PxiParamsDialog::PxiParamsDialog(const char *alg, const char *label, 
                                  const char *fn, wxWindow *parent,
                                  const char *help_str)
-  : OutputParamsDialog(label, parent, help_str)
+  : dialogAlgorithm(label, parent, help_str)
 { }
 
 // Make Pxi Fields

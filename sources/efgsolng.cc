@@ -30,11 +30,6 @@ guiEfgSolution::guiEfgSolution(const EFSupport &p_support,
 //                    BaseBySubgameG: Class definition
 //=========================================================================
 
-#define SELECT_SUBGAME_NUM  10000
-
-// in efgutils.cc
-extern void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list); 
-
 class BaseBySubgameG {
 protected:
   EfgShowInterface *m_parent;
@@ -49,13 +44,14 @@ public:
   BaseBySubgameG(EfgShowInterface *, const Efg &,
 		 bool p_eliminate = false, bool p_iterative = false,
 		 bool p_strong = false);
+  virtual ~BaseBySubgameG() { } 
 };
 
 BaseBySubgameG::BaseBySubgameG(EfgShowInterface *p_parent, const Efg &p_efg,
 			       bool p_eliminate, bool p_iterative,
 			       bool p_strong)
-    : m_parent(p_parent), m_eliminate(p_eliminate), m_iterative(p_iterative),
-      m_strong(p_strong)
+  : m_parent(p_parent), m_eliminate(p_eliminate), m_iterative(p_iterative),
+    m_strong(p_strong)
 {
   MarkedSubgameRoots(p_efg, m_subgameRoots);
   wxGetResource(SOLN_SECT, "Efg-Interactive-Solns", &m_pickSoln, "gambit.ini");
@@ -67,29 +63,12 @@ BaseBySubgameG::BaseBySubgameG(EfgShowInterface *p_parent, const Efg &p_efg,
 void BaseBySubgameG::BaseSelectSolutions(int p_subgame, const Efg &p_efg, 
 					 gList<BehavSolution> &p_solutions)
 {
-  if (!m_pickSoln) 
+  if (!m_pickSoln || p_solutions.Length() == 0) 
     return;
 
-  m_parent->SetPickSubgame(m_subgameRoots[p_subgame]);
-
-  if (p_solutions.Length() == 0) {
-    wxMessageBox("No solutions were found for this subgame");
-    m_parent->SetPickSubgame(0);
-    return;
-  }
-  
-  if (p_efg.TotalNumInfosets() > 0)
-    m_parent->PickSolutions(p_efg, p_solutions);
-
-  // turn off the subgame picking icon at the last subgame
-  if (p_subgame == m_subgameRoots.Length()) 
-    m_parent->SetPickSubgame(0);
+  if (p_solutions.Length() > 0 && p_efg.TotalNumInfosets() > 0)
+    m_parent->PickSolutions(p_efg, m_subgameRoots[p_subgame], p_solutions);
 }
-
-// Eliminated dominanted strats, if so requested
-extern NFSupport *ComputeDominated(const Nfg &, NFSupport &, bool strong,
-				   const gArray<int> &players,
-				   gOutput &tracefile, gStatus &gstatus);
 
 #include "nfstrat.h"
 
@@ -139,7 +118,7 @@ void BaseBySubgameG::BaseViewNormal(const Nfg &p_nfg, NFSupport *&p_support)
 
 LiapSolveParamsDialog::LiapSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames, bool p_vianfg)
-  : OutputParamsDialog("LiapSolve Parameters", p_parent)
+  : dialogAlgorithm("LiapSolve Parameters", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
 }
@@ -326,7 +305,7 @@ bool guiefgLiapNfg::SolveSetup(void)
 
 LcpSolveDialog::LcpSolveDialog(wxWindow *p_parent, bool p_subgames,
 			       bool p_vianfg)
-  : OutputParamsDialog("LcpSolve Parameters", p_parent)
+  : dialogAlgorithm("LcpSolve Parameters", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -491,7 +470,7 @@ bool guiefgLcpNfg::SolveSetup(void)
 PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						     bool p_subgames/*=false*/,
 						     bool p_vianfg/*=false*/)
-  : OutputParamsDialog("EnumPureSolve Params", p_parent)
+  : dialogAlgorithm("EnumPureSolve Params", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -625,7 +604,7 @@ bool guiefgEnumPureEfg::SolveSetup(void)
 EnumSolveParamsDialog::EnumSolveParamsDialog(wxWindow *p_parent,
 					     bool p_subgames,
 					     bool p_vianfg)
-  : OutputParamsDialog("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
+  : dialogAlgorithm("EnumMixedSolve Params", p_parent, ENUMMIXED_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -741,7 +720,7 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 
 LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames,
 					 bool p_vianfg)
-  : OutputParamsDialog("LpSolve Parameters", p_parent, LP_HELP)
+  : dialogAlgorithm("LpSolve Parameters", p_parent, LP_HELP)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -913,7 +892,7 @@ bool guiefgLpEfg::SolveSetup(void)
 
 SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *p_parent /*=0*/,
 						   bool p_subgames /*=false*/)
-  : OutputParamsDialog("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
+  : dialogAlgorithm("SimpdivSolve Params", p_parent, SIMPDIV_HELP)
 {
   MakeCommonFields(true, p_subgames, true);
   Go();
@@ -1009,7 +988,7 @@ bool guiefgSimpdivNfg::SolveSetup(void)
 guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
 					       bool p_subgames,
 					       bool p_vianfg)
-  : OutputParamsDialog("PolEnumSolve Parameters", p_parent)
+  : dialogAlgorithm("PolEnumSolve Parameters", p_parent)
 {
   MakeCommonFields(true, p_subgames, p_vianfg);
   Go();
@@ -1274,7 +1253,7 @@ bool guiefgQreEfg::SolveSetup(void)
 
 GridSolveParamsDialog::GridSolveParamsDialog(wxWindow *p_parent,
 					     const gText &/*p_filename*/)
-  : OutputParamsDialog("QreAllSolve Params", p_parent, QRE_HELP)
+  : dialogAlgorithm("QreAllSolve Params", p_parent, QRE_HELP)
 {
   MakeCommonFields(true, false, true);
   Go();

@@ -23,15 +23,15 @@
 #define     PRECISION_FIELD     16
 
 //=========================================================================
-//                 OutputParamsDialog: Class declaration
+//                 dialogAlgorithm: Class declaration
 //=========================================================================
 
-class OutputParamsDialog : public wxDialogBox {
+class dialogAlgorithm : public wxDialogBox {
 private:
   static void CallbackOK(wxButton &p_object, wxEvent &)
-    { ((OutputParamsDialog *) p_object.GetClientData())->OnOK(); }
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnOK(); }
   static void CallbackCancel(wxButton &p_object, wxEvent &)
-    { ((OutputParamsDialog *) p_object.GetClientData())->OnCancel(); }
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnCancel(); }
 
   void OnOK(void);
   void OnCancel(void);
@@ -47,15 +47,13 @@ protected:
   virtual void AlgorithmFields(void) { }
 
   void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);
-  void MakeOutputFields(unsigned int fields = OUTPUT_FIELD);
 
-  void Add(wxFormItem *) { }
   void Go(void) { Fit(); Show(TRUE); }
 
 public:
-  OutputParamsDialog(const gText &, wxWindow *parent = 0, 
+  dialogAlgorithm(const gText &, wxWindow *parent = 0, 
 		     const char *help_str = 0);
-  virtual ~OutputParamsDialog();
+  virtual ~dialogAlgorithm();
 
   int Completed(void) const { return m_completed; }
 
@@ -79,7 +77,7 @@ public:
 //                 PxiParamsDialog: Class declaration
 //=========================================================================
 
-class PxiParamsDialog : public OutputParamsDialog {
+class PxiParamsDialog : public dialogAlgorithm {
 public:
   PxiParamsDialog(const char *alg = "Pxi", const char *label = 0, 
 		  const char *filename = "pxi.out", wxWindow *parent = 0, 

@@ -10,7 +10,7 @@
 #include "algdlgs.h"
 #include "enum.h"
 
-class EnumSolveParamsDialog : public OutputParamsDialog {
+class EnumSolveParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_stopAfter;
   wxRadioBox *m_precision;

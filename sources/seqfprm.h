@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class LcpSolveDialog : public OutputParamsDialog {
+class LcpSolveDialog : public dialogAlgorithm {
 private:
   wxText *m_maxDepth, *m_stopAfter;
   wxRadioBox *m_precision;

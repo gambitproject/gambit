@@ -666,12 +666,6 @@ MixedProfile<gNumber> NfgShow::CreateStartProfile(int how)
 }
 
 #include "gstatus.h"
-extern NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
-				   const gArray<int> &players,
-				   gOutput &tracefile, 
-				   gStatus &status); // in nfdom.cc
-
-
 NFSupport *NfgShow::MakeSolnSupport(void)
 {
   NFSupport *sup = new NFSupport(nf);
@@ -951,15 +945,6 @@ void NfgShow::OutcomeLabel(void)
 }
 
 #include "wxstatus.h"
-NFSupport *ComputeDominated(const Nfg &N, NFSupport &S, bool strong,
-                            const gArray<int> &players,
-                            gOutput &tracefile, gStatus &status); // nfdom.cc
-
-NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, 
-                                 bool strong,
-                                 const gArray<int> &players,
-                                 gOutput &tracefile, gStatus &status); // nfdommix.cc
-
 #include "elimdomd.h"
 #include "nfsuptd.h"
 

@@ -9,7 +9,7 @@
 
 #include "algdlgs.h"
 
-class LiapSolveParamsDialog : public OutputParamsDialog {
+class LiapSolveParamsDialog : public dialogAlgorithm {
 private:
   wxText *m_tol1D, *m_tolND, *m_maxits1D, *m_maxitsND, *m_nTries;
   wxRadioBox *m_startOption;
