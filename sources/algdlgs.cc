@@ -575,4 +575,35 @@ int dialogSimpdiv::StopAfter(void) const
     return m_stopAfter->GetInteger(); 
 }
 
+//=======================================================================
+//                    dialogPolEnum: Member functions
+//=======================================================================
 
+#include "dlpolenum.h"
+
+dialogPolEnum::dialogPolEnum(wxWindow *p_parent,
+			     bool p_subgames, bool p_vianfg)
+  : dialogAlgorithm("PolEnumSolve Parameters", p_vianfg, p_parent)
+{
+  MakeCommonFields(true, p_subgames, p_vianfg);
+  Go();
+}
+
+dialogPolEnum::~dialogPolEnum()
+{ }
+
+void dialogPolEnum::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm parameters");
+  NewLine();
+  StopAfterField();
+  NewLine();
+}
+
+int dialogPolEnum::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
+}

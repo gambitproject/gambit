@@ -943,30 +943,13 @@ bool guiefgSimpdivNfg::SolveSetup(void)
 //                           PolEnumSolve
 //========================================================================
 
-#include "peprm.h"
-#include "polenum.h"
-#include "polensub.h"
-
-guiPolEnumParamsDialog::guiPolEnumParamsDialog(wxWindow *p_parent,
-					       bool p_subgames,
-					       bool p_vianfg)
-  : dialogAlgorithm("PolEnumSolve Parameters", p_vianfg, p_parent)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
-}
-
-void guiPolEnumParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm parameters");
-  NewLine();
-  m_stopAfter = new wxText(this, 0, "Stop after");
-  NewLine();
-}
+#include "dlpolenum.h"
 
 //------------------
 // PolEnum on nfg
 //------------------
+
+#include "polensub.h"
 
 class guiPolEnumEfgByNfgSubgame : public efgPolEnumNfgSolve,
 				  public guiSubgameViaNfg {
@@ -1013,7 +996,7 @@ gList<BehavSolution> guiefgPolEnumNfg::Solve(void) const
 
 bool guiefgPolEnumNfg::SolveSetup(void)
 {
-  guiPolEnumParamsDialog dialog(m_parent->Frame(), true, true); 
+  dialogPolEnum dialog(m_parent->Frame(), true, true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -1045,7 +1028,7 @@ gList<BehavSolution> guiefgPolEnumEfg::Solve(void) const
 
 bool guiefgPolEnumEfg::SolveSetup(void)
 {
-  guiPolEnumParamsDialog dialog(m_parent->Frame(), true); 
+  dialogPolEnum dialog(m_parent->Frame(), true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

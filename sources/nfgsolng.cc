@@ -395,7 +395,7 @@ bool guinfgSimpdiv::SolveSetup(void)
 // PolEnum
 //----------
 
-#include "peprm.h"
+#include "dlpolenum.h"
 #include "polenum.h"
 
 guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
@@ -421,7 +421,7 @@ gList<MixedSolution> guinfgPolEnum::Solve(void)
 
 bool guinfgPolEnum::SolveSetup(void)
 {
-  guiPolEnumParamsDialog dialog(m_parent->Frame());
+  dialogPolEnum dialog(m_parent->Frame(), false, true);
   
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
