@@ -21,51 +21,6 @@
 #include "efgshow.h"
 #include "legend.h"
 
-int SUBGAME_LARGE_ICON_SIZE = 20;
-int SUBGAME_SMALL_ICON_SIZE = 10;
-int DELTA = 8;
-int MAX_TW = 60;
-int MAX_TH = 20;
-
-//-----------------------------------------------------------------------
-//                    MISCELLANEOUS FUNCTIONS
-//-----------------------------------------------------------------------
-
-inline void DrawLine(wxDC &dc, double x_s, double y_s, double x_e, double y_e,
-                     const wxColour &color, int thick = 0)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, (thick) ? 4 : 2, wxSOLID));
-  dc.DrawLine((int) x_s, (int) y_s, (int) x_e, (int) y_e);
-}
-
-inline void DrawRectangle(wxDC &dc, int x_s, int y_s, int w, int h,
-                          const wxColour &color)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 2, wxSOLID));
-  dc.DrawRectangle(x_s, y_s, w, h);
-}
-
-inline void DrawThinLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
-                         const wxColour &color)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 1, wxSOLID));
-  dc.DrawLine(x_s, y_s, x_e, y_e);
-}
-
-inline void DrawDashedLine(wxDC &dc, int x_s, int y_s, int x_e, int y_e,
-			   const wxColour &color)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 1, wxSHORT_DASH));
-  dc.DrawLine(x_s, y_s, x_e, y_e);
-}
-
-inline void DrawCircle(wxDC &dc, int x, int y, int r, const wxColour &color)
-{
-  dc.SetPen(*wxThePenList->FindOrCreatePen(color, 3, wxSOLID));
-  dc.DrawEllipse(x-r, y-r, 2*r, 2*r);
-}
-
-
 //-----------------------------------------------------------------------
 //                   class NodeEntry: Member functions
 //-----------------------------------------------------------------------
@@ -864,28 +819,38 @@ void efgTreeLayout::RenderSubtree(wxDC &p_dc) const
 
 	  if (parentEntry->GetNextMember()->X() != parentEntry->X()) {
 	    // Draw a little arrow in the direction of the iset.
+	    int startX, endX; 
 	    if (settings.InfosetJoin() == INFOSET_JOIN_LINES) {
-	      p_dc.DrawLine(parentEntry->X(), nextY, 
-			    parentEntry->X() + m_infosetSpacing * 
-			    ((parentEntry->GetNextMember()->X() > 
-			      parentEntry->X()) ? 1 : -1),
-			    nextY);
-
+	      startX = parentEntry->X();
+	      endX = (startX + m_infosetSpacing * 
+		      ((parentEntry->GetNextMember()->X() > 
+			parentEntry->X()) ? 1 : -1));
 	    }
 	    else {
 	      if (parentEntry->GetNextMember()->X() < parentEntry->X()) {
 		// information set is continued to the left
-		p_dc.DrawLine(parentEntry->X() + parentEntry->GetSize(),
-			      nextY,
-			      parentEntry->X() - m_infosetSpacing,
-			      nextY);
+		startX = parentEntry->X() + parentEntry->GetSize();
+		endX = parentEntry->X() - m_infosetSpacing;
 	      }
 	      else {
 		// information set is continued to the right
-		p_dc.DrawLine(parentEntry->X(), nextY,
-			      parentEntry->X() + parentEntry->GetSize() +
-			      m_infosetSpacing, nextY);
+		startX = parentEntry->X();
+		endX = (parentEntry->X() + parentEntry->GetSize() + 
+			m_infosetSpacing);
 	      }
+	    }
+	    p_dc.DrawLine(startX, nextY, endX, nextY);
+	    if (startX > endX) {
+	      p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2,
+			    nextY + m_infosetSpacing / 2);
+	      p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2,
+			    nextY - m_infosetSpacing / 2);
+	    }
+	    else {
+	      p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2,
+			    nextY + m_infosetSpacing / 2);
+	      p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2,
+			    nextY - m_infosetSpacing / 2);
 	    }
 	  }
 	}
