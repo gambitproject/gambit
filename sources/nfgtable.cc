@@ -18,7 +18,7 @@ BEGIN_EVENT_TABLE(NfgTable, wxGrid)
 END_EVENT_TABLE()
 
 NfgTable::NfgTable(NfgShow *p_parent)
-  : wxGrid(p_parent, -1, wxPoint(200, 40), wxDefaultSize),
+  : wxGrid(p_parent, -1, wxPoint(200, 0), wxDefaultSize),
     m_parent(p_parent)
 {
   CreateGrid(p_parent->CurrentSupport()->NumStrats(1),

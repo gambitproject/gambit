@@ -15,15 +15,11 @@
 #include "gambit.h"
 #include "efgconst.h"
 #include "behavsol.h"
-#include "solnlist.h"
 
 class EfgProfileList;
-class EfgToolbar;
 class EfgCursorWindow;
 class TreeWindow;
 class TreeZoomWindow;
-
-typedef SolutionList<BehavSolution> BehavSolutionList;
 
 const int idEFG_SOLUTION_LIST = 900;
 
@@ -41,7 +37,6 @@ private:
 
   EfgProfileList *m_solutionTable;
   gText   filename;
-  EfgToolbar *m_toolbar;
   wxSashWindow *m_treeSashWindow, *m_nodeSashWindow, *m_toolSashWindow;
   wxSashWindow *m_solutionSashWindow;
 
@@ -58,6 +53,7 @@ private:
   } features;
 
   void MakeMenus(void);
+  void MakeToolbar(void);
   void AdjustSizes(void);
   
   // Event handlers

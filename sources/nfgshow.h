@@ -19,7 +19,6 @@
 #include "nfg.h"
 #include "nfgiter.h"
 #include "mixedsol.h"
-#include "solnlist.h"
 
 #include "efgnfgi.h"
 
@@ -29,17 +28,13 @@ class NfgProfileList;
 class NfgTable;
 class dialogNfgSupportInspect;
 
-typedef SolutionList<MixedSolution> MixedSolutionList;
-
 class NfgPanel;
-class NfgToolbar;
 
 class NfgShow : public wxFrame, public EfgNfgInterface {
 private:
   Nfg &m_nfg;
 
   NfgPanel *m_panel;
-  NfgToolbar *m_toolbar;
   NfgTable *m_table;
   NfgProfileList *m_solutionTable;
 
@@ -57,6 +52,7 @@ private:
   wxPrintData m_printData;
 
   void MakeMenus(void);
+  void MakeToolbar(void);
   void UpdateMenus(void);
   gText UniqueSupportName(void) const;
   void AdjustSizes(void);

@@ -57,113 +57,6 @@
 #include "behavedit.h"
 
 //=====================================================================
-//                          class EfgToolbar
-//=====================================================================
-
-const int EFG_TOOLBAR_ID = 102;
-
-class EfgToolbar : public wxToolBar {
-private:
-  wxFrame *m_parent;
-
-  // Event handlers
-  void OnMouseEnter(wxCommandEvent &);
-
-public:
-  EfgToolbar(wxFrame *p_frame, wxWindow *p_parent);
-  ~EfgToolbar() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(EfgToolbar, wxToolBar)
-  EVT_TOOL_ENTER(EFG_TOOLBAR_ID, EfgToolbar::OnMouseEnter)
-END_EVENT_TABLE()
-
-EfgToolbar::EfgToolbar(wxFrame *p_frame, wxWindow *p_parent)
-  : wxToolBar(p_parent, EFG_TOOLBAR_ID), m_parent(p_frame)
-{
-#ifdef __WXMSW__
-  wxBitmap openBitmap("OPEN_BITMAP");
-  wxBitmap saveBitmap("SAVE_BITMAP");
-  wxBitmap printBitmap("PRINT_BITMAP");
-  wxBitmap deleteBitmap("DELETE_BITMAP");
-  wxBitmap solveBitmap("SOLVE_BITMAP");
-  wxBitmap zoominBitmap("ZOOMIN_BITMAP");
-  wxBitmap zoomoutBitmap("ZOOMOUT_BITMAP");
-  wxBitmap helpBitmap("HELP_BITMAP");
-  wxBitmap addBitmap("ADD_BITMAP");
-  wxBitmap optionsBitmap("OPTIONS_BITMAP");
-  wxBitmap makenfBitmap("NFG_BITMAP");
-  wxBitmap inspectBitmap("INSPECT_BITMAP");
-#else
-#include "bitmaps/open.xpm"
-#include "bitmaps/save.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/delete.xpm"
-#include "bitmaps/solve.xpm"
-#include "bitmaps/zoomin.xpm"
-#include "bitmaps/zoomout.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/add.xpm"
-#include "bitmaps/options.xpm"
-#include "bitmaps/makenf.xpm"
-#include "bitmaps/inspect.xpm"
-  wxBitmap openBitmap(open_xpm);
-  wxBitmap saveBitmap(save_xpm);
-  wxBitmap printBitmap(print_xpm);
-  wxBitmap deleteBitmap(delete_xpm);
-  wxBitmap solveBitmap(solve_xpm);
-  wxBitmap zoominBitmap(zoomin_xpm);
-  wxBitmap zoomoutBitmap(zoomout_xpm);
-  wxBitmap helpBitmap(help_xpm);
-  wxBitmap addBitmap(add_xpm);
-  wxBitmap optionsBitmap(options_xpm);
-  wxBitmap makenfBitmap(makenf_xpm);
-  wxBitmap inspectBitmap(inspect_xpm);
-#endif  // __WXMSW__
-    
-  SetMargins(2, 2);
-#ifdef __WXMSW__
-  SetToolBitmapSize(wxSize(33, 30));
-#endif // _WXMSW__
-  AddTool(FILE_OPEN, openBitmap);
-  AddTool(efgmenuFILE_SAVE, saveBitmap);
-  AddTool(efgmenuFILE_PRINT_PREVIEW, printBitmap);
-  AddSeparator();
-  AddTool(efgmenuEDIT_NODE_ADD, addBitmap);
-  AddTool(efgmenuEDIT_NODE_DELETE, deleteBitmap);
-  AddSeparator();
-  AddTool(efgmenuSOLVE_STANDARD, solveBitmap);
-  AddTool(efgmenuINSPECT_SOLUTIONS, inspectBitmap);
-  AddTool(efgmenuSOLVE_NFG_REDUCED, makenfBitmap);
-  AddSeparator();
-  AddTool(efgmenuPREFS_INC_ZOOM, zoominBitmap);
-  AddTool(efgmenuPREFS_DEC_ZOOM, zoomoutBitmap);
-  AddTool(efgmenuPREFS_DISPLAY_LAYOUT, optionsBitmap);
-  AddSeparator();
-  AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
-
-  Realize();
-}
-
-void EfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
-{
-  if (p_event.GetSelection() == efgmenuPREFS_INC_ZOOM) {
-    m_parent->SetStatusText("Zoom in");
-  }
-  else if (p_event.GetSelection() == efgmenuPREFS_DEC_ZOOM) {
-    m_parent->SetStatusText("Zoom out");
-  }
-  else if (p_event.GetSelection() > 0) {
-    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
-  }
-  else {
-    m_parent->SetStatusText("");
-  }
-}
-
-//=====================================================================
 //                     EfgShow MEMBER FUNCTIONS
 //=====================================================================
 
@@ -284,8 +177,7 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
     EfgNfgInterface(gEFG, p_nfg), EfgClient(&p_efg),
     parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
-    m_solutionTable(0), m_toolbar(0),
-    m_solutionSashWindow(0), m_cursorWindow(0)
+    m_solutionTable(0), m_solutionSashWindow(0), m_cursorWindow(0)
 {
   SetSizeHints(300, 300);
 
@@ -314,7 +206,7 @@ EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   m_currentSupport->SetName("Full Support");
   m_supports.Append(m_currentSupport);
 
-  m_toolbar = new EfgToolbar(this, this);
+  MakeToolbar();
   
   m_nodeSashWindow = new wxSashWindow(this, idNODEWINDOW,
 				      wxPoint(0, 40), wxSize(200, 200),
@@ -833,7 +725,7 @@ void EfgShow::MakeMenus(void)
 		    "Table of contents");
   help_menu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
-  wxMenuBar *menu_bar = new wxMenuBar;
+  wxMenuBar *menu_bar = new wxMenuBar(wxMB_DOCKABLE);
   menu_bar->Append(fileMenu, "&File");
   menu_bar->Append(edit_menu,     "&Edit");
   menu_bar->Append(subgame_menu,  "Sub&games");
@@ -845,6 +737,37 @@ void EfgShow::MakeMenus(void)
 
   // Set the menu bar
   SetMenuBar(menu_bar);
+}
+
+#include "bitmaps/new.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/save.xpm"
+#include "bitmaps/preview.xpm"
+#include "bitmaps/print.xpm"
+#include "bitmaps/help.xpm"
+
+void EfgShow::MakeToolbar(void)
+{
+  wxToolBar *toolBar = CreateToolBar(wxTB_FLAT | wxTB_DOCKABLE |
+				     wxTB_HORIZONTAL);
+  toolBar->SetMargins(4, 4);
+
+  toolBar->AddTool(FILE_NEW_EFG, wxBITMAP(new), wxNullBitmap, false,
+		   -1, -1, 0, "New game", "Create a new game");
+  toolBar->AddTool(FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
+		   -1, -1, 0, "Open file", "Open a saved game");
+  toolBar->AddTool(efgmenuFILE_SAVE, wxBITMAP(save), wxNullBitmap, false,
+		   -1, -1, 0, "Save game", "Save this game");
+  toolBar->AddSeparator();
+  toolBar->AddTool(efgmenuFILE_PRINT_PREVIEW, wxBITMAP(preview), wxNullBitmap,
+		   false, -1, -1, 0, "Print Preview",
+		   "View a preview of the game printout");
+  toolBar->AddTool(efgmenuFILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
+		   -1, -1, 0, "Print", "Print this game");
+  toolBar->AddSeparator();
+  toolBar->AddTool(GAMBIT_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+		   -1, -1, 0, "Help", "Table of contents");
+  toolBar->Realize();
 }
 
 // if who == 2, hilight in the tree display
@@ -2221,12 +2144,8 @@ void EfgShow::OnSashDrag(wxSashEvent &p_event)
 
 void EfgShow::AdjustSizes(void)
 {
-  const int toolbarHeight = 40;
   int width, height;
   GetClientSize(&width, &height);
-  if (m_toolbar) {
-    m_toolbar->SetSize(0, 0, width, toolbarHeight);
-  }
   if (m_solutionTable && m_solutionSashWindow->IsShown()) {
     m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
 				  width, m_solutionSashWindow->GetRect().height);
@@ -2235,17 +2154,15 @@ void EfgShow::AdjustSizes(void)
 
   if ((m_cursorWindow && m_nodeSashWindow->IsShown())) {
     if (m_treeWindow) {
-      m_treeWindow->SetSize(250, toolbarHeight,
-			    width - 250, height - toolbarHeight);
+      m_treeWindow->SetSize(250, 0, width - 250, height);
     }
   }
   else if (m_treeWindow) {
-    m_treeWindow->SetSize(0, toolbarHeight, width, height - toolbarHeight);
+    m_treeWindow->SetSize(0, 0, width, height);
   }
 
   if (m_cursorWindow && m_nodeSashWindow->IsShown()) {
-    m_nodeSashWindow->SetSize(0, toolbarHeight,
-			      250, height - toolbarHeight);
+    m_nodeSashWindow->SetSize(0, 0, 250, height);
   }
 
   if (m_treeWindow) {
@@ -2373,8 +2290,6 @@ Node *EfgShow::Cursor(void) const
 {
   return m_treeWindow->Cursor();
 }
-
-template class SolutionList<BehavSolution>;
 
 #include "glist.imp"
 

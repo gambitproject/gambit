@@ -49,6 +49,8 @@ private:
   int GetPlayers(void);
   int GetStrategies(gArray<int> &);
 
+  void MakeToolbar(void);
+  
 public:
   GambitFrame(wxFrame *p_parent, const wxString &p_title,
 	      const wxPoint &p_position, const wxSize &p_size);

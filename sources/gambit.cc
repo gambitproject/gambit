@@ -143,75 +143,6 @@ bool GambitApp::OnInit(void)
 IMPLEMENT_APP(GambitApp)
 
 //=====================================================================
-//                       class GambitToolbar
-//=====================================================================
-
-const int GAMBIT_TOOLBAR_ID = 101;
-
-class GambitToolbar : public wxToolBar {
-private:
-  wxFrame *m_parent;
-
-  // Event handlers
-  void OnMouseEnter(wxCommandEvent &);
-    
-public:
-  GambitToolbar(wxFrame *, const wxPoint &, const wxSize &);
-  virtual ~GambitToolbar() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(GambitToolbar, wxToolBar)
-  EVT_TOOL_ENTER(GAMBIT_TOOLBAR_ID, GambitToolbar::OnMouseEnter)
-END_EVENT_TABLE()
-
-GambitToolbar::GambitToolbar(wxFrame *p_parent, const wxPoint &p_position,
-			     const wxSize &p_size)
-  : wxToolBar(p_parent, GAMBIT_TOOLBAR_ID, p_position, p_size),
-    m_parent(p_parent)
-{
-#ifdef __WXMSW__
-  wxBitmap loadBitmap("OPEN_BITMAP");
-  wxBitmap efgBitmap("EFG_BITMAP");
-  wxBitmap nfgBitmap("NFG_BITMAP");
-  wxBitmap helpBitmap("HELP_BITMAP");
-#else
-#include "bitmaps/open.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/efg.xpm"
-#include "bitmaps/nfg.xpm"
-  wxBitmap loadBitmap(open_xpm);
-  wxBitmap efgBitmap(efg_xpm);
-  wxBitmap nfgBitmap(nfg_xpm);
-  wxBitmap helpBitmap(help_xpm);
-#endif  // __WXMSW__
-  
-  SetMargins(2, 2);
-#ifdef __WXMSW__
-  SetToolBitmapSize(wxSize(33, 30));
-#endif  // __WXMSW__
-  AddTool(FILE_OPEN, loadBitmap);
-  AddSeparator();
-  AddTool(FILE_NEW_EFG, efgBitmap);
-  AddTool(FILE_NEW_NFG, nfgBitmap);
-  AddSeparator();
-  AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
-
-  Realize();
-}
-
-void GambitToolbar::OnMouseEnter(wxCommandEvent &p_event)
-{
-  if (p_event.GetSelection() > 0) {
-    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
-  }
-  else {
-    m_parent->SetStatusText("");
-  }
-}
-
-//=====================================================================
 //                       class GambitFrame
 //=====================================================================
 
@@ -241,12 +172,12 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1", "Table of contents");
   helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
   
-  wxMenuBar *menuBar = new wxMenuBar;
+  wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(helpMenu, "&Help");
   SetMenuBar(menuBar);
 
- wxAcceleratorEntry entries[3];
+  wxAcceleratorEntry entries[3];
   entries[0].Set(wxACCEL_CTRL, (int) 'O', FILE_OPEN);
   entries[1].Set(wxACCEL_CTRL, (int) 'X', FILE_QUIT);
   entries[2].Set(wxACCEL_NORMAL, WXK_F1, GAMBIT_HELP_CONTENTS);
@@ -259,14 +190,35 @@ GambitFrame::GambitFrame(wxFrame *p_parent, const wxString &p_title,
   m_fileHistory.AddFilesToMenu();
 
   CreateStatusBar();
-
-  (void) new GambitToolbar(this, wxPoint(0, 0), wxSize(200, 40));
+  MakeToolbar();
 }
 
 GambitFrame::~GambitFrame()
 {
   wxConfig config("Gambit");
   m_fileHistory.Save(config);
+}
+
+#include "bitmaps/new.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/help.xpm"
+
+void GambitFrame::MakeToolbar(void)
+{
+  wxToolBar *toolBar = CreateToolBar(wxTB_FLAT | wxTB_DOCKABLE |
+				     wxTB_HORIZONTAL);
+
+  toolBar->SetMargins(4, 4);
+
+  toolBar->AddTool(FILE_NEW_EFG, wxBITMAP(new), wxNullBitmap, false,
+		   -1, -1, 0, "New game");
+  toolBar->AddTool(FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
+		   -1, -1, 0, "Open file");
+  toolBar->AddSeparator();
+  toolBar->AddTool(GAMBIT_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+		   -1, -1, 0, "Help");
+
+  toolBar->Realize();
 }
 
 //--------------------------------------------------------------------

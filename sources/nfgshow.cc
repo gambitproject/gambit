@@ -41,88 +41,6 @@
 const int idPANELWINDOW = 3001;
 const int idSOLUTIONWINDOW = 3002;
 
-//=====================================================================
-//                       class NfgToolbar
-//=====================================================================
-
-const int NFG_TOOLBAR_ID = 100;
-
-class NfgToolbar : public wxToolBar {
-private:
-  wxFrame *m_parent;
-
-  // Event handlers
-  void OnMouseEnter(wxCommandEvent &);
-
-public:
-  NfgToolbar(wxFrame *p_frame);
-  virtual ~NfgToolbar() { }
-
-  DECLARE_EVENT_TABLE()
-};
-
-BEGIN_EVENT_TABLE(NfgToolbar, wxToolBar)
-  EVT_TOOL_ENTER(NFG_TOOLBAR_ID, NfgToolbar::OnMouseEnter)
-END_EVENT_TABLE()
-
-NfgToolbar::NfgToolbar(wxFrame *p_frame)
-  : wxToolBar(p_frame, NFG_TOOLBAR_ID), m_parent(p_frame)
-{
-#ifdef __WXMSW__
-  wxBitmap openBitmap("OPEN_BITMAP");
-  wxBitmap saveBitmap("SAVE_BITMAP");
-  wxBitmap printBitmap("PRINT_BITMAP");
-  wxBitmap solveBitmap("SOLVE_BITMAP");
-  wxBitmap helpBitmap("HELP_BITMAP");
-  wxBitmap optionsBitmap("OPTIONS_BITMAP");
-  wxBitmap inspectBitmap("INSPECT_BITMAP");
-#else
-#include "bitmaps/open.xpm"
-#include "bitmaps/save.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/solve.xpm"
-#include "bitmaps/help.xpm"
-#include "bitmaps/options.xpm"
-#include "bitmaps/inspect.xpm"
-  wxBitmap openBitmap(open_xpm);
-  wxBitmap saveBitmap(save_xpm);
-  wxBitmap printBitmap(print_xpm);
-  wxBitmap solveBitmap(solve_xpm);
-  wxBitmap helpBitmap(help_xpm);
-  wxBitmap optionsBitmap(options_xpm);
-  wxBitmap inspectBitmap(inspect_xpm);
-#endif // __WXMSW__
-
-  SetMargins(2, 2);
-#ifdef __WXMSW__
-  SetToolBitmapSize(wxSize(33, 30));
-#endif // __WXMSW__
-
-  AddTool(FILE_OPEN, openBitmap);
-  AddTool(NFG_FILE_SAVE, saveBitmap);
-  AddTool(NFG_FILE_PRINT_PREVIEW, printBitmap);
-  AddSeparator();
-  AddTool(NFG_SOLVE_STANDARD, solveBitmap);
-  AddTool(NFG_VIEW_SOLUTIONS, inspectBitmap);
-  AddSeparator();
-  AddTool(NFG_OPTIONS_MENU, optionsBitmap);
-  AddSeparator();
-  AddTool(GAMBIT_HELP_CONTENTS, helpBitmap);
-
-  Realize();
-  Show(true);
-}
-
-void NfgToolbar::OnMouseEnter(wxCommandEvent &p_event)
-{
-  if (p_event.GetSelection() > 0) {
-    m_parent->SetStatusText(m_parent->GetMenuBar()->GetHelpString(p_event.GetSelection()));
-  }
-  else {
-    m_parent->SetStatusText("");
-  }
-}
-
 //----------------------------------------------------------------------
 //                   class NfgShow: Member functions
 //----------------------------------------------------------------------
@@ -183,7 +101,7 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   : wxFrame(p_frame, -1, "", wxDefaultPosition, wxSize(500, 500)),
     EfgNfgInterface(gNFG, efg),
     m_nfg(p_nfg),
-    m_panel(0), m_toolbar(0), m_table(0), m_solutionTable(0),
+    m_panel(0), m_table(0), m_solutionTable(0),
     m_panelSashWindow(0), m_solutionSashWindow(0),
     m_rowPlayer(1), m_colPlayer(2)
 {
@@ -211,7 +129,7 @@ NfgShow::NfgShow(Nfg &p_nfg, EfgNfgInterface *efg, wxFrame *p_frame)
   SetAcceleratorTable(accel);
 
   CreateStatusBar(3);
-  m_toolbar = new NfgToolbar(this);
+  MakeToolbar();
 
   m_panelSashWindow = new wxSashWindow(this, idPANELWINDOW,
 				       wxPoint(0, 40), wxSize(200, 200),
@@ -373,7 +291,7 @@ void NfgShow::MakeMenus(void)
   helpMenu->Append(GAMBIT_HELP_CONTENTS, "&Contents\tF1", "Table of contents");
   helpMenu->Append(GAMBIT_HELP_ABOUT, "&About", "About Gambit");
 
-  wxMenuBar *menuBar = new wxMenuBar;
+  wxMenuBar *menuBar = new wxMenuBar(wxMB_DOCKABLE);
   menuBar->Append(fileMenu, "&File");
   menuBar->Append(editMenu, "&Edit");
   menuBar->Append(supportsMenu, "S&upports");
@@ -385,6 +303,37 @@ void NfgShow::MakeMenus(void)
   viewMenu->Check(NFG_VIEW_OUTCOMES, !m_drawSettings.OutcomeValues());
   
   SetMenuBar(menuBar);
+}
+
+#include "bitmaps/new.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/save.xpm"
+#include "bitmaps/preview.xpm"
+#include "bitmaps/print.xpm"
+#include "bitmaps/help.xpm"
+
+void NfgShow::MakeToolbar(void)
+{
+  wxToolBar *toolBar = CreateToolBar(wxTB_FLAT | wxTB_DOCKABLE |
+				     wxTB_HORIZONTAL);
+  toolBar->SetMargins(4, 4);
+
+  toolBar->AddTool(FILE_NEW_EFG, wxBITMAP(new), wxNullBitmap, false,
+		   -1, -1, 0, "New game", "Create a new game");
+  toolBar->AddTool(FILE_OPEN, wxBITMAP(open), wxNullBitmap, false,
+		   -1, -1, 0, "Open file", "Open a saved game");
+  toolBar->AddTool(NFG_FILE_SAVE, wxBITMAP(save), wxNullBitmap, false,
+		   -1, -1, 0, "Save game", "Save this game");
+  toolBar->AddSeparator();
+  toolBar->AddTool(NFG_FILE_PRINT_PREVIEW, wxBITMAP(preview), wxNullBitmap,
+		   false, -1, -1, 0, "Print Preview",
+		   "View a preview of the game printout");
+  toolBar->AddTool(NFG_FILE_PRINT, wxBITMAP(print), wxNullBitmap, false,
+		   -1, -1, 0, "Print", "Print this game");
+  toolBar->AddSeparator();
+  toolBar->AddTool(GAMBIT_HELP_CONTENTS, wxBITMAP(help), wxNullBitmap, false,
+		   -1, -1, 0, "Help", "Table of contents");
+  toolBar->Realize();
 }
 
 void NfgShow::UpdateMenus(void)
@@ -460,25 +409,21 @@ void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 
 void NfgShow::AdjustSizes(void)
 {
-  const int toolbarHeight = 40;
   int width, height;
   GetClientSize(&width, &height);
-  if (m_toolbar) {
-    m_toolbar->SetSize(0, 0, width, toolbarHeight);
-  }
+
   if (m_solutionSashWindow && m_solutionSashWindow->IsShown()) {
     m_solutionSashWindow->SetSize(0, height - m_solutionSashWindow->GetRect().height,
 				  width, m_solutionSashWindow->GetRect().height);
     height -= m_solutionSashWindow->GetRect().height;
   }
   if (m_panelSashWindow) {
-    m_panelSashWindow->SetSize(0, 40, m_panelSashWindow->GetRect().width,
-			       height - 40);
+    m_panelSashWindow->SetSize(0, 0, m_panelSashWindow->GetRect().width,
+			       height);
   }
   if (m_table) {
     m_table->SetSize(m_table->GetRect().x, m_table->GetRect().y,
-		     width - m_table->GetRect().x,
-		     height - toolbarHeight);
+		     width - m_table->GetRect().x, height);
   }
 }
 
