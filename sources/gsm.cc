@@ -1361,7 +1361,7 @@ void GSM::Output( void )
 
   if( _Depth() == 0 )
   {
-    _StdOut << "\n";
+//    _StdOut << "\n";
   }
   else
   {
