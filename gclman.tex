@@ -21,7 +21,7 @@ Technology
 Andrew McLennan\\University of
 Minnesota
 \and 
-Ted Turocy\\California Institute of Technology
+Theodore Turocy\\California Institute of Technology
 }
 
 \date{\today\\ \jobname.tex}
@@ -84,15 +84,15 @@ parentheses or brackets.  For example, the following two lines are
 interpreted as one statement:
 
 \begin{verbatim}
-	Plus[x->1, 
-	y->2]
+Plus[x->1, 
+y->2]
 \end{verbatim}
 
 If both lines are followed by a carriage return, the statement will
 generate the line of output:
 
 \begin{verbatim}
-	3
+3
 \end{verbatim}
 
 The function \verb+Plus+ is defined to return the sum of two integers,
@@ -114,7 +114,7 @@ followed by the name of a file, the user can direct the output of the
 command language to an external text file.  For example, at the unix prompt:
 
 \begin{verbatim}
-	> gcl < input.gcl > output.out
+> gcl < input.gcl > output.out
 \end{verbatim}
 
 \section{Language Description}
@@ -126,14 +126,11 @@ statement as a function call, which operates on some set of parameters and
 returns a value.  Many commonly used functions have a more convenient
 ``short form'' format for additional terseness and readability.
 
-At any point in time, there is a set of ``visible functions.''
-Functions can be either built-in functions, or user created functions.
 Each function is identified by its \verb+FunctionName+, which is a
 unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
 case letters or numbers beginning with a letter.  The set of all
 built-in functions is listed in the Function Reference section of this
-manual.  The built-in functions are always visible, unless they are
-explicitly deleted.
+manual.
 
 A statement in the GCL has the
 following syntax
@@ -170,7 +167,7 @@ need only be specified when the default is to be changed.
 
 The arguments to a function can be specified in any order, as long as
 the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function ca also be called with without specifying
+argument list for a function can also be called with without specifying
 the prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as
 the arguments are specified in the correct order.  In fact a mixture
 is allowed in which the prefix is specified for some arguments and not
@@ -199,7 +196,7 @@ Summarizing, a rough description of the formal grammar of the GCL
 follows:
 
 \begin{verbatim}
-Name: [A-Za-z]([A-Za-z0-9])
+Name: [A-Za-z]([A-Za-z0-9_])
 
 Statement: FunctionName
         | FunctionName[ArgumentList]
@@ -246,59 +243,84 @@ name := expression
 
 \subsection{User defined functions}
 
-[This is very tentative.  I have problems with some aspects of this. -- TED]
+As GCL programs become more and more complex, frequently there are complicated
+operations which must be performed repeatedly.  The command language therefore
+supports user-defined functions, which allow for defining sections of code
+which may be called later.
 
-\subsubsection{Creating functions}
-A user defined function can be created using the function
-\verb+NewFunction+, which has the following format.
+A new function can be created using the function
+\verb+DefineFunction+.  For example, one might define a function to compute
+the absolute value of an INTEGER as such:
 
 \begin{verbatim}
-NewFunction[name->TEXT,arglist->LIST[ TEXT, BOOLEAN, TEXT], 
-            body->STATEMENTLIST,scope->BOOLEAN] =: BOOLEAN
+DefineFunction[Abs[n->INTEGER], INTEGER,
+                 If[n > 0, n, If[n < 0, -n, 0]]]
 \end{verbatim}
 
-\subsubsection{Using functions}
+\noindent After defining the \verb+Abs+ function, it may be called in exactly
+the same way a system-supplied predefined function may.
 
-When a user defined function is evaluated, the following things,
-happen, in order:
+Parameter type matching rules apply to user defined functions in exactly the
+same way as to predefined functions.  From the function's point of view,
+the parameter list is a list of variables on which assignments are
+automatically done at the beginning of the function execution.  So, taking
+the \verb+Abs+ example above, in executing the call
 
-\begin{enumerate}
-\item
-The current list of visible functions is 
-replaced with a new set of visible functions, consisting of the
-previous set of visible functions with global scope.  
- 
-\item
-\begin{itemize}
-\item
-For each argument in the argument list which is called by
-value, a new variable of local scope is created, whose name is the
-corresponding \verb+ArgumentName+, and it is assigned the value
-which results from evaluating the argument \verb+argval+.  
-\item
-For each
-argument that is called by reference, the name \verb+ArgumentName+ is
-added to the list of visible functions, and this name is treated as a
-proxy (a reference) for the function name of \verb+argref+.  In other
-words, this function remains visible, but is given a different name by
-which it is referred to while in the function.  It is very important
-to note that this means that any changes to the function with name
-\verb+ArgumentName+ will result to the exact same change to
-\verb+argref+, once that function is again visible, since
-\verb+ArgumentName+ and \verb+argref+ are just different names for the
-same function.
-\end{itemize}
+\begin{verbatim}
+Abs[42]
+\end{verbatim}
 
-\item
-The statements in the body of the function are evaluated, in
-order, until a \verb+Return+ function is encountered.  
+\noindent an assignment \verb+n := 42+ is implicitly performed before the
+body of the function is executed.
 
-\item
-When a return function is evaluated, the list of visible
-functions is restored to what it was before the \verb+FunctionName+
-was evaluated, and the argument of the Return function is evaluated
-and returned as the evaluation of \verb+FunctionName+. 
-\end{enumerate}
+It is also possible to pass variables by ``reference'' to a user-defined
+function in the same way as a predefined function.  In this case, the
+function's ``local'' variable is stored in the same physical location in the
+computer, and modifying the value locally also takes effect on the variable
+passed to the function.  For example, it might
+be useful instead to define \verb+Abs+ as:
+
+\begin{verbatim}
+DefineFunction[Abs[n<->INTEGER], INTEGER,
+		 If[n > 0, n, If[n < 0, n := -n, 0]]]
+\end{verbatim}
+
+\noindent in which case the function would still return the absolute value
+of \verb+n+, but also modify the variable passed to \verb+n+ to be the
+absolute value of the input \verb+n+.  So,
+
+\begin{verbatim}
+q := -37;
+Abs[q]
+\end{verbatim}
+
+\noindent would result in the variable \verb+q+ containing the value 37
+at the conclusion of execution.
+
+Each function has its own ``scope'', or set of variables.  Within a function
+body, the only variables which are visible are those which are declared
+in the parameter list of the function (this is \verb+n+ in the \verb+Abs+
+example above), and those which are created during the function's execution.
+That is, no ``global'' or outside variables may be accessed directly by the
+function.  For example, if the user typed in the following:
+
+\begin{verbatim}
+i := 4;
+DefineFunction[FooFunc[x->INTEGER], INTEGER, x * i]
+\end{verbatim}
+
+\noindent later execution of the \verb+FooFunc+ would yield an ``undefined
+variable i'' error message, since \verb+i+ is never defined within the
+function.  If instead \verb+FooFunc+ had been defined as follows:
+
+\begin{verbatim}
+DefineFunction[FooFunc[x->INTEGER], INTEGER, i := 13, x * i]
+\end{verbatim}
+
+\noindent \verb+FooFunc+ would always return 13 times the value of the
+parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+ is
+always 13, regardless of the value of \verb+i+ outside of the function.
+
 
 \subsection{Data types}
 
@@ -330,20 +352,17 @@ EFG	& Game in extensive form\\
 
 NFG	& Game in normal form\\
 
-NODE	& A node (may only be a subvariable of an extensive
-form problem) \\ 
+NODE	& A node in an extensive form\\
 
 DATATYPE & Defines precision (constants: Float or
 Rational) \\ 
 
-STRATEGY & In a normal form game, one of the options a player may adopt
+STRATEGY & In a normal form game, one of the options a player may adopt\\
 
 MIXED	& Profile of mixed strategies\\
 
 BEHAV	& Profile of behavioral strategies
 \end{tabular}
-
-
 
 \medskip
 
@@ -356,33 +375,37 @@ contains a vector of variables of the same type enclosed in curly braces
 and separated by commas.  For example:
 
 \begin{verbatim}
-	LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
+LIST(BOOLEAN) := { BOOLEAN1, BOOLEAN2, . . . . , BOOLEANn }
 \end{verbatim}
 
 The elements of a list are indexed sequentially, with the first element
-defined to have index 1.  Therefore, the ith
-element of a list is defined as:
+defined to have index 1.  The predefined function \verb+Subscript+ is
+provided to extract an element from a list:
 
 \begin{verbatim}
-	LIST(BOOLEAN)[[i]]
+Subscript[l->LIST(T), i->INTEGER] =: T
 \end{verbatim}
 
-\noindent which evaluates to a single variable of type \verb+BOOLEAN+.
+\noindent which evaluates to a single variable of the same type as the list.
+The shorthand for the \verb+Subscript+ function is \verb+l[[i]]+.
+
 In the same manner, lists of any type may be created and manipulated.
 Lists may be nested to any depth; however, the type of all the elements
 of the list and any sublists must always be the same.  Hence
 
 \begin{verbatim}
-	{ 3, { 4, 6 }, 23 }
+{ 3, { 4, 6 }, 23 }
 \end{verbatim}
 
 is a legal list, since all the elements are of type INTEGER, but
 
 \begin{verbatim}
-	{ 3, { 4.2, 5.7 }, 23 }
+{ 3, { 4.2, 5.7 }, 23 }
 \end{verbatim}
 
 is not, since the second element is a LIST(FLOAT).
+
+\subsection{Boolean and numeric data types}
 
 \subsubsection{Boolean}
 
@@ -681,6 +704,42 @@ It has the short form \verb+a != b+.
 \ed
 \end{itemize}
 
+\subsection{Extensive forms}
+
+\subsubsection{Creating a new extensive form}
+
+\subsubsection{Modifying an extensive form}
+
+\subsubsection{Saving and loading extensive forms}
+
+\subsection{Normal forms}
+
+\subsubsection{Creating a new normal form}
+
+Creating a game in normal form is accomplished by the predefined function
+\verb+NewNfg+, which takes as its only required parameter a list of integers
+specifying the number of strategies available to each player in the game.
+Players are numbered starting at 1, and the $i$th element of the list
+corresponds to the number of strategies for the $i$th player in the game.
+Upon creation, all entries of the normal form are zero.
+
+Additionally, normal forms may be created based upon an existing extensive
+form game.  The predefined function \verb+EfgToNfg+ creates a normal form
+which is the reduced normal form of an extensive form, and \verb+EfgToAfg+
+produces the agent normal form for an extensive form.
+
+\subsubsection{Modifying a normal form}
+
+[Basically this stuff doesn't exist yet, but will soon. -- TED]
+
+\subsubsection{Saving and loading normal forms}
+
+The Gambit system reads and writes normal form games in a special ASCII
+format.  By convention, files containing a normal form game have the extension
+\verb+.nfg+.
+
+To write a normal form game to a file, use the function \verb+WriteNfg+.
+To read a normal form game from a file, use \verb+ReadNfg+.
 
 \subsection{Order of precedence}
 
@@ -1044,18 +1103,18 @@ CrunchNfg[N->NFG] =: NFG
 
 \bd
 \item
-[Description:] Creates a new problem in normal form for which the
+[Description:] Creates a new game in normal form for which the
 strategies are those of the smallest strategy set of the specified
-normal form problem and which contains only those payoff elements
+normal form game and which contains only those payoff elements
 corresponding to those strategies.
 \item
-[Return value:] Returns the new normal form problem.
+[Return value:] Returns the new normal form game.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[N:] The problem in normal form from which the new normal form problem
+[N:] The game in normal form from which the new normal form game
 is to be created.
 \ed
 
@@ -1169,7 +1228,7 @@ DisplayEfg[E->EFG]
 \bd
 \item
 [Description:] Prints the game tree of the specified extensive form
-problem in outline form.
+game in outline form.
 \item
 [Return value:] None.
 \item
@@ -1191,7 +1250,7 @@ DisplayNfg[N->NFG, {sset->INTEGER}]
 
 \bd
 \item
-[Description:] Prints the specified normal form problem as a list of
+[Description:] Prints the specified normal form game as a list of
 contingencies and corresponding payoff vectors.  Uses the last
 strategy set unless otherwise specified.
 \item
@@ -1210,7 +1269,7 @@ strategy set unless otherwise specified.
 \bd
 \item
 [sset:] The number of the strategy set of the specified normal form
-problem which is to be used in displaying the problem.  If not
+game which is to be used in displaying the game.  If not
 specified, the last (smallest) strategy set is used.
 \ed
 \ed
@@ -1275,8 +1334,8 @@ EfgToAfg[E->EFG, {time<->RATIONAL}] =: NFG
 
 \bd
 \item
-[Description:] Converts a problem in extensive form to the same
-problem in the corresponding agent normal form.
+[Description:] Converts a game in extensive form to the same
+game in the corresponding agent normal form.
 \item
 [Return value:] The new agent normal form game.
 \item 
@@ -1284,7 +1343,7 @@ problem in the corresponding agent normal form.
 
 \bd
 \item
-[E:] The problem in extensive form to be converted to agent normal
+[E:] The game in extensive form to be converted to agent normal
 form.
 \ed
 
@@ -1304,8 +1363,8 @@ EfgToNfg[E->EFG, {time<->RATIONAL}] =: NFG
 
 \bd
 \item
-[Description:] Converts a problem in extensive form to the same
-problem as a reduced normal form game.
+[Description:] Converts a game in extensive form to the same
+game as a reduced normal form game.
 \item
 [Return value:] The new normal form game.
 \item
@@ -1313,7 +1372,7 @@ problem as a reduced normal form game.
 	
 \bd
 \item
-[E:] The problem in extensive form to be converted to normal form.
+[E:] The game in extensive form to be converted to normal form.
 \ed
 
 \item
@@ -1366,7 +1425,7 @@ value is equal to 1.
 	
 \bd
 \item
-[N:] The problem in normal form for which dominated strategies are to
+[N:] The game in normal form for which dominated strategies are to
 be eliminated.
 \ed
 
@@ -1498,7 +1557,7 @@ GetDominator[N->NFG, pl->INTEGER, st->INTEGER] =: INTEGER
 \bd
 \item
 [Description:] Determines the number of strategies which dominate the
-specified strategy for the indicated player in the given problem in
+specified strategy for the indicated player in the given game in
 normal form.
 \item
 [Return value:] Returns the number of strategies which dominate the
@@ -1509,7 +1568,7 @@ of zero.
 
 \bd
 \item
-[N:] The problem in normal form in which the specified strategy of the
+[N:] The game in normal form in which the specified strategy of the
 indicated player is to be tested for domination.
 \item
 [pl:] The number corresponding to the player for whom the specified
@@ -1577,7 +1636,7 @@ GetOutcome[E->EFG, outc->INTEGER] =: LIST(RATIONAL)
 \bd
 \item
 [Description:] Finds the vector of payoffs to the players for the
-outcome with the indicated number in the specified problem in
+outcome with the indicated number in the specified game in
 extensive form.
 \item
 [Return value:] The vector of payoffs corresponding to the specified
@@ -1588,7 +1647,7 @@ empty list.
 
 \bd
 \item
-[E:] The problem in extensive form for which the outcome is to be
+[E:] The game in extensive form for which the outcome is to be
 found.
 \item
 [outc:] The number assigned to the outcome for which the payoff vector
@@ -1608,7 +1667,7 @@ GetOutcomeName[E->EFG, outc->INTEGER] =: TEXT
 
 \item
 [Description:] Finds the name of the specified outcome in the
-indicated problem in extensive form.  If the outcome is not defined,
+indicated game in extensive form.  If the outcome is not defined,
 an error is given.
 \item
 [Return value:] The name assigned to the indicated outcome.  By
@@ -1618,7 +1677,7 @@ default, the name of an outcome is the empty string.
 
 \bd
 \item	  
-[E:] The problem in extensive form for which the outcome name is to be
+[E:] The game in extensive form for which the outcome name is to be
 found.
 \item
 [outc:] The number corresponding to the outcome for which the name
@@ -1637,7 +1696,7 @@ GetPlayerName[E->EFG, pl->INTEGER] =: TEXT
 \bd
 \item
 [Description:] Finds the name of the indicated player in the given
-problem in extensive form.
+game in extensive form.
 \item
 [Return value:] The name assigned to the indicated player.  If the
 indicated player has not been assigned a name or does not exist, the
@@ -1647,7 +1706,7 @@ procedure returns the empty string.
 
 \bd
 \item  
-[E:] The problem in extensive form for which the player name is to be
+[E:] The game in extensive form for which the player name is to be
 found.
 \item
 [pl:] The number assigned to the player whose name will be returned.
@@ -1688,7 +1747,7 @@ GetStratName[N->NFG, pl->INTEGER, st->INTEGER] =: TEXT
 \bd
 \item
 [Description:] Finds the name assigned to the specified strategy of
-the indicated player of the given problem in normal form.
+the indicated player of the given game in normal form.
 \item
 [Return value:] Returns the name found.  If a name has not been
 assigned to the strategy, the empty string is returned.
@@ -1697,7 +1756,7 @@ assigned to the strategy, the empty string is returned.
 
 \bd
 \item
-[N:] The problem in normal form in which the name assigned to the
+[N:] The game in normal form in which the name assigned to the
 specified strategy of the indicated player is to be found.
 \item
 [pl:] The number corresponding to the player for which the name of the
@@ -1718,17 +1777,17 @@ GetTitle[E->EFG] =: TEXT
 
 \bd
 \item
-[Description:] Finds the title of the indicated problem in extensive
+[Description:] Finds the title of the indicated game in extensive
 form.
 \item
-[Return value:] The title of the indicated extensive form problem.  If
+[Return value:] The title of the indicated extensive form game.  If
 the title has not been assigned, the empty string is returned.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[E:] The problem in extensive form whose title is to be found.
+[E:] The game in extensive form whose title is to be found.
 \ed
 
 \item
@@ -1770,10 +1829,10 @@ the point found in step $t - 1$
 
 \bd
 \item
-[N:] The problem in normal form for which the Gobit solution is to be
+[N:] The game in normal form for which the Gobit solution is to be
 found.
 \item	
-[E:] The problem in extensive form for which the Gobit solution is to
+[E:] The game in extensive form for which the Gobit solution is to
 be found.
 \ed
 
@@ -1919,7 +1978,7 @@ of the probabilities are evaluated on a grid of mesh 'delp.'
 	
 \bd
 \item  
-[N:] The problem in normal form which is to be operated on.
+[N:] The game in normal form which is to be operated on.
 \ed
 
 \item
@@ -2052,7 +2111,7 @@ IsDominated[N->NFG, pl->INTEGER, st->INTEGER] =: BOOLEAN
 \item
 [Description:] Determines if the strategy corresponding to the
 specified number for the indicated player is dominated by another
-strategy in the given problem in normal form.  Uses only strategies in
+strategy in the given game in normal form.  Uses only strategies in
 the first strategy set.
 \item
 [Return value:] Returns True only if the specified strategy for the
@@ -2062,7 +2121,7 @@ given player is dominated.  Returns false otherwise.
 
 \bd
 \item
-[N:] The problem in normal form in which the specified strategy of the
+[N:] The game in normal form in which the specified strategy of the
 indicated player is to be tested for domination.
 \item
 [pl:] The number corresponding to the player for whom the specified
@@ -2226,7 +2285,7 @@ game specified using the Lemke-Howson algorithm.
 
 \bd
 \item
-[N:] The problem in normal form for which the solution is to be
+[N:] The game in normal form for which the solution is to be
 searched.
 \ed
 
@@ -2359,10 +2418,10 @@ whichever comes first.
 
 \bd
 \item
-[N:] The problem in normal form for which the Liapunov solution is to
+[N:] The game in normal form for which the Liapunov solution is to
 be found.
 \item
-[E:] The problem in extensive form for which the Liapunov solution is
+[E:] The game in extensive form for which the Liapunov solution is
 to be found.
 \ed
 
@@ -2468,7 +2527,7 @@ MixedToBehav[E->EFG, mp->MIXED] =: BEHAV
 \bd
 \item
 [Description:] Projects a specified mixed profile to a behavioral
-profile on the given extensive form problem.
+profile on the given extensive form game.
 \item
 [Return value:] Returns the behavioral profile.
 \item
@@ -2476,7 +2535,7 @@ profile on the given extensive form problem.
 
 \bd
 \item
-[E:] The problem in extensive form of which the behavioral profile is
+[E:] The game in extensive form of which the behavioral profile is
 to be a subvariable.
 \item
 [mp:] The mixed profile which is to be projected to a behavioral
@@ -2495,7 +2554,7 @@ MixedToBehav[E->EFG, mp->LIST(MIXED)] =: LIST(BEHAV)
 \bd
 \item
 [Description:] Projects a specified vector of mixed profiles to a
-vector of behavioral profiles on the given extensive form problem.
+vector of behavioral profiles on the given extensive form game.
 \item
 [Return value:] Returns the vector of behavioral profiles.
 \item
@@ -2503,7 +2562,7 @@ vector of behavioral profiles on the given extensive form problem.
 
 \bd
 \item
-[E:] The problem in extensive form of which the vector of behavioral
+[E:] The game in extensive form of which the vector of behavioral
 profiles is to be a subvariable.
 \item
 [mp:] The vector of mixed profiles which is to be projected to a
@@ -2613,7 +2672,7 @@ NewEfg[{players->LIST(TEXT)}, {type->DATATYPE}] =: EFG
 unspecified, the new game has only the chance player.
 \item
 [type:] Specifies the type (Float or Rational) of the new extensive
-form problem.
+form game.
 \ed
 \ed
 
@@ -2646,7 +2705,7 @@ than all function names in current scope.
 \bd
 \item
 [type:] Specifies the type (Float or Rational) of the new extensive
-form problem.
+form game.
 \ed
 \ed
 
@@ -2697,7 +2756,7 @@ NewOutcome[E->EFG, {outc->INTEGER}] =: INTEGER
 \bd
 \item
 [Description:] Creates and assigns a number to a new outcome within
-the specified problem in extensive form.  Note that outcomes are
+the specified game in extensive form.  Note that outcomes are
 sequentially numbered, so that if an outcome with the number n exists,
 then outcomes with the numbers 1 . . n-1 necessarily also exist.
 Therefore, this procedure creates not only the outcome with the
@@ -2715,7 +2774,7 @@ action is taken and the procedure returns a value of zero.
 
 \bd
 \item
-[E:] The problem in extensive form for which a new outcome is to be
+[E:] The game in extensive form for which a new outcome is to be
 created.
 \ed
 
@@ -2841,7 +2900,7 @@ NumInfosets[E->EFG, pl->INTEGER] =: INTEGER
 \bd
 \item
 [Description:] Finds the number of information sets belonging to the
-specified player in the given problem in extensive form.
+specified player in the given game in extensive form.
 \item
 [Return value:] Returns the number of information sets belonging to
 the specified player.  If the indicated player is not defined in the
@@ -2851,7 +2910,7 @@ game, the return value is equal to zero.
 
 \bd
 \item
-[E:] The problem in extensive form in which the information sets for
+[E:] The game in extensive form in which the information sets for
 the specified player are to be counted.
 \item
 [pl:] The number corresponding to the player for which the number of
@@ -2869,7 +2928,7 @@ NumNodes[E->EFG] =: INTEGER
 \bd
 \item
 [Description:] Finds the number of nodes (including terminal nodes) in
-the specified problem in extensive form.
+the specified game in extensive form.
 \item
 [Return value:] Returns the number of nodes found.
 \item
@@ -2877,7 +2936,7 @@ the specified problem in extensive form.
 
 \bd
 \item
-[E:] The problem in extensive form in which the number of nodes are to
+[E:] The game in extensive form in which the number of nodes are to
 be counted.
 \ed
 
@@ -2892,7 +2951,7 @@ NumOutcomes[E->EFG] =: INTEGER
 
 \bd
 \item
-[Description:] Finds the number of outcomes in the specified problem
+[Description:] Finds the number of outcomes in the specified game
 in extensive form.
 \item
 [Return value:] Returns the number of outcomes found.
@@ -2901,7 +2960,7 @@ in extensive form.
 
 \bd
 \item
-[E:] The problem in extensive form in which the number of outcomes is
+[E:] The game in extensive form in which the number of outcomes is
 to be found.
 \ed
 
@@ -2916,7 +2975,7 @@ NumOutcomes[N->NFG] =: INTEGER
 
 \bd
 \item
-[Description:] Finds the number of outcomes in the specified problem
+[Description:] Finds the number of outcomes in the specified game
 in normal form.
 \item
 [Return value:] Returns the number of outcomes found.
@@ -2925,7 +2984,7 @@ in normal form.
 	
 \bd
 \item
-[N:] The problem in normal form in which the number of outcomes is to
+[N:] The game in normal form in which the number of outcomes is to
 be found.
 \ed
 
@@ -2940,7 +2999,7 @@ NumPlayers[E->EFG] =: INTEGER
 
 \bd
 \item
-[Description:] Finds the number of players in the specified problem in
+[Description:] Finds the number of players in the specified game in
 extensive form.
 \item
 [Return value:] Returns the number of players found.
@@ -2949,7 +3008,7 @@ extensive form.
 
 \bd
 \item
-[E:] The problem in extensive form in which the number of players is
+[E:] The game in extensive form in which the number of players is
 to be found.
 \ed
 
@@ -2966,7 +3025,7 @@ NumStrats[N->NFG, pl->INTEGER, {sset->INTEGER}] =: INTEGER
 
 \item
 [Description:] Finds the number of strategies for the specified player
-in the given problem in normal form.
+in the given game in normal form.
 \item
 [Return value:] Returns the number of strategies found.
 \item
@@ -2974,10 +3033,10 @@ in the given problem in normal form.
 
 \bd
 \item
-[N:] The normal form problem in which the number of strategies for the
+[N:] The normal form game in which the number of strategies for the
 specified player is to be found.
 \item
-[pl:] The number corresponding to the player in the given problem in
+[pl:] The number corresponding to the player in the given game in
 normal form for whom the number of strategies is to be found.
 \ed
 
@@ -3205,7 +3264,7 @@ maximum number of Nash equilibria to find and has a default value of
 	
 \bd
 \item
-[N:] The problem in normal form for which the weak pure strategy Nash
+[N:] The game in normal form for which the weak pure strategy Nash
 equilibria are to be found.
 \ed
 
@@ -3250,15 +3309,15 @@ Quit
 
 \item
 \protect \large \begin{verbatim}
-ReadEfgFile[file->TEXT] =: EFG
+ReadEfg[file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Creates a new problem whose contents are the extensive
+[Description:] Creates a new game whose contents are the extensive
 form game stored in the specified file.
 \item
-[Return value:] The problem in extensive form read from the file.
+[Return value:] The game in extensive form read from the file.
 \item
 
 [Required parameters:
@@ -3276,16 +3335,16 @@ returned.
 
 \item
 \protect \large \begin{verbatim}
-ReadNfgFile[file->TEXT, {type->DATATYPE}] =: NFG
+ReadNfg[file->TEXT, {type->DATATYPE}] =: NFG
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Creates a new problem whose contents are the normal
+[Description:] Creates a new game whose contents are the normal
 form game stored in the specified file.  The file is read as a
 floating- point normal form unless otherwise specified by the user.
 \item
-[Return value:] The problem in normal form read from the file.
+[Return value:] The game in normal form read from the file.
 \item
 [Required parameters:]\hfil\null
 
@@ -3316,27 +3375,27 @@ RemoveOutcome[E->EFG, outc->INTEGER] =: EFG
 
 \bd
 \item
-[Description:] Removes the specified outcome from the given problem in
+[Description:] Removes the specified outcome from the given game in
 extensive form.  All nodes with the specified outcome attached are
 reset to having no outcome attached.  If the outcome does not exist in
-the given problem, no action is taken.  The outcomes remaining in the
+the given game, no action is taken.  The outcomes remaining in the
 game are re-numbered, so that the number of the outcome removed is
 given to the outcome which previously had the next highest number, the
 number previously corresponding to this outcome is assigned to the
 outcome which previously had the next highest number, and so on.
 \item  
-[Return value:] Returns the modified extensive form problem.
+[Return value:] Returns the modified extensive form game.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The problem in extensive form from which the specified outcome is
+[E:] The game in extensive form from which the specified outcome is
 to be removed.
 \item
 [outc:] The number corresponding to the outcome which is to be removed
-from the given problem.  If no outcome with that number exists in the
-problem, no action is taken.
+from the given game.  If no outcome with that number exists in the
+game, no action is taken.
 \ed
 \ed
 
@@ -3348,7 +3407,7 @@ RootNode[E->EFG, {game->INTEGER}] =: NODE
 \bd
 \item
 [Description:] Finds the root node of specified game in the given
-problem in extensive form.  If a game is not specified, the first game
+game in extensive form.  If a game is not specified, the first game
 is used by default.
 \item
 [Return value:] Returns the root node of the game.
@@ -3357,7 +3416,7 @@ is used by default.
 	
 \bd
 \item
-[E:] The problem in extensive form in which the root node is to be
+[E:] The game in extensive form in which the root node is to be
 found.
 \ed
 
@@ -3518,15 +3577,15 @@ SetOutcome[E->EFG, outc->INTEGER, value->LIST(RATIONAL)] =: EFG
 \bd
 \item
 [Description:] Sets the value of the indicated outcome in the given
-problem in extensive form, to the values in the specified vector.
+game in extensive form, to the values in the specified vector.
 \item
-[Return value:] Returns the modified problem in extensive form.
+[Return value:] Returns the modified game in extensive form.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The extensive form problem in which the given outcome is to be
+[E:] The extensive form game in which the given outcome is to be
 assigned values.
 \item
 
@@ -3536,7 +3595,7 @@ is created.
 \item
 [value:] The vector of payoffs (as a list of rationals) which are to
 be assigned to the outcome.  The length of `value` must match the
-number of players defined in the problem.
+number of players defined in the game.
 \ed
 
 \item
@@ -3553,16 +3612,16 @@ pl->INTEGER, value->RATIONAL] =: EFG
 \bd
 \item
 [Description:] Sets the payoff to the player specified for the
-indicated outcome in the given problem in extensive form to the given
+indicated outcome in the given game in extensive form to the given
 value.
 \item
-[Return value:] Returns the modified problem in extensive form.
+[Return value:] Returns the modified game in extensive form.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The extensive form problem in which the given outcome is to be
+[E:] The extensive form game in which the given outcome is to be
 assigned a value for the specified player.
 \item
 [outc:] The number corresponding to the outcome which is to be
@@ -3588,13 +3647,13 @@ SetOutcomeName[E->EFG, outc->INTEGER, name->TEXT] =: EFG
 [Description:] Assigns to the outcome with the specified number the
 given title.
 \item
-[Return value:] Returns the modified problem in extensive form.
+[Return value:] Returns the modified game in extensive form.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The problem in extensive form in which the indicated outcome is
+[E:] The game in extensive form in which the indicated outcome is
 to be assigned the given title.
 \item
 [outc:] The number corresponding to the outcome which is to be
@@ -3618,13 +3677,13 @@ SetPlayerName[E->EFG, pl->INTEGER, name->TEXT] =: EFG
 [Description:] Assigns to the player with the specified number the
 given name.
 \item
-[Return value:] Returns the modified problem in extensive form.
+[Return value:] Returns the modified game in extensive form.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[E:] The problem in extensive form in which the indicated player is to
+[E:] The game in extensive form in which the indicated player is to
 be assigned a name.
 \item
 [pl:] The number corresponding to the player which is to be assigned a
@@ -3646,15 +3705,15 @@ name->TEXT] =: NFG
 \bd
 \item
 [Description:] Assigns the given name to the specified strategy of the
-indicated player in the given problem in normal form.
+indicated player in the given game in normal form.
 \item
-[Return value:] Returns the modified normal form problem.
+[Return value:] Returns the modified normal form game.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[N:] The problem in normal form in which the given name is to be
+[N:] The game in normal form in which the given name is to be
 assigned to the specified strategy of the indicated player.
 \item
 [pl:] The number corresponding to the player for which the indicated
@@ -3677,18 +3736,18 @@ SetTitle[E->EFG, title->TEXT] =: EFG
 
 \bd
 \item
-[Description:] Assigns the specified title to the given problem in
+[Description:] Assigns the specified title to the given game in
 extensive form.
 \item
-[Return value:] Returns the modified problem in extensive form.
+[Return value:] Returns the modified game in extensive form.
 \item
 [Required parameters:]\hfil\null
 	
 \bd
 \item
-[E:] The problem in extensive form which is to be assigned a title.
+[E:] The game in extensive form which is to be assigned a title.
 \item
-[title:] The title which is to be assigned to the given problem in
+[title:] The title which is to be assigned to the given game in
 extensive form.
 \ed
 
@@ -3749,7 +3808,7 @@ convergence.
 
 \bd
 \item
-[N:] The problem in normal form on which the operation will be
+[N:] The game in normal form on which the operation will be
 performed.
 \ed
 
@@ -3874,27 +3933,27 @@ statement body, or NULL if the loop never executes.
 \item
 
 \protect \large \begin{verbatim}
-WriteEfgFile[E->EFG, file->TEXT] =: EFG
+WriteEfg[E->EFG, file->TEXT] =: EFG
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Writes the given extensive form problem to the
+[Description:] Writes the given extensive form game to the
 specified file.  Indicates in the file the type of the file(Float or
 Rational) immediately following the title string.  If the type is
 Float, the file contains floating point numbers and if the type is
 Rational, the file contains rational numbers.
 \item
-[Return value:] Returns the same extensive form problem.
+[Return value:] Returns the same extensive form game.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[E:] The problem in extensive form which is to be written to the
+[E:] The game in extensive form which is to be written to the
 indicated file.
 \item
-[file:] The name of the file to which the extensive form problem is to
+[file:] The name of the file to which the extensive form game is to
 be written.
 \ed
 \ed
@@ -3902,25 +3961,25 @@ be written.
 \item
 
 \protect \large \begin{verbatim}
-WriteNfgFile[N->NFG, file->TEXT] =: NFG
+WriteNfg[N->NFG, file->TEXT] =: NFG
 \end{verbatim}\normalsize
 
 \bd
 \item
-[Description:] Writes the given normal form problem to the specified
+[Description:] Writes the given normal form game to the specified
 file.
 \item
-[Return value:] Returns the same normal form problem.
+[Return value:] Returns the same normal form game.
 \item
 [Required parameters:]\hfil\null
 
 \bd
 \item
-[N:] The problem in normal form which is to be written to the
+[N:] The game in normal form which is to be written to the
 indicated file.
 
 \item
-[file:] The name of the file to which the normal form problem is
+[file:] The name of the file to which the normal form game is
 to be written.
 \ed
 \ed
