@@ -249,7 +249,8 @@ void BehavSolution::CheckIsNash(void) const
   if (m_checkedNash == false) {
     if (IsPerfectRecall(m_profile->Game())) {
       gStatus &m_status = gstatus;
-      m_isNash = (m_profile->ExtendsToNash(Support(),Support(),m_status)) ? 
+      m_isNash = (m_profile->MaxGripe() <= m_epsilon  &&
+		  ExtendsToNash(Support(),Support(),m_status)) ? 
 		     triTRUE:triFALSE;
     }
     if (m_isNash == triFALSE) {
@@ -671,7 +672,9 @@ bool BehavSolution::ExtendsToNash(const EFSupport &little_supp,
   // all information sets at which the behavioral probabilities are not
   // specified.  The assumption is that the support has active actions
   // at infosets at which the behavioral probabilities are defined, and
-  // no others.
+  // no others.  Also, the BehavSol is assumed to be already a Nash
+  // equilibrium for the truncated game obtained by eliminating stuff
+  // outside little_supp.
   
   // First we compute the number of variables, and indexing information
   int num_vars(0);
