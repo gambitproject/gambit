@@ -7,7 +7,7 @@
 #ifndef DLSTRATEGIES_H
 #define DLSTRATEGIES_H
 
-class dialogStrategies : public wxDialogBox {
+class dialogStrategies : public guiAutoDialog {
 private:
   Nfg &m_nfg;
   bool m_gameChanged;
@@ -18,15 +18,13 @@ private:
 	
   static void CallbackPlayer(wxListBox &, wxCommandEvent &);
   static void CallbackStrategy(wxListBox &, wxCommandEvent &);
-  static void CallbackOk(wxButton &, wxCommandEvent &);
-  static void CallbackHelp(wxButton &, wxCommandEvent &);
 
-  void OnOk(void);
-  Bool OnClose(void);
-  void OnHelp(void);
+  const char *HelpString(void) const { return "Edit Menu"; }
 
   void OnPlayer(int);
   void OnStrategy(int);
+
+  void OnOk(void);
 
 public:
   dialogStrategies(Nfg &, wxFrame * = 0);

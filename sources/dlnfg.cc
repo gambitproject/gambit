@@ -182,37 +182,59 @@ void dialogNfgPlayers::OnEdit(void)
 //=========================================================================
 
 dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
-  : wxDialogBox(p_parent, "Strategy Information", TRUE), m_nfg(p_nfg),
-    m_gameChanged(false), m_prevStrategy(0)
+  : guiAutoDialog(p_parent, "Strategy Information"), 
+    m_nfg(p_nfg), m_gameChanged(false), m_prevStrategy(0)
 {
   SetLabelPosition(wxVERTICAL);
-  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",
-			       wxSINGLE, 11, 3, 104, 125, 0, NULL, 0);	
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
   m_playerItem->wxEvtHandler::SetClientData((char *) this);
-  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
-				 "Strategy",
-				 wxSINGLE, 130, 4, 100, 125, 0, NULL, 0);
-  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
-  m_strategyNameItem = new wxText(this, 0, "Strategy Name", "",
-				  251, 12, 174, 58, 0);
+  m_playerItem->SetConstraints(new wxLayoutConstraints());
+  m_playerItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerItem->GetConstraints()->width.AsIs();
+  m_playerItem->GetConstraints()->height.AsIs();
 
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "Ok",
-				    160, 162, -1, -1, 0);
-  okButton->SetClientData((char *) this);
-  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help",
-				      220, 162, -1, -1, 0);
-  helpButton->SetClientData((char *) this);
+  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
+				 "Strategy");
+  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
+  m_strategyItem->SetConstraints(new wxLayoutConstraints());
+  m_strategyItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_strategyItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
+  m_strategyItem->GetConstraints()->width.AsIs();
+  m_strategyItem->GetConstraints()->height.AsIs();
+
+  m_strategyNameItem = new wxText(this, 0, "Strategy Name");
+  m_strategyNameItem->SetConstraints(new wxLayoutConstraints());
+  m_strategyNameItem->GetConstraints()->top.SameAs(m_strategyItem, wxTop);
+  m_strategyNameItem->GetConstraints()->left.SameAs(m_strategyItem,
+						    wxRight, 10);
+  m_strategyNameItem->GetConstraints()->height.AsIs();
+  m_strategyNameItem->GetConstraints()->width.PercentOf(m_playerItem,
+							wxWidth, 50);
 
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    if (m_nfg.Players()[pl]->GetName() != "")
-      m_playerItem->Append(m_nfg.Players()[pl]->GetName());
-    else
-      m_playerItem->Append("Player " + ToText(pl));
+    m_playerItem->Append(ToText(pl) + ": " + 
+			 m_nfg.Players()[pl]->GetName());
   }
 
+  m_okButton->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(m_helpButton, wxWidth);
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->width.AsIs();
+
+  m_cancelButton->Show(FALSE);
+  m_cancelButton->GetConstraints()->top.SameAs(this, wxTop);
+  m_cancelButton->GetConstraints()->left.SameAs(this, wxLeft);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.AsIs();
+
   OnPlayer(0);
-  Fit(); 
-  Show(TRUE);
+  Go();
 }
 
 void dialogStrategies::OnPlayer(int p_number)
@@ -252,16 +274,6 @@ void dialogStrategies::OnOk(void)
   Show(FALSE);
 }
 
-Bool dialogStrategies::OnClose(void)
-{
-  Show(FALSE);
-  return FALSE;
-}
-
-void dialogStrategies::OnHelp(void)
-{wxHelpContents("");}
-
-
 void dialogStrategies::CallbackPlayer(wxListBox &p_object,
 				      wxCommandEvent &p_event)
 {
@@ -276,88 +288,103 @@ void dialogStrategies::CallbackStrategy(wxListBox &p_object,
     OnStrategy(p_event.commandInt);
 }
 
-void dialogStrategies::CallbackOk(wxButton &p_object, wxCommandEvent &)
-{
-  ((dialogStrategies *) p_object.GetClientData())->OnOk();
-}
-
-void dialogStrategies::CallbackHelp(wxButton &p_object, wxCommandEvent &)
-{
-  ((dialogStrategies *) p_object.GetClientData())->OnHelp();
-}
-
 //=========================================================================
 //                   dialogNfgNewSupport: Member functions
 //=========================================================================
 
 dialogNfgNewSupport::dialogNfgNewSupport(const Nfg &p_nfg, wxWindow *p_parent)
-  : wxDialogBox(p_parent, "Define support", TRUE), m_nfg(p_nfg)
+  : guiAutoDialog(p_parent, "Define support"),
+    m_nfg(p_nfg), m_support(m_nfg)
 {
   SetLabelPosition(wxVERTICAL);
-  m_strategyLists = new wxListBox *[m_nfg.NumPlayers()];
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player");
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
+  m_playerItem->SetConstraints(new wxLayoutConstraints());
+  m_playerItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_playerItem->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_playerItem->GetConstraints()->width.AsIs();
+  m_playerItem->GetConstraints()->height.AsIs();
+
+  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
+				 "Strategy", wxMULTIPLE);
+  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
+  m_strategyItem->SetConstraints(new wxLayoutConstraints());
+  m_strategyItem->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_strategyItem->GetConstraints()->left.SameAs(m_playerItem, wxRight, 10);
+  m_strategyItem->GetConstraints()->width.AsIs();
+  m_strategyItem->GetConstraints()->height.AsIs();
+
   for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    m_strategyLists[pl-1] = new wxListBox(this, 0, "Player " + ToText(pl),
-					  wxMULTIPLE);
-    for (int st = 1; st <= m_nfg.NumStrats(pl); st++) {
-      m_strategyLists[pl-1]->Append(ToText(st) + ": " +
-				    m_nfg.Strategies(pl)[st]->Name());
+    m_playerItem->Append(ToText(pl) + ": " + 
+			 m_nfg.Players()[pl]->GetName());
 #ifndef LINUX_WXXT
-      m_strategyLists[pl-1]->SetSelection(st - 1, TRUE);
+    m_playerItem->SetSelection(pl - 1, TRUE);
 #endif  // LINUX_WXXT
+  }
+
+  m_okButton->GetConstraints()->top.SameAs(m_playerItem, wxBottom, 10);
+  m_okButton->GetConstraints()->right.SameAs(m_cancelButton, wxLeft, 10);
+  m_okButton->GetConstraints()->height.AsIs();
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->centreX.SameAs(this, wxCentreX);
+  m_cancelButton->GetConstraints()->height.AsIs();
+  m_cancelButton->GetConstraints()->width.AsIs();
+
+  m_helpButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_helpButton->GetConstraints()->left.SameAs(m_cancelButton, wxRight, 10);
+  m_helpButton->GetConstraints()->height.AsIs();
+  m_helpButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+
+  OnPlayer(0);
+  Go();
+}
+
+void dialogNfgNewSupport::OnPlayer(int p_number)
+{
+  m_playerItem->SetSelection(p_number);
+  NFPlayer *player = m_nfg.Players()[p_number+1];
+  m_strategyItem->Clear();
+  for (int st = 1; st <= player->NumStrats(); st++) {
+    m_strategyItem->Append(ToText(st));
+    if (m_support.Find(player->Strategies()[st])) {
+      m_strategyItem->SetSelection(st - 1, TRUE);
     }
   }
-
-  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
-  okButton->SetClientData((char *) this);
-  okButton->SetDefault();
-  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
-					"Cancel");
-  cancelButton->SetClientData((char *) this);
-
-  Fit();
-  Show(TRUE);
 }
 
-dialogNfgNewSupport::~dialogNfgNewSupport()
+void dialogNfgNewSupport::OnStrategy(int /*p_strategy*/)
 {
-  delete [] m_strategyLists;
-}
-
-void dialogNfgNewSupport::OnOK(void)
-{
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    int *selections;
-    if (m_strategyLists[pl-1]->GetSelections(&selections) == 0)
-      return;
+  int player = m_playerItem->GetSelection() + 1;
+  for (int st = 0; st < m_strategyItem->Number(); st++) {
+    Strategy *strategy = m_nfg.Players()[player]->Strategies()[st+1];
+    if (m_strategyItem->Selected(st)) {
+      m_support.AddStrategy(strategy);
+    }
+    else {
+      m_support.RemoveStrategy(strategy);
+    }
   }
-  m_completed = wxOK;
-  Show(FALSE);
-}
-
-void dialogNfgNewSupport::OnCancel(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-}
-
-Bool dialogNfgNewSupport::OnClose(void)
-{
-  m_completed = wxCANCEL;
-  Show(FALSE);
-  return FALSE;
 }
 
 NFSupport *dialogNfgNewSupport::CreateSupport(void) const
 {
-  NFSupport *support = new NFSupport(m_nfg);
-  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
-    for (int st = 1; st <= m_nfg.NumStrats(pl); st++) {
-      if (!m_strategyLists[pl-1]->Selected(st-1))
-	support->RemoveStrategy(m_nfg.Strategies(pl)[st]);
-    }
-  }
+  return new NFSupport(m_support);
+}
 
-  return support;
+void dialogNfgNewSupport::CallbackPlayer(wxListBox &p_object,
+					 wxCommandEvent &p_event)
+{
+  ((dialogNfgNewSupport *) p_object.wxEvtHandler::GetClientData())->
+    OnPlayer(p_event.commandInt);
+}
+
+void dialogNfgNewSupport::CallbackStrategy(wxListBox &p_object, 
+					   wxCommandEvent &p_event)
+{
+  ((dialogNfgNewSupport *) p_object.wxEvtHandler::GetClientData())->
+    OnStrategy(p_event.commandInt);
 }
 
 //=========================================================================
