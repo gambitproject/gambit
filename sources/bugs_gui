@@ -256,6 +256,16 @@ gui crashes.
 
 RDM: The above is now fixed (12/29/98)
 
+//------------------------------
+
+Bug D29: .efg and .nfg files not recognized in wxxt port of gambit
+
+When you start up the gambit gui compiled with wxxt and try to load
+either an nfg or an efg, you get an error window that says "Unknown
+file type".  On the other hand, if you load the file from the command
+line ("gui foo.efg") it works.
+
+
 -------------  older bugs that still remain ---------------
 
 //------------------------------
