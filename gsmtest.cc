@@ -1635,6 +1635,7 @@ int main( void )
   gin >> cont;
 
 
+
   machine->PushRef( "i" );
   machine->Push( (gInteger) 3 );
   machine->Assign();
@@ -1670,6 +1671,22 @@ int main( void )
   machine->InitCallFunction( "Lemke" );
   machine->PushRef( "N" );
   machine->Bind( "N" );
+  machine->PushRef( "time" );
+  machine->Bind( "time" );
+  machine->CallFunction();
+  machine->Output();
+
+  machine->PushRef( "time" );
+  machine->Dump();
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
+  machine->InitCallFunction( "GobitEfg" );
+  machine->PushRef( "E" );
+  machine->Bind( "E" );
+  machine->Push( "/dev/null" );
+  machine->Bind( "pxifile" );
   machine->PushRef( "time" );
   machine->Bind( "time" );
   machine->CallFunction();

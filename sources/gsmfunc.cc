@@ -578,13 +578,25 @@ Portion* CallFuncObj::CallFunction( Portion **param )
       }
       else // ( _RunTimeParamInfo[ index ].Defined )
       {
-	if( _RunTimeParamInfo[ index ].Ref != 0 && _Param[ index ] == 0 )
+	if( _Param[ index ] == 0 )
 	{
-	  if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
+	  if( !_FuncInfo[ _FuncIndex ].ParamInfo[ index ].PassByReference )
 	  {
-	    _Param[ index ] = 
-	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->Copy();
-	  }	  
+	    gerr << "GSM Error: required parameter \"" << 
+	      _FuncInfo[ _FuncIndex ].ParamInfo[ index ].Name;
+	    gerr << "\"" << " undefined while executing CallFunction()\n";
+	    gerr << "           on function \"" << _FuncName << "\"\n";
+	    _ErrorOccurred = true;
+	  }
+	  else if( _RunTimeParamInfo[ index ].Ref != 0 )
+	  {
+	    if( _FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue != 0 )
+	    {
+	      _Param[ index ] = 
+		_FuncInfo[ _FuncIndex ].ParamInfo[ index ].DefaultValue->
+		  Copy();
+	    }	  
+	  }
 	}
       }
     }

@@ -145,10 +145,9 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("GobitEfg");
-  FuncObj->SetFuncInfo(GSM_GobitEfg, 2);
+  FuncObj->SetFuncInfo(GSM_GobitEfg, 10);
   FuncObj->SetParamInfo(GSM_GobitEfg, 0, "E", porEFG_DOUBLE, NO_DEFAULT_VALUE);
   FuncObj->SetParamInfo(GSM_GobitEfg, 1, "pxifile", porSTRING, NO_DEFAULT_VALUE);
-/*
   FuncObj->SetParamInfo(GSM_GobitEfg, 2, "minLam", porDOUBLE,
 		        new numerical_Portion<double>(.01));
   FuncObj->SetParamInfo(GSM_GobitEfg, 3, "maxLam", porDOUBLE,
@@ -165,7 +164,6 @@ void Init_efgfunc(GSM *gsm)
 		        new numerical_Portion<double>(2.0e-10));
   FuncObj->SetParamInfo(GSM_GobitEfg, 9, "time", porDOUBLE,
 			new numerical_Portion<double>(0), PASS_BY_REFERENCE);
-  */
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("LiapEfg");
