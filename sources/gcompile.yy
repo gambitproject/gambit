@@ -74,7 +74,7 @@ gStack<gString> GCL_InputFileNames(4);
   bool DeleteFunction(void); \
   void RecoverFromError(void); \
   \
-  int Parse(const gString &line, const gString &file, int line); \
+  int Parse(const gString &line, const gString &file, int lineno); \
   int Execute(void); 
 
 %define CONSTRUCTOR_INIT     : gsm(*_gsm), in_funcdecl(false)
