@@ -18,9 +18,6 @@ template class TableauInterface<gRational>;
 template class Tableau<double>;
 template class Tableau<gRational>;
 
-template class LPTableau<double>;
-template class LPTableau<gRational>;
-
 /*
 template gOutput & operator<< {gOutput&, const Basis<double>&);
 template gOutput & operator<< {gOutput&, const Basis<gRational>&);
