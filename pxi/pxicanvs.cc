@@ -26,8 +26,11 @@ void PxiCanvas::PlotLabels(wxDC &dc, int ch,int cw)
   dc.SetTextForeground(*wxBLACK);
   //dc.SetBackgroundMode(wxTRANSPARENT);
   dc.SetFont(draw_settings->GetLabelFont());
-  for (int i=1;i<=labels.Length();i++)
-    dc.DrawText(labels[i].label,labels[i].x*cw,labels[i].y*ch);
+  for (int i=1;i<=labels.Length();i++) {
+    wxCoord tw,th;
+    dc.GetTextExtent(labels[i].label,&tw,&th);
+    dc.DrawText(labels[i].label,labels[i].x*cw-tw/2,labels[i].y*ch-th/2);
+  }
 }
 /******************************** CALC Y X************************************/
 double PxiCanvas::CalcY_X(double y,int ch,int plot)
@@ -114,7 +117,10 @@ void PxiCanvas::DrawExpPoint_X(wxDC &dc,double cur_e,int iset,int st,int ch,int 
       sprintf(tmp,"%d",point_nums[i]);
       dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
-      dc.DrawText(tmp,x-3,y-6);
+      wxCoord tw,th;
+      dc.GetTextExtent(tmp,&tw,&th);
+      dc.DrawText(tmp,x-tw/2,y-th/2);
+      //      dc.DrawText(tmp,x-3,y-6);
     }
     if (draw_settings->GetOverlayLines() && st!=1) {
       dc.SetBrush(*wxBLACK_BRUSH);
@@ -231,7 +237,10 @@ void PxiCanvas::DrawExpPoint_2(wxDC &dc,double cur_e,int pl1,int st1,int pl2,int
       sprintf(tmp,"%d",point_nums[i]);
       dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
-      dc.DrawText(tmp,x-3,y-6);
+      wxCoord tw,th;
+      dc.GetTextExtent(tmp,&tw,&th);
+      dc.DrawText(tmp,x-tw/2,y-th/2);
+      //      dc.DrawText(tmp,x-3,y-6);
     }
     delete s;
   }
@@ -340,7 +349,10 @@ void PxiCanvas::DrawExpPoint_3(wxDC &dc,double cur_e,int iset,int st1,int st2,in
       sprintf(tmp,"%d",point_nums[i]);
       dc.SetFont(draw_settings->GetOverlayFont());
       dc.SetTextForeground(*wxBLACK);
-      dc.DrawText(tmp,x-3,y-6);
+      wxCoord tw,th;
+      dc.GetTextExtent(tmp,&tw,&th);
+      dc.DrawText(tmp,x-tw/2,y-th/2);
+      //      dc.DrawText(tmp,x-3,y-6);
     }
     delete s;
   }
@@ -353,18 +365,18 @@ void PxiCanvas::PlotData_3(wxDC& dc,int ch,int cw,const FileHeader &f_header,int
   static int color_start;
   if (level==1) color_start=0;
   int max_equ=-1;
-  double	x,y;
-  int	iset;
+  double x,y;
+  int iset;
   int new_equ=0;
   // where the actual data gets read in
   
-  int		point_color;			// color of the pixel, corresponds to equilibrium #
+  int point_color;                 // color of the pixel, corresponds to equilibrium #
   
   gFileInput f(f_header.FileName());
   DataLine *prev_point=(draw_settings->ConnectDots()) ? new DataLine : NULL;
   int ok=FindStringInFile(f,"Data:");assert(ok);
   
-  EquTracker equs;		// init the EquTracker class
+  EquTracker equs;                // init the EquTracker class
   f>>probs;
   if (draw_settings->GetColorMode()!=COLOR_EQU && prev_point) (*prev_point)=probs;
   
@@ -454,8 +466,27 @@ void PxiCanvas::Update(wxDC& dc,int device)
     PlotAxis_2(dc,0,1,0,1,ch,cw,draw_settings->PlotFeatures());
     for (int i=1;i<=headers.Length();i++) PlotData_2(dc,ch,cw,headers[i]);
   }
+  int iset;
   if (draw_settings->GetPlotMode()==PXI_PLOT_3) {
-    PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures());
+    wxString labels[] = {"1", "2", "3", "1", "2", "3"};
+    for (int plots=0;plots<draw_settings->GetNumPlots();plots++) {	// which plot
+      for (int iset_num=1;iset_num<=((plots) ?  draw_settings->GetPlotBottom() : draw_settings->GetPlotTop());iset_num++) {
+	iset=(plots) ? draw_settings->GetPlotBottom(iset_num) : draw_settings->GetPlotTop(iset_num);
+	int st1=0,st2=0,st3=0;	// which two strategies to plot
+	int i=1;
+	while(!st1) {if (draw_settings->GetStrategyShow(iset,i)) st1=i;i++;}
+	while(!st2) {if (draw_settings->GetStrategyShow(iset,i)) st2=i;i++;}
+	st3=i;
+	wxString tmp;
+	tmp.Printf("%d",st1);
+	if(plots==0)labels[0]=tmp; else labels[3]=tmp;
+	tmp.Printf("%d",st2);
+	if(plots==0)labels[1]=tmp; else labels[4]=tmp;
+	tmp.Printf("%d",st3);
+	if(plots==0)labels[2]=tmp; else labels[5]=tmp;
+      }
+    }
+    PlotAxis_3(dc,ch,cw,draw_settings->GetNumPlots(),draw_settings->PlotFeatures(), labels);
     for (int i=1;i<=headers.Length();i++) PlotData_3(dc,ch,cw,headers[i],i);
   }
   if (device==PXI_UPDATE_SCREEN)

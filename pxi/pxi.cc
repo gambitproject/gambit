@@ -658,11 +658,8 @@ void PxiChild::save_mf(wxOutputOption /*fit*/, bool /*save_mf*/)
 }
 #endif // __WXMSW__
 
-void PxiFrame::OnCloseWindow(wxCloseEvent &)
-{
-  wxKillHelp();
-  Destroy();
-}
+// Define the behaviour for the frame closing
+// - must delete all frames except for the main one.
 
 // Define the repainting behaviour
 void PxiCanvas::OnPaint(wxPaintEvent &)
@@ -675,8 +672,11 @@ void PxiCanvas::OnPaint(wxPaintEvent &)
   painting = false;
 }
 
-// Define the behaviour for the frame closing
-// - must delete all frames except for the main one.
+void PxiFrame::OnCloseWindow(wxCloseEvent &)
+{
+  wxKillHelp();
+  Destroy();
+}
 
 //*************************************************************************
 //************************* DRAW SETTINGS *********************************

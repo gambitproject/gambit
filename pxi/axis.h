@@ -22,7 +22,7 @@ void PlotAxis_X(wxDC& dc,float x_start,float x_end,
 		float y_start,float y_end,int ch,int cw,int num_players,
 		int plot_type=DATA_TYPE_ARITH,unsigned int features=0,float log_step=0.0);
 void PlotAxis_3(wxDC& dc, int ch,int cw,int num_players,
-		unsigned int features);
+		unsigned int features,wxString labels[]);
 void PlotAxis_2(wxDC& dc, float x_start,float x_end,float y_start,
 		float y_end,int ch,int cw,unsigned int features);
 

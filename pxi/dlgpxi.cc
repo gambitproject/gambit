@@ -339,13 +339,15 @@ void dialogDrawSettings::OnWhichPlot(wxCommandEvent &)
 void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
 {
   int i = m_whichPlotItem->GetSelection()+1; 
-
+  int j = 0;
   if(i==1)
     for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
       bool flag = m_whichIsetItem->Selected(iset-1);
       bool member = draw_settings.plot_top.Contains(iset);
-      if (flag && !member) 
+      if (flag && !member) {
 	draw_settings.plot_top.Append(iset);
+	j = iset;
+      }
       else if (!flag && member) 
 	draw_settings.plot_top.Remove(draw_settings.plot_top.Find(iset));
     }
@@ -353,11 +355,18 @@ void dialogDrawSettings::OnWhichInfoset(wxCommandEvent &)
     for (int iset = 1; iset <= draw_settings.num_infosets; iset++) {
       bool flag = m_whichIsetItem->Selected(iset-1);
       bool member = draw_settings.plot_bottom.Contains(iset);
-      if (flag && !member) 
+      if (flag && !member) {
 	draw_settings.plot_bottom.Append(iset);
+	j = iset;
+      }
       else if(!flag && member)
 	draw_settings.plot_bottom.Remove(draw_settings.plot_bottom.Find(iset));
     }
+  if(j) {
+    m_infosetItem->SetSelection(j-1);
+    wxCommandEvent event;
+    OnInfoset(event);
+  }
 }
 
 void dialogDrawSettings::OnInfoset(wxCommandEvent &)
