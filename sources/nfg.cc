@@ -10,6 +10,12 @@
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+template <class T> class gArray;
+class gArray<int>;
+class gArray<double>;
+class gArray<gRational>;
+template <class T> class gBlock;
+class gBlock<int>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__

@@ -31,7 +31,8 @@ class EFPlayer;
 class EFOutcome;
 class gArray<EFPlayer *>;
 class gArray<EFOutcome *>;
-
+template <class T> class EfgFile;
+class EfgFile<gRational>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__

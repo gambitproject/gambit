@@ -22,7 +22,8 @@ class gList<gRational>;
 template <class T> class gNode;
 class gNode<gString>;
 class gNode<gRational>;
-
+class Node;
+class gList<Node *>;
 #define TEMPLATE
 #pragma option -Jgd
 #endif // __GNUG__, __BORLANDC__
