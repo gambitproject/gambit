@@ -903,9 +903,8 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
 
   PolEnumParams params;
   params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.precision = ((PrecisionPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
+  params.tracefile = &((OutputPortion *) param[4])->Value();
+  params.trace = ((NumberPortion *) param[5])->Value();
   
   gList<MixedSolution> solutions;
   bool is_singular;
@@ -914,12 +913,12 @@ static Portion *GSM_PolEnum_Nfg(Portion **param)
     long nevals;
     double time;
     PolEnum(*S, params, solutions, nevals, time, is_singular);
-    ((NumberPortion *) param[3])->SetValue(nevals);
-    ((NumberPortion *) param[4])->SetValue(time);
+    ((NumberPortion *) param[2])->SetValue(nevals);
+    ((NumberPortion *) param[3])->SetValue(time);
     if (is_singular)
-      ((BoolPortion *) param[7])->SetValue(triTRUE);
+      ((BoolPortion *) param[6])->SetValue(triTRUE);
     else
-      ((BoolPortion *) param[7])->SetValue(triFALSE);
+      ((BoolPortion *) param[6])->SetValue(triFALSE);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -940,9 +939,8 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
   NFSupport* S = new NFSupport(N);
   PolEnumParams params;
   params.stopAfter = ((NumberPortion *) param[1])->Value();
-  params.precision = ((PrecisionPortion *) param[2])->Value();
-  params.tracefile = &((OutputPortion *) param[5])->Value();
-  params.trace = ((NumberPortion *) param[6])->Value();
+  params.tracefile = &((OutputPortion *) param[4])->Value();
+  params.trace = ((NumberPortion *) param[5])->Value();
 
   gList<MixedSolution> solutions;
   gList<const NFSupport> singular_supports;
@@ -953,9 +951,9 @@ static Portion *GSM_AllNashSolve_Nfg(Portion **param)
     AllNashSolve(S->Game(), params, solutions, nevals, time, 
 		 singular_supports);
 
-    ((NumberPortion *) param[3])->SetValue(nevals);
-    ((NumberPortion *) param[4])->SetValue(time);
-    ((NfSupport_ListPortion *) param[7])->SetValue(singular_supports);
+    ((NumberPortion *) param[2])->SetValue(nevals);
+    ((NumberPortion *) param[3])->SetValue(time);
+    ((NfSupport_ListPortion *) param[6])->SetValue(singular_supports);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -977,14 +975,13 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
   if (((BoolPortion *) param[1])->Value()) {
     PolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((NumberPortion *) param[6])->Value();
 
     try {
       efgPolEnumNfgSolve algorithm(support, params);
       solutions = algorithm.Solve(support);
-      ((NumberPortion *) param[4])->SetValue(algorithm.NumEvals());
+      ((NumberPortion *) param[3])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       params.status.Reset();
@@ -993,21 +990,20 @@ static Portion *GSM_PolEnum_Efg(Portion **param)
   else {
     EfgPolEnumParams params;
     params.stopAfter = ((NumberPortion *) param[2])->Value();
-    params.precision = ((PrecisionPortion *) param[3])->Value();
-    params.tracefile = &((OutputPortion *) param[6])->Value();
-    params.trace = ((NumberPortion *) param[7])->Value();
+    params.tracefile = &((OutputPortion *) param[5])->Value();
+    params.trace = ((NumberPortion *) param[6])->Value();
 
     try {
       long npivots;
       EfgPolEnum(support, params, solutions, npivots, time);
-      ((NumberPortion *) param[4])->SetValue(npivots);
+      ((NumberPortion *) param[3])->SetValue(npivots);
     }
     catch (gSignalBreak &) {
       params.status.Reset();
     }
   }
 
-  ((NumberPortion *) param[5])->SetValue(time);
+  ((NumberPortion *) param[4])->SetValue(time);
 
   return new Behav_ListPortion(solutions);
 }
@@ -1595,62 +1591,56 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("PolEnumSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_PolEnum_Nfg, 
-				       PortionSpec(porMIXED, 1), 8));
+				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
-              new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("issingular", porBOOLEAN,
+  FuncObj->SetParamInfo(0, 6, gclParameter("issingular", porBOOLEAN,
 					    new BoolPortion(false), BYREF));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_PolEnum_Efg, 
-				       PortionSpec(porBEHAV, 1), 8));
+				       PortionSpec(porBEHAV, 1), 7));
   FuncObj->SetParamInfo(1, 0, gclParameter("support", porEFSUPPORT));
   FuncObj->SetParamInfo(1, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(1, 2, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(1, 3, gclParameter("precision", porPRECISION,
-              new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(1, 4, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 5, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new gclFunction("AllNashSolve", 2);
+  FuncObj = new gclFunction("AllNashSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_AllNashSolve_Nfg, 
-				       PortionSpec(porMIXED, 1), 8));
+				       PortionSpec(porMIXED, 1), 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("nfg", porNFG));
   FuncObj->SetParamInfo(0, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 2, gclParameter("precision", porPRECISION,
-              new PrecisionPortion(precDOUBLE)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 2, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("singularsupps", 
+  FuncObj->SetParamInfo(0, 6, gclParameter("singularsupps", 
 					   PortionSpec(porNFSUPPORT,1),
 					   new NfSupport_ListPortion(), 
 					   BYREF));

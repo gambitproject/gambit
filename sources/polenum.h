@@ -16,7 +16,6 @@
 class PolEnumParams     {
 public:
   int trace, stopAfter;
-  gPrecision precision;
   gOutput *tracefile;
   gStatus &status;
 
