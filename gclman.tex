@@ -288,6 +288,8 @@ types in the next two sections are more specialized data types that
 are used to represent elements of normal and extensive form games,
 respectively.  The last section contains only one type, lists, which
 play an important role in the GCL.
+\marginpar{{\tt BOOLEAN} is now tri-state}
+\marginpar{{\tt EFBASIS}, {\tt ASSESSMENT}, {\tt INTEGER} are subtypes}
 
 \medskip
 
@@ -335,10 +337,11 @@ standard types
 \tindex{INPUT} and \tindex{OUTPUT}, as well as general rules for typing.
 The extensive form and normal form types, and their related types, are
 detailed later in special sections.
+\marginpar{{\tt INTEGER} now a subtype}
 
 
 \subsection{Boolean}
-
+\marginpar{{\tt BOOLEAN} is tri-state!}
 The \tindex{BOOLEAN} type represents the boolean values
 ``true'' and ``false''.  The command language predefines two constants
 to represent these, \tindex{True} and \tindex{False}.
@@ -381,8 +384,8 @@ rounding of least significant digits, and hence these numbers can be
 imprecise; for example, operations usually associated with being
 inverses of each other may not be with floating point
 numbers. However, since arithmetic operations on floating point
-numbers are typically implemented in hardware, the \verb+FLOAT+ data
-type is frequently used when speed is important.
+numbers are typically implemented in hardware, the {\tt Machine} precision
+is frequently used when speed is important.
 
 Rational numbers are implemented as the ratios of two arbitrary-length
 integers. Rational numbers are capable of precisely representing any
@@ -393,10 +396,7 @@ output from them may be unreadably large.
 
 In the current implementation, rational constants are not supported.
 Instead, rational numbers can be formed from two integers using the
-{\tt /} (or \tindex{Divide}) operator, described below.  (Note that at
-present, rational numbers whose numerator or denomerator exceed
-\verb+MaxInt[]+ must be built with GCL functions from smaller rational
-numbers.)
+{\tt /} (or \tindex{Divide}) operator, described below. 
 
 \end{itemize}
 
@@ -406,9 +406,9 @@ you write a numeric constant, keep the following in mind.  Floating
 point constants must include a \verb+.+ in them.  Rational numbers are
 built from integers, and hence must have a \verb+/+ in them, and
 integer constants must have neither of the above. Thus, to represent
-the number \verb+2+ as an \verb+INTEGER+, floating point \verb+NUMBER+
-or rational \verb+NUMBER+, you would write, \verb+2+, \verb+2.+, and
-\verb+2/1+, respectively.
+the number \verb+2+ as a floating point \verb+NUMBER+, you would write
+\verb+2.+, and to represent it in rational precision, you would use \verb+2+ or
+\verb+2/1+.
 
 \subsection{Text}
 
@@ -418,7 +418,7 @@ elements of games in the command language for ease of identification;
 however it is not required.  To specify a {\tt TEXT} constant,
 surround the text with double-quote characters ({\tt "}).  Constants
 may span more than one input line.  Also, line feeds can be explicitly
-included in text constants using the \verb+C+ style notation of
+included in text constants using the \verb+C+-style notation of
 \verb+\n+. 
 
 \subsection{Input and Output}
@@ -462,7 +462,7 @@ in the GCL.  Hence, a more detailed discussion of them is deferred
 until later.  
 
 \subsection{Extensive form data types}
-
+\marginpar{{\tt EFBASIS}, {\tt ASSESSMENT}}
 The data type \tindex{EFG} is used to represent an extensive form game.  As
 with normal form games, no other extensive form data type can exist
 independently of the extensive form game to which it belongs.  The
@@ -519,7 +519,7 @@ elements are of type {\tt INTEGER}, and
 \begin{verbatim}
 { { 2, 3 }, 1, 4 }
 \end{verbatim}
-
+\marginpar{This is a bad example!}
 \noindent 
 is a legal list of type \verb+LIST(LIST(INTEGER))+.  On the other
 hand, 
@@ -565,9 +565,9 @@ Conglomerate Type & Includes \\
 Here \verb+T+ could be any data type except \verb+LIST+
 
 
-\section{\rindex{Statements}}
+\section{\rindex{Expressions}}
 
-A GCL program consists of a series of statements.  A statement is
+A GCL program consists of a series of expressions.  An expression is
 typically an expression built up out of function calls.  A statement
 is terminated by a linefeed or by a semicolon.  Statements can be
 entered interactively, at the command prompt, or can be entered from
@@ -603,7 +603,9 @@ functions can either require arguments or not.  This leads to four
 combinations.  We label these as follows
 
 \medskip
-\begin{tabular} {|l|ll|} 
+\begin{center}
+\begin{tabular} {|l||c|c|} 
+\hline
 Description & Built-in & Parameters\\ 
 \hline
 Constant & Yes & No \\ 
@@ -612,6 +614,7 @@ Variable & No & No \\
 User Defined Function (UDF) & No & Yes \\ 
 \hline
 \end{tabular}
+\end{center}
 
 \subsection{\rindex{Constants}}
 
@@ -622,17 +625,20 @@ data types is described in the section on data types.  Some examples
 of constants follow:
 
 \medskip
+\begin{center}
 \begin{tabular} {|l|l|} 
+\hline
 Data Type & Constant \\ 
 \hline
 \verb+BOOLEAN+  & \tindex{True},  \tindex{False} \\
-\verb+INTEGER+ & \verb+1+, \verb+-1234567+ \\
-\verb+NUMBER+  & \verb+1.+,  \verb+-1.234567+ \\
+\verb+NUMBER+ (rational precision) & \verb+1+, \verb+-1234567/563+ \\
+\verb+NUMBER+ (machine precision)  & \verb+1.+,  \verb+-1.234567+ \\
 \verb+TEXT+  & \verb+"Help"+ \\
 \verb+OUTPUT+  & \tindex{StdOut}, \tindex{NullOut} \\
 \verb+INPUT+  & \tindex{StdIn} \\
 \hline
 \end{tabular}
+\end{center}
 \medskip
 
 You typically don't think of a constant as a function, but it is.  It
@@ -653,6 +659,7 @@ It is important to note that like all functions in the GCL, constants
 have a data type, which is determined by the ``function name''.  If
 you try and use a \verb+INTEGER+ constant, say \verb+123+, where a
 \verb+NUMBER+ or other data type is expected, you will get an error.
+\marginpar{Another outdated example!}
 
 \subsection{\rindex{Variables}}
 
@@ -674,7 +681,7 @@ which is the name of the variable, and the second of which is the
 value to be assigned to the variable.)  The variable name can be any
 string of alphanumeric characters (\verb+a-z+, \verb+A-Z+, or
 \verb+0-9+) beginning with a letter.  So, to create a variable with
-name \verb+x+ which returns the \verb+INTEGER+ \verb+1+, we can use
+name \verb+x+ which returns the \verb+NUMBER+ \verb+1+, we can use
 \verb+Assign+ as follows:
 
 \begin{verbatim}
@@ -703,7 +710,7 @@ y:=2
 y:=3
 y:= 3.0
 \end{verbatim}
-
+\marginpar{Another outdated example}
 \noindent The first call creates a new variable {\tt y} of type {\tt
 INTEGER}, with value of \verb+3+.  The second modifies \verb+y+ to
 have value \verb+3+.  Since the new assignment does not change the
@@ -770,15 +777,15 @@ In the addition example above, we called a function which is listed in
 the function reference as
 
 \begin{verbatim}
-Plus[x->INTEGER, y->INTEGER] =: INTEGER
+Plus[x->NUMBER, y->NUMBER] =: NUMBER
 \end{verbatim}
 
 \noindent This listing of a function is called its {\it prototype}.  
 It contains the function's name, its list of parameters, and its return
 value.  In this case, the function {\tt Plus} takes two parameters, the
-first named \verb+x+ and taking a value of type {\tt INTEGER} and the
-second named \verb+y+ and taking a value of type {\tt INTEGER}, and
-returns a value of type {\tt INTEGER}.
+first named \verb+x+ and taking a value of type {\tt NUMBER} and the
+second named \verb+y+ and taking a value of type {\tt NUMBER}, and
+returns a value of type {\tt NUMBER}.
 
 Because the parameters have explicit names, it is possible to rearrange
 the order in which parameters are listed when a function is called.
@@ -841,7 +848,6 @@ To be more precise, the function {\tt Plus} comes in several different
 variations listed in the function reference:
 
 \begin{verbatim}
-Plus[x->INTEGER, y->INTEGER] =: INTEGER
 Plus[x->NUMBER, y->NUMBER] =: NUMBER
 Plus[x->MIXED, y->MIXED] =: MIXED
 Plus[x->BEHAV, y->BEHAV] =: BEHAV 
@@ -897,10 +903,10 @@ allow for defining sections of code which may be called later.
 
 A new function can be created using the function \tindex{NewFunction}.
 For example, one might define a function to compute the absolute value
-of an {\tt INTEGER} as such:
+of an {\tt NUMBER} as such:
 
 \begin{verbatim}
-NewFunction[Abs[n->INTEGER],
+NewFunction[Abs[n->NUMBER],
   If[n > 0, n, If[n < 0, -n, 0]];
 ];
 \end{verbatim}
@@ -932,7 +938,7 @@ also takes effect on the variable passed to the function.  For
 example, it might be useful instead to define \verb+Abs+ as:
 
 \begin{verbatim}
-NewFunction[Abs[n<->INTEGER],
+NewFunction[Abs[n<->NUMBER],
 		 If[n > 0, n, If[n < 0, n := -n, 0]]]
 \end{verbatim}
 
@@ -958,7 +964,7 @@ typed in the following:
 
 \begin{verbatim}
 i := 4;
-NewFunction[FooFunc[x->INTEGER], x * i]
+NewFunction[FooFunc[x->NUMBER], x * i]
 \end{verbatim}
 
 \noindent later execution of the \verb+FooFunc+ would yield an
@@ -967,7 +973,7 @@ defined within the function.  If instead \verb+FooFunc+ had been
 defined as follows:
 
 \begin{verbatim}
-NewFunction[FooFunc[x->INTEGER], i := 13, x * i]
+NewFunction[FooFunc[x->NUMBER], i := 13, x * i]
 \end{verbatim}
 
 \noindent \verb+FooFunc+ would always return 13 times the value of the
@@ -1094,11 +1100,11 @@ Times[Plus[a,b],c]
 \index{Console output}
 
 The GCL will only print output at the console if you explicity ask for
-it with the built-in function \tindex+Print+.  This function has the
+it with the built-in function \tindex{Print}.  This function has the
 prototype \verb+Print[x->T] =: T+ for any data type \verb+T+, and has
 the short form \verb+<< x+.  You may have noticed that the GCL prompt
 concludes with a \verb+<<+.  In fact, this is not part of the prompt,
-but rather is a ``pre typed'' part of your GCL command.  
+but rather is a ``pre-typed'' part of your GCL command.  
 
 Once you have become accustomed to the GCL, you may prefer to supress
 output from some or all commands typed at the GCL command line.  This
@@ -1177,6 +1183,7 @@ GCL3:= << list
   { 0, 1, 0 },
   { 0, 0, 1 } }
 \end{verbatim}
+
 
 \subsection{\rindex{Listability} of functions}\index{Functions!listability}
 
@@ -1299,7 +1306,7 @@ Note that the function \verb+Help+ is listable (see section on
 listability), so that we can do \verb+Help[Help["*efg"]]+ to get a
 list of function prototypes for all functions whose names end with
 \verb+efg+.  Similarly, \verb+Help["*"]+ gives a list of all function
-names in the GCL, and \verb+Help[Help["*"]]+ gives a list of all
+names in the GCL, and {\tt Help[Help["*"]]} gives a list of all
 function prototypes in the GCL.
 
 If \verb+Manual+ command is used to obtain a more complete description
@@ -1312,7 +1319,7 @@ the function and its parameters is returned.
 
 \section{\rindex{Including files}}
 
-The function \verb+Include[file->TEXT]+\tindex{Include} is used to
+The function \verb+Include[file->TEXT]+\index{Include} is used to
 insert the contents of the file given into the input stream, as if
 they had been typed directly by the user.  This can be particularly
 useful in conjunction with user defined functions, in that a library
@@ -1329,8 +1336,8 @@ When a file is included, the GCL looks for a file with that name in
 the following locations, in order.  
 \begin{enumerate}
 \item The current directory.
-\item The directory specified by the HOME environment variable, if any.
-\item The directory specified by the GCLLIB environment variable, if any.
+\item The directory specified by the \verb+HOME+ environment variable, if any.
+\item The directory specified by the \verb+GCLLIB+ environment variable, if any.
 \item The directory where the executable is located.
 \end{enumerate}
 
@@ -1343,7 +1350,7 @@ project.
 
 It is good practice to have included files identify themselves when
 they are included. This can be done by using the
-\verb+GetPath[]+\tindex{GetPath} function, which returns the full
+\verb+GetPath[]+\index{GetPath} function, which returns the full
 pathname of the file from which the command is executed.  For example,
 if the following line is placed as the first line in an included file
 (say with filename \verb+path/myfile.gcl+)
@@ -1545,6 +1552,7 @@ in >> i >> r >> t >> b >> f >> l >> x
 opens an input stream, consisting of the file \verb+"file.dat"+, and
 then reads data from the input stream into the corresponding
 variables.  After the last statement, 
+\marginpar{Correct {\tt INTEGER} references}
 \verb+i+ is an \verb+INTEGER+ with value \verb+25+, 
 \verb+r+ is a \verb+NUMBER+ with value \verb+1/3+, 
 \verb+t+ is a \verb+TEXT+ with value \verb+"This is a text string!"+, 
@@ -1661,6 +1669,7 @@ before they work correctly.}
 
 \section{\rindex{Orphan variables} and memory management}
 
+\marginpar{Mention conventions for games}
 One feature of the GCL which is not encountered in other computing
 environments is the notion of ``orphan variables''.  In the GCL, you
 can create variables to represent objects which may be deleted or
@@ -1751,8 +1760,7 @@ variable name which is not defined, and using a value of one type
 where another type was expected.  Also, builtin functions may generate
 this type of error on invalid inputs.  A run time error will result in
 termination of the GCL at the point where the error occurs, with a
-message indicating the type of error encountered.  However, no line
-number is given for run time errors.  
+message indicating the type of error encountered.
 
 \chapter{Building and Modifying Games}
 
@@ -1760,7 +1768,7 @@ The whole point of the GCL is to provide an environment to enable
 building and doing computations on games.  This chapter describes how
 to build and solve normal and extensive form games in the GCL.  
 
-\section{\rindex{Normal forms}}
+\section{\rindex{Normal form games}}
 
 A normal form game is a set of $n$ players, each with a strategy
 set, together with a function from the cartesian product of strategy
@@ -1857,7 +1865,7 @@ use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
 
 \begin{verbatim}
-GCL2: Randomize[NewNfg[{2,2},True],34]
+GCL2:= Randomize[NewNfg[{2,2},True],34]
 \end{verbatim}  
 
 \noindent
@@ -2853,9 +2861,11 @@ equilibria (\tindex{OnePerfect}, \tindex{AllPerfect})\footnote{The
 functions for computing perfect equilibrium are only implemented for
 two person games}.  Table 5 gives the settings that are used for these
 UDFs.
-\medskip
 
+\medskip
+\begin{center}
 \begin{tabular}{|l|l|p{2cm}|l|l|}
+\hline
 Type & ElimDom & Game Type & Algorithm & Notes \\
 \hline
 OneNash & Weak & 2-person const sum & Lp & \\ \cline{3-5}
@@ -2876,6 +2886,7 @@ AllPerfect & Strong & 2 person      & Lcp & Not guaranteed \\ \cline{3-5}
 \multicolumn{5}{c}{Table 5}\\
 \multicolumn{5}{c}{Standard UDFs for normal form equilibria}\\
 \end{tabular}
+\end{center}
 \medskip
 
 The standard user defined functions for finding ``all'' equilibria
@@ -2922,7 +2933,9 @@ equilibrium are only implemented for two person games}.  Table 6 gives
 the settings that are used for these UDFs.  
 
 \medskip
+\begin{center}
 \begin{tabular}{|l|l|l|p{2cm}|l|l|}
+\hline
 Type & Subgames & ElimDom & Game Type & Algorithm & Notes\\
 \hline
 OneNash & Mark & Weak &  2-person const sum & EF/Lp &\\ \cline{4-6}
@@ -2949,6 +2962,7 @@ AllSequential &         &       &  2 or n-person   & EF/Liap &Not guaranteed\\
 \multicolumn{6}{c}{Table 6}\\
 \multicolumn{6}{c}{Standard UDFs for extensive form equilibria}\\
 \end{tabular}
+\end{center}
 \medskip
 
 In Table 6, the column headed ``Subgames'' indicates whether all
@@ -3027,10 +3041,10 @@ infoset under \verb+b+\\
 under \verb+b+\\ 
 \verb+  InfosetProbs[b]+ & Nested list of all infoset probabilities
 for \verb+b+\\ 
-\verb+  IsKnownNash[p]+ &\verb+True+ if \verb+p+ is known to be Nash\\
-\verb+  IsKnownPerfect[m]+ &\verb+True+ if \verb+m+ is known to be perfect\\
-\verb+  IsKnownSequential[b]+ &\verb+True+ if \verb+b+ is known sequential\\
-\verb+  IsKnownSubgamePerfect[b]+ &  \verb+True+ if \verb+b+ is known subgame perfect\\ 
+\verb+  IsNash[p]+ &\verb+True+ if \verb+p+ is known to be Nash\\
+\verb+  IsPerfect[m]+ &\verb+True+ if \verb+m+ is known to be perfect\\
+\verb+  IsSequential[b]+ &\verb+True+ if \verb+b+ is known sequential\\
+\verb+  IsSubgamePerfect[b]+ &  \verb+True+ if \verb+b+ is known subgame perfect\\ 
 \verb+  NodeValue[b,p,n]+ & Value of \verb+b+ to player \verb+p+ at
 node \verb+n+\\ 
 \verb+# NodeValues[b,n]+ & List of values of \verb+b+ to all players at node \verb+n+\\
@@ -3056,6 +3070,7 @@ player \verb+p+ to \verb+v+\\
 
 \chapter{Function Reference, by Category}
 
+\marginpar{This section has not been updated}
 This section contains a list of functions organized by
 category.  For a description of each function and its arguments,
 refer to the following, alphabetically organized, section.  
@@ -3560,6 +3575,7 @@ ActionProb[profile->BEHAV, action->ACTION] =: NUMBER
 \end{verbatim}\normalsize
 
 \bd
+\marginpar{Check this function works this way}
 Returns the probability that \verb+action+ is chosen at its
 information set when all players are following \verb+profile+.
 If \verb+action+ is a chance action, the probability of chance selecting
@@ -3578,7 +3594,9 @@ ActionProbs[profile->BEHAV] =: LIST(LIST(LIST(NUMBER)))
 \bd 
 Returns a nested list of probabilities for each action under
 \verb+profile+.  The \verb+(i,j,k)+th entry is the probability of
-player \verb+i+, information set \verb+j+, action \verb+k+. 
+player \verb+i+, information set \verb+j+, action \verb+k+, where the
+index numbers correspond to the output of \verb+Players+, \verb+Infosets+,
+and \verb+Actions+, respectively. 
 
 \item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
 \ed
@@ -3606,10 +3624,13 @@ the chance player.
 ActionValues[profile->BEHAV] =: LIST(LIST(LIST(NUMBER))) 
 \end{verbatim}\normalsize
 
-\bd 
-Returns a list of expected payoffs of each action (to the player who
-chooses that action).  The \verb+(i,j,k)+th entry is the expected
-payoff to player \verb+i+ at information set \verb+j+, of action \verb+k+. 
+\bd
+Returns a list of expected payoffs of each action (to the player
+who chooses that action).  The null value is returned for actions for
+which this value is not well-defined.  The \verb+(i,j,k)+th entry is
+the expected payoff to player \verb+i+ at information set \verb+j+, of
+action \verb+k+, where the index numbers correspond to the output of
+\verb+Players+, \verb+Infosets+, and \verb+Actions+, respectively.
 
 \item [See also:] \verb+ActionValue+, \verb+Belief+,
 \verb+InfosetProb+, \verb+NodeValue+, \verb+RealizProb+.  
@@ -3635,6 +3656,7 @@ AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT
 \end{verbatim}\normalsize
 
 \bd 
+\marginpar{This implementation should cover {\tt EFBASIS} also}
 Adds \verb+action+ to the \verb+support+.  If the action is already in
 the support, no change is made.  A copy of the modified support is
 returned.  It is an error if \verb+support+ and \verb+action+ are not from the
@@ -3659,6 +3681,15 @@ extensive form game, or if \verb+node+ is not a terminal node.
 
 \item [See also:] \verb+InsertMove+, \verb+DeleteMove+,
 \verb+NewInfoset+.  
+\ed
+
+\item\lex{AddNode}
+\protect \large \begin{verbatim}
+AddNode[basis->EFBASIS, node->NODE] =: EFBASIS
+\end{verbatim}\normalsize
+
+\bd
+Describe me!
 \ed
 
 \item\lex{AddStrategy}
@@ -3694,7 +3725,17 @@ And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
-Computes the logical conjunction of \verb+x+ and \verb+y+.
+Computes the logical conjunction of \verb+x+ and \verb+y+, defined by the
+truth table:
+\begin{center}
+\begin{tabular} {|c||c|c|c|} \hline
+& \verb+True+ & \verb+False+ & \verb+Unknown+ \\ \hline 
+\verb+True+ & \verb+True+ & \verb+False+ & \verb+Unknown+ \\
+\verb+False+ & \verb+False+ & \verb+False+ & \verb+False+ \\
+\verb+Unknown+ & \verb+Unknown+ & \verb+False+ & \verb+Unknown+ \\ \hline
+\end{tabular}
+\end{center}
+
 \item [Short forms:] \verb+x && y+, \verb+x AND y+.
 \item [See also:] \verb+Not+, \verb+Or+.
 \ed
@@ -3703,7 +3744,6 @@ Computes the logical conjunction of \verb+x+ and \verb+y+.
 
 \item\lex{ArgMax} 
 \protect \large \begin{verbatim}
-ArgMax[x->LIST(INTEGER)] =: INTEGER 
 ArgMax[x->LIST(NUMBER)] =: INTEGER 
 \end{verbatim} \normalsize
 
@@ -3719,6 +3759,7 @@ Assign[name->TEXT, value<->T*] =: T
 
 {\it for all types} {\tt T} 
 \bd 
+\marginpar{The usual objections apply.}
 Creates a new variable \verb+name+, with return value of \verb+value+.
 Returns the value assigned.  If \verb+name+ is already a defined
 variable in the current scope, then if it is of type \verb+T+, it is
@@ -3733,6 +3774,14 @@ required, and the function is not listable.
 
 %--B--
 
+\item\lex{Basis}
+\protect \large \begin{verbatim}
+Basis[efg->EFG] =: EFBASIS
+\end{verbatim}\normalsize
+
+\bd
+Describe me!
+\ed
 
 \item\lex{Behav}
 \protect \large \begin{verbatim}
@@ -3740,6 +3789,7 @@ Behav[mixed->MIXED] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd
+\marginpar{How does this work with imperfect recall?}
 Converts \verb+profile+ to the equivalent behavior strategy profile on the
 associated extensive form game using Kuhn's Theorem.  It is an error
 if there is no extensive form game associated with the normal form game
@@ -3753,8 +3803,8 @@ Behav[support->EFSUPPORT] =: BEHAV
 \end{verbatim}\normalsize
 
 \bd
-Returns a behavior strategy profile over \verb+support+ with equal
-probabilities for all actions in the same information set. 
+Returns a behavior strategy profile with equal
+probabilities for all actions in \verb+support+ in the same information set. 
 \item [See also:] \verb+Centroid+, \verb+Mixed+.
 \ed
 
@@ -3770,8 +3820,8 @@ information set, assuming all players follow \verb+profile+.  The null
 value is returned if the belief value is not well-defined, or if
 \verb+node+ is terminal.  It is an error if \verb+profile+ and \verb+node+
 are not from the same extensive form game.
-\item [See also:] \verb+ActionValue+, \verb+InfosetProb+, \verb+NodeValue+,
-\verb+RealizProb+, verb+Beliefs+
+\item [See also:] \verb+ActionValue+, \verb+Beliefs+, \verb+InfosetProb+,
+\verb+NodeValue+, \verb+RealizProb+.
 \ed
 
 \item\lex{Beliefs}
@@ -3787,8 +3837,8 @@ to player \verb+i+, information set \verb+j+, and member node
 \verb+k+. The null value is returned for nodes where beliefs are
 undefined.
 
-\item [See also:] \verb+ActionValue+, \verb+InfosetProb+, \verb+NodeValue+,
-\verb+RealizProb+, verb+Belief+
+\item [See also:] \verb+ActionValue+, \verb+Belief+, \verb+InfosetProb+,
+\verb+NodeValue+, \verb+RealizProb+.
 \ed
 
 
@@ -3864,9 +3914,10 @@ removed.
 
 \item\lex{Concat}
 \protect \large \begin{verbatim}
-Concat[x->NLIST(ANYTYPE), y->NLIST(ANYTYPE)] =: LIST(ANYTYPE) 
+Concat[x->NLIST(T), y->NLIST(T)] =: LIST(T) 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns the concatenation of the lists \verb+x+ and \verb+y+.
 \item
@@ -3885,10 +3936,11 @@ Returns the concatenation of \verb+x+ and \verb+y+.
 
 \item\lex{Contains}
 \protect \large \begin{verbatim}
-Contains[list->NLIST(ANYTYPE), x->ANYTYPE] =: BOOLEAN 
-Contains[list->NLIST(ANYTYPE), x->LIST(ANYTYPE)] =: BOOLEAN 
+Contains[list->NLIST(T), x->T] =: BOOLEAN 
+Contains[list->NLIST(T), x->LIST(T)] =: BOOLEAN 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns \verb+True+ when the value \verb+x+ is contained in \verb+list+.
 \item [See also:] \verb+NthElement+.
@@ -3999,7 +4051,7 @@ DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-Removes \verb+outcome+ from its normal form game.  Return \verb+True+.
+Removes \verb+outcome+ from its normal form game.  Returns \verb+True+.
 \item [See also:] \verb+NewOutcome+.
 \ed
 
@@ -4039,7 +4091,6 @@ Divides \verb+y+ into \verb+x+ by forming the equivalent rational number.
 
 \item\lex{Dot}
 \protect \large \begin{verbatim}
-Dot[x->LIST(INTEGER), y->LIST(INTEGER)] =: INTEGER 
 Dot[x->LIST(NUMBER), y->LIST(NUMBER)] =: NUMBER 
 \end{verbatim}\normalsize
 
@@ -4112,7 +4163,7 @@ EnumMixedSolve[support->EFSUPPORT, {asNfg->False},
                {nPivots<->0}, {time<->0.000000}, 
                {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
-
+\marginpar{Add new options.}
 \bd
 Returns the extreme points of the set of all Nash equilibria (pure or
 mixed) for a two person game using \verb+support+.
@@ -4197,6 +4248,7 @@ Equal[x->T*, y->T*] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
+\marginpar{Verify Null implementation}
 \bd
 Returns \verb+True+ when \verb+x+ and \verb+y+ are equal.  For games,
 \verb+x+ and \verb+y+ are considered equal when they refer to the same
@@ -4221,6 +4273,26 @@ Returns the path of the GCL executable.
 \item [path:] Returns the path.  Default is True. 
 \ed
 \item [See also:] \verb+GetPath+.
+\ed
+
+\item\lex{ExistsGlobalVar}
+\protect \large \begin{verbatim}
+ExistsGlobalVar[name->TEXT] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Describe me!
+\item [See also:] \verb+LoadGlobalVar+, \verb+SaveGlobalVar+.
+\ed
+
+\item\lex{ExistsLocalVar}
+\protect \large \begin{verbatim}
+ExistsLocalVar[name->TEXT] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Describe me!
+\item [See also:] \verb+LoadLocalVar+, \verb+SaveLocalVar+.
 \ed
 
 \item\lex{Exp}
@@ -4282,7 +4354,7 @@ Format[x->INTEGER, {width<->0}] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd 
-Sets the formatting style for output of INTEGER data types on
+Sets the formatting style for output of integer values on
 output streams.
 \bd
 \item [width:] The width for a numeric field.  If the width of the
@@ -4329,7 +4401,8 @@ written.  The default is True.
 
 \item\lex{Format}
 \protect \large \begin{verbatim}
-Format[x->MIXED BEHAV, {info<->1}] =: MIXED BEHAV 
+Format[x->MIXED, {info<->1}] =: MIXED
+Format[x->BEHAV, {indo<->1}] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd
@@ -4339,7 +4412,7 @@ Sets the formatting style for output of solution types on output streams.
 displays just the strategy or action probabilities.  A value of 2
 displays all of the information about the solution. 
 \ed
-\item [See also:] \verb+Write+, \verb+ListFormat+.
+\item [See also:] \verb+ListFormat+, verb+Write+.
 \ed
 
 
@@ -4381,7 +4454,7 @@ GetFormat[x->INTEGER, {width<->0}] =: INTEGER
 \end{verbatim} \normalsize
 
 \bd 
-Gets the current formatting style for output of INTEGER data types on
+Gets the current formatting style for output of integers on
 output streams.
 \bd
 \item [width:] The width for a numeric field.  
@@ -4395,7 +4468,7 @@ output streams.
 GetFormat[x->NUMBER, {width<->0}, {precis<->6}, {expmode<->False}] =: NUMBER 
 \end{verbatim} \normalsize
 
-\bd Gets the current formatting style for output of NUMBER data types
+\bd Gets the current formatting style for output of {\tt NUMBER} data types
 on output streams.  
 \bd
 \item [width:] The width for a numeric field.  
@@ -4424,7 +4497,8 @@ written.
 
 \item\lex{GetFormat}
 \protect \large \begin{verbatim}
-GetFormat[x->MIXED BEHAV, {info<->1}] =: MIXED BEHAV 
+GetFormat[x->MIXED, {info<->1}] =: MIXED
+GetFormat[x->BEHAV, {info<->1}] =: BEHAV
 \end{verbatim} \normalsize
 
 \bd Gets the current formatting style for output of solution types on
@@ -4437,7 +4511,8 @@ output streams.
 
 \item\lex{GetListFormat}
 \protect \large \begin{verbatim}
-GetListFormat[{braces<->True}, {commas<->True}, {lf<->1}, {indent<->2}] =: BOOLEAN 
+GetListFormat[{braces<->True}, {commas<->True},
+              {lf<->1}, {indent<->2}] =: BOOLEAN 
 \end{verbatim} \normalsize
 
 \bd
@@ -4459,10 +4534,10 @@ GetPath[{file->True}, {path->True}] =: TEXT
 
 \bd
 Returns the path to the file in which the command is included.  Can be
-used to identify Include[] files. 
+used to identify \verb+Include[]+ files. 
 \bd
-\item [file:] Returns the file name.  Default is True.  
-\item [path:] Returns the path.  Default is true. 
+\item [file:] Returns the file name.  Default is \verb+True+.  
+\item [path:] Returns the path.  Default is \verb+True+. 
 \ed
 \item [See also:] \verb+ExePath+, \verb+Include+.
 \ed
@@ -4524,12 +4599,18 @@ created by one of these algorithms have a null lambda value.
 
 \item\lex{GobitSolve}
 \protect \large \begin{verbatim}
-GobitSolve[start->MIXED BEHAV, {pxifile->}, {minLam->0.001000}, 
+GobitSolve[start->MIXED, {pxifile->""}, {minLam->0.001000}, 
            {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
            {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
            {maxits1->100}, {tol1->0.000000}, {time<->0}, 
            {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
-           {traceLevel->0}] =: LIST(MIXED BEHAV) 
+           {traceLevel->0}] =: LIST(MIXED) 
+GobitSolve[start->BEHAV, {pxifile->""}, {minLam->0.001000}, 
+           {maxLam->500.000000}, {delLam->0.020000}, {powLam->1}, 
+           {fullGraph->False}, {maxitsN->20}, {tolN->0.000000}, 
+           {maxits1->100}, {tol1->0.000000}, {time<->0}, 
+           {nEvals<->0}, {nIters<->0}, {traceFile<->(Output)}, 
+           {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -4615,7 +4696,6 @@ value for profiles not created by these algorithms is null.
 
 \item\lex{Greater}
 \protect \large \begin{verbatim}
-Greater[x->INTEGER, y->INTEGER] =: BOOLEAN 
 Greater[x->NUMBER, y->NUMBER] =: BOOLEAN 
 \end{verbatim}\normalsize
 
@@ -4644,10 +4724,10 @@ achine.
 
 \item\lex{GreaterEqual}
 \protect \large \begin{verbatim}
-GreaterEqual[x->INTEGER, y->INTEGER] =: BOOLEAN 
 GreaterEqual[x->NUMBER, y->NUMBER] =: BOOLEAN 
 \end{verbatim}\normalsize
 
+\marginpar{Precision issues}
 \bd
 Returns \verb+True+ when \verb+x+ is at least as large as \verb+y+.
 \item
@@ -4718,7 +4798,7 @@ is returned.
 \bd
 Defines a block of statements to be executed under certain conditions.
 See the section on control structures for complete information. 
-\item [Note:] Special function.  Not listable; arguments are not GCl
+\item [Note:] Special function.  Not listable; arguments are not GCL
 data types; not documented in \verb+Help+ or \verb+Manual+.  
 \ed
 
@@ -4766,9 +4846,9 @@ Infoset[node->NODE*] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
-Returns the information set to which \verb+node+
-belongs.  All nonterminal nodes belong to an information set. 
-Terminal nodes, and the null node, belong to the null information set.
+Returns the information set to which \verb+node+ belongs.  All
+nonterminal nodes belong to an information set.  By convention,
+terminal nodes and the null node, belong to the null information set.
 \item [See also:] \verb+Members+.
 \ed
 
@@ -4872,11 +4952,10 @@ becomes the first child of the new node.  Returns the new node.
 \item\lex{Integer}
 \protect \large \begin{verbatim}
 Integer[x->NUMBER] =: INTEGER 
-Integer[x->INTEGER] =: INTEGER 
 \end{verbatim} \normalsize
 
 \bd
-Converts \verb+x+ into a value of type \verb+INTEGER+.
+Converts \verb+x+ into an integer value by truncation.
 \item [See also:] \verb+Number+.
 \ed
 
@@ -4892,6 +4971,23 @@ towards zero.  It is an error to attempt to divide by zero.
 \item [See also:] \verb+Divide+, \verb+Modulus+.
 \ed
 
+\item\lex{Inverse}
+\protect \large \begin{verbatim}
+Inverse[x->LIST(LIST(NUMBER))] =: LIST(LIST(NUMBER))
+\end{verbatim} \normalsize
+
+\bd
+Describe me!
+\ed
+
+\item\lex{IsConsistent}
+\protect \large \begin{verbatim}
+IsConsistent[basis->EFBASIS] =: BOOLEAN
+\end{verbatim} \normalsize
+
+\bd
+Describe me!
+\ed
 
 \item\lex{IsConstSum}
 \protect \large \begin{verbatim}
@@ -4903,25 +4999,27 @@ IsConstSum[efg->EFG] =: BOOLEAN
 Returns \verb+True+ when the game \verb+efg+ or \verb+nfg+ is constant sum.
 \ed
 
-\item\lex{IsFloat}
+\item\lex{IsList}
 \protect \large \begin{verbatim}
-IsFloat[x->NUMBER] =: BOOLEAN 
+IsList[x->T] =: BOOLEAN 
+IsList[list->NLIST(T)] =: BOOLEAN 
 \end{verbatim}\normalsize
 
-\bd
-Returns \verb+True+ when the internal representation of \verb+x+ is a
-floating point number 
+{\it for all types} {\tt T}
+\bd 
+Returns \verb+True+ when \verb+x+ is a list or a nested list.
 \item
-[See also:] \verb+Float+.
+[See also:] \verb+List+.
 \ed
 
-\item\lex{IsKnownNash}
+\item\lex{IsNash}
 \protect \large \begin{verbatim}
-IsKnownNash[profile->BEHAV] =: BOOLEAN 
-IsKnownNash[profile->MIXED] =: BOOLEAN 
+IsNash[profile->BEHAV] =: BOOLEAN 
+IsNash[profile->MIXED] =: BOOLEAN 
 \end{verbatim}\normalsize
 
 \bd
+\marginpar{Update description}
 Returns \verb+True+ when \verb+profile+
 is known by Gambit to be a Nash equilibrium of the
 corresponding game.  If \verb+profile+ is complete (probabilities sum to
@@ -4933,63 +5031,25 @@ of all completions of the profile) may be Nash, but \verb+IsKnownNash+
 returns \verb+False+, because it is not known by Gambit to be Nash.
 If the answer is not known to Gambit, then \verb+IsKnownNotNash+ will also
 return \verb+False+.
-\item [See also:] \verb+IsKnownNotNash+, \verb+IsKnownStrictNash+.
 \ed
 
-\item\lex{IsKnownNotNash}
+\item\lex{IsNull}
 \protect \large \begin{verbatim}
-IsKnownNotNash[profile->BEHAV] =: BOOLEAN 
-IsKnownNotNash[profile->MIXED] =: BOOLEAN 
+IsNull[x->T*] =: BOOLEAN 
+\end{verbatim}\normalsize
+
+{\it for all types} {\tt T}
+\bd
+Returns \verb+True+ if x is a NULL object of type \verb+T+.  
+\ed
+
+\item\lex{IsPerfect}
+\protect \large \begin{verbatim}
+IsPerfect[profile->MIXED] =: BOOLEAN 
 \end{verbatim}\normalsize
 
 \bd 
-Returns \verb+True+ if the \verb+Profile+
-is known by Gambit not to be a Nash equilibrium of the
-corresponding game.  
-\item
-[See also:] \verb+IsKnownNash+.
-\ed
-
-\item\lex{IsKnownNotPerfect}
-\protect \large \begin{verbatim}
-IsKnownNotPerfect[profile->MIXED] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd
-Returns \verb+True+ if \verb+profile+
-is known by Gambit not to be a perfect Nash equilibrium.
-\item [See also:] \verb+IsKnownPerfect+.
-\ed
-
-\item\lex{IsKnownNotSequential}
-\protect \large \begin{verbatim}
-IsKnownNotSequential[profile->BEHAV] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd
-Returns \verb+True+ if \verb+profile+
-is known by Gambit not to be a sequential Nash
-equilibrium.
-\item [See also:] \verb+IsKnownSequential+.
-\ed
-
-\item\lex{IsKnownNotSubgamePerfect}
-\protect \large \begin{verbatim}
-IsKnownNotSubgamePerfect[profile->BEHAV] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd
-Returns \verb+True+ if \verb+profile+
-is known by Gambit not to be a subgame perfect Nash equilibrium.
-\item [See also:] \verb+IsKnownSubgamePerfect+.
-\ed
-
-\item\lex{IsKnownPerfect}
-\protect \large \begin{verbatim}
-IsKnownPerfect[profile->MIXED] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd 
+\marginpar{Update description}
 Returns \verb+True+ if \verb+profile+
 is known by Gambit to be a perfect Nash equilibrium, and \verb+False+
 otherwise.  There is currently no definitive test in Gambit for
@@ -4997,78 +5057,6 @@ whether an arbitrary profile is perfect, so it is possible for a
 perfect equilibrium to return \verb+False+.  However some of the
 algorithms (notably \verb+LcpSolve+) will only return perfect
 equilibria, which are marked as such.  
-\item [See also:] \verb+IsKnownNotPerfect+.
-\ed
-
-\item\lex{IsKnownSequential}
-\protect \large \begin{verbatim}
-IsKnownSequential[profile->BEHAV] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd 
-Returns \verb+True+ if \verb+profile+
-is known by Gambit to be an approximation to a
-sequential Nash equilibrium, and \verb+False+ otherwise.  There is
-currently no definitive test in Gambit for whether an arbitrary
-profile is sequential.  However any Nash equilibrium of an extensive
-form game which is computed via the \verb+LiapSolve+ or
-\verb+GobitSolve+ algorithms is sequential.
-\item [See also:] \verb+IsKnownNotSequential+.
-\ed
-
-%\item\lex{IsKnownStrictNash}
-%\protect \large \begin{verbatim}
-%IsKnownStrictNash[profile->BEHAV(T)] =: BOOLEAN
-%IsKnownStrictNash[profile->MIXED(T)] =: BOOLEAN
-%\end{verbatim}\normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Returns \verb+True+ if \verb+profile+ is known by Gambit to be a strict
-%Nash equilibrium of the corresponding game.  If \verb+profile+ is
-%complete, there is a definitive test for strict Nash equilibrium.
-%However, if the profile is incomplete,then it is possible that a profile
-%(or the set of all completions of the profile) may be strict Nash, but
-%\verb+IsKnownStrictNash+ returns \verb+False+.  If the answer is not
-%known to Gambit, then \verb+IsKnownNotStrictNash+ also returns \verb+False+.
-%\item [See also:] \verb+IsKnownNash+, \verb+IsKnownNotStrictNash+.
-%\ed
-
-\item\lex{IsKnownSubgamePerfect}
-\protect \large \begin{verbatim}
-IsKnownSubgamePerfect[profile->BEHAV] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd
-Returns \verb+True+ if \verb+profile+
-is known by Gambit to be a subgame perfect Nash
-equilibrium.  There is currently no
-definitive test in Gambit for whether an arbitrary profile is subgame
-perfect.  However, any Nash equilibrium of an extensive form game which
-is computed when all subgames are marked will only return a subgame
-perfect equilibrium.  
-\item [See also:] \verb+IsKnownNotSubgamePerfect+.
-\ed
-
-\item\lex{IsList}
-\protect \large \begin{verbatim}
-IsList[x->ANYTYPE] =: BOOLEAN 
-IsList[list->NLIST(ANYTYPE)] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd 
-Returns \verb+True+ when \verb+x+ is a list or a nested list.
-\item
-[See also:] \verb+List+.
-\ed
-
-\item\lex{IsNull}
-\protect \large \begin{verbatim}
-IsNull[x->ANYTYPE*] =: BOOLEAN 
-\end{verbatim}\normalsize
-
-\bd
-Returns \verb+True+ if x is a NULL object of type \verb+T+.  
 \ed
 
 \item\lex{IsPerfectRecall}
@@ -5092,16 +5080,37 @@ in the tree of the node \verb+of+.  A node is considered its own predecessor.
 \item [See also:] \verb+IsSuccessor+.
 \ed
 
-%\item\lex{IsRoot}
-%\protect \large \begin{verbatim}
-%#IsRoot[node->NODE] =: BOOLEAN
-%\end{verbatim}\normalsize
+\item\lex{IsSequential}
+\protect \large \begin{verbatim}
+IsSequential[profile->BEHAV] =: BOOLEAN 
+\end{verbatim}\normalsize
 
-%\bd
-%Returns \verb+True+ when \verb+node+ is the root node of its
-%extensive form.
-%\item [See also:] \verb+Parent+.
-%\ed
+\bd 
+\marginpar{Update description}
+Returns \verb+True+ if \verb+profile+
+is known by Gambit to be an approximation to a
+sequential Nash equilibrium, and \verb+False+ otherwise.  There is
+currently no definitive test in Gambit for whether an arbitrary
+profile is sequential.  However any Nash equilibrium of an extensive
+form game which is computed via the \verb+LiapSolve+ or
+\verb+GobitSolve+ algorithms is sequential.
+\ed
+
+\item\lex{IsSubgamePerfect}
+\protect \large \begin{verbatim}
+IsSubgamePerfect[profile->BEHAV] =: BOOLEAN 
+\end{verbatim}\normalsize
+
+\bd
+\marginpar{Update description}
+Returns \verb+True+ if \verb+profile+
+is known by Gambit to be a subgame perfect Nash
+equilibrium.  There is currently no
+definitive test in Gambit for whether an arbitrary profile is subgame
+perfect.  However, any Nash equilibrium of an extensive form game which
+is computed when all subgames are marked will only return a subgame
+perfect equilibrium.  
+\ed
 
 \item\lex{IsSuccessor}
 \protect \large \begin{verbatim}
@@ -5129,6 +5138,8 @@ Returns \verb+True+ when the system stopwatch is currently running.
 %--J--
 
 %--K--
+
+\marginpar{Should we put \verb+KGobitSolve+ in?}
 
 %--L--
 
@@ -5181,18 +5192,18 @@ logging at all.
 
 \item\lex{Length}
 \protect \large \begin{verbatim}
-Length[list->LIST(ANYTYPE*)] =: INTEGER 
+Length[list->LIST(T*)] =: INTEGER 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns the number of elements in \verb+list+.
 \item
-[See also:] {\tt NthElement}, \verb+NumElements+.
+[See also:] \verb+NthElement+, \verb+NumElements+.
 \ed
 
 \item\lex{Less}
 \protect \large \begin{verbatim}
-Less[x->INTEGER, y->INTEGER] =: BOOLEAN 
 Less[x->NUMBER, y->NUMBER] =: BOOLEAN 
 \end{verbatim}\normalsize
 
@@ -5217,10 +5228,10 @@ the string \verb+y+, using the native character set of the machine.
 
 \item\lex{LessEqual}
 \protect \large \begin{verbatim}
-LessEqual[x->INTEGER, y->INTEGER] =: BOOLEAN 
 LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN 
 \end{verbatim}\normalsize
 
+\marginpar{Address precision issue}
 \bd
 Returns \verb+True+ when \verb+x+ is no more than \verb+y+.
 \item [Short form:] \verb+x <= y+
@@ -5330,7 +5341,6 @@ If \verb+length+ is unspecified, it defaults to 1.
 
 \item\lex{List}
 \protect \large \begin{verbatim}
-List[x->INTEGER, {length->1}, {delta->0}] =: LIST(INTEGER) 
 List[x->NUMBER, {length->1}, {delta->0}] =: LIST(NUMBER) 
 \end{verbatim}\normalsize
 
@@ -5342,9 +5352,11 @@ it defaults to 1; if \verb+delta+ is unspecified, it defaults to 0.
 
 \item\lex{ListFormat}
 \protect \large \begin{verbatim}
-ListFormat[{braces<->True}, {commas<->True}, {lf<->1}, {indent<->2}] =: BOOLEAN
+ListFormat[{braces<->True}, {commas<->True},
+           {lf<->1}, {indent<->2}] =: BOOLEAN
 \end{verbatim} \normalsize
 
+\marginpar{Mention it gets old settings!}
 \bd
 Sets the formatting style for output of lists on output streams.
 \bd
@@ -5370,24 +5382,26 @@ not contain a valid extensive form savefile.
 
 \item\lex{LoadGlobalVar}
 \protect \large \begin{verbatim}
-LoadGlobalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+LoadGlobalVar[name->TEXT, var->T] =: T
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Loads a variable from memory that was previously saved with 
 \verb+SaveGlobalVar+. 
-\item [See also:] \verb+SaveGlobalVar+.
+\item [See also:] \verb+ExistsGlobalVar+, \verb+SaveGlobalVar+.
 \ed
 
 \item\lex{LoadLocalVar}
 \protect \large \begin{verbatim}
-LoadLocalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+LoadLocalVar[name->TEXT, var->T] =: T
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Loads a variable from memory that was previously saved with 
 \verb+SaveLocalVar+. 
-\item [See also:] \verb+SaveLocalVar+.
+\item [See also:] \verb+ExistsLocalVar+, \verb+SaveLocalVar+.
 \ed
 
 \item\lex{LoadNfg}
@@ -5469,7 +5483,7 @@ Manual[x->TEXT, {y->(Output)}] =: BOOLEAN
 
 \bd 
 Prints the manual entry for the function \verb+x+.  If there is no
-entry for \verb+x+, the empty string is returned. The parameter
+entry for \verb+x+, no output is generated. The parameter
 \verb+y+, which is the null output by default, can be used to print
 the manual entry to an output stream.
 \item [See also:] \verb+Help+, \verb+HelpVars+.
@@ -5489,20 +5503,6 @@ if \verb+node+ was marked as a subgame (i.e., if it is the root of a subgame).
 \ed
 
 
-%\item\lex{MarkSubgames}
-%\protect \large \begin{verbatim}
-%#MarkSubgames[efg->EFG(T)] =: LIST(NODE)
-%\end{verbatim} \normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL} 
-
-%\bd 
-%Marks all the nodes in \verb+efg+ which are roots of subgames.  The
-%subgame marking is used in solution computation. Returns a list of the
-%marked nodes. 
-%\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
-%\ed
-
 \item\lex{MarkedSubgame}
 \protect \large \begin{verbatim}
 MarkedSubgame[node->NODE] =: BOOLEAN 
@@ -5513,17 +5513,6 @@ Returns \verb+True+ if \verb+node+ is currently marked as a subgame.
 \item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
 \ed
 
-%\item\lex{MarkedSubgames}
-%\protect \large \begin{verbatim}
-%#MarkedSubgames[efg->EFG(T)] =: LIST(NODE)
-%\end{verbatim} \normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Returns the list of nodes currently marked as roots of subgames in
-%\verb+efg+.  
-%\item [See also:] \verb+MarkSubgame+, \verb+Subgames+, \verb+UnmarkSubgame+.
-%\ed
 
 \item\lex{Members}
 \protect \large \begin{verbatim}
@@ -5552,7 +5541,6 @@ same extensive form game.  \verb+infoset1+ is returned.
 
 \item 
 \protect \large \begin{verbatim}
-Minus[x->INTEGER, y->INTEGER] =: INTEGER 
 Minus[x->NUMBER, y->NUMBER] =: NUMBER 
 Minus[x->MIXED, y->MIXED] =: MIXED 
 Minus[x->BEHAV, y->BEHAV] =: BEHAV 
@@ -5575,19 +5563,7 @@ probabilites for each strategy in the support.
 \item [See also:] \verb+Behav+, \verb+Centroid+.
 \ed
 
-%\item\lex{Mixed}
-%\protect \large \begin{verbatim}
-%Mixed[profile->BEHAV(T)] =: MIXED(T)
-%\end{verbatim}\normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Converts \verb+profile+ to the equivalent mixed strategy profile on the
-%associated normal form game.  It is an error if there is no associated
-%normal form game.
-%\item [See also:] \verb+Behav+.
-%\ed
-
+\marginpar{Didn't we used to have {\tt Mixed[BEHAV]}?}
 \item\lex{Modulus}
 \protect \large \begin{verbatim}
 Modulus[x->INTEGER, y->INTEGER] =: INTEGER 
@@ -5634,11 +5610,11 @@ form game.
 
 \item\lex{Name}
 \protect \large \begin{verbatim}
-Name[x->T] =: TEXT
+Name[x->T*] =: TEXT
 \end{verbatim}\normalsize
 
-{\it for} {\tt T = ACTION*, EFG*, EFOUTCOME*, EFPLAYER*, INFOSET*,
-NFG*, NFOUTCOME*, NFPLAYER*, NODE*, STRATEGY*} 
+{\it for} {\tt T = ACTION, EFG, EFOUTCOME, EFPLAYER, INFOSET,
+NFG, NFOUTCOME, NFPLAYER, NODE, STRATEGY} 
 \bd
 Returns the name of \verb+x+.  The name of a null object is defined
 to be the empty string.
@@ -5648,7 +5624,6 @@ to be the empty string.
 
 \item\lex{Negate} 
 \protect \large \begin{verbatim}
-Negate[x->INTEGER] =: INTEGER 
 Negate[x->NUMBER] =: NUMBER 
 \end{verbatim} \normalsize
 
@@ -5706,19 +5681,6 @@ Creates a new normal form game with dimensionality \verb+dim+.  No
 initialization of the payoffs of the game is done.  Returns the newly
 created game.  
 \ed
-
-%\item\lex{NewNfg}
-%\protect \large \begin{verbatim}
-%NewNfg[payoffs->NLIST(T)] =: NFG(T) 
-%\end{verbatim}\normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL} 
-%\bd 
-%Creates an \verb+n+ person normal form game from a \verb&n+1&
-%dimensional nested list of payoffs.  It is an error if the array of payoffs
-%is not rectangular.  Returns the newly created game.
-%\item [See also:] \verb+ListForm+
-%\ed
 
 \item\lex{NewOutcome}
 \protect \large \begin{verbatim} 
@@ -5824,17 +5786,27 @@ Not[x->BOOLEAN] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-Returns the boolean inverse of \verb+x+.
+Returns the boolean inverse of \verb+x+, according to the truth table:
+\begin{center}
+\begin{tabular}{|c|c|}  \hline
+\verb+x+ & \verb+Not[x]+ \\ \hline
+\verb+True+ & \verb+False+ \\
+\verb+False+ & \verb+True+ \\
+\verb+Unknown+ & \verb+Unknown+ \\ \hline
+\end{tabular}
+\end{center}
+
 \item [Short forms:] \verb+NOT x+, \verb+!x+.
 \item [See also:] \verb+And+, \verb+Or+.
 \ed
 
 \item\lex{NotEqual}
 \protect \large \begin{verbatim}
-NotEqual[x->T, y->T] =: BOOLEAN
+NotEqual[x->T*, y->T*] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
+\marginpar{Check for null implementation}
 \bd
 Returns \verb+True+ when the values of \verb+x+ and \verb+y+ are
 not equal.
@@ -5872,10 +5844,11 @@ than the number of children of \verb+node+.
 
 \item\lex{NthElement}
 \protect \large \begin{verbatim}
-NthElement[list<->NLIST(ANYTYPE*), n->INTEGER] =: ANYTYPE 
+NthElement[list<->NLIST(T*), n->INTEGER] =: T 
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
+\marginpar{Check for null implementation}
 \bd
 Returns the \verb+n+th element of \verb+list+.
 By convention, the first element of a list is indexed by 1.
@@ -5887,19 +5860,20 @@ than the number of elements in \verb+list+.
 
 \item\lex{Null}
 \protect \large \begin{verbatim}
-Null[x->ANYTYPE] =: ANYTYPE* 
+Null[x->T] =: T*
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns a null object of type \verb+T+.  
 \ed
 
 \item\lex{Number}
 \protect \large \begin{verbatim}
-Number[x->INTEGER] =: NUMBER 
 Number[x->NUMBER] =: NUMBER 
 \end{verbatim} \normalsize
 
+\marginpar{Name?}
 \bd
 Converts \verb+x+ into a value of type \verb+NUMBER+.
 \item [See also:] \verb+Float+, \verb+Number+.
@@ -5941,7 +5915,16 @@ Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 \end{verbatim} \normalsize
   
 \bd
-Returns the disjunction of \verb+x+ and \verb+y+.
+Returns the disjunction of \verb+x+ and \verb+y+, according to the truth
+table:
+\begin{center}
+\begin{tabular} {|c||c|c|c|} \hline
+& \verb+True+ & \verb+False+ & \verb+Unknown+ \\ \hline 
+\verb+True+ & \verb+True+ & \verb+True+ & \verb+True+ \\
+\verb+False+ & \verb+True+ & \verb+False+ & \verb+Unknown+ \\
+\verb+Unknown+ & \verb+True+ & \verb+Unknown+ & \verb+Unknown+ \\ \hline
+\end{tabular}
+\end{center}
 \item
 [Short form:] \verb+x || y+, \verb+x OR y+.
 \item [See also:] \verb+And+, \verb+Or+.
@@ -6018,9 +6001,10 @@ or if \verb+node+ is null, the null node is returned.
 
 \item\lex{Parentheses}
 \protect \large \begin{verbatim}
-Parentheses[x->ANYTYPE] =: ANYTYPE 
+Parentheses[x->T] =: T 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Returns the value passed in \verb+x+.  This is used to control
 the order of evaluation of expressions.
@@ -6031,7 +6015,7 @@ the order of evaluation of expressions.
 \protect \large \begin{verbatim}
 Payoff[outcome->EFOUTCOME, player->EFPLAYER] =: NUMBER 
 \end{verbatim}\normalsize
-
+\marginpar{Nulls?}
 \bd
 Returns the payoff to \verb+player+ at \verb+outcome+.  It is an error if
 \verb+player+ and \verb+outcome+ are not from the same extensive form game.
@@ -6126,15 +6110,18 @@ Returns the list of players defined on \verb+nfg+.
 
 \item\lex{Plus} 
 \protect \large \begin{verbatim}
-Plus[x->T, y->T] =: T
+Plus[x->NUMBER, y->NUMBER] =: NUMBER
+Plus[x->MIXED, y->MIXED] =: MIXED
+Plus[x->BEHAV, y->BEHAV] =: BEHAV
 \end{verbatim} \normalsize
 
-{\it for} {\tt T = NUMBER, INTEGER, MIXED, BEHAV}
 \bd
 Returns the sum of \verb+x+ and \verb+y+.
 \item [Short form:] \verb%x + y%
 \item [See also:] \verb+Divide+, \verb+Minus+, \verb+Times+.
 \ed
+
+\marginpar{Insert {\tt PolEnumSolve}}
 
 \item\lex{Power}
 \protect \large \begin{verbatim}
@@ -6147,12 +6134,22 @@ Computes the value $x^{y}$.
 \item [See also:] \verb+Exp+, \verb+Log+.
 \ed
 
-\item\lex{Print}
+\item\lex{Precision}
 \protect \large \begin{verbatim}
-Print[x->ANYTYPE*] =: ANYTYPE 
-Print[x->NLIST(ANYTYPE*)] =: NLIST(ANYTYPE) 
+Precision[x->NUMBER] =: PRECISION
 \end{verbatim} \normalsize
 
+\bd
+Returns the precision of \verb+x+.
+\ed
+
+\item\lex{Print}
+\protect \large \begin{verbatim}
+Print[x->T*] =: T 
+Print[x->NLIST(T*)] =: NLIST(T) 
+\end{verbatim} \normalsize
+
+{\it for all types} {\tt T}
 \bd
 Prints \verb+x+ at the console.  When relevant, the output is
 formatted according to the current settings determined by the
@@ -6186,15 +6183,14 @@ no prior sibling, the null node is returned.
 
 %--Q--
 
-
 \item\lex{Quit}
 \protect \large \begin{verbatim}
-*Quit
+*Quit[]
 \end{verbatim}\normalsize
 
 \bd
 Exits the command language.  
-\item [notes:] Special function:  Typed without \verb+[ ]+, not
+\item [Notes:] Special function. The brackets \verb+[]+ are optional; not
 listable; not documented in \verb+Help+ or \verb+Manual+.  
 \ed
 
@@ -6202,9 +6198,10 @@ listable; not documented in \verb+Help+ or \verb+Manual+.
 
 \item\lex{Randomize}
 \protect \large \begin{verbatim}
-Randomize[x->INTEGER, {seed->0}] =: INTEGER 
+Randomize[x->NUMBER, {seed->0}] =: NUMBER
 \end{verbatim}\normalsize
 
+\marginpar{Change to uniform on $[0,1]$}
 \bd 
 Returns a random number of type \verb+INTEGER+.  The return value
 is uniform between 1 and \verb+MAXINT=214748367+.  
@@ -6213,9 +6210,10 @@ is uniform between 1 and \verb+MAXINT=214748367+.
 \item\lex{Read}
 \protect \large \begin{verbatim}
 Read[input<->INPUT, x<->T] =: INPUT 
+Read[input<->INPUT, x<->LIST(T)] =: INPUT
 \end{verbatim}\normalsize
 
-{\it for} {\tt T = BOOLEAN, INTEGER, NUMBER, TEXT, LIST}
+{\it for} {\tt T = BOOLEAN, INTEGER, NUMBER, TEXT}
 \bd
 Reads data of type \verb+T+ from the input stream and assigns it to
 \verb+x+.  If \verb+x+ is undefined, an error is generated.  If
@@ -6311,9 +6309,10 @@ Returns a nested list of the regrets generated for each strategy by
 
 \item\lex{Remove}
 \protect \large \begin{verbatim}
-Remove[list->NLIST(ANYTYPE), n->INTEGER] =: LIST(ANYTYPE) 
+Remove[list->NLIST(T), n->INTEGER] =: LIST(T) 
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Removes the \verb+n+th element from \verb+list+.  A copy of the list
 with the element removed is returned.  It is an error if \verb+n+
@@ -6325,7 +6324,7 @@ is nonpositive, or if \verb+n+ is greater than the length of \verb+list+.
 \protect \large \begin{verbatim}
 RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
 \end{verbatim}\normalsize
-
+\marginpar{Should work for {\tt EFBASIS} as well}
 \bd
 Removes \verb+action+ from \verb+support+.  If \verb+action+ is
 not in \verb+support+, there is no effect.  A copy of the modified
@@ -6384,9 +6383,10 @@ if \verb+file+ cannot be opened for writing.  Returns \verb+efg+.
 
 \item\lex{SaveGlobalVar}
 \protect \large \begin{verbatim}
-SaveGlobalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+SaveGlobalVar[name->TEXT, var->T] =: T
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
 text string to identify it so it can later be retrieved with
@@ -6394,21 +6394,24 @@ text string to identify it so it can later be retrieved with
 retreived outside of the function in which they are saved.  So this
 function can be used to create variables that are shared in common by
 user defined functions.   
-\item [See also:] \verb+LoadGlobalVar+, \verb+SaveLocalVar+.
+\item [See also:] \verb+ExistsGlobalVar+, \verb+LoadGlobalVar+,
+\verb+SaveLocalVar+.
 \ed
 
 \item\lex{SaveLocalVar}
 \protect \large \begin{verbatim}
-SaveLocalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+SaveLocalVar[name->TEXT, var->T] =: T
 \end{verbatim}\normalsize
 
+{\it for all types} {\tt T}
 \bd
 Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
 text string to identify it so it can later be retrieved with
 \verb+LoadLocalVar+.  Variables saved with this function can only be
 retrieved in the scope in which they are saved.  So this function can
 be used to create ``static'' variables within a user defined function.   
-\item [See also:] \verb+LoadLocalVar+, \verb+SaveGlobalVar+.
+\item [See also:] \verb+ExistsLocalVar+, \verb+LoadLocalVar+,
+\verb+SaveGlobalVar+.
 \ed
 
 \item\lex{SaveNfg}
@@ -6421,6 +6424,9 @@ Writes \verb+nfg+ to an external savefile \verb+file+.  It is an
 error if \verb+file+ cannot be opened for writing.  Returns \verb+nfg+.
 \item [See also:] \verb+LoadNfg+.
 \ed
+
+\marginpar{Put in {\tt SeqEquilibSolve}}
+\marginpar{Put in {\tt SetActionProb}}
 
 \item\lex{SetActionProbs}
 \protect \large \begin{verbatim} 
@@ -6504,7 +6510,8 @@ for each player in the game.
 
 \item\lex{SetPayoff}
 \protect \large \begin{verbatim}
-SetPayoff[outcome->EFOUTCOME, player->EFPLAYER, payoff->NUMBER] =: EFOUTCOME 
+SetPayoff[outcome->EFOUTCOME, player->EFPLAYER,
+          payoff->NUMBER] =: EFOUTCOME 
 \end{verbatim}\normalsize
 
 \bd
@@ -6544,7 +6551,7 @@ support of \verb+profile+.  Returns \verb+profile+.
 
 \item\lex{Shell}
 \protect \large \begin{verbatim}
-Shell[{command->}, {spawn->True}] =: INTEGER 
+Shell[{command->""}, {spawn->True}] =: INTEGER 
 \end{verbatim} \normalsize
 
 \bd
@@ -6613,10 +6620,10 @@ no output at all.
 
 \item\lex{Sort}
 \protect \large \begin{verbatim}
-Sort[x->LIST(T)] =: LIST(T)
+Sort[x->LIST(NUMBER)] =: LIST(NUMBER)
+Sort[x->LIST(TEXT)] =: LIST(TEXT)
 \end{verbatim} \normalsize
 
-{\it for} {\tt T = INTEGER, NUMBER, TEXT}
 \bd
 Returns a list consisting of the elements of \verb+x+ sorted in
 increasing order.
@@ -6624,11 +6631,11 @@ increasing order.
 
 \item\lex{Sort}
 \protect \large \begin{verbatim}
-Sort[x->LIST(T), by->LIST(X)] =: LIST(T)
+Sort[x->LIST(T), by->LIST(NUMBER)] =: LIST(T)
+Sort[x->LIST(T), by->LIST(TEXT)] =: LIST(T)
 \end{verbatim} \normalsize
 
-{\it for all types} {\tt T}, {\it for} {\tt X = INTEGER, NUMBER,
-TEXT}
+{\it for all types} {\tt T}
 \bd
 Returns a list consisting of the elements of \verb+list+, sorted
 according to the ordering of the elements of \verb+by+.  It is an
@@ -6706,9 +6713,10 @@ strategy set including \verb+strategy+) of choosing \verb+strategy+ when
 all players are following \verb+profile+.  It is an error if
 \verb+profile+ and \verb+strategy+ are not from the same normal form
 game.
-
 \item [See also:] \verb+StrategyProb+. 
 \ed
+
+\marginpar{Add {\tt StrategyValues}}
 
 \item\lex{Subgames}
 \protect \large \begin{verbatim}
@@ -6760,7 +6768,6 @@ Returns the support on which \verb+profile+ is defined.
 
 \item\lex{Text}
 \protect \large \begin{verbatim}
-Text[x->INTEGER] =: TEXT 
 Text[x->NUMBER] =: TEXT 
 Text[x->TEXT] =: TEXT 
 \end{verbatim} \normalsize
@@ -6771,7 +6778,6 @@ Converts \verb+x+ into a text string.
 
 \item\lex{Times} 
 \protect \large \begin{verbatim}
-Times[x->INTEGER, y->INTEGER] =: INTEGER 
 Times[x->NUMBER, y->NUMBER] =: NUMBER 
 \end{verbatim} \normalsize
 
@@ -6815,7 +6821,7 @@ UnAssign[name->TEXT] =: BOOLEAN
 Undefines the variable with name \verb+name+.  Returns 
 \verb+True+ if the variable was defined, and \verb+False+ if the
 variable was not defined, at the time of the call.
-\item [Short form:] \verb+x :=
+\item [Short form:] \verb+x := +
 \item [Note:] For the short form, quotes around \verb+name+ are not
 required, and the function is not listable.
 \item [See also:] \verb+Assign+, \verb+Clear+.
@@ -6835,18 +6841,6 @@ the \verb+node+.
 \verb+Subgames+.
 \ed
 
-%\item\lex{UnmarkSubgames}
-%\protect \large \begin{verbatim}
-%#UnmarkSubgames[efg<->EFG] =: LIST(NODE) 
-%\end{verbatim}\normalsize
-
-%\bd 
-%Unmarks all non trivial subgames in \verb+efg+.  Returns a list of
-%roots of currently marked subgames, which will be a singleton list
-%containing the root node of \verb+efg+ if the function is successful.
-%\item [See also:] \verb+MarkSubgame+, \verb+MarkedSubgames+,
-%\verb+Subgames+.
-%\ed
 
 \item\lex{UnSetEnv}
 \protect \large \begin{verbatim}
@@ -6854,8 +6848,8 @@ UnSetEnv[name->TEXT] =: BOOLEAN
 \end{verbatim} \normalsize
 
 \bd
-Un sets the environment variable \verb+name+.
-\item [See also:] \verb+SetEnv+, \verb+GetEnv+.
+Unsets the environment variable \verb+name+.
+\item [See also:] \verb+GetEnv+, \verb+SetEnv+.
 \ed
 
 %--V--
@@ -6868,6 +6862,8 @@ Version[] =: NUMBER
 \bd
 Returns the version number of the command language.
 \ed
+
+\marginpar{Add {\tt VertEnum}}
 
 %--W--
 
@@ -6888,15 +6884,15 @@ data types; not documented in \verb+Help+ or \verb+Manual+.
 \item\lex{Write}
 \protect \large \begin{verbatim}
 Write[output<->OUTPUT, x->T] =: OUTPUT  
+Write[output<->OUTPUT, x->LIST(T)] =: OUTPUT
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = BEHAV, BOOLEAN, EFG, EFSUPPORT, INTEGER,
-NFG, NFSUPPORT, MIXED, NUMBER, STRATEGY, TEXT, LIST}
+NFG, NFSUPPORT, MIXED, NUMBER, STRATEGY, TEXT}
 \bd
 Does a formatted write of \verb+x+ to \verb+output+.
 \item [Short form:] \verb+output << x+
-\item [See also:] \verb+Output+, \verb+Read+, \verb+ListFormat+,
-\verb+Format+.
+\item [See also:] \verb+Format+, \verb+ListFormat+, \verb+Output+, \verb+Read+
 \ed
 
 %--X--
