@@ -70,7 +70,7 @@ template <class T> int EfgContIter<T>::NextContingency(void)
     
   while (true)   {
     if (pl == _frozen_pl && iset == _frozen_iset)  {
-      if (iset == 0)  {
+      if (iset == 1)  {
 	if (--pl == 0)   return 0;
 	iset = _efg->PlayerList()[pl]->NumInfosets();
       }
@@ -103,9 +103,9 @@ template <class T> const T &EfgContIter<T>::Payoff(int pl) const
   return _payoff[pl];
 }
 
-template <class T> void EfgContIter<T>::Dump(void) const
+template <class T> void EfgContIter<T>::Dump(gOutput &f) const
 {
-  _efgidx.Dump(gout);
+  _efgidx.Dump(f);
 }
 
 

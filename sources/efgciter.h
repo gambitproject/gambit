@@ -11,6 +11,8 @@
 
 #include "efg.h"
 
+template <class T> class EfgIter;
+
 //
 // N.B.: Currently, the contingency iterator only allows one information
 //       set to be "frozen".  This functionality will be expanded in the
@@ -48,7 +50,7 @@ template <class T> class EfgContIter    {
   
     const T &Payoff(int pl) const;
   
-    void Dump(void) const;
+    void Dump(gOutput &) const;
 };
 
 #endif   // NFGCITER_H
