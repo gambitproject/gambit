@@ -66,6 +66,34 @@ template <class T> bool Nfg<T>::IsConstSum(void) const
   return true;
 }
 
+template <class T> void Nfg<T>::MinPayoff(gArray<T> &minpay) const
+{
+  int index, pl;
+  
+  for (pl = 1; pl <= players.Length(); pl++)
+    minpay[pl] = payoffs[pl][0];
+  
+  for (index = 1; index < NumPayPerPlayer; index++)  {
+    for (pl = 1; pl <= players.Length(); pl++)
+      if (payoffs[pl][index] < minpay[pl])
+	minpay[pl] = payoffs[pl][index];
+  }
+}
+
+template <class T> void Nfg<T>::MaxPayoff(gArray<T> &maxpay) const
+{
+  int index, pl;
+
+  for (pl = 1; pl <= players.Length(); pl++)
+    maxpay[pl] = payoffs[pl][0];
+  
+  for (index = 1; index < NumPayPerPlayer; index++)  {
+    for (pl = 1; pl <= players.Length(); pl++)
+      if (payoffs[pl][index] > maxpay[pl])
+	maxpay[pl] = payoffs[pl][index];
+  }
+}
+
 template <class T> void Nfg<T>::SetPayoff(int pl, const gArray<int> &profile,
 					  const T &value)
 {

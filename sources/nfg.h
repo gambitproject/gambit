@@ -81,6 +81,8 @@ public:
   // returns the type of the nfg, DOUBLE or RATIONAL
   DataType Type(void) const;
   bool IsConstSum(void) const;
+  void MinPayoff(gArray<T> &values) const;
+  void MaxPayoff(gArray<T> &values) const;
 
   void WriteNfgFile(gOutput &) const;
 
