@@ -767,9 +767,206 @@ AFFECTS:  GCL; a
 STATUS:   CLOSED 9/9/1999 by TLT
 SEVERITY: CRUCIAL
 
+---------------
 
+ITEM 0036:  THE WEIRD ONE:  Same binary yields different results for different users.  
 
+DATE:     9/24/1999 by RDM
+AFFECTS:  GUI
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
 
+Load poker.nfg and solve for One Nash Float, using standard solution
+dialog. It brings up a dialog "An internal error occurred in
+Gambit. Bad index in gArray", and does not display the solution
+inspect dialog. On the other hand, it has evidently solved the game
+OK, since the solution is displayed in the Normal form window.
+
+This is a weird problem that does not always occur.  It first occurred
+for me(RDM), and Ted could not reproduce.  Then we both tried running
+simultaneously using the same binary, and it still occurred for me,
+but not for Ted.  Ted was finally able to reproduce the problem.  It
+required him launching in a particular manner.  As I recall it was to
+to to direcory of executable, and then load the file from the command
+line:
+
+  gui_motif_Linux ../nfg/poker.nfg &
+
+Here is some correspondence with further info on the problem. 
+
+On Tue, 14 Sep 1999, Richard D. McKelvey wrote:
+
+> Ted
+> 
+> I compiled the binary in ~rdm/gambit/debug/gambit/sources/gui_motif_Linux 
+> 
+> The problem occurs for poker.nfg when you use the standard solutions, with
+> OneNashFloat.  Here is a function stack.  
+> 
+> I tried various other games, and solving the same game via the custom
+> algorithms, and think that it is related to dominance elimination.  If 
+> you solve the game via Lp without any dominance elimination, then it
+> works fine.  But if you use iterative dominance elimination, then it
+> gives this problem.  Once it has given the problem, any other attempt
+> to solve the problem will result in the exception being thrown again.  
+> So evidently something bad is being put into the solution inspect
+> window.  
+> 
+> Possibly this is an algorithm problem.  On the other hand, it displays the
+> correct solution values on the normal form. So it is evidently solving it.
+> 
+> Here is a stack trace. 
+> 
+> Breakpoint 1, 0x402d6a40 in __throw ()
+> (gdb) bt
+> #0  0x402d6a40 in __throw ()
+> #1  0x80542db in gArray<Strategy *>::operator[] (this=0x852349c, index=3) at garray.h:75
+> #2  0x81a76dd in NfgSolnShow::UpdateValues (this=0x8543fc8) at nfgsoln.cc:653
+> #3  0x81a7efd in NfgSolnShow::SortFilter (this=0x8543fc8, inter=false) at nfgsoln.cc:754
+> #4  0x81a600c in NfgSolnShow::NfgSolnShow (this=0x8543fc8, solns_=@0x853e388, num_players_=2, max_strats=4, cur_soln_=1, 
+>     ds=@0x853e3f4, sf_options_=@0x853e400, parent_=0x853e318, parent_frame=0x8544d70, opts=23) at nfgsoln.cc:281
+> #5  0x819d0b0 in NfgShow::InspectSolutions (this=0x853e318, what=0) at nfgshow.cc:472
+> #6  0x819dd33 in NfgShow::SolveStandard (this=0x853e318) at nfgshow.cc:677
+> #7  0x81a3760 in NormalSpread::OnMenuCommand (this=0x8544d70, id=145) at nfgshow.cc:1965
+> #8  0x826d863 in wxMenuItemCallback () at dlsupport.cc:294
+> #9  0x4026eb24 in XtCallCallbackList ()
+> #10 0x4013ccb5 in XmCreatePushButton ()
+> #11 0x4013e6bb in XmCreatePushButton ()
+> #12 0x4013c293 in XmCreatePushButton ()
+> #13 0x40119b35 in _XmDispatchGadgetInput ()
+> #14 0x401bd3a9 in _XmMenuBtnUp ()
+> #15 0x4029be9b in HandleActions ()
+> #16 0x4029c379 in HandleSimpleState ()
+> #17 0x4029c8c1 in _XtTranslateEvent ()
+> #18 0x40279cbf in XtDispatchEventToWidget ()
+> #19 0x4027a6fd in _XtDefaultDispatcher ()
+> #20 0x4027a975 in XtDispatchEvent ()
+> #21 0x823f2c1 in wxApp::MainLoop () at dlsupport.cc:294
+> #22 0x823f038 in wxEntry () at dlsupport.cc:294
+> #23 0x823f474 in main () at dlsupport.cc:294
+
+---------------
+
+ITEM 0037:  Short form for NthChar[] not enabled
+
+DATE:     9/24/1999 by RDM
+AFFECTS:  GCL
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Documentation claims x_n is short form for NthChar[x,n].  However, 
+
+  GCL1:= << x:="12345"
+  12345
+  GCL2:= << x_2
+  ERROR: NthElement[] called with ambiguous parameter(s)
+  GCL3:= << Help["nthelement"]
+  { NthElement[list<->NLIST(ANYTYPE), n->INTEGER] =: ANYTYPE,
+    NthElement[s<->NFSUPPORT, n->NUMBER] =: LIST(STRATEGY), 
+    NthElement[s<->EFSUPPORT, n->NUMBER] =: LIST(ACTION) }
+
+Evidently, x_n is only recognized as short form for NthElement.  The
+error message claims ambiguity.  However, the ambiguity is *resolved*
+by adding another signature:
+
+  GCL4:= << NewFunction[NthElement[x->TEXT,n->NUMBER]=:TEXT,NthChar[x,n];];
+  True
+  GCL5:= << x_2                                                            
+  2
+
+---------------
+
+ITEM 0038:  AllSubgamePerfect[] fails on Nim.  
+
+DATE:     9/24/1999 by RDM
+AFFECTS:  GCL
+STATUS:   OPEN
+SEVERITY: CRUCIAL
+DETAILS:
+
+Problem is not in the UDF.  Here is problem without going through AllSubgamePerfect:
+
+  GCL1:= << e:=LoadEfg["../efg/e10.efg"]
+  (Efg) "Nim with 5 stones"
+  GCL2:= MarkSubgames[e]
+  GCL3:= << b:=EnumMixedSolve[Support[e],asNfg->True]
+  In function EnumMixedSolve[], in file "console" at line 3:
+  EXCEPTION: Bad index in gArray
+
+Here is a stack trace:
+
+  Breakpoint 1, 0x4003ba40 in __throw ()
+  Current language:  auto; currently c
+
+  (gdb) bt
+  #0  0x4003ba40 in __throw ()
+  #1  0x817d8b6 in gArray<Strategy *>::operator[] (this=0x850b3dc, index=1) at garray.h:75
+  #2  0x81794cd in StrategyProfile::StrategyProfile (this=0xbfffe864, N=@0x850c910) at nfstrat.cc:20
+  #3  0x817ce72 in NfgContIter::NfgContIter (this=0xbfffe834, s=@0xbfffe898) at nfgciter.imp:17
+  #4  0x81ca3a6 in MakeReducedNfg (support=@0xbfffeb68) at efgnfg.cc:139
+  #5  0x8283bf3 in EnumBySubgame::SolveSubgame (this=0xbffff360, E=@0xbfffeb2c, sup=@0xbfffeb68, solns=@0xbfffec54)
+      at enumsub.cc:12
+  #6  0x825dc85 in SubgameSolver::FindSubgames (this=0xbffff360, p_support=@0xbffff294, n=0x8505ee0, solns=@0xbfffef18, 
+      values=@0xbfffef00) at subsolve.cc:130
+  #7  0x825d21a in SubgameSolver::FindSubgames (this=0xbffff360, p_support=@0xbffff294, n=0x8505dc0, solns=@0xbffff1ac, 
+      values=@0xbffff194) at subsolve.cc:39
+  #8  0x825d21a in SubgameSolver::FindSubgames (this=0xbffff360, p_support=@0xbffff294, n=0x8505d60, solns=@0xbffff378, 
+      values=@0xbffff30c) at subsolve.cc:39
+  #9  0x825f05d in SubgameSolver::Solve (this=0xbffff360, p_support=@0x8504460) at subsolve.cc:282
+  #10 0x8283f1d in Enum (support=@0x8504460, params=@0xbffff444, solutions=@0xbffff420, npivots=@0xbffff414, time=@0xbffff418)
+      at enumsub.cc:44
+  #11 0x82dee22 in GSM_EnumMixed_Efg (param=0x85021d8) at algfunc.cc:215
+  #12 0x8293bdc in CallFuncObj::CallNormalFunction (this=0xbffff828, gsm=0x8493910, param=0x85021d8) at gsmfunc.cc:1051
+  #13 0x8298e74 in CallFuncObj::CallFunction (this=0xbffff828, gsm=0x8493910, param=0x8502270) at gsmfunc.cc:1645
+  #14 0x82b8efa in gclFunctionCall::Evaluate (this=0x84fa4f8) at gsminstr.cc:263
+  #15 0x82b9362 in gclAssignment::Evaluate (this=0x84fc940) at gsminstr.cc:304
+  #16 0x82b8b4a in gclFunctionCall::Evaluate (this=0x84fb778) at gsminstr.cc:230
+  #17 0x82b9362 in gclAssignment::Evaluate (this=0x84fb940) at gsminstr.cc:304
+  #18 0x828962d in GSM::Execute (this=0x8493910, expr=0x84fb940) at gsm.cc:559
+  #19 0x83058f3 in GCLCompiler::Execute (this=0xbffffaa4) at gcompile.yy:836
+  #20 0x83041d0 in GCLCompiler::Parse (this=0xbffffaa4, line=@0xbffffa5c, file=@0xbffffa58, lineno=3, rawline=@0xbffffa54)
+      at gcompile.yy:691
+  #21 0x8312615 in main (argv=0xbffffb94) at gcl.cc:174
+
+---------------
+
+ITEM 0039:  No way to access Liap and QRE by subsupports.  
+
+DATE:     9/24/1999 by RDM
+AFFECTS:  GUI
+STATUS:   OPEN
+SEVERITY: MAJOR
+DETAILS:
+
+From e-mail exchange around Aug 21 RDM/TED
+
+> > If I 
+> > remember correctly, they *do* compute on subsupports, which are drawn from
+> > the profile they are passed.  However, starting profiles generated by the
+> > GCL will never have non-full support (since they are Solutions).
+> 
+> You are right in that these algorithms do take starting profiles, and use
+> their support.  I gather that this is used (at least for Liap) when
+> solving by subgames.  
+> 
+> So does your observation above mean that there is no way of accessing
+> these algorithms on a sub-support via the GCL?  
+
+Yes
+
+> Perhaps we should remedy this.  We could use the m_support parameter of
+> the solutions to fake this (i. e., construct a profile from the solution
+> on the smaller support, and then pass this on to the algorithm as the
+> starting point.  
+
+I think a simpler solution than the one you propose is to add a support
+parameter back to these algorithms.  We used to have one before, but
+removed it since it was redundant.  Creating a MixedProfile<double>
+or BehavProfile<double> from a Solution is not difficult; we can just
+create one on the desired subsupport, then use the () operator to
+fill it in appropriately.
 
 
 
