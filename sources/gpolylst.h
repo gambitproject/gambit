@@ -101,9 +101,9 @@ class index_pair {
   index_pair(const int&, const int&);
   ~index_pair();
 
-  operator == (const index_pair&) const;
-  operator != (const index_pair&) const;
-  operator [] (const int&) const; 
+  bool operator == (const index_pair&) const;
+  bool operator != (const index_pair&) const;
+  int operator [] (const int&) const; 
 
 friend gOutput& operator << (gOutput& output, const index_pair& x);  
 };

@@ -1,7 +1,7 @@
 //
 // File: ideal.cc  
 //        -- Instantiations of classes gBasis and gIdeal
-// $Id$ 
+// @(#)gpolylst.cc	1.1 1/7/98 
 //
 
 #include "gpolylst.imp"
