@@ -560,7 +560,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     
             // Word gets the word, which is the type of variable.
           word = ch;
-          int     listNum = 0;
+          /*int     listNum = 0;*/
           ch=s[index++];
           while (isalpha(ch)) { word += ch; ch = s[index++]; }
     
@@ -602,9 +602,30 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   gString word = ch;
   ch=s[index++];
   while (isalpha(ch)) { word += ch; ch = s[index++]; }
+  int     listNum = 0;
   
+  
+    // Check to see if it is a list
+  if (word == "LIST")
+  {
+    /*numArgs++;*/
+    while (word == "LIST")
+    {
+        // increment counter, and while it is a list, keep incrementing.
+      listNum++;
+      ch=s[index++];  // move ch past left parenthesis
+
+        // Word gets the word, which is the type of variable.
+      word = ch;
+      ch=s[index++];
+      while (isalpha(ch)) { word += ch; ch = s[index++]; }
+
+    }
+  }
+
     // Bunch of prints for debugging purposes.
   /*gout << "\nReturn Type: " << word << "\n";*/
+  /*gout << "Return listNum: " << listNum << "\n";*/
   /*gout << "SpecList: \n";*/
   /*specList.Dump(gout);*/
   /*gout << "NameList: \n";*/
@@ -622,65 +643,65 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   {
       ParamInfoType pit[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit));
   } else if (numArgs == 2) 
   {
       ParamInfoType pit2[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit2));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit2));
   } else if (numArgs == 3) 
   {
       ParamInfoType pit3[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit3));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit3));
   } else if (numArgs == 4) 
   {
       ParamInfoType pit4[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit4));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit4));
   } else if (numArgs == 5) 
   {
       ParamInfoType pit5[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4])),
-        ParamInfoType(nameList[5], ToSpec(specList[5]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4])),
+        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit5));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit5));
   } else if (numArgs == 6) 
   {
       ParamInfoType pit6[] =
       {
-        ParamInfoType(nameList[1], ToSpec(specList[1])),
-        ParamInfoType(nameList[2], ToSpec(specList[2])),
-        ParamInfoType(nameList[3], ToSpec(specList[3])),
-        ParamInfoType(nameList[4], ToSpec(specList[4])),
-        ParamInfoType(nameList[5], ToSpec(specList[5])),
-        ParamInfoType(nameList[6], ToSpec(specList[6]))
+        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1])),
+        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2])),
+        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3])),
+        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4])),
+        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5])),
+        ParamInfoType(nameList[6], ToSpec(specList[6], listList[6]))
       };
       SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word), numArgs, pit6));
+                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit6));
   } else
   {
       gout << "Hey, too many/few arguments.\n";
@@ -689,43 +710,42 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
 
 }
 
-
   // Replaces strings with their enumerated types.
-PortionSpec ToSpec(gString &str)
+PortionSpec ToSpec(gString &str, int num=0)
 {
-  gout << "ToSpec called with " << str << " for string\n";
+  /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
   if (str == "NUMBER")
-    return porNUMBER;
+    return PortionSpec(porNUMBER, num);
   else if (str == "BOOLEAN")
-    return porBOOL;
+    return PortionSpec(porBOOL, num);
   else if (str == "INTEGER")
-    return porINTEGER;
+    return PortionSpec(porINTEGER, num);
   else if (str == "TEXT")
-    return porTEXT;
+    return PortionSpec(porTEXT, num);
   else if (str == "EFG")
-    return porEFG;
+    return PortionSpec(porEFG, num);
   else if (str == "EFPLAYER")
-    return porEFPLAYER;
+    return PortionSpec(porEFPLAYER, num);
   else if (str == "EFOUTCOME")
-    return porEFOUTCOME;
+    return PortionSpec(porEFOUTCOME, num);
   else if (str == "NODE")
-    return porNODE;
+    return PortionSpec(porNODE, num);
   else if (str == "INFOSET")
-    return porINFOSET;
+    return PortionSpec(porINFOSET, num);
   else if (str == "BEHAV")
-    return porBEHAV;
+    return PortionSpec(porBEHAV, num);
   else if (str == "NFG")
-    return porNFG;
+    return PortionSpec(porNFG, num);
   else if (str == "NFPLAYER")
-    return porNFPLAYER;
+    return PortionSpec(porNFPLAYER, num);
   else if (str == "NFOUTCOME")
-    return porNFOUTCOME;
+    return PortionSpec(porNFOUTCOME, num);
   else if (str == "MIXED")
-    return porMIXED;
+    return PortionSpec(porMIXED, num);
   else if (str == "STRATEGY")
-    return porSTRATEGY;
+    return PortionSpec(porSTRATEGY, num);
   else if (str == "ACTION")
-    return porACTION;
+    return PortionSpec(porACTION, num);
   else
   {
     gout << "ERROR: incorrect type, " << str << ", in function definition\n\n";

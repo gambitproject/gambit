@@ -225,7 +225,7 @@ class CallFuncObj : public FuncDescObj
   void Dump(gOutput& f) const;
 };
 
-PortionSpec ToSpec(gString &str);
+PortionSpec ToSpec(gString &str, int num=0);
 
 
 #endif  // GSMFUNC_H
