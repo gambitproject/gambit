@@ -192,6 +192,9 @@ bool EFActionSet::operator==(const EFActionSet &s) const
 // Append an action to a particular infoset;
 void EFActionSet::AddAction(int iset, Action *s)
 { 
+  if (infosets[iset]->acts.Find(s))
+    return;
+
   if (infosets[iset]->acts.Length() == 0) {
     infosets[iset]->acts.Append(s); 
   }
@@ -207,7 +210,8 @@ void EFActionSet::AddAction(int iset, Action *s)
 // Insert an action  to a particular infoset at a particular place;
 void EFActionSet::AddAction(int iset, Action *s, int index)
 { 
-  infosets[iset]->acts.Insert(s,index); 
+  if (!infosets[iset]->acts.Find(s))
+    infosets[iset]->acts.Insert(s,index); 
 }
 
 // Remove an action from infoset iset at int i, 
