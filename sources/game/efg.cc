@@ -1609,6 +1609,17 @@ void FullEfg::MarkSubgames(const gList<Node *> &list)
   }
 }
 
+void FullEfg::MarkSubgames(void)
+{
+  gList<Node *> subgames;
+  LegalSubgameRoots(*this, subgames);
+
+  for (int i = 1; i <= subgames.Length(); i++)  {
+    subgames[i]->gameroot = 0;
+    MarkSubgame(subgames[i], subgames[i]);
+  }
+}
+
 void FullEfg::UnmarkSubgames(Node *n)
 {
   if (NumChildren(n) == 0)   return;

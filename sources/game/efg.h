@@ -301,6 +301,7 @@ namespace FullEfgNamespace {
     void InitPayoffs(void) const;
   
     bool IsLegalSubgame(Node *n);
+    void MarkSubgames(void);
     void MarkSubgames(const gList<Node *> &list);
     bool MarkSubgame(Node *n);
     void UnmarkSubgame(Node *n);
