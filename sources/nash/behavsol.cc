@@ -476,15 +476,6 @@ const gbtTriState &BehavSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
-BehavSolution BehavSolution::PolishEq(void) const
-{
-#ifdef UNUSED
-  bool is_singular = false;
-  return PolishEquilibrium(m_support,*this,is_singular);
-#endif // UNUSED
-  return *this;
-}
-
 const gbtTriState &BehavSolution::IsANFNash(void) const
 {
   CheckIsValid();

@@ -106,8 +106,6 @@ public:
   void Invalidate(void) const;
   void CheckIsValid(void) const {if(!IsValid()) Invalidate();}
   bool IsValid(void) const {return (m_revision == GetGame()->RevisionNumber());}
-  MixedSolution PolishEq() const;
-
   // FUNCTIONS FOR COMPATIBILITY WITH GUI
   // these are all obsolescent :)
   gbtNumber Payoff(int p_player) const { return m_profile.Payoff(p_player); }

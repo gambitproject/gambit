@@ -96,7 +96,6 @@ public:
   const gbtText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   gbtEfgSupport Support(void) const { CheckIsValid(); return m_support; }
   const gbtTriState &IsNash(void) const;
-  BehavSolution PolishEq(void) const;
   const gbtTriState &IsANFNash(void) const;
   const gbtTriState &IsSubgamePerfect(void) const;
   const gbtTriState &IsSequential(void) const;

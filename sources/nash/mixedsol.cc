@@ -317,12 +317,6 @@ const gbtTriState &MixedSolution::IsNash(void) const
   return m_Nash.Answer();
 }
 
-MixedSolution MixedSolution::PolishEq(void) const
-{
-  bool is_singular = false;
-  return PolishEquilibrium(m_support,*this,is_singular);
-}
-
 const gbtTriState &MixedSolution::IsPerfect(bool p_compute /*=false*/) const
 {
   CheckIsValid();
