@@ -117,9 +117,10 @@ http://www.hss.caltech.edu/~gambit/Gambit.html
 list of platforms supported can be obtained there.  Source code is
 also available at the same location. 
 
-After you have installed the GCL, you can start it by typing
-\verb+gcl+ at the command line prompt (on unix systems), or double
-clicking on its icon (on Windows systems).
+After you have installed the GCL, you can start it on unix systems by
+typing the name of the GCL executable file (usually \verb+gcl+) at the
+command line prompt.  On Windows systems, you can start it by double
+clicking on its icon.
 
 When the GCL starts, it first looks for the initialization file
 \verb+gclini.gcl+, which is a file containing GCL commands, including
@@ -129,10 +130,12 @@ will be issued.  Control is then turned over to you, and you will
 receive the GCL prompt
 
 \begin{verbatim}
-GCL1:
+GCL1: << 
 \end{verbatim}
 
-\noindent The interpreter is ready for your first command.
+\noindent The interpreter is ready for your first command.  Note that
+your prompt may be different from the above depending on settings in
+your \verb+gclini.gcl+ file.  
 
 
 \section{\rindex{Technical support} and \rindex{bug reports}}
@@ -338,7 +341,7 @@ The \verb+INTEGER+ type is implemented as the machine's long integer
 type, which is typically at least 32 bits in modern machines.  Thus,
 there is a danger of overflow or underflow in computations involving
 these numbers.  The largest legal integer is given by
-\verb+Maxint[]+\tindex{MaxInt}, and the smallest legal integer is
+\tindex{MaxInt}, and the smallest legal integer is
 \verb+-Maxint[]+.  Integer computations that exceed these limits are
 subject to truncation or wraparound, depending on the platform.
 
@@ -413,7 +416,7 @@ section.
 
 The \tindex{OUTPUT} type is a reference to an output stream, generally a
 file on disk.  Its principal use is as a logging file for writing
-formatting output from an extended command language job.  The
+formatted output from an extended command language job.  The
 constants \tindex{StdOut} and \tindex{NullOut} refer to the standard
 output stream (generally the console) and the null output stream (the
 garbage can), respectively.  New \verb+OUTPUT+ streams are created with the 
@@ -585,17 +588,14 @@ either type \verb+EFG(FLOAT)+ or \verb+EFG(RATIONAL)+.
 
 A GCL program consists of a series of statements.  A statement is
 typically an expression built up out of function calls.  A statement
-is terminated by a linefeed or by a semicolon.  The GCL interpreter
-reports the value of each expression evaluated unless the semicolon is
-present.  
-
-Statements can be entered interactively, at the command prompt, or can
-be entered from files, via the \verb+Include["filename"]+ directive
-(see the section on including files).  Statements can be continued for
-more than one line by using the continuation character, \verb+\+.
-Comments can be included in GCL statements by preceeding the comments
-with the characters \verb+//+.  Anything after the \verb+//+ and
-before a linefeed is ignored by the GCL interpreter.
+is terminated by a linefeed or by a semicolon.  Statements can be
+entered interactively, at the command prompt, or can be entered from
+files, via the \verb+Include["filename"]+ directive (see the section
+on including files).  Statements can be continued for more than one
+line by using the continuation character, \verb+\+.  Comments can be
+included in GCL statements by preceeding the comments with the
+characters \verb+//+.  Anything after the \verb+//+ and before a
+linefeed is ignored by the GCL interpreter.
 
 Some statements can lead to computations which may take a long time to
 complete.  A control-C, typed at the console, is used to halt
@@ -622,13 +622,14 @@ functions can either require arguments or not.  This leads to four
 combinations.  We label these as follows
 
 \medskip
-\begin{tabular} {l|ll} 
+\begin{tabular} {|l|ll|} 
 Description & Built-in & Parameters\\ 
 \hline
 Constant & Yes & No \\ 
 Built-In Function (BIF) & Yes & Yes \\ 
 Variable & No & No \\ 
 User Defined Function (UDF) & No & Yes \\ 
+\hline
 \end{tabular}
 
 \subsection{\rindex{Constants}}
@@ -640,7 +641,7 @@ data types is described in the section on data types.  Some examples
 of constants follow:
 
 \medskip
-\begin{tabular} {ll} 
+\begin{tabular} {|l|l|} 
 Data Type & Constant \\ 
 \hline
 \verb+BOOLEAN+  & \tindex{True},  \tindex{False} \\
@@ -649,6 +650,7 @@ Data Type & Constant \\
 \verb+TEXT+  & \verb+"Help"+ \\
 \verb+OUTPUT+  & \tindex{StdOut}, \tindex{NullOut} \\
 \verb+INPUT+  & \tindex{StdIn} \\
+\hline
 \end{tabular}
 \medskip
 
@@ -662,7 +664,7 @@ represents.
 You are now ready to write your first GCL program:
 
 \begin{verbatim}
-GCL1: "Help"
+GCL1: << "Help"
 "Help"
 \end{verbatim}
 
@@ -695,7 +697,7 @@ name \verb+x+ which returns the \verb+INTEGER+ \verb+1+, we can use
 \verb+Assign+ as follows:
 
 \begin{verbatim}
-GCL1: Assign["x",1]
+GCL1: << Assign["x",1]
 1
 \end{verbatim}
 
@@ -707,7 +709,7 @@ name, and the function is not ``listable'' (see the section on Lists,
 later in this chapter).  So, equivalently, and more compactly,
 
 \begin{verbatim}
-GCL1: x := 1
+GCL1: << x := 1
 1
 \end{verbatim}
 
@@ -996,7 +998,7 @@ function.
 \section{Aliases for function calls}\index{Short forms}
 
 There are several functions which are so commonly used that special
-``short'' forms are defined for them.  We already saw one example with
+``short forms'' are defined for them.  We already saw one example with
 the function \verb+Assign+, which has the short form \verb+:=+.  Most
 functions with short forms are the standard arithmetic and logic
 operators, for which the usual binary infix or unary prefix notations
@@ -1039,6 +1041,7 @@ Or[x,y]             x || y, x OR y
 Parentheses[x]      (x) 
 Plus[x,y]           x + y 
 Power[x,y]          x ^ y 
+Print[x]            << x
 Read[in,x]          in >> x 
 Times[x,y]          x * y 
 Write[out,x]        out << x 
@@ -1106,6 +1109,41 @@ Times[Plus[a,b],c]
 
 \medskip
 
+\section{Getting and suppressing console output}\index{Output!console}
+\index{Console output}
+
+The GCL will only print output at the console if you explicity ask for
+it with the built-in function \tindex+Print+.  This function has the
+prototype \verb+Print[x->T] =: T+ for any data type \verb+T+, and has
+the short form \verb+<< x+.  You may have noticed that the GCL prompt
+concludes with a \verb+<<+.  In fact, this is not part of the prompt,
+but rather is a ``pre typed'' part of your GCL command.  
+
+Once you have become accustomed to the GCL, you may prefer to supress
+output from some or all commands typed at the GCL command line.  The
+built-in function \tindex{SetVerbose} controls whether \verb+<<+ is
+pretyped at every prompt.  The command \verb+SetVerbose[False]+ will
+turn off this feature, so that your prompt will then look as
+follows:
+
+\begin{verbatim}
+GCL1: 
+\end{verbatim}
+
+Now, you can decide for yourself whether to get console output.  Now,
+if you start your command with \verb+<<+, then console output will be
+generated.  Otherwise, no console output will be generated.  For example
+
+\begin{verbatim}
+GCL1: 1+1
+GCL2: << 1+1
+2
+\end{verbatim}
+
+Note that error messages will be reported at the console regardless of
+the setting of the verbose mode.
+
+
 \section{\rindex{Lists}}
 
 \subsection{Building and modifying lists}\index{Lists!building}\index{Lists!modifying}
@@ -1122,13 +1160,13 @@ create a list of length \verb+n+ all of whose elements have the value
 allows each successive entry to be incremented.
 
 \begin{verbatim}
-GCL1: List["Help",3]
+GCL1: << List["Help",3]
 { "Help", "Help", "Help" }
-GCL2: List[List[0,3],3]
+GCL2: << List[List[0,3],3]
 { { 0, 0, 0 },
   { 0, 0, 0 },
   { 0, 0, 0 } }
-GCL3: List[0/1, 5, 1/4]
+GCL3: << List[0/1, 5, 1/4]
 { 0, 1/4, 1/2, 3/4, 1 }
 \end{verbatim}
 
@@ -1149,9 +1187,9 @@ Thus, you can constuct your own $3\times 3$ identity matrix as
 follows:
 
 \begin{verbatim}
-GCL1: list:=List[List[0,3],3];
+GCL1: list:=List[List[0,3],3]
 GCL2: list_1_1:=list_2_2:=list_3_3:=1;
-GCL3: list
+GCL3: << list
 { { 1, 0, 0 },
   { 0, 1, 0 },
   { 0, 0, 1 } }
@@ -1210,9 +1248,9 @@ add two conformable matrices:
 
 \begin{verbatim}
 GCL1: a:={{1,2},{3,4}};
-GCL2: 2*a
+GCL2: << 2*a
 {{2,4},{6,8}}
-GCL3: a+Transpose[a]
+GCL3: << a+Transpose[a]
 {{2,5},{5,8}}
 \end{verbatim}
 
@@ -1220,7 +1258,7 @@ Here listability of \verb+Power+ is used to create a list of the first
 ten perfect squares:
 
 \begin{verbatim}
-GCL4: List[1,10,1]^2
+GCL4: << List[1,10,1]^2
 { 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 }
 \end{verbatim}
 
@@ -1250,7 +1288,7 @@ prototype for a function name since GCL functions can be overloaded.)
 For example,
 
 \begin{verbatim}
-GCL1: Help["help"]
+GCL1: << Help["help"]
 { Help[x->TEXT, {udf->True}, {bif->True}] =: LIST(TEXT) }
 \end{verbatim}
 
@@ -1267,7 +1305,7 @@ case, if there is not an exact match, a list of function names
 matching \verb+x+ is returned.  For example, The command 
 
 \begin{verbatim}
-GCL1: Help["load*"]
+GCL1: << Help["load*"]
 { LoadEfg, LoadNfg }
 \end{verbatim}
 
@@ -1632,14 +1670,14 @@ before they work correctly.}
 \section{\rindex{Orphan variables} and memory management}
 
 One feature of the GCL which is not encountered in other computing
-environments is the notion of \bindex{orphan variables}.  In the GCL, you
+environments is the notion of ``orphan variables''.  In the GCL, you
 can create variables to represent objects which may be deleted or
 invalidated because of subsequent things you do. For example, suppose
 you define a variable to represent an element (node, information set,
 outcome, etc) of an extensive form game.  You may subsequently delete
 the part of the tree that contains that element.  The object that the
 variable originally referred to is no longer valid.  In such a case,
-we call the variable an \bindex{orphan variable}.
+we call the variable an {\bf orphan variable}.
 
 The basic rule in the GCL is that when a variable becomes an orphan,
 it is unassigned.  Thus, situations can arise when you have defined a
@@ -1652,11 +1690,11 @@ Now the part of the tree after the first branch is deleted, the
 variable \verb+n+ is now undefined:
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"];
-GCL2: r:=RootNode[e];
-GCL3:  n:=r#1#1;
-GCL4: DeleteTree[r#1];
-GCL5: n
+GCL1: e:=LoadEfg["poker.efg"]
+GCL2: r:=RootNode[e]
+GCL3: n:=r#1#1
+GCL4: DeleteTree[r#1]
+GCL5: << n
 (Reference) "n" (undefined)
 \end{verbatim}
 
@@ -1666,10 +1704,10 @@ refers to it must be deleted.  A similar situation occurs here if some
 element of a list becomes an orphan:
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"];
-GCL2: t:=TerminalNodes[e];
-GCL3: DeleteTree[RootNode[e]#1];
-GCL4: t
+GCL1: e:=LoadEfg["poker.efg"]
+GCL2: t:=TerminalNodes[e]
+GCL3: DeleteTree[RootNode[e]#1]
+GCL4: << t
 (Reference) "t" (undefined)
 \end{verbatim}
 
@@ -1686,11 +1724,11 @@ solutions.  In the following example, a solution to the game \verb+e+
 is saved as a variable \verb+b+ of type \verb+BEHAV+.  
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"];
-GCL2: b:=LcpSolve[e]_1
+GCL1: e:=LoadEfg["poker.efg"]
+GCL2: << b:=LcpSolve[e]_1
 (Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
-GCL3: DeleteTree[RootNode[e]#1];
-GCL4: b
+GCL3: DeleteTree[RootNode[e]#1]
+GCL4: << b
 (Reference) "b" (undefined)
 \end{verbatim}
 
@@ -1738,7 +1776,7 @@ The function \tindex{NewNfg} is used to create a new normal form game.
 Thus, the command
 
 \begin{verbatim}
-GCL1: NewNfg[{2,3,2}];
+GCL1: NewNfg[{2,3,2}]
 \end{verbatim}
 
 \noindent 
@@ -1763,7 +1801,7 @@ use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
 
 \begin{verbatim}
-GCL2: Randomize[NewNfg[{2,2}],7];
+GCL2: Randomize[NewNfg[{2,2}],7]
 \end{verbatim}  
 
 \noindent
@@ -1771,7 +1809,7 @@ You can look at the payoffs of the game by using the standard UDF,
 \tindex{Payoffs}:
 
 \begin{verbatim}
-GCL3: Payoffs[Randomize[NewNfg[{2,2}],7]]
+GCL3: << Payoffs[Randomize[NewNfg[{2,2}],7]]
 { { { 0.597056, 0.992785 }, { 0.331675, 0.977620 } },
   { { 0.299265, 0.102707 }, { 0.691973, 0.970182 } } }
 \end{verbatim}  
@@ -1783,7 +1821,7 @@ strategy \verb+i+ and player 2 takes strategy \verb+j+.  The game can
 be solved for all mixed nash equilibrium by
 
 \begin{verbatim}
-GCL4: EnumMixedSolve[Randomize[NewNfg[{2,2}],7]]
+GCL4: << EnumMixedSolve[Randomize[NewNfg[{2,2}],7]]
 { (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 },
   (Mixed) { 0.982819 0.017181 }{ 0.547492 0.452508 },
   (Mixed) { 0.000000 1.000000 }{ 0.000000 1.000000 } }
@@ -1828,13 +1866,13 @@ creating a normal form game of the correct dimension, and then
 modifying the payoffs one by one.  
 
 \begin{verbatim}
-GCL1: n:=NewNfg[{2,2}];
-GCL2: s:=Strategies[n];
-GCL3: SetPayoffs[{s_1_1,s_2_1},{9.0,9.0}];
-GCL4: SetPayoffs[{s_1_1,s_2_2},{0.0,10.0}];
-GCL5: SetPayoffs[{s_1_2,s_2_1},{10.0,0.0}];
-GCL6: SetPayoffs[{s_1_2,s_2_2},{1.0,1.0}];
-GCL7: Payoffs[n]
+GCL1: n:=NewNfg[{2,2}]
+GCL2: s:=Strategies[n]
+GCL3: SetPayoffs[{s_1_1,s_2_1},{9.0,9.0}]
+GCL4: SetPayoffs[{s_1_1,s_2_2},{0.0,10.0}]
+GCL5: SetPayoffs[{s_1_2,s_2_1},{10.0,0.0}]
+GCL6: SetPayoffs[{s_1_2,s_2_2},{1.0,1.0}]
+GCL7: << Payoffs[n]
 { { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
   { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
 \end{verbatim}
@@ -1844,8 +1882,8 @@ the standard UDF, \tindex{Nfg} to create the game directly from a payoff
 list:
 
 \begin{verbatim}
-GCL1: n:=Nfg[Float[{{{9,9},{0,10}},{{10,0},{1,1}}}]];
-GCL2: Payoffs[n]
+GCL1: n:=Nfg[Float[{{{9,9},{0,10}},{{10,0},{1,1}}}]]
+GCL2: << Payoffs[n]
 { { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
   { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
 \end{verbatim}
@@ -1856,10 +1894,10 @@ get a list of the strategies in the game, and \tindex{SetName} to name
 them.
 
 \begin{verbatim}
-GCL3: s:=Strategies[n];
-GCL4: SetName[s_1,{"Cooperate","Defect"}];
-GCL5: SetName[s_2,{"Cooperate","Defect"}];  
-GGCL6: Name[s]
+GCL3: s:=Strategies[n]
+GCL4: SetName[s_1,{"Cooperate","Defect"}]
+GCL5: SetName[s_2,{"Cooperate","Defect"}]
+GGCL6: << Name[s]
 { { Cooperate, Defect },
   { Cooperate, Defect } }
 \end{verbatim}
@@ -1870,28 +1908,28 @@ normal form according to a formula.  In this example, we create a
 version of the ``stag hunt'' game.
 
 \begin{verbatim}
-GCL1: strat:=List[1,3,1]
+GCL1: << strat:=List[1,3,1]
 { 1, 2, 3 }
-GCL2: stratSets:=List[strat,2]
+GCL2: << stratSets:=List[strat,2]
 { { 1, 2, 3 },
   { 1, 2, 3 } }
-GCL3: effort:=Float[CartesianProd[stratSets]] 
+GCL3: << effort:=Float[CartesianProd[stratSets]] 
 { { { 1.000, 1.000 }, { 1.000, 2.000 }, { 1.000, 3.000 } },
   { { 2.000, 1.000 }, { 2.000, 2.000 }, { 2.000, 3.000 } },
   { { 3.000, 1.000 }, { 3.000, 2.000 }, { 3.000, 3.000 } } }
-GCL4: pay:=Min[effort]-.5*effort
+GCL4: << pay:=Min[effort]-.5*effort
 { { { 0.500, 0.500 }, { 0.500, 0.000 }, { 0.500, -0.500 } },
   { { 0.000, 0.500 }, { 1.000, 1.000 }, { 1.000, 0.500 } },
   { { -0.500, 0.500 }, { 0.500, 1.000 }, { 1.500, 1.500 } } }
-GCL5: n:=Nfg[pay]
+GCL5: << n:=Nfg[pay]
 (Nfg) ""
 \end{verbatim}
 
 First, the set of effort levels for a player (consisting of the list
 of integers from one to 3) is constructed and stored in the variable
 \verb+strat+.  (While this variable is called \verb+strat+ its data
-type is \verb+LIST(INTEGER+, not \verb+STRATEGY+.)  Second, the set
-of efstrategy sets for both players is assembled in \verb+stratSets+.
+type is \verb+LIST(INTEGER)+, not \verb+STRATEGY+.)  Second, the set
+of strategy sets for both players is assembled in \verb+stratSets+.
 Third, the set of pure strategy profiles is assembled by taking the
 cartesian product of the strategy sets, and converted to \verb+FLOAT+
 to give a vector of efforts for each pure strategy profile.  The
@@ -1914,7 +1952,7 @@ innermost vectors in the nested list, generating a result of type
 of which contains the minimum of the vector in that cell.  Thus:
 
 \begin{verbatim}
-GCL6: Min[effort]
+GCL6: << Min[effort]
 { { 1.000, 1.000, 1.000 },
   { 1.000, 2.000, 2.000 },
   { 1.000, 2.000, 3.000 } }
@@ -1927,7 +1965,7 @@ It is being run with the first argument of type
 \verb+LIST(LIST(FLOAT))+, and dimension $3\times 3$, and the second of
 type \verb+LIST(LIST(LIST(FLOAT)))+, and dimension $3\times 3\times
 2$.  The first two levels of the list for both arguments match
-indimensionality.  Then it encounters a \verb+FLOAT+ in the first
+in dimensionality.  Then it encounters a \verb+FLOAT+ in the first
 argument, and a \verb+LIST(FLOAT)+ of dimension $2$ on the second.
 Hence, \verb+Minus+ runs listably on its second argument, yielding a
 \verb+LIST(FLOAT)+ of dimension $2$ for each entry in the $3\times 3$
@@ -2310,11 +2348,11 @@ normal form of the game of poker encountered earlier.
 
 \begin{verbatim}
 GCL1: e:=LoadEfg["poker.efg"]
-GCL2: Name[Actions[e]]
+GCL2: << Name[Actions[e]]
 { { { Raise, Fold }, { Raise, Fold } },
   { { Meet, Pass } } }
 GCL3: n:=Nfg[e];
-GCL4: Name[Strategies[n]]
+GCL4: << Name[Strategies[n]]
 { { 11, 12, 21, 22 },
   { 1, 2 } }
 \end{verbatim}
@@ -2350,6 +2388,37 @@ b := Behav[LcpSolve[Nfg[e]]]
 
 \chapter{Solving Games}\index{Solving games}
 
+Every finite game has at least one \rindex{Nash
+equilibrium}\index{equilibrium!Nash} in either pure or mixed
+strategies (\cite{Nash:1950}).  Various refinements of Nash
+equilibrium are frequently used to select reasonable equilibria in
+games with multiple equilibria.  The most commonly studied refinements
+are ``perfect'' and ``proper'' equilibria for normal form games, and
+``subgame perfect'' and ``sequential'' equilibria for extensive form
+games.  
+
+The best way to compute an equilibrium depends on many factors, the
+most important of which are the number of players, the number of
+equilibrium you want to find, and what kind of refinement you are
+looking for.  For a detailed discussion of these issues, see
+\cite{McKMcL:1996}.  In general, it is easier to solve two person
+games than n-person games, it is easier to find one equilibrium than
+to find all, and it is easier to find a Nash equilibrium than a
+refinement.
+
+The computational complexity of solving for equilibria of games also
+typically at least exponential in the number of strategies or actions.
+Consequently, you will find it quite easy to build games in Gambit
+which cannot be solved (in any reasonable amount of time) by Gambit.
+
+When solving games of any reasonable size, it is therefore good to try
+and simplify things as much as possible before launching into a
+solution algorithm.  One way of simplifying a game is by reducing the
+size of the strategy set by elimination of dominated strategies.  For
+extensive form games, a second way of simplifying the problem is by
+taking account of the subgame structure of the game, and then
+recursively solve the game from the end.
+
 \section{\rindex{Supports} and dominance elimination}\index{Dominance elimination}
 
 The GCL data types \verb+NFSUPPORT+ and \verb+EFSUPPORT+ can be used
@@ -2384,19 +2453,19 @@ and reduced normal form of the poker example of the previous chapter.
 
 \begin{verbatim}
 GCL1: e:=LoadEfg["poker.efg"]
-GCL2: efsupp:=ElimDom[e];
-GCL3: Name[Actions[e]]
+GCL2: efsupp:=ElimDom[e]
+GCL3: << Name[Actions[e]]
 { { { Raise, Fold }, { Raise, Fold } },
   { { Meet, Pass } } }
-GCL4: Name[Actions[efsupp]]
+GCL4: << Name[Actions[efsupp]]
 { { { Raise }, { Raise, Fold } },
   { { Meet, Pass } } }
 GCL5: n:=Nfg[e];
 GCL6: nfsupp:=ElimDom[n];
-GCL7: Name[Strategies[n]]
+GCL7: << Name[Strategies[n]]
 { { 11, 12, 21, 22 },
   { 1, 2 } }
-GCL8: Name[Strategies[nfsupp]]
+GCL8: << Name[Strategies[nfsupp]]
 { { 11, 12 },
   { 1, 2 } }
 \end{verbatim}
@@ -2417,6 +2486,7 @@ n:=LoadNfg["mygame.nfg"];
 s:=ElimAllDom[n,strong->True,mixed->True];
 \end{verbatim}
 
+\noindent
 will find the set of all strategies that remain after iterative
 elimination by mixed strategies of strongly dominated strategies in
 the game \verb+n+.
@@ -2425,6 +2495,45 @@ While the main use of supports is to represent strategies that
 remain after dominance elimination, you can also construct your own
 support for a game using the commands \tindex{RemoveStrategy} and
 \tindex{AddStrategy}.
+
+\section{\rindex{Subgames}}
+
+For extensive form games, Gambit recognizes and supports the notion of
+a {\bf subgame}.  If \verb+efg+ is an extensive form game, the
+command \verb+Subgames[efg]+ returns a list of nodes
+representing the roots of valid subgames.
+
+You can control the way the extensive form solution algorithms deal
+with subgames by ``marking'' or ``unmarking'' subgames.  All of the
+extensive form solution algorithms recursively solve the extensive
+form game by subgames, but only for subgames that are marked.  Terminal
+marked subgames are solved first, and then for any solution of the
+subgame, the parent game is pruned, plugging in the continuation value
+generated by the terminal subgame.  The marked subgames that are now
+terminal are then recursively solved in a similar manner, and so on,
+until the game starting at the root node is reached.  Be warned that
+if there are multiple equilibria to each subgame, the size of the set
+of solutions to the full game that are generated by this procedure can
+be exponential with the number of subgames.
+
+When you first construct a game, the only subgame that is marked is
+the root node of the tree.  This node always represents a valid
+subgame, and it is not possible to unmark the root node.  If
+\verb+node+ is the root of a valid non-trivial subgame, then the
+built-in functions \tindex{MarkSubgame} and \tindex{UnmarkSubgame} can be
+used to mark and unmark the specific subgames starting at that node.
+\tindex{MarkedSubgame} can be used to check if the subgame is marked.
+The user defined functions \tindex{MarkSubgames} and
+\tindex{UnmarkSubgames} can be used to mark and unmark all valid
+subgames in the game.  \tindex{MarkedSubgames} returns a lsit of root
+nodes of all currently marked subgames.
+
+The technique of marking subgames can be used to control whether a
+solution algorithm that finds Nash equilibria returns any Nash
+equilibrium or only subgame perfect Nash equilibria of the game.  If
+no subgames are marked, the algorithm will return Nash equilibria
+which may not be subgame perfect.  If you first mark all subgames,the
+algorithm will return subgame perfect equilibria.
 
 \section{Mixed and Behavior strategy profiles}
 \index{Profiles!mixed}\index{Profiles!behav}
@@ -2459,11 +2568,11 @@ create new mixed profiles, as illustrated in this example:
 
 \begin{verbatim}  
 GCL1: n:=Nfg[Rational[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}]];
-GCL2: c:=Centroid[n]
+GCL2: << c:=Centroid[n]
 (Mixed) { 1/3 1/3 1/3 }{ 1/2 1/2 }
-GCL3: cc:=Mixed[n,Rational[{{1,0,0},{1,0}}]]
+GCL3: << cc:=Mixed[n,Rational[{{1,0,0},{1,0}}]]
 (Mixed) { 1 0 0 }{ 1 0 }
-GCL4: m:=1/2*c+1/2*cc
+GCL4: << m:=1/2*c+1/2*cc
 (Mixed) { 2/3 1/6 1/6 }{ 3/4 1/4 }
 \end{verbatim}
 
@@ -2492,105 +2601,7 @@ information that is known about a mixed or behavior profile, you can
 change the format by which solutions are displayed using the
 \tindex{SetSolutionFormat} function.
 
-\section{\rindex{Subgames}}
-
-For extensive form games, Gambit recognizes and supports the notion of
-a \bindex{subgame}.  If \verb+efg+ is an extensive form game, the
-command \verb+Subgames[efg]+\tindex{Subgames} returns a list of nodes
-representing the roots of valid subgames.
-
-You can control the way the extensive form solution algorithms deal
-with subgames by ``marking'' or ``unmarking'' subgames.  All of the
-extensive form solution algorithms recursively solve the extensive
-form game by subgames, for any subgame that is marked.  Terminal
-marked subgames are solved first, and then for any solution of the
-subgame, the parent game is pruned, plugging in the continuation value
-generated by the terminal subgame.  The marked subgames that are now
-terminal are then recursively solved in a similar manner, and so on,
-until the game starting at the root node is reached.  Be warned that
-if there are multiple equilibria to each subgame, the size of the set
-of solutions to the full game that are generated by this procedure can
-be exponential with the number of subgames.
-
-When you first construct a game, the only subgame that is marked is
-the root node of the tree.  This node always represents a valid
-subgame, and it is not possible to unmark the root node.  If
-\verb+node+ is the root of a valid non-trivial subgame, then the
-built-in functions \tindex{MarkSubgame} and \tindex{UnmarkSubgame} can be
-used to mark and unmark the specific subgames starting at that node.
-\tindex{MarkedSubgame} can be used to check if the subgame is marked.
-The user defined functions \tindex{MarkSubgames} and
-\tindex{UnmarkSubgames} can be used to mark and unmark all valid
-subgames in the game.  \tindex{MarkedSubgames} returns a lsit of root
-nodes of all currently marked subgames.
-
-The technique of marking subgames can be used to control whether a
-solution algorithm computes Nash equilibria or subgame perfect
-equilibria to the game.  If no subgames are marked, the algorithm will
-return Nash equilibria which may not be subgame perfect.  If you first
-mark all subgames,the algorithm will return subgame perfect
-equilibria.  
-
-\section{Solving games}
-
 \section{Solution Algorithms}\index{Solving games!Algorithms}
-
-\begin{tabular}{|p{2cm}|p{2cm}|p{3cm}|p{2cm}|p{3cm}|l|}
-Type & Number & Game Type & ElimDom & Algorithm & Notes \\
-\hline
-Nash & One    & 2-person constant sum &Weak & LP-1 & \\
-     &        & 2-person general  sum &Weak & LCP-1& \\
-     &        & n person              &Weak & SimpDiv-1 & \\
-\hline
-Nash & Two    & 2 person              &Strong & EnumMixed-2 &\\ 
-     &        & n person              &Strong & Liap-2      & \\
-\hline
-Nash & All    & 2 person              &Strong & EnumMixed-0 &  \\
-     &        & n person              &Strong & Liap-0      & Not guaranteed\\
-\hline
-\hline
-Perfect & One    & 2 person           &Strong & LCP-1    & \\
-     &           & n person              &       &     &Not implemented  \\
-\hline
-Perfect & Two    & 2 person              &Strong & LCP-2 & Not guaranteed \\
-     &           & n person              &       &     & Not implemented \\
-\hline
-Perfect & All    & 2 person              &Strong & LCP-0 & Not guaranteed \\
-     &           & n person              &       &     & Not implemented\\
-\hline
-\end{tabular}
-
-\begin{tabular}{|p{2cm}|p{2cm}|p{3cm}|p{2cm}|p{2cm}|p{3cm}|l|}
-Type & Number & Game Type & Subgames & ElimDom & Algorithm & Notes\\
-\hline
-Nash & One &  2-person constant sum&  Mark & Weak & EF/LP-1 &\\
-     &     &  2-person general sum &  Mark & Weak & EF/LCP-1 &\\
-     &     &  n-person             &  Mark & Weak & NF/SimpDiv-1 &\\
-\hline
-Nash & Two &  2-person             &  Unmark & Strong & NF/EnumMixed-2 &\\
-     &     &  n-person             &  Unmark & Strong & EF/Liap-2 &Not guaranteed\\
-\hline
-Nash & All &  2-person             &  Unmark & Strong & NF/EnumMixed-0 &\\
-     &     &  n-person             &  Unmark & Strong & EF/Liap-0 &Not guaranteed\\
-\hline
-Subgame Perfect & One &  2-person constant sum&  Mark & Weak & EF/LP-1 &\\
-                &     &  2-person general sum &  Mark & Weak & EF/LCP-1 &\\
-                &     &  n-person             &  Mark & Weak & NF/SimpDiv-1 &\\
-\hline
-Subgame Perfect & Two &  2-person             &  Mark & Strong & NF/EnumMixed-2 &\\
-                &     &  n-person             &  Mark & Strong & NF/Liap-2 &Not guaranteed\\
-\hline
-Subgame Perfect & All &  2-person             &  Mark & Strong & NF/EnumMixed-0 &\\
-                &     &  n-person             &  Mark & Strong & EF/Liap-0 &Not guaranteed\\
-\hline
-Sequential & One &  2 or n-person          &  Unmark & None & EF/Gobit-1 &\\
-\hline
-Sequential & Two &  2 or n-person          &  Unmark & None & EF/Liap-2 &Not guaranteed\\
-\hline
-Sequential & All &  2 or n-person          &  Unmark & None & EF/Liap-0 &Not guaranteed\\
-\hline
-\end{tabular}
-
 
 \subsection{\tindex{Enum}}
 \index{Algorithms!enumeration!{\tt EnumMixedSolve}}
@@ -2713,8 +2724,9 @@ starting point.  The algorithm thus incorporates the capability of
 restarting.  The algorithm starts from the initial starting point
 determined by the parameter 'start'.  If a Nash equilibrium is not
 found, it will keep searching from new randomly chosen starting points
-until a Nash equilibrium has  been found or the maximum number of tries
-(parameter 'ntries') is exceeded, whichever comes first.
+until the desired number of Nash equilibria have been found or the
+maximum number of tries (\verb+nTries+) is exceeded, whichever
+comes first.
 
 \subsection{Linear Program}
 \index{Algorithms!linear programming!{\tt LpSolve}}
@@ -2762,6 +2774,233 @@ experience shows that values of the parameter on the order of 10
 generally do not destroy convergence, and yield much faster
 convergence.
 
+\section{Computing Nash equilibria and refinements}\index{Nash equilibrium}
+\index{equilibrium!refinements}
+
+As mentioned above, the appropriate algorithm to use to compute a
+particular kind of Nash equilibrium depends on a number of different
+factors, such as the number of players in the game, how many
+equilibria are desired, and whether one wants to find refinements.  In
+addition, in some cases it may be advantageous to eliminate dominated
+strategies or mark subgames before proceeding.
+
+For each of a number of common equilibrium refinements, the GCL
+provides standard user defined functions to compute either one or ``all''
+equilibria of the given type.  These user defined functions pick the
+appropriate algorithm for the required computation, and select the
+type of dominance elimination and subgame marking for the desired
+computation.
+
+\subsection{Normal form equilibria}\index{equilibrium!refinements!normal form}
+
+For normal form games, the GCL provides standard user defined
+functions for the computation of Nash equilibria\index{Nash
+equilibrium} (\tindex{OneNash} and \tindex{AllNash}), and perfect
+equilibria (\tindex{OnePerfect}, \tindex{AllPerfect})\footnote{The
+functions for computing perfect equilibrium are only implemented for
+two person games}.  Table 4 gives the settings that are used for these
+UDFs.
+\medskip
+
+\begin{tabular}{|l|l|p{2cm}|l|l|}
+Type & ElimDom & Game Type & Algorithm & Notes \\
+\hline
+OneNash & Weak & 2-person const sum & Lp & \\ \cline{3-5}
+        &      & 2-person general  sum & Lcp& \\ \cline{3-5}
+        &      & n person              & SimpDiv & \\
+\hline
+AllNash & Strong & 2 person       & EnumMixed &  \\ \cline{3-5}
+        &        & n person       & Liap      & Not guaranteed\\
+\hline
+\hline
+OnePerfect & Strong & 2 person     & Lcp    & \\ \cline{3-5}
+           &        & n person     &     &Not implemented  \\
+\hline
+AllPerfect & Strong & 2 person      & Lcp & Not guaranteed \\ \cline{3-5}
+           &        & n person      &     & Not implemented\\
+\hline
+\multicolumn{5}{c}{\ }\\
+\multicolumn{5}{c}{Table 4}\\
+\multicolumn{5}{c}{Standard UDFs for normal form equilibria}\\
+\end{tabular}
+\medskip
+
+The standard user defined functions for finding ``all'' equilibria
+should be used with some care.  These algorithms are sometimes not
+guaranteed to find all solutions if they are terminated by the user
+(see Table 4).  Rather, these functions for computing ``all''
+equilibria will only find all equilibria (for generic games) in a weak
+probabilistic sense: Given any number less than one, there is an
+amount of time such that if the algorithm is run for at least that amount of
+time it will find all solutions with probability higher than the given
+number.  However, for an arbitrary game, there is no way of knowing
+{\it a priori} how long to run the algorithm in order to achieve the
+desired probability.  
+
+For example in $n$ person games, with $n$ greater than two, there are
+no algorithms yet implemented in Gambit to find all equilibria in a
+finite amount of time.  In these cases, the corresponding user defined
+function is designed to enter an infinite loop, continuing to search
+for new solutions from new random starting points as long as you are
+willing to wait (see documentation in function reference section).
+The algorithm can be terminated by a \verb+ctrl-C+ from the console.
+These functions (for computing all equilibria) have two optional
+arguments, \verb+stopAfter+ to specify the maximum number of
+equilibria to find before stopping, and \verb+nTries+ to specify the
+maximum number of attempts to find equilibria before stopping. If
+either of these parameters is set to a positive value, then the
+computation will stop when the parameter reaches the specified value.
+So for a three person game \verb+n+, the command
+\verb+AllNash[n,2,10]+ will compute a maximum of two Nash equilibria,
+taking at most ten tries to do so, whereas the command
+\verb+AllNasn[n]+ will enter an infinite loop, continuing to search
+for new equilibria until you terminate execution.
+
+\subsection{Extensive form equilibria}
+\index{equilibrium!refinements!extensive form}
+
+For extensive form games, the GCL provides standard user defined
+functions for the computation of Nash equilibria\index{Nash
+equilibrium} (\tindex{OneNash} and \tindex{AllNash}), subgame perfect
+equilibria (\tindex{OnePerfect}, \tindex{AllPerfect}), and sequential
+equilibria (\tindex{OneSequential},
+\tindex{AllSequential})\footnote{The functions for computing perfect
+equilibrium are only implemented for two person games}.  Table 5 gives
+the settings that are used for these UDFs.  
+
+\medskip
+\begin{tabular}{|l|l|l|p{2cm}|l|l|}
+Type & Subgames & ElimDom & Game Type & Algorithm & Notes\\
+\hline
+OneNash & Mark & Weak &  2-person const sum & EF/Lp &\\ \cline{4-6}
+        &      &      &  2-person general sum & EF/Lcp &\\ \cline{4-6}
+        &      &      &  n-person             & NF/SimpDiv &\\
+\hline
+AllNash &  Unmark & Strong &  2-person       & NF/EnumMixed &\\ \cline{4-6}
+        &         &        &  n-person       & NF/Liap &Not guaranteed\\
+\hline
+\hline
+OneSubgamePerfect &  Mark & Weak &  2-person const sum& EF/Lp &\\ \cline{4-6}
+                  &       &      &  2-person general sum & EF/Lcp &\\ \cline{4-6}
+                  &       &      &  n-person        & NF/SimpDiv &\\
+\hline
+AllSubgamePerfect &  Mark & Strong &  2-person    & NF/EnumMixed &\\ \cline{4-6}
+                  &       &        &  n-person    & NF/Liap &Not guaranteed\\
+\hline
+\hline
+OneSequential &  Unmark & None &  2 or n-person   & EF/Gobit &\\ \cline{4-6}
+\hline
+AllSequential &         &       &  2 or n-person   & EF/Liap &Not guaranteed\\
+\hline
+\multicolumn{6}{c}{\ }\\
+\multicolumn{6}{c}{Table 5}\\
+\multicolumn{6}{c}{Standard UDFs for extensive form equilibria}\\
+\end{tabular}
+\medskip
+
+In Table 5, the column headed ``Subgames'' indicates whether all
+subgames are marked or unmarked before solving.  In the column headed
+``algorithm'', the prefix \verb+EF+ or \verb+NF+ on the algorithm
+indicates whether the game is first converted to normal form before
+solving.  For example to find all Nash equilibria of a two person
+extensive form game, all subgames are unmarked, the game is converted
+to normal form, strongly dominated strategies are iterateively
+eliminated, and the resulting game is then solved with the
+\verb+EnumMixed+ algorithm.  The resulting set of mixed strategies is
+converted back to behavior strategies of the original extensive form
+game.  Inspection of the body of the UDF, which is given in the
+Function Reference section of the manual (or via the
+\verb+Manual["AllNash"]+ command) will reveal the details:
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];UnmarkSubgames[e];
+s:=ElimAllDom[Nfg[e],strong->True];
+If[NumPlayers[e] = 2, 
+  m:=EnumMixedSolve[s,stopAfter->0],
+  << InfiniteLoopWarning[stopAfter,nTries];
+  m:=LiapSolve[Centroid[s],stopAfter,nTries];
+];
+MarkSubgames[ms];Behav[m];
+\end{verbatim} 
+
+Note that some of the settings for the UDFs of Table 5 are chosen for
+efficiency in particular problems.  But they may not result in the
+fastest solution in all cases.  For example, in the above example, for
+$n$-person games, \verb+AllNash+ applies \verb+LiapSolve+ to the normal form.
+In many cases, it may be better to apply \verb+LiapSolve+ directly to
+the extensive form.  You can easily define a UDFs to suit your own
+needs (or redefine the standard UDFs) if you find this to be the case
+in the problems you work with.  
+
+As in the normal form case, the functions for computing all equilibria
+of extensive form games are sometimes not guaranteed to find all
+solutions in finite time (see Table 5).  In these cases, the same
+comments that are made in the section on normal form solution
+algorithms apply here: The corresponding user defined function is
+designed to enter an infinite loop, continuing to search for new
+solutions from new random starting points as long as you are willing
+to wait (see documentation in function reference section).  The
+algorithm can be terminated by a \verb+ctrl-C+ from the console.  As
+with the normal form functions, these functions (for computing all
+equilibria) have two optional arguments, \verb+stopAfter+ to specify
+the maximum number of equilibria to find before stopping, and
+\verb+nTries+ to specify the maximum number of attempts to find
+equilibria before stopping. If either of these parameters is set to a
+positive value, then the computation will stop when the parameter
+reaches the specified value.
+
+\section{Solution information}
+\index{Solutions!information}
+
+Once a game has been solved, there are a number of functions for
+finding out information about the solution.  A full list is given in
+the section on Solution information in the function reference section.
+Some of the more important functions are given in Table 6. 
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular} {|l||l|} \hline
+Function Name	& Description \\ 
+\hline
+\verb+  ActionProb[b,a]+ & Prob of action \verb+a+ for profile \verb+b+\\
+\verb+  ActionProbs[b]+ & Nested list of all action probs for \verb+b+ \\ 
+\verb+  ActionValue[b,a]+ & Value of action \verb+a+ for profile \verb+b+\\ 
+\verb+  ActionValues[b]+ & Nested list of all action values for \verb+b+ \\ 
+\verb+  Belief[b,n]+ & Prob of node \verb+n+ conditional on its
+infoset under \verb+b+\\ 
+\verb+  Beliefs[b]+ & Nested list of all beliefs under \verb+b+\\ 
+\verb+  Behav[m]+ & \verb+Behav profile associated with mixed profile \verb+m+\\
+\verb+  InfosetProb[b,i]+ & Probability of information set \verb+i+
+under \verb+b+\\ 
+\verb+  InfosetProbs[b]+ & Nested list of all infoset probabilities
+for \verb+b+\\ 
+\verb+  IsKnownNash[p]+ &\verb+True+ if \verb+p+ is known to be Nash\\
+\verb+  IsKnownPerfect[m]+ &\verb+True+ if \verb+m+ is known to be perfect\\
+\verb+  IsKnownSequential[b]+ &\verb+True+ if \verb+b+ is known sequential\\
+\verb+  IsKnownSubgamePerfect[b]+ &  \verb+True+ if \verb+b+ is known subgame perfect\\ 
+\verb+  NodeValue[b,p,n]+ & Value of \verb+b+ to player \verb+p+ at
+node \verb+n+\\ 
+\verb+# NodeValues[b,n]+ & List of values of \verb+b+ to all players at node \verb+n+\\
+\verb+  NodeValues[b,p]+ & List of values of \verb+b+ to player \verb+p+ at all nodes\\
+\verb+  Payoff[p,pl]+ & Payoff of profile \verb+p+ for player \verb+pl+\\
+\verb+# Payoffs[p]+ & List of payoffs to all players of profile \verb+p+\\
+\verb+  RealizProb[b,n]+ & Probability of reaching node \verb+n+ under \verb+b+\\
+\verb+  RealizProbs[b]+ & Realization probabilites of all nodes under \verb+b+\\ 
+\verb+  SetActionProbs[b,i.v]+ & Sets action probabilies of \verb+b+ at infoset \verb+i+ to \verb+v+\\
+\verb+  SetStrategyProbs[m,p,v]+ & Sets strategy probs of \verb+m+ for
+player \verb+p+ to \verb+v+\\
+\verb+  StrategyProb[m,s]+ & Probability of strategy \verb+s+ under \verb+m+ \\
+\verb+  StrategyProbs[m]+ & Nested list of all strategy probs for \verb+m+\\
+\hline
+\multicolumn{2}{c}{\ }\\
+\multicolumn{2}{c}{Table 6}\\
+\multicolumn{2}{c}{Solution information functions}\\
+\end{tabular}
+\end{center}
+\end{table}
+\medskip
+
+
 \chapter{Function Reference, by Category}
 
 This section contains a list of functions organized by
@@ -2801,7 +3040,7 @@ functionality.
 
 Much of the development of the GCL is based on our own computational
 experience, and tends to be optimized with respect to the kinds of
-problems we encounter  However, it may not be optimized
+problems we encounter.  However, it may not be optimized
 for the type of problems you find interesting.  If you find that
 certain operations in the GCL are unacceptably slow, we would
 appreciate getting feedback on this.
@@ -2812,15 +3051,15 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
- *Assign 
- *UnAssign 
+* Assign 
+* UnAssign 
 
- *NewFunction
- *DeleteFunction
+* NewFunction
+* DeleteFunction
 
   Clear 
- *Include
- *Quit
+* Include
+* Quit
 \end{verbatim}
 \end{multicols}
 
@@ -2828,9 +3067,9 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
- *For
- *If
- *While
+* For
+* If
+* While
 \end{verbatim}
 \end{multicols}
 
@@ -2869,7 +3108,7 @@ appreciate getting feedback on this.
   SetEnv 
   Shell 
   UnSetEnv 
- #GambitExe 
+# GambitExe 
 \end{verbatim}
 \end{multicols}
 
@@ -2906,8 +3145,8 @@ appreciate getting feedback on this.
   Exp 
   IntegerDivide 
   Log 
- #Max
- #Min
+# Max
+# Min
   Minus 
   Modulus 
   Negate 
@@ -2940,23 +3179,23 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
   ArgMax 
- #CartesianProd
+# CartesianProd
   Concat 
   Contains 
- #Dimensions
+# Dimensions
   Dot 
   Filter 
   Flatten 
   Index
   Length 
   List 
- #Max
- #Min
+# Max
+# Min
   NthElement 
- #Prepend
+# Prepend
   Remove 
   Sort 
- #Sum 
+# Sum 
   Transpose 
 \end{verbatim}
 \end{multicols}
@@ -2977,7 +3216,7 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
- #Display 
+# Display 
   GetListFormat 
   GetNumericFormat 
   GetSolutionFormat 
@@ -2986,6 +3225,7 @@ appreciate getting feedback on this.
   LoadEfg 
   LoadNfg 
   Output 
+  Print
   Read 
   SaveEfg 
   SaveNfg 
@@ -2993,6 +3233,7 @@ appreciate getting feedback on this.
   SetNumericFormat 
   SetSolutionFormat 
   SetTextFormat 
+  SetVerbose
   Write   
 \end{verbatim}
 \end{multicols}
@@ -3005,14 +3246,14 @@ appreciate getting feedback on this.
 \begin{verbatim}
   AddAction
   AddMove 
- #AddMove 
- #AttachNewOutcome 
+# AddMove 
+# AttachNewOutcome 
   AttachOutcome 
   CompressEfg 
   CopyTree 
   DeleteAction 
   DeleteEmptyInfoset 
- #DeleteEmptyInfosets 
+# DeleteEmptyInfosets 
   DeleteMove 
   DeleteOutcome 
   DeleteTree 
@@ -3024,18 +3265,18 @@ appreciate getting feedback on this.
   MoveTree 
   NewEfg 
   NewInfoset 
- #NewInfoset 
+# NewInfoset 
   NewOutcome 
- #NewOutcome 
+# NewOutcome 
   NewPlayer 
- #NewPlayer 
+# NewPlayer 
   Randomize 
   RemoveAction 
   Reveal 
   SetChanceProbs 
   SetName 
   SetPayoff 
- #SetPayoffs 
+# SetPayoffs 
   Support 
 \end{verbatim}
 \end{multicols}
@@ -3047,16 +3288,16 @@ appreciate getting feedback on this.
   AddStrategy 
   AgentForm 
   CompressNfg 
- #ListForm 
+# ListForm 
   NewNfg 
   NewPlayer 
   Nfg 
- #Nfg
+# Nfg
   Randomize 
   RemoveStrategy 
   SetName 
   SetPayoff 
- #SetPayoffs
+# SetPayoffs
   Support 
 \end{verbatim}
 \end{multicols}
@@ -3066,57 +3307,57 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
   Actions 
- #Actions 
- #AllActions 
- #AllInfosets 
- #AllMembers 
- #Ancestors
+# Actions 
+# AllActions 
+# AllInfosets 
+# AllMembers 
+# Ancestors
   Centroid 
- #Centroid 
+# Centroid 
   Chance 
   ChanceProb 
   Children 
- #Descendants 
+# Descendants 
   Game 
- #History
+# History
   Infoset 
   Infosets 
- #Infosets 
+# Infosets 
   IsConstSum 
   IsNull 
   IsPerfectRecall 
   IsPredecessor 
- #IsRoot 
+# IsRoot 
   IsSuccessor 
   Members 
- #Members 
+# Members 
   Mixed
- #Mixed
+# Mixed
   Name 
   NextSibling 
   Nodes 
- #NonterminalNodes 
+# NonterminalNodes 
   NthChild 
- #NumActions 
- #NumChildren 
- #NumMembers 
- #NumPlayers 
- #NumStrats 
+# NumActions 
+# NumChildren 
+# NumMembers 
+# NumPlayers 
+# NumStrats 
   Outcome 
   Outcomes 
   Parent 
   Payoff 
- #Payoffs
+# Payoffs
   Player 
- #PlayerNumber 
+# PlayerNumber 
   Players 
   PriorAction 
   PriorSibling 
- #Profiles
+# Profiles
   RootNode 
   Strategies 
- #Strategies 
- #TerminalNodes 
+# Strategies 
+# TerminalNodes 
 \end{verbatim}
 \end{multicols}
 
@@ -3126,10 +3367,12 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
-  MarkSubgames 
+  MarkedSubgame 
+# MarkedSubgames 
+# MarkSubgames 
   MarkSubgame 
   Subgames 
-  UnmarkSubgames 
+# UnmarkSubgames 
   UnmarkSubgame 
 \end{verbatim}
 \end{multicols}
@@ -3139,16 +3382,16 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
   Actions
- #Actions
+# Actions
   AddAction
   AddStrategy
- #ElimAllDom 
+# ElimAllDom 
   ElimDom 
- #ElimDom 
+# ElimDom 
   RemoveAction
   RemoveStrategy
   Strategies 
- #Strategies 
+# Strategies 
   Support 
 \end{verbatim}
 \end{multicols}
@@ -3158,20 +3401,20 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
   EnumMixedSolve 
- #EnumMixedSolve 
+# EnumMixedSolve 
   EnumPureSolve 
- #EnumPureSolve 
+# EnumPureSolve 
   GobitGridSolve 
   GobitSolve 
- #GobitSolve 
+# GobitSolve 
   LcpSolve 
- #LcpSolve 
+# LcpSolve 
   LiapSolve 
- #LiapSolve 
+# LiapSolve 
   LpSolve 
- #LpSolve 
+# LpSolve 
   SimpDivSolve 
- #SimpDivSolve 
+# SimpDivSolve 
 \end{verbatim}
 \end{multicols}
 
@@ -3179,13 +3422,13 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
- #AllNash
- #AllPerfect
- #AllSubgamePerfect
- #OneNash
- #OnePerfect
- #OneSubgamePerfect
- #OneSequential
+# AllNash
+# AllPerfect
+# AllSubgamePerfect
+# OneNash
+# OnePerfect
+# OneSubgamePerfect
+# OneSequential
 \end{verbatim}
 \end{multicols}
 
@@ -3200,7 +3443,7 @@ appreciate getting feedback on this.
   Belief 
   Beliefs 
   Behav 
- #Behav 
+# Behav 
   GobitLambda 
   GobitValue 
   InfosetProb 
@@ -3215,12 +3458,12 @@ appreciate getting feedback on this.
   IsKnownSubgamePerfect 
   LiapValue 
   Mixed
- #Mixed
+# Mixed
   NodeValue 
- #NodeValue 
+# NodeValue 
   NodeValues 
   Payoff 
- #Payoffs 
+# Payoffs 
   RealizProb 
   RealizProbs 
   Regret
@@ -4229,13 +4472,13 @@ following optional parameters:
 the PXI program.  By default no output file is generated.
 \item
 [minLam:] Sets $\underline{\lambda}$, the minimum value of $\lambda$.  The 
-default value is $\underline{\lambda}=0.01$.
+default value is $\underline{\lambda}=0.001$.
 \item
 [maxLam:] Sets $\overline{\lambda}$, the maximum value of $\lambda$.  The
-default value is $\overline{\lambda}=30.0$.
+default value is $\overline{\lambda}=500.0$.
 \item
 [delLam:] Sets the constant $\delta$ used in incrementing $\lambda$.  The
-default value is $\delta=0.01$.
+default value is $\delta=0.02$.
 \item
 [powLam:] Sets the exponent $a$ used in incrementing $\lambda$.  The default
 value is $a=1$, producing geometric incrementing.  Setting $a=0$ corresponds
@@ -5771,6 +6014,20 @@ Computes the value $x^{y}$.
 \item [See also:] \verb+Exp+, \verb+Log+.
 \ed
 
+\item\lex{Print}
+\protect \large \begin{verbatim}
+Print[x->T] =: T
+\end{verbatim} \normalsize
+
+\bd
+Prints \verb+x+ at the console.  When relevant, the output is
+formatted according to the current settings determined by the
+\verb+SetFormat+ commands.  Returns \verb+x+.  
+\item [Short form:] \verb+<< x+.
+\item [See also:] \verb+SetVerbose+, \verb+Write+, \verb+SetListFormat+, 
+\verb+SetNumericFormat+, \verb+SetTextFormat+, \verb+SetSolutionFormat+.  
+\ed
+
 \item\lex{PriorAction}
 \protect \large \begin{verbatim}
 PriorAction[node->NODE] =: ACTION
@@ -6234,6 +6491,20 @@ written.  The default is True.
 \verb+SetNumericFormat+, \verb+Write+.
 \ed
 
+\item\lex{SetVerbose}
+\protect \large \begin{verbatim}
+SetVerbose[x->BOOLEAN] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd 
+Determines whether output is generated at the console when you
+type a command at the GCL prompt.  When \verb+x+ is \verb+True+,
+output is generated.  This is implemented by appending the unary
+operator \verb+<<+ (short form for Print[]) to every command line
+prompt, which then becomes part of your command.
+\item [See also:] \verb+Print+.  
+\ed
+
 \item\lex{Shell}
 \protect \large \begin{verbatim}
 Shell[{command->}, {spawn->True}] =: INTEGER
@@ -6692,6 +6963,46 @@ Infosets[{Chance[efg]}&Players[efg]];
 \end{verbatim} 
 \ed
 
+\item\lex{AllNash}
+\protect \large \begin{verbatim}
+AllNash[e->EFG,{stopAfter->0},{nTries->0}]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all Nash equilibria of the extensive form game
+\verb+e+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];UnmarkSubgames[e];
+s:=ElimAllDom[Nfg[e],strong->True];
+If[NumPlayers[e] = 2, 
+  m:=EnumMixedSolve[s,stopAfter->0],
+  << InfiniteLoopWarning[stopAfter,nTries];
+  m:=LiapSolve[Centroid[s],stopAfter,nTries];
+];
+MarkSubgames[ms];Behav[m];
+\end{verbatim} 
+\ed
+
+\item\lex{AllNash}
+\protect \large \begin{verbatim}
+AllNash[n->NFG,{stopAfter->0},{nTries->0}]=:LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+s:=ElimAllDom[n,strong->True];
+If[NumPlayers[n] = 2, 
+  EnumMixedSolve[s,stopAfter->0],
+  << InfiniteLoopWarning[stopAfter,nTries];
+  LiapSolve[Centroid[s],stopAfter,nTries]
+];
+\end{verbatim} 
+\ed
+
 \item\lex{AllMembers}
 \protect \large \begin{verbatim}
 AllMembers[efg->EFG]=:LIST(LIST(LIST(NODE)))
@@ -6702,6 +7013,63 @@ Returns a list of all member nodes of information sets, including
 those of the chance player.
 \begin{verbatim}
 Members[AllInfosets[efg]];
+\end{verbatim} 
+\ed
+
+\item\lex{AllPerfect}
+\protect \large \begin{verbatim}
+AllPerfect[n->NFG,{stopAfter->0},{nTries->0}]=:LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all Perfect Nash equilibria of the normal form game
+\verb+n+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+s:=ElimAllDom[n,strong->True];
+If[NumPlayers[n] = 2, 
+  << " Warning: may not find all";
+  LcpSolve[s,stopAfter->0],
+  << " Not implemented for n-person games";
+  List[Centroid[Support[n]],0];
+];
+\end{verbatim} 
+\ed
+
+\item\lex{AllSequential}
+\protect \large \begin{verbatim}
+AllSequential[e->EFG,{stopAfter->0},{nTries->0}]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all sequential Nash equilibria of the extensive form
+game \verb+e+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];UnmarkSubgames[e];
+<< InfiniteLoopWarning[stopAfter,nTries];
+b:=LiapSolve[e,stopAfter->stopAfter,nTries->nTries];
+MarkSubgames[ms];b;
+\end{verbatim} 
+\ed
+
+\item\lex{AllSubgamePerfect}
+\protect \large \begin{verbatim}
+AllSubgamePerfect[e->EFG,{stopAfter->0},{nTries->0}]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Searches for all subgame perfect Nash equilibria of the extensive
+form game \verb+e+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];MarkSubgames[e];
+If[NumPlayers[e] = 2, 
+  b:=EnumMixedSolve[e,asNfg->True,stopAfter->0],
+  << InfiniteLoopWarning[stopAfter,nTries];
+  b:=LiapSolve[e,asNfg->True,stopAfter->stopAfter,nTries->nTries];
+];
+MarkSubgames[ms];b;
 \end{verbatim} 
 \ed
 
@@ -7022,8 +7390,8 @@ p;
 
 \item\lex{GobitSolve}
 \protect \large \begin{verbatim}
-GobitSolve[efg->EFG, {pxifile->""}, {minLam->0.01}, {maxLam->30.00}, 
-            {delLam->0.01}, {powLam->01}, {fullGraph->False}, 
+GobitSolve[efg->EFG, {pxifile->""}, {minLam->0.001}, {maxLam->500.00}, 
+            {delLam->0.02}, {powLam->01}, {fullGraph->False}, 
             {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, 
             {tol1->.0000000001}, {time<->0.00}, {nEvals<->00}, 
             {nIters<->00}, {traceFile<->NullOut}, 
@@ -7043,8 +7411,8 @@ GobitSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam, \
 
 \item\lex{GobitSolve}
 \protect \large \begin{verbatim}
-GobitSolve[nfg->NFG, {pxifile->""}, {minLam->0.01}, 
-            {maxLam->30.00}, {delLam->0.01}, {powLam->01}, 
+GobitSolve[nfg->NFG, {pxifile->""}, {minLam->0.001}, 
+            {maxLam->500.00}, {delLam->0.02}, {powLam->01}, 
             {fullGraph->False}, {maxitsN->20}, {tolN->.0000000001}, 
             {maxits1->100}, {tol1->.0000000001}, {time<->0.00}, 
             {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
@@ -7075,6 +7443,24 @@ If[IsRoot[n],{},Flatten[{History[Parent[n]]}&{PriorAction[n]}]];
 \end{verbatim} 
 \ed
 
+\item\lex{InfiniteLoopWarning}
+\protect \large \begin{verbatim}
+InfiniteLoopWarning[stopAfter->INTEGER,nTries->INTEGER]=:TEXT
+\end{verbatim}\normalsize
+
+\bd 
+Generates a warning at the console when a solution algorithm may enter
+an infinite loop.  Used by the standard solution algorithms
+\verb+AllNash+, \verb+AllSubgamePerfect+, etc.  
+
+\begin{verbatim}
+If[nTries=0,
+  If[stopAfter=0,
+  " Warning: Entering infinite loop.  Use Ctl-C to exit.",
+  " Warning: Entering possible infinite loop.  Use Ctl-C to exit."],
+" Warning: May not find all"]
+\end{verbatim} 
+\ed
 
 \item\lex{Infosets}
 \protect \large \begin{verbatim}
@@ -7248,7 +7634,7 @@ Filter[n:=Nodes[efg],MarkedSubgame[n]];
 
 \item\lex{MarkSubgames}
 \protect \large \begin{verbatim}
-MarkSubgames[efg->EFG(T)]=:LIST(NODE),
+MarkSubgames[efg->EFG(T)]=:LIST(NODE)
 \end{verbatim}\normalsize
 
 \bd 
@@ -7257,6 +7643,22 @@ of the marked subgames.
 \begin{verbatim}
 MarkSubgame[s:=Subgames[efg]];
 MarkedSubgames[efg];
+\end{verbatim} 
+\ed
+
+
+\item\lex{MarkSubgames}
+\protect \large \begin{verbatim}
+MarkSubgames[n->LIST(NODE)]=:LIST(BOOLEAN)
+\end{verbatim}\normalsize
+
+\bd 
+Marks the subgames whose roots are in \verb+n+, leaving all other
+subgames unmarked.  Returns a list of \verb+BOOLEAN+, indicating if
+the corresponding node was successfully marked (i. e., was a valid
+subgame root).
+\begin{verbatim}
+UnmarkSubgames[Game[n_1]];MarkSubgame[n];
 \end{verbatim} 
 \ed
 
@@ -7412,9 +7814,9 @@ Descendants[RootNode[efg]];
 \end{verbatim} 
 \ed
 
-\item\lex{NodeValue}
+\item\lex{NodeValues}
 \protect \large \begin{verbatim}
-NodeValue[behav->BEHAV(T),node->NODE]=:LIST(T)
+NodeValues[behav->BEHAV(T),node->NODE]=:LIST(T)
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -7542,6 +7944,101 @@ NumStrats[player->NFPLAYER, support->NFSUPPORT] =: INTEGER
 The number of strategies in \verb+support+ for player \verb+player+.
 \begin{verbatim}
 Length[Strategies[player,support]]; 
+\end{verbatim} 
+\ed
+
+\item\lex{OneNash}
+\protect \large \begin{verbatim}
+OneNash[e->EFG]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Finds one Nash equilibrium of the extensive form game \verb+e+.
+Returns a singleton list containing the equilibrium found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];MarkSubgames[e];
+If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+  If[IsConstSum[e],b:=LpSolve[e],b:=LcpSolve[e,stopAfter->1]],
+  b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16];
+];
+MarkSubgames[ms];b;
+\end{verbatim} 
+\ed
+
+\item\lex{OneNash}
+\protect \large \begin{verbatim}
+OneNash[n->NFG]=:LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Finds one Nash equilibrium of the normal form game \verb+n+.
+Returns a singleton list containing the equilibrium found.
+
+\begin{verbatim}
+s:=ElimAllDom[n];
+If[NumPlayers[n] = 2,
+  If[IsConstSum[n],LpSolve[s],LcpSolve[s,stopAfter->1]],
+  SimpDivSolve[s,stopAfter->1,nRestarts->16];
+];
+\end{verbatim} 
+\ed
+
+\item\lex{OnePerfect}
+\protect \large \begin{verbatim}
+OnePerfect[n->NFG]=:LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Finds one Perfect Nash equilibrium of the normal form game
+\verb+n+.  Returns a singleton list containing the equilibrium found.
+
+\begin{verbatim}
+s:=ElimAllDom[n,strong->True];
+If[NumPlayers[n] = 2, 
+  LcpSolve[s,stopAfter->1],
+  << " Not implemented for n-person games";
+  List[Centroid[Support[n]],0]; // return empty set of mixed
+];
+\end{verbatim} 
+\ed
+
+\item\lex{OneSequential}
+\protect \large \begin{verbatim}
+OneSequential[e->EFG]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Finds one sequential Nash equilibrium of the extensive form game
+\verb+e+.  Returns a singleton list containing the equilibrium found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];UnmarkSubgames[e];
+b:=GobitSolve[e,fullGraph->False];
+If[!IsKnownSequential[b_1],
+  << " Warning: Algorithm did not converge, returning last value";
+];
+MarkSubgames[ms];b;
+\end{verbatim} 
+\ed
+
+\item\lex{OneSubgamePerfect}
+\protect \large \begin{verbatim}
+OneSubgamePerfect[e->EFG]=:LIST(BEHAV)
+\end{verbatim}\normalsize
+
+\bd 
+Finds one subgame perfect Nash equilibrium of the extensive form
+game \verb+e+.  Returns a singleton list containing the equilibrium
+found.
+
+\begin{verbatim}
+ms:=MarkedSubgames[e];MarkSubgames[e];
+If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+  If[IsConstSum[e],b:=LpSolve[e],b:=LcpSolve[e,stopAfter->1]],
+  b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16];
+];
+MarkSubgames[ms];b;
 \end{verbatim} 
 \ed
 
@@ -7834,7 +8331,7 @@ The following GCL program, in the file ``holdout.gcl'' defines a user
 defined function
 
 \begin{verbatim}
-  CreateHoldout[ stages->INTEGER, prob1->FLOAT, prob2->FLOAT, 
+  HoldoutGame[ stages->INTEGER, prob1->FLOAT, prob2->FLOAT, 
                  disc->FLOAT, b->FLOAT] =: EFG
 \end{verbatim}
 
@@ -7843,7 +8340,7 @@ which can be used to create a finite horizon version of the
 ``holdout'' game studied in McKelvey and Palfrey, ``Endogeneity of
 alternating offers in a bargaining game,'' forthcoming, JET.  To use
 the function, include the file ``holdout.gcl'' and then type
-\verb+CreateHoldout[n,r1,r2,d,b]+, where \verb+n+ is the number of
+\verb+HoldoutGame[n,r1,r2,d,b]+, where \verb+n+ is the number of
 stages, \verb+r1+ and \verb+r2+ are the prior probabilities that
 players 1 and 2 are a low benefit type, \verb+d+ is the common
 discount factor, and \verb+b+ is the common benefit of giving in to
@@ -7851,9 +8348,9 @@ the high type.  For example, the following sequence of commands
 
 \begin{verbatim}
   Include["holdout.gcl"]
-  e:= CreateHoldout[1, .5, .5, .9, .5]
+  e:= HoldoutGame[1, .5, .5, .9, .5]
   SaveEfg[e,"holdout1.efg"]
-  e:= CreateHoldout[7, .5, .5, .9, .5]
+  e:= HoldoutGame[7, .5, .5, .9, .5]
   SaveEfg[e,"holdout7.efg"]
 \end{verbatim}
 
@@ -7877,22 +8374,22 @@ of the resulting seven stage game to check various theoretical predictions.
 \newpage
 \noindent
 This is the contents of the file "holdout.gcl" which defines the
-function ``CreateHoldout[]'' used in the above programs.
+function ``HoldoutGame[]'' used in the above programs.
 
 {\scriptsize 
 \begin{verbatim}
-  //
-  // A gcl program to construct a multi stage holdout game
-  //
+//
+// A gcl program to construct a multi stage holdout game
+//
 
-  NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(ISET), \
-  out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
-    // build tree
+NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
+            out->LIST(OUTCOME), stages->INTEGER, disc->FLOAT],
+  // build tree
   i1:=isets[[1]];
   i2:=isets[[2]];
-  AddMove[i1, node];
-  AddMove[i2, node#1];
-  If[NumActions[i1]>1, AddMove[id, node#2] ];
+  AddMove[i1,node];
+  AddMove[i2,node#1];
+  If[NumActions[i1]>1, AddMove[i2, node#2] ];
     // attach outcomes
   AttachOutcome[node#1#1, out[[1]] ]; 
   If[NumActions[i2]>1, AttachOutcome[node#1#2, out[[2]] ] ];
@@ -7908,22 +8405,22 @@ function ``CreateHoldout[]'' used in the above programs.
       SetChanceProbs[diset,{1.0-disc,disc}];
       AddMove[diset, node#1#1];
       MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc];
-      ];
     ];
-  ]
+  ];
+];
 
-  NewFunction[CreateHoldout[ stages->INTEGER,
-    prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
+NewFunction[HoldoutGame[ stages->INTEGER,
+            prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
   e := NewEfg[];
   n := RootNode[e];
     // create chance moves
-  ciset1 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 1's type"];
-  ciset2 := NewInfoset[Chance[e], {"High", "Lo"} , "Choose 2's type"];
+  ciset1 := NewInfoset[Chance[e], {"High", "Low"} , "Choose 1's type"];
+  ciset2 := NewInfoset[Chance[e], {"High", "Low"} , "Choose 2's type"];
   SetChanceProbs[ciset1,{prob1,1.0-prob1}];
   SetChanceProbs[ciset2,{prob2,1.0-prob2}];
-  AddMove[ciset1, n ];
+  AddMove[ciset1, n];
   AddMove[ciset2, n#1];
-  AddMove[ciset2, n#2];
+  AddMove[ciset2, n#2 ];
     // Define players, actions, and outcomes
   pl1 := NewPlayer[e,"Player 1"];
   pl2 := NewPlayer[e,"Player 2"];
@@ -7942,15 +8439,18 @@ function ``CreateHoldout[]'' used in the above programs.
   MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
   MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
   MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
+  ElapsedTime[]
   nonterm:=NonterminalNodes[e];
+  ElapsedTime[]
+
     // Make perfect recall 
   For[i:=1,i<=Length[nonterm],i:=i+1,
-    p:=Player[nonterm[[i]] ];
+    p:=Player[Infoset[nonterm[[i]] ] ];
     If[p!=Chance[e],
       Reveal[Infoset[nonterm[[i]] ],{p}]; ];
-    ];	 
-  e
-  ]
+    ];	
+  e;
+];
 \end{verbatim}
 }
 
@@ -7960,76 +8460,99 @@ illustrated in Figure 2, using various parameters for the chance
 moves, to check various theoretical predictions. 
 {\scriptsize
 \begin{verbatim}
-  //
-  // A gcl program to check theoretical results from McKelvey Palfrey 
-  // paper "Endogeneity of Alternating Offers,"  forthcoming JET.  
-  //
+//
+// A gcl program to check theoretical results from McKelvey Palfrey 
+// paper "Endogeneity of Alternating Offers,"  forthcoming JET.  
+//
 
-  // Include["holdout.gcl"]
+// First define function to compute all Nash equilibria of the game
 
-  // First define function to compute all Nash equilibria for 
-  // two person extensive form game
+NewFunction[AllNash[e<->EFG]=:LIST(BEHAV),
+  Behav[ EnumMixedSolve[ ElimAllDom[Nfg[e],strong->True] ,stopAfter->0] ];
+];
 
-  NewFunction[AllNash[e<->EFG],
-    n:=Nfg[e];
-    s:=ElimAllDom[n,strong->True];
-    m:=EnumMixedSolve[s,stopAfter->0];
-    b:=Behav[m];
-  ];
+// Create seven stage holdout game (or read in previously
+// saved game to save time). 
 
-  // Create seven stage holdout game
+b:=.5;
+del:=.9;
 
-  b:=.5;
-  del:=.9;
-  e:= CreateHoldout[7, .5, .5, del, b]
+// Include["holdout.gcl"]
+// e:= HoldoutGame[7, .5, .5, del, b]
+// SaveEfg[e,"holdout7.efg"]
 
-  // set variables to refer to the chance moves, 
+e:=LoadEfg["holdout7.efg"]
 
-  n:=RootNode[e];
-  i1:=Infoset[n];
-  i2:=Infoset[n#1];
+// set variables to refer to the chance moves, 
 
-  // open outfile and set output format
+n:=RootNode[e];
+i1:=Infoset[n];
+i2:=Infoset[n#1];
 
-  o:=Output["eaotest.out"];
-  SetFormat[listLF->2,precis->3,listCommas->False,listIndent->0];
+// open outfile 
+o:=Output["eaotest.out"];
+SetListFormat[lf->0,commas->False,braces->False];
+SetNumericFormat[precis->3];
 
-  // define the constants demarcating the regions of equilibria
+// define the constants demarcating the regions of equilibria
 
-  R := (1.0-b)/(1.0-del*b);
-  Q := (del-b) / (del*(1.0-del*b));
+R := (1.0-b)/(1.0-del*b);
+Q := (del-b) / (del*(1.0-del*b));
 
-  o << "\nb: " << b << " del: " << del;
-  o << " R: " << R << " Q: " << Q << "\n";
+o << "\nb: " << b << " del: " << del;
+o << " R: " << R << " Q: " << Q << "\n";
 
-  // Now, check various regions to make sure they have the right 
-  // kinds of equilibria predicted by the theorems.  
+// define variable, g,  for actions where players give in.  
 
-  o << "\nIn these regions there should be just one equilibrium,";
-  o << "\nwith full alternating offers, lasting J innings:\n ";
+a:=Actions[e]
+g:=Filter[a,Name[a]="G"]
+g:={Flatten[g_1],Flatten[g_2]}
 
-  For[J:=2,J<=4,J:=J+1,
-    r1:=(Q^J+Q^(J-1))/2.0;
-    r2:=(R*Q^(J-1))/2.0;
-    SetChanceProbs[i1,{1.0-r1,r1}];
-    SetChanceProbs[i2,{1.0-r2,r2}];
-    s:=AllNash[e];
-    o << "\nJ: " << J << " r1: " << r1 << "  r2: " << r2;
-    o << "\ns: " << s;
-  ];
 
-  o << "\n\nIn these regions there may be multiple equilibria. At least ";
-  o << "\none should be full simultaneous offer, lasting M innings:\n";
+// Now, check various regions to make sure they have the right 
+// kinds of equilibria predicted by the theorems.  
 
-  For[M:=3,M<=4,M:=M+1,
-    r1:=(R^(M+1)+R^M)/2.0;
-    r2:=r1;
-    SetChanceProbs[i1,{1.0-r1,r1}];
-    SetChanceProbs[i2,{1.0-r2,r2}];
-    s:=AllNash[e];
-    o << "\nM: " << M << " r1: " << r1 << "  r2: " << r2;
-    o << "\ns: " << s;
-  ];
+o << "\nProbabilities of Giving in by player and move:\n\n"
+
+o << "\nIn these regions there should be just one equilibrium, with";
+o << "\nfull alternating offers, lasting J innings (2 J moves)\n ";
+
+For[J:=1,J<=4,J:=J+1,
+  r1:=(Q^J+Q^(J-1))/2.0;
+  r2:=(R*Q^(J-1))/2.0;
+  SetChanceProbs[i1,{1.0-r1,r1}];
+  SetChanceProbs[i2,{1.0-r2,r2}];
+  s:=AllNash[e];
+  o << "\nJ: " << J << " r1: " << r1 << "  r2: " << r2;
+  o << "\n                        move" 
+  o << "\nplayer    1      2      3      4      5      6      7  \n" 
+  For[k:=1,k<=Length[s],k:=k+1,
+    o << "   1: " << ActionProb[s_k,g]_1 << "\n";
+    o << "   2: " << ActionProb[s_k,g]_2 << "\n\n";
+  ]
+];
+
+o << "\n\nIn these regions there may be multiple equilibria. At least ";
+o << "\none should be full simultaneous offer, lasting M moves:\n";
+
+For[M:=1,M<=4,M:=M+1,
+  r1:=(R^(M+1)+R^M)/2.0;
+  r2:=r1;
+  SetChanceProbs[i1,{1.0-r1,r1}];
+  SetChanceProbs[i2,{1.0-r2,r2}];
+  s:=AllNash[e];
+  o << "\nM: " << M << " r1: " << r1 << "  r2: " << r2;
+  o << "\n                        move" 
+  o << "\nplayer    1      2      3      4      5      6      7  \n" 
+  For[k:=1,k<=Length[s],k:=k+1,
+    o << "   1: " << ActionProb[s_k,g]_1 << "\n";
+    o << "   2: " << ActionProb[s_k,g]_2 << "\n\n";
+  ]
+];
+
+// close file
+
+o:=
 \end{verbatim}
 }
 
@@ -8037,58 +8560,85 @@ moves, to check various theoretical predictions.
 Following is the output from running the above program:
 {\scriptsize
 \begin{verbatim}
-  b: 0.500 del: 0.900 R: 0.909 Q: 0.808
 
-  In these regions there should be just one equilibrium,
-  with full alternating offers, lasting J innings:
+b: 0.500 del: 0.900 R: 0.909 Q: 0.808
+
+Probabilities of Giving in by player and move:
+
+
+In these regions there should be just one equilibrium, with
+full alternating offers, lasting J innings (2 J moves)
  
-  J: 2 r1: 0.731  r2: 0.367
-  s: {
-  (Behav) { { 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 0.000 1.000
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  { { 0.138 0.862 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-  }
-  J: 3 r1: 0.590  r2: 0.270
-  s: {
-  (Behav) { { 1.000 0.000 }{ 0.532 0.468 }{ 1.000 0.000 }{ 0.288 0.712
-  }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 }{ 1.000 } }
-  { { 0.196 0.804 }{ 1.000 0.000 }{ 0.447 0.553 }{ 1.000 0.000 
-  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-  }
-  J: 4 r1: 0.477  r2: 0.198
-  s: {
-  (Behav) { { 1.000 0.000 }{ 0.633 0.367 }{ 1.000 0.000 }{ 0.532 0.468
-  }{ 1.000 0.000 }{ 0.288 0.712 }{ 1.000 0.000 }{ 1.000 } }
-  { { 0.605 0.395 }{ 1.000 0.000 }{ 0.730 0.270 }{ 1.000 0.000 
-  }{ 0.701 0.299 }{ 1.000 0.000 }{ 0.000 1.000 }{ 1.000 } } 
-  }
+J: 1 r1: 0.904  r2: 0.500
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  1.000  0.000  0.000  0.000  0.000  0.000  
+   2:   1.000  0.000  0.000  0.000  0.000  0.000  0.000  
 
-  In these regions there may be multiple equilibria. At least 
-  one should be full simultaneous offer, lasting M innings:
 
-  M: 3 r1: 0.717  r2: 0.717
-  s: {
-  (Behav) { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500 
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  (Behav) { { 0.602 0.398 }{ 1.000 0.000 }{ 0.000 1.000 }{ 0.500 0.500
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  { { 1.000 0.000 }{ 0.321 0.679 }{ 1.000 0.000 }{ 0.000 1.000 
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  (Behav) { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  { { 0.679 0.321 }{ 0.569 0.431 }{ 0.313 0.687 }{ 0.000 1.000 
-  }{ 0.500 0.500 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-  }
-  M: 4 r1: 0.652  r2: 0.652
-  s: {
-  (Behav) { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688
-  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } }
-  { { 0.739 0.261 }{ 0.679 0.321 }{ 0.569 0.431 }{ 0.312 0.688 
-  }{ 0.000 1.000 }{ 0.500 0.500 }{ 0.500 0.500 }{ 1.000 } } 
-  }
+J: 2 r1: 0.731  r2: 0.367
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  0.712  0.000  1.000  0.000  0.000  0.000  
+   2:   0.862  0.000  1.000  0.000  0.000  0.000  0.000  
+
+
+J: 3 r1: 0.590  r2: 0.270
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  0.468  0.000  0.712  0.000  1.000  0.000  
+   2:   0.804  0.000  0.553  0.000  1.000  0.000  0.000  
+
+
+J: 4 r1: 0.477  r2: 0.198
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  0.367  0.000  0.468  0.000  0.712  0.000  
+   2:   0.395  0.000  0.270  0.000  0.299  0.000  1.000  
+
+
+
+In these regions there may be multiple equilibria. At least 
+one should be full simultaneous offer, lasting M moves:
+
+M: 1 r1: 0.868  r2: 0.868
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  1.000  0.000  0.000  0.000  0.000  0.000  
+   2:   1.000  0.000  0.000  0.000  0.000  0.000  0.000  
+
+   1:   1.000  0.000  0.000  0.000  0.000  0.000  0.000  
+   2:   0.000  1.000  0.000  0.000  0.000  0.000  0.000  
+
+   1:   0.687  1.000  0.000  0.000  0.000  0.000  0.000  
+   2:   0.687  1.000  0.000  0.000  0.000  0.000  0.000  
+
+
+M: 2 r1: 0.789  r2: 0.789
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.431  0.687  1.000  0.000  0.000  0.000  0.000  
+   2:   0.431  0.687  1.000  0.000  0.000  0.000  0.000  
+
+
+M: 3 r1: 0.717  r2: 0.717
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.000  0.679  0.000  1.000  0.000  0.000  0.000  
+   2:   0.398  0.000  1.000  0.000  0.000  0.000  0.000  
+
+   1:   0.398  0.000  1.000  0.000  0.000  0.000  0.000  
+   2:   0.000  0.679  0.000  1.000  0.000  0.000  0.000  
+
+   1:   0.321  0.431  0.687  1.000  0.000  0.000  0.000  
+   2:   0.321  0.431  0.687  1.000  0.000  0.000  0.000  
+
+
+M: 4 r1: 0.652  r2: 0.652
+                        move
+player    1      2      3      4      5      6      7  
+   1:   0.261  0.321  0.431  0.688  1.000  0.000  0.000  
+   2:   0.261  0.321  0.431  0.688  1.000  0.000  0.000  
 \end{verbatim}
 }
 
@@ -8187,53 +8737,53 @@ is the contents of ``egobit.gcl'':
 
 {\scriptsize
 \begin{verbatim}
-  //
-  //  This gcl program estimates the principal branch of
-  //  the QRE and corresponding OSEM for a given extensive 
-  //  form game, finds MLE fits to experimental data 
-  //  and computes 95% confidence intervals for each model. 
-  //
-  //  The extensive form is assumed to be in filename.efg
-  //  and the data is in filename.agg.  The first line
-  //  in the agg file should contain the bounds for lambda 
-  //  The second line should contain an equilibrium selection 
-  //  to be used by the OSEM model. The third line gives 
-  //  the number of data sets
-  //  for which the estimation is to be conducted.  This 
-  //  should be followed by at least that many sets of data.
-  //
-  //  The output is put in filename.out, and the pxifile is put in
-  //  filename.pxi
-  //
-  
-  Include["egobitml.gcl"];
+//
+//  This gcl program estimates the principal branch of
+//  the QRE and corresponding OSEM for a given extensive 
+//  form game, finds MLE fits to experimental data 
+//  and computes 95% confidence intervals for each model. 
+//
+//  The extensive form is assumed to be in filename.efg
+//  and the data is in filename.agg.  The first line
+//  in the agg file should contain the bounds for lambda 
+//  The second line should contain an equilibrium selection 
+//  to be used by the OSEM model. The third line gives 
+//  the number of data sets
+//  for which the estimation is to be conducted.  This 
+//  should be followed by at least that many sets of data.
+//
+//  The output is put in filename.out, and the pxifile is put in
+//  filename.pxi
+//
 
-  NewFunction[EGobit[filename->TEXT],
-    //  Load efg and open agg file for reading
-    e := LoadEfg[filename&".efg"]
-    in := Input[filename&".agg"]
+Include["egobitml.gcl"]
 
-    // read in range of lambdas for QRE estimation
-    in >> min >> max >> del;
+NewFunction[EGobit[filename->TEXT],
+  //  Load efg and open agg file for reading
+  e := LoadEfg[filename&".efg"]
+  in := Input[filename&".agg"]
 
-    // read in nash equilibrium selection to be used for OSEM model
-    nash :=Centroid[e];
-    datlist := Integer[ListForm[nash]];
-    in >> nash;
+  // read in range of lambdas for QRE estimation
+  in >> min >> max >> del;
 
-    //  Load data into dat
-    in >> ndat;
-    dat := {};
-    For[i := 1, i <= ndat, i := i+1,
-      dat := dat & {datlist};
-      in >> dat[[i]];
-    ];
+  // read in nash equilibrium selection to be used for OSEM model
+  nash :=Centroid[e];
+  datlist := Integer[ListForm[nash]];
+  in >> nash;
 
-    pxi := filename&".pxi";
-    out := filename&".out";
-
-    EGobitML[e,dat,min,max,del,out,pxi,nash];
+  //  Load data into dat
+  in >> ndat;
+  dat := {};
+  For[i := 1, i <= ndat, i := i+1,
+    dat := dat & {datlist};
+    in >> dat[[i]];
   ];
+
+  pxi := filename&".pxi";
+  out := filename&".out";
+
+  EGobitML[e,dat,min,max,del,out,pxi,nash];
+];
 \end{verbatim}
 }
 
@@ -8242,106 +8792,106 @@ Following is the contents of ``egobitml.gcl'':
 
 {\scriptsize
 \begin{verbatim}
-  //
-  // A gcl program to estimate the principal branch of the 
-  // QRE for an extensive form game, and find the maximum likelihood 
-  // estimate of lambda for a list of aggregate experimental data
-  // 
-  // e is the normal form game
-  // dat is a list of observations.  Each observation is in the form of  
-  //    a LIST(LIST(LIST(INTEGER))), where the integers correspond to
-  //    the number times the corresponding action (for that player in
-  //    that information set) was chosen.  So for a 2 player game where
-  //    each player has two information sets with two actions each, the 
-  //    element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
-  //    used to indicate that player 1 chose the first action at the
-  //    first information set 43 times, etc.  
-  // min is the minimum value for Lambda used by GobitSolve[]
-  // max is the maximum value for Lambda used by GobitSolve[]
-  // del is the increment for Lambda used by GobitSolve[]
-  // out is the name of a file in which the results will be written
-  // pxi is the name of a file where the pxi file is written
-  // nash is a Nash equilibrium selection that is passed for use
-  //     in estimating the OSEM model 
+//
+// A gcl program to estimate the principal branch of the 
+// QRE for an extensive form game, and find the maximum likelihood 
+// estimate of lambda for a list of aggregate experimental data
+// 
+// e is the normal form game
+// dat is a list of observations.  Each observation is in the form of  
+//      a LIST(LIST(LIST(INTEGER))), where the integers correspond to
+//	the number times the corresponding action (for that player in
+//	that information set) was chosen.  So for a 2 player game where
+//	each player has two information sets with two actions each, the 
+//      element in dat {{{43, 32}, {12, 20}}, {{15, 32}, {16, 28}}} is 
+//	used to indicate that player 1 chose the first action at the
+//	first information set 43 times, etc.  
+// min is the minimum value for Lambda used by GobitSolve[]
+// max is the maximum value for Lambda used by GobitSolve[]
+// del is the increment for Lambda used by GobitSolve[]
+// out is the name of a file in which the results will be written
+// pxi is the name of a file where the pxi file is written
+// nash is a Nash equilibrium selection that is passed for use
+//     in estimating the OSEM model 
 
-  Include["loglike.gcl"];
+Include["loglike.gcl"]
 
-  NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
-    del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
-    o := Output[out];
-    gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
-      pxifile->pxi];
+NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
+  del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
+  o := Output[out];
+  gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
+    pxifile->pxi];
 
-    size := Length[gob];
+  size := Length[gob];
 
-    eps:=0.0000000001;
-    For[i := size , i>=1 , i:=i-1,
-      If[GobitValue[gob[[i]]] > eps, 
-        o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob[[i]]];
-        gob:=Remove[gob,i]; 
-      ];
-    ];
-    lamlist:=GobitLambda[gob];
-    size := Length[gob];
-
-    goblist := ListForm[gob];
-    exdat := Float[dat];
-
-    numactions := Length[ListForm[nash]];
-    numisets := Length[numactions];
-    numplayers := Length[numisets];
-
-    o << "\nUsing Nash: " << nash << "\n";
-    o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
-
-    delgam := .001;
-    o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
-
-    gamsize := Integer[1./delgam] - 1;
-    gamlist := List[delgam, gamsize, delgam];
-  
-    c := Centroid[e];
-    n := nash
-    osem := (1.0-gamlist)*c + gamlist*n;
-    osemlist := ListForm[osem];
-
-    // compute maximum likelihoods and pretty-print results to output file
-
-    SetFormat[quote->False];
-
-    ldat := Length[Length[Length[Length[dat]]]];
-
-    For[ii:=1, ii<=ldat, ii:=ii+1,
-      goblogl := LogLike[exdat[[ii]],gob];
-      osemlogl := LogLike[exdat[[ii]], osem];
-      header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
-      o << header;
-
-      gobllmax := ArgMax[goblogl];
-      osemllmax := ArgMax[osemlogl];
-      For[i:=1, i<=numplayers, i:=i+1,
-        For[j:=1, j<=numisets[[i]], j:=j+1,
-          sum:=Sum[exdat[[ii]][[i]][[j]]];
-          For[k:=1,k<=numactions[[i]][[j]],k:=k+1,
-            nob:=exdat[[ii]][[i]][[j]][[k]];
-            SetFormat[precis->0,width->7];
-            o << "\n" << i << j << nob;
-            SetFormat[precis->4,width->10];
-            If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
-            o << goblist[[gobllmax]][[i]][[j]][[k]];
-            o << osemlist[[osemllmax]][[i]][[j]][[k]];
-          ];
-        ];
-      ];
-      LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
-      GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
-      o << "\nLam\Gam                " << 0.0 <<  lamlist[[gobllmax]] << gamlist[[osemllmax]];
-      o << "\nLam\Gam_lo                       " << LamCI[[1]] << GamCI[[1]];
-      o << "\nLam\Gam_hi                       " << LamCI[[2]] << GamCI[[2]];
-      SetFormat[precis->3, width->10];
-      o << "\nLogLik                           " << goblogl[[gobllmax]] << osemlogl[[osemllmax]] << "\n";
+  eps:=0.0000000001;
+  For[i := size , i>=1 , i:=i-1,
+    If[GobitValue[gob_i] > eps, 
+      o << "\nRemoved element: " << i << " lambda: " << GobitLambda[gob_i];
+      gob:=Remove[gob,i]; 
     ];
   ];
+  lamlist:=GobitLambda[gob];
+  size := Length[gob];
+
+  goblist := ListForm[gob];
+  exdat := Float[dat];
+
+  numactions := Length[ListForm[nash]];
+  numisets := Length[numactions];
+  numplayers := Length[numisets];
+
+  o << "\nUsing Nash: " << nash << "\n";
+  o << "\nminLam: " << min << " maxLam: " << max << " delLam: " << del;
+
+  delgam := .001;
+  o << "\ndelGam: " << delgam << " eps: " << eps << "\n\n";
+
+  gamsize := Integer[1./delgam] - 1;
+  gamlist := List[delgam, gamsize, delgam];
+  
+  c := Centroid[e];
+  n := nash
+  osem := (1.0-gamlist)*c + gamlist*n;
+  osemlist := ListForm[osem];
+
+  // compute maximum likelihoods and pretty-print results to output file
+
+  SetTextFormat[quote->False];
+
+  ldat := Length[Length[Length[Length[dat]]]];
+
+  For[ii:=1, ii<=ldat, ii:=ii+1,
+    goblogl := LogLike[exdat_ii,gob];
+    osemlogl := LogLike[exdat_ii, osem];
+    header:="\n  Player  Infoset   n         f       QRE      OSEM\n";
+    o << header;
+
+    gobllmax := ArgMax[goblogl];
+    osemllmax := ArgMax[osemlogl];
+    For[i:=1, i<=numplayers, i:=i+1,
+      For[j:=1, j<=numisets_i, j:=j+1,
+        sum:=Sum[exdat_ii_i_j];
+        For[k:=1,k<=numactions_i_j,k:=k+1,
+          nob:=exdat_ii_i_j_k;
+          SetNumericFormat[precis->0,width->7];
+          o << "\n" << i << j << nob;
+          SetNumericFormat[precis->4,width->10];
+          If[sum != 0.0, o << "  " << nob/sum, o << " " << 0.0];
+          o << goblist_gobllmax_i_j_k;
+          o << osemlist_osemllmax_i_j_k;
+        ];
+      ];
+    ];
+    LamCI := LamHiLo[goblogl, lamlist, 1.9205, gobllmax];
+    GamCI := LamHiLo[osemlogl, gamlist, 1.9205, osemllmax];
+    o << "\nLam\Gam                " << 0.0 <<  lamlist_gobllmax << gamlist_osemllmax;
+    o << "\nLam\Gam_lo                       " << LamCI_1 << GamCI_1;
+    o << "\nLam\Gam_hi                       " << LamCI_2 << GamCI_2;
+    SetNumericFormat[precis->3, width->10];
+    o << "\nLogLik                           " << goblogl_gobllmax << osemlogl_osemllmax << "\n";
+  ];
+];
 \end{verbatim}
 }
 
@@ -8350,66 +8900,62 @@ Following is the contents of ``loglike.gcl'':
 
 {\scriptsize
 \begin{verbatim}
-  //
-  // Some user defined functions for maximum likelihood estimation
-  // 
+//
+// Some user defined functions for maximum likelihood estimation
+// 
 
-  // sum of components of a vector
+// log likelihood of the data for a given solution
+// note that the data must be of type MIXED
+// So if data is LIST(LIST(INTEGER)), then call function by  
+// LogLik[Mixed[n,Float[data]],sol]
 
-  NewFunction[ Sum[l->LIST(FLOAT)], Dot[l,List[1.0,Length[l] ]];];
+NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
 
-  // log likelihood of the data for a given solution
-  // note that the data must be of type MIXED
-  // So if data is LIST(LIST(INTEGER)), then call function by  
-  // LogLik[Mixed[n,Float[data]],sol]
+NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[x]];
+];
 
-  NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
-    x:= dat * Log [ ListForm[sol]];
-    Sum[Sum[x]];
+// log likelihood of the data for a given solution
+// note that the data must be of type BEHAV
+// So if data is LIST(LIST(LIST(INTEGER))), then call function by  
+// LogLik[Behav[n,Float[data]],sol]
+
+NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
+  x:= ListForm[dat] * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
+  x:= dat * Log [ ListForm[sol]];
+  Sum[Sum[Sum[x]]];
+];
+
+// This function computes confidence intervals for a solution
+// Here list is the list of likelihood values, lam is the list of parameters
+// (assumed to have the same length as list, range is 1/2 of the chi^2 value
+// (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
+// maximum (assumed correct) 
+
+NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER],
+  newlist := list -(list_llmaxind-range);
+  t1:={};
+  t2:={};
+  llsize := Length[lam];
+  For[z:=2, z<=llsize, z:=z+1,
+    If[newlist_z >= 0.0, 
+    t1:=t1&{z}; 
+    t2:=t2&{lam_z};];
   ];
-
-  NewFunction[ LogLike[dat->MIXED, sol->MIXED], 
-    x:= ListForm[dat] * Log [ ListForm[sol]];
-    Sum[Sum[x]];
-  ];
-
-  // log likelihood of the data for a given solution
-  // note that the data must be of type BEHAV
-  // So if data is LIST(LIST(LIST(INTEGER))), then call function by  
-  // LogLik[Behav[n,Float[data]],sol]
-
-  NewFunction[ LogLike[dat->BEHAV, sol->BEHAV], 
-    x:= ListForm[dat] * Log [ ListForm[sol]];
-    Sum[Sum[Sum[x]]];
-  ];
-
-  NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
-    x:= dat * Log [ ListForm[sol]];
-    Sum[Sum[Sum[x]]];
-  ];
-
-  // This function computes confidence intervals for a solution
-  // Here list is the list of likelihood values, lam is the list of parameters
-  // (assumed to have the same length as list, range is 1/2 of the chi^2 value
-  // (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
-  // maximum (assumed correct) 
-
-  NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER], 
-    newlist := list -(list[[llmaxind]]-range);
-    t1:={};
-    t2:={};
-    llsize := Length[lam];
-    For[z:=2, z<=llsize, z:=z+1,
-      If[newlist[[z]]>=0.0, 
-      t1:=t1&{z}; 
-      t2:=t2&{lam[[z]]};];
-    ];
-    flag := True;
-    t1:=t1-(t1[[1]]-1);
-    s1:=Length[t1];
-    If[s1 != t1[[s1]], flag:=False];
-    lhilo:={t2[[1]],t2[[s1]]};
-  ];
+  flag := True;
+  t1:=t1-(t1_1 - 1);
+  len:=Length[t1];
+  If[len != t1_len, flag:=False];
+  lhilo:={t2_1,t2_len};
+];
 \end{verbatim}
 }
 
@@ -9054,315 +9600,17 @@ was evaluated, and the argument of the Return function is evaluated
 and returned as the evaluation of \verb+FunctionName+. 
 \end{enumerate}
 
-\section{Data types}
+\section{Function Prototypes}\index{Function prototypes}
 
-Like most high-level languages, GCL has a data typing system which
-permits only one type of data to be returned by a given function.
-However, GCL is a bit unusual in that it has implicit typing of
-functions.  That is, a function's return type is determined by its
-first use in the program.  For a user defined function, this is in the
-NewFunction command that first creates the function.  For a user
-defined variable, this will be in the \verb+Assign+ function that
-first creates the variable.
-
-The built-in data types for the GCL are the following:  
-
-
-
-
-
-
-
-
-
-
-Notes
-
-Gary:  Check default search path section.  
-
-
-
-
-\subsection{Creating a normal form game}
-
-The function \verb+NewNfg[]+ is used to create a new normal form game.
-Thus, the command
+The function prototype is a template used to describe the correct
+syntax for calling a GCL function.  A function prototype begins with 
 
 \begin{verbatim}
-GCL1: NewNfg[{2,3,2}]
-\end{verbatim}
-
-\noindent 
-will create a new normal form game with three players, where the first
-player has two strategies, the second player has three strategies, and
-the third player has two strategies.  The game has payoffs of zero for
-every pure strategy profile.  By default, the game will have be of
-data type \verb+NFG(FLOAT)+.  In other words, its numeric data is of
-type \verb+FLOAT+.  You can create a game whose data is
-\verb+RATIONAL+ by specifying the parameter \verb+rational+ to be
-\verb+True+.
-
-The game created by \verb+NewNfg+ is not very interesting, because all
-payoffs for all strategies are zero.  However, the game returned by
-\verb+NewNfg+ can be used to create more interesting games by using it
-as an argument to other functions that accept Normal form games as
-arguments.
-
-For example to create a random two person $2\times 2$ normal form
-game, with a seed of \verb+7+ for the random number generator, you can
-use the function \verb+Randomize+ to randomize the payoffs of the
-original game.
-
-\begin{verbatim}
-GCL2: Randomize[NewNfg[{2,2}],7]
-(Nfg) ""
-\end{verbatim}  
-
-\noindent
-You can look at the payoffs of the game by using the standard UDF,
-\verb+Payoffs+:
-
-\begin{verbatim}
-GCL3: Payoffs[Randomize[NewNfg[{2,2}],7]]
-{ { { 0.597056, 0.992785 }, { 0.331675, 0.977620 } },
-  { { 0.299265, 0.102707 }, { 0.691973, 0.970182 } } }
-\end{verbatim}  
-
-\noindent
-Here, the payofffs are written in a nested list, where the
-\verb+(i,j)+th component is the vector of payoffs when player 1 takes
-strategy \verb+i+ and player 2 takes strategy \verb+j+.  The game can
-be solved for all mixed nash equilibrium by
-
-\begin{verbatim}
-GCL4: EnumMixedSolve[Randomize[NewNfg[{2,2}],7]]
-{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 },
-  (Mixed) { 0.982819 0.017181 }{ 0.547492 0.452508 },
-  (Mixed) { 0.000000 1.000000 }{ 0.000000 1.000000 } }
-\end{verbatim}
-
-In all of the above examples, all work is thrown out, and the normal
-form game is created anew in each successive command.  You can avoid
-such wasteful computation, and minimize the typing you need to do by
-saving intermediate results in a variable.  For example, the above
-could be done as follows:
-
-\begin{verbatim}
-GCL1: n:=Randomize[NewNfg[{2,2}],7];
-GCL2: p:=Payoffs[n];
-GCL3: m:=EnumMixedSolve[n];
-\end{verbatim}
-
-The first statement creates a variable \verb+n+ to store the normal
-form game.  This variable is then used as an argument in the next two
-function calls.  The second two statements create variables \verb+p+
-and \verb+m+ to store the nested list of payoffs of the game, and the
-list of mixed strategy solutions of the game.  Any of these variables
-can then be used as input to other function calls, as long as the data
-type of the variable is the same as the data type of the 
-
-The above also illustrates another important principle of the GCL.
-All of the functions in the GCL (with a few exeptions, noted in the
-Function Reference Section) return objects of some specific data type.
-Any object returned by a function can be stored in a variable.  While
-the GCL supports a large number specialized data types, the data
-typing is all implicit.  In other words, you never have to declare
-what data type a variable will be before it is used.  A variable takes
-on the data type of the object that is first assigned to it.    
-
-\subsection{Setting payoffs and modifying a normal form game}  
-
-One reason for using variables is that the objects they represent can
-then be manipulated and changed much more easily.  This is especially
-true of complicated objects like normal and extensive form games.  
-
-The following sequence of statements illustrates how to build a simple
-prisoner's dilemma game, by first creating a normal form game of the
-correct dimension, and then modifyint the payoffs one by one.
-
-\begin{verbatim}
-GCL1: n:=NewNfg[{2,2}];
-GCL2: s:=Strategies[n];
-GCL3: SetPayoff[{s_1_1,s_2_1},{9.0,9.0}];
-GCL4: SetPayoff[{s_1_1,s_2_2},{0.0,10.0}];
-GCL5: SetPayoff[{s_1_2,s_2_1},{10.0,0.0}];
-GCL6: SetPayoff[{s_1_2,s_2_2},{1.0,1.0}];
-GCL7: Payoffs[n]
-{ { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
-  { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
-\end{verbatim}
-
-Note that the above can be done equivalently and more simply by using
-the standard UDF, \verb+Nfg+ to create the game directly from a payoff
-list:
-
-\begin{verbatim}
-GCL1: n:=Nfg[Float[{{{9,9},{0,10}},{{10,0},{1,1}}}]];
-GCL2: Payoffs[n]
-{ { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
-  { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
-GCL3: s:=Strategies[n];
-GCL4: SetName[s_1,{"Cooperate","Defect"}];
-GCL5: SetName[s_2,{"Cooperate","Defect"}];  
-GCL6: s
-{ { (Strategy) 191b70 "Cooperate", (Strategy) 191b98 "Defect" },
-  { (Strategy) 191c08 "Cooperate", (Strategy) 191c30 "Defect" } }
-\end{verbatim}
-
-We now give a more complicated example, in which one can use
-listability of vector and matrix operations to set the payoffs in the
-normal form according to a formula.  In this example, we create a
-version of the ``stag hunt'' game.
-
-\begin{verbatim}
-GCL1: strats:=List[1,3,1]
-{ 1, 2, 3 }
-GCL2: p:=List[strats,2]
-{ { 1, 2, 3 },
-  { 1, 2, 3 } }
-GCL3: effort:=Float[CartesianProd[p]] 
-{ { { 1.000, 1.000 }, { 1.000, 2.000 }, { 1.000, 3.000 } },
-  { { 2.000, 1.000 }, { 2.000, 2.000 }, { 2.000, 3.000 } },
-  { { 3.000, 1.000 }, { 3.000, 2.000 }, { 3.000, 3.000 } } }
-GCL4: pay:=Min[effort]-.5*effort
-{ { { 0.500, 0.500 }, { 0.500, 0.000 }, { 0.500, -0.500 } },
-  { { 0.000, 0.500 }, { 1.000, 1.000 }, { 1.000, 0.500 } },
-  { { -0.500, 0.500 }, { 0.500, 1.000 }, { 1.500, 1.500 } } }
-GCL5: n:=Nfg[pay]
-(Nfg) ""
+FunctionName[param1->T, Param2->S, {Param3->R}] =: 
 \end{verbatim}
 
 
-The above can be incorporated into a user defined function which
-allows one to build a stag hunt game for an arbitrary number of
-players and strategies:  
-
-\begin{verbatim}
-NewFunction[StagHuntNfg[n->INTEGER,maxeff->INTEGER,cost->FLOAT]=:NFG,
-  strats:=List[1,maxeff,1];
-  effort:=Float[CartesianProd[List[strats,n]]];
-  Nfg[Min[effort]-cost*effort];
-];
-\end{verbatim}
-
-\noindent
-Once the above function has been defined, then you can then use it as
-follows
-
-\begin{verbatim}
-n:=StagHuntNfg[4,2,.5];
-\end{verbatim}
-
-\noindent
-to create a four person stag hunt game where each player has two
-strategy choices (effort levels) and the cost of effort is \verb+.5+.
-
-Once a normal form game has been defined, there are a number of
-solution algorithms that can be applied to solve the game.  
-
-\subsection{Supports and dominance elimination}
-
-The GCL data type \verb+EFSUPPORT+ can be used to represent a {\bf
-support} in an extensive form game.  A support for an extensive form
-game is a selection of non-empty subsets of actions for all
-information sets in the game.
-
-As with normal form games, the main use of supports in extensive form
-games is to represent the sets of strategies that remain after
-dominated actions have been eliminated from the game.  All of the
-built-in functions for extensive form solution algorithms in the GCL
-take an \verb+EFSUPPORT+ as their first parameter, hence can be run on
-any support of the game.
-
-The command \verb+Support[efg]+ returns the full support of the
-extensive form game \verb+efg+, i. e., the support in which no actions
-have been eliminated in any information set.  The function
-\verb+ElimDom+ can be used to find the dominated strategies in a
-support of a game.  \verb+ElimDom+ returns a support containing the
-undominated strategies for each player.  By default weak domination is
-used, and only domination by pure strategies is considered. By setting
-the optional parameters \verb+strong+ to true, strong domination can
-be used.  Note that mixed dominance elimination is not yet implemented
-in the extensive form.  
-
-As with the normal form a user defined function \verb+ElimAllDom+ can
-be used to iteratively eliminate dominated actions in a game, until
-no further dominance elimination is possible.  This function returns
-the final support.  So the commands
-
-\begin{verbatim}
-e:=LoadNfg["mygame.efg"];
-s:=ElimAllDom[e,strong->True];
-\end{verbatim}
-
-will find the set of all strategies that remain after iterative
-elimination by pure strategies of strongly dominated strategies in
-the game \verb+e+.
-
-While the main use of supports is to represent strategies that
-remain after dominance elimination, you can also construct your own
-support for a game using the commands \verb+RemoveAction+ and
-\verb+AddAction+.
-
-\subsection{Behavior strategy profiles}
-
-The data type \verb+BEHAV+ is used to represent behavior strategy
-profiles for normal form games.  A behavior strategy profile can be
-defined on any support of the game, and is a specification of a
-numeric value (usually interpreted as a probability) for each action
-in the support.
-
-The built-in function \verb+Centroid+, generates a mixed strategy
-profile in which for every player information set, the actions in that
-information set are adopted with equal probability.  For example, if
-\verb+efg+ is a variable representing an extensive form game, and \verb+s+
-is a support for the game \verb+efg+, then the commands
-\verb+Centroid[efg]+ or \verb+Centroid[s]+ will generate behavior
-strategy profiles for the extensive form game \verb+efg+, and for the
-support, \verb+s+, respectively.  You can use the built-in function
-\verb+SetActionProbs+ to change the strategy probabilites for a
-mixed profile.  You can also use the standard user defined function
-\verb+Behav+ to generate a behavior profile from a nested list of numeric
-data, as long as the nested list is of the correct dimensions.
-
-Basic arithmetic operations are defined on behavior profiles.  So you
-can take linear combinations of behavior profiles to create new
-behavior profiles, as illustrated in this example:
-
-\begin{verbatim}  
-GCL1: e:=Rational[LoadEfg["poker.efg"]]
-GCL2: c:=Centroid[e]
-(Behav) { { 1/2 1/2 }{ 1/2 1/2 } }{ { 1/2 1/2 } }
-GCL3: cc:=Behav[e,Rational[{{{1,0},{1,0}},{{1,0}}}]]
-(Behav) { { 1 0 }{ 1 0 } }{ { 1 0 } }
-GCL4: m:=1/2*c+1/2*cc
-(Behav) { { 3/4 1/4 }{ 3/4 1/4 } }{ { 3/4 1/4 } }
-\end{verbatim}
-
-As with mixed profiles for normal form games, the data for
-\verb+BEHAV+ need not be legitimate probabilities.  For example, it
-would be valid to create a behavior profile using the command
-\verb+Mixed[n,Rational[{{{1,2},{3,4}},{{5,6}}}]]+, where probabilities
-do not add up to one.  This feature can be used in econometric
-analysis, as the \verb+MIXED+ to allow the data to represent choice
-frequencies for each action
-
-All of the solution algorithms that operate on extensive form games or on
-supports return behavior profiles representing the solutions.  Some
-algorithms also compute useful information about the profile that may
-not be recoverable from knowledge of just the action probabilies.
-Consequently, \verb+BEHAV+ data type keeps track of who created it,
-and what properties are known about it.  A series of functions are
-available to query a behav profile to return this information.  These
-functions are listed in section on ``information about solutions'' in
-the Categorical Function Reference chapter.  To view all of the
-information that is known about a behav profile, you can change the
-format by which solutions are displayed using the
-\verb+SetSolutionFormat+ function.  
-
-\section{Supports and Dominance Elimination}
-
-
-\section{Solutions and Solution classes}
-
+The final chapter of this manual contains a description of every
+built-in function provided in the GCL, as well as a listing of all of
+the standard user defined functions.    
 
