@@ -8,7 +8,7 @@
 #define GSOLVER_H
 
 #include "ideal.h"
-#include "double.h"
+#include "math/double.h"
 #include "linrcomb.h"
 #include "gpolylst.h"
 

@@ -11,6 +11,7 @@
 #include <stdio.h>
 
 #include "base/base.h"
+#include "math/math.h"
 #include "lapack.h"
 
 template <class T> gLapack<T>::gLapack(void)

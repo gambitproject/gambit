@@ -5,7 +5,7 @@
 //
 
 #include "base/base.h"
-#include "gpvector.h"
+#include "math/gpvector.h"
 #include "efgutils.h"
 
 #include "efgcsum.h"

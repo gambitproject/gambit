@@ -1,0 +1,256 @@
+//
+// FILE: gpvector.imp -- Implementation of profile vector members
+//
+// $Id$
+//
+
+#include "gpvector.h"
+
+//-------------------------------------------------------------------------
+//          gPVector<T>: Private and protected member functions
+//-------------------------------------------------------------------------
+
+template <class T> int gPVector<T>::sum(const gArray<int> &V) const
+{
+  int total = 0;
+  for (int i = V.First(); i <= V.Last(); total += V[i++]);
+  return total;
+}
+
+template <class T> void gPVector<T>::setindex(void)
+{
+  int index = First();
+  for(int i = 1; i <= svlen.Length(); i++)  {
+    svptr[i] = data + index - 1;
+    index += svlen[i];
+  }
+  assert(index == Last() + 1);
+}
+
+
+template <class T> int gPVector<T>::Check(const gPVector<T> &v) const
+{
+  if (v.mindex == mindex && v.maxdex == maxdex)  {
+    for (int i = 1; i <= svlen.Length(); i++)
+      if (svlen[i] != v.svlen[i])   return 0;
+    return 1;
+  }
+  return 0;
+}
+
+//-------------------------------------------------------------------------
+//     gPVector<T>: Constructors, destructor, and constructive operators
+//-------------------------------------------------------------------------
+
+template <class T> gPVector<T>::gPVector(void) : svptr(0)
+{ }
+
+template <class T> gPVector<T>::gPVector(const gArray<int> &sig)
+  : gVector<T>(sum(sig)), svlen(sig)
+{
+  svptr = new T *[sig.Last() - sig.First() + 1];
+  svptr -= 1;    // align things correctly
+  setindex();
+}
+
+template <class T> gPVector<T>::gPVector(const gVector<T> &val,
+					 const gArray<int> &sig)
+  : gVector<T>(val), svlen(sig)
+{
+  assert(sum(svlen) == val.Length());
+  svptr = new T *[sig.Last() - sig.First() + 1];
+  svptr -= 1;
+  setindex();
+}
+
+template <class T> gPVector<T>::gPVector(const gPVector<T> &v)
+  : gVector<T>(v), svlen(v.svlen)
+{
+  svptr = new T *[v.svlen.Last() - v.svlen.First() + 1];
+  svptr -= 1;
+  setindex();
+}
+
+template <class T> gPVector<T>::~gPVector()
+{
+  if (svptr)   delete [] (svptr + 1);
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator=(const gPVector<T> &v)
+{
+  if (!Check(v))   throw BadDim();
+  gVector<T>::operator=(v);
+  return (*this);
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator=(const gVector<T> &v)
+{
+  gVector<T>::operator=(v);
+  return (*this);
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator=(T c)
+{
+  gVector<T>::operator=(c);
+  return (*this);
+}
+
+//-------------------------------------------------------------------------
+//                 gPVector<T>: Operator definitions
+//-------------------------------------------------------------------------
+
+template <class T> T& gPVector<T>::operator()(int a, int b)
+{
+  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
+  if (1 > b || b > svlen[a])    throw BadIndex();
+
+  return svptr[a][b];
+}
+
+template <class T> const T& gPVector<T>::operator()(int a, int b) const
+{
+  if (svlen.First() > a || a > svlen.Last())   throw BadIndex();
+  if (1 > b || b > svlen[a])    throw BadIndex();
+  return svptr[a][b];
+}
+
+template <class T>
+gPVector<T> gPVector<T>::operator+(const gPVector<T> &v) const
+{
+  if (!Check(v))   throw BadDim();
+
+  gPVector<T> tmp(*this);
+  tmp.gVector<T>::operator+=(v);
+  return tmp;
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator+=(const gPVector<T> &v)
+{
+  if (!Check(v))   throw BadDim();
+
+  gVector<T>::operator+=(v);
+  return (*this);
+}
+
+template <class T> gPVector<T> gPVector<T>::operator-(void) const
+{
+  gPVector<T> tmp(*this);
+  for(int i=First(); i<=Last(); i++)
+    tmp[i]= -tmp[i];
+  return tmp;
+}
+
+template <class T>
+gPVector<T> gPVector<T>::operator-(const gPVector<T> &v) const
+{
+  if (!Check(v))   throw BadDim();
+
+  gPVector<T> tmp(*this);
+  tmp.gVector<T>::operator-=(v);
+  return tmp;
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator-=(const gPVector<T> &v)
+{
+  if (!Check(v))   throw BadDim();
+
+  gVector<T>::operator-=(v);
+  return (*this);
+}
+
+template <class T> T gPVector<T>::operator*(const gPVector<T> &v) const
+{
+  if (!Check(v))   throw BadDim();
+
+  return (*this).gVector<T>::operator*(v);
+}
+
+template <class T> gPVector<T>& gPVector<T>::operator*=(const T c)
+{
+  gVector<T>::operator*=(c);
+  return (*this);
+}
+
+template <class T> gPVector<T> gPVector<T>::operator/(T c)
+{
+  gPVector<T> tmp(*this);
+  tmp= tmp.gVector<T>::operator/(c);
+  return tmp;
+}
+
+template <class T> bool gPVector<T>::operator==(const gPVector<T> &v) const
+{
+  if (!Check(v))   throw BadDim();
+
+  return (*this).gVector<T>::operator==(v);
+}
+
+template <class T> bool gPVector<T>::operator!=(const gPVector<T> &v) const
+{ return !((*this)==v); }
+
+//-------------------------------------------------------------------------
+//                 gPVector<T>: General data access
+//-------------------------------------------------------------------------
+
+template <class T> gVector<T> gPVector<T>::GetRow(int row) const
+{
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+
+  gVector<T> v(1, svlen[row]);
+
+  for(int i=v.First(); i<=v.Last(); i++)
+    v[i]= (*this)(row,i);
+  return v;
+}
+
+template <class T> void gPVector<T>::GetRow(int row, gVector<T> &v) const
+{
+  if (svlen.First() > row || row > svlen.Last())  throw BadIndex();
+  if (v.First() != 1 || v.Last() != svlen[row])   throw BadDim();
+
+  for(int i=v.First(); i<=v.Last(); i++)
+    v[i]= (*this)(row,i);
+}
+
+template <class T> void gPVector<T>::SetRow(int row, const gVector<T> &v)
+{
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex();
+  if (v.First() != 1 || v.Last() != svlen[row])    throw BadDim();
+
+  for(int i=v.First(); i<=v.Last(); i++)
+    (*this)(row,i)= v[i];
+}
+
+template <class T> void gPVector<T>::CopyRow(int row, const gPVector<T> &v)
+{
+  if (!Check(v))   throw BadDim();
+  if (svlen.First() > row || row > svlen.Last())   throw BadIndex(); 
+
+  for (int i = 1; i <= svlen[row]; i++)
+    svptr[row][i] = v.svptr[row][i];
+}
+
+template <class T> const gArray<int> &gPVector<T>::Lengths(void) const
+{
+  return svlen;
+}
+
+//-------------------------------------------------------------------------
+//                    gPVector<T>: Output functions
+//-------------------------------------------------------------------------
+
+template <class T> gOutput &operator<<(gOutput &to, const gPVector<T> &v)
+{
+  v.Dump(to); return to;
+}
+
+template <class T> void gPVector<T>::Dump(gOutput &f) const
+{
+  for (int i = svlen.First(); i <= svlen.Last(); i++)    {
+    f << "{ ";
+    for (int j = 1; j <= svlen[i]; j++)
+      f << (*this)(i,j) << " ";
+    f << "}";
+  }
+}
+

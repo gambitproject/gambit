@@ -7,7 +7,7 @@
 #ifndef BTABLEAU_H  
 #define BTABLEAU_H
 
-#include "rational.h"
+#include "math/rational.h"
 #include "bfs.h"
 #include "basis.h"
 

@@ -109,7 +109,7 @@ template <class T> gText gFact<T>::Unknown::Description(void) const
 template class gFact<gNumber>;
 template class gFact<gTriState>;
 
-#include "gpvector.h"
+#include "math/gpvector.h"
 template class gFact<gPVector<gNumber> >;
 
 // Following is an intitial, more complicated implementation of the above

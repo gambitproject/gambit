@@ -8,9 +8,9 @@
 #define MIXED_H
 
 #include "base/gmisc.h"
+#include "math/gpvector.h"
 #include "nfstrat.h"
 
-#include "gpvector.h"
 
 class Nfg;
 class MixedSolution;

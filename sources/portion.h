@@ -9,8 +9,8 @@
 #define PORTION_H
 
 #include "base/base.h"
+#include "math/gnumber.h"
 #include "gsmincl.h"
-#include "gnumber.h"
 
 //-------------
 // Portion

@@ -129,7 +129,9 @@ public:
 
 };
 
-typedef gRational RatTmp; // backwards compatibility
+gText ToText(const gRational &);
+gRational FromText(const gText &, gRational &);
+void gEpsilon(gRational &v, int i = 8);
 
 #endif
 

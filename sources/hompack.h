@@ -9,8 +9,8 @@
 
 // Includes //////////////////////////////////////////////////////////////
 #include "base/base.h"
-#include "gvector.h"
-#include "gmatrix.h"
+#include "math/gvector.h"
+#include "math/gmatrix.h"
 #include "stdio.h"
 #include "homotopy.h" // needed for HomQreParams
 

@@ -5,9 +5,9 @@
 //
 
 #include "gpoly.imp"
-#include "double.h"
-#include "rational.h"
-#include "gnumber.h"
+#include "math/double.h"
+#include "math/rational.h"
+#include "math/gnumber.h"
 
 #ifdef UNUSED
 double gPoly<double>::String_Coeff(double nega)

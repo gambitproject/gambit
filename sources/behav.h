@@ -8,9 +8,9 @@
 #define BEHAV_H
 
 #include "base/base.h"
+#include "math/gdpvect.h"
 #include "efstrat.h"
 
-#include "gdpvect.h"
 #include "rectangl.h"
 #include "ineqsolv.h"
 

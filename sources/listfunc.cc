@@ -10,12 +10,12 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "rational.h"
+#include "math/rational.h"
+#include "math/gsmatrix.h"
 
 #include "nfg.h"
 #include "efg.h"
 
-#include "gsmatrix.h"
 
 
 //---------

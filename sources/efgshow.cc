@@ -13,6 +13,7 @@
 #include "wxmisc.h"
 #include "wxstatus.h"
 
+#include "math/math.h"
 #include "efg.h"
 #include "infoset.h"
 #include "node.h"

@@ -8,9 +8,9 @@
 #define EFG_H
 
 #include "base/base.h"
+#include "math/gnumber.h"
+#include "math/gpvector.h"
 
-#include "gpvector.h"
-#include "gnumber.h"
 
 class EFOutcome;
 class EFPlayer;

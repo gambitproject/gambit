@@ -36,7 +36,7 @@ int Simpdiv(const NFSupport &support, const SimpdivParams &params,
 
 
 
-#include "rational.h"
+#include "math/rational.h"
 
 template class SimpdivModule<double>;
 template class SimpdivModule<gRational>;

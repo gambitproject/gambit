@@ -9,7 +9,7 @@
 #include "ngobit.h"
 
 #include "gfunc.h"
-#include "gmatrix.h"
+#include "math/gmatrix.h"
 #include "gnullstatus.h"
 
 NFQreParams::NFQreParams(void)

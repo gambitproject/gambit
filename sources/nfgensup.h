@@ -6,7 +6,7 @@
 
 #include "base/base.h"
 #include "nfg.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gstatus.h"
 #include "nfdom.h"
 #include "nfgciter.h"

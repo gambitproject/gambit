@@ -5,6 +5,7 @@
 //
 
 #include "efgprint.h"
+#include "math/math.h"
 
 EfgPrintout::EfgPrintout(TreeWindow *t, const char *title)
   : wxPrintout((char *) title), tree(t)

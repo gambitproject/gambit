@@ -5,9 +5,8 @@
 //
 
 #include "base/base.h"
-#include "gpvector.imp"
-#include "rational.h"
-#include "gnumber.h"
+#include "math/gpvector.imp"
+#include "math/gnumber.h"
 
 template class gPVector<int>;
 template class gPVector<double>;

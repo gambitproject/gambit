@@ -8,12 +8,12 @@
 #define VERTENUM_H
 
 #include "base/base.h"
+#include "math/gmatrix.h"
+#include "math/gsmatrix.h"
 #include "lptab.h"
 #include "bfs.h"
 
 #include "gstatus.h"
-#include "gmatrix.h"
-#include "gsmatrix.h"
 
 //
 // This class enumerates the vertices of the convex polyhedron 

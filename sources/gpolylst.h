@@ -7,10 +7,9 @@
 #ifndef GPOLYLST_H
 #define GPOLYLST_H
 
+#include "math/gsmatrix.h"
 #include "gpoly.h"
-#include "gsmatrix.h"
 #include "odometer.h"
-// #include "objcount.h"
 
 // ***********************
 //      class gPolyList

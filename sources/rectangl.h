@@ -9,7 +9,7 @@
 
 #include "interval.h"
 #include "odometer.h"
-#include "gvector.h"
+#include "math/gvector.h"
 
 /* This file provides the template class
 

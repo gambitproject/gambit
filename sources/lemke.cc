@@ -39,7 +39,7 @@ int Lemke(const NFSupport &support, const LemkeParams &params,
   return 1;
 }
 
-#include "rational.h"
+#include "math/rational.h"
 
 template class LemkeModule<double>;
 template class LemkeModule<gRational>;

@@ -7,7 +7,7 @@
 #include "behav.h"
 #include "lexicon.h"
 #include "mixed.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 TEMPLATE_SPECIALIZATION()
 const gNumber MixedProfile<gNumber>::Payoff(const NFOutcome *o, int pl) const

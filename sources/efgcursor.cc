@@ -83,6 +83,6 @@ void EfgCursorWindow::Set(const Node *p_cursor)
       SetCellValue("N/A", 7, 0);
     }
   }	
-  catch (gNumber::DivideByZero &) { }
+  catch (gException &) { }
 }
 

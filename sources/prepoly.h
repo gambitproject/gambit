@@ -10,8 +10,8 @@
 
 #include <math.h>
 #include "base/base.h"
-#include "rational.h"
-#include "gvector.h"
+#include "math/rational.h"
+#include "math/gvector.h"
 
 /*
    The classes in this file are prior to the notion of a 

@@ -120,7 +120,7 @@ public:
 };
 
 #ifdef __GNUG__
-#include "rational.h"
+#include "math/rational.h"
 gOutput &operator<<(gOutput &, const Tableau<double> &);
 gOutput &operator<<(gOutput &, const Tableau<gRational> &);
 #elif defined __BORLANDC__

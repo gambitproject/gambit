@@ -209,7 +209,7 @@ FullEfg *CompressEfg(const FullEfg &efg, const EFSupport &S)
 }
 
 
-#include "rational.h"
+#include "math/rational.h"
 // prototype in efg.h
 
 void RandomEfg(FullEfg &efg)

@@ -13,7 +13,7 @@
 #include <ctype.h>
 
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gsm.h"
 #include "gsminstr.h"
 #include "gsmfunc.h"

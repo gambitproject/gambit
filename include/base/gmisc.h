@@ -22,21 +22,6 @@ class gOutput;
 gOutput &operator<<(gOutput &, gTriState);
 
 //
-// A few mathematically-related functions which appear frequently
-//
-template <class T> class gArray;
-
-template <class T> T gmin(const T &a, const T &b);
-template <class T> T gmax(const T &a, const T &b);
-template <class T> T gmax(const gArray<T> &);
-
-class gNumber;
-double abs(double a);
-gNumber abs(const gNumber &);
-
-int sign(const double &a);
-
-//
 // Generation of random numbers
 //
 
@@ -67,17 +52,9 @@ gText ToText(int);
 gText ToText(long);
 gText ToText(double);
 gText ToText(double p_number, int p_precision);
-gText ToText(const gInteger &);
-gText ToText(const gRational &, bool approx = true);
-gText ToText(const gNumber &);
-gText ToText(const gNumber &p_number, int p_precision);
 gText ToText(gTriState);
 
-double FromText(const gText &, double &);
-gRational FromText(const gText &, gRational &);
-gNumber	FromText(const gText &, gNumber &);
 double ToDouble(const gText &);
-gNumber ToNumber(const gText &);    
 
 //
 /// Return a copy of the string with all quotes preceded by a backslash
@@ -89,8 +66,6 @@ gText EscapeQuotes(const gText &);
 //
 
 void gEpsilon(double &v, int i = 8);
-void gEpsilon(gRational &v, int i = 8);
-void gEpsilon(gNumber &v, int i=8);
 
 double pow(int,long);
 double pow(double,long);

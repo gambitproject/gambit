@@ -1,14 +1,15 @@
 //
 // FILE: basis.h -- Definition of the Basis class for tableaus
 //
+// $Id$
 //
 
 #ifndef BASIS_H
 #define BASIS_H
 
 #include "base/base.h"
-#include "gmatrix.h"
-#include "gvector.h"
+#include "math/gvector.h"
+#include "math/gmatrix.h"
 
 //---------------------------------------------------------------------------
 // Class Basis

@@ -5,7 +5,7 @@
 //
 
 #include "seqform.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 //---------------------------------------------------------------------------
 //                        SeqFormParams: member functions

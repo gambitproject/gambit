@@ -5,7 +5,7 @@
 //
 
 #include "vertenum.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 template class VertEnum<double>;
 template class VertEnum<gRational>;

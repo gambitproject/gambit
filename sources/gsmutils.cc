@@ -5,10 +5,10 @@
 //
 
 #include "portion.h"
-#include "rational.h"
-#include "gvector.h"
-#include "gdpvect.h"
-#include "gmatrix.h"
+#include "math/rational.h"
+#include "math/gvector.h"
+#include "math/gdpvect.h"
+#include "math/gmatrix.h"
 
 Portion *ArrayToList(const gArray<double> &A)
 {

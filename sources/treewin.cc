@@ -10,6 +10,7 @@
 #include "wxmisc.h"
 
 #include "base/gmisc.h"
+#include "math/math.h"
 #include "efg.h"
 #include "legendc.h"
 #include "treewin.h"

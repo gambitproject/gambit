@@ -10,6 +10,8 @@
 
 #include "wxgcl.h"
 #include "wxstatus.h"
+
+#include "math/math.h"
 #include "gsm.h"
 #include "gnullstatus.h"
 #include "gcmdline.h"

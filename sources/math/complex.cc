@@ -16,8 +16,7 @@
 #include <ctype.h>
 
 #include "base/base.h"
-#include "complex.h"
-#include "gnulib.h"
+#include "math/complex.h"
 
 //--------------------------------------------------------------------------
 //                              class: gComplex

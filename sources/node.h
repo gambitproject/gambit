@@ -7,7 +7,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "rational.h"
+#include "math/rational.h"
 #include "efg.h"
 
 #ifdef __GNUG__

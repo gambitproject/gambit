@@ -18,7 +18,7 @@
 #include "portion.h"
 #include "gsmfunc.h"
 
-#include "rational.h"
+#include "math/rational.h"
 
 #include "mixedsol.h"
 #include "behavsol.h"

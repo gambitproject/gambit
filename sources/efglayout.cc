@@ -6,6 +6,7 @@
 
 #include "wx/wx.h"
 #include "wxmisc.h"
+#include "math/math.h"
 
 #include "efg.h"
 

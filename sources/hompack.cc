@@ -9,6 +9,7 @@
 #include <iostream.h>
 #include <math.h>
 #include "base/gmisc.h"
+#include "math/math.h"
 #include "hompack.h"
 #include "lapack.h"
 #include "homotopy.h"

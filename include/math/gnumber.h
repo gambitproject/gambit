@@ -8,7 +8,7 @@
 #define GNUMBER_H
 
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 
 class gOutput;
 
@@ -21,8 +21,6 @@ protected:
     gRational *rval;
     double dval;
   };
-
-  static gPool pool;
 
 public:
   class DivideByZero : public gException  {
@@ -78,4 +76,12 @@ public:
 
 gOutput &operator<<(gOutput &, const gNumber &);
 
-#endif 
+gText ToText(const gNumber &);
+gText ToText(const gNumber &p_number, int p_precision);
+gNumber	FromText(const gText &, gNumber &);
+gNumber ToNumber(const gText &);    
+
+void gEpsilon(gNumber &v, int i=8);
+
+#endif  // GNUMBER_H
+

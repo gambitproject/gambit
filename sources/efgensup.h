@@ -6,7 +6,7 @@
 
 #include "efg.h"
 #include "efgciter.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gstatus.h"
 #include "efdom.h"
 

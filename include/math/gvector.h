@@ -7,8 +7,7 @@
 #ifndef GVECTOR_H
 #define GVECTOR_H
 
-#include "base/gmisc.h"
-#include "base/gstream.h"
+#include "base/base.h"
 
 template <class T> class gMatrix;
 

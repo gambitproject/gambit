@@ -5,7 +5,7 @@
 //
 
 #include "behav.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 class ChanceInfoset;
 

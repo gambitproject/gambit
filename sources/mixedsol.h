@@ -8,8 +8,8 @@
 #define MIXEDSOL_H
 
 #include "base/base.h"
+#include "math/gnumber.h"
 #include "mixed.h"
-#include "gnumber.h"
 #include "nfplayer.h"
 #include "nfg.h"
 #include "algutils.h"  // needed for gFact

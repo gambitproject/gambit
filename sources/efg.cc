@@ -5,7 +5,7 @@
 //
 
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 
 #ifdef __GNUG__
 #pragma implementation "outcome.h"

@@ -273,7 +273,6 @@ gNumber Sfg::Payoff(const gArray<int> & index,int pl) const
 template class gNArray<gArray<gNumber> *>;
 template class gArray<gRectArray<gNumber> *>;
 template gOutput &operator<<(gOutput &, const gArray<gNumber> &);
-template gOutput &operator<<(gOutput &, const gRectArray<gNumber> &);
 template class gArray<gList<Infoset *> >;
 template gOutput &operator<<(gOutput &, const gArray<gList<Infoset *> > &);
 template gOutput &operator<<(gOutput &, const gList<Infoset *> &);

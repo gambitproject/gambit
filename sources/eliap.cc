@@ -7,7 +7,7 @@
 #include "eliap.h"
 
 #include "gfunc.h"
-#include "gmatrix.h"
+#include "math/gmatrix.h"
 
 EFLiapParams::EFLiapParams(void)
   : nTries(10)

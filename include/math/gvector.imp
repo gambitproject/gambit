@@ -1,0 +1,191 @@
+//
+// FILE: gvector.imp -- Implementation of vector class
+//
+// $Id$
+//
+
+#include "gvector.h"
+#include "base/base.h"
+
+template <class T> gText gVector<T>::BadDim::Description(void) const
+{
+  return "Mismatched vector lengths";
+}
+
+//------------------------------------------------------------------------
+//     gVector<T>: Constructors, destructor, constructive operators
+//------------------------------------------------------------------------
+
+template <class T> gVector<T>::gVector(unsigned int len) : gArray<T>(len) 
+{ }
+
+template <class T> gVector<T>::gVector(int low, int high) 
+  : gArray<T>(low, high)
+{ }
+
+template <class T> gVector<T>::gVector(const gVector<T> &V) 
+  : gArray<T>(V) 
+{ }
+
+template <class T> gVector<T>::~gVector()   { }
+
+template <class T> gVector<T>& gVector<T>::operator=(const gVector<T>& V)
+{
+  if (!Check(V))   throw BadDim();
+  gArray<T>::operator=(V);
+  return *this;
+}
+
+
+//------------------------------------------------------------------------
+// inline arithmetic operators
+//------------------------------------------------------------------------
+
+template <class T> bool gVector<T>::operator!=(const gVector<T> &V) const
+{ return !(*this == V); }
+
+template <class T> bool gVector<T>::operator!=(T c) const
+{ return !(*this == c); }
+
+
+//------------------------------------------------------------------------
+// inline internal functions
+//------------------------------------------------------------------------
+
+template <class T> bool gVector<T>::Check(const gVector<T> &v) const
+{ return( v.mindex == mindex && v.maxdex == maxdex ); }
+
+
+//------------------------------------------------------------------------
+//	gVector: arithmetic operators
+//------------------------------------------------------------------------
+
+template<class T> gVector<T>& gVector<T>::operator=(T c)
+{
+  for(int i=mindex; i<=maxdex; i++)
+    (*this)[i]= c;
+  return (*this);
+}
+
+// arithmetic operators
+template <class T> gVector<T>
+gVector<T>::operator+(const gVector<T>& V) const
+{
+  if (!Check(V))   throw BadDim();
+
+  gVector<T> tmp(mindex,maxdex);
+  for(int i=mindex; i<=maxdex; i++)
+    tmp[i]= (*this)[i] + V[i];
+  return tmp;
+}
+
+template <class T> gVector<T>
+gVector<T>::operator-(const gVector<T>& V) const
+{
+  if (!Check(V))   throw BadDim();
+
+  gVector<T> tmp(mindex,maxdex);
+  for(int i=mindex; i<=maxdex; i++)
+    tmp[i]= (*this)[i] - V[i];
+  return tmp;
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator+=(const gVector<T>& V)
+{
+  if (!Check(V))   throw BadDim();
+
+  for(int i=mindex; i<=maxdex; i++)
+    (*this)[i] += V[i];
+  return (*this);
+}
+
+template <class T> gVector<T>&
+gVector<T>::operator-=(const gVector<T>& V)
+{
+  if (!Check(V))    throw BadDim();
+
+  for(int i=mindex; i<=maxdex; i++)
+    (*this)[i] -= V[i];
+  return (*this);
+}
+
+template <class T> gVector<T> gVector<T>::operator-(void)
+{
+  gVector<T> tmp(mindex,maxdex);
+  for(int i=mindex; i<=maxdex; i++)
+    tmp[i]= -(*this)[i];
+  return tmp;
+}
+
+template <class T> gVector<T> gVector<T>::operator*(T c) const
+{
+  gVector<T> tmp(mindex,maxdex);
+  for(int i=mindex; i<=maxdex; i++)
+    tmp[i]= (*this)[i]*c;
+  return tmp;
+}
+
+template <class T> gVector<T> &gVector<T>::operator*=(T c)
+{
+  for(int i=mindex; i<=maxdex; i++)
+    (*this)[i] *= c;
+  return (*this);
+}
+
+template <class T> T gVector<T>::operator*(const gVector<T>& V) const
+{
+  if (!Check(V))   throw BadDim();
+
+  T sum= (T)0;
+  for(int i=mindex; i<=maxdex; i++)
+    sum += (*this)[i] * V[i];
+  return sum;
+}
+
+
+template <class T> gVector<T> gVector<T>::operator/(T c) const
+{
+  gVector<T> tmp(mindex,maxdex);
+  for(int i=mindex; i<=maxdex; i++)
+    tmp[i]= (*this)[i]/c;
+  return tmp;
+}
+
+
+template <class T> bool gVector<T>::operator==(const gVector<T>& V) const
+{
+  if (!Check(V))   throw BadDim();
+
+  for(int i=mindex; i<=maxdex; i++)
+    if( (*this)[i] != V[i] )
+      return false;
+  return true;
+}
+
+template <class T> bool gVector<T>::operator==(T c) const
+{
+  for(int i=mindex; i<=maxdex; i++)
+    if( (*this)[i] != c )
+      return false;
+  return true;
+}
+
+template <class T> T gVector<T>::NormSquared(void) const
+{
+  T answer = (T)0;
+  for (int i = 1; i <= Length(); i++)
+    answer += (*this)[i] * (*this)[i];
+  return answer;
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gVector<T> &V)
+{ V.Dump(f);  return f; }
+
+template <class T> gVector<gDouble> TogDouble(const gVector<T>& V)
+{
+  gVector<gDouble> answer(V.Length());
+  for (int i = 1; i <= V.Length(); i++)
+    answer[i] = (gDouble)V[i];
+  return answer;
+}

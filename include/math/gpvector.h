@@ -7,7 +7,7 @@
 #ifndef GPVECTOR_H
 #define GPVECTOR_H
 
-#include "gvector.h"
+#include "math/gvector.h"
 
 template <class T> class gPVector : public gVector<T> {
  private:

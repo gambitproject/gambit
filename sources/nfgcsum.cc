@@ -5,7 +5,7 @@
 //
 
 #include "nfgcsum.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 //---------------------------------------------------------------------------
 //                        ZSumParams: member functions

@@ -9,7 +9,7 @@
 
 #include <assert.h>
 #include "base/gstream.h"
-#include "gvector.h"
+#include "math/gvector.h"
 
 //
 // Basic n-dimensional array

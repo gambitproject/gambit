@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------
 
 //DEBUG
-#include "gsmatrix.h"
+#include "math/gsmatrix.h"
 
 template <class T> 
 LinearCombination<T>::LinearCombination(const gMatrix<T> &M)

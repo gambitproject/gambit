@@ -7,9 +7,9 @@
 #ifndef GPOLY_H
 #define GPOLY_H
 
+#include "math/gsmatrix.h"
 #include "monomial.h"
 #include "poly.h"
-#include "gsmatrix.h"
 
 // These classes are used to store and mathematically manipulate polynomials.
 

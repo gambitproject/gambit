@@ -11,7 +11,7 @@
 #include <new.h>
 
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gsmconsole.h"
 #include "gcompile.h"
 #include "gcmdline.h"

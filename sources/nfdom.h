@@ -10,7 +10,7 @@
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfgciter.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gstatus.h"
 #include "nfplayer.h"
 #include "mixed.h"

@@ -6,12 +6,12 @@
 //
 
 #include "gpolylst.imp"
-#include "double.h"
-#include "gnumber.h"
+#include "math/double.h"
 #include "base/glist.imp"
 #include "base/garray.imp"
 #include "base/grarray.imp"
-#include "gmatrix.imp"
+#include "math/gnumber.h"
+#include "math/gmatrix.imp"
 
 //template class gPolyList<int>;
 //template gOutput &operator<<(gOutput &f, const gPolyList<int> &y);

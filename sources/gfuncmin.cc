@@ -10,7 +10,8 @@
 #include "gfunc.h"
 #include "gstatus.h"
 
-#include "gvector.h"
+#include "math/math.h"
+#include "math/gvector.h"
 
 static const double GOLD = 1.618034;
 static const double TINY = 1.0e-20;
@@ -328,7 +329,7 @@ void RayMin(gFunction<double> &func,
 }
 
 
-#include "gpvector.h"
+#include "math/gpvector.h"
 
 void Project(gVector<double> &x,
 	     const gArray<int> &lengths)
@@ -348,7 +349,7 @@ void Project(gVector<double> &x,
   }
 }
 
-#include "gmatrix.h"
+#include "math/gmatrix.h"
 
 bool DFP(gPVector<double> &p,
 	 gC2Function<double> &func,

@@ -2,7 +2,7 @@
 /*  $Id$ */
 #include <ctype.h>
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"

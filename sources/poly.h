@@ -6,11 +6,11 @@
 
 #include <assert.h>
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "interval.h"
-#include "gvector.h"
-#include "double.h"
-#include "complex.h"
+#include "math/gvector.h"
+#include "math/double.h"
+#include "math/complex.h"
 
 /*  This file supplies the template class
 

@@ -5,7 +5,7 @@
 //
 
 #include "efgcsum.imp"
-#include "rational.h"
+#include "math/rational.h"
 
 //---------------------------------------------------------------------------
 //                        EFCSumParams: member functions

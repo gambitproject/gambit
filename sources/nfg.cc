@@ -5,7 +5,7 @@
 // $Id$
 //
 
-#include "rational.h"
+#include "math/rational.h"
 #include "nfg.h"
 #include "nfstrat.h"
 #include "nfplayer.h"

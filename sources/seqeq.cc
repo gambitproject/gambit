@@ -26,7 +26,7 @@ int SequentialEquilib(const EFBasis &b, const EFSupport &B,
   return 1;
 }
 
-#include "double.h"
+#include "math/double.h"
 
 template class SequentialEquilibModule<gDouble>;
 

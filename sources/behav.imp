@@ -11,7 +11,7 @@
 #include "outcome.h"
 #include "efgutils.h"
 
-#include "gvector.h"
+#include "math/gvector.h"
 #include "behavsol.h"
 
 #include "nfg.h"

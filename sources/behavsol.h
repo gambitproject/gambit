@@ -8,8 +8,8 @@
 #define BEHAVSOL_H
 
 #include "base/base.h"
+#include "math/gnumber.h"
 #include "behav.h"
-#include "gnumber.h"
 #include "efg.h"
 #include "algutils.h"  // needed for gFact
 

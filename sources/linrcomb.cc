@@ -5,9 +5,9 @@
 //
 
 #include "linrcomb.imp"
-#include "gvector.imp"
-#include "gmatrix.imp"
-#include "double.h"
+#include "math/gvector.imp"
+#include "math/gmatrix.imp"
+#include "math/double.h"
 
 template gOutput & operator<< (gOutput&, const gMatrix<gDouble>&);
 template gVector<gDouble> operator* (const gVector<gDouble>&,

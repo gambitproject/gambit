@@ -7,17 +7,16 @@
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "base/base.h"
-#include "gnumber.h"
 #include <math.h>
 #include <values.h>
 #include <float.h>
 #include <ctype.h>
+#include "base/base.h"
+#include "math/math.h"
+#include "math/gnumber.h"
 
 gText gNumber::DivideByZero::Description(void) const
 { return "Divide by zero in gNumber"; }
-
-gPool gNumber::pool(sizeof(gNumber));
 
 //-------------------------------------------------------------------------
 //     gNumber: Constructors, Destructor, and Constructive Operators
@@ -445,5 +444,48 @@ bool gNumber::IsInteger(void) const
 {
   return ((rep == precDOUBLE && fmod(dval, 1.0) == 0.0) ||
 	  (rep == precRATIONAL && rval->denominator() == 1));
+}
+
+gText ToText(const gNumber &n)
+{
+  if (n.Precision() == precDOUBLE)
+    return ToText((double) n);
+  else
+    return ToText(n.operator gRational());
+}
+
+gText ToText(const gNumber &p_number, int p_precision)
+{
+  if (p_number.Precision() == precDOUBLE)
+    return ToText((double) p_number, p_precision);
+  else
+    return ToText(p_number.operator gRational());
+}
+
+// Rational if there is no decimal point
+gNumber FromText(const gText &s,gNumber &n)
+{
+  gRational r;
+  double d;
+  gText tmp=s;
+  if (tmp.LastOccur('.'))
+    n=FromText(s,d);
+  else
+    n=FromText(s,r);
+  return n;
+}
+
+gNumber ToNumber(const gText &p_string)
+{
+  gNumber tmp;
+  return FromText(p_string, tmp);
+}
+
+void gEpsilon(gNumber &n, int i)
+{
+  if (n.Precision() == precRATIONAL)
+    n = (gRational)0;
+  else
+    n = pow(10.0,(double)-i);
 }
 

@@ -4,7 +4,7 @@
 // $Id$
 //
 
-
+#include "math/math.h"
 #include "mixedsol.h"
 #include "nfdom.h"
 

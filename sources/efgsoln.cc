@@ -7,7 +7,7 @@
 #include "wx/wx.h"
 #include "wxmisc.h"
 #include "base/base.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "efgsoln.h"
 #include "treedraw.h"
 #include "treewin.h"

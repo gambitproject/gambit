@@ -24,6 +24,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #define _Integer_h 1
 
+#include "base/gtext.h"
+
 class gInput;
 class gOutput;
 
@@ -282,8 +284,7 @@ extern char*    hex(const gInteger& x, int width = 0);
 extern gInteger  sqrt(const gInteger&); // floor of square root
 extern gInteger  lcm(const gInteger& x, const gInteger& y); // least common mult
 
-
-typedef gInteger IntTmp; // for backward compatibility
+gText ToText(const gInteger &);
 
 #endif /* _Integer_h */
 

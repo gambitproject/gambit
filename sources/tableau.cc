@@ -4,9 +4,9 @@
 // $Id$
 //
 
-#include "rational.h"
+#include "math/rational.h"
 #include "tableau.imp"
-#include "gmatrix.imp"
+#include "math/gmatrix.imp"
 #include "base/grarray.imp"
 
 

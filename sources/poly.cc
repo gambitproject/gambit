@@ -5,8 +5,8 @@
 //
 
 #include "poly.imp"
-#include "double.h"
-#include "gnumber.h"
+#include "math/double.h"
+#include "math/gnumber.h"
 
 template class polynomial<gRational>;
 template gOutput& operator << (gOutput& output, 

@@ -4,7 +4,7 @@
 // $Id$
 //
 
-#include "rational.h"
+#include "math/rational.h"
 
 #include "base/garray.imp"
 #include "base/gblock.imp"

@@ -25,7 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "base/gstream.h"
-#include "rational.h"
+#include "math/rational.h"
 #include "gnulib.h"
 #include <math.h>
 #include <values.h>
@@ -599,4 +599,70 @@ gRational operator / (const gRational& x, const gRational& y)
   gRational r; div(x, y, r); return r;
 }
 #endif
+
+
+gText ToText(const gRational &r)
+{
+  const int GCONVERT_BUFFER_LENGTH = 255;
+  char gconvert_buffer[GCONVERT_BUFFER_LENGTH];
+
+  strncpy(gconvert_buffer, Itoa(r.numerator()), GCONVERT_BUFFER_LENGTH);
+  if (r.denominator() != gInteger(1)) {
+    strcat(gconvert_buffer, "/");
+    strncat(gconvert_buffer, Itoa(r.denominator()), GCONVERT_BUFFER_LENGTH);
+  }
+  
+  return gText(gconvert_buffer);
+}
+
+gRational FromText(const gText &f,gRational &y)
+{
+  char ch = ' ';
+  int sign = 1;
+  int index=0,length=f.Length();
+  gInteger num = 0, denom = 1;
+
+  while (isspace(ch) && index<=length)    ch=f[index++];
+
+  if (ch == '-' && index<=length)  {
+    sign = -1;
+    ch=f[index++];
+  }
+
+  while (ch >= '0' && ch <= '9' && index<=length)   {
+    num *= 10;
+    num += (int) (ch - '0');
+    ch=f[index++];
+  }
+
+  if (ch == '/')  {
+    denom = 0;
+    ch=f[index++];
+    while (ch >= '0' && ch <= '9' && index<=length)  {
+      denom *= 10;
+      denom += (int) (ch - '0');
+      ch=f[index++];
+    }
+  }
+  else if (ch == '.')  {
+    denom = 1;
+    ch=f[index++];
+    while (ch >= '0' && ch <= '9' && index<=length)  {
+      denom *= 10;
+      num *= 10;
+      num += (int) (ch - '0');
+      ch=f[index++];
+    }
+  }
+
+  if (denom != 0)
+    y = gRational(sign * num, denom);
+  else
+    y = gRational(sign * num);
+  return y;
+}
+
+void gEpsilon(gRational &v, int /* i */)
+{ v = (gRational)0;}
+
 

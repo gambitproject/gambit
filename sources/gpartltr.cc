@@ -48,3 +48,19 @@ template gOutput &operator<<(gOutput &f,
 //template gOutput &operator<<(gOutput &f, 
 //			     const ListOfPartialTrees<double> &y);
 
+#include "base/gtree.imp"
+
+template class gTreeNode<gPoly<gRational> >;
+template class gList<gTreeNode<gPoly<gRational> >*>;
+template class gTree<gPoly<gRational> >;
+template class gList<gTree<gPoly<gRational> > >;
+template gOutput& operator << (gOutput& output, 
+			       const gTree<gPoly<gRational> >&);
+
+template class gTreeNode<gPoly<gDouble> >;
+template class gList<gTreeNode<gPoly<gDouble> >*>;
+template class gTree<gPoly<gDouble> >;
+template class gList<gTree<gPoly<gDouble> > >;
+template gOutput& operator << (gOutput& output, 
+			       const gTree<gPoly<gDouble> >&);
+

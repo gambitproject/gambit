@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "math/math.h"
 #include "behavsol.h"
 #include "lexicon.h"  // needed for ReducedNormalFormRegrets
 

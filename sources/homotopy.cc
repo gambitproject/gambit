@@ -8,7 +8,7 @@
 #include <math.h>
 #include "homotopy.h"
 #include "hompack.h"
-#include "gmatrix.h"
+#include "math/gmatrix.h"
 #include "nfgciter.h"
 
 HomQreParams::HomQreParams(void)

@@ -8,20 +8,19 @@
 #pragma implementation
 #endif
 
-#include "double.h"
-#include "gnulib.h"
-#include "gvector.imp"
-#include "base/garray.imp"
-#include "base/gblock.imp"
-#include "base/grarray.imp"
-#include "gmatrix.imp"
-#include "monomial.imp"
-#include "base/glist.imp"
 #include <math.h>
 #include <values.h>
 #include <float.h>
 #include <assert.h>
 #include <ctype.h>
+
+#include "math/double.h"
+#include "math/gvector.imp"
+#include "base/garray.imp"
+#include "base/gblock.imp"
+#include "base/grarray.imp"
+#include "math/gmatrix.imp"
+#include "base/glist.imp"
 
 //--------------------------------------------------------------------------
 //                              class: gDouble
@@ -213,7 +212,7 @@ gDouble abs(const gDouble& x)
 
 gDouble sqr(const gDouble& x)
 {
-  return gDouble(sqr(x.dbl));
+  return gDouble(x.dbl * x.dbl);
 }
 
 gDouble sqrt(const gDouble& x)
@@ -257,3 +256,4 @@ template class gBlock<gDouble>;
 template class gRectArray<gDouble>;
 template class gMatrix<gDouble>;
 template gOutput & operator<< (gOutput&, const gVector<gDouble>&);
+

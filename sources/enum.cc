@@ -40,7 +40,7 @@ int Enum(const NFSupport &support, const EnumParams &params,
   return 1;
 }
 
-#include "rational.h"
+#include "math/rational.h"
 
 template class EnumModule<double>;
 template class EnumModule<gRational>;

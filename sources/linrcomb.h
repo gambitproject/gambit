@@ -18,9 +18,8 @@ independent.
 #ifndef LINRCOMB_H
 #define LINRCOMB_H
 
-
-#include "gmatrix.h"
-#include "rational.h"
+#include "math/rational.h"
+#include "math/gmatrix.h"
 
 template <class T> class LinearCombination  {
   private:

@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include "base/glist.imp"
-#include "double.h"
+#include "math/double.h"
 #include "rectangl.imp"
 
 template class gRectangle<gRational>;

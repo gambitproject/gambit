@@ -4,8 +4,8 @@
 // $Id$
 //
 
-#include "gmatrix.imp"
-#include "rational.h"
+#include "math/gmatrix.imp"
+#include "math/rational.h"
 
 template class gMatrix<double>;
 template class gMatrix<gRational>;

@@ -8,10 +8,10 @@
 #define LPSOLVE_H
 
 #include "base/base.h"
+#include "math/gsmatrix.h"
 #include "lptab.h"
 #include "bfs.h"
 #include "gstatus.h"
-#include "gsmatrix.h"
 #include "vertenum.h"
 
 //

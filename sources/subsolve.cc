@@ -10,7 +10,7 @@
 #include "efgutils.h"
 #include "nfg.h"
 #include "nfstrat.h"
-#include "rational.h"
+#include "math/rational.h"
 
 #include "subsolve.h"
 

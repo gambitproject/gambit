@@ -8,8 +8,8 @@
 #define EFSTRAT_H
 
 #include "base/base.h"
+#include "math/gpvector.h"
 #include "efg.h"
-#include "gpvector.h"
 #include "gstatus.h"
 
 class Action;

@@ -7,8 +7,8 @@
 #include <assert.h>
 #include "interval.imp"
 #include "base/glist.imp"
-#include "double.h"
-#include "gnumber.h"
+#include "math/double.h"
+#include "math/gnumber.h"
 
 template class gInterval<gRational>;
 template class gList< gInterval<gRational> >;

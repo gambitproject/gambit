@@ -9,6 +9,8 @@
 #include "wx/help.h"  // for help
 #include "wx/config.h"  // for config
 
+#include "math/math.h"
+
 #ifdef __BORLANDC__
 #pragma hdr_stop
 #endif  // __BORLANDC__

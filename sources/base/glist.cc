@@ -6,11 +6,7 @@
 
 #include "base/base.h"
 #include "base/glist.imp"
-#include "rational.h"
-#include "gnumber.h"
 
-template class gList<gRational>;
-template class gList<gNumber>;
 template class gList<int>;
 template class gList<long>;
 template class gList<double>;

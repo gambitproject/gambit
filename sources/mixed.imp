@@ -9,7 +9,7 @@
 #include "nfstrat.h"
 
 
-#include "gpvector.h"
+#include "math/gpvector.h"
 #include "mixed.h"
 #include "mixedsol.h"
 

@@ -5,6 +5,7 @@
 //
 
 #include "quiksolv.h"
+#include "math/math.h"
 
 //---------------------------------------------------------------
 //                      class: QuikSolv

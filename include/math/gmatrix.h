@@ -8,7 +8,7 @@
 #define GMATRIX_H
 
 #include "base/grarray.h"
-#include "gvector.h"
+#include "math/gvector.h"
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:

@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "base/base.h"
-#include "rational.h"
-#include "gnumber.h"
+#include "math/rational.h"
+#include "math/gnumber.h"
 #include "efg.h"
 
 

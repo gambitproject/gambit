@@ -12,7 +12,7 @@
 #endif  // __GNUG__
 
 #include "wx/validate.h"
-#include "gnumber.h"
+#include "math/gnumber.h"
 
 class gNumberValidator : public wxValidator {
 protected:

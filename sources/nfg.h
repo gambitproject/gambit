@@ -8,7 +8,7 @@
 #define NFG_H
 
 #include "base/base.h"
-#include "gnumber.h"
+#include "math/gnumber.h"
 #include "nfplayer.h"
 
 class NFOutcome;

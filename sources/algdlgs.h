@@ -11,7 +11,7 @@
 #include "wx/wx.h"
 #include "wxmisc.h"
 
-#include "gnumber.h"  
+#include "math/gnumber.h"  
 
 //=========================================================================
 //                 dialogAlgorithm: Class declaration

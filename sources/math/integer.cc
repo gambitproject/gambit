@@ -31,7 +31,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "base/gstream.h"
-#include "integer.h"
+#include "math/integer.h"
 #include "gnulib.h"
 #include <ctype.h>
 #include <float.h>
@@ -3181,3 +3181,9 @@ void gInteger::operator %= (long y)
 {
   *this = *this % y; // mod(*this, y, *this) doesn't work.
 }
+
+gText ToText(const gInteger &i)
+{
+  return gText(Itoa(i));
+}
+

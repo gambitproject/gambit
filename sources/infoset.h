@@ -11,7 +11,7 @@
 #pragma interface
 #endif   // __GNUG__
 
-#include "gvector.h"
+#include "math/gvector.h"
 
 #include "efplayer.h"
 

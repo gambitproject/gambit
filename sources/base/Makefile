@@ -4,8 +4,7 @@ CFLAGS = -Wall $(DEFINES) -fguiding-decls $(INCDIR)
 OBJECT_SUFFIX = .o
 
 SOURCES = garray.cc gblock.cc glist.cc gmisc.cc gpool.cc \
-          grarray.cc grblock.cc gstream.cc gtext.cc gtree.cc \
-          gwatch.cc
+          grarray.cc gstream.cc gtext.cc gwatch.cc
 
 OBJECTS = $(SOURCES:.cc=.o)
 

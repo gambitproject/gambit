@@ -6,10 +6,10 @@
 
 #include "monomial.imp"
 #include "base/glist.imp"
-#include "double.h"
+#include "math/double.h"
 #include "base/garray.imp"
 #include "base/gblock.imp"
-#include "gnumber.h"
+#include "math/gnumber.h"
 
 template class gMono<int>;
 template gOutput& operator << (gOutput& output, const gMono<int>& x);

@@ -5,7 +5,7 @@
 //
 
 #include "quiksolv.imp"
-#include "double.h"
+#include "math/double.h"
 #include "base/grarray.imp"
 
 template class gRectArray<bool>;

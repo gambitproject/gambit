@@ -9,7 +9,7 @@
 
 #include "base/gstream.h"
 #include "gstatus.h"
-#include "gnumber.h"
+#include "math/gnumber.h"
 
 class AlgParams   {
 protected:
