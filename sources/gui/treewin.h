@@ -54,6 +54,7 @@ public:
   EfgShow *Parent(void) const { return m_parent; }
   
   virtual void OnDraw(wxDC &dc);
+  void OnDraw(wxDC &, double);
 
   void RefreshTree(void);
   void RefreshLayout(void);

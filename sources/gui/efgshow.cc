@@ -143,16 +143,13 @@ EfgShow::EfgShow(efgGame &p_efg, wxWindow *p_parent)
 
   CreateStatusBar();
 
-  wxAcceleratorEntry entries[8];
+  wxAcceleratorEntry entries[5];
   entries[0].Set(wxACCEL_CTRL, (int) 'N', wxID_NEW);
   entries[1].Set(wxACCEL_CTRL, (int) 'O', wxID_OPEN);
   entries[2].Set(wxACCEL_CTRL, (int) 'S', wxID_SAVE);
   entries[3].Set(wxACCEL_CTRL, (int) 'P', wxID_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int) 'X', wxID_EXIT);
-  entries[5].Set(wxACCEL_NORMAL, WXK_F1, wxID_HELP_CONTENTS);
-  entries[6].Set(wxACCEL_NORMAL, (int) '+', efgmenuVIEW_ZOOMIN);
-  entries[7].Set(wxACCEL_NORMAL, (int) '-', efgmenuVIEW_ZOOMOUT);
-  wxAcceleratorTable accel(8, entries);
+  wxAcceleratorTable accel(5, entries);
   SetAcceleratorTable(accel);
 
   MakeMenus();
@@ -1123,20 +1120,20 @@ void EfgShow::OnViewSupports(wxCommandEvent &)
   AdjustSizes();
 }
 
-const float ZOOM_DELTA = .1;
-const float ZOOM_MAX = 1;
-const float ZOOM_MIN = .2;
+const double ZOOM_DELTA = .1;
+const double ZOOM_MAX = 1;
+const double ZOOM_MIN = .2;
 
 void EfgShow::OnViewZoomIn(wxCommandEvent &)
 {
-  float zoom = m_treeWindow->GetZoom();
+  double zoom = m_treeWindow->GetZoom();
   zoom = gmin(zoom + ZOOM_DELTA, ZOOM_MAX);
   m_treeWindow->SetZoom(zoom);
 }
 
 void EfgShow::OnViewZoomOut(wxCommandEvent &)
 {
-  float zoom = m_treeWindow->GetZoom();
+  double zoom = m_treeWindow->GetZoom();
   zoom = gmax(zoom - ZOOM_DELTA, ZOOM_MIN);
   m_treeWindow->SetZoom(zoom);
 }

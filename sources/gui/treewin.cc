@@ -238,11 +238,6 @@ void TreeWindow::SetZoom(double p_zoom)
   Refresh();
 }
 
-//
-// Draws the tree to device context 'dc'.  Assumes zoom has already been
-// set in 'dc', and ignores 'm_zoom'.  Currently only used by
-// the printing code.
-//
 void TreeWindow::OnDraw(wxDC &dc)
 {
   if (m_parent->Cursor()) {
@@ -253,10 +248,20 @@ void TreeWindow::OnDraw(wxDC &dc)
     UpdateCursor();
   }
     
+  dc.SetUserScale(m_zoom, m_zoom);
   dc.BeginDrawing();
   dc.Clear();
   m_layout.Render(dc);
   dc.EndDrawing();
+}
+
+void TreeWindow::OnDraw(wxDC &p_dc, double p_zoom)
+{
+  // Bit of a hack: this allows us to set zoom separately in printout code
+  double saveZoom = m_zoom;
+  m_zoom = p_zoom;
+  OnDraw(p_dc);
+  m_zoom = saveZoom;
 }
 
 void TreeWindow::EnsureCursorVisible(void)

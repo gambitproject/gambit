@@ -60,7 +60,7 @@ bool EfgPrintout::OnPrintPage(int)
   dc->SetDeviceOrigin((long) posX, (long) posY);
 
   // Draw!
-  m_treeWindow->OnDraw(*dc);
+  m_treeWindow->OnDraw(*dc, actualScale);
     
   return true;
 }
