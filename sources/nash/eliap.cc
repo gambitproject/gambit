@@ -9,21 +9,22 @@
 
 #include "eliap.h"
 #include "math/gmatrix.h"
-#include "numerical/gfunc.h"
+#include "numerical/gfuncmin.h"
 
-class EFLiapFunc : public gFunction<double>  {
-  private:
-    long _nevals;
-    const efgGame &_efg;
-    BehavProfile<double> _p;
+class EFLiapFunc : public gC1Function<double>  {
+private:
+  mutable long _nevals;
+  const efgGame &_efg;
+  mutable BehavProfile<double> _p;
 
-    double Value(const gVector<double> &x);
+  double Value(const gVector<double> &x) const;
+  bool Gradient(const gVector<double> &, gVector<double> &) const;
 
-  public:
-    EFLiapFunc(const efgGame &, const BehavProfile<double> &);
-    virtual ~EFLiapFunc();
+public:
+  EFLiapFunc(const efgGame &, const BehavProfile<double> &);
+  virtual ~EFLiapFunc();
     
-    long NumEvals(void) const  { return _nevals; }
+  long NumEvals(void) const  { return _nevals; }
 };
 
 
@@ -36,12 +37,55 @@ EFLiapFunc::~EFLiapFunc()
 { }
 
 
-double EFLiapFunc::Value(const gVector<double> &v)
+double EFLiapFunc::Value(const gVector<double> &v) const
 {
   _nevals++;
   ((gVector<double> &) _p).operator=(v);
     //_p = v;
   return _p.LiapValue();
+}
+
+//
+// This function projects a gradient into the plane of the simplex.
+// (Actually, it works by computing the projection of 'x' onto the
+// vector perpendicular to the plane, then subtracting to compute the
+// component parallel to the plane.)
+//
+static void Project(gVector<double> &x, const gArray<int> &lengths)
+{
+  int index = 1;
+  for (int part = 1; part <= lengths.Length(); part++)  {
+    double avg = 0.0;
+    int j;
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      avg += x[index];
+    }
+    avg /= (double) lengths[part];
+    index -= lengths[part];
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      x[index] -= avg;
+    }
+  }
+}
+
+bool EFLiapFunc::Gradient(const gVector<double> &x,
+			  gVector<double> &grad) const
+{
+  const double DELTA = .00001;
+
+  ((gVector<double> &) _p).operator=(x);
+  for (int i = 1; i <= x.Length(); i++) {
+    _p[i] += DELTA;
+    double value = Value(_p.GetDPVector());
+    _p[i] -= 2.0 * DELTA;
+    value -= Value(_p.GetDPVector());
+    _p[i] += DELTA;
+    grad[i] = value / (2.0 * DELTA);
+  }
+
+  Project(grad, _p.GetPVector().Lengths());
+
+  return true;
 }
 
 static void PickRandomProfile(BehavProfile<double> &p)
@@ -67,38 +111,6 @@ static void PickRandomProfile(BehavProfile<double> &p)
     }
   }
 }
-
-
-static void AddSolution(gList<BehavSolution> &solutions,
-			const BehavProfile<double> &profile,
-		        double /*value*/, double epsilon)
-{
-  int index = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
-  solutions[index].SetEpsilon(epsilon);
-}
-
-extern void Project(gVector<double> &, const gArray<int> &);
-
-static void InitMatrix(gMatrix<double> &xi, const gArray<int> &dim)
-{
-  xi.MakeIdent();
-
-  gVector<double> foo(xi.NumColumns());
-  for (int i = 1; i <= xi.NumRows(); i++)   {
-    xi.GetRow(i, foo);
-    Project(foo, dim);
-    xi.SetRow(i, foo);
-  }
-}
-
-extern bool Powell(gPVector<double> &p,
-		   gMatrix<double> &xi,
-		   gFunction<double> &func,
-		   double &fret, int &iter,
-		   int maxits1, double tol1, int maxitsN, double tolN,
-		   gOutput &tracefile, int tracelevel, bool interior,
-		   gStatus &status);
-
 
 efgLiap::efgLiap(void)
   : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
@@ -133,29 +145,31 @@ gList<BehavSolution> efgLiap::Solve(const EFSupport &p_support,
        (m_stopAfter == 0 || solutions.Length() < m_stopAfter); 
        i++)   {
     p_status.Get();
-    if (i > 1)  PickRandomProfile(p);
+    p_status.SetProgress((double) i / (double) m_numTries,
+			 gText("Attempt ") + ToText(i) + 
+			 gText(", equilibria so far: ") +
+			 ToText(solutions.Length())); 
+    gConjugatePR minimizer(p.Length());
+    gVector<double> gradient(p.Length()), dx(p.Length());
+    double fval;
+    minimizer.Set(F, p.GetDPVector(), fval, gradient, .01, .0001);
 
-    InitMatrix(xi, p.Lengths());
-    
-    gPVector<double> pvect(p.GetPVector());
-    gNullOutput gnull;
-    if (Powell(pvect, xi, F, value, iter,
-	       m_maxits1, m_tol1, m_maxitsN, 
-	       m_tolN, gnull, 0, true, 
-	       p_status)) {
-      p = pvect;
-      bool add = true;
-      int ii=1;
-      while(ii<=solutions.Length() && add == true) {
-	if(solutions[ii].Equals(p)) 
-	  add = false;
-	ii++;
+    for (int iter = 1; iter <= m_maxitsN; iter++) {
+      if (iter % 20 == 0) {
+	p_status.Get();
       }
 
-      if (add)  {
-	AddSolution(solutions, p, value, pow(m_tolN,.5));
+      if (!minimizer.Iterate(F, p.GetDPVector(), fval, gradient, dx)) {
+	break;
+      }
+
+      if (sqrt(gradient.NormSquared()) < .001) {
+	solutions.Append(BehavSolution(p, algorithmEfg_LIAP_EFG));
+	break;
       }
     }
+
+    PickRandomProfile(p);
   }
 
   return solutions;

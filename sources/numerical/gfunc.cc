@@ -7,4 +7,4 @@
 #include "gfunc.h"
 
 template class gFunction<double>;
-template class gC2Function<double>;
+template class gC1Function<double>;

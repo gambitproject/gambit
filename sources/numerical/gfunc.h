@@ -16,16 +16,14 @@ template <class T> class gMatrix;
 template <class T> class gFunction   {
   public:
     virtual ~gFunction()    { }
-    virtual T Value(const gVector<T> &) = 0;
+    virtual T Value(const gVector<T> &) const = 0;
 };
 
+template <class T> class gC1Function : public gFunction<T> {
+public:
+  virtual ~gC1Function() { }
 
-template <class T> class gC2Function : public gFunction<T>   {
-  public:
-    virtual ~gC2Function()   { }
-
-    virtual bool Deriv(const gVector<T> &, gVector<T> &) = 0;
-    virtual bool Hessian(const gVector<T> &, gMatrix<T> &) = 0;
+  virtual bool Gradient(const gVector<T> &, gVector<T> &) const = 0;
 };
 
 class gFuncMinError : public gException {

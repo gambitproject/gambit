@@ -15,6 +15,7 @@ libnumerical_a_SOURCES = \
 	gfunc.cc \
 	gfunc.h \
 	gfuncmin.cc \
+	gfuncmin.h \
 	lemketab.cc \
 	lemketab.h \
 	lemketab.imp \

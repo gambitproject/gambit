@@ -25,7 +25,7 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   int NumTries(void) const { return m_numTries; }
-  void SetNumTries(int p_numTries) { m_numTries = m_numTries; }
+  void SetNumTries(int p_numTries) { m_numTries = p_numTries; }
 
   int Maxits1(void) const { return m_maxits1; }
   void SetMaxits1(int p_maxits1) { m_maxits1 = p_maxits1; }

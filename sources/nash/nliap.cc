@@ -7,25 +7,24 @@
 // Compute Nash equilibria by minimizing Liapunov function
 //
 
-#include "numerical/gfunc.h"
+#include "numerical/gfuncmin.h"
 #include "nliap.h"
 
 //---------------------------------------------------------------------
 //                        class NFLiapFunc
 //---------------------------------------------------------------------
 
-class NFLiapFunc : public gC2Function<double>   {
+class NFLiapFunc : public gC1Function<double>  {
 private:
-  long _nevals;
+  mutable long _nevals;
   const Nfg &_nfg;
-  MixedProfile<double> _p;
+  mutable MixedProfile<double> _p;
 
-  double Value(const gVector<double> &);
+  double Value(const gVector<double> &) const;
+  bool Gradient(const gVector<double> &, gVector<double> &) const;
 
-  double LiapDerivValue(int, int, const MixedProfile<double> &);
+  double LiapDerivValue(int, int, const MixedProfile<double> &) const;
     
-  bool Deriv(const gVector<double> &, gVector<double> &);
-  bool Hessian(const gVector<double> &, gMatrix<double> &);
 
 public:
   NFLiapFunc(const Nfg &, const MixedProfile<double> &);
@@ -42,13 +41,8 @@ NFLiapFunc::NFLiapFunc(const Nfg &N,
 NFLiapFunc::~NFLiapFunc()
 { }
 
-bool NFLiapFunc::Hessian(const gVector<double> &, gMatrix<double> &)
-{
-  return true;
-} 
-
 double NFLiapFunc::LiapDerivValue(int i1, int j1,
-				  const MixedProfile<double> &p)
+				  const MixedProfile<double> &p) const
 {
   int i, j;
   double x, x1, psum;
@@ -68,26 +62,51 @@ double NFLiapFunc::LiapDerivValue(int i1, int j1,
 	  x += x1 * (p.Payoff(i, i, j, i1, j1) - p.Payoff(i, i1, j1));
       }
     }
-    if (i == i1)  x += psum - 1.0;
+    if (i == i1)  x += 100.0 * (psum - 1.0);
   }
   if (p(i1, j1) < 0.0)   x += p(i1, j1);
   return 2.0 * x;
 }
 
-bool NFLiapFunc::Deriv(const gVector<double> &v, gVector<double> &d)
+//
+// This function projects a gradient into the plane of the simplex.
+// (Actually, it works by computing the projection of 'x' onto the
+// vector perpendicular to the plane, then subtracting to compute the
+// component parallel to the plane.)
+//
+static void Project(gVector<double> &x, const gArray<int> &lengths)
+{
+  int index = 1;
+  for (int part = 1; part <= lengths.Length(); part++)  {
+    double avg = 0.0;
+    int j;
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      avg += x[index];
+    }
+    avg /= (double) lengths[part];
+    index -= lengths[part];
+    for (j = 1; j <= lengths[part]; j++, index++)  {
+      x[index] -= avg;
+    }
+  }
+}
+
+bool NFLiapFunc::Gradient(const gVector<double> &v, gVector<double> &d) const
 {
   ((gVector<double> &) _p).operator=(v);
   int i1, j1, ii;
   
-  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {//
+  for (i1 = 1, ii = 1; i1 <= _nfg.NumPlayers(); i1++) {
     for (j1 = 1; j1 <= _p.Support().NumStrats(i1); j1++) {
       d[ii++] = LiapDerivValue(i1, j1, _p);
     }
   }
+
+  Project(d, _p.Lengths());
   return true;
 }
   
-double NFLiapFunc::Value(const gVector<double> &v)
+double NFLiapFunc::Value(const gVector<double> &v) const
 {
   static const double BIG1 = 100.0;
   static const double BIG2 = 100.0;
@@ -157,13 +176,6 @@ static void PickRandomProfile(MixedProfile<double> &p)
 //                  class nfgLiap: Member functions
 //---------------------------------------------------------------------
 
-extern bool DFP(gPVector<double> &p,
-		gC2Function<double> &func,
-		double &fret, int &iter,
-		int maxits1, double tol1, int maxitsN, double tolN,
-		gOutput &tracefile, int tracelevel, bool interior,
-		gStatus &status);
-
 nfgLiap::nfgLiap(void)
   : m_stopAfter(1), m_numTries(10), m_maxits1(100), m_maxitsN(20),
     m_tol1(2.0e-10), m_tolN(1.0e-10)
@@ -192,27 +204,30 @@ gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
 		   (m_stopAfter == 0 || solutions.Length() < m_stopAfter));
        i++) { 
     p_status.Get();
+    p_status.SetProgress((double) i / (double) m_numTries,
+			 gText("Attempt ") + ToText(i) + 
+			 gText(", equilibria so far: ") +
+			 ToText(solutions.Length())); 
+    gConjugatePR minimizer(p.Length());
+    gVector<double> gradient(p.Length()), dx(p.Length());
+    double fval;
+    minimizer.Set(F, p, fval, gradient, .01, .0001);
 
-    double value;
-    int iter;
-
-    gNullOutput gnull;
-    if (DFP(p, F, value, iter, m_maxits1, m_tol1,
-	    m_maxitsN, m_tolN, gnull, 0, false, p_status)) {
-      bool add = true;
-      int ii = 1;
-      while (ii <= solutions.Length() && add) {
-	if (solutions[ii].Equals(p)) {
-	  add = false;
-	  break;
-	}
-	ii++;
+    for (int iter = 1; iter <= m_maxitsN; iter++) {
+      if (iter % 20 == 0) {
+	p_status.Get();
       }
 
-      if (add)  {
-	int index = solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+      if (!minimizer.Iterate(F, p, fval, gradient, dx)) {
+	break;
+      }
+
+      if (sqrt(gradient.NormSquared()) < .001) {
+	solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
+	break;
       }
     }
+
     PickRandomProfile(p);
   }
 
