@@ -1160,7 +1160,19 @@ Portion *GSM_CompressNfg(Portion **param)
   return new NfgValPortion(M);
 }
 
-/*
+extern Nfg<double> *ConvertNfg(const Nfg<gRational> &);
+
+Portion *GSM_FloatNfg(Portion **param)
+{
+  Nfg<gRational> &orig = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
+  Nfg<double> *N = ConvertNfg(orig);
+
+  if (N)
+    return new NfgValPortion(N);
+  else
+    return new ErrorPortion("Conversion failed.");
+}
+
 extern Nfg<gRational> *ConvertNfg(const Nfg<double> &);
 
 Portion *GSM_RationalNfg(Portion **param)
@@ -1173,7 +1185,6 @@ Portion *GSM_RationalNfg(Portion **param)
   else
     return new ErrorPortion("Conversion failed.");
 }
-*/
 
 Portion *GSM_NewNfg(Portion **param)
 {
@@ -2098,13 +2109,19 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_NewNfg, 1, "rational", porBOOL,
 			new BoolValPortion(false));
   gsm->AddFunction(FuncObj);
-/*
+
+  FuncObj = new FuncDescObj("Float");
+  FuncObj->SetFuncInfo(GSM_FloatNfg, 1);
+  FuncObj->SetParamInfo(GSM_FloatNfg, 0, "nfg", porNFG_RATIONAL,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
+
   FuncObj = new FuncDescObj("Rational");
   FuncObj->SetFuncInfo(GSM_RationalNfg, 1);
   FuncObj->SetParamInfo(GSM_RationalNfg, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
-  */
+
   FuncObj = new FuncDescObj("RandomNfg");
   FuncObj->SetFuncInfo(GSM_RandomNfgFloat, 1);
   FuncObj->SetParamInfo(GSM_RandomNfgFloat, 0, "nfg", porNFG_FLOAT,
