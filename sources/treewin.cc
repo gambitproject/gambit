@@ -812,15 +812,6 @@ void TreeZoomWindow::UpdateCursor(const NodeEntry *entry)
     Render(*GetDC());
 }
 
-/*
-Bool TreeZoomWindow::OnClose(void)
-{
-  parent->delete_zoom_win();
-  return FALSE;
-}
-*/
-
-
 //----------------------------------------------------------------------
 //                      TreeWindow: Member classes
 //----------------------------------------------------------------------

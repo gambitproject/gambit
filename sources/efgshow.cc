@@ -836,6 +836,7 @@ void EfgShow::MakeMenus(void)
   inspect_menu->Append(INSPECT_GAMEINFO, "Game&Info",
                "Information about this game");
   m_inspectInfosetsItem = inspect_menu->FindItem("&Infosets");
+  m_zoomWindowItem = inspect_menu->FindItem("Zoom &Window");
   
   wxMenu *prefs_menu = new wxMenu;
   prefs_menu->Append(DISPLAY_SET_ZOOM,    "&Zoom",        "Specify zoom level");
@@ -1031,7 +1032,7 @@ void EfgShow::OnMenuCommand(int id)
       GetMenuBar()->Check(m_inspectInfosetsItem, features.iset_hilight);
       break;
     case INSPECT_ZOOM_WIN:
-      tw->display_zoom_win();
+      GetMenuBar()->Check(m_zoomWindowItem, tw->display_zoom_win());
       break;
     case INSPECT_GAMEINFO: 
       ShowGameInfo();

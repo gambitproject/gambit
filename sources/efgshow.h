@@ -76,7 +76,7 @@ private:
     gList<Accel>    accelerators;
     gText   filename;
     // checkable menu items 
-    int m_inspectInfosetsItem;
+    int m_inspectInfosetsItem, m_zoomWindowItem;
     guiEfgShowToolBar *toolbar;
 
     // Private functions

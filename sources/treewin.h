@@ -116,7 +116,6 @@ public:
   virtual void Render(wxDC &dc);
   // Makes sure the cursor is always in the center of the window
   virtual void UpdateCursor(const NodeEntry *entry);
-  //  Bool OnClose(void);
 };
 
 
@@ -267,8 +266,7 @@ public:
     void display_set_zoom(float z=-1);
     void display_zoom_fit(void);
     float display_get_zoom(void);
-    void display_zoom_win(void);
-    void delete_zoom_win(void);
+    Bool display_zoom_win(void);
     
     void  file_save(void);
     void  output(void);
