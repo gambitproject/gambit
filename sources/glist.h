@@ -126,7 +126,7 @@ template <class T> class gList  {
 //
 // Returns the first gNode in the list
 //
-    gNode<T> *First(void) const;
+    gNode<T> *const First(void) const;
     gNode<T> *First(void);
 
 //
