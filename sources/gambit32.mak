@@ -86,6 +86,15 @@ wxgcl.res
 wxgcl.res :      ..\winsrc\res\wxgcl.rc 
     brc32 -r -fo.\wxgcl.res /i$(BCCDIR)\include /i$(WXDIR)\include\wx\msw /i$(WXDIR)\include ..\winsrc\res\wxgcl
 
+gcompile.cc:     gcompile.yy
+   ..\bisondos\bison -d -h gcompile.h -o gcompile.cc gcompile.yy 
+
+readefg.cc:      readefg.yy
+   ..\bisondos\bison -d -h readefg.h -o readefg.cc readefg.yy
+
+readnfg.cc:      readnfg.yy
+   ..\bisondos\bison -d -h readnfg.h -o readnfg.cc readnfg.yy
+
 clean:
         -erase *.obj
         -erase *.exe
