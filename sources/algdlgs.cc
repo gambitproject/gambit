@@ -331,7 +331,8 @@ int PxiParamsSettings::RunPxi(void)
         gText pxi_run(pxi_command);
         pxi_run += " ";
         // if the filename includes path, use it, if not, append current dir
-        char *fname = copystring(FileNameFromPath(pxiname));
+	//        char *fname = copystring(FileNameFromPath(pxiname));
+	char *fname = copystring(pxiname);
         gText pxifilename;
 
         if (strcmp(fname, pxiname) == 0)
