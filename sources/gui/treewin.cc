@@ -369,9 +369,9 @@ void TreeWindow::UpdateCursor(void)
 
 gText TreeWindow::OutcomeAsString(const Node *n) const
 {
-  gbtEfgOutcome outcome = n->Game()->GetOutcome(n);
+  gbtEfgOutcome outcome = n->GetGame()->GetOutcome(n);
   if (!outcome.IsNull()) {
-    const gArray<gNumber> &v = n->Game()->Payoff(outcome);
+    const gArray<gNumber> &v = n->GetGame()->Payoff(outcome);
     gText tmp = "(";
 
     for (int i = v.First(); i <= v.Last(); i++) {
@@ -456,8 +456,8 @@ void TreeWindow::OnMouseMotion(wxMouseEvent &p_event)
 	  RefreshTree();
 	}
 	else if (m_dragMode == dragOUTCOME) { 
-	  node->Game()->SetOutcome(node,
-				   m_dragSource->Game()->GetOutcome(m_dragSource));
+	  node->GetGame()->SetOutcome(node,
+				      m_dragSource->GetGame()->GetOutcome(m_dragSource));
 	}
       }
       catch (gException &ex) {

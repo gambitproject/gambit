@@ -646,7 +646,7 @@ void EFBasis::Dump(gOutput& s) const
       s << '"' << infoset.GetLabel() << "\" { ";
       for (k = 1; k <= NumNodes(i, j); k++)  {
 	Node *node = nodes[i]->NodeList(j)[k];
-	s << '"' << node->GetName() << "\" ";
+	s << '"' << node->GetLabel() << "\" ";
       }
       s << "} ";
     }

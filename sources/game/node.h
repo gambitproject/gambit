@@ -65,10 +65,10 @@ class Node    {
     void DeleteOutcome(gbt_efg_outcome_rep *outc);
 
   public:
-    efgGame *Game(void) const   { return E; }
+    efgGame *GetGame(void) const   { return E; }
 
     int NumChildren(void) const    { return children.Length(); }
-    int GetNumber(void) const { return number; }
+    int GetId(void) const { return number; }
     int NumberInInfoset(void) const;
     gbtEfgInfoset GetInfoset(void) const;
     bool IsTerminal(void) const { return (children.Length() == 0); }
@@ -82,8 +82,8 @@ class Node    {
     Node *NextSibling(void) const;
     Node *PriorSibling(void) const;
 
-    const gText &GetName(void) const   { return name; }
-    void SetName(const gText &s)       { name = s; }
+    const gText &GetLabel(void) const   { return name; }
+    void SetLabel(const gText &s)       { name = s; }
 
 };
 

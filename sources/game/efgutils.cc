@@ -47,7 +47,7 @@ static void LSRDoChild(const efgGame &e, Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
     LSRDoChild(e, n->GetChild(i), list);
-  if (n->Game()->IsLegalSubgame(n))   list.Append(n);
+  if (n->GetGame()->IsLegalSubgame(n))   list.Append(n);
 }
 
 static void CSDoChild(const efgGame &e, Node *n, gList<Node *> &list)
@@ -110,7 +110,7 @@ bool HasSubgames(const efgGame &e, Node * n)
 {
   gList<Node *> list;
   LegalSubgameRoots(e, n, list);
-  if(n->Game()->IsLegalSubgame(n))
+  if (n->GetGame()->IsLegalSubgame(n))
     return list.Length()>1;
   return list.Length()>0;
 }

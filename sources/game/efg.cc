@@ -455,7 +455,7 @@ bool gbtEfgAction::Precedes(const Node *n) const
     return false;
   }
 
-  while (n != n->Game()->RootNode() ) {
+  while (n != n->GetGame()->RootNode() ) {
     if (n->GetAction().rep == rep) {
       return true;
     }
@@ -668,7 +668,7 @@ efgGame *gbtEfgInfoset::GetGame(void) const
 
 bool gbtEfgInfoset::Precedes(const Node *p_node) const
 {
-  while (p_node != p_node->Game()->RootNode()) {
+  while (p_node != p_node->GetGame()->RootNode()) {
     if (p_node->GetInfoset() == *this) {
       return true;
     }
@@ -788,7 +788,7 @@ Node *Node::PriorSibling(void) const
 
 gbtEfgAction Node::GetAction(void) const
 {
-  if (this == Game()->RootNode()) {
+  if (this == GetGame()->RootNode()) {
     return gbtEfgAction();
   }
   

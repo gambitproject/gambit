@@ -344,7 +344,7 @@ wxString efgTreeLayout::CreateNodeAboveLabel(const NodeEntry *p_entry) const
   case NODE_ABOVE_NOTHING:
     return "";
   case NODE_ABOVE_LABEL:
-    return (const char *) n->GetName();
+    return (const char *) n->GetLabel();
   case NODE_ABOVE_PLAYER:
     return ((const char *) 
 	    (!(n->GetPlayer().IsNull()) ? 
@@ -378,7 +378,7 @@ wxString efgTreeLayout::CreateNodeBelowLabel(const NodeEntry *p_entry) const
   case NODE_BELOW_NOTHING:
     return "";
   case NODE_BELOW_LABEL:
-    return (const char *) n->GetName();
+    return (const char *) n->GetLabel();
   case NODE_BELOW_PLAYER:
     return ((const char *)
 	    ((!n->GetPlayer().IsNull()) ?
@@ -414,7 +414,7 @@ wxString efgTreeLayout::CreateNodeRightLabel(const NodeEntry *p_entry) const
   case NODE_RIGHT_OUTCOME:
     return (const char *) m_parent->OutcomeAsString(node);
   case NODE_RIGHT_NAME:
-    return (const char *) node->Game()->GetOutcome(node).GetLabel();
+    return (const char *) node->GetGame()->GetOutcome(node).GetLabel();
   default:
     return "";
   }
@@ -527,7 +527,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
   int y1 = -1, yn = 0;
   const TreeDrawSettings &settings = m_parent->DrawSettings();
     
-  NodeEntry *entry = m_nodeList[p_node->GetNumber()];
+  NodeEntry *entry = m_nodeList[p_node->GetId()];
   entry->SetNextMember(0);
   if (p_node->NumChildren() > 0) {
     for (int i = 1; i <= p_node->NumChildren(); i++) {
@@ -539,7 +539,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
 
       if (!p_node->GetPlayer().IsChance() &&
 	  !p_support.Contains(p_node->GetInfoset().GetAction(i))) {
-	m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
+	m_nodeList[p_node->GetChild(i)->GetId()]->SetInSupport(false);
       }
     }
     entry->SetY((y1 + yn) / 2);
@@ -580,7 +580,7 @@ int efgTreeLayout::LayoutSubtree(Node *p_node, const EFSupport &p_support,
   entry->SetBranchLength(settings.BranchLength());
 
   if (settings.SubgameStyle() == SUBGAME_ARC &&
-      p_node->Game()->IsLegalSubgame(p_node)) {
+      p_node->GetGame()->IsLegalSubgame(p_node)) {
     entry->SetSubgameRoot(true);
     entry->SetSubgameMarked(p_node->GetSubgameRoot() == p_node);
   }

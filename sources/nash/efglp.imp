@@ -161,15 +161,15 @@ void gbtEfgNashLp<T>::FillTableau(const EFSupport &p_support,
 				  int s1, int s2, int i1, int i2)
 {
   int i,snew;
-  if (!n->Game()->GetOutcome(n).IsNull()) {
+  if (!n->GetGame()->GetOutcome(n).IsNull()) {
     A(s1,s2) = gNumber(A(s1,s2)) +
-      gNumber(prob) * n->Game()->Payoff(n, n->Game()->GetPlayer(1)) - gNumber(minpay);
+      gNumber(prob) * n->GetGame()->Payoff(n, n->GetGame()->GetPlayer(1)) - gNumber(minpay);
   }
   if (!n->GetInfoset().IsNull()) {
     if(n->GetPlayer().IsChance()) {
       for(i=1;i<=n->NumChildren();i++)
 	FillTableau(p_support, A, n->GetChild(i),
-		    gNumber(prob) * n->Game()->GetChanceProb(n->GetInfoset(), i),
+		    gNumber(prob) * n->GetGame()->GetChanceProb(n->GetInfoset(), i),
 		    s1,s2,i1,i2);
     }
     int pl = n->GetPlayer().GetId();

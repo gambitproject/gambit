@@ -640,7 +640,7 @@ static void Parse(ParserState &p_state, TreeData &p_treeData)
 static void BuildSubtree(efgGame *p_efg, Node *p_node,
 			 TreeData &p_treeData, NodeData **p_nodeData)
 {
-  p_node->SetName((*p_nodeData)->m_name);
+  p_node->SetLabel((*p_nodeData)->m_name);
 
   if ((*p_nodeData)->m_outcome > 0) {
     if (!p_treeData.GetOutcome((*p_nodeData)->m_outcome).IsNull()) {

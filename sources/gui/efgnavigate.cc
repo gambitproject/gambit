@@ -68,7 +68,7 @@ void EfgNavigateWindow::Set(const Node *p_cursor)
 
   // if we got here, the node is valid.
   try {
-    SetCellValue((char *) m_cursor->GetName(), 0, 0);
+    SetCellValue((char *) m_cursor->GetLabel(), 0, 0);
     SetCellValue((char *) m_parent->GetRealizProb(m_cursor), 1, 0);
     SetCellValue((char *) m_parent->GetNodeValue(m_cursor), 2, 0);
 

@@ -1183,7 +1183,7 @@ void EfgShow::OnEditNode(wxCommandEvent &)
 {
   dialogEditNode dialog(this, Cursor());
   if (dialog.ShowModal() == wxID_OK) {
-    Cursor()->SetName(dialog.GetNodeName().c_str());
+    Cursor()->SetLabel(dialog.GetNodeName().c_str());
     if (dialog.GetOutcome() > 0) {
       m_efg.SetOutcome(Cursor(), m_efg.GetOutcome(dialog.GetOutcome()));
     }

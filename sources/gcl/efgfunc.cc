@@ -191,9 +191,9 @@ static Portion *GSM_AddMove(GSM &gsm, Portion **param)
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   Node *n = ((NodePortion *) param[1])->Value();
 
-  n->Game()->AppendNode(n, s);
+  n->GetGame()->AppendNode(n, s);
 
-  gsm.UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(n->GetGame(), true, porBEHAV | porEFSUPPORT);
 
   return new NodePortion(n->GetChild(1));
 }
@@ -270,9 +270,9 @@ static Portion *GSM_CopyTree(GSM &gsm, Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
 
-  gsm.UnAssignGameElement(n1->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(n1->GetGame(), true, porBEHAV | porEFSUPPORT);
 
-  return new NodePortion(n1->Game()->CopyTree(n1, n2));
+  return new NodePortion(n1->GetGame()->CopyTree(n1, n2));
 }
 
 //-----------------
@@ -319,13 +319,13 @@ static Portion *GSM_DeleteMove(GSM &gsm, Portion **param)
   if (keep->GetParent() != n)
     throw gclRuntimeError("keep is not a child of node");
 
-  gsm.UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(n->GetGame(), true, porBEHAV | porEFSUPPORT);
   for (int i = 1; i <= n->NumChildren(); i++) 
     if (n->GetChild(i) != keep)
-      gsm.UnAssignEfgSubTree(n->Game(), n->GetChild(i));
-  gsm.UnAssignEfgElement(n->Game(), porNODE, n);
+      gsm.UnAssignEfgSubTree(n->GetGame(), n->GetChild(i));
+  gsm.UnAssignEfgElement(n->GetGame(), porNODE, n);
 
-  return new NodePortion(n->Game()->DeleteNode(n, keep));
+  return new NodePortion(n->GetGame()->DeleteNode(n, keep));
 }
 
 //-----------------
@@ -365,10 +365,10 @@ static Portion *GSM_DeleteTree(GSM &gsm, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  gsm.UnAssignGameElement(n->Game(), true, porBEHAV | porEFSUPPORT);
-  gsm.UnAssignEfgSubTree(n->Game(), n);
+  gsm.UnAssignGameElement(n->GetGame(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignEfgSubTree(n->GetGame(), n);
 
-  n->Game()->DeleteTree(n);
+  n->GetGame()->DeleteTree(n);
 
   return new NodePortion(n);
 }
@@ -489,7 +489,7 @@ static Portion *GSM_InsertMove(GSM &gsm, Portion **param)
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   Node *n = ((NodePortion *) param[1])->Value();
 
-  n->Game()->InsertNode(n, s);
+  n->GetGame()->InsertNode(n, s);
 
   gsm.UnAssignGameElement(s.GetGame(), true, porBEHAV | porEFSUPPORT);
 
@@ -524,7 +524,7 @@ static Portion *GSM_IsPredecessor(GSM &, Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
-  return new BoolPortion(n1->Game()->IsPredecessor(n1, n2));
+  return new BoolPortion(n1->GetGame()->IsPredecessor(n1, n2));
 }
 
 //---------------
@@ -535,7 +535,7 @@ static Portion *GSM_IsSuccessor(GSM &, Portion **param)
 {
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
-  return new BoolPortion(n1->Game()->IsSuccessor(n1, n2));
+  return new BoolPortion(n1->GetGame()->IsSuccessor(n1, n2));
 }
 
 
@@ -580,7 +580,7 @@ static Portion *GSM_MarkSubgame(GSM &, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  return new BoolPortion(n->Game()->MarkSubgame(n));
+  return new BoolPortion(n->GetGame()->MarkSubgame(n));
 }
 
 //------------------
@@ -653,9 +653,9 @@ static Portion *GSM_MoveTree(GSM &gsm, Portion **param)
   Node *n1 = ((NodePortion *) param[0])->Value();
   Node *n2 = ((NodePortion *) param[1])->Value();
 
-  gsm.UnAssignGameElement(n1->Game(), true, porBEHAV | porEFSUPPORT);
+  gsm.UnAssignGameElement(n1->GetGame(), true, porBEHAV | porEFSUPPORT);
 
-  return new NodePortion(n1->Game()->MoveTree(n1, n2));
+  return new NodePortion(n1->GetGame()->MoveTree(n1, n2));
 }
 
 //----------
@@ -674,7 +674,7 @@ static Portion *GSM_Name(GSM &, Portion **param)
     return new TextPortion(AsEfgInfoset(param[0]).GetLabel());
   case porNODE:
     return new TextPortion(((NodePortion *) param[0])->Value()->
-			   GetName());
+			   GetLabel());
   case porEFOUTCOME:
     return new TextPortion(((EfOutcomePortion *) param[0])->Value().GetLabel());
   case porEFPLAYER:
@@ -803,7 +803,7 @@ static Portion *GSM_Outcome(GSM &, Portion **param)
   }
 
   Node *n = ((NodePortion *) param[0])->Value();
-  gbtEfgOutcome outcome = n->Game()->GetOutcome(n);
+  gbtEfgOutcome outcome = n->GetGame()->GetOutcome(n);
   if (outcome.IsNull()) {
     return new NullPortion(porEFOUTCOME);
   }
@@ -1197,7 +1197,7 @@ static Portion *GSM_SetName(GSM &, Portion **param)
     AsEfgInfoset(param[0]).SetLabel(name);
     break;
   case porNODE:
-    ((NodePortion *) param[0])->Value()->SetName(name);
+    ((NodePortion *) param[0])->Value()->SetLabel(name);
     break;
   case porEFOUTCOME: {
     gbtEfgOutcome outcome = ((EfOutcomePortion *) param[0])->Value();
@@ -1232,7 +1232,7 @@ static Portion *GSM_SetOutcome(GSM &gsm, Portion **param)
 
   if (!outcome.IsNull()) {
     outcome.GetGame()->SetOutcome(n, outcome);
-    gsm.InvalidateGameProfile(n->Game(), true);
+    gsm.InvalidateGameProfile(n->GetGame(), true);
     return new EfOutcomePortion(outcome);
   }
   else {
@@ -1326,7 +1326,7 @@ static Portion *GSM_UnMarkSubgame(GSM &, Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  n->Game()->UnmarkSubgame(n);
+  n->GetGame()->UnmarkSubgame(n);
   
   return new NodePortion(n);
 }

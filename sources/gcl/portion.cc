@@ -1200,14 +1200,14 @@ gPool NodePortion::pool(sizeof(NodePortion));
 NodePortion::NodePortion(Node *value)
   : _Value(new Node *(value)), _ref(false)
 {
-  SetGame(value->Game());
+  SetGame(value->GetGame());
 }
 
 NodePortion::NodePortion(Node *&value, bool ref)
   : _Value(&value), _ref(ref)
 {
   if (!_ref) {
-    SetGame(value->Game());
+    SetGame(value->GetGame());
   }
 }  
 
@@ -1225,7 +1225,7 @@ void NodePortion::SetValue(Node *value)
     ((NodePortion *) Original())->SetValue(value);
   }
   else {
-    SetGame(value->Game());
+    SetGame(value->GetGame());
     *_Value = value;
   }
 }
@@ -1238,7 +1238,7 @@ void NodePortion::Output(gOutput& s) const
   Portion::Output(s);
   s << "(Node) " << *_Value;
   if(*_Value)
-    s << " \"" << (*_Value)->GetName() << "\""; 
+    s << " \"" << (*_Value)->GetLabel() << "\""; 
 }
 
 gText NodePortion::OutputString(void) const
