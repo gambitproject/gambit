@@ -1,7 +1,7 @@
 //
 // FILE: nfdommix.cc -- Elimination of dominated strategies in nfg
 //
-// @(#)nfdommix.cc	1.6 8/13/96
+// $Id$
 //
 
 #include "gambitio.h"
@@ -35,35 +35,42 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     gVector<T> B(1,contingencies+1);
     gVector<T> C(1,strats);
   
-    n=contingencies+1;
-    for(k=1;k<strats;k++) {
+    n = contingencies + 1;
+    for (k = 1; k < strats; k++) {
       C[k] = (T) 0;
-      A(n,k)=(T)1;
+      A(n, k) = (T) 1;
     }
-    B[n]=(T)1;
-    C[k]=(T)1;  A(n,k)=(T)1;
+    A(n, k) = (T) 0;
+    B[n] = (T) 1;
+    C[k] = (T) 1; 
   
     s.First();
-    for(n=1;n<=contingencies;n++) {
-      s.Set(pl,1);
-      B[n]=-s.Payoff(pl);
-      for(k=2;k<=strats;k++) {
-	s.Set(pl,k);
-	A(n,k-1)=-s.Payoff(pl);
+    for (n = 1; n <= contingencies; n++) {
+      s.Set(pl, 1);
+      B[n] = -s.Payoff(pl);
+      for (k = 2; k <= strats; k++) {
+	s.Set(pl, k);
+	A(n, k - 1) = -s.Payoff(pl);
       }
-      A(n,strats)=(T)1;
+      A(n, strats) = (T) 1;
       s.NextContingency();
     }
   
     for (k = 1; k <= strats; k++)	{
       LPSolve<T> Tab(A, B, C, 1);
+
+      tracefile << '\n' << A << '\n';
+      tracefile << B << '\n';
+      tracefile << C << '\n';
     
       COpt = Tab.OptimumCost();
       tracefile << "\nPlayer = " << pl << " Strat = "<< k;
       tracefile << " F = " << Tab.IsFeasible();
-      tracefile << " Obj = " <<  - COpt;
+      tracefile << " Obj = " << COpt;
+
+      dom[k] = false;
     
-      if(Tab.IsFeasible() && COpt>(T)0) { 
+      if (Tab.IsFeasible() && COpt > (T) 0) { 
 	tracefile << " Strongly Dominated";
 	ret = true;
 	dom[k] = true;
@@ -178,7 +185,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
       any = true;
     }
   }
-  
+
   if (!any)  {
     delete T;
     return 0;
