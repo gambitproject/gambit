@@ -41,6 +41,8 @@ gText NameEfgAlgType(EfgAlgType p_algorithm)
     return "Qre[NFG]";
   case algorithmEfg_QREALL_NFG:
     return "QreAll[NFG]";
+  default:
+    return "None";
   }
 }
 

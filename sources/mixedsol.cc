@@ -30,6 +30,8 @@ gText NameNfgAlgType(NfgAlgType p_algorithm)
     return "Qre";
   case algorithmNfg_QREALL:
     return "QreAll";
+  default:
+    return "None";
   }
 }
 
