@@ -20,14 +20,19 @@ it is intended that there be some form of descent to problems on the
 boundary.
    At this point I see the following agenda:
 
-1.  Figuring out how this actually works for the sequence form.
+1.  Figuring out how this actually works for the sequence form. UNRESOLVED
 
 2.  Little fix to get compiling.  DONE
 
-3.  Figure out how far along the rest of it is.
+3.  Initialize new member as partial tree for diffs of Utilities.
 
-THIS IS BEING ABANDONED.  NOT MUCH PROGRESS HAS BEEN MADE, AND IT
-SEEMS LIKE THE WRONG WAY TO PROCEED  (3.24.98)
+4.  Generally, try to reform away ListOfPartialTrees.
+
+4.  Make sure all "no more roots" routines are brought up to date.
+
+5.  Generalize to simpletope.
+
+6.  Add descent feature.
 
 */
 
@@ -39,9 +44,10 @@ SEEMS LIKE THE WRONG WAY TO PROCEED  (3.24.98)
 template <class T> class EquiSolv {
  private:
 // New Data Members
-  const gList<gPolyList<T> >                 UtilityLists;
-  const gList<gPolyList<gDouble> >           gDoubleULists;
-  const gList<ListOfPartialTrees<gDouble> >  ListsOfTreesOfPartials;
+  const gList<gPolyList<T> >                            UtilityLists;
+  const gList<gPolyList<gDouble> >                      gDoubleULists;
+  const gList<gList<gList<TreeOfPartials<gDouble> > > > UDiffPartialTrees;
+  const gList<ListOfPartialTrees<gDouble> >             ListsOfTreesOfPartials;
 
 // Old Data Members
   const gPolyList<T>                 System;
@@ -57,9 +63,12 @@ template <class T> class EquiSolv {
   const gList<gPolyList<T> > CopyGivenLists(const gList<gPolyList<T> >&)
                                                                       const;
   const gPolyList<T>                 DerivedEquationSystem()          const;
+  const gPolyList<gDouble>        ListTogDouble(const gPolyList<T>&)  const;
   const gList<gPolyList<gDouble> > ListsTogDouble(const gList<gPolyList<T> >&)
                                                                       const;
   const gList<ListOfPartialTrees<gDouble> > GenerateTreesOfPartials() const;
+  const gList<gList<gList<TreeOfPartials<gDouble> > > > 
+                                            UtilityDiffPartialTrees() const;
 
   // SUPPORTING CALCULATIONS - conceptually, some of these belong elsewhere
 
@@ -69,10 +78,14 @@ template <class T> class EquiSolv {
    bool PolyEverywhereNegativeIn(const gRectangle<gDouble>&, 
 				 const int&)                             const;
    bool SystemHasNoRootsIn(const gRectangle<gDouble>& r, gArray<int>&)   const;
-   bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
+//   bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
 
   // Ask whether Newton's method leads to a root without leaving the rectangle
+   gSquareMatrix<gDouble> DerivativeMatrix(const gVector<gDouble>&)      const;
+   gVector<gDouble>       UtilityDiffs(const gVector<gDouble>&)          const;
    bool NewtonRootInRectangle(const gRectangle<gDouble>&, 
+			            gVector<gDouble>&) const;
+   bool NewtonEquiInRectangle(const gRectangle<gDouble>&, 
 			            gVector<gDouble>&) const;
 
   // Ask whether we can prove that there is no root other than 
@@ -103,6 +116,8 @@ template <class T> class EquiSolv {
   // Combine the last two steps into a single query
    bool NewtonRootIsOnlyInRct(const gRectangle<gDouble>&, 
 			            gVector<gDouble>&) const;
+   bool NewtonEquiIsOnlyInRct(const gRectangle<gDouble>&, 
+			            gVector<gDouble>&) const;
 
   // Recursive part of recursive method //ORIG
   void               FindRootsRecursion(      gList<gVector<gDouble> >*,
@@ -122,6 +137,12 @@ template <class T> class EquiSolv {
 					      int*)                  const;
 
  public:
+
+// Should be returned to privacy after testing
+   bool SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)            const;
+
+
+
    EquiSolv(const gList<gPolyList<T> > &);  
    EquiSolv(const EquiSolv<T> &);
    ~EquiSolv();

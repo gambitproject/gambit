@@ -19,23 +19,21 @@
 template <class T> EquiSolv<T>::EquiSolv(const gList<gPolyList<T> >& given) 
 : UtilityLists(CopyGivenLists(given)),
   gDoubleULists(ListsTogDouble(given)),
+  UDiffPartialTrees(UtilityDiffPartialTrees()),
   ListsOfTreesOfPartials(GenerateTreesOfPartials()),
-  System(DerivedEquationSystem()
-//given
-), 
-  gDoubleSystem(given[1].AmbientSpace(),
-		given[1].TermOrder(),
-		given[1].ListTogDouble()
-//given.AmbientSpace(),given.TermOrder(),given.ListTogDouble()
-),
+  System(DerivedEquationSystem()), 
+  gDoubleSystem(ListTogDouble(System)),
   TreesOfPartials(gDoubleSystem),
-  HasBeenSolved(false), Roots()
+  HasBeenSolved(false), 
+  Roots()
 {
 }
 
 template<class T> EquiSolv<T>::EquiSolv(const EquiSolv& qs)
 : UtilityLists(qs.UtilityLists),
   gDoubleULists(qs.gDoubleULists),
+  UDiffPartialTrees(qs.UDiffPartialTrees),
+  ListsOfTreesOfPartials(qs.ListsOfTreesOfPartials),
   System(qs.System), 
   gDoubleSystem(qs.gDoubleSystem),
   TreesOfPartials(qs.TreesOfPartials), 
@@ -72,6 +70,14 @@ const gPolyList<T> EquiSolv<T>::DerivedEquationSystem() const
 		UtilityLists[1].TermOrder(),polylist);
 }
 
+template <class T> const gPolyList<gDouble>
+EquiSolv<T>::ListTogDouble(const gPolyList<T>& given) const
+{
+  return gPolyList<gDouble>(given.AmbientSpace(),
+			    given.TermOrder(),
+			    given.ListTogDouble());
+}
+
 template <class T> const gList<gPolyList<gDouble> >
 EquiSolv<T>::ListsTogDouble(const gList<gPolyList<T> >& given) const
 {
@@ -89,6 +95,24 @@ EquiSolv<T>::GenerateTreesOfPartials() const
   gList<ListOfPartialTrees<gDouble> > answer;
   for (int i = 1; i <= gDoubleULists.Length(); i++)
     answer += ListOfPartialTrees<gDouble>(gDoubleULists[i]);
+  return answer;
+}
+
+template <class T> const gList<gList<gList<TreeOfPartials<gDouble> > > >
+EquiSolv<T>::UtilityDiffPartialTrees() const
+{
+  gList<gList<gList<TreeOfPartials<gDouble> > > > answer;
+  for (int i = 1; i <= UtilityLists.Length(); i++) {
+    gList<gList<TreeOfPartials<gDouble> > > listoflists;
+    for (int j = 1; j <= UtilityLists[i].Length(); j++) {
+      gList<TreeOfPartials<gDouble> > list;
+      for (int k = 1; k <= UtilityLists[i].Length(); k++)
+	list += TreeOfPartials<gDouble>(gDoubleULists[i][j] - 
+					gDoubleULists[i][k]);
+      listoflists += list;
+    }
+    answer += listoflists;
+  }
   return answer;
 }
 
@@ -192,9 +216,9 @@ bool EquiSolv<T>::SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)  const
     gVector<gDouble> HalvesOfSideLengths(r.Dmnsn());
     for (int k = 1; k <= r.Dmnsn(); k++)
       HalvesOfSideLengths[k] = r.HeightInCoord(k) / (gDouble)2.0;
-    gDouble ncdiff = 
-      ListsOfTreesOfPartials[i][maxdex].MaximalNonconstantDifference(
-	       ListsOfTreesOfPartials[i][mindex],center,HalvesOfSideLengths);
+    gDouble ncdiff = ListsOfTreesOfPartials[i].
+      MaximalNonconstantDifference(maxdex,mindex,center,HalvesOfSideLengths);
+
     if (max - min > ncdiff) 
       return true;
   }
@@ -205,6 +229,77 @@ bool EquiSolv<T>::SystemHasNoEquilibriaIn(const gRectangle<gDouble>& r)  const
 //--------------------------------------
 // Does Newton's method lead to a root?
 //--------------------------------------
+
+template <class T> gSquareMatrix<gDouble> 
+EquiSolv<T>::DerivativeMatrix(const gVector<gDouble>& point) const
+{
+  gSquareMatrix<gDouble> Df(Dmnsn());
+
+  int rownumber = 1;
+
+  for (int i = 1; i <= UtilityLists.Length(); i++) {
+    for (int j = 2; j <= UtilityLists[i].Length(); j++) {
+      gVector<gDouble> v = UDiffPartialTrees[i][j][1].VectorOfPartials(point);
+      for (int k = 1; k <= Dmnsn(); k++) 
+	Df(rownumber,k) = v[k];
+
+      rownumber++;
+    }
+  }
+  return Df;
+}
+
+template <class T> gVector<gDouble> 
+EquiSolv<T>::UtilityDiffs(const gVector<gDouble>& point) const
+{
+  gVector<gDouble> Diffs(Dmnsn());
+
+  int index = 1;
+
+  for (int i = 1; i <= UtilityLists.Length(); i++) {
+    for (int j = 2; j <= UtilityLists[i].Length(); j++) {
+
+      Diffs[index] = gDoubleULists[i][j].Evaluate(point) - 
+	             gDoubleULists[i][1].Evaluate(point);
+      index++;
+    }
+  }
+  return Diffs;
+}
+
+template <class T>
+bool EquiSolv<T>::NewtonEquiInRectangle(const gRectangle<gDouble>& r,
+					      gVector<gDouble>& point) const
+{
+  gVector<gDouble> zero(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++) zero[i] = (gDouble)0;
+
+  gVector<gDouble> oldevals = UtilityDiffs(point);
+
+  if ( oldevals == zero ) 
+    if (r.Contains(point)) return true;
+    else                   return false;
+
+  gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
+
+  while (true) {
+    gSquareMatrix<gDouble> Df = DerivativeMatrix(point);
+    if (Df.Determinant() == (gDouble)0) return false;
+    gVector<gDouble> Del = - (Df.Inverse() * oldevals);
+
+    if ( !bigr.Contains(point + Del) ) return false;
+    point += Del;
+
+    gVector<gDouble> newevals = UtilityDiffs(point);
+
+    if (newevals * newevals > oldevals * oldevals) return false;
+    if ( newevals == zero )
+      if (r.Contains(point)) return true;
+      else                   return false;                
+
+    oldevals = newevals;
+  }
+}
 
 template <class T>
 bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
@@ -412,6 +507,19 @@ bool EquiSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<gDouble>& r,
 
   if ( NewtonRootInRectangle(r,point) ) {
     gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+    if ( HasNoOtherRootsIn(r,point,Df.Inverse()) ) return true;
+    else                                           return false;
+  }
+  else                                             return false;
+}
+
+template <class T>
+bool EquiSolv<T>::NewtonEquiIsOnlyInRct(const gRectangle<gDouble>& r,
+					      gVector<gDouble>& point) const
+{
+
+  if ( NewtonRootInRectangle(r,point) ) {
+    gSquareMatrix<gDouble> Df = DerivativeMatrix(point);
     if ( HasNoOtherRootsIn(r,point,Df.Inverse()) ) return true;
     else                                           return false;
   }
