@@ -37,7 +37,8 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 				 const char */*help_str*/)
   : wxDialogBox(p_parent, p_label, TRUE),
     m_usesNfg(p_usesNfg), m_depthChoice(0), m_typeChoice(0),
-    m_methodChoice(0), m_markSubgames(0)
+    m_methodChoice(0), m_markSubgames(0),
+    m_stopAfter(0), m_findAll(0), m_precision(0)
 { }
 
 dialogAlgorithm::~dialogAlgorithm(void)
@@ -67,6 +68,18 @@ dialogAlgorithm::~dialogAlgorithm(void)
       wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
 		      m_selectSolutions->GetValue(), "gambit.ini");
     }
+
+    if (m_stopAfter) {
+      if (m_findAll->GetValue()) 
+	wxWriteResource("Algorithm Params", "StopAfter", 0, "gambit.ini");
+      else
+	wxWriteResource("Algorithm Params", "StopAfter",
+			m_stopAfter->GetInteger(), "gambit.ini");
+    }
+
+    if (m_precision) 
+      wxWriteResource("Algorithm Params", "Precision",
+		      m_precision->GetSelection(), "gambit.ini");
   }
 }
 
@@ -96,6 +109,10 @@ void dialogAlgorithm::OnDepth(void)
     m_methodChoice->Enable(m_depthChoice->GetSelection() > 0);
 }
 
+void dialogAlgorithm::OnAll(void)
+{
+  m_stopAfter->Enable(!m_findAll->GetValue());
+}
 
 void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
@@ -179,6 +196,36 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   cancelButton->SetClientData((char *) this);
 }
 
+void dialogAlgorithm::StopAfterField(void)
+{
+  int stopAfter = 0;
+  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, "gambit.ini");
+  
+  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
+  m_findAll->SetClientData((char *) this);
+
+  m_stopAfter = new wxIntegerItem(this, "Stop after",
+				  (stopAfter > 0) ? stopAfter : 1,
+				  -1, -1, 100, -1);
+
+  if (stopAfter == 0) {
+    m_findAll->SetValue(true);
+    m_stopAfter->Enable(FALSE);
+  }
+}
+
+void dialogAlgorithm::PrecisionField(void)
+{
+  int precision = 0;
+  wxGetResource("Algorithm Params", "Precision", &precision, "gambit.ini");
+
+  char *precisionChoices[] = { "Float", "Rational" };
+  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
+			       2, precisionChoices);
+  if (precision == 0 || precision == 1)
+    m_precision->SetSelection(precision);;
+}
+
 //=======================================================================
 //                class PxiParamsDialog: Member functions
 //=======================================================================
@@ -235,40 +282,14 @@ dialogEnumPure::dialogEnumPure(wxWindow *p_parent, bool p_subgames,
 }
 
 dialogEnumPure::~dialogEnumPure()
-{
-  if (m_completed == wxOK) {
-    wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
-		    "gambit.ini");
-  }
-}
+{ }
 
 void dialogEnumPure::AlgorithmFields(void)
 {
   wxMessage *header = new wxMessage(this, "Algorithm parameters:");
   NewLine();
-
-  int stopAfter = 0;
-  wxGetResource("Algorithm Params", "StopAfter", &stopAfter,
-		"gambit.ini");
-  
-  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
-  m_findAll->SetClientData((char *) this);
-
-  m_stopAfter = new wxIntegerItem(this, "Stop after",
-				  (stopAfter > 0) ? stopAfter : 1,
-				  -1, -1, 100, -1);
-
-  if (stopAfter == 0) {
-    m_findAll->SetValue(true);
-    m_stopAfter->Enable(FALSE);
-  }
-
+  StopAfterField();
   NewLine();
-}
-
-void dialogEnumPure::OnAll(void)
-{
-  m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
 int dialogEnumPure::StopAfter(void) const
@@ -294,52 +315,16 @@ dialogEnumMixed::dialogEnumMixed(wxWindow *p_parent, bool p_subgames)
 }
 
 dialogEnumMixed::~dialogEnumMixed()
-{
-  if (m_completed == wxOK) {
-    wxWriteResource("Algorithm Params", "StopAfter", StopAfter(),
-		    "gambit.ini");
-    wxWriteResource("Algorithm Params", "Precision",
-		    m_precision->GetSelection(), "gambit.ini");
-  }
-}
+{ }
 
 void dialogEnumMixed::AlgorithmFields(void)
 {
   (void) new wxMessage(this, "Algorithm parameters:");
   NewLine();
-
-  int stopAfter = 0;
-  wxGetResource("Algorithm Params", "StopAfter", &stopAfter, "gambit.ini");
-  
-  m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
-  m_findAll->SetClientData((char *) this);
-
-  m_stopAfter = new wxIntegerItem(this, "Stop after",
-				  (stopAfter > 0) ? stopAfter : 1,
-				  -1, -1, 100, -1);
-
-  if (stopAfter == 0) {
-    m_findAll->SetValue(true);
-    m_stopAfter->Enable(FALSE);
-  }
-
+  StopAfterField();
   NewLine();
-
-  int precision = 0;
-  wxGetResource("Algorithm Params", "Precision", &precision, "gambit.ini");
-
-  char *precisionChoices[] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-  if (precision == 0 || precision == 1)
-    m_precision->SetSelection(precision);;
-
+  PrecisionField();
   NewLine();
-}
-
-void dialogEnumMixed::OnAll(void)
-{
-  m_stopAfter->Enable(!m_findAll->GetValue());
 }
 
 int dialogEnumMixed::StopAfter(void) const
@@ -364,5 +349,40 @@ void wxEnumStatus::SetProgress(double p_value)
     pass++;
   }
   wxYield();
+}
+
+
+//=======================================================================
+//                        dialogLp: Member functions
+//=======================================================================
+
+#include "dllp.h"
+
+dialogLp::dialogLp(wxWindow *p_parent, bool p_subgames, bool p_vianfg)
+  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent, LP_HELP)
+{
+  MakeCommonFields(true, p_subgames, p_vianfg);
+  Go();
+}
+
+dialogLp::~dialogLp()
+{ }
+
+void dialogLp::AlgorithmFields(void)
+{
+  (void) new wxMessage(this, "Algorithm Parameters:");
+  NewLine();
+  StopAfterField();
+  NewLine();
+  PrecisionField();
+  NewLine();
+}
+
+int dialogLp::StopAfter(void) const
+{
+  if (m_findAll->GetValue())
+    return 0;
+  else
+    return m_stopAfter->GetInteger(); 
 }
 

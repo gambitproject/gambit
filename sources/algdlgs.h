@@ -29,12 +29,15 @@ private:
 
   static void CallbackDepth(wxRadioBox &p_object, wxEvent &)
     { ((dialogAlgorithm *) p_object.GetClientData())->OnDepth(); }
+  static void CallbackAll(wxCheckBox &p_object, wxEvent &)
+    { ((dialogAlgorithm *) p_object.GetClientData())->OnAll(); } 
 
   void OnOK(void);
   void OnCancel(void);
   Bool OnClose(void);
 
   void OnDepth(void);
+  void OnAll(void);
 
 protected:
   bool m_usesNfg, m_subgames;
@@ -42,8 +45,16 @@ protected:
   wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
   wxCheckBox *m_markSubgames, *m_selectSolutions;
 
+  wxIntegerItem *m_stopAfter;
+  wxCheckBox *m_findAll;
+  wxRadioBox *m_precision;
+
   void DominanceFields(bool p_mixed);
   void SubgameFields(void);
+
+  void StopAfterField(void);
+  void PrecisionField(void);
+
   virtual void AlgorithmFields(void) { }
 
   void MakeCommonFields(bool p_dominance, bool p_subgames, bool p_vianfg);

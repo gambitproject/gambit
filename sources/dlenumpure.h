@@ -11,13 +11,6 @@
 
 class dialogEnumPure : public dialogAlgorithm {
 private:
-  wxCheckBox *m_findAll;
-  wxIntegerItem *m_stopAfter;
-
-  static void CallbackAll(wxCheckBox &p_object, wxEvent &)
-    { ((dialogEnumPure *) p_object.GetClientData())->OnAll(); } 
-
-  void OnAll(void);
   void AlgorithmFields(void);
 
 public:

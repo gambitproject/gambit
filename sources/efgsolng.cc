@@ -765,38 +765,13 @@ bool guiefgEnumMixedNfg::SolveSetup(void)
 //                                LpSolve
 //========================================================================
 
-#include "csumsub.h"
-#include "efgcsum.h"
-#include "csumprm.h"
-
-LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *p_parent, bool p_subgames,
-					 bool p_vianfg)
-  : dialogAlgorithm("LpSolve Parameters", p_vianfg, p_parent, LP_HELP)
-{
-  MakeCommonFields(true, p_subgames, p_vianfg);
-  Go();
-}
-
-LPSolveParamsDialog::~LPSolveParamsDialog()
-{
-}
-
-void LPSolveParamsDialog::AlgorithmFields(void)
-{
-  (void) new wxMessage(this, "Algorithm Parameters:");
-  NewLine();
-
-  m_stopAfter = new wxText(this, 0, "Stop after");
-  NewLine();
-  char *precisionChoices[] = { "Float", "Rational" };
-  m_precision = new wxRadioBox(this, 0, "Precision", -1, -1, -1, -1,
-			       2, precisionChoices);
-  NewLine();
-}
+#include "dllp.h"
 
 //---------------------
 // Lp on nfg
 //---------------------
+
+#include "csumsub.h"
 
 class ZSumBySubgameG : public efgLpNfgSolve, public guiSubgameViaNfg {
 protected:
@@ -847,7 +822,7 @@ gList<BehavSolution> guiefgLpNfg::Solve(void) const
 
 bool guiefgLpNfg::SolveSetup(void)
 {
-  LPSolveParamsDialog dialog(m_parent->Frame(), true, true); 
+  dialogLp dialog(m_parent->Frame(), true, true); 
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();
@@ -867,6 +842,8 @@ bool guiefgLpNfg::SolveSetup(void)
 //---------------------
 // Lp on efg
 //---------------------
+
+#include "efgcsum.h"
 
 class EfgCSumBySubgameG : public efgLpSolve, public guiSubgameViaEfg {
 protected:
@@ -918,7 +895,7 @@ gList<BehavSolution> guiefgLpEfg::Solve(void) const
 
 bool guiefgLpEfg::SolveSetup(void)
 {
-  LPSolveParamsDialog dialog(m_parent->Frame(), true);
+  dialogLp dialog(m_parent->Frame(), true);
 
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

@@ -235,8 +235,8 @@ bool guinfgLcp::SolveSetup(void)
 // LpSolve
 //----------
 
+#include "dllp.h"
 #include "nfgcsum.h"
-#include "csumprm.h"
 
 guinfgLp::guinfgLp(const NFSupport &p_support, NfgShowInterface *p_parent)
   : guiNfgSolution(p_support, p_parent)
@@ -268,7 +268,7 @@ gList<MixedSolution> guinfgLp::Solve(void)
 
 bool guinfgLp::SolveSetup(void)
 {
-  LPSolveParamsDialog dialog(m_parent->Frame());
+  dialogLp dialog(m_parent->Frame());
   
   if (dialog.Completed() == wxOK) {
     m_eliminate = dialog.Eliminate();

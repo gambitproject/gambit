@@ -11,14 +11,6 @@
 
 class dialogEnumMixed : public dialogAlgorithm {
 private:
-  wxCheckBox *m_findAll;
-  wxIntegerItem *m_stopAfter;
-  wxRadioBox *m_precision;
-
-  static void CallbackAll(wxCheckBox &p_object, wxEvent &)
-    { ((dialogEnumMixed *) p_object.GetClientData())->OnAll(); } 
-
-  void OnAll(void);
   void AlgorithmFields(void);
 
 public:
