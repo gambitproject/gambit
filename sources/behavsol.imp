@@ -147,7 +147,7 @@ void BehavSolution::SetLiap(gNumber value)
 
 gNumber BehavSolution::LiapValue(void) const
 { 
-  if (_LiapValue < 0)
+  if (_LiapValue < (gNumber)0)
     _LiapValue = BehavProfile<gNumber>::LiapValue();
   return _LiapValue; 
 }
@@ -177,7 +177,7 @@ bool BehavSolution::Equals(const BehavProfile<double> &s) const
   bool flag=true;
   int i=s.First();
   while(flag==true && i<=s.Length()) {
-    if(abs((*this)[i]-s[i]) > eps) 
+    if(abs((*this)[i]-(gNumber)s[i]) > eps) 
       flag=false;
     i++;
   }

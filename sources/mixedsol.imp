@@ -150,7 +150,7 @@ void MixedSolution::SetLiap(gNumber value)
 
 gNumber MixedSolution::LiapValue(void) const 
 { 
-  if(_LiapValue < 0)
+  if(_LiapValue < (gNumber)0)
     this->_LiapValue = MixedProfile<gNumber>::LiapValue();
   return _LiapValue; 
 }
@@ -162,7 +162,7 @@ bool MixedSolution::Equals(const MixedProfile<double> &s) const
   bool flag=true;
   int i=s.First();
   while(flag==true && i<=s.Length()) {
-    if(abs((*this)[i]-s[i]) > eps) 
+    if(abs((*this)[i]-(gNumber)s[i]) > eps) 
       flag=false;
     i++;
   }
