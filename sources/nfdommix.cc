@@ -67,7 +67,7 @@ bool ComputeMixedDominated(const Nfg &nfg,
       status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << '\n' << (gRectArray<gRational> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
       LPSolve<gRational> Tab(A, B, C, 1);
@@ -145,7 +145,7 @@ bool ComputeMixedDominated(const Nfg &nfg,
       status.Get();
       double s1 = (double)k/(double)(strats);
       status.SetProgress((1.0-s1)*d1 + s1*d2);
-      // tracefile << '\n' << (gRectArray<T> &)A << '\n';
+      // tracefile << '\n' << (gRectArray<gRational> &)A << '\n';
       // tracefile << B << '\n';
       // tracefile << C << '\n';
       LPSolve<gRational> Tab(A, B, C, 1);
@@ -159,7 +159,7 @@ bool ComputeMixedDominated(const Nfg &nfg,
       dom[k] = false;
 
       if (Tab.IsFeasible() && (COpt >= C0-eps && COpt <=C0+eps))
-	tracefile << " Duplicated strategy?\n\n";
+	tracefile << " Duplicated strategy? ";
       else if (Tab.IsFeasible() && COpt > C0+eps) {
 	tracefile << " Weakly Dominated by ";
 	gVector<gRational> xx(Tab.OptimumVector());

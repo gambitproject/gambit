@@ -126,12 +126,23 @@ gVector<T> LPTableau<T>::GetUnitCost(void) const
 }
 
 
-template <class T>
-T LPTableau<T>::TotalCost()
+double LPTableau<double>::TotalCost()
 {
-  gVector<T> tmpcol(MinRow(),MaxRow());
+  gVector<double> tmpcol(MinRow(),MaxRow());
   BasisSelect(unitcost,cost,tmpcol);
   return tmpcol*solution;
+}
+
+gRational LPTableau<gRational>::TotalCost()
+{
+  gVector<gRational> tmpcol(MinRow(),MaxRow());
+  gVector<gRational> sol(MinRow(),MaxRow());
+  BasisSelect(unitcost,cost,tmpcol);
+  BasisVector(sol);
+  for(int i=tmpcol.First();i<=tmpcol.Last();i++)
+    if(Label(i)>0)tmpcol[i]/=(gRational)Tableau<gRational>::TotDenom();
+
+  return tmpcol*sol;
 }
 
 void LPTableau<double>::DualVector(gVector<double> &L) const
@@ -142,8 +153,8 @@ void LPTableau<double>::DualVector(gVector<double> &L) const
 void LPTableau<gRational>::DualVector(gVector<gRational> &out) const
 {
   out= dual;
-  //   for(int i=out.First();i<=out.Last();i++) 
-  //   if(Label(i)>=0) out[i]*=TotDenom();
+  //  for(int i=out.First();i<=out.Last();i++) 
+  //  if(Label(i)>=0) out[i]*=TotDenom();
 }
 
 template <class T>

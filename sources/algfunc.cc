@@ -762,11 +762,13 @@ Portion* GSM_Lp_List(Portion** param)
     int nequals = ((NumberPortion*) param[3])->Value();
     bool isFeasible;
     bool isBounded;
-  
+    double value;
+
     LPSolve<double>* s = new LPSolve<double>(*a, *b, *c, nequals);
     Portion* result = ArrayToList(s->OptimumVector());
     isFeasible = s->IsFeasible();
     isBounded = s->IsBounded();
+    value = s->OptimumCost();
     delete s;
     delete a;
     delete b;
@@ -774,6 +776,7 @@ Portion* GSM_Lp_List(Portion** param)
   
     ((BoolPortion*) param[5])->SetValue((isFeasible) ? triTRUE : triFALSE);
     ((BoolPortion*) param[6])->SetValue((isBounded) ? triTRUE : triFALSE);
+    ((NumberPortion*) param[7])->SetValue((value));
     return result;
   }
   else  {
@@ -784,11 +787,13 @@ Portion* GSM_Lp_List(Portion** param)
     int nequals = ((NumberPortion*) param[3])->Value();
     bool isFeasible;
     bool isBounded;
+    gRational value;
   
     LPSolve<gRational>* s = new LPSolve<gRational>(*a, *b, *c, nequals);
     Portion* result = ArrayToList(s->OptimumVector());
     isFeasible = s->IsFeasible();
     isBounded = s->IsBounded();
+    value = s->OptimumCost();
     delete s;
     delete a;
     delete b;
@@ -796,6 +801,7 @@ Portion* GSM_Lp_List(Portion** param)
   
     ((BoolPortion *) param[5])->SetValue((isFeasible) ? triTRUE : triFALSE);
     ((BoolPortion *) param[6])->SetValue((isBounded) ? triTRUE : triFALSE);
+    ((NumberPortion*) param[7])->SetValue((value));
     return result;
   }
 }
@@ -1532,7 +1538,7 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(0)));
 
   FuncObj->SetFuncInfo(2, gclSignature(GSM_Lp_List, 
-				       PortionSpec(porNUMBER, 1), 7));
+				       PortionSpec(porNUMBER, 1), 8));
   FuncObj->SetParamInfo(2, 0, gclParameter("a", PortionSpec(porNUMBER, 2)));
   FuncObj->SetParamInfo(2, 1, gclParameter("b", PortionSpec(porNUMBER, 1)));
   FuncObj->SetParamInfo(2, 2, gclParameter("c", PortionSpec(porNUMBER, 1)));
@@ -1543,6 +1549,8 @@ void Init_algfunc(GSM *gsm)
 					    new BoolPortion(false), BYREF));
   FuncObj->SetParamInfo(2, 6, gclParameter("isBounded", porBOOLEAN,
 					    new BoolPortion(false), BYREF));
+  FuncObj->SetParamInfo(2, 7, gclParameter("optimalCost", porNUMBER,
+					    new NumberPortion(0), BYREF));
 
   gsm->AddFunction(FuncObj);
 
