@@ -1,0 +1,101 @@
+//
+// FILE: efgiter.imp -- Implementation of extensive form strategy iterator
+//
+// $Id$
+//
+
+#include "efgciter.h"
+#include "efgiter.h"
+
+template <class T> EfgIter<T>::EfgIter(Efg<T> &efg)
+  : _efg(&efg), _support(efg),
+    _efgidx(_efg->PureDimensionality()), _supidx(_efgidx),
+    _payoff(_efg->NumPlayers())
+{
+  First();
+}
+
+template <class T> EfgIter<T>::EfgIter(const EFSupport &s)
+  : _efg((Efg<T> *) &s.BelongsTo()), _support(s),
+    _efgidx(_efg->PureDimensionality()), _supidx(_efgidx),
+    _payoff(_efg->NumPlayers())
+{
+  First();
+}
+
+template <class T> EfgIter<T>::EfgIter(const EfgIter<T> &it)
+  : _efg(it._efg), _support(it._support),
+    _efgidx(it._efgidx), _supidx(it._supidx),
+    _payoff(_efg->NumPlayers())
+{ }
+
+template <class T> EfgIter<T>::EfgIter(const EfgContIter<T> &it)
+  : _efg(it._efg), _support(it._support),
+    _efgidx(it._efgidx), _supidx(it._supidx),
+    _payoff(_efg->NumPlayers())
+{ }
+  
+
+template <class T> EfgIter<T>::~EfgIter()
+{ }
+
+template <class T>
+EfgIter<T> &EfgIter<T>::operator=(const EfgIter<T> &it)
+{
+  if (this != &it && _efg == it._efg)  {
+    _efgidx = it._efgidx;
+    _supidx = it._supidx;
+  }
+  return *this;
+}
+
+
+template <class T> void EfgIter<T>::First(void)
+{
+  _supidx = 1;
+
+  for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= _efg->PlayerList()[pl]->NumInfosets(); iset++)
+      _efgidx(pl, iset) = _support.ActionList(pl, iset)[1]->GetNumber();
+  }
+}
+
+template <class T> int EfgIter<T>::Next(int pl, int iset)
+{
+  const gArray<Action *> &actions = _support.ActionList(pl, iset);
+  
+  if (_supidx(pl, iset) == actions.Length())   {
+    _supidx(pl, iset) = 1;
+    _efgidx(pl, iset) = actions[1]->GetNumber();
+    return 0;
+  }
+
+  _supidx(pl, iset)++;
+  _efgidx(pl, iset) = actions[_supidx(pl, iset)]->GetNumber();
+  return 1;
+}
+
+template <class T> int EfgIter<T>::Set(int pl, int iset, int act)
+{
+  if (pl <= 0 || pl > _efg->NumPlayers() ||
+      iset <= 0 || iset > _efg->PlayerList()[pl]->NumInfosets() ||
+      act <= 0 || act > _support.NumActions(pl, iset))
+    return 0;
+
+  _supidx(pl, iset) = act;
+  _efgidx(pl, iset) = _support.ActionList(pl, iset)[act]->GetNumber();
+  return 1;
+}
+
+template <class T> const T &EfgIter<T>::Payoff(int pl) const
+{
+  _efg->Payoff(_efgidx, (gVector<T> &) _payoff);
+  return _payoff[pl];
+}
+
+template <class T> void EfgIter<T>::Payoff(gVector<T> &payoff) const
+{
+  _efg->Payoff(_efgidx, payoff);
+}
+
+
