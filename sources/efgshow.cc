@@ -318,7 +318,7 @@ void EfgShow::SolveStandard(void)
     case efgSTANDARD_ALL:
       wxMessageBox("Not guaranteed to find all solutions", "Warning");
       solver = new guiefgLiapEfg(*cur_sup, this, 0, 0);
-      return;
+      break;
     }
   }
 
