@@ -95,7 +95,11 @@ int matherr(struct exception *e)
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
+#ifdef __BORLANDC__
+int gcl_main(int /*argc*/, char *argv[])
+#else
 int main( int /*argc*/, char* argv[] )
+#endif    // __BORLANDC__
 {
   _ExePath = new char[strlen(argv[0]) + 2];
   strcpy(_ExePath, argv[0]);

@@ -11,41 +11,8 @@
 #include "tristate.h"
 
 
-
-DECLARE_UNARY_LIST(gelfuncPrintNumber, gNumber, gNumber)
-DECLARE_UNARY_LIST(gelfuncPrintBoolean, gTriState, gTriState)
-DECLARE_UNARY_LIST(gelfuncPrintText, gText, gText)
-
 DECLARE_UNARY(gelfuncNot, gTriState, gTriState)
 DECLARE_UNARY(gelfuncNegate, gNumber, gNumber)
-
-
-
-gNestedList<gNumber> 
-gelfuncPrintNumber::Evaluate( gelVariableTable *vt ) const
-{
-  gNestedList<gNumber> ret = op1->Evaluate( vt );
-  gout << ret;
-  return ret;
-}
-
-gNestedList<gText> 
-gelfuncPrintText::Evaluate( gelVariableTable *vt ) const
-{
-  gNestedList<gText> ret = op1->Evaluate( vt );
-  gout << ret;
-  return ret;
-}
-
-
-
-gNestedList<gTriState> 
-gelfuncPrintBoolean::Evaluate( gelVariableTable *vt ) const
-{
-  gNestedList<gTriState> ret = op1->Evaluate( vt );
-  ret.Output( gout, gTriState_Output );
-  return ret;
-}
 
 
 gTriState gelfuncNot::EvalItem( gTriState x1 ) const
@@ -184,9 +151,9 @@ gNumber gelfuncNumChars::EvalItem( gText x1 ) const
 
 DECLARE_BINARY(gelfuncNthElement, gText, gNumber, gText)
 
-     
+
 #ifdef USE_EXCEPTIONS
-class gelExceptionNonInteger : public gException  { 
+class gelExceptionNonInteger : public gException  {
   public:
     virtual ~gelExceptionNonInteger()   { }
     gText Description(void) const  { return "Expected integer index"; }
@@ -216,54 +183,6 @@ gTriState gelfuncEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
 gTriState gelfuncNotEqualBoolean::EvalItem( gTriState x1, gTriState x2 ) const
 {
   return gTriState( x1 != x2 );
-}
-
-
-template <class T> class gelfuncSemi : public gelExpression<T>  
-{
-private:
-  gelExpr *op1;
-  gelExpression<T> *op2;
-  
-public:
-  gelfuncSemi(gelExpr *, gelExpression<T> *);
-  ~gelfuncSemi();
-  
-  gNestedList<T> Evaluate(gelVariableTable *vt) const;
-};
-
-template <class T>
-gelfuncSemi<T>::gelfuncSemi(gelExpr *x, gelExpression<T> *y)
-  : op1(x), op2(y)
-{ }
-
-template <class T> gelfuncSemi<T>::~gelfuncSemi()
-{ delete op1;  delete op2; }
-
-template <class T> 
-gNestedList<T> gelfuncSemi<T>::Evaluate(gelVariableTable *vt) const
-{
-  op1->Execute(vt);
-  return op2->Evaluate(vt);
-}
-
-template class gelfuncSemi<gTriState>;
-template class gelfuncSemi<gNumber>;
-template class gelfuncSemi<gText>;
-
-
-#include "gwatch.h"
-
-gWatch _gelStopwatch;
-
-DECLARE_NOPARAM(gelfuncStartWatch, gNumber);
-
-gNestedList<gNumber> gelfuncStartWatch::Evaluate(gelVariableTable *) const
-{
-  _gelStopwatch.Start();
-  gNestedList<gNumber> ret;
-  ret.Data().Append( 0 );
-  return ret;
 }
 
 
@@ -403,43 +322,6 @@ gelExpr *GEL_Plus(const gArray<gelExpr *> &params)
 			 (gelExpression<gNumber> *) params[2]);
 }
 
-gelExpr *GEL_PrintBoolean(const gArray<gelExpr *> &params)
-{
-  return new gelfuncPrintBoolean((gelExpression<gTriState> *) params[1]);
-}
-
-gelExpr *GEL_PrintNumber(const gArray<gelExpr *> &params)
-{
-  return new gelfuncPrintNumber((gelExpression<gNumber> *) params[1]);
-}
-
-gelExpr *GEL_PrintText(const gArray<gelExpr *> &params)
-{
-  return new gelfuncPrintText((gelExpression<gText> *) params[1]);
-}
-
-gelExpr *GEL_SemiBoolean(const gArray<gelExpr *> &params)
-{
-  return new gelfuncSemi<gTriState>(params[1],
-				    ((gelExpression<gTriState> *) params[2]));
-}
-
-gelExpr *GEL_SemiNumber(const gArray<gelExpr *> &params)
-{
-  return new gelfuncSemi<gNumber>(params[1],
-				  ((gelExpression<gNumber> *) params[2]));
-}
-
-gelExpr *GEL_SemiText(const gArray<gelExpr *> &params)
-{
-  return new gelfuncSemi<gText>(params[1],
-				((gelExpression<gText> *) params[2]));
-}
-
-gelExpr *GEL_StartWatch(const gArray<gelExpr *> &)
-{
-  return new gelfuncStartWatch();
-}
 
 gelExpr *GEL_Times(const gArray<gelExpr *> &params)
 {
@@ -475,19 +357,6 @@ void gelMathInit(gelEnvironment *env)
     { GEL_NumChars, "NumChars[x->TEXT] =: NUMBER" },
     { GEL_Or, "Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN" },
     { GEL_Plus, "Plus[x->NUMBER, y->NUMBER] =: NUMBER" },
-    { GEL_PrintBoolean, "Print[x->BOOLEAN] =: BOOLEAN" },
-    { GEL_PrintNumber, "Print[x->NUMBER] =: NUMBER" },
-    { GEL_PrintText, "Print[x->TEXT] =: TEXT" },
-    { GEL_SemiBoolean, "Semi[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN" },
-    { GEL_SemiBoolean, "Semi[x->NUMBER, y->BOOLEAN] =: BOOLEAN" },
-    { GEL_SemiBoolean, "Semi[x->TEXT, y->BOOLEAN] =: BOOLEAN" },
-    { GEL_SemiNumber, "Semi[x->BOOLEAN, y->NUMBER] =: NUMBER" },
-    { GEL_SemiNumber, "Semi[x->NUMBER, y->NUMBER] =: NUMBER" },
-    { GEL_SemiNumber, "Semi[x->TEXT, y->NUMBER] =: NUMBER" },
-    { GEL_SemiText, "Semi[x->BOOLEAN, y->TEXT] =: TEXT" },
-    { GEL_SemiText, "Semi[x->NUMBER, y->TEXT] =: TEXT" },
-    { GEL_SemiText, "Semi[x->TEXT, y->TEXT] =: TEXT" },
-    { GEL_StartWatch, "StartWatch[] =: NUMBER" },
     { GEL_Times, "Times[x->NUMBER, y->NUMBER] =: NUMBER" },
     { 0, 0 } };
 

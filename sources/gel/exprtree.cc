@@ -21,28 +21,46 @@ template class gelExpression<gTriState>;
 gelType gelExpression<gTriState>::Type(void) const { return gelBOOLEAN; }
 template class gelExpression<gText>;
 gelType gelExpression<gText>::Type(void) const   { return gelTEXT; }
+template class gelExpression<Efg *>;
+gelType gelExpression<Efg *>::Type(void) const   { return gelEFG; }
+template class gelExpression<Node *>;
+gelType gelExpression<Node *>::Type(void) const  { return gelNODE; }
+template class gelExpression<Action *>;
+gelType gelExpression<Action *>::Type(void) const  { return gelACTION; }
+template class gelExpression<Infoset *>;
+gelType gelExpression<Infoset *>::Type(void) const  { return gelINFOSET; }
+template class gelExpression<EFOutcome *>;
+gelType gelExpression<EFOutcome *>::Type(void) const  { return gelEFOUTCOME; }
+template class gelExpression<EFPlayer *>;
+gelType gelExpression<EFPlayer *>::Type(void) const   { return gelEFPLAYER; }
+template class gelExpression<Nfg *>;
+gelType gelExpression<Nfg *>::Type(void) const   { return gelNFG; }
+template class gelExpression<Strategy *>;
+gelType gelExpression<Strategy *>::Type(void) const   { return gelSTRATEGY; }
+template class gelExpression<NFOutcome *>;
+gelType gelExpression<NFOutcome *>::Type(void) const   { return gelNFOUTCOME; }
+template class gelExpression<NFPlayer *>;
+gelType gelExpression<NFPlayer *>::Type(void) const   { return gelNFPLAYER; }
 
 template class gelConstant<gNumber>;
 template class gelConstant<gTriState>;
 template class gelConstant<gText>;
 
-
-
-gelConstant<gNumber>::gelConstant(const gNumber &v) 
+gelConstant<gNumber>::gelConstant(const gNumber &v)
 { m_Value.Data().Append(v); }
-gelConstant<gNumber>::gelConstant(const gNestedList<gNumber> &v) 
+gelConstant<gNumber>::gelConstant(const gNestedList<gNumber> &v)
   : m_Value(v) { }
 gelConstant<gNumber>::~gelConstant()   { }
-gNestedList<gNumber> gelConstant<gNumber>::Evaluate(gelVariableTable *) const 
+gNestedList<gNumber> gelConstant<gNumber>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
 
-gelConstant<gTriState>::gelConstant(const gTriState &v) 
+gelConstant<gTriState>::gelConstant(const gTriState &v)
 { m_Value.Data().Append(v); }
-gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v) 
+gelConstant<gTriState>::gelConstant(const gNestedList<gTriState>& v)
   : m_Value(v) { }
 gelConstant<gTriState>::~gelConstant() { }
-gNestedList<gTriState> gelConstant<gTriState>::Evaluate(gelVariableTable *) const 
+gNestedList<gTriState> gelConstant<gTriState>::Evaluate(gelVariableTable *) const
 { return m_Value; }
 
 
@@ -57,7 +75,7 @@ gNestedList<gText> gelConstant<gText>::Evaluate(gelVariableTable *) const
 
 #include "gvartbl.h"
 
-template <class T> gelVariable<T>::gelVariable(const gText &varname) 
+template <class T> gelVariable<T>::gelVariable(const gText &varname)
   : m_Name(varname) { }
 
 template <class T> gelVariable<T>::~gelVariable()   { }
@@ -73,11 +91,21 @@ gNestedList<T> gelVariable<T>::Evaluate(gelVariableTable *vt) const
 template class gelVariable<gNumber>;
 template class gelVariable<gTriState>;
 template class gelVariable<gText>;
+template class gelVariable<Efg *>;
+template class gelVariable<Node *>;
+template class gelVariable<Infoset *>;
+template class gelVariable<Action *>;
+template class gelVariable<EFOutcome *>;
+template class gelVariable<EFPlayer *>;
+template class gelVariable<Nfg *>;
+template class gelVariable<Strategy *>;
+template class gelVariable<NFOutcome *>;
+template class gelVariable<NFPlayer *>;
 
 
 
-template <class T> gelAssignment<T>::gelAssignment( const gText& varname,
-						    gelExpression<T> *v )
+template <class T> gelAssignment<T>::gelAssignment(const gText &varname,
+                                                   gelExpression<T> *v )
   : name(varname), rhs(v)
 { }
 
@@ -99,7 +127,16 @@ gNestedList<T> gelAssignment<T>::Evaluate(gelVariableTable *vt) const
 template class gelAssignment<gNumber>;
 template class gelAssignment<gTriState>;
 template class gelAssignment<gText>;
-
+template class gelAssignment<Efg *>;
+template class gelAssignment<Node *>;
+template class gelAssignment<Action *>;
+template class gelAssignment<Infoset *>;
+template class gelAssignment<EFPlayer *>;
+template class gelAssignment<EFOutcome *>;
+template class gelAssignment<Nfg *>;
+template class gelAssignment<Strategy *>;
+template class gelAssignment<NFPlayer *>;
+template class gelAssignment<NFOutcome *>;
 
 template <class T>
 gelConditional<T>::gelConditional(gelExpression<gTriState> *g,
@@ -134,6 +171,17 @@ gNestedList<T> gelConditional<T>::Evaluate(gelVariableTable *vt) const
 template class gelConditional<gNumber>;
 template class gelConditional<gTriState>;
 template class gelConditional<gText>;
+template class gelConditional<Efg *>;
+template class gelConditional<Node *>;
+template class gelConditional<Action *>;
+template class gelConditional<Infoset *>;
+template class gelConditional<EFPlayer *>;
+template class gelConditional<EFOutcome *>;
+template class gelConditional<Nfg *>;
+template class gelConditional<Strategy *>;
+template class gelConditional<NFPlayer *>;
+template class gelConditional<NFOutcome *>;
+
 
 template <class T> gelWhileLoop<T>::gelWhileLoop(gelExpression<gTriState> *g,
 						 gelExpression<T> *b)
@@ -162,6 +210,16 @@ gNestedList<T> gelWhileLoop<T>::Evaluate(gelVariableTable *vt) const
 template class gelWhileLoop<gNumber>;
 template class gelWhileLoop<gTriState>;
 template class gelWhileLoop<gText>;
+template class gelWhileLoop<Efg *>;
+template class gelWhileLoop<Node *>;
+template class gelWhileLoop<Action *>;
+template class gelWhileLoop<Infoset *>;
+template class gelWhileLoop<EFPlayer *>;
+template class gelWhileLoop<EFOutcome *>;
+template class gelWhileLoop<Nfg *>;
+template class gelWhileLoop<Strategy *>;
+template class gelWhileLoop<NFPlayer *>;
+template class gelWhileLoop<NFOutcome *>;
 
 
 template <class T> gelForLoop<T>::gelForLoop(gelExpr *ini,
@@ -198,6 +256,16 @@ gNestedList<T> gelForLoop<T>::Evaluate(gelVariableTable *vt) const
 template class gelForLoop<gNumber>;
 template class gelForLoop<gTriState>;
 template class gelForLoop<gText>;
+template class gelForLoop<Efg *>;
+template class gelForLoop<Node *>;
+template class gelForLoop<Action *>;
+template class gelForLoop<Infoset *>;
+template class gelForLoop<EFPlayer *>;
+template class gelForLoop<EFOutcome *>;
+template class gelForLoop<Nfg *>;
+template class gelForLoop<Strategy *>;
+template class gelForLoop<NFPlayer *>;
+template class gelForLoop<NFOutcome *>;
 
 #include "gcmdline.h"
 
@@ -240,4 +308,28 @@ gNestedList<T> gelUDF<T>::Evaluate( gelVariableTable* vt ) const
 template class gelUDF<gNumber>;
 template class gelUDF<gTriState>;
 template class gelUDF<gText>;
+template class gelUDF<Efg *>;
+template class gelUDF<Node *>;
+template class gelUDF<Action *>;
+template class gelUDF<Infoset *>;
+template class gelUDF<EFPlayer *>;
+template class gelUDF<EFOutcome *>;
+template class gelUDF<Nfg *>;
+template class gelUDF<Strategy *>;
+template class gelUDF<NFPlayer *>;
+template class gelUDF<NFOutcome *>;
+
+
+
+#include "glist.imp"
+
+template class gList<Efg *>;
+template class gList<Action *>;
+template class gList<EFPlayer *>;
+template class gList<EFOutcome *>;
+template class gList<Infoset *>;
+template class gList<Nfg *>;
+template class gList<NFPlayer *>;
+template class gList<NFOutcome *>;
+template class gList<Strategy *>;
 

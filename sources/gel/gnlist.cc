@@ -282,14 +282,54 @@ void gNestedList<T>::Remove( int el )
 
 template class gList<int>;
 
+class Efg;
+class Node;
+class Action;
+class Infoset;
+class EFOutcome;
+class EFPlayer;
+class Nfg;
+class Strategy;
+class NFOutcome;
+class NFPlayer;
+
 template class gNestedList< gNumber >;
 template class gNestedList< gText >;
 template class gNestedList< gTriState >;
+template class gNestedList< Efg *>;
+template class gNestedList< Node *>;
+template class gNestedList< Infoset *>;
+template class gNestedList< Action *>;
+template class gNestedList< EFPlayer *>;
+template class gNestedList< EFOutcome *>;
+template class gNestedList< Nfg *>;
+template class gNestedList< Strategy *>;
+template class gNestedList< NFPlayer *>;
+template class gNestedList< NFOutcome *>;
 
-template class 
-gOutput& operator<<( gOutput& out, const gNestedList< gNumber >& list );
-template class 
-gOutput& operator<<( gOutput& out, const gNestedList< gText >& list );
-template class 
-gOutput& operator<<( gOutput& out, const gNestedList< gTriState >& list );
+template class gList<gNestedList< Efg * > >;
+template class gList< gNestedList<Node *> >;
+template class gList< gNestedList<Infoset *> >;
+template class gList< gNestedList<Action *> >;
+template class gList< gNestedList<EFPlayer *> >;
+template class gList< gNestedList<EFOutcome *> >;
+template class gList< gNestedList<Nfg *> >;
+template class gList< gNestedList<Strategy *> >;
+template class gList< gNestedList<NFPlayer *> >;
+template class gList< gNestedList<NFOutcome *> >;
+
+
+template gOutput& operator<<(gOutput& out, const gNestedList<gNumber> &list);
+template gOutput& operator<<(gOutput& out, const gNestedList<gText> &list);
+template gOutput& operator<<(gOutput& out, const gNestedList<gTriState> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Efg *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Node *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Action *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Infoset *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<EFPlayer *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<EFOutcome *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Nfg *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<Strategy *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<NFPlayer *> &list);
+template gOutput &operator<<(gOutput& out, const gNestedList<NFOutcome *> &list);
 

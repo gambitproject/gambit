@@ -98,7 +98,7 @@
 %token COMMA
 %token HASH
 %token DOT
-%token CARET
+%token CRET
 %token UNDERSCORE
 %token AMPER
 %token WRITE
@@ -671,6 +671,46 @@ gelExpr *GELCompiler::MatchAssignment(gelExpr *lhs, gelExpr *rhs)
       vartable->Define(((gelVariable<gText> *) lhs)->Name(), gelTEXT);  
       return new gelAssignment<gText>(((gelVariable<gText> *) lhs)->Name(),
 		   		      ((gelExpression<gText> *) rhs));
+    case gelEFG:
+      vartable->Define(((gelVariable<Efg *> *) lhs)->Name(), gelEFG);
+      return new gelAssignment<Efg *>(((gelVariable<Efg *> *) lhs)->Name(),
+				      ((gelExpression<Efg *> *) rhs));
+    case gelNODE:
+      vartable->Define(((gelVariable<Node *> *) lhs)->Name(), gelNODE);
+      return new gelAssignment<Node *>(((gelVariable<Node *> *) lhs)->Name(),
+				      ((gelExpression<Node *> *) rhs));
+    case gelACTION:
+      vartable->Define(((gelVariable<Action *> *) lhs)->Name(), gelACTION);
+      return new gelAssignment<Action *>(((gelVariable<Action *> *) lhs)->Name(),
+				      ((gelExpression<Action *> *) rhs));
+    case gelINFOSET:
+      vartable->Define(((gelVariable<Infoset *> *) lhs)->Name(), gelINFOSET);
+      return new gelAssignment<Infoset *>(((gelVariable<Infoset *> *) lhs)->Name(),
+				      ((gelExpression<Infoset *> *) rhs));
+    case gelEFPLAYER:
+      vartable->Define(((gelVariable<EFPlayer *> *) lhs)->Name(), gelEFPLAYER);
+      return new gelAssignment<EFPlayer *>(((gelVariable<EFPlayer *> *) lhs)->Name(),
+				      ((gelExpression<EFPlayer *> *) rhs));
+    case gelEFOUTCOME:
+      vartable->Define(((gelVariable<EFOutcome *> *) lhs)->Name(), gelEFOUTCOME);
+      return new gelAssignment<EFOutcome *>(((gelVariable<EFOutcome *> *) lhs)->Name(),
+				      ((gelExpression<EFOutcome *> *) rhs));
+    case gelNFG:
+      vartable->Define(((gelVariable<Nfg *> *) lhs)->Name(), gelNFG);
+      return new gelAssignment<Nfg *>(((gelVariable<Nfg *> *) lhs)->Name(),
+				      ((gelExpression<Nfg *> *) rhs));
+    case gelSTRATEGY:
+      vartable->Define(((gelVariable<Strategy *> *) lhs)->Name(), gelSTRATEGY);
+      return new gelAssignment<Strategy *>(((gelVariable<Strategy *> *) lhs)->Name(),
+				      ((gelExpression<Strategy *> *) rhs));
+    case gelNFPLAYER:
+      vartable->Define(((gelVariable<NFPlayer *> *) lhs)->Name(), gelNFPLAYER);
+      return new gelAssignment<NFPlayer *>(((gelVariable<NFPlayer *> *) lhs)->Name(),
+				      ((gelExpression<NFPlayer *> *) rhs));
+    case gelNFOUTCOME:
+      vartable->Define(((gelVariable<NFOutcome *> *) lhs)->Name(), gelNFOUTCOME);
+      return new gelAssignment<NFOutcome *>(((gelVariable<NFOutcome *> *) lhs)->Name(),
+				      ((gelExpression<NFOutcome *> *) rhs));
     default:
       delete lhs;
       delete rhs;
@@ -701,6 +741,36 @@ gelExpr *GELCompiler::MatchWhile(gelExpr *guard, gelExpr *body)
     case gelTEXT:
       return new gelWhileLoop<gText>(((gelExpression<gTriState> *) guard),
 	  	   		     ((gelExpression<gText> *) body));
+    case gelEFG:
+      return new gelWhileLoop<Efg *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Efg *> *) body));
+    case gelNODE:
+      return new gelWhileLoop<Node *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Node *> *) body));
+    case gelACTION:
+      return new gelWhileLoop<Action *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Action *> *) body));
+    case gelINFOSET:
+      return new gelWhileLoop<Infoset *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Infoset *> *) body));
+    case gelEFPLAYER:
+      return new gelWhileLoop<EFPlayer *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<EFPlayer *> *) body));
+    case gelEFOUTCOME:
+      return new gelWhileLoop<EFOutcome *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<EFOutcome *> *) body));
+    case gelNFG:
+      return new gelWhileLoop<Nfg *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Nfg *> *) body));
+    case gelSTRATEGY:
+      return new gelWhileLoop<Strategy *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<Strategy *> *) body));
+    case gelNFPLAYER:
+      return new gelWhileLoop<NFPlayer *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<NFPlayer *> *) body));
+    case gelNFOUTCOME:
+      return new gelWhileLoop<NFOutcome *>(((gelExpression<gTriState> *) guard),
+				     ((gelExpression<NFOutcome *> *) body));
     default:
       delete guard;
       delete body;
@@ -743,7 +813,56 @@ gelExpr *GELCompiler::MatchFor(gelExpr *init, gelExpr *guard,
 				   (gelExpression<gTriState> *) guard,
                                    incr,
                                    (gelExpression<gText> *) body);
-
+    case gelEFG:
+      return new gelForLoop<Efg *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Efg *> *) body);
+    case gelNODE:
+      return new gelForLoop<Node *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Node *> *) body);
+    case gelACTION:
+      return new gelForLoop<Action *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Action *> *) body);
+    case gelINFOSET:
+      return new gelForLoop<Infoset *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Infoset *> *) body);
+    case gelEFPLAYER:
+      return new gelForLoop<EFPlayer *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<EFPlayer *> *) body);
+    case gelEFOUTCOME:
+      return new gelForLoop<EFOutcome *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<EFOutcome *> *) body);
+    case gelNFG:
+      return new gelForLoop<Nfg *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Nfg *> *) body);
+    case gelSTRATEGY:
+      return new gelForLoop<Strategy *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<Strategy *> *) body);
+    case gelNFPLAYER:
+      return new gelForLoop<NFPlayer *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<NFPlayer *> *) body);
+    case gelNFOUTCOME:
+      return new gelForLoop<NFOutcome *>(init,
+				   (gelExpression<gTriState> *) guard,
+				   incr,
+				   (gelExpression<NFOutcome *> *) body);
     default:
       delete init;
       delete guard;
@@ -783,7 +902,47 @@ gelExpr *GELCompiler::MatchConditional(gelExpr *guard,
       return new gelConditional<gText>((gelExpression<gTriState> *) guard, 
 	    	   		       (gelExpression<gText> *) iftrue,
 				       (gelExpression<gText> *) iffalse);
-
+    case gelEFG:
+      return new gelConditional<Efg *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Efg *> *) iftrue,
+				       (gelExpression<Efg *> *) iffalse);
+    case gelNODE:
+      return new gelConditional<Node *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Node *> *) iftrue,
+				       (gelExpression<Node *> *) iffalse);
+    case gelACTION:
+      return new gelConditional<Action *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Action *> *) iftrue,
+				       (gelExpression<Action *> *) iffalse);
+    case gelINFOSET:
+      return new gelConditional<Infoset *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Infoset *> *) iftrue,
+				       (gelExpression<Infoset *> *) iffalse);
+    case gelEFPLAYER:
+      return new gelConditional<EFPlayer *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<EFPlayer *> *) iftrue,
+				       (gelExpression<EFPlayer *> *) iffalse);
+    case gelEFOUTCOME:
+      return new gelConditional<EFOutcome *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<EFOutcome *> *) iftrue,
+				       (gelExpression<EFOutcome *> *) iffalse);
+    case gelNFG:
+      return new gelConditional<Nfg *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Nfg *> *) iftrue,
+				       (gelExpression<Nfg *> *) iffalse);
+    case gelSTRATEGY:
+      return new gelConditional<Strategy *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<Strategy *> *) iftrue,
+				       (gelExpression<Strategy *> *) iffalse);
+    case gelNFPLAYER:
+      return new gelConditional<NFPlayer *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<NFPlayer *> *) iftrue,
+				       (gelExpression<NFPlayer *> *) iffalse);
+    case gelNFOUTCOME:
+      return new gelConditional<NFOutcome *>((gelExpression<gTriState> *) guard, 
+	    	   		       (gelExpression<NFOutcome *> *) iftrue,
+				       (gelExpression<NFOutcome *> *) iffalse);
+      
     default:
       delete guard;
       delete iftrue;
@@ -854,6 +1013,26 @@ gelExpr *GELCompiler::LookupVar(const gText &name)
       return new gelVariable<gTriState>(name);
     case gelTEXT:
       return new gelVariable<gText>(name);
+    case gelEFG:
+      return new gelVariable<Efg *>(name); 
+    case gelNODE:
+      return new gelVariable<Node *>(name); 
+    case gelACTION:
+      return new gelVariable<Action *>(name); 
+    case gelINFOSET:
+      return new gelVariable<Infoset *>(name); 
+    case gelEFPLAYER:
+      return new gelVariable<EFPlayer *>(name); 
+    case gelEFOUTCOME:
+      return new gelVariable<EFOutcome *>(name); 
+    case gelNFG:
+      return new gelVariable<Nfg *>(name); 
+    case gelSTRATEGY:
+      return new gelVariable<Strategy *>(name); 
+    case gelNFPLAYER:
+      return new gelVariable<NFPlayer *>(name); 
+    case gelNFOUTCOME:
+      return new gelVariable<NFOutcome *>(name); 
     default:
       return 0;
   }

@@ -13,9 +13,32 @@ typedef enum
   gelUNDEFINED, 
   gelBOOLEAN, 
   gelNUMBER, 
-  gelTEXT 
+  gelTEXT,
+  gelEFG,
+  gelNODE,
+  gelINFOSET,
+  gelACTION,
+  gelEFPLAYER,
+  gelEFOUTCOME,
+  gelNFG,
+  gelSTRATEGY,
+  gelNFPLAYER,
+  gelNFOUTCOME,
+  gelINPUT,
+  gelOUTPUT,
+  gelANYTYPE
 } gelType;
 
+class Efg;
+class Node;
+class Infoset;
+class Action;
+class EFPlayer;
+class EFOutcome;
+class Nfg;
+class NFPlayer;
+class NFOutcome;
+class Strategy;
 
 #include <assert.h>
 
@@ -24,6 +47,7 @@ typedef enum
 #include "tristate.h"
 #include "gtext.h"
 #include "funcmisc.h"
+
 
 
 
