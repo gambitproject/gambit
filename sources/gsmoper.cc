@@ -20,7 +20,13 @@
 Portion* GSM_Assign_Undefined( Portion** param )
 {
   assert( param[0] == 0 );
-  param[0] = param[1]->ValCopy();
+  if( param[1]->Type() & (porINPUT|porOUTPUT) )
+  {
+    param[0] = param[1];
+    param[1] = param[0]->RefCopy();
+  }
+  else
+    param[0] = param[1]->ValCopy();
   return param[0]->RefCopy();
 }
 
@@ -45,7 +51,7 @@ Portion* GSM_Assign( Portion** param )
       }
       else
 	result = 
-	  new ErrorPortion( "Cannot assign to an INPUT or OUTPUT variable" );
+	  new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
     }
     else if( ( (ListPortion*) param[ 0 ] )->DataType() ==
 	    ( (ListPortion*) param[ 1 ] )->DataType() )
@@ -57,7 +63,7 @@ Portion* GSM_Assign( Portion** param )
       }
       else
 	result = 
-	  new ErrorPortion( "Cannot assign to an INPUT or OUTPUT variable" );
+	  new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
     }
     else
     {
