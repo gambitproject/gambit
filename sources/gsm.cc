@@ -726,17 +726,17 @@ Portion* GSM::UnAssignExt(void)
   p = _Pop();
   if(p->Spec().Type == porREFERENCE)
   {
-    if(_VarIsDefined(((ReferencePortion*) p)->Value()))
+    gString varname = ((ReferencePortion*) p)->Value(); 
+    if(_VarIsDefined( varname ) )
     {
       delete p;
-      p = _VarRemove(((ReferencePortion*) p)->Value());
-      return p;
+      return _VarRemove( varname );
     }
     else
     {
       _Push(p);
       txt = "UnAssign[] called on undefined reference \"";
-      txt += ((ReferencePortion*) p)->Value();
+      txt += varname;
       txt += '\"';
       p = new ErrorPortion(txt);
       return p;
