@@ -290,6 +290,16 @@ Load poker.efg.  Connect the two infosets for player 1 (red).  Solve
 using Standard All Nash Float.  Now split the infoset again and
 resolve.  The display will go blank and the gui will crash.
 
+//--------------------------------
+
+Bug D34: Elimination by mixed strategies crash
+
+Use e02.efg.  Do Solve->Custom->Normal form->EnumPure.  Request to
+eliminate by mixed strategies.  We get a failed assertion in the
+tableau code.  
+
+Also, this generates output via gout, which needs to be corrected.
+Plus, the tableau should not be failing assertions but throwing exceptions.
 
 -------------  older bugs that still remain ---------------
 
