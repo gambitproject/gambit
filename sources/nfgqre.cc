@@ -223,85 +223,58 @@ void QreNfg::Solve(const MixedProfile<double> &p_startProfile,
 		   gOutput &p_pxiFile, gStatus &p_status,
 		   Correspondence<double, MixedSolution> &p_corresp)
 {
-  MixedProfile<double> profile(p_startProfile);
-  double nu = p_startLambda / (p_startLambda + 1.0);
   double stepsize = 0.00001;
 
   WritePXIHeader(p_pxiFile, p_startProfile.Game());
 
   // Pick the direction to follow the path so that nu starts out
   // increasing
-  double initialsign = (profile.Length() % 2 == 0) ? 1.0 : -1.0;
+  double initialsign = (p_startProfile.Length() % 2 == 0) ? 1.0 : -1.0;
 
-  try {
-    while (nu / (1.0-nu) <= m_maxLam) {
-      SolveStep(profile, nu, initialsign, stepsize);
+  for (int dir = 1; dir <= 2; dir++) {
+    MixedProfile<double> profile(p_startProfile), lastProfile(p_startProfile);
+    double nu = p_startLambda / (p_startLambda + 1.0), lastNu = nu;
 
-      if (nu < 0.0 || nu > 1.0) {
-	// negative nu is probably numerical instability;
-	// nu > 1.0 runs past valid region...
-	return;
-      }
+    try {
+      while (nu / (1.0-nu) <= m_maxLam) {
+	SolveStep(profile, nu, initialsign, stepsize);
 
-      // Write out the QreValue as 0 in the PXI file; not generally
-      // going to be the case, but QreValue is suspect for large lambda 
-      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
-      for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
-	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
-	  p_pxiFile << profile(pl, st) << " ";
+	if (nu < 0.0 || nu > 1.0) {
+	  break;
 	}
-      }
- 
-      if (m_fullGraph) { 
-	p_corresp.Append(1, nu / (1.0-nu),
-			 MixedSolution(profile, algorithmNfg_QRE));
-      }
 
-      p_status.Get();
-      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
-			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
+	p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
+	for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
+	  for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
+	    p_pxiFile << profile(pl, st) << " ";
+	  }
+	}
+ 
+	if (m_fullGraph) { 
+	  p_corresp.Append(1, nu / (1.0-nu),
+			   MixedSolution(profile, algorithmNfg_QRE));
+	}
+
+	p_status.Get();
+	p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
+			     gText("Current lambda: ") + ToText(nu / (1.0-nu)));
+	lastProfile = profile;
+	lastNu = nu;
+      }
+      if (!m_fullGraph) {
+	p_corresp.Append(1, lastNu / (1.0-lastNu),
+			 MixedSolution(lastProfile, algorithmNfg_QRE));
+      }
+    }
+    catch (gSignalBreak &) {
+      if (!m_fullGraph) {
+	p_corresp.Append(1, lastNu / (1.0-lastNu),
+			 MixedSolution(lastProfile, algorithmNfg_QRE));
+      }
+      throw;
     }
 
-    // Now, reverse direction and trace out the other way
     initialsign *= -1.0;
-    nu = p_startLambda / (p_startLambda + 1.0);
-    profile = p_startProfile;
-
-    while (nu / (1.0-nu) <= m_maxLam) {
-      SolveStep(profile, nu, initialsign, stepsize);
-
-      if (nu < 0.0 || nu > 1.0) {
-	// negative nu is probably numerical instability;
-	// nu > 1.0 runs past valid region...
-	return;
-      }
-
-      // Write out the QreValue as 0 in the PXI file; not generally
-      // going to be the case, but QreValue is suspect for large lambda 
-      p_pxiFile << "\n" << (nu / (1.0-nu)) << " " << 0.0 << " ";
-      for (int pl = 1; pl <= profile.Game().NumPlayers(); pl++) {
-	for (int st = 1; st <= profile.Support().NumStrats(pl); st++) {
-	  p_pxiFile << profile(pl, st) << " ";
-	}
-      }
- 
-      if (m_fullGraph) { 
-	p_corresp.Append(1, nu / (1.0-nu),
-			 MixedSolution(profile, algorithmNfg_QRE));
-      }
-
-      p_status.Get();
-      p_status.SetProgress(nu * (1.0 + m_maxLam) / m_maxLam,
-			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
-    }
-  }
-  catch (...) {
-    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
-    throw;
-  }
-  
-  if (!m_fullGraph) { 
-    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
   }
 }
 
