@@ -117,38 +117,8 @@ ITEM 0003: LPSolve[] fails when stopAfter != 1
 
 DATE:     9/8/1999 by TLT (was Bugs C18 and C27 in bugs_gcl)
 AFFECTS:  GCL (GUI as well?), all platforms(?)
-STATUS:   OPEN
+STATUS:   CLOSED 9/13/99 by RDM
 SEVERITY: MAJOR
-DETAILS:
-
-  GCL1:= << n:=LoadNfg["../nfg/csg1.nfg"]
-  (Nfg) ""
-  GCL2:= << m:=LpSolve[n,stopAfter->0]
-
-  c: { 0.000000 0.000000 0.000000 1.000000 }
-  uc: { 0.000000 0.000000 0.000000 0.000000 }
-  col: 1 cost: 0.000000 label: 4 x: 1.000000
-  col: 2 cost: -1.000000 label: -2 x: In function LpSolve[], in file "stdudfs.gcl" at line 463:
-  In function LpSolve[], in file "console" at line 2:
-  GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
-
-Include["gclini.gcl"]
-Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
-GCL1:= << n:=LoadNfg["../nfg/zero.nfg"]
-(Nfg) "Two person 2 x 2 game with all zero payoffs"
-GCL2:= << LpSolve[n]
-{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 } }
-GCL3:= << LpSolve[n,stopAfter->2]
-
-c: { 0.000000 0.000000 1.000000 }
-uc: { 0.000000 0.000000 0.000000 }
-col: 1 cost: 0.000000 label: 3 x: 1.000000
-col: 2 cost: 0.000000 label: -2 x: In function LpSolve[], in file "/home/mill/rdm/gambit/bin/stdudfs.gcl" at line 461:
-In function LpSolve[], in file "console" at line 3:
-EXCEPTION: Bad index in gArray
-GCL4:= << Quit
-
-Note: Bug does not occur if stopAfter->1
 
 ---------------
 
@@ -718,7 +688,7 @@ eliminate all pure strategies weakly dominated by mixed strategies,
 compute all Nash equilibria of the resulting game, and then check any
 mixed equilibria that result to make sure they are not weakly
 dominated.  This is now done in the GCL (9/9/99).  We still need to
-make changes in the GCU to implement it like this.  
+make changes in the GUI to implement it like this.  
 
 
 Earlier this year, we changed the UDFs (and standard algorithms in the

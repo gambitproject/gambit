@@ -3821,9 +3821,13 @@ of time consumed by the conversion.
 
 \item\lex{AllNashSolve}
 \protect \large \begin{verbatim}
-AllNashSolve[nfg->NFG, {stopAfter->0}, {precision->Float}, {nEvals<->0}, 
-              {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
-              {singularsupps<->{  }}] =: LIST(MIXED)
+AllNashSolve[support->NFSUPPORT, {stopAfter->0}, {nEvals<->0}, 
+             {time<->0.000000}, {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularSupps<->{  }}, {recurse->True}] =: LIST(MIXED)
+AllNashSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}, {singularSupps<->{  }}, 
+             {recurse->True}] =: LIST(BEHAV),
 \end{verbatim}\normalsize
 
 \bd
@@ -3855,7 +3859,10 @@ execution of the algorithm.  By default, no logging is done.
 Higher integers correspond to more detail; zero corresponds to no output
 at all.
 \item
-[singularsupps:] Returns a list of the supports which have singular solutions.  
+[singularSupps:] Returns a list of the supports which have singular solutions. 
+\item
+[recurse:] Recurses to find totally mixed equilibria on all
+subsupports of \verb+support+.
 \ed
 
 \item [See also:] \verb+PolEnumSolve+, \verb+PossibleNashSupports+
@@ -5439,12 +5446,10 @@ the precision of \verb+x+.
 
 \item\lex{LpSolve}
 \protect \large \begin{verbatim}
-LpSolve[support->NFSUPPORT, {stopAfter->1}, 
-        {precision->Float}, {nPivots<->0}, 
+LpSolve[support->NFSUPPORT, {precision->Float}, {nPivots<->0}, 
         {time<->0.000000}, {traceFile<->(Output)}, 
         {traceLevel->0}] =: LIST(MIXED) 
-LpSolve[support->EFSUPPORT, {asNfg->False}, 
-        {stopAfter->1}, {precision->Float}, 
+LpSolve[support->EFSUPPORT, {asNfg->False}, {precision->Float}, 
         {nPivots<->0}, {time<->0.000000}, 
         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
@@ -5464,8 +5469,6 @@ By setting this parameter to \verb+True+, each marked subgame of the
 extensive form is converted to its corresponding reduced normal form,
 solved as a linear program, and the mixed strategy solutions converted back
 into behavior profiles.
-\item
-[stopAfter:] Maximum number of equilibria to find.  
 \item
 [precision:] Determines the precision of the computation. Default is
 floating point precision (\verb+Float+). 
@@ -7440,6 +7443,24 @@ Searches for all Nash equilibria of the normal form game
 \end{verbatim} 
 \ed
 
+\item\lex{AllNashSolve}
+\protect \large \begin{verbatim}
+AllNashSolve[nfg->NFG, {stopAfter->0}, {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, {traceLevel->0}, 
+             {singularsupps<->{  }}, {recurse->True}] =: LIST(MIXED)
+\end{verbatim}\normalsize
+
+\bd 
+Version of \verb+AllNashSolve+ that takes a game rather than a support
+as an argument.  Searches for all Nash equilibria of an n person game
+\verb+nfg+.  Returns a list containing the equilibria found.
+
+\begin{verbatim}
+  AllNashSolve[Support[nfg],stopAfter,nEvals,time,traceFile,
+    traceLevel,singularsupps,recurse];
+\end{verbatim} 
+\ed
+
 \item\lex{AllPerfect}
 \protect \large \begin{verbatim}
 AllPerfect[n->NFG, {stopAfter->0}, {nTries->0}, 
@@ -8139,9 +8160,8 @@ provides the same output as \verb+StrategyProbs+.
 
 \item\lex{LpSolve}
 \protect \large \begin{verbatim}
-LpSolve[nfg->NFG, {stopAfter->1}, {precision->Float}, 
-        {nPivots<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
-        {traceLevel->0}] =: LIST(MIXED) 
+LpSolve[nfg->NFG, {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED) 
 \end{verbatim}\normalsize
 
 \bd 
@@ -8149,7 +8169,7 @@ A version of \verb+LpSolve+ that takes a normal form
 game instead of a support.  See the built-in function,
 \verb+LpSolve+ for a description of the parameters.
 \begin{verbatim}
-  LpSolve[Support[nfg], stopAfter, precision, nPivots, time, traceFile, 
+  LpSolve[Support[nfg], precision, nPivots, time, traceFile, 
   traceLevel]
 \end{verbatim} 
 \ed

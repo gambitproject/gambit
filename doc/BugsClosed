@@ -2,6 +2,50 @@ Gambit Closed Bugs List
 
 ---------------
 
+ITEM 0003: LPSolve[] fails when stopAfter != 1
+
+DATE:     9/8/1999 by TLT (was Bugs C18 and C27 in bugs_gcl)
+AFFECTS:  GCL (GUI as well?), all platforms(?)
+STATUS:   CLOSED
+SEVERITY: MAJOR
+DETAILS:
+
+RDM: This bug was "fixed" by getting rid of the "stopAfter" parameter.
+Since there are other ways of computing all Nash equilibria for a 2
+person const sum game, and the code to do this through the LP is not
+completed, getting this working is not essential.  So it was just disabled, to prevent anyone from using this part of the code. 
+
+  GCL1:= << n:=LoadNfg["../nfg/csg1.nfg"]
+  (Nfg) ""
+  GCL2:= << m:=LpSolve[n,stopAfter->0]
+
+  c: { 0.000000 0.000000 0.000000 1.000000 }
+  uc: { 0.000000 0.000000 0.000000 0.000000 }
+  col: 1 cost: 0.000000 label: 4 x: 1.000000
+  col: 2 cost: -1.000000 label: -2 x: In function LpSolve[], in file "stdudfs.gcl" at line 463:
+  In function LpSolve[], in file "console" at line 2:
+  GCL EXCEPTION:Bad index in gArray; Caught in gcl.cc, main()
+
+Include["gclini.gcl"]
+Include["/home/mill/rdm/gambit/bin/stdudfs.gcl"]
+GCL1:= << n:=LoadNfg["../nfg/zero.nfg"]
+(Nfg) "Two person 2 x 2 game with all zero payoffs"
+GCL2:= << LpSolve[n]
+{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 } }
+GCL3:= << LpSolve[n,stopAfter->2]
+
+c: { 0.000000 0.000000 1.000000 }
+uc: { 0.000000 0.000000 0.000000 }
+col: 1 cost: 0.000000 label: 3 x: 1.000000
+col: 2 cost: 0.000000 label: -2 x: In function LpSolve[], in file "/home/mill/rdm/gambit/bin/stdudfs.gcl" at line 461:
+In function LpSolve[], in file "console" at line 3:
+EXCEPTION: Bad index in gArray
+GCL4:= << Quit
+
+Note: Bug does not occur if stopAfter->1
+
+---------------
+
 ITEM 0004: Algorithms producing nonsense on games of imperfect recall
 
 DATE:     9/8/1999 by TLT (was Bug C21 in bugs_gcl)
