@@ -27,8 +27,6 @@ class gList<gString>;
 class gList<gRational>;
 class gList<Node *>;
 
-template <class T> class BehavSolution;
-gOutput &operator<<(gOutput &, const BehavSolution<double> &);
 
 #define TEMPLATE
 #pragma option -Jgd

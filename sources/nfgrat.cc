@@ -27,8 +27,6 @@ class NfgIter<double>;
 template <class T> class NfgContIter;
 class NfgContIter<double>;
 
-template <class T> class MixedSolution;
-gOutput &operator<<(gOutput &, const MixedSolution<gRational> &);
 
 #define TEMPLATE
 #pragma option -Jgd
