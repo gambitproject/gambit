@@ -136,6 +136,7 @@ private:
   void OnSolveCustom(wxCommandEvent &);
   void OnSolveNormalReduced(wxCommandEvent &);
   void OnSolveNormalAgent(wxCommandEvent &);
+  void OnSolveWizard(wxCommandEvent &);
 
   void OnInspectSolutions(wxCommandEvent &);
   void OnInspectCursor(wxCommandEvent &);

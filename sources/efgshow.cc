@@ -8,6 +8,7 @@
 #include "wx/fontdlg.h"
 #include "wx/colordlg.h"
 #include "wx/printdlg.h"
+#include "wx/wizard.h"
 #include "wxmisc.h"
 #include "wxstatus.h"
 
@@ -242,6 +243,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuSOLVE_CUSTOM_NFG_QREGRID, EfgShow::OnSolveCustom)
   EVT_MENU(efgmenuSOLVE_NFG_REDUCED, EfgShow::OnSolveNormalReduced)
   EVT_MENU(efgmenuSOLVE_NFG_AGENT, EfgShow::OnSolveNormalAgent)
+  EVT_MENU(efgmenuSOLVE_WIZARD, EfgShow::OnSolveWizard)
   EVT_MENU(efgmenuINSPECT_SOLUTIONS, EfgShow::OnInspectSolutions)
   EVT_MENU(efgmenuINSPECT_CURSOR, EfgShow::OnInspectCursor)
   EVT_MENU(efgmenuINSPECT_INFOSETS, EfgShow::OnInspectInfosets)
@@ -768,6 +770,10 @@ void EfgShow::MakeMenus(void)
                "Generate agent normal form");
   solve_menu->Append(efgmenuSOLVE_NFG, "Normal form", solveNfgMenu,
              "Create a normal form representation of this game");
+
+  solve_menu->AppendSeparator();
+  solve_menu->Append(efgmenuSOLVE_WIZARD, "&Wizard",
+		     "Experimental wizard for algorithms");
   
   wxMenu *inspect_menu = new wxMenu;
   inspect_menu->Append(efgmenuINSPECT_SOLUTIONS, "&Solutions",
@@ -1871,6 +1877,100 @@ void EfgShow::OnSolveNormalAgent(wxCommandEvent &)
   if (N) {
     (void) new NfgShow(*N, (EfgNfgInterface *) this, this);
   }
+}
+
+class DominancePage : public wxWizardPageSimple {
+private:
+  wxRadioBox *m_depthChoice, *m_typeChoice, *m_methodChoice;
+
+public:
+  DominancePage(wxWizard *);
+};
+
+DominancePage::DominancePage(wxWizard *p_parent)
+  : wxWizardPageSimple(p_parent)
+{
+  SetAutoLayout(true);
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  wxString depthChoices[] = { "None", "Once", "Iterative" };
+  m_depthChoice = new wxRadioBox(this, idDEPTH_CHOICE, "Depth",
+				 wxDefaultPosition, wxDefaultSize,
+				 3, depthChoices, 0, wxRA_SPECIFY_COLS);
+  topSizer->Add(m_depthChoice, 0, wxALL, 5);
+
+  wxString typeChoices[] = { "Weak", "Strong" };
+  m_typeChoice = new wxRadioBox(this, -1, "Type",
+				wxDefaultPosition, wxDefaultSize,
+				2, typeChoices, 0, wxRA_SPECIFY_COLS);
+  if (m_depthChoice->GetSelection() == 0)
+    m_typeChoice->Enable(false);
+  topSizer->Add(m_typeChoice, 0, wxALL, 5);
+
+  wxString methodChoices[] = { "Pure", "Mixed" };
+  m_methodChoice = new wxRadioBox(this, -1, "Method",
+				  wxDefaultPosition, wxDefaultSize,
+				  2, methodChoices, 0, wxRA_SPECIFY_COLS);
+  if (m_depthChoice->GetSelection() == 0)
+    m_methodChoice->Enable(false);
+  topSizer->Add(m_methodChoice, 0, wxALL, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+
+  Layout();
+}
+
+class SubgamesPage : public wxWizardPageSimple {
+public:
+  SubgamesPage(wxWizard *p_parent);
+};
+
+SubgamesPage::SubgamesPage(wxWizard *p_parent)
+  : wxWizardPageSimple(p_parent)
+{
+  new wxStaticText(this, -1, "Subgames options go here");
+}
+
+class AlgorithmPage : public wxWizardPageSimple {
+public:
+  AlgorithmPage(wxWizard *);
+};
+
+AlgorithmPage::AlgorithmPage(wxWizard *p_parent)
+  : wxWizardPageSimple(p_parent)
+{
+  new wxStaticText(this, -1, "Algorithm options go here");
+}
+
+class FinishPage : public wxWizardPageSimple {
+public:
+  FinishPage(wxWizard *);
+};
+
+FinishPage::FinishPage(wxWizard *p_parent)
+  : wxWizardPageSimple(p_parent)
+{
+  new wxStaticText(this, -1, "All finished... click Finish to run");
+}
+
+void EfgShow::OnSolveWizard(wxCommandEvent &)
+{
+  wxWizard *wizard = wxWizard::Create(this, -1, "Solution wizard");
+  wxWizardPageSimple *page1 = new DominancePage(wizard);
+  wxWizardPageSimple *page2 = new SubgamesPage(wizard);
+  wxWizardPageSimple *page3 = new AlgorithmPage(wizard);
+  wxWizardPageSimple *page4 = new FinishPage(wizard);
+  wxWizardPageSimple::Chain(page1, page2);
+  wxWizardPageSimple::Chain(page2, page3);
+  wxWizardPageSimple::Chain(page3, page4);
+
+  if (wizard->RunWizard(page1)) {
+
+  }
+
+  wizard->Destroy();
 }
 
 

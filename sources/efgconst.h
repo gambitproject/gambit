@@ -99,6 +99,8 @@ typedef enum {
   efgmenuSOLVE_NFG = 1521,
   efgmenuSOLVE_NFG_REDUCED = 1504,
   efgmenuSOLVE_NFG_AGENT = 1519,
+  
+  efgmenuSOLVE_WIZARD = 1525,
 
   efgmenuINSPECT_SOLUTIONS = 1850,
   efgmenuINSPECT_CURSOR = 1860,
