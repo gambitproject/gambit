@@ -532,7 +532,7 @@ void Init_listfunc(GSM *gsm)
   //-------------------------- List -----------------------------
 
   FuncObj = new FuncDescObj("List");
-  FuncObj->SetFuncInfo(GSM_List, 2);
+  FuncObj->SetFuncInfo(GSM_List, 2, NO_PREDEFINED_PARAMS, NON_LISTABLE);
   FuncObj->SetParamInfo(GSM_List, 0, "x", porANYTYPE & ~porLIST &
 			~(porINTEGER|porFLOAT|porRATIONAL) );
   FuncObj->SetParamInfo(GSM_List, 1, "length", porINTEGER, 
