@@ -53,7 +53,6 @@ void EnumCliques::
 candtry1 (int stk[], // stack 
 	  bool connected[MAXM][MAXN],
 	  int cand,  // the candidate from NODES1  to be added to CLIQUE 
-	  int poscand,  // its stack position 
 	  int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
 	  int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
 	  int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
@@ -71,11 +70,15 @@ candtry1 (int stk[], // stack
      CAND1 may be shuffled,  o/w stack unchanged 
   */
 {
-  int j, snnew, scnew, ecnew;
+  int i, j, snnew, scnew, ecnew;
   
   clique1[cliqsize1++] = cand ;
   // remove  cand  from CAND1 by replacing it with the last element of CAND1 
-  stk[poscand] = stk[--ec1] ;
+  for (i=*sc1; i<ec1; i++)
+      if (cand == stk[i]) {
+         stk[i] = stk[--ec1] ;
+         break ;
+         }
   // stk[ec1] is free now but will after extension be needed again 
   // fill new sets NOT2, CAND2 
   snnew = tos ;
@@ -105,7 +108,6 @@ void EnumCliques::
 candtry2 (int stk[], // stack 
 	  bool connected[MAXM][MAXN],
 	  int cand,  // the candidate from NODES2  to be added to CLIQUE 
-	  int poscand,  // its stack position 
 	  int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
 	  int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
 	  int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
@@ -123,11 +125,15 @@ candtry2 (int stk[], // stack
   // CAND2 may be shuffled,  o/w stack unchanged
   
 {
-  int i, snnew, scnew, ecnew;
+  int i, j,  snnew, scnew, ecnew;
   
   clique2[cliqsize2++] = cand ;
   // remove  cand  from CAND2 by replacing it with the last element of CAND2 
-  stk[poscand] = stk[--ec2] ;
+  for (j=*sc2; j<ec2; j++)
+      if (cand == stk[j]) {
+	 stk[j] = stk[--ec2] ;
+	 break ;
+	 }
   // stk[ec2] is free now but will after extension be needed again 
   // fill new sets NOT1, CAND1 
   snnew = tos ;
@@ -224,8 +230,8 @@ extend (int stk[], // stack
        posfix   = its position on the stack,
        bfixin1  = fixp  is in NODES1
        bcandfix = fixp  is a candidate
-       stk[savelist, +minnod] = stack indices (!) of nodes
-       disconnected to fixp which are all either in CAND1 or in CAND2;
+       stk[savelist, +minnod] = nodes disconnected to fixp
+       which are all either in CAND1 or in CAND2;
     */
     /*    top of stack can be reset to  savelist+minnod  where
 	  if savelist  is the second of the two lists, recopy it
@@ -240,23 +246,23 @@ extend (int stk[], // stack
     
     if (bfixin1) {int j;  // fixpoint in NODES1  
     if (bcandfix)      // fixpoint is a candidate 
-      candtry1(stk, connected, fixp, posfix,
+      candtry1(stk, connected, fixp, 
 	       clique1, cliqsize1, clique2, cliqsize2,
 	       sn1, &sc1, ec1, sn2, sc2, ec2, tos, orignode1, orignode2);
     // fixpoint is now in NOT1, try all the nodes disconnected to it 
     for (j=0; j<minnod;  j++) 
-      candtry2(stk, connected, stk[stk[savelist+j]], stk[savelist+j],
+      candtry2(stk, connected, stk[savelist+j],
 	       clique1, cliqsize1, clique2, cliqsize2,
 	       sn1, sc1, ec1, sn2, &sc2, ec2, tos, orignode1, orignode2);
     }
     else {int j;          // fixpoint in NODES2  
     if (bcandfix)      // fixpoint is a candidate 
-      candtry2(stk, connected, fixp, posfix,
+      candtry2(stk, connected, fixp,
 	       clique1, cliqsize1, clique2, cliqsize2,
 	       sn1, sc1, ec1, sn2, &sc2, ec2, tos, orignode1, orignode2);
     // fixpoint is now in NOT2, try all the nodes disconnected to it 
     for (j=0; j<minnod;  j++) 
-      candtry1(stk, connected, stk[stk[savelist+j]], stk[savelist+j],
+      candtry1(stk, connected, stk[savelist+j],
 	       clique1, cliqsize1, clique2, cliqsize2,
 	       sn1, &sc1, ec1, sn2, sc2, ec2, tos, orignode1, orignode2);
     }
@@ -296,12 +302,13 @@ findfixpoint(int stk[], // stack
     p = stk[i] ;
     count = 0;
     /* count number of disconnections to  p,  
-       building up stk[tmplist+count] containing the indices (!)
-       of disconnected points */
+       building up stk[tmplist+count] containing the
+       disconnected points */
     for (j=scother; (j<ecother) && (count < *minnod); j++) {
-      if (!( binspect1 ? connected[p][stk[j]] : connected[stk[j]][p] )) {
-	stk[(*tmplist) + count] = j ;
-	count ++ ;
+      int k = stk[j] ;
+      if (!( binspect1 ? connected[p][k] : connected[k][p] )) {
+         stk[(*tmplist) + count] = k ;
+         count ++ ;
       }
     }  // end loop j, comparing to other side 
     // check if new minimum found, in that case update fixpoint 
