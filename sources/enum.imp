@@ -135,7 +135,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	    nash=0;
 
       if(nash) {
-	gout << "\ni2,i1: " << i2 << " " << i1;
+	// gout << "\ni2,i1: " << i2 << " " << i1;
 	sum = (T)0;
 	for(k=1;k<=n1;k++) {
 	  profile(1,k) = (T)0;
