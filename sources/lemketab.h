@@ -12,7 +12,7 @@
 
 template <class T> class LTableau : public Tableau<T> {
 protected:
-  T eps2;
+//  T eps2;
 public:
 //   LTableau(void);
   LTableau(const gMatrix<T> &A, const gVector<T> &b);

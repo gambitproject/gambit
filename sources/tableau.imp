@@ -11,6 +11,17 @@
 
 // Basis method definitions
 
+    // These are the values recommended by Murtagh (1981) for 15 digit 
+    // accuracy in LP problems 
+void Epsilon_Tab(double &v, int i)
+{
+  if(i==1)v=(double)1.0e-5;
+  if(i==2)v=(double)1.0e-8;
+  if(i==3)v=(double)1.0e-6;
+}
+
+void Epsilon_Tab(gRational &v, int i) { v = (gRational)0;}
+
 template <class T> 
 Basis<T>::Basis(const gMatrix<T> &A)
   :  A(&A), label(A.MinRow(), A.MaxRow())
@@ -165,6 +176,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
     basis(A),  B(A.MinRow(), A.MaxRow()),
     solution(A.MinRow(),A.MaxRow()) 
 {
+  Epsilon_Tab(eps2,2);
   B.refactor(A, basis.label);
   B.solve(b, solution);
 };
@@ -172,7 +184,7 @@ Tableau<T>::Tableau(const gMatrix<T> &A, const gVector<T> &b)
 
 template <class T>
 Tableau<T>::Tableau(const Tableau<T> &orig)
-  : npivots(0), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
+  : eps2(orig.eps2), npivots(0), tmpcol(orig.tmpcol), A(orig.A),b(orig.b), 
     basis(orig.basis), B(orig.B), solution(orig.solution)
 { }
 
@@ -242,7 +254,8 @@ int Tableau<T>::CanPivot(int outlabel, int inlabel)
 {
 //  gVector<T> tmpcol(MinRow(),MaxRow());
   SolveColumn(inlabel,tmpcol);
-  if(tmpcol[basis.Find(outlabel)] == (T)0) return 0;
+  T val = tmpcol[basis.Find(outlabel)];
+  if(val <=eps2 && val >= -eps2) return 0;
   return 1;  
 }
 
@@ -329,7 +342,7 @@ void Tableau<T>::MultiplyT(const gVector<T> &in, gVector<T> &out)
   for(int i=out.First(); i<=out.Last(); i++) {
       if( basis.label[i]<0 ) {
 	tmpcol= (T)0; 
-	tmpcol[-basis.label[i]]=0; 
+	tmpcol[-basis.label[i]]=(T)0; // ? is this right ?
       }
       else {
 	A->GetColumn(basis.label[i],tmpcol); }
