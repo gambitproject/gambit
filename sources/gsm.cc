@@ -575,6 +575,14 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
   
     if (result)   {
       _ResolveRef(result);
+
+      if (result->Spec().Type == porREFERENCE) {
+	throw gclRuntimeError("Reference to unknown variable " +
+			      ((ReferencePortion *) result)->Value() +
+			      " returned from function " +
+			      UserFuncName());
+      }
+
       if (result->IsReference())  {
 	result_copy = result->ValCopy();
 	delete result;
