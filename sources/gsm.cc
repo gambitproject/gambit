@@ -602,6 +602,15 @@ Portion* GSM::ExecuteUserFunc(gclExpression& program,
       _FuncNameStack->Pop();
     }
   }
+  // The reason for this dual handler is that Borland apparently has
+  // some compiler bug with rethrowing exceptions.  When the throw
+  // above was introduced to check for returning undefined variables
+  // crashes ensued.  This seems to fix matters.  -- magyar, 3/18/99
+  catch (gclRuntimeError &E) {
+    delete _RefTableStack->Pop();
+    _FuncNameStack->Pop();
+    throw E;
+  }
   catch (...) {
     delete _RefTableStack->Pop();
     _FuncNameStack->Pop();
