@@ -1,0 +1,826 @@
+// Standard User defined functions
+
+StdOut << "Include[\""&GetPath[]&"\"]\n"
+
+NewFunction[SetNumericFormat[{width->0},{precis->6},{expmode->False}]=:BOOLEAN,
+  !IsNull[Format[1.0,width,precis,expmode]]
+]
+
+NewFunction[GetNumericFormat[{width<->0}, {precis<->6},
+  {expmode<->False}]=:BOOLEAN,
+  GetFormat[1.0,width,precis,expmode];
+  True
+]
+
+NewFunction[SetIntegerFormat[{width->0}]=:BOOLEAN,
+  !IsNull[Format[1,width]]
+]
+
+NewFunction[GetIntegerFormat[{width<->0}]=:BOOLEAN,
+  GetFormat[1,width];
+  True
+]
+
+NewFunction[SetTextFormat[{quote->True}]=:BOOLEAN,
+  !IsNull[Format["",quote]]
+]
+
+NewFunction[GetTextFormat[{quote<->True}]=:BOOLEAN,
+  GetFormat["",quote];
+  True
+]
+
+NewFunction[SetSolutionFormat[{info->1}]=:BOOLEAN,
+  !IsNull[Format[Centroid[NewEfg[]],info]]
+]
+
+NewFunction[GetSolutionFormat[{info<->1}]=:BOOLEAN,
+  GetFormat[Centroid[NewEfg[]],info];
+  True
+]
+
+NewFunction[SetListFormat[{braces->True},{commas->True},{lf->1},{indent->2}]=:BOOLEAN,
+  ListFormat[braces,commas,lf,indent]
+]
+
+// NewFunction[GetListFormat[{braces<->True},{commas<->True},
+//  {lf<->1},{indent<->2}]=:BOOLEAN,
+//  a := True;  b := True;  c := 0; d := 0;
+//  ListFormat[a,b,c,d];
+//  braces:=a;commas:=b;lf:=c;indent:=d;True/
+//]
+
+NewFunction[Max[x->LIST(NUMBER)]=:NUMBER,
+  i:=1;r:=x_1;
+  While[i<NumElements[x],i:=i+1;If[x_i>r,r:=x_i]];
+  r
+]
+
+NewFunction[Min[x->LIST(NUMBER)]=:NUMBER,-Max[-x]]
+
+NewFunction[Dimensions[x->NLIST(ANYTYPE)]=:LIST(NUMBER),
+//*  Note:  x is assumed rectangular
+  l:=Length[x];
+  If[IsList[l],{NumElements[x]}&Dimensions[x_1],{l}]
+]
+
+NewFunction[Prepend[x->ANYTYPE,l->LIST(ANYTYPE)]=:LIST(ANYTYPE),
+  {x}&l
+]
+
+NewFunction[CartesianProd[l->LIST(LIST(ANYTYPE))]=:LIST(LIST(ANYTYPE)),
+  If[NumElements[l]=1,
+    Prepend[l_1,{}],
+    r:={};i:=1;
+    l1:=l_1;
+    l2:=CartesianProd[Remove[l,1]];
+    While[i<=Length[l1], r:=r&{Prepend[l1_i,l2]};i:=i+1];
+    r
+  ]
+]	
+
+NewFunction[Nfg[x->NLIST(NUMBER)]=:NFG,
+  d:=Dimensions[x];
+  n:=NewNfg[Remove[d,Length[d]]];
+  s:=CartesianProd[Strategies[n]];
+  NewOutcome[s,x];
+  n
+]
+
+NewFunction[Payoffs[profile->LIST(STRATEGY)],
+  Payoff[Outcome[profile],Players[Game[profile_1]]]
+]
+
+NewFunction[Payoffs[n->NFG]=:NLIST(NUMBER),
+  Payoffs[CartesianProd[Strategies[n]]]
+]
+
+NewFunction[Strategies[s->NFSUPPORT]=:LIST(LIST(STRATEGY)),
+  Strategies[Players[Game[s]],s]
+]    
+
+NewFunction[Actions[s->EFSUPPORT]=:LIST(LIST(LIST(ACTION))),
+  Actions[Infosets[Game[s]],s]
+]    
+
+NewFunction[Profiles[s->NFSUPPORT]=:NLIST(STRATEGY),
+  CartesianProd[Strategies[s]]
+]
+
+NewFunction[Profiles[nfg->NFG]=:NLIST(STRATEGY),
+  Profiles[Support[nfg]]
+]
+
+
+NewFunction[AddMove[i->INFOSET,a->ACTION]=:LIST(NODE),
+  AddMove[i,Filter[n:=Nodes[Game[i]],PriorAction[n]=a]]
+]
+
+//NewFunction[Zero[] =: NUMBER, 0;];
+
+//NewFunction[One[] =: NUMBER, 1;];
+
+NewFunction[MaxInt[] =: NUMBER, 
+// MAXINT = 2^31-1
+  2147483647
+]
+
+NewFunction[Ancestors[n->NODE]=:LIST(NODE),
+  If[IsRoot[n],{n},Flatten[{Ancestors[Parent[n]]}&{n}]]
+]
+
+NewFunction[History[n->NODE]=:LIST(ACTION),
+  If[IsRoot[n],{},Flatten[{History[Parent[n]]}&{PriorAction[n]}]]
+]
+
+NewFunction[Sum[l->LIST(NUMBER)] =: NUMBER, 
+  Dot[l,List[1/1,Length[l] ]]
+]
+
+NewFunction[IsRoot[n->NODE]=:BOOLEAN,
+  IsNull[Parent[n]]
+]
+
+NewFunction[Behav[efg->EFG, list->LIST(LIST(LIST(NUMBER)))] =: BEHAV(NUMBER),
+  SetProbs[Behav[Support[efg]],list]
+]
+
+NewFunction[Mixed[nfg->NFG, list->LIST(LIST(NUMBER))] =: MIXED(NUMBER),
+  SetProbs[Mixed[Support[nfg]],list]
+]
+
+// Note: The following functions are intended to be UDFs, but because of
+// poor speed performance, are currently implemented as BIFs
+
+//NewFunction[ActionProbs[behav->BEHAV(NUMBER)]=:LIST(LIST(LIST(NUMBER))),
+//  ActionProb[behav,Actions[Game[behav]]];
+//];
+
+//NewFunction[ActionValues[behav->BEHAV(NUMBER)]=:LIST(LIST(LIST(NUMBER))),
+//  ActionValues[behav,Infosets[Game[behav]]];
+//];
+
+//NewFunction[Beliefs[behav->BEHAV(NUMBER)]=:LIST(LIST(LIST(NUMBER))),
+//  Belief[behav,Members[Game[behav]]];
+//];
+
+//NewFunction[InfosetProbs[behav->BEHAV(NUMBER)]=:LIST(LIST(NUMBER)),
+//  InfosetProb[behav,Infosets[Game[behav]]];
+//];
+
+NewFunction[NodeValues[behav->BEHAV,node->NODE]=:LIST(NUMBER),
+  NodeValue[behav,Players[Game[behav]],node]
+]
+
+//NewFunction[NodeValues[behav->BEHAV(NUMBER),player->EFPLAYER]=:LIST(NUMBER),
+//  NodeValue[behav,player,NodeTree[Game[behav]]]
+//]
+
+//NewFunction[NodeValues[behav->BEHAV(NUMBER)]=:LIST(NUMBER),
+//  NodeValue[behav,NodeTree[Game[behav]]];
+//];
+
+//NewFunction[RealizProbs[behav->BEHAV(NUMBER)]=:NLIST(NUMBER),
+//  RealizProb[behav,NodeTree[Game[behav]]];
+//];
+
+//NewFunction[Regrets[behav->BEHAV(NUMBER)]=:LIST(LIST(LIST(NUMBER))),
+//  Regret[behav,Actions[Game[behav]]];
+//];
+
+//NewFunction[StrategyProbs[mixed->MIXED(NUMBER)]=:LIST(LIST(NUMBER)),
+//  StrategyProb[mixed,Strategies[Game[mixed]]];
+//];
+
+//NewFunction[StrategyValues[profile->MIXED(NUMBER)]=:LIST(LIST(NUMBER)),
+//  StrategyValue[profile,Strategies[Game[profile]]];
+//];
+
+// the ListForm[] functions will be replaced by ActionProbs[] 
+// and StrategyProbs[]. The old versions are provided for backwards 
+// compatibility only and should not be counted on to exist in the future. 
+
+NewFunction[ListForm[behav->BEHAV]=:LIST(LIST(LIST(NUMBER))),
+  ActionProb[behav,Actions[Game[behav]]]
+]
+
+NewFunction[ListForm[mixed->MIXED]=:LIST(LIST(NUMBER)),
+  StrategyProb[mixed,Strategies[Game[mixed]]]
+]
+
+NewFunction[Centroid[s->EFSUPPORT]=:BEHAV,
+  Behav[s]
+]
+
+NewFunction[Centroid[s->NFSUPPORT]=:MIXED,
+  Mixed[s]
+]
+
+NewFunction[Centroid[efg->EFG]=:BEHAV,
+  Behav[Support[efg]]
+]
+
+NewFunction[Centroid[nfg->NFG]=:MIXED,
+  Mixed[Support[nfg]]
+]
+
+NewFunction[Infosets[efg->EFG]=:LIST(LIST(INFOSET)),
+  Infosets[Players[efg]]
+]
+
+NewFunction[AllInfosets[efg->EFG]=:LIST(LIST(INFOSET)),
+  Infosets[{Chance[efg]}&Players[efg]]
+]
+
+NewFunction[Members[efg->EFG]=:LIST(LIST(LIST(NODE))),
+  Members[Infosets[Players[efg]]]
+]
+
+NewFunction[AllMembers[efg->EFG]=:LIST(LIST(LIST(NODE))),
+  Members[AllInfosets[efg]]
+]
+
+NewFunction[Actions[infoset->INFOSET] =: LIST(ACTION),
+  Actions[infoset,Support[Game[infoset]]]
+]
+
+NewFunction[Actions[efg->EFG]=:LIST(LIST(LIST(ACTION))),
+  Actions[Infosets[Players[efg]]]
+]
+
+NewFunction[Strategies[player->NFPLAYER] =: LIST(STRATEGY),
+  Strategies[player,Support[Game[player]]]
+]
+
+NewFunction[Strategies[nfg->NFG]=:LIST(LIST(STRATEGY)),
+  Strategies[Players[nfg]]
+]
+
+NewFunction[AllActions[efg->EFG]=:LIST(LIST(LIST(ACTION))),
+  Actions[AllInfosets[efg]]
+]
+
+NewFunction[DeleteEmptyInfosets[efg->EFG] =: LIST(BOOLEAN),
+  DeleteEmptyInfoset[Filter[i:=Infosets[efg],NumMembers[i]=0]]
+]
+
+NewFunction[NumChildren[n->NODE]=:NUMBER,
+  Length[Children[n]]
+]
+
+NewFunction[NumPlayers[efg->EFG]=:NUMBER,
+  Length[Players[efg]]
+]
+
+NewFunction[PlayerNumber[p->EFPLAYER]=:NUMBER,
+  Index[Players[Game[p]],p]_1
+]
+
+NewFunction[PlayerNumber[p->NFPLAYER]=:NUMBER,
+  Index[Players[Game[p]],p]_1
+]
+
+NewFunction[NumMembers[i->INFOSET]=:NUMBER,
+  Length[Members[i]]
+]
+
+NewFunction[NumPlayers[nfg->NFG]=:NUMBER,
+  Length[Players[nfg]]
+]
+
+NewFunction[NumActions[infoset->INFOSET, support->EFSUPPORT]=:NUMBER,
+  Length[Actions[infoset,support]] 
+]
+
+NewFunction[NumActions[infoset->INFOSET] =: NUMBER,
+  Length[Actions[infoset,Support[Game[infoset]]]] 
+]
+
+NewFunction[NumStrats[player->NFPLAYER, support->NFSUPPORT] =: NUMBER,
+  Length[Strategies[player,support]] 
+]
+
+NewFunction[Descendants[n->NODE]=:NLIST(NODE),
+  {n}&Descendants[Children[n]]
+// the above version is _very_ slow on large games.
+// may want to repalce with following:
+//  {n}&Flatten[Descendants[Children[n]]];
+]
+
+NewFunction[NodeTree[efg->EFG]=:NLIST(NODE),
+  Descendants[RootNode[efg]]
+]
+
+NewFunction[TerminalNodes[efg->EFG]=:LIST(NODE),
+  Filter[d:=Nodes[efg],NumChildren[d]=0]
+]
+
+NewFunction[NonterminalNodes[efg->EFG]=:LIST(NODE),
+  Filter[d:=Nodes[efg],NumChildren[d]>0]
+]
+
+NewFunction[ElimDom[nfg->NFG, {strong->False}, {mixed->False},{time<->0.00}, 
+  {traceFile<->NullOut}, {traceLevel->00}] =: NFSUPPORT,
+  ElimDom[Support[nfg],strong,mixed,time,traceFile,traceLevel]
+]
+
+NewFunction[ElimDom[efg->EFG, {strong->False}, {mixed->False},{time<->0.00}, 
+  {traceFile<->NullOut}, {traceLevel->00}] =: EFSUPPORT,
+  ElimDom[Support[efg],strong,mixed,time,traceFile,traceLevel]
+]
+
+NewFunction[ElimAllDom[s->NFSUPPORT, {strong->False}, {mixed->False},
+  {time<->0.00},{traceFile<->NullOut}, {traceLevel->00}] =: NFSUPPORT,
+  While[s!=(ss:=ElimDom[s,strong,mixed,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+]
+
+NewFunction[ElimAllDom[s->EFSUPPORT, {strong->False}, {mixed->False},
+  {time<->0.00}, {traceFile<->NullOut}, {traceLevel->00}] =: EFSUPPORT,
+  While[s!=(ss:=ElimDom[s,strong,mixed,time,traceFile,traceLevel]),
+    s:=ss
+  ];
+  s;
+]
+
+NewFunction[ElimAllDom[nfg->NFG, {strong->False}, {mixed->False},
+  {time<->0.00},{traceFile<->NullOut}, {traceLevel->00}] =: NFSUPPORT,
+  ElimAllDom[Support[nfg],strong,mixed,time,traceFile,traceLevel];
+]
+
+NewFunction[ElimAllDom[efg->EFG, {strong->False}, {mixed->False},
+  {time<->0.00}, {traceFile<->NullOut}, {traceLevel->00}] =: EFSUPPORT,
+  ElimDom[Support[efg],strong,mixed,time,traceFile,traceLevel];
+]
+
+NewFunction[NewPlayer[efg->EFG,  name->TEXT] =: EFPLAYER,
+  SetName[NewPlayer[efg],name]
+]
+
+NewFunction[NewPlayer[nfg->NFG,  name->TEXT] =: NFPLAYER,
+  SetName[NewPlayer[nfg],name]
+]
+
+NewFunction[NewOutcome[efg->EFG,  name->TEXT] =: EFOUTCOME,
+ SetName[NewOutcome[efg],name]
+]
+
+NewFunction[NewInfoset[player->EFPLAYER, actions->LIST(TEXT), 
+  {name->""}] =: INFOSET,
+  i:=SetName[NewInfoset[player,Length[actions]],name];
+  SetName[Actions[i,Support[Game[player]]],actions];
+  i
+]
+
+NewFunction[SetPayoffs[outcome->EFOUTCOME, 
+  payoff->LIST(NUMBER)]=:EFOUTCOME,
+  SetPayoff[outcome,Players[Game[outcome]],payoff];
+  outcome
+]
+
+NewFunction[SetPayoffs[outcome->NFOUTCOME, 
+  payoff->LIST(NUMBER)]=:NFOUTCOME,
+  SetPayoff[outcome,Players[Game[outcome]],payoff];
+  outcome
+]
+
+NewFunction[Payoffs[outcome->EFOUTCOME*]=:LIST(NUMBER),
+  Payoff[outcome,Players[Game[outcome]]]
+]
+
+NewFunction[Payoffs[outcome->NFOUTCOME*]=:LIST(NUMBER),
+  Payoff[outcome,Players[Game[outcome]]]
+]
+
+NewFunction[EnumMixedSolve[nfg->NFG, {stopAfter->00}, {precision->Machine},
+  {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00},{cliques->False}] =: LIST(MIXED),
+  EnumMixedSolve[Support[nfg], stopAfter, precision, nPivots, time, 
+  traceFile, traceLevel, cliques]
+]
+
+NewFunction[EnumMixedSolve[efg->EFG, {asNfg->False},{stopAfter->00}, 
+  {precision->Machine}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00},{cliques->False}] =: LIST(BEHAV),
+  EnumMixedSolve[Support[efg], asNfg,stopAfter, precision, nPivots, time,
+  traceFile, traceLevel, cliques]
+]
+
+NewFunction[EnumPureSolve[nfg->NFG, {stopAfter->00}, {precision->Machine}, 
+  {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(MIXED),
+  EnumPureSolve[Support[nfg], stopAfter, precision, time, traceFile,
+  traceLevel]
+]
+
+NewFunction[EnumPureSolve[efg->EFG, {stopAfter->00},  {precision->Machine},
+  {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(BEHAV),
+  EnumPureSolve[Support[efg], False, stopAfter, precision, time, 
+  traceFile, traceLevel]
+]
+
+NewFunction[GobitSolve[efg->EFG, {pxifile->""}, {minLam->.001}, 
+  {maxLam->500.}, {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+  {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
+  {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(BEHAV),
+  GobitSolve[Centroid[Support[efg]],pxifile,minLam,maxLam,delLam,powLam, 
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+]
+
+NewFunction[GobitSolve[nfg->NFG, {pxifile->""}, {minLam->.001}, 
+  {maxLam->500.}, {delLam->.02}, {powLam->01}, {fullGraph->False}, 
+  {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
+  {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(MIXED),
+  GobitSolve[Centroid[Support[nfg]],pxifile,minLam,maxLam,delLam,powLam,
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+]
+
+NewFunction[LcpSolve[nfg->NFG,{stopAfter->00}, {precision->Machine},
+  {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut},
+  {traceLevel->00}] =: LIST(MIXED),
+  LcpSolve[Support[nfg], stopAfter, precision, nPivots,
+    time, traceFile, traceLevel]
+]
+
+NewFunction[LcpSolve[efg->EFG, {asNfg->False}, {stopAfter->00}, 
+   {precision->Machine}, {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(BEHAV),
+  LcpSolve[Support[efg], asNfg, stopAfter, precision, nPivots,
+    time, traceFile, traceLevel]
+]
+
+NewFunction[LpSolve[nfg->NFG, {stopAfter->1}, {precision->Machine},
+  {nPivots<->00}, {time<->0.00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(MIXED),
+  LpSolve[Support[nfg], stopAfter, precision, nPivots, time, traceFile, 
+  traceLevel]
+]
+
+NewFunction[LpSolve[efg->EFG, {asNfg->False}, {stopAfter->1}, 
+  {precision->Machine}, {nPivots<->00}, {time<->0.00},
+  {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV),
+  LpSolve[Support[efg], asNfg, stopAfter, precision, nPivots, time, 
+  traceFile, traceLevel]
+]
+
+NewFunction[LiapSolve[nfg->NFG, {stopAfter->01}, 
+  {nTries->10}, {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, 
+  {tol1->.0000000001}, {time<->0.00}, {nEvals<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(MIXED),
+  LiapSolve[Centroid[Support[nfg]], stopAfter, nTries,
+  maxitsN, tolN, maxits1, tol1, time, nEvals, traceFile,
+  traceLevel]
+]
+
+NewFunction[LiapSolve[efg->EFG, {asNfg->False}, {stopAfter->01}, 
+  {nTries->10}, {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, 
+  {tol1->.0000000001}, {time<->0.00}, {nEvals<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(BEHAV),
+  LiapSolve[Centroid[Support[efg]], asNfg, stopAfter, nTries,
+  maxitsN, tolN, maxits1, tol1, time, nEvals, traceFile,
+  traceLevel]
+]
+
+NewFunction[SimpDivSolve[nfg->NFG, {stopAfter->01}, {nRestarts->16}, 
+  {leashLength->00}, {precision->Machine}, {nEvals<->00},
+  {time<->0.00}, {traceFile<->NullOut},
+  {traceLevel->00}] =: LIST(MIXED),
+  SimpDivSolve[Support[nfg], stopAfter, nRestarts, leashLength,
+    precision, nEvals, time, traceFile, traceLevel]
+]
+
+NewFunction[SimpDivSolve[efg->EFG, {asNfg->False}, {stopAfter->01}, 
+  {nRestarts->16}, {leashLength->00}, {precision->Machine},
+  {nEvals<->00}, {time<->0.00},
+  {traceFile<->NullOut}, {traceLevel->00}] =: LIST(BEHAV),
+  SimpDivSolve[Support[efg], asNfg, stopAfter, nRestarts, leashLength,
+    precision, nEvals, time, traceFile, traceLevel]
+]
+
+NewFunction[MarkSubgames[efg->EFG(T)]=:LIST(NODE),
+  MarkSubgame[s:=Subgames[efg]];
+  MarkedSubgames[efg]
+//  replace above line with following when we know this works:
+//  s;
+]
+
+NewFunction[MarkSubgames[n->LIST(NODE)]=:LIST(BOOLEAN),  
+  UnmarkSubgames[Game[n_1]];MarkSubgame[n]
+]
+
+NewFunction[UnmarkSubgames[efg->EFG(T)]=:LIST(NODE),
+  UnmarkSubgame[Nodes[efg]];
+  MarkedSubgames[efg]
+//  replace above line with following when we know this works:
+//  {RootNode[efg]}
+]
+
+NewFunction[MarkedSubgames[efg->EFG(T)]=:LIST(NODE),
+  Filter[n:=Nodes[efg],MarkedSubgame[n]]
+]
+
+//NewFunction[CheckEnv[x->TEXT]=: TEXT,
+//  If[(t:=GetEnv[x])="",StdOut << "Environment Variable "&x&" undefined\n";];
+//  t;
+//];
+
+NewFunction[GambitExe[]=:TEXT,
+  p:=Platform[];
+  If[p="DOS/Windows",f:="gambit32"];
+  If[p="HP UX" || p="HPPA",f:="gui_motif_hp"];
+  If[p="SPARC" || p="SUN",f:="gui_motif_sun4"];
+  If[p="SVR4",f:="gui_motif_solaris"];
+  If[p="AIX32" || p="AIX",f:="gui_motif_rs6000"];
+  If[(h:=GetEnv["GAMBIT_HOME"])="",p:=ExePath[file->False]&f,p:=h&f];
+  p
+]
+
+NewFunction[Display[e->EFG]=:NUMBER,
+  SaveEfg[e,"junk.efg"];
+  Shell[GambitExe[]&" junk.efg"]
+]
+
+NewFunction[Display[n->NFG]=:NUMBER,
+  SaveNfg[n,"junk.nfg"];
+  Shell[GambitExe[]&" junk.nfg"]
+]
+
+
+NewFunction[Payoffs[profile->BEHAV(NUMBER)]=:LIST(NUMBER),
+  Payoff[profile,Players[Game[profile]]]
+]
+
+NewFunction[Payoffs[profile->MIXED(NUMBER)]=:LIST(NUMBER),
+  Payoff[profile,Players[Game[profile]]]
+]
+
+//
+// A set of user defined gcl functions for computing standard 
+// equilibrium sets
+// 
+
+NewFunction[InfiniteLoopWarning[stopAfter->NUMBER,nTries->NUMBER]=:TEXT,
+  If[nTries=0,
+    If[stopAfter=0,
+    " Warning: Entering infinite loop.  Use Ctl-C to exit.",  
+    " Warning: Entering possible infinite loop.  Use Ctl-C to exit."],
+  " Warning: May not find all"]
+]
+
+NewFunction[OneNash[n->NFG,{precision->Machine}]=:LIST(MIXED),
+  s:=ElimAllDom[n];
+  If[NumPlayers[n] = 2,
+    If[IsConstSum[n],LpSolve[s,1,precision],LcpSolve[s,1,precision]],
+    SimpDivSolve[s,stopAfter->1,nRestarts->16,precision->precision]
+  ]
+]  
+
+NewFunction[AllNash[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(MIXED),
+  s:=ElimAllDom[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    LiapSolve[Centroid[s],stopAfter,nTries]
+  ]
+]  
+
+NewFunction[OnePerfect[n->NFG,{precision->Machine}]=:LIST(MIXED),
+  s:=ElimAllDom[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    LcpSolve[s,1,precision],
+    << " Not implemented for n-person games";
+    List[Centroid[Support[n]],0] // return empty set of mixed
+  ]
+]  
+
+NewFunction[AllPerfect[n->NFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(MIXED),
+  s:=ElimAllDom[n,strong->True];
+  If[NumPlayers[n] = 2, 
+    << " Warning: may not find all";
+    LcpSolve[s,0,precision],
+    << " Not implemented for n-person games";
+    List[Centroid[Support[n]],0]
+  ]
+]  
+
+NewFunction[OneNash[e->EFG,{precision->Machine}]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+    If[IsConstSum[e],
+      b:=LpSolve[e,False,1,precision],
+      b:=LcpSolve[e,False,1,precision]
+    ],
+    b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16,
+      precision->precision]
+  ];
+  MarkSubgames[ms];b
+]  
+
+NewFunction[AllNash[e->EFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];UnmarkSubgames[e];
+  s:=ElimAllDom[Nfg[e],strong->True];
+  If[NumPlayers[e] = 2, 
+    m:=EnumMixedSolve[s,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    m:=LiapSolve[Centroid[s],stopAfter,nTries]
+  ];
+  MarkSubgames[ms];Behav[m]
+]  
+
+NewFunction[OneSubgamePerfect[e->EFG,{precision->Machine}]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2 && IsPerfectRecall[e],
+    If[IsConstSum[e],
+      b:=LpSolve[e,False,1,precision],
+      b:=LcpSolve[e,False,1,precision]
+    ],
+    b:=SimpDivSolve[e,asNfg->True,stopAfter->1,nRestarts->16,
+      precision->precision]
+  ];
+  MarkSubgames[ms];b
+]  
+
+NewFunction[AllSubgamePerfect[e->EFG,{stopAfter->0},{nTries->0},{precision->Machine}]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];MarkSubgames[e];
+  If[NumPlayers[e] = 2, 
+    b:=EnumMixedSolve[e,True,0,precision],
+    << InfiniteLoopWarning[stopAfter,nTries];
+    b:=LiapSolve[e,asNfg->True,stopAfter->stopAfter,nTries->nTries]
+  ];
+  MarkSubgames[ms];b
+]  
+
+NewFunction[OneSequential[e->EFG]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];UnmarkSubgames[e];
+  b:=GobitSolve[e,fullGraph->False];
+  If[!IsSequential[b_1],
+    << " Warning: Algorithm did not converge, returning last value"
+  ];
+  MarkSubgames[ms];b
+]  
+
+NewFunction[AllSequential[e->EFG,{stopAfter->0},{nTries->0}]=:LIST(BEHAV),
+  ms:=MarkedSubgames[e];UnmarkSubgames[e];
+  << InfiniteLoopWarning[stopAfter,nTries];
+  b:=LiapSolve[e,stopAfter->stopAfter,nTries->nTries];
+  MarkSubgames[ms];b
+]
+
+
+// the following added after .94 distribution
+ 
+NewFunction[ActionNumber[a->ACTION]=:NUMBER,
+  Index[Actions[Infoset[a]],a]_1
+]
+
+NewFunction[Float[x->NUMBER]=:NUMBER,
+  0.0+x
+]
+
+NewFunction[Float[x->MIXED]=:MIXED,
+  1.0*x
+]
+
+NewFunction[Float[x->BEHAV]=:BEHAV,
+  1.0*x
+]
+
+NewFunction[Float[x->NFOUTCOME]=:NFOUTCOME,
+  SetPayoffs[x,Float[Payoffs[x]]];
+]
+
+NewFunction[Float[x->EFOUTCOME]=:EFOUTCOME,
+  SetPayoffs[x,Float[Payoffs[x]]];
+]
+
+NewFunction[SetProbs[profile<->MIXED,value->LIST(LIST(NUMBER))]=:MIXED,
+  SetStrategyProbs[profile,Players[Game[profile]],value];
+  profile
+]
+
+NewFunction[SetProbs[profile<->BEHAV,value->LIST(LIST(LIST(NUMBER)))]=:BEHAV,
+  SetActionProbs[profile,Infosets[Game[profile]],value];
+  profile
+]
+
+NewFunction[Read[input<->INPUT,x<->MIXED]=:INPUT,
+  v:=ListForm[x];
+  input >> v;
+  SetProbs[x,v];
+  input
+]
+
+NewFunction[Read[input<->INPUT,x<->BEHAV]=:INPUT,
+  v:=ListForm[x];
+  input >> v;
+  SetProbs[x,v];
+  input
+]
+
+NewFunction[StrategyValues[profile->MIXED]=:LIST(LIST(NUMBER)),
+  StrategyValue[profile,Strategies[Game[profile]]];
+];
+
+NewFunction[Mixed[list->LIST(STRATEGY)]=:MIXED,
+  n:=Game[list_1];
+  s:=Strategies[n];
+  m:=Centroid[n];
+  v:=ListForm[m];
+  For[i:=1,i<=NumElements[v],i:=i+1,
+    For[j:=1,j<=NumElements[v_i],j:=j+1,
+      v_i_j:=0/1;
+    ];
+    v_i_(Index[s_i,list_i]_1) := 1/1
+  ];
+  SetProbs[m,v];   
+];
+
+//NewFunction[Randomize[x->NUMBER,{seed->0}]=:NUMBER,
+//  num:=Randomize[1,seed]/MaxInt[];
+//  If[IsFloat[x],Float[num],num];
+//];
+
+NewFunction[Randomize[x->EFG, {seed->0}]=:EFG,
+  o:=Outcomes[x];
+  pay:=Payoffs[o];
+  Randomize[pay_1_1,seed];
+  pay:=Randomize[pay];
+  SetPayoffs[o,pay];
+  x;
+];
+  
+NewFunction[Randomize[x->NFG, {seed->0}]=:NFG,
+  o:=Outcomes[x];
+  pay:=Payoffs[o];
+  Randomize[pay_1_1,seed];
+  pay:=Randomize[pay];
+  SetPayoffs[o,pay];
+  x;
+];
+  
+NewFunction[KGobitSolve[nfg->NFG, {pxifile->""}, {minK->.0001}, 
+  {maxK->1000.}, {delK->-.2}, {powK->01}, {fullGraph->False}, 
+  {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
+  {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(MIXED),
+  KGobitSolve[Centroid[Support[nfg]],pxifile,minK,maxK,delK,powK,
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+]
+
+NewFunction[KGobitSolve[efg->EFG, {pxifile->""}, {minK->.0001}, 
+  {maxK->1000.}, {delK->-.2}, {powK->01}, {fullGraph->False}, 
+  {maxitsN->20}, {tolN->.0000000001}, {maxits1->100}, {tol1->.0000000001}, 
+  {time<->0.00}, {nEvals<->00}, {nIters<->00}, {traceFile<->NullOut}, 
+  {traceLevel->00}] =: LIST(BEHAV),
+  KGobitSolve[Centroid[Support[efg]],pxifile,minK,maxK,delK,powK,
+  fullGraph,maxitsN,tolN,maxits1,tol1,time,nEvals,nIters,traceFile,
+  traceLevel]
+]
+
+NewFunction[OutcomeForm[n->NFG(NUMBER)]=:NLIST(NFOUTCOME),
+  Outcome[CartesianProd[Strategies[n]]]
+]
+
+NewFunction[NewOutcome[nfg->NFG,  name->TEXT] =: NFOUTCOME,
+  SetName[NewOutcome[nfg],name]
+]
+
+NewFunction[Concat[list->LIST(TEXT)]=:TEXT,
+  If[Length[list]=1,list_1,list_1&Concat[Remove[list,1]]];
+]
+
+NewFunction[NewOutcome[profile->LIST(STRATEGY)]=:NFOUTCOME,
+  name:=Concat[Name[profile]];
+  SetName[SetOutcome[profile,NewOutcome[Game[profile_1]]],name];
+];
+
+NewFunction[NewOutcome[profile->LIST(STRATEGY), 
+  payoff->LIST(NUMBER)]=:NFOUTCOME,
+  SetPayoffs[NewOutcome[profile], payoff];
+]
+
+NewFunction[NewNfg[dim->LIST(NUMBER),outcomes->BOOLEAN] =: NFG,
+  n:=NewNfg[dim];
+  If[outcomes=True,
+    NewOutcome[CartesianProd[Strategies[n]]]
+  ];
+  n;
+];
+
+NewFunction[NthElement[s<->NFSUPPORT,n->NUMBER]=:LIST(STRATEGY),
+Strategies[s]_n;
+];
+
+NewFunction[NthElement[s<->EFSUPPORT,n->NUMBER]=:LIST(ACTION),
+Actions[s]_n;
+];
+
+
