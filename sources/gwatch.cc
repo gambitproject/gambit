@@ -5,11 +5,18 @@
 //#
 
 #include "gwatch.h"
+#include <stdio.h>
 #include <math.h>
 
 #ifdef __GNUG__
 #include <sys/times.h>
 #include <limits.h>
+
+#ifndef CLK_TCK
+// This is correct for SunOS; Solaris has CLK_TCK predefined.  Other
+// systems might have problems with this.
+#define CLK_TCK      60
+#endif   // CLK_TCK
 
 extern "C" long _sysconf(int);
 
