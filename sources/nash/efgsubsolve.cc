@@ -257,8 +257,6 @@ gbtEfgNashSubgames::~gbtEfgNashSubgames()
 gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 					  gbtStatus &p_status)
 {
-  gbtStopWatch watch;
-
   solutions.Flush();
   gbtList<gbtEfgOutcome> values;
 
@@ -302,7 +300,6 @@ gbtList<BehavSolution> gbtEfgNashSubgames::Solve(const gbtEfgSupport &p_support,
 
   delete solution;
 
-  time = watch.Elapsed();
   return solutions;
 }
 

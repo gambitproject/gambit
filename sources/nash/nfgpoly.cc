@@ -65,7 +65,6 @@ private:
   gbtList<gbtVector<gbtDouble> > 
                NashOnSupportSolnVectors(const gbtPolyMultiList<gbtDouble> &equations,
 					const gRectangle<gbtDouble> &Cube,
-					gbtStopWatch &timer,
 					gbtStatus &p_status);
 
   int SaveSolutions(const gbtList<gbtVector<gbtDouble> > &list);
@@ -106,7 +105,6 @@ PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
 
 int PolEnumModule::PolEnum(gbtStatus &p_status)
 {
-  gbtStopWatch watch;
   gbtPolyMultiList<gbtDouble> equations = NashOnSupportEquationsAndInequalities();
 
   /*
@@ -128,17 +126,11 @@ int PolEnumModule::PolEnum(gbtStatus &p_status)
   gRectangle<gbtDouble> Cube(bottoms, tops); 
 
   // start gbtPolyQuickSolve
-  gbtStopWatch timer;
-  timer.Start();
-
   gbtList<gbtVector<gbtDouble> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube,
-								   timer,
 								   p_status);
 
-  timer.Stop();
   int index = SaveSolutions(solutionlist);
-  time = watch.Elapsed();
   return index;	 
 }
 
@@ -292,7 +284,6 @@ gbtPolyMultiList<gbtDouble> PolEnumModule::NashOnSupportEquationsAndInequalities
 gbtList<gbtVector<gbtDouble> > 
 PolEnumModule::NashOnSupportSolnVectors(const gbtPolyMultiList<gbtDouble> &equations,
 					      const gRectangle<gbtDouble> &Cube,
-					      gbtStopWatch &timer,
 					      gbtStatus &p_status)
 {  
   gbtPolyQuickSolve<gbtDouble> quickie(equations, p_status);
@@ -406,9 +397,6 @@ const int PolEnumModule::PolishKnownRoot(gbtVector<gbtDouble> &point) const
   //  gout << "Prior to Polishing point is " << point << ".\n";
 
   if (point.Length() > 0) {
-    
-    gbtStopWatch watch;
-    
     // equations for equality of strat j to strat j+1
     gbtPolyMultiList<gbtDouble> equations(&Space,&Lex);
     equations += IndifferenceEquations();

@@ -44,6 +44,4 @@
 
 #include "gmap.h"
 
-#include "gwatch.h"
-
 #endif // BASE_H

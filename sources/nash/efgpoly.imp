@@ -72,7 +72,6 @@ private:
   gbtList<gbtVector<gbtDouble> > 
                NashOnSupportSolnVectors(const gbtPolyMultiList<T> &equations,
 					const gRectangle<T> &Cube,
-					gbtStopWatch &timer,
 					gbtStatus &p_status);
 
   // Pass to the sequence form variables from the solution variables
@@ -260,42 +259,15 @@ gbtPolyMultiList<T> EfgPolEnumModule<T>::NashOnSupportEquationsAndInequalities()
 template <class T> gbtList<gbtVector<gbtDouble> > 
 EfgPolEnumModule<T>::NashOnSupportSolnVectors(const gbtPolyMultiList<T> &equations,
 					      const gRectangle<T> &Cube,
-					      gbtStopWatch &timer,
 					      gbtStatus &p_status)
 {
   gbtPolyQuickSolve<T> quickie(equations, p_status);
-#ifdef UNUSED
-  if(params.trace>0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n" 
-      << quickie.UnderlyingEquations() ;
-  }  
-#endif  // UNUSED
-
-  // 2147483647 = 2^31-1 = MaxInt
 
   try {
     if(quickie.FindCertainNumberOfRoots(Cube,2147483647,params.stopAfter)) {
-#ifdef UNUSED
-      if(params.trace>0) {
-	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-			    << num_vars << " :\n" << quickie.RootList();
-      }
-#endif  // UNUSED
+
     }
-    else
-#ifdef UNUSED
-      if(params.trace>0) {
-	(*params.tracefile) << "The system\n" << quickie.UnderlyingEquations()
-			    << " could not be resolved by FindRoots.\n";
-      }
-#endif  // UNUSED
-    timer.Stop();
-#ifdef UNUSED
-    if(params.trace>0) {
-      (*params.tracefile)  << "The gbtPolyQuickSolve computation of roots took " 
-			   << (int)timer.Elapsed() << " seconds.\n\n";
-    }
-#endif  // UNUSED
+
   }
   catch (gbtSignalBreak &) { }
   catch (gbtSquareMatrix<gbtDouble>::MatrixSingular) {
@@ -315,18 +287,10 @@ template <class T> int EfgPolEnumModule<T>::EfgPolEnum(gbtStatus &p_status)
   tops = (T)1;
   gRectangle<T> Cube(bottoms, tops); 
 
-  // timing
-  gbtStopWatch watch;
-  gbtStopWatch timer;
-  timer.Start();
-
-  gbtList<gbtVector<gbtDouble> > solutionlist = NashOnSupportSolnVectors(equations,
-								   Cube,
-								   timer,
-								   p_status);
+  gbtList<gbtVector<gbtDouble> > solutionlist = 
+    NashOnSupportSolnVectors(equations, Cube,p_status);
 
   int index = SaveNashSolutions(solutionlist, p_status);
-  time = watch.Elapsed();
   return index;	 
 }
 
@@ -534,8 +498,6 @@ const int EfgPolEnumModule<T>::PolishKnownRoot(gbtVector<gbtDouble> &point) cons
   if (point.Length() > 0) {
     int i,j;
     
-    
-    gbtStopWatch watch;
     gbtPolyMultiList<T> equations(Space,Lex);
     
     // equations for equality of strat j to strat j+1

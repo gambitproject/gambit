@@ -22,7 +22,6 @@ libbase_a_SOURCES = \
 	grarray.cc \
 	gstream.cc \
 	gtext.cc \
-	gwatch.cc \
 	odometer.cc 
 
 OBJECTS = $(libbase_a_SOURCES:.cc=.obj)

@@ -41,8 +41,6 @@ libbase_a_SOURCES = \
 	gtext.h \
 	gtree.h \
 	gtree.imp \
-	gwatch.cc \
-	gwatch.h \
 	odometer.cc \
 	odometer.h 
 
