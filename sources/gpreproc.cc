@@ -212,6 +212,15 @@ gString gPreprocessor::GetLine( void )
 	    break;
 	  }
 
+	  // bring in the rest of this line
+	  gString restOfLine;
+	  c = ' ';
+	  while( !m_InputStack.Peek()->eof() && !EOL( c ) )
+	  {
+	    GetChar( c );
+	    restOfLine += c;
+	  }
+
 	  // note: filename might be changed after this call
 	  gInput* input = LoadInput( filename );
 	  if( input )
@@ -229,6 +238,7 @@ gString gPreprocessor::GetLine( void )
 	    error = true;
 	  }
 
+	  line += restOfLine;
 	  break;
 	  
 	} // "Include"
