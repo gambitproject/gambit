@@ -1,14 +1,54 @@
 //#
 //# FILE: purenash.cc -- Find all pure strategy Nash equilibria
 //#
-//# @(#)purenash.cc	1.1 10/19/94
+//# $Id$
 //#
-#include "rational.h"
+
+#ifdef __GNUG__
+#pragma implementation "purenash.h"
+#endif   // __GNUG__
+
 #include "gambitio.h"
 #include "normal.h"
 #include "normiter.h"
 #include "purenash.h"
-#include "integer.h"
+#include "rational.h"
+
+#ifdef __GNUG__
+// This is a horrible kludge.  I need to figure out why this isn't getting
+// instantiated
+
+typedef gPVector<gRational> FooBarBletch;
+
+#endif   // __GNUG__
+
+PureNashParams::PureNashParams(void) : plev(0), number(1)  { }
+
+template <class T> class PureNashModule {
+  private:
+    const NormalForm<T> &rep;
+    gBlock<long> solution; /**index of the nash equilibrium*****/
+    gBlock<StrategyProfile> sol;/*solution for the nash equilibria in SP form*/
+    gBlock<int> Num_strats;/***number strategys fot each player***/
+ 
+    gBlock<long> sindex; /***corresponding index for the StrategyProfile***/
+    int players; /*number of players**/
+
+  public: 
+    PureNashModule(const NormalForm<T> &r);
+    virtual ~PureNashModule(void);
+    void SingleNash(long i);/*checks if the given SP in a Nash equilibria*/
+    int Reverse (long index, int player);/*take index and the player number and 
+					 returns number of the strategy*/
+    int PureNash(void); /*takes the SP and return index*/
+    int NumNash() const;
+};
+
+
+template <class T> int PureNashModule<T>::NumNash(void) const
+{
+  return solution.Length();
+}
 
 /*****************************************************/
 template <class T> int PureNashModule<T>::PureNash(void)
@@ -18,11 +58,9 @@ template <class T> int PureNashModule<T>::PureNash(void)
  
   long i;
 
-  for(i=0;i<sindex[players];i++)
-    {
-      SingleNash(i);
-    }
-  gout << Number_Nash();
+  for (i = 0; i < sindex[players]; i++)
+    SingleNash(i);
+  gout << NumNash();
   /**********print payoffs**************/
  
   return 0;
@@ -120,15 +158,11 @@ template <class T> void PureNashModule<T>::SingleNash(long i)
       gout << "\n";
     }
 }
-	    
-/**************************************************/
-//
-//initializes the PureNashModule
-//
-int NashSolver::Solve(void)
+
+int PureNashSolver::PureNash(void)
 {
   PureNashModule<double> *M;
-  PureNashModule<Rational> *N;
+  PureNashModule<gRational> *N;
   
   switch (nf.Type())   {
     case DOUBLE:   {
@@ -139,7 +173,7 @@ int NashSolver::Solve(void)
    }
     
     case RATIONAL:  {
-      N=new PureNashModule<Rational>((NormalForm<Rational> &) nf);
+      N=new PureNashModule<gRational>((NormalForm<Rational> &) nf);
       N->PureNash();
       return 1;
       delete N;
