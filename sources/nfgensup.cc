@@ -242,8 +242,9 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
   gList<const NFSupport> answer;
   NFSupport sact(S);
   StrategyCursorForSupport cursor(S);
-
+  status.SetProgress(0);
   PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
+  status.SetProgress(.5);
 
   // At this point answer has all consistent subsupports without
   // any strong dominations.  We now edit the list, removing all
@@ -251,6 +252,8 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
   // subsupports exhibiting domination by currently inactive strategies.
 
   for (int i = answer.Length(); i >= 1; i--) {
+    status.SetProgress((2.0-((double)i/(double)answer.Length()))/2.0);
+    status.Get();
     NFSupport current(answer[i]);
     StrategyCursorForSupport crsr(S);
     bool remove = false;

@@ -94,7 +94,7 @@ int PolEnumModule::PolEnum(void)
 
   
   QuikSolv<gDouble> quickie(equations, params.status);
-  params.status.SetProgress(50.0);
+  //  params.status.SetProgress(0);
 
   if (params.trace>0) {
     (*params.tracefile) << "\nThe equilibrium equations are \n" 

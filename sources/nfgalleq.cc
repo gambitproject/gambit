@@ -118,7 +118,10 @@ int AllNashSolve(const NFSupport &S, const PolEnumParams &params,
 		 gList<MixedSolution> &solutions, long &nevals, double &time,
 		 gList<const NFSupport> &singular_supports)
 {
+
+  params.status.SetProgress((double)0);
   AllNashSolveModule module(S, params);
+  params.status.SetProgress(-(double)(1)); // trigger second pass
   module.NashEnum();
   nevals = module.NumEvals();
   time = module.Time();

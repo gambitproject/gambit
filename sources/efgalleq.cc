@@ -124,7 +124,9 @@ int AllEFNashSolve(const EFSupport &S, const EfgPolEnumParams &params,
 		   gList<BehavSolution> &solutions, long &nevals, double &time,
 		   gList<const EFSupport> &singular_supports)
 {
+  params.status.SetProgress((double)0);
   AllEFNashSolveModule module(S, params);
+  params.status.SetProgress(-(double)(1)); // trigger second pass
   module.NashEnum();
   nevals = module.NumEvals();
   time = module.Time();

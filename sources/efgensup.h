@@ -78,7 +78,7 @@ void PossibleNashSubsupportsRECURSIVE(const EFSupport *s,
 				      const gStatus &status);
   
 gList<const EFSupport> PossibleNashSubsupports(const EFSupport &S,
-					       const gStatus &status);
+					       gStatus &status);
 
 ///////////////// Utility Cursor Class /////////////////////
 

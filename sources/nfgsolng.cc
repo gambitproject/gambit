@@ -477,7 +477,7 @@ guinfgPolEnum::guinfgPolEnum(const NFSupport &p_support,
 
 gList<MixedSolution> guinfgPolEnum::Solve(void)
 {
-  wxStatus status(m_parent->Frame(), "PolEnumSolve Algorithm");
+  wxPolEnumStatus status(m_parent->Frame());
   PolEnumParams params(status);
   params.stopAfter = m_stopAfter;
   params.trace = m_traceLevel;

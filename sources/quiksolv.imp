@@ -456,7 +456,7 @@ QuikSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
   assert (NoEquations == System.Dmnsn());
 
   // Check for user interrupt
-  m_status.SetProgress(50.0);
+  //  m_status.SetProgress(50.0);
   m_status.Get();
 
   if ( SystemHasNoRootsIn(r, precedence) ) 
