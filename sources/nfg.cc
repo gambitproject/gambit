@@ -127,7 +127,7 @@ NFPlayer::NFPlayer(BaseNfg *n, int num)
 : N(n), strategies(num)
 { 
   for (int j = 1; j <= num; j++)
-    strategies[j] = new Strategy;
+    strategies[j] = new Strategy(this);
 }
 
 NFPlayer::~NFPlayer()

@@ -4,10 +4,6 @@
 //# $Id$
 //#
 
-#ifdef __GNUG__
-#pragma implementation "nfstrat.h"
-#endif   // __GNUG__
-
 #include "nfstrat.h"
 #include "nfplayer.h"
 #include "nfg.h"
@@ -16,7 +12,7 @@
 // Strategy:  Constructors, Destructors
 //--------------------------------------
 
-Strategy::Strategy(void) : number (0), nfp(NULL), index(0L)
+Strategy::Strategy(NFPlayer *p) : number (0), nfp(p), index(0L)
 { }
 
 Strategy::Strategy(const Strategy &s) : nfp(s.nfp), name(s.name)
@@ -256,9 +252,9 @@ const gArray<Strategy *> &NFSupport::GetStrategy(int pl) const
   return (sups[pl]->GetNFStrategySet());
 }
 
-const BaseNfg &NFSupport::BelongsTo(void) const
+const BaseNfg *NFSupport::BelongsTo(void) const
 {
-  return (*bnfg);
+  return bnfg;
 }
 
 

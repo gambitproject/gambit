@@ -7,10 +7,6 @@
 #ifndef NFSTRAT_H
 #define NFSTRAT_H
 
-#ifdef __GNUG__
-#pragma interface
-#endif   // __GNUG__
-
 #include "gstring.h"
 #include "gblock.h"
 
@@ -22,7 +18,7 @@ struct Strategy   {
   long index;
   gString name;
 
-  Strategy(void);
+  Strategy(NFPlayer *);
   Strategy(const Strategy &s);
   Strategy &operator=(const Strategy &s);
   ~Strategy();
@@ -146,7 +142,7 @@ public:
 
   Strategy *GetStrategy(int pl, int num) const;
   const gArray<Strategy *> &GetStrategy(int pl) const;
-  const BaseNfg &BelongsTo(void) const;
+  const BaseNfg *BelongsTo(void) const;
 };
 
 
