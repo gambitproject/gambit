@@ -42,7 +42,26 @@ protected:
 
   Portion( void );
 
+  static long _WriteWidth;
+  static long _WritePrecis;
+  static bool _WriteExpmode;
+  static bool _WriteQuoted;
+  static bool _WriteListBraces;
+  static bool _WriteListCommas;
+  static long _WriteListLF;
+  static long _WriteListIndent;
+
 public:
+  static void _SetWriteWidth( long );
+  static void _SetWritePrecis( long );
+  static void _SetWriteExpmode( bool );
+  static void _SetWriteQuoted( bool );
+  static void _SetWriteListBraces( bool );
+  static void _SetWriteListCommas( bool );
+  static void _SetWriteListLF( long );
+  static void _SetWriteListIndent( long );
+
+
   virtual ~Portion();
 
   virtual bool IsValid( void ) const;
@@ -58,7 +77,7 @@ public:
   Portion* Original( void ) const;
 
   virtual PortionType Type( void ) const = 0;
-  virtual void Output( gOutput& s ) const = 0;
+  virtual void Output( gOutput& s ) const;
   virtual Portion* ValCopy( void ) const = 0;
   virtual Portion* RefCopy( void ) const = 0;
 
@@ -1020,6 +1039,7 @@ public:
   gList< Portion* >& Value( void ) const;
   PortionType Type( void ) const;
   void Output( gOutput& s ) const;
+  void Output( gOutput& s, long ListLF ) const;
   Portion* ValCopy( void ) const;
   Portion* RefCopy( void ) const;
   void AssignFrom( Portion* p );

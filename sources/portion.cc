@@ -49,6 +49,48 @@ class Portion;
 //                          base class
 //---------------------------------------------------------------------
 
+
+long Portion::_WriteWidth = 0;
+long Portion::_WritePrecis = 6;
+bool Portion::_WriteExpmode = false;
+bool Portion::_WriteQuoted = true;
+bool Portion::_WriteListBraces = true;
+bool Portion::_WriteListCommas = true;
+long Portion::_WriteListLF = 0;
+long Portion::_WriteListIndent = 2;
+
+void Portion::_SetWriteWidth( long x )
+{ _WriteWidth = x; }
+void Portion::_SetWritePrecis( long x )
+{ _WritePrecis = x; }
+void Portion::_SetWriteExpmode( bool x )
+{ _WriteExpmode = x; }
+void Portion::_SetWriteQuoted( bool x )
+{ _WriteQuoted = x; }
+void Portion::_SetWriteListBraces( bool x )
+{ _WriteListBraces = x; }
+void Portion::_SetWriteListCommas( bool x )
+{ _WriteListCommas = x; }
+void Portion::_SetWriteListLF( long x )
+{ _WriteListLF = x; }
+void Portion::_SetWriteListIndent( long x )
+{ _WriteListIndent = x; }
+
+
+
+void Portion::Output( gOutput& s ) const
+{
+  s.SetWidth( (int) _WriteWidth );
+  s.SetPrec( (int) _WritePrecis );
+  if( _WriteExpmode )
+    s.SetExpMode();
+  else
+    s.SetFloatMode();
+}
+
+
+
+
 #ifdef MEMCHECK
 int Portion::_NumObj = 0;
 #endif
@@ -153,6 +195,7 @@ PortionType ErrorPortion::Type( void ) const
 
 void ErrorPortion::Output( gOutput& s ) const
 {
+  Portion::Output( s );
   if( _Value == "" )
     s << "(Error)";
   else
@@ -200,7 +243,10 @@ PortionType ReferencePortion::Type( void ) const
 { return porREFERENCE; }
 
 void ReferencePortion::Output( gOutput& s ) const
-{ s << "(Reference) \"" << _Value << "\""; }
+{ 
+  Portion::Output( s );
+  s << "(Reference) \"" << _Value << "\""; 
+}
 
 Portion* ReferencePortion::ValCopy( void ) const
 { return new ReferencePortion( _Value ); }
@@ -243,7 +289,10 @@ PortionType IntPortion::Type( void ) const
 { return porINTEGER; }
 
 void IntPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{
+  Portion::Output( s );
+  s << *_Value; 
+}
 
 Portion* IntPortion::ValCopy( void ) const
 { return new IntValPortion( *_Value ); }
@@ -307,7 +356,10 @@ PortionType FloatPortion::Type( void ) const
 { return porFLOAT; }
 
 void FloatPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{
+  Portion::Output( s );
+  s << *_Value; 
+}
 
 Portion* FloatPortion::ValCopy( void ) const
 { return new FloatValPortion( *_Value ); }
@@ -373,7 +425,10 @@ PortionType RationalPortion::Type( void ) const
 { return porRATIONAL; }
 
 void RationalPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{
+  Portion::Output( s );
+  s << *_Value; 
+}
 
 Portion* RationalPortion::ValCopy( void ) const
 { return new RationalValPortion( *_Value ); }
@@ -439,7 +494,12 @@ PortionType TextPortion::Type( void ) const
 { return porTEXT; }
 
 void TextPortion::Output( gOutput& s ) const
-{ s << "\"" << *_Value << "\""; }
+{ 
+  Portion::Output( s );
+  if( _WriteQuoted ) s << "\"";
+  s << *_Value;
+  if( _WriteQuoted ) s << "\""; 
+}
 
 Portion* TextPortion::ValCopy( void ) const
 { return new TextValPortion( *_Value ); }
@@ -508,7 +568,10 @@ PortionType BoolPortion::Type( void ) const
 { return porBOOL; }
 
 void BoolPortion::Output( gOutput& s ) const
-{ s << ( *_Value ? "True" : "False" ); }
+{
+  Portion::Output( s );
+  s << ( *_Value ? "True" : "False" ); 
+}
 
 Portion* BoolPortion::ValCopy( void ) const
 { return new BoolValPortion( *_Value ); }
@@ -590,6 +653,8 @@ PortionType OutcomePortion::Type( void ) const
 
 void OutcomePortion::Output( gOutput& s ) const
 {
+    Portion::Output( s );
+
   s << "(Outcome) " << *_Value << " \"" << (*_Value)->GetName() << "\" ";
   (*_Value)->PrintValues( s );
 }
@@ -675,7 +740,10 @@ PortionType NfPlayerPortion::Type( void ) const
 { return porPLAYER_NFG; }
 
 void NfPlayerPortion::Output( gOutput& s ) const
-{ s << "(NfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  Portion::Output( s );
+  s << "(NfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+}
 
 Portion* NfPlayerPortion::ValCopy( void ) const
 {
@@ -767,7 +835,10 @@ PortionType StrategyPortion::Type( void ) const
 { return porSTRATEGY; }
 
 void StrategyPortion::Output( gOutput& s ) const
-{ s << "(Strategy) " << *_Value << " \"" << (*_Value)->name << "\""; }
+{ 
+  Portion::Output( s );
+  s << "(Strategy) " << *_Value << " \"" << (*_Value)->name << "\""; 
+}
 
 Portion* StrategyPortion::ValCopy( void ) const
 {
@@ -852,6 +923,7 @@ PortionType NfSupportPortion::Type( void ) const
 
 void NfSupportPortion::Output( gOutput& s ) const
 { 
+  Portion::Output( s );
   int numplayers;
   int i;
   int j;
@@ -958,6 +1030,7 @@ PortionType EfSupportPortion::Type( void ) const
 
 void EfSupportPortion::Output( gOutput& s ) const
 { 
+  Portion::Output( s );
   int numplayers;
   int i;
   int j;
@@ -1071,7 +1144,10 @@ PortionType EfPlayerPortion::Type( void ) const
 { return porPLAYER_EFG; }
 
 void EfPlayerPortion::Output( gOutput& s ) const
-{ s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  Portion::Output( s );
+  s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+}
 
 Portion* EfPlayerPortion::ValCopy( void ) const
 {
@@ -1153,7 +1229,10 @@ PortionType InfosetPortion::Type( void ) const
 { return porINFOSET; }
 
 void InfosetPortion::Output( gOutput& s ) const
-{ s << "(Infoset) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  Portion::Output( s );
+  s << "(Infoset) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+}
 
 Portion* InfosetPortion::ValCopy( void ) const
 { 
@@ -1235,7 +1314,10 @@ PortionType NodePortion::Type( void ) const
 { return porNODE; }
 
 void NodePortion::Output( gOutput& s ) const
-{ s << "(Node) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  Portion::Output( s );
+  s << "(Node) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+}
 
 Portion* NodePortion::ValCopy( void ) const
 {
@@ -1319,7 +1401,10 @@ PortionType ActionPortion::Type( void ) const
 { return porACTION; }
 
 void ActionPortion::Output( gOutput& s ) const
-{ s << "(Action) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
+{
+  Portion::Output( s );
+  s << "(Action) " << *_Value << " \"" << (*_Value)->GetName() << "\""; 
+}
 
 Portion* ActionPortion::ValCopy( void ) const
 {
@@ -1423,6 +1508,7 @@ PortionType MixedPortion::Type( void ) const
 
 void MixedPortion::Output( gOutput& s ) const
 {
+  Portion::Output( s );
   if( !*_Value )
   {
     s << "(Mixed) NULL"; 
@@ -1590,6 +1676,7 @@ PortionType BehavPortion::Type( void ) const
 
 void BehavPortion::Output( gOutput& s ) const
 {
+  Portion::Output( s );
   if( !*_Value )
   {
     s << "(Behav) NULL"; 
@@ -1754,7 +1841,10 @@ PortionType NfgPortion::Type( void ) const
 }
 
 void NfgPortion::Output( gOutput& s ) const
-{ s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; }
+{
+  Portion::Output( s );
+  s << "(Nfg) \"" << (*_Value)->GetTitle() << "\""; 
+}
 
 Portion* NfgPortion::ValCopy( void ) const
 { 
@@ -1903,7 +1993,10 @@ PortionType EfgPortion::Type( void ) const
 }
 
 void EfgPortion::Output( gOutput& s ) const
-{ s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; }
+{
+  Portion::Output( s );
+  s << "(Efg) \"" << (*_Value)->GetTitle() << "\""; 
+}
 
 Portion* EfgPortion::ValCopy( void ) const
 { 
@@ -2028,7 +2121,10 @@ PortionType OutputPortion::Type( void ) const
 { return porOUTPUT; }
 
 void OutputPortion::Output( gOutput& s ) const
-{ s << "(Output)"; }
+{
+  Portion::Output( s );
+  s << "(Output)"; 
+}
 
 Portion* OutputPortion::ValCopy( void ) const
 { return RefCopy(); }
@@ -2098,7 +2194,10 @@ PortionType InputPortion::Type( void ) const
 { return porINPUT; }
 
 void InputPortion::Output( gOutput& s ) const
-{ s << "(Input)"; }
+{
+  Portion::Output( s );
+  s << "(Input)"; 
+}
 
 Portion* InputPortion::ValCopy( void ) const
 {  return RefCopy(); }
@@ -2383,19 +2482,39 @@ PortionType ListPortion::DataType( void ) const
 
 
 void ListPortion::Output( gOutput& s ) const
+{ Output( s, 0 ); }
+
+void ListPortion::Output( gOutput& s, long ListLF ) const
 {
+  Portion::Output( s );
   int i;
+  int c;
   int length = _Value->Length();
 
-  s << "{";
+  if( _WriteListBraces ) s << '{';
+  if( _WriteListLF > ListLF ) s << '\n';
   if( length >= 1 )
   {
     for( i = 1; i <= length; i++ )
     {
       if( i > 1 )
-	s << ",";
+      {
+	if( _WriteListCommas ) s << ',';
+	if( _WriteListLF > ListLF ) 
+	  s << '\n';
+      }
+      if( _WriteListLF > ListLF ) 
+	for( c = 0; c < (ListLF+1) * _WriteListIndent; c++ )
+	  s << ' ';
       if( (*_Value)[ i ]->IsValid() )
-	s << " " << (*_Value)[ i ];
+      {
+	if( _WriteListLF <= ListLF )
+	  s << ' ';
+	if( (*_Value)[ i ]->Type() != porLIST )
+	  s << (*_Value)[ i ];
+	else
+	  ((ListPortion*) (*_Value)[ i ])->Output( s, ListLF + 1 );
+      }
       else
 	s << " (undefined)";
     }
@@ -2404,7 +2523,15 @@ void ListPortion::Output( gOutput& s ) const
   {
     s << " empty";
   }
-  s << " }";
+
+  s << ' ';
+  if( _WriteListLF > ListLF ) 
+  {
+    s << '\n';
+    for( c = 0; c < ListLF * _WriteListIndent; c++ )
+      s << ' ';
+  }
+  s << '}';
 }
 
 
