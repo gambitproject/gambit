@@ -14,9 +14,9 @@
 //
 // This class enumerates the vertices of the convex polyhedron 
 //
-//        P = {y:Ay <= b, y>=0 }
+//        P = {y:Ay + b <= 0, y>=0 }
 // 
-// where b >= 0.  Enumeration starts from the vertex y = 0.
+// where b <= 0.  Enumeration starts from the vertex y = 0.
 // All computation is done in the class constructor. The 
 // list of vertices can be accessed by VertexList()
 //  
