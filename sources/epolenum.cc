@@ -13,30 +13,10 @@
 EfgPolEnumParams::EfgPolEnumParams(void)
 { }
 
-#include "double.h"
-/*
-TEMPLATE_SPECIALIZATION()
-gPoly<gDouble> EfgPolEnumModule<gDouble>::Payoff(int pl) const
-{
-  gIndexOdometer index(SF.NumSequences());
-  gNumber pay;
+//---------------------------------------------------------------------------
+//                    EfgPolEnum: nontemplate functions
+//---------------------------------------------------------------------------
 
-  gPoly<gDouble> equation(Space,Lex);
-  while (index.Turn()) {
-    pay=SF.Payoff(index.CurrentIndices(),pl);
-    if( pay !=(gNumber)0) {
-      gPoly<gDouble> term(Space,(gDouble)((double)pay),Lex);
-      int k;
-      for(k=1;k<=EF.NumPlayers();k++) 
-	term*=Prob(k,(index.CurrentIndices())[k]);
-      equation+=term;
-    }
-  }
-  if(params.trace >1)
-    (*params.tracefile) << "\nPayoff( " << pl << "): " << equation;
-  return equation;
-}
-*/
 template class EfgPolEnumModule<gDouble>;
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,
