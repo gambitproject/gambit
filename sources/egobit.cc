@@ -235,4 +235,8 @@ TEMPLATE class EFGobitParams<double>;
 TEMPLATE class EFGobitFunc<double>;
 TEMPLATE class EFGobitModule<double>;
 
+TEMPLATE class EFGobitParams<gRational>;
+TEMPLATE class EFGobitFunc<gRational>;
+TEMPLATE class EFGobitModule<gRational>;
+
 
