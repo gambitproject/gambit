@@ -199,6 +199,8 @@ may not be tested.  Again, reports are always welcome.
 </itemizedlist>
 </para>
 
+<sect2 id="intro.getting.releases">
+<title>Releases of Gambit</title>
 <para>
 The latest stable and unstable releases of Gambit can always
 be found at the Gambit website at
@@ -211,6 +213,42 @@ in binary form for Windows, in which case you don't need the compiler
 or wxWindows installed.  There currently are not any prebuilt binaries
 for *nix.
 </para>
+</sect2>
+
+<sect2 id="intro.getting.cvs">
+<title>The bleeding edge: Gambit CVS access</title>
+<para>
+Beginning in March 2003, anonymous access to the Gambit CVS repository is
+available on SourceForge.  Instructions for accessing the repository can
+be found at 
+<ulink url="http://sourceforge.net/cvs/?group_id=57119">
+http://sourceforge.net/cvs/?group_id=57119</ulink>.
+Be warned that the current state of CVS is very bleeding-edge; the
+code may not work, or even compile correctly!  If you are interested in
+helping Gambit's development, or if you need access to the latest and
+greatest features of Gambit not yet available in a release, this is for
+you; it is not recommended to use the current CVS version for serious
+research or teaching applications otherwise.
+</para>
+
+<para>
+If you choose to build from CVS on *nix, please note that you will need
+to run <command>aclocal</command>, <command>automake</command> and
+<command>autoconf</command>, in that order, to set up the build system;
+after this, follow the instructions in the file INSTALL in the root
+directory.
+You should only need to do this the first time you build; after later
+updates, the build system should take care of changes in the dependencies
+for you.
+</para>
+
+<para>
+Bug reports on the CVS version are particularly welcomed.
+</para>
+
+</sect2>
+
+
 </sect1>
 
 <sect1 id="intro.contact">
