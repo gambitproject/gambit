@@ -64,7 +64,7 @@ Strategy *const StrategyProfile::Get(int p) const
 return profile[p];
 }
 
-void StrategyProfile::Set(int p, Strategy *const s)
+void StrategyProfile::Set(int p, const Strategy *const s)
 {
   index += (((s) ? s->Index() : 0L) - ((profile[p]) ? profile[p]->Index() : 0L));
   profile[p] = s;
