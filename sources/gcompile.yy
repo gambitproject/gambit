@@ -123,6 +123,7 @@ extern GSM* _gsm;  // defined at the end of gsm.cc
 %token HASH
 %token DOT
 %token CARET
+%token UNDERSCORE
 %token AMPER
 %token WRITE
 %token READ
@@ -380,6 +381,8 @@ E7:           E8
   |           E7 HASH E8   { emit(new NewInstr(iCHILD)); }
   |           E7 DBLLBRACK expression RBRACK RBRACK 
                  { emit(new NewInstr(iSUBSCRIPT)); }
+  |           E7 UNDERSCORE E8
+		 { emit(new NewInstr(iSUBSCRIPT)); }
   ;
 
 E8:           E9            { delete por; }
@@ -489,7 +492,8 @@ static struct tokens toktable[] =
     { LBRACK, "[" }, { DBLLBRACK, "[[" }, { RBRACK, "]" },
     { LBRACE, "{" }, { RBRACE, "}" }, { RARROW, "->" },
     { LARROW, "<-" }, { COMMA, "," }, { HASH, "#" },
-    { DOT, "." }, { CARET, "^" }, { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
+    { DOT, "." }, { CARET, "^" }, { UNDERSCORE, "_" },
+    { AMPER, "&" }, { WRITE, "<<" }, { READ, ">>" },
     { IF, "If" }, { WHILE, "While" }, { FOR, "For" },
     { QUIT, "Quit" }, 
     { DEFFUNC, "NewFunction" }, 
@@ -589,7 +593,7 @@ I_dont_believe_Im_doing_this:
   if (isalpha(c))  {
     gString s(c);
     c = nextchar();
-    while (isalpha(c) || isdigit(c) || c == '_')   {
+    while (isalpha(c) || isdigit(c))   {
       s += c;
       c = nextchar();
     }
@@ -677,6 +681,7 @@ I_dont_believe_Im_doing_this:
       }
 
     case ';':   return SEMI;
+    case '_':   return UNDERSCORE;
     case '(':   matching.Push('(');  return LPAREN;
     case ')':   if (matching.Depth() > 0 && matching.Peek() == '(')
                   matching.Pop();
