@@ -487,7 +487,7 @@ PortionType OutcomePortion::Type( void ) const
 { return porOUTCOME; }
 
 void OutcomePortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{ s << "(Outcome) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* OutcomePortion::ValCopy( void ) const
 { return new OutcomeValPortion( *_Value ); }
@@ -552,7 +552,7 @@ PortionType EfPlayerPortion::Type( void ) const
 { return porEF_PLAYER; }
 
 void EfPlayerPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{ s << "(EfPlayer) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* EfPlayerPortion::ValCopy( void ) const
 { return new EfPlayerValPortion( *_Value ); }
@@ -616,7 +616,7 @@ PortionType InfosetPortion::Type( void ) const
 { return porINFOSET; }
 
 void InfosetPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{ s << "(Infoset) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* InfosetPortion::ValCopy( void ) const
 { return new InfosetValPortion( *_Value ); }
@@ -680,7 +680,7 @@ PortionType NodePortion::Type( void ) const
 { return porNODE; }
 
 void NodePortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{ s << "(Node) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* NodePortion::ValCopy( void ) const
 { return new NodeValPortion( *_Value ); }
@@ -746,7 +746,7 @@ PortionType ActionPortion::Type( void ) const
 { return porACTION; }
 
 void ActionPortion::Output( gOutput& s ) const
-{ s << *_Value; }
+{ s << "(Action) " << *_Value << " \"" << (*_Value)->GetName() << "\""; }
 
 Portion* ActionPortion::ValCopy( void ) const
 { return new ActionValPortion( *_Value ); }
@@ -1002,7 +1002,7 @@ template <class T> NormalForm<T>& NfgPortion<T>::Value( void ) const
 { return * (NormalForm<T>*) _Value; }
 
 template <class T> void NfgPortion<T>::Output( gOutput& s ) const
-{ s << "(Nfg)"; }
+{ s << "(Nfg) \"" << _Value->GetTitle() << "\""; }
 
 template <class T> Portion* NfgPortion<T>::ValCopy( void ) const
 {
@@ -1096,7 +1096,7 @@ template <class T> ExtForm<T>& EfgPortion<T>::Value( void ) const
 { return * (ExtForm<T>*) _Value; }
 
 template <class T> void EfgPortion<T>::Output( gOutput& s ) const
-{ s << "(Efg)"; }
+{ s << "(Efg) \"" << _Value->GetTitle() << "\""; }
 
 template <class T> Portion* EfgPortion<T>::ValCopy( void ) const
 {
@@ -1565,7 +1565,10 @@ Portion* ListPortion::Subscript( int index ) const
   if( index >= 1 && index <= _Value->Length() )
   {
     assert( (*_Value)[ index ] != 0 );
-    return (*_Value)[ index ]->RefCopy();
+    if( IsReference() )
+      return (*_Value)[ index ]->RefCopy();
+    else
+      return (*_Value)[ index ]->ValCopy();
   }
   else
     return 0;
