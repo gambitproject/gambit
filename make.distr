@@ -12,8 +12,9 @@ gui:
 	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
 #	-strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
+	cp ~/.gambit.ini .
 	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
-		./efg/*.efg ./nfg/*.nfg gambit.ini
+		./efg/*.efg ./nfg/*.nfg .gambit.ini
 	ftp_put gambit_$(GUI)_$(HOST).zip
 	rm gambit_$(GUI)_$(HOST).zip
 gcl:	
@@ -25,12 +26,9 @@ gcl:
 	rm gcl_$(HOST).zip
 src:
 	@echo Updating source code on ftp server
-# 	get the BCC specific binary files from my (egrayver's) dir
-#	cp /egrayver/job/gambit/*.ide .
-#	cp ~egrayver/job/gambit/*.ico .
 	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
 		Makefile ../bisondos/* ./bin32/dummy ./bitmaps/* ./wx_fake/* \
-		make.go make.site*
+		make.go make.site* 
 	ftp_put gambsrc.zip
 	rm gambsrc.zip
 wxwin:
