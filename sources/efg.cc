@@ -164,7 +164,7 @@ Node ExtForm::DeleteBranch(const Node &n, int which)
   return ret;
 }
 
-Node ExtForm::MoveTree(const Node &src, const Node &dest)
+Node ExtForm::MoveTree(Node src, Node dest)
 {
   if (!nodes.IsMember(src) || !nodes.IsMember(dest)) return Node(dummy, 1, 1);
   if (!nodes.IsTerminal(dest))   return src;

@@ -50,7 +50,7 @@ class ExtForm    {
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }
 
-    Node MoveTree(const Node &from, const Node &dest);
+    Node MoveTree(Node from, Node dest);
     Node DeleteTree(const Node &n);
 
 	// OPERATIONS ON NODES
