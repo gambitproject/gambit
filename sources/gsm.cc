@@ -393,6 +393,7 @@ bool GSM::Assign( void )
   assert( _Depth() >= 2 );
 #endif // NDEBUG
 
+
   p2 = _Pop();
   p1 = _Pop();
 
@@ -411,6 +412,15 @@ bool GSM::Assign( void )
     return result;
   }
 
+  if( !p2->IsValid() )
+  {
+    _ErrorMessage( _StdErr, 58 );
+    result = false;
+    _Push( new ErrorPortion );
+    delete p1;
+    delete p2;
+    return result;
+  }
 
   p1 = _ResolveRef( p1 );
   
@@ -594,11 +604,6 @@ Portion* GSM::_ResolveRef( Portion* p )
 
 
 // Main dispatcher of built-in binary operations
-
-// operations are dispatched to the appropriate Portion classes,
-// except in cases where the return type is differen from parameter
-// #1, in which case the operation implementation would be placed here
-// labeled as SPECIAL CASE HANDLING
 
 bool GSM::_BinaryOperation( const gString& funcname )
 {
@@ -1029,22 +1034,33 @@ bool GSM::BindVal( const gString& param_name )
 
   if( result )
   {
-    func = _CallFuncStack->Pop();
     param = _Pop();
     
     org_param = _ResolveRef( param );
-    param = org_param->ValCopy();
-    delete org_param;
-    
-    if( param->Type() == porREFERENCE )
+    if( org_param->IsValid() )
     {
-      delete param;
-      param = new ErrorPortion;
+      param = org_param->ValCopy();
+      delete org_param;
+      
+      func = _CallFuncStack->Pop();
+      
+      if( param->Type() == porREFERENCE )
+      {
+	delete param;
+	param = new ErrorPortion;
+      }
+      
+      result = func->SetCurrParam( param ); 
+      
+      _CallFuncStack->Push( func );
     }
-    
-    result = func->SetCurrParam( param ); 
-    
-    _CallFuncStack->Push( func );
+    else
+    {
+      _CallFuncStack->Peek()->SetErrorOccurred();
+      _ErrorMessage( _StdErr, 59 );
+      delete param;
+      result = false;
+    }
   }
 
   return result;
@@ -1066,14 +1082,22 @@ bool GSM::BindRef( const gString& param_name )
 
   if( result )
   {
-    func = _CallFuncStack->Pop();
     param = _Pop();
     
     param = _ResolveRef( param );
-    
-    result = func->SetCurrParam( param );
-    
-    _CallFuncStack->Push( func );
+    if( param->IsValid() )
+    {
+      func = _CallFuncStack->Pop();
+      result = func->SetCurrParam( param );
+      _CallFuncStack->Push( func );
+    }
+    else
+    {
+      _CallFuncStack->Peek()->SetErrorOccurred();
+      _ErrorMessage( _StdErr, 59 );
+      delete param;
+      result = false;
+    }
   }
 
   return result;
@@ -1351,10 +1375,17 @@ void GSM::Output( void )
     p = _Pop();
     p = _ResolveRef( p );
 
-    p->Output( _StdOut );
-    if( p->Type() == porREFERENCE )
-      _StdOut << " (undefined)";
-    _StdOut << "\n";
+    if( p->IsValid() )
+    {
+      p->Output( _StdOut );
+      if( p->Type() == porREFERENCE )
+	_StdOut << " (undefined)";
+      _StdOut << "\n";
+    }
+    else
+    {
+      _StdOut << "(undefined)\n";
+    }
     
     _Push( p );
   }
@@ -1526,6 +1557,12 @@ void GSM::_ErrorMessage
     break;
   case 57:
     s << "  Atttempted to assign to a non-reference type\n";
+    break;
+  case 58:
+    s << "  Attempted to resolve an undefined reference\n";
+    break;
+  case 59:
+    s << "  Attempted to pass an undefined reference to a function\n";
     break;
   default:
     s << "  General error\n";

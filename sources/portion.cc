@@ -63,26 +63,18 @@ Portion::~Portion()
 
 
 bool Portion::operator == ( Portion* p ) const
-{
-  return false;
-}
+{ return false; }
 
 
 bool Portion::IsValid( void ) const
-{ 
-  if( Original() != 0 )
-    return Original()->_IsValid; 
-  else
-    return _IsValid;
-}
+{ return Original()->_IsValid; }
 
-void Portion::SetInvalid( void )
+
+void Portion::SetIsValid( bool is_valid )
 { 
-  if( Original() != 0 )
-    Original()->_IsValid = false; 
-  else
-    _IsValid = false;
-  SetOwner( 0 );
+  Original()->_IsValid = is_valid; 
+  if( !IsValid() ) 
+    SetOwner( 0 );
 }
 
 
@@ -98,7 +90,7 @@ void Portion::SetOriginal( const Portion* p )
 
 Portion* Portion::Original( void ) const
 { 
-  if( !IsReference() )
+  if( !IsReference() || _Original == 0 )
     return (Portion*) this;
   else
     return _Original; 
@@ -675,6 +667,7 @@ Portion* EfPlayerPortion::ValCopy( void ) const
 {
   Portion* p = new EfPlayerValPortion( *_Value ); 
   p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
   p->AddDependency();
   return p;
 }
@@ -693,6 +686,7 @@ void EfPlayerPortion::AssignFrom( Portion* p )
   RemoveDependency();
   *_Value = *( ( (EfPlayerPortion*) p )->_Value );
   SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
   AddDependency();
 }
 
@@ -1318,7 +1312,7 @@ void NfgPortion::AssignFrom( Portion* p )
   assert( p->Type() & porNFG );
 
   while( ( (NfgPortion*) Original() )->_Dependent->Length() > 0 )
-    ( (NfgPortion*) Original() )->_Dependent->Remove( 1 )->SetInvalid();
+    ( (NfgPortion*) Original() )->_Dependent->Remove( 1 )->SetIsValid( false );
   delete *_Value;
 
   switch( ( (NfgPortion*) p )->Value()->Type() )
@@ -1376,7 +1370,7 @@ NfgValPortion::NfgValPortion( BaseNormalForm* value )
 NfgValPortion::~NfgValPortion()
 { 
   while( _Dependent->Length() > 0 )
-    _Dependent->Remove( 1 )->SetInvalid();
+    _Dependent->Remove( 1 )->SetIsValid( false );
   delete _Dependent;
   delete *_Value;
   delete _Value; 
@@ -1469,7 +1463,7 @@ void EfgPortion::AssignFrom( Portion* p )
   assert( p->Type() & porEFG );
 
   while( ( (EfgPortion*) Original() )->_Dependent->Length() > 0 )
-    ( (EfgPortion*) Original() )->_Dependent->Remove( 1 )->SetInvalid();
+    ( (EfgPortion*) Original() )->_Dependent->Remove( 1 )->SetIsValid( false );
   delete *_Value;
 
   switch( ( (EfgPortion*) p )->Value()->Type() )
@@ -1524,7 +1518,7 @@ EfgValPortion::EfgValPortion( BaseEfg* value )
 EfgValPortion::~EfgValPortion()
 { 
   while( _Dependent->Length() > 0 )
-    _Dependent->Remove( 1 )->SetInvalid();
+    _Dependent->Remove( 1 )->SetIsValid( false );
   delete _Dependent;
   delete *_Value;
   delete _Value; 
@@ -1722,12 +1716,27 @@ gBlock< Portion* >& ListPortion::Value( void ) const
 { return *_Value; }
 
 
+bool ListPortion::IsValid( void ) const
+{
+  bool result = false;
+  int i;
+  int length;
+
+  // Portion::AddDependency();
+  for( i = 1, length = _Value->Length(); i <= length; i++ )
+  {
+    result = result || (*_Value)[ i ]->IsValid();
+  }
+  return result && Portion::IsValid();
+}
+
+
 void ListPortion::AddDependency( void )
 { 
   int i;
   int length;
 
-  Portion::AddDependency();
+  // Portion::AddDependency();
   for( i = 1, length = _Value->Length(); i <= length; i++ )
   {
     (*_Value)[ i ]->AddDependency();
@@ -1739,7 +1748,7 @@ void ListPortion::RemoveDependency( void )
   int i;
   int length;
 
-  Portion::RemoveDependency();
+  // Portion::RemoveDependency();
   for( i = 1, length = _Value->Length(); i <= length; i++ )
   {
     (*_Value)[ i ]->RemoveDependency();
@@ -1751,10 +1760,10 @@ void ListPortion::SetOwner( Portion* p )
   int i;
   int length;
 
-  Portion::SetOwner( p );
+  // Portion::SetOwner( p );
   for( i = 1, length = _Value->Length(); i <= length; i++ )
   {
-    (*_Value)[ i ]->SetOwner( Owner() );
+    (*_Value)[ i ]->SetOwner( p );
   }
 }
 
@@ -1766,7 +1775,7 @@ PortionType ListPortion::Type( void ) const
 Portion* ListPortion::ValCopy( void ) const
 { 
   Portion* p =new ListValPortion( *_Value ); 
-  p->SetOwner( Owner() );
+  // p->SetOwner( Owner() );
   p->AddDependency();
   return p;
 }
@@ -1776,7 +1785,7 @@ Portion* ListPortion::RefCopy( void ) const
   Portion* p = new ListRefPortion( *_Value ); 
   ( (ListPortion*) p )->_DataType = _DataType;
   p->SetOriginal( Original() );
-  p->SetOwner( Owner() );
+  // p->SetOwner( Owner() );
   return p;
 }
 
@@ -1800,7 +1809,7 @@ void ListPortion::AssignFrom( Portion* p )
     assert( result != 0 );
   }
  
-  SetOwner( p->Owner() );
+  // SetOwner( p->Owner() );
 
   AddDependency();
 }
@@ -1893,28 +1902,6 @@ PortionType ListPortion::DataType( void ) const
 { return _DataType; }
 
 
-bool ListPortion::TypeCheck( Portion* item )
-{
-  bool result = false;
-  PortionType new_type;
-
-  if( item->Type() == _DataType )
-  {
-    result = true;
-  }
-  else
-  {
-    if( item->Type() == porLIST )
-      new_type = ( (ListPortion*) item )->_DataType;
-    else
-      new_type = item->Type();
-    
-    result = PortionTypeMatch( _DataType, new_type );
-  }
-  return result;
-}
-
-
 void ListPortion::Output( gOutput& s ) const
 {
   int i;
@@ -1923,10 +1910,14 @@ void ListPortion::Output( gOutput& s ) const
   s << "{";
   if( length >= 1 )
   {
-    s << " " << (*_Value)[ 1 ];
-    for( i = 2; i <= length; i++ )
+    for( i = 1; i <= length; i++ )
     {
-      s << ", " << (*_Value)[ i ];
+      if( i > 1 )
+	s << ",";
+      if( (*_Value)[ i ]->IsValid() )
+	s << " " << (*_Value)[ i ];
+      else
+	s << " (undefined)";
     }
   }
   else
@@ -1957,13 +1948,13 @@ int ListPortion::Insert( Portion* item, int index )
   assert( item->Type() != porREFERENCE );
 #endif
   
+  if( item->Type() == porLIST )
+    item_type = ( (ListPortion*) item )->_DataType;
+  else
+    item_type = item->Type();
+
   if( _Value->Length() == 0 )  // creating a new list
   {
-    if( item->Type() == porLIST )
-      item_type = ( (ListPortion*) item )->_DataType;
-    else
-      item_type = item->Type();
-
     if( PortionTypeMatch( item_type, _DataType ) || 
        _DataType == porUNKNOWN )
     {
@@ -1978,13 +1969,9 @@ int ListPortion::Insert( Portion* item, int index )
   }
   else  // inserting into an existing list
   {
-    if( TypeCheck( item ) )
-    {
-      if( _Owner == item->Original()->Owner() )
-	result = _Value->Insert( item, index );
-      else
-	delete item;
-    }
+    if( PortionTypeMatch( item_type, _DataType ) || 
+       _DataType == porUNKNOWN )
+      result = _Value->Insert( item, index );
     else
       delete item;
   }
@@ -2036,13 +2023,14 @@ void ListPortion::Flush( void )
 
 Portion* ListPortion::Subscript( int index )
 {
+  Portion* p;
   if( index >= 1 && index <= _Value->Length() )
   {
     assert( (*_Value)[ index ] != 0 );
-    if( IsReference() )
-      return (*_Value)[ index ]->RefCopy();
-    else
-      return (*_Value)[ index ]->ValCopy();
+    p = (*_Value)[ index ]->RefCopy();
+    if( !(*_Value)[ index ]->IsValid() )
+      p->SetIsValid( false );
+    return p;
   }
   else
     return 0;

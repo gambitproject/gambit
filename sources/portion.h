@@ -40,12 +40,11 @@ protected:
 
   Portion( void );
 
-
 public:
   virtual ~Portion();
 
-  bool IsValid( void ) const;
-  void SetInvalid( void );
+  virtual bool IsValid( void ) const;
+  void SetIsValid( bool is_valid );
 
   virtual void AddDependency( void );
   virtual void RemoveDependency( void );
@@ -828,10 +827,11 @@ protected:
   ListPortion( void );
 
   PortionType      _DataType;
-  bool TypeCheck( Portion* item );
 
 public:
   virtual ~ListPortion();
+
+  bool IsValid( void ) const;
 
   void AddDependency( void );
   void RemoveDependency( void );
