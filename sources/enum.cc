@@ -1,7 +1,7 @@
 //#
 //# FILE: enum.cc -- Nash Enum module
 //#
-//# @(#)enum.cc	1.33 5/31/96
+//# $Id$
 //#
 
 #include "gwatch.h"
@@ -128,11 +128,18 @@ template <class T> int EnumModule<T>::Enum(void)
   gListIter< BFS<T> > iter1((gList< BFS<T> > &) verts1);
   gListIter< BFS<T> > iter2((gList< BFS<T> > &) verts2);
 
-  for( iter2.GoFirst(),iter2++; ! iter2.PastEnd(); iter2++ ) {
+  i=0;
+  for( iter2.GoFirst(),iter2++; 
+       !iter2.PastEnd() &&  !params.status.Get()
+       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+       iter2++ ) {
     bfs1 = iter2.GetValue();
     params.status.SetProgress((double)(i-2)/(double)v2);
 //    gout << "\nProgress = " << (double)(i-2)/(double)v2;
-    for( iter1.GoFirst(),iter1++; ! iter1.PastEnd(); iter1++ ) {
+    i++;
+    for( iter1.GoFirst(),iter1++; !iter1.PastEnd()
+       && (params.stopAfter==0 || solutions.Length()<params.stopAfter);
+	 iter1++ ) {
       bfs2 = iter1.GetValue();
       
       // check if solution is nash 
