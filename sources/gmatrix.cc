@@ -17,5 +17,11 @@
 TEMPLATE class gMatrix<double>;
 TEMPLATE class gMatrix<gRational>;
 
+TEMPLATE gVector<double> operator* (const gVector<double>&,
+				    const gMatrix<double>&);
+TEMPLATE gVector<gRational> operator* (const gVector<gRational>&,
+				    const gMatrix<gRational>&);
+
+
 TEMPLATE gOutput & operator<< (gOutput&, const gMatrix<double>&);
 TEMPLATE gOutput & operator<< (gOutput&, const gMatrix<gRational>&);
