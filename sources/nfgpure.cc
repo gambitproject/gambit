@@ -39,6 +39,14 @@ template <class T> int FindPureNash(const NormalForm<T> &N,
   return eqs.Length();
 }
 
-template int FindPureNash(const NormalForm<double> &, gList<gTuple<int> > &);
-template int FindPureNash(const NormalForm<gRational> &,gList<gTuple<int> > &);
+
+#ifdef __GNUG__
+#define TEMPLATE template
+#elif defined __BORLANDC__
+#define TEMPLATE
+#pragma option -Jgd
+#endif   // __GNUG__, __BORLANDC__
+
+TEMPLATE int FindPureNash(const NormalForm<double> &, gList<gTuple<int> > &);
+TEMPLATE int FindPureNash(const NormalForm<gRational> &,gList<gTuple<int> > &);
 
