@@ -184,33 +184,21 @@ bool ElimDominatedForPlayer(const EFSupport &S, EFSupport &T,
   return action_was_eliminated;
 }
 
-EFSupport *EFSupport::Undominated(bool strong, bool conditional,
+EFSupport EFSupport::Undominated(bool strong, bool conditional,
 				  const gArray<int> &players,
 				  gOutput &, // tracefile 
 				  gStatus &status) const
 {
-  EFSupport *T = new EFSupport(*this);
-  bool any = false;
-  int cumiset;
+  EFSupport T(*this);
+  int cumiset = 0;
 
-  try {
-    cumiset = 0;
-    for (int i = 1; i <= players.Length(); i++)   {
-      status.Get();
-      int pl = players[i];
-      if (ElimDominatedForPlayer(*this, *T, pl, cumiset, 
-				 strong, conditional, status)) 
-	any = true;
-    }
-
-    if (!any)  {
-      delete T;
-      return 0;
-    }
-  }
-  catch (gSignalBreak &E) {
-    delete T;
-    throw;
+  for (int i = 1; i <= players.Length(); i++)   {
+    status.Get();
+    status.SetProgress(0, (gText("Eliminating strategies for player ") +
+			   ToText(players[i])));
+    int pl = players[i];
+    ElimDominatedForPlayer(*this, T, pl, cumiset, 
+			   strong, conditional, status); 
   }
 
   return T;

@@ -85,7 +85,7 @@ public:
 		 bool strong, bool conditional) const;
   bool IsDominated(const Action *a, 
 		   bool strong, bool conditional) const;
-  EFSupport *Undominated(bool strong, bool conditional,
+  EFSupport Undominated(bool strong, bool conditional,
 			 const gArray<int> &players,
 			 gOutput &, // tracefile 
 			 gStatus &status) const;

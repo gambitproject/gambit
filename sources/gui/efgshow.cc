@@ -1254,37 +1254,44 @@ void EfgShow::OnFormatLoad(wxCommandEvent &)
 void EfgShow::OnToolsDominance(wxCommandEvent &)
 {
   gArray<gText> playerNames(m_efg.NumPlayers());
-  for (int pl = 1; pl <= playerNames.Length(); pl++)
+  for (int pl = 1; pl <= playerNames.Length(); pl++) {
     playerNames[pl] = m_efg.Players()[pl]->GetName();
+  }
   dialogElimBehav dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    EFSupport *sup = m_currentSupport;
+    EFSupport support(*m_currentSupport);
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      if (dialog.Iterative()) {
-	while ((sup = sup->Undominated(dialog.DomStrong(),
-				       dialog.DomConditional(),
-				       dialog.Players(), gnull, status)) != 0) {
-	  sup->SetName(UniqueSupportName());
-	  m_supports.Append(sup);
+      EFSupport newSupport(support);
+
+      while (true) {
+	newSupport = support.Undominated(dialog.DomStrong(),
+					 dialog.DomConditional(),
+					 dialog.Players(), gnull, status);
+
+	if (newSupport == support) {
+	  break;
 	}
-      }
-      else {
-	if ((sup = sup->Undominated(dialog.DomStrong(),
-				    dialog.DomConditional(),
-				    dialog.Players(), gnull, status)) != 0) {
-	  sup->SetName(UniqueSupportName());
-	  m_supports.Append(sup);
+	else {
+	  newSupport.SetName(UniqueSupportName());
+	  m_supports.Append(new EFSupport(newSupport));
+	  support = newSupport;
+	}
+
+	if (!dialog.Iterative()) {
+	  // Bit of a kludge; short-circuit loop if iterative not requested
+	  break;
 	}
       }
     }
-    catch (gSignalBreak &E) { }
+    catch (gSignalBreak &) { }
     
-    if (m_currentSupport != sup) {
+    if (*m_currentSupport != support) {
       m_currentSupport = m_supports[m_supports.Length()]; 
       OnSupportsEdited();
+      UpdateMenus();
     }
   }
 }

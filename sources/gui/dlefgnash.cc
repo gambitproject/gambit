@@ -14,6 +14,8 @@
 #include "wx/spinctrl.h"
 #include "dlefgnash.h"
 
+#include "base/gnullstatus.h"
+
 #include "nash/subsolve.h"
 
 #include "nash/efgpure.h"
@@ -39,6 +41,711 @@ public:
 
   virtual efgNashAlgorithm *GetAlgorithm(void) const = 0;
 };
+
+//========================================================================
+//                         class efgOneNash
+//========================================================================
+
+class efgOneNash : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "OneNash"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgOneNash::Solve(const EFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    EFSupport support = p_support.Undominated(false, true,
+					      players, gnull, status);
+    
+    SubgameSolver algorithm;
+    p_support.GetGame().MarkSubgames();
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      if (p_support.GetGame().IsConstSum()) {
+	algorithm.SetAlgorithm(new efgLp<double>);
+      }
+      else {
+	efgLcp<double> *subAlgorithm = new efgLcp<double>;
+	subAlgorithm->SetStopAfter(1);
+	algorithm.SetAlgorithm(subAlgorithm);
+      }
+    }
+    else {
+      algorithm.SetAlgorithm(new nfgSimpdiv<double>);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgOneNash
+//========================================================================
+
+class panelEfgOneNash : public panelEfgNashAlgorithm {
+public:
+  panelEfgOneNash(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgOneNash::panelEfgOneNash(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgOneNash::GetAlgorithm(void) const
+{
+  return new efgOneNash;
+}
+
+//========================================================================
+//                         class efgTwoNash
+//========================================================================
+
+class efgTwoNash : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "TwoNash"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgTwoNash::Solve(const EFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    EFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      EFSupport newSupport = support.Undominated(true, true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    SubgameSolver algorithm;
+    p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      subAlgorithm->SetStopAfter(2);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+    else {
+      efgPolEnum *subAlgorithm = new efgPolEnum;
+      subAlgorithm->SetStopAfter(2);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgTwoNash
+//========================================================================
+
+class panelEfgTwoNash : public panelEfgNashAlgorithm {
+public:
+  panelEfgTwoNash(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgTwoNash::panelEfgTwoNash(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgTwoNash::GetAlgorithm(void) const
+{
+  return new efgTwoNash;
+}
+
+//========================================================================
+//                         class efgAllNash
+//========================================================================
+
+class efgAllNash : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "AllNash"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgAllNash::Solve(const EFSupport &p_support,
+				       gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    EFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      EFSupport newSupport = support.Undominated(true, true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    SubgameSolver algorithm;
+    p_support.GetGame().UnmarkSubgames(p_support.GetGame().RootNode());
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      subAlgorithm->SetStopAfter(0);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+    else {
+      efgPolEnum *subAlgorithm = new efgPolEnum;
+      subAlgorithm->SetStopAfter(0);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgAllNash
+//========================================================================
+
+class panelEfgAllNash : public panelEfgNashAlgorithm {
+public:
+  panelEfgAllNash(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgAllNash::panelEfgAllNash(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgAllNash::GetAlgorithm(void) const
+{
+  return new efgAllNash;
+}
+
+//========================================================================
+//                         class efgOnePerfect
+//========================================================================
+
+class efgOnePerfect : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "OnePerfect"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgOnePerfect::Solve(const EFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    gNullStatus status;
+    /* one round of elimination of weakly dominated strategies */
+    EFSupport support = p_support.Undominated(false, true,
+					      players, gnull, status);
+    
+    SubgameSolver algorithm;
+    p_support.GetGame().MarkSubgames();
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      if (p_support.GetGame().IsConstSum()) {
+	algorithm.SetAlgorithm(new efgLp<double>);
+      }
+      else {
+	efgLcp<double> *subAlgorithm = new efgLcp<double>;
+	subAlgorithm->SetStopAfter(1);
+	algorithm.SetAlgorithm(subAlgorithm);
+      }
+    }
+    else {
+      algorithm.SetAlgorithm(new nfgSimpdiv<double>);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgOnePerfect
+//========================================================================
+
+class panelEfgOnePerfect : public panelEfgNashAlgorithm {
+public:
+  panelEfgOnePerfect(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgOnePerfect::panelEfgOnePerfect(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgOnePerfect::GetAlgorithm(void) const
+{
+  return new efgOnePerfect;
+}
+
+//========================================================================
+//                         class efgTwoPerfect
+//========================================================================
+
+class efgTwoPerfect : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "TwoPerfect"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgTwoPerfect::Solve(const EFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    EFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      EFSupport newSupport = support.Undominated(true, true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    SubgameSolver algorithm;
+    p_support.GetGame().MarkSubgames();
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      subAlgorithm->SetStopAfter(2);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+    else {
+      efgPolEnum *subAlgorithm = new efgPolEnum;
+      subAlgorithm->SetStopAfter(2);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgTwoPerfect
+//========================================================================
+
+class panelEfgTwoPerfect : public panelEfgNashAlgorithm {
+public:
+  panelEfgTwoPerfect(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgTwoPerfect::panelEfgTwoPerfect(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgTwoPerfect::GetAlgorithm(void) const
+{
+  return new efgTwoPerfect;
+}
+
+//========================================================================
+//                         class efgAllPerfect
+//========================================================================
+
+class efgAllPerfect : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "AllPerfect"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgAllPerfect::Solve(const EFSupport &p_support,
+					  gStatus &p_status)
+{
+  gArray<int> players(p_support.GetGame().NumPlayers());
+  for (int pl = 1; pl <= players.Length(); pl++) {
+    players[pl] = pl;
+  }
+
+  try {
+    EFSupport support(p_support);
+
+    while (true) {
+      gNullStatus status;
+      EFSupport newSupport = support.Undominated(true, true, players,
+						 gnull, status);
+      
+      if (newSupport == support) {
+	break;
+      }
+      else {
+	support = newSupport;
+      }
+    }
+
+    SubgameSolver algorithm;
+    p_support.GetGame().MarkSubgames();
+
+    if (p_support.GetGame().NumPlayers() == 2) {
+      nfgEnumMixed<double> *subAlgorithm = new nfgEnumMixed<double>;
+      subAlgorithm->SetStopAfter(0);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+    else {
+      efgPolEnum *subAlgorithm = new efgPolEnum;
+      subAlgorithm->SetStopAfter(0);
+      algorithm.SetAlgorithm(subAlgorithm);
+    }
+
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                       class panelEfgAllPerfect
+//========================================================================
+
+class panelEfgAllPerfect : public panelEfgNashAlgorithm {
+public:
+  panelEfgAllPerfect(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgAllPerfect::panelEfgAllPerfect(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgAllPerfect::GetAlgorithm(void) const
+{
+  return new efgAllPerfect;
+}
+
+//========================================================================
+//                       class efgOneSequential
+//========================================================================
+
+class efgOneSequential : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "OneSequential"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgOneSequential::Solve(const EFSupport &p_support,
+					     gStatus &p_status)
+{
+  try {
+    efgQre algorithm;
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelEfgOneSequential
+//========================================================================
+
+class panelEfgOneSequential : public panelEfgNashAlgorithm {
+public:
+  panelEfgOneSequential(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgOneSequential::panelEfgOneSequential(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgOneSequential::GetAlgorithm(void) const
+{
+  return new efgOneSequential;
+}
+
+//========================================================================
+//                       class efgTwoSequential
+//========================================================================
+
+class efgTwoSequential : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "TwoSequential"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgTwoSequential::Solve(const EFSupport &p_support,
+					     gStatus &p_status)
+{
+  try {
+    p_support.GetGame().MarkSubgames();
+    SubgameSolver algorithm;
+    efgLiap *subAlgorithm = new efgLiap;
+    subAlgorithm->SetStopAfter(2);
+    algorithm.SetAlgorithm(subAlgorithm);
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelEfgTwoSequential
+//========================================================================
+
+class panelEfgTwoSequential : public panelEfgNashAlgorithm {
+public:
+  panelEfgTwoSequential(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgTwoSequential::panelEfgTwoSequential(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgTwoSequential::GetAlgorithm(void) const
+{
+  return new efgTwoSequential;
+}
+
+//========================================================================
+//                       class efgAllSequential
+//========================================================================
+
+class efgAllSequential : public efgNashAlgorithm {
+public:
+  gText GetAlgorithm(void) const { return "AllSequential"; }
+  gList<BehavSolution> Solve(const EFSupport &, gStatus &);
+};
+
+gList<BehavSolution> efgAllSequential::Solve(const EFSupport &p_support,
+					     gStatus &p_status)
+{
+  try {
+    p_support.GetGame().MarkSubgames();
+    SubgameSolver algorithm;
+    efgLiap *subAlgorithm = new efgLiap;
+    subAlgorithm->SetStopAfter(0);
+    algorithm.SetAlgorithm(subAlgorithm);
+    return algorithm.Solve(p_support, p_status);
+  }
+  catch (...) {
+    return gList<BehavSolution>();
+  }
+}
+
+//========================================================================
+//                     class panelEfgAllSequential
+//========================================================================
+
+class panelEfgAllSequential : public panelEfgNashAlgorithm {
+public:
+  panelEfgAllSequential(wxWindow *);
+
+  efgNashAlgorithm *GetAlgorithm(void) const;
+};
+
+panelEfgAllSequential::panelEfgAllSequential(wxWindow *p_parent)
+  : panelEfgNashAlgorithm(p_parent)
+{
+  SetAutoLayout(true);
+
+  wxBoxSizer *topSizer = new wxBoxSizer(wxVERTICAL);
+
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+				 "This algorithm requires no parameters"),
+		0, wxALL | wxCENTER, 5);
+
+  SetSizer(topSizer);
+  topSizer->Fit(this);
+  topSizer->SetSizeHints(this);
+  Layout();
+
+  Show(false);
+}
+
+efgNashAlgorithm *panelEfgAllSequential::GetAlgorithm(void) const
+{
+  return new efgAllSequential;
+}
 
 //========================================================================
 //                      class panelEfgEnumPure
@@ -911,12 +1618,33 @@ void dialogEfgNash::LoadAlgorithms(const efgGame &p_efg)
   wxTreeItemId root = m_algorithmTree->AddRoot("Algorithms");
   wxTreeItemId standard = m_algorithmTree->AppendItem(root,
 						      "Standard algorithms");
-  m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
-  m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
-  m_algorithmTree->AppendItem(standard, "All Nash equilibria");
-  m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
-  m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
-  m_algorithmTree->AppendItem(standard, "All perfect equilibria");
+
+  id = m_algorithmTree->AppendItem(standard, "One Nash equilibrium");
+  m_algorithms.Define(id, new panelEfgOneNash(this));
+
+  id = m_algorithmTree->AppendItem(standard, "Two Nash equilibria");
+  m_algorithms.Define(id, new panelEfgTwoNash(this));
+
+  id = m_algorithmTree->AppendItem(standard, "All Nash equilibria");
+  m_algorithms.Define(id, new panelEfgAllNash(this));
+
+  id = m_algorithmTree->AppendItem(standard, "One perfect equilibrium");
+  m_algorithms.Define(id, new panelEfgOnePerfect(this));
+
+  id = m_algorithmTree->AppendItem(standard, "Two perfect equilibria");
+  m_algorithms.Define(id, new panelEfgTwoPerfect(this));
+
+  id = m_algorithmTree->AppendItem(standard, "All perfect equilibria");
+  m_algorithms.Define(id, new panelEfgAllPerfect(this));
+
+  id = m_algorithmTree->AppendItem(standard, "One sequential equilibrium");
+  m_algorithms.Define(id, new panelEfgOneSequential(this));
+
+  id = m_algorithmTree->AppendItem(standard, "Two sequential equilibria");
+  m_algorithms.Define(id, new panelEfgTwoSequential(this));
+
+  id = m_algorithmTree->AppendItem(standard, "All sequential equilibria");
+  m_algorithms.Define(id, new panelEfgAllSequential(this));
 
   wxTreeItemId custom = m_algorithmTree->AppendItem(root, "Custom algorithms");
 
