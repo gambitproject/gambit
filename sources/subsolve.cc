@@ -169,9 +169,11 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
 	  
 	  assert(index <= infosets[pl]->Length());
 	  
-	  for (int act = 1; act <= subsupport.NumActions(pl, iset); act++)
-	    solns[solns.Length()].Set(((*infosets[pl])[index]->Actions()[act]),
-              sol[solno](subsupport.Actions(pl, iset)[act]));
+	  for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
+	    int actno = subsupport.Actions(pl, iset)[act]->GetNumber();
+	    solns[solns.Length()].Set(((*infosets[pl])[index]->Actions()[actno]),
+				      sol[solno](subsupport.Actions(pl, iset)[act]));
+	  }
 	}
 
 	int j = solns.Length();
