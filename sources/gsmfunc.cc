@@ -752,96 +752,106 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   /*gout << "\n\n";*/
 
   
+  ParamInfoType PIT[numArgs];
 
-  if (numArgs == 1) 
+  for (int i=1;i<=numArgs;i++)
   {
-      ParamInfoType pit[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit));
-  } else if (numArgs == 2) 
-  {
-      ParamInfoType pit2[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1]),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
-                      reqList[2])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit2));
-  } else if (numArgs == 3) 
-  {
-      ParamInfoType pit3[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1]),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
-                      reqList[2]),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
-                      reqList[3])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit3));
-  } else if (numArgs == 4) 
-  {
-      ParamInfoType pit4[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1]),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
-                      reqList[2]),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
-                      reqList[3]),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
-                      reqList[4])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit4));
-  } else if (numArgs == 5) 
-  {
-      ParamInfoType pit5[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1]),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
-                      reqList[2]),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
-                      reqList[3]),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
-                      reqList[4]),
-        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),
-                      reqList[5])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit5));
-  } else if (numArgs == 6) 
-  {
-      ParamInfoType pit6[] =
-      {
-        ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),
-                      reqList[1]),
-        ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),
-                      reqList[2]),
-        ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),
-                      reqList[3]),
-        ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),
-                      reqList[4]),
-        ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),
-                      reqList[5]),
-        ParamInfoType(nameList[6], ToSpec(specList[6], listList[6]),
-                      reqList[6])
-      };
-      SetFuncInfo(funcindex, 
-                  FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit6));
-  } else
-  {
-      gout << "Hey, too many/few arguments.\n";
-      assert(0);
-  } 
+    PIT[i-1] = ParamInfoType(nameList[i], ToSpec(specList[i], listList[i]),
+                                  reqList[i]);
+  }
+
+  SetFuncInfo(funcindex, 
+              FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, PIT));
+
+  /*if (numArgs == 1) */
+  /*{*/
+      /*ParamInfoType pit[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit));*/
+  /*} else if (numArgs == 2) */
+  /*{*/
+      /*ParamInfoType pit2[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1]),*/
+        /*ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),*/
+                      /*reqList[2])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit2));*/
+  /*} else if (numArgs == 3) */
+  /*{*/
+      /*ParamInfoType pit3[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1]),*/
+        /*ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),*/
+                      /*reqList[2]),*/
+        /*ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),*/
+                      /*reqList[3])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit3));*/
+  /*} else if (numArgs == 4) */
+  /*{*/
+      /*ParamInfoType pit4[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1]),*/
+        /*ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),*/
+                      /*reqList[2]),*/
+        /*ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),*/
+                      /*reqList[3]),*/
+        /*ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),*/
+                      /*reqList[4])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit4));*/
+  /*} else if (numArgs == 5) */
+  /*{*/
+      /*ParamInfoType pit5[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1]),*/
+        /*ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),*/
+                      /*reqList[2]),*/
+        /*ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),*/
+                      /*reqList[3]),*/
+        /*ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),*/
+                      /*reqList[4]),*/
+        /*ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),*/
+                      /*reqList[5])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit5));*/
+  /*} else if (numArgs == 6) */
+  /*{*/
+      /*ParamInfoType pit6[] =*/
+      /*{*/
+        /*ParamInfoType(nameList[1], ToSpec(specList[1], listList[1]),*/
+                      /*reqList[1]),*/
+        /*ParamInfoType(nameList[2], ToSpec(specList[2], listList[2]),*/
+                      /*reqList[2]),*/
+        /*ParamInfoType(nameList[3], ToSpec(specList[3], listList[3]),*/
+                      /*reqList[3]),*/
+        /*ParamInfoType(nameList[4], ToSpec(specList[4], listList[4]),*/
+                      /*reqList[4]),*/
+        /*ParamInfoType(nameList[5], ToSpec(specList[5], listList[5]),*/
+                      /*reqList[5]),*/
+        /*ParamInfoType(nameList[6], ToSpec(specList[6], listList[6]),*/
+                      /*reqList[6])*/
+      /*};*/
+      /*SetFuncInfo(funcindex, */
+                  /*FuncInfoType(funcptr, ToSpec(word, listNum), numArgs, pit6));*/
+  /*} else*/
+  /*{*/
+      /*gout << "Hey, too many/few arguments.\n";*/
+      /*assert(0);*/
+  /*} */
 
 }
 
