@@ -1,8 +1,8 @@
-//#
-//# FILE: gstack.imp -- Implementation of stack type
-//#
-//# @(#)gstack.imp	2.1 03/24/97
-//#
+//
+// FILE: gstack.imp -- Implementation of stack type
+//
+// $Id$
+//
 
 #include "gstack.h"
 #include <assert.h>
@@ -58,17 +58,11 @@ template <class T> void gStack<T>::Flush(void)
 
 template <class T> void gStack<T>::Resize( int new_max_depth )
 {
-  int i;
-  T*  new_contents;
-
-  if( new_max_depth > depth )
-  {
-    new_contents = new T[ new_max_depth ];
-    for( i = 0; i < depth; i++ )
-    {
-      new_contents[ i ] = contents[ i ];
-    }
-    delete[] contents;
+  if (new_max_depth > depth)   {
+    T *new_contents = new T[new_max_depth];
+    for (int i = 0; i < depth; i++)
+      new_contents[i] = contents[i];
+    delete [] contents;
     contents = new_contents;
     max_depth = new_max_depth;
   }
