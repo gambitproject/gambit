@@ -80,9 +80,11 @@ template <class T> class LUdecomp {
   void identity(); // fill mat with identity matrix (already factored...)
 
   void factor(); // factor in place
-  void PermuteColumn(const gVector<T>&x, gVector<T>&y) const; // y <- P(x)
+  void permute(const gVector<T>&x, gVector<T>&y) const; // y <- P(x)
+  void unpermute(const gVector<T>&x, gVector<T>&y) const; // y <- P^-1(x)
   void Lsolve(const gVector<T>&b, gVector<T>&x) const; // solve: L x = b
-  void apply(LUupdate<T> &, gVector<T> &) const; // apply 2x2 gauss elims
+  void apply(gVector<T> &) const; // apply updates factored into U
+  void unapply(gVector<T> &) const; // apply inverse of updates factored into U
   void Usolve(const gVector<T>&b, gVector<T>&x) const; // solve U x = b
  public:
   LUdecomp(int); // create identity matrix [1..length][1..length]
@@ -96,8 +98,9 @@ template <class T> class LUdecomp {
   void refactor(gMatrix<T>&); // factor a new matrix
   void refactor(gMatrix<T>&, gTuple<int>&); // reinitialize /w selected columns
 
-  void solve(const gVector<T>&, gVector<T>&); // solve:  M x = b
+  void solve(const gVector<T>&, gVector<T>&) const; // solve:  M x = b
   void solveT(const gVector<T>&, gVector<T>&) const; // solve:  yt M = ct
+  void reconstruct(gMatrix<T>&) const; // reconstruct M from decomposition
   T Determinant() const; // compute determinant
 
 }; // end class LUdecomp

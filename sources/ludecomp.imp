@@ -110,7 +110,7 @@ void LUdecomp<T>::identity()
 
 
 template<class T>
-void LUdecomp<T>::PermuteColumn(const gVector<T> &in, gVector<T> &out) const
+void LUdecomp<T>::permute(const gVector<T> &in, gVector<T> &out) const
 // perform row permutation on column vector
 {
   assert( mat.CheckColumn(in) && mat.CheckColumn(out) );
@@ -120,7 +120,20 @@ void LUdecomp<T>::PermuteColumn(const gVector<T> &in, gVector<T> &out) const
   // out <- permute(in)
   for(int i=min; i<=max; i++)
     out[i]= in[rpp[i]];
-} // end PermuteColumn
+} // end permute
+
+template<class T>
+void LUdecomp<T>::unpermute(const gVector<T> &in, gVector<T> &out) const
+// perform inverse of row permutation on column vector
+{
+  assert( mat.CheckColumn(in) && mat.CheckColumn(out) );
+  assert( &in != &out );
+  int min=out.First(), max=out.Last();
+
+  // out <- permute(in)
+  for(int i=min; i<=max; i++)
+    out[rpp[i]]= in[i];
+} // end unpermute
 
 template<class T>
 void LUdecomp<T>::Lsolve(const gVector<T> &b, gVector<T> &x) const
@@ -141,26 +154,61 @@ void LUdecomp<T>::Lsolve(const gVector<T> &b, gVector<T> &x) const
 } // end Lsolve
 
 template<class T>
-void LUdecomp<T>::apply(LUupdate<T> &update, gVector<T> &v) const
-// solve Z v_out = v_in
-// where Z is the update not factored into L:
-// Z= (first applied) P M^-1 P M^-1 ... P M^-1 (last applied)
-// Z^-1= (last applied) M P ... M P M P (first applied)
+void LUdecomp<T>::apply(gVector<T> &v) const
+// apply Z to column vector v
+// where Z is the update which was applied to U:
+// Z= (last applied) M P ... M P (first applied)
+// Z v is done in place
+{
+  assert( mat.CheckColumn(v) );
+
+  T tmp;
+  gListIter< LUupdate<T> > iter(updates);
+  for( iter.GoFirst(); ! iter.PastEnd(); iter++ )
+    {
+      LUupdate<T> update= iter.GetValue();
+      assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
+
+      for(int i=update.First(); i<=update.Last(); i++)
+	{
+	  if(update.rowp[i])
+	    {
+	      tmp= v[i];
+	      v[i]= v[i+1];
+	      v[i+1]= tmp;
+	    }
+	  v[i+1]-= v[i]*update.alpha[i];
+	}
+    }
+}
+
+template<class T>
+void LUdecomp<T>::unapply(gVector<T> &v) const
+// apply Z^-1 to column vector v
+// where Z is the update which was applied to U:
+// Z= (last applied) M P ... M P (first applied)
+// Z^-1= (first applied) P M^-1 ... P M^-1 (last applied)
 // Z^-1 v is done in place
 {
   assert( mat.CheckColumn(v) );
-  assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
-  T tmp;
 
-  for(int i=update.First(); i<=update.Last(); i++)
+  T tmp;
+  gListIter< LUupdate<T> > iter(updates);
+  for( iter.GoLast(); ! iter.PastBeginning(); iter-- )
     {
-      if(update.rowp[i])
+      LUupdate<T> update= iter.GetValue();
+      assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
+
+      for(int i=update.Last(); i>=update.First(); i--)
 	{
-	  tmp= v[i];
-	  v[i]= v[i+1];
-	  v[i+1]= tmp;
+	  v[i+1]+= v[i]*update.alpha[i];
+	  if(update.rowp[i])
+	    {
+	      tmp= v[i];
+	      v[i]= v[i+1];
+	      v[i+1]= tmp;
+	    }
 	}
-      v[i+1]-= v[i]*update.alpha[i];
     }
 }
 
@@ -184,7 +232,7 @@ void LUdecomp<T>::Usolve(const gVector<T> &b, gVector<T> &x) const
 
 
 template<class T>
-void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x)
+void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x) const
 // solve A x = b
 {
   // &x can be the same as &b...
@@ -192,13 +240,9 @@ void LUdecomp<T>::solve(const gVector<T> &b, gVector<T> &x)
   int min= mat.MinCol(), max= mat.MaxCol();
   gVector<T> tmp(min,max);
 
-  PermuteColumn(b,x);
+  permute(b,x);
   Lsolve(x,tmp);
-  for( gListIter< LUupdate<T> > iter= gListIter< LUupdate<T> >(updates);
-       ! iter.PastEnd();
-       iter++
-     )
-    apply(iter.GetValue(),tmp);
+  apply(tmp);
   Usolve(tmp,x);
 }
 
@@ -299,47 +343,45 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
   gVector<T> Ucol(min,max);
 
   // shift matrix, add new column
-  PermuteColumn(v,temp);
+  permute(v,temp);
   Lsolve(temp,Ucol); // Ucol is new U column
-  mat.GetColumn(column,temp); // temp is temp. storage for L column
+  apply(Ucol); // apply previous updates
   mat.RotateLeft(column,max); // shift columns over
+  mat.GetColumn(max,temp); // temp is temp. storage for L column
   mat.SetColumn(max,Ucol); // insert new U column
 
-  LUupdate<T> update(column, mat.MaxCol()-1);
+  // make U upper-diagonal
+  LUupdate<T> updatev(column, mat.MaxCol()-1);
   T tmp, alpha;
   for(int k=column; k<max; k++)
     {
+      
       // do pivot and update U rows
-      if( abs(mat(k+1,k)) <= abs(mat(k,k)) )
+      if( abs(mat(k+1,k)) > abs(mat(k,k)) )
 	{
-	  // do not permute U_k, U_k+1
-	  assert( mat(k,k) != 0 ); // must be nonsingular
-          alpha= mat(k+1,k)/mat(k,k);
-          update.rowp[k]= 0;
-          update.alpha[k]= alpha;
-	  for(int i=max; i>k; i--)
-            mat(k+1,i)-= alpha*mat(k,i);
-	}
-      else
-	{
-	  assert( mat(k,k+1) != 0 ); // must be nonsingular
-	  alpha= mat(k,k)/mat(k+1,k);
-	  update.rowp[k]= 1;
-	  update.alpha[k]= alpha;
-	  // switch U rows (but not L rows -- perm. stored in factored form)
-	  for(int i=max; i>k; i--)
+	  // permute U rows only
+	  updatev.rowp[k]= 1;
+	  for(int i=max; i>=k; i--)
 	    {
 	      tmp= mat(k+1,i);
-	      mat(k+1,i)= mat(k,i) - tmp*alpha;
+	      mat(k+1,i)= mat(k,i);
 	      mat(k,i)= tmp;
 	    }
 	}
+      else
+	{
+	  // do not permute
+	  updatev.rowp[k]= 0;
+	}
 
-      // append update to updates list
-      updates.Append(update);
+      assert( mat(k,k) != 0 ); // must be nonsingular
+      alpha= mat(k+1,k)/mat(k,k);
+      updatev.alpha[k]= alpha;
+      for(int i=max; i>k; i--)
+	mat(k+1,i)-= alpha*mat(k,i);
 
       // switch L column with temp
-      for(int i=max; i>k; i--)
+      for( i=max; i>k; i--)
 	{
 	  tmp= mat(i,k);
 	  mat(i,k)= temp[i];
@@ -349,8 +391,48 @@ void LUdecomp<T>::update(int column, const gVector<T> &v)
 
   // make sure U is nonsingular (practically useless as written...)
   assert( mat(max,max) != (T)0 );
+
+  // append update to updates list
+  updates.Append(updatev);
+
 } // end update()
 
+
+template<class T>
+void LUdecomp<T>::reconstruct(gMatrix<T> &M) const
+// reconstruct matrix from L(updates)U decomposition
+{
+  assert( mat.CheckBounds(M) );
+  int min= mat.MinCol(), max= mat.MaxCol();
+
+  gMatrix<T> aux(mat); // aux == L
+  for(int i=min; i<=max; i++)
+    {
+      for(int j=max; j>i; j--)
+	aux(i,j)= (T)0;
+      aux(i,i)= (T)1;
+    }
+
+  gVector<T> col(min,max), tmp(min,max);
+  for(int k=min; k<=max; k++)
+    {
+      // col is U col
+      mat.GetColumn(k,col);
+      for(int i=max; i>k; i--)
+	col[i]= (T)0;
+
+      // unapply updates to col
+      unapply(col);
+
+      // apply L to col
+      col= aux*col;
+
+      // unpermute col
+      unpermute(col,tmp);
+
+      M.SetColumn(k,tmp);
+    }
+}
 
 template<class T>
 T LUdecomp<T>::Determinant() const
