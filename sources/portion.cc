@@ -1172,7 +1172,18 @@ Infoset*& InfosetPortion::Value(void) const
 { return *_Value; }
 
 PortionSpec InfosetPortion::Spec(void) const
-{ return PortionSpec(porINFOSET); }
+{
+  switch( SubType() )
+  {
+  case DOUBLE:
+    return PortionSpec(porINFOSET_FLOAT);
+  case RATIONAL:
+    return PortionSpec(porINFOSET_RATIONAL);
+  default:
+    assert(0);
+  }
+  return porUNDEFINED; 
+}
 
 DataType InfosetPortion::SubType( void ) const
 {
