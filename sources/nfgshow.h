@@ -101,7 +101,8 @@ public:
   void SetColors(void);
 
   void EditLabel(void);
-  void SetLabels(int what); // what == 1: strats, what == 2: players
+  void SetStrategyLabels(void);
+  void SetPlayerLabels(void);
 
   // Saving the game in native (.nfg) format
   Bool Save(void);
@@ -209,9 +210,9 @@ public:
   // Set Dimensionality.  This is needed for elimdom stuff
   void SetDimensionality(const NFSupport *sup);
 
-  // what == 0: game, what == 1: strats, what == 2: players
-  void SetLabels(const NFSupport *sup, int what); 
-    
+  void SetStrategyLabels(const NFSupport *);
+  void SetPlayerLabels(const NFSupport *);
+
   // Functions to display the row/col players
   void SetRowPlayer(int pl)
     {

@@ -8,6 +8,7 @@
 #include "wxmisc.h"
 
 #include "nfg.h"
+#include "nfplayer.h"
 #include "nfstrat.h"
 
 #include "dlnfgpayoff.h"
@@ -232,6 +233,133 @@ Bool dialogNfgOutcomeSelect::OnClose(void)
 NFOutcome *dialogNfgOutcomeSelect::GetOutcome(void)
 {
   return m_nfg.Outcomes()[m_outcomeSelected + 1];
+}
+
+//=========================================================================
+//                    dialogStrategies: Member functions
+//=========================================================================
+
+#include "dlstrategies.h"
+
+dialogStrategies::dialogStrategies(Nfg &p_nfg, wxFrame *p_parent)
+  : wxDialogBox(p_parent, "Strategy Information", TRUE), m_nfg(p_nfg),
+    m_prevStrategy(0), m_gameChanged(false)
+{
+  SetLabelPosition(wxVERTICAL);
+  m_playerItem = new wxListBox(this, (wxFunction) CallbackPlayer, "Player",
+			       wxSINGLE, 11, 3, 104, 125, 0, NULL, 0);	
+  m_playerItem->wxEvtHandler::SetClientData((char *) this);
+  m_strategyItem = new wxListBox(this, (wxFunction) CallbackStrategy,
+				 "Strategy",
+				 wxSINGLE, 130, 4, 100, 125, 0, NULL, 0);
+  m_strategyItem->wxEvtHandler::SetClientData((char *) this);
+  m_strategyNameItem = new wxText(this, 0, "Strategy Name", "",
+				  251, 12, 174, 58, 0);
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOk, "Ok",
+				    13, 162, -1, -1, 0);
+  okButton->SetClientData((char *) this);
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel", 71, 163, -1, -1, 0);
+  cancelButton->SetClientData((char *) this);
+  wxButton *helpButton = new wxButton(this, (wxFunction) CallbackHelp, "Help",
+				      342, 164, -1, -1, 0);
+  helpButton->SetClientData((char *) this);
+
+  for (int pl = 1; pl <= m_nfg.NumPlayers(); pl++) {
+    if (m_nfg.Players()[pl]->GetName() != "")
+      m_playerItem->Append(m_nfg.Players()[pl]->GetName());
+    else
+      m_playerItem->Append("Player " + ToText(pl));
+  }
+
+  OnPlayer(0);
+  Fit(); 
+  Show(TRUE);
+}
+
+void dialogStrategies::OnPlayer(int p_number)
+{
+  m_playerItem->SetSelection(p_number);
+  NFPlayer *player = m_nfg.Players()[p_number+1];
+  m_strategyItem->Clear();
+  for (int st = 1; st <= player->NumStrats(); st++)
+    m_strategyItem->Append(ToText(st));
+  OnStrategy(0);
+}
+
+void dialogStrategies::OnStrategy(int p_number)
+{
+  if (m_prevStrategy)
+    if (strcmp(m_prevStrategy->Name(), m_strategyNameItem->GetValue()) != 0) {
+      m_prevStrategy->SetName(m_strategyNameItem->GetValue());
+      m_gameChanged = true;
+    }
+
+  NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection()+1];
+  m_strategyItem->SetSelection(p_number);
+  Strategy *strategy = player->Strategies()[p_number+1];
+  m_strategyNameItem->SetValue(strategy->Name());
+  m_prevStrategy = strategy;
+}
+
+void dialogStrategies::OnOk(void)
+{
+  NFPlayer *player = m_nfg.Players()[m_playerItem->GetSelection()+1];
+  Strategy *strategy = player->Strategies()[m_strategyItem->GetSelection()+1];
+  if (strcmp(strategy->Name(), m_strategyNameItem->GetValue()) != 0) {
+    strategy->SetName(m_strategyNameItem->GetValue());
+    m_gameChanged = true;
+  }
+
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void dialogStrategies::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool dialogStrategies::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void dialogStrategies::OnHelp(void)
+{wxHelpContents("");}
+
+
+void dialogStrategies::CallbackPlayer(wxListBox &p_object,
+				      wxCommandEvent &p_event)
+{
+  ((dialogStrategies *) p_object.wxEvtHandler::GetClientData())->
+    OnPlayer(p_event.commandInt);
+}
+
+void dialogStrategies::CallbackStrategy(wxListBox &p_object, 
+					wxCommandEvent &p_event)
+{
+  ((dialogStrategies *) p_object.wxEvtHandler::GetClientData())->
+    OnStrategy(p_event.commandInt);
+}
+
+void dialogStrategies::CallbackOk(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogStrategies *) p_object.GetClientData())->OnOk();
+}
+
+void dialogStrategies::CallbackCancel(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogStrategies *) p_object.GetClientData())->OnCancel();
+}
+
+void dialogStrategies::CallbackHelp(wxButton &p_object, wxCommandEvent &)
+{
+  ((dialogStrategies *) p_object.GetClientData())->OnHelp();
 }
 
 //=========================================================================

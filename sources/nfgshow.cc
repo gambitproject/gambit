@@ -13,6 +13,7 @@
 #include "dlnfgpayoff.h"
 #include "dlnfgoutcome.h"
 #include "dlnfgnewsupport.h"
+#include "dlstrategies.h"
 #include "dlnfgsave.h"
 
 //======================================================================
@@ -1089,80 +1090,46 @@ void NfgShow::EditLabel(void)
 #define LABEL_LENGTH    20
 #define ENTRIES_PER_ROW 3
 
-// Call Spread->SetLabels afterwards to update the display
-void NfgShow::SetLabels(int what)
+void NfgShow::SetStrategyLabels(void)
+{
+  dialogStrategies dialog(nf, pframe);
+
+  if (dialog.GameChanged()) {
+    spread->SetStrategyLabels(disp_sup);
+    UpdateVals();
+  }
+}
+
+void NfgShow::SetPlayerLabels(void)
 {
   int num_players = nf.NumPlayers();
   
-  if (what == 1) { // label strategies
-    int max_strats = 0, i;
+  MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
+  char **player_labels = new char *[num_players+1];
+  int i;
 
-    for (i = 1; i <= num_players; i++) {
-      if (max_strats < disp_sup->NumStrats(i)) 
-	max_strats = disp_sup->NumStrats(i);
-    }
-
-    SpreadSheet3D *labels = 
-      new SpreadSheet3D(num_players, max_strats, 1, "Label Strategies", spread);
-    labels->DrawSettings()->SetLabels(S_LABEL_ROW);
-	
-    for (i = 1; i <= num_players; i++) { 
-      int j;
-
-      for (j = 1; j <= disp_sup->NumStrats(i); j++) {
-	labels->SetCell(i, j, disp_sup->Strategies(i)[j]->Name());
-	labels->SetType(i, j, 1, gSpreadStr);
-      } // note that we continue using j
-
-      for (; j <= max_strats; j++)
-	labels->HiLighted(i, j, 1, TRUE);
-
-      labels->SetLabelRow(i, nf.Players()[i]->GetName());
-    }
-
-    labels->Redraw();
-    labels->Show(TRUE);
-
-    while (labels->Completed() == wxRUNNING) 
-      wxYield(); // wait for ok/cancel
-
-    if (labels->Completed() == wxOK) {
-      for (i = 1; i <= num_players; i++)
-	for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-	  disp_sup->Strategies(i)[j]->SetName(labels->GetCell(i, j));
-    }
-    
-    delete labels;
-  }
-
-  if (what == 2)  { // label players
-    MyDialogBox *labels = new MyDialogBox(spread, "Label Players", NFG_EDIT_HELP);
-    char **player_labels = new char *[num_players+1];
-    int i;
-
-    for (i = 1; i <= num_players; i++) {
-      player_labels[i] = new char[LABEL_LENGTH];
-      strcpy(player_labels[i], nf.Players()[i]->GetName());
-      labels->Add(wxMakeFormString(ToText(i), &player_labels[i]));
+  for (i = 1; i <= num_players; i++) {
+    player_labels[i] = new char[LABEL_LENGTH];
+    strcpy(player_labels[i], nf.Players()[i]->GetName());
+    labels->Add(wxMakeFormString(ToText(i), &player_labels[i]));
       
-      if (i % ENTRIES_PER_ROW == 0) 
-	labels->Add(wxMakeFormNewLine());
-    }
-
-    labels->Go();
-
-    if (labels->Completed() == wxOK) {
-      for (i = 1; i <= num_players; i++) 
-	nf.Players()[i]->SetName(player_labels[i]);
-    }
-
-    for (i = 1; i <= num_players; i++) 
-      delete [] player_labels[i];
-
-    delete [] player_labels;
+    if (i % ENTRIES_PER_ROW == 0) 
+      labels->Add(wxMakeFormNewLine());
   }
 
-  spread->SetLabels(disp_sup, what);
+  labels->Go();
+
+  if (labels->Completed() == wxOK) {
+    for (i = 1; i <= num_players; i++) 
+      nf.Players()[i]->SetName(player_labels[i]);
+  }
+
+  for (i = 1; i <= num_players; i++) 
+    delete [] player_labels[i];
+
+  delete [] player_labels;
+
+  spread->SetPlayerLabels(disp_sup);
   UpdateVals();
 }
 
@@ -1758,55 +1725,52 @@ Bool NormalSpread::OnClose(void)
   }
 }
 
-void NormalSpread::SetLabels(const NFSupport *disp_sup, int what)
+void NormalSpread::SetStrategyLabels(const NFSupport *disp_sup)
 {
-    if (what == 1) // strategies
+  gArray<int> profile = GetProfile();
+  // update the profile choiceboxes
+  int i;
+
+  for (i = 1; i <= dimensionality.Length(); i++)
     {
-        gArray<int> profile = GetProfile();
-        // update the profile choiceboxes
-        int i;
-
-        for (i = 1; i <= dimensionality.Length(); i++)
-        {
-            strat_profile[i]->Clear();
-
-            for (int j = 1; j <= disp_sup->NumStrats(i); j++)
-                strat_profile[i]->Append(disp_sup->Strategies(i)[j]->Name());
-        }
-
-        // Update the row/col labels
-        for (i = 1; i <= disp_sup->NumStrats(pl1); i++)
-            SetLabelRow(i, disp_sup->Strategies(pl1)[i]->Name());
-
-        for (i = 1; i <= disp_sup->NumStrats(pl2); i++)
-            SetLabelCol(i, disp_sup->Strategies(pl2)[i]->Name());
-
-        for (i = 1; i <= dimensionality.Length(); i++) 
-            strat_profile[i]->SetSelection(profile[i] - 1);
-
-        Redraw();
+      strat_profile[i]->Clear();
+      
+      for (int j = 1; j <= disp_sup->NumStrats(i); j++)
+	strat_profile[i]->Append(disp_sup->Strategies(i)[j]->Name());
     }
 
-    if (what == 2) // players
+  // Update the row/col labels
+  for (i = 1; i <= disp_sup->NumStrats(pl1); i++)
+    SetLabelRow(i, disp_sup->Strategies(pl1)[i]->Name());
+  
+  for (i = 1; i <= disp_sup->NumStrats(pl2); i++)
+    SetLabelCol(i, disp_sup->Strategies(pl2)[i]->Name());
+  
+  for (i = 1; i <= dimensionality.Length(); i++) 
+    strat_profile[i]->SetSelection(profile[i] - 1);
+
+  Redraw();
+}
+
+void NormalSpread::SetPlayerLabels(const NFSupport *disp_sup)
+{
+  // the row, col player choicebox
+  const Nfg &nf = disp_sup->Game();
+  row_choice->Clear();
+  col_choice->Clear();
+  
+  for (int i = 1; i <= nf.NumPlayers(); i++)
     {
-        // the row, col player choicebox
-        const Nfg &nf = disp_sup->Game();
-        row_choice->Clear();
-        col_choice->Clear();
-
-        for (int i = 1; i <= nf.NumPlayers(); i++)
-        {
-            row_choice->Append(nf.Players()[i]->GetName());
-            col_choice->Append(nf.Players()[i]->GetName());
-        }
-
-        row_choice->SetSelection(pl1 - 1);
-        col_choice->SetSelection(pl2 - 1);
-
-        // Set new title
-        SetTitle(nf.GetTitle() + " : " + nf.Players()[pl1]->GetName() + " x " + 
-                 nf.Players()[pl2]->GetName());
+      row_choice->Append(nf.Players()[i]->GetName());
+      col_choice->Append(nf.Players()[i]->GetName());
     }
+
+  row_choice->SetSelection(pl1 - 1);
+  col_choice->SetSelection(pl2 - 1);
+  
+  // Set new title
+  SetTitle(nf.GetTitle() + " : " + nf.Players()[pl1]->GetName() + " x " + 
+	   nf.Players()[pl2]->GetName());
 }
 
 
@@ -2003,10 +1967,10 @@ void NormalSpread::OnMenuCommand(int id)
       parent->EditLabel();
       break;
     case NFG_EDIT_STRATS: 
-      parent->SetLabels(1);
+      parent->SetStrategyLabels();
       break;
     case NFG_EDIT_PLAYERS: 
-      parent->SetLabels(2);
+      parent->SetPlayerLabels();
       break;
     case NFG_EDIT_OUTCOMES_NEW:
       parent->OutcomeNew();
