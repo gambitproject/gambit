@@ -500,7 +500,8 @@ void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
       }
     } while (iter1.Next());
 
-    p_status.SetProgress((double) step / (double) numSteps);
+    p_status.SetProgress((double) step / (double) numSteps,
+			 gText("Lambda = ") + ToText(lambda));
 
     if (m_fullGraph || step == numSteps) {
       p_solutions += cursolns;

@@ -214,9 +214,10 @@ static void QreJacobian(const NFSupport &p_support,
   }
 }
 
-MixedProfile<double> TracePath(const MixedProfile<double> &p_start,
-			       double p_startLambda, double p_maxLambda,
-			       gStatus &p_status)
+void TracePath(const MixedProfile<double> &p_start,
+	       double p_startLambda, double p_maxLambda,
+	       gStatus &p_status,
+	       gList<MixedSolution> &p_solutions)
 {
 #ifdef USE_CORRECTOR
   const double c_tol = 1.0e-4;     // tolerance for corrector iteration
@@ -325,12 +326,6 @@ MixedProfile<double> TracePath(const MixedProfile<double> &p_start,
     h = fabs(h / decel);
 #endif   // USE_CORRECTOR
 
-    MixedProfile<double> foo(p_start), bar(p_start);
-    for (int i = 1; i <= foo.Length(); i++) {
-      foo[i] = x[i];
-      bar[i] = u[i];
-    }
-
     // PC step was successful; update and iterate
     for (int i = 1; i <= x.Length(); i++) {
       if (u[i] < 1.0e-25) {
@@ -341,13 +336,14 @@ MixedProfile<double> TracePath(const MixedProfile<double> &p_start,
       }
     }
     q.GetRow(q.NumRows(), t);  // new tangent
-  }
 
-  MixedProfile<double> foo(p_start);
-  for (int i = 1; i <= foo.Length(); i++) {
-    foo[i] = x[i];
+    MixedProfile<double> foo(p_start);
+    for (int i = 1; i <= foo.Length(); i++) {
+      foo[i] = x[i];
+    }
+    p_solutions.Append(MixedSolution(foo, algorithmNfg_QRE));
+    p_solutions[p_solutions.Length()].SetQre(x[x.Last()], 0);
   }
-  return foo;
 }
 
 nfgQre::nfgQre(void)
@@ -362,8 +358,7 @@ gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
   WritePXIHeader(gnull, p_support.Game());
 
   try {
-    MixedProfile<double> profile = TracePath(start, 0.0, m_maxLam, p_status);
-    solutions.Append(MixedSolution(profile));
+    TracePath(start, 0.0, m_maxLam, p_status, solutions);
 
 #ifdef UNUSED
       // Write out the QreValue as 0 in the PXI file; not generally
@@ -385,13 +380,12 @@ gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
 			   gText("Current lambda: ") + ToText(nu / (1.0-nu)));
 #endif // UNUSED
   }
-  catch (...) {
-    //    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
-    throw;
-  }
-  
+  catch (...) { }
+
   if (!m_fullGraph) { 
-    //    p_corresp.Append(1, nu / (1.0-nu), MixedSolution(profile, algorithmNfg_QRE));
+    while (solutions.Length() > 1) {
+      solutions.Remove(1);
+    }
   }
 
   return solutions;
