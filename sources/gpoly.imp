@@ -137,6 +137,9 @@ template <class T> gPoly<T>& gPoly<T>::operator=(const gString &Hold)
   return (*this);
 }
 
+
+#ifndef MINI_POLY
+
 template<class T> gPoly<T> gPoly<T>::operator-() const
 {
   gPoly<T> neg(*this);
@@ -194,6 +197,22 @@ gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
   return DivideByPolynomial(den);
 }
 
+
+template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
+{ 
+  assert(Space == p.Space);
+
+  Terms = Mult(Terms,p.Terms);
+}
+
+template<class T> void gPoly<T>::operator*=(const T& val)
+{ 
+  for (int j = 1; j <= Terms.Length(); j++)
+    Terms[j] *= val;
+}
+
+#endif   // MINI_POLY
+
 template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 {
   assert(Space == p.Space && Order == p.Order);
@@ -207,19 +226,6 @@ template<class T> bool gPoly<T>::operator==(const gPoly<T> &p) const
 template<class T> bool gPoly<T>::operator!=(const gPoly<T> &p) const
 {
   return !(*this == p);
-}
-
-template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
-{ 
-  assert(Space == p.Space);
-
-  Terms = Mult(Terms,p.Terms);
-}
-
-template<class T> void gPoly<T>::operator*=(const T& val)
-{ 
-  for (int j = 1; j <= Terms.Length(); j++)
-    Terms[j] *= val;
 }
 
 
@@ -291,6 +297,8 @@ template <class T> const term_order* gPoly<T>::GetOrder(void) const
   return (term_order *) Order;  
 }
 
+#ifndef MINI_POLY
+
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
 {
   int max = 0;
@@ -330,6 +338,8 @@ template <class T> T gPoly<T>::NumLeadCoeff() const
   else                     return (T)0;
 }
 
+#endif   // MINI_POLY
+
 template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
 {
   T answer=0;
@@ -337,6 +347,14 @@ template <class T> T gPoly<T>::Evaluate(const gArray<T> &values) const
     answer += Terms[j].Evaluate(values);
   return answer;
 }
+
+template <class T> int gPoly<T>::Dmnsn() const
+{
+  return Space->Dmnsn();
+}
+
+
+#ifndef MINI_POLY
 
 template <class T> gList<exp_vect> gPoly<T>::ExponentVectors() const
 {
@@ -351,11 +369,6 @@ template <class T> int gPoly<T>::No_Monomials() const
   gout << "Eliminate old code in No_monomials, if successful.\n";
 
   return Terms.Length();
-}
-
-template <class T> int gPoly<T>::Dmnsn() const
-{
-  return Space->Dmnsn();
 }
 
 template <class T> 
@@ -651,7 +664,9 @@ template<class T> gPoly<T> operator*(const gPoly<T> &poly, const T val)
   return val * poly;
 }
 
-template <class T> gOutput& operator<<(gOutput &f, const gPoly<T> &p)
+#endif   // MINI_POLY
+
+template <class T> gString &operator<<(gString &t, const gPoly<T> &p)
 {
   gString s;
   if (p.Terms.Length() == 0) s += "0";
@@ -683,8 +698,21 @@ template <class T> gOutput& operator<<(gOutput &f, const gPoly<T> &p)
       }
   }
   if (s == "") s = " 0";
-
-  f << s; return f;
+  
+  t += s;
+  
+  return t;
 }
+
+template <class T> gOutput &operator<<(gOutput &f, const gPoly<T> &p)
+{
+  gString s;
+  s << p;
+  f << s;
+  return f;
+}
+
+  
+
 
 

@@ -15,19 +15,28 @@
 #endif   // __GNUG__, __BORLANDC__
 
 TEMPLATE class gPoly<int>;
+#ifndef MINI_POLY
 TEMPLATE gPoly<int> operator*(const int val, const gPoly<int> poly);
 TEMPLATE gPoly<int> operator*(const gPoly<int> poly, const int val);
+#endif   // MINI_POLY
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<int> &y);
+TEMPLATE gString &operator<<(gString &, const gPoly<int> &);
 
 TEMPLATE class gPoly<gRational>;
+#ifndef MINI_POLY
 TEMPLATE gPoly<gRational> operator*(const gRational val, const gPoly<gRational> poly);
 TEMPLATE gPoly<gRational> operator*(const gPoly<gRational> poly, const gRational val);
+#endif   // MINI_POLY
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<gRational> &y);
+TEMPLATE gString &operator<<(gString &, const gPoly<gRational> &);
 
 TEMPLATE class gPoly<double>;
+#ifndef MINI_POLY
 TEMPLATE gPoly<double> operator*(const double val, const gPoly<double> poly);
 TEMPLATE gPoly<double> operator*(const gPoly<double> poly, const double val);
+#endif   // MINI_POLY
 TEMPLATE gOutput &operator<<(gOutput &f, const gPoly<double> &y);
+TEMPLATE gString &operator<<(gString &, const gPoly<double> &);
 
 /*
 TEMPLATE class gPoly<long>;

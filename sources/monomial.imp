@@ -1,8 +1,8 @@
-//#
-//# FILE: monomial.imp -- Implementation of class gMono
-//#
-//# @(#)monomial.imp	1.0   2/19/96
-//#
+//
+// FILE: monomial.imp -- Implementation of class gMono
+//
+// $Id$
+//
 
 #include "monomial.h"
 
@@ -50,6 +50,8 @@ template<class T> bool gMono<T>::operator != (const gMono<T>& y) const
   return !(*this == y);
 }
 
+#ifndef MINI_POLY
+
 template<class T> gMono<T> gMono<T>::operator * (const gMono<T> & y) const
 {
   return gMono<T>(coef * y.coef,exps + y.exps);
@@ -85,31 +87,33 @@ template<class T> gMono<T> gMono<T>::operator - () const
   return gMono<T>(-coef,exps);
 }
 
+#endif   // MINI_POLY
+
 //--------------------------------------------------------------------------
 //                             gMono -- information
 //--------------------------------------------------------------------------
 
-template<class T> const T gMono<T>::Coef() const 
+template<class T> const T &gMono<T>::Coef() const 
 { 
   return coef; 
 }
 
-template<class T> const int gMono<T>::Dmnsn() const 
+template<class T> int gMono<T>::Dmnsn() const 
 { 
   return exps.Dmnsn(); 
 }
 
-template<class T> const int gMono<T>::TotalDegree() const 
+template<class T> int gMono<T>::TotalDegree() const 
 { 
   return exps.TotalDegree(); 
 }
 
-template<class T> const exp_vect gMono<T>::ExpV() const 
+template<class T> const exp_vect &gMono<T>::ExpV() const 
 { 
   return exps; 
 }
 
-template<class T> const bool gMono<T>::IsConstant() const 
+template<class T> bool gMono<T>::IsConstant() const 
 { 
   return exps.IsConstant(); 
 }

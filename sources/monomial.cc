@@ -1,7 +1,8 @@
-//#
-//# FILE: gMono.cc -- Instantiation of gMono classes
-//# @(#) gMono.cc	1.0  2/19/96
-//#
+//
+// FILE: monomial.cc -- Instantiation of gMono classes
+//
+// $Id$
+//
 
 #include "monomial.imp"
 #include "glist.imp"

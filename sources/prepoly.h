@@ -1,12 +1,12 @@
+//
+// FILE: prepoly.h  --  Declaration of classes supporting 
+//                      multivariate polynomials.
+//
+// $Id$
+//
 
-//#
-//# File: pre_poly.h  --  Declaration of classes supporting 
-//#                       multivariate polynomials.
-//# @(#)pre_poly.h 1.0 12/12/95
-//#
-
-#ifndef PRE_POLY_H
-#define PRE_POLY_H
+#ifndef PREPOLY_H
+#define PREPOLY_H
 
 #include <math.h>
 #include "gambitio.h"
@@ -191,4 +191,4 @@ public:
   term_order WithVariableAppended(const gSpace*) const;
 };
 
-#endif //# PRE_POLY_H
+#endif  // PREPOLY_H

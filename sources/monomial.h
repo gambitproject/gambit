@@ -1,30 +1,21 @@
-//#
-//# FILE: mono.h -- Multivariate monomial class
-//#
-//# @(#)mono.h	1.0  2/19/96
-//#
+//
+// FILE: monomial.h -- Multivariate monomial class
+//
+// $Id$
+//
 
 
-#include "pre_poly.h"
+#include "prepoly.h"
 
-/*
-#include<stream.h>
-#include<String.h>
-#include "rational.h"
-#include "gambitio.h"
-*/
 
-/* 
+// This file provides the template class
+//
+//              gMono
+//
+// whose objects are monomials in several variables
+// with coefficients of class T and nonnegative exponents. 
+// This role of this class is to support the class gPoly. 
 
-This file provides the template class
-
-              gMono
-
-whose objects are monomials in several variables
-with coefficients of class T and nonnegative exponents. 
-This role of this class is to support the class gPoly. 
-
-*/
 
 template<class T> class gMono {
 private:
@@ -43,19 +34,21 @@ public:
 
           bool      operator == (const gMono<T>&) const;
           bool      operator != (const gMono<T>&) const;
+#ifndef MINI_POLY
           gMono<T>  operator *  (const gMono<T>&) const;
           gMono<T>  operator /  (const gMono<T>&) const;
           gMono<T>  operator +  (const gMono<T>&) const; // assert exps ==
           gMono<T>& operator += (const gMono<T>&);       // assert exps ==
           gMono<T>& operator *= (const T&);      
           gMono<T>  operator -  ()                const; 
+#endif   // MINI_POLY
 
     // information
-    const T        Coef()                     const;
-    const int      Dmnsn()                    const;
-    const int      TotalDegree()              const;
-    const bool     IsConstant()               const;
-    const exp_vect ExpV()                     const;
+    const T &       Coef()                     const;
+    int      Dmnsn()                    const;
+    int      TotalDegree()              const;
+    bool     IsConstant()               const;
+    const exp_vect &ExpV()                     const;
     T              Evaluate(const gArray<T>&) const;
 
     // output

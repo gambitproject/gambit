@@ -1,7 +1,8 @@
-//#
-//# File: pre_poly.imp  -- Implementation of supporting classes for polynomials
-//# @(#) pre_poly.imp	1.3 8/2/95
-//#
+//
+// FILE: prepoly.cc  -- Implementation of supporting classes for polynomials
+//
+// $Id$
+//
 
 #ifdef __GNUG__
 #define TEMPLATE template
@@ -12,7 +13,7 @@ void gList<gBlock<int> >::Dump(gOutput &) const { };
 #pragma option -Jgd
 #endif   // __GNUG__, __BORLANDC__
 
-#include "pre_poly.h"
+#include "prepoly.h"
 #include "glist.imp"
 
 //-----------------------------------------------------------
