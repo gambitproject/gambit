@@ -68,15 +68,15 @@ friend class DisplayOptionsForm;
 };
 
 
+typedef struct   {
+  int x, y, level, color;
+  Node n;
+}  NodeEntry;
 
 
 class TreeWindow : public wxCanvas
 {
 friend class DisplayOptionsForm;
-	typedef struct   {
-			int x, y, level, color;
-			Node n;
-	}  NodeEntry;
 		// Private variables
 		Problem *the_problem;
 		wxFrame *frame;								// parent frame
