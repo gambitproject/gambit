@@ -1,6 +1,7 @@
 //#
 //# FILE: eliap.h -- Interface to extensive form Liapunov solution module
 //#
+//# $Id$
 //#
 
 #ifndef ELIAP_H
@@ -9,15 +10,16 @@
 #include "extform.h"
 #include "liap.h"
 #include "glist.h"
+//#include "gdpvect.h"
 
 template <class T> class EFLiapParams : public LiapParams<T>  {
-  public:
-    EFLiapParams(void);
+public:
+  EFLiapParams(void);
 };
 
 template <class T> class EFLiapModule : public LiapModule<T>  {
   private:
-    const ExtForm<T> &ef;
+    const ExtForm<T> &E;
     gList<gPVector<T> > solutions;
 
     LiapFunc<T> *CreateFunc(void);
@@ -25,7 +27,8 @@ template <class T> class EFLiapModule : public LiapModule<T>  {
 
   public:
     EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p); 
-
+    EFLiapModule(const ExtForm<T> &E, EFLiapParams<T> &p, gDPVector<T> &s); 
+    virtual ~EFLiapModule();
     const gList<gPVector<T> > &GetSolutions(void) const;
 };
 

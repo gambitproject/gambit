@@ -1,6 +1,7 @@
 //#
 //# FILE: eliap.cc -- Extensive Form Liapunov module
 //#
+//# $Id$
 //#
 
 #define MAXIT 10
@@ -33,7 +34,6 @@ class EFLiapFunc : public LiapFunc<T>, public gBFunctMin<T>   {
     const ExtForm<T> &E;
     gDPVector<T> p, pp,cpay;
     gMatrix<T> xi;
-//    EFLiapParams<T> &params;
 
     T Value(const gVector<T> &x);
 
@@ -110,14 +110,7 @@ template <class T> int EFLiapFunc<T>::NumEvals(void) const
 
 template <class T> int EFLiapFunc<T>::Optimize(int &iter, T &value)
 {
-//  if (params.plev >= 3 && params.outfile)
-//    *params.outfile << "\np= " << pp;
-//  T val = (T) 0;
-//  int iter = 0;
   return Powell(pp, xi, iter, value);
-//  if (params.plev > 0)
-//    *params.outfile << "\np= " << pp << " f = " << val;
-//  return (val < (T) ((T) 1 / (T) 100000));
 }
 
 template <class T> void EFLiapFunc<T>::Randomize(void)
@@ -127,7 +120,7 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
   for (int i = 1; i <= E.NumPlayers(); i++)  
     for(int j=1;j<=E.NumInfosets(1,i);j++) {
       sum = (T) 0;
-      for (int k = 1; k <= E.NumActions(1,i,j); k++)  {
+      for (int k = 1; k < E.NumActions(1,i,j); k++)  {
 	do
 	  tmp = (T) Uniform();
 	while (tmp + sum > (T) 1);
@@ -141,38 +134,30 @@ template <class T> void EFLiapFunc<T>::Randomize(void)
 
 template <class T> T EFLiapFunc<T>::Value(const gVector<T> &v)
 {
-  static const T BIG1 = (T) 100;
-  static const T BIG2 = (T) 100;
+  static const T BIG1 = (T) 10000.0;
+  static const T BIG2 = (T) 100.0;
 
   nevals++;
 
   p = v;
-  gDPVector<T> tmp(p), payoff(p);
   T x, result((T) 0), avg, sum;
-  payoff = (T) 0;
 
   E.CondPayoff(p,cpay);
 
-  result = (T) 0;
+//  gout << "\nv = " << v << "\np = " << p << "\ncpay = " << cpay;
+
   for(int i = 1; i <= E.NumPlayers(); i++) 
     for(int j=1;j<=E.NumInfosets(1,i);j++) {
-      tmp.CopySubRow(i, j,payoff);
       avg = sum = (T) 0;
-	  // then for each strategy for that player set it to 1 and evaluate
       for (int k = 1; k <= E.NumActions(1,i,j); k++) {
-	tmp(i, j, k) = (T) 1;
-	x = p(i, j, k);
-	E.CondPayoff(tmp,cpay);
-	payoff(i, j, k) = cpay(i,j,k);
-	avg += x * payoff(i, j, k);
+	x = p(i, j, k); 
+	avg += (x * cpay(i, j, k));
 	sum += x;
 	x= (x > ((T) 0) ? ((T) 0) : x);
 	result += BIG1*x*x;         // add penalty for neg probabilities
-	tmp(i,j,k) = (T) 0;
       }
-      tmp.CopySubRow(i, j,p);
-      for(k=1;k<=E.NumActions(1,i,j);k++) {
-	x=payoff(i,j,k)-avg;
+      for(k=1; k<=E.NumActions(1,i,j); k++) {
+	x=cpay(i,j,k)-avg;
 	x = (x > 0 ? x : 0);
 	result += x*x;          // add penalty if not best response
       }
