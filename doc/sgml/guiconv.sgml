@@ -289,6 +289,10 @@ a new outcome can be created by right-clicking in the grid, which generates
 a context menu for the outcomes window, and select 
 <guimenuitem>New</guimenuitem>.
 <note>
+For newly-created games with no outcomes, the outcomes context menu is
+accessible by right-clicking on the column headers of the grid.
+</note>
+<note>
 <para>For GTK users: A quirk in GTK causes a <keycap>CTRL</keycap>-<keycap>N</keycap> shortcut to appear on this menu item.  The shortcut does not create
 an outcome, but rather a new game.
 </para>
