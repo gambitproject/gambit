@@ -28,10 +28,8 @@ libgcl_a_SOURCES = \
 	gsminstr.cc \
 	gsminstr.h \
 	gsmoper.cc \
-	gsmoper.h \
 	gsmutils.cc \
 	listfunc.cc \
-	listfunc.h \
 	nfgfunc.cc \
 	portion.cc \
 	portion.h \

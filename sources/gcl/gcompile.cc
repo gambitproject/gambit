@@ -71,13 +71,29 @@
 #line 1 "gcompile.yy"
 
 //
-// FILE: gcompile.yy -- yaccer/compiler for the GCL
+// $Source$
+// $Date$
+// $Revision$
 //
-// This parser/compiler is dedicated to the memory of
-// Jan L. A. van de Snepscheut, who wrote a program after which
-// this code is modeled.
+// DESCRIPTION:
+// Parser input file for GCL
 //
-// $Id$
+// This file is part of Gambit
+// Copyright (c) 2002, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
 #include <stdlib.h>
@@ -127,7 +143,7 @@ void gcl_yyerror(char *s);
 int gcl_yylex(void);
 
 
-#line 60 "gcompile.yy"
+#line 76 "gcompile.yy"
 typedef union  {
   gclExpression *eval;
   gclParameterList *pval;
@@ -241,17 +257,17 @@ static const short yyrhs[] = {    60,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   149,   150,   151,   154,   155,   156,   157,   159,   161,   163,
-   165,   168,   171,   174,   177,   180,   183,   185,   188,   191,
-   194,   197,   200,   203,   206,   209,   212,   215,   218,   221,
-   224,   227,   230,   233,   236,   241,   244,   247,   249,   252,
-   253,   255,   258,   259,   261,   261,   265,   266,   267,   270,
-   271,   272,   273,   276,   277,   279,   281,   281,   283,   284,
-   287,   287,   289,   291,   293,   295,   297,   299,   301,   303,
-   305,   307,   309,   311,   314,   315,   318,   319,   323,   324,
-   326,   327,   328,   330,   331,   333,   333,   334,   335,   337,
-   337,   339,   340,   342,   343,   345,   346,   347,   348,   349,
-   350,   362,   363
+   165,   166,   167,   170,   171,   172,   173,   175,   177,   179,
+   181,   184,   187,   190,   193,   196,   199,   201,   204,   207,
+   210,   213,   216,   219,   222,   225,   228,   231,   234,   237,
+   240,   243,   246,   249,   252,   257,   260,   263,   265,   268,
+   269,   271,   274,   275,   277,   277,   281,   282,   283,   286,
+   287,   288,   289,   292,   293,   295,   297,   297,   299,   300,
+   303,   303,   305,   307,   309,   311,   313,   315,   317,   319,
+   321,   323,   325,   327,   330,   331,   334,   335,   339,   340,
+   342,   343,   344,   346,   347,   349,   349,   350,   351,   353,
+   353,   355,   356,   358,   359,   361,   362,   363,   364,   365,
+   366,   378,   379
 };
 #endif
 
@@ -1085,378 +1101,378 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 149 "gcompile.yy"
+#line 165 "gcompile.yy"
 { exprtree = yyvsp[-1].eval; return 0; ;
     break;}
 case 2:
-#line 150 "gcompile.yy"
+#line 166 "gcompile.yy"
 { RecoverFromError(); return 1; ;
     break;}
 case 3:
-#line 151 "gcompile.yy"
+#line 167 "gcompile.yy"
 { RecoverFromError(); return 1; ;
     break;}
 case 6:
-#line 156 "gcompile.yy"
+#line 172 "gcompile.yy"
 { yyval.eval = yyvsp[-1].eval; ;
     break;}
 case 7:
-#line 158 "gcompile.yy"
+#line 174 "gcompile.yy"
 { yyval.eval = new gclSemiExpr(yyvsp[-2].eval, yyvsp[0].eval); ;
     break;}
 case 8:
-#line 160 "gcompile.yy"
+#line 176 "gcompile.yy"
 { yyval.eval = yyvsp[-1].eval; ;
     break;}
 case 9:
-#line 162 "gcompile.yy"
+#line 178 "gcompile.yy"
 { yyval.eval = new gclAssignment(yyvsp[-2].eval, yyvsp[0].eval); ;
     break;}
 case 10:
-#line 164 "gcompile.yy"
+#line 180 "gcompile.yy"
 { yyval.eval = new gclUnAssignment(yyvsp[-1].eval); ;
     break;}
 case 11:
-#line 166 "gcompile.yy"
+#line 182 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Print", yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 12:
-#line 169 "gcompile.yy"
+#line 185 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("NthChild", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 13:
-#line 172 "gcompile.yy"
+#line 188 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("NthElement", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 14:
-#line 175 "gcompile.yy"
+#line 191 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Plus", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 15:
-#line 178 "gcompile.yy"
+#line 194 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Minus", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 16:
-#line 181 "gcompile.yy"
+#line 197 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Concat", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 17:
-#line 184 "gcompile.yy"
+#line 200 "gcompile.yy"
 { yyval.eval = yyvsp[0].eval; ;
     break;}
 case 18:
-#line 186 "gcompile.yy"
+#line 202 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Negate", yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 19:
-#line 189 "gcompile.yy"
+#line 205 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Times", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 20:
-#line 192 "gcompile.yy"
+#line 208 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Divide", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 21:
-#line 195 "gcompile.yy"
+#line 211 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Modulus", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 22:
-#line 198 "gcompile.yy"
+#line 214 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("IntegerDivide", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 23:
-#line 201 "gcompile.yy"
+#line 217 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Dot", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 24:
-#line 204 "gcompile.yy"
+#line 220 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Power", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 25:
-#line 207 "gcompile.yy"
+#line 223 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Equal", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 26:
-#line 210 "gcompile.yy"
+#line 226 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("NotEqual", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 27:
-#line 213 "gcompile.yy"
+#line 229 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Less", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 28:
-#line 216 "gcompile.yy"
+#line 232 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("LessEqual", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 29:
-#line 219 "gcompile.yy"
+#line 235 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Greater", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 30:
-#line 222 "gcompile.yy"
+#line 238 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("GreaterEqual", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 31:
-#line 225 "gcompile.yy"
+#line 241 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Not", yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 32:
-#line 228 "gcompile.yy"
+#line 244 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("And", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 33:
-#line 231 "gcompile.yy"
+#line 247 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Or", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 34:
-#line 234 "gcompile.yy"
+#line 250 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Write", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 35:
-#line 237 "gcompile.yy"
+#line 253 "gcompile.yy"
 { yyval.eval = new gclFunctionCall("Read", yyvsp[-2].eval, yyvsp[0].eval,
 					 current_line, current_file); ;
     break;}
 case 36:
-#line 243 "gcompile.yy"
+#line 259 "gcompile.yy"
 { yyval.eval = new gclConditional(yyvsp[-5].eval, yyvsp[-3].eval, yyvsp[-1].eval); ;
     break;}
 case 37:
-#line 245 "gcompile.yy"
+#line 261 "gcompile.yy"
 { yyval.eval = new gclConditional(yyvsp[-3].eval, yyvsp[-1].eval, 
 				new gclConstExpr(new BoolPortion(false))); ;
     break;}
 case 38:
-#line 248 "gcompile.yy"
+#line 264 "gcompile.yy"
 { yyval.eval = new gclWhileExpr(yyvsp[-3].eval, yyvsp[-1].eval); ;
     break;}
 case 39:
-#line 251 "gcompile.yy"
+#line 267 "gcompile.yy"
 { yyval.eval = new gclForExpr(yyvsp[-7].eval, yyvsp[-5].eval, yyvsp[-3].eval, yyvsp[-1].eval); ;
     break;}
 case 40:
-#line 252 "gcompile.yy"
+#line 268 "gcompile.yy"
 { if (in_funcdecl) YYERROR;  in_funcdecl = true; ;
     break;}
 case 41:
-#line 254 "gcompile.yy"
+#line 270 "gcompile.yy"
 { funcbody = ""; record_funcbody = true; ;
     break;}
 case 42:
-#line 256 "gcompile.yy"
+#line 272 "gcompile.yy"
 { record_funcbody = false; in_funcdecl = false;
                     yyval.eval = NewFunction(yyvsp[-1].eval); ;
     break;}
 case 43:
-#line 258 "gcompile.yy"
+#line 274 "gcompile.yy"
 { if (in_funcdecl) YYERROR; ;
     break;}
 case 44:
-#line 260 "gcompile.yy"
+#line 276 "gcompile.yy"
 { yyval.eval = DeleteFunction(); ;
     break;}
 case 45:
-#line 261 "gcompile.yy"
+#line 277 "gcompile.yy"
 { funcnames.Push(tval); ;
     break;}
 case 46:
-#line 262 "gcompile.yy"
+#line 278 "gcompile.yy"
 { yyval.eval = new gclFunctionCall(funcnames.Pop(), yyvsp[-1].pval,
 					 current_line, current_file); ;
     break;}
 case 48:
-#line 266 "gcompile.yy"
+#line 282 "gcompile.yy"
 { tval = "Float"; ;
     break;}
 case 49:
-#line 267 "gcompile.yy"
+#line 283 "gcompile.yy"
 { tval = "Rational"; ;
     break;}
 case 50:
-#line 270 "gcompile.yy"
+#line 286 "gcompile.yy"
 { yyval.pval = new gclParameterList; ;
     break;}
 case 51:
-#line 271 "gcompile.yy"
+#line 287 "gcompile.yy"
 { yyval.pval = new gclParameterList(yyvsp[0].rpval); ;
     break;}
 case 52:
-#line 272 "gcompile.yy"
+#line 288 "gcompile.yy"
 { yyval.pval = new gclParameterList(yyvsp[0].opval); ;
     break;}
 case 53:
-#line 274 "gcompile.yy"
+#line 290 "gcompile.yy"
 { yyval.pval = new gclParameterList(yyvsp[-2].rpval, yyvsp[0].opval); ;
     break;}
 case 54:
-#line 276 "gcompile.yy"
+#line 292 "gcompile.yy"
 { yyval.rpval = new gclReqParameterList(yyvsp[0].eval); ;
     break;}
 case 55:
-#line 277 "gcompile.yy"
+#line 293 "gcompile.yy"
 { yyvsp[-2].rpval->Append(yyvsp[0].eval); ;
     break;}
 case 57:
-#line 281 "gcompile.yy"
+#line 297 "gcompile.yy"
 { funcnames.Push(tval); ;
     break;}
 case 58:
-#line 282 "gcompile.yy"
+#line 298 "gcompile.yy"
 { yyval.opval = new gclOptParameterList(funcnames.Pop(), yyvsp[0].eval); ;
     break;}
 case 59:
-#line 283 "gcompile.yy"
+#line 299 "gcompile.yy"
 { funcnames.Push(tval); ;
     break;}
 case 60:
-#line 285 "gcompile.yy"
+#line 301 "gcompile.yy"
 { yyvsp[-5].opval->Append(funcnames.Pop(), yyvsp[0].eval); ;
     break;}
 case 63:
-#line 290 "gcompile.yy"
+#line 306 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new BoolPortion(bval)); ;
     break;}
 case 64:
-#line 292 "gcompile.yy"
+#line 308 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new NumberPortion(ival)); ;
     break;}
 case 65:
-#line 294 "gcompile.yy"
+#line 310 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new NumberPortion(dval)); ;
     break;}
 case 66:
-#line 296 "gcompile.yy"
+#line 312 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new TextPortion(tval)); ;
     break;}
 case 67:
-#line 298 "gcompile.yy"
+#line 314 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new OutputPortion(gsm->OutputStream())); ;
     break;}
 case 68:
-#line 300 "gcompile.yy"
+#line 316 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new OutputPortion(*new gNullOutput)); ;
     break;}
 case 69:
-#line 302 "gcompile.yy"
+#line 318 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new PrecisionPortion(precDOUBLE)); ;
     break;}
 case 70:
-#line 304 "gcompile.yy"
+#line 320 "gcompile.yy"
 { yyval.eval = new gclConstExpr(new PrecisionPortion(precRATIONAL)); ;
     break;}
 case 71:
-#line 306 "gcompile.yy"
+#line 322 "gcompile.yy"
 { yyval.eval = new gclVarName(tval); ;
     break;}
 case 72:
-#line 308 "gcompile.yy"
+#line 324 "gcompile.yy"
 { yyval.eval = new gclVarName(gText("$") + tval); ;
     break;}
 case 73:
-#line 310 "gcompile.yy"
+#line 326 "gcompile.yy"
 { yyval.eval = new gclVarName(gText("$$") + tval); ;
     break;}
 case 74:
-#line 311 "gcompile.yy"
+#line 327 "gcompile.yy"
 { yyval.eval = yyvsp[0].lcval; ;
     break;}
 case 75:
-#line 314 "gcompile.yy"
+#line 330 "gcompile.yy"
 { yyval.lcval = new gclListConstant; ;
     break;}
 case 76:
-#line 315 "gcompile.yy"
+#line 331 "gcompile.yy"
 { yyval.lcval = yyvsp[-1].lcval; ;
     break;}
 case 77:
-#line 318 "gcompile.yy"
+#line 334 "gcompile.yy"
 { yyval.lcval = new gclListConstant(yyvsp[0].eval); ;
     break;}
 case 78:
-#line 319 "gcompile.yy"
+#line 335 "gcompile.yy"
 { yyvsp[-2].lcval->Append(yyvsp[0].eval); ;
     break;}
 case 79:
-#line 323 "gcompile.yy"
+#line 339 "gcompile.yy"
 { funcname = tval; ;
     break;}
 case 81:
-#line 326 "gcompile.yy"
+#line 342 "gcompile.yy"
 { functype = "ANYTYPE"; ;
     break;}
 case 82:
-#line 327 "gcompile.yy"
+#line 343 "gcompile.yy"
 { paramtype = ""; ;
     break;}
 case 83:
-#line 328 "gcompile.yy"
+#line 344 "gcompile.yy"
 { functype = paramtype; ;
     break;}
 case 85:
-#line 331 "gcompile.yy"
+#line 347 "gcompile.yy"
 { paramtype += tval; ;
     break;}
 case 88:
-#line 334 "gcompile.yy"
+#line 350 "gcompile.yy"
 { paramtype += '('; ;
     break;}
 case 89:
-#line 335 "gcompile.yy"
+#line 351 "gcompile.yy"
 { paramtype += ')'; ;
     break;}
 case 90:
-#line 337 "gcompile.yy"
+#line 353 "gcompile.yy"
 { paramtype += tval; ;
     break;}
 case 91:
-#line 337 "gcompile.yy"
+#line 353 "gcompile.yy"
 { paramtype += '*'; ;
     break;}
 case 96:
-#line 345 "gcompile.yy"
+#line 361 "gcompile.yy"
 { formals.Append(tval); ;
     break;}
 case 97:
-#line 346 "gcompile.yy"
+#line 362 "gcompile.yy"
 { paramtype = ""; ;
     break;}
 case 98:
-#line 347 "gcompile.yy"
+#line 363 "gcompile.yy"
 { types.Append(paramtype); portions.Append(REQUIRED); ;
     break;}
 case 99:
-#line 348 "gcompile.yy"
+#line 364 "gcompile.yy"
 { formals.Append(tval); ;
     break;}
 case 100:
-#line 349 "gcompile.yy"
+#line 365 "gcompile.yy"
 { paramtype = ""; types.Append(paramtype); ;
     break;}
 case 101:
-#line 351 "gcompile.yy"
+#line 367 "gcompile.yy"
 { {
                    Portion *_p_ = yyvsp[-1].eval->Evaluate(*gsm);
                    if (_p_->Spec().Type != porREFERENCE)
@@ -1469,11 +1485,11 @@ case 101:
                  } ;
     break;}
 case 102:
-#line 362 "gcompile.yy"
+#line 378 "gcompile.yy"
 { refs.Append(false); ;
     break;}
 case 103:
-#line 363 "gcompile.yy"
+#line 379 "gcompile.yy"
 { refs.Append(true); ;
     break;}
 }
@@ -1698,7 +1714,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 366 "gcompile.yy"
+#line 382 "gcompile.yy"
 
 
 
