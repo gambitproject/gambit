@@ -8,7 +8,7 @@
 #define TABLEAU_H
 
 #include "rational.h"
-#include "qrdecomp.h"
+#include "ludecomp.h"
 #include "bfs.h"
 
 template <class T> class Basis;
@@ -88,7 +88,7 @@ protected:
   const gMatrix<T> *A;
   const gVector<T> *b;
   Basis<T> basis;
-  QRdecomp<T> B;
+  LUdecomp<T> B;
   gVector<T> solution;
 public:
       // constructors and destructors
