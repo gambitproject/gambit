@@ -214,12 +214,11 @@ protected:
 
 public:
   EFLiapBySubgameG(const Efg &p_efg, const EFLiapParams &p_params,
-		   const BehavSolution &p_start, 
+		   const BehavProfile<gNumber> &p_start, 
 		   bool p_eliminate, bool p_iterative, bool p_strong,
 		   int p_max = 0,
 		   EfgShowInterface *p_parent = 0)
-    : efgLiapSolve(p_efg, p_params, 
-		   BehavProfile<gNumber>(p_start), p_max),
+    : efgLiapSolve(p_efg, p_params, p_start, p_max),
       guiSubgameViaEfg(p_parent, p_efg, p_eliminate, p_iterative, p_strong)
     { }
 };
@@ -260,7 +259,7 @@ gList<BehavSolution> guiefgLiapEfg::Solve(void) const
   try {
     return EFLiapBySubgameG(m_efg, params, start, m_eliminate,
 			    m_eliminateAll, !m_eliminateWeak,
-			    0, m_parent).Solve(EFSupport(m_efg));
+			    0, m_parent).Solve(start.Support());
   }
   catch (gSignalBreak &) {
     return gList<BehavSolution>();
