@@ -14,11 +14,13 @@
 
 
 #include "portion.h"
+#include "gsmfunc.h"
 
 
+
+// These two classes implemented in gsm.cc
 class FunctionHashTable;
 class RefHashTable;
-
 
 
 class GSM
@@ -32,8 +34,8 @@ class GSM
 
   Portion *resolve_ref( Reference_Portion *p );
 
-  int unary_operation( OperationMode mode );
-  int binary_operation( OperationMode mode );
+  void unary_operation( OperationMode mode );
+  void binary_operation( OperationMode mode );
 
 
   // This function is located in gsmfunc.cc
@@ -66,12 +68,12 @@ class GSM
   void Divide   ( void );
   void Negate   ( void );
 
-  int  EqualTo              ( void );
-  int  NotEqualTo           ( void );
-  int  GreaterThan          ( void );
-  int  LessThan             ( void );
-  int  GreaterThanOrEqualTo ( void );
-  int  LessThanOrEqualTo    ( void );
+  void EqualTo              ( void );
+  void NotEqualTo           ( void );
+  void GreaterThan          ( void );
+  void LessThan             ( void );
+  void GreaterThanOrEqualTo ( void );
+  void LessThanOrEqualTo    ( void );
   
   void AND ( void );
   void OR  ( void );
@@ -79,8 +81,9 @@ class GSM
 
   void Concatenate( void );
 
-
-  static void AddFunction( const gString& funcname, Portion *(*function)( void ) );
+  static void AddFunction(const gString& funcname, FuncDescObj *func );
+  static int FunctionParamCheck(const PortionType stack_param_type, 
+				const PortionType func_param_type );
   void CallFunction( const gString& funcname );
 
 
@@ -90,7 +93,6 @@ class GSM
   void Flush( void );
 
 };
-
 
 
 

@@ -36,12 +36,14 @@ template <class K, class T> void HashTable<K,T>::Init( void )
 template <class K, class T> void HashTable<K,T>::Flush( void )
 {
   int i;
+  K removed_key;
   T removed_value;
 
   for( i = 0; i < num_of_buckets; i++ )
   {
-    while( value_bucket[i].Length() > 0 )
+    while( key_bucket[i].Length() > 0 )
     {
+      removed_key = key_bucket[i].Remove( 1 );
       removed_value = value_bucket[i].Remove( 1 );
       DeleteAction( removed_value );
     }
@@ -51,11 +53,10 @@ template <class K, class T> void HashTable<K,T>::Flush( void )
 template <class K, class T> HashTable<K,T>::~HashTable()
 {
   int i;
-  T removed_value;
 
   for( i = 0; i < num_of_buckets; i++ )
   {
-    if( value_bucket[i].Length() > 0 )
+    if( key_bucket[i].Length() > 0 )
     {
       gerr << "** HashTable Error: decendent class dtor did not call Flush()\n";
       assert(0);

@@ -29,7 +29,8 @@ typedef enum
 
 typedef enum 
 { 
-  porERROR, porBOOL, porDOUBLE, porINTEGER, porRATIONAL, 
+  porERROR, porBOOL, 
+  porNUMERICAL, porDOUBLE, porINTEGER, porRATIONAL, 
   porSTRING, porREFERENCE 
 } PortionType;
 

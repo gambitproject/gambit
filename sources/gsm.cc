@@ -7,21 +7,23 @@
 #include "gsm.h"
 #include "hash.h"
 
+
+
 //--------------------------------------------------------------------
   // hash tables used by GSM
 //-------------------------------------------------------------------
 
-gOutput& operator << (class gOutput &s, class Portion *(*funcname)( void ) )
+gOutput& operator << ( class gOutput &s, class Portion * (*funcname)() )
 {
   return s << funcname;
 }
 
-class FunctionHashTable : public HashTable<gString, Portion *(*)( void )>
+class FunctionHashTable : public HashTable<gString, FuncDescObj *>
 {
  private:
   int NumBuckets() const { return 1; }
   int Hash( const gString &funcname ) const { return 0; }
-  void DeleteAction( Portion *(*function)( void ) ) { return; }
+  void DeleteAction( FuncDescObj *func ) { delete func; }
  public:
   FunctionHashTable() { Init(); }
   ~FunctionHashTable() { Flush(); }  
@@ -29,6 +31,7 @@ class FunctionHashTable : public HashTable<gString, Portion *(*)( void )>
 
 int GSM::FunctionsInitialized = false;
 FunctionHashTable *GSM::FuncTable = new FunctionHashTable;
+
 
 class RefHashTable : public HashTable<gString, Portion *>
 {
@@ -46,20 +49,59 @@ class RefHashTable : public HashTable<gString, Portion *>
   // definable function functions
 //-------------------------------------------------------------------
 
-void GSM::AddFunction( const gString& funcname, Portion *(*function)( void ) )
+void GSM::AddFunction(const gString& funcname, FuncDescObj *func )
 {
-  FuncTable->Define( funcname, function );
+  FuncTable->Define( funcname, func );
+}
+
+int GSM::FunctionParamCheck(const PortionType stack_param_type, 
+			    const PortionType func_param_type )
+{
+  int result = false;
+  if( stack_param_type == func_param_type )
+    result = true;
+  else if(func_param_type == porNUMERICAL &&
+	  (stack_param_type == porDOUBLE ||
+	   stack_param_type == porINTEGER ||
+	   stack_param_type == porRATIONAL ) )
+    result = true;
+  return result;
 }
 
 void GSM::CallFunction( const gString& funcname )
 {
-  Portion *(*function)();
+  FuncDescObj *func;
+  Portion **param_list;
   Portion *p;
+  int i, current_index, num_of_params;
+  int type_match;
 
   if( FuncTable->IsDefined( funcname ) )
   {
-    function = (*FuncTable)( funcname );
-    p = function();
+    func = (*FuncTable)( funcname );
+    num_of_params = func->NumParams();
+    param_list = new (Portion*) [ num_of_params ];
+    for( i = num_of_params - 1; i >= 0; i-- )
+    {
+      param_list[ i ] = stack->Pop();
+      type_match = FunctionParamCheck( param_list[ i ]->Type(), func->ParamType( i ) );
+      if( !type_match )
+      {
+	gerr << "** GSM Error: a mismatched parameter type found while executing\n";
+	gerr << "              CallFunction( \"" << funcname << "\" )\n\n";
+	gerr << "   Error at Parameter # : i " << "\n";
+	gerr << "            Expected type: " << func->ParamType( i ) << "\n";
+	gerr << "            Type found:    " << param_list[i]->Type() << "\n";
+	assert(0);
+      }
+    }
+    p = func->CallFunction( param_list );
+    if( p == 0 )
+    {
+      gerr << "** GSM Error: an error occurred while attempting to execute\n";
+      gerr << "              CallFunction( \"" << funcname << "\" )\n";
+      assert(0);
+    }
     stack->Push( p );
   }
   else
@@ -238,9 +280,9 @@ Portion *GSM::resolve_ref( Reference_Portion *p )
   // binary operations
 //------------------------------------------------------------------------
 
-int GSM::binary_operation( OperationMode mode )
+void GSM::binary_operation( OperationMode mode )
 {
-  int result = 0;
+  int result;
   Portion *p2, *p1;
   if( stack->Depth() > 1 )
   {
@@ -255,14 +297,17 @@ int GSM::binary_operation( OperationMode mode )
     if( p1->Type() == p2->Type() )
     {
       result = p1->Operation( p2, mode );
-      stack->Push( p1 );
       if(mode == opEQUAL_TO ||
 	 mode == opNOT_EQUAL_TO ||
 	 mode == opGREATER_THAN ||
 	 mode == opLESS_THAN ||
 	 mode == opGREATER_THAN_OR_EQUAL_TO ||
 	 mode == opLESS_THAN_OR_EQUAL_TO )
-	stack->Push( p2 );
+      {
+	delete p1;
+	p1 = new bool_Portion( (bool) result );
+      }
+      stack->Push( p1 );
     }
     else
     {  
@@ -275,8 +320,6 @@ int GSM::binary_operation( OperationMode mode )
   {
     gerr << "** GSM Error: not enough operands to perform binary operation\n";
   }  
-
-  return result;
 }
 
 
@@ -284,9 +327,8 @@ int GSM::binary_operation( OperationMode mode )
   // Unary operations
 //-----------------------------------------------------------------------
 
-int GSM::unary_operation( OperationMode mode )
+void GSM::unary_operation( OperationMode mode )
 {
-  int result = 0;
   Portion *p1;
   if( stack->Depth() > 0 )
   {
@@ -295,15 +337,13 @@ int GSM::unary_operation( OperationMode mode )
     if( p1->Type() == porREFERENCE )
       p1 = resolve_ref( (Reference_Portion *)p1 );
 
-    result = p1->Operation( 0, mode );
+    p1->Operation( 0, mode );
     stack->Push( p1 );
   }
   else
   {
     gerr << "** GSM Error: not enough operands to perform unary operation\n";
   }  
-
-  return result;
 }
 
 
@@ -330,23 +370,23 @@ void GSM::Negate( void )
 
 
 
-int  GSM::EqualTo ( void )
-{ return binary_operation( opEQUAL_TO ); }
+void GSM::EqualTo ( void )
+{ binary_operation( opEQUAL_TO ); }
 
-int  GSM::NotEqualTo ( void )
-{ return binary_operation( opNOT_EQUAL_TO ); }
+void GSM::NotEqualTo ( void )
+{ binary_operation( opNOT_EQUAL_TO ); }
 
-int  GSM::GreaterThan ( void )
-{ return binary_operation( opGREATER_THAN ); }
+void GSM::GreaterThan ( void )
+{ binary_operation( opGREATER_THAN ); }
 
-int  GSM::LessThan ( void )
-{ return binary_operation( opLESS_THAN ); }
+void GSM::LessThan ( void )
+{ binary_operation( opLESS_THAN ); }
 
-int  GSM::GreaterThanOrEqualTo ( void )
-{ return binary_operation( opGREATER_THAN_OR_EQUAL_TO ); }
+void GSM::GreaterThanOrEqualTo ( void )
+{ binary_operation( opGREATER_THAN_OR_EQUAL_TO ); }
 
-int  GSM::LessThanOrEqualTo ( void )
-{ return binary_operation( opLESS_THAN_OR_EQUAL_TO ); }
+void GSM::LessThanOrEqualTo ( void )
+{ binary_operation( opLESS_THAN_OR_EQUAL_TO ); }
 
 
 void GSM::AND ( void )
@@ -369,6 +409,8 @@ void GSM::Output( void )
 {
   Portion *p;
   p = stack->Pop();
+  if( p->Type() == porREFERENCE )
+    p = resolve_ref( (Reference_Portion *)p );
   p->Output( gout );
   delete p;
 }
@@ -407,19 +449,19 @@ void GSM::Flush( void )
 
 #include "hash.imp"
 
-template class HashTable<gString, Portion *(*)(void)>;
 template class HashTable<gString, Portion *>;
+template class HashTable<gString, FuncDescObj *>;
 
 #include "glist.imp"
 
 template class gList<Portion *>;
 template class gNode<Portion *>;
 
-template class gList<Portion *(*)(void)>;
-template class gNode<Portion *(*)(void)>;
-
 template class gList<gString>;
 template class gNode<gString>;
+
+template class gList<FuncDescObj *>;
+template class gNode<FuncDescObj *>;
 
 #include "gstack.imp"
 

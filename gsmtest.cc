@@ -74,7 +74,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
-
+/*
   gout << "Testing PushRef()\n";
   machine->PushRef( x );
   machine->PushRef( y );
@@ -83,7 +83,7 @@ int main( void )
   machine->PushRef( y );
   machine->PushRef( z );
   machine->Dump();
-  
+*/  
 
   gout << "Assigning x = (double)7\n";
   machine->PushRef( x );
@@ -173,13 +173,40 @@ int main( void )
 
   machine->Push( d_1 );
   machine->Push( d_2 );
-
-  gout << "EqualTo()              : " << machine->EqualTo() << "\n";
-  gout << "NotEqualTo()           : " << machine->NotEqualTo() << "\n";
-  gout << "GreaterThan()          : " << machine->GreaterThan() << "\n";
-  gout << "LessThan()             : " << machine->LessThan() << "\n";
-  gout << "GreaterThanOrEqualTo() : " << machine->GreaterThanOrEqualTo() << "\n";
-  gout << "LessThanOrEqualTo()    : " << machine->LessThanOrEqualTo() << "\n";
+  gout << "EqualTo()              : ";
+  machine->EqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  gout << "NotEqualTo()           : ";
+  machine->NotEqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  gout << "GreaterThan()          : ";
+  machine->GreaterThan();
+  machine->Output();
+  machine->Flush();
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  gout << "LessThan()             : ";
+  machine->LessThan();
+  machine->Output();
+  machine->Flush();
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  gout << "GreaterThanOrEqualTo() : ";
+  machine->GreaterThanOrEqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( d_1 );
+  machine->Push( d_2 );
+  gout << "LessThanOrEqualTo()    : ";
+  machine->LessThanOrEqualTo();
+  machine->Output();
+  machine->Flush();
 
   
   gout << "\n";
@@ -189,18 +216,47 @@ int main( void )
 
   machine->Push( r_1 );
   machine->Push( r_1 );
+  gout << "EqualTo()              : ";
+  machine->EqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  gout << "NotEqualTo()           : ";
+  machine->NotEqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  gout << "GreaterThan()          : ";
+  machine->GreaterThan();
+  machine->Output();
+  machine->Flush();
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  gout << "LessThan()             : ";
+  machine->LessThan();
+  machine->Output();
+  machine->Flush();
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  gout << "GreaterThanOrEqualTo() : ";
+  machine->GreaterThanOrEqualTo();
+  machine->Output();
+  machine->Flush();
+  machine->Push( r_1 );
+  machine->Push( r_1 );
+  gout << "LessThanOrEqualTo()    : ";
+  machine->LessThanOrEqualTo();
+  machine->Output();
+  machine->Flush();
 
-  gout << "EqualTo()              : " << machine->EqualTo() << "\n";
-  gout << "NotEqualTo()           : " << machine->NotEqualTo() << "\n";
-  gout << "GreaterThan()          : " << machine->GreaterThan() << "\n";
-  gout << "LessThan()             : " << machine->LessThan() << "\n";
-  gout << "GreaterThanOrEqualTo() : " << machine->GreaterThanOrEqualTo() << "\n";
-  gout << "LessThanOrEqualTo()    : " << machine->LessThanOrEqualTo() << "\n";
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
   machine->Flush();
+/*
   gout << "Testing CallFunction(\"Sign\")\n";
   machine->CallFunction( (gString) "Sign" );
   gout << "Testing CallFunction(\"Abs\")\n";
@@ -208,8 +264,33 @@ int main( void )
   gout << "Testing CallFunction(\"Sqr\")\n";
   machine->CallFunction( (gString) "Sqr" );
   machine->Dump();
+*/
 
+  gout << "Pushing (double) 8\n";
+  machine->Push( (double) 8 );
+  gout << "Testing CallFunction(\"Sqr\")\n";
+  machine->CallFunction( (gString) "Sqr" );
+  machine->Dump();
 
+  machine->Flush();
+  gout << "Testing CallFunction(\"Sqr\") 3 times on (double) 300\n";
+  machine->Push( (double) 300 );
+  machine->CallFunction( (gString) "Sqr" );
+  machine->CallFunction( (gString) "Sqr" );
+  machine->CallFunction( (gString) "Sqr" );
+  machine->Dump();
+
+  gout << "Push( x = (double) 7 )\n";
+  machine->PushRef( x );
+  machine->Push( (double) 7 );
+  machine->Assign();
+  gout << "Push( y = (double) 11 )\n";
+  machine->PushRef( y );
+  machine->Push( (double) 11 );
+  machine->Assign();
+  gout << "Testing CallFunction( \"Angle\" )\n";
+  machine->CallFunction( (gString) "Angle" );
+  machine->Dump();
 
   delete machine;
 

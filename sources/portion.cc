@@ -1,5 +1,5 @@
 //
-//  FILE: portion.cc  implementation ofPortion base and descendent classes
+//  FILE: portion.cc  implementation of Portion base and descendent classes
 //                    companion to gsm.cc
 //
 
@@ -74,19 +74,15 @@ template <class T>
     {
     case opADD:
       value += p_value;
-      delete p;
       break;
     case opSUBTRACT:
       value -= p_value;
-      delete p;
       break;
     case opMULTIPLY:
       value *= p_value;
-      delete p;
       break;
     case opDIVIDE:
       value /= p_value;
-      delete p;
       break;
     case opEQUAL_TO:
       result = ( value == p_value );
@@ -109,6 +105,7 @@ template <class T>
     default:
       result = Portion::Operation( p, mode );
     }
+    delete p;
   }
   return result;
 }
@@ -196,13 +193,18 @@ int bool_Portion:: Operation( Portion *p, OperationMode mode )
     default:
       result = Portion::Operation( p, mode );
     }
+    delete p;
   }
   return result;
 }
 
 void bool_Portion::Output( gOutput& s ) const
 {
-  s << value << "     type: bool\n";
+  if( value == true )
+    s << "true";
+  else
+    s << "false";
+  s << "     type: bool\n";
 }
 
 
@@ -243,7 +245,6 @@ int gString_Portion:: Operation( Portion *p, OperationMode mode )
     {
     case opCONCATENATE:
       value += p_value;
-      delete p;
       break;
     case opEQUAL_TO:
       result = ( value == p_value );
@@ -266,6 +267,7 @@ int gString_Portion:: Operation( Portion *p, OperationMode mode )
     default:
       result = Portion::Operation( p, mode );
     }
+    delete p;
   }
   return result;
 }
