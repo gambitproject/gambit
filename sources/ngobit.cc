@@ -11,18 +11,16 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-NFQreParams::NFQreParams(gStatus &s)
-  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+NFQreParams::NFQreParams()
+  : AlgParams(), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
-    fullGraph(false), tracefile(&gnull), pxifile(&gnull),
-    status(s)
+    fullGraph(false), pxifile(&gnull)
 { }
 
-NFQreParams::NFQreParams(gOutput &out, gOutput &pxi, gStatus &s)
-  : trace(0), powLam(1), maxits1(100), maxitsN(20),
+NFQreParams::NFQreParams(gOutput &out, gOutput &pxi)
+  : AlgParams(), powLam(1), maxits1(100), maxitsN(20),
     minLam(0.01), maxLam(30.0), delLam(0.01), tol1(2.0e-10), tolN(1.0e-10),
-    fullGraph(false), tracefile(&out), pxifile(&pxi),
-    status(s)
+    fullGraph(false), pxifile(&pxi)
 { }
 
 // This is the function to be minimized.  It is a non negative real valued 

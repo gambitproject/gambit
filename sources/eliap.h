@@ -7,8 +7,7 @@
 #ifndef ELIAP_H
 #define ELIAP_H
 
-#include "gstream.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "glist.h"
 
 #include "efg.h"
@@ -16,14 +15,12 @@
 
 #include "subsolve.h"
 
-class EFLiapParams  {
+class EFLiapParams : public AlgParams {
   public:
-    int trace, nTries, stopAfter, maxits1, maxitsN;
+    int nTries, stopAfter, maxits1, maxitsN;
     double tol1, tolN;
-    gOutput *tracefile;
-    gStatus &status;
 
-    EFLiapParams(gStatus & = gstatus);
+    EFLiapParams();
 };
 
 class efgLiapSolve : public SubgameSolver  {

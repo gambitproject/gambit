@@ -7,23 +7,20 @@
 #ifndef EGOBIT_H
 #define EGOBIT_H
 
-#include "gstream.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "glist.h"
 
 #include "efg.h"
 #include "behavsol.h"
 
-class EFQreParams   {
+class EFQreParams : public AlgParams  {
   public:
-    int trace, powLam, maxits1, maxitsN;
+    int powLam, maxits1, maxitsN;
     double minLam, maxLam, delLam, tol1, tolN;
     bool fullGraph;
-    gOutput *tracefile, *pxifile;
-    gStatus &status;
-
-    EFQreParams(gStatus & = gstatus);
-    EFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
+    gOutput *pxifile;
+    EFQreParams();
+    EFQreParams(gOutput &out, gOutput &pxi);
 };
 
 

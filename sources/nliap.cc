@@ -8,9 +8,9 @@
 
 #include "gfunc.h"
 
-NFLiapParams::NFLiapParams(gStatus &s)
-  : trace(0), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
-    tol1(2.0e-10), tolN(1.0e-10), tracefile(&gnull), status(s)
+NFLiapParams::NFLiapParams()
+  : AlgParams(), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
+    tol1(2.0e-10), tolN(1.0e-10) 
 { }
 
 class NFLiapFunc : public gC2Function<double>   {
@@ -202,9 +202,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	if(params.trace>0)
 	  *params.tracefile << p;
       
-	int index = solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
-	//	solutions[index].SetEpsilon(params.tolN);
-	//	solutions[index].SetLiap(value);
+	solutions.Append(MixedSolution(p, algorithmNfg_LIAP));
       }
     }
   }
@@ -214,6 +212,3 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 
   return found;
 }
-
-
-  

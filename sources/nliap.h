@@ -7,22 +7,20 @@
 #ifndef NLIAP_H
 #define NLIAP_H
 
-#include "gstream.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "glist.h"
+
 
 #include "nfg.h"
 #include "mixed.h"
 #include "mixedsol.h"
 
-class NFLiapParams   {
-  public:
-    int trace, nTries, stopAfter, maxits1, maxitsN;
-    double tol1, tolN;
-    gOutput *tracefile;
-    gStatus &status;
-
-    NFLiapParams(gStatus & = gstatus);
+class NFLiapParams : public AlgParams  {
+public:
+  int nTries, stopAfter, maxits1, maxitsN;
+  double tol1, tolN;
+  
+  NFLiapParams();
 };
 
 

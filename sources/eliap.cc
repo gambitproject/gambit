@@ -9,12 +9,10 @@
 #include "gfunc.h"
 #include "gmatrix.h"
 
-EFLiapParams::EFLiapParams(gStatus &s)
-  : trace(0), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
-    tol1(2.0e-10), tolN(1.0e-10), tracefile(&gnull), status(s)
+EFLiapParams::EFLiapParams()
+  : AlgParams(), nTries(10), stopAfter(1), maxits1(100), maxitsN(20),
+    tol1(2.0e-10), tolN(1.0e-10)
 { }
-
-
 
 class EFLiapFunc : public gFunction<double>  {
   private:
@@ -114,12 +112,7 @@ static void AddSolution(gList<BehavSolution> &solutions,
 			const BehavProfile<double> &profile,
 		        double value, double epsilon)
 {
-  int i = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
-  //  solutions[i].SetLiap(value);
-  //  solutions[i].SetEpsilon(epsilon);
-  //  if (IsPerfectRecall(profile.Game()) && solutions[i].IsNash()) {
-  //    solutions[i].SetIsSequential(triTRUE);
-  //  }
+  solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);

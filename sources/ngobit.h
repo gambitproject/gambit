@@ -7,23 +7,21 @@
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
-#include "gstream.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "glist.h"
 
 #include "nfg.h"
 #include "mixedsol.h"
 
-class NFQreParams  {
+class NFQreParams : public AlgParams {
   public:
-    int trace, powLam, maxits1, maxitsN;
+    int powLam, maxits1, maxitsN;
     double minLam, maxLam, delLam, tol1, tolN;
     bool fullGraph;
-    gOutput *tracefile, *pxifile;
-    gStatus &status;
+    gOutput *pxifile;
 
-    NFQreParams(gStatus & = gstatus);
-    NFQreParams(gOutput &out, gOutput &pxi, gStatus & = gstatus);
+    NFQreParams();
+    NFQreParams(gOutput &out, gOutput &pxi);
 };
 
 
