@@ -59,7 +59,7 @@
 // is advisable to call CanvasFocus member after processing any panel item
 // events.
 
-// $Id$
+// @(#)spread.h	1.9 8/7/95
 
 #ifndef	SPREAD_H
 #define	SPREAD_H

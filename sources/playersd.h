@@ -1,7 +1,7 @@
 class PlayerNamesDialog: public MyDialogBox
 {
 private:
-	BaseExtForm	&ef;
+	BaseEfg	&ef;
 	// keep track of panel items
 	wxChoice	*name_item;
 	wxText		*new_name_item;
@@ -13,13 +13,13 @@ private:
 	void			UpdateName(void);
 public:
 	// Constructor
-	PlayerNamesDialog(BaseExtForm &ef_,wxFrame *parent=0);
+	PlayerNamesDialog(BaseEfg &ef_,wxFrame *parent=0);
 	// Override default OnOk behavior
 	void OnOk(void);
 };
 
 //************************************** CONSTRUCTOR **************************
-PlayerNamesDialog::PlayerNamesDialog(BaseExtForm &ef_,wxFrame *parent)
+PlayerNamesDialog::PlayerNamesDialog(BaseEfg &ef_,wxFrame *parent)
 												:ef(ef_),MyDialogBox(parent,"Player Names",EFG_TREE_HELP)
 {
 wxStringList *player_list=new wxStringList;char *player_name=new char[20];
@@ -51,7 +51,7 @@ delete [] player_name;
 void PlayerNamesDialog::UpdateName(void)
 {
 gString new_name=name_item->GetStringSelection();
-Player *player=ef.GetPlayer(prev_name);
+EFPlayer *player=EfgGetPlayer(ef,prev_name);
 if (strcmp(player->GetName(),new_name_item->GetValue())!=0)	// name changed
 {
 	player->SetName(new_name_item->GetValue());	// might want to check if there already exists one
@@ -60,14 +60,14 @@ if (strcmp(player->GetName(),new_name_item->GetValue())!=0)	// name changed
 	for (int i=1;i<=ef.NumPlayers();i++) name_item->Append((ef.PlayerList()[i])->GetName());
 	name_item->SetStringSelection(new_name);
 }
-player=ef.GetPlayer(new_name);
+player=EfgGetPlayer(ef,new_name);
 new_name_item->SetValue(player->GetName());
 prev_name=new_name;
 }
 
 void PlayerNamesDialog::OnOk(void)
 {
-Player *player=ef.GetPlayer(prev_name);
+EFPlayer *player=EfgGetPlayer(ef,prev_name);
 if (strcmp(player->GetName(),new_player_name)!=0)	// name changed
 	player->SetName(new_player_name);	// might want to check if there already exists one
 

@@ -6,7 +6,7 @@
 class LemkeSolveParamsDialog : public OutputParamsDialog
 {
 private:
-	int plev,nequilib,maxdepth,dup_strat;
+	int stopAfter,maxDepth;
 	void SaveDefaults(void);
 public:
 	LemkeSolveParamsDialog(wxWindow *parent=0);
@@ -19,27 +19,22 @@ LemkeSolveParamsDialog::LemkeSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("Lemke Params",parent)
 
 {
-dup_strat=0;nequilib=0;maxdepth=0;
-wxGetResource(PARAMS_SECTION,"Lemke-dup_strat",&dup_strat,defaults_file);
-wxGetResource(PARAMS_SECTION,"Lemke-Nequilib",&nequilib,defaults_file);
-wxGetResource(PARAMS_SECTION,"Lemke-maxdepth",&maxdepth,defaults_file);
+stopAfter=0;maxDepth=0;
+wxGetResource(PARAMS_SECTION,"Lemke-stopAfter",&stopAfter,defaults_file);
+wxGetResource(PARAMS_SECTION,"Lemke-maxDepth",&maxDepth,defaults_file);
 
-Form()->Add(wxMakeFormBool("All Solutions",&dup_strat));
-Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormShort("# Equ",&nequilib));
-Form()->Add(wxMakeFormShort("Max depth",&maxdepth));
-
+Form()->Add(wxMakeFormShort("# Equ",&stopAfter));
+Form()->Add(wxMakeFormShort("Max depth",&maxDepth));
 // Now add the basic stuff
-MakeOutputFields(OUTPUT_FIELD);
+MakeOutputFields();
 Go();
 }
 
 void LemkeSolveParamsDialog::SaveDefaults(void)
 {
 if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Lemke-dup_strat",dup_strat,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Lemke-Nequilib",nequilib,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Lemke-maxdepth",maxdepth,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Lemke-stopAfter",stopAfter,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Lemke-maxDepth",maxDepth,defaults_file);
 }
 
 LemkeSolveParamsDialog::~LemkeSolveParamsDialog(void)
@@ -47,9 +42,9 @@ LemkeSolveParamsDialog::~LemkeSolveParamsDialog(void)
 
 void LemkeSolveParamsDialog::GetParams(LemkeParams &P)
 {
-P.dup_strat=!dup_strat;P.nequilib=nequilib;P.maxdepth=maxdepth;
+P.stopAfter=stopAfter;P.maxDepth=maxDepth;
 // Output stuff
-P.plev=TraceLevel();P.output=OutFile();
+P.trace=TraceLevel();P.output=OutFile();
 
 }
 #endif

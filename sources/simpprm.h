@@ -6,7 +6,7 @@
 class SimpdivSolveParamsDialog : public OutputParamsDialog
 {
 private:
-	int number,ndivs,leash;
+	int stopAfter, nRestarts, leashLength;
 	void SaveDefaults(void);
 public:
 	SimpdivSolveParamsDialog(wxWindow *parent=0);
@@ -19,36 +19,36 @@ SimpdivSolveParamsDialog::SimpdivSolveParamsDialog(wxWindow *parent)
 														:OutputParamsDialog("SimpDiv Params",parent)
 
 {
-number=1;ndivs=10;leash=0;
-wxGetResource(PARAMS_SECTION,"Simpdiv-number",&number,defaults_file);
-wxGetResource(PARAMS_SECTION,"Simpdiv-ndivs",&ndivs,defaults_file);
-wxGetResource(PARAMS_SECTION,"Simpdiv-leash",&leash,defaults_file);
+stopAfter=1;nRestarts=10;leashLength=0;
+wxGetResource(PARAMS_SECTION,"Simpdiv-stopAfter",&stopAfter,defaults_file);
+wxGetResource(PARAMS_SECTION,"Simpdiv-nRestarts",&nRestarts,defaults_file);
+wxGetResource(PARAMS_SECTION,"Simpdiv-leashLength",&leashLength,defaults_file);
 
-Form()->Add(wxMakeFormShort("# Equilibria",&number));
+Form()->Add(wxMakeFormShort("# Equilibria",&stopAfter));
 Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormShort("# Restarts",&ndivs));
-Form()->Add(wxMakeFormShort("Leash",&leash));
+Form()->Add(wxMakeFormShort("# Restarts",&nRestarts));
+Form()->Add(wxMakeFormShort("Leash",&leashLength));
 
 // Now add the basic stuff
-MakeOutputFields(OUTPUT_FIELD);
+MakeOutputFields();
 Go();
 }
 
 void SimpdivSolveParamsDialog::SaveDefaults(void)
 {
 if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Simpdiv-number",number,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Simpdiv-ndivs",ndivs,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Simpdiv-leash",leash,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Simpdiv-stopAfter",stopAfter,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Simpdiv-nRestarts",nRestarts,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Simpdiv-leashLength",leashLength,defaults_file);
 }
 SimpdivSolveParamsDialog::~SimpdivSolveParamsDialog(void)
 {SaveDefaults();}
 
 void SimpdivSolveParamsDialog::GetParams(SimpdivParams &P)
 {
-P.ndivs=ndivs;P.leash=leash;P.number=number;
+P.nRestarts=nRestarts;P.leashLength=leashLength;P.stopAfter=stopAfter;
 // Output stuff
-P.plev=TraceLevel();P.output=OutFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 #endif

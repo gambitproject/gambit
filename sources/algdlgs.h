@@ -32,7 +32,7 @@ public:
 // Destructor
 	~OutputParamsDialog(void);
 // Create the fields
-	void MakeOutputFields(unsigned int fields=ERROR_FIELD|OUTPUT_FIELD);
+	void MakeOutputFields(unsigned int fields=OUTPUT_FIELD);
 // Return the results...
 	gOutput *OutFile(void);
 	gOutput *ErrFile(void);

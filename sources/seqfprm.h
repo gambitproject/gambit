@@ -1,6 +1,6 @@
 // File: seqfprm.h -- definition of params dialog for the sequence form
 // algorithm
-// $Id$
+// @(#)seqfprm.h	1.1 8/7/95
 #ifndef SEQFPRM_H
 #define SEQFPRM_H
 

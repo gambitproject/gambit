@@ -1,6 +1,6 @@
 // File: liapprm.h -- definition of the parameter dialog for the liap
 // algorithm
-// $Id$
+// @(#)liapprm.h	1.8 8/7/95
 #ifndef LIAPPRM_H
 #define LIAPPRM_H
 #include "algdlgs.h"
@@ -10,7 +10,7 @@ class LiapSolveParamsDialog : public OutputParamsDialog
 {
 private:
 	float tolOpt, tolBrent;
-	int maxitsOpt,maxitsBrent,nequilib,ntries;
+	int maxitsOpt,maxitsBrent,stopAfter,nTries;
 	void SaveDefaults(void);
 public:
 	LiapSolveParamsDialog(wxWindow *parent);
@@ -25,17 +25,17 @@ LiapSolveParamsDialog<T>::LiapSolveParamsDialog(wxWindow *parent)
 												:OutputParamsDialog("Liap Params",parent)
 {
 tolOpt=Funct_tolN;tolBrent=Funct_tolBrent;maxitsBrent=Funct_maxitsBrent;maxitsOpt=Funct_maxitsN;
-nequilib=1;ntries=10;
+stopAfter=1;nTries=10;
 
-wxGetResource(PARAMS_SECTION,"Liap-Ntries",&ntries,defaults_file);
-wxGetResource(PARAMS_SECTION,"Liap-Nequilib",&nequilib,defaults_file);
+wxGetResource(PARAMS_SECTION,"Liap-Ntries",&nTries,defaults_file);
+wxGetResource(PARAMS_SECTION,"Liap-stopAfter",&stopAfter,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-tolN",&tolOpt,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-tolBrent",&tolBrent,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-maxitsBrent",&maxitsBrent,defaults_file);
 wxGetResource(PARAMS_SECTION,"Func-maxitsOpt",&maxitsOpt,defaults_file);
 
-Form()->Add(wxMakeFormShort("# Equilibria",&nequilib,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
-Form()->Add(wxMakeFormShort("# Tries",&ntries,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
+Form()->Add(wxMakeFormShort("# Equilibria",&stopAfter,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
+Form()->Add(wxMakeFormShort("# Tries",&nTries,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL));
 Form()->Add(wxMakeFormNewLine());
 Form()->Add(wxMakeFormFloat("Tolerance n-D",&tolOpt,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 Form()->Add(wxMakeFormFloat("Tolerance 1-D",&tolBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
@@ -52,8 +52,8 @@ template <class T>
 void LiapSolveParamsDialog<T>::SaveDefaults(void)
 {
 if (!Default()) return;
-wxWriteResource(PARAMS_SECTION,"Liap-Ntries",ntries,defaults_file);
-wxWriteResource(PARAMS_SECTION,"Liap-Nequilib",nequilib,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Liap-Ntries",nTries,defaults_file);
+wxWriteResource(PARAMS_SECTION,"Liap-stopAfter",stopAfter,defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-tolN",ToString(tolOpt),defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-tolBrent",ToString(tolBrent),defaults_file);
 wxWriteResource(PARAMS_SECTION,"Func-maxitsBrent",maxitsBrent,defaults_file);
@@ -67,9 +67,9 @@ template <class T>
 void LiapSolveParamsDialog<T>::GetParams(LiapParams<T> &P)
 {
 Funct_tolBrent=tolBrent;Funct_maxitsBrent=maxitsBrent;
-P.nequilib=nequilib;P.ntries=ntries;
+P.stopAfter=stopAfter;P.nTries=nTries;
 // Output stuff
-P.plev=TraceLevel();P.outfile=OutFile();P.errfile=ErrFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 #ifdef LIAP_INST 			// need this so we only create this once
 	#ifdef __GNUG__

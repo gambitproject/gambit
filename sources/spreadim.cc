@@ -25,6 +25,9 @@ TEMPLATE class gList<int>;
 TEMPLATE class gNode<SpreadSheet> ;
 TEMPLATE class gList<SpreadSheet> ;
 
+class BaseExtSolnShow;
+TEMPLATE class gList<BaseExtSolnShow *>;
+TEMPLATE class gNode<BaseExtSolnShow *>;
 
 template <class T> class SolnShow;
 TEMPLATE class gNode<SolnShow<double> *>;

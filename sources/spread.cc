@@ -504,10 +504,18 @@ for (col=min_col;col<=max_col;col++)
 							MaxX(col),
 							draw_settings->YStart()+max_row*draw_settings->GetRowHeight()+1);
 dc.SetPen(grid_border_pen);
-dc.SetBrush(wxTRANSPARENT_BRUSH);
-dc.DrawRectangle(	draw_settings->XStart(),draw_settings->YStart(),
-									MaxX(max_col)-draw_settings->XStart(),
-									max_row*draw_settings->GetRowHeight()+2);
+dc.SetBrush(wxTRANSPARENT_BRUSH); // draw bounding rectangle out of 4 lines
+if (min_col==1)	// left
+	dc.DrawLine(draw_settings->XStart(),draw_settings->YStart(),draw_settings->XStart(),
+							max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
+if (max_col==sheet->GetCols()) // right
+	dc.DrawLine(MaxX(),draw_settings->YStart(),MaxX(),
+		max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
+if (min_row==1) // top
+	dc.DrawLine(draw_settings->XStart(),draw_settings->YStart(),MaxX(max_col),draw_settings->YStart());
+if (max_row==sheet->GetRows()) // bottom
+	dc.DrawLine(draw_settings->XStart(),max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart(),
+							MaxX(),max_row*draw_settings->GetRowHeight()+2+draw_settings->YStart());
 // Draw the labels if any (no sense in showing them if even the first row/col
 // are not visible
 dc.SetFont(draw_settings->GetLabelFont());
@@ -1113,13 +1121,16 @@ if (draw_settings->ColLabels())
 
 void SpreadSheet3D::Resize(void)
 {
-int w,h,w1,h1;
+int w,h,w1=0,h1=0;
 data[cur_level].GetSize(&w,&h);
-Panel()->Fit();Panel()->GetSize(&w1,&h1);
-w=max(w,w1);
-h1=max(h1,MIN_BUTTON_SPACE);
+if (panel)
+{
+	Panel()->Fit();Panel()->GetSize(&w1,&h1);
+	w=max(w,w1);
+	h1=max(h1,MIN_BUTTON_SPACE);
+	Panel()->SetSize(0,h,w,h1);
+}
 DrawSettings()->SetPanelSize(h1);
-Panel()->SetSize(0,h,w,h1);
 SetClientSize(w,h+h1);
 }
 

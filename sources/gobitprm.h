@@ -45,7 +45,7 @@ Form()->Add(wxMakeFormShort("Iterations n-D",&maxitsOpt,wxFORM_DEFAULT,NULL,NULL
 Form()->Add(wxMakeFormShort("Iterations 1-D",&maxitsBrent,wxFORM_DEFAULT,NULL,NULL,wxVERTICAL,100));
 // Now add the basic stuff
 MakePxiFields();
-MakeOutputFields(OUTPUT_FIELD);
+MakeOutputFields();
 Go();
 }
 // Save Defaults
@@ -76,7 +76,7 @@ Funct_tolN=tolOpt;Funct_maxitsN=maxitsOpt;
 // Pxi stuff
 P.powLam=PxiType();P.pxifile=PxiFile();
 // Output stuff
-P.trace=TraceLevel();P.outfile=OutFile();
+P.trace=TraceLevel();P.tracefile=OutFile();
 }
 
 #ifdef GOBIT_INST		// need this so we only create this once

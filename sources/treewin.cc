@@ -7,33 +7,12 @@
 #include "wx.h"
 #include "wx_form.h"
 #include "wxmisc.h"
-#include "extform.h"
+#include "efg.h"
 #include "infoset.h"
 #include "node.h"
 #include "gmisc.h"
 #include "treewin.h"
 #include "extshow.h"
-
-
-template <class T>
-char *OutcomeToString(const gVector<T> &v,const TreeDrawSettings &draw_settings)
-{
-static gString gvts;
-gvts="(";
-ToStringPrecision(2);
-for (int i=v.First();i<=v.Last();i++)
-{
-	if (i!=1) gvts+=",";
-	if (draw_settings.ColorCodedOutcomes())
-		gvts+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
-	gvts+=ToString(v[i]);
-}
-if (draw_settings.ColorCodedOutcomes()) gvts+=("\\C{"+ToString(WX_COLOR_LIST_LENGTH-1)+"}");
-gvts+=")";
-
-return (char *)gvts;
-}
-
 
 
 //=====================================================================
@@ -54,9 +33,8 @@ void TreeWindow<T>::operator=(const TreeWindow<T> &t)
 
 //************************* normal constructor ********************
 template <class T>
-TreeWindow<T>::TreeWindow(ExtForm<T> &ef_,ExtensiveShow<T> *frame_,
-												int _subgame,int x,int y,int w,int h,int style)
-												:	ef(ef_), frame(frame_), BaseTreeWindow(ef_,frame_,x,y,w,h,style)
+TreeWindow<T>::TreeWindow(Efg<T> &ef_,ExtensiveShow<T> *frame_)
+												:	ef(ef_), frame(frame_), BaseTreeWindow(ef_,frame_)
 { }
 
 template <class T>
@@ -71,36 +49,50 @@ delete &ef;
 }
 
 template <class T>
-double TreeWindow<T>::ProbAsDouble(const Node *n,int action)
+double TreeWindow<T>::ProbAsDouble(const Node *n,int action) const
 {
 return (double)frame->GetActionProb(n,action);
 }
 
 template <class T>
-gString TreeWindow<T>::ProbAsString(const Node *n,int action)
+gString TreeWindow<T>::ProbAsString(const Node *n,int action) const
 {
 T prob=frame->GetActionProb(n,action);
 if (prob<(T)0) return ""; else return ToString(prob);
 }
 
 template <class T>
-gString TreeWindow<T>::OutcomeAsString(const Node *n)
+gString TreeWindow<T>::OutcomeAsString(const Node *n) const
 {
 if (n->GetOutcome())
 {
-	Outcome *t=n->GetOutcome();
-	OutcomeVector<T> *tv=(OutcomeVector<T> *)t;
-	gVector<T> *ttv=(gVector<T> *)tv;
-	return OutcomeToString(*ttv,draw_settings);
+	OutcomeVector<T> *tv=(OutcomeVector<T> *)n->GetOutcome();;
+	gVector<T> &v=*tv;
+	ToStringPrecision(2);
+	gString tmp="(";
+	for (int i=v.First();i<=v.Last();i++)
+	{
+		if (i!=1) tmp+=",";
+		if (draw_settings.ColorCodedOutcomes())
+			tmp+=("\\C{"+ToString(draw_settings.GetPlayerColor(i))+"}");
+		tmp+=ToString(v[i]);
+	}
+	if (draw_settings.ColorCodedOutcomes()) tmp+=("\\C{"+ToString(WX_COLOR_LIST_LENGTH-1)+"}");
+	tmp+=")";
+
+	return tmp;
 }
-return "";
+else
+	return "";
 }
 
 //***********************************************************************
 //                      TREE-OUTCOME MENU HANDLER
 //***********************************************************************
-// If save_now is true, we just update the outcome data in the extensive
-// form, but do not delete the dialog
+// If the dialog does not exist, create it.  If it exists and save_num==0,
+// delete it.  If out_name!="", find the outcome # and set the current row.
+// If out_name=="" and save_num>0, update that outcome, if save_num<0, delete
+// that outcome.
 #include "outcomed.h"
 template<class T> void TreeWindow<T>::tree_outcomes(const gString out_name,int save_num)
 {
@@ -119,8 +111,9 @@ if (!outcome_dialog)	// creating a new one
 	if (out_name!=gString())
 		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 	// create the dialog
-
+	if (outcome_dialog) {wxMessageBox("Recursion!"); return;}
 	outcome_dialog=new OutcomeDialog(rows,cols,(BaseTreeWindow *)this,(wxFrame *)frame,out);
+	if (out>0) outcome_dialog->SetCurRow(out);
 	for (i=1;i<=num_players;i++)
 		outcome_dialog->SetLabelCol(i,(ef.PlayerList()[i])->GetName());
 	old_names=gBlock<gString>(ef.NumOutcomes());
@@ -144,18 +137,22 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 		for (i=1;i<=ef.NumOutcomes();i++) if ((ef.OutcomeList()[i])->GetName()==out_name) out=i;
 		outcome_dialog->SetCurRow(out);return;
 	}
-	else	// this is an OK, or it is a save action
+	else	// this is an OK, save, or delete action
 	{
-		if (save_num)	// save action
+		if (save_num>0)	// save action
 		{
-			T dummy;
+			T payoff;
 			// if a new row was created, append an entry to old_names.
 			if (save_num>ef.NumOutcomes()) old_names+=gString();
-			OutcomeVector<T> *tmp=(save_num>ef.NumOutcomes()) ? ef.NewOutcome() : ef.GetOutcome(old_names[save_num]);
+			OutcomeVector<T> *tmp=(save_num>ef.NumOutcomes()) ? ef.NewOutcome() : (OutcomeVector<T> *)(ef.OutcomeList()[save_num]);
 			if (tmp)
 			{
 				for (j=1;j<=num_players;j++)
-						(*tmp)[j]=FromString(outcome_dialog->GetCell(save_num,j),dummy);
+				{
+					FromString(outcome_dialog->GetCell(save_num,j),payoff);
+					if ((*tmp)[j]!=payoff)
+						{(*tmp)[j]=payoff;outcomes_changed=TRUE;}
+				}
 				if (!outcome_dialog->EnteredCell(save_num,j) || outcome_dialog->GetCell(save_num,j)=="")
 				{
 					outcome_dialog->SetCell(save_num,num_players+1,"Outcome "+ToString(save_num));
@@ -166,10 +163,18 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 				OnPaint();
 			}
 		}
-		else	// OK action
+		if (save_num==0)	// OK action
 		{
 			delete outcome_dialog;
 			outcome_dialog=0;
+		}
+		if (save_num<0)	// delete action
+		{
+			int del_num=-save_num;
+			// ef.DeleteOutcome(....)
+			outcome_dialog->DelRow(del_num);
+			outcomes_changed=TRUE;
+			OnPaint();
 		}
 	}
 }
@@ -178,40 +183,52 @@ else	// either going to a new one by clicking on an outcome, closing, or saving
 //***********************************************************************
 //                      NODE-PROBS MENU HANDLER
 //***********************************************************************
-#define ENTRIES_PER_ROW	8
+// The text input fields are stacked vertically up to ENTRIES_PER_DIALOG.
+// If there are more than ENTRIES_PER_DIALOG actions for this infoset,
+// consequtive dialogs will be created.
+#define ENTRIES_PER_DIALOG	10
 
 template<class T> void TreeWindow<T>::action_probs(void)
 {
 Node *n=cursor;
-int 	i,num_children=n->NumChildren();
+int 	i;
 
 if (!n->GetPlayer()->IsChance())	// if this is not a chance player
 {
 	wxMessageBox("Probabilities only valid for CHANCE player","Error",wxOK | wxCENTRE,frame);
 	return;
 }
-
-MyDialogBox *node_probs_dialog=new MyDialogBox(frame,"Node Probabilities");
 ToStringPrecision(4);
-char **prob_vector=new char *[num_children+1];
-for (i=1;i<=num_children;i++)
-{
-	T temp_p=((ChanceInfoset<T> *)(n->GetInfoset()))->GetActionProb(i);
-	prob_vector[i]=new char[20];
-	strcpy(prob_vector[i],ToString(temp_p));
-	node_probs_dialog->Form()->Add(wxMakeFormString("",&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
-	if (i%ENTRIES_PER_ROW==0) node_probs_dialog->Add(wxMakeFormNewLine());
-}
-node_probs_dialog->Go();
-if (node_probs_dialog->Completed()==wxOK)
-{
-	T dummy;
-	for (i=1;i<=num_children;i++)
-		((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i,FromString(prob_vector[i],dummy));
 
+int num_actions=cursor->NumChildren();
+int num_d=num_actions/ENTRIES_PER_DIALOG-((num_actions%ENTRIES_PER_DIALOG) ? 0 : 1);
+
+for (int d=0;d<=num_d;d++)
+{
+	MyDialogBox *node_probs_dialog=new MyDialogBox(frame,"Node Probabilities");
+	int actions_now=gmin(num_actions-d*ENTRIES_PER_DIALOG,ENTRIES_PER_DIALOG);
+	char **prob_vector=new char *[actions_now+1];
+	for (i=1;i<=actions_now;i++)
+	{
+		T temp_p=((ChanceInfoset<T> *)(n->GetInfoset()))->GetActionProb(i+d*ENTRIES_PER_DIALOG);
+		prob_vector[i]=new char[20];
+		strcpy(prob_vector[i],ToString(temp_p));
+		node_probs_dialog->Add(wxMakeFormString("",&(prob_vector[i]),wxFORM_TEXT,NULL,NULL,wxVERTICAL,80));
+		node_probs_dialog->Add(wxMakeFormNewLine());
+	}
+	if (num_actions-(d+1)*ENTRIES_PER_DIALOG>0)
+		node_probs_dialog->Add(wxMakeFormMessage("Continued..."));
+
+	node_probs_dialog->Go();
+	if (node_probs_dialog->Completed()==wxOK)
+	{
+		T dummy;
+		for (i=1;i<=actions_now;i++)
+			((ChanceInfoset<T> *)n->GetInfoset())->SetActionProb(i+d*ENTRIES_PER_DIALOG,FromString(prob_vector[i],dummy));
+	}
+	for (i=1;i<=actions_now;i++) delete [] prob_vector[i];delete [] prob_vector;
+	delete node_probs_dialog;
 }
-for (i=1;i<=num_children;i++) delete [] prob_vector[i];delete [] prob_vector;
-delete node_probs_dialog;
 }
 
 //***********************************************************************
@@ -236,10 +253,8 @@ if (s)
 	#define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
 TEMPLATE class TreeWindow<double> ;
-TEMPLATE char *OutcomeToString(const gVector<double> &v,const TreeDrawSettings &draw_settings);
 
 #ifdef GRATIONAL
 	TEMPLATE class TreeWindow<gRational> ;
-	TEMPLATE char *OutcomeToString(const gVector<gRational> &v,const TreeDrawSettings &draw_settings);
 #endif
 

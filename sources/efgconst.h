@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// $Id$
+// @(#)efgconst.h	1.2 8/7/95
 //
 
 #ifndef EFGCONST_H
@@ -11,6 +11,7 @@
 #define FILE_SAVE								1020
 #define FILE_OUTPUT							1040
 #define	FILE_CLOSE							1050
+#define	FILE_LOG								1055
 
 #define NODE_OUTCOME_OUTCOME		1100
 #define NODE_OUTCOME_DIALOG			1101
@@ -52,6 +53,8 @@
 #define SOLVE_INSPECT						1502
 #define SOLVE_REMOVE						1503
 #define SOLVE_SOLVE_NORMAL			1504
+#define SOLVE_FEATURES					1505
+
 
 #define DISPLAY_SET_ZOOM				1600
 #define	DISPLAY_INC_ZOOM				1601
@@ -65,6 +68,7 @@
 #define	DISPLAY_SAVE_CUSTOM			1607
 #define DISPLAY_LOAD_CUSTOM			1608
 #define DISPLAY_REDRAW					1611
+#define DISPLAY_ZOOM_WIN				1613
 
 // Help system
 #define	EFG_GUI_HELP				"Extensive Form GUI"
@@ -75,6 +79,7 @@
 #define EFG_TREE_HELP				"Tree Menu"
 #define EFG_SOLVE_HELP			"Extensive Form Solutions"
 #define EFG_INSPECT_HELP		"Extensive Solutions Inspect"
-#define NFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
+#define EFG_SOLVE_INSPECT_OPTIONS_HELP	"Extensive Form Inspect Options"
+#define EFG_SOLVE_OPTIONS_HELP	"Extensive Form Solution Options"
 
 #endif

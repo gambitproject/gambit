@@ -3,7 +3,7 @@ typedef enum {NodeAddNew,NodeAddIset} NodeAddMode;
 class NodeAddDialog : public MyDialogBox
 {
 private:
-	BaseExtForm &ef;
+	BaseEfg &ef;
 	int		branches;
 	char	*player_name;
 	char	*iset_name;
@@ -22,19 +22,19 @@ private:
 	void OnBranch(void);
 public:
 	// Constructor
-	NodeAddDialog(BaseExtForm &ef_,Player *player=0,Infoset *infoset=0,int branches=1,wxFrame *frame=0);
+	NodeAddDialog(BaseEfg &ef_,EFPlayer *player=0,Infoset *infoset=0,int branches=1,wxFrame *frame=0);
 	// Destructor
 	~NodeAddDialog(void);
 	// DataAccess
 	NodeAddMode	GetAddMode(void) const;
-	Player 			*GetPlayer(void);
+	EFPlayer 			*GetPlayer(void);
 	Infoset 		*GetInfoset(void);
 	int					GetBranches(void);
 	Bool				SetNames(void) const;
 };
 
 //************************************** CONSTRUCTOR **************************
-NodeAddDialog::NodeAddDialog(BaseExtForm &ef_,Player *player,Infoset *infoset,int branches_,wxFrame *frame)
+NodeAddDialog::NodeAddDialog(BaseEfg &ef_,EFPlayer *player,Infoset *infoset,int branches_,wxFrame *frame)
 						:MyDialogBox(frame,"Add Node",EFG_NODE_HELP),ef(ef_),branches(branches_)
 {
 set_names=TRUE;
@@ -46,8 +46,7 @@ if (player) strcpy(player_name,player->GetName()); else strcpy(player_name,"New 
 wxFormItem *player_fitem=Add(wxMakeFormString("Player", &player_name, wxFORM_CHOICE,
 			new wxList(wxMakeConstraintStrings(player_list),0)));
 Add(wxMakeFormNewLine());
-wxFormItem *branch_fitem=Add(wxMakeFormShort("Branches",&branches, wxFORM_TEXT,
-										 new wxList(wxMakeConstraintRange(0, MAX_BRANCHES), 0)));
+wxFormItem *branch_fitem=Add(wxMakeFormShort("Branches",&branches, wxFORM_TEXT));
 wxStringList *infoset_list=new wxStringList;iset_name=new char[20];
 infoset_list->Add("New");
 if (infoset) strcpy(iset_name,infoset->GetName()); else strcpy(iset_name,"New");
@@ -88,15 +87,15 @@ NodeAddDialog::~NodeAddDialog(void)
 NodeAddMode NodeAddDialog::GetAddMode(void) const
 {return (iset_item->GetSelection()==0) ? NodeAddNew : NodeAddIset;}
 
-Player *NodeAddDialog::GetPlayer(void)
+EFPlayer *NodeAddDialog::GetPlayer(void)
 {
-Player *player;
+EFPlayer *player;
 if (strcmp(player_name,"New Player")==0)
 {
 	player=ef.NewPlayer();
 	player->SetName(ToString(ef.NumPlayers()));
 }
-else player=ef.GetPlayer(player_name);
+else player=EfgGetPlayer(ef,player_name);
 if (strcmp(player_name,"Chance")==0) player=ef.GetChance();
 return player;
 }
@@ -104,7 +103,7 @@ return player;
 Infoset *NodeAddDialog::GetInfoset(void)
 {
 if (GetAddMode()==NodeAddIset)
-	return ef.GetPlayer(player_name)->GetInfoset(iset_name);
+	return EfgGetPlayer(ef,player_name)->GetInfoset(iset_name);
 else
 	return 0;
 }
@@ -119,7 +118,7 @@ void NodeAddDialog::OnPlayer(const char *name)
 {
 iset_item->Clear();
 iset_item->Append("New");
-Player *player=ef.GetPlayer(name);
+EFPlayer *player=EfgGetPlayer(ef,name);
 if (player)
 	for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->InfosetList()[i]->GetName());
 iset_item->SetSelection(iset_item->FindString("New"));
@@ -127,7 +126,7 @@ iset_item->SetSelection(iset_item->FindString("New"));
 
 void NodeAddDialog::OnIset(const char *name)
 {
-Player *player=ef.GetPlayer(player_item->GetStringSelection());
+EFPlayer *player=EfgGetPlayer(ef,player_item->GetStringSelection());
 if (!player) return;
 Infoset *infoset=player->GetInfoset(name);
 if (!infoset) return;

@@ -19,7 +19,7 @@
 #include "mixed.h"
 typedef enum {gNONE=0,gNFG,gEFG} InterfaceTypeT;
 template <class T> class NormalForm;
-template <class T> class ExtForm;
+template <class T> class Efg;
 // We need this base class to allow the non-templated functions to take
 // EfgNfgInterface as a parameter.  By itself, its useless.
 class BaseEfgNfgInterface
@@ -51,7 +51,7 @@ public:
 	virtual void SolutionToNfg(const MixedProfile<T> &s,bool set=false)
 		{assert(type==gEFG); inter->SolutionToNfg(s);}
 // Getting at the underlying object
-	virtual const ExtForm<T> *InterfaceObjectEfg(void)
+	virtual const Efg<T> *InterfaceObjectEfg(void)
 		{assert(type==gNFG); return inter->InterfaceObjectEfg();}
 	virtual const NormalForm<T> *InterfaceObjectNfg(void)
 		{assert(type==gEFG); return inter->InterfaceObjectNfg();}

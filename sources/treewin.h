@@ -24,70 +24,94 @@ typedef struct NODEENTRY {
 } NodeEntry;
 
 class BaseExtensiveShow;
+class BaseTreeWindow;
 
-class BaseTreeWindow: public wxCanvas
+// This class can render an extensive form tree using a pre-calculated
+// (in BaseTreeWindow) list of NodeEntry.  It is used for rendering
+// functions for the main TreeWindow display and for the optional
+// 'unity zoom' zoom window.  Note that it does not have any data
+// members of its own, but just references to those of its parent. This
+// way we do not duplicate the data and only need one assignment regardless
+// of the number of renderers.
+class TreeRender : public wxCanvas
+{
+private:
+	const BaseTreeWindow *parent;
+	const gList<NodeEntry *> &node_list;
+	const Infoset * &hilight_infoset;		// Hilight infoset from the solution disp
+	const Node	*&mark_node;							// Used in mark/goto node operations
+	const Node	 *&cursor;								// Used to process cursor keys, stores current pos
+	const TreeDrawSettings &draw_settings;		// Stores drawing parameters
+	// Private Functions
+	void	RenderLabels(wxDC &dc,NodeEntry *entry);
+	void 	RenderSubtree(wxDC &dc);
+protected:
+	TreeNodeCursor *flasher;			// Used to flash/display the cursor
+public:
+	TreeRender(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
+						const Infoset * &hilight_infoset_,
+						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_);
+	~TreeRender(void);
+	// Windows event handlers
+	void OnPaint(void);
+	virtual void Render(wxDC &dc);
+	// Call this every time the cursor moves
+	void UpdateCursor(const NodeEntry *entry);
+	// Override this if extra functionality is desired
+	virtual Bool JustRender(void) const;
+	// This must be here since we do not have draw_settings at constructor time
+	void MakeFlasher(void);
+};
+
+class TreeZoomWindow : public TreeRender
+{
+public:
+	TreeZoomWindow(wxFrame *frame,const BaseTreeWindow *parent,const gList<NodeEntry *> &node_list,
+						const Infoset * &hilight_infoset_,
+						const Node *&mark_node_,const Node *&cursor,const TreeDrawSettings &draw_settings_);
+};
+
+class BaseTreeWindow: public TreeRender
 {
 friend class ExtensivePrintout;
 
 private:
 	BaseExtensiveShow	*frame;
-	BaseExtForm		&ef;
+	BaseEfg		&ef;
 	Node	*mark_node,*old_mark_node;		// Used in mark/goto node operations
-	TreeNodeCursor *flasher;			// Used to flash the cursor
 	gList<NodeEntry *> node_list;		// Data for display coordinates of nodes
 	Bool		nodes_changed;    		// Used to determine if a node_list recalc
 	Bool		infosets_changed;			// is needed
 	Bool		need_clear;						// Do we need to clear the screen?
-#ifdef SUBGAMES
-	// Subgames are no longer implemented, but the code is in there, just in case
-	int			subgame;							// which subgame I am.  1 for root
-		typedef struct SUBGAMESTRUCT{
-		friend gOutput &operator<<(gOutput &op,const SUBGAMESTRUCT &S);
-										int num;ExtensiveShow<T> *win;
-										SUBGAMESTRUCT(void)
-											{num=0;win=NULL;}
-										SUBGAMESTRUCT(const int _num)
-											{num=_num;win=NULL;}
-										SUBGAMESTRUCT(int _num,ExtensiveShow<T> *_win)
-											{num=_num;win=_win;}
-										SUBGAMESTRUCT &operator=(const SUBGAMESTRUCT &S)
-											{num=S.num;win=S.win;return (*this);}
-										int operator==(const SUBGAMESTRUCT &S)
-											{return (num==S.num);}
-										int operator!=(const SUBGAMESTRUCT &S)
-											{return (num!=S.num);}
-										} subgame_struct;
-
-		gArray<subgame_struct>	open_subgames;			// Used to keep track of which subgames are already open
-#endif
-
-		// Private Functions
-		void	RenderLabels(wxDC &dc,NodeEntry *entry);
-		void 	RenderSubtree(wxDC &dc);
-		int 	FillTable(const Node *n, int level);
-		void 	ProcessCursor(void);
-		void 	ProcessClick(int x,int y);
-		NodeEntry *GetNodeEntry(const Node *n);
-		NodeEntry *NextInfoset(const NodeEntry * const e);
-		void	FillInfosetTable(const Node *n);
-		void	CheckInfosetEntry(NodeEntry *e);
-		void	UpdateTableInfosets(void);
-		void	UpdateTableParents(void);
+	gOutput	*log;									// Are we saving each action to a file?
+	Infoset *hilight_infoset;			// Hilight infoset from the solution disp
+	TreeRender *zoom_window;
+	// Private Functions
+	int 	FillTable(const Node *n, int level);
+	void 	ProcessCursor(void);
+	void 	ProcessClick(int x,int y);
+	NodeEntry *GetNodeEntry(const Node *n);
+	NodeEntry *NextInfoset(const NodeEntry * const e);
+	void	FillInfosetTable(const Node *n);
+	void	CheckInfosetEntry(NodeEntry *e);
+	void	UpdateTableInfosets(void);
+	void	UpdateTableParents(void);
+	void	Log(const gString &s);
 	// These functions are type dependent and are defined in TreeWindow
-		virtual double 	ProbAsDouble(const Node *n,int action) { }
-		virtual gString	ProbAsString(const Node *n,int action) { }
-		virtual gString	OutcomeAsString(const Node *n) { }
 protected:
 	Node	 *cursor;										// Used to process cursor keys, stores current pos
+	Bool		outcomes_changed;
 	TreeDrawSettings draw_settings;		// Stores drawing parameters
 public:
+	virtual double 	ProbAsDouble(const Node *n,int action) const =0;
+	virtual gString	ProbAsString(const Node *n,int action) const =0;
+	virtual gString	OutcomeAsString(const Node *n) const =0;
+	virtual Bool JustRender(void) const;
 	// Constructor
-  BaseTreeWindow(const BaseTreeWindow &bt);
-	BaseTreeWindow(BaseExtForm &ef_,BaseExtensiveShow *frame,int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
+//	BaseTreeWindow(const BaseTreeWindow &bt);
+	BaseTreeWindow(BaseEfg &ef_,BaseExtensiveShow *frame);
 	// Destructor
 	~BaseTreeWindow(void);
-	// Windows event handlers
-	void OnPaint(void);
 	void OnEvent(wxMouseEvent& event);
 	void OnChar(wxKeyEvent& ch);
 	// Menu event handlers (these are mostly in treewin1.cc)
@@ -135,17 +159,20 @@ public:
 	void display_load_options(Bool def=TRUE);
 	void display_set_zoom(float z=-1);
 	float display_get_zoom(void);
+	Bool display_zoom_win(void);
 
 	void 	output(void);
 	void	print_eps(wxOutputOption fit);			// output to postscript file
 	void	print(wxOutputOption fit,bool preview=false);	// output to printer (WIN3.1 only)
 	void	print_mf(wxOutputOption fit,bool save_mf=false);				// copy to clipboard (WIN3.1 only)
+	Bool	logging(void);
 
 	virtual void	file_save(void) =0;
 
 	gString Title(void) const;
 
 	void Render(wxDC &dc);
+  void HilightInfoset(int pl,int iset);
 	// Gives access to the parent to the private draw_settings. Used for SolnShow
 	const TreeDrawSettings &DrawSettings(void) {return draw_settings;}
 };
@@ -155,35 +182,32 @@ template <class T> class ExtensiveShow;
 template <class T>
 class TreeWindow : public BaseTreeWindow
 {
-		// Private variables
-		ExtForm<T> &ef;
-		ExtensiveShow<T> *frame;			// parent frame
-		// The copy/assignment operators are private since they are NEVER
-		// used or implemented.  Perhaps later...
-		TreeWindow(const TreeWindow<T> &);
-		void operator=(const TreeWindow<T> &);
+	// Private variables
+	Efg<T> &ef;
+	ExtensiveShow<T> *frame;			// parent frame
+	// The copy/assignment operators are private since they are NEVER
+	// used or implemented.  Perhaps later...
+	TreeWindow(const TreeWindow<T> &);
+	void operator=(const TreeWindow<T> &);
 
-		double 	ProbAsDouble(const Node *n,int action);
-		gString	ProbAsString(const Node *n,int action);
-		gString	OutcomeAsString(const Node *n);
-	public:
-		// Constructor
-		TreeWindow(ExtForm<T> &ef_,ExtensiveShow<T> *frame,int subgame=1,
-							int x=-1,int y=-1,int w=-1,int h=-1,int style=0);
-		// Destructor
-		~TreeWindow();
-
+public:
+	double 	ProbAsDouble(const Node *n,int action) const ;
+	gString	ProbAsString(const Node *n,int action) const ;
+	gString	OutcomeAsString(const Node *n) const;
+	// Constructor
+	TreeWindow(Efg<T> &ef_,ExtensiveShow<T> *frame);
+	// Destructor
+	~TreeWindow();
 		// Menu events
-		void tree_outcomes(const gString out_name=gString(),int save_num=0);
-		void action_probs(void);
-		void node_outcome(const gString out_name);
-		void file_save(void);
-
+	void tree_outcomes(const gString out_name=gString(),int save_num=0);
+	void action_probs(void);
+	void node_outcome(const gString out_name);
+	void file_save(void);
 #ifdef SUBGAMES
-		// Subgame handlers
-		void OpenSubgame(int num);
-		void CloseSubgame(int num);
-		void MakeSubgame(void);
+	// Subgame handlers
+	void OpenSubgame(int num);
+	void CloseSubgame(int num);
+	void MakeSubgame(void);
 #endif
 };
 

@@ -12,9 +12,7 @@
 TreeDrawSettings::TreeDrawSettings(void)
 {
 zoom_factor=1.0;
-wxPathList path_list;
-path_list.AddEnvList("PATH");
-char *file_name=path_list.FindValidPath("gambit.ini");
+char *file_name=wxFindFile("gambit.ini");
 if (!file_name)
 {
 	// if there is no ini file yet, use the hard coded defaults and create
@@ -31,7 +29,7 @@ if (!file_name)
 	cursor_color=CURSOR_COLOR_DEFAULT;
 	show_infosets=SHOW_INFOSETS_DEFAULT;
 	node_above_label=NODE_ABOVE_LABEL;
-	node_below_label=NODE_BELOW_INFOSET;
+	node_below_label=NODE_BELOW_ISETLABEL;
 	node_right_label=NODE_RIGHT_OUTCOME;
 	branch_above_label=BRANCH_ABOVE_LABEL;
 	branch_below_label=BRANCH_BELOW_PROBS;
@@ -69,19 +67,19 @@ tree_options_dialog->Form()->Add(wxMakeFormMessage("Size Settings"));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormShort("Branch Length",&branch_length,wxFORM_SLIDER,
 											 new wxList(wxMakeConstraintRange(BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX),0),
-											 NULL,wxHORIZONTAL,150));
+											 NULL,wxHORIZONTAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormShort("Node Length  ",&node_length,wxFORM_SLIDER,
 											 new wxList(wxMakeConstraintRange(NODE_LENGTH_MIN,NODE_LENGTH_MAX), 0),
-											 NULL,wxHORIZONTAL,150));
+											 NULL,wxHORIZONTAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormShort("Fork Length  ",&fork_length,wxFORM_SLIDER,
 											 new wxList(wxMakeConstraintRange(FORK_LENGTH_MIN,FORK_LENGTH_MAX), 0),
-											 NULL,wxHORIZONTAL,150));
+											 NULL,wxHORIZONTAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormShort("Y Spacing    ",&y_spacing,wxFORM_SLIDER,
 											 new wxList(wxMakeConstraintRange(Y_SPACING_MIN, Y_SPACING_MAX), 0),
-											 NULL,wxHORIZONTAL,150));
+											 NULL,wxHORIZONTAL));
 tree_options_dialog->Form()->Add(wxMakeFormNewLine());
 tree_options_dialog->Form()->Add(wxMakeFormBool("Show Infosets",&show_infosets,wxFORM_CHECKBOX));
 tree_options_dialog->Form()->Add(wxMakeFormBool("Flashing Cursor",&flashing_cursor,wxFORM_CHECKBOX));
