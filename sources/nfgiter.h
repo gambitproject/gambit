@@ -1,7 +1,7 @@
 //
 // FILE: nfgiter.h -- Normal form iterator class
 //
-// @(#)nfgiter.h	1.9 2/14/97
+// $Id$
 //
 
 #ifndef NFGITER_H
@@ -20,14 +20,14 @@ class NFSupport;
 
 template <class T> class NfgIter    {
 private:
-  NFSupport stratset;
+  NFSupport support;
   Nfg<T> *N;
   gArray<int> current_strat;
   StrategyProfile *profile;
   
 public:
-  NfgIter ( Nfg<T> &);
-  NfgIter(const NFSupport *s);
+  NfgIter(Nfg<T> &);
+  NfgIter(const NFSupport &s);
   NfgIter(const NfgIter<T> &);
   NfgIter(const NfgContIter<T> &);
   ~NfgIter();
@@ -45,12 +45,8 @@ public:
   
   const T &Payoff(int p) const;
   void SetPayoff(int p, const T &);
-//  void Payoff(gVector<T> &value) const;
-  
-//  const gArray<int> *const GetActions(int pl) const;
 
-  Strategy *GetStrategy(int pl, int num);
-  const NFSupport &GetNFSupport(void) const { return stratset; }
+  const NFSupport &Support(void) const { return support; }
 };
 
 #endif   // NFGITER_H

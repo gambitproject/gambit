@@ -55,7 +55,7 @@ NFGobitFunc::NFGobitFunc(const Nfg<double> &N,
 {
   _scratch = new gVector<double> *[_nfg.NumPlayers()] - 1;
   for (int i = 1; i <= _nfg.NumPlayers(); i++)  
-    _scratch[i] = new gVector<double>(_p.GetNFSupport().GetStrategy(i).Length());
+    _scratch[i] = new gVector<double>(_p.Support().NumStrats(i));
 }
 
 NFGobitFunc::~NFGobitFunc()
@@ -79,7 +79,7 @@ double NFGobitFunc::GobitDerivValue(int i, int j,
   for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
     gVector<double> &payoff = *_scratch[pl];
     v.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= _p.GetNFSupport().GetStrategy(pl).Length(); st++) {
+    for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
       dv = (double) log(v(pl, 1)) - (double) log(v(pl, st)) -
 	_Lambda * (payoff[1] - payoff[st]);
       if (pl == i)  {
@@ -101,7 +101,7 @@ bool NFGobitFunc::Deriv(const gVector<double> &v, gVector<double> &d)
   ((gVector<double> &) _p).operator=(v);
   
   for (int pl = 1, index = 1; pl <= _nfg.NumPlayers(); pl++)  {
-    int nstrats = _p.GetNFSupport().GetStrategy(pl).Length();
+    int nstrats = _p.Support().NumStrats(pl);
     int st;
 
     for (st = 1; st <= nstrats;
@@ -120,7 +120,7 @@ double NFGobitFunc::Value(const gVector<double> &v)
   for (int pl = 1; pl <= _nfg.NumPlayers(); pl++)  {
     gVector<double> &payoff = *_scratch[pl];
     _p.Payoff(pl, pl, payoff);
-    for (int st = 2; st <= _p.GetNFSupport().GetStrategy(pl).Length(); st++) {
+    for (int st = 2; st <= _p.Support().NumStrats(pl); st++) {
       z = log(_p(pl, 1)) - log(_p(pl, st)) -
           _Lambda * (payoff[1] - payoff[st]);
       val += z * z;
@@ -205,7 +205,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
       *params.pxifile << " ";
       for (int pl = 1; pl <= N.NumPlayers(); pl++)
 	for (int strat = 1;
-	     strat <= p.GetNFSupport().GetStrategy(pl).Length();
+	     strat <= p.Support().NumStrats(pl);
 	     strat++)
 	  *params.pxifile << p(pl, strat) << " ";
     }

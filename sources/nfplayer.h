@@ -1,8 +1,8 @@
-//#
-//# FILE: nfplayer.h -- Declaration of Normal Form Player data type
-//#
-//# $Id$
-//#
+//
+// FILE: nfplayer.h -- Declaration of normal form player data type
+//
+// $Id$
+//
 
 #ifndef NFPLAYER_H
 #define NFPLAYER_H
@@ -37,18 +37,18 @@ public:
   NFPlayer( int n, BaseNfg *no, int num );
   virtual ~NFPlayer();
 
-  BaseNfg *BelongsTo(void) const;
+  BaseNfg &BelongsTo(void) const;
   
   const gString &GetName(void) const;
-  void SetName (const gString &s);
+  void SetName(const gString &s);
 
   int NumStrats(void) const;
 
-  const gArray<Strategy *> &StrategyList(void) const;
+  const gArray<Strategy *> &Strategies(void) const;
 
   int GetNumber(void) const  { return number; }
 };
 
-#endif    //# NFPLAYER_H
+#endif    // NFPLAYER_H
 
 

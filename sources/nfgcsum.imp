@@ -39,7 +39,7 @@ template <class T> void ZSumModule<T>::Make_Abc()
   A = new gMatrix<T>(1,k+1,1,m+1);
   b = new gVector<T>(1,k+1);
   c = new gVector<T>(1,m+1);
-  NfgIter<T> iter(&support);
+  NfgIter<T> iter(support);
 
   minpay = NF.MinPayoff()-(T)1; 
 

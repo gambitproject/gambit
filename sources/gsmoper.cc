@@ -180,8 +180,8 @@ Portion* GSM_Add_MixedFloat(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
-     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+  if(((MixedPortion*) param[0])->Value()->Support() !=
+     ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
@@ -197,8 +197,8 @@ Portion* GSM_Add_MixedRational(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
-     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+  if(((MixedPortion*) param[0])->Value()->Support() !=
+     ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
@@ -324,8 +324,8 @@ Portion* GSM_Subtract_MixedFloat(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
-     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+  if(((MixedPortion*) param[0])->Value()->Support() !=
+     ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
@@ -341,8 +341,8 @@ Portion* GSM_Subtract_MixedRational(Portion** param)
      ((MixedPortion*) param[1])->Value() == 0)
     return new ErrorPortion("Cannot operate on a null Mixed value");
 
-  if(((MixedPortion*) param[0])->Value()->GetNFSupport() !=
-     ((MixedPortion*) param[1])->Value()->GetNFSupport())
+  if(((MixedPortion*) param[0])->Value()->Support() !=
+     ((MixedPortion*) param[1])->Value()->Support())
     return new ErrorPortion("Support mismatch");
 
   result = param[0]->ValCopy();
@@ -2437,7 +2437,7 @@ Portion* GSM_Read_MixedFloat(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion(((MixedSolution<double>*) 
+    new NfgValPortion(& ((MixedSolution<double>*) 
 		       ((MixedPortion*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];
@@ -2473,7 +2473,7 @@ Portion* GSM_Read_MixedRational(Portion** param)
 {
   Portion* sub_param[2];
   Portion* owner = 
-    new NfgValPortion(((MixedSolution<gRational>*) 
+    new NfgValPortion(& ((MixedSolution<gRational>*) 
 		       ((MixedPortion*) param[1])->Value())->BelongsTo());
 
   sub_param[0] = param[1];

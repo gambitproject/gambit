@@ -116,7 +116,7 @@ static Portion *GSM_Behav_Float(Portion **param)
 {
   MixedSolution<double> &mp = * (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
 
-  Nfg<double> &N = *mp.BelongsTo(); 
+  Nfg<double> &N = mp.BelongsTo(); 
   const Efg<double> &E = *(const Efg<double> *) N.AssociatedEfg();
 
   BehavSolution<double> *bp = new BehavSolution<double>(E);
@@ -132,7 +132,7 @@ static Portion *GSM_Behav_Rational(Portion **param)
   MixedSolution<gRational> &mp = 
     * (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
 
-  Nfg<gRational> &N = *mp.BelongsTo(); 
+  Nfg<gRational> &N = mp.BelongsTo(); 
   const Efg<gRational> &E = *(const Efg<gRational> *) N.AssociatedEfg();
 
   BehavSolution<gRational> *bp = new BehavSolution<gRational>(E);
@@ -412,7 +412,7 @@ static Portion *GSM_Gobit_Start(Portion **param)
   if (param[0]->Spec().Type == porMIXED_FLOAT)  {
     MixedSolution<double> &start = 
       * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
-    Nfg<double> &N = *start.BelongsTo();
+    Nfg<double> &N = start.BelongsTo();
   
     NFGobitParams NP;
     if (((TextPortion *) param[1])->Value() != "")
@@ -703,7 +703,7 @@ static Portion *GSM_Liap_MixedFloat(Portion **param)
 {
   MixedSolution<double> &start = 
     * (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
-  Nfg<double> &N = *start.BelongsTo();
+  Nfg<double> &N = start.BelongsTo();
 
   NFLiapParams params;
   

@@ -25,6 +25,7 @@ struct Strategy   {
   ~Strategy();
 };
 
+class BaseNfg;
 template <class T> class Nfg;
 
 class StrategyProfile   {
@@ -35,14 +36,14 @@ private:
   gArray<Strategy *> profile;
   
 public:
-  StrategyProfile(int pl);
+  StrategyProfile(BaseNfg &);
   StrategyProfile(const StrategyProfile &p);
 
   ~StrategyProfile();
   
   StrategyProfile &operator=(const StrategyProfile &);
   
-  int IsValid(void) const; 
+  bool IsValid(void) const; 
   
   long GetIndex(void) const;
   
@@ -54,64 +55,9 @@ public:
 template <class T> class NfgIter;
 template <class T> class NfgContIter;
 
-class NFStrategySet {
-  friend class NfgIter<double>;
-  friend class NfgIter<gRational>;
-  friend class NfgContIter<double>;
-  friend class NfgContIter<gRational>;
-protected:
-  NFPlayer * nfp;
-  gBlock <Strategy *> strategies;
-  
-public:
-
-  //
-  // Constructors, Destructor, operators
-  //
-
-  NFStrategySet();
-
-  NFStrategySet(const NFStrategySet &s); 
-
-  NFStrategySet( NFPlayer &p);
-  
-  NFStrategySet &operator=(const NFStrategySet &s); 
-  bool operator==(const NFStrategySet &s);
-
-  virtual ~NFStrategySet();
-
-  //
-  // Member Functions
-  //
-
-  // Append a strategies to the NFStrategySet
-  void AddStrategy(Strategy *s);
-
-  // Insert a strategy to a particular place in the gBlock;
-  void AddStrategy(Strategy *s, int i);
-
-  // Remove a strategy at int i, returns the removed strategy pointer
-  Strategy* RemoveStrategy(int i);
-  
-  // Removes a strategy pointer. Returns true if the strategy was successfully
-  // removed, false otherwise.
-  bool RemoveStrategy( Strategy *s ); 
-
-  // Get a Strategy
-  Strategy* GetStrategy(int num) const;
-
-  // Number of Strategies in the NFStrategySet
-  int NumStrats(void) const;
-
-  //  return the entire strategy set in a const gArray
-  const gBlock<Strategy *> &GetNFStrategySet(void) const;
-
-  // return the NFPlayer of this NFStrategySet
-  NFPlayer &GetPlayer(void) const;
-
-};
 
 class BaseNfg;
+class NFStrategySet;
 
 class NFSupport {
 
@@ -121,49 +67,39 @@ class NFSupport {
   friend class NfgContIter<gRational>;
 
 protected:
-  gString name;
   const BaseNfg *bnfg;
   gArray <NFStrategySet *> sups;
   
 public:
-
-  //
-  // Constructors, Destructors, operators
-  //
-
-  NFSupport( const BaseNfg &);
+  NFSupport(const BaseNfg &);
   NFSupport(const NFSupport &s); 
   virtual ~NFSupport();
   NFSupport &operator=(const NFSupport &s);
+
   bool operator==(const NFSupport &s) const;
   bool operator!=(const NFSupport &s) const;
 
-
-  //---------
-  // Members
-  //---------
-
-  void SetNFStrategySet(int pl, NFStrategySet *s);   
-  NFStrategySet *GetNFStrategySet(int pl) const    { return sups[pl]; }
-
-  Strategy *GetStrategy(int pl, int num) const;
-  const gBlock<Strategy *> &GetStrategy(int pl) const;
-  int NumStrats(int pl) const  { return sups[pl]->NumStrats(); }
+  const BaseNfg &BelongsTo(void) const   { return *bnfg; }
   
-  const BaseNfg &BelongsTo(void) const;
-  const gArray<int> SupportDimensions(void) const;
+  const gBlock<Strategy *> &Strategies(int pl) const;
+
+  int NumStrats(int pl) const;
+  const gArray<int> NumStrats(void) const;
+
+  void AddStrategy(Strategy *);
+  bool RemoveStrategy(Strategy *);
   
   bool IsSubset(const NFSupport &s) const;
 
   // returns the index of the strategy in the support if it exists,
   // otherwise returns zero
-  int Contains(const Strategy *s) const; 
+  int Find(Strategy *) const; 
 
-  void Dump(gOutput&s) const;
+  void Dump(gOutput &) const;
 };
 
 gOutput &operator<<(gOutput &f, const NFSupport &);
 
-#endif //#NFSTRAT_H
+#endif    // NFSTRAT_H
 
 

@@ -32,7 +32,7 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
   L->N->SetTitle(E.GetTitle());
   
   for (i = 1; i <= E.NumPlayers(); i++)   {
-    L->N->PlayerList()[i]->SetName(E.PlayerList()[i]->GetName());
+    L->N->Players()[i]->SetName(E.PlayerList()[i]->GetName());
     for (int j = 1; j <= L->strategies[i].Length(); j++)   {
       gString name;
       for (int k = 1; k <= L->strategies[i][j]->Length(); k++)
@@ -40,12 +40,12 @@ template <class T> Nfg<T> *MakeReducedNfg(Efg<T> &E, const EFSupport &support)
 	  name += ToString((*L->strategies[i][j])[k]);
         else
 	  name += "*";
-      L->N->PlayerList()[i]->StrategyList()[j]->name = name;
+      L->N->Players()[i]->Strategies()[j]->name = name;
     }
   }
   
   NFSupport S(*L->N);
-  NfgContIter<T> iter(&S);
+  NfgContIter<T> iter(S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<int> corrs(E.NumPlayers());
   for (i = 1; i <= E.NumPlayers(); i++)  {
@@ -159,14 +159,13 @@ void MixedToBehav(const Nfg<T> &N, const MixedProfile<T> &mp,
   ((gVector<T> &) bp).operator=((T)0); 
 
   Node *n = E.RootNode();
+  const NFSupport &support = mp.Support();
 
   for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
     ClearNodeProbs((TypedNode<T> *) n);
 
-    NFStrategySet *S = mp.GetNFSupport().GetNFStrategySet(pl);
-
-    for (int st = 1; st <= S->NumStrats(); st++)  {
-      int snum = S->GetStrategy(st)->number;
+    for (int st = 1; st <= support.NumStrats(pl); st++)  {
+      int snum = support.Strategies(pl)[st]->number;
       if (mp(pl, st) > (T) 0.0)  {
 	const gArray<int> *const actions = E.lexicon->strategies[pl][snum];
 
@@ -193,7 +192,7 @@ void BehavToMixed(const Efg<T> &E, const BehavProfile<T> &bp,
   if (!E.lexicon || (const Nfg<T> *) E.lexicon->N != &N)  return;
   
   for (int pl = 1; pl <= N.NumPlayers(); pl++)  {
-    for (int st = 1; st <= N.PlayerList()[pl]->NumStrats(); st++)  {
+    for (int st = 1; st <= N.NumStrats(pl); st++)  {
       T prob = (T) 1.0;
 
       for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++) {
@@ -219,7 +218,7 @@ template <class T> Nfg<T> *MakeAfg(Efg<T> &E)
     for (int iset = 1; iset <= E.PlayerList()[epl]->NumInfosets(); iset++, npl++)  {
       Infoset *s = E.PlayerList()[epl]->InfosetList()[iset];
       for (int act = 1; act <= s->NumActions(); act++)  {
-	Strategy *st = afg->GetStrategy(npl, act);
+	Strategy *st = afg->Strategies(npl)[act];
 	st->name = ToString(act);
       }
     }

@@ -28,7 +28,7 @@ class BaseMixedProfile     {
     DataType Type(void) const;
     virtual bool IsPure(void) const = 0;
     virtual bool IsPure(int pl) const = 0;
-    const NFSupport &GetNFSupport(void) const;
+    const NFSupport &Support(void) const;
 };
 
 
@@ -59,7 +59,7 @@ template <class T> class MixedProfile
 
     MixedProfile<T> &operator=(const MixedProfile<T> &);
 
-    Nfg<T> *BelongsTo(void) const  { return (Nfg<T> *) N; }
+    Nfg<T> &BelongsTo(void) const  { return (Nfg<T> &) *N; }
 
     T LiapValue(void) const;
     void Regret(gPVector<T> &value) const;

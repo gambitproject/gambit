@@ -44,10 +44,10 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
   N = new Nfg<T>(dim);
   int strat = 1;
   for (i = 1; i <= dim.Length(); i++)  {
-    N->PlayerList()[i]->SetName(players[i]);
+    N->Players()[i]->SetName(players[i]);
     if (strats.Length() > 0)
       for (int j = 1; j <= dim[i]; j++)
-	N->PlayerList()[i]->StrategyList()[j]->name = strats[strat++];
+	N->Strategies(i)[j]->name = strats[strat++];
   }
   return true;
 }

@@ -18,7 +18,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
 {
   int index;
   NFSupport S(N);
-  NfgContIter<T> citer(&S);
+  NfgContIter<T> citer(S);
   
   do  {
     int flag = 1;
@@ -26,7 +26,7 @@ template <class T> int FindPureNash(const Nfg<T> &N,
     
     for (int pl = 1; flag && pl <= N.NumPlayers(); pl++)  {
       T current = citer.Payoff(pl);
-      for (int i = 1; i <= N.Dimensionality()[pl]; i++)  {
+      for (int i = 1; i <= N.NumStrats(pl); i++)  {
 	niter.Next(pl);
 	if (niter.Payoff(pl) > current)  {
 	  flag = 0;

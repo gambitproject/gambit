@@ -65,24 +65,14 @@ BaseNfg::~BaseNfg()
 }
 
 
-const gArray<Strategy *> &BaseNfg::operator()(int p) const
-{
-  return (players[p]->StrategyList());
-}
-
 // -------------------------
 // BaseNfg: Member Functions
 // -------------------------
 
 
-Strategy *BaseNfg::GetStrategy(int p, int s) const
+const gArray<Strategy *> &BaseNfg::Strategies(int p) const
 {
-  return ((players[p]->StrategyList())[s]);
-}
-
-const gArray<Strategy *> &BaseNfg::GetStrategy(int p) const
-{
-  return (players[p]->StrategyList());
+  return (players[p]->Strategies());
 }
 
 void BaseNfg::SetTitle(const gString &s) 
@@ -100,7 +90,7 @@ int BaseNfg::NumPlayers(void) const
   return (players.Length()); 
 }
 
-const gArray<NFPlayer *> &BaseNfg::PlayerList(void) const
+const gArray<NFPlayer *> &BaseNfg::Players(void) const
 {
   return players;
 }
@@ -156,9 +146,9 @@ NFPlayer::~NFPlayer()
     delete strategies[j];
 }
 
-BaseNfg *NFPlayer::BelongsTo(void) const
+BaseNfg &NFPlayer::BelongsTo(void) const
 {
-  return N;
+  return *N;
 }
 
 const gString &NFPlayer::GetName(void) const
@@ -177,7 +167,7 @@ int NFPlayer::NumStrats(void) const
 }
 
 
-const gArray<Strategy *> &NFPlayer::StrategyList(void) const
+const gArray<Strategy *> &NFPlayer::Strategies(void) const
 {
   return strategies;
 }
@@ -216,7 +206,7 @@ DataType BaseMixedProfile::Type(void) const
   return N->Type();
 }
 
-const NFSupport &BaseMixedProfile::GetNFSupport(void) const
+const NFSupport &BaseMixedProfile::Support(void) const
 {
   return support;
 }

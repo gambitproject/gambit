@@ -16,7 +16,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
 
   switch (N.Type())   {
     case DOUBLE:  {
-      NfgContIter<double> A(&S), B(&S);
+      NfgContIter<double> A(S), B(S);
 
       A.Freeze(pl);
       A.Set(pl, a);
@@ -48,7 +48,7 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
     }
 
     case RATIONAL:  {
-      NfgContIter<gRational> A(&S), B(&S);
+      NfgContIter<gRational> A(S), B(S);
 
       A.Freeze(pl);
       A.Set(pl, a);
@@ -85,41 +85,40 @@ bool Dominates(const NFSupport &S, int pl, int a, int b, bool strong)
 }
 
 
-NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
-				gOutput &tracefile, gStatus &status)
+bool ComputeDominated(const NFSupport &S, NFSupport &T,
+		      int pl, bool strong,
+		      gOutput &tracefile, gStatus &status)
 {
-  NFStrategySet *SS = S.GetNFStrategySet(pl);
-
-  gArray<int> set(SS->NumStrats());
+  gArray<int> set(S.NumStrats(pl));
   int i;
   for (i = 1; i <= set.Length(); i++)
-	 set[i] = i;
+    set[i] = i;
 
   int min, dis;
   double d1,d2;
   d1 = (double)(pl-1)/(double)S.BelongsTo().NumPlayers();
   d2 = (double)pl/(double)S.BelongsTo().NumPlayers();
-  for (min = 0, dis = SS->NumStrats() - 1; min <= dis && !status.Get(); )  {
-	 int pp;
-	 double s1 = (double)min/(double)(dis+1);
-	 status.SetProgress((1.0-s1)*d1 + s1*d2);
-	 for (pp = 0;
+  for (min = 0, dis = S.NumStrats(pl) - 1; min <= dis && !status.Get(); )  {
+    int pp;
+    double s1 = (double)min/(double)(dis+1);
+    status.SetProgress((1.0-s1)*d1 + s1*d2);
+    for (pp = 0;
 	 pp < min && !Dominates(S, pl, set[pp+1], set[dis+1], strong);
 	 pp++);
-	 if (pp < min)
-		dis--;
-	 else  {
-		int foo = set[dis+1];
-		set[dis+1] = set[min+1];
-		set[min+1] = foo;
+    if (pp < min)
+      dis--;
+    else  {
+      int foo = set[dis+1];
+      set[dis+1] = set[min+1];
+      set[min+1] = foo;
 
-		for (int inc = min + 1; inc <= dis; )  {
+      for (int inc = min + 1; inc <= dis; )  {
 	if (Dominates(S, pl, set[min+1], set[dis+1], strong))  {
-			 tracefile << SS->GetStrategy(set[dis+1])->number << " dominated by " << SS->GetStrategy(set[min+1])->number << '\n';
+	  tracefile << S.Strategies(pl)[set[dis+1]]->number << " dominated by " << S.Strategies(pl)[set[min+1]]->number << '\n';
 	  dis--;
 	}
 	else if (Dominates(S, pl, set[dis+1], set[min+1], strong))  {
-	  tracefile << SS->GetStrategy(set[min+1])->number << " dominated by " << SS->GetStrategy(set[dis+1])->number << '\n';
+	  tracefile << S.Strategies(pl)[set[min+1]]->number << " dominated by " << S.Strategies(pl)[set[dis+1]]->number << '\n';
 	  foo = set[dis+1];
 	  set[dis+1] = set[min+1];
 	  set[min+1] = foo;
@@ -131,21 +130,20 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
 	  set[inc+1] = foo;
 	  inc++;
 	}
-		}
-		min++;
-	 }
+      }
+      min++;
+    }
   }
-
-
-  if (min + 1 <= SS->NumStrats())   {
-	 NFStrategySet *T = new NFStrategySet(*SS);
-	 for (i = min + 1; i <= SS->NumStrats(); i++)
-		T->RemoveStrategy(SS->GetStrategy(set[i]));
-
-	 return T;
+  
+  
+  if (min + 1 <= S.NumStrats(pl))   {
+    for (i = min + 1; i <= S.NumStrats(pl); i++)
+      T.RemoveStrategy(S.Strategies(pl)[set[i]]);
+    
+    return true;
   }
   else
-    return 0;
+    return false;
 }
 
 
@@ -157,16 +155,10 @@ NFSupport *ComputeDominated(NFSupport &S, bool strong,
   bool any = false;
 
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
-	 int pl = players[i];
-	 tracefile << "Dominated strategies for player " << pl << ":\n";
-	 NFStrategySet *SS = ComputeDominated(S, pl, strong, tracefile,status);
+    int pl = players[i];
+    tracefile << "Dominated strategies for player " << pl << ":\n";
+    any |= ComputeDominated(S, *T, pl, strong, tracefile, status);
 // status.SetProgress((double)i/players.Length());
-
-    if (SS)   {
-      delete T->GetNFStrategySet(pl);
-      T->SetNFStrategySet(pl, SS);
-      any = true;
-    }
   }
 
   if (!any || status.Get())  {

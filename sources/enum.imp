@@ -37,7 +37,7 @@ template <class T> int EnumModule<T>::Enum(void)
 
   n1=support.NumStrats(1);
   n2=support.NumStrats(2);
-  NfgIter<T> iter(&support); 
+  NfgIter<T> iter(support); 
 
   gMatrix<T> A1(1,n1,1,n2);
   gMatrix<T> A2(1,n2,1,n1);

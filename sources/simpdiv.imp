@@ -29,11 +29,11 @@ template <class T> SimpdivModule<T>::SimpdivModule(const Nfg<T> &n,
 						   const NFSupport &s)
   : N(n), params(p), support(s), 
     y(n, s), leash(p.leashLength), t(0), nplayers(N.NumPlayers()),
-    ibar(1), nevals(0), nits(0), nstrats(s.SupportDimensions()),
+    ibar(1), nevals(0), nits(0), nstrats(s.NumStrats()),
     ylabel(2), labels(y.Length(), 2), pi(y.Length(), 2),
-    U(s.SupportDimensions()), TT(s.SupportDimensions()),
-    ab(s.SupportDimensions()), besty(s.SupportDimensions()),
-    v(s.SupportDimensions())
+    U(s.NumStrats()), TT(s.NumStrats()),
+    ab(s.NumStrats()), besty(s.NumStrats()),
+    v(s.NumStrats())
 { }
 
 template <class T> SimpdivModule<T>::~SimpdivModule()

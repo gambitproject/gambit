@@ -33,10 +33,13 @@ Strategy::~Strategy()
 // StrategyProfile: Constructors, Destructors, Operators
 //--------------------------------------------------------
 
-StrategyProfile::StrategyProfile(int pl)
-  : index(0L), profile(pl)
+StrategyProfile::StrategyProfile(BaseNfg &N)
+  : index(0L), profile(N.NumPlayers())
 {
-  for (int i = 1; i <= pl; profile[i++] = (Strategy *) 0);
+  for (int pl = 1; pl <= N.NumPlayers(); pl++)   {
+    profile[pl] = N.Strategies(pl)[1];
+    index += profile[pl]->index;
+  }
 }
 
 StrategyProfile::StrategyProfile(const StrategyProfile &p)
@@ -59,7 +62,7 @@ StrategyProfile &StrategyProfile::operator=(const StrategyProfile &p)
 // StrategyProfile: Members
 //-----------------------------------------
 
-int StrategyProfile::IsValid(void) const
+bool StrategyProfile::IsValid(void) const
 {
   int i;
   for (i = profile.Length(); i > 0 && profile[i] != 0; i--);
@@ -87,28 +90,53 @@ void StrategyProfile::Set(int p, Strategy *const s)
   profile[p] = s;
 }
 
+class NFStrategySet {
+  friend class NfgIter<double>;
+  friend class NfgIter<gRational>;
+  friend class NfgContIter<double>;
+  friend class NfgContIter<gRational>;
+protected:
+  NFPlayer *nfp;
+  gBlock <Strategy *> strategies;
+  
+public:
+  NFStrategySet(const NFStrategySet &s); 
+  NFStrategySet(NFPlayer &p);
+  
+  NFStrategySet &operator=(const NFStrategySet &s); 
+  bool operator==(const NFStrategySet &s);
+
+  virtual ~NFStrategySet();
+
+  // Append a strategies to the NFStrategySet
+  void AddStrategy(Strategy *s);
+
+  // Removes a strategy pointer. Returns true if the strategy was successfully
+  // removed, false otherwise.
+  bool RemoveStrategy( Strategy *s ); 
+
+  // Number of Strategies in the NFStrategySet
+  int NumStrats(void) const;
+
+  //  return the entire strategy set in a const gArray
+  const gBlock<Strategy *> &GetNFStrategySet(void) const;
+};
+
+
 //-----------------------------------------------
 // NFStrategySet: Constructors, Destructors, Operators
 //-----------------------------------------------
 
-NFStrategySet::NFStrategySet()
+NFStrategySet::NFStrategySet(NFPlayer &p)
+  : nfp(&p), strategies(p.NumStrats())
 {
-  nfp = NULL;
+  for (int st = 1; st <= p.NumStrats(); st++)
+    strategies[st] = p.Strategies()[st];  
 }
-
-NFStrategySet::NFStrategySet( NFPlayer &p)
-  : strategies(p.strategies.Length()) 
-{
-  nfp = &p; 
-  for (int i = 1; i <= p.strategies.Length(); i++) 
-    strategies[i] = (p.strategies)[i];
-} 
 
 NFStrategySet::NFStrategySet(const NFStrategySet &s)
-: strategies(s.strategies)
-{
-  nfp = s.nfp;
-}
+  : nfp(s.nfp), strategies(s.strategies)
+{ }
 
 NFStrategySet::~NFStrategySet()
 { }
@@ -119,12 +147,12 @@ NFStrategySet &NFStrategySet::operator=(const NFStrategySet &s)
     nfp = s.nfp;
     strategies = s.strategies;
   }
-  return (*this);
+  return *this;
 }
 
 bool NFStrategySet::operator==(const NFStrategySet &s)
 {
-  if ( strategies.Length() != s.strategies.Length()) return (false);
+  if (strategies.Length() != s.strategies.Length()) return (false);
   int i;
   for (i = 1; i <= strategies. Length() 
        && strategies[i] == s.strategies[i]; i++);
@@ -143,19 +171,6 @@ void NFStrategySet::AddStrategy(Strategy *s)
   strategies.Append(s); 
 }
 
-// Insert a strategy to a particular place in the gBlock;
-void NFStrategySet::AddStrategy(Strategy *s, int i) 
-{ 
-  assert (nfp == s->nfp);
-  strategies.Insert(s,i); 
-}
-
-// Remove a strategy at int i, returns the removed strategy pointer
-Strategy* NFStrategySet::RemoveStrategy(int i) 
-{ 
-  return (strategies.Remove(i)); 
-}
-
 // Removes a strategy pointer. Returns true if the strategy was successfully
 // removed, false otherwise.
 bool NFStrategySet::RemoveStrategy( Strategy *s ) 
@@ -167,12 +182,6 @@ bool NFStrategySet::RemoveStrategy( Strategy *s )
   return (t>0); 
 } 
 
-// Get a Strategy
-Strategy *NFStrategySet::GetStrategy(int num) const
-{
-  return strategies[num];
-}
-
 // Number of Strategies in a NFStrategySet
 int NFStrategySet::NumStrats(void) const
 {
@@ -182,28 +191,21 @@ int NFStrategySet::NumStrats(void) const
 // Return the entire strategy set
 const gBlock<Strategy *> &NFStrategySet::GetNFStrategySet(void) const
 {
-	return strategies;
-}
-
-// Return the NFPlayer of this NFStrategySet
-NFPlayer &NFStrategySet::GetPlayer(void) const
-{
-  return (*nfp);
+  return strategies;
 }
 
 //-----------------------------------------------
 // NFSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-NFSupport::NFSupport (const BaseNfg &N) : sups(N.NumPlayers())
+NFSupport::NFSupport(const BaseNfg &N) : bnfg(&N), sups(N.NumPlayers())
 { 
-  bnfg = &N;
   for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new NFStrategySet(*(N.PlayerList()[i]));
+    sups[i] = new NFStrategySet(*(N.Players()[i]));
 }
 
 NFSupport::NFSupport(const NFSupport &s)
-: name(s.name), bnfg(s.bnfg), sups(s.sups.Length())
+  : bnfg(s.bnfg), sups(s.sups.Length())
 {
   for (int i = 1; i <= sups.Length(); i++)
     sups[i] = new NFStrategySet(*s.sups[i]);
@@ -218,13 +220,12 @@ NFSupport::~NFSupport()
 NFSupport &NFSupport::operator=(const NFSupport &s)
 {
   if (this != &s && bnfg == s.bnfg) {
-    name = s.name; 
     for (int i = 1; i <= sups.Length(); i++)  {
       delete sups[i];
       sups[i] = new NFStrategySet(*s.sups[i]);
     }
   }
-  return (*this);
+  return *this;
 }
 
 bool NFSupport::operator==(const NFSupport &s) const
@@ -245,57 +246,57 @@ bool NFSupport::operator!=(const NFSupport &s) const
 // NFSupport: Members
 //------------------------
 
-void NFSupport::SetNFStrategySet(int pl, NFStrategySet *s)
-{
-  assert (s->GetPlayer().BelongsTo() == bnfg);
-  sups[pl] = s;
-}
-Strategy *NFSupport::GetStrategy(int pl, int num) const
-{
-  return (sups[pl]->GetStrategy(num));
-}
-
-const gBlock<Strategy *> &NFSupport::GetStrategy(int pl) const
+const gBlock<Strategy *> &NFSupport::Strategies(int pl) const
 {
   return (sups[pl]->GetNFStrategySet());
 }
 
-const BaseNfg &NFSupport::BelongsTo(void) const
+int NFSupport::NumStrats(int pl) const
 {
-  return (*bnfg);
+  return sups[pl]->NumStrats();
 }
 
-const gArray<int> NFSupport::SupportDimensions(void) const
+const gArray<int> NFSupport::NumStrats(void) const
 {
   gArray<int> a(sups.Length());
 
-  for ( int i = 1 ; i <= a.Length(); i++)
+  for (int i = 1 ; i <= a.Length(); i++)
     a[i] = sups[i]->NumStrats();
-	return a;
+  return a;
 }
 
-int NFSupport::Contains(const Strategy *s) const
+int NFSupport::Find(Strategy *s) const
 {
-  const gBlock<Strategy *> &strats =
-    sups[s->nfp->GetNumber()]->GetNFStrategySet();
-
-  return strats.Find((Strategy *const) s);
+  return sups[s->nfp->GetNumber()]->GetNFStrategySet().Find(s);
 }
 
+void NFSupport::AddStrategy(Strategy *s)
+{
+  sups[s->nfp->GetNumber()]->AddStrategy(s);
+}
+
+bool NFSupport::RemoveStrategy(Strategy *s)
+{
+  return sups[s->nfp->GetNumber()]->RemoveStrategy(s);
+}
 
 
 // Returns true if all strategies in _THIS_ belong to _S_
 bool NFSupport::IsSubset(const NFSupport &s) const
 {
-	assert(sups.Length() == s.sups.Length());
-	for (int i = 1; i <= sups.Length(); i++)
-		if (NumStrats(i) > s.NumStrats(i))
-			return false;
-		else
-			for (int j = 1; j <= NumStrats(i); j++)
-				if (!s.GetStrategy(i).Contains(GetStrategy(i,j)))
-					return false;
-	return true;
+  assert(sups.Length() == s.sups.Length());
+  for (int i = 1; i <= sups.Length(); i++)
+    if (NumStrats(i) > s.NumStrats(i))
+      return false;
+    else  {
+      const gBlock<Strategy *> &strats =
+        sups[i]->GetNFStrategySet();
+
+      for (int j = 1; j <= NumStrats(i); j++)
+	if (!s.sups[i]->GetNFStrategySet().Find(strats[j]))
+	  return false;
+    }
+  return true;
 }
 
 
@@ -311,8 +312,8 @@ void NFSupport::Dump(gOutput&s) const
   for( i = 1; i <= numplayers; i++ )
   {
     s << "{ ";
-    strat = GetStrategy( i );
-    for( j = 1; j <= strat.Length(); j++ )
+    strat = Strategies( i );
+    for (j = 1; j <= strat.Length(); j++ )
     {
       s << "\"" << strat[ j ]->name << "\" ";
     }

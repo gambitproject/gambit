@@ -13,20 +13,20 @@
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 {
-  Nfg<T> *N = new Nfg<T>(S.SupportDimensions());
+  Nfg<T> *N = new Nfg<T>(S.NumStrats());
   
   N->SetTitle(nfg.GetTitle());
 
   for (int pl = 1; pl <= N->NumPlayers(); pl++)  {
-    NFPlayer *player = N->PlayerList()[pl];
-    player->SetName(nfg.PlayerList()[pl]->GetName());
-    for (int st = 1; st <= N->Dimensionality()[pl]; st++) 
-      player->StrategyList()[st]->name = S.GetStrategy(pl, st)->name;
+    NFPlayer *player = N->Players()[pl];
+    player->SetName(nfg.Players()[pl]->GetName());
+    for (int st = 1; st <= N->NumStrats(pl); st++) 
+      player->Strategies()[st]->name = S.Strategies(pl)[st]->name;
   }
 
-  NfgContIter<T> oiter(&S);
+  NfgContIter<T> oiter(S);
   NFSupport newS(*N);
-  NfgContIter<T> niter(&newS);
+  NfgContIter<T> niter(newS);
   
   do   {
     for (int pl = 1; pl <= nfg.NumPlayers(); pl++)

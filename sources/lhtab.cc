@@ -19,7 +19,7 @@ template <class T> gMatrix<T> Make_A1(const Nfg<T> &N, const NFSupport &S)
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
   gMatrix<T> A1(1,n1,n1+1,n1+n2);
-  NfgIter<T> iter(&S); 
+  NfgIter<T> iter(S); 
   T min; 
 
   min = N.MinPayoff()-(T)1; 
@@ -44,7 +44,7 @@ template <class T> gMatrix<T> Make_A2(const Nfg<T> &N, const NFSupport &S)
   n1=S.NumStrats(1);
   n2=S.NumStrats(2);
   gMatrix<T> A2(n1+1,n1+n2,1,n1);
-  NfgIter<T> iter(&S); 
+  NfgIter<T> iter(S); 
   T min; 
 
   min = N.MinPayoff()-(T)1; 

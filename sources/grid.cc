@@ -359,14 +359,15 @@ else								// now redo the search on a finer grid around this point
 return true;
 }
 
-GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P, const NFSupport &S_)
-										:N(N_),S(S_),params(P),P_calc(N_,S_),tmp(max(S.SupportDimensions()))
+GridSolveModule::GridSolveModule(const Nfg<double> &N_, const GridParams &P,
+                                 const NFSupport &S_)
+  : N(N_), S(S_), params(P), P_calc(N_,S_), tmp(max(S.NumStrats()))
 {
-num_strats=S.SupportDimensions();
+  num_strats=S.NumStrats();
 // find the player w/ max num strats and make it static
-static_player=1;
-for (int i=2;i<=num_strats.Length();i++)
-	if (num_strats[i]>num_strats[static_player]) static_player=i;
+  static_player=1;
+  for (int i=2;i<=num_strats.Length();i++)
+    if (num_strats[i]>num_strats[static_player]) static_player=i;
 }
 
 GridSolveModule::~GridSolveModule() { }

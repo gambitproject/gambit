@@ -25,14 +25,14 @@ class StrategyProfile;
 template <class T> class NfgContIter    {
 friend class NfgIter<T>;
 private:
-  NFSupport stratset;
+  NFSupport support;
   gArray<int> current_strat;
   Nfg<T> *N;
   StrategyProfile *profile;
   gBlock<int> frozen, thawed;
   
 public:
-  NfgContIter(const NFSupport *s);
+  NfgContIter(const NFSupport &s);
   ~NfgContIter();
   
   void First(void);

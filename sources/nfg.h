@@ -1,7 +1,7 @@
 //
 // FILE: nfg.h  -- Declaration of normal form representation
 //
-// $Date$ $Id$
+// $Id$
 //
 
 #ifndef NFG_H
@@ -53,17 +53,14 @@ public:
 
   int NumPlayers(void) const;
   int NumStrats(int pl) const;
+  const gArray<int> &NumStrats(void) const  { return dimensions; }
+
   int ProfileLength(void) const;
-  const gArray<int> &Dimensionality(void) const  { return dimensions; }
-  const gArray<NFPlayer *> &PlayerList(void) const;
+
+  const gArray<NFPlayer *> &Players(void) const;
   BaseEfg *AssociatedEfg(void) const   { return efg; }
 
-// operator to get strategy s of player p
-
-  Strategy * GetStrategy(int p, int s) const;
-
-  const gArray <Strategy *> &GetStrategy(int p) const;
-  const gArray <Strategy *> &operator()(int p) const;
+  const gArray<Strategy *> &Strategies(int p) const;
 
   virtual void WriteNfgFile(gOutput &) const = 0;
 };

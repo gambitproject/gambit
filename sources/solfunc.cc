@@ -1,7 +1,7 @@
 //
 // FILE: solfunc.cc -- GCL functions on profiles and solutions
 //
-// @(#)solfunc.cc	1.33 2/15/97
+// $Id$
 //
 
 #include "gsm.h"
@@ -908,7 +908,7 @@ static Portion *GSM_LiapValue_MixedRational(Portion **param)
 Portion* GSM_Mixed_NFSupport(Portion** param)
 {
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  gArray<int> dim = S->SupportDimensions();
+  gArray<int> dim = S->NumStrats();
   BaseMixedProfile *P;
   Portion* por;
   unsigned long datatype;
@@ -1120,9 +1120,9 @@ static Portion *GSM_Regret_MixedFloat(Portion **param)
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
-  BaseNfg* n = p->BelongsTo();
+  BaseNfg &n = p->BelongsTo();
   
-  gPVector<double> v(n->Dimensionality());
+  gPVector<double> v(n.NumStrats());
   P->Regret(v);
 
   return new FloatValPortion(v(p->GetNumber(), s->number));
@@ -1134,9 +1134,9 @@ static Portion *GSM_Regret_MixedRational(Portion **param)
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
   Strategy* s = ((StrategyPortion*) param[1])->Value();
   NFPlayer* p = s->nfp;
-  BaseNfg* n = p->BelongsTo();
+  BaseNfg &n = p->BelongsTo();
   
-  gPVector<gRational> v(n->Dimensionality());
+  gPVector<gRational> v(n.NumStrats());
   P->Regret(v);
 
   return new RationalValPortion(v(p->GetNumber(), s->number));
@@ -1184,7 +1184,7 @@ static Portion *GSM_Regrets_MixedFloat(Portion **param)
   MixedSolution<double> *profile = 
     (MixedSolution<double> *) ((MixedPortion *) param[0])->Value();
 
-  gPVector<double> v(profile->BelongsTo()->Dimensionality());
+  gPVector<double> v(profile->BelongsTo().NumStrats());
 
   profile->Regret(v);
 
@@ -1208,7 +1208,7 @@ static Portion *GSM_Regrets_MixedRational(Portion **param)
   MixedSolution<gRational> *profile = 
     (MixedSolution<gRational> *) ((MixedPortion *) param[0])->Value();
 
-  gPVector<gRational> v(profile->BelongsTo()->Dimensionality());
+  gPVector<gRational> v(profile->BelongsTo().NumStrats());
 
   profile->Regret(v);
 
@@ -1360,11 +1360,10 @@ static Portion *GSM_SetStrategyProbs_Float(Portion **param)
 
   MixedSolution<double>* P = 
     (MixedSolution<double>*) ((MixedPortion*) param[0])->Value();
-  Nfg<double>& N = * P->BelongsTo();
-  gArray< NFPlayer* > player = N.PlayerList();
+  Nfg<double>& N = P->BelongsTo();
+  const gArray<NFPlayer *> &player = N.Players();
   
-  for(i = 1; i <= N.NumPlayers(); i++)
-  {
+  for(i = 1; i <= N.NumPlayers(); i++)  {
     if(((NfPlayerPortion*) param[1])->Value() == player[i])
     {
       PlayerNum = i;
@@ -1403,8 +1402,8 @@ static Portion *GSM_SetStrategyProbs_Rational(Portion **param)
 
   MixedSolution<gRational>* P = 
     (MixedSolution<gRational>*) ((MixedPortion*) param[0])->Value();
-  Nfg<gRational>& N = * P->BelongsTo();
-  gArray< NFPlayer* > player = N.PlayerList();
+  Nfg<gRational>& N = P->BelongsTo();
+  const gArray<NFPlayer *> &player = N.Players();
   
   for(i = 1; i <= N.NumPlayers(); i++)
   {
@@ -1448,10 +1447,10 @@ static Portion *GSM_StrategyProb_Float(Portion **param)
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->nfp;
   
-  if (profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy))
+  if (profile->Support().Strategies(player->GetNumber()).Find(strategy))
     por = new FloatValPortion((*profile)
 			      (player->GetNumber(),
-			       profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy)));
+			       profile->Support().Strategies(player->GetNumber()).Find(strategy)));
   else
     por = new FloatValPortion(0.0);
   
@@ -1467,10 +1466,10 @@ static Portion *GSM_StrategyProb_Rational(Portion **param)
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->nfp;
   
-  if (profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy))
+  if (profile->Support().Strategies(player->GetNumber()).Find(strategy))
     por = new RationalValPortion((*profile)
 			      (player->GetNumber(),
-			       profile->GetNFSupport().GetStrategy(player->GetNumber()).Find(strategy)));
+			       profile->Support().Strategies(player->GetNumber()).Find(strategy)));
   else
     por = new RationalValPortion(0.0);
   
@@ -1486,19 +1485,19 @@ static Portion *GSM_StrategyProbs_Float(Portion **param)
 {
   MixedSolution<double> *profile =
     (MixedSolution<double> *) ((BehavPortion *) param[0])->Value();
-  const NFSupport *support = &profile->GetNFSupport();
+  const NFSupport *support = &profile->Support();
   const BaseNfg &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
-    NFPlayer *player = nfg.PlayerList()[pl];
+    NFPlayer *player = nfg.Players()[pl];
     ListPortion *p1 = new ListValPortion;
 
     for (int st = 1; st <= player->NumStrats(); st++)   {
-      if (support->Contains(player->StrategyList()[st]))
+      if (support->Find(player->Strategies()[st]))
 	p1->Append(new FloatValPortion(
 	      (*profile)(player->GetNumber(),
-			 support->Contains(player->StrategyList()[st]))));
+			 support->Find(player->Strategies()[st]))));
       else
 	p1->Append(new FloatValPortion(0.0));
     }
@@ -1512,19 +1511,19 @@ static Portion *GSM_StrategyProbs_Rational(Portion **param)
 {
   MixedSolution<gRational> *profile =
     (MixedSolution<gRational> *) ((BehavPortion *) param[0])->Value();
-  const NFSupport *support = &profile->GetNFSupport();
+  const NFSupport *support = &profile->Support();
   const BaseNfg &nfg = support->BelongsTo();
 
   ListPortion *por = new ListValPortion;
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)  {
-    NFPlayer *player = nfg.PlayerList()[pl];
+    NFPlayer *player = nfg.Players()[pl];
     ListPortion *p1 = new ListValPortion;
 
     for (int st = 1; st <= player->NumStrats(); st++)   {
-      if (support->Contains(player->StrategyList()[st]))
+      if (support->Find(player->Strategies()[st]))
 	p1->Append(new RationalValPortion(
 	      (*profile)(player->GetNumber(),
-			 support->Contains(player->StrategyList()[st]))));
+			 support->Find(player->Strategies()[st]))));
       else
 	p1->Append(new RationalValPortion(0.0));
     }
@@ -1548,7 +1547,7 @@ static Portion *GSM_Support_Behav(Portion** param)
 static Portion *GSM_Support_Mixed(Portion** param)
 {
   BaseMixedProfile *P = ((MixedPortion *) param[0])->Value();
-  return new NfSupportValPortion(new NFSupport(P->GetNFSupport()));
+  return new NfSupportValPortion(new NFSupport(P->Support()));
 }
 
 

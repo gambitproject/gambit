@@ -200,7 +200,7 @@ template <class T> void MixedSolution<T>::Dump(gOutput& f) const
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
   f << " IsProper:"; DisplayTriState(f, _IsProper);
-  f << " Support:" << GetNFSupport();
+  f << " Support:" << Support();
   f << " GobitLambda:" << _GobitLambda;
   f << " GobitValue:" << _GobitValue;
   f << " LiapValue:" << _LiapValue;

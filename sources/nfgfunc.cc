@@ -37,7 +37,7 @@ static Portion *GSM_AddStrategy(Portion **param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
 
-  S->GetNFStrategySet(s->nfp->GetNumber())->AddStrategy(s);
+  S->AddStrategy(s);
 
   Portion* por = new StrategyValPortion(s);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -349,7 +349,7 @@ Portion* GSM_NewNfg_Rational(Portion** param)
 Portion* GSM_ListForm_Nfg(Portion** param, bool rational)
 {
   BaseNfg* nfg = ((NfgPortion*) param[0])->Value();
-  gArray<int> dmax(nfg->Dimensionality());
+  gArray<int> dmax(nfg->NumStrats());
   ListPortion* result = new ListValPortion();
   ListPortion* list;
   int ci;
@@ -428,14 +428,14 @@ Portion* GSM_Payoff_Nfg(Portion** param)
 {
   int i;
 
-  BaseNfg *nfg = 
+  BaseNfg &nfg = 
     ((StrategyPortion *) (*((ListPortion *) param[0]))[1])->Value()->nfp->BelongsTo();
   
-  if (nfg->NumPlayers() != ((ListPortion *) param[0])->Length())
+  if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     return new ErrorPortion("Invalid profile");
 
-  StrategyProfile profile(nfg->NumPlayers());
-  for (i = 1; i <= nfg->NumPlayers(); i++)  {
+  StrategyProfile profile(nfg);
+  for (i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
     if (strat->nfp->GetNumber() != i)
@@ -445,14 +445,15 @@ Portion* GSM_Payoff_Nfg(Portion** param)
   
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
-  switch (nfg->Type())  {
+  switch (nfg.Type())  {
     case DOUBLE:
-      return new FloatValPortion(((const Nfg<double> *) nfg)->Payoff(player->GetNumber(), &profile));
+      return new FloatValPortion(((const Nfg<double> &) nfg).Payoff(player->GetNumber(), &profile));
     case RATIONAL:
-      return new RationalValPortion(((const Nfg<gRational> *) nfg)->Payoff(player->GetNumber(), &profile));
+      return new RationalValPortion(((const Nfg<gRational> &) nfg).Payoff(player->GetNumber(), &profile));
     default:
       assert(0);
     }
+  return 0;
 }
 
 
@@ -464,7 +465,7 @@ static Portion *GSM_Players_Nfg(Portion **param)
 {
   BaseNfg &N = *((NfgPortion*) param[0])->Value();
 
-  Portion* por = ArrayToList(N.PlayerList());
+  Portion* por = ArrayToList(N.Players());
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
@@ -535,7 +536,7 @@ static Portion *GSM_RemoveStrategy(Portion **param)
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   
-  S->GetNFStrategySet(s->nfp->GetNumber())->RemoveStrategy(s);
+  S->RemoveStrategy(s);
 
   Portion* por = new NfSupportValPortion(S);
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
@@ -597,13 +598,13 @@ Portion* GSM_SetPayoff_Nfg(Portion** param)
 {
   int i;
 
-  BaseNfg *nfg = ((NfPlayerPortion *) param[1])->Value()->BelongsTo();
+  BaseNfg &nfg = ((NfPlayerPortion *) param[1])->Value()->BelongsTo();
 
-  if (nfg->NumPlayers() != ((ListPortion *) param[0])->Length())
+  if (nfg.NumPlayers() != ((ListPortion *) param[0])->Length())
     return new ErrorPortion("Invalid profile");
 
-  StrategyProfile profile(nfg->NumPlayers());
-  for (i = 1; i <= nfg->NumPlayers(); i++)  {
+  StrategyProfile profile(nfg);
+  for (i = 1; i <= nfg.NumPlayers(); i++)  {
     Strategy *strat =
       ((StrategyPortion *) (*((ListPortion *) param[0]))[i])->Value();
     if (strat->nfp->GetNumber() != i)
@@ -613,18 +614,18 @@ Portion* GSM_SetPayoff_Nfg(Portion** param)
   
   NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
-  switch (nfg->Type())  {
+  switch (nfg.Type())  {
     case DOUBLE:
       if (param[2]->Spec().Type != porFLOAT)
 	return new ErrorPortion("Type mismatch in payoff value");
-      ((Nfg<double> *) nfg)->SetPayoff(player->GetNumber(),
+      ((Nfg<double> &) nfg).SetPayoff(player->GetNumber(),
 				       &profile,
 				       ((FloatPortion *) param[2])->Value());
       break;
     case RATIONAL:
       if (param[2]->Spec().Type != porRATIONAL)
 	return new ErrorPortion("Type mismatch in payoff value");
-      ((Nfg<gRational> *) nfg)->SetPayoff(player->GetNumber(),
+      ((Nfg<gRational> &) nfg).SetPayoff(player->GetNumber(),
 					  &profile,
 					  ((RationalPortion *) param[2])->Value());
       break;
@@ -632,7 +633,7 @@ Portion* GSM_SetPayoff_Nfg(Portion** param)
       assert(0);
   }
 
-  _gsm->InvalidateGameProfile((BaseNfg *) nfg, false);
+  _gsm->InvalidateGameProfile((BaseNfg *) &nfg, false);
  
   return param[0]->ValCopy();
 }
@@ -646,7 +647,7 @@ static Portion *GSM_Strategies(Portion **param)
   NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
   NFSupport* s = ((NfSupportPortion*) param[1])->Value();
 
-  Portion *por = ArrayToList(s->GetStrategy(P->GetNumber()));
+  Portion *por = ArrayToList(s->Strategies(P->GetNumber()));
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
