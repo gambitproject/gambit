@@ -243,7 +243,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
 
   wxMenu *solve_menu = new wxMenu;
   solve_menu->Append(NFG_SOLVE_STANDARD_MENU,  "S&tandard...",
-		     "Standard solutions", TRUE);
+		     "Standard solutions");
   
   wxMenu *solveCustomMenu = new wxMenu;
   solveCustomMenu->Append(NFG_SOLVE_CUSTOM_ENUMPURE, "EnumPure",

@@ -13,8 +13,6 @@
 #ifndef EFGSOLVD_H
 #define EFGSOLVD_H
 
-#define NFG_ALGORITHM_LIST	// we do not need all of nfgsolvd.h
-
 #include "nfgsolvd.h"
 
 #define PARAMS_SECTION	"Algorithm Params"		// section in .ini file
