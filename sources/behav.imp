@@ -1179,10 +1179,10 @@ template <class T> gText BehavProfile<T>::BadStuff::Description(void) const
 }
 
 template <class T>
-void RealizationProbs(const MixedProfile<T> &mp,
-		      const Efg &E, BehavProfile<T> &bp,
-		      int pl, const gArray<int> *const actions,
-		      BehavProfile<T>::BehavNode *n)
+void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
+				       const Efg &E, int pl,
+				       const gArray<int> *const actions,
+				       BehavNode *n)
 {
   static const T tremble = (T) 0;
   T prob;
@@ -1197,9 +1197,9 @@ void RealizationProbs(const MixedProfile<T> &mp,
 	else
 	  prob = tremble / (T) E.NumChildren(node);
       }
-      else if (bp.Support().Find(node->GetInfoset()->Actions()[i]))
-	prob = (T) 1 / (T) bp.Support().NumActions(node->GetPlayer()->GetNumber(),
-							  node->GetInfoset()->GetNumber());
+      else if (Support().Find(node->GetInfoset()->Actions()[i]))
+	prob = (T) 1 / (T) Support().NumActions(node->GetPlayer()->GetNumber(),
+						node->GetInfoset()->GetNumber());
       else
 	prob = (T) 0;
     }
@@ -1207,29 +1207,29 @@ void RealizationProbs(const MixedProfile<T> &mp,
       prob = E.GetChanceProb(node->GetInfoset(), i).operator gRational();
     }
 
-    BehavProfile<T>::BehavNode *child = n->children[i];
+    BehavNode *child = n->children[i];
     child->bval = prob * n->bval;
     child->nval += child->bval;    
 
-    RealizationProbs(mp, E, bp, pl, actions, child);
+    RealizationProbs(mp, E, pl, actions, child);
   }    
 	
 }
 
 template <class T>
-void BehaviorStrat(const Efg &E, BehavProfile<T> &bp, int pl,
-		   BehavProfile<T>::BehavNode *n)
+void BehavProfile<T>::BehaviorStrat(const Efg &E, int pl,
+				    BehavNode *n)
 {
   for (int i = 1; i <= n->children.Length(); i++)   {
     BehavProfile<T>::BehavNode *child = n->children[i];
     if (n->node->GetPlayer() && n->node->GetPlayer()->GetNumber() == pl)
       if (n->nval > (T) 0 && child->nval > (T) 0)  {
-	bp(n->node->GetPlayer()->GetNumber(),
-	   n->node->GetInfoset()->GetNumber(), 
-	   bp.Support().Find(n->node->GetInfoset()->Actions()[i])) =
+	(*this)(n->node->GetPlayer()->GetNumber(),
+		n->node->GetInfoset()->GetNumber(), 
+		Support().Find(n->node->GetInfoset()->Actions()[i])) =
 	  child->nval / n->nval;
       }
-    BehaviorStrat(E, bp, pl, child);
+    BehaviorStrat(E, pl, child);
   }
 }
 
@@ -1275,12 +1275,12 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
 
 	n->bval = p_profile(pl, st);
 
-	RealizationProbs(p_profile, *m_efg, *this, pl, actions, m_root);
+	RealizationProbs(p_profile, *m_efg, pl, actions, m_root);
       }
     }
     
     m_root->nval = (T) 1;
-    BehaviorStrat(*m_efg, *this, pl, n);
+    BehaviorStrat(*m_efg, pl, n);
   }
 }
 

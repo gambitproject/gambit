@@ -23,6 +23,7 @@ template <class T> class gRectArray;
 class BehavSolution;
 
 template <class T> class BehavProfile : public gDPVector<T>  {
+public:
   struct BehavInfoset;
   struct BehavAction;
   struct BehavNode;
@@ -53,7 +54,10 @@ protected:
   
 
   void NodeRealizProbs(Node *node, T prob) const;
-
+  
+  void BehaviorStrat(const Efg &, int, BehavNode *);
+  void RealizationProbs(const MixedProfile<T> &, const Efg &,
+			int pl, const gArray<int> *const, BehavNode *);
 
   // USED IN TEST WHETHER PROFILE (RESTRICTED TO SUPPORT) EXTENDS TO ANF NASH
   
