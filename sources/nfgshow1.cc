@@ -580,22 +580,22 @@ void NormalSpread::OnMenuCommand(int id)
       parent->SetLabels(2);
       break;
     case NFG_EDIT_OUTCOMES_NEW:
-      parent->NewOutcome();
+      parent->OutcomeNew();
       break;
     case NFG_EDIT_OUTCOMES_DELETE:
-      parent->DeleteOutcome();
+      parent->OutcomeDelete();
       break;
     case NFG_EDIT_OUTCOMES_ATTACH:
-      parent->AttachOutcome();
+      parent->OutcomeAttach();
       break;
     case NFG_EDIT_OUTCOMES_DETACH:
-      parent->DetachOutcome();
+      parent->OutcomeDetach();
       break;
     case NFG_EDIT_OUTCOMES_LABEL:
-      parent->RenameOutcome();
+      parent->OutcomeLabel();
       break;
     case NFG_EDIT_OUTCOMES_PAYOFFS:
-      parent->ChangePayoffs(CurRow(), CurCol(), false);
+      parent->OutcomePayoffs(CurRow(), CurCol(), false);
       break;
 
     case NFG_FILE_SAVE:
@@ -603,11 +603,11 @@ void NormalSpread::OnMenuCommand(int id)
       break;
 
     case NFG_ACCL_PAYOFF:
-      parent->ChangePayoffs(CurRow(), CurCol(), false);
+      parent->OutcomePayoffs(CurRow(), CurCol(), false);
       break;
 
     case NFG_ACCL_NEXT_PAYOFF:
-      parent->ChangePayoffs(CurRow(), CurCol(), true);
+      parent->OutcomePayoffs(CurRow(), CurCol(), true);
       break;
 
     default: 

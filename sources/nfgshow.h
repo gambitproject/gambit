@@ -117,6 +117,14 @@ public:
   void SetOutcome(int outc, int x = -1, int y = -1);
   void ChangeOutcomes(int what);
 
+  void OutcomeNew(void);
+  void OutcomeDelete(void);
+  void OutcomeAttach(void);
+  void OutcomeDetach(void);
+  void OutcomeLabel(void);
+  void OutcomePayoffs(int st1, int st2, bool next = false);
+
+
   void OutcomeOptions(void)
     {
       draw_settings.OutcomeOptions();
@@ -129,12 +137,6 @@ public:
   // OnOK clean up
   void OnOk(void);
 
-  void NewOutcome(void);
-  void DeleteOutcome(void);
-  void AttachOutcome(void);
-  void DetachOutcome(void);
-  void RenameOutcome(void);
-  void ChangePayoffs(int st1, int st2, bool next = false);
 
   // Now come the solution functions
   void Solve(int);
@@ -245,7 +247,7 @@ public:
 
   // Callback for double clicking on a cell.
   void OnDoubleClick(int row, int col, int, const gText &) 
-    { parent->ChangePayoffs(row, col); }
+    { parent->OutcomePayoffs(row, col); }
 
   // Callback for moving the selected cell.  Currently this updates the pl1, pl2 choice boxes
   void OnSelectedMoved(int row, int col, SpreadMoveDir /*how*/ = SpreadMoveJump)
