@@ -355,11 +355,13 @@ wxFrame *GambitApp::OnInit(void)
     (void) new GambitToolBar(gambit_frame);
     
     // Set up the help system.
-    wxInitHelp("gambit", "Gambit -- Graphics User Interface, Version 0.94\n\n"
+    gText workingDir = wxGetWorkingDirectory();
+
+    wxInitHelp(workingDir + "/gambit", "Gambit -- Graphics User Interface, Version 0.96\n\n"
                "Developed by Richard D. McKelvey (rdm@hss.caltech.edu)\n"
-               "Main Programmer:  Theodore Turocy (magyar@hss.caltech.edu)\n"
+               "Main Programmer:  Theodore Turocy (arbiter@nwu.edu)\n"
                "Front End: Eugene Grayver (egrayver@hss.caltech.edu)\n"
-               "California Institute of Technology, 1996.\n"
+               "California Institute of Technology, 1996-9.\n"
                "Funding provided by the National Science Foundation");
     
     // Initialize the output (floating point) precision.
