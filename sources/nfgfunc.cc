@@ -87,15 +87,6 @@ static Portion *GSM_DeleteOutcome(Portion **param)
 }
 
 
-NFSupport *ComputeDominated(const Nfg &, NFSupport &S, bool strong,
-			    const gArray<int> &players,
-			    gOutput &tracefile, gStatus &status);
-NFSupport *ComputeMixedDominated(NFSupport &S,
-				 bool strong, gPrecision precision,
-				 const gArray<int> &players,
-				 gOutput &tracefile, gStatus &status);
-
-
 //-------------
 // ElimDom
 //-------------
@@ -116,16 +107,16 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   Nfg *N = (Nfg *) &S->Game();
   if (mixed)
     T = ComputeMixedDominated(*S, strong, precRATIONAL, players,
-			      ((OutputPortion *) param[4])->Value(), gstatus);
+			      ((OutputPortion *) param[5])->Value(), gstatus);
   else   {
     T = ComputeDominated(*N, *S, strong, players,
-			   ((OutputPortion *) param[4])->Value(), gstatus);
+			   ((OutputPortion *) param[5])->Value(), gstatus);
   }
 
-  por = (T) ? new NfSupportPortion(T) :
-                new NfSupportPortion(new NFSupport(*S));
+  por = ((T) ? new NfSupportPortion(T) :
+	 new NfSupportPortion(new NFSupport(*S)));
 
-  ((NumberPortion *) param[3])->SetValue(watch.Elapsed());
+  ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
   
   return por;
 }
@@ -569,18 +560,20 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new gclFunction("ElimDom", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_ElimDom_Nfg,
-				       porNFSUPPORT, 6));
+				       porNFSUPPORT, 7));
   FuncObj->SetParamInfo(0, 0, gclParameter("support", porNFSUPPORT));
   FuncObj->SetParamInfo(0, 1, gclParameter("strong", porBOOLEAN,
 					    new BoolPortion(false)));
   FuncObj->SetParamInfo(0, 2, gclParameter("mixed", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 3, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 3, gclParameter("precision", porPRECISION,
+					   new PrecisionPortion(precRATIONAL)));
+  FuncObj->SetParamInfo(0, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 4, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 5, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(0, 5, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("traceLevel", porNUMBER,
 					    new NumberPortion(0)));
   gsm->AddFunction(FuncObj);
 }
