@@ -362,13 +362,14 @@ static Portion *GSM_Qre_Start(Portion **param)
     NP.powLam = ((NumberPortion *) param[5])->Value();
     NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-    NP.maxitsN = ((NumberPortion *) param[7])->Value();
-    NP.tolN = ((NumberPortion *) param[8])->Value();
-    NP.maxits1 = ((NumberPortion *) param[9])->Value();
-    NP.tol1 = ((NumberPortion *) param[10])->Value();
-    
-    NP.tracefile = &((OutputPortion *) param[14])->Value();
-    NP.trace = ((NumberPortion *) param[15])->Value();
+    gNumber accuracy = ((NumberPortion *) param[7])->Value();
+    NP.maxitsN = 200;
+    NP.maxits1 = 200;
+    NP.tolN = accuracy * accuracy;
+    NP.tol1 = NP.tolN;
+
+    NP.tracefile = &((OutputPortion *) param[11])->Value();
+    NP.trace = ((NumberPortion *) param[12])->Value();
 
     gList<MixedSolution> solutions;
     try {
@@ -376,9 +377,9 @@ static Portion *GSM_Qre_Start(Portion **param)
       gWatch watch;
       Qre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[12])->SetValue(nevals);
-      ((NumberPortion *) param[13])->SetValue(niters);
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
       NP.status.Reset();
@@ -410,13 +411,14 @@ static Portion *GSM_Qre_Start(Portion **param)
     EP.powLam = ((NumberPortion *) param[5])->Value();
     EP.fullGraph = ((BoolPortion *) param[6])->Value();
     
-    EP.maxitsN = ((NumberPortion *) param[7])->Value();
-    EP.tolN = ((NumberPortion *) param[8])->Value();
-    EP.maxits1 = ((NumberPortion *) param[9])->Value();
-    EP.tol1 = ((NumberPortion *) param[10])->Value();
-  
-    EP.tracefile = &((OutputPortion *) param[14])->Value();
-    EP.trace = ((NumberPortion *) param[15])->Value();
+    gNumber accuracy = ((NumberPortion *) param[7])->Value();
+    EP.maxitsN = 200;
+    EP.maxits1 = 200;
+    EP.tolN = accuracy * accuracy;
+    EP.tol1 = EP.tolN;
+
+    EP.tracefile = &((OutputPortion *) param[11])->Value();
+    EP.trace = ((NumberPortion *) param[12])->Value();
     
     gList<BehavSolution> solutions;
     try {
@@ -425,9 +427,9 @@ static Portion *GSM_Qre_Start(Portion **param)
     
       Qre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
-      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[12])->SetValue(nevals);
-      ((NumberPortion *) param[13])->SetValue(niters);
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
       EP.status.Reset();
@@ -466,13 +468,14 @@ static Portion *GSM_KQre_Start(Portion **param)
     NP.powLam = ((NumberPortion *) param[5])->Value();
     NP.fullGraph = ((BoolPortion *) param[6])->Value();
 
-    NP.maxitsN = ((NumberPortion *) param[7])->Value();
-    NP.tolN = ((NumberPortion *) param[8])->Value();
-    NP.maxits1 = ((NumberPortion *) param[9])->Value();
-    NP.tol1 = ((NumberPortion *) param[10])->Value();
-    
-    NP.tracefile = &((OutputPortion *) param[14])->Value();
-    NP.trace = ((NumberPortion *) param[15])->Value();
+    gNumber accuracy = ((NumberPortion *) param[7])->Value();
+    NP.maxitsN = 200;
+    NP.maxits1 = 200;
+    NP.tolN = accuracy * accuracy;
+    NP.tol1 = NP.tolN;
+
+    NP.tracefile = &((OutputPortion *) param[11])->Value();
+    NP.trace = ((NumberPortion *) param[12])->Value();
 
     gList<MixedSolution> solutions;
     try {
@@ -480,9 +483,9 @@ static Portion *GSM_KQre_Start(Portion **param)
       gWatch watch;
       KQre(N, NP, MixedProfile<gNumber>(start), solutions, nevals, niters);
 
-      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[12])->SetValue(nevals);
-      ((NumberPortion *) param[13])->SetValue(niters);
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
       NP.status.Reset();
@@ -514,13 +517,14 @@ static Portion *GSM_KQre_Start(Portion **param)
     EP.powLam = ((NumberPortion *) param[5])->Value();
     EP.fullGraph = ((BoolPortion *) param[6])->Value();
     
-    EP.maxitsN = ((NumberPortion *) param[7])->Value();
-    EP.tolN = ((NumberPortion *) param[8])->Value();
-    EP.maxits1 = ((NumberPortion *) param[9])->Value();
-    EP.tol1 = ((NumberPortion *) param[10])->Value();
-  
-    EP.tracefile = &((OutputPortion *) param[14])->Value();
-    EP.trace = ((NumberPortion *) param[15])->Value();
+    gNumber accuracy = ((NumberPortion *) param[7])->Value();
+    NP.maxitsN = 200;
+    NP.maxits1 = 200;
+    NP.tolN = accuracy * accuracy;
+    NP.tol1 = NP.tolN;
+
+    EP.tracefile = &((OutputPortion *) param[11])->Value();
+    EP.trace = ((NumberPortion *) param[12])->Value();
     
     gList<BehavSolution> solutions;
     try {
@@ -529,9 +533,9 @@ static Portion *GSM_KQre_Start(Portion **param)
     
       KQre(E, EP, BehavProfile<gNumber>(start), solutions, nevals, niters);
 
-      ((NumberPortion *) param[11])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[12])->SetValue(nevals);
-      ((NumberPortion *) param[13])->SetValue(niters);
+      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[9])->SetValue(nevals);
+      ((NumberPortion *) param[10])->SetValue(niters);
     }
     catch (gSignalBreak &) {
       EP.status.Reset();
@@ -706,13 +710,14 @@ static Portion *GSM_Liap_Behav(Portion **param)
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
     LP.nTries = ((NumberPortion *) param[3])->Value();
 
-    LP.maxitsN = ((NumberPortion *) param[4])->Value();
-    LP.tolN = ((NumberPortion *) param[5])->Value();
-    LP.maxits1 = ((NumberPortion *) param[6])->Value();
-    LP.tol1 = ((NumberPortion *) param[7])->Value();
-    
-    LP.tracefile = &((OutputPortion *) param[10])->Value();
-    LP.trace = ((NumberPortion *) param[11])->Value();
+    gNumber accuracy = ((NumberPortion *) param[4])->Value();
+    LP.maxitsN = 200;
+    LP.maxits1 = 200;
+    LP.tolN = accuracy * accuracy;
+    LP.tol1 = LP.tolN;
+
+    LP.tracefile = &((OutputPortion *) param[7])->Value();
+    LP.trace = ((NumberPortion *) param[8])->Value();
 
     gWatch watch;
 
@@ -721,8 +726,8 @@ static Portion *GSM_Liap_Behav(Portion **param)
     try {
       efgLiapNfgSolve algorithm(E, LP, start);
       solutions = algorithm.Solve(EFSupport(E));
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(algorithm.NumEvals());
+      ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       LP.status.Reset();
@@ -740,13 +745,14 @@ static Portion *GSM_Liap_Behav(Portion **param)
     LP.stopAfter = ((NumberPortion *) param[2])->Value();
     LP.nTries = ((NumberPortion *) param[3])->Value();
 
-    LP.maxitsN = ((NumberPortion *) param[4])->Value();
-    LP.tolN = ((NumberPortion *) param[5])->Value();
-    LP.maxits1 = ((NumberPortion *) param[6])->Value();
-    LP.tol1 = ((NumberPortion *) param[7])->Value();
-    
-    LP.tracefile = &((OutputPortion *) param[10])->Value();
-    LP.trace = ((NumberPortion *) param[11])->Value();
+    gNumber accuracy = ((NumberPortion *) param[4])->Value();
+    LP.maxitsN = 200;
+    LP.maxits1 = 200;
+    LP.tolN = accuracy * accuracy;
+    LP.tol1 = LP.tolN;
+
+    LP.tracefile = &((OutputPortion *) param[7])->Value();
+    LP.trace = ((NumberPortion *) param[8])->Value();
 
     gWatch watch;
 
@@ -755,8 +761,8 @@ static Portion *GSM_Liap_Behav(Portion **param)
     try {
       efgLiapSolve algorithm(E, LP, start);
       solutions = algorithm.Solve(EFSupport(E));
-      ((NumberPortion *) param[8])->SetValue(watch.Elapsed());
-      ((NumberPortion *) param[9])->SetValue(algorithm.NumEvals());
+      ((NumberPortion *) param[5])->SetValue(watch.Elapsed());
+      ((NumberPortion *) param[6])->SetValue(algorithm.NumEvals());
     }
     catch (gSignalBreak &) {
       LP.status.Reset();
@@ -778,13 +784,14 @@ static Portion *GSM_Liap_Mixed(Portion **param)
   params.stopAfter = ((NumberPortion *) param[1])->Value();
   params.nTries = ((NumberPortion *) param[2])->Value();
 
-  params.maxitsN = ((NumberPortion *) param[3])->Value();
-  params.tolN = ((NumberPortion *) param[4])->Value();
-  params.maxits1 = ((NumberPortion *) param[5])->Value();
-  params.tol1 = ((NumberPortion *) param[6])->Value();
- 
-  params.tracefile = &((OutputPortion *) param[9])->Value();
-  params.trace = ((NumberPortion *) param[10])->Value();
+  gNumber accuracy = ((NumberPortion *) param[3])->Value();
+  params.maxitsN = 200;
+  params.maxits1 = 200;
+  params.tolN = accuracy * accuracy;
+  params.tol1 = params.tolN;
+
+  params.tracefile = &((OutputPortion *) param[6])->Value();
+  params.trace = ((NumberPortion *) param[7])->Value();
 
   gList<MixedSolution> solutions;
 
@@ -794,8 +801,8 @@ static Portion *GSM_Liap_Mixed(Portion **param)
   
     Liap(N, params, start, solutions, nevals, niters);
 
-    ((NumberPortion *) param[7])->SetValue(watch.Elapsed());
-    ((NumberPortion *) param[8])->SetValue(nevals);
+    ((NumberPortion *) param[4])->SetValue(watch.Elapsed());
+    ((NumberPortion *) param[5])->SetValue(nevals);
   }
   catch (gSignalBreak &) {
     params.status.Reset();
@@ -1426,7 +1433,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("QreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Qre_Start, 
-				       PortionSpec(porMIXED | porBEHAV, 1), 16));
+				       PortionSpec(porMIXED | porBEHAV, 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
@@ -1441,24 +1448,18 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(1)));
   FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porINTEGER,
-					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("tolN", porNUMBER,
-					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 9, gclParameter("maxits1", porINTEGER,
-					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 10, gclParameter("tol1", porNUMBER,
-					     new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
+					    new NumberPortion(1.0e-8)));
+  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 13, gclParameter("nIters", porINTEGER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 14, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 15, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
@@ -1466,7 +1467,7 @@ void Init_algfunc(GSM *gsm)
 #ifdef INTERNAL_VERSION
   FuncObj = new gclFunction("KQreSolve", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_KQre_Start, 
-				       PortionSpec(porMIXED | porBEHAV , 1), 16));
+				       PortionSpec(porMIXED | porBEHAV , 1), 13));
   FuncObj->SetParamInfo(0, 0, gclParameter("start",
 					    porMIXED | porBEHAV));
   FuncObj->SetParamInfo(0, 1, gclParameter("pxifile", porTEXT,
@@ -1481,24 +1482,18 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(1)));
   FuncObj->SetParamInfo(0, 6, gclParameter("fullGraph", porBOOLEAN,
 					    new BoolPortion(false)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("maxitsN", porINTEGER,
-					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("tolN", porNUMBER,
-					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 9, gclParameter("maxits1", porINTEGER,
-					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 10, gclParameter("tol1", porNUMBER,
-					     new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 11, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 7, gclParameter("accuracy", porNUMBER,
+					    new NumberPortion(1.0e-8)));
+  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 12, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 13, gclParameter("nIters", porINTEGER,
+  FuncObj->SetParamInfo(0, 10, gclParameter("nIters", porINTEGER,
 					     new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 14, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 11, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 15, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 12, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
@@ -1555,7 +1550,7 @@ void Init_algfunc(GSM *gsm)
 
   FuncObj = new gclFunction("LiapSolve", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Liap_Behav,
-				       PortionSpec(porBEHAV, 1), 12));
+				       PortionSpec(porBEHAV, 1), 9));
   FuncObj->SetParamInfo(0, 0, gclParameter("start", porBEHAV));
   FuncObj->SetParamInfo(0, 1, gclParameter("asNfg", porBOOLEAN,
 					    new BoolPortion(false)));
@@ -1563,47 +1558,35 @@ void Init_algfunc(GSM *gsm)
 					    new NumberPortion(1)));
   FuncObj->SetParamInfo(0, 3, gclParameter("nTries", porINTEGER,
 					    new NumberPortion(10)));
-  FuncObj->SetParamInfo(0, 4, gclParameter("maxitsN", porINTEGER,
-					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(0, 5, gclParameter("tolN", porNUMBER,
-					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(0, 6, gclParameter("maxits1", porINTEGER,
-					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(0, 7, gclParameter("tol1", porNUMBER,
-					    new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(0, 8, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(0, 4, gclParameter("accuracy", porNUMBER,
+					    new NumberPortion(1.0e-8)));
+  FuncObj->SetParamInfo(0, 5, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 9, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(0, 6, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(0, 10, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 7, gclParameter("traceFile", porOUTPUT,
 					     new OutputPortion(gnull), 
 					     BYREF));
-  FuncObj->SetParamInfo(0, 11, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(0, 8, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   FuncObj->SetFuncInfo(1, gclSignature(GSM_Liap_Mixed,
-				       PortionSpec(porMIXED, 1), 11));
+				       PortionSpec(porMIXED, 1), 8));
   FuncObj->SetParamInfo(1, 0, gclParameter("start", porMIXED));
   FuncObj->SetParamInfo(1, 1, gclParameter("stopAfter", porINTEGER,
 					    new NumberPortion(1)));
   FuncObj->SetParamInfo(1, 2, gclParameter("nTries", porINTEGER,
 					    new NumberPortion(10)));
-  FuncObj->SetParamInfo(1, 3, gclParameter("maxitsN", porINTEGER,
-					    new NumberPortion(20)));
-  FuncObj->SetParamInfo(1, 4, gclParameter("tolN", porNUMBER,
-					    new NumberPortion(1.0e-10)));
-  FuncObj->SetParamInfo(1, 5, gclParameter("maxits1", porINTEGER,
-					    new NumberPortion(100)));
-  FuncObj->SetParamInfo(1, 6, gclParameter("tol1", porNUMBER,
-					    new NumberPortion(2.0e-10)));
-  FuncObj->SetParamInfo(1, 7, gclParameter("time", porNUMBER,
+  FuncObj->SetParamInfo(1, 3, gclParameter("accuracy", porNUMBER,
+					    new NumberPortion(1.0e-8)));
+  FuncObj->SetParamInfo(1, 4, gclParameter("time", porNUMBER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 8, gclParameter("nEvals", porINTEGER,
+  FuncObj->SetParamInfo(1, 5, gclParameter("nEvals", porINTEGER,
 					    new NumberPortion(0), BYREF));
-  FuncObj->SetParamInfo(1, 9, gclParameter("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(1, 6, gclParameter("traceFile", porOUTPUT,
 					    new OutputPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 10, gclParameter("traceLevel", porNUMBER,
+  FuncObj->SetParamInfo(1, 7, gclParameter("traceLevel", porNUMBER,
 					     new NumberPortion(0)));
 
   gsm->AddFunction(FuncObj);
