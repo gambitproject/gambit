@@ -11,9 +11,8 @@
 //                        SeqFormParams: member functions
 //---------------------------------------------------------------------------
 
-SeqFormParams::SeqFormParams(gStatus &status_) 
-  : trace(0), stopAfter(0), maxdepth(0), precision(precDOUBLE),
-    tracefile(&gnull), status(status_)
+SeqFormParams::SeqFormParams(gStatus &s) 
+  : AlgParams(s)
 { }
 
 int _SeqForm(const EFSupport &support, const SeqFormParams &params,

@@ -8,17 +8,14 @@
 #define SEQFORM_H
 
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "behavsol.h"
 
-class SeqFormParams     {
-  public:
-    int trace, stopAfter, maxdepth;
-    gPrecision precision;
-    gOutput *tracefile;
-    gStatus &status;
-    
-    SeqFormParams(gStatus &status_ = gstatus);
+class SeqFormParams : public AlgParams {
+public:
+  int maxdepth;
+  
+  SeqFormParams(gStatus &status_ = gstatus);
 };
 
 #include "subsolve.h"

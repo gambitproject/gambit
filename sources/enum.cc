@@ -11,9 +11,8 @@
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(gStatus &status_)
-  : trace(0), stopAfter(0), cliques(false), precision(precDOUBLE),
-    tracefile(&gnull), status(status_)
+EnumParams::EnumParams(gStatus &s)
+  : AlgParams(s), cliques(false)
 { }
 
 int Enum(const NFSupport &support, const EnumParams &params,

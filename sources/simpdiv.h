@@ -10,17 +10,14 @@
 #include "nfg.h"
 #include "glist.h"
 #include "grarray.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "mixedsol.h"
 
-class SimpdivParams     {
-  public:
-    int trace, stopAfter, nRestarts, leashLength;
-    gPrecision precision;
-    gOutput *tracefile;
-    gStatus &status;
-
-    SimpdivParams(gStatus &status_ = gstatus);
+class SimpdivParams : public AlgParams {
+public:
+  int nRestarts, leashLength;
+  
+  SimpdivParams(gStatus &status_ = gstatus);
 };
 
 template <class T> class SimpdivModule  {

@@ -11,8 +11,10 @@
 
 class AlgParams   {
 public:
-  int trace;
+  int trace, stopAfter;
   gNumber accuracy;
+  gPrecision precision;
+
   gOutput *tracefile;
   gStatus &status;
   

@@ -17,7 +17,7 @@
 
 class EFLiapParams : public FuncMinParams {
 public:
-  int nTries, stopAfter;
+  int nTries;
   
   EFLiapParams(gStatus & = gstatus);
 };

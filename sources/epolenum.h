@@ -10,17 +10,12 @@
 
 #include "efg.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "behav.h"
 #include "behavsol.h"
 
-class EfgPolEnumParams     {
+class EfgPolEnumParams : public AlgParams {
 public:
-  int trace, stopAfter;
-  gPrecision precision;
-  gOutput *tracefile;
-  gStatus &status;
-
   EfgPolEnumParams(gStatus &status_=gstatus);
 };
 

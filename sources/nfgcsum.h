@@ -9,17 +9,12 @@
 
 #include "nfg.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "mixedsol.h"
 
-class ZSumParams     {
-  public:
-    int trace, stopAfter;
-    gPrecision precision;
-    gOutput *tracefile;
-    gStatus &status;
-    
-    ZSumParams(gStatus &status_ = gstatus);
+class ZSumParams : public AlgParams    {
+public:
+  ZSumParams(gStatus &status_ = gstatus);
 };
 
 int ZSum(const NFSupport &, const ZSumParams &,

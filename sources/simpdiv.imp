@@ -436,7 +436,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
     
     MixedProfile<T> profile(y);
     index=solutions.Append(MixedSolution(profile, algorithmNfg_SIMPDIV));
-    solutions[index].SetEpsilon(TOL);
+    //    solutions[index].SetEpsilon(TOL);
   }
 
   time = watch.Elapsed();

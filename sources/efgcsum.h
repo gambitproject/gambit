@@ -8,18 +8,13 @@
 #define EFGCSUM_H
 
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "tableau.h"
 #include "lpsolve.h"
 #include "behavsol.h"
 
-class CSSeqFormParams     {
+class CSSeqFormParams : public AlgParams {
   public:
-    int trace, stopAfter;
-    gPrecision precision;
-    gOutput *tracefile;
-    gStatus &status;
-    
     CSSeqFormParams(gStatus &status_ = gstatus);
 };
 

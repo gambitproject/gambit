@@ -10,14 +10,11 @@
 #include "nfg.h"
 #include "mixedsol.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 
-class LemkeParams     {
+class LemkeParams : public AlgParams    {
   public:
-    int dup_strat, trace, stopAfter,maxdepth;
-    gPrecision precision;
-    gOutput *tracefile;
-    gStatus &status;
+    int dup_strat, maxdepth;
     
     LemkeParams(gStatus & = gstatus);
 };

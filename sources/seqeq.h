@@ -8,18 +8,13 @@
 #define SEQEQ_H
 
 #include "efg.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "efstrat.h"
 #include "efbasis.h"
 #include "behavsol.h"
 
-class SeqEquilibParams     {
+class SeqEquilibParams : public AlgParams    {
 public:
-  int trace, stopAfter;
-  gPrecision precision;
-  gOutput *tracefile;
-  gStatus &status;
-
   SeqEquilibParams(gStatus &status_=gstatus);
 };
 

@@ -9,9 +9,8 @@
 //                        EfgPolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-EfgPolEnumParams::EfgPolEnumParams(gStatus &status_)
-  : trace(0), stopAfter(0), precision(precDOUBLE),
-    tracefile(&gnull), status(status_)
+EfgPolEnumParams::EfgPolEnumParams(gStatus &s)
+  : AlgParams(s)
 { }
 
 int EfgPolEnum(const EFSupport &support, const EfgPolEnumParams &params,

@@ -6,9 +6,8 @@
 
 #include "simpdiv.imp"
 
-SimpdivParams::SimpdivParams(gStatus &status_)
-  : trace(0), stopAfter(1), nRestarts(20), leashLength(0), 
-    precision(precDOUBLE), tracefile(&gnull), status(status_)
+SimpdivParams::SimpdivParams(gStatus &s)
+  : AlgParams(s), nRestarts(20), leashLength(0)
 { }
 
 int Simpdiv(const NFSupport &support, const SimpdivParams &params,

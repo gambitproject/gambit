@@ -244,10 +244,9 @@ bool MixedProfileGrid1::Inc(void)
 // GRID SOLVE
 // ***************************************************************************
 
-GridParams::GridParams(gStatus &st)
-	: minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), tol1(.01),tol2(0.01),
-		powLam(1), trace(0), fullGraph(false), tracefile(&gnull), pxifile(&gnull),
-		status(st)
+GridParams::GridParams(gStatus &s)
+  : AlgParams(s), minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), 
+    tol1(.01),tol2(0.01), powLam(1), fullGraph(false), pxifile(&gnull)
 { }
 
 class GridSolveModule  {

@@ -9,16 +9,15 @@
 
 #include "mixedsol.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 
-class GridParams   {
+class GridParams : public AlgParams  {
 public:
   double minLam, maxLam, delLam, delp1, delp2, tol1, tol2;
   int multi_grid;
-  int powLam, trace;
+  int powLam;
   bool fullGraph;
-  gOutput *tracefile, *pxifile;
-  gStatus &status;
+  gOutput *pxifile;
   
   GridParams(gStatus & = gstatus);
 };

@@ -12,8 +12,7 @@
 //---------------------------------------------------------------------------
 
 LemkeParams::LemkeParams(gStatus &s) 
-  : dup_strat(0), trace(0), stopAfter(0), maxdepth(0), 
-    precision(precDOUBLE), tracefile(&gnull), status(s)
+  : AlgParams(s), dup_strat(0), maxdepth(0)
 { }
 
 

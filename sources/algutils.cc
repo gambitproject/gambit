@@ -5,7 +5,8 @@
 #include "algutils.h"
 
 AlgParams::AlgParams(gStatus &s)
-  : trace(0), accuracy(0), tracefile(&gnull), status(s)
+  : trace(0), stopAfter(0), accuracy(0), precision(precDOUBLE), 
+    tracefile(&gnull), status(s)
 { }
 
 AlgParams::~AlgParams()

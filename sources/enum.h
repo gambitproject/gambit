@@ -16,20 +16,16 @@
 
 #include "nfg.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "mixed.h"
 #include "mixedsol.h"
 #include "vertenum.h"
 
-class EnumParams     {
+class EnumParams : public AlgParams    {
 public:
-  int trace, stopAfter;
   bool cliques;
-  gPrecision precision;
-  gOutput *tracefile;
-  gStatus &status;
 
-  EnumParams(gStatus &status_=gstatus);
+  EnumParams(gStatus & = gstatus);
 };
 
 

@@ -9,9 +9,8 @@
 //                        SeqEquilibParams: member functions
 //---------------------------------------------------------------------------
 
-SeqEquilibParams::SeqEquilibParams(gStatus &status_)
-  : trace(0), stopAfter(0), precision(precDOUBLE),
-    tracefile(&gnull), status(status_)
+SeqEquilibParams::SeqEquilibParams(gStatus &s)
+  : AlgParams(s)
 { }
 
 int SequentialEquilib(const EFBasis &b, const EFSupport &B, 

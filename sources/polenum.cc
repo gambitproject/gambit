@@ -254,8 +254,8 @@ bool PolEnumModule::IsSingular() const
 //                        PolEnumParams: member functions
 //---------------------------------------------------------------------------
 
-PolEnumParams::PolEnumParams(gStatus &status_)
-  : trace(0), stopAfter(0), tracefile(&gnull), status(status_)
+PolEnumParams::PolEnumParams(gStatus &s)
+  : AlgParams(s)
 { }
 
 int PolEnum(const NFSupport &support, const PolEnumParams &params,

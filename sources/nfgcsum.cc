@@ -11,9 +11,8 @@
 //                        ZSumParams: member functions
 //---------------------------------------------------------------------------
 
-ZSumParams::ZSumParams(gStatus &status_) 
-  :  trace(0), stopAfter(0), precision(precDOUBLE),
-     tracefile(&gnull), status(status_)
+ZSumParams::ZSumParams(gStatus &s) 
+  :  AlgParams(s)
 { }
 
 int ZSum(const NFSupport &support, const ZSumParams &params, 

@@ -10,7 +10,7 @@
 #include "gmatrix.h"
 
 EFLiapParams::EFLiapParams(gStatus &s)
-  : FuncMinParams(s), nTries(10), stopAfter(1)
+  : FuncMinParams(s), nTries(10)
 { }
 
 class EFLiapFunc : public gFunction<double>  {

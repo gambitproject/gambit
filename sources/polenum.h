@@ -9,16 +9,12 @@
 
 #include "nfg.h"
 #include "glist.h"
-#include "gstatus.h"
+#include "algutils.h"
 #include "mixed.h"
 #include "mixedsol.h"
 
-class PolEnumParams     {
+class PolEnumParams : public AlgParams  {
 public:
-  int trace, stopAfter;
-  gOutput *tracefile;
-  gStatus &status;
-
   PolEnumParams(gStatus &status_=gstatus);
 };
 
