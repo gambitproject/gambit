@@ -24,6 +24,7 @@
 #include "wxmisc.h"
 #include "nfggui.h"
 #include "efggui.h"
+#include "system.h"
 #include <signal.h>
 #include <math.h>
 
@@ -171,19 +172,47 @@ void GambitToolBar::OnMouseEnter(int tool)
 //                     GAMBITFRAME: CONSTRUCTOR
 //---------------------------------------------------------------------
 
+static gText ResolveVersion(void)
+{
+  gText resourceFile = "gambit.ini";
+  gText firstPath = System::GetEnv("GAMBITHOME");
+
+  if (firstPath != "") {
+    int ver = 0;
+    wxGetResource("Gambit", "Gambit-Version", &ver,
+                  gText(firstPath) + "/" + resourceFile);
+
+    if (ver == GAMBIT_VERSION)
+      return gText(firstPath) + "/" + resourceFile;
+  }
+
+  char *workingDir = wxGetWorkingDirectory();
+  if (workingDir)  {
+    int ver = 0;
+    wxGetResource("Gambit", "Gambit-Version", &ver,
+                  gText(workingDir) + "/" + resourceFile);
+
+    if (ver == GAMBIT_VERSION)
+      return gText(workingDir) + "/" + resourceFile;
+  }
+
+  int ver = 0;
+  wxGetResource("Gambit", "Gambit-Version", &ver, resourceFile);
+  if (ver == GAMBIT_VERSION)
+    return resourceFile;
+
+  return "";
+}
+
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 
 wxFrame *GambitApp::OnInit(void)
 {
     // First check if we have a current settings file (gambit.ini).  If not, exit!
-    m_resourceFile = "gambit.ini";
+    m_resourceFile = ResolveVersion();
 
-    int ver;
-    wxGetResource("Gambit", "Gambit-Version", &ver, m_resourceFile);
-    
-    if (ver != GAMBIT_VERSION)
-    {
+    if (m_resourceFile == "") {
         wxMessageBox("Gambit is unable to locate a current configuration file.\n"
                      "Please make sure that the program was installed correctly",
                      "Config Error");
