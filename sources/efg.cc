@@ -509,32 +509,34 @@ void BaseEfg::UnmarkSubtree(Node *n)
     UnmarkSubtree(n->children[i]);
 }
 
-void BaseEfg::Reveal(Infoset * inf, gBlock<EFPlayer *> who)
+void BaseEfg::Reveal(Infoset *where, gBlock<EFPlayer *> who)
 {
   int i,j,k,l,m;
   bool flag;
+  gBlock<Node*> OldMembers;
   Node *n;
   Infoset *newiset;
 
   UnmarkSubtree(root);
   
-  for(i=1;i<=inf->actions.Length();i++) {
-    for(j=1;j<=inf->members.Length();j++) {
-      UnmarkSubtree(inf->members[j]);
-      MarkSubtree(inf->members[j]->children[i]);
-    }
+  for(i=1;i<=where->actions.Length();i++) {
+    for(j=1;j<=where->members.Length();j++) 
+      MarkSubtree(where->members[j]->children[i]);
     for(j=who.First();j<=who.Last();j++)
       for(k=1;k<=who[j]->infosets.Length();k++) {
+	OldMembers = who[j]->infosets[k]->members;
 	flag=false;
-	for(m=1;m<=who[j]->infosets[k]->members.Length();m++) {
-	  n = who[j]->infosets[k]->members[m];
+	for(m=1;m<=OldMembers.Length();m++) {
+	  n = OldMembers[m];
 	  if(n->mark)
 	   if(!flag) {
 	     newiset = LeaveInfoset(n);
 	     flag=true;
 	   }
-	   else 
+	   else {
 	     JoinInfoset(newiset,n);
+	     n->mark=false;
+	   }
 	}	    
       }
   }
