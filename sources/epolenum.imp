@@ -192,7 +192,8 @@ EfgPolEnumModule<T>::SaveSolutions(const gList<gVector<gDouble> > &list)
     if(ExtendsToNash(sol)) {
       index = solutions.Append(sol);
       solutions[index].SetEpsilon(0);
-      solutions[index].SetIsNash(triTRUE);
+      // turning this over to BehavSolution: 
+      //      solutions[index].SetIsNash(triTRUE);
     }
   }
 

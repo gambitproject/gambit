@@ -117,11 +117,9 @@ static void AddSolution(gList<BehavSolution> &solutions,
   int i = solutions.Append(BehavSolution(profile, algorithmEfg_LIAP_EFG));
   solutions[i].SetLiap(value);
   solutions[i].SetEpsilon(epsilon);
-  if (IsPerfectRecall(profile.Game())) {
-    solutions[i].SetIsNash(triTRUE);
-    solutions[i].SetIsSubgamePerfect(triTRUE);
-    solutions[i].SetIsSequential(triTRUE);
-  }
+  //  if (IsPerfectRecall(profile.Game()) && solutions[i].IsNash()) {
+  //    solutions[i].SetIsSequential(triTRUE);
+  //  }
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);

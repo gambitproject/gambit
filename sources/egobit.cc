@@ -163,10 +163,9 @@ static void AddSolution(gList<BehavSolution> &solutions,
   int i = solutions.Append(BehavSolution(profile, algorithmEfg_QRE_EFG));
   solutions[i].SetQre(lambda, value);
   solutions[i].SetEpsilon(0.0001);
-  if(solutions[i].IsNash() == triTRUE) {
-    solutions[i].SetIsSubgamePerfect(triTRUE);
-    solutions[i].SetIsSequential(triTRUE);
-  }
+  //  if(solutions[i].IsNash() == triTRUE) {
+  //    solutions[i].SetIsSequential(triTRUE);
+  //  }
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);

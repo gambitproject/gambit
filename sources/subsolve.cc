@@ -179,14 +179,14 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support, Node *n,
       int j = solns.Length();
       solns[j].SetCreator((EfgAlgType) AlgorithmID());
 	
-      if (m_isPerfectRecall)
-	solns[j].SetIsNash(triTRUE);
-      if (marked && m_isPerfectRecall)
-	solns[j].SetIsSubgamePerfect(triTRUE); 
+      //      if (m_isPerfectRecall)
+      //	solns[j].SetIsNash(triTRUE);
+      //      if (marked && m_isPerfectRecall)
+      //	solns[j].SetIsSubgamePerfect(triTRUE); 
       if (solns[j].Creator() == algorithmEfg_LIAP_EFG && m_isPerfectRecall) {
 	solns[j].SetLiap(solns[j].LiapValue());
 	solns[j].SetIsSequential(triTRUE);      // even if marked = false
-	solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
+	//	solns[j].SetIsSubgamePerfect(triTRUE);  // even if marked = false
       }
 
       gVector<gNumber> subval(foo.NumPlayers());

@@ -6,6 +6,28 @@
 
 #include "behavsol.h"
 
+// we probably want to break this out into another file (rdm)
+
+#include "subsolve.h"
+
+class SubgamePerfectChecker : public SubgameSolver  {
+private:
+  int subgame_number;
+  gNumber eps;
+  gTriState isSubgamePerfect;
+  gPVector<int> infoset_subgames;
+  BehavProfile<gNumber> start;
+  gList<Node *> oldroots;
+    
+  void SolveSubgame(const Efg &, const EFSupport &, gList<BehavSolution> &);
+  EfgAlgType AlgorithmID(void) const { return algorithmEfg_USER; }    
+
+public:
+  SubgamePerfectChecker(const Efg &, const BehavProfile<gNumber> &, const gNumber & epsilon);
+  virtual ~SubgamePerfectChecker();
+  gTriState IsSubgamePerfect(void) {return isSubgamePerfect;}
+};
+
 gText NameEfgAlgType(EfgAlgType p_algorithm)
 {
   switch (p_algorithm) {
@@ -61,7 +83,10 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
     m_precision(precDOUBLE),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), m_epsilon(0.0),
+    m_isSequential(triUNKNOWN), 
+    m_checkedNash(false), m_checkedSubgamePerfect(false),
+    m_checkedSequential(false), 
+    m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
@@ -88,7 +113,10 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
     m_precision(precRATIONAL), 
     m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
+    m_isSequential(triUNKNOWN), 
+    m_checkedNash(false), m_checkedSubgamePerfect(false),
+    m_checkedSequential(false), 
+    m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   gEpsilon(m_epsilon);
@@ -113,7 +141,10 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
     m_precision(precRATIONAL),
     m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
-    m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
+    m_isSequential(triUNKNOWN), 
+    m_checkedNash(false), m_checkedSubgamePerfect(false),
+    m_checkedSequential(false), 
+    m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -144,7 +175,11 @@ BehavSolution::BehavSolution(const BehavSolution &p_solution)
     m_support(p_solution.m_support), m_creator(p_solution.m_creator),
     m_isNash(p_solution.m_isNash),
     m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
-    m_isSequential(p_solution.m_isSequential), m_epsilon(p_solution.m_epsilon),
+    m_isSequential(p_solution.m_isSequential), 
+    m_checkedNash(p_solution.m_checkedNash),
+    m_checkedSubgamePerfect(p_solution.m_checkedSubgamePerfect),
+    m_checkedSequential(p_solution.m_checkedSequential), 
+    m_epsilon(p_solution.m_epsilon),
     m_qreLambda(p_solution.m_qreLambda),
     m_qreValue(p_solution.m_qreValue),
     m_liapValue(p_solution.m_liapValue),
@@ -176,6 +211,9 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
     m_isSequential = p_solution.m_isSequential;
+    m_checkedNash = p_solution.m_checkedNash;
+    m_checkedSubgamePerfect = p_solution.m_checkedSubgamePerfect;
+    m_checkedSequential = p_solution.m_checkedSequential;
     m_epsilon = p_solution.m_epsilon;
     m_qreLambda = p_solution.m_qreLambda;
     m_qreValue = p_solution.m_qreValue;
@@ -201,16 +239,18 @@ BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 // Private member functions
 //-----------------------------
 
-void BehavSolution::EvalEquilibria(void) const
+void BehavSolution::CheckIsNash(void) const
 {
-  if (IsComplete() && IsPerfectRecall(m_profile->Game())) {
-    if (m_isNash == triUNKNOWN) {
-      m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
+  if (m_checkedNash == false) {
+    if (IsPerfectRecall(m_profile->Game()))
+      if(IsComplete() 
+	 /* || Creator == algorithmEfg_LCP_EFG || Creator == algorithmEfg_LP_EFG */ ) 
+	m_isNash = (m_profile->MaxGripe() <= m_epsilon) ? triTRUE : triFALSE;
+    if (m_isNash == triFALSE) {
+      m_isSubgamePerfect = triFALSE; m_checkedSubgamePerfect = true;
+      m_isSequential = triFALSE; m_checkedSequential = true;
     }
-  }  
-  if (m_isNash == triFALSE) {
-    m_isSubgamePerfect = triFALSE;
-    m_isSequential = triFALSE;
+    m_checkedNash = true;
   }
 }
 
@@ -345,19 +385,53 @@ bool BehavSolution::IsComplete(void) const
 
 gTriState BehavSolution::IsNash(void) const
 {
-  EvalEquilibria();
+  CheckIsNash();
   return m_isNash;
 }
 
 gTriState BehavSolution::IsSubgamePerfect(void) const
 {
-  EvalEquilibria();
+  CheckIsNash();
+  if(m_checkedSubgamePerfect == false) {
+    if(IsComplete()) {
+      BehavProfile<gNumber> p(*this);
+      SubgamePerfectChecker checker(p.Game(),p, Epsilon());
+      checker.Solve(p.Support());
+      m_isSubgamePerfect = checker.IsSubgamePerfect();
+    }
+    else {
+      m_isSubgamePerfect = triFALSE;
+      m_isSequential = triFALSE;
+      m_checkedSequential = true;
+    }
+    m_checkedSubgamePerfect = true;
+  }
   return m_isSubgamePerfect;
 }
 
 gTriState BehavSolution::IsSequential(void) const
 {
-  EvalEquilibria();
+  CheckIsNash();
+  if(m_checkedSequential == false) {
+    if(IsSubgamePerfect()) {
+      // Liap and QRE should be returning Nash solutions that give positive 
+      // probability to all actions, and hence will be approximations to 
+      // sequential equilibria.  But we should add code to check up on these 
+      // algorithms
+      if(Creator() == algorithmEfg_LIAP_EFG || Creator() == algorithmEfg_QRE_EFG)
+	m_isSequential = triTRUE;
+      else {
+	// check if game is perfect info
+	// this should be in efg.h
+	bool flag = true;
+	gPVector<int> v((Game()).NumMembers());
+	for(int i=v.First();flag == true && i<=v.Last();i++)
+	  if(v[i]>1) flag = false;
+	if(flag==true) m_isSequential = triTRUE;
+      }
+    }
+    m_checkedSequential = true;
+  }
   return m_isSequential;
 }
 
@@ -375,6 +449,9 @@ void BehavSolution::Invalidate(void) const
   m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;
   m_isSequential = triUNKNOWN;
+  m_checkedNash = false;
+  m_checkedSubgamePerfect = false;
+  m_checkedSequential = false;
   m_qreLambda = -1;
   m_qreValue = -1;
   m_liapValue = -1;
@@ -425,12 +502,14 @@ void BehavSolution::Dump(gOutput &p_file) const
 void BehavSolution::DumpInfo(gOutput &p_file) const
 {
   p_file << " Creator:"; DisplayEfgAlgType(p_file, m_creator);
-  p_file << " IsNash:" << m_isNash;
-  p_file << " IsSubgamePerfect:" << m_isSubgamePerfect;
-  p_file << " IsSequential:" << m_isSequential;
-  p_file << " QreLambda:" << m_qreLambda;
-  p_file << " QreValue:" << m_qreValue;
-  p_file << " LiapValue:" << m_liapValue;
+  p_file << " IsNash:" << IsNash();
+  p_file << " IsSubgamePerfect:" << IsSubgamePerfect();
+  p_file << " IsSequential:" << IsSequential();
+  p_file << " LiapValue:" << LiapValue();
+  if(m_creator == algorithmEfg_QRE_EFG || m_creator == algorithmEfg_QRE_NFG) {
+    p_file << " QreLambda:" << m_qreLambda;
+    p_file << " QreValue:" << m_qreValue;
+  }
   if (m_beliefs)
     p_file << " Beliefs:" << *m_beliefs;
 }
@@ -439,4 +518,69 @@ gOutput &operator<<(gOutput &p_file, const BehavSolution &p_solution)
 {
   p_solution.Dump(p_file);
   return p_file;
+}
+
+SubgamePerfectChecker::SubgamePerfectChecker(const Efg &E, const BehavProfile<gNumber> &s,
+				     const gNumber & epsilon)
+  : SubgameSolver(1), subgame_number(0), eps(epsilon), isSubgamePerfect(triTRUE),
+    infoset_subgames(E.NumInfosets()), start(s)
+{
+  MarkedSubgameRoots(E, oldroots);
+
+  gList<Node *> subroots;
+  LegalSubgameRoots(E,subroots);
+  (start.Game()).MarkSubgames(subroots);
+
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)   {
+    EFPlayer *player = E.Players()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      int index;
+
+      Infoset *infoset = player->Infosets()[iset];
+      Node *member = infoset->Members()[1];
+
+      for (index = 1; index <= subroots.Length() &&
+	   member->GetSubgameRoot() != subroots[index]; index++);
+
+      infoset_subgames(pl, iset) = index;
+    }
+  }   
+}
+ 
+void SubgamePerfectChecker::SolveSubgame(const Efg &E, const EFSupport &sup,
+				gList<BehavSolution> &solns)
+{
+  BehavProfile<gNumber> bp(sup);
+  
+  subgame_number++;
+
+  gArray<int> infosets(infoset_subgames.Lengths());
+
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    int niset = 1;
+    for (int iset = 1; iset <= infosets[pl]; iset++)  {
+      if (infoset_subgames(pl, iset) == subgame_number)  {
+	for (int act = 1; act <= bp.Support().NumActions(pl, niset); act++)
+	  bp(pl, niset, act) = start(pl, iset, act);
+	niset++;
+      }
+    }
+  }
+  //  gTriState x = IsNashOnSubgame(E,bp,eps);
+  gTriState x = triFALSE;
+  if(bp.MaxGripe() <= eps) x = triTRUE;
+
+  if(isSubgamePerfect == triTRUE &&  x == triTRUE) 
+    isSubgamePerfect = triTRUE;
+  else if(isSubgamePerfect == triFALSE ||  x == triFALSE) 
+    isSubgamePerfect = triFALSE;
+  else 
+    isSubgamePerfect = triUNKNOWN;
+
+  int index = solns.Append(BehavSolution(bp,AlgorithmID()));
+  solns[index].SetEpsilon(eps);
+}
+
+SubgamePerfectChecker::~SubgamePerfectChecker() { 
+  (start.Game()).MarkSubgames(oldroots);
 }

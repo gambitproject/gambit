@@ -20,8 +20,6 @@ static void efgEnumPureSolve(const EFSupport &p_support,
   EfgContIter citer(p_support);
   gPVector<gNumber> probs(p_support.Game().NumInfosets());
 
-  bool isPerfectRecall = IsPerfectRecall(p_support.Game());
-
   int ncont = 1;
   for (int pl = 1; pl <= p_support.Game().NumPlayers(); pl++) {
     EFPlayer *player = p_support.Game().Players()[pl];
@@ -71,7 +69,6 @@ static void efgEnumPureSolve(const EFSupport &p_support,
 
       index = p_solutions.Append(BehavSolution(temp, 
 					       algorithmEfg_ENUMPURE_EFG));
-      p_solutions[index].SetIsNash((isPerfectRecall) ? triTRUE : triUNKNOWN);
     }
     contNumber++;
   }  while ((p_stopAfter == 0 || p_solutions.Length() < p_stopAfter) &&

@@ -267,7 +267,8 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution> &solutions) const
     BehavProfile<T> profile(support);
     GetProfile(profile,List[i],EF.RootNode(),1,1);
     index = solutions.Append(BehavSolution(profile, algorithmEfg_LP_EFG));
-    solutions[index].SetIsNash(triTRUE);
+    // turning this over to BehavSolution:
+    //    solutions[index].SetIsNash(triTRUE);  
   }
 
 }

@@ -37,12 +37,13 @@ protected:
   mutable EFSupport m_support;
   mutable EfgAlgType m_creator;
   mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
+  mutable bool m_checkedNash,  m_checkedSubgamePerfect, m_checkedSequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
   mutable gDPVector<gNumber> *m_beliefs, *m_regret;
   unsigned int m_id;
 
   // PRIVATE AUXILIARY MEMBER FUNCTIONS
-  void EvalEquilibria(void) const;
+  void CheckIsNash(void) const;
   void LevelPrecision(void);
 
 public:
@@ -92,9 +93,6 @@ public:
 
   void SetId(unsigned int p_id) { m_id = p_id; }
   void SetCreator(EfgAlgType p_creator) { m_creator = p_creator; }
-  void SetIsNash(gTriState p_isNash) { m_isNash = p_isNash; }
-  void SetIsSubgamePerfect(gTriState p_isSubgamePerfect)
-    { m_isSubgamePerfect = p_isSubgamePerfect; }
   void SetIsSequential(gTriState p_isSequential)
     { m_isSequential = p_isSequential; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
