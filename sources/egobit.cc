@@ -191,20 +191,20 @@ void Qre(const Efg &E, EFQreParams &params,
   EFQreFunc F(E, start);
 
   int iter = 0;
-  double Lambda, value = 0.0;
+  double Lambda, LambdaOld, LambdaStart, value = 0.0;
 
   if (params.pxifile)
     WritePXIHeader(*params.pxifile, E, params);
 
-  Lambda = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+  LambdaStart = (params.delLam < 0.0) ? params.maxLam : params.minLam;
+  LambdaOld = Lambda = LambdaStart;
 
-  int num_steps, step = 0;
+  double max_prog, prog;
 
   if (params.powLam == 0)
-    num_steps = (int) ((params.maxLam - params.minLam) / params.delLam);
+    max_prog = params.maxLam - params.minLam;
   else
-    num_steps = (int) (log(params.maxLam / params.minLam) /
-		       log(params.delLam + 1.0));
+    max_prog = log(params.maxLam / params.minLam);
 
   BehavProfile<double> p(start.Support());
   for (int i = 1; i <= p.Length(); i++)
@@ -214,18 +214,27 @@ void Qre(const Efg &E, EFQreParams &params,
 
   InitMatrix(xi, p.Lengths());
 
-  bool powell = true;
+  bool FoundSolution = true;
+  double delta, mindelta;
+  delta = params.delLam;
+  mindelta = delta/100.0;
+
   try {
-    for (/*nit = 1*/; powell && !F.DomainErr() &&
-		      Lambda <= params.maxLam && Lambda >= params.minLam &&
-		      value < 10.0; /*nit++*/)   {
+    while (delta>mindelta &&
+		      Lambda <= params.maxLam && Lambda >= params.minLam)   {
       params.status.Get();
       F.SetLambda(Lambda);
-      powell = Powell(p, xi, F, value, iter,
+      FoundSolution = Powell(p, xi, F, value, iter,
 		      params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		      *params.tracefile, params.trace-1,true);
-      
-      if(powell && !F.DomainErr()) {
+      bool derr = F.DomainErr();      
+      double dist = 0.0;
+      for(int jj=p.First();jj<=p.Last();jj++) {
+	double xx = abs(p[jj]-pold[jj]);
+	if(xx>dist)dist=xx;
+      }
+
+      if(FoundSolution && !derr && dist<params.delLam) {
 	if (params.trace>0)  {
 	  *params.tracefile << "\nLam: " << Lambda << " val: ";
 	  params.tracefile->SetExpMode();
@@ -250,11 +259,24 @@ void Qre(const Efg &E, EFQreParams &params,
 	if (params.fullGraph)
 	  AddSolution(solutions, p, Lambda, value, params.Accuracy());
 	pold=p;                              // pold is last good solution
+	if(delta < params.delLam && dist<params.delLam/2.0) delta*=2.0;
       }
 
-      Lambda += params.delLam * pow(Lambda, (long)params.powLam);
-      params.status.SetProgress((double) step / (double) num_steps);
-      step++;
+      else {
+	Lambda = LambdaOld;
+	p = pold;
+	InitMatrix(xi, p.Lengths());
+	if(delta>mindelta) delta/=2.0;
+      }
+
+      if (params.powLam == 0)
+	prog = abs(Lambda - LambdaStart);
+      else
+	prog = abs(log(Lambda/LambdaStart));
+      params.status.SetProgress(prog/max_prog);
+
+      LambdaOld = Lambda;
+      Lambda += delta * pow(Lambda, (long)params.powLam);
     }
 
     if (!params.fullGraph)
@@ -420,15 +442,15 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
     *params.tracefile << "\np: " << p << "\nxi: " << xi;
   }
   
-  bool powell = true;
-  for (nit = 1; powell && !F.DomainErr() &&
+  bool FoundSolution = true;
+  for (nit = 1; FoundSolution && !F.DomainErr() &&
        K <= params.maxLam && K >= params.minLam &&
        value < 10.0; nit++)   {
     params.status.Get();
     
     F.SetK(K);
     
-    powell =  OldPowell(lambda, xi, F, value, iter,
+    FoundSolution =  OldPowell(lambda, xi, F, value, iter,
 			params.maxits1, params.tol1, params.maxitsN, params.tolN,
 			*params.tracefile, params.trace-1);
     
@@ -443,7 +465,7 @@ void KQre(const Efg &E, EFQreParams &params, const BehavProfile<gNumber> &start,
     *params.tracefile << " p: " << p;
   }
     */
-    if(powell && !F.DomainErr()) {
+    if(FoundSolution && !F.DomainErr()) {
       if (params.trace>0)  {
 	*params.tracefile << "\nKQre iter: " << nit << " val = ";
 	params.tracefile->SetExpMode();
