@@ -111,6 +111,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(GBT_MENU_EDIT_NODE, EfgShow::OnEditNode)
   EVT_MENU(GBT_MENU_EDIT_MOVE, EfgShow::OnEditMove)
   EVT_MENU(GBT_MENU_EDIT_GAME, EfgShow::OnEditGame)
+  EVT_MENU(GBT_MENU_VIEW_NFG_REDUCED, EfgShow::OnViewNfgReduced)
   EVT_MENU(GBT_MENU_VIEW_PROFILES, EfgShow::OnViewProfiles)
   EVT_MENU(GBT_MENU_VIEW_NAVIGATION, EfgShow::OnViewCursor)
   EVT_MENU(GBT_MENU_VIEW_OUTCOMES, EfgShow::OnViewOutcomes)
@@ -130,8 +131,6 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, EfgShow::OnToolsDominance)
   EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, EfgShow::OnToolsEquilibrium)
   EVT_MENU(GBT_MENU_TOOLS_QRE, EfgShow::OnToolsQre)
-  EVT_MENU(GBT_MENU_TOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
-  EVT_MENU(GBT_MENU_TOOLS_NFG_AGENT, EfgShow::OnToolsNormalAgent)
   EVT_MENU(wxID_ABOUT, EfgShow::OnHelpAbout)
   EVT_MENU(GBT_MENU_SUPPORTS_DUPLICATE, EfgShow::OnSupportDuplicate)
   EVT_MENU(GBT_MENU_SUPPORTS_DELETE, EfgShow::OnSupportDelete)
@@ -223,6 +222,8 @@ EfgShow::EfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   AdjustSizes();
   m_treeWindow->FitZoom();
 
+  (void) new NfgShow(m_doc, this);
+
   Show(true);
   // Force this at end to make sure item is unchecked; under MSW,
   // the ordering of events in creating the window leaves this checked
@@ -270,6 +271,8 @@ void EfgShow::OnUpdate(gbtGameView *)
   menuBar->Enable(GBT_MENU_EDIT_NODE, !cursor.IsNull());
   menuBar->Enable(GBT_MENU_EDIT_MOVE,
 		  !cursor.IsNull() && !cursor.GetInfoset().IsNull());
+
+  menuBar->Check(GBT_MENU_VIEW_NFG_REDUCED, m_doc->ShowNfg());
   menuBar->Check(GBT_MENU_VIEW_SUPPORT_REACHABLE,
 		 m_doc->GetPreferences().RootReachable());
 
@@ -356,17 +359,11 @@ void EfgShow::MakeMenus(void)
 		    "Compute Nash equilibria and refinements");
   toolsMenu->Append(GBT_MENU_TOOLS_QRE, "&Qre",
 		    "Compute quantal response equilibria");
-
-  wxMenu *toolsNfgMenu = new wxMenu;
-  toolsNfgMenu->Append(GBT_MENU_TOOLS_NFG_REDUCED, "Reduced",
-		       "Generate reduced normal form");
-  toolsNfgMenu->Append(GBT_MENU_TOOLS_NFG_AGENT, "Agent",
-		       "Generate agent normal form");
-  toolsMenu->Append(GBT_MENU_TOOLS_NFG, "Normal form", toolsNfgMenu,
-		    "Create a normal form representation of this game");
-
   
   wxMenu *viewMenu = new wxMenu;
+  viewMenu->Append(GBT_MENU_VIEW_NFG_REDUCED, "Normal form",
+		   "Display reduced normal form", true);
+  viewMenu->AppendSeparator();
   viewMenu->Append(GBT_MENU_VIEW_PROFILES, "&Profiles",
 		   "Display/hide profiles window", true);
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
@@ -936,6 +933,11 @@ void EfgShow::OnEditGame(wxCommandEvent &)
 //                EfgShow: Menu handlers - View menu
 //----------------------------------------------------------------------
 
+void EfgShow::OnViewNfgReduced(wxCommandEvent &)
+{
+  m_doc->SetShowNfg(!m_doc->ShowNfg());
+}
+
 void EfgShow::OnViewProfiles(wxCommandEvent &)
 {
   if (m_solutionSashWindow->IsShown()) {
@@ -1276,35 +1278,6 @@ void EfgShow::OnToolsQre(wxCommandEvent &)
     }
   }
   catch (...) {
-  }
-
-}
-
-void EfgShow::OnToolsNormalReduced(wxCommandEvent &)
-{
-  // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_doc->GetEfg())) {
-    if (wxMessageBox("This game is not perfect recall\n"
-		     "Do you wish to continue?", 
-		     "Reduced normal form", 
-		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
-      return;
-    }
-  }
-    
-  if (m_doc->GetEfg().HasReducedNfg() != 0) {
-    return;
-  }
-
-  try {
-    m_doc->MakeReducedNfg();
-  }
-  catch (...) {
-    wxMessageDialog msgDialog(this,
-			      "An internal exception occurred while converting",
-			      "Gambit exception", wxOK);
-    msgDialog.ShowModal();
-    return;
   }
 
 }

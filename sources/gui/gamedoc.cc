@@ -43,12 +43,14 @@
 
 gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
+    m_showNfg(false), m_showOutcomes(false), 
+    m_showProfiles(false), m_showNfgSupports(false),
     m_efg(new gbtEfgGame(p_efg)), 
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0),
     m_nfg(0),
     m_rowPlayer(1), m_colPlayer(2),
+    m_contingency(p_efg.NumPlayers()),
     m_curNfgSupport(0),
     m_curProfile(0)
 {
@@ -60,11 +62,18 @@ gbtGameDocument::gbtGameDocument(gbtEfgGame p_efg, wxString p_filename)
   m_curEfgSupport = new EFSupport(*m_efg);
   m_curEfgSupport->SetName("Full Support");
   m_efgSupports.Append(m_curEfgSupport);
+
+  for (int pl = 1; pl <= m_efg->NumPlayers(); m_contingency[pl++] = 1);
+
+  m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg(EFSupport(*m_efg)));
+  m_curNfgSupport->SetName("Full Support");
+  m_nfgSupports.Append(m_curNfgSupport);
 }
 
 gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
   : m_filename(p_filename), m_modified(false),
-    m_showOutcomes(false), m_showProfiles(false), m_showNfgSupports(false),
+    m_showNfg(true), m_showOutcomes(false), 
+    m_showProfiles(false), m_showNfgSupports(false),
     m_efg(0),
     m_cursor(0), m_copyNode(0), m_cutNode(0),
     m_curEfgSupport(0), 
@@ -83,8 +92,9 @@ gbtGameDocument::gbtGameDocument(gbtNfgGame p_nfg, wxString p_filename)
 
 gbtGameDocument::~gbtGameDocument()
 {
+  for (int i = 1; i <= m_efgSupports.Length(); delete m_efgSupports[i++]);
+  for (int i = 1; i <= m_nfgSupports.Length(); delete m_nfgSupports[i++]);
   if (m_efg) {
-    for (int i = 1; i <= m_efgSupports.Length(); delete m_efgSupports[i++]);
     delete m_efg;
   }
   if (m_nfg) {
@@ -110,6 +120,14 @@ void gbtGameDocument::OnTreeChanged(bool p_nodesChanged,
     m_copyNode = 0;
     m_cutNode = 0;
     m_modified = true;
+
+    while (m_nfgSupports.Length()) {
+      delete m_nfgSupports.Remove(1);
+    }
+    
+    m_curNfgSupport = new gbtNfgSupport(m_efg->GetReducedNfg(EFSupport(*m_efg)));
+    m_curNfgSupport->SetName("Full Support");
+    m_nfgSupports.Append(m_curNfgSupport);
   }
 }
 
@@ -315,11 +333,9 @@ void gbtGameDocument::AddProfile(const BehavSolution &p_profile)
     m_behavProfiles.Append(p_profile);
   }
 
-  if (m_nfg) {
-    MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
-			p_profile.Creator());
-    m_mixedProfiles.Append(mixed);
-  }
+  MixedSolution mixed(MixedProfile<gNumber>(*p_profile.Profile()),
+		      p_profile.Creator());
+  m_mixedProfiles.Append(mixed);
 
   UpdateViews(0, true, true);
 }
@@ -475,6 +491,16 @@ gNumber gbtGameDocument::ActionProb(const gbtEfgNode &p_node, int p_action) cons
 //               gbtGameDocument: Operations on normal form
 //==========================================================================
 
+gbtNfgGame gbtGameDocument::GetNfg(void) const
+{
+  if (m_efg) {
+    return m_efg->GetReducedNfg(EFSupport(*m_efg));
+  }
+  else {
+    return *m_nfg;
+  }
+}
+
 void gbtGameDocument::MakeReducedNfg(void)
 {
   m_nfg = new gbtNfgGame(m_efg->GetReducedNfg(*m_curEfgSupport));
@@ -584,6 +610,12 @@ void gbtGameDocument::UpdateViews(gbtGameView *p_sender,
       m_views[i]->OnUpdate(p_sender);
     }
   }
+}
+
+void gbtGameDocument::SetShowNfg(bool p_show)
+{
+  m_showNfg = p_show;
+  UpdateViews(0, true, true);
 }
 
 void gbtGameDocument::SetShowOutcomes(bool p_show)

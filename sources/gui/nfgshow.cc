@@ -143,10 +143,12 @@ NfgShow::NfgShow(gbtGameDocument *p_doc, wxWindow *p_parent)
   SetAcceleratorTable(accel);
 
   CreateStatusBar();
-  MakeToolbar();
 
-  (void) new gbtProfileFrame(m_doc, this);
-  (void) new gbtOutcomeFrame(m_doc, this);
+  if (!m_doc->HasEfg()) {
+    MakeToolbar();
+    (void) new gbtProfileFrame(m_doc, this);
+    (void) new gbtOutcomeFrame(m_doc, this);
+  }
   (void) new gbtNfgSupportFrame(m_doc, this);
 
   m_navigateWindow = new NfgNavigateWindow(m_doc, this);
@@ -171,6 +173,11 @@ NfgShow::~NfgShow()
 
 void NfgShow::OnUpdate(gbtGameView *)
 {
+  if (!m_doc->ShowNfg()) {
+    Show(false);
+    return;
+  }
+
   if (m_doc->GetFilename() != "") {
     SetTitle(wxString::Format("Gambit - [%s] %s", 
 			      m_doc->GetFilename().c_str(), 
@@ -192,6 +199,7 @@ void NfgShow::OnUpdate(gbtGameView *)
   menu->Enable(GBT_MENU_VIEW_VALUES, m_doc->IsProfileSelected());
   menu->Check(GBT_MENU_VIEW_OUTCOME_LABELS,
 	      m_doc->GetPreferences().OutcomeLabel() == GBT_OUTCOME_LABEL_LABEL);
+  Show(true);
 }
 
 //----------------------------------------------------------------------
@@ -201,46 +209,60 @@ void NfgShow::OnUpdate(gbtGameView *)
 void NfgShow::MakeMenus(void)
 {
   wxMenu *fileMenu = new wxMenu;
-  fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
-  fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
-  fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
-  fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
-  fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
-  fileMenu->AppendSeparator();
-  wxMenu *fileImportMenu = new wxMenu;
-  fileImportMenu->Append(GBT_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
-			 "Import a game saved in ComLabGames format");
-  fileMenu->Append(GBT_MENU_FILE_IMPORT, "&Import", fileImportMenu,
-		   "Import a game from various formats");
-  wxMenu *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_COMLAB, "&ComLabGames",
-			 "Export game to ComLabGames format");
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_HTML, "&HTML",
-			 "Save this game in HTML format");
-  fileMenu->Append(GBT_MENU_FILE_EXPORT, "&Export", fileExportMenu,
-		   "Export the game in various formats");
-  fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
-		   "Set up preferences for printing");
-  fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
-		   "View a preview of the game printout");
-  fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
-  fileMenu->AppendSeparator();
-  fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
+  if (!m_doc->HasEfg()) {
+    fileMenu->Append(wxID_NEW, "&New\tCtrl-N", "Create a new game");
+    fileMenu->Append(wxID_OPEN, "&Open\tCtrl-O", "Open a saved game");
+    fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_SAVE, "&Save\tCtrl-S", "Save this game");
+    fileMenu->Append(wxID_SAVEAS, "Save &as", "Save game to a different file");
+    fileMenu->AppendSeparator();
+    wxMenu *fileImportMenu = new wxMenu;
+    fileImportMenu->Append(GBT_MENU_FILE_IMPORT_COMLAB, "&ComLabGames",
+			   "Import a game saved in ComLabGames format");
+    fileMenu->Append(GBT_MENU_FILE_IMPORT, "&Import", fileImportMenu,
+		     "Import a game from various formats");
+    wxMenu *fileExportMenu = new wxMenu;
+    fileExportMenu->Append(GBT_MENU_FILE_EXPORT_COMLAB, "&ComLabGames",
+			   "Export game to ComLabGames format");
+    fileExportMenu->Append(GBT_MENU_FILE_EXPORT_HTML, "&HTML",
+			   "Save this game in HTML format");
+    fileMenu->Append(GBT_MENU_FILE_EXPORT, "&Export", fileExportMenu,
+		     "Export the game in various formats");
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
+		     "Set up preferences for printing");
+    fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
+		     "View a preview of the game printout");
+    fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_EXIT, "E&xit\tCtrl-X", "Exit Gambit");
+  }
+  else {
+    fileMenu->Append(wxID_CLOSE, "&Close", "Close this window");
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_PRINT_SETUP, "Page Se&tup",
+		     "Set up preferences for printing");
+    fileMenu->Append(wxID_PREVIEW, "Print Pre&view",
+		     "View a preview of the game printout");
+    fileMenu->Append(wxID_PRINT, "&Print\tCtrl-P", "Print this game");
+  }
   
   wxMenu *editMenu = new wxMenu;
-  editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
-  editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
-  editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
-  // For the moment, these are not implemented -- leave disabled
-  editMenu->Enable(wxID_CUT, false);
-  editMenu->Enable(wxID_COPY, false);
-  editMenu->Enable(wxID_PASTE, false);
-  editMenu->AppendSeparator();
-  editMenu->Append(GBT_MENU_EDIT_STRATS, "&Strategies", "Edit strategy names");
-  editMenu->Append(GBT_MENU_EDIT_CONTINGENCY, "&Contingency",
-		   "Edit the selected contingency");
+  if (!m_doc->HasEfg()) {
+    editMenu->Append(wxID_CUT, "Cu&t", "Cut the current selection");
+    editMenu->Append(wxID_COPY, "&Copy", "Copy the current selection");
+    editMenu->Append(wxID_PASTE, "&Paste", "Paste from clipboard");
+    // For the moment, these are not implemented -- leave disabled
+    editMenu->Enable(wxID_CUT, false);
+    editMenu->Enable(wxID_COPY, false);
+    editMenu->Enable(wxID_PASTE, false);
+    editMenu->AppendSeparator();
+    editMenu->Append(GBT_MENU_EDIT_STRATS, "&Strategies",
+		     "Edit strategy names");
+    editMenu->Append(GBT_MENU_EDIT_CONTINGENCY, "&Contingency",
+		     "Edit the selected contingency");
+  }
   editMenu->Append(GBT_MENU_EDIT_GAME, "&Game", "Edit game properties");
 
   wxMenu *viewMenu = new wxMenu;
@@ -942,6 +964,13 @@ void NfgShow::OnProfilesReport(wxCommandEvent &)
 
 void NfgShow::OnCloseWindow(wxCloseEvent &p_event)
 {
+  if (m_doc->HasEfg()) {
+    // Simply hide the window, don't actually destroy it
+    m_doc->SetShowNfg(false);
+    p_event.Veto();
+    return;
+  }
+
   if (p_event.CanVeto() && m_doc->IsModified()) {
     if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
 		     wxOK | wxCANCEL) == wxCANCEL) {

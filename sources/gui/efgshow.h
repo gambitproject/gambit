@@ -100,6 +100,7 @@ private:
   void OnEditNode(wxCommandEvent &);
   void OnEditGame(wxCommandEvent &);
 
+  void OnViewNfgReduced(wxCommandEvent &);
   void OnViewProfiles(wxCommandEvent &);
   void OnViewCursor(wxCommandEvent &);
   void OnViewOutcomes(wxCommandEvent &);
@@ -121,7 +122,6 @@ private:
   void OnToolsDominance(wxCommandEvent &);
   void OnToolsEquilibrium(wxCommandEvent &);
   void OnToolsQre(wxCommandEvent &);
-  void OnToolsNormalReduced(wxCommandEvent &);
   void OnToolsNormalAgent(wxCommandEvent &);
 
   void OnHelpAbout(wxCommandEvent &);

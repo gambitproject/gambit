@@ -45,7 +45,7 @@ private:
 
   // Management of views
   gBlock<gbtGameView *> m_views;
-  bool m_showOutcomes, m_showProfiles, m_showNfgSupports;
+  bool m_showNfg, m_showOutcomes, m_showProfiles, m_showNfgSupports;
 
   void AddView(gbtGameView *);
   void RemoveView(gbtGameView *);
@@ -91,10 +91,13 @@ public:
 
   // Extensive-form related state information
   gbtEfgGame GetEfg(void) const { return *m_efg; }
-
+  bool HasEfg(void) const { return (m_efg != 0); }
 
   gbtPreferences &GetPreferences(void) { return m_prefs; }
   const gbtPreferences &GetPreferences(void) const { return m_prefs; }
+
+  bool ShowNfg(void) const { return m_showNfg; }
+  void SetShowNfg(bool p_show);
 
   bool ShowOutcomes(void) const { return m_showOutcomes; }
   void SetShowOutcomes(bool p_show);
@@ -177,7 +180,7 @@ public:
 
   // NORMAL FORM STATE
   void MakeReducedNfg(void);
-  gbtNfgGame GetNfg(void) const { return *m_nfg; }
+  gbtNfgGame GetNfg(void) const;
 
   gArray<int> GetContingency(void) const;
   void SetContingency(const gArray<int> &);

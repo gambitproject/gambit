@@ -129,9 +129,15 @@ void NfgNavigateWindow::OnUpdate(gbtGameView *)
 {
   const gbtNfgSupport &support = m_doc->GetNfgSupport();
 
+  m_rowChoice->Clear();
+  m_colChoice->Clear();
+
   for (int pl = 1; pl <= m_doc->GetNfg().NumPlayers(); pl++) {
-    m_stratProfile[pl-1]->Clear();
     gbtNfgPlayer player = m_doc->GetNfg().GetPlayer(pl);
+    m_rowChoice->Append((char *) (ToText(pl) + ": " + player.GetLabel()));
+    m_colChoice->Append((char *) (ToText(pl) + ": " + player.GetLabel()));
+
+    m_stratProfile[pl-1]->Clear();
     for (int st = 1; st <= player.NumStrategies(); st++) {
       if (support.Contains(player.GetStrategy(st))) {
 	m_stratProfile[pl-1]->Append((char *) (ToText(st) + ": " +
