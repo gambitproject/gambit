@@ -1,11 +1,11 @@
-EFG 2 D "Myerson (Game Theory), Exercise 3.3d" { "Player 1" "Player 2" }
+EFG 2 R "Myerson (Game Theory), Exercise 3.3d" { "Player 1" "Player 2" }
 
 p "ROOT" 1 1 "(1,1)" { "x1" "y1" } 0
 p "" 2 1 "(2,1)" { "x2" "y2" "z2" } 0
-t "" 1 "Outcome 1" { 0.000000 4.000000 }
-t "" 2 "Outcome 2" { 5.000000 6.000000 }
-t "" 3 "Outcome 3" { 8.000000 7.000000 }
+t "" 1 "Outcome 1" { 0 4 }
+t "" 2 "Outcome 2" { 5 6 }
+t "" 3 "Outcome 3" { 8 7 }
 p "" 2 1 "(2,1)" { "x2" "y2" "z2" } 0
-t "" 4 "Outcome 4" { 2.000000 9.000000 }
-t "" 5 "Outcome 5" { 6.000000 5.000000 }
-t "" 6 "Outcome 6" { 5.000000 1.000000 }
+t "" 4 "Outcome 4" { 2 9 }
+t "" 5 "Outcome 5" { 6 5 }
+t "" 6 "Outcome 6" { 5 1 }

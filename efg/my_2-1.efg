@@ -1,17 +1,17 @@
-EFG 2 D "Myerson (Game Theory), Exercise 2.1" { "Player 1" "Player 2" }
+EFG 2 R "Myerson (Game Theory), Exercise 2.1" { "Player 1" "Player 2" }
 
-c "ROOT" 1 "(0,1)" { "High Cost" 0.500000 "Low Cost" 0.500000 } 0
+c "ROOT" 1 "(0,1)" { "High Cost" 1/2 "Low Cost" 1/2 } 0
 p "" 1 1 "(1,1)" { "Build" "Not" } 0
 p "" 2 1 "(2,1)" { "Enter" "Not" } 0
-t "" 1 "Outcome 1" { -10.000000 2.000000 }
-t "" 2 "Outcome 2" { -4.000000 0.000000 }
+t "" 1 "Outcome 1" { -10 2 }
+t "" 2 "Outcome 2" { -4 0 }
 p "" 2 2 "(2,2)" { "Enter" "Not" } 0
-t "" 3 "Outcome 3" { -6.000000 2.000000 }
-t "" 4 "Outcome 4" { 0.000000 0.000000 }
+t "" 3 "Outcome 3" { -6 2 }
+t "" 4 "Outcome 4" { 0 0 }
 p "" 1 2 "(1,2)" { "Build" "Not" } 0
 p "" 2 1 "(2,1)" { "Enter" "Not" } 0
-t "" 5 "Outcome 5" { 0.000000 -4.000000 }
-t "" 6 "Outcome 6" { 6.000000 0.000000 }
+t "" 5 "Outcome 5" { 0 -4 }
+t "" 6 "Outcome 6" { 6 0 }
 p "" 2 2 "(2,2)" { "Enter" "Not" } 0
-t "" 7 "Outcome 7" { -2.000000 -4.000000 }
-t "" 8 "Outcome 8" { 4.000000 0.000000 }
+t "" 7 "Outcome 7" { -2 -4 }
+t "" 8 "Outcome 8" { 4 0 }

@@ -1,10 +1,10 @@
-EFG 2 D "Kohlberg Mertens, Example 1" { "Player 1" "Player 2" }
+EFG 2 R "Kohlberg Mertens, Example 1" { "Player 1" "Player 2" }
 
 p "ROOT" 1 1 "(1,1)" { "1" "2" "3" } 0
-t "" 1 "Outcome 1" { 2.000000 2.000000 }
+t "" 1 "Outcome 1" { 2 2 }
 p "" 2 1 "(2,1)" { "1" "2" } 0
-t "" 2 "Outcome 2" { 3.000000 3.000000 }
-t "" 3 "Outcome 3" { 1.000000 0.000000 }
+t "" 2 "Outcome 2" { 3 3 }
+t "" 3 "Outcome 3" { 1 0 }
 p "" 2 1 "(2,1)" { "1" "2" } 0
-t "" 4 "Outcome 4" { 0.000000 0.000000 }
-t "" 5 "Outcome 5" { 1.000000 1.000000 }
+t "" 4 "Outcome 4" { 0 0 }
+t "" 5 "Outcome 5" { 1 1 }

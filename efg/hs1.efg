@@ -1,23 +1,23 @@
-EFG 2 D "Harsanyi, Selton (1988): example reanalyzed by Dickout Kaplan " { "Player 1" "Player 2" }
+EFG 2 R "Harsanyi, Selton (1988): example reanalyzed by Dickout Kaplan " { "Player 1" "Player 2" }
 
 p "ROOT" 1 1 "(1,1)" { "1" "2" "3" "4" } 0
 p "" 2 1 "(2,1)" { "1" "2" "3" "4" } 0
-t "" 1 "Outcome 1" { -1.000000 -1.000000 }
-t "" 2 "Outcome 2" { -1.000000 -1.000000 }
-t "" 3 "Outcome 3" { 1.000000 1.000000 }
-t "" 4 "Outcome 4" { -1.000000 -1.000000 }
+t "" 1 "Outcome 1" { -1 -1 }
+t "" 2 "Outcome 2" { -1 -1 }
+t "" 3 "Outcome 3" { 1 1 }
+t "" 4 "Outcome 4" { -1 -1 }
 p "" 2 1 "(2,1)" { "1" "2" "3" "4" } 0
-t "" 5 "Outcome 5" { -1.000000 -1.000000 }
-t "" 6 "Outcome 6" { -1.000000 -1.000000 }
-t "" 7 "Outcome 7" { 0.000000 2.000000 }
-t "" 8 "Outcome 8" { 0.000000 2.000000 }
+t "" 5 "Outcome 5" { -1 -1 }
+t "" 6 "Outcome 6" { -1 -1 }
+t "" 7 "Outcome 7" { 0 2 }
+t "" 8 "Outcome 8" { 0 2 }
 p "" 2 1 "(2,1)" { "1" "2" "3" "4" } 0
-t "" 9 "Outcome 9" { 0.000000 2.000000 }
-t "" 10 "Outcome 10" { 0.000000 2.000000 }
-t "" 11 "Outcome 11" { 1.000000 1.000000 }
-t "" 12 "Outcome 12" { -1.000000 -1.000000 }
+t "" 9 "Outcome 9" { 0 2 }
+t "" 10 "Outcome 10" { 0 2 }
+t "" 11 "Outcome 11" { 1 1 }
+t "" 12 "Outcome 12" { -1 -1 }
 p "" 2 1 "(2,1)" { "1" "2" "3" "4" } 0
-t "" 13 "Outcome 13" { 0.000000 2.000000 }
-t "" 14 "Outcome 14" { 0.000000 2.000000 }
-t "" 15 "Outcome 15" { 0.000000 2.000000 }
-t "" 16 "Outcome 16" { 0.000000 2.000000 }
+t "" 13 "Outcome 13" { 0 2 }
+t "" 14 "Outcome 14" { 0 2 }
+t "" 15 "Outcome 15" { 0 2 }
+t "" 16 "Outcome 16" { 0 2 }
