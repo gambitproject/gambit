@@ -381,7 +381,7 @@ template <class K, class T> INLINE T &gOrdMap<K, T>::operator()(const K &key)
 {
   int where = Locate(key);
 
-  if (keys[where] == key)    return values[where];
+  if (length > 0 && keys[where] == key)    return values[where];
   else return Insert(key, ((key < keys[where]) ? where : where + 1),
 		    _default);
 }
@@ -391,7 +391,7 @@ T gOrdMap<K, T>::operator()(const K &key) const
 {
   int where = Locate(key);
 
-  if (keys[where] == key)    return values[where];
+  if (length > 0 && keys[where] == key)    return values[where];
   else   return _default;
 }
 
