@@ -76,41 +76,41 @@ class Player   {
     int NumInfosets(int game) const
       { return infosets.NumElements(game); }
 
-	// OPERATIONS ON BRANCHES
+	// OPERATIONS ON ActionES
 	// returns the number of branches in an infoset
-    int NumBranches(int game, int iset) const
+    int NumActions(int game, int iset) const
       { return infosets(game, iset)->NumActions(); }
 
 	// set the name of a branch in an infoset
-    void SetBranchName(int game, int iset, int br, const gString &name)
+    void SetActionName(int game, int iset, int br, const gString &name)
       { infosets(game, iset)->SetActionName(br, name); }
 
 	// returns the name of a branch in an infoset
-    gString GetBranchName(int game, int iset, int br) const
+    gString GetActionName(int game, int iset, int br) const
       { return infosets(game, iset)->GetActionName(br); }
 
 	// set the probabilities of branches in an infoset
-    void SetBranchProbs(int game, int iset, const gVector<double> &probs)
+    void SetActionProbs(int game, int iset, const gVector<double> &probs)
       { infosets(game, iset)->SetActionProbs(probs); }
 
 	// get the probabilities of branches in an infoset
-    gVector<double> GetBranchProbs(int game, int iset) const
+    gVector<double> GetActionProbs(int game, int iset) const
       { return infosets(game, iset)->GetActionProbs(); }
 
 	// get the probability associated with one branch of an infoset
-    double GetBranchProb(int game, int iset, int br) const
+    double GetActionProb(int game, int iset, int br) const
       { return infosets(game, iset)->GetActionProb(br); }
 
 	// remove a branch from an infoset
-    void RemoveBranch(int game, int iset, int br)
+    void RemoveAction(int game, int iset, int br)
       { infosets(game, iset)->RemoveAction(br); }
 
 	// insert a branch in an infoset
-    void InsertBranch(int game, int iset, int br)
+    void InsertAction(int game, int iset, int br)
       { infosets(game, iset)->InsertAction(br); }
 
 	// append a branch in an infoset
-    void AppendBranch(int game, int iset, const gString &name = "")
+    void AppendAction(int game, int iset, const gString &name = "")
       { infosets(game, iset)->AppendAction();
         infosets(game,iset)->SetActionName(infosets(game,iset)->NumActions(),
 					   name);
@@ -210,43 +210,43 @@ class PlayerSet   {
 
 	// OPERATIONS ON BRANCHES
 	// returns the number of branches in an infoset
-    int NumBranches(int p, int game, int iset) const
-      { return players[p + 2]->NumBranches(game, iset); }
+    int NumActions(int p, int game, int iset) const
+      { return players[p + 2]->NumActions(game, iset); }
 
 	// set the name of a branch
-    void SetBranchName(int p, int game, int iset, int br, const gString &name)
-      { players[p + 2]->SetBranchName(game, iset, br, name); }
+    void SetActionName(int p, int game, int iset, int br, const gString &name)
+      { players[p + 2]->SetActionName(game, iset, br, name); }
 
 	// returns the name of a branch
-    gString GetBranchName(int p, int game, int iset, int br) const
-      { return players[p + 2]->GetBranchName(game, iset, br); }
+    gString GetActionName(int p, int game, int iset, int br) const
+      { return players[p + 2]->GetActionName(game, iset, br); }
 
 	// set the probabilities at an infoset
 	//  Note: this is only available for the chance player
-    void SetBranchProbs(int game, int iset, const gVector<double> &probs)
-      { players[2]->SetBranchProbs(game, iset, probs); }
+    void SetActionProbs(int game, int iset, const gVector<double> &probs)
+      { players[2]->SetActionProbs(game, iset, probs); }
 
 	// get the probabilities at an infoset
 	//  Note: this is only available for the chance player
-    gVector<double> GetBranchProbs(int game, int iset) const
-      { return players[2]->GetBranchProbs(game, iset); }
+    gVector<double> GetActionProbs(int game, int iset) const
+      { return players[2]->GetActionProbs(game, iset); }
 
 	// get the probability of a branch in an infoset
 	//  Note: this is only available for the chance player
-    double GetBranchProb(int game, int iset, int br) const
-      { return players[2]->GetBranchProb(game, iset, br); }
+    double GetActionProb(int game, int iset, int br) const
+      { return players[2]->GetActionProb(game, iset, br); }
 
 	// remove a branch from an infoset
-    void RemoveBranch(int p, int game, int iset, int br)
-      { players[p + 2]->RemoveBranch(game, iset, br); }
+    void RemoveAction(int p, int game, int iset, int br)
+      { players[p + 2]->RemoveAction(game, iset, br); }
 
 	// insert a branch in an infoset
-    void InsertBranch(int p, int game, int iset, int br)
-      { players[p + 2]->InsertBranch(game, iset, br); }
+    void InsertAction(int p, int game, int iset, int br)
+      { players[p + 2]->InsertAction(game, iset, br); }
 
 	// append a branch in an infoset
-    void AppendBranch(int p, int game, int iset, const gString &name = "")
-      { players[p + 2]->AppendBranch(game, iset, name); }
+    void AppendAction(int p, int game, int iset, const gString &name = "")
+      { players[p + 2]->AppendAction(game, iset, name); }
 
 };
 #endif    // PLAYER_H

@@ -47,12 +47,12 @@ class ExtForm    {
     void LabelInfoset(const Node &n, const gString &label)
       { players.SetInfosetName(n[1], n[0], n[2], label); }
 
-    void InsertBranch(const Node &n, int where, int number);
-    Node DeleteBranch(const Node &n, int which);
-    void LabelBranch(const Node &n, int br, const gString &label)  { }
-    gVector<double> GetBranchProbs(const Node &n) const;
-    double GetBranchProb(const Node &n, int br) const;
-    void SetBranchProbs(const Node &n, const gVector<double> &probs);
+    void InsertAction(const Node &n, int where, int number);
+    Node DeleteAction(const Node &n, int which);
+    void LabelAction(const Node &n, int br, const gString &label)  { }
+    gVector<double> GetActionProbs(const Node &n) const;
+    double GetActionProb(const Node &n, int br) const;
+    void SetActionProbs(const Node &n, const gVector<double> &probs);
 
     void SetOutcome(const Node &n, int outcome)
       { if (nodes.IsMember(n))  nodes.SetOutcome(n, outcome); }

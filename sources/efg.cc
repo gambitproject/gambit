@@ -141,12 +141,12 @@ Node ExtForm::MergeInfoset(const Node &from, const Node &into)
 }
 
 
-void ExtForm::InsertBranch(const Node &n, int where, int number)
+void ExtForm::InsertAction(const Node &n, int where, int number)
 {
   if (!nodes.IsMember(n))   return;
   
   for (int i = 0; i < number; i++)  
-    players.InsertBranch(n[1], n[0], n[2], where + i);
+    players.InsertAction(n[1], n[0], n[2], where + i);
 
 
       // we have to remember to insert the branch in all members of the iset
@@ -158,11 +158,11 @@ void ExtForm::InsertBranch(const Node &n, int where, int number)
 }
 
 
-Node ExtForm::DeleteBranch(const Node &n, int which)
+Node ExtForm::DeleteAction(const Node &n, int which)
 {
   if (!nodes.IsMember(n))    return Node(efg_no, dummy, 1, 1);
 
-  players.RemoveBranch(n[1], n[0], n[2], which);
+  players.RemoveAction(n[1], n[0], n[2], which);
 
   Node ret(n);
 
@@ -175,22 +175,22 @@ Node ExtForm::DeleteBranch(const Node &n, int which)
   return ret;
 }
 
-gVector<double> ExtForm::GetBranchProbs(const Node &n) const
+gVector<double> ExtForm::GetActionProbs(const Node &n) const
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return gVector<double>(1, 0);
-  return players.GetBranchProbs(n[0], n[2]);
+  return players.GetActionProbs(n[0], n[2]);
 }
 
-double ExtForm::GetBranchProb(const Node &n, int br) const
+double ExtForm::GetActionProb(const Node &n, int br) const
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return -1.0;
-  return players.GetBranchProb(n[0], n[2], br);
+  return players.GetActionProb(n[0], n[2], br);
 }
 
-void ExtForm::SetBranchProbs(const Node &n, const gVector<double> &probs)
+void ExtForm::SetActionProbs(const Node &n, const gVector<double> &probs)
 {
   if (!nodes.IsMember(n) || n[1] != 0)   return;
-  players.SetBranchProbs(n[0], n[2], probs);
+  players.SetActionProbs(n[0], n[2], probs);
 }
 
 
@@ -280,14 +280,14 @@ void ExtForm::WriteToFile(output &f) const
     for (int j = 1; j <= players.NumInfosets(i, efg_no); j++)  {
       f << ((j == 1) ? " " : "\n      ");
       f << "{ \"" << players.GetInfosetName(i, efg_no, j) << "\" {";
-      for (int k = 1; k <= players.NumBranches(i, efg_no, j); k++)
-	f << " \"" << players.GetBranchName(i, efg_no, j, k) << '"';
+      for (int k = 1; k <= players.NumActions(i, efg_no, j); k++)
+	f << " \"" << players.GetActionName(i, efg_no, j, k) << '"';
       f << " }";
       
       if (i == 0)   { // chance player, print branch probs
 	f << " { ";
-	for (k = 1; k <= players.NumBranches(i, efg_no, j); k++)
-	  f << players.GetBranchProb(efg_no, j, k) << ' ';
+	for (k = 1; k <= players.NumActions(i, efg_no, j); k++)
+	  f << players.GetActionProb(efg_no, j, k) << ' ';
 	f << '}';
       }
 
@@ -321,7 +321,7 @@ int ExtForm::yyparse(void)
     for (int j = 1; j <= nodes.NumInfosets(i); j++)
       for (int k = 1; k <= nodes.NumNodes(i, j); k++)
 	if (nodes.NumChildren(Node(efg_no, i, j, k)) !=
-	    players.NumBranches(i, efg_no, j))  return 1;
+	    players.NumActions(i, efg_no, j))  return 1;
   }
 
   return 0;
