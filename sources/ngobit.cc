@@ -225,7 +225,7 @@ void Gobit(const Nfg &N, NFGobitParams &params,
       solutions[i].SetGobit(Lambda, value);
     }
 
-    Lambda += params.delLam * pow(Lambda, (double)params.powLam);
+    Lambda += params.delLam * pow(Lambda, (long)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }
@@ -426,7 +426,7 @@ void KGobit(const Nfg &N, NFGobitParams &params,
       lam_old=lambda;                            
       p_old=p;                             
     }
-    K += params.delLam * pow(K, (double)params.powLam);
+    K += params.delLam * pow(K, (long)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }

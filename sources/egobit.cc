@@ -259,7 +259,7 @@ void Gobit(const Efg &E, EFGobitParams &params,
       pold=p;                              // pold is last good solution
     }
 
-    Lambda += params.delLam * pow(Lambda, (double)params.powLam);
+    Lambda += params.delLam * pow(Lambda, (long)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }
@@ -474,7 +474,7 @@ void KGobit(const Efg &E, EFGobitParams &params, const BehavProfile<gNumber> &st
       lam_old=lambda;                            
       p_old=p;                             
     }
-    K += params.delLam * pow(K, (double)params.powLam);
+    K += params.delLam * pow(K, (long)params.powLam);
     params.status.SetProgress((double) step / (double) num_steps);
     step++;
   }
