@@ -48,188 +48,54 @@ Portion *GSM_AddStrategy(Portion **param)
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &, const NFSupport &);
 
-Portion *GSM_CompressNfg_Float(Portion **param)
+Portion *GSM_CompressNfg(Portion **param)
 {
-  Nfg<double> *N = (Nfg<double> *) ((NfgPortion *) param[0])->Value();
-  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
-  if (&S->BelongsTo() != N)  
-    return new ErrorPortion("Support must belong to normal form");
-
-  return new NfgValPortion(CompressNfg(*N, *S));
+  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  const BaseNfg &N = S->BelongsTo();
+  
+  if (N.Type() == DOUBLE)
+    return new NfgValPortion(CompressNfg((const Nfg<double> &) N, *S));
+  else
+    return new NfgValPortion(CompressNfg((const Nfg<gRational> &) N, *S));
 }
 
-Portion *GSM_CompressNfg_Rational(Portion **param)
-{
-  Nfg<gRational> *N = (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
-  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
-  if (&S->BelongsTo() != N)  
-    return new ErrorPortion("Support must belong to normal form");
-
-  return new NfgValPortion(CompressNfg(*N, *S));
-}
   
 extern NFSupport *ComputeDominated(NFSupport &S, bool strong,
 				   const gArray<int> &players,
 				   gOutput &tracefile,gStatus &status=gstatus);
+NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
+				 const gArray<int> &players,
+				 gOutput &tracefile,gStatus &status=gstatus);
 
-//--------------
-// ElimAllDom
-//--------------
-
-Portion *GSM_ElimAllDom_NfSupport(Portion **param)
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport* new_T = S;
-  NFSupport* old_T = S;
-  while(new_T)
-  {
-    old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value());
-  }
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = new NfSupportValPortion(old_T);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-
-Portion *GSM_ElimAllDom_Nfg(Portion **param)
-{
-  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport* new_T = S;
-  NFSupport* old_T = S;
-  while(new_T)
-  {
-    old_T = new_T;
-    new_T = ComputeDominated(*old_T, strong, players,
-			     ((OutputPortion *) param[3])->Value());
-  }
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = new NfSupportValPortion(old_T);
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
 
 //-------------
 // ElimDom
 //-------------
 
-Portion *GSM_ElimDom_NfSupport(Portion **param)
-{
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value());
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-
 Portion *GSM_ElimDom_Nfg(Portion **param)
 {
-  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport *T = ComputeDominated(*S, strong, players,
-				  ((OutputPortion *) param[3])->Value());
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//-----------------
-// ElimMixedDom
-//-----------------
-
-// WARNING:  This is a purely speculative function, don't include in
-//           official distributions unless I say so!  --  Ted
-
-NFSupport *ComputeMixedDominated(NFSupport &S, bool strong,
-				 const gArray<int> &players,
-				 gOutput &tracefile,gStatus &status=gstatus);
-
-Portion *GSM_ElimMixedDom_NfSupport(Portion **param)
-{
   NFSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
+  bool mixed = ((BoolPortion *) param[2])->Value();
   
   gWatch watch;
   gBlock<int> players(S->BelongsTo().NumPlayers());
   int i;
   for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  NFSupport *T = ComputeMixedDominated(*S, strong, players,
-				       ((OutputPortion *) param[3])->Value());
+  NFSupport *T = (mixed) ?
+    ComputeMixedDominated(*S, strong, players,
+			  ((OutputPortion *) param[4])->Value()) :
+    ComputeDominated(*S, strong, players,
+		     ((OutputPortion *) param[4])->Value());
 
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
+  ((FloatPortion *) param[3])->Value() = watch.Elapsed();
   
   Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
 
   por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
-
-
-Portion *GSM_ElimMixedDom_Nfg(Portion **param)
-{
-  NFSupport *S = new NFSupport(* ((NfgPortion *) param[0])->Value());
-  bool strong = ((BoolPortion *) param[1])->Value();
-  
-  gWatch watch;
-  gBlock<int> players(S->BelongsTo().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
-
-  NFSupport *T = ComputeMixedDominated(*S, strong, players,
-				       ((OutputPortion *) param[3])->Value());
-
-  ((FloatPortion *) param[2])->Value() = watch.Elapsed();
-  
-  Portion *por = (T) ? new NfSupportValPortion(T) : new NfSupportValPortion(new NFSupport(*S));
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-  
 
 //----------
 // Float
@@ -246,6 +112,20 @@ Portion *GSM_Float_Nfg(Portion **param)
     return new NfgValPortion(N);
   else
     return new ErrorPortion("Conversion failed.");
+}
+
+//----------
+// Game
+//----------
+
+Portion* GSM_Game_NfgElements(Portion** param)
+{
+  if (param[0]->Game())  {
+    assert(!param[0]->GameIsEfg());
+    return new NfgValPortion((BaseNfg*) param[0]->Game());
+  }
+  else
+    return 0;
 }
 
 //--------------
@@ -528,56 +408,6 @@ Portion* GSM_ListForm_NfgRational(Portion** param)
 }
 
 
-//--------------
-// NewSupport
-//--------------
-
-Portion *GSM_NewSupport_Nfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
-  Portion *por = new NfSupportValPortion(new NFSupport(N));
-
-  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  return por;
-}
-
-//--------------
-// NumPlayers
-//--------------
-
-Portion *GSM_NumPlayers_Nfg(Portion **param)
-{
-  BaseNfg &N = * ((NfgPortion*) param[0])->Value();
-  return new IntValPortion(N.NumPlayers());
-}
-
-//-------------
-// NumStrats
-//-------------
-
-Portion *GSM_NumStrats(Portion** param)
-{
-  int i;
-  gArray< int > dim;
-
-  NFPlayer* P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ((NfSupportPortion*) param[1])->Value();
-
-  if(s == 0)
-    return new IntValPortion(P->StrategyList().Length());
-  else
-  {
-    dim = s->SupportDimensions();
-    for(i = 1; i <= dim.Length(); i++)
-    {
-      if(&(s->GetNFStrategySet(i)->GetPlayer()) == P)
-	return new IntValPortion(s->NumStrats(i));
-    }
-  }
-  return new ErrorPortion("Specified player is not found in the support");
-}
-
-
 //------------
 // Players
 //------------
@@ -592,10 +422,10 @@ Portion *GSM_Players_Nfg(Portion **param)
 }
 
 //-------------
-// RandomNfg
+// Randomize
 //-------------
 
-Portion *GSM_RandomNfg_Float(Portion **param)
+Portion *GSM_Randomize_NfgFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   
@@ -603,7 +433,7 @@ Portion *GSM_RandomNfg_Float(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_RandomNfg_Rational(Portion **param)
+Portion *GSM_Randomize_NfgRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   
@@ -611,7 +441,7 @@ Portion *GSM_RandomNfg_Rational(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_RandomNfg_SeedFloat(Portion **param)
+Portion *GSM_Randomize_NfgSeedFloat(Portion **param)
 {
   Nfg<double> &N = * (Nfg<double> *) ((NfgPortion *) param[0])->Value();
   int seed = ((IntPortion *) param[1])->Value();
@@ -621,7 +451,7 @@ Portion *GSM_RandomNfg_SeedFloat(Portion **param)
   return param[0]->RefCopy();
 }
 
-Portion *GSM_RandomNfg_SeedRational(Portion **param)
+Portion *GSM_Randomize_NfgSeedRational(Portion **param)
 {
   Nfg<gRational> &N = * (Nfg<gRational> *) ((NfgPortion *) param[0])->Value();
   int seed = ((IntPortion *) param[1])->Value();
@@ -711,63 +541,33 @@ Portion *GSM_SetName_Strategy(Portion **param)
   return param[0]->ValCopy();
 }
 
-
-//--------------
-// StrategieNumber
-//--------------
-
-Portion* GSM_StrategyNumber(Portion** param)
-{
-  /*
-  int i = 0;
-  Strategy* s = ((StrategyPortion*) param[0])->Value();
-  int strategy;
-  for(i=1; i<s->nfp()->NumStrats(); i++)
-    strategy = i;
-  return new IntValPortion(strategy);
-  */
-  return new IntValPortion(((StrategyPortion*) param[0])->Value()->number);
-}
-
-
 //--------------
 // Strategies
 //--------------
 
 Portion *GSM_Strategies(Portion **param)
 {
-  int i;
-  gArray< int > dim;
-  Portion* por = 0;
-
   NFPlayer *P = (NFPlayer *) ((NfPlayerPortion *) param[0])->Value();
   NFSupport* s = ((NfSupportPortion*) param[1])->Value();
 
-  if(s == 0)
-    por = ArrayToList(P->StrategyList());
-  else
-  {
-    dim = s->SupportDimensions();
-    for(i = 1; i <= dim.Length(); i++)
-    {
-      if(&(s->GetNFStrategySet(i)->GetPlayer()) == P)
-      {
-	por = ArrayToList(s->GetStrategy(i));
-	break;
-      }
-    }
-  }
-
-  if(por != 0)
-  {
-    por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
-  }
-  else
-  {
-    por = new ErrorPortion("Specified player is not found in the support");
-  }
+  Portion *por = ArrayToList(s->GetStrategy(P->GetNumber()));
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
   return por;
 }
+
+//--------------
+// Support
+//--------------
+
+Portion *GSM_Support_Nfg(Portion **param)
+{
+  BaseNfg &N = * ((NfgPortion *) param[0])->Value();
+  Portion *por = new NfSupportValPortion(new NFSupport(N));
+
+  por->SetGame(param[0]->Game(), param[0]->GameIsEfg());
+  return por;
+}
+
 
 
 void Init_nfgfunc(GSM *gsm)
@@ -777,155 +577,64 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("AddStrategy", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_AddStrategy, porNF_SUPPORT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT,
+					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strategy", porSTRATEGY));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("CompressNfg", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressNfg_Float,
-				       porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_CompressNfg_Rational,
-				       porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("support", porNF_SUPPORT));
+  FuncObj = new FuncDescObj("CompressNfg", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_CompressNfg, porNFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
   gsm->AddFunction(FuncObj);
 
-
-  FuncObj = new FuncDescObj("ElimAllDom", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimAllDom_NfSupport, 
-				       porNF_SUPPORT, 5));
+  FuncObj = new FuncDescObj("ElimDom", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_Nfg,
+				       porNF_SUPPORT, 6));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
 					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimAllDom_Nfg, 
-				       porNF_SUPPORT, 5));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("mixed", porBOOL,
 					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
+  FuncObj->SetParamInfo(0, 3, ParamInfoType("time", porFLOAT,
 					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
+  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceFile", porOUTPUT,
 					    new OutputRefPortion(gnull), 
 					    BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
+  FuncObj->SetParamInfo(0, 5, ParamInfoType("traceLevel", porINTEGER,
 					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("ElimDom", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimDom_NfSupport, 
-				       porNF_SUPPORT, 5));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimDom_Nfg, 
-				       porNF_SUPPORT, 5));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("ElimMixedDom", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_ElimMixedDom_NfSupport, 
-				       porNF_SUPPORT, 5));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("support", porNF_SUPPORT));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(0, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_ElimMixedDom_Nfg, 
-				       porNF_SUPPORT, 5));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("strong", porBOOL,
-					    new BoolValPortion(false)));
-  FuncObj->SetParamInfo(1, 2, ParamInfoType("time", porFLOAT,
-					    new FloatValPortion(0.0), BYREF));
-  FuncObj->SetParamInfo(1, 3, ParamInfoType("traceFile", porOUTPUT,
-					    new OutputRefPortion(gnull), 
-					    BYREF));
-  FuncObj->SetParamInfo(1, 4, ParamInfoType("traceLevel", porINTEGER,
-					    new IntValPortion(0)));
-
-  gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("Float", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Float_Nfg, 
 				       porNFG_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
-
+  FuncObj = new FuncDescObj("Game", 2);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_NfgElements, porNFG, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
+  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsConstSum", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_IsConstSum_Nfg, porBOOL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("LoadNfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_LoadNfg, porNFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
 
-
-
   FuncObj = new FuncDescObj("Name", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Name_Nfg, porTEXT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG, REQUIRED, BYREF));
-
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Name_NfPlayer, porTEXT, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porPLAYER_NFG));
-
   FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Name_Strategy, porTEXT, 1));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porSTRATEGY));
   gsm->AddFunction(FuncObj);
-
 
 
   FuncObj = new FuncDescObj("NewNfg", 3);
@@ -959,103 +668,42 @@ void Init_nfgfunc(GSM *gsm)
 					    REQUIRED, BYREF));
   gsm->AddFunction(FuncObj);
 
-
-
-
-  FuncObj = new FuncDescObj("Support", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NewSupport_Nfg, porNF_SUPPORT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("NumPlayers", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumPlayers_Nfg, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
-  gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("NumStrats", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_NumStrats, porINTEGER, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
-					    new NfSupportValPortion(0)));
-  gsm->AddFunction(FuncObj);
-
-
-
   FuncObj = new FuncDescObj("Players", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Players_Nfg, 
 				       PortionSpec(porPLAYER_NFG, 1), 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
-  
   
 
   FuncObj = new FuncDescObj("Randomize", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomNfg_Float, 
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_NfgFloat, 
 				       porNFG_FLOAT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT,
 					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomNfg_Rational, 
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Randomize_NfgRational, 
 				       porNFG_RATIONAL, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL,
 					    REQUIRED, BYREF));
 
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomNfg_SeedFloat, 
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Randomize_NfgSeedFloat, 
 				       porNFG_FLOAT, 2));
   FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
 
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomNfg_SeedRational, 
+  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_Randomize_NfgSeedRational, 
 				       porNFG_RATIONAL, 2));
   FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
   gsm->AddFunction(FuncObj);
-
-
-
-  FuncObj = new FuncDescObj("RandomNfg", 4);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RandomNfg_Float, 
-				       porNFG_FLOAT, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG_FLOAT,
-					    REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_RandomNfg_Rational, 
-				       porNFG_RATIONAL, 1));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
-
-  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_RandomNfg_SeedFloat, 
-				       porNFG_FLOAT, 2));
-  FuncObj->SetParamInfo(2, 0, ParamInfoType("x", porNFG_FLOAT,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(2, 1, ParamInfoType("seed", porINTEGER));
-
-  FuncObj->SetFuncInfo(3, FuncInfoType(GSM_RandomNfg_SeedRational, 
-				       porNFG_RATIONAL, 2));
-  FuncObj->SetParamInfo(3, 0, ParamInfoType("x", porNFG_RATIONAL,
-					    REQUIRED, BYREF));
-  FuncObj->SetParamInfo(3, 1, ParamInfoType("seed", porINTEGER));
-  gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("Rational", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Rational_Nfg, 
 				       porNFG_RATIONAL, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT,
-					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG_FLOAT));
   gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("RemoveStrategy", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
@@ -1065,14 +713,11 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
-
   FuncObj = new FuncDescObj("SaveNfg", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SaveNfg, porNFG, 2));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG, REQUIRED, BYREF));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   FuncObj->SetParamInfo(0, 1, ParamInfoType("file", porTEXT));
   gsm->AddFunction(FuncObj);
-
-
 
   FuncObj = new FuncDescObj("SetName", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetName_Nfg, porNFG, 2));
@@ -1090,20 +735,17 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(2, 1, ParamInfoType("name", porTEXT));
   gsm->AddFunction(FuncObj);
 
-
-
   FuncObj = new FuncDescObj("Strategies", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Strategies, 
 				       PortionSpec(porSTRATEGY, 1), 2));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_NFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT, 
-					    new NfSupportValPortion(0)));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("support", porNF_SUPPORT));
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("StrategyNumber", 1);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_StrategyNumber, porINTEGER, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("strategy", porSTRATEGY));
+  FuncObj = new FuncDescObj("Support", 1);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Support_Nfg, porNF_SUPPORT, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
 
 }

@@ -331,6 +331,21 @@ Portion *GSM_FloatEfg(Portion **param)
     return new ErrorPortion("Conversion failed.");
 }
 
+//----------
+// Game
+//----------
+
+Portion* GSM_Game_EfgElements(Portion** param)
+{
+  if (param[0]->Game())  {
+    assert(param[0]->GameIsEfg());
+    return new EfgValPortion((BaseEfg*) param[0]->Game());
+  }
+  else
+    return 0;
+}
+
+
 //-------------
 // Infoset
 //-------------
@@ -1329,13 +1344,19 @@ void Init_efgfunc(GSM *gsm)
 					    new IntValPortion(0)));
   gsm->AddFunction(FuncObj);
 
-
-
   FuncObj = new FuncDescObj("Float", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_FloatEfg, porEFG_FLOAT, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("efg", porEFG_RATIONAL));
   gsm->AddFunction(FuncObj);
 
+  FuncObj = new FuncDescObj("Game", 3);
+  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porPLAYER_EFG));
+  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
+  FuncObj->SetParamInfo(1, 0, ParamInfoType("node", porNODE));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_EfgElements, porEFG, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porOUTCOME));
+  gsm->AddFunction(FuncObj);
   
   FuncObj = new FuncDescObj("Infoset", 2);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Infoset_Node, porINFOSET, 1));
