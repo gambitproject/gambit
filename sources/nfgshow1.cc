@@ -324,6 +324,22 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   return tmp_menubar;
 }
 
+Bool NormalSpread::OnClose(void)
+{
+  if (parent->GameIsDirty()) {
+    if (wxMessageBox("Game has been modified.  Close anyway?", "Warning",
+		     wxOK | wxCANCEL) == wxCANCEL)
+      return FALSE;
+    else {
+      parent->InterfaceDied();
+      Show(FALSE);
+      return TRUE;
+    }
+  }
+  else {
+    return TRUE;
+  }
+}
 
 void NormalSpread::SetLabels(const NFSupport *disp_sup, int what)
 {

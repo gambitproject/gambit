@@ -222,65 +222,144 @@ void NfgShow::ChangeOutcomes(int what)
     }
 }
 
-
-
-
 Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S); // in nfgutils.cc
 
-void NfgShow::Save(void)
+class nfgFileSaveDialog : public wxDialogBox {
+private:
+  int m_completed;
+
+  wxText *m_fileName, *m_treeLabel;
+  wxSlider *m_numDecimals;
+  
+  static void CallbackOK(wxButton &p_object, wxEvent &)
+    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnOK(); }
+  static void CallbackCancel(wxButton &p_object, wxEvent &)
+    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnCancel(); }
+  static void CallbackBrowse(wxButton &p_object, wxEvent &)
+    { ((nfgFileSaveDialog *) p_object.GetClientData())->OnBrowse(); }
+
+  void OnOK(void);
+  void OnCancel(void);
+  void OnBrowse(void);
+  Bool OnClose(void);
+
+public:
+  nfgFileSaveDialog(const gText &, const gText &, int, wxWindow *);
+  virtual ~nfgFileSaveDialog() { }
+
+  int Completed(void) const { return m_completed; }
+  gText Filename(void) const { return m_fileName->GetValue(); }
+  gText Label(void) const { return m_treeLabel->GetValue(); }
+  int NumDecimals(void) const { return m_numDecimals->GetValue(); }
+};
+
+nfgFileSaveDialog::nfgFileSaveDialog(const gText &p_name,
+				     const gText &p_label, int p_decimals,
+				     wxWindow *p_parent)
+  : wxDialogBox(p_parent, "Save File", TRUE)
 {
-  static int s_nDecimals = 6;
-  gText filename = Filename();
-  gText s = wxFileSelector("Save data file", (char *)gPathOnly(filename), 
-               (char *)gFileNameFromPath(filename), ".nfg", "*.nfg", 
-               wxSAVE | wxOVERWRITE_PROMPT);
+  m_fileName = new wxText(this, 0, "Path:");
+  m_fileName->SetValue(p_name);
 
-#ifdef __GNUG__
-    // Overwrite protection doesn't work in Unix, so we
-    // have to check explicitly.
+  wxButton *browseButton = new wxButton(this, (wxFunction) CallbackBrowse,
+					"Browse...");
+  browseButton->SetClientData((char *) this);
+  NewLine();
 
-    if (wxFileExists((char *) s))  {  // Ask for confirmation.
-      if (wxMessageBox("File exists.  Overwrite?", "Confirm", wxOK | wxCANCEL) 
-      != wxOK) {
-    return;
-      }
-    }
-#endif  // __GNUG__
+  m_treeLabel = new wxText(this, 0, "Description:", p_label, -1, -1, 300);
+  m_treeLabel->SetValue(p_label);
+  NewLine();
 
-  if (s != "") {
-    // Allow to change description 
-    if (filename != "untitled.nfg") {
-      char *label = new char[256];
-      
-      strcpy(label, nf.GetTitle());
-      MyDialogBox *nfg_save_dialog = 
-	new MyDialogBox(spread, "Label Game", NFG_EDIT_HELP);
-      nfg_save_dialog->Add(wxMakeFormString("Label", &label, wxFORM_DEFAULT,
-	new wxList(wxMakeConstraintFunction(LongStringConstraint), 0), 0, 0, 350));
-      nfg_save_dialog->Add(wxMakeFormNewLine());
-      nfg_save_dialog->Add(wxMakeFormShort("Decimals", &s_nDecimals, wxFORM_DEFAULT,
-	new wxList(wxMakeConstraintRange(0, 25), 0)));
-      nfg_save_dialog->Go();
-      
-      if (nfg_save_dialog->Completed() == wxOK) {
-	nf.SetTitle(label);
-	SetFileName(Filename()); // updates the title
-      }
-      
-      delete nfg_save_dialog;
-      delete [] label;
-    }
-    
-    gFileOutput out(s);
-    
-    // Compress the nfg to the current support
-    Nfg *N = CompressNfg(nf, *cur_sup);
-    N->WriteNfgFile(out, s_nDecimals);
-    delete N;
-    SetFileName(s);
+  m_numDecimals = new wxSlider(this, 0, "Decimal places:",
+			       p_decimals, 0, 25, 100);
+  NewLine();
+
+  wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
+  okButton->SetClientData((char *) this);
+  okButton->SetDefault();
+  wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
+					"Cancel");
+  cancelButton->SetClientData((char *) this);
+
+  Fit();
+  Show(TRUE);
+}
+
+void nfgFileSaveDialog::OnOK(void)
+{
+  m_completed = wxOK;
+  Show(FALSE);
+}
+
+void nfgFileSaveDialog::OnCancel(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+}
+
+Bool nfgFileSaveDialog::OnClose(void)
+{
+  m_completed = wxCANCEL;
+  Show(FALSE);
+  return FALSE;
+}
+
+void nfgFileSaveDialog::OnBrowse(void)
+{
+  char *file = wxFileSelector("Save data file", 
+			      gPathOnly(m_fileName->GetValue()),
+			      gFileNameFromPath(m_fileName->GetValue()),
+			      ".nfg", "*.nfg");
+
+  if (file) {
+    m_fileName->SetValue(file);
   }
 }
 
+
+Bool NfgShow::Save(void)
+{
+  static int s_nDecimals = 6;
+  nfgFileSaveDialog dialog(Filename(), nf.GetTitle(), s_nDecimals, pframe);
+
+  if (dialog.Completed() == wxOK) {
+    if (wxFileExists(dialog.Filename())) {
+      if (wxMessageBox("File " + dialog.Filename() + " exists.  Overwrite?",
+		       "Confirm", wxOK | wxCANCEL) != wxOK) {
+	return FALSE;
+      }
+    }
+
+    nf.SetTitle(dialog.Label());
+
+    Nfg *nfg = 0;
+    try {
+      gFileOutput file(dialog.Filename());
+      nfg = CompressNfg(nf, *cur_sup);
+      nfg->WriteNfgFile(file, s_nDecimals);
+      delete nfg;
+      SetFileName(dialog.Filename());
+    }
+    catch (gFileOutput::OpenFailed &) {
+      wxMessageBox("Could not open " + dialog.Filename() + " for writing.",
+		   "Error", wxOK);
+      if (nfg)  delete nfg;
+    }
+    catch (gFileOutput::WriteFailed &) {
+      wxMessageBox("Write error occurred in saving " + dialog.Filename(),
+		   "Error", wxOK);
+      if (nfg)  delete nfg;
+    }
+    catch (gException &) {
+      wxMessageBox("Internal exception in Gambit", "Error", wxOK);
+      if (nfg)  delete nfg;
+    }
+    return TRUE;
+  }
+  else {
+    return FALSE;
+  }
+}
 
 #include "nfgciter.h"
 

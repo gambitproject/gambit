@@ -105,7 +105,7 @@ public:
   void SetLabels(int what); // what == 0: game, what == 1: strats, what == 2: players
 
   // Saving the game in native (.nfg) format
-  void Save(void);
+  Bool Save(void);
 
   // Supports and domination
   int SolveElimDom(void);
@@ -137,7 +137,6 @@ public:
   // OnOK clean up
   void OnOk(void);
 
-
   // Now come the solution functions
   void Solve(int);
   void SolveStandard(void);
@@ -157,6 +156,7 @@ public:
   
   // Display some inherent game properties
   void ShowGameInfo(void);
+  bool GameIsDirty(void) const { return nf.IsDirty(); }
 
   // Process Accelerator Keys
   void EditAccelerators(void);
@@ -268,6 +268,8 @@ public:
       Show(FALSE);
       parent->OnOk();
     }
+
+  Bool OnClose(void);
   
   // Override menu handling
   void OnMenuCommand(int id);
