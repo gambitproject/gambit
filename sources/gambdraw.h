@@ -27,6 +27,6 @@ public:
 };
 
 #define INIFILE		"gambit.ini"
-#define CURVER		2
 
 #endif
+
