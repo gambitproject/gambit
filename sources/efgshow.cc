@@ -1264,6 +1264,7 @@ void EfgShow::OnMenuCommand(int id)
       tw->OnPaint();
       tw->SetFocus();
     }
+    tw->UpdateMenus();
   }
   catch (gException &E) {
     guiExceptionDialog(E.Description(), this);

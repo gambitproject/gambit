@@ -213,7 +213,6 @@ protected:
     TreeDrawSettings draw_settings;  // Stores drawing parameters
 
   void SetCursorPosition(Node *p_cursor);
-  void UpdateMenus(void);
     
 public:
   // LIFECYCLE
@@ -317,6 +316,8 @@ public:
   
   // Gives access to the parent to the current cursor node
   Node *Cursor(void) const { return m_cursor; }
+  Node *MarkNode(void) const { return mark_node; }
+  void UpdateMenus(void);
   
   // Hilight the subgame root for the currently active subgame
   void  SetSubgamePickNode(const Node *n);
