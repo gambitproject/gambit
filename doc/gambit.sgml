@@ -1,0 +1,433 @@
+<!DOCTYPE Book PUBLIC "-//OASIS//DTD DocBook V4.1//EN" [
+<!ENTITY % content SYSTEM "entities.ent">
+%content;
+]>
+
+<book id="gambit">
+  <bookinfo>
+    <title>Gambit</title>
+    <subtitle>Graphical User Interface Reference</subtitle>
+    <authorgroup>
+      <author>
+	<firstname>Richard</firstname>
+	<surname>McKelvey</surname>
+	<affiliation>
+	  <orgname>California Institute of Technology</orgname>
+	</affiliation>
+      </author>
+      <author>
+	<firstname>Andrew</firstname>
+	<surname>McLennan</surname>
+	<affiliation>
+	  <orgname>University of Minnesota</orgname>
+	</affiliation>
+      </author>
+      <author>
+	<firstname>Theodore</firstname>
+	<surname>Turocy</surname>
+	<affiliation>
+	  <orgname>Texas A&amp;M University</orgname>
+	</affiliation>
+      </author>
+    </authorgroup>
+    <edition>Version 0.97.1</edition>
+    <pubdate>2004</pubdate>
+    <copyright>
+      <year>2004</year>
+      <holder>The Gambit Project</holder>
+    </copyright>
+  </bookinfo>
+
+
+<chapter id="intro">
+<title>Introduction</title>
+
+<para>
+This manual describes a new implementation of a graphical user interface
+frontend for the Gambit library.  This interface, as well as this
+documentation, is currently under
+development, and is being made available for comments, feedback, and
+suggestions.  Comments about the program, or this documentation, should
+be sent to Ted Turocy at turocy@econmail.tamu.edu.
+</para>
+
+</chapter>
+
+
+<chapter id="overview">
+<title>General overview</title>
+
+<para>
+</para>
+
+<sect1 id="overview.changes">
+<title>Comparison with previous versions</title>
+
+<para>
+Here is an overview of how this new implementation differs from
+previous incarnations of Gambit.
+</para>
+
+<sect2 id="overview.new">
+<title>What's new in the new version</title>
+
+<formalpara>
+<title>Integration of quantal response graphing</title>
+<para>
+Previous versions of Gambit relied on an external program (PXI) for
+plotting and manipulation of quantal response equilibrium correspondences.
+This version incorporates these features inside the graphical interface.
+(Thanks to Eugene Grayver for allowing the PXI code to be used as a model
+for the implementation of the graphing features.)
+</para>
+</formalpara>
+
+<formalpara>
+<title>Flexible manipulation of normal form games</title>
+<para>
+The navigation and editing of normal form games is being completely
+overhauled.  Navigation in the game table, especially for games with
+more than two players, is significantly more intuitive.  For two-player
+games, payoffs are represented in the offset style originated by
+Thomas Schelling, and for all games, all payoffs and strategy labels
+are color-coded.  Entries in the normal form table are now editable
+in place, eliminating the cumbersome manipulation of outcomes which
+existed in previous versions.  (The new features of the normal form
+tables, as well as those of all grids in the interface, are in great
+part due to the functionality of the wxSheet widget for wxWidgets
+created by John Labenski.)
+</para>
+</formalpara>
+
+<formalpara>
+<title>Computations done in separate threads</title>
+<para>
+Long computations, such as computation of Nash equilibria and/or
+quantal response equilibria, are now done in separate threads of
+execution.  As a result, the interface remains responsive during
+computations, and will repaint correctly after windows are restored
+after being hidden, as well as permitting navigation of the interface and
+editing or analysis of other games while the computation is in progress.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Dynamic generation of normal form from extensive form</title>
+<para>
+The reduced normal form of an extensive form tree dynamically updates
+as the extensive form is modified.  It is no longer necessary to explicitly
+create the normal form, and the process of computing the normal form is
+much faster, permitting viewing the normal form for much larger games than
+before.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Internationalization of messages</title>
+<para>
+The source code of the new graphical interface makes it possible for
+Gambit to display labels and messages in languages other than English.
+No other languages are as yet available; individuals interested in
+being responsible for translating messages into their native/fluent
+languages should contact turocy@econmail.tamu.edu.
+</para>
+</formalpara>
+
+</sect2>
+
+<sect2 id="overview.diff">
+<title>What's different in the new version</title>
+
+<para>
+This new version of Gambit incorporates a few changes which might
+affect users moving from old versions.
+</para>
+
+<formalpara>
+<title>All numeric data in games are rational</title> 
+
+<para> 
+The numeric data in games, both payoffs to players and the
+probabilities assigned to actions chosen by chance, are now always
+represented as rational numbers.  In previous versions, these could be
+stored either as rational numbers, or as floating point numbers.
+Users using savefiles containing floating point numbers generated with
+previous versions may find that the floating point numbers convert to
+rational numbers with long numerators and denominators; this is
+because floating point numbers only approximately represent some
+numbers, including common examples such as 0.1.  This behavior can be
+avoided by manually editing the savefiles in a text editor, replacing
+floating-point numbers with their rational equivalents.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Increased use of labels</title>
+
+<para>
+The graphical interface now makes increased use of labels for
+players, strategies, actions, and so forth.  While in most cases the
+interface attempts to cope gracefully with games in which these labels
+have not been set (i.e., are the empty string), use of text labels is
+encouraged.
+</para>
+</formalpara>
+
+</sect2>
+
+</sect1>
+
+<sect1 id="overview.concepts">
+<title>Some interface concepts</title>
+
+<para>
+Gambit treats extensive and normal form games as uniformly as possible.
+An extensive form game can be viewed in normal form by selecting
+the <guimenuitem>Normal form</guimenuitem> item on the 
+<guimenu>View</guimenu> menu.  This view shows the reduced normal form
+of the extensive form game.
+</para>
+
+<note>
+<para>
+The reduced normal form is defined in terms of the structure of the
+game tree; therefore, depending on the payoffs in the game, there
+may still be two or more strategies with identical payoffs in the
+computed reduced normal form.
+</para>
+</note>
+
+<para>
+Menu items generally operate on the representation of the game currently
+displayed. Some menu items, such as exporting graphics and printing games,
+are only available for game trees in this version.
+</para>
+
+</sect1>
+
+</chapter>
+
+
+<chapter id="efg">
+<title>Extensive form games</title>
+
+<sect1 id="efg.editing">
+<title>Editing extensive form games</title>
+
+<para>
+Editing of extensive form games is not yet supported in this version.
+</para>
+
+</sect1>
+
+<sect1 id="efg.printing">
+<title>Creating game tree printouts and graphics files</title>
+
+<para>
+Game trees are printed using the <guimenuitem>Print</guimenuitem> item
+on the <guimenu>File</guimenu> menu.  The tree is scaled to fit on
+one page.
+</para>
+
+<para>
+Options for exporting game trees to graphics formats are
+available on the <guisubmenu>Export</guisubmenu> submenu under
+<guimenu>File</guimenu>.  Currently supported file formats are
+BMP (Windows bitmap), JPEG, and PNG (portable network graphics).
+These are drawn at full scale, independent of the current zoom setting.
+</para>
+
+<note>
+<para>
+Creating GIF files is not supported due to patent problems with the
+compression algorithm used in GIFs.  It is recommended to use PNG, which
+uses a non-lossy but non-patented compression method, instead.
+</para>
+</note>
+
+</chapter>
+
+<chapter id="nfg">
+<title>Normal form games</title>
+
+<para>
+</para>
+
+<sect1 id="nfg.navigating">
+<title>Navigating normal form games</title>
+
+<para>
+A game table can be viewed with any player displayed on the row or the
+column.  Right-clicking on the player name label to the left of the
+table (for the row player) or above the table (for the column player)
+generates a menu to select which player appears as the row or column
+player, respectively.  Selecting the player currently on the column as the 
+row player, or the player currently on the row as the column player,
+results in the roles of the players being reversed on the display.
+</para>
+
+<para>
+For games with more than two players, a two-dimensional &quot;slice&quot;
+of the game is displayed.  A control at the top of the table shows which
+strategies are being played by all players other than the players
+currently shown as row and column choosers.  Right-clicking on the
+entries in this list generates a menu to set the displayed strategy
+for these &quot;table-choosing&quot; players.
+</para>
+
+<para>
+For two-player games shown in the Schelling (offset-payoffs) style, the
+row player's payoff always appears in the lower left of a cell, and the
+column player's in the upper right.  For general games with payoffs shown
+as a list, the row player's payoff is always shown first, followed by
+the column player's payoff, followed by the payoffs of the table
+choosers, in the order they are shown in the list above the game.
+</para>
+
+<sect1 id="nfg.editing">
+<title>Editing normal form games</title>
+
+<para>
+The payoffs of a normal form game can be edited by double-clicking
+on a payoff entry.  Payoffs for players in the same outcome are
+edited indepednently.
+</para>
+
+<para>
+Payoffs for the reduced normal form view of an extensive form game
+cannot be edited.
+</para>
+
+<para>
+Changing the number of players in a normal form game, or the number
+of strategies a player has, is not currently implemented.
+</para>
+
+</sect1>
+
+</chapter>
+
+<chapter id="nash">
+<title>Computing Nash equilibria</title>
+
+<para>
+Display of the Nash equilibrium computation tool is toggled by clicking on
+<guimenuitem>Nash</guimenuitem> on the <guimenu>Tools</guimenu> menu.
+The tool appears as a panel on the right side of the game window.
+</para>
+
+<para>
+The panel is segmented into three parts.  At the top is a control which
+sets the parameters for equilibrium computation.  In the center is a list
+of profiles computed by the last computation run.  At the bottom is a
+control that gives details on the profile selected in the list of
+computed profiles.
+</para>
+
+<sect1 id="nash.parameters">
+<title>Choosing computation parameters</title>
+
+<para>
+The top part of the Nash computation panel sets the parameters for 
+computing equilibria.  In this version, only two methods are offered,
+to compute one and all equilibria, respectively.  (These are the
+counterparts of the &quot;standard&quot; algorithms in previous versions
+of the graphical interface.)  
+</para>
+
+<para>
+The method to compute one equilibrium is a linear complementarity program
+solver, and only operates on two-player games.
+</para>
+
+<para>
+The method to compute all equilbria is the support enumeration algorithm
+of Porter, Nudelman, and Shoham.  This operates on general n-player games;
+however, in this version it does not yet function correctly on normal
+form games which are based on extensive form representations.
+</para>
+
+<para>
+Both methods currently produce only mixed strategy profiles over the
+normal form.
+</para>
+
+<para>
+The selected method is launched by clicking the <guibutton>Start</guibutton>
+button.  The computation is run in the background, and the results are
+displayed in the profile list when complete.  The Nash computation panel
+may be hidden and reshown without affecting the computation.
+</para>
+
+</sect1>
+
+<sect1 id="nash.profiles">
+<title>List of computed profiles</title>
+
+<para>
+The center and bottom portions of the Nash computation control display
+the profiles computed from the last computational run.  Each row
+corresponds to one mixed strategy profile; selecting a row by clicking on
+it displays more detailed information about the profile below the
+list of profiles.  Strategy probabilities are represented in the form
+used in Myerson's (1991) text.
+</para>
+
+</sect1>
+
+</chapter>
+
+<chapter id="qre">
+<title>Quantal response analysis</title>
+
+<para>
+Display of the quantal response equilibrium computation tool is
+toggled by clicking on <guimenuitem>QRE</guimenuitem> on the
+<guimenu>Tools</guimenu> menu.  The tool appears as a panel on the
+right side of the game window.  </para>
+
+<para>
+The panel is segmented into three parts.  At the top is a control which
+sets the parameters for computing quantal response equilibria.  
+In the center is a list
+of profiles computed by the last computation run.  At the bottom is a
+control that plots the computed correspondence.
+</para>
+
+<sect1 id="qre.parameters">
+<title>Choosing computation parameters</title>
+
+<para>
+In this version, only the principal branch of the logit equilibrium
+correspondence on normal forms is computed.  The computation is
+launched by clicking the <guibutton>Start</guibutton> button.  The
+computation is run in the background, and the results are displayed in
+the profile list when complete.  The panel may be hidden and reshown
+without affecting a running computation.  
+</para>
+
+</sect1>
+
+<sect1 id="qre.profiles">
+<title>List of computed profiles</title>
+
+<para>
+The center portion of the panel displays a list of the computed
+profiles, as a function of the parameter lambda.  The correspondence is
+graphed at the bottom of the panel.
+</para>
+
+<para>
+The graphic can be exported to an image file by right-clicking on the
+graphic.
+</para>
+
+<para>
+There is not yet any control over the generation of the graph.
+</para>
+
+</sect1>
+
+</chapter>
+
+</book>
