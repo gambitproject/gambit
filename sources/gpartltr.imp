@@ -63,6 +63,15 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int& coord,
   }
 }
 
+template <class T>
+gVector<T> TreeOfPartials<T>::VectorOfPartials(const gVector<T>& point) const
+{
+  gVector<T> answer(Dmnsn());
+  for (int i = 1; i <= Dmnsn(); i++)
+    answer[i] = ValueOfPartialOfRootPoly(i,point);
+  return answer;
+}
+
 template <class T> T
 TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 					     const gTreeNode<gPoly<T> >* n,

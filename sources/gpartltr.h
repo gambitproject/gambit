@@ -58,7 +58,7 @@ public:
 				    const gVector<T>&)         const;
    T MaximalNonconstantDifference(const TreeOfPartials<T>&,
 				  const gVector<T>&, 
-				  const gVector<T>&)         const;
+				  const gVector<T>&)           const;
 
    inline gTreeNode<gPoly<T> >* RootNode()                     const 
      { return PartialTree.RootNode(); }
@@ -67,6 +67,7 @@ public:
    inline T ValueOfRootPoly(const gVector<T>& point)           const 
      { return RootPoly().Evaluate(point); }
    T ValueOfPartialOfRootPoly(const int&, const gVector<T>&)   const;
+   gVector<T> VectorOfPartials(const gVector<T>&)              const;
 
 friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
 };
