@@ -202,7 +202,7 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 void dialogAlgorithm::SubgameFields(void)
 {
   Bool mark = false, select = false;
-  (void) new wxMessage(this, "Subgames");
+  m_subgamesGroup = new wxGroupBox(this, "Subgames");
   NewLine();
 
   wxGetResource("Soln-Defaults", "Efg-Mark-Subgames", &mark, gambitApp.ResourceFile());
@@ -216,11 +216,35 @@ void dialogAlgorithm::SubgameFields(void)
 				     "Interactively select subgame solutions");
   m_selectSolutions->SetValue(select);
   NewLine();
+
+  wxLayoutConstraints *constraints;
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_subgamesGroup, wxLeft, 10);
+  constraints->top.SameAs(m_subgamesGroup, wxTop, 20);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_markSubgames->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_markSubgames, wxLeft);
+  constraints->top.SameAs(m_markSubgames, wxBottom, 10);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_selectSolutions->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->top.SameAs(m_dominanceGroup, wxBottom, 15);
+  constraints->left.SameAs(m_dominanceGroup, wxLeft);
+  constraints->bottom.SameAs(m_selectSolutions, wxBottom, -10);
+  constraints->right.SameAs(m_selectSolutions, wxRight, -10);
+  m_subgamesGroup->SetConstraints(constraints);
+
 }
 
 void dialogAlgorithm::TraceFields(void)
 {
-  (void) new wxMessage(this, "Trace options");
+  m_traceGroup = new wxGroupBox(this, "Trace options");
   NewLine();
   char *traceChoices[] = { "None", "Window", "File" };
   NewLine();
@@ -229,12 +253,42 @@ void dialogAlgorithm::TraceFields(void)
 			       3, traceChoices);
   m_traceDest->SetClientData((char *) this);
   NewLine();
-  m_traceFile = new wxText(this, 0, "File name");
+  m_traceFile = new wxText(this, 0, "Filename");
   m_traceFile->Enable(FALSE);
-  NewLine();
   m_traceLevel = new wxIntegerItem(this, "Level", 0, -1, -1, 100, -1);
   m_traceLevel->Enable(FALSE);
   NewLine();
+
+  wxLayoutConstraints *constraints;
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_traceGroup, wxLeft, 10);
+  constraints->top.SameAs(m_traceGroup, wxTop, 20);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_traceDest->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_traceDest, wxLeft);
+  constraints->top.SameAs(m_traceDest, wxBottom, 10);
+  constraints->height.AsIs();
+  constraints->right.SameAs(m_traceGroup, wxRight, 10);
+  m_traceFile->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_traceFile, wxLeft);
+  constraints->top.SameAs(m_traceFile, wxBottom, 10);
+  constraints->height.AsIs();
+  constraints->right.SameAs(m_traceGroup, wxRight, 10);
+  m_traceLevel->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->top.AsIs();
+  constraints->left.SameAs(m_dominanceGroup, wxLeft);
+  constraints->bottom.SameAs(m_traceLevel, wxBottom, -10);
+  constraints->right.SameAs(m_traceDest, wxRight, -10);
+  m_traceGroup->SetConstraints(constraints);
+
 }
 
 void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
@@ -249,9 +303,23 @@ void dialogAlgorithm::MakeCommonFields(bool p_dominance, bool p_subgames,
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");
   okButton->SetClientData((char *) this);
   okButton->SetDefault();
+  okButton->SetConstraints(new wxLayoutConstraints);
+  okButton->GetConstraints()->left.SameAs(m_traceGroup, wxLeft);
+  okButton->GetConstraints()->top.SameAs(m_traceGroup, wxBottom, 10);
+  okButton->GetConstraints()->height.AsIs();
+  okButton->GetConstraints()->width.AsIs();
+
   wxButton *cancelButton = new wxButton(this, (wxFunction) CallbackCancel,
 					"Cancel");
   cancelButton->SetClientData((char *) this);
+  cancelButton->SetConstraints(new wxLayoutConstraints);
+  cancelButton->GetConstraints()->left.SameAs(okButton, wxRight, 10);
+  cancelButton->GetConstraints()->top.SameAs(okButton, wxTop);
+  cancelButton->GetConstraints()->height.AsIs();
+  cancelButton->GetConstraints()->width.AsIs();
+
+  Layout();
+  Fit();
 }
 
 void dialogAlgorithm::StopAfterField(void)
