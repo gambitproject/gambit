@@ -198,7 +198,7 @@ nfgLiap::nfgLiap(void)
     m_tol1(2.0e-10), m_tolN(1.0e-10)
 { }
 
-gList<MixedSolution> nfgLiap::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgLiap::Solve(const gbtNfgSupport &p_support,
 				    gStatus &p_status)
 {
   static const double ALPHA = .00000001;

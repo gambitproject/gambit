@@ -40,7 +40,7 @@ NfgIter::NfgIter(Nfg &nfg)
   First();
 }
 
-NfgIter::NfgIter(const NFSupport &s) 
+NfgIter::NfgIter(const gbtNfgSupport &s) 
   : support(s), N((Nfg *) &s.Game()),
     current_strat(N->NumPlayers()), profile(*N)
 {
@@ -142,7 +142,7 @@ void NfgIter::SetOutcome(gbtNfgOutcome outcome)
 // NfgContIter: Constructor, Destructor
 //-------------------------------------
 
-NfgContIter::NfgContIter(const NFSupport &s)
+NfgContIter::NfgContIter(const gbtNfgSupport &s)
   : support(s), 
     current_strat(s.Game().NumPlayers()),
     N((Nfg *) &s.Game()), profile(*N), thawed(N->NumPlayers())

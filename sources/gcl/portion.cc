@@ -805,14 +805,14 @@ gPool NfSupportPortion::pool(sizeof(NfSupportPortion));
 NfSupportPortion::rep::~rep()
 { delete value; }
 
-NfSupportPortion::NfSupportPortion(NFSupport *value)
+NfSupportPortion::NfSupportPortion(gbtNfgSupport *value)
   : m_rep(new struct rep(value)), m_ref(false)
 {
   SetGame(&m_rep->value->Game());
 }
 
-NfSupportPortion::NfSupportPortion(NFSupport &value)
-  : m_rep(new struct rep(new NFSupport(value))), m_ref(false)
+NfSupportPortion::NfSupportPortion(gbtNfgSupport &value)
+  : m_rep(new struct rep(new gbtNfgSupport(value))), m_ref(false)
 {
   SetGame(&m_rep->value->Game());
 }
@@ -831,10 +831,10 @@ NfSupportPortion::~NfSupportPortion()
   if (--m_rep->nref == 0)  delete m_rep;
 }
 
-NFSupport *NfSupportPortion::Value(void) const
+gbtNfgSupport *NfSupportPortion::Value(void) const
 { return m_rep->value; }
 
-void NfSupportPortion::SetValue(NFSupport *value)
+void NfSupportPortion::SetValue(gbtNfgSupport *value)
 {
   if (m_ref) {
     ((NfSupportPortion *) Original())->SetValue(value);

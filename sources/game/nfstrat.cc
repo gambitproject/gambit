@@ -89,211 +89,99 @@ void StrategyProfile::Set(int p, const Strategy *const s)
   profile[p] = (Strategy *)s;
 }
 
-class nfgSupportPlayer  {
-protected:
-  gbtNfgPlayer m_player;
-  gBlock<Strategy *> strategies;
-  
-public:
-  nfgSupportPlayer(const nfgSupportPlayer &s); 
-  nfgSupportPlayer(gbtNfgPlayer);
-  
-  nfgSupportPlayer &operator=(const nfgSupportPlayer &s); 
-  bool operator==(const nfgSupportPlayer &s);
-
-  virtual ~nfgSupportPlayer();
-
-  // Add a strategy to the nfgSupportPlayer
-  void AddStrategy(Strategy *s);
-
-  // Removes a strategy. Returns true if the strategy was successfully
-  // removed, false otherwise.
-  bool RemoveStrategy(Strategy *s); 
-
-  // Number of strategies in the nfgSupportPlayer
-  int NumStrats(void) const;
-
-  //  return the entire strategy set in a const gArray
-  const gBlock<Strategy *> &Strategies(void) const;
-};
-
-
 //-----------------------------------------------
-// nfgSupportPlayer: Constructors, Destructors, Operators
+// gbtNfgSupport: Ctors, Dtor, Operators
 //-----------------------------------------------
 
-nfgSupportPlayer::nfgSupportPlayer(gbtNfgPlayer p_player)
-  : m_player(p_player), strategies(p_player.NumStrategies())
-{
-  for (int st = 1; st <= p_player.NumStrategies(); st++) {
-    strategies[st] = p_player.GetStrategy(st);
-  }
+gbtNfgSupport::gbtNfgSupport(const Nfg &N) : 
+  bnfg(&N), m_strategies(N.NumStrats())
+{ 
+  m_strategies = 1;
 }
 
-nfgSupportPlayer::nfgSupportPlayer(const nfgSupportPlayer &s)
-  : m_player(s.m_player), strategies(s.strategies)
+gbtNfgSupport::gbtNfgSupport(const gbtNfgSupport &s)
+  : bnfg(s.bnfg), m_strategies(s.m_strategies), m_name(s.m_name)
 { }
 
-nfgSupportPlayer::~nfgSupportPlayer()
+gbtNfgSupport::~gbtNfgSupport()
 { }
 
-nfgSupportPlayer &nfgSupportPlayer::operator=(const nfgSupportPlayer &s)
-{
-  if (this != &s) {
-    m_player = s.m_player;
-    strategies = s.strategies;
-  }
-  return *this;
-}
-
-bool nfgSupportPlayer::operator==(const nfgSupportPlayer &s)
-{
-  if (strategies.Length() != s.strategies.Length()) return (false);
-  int i;
-  for (i = 1; i <= strategies. Length() 
-       && strategies[i] == s.strategies[i]; i++);
-  if (i > strategies.Length()) return (true);
-  else return (false);
-}
-
-//------------------------------------------
-// nfgSupportPlayer: Member functions 
-//------------------------------------------
-
-// Add a strategy to the nfgSupportPlayer
-void nfgSupportPlayer::AddStrategy(Strategy *s)
-{ 
-  if (m_player == s->GetPlayer() && !strategies.Find(s)) {
-    int index;
-    for (index = 1; (index <= strategies.Length() &&
-		     strategies[index]->Number() < s->Number()); index++);
-    strategies.Insert(s, index);
-  }
-}
-
-// Removes a strategy. Returns true if the strategy was successfully
-// removed, false otherwise.
-bool nfgSupportPlayer::RemoveStrategy(Strategy *s) 
-{ 
-  if (m_player != s->GetPlayer())  return false;
-  int t = strategies.Find(s); 
-  if (t > 0) 
-    strategies.Remove(t); 
-  return (t > 0); 
-} 
-
-// Number of Strategies in a nfgSupportPlayer
-int nfgSupportPlayer::NumStrats(void) const
-{
-  return (strategies.Length());
-}
-
-// Return the entire strategy set
-const gBlock<Strategy *> &nfgSupportPlayer::Strategies(void) const
-{
-  return strategies;
-}
-
-//-----------------------------------------------
-// NFSupport: Ctors, Dtor, Operators
-//-----------------------------------------------
-
-NFSupport::NFSupport(const Nfg &N) : 
-  bnfg(&N), sups(N.NumPlayers())
-{ 
-  for (int i = 1; i <= sups.Length(); i++) {
-    sups[i] = new nfgSupportPlayer(N.GetPlayer(i));
-  }
-}
-
-NFSupport::NFSupport(const NFSupport &s)
-  : bnfg(s.bnfg), sups(s.sups.Length()), m_name(s.m_name)
-{
-  for (int i = 1; i <= sups.Length(); i++)
-    sups[i] = new nfgSupportPlayer(*s.sups[i]);
-}
-
-NFSupport::~NFSupport()
-{ 
-  for (int i = 1; i <= sups.Length(); i++)
-    delete sups[i];
-}
-
-NFSupport &NFSupport::operator=(const NFSupport &s)
+gbtNfgSupport &gbtNfgSupport::operator=(const gbtNfgSupport &s)
 {
   if (this != &s && bnfg == s.bnfg) {
     m_name = s.m_name;
-    for (int i = 1; i <= sups.Length(); i++)  {
-      delete sups[i];
-      sups[i] = new nfgSupportPlayer(*s.sups[i]);
-    }
+    m_strategies = s.m_strategies;
   }
   return *this;
 }
 
-bool NFSupport::operator==(const NFSupport &s) const
+bool gbtNfgSupport::operator==(const gbtNfgSupport &s) const
 {
-  if (bnfg != s.bnfg)  return false;
-  int i;
-  for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
-  if (i > sups.Length()) return (true);
-  else return (false);
+  return (bnfg == s.bnfg && m_strategies == s.m_strategies);
 }
   
-bool NFSupport::operator!=(const NFSupport &s) const
+bool gbtNfgSupport::operator!=(const gbtNfgSupport &s) const
 {
   return !(*this == s);
 }
 
 //------------------------
-// NFSupport: Members
+// gbtNfgSupport: Members
 //------------------------
 
-const gBlock<Strategy *> &NFSupport::Strategies(int pl) const
+gArray<Strategy *> gbtNfgSupport::Strategies(int pl) const
 {
-  return (sups[pl]->Strategies());
+  gBlock<Strategy *> ret;
+  for (int st = 1; st <= bnfg->NumStrats(pl); st++) {
+    if (m_strategies(pl, st)) {
+      ret += bnfg->GetPlayer(pl).GetStrategy(st);
+    }
+  }
+  return ret;
 }
 
-int NFSupport::GetNumber(const Strategy *s) const
+int gbtNfgSupport::GetNumber(const Strategy *s) const
 {
   int pl = s->GetPlayer().GetId();
-  gBlock<Strategy *> strats = Strategies(pl);
-  for (int i = 1; i <= strats.Length(); i++)
-    if (strats[i] == s)
+  gArray<Strategy *> strats = Strategies(pl);
+  for (int i = 1; i <= strats.Length(); i++) {
+    if (strats[i] == s) {
       return i;
-  //  gout << "Looking for the number of a strategy not in the support.\n";
-  exit(0);
+    }
+  }
   return 0;
 }
 
-int NFSupport::NumStrats(int pl) const
+int gbtNfgSupport::NumStrats(int pl) const
 {
-  return sups[pl]->NumStrats();
+  return Strategies(pl).Length();
 }
 
-const gArray<int> NFSupport::NumStrats(void) const
+gArray<int> gbtNfgSupport::NumStrats(void) const
 {
-  gArray<int> a(sups.Length());
+  gArray<int> ret(bnfg->NumPlayers());
 
-  for (int i = 1 ; i <= a.Length(); i++)
-    a[i] = sups[i]->NumStrats();
-  return a;
+  for (int pl = 1; pl <= ret.Length(); pl++) {
+    ret[pl] = NumStrats(pl);
+  }
+  return ret;
 }
 
-int NFSupport::TotalNumStrats(void) const
+int gbtNfgSupport::TotalNumStrats(void) const
 {
   int total = 0;
-  for (int i = 1 ; i <= sups.Length(); i++)
-    total += sups[i]->NumStrats();
+  for (int i = 1; i <= m_strategies.Length(); i++) {
+    total += m_strategies[i];
+  }
   return total;
 }
 
-int NFSupport::Find(Strategy *s) const
+int gbtNfgSupport::Find(Strategy *s) const
 {
-  return sups[s->GetPlayer().GetId()]->Strategies().Find(s);
+  return GetNumber(s);
 }
 
-bool NFSupport::StrategyIsActive(Strategy *s) const
+bool gbtNfgSupport::StrategyIsActive(Strategy *s) const
 {
   if (Find(s) > 0)
     return true;
@@ -301,45 +189,46 @@ bool NFSupport::StrategyIsActive(Strategy *s) const
     return false;
 }
 
-void NFSupport::AddStrategy(Strategy *s)
+void gbtNfgSupport::AddStrategy(Strategy *s)
 {
-  sups[s->GetPlayer().GetId()]->AddStrategy(s);
+  m_strategies(s->GetPlayer().GetId(), s->Number()) = 1;
 }
 
-bool NFSupport::RemoveStrategy(Strategy *s)
+bool gbtNfgSupport::RemoveStrategy(Strategy *s)
 {
-  return sups[s->GetPlayer().GetId()]->RemoveStrategy(s);
+  m_strategies(s->GetPlayer().GetId(), s->Number()) = 0;
+  return false;
 }
 
-
-// Returns true if all strategies in _THIS_ belong to _S_
-bool NFSupport::IsSubset(const NFSupport &s) const
+// Returns true if all strategies in this belong to s
+bool gbtNfgSupport::IsSubset(const gbtNfgSupport &s) const
 {
   if (bnfg != s.bnfg)  return false;
-  for (int i = 1; i <= sups.Length(); i++)
-    if (NumStrats(i) > s.NumStrats(i))
-      return false;
-    else  {
-      const gBlock<Strategy *> &strats =
-        sups[i]->Strategies();
-
-      for (int j = 1; j <= NumStrats(i); j++)
-	if (!s.sups[i]->Strategies().Find(strats[j]))
-	  return false;
-    }
-  return true;
-}
-
-bool NFSupport::IsValid(void) const
-{
   for (int pl = 1; pl <= bnfg->NumPlayers(); pl++) {
-    if (NumStrats(pl) == 0)
+    if (NumStrats(pl) > s.NumStrats(pl)) {
       return false;
+    }
+
+    for (int st = 1; st <= bnfg->NumStrats(pl); st++) {
+      if (m_strategies(pl, st) && !s.m_strategies(pl, st)) {
+	return false;
+      }
+    }
   }
   return true;
 }
 
-void NFSupport::Dump(gOutput &p_output) const
+bool gbtNfgSupport::IsValid(void) const
+{
+  for (int pl = 1; pl <= bnfg->NumPlayers(); pl++) {
+    if (NumStrats(pl) == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void gbtNfgSupport::Dump(gOutput &p_output) const
 {
   p_output << '"' << m_name << "\" { ";
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
@@ -353,7 +242,7 @@ void NFSupport::Dump(gOutput &p_output) const
   p_output << "} ";
 }
 
-gOutput& operator<<(gOutput& s, const NFSupport& n)
+gOutput& operator<<(gOutput& s, const gbtNfgSupport& n)
 {
   n.Dump(s);
   return s;

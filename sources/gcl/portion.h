@@ -444,15 +444,15 @@ public:
 // NfSupport
 //-------------
 
-class NFSupport;
+class gbtNfgSupport;
 
 class NfSupportPortion : public Portion   {
 protected:
   struct rep  {
-    NFSupport *value;
+    gbtNfgSupport *value;
     int nref;
 
-    rep(NFSupport *v) : value(v), nref(1)  { }
+    rep(gbtNfgSupport *v) : value(v), nref(1)  { }
     ~rep();
   };
   
@@ -464,12 +464,12 @@ protected:
   NfSupportPortion(const NfSupportPortion *, bool);
 
 public:
-  NfSupportPortion(NFSupport *);
-  NfSupportPortion(NFSupport &);
+  NfSupportPortion(gbtNfgSupport *);
+  NfSupportPortion(gbtNfgSupport &);
   virtual ~NfSupportPortion();
 
-  NFSupport *Value(void) const;
-  void SetValue(NFSupport *);
+  gbtNfgSupport *Value(void) const;
+  void SetValue(gbtNfgSupport *);
   PortionSpec Spec(void) const;
 
   void Output(gOutput& s) const;
@@ -484,7 +484,7 @@ public:
   void operator delete(void *p) { pool.Free(p); }
 };
 
-inline const NFSupport &AsNfgSupport(Portion *portion)
+inline const gbtNfgSupport &AsNfgSupport(Portion *portion)
 { return *((NfSupportPortion *) portion)->Value(); }
 
 //-------------

@@ -127,11 +127,11 @@ Portion *ArrayToList(const gList<const EFSupport> &A)
 }
 
 template<>
-Portion *ArrayToList(const gList<const NFSupport> &A)
+Portion *ArrayToList(const gList<const gbtNfgSupport> &A)
 {
   ListPortion *ret = new ListPortion;
   for (int i = 1; i <= A.Length(); i++) {
-    NFSupport sup = A[i];
+    gbtNfgSupport sup = A[i];
     ret->Append(new NfSupportPortion(sup));
   }
   return ret;

@@ -35,9 +35,9 @@ private:
   int m_stopAfter, m_maxDepth;
 
   int AddBfs(LHTableau<T> &, gList<BFS<T> > &);
-  gList<MixedSolution> AddSolutions(const NFSupport &,
+  gList<MixedSolution> AddSolutions(const gbtNfgSupport &,
 				    const gList<BFS<T> > &, const T &);
-  void AllLemke(const NFSupport &, int, LHTableau<T> &B, gList<BFS<T> > &,
+  void AllLemke(const gbtNfgSupport &, int, LHTableau<T> &B, gList<BFS<T> > &,
 		int depth, gStatus &);
   
 public:
@@ -51,7 +51,7 @@ public:
   void SetMaxDepth(int p_maxDepth) { m_maxDepth = p_maxDepth; }
 
   gText GetAlgorithm(void) const { return "Lcp[NFG]"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 

@@ -33,18 +33,18 @@ nfgPolEnum::nfgPolEnum(void)
   : m_stopAfter(0)
 { }
 
-gList<MixedSolution> nfgPolEnum::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgPolEnum::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
   p_status.SetProgress(0.0);
   p_status << "Step 1 of 2: Enumerating supports";
-  gList<const NFSupport> supports = PossibleNashSubsupports(p_support,
-							    p_status);
+  gList<const gbtNfgSupport> supports = PossibleNashSubsupports(p_support,
+								p_status);
 
   p_status.SetProgress(0.0);
   p_status << "Step 2 of 2: Computing equilibria";
 
-  gList<const NFSupport> singularSupports;
+  gList<const gbtNfgSupport> singularSupports;
   gList<MixedSolution> solutions;
 
   for (int i = 1; (i <= supports.Length() &&

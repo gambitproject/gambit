@@ -139,7 +139,7 @@ void NfgSupportWindow::UpdateValues(void)
 {
   m_supportList->Clear();
 
-  const gList<NFSupport *> &supports = m_parent->Supports();
+  const gList<gbtNfgSupport *> &supports = m_parent->Supports();
 
   for (int i = 1; i <= supports.Length(); i++) {
     m_supportList->Append((char *)

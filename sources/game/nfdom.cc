@@ -26,7 +26,7 @@
 
 #include "nfdom.h"
 
-bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
+bool gbtNfgSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
 {
   const Nfg &n = Game();
 
@@ -73,7 +73,7 @@ bool NFSupport::Dominates(Strategy *s, Strategy *t, bool strong) const
 }
 
 
-bool NFSupport::IsDominated(Strategy *s, bool strong) const
+bool gbtNfgSupport::IsDominated(Strategy *s, bool strong) const
 {
   for (int i = 1; i <= NumStrats(s->GetPlayer().GetId()); i++) {
     if (i != s->Number()) {
@@ -85,7 +85,7 @@ bool NFSupport::IsDominated(Strategy *s, bool strong) const
   return false;
 }
 
-bool NFSupport::Undominated(NFSupport &newS, int pl, bool strong,
+bool gbtNfgSupport::Undominated(gbtNfgSupport &newS, int pl, bool strong,
 			    gOutput &tracefile, gStatus &status) const
 {
   gArray<int> set(NumStrats(pl));
@@ -148,10 +148,10 @@ bool NFSupport::Undominated(NFSupport &newS, int pl, bool strong,
     return false;
 }
 
-NFSupport NFSupport::Undominated(bool strong, const gArray<int> &players,
+gbtNfgSupport gbtNfgSupport::Undominated(bool strong, const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status) const
 {
-  NFSupport newS(*this);
+  gbtNfgSupport newS(*this);
   
   for (int i = 1; i <= players.Length(); i++)   {
     status.Get();

@@ -154,7 +154,7 @@ void NfgNavigateWindow::SetStrategy(int p_player, int p_strategy)
   m_stratProfile[p_player-1]->SetSelection(p_strategy-1);
 }
 
-void NfgNavigateWindow::SetSupport(const NFSupport &p_support)
+void NfgNavigateWindow::SetSupport(const gbtNfgSupport &p_support)
 {
   m_support = p_support;
 

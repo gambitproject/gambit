@@ -143,7 +143,7 @@ void GambitApp::OnFileNew(wxWindow *p_parent)
 	nfg->GetPlayer(pl).SetLabel(gText("Player") + ToText(pl));
       }
       if (dialog.CreateOutcomes()) {
-	NFSupport support(*nfg);
+	gbtNfgSupport support(*nfg);
 	NfgContIter iter(support);
 	iter.First();
 	do {

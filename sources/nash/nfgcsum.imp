@@ -33,7 +33,7 @@ template <class T> nfgLp<T>::nfgLp(void)
 { }
 
 template <class T> 
-gList<MixedSolution> nfgLp<T>::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgLp<T>::Solve(const gbtNfgSupport &p_support,
 				     gStatus &p_status)
 {
   BFS<T> cbfs((T) 0);
@@ -84,7 +84,7 @@ gList<MixedSolution> nfgLp<T>::Solve(const NFSupport &p_support,
   return solutions;
 }
 
-template <class T> int nfgLp<T>::Add_BFS(const NFSupport &p_support,
+template <class T> int nfgLp<T>::Add_BFS(const gbtNfgSupport &p_support,
 					 /*const*/ LPSolve<T> &lp,
 					 gList<BFS<T> > &p_list)
 {
@@ -101,7 +101,7 @@ template <class T> int nfgLp<T>::Add_BFS(const NFSupport &p_support,
 }
 
 template <class T>
-void nfgLp<T>::GetSolutions(const NFSupport &p_support,
+void nfgLp<T>::GetSolutions(const gbtNfgSupport &p_support,
 			    const gList<BFS<T> > &p_list,
 			    gList<MixedSolution > &solutions,
 			    const T &p_epsilon) const

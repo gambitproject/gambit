@@ -305,7 +305,7 @@ static double PDenom(double p_lambda, int p_m)
   return total;
 }
 
-gList<MixedSolution> nfgYamamoto::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgYamamoto::Solve(const gbtNfgSupport &p_support,
 					gStatus &p_status)
 {
   // In the notation of Yamamoto's paper, profile(i,j)=x_{ij}

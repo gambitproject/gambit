@@ -63,7 +63,7 @@ private:
   wxGrid *m_grid;
   bool m_editable, m_cursorMoving;
   int m_rowPlayer, m_colPlayer;
-  NFSupport m_support;
+  gbtNfgSupport m_support;
   MixedSolution *m_profile;
 
   int m_showProb, m_showDom, m_showValue;
@@ -104,8 +104,8 @@ public:
   void SetOutcomeValues(bool);
   bool OutcomeValues(void) const { return m_settings.OutcomeValues(); }
 
-  void SetSupport(const NFSupport &);
-  const NFSupport &GetSupport(void) const { return m_support; }
+  void SetSupport(const gbtNfgSupport &);
+  const gbtNfgSupport &GetSupport(void) const { return m_support; }
 
   bool IsEditable(void) const { return m_editable; }
   void SetEditable(bool p_editable) { m_editable = p_editable; }

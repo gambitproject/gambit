@@ -42,7 +42,7 @@ public:
   void SetStopAfter(int p_stopAfter) { m_stopAfter = p_stopAfter; }
 
   gText GetAlgorithm(void) const { return "PolEnum[NFG]"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 #endif    // NFGALLEQ_H

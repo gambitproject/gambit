@@ -36,21 +36,21 @@ class StrategyCursorForSupport;
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const NFSupport *s,
-			     NFSupport *sact,
+void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
+			     gbtNfgSupport *sact,
 			     StrategyCursorForSupport *c,
-			     gList<const NFSupport> *list);
+			     gList<const gbtNfgSupport> *list);
 
-gList<const NFSupport> AllSubsupports(const NFSupport &S);
+gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S);
 
 // Subsupports of a given support are _valid_ if each agent has an action.
 
-void AllValidSubsupportsRECURSIVE(const NFSupport *s,
-					 NFSupport *sact,
+void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
+					 gbtNfgSupport *sact,
 					 StrategyCursorForSupport *c,
-					 gList<const NFSupport> *list);
+					 gList<const gbtNfgSupport> *list);
 
-gList<const NFSupport> AllValidSubsupports(const NFSupport &S);
+gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S);
 
 // The following routines combine to return all supports that do not 
 // exhibit particular type of domination.  This was a prototype for 
@@ -61,14 +61,14 @@ gList<const NFSupport> AllValidSubsupports(const NFSupport &S);
 // process, when, after more truncations, it might be no longer weakly
 // dominated, and thus part of an allowed subsupport.
 
-void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
-					      NFSupport *sact,
+void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
+					      gbtNfgSupport *sact,
 					      StrategyCursorForSupport *c,
 					const bool strong,
-					      gList<const NFSupport> *list,
+					      gList<const gbtNfgSupport> *list,
 					gStatus &status);
   
-gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
+gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
 						 gStatus &status);
@@ -84,28 +84,28 @@ gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
 // of having active strategys at all active infosets, and not at other
 // infosets.
 
-void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
-					    NFSupport *sact,
+void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
+					    gbtNfgSupport *sact,
 				            StrategyCursorForSupport *c,
-					    gList<const NFSupport> *list,
+					    gList<const gbtNfgSupport> *list,
 				      gStatus &status);
 
-gList<const NFSupport> SortSupportsBySize(gList<const NFSupport> &);
+gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &);
   
-gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
+gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 					       gStatus &status);
 
 ///////////////// Utility Cursor Class /////////////////////
 
 class StrategyCursorForSupport {
 protected:
-  const NFSupport *support;
+  const gbtNfgSupport *support;
   int pl;
   int strat;
 
 public:
   //Constructors and dtor
-  StrategyCursorForSupport(const NFSupport &S);
+  StrategyCursorForSupport(const gbtNfgSupport &S);
   StrategyCursorForSupport(const StrategyCursorForSupport &s);
   ~StrategyCursorForSupport();
 
@@ -128,6 +128,3 @@ public:
 };
 
 
-//////////////////////Testing////////////////////
-
-//void AndyTest(const NFSupport &S, gStatus &status);

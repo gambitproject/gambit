@@ -150,6 +150,6 @@ Nfg *ReadNfgFile(gInput &);
 
 #include "mixed.h"
 
-extern Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S);
+extern Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S);
 
 #endif    // NFG_H

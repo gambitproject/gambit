@@ -37,7 +37,7 @@ class PolEnumModule  {
 private:
   gDouble eps;
   const Nfg &NF;
-  const NFSupport &support;
+  const gbtNfgSupport &support;
   PolEnumParams params;
   gSpace Space;
   term_order Lex;
@@ -66,7 +66,7 @@ private:
 
   int SaveSolutions(const gList<gVector<gDouble> > &list);
 public:
-  PolEnumModule(const NFSupport &, const PolEnumParams &p);
+  PolEnumModule(const gbtNfgSupport &, const PolEnumParams &p);
   
   int PolEnum(gStatus &);
   
@@ -90,7 +90,7 @@ public:
 //                    PolEnumModule: Member functions
 //-------------------------------------------------------------------------
 
-PolEnumModule::PolEnumModule(const NFSupport &S, const PolEnumParams &p)
+PolEnumModule::PolEnumModule(const gbtNfgSupport &S, const PolEnumParams &p)
   : NF(S.Game()), support(S), params(p), 
     Space(support.TotalNumStrats()-NF.NumPlayers()), 
     Lex(&Space, lex), num_vars(support.TotalNumStrats()-NF.NumPlayers()), 
@@ -320,7 +320,7 @@ bool PolEnumModule::IsSingular() const
 PolEnumParams::PolEnumParams(void)
 { }
 
-int PolEnum(const NFSupport &support, const PolEnumParams &params,
+int PolEnum(const gbtNfgSupport &support, const PolEnumParams &params,
 	    gList<MixedSolution> &solutions, gStatus &p_status,
 	    long &nevals, double &time, bool &is_singular)
 {
@@ -341,7 +341,7 @@ int PolEnum(const NFSupport &support, const PolEnumParams &params,
 //                        Polish Equilibrum for Nfg
 //---------------------------------------------------------------------------
 
-MixedSolution PolishEquilibrium(const NFSupport &support, 
+MixedSolution PolishEquilibrium(const gbtNfgSupport &support, 
 				const MixedSolution &sol, 
 				bool &is_singular)
 {

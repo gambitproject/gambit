@@ -49,7 +49,7 @@ private:
 
 public:
   // Lifecycle
-  dialogNfgNash(wxWindow *, const NFSupport &);
+  dialogNfgNash(wxWindow *, const gbtNfgSupport &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   nfgNashAlgorithm *GetAlgorithm(void) const;

@@ -48,10 +48,10 @@ template <class T> Portion *ArrayToList(const gList<T> &);
 
 static Portion *GSM_AddStrategy(GSM &, Portion **param)
 {
-  NFSupport *support = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *support = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
 
-  NFSupport *S = new NFSupport(*support);
+  gbtNfgSupport *S = new gbtNfgSupport(*support);
   S->AddStrategy(s);
 
   return new NfSupportPortion(S);
@@ -71,11 +71,11 @@ static Portion *GSM_Comment(GSM &, Portion **param)
 // CompressNfg
 //---------------
 
-Nfg *CompressNfg(const Nfg &, const NFSupport &);
+Nfg *CompressNfg(const Nfg &, const gbtNfgSupport &);
 
 static Portion *GSM_CompressNfg(GSM &, Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *S = ((NfSupportPortion *) param[0])->Value();
   Nfg *N = (Nfg *) &S->Game();
 
   return new NfgPortion(CompressNfg(*N, *S));
@@ -105,7 +105,7 @@ static Portion *GSM_DeleteOutcome(GSM &gsm, Portion **param)
 static Portion *GSM_IsDominated_Nfg(GSM &, Portion **param)
 {
   Strategy *str = ((StrategyPortion *) param[0])->Value();
-  NFSupport *S = ((NfSupportPortion *) param[1])->Value();
+  gbtNfgSupport *S = ((NfSupportPortion *) param[1])->Value();
   bool strong = ((BoolPortion *) param[2])->Value();
   bool mixed = ((BoolPortion *) param[3])->Value();
   gPrecision prec = ((PrecisionPortion *) param[4])->Value();
@@ -363,8 +363,8 @@ static Portion *GSM_PossibleNashSupportsNFG(GSM &gsm, Portion **param)
 {
   Nfg &N = *((NfgPortion*) param[0])->Value();
 
-  gList<const NFSupport> list =
-    PossibleNashSubsupports(NFSupport(N), gsm.GetStatusMonitor());
+  gList<const gbtNfgSupport> list =
+    PossibleNashSubsupports(gbtNfgSupport(N), gsm.GetStatusMonitor());
 
   Portion *por = ArrayToList(list);
   return por;
@@ -377,7 +377,7 @@ static Portion *GSM_PossibleNashSupportsNFG(GSM &gsm, Portion **param)
 static Portion *GSM_StrategyNumber(GSM &, Portion **param)
 {
   Strategy *s = ((StrategyPortion *) param[0])->Value();
-  NFSupport *support = ((NfSupportPortion *) param[1])->Value();
+  gbtNfgSupport *support = ((NfSupportPortion *) param[1])->Value();
 
   return new NumberPortion(support->Find(s));
 }
@@ -388,10 +388,10 @@ static Portion *GSM_StrategyNumber(GSM &, Portion **param)
 
 static Portion *GSM_RemoveStrategy(GSM &, Portion **param)
 {
-  NFSupport *support = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *support = ((NfSupportPortion *) param[0])->Value();
   Strategy *s = ((StrategyPortion *) param[1])->Value();
   
-  NFSupport *S = new NFSupport(*support);
+  gbtNfgSupport *S = new gbtNfgSupport(*support);
   S->RemoveStrategy(s);
 
   return new NfSupportPortion(S);
@@ -468,7 +468,7 @@ static Portion *GSM_SetName_NfOutcome(GSM &, Portion **param)
 
 static Portion *GSM_SetName_NfSupport(GSM &, Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *S = ((NfSupportPortion *) param[0])->Value();
   gText name = ((TextPortion *) param[1])->Value();
   S->SetName(name);
   return param[0]->RefCopy();
@@ -530,7 +530,7 @@ static Portion* GSM_SetPayoff(GSM &gsm, Portion** param)
 static Portion *GSM_Strategies(GSM &, Portion **param)
 {
   gbtNfgPlayer player = ((NfPlayerPortion *) param[0])->Value();
-  NFSupport* s = ((NfSupportPortion*) param[1])->Value();
+  gbtNfgSupport* s = ((NfSupportPortion*) param[1])->Value();
 
   return ArrayToList(s->Strategies(player.GetId()));
 }
@@ -542,7 +542,7 @@ static Portion *GSM_Strategies(GSM &, Portion **param)
 static Portion *GSM_Support(GSM &, Portion **param)
 {
   Nfg &N = * ((NfgPortion *) param[0])->Value();
-  return new NfSupportPortion(new NFSupport(N));
+  return new NfSupportPortion(new gbtNfgSupport(N));
 }
 
 //-------------
@@ -551,7 +551,7 @@ static Portion *GSM_Support(GSM &, Portion **param)
 
 static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *S = ((NfSupportPortion *) param[0])->Value();
   bool strong = ((BoolPortion *) param[1])->Value();
   bool mixed = ((BoolPortion *) param[2])->Value();
   gPrecision prec = ((PrecisionPortion *) param[3])->Value();
@@ -561,14 +561,14 @@ static Portion *GSM_UnDominated(GSM &gsm, Portion **param)
   for (int i = 1; i <= players.Length(); i++)   players[i] = i;
 
   Portion *por;
-  NFSupport *T;
+  gbtNfgSupport *T;
 
   if (mixed)
-    T = new NFSupport(S->MixedUndominated(strong, prec, players,
+    T = new gbtNfgSupport(S->MixedUndominated(strong, prec, players,
 					  ((OutputPortion *) param[5])->Value(), 
 					  gsm.GetStatusMonitor()));
   else   {
-    T = new NFSupport(S->Undominated(strong, players,
+    T = new gbtNfgSupport(S->Undominated(strong, players,
 				     ((OutputPortion *) param[5])->Value(),
 				     gsm.GetStatusMonitor()));
   }

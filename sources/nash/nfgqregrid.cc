@@ -216,7 +216,7 @@ QreNfgGrid::QreNfgGrid(void)
 //               QreNfgGrid: Private auxiliary functions
 //--------------------------------------------------------------------------
 
-void QreNfgGrid::OutputHeader(const NFSupport &p_support, gOutput &out) const
+void QreNfgGrid::OutputHeader(const gbtNfgSupport &p_support, gOutput &out) const
 {
   out<< "Dimensionality:\n";
   out<< p_support.Game().NumPlayers()<<' ';
@@ -421,7 +421,7 @@ static bool Polish(MixedProfile<double> &p_profile, double p_lambda)
   return false;
 }
 
-void QreNfgGrid::Solve(const NFSupport &p_support, gOutput &p_pxifile,
+void QreNfgGrid::Solve(const gbtNfgSupport &p_support, gOutput &p_pxifile,
 		       gStatus &p_status, gList<MixedSolution> &p_solutions)
 {
   p_solutions.Flush();

@@ -327,7 +327,7 @@ static Portion *GSM_Accuracy_Mixed(GSM &, Portion **param)
 
 Portion* GSM_Mixed(GSM &, Portion** param)
 {
-  NFSupport *S = ((NfSupportPortion *) param[0])->Value();
+  gbtNfgSupport *S = ((NfSupportPortion *) param[0])->Value();
   return new MixedPortion(new MixedSolution(MixedProfile<gNumber>(*S)));
 }
 
@@ -614,7 +614,7 @@ static Portion *GSM_Support_Behav(GSM &, Portion** param)
 static Portion *GSM_Support_Mixed(GSM &, Portion** param)
 {
   MixedSolution *P = ((MixedPortion *) param[0])->Value();
-  return new NfSupportPortion(new NFSupport(P->Support()));
+  return new NfSupportPortion(new gbtNfgSupport(P->Support()));
 }
 
 

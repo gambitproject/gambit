@@ -30,6 +30,7 @@
 #include "base/base.h"
 #include "base/gstatus.h"
 #include "math/gnumber.h"
+#include "math/gpvector.h"
 #include "player.h"
 
 class Nfg;
@@ -60,25 +61,26 @@ public:
 
 
 class Nfg;
-class nfgSupportPlayer;
 
-class NFSupport {
+class gbtNfgSupport {
 protected:
   const Nfg *bnfg;
-  gArray <nfgSupportPlayer *> sups;
+  // This really could be a gPVector<bool> probably, but we'll keep
+  // it this way for now to placate possibly older compilers.
+  gPVector<int> m_strategies;
   gText m_name;
   
-  bool Undominated(NFSupport &newS, int pl, bool strong,
+  bool Undominated(gbtNfgSupport &newS, int pl, bool strong,
 		   gOutput &tracefile, gStatus &status) const;
 
 public:
-  NFSupport(const Nfg &);
-  NFSupport(const NFSupport &s); 
-  virtual ~NFSupport();
-  NFSupport &operator=(const NFSupport &s);
+  gbtNfgSupport(const Nfg &);
+  gbtNfgSupport(const gbtNfgSupport &s); 
+  virtual ~gbtNfgSupport();
+  gbtNfgSupport &operator=(const gbtNfgSupport &s);
 
-  bool operator==(const NFSupport &s) const;
-  bool operator!=(const NFSupport &s) const;
+  bool operator==(const gbtNfgSupport &s) const;
+  bool operator!=(const gbtNfgSupport &s) const;
 
   const Nfg &Game(void) const   { return *bnfg; }
   const Nfg *GamePtr(void) const { return bnfg; }
@@ -86,21 +88,21 @@ public:
   const gText &GetName(void) const { return m_name; }
   void SetName(const gText &p_name) { m_name = p_name; }
   
-  const gBlock<Strategy *> &Strategies(int pl) const;
-  inline Strategy *GetStrategy(int pl, int i) const
+  gArray<Strategy *> Strategies(int pl) const;
+  Strategy *GetStrategy(int pl, int i) const
     { return Strategies(pl)[i]; }
   int GetNumber(const Strategy *s) const;
 
   int NumStrats(int pl) const;
   int NumStrats(const gbtNfgPlayer &p_player) const 
     { return NumStrats(p_player.GetId()); }
-  const gArray<int> NumStrats(void) const;
+  gArray<int> NumStrats(void) const;
   int TotalNumStrats(void) const;
 
   void AddStrategy(Strategy *);
   bool RemoveStrategy(Strategy *);
   
-  bool IsSubset(const NFSupport &s) const;
+  bool IsSubset(const gbtNfgSupport &s) const;
   bool IsValid(void) const;
 
   // returns the index of the strategy in the support if it exists,
@@ -112,18 +114,17 @@ public:
   bool Dominates(Strategy *s, Strategy *t, bool strong) const;
   bool IsDominated(Strategy *s, bool strong) const; 
 
-  NFSupport Undominated(bool strong, const gArray<int> &players,
-			gOutput &tracefile, gStatus &status) const;
-  NFSupport MixedUndominated(bool strong, gPrecision precision,
-			     const gArray<int> &players,
-			     gOutput &, gStatus &status) const;
+  gbtNfgSupport Undominated(bool strong, const gArray<int> &players,
+			    gOutput &tracefile, gStatus &status) const;
+  gbtNfgSupport MixedUndominated(bool strong, gPrecision precision,
+				 const gArray<int> &players,
+				 gOutput &, gStatus &status) const;
 
   void Dump(gOutput &) const;
 };
 
-gOutput &operator<<(gOutput &f, const NFSupport &);
+gOutput &operator<<(gOutput &f, const gbtNfgSupport &);
 
-
-#endif    // NFSTRAT_H
+#endif  // NFSTRAT_H
 
 

@@ -161,7 +161,7 @@ Nfg *MakeReducedNfg(const EFSupport &support)
     }
   }
 
-  NFSupport S(*L->N);
+  gbtNfgSupport S(*L->N);
   NfgContIter iter(S);
   gArray<gArray<int> *> corr(E.NumPlayers());
   gArray<int> corrs(E.NumPlayers());

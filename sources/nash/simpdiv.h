@@ -59,7 +59,7 @@ public:
   void SetLeashLength(int p_leashLength) { m_leashLength = p_leashLength; }
 
   gText GetAlgorithm(void) const { return "Simpdiv[NFG]"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 #endif  // SIMPDIV_H

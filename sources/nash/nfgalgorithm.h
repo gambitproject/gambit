@@ -35,7 +35,7 @@ public:
   virtual ~nfgNashAlgorithm() { }
 
   virtual gText GetAlgorithm(void) const = 0;
-  virtual gList<MixedSolution> Solve(const NFSupport &, gStatus &) = 0;
+  virtual gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &) = 0;
 };
 
 #endif  // NFGALGORITHM_H

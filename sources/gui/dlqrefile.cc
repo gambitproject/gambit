@@ -63,7 +63,7 @@ dialogQreFile::dialogQreFile(wxWindow *p_parent,
   m_qreList->InsertColumn(0, "Lambda");
 
   int maxColumn = 0;
-  const NFSupport &support = p_profiles[1].Support();
+  const gbtNfgSupport &support = p_profiles[1].Support();
   for (int pl = 1; pl <= support.Game().NumPlayers(); pl++) {
     for (int st = 1; st <= support.NumStrats(pl); st++) {
       m_qreList->InsertColumn(++maxColumn,

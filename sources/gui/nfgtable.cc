@@ -176,7 +176,7 @@ wxString NfgGridTable::GetValue(int row, int col)
 {
   int rowPlayer = m_table->GetRowPlayer();
   int colPlayer = m_table->GetColPlayer();
-  const NFSupport &support = m_table->GetSupport();
+  const gbtNfgSupport &support = m_table->GetSupport();
   int numRowStrats = support.NumStrats(rowPlayer);
   int numColStrats = support.NumStrats(colPlayer);
 
@@ -668,7 +668,7 @@ void NfgTable::OnLabelLeftClick(wxGridEvent &p_event)
   p_event.Veto();
 }
 
-void NfgTable::SetSupport(const NFSupport &p_support)
+void NfgTable::SetSupport(const gbtNfgSupport &p_support)
 {
   m_support = p_support;
   SetPlayers(m_rowPlayer, m_colPlayer);

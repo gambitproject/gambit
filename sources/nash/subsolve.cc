@@ -139,7 +139,7 @@ void SubgameSolver::FindSubgames(const EFSupport &p_support,
       }
       else if (m_nfgAlgorithm) {
 	Nfg *nfg = MakeReducedNfg(subsupport);
-	NFSupport support(*nfg);
+	gbtNfgSupport support(*nfg);
 
 	gList<MixedSolution> nfgSolutions;
 

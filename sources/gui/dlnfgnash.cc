@@ -59,10 +59,10 @@ public:
 class nfgOneNash : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OneNash"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgOneNash::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgOneNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -74,7 +74,7 @@ gList<MixedSolution> nfgOneNash::Solve(const NFSupport &p_support,
     gNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
-    NFSupport support = p_support.Undominated(false, players, gnull, status);
+    gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
     if (p_support.Game().NumPlayers() == 2) {
       if (IsConstSum(p_support.Game())) {
@@ -146,10 +146,10 @@ nfgNashAlgorithm *panelNfgOneNash::GetAlgorithm(void) const
 class nfgTwoNash : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoNash"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgTwoNash::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgTwoNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -158,12 +158,12 @@ gList<MixedSolution> nfgTwoNash::Solve(const NFSupport &p_support,
   }
 
   try {
-    NFSupport support(p_support);
+    gbtNfgSupport support(p_support);
 
     while (true) {
       gNullStatus status;
       gNullOutput gnull;
-      NFSupport newSupport = support.Undominated(true, players,
+      gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
       
       if (newSupport == support) {
@@ -239,10 +239,10 @@ nfgNashAlgorithm *panelNfgTwoNash::GetAlgorithm(void) const
 class nfgAllNash : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllNash"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgAllNash::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgAllNash::Solve(const gbtNfgSupport &p_support,
 				       gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -251,12 +251,12 @@ gList<MixedSolution> nfgAllNash::Solve(const NFSupport &p_support,
   }
 
   try {
-    NFSupport support(p_support);
+    gbtNfgSupport support(p_support);
 
     while (true) {
       gNullStatus status;
       gNullOutput gnull;
-      NFSupport newSupport = support.Undominated(true, players,
+      gbtNfgSupport newSupport = support.Undominated(true, players,
 						 gnull, status);
       
       if (newSupport == support) {
@@ -331,10 +331,10 @@ nfgNashAlgorithm *panelNfgAllNash::GetAlgorithm(void) const
 class nfgOnePerfect : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "OnePerfect"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgOnePerfect::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgOnePerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -346,7 +346,7 @@ gList<MixedSolution> nfgOnePerfect::Solve(const NFSupport &p_support,
     gNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
-    NFSupport support = p_support.Undominated(false, players, gnull, status);
+    gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
     nfgLcp<double> algorithm;
     algorithm.SetStopAfter(1);
@@ -406,10 +406,10 @@ nfgNashAlgorithm *panelNfgOnePerfect::GetAlgorithm(void) const
 class nfgTwoPerfect : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "TwoPerfect"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgTwoPerfect::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgTwoPerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -421,7 +421,7 @@ gList<MixedSolution> nfgTwoPerfect::Solve(const NFSupport &p_support,
     gNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
-    NFSupport support = p_support.Undominated(false, players, gnull, status);
+    gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
     nfgEnumMixed<double> algorithm;
     algorithm.SetStopAfter(2);
@@ -481,10 +481,10 @@ nfgNashAlgorithm *panelNfgTwoPerfect::GetAlgorithm(void) const
 class nfgAllPerfect : public nfgNashAlgorithm {
 public:
   gText GetAlgorithm(void) const { return "AllPerfect"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
-gList<MixedSolution> nfgAllPerfect::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgAllPerfect::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
   gArray<int> players(p_support.Game().NumPlayers());
@@ -496,7 +496,7 @@ gList<MixedSolution> nfgAllPerfect::Solve(const NFSupport &p_support,
     gNullStatus status;
     gNullOutput gnull;
     /* one round of elimination of weakly dominated strategies */
-    NFSupport support = p_support.Undominated(false, players, gnull, status);
+    gbtNfgSupport support = p_support.Undominated(false, players, gnull, status);
 
     nfgEnumMixed<double> algorithm;
     algorithm.SetStopAfter(0);
@@ -1317,7 +1317,7 @@ BEGIN_EVENT_TABLE(dialogNfgNash, wxDialog)
 			   dialogNfgNash::OnItemCollapsing)
 END_EVENT_TABLE()
 
-dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const NFSupport &p_support)
+dialogNfgNash::dialogNfgNash(wxWindow *p_parent, const gbtNfgSupport &p_support)
   : wxDialog(p_parent, -1, "Compute Nash equilibria"),
     m_algorithms(0)
 {

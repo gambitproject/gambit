@@ -32,7 +32,7 @@
 wxString gbtBuildHtml(const Nfg &p_nfg, int p_rowPlayer, int p_colPlayer)
 {
   wxString theHtml;
-  NFSupport support(p_nfg);
+  gbtNfgSupport support(p_nfg);
   NfgContIter iter(support);
   iter.Freeze(p_rowPlayer);
   iter.Freeze(p_colPlayer);

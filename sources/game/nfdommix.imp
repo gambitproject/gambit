@@ -27,7 +27,7 @@
 #include "base/gnullstatus.h"
 
 template <class T>
-bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
+bool ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,
 			   int pl, bool strong, T /*junk*/,
 			   gOutput &tracefile, gStatus &status)
 {
@@ -213,7 +213,7 @@ bool ComputeMixedDominated(const NFSupport &S, NFSupport &R,
 }
 
 template <class T>
-bool IsMixedDominated(const NFSupport &S,Strategy *str,
+bool IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
 			   bool strong, T /*junk*/,
 			   gOutput &tracefile)
 {
@@ -378,7 +378,7 @@ template <class T>
 bool IsMixedDominated(const MixedProfile<T> &pr, int pl,
 		      bool strong, gOutput &tracefile)
 {
-  NFSupport S = pr.Support();
+  gbtNfgSupport S = pr.Support();
   Nfg nfg = pr.Game();
   int strats = S.NumStrats(pl);
   gVector<T> prob = pr.GetRow(pl);

@@ -116,7 +116,7 @@ static void NewtonStep(gMatrix<double> &q, gMatrix<double> &b,
   d = sqrt(d);
 }
 
-static void QreLHS(const NFSupport &p_support, const gVector<double> &p_point,
+static void QreLHS(const gbtNfgSupport &p_support, const gVector<double> &p_point,
 		   gVector<double> &p_lhs)
 {
   MixedProfile<double> profile(p_support);
@@ -145,7 +145,7 @@ static void QreLHS(const NFSupport &p_support, const gVector<double> &p_point,
   }
 }
 
-static void QreJacobian(const NFSupport &p_support,
+static void QreJacobian(const gbtNfgSupport &p_support,
 			const gVector<double> &p_point,
 			gMatrix<double> &p_matrix)
 {
@@ -359,7 +359,7 @@ static void TracePath(const MixedProfile<double> &p_start,
       if (u[i] < 1.0e-10) {
 	// Drop this strategy from the support, then recursively call
 	// to continue tracing
-	NFSupport newSupport(p_start.Support());
+	gbtNfgSupport newSupport(p_start.Support());
 	int index = 1;
 	for (int pl = 1; pl <= newSupport.Game().NumPlayers(); pl++) {
 	  for (int st = 1; st <= newSupport.NumStrats(pl); st++) {
@@ -413,7 +413,7 @@ nfgQre::nfgQre(void)
   : m_maxLam(30.0), m_stepSize(0.0001), m_fullGraph(false)
 { }
 
-gList<MixedSolution> nfgQre::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgQre::Solve(const gbtNfgSupport &p_support,
 				   gStatus &p_status)
 {
   gList<MixedSolution> solutions;

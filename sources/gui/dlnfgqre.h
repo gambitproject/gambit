@@ -38,7 +38,7 @@ private:
 
 public:
   // Lifecycle
-  dialogNfgQre(wxWindow *, const NFSupport &);
+  dialogNfgQre(wxWindow *, const gbtNfgSupport &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   bool UseGridSearch(void) const

@@ -32,7 +32,6 @@ template <class T> class gArray;
 class StrategyProfile;
 #include "nfstrat.h"
 #include "outcome.h"
-class NFSupport;
 class NfgContIter;
 
 //
@@ -41,14 +40,14 @@ class NfgContIter;
 
 class NfgIter    {
 private:
-  NFSupport support;
+  gbtNfgSupport support;
   Nfg *N;
   gArray<int> current_strat;
   StrategyProfile profile;
 
 public:
   NfgIter(Nfg &);
-  NfgIter(const NFSupport &s);
+  NfgIter(const gbtNfgSupport &s);
   NfgIter(const NfgIter &);
   NfgIter(const NfgContIter &);
   ~NfgIter();
@@ -67,7 +66,7 @@ public:
   gbtNfgOutcome GetOutcome(void) const;
   void SetOutcome(gbtNfgOutcome);
 
-  const NFSupport &Support(void) const { return support; }
+  const gbtNfgSupport &Support(void) const { return support; }
 };
 
 #endif   // NFGITER_H

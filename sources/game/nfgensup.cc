@@ -27,18 +27,14 @@
 #include "nfgensup.h"
 #include "nfdom.h"
 
-// Instantiations
-//template class gList<const NFSupport>;
-//template class gList<NFSupport const>;
-
 // We build a series of functions of increasing complexity.  The
 // final one, which is our goal, is the undominated support function.
 // We begin by simply enumerating all subsupports.
 
-void AllSubsupportsRECURSIVE(const NFSupport *s,
-			           NFSupport *sact,
+void AllSubsupportsRECURSIVE(const gbtNfgSupport *s,
+			           gbtNfgSupport *sact,
 			           StrategyCursorForSupport *c,
-			           gList<const NFSupport> *list)
+			           gList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
@@ -54,10 +50,10 @@ void AllSubsupportsRECURSIVE(const NFSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const NFSupport> AllSubsupports(const NFSupport &S)
+gList<const gbtNfgSupport> AllSubsupports(const gbtNfgSupport &S)
 {
-  gList<const NFSupport> answer;
-  NFSupport SAct(S);
+  gList<const gbtNfgSupport> answer;
+  gbtNfgSupport SAct(S);
   StrategyCursorForSupport cursor(S);
 
   AllSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
@@ -68,10 +64,10 @@ gList<const NFSupport> AllSubsupports(const NFSupport &S)
 // In the next two routines we only output subsupports that
 // have at least one active strategy for each agent.
 
-void AllValidSubsupportsRECURSIVE(const NFSupport *s,
-                                         NFSupport *sact,
+void AllValidSubsupportsRECURSIVE(const gbtNfgSupport *s,
+                                         gbtNfgSupport *sact,
 					 StrategyCursorForSupport *c,
-					 gList<const NFSupport> *list)
+					 gList<const gbtNfgSupport> *list)
 { 
   (*list) += *sact;
 
@@ -87,10 +83,10 @@ void AllValidSubsupportsRECURSIVE(const NFSupport *s,
   } while (c_copy.GoToNext()) ;
 }
 
-gList<const NFSupport> AllValidSubsupports(const NFSupport &S)
+gList<const gbtNfgSupport> AllValidSubsupports(const gbtNfgSupport &S)
 {
-  gList<const NFSupport> answer;
-  NFSupport SAct(S);
+  gList<const gbtNfgSupport> answer;
+  gbtNfgSupport SAct(S);
   StrategyCursorForSupport cursor(S);
 
   AllValidSubsupportsRECURSIVE(&S,&SAct,&cursor,&answer);
@@ -98,12 +94,12 @@ gList<const NFSupport> AllValidSubsupports(const NFSupport &S)
   return answer;
 }
 
-void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
-					      NFSupport *sact,
+void AllUndominatedSubsupportsRECURSIVE(const gbtNfgSupport *s,
+					      gbtNfgSupport *sact,
 					      StrategyCursorForSupport *c,
 					const bool strong,
 					const bool conditional,
-					      gList<const NFSupport> *list,
+					      gList<const gbtNfgSupport> *list,
 					gStatus &status)
 { 
   bool abort = false;
@@ -178,13 +174,13 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
   }
 }
   
-gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
+gList<const gbtNfgSupport> AllUndominatedSubsupports(const gbtNfgSupport &S,
 						 const bool strong,
 						 const bool conditional,
 						 gStatus &status)
 {
-  gList<const NFSupport> answer;
-  NFSupport sact(S);
+  gList<const gbtNfgSupport> answer;
+  gbtNfgSupport sact(S);
   StrategyCursorForSupport cursor(S);
 
   AllUndominatedSubsupportsRECURSIVE(&S,
@@ -199,10 +195,10 @@ gList<const NFSupport> AllUndominatedSubsupports(const NFSupport &S,
 }
 
 
-void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
-					    NFSupport *sact,
+void PossibleNashSubsupportsRECURSIVE(const gbtNfgSupport *s,
+					    gbtNfgSupport *sact,
 				            StrategyCursorForSupport *c,
-				            gList<const NFSupport> *list,
+				            gList<const gbtNfgSupport> *list,
 				      gStatus &status)
 { 
   status.Get();
@@ -258,7 +254,7 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
   }
 }
 
-gList<const NFSupport> SortSupportsBySize(gList<const NFSupport> &list) 
+gList<const gbtNfgSupport> SortSupportsBySize(gList<const gbtNfgSupport> &list) 
 {
   gArray<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++)
@@ -295,18 +291,18 @@ gList<const NFSupport> SortSupportsBySize(gList<const NFSupport> &list)
       }
   }
 
-  gList<const NFSupport> answer;
+  gList<const gbtNfgSupport> answer;
   for (int i = 1; i <= list.Length(); i++)
     answer += list[listproxy[i]];
 
   return answer;
 }
   
-gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
+gList<const gbtNfgSupport> PossibleNashSubsupports(const gbtNfgSupport &S,
 					       gStatus &status)
 {
-  gList<const NFSupport> answer;
-  NFSupport sact(S);
+  gList<const gbtNfgSupport> answer;
+  gbtNfgSupport sact(S);
   StrategyCursorForSupport cursor(S);
   status.SetProgress(0);
   PossibleNashSubsupportsRECURSIVE(&S,&sact,&cursor,&answer,status);
@@ -320,7 +316,7 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
   for (int i = answer.Length(); i >= 1; i--) {
     status.SetProgress((2.0-((double)i/(double)answer.Length()))/2.0);
     status.Get();
-    NFSupport current(answer[i]);
+    gbtNfgSupport current(answer[i]);
     StrategyCursorForSupport crsr(S);
     bool remove = false;
     do {
@@ -355,7 +351,7 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
 //                StrategyCursorForSupport
 // ---------------------------------------------------
 
-StrategyCursorForSupport::StrategyCursorForSupport(const NFSupport &S)
+StrategyCursorForSupport::StrategyCursorForSupport(const gbtNfgSupport &S)
   : support(&S), pl(1), strat(1)
 {}
 

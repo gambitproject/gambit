@@ -37,7 +37,7 @@ class MixedSolution   {
 protected:
   MixedProfile<gNumber> m_profile;
   gPrecision m_precision;
-  mutable NFSupport m_support;
+  mutable gbtNfgSupport m_support;
   mutable gText m_creator;
   mutable gFact<gTriState> m_Nash, m_Perfect, m_Proper;
   mutable gFact<gNumber> m_liapValue;
@@ -84,7 +84,7 @@ public:
 
   const gText &GetName(void) const { return m_name; }
   const gText &Creator(void) const { CheckIsValid(); return m_creator; }
-  const NFSupport &Support(void) const { CheckIsValid(); return m_support; }
+  const gbtNfgSupport &Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   const gTriState &IsPerfect(void) const;
   const gTriState &IsProper(void) const;

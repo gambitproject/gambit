@@ -33,7 +33,7 @@
 //                        LemkeHowson Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
+template <class T> gMatrix<T> Make_A1(const Nfg &N, const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
@@ -58,7 +58,7 @@ template <class T> gMatrix<T> Make_A1(const Nfg &N, const NFSupport &S,
   return A1;
 }
 
-template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
+template <class T> gMatrix<T> Make_A2(const Nfg &N, const gbtNfgSupport &S,
                                       const T &)
 {
   int n1, n2, i,j;
@@ -83,7 +83,7 @@ template <class T> gMatrix<T> Make_A2(const Nfg &N, const NFSupport &S,
   return A2;
 }
 
-template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S,
+template <class T> gVector<T> Make_b1(const Nfg &, const gbtNfgSupport &S,
 				      const T &)
 {
   int n1 = S.NumStrats(1);
@@ -94,7 +94,7 @@ template <class T> gVector<T> Make_b1(const Nfg &, const NFSupport &S,
   return b1;
 }
 
-template <class T> gVector<T> Make_b2(const Nfg &, const NFSupport &S, const T &)
+template <class T> gVector<T> Make_b2(const Nfg &, const gbtNfgSupport &S, const T &)
 {
   int n1, n2, i;
   n1=S.NumStrats(1);

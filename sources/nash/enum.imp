@@ -38,7 +38,7 @@ template <class T> nfgEnumMixed<T>::nfgEnumMixed(void)
 { }
 
 template <class T> 
-gList<MixedSolution> nfgEnumMixed<T>::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgEnumMixed<T>::Solve(const gbtNfgSupport &p_support,
 					    gStatus &p_status)
 {
   const Nfg &nfg = p_support.Game();

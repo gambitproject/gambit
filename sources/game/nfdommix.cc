@@ -35,12 +35,12 @@
 
 #include "nfdommix.imp"
 
-NFSupport NFSupport::MixedUndominated(bool strong, gPrecision precision,
+gbtNfgSupport gbtNfgSupport::MixedUndominated(bool strong, gPrecision precision,
 				      const gArray<int> &players,
 				      gOutput &tracefile,
 				      gStatus &status) const
 {
-  NFSupport newS(*this);
+  gbtNfgSupport newS(*this);
   bool any = false;
   
   if (precision == precRATIONAL) {
@@ -64,7 +64,7 @@ NFSupport NFSupport::MixedUndominated(bool strong, gPrecision precision,
   return newS;
 }
 
-bool IsMixedDominated(const NFSupport &S,Strategy *str,
+bool IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
 			   bool strong, gPrecision precision,
 			   gOutput &tracefile)
 {
@@ -117,17 +117,17 @@ bool IsMixedDominated(const MixedProfile<gNumber> &sol, int pl,
 // There is probably a cleaner way to do this.  
 #ifndef __BCC55__
 template bool 
-ComputeMixedDominated(const NFSupport &S, NFSupport &R,int pl, bool strong, 
+ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
 		      gRational junk, gOutput &tracefile, gStatus &status);
 template bool 
-ComputeMixedDominated(const NFSupport &S, NFSupport &R,int pl, bool strong, 
+ComputeMixedDominated(const gbtNfgSupport &S, gbtNfgSupport &R,int pl, bool strong, 
 		      double junk, gOutput &tracefile, gStatus &status);
 
 template bool
-IsMixedDominated(const NFSupport &S,Strategy *str,
+IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
 		 bool strong, gRational junk, gOutput &tracefile);
 template bool
-IsMixedDominated(const NFSupport &S,Strategy *str,
+IsMixedDominated(const gbtNfgSupport &S,Strategy *str,
 		 bool strong, double junk, gOutput &tracefile);
 
 template bool 

@@ -35,7 +35,7 @@ public:
   virtual ~nfgYamamoto() { }
 
   gText GetAlgorithm(void) const { return "Yamamoto"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 #endif  // YAMAMOTO_H

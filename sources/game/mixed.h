@@ -40,7 +40,7 @@ template <class T> class BehavProfile;
 template <class T> class MixedProfile : public gPVector<T>  {
   private:
     const Nfg *N;
-    NFSupport support;
+    gbtNfgSupport support;
 
     // Private Payoff functions
 
@@ -55,7 +55,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
     const T Payoff(const gbtNfgOutcome &o, int pl) const;
 
   public:
-    MixedProfile(const NFSupport &);
+    MixedProfile(const gbtNfgSupport &);
     MixedProfile(const MixedProfile<T> &);
     MixedProfile(const BehavProfile<T> &);
     virtual ~MixedProfile();
@@ -81,7 +81,7 @@ template <class T> class MixedProfile : public gPVector<T>  {
 
     bool operator==(const MixedProfile<T> &) const;
 
-    const NFSupport &Support(void) const   { return support; }
+    const gbtNfgSupport &Support(void) const   { return support; }
 };
 
 #ifndef __BORLANDC__

@@ -136,7 +136,7 @@ NfgShow::NfgShow(Nfg &p_nfg, wxWindow *p_parent)
 #endif  // __WXMSW__
 
   m_currentProfile = 0;
-  m_currentSupport = new NFSupport(m_nfg);    // base support
+  m_currentSupport = new gbtNfgSupport(m_nfg);    // base support
   m_currentSupport->SetName("Full Support");
   m_supports.Append(m_currentSupport);
 
@@ -877,11 +877,11 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
   dialogElimMixed dialog(this, playerNames);
 
   if (dialog.ShowModal() == wxID_OK) {
-    NFSupport support(*m_currentSupport);
+    gbtNfgSupport support(*m_currentSupport);
     wxStatus status(this, "Dominance Elimination");
 
     try {
-      NFSupport newSupport(support);
+      gbtNfgSupport newSupport(support);
 
       while (true) {
 	gNullOutput gnull;
@@ -902,7 +902,7 @@ void NfgShow::OnToolsDominance(wxCommandEvent &)
 	}
 	else {
 	  newSupport.SetName(UniqueSupportName());
-	  m_supports.Append(new NFSupport(newSupport));
+	  m_supports.Append(new gbtNfgSupport(newSupport));
 	  support = newSupport;
 	}
 
@@ -1031,7 +1031,7 @@ void NfgShow::OnHelpAbout(wxCommandEvent &)
 
 void NfgShow::OnSupportDuplicate(wxCommandEvent &)
 {
-  NFSupport *newSupport = new NFSupport(*m_currentSupport);
+  gbtNfgSupport *newSupport = new gbtNfgSupport(*m_currentSupport);
   newSupport->SetName(UniqueSupportName());
   m_supports.Append(newSupport);
   m_currentSupport = newSupport;
@@ -1051,7 +1051,7 @@ void NfgShow::OnSupportDelete(wxCommandEvent &)
 
 void NfgShow::OnProfilesNew(wxCommandEvent &)
 {
-  MixedSolution profile = MixedProfile<gNumber>(NFSupport(m_nfg));
+  MixedSolution profile = MixedProfile<gNumber>(gbtNfgSupport(m_nfg));
 
   dialogEditMixed dialog(this, profile);
   if (dialog.ShowModal() == wxID_OK) {
@@ -1249,5 +1249,5 @@ void NfgShow::OnSupportsEdited(void)
 }
 
 #include "base/glist.imp"
-template class gList<NFSupport *>;
+template class gList<gbtNfgSupport *>;
 

@@ -30,7 +30,7 @@
 #include "nfgciter.h"
 
 
-Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
+Nfg *CompressNfg(const Nfg &nfg, const gbtNfgSupport &S)
 {
   Nfg *N = new Nfg(S.NumStrats());
   
@@ -55,7 +55,7 @@ Nfg *CompressNfg(const Nfg &nfg, const NFSupport &S)
   }
 
   NfgContIter oiter(S);
-  NFSupport newS(*N);
+  gbtNfgSupport newS(*N);
   NfgContIter niter(newS);
   
   do   {

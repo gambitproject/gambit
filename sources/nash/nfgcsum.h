@@ -30,9 +30,9 @@
 
 template <class T> class nfgLp : public nfgNashAlgorithm {
 private:
-  int Add_BFS(const NFSupport &, /*const*/ LPSolve<T> &B,
+  int Add_BFS(const gbtNfgSupport &, /*const*/ LPSolve<T> &B,
 	      gList<BFS<T> > &);
-  void GetSolutions(const NFSupport &, const gList<BFS<T> > &,
+  void GetSolutions(const gbtNfgSupport &, const gList<BFS<T> > &,
 		    gList<MixedSolution > &,
 		    const T &) const;
 
@@ -41,7 +41,7 @@ public:
   virtual ~nfgLp() { }
 
   gText GetAlgorithm(void) const { return "Lp[NFG]"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 #endif    // NFGCSUM_H

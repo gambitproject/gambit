@@ -268,7 +268,7 @@ BehavProfile<T>::BehavProfile(const MixedProfile<T> &p_profile)
   ((gVector<T> &) *this).operator=((T)0); 
 
   Node *n = m_efg->RootNode();
-  const NFSupport &support = p_profile.Support();
+  const gbtNfgSupport &support = p_profile.Support();
   const Nfg &nfg = p_profile.GetGame();
 
   for (int pl = 1; pl <= nfg.NumPlayers(); pl++)   {

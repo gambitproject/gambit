@@ -95,19 +95,19 @@ Behav_ListPortion::Behav_ListPortion(const gList<BehavSolution> &list)
 
 class NfSupport_ListPortion : public ListPortion   {
   public:
-    NfSupport_ListPortion(const gList<const NFSupport> &);
+    NfSupport_ListPortion(const gList<const gbtNfgSupport> &);
     NfSupport_ListPortion();
     virtual ~NfSupport_ListPortion()   { }
 
-  void SetValue(const gList<const NFSupport> &);
+  void SetValue(const gList<const gbtNfgSupport> &);
 };
 
 NfSupport_ListPortion::NfSupport_ListPortion(const gList<const 
-					                 NFSupport> &list)
+					                 gbtNfgSupport> &list)
 {
   rep->_DataType = porNFSUPPORT;
   for (int i = 1; i <= list.Length(); i++)
-    Append(new NfSupportPortion(new NFSupport(list[i])));
+    Append(new NfSupportPortion(new gbtNfgSupport(list[i])));
 }
 
 NfSupport_ListPortion::NfSupport_ListPortion()
@@ -115,10 +115,10 @@ NfSupport_ListPortion::NfSupport_ListPortion()
   rep->_DataType = porNFSUPPORT;
 }
 
-void NfSupport_ListPortion::SetValue(const gList<const NFSupport> &list)
+void NfSupport_ListPortion::SetValue(const gList<const gbtNfgSupport> &list)
 {
   for (int i = 1; i <= list.Length(); i++)
-    Append(new NfSupportPortion(new NFSupport(list[i])));
+    Append(new NfSupportPortion(new gbtNfgSupport(list[i])));
 }
 
 
@@ -211,7 +211,7 @@ static nfgNashAlgorithm *GSM_EnumMixed_Nfg_Rational(int p_stopAfter,
 
 static Portion *GSM_EnumMixed_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   nfgNashAlgorithm *algorithm = 0;
 
   if (((PrecisionPortion *) param[2])->Value() == precDOUBLE) {
@@ -289,7 +289,7 @@ static Portion *GSM_EnumMixed_Efg(GSM &gsm, Portion **param)
 
 static Portion *GSM_EnumPure_Nfg(GSM &gsm, Portion **param)
 {
-  NFSupport *support = ((NfSupportPortion*) param[0])->Value();
+  gbtNfgSupport *support = ((NfSupportPortion*) param[0])->Value();
 
   gWatch watch;
   gList<MixedSolution> solutions;
@@ -372,7 +372,7 @@ static nfgNashAlgorithm *GSM_Lcp_Nfg_Rational(int p_stopAfter)
 
 static Portion *GSM_Lcp_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   const Nfg &nfg = support.Game();
 
   if (nfg.NumPlayers() != 2) {
@@ -596,7 +596,7 @@ static nfgNashAlgorithm *GSM_Lp_Nfg_Rational(void)
 
 static Portion *GSM_Lp_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   const Nfg &nfg = support.Game();
 
   if (nfg.NumPlayers() != 2 || !IsConstSum(nfg)) {
@@ -746,7 +746,7 @@ static Portion *GSM_Lp_Efg(GSM &gsm, Portion **param)
 
 static Portion *GSM_PolEnumSolve_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   
   nfgPolEnum algorithm;
   algorithm.SetStopAfter(AsNumber(param[1]));
@@ -844,7 +844,7 @@ Portion* GSM_Payoff_Mixed(GSM &, Portion** param)
 
 static Portion *GSM_QreGrid_Support(GSM &gsm, Portion **param)
 {
-  NFSupport &support = *((NfSupportPortion*) param[0])->Value();
+  gbtNfgSupport &support = *((NfSupportPortion*) param[0])->Value();
 
   gOutput *pxiFile = 0;
   if (((TextPortion *) param[1])->Value() != "") {
@@ -981,7 +981,7 @@ static nfgNashAlgorithm *GSM_Simpdiv_Nfg_Rational(int p_stopAfter,
 
 static Portion *GSM_Simpdiv_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   nfgNashAlgorithm *algorithm;
   if (AsPrecision(param[4]) == precDOUBLE) {
     algorithm = GSM_Simpdiv_Nfg_Double(AsNumber(param[1]),
@@ -1104,7 +1104,7 @@ static Portion *GSM_VertEnum(GSM &gsm, Portion** param)
 
 static Portion *GSM_Yamamoto_Nfg(GSM &gsm, Portion **param)
 {
-  const NFSupport &support = AsNfgSupport(param[0]);
+  const gbtNfgSupport &support = AsNfgSupport(param[0]);
   nfgYamamoto algorithm;
   gsm.StartAlgorithmMonitor("YamamotoSolve Progress");
   gList<MixedSolution> solutions;

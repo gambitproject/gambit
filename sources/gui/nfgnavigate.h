@@ -33,7 +33,7 @@ private:
   wxChoice *m_rowChoice, *m_colChoice, **m_stratProfile;
 
   int m_rowPlayer, m_colPlayer;
-  NFSupport m_support;
+  gbtNfgSupport m_support;
   
   void OnStrategyChange(wxCommandEvent &);
   void OnRowPlayerChange(wxCommandEvent &);
@@ -52,8 +52,8 @@ public:
   int GetRowStrategy(void) const;
   int GetColStrategy(void) const;
 
-  void SetSupport(const NFSupport &);
-  const NFSupport &GetSupport(void) const { return m_support; }
+  void SetSupport(const gbtNfgSupport &);
+  const gbtNfgSupport &GetSupport(void) const { return m_support; }
 
   int GetRowPlayer(void) const { return m_rowPlayer; }
   int GetColPlayer(void) const { return m_colPlayer; }

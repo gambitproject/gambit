@@ -35,7 +35,7 @@
 
 MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 			     const gText &p_creator)
-  : m_profile(NFSupport(p_profile.Game())), m_precision(precDOUBLE),
+  : m_profile(gbtNfgSupport(p_profile.Game())), m_precision(precDOUBLE),
     m_support(p_profile.Support()), 
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_epsilon(0.0), m_qreLambda(-1), m_qreValue(-1),
@@ -55,7 +55,7 @@ MixedSolution::MixedSolution(const MixedProfile<double> &p_profile,
 
 MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 			     const gText &p_creator)
-  : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
+  : m_profile(gbtNfgSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
@@ -75,7 +75,7 @@ MixedSolution::MixedSolution(const MixedProfile<gRational> &p_profile,
 
 MixedSolution::MixedSolution(const MixedProfile<gNumber> &p_profile,
 			     const gText &p_creator)
-  : m_profile(NFSupport(p_profile.Game())), m_precision(precRATIONAL),
+  : m_profile(gbtNfgSupport(p_profile.Game())), m_precision(precRATIONAL),
     m_support(p_profile.Support()),
     m_creator(p_creator), m_Nash(), m_Perfect(), m_Proper(), 
     m_liapValue(), m_qreLambda(-1), m_qreValue(-1),
@@ -317,7 +317,7 @@ const gNumber &MixedSolution::LiapValue(void) const
 
 void MixedSolution::Invalidate(void) const
 {
-  m_support = NFSupport(m_profile.Game());
+  m_support = gbtNfgSupport(m_profile.Game());
   m_creator = "User";
   m_Nash.Invalidate();
   m_Perfect.Invalidate();

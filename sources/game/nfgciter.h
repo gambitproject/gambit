@@ -45,14 +45,14 @@ class StrategyProfile;
 class NfgContIter    {
 friend class NfgIter;
 private:
-  NFSupport support;
+  gbtNfgSupport support;
   gArray<int> current_strat;
   Nfg *N;
   StrategyProfile profile;
   gBlock<int> frozen, thawed;
   
 public:
-  NfgContIter(const NFSupport &s);
+  NfgContIter(const gbtNfgSupport &s);
   ~NfgContIter();
   
   void First(void);

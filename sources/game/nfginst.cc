@@ -71,7 +71,6 @@ template class gRectBlock<gRational>;
 #include "base/garray.imp"
 #include "base/gblock.imp"
 
-template class gArray<nfgSupportPlayer *>;
 template class gArray<Strategy *>;
 template class gArray<gbt_nfg_outcome_rep *>;
 template class gArray<gbt_nfg_player_rep *>;
@@ -82,7 +81,7 @@ template class gBlock<gbt_nfg_player_rep *>;
 
 template class gList<Strategy *>;
 
-template class gList<const NFSupport>;
+template class gList<const gbtNfgSupport>;
 
 
 

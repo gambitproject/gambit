@@ -407,7 +407,7 @@ template <class T> T nfgSimpdiv<T>::getlabel(MixedProfile<T> &yy,
 //-------------------------------------------------------------------------
 
 template <class T> 
-gList<MixedSolution> nfgSimpdiv<T>::Solve(const NFSupport &p_support,
+gList<MixedSolution> nfgSimpdiv<T>::Solve(const gbtNfgSupport &p_support,
 					  gStatus &p_status)
 {
   int qf,i,j,k,ii;

@@ -39,11 +39,11 @@ public:
 };
 
 
-int PolEnum(const NFSupport &, const PolEnumParams &, 
+int PolEnum(const gbtNfgSupport &, const PolEnumParams &, 
 	    gList<MixedSolution> &, gStatus &,
 	    long &nevals, double &time, bool &is_singular);
 
-MixedSolution PolishEquilibrium(const NFSupport &, const MixedSolution &, 
+MixedSolution PolishEquilibrium(const gbtNfgSupport &, const MixedSolution &, 
 				bool &is_singular);
 
 #endif    // POLENUM_H

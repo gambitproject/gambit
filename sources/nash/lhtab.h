@@ -27,12 +27,8 @@
 #ifndef LHTAB_H
 #define LHTAB_H
 
-// includes
 #include "numerical/lemketab.h"
-
-class Nfg;
-class NFSupport;
-
+#include "game/nfg.h"
 
 template <class T> class LHTableau : public BaseTableau<T>{
 protected:

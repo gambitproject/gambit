@@ -55,7 +55,7 @@ public:
   void SetCliques(bool p_cliques) { m_cliques = p_cliques; }
 
   gText GetAlgorithm(void) const { return "EnumMixed[NFG]"; }
-  gList<MixedSolution> Solve(const NFSupport &, gStatus &);
+  gList<MixedSolution> Solve(const gbtNfgSupport &, gStatus &);
 };
 
 #endif  // ENUM_H

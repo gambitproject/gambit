@@ -67,8 +67,8 @@ private:
   int m_currentProfile;
   gList<MixedSolution> m_profiles;
 
-  NFSupport *m_currentSupport;
-  gList<NFSupport *> m_supports;
+  gbtNfgSupport *m_currentSupport;
+  gList<gbtNfgSupport *> m_supports;
 
   wxString m_filename;
 
@@ -146,8 +146,8 @@ public:
   gText UniqueProfileName(void) const;
 
   // SUPPORT ACCESS AND MANIPULATION
-  NFSupport *GetSupport(void) { return m_currentSupport; }
-  const gList<NFSupport *> &Supports(void) const { return m_supports; }
+  gbtNfgSupport *GetSupport(void) { return m_currentSupport; }
+  const gList<gbtNfgSupport *> &Supports(void) const { return m_supports; }
   void SetSupportNumber(int p_number);
   gText UniqueSupportName(void) const;
   void OnSupportsEdited(void);

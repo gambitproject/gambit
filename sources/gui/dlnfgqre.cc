@@ -37,7 +37,7 @@ BEGIN_EVENT_TABLE(dialogNfgQre, wxDialog)
   EVT_RADIOBOX(idRADIOBOX_SOLVEUSING, dialogNfgQre::OnSolveUsing)
 END_EVENT_TABLE()
 
-dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const NFSupport &p_support)
+dialogNfgQre::dialogNfgQre(wxWindow *p_parent, const gbtNfgSupport &p_support)
   : wxDialog(p_parent, -1, "Compute quantal response equilibria")
 {
   SetAutoLayout(true);

@@ -28,14 +28,14 @@
 
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template gMatrix<double> Make_A1(const Nfg &, const NFSupport &, const double &);
-template gMatrix<gRational> Make_A1(const Nfg &, const NFSupport &, const gRational &);
-template gVector<double> Make_b1(const Nfg &, const NFSupport &, const double &);
-template gVector<gRational> Make_b1(const Nfg &, const NFSupport &, const gRational &);
-template gMatrix<double> Make_A2(const Nfg &, const NFSupport &, const double &);
-template gMatrix<gRational> Make_A2(const Nfg &, const NFSupport &, const gRational &);
-template gVector<double> Make_b2(const Nfg &, const NFSupport &, const double &);
-template gVector<gRational> Make_b2(const Nfg &, const NFSupport &, const gRational &);
+template gMatrix<double> Make_A1(const Nfg &, const gbtNfgSupport &, const double &);
+template gMatrix<gRational> Make_A1(const Nfg &, const gbtNfgSupport &, const gRational &);
+template gVector<double> Make_b1(const Nfg &, const gbtNfgSupport &, const double &);
+template gVector<gRational> Make_b1(const Nfg &, const gbtNfgSupport &, const gRational &);
+template gMatrix<double> Make_A2(const Nfg &, const gbtNfgSupport &, const double &);
+template gMatrix<gRational> Make_A2(const Nfg &, const gbtNfgSupport &, const gRational &);
+template gVector<double> Make_b2(const Nfg &, const gbtNfgSupport &, const double &);
+template gVector<gRational> Make_b2(const Nfg &, const gbtNfgSupport &, const gRational &);
 
 
 
