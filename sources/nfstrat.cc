@@ -286,6 +286,14 @@ bool NFSupport::IsSubset(const NFSupport &s) const
   return true;
 }
 
+bool NFSupport::IsValid(void) const
+{
+  for (int pl = 1; pl <= bnfg->NumPlayers(); pl++) {
+    if (NumStrats(pl) == 0)
+      return false;
+  }
+  return true;
+}
 
 void NFSupport::Dump(gOutput&s) const
 {

@@ -68,6 +68,7 @@ public:
   bool RemoveStrategy(Strategy *);
   
   bool IsSubset(const NFSupport &s) const;
+  bool IsValid(void) const;
 
   // returns the index of the strategy in the support if it exists,
   // otherwise returns zero
