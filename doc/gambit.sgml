@@ -72,6 +72,35 @@ previous incarnations of Gambit.
 <title>What's new in the new version</title>
 
 <formalpara>
+<title>New graphical interface save format</title>
+<para>
+There is now support for saving the state of your work in the graphical
+user interface - not just the game itself, as before, but color choices
+for players, computed profiles, and so forth.
+</para>
+</formalpara>
+
+<note>
+<para>
+The savefile format may change as this new version is developed.  While
+the graphical interface is still labeled as a &quot;development&quot;
+version, the format may change incompatibly.  Therefore, it is encouraged
+that you save any games you create in the traditional Gambit savefile formats
+(.efg and .nfg).  (However, games are stored in the new .gbt format in the
+same way as in .efg and .nfg, so it is possible to manually extract the game
+using a text editor.)
+</para>
+</note>
+
+<formalpara>
+<title>Undo and redo functionality</title>
+<para>
+Undoing and redoing of all operations in the graphical interface is now
+supported.
+</para>
+</formalpara>
+
+<formalpara>
 <title>Integration of quantal response graphing</title>
 <para>
 Previous versions of Gambit relied on an external program (PXI) for
