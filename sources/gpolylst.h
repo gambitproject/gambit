@@ -16,27 +16,6 @@
 //      class gPolyList
 // ***********************
 
-//
-// Simple class for compact reference to pairs of indices
-//
-
-class index_pair {
- private:
-  const int first;
-  const int second;
-
- public:
-  index_pair(const int&, const int&);
-  ~index_pair();
-
-  bool operator == (const index_pair&) const;
-  bool operator != (const index_pair&) const;
-  int operator [] (const int&) const; 
-
-friend gOutput& operator << (gOutput& output, const index_pair& x);  
-};
-
-
 template <class T> class gPolyList
 //  : private Counted<gPolyList<T> >
 { 

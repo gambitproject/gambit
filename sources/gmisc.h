@@ -92,6 +92,26 @@ void gEpsilon(gNumber &v, int i=8);
 double pow(int,long);
 double pow(double,long);
 
+//
+// Simple class for compact reference to pairs of indices
+//
+
+class index_pair {
+ private:
+  const int first;
+  const int second;
+
+ public:
+  index_pair(const int&, const int&);
+  ~index_pair();
+
+  bool operator == (const index_pair&) const;
+  bool operator != (const index_pair&) const;
+  int operator [] (const int&) const; 
+
+friend gOutput& operator << (gOutput& output, const index_pair& x);  
+};
+
 #ifdef USE_EXCEPTIONS
 class gException   {
   public:

@@ -378,7 +378,54 @@ double pow(double x, long n)
   return pow((double)x,(double)n);
 }
 
+//--------------------------------------------------------------------------
+//               A Simple Class for Compact Reference to Pairs
+//--------------------------------------------------------------------------
 
+
+
+//---------------------------
+// Constructors / Destructors
+//---------------------------
+
+index_pair::index_pair(const int& f, const int& s)
+: first(f), second(s)
+{
+}
+
+index_pair::~index_pair()
+{
+}
+
+bool index_pair::operator == (const index_pair& other) const
+{
+  if ((first == other.first) && (second == other.second))
+    return true;
+  else
+    return false;
+}
+
+bool index_pair::operator != (const index_pair& other) const
+{
+  if ((first != other.first) || (second != other.second))
+    return true;
+  else
+    return false;
+}
+
+int index_pair::operator [] (const int& index) const 
+{
+  assert ((index == 1) || (index == 2));
+  if (index == 1) return first;
+  else            return second;
+}
+ 
+gOutput& operator << (gOutput& output, const index_pair& x)
+{
+  gout << "(" << x.first << "," << x.second << ")"; return output;
+}
+
+//--------------------Exceptions Related Stuff---------------------
 
 #ifdef USE_EXCEPTIONS
 gText gNewFailed::Description(void) const
