@@ -63,7 +63,7 @@ template <class T> int RefCountHashTable<T>::NumBuckets( void ) const
 { return 10; }
 
 template <class T> int RefCountHashTable<T>::Hash( const T& ptr ) const 
-{ return ( (int) ptr / 4 ) % 10; }
+{ return ( (unsigned int) ptr / 4 ) % 10; }
 
 template <class T> void RefCountHashTable<T>::DeleteAction( int value ) 
 { }

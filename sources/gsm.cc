@@ -55,9 +55,13 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
   // these should be done before InitFunctions() is called
   if( _NumObj == 0 )
   {
+    _INPUT  = new Input_Portion ( _StdIn, true );
+    _OUTPUT = new Output_Portion( _StdOut, true );
+    _NULL   = new Output_Portion( gnull, true );
+
     gArray<int> dim( 2 );
-    dim[ 1 ] = 2;
-    dim[ 2 ] = 2;
+    dim[ 1 ] = 1;
+    dim[ 2 ] = 1;
     _DefaultNfgShadow = new Error_Portion;
     _DefaultNfgShadow->ShadowOf() = 
       new Nfg_Portion<double>( * new NormalForm<double>( dim ) );
@@ -65,10 +69,6 @@ GSM::GSM( int size, gInput& s_in, gOutput& s_out, gOutput& s_err )
     _DefaultEfgShadow = new Error_Portion;
     _DefaultEfgShadow->ShadowOf() = 
       new Efg_Portion<double>( * new ExtForm<double> );
-    
-    _INPUT  = new Input_Portion ( _StdIn,   true );
-    _OUTPUT = new Output_Portion( _StdOut,  true );
-    _NULL   = new Output_Portion( gnull,    true );
   }
 
   _StackStack    = new gGrowableStack< gGrowableStack< Portion* >* >( 1 );
