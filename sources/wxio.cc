@@ -165,7 +165,9 @@ void gWxOutput::MakeFrame(void)
 {
 assert(!frame && "Frame already exists");
 frame=new gWxIOFrame(this,(label) ? label : "WxIO");
+#ifndef wx_msw
 frame->SetSize(200,200); // does not resize automatically for some reason.
+#endif
 }
 
 void gWxOutput::OnClose(void)
