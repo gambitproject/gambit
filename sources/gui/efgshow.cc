@@ -37,7 +37,6 @@
 #include "efgoutcome.h"
 #include "efgsupport.h"
 #include "efgsoln.h"
-#include "efgsolng.h"
 #include "nfgshow.h"
 #include "efgsolvd.h"
 
@@ -68,6 +67,7 @@
 #include "alglp.h"
 #include "algpolenum.h"
 #include "algqre.h"
+#include "algqregrid.h"
 #include "algsimpdiv.h"
 
 #include "behavedit.h"
@@ -193,7 +193,7 @@ BEGIN_EVENT_TABLE(EfgShow, wxFrame)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QRE,
 	   EfgShow::OnToolsEquilibriumCustomNfgQre)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID,
-	   EfgShow::OnToolsEquilibriumCustom)
+	   EfgShow::OnToolsEquilibriumCustomNfgQreGrid)
   EVT_MENU(efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_SIMPDIV, 
 	   EfgShow::OnToolsEquilibriumCustomNfgSimpdiv)
   EVT_MENU(efgmenuTOOLS_NFG_REDUCED, EfgShow::OnToolsNormalReduced)
@@ -2204,67 +2204,6 @@ void EfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 #endif  // COMMENTED_OUT
 }
 
-void EfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
-{
-  int algorithm = p_event.GetId();
-
-  // This is a guard against trying to solve the "trivial" game.
-  // Most of the GUI code assumes information sets exist.
-  if (m_efg.NumPlayerInfosets() == 0)  return;
-
-  // check that the game is perfect recall, if not give a warning
-  if (!IsPerfectRecall(m_efg) && 
-      wxGetApp().GetPreferences().WarnOnSolveImperfectRecall()) {
-    if (wxMessageBox("This game is not perfect recall\n"
-		     "Do you wish to continue?", 
-		     "Solve Warning", 
-		     wxOK | wxCANCEL | wxCENTRE, this) != wxOK) {
-      return;
-    }
-  }
-    
-  guiEfgSolution *solver = 0;
-
-  switch (algorithm) {
-  case efgmenuTOOLS_EQUILIBRIUM_CUSTOM_NFG_QREGRID: 
-    solver = new guiefgQreAllNfg(this);
-    break;
-  default:
-    // internal error, we'll just ignore silently
-    return;
-  }
-
-  bool go = solver->SolveSetup();
-  
-  try {
-    if (go) {
-      if (solver->MarkSubgames())
-	m_treeWindow->SubgameMarkAll();
-      wxBeginBusyCursor();
-      gList<BehavSolution> solutions = solver->Solve(*m_currentSupport);
-      for (int soln = 1; soln <= solutions.Length(); soln++) {
-	AddProfile(solutions[soln], true);
-      }
-      wxEndBusyCursor();
-    }
-  }
-  catch (gException &E) {
-    wxEndBusyCursor();
-    guiExceptionDialog(E.Description(), this);
-  }
-
-  delete solver;
- 
-  ChangeProfile(m_profileTable->Length());
-  UpdateMenus();
-  if (!m_solutionSashWindow->IsShown())  {
-    m_profileTable->Show(true);
-    m_solutionSashWindow->Show(true);
-    GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
-    AdjustSizes();
-  }
-}
-
 void EfgShow::OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
@@ -2497,6 +2436,25 @@ void EfgShow::OnToolsEquilibriumCustomNfgQre(wxCommandEvent &)
 {
   gList<BehavSolution> solutions;
   if (QreNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddProfile(solutions[soln], true);
+    }
+    
+    ChangeProfile(m_profileTable->Length());
+    UpdateMenus();
+    if (!m_solutionSashWindow->IsShown())  {
+      m_profileTable->Show(true);
+      m_solutionSashWindow->Show(true);
+      GetMenuBar()->Check(efgmenuVIEW_PROFILES, true);
+      AdjustSizes();
+    }
+  }
+}
+
+void EfgShow::OnToolsEquilibriumCustomNfgQreGrid(wxCommandEvent &)
+{
+  gList<BehavSolution> solutions;
+  if (QreGridNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddProfile(solutions[soln], true);
     }

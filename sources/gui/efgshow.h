@@ -153,7 +153,6 @@ private:
   void OnToolsSupportReachable(wxCommandEvent &);
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
-  void OnToolsEquilibriumCustom(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomEfgLiap(wxCommandEvent &);
@@ -166,6 +165,7 @@ private:
   void OnToolsEquilibriumCustomNfgLiap(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgLp(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomNfgQreGrid(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgPolEnum(wxCommandEvent &);
   void OnToolsEquilibriumCustomNfgSimpdiv(wxCommandEvent &);
 

@@ -33,7 +33,6 @@
 #include "nfgciter.h"
 
 #include "nfgsolvd.h"
-#include "nfgsolng.h"
 
 #include "gambit.h"
 #include "efgshow.h"
@@ -49,6 +48,7 @@
 #include "alglp.h"
 #include "algpolenum.h"
 #include "algqre.h"
+#include "algqregrid.h"
 #include "algsimpdiv.h"
 
 #include "dlelim.h"
@@ -119,11 +119,10 @@ BEGIN_EVENT_TABLE(NfgShow, wxFrame)
 	   NfgShow::OnToolsEquilibriumCustomPolEnum)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QRE,
 	   NfgShow::OnToolsEquilibriumCustomQre)
+  EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
+	   NfgShow::OnToolsEquilibriumCustomQreGrid)
   EVT_MENU(NFG_TOOLS_EQUILIBRIUM_CUSTOM_SIMPDIV,
 	   NfgShow::OnToolsEquilibriumCustomSimpdiv)
-  EVT_MENU_RANGE(NFG_TOOLS_EQUILIBRIUM_CUSTOM_ENUMPURE,
-		 NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID,
-		 NfgShow::OnToolsEquilibriumCustom)
   EVT_MENU(wxID_HELP_CONTENTS, NfgShow::OnHelpContents)
   EVT_MENU(wxID_HELP_INDEX, NfgShow::OnHelpIndex)
   EVT_MENU(wxID_ABOUT, NfgShow::OnHelpAbout)
@@ -1183,52 +1182,6 @@ void NfgShow::OnToolsEquilibriumStandard(wxCommandEvent &)
 #endif  // COMMENTED_OUT
 }
 
-void NfgShow::OnToolsEquilibriumCustom(wxCommandEvent &p_event)
-{
-  int id = p_event.GetId();
-
-  guiNfgSolution *solver;
-
-  switch (id) {
-  case NFG_TOOLS_EQUILIBRIUM_CUSTOM_QREGRID:
-    solver = new guinfgQreAll(this);
-    break;
-  default:
-    // shouldn't happen.  we'll ignore silently
-    return;
-  }
-
-  if (!solver->SolveSetup()) {
-    delete solver;
-    return;
-  }
-
-  wxBeginBusyCursor();
-
-  try {
-    NFSupport support = solver->Eliminate(*m_currentSupport);
-    gList<MixedSolution> solutions = solver->Solve(support);
-    for (int soln = 1; soln <= solutions.Length(); soln++) {
-      AddSolution(solutions[soln], true);
-    }
-    ChangeSolution(m_solutionTable->Length());
-
-    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
-      m_table->ToggleProbs();
-      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
-    }
-
-    wxEndBusyCursor();
-  }
-  catch (gException &E) {
-    guiExceptionDialog(E.Description(), this);
-    wxEndBusyCursor();
-  }
-    
-  delete solver;
-  UpdateMenus();
-}
-
 void NfgShow::OnToolsEquilibriumCustomEnumPure(wxCommandEvent &)
 {
   gList<MixedSolution> solutions;
@@ -1323,6 +1276,24 @@ void NfgShow::OnToolsEquilibriumCustomQre(wxCommandEvent &)
 {
   gList<MixedSolution> solutions;
   if (QreNfg(this, *m_currentSupport, solutions)) {
+    for (int soln = 1; soln <= solutions.Length(); soln++) {
+      AddSolution(solutions[soln], true);
+    }
+    ChangeSolution(m_solutionTable->Length());
+
+    if (solutions.Length() > 0 && !m_table->ShowProbs()) {
+      m_table->ToggleProbs();
+      GetMenuBar()->Check(NFG_VIEW_PROBABILITIES, true);
+    }
+
+    UpdateMenus();
+  }
+}
+
+void NfgShow::OnToolsEquilibriumCustomQreGrid(wxCommandEvent &)
+{
+  gList<MixedSolution> solutions;
+  if (QreGridNfg(this, *m_currentSupport, solutions)) {
     for (int soln = 1; soln <= solutions.Length(); soln++) {
       AddSolution(solutions[soln], true);
     }

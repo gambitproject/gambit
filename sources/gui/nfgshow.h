@@ -104,13 +104,13 @@ private:
   void OnToolsSupportSelectNext(wxCommandEvent &);
 
   void OnToolsEquilibriumStandard(wxCommandEvent &);
-  void OnToolsEquilibriumCustom(wxCommandEvent &);
   void OnToolsEquilibriumCustomEnumPure(wxCommandEvent &);
   void OnToolsEquilibriumCustomLcp(wxCommandEvent &);
   void OnToolsEquilibriumCustomLiap(wxCommandEvent &);
   void OnToolsEquilibriumCustomLp(wxCommandEvent &);
   void OnToolsEquilibriumCustomPolEnum(wxCommandEvent &);
   void OnToolsEquilibriumCustomQre(wxCommandEvent &);
+  void OnToolsEquilibriumCustomQreGrid(wxCommandEvent &);
   void OnToolsEquilibriumCustomSimpdiv(wxCommandEvent &);
 
   void OnHelpContents(wxCommandEvent &);

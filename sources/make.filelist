@@ -100,16 +100,15 @@ GUI_SOURCES = gambit.cc treewin.cc twflash.cc treedraw.cc treedrag.cc \
               efglayout.cc splash.cc efgshow.cc \
 	      efgsolvd.cc efgoutcome.cc efgsupport.cc \
               nfgsolvd.cc dlefg.cc dlnfg.cc \
-              efgsolng.cc algdlgs.cc \
               behavfilter.cc efgsoln.cc nfgshow.cc \
-              nfgsoln.cc nfgsolng.cc mixedfilter.cc \
+              nfgsoln.cc mixedfilter.cc \
               wxio.cc dlsupport.cc \
               efgprofile.cc efgnavigate.cc behavedit.cc efgprint.cc \
               nfgtable.cc nfgnavigate.cc nfgprofile.cc mixededit.cc \
               nfgprint.cc nfgoutcome.cc nfgsupport.cc \
               userprefs.cc \
               algenumpure.cc algenummixed.cc alglcp.cc algliap.cc alglp.cc \
-              algpolenum.cc algqre.cc algsimpdiv.cc
+              algpolenum.cc algqre.cc algqregrid.cc algsimpdiv.cc
 
 GUI_OBJECTS = $(GUI_SOURCES:.cc=$(OBJECT_SUFFIX))
 
