@@ -305,7 +305,8 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetFuncInfo(GSM_WriteNfg, 3);
   FuncObj->SetParamInfo(GSM_WriteNfg, 0, "output", porOUTPUT);
   FuncObj->SetParamInfo(GSM_WriteNfg, 1, "nfg", porNFG);
-  FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER);
+  FuncObj->SetParamInfo(GSM_WriteNfg, 2, "sset", porINTEGER,
+		        new IntValPortion(1));
   gsm->AddFunction(FuncObj);
 
 
