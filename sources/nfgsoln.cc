@@ -69,7 +69,7 @@ MSolnSortFilterDialog::MSolnSortFilterDialog(MSolnSortFilterOptions &options_)
     sortby = new wxRadioBox(this, 0, "Sort By", -1, -1, -1, -1, 8, sort_by_str, 2, wxVERTICAL);
     NewLine();
     NewLine();
-    new wxGroupBox(this, "Filter By", 12, 95, 464, 150, 0, "gbox");
+    (void)new wxGroupBox(this, "Filter By", 12, 95, 464, 150, 0, "gbox");
 
     filter_creator = new wxListBox(this, 0, "Creator", wxMULTIPLE, 55, -1, 140, 85, 
                                    NUM_MCREATORS, options.filter_cr_str + 1);
