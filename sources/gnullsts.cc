@@ -38,6 +38,5 @@ public:
 
 gNullStatus _gstatus;
 gStatus &gstatus=_gstatus;
-//gSignal &gbreak=_gstatus;
 
 
