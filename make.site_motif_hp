@@ -1,0 +1,12 @@
+# Setup the information needed for the gui compilation using MOTIF on HP
+# Edit the following where appropriate
+# WxWin information
+WXDIR = /home/ironbark/gambit/wxwin
+
+WXGUI = -Dwx_motif
+GUISUFFIX = _motif
+
+# XWindows information
+XINCDIR = -I/usr/include/X11
+XLIBDIR = -L/usr/lib/X11
+XLIB = -lXm -lXt -lX11 -lm -lg++
