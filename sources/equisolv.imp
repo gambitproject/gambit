@@ -55,13 +55,9 @@ EquiSolv<T>::PolyHasNoRootsIn(const gRectangle<gDouble>& r,
     TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
   if (constant < (gDouble)0) constant = - constant;
 
-  gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
-
-/*  - The following seems to do nothing
-  gVector<int> WithRespectTos(r.Dmnsn());
-  for (int i = 1; i <= r.Dmnsn(); i++) WithRespectTos[i] = 0;
-*/
+  gVector<gDouble> HalvesOfSideLengths(Dmnsn());
+  for (int k = 1; k <= Dmnsn(); k++) 
+    HalvesOfSideLengths[k] = r.HeightInCoord(k) / (gDouble)2.0;
 
   gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
 							center,
@@ -81,8 +77,9 @@ EquiSolv<T>::PolyEverywhereNegativeIn(const gRectangle<gDouble>& r,
     TreesOfPartials[index].RootNode()->GetData().Evaluate(center);
   if (constant >= (gDouble)0) return false;
 
-  gVector<gDouble> HalvesOfSideLengths = r.SideLengths();
-  for (int k = 1; k <= Dmnsn(); k++) HalvesOfSideLengths[k] /= (gDouble)2;
+  gVector<gDouble> HalvesOfSideLengths(Dmnsn());
+  for (int k = 1; k <= Dmnsn(); k++) 
+    HalvesOfSideLengths[k] = r.HeightInCoord(k) / (gDouble)2.0;
 
   gDouble max = TreesOfPartials[index].MaximalNonconstantContribution(
 							center,
@@ -131,12 +128,14 @@ bool EquiSolv<T>::NewtonRootInRectangle(const gRectangle<gDouble>& r,
     if (r.Contains(point)) return true;
     else                   return false;
 
+  gRectangle<gDouble> bigr = r.SameCenterDoubleSideLengths();
+
   while (true) {
     gSquareMatrix<gDouble> Df = TreesOfPartials.SquareDerivativeMatrix(point);
     if (Df.Determinant() == (gDouble)0) return false;
     gVector<gDouble> Del = - (Df.Inverse() * oldevals);
 
-    if ( !r.SameCenterDoubleSideLengths().Contains(point + Del) ) return false;
+    if ( !bigr.Contains(point + Del) ) return false;
     point += Del;
 
     gVector<gDouble> newevals = TreesOfPartials.ValuesOfRootPolys(point);
@@ -261,9 +260,9 @@ template<class T>
     gVector<gDouble> diffs(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++)
       if (ListOfTopBottoms[i] == 2)
-	diffs[i] = r.CartesianFactor(i).UpperBound() - p[i];
+	diffs[i] = r.UpperBoundOfCoord(i) - p[i];
       else 
-	diffs[i] = p[i] - r.CartesianFactor(i).LowerBound();
+	diffs[i] = p[i] - r.LowerBoundOfCoord(i);
     gVector<gDouble> new_diffs = M * diffs;
     gDouble squared_length = new_diffs * new_diffs;
     if (max < squared_length)
@@ -386,14 +385,15 @@ EquiSolv<T>::MightHaveSingularRoots() const
 //-------------------------------------------
 
 template<class T> bool
-EquiSolv<T>::FindRoots(const gRectangle<T>& r, const int& max_iterations) 
+EquiSolv<T>::FindRoots(const gRectangle<gDouble>& r, 
+		       const int& max_iterations) 
 {
   int zero = 0;
   return FindCertainNumberOfRoots(r,max_iterations,zero);
 }
 
 template<class T> bool
-EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r, 
+EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<gDouble>& r, 
 				      const int& max_iterations,
 				      const int& max_no_roots) 
 {
@@ -407,7 +407,7 @@ EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
 
   int* no_found = new int(0);
   FindRootsRecursion(rootlistptr,
-		     TogDouble(r), 
+		     r,
 		     max_iterations, 
 		     precedence, 
 		     iterations,
@@ -434,7 +434,7 @@ EquiSolv<T>::FindCertainNumberOfRoots(const gRectangle<T>& r,
     rootlist = bigsolver.Roots();
     gList<gVector<gDouble> > roots;
     for (int j = 1; j <= rootlist.Length(); j++)
-      if (TogDouble(r).Contains(rootlist[j])) roots += rootlist[j];
+      if (r.Contains(rootlist[j])) roots += rootlist[j];
     Roots = roots;
   }
 
@@ -470,23 +470,20 @@ EquiSolv<T>::FindRootsRecursion(      gList<gVector<gDouble> >* rootlistptr,
     return; 
   }
 
-  gArray<int> zeros(Dmnsn());
-  gArray<int> ones(Dmnsn());
-  for (int j = 1; j <= Dmnsn(); j++)
-    { zeros[j] = 0; ones[j] = 1; }
-  gIndexOdometer topbottoms(zeros,ones);
-  while (topbottoms.Turn() && 
+  int i = 1;
+  while (i <= r.NumberOfCellsInSubdivision() && 
                  (max_no_roots == 0 || *roots_found < max_no_roots)) {
     if (iterations >= max_iterations) return;
     else {
       iterations++;
       FindRootsRecursion(rootlistptr,
-			 r.Orthant(topbottoms.CurrentIndices()),
+			 r.SubdivisionCell(i),
 			 max_iterations, 
 			 precedence, 
 			 iterations,
 			 max_no_roots,
 			 roots_found);
+      i++;
     }
   }
 

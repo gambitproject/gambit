@@ -9,31 +9,6 @@
 
 #include "quiksolv.h"
 
-/*
-    The (optimistically named) class described in this file is a method
-of finding the roots of a system of polynomials and inequalities, with
-equal numbers of equations and unknowns, that lie inside a given
-rectangle.  The general idea is to first ask whether the Taylor's
-series information at the center of the rectangle precludes the
-existence of roots, and if it does not, whether Newton's method leads
-to a root, and if it does, whether the Taylor's series information at
-the root precludes the existence of another root.  If the roots in the
-rectangle are not resolved by these queries, the rectangle is
-subdivided into 2^d subrectangles, and the process is repeated on
-each.  This continues until it has been shown that all roots have been
-found, or a predetermined search depth is reached.  The bound on depth
-is necessary because the procedure will not terminate if there are
-singular roots.
-*/
-
-/*
-   The main constructor for this takes a gPolyList<T>.  The list must
-be at least as long as the dimension Dmnsn() of the space of the
-system.  The first Dmnsn() polynomials are interpreted as equtions,
-while remaining polynomials are interpreted as inequalities in the
-sense that the polynomial is required to be nonnegative.
-*/
-
 
 // ***********************
 //      class EquiSolv
@@ -126,10 +101,10 @@ template <class T> class EquiSolv {
    bool     MightHaveSingularRoots()                                 const;
 
   // The grand calculation - returns true if successful
-   bool     FindCertainNumberOfRoots  (const gRectangle<T>&, 
+   bool     FindCertainNumberOfRoots  (const gRectangle<gDouble>&, 
 				       const int&,
 				       const int&);
-   bool     FindRoots  (const gRectangle<T>&, const int&);
+   bool     FindRoots  (const gRectangle<gDouble>&, const int&);
 
 friend gOutput& operator << (gOutput& output, const EquiSolv<T>& x);
 };  
