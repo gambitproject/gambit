@@ -11,6 +11,7 @@
 #include "gtext.h"
 #include "grblock.h"
 #include "gnumber.h"
+#include "nfplayer.h"
 
 class NFOutcome;
 class NFPlayer;
@@ -111,6 +112,8 @@ public:
 
   void SetPayoff(NFOutcome *, int pl, const gNumber &value);
   gNumber Payoff(NFOutcome *, int pl) const;
+  gNumber Payoff(NFOutcome *o, NFPlayer *p) const 
+    { return Payoff(o,p->GetNumber()); }
 
     // defined in nfgutils.cc
   friend void RandomNfg(Nfg &);

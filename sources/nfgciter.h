@@ -8,6 +8,7 @@
 #define NFGCITER_H
 
 #include "gblock.h"
+#include "nfplayer.h"
 
 class StrategyProfile;
 
@@ -38,10 +39,12 @@ public:
   
   void Freeze(const gBlock<int> &);
   void Freeze(int);
+  inline void Freeze(const NFPlayer* p) { Freeze(p->GetNumber()); }
   void Thaw(int);
   
   // These next two only work on frozen strategies
   void Set(int pl, int num);
+  void Set(const Strategy *);
   int Next(int pl);
   
   const StrategyProfile &Profile(void) const;
