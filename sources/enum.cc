@@ -16,14 +16,8 @@ EnumParams::EnumParams(gStatus &status_)
 
 #include "rational.h"
 
-#ifdef __GNUG__
 template class EnumModule<double>;
 template class EnumModule<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class EnumModule<double>;
-class EnumModule<gRational>;
-#endif   // __GNUG__, __BORLANDC__
 
 
 

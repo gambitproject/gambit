@@ -9,49 +9,43 @@
 #include "gstring.h"
 #include "rational.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gArray<bool>;
-TEMPLATE class gArray<int>;
-TEMPLATE class gArray<long>;
-TEMPLATE class gArray<float>;
-TEMPLATE class gArray<double>;
-TEMPLATE class gArray<gInteger>;
-TEMPLATE class gArray<gRational>;
-TEMPLATE class gArray<gString>;
-TEMPLATE class gArray<gArray<int> >;
-TEMPLATE class gArray<gArray<int> *>;
-TEMPLATE class gArray<gArray<double> >;
-TEMPLATE class gArray<void *>;
-TEMPLATE bool operator==(const gArray<int> &, const gArray<int> &);
-TEMPLATE bool operator!=(const gArray<int> &, const gArray<int> &);
+template class gArray<bool>;
+template class gArray<int>;
+template class gArray<long>;
+template class gArray<float>;
+template class gArray<double>;
+template class gArray<gInteger>;
+template class gArray<gRational>;
+template class gArray<gString>;
+template class gArray<gArray<int> >;
+template class gArray<gArray<int> *>;
+template class gArray<gArray<double> >;
+template class gArray<void *>;
+template bool operator==(const gArray<int> &, const gArray<int> &);
+template bool operator!=(const gArray<int> &, const gArray<int> &);
 
 /* commented out for now
 
-TEMPLATE class gArrayPtr<bool>;
-TEMPLATE class gArrayPtr<int>;
-TEMPLATE class gArrayPtr<long>;
-TEMPLATE class gArrayPtr<float>;
-TEMPLATE class gArrayPtr<double>;
-TEMPLATE class gArrayPtr<gInteger>;
-TEMPLATE class gArrayPtr<gRational>;
-TEMPLATE class gArrayPtr<gString>;
+template class gArrayPtr<bool>;
+template class gArrayPtr<int>;
+template class gArrayPtr<long>;
+template class gArrayPtr<float>;
+template class gArrayPtr<double>;
+template class gArrayPtr<gInteger>;
+template class gArrayPtr<gRational>;
+template class gArrayPtr<gString>;
 */
 
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<bool> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<int> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<long> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<float> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<double> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gInteger> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gRational> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gString> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<int> > &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<int> *> &);
-TEMPLATE gOutput &operator<<(gOutput &, const gArray<gArray<double> > &);
+template gOutput &operator<<(gOutput &, const gArray<bool> &);
+template gOutput &operator<<(gOutput &, const gArray<int> &);
+template gOutput &operator<<(gOutput &, const gArray<long> &);
+template gOutput &operator<<(gOutput &, const gArray<float> &);
+template gOutput &operator<<(gOutput &, const gArray<double> &);
+template gOutput &operator<<(gOutput &, const gArray<gInteger> &);
+template gOutput &operator<<(gOutput &, const gArray<gRational> &);
+template gOutput &operator<<(gOutput &, const gArray<gString> &);
+template gOutput &operator<<(gOutput &, const gArray<gArray<int> > &);
+template gOutput &operator<<(gOutput &, const gArray<gArray<int> *> &);
+template gOutput &operator<<(gOutput &, const gArray<gArray<double> > &);
 

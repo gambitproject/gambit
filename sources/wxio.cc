@@ -99,6 +99,13 @@ gOutput &gWxOutput::operator<<(unsigned int x)
 	*frame->f<<wxio_buffer; return *this;
 }
 
+gOutput &gWxOutput::operator<<(bool x)
+{
+	if (!frame) MakeFrame();
+	sprintf(wxio_buffer, "%c",(x) ? 'T' : 'F');
+	*frame->f<<wxio_buffer; return *this;
+}
+
 gOutput &gWxOutput::operator<<(long x)
 {
 	if (!frame) MakeFrame();

@@ -1,6 +1,6 @@
 //#
 //# FILE: garray.h -- A basic bounds-checked array type
-//#	
+//#
 //# $Id$
 //#
 
@@ -13,9 +13,9 @@
 
 template <class T> class gArray  {
   friend bool operator==(const gArray<T> &, const gArray<T> &);
-#ifdef __BORLANDC__  // need this for BC++ compile, but not for g++
-  friend bool operator!=(const gArray<T> &, const gArray<T> &);
-#endif                           
+//#ifdef __BORLANDC__  // need this for BC++ compile, but not for g++
+//  friend bool operator!=(const gArray<T> &, const gArray<T> &);
+//#endif
   protected:
     int mindex, maxdex;
     T *data;
@@ -67,10 +67,9 @@ template <class T> class gArray  {
 //
     virtual void Dump(gOutput &) const;
 };
-#ifndef __BORLANDC__
 template <class T> bool operator==(const gArray<T> &, const gArray<T> &);
 template <class T> bool operator!=(const gArray<T> &, const gArray<T> &);
-#endif
+
 template <class T> gOutput &operator<<(gOutput &, const gArray<T> &);
 
 // ***********************

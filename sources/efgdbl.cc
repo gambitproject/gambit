@@ -6,77 +6,43 @@
 
 #include "rational.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-
-template <class T> class TypedNode;
-class TypedNode<gRational>;
-template <class T> class BehavProfile;
-class BehavProfile<gRational>;
-template <class T> class Efg;
-class Efg<gRational>;
-template <class T> class ChanceInfoset;
-class ChanceInfoset<gRational>;
-class Node;
-class gString;
-template <class T> class gList;
-template <class T> class gNode;
-class gList<gString>;
-class gList<gRational>;
-class gList<Node *>;
-class gNode<Node *>;
-class gNode<gString>;
-class gNode<gRational>;
-template <class T> class gArray;
-class gNode<gArray<int> >;
-class gList<gArray<int> *>;
-class EFPlayer;
-class EFOutcome;
-class gArray<EFPlayer *>;
-class gArray<EFOutcome *>;
-template <class T> class EfgFile;
-class EfgFile<gRational>;
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "efg.imp"
-TEMPLATE class Efg<double>;
-DataType Efg<double>::Type(void) const    { return DOUBLE; }
+template class Efg<double>;
+DataType Efg<double>::Type(void) const    { return gDOUBLE; }
 
-TEMPLATE class TypedNode<double>;
-TEMPLATE class ChanceInfoset<double>;
+template class TypedNode<double>;
+template class ChanceInfoset<double>;
 
-TEMPLATE class BehavProfile<double>;
-TEMPLATE gOutput &operator<<(gOutput &, const BehavProfile<double> &);
+template class BehavProfile<double>;
+template gOutput &operator<<(gOutput &, const BehavProfile<double> &);
 
 #include "behavsol.imp"
 
-TEMPLATE class BehavSolution<double>;
-TEMPLATE gOutput &operator<<(gOutput &, const BehavSolution<double> &);
+template class BehavSolution<double>;
+template gOutput &operator<<(gOutput &, const BehavSolution<double> &);
 
 
 #include "efgiter.imp"
 
-TEMPLATE class EfgIter<double>;
+template class EfgIter<double>;
 
 #include "efgciter.imp"
 
-TEMPLATE class EfgContIter<double>;
+template class EfgContIter<double>;
 
 #include "readefg.imp"
 
-TEMPLATE class EfgFile<double>;
-TEMPLATE int ReadEfgFile(gInput &, Efg<double> *&);
+template class EfgFile<double>;
+template int ReadEfgFile(gInput &, Efg<double> *&);
 
 #include "glist.imp"
 
-TEMPLATE class gList<BehavProfile<double> >;
-TEMPLATE class gNode<BehavProfile<double> >;
+template class gList<BehavProfile<double> >;
+template class gNode<BehavProfile<double> >;
 
-TEMPLATE class gList<BehavSolution<double> >;
-TEMPLATE class gNode<BehavSolution<double> >;
+template class gList<BehavSolution<double> >;
+template class gNode<BehavSolution<double> >;
 
 
 

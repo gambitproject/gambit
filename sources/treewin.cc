@@ -1,6 +1,6 @@
 //
 // FILE: Treewin.cc -- Type-specific portion of the extensive form rendering code.
-// 
+//
 // $Id$
 //
 
@@ -81,7 +81,7 @@ else
 //***********************************************************************
 //                      TREE-OUTCOME MENU HANDLER
 //***********************************************************************
-#include "outcomed.h"
+#include "efgoutcd.h"
 
 template<class T>
 void TreeWindow<T>::tree_outcomes(const gString out_name)
@@ -180,20 +180,8 @@ if (s!="")
 }
 }
 
-#ifdef __GNUG__
-	#define TEMPLATE template
-#elif defined __BORLANDC__
-	class gList<Node *>;
-	class gList<BehavProfile<double> >;
-	class gNode<BehavProfile<double> >;
-	class gList<BehavProfile<gRational> >;
-	class gNode<BehavProfile<gRational> >;
-	#pragma option -Jgd
-	#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
-//TEMPLATE class gList<OutcomeWindowS>;
-TEMPLATE class TreeWindow<double> ;
-TEMPLATE class TreeWindow<gRational> ;
+template class TreeWindow<double> ;
+template class TreeWindow<gRational> ;
 
 
 

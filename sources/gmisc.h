@@ -14,15 +14,10 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 typedef unsigned short ushort;
 
-#ifdef __BORLANDC__
-typedef unsigned char bool;
-#define true     1
-#define false    0
-#endif   // __BORLANDC__
 
 typedef enum { DT_ERROR, DT_DOUBLE, DT_RATIONAL, DT_MIXED }  DataType;
-const DataType DOUBLE = DT_DOUBLE;
-const DataType RATIONAL = DT_RATIONAL;
+const DataType gDOUBLE = DT_DOUBLE;
+const DataType gRATIONAL = DT_RATIONAL;
 
 typedef enum { T_NO=0, T_YES=1, T_DONTKNOW=2 } TriState;
 

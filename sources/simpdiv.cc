@@ -13,11 +13,6 @@ SimpdivParams::SimpdivParams(gStatus &status_)
 
 #include "rational.h"
 
-#ifdef __GNUG__
 template class SimpdivModule<double>;
 template class SimpdivModule<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class SimpdivModule<double>;
-class SimpdivModule<gRational>;
-#endif   // __GNUG__, __BORLANDC__
+

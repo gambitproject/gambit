@@ -7,28 +7,20 @@
 #include "rational.h"
 #include "tableau.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#else
-#error Unsupported compiler type
-#endif // __GNUG__, __BORLANDC__
 
-TEMPLATE class BaseTableau<double>;
-TEMPLATE class BaseTableau<gRational>;
+template class BaseTableau<double>;
+template class BaseTableau<gRational>;
 
-TEMPLATE class Tableau<double>;
-TEMPLATE class Tableau<gRational>;
+template class Tableau<double>;
+template class Tableau<gRational>;
 
-TEMPLATE class LPTableau<double>;
-TEMPLATE class LPTableau<gRational>;
+template class LPTableau<double>;
+template class LPTableau<gRational>;
 
 /*
-TEMPLATE gOutput & operator<< {gOutput&, const Basis<double>&);
-TEMPLATE gOutput & operator<< {gOutput&, const Basis<gRational>&);
-TEMPLATE gOutput & operator<< {gOutput&, const Tableau<double>&);
-TEMPLATE gOutput & operator<< {gOutput&, const Tableau<gRational>&);
+template gOutput & operator<< {gOutput&, const Basis<double>&);
+template gOutput & operator<< {gOutput&, const Basis<gRational>&);
+template gOutput & operator<< {gOutput&, const Tableau<double>&);
+template gOutput & operator<< {gOutput&, const Tableau<gRational>&);
 */
 

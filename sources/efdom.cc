@@ -14,7 +14,7 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
 	const BaseEfg &E = S.BelongsTo();
 
 	switch (E.Type())   {
-		case DOUBLE:  {
+		case gDOUBLE:  {
 			EfgContIter<double> A(S), B(S);
 
 			A.Freeze(pl, iset);
@@ -46,7 +46,7 @@ bool Dominates(const EFSupport &S, int pl, int iset, int a, int b, bool strong,g
 			return (!equal);
 		}
 
-	case RATIONAL:  {
+	case gRATIONAL:  {
     EfgContIter<gRational> A(S), B(S);
     
     A.Freeze(pl, iset);

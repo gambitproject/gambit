@@ -1,7 +1,7 @@
 //
 // FILE: lhtab.cc -- Lemke-Howson tableau
 //
-// $Id$ 
+// $Id$
 //
 
 #include "lhtab.h"
@@ -359,31 +359,16 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
 
 
 
-#ifdef __GNUG__
 template class LHTableau<double>;
 template class LHTableau<gRational>;
-template class gMatrix<double> Make_A1(const Nfg<double> &, const NFSupport &);
-template class gMatrix<gRational> Make_A1(const Nfg<gRational> &, const NFSupport &);
-template class gVector<double> Make_b1(const Nfg<double> &, const NFSupport &);
-template class gVector<gRational> Make_b1(const Nfg<gRational> &, const NFSupport &);
-template class gMatrix<double> Make_A2(const Nfg<double> &, const NFSupport &);
-template class gMatrix<gRational> Make_A2(const Nfg<gRational> &, const NFSupport &);
-template class gVector<double> Make_b2(const Nfg<double> &, const NFSupport &);
-template class gVector<gRational> Make_b2(const Nfg<gRational> &, const NFSupport &);
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class LHTableau<double>;
-class LHTableau<gRational>;
-class gMatrix<double> Make_A1(const Nfg<double> &, const NFSupport &);
-class gMatrix<gRational> Make_A1(const Nfg<gRational> &, const NFSupport &);
-class gVector<double> Make_b1(const Nfg<double> &, const NFSupport &);
-class gVector<gRational> Make_b1(const Nfg<gRational> &, const NFSupport &);
-class gMatrix<double> Make_A2(const Nfg<double> &, const NFSupport &);
-class gMatrix<gRational> Make_A2(const Nfg<gRational> &, const NFSupport &);
-class gVector<double> Make_b2(const Nfg<double> &, const NFSupport &);
-class gVector<gRational> Make_b2(const Nfg<gRational> &, const NFSupport &);
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
+template gMatrix<double> Make_A1(const Nfg<double> &, const NFSupport &);
+template gMatrix<gRational> Make_A1(const Nfg<gRational> &, const NFSupport &);
+template gVector<double> Make_b1(const Nfg<double> &, const NFSupport &);
+template gVector<gRational> Make_b1(const Nfg<gRational> &, const NFSupport &);
+template gMatrix<double> Make_A2(const Nfg<double> &, const NFSupport &);
+template gMatrix<gRational> Make_A2(const Nfg<gRational> &, const NFSupport &);
+template gVector<double> Make_b2(const Nfg<double> &, const NFSupport &);
+template gVector<gRational> Make_b2(const Nfg<gRational> &, const NFSupport &);
 
 
 

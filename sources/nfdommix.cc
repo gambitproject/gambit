@@ -215,29 +215,23 @@ NFSupport *ComputeMixedDominated(const Nfg<T> &N, NFSupport &S, bool strong,
   return newS;
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
 
-TEMPLATE bool ComputeMixedDominated(const Nfg<double> &,
+template bool ComputeMixedDominated(const Nfg<double> &,
 				    const NFSupport &, NFSupport &,
 				    int, bool, gOutput &,
 				    gStatus &);
-TEMPLATE bool ComputeMixedDominated(const Nfg<gRational> &,
+template bool ComputeMixedDominated(const Nfg<gRational> &,
 				    const NFSupport &, NFSupport &,
 				    int, bool, gOutput &,
 				    gStatus &);
 
-TEMPLATE
+template
 NFSupport *ComputeMixedDominated(const Nfg<double> &N, NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status);
-TEMPLATE
+template
 NFSupport *ComputeMixedDominated(const Nfg<gRational> &N, NFSupport &S, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status);

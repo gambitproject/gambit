@@ -1,7 +1,7 @@
 //#
 //# FILE: lemketab.cc -- Lemke tableau
 //#
-//# $Id$ 
+//# $Id$
 //#
 
 #include "lemketab.h"
@@ -84,7 +84,7 @@ template <class T> int LTableau<T>::SF_ExitIndex(int inlabel)
   assert(BestSet.Length() > 0);
   
       // If there are multiple candidates, break ties by
-      // looking at ratios with other columns, 
+      // looking at ratios with other columns,
       // eliminating nonmaximizers of 
       // a similar ratio, until only one candidate remains.
   c = MinRow()-1;
@@ -256,15 +256,8 @@ template <class T> int LTableau<T>::LemkePath(int dup)
 }
 
 
-#ifdef __GNUG__
 template class LTableau<double>;
 template class LTableau<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class LTableau<double>;
-class LTableau<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
 
 
 

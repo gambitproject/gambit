@@ -467,7 +467,7 @@ template <class T> void Efg<T>::WriteEfgFile(gOutput &f, Node *n) const
 
 template <class T> void Efg<T>::WriteEfgFile(gOutput &f) const
 {
-  f << "EFG 2 " << ((Type() == DOUBLE) ? 'D' : 'R');
+  f << "EFG 2 " << ((Type() == gDOUBLE) ? 'D' : 'R');
   f << " \"" << EscapeQuotes(title) << "\" { ";
   for (int i = 1; i <= players.Length(); i++)
     f << '"' << EscapeQuotes(players[i]->name) << "\" ";

@@ -586,18 +586,12 @@ d->Show(TRUE);
 }
 
 
-#ifdef __GNUG__
-	#define TEMPLATE template
-#elif defined __BORLANDC__
-	#pragma option -Jgd
-	#define TEMPLATE template
-#endif   // __GNUG__, __BORLANDC__
-TEMPLATE class NFOutcomeDialogC<double>;
-TEMPLATE class NFOutcomeDialogShort<double>;
-TEMPLATE class NFOutcomeDialogLong<double>;
-TEMPLATE class NFOutcomeDialog<double>;
+template class NFOutcomeDialogC<double>;
+template class NFOutcomeDialogShort<double>;
+template class NFOutcomeDialogLong<double>;
+template class NFOutcomeDialog<double>;
 #include "rational.h"
-TEMPLATE class NFOutcomeDialogC<gRational>;
-TEMPLATE class NFOutcomeDialogShort<gRational>;
-TEMPLATE class NFOutcomeDialogLong<gRational>;
-TEMPLATE class NFOutcomeDialog<gRational>;
+template class NFOutcomeDialogC<gRational>;
+template class NFOutcomeDialogShort<gRational>;
+template class NFOutcomeDialogLong<gRational>;
+template class NFOutcomeDialog<gRational>;

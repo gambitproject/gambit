@@ -7,22 +7,13 @@
 #include "keynames.h"
 #include "gmisc.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 
 #include "glist.imp"
 #include "accels.h"
-TEMPLATE class gList<Accel>;
-TEMPLATE class gNode<Accel>;
+template class gList<Accel>;
+template class gNode<Accel>;
 #include "garray.imp"
-TEMPLATE class gArray<AccelEvent>;
-#ifdef __BORLANDC__
-#pragma option -Jgx
-#endif
+template class gArray<AccelEvent>;
 
 gOutput &operator<<(gOutput &o,const AccelEvent &p)
 {o<<p.name<<' '<<p.id<<'\n'; return o;}

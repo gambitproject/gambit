@@ -1,4 +1,4 @@
-// 
+//
 // FILE: efgutils.cc -- useful global functions for the extensive form
 //
 // $Id$
@@ -214,12 +214,6 @@ template <class T> Efg<T> *CompressEfg(const Efg<T> &efg, const EFSupport &S)
   return newefg;
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "rational.h"
 // prototype in efg.h
@@ -231,10 +225,10 @@ template <class T> void RandomEfg(Efg<T> &efg)
       efg.SetPayoff(efg.outcomes[j], i, (T) Uniform());
 }
 
-TEMPLATE void RandomEfg(Efg<double> &efg);
-TEMPLATE void RandomEfg(Efg<gRational> &efg);
+template void RandomEfg(Efg<double> &efg);
+template void RandomEfg(Efg<gRational> &efg);
 
-TEMPLATE Efg<double> *CompressEfg(const Efg<double> &, const EFSupport &);
-TEMPLATE Efg<gRational> *CompressEfg(const Efg<gRational> &, const EFSupport &);
+template Efg<double> *CompressEfg(const Efg<double> &, const EFSupport &);
+template Efg<gRational> *CompressEfg(const Efg<gRational> &, const EFSupport &);
 
 

@@ -7,17 +7,11 @@
 #include "gpvector.imp"
 #include "rational.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gPVector<int>;
-TEMPLATE class gPVector<double>;
-TEMPLATE class gPVector<gRational>;
+template class gPVector<int>;
+template class gPVector<double>;
+template class gPVector<gRational>;
 
-TEMPLATE gOutput & operator<< (gOutput&, const gPVector<int>&);
-TEMPLATE gOutput & operator<< (gOutput&, const gPVector<double>&);
-TEMPLATE gOutput & operator<< (gOutput&, const gPVector<gRational>&);
+template gOutput & operator<< (gOutput&, const gPVector<int>&);
+template gOutput & operator<< (gOutput&, const gPVector<double>&);
+template gOutput & operator<< (gOutput&, const gPVector<gRational>&);

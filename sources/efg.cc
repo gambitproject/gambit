@@ -11,52 +11,37 @@ class Action;
 class EFOutcome;
 #include "garray.h"
 #include "rational.h"
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-class gArray<int>;
-class gArray<gArray<int> *>;
-class gArray<double>;
-class gArray<gRational>;
-template <class T> class gBlock;
-class gBlock<double>;
-class gBlock<gRational>;
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
 #include "garray.imp"
 #include "gblock.imp"
 
-TEMPLATE class gArray<EFPlayer *>;
-TEMPLATE class gBlock<EFPlayer *>;
+template class gArray<EFPlayer *>;
+template class gBlock<EFPlayer *>;
 
-TEMPLATE class gArray<Infoset *>;
-TEMPLATE class gBlock<Infoset *>;
+template class gArray<Infoset *>;
+template class gBlock<Infoset *>;
 
-TEMPLATE class gArray<Node *>;
-TEMPLATE class gBlock<Node *>;
+template class gArray<Node *>;
+template class gBlock<Node *>;
 
-TEMPLATE class gArray<Action *>;
-TEMPLATE class gBlock<Action *>;
+template class gArray<Action *>;
+template class gBlock<Action *>;
 
-TEMPLATE class gArray<EFOutcome *>;
-TEMPLATE class gBlock<EFOutcome *>;
+template class gArray<EFOutcome *>;
+template class gBlock<EFOutcome *>;
 
 class EFActionSet;
 class EFActionArrays;
 
-TEMPLATE bool operator==(const gArray<Action *> &, const gArray<Action *> &);
-TEMPLATE class gArray<EFActionSet *>;
-TEMPLATE class gArray<EFActionArrays *>;
-//TEMPLATE class gArray<gBlock <Action *> *>;
-//TEMPLATE class gArray<gArray <Action *> *>;
+template bool operator==(const gArray<Action *> &, const gArray<Action *> &);
+template class gArray<EFActionSet *>;
+template class gArray<EFActionArrays *>;
+//template class gArray<gBlock <Action *> *>;
+//template class gArray<gArray <Action *> *>;
 #include "glist.imp"
 
-TEMPLATE class gList<Node *>;
-TEMPLATE class gNode<Node *>;
+template class gList<Node *>;
+template class gNode<Node *>;
 
-#pragma -Jgx
 
 #ifdef __GNUG__
 #pragma implementation "outcome.h"
@@ -158,7 +143,7 @@ Node *Node::PriorSibling(void) const
 }
 
 void Node::DeleteOutcome(EFOutcome *outc)
-{ 
+{
   if (outc == outcome)   outcome = 0;
   for (int i = 1; i <= children.Length(); i++)
     children[i]->DeleteOutcome(outc);
@@ -941,4 +926,4 @@ gPVector<int> BaseEfg::NumMembers(void) const
       bar(i, j) = players[i]->infosets[j]->members.Length();
 
   return bar;
-}  
+}

@@ -7,12 +7,6 @@
 #include "rational.h"
 #include "enumsub.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif 
 
-TEMPLATE class EnumBySubgame<double>;
-TEMPLATE class EnumBySubgame<gRational>;
+template class EnumBySubgame<double>;
+template class EnumBySubgame<gRational>;

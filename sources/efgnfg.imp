@@ -4,8 +4,8 @@
 // $Id$
 //
 
-#include "tnode.h"
 #include "efg.h"
+#include "tnode.h"
 #include "nfg.h"
 #include "nfplayer.h"
 #include "nfstrat.h"

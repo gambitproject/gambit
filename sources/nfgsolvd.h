@@ -1,6 +1,6 @@
 //
 // FILE: nfgsolvd.h -- the main dialog for running NormalForm solution
-//                     algorithms. 
+//                     algorithms.
 //
 // $Id$
 //
@@ -139,9 +139,9 @@ protected:
 	// -------- now write the new settings to file
 	wxWriteResource(SOLN_SECT,"Nfg-Algorithm",algorithm,defaults_file);
 	wxWriteResource(PARAMS_SECTION,"Stop-After",stopAfter,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",(int)all,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",(int)use_elimdom,defaults_file);
 }
 virtual void Warn(const char *warning) // only warn when solving
 {if (solving) wxMessageBox((char *)warning,"Standard Solution");}

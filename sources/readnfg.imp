@@ -6,6 +6,8 @@
 
 #include "glist.h"
 #include "readnfg.h"
+#include "nfplayer.h"
+#include "nfstrat.h"
 
 template <class T> class NfgFile : public NfgFileReader   {
   private:
@@ -42,7 +44,7 @@ template <class T> bool NfgFile<T>::CreateNfg(const gList<gString> &players,
     if (dim[i] <= 0)   return false;
   }
   
-  if (type == DOUBLE)   {
+  if (type == gDOUBLE)   {
     Ndbl = new Nfg<double>(dim);
     int strat = 1;
     for (i = 1; i <= dim.Length(); i++)  {

@@ -439,7 +439,7 @@ template <class T> int SimpdivModule<T>::Simpdiv(void)
 //	  if(maxz<(T)(TOL) || nevals>=MAXIT)qf=1;
       if(maxz<(T)(TOL))qf=1;
     }
-    *params.tracefile << "\nSimpDiv solution # " << soln+1 << " : " << y;
+    *params.tracefile << "\nSimpDiv solution # " << (soln+1) << " : " << y;
     *params.tracefile << " maxz = " << maxz; 
 
     add = false;

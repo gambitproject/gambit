@@ -189,11 +189,11 @@ void NfgFileType(gInput &f, bool &valid, DataType &type)
   switch (c)   {
     case 'D':
       valid = true;
-      type = DOUBLE;
+      type = gDOUBLE;
       return;
     case 'R':
       valid = true;
-      type = RATIONAL;
+      type = gRATIONAL;
       return;
     default:
       valid = false;
@@ -214,7 +214,7 @@ int ReadNfgFile(gInput &f, Nfg<double> *& Ndbl, Nfg<gRational> *& Nrat)
 
   if (!valid)   return 0;
 
-  if (type == DOUBLE)   {
+  if (type == gDOUBLE)   {
     NfgFile<double> R(f, Ndbl);
 
     if (R.Parse())   {

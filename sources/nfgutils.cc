@@ -10,12 +10,6 @@
 #include "nfstrat.h"
 #include "nfgciter.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 template <class T> Nfg<T> *CompressNfg(const Nfg<T> &nfg, const NFSupport &S)
 {
@@ -133,16 +127,16 @@ template <class T> void RandomNfg(Nfg<T> &nfg)
 
 #include "rational.h"
 
-TEMPLATE void RandomNfg(Nfg<double> &nfg);
-TEMPLATE void RandomNfg(Nfg<gRational> &nfg);
+template void RandomNfg(Nfg<double> &nfg);
+template void RandomNfg(Nfg<gRational> &nfg);
 
-TEMPLATE Nfg<double> *CompressNfg(const Nfg<double> &, const NFSupport &);
-TEMPLATE Nfg<gRational> *CompressNfg(const Nfg<gRational> &, const NFSupport &);
+template Nfg<double> *CompressNfg(const Nfg<double> &, const NFSupport &);
+template Nfg<gRational> *CompressNfg(const Nfg<gRational> &, const NFSupport &);
 
-TEMPLATE bool IsConstSum(const Nfg<double> &nfg);
-TEMPLATE double MinPayoff(const Nfg<double> &nfg, int player);
-TEMPLATE double MaxPayoff(const Nfg<double> &nfg, int player);
+template bool IsConstSum(const Nfg<double> &nfg);
+template double MinPayoff(const Nfg<double> &nfg, int player);
+template double MaxPayoff(const Nfg<double> &nfg, int player);
 
-TEMPLATE bool IsConstSum(const Nfg<gRational> &nfg);
-TEMPLATE gRational MinPayoff(const Nfg<gRational> &nfg, int player);
-TEMPLATE gRational MaxPayoff(const Nfg<gRational> &nfg, int player);
+template bool IsConstSum(const Nfg<gRational> &nfg);
+template gRational MinPayoff(const Nfg<gRational> &nfg, int player);
+template gRational MaxPayoff(const Nfg<gRational> &nfg, int player);

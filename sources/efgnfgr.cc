@@ -5,14 +5,6 @@
 //
 
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-template <class T> class Lexicon;
-class Lexicon<double>;
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 #include "efgnfg.imp"
 
 // The gratuitious casts are put in to convince g++ 2.7.2 to compile
@@ -31,25 +23,25 @@ Nfg<gRational> *AssociatedAfg(Efg<gRational> *E)
   return E->afg;
 }
 
-TEMPLATE void ClearNodeProbs(TypedNode<gRational> *);
+template void ClearNodeProbs(TypedNode<gRational> *);
 
-TEMPLATE void MixedToBehav(const Nfg<gRational> &, const MixedProfile<gRational> &,
+template void MixedToBehav(const Nfg<gRational> &, const MixedProfile<gRational> &,
 			   const Efg<gRational> &, BehavProfile<gRational> &);
 
-TEMPLATE void BehavToMixed(const Efg<gRational> &, const BehavProfile<gRational> &,
+template void BehavToMixed(const Efg<gRational> &, const BehavProfile<gRational> &,
 			   const Nfg<gRational> &, MixedProfile<gRational> &);
 
-TEMPLATE void RealizationProbs(const Nfg<gRational> &N, const MixedProfile<gRational> &mp,
+template void RealizationProbs(const Nfg<gRational> &N, const MixedProfile<gRational> &mp,
 			       const Efg<gRational> &E, BehavProfile<gRational> &bp,
 			       int pl, const gArray<int> *const actions, Node *);
 
-TEMPLATE void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp, int pl, Node *n);
+template void BehaviorStrat(const Efg<gRational> &E, BehavProfile<gRational> &bp, int pl, Node *n);
 
-TEMPLATE Nfg<gRational> *MakeReducedNfg(Efg<gRational> &, const EFSupport &);
+template Nfg<gRational> *MakeReducedNfg(Efg<gRational> &, const EFSupport &);
 
-TEMPLATE Nfg<gRational> *MakeAfg(Efg<gRational> &);
+template Nfg<gRational> *MakeAfg(Efg<gRational> &);
 
-TEMPLATE void SetEfg(Nfg<gRational> *, Efg<gRational> *);
-TEMPLATE class Lexicon<gRational>;
+template void SetEfg(Nfg<gRational> *, Efg<gRational> *);
+template class Lexicon<gRational>;
 
 

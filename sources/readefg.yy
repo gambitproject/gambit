@@ -10,19 +10,10 @@
 #include "glist.h"
 #include "efg.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
 #include "gstack.imp"
 
-TEMPLATE class gStack<Node *>;
-#ifdef __BORLANDC__
-#pragma option -Jgx
-#endif
+template class gStack<Node *>;
 %}
 
 %name EfgFileReader
@@ -302,11 +293,11 @@ void EfgFileType(gInput &f, bool &valid, DataType &type)
   switch (c)   {
     case 'D':
       valid = true;
-      type = DOUBLE;
+      type = gDOUBLE;
       return;
     case 'R':
       valid = true;
-      type = RATIONAL;
+      type = gRATIONAL;
       return;
     default:
       valid = false;

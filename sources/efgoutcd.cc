@@ -4,9 +4,8 @@
 #include "wxmisc.h"
 #include "spread.h"
 #include "efg.h"
-#pragma hdrstop
 #include "treewin.h"
-#include "outcomed.h"
+#include "efgoutcd.h"
 
 /****************************************************************************
 												BASE OUTCOME DIALOG
@@ -580,19 +579,13 @@ d->Show(TRUE);
 }
 
 
-#ifdef __GNUG__
-	#define TEMPLATE template
-#elif defined __BORLANDC__
-	#pragma option -Jgd
-	#define TEMPLATE template
-#endif   // __GNUG__, __BORLANDC__
-TEMPLATE class OutcomeDialogC<double>;
-TEMPLATE class OutcomeDialogShort<double>;
-TEMPLATE class OutcomeDialogLong<double>;
-TEMPLATE class OutcomeDialog<double>;
+template class OutcomeDialogC<double>;
+template class OutcomeDialogShort<double>;
+template class OutcomeDialogLong<double>;
+template class OutcomeDialog<double>;
 #include "rational.h"
-TEMPLATE class OutcomeDialogC<gRational>;
-TEMPLATE class OutcomeDialogShort<gRational>;
-TEMPLATE class OutcomeDialogLong<gRational>;
-TEMPLATE class OutcomeDialog<gRational>;
+template class OutcomeDialogC<gRational>;
+template class OutcomeDialogShort<gRational>;
+template class OutcomeDialogLong<gRational>;
+template class OutcomeDialog<gRational>;
 

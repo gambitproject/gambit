@@ -89,7 +89,8 @@ void Nfg<T>::WriteNfgFile(gOutput &f) const
 {
   int i;
 
-  f << "NFG 1 " << ((Type() == DOUBLE) ? 'D' : 'R');
+
+  f << "NFG 1 " << ((Type() == gDOUBLE) ? 'D' : 'R');
   f << " \"" << EscapeQuotes(gameform->GetTitle()) << "\" { ";
 
   for (i = 1; i <= gameform->NumPlayers(); i++)

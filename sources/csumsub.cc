@@ -7,13 +7,7 @@
 #include "rational.h"
 #include "csumsub.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif 
 
-TEMPLATE class ZSumBySubgame<double>;
-TEMPLATE class ZSumBySubgame<gRational>;
+template class ZSumBySubgame<double>;
+template class ZSumBySubgame<gRational>;
 

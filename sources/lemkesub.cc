@@ -7,12 +7,6 @@
 #include "rational.h"
 #include "lemkesub.imp"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif 
 
-TEMPLATE class LemkeBySubgame<double>;
-TEMPLATE class LemkeBySubgame<gRational>;
+template class LemkeBySubgame<double>;
+template class LemkeBySubgame<gRational>;

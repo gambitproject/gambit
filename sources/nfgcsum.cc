@@ -16,13 +16,6 @@ ZSumParams::ZSumParams(gStatus &status_)
 { }
 
 
-#ifdef __GNUG__
 template class ZSumModule<double>;
 template class ZSumModule<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class ZSumModule<double>;
-class ZSumModule<gRational>;
-#endif   // __GNUG__, __BORLANDC__
-
 

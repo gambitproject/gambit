@@ -42,36 +42,24 @@ template <class T> gOutput &operator<<(gOutput &f, const BFS<T> &)
   return f;
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-// This is here to avoid a duplicate definition...
-class gArray<int>;
-class gArray<double>;
-class gArray<gRational>;
 
-class gBlock<int>;
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
+template class BFS<double>;
+template class BFS<gRational>;
 
-TEMPLATE class BFS<double>;
-TEMPLATE class BFS<gRational>;
+template gOutput &operator<<(gOutput &, const BFS<double> &);
+template gOutput &operator<<(gOutput &, const BFS<gRational> &);
 
-TEMPLATE gOutput &operator<<(gOutput &, const BFS<double> &);
-TEMPLATE gOutput &operator<<(gOutput &, const BFS<gRational> &);
+template class gArray<BFS<double> >;
+template class gArray<BFS<gRational> >;
+template class gBlock<BFS<double> >;
+template class gBlock<BFS<gRational> >;
+template class gList<BFS<double> >;
+template class gList<BFS<gRational> >;
+template class gNode<BFS<double> >;
+template class gNode<BFS<gRational> >;
 
-TEMPLATE class gArray<BFS<double> >;
-TEMPLATE class gArray<BFS<gRational> >;
-TEMPLATE class gBlock<BFS<double> >;
-TEMPLATE class gBlock<BFS<gRational> >;
-TEMPLATE class gList<BFS<double> >;
-TEMPLATE class gList<BFS<gRational> >;
-TEMPLATE class gNode<BFS<double> >;
-TEMPLATE class gNode<BFS<gRational> >;
-
-TEMPLATE class gBaseMap<int, double>;
-TEMPLATE class gOrdMap<int, double>;
-TEMPLATE class gBaseMap<int, gRational>;
-TEMPLATE class gOrdMap<int, gRational>;
+template class gBaseMap<int, double>;
+template class gOrdMap<int, double>;
+template class gBaseMap<int, gRational>;
+template class gOrdMap<int, gRational>;
 

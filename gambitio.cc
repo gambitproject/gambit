@@ -346,6 +346,13 @@ gOutput &gFileOutput::operator<<(unsigned int x)
   return *this;
 }
 
+gOutput &gFileOutput::operator<<(bool x)
+{
+  gio_error(f);
+	int c=fprintf(f, "%c", (x) ? 'T' : 'F');valid=(c==1) ? 1 : 0;
+  return *this;
+}
+
 gOutput &gFileOutput::operator<<(long x)
 {
   gio_error(f);
@@ -439,6 +446,8 @@ char gNullOutput::GetRepMode(void) { return true; }
 gOutput &gNullOutput::operator<<(int)    { return *this; }
 
 gOutput &gNullOutput::operator<<(unsigned int)   { return *this; }
+
+gOutput &gNullOutput::operator<<(bool)    { return *this; }
 
 gOutput &gNullOutput::operator<<(long)   { return *this; }
 

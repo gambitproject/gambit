@@ -21,6 +21,7 @@ public:
 
 	gOutput &operator<<(int x) { ;}
 	gOutput &operator<<(unsigned int x) { ;}
+	gOutput &operator<<(bool x) { ;}
 	gOutput &operator<<(long x) { ;}
 	gOutput &operator<<(char x) { ;}
 	gOutput &operator<<(double x) { ;}

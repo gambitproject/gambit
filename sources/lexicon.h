@@ -8,6 +8,8 @@
 #define LEXICON_H
 
 
+#include "glist.h"
+
 typedef gArray<int> Correspondence;
 
 template <class T> class Lexicon   {

@@ -6,20 +6,6 @@
 //
 
 #include "rational.h"
-
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-template <class T> class gArray;
-class gArray<int>;
-class gArray<double>;
-class gArray<gRational>;
-template <class T> class gBlock;
-class gBlock<int>;
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
-
 #include <assert.h>
 #include "nfg.h"
 #include "nfstrat.h"
@@ -254,12 +240,12 @@ const gArray<Strategy *> &NFPlayer::Strategies(void) const
 #include "gblock.imp"
 #include "glist.imp"
 
-TEMPLATE class gArray<NFStrategySet *>;
-TEMPLATE class gArray<Strategy *>;
-TEMPLATE class gArray<NFOutcome *>;
+template class gArray<NFStrategySet *>;
+template class gArray<Strategy *>;
+template class gArray<NFOutcome *>;
 
-TEMPLATE class gArray<NFPlayer *>;
-TEMPLATE class gBlock<Strategy *>;
+template class gArray<NFPlayer *>;
+template class gBlock<Strategy *>;
 
-TEMPLATE class gArray<NFOutcome *>;
-TEMPLATE class gBlock<NFOutcome *>;
+template class gArray<NFOutcome *>;
+template class gBlock<NFOutcome *>;

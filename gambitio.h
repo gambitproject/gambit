@@ -127,7 +127,7 @@ class gOutput  {
     virtual gOutput &operator<<(const void *x) = 0;
 
     virtual bool IsValid(void) const = 0;
-    
+
     virtual int GetWidth(void)  = 0;
     virtual gOutput &SetWidth(int w)  = 0;
     virtual int GetPrec(void)  = 0;

@@ -12,35 +12,27 @@
 #include "garray.h"
 #include "gblock.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-bool operator!=(const gArray<int> &, const gArray<int> &);
-void gList<gBlock<int> >::Dump(gOutput &) const { };
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gList<gRational>;
-TEMPLATE class gNode<gRational>;
+template class gList<gRational>;
+template class gNode<gRational>;
 
-TEMPLATE class gList<int>;
-TEMPLATE class gNode<int>;
+template class gList<int>;
+template class gNode<int>;
 
-TEMPLATE class gList<long>;
-TEMPLATE class gNode<long>;
+template class gList<long>;
+template class gNode<long>;
 
-TEMPLATE class gList<double>;
-TEMPLATE class gNode<double>;
+template class gList<double>;
+template class gNode<double>;
 
-TEMPLATE class gList<gString>;
-TEMPLATE class gNode<gString>;
+template class gList<gString>;
+template class gNode<gString>;
 
-TEMPLATE class gList<gBlock<int> >;
-TEMPLATE class gNode<gBlock<int> >;
+template class gList<gBlock<int> >;
+template class gNode<gBlock<int> >;
 
-TEMPLATE class gList<gArray<int> >;
-TEMPLATE class gNode<gArray<int> >;
+template class gList<gArray<int> >;
+template class gNode<gArray<int> >;
 
 
 

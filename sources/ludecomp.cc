@@ -4,36 +4,23 @@
 //# $Id$
 //#
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined(__BORLANDC__)
-template <class T> class gList;
-class gList<int>;
-template <class T> class gNode;
-class gNode<int>;
-#pragma option -Jgd
-#define TEMPLATE
-#else
-#error Unsupported compiler type.
-#endif   // __GNUG__, __BORLANDC__
-
 #include "ludecomp.imp"
 #include "glist.imp"
 #include "rational.h"
 
-TEMPLATE class EtaMatrix< double >;
-TEMPLATE class gList< EtaMatrix< double > >;
-TEMPLATE class gNode< EtaMatrix< double > >;
-TEMPLATE class Basis< double >;
-TEMPLATE class LUdecomp< double >;
+template class EtaMatrix< double >;
+template class gList< EtaMatrix< double > >;
+template class gNode< EtaMatrix< double > >;
+template class Basis< double >;
+template class LUdecomp< double >;
 
-TEMPLATE gOutput& operator<<( gOutput&, const EtaMatrix< double > &); 
+template gOutput& operator<<( gOutput&, const EtaMatrix< double > &); 
 
-TEMPLATE class EtaMatrix< gRational >;
-TEMPLATE class gList< EtaMatrix< gRational > >;
-TEMPLATE class gNode< EtaMatrix< gRational > >;
-TEMPLATE class Basis< gRational >;
-TEMPLATE class LUdecomp< gRational >;
+template class EtaMatrix< gRational >;
+template class gList< EtaMatrix< gRational > >;
+template class gNode< EtaMatrix< gRational > >;
+template class Basis< gRational >;
+template class LUdecomp< gRational >;
 
-TEMPLATE gOutput& operator<<( gOutput&, const EtaMatrix< gRational > &); 
+template gOutput& operator<<( gOutput&, const EtaMatrix< gRational > &); 
 

@@ -17,14 +17,7 @@ LemkeParams::LemkeParams(gStatus &s)
 
 #include "rational.h"
 
-#ifdef __GNUG__
 template class LemkeModule<double>;
 template class LemkeModule<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class LemkeModule<double>;
-class LemkeModule<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
 
 

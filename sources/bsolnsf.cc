@@ -158,21 +158,15 @@ default: assert(0 && "Unknown sort criterion");
 return Equal;
 }
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
 #include "rational.h"
 #include "gslist.imp"
-TEMPLATE class gSortList<BehavSolution<double> >;
-TEMPLATE class gSortList<BehavSolution<gRational> >;
-TEMPLATE class gListSorter<BehavSolution<gRational> >;
-TEMPLATE class gListSorter<BehavSolution<double> >;
-TEMPLATE class  gListFilter<BehavSolution<gRational> >;
-TEMPLATE class  gListFilter<BehavSolution<double> >; 
-TEMPLATE class BSolnSorterFilter<double>;
-TEMPLATE class BSolnSorterFilter<gRational>;
+template class gSortList<BehavSolution<double> >;
+template class gSortList<BehavSolution<gRational> >;
+template class gListSorter<BehavSolution<gRational> >;
+template class gListSorter<BehavSolution<double> >;
+template class  gListFilter<BehavSolution<gRational> >;
+template class  gListFilter<BehavSolution<double> >; 
+template class BSolnSorterFilter<double>;
+template class BSolnSorterFilter<gRational>;
 
 

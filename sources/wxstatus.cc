@@ -36,6 +36,8 @@ gOutput &wxStatus::operator<<(int x)
 {sprintf(tmp_str, "%*d", Width,  x);twin->SetValue(tmp_str);return *this;}
 gOutput &wxStatus::operator<<(unsigned int x)
 {sprintf(tmp_str, "%*d", Width,  x);twin->SetValue(tmp_str);return *this;}
+gOutput &wxStatus::operator<<(bool x)
+{sprintf(tmp_str, "%c",(x) ? 'T' : 'F');twin->SetValue(tmp_str);return *this;}
 gOutput &wxStatus::operator<<(long x)
 {sprintf(tmp_str, "%*ld", Width, x);twin->SetValue(tmp_str);return *this;}
 gOutput &wxStatus::operator<<(char x)

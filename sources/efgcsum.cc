@@ -16,25 +16,10 @@ CSSeqFormParams::CSSeqFormParams(gStatus &status_)
 { }
 
 
-#ifdef __GNUG__
 template class CSSeqFormModule<double>;
 template class CSSeqFormModule<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class CSSeqFormModule<double>;
-class CSSeqFormModule<gRational>;
-#pragma option -Jgx
-#endif   // __GNUG__, __BORLANDC__
-
-
-#ifdef __GNUG__
 template class CSSeqFormBySubgame<double>;
 template class CSSeqFormBySubgame<gRational>;
-#elif defined __BORLANDC__
-#pragma option -Jgd
-class CSSeqFormBySubgame<double>;
-class CSSeqFormBySubgame<gRational>;
-#endif   // __GNUG__, __BORLANDC__
 
 
 

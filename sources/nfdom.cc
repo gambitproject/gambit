@@ -131,35 +131,28 @@ NFSupport *ComputeDominated(const Nfg<T> &N, NFSupport &S, bool strong,
 }
 
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#pragma option -Jgd
-#define TEMPLATE
-#endif   // __GNUG__, __BORLANDC__
-
-TEMPLATE
+template
 bool Dominates(const Nfg<double> &N,
 	       const NFSupport &S, int pl, int a, int b, bool strong);
-TEMPLATE
+template
 bool Dominates(const Nfg<gRational> &N,
 	       const NFSupport &S, int pl, int a, int b, bool strong);
 
-TEMPLATE
+template
 bool ComputeDominated(const Nfg<double> &N, const NFSupport &S, NFSupport &newS,
 		      int pl, bool strong,
 		      gOutput &tracefile, gStatus &status);
-TEMPLATE
+template
 bool ComputeDominated(const Nfg<gRational> &N, const NFSupport &S, NFSupport &newS,
 		      int pl, bool strong,
 		      gOutput &tracefile, gStatus &status);
 
 
-TEMPLATE
+template
 NFSupport *ComputeDominated(const Nfg<double> &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
-TEMPLATE
+template
 NFSupport *ComputeDominated(const Nfg<gRational> &N, NFSupport &S, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);

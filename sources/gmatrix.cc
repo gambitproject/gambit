@@ -7,25 +7,19 @@
 #include "gmatrix.imp"
 #include "rational.h"
 
-#ifdef __GNUG__
-#define TEMPLATE template
-#elif defined __BORLANDC__
-#define TEMPLATE
-#pragma option -Jgd
-#endif   // __GNUG__, __BORLANDC__
 
-TEMPLATE class gMatrix<double>;
-TEMPLATE class gMatrix<gRational>;
-TEMPLATE class gMatrix<int>;
+template class gMatrix<double>;
+template class gMatrix<gRational>;
+template class gMatrix<int>;
 
-TEMPLATE gVector<double> operator* (const gVector<double>&,
+template gVector<double> operator* (const gVector<double>&,
 				    const gMatrix<double>&);
-TEMPLATE gVector<gRational> operator* (const gVector<gRational>&,
+template gVector<gRational> operator* (const gVector<gRational>&,
 				    const gMatrix<gRational>&);
-TEMPLATE gVector<int> operator* (const gVector<int>&,
+template gVector<int> operator* (const gVector<int>&,
 				    const gMatrix<int>&);
 
 
-TEMPLATE gOutput & operator<< (gOutput&, const gMatrix<double>&);
-TEMPLATE gOutput & operator<< (gOutput&, const gMatrix<gRational>&);
-TEMPLATE gOutput & operator<< (gOutput&, const gMatrix<int>&);
+template gOutput & operator<< (gOutput&, const gMatrix<double>&);
+template gOutput & operator<< (gOutput&, const gMatrix<gRational>&);
+template gOutput & operator<< (gOutput&, const gMatrix<int>&);
