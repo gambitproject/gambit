@@ -25,6 +25,7 @@
 // of GSM can add those functions to their memory.
 
 extern void Init_nfgfunc(GSM *);
+extern void Init_efgfunc(GSM *);
 
 void GSM::InitFunctions( void )
 {
@@ -33,6 +34,7 @@ void GSM::InitFunctions( void )
   Init_gclmath( this );
 
   Init_nfgfunc( this );
+  Init_efgfunc( this );
 }
 
 
