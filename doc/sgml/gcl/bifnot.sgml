@@ -1,0 +1,72 @@
+<refentry id="bif.Not" xreflabel="Not">
+
+<refmeta>
+<indexterm>
+<primary>Not</primary>
+</indexterm>
+
+<refentrytitle>Not</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Not</refname>
+<refpurpose>
+Returns the logical negation of a value
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Not[x->BOOLEAN] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Not</function>
+returns the boolean inverse of <parameter>x</parameter>,
+according to the truth table:
+<informaltable>
+<tgroup cols="2">
+<tbody>
+<row>
+<entry><parameter>x</parameter></entry>
+<entry><literal>Not[x]</literal></entry>
+</row>
+<row>
+<entry><literal>True</literal></entry>
+<entry><literal>False</literal></entry>
+</row>
+<row>
+<entry><literal>False</literal></entry>
+<entry><literal>True</literal></entry>
+</row>
+<row>
+<entry><literal>Unknown</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+</tbody
+</tgroup>
+</informaltable>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short forms</title>
+<para>
+<literal>NOT x</literal>, <literal>!x</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.And">,
+<xref linkend="bif.Or">.
+</para>
+</refsect1>
+
+</refentry>
+
+

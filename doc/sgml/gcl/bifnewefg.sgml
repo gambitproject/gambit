@@ -1,0 +1,38 @@
+<refentry id="bif.NewEfg" xreflabel="NewEfg">
+
+<refmeta>
+<indexterm>
+<primary>NewEfg</primary>
+</indexterm>
+
+<refentrytitle>NewEfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewEfg</refname>
+<refpurpose>
+Creates a new extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewEfg[{players->{}}] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewEfg</function>
+creates a new extensive form game.  The default extensive form
+game has no players (other than the chance player) defined on it; the
+optional parameter <parameter>players</parameter> specifies a list of 
+players to be
+created and the names to be assigned to them.  Returns the newly created game.
+</para>
+</refsect1>
+
+</refentry>
+
+

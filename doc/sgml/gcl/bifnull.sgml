@@ -1,0 +1,41 @@
+<refentry id="bif.Null" xreflabel="Null">
+
+<refmeta>
+<indexterm>
+<primary>Null</primary>
+</indexterm>
+
+<refentrytitle>Null</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Null</refname>
+<refpurpose>
+Returns a null object of a specified type
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Null[x->T] =: T*
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Null</function>
+returns a null object of type <type>T</type>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.IsNull">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,44 @@
+<refentry id="bif.Outcome" xreflabel="Outcome">
+
+<refmeta>
+<indexterm>
+<primary>Outcome</primary>
+</indexterm>
+
+<refentrytitle>Outcome</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Outcome</refname>
+<refpurpose>
+Returns the outcome of a node or contingency
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Outcome[node->NODE*] =: EFOUTCOME 
+Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Outcome</function>
+returns the outcome associated with the <parameter>node</parameter>,
+or the contingency <parameter>profile</parameter>.  The outcome associated
+with the null node is the null outcome.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetOutcome">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.Nodes" xreflabel="Nodes">
+
+<refmeta>
+<indexterm>
+<primary>Nodes</primary>
+</indexterm>
+
+<refentrytitle>Nodes</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Nodes</refname>
+<refpurpose>
+Returns the nodes in a game or basis
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Nodes[efg->EFG] =: LIST(NODE) 
+Nodes[infoset->INFOSET*, basis->EFBASIS] =: LIST(NODE) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first version of <function>Nodes</function>
+returns a list of nodes of the extensive form game <parameter>efg</parameter>.
+The list is in prefix traversal order; each node appears in the list
+prior to any of its descendants.
+</para>
+
+<para>
+The second version of <function>Nodes</function>
+returns a list of nodes of the information set <parameter>infoset</parameter>
+in the <parameter>basis</parameter>.  
+</para>
+</refsect1>
+
+</refentry>
+
+

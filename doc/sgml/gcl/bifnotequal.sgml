@@ -1,0 +1,50 @@
+<refentry id="bif.NotEqual" xreflabel="NotEqual">
+
+<refmeta>
+<indexterm>
+<primary>NotEqual</primary>
+</indexterm>
+
+<refentrytitle>NotEqual</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NotEqual</refname>
+<refpurpose>
+Determines if two values are not equal
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NotEqual[x->T*, y->T*] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NotEqual</function>
+returns <literal>True</literal> when the values of <parameter>x</parameter>
+and <parameter>y</parameter> are
+not equal.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x != y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Equal">.
+</para>
+</refsect1>
+
+</refentry>
+
+

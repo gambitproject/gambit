@@ -1,0 +1,35 @@
+<refentry id="bif.NewPlayer" xreflabel="NewPlayer">
+
+<refmeta>
+<indexterm>
+<primary>NewPlayer</primary>
+</indexterm>
+
+<refentrytitle>NewPlayer</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewPlayer</refname>
+<refpurpose>
+Creates a new player in an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewPlayer[efg->EFG] =: EFPLAYER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewPlayer</function>
+defines a new player in the extensive form game \verb+efg+.  Returns
+the newly created player.  
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,43 @@
+<refentry id="bif.NextSibling" xreflabel="NextSibling">
+
+<refmeta>
+<indexterm>
+<primary>NextSibling</primary>
+</indexterm>
+
+<refentrytitle>NextSibling</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NextSibling</refname>
+<refpurpose>
+Returns the next sibling of a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NextSibling[node->NODE] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NextSibling</function>
+returns the next sibling of <parameter>node</parameter>. 
+If <parameter>node</parameter> has no next
+sibling, the null node is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.PriorSibling">.
+</para>
+</refsect1>
+
+</refentry>
+
+

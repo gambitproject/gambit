@@ -1,0 +1,45 @@
+<refentry id="bif.Nfg" xreflabel="Nfg">
+
+<refmeta>
+<indexterm>
+<primary>Nfg</primary>
+</indexterm>
+
+<refentrytitle>Nfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Nfg</refname>
+<refpurpose>
+Creates the reduced normal form corresponding to an extensive form
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Nfg[efg->EFG, {time<->0}] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Nfg</function>
+creates and returns the (structural) reduced normal form game equivalent
+to the extensive form game <parameter>efg</parameter>.
+The optional parameter <parameter>time</parameter>,
+if specified, contains upon completion the amount of time consumed by
+the transformation.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.AgentForm">.
+</para>
+</refsect1>
+
+</refentry>
+
+

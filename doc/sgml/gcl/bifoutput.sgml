@@ -1,0 +1,52 @@
+<refentry id="bif.Output" xreflabel="Output">
+
+<refmeta>
+<indexterm>
+<primary>Output</primary>
+</indexterm>
+
+<refentrytitle>Output</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Output</refname>
+<refpurpose>
+Opens a file for output
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Output[file->TEXT, {append->False}, {close->True}] =: OUTPUT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Output</function>
+opens a new output stream for writing to <parameter>file</parameter>.
+An error occurs
+if <parameter>file</parameter> is not able to be opened.  By default, an existing file
+is overwritten; specifying <parameter>append</parameter> to be <literal>True</literal> opens the
+file in append mode.  Also, by default, the file is closed after every
+write operation to the file; specifying <parameter>close</parameter> to be
+<literal>False</literal> will leave the file open between write operations.  This
+may speed up output to a file, but will mean that the file is not
+closed until all references to the output stream are <function>UnAssign</function>ed.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Format">,
+<xref linkend="bif.Input">,
+<xref linkend="bif.ListFormat">,
+<xref linkend="bif.Write">.
+</para>
+</refsect1>
+
+</refentry>
+
+

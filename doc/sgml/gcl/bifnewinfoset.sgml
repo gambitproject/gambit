@@ -1,0 +1,43 @@
+<refentry id="bif.NewInfoset" xreflabel="NewInfoset">
+
+<refmeta>
+<indexterm>
+<primary>NewInfoset</primary>
+</indexterm>
+
+<refentrytitle>NewInfoset</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewInfoset</refname>
+<refpurpose>
+Creates a new information set in an extensive form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewInfoset[player->EFPLAYER, actions->INTEGER] =: INFOSET 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewInfoset</function>
+creates a new information set belonging to <parameter>player</parameter>, with
+<parameter>actions</parameter> actions.  It is an error if <parameter>actions</parameter> is not
+positive.  The newly created information set is returned.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.DeleteEmptyInfoset">.
+</para>
+</refsect1>
+
+</refentry>
+
+

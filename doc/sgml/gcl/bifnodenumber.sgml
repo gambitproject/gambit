@@ -1,0 +1,42 @@
+<refentry id="bif.NodeNumber" xreflabel="NodeNumber">
+
+<refmeta>
+<indexterm>
+<primary>NodeNumber</primary>
+</indexterm>
+
+<refentrytitle>NodeNumber</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NodeNumber</refname>
+<refpurpose>
+Returns the number of a node in a basis
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NodeNumber[node->NODE, basis->EFBASIS] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NodeNumber</function>
+returns the number assigned to <parameter>node</parameter> in the
+basis <parameter>basis</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Basis">.
+</para>
+</refsect1>
+
+</refentry>
+
+

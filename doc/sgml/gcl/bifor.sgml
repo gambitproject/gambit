@@ -1,0 +1,80 @@
+<refentry id="bif.Or" xreflabel="Or">
+
+<refmeta>
+<indexterm>
+<primary>Or</primary>
+</indexterm>
+
+<refentrytitle>Or</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Or</refname>
+<refpurpose>
+Returns the logical disjunction of two values
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Or</function>
+returns the disjunction of <parameter>x</parameter> and <parameter>y</parameter>, according to the truth
+table:
+<informaltable>
+<tgroup cols="4">
+<tbody>
+<row>
+<entry></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+<row>
+<entry><literal>True</literal></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>True</literal></entry>
+</row>
+<row>
+<entry><literal>False</literal></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>False</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+<row>
+<entry><literal>Unknown</literal></entry>
+<entry><literal>True</literal></entry>
+<entry><literal>Unknown</literal></entry>
+<entry><literal>Unknown</literal></entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short forms</title>
+<para>
+<literal>x || y</literal>, <literal>x OR y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.And">.
+<xref linkend="bif.Not">.
+</para>
+</refsect1>
+
+</refentry>
+
+

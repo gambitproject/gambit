@@ -1,0 +1,41 @@
+<refentry id="bif.NumChars" xreflabel="NumChars">
+
+<refmeta>
+<indexterm>
+<primary>NumChars</primary>
+</indexterm>
+
+<refentrytitle>NumChars</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NumChars</refname>
+<refpurpose>
+Returns the length of a text string
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NumChars[text->TEXT] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NumChars</function>
+returns the number of characters in <parameter>text</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NthChar">.
+</para>
+</refsect1>
+
+</refentry>
+
+

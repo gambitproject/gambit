@@ -1,0 +1,41 @@
+<refentry id="bif.Negate" xreflabel="Negate">
+
+<refmeta>
+<indexterm>
+<primary>Negate</primary>
+</indexterm>
+
+<refentrytitle>Negate</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Negate</refname>
+<refpurpose>
+Returns the negation of a number
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Negate[x->NUMBER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Negate</function>
+returns the negation of <parameter>x</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>-x</literal>
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,52 @@
+<refentry id="bif.NthElement" xreflabel="NthElement">
+
+<refmeta>
+<indexterm>
+<primary>NthElement</primary>
+</indexterm>
+
+<refentrytitle>NthElement</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NthElement</refname>
+<refpurpose>
+Returns an element of a list, by index
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NthElement[list<->NLIST(T*), n->INTEGER] =: T 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NthElement</function>
+returns the <parameter>n</parameter>th element of <parameter>list</parameter>.
+By convention, the first element of a list is indexed by 1.
+It is an error if <parameter>n</parameter> is nonpositive, or if 
+<parameter>n</parameter> is greater
+than the number of elements in <parameter>list</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short forms</title>
+<para>
+<literal>list[[n]]</literal>, <literal>list_n</literal>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Length">.
+</para>
+</refsect1>
+
+</refentry>
+
+

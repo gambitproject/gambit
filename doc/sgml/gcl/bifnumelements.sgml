@@ -1,0 +1,45 @@
+<refentry id="bif.NumElements" xreflabel="NumElements">
+
+<refmeta>
+<indexterm>
+<primary>NumElements</primary>
+</indexterm>
+
+<refentrytitle>NumElements</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NumElements</refname>
+<refpurpose>
+Returns the number of elements in a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NumElements[list->NLIST(T*)] =: INTEGER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NumElements</function>
+returns the number of elements in <parameter>list</parameter>.
+The difference between
+this function and <function>Length</function> is that this function is not listable,
+while <function>Length</function> is.  
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Length">.
+<xref linkend="bif.NthChar">.
+</para>
+</refsect1>
+
+</refentry>
+
+

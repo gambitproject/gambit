@@ -1,0 +1,47 @@
+<refentry id="bif.NewOutcome" xreflabel="NewOutcome">
+
+<refmeta>
+<indexterm>
+<primary>NewOutcome</primary>
+</indexterm>
+
+<refentrytitle>NewOutcome</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewOutcome</refname>
+<refpurpose>
+Creates a new outcome in a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewOutcome[efg->EFG] =: EFOUTCOME 
+NewOutcome[nfg->NFG] =: NFOUTCOME 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewOutcome</function>
+defines a new outcome in the extensive form game <parameter>efg</parameter>
+or normal form game <parameter>nfg</parameter>.  The new
+outcome specifies payoffs of zero for all players.  Returns the newly
+created outcome.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.DeleteOutcome">,
+<xref linkend="bif.Outcomes">,
+<xref linkend="bif.SetOutcome">.
+</para>
+</refsect1>
+
+</refentry>
+
+

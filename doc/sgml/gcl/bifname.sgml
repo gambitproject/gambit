@@ -1,0 +1,52 @@
+<refentry id="bif.Name" xreflabel="Name">
+
+<refmeta>
+<indexterm>
+<primary>Name</primary>
+</indexterm>
+
+<refentrytitle>Name</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Name</refname>
+<refpurpose>
+Returns the text label of an object
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Name[x->ACTION*] =: TEXT
+Name[x->EFG*] =: TEXT
+Name[x->EFOUTCOME*] =: TEXT
+Name[x->EFPLAYER*] =: TEXT
+Name[x->INFOSET*] =: TEXT
+Name[x->NFG*] =: TEXT
+Name[x->NFOUTCOME*] =: TEXT
+Name[x->NFPLAYER*] =: TEXT
+Name[x->NODE*] =: TEXT
+Name[x->STRATEGY*] =: TEXT
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Name</function>
+returns the name of <parameter>x</parameter>.
+The name of a null object is defined
+to be the empty string.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SetName">.
+</para>
+</refsect1>
+
+</refentry>
+
+

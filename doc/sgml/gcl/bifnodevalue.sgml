@@ -1,0 +1,46 @@
+<refentry id="bif.NodeValue" xreflabel="NodeValue">
+
+<refmeta>
+<indexterm>
+<primary>NodeValue</primary>
+</indexterm>
+
+<refentrytitle>NodeValue</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NodeValue</refname>
+<refpurpose>
+Returns the expected payoff to a player of being at a node
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NodeValue[profile->BEHAV, player->EFPLAYER, node->NODE] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NodeValue</function>
+returns the expected payoff to <parameter>player</parameter> at
+<parameter>node</parameter>, given
+that all players are following <parameter>profile</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.ActionValue">,
+<xref linkend="bif.Belief">,
+<xref linkend="bif.InfosetProb">,
+<xref linkend="bif.RealizProb">.
+</para>
+</refsect1>
+
+</refentry>
+
+

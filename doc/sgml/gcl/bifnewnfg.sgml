@@ -1,0 +1,36 @@
+<refentry id="bif.NewNfg" xreflabel="NewNfg">
+
+<refmeta>
+<indexterm>
+<primary>NewNfg</primary>
+</indexterm>
+
+<refentrytitle>NewNfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewNfg</refname>
+<refpurpose>
+Creates a normal form game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewNfg[dim->LIST(INTEGER)] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewNfg</function>
+creates a new normal form game with dimension <parameter>dim</parameter>.  No
+initialization of the payoffs of the game is done.  Returns the newly
+created game.  
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,52 @@
+<refentry id="bif.NthChild" xreflabel="NthChild">
+
+<refmeta>
+<indexterm>
+<primary>NthChild</primary>
+</indexterm>
+
+<refentrytitle>NthChild</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NthChild</refname>
+<refpurpose>
+Returns a child of a node, by index
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NthChild[node->NODE, n->INTEGER] =: NODE 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NthChild</function>
+returns the <parameter>n</parameter>th child of <parameter>node</parameter>.
+By convention, the first child of a node is indexed by 1.
+It is an error if <parameter>n</parameter> is nonpositive, or if 
+<parameter>n</parameter> is greater
+than the number of children of <parameter>node</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short forms</title>
+<para>
+<literal>node#n</literal>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Children">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,45 @@
+<refentry id="bif.Outcomes" xreflabel="Outcomes">
+
+<refmeta>
+<indexterm>
+<primary>Outcomes</primary>
+</indexterm>
+
+<refentrytitle>Outcomes</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Outcomes</refname>
+<refpurpose>
+Returns the outcomes defined on a game
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Outcomes[efg->EFG] =: LIST(EFOUTCOME) 
+Outcomes[nfg->NFG] =: LIST(NFOUTCOME) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Outcomes</function>
+returns the list of outcomes defined on the game <parameter>efg</parameter>
+or <parameter>nfg</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.DeleteOutcome">,
+<xref linkend="bif.NewOutcome">,
+<xref linkend="bif.SetOutcome">.
+</para>
+</refsect1>
+
+</refentry>
+
+

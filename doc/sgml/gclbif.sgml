@@ -112,6 +112,31 @@ for a listing of functions by category.
 &bifmodulus;
 &bifmovetoinfoset;
 &bifmovetree;
+&bifname;
+&bifnegate;
+&bifnewefg;
+&bifnewfunction;
+&bifnewinfoset;
+&bifnewnfg;
+&bifnewoutcome;
+&bifnewplayer;
+&bifnextsibling;
+&bifnfg;
+&bifnodenumber;
+&bifnodevalue;
+&bifnodes;
+&bifnot;
+&bifnotequal;
+&bifnthchar;
+&bifnthchild;
+&bifnthelement;
+&bifnull;
+&bifnumchars;
+&bifnumelements;
+&bifor;
+&bifoutcome;
+&bifoutcomes;
+&bifoutput;
 
 </sect1>
 

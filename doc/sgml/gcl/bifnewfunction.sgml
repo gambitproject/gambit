@@ -1,0 +1,36 @@
+<refentry id="bif.NewFunction" xreflabel="NewFunction">
+
+<refmeta>
+<indexterm>
+<primary>NewFunction</primary>
+</indexterm>
+
+<refentrytitle>NewFunction</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NewFunction</refname>
+<refpurpose>
+Creates a user-defined function
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NewFunction[name[argument-list], body]
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NewFunction</function>
+creates a new function.  The function may be called exactly
+as if it were a predefined function of the command language.  See the
+section on user-defined functions for more detailed information.
+</para>
+</refsect1>
+
+</refentry>
+
+

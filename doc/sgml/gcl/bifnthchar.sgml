@@ -1,0 +1,53 @@
+<refentry id="bif.NthChar" xreflabel="NthChar">
+
+<refmeta>
+<indexterm>
+<primary>NthChar</primary>
+</indexterm>
+
+<refentrytitle>NthChar</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>NthChar</refname>
+<refpurpose>
+Extracts a character from a string
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+NthChar[text->TEXT, n->INTEGER] =: TEXT 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>NthChar</function>
+returns a text string of length 1 containing the <parameter>n</parameter>th
+character from <parameter>text</parameter>.  By convention, the first character
+in a string is indexed by 1.  It is an error if <parameter>n</parameter>
+is nonpositive,
+or if <parameter>n</parameter> is greater than the length of <parameter>text</parameter>.
+not equal.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short forms</title>
+<para>
+<literal>text[[n]]</literal>, <literal>text#n</literal>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NumChars">.
+</para>
+</refsect1>
+
+</refentry>
+
+
