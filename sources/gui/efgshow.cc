@@ -403,7 +403,7 @@ gText EfgShow::GetInfosetValue(const gbtEfgNode &p_node) const
 gText EfgShow::GetActionProb(const gbtEfgNode &p_node, int p_act) const
 {
   if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
-    return ToText(m_efg.GetChanceProb(p_node.GetInfoset(), p_act),
+    return ToText(p_node.GetInfoset().GetChanceProb(p_act),
 		  NumDecimals());
   }
 
@@ -435,7 +435,7 @@ gText EfgShow::GetActionValue(const gbtEfgNode &p_node, int p_act) const
 gNumber EfgShow::ActionProb(const gbtEfgNode &p_node, int p_action) const
 {
   if (!p_node.GetPlayer().IsNull() && p_node.GetPlayer().IsChance()) {
-    return m_efg.GetChanceProb(p_node.GetInfoset(), p_action);
+    return p_node.GetInfoset().GetChanceProb(p_action);
   }
 
   if (m_currentProfile && !p_node.GetInfoset().IsNull()) {

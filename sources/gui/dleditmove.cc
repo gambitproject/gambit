@@ -100,7 +100,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
 			  p_infoset.GetAction(act).GetLabel()));
     m_actionNames.Append(p_infoset.GetAction(act).GetLabel());
     if (p_infoset.IsChanceInfoset()) {
-      m_actionProbs.Append(p_infoset.GetGame()->GetChanceProb(p_infoset, act));
+      m_actionProbs.Append(p_infoset.GetChanceProb(act));
     }
     m_actions.Append(p_infoset.GetAction(act));
   }
@@ -124,7 +124,7 @@ dialogEditMove::dialogEditMove(wxWindow *p_parent, gbtEfgInfoset p_infoset)
     wxBoxSizer *editProbSizer = new wxBoxSizer(wxVERTICAL);
     editProbSizer->Add(new wxStaticText(this, wxID_STATIC, "Probability"),
 		       0, wxTOP | wxCENTER, 5);
-    m_actionProbValue = ToText(p_infoset.GetGame()->GetChanceProb(p_infoset, 1));
+    m_actionProbValue = ToText(p_infoset.GetChanceProb(1));
     m_actionProb = new wxTextCtrl(this, -1, "",
 				  wxDefaultPosition, wxDefaultSize,
 				  0, gNumberValidator(&m_actionProbValue,

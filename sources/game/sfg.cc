@@ -123,7 +123,7 @@ Sfg::MakeSequenceForm(const gbtEfgNode &n, gNumber prob,gArray<int>seq,
     if (n.GetPlayer().IsChance()) {
       for(i=1;i<=n.NumChildren();i++)
 	MakeSequenceForm(n.GetChild(i),
-		     prob * EF.GetChanceProb(n.GetInfoset(), i), seq,iset,parent);
+		     prob * n.GetInfoset().GetChanceProb(i), seq,iset,parent);
     }
     else {
       int pl = n.GetPlayer().GetId();

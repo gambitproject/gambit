@@ -227,7 +227,7 @@ void gbtEfgNashLcp<T>::FillTableau(const EFSupport &p_support, gMatrix<T> &A,
     if (n.GetPlayer().IsChance()) {
       for (int i = 1; i <= n.NumChildren(); i++) {
 	FillTableau(p_support, A, n.GetChild(i),
-		    gNumber(prob) * p_support.GetGame().GetChanceProb(n.GetInfoset(), i),
+		    gNumber(prob) * n.GetInfoset().GetChanceProb(i),
 		    s1,s2,i1,i2);
       }
     }

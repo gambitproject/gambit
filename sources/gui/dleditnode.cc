@@ -111,10 +111,10 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, gbtEfgNode p_node)
       item = "Outcome" + ToText(outc);
     }
 
-    item += (" (" + ToText(efg.Payoff(outcome, efg.GetPlayer(1))) + ", " +
-	     ToText(efg.Payoff(outcome, efg.GetPlayer(2))));
+    item += (" (" + ToText(outcome.GetPayoff(efg.GetPlayer(1))) + ", " +
+	     ToText(outcome.GetPayoff(efg.GetPlayer(2))));
     if (efg.NumPlayers() > 2) {
-      item += ", " + ToText(efg.Payoff(outcome, efg.GetPlayer(3)));
+      item += ", " + ToText(outcome.GetPayoff(efg.GetPlayer(3)));
       if (efg.NumPlayers() > 3) {
 	item += ",...)";
       }

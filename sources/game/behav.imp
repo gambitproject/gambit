@@ -161,7 +161,7 @@ void PureBehavProfile<T>::Payoff(const gbtEfgNode &n, const T prob,
     if (n.GetPlayer().IsChance()) {
       for (int i = 1; i <= n.NumChildren(); i++) {
 	Payoff(n.GetChild(i),
-	       prob * (T) E->GetChanceProb(n.GetInfoset(), i), payoff);
+	       prob * (T) n.GetInfoset().GetChanceProb(i), payoff);
       }
     }
     else {
@@ -177,7 +177,7 @@ void PureBehavProfile<T>::InfosetProbs(const gbtEfgNode &n,
   if (!n.GetInfoset().IsNull() && n.GetPlayer().IsChance()) {
     for (int i = 1; i <= n.NumChildren(); i++) {
       InfosetProbs(n.GetChild(i),
-		   prob * (T) E->GetChanceProb(n.GetInfoset(), i), probs);
+		   prob * (T) n.GetInfoset().GetChanceProb(i), probs);
     }
   }
   else if (!n.GetInfoset().IsNull())  {
@@ -372,7 +372,7 @@ template <class T>
 T BehavProfile<T>::ActionProb(const gbtEfgAction &action) const
 {
   if (action.GetInfoset().GetPlayer().IsChance()) {
-    return m_efg->GetChanceProb(action);
+    return action.GetChanceProb();
   }
   else if (!m_support.Contains(action)) {
     return (T) 0.0;
@@ -781,7 +781,7 @@ void BehavProfile<T>::RealizationProbs(const MixedProfile<T> &mp,
 	prob = (T) 0;
     }
     else  {   // n.GetPlayer() == 0
-      prob = E.GetChanceProb(node.GetInfoset(), i).operator gRational();
+      prob = node.GetInfoset().GetChanceProb(i);
     }
 
     gbtEfgNode child = node.GetChild(i);

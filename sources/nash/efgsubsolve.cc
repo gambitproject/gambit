@@ -217,7 +217,7 @@ void gbtEfgNashSubgames::FindSubgames(const EFSupport &p_support,
       for (i = 1; i <= foo.NumPlayers(); i++)  {
 	subval[i] = sol[solno].Payoff(i);
 	if (!n.GetOutcome().IsNull())  {
-	  subval[i] += efg.Payoff(n.GetOutcome(), efg.GetPlayer(i));
+	  subval[i] += n.GetOutcome().GetPayoff(efg.GetPlayer(i));
         }
       }
 

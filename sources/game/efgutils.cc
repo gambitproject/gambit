@@ -208,13 +208,12 @@ IsPerfectRecall(const efgGame & efg, gbtEfgInfoset & s1, gbtEfgInfoset & s2)
         for (int m = 1; m <= iset2.NumMembers(); m++) {
           int n;
           for (n = 1; n <= iset1.NumMembers(); n++) {
-            if (efg.IsPredecessor(iset1.GetMember(n), iset2.GetMember(m))
+            if (iset1.GetMember(n).IsPredecessor(iset2.GetMember(m))
                 && iset1.GetMember(n) != iset2.GetMember(m)) {
               precedes = true;
               for (int act = 1; act <= iset1.NumActions(); act++) {
-                if (efg.
-                    IsPredecessor
-                    (iset1.GetMember(n).GetChild(act), iset2.GetMember(m))) {
+                if (iset1.GetMember(n).GetChild(act).
+                    IsPredecessor(iset2.GetMember(m))) {
                   if (action != 0 && action != act) {
                     s1 = iset1;
                     s2 = iset2;

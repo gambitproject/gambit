@@ -474,16 +474,6 @@ void efgGame::SetPayoff(gbtEfgOutcome p_outcome, int pl,
   p_outcome.rep->m_doublePayoffs[pl] = (double) value;
 }
 
-gNumber efgGame::Payoff(const gbtEfgOutcome &p_outcome,
-			const gbtEfgPlayer &p_player) const
-{
-  if (p_outcome.IsNull() || p_player.IsNull()) {
-    return gNumber(0);
-  }
-
-  return p_outcome.rep->m_payoffs[p_player.rep->m_id];
-}
-
 gNumber efgGame::Payoff(const gbtEfgNode &p_node,
 			const gbtEfgPlayer &p_player) const
 {
@@ -572,18 +562,6 @@ gNumber efgGame::MaxPayoff(int pl) const
 
 gbtEfgNode efgGame::RootNode(void) const
 { return root; }
-
-bool efgGame::IsSuccessor(const gbtEfgNode &n, const gbtEfgNode &from) const
-{ return IsPredecessor(from, n); }
-
-bool efgGame::IsPredecessor(const gbtEfgNode &n, gbtEfgNode of) const
-{
-  while (!of.IsNull() && n != of) {
-    of = of.GetParent();
-  }
-
-  return (n == of);
-}
 
 gbtEfgOutcome efgGame::NewOutcome(int index)
 {
@@ -1025,7 +1003,7 @@ gbtEfgNode efgGame::CopyTree(gbtEfgNode src, gbtEfgNode dest)
 gbtEfgNode efgGame::MoveTree(gbtEfgNode src, gbtEfgNode dest)
 {
   if (src.IsNull() || dest.IsNull())  throw Exception();
-  if (src == dest || dest.rep->m_children.Length() || IsPredecessor(src, dest))
+  if (src == dest || dest.rep->m_children.Length() || src.IsPredecessor(dest))
     return src;
   if (src.rep->m_gameroot != dest.rep->m_gameroot)  return src;
 
@@ -1144,19 +1122,6 @@ void efgGame::SetChanceProb(gbtEfgInfoset infoset,
     m_dirty = true;
     infoset.SetChanceProb(act, value);
   }
-}
-
-gNumber efgGame::GetChanceProb(gbtEfgInfoset infoset, int act) const
-{
-  if (infoset.IsChanceInfoset())
-    return infoset.GetChanceProb(act);
-  else
-    return (gNumber) 0;
-}
-
-gNumber efgGame::GetChanceProb(const gbtEfgAction &a) const
-{
-  return GetChanceProb(a.GetInfoset(), a.GetId());
 }
 
 //---------------------------------------------------------------------
@@ -1357,7 +1322,7 @@ void efgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
   if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
     for (int i = 1; i <= n->m_children.Length(); i++) {
       Payoff(n->m_children[i],
-	     prob * GetChanceProb(n->m_infoset, i),
+	     prob * n->m_infoset->m_chanceProbs[i],
 	     profile, payoff);
     }
   }
@@ -1375,7 +1340,7 @@ void efgGame::InfosetProbs(gbt_efg_node_rep *n, gNumber prob,
   if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
     for (int i = 1; i <= n->m_children.Length(); i++) {
       InfosetProbs(n->m_children[i],
-		   prob * GetChanceProb(n->m_infoset, i),
+		   prob * n->m_infoset->m_chanceProbs[i],
 		   profile, probs);
     }
   }
@@ -1412,7 +1377,7 @@ void efgGame::Payoff(gbt_efg_node_rep *n, gNumber prob,
   if (n->m_infoset && n->m_infoset->m_player->m_id == 0) {
     for (int i = 1; i <= n->m_children.Length(); i++) {
       Payoff(n->m_children[i],
-	     prob * GetChanceProb(n->m_infoset, i),
+	     prob * n->m_infoset->m_chanceProbs[i],
 	     profile, payoff);
     }
   }

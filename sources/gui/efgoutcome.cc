@@ -111,7 +111,7 @@ void EfgOutcomeWindow::UpdateValues(void)
     SetCellValue((char *) outcome.GetLabel(), outc - 1, 0);
 
     for (int pl = 1; pl <= efg.NumPlayers(); pl++) {
-      SetCellValue((char *) ToText(efg.Payoff(outcome, efg.GetPlayer(pl))),
+      SetCellValue((char *) ToText(outcome.GetPayoff(efg.GetPlayer(pl))),
 		   outc - 1, pl);
     }
   }

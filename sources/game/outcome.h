@@ -35,6 +35,7 @@
 
 struct gbt_efg_outcome_rep;
 class efgGame;
+class gbtEfgPlayer;
 
 class gbtEfgOutcome {
 friend class efgGame;
@@ -59,7 +60,7 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
-  gNumber GetPayoff(int p_playerId) const;
+  gNumber GetPayoff(const gbtEfgPlayer &) const;
   double GetPayoffDouble(int p_playerId) const;
 };
 

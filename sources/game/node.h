@@ -77,6 +77,10 @@ public:
 
   gbtEfgOutcome GetOutcome(void) const;
   void SetOutcome(const gbtEfgOutcome &);
+
+  bool IsPredecessor(const gbtEfgNode &) const;
+  bool IsSuccessor(const gbtEfgNode &p_from) const
+    { return p_from.IsPredecessor(*this); }
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgNode &);

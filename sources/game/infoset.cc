@@ -149,6 +149,16 @@ gbtEfgInfoset gbtEfgAction::GetInfoset(void) const
   }
 }
 
+gNumber gbtEfgAction::GetChanceProb(void) const
+{
+  if (rep) {
+    return rep->m_infoset->m_chanceProbs[rep->m_id];
+  }
+  else {
+    return 0;
+  }
+}
+
 bool gbtEfgAction::Precedes(gbtEfgNode n) const
 {
   if (!rep) {
@@ -396,9 +406,14 @@ void gbtEfgInfoset::SetChanceProb(int p_action, const gNumber &p_value)
   rep->m_chanceProbs[p_action] = p_value;
 }
 
-const gNumber &gbtEfgInfoset::GetChanceProb(int p_action) const
+gNumber gbtEfgInfoset::GetChanceProb(int p_action) const
 {
-  return rep->m_chanceProbs[p_action];
+  if (rep) {
+    return rep->m_chanceProbs[p_action];
+  }
+  else {
+    return 0;
+  }
 }
 
 bool gbtEfgInfoset::GetFlag(void) const

@@ -128,8 +128,6 @@ public:
   gNumber MaxPayoff(int pl = 0) const;
   
   gbtEfgNode RootNode(void) const;
-  bool IsSuccessor(const gbtEfgNode &n, const gbtEfgNode &from) const;
-  bool IsPredecessor(const gbtEfgNode &n, gbtEfgNode of) const;
 
   // DATA ACCESS -- PLAYERS
   int NumPlayers(void) const;
@@ -171,11 +169,8 @@ public:
   void Reveal(gbtEfgInfoset, gbtEfgPlayer);
 
   void SetChanceProb(gbtEfgInfoset, int, const gNumber &);
-  gNumber GetChanceProb(gbtEfgInfoset, int) const;
-  gNumber GetChanceProb(const gbtEfgAction &) const;
 
   void SetPayoff(gbtEfgOutcome, int pl, const gNumber &value);
-  gNumber Payoff(const gbtEfgOutcome &, const gbtEfgPlayer &) const;
   gNumber Payoff(const gbtEfgNode &, const gbtEfgPlayer &) const;
   gArray<gNumber> Payoff(const gbtEfgOutcome &) const;
 

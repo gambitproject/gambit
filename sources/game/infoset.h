@@ -63,6 +63,7 @@ public:
   gText GetLabel(void) const;
   void SetLabel(const gText &);
 
+  gNumber GetChanceProb(void) const;
   bool Precedes(gbtEfgNode) const;
 };
 
@@ -94,7 +95,7 @@ public:
   gbtEfgPlayer GetPlayer(void) const;
 
   void SetChanceProb(int act, const gNumber &value);
-  const gNumber &GetChanceProb(int act) const;
+  gNumber GetChanceProb(int act) const;
 
   gbtEfgAction InsertAction(int where);
   void RemoveAction(int which);

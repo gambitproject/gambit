@@ -190,7 +190,7 @@ NashNodeProbabilityPoly(const BehavSolution &p_solution,
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gDouble) p_solution.GetGame().GetChanceProb(last_action);
+      node_prob *= (gDouble) last_action.GetChanceProb();
     else 
       if (dsupp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == iset) {
@@ -394,7 +394,7 @@ static bool ANFNodeProbabilityPoly(const BehavSolution &p_solution,
     gbtEfgInfoset last_infoset = last_action.GetInfoset();
     
     if (last_infoset.IsChanceInfoset()) 
-      node_prob *= (gDouble)p_solution.GetGame().GetChanceProb(last_action);
+      node_prob *= (gDouble) last_action.GetChanceProb();
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
 	if (last_infoset == p_solution.GetGame().GetPlayer(pl).GetInfoset(i)) {

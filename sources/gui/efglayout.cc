@@ -904,7 +904,7 @@ void efgTreeLayout::Render(wxDC &p_dc) const
 void efgTreeLayout::SetCutNode(const gbtEfgNode &p_node, bool p_cut)
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_efg.IsPredecessor(p_node, m_nodeList[i]->GetNode())) {
+    if (p_node.IsPredecessor(m_nodeList[i]->GetNode())) {
       m_nodeList[i]->SetCut(p_cut);
     }
   }

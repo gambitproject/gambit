@@ -283,19 +283,13 @@ gbtEfgPlayer gbtEfgNode::GetPlayer(void) const
   }
 }
 
+bool gbtEfgNode::IsPredecessor(const gbtEfgNode &p_of) const
+{
+  gbt_efg_node_rep *n;
+  for (n = p_of.rep; n && n != rep; n = n->m_parent);
+  return (n == rep);
+}
+
 gOutput &operator<<(gOutput &p_stream, const gbtEfgNode &)
 { return p_stream; }
 
-#ifdef UNUSED
-//----------------------------------------------------------------------
-//                    class Node: Member functions
-//----------------------------------------------------------------------
-
-Node::Node(efgGame *e, Node *p)
-  : mark(false), number(0), E(e), infoset(0), parent(p), outcome(0),
-    gameroot((p) ? p->gameroot : this)
-{ }
-
-
-
-#endif  // UNUSED

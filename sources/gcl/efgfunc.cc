@@ -211,13 +211,10 @@ static Portion *GSM_Chance(GSM &, Portion **param)
 static Portion *GSM_ChanceProb(GSM &, Portion **param)
 {
   gbtEfgAction action = AsEfgAction(param[0]);
-  gbtEfgInfoset infoset = action.GetInfoset();
-  if (!infoset.GetPlayer().IsChance()) { 
+  if (!action.GetInfoset().GetPlayer().IsChance()) { 
     throw gclRuntimeError("Action must belong to the chance player");
   }
-  efgGame *efg = infoset.GetGame();
-
-  return new NumberPortion(efg->GetChanceProb(infoset, action.GetId()));
+  return new NumberPortion(action.GetChanceProb());
 }
 
 //---------------
@@ -498,9 +495,8 @@ static Portion *GSM_IsBasisConsistent(GSM &, Portion **param)
 
 static Portion *GSM_IsPredecessor(GSM &, Portion **param)
 {
-  gbtEfgNode n1 = AsEfgNode(param[0]);
-  gbtEfgNode n2 = AsEfgNode(param[1]);
-  return new BoolPortion(n1.GetGame()->IsPredecessor(n1, n2));
+  return 
+    new BoolPortion(AsEfgNode(param[0]).IsPredecessor(AsEfgNode(param[1])));
 }
 
 //---------------
@@ -509,9 +505,7 @@ static Portion *GSM_IsPredecessor(GSM &, Portion **param)
 
 static Portion *GSM_IsSuccessor(GSM &, Portion **param)
 {
-  gbtEfgNode n1 = AsEfgNode(param[0]);
-  gbtEfgNode n2 = AsEfgNode(param[1]);
-  return new BoolPortion(n1.GetGame()->IsSuccessor(n1, n2));
+  return new BoolPortion(AsEfgNode(param[0]).IsSuccessor(AsEfgNode(param[1])));
 }
 
 
@@ -829,9 +823,7 @@ static Portion *GSM_Payoff(GSM &, Portion **param)
     return new NumberPortion(0);
   gbtEfgOutcome outcome = AsEfgOutcome(param[0]);
   gbtEfgPlayer player = AsEfgPlayer(param[1]);
-  efgGame *efg = player.GetGame();
-
-  return new NumberPortion(efg->Payoff(outcome, player));
+  return new NumberPortion(outcome.GetPayoff(player));
 }
 
 //----------

@@ -137,6 +137,15 @@ void gbtEfgOutcome::SetLabel(const gText &p_label)
   }
 }
 
+gNumber gbtEfgOutcome::GetPayoff(const gbtEfgPlayer &p_player) const
+{
+  if (!rep || p_player.IsNull()) {
+    return gNumber(0);
+  }
+
+  return rep->m_payoffs[p_player.GetId()];
+}
+
 
 gOutput &operator<<(gOutput &p_stream, const gbtEfgOutcome &)
 { 
