@@ -260,7 +260,8 @@ void BehavSolution::Set(Action *p_action, const gNumber &p_prob)
   EFPlayer *player = infoset->GetPlayer();
   (*m_profile)(player->GetNumber(), infoset->GetNumber(),
 	       p_action->GetNumber()) = p_prob;
-  LevelPrecision();
+  if (m_precision != p_prob.Precision())
+    LevelPrecision();
 }
 
 const gNumber &BehavSolution::operator()(Action *p_action) const
@@ -275,7 +276,8 @@ BehavSolution &BehavSolution::operator+=(const BehavSolution &p_solution)
 {
   Invalidate(); 
   *m_profile += *p_solution.m_profile;
-  LevelPrecision();
+  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this;
 }
 
@@ -283,7 +285,8 @@ BehavSolution &BehavSolution::operator-=(const BehavSolution &p_solution)
 {
   Invalidate();
   *m_profile -= *p_solution.m_profile;
-  LevelPrecision();
+  if (m_precision == precRATIONAL && p_solution.m_precision == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this;
 }
 
@@ -291,7 +294,8 @@ BehavSolution &BehavSolution::operator*=(const gNumber &p_constant)
 { 
   Invalidate();
   *m_profile *= p_constant;
-  LevelPrecision();
+  if (m_precision == precRATIONAL && p_constant.Precision() == precDOUBLE)
+    m_precision = precDOUBLE;
   return *this;
 }
 
