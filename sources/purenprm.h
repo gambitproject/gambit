@@ -1,5 +1,5 @@
 //
-// FILE: purenprm.h -- parameter file for PureNash GUI.
+// FILE: purenprm.h -- Parameter selection for EnumPureSolve
 //
 // $Id$
 //
@@ -15,32 +15,13 @@ protected:
 public:
   PureNashParamsSettings(void) { };
   ~PureNashParamsSettings() { SaveDefaults(); } 
-  void GetParams(int &p_stopAfter);
+  void GetParams(int &p_stopAfter) { p_stopAfter = StopAfter(); }
 };
 
 class PureNashSolveParamsDialog : public OutputParamsDialog,
 				  public PureNashParamsSettings {
 public:
-  PureNashSolveParamsDialog(wxWindow *parent=0,bool subgames=false);
+  PureNashSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
 };
 
-#ifdef PUREN_PRM_INST		// instantiate only once
-
-void PureNashParamsSettings::GetParams(int &p_stopAfter)
-{
-  p_stopAfter = StopAfter();
-}
-
-PureNashSolveParamsDialog::PureNashSolveParamsDialog(wxWindow *parent,
-						     bool subgames)
-  : OutputParamsDialog("PureNash Params", parent)
-
-{
-  MakeOutputFields(OUTPUT_FIELD | MAXSOLN_FIELD |
-		   ((subgames) ? SPS_FIELD : 0));
-  Go();
-}
-
-#endif
-
-#endif
+#endif  // PURENPRM_H

@@ -1,6 +1,5 @@
 //
-// FILE: seqfprm.h -- definition of params dialog for the sequence form
-//                    algorithm
+// FILE: seqfprm.h -- definition of params dialog for LCPSolve[EFG]
 //
 // $Id$
 //
@@ -10,65 +9,24 @@
 
 #include "algdlgs.h"
 
-class SeqFormParamsSettings: public virtual OutputParamsSettings
-{
+class SeqFormParamsSettings: public virtual OutputParamsSettings {
 protected:
-	int plev,maxdepth,dup_strat;
-	void SaveDefaults(void);
+  int plev, maxdepth, dup_strat;
+  void SaveDefaults(void);
+
 public:
-	SeqFormParamsSettings(void);
-	~SeqFormParamsSettings();
-	void GetParams(SeqFormParams &P);
-	int	DupStrat(void);
+  SeqFormParamsSettings(void);
+  ~SeqFormParamsSettings();
+
+  void GetParams(SeqFormParams &P);
+  int DupStrat(void) const { return dup_strat; }
 };
 
-class SeqFormParamsDialog : public OutputParamsDialog,public SeqFormParamsSettings
-{
+class SeqFormParamsDialog : public OutputParamsDialog,
+			    public SeqFormParamsSettings {
 public:
-	SeqFormParamsDialog(wxWindow *parent=0,bool subgames=false);
-//	~SeqFormParamsDialog(void);
+  SeqFormParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+  //	~SeqFormParamsDialog(void);
 };
-
-#ifdef SEQF_PRM_INST // instantiate only once
-SeqFormParamsSettings::SeqFormParamsSettings(void)
-										:OutputParamsSettings()
-{
-wxGetResource(PARAMS_SECTION,"SeqForm-dup_strat",&dup_strat,defaults_file);
-wxGetResource(PARAMS_SECTION,"SeqForm-maxdepth",&maxdepth,defaults_file);
-}
-
-void SeqFormParamsSettings::SaveDefaults(void)
-{
-wxWriteResource(PARAMS_SECTION,"SeqForm-dup_strat",dup_strat,defaults_file);
-wxWriteResource(PARAMS_SECTION,"SeqForm-maxdepth",maxdepth,defaults_file);
-}
-
-SeqFormParamsSettings::~SeqFormParamsSettings(void)
-{SaveDefaults();}
-
-int SeqFormParamsSettings::DupStrat(void) {return dup_strat;}
-
-void SeqFormParamsSettings::GetParams(SeqFormParams &P)
-{
-P.stopAfter=StopAfter();P.maxdepth=maxdepth;
-// Output stuff
-P.trace=TraceLevel();P.tracefile=OutFile();
-}
-
-
-SeqFormParamsDialog::SeqFormParamsDialog(wxWindow *parent,bool subgames)
-										:OutputParamsDialog("LCP Params",parent),SeqFormParamsSettings()
-
-{
-Form()->Add(wxMakeFormBool("All Solutions",&dup_strat));
-Form()->Add(wxMakeFormNewLine());
-Form()->Add(wxMakeFormShort("Max depth",&maxdepth));
-
-// Now add the basic stuff
-MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
-Go();
-}
-
-#endif
 
 #endif

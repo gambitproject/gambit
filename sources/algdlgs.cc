@@ -15,183 +15,181 @@
 
 Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
 {
-    char *tmp_str = 0;
-    Bool ok = wxGetResource(section, entry, &tmp_str, file);
+  char *tmp_str = 0;
+  Bool ok = wxGetResource(section, entry, &tmp_str, file);
 
-    if (ok)
-    {
-        strcpy(value, tmp_str);
-        delete [] tmp_str;
-    }
-
-    return ok;
+  if (ok) {
+    strcpy(value, tmp_str);
+    delete [] tmp_str;
+  }
+  
+  return ok;
 }
 
+//========================================================================
+//            OutputParamsSettings: Member function definitions
+//========================================================================
 
-//******************     OUTPUT PARAMS SETTINGS ******************************
 OutputParamsSettings::OutputParamsSettings(void)
 {
-    defaults_file = "gambit.ini";
-
-    // read in the defaults
-    outname = new char[250];
-    wxGetResourceStr(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
-    errname = new char[250];
-    wxGetResourceStr(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
-    trace_str = new char[10];
-    wxGetResourceStr(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
-    wxGetResource(PARAMS_SECTION, "Stop-After", &stopAfter, defaults_file);
-    wxGetResource(PARAMS_SECTION, "Max-Solns", &max_solns, defaults_file);
-    trace_list = wxStringListInts(4);
-    outfile = 0;
-    errfile = 0;
+  defaults_file = "gambit.ini";
+  
+  // read in the defaults
+  outname = new char[250];
+  wxGetResourceStr(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
+  errname = new char[250];
+  wxGetResourceStr(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
+  trace_str = new char[10];
+  wxGetResourceStr(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Stop-After", &m_stopAfter, defaults_file);
+  wxGetResource(PARAMS_SECTION, "Max-Solns", &m_maxSolns, defaults_file);
+  m_precisionStr = new char[10];
+  wxGetResourceStr(PARAMS_SECTION, "Precision", m_precisionStr,
+  		   defaults_file);
+  trace_list = wxStringListInts(4);
+  m_precisionList = new wxStringList;
+  m_precisionList->Add("Machine");
+  m_precisionList->Add("Rational");
+  outfile = 0;
+  errfile = 0;
 }
-
 
 OutputParamsSettings::~OutputParamsSettings(void)
 {
-    SaveDefaults();
-    delete [] outname;
-    delete [] errname;
-    delete [] trace_str;
-    delete trace_list;
+  SaveDefaults();
+  delete [] outname;
+  delete [] errname;
+  delete [] trace_str;
+  delete trace_list;
 
-    if (outfile && outfile != wout && outfile != &gnull) 
-        delete outfile;
+  delete [] m_precisionStr;
+  delete m_precisionList;
 
-    if (errfile && errfile != wout && errfile != &gnull) 
-        delete errfile;
+  if (outfile && outfile != wout && outfile != &gnull) 
+    delete outfile;
+
+  if (errfile && errfile != wout && errfile != &gnull) 
+    delete errfile;
 }
-
 
 void OutputParamsSettings::SaveDefaults(void)
 {
-    wxWriteResource(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
-    wxWriteResource(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
-    wxWriteResource(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
-    wxWriteResource(PARAMS_SECTION, "Stop-After", stopAfter, defaults_file);
-    wxWriteResource(PARAMS_SECTION, "Max-Solns", max_solns, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Trace-Out", outname, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Trace-Err", errname, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Trace-Level", trace_str, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Stop-After", m_stopAfter, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Max-Solns", m_maxSolns, defaults_file);
+  wxWriteResource(PARAMS_SECTION, "Precision", m_precisionStr, defaults_file);
 }
 
-
-// Make Output file.  If a real file was created, it is saved in outp,
+//
+// Make output file.  If a real file was created, it is saved in outp,
 // if the default output window is used outp is not modified.
-gOutput *OutputParamsSettings::MakeOutputFile(const char *s, gOutput *&outp)
+//
+gOutput *OutputParamsSettings::MakeOutputFile(const char *s,
+					      gOutput *&outp) const
 {
-    if (!s) 
-        return &gnull;
+  if (!s) 
+    return &gnull;
 
-    if (strcmp(s, "gnull") == 0) 
-        return &gnull;
+  if (strcmp(s, "gnull") == 0) 
+    return &gnull;
 
-    if (strcmp(s, gWXOUT) == 0)
-    {
-        if (!wout) 
-            wout = new gWxOutput(gWXOUT);
+  if (strcmp(s, gWXOUT) == 0) {
+    if (!wout) 
+      wout = new gWxOutput(gWXOUT);
+    
+    return wout;
+  }
+  else {
+    outp = new gFileOutput(s);
+    return outp;
+  }
+}
 
-        return wout;
-    }
-    else
-    {
-        outp = new gFileOutput(s);
-        return outp;
-    }
+gOutput *OutputParamsSettings::OutFile(void) const
+{
+  if (strcmp(trace_str, "0") != 0) 
+    return MakeOutputFile(outname, outfile);
+  else 
+    return 0;
+}
+
+gOutput *OutputParamsSettings::ErrFile(void) const
+{
+  if (strcmp(trace_str, "0") != 0) 
+    return MakeOutputFile(errname, errfile);
+  else 
+    return 0;
+}
+
+int OutputParamsSettings::TraceLevel(void) const
+{
+  return wxListFindString(trace_list, trace_str);
+}
+
+gPrecision OutputParamsSettings::Precision(void) const
+{
+  return ((wxListFindString(m_precisionList, m_precisionStr) == 1) ?
+	  precRATIONAL : precDOUBLE);
 }
 
 
-// Out File
-gOutput *OutputParamsSettings::OutFile(void)
-{
-    if (strcmp(trace_str, "0") != 0) 
-        return MakeOutputFile(outname, outfile);
-    else 
-        return 0;
-}
-
-
-// Err File
-gOutput *OutputParamsSettings::ErrFile(void)
-{
-    if (strcmp(trace_str, "0") != 0) 
-        return MakeOutputFile(errname, errfile);
-    else 
-        return 0;
-}
-
-
-// Trace Level
-int OutputParamsSettings::TraceLevel(void)
-{
-    return wxListFindString(trace_list, trace_str);
-}
-
-// Subgame stuff
-int OutputParamsSettings::StopAfter(void)
-{
-    return stopAfter;
-}
-
-int OutputParamsSettings::MaxSolns(void)
-{
-    return max_solns;
-}
-
-
-//******************     OUTPUT PARAMS DIALOG ********************************
-// Constructor
+//========================================================================
+//            OutputParamsDialog: Member function definitions
+//========================================================================
 
 OutputParamsDialog::OutputParamsDialog(const char *label, 
                                        wxWindow *parent, 
                                        const char *help_str) 
-    : OutputParamsSettings(), MyDialogBox(parent, (char *)label, help_str)
+  : MyDialogBox(parent, (char *)label, help_str)
 { }
 
-//  Destructor
 OutputParamsDialog::~OutputParamsDialog(void)
 { }
 
-// Make Output Fields
-// The following fields are available:
-// Max Solns --
 void OutputParamsDialog::MakeOutputFields(unsigned int fields)
 {
+  if (fields & PRECISION_FIELD) {
+    Add(wxMakeFormString("Precision", &m_precisionStr, wxFORM_RADIOBOX,
+			 new wxList(wxMakeConstraintStrings(m_precisionList),
+				    0), 
+			 0, wxVERTICAL));
     Add(wxMakeFormNewLine());
+  }
 
-    if (fields&MAXSOLN_FIELD && !(fields&SPS_FIELD))
-    {
-        Add(wxMakeFormShort("Max Ttl Solns", &stopAfter, wxFORM_DEFAULT, 
-                            NULL, NULL, wxVERTICAL, 100));
-        Add(wxMakeFormNewLine());
-    }
-
-    if (fields&MAXSOLN_FIELD && fields&SPS_FIELD)
-    {
-        Add(wxMakeFormShort("Solns/Subgame", &stopAfter, wxFORM_DEFAULT, 
-                            NULL, NULL, wxVERTICAL, 100));
-        Add(wxMakeFormShort("Max Ttl Solns", &max_solns, wxFORM_DEFAULT, 
-                            NULL, NULL, wxVERTICAL, 100));
-        Add(wxMakeFormNewLine());
-    }
-
-    if (fields&OUTPUT_FIELD)
-    {
-        Add(wxMakeFormString("TraceFile", &outname, wxFORM_DEFAULT, 
-                             NULL, NULL, wxVERTICAL));
-    }
-
-    if (fields&ERROR_FIELD)
-    {
-        Add(wxMakeFormString("ErrFile", &errname, wxFORM_DEFAULT, 
-                             NULL, NULL, wxVERTICAL));
-    }
-
-    if (fields&ERROR_FIELD && fields&OUTPUT_FIELD) 
-        Add(wxMakeFormNewLine());
-
-    Add(wxMakeFormString("Trace Level", &trace_str, wxFORM_CHOICE,
-                         new wxList(wxMakeConstraintStrings(trace_list), 0), 
-                         0, wxVERTICAL));
+  if ((fields & MAXSOLN_FIELD) && !(fields & SPS_FIELD)) {
+    Add(wxMakeFormShort("Max Ttl Solns", &m_stopAfter, wxFORM_DEFAULT, 
+			NULL, NULL, wxVERTICAL, 100));
     Add(wxMakeFormNewLine());
+  }
+
+  if ((fields & MAXSOLN_FIELD) && (fields & SPS_FIELD)) {
+    Add(wxMakeFormShort("Solns/Subgame", &m_stopAfter, wxFORM_DEFAULT, 
+			NULL, NULL, wxVERTICAL, 100));
+    Add(wxMakeFormShort("Max Ttl Solns", &m_maxSolns, wxFORM_DEFAULT, 
+			NULL, NULL, wxVERTICAL, 100));
+    Add(wxMakeFormNewLine());
+  }
+
+  if (fields & OUTPUT_FIELD) {
+    Add(wxMakeFormString("TraceFile", &outname, wxFORM_DEFAULT, 
+			 NULL, NULL, wxVERTICAL));
+  }
+
+  if (fields & ERROR_FIELD) {
+    Add(wxMakeFormString("ErrFile", &errname, wxFORM_DEFAULT, 
+			  NULL, NULL, wxVERTICAL));
+  }
+
+  if ((fields & ERROR_FIELD) && (fields & OUTPUT_FIELD)) { 
+    Add(wxMakeFormNewLine());
+  }
+
+  Add(wxMakeFormString("Trace Level", &trace_str, wxFORM_CHOICE,
+		       new wxList(wxMakeConstraintStrings(trace_list), 0), 
+		       0, wxVERTICAL));
+  Add(wxMakeFormNewLine());
 }
 
 

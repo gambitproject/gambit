@@ -1,6 +1,9 @@
-// File : algdlgs.h -- declaration of base classes for all of the algorithm
-// parameter dialogs.
+//
+// FILE: algdlgs.h -- declaration of base classes for all of the algorithm
+//                    parameter dialogs
+//
 // $Id$
+//
 
 #ifndef ALGDLGS_H
 #define ALGDLGS_H
@@ -9,8 +12,9 @@
 #include "wx_form.h"
 #include "wxmisc.h"
 
-#define PARAMS_SECTION  "Algorithm Params"      // section in .ini file
+#include "gnumber.h"     // for gPrecision
 
+#define PARAMS_SECTION  "Algorithm Params"      // section in .ini file
 
 // This class just creates fields for error/output, trace level, and controls
 // the max # of solutions generated.
@@ -20,51 +24,64 @@
 #define     OUTPUT_FIELD        2
 #define     SPS_FIELD           4
 #define     MAXSOLN_FIELD       8
+#define     PRECISION_FIELD     16
 
-//******************    BASIC OUTPUT PARAMS  ********************************
-class OutputParamsSettings
-{
+//=========================================================================
+//                OutputParamsSettings: Class declaration
+//=========================================================================
+
+class OutputParamsSettings {
 protected:
-    char         *outname, *errname;
-    gOutput      *outfile, *errfile;
-    wxStringList *trace_list;
-    char         *trace_str;
-    int           stopAfter, max_solns; // max solutions_per_subgame, max total solutions
-    char         *defaults_file;
+  char *outname, *errname;
+  gOutput *outfile, *errfile;
+  wxStringList *trace_list, *m_precisionList;
+  char *trace_str, *m_precisionStr;
+ // max solutions_per_subgame, max total solutions
+  int m_stopAfter, m_maxSolns;
+  char *defaults_file;
+  gPrecision m_precision;
 
-    gOutput *MakeOutputFile(const char *s, gOutput *&outp);
-    void     SaveDefaults(void); // Called automatically in the destructor
+  gOutput *MakeOutputFile(const char *s, gOutput *&outp) const;
+  void SaveDefaults(void); // Called automatically in the destructor
 
 public:
-    OutputParamsSettings(void);
-    virtual ~OutputParamsSettings(void);
+  OutputParamsSettings(void);
+  virtual ~OutputParamsSettings(void);
 
-    // Return the results...
-    gOutput    *OutFile(void);
-    gOutput    *ErrFile(void);
-    int         TraceLevel(void);
-    bool        Default(void) { return 1; }
+  // Return the results...
+  gOutput *OutFile(void) const;
+  gOutput *ErrFile(void) const;
+  int TraceLevel(void) const;
+  bool Default(void) const { return true; }
 
-    // subgame stuff
-    int         StopAfter(void);
-    int         MaxSolns(void);
+  int StopAfter(void) const { return m_stopAfter; }
+  int MaxSolns(void) const { return m_maxSolns; }
+
+  gPrecision Precision(void) const;
+};
+
+//=========================================================================
+//                 OutputParamsDialog: Class declaration
+//=========================================================================
+
+class OutputParamsDialog : public virtual OutputParamsSettings, 
+			   public MyDialogBox {
+public:
+  // Constructor
+  OutputParamsDialog(const char *label = 0, wxWindow *parent = 0, 
+		     const char *help_str = 0);
+
+  // Destructor
+  virtual ~OutputParamsDialog(void);
+
+  // Create the fields
+  void MakeOutputFields(unsigned int fields = OUTPUT_FIELD);
 };
 
 
-class OutputParamsDialog : public virtual OutputParamsSettings, public MyDialogBox
-{
-public:
-    // Constructor
-    OutputParamsDialog(const char *label = 0, wxWindow *parent = 0, 
-                       const char *help_str = 0);
-
-    // Destructor
-    virtual ~OutputParamsDialog(void);
-
-    // Create the fields
-    void MakeOutputFields(unsigned int fields = OUTPUT_FIELD);
-};
-
+//=========================================================================
+//                 PxiParamsSettings: Class declaration
+//=========================================================================
 
 // This class is used for PXI type algorithms.  That is those that generate
 // PXI compatible output files.  It creates the fields for output name,
@@ -73,49 +90,51 @@ public:
 // new filename iff it is created by itself (not a part of PxiParamsDialog)
 // and the naming option is set to "Prompt"
 
-class PxiParamsSettings: public virtual OutputParamsSettings
-{
+class PxiParamsSettings: public virtual OutputParamsSettings {
 protected:
-    char         *pxi_command, *pxiname, *algname, *filename;
-    gOutput      *pxifile;
-    Bool          run_pxi;
-    wxStringList *type_list, *name_option_list;
-    char         *type_str, *name_option_str;
+  char         *pxi_command, *pxiname, *algname, *filename;
+  gOutput      *pxifile;
+  Bool          run_pxi;
+  wxStringList *type_list, *name_option_list;
+  char         *type_str, *name_option_str;
 
-    void SaveDefaults(void);
-    static int naming_option; // 0-default, 1-saved, 2-query
-
-public:
-    PxiParamsSettings(const char *alg, const char *fn);
-    virtual ~PxiParamsSettings();
-
-    // Return the results...
-    gOutput *PxiFile(void);
-    int      PxiType(void);
-
-    // Run pxi if necessary
-    int RunPxi(void);
-
-    // Check if I am a parent of a PxiParamsDialog derived class
-    virtual bool FromDialog(void) { return false; }
-};
-
-class PxiParamsDialog: public OutputParamsDialog, public virtual PxiParamsSettings
-{
-private:
+  void SaveDefaults(void);
+  static int naming_option; // 0-default, 1-saved, 2-query
 
 public:
-    // Constructor
-    PxiParamsDialog(const char *alg = "Pxi", const char *label = 0, 
-                    const char *filename = "pxi.out", wxWindow *parent = 0, 
-                    const char *help_str = 0);
+  PxiParamsSettings(const char *alg, const char *fn);
+  virtual ~PxiParamsSettings();
+  
+  // Return the results...
+  gOutput *PxiFile(void);
+  int      PxiType(void);
 
-    // Destructor
-    virtual ~PxiParamsDialog(void);
+  // Run pxi if necessary
+  int RunPxi(void);
 
-    // Create Fields
-    void MakePxiFields(void);
-    virtual bool FromDialog(void) { return true; }
+  // Check if I am a parent of a PxiParamsDialog derived class
+  virtual bool FromDialog(void) { return false; }
 };
 
-#endif
+//=========================================================================
+//                 PxiParamsDialog: Class declaration
+//=========================================================================
+
+class PxiParamsDialog : public OutputParamsDialog,
+			public virtual PxiParamsSettings {
+public:
+  // Constructor
+  PxiParamsDialog(const char *alg = "Pxi", const char *label = 0, 
+		  const char *filename = "pxi.out", wxWindow *parent = 0, 
+		  const char *help_str = 0);
+
+  // Destructor
+  virtual ~PxiParamsDialog(void);
+
+  // Create Fields
+  void MakePxiFields(void);
+  virtual bool FromDialog(void) { return true; }
+};
+
+#endif   // ALGDLGS_H
+

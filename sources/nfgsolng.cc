@@ -128,7 +128,7 @@ gList<MixedSolution> NfgGobitG::Solve(void) const
     GobitParamsSettings GSPD(parent->Filename());
     wxStatus *status = new wxStatus(parent->Frame(), "Gobit Algorithm");
     NFGobitParams P(*status);
-    GSPD.GetParams(&P);
+    GSPD.GetParams(P);
 
     MixedProfile<gNumber> start(parent->CreateStartProfile(GSPD.StartOption()));
 
@@ -249,7 +249,7 @@ gList<MixedSolution> NfgZSumG::Solve(void) const
     status << "Progress not implemented\n" << "Cancel button disabled\n";
     LPParamsSettings LPPS;
     ZSumParams P;
-    LPPS.GetParams(&P);
+    LPPS.GetParams(P);
     int npivots;
     double time;
     ZSum(sup, P, (gList<MixedSolution> &)solns, npivots, time);

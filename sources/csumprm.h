@@ -1,57 +1,33 @@
+//
+// FILE: csumprm.h -- Parameter selection for LpSolve
+//
 // $Id$
-#ifndef ZSUMPRM_H
-#define ZSUMPRM_H
+//
+
+#ifndef CSUMPRM_H
+#define CSUMPRM_H
 
 #include "algdlgs.h"
+
 class CSSeqFormParams;
 class ZSumParams;
-class LPParamsSettings: public virtual OutputParamsSettings
-{
+
+class LPParamsSettings : public virtual OutputParamsSettings {
 protected:
-	void SaveDefaults(void);
+  void SaveDefaults(void);
+
 public:
-	LPParamsSettings(void);
-	~LPParamsSettings() {SaveDefaults();}
-	void GetParams(ZSumParams *P);
-	void GetParams(CSSeqFormParams *P);
-};
-class LPSolveParamsDialog : public OutputParamsDialog, public LPParamsSettings
-{
-public:
-	LPSolveParamsDialog(wxWindow *parent=0,bool subgames=false);
+  LPParamsSettings(void);
+  ~LPParamsSettings() { SaveDefaults(); }
+  void GetParams(ZSumParams &);
+  void GetParams(CSSeqFormParams &);
 };
 
-#ifdef CSUM_PRM_INST   // instantiate only once
-LPParamsSettings::LPParamsSettings(void)
-{}
+class LPSolveParamsDialog : public OutputParamsDialog,
+			    public LPParamsSettings {
+public:
+  LPSolveParamsDialog(wxWindow *p_parent = 0, bool p_subgames = false);
+};
 
-void LPParamsSettings::SaveDefaults(void)
-{}
+#endif  // CSUMPRM_H
 
-void LPParamsSettings::GetParams(ZSumParams *P)
-{
-P->stopAfter=StopAfter();
-// Output stuff
-P->trace=TraceLevel();P->tracefile=OutFile();
-}
-
-void LPParamsSettings::GetParams(CSSeqFormParams *P)
-{
-P->stopAfter=StopAfter();
-// Output stuff
-P->trace=TraceLevel();P->tracefile=OutFile();
-}
-
-LPSolveParamsDialog::LPSolveParamsDialog(wxWindow *parent,bool subgames)
-														:OutputParamsDialog("LP Params",parent,LP_HELP)
-
-{
-Add(wxMakeFormNewLine());
-// Now add the basic stuff
-MakeOutputFields(OUTPUT_FIELD|MAXSOLN_FIELD| ((subgames) ? SPS_FIELD : 0));
-Go();
-}
-
-#endif
-
-#endif
