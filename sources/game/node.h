@@ -40,6 +40,7 @@ template <class T> class BehavAssessment;
 
 class gbtEfgNode {
 friend class gbtEfgGame;
+friend struct gbt_efg_game_rep;
 friend class Lexicon;
 protected:
   struct gbt_efg_node_rep *rep;
@@ -78,65 +79,15 @@ public:
   gbtEfgOutcome GetOutcome(void) const;
   void SetOutcome(const gbtEfgOutcome &);
 
+  gbtEfgInfoset AppendMove(gbtEfgInfoset);
+  gbtEfgInfoset InsertMove(gbtEfgInfoset);
+
   bool IsPredecessor(const gbtEfgNode &) const;
   bool IsSuccessor(const gbtEfgNode &p_from) const
     { return p_from.IsPredecessor(*this); }
 };
 
 gOutput &operator<<(gOutput &, const gbtEfgNode &);
-
-#ifdef UNUSED
-class Node    {
-  friend class efgGame;
-  friend class BehavProfile<double>;
-  friend class BehavProfile<gRational>;
-  friend class BehavProfile<gNumber>;
-  friend class BehavAssessment<double>;
-  friend class BehavAssessment<gRational>;
-  friend class BehavAssessment<gNumber>;
-  friend class Lexicon;
-  
-  protected:
-    bool mark;
-    int number; // This is a unique identifier, not related to infoset memship
-    efgGame *E;
-    gText name;
-    gbt_efg_infoset_rep *infoset;
-    Node *parent;
-    gbt_efg_outcome_rep *outcome;
-    gBlock<Node *> children;
-    Node *whichbranch, *ptr, *gameroot;
-
-    Node(efgGame *e, Node *p);
-    ~Node();
-
-    void DeleteOutcome(gbt_efg_outcome_rep *outc);
-
-  public:
-    efgGame *GetGame(void) const   { return E; }
-
-    int NumChildren(void) const    { return children.Length(); }
-    int GetId(void) const { return number; }
-    int NumberInInfoset(void) const;
-    gbtEfgNode GetInfoset(void) const;
-    bool IsTerminal(void) const { return (children.Length() == 0); }
-    bool IsNonterminal(void) const { return !IsTerminal(); }
-    gbtEfgPlayer GetPlayer(void) const;
-    gbtEfgAction GetAction(void) const; // returns null if root node
-    Node *GetChild(int i) const    { return children[i]; }
-    Node *GetChild(const gbtEfgAction &) const; 
-    Node *GetParent(void) const    { return parent; }
-    Node *GetSubgameRoot(void) const  { return gameroot; }
-    Node *NextSibling(void) const;
-    Node *PriorSibling(void) const;
-
-    const gText &GetLabel(void) const   { return name; }
-    void SetLabel(const gText &s)       { name = s; }
-
-    gbtEfgOutcome GetOutcome(void) const;
-    void SetOutcome(const gbtEfgOutcome &);
-};
-#endif  // UNUSED
 
 #endif   // NODE_H
 

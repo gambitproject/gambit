@@ -133,6 +133,15 @@ struct gbt_efg_game_rep {
 
   gbt_efg_game_rep(void);
   ~gbt_efg_game_rep();
+
+  void SortInfosets(void);
+  void NumberNodes(gbt_efg_node_rep *, int &);
+  void DeleteLexicon(void);
+
+  void AppendMove(gbt_efg_node_rep *, gbt_efg_infoset_rep *);
+  void InsertMove(gbt_efg_node_rep *, gbt_efg_infoset_rep *);
+  gbt_efg_infoset_rep *NewInfoset(gbt_efg_player_rep *,
+				  int p_id, int p_actions);
 };
 
 #endif  // EFGINT_H

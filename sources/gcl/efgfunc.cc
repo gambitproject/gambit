@@ -188,7 +188,7 @@ static Portion *GSM_AddMove(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   gbtEfgNode n = AsEfgNode(param[1]);
-  n.GetGame().AppendNode(n, s);
+  n.AppendMove(s);
   return new NodePortion(n.GetChild(1));
 }
 
@@ -454,7 +454,7 @@ static Portion *GSM_InsertMove(GSM &gsm, Portion **param)
 {
   gbtEfgInfoset s = AsEfgInfoset(param[0]);
   gbtEfgNode n = AsEfgNode(param[1]);
-  n.GetGame().InsertNode(n, s);
+  n.InsertMove(s);
   return new NodePortion(n.GetParent());
 }
 
@@ -648,14 +648,13 @@ static Portion *GSM_NewEfg(GSM &, Portion **param)
 static Portion *GSM_NewInfoset(GSM &gsm, Portion **param)
 {
   gbtEfgPlayer player = AsEfgPlayer(param[0]);
-  int n = AsNumber(param[1]);
+  int actions = AsNumber(param[1]);
 
-  if (n <= 0) {
+  if (actions <= 0) {
     throw gclRuntimeError("Information sets must have at least one action");
   }
 
-  gbtEfgInfoset s = player.GetGame().CreateInfoset(player, n);
-  return new InfosetPortion(s);
+  return new InfosetPortion(player.NewInfoset(actions));
 }
  
 //--------------

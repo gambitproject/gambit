@@ -850,7 +850,7 @@ void EfgShow::OnFileSave(wxCommandEvent &p_event)
 				  m_filename.c_str()),
 		 "Error", wxOK, this);
   }
-  catch (gbtEfgGame::Exception &) {
+  catch (gbtEfgException &) {
     wxMessageBox("Internal exception in extensive form", "Error",
 		 wxOK, this);
   }
@@ -1086,11 +1086,12 @@ void EfgShow::OnEditInsert(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK)  {
     try {
       if (dialog.GetInfoset().IsNull()) {
-	m_efg.InsertNode(Cursor(), dialog.GetPlayer(), dialog.GetActions());
+	gbtEfgInfoset infoset = dialog.GetPlayer().NewInfoset(dialog.GetActions());
+	Cursor().InsertMove(infoset);
 	OnTreeChanged(true, true);
       }
       else {
-	m_efg.InsertNode(Cursor(), dialog.GetInfoset());
+	Cursor().InsertMove(dialog.GetInfoset());
 	OnTreeChanged(true, false);
       }
     }

@@ -59,7 +59,9 @@ public:
   int GetId(void) const;
 
   bool IsChance(void) const;
+
   int NumInfosets(void) const;
+  gbtEfgInfoset NewInfoset(int p_actions);
   gbtEfgInfoset GetInfoset(int p_index) const;
 };
 

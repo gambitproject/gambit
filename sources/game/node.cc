@@ -246,7 +246,7 @@ int gbtEfgNode::NumberInInfoset(void) const
     }
   }
   //  This could be sped up by adding a member to keep track of this
-  throw gbtEfgGame::Exception();
+  throw gbtEfgException();
 }
 
 gbtEfgNode gbtEfgNode::NextSibling(void) const  
@@ -300,6 +300,46 @@ bool gbtEfgNode::IsPredecessor(const gbtEfgNode &p_of) const
   gbt_efg_node_rep *n;
   for (n = p_of.rep; n && n != rep; n = n->m_parent);
   return (n == rep);
+}
+
+gbtEfgInfoset gbtEfgNode::AppendMove(gbtEfgInfoset p_infoset)
+{
+  if (IsNull() || p_infoset.IsNull()) {
+    throw gbtEfgNullObject();
+  }
+  
+  if (rep->m_efg != p_infoset.rep->m_player->m_efg) {
+    throw gbtEfgGameMismatch();
+  }
+
+  // FIXME: For the moment, can't bridge subgames
+  if (p_infoset.rep->m_members.Length() > 0 &&
+      rep->m_gameroot != p_infoset.rep->m_members[1]->m_gameroot) {
+    return 0;
+  }
+
+  if (rep->m_children.Length() > 0) {
+    throw gbtEfgNonterminalNode();
+  }
+
+  rep->m_efg->AppendMove(rep, p_infoset.rep);
+  return p_infoset;
+}
+
+gbtEfgInfoset gbtEfgNode::InsertMove(gbtEfgInfoset p_infoset)
+{
+  if (IsNull() || p_infoset.IsNull()) {
+    throw gbtEfgNullObject();
+  }
+
+  // FIXME: For the moment, can't bridge subgames
+  if (p_infoset.rep->m_members.Length() > 0 &&
+      rep->m_gameroot != p_infoset.rep->m_members[1]->m_gameroot) {
+    return 0;
+  }  
+
+  rep->m_efg->InsertMove(rep, p_infoset.rep);
+  return p_infoset;
 }
 
 gOutput &operator<<(gOutput &p_stream, const gbtEfgNode &)

@@ -45,6 +45,30 @@ template <class T> class PureBehavProfile;
 
 struct gbt_efg_game_rep;
 
+//
+// Exception classes for the various bad stuff that can happen
+//
+class gbtEfgException : public gException {
+public:
+  virtual ~gbtEfgException() { }
+  gText Description(void) const    { return "Error in gbtEfgGame"; }
+};
+
+class gbtEfgNullObject : public gbtEfgException {
+public:
+  virtual ~gbtEfgNullObject() { }
+};
+
+class gbtEfgGameMismatch : public gbtEfgException {
+public:
+  virtual ~gbtEfgGameMismatch() { }
+};
+
+class gbtEfgNonterminalNode : public gbtEfgException {
+public:
+  virtual ~gbtEfgNonterminalNode() { }
+};
+
 class gbtEfgGame {
 private:
   friend class EfgFileReader;
@@ -67,11 +91,6 @@ protected:
   void MarkSubtree(gbt_efg_node_rep *);
   void UnmarkSubtree(gbt_efg_node_rep *);
 
-  void SortInfosets(void);
-  void NumberNodes(gbt_efg_node_rep *, int &);
-  
-  void DeleteLexicon(void) const;
-
   gbtEfgOutcome NewOutcome(int index);
 
   void WriteEfgFile(gOutput &, gbt_efg_node_rep *) const;
@@ -90,15 +109,7 @@ protected:
   bool CheckTree(gbt_efg_node_rep *, gbt_efg_node_rep *);
   void MarkSubgame(gbt_efg_node_rep *, gbt_efg_node_rep *);
 
-  gbt_efg_infoset_rep *CreateInfoset(int n, gbtEfgPlayer, int br);
-
 public:
-  class Exception : public gException   {
-  public:
-    virtual ~Exception()   { }
-    gText Description(void) const    { return "Efg error"; }
-  };
-
   gbtEfgGame(void);
   gbtEfgGame(const gbtEfgGame &);
   gbtEfgGame(gbt_efg_game_rep *);
@@ -145,13 +156,8 @@ public:
   void DeleteOutcome(gbtEfgOutcome &);
 
   // EDITING OPERATIONS
-  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgPlayer, int br);
-  gbtEfgInfoset AppendNode(gbtEfgNode n, gbtEfgInfoset s);
   gbtEfgNode DeleteNode(gbtEfgNode n, gbtEfgNode keep);
-  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgPlayer, int br);
-  gbtEfgInfoset InsertNode(gbtEfgNode n, gbtEfgInfoset s);
 
-  gbtEfgInfoset CreateInfoset(gbtEfgPlayer, int br);
   bool DeleteEmptyInfoset(gbtEfgInfoset);
   void DeleteEmptyInfosets(void);
   gbtEfgInfoset JoinInfoset(gbtEfgInfoset, gbtEfgNode);
@@ -183,7 +189,6 @@ public:
 
   gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
   int           NumPlayerInfosets(void) const;
-  int           NumChanceInfosets(void) const;
   gPVector<int> NumActions(void) const;
   int           NumPlayerActions(void) const;
   gPVector<int> NumMembers(void) const;
@@ -202,16 +207,7 @@ public:
 
   friend gbtNfgGame MakeReducedNfg(const EFSupport &);
   friend gbtNfgGame MakeAfg(const gbtEfgGame &);
-
-  // These are auxiliary functions used by the .efg file reader code
-  gbtEfgInfoset GetInfosetByIndex(gbtEfgPlayer, int index) const;
-  gbtEfgInfoset CreateInfosetByIndex(gbtEfgPlayer, int index, int br);
-  gbtEfgOutcome GetOutcomeByIndex(int index) const;
-  gbtEfgOutcome CreateOutcomeByIndex(int index);
-  void Reindex(void);
 };
-
-//#include "behav.h"
 
 gbtEfgGame ReadEfgFile(gInput &);
 

@@ -71,6 +71,7 @@ gOutput &operator<<(gOutput &, const gbtEfgAction &);
 
 class gbtEfgInfoset {
 friend class gbtEfgGame;
+friend class gbtEfgNode;
 protected:
   struct gbt_efg_infoset_rep *rep;
 
