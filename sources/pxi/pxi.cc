@@ -73,9 +73,6 @@ gOutput &operator<<(gOutput &op,const PxiPlot::LABELSTRUCT &l)
   //{op<<l.x<<' '<<l.y<<' '<<l.label<<'\n';return op;}
 { return op; }
 
-void mem_handler(void)
-{wxFatalError("Memory Error");}
-
 // The `main program' equivalent, creating the windows and returning the
 // main frame
 bool PxiApp::OnInit(void)
@@ -88,8 +85,6 @@ bool PxiApp::OnInit(void)
   wxString helpDir = wxGetWorkingDirectory();
   config.Read("Help-Directory", &helpDir);
   
-  set_new_handler(mem_handler);
-
   pxiFrame->Show(true);
   if (argc>1) pxiFrame->LoadFile( (wxString) (argv[1]));
   return true;
