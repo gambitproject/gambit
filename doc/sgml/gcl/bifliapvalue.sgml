@@ -1,0 +1,37 @@
+<refentry id="bif.LiapValue" xreflabel="LiapValue">
+
+<refmeta>
+<indexterm>
+<primary>LiapValue</primary>
+</indexterm>
+
+<refentrytitle>LiapValue</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LiapValue</refname>
+<refpurpose>
+Computes the Lyapunov function for a profile
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LiapValue[profile->BEHAV] =: NUMBER 
+LiapValue[profile->MIXED] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LiapValue</function>
+returns the Lyapunov function value for <parameter>profile</parameter>.
+This is a nonnegative value which is zero exactly when the
+profile is a Nash equilibrium.
+</para>
+</refsect1>
+
+</refentry>
+
+

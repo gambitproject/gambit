@@ -1,0 +1,43 @@
+<refentry id="bif.LoadEfg" xreflabel="LoadEfg">
+
+<refmeta>
+<indexterm>
+<primary>LoadEfg</primary>
+</indexterm>
+
+<refentrytitle>LoadEfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LoadEfg</refname>
+<refpurpose>
+Loads an extensive form game from file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LoadEfg[file->TEXT] =: EFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LoadEfg</function>
+loads an extensive form game from the file <parameter>file</parameter>.
+An error occurs if the file cannot be opened, or if the file does
+not contain a valid extensive form savefile.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SaveEfg">.
+</para>
+</refsect1>
+
+</refentry>
+
+

@@ -1,0 +1,54 @@
+<refentry id="bif.LessEqual" xreflabel="LessEqual">
+
+<refmeta>
+<indexterm>
+<primary>LessEqual</primary>
+</indexterm>
+
+<refentrytitle>LessEqual</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LessEqual</refname>
+<refpurpose>
+Determines whether a value is less than or equal to another
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LessEqual[x->NUMBER, y->NUMBER] =: BOOLEAN 
+LessEqual[x->TEXT, y->TEXT] =: BOOLEAN 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LessEqual</function>
+returns <literal>True</literal> when <parameter>x</parameter> is 
+less than or equal to <parameter>y</parameter>.
+For <type>TEXT</type> values, the ordering of the machine's character
+set is used.
+</para>
+</refsect1>
+
+<refsect1>
+<title>Short form</title>
+<para>
+<literal>x <= y</literal>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Greater">,
+<xref linkend="bif.GreaterEqual">,
+<xref linkend="bif.Less">.
+</para>
+</refsect1>
+
+</refentry>
+
+

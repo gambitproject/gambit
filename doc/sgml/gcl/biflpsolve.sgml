@@ -1,0 +1,71 @@
+<refentry id="bif.LpSolve" xreflabel="LpSolve">
+
+<refmeta>
+<indexterm>
+<primary>LpSolve</primary>
+</indexterm>
+
+<refentrytitle>LpSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LpSolve</refname>
+<refpurpose>
+Computes Nash equilibria using linear programming
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LpSolve[support->NFSUPPORT, {precision->Float}, {nPivots<->0}, 
+        {time<->0.000000}, {traceFile<->(Output)}, 
+        {traceLevel->0}] =: LIST(MIXED) 
+LpSolve[support->EFSUPPORT, {asNfg->False}, {precision->Float}, 
+        {nPivots<->0}, {time<->0.000000}, 
+        {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) L
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LpSolve</function>
+solves a two-person, constant-sum game for a Nash equilibrium as a linear
+program.  For extensive form games, the Koller-Megiddo-Stengel
+sequence form is used; games not of perfect recall return the empty
+list of solutions.
+</para>
+
+<para>
+The behavior of the algorithm may be modified by the following optional
+parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter>: By default, extensive forms are solved by the sequence form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form,
+solved as a linear program, and the mixed strategy solutions converted back
+into behavior profiles.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter>: Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.LcpSolve">.
+</para>
+</refsect1>
+
+</refentry>
+
+

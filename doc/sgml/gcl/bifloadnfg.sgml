@@ -1,0 +1,43 @@
+<refentry id="bif.LoadNfg" xreflabel="LoadNfg">
+
+<refmeta>
+<indexterm>
+<primary>LoadNfg</primary>
+</indexterm>
+
+<refentrytitle>LoadNfg</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LoadNfg</refname>
+<refpurpose>
+Loads a normal form game from file
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LoadNfg[file->TEXT] =: NFG 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LoadNfg</function>
+loads a normal form game from the file <parameter>file</parameter>.
+An error occurs if the file cannot be opened, or if the file does
+not contain a valid normal form savefile.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.SaveNfg">.
+</para>
+</refsect1>
+
+</refentry>
+
+

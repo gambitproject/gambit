@@ -1,0 +1,77 @@
+<refentry id="bif.LcpSolve" xreflabel="LcpSolve">
+
+<refmeta>
+<indexterm>
+<primary>LcpSolve</primary>
+</indexterm>
+
+<refentrytitle>LcpSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LcpSolve</refname>
+<refpurpose>
+Computes Nash equilibria via linear complementarity program
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LcpSolve[support->NFSUPPORT, {stopAfter->1}, {precision->Float}, 
+         {nPivots<->0}, {time<->0}, {traceFile<->(Output)}, 
+         {traceLevel->0}] =: LIST(MIXED) 
+LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->1}, 
+         {precision->Float}, {nPivots<->0}, {time<->0.000000}, 
+         {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LcpSolve</function>
+solves a game as a linear complementarity problem, using the
+Lemke-Howson algorithm for normal form games, and the
+Koller-Megiddo-Stengel sequence form for extensive form games.  
+</para>
+
+<para>
+The behavior of the algorithm may be modified by the following
+optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameter> By default, extensive forms are solved by the sequence form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the extensive
+form is converted to its corresponding reduced normal form, solved
+via Lemke-Howson, and the mixed strategy solutions converted back into
+behavior profiles.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Specifies the maximum number of equilibria to find.  The
+default is one. If set to zero then all equilibria reachable by the
+algorithm will be found.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>precision</parameter> Determines the precision of the computation. Default is
+floating point precision.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.LpSolve">.
+</para>
+</refsect1>
+
+</refentry>
+
+

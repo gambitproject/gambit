@@ -1,0 +1,85 @@
+<refentry id="bif.LiapSolve" xreflabel="LiapSolve">
+
+<refmeta>
+<indexterm>
+<primary>LiapSolve</primary>
+</indexterm>
+
+<refentrytitle>LiapSolve</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>LiapSolve</refname>
+<refpurpose>
+Computes Nash equilibria via function minimization
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+LiapSolve[start->BEHAV, {asNfg->False}, {stopAfter->1}, 
+          {nTries->10}, {accuracy->0.000000}, {time<->0}, 
+          {nEvals<->0}, {traceFile<->(Output)}, 
+          {traceLevel->0}] =: LIST(BEHAV)
+LiapSolve[start->MIXED, {stopAfter->1}, {nTries->10}, 
+          {accuracy->0.000000}, {time<->0}, {nEvals<->0}, 
+          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(MIXED)
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>LiapSolve</function>
+searches for a Nash equilibrium by minimizing a Lyapunov function
+which is zero exactly at Nash equilibria.  The algorithm starts from
+the initial starting point determined by the parameter 
+<parameter>start</parameter>.
+The algorithm is not guaranteed to find a Nash equilibrium from any
+fixed starting point.  The algorithm thus incorporates the capability
+of restarting.  If a Nash equilibrium is not found, it will keep
+searching from new randomly chosen starting points until a Nash
+equilibrium has been found or the maximum number of tries (parameter
+<parameter>nTries</parameter>) is exceeded, whichever comes first.  The list of
+solutions found is returned.
+</para>
+
+<para>
+The behavior of the algorithm may be modified by specifying the following
+optional parameters:
+<itemizedlist>
+<listitem>
+<para>
+<parameter>asNfg</parameteR> By default, extensive forms are solved in the extensive form.
+By setting this parameter to <literal>True</literal>, each marked subgame of the
+extensive form is converted to its corresponding reduced normal form game,
+solved, and the overall behavior profile reconstructed from these
+solutions.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>nTries</parameter>: Sets the maximum number of attempts at finding an
+equilibrium. Default is 10.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>stopAfter</parameter>: Sets the number of equilibria to find.  Default is 1.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>accuracy</parameter>: Resulting solutions are ``epsilon equilibria'' to at least
+this accuracy.  I. e., no unilateral deviation by any player will
+result in an improvement of more than the accuracy.  Default is
+1.0e-8.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+</refentry>
+
+

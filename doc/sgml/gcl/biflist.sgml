@@ -1,0 +1,48 @@
+<refentry id="bif.List" xreflabel="List">
+
+<refmeta>
+<indexterm>
+<primary>List</primary>
+</indexterm>
+
+<refentrytitle>List</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>List</refname>
+<refpurpose>
+Creates a list or sequence
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+List[x->T, {length->INTEGER}] =: LIST(T)
+List[x->NUMBER, {length->1}, {delta->0}] =: LIST(NUMBER) 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+The first version of
+<function>List</function>
+creates a new list of <parameter>length</parameter> elements, each equal
+to <parameter>x</parameter>. 
+If <parameter>length</parameter> is unspecified, it defaults to 1.
+</para>
+
+<para>
+The second version of
+<function>List</function>
+creates an initialized list of <parameter>length</parameter> elements,
+with first element <parameter>x</parameter> and subsequent elements
+incremented by <parameter>delta</parameter>.
+If <parameter>length</parameter> is unspecified,
+it defaults to 1; if <parameter>delta</parameter> is unspecified, it defaults to 0.
+</para>
+</refsect1>
+
+</refentry>
+
+

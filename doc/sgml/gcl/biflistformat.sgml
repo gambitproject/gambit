@@ -1,0 +1,69 @@
+<refentry id="bif.ListFormat" xreflabel="ListFormat">
+
+<refmeta>
+<indexterm>
+<primary>ListFormat</primary>
+</indexterm>
+
+<refentrytitle>ListFormat</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>ListFormat</refname>
+<refpurpose>
+Sets the formatting style for output of lists
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+ListFormat[{braces<->True}, {commas<->True},
+           {lf<->2}, {indent<->2}] =: BOOLEAN
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>ListFormat</function>
+sets the formatting style for output of lists on output streams.  The
+parameters passed are set to the prior style settings on return.
+<itemizedlist>
+<listitem>
+<para>
+<parameter>braces</parameter>: If <literal>True</literal>,
+lists are delimited by braces.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>commas</parameter>: If <literal>True</literal>,
+elements are delimited by commas.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>lf</parameter>: Number of levels of list that are displayed with a line feed.
+</para>
+</listitem>
+<listitem>
+<para>
+<parameter>indent</parameter>: Number of spaces to indent each level of a list.
+</para>
+</listitem>
+</itemizedlist>
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Format">,
+<xref linkend="bif.GetListFormat">,
+<xref linkend="bif.Write">.
+</para>
+</refsect1>
+
+</refentry>
+
+

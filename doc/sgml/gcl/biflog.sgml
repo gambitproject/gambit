@@ -1,0 +1,45 @@
+<refentry id="bif.Log" xreflabel="Log">
+
+<refmeta>
+<indexterm>
+<primary>Log</primary>
+</indexterm>
+
+<refentrytitle>Log</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Log</refname>
+<refpurpose>
+Returns the natural logarithm of a number
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Log[x->NUMBER] =: NUMBER 
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Log</function>
+computes the natural logarithm of <parameter>x</parameter>.  It is an error if
+<parameter>x</parameter> is nonpositive.  The result is always in
+floating-point precision, regardless of the precision of
+<parameter>x</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.Exp">,
+<xref linkend="bif.Power">.
+</para>
+</refsect1>
+
+</refentry>
+
+

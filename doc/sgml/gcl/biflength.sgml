@@ -1,0 +1,42 @@
+<refentry id="bif.Length" xreflabel="Length">
+
+<refmeta>
+<indexterm>
+<primary>Length</primary>
+</indexterm>
+
+<refentrytitle>Length</refentrytitle>
+<refmiscinfo>Built-in function</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>Length</refname>
+<refpurpose>
+Returns the number of elements in a list
+</refpurpose>
+</refnamediv>
+
+<refsynopsisdiv>
+<synopsis>
+Length[list->LIST(T*)] =: INTEGER
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1><title>Description</title>
+<para>
+<function>Length</function>
+returns the number of elements in <parameter>list</parameter>.
+</para>
+</refsect1>
+
+<refsect1>
+<title>See also</title>
+<para>
+<xref linkend="bif.NthElement">,
+<xref linkend="bif.NumElements">.
+</para>
+</refsect1>
+
+</refentry>
+
+
