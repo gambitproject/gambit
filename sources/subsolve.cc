@@ -15,25 +15,37 @@
 //-------------------------------------------------------------------------
 
 template <class T>
-void SubgameSolver<T>::FindSubgames(Node *n, BehavProfile<T> &soln)
+void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavProfile<T> > &solns)
 {
   int i;
+  
+  solns.Append(solution);
+  ((gVector<T> &) solns[1]).operator=((T) 0);
 
   for (i = 1; i <= n->NumChildren(); i++)  {
-    BehavProfile<T> subsoln(solution);
-    ((gVector<T> &) subsoln).operator=((T) 0);
-    FindSubgames(n->GetChild(i), subsoln);
+    gList<BehavProfile<T> > subsolns;
+    FindSubgames(n->GetChild(i), subsolns);
 
-    soln += subsoln;
+    if (subsolns.Length() == 0)  {
+      solns.Flush();
+      return;
+    }
+
+    solns[1] += subsolns[1];
   }
   
   if (n->GetSubgameRoot() == n)  {
     Efg<T> foo(efg, n);
 
-    BehavProfile<T> bp(foo);
-    SolveSubgame(foo, bp);
+    gList<BehavProfile<T> > sol;
+    SolveSubgame(foo, sol);
 
     // put behav profile in "total" solution here...
+
+    if (sol.Length() == 0)  {
+      solns.Flush();
+      return;
+    }
 
     gList<Node *> nodes;
     Nodes(efg, n, nodes);
@@ -64,7 +76,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, BehavProfile<T> &soln)
 
 	for (int act = 1; act <= p->InfosetList()[iset]->NumActions();
 	     act++)
-	  soln(pl, index, act) = bp(pl, iset, act);
+	  solns[1](pl, index, act) = sol[1](pl, iset, act);
       }
     }
  
@@ -72,7 +84,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, BehavProfile<T> &soln)
         ((OutcomeVector<T> *) n->GetOutcome()) : efg.NewOutcome();
 
     for (i = 1; i <= foo.NumPlayers(); i++)
-      (*outc)[i] += bp.Payoff(i);
+      (*outc)[i] += sol[1].Payoff(i);
 
     efg.DeleteTree(n);
     n->SetOutcome(outc);
@@ -101,11 +113,9 @@ void SubgameSolver<T>::Solve(void)
 
   ((gVector<T> &) solution).operator=((T) 0);
 
-  FindSubgames(efg.RootNode(), solution);
+  FindSubgames(efg.RootNode(), solutions);
 
   time = watch.Elapsed();
-
-  solutions.Append(solution);
 }
 
 //-------------------------------------------------------------------------
@@ -117,18 +127,20 @@ void SubgameSolver<T>::Solve(void)
 //-------------------
 
 template <class T>
-void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void EFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				      gList<BehavProfile<T> > &solns)
 {
-	EFLiapParams EP;
+  EFLiapParams EP;
 
-	EFLiapModule<double> EM(E, EP, bp);
+  BehavProfile<T> bp(E);
+
+  EFLiapModule<double> EM(E, EP, bp);
   
   EM.Liap();
 
   nevals += EM.NumEvals();
 
-  if (EM.GetSolutions().Length() > 0)
-    bp = EM.GetSolutions()[1];
+  solns = EM.GetSolutions();
 }
 
 template <class T>
@@ -145,16 +157,18 @@ template <class T>  EFLiapBySubgame<T>::~EFLiapBySubgame()   { }
 //-------------------
 
 template <class T>
-void SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void SeqFormBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				       gList<BehavProfile<T> > &solns)
 {
+  BehavProfile<T> bp(E);
+
   SeqFormModule<T> M(E, params, bp.GetEFSupport());
   
   M.Lemke();
 
   npivots += M.NumPivots();
 
-  if (M.GetSolutions().Length() > 0)
-    bp = M.GetSolutions()[1];
+  solns = M.GetSolutions();
 }
 
 template <class T>
@@ -172,7 +186,8 @@ template <class T>  SeqFormBySubgame<T>::~SeqFormBySubgame()   { }
 //-------------------
 
 template <class T>
-void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				      gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
@@ -184,8 +199,11 @@ void NFLiapBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
   nevals += M.NumEvals();
 
-  if (M.GetSolutions().Length() > 0)
-    MixedToBehav(*N, M.GetSolutions()[1], E, bp);
+  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -205,7 +223,8 @@ template <class T> NFLiapBySubgame<T>::~NFLiapBySubgame()   { }
 //-------------------
 
 template <class T>
-void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, 
+				     gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
@@ -217,8 +236,11 @@ void LemkeBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
   npivots += M.NumPivots();
 
-  if (M.GetSolutions().Length() > 0)
-    MixedToBehav(*N, M.GetSolutions()[1], E, bp);
+  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -236,7 +258,8 @@ template <class T> LemkeBySubgame<T>::~LemkeBySubgame()   { }
 //-------------------
 
 template <class T>
-void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				       gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
@@ -248,8 +271,11 @@ void SimpdivBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
   nevals += M.NumEvals();
 
-  if (M.GetSolutions().Length() > 0)
-    MixedToBehav(*N, M.GetSolutions()[1], E, bp);
+  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -267,7 +293,8 @@ template <class T> SimpdivBySubgame<T>::~SimpdivBySubgame()   { }
 //-------------------
 
 template <class T>
-void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				    gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
@@ -279,8 +306,11 @@ void EnumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
   npivots += M.NumPivots();
 
-  if (M.GetSolutions().Length() > 0)
-    MixedToBehav(*N, M.GetSolutions()[1], E, bp);
+  for (int i = 1; i <= M.GetSolutions().Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, M.GetSolutions()[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -298,15 +328,19 @@ template <class T> EnumBySubgame<T>::~EnumBySubgame()   { }
 //-------------------
 
 template <class T>
-void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void PureNashBySubgame<T>::SolveSubgame(const Efg<T> &E,
+					gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
-  gList<MixedProfile<T> > solns;
-  FindPureNash(*N, solns);
+  gList<MixedProfile<T> > sol;
+  FindPureNash(*N, sol);
 
-  if (solns.Length() > 0)
-    MixedToBehav(*N, solns[1], E, bp);
+  for (int i = 1; i <= sol.Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, sol[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -324,7 +358,8 @@ template <class T> PureNashBySubgame<T>::~PureNashBySubgame()   { }
 //-------------------
 
 template <class T>
-void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
+void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E,
+				    gList<BehavProfile<T> > &solns)
 {
   Nfg<T> *N = MakeReducedNfg((Efg<T> &) E);
 
@@ -336,11 +371,14 @@ void ZSumBySubgame<T>::SolveSubgame(const Efg<T> &E, BehavProfile<T> &bp)
 
   npivots += M.NumPivots();
 
-  gList<MixedProfile<T> > solns;
-  M.GetSolutions(solns);
+  gList<MixedProfile<T> > sol;
+  M.GetSolutions(sol);
 
-  if (solns.Length() > 0)
-    MixedToBehav(*N, solns[1], E, bp);
+  for (int i = 1; i <= sol.Length(); i++)  {
+    BehavProfile<T> bp(E);
+    MixedToBehav(*N, sol[i], E, bp);
+    solns.Append(bp);
+  }
 
   delete N;
 }
@@ -351,7 +389,6 @@ ZSumBySubgame<T>::ZSumBySubgame(const Efg<T> &E, const ZSumParams &p)
 { }
 
 template <class T> ZSumBySubgame<T>::~ZSumBySubgame()   { }
-
 
 
 #ifdef __GNUG__

@@ -18,10 +18,10 @@ template <class T> class SubgameSolver   {
 
     gArray<gArray<Infoset *> *> infosets;
 
-    void FindSubgames(Node *, BehavProfile<T> &);
+    void FindSubgames(Node *, gList<BehavProfile<T> > &);
 
   protected:
-    virtual void SolveSubgame(const Efg<T> &, BehavProfile<T> &) = 0;
+    virtual void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &) = 0;
 
   public:
     SubgameSolver(const Efg<T> &E);
@@ -41,7 +41,7 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     int npivots;
     SeqFormParams params;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &);
@@ -58,7 +58,7 @@ template <class T> class EFLiapBySubgame : public SubgameSolver<T>  {
     EFLiapParams params;
     BehavProfile<T> start;
     
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     EFLiapBySubgame(const Efg<T> &E, const EFLiapParams &,
@@ -77,7 +77,7 @@ template <class T> class LemkeBySubgame : public SubgameSolver<T>  {
     int npivots;
     LemkeParams params;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     LemkeBySubgame(const Efg<T> &E, const LemkeParams &);
@@ -94,7 +94,7 @@ template <class T> class NFLiapBySubgame : public SubgameSolver<T>  {
     NFLiapParams params;
     BehavProfile<T> start;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     NFLiapBySubgame(const Efg<T> &E, const NFLiapParams &,
@@ -111,7 +111,7 @@ template <class T> class SimpdivBySubgame : public SubgameSolver<T>  {
     int nevals;
     SimpdivParams params;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     SimpdivBySubgame(const Efg<T> &E, const SimpdivParams &);
@@ -127,7 +127,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
     int npivots;
     EnumParams params;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     EnumBySubgame(const Efg<T> &E, const EnumParams &);
@@ -141,7 +141,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
 
 template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
   private:
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     PureNashBySubgame(const Efg<T> &E);
@@ -156,7 +156,7 @@ template <class T> class ZSumBySubgame : public SubgameSolver<T>  {
     int npivots;
     ZSumParams params;
 
-    void SolveSubgame(const Efg<T> &, BehavProfile<T> &);
+    void SolveSubgame(const Efg<T> &, gList<BehavProfile<T> > &);
 
   public:
     ZSumBySubgame(const Efg<T> &E, const ZSumParams &);
