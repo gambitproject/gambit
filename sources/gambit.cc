@@ -55,7 +55,8 @@ menu_bar->Append(help_menu,	"&Help");
 // Associate the menu bar with the frame
 gambit_frame->SetMenuBar(menu_bar);
 
-// Set up the help system wxInitHelp("gambit","Gambit -- Graphics User
+// Set up the help system
+wxInitHelp("gambit","Gambit -- Graphics User
 Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey
 (rdm@hss.caltech.edu)\nMain Programmer: Theodore Turocy
 (magyar@hss.caltech.edu)\nFront End: Eugene Grayver
@@ -64,6 +65,7 @@ Interface, Version 2.0\n\nDeveloped by Richard D. McKelvey
 Richard D. McKelvey and Andrew McLennan, PI's\n
 California Institute of Technology and University of Minnesota,\
 1995.\nFunding provided by the National Science Foundation");
+
 
 gambit_frame->Show(TRUE);
 // Process command line arguments, if any
@@ -94,7 +96,7 @@ if (strcmp(s,"")!=0)
 	char *filename=FileNameFromPath(s);
 #ifndef EFG_ONLY
 	if (StringMatch(".nfg",filename))		// This must be a normal form
-		{NormalFormGUI(0,s,0,this);return;}
+		{NfgGUI(0,s,0,this);return;}
 #endif
 #ifndef NFG_ONLY
 	if (StringMatch(".efg",filename))		// This must be an extensive form
@@ -116,7 +118,7 @@ void GambitFrame::OnMenuCommand(int id)
 		case FILE_QUIT: OnClose(); delete this;	break;
 		case FILE_LOAD:	LoadFile();	break;
 #ifndef EFG_ONLY
-		case FILE_NEW_NFG: NormalFormGUI(0,gString(),0,this);	break;
+		case FILE_NEW_NFG: NfgGUI(0,gString(),0,this);	break;
 #endif
 #ifndef NFG_ONLY
 		case FILE_NEW_EFG: ExtensiveFormGUI(0,gString(),0,this); break;
@@ -126,9 +128,15 @@ void GambitFrame::OnMenuCommand(int id)
 		default: wxMessageBox("Internal Error!\nContact the author\negrayver@cco.caltech.edu","Error");	break;
 	}
 }
+#ifdef wx_x
+extern void wxFlushResources(void);
+#endif
 
 Bool GambitFrame::OnClose()
 {
+#ifdef wx_x
+	wxFlushResources();
+#endif		
 	wxKillHelp();
 	return TRUE;
 }
