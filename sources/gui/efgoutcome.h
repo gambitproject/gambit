@@ -20,6 +20,7 @@ private:
 
   void OnCellChanged(wxGridEvent &);
   void OnCellRightClick(wxGridEvent &);
+  void OnLabelRightClick(wxGridEvent &);
 
   void OnPopupOutcomeNew(wxCommandEvent &);
   void OnPopupOutcomeDelete(wxCommandEvent &);

@@ -22,6 +22,7 @@ const int idPOPUP_DETACH = 2004;
 BEGIN_EVENT_TABLE(EfgOutcomeWindow, wxGrid)
   EVT_GRID_CELL_CHANGE(EfgOutcomeWindow::OnCellChanged)
   EVT_GRID_CELL_RIGHT_CLICK(EfgOutcomeWindow::OnCellRightClick)
+  EVT_GRID_LABEL_RIGHT_CLICK(EfgOutcomeWindow::OnLabelRightClick)
   EVT_MENU(idPOPUP_NEW, EfgOutcomeWindow::OnPopupOutcomeNew)
   EVT_MENU(idPOPUP_DELETE, EfgOutcomeWindow::OnPopupOutcomeDelete)
   EVT_MENU(idPOPUP_ATTACH, EfgOutcomeWindow::OnPopupOutcomeAttach)
@@ -112,6 +113,13 @@ void EfgOutcomeWindow::OnCellChanged(wxGridEvent &p_event)
 }
 
 void EfgOutcomeWindow::OnCellRightClick(wxGridEvent &p_event)
+{
+  m_menu->Enable(idPOPUP_ATTACH, m_parent->Cursor());
+  m_menu->Enable(idPOPUP_DETACH, m_parent->Cursor());
+  PopupMenu(m_menu, p_event.GetPosition().x, p_event.GetPosition().y);
+}
+
+void EfgOutcomeWindow::OnLabelRightClick(wxGridEvent &p_event)
 {
   m_menu->Enable(idPOPUP_ATTACH, m_parent->Cursor());
   m_menu->Enable(idPOPUP_DETACH, m_parent->Cursor());
