@@ -1,0 +1,339 @@
+//#
+//# FILE: glist.imp -- Implementation of a generic array container class
+//#
+//# $Id$
+//#
+
+#include "glist.h"
+
+#include <assert.h>
+
+//--------------------------------------------------------------------------
+//                        gNode<T>: Class definition
+//--------------------------------------------------------------------------
+
+template <class T> class gNode   {
+  private:
+    T data;
+    gNode<T> *prev, *next;
+
+  public:
+    // Constructors
+    gNode(void);
+    gNode(const T &_data,gNode<T> *_prev,gNode<T> *_next);
+    gNode(const gNode<T> &n);
+	// Assignment
+    gNode<T> &operator=(const gNode<T> &n);
+	// Comparison
+    int operator==(const gNode<T> &n) const;
+    int operator!=(const gNode<T> &n) const;
+	// Data Access
+    const T &Data(void)	const;
+    T &Data(void);
+	// Movement
+    const gNode<T> *Next(void) const;
+    const gNode<T> *Prev(void) const;
+    gNode<T> *Next(void);
+    gNode<T> *Prev(void);
+    void SetNext(gNode<T> *_next);
+    void SetPrev(gNode<T> *_prev);
+};
+
+//--------------------------------------------------------------------------
+//                 gNode<T>: Member function implementations
+//--------------------------------------------------------------------------
+
+template <class T> int gList<T>::InsertAt(const T &t, int num)
+{
+  gNode<T> *n = First();
+  if (n)  {
+    for (int i = 1; i < num - 1; i++)  n = n->Next();
+    gNode<T> *temp = new gNode<T>(t, n, n->Next());
+    n->SetNext(temp);
+//  n->Next()->SetPrev(temp);
+    length++;
+  }
+  else 	{
+    head = new gNode<T>(t, 0, 0);
+    length++;
+  }
+  return num;
+}
+
+template <class T> gNode<T>::gNode(void)
+  : prev(0), next(0)
+{ }
+
+template <class T>
+gNode<T>::gNode(const T &_data, gNode<T> *_prev, gNode<T> *_next)
+  : data(_data), prev(_prev), next(_next)
+{ }
+
+template <class T> gNode<T>::gNode(const gNode<T> &n)
+  : data(n.data), prev(n.prev), next(n.next)
+{ }
+
+template <class T> gNode<T> &gNode<T>::operator=(const gNode<T> &n)
+{
+  data = n.data;
+  prev = n.prev;
+  next = n.next;
+  return *this;
+}
+
+template <class T> int gNode<T>::operator==(const gNode<T> &n) const
+{
+  return (data == n.data && prev == n.prev && next == n.next);
+}
+
+template <class T> int gNode<T>::operator!=(const gNode<T> &n) const
+{
+  return !(*this == n);
+}
+
+template <class T> const T &gNode<T>::Data(void) const
+{
+  return data;
+}
+
+template <class T> T &gNode<T>::Data(void)
+{
+  return data;
+}
+
+template <class T> const gNode<T> *gNode<T>::Next(void) const
+{
+  return next;
+}
+
+template <class T> const gNode<T> *gNode<T>::Prev(void) const
+{
+  return prev;
+}
+
+template <class T> gNode<T> *gNode<T>::Next(void)
+{
+  return next;
+}
+
+template <class T> gNode<T> *gNode<T>::Prev(void)
+{
+  return prev;
+}
+
+template <class T> void gNode<T>::SetNext(gNode<T> *_next)
+{
+  next = _next;
+}
+
+template <class T> void gNode<T>::SetPrev(gNode<T> *_prev)
+{
+  prev = _prev;
+}
+
+
+//--------------------------------------------------------------------------
+//                 gList<T>: Member function implementations
+//--------------------------------------------------------------------------
+
+template <class T> gList<T>::gList(int len) : head(0), length(0)
+{
+  if (len)
+    for (int i = 1; i <= len; i++)  Append(T());
+}
+
+template <class T> gList<T>::gList(const gList<T> &b)
+ : length(b.length)
+{
+  if (length)   {
+    gNode<T> *n1 = b.First();
+    head = new gNode<T>(n1->Data(), 0, 0);
+    n1 = n1->Next();
+    gNode<T> *n =First();
+    while (n1)  {
+      n->SetNext(new gNode<T>(n1->Data(), n, 0));
+      n = n->Next();
+      n1 = n1->Next();
+    }
+  }
+  else
+    head = 0;
+}
+
+template <class T> gList<T>::~gList()
+{
+  Flush();
+}
+
+template <class T> gList<T> &gList<T>::operator=(const gList<T> &b)
+{
+  if (this != &b)   {
+    Flush();
+    length = b.length;
+    if (length)   {
+      gNode<T> *n1 = b.First();
+      head = new gNode<T>(n1->Data(), 0, 0);
+      n1 = n1->Next();
+      gNode<T> *n = First();
+      while (n1)  {
+	n->SetNext(new gNode<T>(n1->Data(), n, NULL));
+	n = n->Next();
+	n1 = n1->Next();
+      }
+    }
+    else
+      head = 0;
+  }
+  return *this;
+}
+
+template <class T> int gList<T>::operator==(const gList<T> &b) const
+{
+  if (length != b.length) return 0;
+  gNode<T> *n = First();
+  gNode<T> *n1 = b.First();
+  while (n) {
+    if (n1 != n) return 0;
+    n = n->Next();
+    n1 = n1->Next();
+  }
+  return 1;
+}
+
+template <class T> int gList<T>::operator!=(const gList<T> &b) const
+{
+  return !(*this == b);
+}
+
+template <class T> const T &gList<T>::operator[](int num) const
+{
+  assert(num >= 1 && num <= length);
+  gNode<T> *n = First();
+  for (int i = 1; i < num; i++) n = n->Next();
+  return n->Data();
+}
+
+template <class T> T &gList<T>::operator[](int num)
+{
+  assert(num >= 1 && num <= length);
+  gNode<T> *n = First();
+  for (int i = 1; i< num; i++)  n = n->Next();
+  return n->Data();
+}
+
+template <class T> gList<T> gList<T>::operator+(const T &e) const
+{
+  gList<T> result(*this);
+  result.Append(e);
+  return result;
+}
+
+template <class T. gList<T> &gList<T>::operator+=(const T &e)
+{
+  Append(e);
+  return *this;
+}
+
+template <class T> gList<T> gList<T>::operator+(const gList<T> &b) const
+{
+  gList<T> result(*this);
+  for (int i = 1; i <= b.length; i++)
+    result.Append(b[i]);
+  return result;
+}
+
+template <class T> gList<T> &gList<T>::operator+=(const gList<T> &b)
+{
+// Note: this is a really inefficient way of doing this -- optimize!
+  *this = *this + b;
+  return *this;
+}
+
+template <class T> int gList<T>::Append(const T &t)
+{
+  return InsertAt(t, length + 1);
+}
+
+template <class T> int gList<T>::Insert(const T &t, int n)
+{
+  return InsertAt(t, (n < 1) ? 1 : ((n > length + 1) ? length + 1 : n));
+}
+
+template <class T> T gList<T>::Remove(int num)
+{
+  assert(num >= 1 && num <= length);
+  gNode<T> *n = First();
+  for (int i = 0; i < num - 1; i++)   n = n->Next();
+  n->Prev()->SetNext(n->Next());
+  n->Next()->SetPrev(n->Prev());
+  T ret = n->Data();
+  delete n;
+  length--;
+  return ret;
+}
+
+template <class T> int gList<T>::Find(const T &t) const
+{
+  gNode<T> *n = First();
+  int found = 0, i = 1;
+  while (n && !found) {
+    if (n->Data() == t)
+      found = i;
+    i++;
+    n = n->Next();
+  }
+  return found;
+}
+
+template <class T> int gList<T>::Contains(const T &t) const
+{
+  return Find(t);
+}
+
+template <class T> int gList<T>::Length(void) const
+{
+  return length;
+}
+
+template <class T> gNode<T> *gList<T>::First(void) const
+{
+  return head;
+}
+
+template <class T> gNode<T> *gList<T>::First(void)
+{
+  return head;
+}
+
+template <class T> void gList<T>::Flush(void)
+{
+  length = 0;
+  gNode<T> *n = First();
+  while (n)  {
+    gNode<T> *next = n->Next();
+    delete n;
+    n = next;
+  }
+  head = 0;
+}
+
+template <class T> void gList<T>::Dump(gOutput &f) const
+{
+  f << "gList " << this << " contents\n";
+  if (length)   {
+    gNode<T> *n = First();
+    int i = 1;
+    while (n)  {
+      f << i << ": " << (n->Data()) << '\n';
+      i++;
+      n = n->Next();
+    }
+  }
+}
+
+template <class T> gOutput &operator<<(gOutput &f, const gList<T> &b)
+{
+  b.Dump(f);   return f;
+}
+
+
