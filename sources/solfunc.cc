@@ -36,7 +36,7 @@ template <class T> Portion *gDPVectorToList(const gDPVector<T> &);
 
 static Portion *GSM_ActionProb(Portion **param)
 {
-  BehavSolution *profile = ((BehavPortion *) param[0])->Value();
+  const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   Action* action = ((ActionPortion*) param[1])->Value();
   Infoset* infoset = action->BelongsTo();
   EFPlayer* player = infoset->GetPlayer();
@@ -59,7 +59,7 @@ static Portion *GSM_ActionProb(Portion **param)
 
 static Portion *GSM_ActionProbs(Portion **param)
 {
-  BehavSolution *profile = ((BehavPortion *) param[0])->Value();
+  const BehavSolution *profile = ((BehavPortion *) param[0])->Value();
   const EFSupport *support = &profile->Support();
   const Efg &efg = support->Game();
 
@@ -724,19 +724,16 @@ static Portion *GSM_SetStrategyProbs(Portion **param)
 
 static Portion *GSM_StrategyProb(Portion **param)
 {
-  Portion *por;
-  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
+  const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   Strategy* strategy = ((StrategyPortion*) param[1])->Value();
   NFPlayer* player = strategy->nfp;
   
   if (profile->Support().Strategies(player->GetNumber()).Find(strategy))
-    por = new NumberPortion((*profile)
-			      (player->GetNumber(),
-			       profile->Support().Strategies(player->GetNumber()).Find(strategy)));
+    return new NumberPortion((*profile)
+			     (player->GetNumber(),
+			      profile->Support().Strategies(player->GetNumber()).Find(strategy)));
   else
-    por = new NumberPortion(0.0);
-  
-  return por;
+    return new NumberPortion(0.0);
 }
 
 //----------------
@@ -745,7 +742,7 @@ static Portion *GSM_StrategyProb(Portion **param)
 
 static Portion *GSM_StrategyProbs(Portion **param)
 {
-  MixedSolution *profile = ((MixedPortion *) param[0])->Value();
+  const MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   const NFSupport *support = &profile->Support();
   const Nfg &nfg = support->Game();
 
