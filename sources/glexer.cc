@@ -61,3 +61,20 @@ void gLexer::GetToken(const gText &p_token)
     throw Unexpected();
   }
 }
+
+void gLexer::GetToken(const gText &p_token1, const gText &p_token2)
+{
+  char c;
+  
+  do {
+    m_file >> c;
+  } while (isspace(c));
+
+  gText token;
+  m_file.unget(c);
+  m_file >> token;
+
+  if (token != p_token1 && token != p_token2) {
+    throw Unexpected();
+  }
+}

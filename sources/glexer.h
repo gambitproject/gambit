@@ -28,6 +28,7 @@ public:
   gText GetString(void);
   gNumber GetNumber(void);
   void GetToken(const gText &);
+  void GetToken(const gText &, const gText &);
 };
 
 #endif  // GLEXER_H

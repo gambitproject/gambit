@@ -8,7 +8,7 @@ GLIB_SOURCES = gmisc.cc gstream.cc garray.cc gblock.cc gtext.cc integer.cc \
                rational.cc gnulib.cc gvector.cc gpvector.cc gdpvect.cc \
                grarray.cc gmatrix.cc gsmatrix.cc gwatch.cc \
                glist.cc gfuncmin.cc gfunc.cc system.cc gnumber.cc \
-               grblock.cc gnarray.cc gpool.cc glexer.cc
+               grblock.cc gnarray.cc gpool.cc
 
 GLIB_OBJECTS = $(GLIB_SOURCES:.cc=$(OBJECT_SUFFIX))
 
