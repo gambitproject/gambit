@@ -1,0 +1,359 @@
+# Makefile for the gambit GUI version.  This will only work for unix systems
+# obtain a different makefile for DOS based version.
+# Compile by ussuing: make -f makefile <platform>
+# where the <platform> is one of: 
+# 1.	ol (Xview/OpenLook [dosh,gostek])
+# 2.	motif (Motif, works under AIX [billandal])
+# 3.	solaris (Xview/OpenLook under solaris [nash])
+
+CC = gcc
+
+WXDIR = /home/ironbark/gambit/wxwin
+WXINC = $(WXDIR)/include
+WXLIB = $(WXDIR)/lib/libwx$(GUISUFFIX).a
+
+INC = -I$(WXDIR)/include/base -I$(WXDIR)/include/x
+OBJDIR = objects$(GUISUFFIX)
+
+
+
+EGUISOURCES=gambit.cc treewin.cc treewin1.cc twflash.cc treedraw.cc 	\
+	   twiniter.cc wxmisc.cc general.cc spread.cc extshow.cc \
+	spreadim.cc wximpl.cc
+EGUIOBJECTS=$(OBJDIR)/gambit.o $(OBJDIR)/treewin.o  \
+	   $(OBJDIR)/twiniter.o $(OBJDIR)/treedraw.o $(OBJDIR)/wxmisc.o \
+	   $(OBJDIR)/general.o $(OBJDIR)/twflash.o $(OBJDIR)/spread.o  \
+	   $(OBJDIR)/extshow.o $(OBJDIR)/spreadim.o $(OBJDIR)/wximpl.o
+
+NGUISOURCES=normshow.cc
+NGUIOBJECTS=$(OBJDIR)/normshow.o 
+
+NSOLSOURCES=purenash.cc lemke.cc glpsolve.cc 
+NSOLOBJECTS=$(OBJDIR)/purenash.o $(OBJDIR)/lemke.o $(OBJDIR)/glpsolve.o
+
+GSOURCES=gblock.cc gtuple.cc gvector.cc gpvector.cc gdpvect.cc gnarray.cc \
+	gambitio.cc gwatch.cc grandom.cc gconvert.cc g2dblock.cc gstring.cc \
+	gmatrix1.cc gmatrix2.cc gmessage.cc
+GOBJECTS=$(OBJDIR)/gblock.o $(OBJDIR)/gtuple.o $(OBJDIR)/gvector.o \
+	 $(OBJDIR)/gpvector.o $(OBJDIR)/gdpvect.o $(OBJDIR)/gnarray.o \
+	$(OBJDIR)/gambitio.o $(OBJDIR)/gwatch.o $(OBJDIR)/grandom.o \
+	$(OBJDIR)/gconvert.o $(OBJDIR)/g2dblock.o $(OBJDIR)/gstring.o \
+	$(OBJDIR)/gmatrix1.o $(OBJDIR)/gmatrix2.o $(OBJDIR)/gmessage.o
+
+SOURCES=extform.cc infoset.cc gametree.cc extimpl.cc normimpl.cc \
+	outcome.cc noderep.cc normal.cc strategy.cc integer.cc \
+	rational.cc efg2nfg.cc
+OBJECTS = $(OBJDIR)/extform.o $(OBJDIR)/infoset.o \
+	  $(OBJDIR)/gametree.o $(OBJDIR)/extimpl.o $(OBJDIR)/normimpl.o  \
+	  $(OBJDIR)/outcome.o  $(OBJDIR)/noderep.o \
+	  $(OBJDIR)/efgyacc.o  \
+	  $(OBJDIR)/normal.o $(OBJDIR)/strategy.o \
+	  $(OBJDIR)/integer.o \
+	  $(OBJDIR)/rational.o $(OBJDIR)/efg2nfg.o
+
+ALLOBJECTS=$(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS) $(NSOLOBJECTS)
+ALLSOURCES=$(EGUISOURCES) $(NGUISOURCES) $(GSOURCES) $(SOURCES) $(NSOLSOURCES)
+
+DEBUG = -ggdb
+WARN = 
+OPT = -fno-implicit-templates
+
+CPPFLAGS = $(XINCLUDE) $(INC) -I$(WXDIR)/dummy $(GUI) $(DEBUG) $(WARN) $(OPT)
+LDFLAGS = $(XLIB) -L$(WXDIR)/lib
+
+$(OBJDIR)/%.o: %.cc
+	$(CC) -c $(CPPFLAGS) -o $@ $<
+
+all:   $(OBJDIR) $(ALLOBJECTS) gambit$(GUISUFFIX) 
+
+motif:
+	$(MAKE) -f makefile GUI=-Dwx_motif OPT=$(OPT) GUISUFFIX=_motif 	\
+		LDLIBS='-lwx_motif -lXm -lXt -lX11 -lm -lg++' 		\
+		XVIEW_LINK=-D__AIX					\
+		XINCLUDE='-I/usr/include/X11 -I/usr/include/Xm' XLIB=-L/usr/lib/X11
+		
+
+xview:
+	$(MAKE) -f makefile GUI=-Dwx_xview OPT=$(OPT) GUISUFFIX=_ol    	\
+		LDLIBS='-lwx_ol -lxview -lolgx -lX11 -lm -lg++'		\
+		XVIEW_LINK='$(WXDIR)/src/x/objects_ol/sb_scrol_ol.o'	\
+		XINCLUDE=-I/usr/openwin/include	XLIB=-L/usr/openwin/lib	
+
+
+solaris:
+	$(MAKE) -f makefile GUI=-Dwx_xview OPT=$(OPT) GUISUFFIX=_solaris \
+		LDLIBS='-lwx_solaris -lxview -lolgx -lX11 -lm -lg++' \
+		XVIEW_LINK='$(WXDIR)/src/x/objects_ol/sb_scrol_solaris.o'\
+		XINCLUDE=-I/usr/openwin/include	XLIB=-L/usr/openwin/lib	
+
+depend:
+	makedepend $(ALLSOURCES)
+$(OBJDIR):
+	mkdir $(OBJDIR)
+
+gambit$(GUISUFFIX): 
+	$(CC)  $(LDFLAGS) $(OBJECTS) $(GOBJECTS) $(NGUIOBJECTS) $(EGUIOBJECTS)\
+	 $(NSOLOBJECTS)	$(LDLIBS) $(XVIEW_LINK)  -o gambit$(GUISUFFIX) 
+#	strip gambit$(GUISUFFIX)
+
+
+clean_motif:
+	make -f makefile GUISUFFIX=_motif cleanany
+
+clean_ol:
+	make -f makefile GUISUFFIX=_ol cleanany
+
+clean_solaris:
+	make -f makefile GUISUFFIX=_solaris cleanany
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+gambit.o: extform.h gstring.h /usr/include/string.h
+gambit.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+gambit.o: gtuple.h gmap.h basic.h gmessage.h noderep.h /usr/include/assert.h
+gambit.o: gblock.h /usr/include/stdlib.h nodeid.h gpvector.h gvector.h
+gambit.o: glist.h rational.h integer.h /usr/include/math.h
+gambit.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gametree.h
+gambit.o: gpset.h efgyacc.h treewin.h twiniter.h twflash.h treedraw.h
+gambit.o: treecons.h const.h gambit.h normgui.h extgui.h
+treewin.o: wxmisc.h /usr/include/stdio.h extform.h gstring.h
+treewin.o: /usr/include/string.h /usr/include/sys/stdtypes.h gambitio.h
+treewin.o: gtuple.h gmap.h basic.h gmessage.h noderep.h /usr/include/assert.h
+treewin.o: gblock.h /usr/include/stdlib.h nodeid.h gpvector.h gvector.h
+treewin.o: glist.h rational.h integer.h /usr/include/math.h
+treewin.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gametree.h
+treewin.o: gpset.h efgyacc.h gconvert.h gmisc.h treewin.h twiniter.h
+treewin.o: twflash.h treedraw.h treecons.h legendc.h
+treewin1.o: wxmisc.h /usr/include/stdio.h extform.h gstring.h
+treewin1.o: /usr/include/string.h /usr/include/sys/stdtypes.h gambitio.h
+treewin1.o: gtuple.h gmap.h basic.h gmessage.h noderep.h
+treewin1.o: /usr/include/assert.h gblock.h /usr/include/stdlib.h nodeid.h
+treewin1.o: gpvector.h gvector.h glist.h rational.h integer.h
+treewin1.o: /usr/include/math.h /usr/include/floatingpoint.h
+treewin1.o: /usr/include/sys/ieeefp.h gametree.h gpset.h efgyacc.h outcome.h
+treewin1.o: gconvert.h gmisc.h treewin.h twiniter.h twflash.h treedraw.h
+treewin1.o: treecons.h legendc.h spread.h gtuplem.h outcomed.h
+twflash.o: twflash.h
+treedraw.o: wxmisc.h /usr/include/stdio.h treedraw.h treecons.h legendc.h
+treedraw.o: legend.h
+wxmisc.o: wxmisc.h /usr/include/stdio.h general.h /usr/include/stdlib.h
+wxmisc.o: /usr/include/sys/stdtypes.h /usr/include/string.h
+general.o: general.h /usr/include/stdio.h /usr/include/stdlib.h
+general.o: /usr/include/sys/stdtypes.h /usr/include/string.h
+spread.o: /usr/include/stdio.h general.h /usr/include/stdlib.h
+spread.o: /usr/include/sys/stdtypes.h /usr/include/string.h wxmisc.h spread.h
+spread.o: glist.h gambitio.h gtuple.h gtuplem.h gblock.h
+spread.o: /usr/include/assert.h gstring.h g2dblock.h
+extshow.o: wxmisc.h /usr/include/stdio.h extform.h gstring.h
+extshow.o: /usr/include/string.h /usr/include/sys/stdtypes.h gambitio.h
+extshow.o: gtuple.h gmap.h basic.h gmessage.h noderep.h /usr/include/assert.h
+extshow.o: gblock.h /usr/include/stdlib.h nodeid.h gpvector.h gvector.h
+extshow.o: glist.h rational.h integer.h /usr/include/math.h
+extshow.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gametree.h
+extshow.o: gpset.h efgyacc.h const.h treewin.h twiniter.h twflash.h
+extshow.o: treedraw.h treecons.h extgui.h normgui.h efgsolvd.h
+spreadim.o: gblock.h /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+spreadim.o: /usr/include/assert.h gambitio.h /usr/include/stdio.h gtuple.h
+spreadim.o: gstring.h /usr/include/string.h spread.h glist.h gtuplem.h
+spreadim.o: glist.imp glistit.h gblock.imp rational.h integer.h
+spreadim.o: /usr/include/math.h /usr/include/floatingpoint.h
+spreadim.o: /usr/include/sys/ieeefp.h gtuplem.imp
+wximpl.o: gblock.h /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+wximpl.o: /usr/include/assert.h gambitio.h /usr/include/stdio.h gblock.imp
+normshow.o: rational.h gambitio.h /usr/include/stdio.h integer.h
+normshow.o: /usr/include/math.h /usr/include/floatingpoint.h
+normshow.o: /usr/include/sys/ieeefp.h normal.h basic.h gstring.h
+normshow.o: /usr/include/string.h /usr/include/sys/stdtypes.h gblock.h
+normshow.o: /usr/include/stdlib.h /usr/include/assert.h gtuple.h gpvector.h
+normshow.o: gvector.h normiter.h contiter.h lemke.h glist.h purenash.h
+normshow.o: spread.h gtuplem.h wxmisc.h normgui.h nfgsolvd.h
+gblock.o: basic.h gblock.imp /usr/include/stdlib.h
+gblock.o: /usr/include/sys/stdtypes.h /usr/include/assert.h gblock.h
+gblock.o: gambitio.h /usr/include/stdio.h gstring.h /usr/include/string.h
+gblock.o: rational.h integer.h /usr/include/math.h
+gblock.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
+gtuple.o: gtuple.imp gtuple.h gambitio.h /usr/include/stdio.h
+gtuple.o: /usr/include/assert.h basic.h gstring.h /usr/include/string.h
+gtuple.o: /usr/include/sys/stdtypes.h rational.h integer.h
+gtuple.o: /usr/include/math.h /usr/include/floatingpoint.h
+gtuple.o: /usr/include/sys/ieeefp.h
+gvector.o: gvector.imp gvector.h /usr/include/assert.h basic.h gtuple.h
+gvector.o: gambitio.h /usr/include/stdio.h rational.h integer.h
+gvector.o: /usr/include/math.h /usr/include/floatingpoint.h
+gvector.o: /usr/include/sys/ieeefp.h
+gpvector.o: gpvector.imp gpvector.h gvector.h /usr/include/assert.h basic.h
+gpvector.o: gtuple.h gambitio.h /usr/include/stdio.h rational.h integer.h
+gpvector.o: /usr/include/math.h /usr/include/floatingpoint.h
+gpvector.o: /usr/include/sys/ieeefp.h
+gdpvect.o: gdpvect.imp gdpvect.h gpvector.h gvector.h /usr/include/assert.h
+gdpvect.o: basic.h gtuple.h gambitio.h /usr/include/stdio.h rational.h
+gdpvect.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gdpvect.o: /usr/include/sys/ieeefp.h
+gnarray.o: gnarray.imp gnarray.h /usr/include/assert.h gambitio.h
+gnarray.o: /usr/include/stdio.h gvector.h basic.h gtuple.h rational.h
+gnarray.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gnarray.o: /usr/include/sys/ieeefp.h
+gambitio.o: /usr/include/assert.h gambitio.h /usr/include/stdio.h
+gwatch.o: gwatch.h /usr/include/stdio.h /usr/include/math.h
+gwatch.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
+grandom.o: grandom.h /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+grandom.o: /usr/include/limits.h
+gconvert.o: gconvert.h gstring.h /usr/include/string.h
+gconvert.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+gconvert.o: rational.h integer.h /usr/include/math.h
+gconvert.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h
+g2dblock.o: rational.h gambitio.h /usr/include/stdio.h integer.h
+g2dblock.o: /usr/include/math.h /usr/include/floatingpoint.h
+g2dblock.o: /usr/include/sys/ieeefp.h g2dblock.imp g2dblock.h gblock.h
+g2dblock.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+g2dblock.o: /usr/include/assert.h gtuple.h
+gstring.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+gstring.o: /usr/include/assert.h /usr/include/ctype.h gstring.h
+gstring.o: /usr/include/string.h gambitio.h /usr/include/stdio.h
+gmatrix1.o: gmatrix.imp gmatrix.h gambitio.h /usr/include/stdio.h gvector.h
+gmatrix1.o: /usr/include/assert.h basic.h gtuple.h gblock.h
+gmatrix1.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h rational.h
+gmatrix1.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gmatrix1.o: /usr/include/sys/ieeefp.h
+gmatrix2.o: gmatrix.imp gmatrix.h gambitio.h /usr/include/stdio.h gvector.h
+gmatrix2.o: /usr/include/assert.h basic.h gtuple.h gblock.h
+gmatrix2.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h rational.h
+gmatrix2.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+gmatrix2.o: /usr/include/sys/ieeefp.h
+gmessage.o: gmessage.h
+extform.o: extform.h gstring.h /usr/include/string.h
+extform.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+extform.o: gtuple.h gmap.h basic.h gmessage.h noderep.h /usr/include/assert.h
+extform.o: gblock.h /usr/include/stdlib.h nodeid.h gpvector.h gvector.h
+extform.o: glist.h rational.h integer.h /usr/include/math.h
+extform.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gametree.h
+extform.o: gpset.h efgyacc.h outcome.h gmapiter.h glistit.h gdpvect.h
+infoset.o: infoset.h basic.h gstring.h /usr/include/string.h
+infoset.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+infoset.o: gblock.h /usr/include/stdlib.h /usr/include/assert.h gtuple.h
+infoset.o: gnumber.h integer.h rational.h /usr/include/math.h
+infoset.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h noderep.h
+infoset.o: nodeid.h
+gametree.o: gametree.h gstring.h /usr/include/string.h
+gametree.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+gametree.o: gpset.h gblock.h /usr/include/stdlib.h /usr/include/assert.h
+gametree.o: gmap.h basic.h gmessage.h nodeid.h gmapiter.h gdpvect.h
+gametree.o: gpvector.h gvector.h gtuple.h infoset.h gnumber.h integer.h
+gametree.o: rational.h /usr/include/math.h /usr/include/floatingpoint.h
+gametree.o: /usr/include/sys/ieeefp.h noderep.h outcome.h
+extimpl.o: gblock.imp /usr/include/stdlib.h /usr/include/sys/stdtypes.h
+extimpl.o: /usr/include/assert.h gblock.h gambitio.h /usr/include/stdio.h
+extimpl.o: nodeid.h gmap.imp gmap.h basic.h gmessage.h gmapiter.h
+extimpl.o: /usr/include/string.h gmapiter.imp gpset.imp gpset.h gtuple.h
+extimpl.o: glist.imp glist.h glistit.h gstring.h rational.h integer.h
+extimpl.o: /usr/include/math.h /usr/include/floatingpoint.h
+extimpl.o: /usr/include/sys/ieeefp.h gtuple.imp
+normimpl.o: rational.h gambitio.h /usr/include/stdio.h integer.h
+normimpl.o: /usr/include/math.h /usr/include/floatingpoint.h
+normimpl.o: /usr/include/sys/ieeefp.h gpvector.h gvector.h
+normimpl.o: /usr/include/assert.h basic.h gtuple.h gblock.imp
+normimpl.o: /usr/include/stdlib.h /usr/include/sys/stdtypes.h gblock.h
+normimpl.o: gtuple.imp glist.imp glist.h glistit.h gpset.imp gpset.h
+outcome.o: outcome.h gstring.h /usr/include/string.h
+outcome.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+outcome.o: gvector.h /usr/include/assert.h basic.h gtuple.h rational.h
+outcome.o: integer.h /usr/include/math.h /usr/include/floatingpoint.h
+outcome.o: /usr/include/sys/ieeefp.h
+noderep.o: noderep.h /usr/include/assert.h gstring.h /usr/include/string.h
+noderep.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+noderep.o: gblock.h /usr/include/stdlib.h nodeid.h
+normal.o: /usr/include/assert.h /usr/include/limits.h normal.h basic.h
+normal.o: gstring.h /usr/include/string.h /usr/include/sys/stdtypes.h
+normal.o: gambitio.h /usr/include/stdio.h gblock.h /usr/include/stdlib.h
+normal.o: gtuple.h gpvector.h gvector.h normiter.h rational.h integer.h
+normal.o: /usr/include/math.h /usr/include/floatingpoint.h
+normal.o: /usr/include/sys/ieeefp.h gnarray.h gpset.h strategy.h normal.imp
+normal.o: grandom.h normiter.imp contiter.h contiter.imp
+strategy.o: strategy.h gstring.h /usr/include/string.h
+strategy.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+strategy.o: gblock.h /usr/include/stdlib.h /usr/include/assert.h gtuple.h
+integer.o: integer.h gambitio.h /usr/include/stdio.h gnulib.h
+integer.o: /usr/include/stddef.h /usr/include/sys/stdtypes.h
+integer.o: /usr/include/stdlib.h /usr/include/string.h /usr/include/memory.h
+integer.o: /usr/include/errno.h /usr/include/sys/errno.h /usr/include/fcntl.h
+integer.o: /usr/include/sys/fcntlcom.h /usr/include/sys/stat.h
+integer.o: /usr/include/sys/types.h /usr/include/sys/sysmacros.h
+integer.o: /usr/include/math.h /usr/include/floatingpoint.h
+integer.o: /usr/include/sys/ieeefp.h /usr/include/ctype.h
+integer.o: /usr/include/limits.h /usr/include/assert.h
+rational.o: rational.h gambitio.h /usr/include/stdio.h integer.h
+rational.o: /usr/include/math.h /usr/include/floatingpoint.h
+rational.o: /usr/include/sys/ieeefp.h gnulib.h /usr/include/stddef.h
+rational.o: /usr/include/sys/stdtypes.h /usr/include/stdlib.h
+rational.o: /usr/include/string.h /usr/include/memory.h /usr/include/errno.h
+rational.o: /usr/include/sys/errno.h /usr/include/fcntl.h
+rational.o: /usr/include/sys/fcntlcom.h /usr/include/sys/stat.h
+rational.o: /usr/include/sys/types.h /usr/include/sys/sysmacros.h
+rational.o: /usr/include/values.h /usr/include/assert.h /usr/include/ctype.h
+efg2nfg.o: extform.h gstring.h /usr/include/string.h
+efg2nfg.o: /usr/include/sys/stdtypes.h gambitio.h /usr/include/stdio.h
+efg2nfg.o: gtuple.h gmap.h basic.h gmessage.h noderep.h /usr/include/assert.h
+efg2nfg.o: gblock.h /usr/include/stdlib.h nodeid.h gpvector.h gvector.h
+efg2nfg.o: glist.h rational.h integer.h /usr/include/math.h
+efg2nfg.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gametree.h
+efg2nfg.o: gpset.h efgyacc.h normal.h normiter.h gconvert.h glistit.h
+efg2nfg.o: strategy.h glist.imp gblock.imp gtuple.imp
+purenash.o: gambitio.h /usr/include/stdio.h normal.h basic.h gstring.h
+purenash.o: /usr/include/string.h /usr/include/sys/stdtypes.h gblock.h
+purenash.o: /usr/include/stdlib.h /usr/include/assert.h gtuple.h gpvector.h
+purenash.o: gvector.h normiter.h contiter.h rational.h integer.h
+purenash.o: /usr/include/math.h /usr/include/floatingpoint.h
+purenash.o: /usr/include/sys/ieeefp.h glist.h
+lemke.o: rational.h gambitio.h /usr/include/stdio.h integer.h
+lemke.o: /usr/include/math.h /usr/include/floatingpoint.h
+lemke.o: /usr/include/sys/ieeefp.h gwatch.h gpvector.h gvector.h
+lemke.o: /usr/include/assert.h basic.h gtuple.h normal.h gstring.h
+lemke.o: /usr/include/string.h /usr/include/sys/stdtypes.h gblock.h
+lemke.o: /usr/include/stdlib.h normiter.h gtableau.h gmatrix.h gmap.h
+lemke.o: gmessage.h lemke.h glist.h
+glpsolve.o: glpsolve.imp glpsolve.h gtableau.h /usr/include/assert.h basic.h
+glpsolve.o: gambitio.h /usr/include/stdio.h gmatrix.h gvector.h gtuple.h
+glpsolve.o: gblock.h /usr/include/stdlib.h /usr/include/sys/stdtypes.h gmap.h
+glpsolve.o: gmessage.h rational.h integer.h /usr/include/math.h
+glpsolve.o: /usr/include/floatingpoint.h /usr/include/sys/ieeefp.h gblock.imp
+glpsolve.o: gmap.imp gmapiter.h /usr/include/string.h gtableau.imp
