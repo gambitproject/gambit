@@ -1,7 +1,7 @@
 //#
 //# FILE: enum.h -- Interface to Enum solution module
 //#
-//# @(#)enum.h	1.6 2/7/95
+//# $Id$
 //#
 
 #ifndef ENUM_H
@@ -10,7 +10,7 @@
 #include "normal.h"
 #include "rational.h"
 #include "glist.h"
-#include "gsignal.h"
+#include "gstatus.h"
 #include "tableau.h"
 #include "gtableau.h"
 
@@ -38,9 +38,9 @@ class EnumParams     {
 public:
   int plev, nequilib;
   gOutput *outfile, *errfile;
-  gSignal &sig;
-  
-  EnumParams(void);
+  gStatus &status;
+
+	EnumParams(gStatus &status_=gstatus);
 };
 
 //

@@ -113,10 +113,9 @@ void NodeAddDialog::OnPlayer(const char *name)
 {
 iset_item->Clear();
 iset_item->Append("New");
-iset_item->SetSelection(iset_item->FindString("New"));
 Player *player=ef.GetPlayer(name);
-if (!player) return;
-for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->InfosetList()[i]->GetName());
+if (player)
+	for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(player->InfosetList()[i]->GetName());
 iset_item->SetSelection(iset_item->FindString("New"));
 }
 

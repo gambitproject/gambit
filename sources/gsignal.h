@@ -1,7 +1,7 @@
 //#
 //# FILE: gsignal.h -- Declaration of abstract signal-handling class
 //#
-//# $Id$
+//# @(#)gsignal.h	1.1 5/9/95
 //#
 
 #ifndef SIGNAL_H

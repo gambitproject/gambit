@@ -20,16 +20,23 @@
 
 template <class T>
 GridParams<T>::GridParams(void) :
-	plev(0),outfile(0),errfile(0),pxifile(0),update_func(0),
-	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01)
+	plev(0),outfile(0),errfile(0),pxifile(0),
+	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01),
+	status(gstatus)
 { }
 template <class T>
 GridParams<T>::GridParams(const GridParams<T> &p) :
 	plev(p.plev),outfile(p.outfile),errfile(p.errfile),
-	pxifile(p.pxifile),update_func(p.update_func),
+	pxifile(p.pxifile),
 	minLam(p.minLam),maxLam(p.maxLam),delLam(p.delLam),
-	delp(p.delp),tol(p.tol),type(p.type)
+	delp(p.delp),tol(p.tol),type(p.type),status(p.status)
 
+{ }
+template <class T>
+GridParams<T>::GridParams(gStatus &st):
+	plev(0),outfile(0),errfile(0),pxifile(0),
+	minLam(.01), maxLam(30), delLam(.01), tol(.01), delp(.01),
+	status(st)
 { }
 
 template <class T>
@@ -38,14 +45,7 @@ int GridParams<T>::Ok(void) const
 if (!pxifile) return 0;
 return 1;
 }
-/*
-template <class T>
-GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r, gInput &param)
-	: nf(r), x(r.NumStrats(1)), p(r.NumStrats(1)),y(r.NumStrats(2)),
-		q_calc(r.NumStrats(2)),matrix(r.NumStrats(1),r.NumStrats(2))
-{assert(0);	// this does not work
-}
-*/
+
 template <class T>
 GridSolveModule<T>::GridSolveModule(const NormalForm<T> &r,const GridParams<T> &param)
 	: nf(r), params(param), x(r.NumStrats(1)), p(r.NumStrats(1)),
@@ -158,6 +158,7 @@ template <class T> int GridSolveModule<T>::GridSolve(void)
 int i,j;
 if (!params.Ok()) {if (params.errfile) *params.errfile<<"Param Error\n";return 0;}
 
+params.status<<"Grid Solve algorithm\n";
 NormalIter<T> iter(nf);
 int	st1=nf.NumStrats(1),st2=nf.NumStrats(2);
 // Build a game matrix--this speeds things up enormously
@@ -182,18 +183,18 @@ if (params.type==0)
 else
 	num_steps=(int)(log(params.maxLam/params.minLam)/log(params.delLam+(T)1));
 T l=params.minLam;
-for (int step=1;step<num_steps;step++)
+for (int step=1;step<num_steps && !params.status.Get();step++)
 {
 	if (params.type==0)  l=l+params.delLam; else l=l*(params.delLam+(T)1);
 	while (!pv->Done()) if (pv->Inc())	CheckEqu(pv->GetP(),l);
 	pv->Reset();
-	if (params.update_func) (*params.update_func)(step/num_steps);
+	params.status.SetProgress((double)step/(double)num_steps);
 }
 // Record the time taken and close the output file
 *params.pxifile<<"Simulation took "<<timer.ElapsedStr()<<'\n';
+params.status<<"Simulation took "<<timer.ElapsedStr()<<'\n';
 delete pv;
-delete params.pxifile; 		// close the file;
-return 1;
+return !params.status.Get();
 }
 
 #ifdef __GNUG__

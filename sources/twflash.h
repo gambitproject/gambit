@@ -18,14 +18,14 @@ private:
 	wxDC *dc;
 public:
 	TreeNodeCursor(wxDC *_dc);
-virtual  ~TreeNodeCursor(void);
+	virtual  ~TreeNodeCursor(void);
 	void	SetDC(wxDC *_dc) {dc=_dc;}
 	void	SetFlashNode(int x_s,int x_e,int y_s,int y_e);
-	void	SetFlashing(Bool _flashing) {flashing=_flashing;}
+	virtual void	SetFlashing(Bool _flashing) {flashing=_flashing;}
 	Bool	Flashing(void) {return flashing;}
 	void	Flash(void);		// used to force a flash after moving
 	void	SetType(FlashType _t) {__mytype=_t;}
-  FlashType Type(void)	{return __mytype;}
+	FlashType Type(void)	{return __mytype;}
 };
 
 class TreeNodeFlasher: public wxTimer,public TreeNodeCursor

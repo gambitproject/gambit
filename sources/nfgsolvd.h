@@ -25,7 +25,8 @@ public:
 		algorithm_list[NFG_ELIMDOM_SOLUTION]="ElimDom";
 		algorithm_list[NFG_GRID_SOLUTION]="GridSolve";
 		algorithm_list[NFG_NGOBIT_SOLUTION]="Gobit";
-    algorithm_list[NFG_SIMPDIV_SOLUTION]="Simpdiv";
+		algorithm_list[NFG_SIMPDIV_SOLUTION]="Simpdiv";
+		algorithm_list[NFG_ENUM_SOLUTION]="Enum";
 		algorithm_list[NFG_ALL_SOLUTION]="All";
 		algorithm_box=new	wxRadioBox(d,(wxFunction)algorithm_box_func,"Algorithm",-1,-1,-1,-1,NFG_NUM_SOLUTIONS,algorithm_list,2);
 		algorithm_box->SetClientData((char *)this);

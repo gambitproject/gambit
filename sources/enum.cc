@@ -17,8 +17,8 @@
 //                        EnumParams: member functions
 //---------------------------------------------------------------------------
 
-EnumParams::EnumParams(void) : plev(0), nequilib(0),outfile(0), 
-errfile(0),sig(gbreak)
+EnumParams::EnumParams(gStatus status_) : plev(0), nequilib(0),outfile(0),
+errfile(0),status(status_)
 { }
 
 //-------------------------------------------------------------------------
@@ -116,27 +116,28 @@ template <class T> int EnumModule<T>::Enum(void)
 
   gWatch watch;
 
-  gBlock<int> target(rows+cols);
-  for(int i=1;i<=target.Length();i++) 
-    target[i]=i;
+	gBlock<int> target(rows+cols);
+	for(int i=1;i<=target.Length();i++)
+		target[i]=i;
 
-  Basis<T> basis(tab);
+	Basis<T> basis(tab);
 
-  i = rows+1;
-  
-  while(i<=rows+cols && !params.sig.Get()) 
-    if(params.nequilib==0 || List.Length()<params.nequilib) {
-      SubSolve(rows,i,basis,target);
-      i++;
-    }
-  
-  if(params.sig.Get()) {
-    gout << "\n User Break \n";
-    params.sig.Reset();
-  }
-  for(i=1;i<=List.Length();i++) {
-    gout << "\n";
-    List[i].Dump(gout);
+	i = rows+1;
+
+	while(i<=rows+cols && !params.status.Get())
+		if(params.nequilib==0 || List.Length()<params.nequilib) {
+			SubSolve(rows,i,basis,target);
+			i++;
+      params.status.SetProgress((double)(i-rows-1)/(double)cols);
+		}
+
+	if(params.status.Get()) {
+		gout << "\n User Break \n";
+		params.status.Reset();
+	}
+	for(i=1;i<=List.Length();i++) {
+		gout << "\n";
+		List[i].Dump(gout);
   }
   time = (gRational) watch.Elapsed();
   return 1;
@@ -191,7 +192,7 @@ template <class T> void EnumModule<T>
 	  }
 	  else flag=1;
 	}
-      }
+			}
     }
   }
 //  gout << "\n";
@@ -223,7 +224,7 @@ template <class T> void EnumModule<T>
 
   if(pr>1) {
     i=targ2[pr-1];
-    while(i+1<targ2[pr] && !params.sig.Get())
+		while(i+1<targ2[pr] && !params.status.Get())
       if(params.nequilib==0 || List.Length()<params.nequilib) {
 	i++;
 	SubSolve(pr-1,i,B2,targ2);

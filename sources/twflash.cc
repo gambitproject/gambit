@@ -56,9 +56,7 @@ if (flashing && dc && x_s!=-1)
 TreeNodeFlasher::TreeNodeFlasher(wxDC *_dc):wxTimer(),TreeNodeCursor(_dc)
 {SetType(myFlasher);SetFlashing(TRUE);}
 TreeNodeFlasher::~TreeNodeFlasher(void)
-{
-Stop();
-}
+{Stop();TreeNodeCursor::~TreeNodeCursor();}
 
 #define FLASHDELAY 200
 void TreeNodeFlasher::SetFlashing(Bool _flashing)

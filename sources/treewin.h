@@ -1,16 +1,15 @@
 //
 // FILE: treewin.h -- Interface for TreeWindow class
 //
-// @(#)treewin.h	1.4 4/7/94
+// $Id$
 //
 
 #ifndef TREEWINDOW_H
 #define TREEWINDOW_H
 #include "garray.h"
 #include "glist.h"
-#include "twiniter.h"
-#include "twflash.h"
 #include "treedraw.h"
+#include "twflash.h"
 
 typedef struct NODEENTRY {
 		int x, y, level, color;

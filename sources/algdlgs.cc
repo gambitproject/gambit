@@ -1,6 +1,9 @@
 //*************************************************************************************
 // Classes that are often used for the algorithm params dialogs.
 //*************************************************************************************
+// $Id$
+//
+
 #include "zfortify.hpp"
 #include "gambitio.h"
 #include "wxio.h"
