@@ -49,7 +49,7 @@ EfgPolEnumModule<gDouble>::Payoff(int pl) const
   while (index.Turn()) {
     pay=SF.Payoff(index.CurrentIndices(),pl);
     if( pay !=(gNumber)0) {
-      gPoly<gDouble> term(&Space,(double)pay,&Lex);
+      gPoly<gDouble> term(&Space,(gDouble)((double)pay),&Lex);
       int k;
       for(k=1;k<=EF.NumPlayers();k++) 
 	term*=Prob(k,(index.CurrentIndices())[k]);
