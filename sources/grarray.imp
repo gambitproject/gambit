@@ -21,6 +21,10 @@ template <class T> bool gRectArray<T>::Check(int row, int col) const
 //            Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
+template <class T> gRectArray<T>::gRectArray(void)
+  : minrow(1), maxrow(0), mincol(1), maxcol(0), data(0)
+{ }
+
 template <class T> gRectArray<T>::gRectArray(int rows, int cols)
   : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
 {
@@ -42,7 +46,7 @@ gRectArray<T>::gRectArray(int minr, int maxr, int minc, int maxc)
 template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
   : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
 {
-  data = new T *[maxrow - minrow + 1] - minrow;
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
   for (int i = minrow; i <= maxrow; i++)  {
     data[i] = new T[maxcol - mincol + 1] - mincol;
     for (int j = mincol; j <= maxcol; j++)
@@ -53,16 +57,23 @@ template <class T> gRectArray<T>::gRectArray(const gRectArray<T> &a)
 template <class T> gRectArray<T>::~gRectArray()
 {
   for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
-  delete [] (data + minrow);
+  if (data)  delete [] (data + minrow);
 }
 
 template <class T>
 gRectArray<T> &gRectArray<T>::operator=(const gRectArray<T> &a)
 {
-  assert(minrow == a.minrow && maxrow == a.maxrow &&
-	 mincol == a.mincol && maxcol == a.maxcol);
+  for (int i = minrow; i <= maxrow; delete [] (data[i++] + mincol));
+  if (data)  delete [] (data + minrow);
 
-  for (int i = minrow; i <= maxrow; i++)
+  minrow = a.minrow;
+  maxrow = a.maxrow;
+  mincol = a.mincol;
+  maxcol = a.maxcol;
+
+  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : 0;
+
+  for (i = minrow; i <= maxrow; i++)
     for (int j = mincol; j <= maxcol; j++)
       data[i][j] = a.data[i][j];
 
