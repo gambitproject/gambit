@@ -175,7 +175,7 @@ if (ver!=GAMBIT_VERSION)
 	return 0;
 }
 // Create the main frame window
-GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 220, 150,wxDEFAULT_FRAME);
+GambitFrame *gambit_frame = new GambitFrame(NULL, "Gambit", 0, 0, 200,100,wxDEFAULT_FRAME);
 // Give it an icon
 wxIcon *frame_icon;
 #ifdef wx_msw

@@ -74,8 +74,8 @@ class MixedProfileGrid: public MixedProfile<double>
 friend class MixedProfileGrid1;
 private:
 	double step;
-	gArray<double> sums;
 	int static_player;
+	gArray<double> sums;
 	bool Inc1(int row);
 public:
 	MixedProfileGrid(const Nfg<double> &N,const NFSupport &S,double step);
@@ -187,7 +187,8 @@ sums=gArray<double>(svlen.Length());
 for (int i=1;i<=svlen.Length();i++)
 {
 	sums[i]=0;
-	for (int j=1;j<=svlen[i]-1;j++)
+	int j;
+	for (j=1;j<=svlen[i]-1;j++)
 	{  // Precalc these to save time.  Memory is cheap.
 		if (min_val(i,j)>=size) min_val(i,j)-=size; else min_val(i,j)=0;
 		(*this)(i,j)=min_val(i,j);		// start at the minimum
@@ -244,8 +245,8 @@ return false; // return from here only when static_player==svlen.Length
 // ***************************************************************************
 
 GridParams::GridParams(gStatus &st)
-	: minLam(.01), maxLam(30), delLam(.01), delp1(.01), tol1(.01),tol2(0.01),
-		powLam(1), delp2(0.01), trace(0), tracefile(&gnull), pxifile(&gnull),
+	: minLam(.01), maxLam(30), delLam(.01), delp1(.01), delp2(0.01), tol1(.01),tol2(0.01),
+		powLam(1), trace(0), tracefile(&gnull), pxifile(&gnull),
 		status(st)
 { }
 
@@ -255,7 +256,7 @@ void GridSolveModule::OutputHeader(gOutput &out)
 out<<"Dimensionality:\n";
 out<<N.NumPlayers()<<' ';
 for (int pl = 1; pl <= N.NumPlayers(); pl++) out << N.NumStrats(pl) << ' ';
-gout << '\n';
+out << '\n';
 if (N.NumPlayers()==2)		// output the matrix in case of a 2x2 square game
 	if (N.NumStrats(1)==N.NumStrats(2))
 	{
@@ -372,7 +373,7 @@ GridSolveModule::~GridSolveModule() { }
 
 void GridSolveModule::GridSolve(void)
 {
-params.status<<"Grid Solve algorithm\n";
+//params.status<<"Grid Solve algorithm\n";
 // Initialize the output file
 gWatch timer;timer.Start();
 OutputHeader(*params.pxifile);
@@ -385,7 +386,7 @@ else
 MixedProfileGrid M(N,S,params.delp1);
 M.SetStatic(static_player);
 double lam=params.minLam;
-for (int step=1;step<num_steps && !params.status.Get();step++)
+for (int step=1;step<num_steps  && !params.status.Get();step++)
 {
 	if (params.powLam==0)  lam=lam+params.delLam; else lam=lam*(params.delLam+1);
 	do {CheckEqu(M,lam,0);} while (M.Inc())	;

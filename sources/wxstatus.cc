@@ -26,6 +26,8 @@ Enable(FALSE);
 Show(FALSE);
 }
 
+bool wxStatus::Get(void) const  
+{wxYield();return sig;}
 
 void wxStatus::button_proc(wxButton& but, wxCommandEvent& )
 {((wxStatus *)but.GetClientData())->SetSignal();}

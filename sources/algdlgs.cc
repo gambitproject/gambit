@@ -8,17 +8,29 @@
 #include "wxio.h"
 #include "algdlgs.h"
 
+// Need this function since the default wxGetResource takes a char **value,
+// and replaces it with a newly created string (while deleting the old one).
+// This is NOT what we want.
+Bool wxGetResourceStr(char *section, char *entry, char *value, char *file)
+{
+char *tmp_str=0;
+Bool ok=wxGetResource(section,entry,&tmp_str,file);
+if (ok) {strcpy(value,tmp_str); delete [] tmp_str;}
+return ok;
+}
+
+
 //******************	 OUTPUT PARAMS SETTINGS ******************************
 OutputParamsSettings::OutputParamsSettings(void)
 {
 defaults_file="gambit.ini";
 // read in the defaults
 outname=new char[250];
-wxGetResource(PARAMS_SECTION,"Trace-Out",&outname,defaults_file);
+wxGetResourceStr(PARAMS_SECTION,"Trace-Out",outname,defaults_file);
 errname=new char[250];
-wxGetResource(PARAMS_SECTION,"Trace-Err",&errname,defaults_file);
+wxGetResourceStr(PARAMS_SECTION,"Trace-Err",errname,defaults_file);
 trace_str=new char[10];
-wxGetResource(PARAMS_SECTION,"Trace-Level",&trace_str,defaults_file);
+wxGetResourceStr(PARAMS_SECTION,"Trace-Level",trace_str,defaults_file);
 wxGetResource(PARAMS_SECTION,"Stop-After",&stopAfter,defaults_file);
 wxGetResource(PARAMS_SECTION,"Max-Solns",&max_solns,defaults_file);
 trace_list=wxStringListInts(4);
@@ -137,10 +149,10 @@ filename=new char[250];
 strcpy(filename,fn);
 type_str=new char[20];
 char tmp_str[100];sprintf(tmp_str,"%s-Plot-Type",algname);
-wxGetResource(PARAMS_SECTION,tmp_str,&type_str,defaults_file);
+wxGetResourceStr(PARAMS_SECTION,tmp_str,type_str,defaults_file);
 pxiname=new char[250];
 if (naming_option==SAVED_NAME)
-	wxGetResource(PARAMS_SECTION,"Pxi-Saved-Name",&pxiname,defaults_file);
+	wxGetResourceStr(PARAMS_SECTION,"Pxi-Saved-Name",pxiname,defaults_file);
 if (naming_option==DEFAULT_NAME)
 	strcpy(pxiname,wxOutputFile(filename));
 if (naming_option==PROMPT_NAME)
@@ -154,7 +166,7 @@ if (naming_option==PROMPT_NAME)
 		}
 name_option_str=new char[20];
 pxi_command=new char[250];
-wxGetResource(PARAMS_SECTION,"Pxi-Command",&pxi_command,defaults_file);
+wxGetResourceStr(PARAMS_SECTION,"Pxi-Command",pxi_command,defaults_file);
 wxGetResource(PARAMS_SECTION,"Run-Pxi",&run_pxi,defaults_file);
 
 type_list=new wxStringList("Lin","Log",0);
@@ -170,7 +182,9 @@ gOutput *PxiParamsSettings::PxiFile(void)
 
 // Pxi Type
 int PxiParamsSettings::PxiType(void)
-{return	wxListFindString(type_list,type_str);}
+{
+return wxListFindString(type_list,type_str);
+}
 
 // Run Pxi
 int PxiParamsSettings::RunPxi(void)
