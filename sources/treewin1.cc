@@ -12,6 +12,8 @@
 #include "wxmisc.h"
 #include "efg.h"
 #include "treewin.h"
+#include "nodeaddd.h"
+#include "infosetd.h"
 
 #define MAX_LABEL_LENGTH	25
 
@@ -83,7 +85,6 @@ void TreeWindow::edit_paste(void)
 //***********************************************************************
 //                        NODE-ADD MENU HANDLER
 //***********************************************************************
-#include "nodeaddd.h"
 void TreeWindow::node_add(void)
 {
   static int branches=2; // make this static so it remembers the last entry
@@ -927,7 +928,6 @@ void TreeWindow::tree_players(void)
 //                      TREE-INFOSETS MENU HANDLER
 //***********************************************************************
 
-#include "infosetd.h"
 void TreeWindow::tree_infosets(void)
 {
   InfosetDialog ID(ef,pframe);
