@@ -212,13 +212,15 @@ int Sfg::TotalNumInfosets() const
 int Sfg::InfosetNumber(int pl, int j) const 
 {
   if(j==1) return 0;
-  return (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
+  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
+  return isetRow(pl,isetnum)-1;
 }
 
 int Sfg::ActionNumber(int pl, int j) const
 {
   if(j==1) return 0;
-  return (*sequences)[pl]->Find(j)->GetAction()->GetNumber();
+  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
+  return efsupp.Find(pl,isetnum,GetAction(pl,j));
 }
 
 const Infoset*  Sfg::GetInfoset(int pl, int j) const 
