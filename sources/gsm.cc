@@ -673,6 +673,7 @@ bool GSM::Child ( void )
   Portion* p2;
   Portion* p1;
 
+  Node* old_node;
   Node* new_node;
   
   int      subscript;
@@ -693,10 +694,20 @@ bool GSM::Child ( void )
     if( p2->Type() == porINTEGER )
     {
       subscript = (int) ((numerical_Portion<gInteger>*)p2 )->Value().as_long();
-      new_node = ( (Node_Portion*) p1 )->Value()->GetChild( subscript );
+      old_node = ( (Node_Portion*) p1 )->Value();
       delete p1;
-      p1 = new Node_Portion( new_node );
-      _Stack->Push( p1 );
+      if( subscript >= 1 && subscript <= old_node->NumChildren() )
+      {
+	new_node = old_node->GetChild( subscript );
+	p1 = new Node_Portion( new_node );
+	_Stack->Push( p1 );
+      }
+      else
+      {
+	_ErrorMessage( _StdErr, 40, old_node->NumChildren() );
+	_Stack->Push( new Error_Portion );
+	result = false;
+      }
     }
     else
     {
@@ -1370,6 +1381,10 @@ void GSM::_ErrorMessage
   case 39:
     s << "  Attempted to find the child of a non-Node\n";
     s << "  Portion type\n";
+    break;
+  case 40:
+    s << "  Node child number out of range\n";
+    s << "  Only " << num1 << " child(ren) available\n";
     break;
   default:
     s << "  General error\n";
