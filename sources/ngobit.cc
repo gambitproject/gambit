@@ -32,7 +32,7 @@ public:
 };
 
 template <class T> class GobitModule
-: public gBC2Funct_nDim<T>, public BaseGobit, public SolutionModule {
+: public gBC2FunctMin<T>, public BaseGobit, public SolutionModule {
 private:
   const NormalForm<T> &rep;
   T Lambda;
@@ -45,14 +45,14 @@ public:
 	      const GobitParams &params)
     :  SolutionModule(ofile,efile,params.plev), rep(N), Lambda(0),
   p(rep.Dimensionality()), params(params),
-  maxits(500), gBC2Funct_nDim<T>(N.ProfileLength()){ }
+  maxits(500), gBC2FunctMin<T>(N.ProfileLength()){ }
   virtual ~GobitModule() {}
   
   T GobitDerivValue(int i1, int j1, const gPVector<T> &p) const;
   T GobitValue(void) const;
   void get_grad(const gPVector<T> &p, gVector<T> &dp);
   
-  T operator()(const gVector<T> &x);
+  T Value(const gVector<T> &x);
   int Deriv(const gVector<T> &p, gVector<T> &d);
   int Hess(const gVector<T> &p, gMatrix<T> &d) {return 1;}
   int Gobit(int);
@@ -86,7 +86,7 @@ template <class T> int GobitModule<T>::Gobit(int number)
 };
 
 template <class T>
-T GobitModule<T>::operator()(const gVector<T> &v)
+T GobitModule<T>::Value(const gVector<T> &v)
 {
 //  gout << " in GobitModule::Operator()";
   assert(v.Length()==p.Length());
@@ -133,33 +133,6 @@ get_grad(const gPVector<T> &p, gVector<T> &dp)
   }
 }
 
-
-/*
-
-template <class T> void GobitModule<T>::
-get_x(void)
-{
-  int k=1;
-  for(int i=1;i<=rep.NumPlayers();i++) {
-    for(int j=1;j<=rep.NumStrats(i);j++) {
-      x[k]=p[i][j];
-      k++;
-    }
-  }
-};
-
-template <class T> void GobitModule<T>::
-get_p(void)
-{
-  int k=1;
-  for(int i=1;i<=rep.NumPlayers();i++) {
-    for(int j=1;j<=rep.NumStrats(i);j++) {
-      p[i][j]=x[k];
-      k++;
-    }
-  }
-};
-*/
 
 #define BIG1 ((T) 100)
 #define BIG2 ((T) 100)
