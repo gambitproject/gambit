@@ -17,6 +17,7 @@
 #include "wx/wx.h"
 #endif  // WX_PRECOMP
 #include "wx/image.h"
+#include "wx/splash.h"
 
 #include "game/nfg.h"
 #include "game/nfstrat.h"
@@ -24,7 +25,6 @@
 
 #include "gambit.h"
 #include "dlabout.h"
-#include "splash.h"
 #include "dlnewgame.h"
 #include "efgshow.h"
 #include "nfgshow.h"
@@ -47,11 +47,17 @@ GambitApp::GambitApp(void)
 
 bool GambitApp::OnInit(void)
 {
+#include "bitmaps/gambit.xpm"
+
   wxConfig config("Gambit");
   m_fileHistory.Load(config);
 
-  Splash *splash = new Splash(2);
-  splash->Show(true);
+  wxBitmap bitmap(wxBITMAP(gambit));
+  wxSplashScreen *splash =
+    new wxSplashScreen(bitmap,
+		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
+		       2000, NULL, -1, wxDefaultPosition, wxDefaultSize,
+		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
   while (splash->IsShown()) {
     wxYield();
   }
