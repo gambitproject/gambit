@@ -239,6 +239,11 @@ segfaults.  The same thing happens with
 
   GCL1:= << While[True,<< True]
 
+COMMENT (magyar 9/29/98): I think this is fixed now.  At least, the simpler
+examples no longer leak memory.  This doesn't mean the more complicated
+one above is fixed; I haven't tested it.  So, I'm leaving it here until
+we can verify independently.
+
 //------------------------------
 
 Bug C30:  ElimDom on efg not working:
