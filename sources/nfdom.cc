@@ -140,12 +140,14 @@ NFStrategySet *ComputeDominated(NFSupport &S, int pl, bool strong,
 }
 
 
-NFSupport *ComputeDominated(NFSupport &S, bool strong, gOutput &tracefile)
+NFSupport *ComputeDominated(NFSupport &S, bool strong, 
+			    const gArray<int> &players, gOutput &tracefile)
 {
   NFSupport *T = new NFSupport(S);
   bool any = false;
   
-  for (int pl = 1; pl <= S.BelongsTo().NumPlayers(); pl++)   {
+  for (int i = 1; i <= players.Length(); i++)   {
+    int pl = players[i];
     tracefile << "Dominated strategies for player " << pl << ":\n";
     NFStrategySet *SS = ComputeDominated(S, pl, strong);
     if (SS)   {
