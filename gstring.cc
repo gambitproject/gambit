@@ -17,7 +17,7 @@
 
 gString::gString(void)
 {
-  storage = new char;
+  storage = new char[1];
   assert(storage != 0);
   *storage = '\0';
 }
