@@ -4,6 +4,7 @@
 // 
 
 #include"basis.h"
+#include "gtext.h"
 
 // ---------------------------------------------------------------------------
 // Class Basis
@@ -14,13 +15,11 @@
 // -----------------------
 
 template <class T> 
-Basis<T>::Basis(const gMatrix<T> &mat)
-: A(&mat), label( mat.MinRow(), mat.MaxRow() ), 
-  cols( mat.MinCol(), mat.MaxCol() ), slacks( mat.MinRow(), mat.MaxRow() ), 
-  arts(mat.MaxCol()+1,mat.MaxCol()), artUnitEntry(mat.MaxCol()+1,mat.MaxCol()),
-  colBlocked(mat.MinCol(), mat.MaxCol() ), rowBlocked( mat.MinRow(), mat.MaxRow() )
+Basis<T>::Basis(const gMatrix<T> &A)
+  : A(&A), label(A.MinRow(),A.MaxRow()), cols(A.MinCol(),A.MaxCol()), 
+    slacks(A.MinRow(),A.MaxRow()), artUnitEntry(A.MaxCol()+1,A.MaxCol()),
+    colBlocked(A.MinCol(),A.MaxCol()),rowBlocked(A.MinRow(),A.MaxRow())
 {
-
   int i;
   for(i = cols.First(); i <= cols.Last(); i++) {
     cols[i] = 0;
@@ -38,9 +37,8 @@ Basis<T>::Basis(const gMatrix<T> &mat)
 template <class T>
 Basis<T>::Basis(const Basis<T> &bas)
 : A(bas.A), label(bas.label), cols( bas.cols ), slacks( bas.slacks ),
-  arts(bas.arts), artUnitEntry(bas.artUnitEntry),
-  colBlocked(bas.colBlocked),rowBlocked(bas.rowBlocked),
-  IsBasisIdent(bas.IsBasisIdent)
+  artUnitEntry(bas.artUnitEntry), colBlocked(bas.colBlocked), 
+  rowBlocked(bas.rowBlocked), IsBasisIdent(bas.IsBasisIdent)
 { }
 
 template <class T>
@@ -55,7 +53,6 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
     label = orig.label; 
     cols = orig.cols;
     slacks = orig.slacks;
-    arts = orig.arts;
     artUnitEntry = orig.artUnitEntry;
     rowBlocked = orig.rowBlocked;
     colBlocked = orig.colBlocked;
@@ -77,13 +74,14 @@ int Basis<T>::Pivot(int outindex, int col)
  
   if (IsSlackColumn(col)) slacks[-col] = outindex;
   else if (IsRegColumn(col)) cols[col] = outindex;
-  else if (IsArtifColumn(col)) arts[col] = outindex;
-  else assert(0); // not a valid column to pivot in.
+  else throw BadIndex(); // not a valid column to pivot in.
   
   if (IsSlackColumn(outlabel)) slacks[-outlabel] = 0;
   else if (IsRegColumn(outlabel)) cols[outlabel] = 0;
-  else if (IsArtifColumn(outlabel)) arts[outlabel] = 0;
-  else assert(0); // not a valid column to pivot in.
+  else {
+    // Note: here, should back out outindex.    
+    throw BadIndex(); // not a valid column to pivot out. 
+  }
   
   label[outindex] = col;
   CheckBasis();
@@ -98,7 +96,6 @@ bool Basis<T>::Member( int col ) const
 
   if (IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
-  else if (IsArtifColumn(col)) ret = arts[col];
   else ret = 0;
 
   return (ret != 0);
@@ -112,7 +109,6 @@ int Basis<T>::Find( int col ) const
 
   if ( IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
-  else if (IsArtifColumn(col)) ret = arts[col];
   else ret = 0;
   
   assert (ret != 0);
@@ -191,39 +187,26 @@ void Basis<T>::GetColumn( int col, gVector<T> &ret ) const
   }
 }
 
-
-template <class T>
-void Basis<T>::InsertArtificial( int art, int col )
-{
-  arts.Insert( 0, col);
-  artUnitEntry.Insert( art, col);
-}
-
 template <class T>
 int Basis<T>::AppendArtificial( int art )
 {
-  arts.Append(0);
+  cols.Append(0);
   return artUnitEntry.Append(art);
 }
 
 template <class T>
 void Basis<T>::RemoveArtificial( int col )
 {
-  arts.Remove(col);
+  assert(IsArtifColumn(col));
+  assert(cols[col]==0); // can only remove non basic columns
+  cols.Remove(col);
   artUnitEntry.Remove( col);
 }
 
 template <class T>
-void Basis<T>::FlushArtificial()
+int Basis<T>::LastLabel()
 {
-  arts.Flush();
-  artUnitEntry.Flush();
-}
-
-template <class T>
-int Basis<T>::LastArtificial()
-{
-  return artUnitEntry.Last();
+  return cols.Last();
 }
 
 template <class T> 
@@ -257,4 +240,12 @@ template<class T>
 bool Basis<T>::IsIdent()
 {
   return IsBasisIdent;
+}
+
+template <class T> Basis<T>::BadIndex::~BadIndex()
+{ }
+
+template <class T> gText Basis<T>::BadIndex::Description(void) const
+{
+  return "Bad index in gArray";
 }

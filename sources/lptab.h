@@ -44,20 +44,15 @@ public:
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS(void) const;
 
-  // Inserts an artificial variable in column col
-  void InsertArtificial( int art, int col );
-
   // Appends an artificial variable
   int AppendArtificial( int art );
 
   // Removes an artificial variable located at col.
   void RemoveArtificial( int col );
 
-  // returns the index of the last artificial variable
-  int LastArtificial( void );
+  // returns the label of the index of the last artificial variable
+  int LastLabel( void );
 
-  // Removes all artificial variables
-  void FlushArtificial( void );
   void BigDump(gOutput &);
 };
 

@@ -194,8 +194,9 @@ void LPTableau<T>::Refactor()
 template <class T>
 void LPTableau<T>::Pivot(int outrow,int col)
 {
-  // gout << "\noutrow, col: " << outrow << " " << col;
-  // Dump(gout);
+  // gout << "\nIn LPTableau<T>::Pivot() ";
+  // gout << "outrow: " << outrow << " col: " << col;
+  // BigDump(gout);
   Tableau<T>::Pivot(outrow,col);
   SolveDual();
 }
@@ -652,19 +653,11 @@ BFS<T> LPTableau<T>::DualBFS() const
 }
 
 template <class T>
-void LPTableau<T>::InsertArtificial( int art, int col )
-{
-  basis.InsertArtificial( art, col );
-}
-
-
-template <class T>
 int LPTableau<T>::AppendArtificial( int art )
 {
   cost.Append(0);
   return basis.AppendArtificial( art );
 }
-
 
 template <class T>
 void LPTableau<T>::RemoveArtificial( int col )
@@ -672,25 +665,41 @@ void LPTableau<T>::RemoveArtificial( int col )
   basis.RemoveArtificial( col );
 }
 
-
 template <class T>
-int LPTableau<T>::LastArtificial( void )
+int LPTableau<T>::LastLabel( void )
 {
-  return basis.LastArtificial();
+  return basis.LastLabel();
 }
 
+template <class T>
+void LPTableau<T>::BigDump(gOutput &to)
+{
+  //   Tableau<T>::BigDump(to);
 
-template <class T>
-void LPTableau<T>::FlushArtificial( void )
-{
-  basis.FlushArtificial();
+  to << "\nBasis:";
+  basis.Dump(to);
+  to << "\nMaxCol(): " << MaxCol(); 
+  to << "\nLastlabel(): " << LastLabel(); 
+  gMatrix<T> AA(MinRow(),MaxRow(),MinCol(),LastLabel()+(*A).NumRows());
+  gVector<T> bb(MinRow(), MaxRow());
+
+  BasisVector(bb);
+  to << "\nBasisVector:\n" << bb;
+
+  for(int j=MinCol();j<=LastLabel();j++) {
+    SolveColumn(j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,j) = bb[i];
+  }
+  for(int j=MinRow();j<=MaxRow();j++) {
+    SolveColumn(-j, bb);
+    for(int i=AA.MinRow();i<=AA.MaxRow();i++) 
+      AA(i,LastLabel()+j) = bb[i];
+  }
+  to << "\nTableau:\n" << AA;
+
+  to << "\nCost vector: " << GetCost();
+  to << "\nUnit Cost  : " << GetUnitCost();
+  to << "\nTotal Cost: " << TotalCost();
 }
-  
-template <class T>
-void LPTableau<T>::BigDump(gOutput &out)
-{
-  Tableau<T>::BigDump(out);
-  gout << "\nCost vector: " << GetCost();
-  gout << "\nUnit Cost  : " << GetUnitCost();
-  gout << "\nTotal Cost: " << TotalCost();
-}
+

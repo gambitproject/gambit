@@ -24,12 +24,11 @@ friend class LUdecomp<T>;
 protected:
 
   const gMatrix<T> *A;
-  gBlock<int> label;
-  gBlock<int> cols;
-  gBlock<int> slacks;
-  gBlock<int> arts;
-  gBlock<int> artUnitEntry;
-  gArray<bool> colBlocked;
+  gBlock<int> label;        // labels of variables in basis (neg for slacks)
+  gBlock<int> cols;         // location of col in basis (0 if not in basis)
+  gBlock<int> slacks;       // location of slacks in basis
+  gBlock<int> artUnitEntry; // artificial variable label
+  gArray<bool> colBlocked;  
   gArray<bool> rowBlocked;
   bool IsBasisIdent;
 
@@ -37,15 +36,21 @@ protected:
   inline bool IsSlackColumn( int col ) const 
     {return  -col >= label.First() && -col <= label.Last();} 
   
-  // returns true if the column is artificial
-  inline bool IsArtifColumn( int col ) const
-    {return col > cols.Last() && col <= cols.Last() + arts.Length();} 
-
   // returns true if the column is a regular column
   inline bool IsRegColumn( int col ) const
     {return col >= cols.First() && col <= cols.Last();} 
   
+  // returns true if the column is artificial
+  inline bool IsArtifColumn( int col ) const
+    {return col > (*A).MaxCol() && col <= cols.Last();} 
+
 public:
+    class BadIndex : public gException  {
+    public:
+      virtual ~BadIndex();
+      gText Description(void) const;
+    };
+
 
   //-------------------------------------------
   // Constructors, Destructor, Operators
@@ -98,9 +103,6 @@ public:
   // returns a column from the matrix  
   void GetColumn( int col, gVector<T> & ) const;
   
-  // Insert an artificial variable at column col
-  void InsertArtificial( int art, int col );
-
   // Append an artificial variable.  Returns the last col index
   // ( ie where the artificial variable was appended ).
   int AppendArtificial( int art );
@@ -109,11 +111,8 @@ public:
   // was removed.
   void RemoveArtificial( int col );
   
-  // Clears out all the artificial variables
-  void FlushArtificial();
-
   // Returns the index of the last artificial variable
-  int LastArtificial();
+  int LastLabel();
 
   void Dump(gOutput &) const;
 
