@@ -17,6 +17,7 @@
 #include "treewin.h"
 
 
+#define BAD_NODE Node(-1,-1,-1,-1)
 extern GambitFrame *gambit_frame;
 
 wxFont *label_font;
@@ -287,7 +288,7 @@ TreeWindow::TreeWindow(wxFrame *_frame,int x,int y,int w,int h,Problem *p,int st
 
 	iterator=new TreeWinIter(the_problem);
 	flasher=new TreeNodeFlasher(GetDC());
-	mark_node=the_problem->RootNode();
+	mark_node=BAD_NODE;
 
 	label_font=new wxFont(10,wxSWISS,wxNORMAL,wxNORMAL);
 	fixed_font=new wxFont(12,wxMODERN,wxNORMAL,wxBOLD);
@@ -469,7 +470,11 @@ void TreeWindow::RenderSubtree(wxDC &dc,const Node &n, wxList *node_list)
 	dc.SetFont(label_font);
 
 	::DrawLine(dc,entry->x, entry->y,
-			entry->x + draw_settings.NodeLength(), entry->y, entry->color);
+			entry->x + draw_settings.NodeLength(), entry->y,entry->color);
+
+	if (n==mark_node)
+		::DrawLine(dc,entry->x-4, entry->y+4,
+				entry->x + draw_settings.NodeLength(), entry->y+4,::ColorNum(draw_settings.CursorColor()));
 
   if (draw_settings.ShowLabels())
 		::DrawText(dc,the_problem->GetNodeLabel(n).stradr(),entry->x, entry->y+3, entry->color);

@@ -69,8 +69,8 @@ friend class DisplayOptionsForm;
 
 
 typedef struct   {
-  int x, y, level, color;
-  Node n;
+		int x, y, level, color;
+		Node n;
 }  NodeEntry;
 
 
