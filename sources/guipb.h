@@ -23,14 +23,14 @@
 // GuiPlayback object.
 
 class GuiPlayback;
-extern GuiPlayback gui_playback;
+extern GuiPlayback *gui_playback;
 
 
 // Macros; these make accessing the logging state easier.
 
-#define GUI_PLAYBACK gui_playback.IsPlayingBack()
+#define GUI_PLAYBACK gui_playback->IsPlayingBack()
 
-#define GUI_READ_ARG(F,N) gui_playback.ReadArg(F,N)
+#define GUI_READ_ARG(F,N) gui_playback->ReadArg(F,N)
 
 
 /*

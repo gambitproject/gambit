@@ -21,7 +21,7 @@ template class HashTable<gText, GuiObject*>;
 
 
 // The global GuiRecorderDatabase object:
-GuiRecorderDatabase gui_recorder_db;
+GuiRecorderDatabase *gui_recorder_db;
 
 // Initialize static class members.
 bool GuiRecorderDatabase::instantiated = false;

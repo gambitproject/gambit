@@ -14,7 +14,7 @@
 
 
 // The global GuiPlayback object:
-GuiPlayback gui_playback;
+GuiPlayback *gui_playback;
 
 // Initialize static class members.
 bool GuiPlayback::instantiated = false;
@@ -422,10 +422,10 @@ void GuiPlayback::ExecuteCommand(const gText& object_name,
     //          can't be checked as a result, and can't be overridden 
     //          by subclasses!  FIXME!
 
-    if (gui_recorder_db.IsDefined(object_name) == 0) // This shouldn't be necessary.
+    if (gui_recorder_db->IsDefined(object_name) == 0) // This shouldn't be necessary.
         throw ObjectNotFound();
 
-    GuiObject *object = gui_recorder_db(object_name);
+    GuiObject *object = (*gui_recorder_db)(object_name);
 
     // Separate the object name from the object number.  The object name is
     // whatever comes before the last '#' and the number is whatever comes

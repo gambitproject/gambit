@@ -51,7 +51,7 @@
 // GuiRecorderDatabase object.
 
 class GuiRecorderDatabase;
-extern GuiRecorderDatabase gui_recorder_db;
+extern GuiRecorderDatabase *gui_recorder_db;
 
 // The GuiRecorderDatabase class.  This is just a hash table of
 // GuiObject pointers.  It should only have one instance.

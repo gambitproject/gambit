@@ -181,9 +181,9 @@ GuiObject::GuiObject(const gText& my_name)
     // Put the object's pointer into the database.
     // Make sure it isn't already there.
 
-    if (gui_recorder_db.IsDefined(GuiLogName) == 0)
+    if (gui_recorder_db->IsDefined(GuiLogName) == 0)
     {
-        gui_recorder_db.Define(GuiLogName, this); 
+        gui_recorder_db->Define(GuiLogName, this); 
     }
     else  // The object is already there!
     {
@@ -198,13 +198,13 @@ GuiObject::GuiObject(const gText& my_name)
 GuiObject::~GuiObject()
 { 
 #ifdef GUIOBJ_DEBUG
-    gui_recorder_db.dump();
+    gui_recorder_db->dump();
     printf("Removing GUI object %s from recorder database.\n", (char *)GuiLogName);
 #endif
     // Remove this object from the global gui object database.
-    gui_recorder_db.Remove(GuiLogName);
+    gui_recorder_db->Remove(GuiLogName);
 #ifdef GUIOBJ_DEBUG
-    gui_recorder_db.dump();
+    gui_recorder_db->dump();
 #endif
 }
 

@@ -41,7 +41,7 @@ extern wxApp *wxTheApp = 1;
 #endif
 
 
-GambitApp gambitApp;
+GambitApp   *gambitApp;
 GambitFrame *main_gambit_frame;
 
 typedef void (*fptr)(int);
@@ -187,6 +187,18 @@ wxFrame *GambitApp::OnInit(void)
         return NULL;
     }
 
+	// Initialize global App object.
+
+	gambitApp = new GambitApp;
+
+	//
+	// Initialize GUI record/playback globals.
+	//
+
+	gui_recorder    = new GuiRecorder;
+	gui_recorder_db = new GuiRecorderDatabase;
+	gui_playback    = new GuiPlayback;
+
     // ----------------------------------------------------------------------
     // Check command-line options.  These are used in the GUI record/playback
     // system.  If relevant options are found, they are removed from the 
@@ -217,7 +229,7 @@ wxFrame *GambitApp::OnInit(void)
             rpindex = i;
             i++;
 
-            gui_recorder.openFile(argv[i]);
+            gui_recorder->openFile(argv[i]);
 
             record_requested = true;
             options_found = true;
@@ -330,7 +342,7 @@ wxFrame *GambitApp::OnInit(void)
 
     // Set current directory.
 
-    gambitApp.SetCurrentDir(gText(wxGetWorkingDirectory()));
+    gambitApp->SetCurrentDir(gText(wxGetWorkingDirectory()));
 
     // If playing back a log file, read in the log file and
     // execute the log file commands one by one.
@@ -339,7 +351,7 @@ wxFrame *GambitApp::OnInit(void)
     {
         try
         {
-            gui_playback.Playback(playback_filename);
+            gui_playback->Playback(playback_filename);
         }
         catch (gException &e)
         {
@@ -390,7 +402,7 @@ void GambitFrame::LoadFile(char *s)
         {
             Enable(FALSE); // Don't allow anything while the dialog is up.
 
-            s = wxFileSelector("Load data file", gambitApp.CurrentDir(), 
+            s = wxFileSelector("Load data file", gambitApp->CurrentDir(), 
                                NULL, NULL, "*.?fg");
 
             Enable(TRUE);
@@ -399,7 +411,7 @@ void GambitFrame::LoadFile(char *s)
                 return;
 
             // Save the current directory.
-            gambitApp.SetCurrentDir(gText(wxPathOnly(s)));
+            gambitApp->SetCurrentDir(gText(wxPathOnly(s)));
 
             GUI_RECORD_ARG("GambitFrame::LoadFile", 1, s);
 

@@ -8,7 +8,7 @@
 #include "guirec.h"
 
 // The global GuiRecorder object:
-GuiRecorder gui_recorder;  
+GuiRecorder *gui_recorder;  
 
 // Initialize static class members.
 bool GuiRecorder::recording = false;

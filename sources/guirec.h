@@ -18,23 +18,23 @@
 // This is so other files can refer to the global GuiRecorder object.
 
 class GuiRecorder;
-extern GuiRecorder gui_recorder;
+extern GuiRecorder *gui_recorder;
 
 // Macros; these make accessing the logging state easier.
 
-#define GUI_RECORDING gui_recorder.IsRecording()
+#define GUI_RECORDING gui_recorder->IsRecording()
 
 // Write a line of the form: "object, command" to the log file with
 // a newline at the end.
 #define GUI_RECORD(X) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeToFile_newline(get_log_name(), X); }
+if (gui_recorder->IsRecording()) { gui_recorder->writeToFile_newline(get_log_name(), X); }
 
 // Make an "argument line" for a command that is being logged.
 #define GUI_RECORD_ARG(X, Y, Z) \
-if (gui_recorder.IsRecording()) { gui_recorder.writeArgToFile(get_log_name(), X, Y, Z); }
+if (gui_recorder->IsRecording()) { gui_recorder->writeArgToFile(get_log_name(), X, Y, Z); }
 
 // Close the log file.
-#define GUI_RECORDER_CLOSE if (gui_recorder.IsRecording()) { gui_recorder.closeFile(); }
+#define GUI_RECORDER_CLOSE if (gui_recorder->IsRecording()) { gui_recorder->closeFile(); }
 
 
 // 
