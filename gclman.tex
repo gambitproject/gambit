@@ -63,15 +63,15 @@ University of Minnesota.
 
 Numerous students at Caltech and the University of Minnesota have
 contributed to the Gambit Command Language and to the Gambit Project
-more generally: Among these are Bruce Bell, Anand Chelian, Nelson
-Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and Gary Wu.  We
-are particularly grateful to Gary Wu for his work on the stack machine
-used by the command language, to Bruce Bell and Nelson Escobar for
-work on data structures, and to Rob Weber for help in compiling this
-manual and testing parts of the language.  We are also extremely
-grateful to Eugene Grayver for setting up and maintaining our Web
-site, for compiling the DOS/WINDOWS version of the GCL, and for his
-extensive work on the related GUI and PXI programs.
+more generally: Among these are Bruce Bell, Anand Chelian, Matthew
+Derer, Nelson Escobar, Eugene Grayver, Todd Kaplan, Brian Trotter, and
+Gary Wu.  We are particularly grateful to Gary Wu for his work on the
+stack machine used by the command language, to Bruce Bell and Nelson
+Escobar for work on data structures, and to Rob Weber for help in
+compiling this manual and testing parts of the language.  We are also
+extremely grateful to Eugene Grayver for setting up and maintaining
+our Web site, for compiling the DOS/WINDOWS version of the GCL, and
+for his extensive work on the related GUI and PXI programs.
 
 \section{Installation}
 
@@ -1104,33 +1104,7 @@ e := LoadEfg["filename.efg" ]
 
 \subsubsection{Subgames}
 
-Gambit implements and supports the concept of a game theoretic
-subgame.  When an extensive form is first created, no subgames (except
-for the default ROOT subgame) are defined.  The function
-\verb+MarkSubgames[]+ can be used to mark all of the subgames in the
-extensive form, and \verb+MarkSubgame[]+ can be used to check whether
-a specific node is a subgame root, and mark it if it is.  Similarly,
-subgames can be unmarked by using \verb+UnmarkSubgames[]+ and
-\verb+UnmarkSubgame[]+.  The function \verb+Subgames[]+ returns a list
-of all currently marked subgame roots.
-
-All of the solution algorithms (with the current exception of the
-\verb+GobitSolve[]+ algorithms) make use of the marked subgames.  When
-non-trivial subgames are marked, then the solution algorithms will
-solve the extensive form game by recursion through the marked
-subgames.  Thus, a subgame is solved only when all subgames following
-it have been solved.
-
-If all subgames are marked, then any Nash equilibrium found will be a
-subgame perfect Nash equilibrium.  Note that the solution algorithms
-only respect marked subgames, and hence if you want the solution
-algorithms to make use of subgames, you must mark the subgames.
-
-\noindent
-[Note: If there are non trivial marked subgames, the solution
-algorithms currently only return one equilibrium (the first
-found) in each subgame.  If no non-trivial subgames are marked, then
-as many solutions as are requested will be found.]
+{\bf This section was out of date, needs replaced.}
 
 \subsection{Normal forms}
 
@@ -1179,7 +1153,7 @@ b := Behav[m]
 
 \noindent
 will convert the game \verb+e+ to reduced normal form, solve it using
-the LcpSolve algorithm, and then convert all mixed profiles found back
+the \verb+LcpSolve+ algorithm, and then convert all mixed profiles found back
 to behavior profiles, and display the list, \verb+b+ of behavior
 profiles found. The avove can also be done in one command without saving
 intermediate steps as follows:  
@@ -1317,7 +1291,7 @@ and von Stengel's {\em sequence form} (\cite{KolMegSte:94}. The
 sequence form is a formulation of the set of Nash equilibria as the
 solution to a non linear complementarity problem in variables that
 correspond to ``sequences'' in the extensive form, which they show can
-be solved by Lemke's algorithm for Linear complementarity problems.
+be solved by Lemke's algorithm for linear complementarity problems.
 The method has nice properties in terms of its computational
 complexity, as it only grows linearly in the size of the extensive
 form game.  
@@ -1343,8 +1317,8 @@ until a Nash equilibrium has been found or the maximum number of tries
 
 \subsection{Linear Program}
 
-Finds the minmimax solution (a Nash equilibrium) for a two person
-constant-sum game in normal form, by solving it as a Linear Program.
+Finds the minimax solution (a Nash equilibrium) for a two person
+constant-sum game in normal form, by solving it as a linear program.
 
 \subsection{Simpicial Subdivision}
 
@@ -1750,19 +1724,8 @@ are also not documented by the GCL \verb+Help+ function.
 \end{verbatim}
 
 
-\section{Function Reference, Alphabetical}
+\section{Alphabetical Reference}
 
-The following is a list of procedures with the operations that they
-perform in the Gambit Command Language:
-
-Variable types in all capital letters indicate the type of the
-required parameter or return value of the procedure.
-
-The symbol {\tt "=:"} to the right of a procedure specifies the type
-of the return value (if any exists) produced by the procedure.
-
-Paremeters enclosed in brackets {\tt "\{ \}"} represent optional
-parameters which are not necessary for the procedure to function.
 
 \begin{itemize}
 
@@ -1866,8 +1829,8 @@ And[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 
 \bd
 Computes the logical conjunction of \verb+x+ and \verb+y+.
-\item
-[Short forms:] \verb+x && y+, \verb+x AND y+.
+\item [Short forms:] \verb+x && y+, \verb+x AND y+.
+\item [See also:] \verb+Not+, \verb+Or+.
 \ed
 
 \item
@@ -1908,8 +1871,7 @@ Assign[x<->T, value->T*] =: T
 {\it for all types} {\tt T}
 \bd
 Copies the \verb+value+ to the variable referred to by \verb+x+.
-Note that the type-matching rules combined with this signature imply that
-a variable's type may not be directly changed.  Returns the value assigned.
+Returns the value assigned.
 \item [Short form:] \verb+x := value+
 \item [See also:] \verb+Clear+, \verb+UnAssign+.
 \ed
@@ -1926,7 +1888,7 @@ is that nonterminal outcomes represent incremental payoffs.  Attaching
 the null outcome is equivalent to a call to \verb+DetachOutcome+.  It is
 an error if \verb+node+ and \verb+outcome+ are not from the same
 extensive form game.
-\item [See also:] \verb+DetachOutcome+, \verb+HasOutcome+, \verb+Outcome+.
+\item [See also:] \verb+DetachOutcome+, \verb+Outcome+.
 \ed
 
 %--B--
@@ -2050,8 +2012,7 @@ Clear[] =: BOOLEAN
 \end{verbatim}\normalsize
 
 \bd
-Unassigns all variables defined in the current scope.  Within a user-defined
-function, parameters are not unassigned.  Returns \verb+True+.
+Unassigns all variables defined in the current scope.  Returns \verb+True+.
 \item [See also:] \verb+Assign+, \verb+UnAssign+.
 \ed
 
@@ -2081,7 +2042,7 @@ removed.
 
 \item
 \protect \large \begin{verbatim}
-Concat[x->NLIST(T), y->NLIST(T)] =: LIST(T)
+Concat[x->NLIST(T*), y->NLIST(T*)] =: LIST(T)
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -2093,7 +2054,7 @@ Returns the concatenation of the lists \verb+x+ and \verb+y+.
 
 \item
 \protect \large \begin{verbatim}
-Contains[list->NLIST(T), x->T] =: BOOLEAN
+Contains[list->NLIST(T*), x->T*] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -2134,17 +2095,15 @@ Returns the current date and time.
 
 \item
 \protect \large \begin{verbatim}
-DeleteAction[action->ACTION] =: BOOLEAN
+DeleteAction[action->ACTION] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
 Deletes \verb+action+ from its information set. 
 As a consequence, the corresponding subtrees associated
 with the action from each member of the information set are deleted.
-If \verb+action+ is the last action in its information set, the
-information set is deleted, and its members become terminal nodes.
-Returns \verb+True+ when \verb+action+ was the last action in its
-information set.
+Returns the information set to which \verb+action+ belonged.  It is an
+error if \verb+action+ is the only action at its information set.
 \item [See also:] \verb+Actions+, \verb+InsertAction+.
 \ed
 
@@ -2167,7 +2126,8 @@ deleted.
 \end{verbatim}\normalsize
 
 \bd
-Removes the specified function from the list of user-defined functions.
+Removes the function with the given signature
+from the list of user-defined functions.
 \item [Note:] Special function. Not listable; cannot be called inside
 a user defined function; not documented in \verb+Help+ or \verb+Manual+.  
 \item [See also:] \verb+NewFunction+.
@@ -2224,7 +2184,7 @@ Sets the outcome associated with \verb+node+ to be the
 null outcome.  If there is no outcome associated with \verb+node+ this
 function has no effect.  Returns the outcome which was attached to
 \verb+node+, or the null outcome if no outcome was attached.
-\item [See also:] \verb+AttachOutcome+, \verb+HasOutcome+, \verb+Outcome+.
+\item [See also:] \verb+AttachOutcome+, \verb+Outcome+.
 \ed
 
 \item 
@@ -2330,10 +2290,6 @@ EnumMixedSolve[support->NFSUPPORT, {stopAfter->INTEGER},
 \bd
 Returns the extreme points of the set of all Nash equilibria (pure or
 mixed) for a two person game using \verb+support+.
-The extensive form version converts
-each marked subgame into its associated reduced normal form, enumerates
-equilibria, and reassembles the behavioral profiles.  The normal form
-version operates directly on the given normal form.
 
 The following optional parameters may be used to modify the behavior
 of the algorithm:
@@ -2633,8 +2589,9 @@ Computes a branch of the logistic quantal response equilibrium
 correspondence for a game. \verb+start+ is
 used as the starting point for the computation of $\lambda_{0}$, and
 the support over which \verb+start+ is defined is the support over
-which the correspondence is computed.  The
-behavior of the algorithm may be modified by specifying some of the
+which the correspondence is computed.
+
+The behavior of the algorithm may be modified by specifying some of the
 following optional parameters:
 \bd
 \item
@@ -2665,10 +2622,10 @@ optimization routine.  The default value is $200$.
 [tolN:] Sets the tolerance for the $n$-dimensional optimization routine.
 The default is 1.0e-10.
 \item
-[maxits1:] Sets the maximum number of iterations for the 1-dimensional
+[maxits1:] Sets the maximum number of iterations for the one-dimensional
 optimization routine.  The default is $100$.
 \item
-[tol1:] Sets the tolerance for the 1-dimensional optimization routine.
+[tol1:] Sets the tolerance for the one-dimensional optimization routine.
 The default is 2.0e-10.
 \item
 [time:] Returns the amount of time consumed by the
@@ -2683,7 +2640,7 @@ by the algorithm.
 [traceFile:] A file containing a log of more detailed information on
 the execution of the algorithm.  By default, no logging is done.
 \item
-[traceLevel:] An interger specifying the level of detail in logging.
+[traceLevel:] An integer specifying the level of detail in logging.
 Higher integers correspond to more detail; zero corresponds to
 no output at all.
 \ed
@@ -2742,7 +2699,7 @@ achine.
 GreaterEqual[x->T, y->T] =: BOOLEAN
 \end{verbatim}\normalsize
 
-{\it for} {\tt T + FLOAT, INTEGER, RATIONAL}
+{\it for} {\tt T = FLOAT, INTEGER, RATIONAL}
 \bd
 Returns \verb+True+ when \verb+x+ is at least as large as \verb+y+.
 \item
@@ -2870,7 +2827,7 @@ Terminal nodes, and the null node, belong to the null information set.
 
 \item
 \protect \large \begin{verbatim}
-InfosetProb[profile->BEHAV(T), infoset->INFOSET*] =: T
+InfosetProb[profile->BEHAV(T), infoset->INFOSET] =: T
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -3126,7 +3083,7 @@ form game which is computed via the \verb+LiapSolve+ or
 
 \item
 \protect \large \begin{verbatim}
-IsKnownSubgamePerfect[profile->BEHAV](T) =: BOOLEAN
+IsKnownSubgamePerfect[profile->BEHAV(T)] =: BOOLEAN
 \end{verbatim}\normalsize
 
 {\it for} {\tt T = FLOAT, RATIONAL}
@@ -3364,16 +3321,16 @@ equilibrium. Default is 10.
 \item
 [stopAfter:] Sets the number of equilibria to find.  Default is 1.
 \item
-[maxits1:] Sets the maximum number of iterations in the
-1-dimensional line search.  Default is 100.
-\item
 [maxitsN:] Sets the maximum number of iterations in the
-n-dimensional optimization.  Default is 10.
+$n$-dimensional optimization.  Default is 10.
 \item
-[tolN:] Sets the tolerance for the n-dimensional optimization
+[tolN:] Sets the tolerance for the $n$-dimensional optimization
 routine.  Default is 1.0e-10.
 \item
-[tol1:] Sets the tolerance for the 1-dimensional line search.
+[maxits1:] Sets the maximum number of iterations in the
+one-dimensional line search.  Default is 100.
+\item
+[tol1:] Sets the tolerance for the one-dimensional line search.
 Default is 2.0e-10.
 \item
 [time:] Returns the elapsed time for the operation.
@@ -3445,7 +3402,7 @@ LoadEfg[file->TEXT] =: EFG(T)
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Loads an extensive form game from an external savefile.
-An error occurs if the file cannot be opened, or if the file does
+It is an error if the file cannot be opened, or if the file does
 not contain a valid extensive form savefile.
 \item [See also:] \verb+SaveEfg+.
 \ed
@@ -3458,7 +3415,7 @@ LoadNfg[file->TEXT] =: NFG(T)
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Loads a normal form game from an external savefile.
-An error occurs if the file cannot be opened, or if the file does not 
+It is an error if the file cannot be opened, or if the file does not 
 contain a valid normal form savefile.
 \item [See also:] \verb+SaveNfg+.
 \ed
@@ -3469,7 +3426,7 @@ Log[x->FLOAT] =: FLOAT
 \end{verbatim} \normalsize
 
 \bd
-Computes the natural logarithm of \verb+x+.  An error occurs if
+Computes the natural logarithm of \verb+x+.  It is an error if
 \verb+x+ is nonpositive.
 \item [See also:] \verb+Exp+, \verb+Power+.
 \ed
@@ -3615,6 +3572,7 @@ Minus[x->T, y->T] =: T
 \bd
 Returns the difference $x - y$.
 \item [Short form:] \verb+x - y+
+\item [See also:] \verb+Divide+, \verb+Plus+, \verb+Times+.
 \ed
 
 \item
@@ -3662,7 +3620,7 @@ MoveToInfoset[node->NODE, infoset->INFOSET] =: NODE
 \end{verbatim}\normalsize
 
 \bd
-Removes \verb+node+ from it's current information set, and makes it a
+Removes \verb+node+ from its current information set, and makes it a
 member of \verb+infoset+. It is an error if the number of actions at
 \verb+node+ is not the same as the number of actions in
 \verb+infoset+, or if \verb+node+ and \verb+infoset+ are from
@@ -3692,7 +3650,7 @@ form game.
 Name[x->T] =: TEXT
 \end{verbatim}\normalsize
 
-{\it for} {T = ACTION*, EFG, EFPLAYER*, INFOSET*, NFG, NFPLAYER*,
+{\it for} {\tt T = ACTION*, EFG, EFPLAYER*, INFOSET*, NFG, NFPLAYER*,
 NODE*, OUTCOME*, STRATEGY*} 
 \bd
 Returns the name of \verb+x+.  The name of a null object is defined
@@ -3842,6 +3800,7 @@ Creates and returns the (structural) reduced normal form game equivalent
 to the extensive form game \verb+efg+.  The optional parameter \verb+time+,
 if specified, contains upon completion the amount of time consumed by
 the transformation.
+\item [See also:] \verb+AgentForm+.
 \ed
 
 \item
@@ -3877,6 +3836,7 @@ Not[x->BOOLEAN] =: BOOLEAN
 \bd
 Returns the boolean inverse of \verb+x+.
 \item [Short forms:] \verb+NOT x+, \verb+!x+.
+\item [See also:] \verb+And+, \verb+Or+.
 \ed
 
 \item
@@ -3922,7 +3882,7 @@ than the number of children of \verb+node+.
 
 \item
 \protect \large \begin{verbatim}
-NthElement[list->NLIST(T), n->INTEGER] =: T 
+NthElement[list->NLIST(T*), n->INTEGER] =: T 
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -3966,6 +3926,7 @@ Or[x->BOOLEAN, y->BOOLEAN] =: BOOLEAN
 Returns the disjunction of \verb+x+ and \verb+y+.
 \item
 [Short form:] \verb+x || y+, \verb+x OR y+.
+\item [See also:] \verb+And+, \verb+Or+.
 \ed
 
 \item
@@ -4014,12 +3975,12 @@ Parent[node->NODE*] =: NODE
 \bd
 Returns the parent of \verb+node+.  If \verb+node+ is the root node,
 or if \verb+node+ is null, the null node is returned.
-\item [See also:] \verb+Children+, \verb+IsRoot+.
+\item [See also:] \verb+Children+.
 \ed
 
 \item
 \protect \large \begin{verbatim}
-Parenthesis[x->T] =: T
+Parentheses[x->T] =: T
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -4036,7 +3997,8 @@ Payoff[outcome->OUTCOME, player->EFPLAYER] =: T
 
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
-Returns the payoff to \verb+player+ at \verb+outcome+.
+Returns the payoff to \verb+player+ at \verb+outcome+.  It is an error if
+\verb+player+ and \verb+outcome+ are not from the same extensive form game.
 \item [See also:] \verb+SetPayoff+.
 \ed
 
@@ -4143,6 +4105,7 @@ Plus[x->T, y->T] =: T
 \bd
 Returns the sum of \verb+x+ and \verb+y+.
 \item [Short form:] \verb%x + y%
+\item [See also:] \verb+Divide+, \verb+Minus+, \verb+Times+.
 \ed
 
 \item
@@ -4215,7 +4178,7 @@ Assigns a payoff for each outcome for each player in the
 extensive form \verb+efg+ randomly chosen from the uniform distribution
 between 0 and 1.  The optional parameter \verb+seed+ may be used to
 set the seed of the pseudo-random number generator.  The identical game
-randomized with the same seed on the same machine will always produce
+randomized with the same seed will always produce
 the same results.
 \ed
 
@@ -4339,12 +4302,12 @@ identically zero.
 
 \item
 \protect \large \begin{verbatim}
-Remove[list<->NLIST(T), n->INTEGER] =: LIST(T)
+Remove[list<->NLIST(T*), n->INTEGER] =: LIST(T)
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
 \bd
-Rmoves the \verb+n+th element from \verb+list+.  A copy of the list
+Removes the \verb+n+th element from \verb+list+.  A copy of the list
 with the element removed is returned.  It is an error if \verb+n+
 is nonpositive, or if \verb+n+ is greater than the length of \verb+list+.
 \item [See also:] \verb+Insert+.
@@ -4384,14 +4347,9 @@ Reveal[infoset->INFOSET, who->LIST(EFPLAYER)] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
-Reveals the list of actions at the given information
-set to the indicated players, refining their information partitions at
-all information sets in the extensive form game accordingly.  The list
-of actions is considered as a set Thus, it is indicated to the
-specified players whether the set of actions in \verb+what+ or its
-complement has occurred.  If \verb+what+ is not specified, then all of
-the actions in the information set are individually revealed to
-the players specified.  
+Reveals the list of actions at \verb+infoset+ to the players in \verb+who+,
+refining their information partitions at
+all information sets in the extensive form game accordingly.  
 \ed
 
 \item
@@ -4402,7 +4360,6 @@ RootNode[efg->EFG(T)] =: NODE
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Returns the root node of \verb+efg+.
-\item [See also:] \verb+IsRoot+.
 \ed
 
 %--S--
@@ -4630,7 +4587,7 @@ SimpDivSolve[support->NFSUPPORT,
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Computes a Nash equilibrium for a game using a simplicial subdivision
-algorithm.  The list of solutions found is returned.
+algorithm. 
 
 The behavior of the algorithm may be modified by several optional
 parameters:
@@ -4809,6 +4766,7 @@ Times[x->T, y->T] =: T
 \bd
 Computes the product of \verb+x+ and \verb+y+.
 \item [Short form:] \verb+x * y+.
+\item [See also:] \verb+Divide+, \verb+Minus+, \verb+Plus+.
 \ed
 
 \item
@@ -4821,6 +4779,7 @@ Times[x->T, y->MIXED(T)] =: T
 \bd
 Computes the product of \verb+x+ and \verb+y+.
 \item [Short form:] \verb+x * y+.
+\item [See also:] \verb+Minus+, \verb+Plus+.
 \ed
 
 \item
