@@ -54,7 +54,7 @@ Theodore Turocy\\Northwestern University
 Gary Wu\\California Institute of Technology
 }
 
-\date{Version 0.94\\ \today\\ \jobname.tex}
+\date{Version 0.95\\ \today\\ \jobname.tex}
 
 \maketitle
 
@@ -75,11 +75,11 @@ University of Minnesota.
 Numerous students at Caltech and the University of Minnesota have
 contributed to the Gambit Command Language and to the Gambit Project
 more generally: Among these are Bruce Bell, Anand Chelian, Matthew
-Derer, Nelson Escobar, Eugene Grayver, Todd Kaplan, and Brian Trotter,
-and Rob Weber. We are particularly grateful to Eugene Grayver for
-setting up and maintaining our Web site, for compiling the DOS/WINDOWS
-version of the GCL, and for his extensive work on the related GUI and
-PXI programs.
+Derer, Nelson Escobar, Eugene Grayver, Todd Kaplan, Geoff Matters,
+Brian Trotter, and Rob Weber. We are particularly grateful to Eugene
+Grayver for setting up and maintaining our Web site, for compiling the
+DOS/WINDOWS version of the GCL, and for his extensive work on the
+related GUI and PXI programs.
 
 \chapter{Introduction}
 \pagestyle{headings}
@@ -130,13 +130,32 @@ will be issued.  Control is then turned over to you, and you will
 receive the GCL prompt
 
 \begin{verbatim}
-GCL1: << 
+GCL1:= << 
 \end{verbatim}
 
 \noindent The interpreter is ready for your first command.  Note that
 your prompt may be different from the above depending on settings in
 your \verb+gclini.gcl+ file.  
 
+\subsection{Command line editing}\index{Command line!Editing}
+
+You can edit the command line by using the arrow keys. The left and
+right arrow key move the cursor, the back space or delete key can be
+used to delete characters, and the typing characters will enter the
+characters in insert mode. The up and down arrow keys can be used to
+recall previous lines.  
+
+\subsection{Meaning of the prompt}\index{Prompt}
+\index{Command line!Prompt}
+
+The GCL prompt is of the form \verb+GCLnn:= <<+.  The prompt is
+actually part of the GCL command, and can be deleted or modified by
+the command line editor if so desired.  The \verb+<<+ part of the
+command causes the evaluation of the command line to be echoed to the
+console. Backspacing over this part of the command will supress
+output.  The \verb+GCLnn:=+ part of the command saves the evaluation
+of the command line to the variable \verb+GCLnn+.  Backspacing over
+this will prevent saving of the output into a variable.
 
 \section{\rindex{Technical support} and \rindex{bug reports}}
 
@@ -278,8 +297,7 @@ play an important role in the GCL.
 Type name	& Description \\ \hline
 \tindex{BOOLEAN} 	& boolean \\
 \tindex{INTEGER} 	& integer \\ 
-\tindex{FLOAT} 	& floating-point number \\
-\tindex{RATIONAL} 	& rational number with arbitrary precision \\
+\tindex{NUMBER} 	& floating-point or rational number \\
 \tindex{TEXT}	& string of arbitrary length \\
 \tindex{INPUT}	& input stream \\
 \tindex{OUTPUT}	& output stream \\ 
@@ -313,7 +331,7 @@ game \\
 
 The remainder of this section details the rules concerning the
 standard types
-\tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{FLOAT}, \tindex{RATIONAL}, \tindex{TEXT},
+\tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{NUMBER}, \tindex{TEXT},
 \tindex{INPUT} and \tindex{OUTPUT}, as well as general rules for typing.
 The extensive form and normal form types, and their related types, are
 detailed later in special sections.
@@ -327,8 +345,8 @@ to represent these, \tindex{True} and \tindex{False}.
 
 \subsection{Numeric Data types}
 
-The GCL supports three numeric data types, \verb+INTEGER+,
-\verb+FLOAT+, and \verb+RATIONAL+.
+The GCL supports two numeric data types, \verb+INTEGER+,
+and \verb+NUMBER+.
 
 \begin{itemize}
 \item \bindex{Integer}
@@ -342,17 +360,22 @@ The \verb+INTEGER+ type is implemented as the machine's long integer
 type, which is typically at least 32 bits in modern machines.  Thus,
 there is a danger of overflow or underflow in computations involving
 these numbers.  The largest legal integer is given by
-\tindex{MaxInt}, and the smallest legal integer is
+\verb+\index{MaxInt}, and the smallest legal integer is
 \verb+-Maxint[]+.  Integer computations that exceed these limits are
 subject to truncation or wraparound, depending on the platform.
 
-\item {\bf Float}
+\item {\bf Number}
 
-The \tindex{FLOAT} type may contain floating point values.  Floating
-point constants are represented in the GCL by any string of digits
-containing exactly one decimal point (\verb+.+).
+The \tindex{NUMBER} type may contain numbers whose internal
+representation is either floating point or rational.  Whether the
+internal representation is floating point or rational depends on how
+the number is initially input.  It can be input either as a floating
+point constant, or a ratio of integers.  
 
-The \verb+FLOAT+ type is implemented as the machine's double-precision
+Floating point constants are represented in the GCL by any
+string of digits containing exactly one decimal point (\verb+.+).
+
+Floating point numbers are implemented as the machine's double-precision
 floating point type.  Computation with these numbers is subject to
 rounding of least significant digits, and hence these numbers can be
 imprecise; for example, operations usually associated with being
@@ -361,16 +384,12 @@ numbers. However, since arithmetic operations on floating point
 numbers are typically implemented in hardware, the \verb+FLOAT+ data
 type is frequently used when speed is important.
 
-\item {\bf Rational}
-
-The \tindex{RATIONAL} type is used to represent rational numbers, which
-are ratios of two arbitrary-length integers.   
-
-This data type is capable of precisely representing any rational
-number, and arithmetic operations on rationals are exact.  However,
-arithmetic operations on rational numbers are implemented in software.
-Hence, computations with rational numbers can be slow, and output from
-them may be unreadably large.
+Rational numbers are implemented as the ratios of two arbitrary-length
+integers. Rational numbers are capable of precisely representing any
+rational number, and arithmetic operations on rationals are exact.
+However, arithmetic operations on rational numbers are implemented in
+software.  Hence, computations with rational numbers can be slow, and
+output from them may be unreadably large.
 
 In the current implementation, rational constants are not supported.
 Instead, rational numbers can be formed from two integers using the
@@ -378,6 +397,7 @@ Instead, rational numbers can be formed from two integers using the
 present, rational numbers whose numerator or denomerator exceed
 \verb+MaxInt[]+ must be built with GCL functions from smaller rational
 numbers.)
+
 \end{itemize}
 
 Since the GCL uses implicit data typing, the data type of a numeric
@@ -386,9 +406,9 @@ you write a numeric constant, keep the following in mind.  Floating
 point constants must include a \verb+.+ in them.  Rational numbers are
 built from integers, and hence must have a \verb+/+ in them, and
 integer constants must have neither of the above. Thus, to represent
-the number \verb+2+ as an \verb+INTEGER+, \verb+FLOAT+, and a
-\verb+RATIONAL+, you would write, \verb+2+, \verb+2.+, and \verb+2/1+,
-respectively.
+the number \verb+2+ as an \verb+INTEGER+, floating point \verb+NUMBER+
+or rational \verb+NUMBER+, you would write, \verb+2+, \verb+2.+, and
+\verb+2/1+, respectively.
 
 \subsection{Text}
 
@@ -430,7 +450,8 @@ The data type \tindex{NFG} is used to represent a normal form game.  No
 other normal form data type can exist independently of the normal form
 game to which it belongs.  The \tindex{NFPLAYER} and \tindex{STRATEGY}
 data types are used to represent players and strategies in a normal
-form game.  An \tindex{NFSUPPORT} represents a support for a normal form
+form game.  A \tindex{NFOUTCOME} is an outcome for a normal form game,
+and an \tindex{NFSUPPORT} represents a support for a normal form
 game, which is a collection of sets of admissible strategies, one for
 each player.  Finally a \tindex{MIXED} is a mixed strategy profile over
 an arbitrary support.
@@ -508,25 +529,22 @@ hand,
 \end{verbatim}
 
 \noindent 
-is not a legal list, since the second element is a {\tt LIST(FLOAT)}.
+is not a legal list, since the second element is a {\tt LIST(NUMBER)}.
 
 Lists are distinct in type from each other and from their scalar
 equivalents.  That is to say, {\tt LIST(INTEGER)} is a distinct data
-type from {\tt LIST(FLOAT)}, and is also a distinct data type from
+type from {\tt LIST(NUMBER)}, and is also a distinct data type from
 {\tt INTEGER}.
  
-\subsection{Conglomerate and qualified data types}
+\subsection{Conglomerate data types}
 
 In some of the function prototypes in the Function Reference section,
 you will notice certain data types which are not listed as supported
-data types in the section on GCL data types. 
-
-\medskip
-\noindent
-\bindex{Conglomerate types} are not actually data types, but are names
-used in GCL function prototypes to represent subsets of data types.
-Following is a list of the conglomerate data types along with the
-types they include:  
+data types in the section on GCL data types. These are referred to as
+\bindex{Conglomerate data types}. Conglomerate types are not actually
+data types, but are names used in GCL function prototypes to represent
+subsets of data types.  Following is a list of the conglomerate data
+types along with the types they include:
 
 \medskip
 \begin{center}
@@ -546,44 +564,6 @@ Conglomerate Type & Includes \\
 \noindent
 Here \verb+T+ could be any data type except \verb+LIST+
 
-
-\medskip
-\noindent
-\bindex{Qualified data types} represent objects of a specified type whose
-numeric data is of a specific data type, \verb+T+.  They are
-represented by writing the sub-type in parentheses after the parent
-type.  Following are the qualified data types in the GCL.
-
-\medskip
-\begin{center}
-\begin{tabular} {|l|l|} 
-\hline
-Parent Type & Qualified types\\
-\hline
-\tindex{EFG} & \verb+EFG(FLOAT)+, \verb+EFG(RATIONAL)+ \\ 
-\tindex{NFG} & \verb+NFG(FLOAT)+, \verb+NFG(RATIONAL)+ \\ 
-\tindex{BEHAV} & \verb+BEHAV(FLOAT)+, \verb+BEHAV(RATIONAL)+ \\ 
-\tindex{MIXED} & \verb+MIXED(FLOAT)+, \verb+MIXED(RATIONAL)+ \\ 
-\tindex{EFOUTCOME} & \verb+EFOUTCOME(FLOAT)+, \verb+EFOUTCOME(RATIONAL)+ \\ 
-\hline
-\end{tabular}
-\end{center}
-\medskip
-
-Qualified data types are treated as distinct data types for the
-purpose of parameter matching when passing values to functions.  In
-other words, if a GCL function requires a parameter of data type
-\verb+EFG(FLOAT)+, then it is an error to call it with with a variable
-or expression that evaluates to \verb+EFG(RATIONAL)+.  However for
-variable assignment and use in lists, the qualified data types of the
-same parent type are not distinguished. For example, it is legal to
-reassign a variable of type \verb+EFG(FLOAT)+ to be
-\verb+EFG(RATIONAL)+.  It is also legal to construct lists containing
-a mixture of qualified types which have the same parent type.  Note
-that if a variable or function is of the unqualified parent type, then
-it matches the qualified types with that parent. Hence if a function
-parmeter is of type \verb+EFG+, then it is OK to pass it values of
-either type \verb+EFG(FLOAT)+ or \verb+EFG(RATIONAL)+.
 
 \section{\rindex{Statements}}
 
@@ -647,7 +627,7 @@ Data Type & Constant \\
 \hline
 \verb+BOOLEAN+  & \tindex{True},  \tindex{False} \\
 \verb+INTEGER+ & \verb+1+, \verb+-1234567+ \\
-\verb+FLOAT+  & \verb+1.+,  \verb+-1.234567+ \\
+\verb+NUMBER+  & \verb+1.+,  \verb+-1.234567+ \\
 \verb+TEXT+  & \verb+"Help"+ \\
 \verb+OUTPUT+  & \tindex{StdOut}, \tindex{NullOut} \\
 \verb+INPUT+  & \tindex{StdIn} \\
@@ -665,14 +645,14 @@ represents.
 You are now ready to write your first GCL program:
 
 \begin{verbatim}
-GCL1: << "Help"
+GCL1:= << "Help"
 "Help"
 \end{verbatim}
 
 It is important to note that like all functions in the GCL, constants
 have a data type, which is determined by the ``function name''.  If
 you try and use a \verb+INTEGER+ constant, say \verb+123+, where a
-\verb+FLOAT+ or other data type is expected, you will get an error.
+\verb+NUMBER+ or other data type is expected, you will get an error.
 
 \subsection{\rindex{Variables}}
 
@@ -698,7 +678,7 @@ name \verb+x+ which returns the \verb+INTEGER+ \verb+1+, we can use
 \verb+Assign+ as follows:
 
 \begin{verbatim}
-GCL1: << Assign["x",1]
+GCL1:= << Assign["x",1]
 1
 \end{verbatim}
 
@@ -710,7 +690,7 @@ name, and the function is not ``listable'' (see the section on Lists,
 later in this chapter).  So, equivalently, and more compactly,
 
 \begin{verbatim}
-GCL1: << x := 1
+GCL1:= << x := 1
 1
 \end{verbatim}
 
@@ -734,7 +714,7 @@ variable.  To change the data type of a variable, it must first be
 deleted, and then reassigned.  
 
 An existing variable may be deleted by the use of the \tindex{UnAssign}
-function
+function, with the following prototype:
 
 \begin{verbatim}
 UnAssign[name->TEXT] =: BOOLEAN
@@ -745,7 +725,7 @@ is no longer defined.  A subsequent call of {\tt Assign} may redefine
 the variable to be of any type.  \verb+UnAssign+ has a short form of
 \verb+:=+ followed immediately by a linefeed or semicolon.  Hence, if
 \verb+y+ is a variable of type \verb+INTEGER+ you can change it to
-\verb+FLOAT+ with value \verb+3.0+ in two steps as follows:
+\verb+NUMBER+ with value \verb+3.0+ in two steps as follows:
 
 \begin{verbatim}
 y:=
@@ -862,10 +842,9 @@ variations listed in the function reference:
 
 \begin{verbatim}
 Plus[x->INTEGER, y->INTEGER] =: INTEGER
-Plus[x->FLOAT, y->FLOAT] =: FLOAT
-Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Plus[x->NUMBER, y->NUMBER] =: NUMBER
 Plus[x->MIXED, y->MIXED] =: MIXED
-Plus[x->BEHAV, y->BEHAV] =: BEHAV
+Plus[x->BEHAV, y->BEHAV] =: BEHAV 
 \end{verbatim}
 
 \noindent This is a good example of function {\it overloading}.  This
@@ -1045,6 +1024,7 @@ Power[x,y]          x ^ y
 Print[x]            << x
 Read[in,x]          in >> x 
 Times[x,y]          x * y 
+UnAssign[x]         x:=
 Write[out,x]        out << x 
 \end{verbatim}
 \end{multicols}
@@ -1121,23 +1101,25 @@ concludes with a \verb+<<+.  In fact, this is not part of the prompt,
 but rather is a ``pre typed'' part of your GCL command.  
 
 Once you have become accustomed to the GCL, you may prefer to supress
-output from some or all commands typed at the GCL command line.  The
+output from some or all commands typed at the GCL command line.  This
+can be done for individual commands by using the backspace or delete
+keys to erase the \verb+<<+  part of the prompt.  The
 built-in function \tindex{SetVerbose} controls whether \verb+<<+ is
 pretyped at every prompt.  The command \verb+SetVerbose[False]+ will
 turn off this feature, so that your prompt will then look as
 follows:
 
 \begin{verbatim}
-GCL1: 
+GCL1:= 
 \end{verbatim}
 
-Now, you can decide for yourself whether to get console output.  Now,
-if you start your command with \verb+<<+, then console output will be
-generated.  Otherwise, no console output will be generated.  For example
+Now, the default is that no output is printed.  If you want to have
+the output of specific commands printed, then you can start your
+command with \verb+<<+.  For example
 
 \begin{verbatim}
-GCL1: 1+1
-GCL2: << 1+1
+GCL1:= 1+1
+GCL2:= << 1+1
 2
 \end{verbatim}
 
@@ -1161,13 +1143,13 @@ create a list of length \verb+n+ all of whose elements have the value
 allows each successive entry to be incremented.
 
 \begin{verbatim}
-GCL1: << List["Help",3]
+GCL1:= << List["Help",3]
 { "Help", "Help", "Help" }
-GCL2: << List[List[0,3],3]
+GCL2:= << List[List[0,3],3]
 { { 0, 0, 0 },
   { 0, 0, 0 },
   { 0, 0, 0 } }
-GCL3: << List[0/1, 5, 1/4]
+GCL3:= << List[0/1, 5, 1/4]
 { 0, 1/4, 1/2, 3/4, 1 }
 \end{verbatim}
 
@@ -1188,9 +1170,9 @@ Thus, you can constuct your own $3\times 3$ identity matrix as
 follows:
 
 \begin{verbatim}
-GCL1: list:=List[List[0,3],3]
-GCL2: list_1_1:=list_2_2:=list_3_3:=1;
-GCL3: << list
+GCL1:= list:=List[List[0,3],3]
+GCL2:= list_1_1:=list_2_2:=list_3_3:=1;
+GCL3:= << list
 { { 1, 0, 0 },
   { 0, 1, 0 },
   { 0, 0, 1 } }
@@ -1248,10 +1230,10 @@ of a scalar and a matrix, and listability of \verb+Plus+ is used to
 add two conformable matrices:  
 
 \begin{verbatim}
-GCL1: a:={{1,2},{3,4}};
-GCL2: << 2*a
+GCL1:= a:={{1,2},{3,4}};
+GCL2:= << 2*a
 {{2,4},{6,8}}
-GCL3: << a+Transpose[a]
+GCL3:= << a+Transpose[a]
 {{2,5},{5,8}}
 \end{verbatim}
 
@@ -1259,7 +1241,7 @@ Here listability of \verb+Power+ is used to create a list of the first
 ten perfect squares:
 
 \begin{verbatim}
-GCL4: << List[1,10,1]^2
+GCL4:= << List[1,10,1]^2
 { 1, 4, 9, 16, 25, 36, 49, 64, 81, 100 }
 \end{verbatim}
 
@@ -1289,7 +1271,7 @@ prototype for a function name since GCL functions can be overloaded.)
 For example,
 
 \begin{verbatim}
-GCL1: << Help["help"]
+GCL1:= << Help["help"]
 { Help[x->TEXT, {udf->True}, {bif->True}] =: LIST(TEXT) }
 \end{verbatim}
 
@@ -1306,17 +1288,17 @@ case, if there is not an exact match, a list of function names
 matching \verb+x+ is returned.  For example, The command 
 
 \begin{verbatim}
-GCL1: << Help["load*"]
-{ LoadEfg, LoadNfg }
+GCL1:= << Help["*efg"]
+{ CompressEfg, LoadEfg, NewEfg, SaveEfg }
 \end{verbatim}
 
 \noindent
-returns a list of all function names beginning with ``load''
+returns a list of all function names ending with ``efg''
 
 Note that the function \verb+Help+ is listable (see section on
-listability), so that we can do \verb+Help[Help["load*"]]+ to get a
-list of function prototypes for all functions whose names begin with
-\verb+load+.  Similarly, \verb+Help["*"]+ gives a list of all function
+listability), so that we can do \verb+Help[Help["*efg"]]+ to get a
+list of function prototypes for all functions whose names end with
+\verb+efg+.  Similarly, \verb+Help["*"]+ gives a list of all function
 names in the GCL, and \verb+Help[Help["*"]]+ gives a list of all
 function prototypes in the GCL.
 
@@ -1367,15 +1349,17 @@ if the following line is placed as the first line in an included file
 (say with filename \verb+path/myfile.gcl+)
 
 \begin{verbatim}
-StdOut << "Include["&GetPath[]&"]\n";
+StdOut << "Include[\""&GetPath[]&"\"]\n"
 \end{verbatim}
 
 \noindent
-then when the file is included, it will identify itself by writing
-the following message to the standard output stream.  
+(Note that the standard escape sequences \verb+\"+ and \verb+\n+ are
+used within a text string to represent a quotation mark and a carriage
+return, respectively.)  Then when the file is included, it will identify
+itself by writing the following message to the standard output stream:
 
 \begin{verbatim}
-Include[path/myfile.gcl]
+Include["path/myfile.gcl"]
 \end{verbatim}
 
 
@@ -1489,7 +1473,7 @@ Returning to the example in the \verb+While+ section, we see another
 way of writing the loop to create a list of the first ten squares:
 
 \begin{verbatim}
-For[i := 1, list := { }; i <= 10, list := list & {i^2}; i := i + 1;]
+For[i:=1; list:={}, i<=10, i:=i+1, list:=list&{i^2}]
 \end{verbatim}
 
 \noindent The two methods are completely equivalent, but it is often
@@ -1499,14 +1483,23 @@ function.
 \section{\rindex{Input} and \rindex{Output}}
 
 Data can be read from an input stream by the \tindex{Read} function.
-So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+) then
-a successful call of \verb+Read[in,x]+ will read the exposed data (see
-function reference for definition of ``exposed data'') from the input
-stream, \verb+in+, assign \verb+x+ to have that type and value, and
-position the file pointer at the end of the exposed data, to be ready
-for the next call of \verb+Read[]+.  \verb+Read[in,x]+ has the short
-form \verb+in >> x+.  Since the return value of \verb+Read[in,x]+ is
-\verb+in+, these commands can be chained.  In other words,
+So if \verb+in+ is an input stream (i. e., of type \verb+INPUT+), and
+\verb+x+ is a defined variable of a data type which can be read by the
+\verb+Read+ function, then a successful call of \verb+Read[in,x]+ will
+read the exposed data (see function reference for definition of
+``exposed data'') from the input stream, \verb+in+, assign \verb+x+ to
+have that type and value, and position the file pointer at the end of
+the exposed data, to be ready for the next call of \verb+Read[]+.  
+
+A variable must be defined before it can be read.  Otherwise, the
+\verb+Read+ statement will not be able to resolve the data type of the
+input.  This can be done by assigning the variable to be an arbitrary
+value of the desired data type.  The variable will be changed to the
+value in the input stream with subsequent to the \verb+Read+ command.
+
+The \verb+Read[in,x]+ has the short form \verb+in >> x+.  Since the
+return value of \verb+Read[in,x]+ is \verb+in+, these commands can be
+chained.  In other words,
 
 \begin{verbatim}
 in >> x >> y
@@ -1521,17 +1514,16 @@ Read[in,y]
 \end{verbatim}
 
 \noindent
-In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then its
-data type is determined from the exposed data in the input stream.  On
-the other hand if \verb+x+ is previously defined, then the
-\verb+Read[]+ function will expect to find the corresponding data type
-in the input stream, and a file read error will be generated if the
-exposed data is of the wrong data type.  If \verb+x+ is previously
-defined to be a \verb+LIST(T)+, then \verb+Read[in,x]+ will
-successively read elements into each element of the list.  If the
-wrong data type is found for any element of the list, a file read
-error will be returned.  Thus, if the file \verb+"file.out"+ contains
-the following data
+In the statement \verb+Read[in,x]+, if \verb+x+ is undefined, then an
+error is generated. On the other hand if \verb+x+ is previously
+defined, then the \verb+Read[]+ function will expect to find the
+corresponding data type in the input stream, and a file read error
+will be generated if the exposed data is of the wrong data type.  If
+\verb+x+ is previously defined to be a \verb+LIST(T)+, then
+\verb+Read[in,x]+ will successively read elements into each element of
+the list.  If the wrong data type is found for any element of the
+list, a file read error will be returned.  Thus, if the file
+\verb+"file.dat"+ contains the following data
 
 \begin{verbatim}
 25 1/3 "This is a text string!" False 3.14159 
@@ -1544,6 +1536,7 @@ then the following GCL code
 
 \begin{verbatim}
 in:=Input["file.dat"]
+i:=0;r:=1/1;t:="";b:=True;f:=1.0;l:={{0,0},{0,0}}
 x:=List[0,5]
 in >> i >> r >> t >> b >> f >> l >> x
 \end{verbatim}
@@ -1553,10 +1546,10 @@ opens an input stream, consisting of the file \verb+"file.dat"+, and
 then reads data from the input stream into the corresponding
 variables.  After the last statement, 
 \verb+i+ is an \verb+INTEGER+ with value \verb+25+, 
-\verb+r+ is a \verb+RATIONAL+ with value \verb+1/3+, 
+\verb+r+ is a \verb+NUMBER+ with value \verb+1/3+, 
 \verb+t+ is a \verb+TEXT+ with value \verb+"This is a text string!"+, 
 \verb+b+ is a \verb+BOOLEAN+ with value \verb+False+, 
-\verb+f+ is a \verb+FLOAT+ with value \verb+3.14159+, 
+\verb+f+ is a \verb+NUMBER+ with value \verb+3.14159+, 
 \verb+l+ is a \verb+LIST(LIST(INTEGER))+ with value \verb+{{1,0},{0,1}}+, and 
 \verb+x+ is a \verb+LIST(INTEGER)+ with value \verb+{1,2,3,4,5}+.  
 
@@ -1572,7 +1565,7 @@ Write[out,y]
 
 \noindent
 creates an output stream, \verb+out+, and then writes out a
-\verb+RATIONAL+ number, followed by a list of two \verb+FLOAT+s.
+\verb+NUMBER+, followed by a list of two \verb+NUMBER+s.
 \verb+Write[out,x]+ has the short form \verb+out << x+.  Since the
 return value of \verb+Write[]+ is \verb+out+, these commands can be
 chained.  So the two lines writing out \verb+x+ and \verb+y+ in the
@@ -1581,7 +1574,7 @@ above example could be written instead
 \begin{verbatim}
 out << x << y
 \end{verbatim}
- 
+
 The \tindex{Format} and \tindex{ListFormat} functions can be used to
 control the formatting of data written to an output stream.  Note that
 the \tindex{Read} and \tindex{Write} functions are not listable.
@@ -1689,12 +1682,12 @@ Now the part of the tree after the first branch is deleted, the
 variable \verb+n+ is now undefined:
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"]
-GCL2: r:=RootNode[e]
-GCL3: n:=r#1#1
-GCL4: DeleteTree[r#1]
-GCL5: << n
-(Reference) "n" (undefined)
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= r:=RootNode[e]
+GCL3:= n:=r#1#1
+GCL4:= DeleteTree[r#1]
+GCL5:= << n
+GCL: Parameter 1 undefined in call to Print
 \end{verbatim}
 
 \noindent
@@ -1703,11 +1696,11 @@ refers to it must be deleted.  A similar situation occurs here if some
 element of a list becomes an orphan:
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"]
-GCL2: t:=TerminalNodes[e]
-GCL3: DeleteTree[RootNode[e]#1]
-GCL4: << t
-(Reference) "t" (undefined)
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= t:=TerminalNodes[e]
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << t
+GCL: Parameter 1 undefined in call to Print
 \end{verbatim}
 
 In this case, a variable \verb+t+ is defined to refer to the list of
@@ -1723,12 +1716,12 @@ solutions.  In the following example, a solution to the game \verb+e+
 is saved as a variable \verb+b+ of type \verb+BEHAV+.  
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"]
-GCL2: << b:=LcpSolve[e]_1
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << b:=LcpSolve[e]_1
 (Behav) { { 1.000 0.000 }{ 0.333 0.667 } }{ { 0.667 0.333 } }
-GCL3: DeleteTree[RootNode[e]#1]
-GCL4: << b
-(Reference) "b" (undefined)
+GCL3:= DeleteTree[RootNode[e]#1]
+GCL4:= << b
+GCL: Parameter 1 undefined in call to Print
 \end{verbatim}
 
 The game is subsequently edited, making the solution no longer valid
@@ -1769,38 +1762,102 @@ to build and solve normal and extensive form games in the GCL.
 
 \section{\rindex{Normal forms}}
 
+A normal form game is a set of $n$ players, each with a strategy
+set, together with a function from the cartesian product of strategy
+sets to a set of outcomes. Each outcome results in a payoff to each of
+the players.  To construct a normal form game, one must therefore
+define each of these parts.  A series of GCl functions are available
+for building and editing normal form games.  A complete list is given
+in the sections on ``Normal Form Manipulation'' in the Categorical
+Function Reference section of the manual.  Some of the more important
+functions are given in Table 2.  User defined functions are preceded
+with a \#, and all other functions are built in functions.  
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular} {|l||l|} \hline
+Function Name	& Description \\ 
+\hline
+\verb+  DeleteOutcome[o]+ &Deletes outcome \verb+o+ from its game. \\
+
+\verb+  NewOutcome[n]+ &Returns a new outcome for the game \verb+n+\\ 
+\verb+# NewOutcome[n, name]+ &Returns a new oucome named \verb+name+ for game \verb+n+ \\ 
+\verb+# NewOutcome[p]+ &Attaches a new outcome with zero payoffs to
+the pure profile \verb+p+\\ 
+
+\verb+  Outcome[p]+ &The outcome attached to the pure strategy profile \verb+p+\\ 
+
+\verb+  OutcomeForm[n]+ &The game form for game \verb+n+\\ 
+
+\verb+  Outcomes[n]+ &List of outcomes defined for game \verb+n+\\ 
+
+\verb+  SetOutcome[p, o]+ &Attach outcome \verb+o+ to pure strategy profile \verb+p+\\ 
+
+\verb+  NewNfg[dim]+ &A new normal form with dimensions \verb+dim+\\ 
+\verb+# NewNfg[dim, True]+ &A new normal form with dimensions \verb+dim+, outcomes in all cells\\ 
+
+\verb+  Nfg[e]+ &Converts extensive form game \verb+e+ to normal form\\ 
+\verb+# Nfg[x]+ &Converts nested list of numbers \verb+x+ to normal form\\ 
+
+\verb+  Payoff[o, pl]+ &Payoff of outcome \verb+o+ to player \verb+pl+\\ 
+\verb+  Payoff[m, pl]+ &Payoff of mixed profile \verb+m+ to player \verb+pl+\\ 
+
+\verb+# Payoffs[p]+ &Payoffs of pure strategy \verb+p+\\ 
+\verb+# Payoffs[n]+ &Normal form game payoffs of \verb+n+ as a nested list\\ 
+\verb+# Payoffs[o]+ &Payoffs of outcome \verb+o+\\ 
+\verb+# Payoffs[m]+ &Payoffs of mixed profile \verb+m+ \\ 
+
+\verb+# Strategies[pl]+ &Strategies for player \verb+pl+\\ 
+\verb+# Strategies[n]+ &Strategies for game \verb+n+ \\ 
+
+\verb+  SetPayoff[o, pl, pay]+ &Set payoff to player \verb+pl+ in outcome \verb+o+ to \verb+pay+\\ 
+
+\verb+# SetPayoffs[p, pay]+ &Attach new outcome to pure profile \verb+p+ with payoffs \verb+pay+\\ 
+\verb+# SetPayoffs[o, pay]+ &Set payoffs of outcome \verb+o+ to vector \verb+pay+.  \\ 
+\hline
+\multicolumn{2}{c}{\ }\\
+\multicolumn{2}{c}{Table 2}\\
+\multicolumn{2}{c}{Normal form Building and Editing Functions}\\
+\end{tabular}
+\end{center}
+\end{table}
+\medskip
+
+
 \subsection{Creating a normal form game}\index{Normal forms!creating}
 
 The function \tindex{NewNfg} is used to create a new normal form game.
 Thus, the command
 
 \begin{verbatim}
-GCL1: NewNfg[{2,3,2}]
+GCL1:= NewNfg[{2,3,2}]
 \end{verbatim}
 
 \noindent 
 will create a new normal form game with three players, where the first
 player has two strategies, the second player has three strategies, and
-the third player has two strategies.  The game has payoffs of zero for
-every pure strategy profile.  By default, the game will have be of
-data type \verb+NFG(FLOAT)+.  In other words, its numeric data is of
-type \verb+FLOAT+.  You can create a game whose data is
-\verb+RATIONAL+ by specifying the parameter \verb+rational+ to be
-\verb+True+.
+the third player has two strategies.  Since no outcomes have been
+defined, all strategy $n$-tuples of pure strategies result in the
+``null'' outcome, which has payoff of zero for all players.  
 
 The game created by \verb+NewNfg+ is not very interesting, because all
-payoffs for all strategies are zero.  However, the game returned by
-\verb+NewNfg+ can be used to create more interesting games by using it
-as an argument to other functions that accept Normal form games as
-arguments.
+payoffs for all strategies are zero.  To make it more interesting,
+outcomes must be created and associated with strategy $n$-tuples.  To
+create a separate outcome for each pure strategy, one can specify the
+second argument in \verb+NewNfg+ to be \verb+TRUE+.  These outcomes
+will still have zero payoffs until they are changed. The function
+\verb+Randomize+ can be used to randomize the payoffs of each outcome
+in the game.  In this way, \verb+NewNfg+ can be used to create
+more interesting games by using it as an argument to other functions
+that accept Normal form games as arguments.
 
 For example to create a random two person $2\times 2$ normal form
-game, with a seed of \verb+7+ for the random number generator, you can
+game, with a seed of \verb+34+ for the random number generator, you can
 use the function \tindex{Randomize} to randomize the payoffs of the
 original game.
 
 \begin{verbatim}
-GCL2: Randomize[NewNfg[{2,2}],7]
+GCL2: Randomize[NewNfg[{2,2},True],34]
 \end{verbatim}  
 
 \noindent
@@ -1808,22 +1865,22 @@ You can look at the payoffs of the game by using the standard UDF,
 \tindex{Payoffs}:
 
 \begin{verbatim}
-GCL3: << Payoffs[Randomize[NewNfg[{2,2}],7]]
-{ { { 0.597056, 0.992785 }, { 0.331675, 0.977620 } },
-  { { 0.299265, 0.102707 }, { 0.691973, 0.970182 } } }
+GCL3:= << Payoffs[Randomize[NewNfg[{2,2},True],34]]
+{ { { 0.159964, 0.026784 }, { 0.421515, 0.399322 } },
+  { { 0.233245, 0.923402 }, { 0.039071, 0.695271 } } }
 \end{verbatim}  
 
 \noindent
 Here, the payoffs are written in a nested list, where the
 \verb+(i,j)+th component is the vector of payoffs when player 1 takes
 strategy \verb+i+ and player 2 takes strategy \verb+j+.  The game can
-be solved for all mixed nash equilibrium by
+be solved for all mixed Nash equilibrium by
 
 \begin{verbatim}
-GCL4: << EnumMixedSolve[Randomize[NewNfg[{2,2}],7]]
-{ (Mixed) { 1.000000 0.000000 }{ 1.000000 0.000000 },
-  (Mixed) { 0.982819 0.017181 }{ 0.547492 0.452508 },
-  (Mixed) { 0.000000 1.000000 }{ 0.000000 1.000000 } }
+GCL4:= << AllNash[Randomize[NewNfg[{2,2},True],34]]
+{ (Mixed) { 1.000000 0.000000 }{ 0.000000 1.000000 },
+  (Mixed) { 0.000000 1.000000 }{ 1.000000 0.000000 },
+  (Mixed) { 0.379795 0.620205 }{ 0.839199 0.160801 } }
 \end{verbatim}
 
 In all of the above examples, all work is thrown out, and the normal
@@ -1833,9 +1890,9 @@ saving intermediate results in a variable.  For example, the above
 could be done as follows:
 
 \begin{verbatim}
-GCL1: n:=Randomize[NewNfg[{2,2}],7];
-GCL2: p:=Payoffs[n];
-GCL3: m:=EnumMixedSolve[n];
+GCL1:= n:=Randomize[NewNfg[{2,2},True],34];
+GCL2:= p:=Payoffs[n];
+GCL3:= m:=EnumMixedSolve[n];
 \end{verbatim}
 
 The first statement creates a variable \verb+n+ to store the normal
@@ -1865,13 +1922,13 @@ creating a normal form game of the correct dimension, and then
 modifying the payoffs one by one.  
 
 \begin{verbatim}
-GCL1: n:=NewNfg[{2,2}]
-GCL2: s:=Strategies[n]
-GCL3: SetPayoffs[{s_1_1,s_2_1},{9.0,9.0}]
-GCL4: SetPayoffs[{s_1_1,s_2_2},{0.0,10.0}]
-GCL5: SetPayoffs[{s_1_2,s_2_1},{10.0,0.0}]
-GCL6: SetPayoffs[{s_1_2,s_2_2},{1.0,1.0}]
-GCL7: << Payoffs[n]
+GCL1:= n:=NewNfg[{2,2}]
+GCL2:= s:=Strategies[n]
+GCL3:= NewOutcome[{s_1_1,s_2_1},{9.0,9.0}]
+GCL4:= NewOutcome[{s_1_1,s_2_2},{0.0,10.0}]
+GCL5:= NewOutcome[{s_1_2,s_2_1},{10.0,0.0}]
+GCL6:= NewOutcome[{s_1_2,s_2_2},{1.0,1.0}]
+GCL7:= << Payoffs[n]
 { { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
   { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
 \end{verbatim}
@@ -1881,8 +1938,8 @@ the standard UDF, \tindex{Nfg} to create the game directly from a payoff
 list:
 
 \begin{verbatim}
-GCL1: n:=Nfg[Float[{{{9,9},{0,10}},{{10,0},{1,1}}}]]
-GCL2: << Payoffs[n]
+GCL1:= n:=Nfg[Number[{{{9,9},{0,10}},{{10,0},{1,1}}}]]
+GCL2:= << Payoffs[n]
 { { { 9.000000, 9.000000 }, { 0.000000, 10.000000 } },
   { { 10.000000, 0.000000 }, { 1.000000, 1.000000 } } }
 \end{verbatim}
@@ -1893,10 +1950,10 @@ get a list of the strategies in the game, and \tindex{SetName} to name
 them.
 
 \begin{verbatim}
-GCL3: s:=Strategies[n]
-GCL4: SetName[s_1,{"Cooperate","Defect"}]
-GCL5: SetName[s_2,{"Cooperate","Defect"}]
-GGCL6: << Name[s]
+GCL3:= s:=Strategies[n]
+GCL4:= SetName[s_1,{"Cooperate","Defect"}]
+GCL5:= SetName[s_2,{"Cooperate","Defect"}]
+GGCL6:= << Name[s]
 { { Cooperate, Defect },
   { Cooperate, Defect } }
 \end{verbatim}
@@ -1907,20 +1964,20 @@ normal form according to a formula.  In this example, we create a
 version of the ``stag hunt'' game.
 
 \begin{verbatim}
-GCL1: << strat:=List[1,3,1]
+GCL1:= << strat:=List[1,3,1]
 { 1, 2, 3 }
-GCL2: << stratSets:=List[strat,2]
+GCL2:= << stratSets:=List[strat,2]
 { { 1, 2, 3 },
   { 1, 2, 3 } }
-GCL3: << effort:=Float[CartesianProd[stratSets]] 
+GCL3:= << effort:=Number[CartesianProd[stratSets]] 
 { { { 1.000, 1.000 }, { 1.000, 2.000 }, { 1.000, 3.000 } },
   { { 2.000, 1.000 }, { 2.000, 2.000 }, { 2.000, 3.000 } },
   { { 3.000, 1.000 }, { 3.000, 2.000 }, { 3.000, 3.000 } } }
-GCL4: << pay:=Min[effort]-.5*effort
+GCL4:= << pay:=Min[effort]-.5*effort
 { { { 0.500, 0.500 }, { 0.500, 0.000 }, { 0.500, -0.500 } },
   { { 0.000, 0.500 }, { 1.000, 1.000 }, { 1.000, 0.500 } },
   { { -0.500, 0.500 }, { 0.500, 1.000 }, { 1.500, 1.500 } } }
-GCL5: << n:=Nfg[pay]
+GCL5:= << n:=Nfg[pay]
 (Nfg) ""
 \end{verbatim}
 
@@ -1930,7 +1987,7 @@ of integers from one to 3) is constructed and stored in the variable
 type is \verb+LIST(INTEGER)+, not \verb+STRATEGY+.)  Second, the set
 of strategy sets for both players is assembled in \verb+stratSets+.
 Third, the set of pure strategy profiles is assembled by taking the
-cartesian product of the strategy sets, and converted to \verb+FLOAT+
+cartesian product of the strategy sets, and converted to \verb+NUMBER+
 to give a vector of efforts for each pure strategy profile.  The
 result is stored in the variable \verb+effort+.  Fourth, the vector of
 payoffs for each pure strategy profile is computed by taking, for
@@ -1938,20 +1995,20 @@ vector of payoffs, the minimum effort across players, and subtracting
 the cost of effort for each player.  Finally, a game is constructed
 with these payoffs, by using the function \verb+Nfg+.  If you now ask
 to see the payoffs for the game via \verb+Payoffs[nfg]+ you will see
-an array just like \verb+pay+.  
+an array just like \verb+pay+.
 
 The fourth step in the above calculation illustrates a subtle but
 important point about listable functions.  The function \tindex{Min}
-requires an argument of type \verb+LIST(FLOAT)+ and returns type
-\verb+FLOAT+.  It is being called with an argument of type
-\verb+LIST(LIST(LIST(FLOAT)))+, and dimensionality $3\times 3\times
+requires an argument of type \verb+LIST(NUMBER)+ and returns type
+\verb+NUMBER+.  It is being called with an argument of type
+\verb+LIST(LIST(LIST(NUMBER)))+, and dimensionality $3\times 3\times
 2$, .  Hence, the function will be run as a listable function on the
 innermost vectors in the nested list, generating a result of type
-\verb+LIST(LIST(FLOAT))+, and dimensionality $3\times 3$, each entry
+\verb+LIST(LIST(NUMBER))+, and dimensionality $3\times 3$, each entry
 of which contains the minimum of the vector in that cell.  Thus:
 
 \begin{verbatim}
-GCL6: << Min[effort]
+GCL6:= << Min[effort]
 { { 1.000, 1.000, 1.000 },
   { 1.000, 2.000, 2.000 },
   { 1.000, 2.000, 3.000 } }
@@ -1959,15 +2016,15 @@ GCL6: << Min[effort]
 
 \noindent
 To subtract the component \verb+.5*effort+ from this, the function
-\verb+Minus+ requires data of type \verb+FLOAT+ for both arguments.
+\verb+Minus+ requires data of type \verb+NUMBER+ for both arguments.
 It is being run with the first argument of type
-\verb+LIST(LIST(FLOAT))+, and dimension $3\times 3$, and the second of
-type \verb+LIST(LIST(LIST(FLOAT)))+, and dimension $3\times 3\times
+\verb+LIST(LIST(NUMBER))+, and dimension $3\times 3$, and the second of
+type \verb+LIST(LIST(LIST(NUMBER)))+, and dimension $3\times 3\times
 2$.  The first two levels of the list for both arguments match
-in dimensionality.  Then it encounters a \verb+FLOAT+ in the first
-argument, and a \verb+LIST(FLOAT)+ of dimension $2$ on the second.
+in dimensionality.  Then it encounters a \verb+NUMBER+ in the first
+argument, and a \verb+LIST(NUMBER)+ of dimension $2$ on the second.
 Hence, \verb+Minus+ runs listably on its second argument, yielding a
-\verb+LIST(FLOAT)+ of dimension $2$ for each entry in the $3\times 3$
+\verb+LIST(NUMBER)+ of dimension $2$ for each entry in the $3\times 3$
 nested list of \verb+Min[effort]+. 
 
 The functions used in the above construction will accept nested lists
@@ -1976,10 +2033,10 @@ function which allows one to build a stag hunt game for an arbitrary
 number of players and strategies:
 
 \begin{verbatim}
-NewFunction[StagHuntNfg[n->INTEGER,maxeff->INTEGER,cost->FLOAT]=:NFG,
+NewFunction[StagHuntNfg[n->INTEGER,maxeff->INTEGER,cost->NUMBER]=:NFG,
   strats:=List[1,maxeff,1];
-  effort:=Float[CartesianProd[List[strats,n]]];
-  Nfg[Min[effort]-cost*effort];
+  effort:=Number[CartesianProd[List[strats,n]]];
+  Nfg[Number[Min[effort]]-cost*effort];
 ];
 \end{verbatim}
 
@@ -2039,21 +2096,19 @@ e := NewEfg[]
 
 \noindent will create a new extensive form game stored in \verb+e+.
 The game is a trivial game with only one node, a \verb+root node+, and
-one player, \verb+chance+.  By default, the game will have its data
-stored as \verb+FLOAT+.  You can create a game whose data is
-\verb+RATIONAL+, and which has two players, named \verb+Fred+ and
-\verb+Alice+ by specifying
+one player, \verb+chance+.  You can create a game whose data is which
+has two players, named \verb+Fred+ and \verb+Alice+ by specifying
 
 
 \begin{verbatim}
-e := NewEfg[True, {"Fred", "Alice"} ]
+e := NewEfg[{"Fred", "Alice"} ]
 \end{verbatim}
 
 For an arbitrary extensive form game, a number of commands are
 available to get information about the game.  A complete list is given
 in the section on ``Getting Information'' in the Categorical Function
 Reference section of this manual.  Some of the more important
-functions are given in Table 2.  
+functions are given in Table 3.  
 
 \begin{table}[htp]
 \begin{center}
@@ -2084,7 +2139,7 @@ Function Name	& Description \\
 \verb+# TerminalNodes[e]+ & Terminal nodes of game \verb+e+\\
 \hline
 \multicolumn{2}{c}{\ }\\
-\multicolumn{2}{c}{Table 2}\\
+\multicolumn{2}{c}{Table 3}\\
 \multicolumn{2}{c}{Extensive form information functions}\\
 \end{tabular}
 \end{center}
@@ -2102,7 +2157,7 @@ A series of extensive form game editing functions are available for
 modifying an extensive form game. A complete list is given in the
 section on ``Extensive form manipulation'' in the Categorical Function
 Reference section of this manual.  The more important functions for
-building a game are given in Table 3.
+building a game are given in Table 4.
 
 \begin{table}[htp]
 \begin{center}
@@ -2111,7 +2166,6 @@ Function Name	& Description \\
 \hline
 \verb+  AddMove[i,n]+ &Adds a move from infoset \verb+i+ to node \verb+n+ \\
 \verb+# AddMove[i,a]+ &Adds a move from infoset \verb+i+ to action \verb+a+ \\
-\verb+# AttachNewOutcome[n]+ &Attaches a new outcome to node \verb+n+ \\
 \verb+  CopyTree[n1,n2]+ &Copies tree rooted at node \verb+n1+ to node \verb+n2+ \\
 \verb+  InsertAction[i]+ &Inserts an action into information set \verb+i+ \\
 \verb+  InsertMove[i,n]+ &Inserts a move from infoset \verb+i+ at node \verb+n+\\
@@ -2131,14 +2185,14 @@ with name \verb+t+\\
 \verb+  SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
 \hline
 \multicolumn{2}{c}{\ }\\
-\multicolumn{2}{c}{Table 3}\\
+\multicolumn{2}{c}{Table 4}\\
 \multicolumn{2}{c}{Extensive form building functions}\\
 \end{tabular}
 \end{center}
 \end{table}
 \medskip
 
-The functions in Table 3 can be used to build up any valid extensive
+The functions in Table 4 can be used to build up any valid extensive
 form game from a trivial game.  The basic procedure by which a more
 complex game is constructed from a simple game is:
 
@@ -2346,12 +2400,12 @@ strategy name corresponds to the branch number taken at the player's
 normal form of the game of poker encountered earlier.  
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"]
-GCL2: << Name[Actions[e]]
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= << Name[Actions[e]]
 { { { Raise, Fold }, { Raise, Fold } },
   { { Meet, Pass } } }
-GCL3: n:=Nfg[e];
-GCL4: << Name[Strategies[n]]
+GCL3:= n:=Nfg[e];
+GCL4:= << Name[Strategies[n]]
 { { 11, 12, 21, 22 },
   { 1, 2 } }
 \end{verbatim}
@@ -2451,20 +2505,20 @@ the support resulting from weak dominance elimination in the extensive
 and reduced normal form of the poker example of the previous chapter.
 
 \begin{verbatim}
-GCL1: e:=LoadEfg["poker.efg"]
-GCL2: efsupp:=ElimDom[e]
-GCL3: << Name[Actions[e]]
+GCL1:= e:=LoadEfg["poker.efg"]
+GCL2:= efsupp:=ElimDom[e]
+GCL3:= << Name[Actions[e]]
 { { { Raise, Fold }, { Raise, Fold } },
   { { Meet, Pass } } }
-GCL4: << Name[Actions[efsupp]]
+GCL4:= << Name[Actions[efsupp]]
 { { { Raise }, { Raise, Fold } },
   { { Meet, Pass } } }
-GCL5: n:=Nfg[e];
-GCL6: nfsupp:=ElimDom[n];
-GCL7: << Name[Strategies[n]]
+GCL5:= n:=Nfg[e];
+GCL6:= nfsupp:=ElimDom[n];
+GCL7:= << Name[Strategies[n]]
 { { 11, 12, 21, 22 },
   { 1, 2 } }
-GCL8: << Name[Strategies[nfsupp]]
+GCL8:= << Name[Strategies[nfsupp]]
 { { 11, 12 },
   { 1, 2 } }
 \end{verbatim}
@@ -2566,12 +2620,12 @@ as well.  So you can take linear combinations of mixed profiles to
 create new mixed profiles, as illustrated in this example:
 
 \begin{verbatim}  
-GCL1: n:=Nfg[Rational[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}]];
-GCL2: << c:=Centroid[n]
+GCL1:= n:=Nfg[Number[{{{3,1},{0,0}},{{0,1},{3,0}},{{1,0},{1,3}}}]];
+GCL2:= << c:=Centroid[n]
 (Mixed) { 1/3 1/3 1/3 }{ 1/2 1/2 }
-GCL3: << cc:=Mixed[n,Rational[{{1,0,0},{1,0}}]]
+GCL3:= << cc:=Mixed[n,Number[{{1,0,0},{1,0}}]]
 (Mixed) { 1 0 0 }{ 1 0 }
-GCL4: << m:=1/2*c+1/2*cc
+GCL4:= << m:=1/2*c+1/2*cc
 (Mixed) { 2/3 1/6 1/6 }{ 3/4 1/4 }
 \end{verbatim}
 
@@ -2580,7 +2634,7 @@ interpreted as the probability with which a player adopts the
 corresponding action or strategy.  However, the data for \verb+MIXED+
 need not be legitimate probabilities.  For example, it would be valid
 to create a mixed profile using the command
-\verb+Mixed[n,Rational[{{1,2,3},{4,5}}]]+.  Probabilities are not
+\verb+Mixed[n,Number[{{1,2,3},{4,5}}]]+.  Probabilities are not
 required to add up to one, or even to be positive.  This feature is
 especially useful in econometric analysis, as the \verb+MIXED+ and
 \verb+BEHAV+ data types can be used to represent choice frequencies of
@@ -2797,7 +2851,7 @@ functions for the computation of Nash equilibria\index{Nash
 equilibrium} (\tindex{OneNash} and \tindex{AllNash}), and perfect
 equilibria (\tindex{OnePerfect}, \tindex{AllPerfect})\footnote{The
 functions for computing perfect equilibrium are only implemented for
-two person games}.  Table 4 gives the settings that are used for these
+two person games}.  Table 5 gives the settings that are used for these
 UDFs.
 \medskip
 
@@ -2819,7 +2873,7 @@ AllPerfect & Strong & 2 person      & Lcp & Not guaranteed \\ \cline{3-5}
            &        & n person      &     & Not implemented\\
 \hline
 \multicolumn{5}{c}{\ }\\
-\multicolumn{5}{c}{Table 4}\\
+\multicolumn{5}{c}{Table 5}\\
 \multicolumn{5}{c}{Standard UDFs for normal form equilibria}\\
 \end{tabular}
 \medskip
@@ -2827,7 +2881,7 @@ AllPerfect & Strong & 2 person      & Lcp & Not guaranteed \\ \cline{3-5}
 The standard user defined functions for finding ``all'' equilibria
 should be used with some care.  These algorithms are sometimes not
 guaranteed to find all solutions if they are terminated by the user
-(see Table 4).  Rather, these functions for computing ``all''
+(see Table 5).  Rather, these functions for computing ``all''
 equilibria will only find all equilibria (for generic games) in a weak
 probabilistic sense: Given any number less than one, there is an
 amount of time such that if the algorithm is run for at least that amount of
@@ -2864,7 +2918,7 @@ equilibrium} (\tindex{OneNash} and \tindex{AllNash}), subgame perfect
 equilibria (\tindex{OnePerfect}, \tindex{AllPerfect}), and sequential
 equilibria (\tindex{OneSequential},
 \tindex{AllSequential})\footnote{The functions for computing perfect
-equilibrium are only implemented for two person games}.  Table 5 gives
+equilibrium are only implemented for two person games}.  Table 6 gives
 the settings that are used for these UDFs.  
 
 \medskip
@@ -2892,12 +2946,12 @@ OneSequential &  Unmark & None &  2 or n-person   & EF/Gobit &\\ \cline{4-6}
 AllSequential &         &       &  2 or n-person   & EF/Liap &Not guaranteed\\
 \hline
 \multicolumn{6}{c}{\ }\\
-\multicolumn{6}{c}{Table 5}\\
+\multicolumn{6}{c}{Table 6}\\
 \multicolumn{6}{c}{Standard UDFs for extensive form equilibria}\\
 \end{tabular}
 \medskip
 
-In Table 5, the column headed ``Subgames'' indicates whether all
+In Table 6, the column headed ``Subgames'' indicates whether all
 subgames are marked or unmarked before solving.  In the column headed
 ``algorithm'', the prefix \verb+EF+ or \verb+NF+ on the algorithm
 indicates whether the game is first converted to normal form before
@@ -2915,14 +2969,14 @@ Function Reference section of the manual (or via the
 ms:=MarkedSubgames[e];UnmarkSubgames[e];
 s:=ElimAllDom[Nfg[e],strong->True];
 If[NumPlayers[e] = 2, 
-  m:=EnumMixedSolve[s,stopAfter->0],
+  m:=EnumMixedSolve[s,0,precision],
   << InfiniteLoopWarning[stopAfter,nTries];
-  m:=LiapSolve[Centroid[s],stopAfter,nTries];
+  m:=LiapSolve[Centroid[s],stopAfter,nTries]
 ];
-MarkSubgames[ms];Behav[m];
+MarkSubgames[ms];Behav[m]
 \end{verbatim} 
 
-Note that some of the settings for the UDFs of Table 5 are chosen for
+Note that some of the settings for the UDFs of Table 6 are chosen for
 efficiency in particular problems.  But they may not result in the
 fastest solution in all cases.  For example, in the above example, for
 $n$-person games, \verb+AllNash+ applies \verb+LiapSolve+ to the normal form.
@@ -2933,7 +2987,7 @@ in the problems you work with.
 
 As in the normal form case, the functions for computing all equilibria
 of extensive form games are sometimes not guaranteed to find all
-solutions in finite time (see Table 5).  In these cases, the same
+solutions in finite time (see Table 6).  In these cases, the same
 comments that are made in the section on normal form solution
 algorithms apply here: The corresponding user defined function is
 designed to enter an infinite loop, continuing to search for new
@@ -2954,7 +3008,7 @@ reaches the specified value.
 Once a game has been solved, there are a number of functions for
 finding out information about the solution.  A full list is given in
 the section on Solution information in the function reference section.
-Some of the more important functions are given in Table 6. 
+Some of the more important functions are given in Table 7. 
 
 \begin{table}[htp]
 \begin{center}
@@ -2992,7 +3046,7 @@ player \verb+p+ to \verb+v+\\
 \verb+  StrategyProbs[m]+ & Nested list of all strategy probs for \verb+m+\\
 \hline
 \multicolumn{2}{c}{\ }\\
-\multicolumn{2}{c}{Table 6}\\
+\multicolumn{2}{c}{Table 7}\\
 \multicolumn{2}{c}{Solution information functions}\\
 \end{tabular}
 \end{center}
@@ -3151,8 +3205,9 @@ appreciate getting feedback on this.
   Negate 
   Parentheses 
   Plus 
-  Randomize 
   Power 
+# Power 
+  Randomize 
   Times 
 \end{verbatim}
 \end{multicols}
@@ -3163,6 +3218,7 @@ appreciate getting feedback on this.
 \begin{multicols}{3}
 \begin{verbatim}
   Concat
+# Concat 
   Greater
   GreaterEqual
   Less
@@ -3186,11 +3242,13 @@ appreciate getting feedback on this.
   Filter 
   Flatten 
   Index
+  IsList
   Length 
   List 
 # Max
 # Min
   NthElement 
+  NumElements 
 # Prepend
   Remove 
   Sort 
@@ -3203,10 +3261,10 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
-  Float 
+# Float 
   Integer 
-  ListForm 
-  Rational 
+# ListForm 
+  Number 
   Text 
 \end{verbatim}
 \end{multicols}
@@ -3217,7 +3275,9 @@ appreciate getting feedback on this.
 \begin{verbatim}
 # Display 
   Format
+  GetFormat 
   GetListFormat 
+# GetIntegerFormat 
 # GetNumericFormat 
 # GetSolutionFormat 
 # GetTextFormat 
@@ -3228,8 +3288,10 @@ appreciate getting feedback on this.
   Output 
   Print
   Read 
+# Read 
   SaveEfg 
   SaveNfg 
+# SetIntegerFormat 
 # SetListFormat 
 # SetNumericFormat 
 # SetSolutionFormat 
@@ -3248,7 +3310,6 @@ appreciate getting feedback on this.
   AddAction
   AddMove 
 # AddMove 
-# AttachNewOutcome 
   CompressEfg 
   CopyTree 
   DeleteAction 
@@ -3269,7 +3330,7 @@ appreciate getting feedback on this.
 # NewOutcome 
   NewPlayer 
 # NewPlayer 
-  Randomize 
+# Randomize 
   RemoveAction 
   Reveal 
   SetChanceProbs 
@@ -3291,11 +3352,12 @@ appreciate getting feedback on this.
   DeleteOutcome 
 # ListForm 
   NewNfg 
+# NewNfg 
   NewOutcome
   NewPlayer 
   Nfg 
 # Nfg
-  Randomize 
+# Randomize 
   RemoveStrategy 
   SetName 
   SetOutcome
@@ -3309,13 +3371,13 @@ appreciate getting feedback on this.
 
 \begin{multicols}{3}
 \begin{verbatim}
+# ActionNumber 
   Actions 
 # Actions 
 # AllActions 
 # AllInfosets 
 # AllMembers 
 # Ancestors
-  Centroid 
 # Centroid 
   Chance 
   ChanceProb 
@@ -3427,11 +3489,12 @@ appreciate getting feedback on this.
 \begin{verbatim}
 # AllNash
 # AllPerfect
+# AllSequential 
 # AllSubgamePerfect
 # OneNash
 # OnePerfect
-# OneSubgamePerfect
 # OneSequential
+# OneSubgamePerfect
 \end{verbatim}
 \end{multicols}
 
@@ -3443,10 +3506,10 @@ appreciate getting feedback on this.
   ActionProbs 
   ActionValue 
   ActionValues 
-  Belief 
-  Beliefs 
   Behav 
 # Behav 
+  Belief 
+  Beliefs 
   GobitLambda 
   GobitValue 
   InfosetProb 
@@ -3462,7 +3525,6 @@ appreciate getting feedback on this.
   LiapValue 
   Mixed
 # Mixed
-  NodeValue 
 # NodeValue 
   NodeValues 
   Payoff 
@@ -3473,8 +3535,11 @@ appreciate getting feedback on this.
   Regrets
   SetActionProbs 
   SetStrategyProbs 
+# SetProbs
   StrategyProb 
-  StrategyProbs 
+  StrategyProbs
+  StrategyValue 
+# StrategyValues 
 \end{verbatim}
 \end{multicols}
 
@@ -4066,6 +4131,9 @@ must always be specified and {\tt True}.}
 [stopAfter:] By default, all equilibria are found.  This parameter may
 be used to specify a maximum number of equilibria to be found.
 \item
+[precision:] Determines the precision of the computation. Default is
+machine precision (floating point). 
+\item
 [nPivots:] Returns the number of pivots done by the
 algorithm.
 \item
@@ -4106,6 +4174,9 @@ solution as a behavior profile.
 \item
 [stopAfter:] By default, all equilibria are found.  This parameter may
 be used to specify a maximum number of equilibria to be found.
+\item
+[precision:] Determines the precision of the computation. Default is
+machine precision (floating point). 
 \item
 [time:] Returns the time elapsed during the execution
 of the algorithm.
@@ -4228,7 +4299,7 @@ Format[x->NUMBER, {width<->0}, {precis<->6}, {expmode<->False}] =: NUMBER
 \end{verbatim} \normalsize
 
 \bd
-Sets the formatting style for output of FLOAT data types on output streams.
+Sets the formatting style for output of NUMBER data types on output streams.
 \bd
 \item [width:] The width for a numeric field.  If the width of the
 data is greater than \verb+width+, the width is overridden.  (The
@@ -4806,7 +4877,7 @@ Integer[x->INTEGER] =: INTEGER
 
 \bd
 Converts \verb+x+ into a value of type \verb+INTEGER+.
-\item [See also:] \verb+Float+, \verb+Number+.
+\item [See also:] \verb+Number+.
 \ed
 
 \item\lex{IntegerDivide} 
@@ -4901,19 +4972,6 @@ is known by Gambit not to be a sequential Nash
 equilibrium.
 \item [See also:] \verb+IsKnownSequential+.
 \ed
-
-%\item\lex{IsKnownNotStrictNash}
-%\protect \large \begin{verbatim}
-%IsKnownNotStrictNash[profile->BEHAV(T)] =: BOOLEAN
-%IsKnownNotStrictNash[profile->MIXED(T)] =: BOOLEAN
-%\end{verbatim}\normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Returns \verb+True+ if \verb+profile+ is known by Gambit not to be
-%a strict Nash equilibrium.
-%\item [See also:] \verb+IsKnownStrictNash+.
-%\ed
 
 \item\lex{IsKnownNotSubgamePerfect}
 \protect \large \begin{verbatim}
@@ -5084,7 +5142,6 @@ LcpSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0},
          {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
 \end{verbatim}\normalsize
 
-{\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Solves the game as a linear complementarity problem, using the
 Lemke-Howson algorithm for normal form games, and the
@@ -5104,6 +5161,9 @@ behavior profiles.
 [stopAfter:] Specifies the maximum number of equilibria to find.  If
 not specified, the default value is zero, which means that all
 equilibria reachable by the algorithm are to be found.
+\item
+[precision:] Determines the precision of the computation. Default is
+machine precision (floating point). 
 \item
 [nPivots:] Returns the total number of pivots. 
 \item
@@ -5308,6 +5368,28 @@ not contain a valid extensive form savefile.
 \item [See also:] \verb+SaveEfg+.
 \ed
 
+\item\lex{LoadGlobalVar}
+\protect \large \begin{verbatim}
+LoadGlobalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+\end{verbatim}\normalsize
+
+\bd
+Loads a variable from memory that was previously saved with 
+\verb+SaveGlobalVar+. 
+\item [See also:] \verb+SaveGlobalVar+.
+\ed
+
+\item\lex{LoadLocalVar}
+\protect \large \begin{verbatim}
+LoadLocalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+\end{verbatim}\normalsize
+
+\bd
+Loads a variable from memory that was previously saved with 
+\verb+SaveLocalVar+. 
+\item [See also:] \verb+SaveLocalVar+.
+\ed
+
 \item\lex{LoadNfg}
 \protect \large \begin{verbatim}
 LoadNfg[file->TEXT] =: NFG 
@@ -5358,6 +5440,11 @@ By setting this parameter to \verb+True+, each marked subgame of the
 extensive form is converted to its corresponding reduced normal form,
 solved as a linear program, and the mixed strategy solutions converted back
 into behavior profiles.
+\item
+[stopAfter:] Maximum number of equilibria to find.  
+\item
+[precision:] Determines the precision of the computation. Default is
+machine precision (floating point). 
 \item
 [nPivots:] Returns the total number of pivots.
 \item
@@ -6131,9 +6218,9 @@ Read[input<->INPUT, x<->T] =: INPUT
 {\it for} {\tt T = BOOLEAN, INTEGER, NUMBER, TEXT, LIST}
 \bd
 Reads data of type \verb+T+ from the input stream and assigns it to
-\verb+x+.  If \verb+x+ is undefined, then its data type is determined
-from the exposed data in the input stream.  If \verb+x+ is previously
-defined, then the \verb+Read+ function will expect to find the
+\verb+x+.  If \verb+x+ is undefined, an error is generated.  If
+\verb+x+ is defined to be a variable of one of the allowable types
+\verb+T+ listed above, then the \verb+Read+ function will expect to find the
 corresponding data type in the input stream, and a file read error
 will be generated if the exposed data is of the wrong data type.  If
 \verb+x+ is previously defined to be a \verb+LIST+, then \verb+Read[in,x]+
@@ -6293,6 +6380,35 @@ SaveEfg[efg->EFG, file->TEXT] =: EFG
 Writes \verb+efg+ to an external savefile \verb+file+.  It is an error
 if \verb+file+ cannot be opened for writing.  Returns \verb+efg+.
 \item [See also:] \verb+LoadEfg+.
+\ed
+
+\item\lex{SaveGlobalVar}
+\protect \large \begin{verbatim}
+SaveGlobalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+\end{verbatim}\normalsize
+
+\bd
+Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
+text string to identify it so it can later be retrieved with
+\verb+LoadGlobalVar+.  Variables saved with this function can be
+retreived outside of the function in which they are saved.  So this
+function can be used to create variables that are shared in common by
+user defined functions.   
+\item [See also:] \verb+LoadGlobalVar+, \verb+SaveLocalVar+.
+\ed
+
+\item\lex{SaveLocalVar}
+\protect \large \begin{verbatim}
+SaveLocalVar[name->TEXT, var->ANYTYPE] =: ANYTYPE
+\end{verbatim}\normalsize
+
+\bd
+Saves the variable \verb+var+ in memory.  The name \verb+name+ is a
+text string to identify it so it can later be retrieved with
+\verb+LoadLocalVar+.  Variables saved with this function can only be
+retrieved in the scope in which they are saved.  So this function can
+be used to create ``static'' variables within a user defined function.   
+\item [See also:] \verb+LoadLocalVar+, \verb+SaveGlobalVar+.
 \ed
 
 \item\lex{SaveNfg}
@@ -6472,6 +6588,9 @@ subdivision is only supported on the normal form, so this parameter
 must always be specified and {\tt True}.}
 \item
 [stopAfter:] Maximum number of equilibria to find. Default is 1.  
+\item
+[precision:] Determines the precision of the computation. Default is
+machine precision (floating point). 
 \item 
 [nRestarts:] Number of restarts.  At each restart the mesh of the
 triangulation is halved.  So this parameter determines the final mesh
@@ -7020,20 +7139,6 @@ If[IsRoot[n],{n},Flatten[{Ancestors[Parent[n]]}&{n}]]
 \ed
 
 
-\item\lex{AttachNewOutcome}
-\protect \large \begin{verbatim}
-AttachNewOutcome[s->LIST(STRATEGY)] =: NFOUTCOME 
-\end{verbatim}\normalsize
-
-\bd 
-Creates a new outcome and attaches it to \verb+n+, returning the
-outcome attached.  
-\begin{verbatim}
-SetOutcome[s,NewOutcome[Game[s_1]]];
-\end{verbatim} 
-\ed
-
-
 %--B--
 
 \item\lex{Behav}
@@ -7116,6 +7221,18 @@ Centroid[s->NFSUPPORT] =: MIXED
 Returns the centroid of the support \verb+n+ of a normal form game.  
 \begin{verbatim}
 Mixed[s]
+\end{verbatim} 
+\ed
+
+\item\lex{Concat}
+\protect \large \begin{verbatim}
+Concat[list->LIST(TEXT)]=:TEXT
+\end{verbatim}\normalsize
+
+\bd 
+Concatenates all of the elements of \verb+list+
+\begin{verbatim}
+If[Length[list]=1,list_1,list_1&Concat[Remove[list,1]]];
 \end{verbatim} 
 \ed
 
@@ -7773,7 +7890,7 @@ MaxInt[] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd 
-Returns the maximum value in the list \verb+x+.  
+Returns the maximum integer:
 \begin{verbatim}
 2147483647
 \end{verbatim} 
@@ -7866,6 +7983,27 @@ i
 \end{verbatim} 
 \ed
 
+\item\lex{NewNfg}
+\protect \large \begin{verbatim}
+NewNfg[dim->LIST(INTEGER), outcomes->BOOLEAN] =: NFG }
+\end{verbatim}\normalsize
+
+\bd 
+
+Creates an new normal form game with \verb+Length[dim]+ players, and
+\verb+dim_i+ strategies for player \verb+i+.  A new outcome is
+attached to each cell of the normal form game.  Returns the newly
+created game.
+
+\begin{verbatim}
+n:=NewNfg[dim];
+If[outcomes=True,
+  NewOutcome[CartesianProd[Strategies[n]]]
+];
+n;
+\end{verbatim} 
+\ed
+
 \item\lex{NewOutcome}
 \protect \large \begin{verbatim}
 NewOutcome[efg->EFG, name->TEXT] =: EFOUTCOME 
@@ -7878,6 +8016,41 @@ of the outcome created.
 SetName[NewOutcome[efg],name]
 \end{verbatim} 
 \ed
+
+\item\lex{NewOutcome}
+\protect \large \begin{verbatim}
+NewOutcome[profile->LIST(STRATEGY)] =: NFOUTCOME 
+\end{verbatim}\normalsize
+
+\bd 
+Creates a new outcome for the normal form game, attaching it to
+the pure profile \verb+profile+.  \verb+profile+ must be a list of
+strategies, whose \verb+i+th entry is a strategy for player \verb+i+. 
+
+
+\begin{verbatim}
+name:=Concat[Name[profile]];
+SetName[SetOutcome[profile,NewOutcome[Game[profile_1]]],name];
+\end{verbatim} 
+\ed
+
+\item\lex{NewOutcome}
+\protect \large \begin{verbatim}
+NewOutcome[profile->LIST(STRATEGY), payoff->LIST(NUMBER)] =: NFOUTCOME 
+\end{verbatim}\normalsize
+ 
+\bd 
+Creates a new outcome for the normal form game, attaching it to
+the pure profile \verb+profile+, and sets the payoffs to be the vector
+\verb+payoff+.  \verb+profile+ must be a list of strategies, whose
+\verb+i+th entry is a strategy for player \verb+i+, and \verb+payoff+
+is a list whose \verb+i+th entry is a payoff for player \verb+i+.
+
+\begin{verbatim}
+SetPayoffs[NewOutcome[profile], payoff];
+\end{verbatim} 
+\ed
+
 
 \item\lex{NewPlayer}
 \protect \large \begin{verbatim}
@@ -7927,27 +8100,6 @@ SetPayoffs[s,x];
 n
 \end{verbatim} 
 \ed
-
-\item\lex{Nfg}
-\protect \large \begin{verbatim}
-Nfg[dim->LIST(INTEGER)] =: NFG 
-\end{verbatim}\normalsize
-
-\bd 
-
-Creates an new normal form game with \verb+Length[dim]+ players, and
-\verb+dim_i+ strategies for player \verb+i+.  A new outcome is
-attached to each cell of the normal form game.  Returns the newly
-created game.
-
-\begin{verbatim}
-n:=NewNfg[dim];
-s:=CartesianProd[Strategies[n]];
-AttachNewOutcome[s];
-n;
-\end{verbatim} 
-\ed
-
 
 \item\lex{NodeTree}
 \protect \large \begin{verbatim}
@@ -8173,6 +8325,20 @@ MarkSubgames[ms];b
 \end{verbatim} 
 \ed
 
+\item\lex{OutcomeForm}
+\protect \large \begin{verbatim}
+OutcomeForm[n->NFG(NUMBER)]=:NLIST(NFOUTCOME)
+\end{verbatim}\normalsize
+
+\bd 
+Gives the game form of \verb+n+ in the form of a nested list, with
+entires as the corresponding outcomes for each pure profile. 
+
+\begin{verbatim}
+Outcome[CartesianProd[Strategies[n]]]
+\end{verbatim} 
+\ed
+
 %--P--
 
 \item\lex{Payoffs}
@@ -8246,6 +8412,42 @@ PlayerNumber[p->NFPLAYER] =: INTEGER
 The player number of player \verb+p+.
 \begin{verbatim}
 Index[Players[Game[p]],p]_1
+\end{verbatim} 
+\ed
+
+\item\lex{Power}
+\protect \large \begin{verbatim}
+Power[x->INTEGER,y->INTEGER]=:INTEGER
+\end{verbatim}\normalsize
+
+\bd 
+\verb+x+ to the power \verb+y+.
+\begin{verbatim}
+Integer[Power[Number[x],Number[y]]]
+\end{verbatim} 
+\ed
+
+\item\lex{Power}
+\protect \large \begin{verbatim}
+Power[x->INTEGER,y->NUMBER]=:NUMBER
+\end{verbatim}\normalsize
+
+\bd 
+\verb+x+ to the power \verb+y+.
+\begin{verbatim}
+Power[Number[x],y]
+\end{verbatim} 
+\ed
+
+\item\lex{Power}
+\protect \large \begin{verbatim}
+Power[x->NUMBER,y->INTEGER]=:NUMBER
+\end{verbatim}\normalsize
+
+\bd 
+\verb+x+ to the power \verb+y+.
+\begin{verbatim}
+Power[x,Number[y]]
 \end{verbatim} 
 \ed
 
@@ -8402,28 +8604,6 @@ streams.  See \verb+Format+ for definitions of the parameters.
 
 \item\lex{SetPayoffs}
 \protect \large \begin{verbatim}
-SetPayoffs[profile->LIST(STRATEGY), payoff->LIST(NUMBER)] =: LIST(STRATEGY) 
-\end{verbatim}\normalsize
- 
-\bd 
-Sets the payoffs of a normal form game at the pure strategy profile
-\verb+profile+ to be the vector \verb+payoff+.  \verb+profile+ must be
-a list of strategies, whose \verb+i+th entry is a strategy for player
-\verb+i+, and \verb+payoff+ is a list whose \verb+i+th
-entry is a payoff for player \verb+i+.
-
-
-\begin{verbatim}
-g:=Game[profile_1];
-o:=NewOutcome[g];
-SetPayoff[o , Players[g],payoff];
-SetOutcome[profile, o];
-profile
-\end{verbatim} 
-\ed
-
-\item\lex{SetPayoffs}
-\protect \large \begin{verbatim}
 SetPayoffs[outcome->EFOUTCOME, payoff->LIST(NUMBER)] =: EFOUTCOME 
 SetPayoffs[outcome->NFOUTCOME, payoff->LIST(NUMBER)] =: NFOUTCOME 
 \end{verbatim}\normalsize
@@ -8562,15 +8742,15 @@ Strategies[Players[nfg]]
 
 \item\lex{StrategyValues}
 \protect \large \begin{verbatim}
-StrategyValues[mixed->MIXED] =: LIST(LIST(NUMBER)) 
+StrategyValues[profile->MIXED] =: LIST(LIST(NUMBER)) 
 \end{verbatim}\normalsize
 
 \bd 
-Returns the strategy values of the profile \verb+mixed+.  The
+Returns the strategy values of \verb+profile+.  The
 \verb+(i,j)'th+ element is the value to player \verb+i+ of adopting
 strategy \verb+j+. 
 \begin{verbatim}
-StrategyValue[mixed,Strategies[Game[mixed]]];
+StrategyValue[profile,Strategies[Game[profile]]];
 \end{verbatim} 
 \ed
 
@@ -8650,8 +8830,8 @@ The following GCL program, in the file ``holdout.gcl'' defines a user
 defined function
 
 \begin{verbatim}
-  HoldoutGame[ stages->INTEGER, prob1->FLOAT, prob2->FLOAT, 
-                 disc->FLOAT, b->FLOAT] =: EFG
+  HoldoutGame[ stages->INTEGER, prob1->NUMBER, prob2->NUMBER, 
+                 disc->NUMBER, b->NUMBER] =: EFG
 \end{verbatim}
 
 \noindent
@@ -8702,19 +8882,19 @@ function ``HoldoutGame[]'' used in the above programs.
 //
 
 NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
-            out->LIST(EFOUTCOME), stages->INTEGER, disc->FLOAT],
+            out->LIST(EFOUTCOME), stages->INTEGER, disc->NUMBER],
   // build tree
-  i1:=isets[[1]];
-  i2:=isets[[2]];
+  i1:=isets_1;
+  i2:=isets_2;
   AddMove[i1,node];
   AddMove[i2,node#1];
   If[NumActions[i1]>1, AddMove[i2, node#2] ];
     // attach outcomes
-  SetOutcome[node#1#1, out[[1]] ]; 
-  If[NumActions[i2]>1, SetOutcome[node#1#2, out[[2]] ] ];
+  SetOutcome[node#1#1, out_1 ]; 
+  If[NumActions[i2]>1, SetOutcome[node#1#2, out_2 ] ];
   If[NumActions[i1]>1, 
-    SetOutcome[node#2#1, out[[3]] ];
-    If[NumActions[i2]>1, SetOutcome[node#2#2, out[[4]] ] ];
+    SetOutcome[node#2#1, out_3 ];
+    If[NumActions[i2]>1, SetOutcome[node#2#2, out_4 ] ]
     ];
     // recurse to next stage
   If[NumActions[i1]>1 || NumActions[i2]>1,
@@ -8723,13 +8903,13 @@ NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
       diset := NewInfoset[Chance[efg], {"",""} , "Discount"];
       SetChanceProbs[diset,{1.0-disc,disc}];
       AddMove[diset, node#1#1];
-      MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc];
-    ];
-  ];
+      MultiStageHoldout[efg,node#1#1#2,isets,out,stages-1,disc]
+    ]
+  ]
 ];
 
 NewFunction[HoldoutGame[ stages->INTEGER,
-            prob1->FLOAT, prob2->FLOAT, disc->FLOAT, b->FLOAT],
+            prob1->NUMBER, prob2->NUMBER, disc->NUMBER, b->NUMBER],
   e := NewEfg[];
   n := RootNode[e];
     // create chance moves
@@ -8758,18 +8938,16 @@ NewFunction[HoldoutGame[ stages->INTEGER,
   MultiStageHoldout[ e, n#1#2, {is1w,is2s}, outs, stages, disc];
   MultiStageHoldout[ e, n#2#1, {is1s,is2w}, outs, stages, disc];
   MultiStageHoldout[ e, n#2#2, {is1s,is2s}, outs, stages, disc];
-  ElapsedTime[]
   nonterm:=NonterminalNodes[e];
-  ElapsedTime[]
 
     // Make perfect recall 
   For[i:=1,i<=Length[nonterm],i:=i+1,
-    p:=Player[Infoset[nonterm[[i]] ] ];
+    p:=Player[Infoset[nonterm_i ] ];
     If[p!=Chance[e],
-      Reveal[Infoset[nonterm[[i]] ],{p}]; ];
+      Reveal[Infoset[nonterm_i ],{p}] ]
     ];	
-  e;
-];
+  e
+]
 \end{verbatim}
 }
 
@@ -8783,12 +8961,6 @@ moves, to check various theoretical predictions.
 // A gcl program to check theoretical results from McKelvey Palfrey 
 // paper "Endogeneity of Alternating Offers,"  forthcoming JET.  
 //
-
-// First define function to compute all Nash equilibria of the game
-
-NewFunction[AllNash[e<->EFG]=:LIST(BEHAV),
-  Behav[ EnumMixedSolve[ ElimAllDom[Nfg[e],strong->True] ,stopAfter->0] ];
-];
 
 // Create seven stage holdout game (or read in previously
 // saved game to save time). 
@@ -8827,7 +8999,6 @@ a:=Actions[e]
 g:=Filter[a,Name[a]="G"]
 g:={Flatten[g_1],Flatten[g_2]}
 
-
 // Now, check various regions to make sure they have the right 
 // kinds of equilibria predicted by the theorems.  
 
@@ -8843,11 +9014,11 @@ For[J:=1,J<=4,J:=J+1,
   SetChanceProbs[i2,{1.0-r2,r2}];
   s:=AllNash[e];
   o << "\nJ: " << J << " r1: " << r1 << "  r2: " << r2;
-  o << "\n                        move" 
-  o << "\nplayer    1      2      3      4      5      6      7  \n" 
+  o << "\n                        move";
+  o << "\nplayer    1      2      3      4      5      6      7  \n"; 
   For[k:=1,k<=Length[s],k:=k+1,
-    o << "   1: " << ActionProb[s_k,g]_1 << "\n";
-    o << "   2: " << ActionProb[s_k,g]_2 << "\n\n";
+    o << "   1: " << Float[ActionProb[s_k,g]_1] << "\n";
+    o << "   2: " << Float[ActionProb[s_k,g]_2] << "\n\n"
   ]
 ];
 
@@ -8861,17 +9032,17 @@ For[M:=1,M<=4,M:=M+1,
   SetChanceProbs[i2,{1.0-r2,r2}];
   s:=AllNash[e];
   o << "\nM: " << M << " r1: " << r1 << "  r2: " << r2;
-  o << "\n                        move" 
-  o << "\nplayer    1      2      3      4      5      6      7  \n" 
+  o << "\n                        move";
+  o << "\nplayer    1      2      3      4      5      6      7  \n"; 
   For[k:=1,k<=Length[s],k:=k+1,
-    o << "   1: " << ActionProb[s_k,g]_1 << "\n";
-    o << "   2: " << ActionProb[s_k,g]_2 << "\n\n";
+    o << "   1: " << Float[ActionProb[s_k,g]_1] << "\n";
+    o << "   2: " << Float[ActionProb[s_k,g]_2] << "\n\n"
   ]
 ];
 
 // close file
 
-o:=
+o:=;
 \end{verbatim}
 }
 
@@ -8994,7 +9165,7 @@ game in ``bhg3.efg'' is displayed in Figure 3:
 \end{figure}
 
 \noindent
-The input data file ``bhg.agg'' follows:
+The input data file ``bhg3.agg'' follows:
 
 \begin{verbatim}
   .01 0.70 .01
@@ -9079,10 +9250,16 @@ Include["egobitml.gcl"]
 
 NewFunction[EGobit[filename->TEXT],
   //  Load efg and open agg file for reading
-  e := LoadEfg[filename&".efg"]
-  in := Input[filename&".agg"]
+  width:=0;precis:=0;quote:=True;lf:=0;
+  GetNumericFormat[width<->width,precis<->precis];
+  GetTextFormat[quote<->quote];
+  GetListFormat[lf<->lf];
+
+  e := LoadEfg[filename&".efg"];
+  in := Input[filename&".agg"];
 
   // read in range of lambdas for QRE estimation
+  min:=max:=del:=0.0;
   in >> min >> max >> del;
 
   // read in nash equilibrium selection to be used for OSEM model
@@ -9091,17 +9268,21 @@ NewFunction[EGobit[filename->TEXT],
   in >> nash;
 
   //  Load data into dat
+  ndat:=0;
   in >> ndat;
   dat := {};
   For[i := 1, i <= ndat, i := i+1,
     dat := dat & {datlist};
-    in >> dat[[i]];
+    in >> dat_i;
   ];
 
   pxi := filename&".pxi";
   out := filename&".out";
 
   EGobitML[e,dat,min,max,del,out,pxi,nash];
+  SetNumericFormat[width,precis];
+  SetTextFormat[quote];
+  SetListFormat[lf->lf];
 ];
 \end{verbatim}
 }
@@ -9135,9 +9316,10 @@ Following is the contents of ``egobitml.gcl'':
 
 Include["loglike.gcl"]
 
-NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max->FLOAT,\
-  del->FLOAT,out->TEXT,pxi->TEXT,nash->BEHAV],
+NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->NUMBER,max->NUMBER,\
+  del->NUMBER,out->TEXT,pxi->TEXT,nash->BEHAV],
   o := Output[out];
+
   gob := GobitSolve[e, minLam->min, maxLam->max, delLam->del,fullGraph->True, \
     pxifile->pxi];
 
@@ -9168,9 +9350,9 @@ NewFunction[EGobitML[e<->EFG,dat->LIST(LIST(LIST(LIST(INTEGER)))),min->FLOAT,max
 
   gamsize := Integer[1./delgam] - 1;
   gamlist := List[delgam, gamsize, delgam];
-  
-  c := Centroid[e];
-  n := nash
+
+  c := Float[Centroid[e]];
+  n := nash;
   osem := (1.0-gamlist)*c + gamlist*n;
   osemlist := ListForm[osem];
 
@@ -9228,7 +9410,7 @@ Following is the contents of ``loglike.gcl'':
 // So if data is LIST(LIST(INTEGER)), then call function by  
 // LogLik[Mixed[n,Float[data]],sol]
 
-NewFunction[ LogLike[dat->LIST(LIST(FLOAT)), sol->MIXED], 
+NewFunction[ LogLike[dat->LIST(LIST(NUMBER)), sol->MIXED], 
   x:= dat * Log [ ListForm[sol]];
   Sum[Sum[x]];
 ];
@@ -9248,7 +9430,7 @@ NewFunction[ LogLike[dat->BEHAV, sol->BEHAV],
   Sum[Sum[Sum[x]]];
 ];
 
-NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV], 
+NewFunction[ LogLike[dat->LIST(LIST(LIST(NUMBER))), sol->BEHAV], 
   x:= dat * Log [ ListForm[sol]];
   Sum[Sum[Sum[x]]];
 ];
@@ -9259,7 +9441,7 @@ NewFunction[ LogLike[dat->LIST(LIST(LIST(FLOAT))), sol->BEHAV],
 // (use 1.9205 for a 95% confidence interval), and llmaxind is the location of the 
 // maximum (assumed correct) 
 
-NewFunction[LamHiLo[list->LIST(FLOAT),lam->LIST(FLOAT),range->FLOAT,llmaxind->INTEGER],
+NewFunction[LamHiLo[list->LIST(NUMBER),lam->LIST(NUMBER),range->NUMBER,llmaxind->INTEGER],
   newlist := list -(list_llmaxind-range);
   t1:={};
   t2:={};
@@ -9291,7 +9473,7 @@ The following GCL program, in the file ``cs.gcl'' defines a user
 defined function
 
 \begin{verbatim}
-CreateChainStore[num_stages->INTEGER,prob->FLOAT] =: EFG
+CreateChainStore[num_stages->INTEGER,prob->NUMBER] =: EFG
 \end{verbatim}
 
 \noindent
@@ -9363,7 +9545,7 @@ If[Length[list] > 1,
   ];
 ]
 
-NewFunction[CreateChainStore[ num_stages->INTEGER, prob -> FLOAT],
+NewFunction[CreateChainStore[ num_stages->INTEGER, prob -> NUMBER],
 e := NewEfg[];
 n := RootNode[e];
 iset := NewInfoset[Chance[e], {"Strong", "Weak"} , "Chance move"];
@@ -10093,6 +10275,51 @@ each node in the node tree.
 NodeValue[behav,player,NodeTree[Game[behav]]];
 \end{verbatim} 
 \ed
+
+
+
+notes: 10/11/97
+
+1.   How is the type of a heterogeneous list determined?
+eg. {1,{2,3}} versus {{1,2},3}
+
+2. There are no functions Assign[] and Unassign[] anymore.  How can we
+rewrite this section.  
+
+3. Shouldn't second arg in second signature be NLIST(ANYTYPE):
+
+  Contains[list->NLIST(ANYTYPE), x->ANYTYPE] =: BOOLEAN 
+  Contains[list->NLIST(ANYTYPE), x->LIST(ANYTYPE)] =: BOOLEAN 
+
+4.  Equal[] should accept null arguments. 
+
+5.  NthElement[list<->NLIST(ANYTYPE), n->INTEGER] =: ANYTYPE 
+
+should be 
+
+  NthElement[list<->NLIST(ANYTYPE*), n->INTEGER] =: ANYTYPE 
+
+
+6.  In 
+
+MergeInfosets[infoset->INFOSET, infoset->INFOSET] =: INFOSET 
+
+ Params should be infoset1 and infoset2.  
+
+7.  Pass by ref does not work in 
+
+NewFunction[Abs[n<->INTEGER],
+		 If[n > 0, n, If[n < 0, n := -n, 0]]]
+
+8.  What happened to the SetVerbose[] command?  It would still make
+sense to have it.  
+
+9.  Change section on Read so that implicit types are not allowed.  
+
+10.  Payoffs always come out in Float.  Why?  
+
+
+
 
 
 
