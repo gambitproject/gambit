@@ -649,7 +649,7 @@ EFPlayer *FullEfg::NewPlayer(void)
   EFPlayer *ret = new EFPlayer(this, players.Length() + 1);
   players.Append(ret);
 
-  for (int outc = 1; outc <= outcomes.Last();
+  for (int outc = 0; outc <= outcomes.Last();
        outcomes[outc++]->payoffs.Append(0));
   DeleteLexicon();
   return ret;
