@@ -17,7 +17,7 @@
 
 %define MEMBERS      gInput &infile;  \
                      gString last_name;  gNumber last_number; \
-                     gString title; \
+                     gString title, comment; \
                      Nfg *& N; \
                      int ncont, pl, cont; \
                      gList<gString> names; \
@@ -48,11 +48,12 @@
 nfgfile:      header 
               { if (!CreateNfg(names, numbers, stratnames))  return 1;
 		names.Flush();  numbers.Flush();  stratnames.Flush();
-	        N->SetTitle(title);
+	        N->SetTitle(title); N->SetComment(comment);
               }              
               body  { return 0; }
 
 header:       NAME { title = last_name; pl = 0; }  playerlist  stratlist
+              commentopt
 
 playerlist:   LBRACE players RBRACE
 
@@ -75,6 +76,9 @@ stratnames:   stratname
           |   stratnames stratname
 
 stratname:    NAME  { stratnames.Append(last_name); numbers[pl] += 1; }
+
+commentopt:
+          |   NAME   { comment = last_name; }
 
 
 dimensionality:   LBRACE intlist RBRACE
@@ -118,7 +122,7 @@ outcome:       LBRACE NAME
                outcpaylist RBRACE
 
 outcpaylist:   outcpay
-           |   outcpaylist outcpay
+           |   outcpaylist commaopt outcpay
 
 outcpay:       NUMBER   
                  { if (pl > N->NumPlayers())  YYERROR;
@@ -126,6 +130,9 @@ outcpay:       NUMBER
 	                        gPoly<gNumber>(N->Parameters(),
                                                last_number,
 					       N->ParamOrder())); } 
+
+commaopt:    | ','   
+      
 
 contingencylist:  contingency
                |  contingencylist contingency
