@@ -37,6 +37,7 @@
 #include "dialog-about.h"        // for "About..." dialog
 
 #include "table-schelling.h"
+#include "table-matrix.h"
 #include "panel-nash.h"
 
 const int GBT_MENU_TOOLS_EQM = 1000;
@@ -62,7 +63,13 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
 {
   MakeMenu();
 
-  m_tablePanel = new gbtTableSchelling(this, p_doc);
+  if (p_doc->GetGame()->NumPlayers() == 2) {
+    m_tablePanel = new gbtTableSchelling(this, p_doc);
+  }
+  else {
+    m_tablePanel = new gbtTableMatrix(this, p_doc);
+  }
+
   m_algorithmPanel = new gbtNashPanel(this, p_doc);
 
   wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);

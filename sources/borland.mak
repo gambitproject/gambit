@@ -27,6 +27,7 @@ gambit_SOURCES = \
 	"sheetctl.cc" \
 	"sheetsel.cc" \
 	"sheetspt.cc" \
+	"table-matrix.cc" \
 	"table-schelling.cc"
 
 OBJECTS = $(gambit_SOURCES:.cc=.obj)

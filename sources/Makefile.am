@@ -24,6 +24,8 @@ gambit_SOURCES = \
 	sheetsel.h \
 	sheetspt.cc \
 	sheetspt.h \
+	table-matrix.cc \
+	table-matrix.h \
 	table-schelling.cc \
 	table-schelling.h \
 	wx24defs.h
