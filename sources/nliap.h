@@ -1,48 +1,37 @@
 //#
-//# FILE: liap.h -- Interface to Liap solution module
+//# FILE: nliap.h -- Interface to normal form Liapunov solution module
 //#
 //# $Id$
 //#
 
-#ifndef LIAP_H
-#define LIAP_H
+#ifndef NLIAP_H
+#define NLIAP_H
 
+#include "liap.h"
 #include "normal.h"
 #include "glist.h"
 
-template <class T> class LiapParams     {
+template <class T> class NFLiapParams : public LiapParams<T>  {
   public:
-    int plev, ntries, nequilib, maxitsDFP, maxitsBrent;
-    T tolDFP, tolBrent;
-    gString outfile, errfile;
-    
-    LiapParams(void);
+    NFLiapParams(void);
 };
 
-template <class T> class LiapSolver  {
+template <class T> class NFLiapModule : public LiapModule<T>  {
   private:
     const NormalForm<T> &nf;
-    LiapParams<T> params;
-    int nevals,nits;
-    gRational time;
     gList<gPVector<T> > solutions;
 
+    LiapFunc<T> *CreateFunc(void);
+    void AddSolution(const LiapFunc<T> *const);
+
   public:
-    LiapSolver(const NormalForm<T> &N, const LiapParams<T> &p); 
-
-    int Liap(void);
-    
-    int NumEvals(void) const;
-    int NumIters(void) const;
-    gRational Time(void) const;
-
-    LiapParams<T> &Parameters(void);
+    NFLiapModule(const NormalForm<T> &N, NFLiapParams<T> &p); 
 
     const gList<gPVector<T> > &GetSolutions(void) const;
 };
 
 
-#endif    // LIAP_H
+#endif    // NLIAP_H
 
 
 
