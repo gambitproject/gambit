@@ -151,6 +151,7 @@ static void AddSolution(gList<BehavSolution<double> > &solutions,
 {
   int i = solutions.Append(BehavSolution<double>(profile, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
+  solutions[i].SetIsSequential(T_YES);
 }
 
 extern void Project(gVector<double> &, const gArray<int> &);
