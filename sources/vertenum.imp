@@ -83,7 +83,7 @@ template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
   if(mult_opt) {
     tab.SetConst(btemp);    // install artifical constraint vector
     for(i=b.First();i<=b.Last();i++)
-      if(b[i]==0)
+      if(b[i]==(T)0)
 	for(j=-b.Last();j<=c.Last();j++) 
 	  if(j && !tab.Member(j))
 	    if(tab.IsDualReversePivot(i,j)) {
