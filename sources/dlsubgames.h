@@ -7,6 +7,8 @@
 #ifndef DLSUBGAMES_H
 #define DLSUBGAMES_H
 
+#include "wx/listctrl.h"
+
 class dialogSubgames : public guiAutoDialog {
 private:
   FullEfg &m_efg;
