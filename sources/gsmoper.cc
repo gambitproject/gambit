@@ -1661,10 +1661,15 @@ Portion* GSM_Read_Rational( Portion** param )
   input.get(c);
   while( !input.eof() && isspace(c) ) 
     input.get(c); 
+  if( !input.eof() && c == '.' )
+  {
+    input.setpos( old_pos );
+    return new ErrorPortion( "Expected RATIONAL, got FLOAT" );
+  }
   if( input.eof() || c != '/' )
   {
-    input.unget(c);
-    return param[0]->RefCopy();
+    input.setpos( old_pos );
+    return new ErrorPortion( "Expected RATIONAL, got INTEGER" );
   }
 
   if( input.eof() )
