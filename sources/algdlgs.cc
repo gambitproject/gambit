@@ -27,7 +27,7 @@ Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
     value = tmp_str;
     delete [] tmp_str;
   }
-  
+
   return ok;
 }
 
@@ -36,7 +36,7 @@ Bool wxGetResourceStr(char *section, char *entry, gText &value, char *file)
 //========================================================================
 
 dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
-				 wxWindow *p_parent, 
+				 wxWindow *p_parent,
 				 const char */*help_str*/)
   : wxDialogBox(p_parent, p_label, TRUE),
     m_usesNfg(p_usesNfg), m_depthChoice(0), m_typeChoice(0),
@@ -73,14 +73,14 @@ dialogAlgorithm::~dialogAlgorithm(void)
     }
 
     if (m_stopAfter) {
-      if (m_findAll->GetValue()) 
+      if (m_findAll->GetValue())
 	wxWriteResource("Algorithm Params", "StopAfter", 0, gambitApp.ResourceFile());
       else
 	wxWriteResource("Algorithm Params", "StopAfter",
 			m_stopAfter->GetInteger(), gambitApp.ResourceFile());
     }
 
-    if (m_precision) 
+    if (m_precision)
       wxWriteResource("Algorithm Params", "Precision",
 		      m_precision->GetSelection(), gambitApp.ResourceFile());
   }
@@ -108,7 +108,7 @@ Bool dialogAlgorithm::OnClose(void)
 void dialogAlgorithm::OnDepth(void)
 {
   m_typeChoice->Enable(m_depthChoice->GetSelection() > 0);
-  if (m_methodChoice)
+  if (m_methodChoice && m_usesNfg)
     m_methodChoice->Enable(m_depthChoice->GetSelection() > 0);
 }
 
@@ -127,20 +127,17 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 {
   int depth = 0, type = 0, method = 0;
 
-  wxLayoutConstraints *constraints;
   SetAutoLayout(TRUE);
 
-  wxGroupBox *dominanceBox = new wxGroupBox(this, "Eliminate strategies");
-
   if (p_usesNfg) {
-    (void) new wxMessage(this, "Eliminate dominated mixed strategies");
+    m_dominanceGroup = new wxGroupBox(this, "Eliminate dominated mixed strategies");
     wxGetResource("Soln-Defaults", "Nfg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
     wxGetResource("Soln-Defaults", "Nfg-ElimDom-Type", &type, gambitApp.ResourceFile());
     wxGetResource("Soln-Defaults", "Nfg-ElimDom-Method", &method,
 		  gambitApp.ResourceFile());
   }
   else {
-    (void) new wxMessage(this, "Eliminate dominated behavior strategies");
+    m_dominanceGroup = new wxGroupBox(this, "Eliminate dominated behavior strategies");
     wxGetResource("Soln-Defaults", "Efg-ElimDom-Depth", &depth, gambitApp.ResourceFile());
     wxGetResource("Soln-Defaults", "Efg-ElimDom-Type", &type, gambitApp.ResourceFile());
   }
@@ -148,37 +145,57 @@ void dialogAlgorithm::DominanceFields(bool p_usesNfg)
 
   char *depthChoices[] = { "None", "Once", "Iterative" };
   m_depthChoice = new wxRadioBox(this, (wxFunction) CallbackDepth, "Depth",
-				 -1, -1, -1, -1, 3, depthChoices);
+				 -1, -1, -1, -1, 3, depthChoices, 0, wxVERTICAL);
   m_depthChoice->SetClientData((char *) this);
   if (depth >= 0 && depth <= 2)
     m_depthChoice->SetSelection(depth);
 
-  NewLine();
-
   char *typeChoices[] = { "Weak", "Strong" };
   m_typeChoice = new wxRadioBox(this, 0, "Type", -1, -1, -1, -1,
-				2, typeChoices);
+				2, typeChoices, 0, wxVERTICAL);
   if (m_depthChoice->GetSelection() == 0)
     m_typeChoice->Enable(FALSE);
   else if (type == 0 || type == 1)
     m_typeChoice->SetSelection(type);
 
-  constraints = new wxLayoutConstraints;
-  constraints->top.SameAs(m_depthChoice, wxTop, -20);
-  constraints->bottom.SameAs(m_typeChoice, wxBottom, -20);
-  constraints->centreX.SameAs(m_depthChoice, wxCentreX);
-  constraints->width.PercentOf(m_depthChoice, wxWidth, 110);
-  dominanceBox->SetConstraints(constraints);
+  char *methodChoices[] = { "Pure", "Mixed" };
+  m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
+ 	    2, methodChoices, 0, wxVERTICAL);
+  if (m_depthChoice->GetSelection() == 0 || !p_usesNfg)
+    m_methodChoice->Enable(FALSE);
+  else if (method == 0 || method == 1)
+    m_methodChoice->SetSelection(method);
 
-  if (p_usesNfg) {
-    char *methodChoices[] = { "Pure", "Mixed" };
-    m_methodChoice = new wxRadioBox(this, 0, "Method", -1, -1, -1, -1,
-				    2, methodChoices);
-    if (m_depthChoice->GetSelection() == 0) 
-      m_methodChoice->Enable(FALSE);
-    else if (method == 0 || method == 1)
-      m_methodChoice->SetSelection(method);
-  }
+  wxLayoutConstraints *constraints;
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_dominanceGroup, wxLeft, 10);
+  constraints->top.SameAs(m_dominanceGroup, wxTop, 20);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_depthChoice->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->left.SameAs(m_depthChoice, wxRight, 10);
+  constraints->top.SameAs(m_depthChoice, wxTop);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_typeChoice->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->top.SameAs(m_depthChoice, wxTop);
+  constraints->left.SameAs(m_typeChoice, wxRight, 10);
+  constraints->height.AsIs();
+  constraints->width.AsIs();
+  m_methodChoice->SetConstraints(constraints);
+
+  constraints = new wxLayoutConstraints;
+  constraints->top.SameAs(this, wxTop, 5);
+  constraints->left.SameAs(this, wxLeft, 5);
+  constraints->bottom.SameAs(m_depthChoice, wxBottom, -10);
+  constraints->right.SameAs(m_methodChoice, wxRight, -10);
+  m_dominanceGroup->SetConstraints(constraints);
+
   NewLine();
 }
 
@@ -241,7 +258,7 @@ void dialogAlgorithm::StopAfterField(void)
 {
   int stopAfter = 0;
   wxGetResource("Algorithm Params", "StopAfter", &stopAfter, gambitApp.ResourceFile());
-  
+
   m_findAll = new wxCheckBox(this, (wxFunction) CallbackAll, "Find all");
   m_findAll->SetClientData((char *) this);
 
