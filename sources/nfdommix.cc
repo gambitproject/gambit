@@ -15,12 +15,12 @@
 
 #include "nfdommix.imp"
 
-NFSupport *ComputeMixedDominated(NFSupport &S,
-				 bool strong, gPrecision precision,
-				 const gArray<int> &players,
-				 gOutput &tracefile, gStatus &status)
+NFSupport *NFSupport::MixedUndominated(bool strong, gPrecision precision,
+				       const gArray<int> &players,
+				       gOutput &tracefile,
+				       gStatus &status) const
 {
-  NFSupport *newS = new NFSupport(S);
+  NFSupport *newS = new NFSupport(*this);
   bool any = false;
   
   if(precision == precRATIONAL) {
@@ -29,7 +29,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S,
       status.Get();
       int pl = players[i];
       
-      any |= ComputeMixedDominated(S, *newS, pl, strong,
+      any |= ComputeMixedDominated(*this, *newS, pl, strong,
 				  (gRational)0, tracefile, status);
     }
   }
@@ -38,7 +38,7 @@ NFSupport *ComputeMixedDominated(NFSupport &S,
       status.Get();
       int pl = players[i];
       
-      any |= ComputeMixedDominated(S, *newS, pl, strong,
+      any |= ComputeMixedDominated(*this, *newS, pl, strong,
 				  (double)0, tracefile, status);
     }
   }

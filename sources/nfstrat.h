@@ -10,6 +10,7 @@
 #include "gtext.h"
 #include "gblock.h"
 #include "gstream.h"
+#include "gstatus.h"
 #include "gnumber.h"
 #include "nfplayer.h"
 
@@ -50,6 +51,9 @@ protected:
   gArray <nfgSupportPlayer *> sups;
   gText m_name;
   
+  bool Undominated(NFSupport &newS, int pl, bool strong,
+		   gOutput &tracefile, gStatus &status) const;
+
 public:
   NFSupport(const Nfg &);
   NFSupport(const NFSupport &s); 
@@ -86,6 +90,16 @@ public:
   // otherwise returns zero
   int Find(Strategy *) const; 
   bool StrategyIsActive(Strategy *) const;
+
+  // Domination 
+  bool Dominates(Strategy *s, Strategy *t, bool strong) const;
+  bool IsDominated(Strategy *s, bool strong) const; 
+
+  NFSupport *Undominated(bool strong, const gArray<int> &players,
+			 gOutput &tracefile, gStatus &status) const;
+  NFSupport *MixedUndominated(bool strong, gPrecision precision,
+			      const gArray<int> &players,
+			      gOutput &, gStatus &status) const;
 
   void Dump(gOutput &) const;
 };

@@ -98,7 +98,7 @@ void AllUndominatedSubsupportsRECURSIVE(const NFSupport *s,
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
     if ( sact->StrategyIsActive(this_strategy) ) 
-      if ( IsDominated(*sact,this_strategy,strong,status) ) 
+      if (sact->IsDominated(this_strategy,strong) ) 
 	delete_this_strategy = true;
 	
     if (delete_this_strategy) {
@@ -195,7 +195,7 @@ void PossibleNashSubsupportsRECURSIVE(const NFSupport *s,
     Strategy *this_strategy = (Strategy *)scanner.GetStrategy();
     bool delete_this_strategy = false;
     if ( sact->StrategyIsActive(this_strategy) ) 
-      if ( IsDominated(*sact,this_strategy,true,status) ) {
+      if (sact->IsDominated(this_strategy,true) ) {
 	delete_this_strategy = true;
       }
     if (delete_this_strategy) {
@@ -261,12 +261,12 @@ gList<const NFSupport> PossibleNashSubsupports(const NFSupport &S,
 	  Strategy *other_strat = strat->Player()->GetStrategy(j);
 	  if (other_strat != strat)
 	    if (current.StrategyIsActive(other_strat)) {
-	      if (Dominates(current,other_strat,strat,false,status)) 
+	      if (current.Dominates(other_strat,strat,false)) 
 		remove = true;
 	    }
 	    else { 
 	      current.AddStrategy(other_strat);
-	      if (Dominates(current,other_strat,strat,false,status)) {
+	      if (current.Dominates(other_strat,strat,false)) {
 		remove = true;
 	      }
 	      current.RemoveStrategy(other_strat);

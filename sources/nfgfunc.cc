@@ -106,13 +106,12 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   NFSupport *T;
   Portion *por;
 
-  Nfg *N = (Nfg *) &S->Game();
   if (mixed)
-    T = ComputeMixedDominated(*S, strong, prec, players,
-			      ((OutputPortion *) param[5])->Value(), gstatus);
+    T = S->MixedUndominated(strong, prec, players,
+			    ((OutputPortion *) param[5])->Value(), gstatus);
   else   {
-    T = ComputeDominated(*N, *S, strong, players,
-			   ((OutputPortion *) param[5])->Value(), gstatus);
+    T = S->Undominated(strong, players,
+		       ((OutputPortion *) param[5])->Value(), gstatus);
   }
 
   por = ((T) ? new NfSupportPortion(T) :
@@ -142,7 +141,7 @@ static Portion *GSM_IsDominated_Nfg(Portion **param)
     ret = IsMixedDominated(*S, str,strong, prec, 
 			   ((OutputPortion *) param[6])->Value());
   else   {
-    ret = IsDominated(*S, str, strong, gstatus);
+    ret = S->IsDominated(str, strong);
   }
 
   ((NumberPortion *) param[5])->SetValue(watch.Elapsed());

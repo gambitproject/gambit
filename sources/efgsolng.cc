@@ -145,9 +145,9 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
   if (m_iterative) {
     if (m_mixed) {
       NFSupport *oldSupport = new NFSupport(p_support), *newSupport;
-      while ((newSupport = ComputeMixedDominated(*oldSupport, m_strong,
-						 precRATIONAL,
-						 players, gnull, gstatus)) != 0) {
+      while ((newSupport = oldSupport->MixedUndominated(m_strong,
+							precRATIONAL,
+							players, gnull, gstatus)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
       }
@@ -157,9 +157,8 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
     }
     else {
       NFSupport *oldSupport = new NFSupport(p_support), *newSupport;
-      while ((newSupport = ComputeDominated(oldSupport->Game(), 
-					    *oldSupport, m_strong,
-					    players, gnull, gstatus)) != 0) {
+      while ((newSupport = oldSupport->Undominated(m_strong,
+						   players, gnull, gstatus)) != 0) {
 	delete oldSupport;
 	oldSupport = newSupport;
       }
@@ -171,18 +170,17 @@ void guiSubgameViaNfg::BaseViewNormal(const Nfg &p_nfg, NFSupport &p_support)
   else {
     if (m_mixed) {
       NFSupport *newSupport;
-      if ((newSupport = ComputeMixedDominated(p_support, m_strong,
-					      precRATIONAL,
-					      players, gnull, gstatus)) != 0) {
+      if ((newSupport = p_support.MixedUndominated(m_strong,
+						    precRATIONAL,
+						    players, gnull, gstatus)) != 0) {
 	p_support = *newSupport;
 	delete newSupport;
       }
     }
     else {
       NFSupport *newSupport;
-      if ((newSupport = ComputeDominated(p_support.Game(), 
-					 p_support, m_strong,
-					 players, gnull, gstatus)) != 0) {
+      if ((newSupport = p_support.Undominated(m_strong,
+					      players, gnull, gstatus)) != 0) {
 	p_support = *newSupport;
 	delete newSupport;
       }

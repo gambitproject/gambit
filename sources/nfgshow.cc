@@ -90,7 +90,7 @@ void NfgShow::UpdateVals(void)
     if (spread->HaveDom()) { 
       int dom_pos = 1+spread->HaveProbs();
       Strategy *strategy = cur_sup->Strategies(pl1)[i];
-      bool dominated = IsDominated(*cur_sup, strategy, false, gstatus);
+      bool dominated = cur_sup->IsDominated(strategy, false);
       if (dominated) { 
 	spread->SetCell(i, cols+dom_pos, "Y");
       }
@@ -107,7 +107,7 @@ void NfgShow::UpdateVals(void)
     if (spread->HaveDom()) { 
       int dom_pos = 1+spread->HaveProbs();
       Strategy *strategy = cur_sup->Strategies(pl2)[j];
-      bool dominated = IsDominated(*cur_sup, strategy, false, gstatus);
+      bool dominated = cur_sup->IsDominated(strategy, false);
       if (dominated) { 
 	spread->SetCell(rows+dom_pos, j, "Y");
       }
@@ -989,29 +989,25 @@ int NfgShow::SolveElimDom(void)
     try {
       if (!dialog.DomMixed()) {
 	if (dialog.FindAll()) {
-	  while ((sup = ComputeDominated(sup->Game(), 
-					 *sup, dialog.DomStrong(), 
+	  while ((sup = sup->Undominated(dialog.DomStrong(), 
 					 dialog.Players(), gnull, status)) != 0)
 	    supports.Append(sup);
 	}
 	else {
-	  if ((sup = ComputeDominated(sup->Game(), 
-				      *sup, dialog.DomStrong(), 
+	  if ((sup = sup->Undominated(dialog.DomStrong(), 
 				      dialog.Players(), gnull, status)) != 0)
 	    supports.Append(sup);
 	}
       }
       else {
 	if (dialog.FindAll()) {
-	  while ((sup = ComputeMixedDominated(*sup, 
-					      dialog.DomStrong(), precRATIONAL,
+	  while ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
 					      dialog.Players(),
 					      gnull, status)) != 0)
 	    supports.Append(sup);
 	}
 	else {
-	  if ((sup = ComputeMixedDominated(*sup,
-					   dialog.DomStrong(), precRATIONAL,
+	  if ((sup = sup->MixedUndominated(dialog.DomStrong(), precRATIONAL,
 					   dialog.Players(),
 					   gnull, status)) != 0)
 	    supports.Append(sup);
