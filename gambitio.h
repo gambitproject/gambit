@@ -118,6 +118,7 @@ class gOutput  {
 
     virtual gOutput &operator<<(int x) = 0;
     virtual gOutput &operator<<(unsigned int x) = 0;
+    virtual gOutput &operator<<(bool x) = 0;
     virtual gOutput &operator<<(long x) = 0;
     virtual gOutput &operator<<(char x) = 0;
     virtual gOutput &operator<<(double x) = 0;
@@ -165,6 +166,7 @@ class gFileOutput : public gOutput  {
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
+    gOutput &operator<<(bool x);
     gOutput &operator<<(long x);
     gOutput &operator<<(char x);
     gOutput &operator<<(double x);
@@ -198,6 +200,7 @@ class gNullOutput : public gOutput  {
 
     gOutput &operator<<(int x);
     gOutput &operator<<(unsigned int x);
+    gOutput &operator<<(bool x);
     gOutput &operator<<(long x);
     gOutput &operator<<(char x);
     gOutput &operator<<(double x);
