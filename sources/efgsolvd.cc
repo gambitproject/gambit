@@ -95,12 +95,15 @@ dialogEfgSolveStandard::~dialogEfgSolveStandard()
 {
   if (Completed() == wxOK) {
     gText defaultsFile(gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
-		    m_standardType->GetSelection(), defaultsFile);
-    wxWriteResource(SOLN_SECT, "Efg-Standard-Num",
-		    m_standardNum->GetSelection(), defaultsFile);
-    wxWriteResource(SOLN_SECT, "Efg-Standard-Precision",
-		    m_precision->GetSelection(), defaultsFile);
+    if(m_standardType)
+      wxWriteResource(SOLN_SECT, "Efg-Standard-Type",
+		      m_standardType->GetSelection(), defaultsFile);
+    if(m_standardNum)
+      wxWriteResource(SOLN_SECT, "Efg-Standard-Num",
+		      m_standardNum->GetSelection(), defaultsFile);
+    if(m_precision)
+      wxWriteResource(SOLN_SECT, "Efg-Standard-Precision",
+		      m_precision->GetSelection(), defaultsFile);
   }
 }
 

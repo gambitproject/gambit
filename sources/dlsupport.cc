@@ -110,14 +110,18 @@ dialogElimMixed::dialogElimMixed(wxWindow *p_parent,
 dialogElimMixed::~dialogElimMixed()
 {
   if (Completed() == wxOK) {
-    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-All", 
-		    m_allBox->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Type",
-		    m_domTypeBox->GetSelection(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Method",
-		    m_domMethodBox->GetSelection(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Precision",
-		    m_domPrecisionBox->GetSelection(), gambitApp.ResourceFile());
+    if(m_allBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Mixed-All", 
+		      m_allBox->GetValue(), gambitApp.ResourceFile());
+    if(m_domTypeBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Type",
+		      m_domTypeBox->GetSelection(), gambitApp.ResourceFile());
+    if(m_domMethodBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Method",
+		      m_domMethodBox->GetSelection(), gambitApp.ResourceFile());
+    if(m_domPrecisionBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Mixed-Precision",
+		      m_domPrecisionBox->GetSelection(), gambitApp.ResourceFile());
   }
 }
 
@@ -217,12 +221,15 @@ dialogElimBehav::dialogElimBehav(wxWindow *p_parent,
 dialogElimBehav::~dialogElimBehav()
 {
   if (Completed() == wxOK) {
-    wxWriteResource(SOLN_SECT, "ElimDom-Behav-All", 
-		    m_allBox->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Behav-Type",
-		    m_domTypeBox->GetSelection(),  gambitApp.ResourceFile());
-    wxWriteResource(SOLN_SECT, "ElimDom-Behav-Conditional",
-		    m_domConditionalBox->GetSelection(), gambitApp.ResourceFile());
+    if(m_allBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Behav-All", 
+		      m_allBox->GetValue(), gambitApp.ResourceFile());
+    if(m_domTypeBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Behav-Type",
+		      m_domTypeBox->GetSelection(),  gambitApp.ResourceFile());
+    if(m_domConditionalBox)
+      wxWriteResource(SOLN_SECT, "ElimDom-Behav-Conditional",
+		      m_domConditionalBox->GetSelection(), gambitApp.ResourceFile());
   }
 }
 

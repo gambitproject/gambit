@@ -119,37 +119,45 @@ dialogAlgorithm::dialogAlgorithm(const gText &p_label, bool p_usesNfg,
 dialogAlgorithm::~dialogAlgorithm()
 {
   if (Completed() == wxOK) {
-    if (m_usesNfg) {
-      wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
-		      m_depthChoice->GetSelection(), gambitApp.ResourceFile());
-      if (m_depthChoice->GetSelection() != 0) {
-	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Type",
-			m_typeChoice->GetSelection(), gambitApp.ResourceFile());
-	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Method",
-			m_methodChoice->GetSelection(), gambitApp.ResourceFile());
+    if(m_depthChoice)
+      if (m_usesNfg) {
+	wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Depth",
+			m_depthChoice->GetSelection(), gambitApp.ResourceFile());
+	if (m_depthChoice->GetSelection() != 0) {
+	  if(m_typeChoice)
+	    wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Type",
+			    m_typeChoice->GetSelection(), gambitApp.ResourceFile());
+	  if(m_methodChoice)
+	    wxWriteResource("Soln-Defaults", "Nfg-ElimDom-Method",
+			    m_methodChoice->GetSelection(), gambitApp.ResourceFile());
+	}
       }
-    }
-    else {
-      wxWriteResource("Soln-Defaults", "Efg-ElimDom-Depth",
-		      m_depthChoice->GetSelection(), gambitApp.ResourceFile());
-      if (m_depthChoice->GetSelection() != 0)
-	wxWriteResource("Soln-Defaults", "Efg-ElimDom-Type",
-			m_typeChoice->GetSelection(), gambitApp.ResourceFile());
-    }
-
+      else {
+	wxWriteResource("Soln-Defaults", "Efg-ElimDom-Depth",
+			m_depthChoice->GetSelection(), gambitApp.ResourceFile());
+	if (m_depthChoice->GetSelection() != 0)
+	  if(m_typeChoice)
+	    wxWriteResource("Soln-Defaults", "Efg-ElimDom-Type",
+			    m_typeChoice->GetSelection(), gambitApp.ResourceFile());
+      }
+    
     if (m_subgames) {
-      wxWriteResource("Soln-Defaults", "Efg-Mark-Subgames",
-		      m_markSubgames->GetValue(), gambitApp.ResourceFile());
-      wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
-		      m_selectSolutions->GetValue(), gambitApp.ResourceFile());
+      if(m_markSubgames)
+	wxWriteResource("Soln-Defaults", "Efg-Mark-Subgames",
+			m_markSubgames->GetValue(), gambitApp.ResourceFile());
+      if(m_selectSolutions)
+	wxWriteResource("Soln-Defaults", "Efg-Interactive-Solns",
+			m_selectSolutions->GetValue(), gambitApp.ResourceFile());
     }
 
     if (m_stopAfter) {
-      if (m_findAll->GetValue())
-	wxWriteResource("Algorithm Params", "StopAfter", 0, gambitApp.ResourceFile());
-      else
-	wxWriteResource("Algorithm Params", "StopAfter",
-			m_stopAfter->GetInteger(), gambitApp.ResourceFile());
+      if(m_findAll)
+	if (m_findAll->GetValue())
+	  wxWriteResource("Algorithm Params", "StopAfter", 0, gambitApp.ResourceFile());
+	else
+	  if(m_stopAfter)
+	    wxWriteResource("Algorithm Params", "StopAfter",
+			    m_stopAfter->GetInteger(), gambitApp.ResourceFile());
     }
 
     if (m_precision) {
@@ -920,13 +928,16 @@ dialogPxi::dialogPxi(const char *p_label, const char *p_filename,
 dialogPxi::~dialogPxi()
 {
   if (Completed() == wxOK) {
-    wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
-		    m_plotType->GetSelection(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Run-Pxi",
-		    m_runPxi->GetValue(), gambitApp.ResourceFile());
-    if (m_runPxi->GetValue()) 
-      wxWriteResource("Algorithm Params", "Pxi-Command",
-		      m_pxiCommand->GetValue(), gambitApp.ResourceFile());
+    if(m_plotType)
+      wxWriteResource("Algorithm Params", "Pxi-Plot-Type",
+		      m_plotType->GetSelection(), gambitApp.ResourceFile());
+    if(m_runPxi) {
+      wxWriteResource("Algorithm Params", "Run-Pxi",
+		      m_runPxi->GetValue(), gambitApp.ResourceFile());
+      if (m_runPxi->GetValue()) 
+	wxWriteResource("Algorithm Params", "Pxi-Command",
+			m_pxiCommand->GetValue(), gambitApp.ResourceFile());
+    }
   }
 }
 
@@ -1011,16 +1022,21 @@ dialogQre::dialogQre(wxWindow *p_parent, const gText &p_filename,
 dialogQre::~dialogQre()
 {
   if (Completed() == wxOK) {
-    wxWriteResource("Algorithm Params", "Qre-minLam",
-		    m_minLam->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Qre-maxLam",
-		    m_maxLam->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Qre-delLam",
-		    m_delLam->GetValue(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Qre-accuracy",
-		    m_accuracy->GetInteger(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "Qre-startOption",
-		    m_startOption->GetSelection(), gambitApp.ResourceFile());
+    if(m_minLam)
+      wxWriteResource("Algorithm Params", "Qre-minLam",
+		      m_minLam->GetValue(), gambitApp.ResourceFile());
+    if(m_maxLam)
+      wxWriteResource("Algorithm Params", "Qre-maxLam",
+		      m_maxLam->GetValue(), gambitApp.ResourceFile());
+    if(m_delLam)
+      wxWriteResource("Algorithm Params", "Qre-delLam",
+		      m_delLam->GetValue(), gambitApp.ResourceFile());
+    if(m_accuracy)
+      wxWriteResource("Algorithm Params", "Qre-accuracy",
+		      m_accuracy->GetInteger(), gambitApp.ResourceFile());
+    if(m_startOption)
+      wxWriteResource("Algorithm Params", "Qre-startOption",
+		      m_startOption->GetSelection(), gambitApp.ResourceFile());
   }
 }
 
@@ -1133,22 +1149,30 @@ dialogQreGrid::dialogQreGrid(wxWindow *p_parent,
 dialogQreGrid::~dialogQreGrid()
 {
   if (Completed() == wxOK) {
-    wxWriteResource("Algorithm Params", "QreGrid-minLam",
-		    (float) m_minLam->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-maxLam",
-		    (float) m_maxLam->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-delLam",
-		    (float) m_delLam->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Parmas", "QreGrid-delp1",
-		    (float) m_delp1->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-delp2",
-		    (float) m_delp2->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-tol1",
-		    (float) m_tol1->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-tol2",
-		    (float) m_tol2->GetNumber(), gambitApp.ResourceFile());
-    wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
-		    m_multiGrid->GetValue(), gambitApp.ResourceFile());
+    if(m_minLam)
+      wxWriteResource("Algorithm Params", "QreGrid-minLam",
+		      (float) m_minLam->GetNumber(), gambitApp.ResourceFile());
+    if(m_maxLam)
+      wxWriteResource("Algorithm Params", "QreGrid-maxLam",
+		      (float) m_maxLam->GetNumber(), gambitApp.ResourceFile());
+    if(m_delLam)
+      wxWriteResource("Algorithm Params", "QreGrid-delLam",
+		      (float) m_delLam->GetNumber(), gambitApp.ResourceFile());
+    if(m_delp1)
+      wxWriteResource("Algorithm Params", "QreGrid-delp1",
+		      (float) m_delp1->GetNumber(), gambitApp.ResourceFile());
+    if(m_delp2)
+      wxWriteResource("Algorithm Params", "QreGrid-delp2",
+		      (float) m_delp2->GetNumber(), gambitApp.ResourceFile());
+    if(m_tol1)
+      wxWriteResource("Algorithm Params", "QreGrid-tol1",
+		      (float) m_tol1->GetNumber(), gambitApp.ResourceFile());
+    if(m_tol2)
+      wxWriteResource("Algorithm Params", "QreGrid-tol2",
+		      (float) m_tol2->GetNumber(), gambitApp.ResourceFile());
+    if(m_multiGrid)
+      wxWriteResource("Algorithm Params", "QreGrid-multiGrid",
+		      m_multiGrid->GetValue(), gambitApp.ResourceFile());
   }
 }
 
@@ -1159,7 +1183,7 @@ void dialogQreGrid::AlgorithmFields(void)
   wxGetResourceStr("Algorithm Params", "QreGrid-minLam", minLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-maxLam", maxLam, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-delLam", delLam, gambitApp.ResourceFile());
-  wxGetResourceStr("Algorithm Parmas", "QreGrid-delp1", delp1, gambitApp.ResourceFile());
+  wxGetResourceStr("Algorithm Params", "QreGrid-delp1", delp1, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-delp2", delp2, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-tol1", tol1, gambitApp.ResourceFile());
   wxGetResourceStr("Algorithm Params", "QreGrid-tol2", tol2, gambitApp.ResourceFile());
