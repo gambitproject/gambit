@@ -2410,23 +2410,117 @@ Portion* GSM_Manual(Portion** param)
     s << ((TextPortion*) (*Prototypes)[i])->Value() << '\n';
   }
 
-  gFileInput f("gcl.man");
+
+  gString name = "gcl.man";
+  gFileInput* f = NULL;
+
+
+
+
+
+  // This section is very inelegantly adopted from gcompile.yy...
+  // This section and its gcompile.yy parallel should be converted into
+  // one function...
+
+  extern char* _SourceDir;
+  const char* SOURCE = _SourceDir; 
+  assert( SOURCE );
+
+#ifdef __GNUG__
+  const char SLASH = '/';
+#elif defined __BORLANDC__
+  const char * SLASH = "\\";
+#endif   // __GNUG__
+
+  bool search = false;
+  bool man_found = false;
+  if( strchr( name, SLASH ) == NULL )
+    search = true;
+  gString ManFileName;
+
+  ManFileName = (gString) name;
+  f = new gFileInput( ManFileName );
+  if (!f->IsValid())
+  {
+    delete f;
+    f = NULL;
+  }
+  else
+  {  
+    man_found = true;
+  }
+
+  if( search )
+  {
+
+    if( !man_found && (System::GetEnv( "HOME" ) != NULL) )
+    {
+      ManFileName = (gString) System::GetEnv( "HOME" ) + SLASH + name;
+      f = new gFileInput( ManFileName );
+      if (!f->IsValid())
+      {
+	delete f;
+	f = NULL;
+      }
+      else
+      {  
+        man_found = true;
+      }
+    }
+
+    if( !man_found && (System::GetEnv( "GCLLIB" ) != NULL) )
+    {
+      ManFileName = (gString) System::GetEnv( "GCLLIB" ) + SLASH + name;
+      f = new gFileInput( ManFileName );
+      if (!f->IsValid())
+      {
+	delete f;
+	f = NULL;
+      }
+      else
+      {
+        man_found = true;
+      }
+    }
+
+    if( !man_found && (SOURCE != NULL) )
+    {
+      ManFileName = (gString) SOURCE + SLASH + name;
+      f = new gFileInput( ManFileName );
+      if (!f->IsValid())
+      {
+        delete f;
+	f = NULL;
+      }
+      else
+      {  
+        man_found = true;
+      }
+    }
+
+  }
+
+  // End bad section
+
+
+
+
   gString line;
   gString line_out;
   bool found = false;
-  while(f.IsValid() && !f.eof() && !found)
+  while(f->IsValid() && !f->eof() && !found)
   {
-    line = GetLine(f);
+    line = GetLine(*f);
     if(line.length() > txt.length())
-      if(line.left(txt.length() + 1)==txt + '[')
+      if( line.left(txt.length() + 1).dncase() == (txt + "[").dncase() )
 	found = true;
   }
   if(found)
   {
     body = 0;
-    while(f.IsValid() && !f.eof())
+    while(f->IsValid() && !f->eof())
     {
-      line = GetLine(f);      
+      line = GetLine(*f);      
       if(line.length()>=3 && line.left(3) == "\\bd")
 	body++;
       if(body > 0)
@@ -2503,6 +2597,9 @@ Portion* GSM_Manual(Portion** param)
     s << '\n';
   }
   */
+
+  delete f;
+
   return new BoolValPortion(found);
 }
 
