@@ -339,7 +339,7 @@ game \\
 \end{center}
 \end{table}
 The remainder of this section details the rules concerning the
-standard types \tindex{BOOLEAN}, \tindex{INTEGER}, \tindex{NUMBER},
+standard types \tindex{BOOLEAN}, \tindex{NUMBER},
 \tindex{TEXT}, \tindex{INPUT} and \tindex{OUTPUT}, as well as general
 rules for typing.  The extensive form and normal form types, and their
 related types, are detailed later in special sections.
@@ -540,7 +540,7 @@ not a {\tt NUMBER}.
 Lists are distinct in type from each other and from their scalar
 equivalents.  That is to say, {\tt LIST(BOOLEAN)} is a distinct data
 type from {\tt LIST(NUMBER)}, and is also a distinct data type from
-{\tt INTEGER}.
+{\tt NUMBER}.
  
 \subsection{Conglomerate data types}
 
@@ -716,7 +716,7 @@ y:=3
 y:="3"
 \end{verbatim}
 \noindent The first call creates a new variable {\tt y} of type {\tt
-INTEGER}, with value of \verb+3+.  The second modifies \verb+y+ to
+NUMBER}, with value of \verb+3+.  The second modifies \verb+y+ to
 have value \verb+3+.  Since the new assignment does not change the
 type of \verb+y+, this command is fine.  The third statement attempts
 to change the data type of \verb+y+.  This statement will result in an
@@ -735,7 +735,7 @@ UnAssign[name->TEXT] =: BOOLEAN
 is no longer defined.  A subsequent call of {\tt Assign} may redefine
 the variable to be of any type.  \verb+UnAssign+ has a short form of
 \verb+:=+ followed immediately by a linefeed or semicolon.  Hence, if
-\verb+y+ is a variable of type \verb+INTEGER+ you can change it to
+\verb+y+ is a variable of type \verb+BOOLEAN+ you can change it to
 \verb+NUMBER+ with value \verb+3.0+ in two steps as follows:
 
 \begin{verbatim}
@@ -3618,8 +3618,8 @@ appreciate getting feedback on this.
 
 \item\lex{ActionNumber}
 \protect \large \begin{verbatim}
-ActionNumber[action->ACTION, sup->EFSUPPORT] =: NUMBER 
-ActionNumber[action->ACTION, basis->EFBASIS] =: NUMBER 
+ActionNumber[action->ACTION, sup->EFSUPPORT] =: INTEGER 
+ActionNumber[action->ACTION, basis->EFBASIS] =: INTEGER
 \end{verbatim}\normalsize
 
 \bd
@@ -5104,7 +5104,7 @@ logging at all.
 
 \item\lex{Length}
 \protect \large \begin{verbatim}
-Length[list->LIST(T*)] =: NUMBER
+Length[list->LIST(T*)] =: INTEGER
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -5417,15 +5417,15 @@ Returns the list of nodes which are members of \verb+infoset+.  If
 
 \item\lex{MergeInfosets}
 \protect \large \begin{verbatim}
-MergeInfosets[infoset1->INFOSET,
-              infoset2->INFOSET] =: INFOSET
+MergeInfosets[to->INFOSET,
+              from->INFOSET] =: INFOSET
 \end{verbatim}\normalsize
 
 \bd
-Moves all the nodes from \verb+infoset2+ into \verb+infoset1+.
+Moves all the nodes from the information set \verb+from+ into \verb+to+.
 It is an error if the number of actions is not the same at the
 two information sets, or if the information sets are not from the
-same extensive form game.  \verb+infoset1+ is returned.
+same extensive form game.  The information set \verb+to+ is returned.
 \item [See also:] \verb+MoveToInfoset+.
 \ed
 
@@ -5634,16 +5634,14 @@ the transformation.
 \item [See also:] \verb+AgentForm+.
 \ed
 
-\item\lex{Nodes}
+\item\lex{NodeNumber}
 \protect \large \begin{verbatim}
-Nodes[efg->EFG] =: LIST(NODE) 
+NodeNumber[node->NODE, basis->EFBASIS] =: INTEGER 
 \end{verbatim}\normalsize
 
-\bd
-Returns a list of nodes of the extensive form game \verb+efg+.  The
-list is in {\it indexed traversal} order.  This is the order that is
-imposed by a lexicographic ordering of the nodes when each node is
-identified by the sequence of branch numbers taken to reach it.  
+\bd Returns the number assigned to \verb+node+ in the \verb+EFBASIS+,
+\verb+basis+.
+\item [See also:] \verb+Basis+. 
 \ed
 
 \item\lex{NodeValue}
@@ -5668,6 +5666,28 @@ Returns the expected payoff to \verb+player+ at all nodes in the
 game, given that all players are following \verb+profile+.  The nodes
 are in indexed traversal order.
 \item [See also:] \verb+NodeValue+.  
+\ed
+
+\item\lex{Nodes}
+\protect \large \begin{verbatim}
+Nodes[efg->EFG] =: LIST(NODE) 
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of nodes of the extensive form game \verb+efg+.  The
+list is in {\it indexed traversal} order.  This is the order that is
+imposed by a lexicographic ordering of the nodes when each node is
+identified by the sequence of branch numbers taken to reach it.  
+\ed
+
+\item\lex{Nodes}
+\protect \large \begin{verbatim}
+Nodes[infoset->INFOSET*, basis->EFBASIS] =: LIST(NODE) 
+\end{verbatim}\normalsize
+
+\bd
+Returns a list of nodes of the information set \verb+infoset+ in the
+\verb+basis+.  
 \ed
 
 \item\lex{Not}
@@ -5879,7 +5899,7 @@ or if \verb+node+ is null, the null node is returned.
 
 \item\lex{Parentheses}
 \protect \large \begin{verbatim}
-Parentheses[x->T] =: T 
+Parentheses[x->T*] =: T 
 \end{verbatim}\normalsize
 
 {\it for all types} {\tt T}
@@ -5891,7 +5911,7 @@ the order of evaluation of expressions.
 
 \item\lex{Payoff}
 \protect \large \begin{verbatim}
-Payoff[outcome->EFOUTCOME, player->EFPLAYER] =: NUMBER 
+Payoff[outcome->EFOUTCOME*, player->EFPLAYER] =: NUMBER 
 \end{verbatim}\normalsize
 \marginpar{Nulls?}
 \bd
@@ -5999,7 +6019,74 @@ Returns the sum of \verb+x+ and \verb+y+.
 \item [See also:] \verb+Divide+, \verb+Minus+, \verb+Times+.
 \ed
 
-\marginpar{Insert {\tt PolEnumSolve}}
+\item\lex{Plus} 
+\protect \large \begin{verbatim}
+Plus[x->TEXT, y->TEXT] =: TEXT
+\end{verbatim} \normalsize
+
+\bd
+Returns the concatenation of the text strings \verb+x+ and \verb+y+.
+\item [Short form:] \verb%x + y%
+\ed
+
+\item\lex{PolEnumSolve} 
+\protect \large \begin{verbatim}
+PolEnumSolve[support->NFSUPPORT, {stopAfter->0}, {precision->Float}, 
+             {nEvals<->0}, {time<->0.000000}, {traceFile<->(Output)}, 
+             {traceLevel->0}] =: LIST(MIXED) 
+PolEnumSolve[support->EFSUPPORT, {asNfg->False}, {stopAfter->0}, 
+             {precision->Float}, {nEvals<->0}, {time<->0.000000}, 
+             {traceFile<->(Output)}, {traceLevel->0}] =: LIST(BEHAV) 
+\end{verbatim} \normalsize
+\bd 
+\marginpar{give better  description and cite}
+Solves for all totally mixed equilibrium on the support
+\verb+support+.  
+
+The following optional parameters may be used to modify the behavior
+of the algorithm:
+\bd
+\item
+[asNfg:] By default, this is \verb+False+.  If it is specified to be
+\verb+True+, the extensive form game is solved by recursively converting
+its marked subgames into normal form, solving, and reconstructing the
+solution as a behavior profile.  {\it Note that currently this algorithm
+is only supported on the normal form, so this parameter
+must always be specified and {\tt True}.} 
+\item
+[stopAfter:] By default, all equilibria are found.  This parameter may
+be used to specify a maximum number of equilibria to be found.
+\item
+[precision:] Determines the precision of the computation. Default is
+floating point precision (\verb+Float+). 
+\item
+[nEvals:] Returns the number of function evaluations done by the
+algorithm.
+\item
+[time:] Returns the time elapsed during the execution
+of the algorithm.
+\item
+[traceFile:] A file containing a log of more detailed information on the
+execution of the algorithm.  By default, no logging is done.
+\item
+[traceLevel:] An integer specifying the level of detail in logging.
+Higher integers correspond to more detail; zero corresponds to no output
+at all.
+\ed
+\item [See also:] \verb+EnumNashSupports+.
+\ed
+
+\item\lex{PossibleNashSupports}
+\protect \large \begin{verbatim}
+PossibleNashSupports[efg->EFG] =: LIST(EFSUPPORT) 
+\end{verbatim} \normalsize
+
+\bd
+\marginpar{give better  description and cite}
+Returns a list of supports that could contain a completely mixed Nash
+equilibrium.
+\item [See also:] \verb+PolEnumSolve+.
+\ed
 
 \item\lex{Power}
 \protect \large \begin{verbatim}
@@ -6368,14 +6455,40 @@ is nonpositive, or if \verb+n+ is greater than the length of \verb+list+.
 \protect \large \begin{verbatim}
 RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT 
 \end{verbatim}\normalsize
-\marginpar{Should work for {\tt EFBASIS} as well}
 \bd
-Removes \verb+action+ from \verb+support+.  If \verb+action+ is
-not in \verb+support+, there is no effect.  A copy of the modified
-support is returned.  It is an error if \verb+support+ and \verb+action+
-are not from the same extensive form game, or if removing \verb+action+
-would result in the support containing no actions at an information set.
+Removes \verb+action+ from \verb+support+.  If
+\verb+action+ is not in \verb+support+ there is no
+effect.  A copy of the modified support is returned.  It is an error
+if \verb+support+ and \verb+action+ are not from the same extensive
+form game, or if removing \verb+action+ would result in the support
+containing no actions at an information set.
 \item [See also:] \verb+AddAction+, \verb+Support+.
+\ed
+
+\item\lex{RemoveAction}
+\protect \large \begin{verbatim}
+RemoveAction[basis->EFBASIS, action->ACTION] =: EFBASIS 
+\end{verbatim}\normalsize
+\bd
+Removes \verb+action+ from \verb+basis+.  If
+\verb+action+ is not in \verb+basis+ there is no
+effect.  A copy of the modified \verb+EFBASIS+ is returned.  It is an error
+if \verb+basis+ and \verb+action+ are not from the same extensive
+form game, or if removing \verb+action+ would result in the basis
+containing no actions at an information set.
+\item [See also:] \verb+AddAction+, \verb+Basis+.
+\ed
+
+\item\lex{RemoveNode}
+\protect \large \begin{verbatim}
+RemoveNode[support->EFBASIS, node->NODE] =: EFBASIS 
+\end{verbatim}\normalsize
+
+\bd
+Removes \verb+node+ from \verb+support+.  If \verb+node+ is not in
+the basis, there is no effect.  A copy of the modified basis is
+returned.  
+\item [See also:] \verb+AddAction+, \verb+Basis+.
 \ed
 
 \item\lex{RemoveStrategy}
@@ -6453,6 +6566,20 @@ are not from the same extensive form game, or if the length of
 \verb+value+ is not the same as the number of actions in \verb+profile+'s
 support at \verb+infoset+.
 \item [See also:] \verb+ActionProb+.
+\ed
+
+\item\lex{SetActionProb}
+\protect \large \begin{verbatim} 
+SetActionProb[profile<->BEHAV, action->ACTION, 
+               value->NUMBER] =: BEHAV 
+\end{verbatim}\normalsize
+
+\bd
+Sets the component of \verb+profile+ for
+\verb+action+ to be equal to \verb+value+, and 
+returns \verb+profile+.  It is an error if \verb+profile+ and \verb+action+
+are not from the same extensive form game. 
+\item [See also:] \verb+ActionProb+, \verb+SetActionProbs+.
 \ed
 
 \item\lex{SetChanceProbs}
@@ -6554,6 +6681,19 @@ Sets the payoff of \verb+outcome+ for \verb+player+ to \verb+payoff+.
 It is an error if \verb+outcome+ and \verb+player+ are not from \verb+nfg+.
 Returns \verb+outcome+.
 \item [See also:] \verb+Payoff+.
+\ed
+
+\item\lex{SetStrategyProb} 
+\protect \large \begin{verbatim}
+SetStrategyProb[profile<->MIXED, strategy->STRATEGY, 
+                 value->NUMBER] =: MIXED 
+\end{verbatim} \normalsize
+
+\bd
+Sets the components of \verb+profile+ for \verb+strategy+ to be equal
+to \verb+value+.  It is an error if \verb+profile+ and \verb+strategy+
+are not from the same normal form game.  Returns \verb+profile+.
+\item [See also:] \verb+StrategyProb+.
 \ed
 
 \item\lex{SetStrategyProbs} 
@@ -6698,6 +6838,20 @@ Strategies[player->NFPLAYER, support->NFSUPPORT] =: LIST(STRATEGY)
 Returns the list of strategies from which  \verb+player+ may choose
 in \verb+support+.
 \item [See also:] \verb+Player+. 
+\ed
+
+\item\lex{StrategyNumber}
+\protect \large \begin{verbatim}
+StrategyNumber[strategy->STRATEGY, sup->NFSUPPORT] =: INTEGER
+\end{verbatim}\normalsize
+
+\bd 
+Returns the number assigned to \verb+strategy+ in the support
+\verb+sup+.  Strategies  for each player are numbered from 1 to
+the number of strategies for the player.  If a strategy is not in
+the corresponding support, it is assigned a number of
+\verb+0+.
+\item [See also:] \verb+Strategies+. 
 \ed
 
 \item\lex{StrategyProb}
