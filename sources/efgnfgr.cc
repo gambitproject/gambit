@@ -39,11 +39,11 @@ template void BehavToMixed(const Efg &, const BehavProfile<gRational> &,
 template void BehavToMixed(const Efg &, const BehavProfile<gNumber> &,
 			   const Nfg &, MixedProfile<gNumber> &);
 
-template void RealizationProbs(const Nfg &N, const MixedProfile<gRational> &mp,
+template void RealizationProbs(const MixedProfile<gRational> &mp,
 			       const Efg &E, BehavProfile<gRational> &bp,
 			       int pl, const gArray<int> *const actions, BehavNode<gRational> *);
 
-template void RealizationProbs(const Nfg &N, const MixedProfile<gNumber> &mp,
+template void RealizationProbs(const MixedProfile<gNumber> &mp,
 			       const Efg &E, BehavProfile<gNumber> &bp,
 			       int pl, const gArray<int> *const actions, BehavNode<gNumber> *);
 

@@ -19,7 +19,7 @@
 #include "behav.imp"
 
 template <class T>
-void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
+void RealizationProbs(const MixedProfile<T> &mp,
 		      const Efg &E, BehavProfile<T> &bp,
 		      int pl, const gArray<int> *const actions,
 		      BehavNode<T> *n)
@@ -51,7 +51,7 @@ void RealizationProbs(const Nfg &N, const MixedProfile<T> &mp,
     child->bval = prob * n->bval;
     child->nval += child->bval;    
 
-    RealizationProbs(N, mp, E, bp, pl, actions, child);
+    RealizationProbs(mp, E, bp, pl, actions, child);
   }    
 	
 }
@@ -106,7 +106,7 @@ void MixedToBehav(const Nfg &N, const MixedProfile<T> &mp,
 
 	n->bval = mp(pl, st);
 
-	RealizationProbs(N, mp, E, bp, pl, actions, bp.m_root);
+	RealizationProbs(mp, E, bp, pl, actions, bp.m_root);
       }
     }
     
