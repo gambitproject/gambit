@@ -1,7 +1,7 @@
 //
 // File: gstatus.h -- declaration of an abstract class to combine features
 //										of gprogress and gsignal.  Used by most algorithms.
-// $Id$
+// @(#)gstatus.h	1.3 6/21/95
 //
 
 #ifndef GSTATUS_H
@@ -15,8 +15,11 @@ class gStatus: public gSignal, public gProgress
 private:
 
 public:
-	virtual ~gStatus() { };
+	virtual ~gStatus(void) { }
 };
 
 extern gStatus &gstatus;
 #endif
+
+
+

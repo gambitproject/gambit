@@ -1,7 +1,7 @@
 //
 // File: gprogress.h -- Declaration of an abstract class to handle progress
 // 											updates
-// $Id$
+// @(#)gprogres.h	1.3 6/21/95
 //
 
 #ifndef GPROGRES_H
@@ -18,7 +18,7 @@ class gProgress : public gOutput
 private:
 
 public:
-	virtual ~gProgress(void) { ;}
+	virtual ~gProgress(void) { }
 // functions for gOutput
 	// see gambitio.h
 // functions to show progress
