@@ -63,7 +63,6 @@ class EfgContIter    {
 class EfgConditionalContIter    {
   friend class EfgIter;
   private:
-    int _frozen_pl, _frozen_iset;
     const Efg *_efg;
     EFSupport _support;
     PureBehavProfile<gNumber> _profile;
@@ -79,9 +78,6 @@ class EfgConditionalContIter    {
   
     void First(void); // Sets each infoset's action to the first in the support
   
-    void Freeze(int pl, int iset);
-  
-  // These next two only work on frozen infosets
     void Set(int pl, int iset, int act);
     int Next(int pl, int iset); 
   

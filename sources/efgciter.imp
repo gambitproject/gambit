@@ -145,8 +145,7 @@ void EfgContIter::Dump(gOutput &f) const
 
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
-  : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.Game()), _support(s),
+  : _efg(&s.Game()), _support(s),
     _profile(s.Game()), _current(s.Game().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
@@ -166,8 +165,7 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s)
 
 EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s, 
 				   const gList<const Infoset *>& active)
-  : _frozen_pl(0), _frozen_iset(0),
-    _efg(&s.Game()), _support(s),
+  : _efg(&s.Game()), _support(s),
     _profile(s.Game()), _current(s.Game().NumInfosets()),
     _is_active(),
     _num_active_infosets(_efg->NumPlayers()),
@@ -196,26 +194,21 @@ EfgConditionalContIter::~EfgConditionalContIter()
 void EfgConditionalContIter::First(void)
 {
   for (int pl = 1; pl <= _efg->NumPlayers(); pl++)  {
-    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++)
-      if (pl != _frozen_pl && iset != _frozen_iset)   {
-	      _current(pl, iset) = 1;
-      	_profile.Set(_support.Actions(pl, iset)[1]);
-      }
+    for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
+      _current(pl, iset) = 1;
+      _profile.Set(_support.Actions(pl, iset)[1]);
+    }
   }
 }
 
 void EfgConditionalContIter::Set(int pl, int iset, int act)
 {
-  if (pl != _frozen_pl || iset != _frozen_iset)   return;
-
   _current(pl, iset) = act;
   _profile.Set(_support.Actions(pl, iset)[act]);
 }
 
 int EfgConditionalContIter::Next(int pl, int iset)
 {
-  if (pl != _frozen_pl || iset != _frozen_iset)   return 1;
-
   const gArray<Action *> &actions = _support.Actions(pl, iset);
   
   if (_current(pl, iset) == actions.Length())   {
@@ -228,14 +221,6 @@ int EfgConditionalContIter::Next(int pl, int iset)
   _profile.Set(actions[_current(pl, iset)]);
   return 1;
 }
-  
-
-void EfgConditionalContIter::Freeze(int pl, int iset)
-{
-  _frozen_pl = pl;
-  _frozen_iset = iset;
-  First();
-}
 
 int EfgConditionalContIter::NextContingency(void)
 {
@@ -247,7 +232,7 @@ int EfgConditionalContIter::NextContingency(void)
     
   while (true) {
 
-    if (_is_active[pl][iset] && (pl != _frozen_pl || iset != _frozen_iset))
+    if (_is_active[pl][iset]) 
       if (_current(pl, iset) < _support.NumActions(pl, iset))  {
 	_current(pl, iset) += 1;
 	_profile.Set(_support.Actions(pl, iset)[_current(pl, iset)]);
