@@ -16,6 +16,7 @@
 
 #define NO_DEFAULT_VALUE  (Portion*)  0
 #define PARAM_NOT_FOUND   (int)      -1
+#define PARAM_AMBIGUOUS   (int)      -2
 
 #define PASS_BY_REFERENCE true
 
@@ -31,37 +32,39 @@ class FuncDescObj
     bool         PassByReference;
   };
 
+  struct FuncInfoType
+  {
+    Portion*       (*FuncPtr)(Portion **);
+    int            NumParams;
+    ParamInfoType* ParamInfo;
+  };
+
   gString        _FuncName;
-  Portion*       (*_FuncPtr)(Portion **);
-  int            _NumParams;
-  ParamInfoType* _ParamInfo;
+  int            _NumFuncs;
+  FuncInfoType*  _FuncInfo;
 
  public:
   FuncDescObj( FuncDescObj& func );
-  FuncDescObj
-    ( 
-     const gString&  func_name,
+  FuncDescObj( const gString& func_name );
+  virtual ~FuncDescObj();
+
+  void SetFuncInfo
+    (
      Portion*        (*func_ptr)(Portion**),
      const int       num_params = 0 
      );
-  ~FuncDescObj();
 
   void SetParamInfo
     ( 
+     Portion*          (*func_ptr)(Portion**),
      const int         index, 
      const gString&    name,
      const PortionType type,
      Portion*          default_value,
-     bool              pass_by_reference = false
+     const bool        pass_by_reference = false
      );
 
   gString     FuncName             ( void ) const;
-  int         NumParams            ( void ) const;
-  gString     ParamName            ( const int index ) const;
-  PortionType ParamType            ( const int index ) const;
-  Portion*    ParamDefaultValue    ( const int index ) const;
-  bool        ParamPassByReference ( const int index ) const;
-  int         FindParamName        ( const gString& param_name ) const;
 };
 
 
@@ -75,6 +78,9 @@ class CallFuncObj : public FuncDescObj
     bool               Defined;
     Reference_Portion* Ref;
   };
+  int                   _FuncIndex;
+  int                   _NumParams;
+  int                   _NumParamsDefined;
   Portion**             _Param;
   RunTimeParamInfoType* _RunTimeParamInfo;
   int                   _CurrParamIndex;
@@ -83,6 +89,10 @@ class CallFuncObj : public FuncDescObj
  public:
   CallFuncObj( FuncDescObj* func );
   ~CallFuncObj();
+
+  int         NumParams ( void ) const;
+  bool        ParamPassByReference( const int index ) const;
+  int         FindParamName        ( const gString& param_name );
 
   void        SetCurrParamIndex   ( const int index );
   bool        SetCurrParam        ( Portion *new_param );

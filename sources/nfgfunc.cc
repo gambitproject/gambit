@@ -73,28 +73,39 @@ void Init_nfgfunc(GSM *gsm)
 {
   FuncDescObj *FuncObj;
 
-  FuncObj = new FuncDescObj("DisplayNfg", GSM_DisplayNfg, 1);
-  FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
+  FuncObj = new FuncDescObj( "DisplayNfg" );
+  FuncObj->SetFuncInfo( GSM_DisplayNfg, 1 );
+  FuncObj->SetParamInfo( GSM_DisplayNfg, 0, "N", 
+			porNFG, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Enum", GSM_Enum, 1);
-  FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
+  FuncObj = new FuncDescObj( "Enum" );
+  FuncObj->SetFuncInfo( GSM_Enum, 1 );
+  FuncObj->SetParamInfo( GSM_Enum, 0, "N", 
+			porNFG, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Lemke", GSM_Lemke, 4);
-  FuncObj->SetParamInfo(0, "N", porNFG, NO_DEFAULT_VALUE);
-  FuncObj->SetParamInfo(1, "nequilib", porINTEGER,
-			new numerical_Portion<gInteger>(0));
-  FuncObj->SetParamInfo(2, "time", porDOUBLE, new numerical_Portion<double>(0),
+  FuncObj = new FuncDescObj( "Lemke" );
+  FuncObj->SetFuncInfo( GSM_Lemke, 4 );
+  FuncObj->SetParamInfo( GSM_Lemke, 0, "N", 
+			porNFG, NO_DEFAULT_VALUE);
+  FuncObj->SetParamInfo( GSM_Lemke, 1, "nequilib", 
+			porINTEGER, new numerical_Portion<gInteger>( 0 ) );
+  FuncObj->SetParamInfo( GSM_Lemke, 2, "time", 
+			porDOUBLE, new numerical_Portion<double>( 0 ),
 			PASS_BY_REFERENCE);
-  FuncObj->SetParamInfo(3, "npivots", porINTEGER, new numerical_Portion<gInteger>(0));
+  FuncObj->SetParamInfo( GSM_Lemke, 3, "npivots", 
+			porINTEGER, new numerical_Portion<gInteger>( 0 ) );
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("ReadNfg", GSM_ReadNfg, 1);
-  FuncObj->SetParamInfo(0, "file", porSTRING, NO_DEFAULT_VALUE);
+  FuncObj = new FuncDescObj( "ReadNfg" );
+  FuncObj->SetFuncInfo( GSM_ReadNfg, 1 );
+  FuncObj->SetParamInfo( GSM_ReadNfg, 0, "file", 
+			porSTRING, NO_DEFAULT_VALUE);
   gsm->AddFunction(FuncObj);
 
 }
+
 
 #ifdef __GNUG__
 #define TEMPLATE template

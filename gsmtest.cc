@@ -41,6 +41,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
+
   gout << "\n";
   machine->Push( d_1 );
   machine->Push( d_2 );
@@ -296,6 +297,7 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+
   gout << "Testing CallFunction( \"Angle\" )\n";
   machine->Flush();
   machine->InitCallFunction( (gString) "Angle" );
@@ -320,6 +322,7 @@ int main( void )
   machine->Bind();
   machine->CallFunction();
   machine->Dump();
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -461,6 +464,7 @@ int main( void )
   gout << "*********************** press return to continue ************";
   gin >> cont;
 
+
   gout << "\n\nTesting the instruction memory\n";
   program.Append( new Push<double>( (double) 1 ) );
   program.Append( new Push<double>( (double) 2 ) );
@@ -511,7 +515,6 @@ int main( void )
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
 
-
   program.Append( new Push<gString>( "hi!" ) );
   program.Append( new Push<gString>( "how are you?" ) );
   program.Append( new Push<gString>( "I'm fine!  you?!" ) );
@@ -521,6 +524,7 @@ int main( void )
   program.Append( new Dump );
   result = machine->Execute( program );
   gout << "Program Status: " << result << "\n";
+
 
   gout << "*********************** press return to continue ************";
   gin >> cont;
@@ -1267,11 +1271,12 @@ int main( void )
 
 
   machine->PushRef( "x" );
-  machine->Push( (double) 1 );
+  machine->Push( (double) 5 );
   machine->Assign();
   machine->PushRef( "y" );
-  machine->Push( (double) 2 );
+  machine->Push( (double) 6 );
   machine->Assign();
+  machine->Dump();
 
 
   machine->InitCallFunction( "Test" );
@@ -1317,7 +1322,6 @@ int main( void )
 
 
 
-
 #ifdef CRASHTEST
   machine->PushRef( "x" );
   machine->Push( (gRational) 1 );
@@ -1327,6 +1331,7 @@ int main( void )
   machine->Assign();
 
 
+  gout << "testing Test\n";
   machine->InitCallFunction( "Test" );
   machine->CallFunction();
   machine->Dump();
@@ -1435,6 +1440,31 @@ int main( void )
   machine->Dump();
 
 
+
+
+  machine->InitCallFunction( "Test" );
+  machine->Push( (double) 5 );
+  machine->Bind();
+  machine->Push( (double) 6 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Test" );
+  machine->Push( (gRational) 5 );
+  machine->Bind();
+  machine->Push( (gRational) 6 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Test" );
+  machine->Push( (gInteger) 5 );
+  machine->Bind();
+  machine->Push( (gInteger) 6 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
 
   gout << "*********************** press return to continue ************";
   gin >> cont;

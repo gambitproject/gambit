@@ -120,25 +120,6 @@ bool GSM::Push( const gString& data )
 }
 
 
-
-
-
-// This function is only temporarily here for testing reasons
-/*
-bool GSM::GenerateNfg( const double& data )
-{
-  Nfg_Portion<double>* p;
-  p = new Nfg_Portion( *(new Nfg) );
-  p->Value().value = data;
-  p->Temporary() = false;
-  _Stack->Push( p );
-  return true;
-}
-*/
-
-
-
-
 bool GSM::PushList( const int num_of_elements )
 { 
   int            i;
@@ -832,10 +813,17 @@ bool GSM::_BindCheck( const gString& param_name ) const
   {
     func->SetCurrParamIndex( new_index );
   }
-  else // ( new_index == PARAM_NOT_FOUND )
+  else if ( new_index == PARAM_NOT_FOUND )
   {
     gerr << "FuncDescObj Error: parameter \"" << param_name;
     gerr << "\" is not defined for\n";
+    gerr << "                   the function \"" << func->FuncName() << "\"\n";
+    result = false;
+  }
+  else // ( new_index == PARAM_AMBIGUOUS )
+  {
+    gerr << "FuncDescObj Error: parameter \"" << param_name;
+    gerr << "\" is ambiguous in\n";
     gerr << "                   the function \"" << func->FuncName() << "\"\n";
     result = false;
   }
@@ -877,17 +865,13 @@ bool GSM::Bind( void )
   _BindCheck();
 #endif // NDEBUG
 
+/*
   func = _CallFuncStack->Peek();
   param = _Stack->Peek();
+*/
 
-  if( func->GetCurrParamPassByRef() && ( param->Type() == porREFERENCE ) )
-  {
-    result = BindRef();
-  }
-  else
-  {
-    result = BindVal();
-  }
+  result = BindRef();
+
   return result;
 }
 
@@ -914,16 +898,18 @@ bool GSM::BindVal( void )
   if( param->Type() == porREFERENCE )
     param = _ResolveRef( (Reference_Portion *)param );
 
+/*
   result = _FuncParamCheck( func, param->Type() );
   if( result == true )
   {
-    result = func->SetCurrParam( param ); 
   }
   else
   {
     delete param;
     func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
   }
+*/
+  result = func->SetCurrParam( param ); 
 
   if( !result )  // == false
   {
@@ -955,32 +941,30 @@ bool GSM::BindRef( void )
   func = _CallFuncStack->Pop();
   param = _Stack->Pop();
   
-  if( func->GetCurrParamPassByRef() )
+  if( param->Type() == porREFERENCE )
   {
-    if( param->Type() == porREFERENCE )
+    ref = ( (Reference_Portion*) param )->Value();
+    subref = ( (Reference_Portion*) param )->SubValue();
+    func->SetCurrParamRef( (Reference_Portion*)( param->Copy() ) );
+    param = _ResolveRefWithoutError( (Reference_Portion*) param );
+    if( param != 0 )
     {
-      ref = ( (Reference_Portion*) param )->Value();
-      subref = ( (Reference_Portion*) param )->SubValue();
-      func->SetCurrParamRef( (Reference_Portion*)( param->Copy() ) );
-      param = _ResolveRefWithoutError( (Reference_Portion*) param );
-      if( param != 0 )
+      if( param->Type() == porERROR )
       {
-	if( param->Type() == porERROR )
-	{
-	  delete param;
-	  result = false;
-	}
+	delete param;
+	result = false;
       }
     }
-    else // ( param->Type() != porREFERENCE )
-    {
-      gerr << "GSM Error: called BindRef() on a non-Reference type\n";
-      _CallFuncStack->Push( func );
-      _Stack->Push( param );
-      result = BindVal();
-      return false;
-    }
   }
+  else // ( param->Type() != porREFERENCE )
+  {
+    _CallFuncStack->Push( func );
+    _Stack->Push( param );
+    result = BindVal();
+    return result;
+  }
+
+/*
   else // ( !func->GetCurrParamPassByRef() )
   {
     gerr << "GSM Error: called BindRef() on a parameter that is specified\n";
@@ -988,24 +972,25 @@ bool GSM::BindRef( void )
     _CallFuncStack->Push( func );
     _Stack->Push( param );
     result = BindVal();
-    return false;
   }
-
+*/
   
   if( result )  // == true
   {
     if( param != 0 )
     {
+      /*
       result = _FuncParamCheck( func, param->Type() );
       if( result == true )
       {
-	result = func->SetCurrParam( param );
       }
       else
       {
 	delete param;
 	func->SetCurrParamIndex( func->GetCurrParamIndex() + 1 );
       }
+      */
+      result = func->SetCurrParam( param );
     }
     else
     {
@@ -1162,7 +1147,6 @@ bool GSM::CallFunction( void )
       }
     }
   }
-
 
   delete func;
 
