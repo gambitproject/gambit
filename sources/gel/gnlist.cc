@@ -46,18 +46,11 @@ void gNestedList<T>::GetElementInfo( int el,
   assert( m_Dim.Length() > 1 );
   assert( m_Dim[1] == 1 );
 
-  
-
-  int index = 0;
-  int steps = 0;
-  int depth = 0;
-
-
   k_end = 1;
-  depth = 1;
-  steps = abs( Dim()[2] ) - 1;
+  int depth = 1;
+  int steps = abs( Dim()[2] ) - 1;
 
-  for( index = 1; index <= el; ++index )
+  for (int index = 1; index <= el; ++index )
   {
     k_start = k_end+1;
     el_start = el_end+1;      
@@ -96,11 +89,6 @@ void gNestedList<T>::GetElementInfo( int el,
     }
   }
 
-
-
-
-  assert( index == el + 1 );
-  
   gout << "islist: " << islist << " k_start: " << k_start << " k_end: " << k_end << " el_start: " << el_start << " el_end: " << el_end << '\n';
 }
 
@@ -113,8 +101,8 @@ template <class T>
 void gNestedList<T>::Output( gOutput& out, 
 			     gOutput& (*disp_func)( gOutput& out, T ) ) const
 {
-  int i = 0;
-  int j = 0;
+  int i;
+  int j;
   int el = 1;
 
   if( m_Dim[1] == 0 ) // not a list
@@ -128,10 +116,10 @@ void gNestedList<T>::Output( gOutput& out,
   }
   else // is a list
   {
-    for( i = 1; i <= m_Dim.Length(); ++i )
+    for (i = 1; i <= m_Dim.Length(); ++i )
     {
       assert( m_Dim[i] != 0 );
-      for( j = 0; j < abs( m_Dim[i] ) - 1; ++j )
+      for (j = 0; j < abs( m_Dim[i] ) - 1; ++j )
       {
 	if( disp_func )
 	  disp_func( out, Data()[el] );
@@ -207,8 +195,7 @@ int gNestedList<T>::NumElements( void ) const
   assert( m_Dim.Length() > 1 );
   assert( m_Dim[1] == 1 );
   // k is for index into the dimention list
-  int k = 0;
-  for( k = 1; k <= m_Dim.Length(); ++k )
+  for (int k = 1; k <= m_Dim.Length(); ++k )
   {
     assert( m_Dim[k] != 0 );
     if( depth == 1 )
@@ -232,8 +219,8 @@ int gNestedList<T>::NumElements( void ) const
 template <class T> 
 bool gNestedList<T>::Contains( const gNestedList<T>& t ) const
 {
-  int i = 0;
-  for( i = 1; i <= NumElements(); ++i )
+  int i;
+  for (i = 1; i <= NumElements(); ++i )
     if( NthElement( i ) == t )
       return true;
   return false;
