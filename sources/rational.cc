@@ -27,6 +27,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 void Rational::error(const char* msg) const
 {
+  gerr << "Rational class error: " << msg << '\n';
   assert(0);
 }
 
