@@ -183,9 +183,9 @@ FunctionName: Name
 ArgumentList: Argument
         | Argument, Argumentlist
 
-Argument: ArgumentName -> Function
-        | ArgumentName <-> Function
-        | Function
+Argument: ArgumentName -> Statement
+        | ArgumentName <-> Statement
+        | Statement
 
 ArgumentName: Name
 \end{verbatim}
