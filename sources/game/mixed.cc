@@ -27,6 +27,8 @@
 #include "gamebase.h"
 #include "behav.h"
 #include "mixed.imp"
+#include "mixedtable.imp"
+#include "mixedtree.imp"
 #include "base/glist.imp"
 
 template class gbtMixedProfileRep<double>;

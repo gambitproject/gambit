@@ -155,9 +155,8 @@ public:
 };
 
 
-#ifndef __BORLANDC__
-template <class T> gbtOutput &operator<<(gbtOutput &, 
-					 const gbtBehavProfile<T> &);
-#endif
+template <class T> gbtOutput &operator<<(gbtOutput &p_file, 
+					 const gbtBehavProfile<T> &)
+{ return p_file; }
 
 #endif   // BEHAV_H

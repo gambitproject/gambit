@@ -32,7 +32,8 @@
 #include "actiter.h"
 #include "nfgiter.h"
 #include "nfgciter.h"
-#include "mixed.h"
+#include "mixedtable.h"
+#include "mixedtree.h"
 #include "behav.h"
 
 // Declarations of internal structures
@@ -1343,19 +1344,19 @@ gbtNfgContingency gbtGameBase::NewContingency(void) const
 
 gbtBehavProfile<double> gbtGameBase::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
+  return new gbtBehavProfileTree<double>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtBehavProfile<gbtRational>
 gbtGameBase::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
+  return new gbtBehavProfileTree<gbtRational>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtBehavProfile<gbtNumber>
 gbtGameBase::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
+  return new gbtBehavProfileTree<gbtNumber>(gbtEfgSupportBase(const_cast<gbtGameBase *>(this)));
 }
 
 gbtMixedProfile<double> gbtGameBase::NewMixedProfile(double) const

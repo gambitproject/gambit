@@ -1,0 +1,189 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of mixed strategy profile defined on game tree representation
+//
+// This file is part of Gambit
+// Copyright (c) 2003, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "nfgsupport.h"
+#include "nfgcont.h"
+#include "mixedtree.h"
+#include "gamebase.h"
+
+//---------------------------------------------------------------------------
+//                    gbtMixedProfileTree<T> member functions
+//---------------------------------------------------------------------------
+
+template <class T>
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtEfgSupportBase &p_efgSupport)
+  : m_profile(gbtNfgSupportBase(p_efgSupport.m_efg).NumStrategies()),
+    m_efgSupport(new gbtEfgSupportBase(p_efgSupport)),
+    m_nfgSupport(new gbtNfgSupportBase(p_efgSupport.m_efg))
+{
+  SetCentroid();
+}
+
+template <class T> 
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtMixedProfileTree<T> &p_profile)
+  : m_profile(p_profile.m_profile),
+    m_efgSupport(new gbtEfgSupportBase(*p_profile.m_efgSupport)),
+    m_nfgSupport(new gbtNfgSupportBase(*p_profile.m_nfgSupport))
+{ }
+
+
+template <class T> T
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  return gbtBehavProfileTree<T>(*this).GetPayoff(p_player);
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player,
+				  const gbtGameStrategy &p_strategy) const
+{
+  gbtMixedProfileTree<T> foo(*m_efgSupport);
+  gbtGamePlayer player = m_efgSupport->GetPlayer(p_strategy->GetPlayer()->GetId());
+  for (int st = 1; st <= player->NumStrategies();
+       foo(p_strategy->GetPlayer()->GetId(), st++) = 0);
+  foo(p_strategy->GetPlayer()->GetId(), m_nfgSupport->GetIndex(p_strategy)) = 1;
+  return gbtBehavProfileTree<T>(foo).GetPayoff(p_player);
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::GetPayoff(const gbtGamePlayer &p_player,
+				  const gbtGameStrategy &p_strategy1,
+				  const gbtGameStrategy &p_strategy2) const
+{
+  if (p_strategy1->GetPlayer() == p_strategy2->GetPlayer()) return (T) 0;
+  gbtMixedProfileTree<T> foo(*m_efgSupport);
+  for (int st = 1; st <= m_efgSupport->GetPlayer(p_strategy1->GetPlayer()->GetId())->NumStrategies();
+       foo(p_strategy1->GetPlayer()->GetId(), st++) = 0);
+  for (int st = 1; st <= m_efgSupport->GetPlayer(p_strategy2->GetPlayer()->GetId())->NumStrategies();
+       foo(p_strategy2->GetPlayer()->GetId(), st++) = 0);
+  foo(p_strategy1) = 1;
+  foo(p_strategy2) = 1;
+  return gbtBehavProfileTree<T>(foo).GetPayoff(p_player);
+}
+
+template <class T>
+bool gbtMixedProfileTree<T>::operator==(const gbtMixedProfileRep<T> &mp) const
+{
+  return (*m_nfgSupport ==
+	  *dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_nfgSupport &&
+	  m_profile == 
+	  dynamic_cast<const gbtMixedProfileTree<T> &>(mp).m_profile);
+}
+
+template <class T>
+gbtMixedProfileTree<T>::gbtMixedProfileTree(const gbtBehavProfileTree<T> &p_profile)
+  : m_profile(p_profile.m_support->m_efg->NumStrategies()),
+    m_efgSupport(new gbtEfgSupportBase(*p_profile.m_support)),
+    m_nfgSupport(new gbtNfgSupportBase(p_profile.m_support->m_efg))
+{
+  for (int pl = 1; pl <= m_nfgSupport->NumPlayers(); pl++)  {
+    gbtGamePlayer player = m_nfgSupport->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++)  {
+      T prob = (T) 1;
+      const gbtArray<int> &behav = player->GetStrategy(st)->GetBehavior();
+
+      for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+	if (behav[iset] > 0)
+	  prob *= p_profile(pl, iset, behav[iset]);
+      }
+      (*this)(pl, st) = prob;
+    }
+  }
+}
+
+template <class T>
+gbtNfgContingency gbtMixedProfileTree<T>::NewContingency(void) const
+{
+  return m_nfgSupport->NewContingency(); 
+}
+
+template <class T>
+gbtMixedProfileRep<T> *gbtMixedProfileTree<T>::Copy(void) const
+{
+  return new gbtMixedProfileTree<T>(*this);
+}
+
+template <class T> T
+gbtMixedProfileTree<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
+{
+  return GetPayoff(p_strategy->GetPlayer(), p_strategy);
+}
+
+template <class T> T &
+gbtMixedProfileTree<T>::operator()(const gbtGameStrategy &p_strategy)
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T> const T &
+gbtMixedProfileTree<T>::operator()(const gbtGameStrategy &p_strategy) const
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T> gbtMixedProfile<double> 
+gbtMixedProfileTree<T>::NewMixedProfile(double) const
+{
+  gbtMixedProfileTree<double> *profile = 
+    new gbtMixedProfileTree<double>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = (double) m_profile[i];
+  }
+
+  return profile;
+}
+
+template <class T> gbtMixedProfile<gbtRational>
+gbtMixedProfileTree<T>::NewMixedProfile(const gbtRational &) const
+{
+  gbtMixedProfileTree<gbtRational> *profile = 
+    new gbtMixedProfileTree<gbtRational>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = m_profile[i];
+  }
+
+  return profile;
+}
+
+template <class T> gbtMixedProfile<gbtNumber>
+gbtMixedProfileTree<T>::NewMixedProfile(const gbtNumber &) const
+{
+  gbtMixedProfileTree<gbtNumber> *profile = 
+    new gbtMixedProfileTree<gbtNumber>(*m_efgSupport);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = gbtNumber(m_profile[i]);
+  }
+
+  return profile;
+}
+
+template <class T>
+gbtMixedProfileTree<T>::operator gbtBehavProfile<T>(void) const
+{
+  return new gbtBehavProfileTree<T>(*this);
+}
+
+

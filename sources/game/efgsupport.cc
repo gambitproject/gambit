@@ -26,7 +26,7 @@
 
 #include "game.h"
 #include "efgsupport.h"
-#include "behav.h"
+#include "behavtree.h"
 #include "gamebase.h"
 
 class gbtEfgSupportInfoset   {
@@ -515,19 +515,19 @@ gbtEfgSupport gbtEfgSupportBase::NewEfgSupport(void) const
 
 gbtBehavProfile<double> gbtEfgSupportBase::NewBehavProfile(double) const
 {
-  return new gbtBehavProfileBase<double>(*this);
+  return new gbtBehavProfileTree<double>(*this);
 }
 
 gbtBehavProfile<gbtRational>
 gbtEfgSupportBase::NewBehavProfile(const gbtRational &) const
 {
-  return new gbtBehavProfileBase<gbtRational>(*this);
+  return new gbtBehavProfileTree<gbtRational>(*this);
 }
 
 gbtBehavProfile<gbtNumber>
 gbtEfgSupportBase::NewBehavProfile(const gbtNumber &) const
 {
-  return new gbtBehavProfileBase<gbtNumber>(*this);
+  return new gbtBehavProfileTree<gbtNumber>(*this);
 }
 
 gbtOutput& operator<<(gbtOutput&s, const gbtEfgSupport &p_support)

@@ -8,8 +8,9 @@ libgame_a_SOURCES = \
         actiter.cc \
         actiter.h \
 	behav.h \
-	behav.imp \
 	behav.cc \
+	behavtree.h \
+	behavtree.imp \
 	efdom.cc \
 	efdom.h \
 	efgciter.h \
@@ -32,6 +33,10 @@ libgame_a_SOURCES = \
 	mixed.cc \
 	mixed.h \
 	mixed.imp \
+	mixedtable.h \
+	mixedtable.imp \
+	mixedtree.h \
+	mixedtree.imp \
 	nfdom.cc \
 	nfdom.h \
 	nfdommix.cc \

@@ -1,0 +1,276 @@
+//
+// $Source$
+// $Date$
+// $Revision$
+//
+// DESCRIPTION:
+// Implementation of mixed strategy profile defined on table representation
+//
+// This file is part of Gambit
+// Copyright (c) 2003, The Gambit Project
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "mixedtable.h"
+
+//---------------------------------------------------------------------------
+//                    gbtMixedProfileTable<T> member functions
+//---------------------------------------------------------------------------
+
+template <class T>
+gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtNfgSupportBase &p_support)
+  : m_profile(p_support.NumStrategies()), 
+    m_support(new gbtNfgSupportBase(p_support))
+{
+  SetCentroid();
+}
+
+template <class T> 
+gbtMixedProfileTable<T>::gbtMixedProfileTable(const gbtMixedProfileTable<T> &p_profile)
+  : m_profile(p_profile.m_profile), 
+    m_support(new gbtNfgSupportBase(*p_profile.m_support))
+{ }
+
+
+template <class T> T 
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player) const
+{
+  return PPayoff(p_player->GetId(), 1, 1);
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player,
+				   const gbtGameStrategy &p_strategy) const
+{
+  T value = (T) 0;
+  PPayoff(p_player->GetId(),
+	  p_strategy->GetPlayer()->GetId(), p_strategy->GetId(), 1,
+	  p_strategy->GetIndex() + 1, (T) 1, value);
+  return value;
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::GetPayoff(const gbtGamePlayer &p_player,
+				   const gbtGameStrategy &p_strategy1,
+				   const gbtGameStrategy &p_strategy2) const
+{
+  if (p_strategy1->GetPlayer() == p_strategy2->GetPlayer()) return (T) 0;
+  T value = (T) 0;
+  PPayoff(p_player->GetId(), 
+	  p_strategy1->GetPlayer()->GetId(), p_strategy1->GetId(),
+	  p_strategy2->GetPlayer()->GetId(), p_strategy2->GetId(), 1,
+	  p_strategy1->GetIndex() + p_strategy2->GetIndex() + 1,
+	  (T) 1, value);
+  return value;
+}
+
+template <class T> T
+gbtMixedProfileTable<T>::GetStrategyValue(const gbtGameStrategy &p_strategy) const
+{
+  return GetPayoff(p_strategy->GetPlayer(), p_strategy);
+}
+
+template <class T> T &
+gbtMixedProfileTable<T>::operator()(const gbtGameStrategy &p_strategy)
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T> const T &
+gbtMixedProfileTable<T>::operator()(const gbtGameStrategy &p_strategy) const
+{
+  return m_profile(p_strategy->GetPlayer()->GetId(), p_strategy->GetId());
+}
+
+template <class T>
+bool gbtMixedProfileTable<T>::operator==(const gbtMixedProfileRep<T> &mp) const
+{
+  return (m_support ==
+	  dynamic_cast<const gbtMixedProfileTable<T> &>(mp).m_support &&
+	  m_profile == 
+	  dynamic_cast<const gbtMixedProfileTable<T> &>(mp).m_profile);
+}
+
+
+//-------------------------------------- 
+// Private Mixed Profile Members
+//--------------------------------------
+
+template <class T>
+T gbtMixedProfileTable<T>::PPayoff(int pl, int index, int i) const
+{
+  int pindex = 0;
+
+  if (i > m_support->NumPlayers())  {
+    if (m_support->m_nfg->m_results[index]) {
+      return m_support->m_nfg->m_results[index]->GetPayoff(m_support->GetPlayer(pl));
+    }
+    else {
+      return (T) 0;
+    }
+  }
+  T sum = (T) 0;
+  gbtGamePlayer player = m_support->GetPlayer(i);
+  for (int j = 1; j <= player->NumStrategies(); j++) {
+    gbtGameStrategy s = player->GetStrategy(j);
+    if ((*this)(i, j) != (T) 0) {
+      index += s->GetIndex() - pindex;
+      pindex = s->GetIndex();
+      sum += (*this)(i, j) * PPayoff(pl, index, i + 1);
+    }
+  }
+  return sum;
+}
+
+template <class T>
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int const_st,
+				int cur_pl, long index, T prob, T &value) const
+{
+  if (cur_pl == const_pl)
+    PPayoff(pl, const_pl, const_st, cur_pl + 1, index,
+	    prob, value);
+  else if (cur_pl > m_support->NumPlayers())  {
+    if (m_support->m_nfg->m_results[index]) {
+      value += prob * Payoff(m_support->m_nfg->m_results[index], pl);
+    }
+  }
+  else   {
+    gbtGamePlayer player = m_support->GetPlayer(cur_pl);
+    for (int j = 1; j <= player->NumStrategies(); j++)  {
+      gbtGameStrategy s = player->GetStrategy(j);
+      if ((*this)(cur_pl, j) > (T) 0)
+	PPayoff(pl, const_pl, const_st, cur_pl + 1,
+		index + s->GetIndex(), prob * (*this)(cur_pl, j), value);
+    }
+  }
+}
+
+
+template <class T>
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl1, int const_st1,
+				int const_pl2, int const_st2,
+				int cur_pl, long index, T prob, T &value) const
+{
+  if (cur_pl == const_pl1 || cur_pl == const_pl2)
+    PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
+	    cur_pl + 1, index,prob, value);
+  else if (cur_pl > m_support->NumPlayers())  {
+    if (m_support->m_nfg->m_results[index]) {
+      value += prob * Payoff(m_support->m_nfg->m_results[index], pl);
+    }
+  }
+  else   {
+    gbtGamePlayer player = m_support->GetPlayer(cur_pl);
+    for (int j = 1; j <= player->NumStrategies(); j++) {
+      gbtGameStrategy s = player->GetStrategy(j);
+      if ((*this)(cur_pl, j) > (T) 0)
+	PPayoff(pl, const_pl1, const_st1, const_pl2, const_st2,
+		cur_pl + 1, index + s->GetIndex(), prob * (*this)(cur_pl, j),
+		value);
+    }
+  }
+}
+
+template <class T>
+void gbtMixedProfileTable<T>::PPayoff(int pl, int const_pl, int cur_pl, long index, 
+			   T prob, gbtVector<T> &value) const
+{
+  if (cur_pl == const_pl)
+    PPayoff(pl, const_pl, cur_pl + 1, index,
+	   prob, value);
+  else if (cur_pl > m_support->NumPlayers())  {
+    gbtGamePlayer player = m_support->GetPlayer(const_pl);
+    for (int j = 1; j <= player->NumStrategies(); j++) { 
+      gbtGameStrategy s = player->GetStrategy(j);
+      if (m_support->m_nfg->m_results[index + s->GetIndex()]) {
+	value[j] += prob * Payoff(m_support->m_nfg->m_results[index + s->GetIndex()], pl);
+      }
+    }
+  }
+  else   {
+    gbtGamePlayer player = m_support->GetPlayer(cur_pl);
+    for (int j = 1; j <= player->NumStrategies(); j++) {
+      gbtGameStrategy s = player->GetStrategy(j);
+      if ((*this)(cur_pl, j) > (T) 0)
+	PPayoff(pl, const_pl, cur_pl + 1,
+		index + s->GetIndex(), prob * (*this)(cur_pl, j), value);
+    }
+  }
+}
+
+template <class T>
+T gbtMixedProfileTable<T>::Payoff(const gbtGameOutcome &p_outcome,
+				  int pl) const
+{ 
+  return p_outcome->GetPayoff(m_support->GetPlayer(pl));
+}
+
+
+template <class T>
+gbtNfgContingency gbtMixedProfileTable<T>::NewContingency(void) const
+{
+  return m_support->NewContingency(); 
+}
+
+template <class T>
+gbtMixedProfileRep<T> *gbtMixedProfileTable<T>::Copy(void) const
+{
+  return new gbtMixedProfileTable<T>(*this);
+}
+
+
+template <class T> gbtMixedProfile<double> 
+gbtMixedProfileTable<T>::NewMixedProfile(double) const
+{
+  gbtMixedProfileTable<double> *profile = 
+    new gbtMixedProfileTable<double>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = (double) m_profile[i];
+  }
+
+  return profile;
+}
+
+template <class T> gbtMixedProfile<gbtRational>
+gbtMixedProfileTable<T>::NewMixedProfile(const gbtRational &) const
+{
+  gbtMixedProfileTable<gbtRational> *profile = 
+    new gbtMixedProfileTable<gbtRational>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = m_profile[i];
+  }
+
+  return profile;
+}
+
+template <class T> gbtMixedProfile<gbtNumber>
+gbtMixedProfileTable<T>::NewMixedProfile(const gbtNumber &) const
+{
+  gbtMixedProfileTable<gbtNumber> *profile = 
+    new gbtMixedProfileTable<gbtNumber>(*m_support);
+  for (int i = 1; i <= MixedProfileLength(); i++) {
+    (*profile)[i] = gbtNumber(m_profile[i]);
+  }
+
+  return profile;
+}
+
+template <class T>
+gbtMixedProfileTable<T>::operator gbtBehavProfile<T>(void) const
+{
+  throw gbtGameUndefinedOperation();
+}
+

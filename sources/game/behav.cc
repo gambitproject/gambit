@@ -24,13 +24,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "behav.imp"
+#include "behavtree.imp"
 #include "base/glist.imp"
 
 
-template class gbtBehavProfileBase<double>;
-template class gbtBehavProfileBase<gbtRational>;
-template class gbtBehavProfileBase<gbtNumber>;
+template class gbtBehavProfileTree<double>;
+template class gbtBehavProfileTree<gbtRational>;
+template class gbtBehavProfileTree<gbtNumber>;
 
 template class gbtBehavProfile<double>;
 template gbtOutput &operator<<(gbtOutput &, const gbtBehavProfile<double> &);

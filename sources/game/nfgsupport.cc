@@ -27,7 +27,8 @@
 #include "game.h"
 #include "nfgsupport.h"
 #include "gamebase.h"
-#include "mixed.h"
+#include "mixedtable.h"
+#include "mixedtree.h"
 
 //==========================================================================
 //                      class gbtNfgSupportPlayerRep
