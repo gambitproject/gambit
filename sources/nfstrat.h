@@ -73,6 +73,7 @@ public:
   // returns the index of the strategy in the support if it exists,
   // otherwise returns zero
   int Find(Strategy *) const; 
+  bool StrategyIsActive(Strategy *) const;
 
   void Dump(gOutput &) const;
 };

@@ -4,6 +4,7 @@
 // $Id$
 //
 
+#include "glist.h"
 #include "nfstrat.h"
 #include "nfplayer.h"
 #include "nfg.h"
@@ -257,6 +258,14 @@ int NFSupport::Find(Strategy *s) const
   return sups[s->Player()->GetNumber()]->Strategies().Find(s);
 }
 
+bool NFSupport::StrategyIsActive(Strategy *s) const
+{
+  if (Find(s) > 0)
+    return true;
+  else
+    return false;
+}
+
 void NFSupport::AddStrategy(Strategy *s)
 {
   sups[s->Player()->GetNumber()]->AddStrategy(s);
@@ -322,3 +331,4 @@ gOutput& operator<<(gOutput& s, const NFSupport& n)
   n.Dump(s);
   return s;
 }
+
