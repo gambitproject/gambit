@@ -1427,7 +1427,9 @@ void divide(const gInteger &Ix, long y, gInteger &Iq, long &rem)
     rem = Itolong(r);
     if (!STATIC_IntRep(r)) delete r;
   }
-  rem = abs(rem).as_long();
+  if (rem < 0) {
+    rem = -rem;
+  }
   if (xsgn == I_NEGATIVE) rem = -rem;
   q->sgn = samesign;
   Icheck(q);
@@ -2617,6 +2619,13 @@ void gInteger::operator /= (long y)
   div(*this, y, *this);
 }
 
+#if !USE_GNU_MP
+void gInteger::operator<<=(const gInteger &y)
+{
+  lshift(*this, y, *this);
+}
+#endif // !USE_GNU_MP
+
 void gInteger::abs()
 {
   ::abs(*this, *this);
@@ -2767,6 +2776,63 @@ gText ToText(const gInteger &i)
 {
   return gText(Itoa(i));
 }
+
+#if !USE_GNU_MP
+int ucompare(const gInteger &x, const gInteger &y)
+{
+  return ucompare(x.rep, y.rep);
+}
+
+void lshift(const gInteger &x, const gInteger &y, gInteger &dest)
+{
+  dest.rep = lshift(x.rep, y.rep, 0, dest.rep);
+}
+
+double ratio(const gInteger &num, const gInteger &den)
+{
+  gInteger q, r;
+  divide(num, den, q, r);
+  double d1 = Itodouble(q.rep);
+ 
+  if (d1 >= DBL_MAX || d1 <= -DBL_MAX || sign(r) == 0)
+    return d1;
+  else      // use as much precision as available for fractional part
+  {
+    double  d2 = 0.0;
+    double  d3 = 0.0; 
+    int cont = 1;
+    for (int i = den.rep->len - 1; i >= 0 && cont; --i)
+    {
+		unsigned short a = (unsigned short) (I_RADIX >> 1);
+      while (a != 0)
+      {
+        if (d2 + 1.0 == d2) // out of precision when we get here
+        {
+          cont = 0;
+          break;
+        }
+
+        d2 *= 2.0;
+        if (den.rep->s[i] & a)
+          d2 += 1.0;
+
+        if (i < r.rep->len)
+        {
+          d3 *= 2.0;
+          if (r.rep->s[i] & a)
+            d3 += 1.0;
+        }
+
+        a >>= 1;
+      }
+    }
+
+    if (sign(r) < 0)
+      d3 = -d3;
+    return d1 + d3 / d2;
+  }
+}
+#endif // !USE_GNU_MP
 
 bool gInteger::fits_in_long(void) const 
 {

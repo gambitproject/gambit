@@ -43,6 +43,9 @@ class gOutput;
 #include <gmp.h>
 #else
 class IntRep;
+extern IntRep _ZeroRep;
+extern IntRep _OneRep;
+extern IntRep _MinusOneRep;
 long Itolong(const IntRep*);
 double Itodouble(const IntRep*);
 int Iislong(const IntRep*);
@@ -123,6 +126,10 @@ public:
   void operator *= (long);
   void operator /= (long);
   void operator %= (long);
+
+#if !USE_GNU_MP
+  void operator <<=(const gInteger &);
+#endif // !USE_GNU_MP
 
 // (constructive binary operations are inlined below)
 
