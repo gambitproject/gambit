@@ -94,10 +94,15 @@ friend class ExtensivePrintout;
 public:
 typedef struct SUBGAMEENTRY {
 					const Node *root;
+					int  subgame_y;
 					bool expanded;
-					SUBGAMEENTRY(void):root(0),expanded(false) { }
-					SUBGAMEENTRY(const Node *r,bool e=false):root(r),expanded(e) { }
-					SUBGAMEENTRY(const SUBGAMEENTRY &s):root(s.root),expanded(s.expanded) { }
+					SUBGAMEENTRY(void):root(0),expanded(true),subgame_y(-1) { }
+					SUBGAMEENTRY(const Node *r,bool e=true):root(r),expanded(e),
+																									subgame_y(-1) { }
+					SUBGAMEENTRY(const SUBGAMEENTRY &s):root(s.root),
+														expanded(s.expanded),subgame_y(s.subgame_y) { }
+					SUBGAMEENTRY &operator=(const SUBGAMEENTRY &s)
+						{root=s.root;expanded=s.expanded;subgame_y=s.subgame_y;}
 					// need these to make a list
 					int operator==(const SUBGAMEENTRY &s) {return (s.root==root);}
 					int operator!=(const SUBGAMEENTRY &s) {return (s.root!=root);}
@@ -117,11 +122,14 @@ private:
 	Infoset *hilight_infoset;			// Hilight infoset from the solution disp
 	TreeRender *zoom_window;
 	// Private Functions
-	int 	FillTable(const Node *n, int level);
+	int 	FillTable(const Node *n,const Node *subgame, int level);
 	void 	ProcessCursor(void);
 	void 	ProcessClick(int x,int y);
 	NodeEntry *GetNodeEntry(const Node *n);
 	NodeEntry *NextInfoset(const NodeEntry * const e);
+	NodeEntry *GetValidParent(const Node *n);
+	NodeEntry *GetValidChild(const Node *n);
+	SubgameEntry &GetSubgameEntry(const Node *n);
 	void	FillInfosetTable(const Node *n);
 	void	CheckInfosetEntry(NodeEntry *e);
 	void	UpdateTableInfosets(void);
