@@ -43,6 +43,57 @@
 #include "base/glist.imp"
 
 
+//=======================================================================
+//                       class gbtCmdSetCursor
+//=======================================================================
+
+class gbtCmdSetCursor : public gbtGameCommand {
+private:
+  gbtEfgNode m_node;
+
+public:
+  gbtCmdSetCursor(gbtEfgNode p_node) : m_node(p_node) { }
+  virtual ~gbtCmdSetCursor() { }
+
+  void Do(gbtGameDocument *);
+
+  bool ModifiesGame(void) const { return false; }
+  bool ModifiesPayoffs(void) const { return false; }
+};
+
+void gbtCmdSetCursor::Do(gbtGameDocument *p_doc)
+{
+  p_doc->SetCursor(m_node);
+}
+
+//=======================================================================
+//                class gbtCmdMoveTree: Implementation
+//=======================================================================
+
+void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
+{
+  p_doc->GetEfg().MoveTree(m_src, m_dest);
+}
+
+//=======================================================================
+//                class gbtCmdCopyTree: Implementation
+//=======================================================================
+
+void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
+{
+  p_doc->GetEfg().CopyTree(m_src, m_dest);
+}
+
+//=======================================================================
+//               class gbtCmdSetOutcome: Implementation
+//=======================================================================
+
+void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)  
+{
+  m_node.SetOutcome(m_outcome);
+}
+
+
 //----------------------------------------------------------------------
 //                      gbtTreeView: Member functions
 //----------------------------------------------------------------------
@@ -115,32 +166,6 @@ void gbtTreeView::MakeMenus(void)
 //                  gbtTreeView: Event-hook members
 //---------------------------------------------------------------------
 
-static gbtEfgNode PriorSameIset(const gbtEfgNode &n)
-{
-  gbtEfgInfoset iset = n.GetInfoset();
-  if (iset.IsNull()) return 0;
-  for (int i = 1; i <= iset.NumMembers(); i++)
-    if (iset.GetMember(i) == n)
-      if (i > 1)
-	return iset.GetMember(i-1);
-      else 
-	return 0;
-  return 0;
-}
-
-static gbtEfgNode NextSameIset(const gbtEfgNode &n)
-{
-  gbtEfgInfoset iset = n.GetInfoset();
-  if (iset.IsNull()) return 0;
-  for (int i = 1; i <= iset.NumMembers(); i++)
-    if (iset.GetMember(i) == n)
-      if (i < iset.NumMembers()) 
-	return iset.GetMember(i+1); 
-      else
-	return 0;
-  return 0;
-}
-
 //
 // OnKeyEvent -- handle keypress events
 // Currently we support the following keys:
@@ -148,55 +173,45 @@ static gbtEfgNode NextSameIset(const gbtEfgNode &n)
 //     right arrow:  go to first child of current node
 //     up arrow:     go to previous sibling of current node
 //     down arrow:   go to next sibling of current node
-// Since the addition of collapsible subgames, a node's parent may not
-// be visible in the current display.  Thus, find the first predecessor
-// that is visible (ROOT is always visible)
 //
 void gbtTreeView::OnKeyEvent(wxKeyEvent &p_event)
 {
-  if (!m_doc->GetCursor().IsNull() && !p_event.ShiftDown()) {
-    bool c = false;   // set to true if cursor position has changed
+  gbtEfgNode cursor = m_doc->GetCursor();
+
+  if (!cursor.IsNull() && !p_event.ShiftDown()) {
     switch (p_event.KeyCode()) {
     case WXK_LEFT:
-      if (!m_doc->GetCursor().GetParent().IsNull()) {
-	m_doc->SetCursor(m_layout.GetValidParent(m_doc->GetCursor())->GetNode());
-	c = true;
+      if (!cursor.GetParent().IsNull()) {
+	m_doc->Submit(new gbtCmdSetCursor(cursor.GetParent()));
       }
       break;
     case WXK_RIGHT:
-      if (m_layout.GetValidChild(m_doc->GetCursor())) {
-	m_doc->SetCursor(m_layout.GetValidChild(m_doc->GetCursor())->GetNode());
-	c = true;
+      if (cursor.NumChildren() > 0) {
+	m_doc->Submit(new gbtCmdSetCursor(cursor.GetChild(1)));
       }
       break;
     case WXK_UP: {
       gbtEfgNode prior = ((!p_event.ControlDown()) ? 
 			  m_layout.PriorSameLevel(m_doc->GetCursor()) :
-			  PriorSameIset(m_doc->GetCursor()));
+			  cursor.GetPriorMember());
       if (!prior.IsNull()) {
-	m_doc->SetCursor(prior);
-	c = true;
+	m_doc->Submit(new gbtCmdSetCursor(prior));
       }
       break;
     }
     case WXK_DOWN: {
       gbtEfgNode next = ((!p_event.ControlDown()) ?
 			 m_layout.NextSameLevel(m_doc->GetCursor()) :
-			 NextSameIset(m_doc->GetCursor()));
+			 cursor.GetNextMember());
       if (!next.IsNull()) {
-	m_doc->SetCursor(next);
-	c = true;
+	m_doc->Submit(new gbtCmdSetCursor(next));
       }
       break;
     }
     case WXK_SPACE:
       // Force a scroll to be sure selected node is visible
-      c = true;
+      EnsureCursorVisible();
       break;
-    }
-        
-    if (c) { 
-      ProcessCursor(); // cursor moved
     }
   }
   else {
@@ -216,6 +231,7 @@ void gbtTreeView::OnUpdate(gbtGameView *)
     m_layout.SetCutNode(m_doc->GetCutNode());
   }
   AdjustScrollbarSteps();
+  EnsureCursorVisible();
 
   gbtEfgNode cursor = m_doc->GetCursor();
 
@@ -291,8 +307,6 @@ void gbtTreeView::OnDraw(wxDC &dc)
     if (!m_layout.GetNodeEntry(m_doc->GetCursor())) {
       m_doc->SetCursor(m_doc->GetEfg().GetRoot());
     }
-    
-    UpdateCursor();
   }
     
   dc.SetUserScale(m_zoom, m_zoom);
@@ -362,30 +376,6 @@ void gbtTreeView::EnsureCursorVisible(void)
   } 
 
   Scroll(xScroll, yScroll);
-}
-
-void gbtTreeView::ProcessCursor(void)
-{
-  if (!m_doc->GetCursor().IsNull()) {
-    gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor()); 
-    if (!entry) {
-      m_doc->SetCursor(m_doc->GetEfg().GetRoot());
-      entry = m_layout.GetNodeEntry(m_doc->GetCursor());
-    }
-    
-    UpdateCursor();
-    EnsureCursorVisible();
-  }
-  Refresh();
-}
-
-void gbtTreeView::UpdateCursor(void)
-{
-  gbtEfgLayoutNode *entry = m_layout.GetNodeEntry(m_doc->GetCursor());
-
-  if (entry) {
-    entry->SetCursor(true);
-  }
 }
 
 //#include "bitmaps/copy.xpm"
@@ -470,10 +460,7 @@ void gbtTreeView::OnLeftClick(wxMouseEvent &p_event)
   x = (int) ((float) x / m_zoom);
   y = (int) ((float) y / m_zoom);
 
-  gbtEfgNode node = m_layout.NodeHitTest(x, y);
-  m_doc->SetCursor(node);
-  Refresh();
-  ProcessCursor();
+  m_doc->Submit(new gbtCmdSetCursor(m_layout.NodeHitTest(x, y)));
 }
 
 //
@@ -558,32 +545,5 @@ void gbtTreeView::OnSize(wxSizeEvent &p_event)
   Refresh();
 }
 
-
-//=======================================================================
-//                class gbtCmdMoveTree: Implementation
-//=======================================================================
-
-void gbtCmdMoveTree::Do(gbtGameDocument *p_doc)  
-{
-  p_doc->GetEfg().MoveTree(m_src, m_dest);
-}
-
-//=======================================================================
-//                class gbtCmdCopyTree: Implementation
-//=======================================================================
-
-void gbtCmdCopyTree::Do(gbtGameDocument *p_doc)  
-{
-  p_doc->GetEfg().CopyTree(m_src, m_dest);
-}
-
-//=======================================================================
-//               class gbtCmdSetOutcome: Implementation
-//=======================================================================
-
-void gbtCmdSetOutcome::Do(gbtGameDocument *p_doc)  
-{
-  m_node.SetOutcome(m_outcome);
-}
 
 template class gbtList<gbtEfgLayoutNode *>;

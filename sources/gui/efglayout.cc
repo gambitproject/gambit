@@ -74,7 +74,7 @@ static wxString OutcomeAsString(const gbtEfgNode &p_node, int p_numDecimals)
 gbtEfgLayoutNode::gbtEfgLayoutNode(gbtEfgNode p_node)
   : m_node(p_node), m_parent(0),
     m_x(-1), m_y(-1), m_nextMember(0), m_inSupport(true),
-    m_selected(false), m_cursor(false), m_cut(false),
+    m_cut(false),
     m_subgameRoot(false), m_subgameMarked(false), m_size(20),
     m_token(GBT_NODE_TOKEN_CIRCLE),
     m_branchStyle(GBT_BRANCH_STYLE_LINE), 
@@ -93,19 +93,11 @@ int gbtEfgLayoutNode::GetChildNumber(void) const
   }
 }
 
-void gbtEfgLayoutNode::SetCursor(bool p_cursor)
-{
-  m_cursor = p_cursor;
-  if (m_cursor) {
-    m_selected = true;
-  }
-}
-
 //
 // Draws the node token itself, as well as the incoming branch
 // (if not the root node)
 //
-void gbtEfgLayoutNode::Draw(wxDC &p_dc) const
+void gbtEfgLayoutNode::Draw(wxDC &p_dc, bool p_selected) const
 {
   if (!m_node.GetParent().IsNull() && m_inSupport) {
     DrawIncomingBranch(p_dc);
@@ -115,7 +107,7 @@ void gbtEfgLayoutNode::Draw(wxDC &p_dc) const
     p_dc.SetPen(*wxLIGHT_GREY_PEN);
   }
   else {
-    p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, (IsSelected()) ? 4 : 2,
+    p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_color, (p_selected) ? 4 : 2,
 					       wxSOLID));
   }
   if (m_token == GBT_NODE_TOKEN_LINE) {
@@ -454,32 +446,6 @@ wxString gbtEfgLayout::CreateBranchLabel(const gbtEfgLayoutNode *p_entry,
   }
 }
 
-gbtEfgLayoutNode *gbtEfgLayout::GetValidParent(const gbtEfgNode &e)
-{
-  gbtEfgLayoutNode *n = GetNodeEntry(e.GetParent());
-  if (n) {
-    return n;
-  }
-  else { 
-    return GetValidParent(e.GetParent());
-  }
-}
-
-gbtEfgLayoutNode *gbtEfgLayout::GetValidChild(const gbtEfgNode &e)
-{
-  for (int i = 1; i <= e.NumChildren(); i++)  {
-    gbtEfgLayoutNode *n = GetNodeEntry(e.GetChild(i));
-    if (n) {
-      return n;
-    }
-    else  {
-      n = GetValidChild(e.GetChild(i));
-      if (n) return n;
-    }
-  }
-  return 0;
-}
-
 gbtEfgLayoutNode *gbtEfgLayout::GetEntry(const gbtEfgNode &p_node) const
 {
   for (int i = 1; i <= m_nodeList.Length(); i++) {
@@ -713,15 +679,6 @@ void gbtEfgLayout::UpdateTableInfosets(void)
   }
 }
 
-void gbtEfgLayout::UpdateTableParents(void)
-{
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    gbtEfgLayoutNode *e = m_nodeList[pos];
-    e->SetParent((e->GetNode() == m_doc->GetEfg().GetRoot()) ? 
-		 e : GetValidParent(e->GetNode()));
-  }
-}
-
 void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
 {
   // Kinda kludgey; probably should query draw prefs whenever needed.
@@ -743,7 +700,6 @@ void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
     UpdateTableInfosets();
   }
 
-  UpdateTableParents();
   GenerateLabels();
 
   const int OUTCOME_LENGTH = 60;
@@ -753,15 +709,17 @@ void gbtEfgLayout::Layout(const gbtEfgSupport &p_support)
 }
 
 void gbtEfgLayout::BuildNodeList(const gbtEfgNode &p_node, 
-				  const gbtEfgSupport &p_support,
-				  int p_level)
+				 const gbtEfgSupport &p_support,
+				 gbtEfgLayoutNode *p_parent,
+				 int p_level)
 {
   gbtEfgLayoutNode *entry = new gbtEfgLayoutNode(p_node);
+  entry->SetParent(p_parent);
   m_nodeList += entry;
   entry->SetLevel(p_level);
   if (p_node.NumChildren() > 0) {
     for (int i = 1; i <= p_node.NumChildren(); i++) {
-      BuildNodeList(p_node.GetChild(i), p_support, p_level + 1);
+      BuildNodeList(p_node.GetChild(i), p_support, entry, p_level + 1);
     }
   }
   m_maxLevel = gmax(p_level, m_maxLevel);
@@ -774,7 +732,7 @@ void gbtEfgLayout::BuildNodeList(const gbtEfgSupport &p_support)
   }
 
   m_maxLevel = 0;
-  BuildNodeList(m_doc->GetEfg().GetRoot(), p_support, 0);
+  BuildNodeList(m_doc->GetEfg().GetRoot(), p_support, 0, 0);
 }
 
 
@@ -824,7 +782,7 @@ void gbtEfgLayout::RenderSubtree(wxDC &p_dc) const
     gbtEfgLayoutNode *parentEntry = entry->GetParent();
         
     if (entry->GetChildNumber() == 1) {
-      parentEntry->Draw(p_dc);
+      parentEntry->Draw(p_dc, m_doc->GetCursor() == parentEntry->GetNode());
 
       if (m_doc->GetPreferences().InfosetConnect() != GBT_INFOSET_CONNECT_NONE &&
 	  parentEntry->GetNextMember()) {
@@ -890,7 +848,7 @@ void gbtEfgLayout::RenderSubtree(wxDC &p_dc) const
     }
 
     if (entry->GetNode().NumChildren() == 0) {
-      entry->Draw(p_dc);
+      entry->Draw(p_dc, m_doc->GetCursor() == entry->GetNode());
     }
 
   }

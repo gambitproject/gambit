@@ -115,8 +115,12 @@ struct gbt_efg_node_rep {
   ~gbt_efg_node_rep();
 
   void DeleteOutcome(gbt_efg_outcome_rep *outc);
+
   gbt_efg_node_rep *GetPriorSibling(void);
   gbt_efg_node_rep *GetNextSibling(void);
+
+  gbt_efg_node_rep *GetPriorMember(void);
+  gbt_efg_node_rep *GetNextMember(void);
 
   void MarkSubtree(bool p_mark);
 };

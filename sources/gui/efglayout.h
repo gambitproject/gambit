@@ -38,8 +38,6 @@ private:
   int m_x, m_y;        // Cartesian coordinates of node
   gbtEfgLayoutNode *m_nextMember;  // entry of next information set member 
   bool m_inSupport;    // true if node reachable in current support
-  bool m_selected;    // true if node is selected
-  bool m_cursor;      // true if node is 'cursor'
   bool m_cut;         // true if node is in a 'cut' subtree
   bool m_subgameRoot, m_subgameMarked;
   int m_size;         // horizontal size of the node
@@ -83,12 +81,6 @@ public:
 
   const wxColour &GetColor(void) const { return m_color; }
   void SetColor(const wxColour &p_color) { m_color = p_color; }
-
-  bool IsCursor(void) const { return m_cursor; }
-  void SetCursor(bool p_cursor);
-
-  bool IsSelected(void) const { return m_selected; }
-  void SetSelected(bool p_selected) { m_selected = p_selected; }
 
   bool IsCut(void) const { return m_cut; }
   void SetCut(bool p_cut) { m_cut = p_cut; }
@@ -162,7 +154,7 @@ public:
 
   bool NodeHitTest(int p_x, int p_y) const;
 
-  void Draw(wxDC &) const;
+  void Draw(wxDC &, bool p_selected) const;
   void DrawIncomingBranch(wxDC &) const;
 };
 
@@ -182,13 +174,13 @@ private:
   gbtEfgLayoutNode *NextInfoset(gbtEfgLayoutNode *);
   void CheckInfosetEntry(gbtEfgLayoutNode *);
 
-  void BuildNodeList(const gbtEfgNode &, const gbtEfgSupport &, int);
+  void BuildNodeList(const gbtEfgNode &, const gbtEfgSupport &, 
+		     gbtEfgLayoutNode *, int);
 
   int LayoutSubtree(const gbtEfgNode &, const gbtEfgSupport &,
 		    int &, int &, int &);
   void FillInfosetTable(const gbtEfgNode &, const gbtEfgSupport &);
   void UpdateTableInfosets(void);
-  void UpdateTableParents(void);
 
   wxString CreateNodeLabel(const gbtEfgLayoutNode *, int) const;
   wxString CreateOutcomeLabel(const gbtEfgLayoutNode *) const;
@@ -212,8 +204,6 @@ public:
   // The following member functions are for temporary compatibility only
   gbtEfgLayoutNode *GetNodeEntry(const gbtEfgNode &p_node) const
     { return GetEntry(p_node); }
-  gbtEfgLayoutNode *GetValidParent(const gbtEfgNode &);
-  gbtEfgLayoutNode *GetValidChild(const gbtEfgNode &);
 
   int MaxX(void) const { return m_maxX; }
   int MaxY(void) const { return m_maxY; }

@@ -77,6 +77,9 @@ public:
 
   gbtEfgInfoset GetInfoset(void) const;
   int GetMemberId(void) const;
+  gbtEfgNode GetPriorMember(void) const;
+  gbtEfgNode GetNextMember(void) const;
+
   gbtEfgPlayer GetPlayer(void) const;
 
   gbtEfgNode GetSubgameRoot(void) const;

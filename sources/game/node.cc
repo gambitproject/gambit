@@ -88,6 +88,36 @@ gbt_efg_node_rep *gbt_efg_node_rep::GetPriorSibling(void)
   }
 }
 
+gbt_efg_node_rep *gbt_efg_node_rep::GetNextMember(void)
+{
+  if (!m_infoset) {
+    return 0;
+  }
+
+  int memberNumber = m_infoset->m_members.Find(this);
+  if (memberNumber == m_infoset->m_members.Length()) {
+    return 0;
+  }
+  else {
+    return m_infoset->m_members[memberNumber + 1];
+  }
+}
+
+gbt_efg_node_rep *gbt_efg_node_rep::GetPriorMember(void)
+{
+  if (!m_infoset) {
+    return 0;
+  }
+
+  int memberNumber = m_infoset->m_members.Find(this);
+  if (memberNumber == 1) {
+    return 0;
+  }
+  else {
+    return m_infoset->m_members[memberNumber - 1];
+  }
+}
+
 //
 // MarkSubtree: sets the Node::mark flag on all children of node
 //
@@ -304,6 +334,18 @@ gbtEfgNode gbtEfgNode::GetPriorSibling(void) const
 { 
   if (!rep || !rep->m_parent)   return 0;
   return rep->GetPriorSibling();
+}
+
+gbtEfgNode gbtEfgNode::GetNextMember(void) const  
+{
+  if (!rep || !rep->m_infoset)   return 0;
+  return rep->GetNextMember();
+}
+
+gbtEfgNode gbtEfgNode::GetPriorMember(void) const
+{ 
+  if (!rep || !rep->m_infoset)   return 0;
+  return rep->GetPriorMember();
 }
 
 gbtEfgAction gbtEfgNode::GetPriorAction(void) const

@@ -46,9 +46,6 @@ private:
   enum { dragCOPY, dragMOVE, dragOUTCOME } m_dragMode;
 
   // Private Functions
-  void MakeFlasher(void);
-  void UpdateCursor(void);
-  void ProcessCursor(void);
   void EnsureCursorVisible(void);
 
   void MakeMenus(void);
