@@ -893,6 +893,8 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     return PortionSpec(porANYTYPE, num);
   else if (str == "EFSUPPORT")
     return PortionSpec(porEFSUPPORT, num);
+  else if (str == "EFBASIS")
+    return PortionSpec(porEFBASIS, num);
   else if (str == "NFSUPPORT")
     return PortionSpec(porNFSUPPORT, num);
   else if (str == "INPUT")
@@ -937,6 +939,8 @@ PortionSpec ToSpec(gText &str, int num /* =0 */)
     return PortionSpec(porANYTYPE, num, porNULLSPEC);
   else if (str == "EFSUPPORT*")
     return PortionSpec(porEFSUPPORT, num, porNULLSPEC);
+  else if (str == "EFBASIS*")
+    return PortionSpec(porEFBASIS, num, porNULLSPEC);
   else if (str == "NFSUPPORT*")
     return PortionSpec(porNFSUPPORT, num, porNULLSPEC);
   else if (str == "INPUT*")

@@ -64,6 +64,7 @@ typedef enum
 
 #define  porNFSUPPORT          ( 0x00040000 )
 #define  porEFSUPPORT          ( 0x00100000 )
+#define  porEFBASIS            ( 0x00200000 )
 
 #define  porNFPLAYER           ( 0x00400000 )
 #define  porEFPLAYER           ( 0x00800000 )

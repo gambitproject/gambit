@@ -15,6 +15,7 @@
 #include "efg.h"
 #include "efgutils.h"
 
+#include "efbasis.h"
 
 //
 // Implementations of these are provided as necessary in gsmutils.cc
@@ -48,6 +49,20 @@ static Portion *GSM_Actions(Portion **param)
   return por;
 }
 
+static Portion *GSM_BasisActions(Portion **param)
+{
+  if( param[0]->Spec().Type == porNULL )
+    return new ListPortion;
+
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
+
+  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Actions()) :
+                ArrayToList(sup->Actions(s->GetPlayer()->GetNumber(),
+					 s->GetNumber()));
+  return por;
+}
+
 //--------------
 // AddAction
 //--------------
@@ -61,6 +76,46 @@ static Portion *GSM_AddAction(Portion **param)
   S->AddAction(action);
 
   return new EfSupportPortion(S);
+}
+
+static Portion *GSM_AddBasisAction(Portion **param)
+{  
+  EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
+
+  EFBasis *S = new EFBasis(*basis);
+  S->AddAction(action);
+
+  return new EfBasisPortion(S);
+}
+
+//-------------
+// Nodes
+//-------------
+
+static Portion *GSM_BasisNodes(Portion **param)
+{
+  if( param[0]->Spec().Type == porNULL )
+    return new ListPortion;
+
+  Infoset *s = ((InfosetPortion *) param[0])->Value();
+  EFBasis* sup = ((EfBasisPortion*) param[1])->Value();
+
+  Portion *por = (s->IsChanceInfoset()) ? ArrayToList(s->Members()) :
+                ArrayToList(sup->Nodes(s->GetPlayer()->GetNumber(),
+					 s->GetNumber()));
+  return por;
+}
+
+static Portion *GSM_AddBasisNode(Portion **param)
+{  
+  EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
+  Node *node = ((NodePortion *) param[1])->Value();
+
+  EFBasis *S = new EFBasis(*basis);
+  S->AddNode(node);
+
+  return new EfBasisPortion(S);
 }
 
 //------------------
@@ -803,6 +858,33 @@ static Portion *GSM_RemoveAction(Portion **param)
   return new EfSupportPortion(S);
 }
 
+static Portion *GSM_RemoveBasisAction(Portion **param)
+{  
+  EFBasis *support = ((EfBasisPortion *) param[0])->Value();
+  Action *action = ((ActionPortion *) param[1])->Value();
+
+  EFBasis *S = new EFBasis(*support);
+  S->RemoveAction(action);
+
+  return new EfBasisPortion(S);
+}
+
+
+//-----------------
+// RemoveNode
+//-----------------
+
+static Portion *GSM_RemoveBasisNode(Portion **param)
+{  
+  EFBasis *basis = ((EfBasisPortion *) param[0])->Value();
+  Node *node = ((NodePortion *) param[1])->Value();
+
+  EFBasis *S = new EFBasis(*basis);
+  S->RemoveNode(node);
+
+  return new EfBasisPortion(S);
+}
+
 
 //-------------
 // Reveal
@@ -974,6 +1056,17 @@ static Portion *GSM_Support(Portion **param)
   return por;
 }
 
+//--------------
+// EFBasis
+//--------------
+
+static Portion *GSM_Basis(Portion **param)
+{
+  Efg &E = * ((EfgPortion *) param[0])->Value();
+  Portion *por = new EfBasisPortion(new EFBasis(E));
+  return por;
+}
+
 //-----------------
 // UnmarkSubgame
 //-----------------
@@ -996,10 +1089,16 @@ void Init_efgfunc(GSM *gsm)
   static struct { char *sig; Portion *(*func)(Portion **); } ftable[] =
     { { "Actions[infoset->INFOSET*, support->EFSUPPORT] =: LIST(ACTION)",
  	GSM_Actions },
+      { "Actions[infoset->INFOSET*, basis->EFBASIS] =: LIST(ACTION)",
+ 	GSM_BasisActions },
       { "AddAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT",
 	GSM_AddAction },
+      { "AddAction[basis->EFBASIS, action->ACTION] =: EFBASIS",
+	GSM_AddBasisAction },
       { "AddMove[infoset->INFOSET, node->NODE] =: NODE",
 	GSM_AddMove },
+      { "AddNode[basis->EFBASIS, node->NODE] =: EFBASIS",
+	GSM_AddBasisNode },
       { "Chance[efg->EFG] =: EFPLAYER", GSM_Chance },
       { "ChanceProb[action->ACTION] =: NUMBER", GSM_ChanceProb },
       { "Children[node->NODE] =: LIST(NODE)", GSM_Children },
@@ -1051,6 +1150,8 @@ void Init_efgfunc(GSM *gsm)
       { "NewPlayer[efg->EFG] =: EFPLAYER", GSM_NewPlayer },
       { "NextSibling[node->NODE] =: NODE", GSM_NextSibling },
       { "Nodes[efg->EFG] =: LIST(NODE)", GSM_Nodes },
+      { "Nodes[infoset->INFOSET*, basis->EFBASIS] =: LIST(NODE)",
+ 	GSM_BasisNodes },
       { "NthChild[node->NODE, n->INTEGER] =: NODE", GSM_NthChild },
       { "Outcome[node->NODE*] =: EFOUTCOME", GSM_Outcome },
       { "Outcomes[efg->EFG] =: LIST(EFOUTCOME)", GSM_Outcomes },
@@ -1063,6 +1164,10 @@ void Init_efgfunc(GSM *gsm)
       { "PriorSibling[node->NODE] =: NODE", GSM_PriorSibling },
       { "RemoveAction[support->EFSUPPORT, action->ACTION] =: EFSUPPORT",
 	GSM_RemoveAction },
+      { "RemoveAction[support->EFBASIS, action->ACTION] =: EFBASIS",
+	GSM_RemoveBasisAction },
+      { "RemoveNode[support->EFBASIS, node->NODE] =: EFBASIS",
+	GSM_RemoveBasisNode },
       { "Reveal[infoset->INFOSET, who->LIST(EFPLAYER)] =: INFOSET",
 	GSM_Reveal },
       { "RootNode[efg->EFG] =: NODE", GSM_RootNode }, 
@@ -1080,6 +1185,7 @@ void Init_efgfunc(GSM *gsm)
       { "SetPayoff[outcome->EFOUTCOME, player->EFPLAYER, payoff->NUMBER] =: EFOUTCOME", GSM_SetPayoff },
       { "Subgames[efg->EFG] =: LIST(NODE)", GSM_Subgames },
       { "Support[efg->EFG] =: EFSUPPORT", GSM_Support },
+      { "Basis[efg->EFG] =: EFBASIS", GSM_Basis },
       { "UnmarkSubgame[node->NODE] =: NODE", GSM_UnmarkSubgame },
       { 0, 0 }
     };

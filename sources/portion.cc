@@ -948,6 +948,76 @@ bool EfSupportPortion::IsReference(void) const
 
 
 //---------------------------------------------------------------------
+//                          EfBasis class
+//---------------------------------------------------------------------
+
+#include "efbasis.h"
+
+EfBasisPortion::EfBasisPortion(EFBasis *value)
+  : _Value(new EFBasis *(value)), _ref(false)
+{
+  SetGame(&value->Game());
+}
+
+EfBasisPortion::EfBasisPortion(EFBasis *&value, bool ref)
+  : _Value(&value), _ref(ref)
+{
+  SetGame(&value->Game());
+}
+
+EfBasisPortion::~EfBasisPortion()
+{
+  if (!_ref)   {
+    delete *_Value;
+    delete _Value;
+  }
+}
+
+EFBasis *EfBasisPortion::Value(void) const
+{ return *_Value; }
+
+void EfBasisPortion::SetValue(EFBasis *value)
+{
+  SetGame(&value->Game());
+  delete *_Value;
+  *_Value = value;
+}
+
+PortionSpec EfBasisPortion::Spec(void) const
+{
+  return PortionSpec(porEFBASIS);
+}
+
+void EfBasisPortion::Output(gOutput& s) const
+{ 
+  Portion::Output(s);
+  s << "(EfBasis) " << *_Value;
+  if(*_Value) 
+    s << ' ' << **_Value;
+}
+
+gText EfBasisPortion::OutputString( void ) const
+{
+  return "(EfBasis)";
+}
+
+Portion* EfBasisPortion::ValCopy(void) const
+{
+  return new EfBasisPortion(new EFBasis(**_Value)); 
+}
+
+Portion* EfBasisPortion::RefCopy(void) const
+{
+  Portion* p = new EfBasisPortion(*_Value, true); 
+  p->SetOriginal(Original());
+  return p;
+}
+
+bool EfBasisPortion::IsReference(void) const
+{ return _ref; }
+
+
+//---------------------------------------------------------------------
 //                          EfPlayer class
 //---------------------------------------------------------------------
 
@@ -1676,6 +1746,10 @@ bool ListPortion::MatchGameData( void* game, void* data ) const
 	if (((EfSupportPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
       }
+      if (spec.Type & porEFBASIS)  {
+	if (((EfBasisPortion*) (*rep->value)[i])->Value() == data)
+	  return true;
+      }
       if (spec.Type & porEFPLAYER)  {
 	if (((EfPlayerPortion*) (*rep->value)[i])->Value() == data)
 	  return true;
@@ -2099,6 +2173,9 @@ bool PortionEqual(Portion* p1, Portion* p2, bool& type_found)
   else if(p1->Spec().Type & porEFSUPPORT)
     b = (*(((EfSupportPortion*) p1)->Value()) ==
 	 *(((EfSupportPortion*) p2)->Value()));
+  else if(p1->Spec().Type & porEFBASIS)
+    b = (*(((EfBasisPortion*) p1)->Value()) ==
+	 *(((EfBasisPortion*) p2)->Value()));
   
   else if(p1->Spec().Type & porMIXED)
     b = (*((MixedPortion*) p1)->Value() == *((MixedPortion*) p2)->Value());

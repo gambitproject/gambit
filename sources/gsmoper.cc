@@ -1946,7 +1946,7 @@ void Init_gsmoper(GSM* gsm)
   gsm->AddFunction(FuncObj);
 
 
-  FuncObj = new FuncDescObj("Write", 10);
+  FuncObj = new FuncDescObj("Write", 11);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Write, 
 				       porOUTPUT, 2, 0, funcNONLISTABLE));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("output", porOUTPUT,
@@ -2010,6 +2010,12 @@ void Init_gsmoper(GSM* gsm)
   FuncObj->SetParamInfo(9, 0, ParamInfoType("output", porOUTPUT,
 					    REQUIRED, BYREF));
   FuncObj->SetParamInfo(9, 1, ParamInfoType("x", porSTRATEGY));
+
+  FuncObj->SetFuncInfo(10, FuncInfoType(GSM_Write,
+				       porOUTPUT, 2, 0, funcNONLISTABLE));
+  FuncObj->SetParamInfo(10, 0, ParamInfoType("output", porOUTPUT,
+					    REQUIRED, BYREF));
+  FuncObj->SetParamInfo(10, 1, ParamInfoType("x", porEFBASIS));
 
   gsm->AddFunction(FuncObj);
 

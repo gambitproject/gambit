@@ -54,7 +54,7 @@ template class gListSorter<gText>;
 #include "gslist.h"
 #include "garray.h"
 
-
+#include "efbasis.h"
 
 
 //----------------------------------------------------------------
@@ -335,6 +335,10 @@ Portion* GSM::Assign( Portion* p1, Portion* p2 )
 
       case porEFSUPPORT:
 	((EfSupportPortion *) p1)->SetValue(new EFSupport(*((EfSupportPortion *) p2)->Value()));
+	break;
+
+      case porEFBASIS:
+	((EfBasisPortion *) p1)->SetValue(new EFBasis(*((EfBasisPortion *) p2)->Value()));
 	break;
 
       case porINFOSET:
@@ -1027,6 +1031,7 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 	   ( spec.Type & porEFPLAYER ) ||
 	   ( spec.Type & porINFOSET ) ||
 	   ( spec.Type & porNODE ) ||
+	   ( spec.Type & porEFBASIS ) ||
 	   ( spec.Type & porACTION ) ||
 	   ( spec.Type & porEFOUTCOME ) );
     
@@ -1044,6 +1049,11 @@ void GSM::UnAssignEfgElement( Efg* game, PortionSpec spec, void* data )
 	  if( spec.Type & porEFSUPPORT )
 	  {
 	    if( ((EfSupportPortion*) varslist[i])->Value() == data )
+	      _RefTableStack->Peek()->Remove( varslist[i] );
+	  }
+	  if( spec.Type & porEFBASIS )
+	  {
+	    if( ((EfBasisPortion*) varslist[i])->Value() == data )
 	      _RefTableStack->Peek()->Remove( varslist[i] );
 	  }
 	  if( spec.Type & porEFPLAYER )

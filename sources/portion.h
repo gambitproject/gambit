@@ -499,6 +499,40 @@ public:
 
 
 //---------------------------------------------------------------------
+//                          EfBasis class
+//---------------------------------------------------------------------
+
+
+class EFBasis;
+
+class EfBasisPortion : public Portion
+{
+protected:
+  EFBasis** _Value;
+  bool _ref;
+
+  EfBasisPortion(EFBasis *&, bool);
+
+public:
+  EfBasisPortion(EFBasis *);
+  virtual ~EfBasisPortion();
+
+  EFBasis *Value(void) const;
+  void SetValue(EFBasis *);
+  PortionSpec Spec(void) const;
+
+  void Output(gOutput& s) const;
+  gText OutputString( void ) const;
+
+  Portion* ValCopy(void) const;
+  Portion* RefCopy(void) const;
+
+  bool IsReference(void) const;
+};
+
+
+
+//---------------------------------------------------------------------
 //                          EfPlayer class
 //---------------------------------------------------------------------
 
