@@ -23,7 +23,7 @@ Basis<T>::Basis(const gMatrix<T> &mat)
 {
 
   int i;
-  for(i = mat.MinCol(); i <= mat.MaxCol(); i++) {
+  for(i = cols.First(); i <= cols.Last(); i++) {
     cols[i] = 0;
     colBlocked[i] = false;
   }
@@ -74,30 +74,21 @@ Basis<T>& Basis<T>::operator=(const Basis<T> &orig)
 template <class T>
 int Basis<T>::Pivot(int outindex, int col)
 {
-  if ( col < 0 ) 
-    assert(A->CheckRow(-col) );
-  else if ( col > A->MaxCol() )
-    assert ( col > A->MaxCol() && 
-	    col <= A->MaxCol() + artificial.Length() && 
-	    A->CheckRow( artificial[col - A->MaxRow()] ) );
-  else 
-    assert( A->CheckColumn(col) );
-
   int outlabel = label[outindex];
  
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) rows[-col] = outindex;
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) cols[col] = outindex;
-  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
-    arts[col - A->MaxCol()] = outindex;
+  if ( -col >= label.First() && -col <= label.Last() ) rows[-col] = outindex;
+  else if ( col >= cols.First() && col <= cols.Last() ) cols[col] = outindex;
+  else if ( col > cols.Last() && col <= cols.Last() + artificial.Length() ) 
+    arts[col - cols.Last()] = outindex;
   else assert(0); // not a valid column to pivot in.
   
-  if ( -outlabel >= A->MinRow() && -outlabel <= A->MaxRow() ) 
+  if ( -outlabel >= label.First() && -outlabel <= label.Last() ) 
     rows[-outlabel] = 0;
-  else if ( outlabel >= A->MinCol() && outlabel <= A->MaxCol() ) 
+  else if ( outlabel >= cols.First() && outlabel <= cols.Last() ) 
     cols[outlabel] = 0;
-  else if ( outlabel > A->MaxCol() && 
-	   outlabel <= A->MaxCol() + artificial.Length() ) 
-    arts[outlabel - A->MaxCol()] = 0;
+  else if ( outlabel > cols.Last() && 
+	   outlabel <= cols.Last() + artificial.Length() ) 
+    arts[outlabel - cols.Last()] = 0;
   else assert(0); // not a valid column to pivot in.
   
   label[outindex] = col;
@@ -111,10 +102,10 @@ bool Basis<T>::Member( int col ) const
 {
   int ret;
 
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) ret = rows[-col];
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) ret = cols[col];
-  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
-    ret = arts[col - A->MaxCol()];
+  if ( -col >= label.First() && -col <= label.Last() ) ret = rows[-col];
+  else if ( col >= cols.First() && col <= cols.Last() ) ret = cols[col];
+  else if ( col > cols.Last() && col <= cols.Last() + artificial.Length() ) 
+    ret = arts[col - cols.Last()];
   else ret = 0;
 
   return (ret != 0);
@@ -126,10 +117,10 @@ int Basis<T>::Find( int col ) const
 {
   int ret;
 
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) ret = rows[-col];
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) ret = cols[col];
-  else if ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length() ) 
-    ret = arts[col - A->MaxCol()];
+  if ( -col >= label.First() && -col <= label.Last() ) ret = rows[-col];
+  else if ( col >= cols.First() && col <= cols.Last() ) ret = cols[col];
+  else if ( col > cols.Last() && col <= cols.Last() + artificial.Length() ) 
+    ret = arts[col - cols.Last()];
   else ret = 0;
   
   assert (ret != 0);
@@ -145,27 +136,27 @@ int Basis<T>::Label(int index) const
 template <class T>
 void Basis<T>::Mark(int col )
 {
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+  if ( -col >= label.First() && -col <= label.Last() ) 
     rowBlocked[-col] = true;
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+  else if ( col >= cols.First() && col <= cols.Last() ) 
     colBlocked[col] = true;
 }
 
 template <class T>
 void Basis<T>::UnMark(int col )
 {
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+  if ( -col >= label.First() && -col <= label.Last() ) 
     rowBlocked[-col] = false;
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+  else if ( col >= cols.First() && col <= cols.Last() ) 
     colBlocked[col] = false;
 }
 
 template <class T>
 bool Basis<T>::IsBlocked(int col) const
 {
-  if ( -col >= A->MinRow() && -col <= A->MaxRow() ) 
+  if ( -col >= label.First() && -col <= label.Last() ) 
     return rowBlocked[-col];
-  else if ( col >= A->MinCol() && col <= A->MaxCol() ) 
+  else if ( col >= cols.First() && col <= cols.Last() ) 
     return colBlocked[col];
   return false;
 }
@@ -204,7 +195,7 @@ template <class T>
 bool Basis<T>::IsSpecialColumn( int col )
 {
   return ( (-col >= label.First() && -col <= label.Last()) ||
-	  ( col > A->MaxCol() && col <= A->MaxCol() + artificial.Length()) ); 
+	  ( col > cols.Last() && col <= cols.Last() + artificial.Length()) ); 
 }
  
 template <class T>
@@ -218,7 +209,7 @@ void Basis<T>::GetColumn( int col, gVector<T> &ret )
     }
     else { // its an artificial variable
       ret = (T) 0;
-      ret[col - A->MaxCol()] = (T) 1;
+      ret[col - cols.Last()] = (T) 1;
     }
   }
   else 
@@ -230,22 +221,22 @@ void Basis<T>::GetColumn( int col, gVector<T> &ret )
 template <class T>
 int Basis<T>::InsertArtificial( int art, int col )
 {
-  arts[ arts.Insert( art, col - A->MaxCol() ) ] = 0;
-  return ( artificial.Insert( art, col - A->MaxCol() ) + A->MaxCol() );
+  arts[ arts.Insert( art, col - cols.Last() ) ] = 0;
+  return ( artificial.Insert( art, col - cols.Last() ) + cols.Last() );
 }
 
 template <class T>
 int Basis<T>::AppendArtificial( int art )
 {
   arts[ arts.Append(art) ] = 0;
-  return ( artificial.Append( art ) + A->MaxCol() );
+  return ( artificial.Append( art ) + cols.Last() );
 }
 
 template <class T>
 int Basis<T>::RemoveArtificial( int col )
 {
   arts.Remove(col);
-  return artificial.Remove( col - A->MaxCol() );
+  return artificial.Remove( col - cols.Last() );
 }
 
 template <class T>
@@ -258,7 +249,7 @@ void Basis<T>::FlushArtificial()
 template <class T>
 int Basis<T>::LastArtificial()
 {
-  return ( artificial.Last() + A->MaxCol() );
+  return ( artificial.Last() + cols.Last() );
 }
 
 template <class T> 
@@ -285,7 +276,7 @@ void Basis<T>::CheckBasis()
 
   for ( i =label.First(); i <= label.Last() && check != false; 
        i++){
-    check = check && ( label[i] == -i  || ( label[i] == i + A->MaxCol() ));
+    check = check && ( label[i] == -i  || ( label[i] == i + cols.Last() ));
   }
 
 //  if ( !check ) {
