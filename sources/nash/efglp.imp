@@ -59,8 +59,8 @@ gbtList<BehavSolution> gbtEfgNashLp<T>::Solve(const gbtEfgSupport &p_support,
   gbtVector<T> b(1,ns1+ni2);
   gbtVector<T> c(1,ns2+ni1);
 
-  maxpay = p_support->MaxPayoff() + gbtNumber(1);
-  minpay = p_support->MinPayoff() - gbtNumber(1);
+  maxpay = p_support->GetMaxPayoff() + gbtNumber(1);
+  minpay = p_support->GetMinPayoff() - gbtNumber(1);
 
   A = (T)0;
   T prob = (T)1;

@@ -52,8 +52,8 @@ gbtNfgNashEnumMixed<T>::Solve(const gbtNfgGame &p_game,
 
   gbtNfgIterator iter(p_game); 
 
-  T min = p_game->MinPayoff() - gbtNumber(1);
-  T max = p_game->MaxPayoff();
+  T min = p_game->GetMinPayoff() - gbtNumber(1);
+  T max = p_game->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
   // Construct matrices A1, A2

@@ -61,8 +61,12 @@ public:
   gbtGameInfoset GetInfoset(int p_index) const
   { return m_player->GetInfoset(p_index); }
 
-  int NumStrategies(void) const { return m_support->NumStrats(m_player->GetId()); }
+  int NumStrategies(void) const
+  { return m_support->NumStrats(m_player->GetId()); }
   gbtGameStrategy GetStrategy(int p_index) const; 
+
+  gbtNumber GetMinPayoff(void) const { return m_player->GetMinPayoff(); }
+  gbtNumber GetMaxPayoff(void) const { return m_player->GetMaxPayoff(); }
 };
 
 

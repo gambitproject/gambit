@@ -111,6 +111,9 @@ public:
 
   virtual int NumStrategies(void) const = 0;
   virtual gbtGameStrategy GetStrategy(int p_index) const = 0;
+
+  virtual gbtNumber GetMinPayoff(void) const = 0;
+  virtual gbtNumber GetMaxPayoff(void) const = 0;
 };
 
 class gbtGamePlayerRep : public gbtGameConstPlayerRep {

@@ -855,55 +855,34 @@ bool gbtGameBase::IsPerfectRecall(gbtGameInfoset &s1, gbtGameInfoset &s2) const
   return true;
 }
 
-gbtNumber gbtGameBase::MinPayoff(int pl) const
+gbtNumber gbtGameBase::GetMinPayoff(void) const
 {
-  int index, p, p1, p2;
-  gbtNumber minpay;
+  gbtNumber minpay = m_players[1]->GetMinPayoff();
 
-  if (NumOutcomes() == 0)  return 0;
-
-  if (pl) { 
-    p1 = p2 = pl;
+  for (int pl = 2; pl <= m_players.Length(); pl++) {
+    gbtNumber payoff = m_players[pl]->GetMinPayoff();
+    if (payoff < minpay) {
+      minpay = payoff;
+    }
   }
-  else {
-    p1 = 1;
-    p2 = m_players.Length();
-  }
-
-  minpay = m_outcomes[1]->m_payoffs[p1];
-
-  for (index = 1; index <= m_outcomes.Last(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->m_payoffs[p] < minpay)
-	minpay = m_outcomes[index]->m_payoffs[p];
-  }
+  
   return minpay;
 }
 
-gbtNumber gbtGameBase::MaxPayoff(int pl) const
+gbtNumber gbtGameBase::GetMaxPayoff(void) const
 {
-  int index, p, p1, p2;
-  gbtNumber maxpay;
+  gbtNumber maxpay = m_players[1]->GetMaxPayoff();
 
-  if (NumOutcomes() == 0)  return 0;
-
-  if (pl) { 
-    p1 = p2 = pl;
+  for (int pl = 2; pl <= m_players.Length(); pl++) {
+    gbtNumber payoff = m_players[pl]->GetMaxPayoff();
+    if (payoff > maxpay) {
+      maxpay = payoff;
+    }
   }
-  else {
-    p1 = 1;
-    p2 = m_players.Length();
-  }
-
-  maxpay = m_outcomes[1]->m_payoffs[p1];
-
-  for (index = 1; index <= m_outcomes.Last(); index++)  {
-    for (p = p1; p <= p2; p++)
-      if (m_outcomes[index]->m_payoffs[p] > maxpay)
-	maxpay = m_outcomes[index]->m_payoffs[p];
-  }
+  
   return maxpay;
 }
+
 
 gbtGameNode gbtGameBase::GetRoot(void) const
 { return root; }

@@ -54,7 +54,7 @@ gbtList<MixedSolution> gbtNfgNashLp<T>::Solve(const gbtNfgGame &p_game,
   gbtVector<T> c(1,m+1);
   gbtNfgIterator iter(p_game);
 
-  T minpay = p_game->MinPayoff() - gbtNumber(1);
+  T minpay = p_game->GetMinPayoff() - gbtNumber(1);
 
   for (i = 1; i <= k; i++)  {
     for (j = 1; j <= m; j++)  {

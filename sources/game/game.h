@@ -104,8 +104,8 @@ public:
   virtual int NumOutcomes(void) const = 0;
   virtual gbtGameOutcome GetOutcome(int p_id) const = 0;
   virtual bool IsConstSum(void) const = 0; 
-  virtual gbtNumber MinPayoff(int pl = 0) const = 0;
-  virtual gbtNumber MaxPayoff(int pl = 0) const = 0;
+  virtual gbtNumber GetMinPayoff(void) const = 0;
+  virtual gbtNumber GetMaxPayoff(void) const = 0;
 };
 
 class gbtConstNfgRep : public virtual gbtConstGameRep {

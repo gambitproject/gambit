@@ -74,7 +74,7 @@ gbtList<BehavSolution> gbtEfgNashLcp<T>::Solve(const gbtEfgSupport &p_support,
   gbtMatrix<T> A(1,ntot,0,ntot);
   gbtVector<T> b(1,ntot);
 
-  maxpay = p_support->MaxPayoff() + gbtNumber(1);
+  maxpay = p_support->GetMaxPayoff() + gbtNumber(1);
 
   T prob = (T)1;
   for (i = A.MinRow(); i <= A.MaxRow(); i++) {

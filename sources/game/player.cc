@@ -78,6 +78,40 @@ gbtGameInfoset gbtGamePlayerBase::NewInfoset(int p_actions)
 gbtGameInfoset gbtGamePlayerBase::GetInfoset(int p_index) const
 { return m_infosets[p_index]; }
 
+gbtNumber gbtGamePlayerBase::GetMinPayoff(void) const
+{
+  if (m_efg->NumOutcomes() == 0) {
+    return 0;
+  }
+
+  gbtNumber minpay = m_efg->m_outcomes[1]->m_payoffs[m_id];
+
+  for (int outc = 2; outc <= m_efg->NumOutcomes(); outc++) {
+    if (m_efg->m_outcomes[outc]->m_payoffs[m_id] < minpay) {
+      minpay = m_efg->m_outcomes[outc]->m_payoffs[m_id];
+    }
+  }
+
+  return minpay;
+}
+
+gbtNumber gbtGamePlayerBase::GetMaxPayoff(void) const
+{
+  if (m_efg->NumOutcomes() == 0) {
+    return 0;
+  }
+
+  gbtNumber maxpay = m_efg->m_outcomes[1]->m_payoffs[m_id];
+
+  for (int outc = 2; outc <= m_efg->NumOutcomes(); outc++) {
+    if (m_efg->m_outcomes[outc]->m_payoffs[m_id] > maxpay) {
+      maxpay = m_efg->m_outcomes[outc]->m_payoffs[m_id];
+    }
+  }
+
+  return maxpay;
+}
+
 gbtOutput &operator<<(gbtOutput &p_stream, const gbtGamePlayer &)
 { 
   return p_stream;

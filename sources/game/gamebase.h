@@ -111,6 +111,9 @@ public:
   int NumStrategies(void) const { return m_strategies.Length(); }
   gbtGameStrategy GetStrategy(int p_index) const 
   { return m_strategies[p_index]; }
+
+  gbtNumber GetMinPayoff(void) const;
+  gbtNumber GetMaxPayoff(void) const;
 };
 
 class gbtGameActionBase : public gbtGameActionRep {
@@ -347,8 +350,8 @@ public:
   bool IsPerfectRecall(void) const;
   bool IsPerfectRecall(gbtGameInfoset &, gbtGameInfoset &) const;
   long RevisionNumber(void) const;
-  gbtNumber MinPayoff(int pl) const;
-  gbtNumber MaxPayoff(int pl) const;
+  gbtNumber GetMinPayoff(void) const;
+  gbtNumber GetMaxPayoff(void) const;
  
   // DATA ACCESS -- NODES
   int NumNodes(void) const;
@@ -535,8 +538,8 @@ public:
   { return m_nfg->GetOutcome(index); }
 
   bool IsConstSum(void) const { return m_nfg->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_nfg->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_nfg->MinPayoff(pl); }
+  gbtNumber GetMaxPayoff(void) const { return m_nfg->GetMaxPayoff(); }
+  gbtNumber GetMinPayoff(void) const { return m_nfg->GetMinPayoff(); }
 
   // The following are just echoed from the base game.  In the future,
   // derivation from gbtGame will handle these.
@@ -620,8 +623,8 @@ public:
   { return m_support->GetOutcome(index); }
 
   bool IsConstSum(void) const { return m_support->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
+  gbtNumber GetMaxPayoff(void) const { return m_support->GetMaxPayoff(); }
+  gbtNumber GetMinPayoff(void) const { return m_support->GetMinPayoff(); }
 
   gbtMixedProfile<double> NewMixedProfile(double) const;
   gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
@@ -702,8 +705,8 @@ public:
   { return m_nfgSupport->GetOutcome(index); }
 
   bool IsConstSum(void) const { return m_nfgSupport->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_nfgSupport->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_nfgSupport->MinPayoff(pl); }
+  gbtNumber GetMaxPayoff(void) const { return m_nfgSupport->GetMaxPayoff(); }
+  gbtNumber GetMinPayoff(void) const { return m_nfgSupport->GetMinPayoff(); }
 
   gbtMixedProfile<double> NewMixedProfile(double) const;
   gbtMixedProfile<gbtRational> NewMixedProfile(const gbtRational &) const;
@@ -826,8 +829,8 @@ public:
   { return m_efg->GetOutcome(index); }
 
   bool IsConstSum(void) const { return m_efg->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_efg->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_efg->MinPayoff(pl); }
+  gbtNumber GetMaxPayoff(void) const { return m_efg->GetMaxPayoff(); }
+  gbtNumber GetMinPayoff(void) const { return m_efg->GetMinPayoff(); }
 
   // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
 
@@ -1056,8 +1059,8 @@ public:
   { return m_support->GetOutcome(index); }
 
   bool IsConstSum(void) const { return m_support->IsConstSum(); }
-  gbtNumber MaxPayoff(int pl = 0) const { return m_support->MaxPayoff(pl); }
-  gbtNumber MinPayoff(int pl = 0) const { return m_support->MinPayoff(pl); }
+  gbtNumber GetMaxPayoff(void) const { return m_support->GetMaxPayoff(); }
+  gbtNumber GetMinPayoff(void) const { return m_support->GetMinPayoff(); }
 
   // IMPLEMENTATION OF gbtConstEfgRep INTERFACE
 

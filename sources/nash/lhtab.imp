@@ -41,8 +41,8 @@ template <class T> gbtMatrix<T> Make_A1(const gbtNfgGame &p_game, const T &)
   gbtNfgIterator iter(p_game); 
   T min; 
 
-  min = p_game->MinPayoff() - gbtNumber(1);
-  T max = p_game->MaxPayoff();
+  min = p_game->GetMinPayoff() - gbtNumber(1);
+  T max = p_game->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
   for (int i = 1; i <= n1; i++)  {
@@ -64,8 +64,8 @@ template <class T> gbtMatrix<T> Make_A2(const gbtNfgGame &p_game, const T &)
   gbtNfgIterator iter(p_game); 
   T min; 
 
-  min = p_game->MinPayoff() - gbtNumber(1);
-  T max = p_game->MaxPayoff();
+  min = p_game->GetMinPayoff() - gbtNumber(1);
+  T max = p_game->GetMaxPayoff();
   T fac = ((T)1)/(max - min);
 
   for (int i = 1; i <= n1; i++)  {
