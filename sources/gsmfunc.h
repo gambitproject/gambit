@@ -13,6 +13,15 @@
 
 
 #include "portion.h"
+#include "glist.h"
+#include "gsmhash.h"
+
+
+
+typedef enum { rcFAIL, rcSUCCESS, rcQUIT } GSM_ReturnCode;
+
+
+
 
 #define NO_DEFAULT_VALUE  (Portion*)  0
 #define PARAM_NOT_FOUND   (int)      -1
@@ -22,11 +31,32 @@
 
 
 class GSM;
+class Instruction;
 
 
 class FuncDescObj
 {
- protected:
+private:
+
+  static RefCountHashTable< gList< Instruction* >* > _RefCountTable;
+
+  void _SetFuncInfo
+    ( 
+     const int f_index, 
+     const int num_params
+     );
+
+  void _SetParamInfo
+    ( 
+     const int         f_index, 
+     const int         index, 
+     const gString&    name,
+     const PortionType type,
+     Portion*          default_value,
+     const bool        pass_by_reference
+     );
+
+protected:
   struct ParamInfoType
   {
     gString      Name;
@@ -37,16 +67,19 @@ class FuncDescObj
 
   struct FuncInfoType
   {
-    Portion*       (*FuncPtr)(Portion **);
-    int            NumParams;
-    ParamInfoType* ParamInfo;
+    bool                 UserDefined;
+    Portion*             (*FuncPtr)(Portion **);
+    gList<Instruction*>* FuncInstr;
+    int                  NumParams;
+    ParamInfoType*       ParamInfo;
   };
 
   gString        _FuncName;
   int            _NumFuncs;
   FuncInfoType*  _FuncInfo;
 
- public:
+
+  public:
   FuncDescObj( FuncDescObj& func );
   FuncDescObj( const gString& func_name );
   virtual ~FuncDescObj();
@@ -57,9 +90,25 @@ class FuncDescObj
      const int       num_params = 0 
      );
 
+  void SetFuncInfo
+    (
+     gList< Instruction* >* func_instr,
+     const int       num_params = 0 
+     );
+
   void SetParamInfo
     ( 
      Portion*          (*func_ptr)(Portion**),
+     const int         index, 
+     const gString&    name,
+     const PortionType type,
+     Portion*          default_value,
+     const bool        pass_by_reference = false
+     );
+
+  void SetParamInfo
+    ( 
+     gList< Instruction* >* func_instr,
      const int         index, 
      const gString&    name,
      const PortionType type,
@@ -83,6 +132,7 @@ class CallFuncObj : public FuncDescObj
     Portion*           ShadowOf;
   };
 
+  gOutput&              _StdOut;
   gOutput&              _StdErr;
 
   int                   _FuncIndex;
@@ -105,7 +155,7 @@ class CallFuncObj : public FuncDescObj
      );
 
  public:
-  CallFuncObj( FuncDescObj* func, gOutput& s_err );
+  CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err );
   ~CallFuncObj();
 
   int         NumParams ( void ) const;
@@ -120,7 +170,7 @@ class CallFuncObj : public FuncDescObj
   Reference_Portion* GetCurrParamRef ( void ) const;
   Portion*    GetCurrParamShadowOf ( void ) const;
 
-  Portion*    CallFunction      ( Portion** param );
+  Portion*    CallFunction      ( GSM*, Portion** param );
 };
 
 

@@ -827,7 +827,7 @@ bool GSM::InitCallFunction( const gString& funcname )
 
   if( _FuncTable->IsDefined( funcname ) )
   {
-    func = new CallFuncObj( (*_FuncTable)( funcname ), _StdErr );
+    func = new CallFuncObj( (*_FuncTable)( funcname ), _StdOut, _StdErr );
     _CallFuncStack->Push( func );
   }
   else // ( !_FuncTable->IsDefined( funcname ) )
@@ -986,7 +986,7 @@ bool GSM::CallFunction( void )
   num_params = func->NumParams();
   param = new Portion*[ num_params ];
 
-  return_value = func->CallFunction( param );
+  return_value = func->CallFunction( this, param );
 
   if( return_value == 0 )
   {
@@ -1102,7 +1102,7 @@ bool GSM::CallFunction( void )
 //                       Execute function
 //----------------------------------------------------------------------------
 
-GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
+GSM_ReturnCode GSM::Execute( gList< Instruction* >& program, bool destruct )
 {
   GSM_ReturnCode  result          = rcSUCCESS;
   bool            instr_success;
@@ -1115,7 +1115,6 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
   while( ( program_counter <= program_length ) && ( !done ) )
   {
     instruction = program[ program_counter ];
-
     switch( instruction->Type() )
     {
     case iQUIT:
@@ -1168,10 +1167,13 @@ GSM_ReturnCode GSM::Execute( gList< Instruction* >& program )
     }
   }
 
-  while( program.Length() > 0 )
+  if( destruct )
   {
-    instruction = program.Remove( 1 );
-    delete instruction;
+    while( program.Length() > 0 )
+    {
+      instruction = program.Remove( 1 );
+      delete instruction;
+    }
   }
 
   return result;

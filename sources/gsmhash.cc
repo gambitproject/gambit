@@ -122,6 +122,9 @@ TEMPLATE class gNode< Portion* >;
 TEMPLATE class gList< FuncDescObj* >;
 TEMPLATE class gNode< FuncDescObj* >;
 
+TEMPLATE class gList< gList< Instruction* >* >;
+TEMPLATE class gNode< gList< Instruction* >* >;
+
 /* 
    already declared in readefg.y
    TEMPLATE class gList< gString >;
@@ -148,6 +151,9 @@ TEMPLATE class RefCountHashTable< ExtForm<double>* >;
 
 TEMPLATE class HashTable< ExtForm<gRational>*, int >;
 TEMPLATE class RefCountHashTable< ExtForm<gRational>* >;
+
+TEMPLATE class HashTable< gList< Instruction* >*, int >;
+TEMPLATE class RefCountHashTable< gList< Instruction* >* >;
 
 
 TEMPLATE class HashTable< gString, Portion* >;

@@ -769,6 +769,7 @@ template <class T> Nfg_Portion<T>::~Nfg_Portion()
   _RefCountTable( _Value )--;
   if( _RefCountTable( _Value ) == 0 )
   {
+    _RefCountTable.Remove( _Value );
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;
@@ -900,6 +901,7 @@ template <class T> Efg_Portion<T>::~Efg_Portion()
   _RefCountTable( _Value )--;
   if( _RefCountTable( _Value ) == 0 )
   {
+    _RefCountTable.Remove( _Value );
     delete _Value;
 #ifdef MEMCHECK
     _NumObj--;

@@ -1871,6 +1871,17 @@ int main( void )
 #endif
 
 
+
+
+  machine->PushRef( "F" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
+
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "E" );
   machine->Bind();
@@ -1883,13 +1894,23 @@ int main( void )
   machine->Dump();
 
 
-  machine->PushRef( "E" );
+
+  machine->PushRef( "G" );
   machine->InitCallFunction( "ReadEfg" );
   machine->Push( "e02.efg" );
   machine->Bind();
   machine->CallFunction();
   machine->Assign();
   machine->Dump();
+
+  machine->PushRef( "H" );
+  machine->InitCallFunction( "ReadEfg" );
+  machine->Push( "e02.efg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
 
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
@@ -1948,10 +1969,19 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 
+  machine->PushRef( "x3" );
+  machine->InitCallFunction( "ReadNfg" );
+  machine->Push( "2x2.nfg" );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Assign();
+  machine->Dump();
+
 #ifdef INTERACTIVE
   gout << "*********************** Press Return to continue ************";
   gin >> cont;
 #endif
+
 
   machine->PushRef( "y1" );
   machine->Push( (double) 1 );
@@ -1977,6 +2007,78 @@ int main( void )
   machine->Push( (gInteger) 2 );
   machine->Subscript();
   machine->Dump();
+
+
+#ifdef INTERACTIVE
+  gout << "*********************** Press Return to continue ************";
+  gin >> cont;
+#endif
+
+
+
+  gList< Instruction* >* prog;
+  FuncDescObj* func;
+
+  prog = new gList< Instruction* >;
+  prog->Append( new Push<double>( 1 ) );
+  prog->Append( new Push<double>( 2 ) );
+  prog->Append( new Push<double>( 3 ) );
+  prog->Append( new Dump );
+
+  func = new FuncDescObj( "TestUsr" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+
+  prog = new gList< Instruction* >;
+  prog->Append( new Push<double>( 4 ) );
+  prog->Append( new InitCallFunction( "TestUsr" ) );
+  prog->Append( new CallFunction );
+  prog->Append( new Dump );
+
+  func = new FuncDescObj( "TestUsr2" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+
+  prog = new gList< Instruction* >;
+  prog->Append( new PushRef( "x" ) );
+  prog->Append( new Push<double>( 10 ) );
+  prog->Append( new Assign );
+  prog->Append( new Dump );
+
+  func = new FuncDescObj( "TestUsr3" );
+  func->SetFuncInfo( prog, 0 );
+  machine->AddFunction( func );
+
+
+
+
+  machine->InitCallFunction( "TestUsr" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestUsr2" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "TestUsr" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Push( (double) 12 );
+  machine->Assign();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+  
+  machine->InitCallFunction( "TestUsr3" );
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->PushRef( "x" );
+  machine->Dump();
+  
 
 
 #ifdef INTERACTIVE

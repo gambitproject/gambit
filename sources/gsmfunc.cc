@@ -7,15 +7,7 @@
 
 
 #include <assert.h>
-#include "gsmfunc.h"
-
-
-
-// The header files for each module should be placed here:
-
-#include "gsmoper.h"
-
-#include "gclmath.h"
+#include "gsm.h"
 
 
 
@@ -24,8 +16,10 @@
 // Each Init() function should take the argument "this" so each instance
 // of GSM can add those functions to their memory.
 
-extern void Init_nfgfunc(GSM *);
-extern void Init_efgfunc(GSM *);
+extern void Init_gclmath( GSM* );
+extern void Init_gsmoper( GSM* );
+extern void Init_nfgfunc( GSM* );
+extern void Init_efgfunc( GSM* );
 
 void GSM::InitFunctions( void )
 {
@@ -45,11 +39,14 @@ void GSM::InitFunctions( void )
 //                   Function descriptor objects
 /*******************************************************************/
 
+RefCountHashTable< gList< Instruction* >* > FuncDescObj::_RefCountTable;
+
    
 FuncDescObj::FuncDescObj( FuncDescObj& func )
 {
   int index;
   int f_index;
+  int i;
 
   _FuncName  = func._FuncName;
   _NumFuncs  = func._NumFuncs;
@@ -57,8 +54,20 @@ FuncDescObj::FuncDescObj( FuncDescObj& func )
 
   for( f_index = 0; f_index < _NumFuncs; f_index++ )
   {
-    _FuncInfo[ f_index ].FuncPtr   = func._FuncInfo[ f_index ].FuncPtr;
-    _FuncInfo[ f_index ].NumParams = func._FuncInfo[ f_index ].NumParams;
+    _FuncInfo[ f_index ].UserDefined = func._FuncInfo[ f_index ].UserDefined;
+    _FuncInfo[ f_index ].FuncPtr     = func._FuncInfo[ f_index ].FuncPtr;
+
+    _FuncInfo[ f_index ].FuncInstr   = func._FuncInfo[ f_index ].FuncInstr;
+    if( !_RefCountTable.IsDefined( _FuncInfo[ f_index ].FuncInstr ) )
+    {
+      _RefCountTable.Define( _FuncInfo[ f_index ].FuncInstr, 1 );
+    }
+    else
+    {
+      _RefCountTable( _FuncInfo[ f_index ].FuncInstr )++;
+    }
+
+    _FuncInfo[ f_index ].NumParams   = func._FuncInfo[ f_index ].NumParams;
     _FuncInfo[ f_index ].ParamInfo =
       new ParamInfoType[ _FuncInfo[ f_index ].NumParams ];
 
@@ -98,6 +107,7 @@ FuncDescObj::~FuncDescObj()
 {
   int index;
   int f_index;
+  Instruction* instruction;
 
   for( f_index = 0; f_index < _NumFuncs; f_index++ )
   {
@@ -105,32 +115,95 @@ FuncDescObj::~FuncDescObj()
     {
       delete _FuncInfo[ f_index ].ParamInfo[ index ].DefaultValue;
     }
+    if( _FuncInfo[ f_index ].UserDefined )
+    {
+      assert( _RefCountTable.IsDefined( _FuncInfo[ f_index ].FuncInstr ) );
+      assert( _RefCountTable( _FuncInfo[ f_index ].FuncInstr ) > 0 );
+      _RefCountTable( _FuncInfo[ f_index ].FuncInstr )--;
+      if( _RefCountTable( _FuncInfo[ f_index ].FuncInstr ) == 0 )
+      {
+	_RefCountTable.Remove( _FuncInfo[ f_index ].FuncInstr );
+	assert( _FuncInfo[ f_index ].FuncInstr != 0 );
+	while( _FuncInfo[ f_index ].FuncInstr->Length() > 0 )
+	{
+	  instruction = _FuncInfo[ f_index ].FuncInstr->Remove( 1 );
+	  delete instruction;
+	}
+	delete _FuncInfo[ f_index ].FuncInstr;
+      }
+    }
     delete [] _FuncInfo[ f_index ].ParamInfo;
   }
   delete [] _FuncInfo;
 }
 
 
+
 void FuncDescObj::SetFuncInfo
-  (
-   Portion*  (*func_ptr)(Portion**),
-   const int  num_params
-   )
+(
+ Portion*  (*func_ptr)(Portion**),
+ const int  num_params
+ )
 {
   int i;
   int f_index = -1;
-  FuncInfoType* NewFuncInfo;
 
   for( i = 0; i < _NumFuncs; i++ )
   {
-    if( _FuncInfo[ i ].FuncPtr == func_ptr )
+    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
     }
   }
 
-  if( f_index = -1 )  // new function
+  _SetFuncInfo( f_index, num_params );
+  
+  _FuncInfo[ _NumFuncs - 1 ].UserDefined = false;
+  _FuncInfo[ _NumFuncs - 1 ].FuncPtr = func_ptr;
+}
+
+
+void FuncDescObj::SetFuncInfo
+(
+ gList< Instruction* >* func_instr,
+ const int num_params
+ )
+{
+  int i;
+  int f_index = -1;
+
+  for( i = 0; i < _NumFuncs; i++ )
+  {
+    if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
+    {
+      f_index = i;
+      break;
+    }
+  }
+
+  _SetFuncInfo( f_index, num_params );
+  
+  _FuncInfo[ _NumFuncs - 1 ].UserDefined = true;
+  _FuncInfo[ _NumFuncs - 1 ].FuncInstr = func_instr;
+
+  if( !_RefCountTable.IsDefined( _FuncInfo[ _NumFuncs - 1 ].FuncInstr ) )
+  {
+    _RefCountTable.Define( _FuncInfo[ _NumFuncs - 1 ].FuncInstr, 1 );
+  }
+  else
+  {
+    _RefCountTable( _FuncInfo[ _NumFuncs - 1 ].FuncInstr )++;
+  }
+}
+
+
+void FuncDescObj::_SetFuncInfo( const int f_index, const int num_params )
+{
+  int i;
+  FuncInfoType* NewFuncInfo;
+
+  if( f_index == -1 )  // new function
   {
     _NumFuncs++;
     NewFuncInfo = new FuncInfoType[ _NumFuncs ];
@@ -141,7 +214,9 @@ void FuncDescObj::SetFuncInfo
     delete [] _FuncInfo;
     _FuncInfo = NewFuncInfo;
 
-    _FuncInfo[ _NumFuncs - 1 ].FuncPtr = func_ptr;
+    _FuncInfo[ _NumFuncs - 1 ].UserDefined = false;
+    _FuncInfo[ _NumFuncs - 1 ].FuncPtr   = 0;
+    _FuncInfo[ _NumFuncs - 1 ].FuncInstr = 0;
     _FuncInfo[ _NumFuncs - 1 ].NumParams = num_params;
     _FuncInfo[ _NumFuncs - 1 ].ParamInfo = new ParamInfoType[ num_params ];
   }
@@ -159,29 +234,87 @@ void FuncDescObj::SetFuncInfo
 
 
 void FuncDescObj::SetParamInfo
-  ( 
-   Portion*           (*func_ptr)(Portion**),
-   const int          param_index,
-   const gString&     param_name, 
-   const PortionType  param_type, 
-   Portion*           param_default_value,
-   const bool         param_pass_by_reference
-   )
+( 
+ Portion*           (*func_ptr)(Portion**),
+ const int          param_index,
+ const gString&     param_name, 
+ const PortionType  param_type, 
+ Portion*           param_default_value,
+ const bool         param_pass_by_reference
+ )
 {
-  int index;
-  int repeated_variable_declaration = false;
   int i;
   int f_index = -1;
   
   for( i = 0; i < _NumFuncs; i++ )
   {
-    if( _FuncInfo[ i ].FuncPtr == func_ptr )
+    if( !_FuncInfo[ i ].UserDefined && ( _FuncInfo[ i ].FuncPtr == func_ptr ) )
     {
       f_index = i;
       break;
     }
   }
 
+  _SetParamInfo
+    ( 
+     f_index,
+     param_index,
+     param_name, 
+     param_type, 
+     param_default_value,
+     param_pass_by_reference
+     );
+}
+
+
+void FuncDescObj::SetParamInfo
+( 
+ gList< Instruction* >* func_instr,
+ const int              param_index,
+ const gString&         param_name, 
+ const PortionType      param_type, 
+ Portion*               param_default_value,
+ const bool             param_pass_by_reference
+ )
+{
+  int i;
+  int f_index = -1;
+  
+  for( i = 0; i < _NumFuncs; i++ )
+  {
+    if( _FuncInfo[ i ].UserDefined && (_FuncInfo[ i ].FuncInstr == func_instr))
+    {
+      f_index = i;
+      break;
+    }
+  }
+
+  _SetParamInfo
+    ( 
+     f_index,
+     param_index,
+     param_name, 
+     param_type, 
+     param_default_value,
+     param_pass_by_reference
+     );
+}
+
+
+void FuncDescObj::_SetParamInfo
+(
+ const int          f_index,
+ const int          param_index,
+ const gString&     param_name, 
+ const PortionType  param_type, 
+ Portion*           param_default_value,
+ const bool         param_pass_by_reference
+ )
+{
+  int index;
+  int repeated_variable_declaration = false;
+  int i;
+  
 #ifndef NDEBUG
   if( !( param_index >= 0 && param_index < _FuncInfo[ f_index ].NumParams ) )
   {
@@ -245,8 +378,8 @@ gString FuncDescObj::FuncName( void ) const
 /*******************************************************************/
 
   
-CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_err )
-     :FuncDescObj( *func ), _StdErr( s_err )
+CallFuncObj::CallFuncObj( FuncDescObj* func, gOutput& s_out, gOutput& s_err )
+     :FuncDescObj( *func ), _StdOut( s_out ), _StdErr( s_err )
 {
   int index;
   int f_index;
@@ -459,7 +592,7 @@ Portion* CallFuncObj::GetCurrParamShadowOf( void ) const
 }
 
 
-Portion* CallFuncObj::CallFunction( Portion **param )
+Portion* CallFuncObj::CallFunction( GSM* gsm, Portion **param )
 {
   int index;
   int f_index;
@@ -468,7 +601,7 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   int params_matched;
   int param_sets_matched;
   Portion* result = 0;
-
+  GSM_ReturnCode return_code;
 
 
   if( _FuncIndex == -1 && _NumFuncs == 1 )
@@ -601,7 +734,18 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   /* This section makes the actual fuunction call */
   if( !_ErrorOccurred )
   {
-    result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
+    if( !_FuncInfo[ _FuncIndex ].UserDefined )
+      result = _FuncInfo[ _FuncIndex ].FuncPtr( _Param );
+    else
+    {
+      // GSM* gsm = new GSM( 32, _StdOut, _StdErr );
+      return_code = gsm->Execute( *(_FuncInfo[_FuncIndex].FuncInstr), false );
+      // delete gsm;
+      if( return_code == rcSUCCESS )
+	result = new bool_Portion( true );
+      else
+	result = new bool_Portion( false );
+    }
 
     if( result == 0 )
       _ErrorOccurred = true;
