@@ -178,7 +178,7 @@ public:
      const int         index, 
      const gString&    name,
      const PortionType type,
-     Portion*          default_value,
+     Portion*          default_value = NO_DEFAULT_VALUE,
      const bool        pass_by_reference = false
      );
 
