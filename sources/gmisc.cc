@@ -92,7 +92,7 @@ gString ToString(long l)
 
 gString ToString(double d)
 {
-  sprintf(gconvert_buffer, "%.*f", precision, d);
+  sprintf(gconvert_buffer, "%.g", precision, d);
   return gString(gconvert_buffer);
 }
 
