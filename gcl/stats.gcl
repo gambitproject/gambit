@@ -1,0 +1,223 @@
+// 
+// stats.gcl: Statistical functions
+// 
+
+//
+// NOTE: Several of the UDFs in this file (any depending 
+// directly or indirectly on Sort[x,by]) will only work 
+// correctly with version .97 or higher.  
+//
+
+StdOut << "Include[\""+GetPath[]+"\"]\n";
+
+//
+// First, some basic math operations
+//
+
+NewFunction[Floor[x->NUMBER]=:INTEGER,
+  If[x>=0,Integer[x],Integer[x-Integer[x-1]]+Integer[x-1];];
+];
+
+NewFunction[Abs[x->NUMBER]=:NUMBER,
+  If[x>=0,x,-x];
+];
+
+NewFunction[And[x->LIST(BOOLEAN)]=:BOOLEAN,
+  Length[Filter[x,!x]]=0;
+];
+
+NewFunction[Or[x->LIST(BOOLEAN)]=:BOOLEAN,
+  Length[Filter[x,x]]>0;
+];
+
+NewFunction[Integer[x->BOOLEAN]=:NUMBER,If[x,1,0];];
+
+NewFunction[ListEqual[x->LIST(ANYTYPE),y->LIST(ANYTYPE)]=:BOOLEAN,
+  If[Length[x]=Length[y],And[x=y],False];
+];
+
+//
+// basic statistical computations
+//
+
+NewFunction[Mean[x->LIST(NUMBER)]=:NUMBER,
+  Sum[x]/Length[x];
+];
+
+NewFunction[SumSquares[x->LIST(NUMBER)]=:NUMBER,
+  Mean[(x-Mean[x])^2];
+];
+
+NewFunction[StdDev[x->LIST(NUMBER)]=:NUMBER,
+  (Mean[(x-Mean[x])^2]/(Length[x]-1))^.5;
+];
+
+//
+// functions for summarizing data 
+//
+
+  // returns Cumulative Density Function for x
+NewFunction[CDF[x->LIST(NUMBER)]=:LIST(NUMBER),
+  For[i:=2,i<=Length[x],i:=i+1,x_i:=x_i+x_(i-1)];
+  x/x_(i-1);
+];
+
+  // returns a sorted vector of unique values taken on by x
+NewFunction[UniqueValues[x->LIST(NUMBER)]=:LIST(NUMBER),
+  a:=Sort[x];
+  len:=Length[a];
+  v:={};
+  i:=1;
+  While[i<=len,
+    w:=a_i;
+    While[If[i<=len,a_i = w,False],i:=i+1;];
+    v:=v&{w};
+  ];
+  v;
+];
+
+  // returns frequencies of unique values taken on by x 
+  // headings gives the 
+NewFunction[Frequencies[x->LIST(NUMBER),{headings<->{0}}]=:LIST(NUMBER),
+  a:=Sort[x];
+  len:=Length[a];
+  headings:=List[0,0];;
+  count:={};
+  i:=1;
+  While[i<=len,
+    w:=a_i;
+    num:=0;
+    While[If[i<=len,a_i = w,False],num:=num+1;i:=i+1;];
+    count:=count&{num};
+    headings:=headings&{w};
+  ];
+  count;
+];
+
+  // returns frequencies of x in categories defined by bins
+  // category i is observations between b_i and b_(i+1)
+NewFunction[Histogram[x->LIST(NUMBER),bins->LIST(NUMBER)]=:LIST(LIST(NUMBER)),
+  lb:={};
+  ub:={};
+  count:={};
+  While[Length[bins]>1,
+    l:=Length[x];
+    x:=Filter[x, x < bins_1 || x >= bins_2];
+    lb:=lb&{bins_1};
+    ub:=ub&{bins_2};
+    bins:=Remove[bins,1];
+    count:=count & {l - Length[x]};
+  ];
+  Transpose[{lb,ub,count}];
+];
+
+  // returns a contingency table of x tabulated by 'by'
+  // headings_1 and headings_2 give the row and column 
+  // headings, respectively.  
+NewFunction[Table[x->LIST(NUMBER),by->LIST(NUMBER),
+            {headings<->{{0}}}]=:LIST(LIST(NUMBER)),
+  headings:={UniqueValues[x],UniqueValues[by]};
+  c:=CartesianProd[headings];
+  list:={x,by};
+  list:=Transpose[Sort[(list:=Sort[list,list_2]),list_1]];
+  d:=Length[headings];
+
+  count:=List[List[0,d_2],d_1];
+  l:=NumElements[list];
+
+  i:=1;
+  For[i1:=1,i1<=d_1,i1:=i1+1,
+    For[i2:=1,i2<=d_2,i2:=i2+1,
+      num:=0;
+      While[If[i<=l,ListEqual[list_i,c_i1_i2],False],num:=num+1;i:=i+1;];
+      count_i1_i2:=num;
+    ];
+  ];
+  count;
+];
+
+//
+// Statistical tests
+//
+
+  // Functions for test of difference in proportion of two independent samples
+
+NewFunction[PBar[x1->NUMBER,n1->NUMBER,x2->NUMBER,n2->NUMBER]=:NUMBER,
+  (n1*x1+n2*x2)/(n1+n2);
+];
+
+NewFunction[Sigma[x1->NUMBER,n1->NUMBER,x2->NUMBER,n2->NUMBER]=:NUMBER,
+  p:=PBar[x1,n1,x2,n2];
+  (p*(1-p)*(1/n1+1/n2))^.5;
+];
+
+NewFunction[ZStat[x1->NUMBER,n1->NUMBER,x2->NUMBER,n2->NUMBER]=:NUMBER,
+  (x1-x2)/Sigma[x1,n1,x2,n2];
+];
+
+NewFunction[ZStat[x->NUMBER,n->NUMBER,p->NUMBER]=:NUMBER,
+  (x-p)/((p*(1-p)/n)^.5);
+];
+
+  // Functions for test of difference in mean of two independent samples
+
+NewFunction[PooledStdDev[x1->LIST(NUMBER),x2->LIST(NUMBER)]=:NUMBER,
+  n1:=Length[x1];
+  n2:=Length[x2];
+  s:=(Sum[x1^2] - n1 * Mean[x1]^2 + Sum[x2^2] - n2 * Mean[x2]^2)/(n1+n2-2);
+  (s*((1/n1)+(1/n2)))^.5;
+];
+
+  // t test of difference in mean of two independent samples
+NewFunction[TStat[x1->LIST(NUMBER),x2->LIST(NUMBER)]=:NUMBER,
+  (Mean[x1]-Mean[x2])/PooledStdDev[x1,x2];
+];
+
+  // t test of difference in mean of two independent samples 
+  // (alternative computation using Regression to check above)
+  // need to load regress.gcl
+NewFunction[RStat[x1->LIST(NUMBER),x2->LIST(NUMBER)]=:NUMBER,
+  d:=x1&x2;
+  one:=d^0;
+  dummy:=x1^0 & x2*0;
+  x:=Transpose[{one,dummy}];
+  b:=Regress[d,x,var];
+  b_2/var_2_2^.5;
+];
+
+//
+// tests for difference of distribution of two independent samples
+//
+
+ // Chi squared test for independence of two independent samples
+NewFunction[ChiSquared[s1->LIST(NUMBER),s2->LIST(NUMBER),{df<->0}]=:NUMBER,
+  df:=Length[s1]-1;
+  s:=s1+s2;
+  e:=s/Sum[s];
+  e1:=Sum[s1]*e;
+  e2:=Sum[s2]*e;
+  Sum[((s1-e1)^2)/e1]+Sum[((s2-e2)^2)/e2];
+];
+
+  // Kolmogorov-Smirnov test for equality of two independent samples
+  // d_i = {p_i,k_i} gives the value k_i above which 
+  //                 to call for rejection at level p_i 
+NewFunction[KolmogorovSmirnov[s1->LIST(NUMBER),s2->LIST(NUMBER),
+            {d<->{{0}}}]=:NUMBER,
+  n1:=Length[s1];
+  n2:=Length[s2];
+  d1:={.1,.05,.025,.01,.005,.001};
+  d2:={1.22,1.36,1.48,1.63,1.73,1.95}*(((n1+n2)/(n1*n2))^.5);
+  d:=Transpose[{d1,d2}];
+  s:=s1&s2;
+  dummy:=s1^0 & s2*0;
+  t:=Table[s,dummy,h];
+  g:=Float[CDF[Transpose[t]]];
+  Max[Abs[g_1-g_2]];
+];
+
+
+
+
+
+
