@@ -10,7 +10,7 @@
 #include "treerender.h"
 #include "wxmisc.h"
 
-class TreeWindow : public TreeRender, public EfgClient {
+class TreeWindow : public TreeRender {
 friend class EfgPrintout;
 
 private:
@@ -56,9 +56,6 @@ private:
   void OnRightDoubleClick(wxMouseEvent &);
   void OnKeyEvent(wxKeyEvent &);
     
-  // EfgClient members
-  void OnTreeChanged(bool, bool);
-
 protected:
   Node *m_cursor;  // Used to process cursor keys, stores current position.
   bool    outcomes_changed;
@@ -98,7 +95,7 @@ public:
   virtual void Render(wxDC &dc);
   void HilightInfoset(int pl,int iset);
 
-  void ForceRecalc(void);
+  void ForceRecalc(void) { m_needsLayout = true; }
   void OutcomeChange(void) { outcomes_changed = true; }
   
   // Used by parent EfgShow when cur_sup changes

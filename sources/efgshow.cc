@@ -275,7 +275,7 @@ END_EVENT_TABLE()
 
 EfgShow::EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent)
   : wxFrame(p_parent, -1, "", wxPoint(0, 0), wxSize(600, 400)),
-    EfgNfgInterface(gEFG, p_nfg), 
+    EfgNfgInterface(gEFG, p_nfg), EfgClient(&p_efg),
     parent(p_parent), m_efg(p_efg), m_treeWindow(0), 
     m_treeZoomWindow(0), cur_soln(0),
     m_solutionTable(0), m_toolbar(0),
@@ -1001,12 +1001,10 @@ void EfgShow::OnEditNodeAdd(wxCommandEvent &)
       else {
 	m_efg.AppendNode(Cursor(), infoset);
       }
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
     }
- 
   }
 }
 
@@ -1018,7 +1016,6 @@ void EfgShow::OnEditNodeDelete(wxCommandEvent &)
     if (dialog.ShowModal() == wxID_OK) {
       Node *keep = dialog.KeepNode();
       m_treeWindow->SetCursorPosition(m_efg.DeleteNode(Cursor(), keep));
-      GameChanged();
     }
   }
   catch (gException &ex) {
@@ -1056,7 +1053,6 @@ void EfgShow::OnEditNodeInsert(wxCommandEvent &)
       }
 
       m_treeWindow->SetCursorPosition(Cursor()->GetParent());
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1095,7 +1091,6 @@ void EfgShow::OnEditActionDelete(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.DeleteAction(infoset, dialog.GetAction());
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1112,7 +1107,6 @@ void EfgShow::OnEditActionInsert(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.InsertAction(infoset, dialog.GetAction());
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1124,7 +1118,6 @@ void EfgShow::OnEditActionAppend(wxCommandEvent &)
 {
   try {
     m_efg.InsertAction(Cursor()->GetInfoset());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1141,7 +1134,6 @@ void EfgShow::OnEditActionLabel(wxCommandEvent &)
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	infoset->Actions()[act]->SetName(dialog.GetActionLabel(act));
       }
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1159,7 +1151,6 @@ void EfgShow::OnEditActionProbs(wxCommandEvent &)
       for (int act = 1; act <= infoset->NumActions(); act++) {
 	m_efg.SetChanceProb(infoset, act, dialog.GetActionProb(act));
       }
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1269,7 +1260,6 @@ void EfgShow::OnEditInfosetMerge(wxCommandEvent &)
   try {
     m_efg.MergeInfoset(m_treeWindow->MarkNode()->GetInfoset(),
 		       Cursor()->GetInfoset());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1280,7 +1270,6 @@ void EfgShow::OnEditInfosetBreak(wxCommandEvent &)
 {
   try {
     m_efg.LeaveInfoset(Cursor());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1291,7 +1280,6 @@ void EfgShow::OnEditInfosetSplit(wxCommandEvent &)
 {
   try {
     m_efg.SplitInfoset(Cursor());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1302,7 +1290,6 @@ void EfgShow::OnEditInfosetJoin(wxCommandEvent &)
 {
   try {
     m_efg.JoinInfoset(m_treeWindow->MarkNode()->GetInfoset(), Cursor());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1329,7 +1316,6 @@ void EfgShow::OnEditInfosetPlayer(wxCommandEvent &)
     if (dialog.ShowModal() == wxID_OK) {
       if (dialog.GetPlayer() != Cursor()->GetInfoset()->GetPlayer()) {
 	m_efg.SwitchPlayer(Cursor()->GetInfoset(), dialog.GetPlayer());
-	GameChanged();
       }
     }
   }
@@ -1345,7 +1331,6 @@ void EfgShow::OnEditInfosetReveal(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.Reveal(Cursor()->GetInfoset(), dialog.GetPlayers());
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1360,7 +1345,6 @@ void EfgShow::OnEditTreeDelete(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_efg.DeleteTree(Cursor());
-      GameChanged();
     }
     catch (gException &ex) {
       guiExceptionDialog(ex.Description(), this);
@@ -1372,7 +1356,6 @@ void EfgShow::OnEditTreeCopy(wxCommandEvent &)
 {
   try {
     m_efg.CopyTree(m_treeWindow->MarkNode(), Cursor());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1383,7 +1366,6 @@ void EfgShow::OnEditTreeMove(wxCommandEvent &)
 {
   try {
     m_efg.MoveTree(m_treeWindow->MarkNode(), Cursor());
-    GameChanged();
   }
   catch (gException &ex) {
     guiExceptionDialog(ex.Description(), this);
@@ -1411,10 +1393,6 @@ void EfgShow::OnEditTreeInfosets(wxCommandEvent &)
 {
   dialogInfosets dialog(m_efg, this);
   dialog.ShowModal();
-
-  if (dialog.GameChanged()) {
-    GameChanged();
-  }
 }
 
 void EfgShow::OnSubgamesMarkAll(wxCommandEvent &)
@@ -1601,7 +1579,7 @@ void EfgShow::OnSupportUndominated(wxCommandEvent &)
     catch (gSignalBreak &E) { }
     
     if (m_currentSupport != sup) {
-      m_currentSupport = m_supports[m_supports.Length()]; // displaying the last created support
+      m_currentSupport = m_supports[m_supports.Length()]; 
       m_treeWindow->SupportChanged();
     }
   }
@@ -2220,20 +2198,6 @@ void EfgShow::AdjustSizes(void)
   }
 }
 
-
-void EfgShow::GameChanged(void)
-{
-  while (m_supports.Length()) 
-    delete m_supports.Remove(1);
-
-  // Create the full support.
-  m_currentSupport = new EFSupport(m_efg);
-  m_supports.Append(m_currentSupport);
-  m_currentSupport->SetName("Full Support");
-  UpdateMenus();
-  m_treeWindow->Render();
-}
-
 void EfgShow::SetFileName(const gText &p_name)
 {
   if (p_name != "")
@@ -2252,6 +2216,24 @@ const EFSupport *EfgShow::GetSupport(void)
 int EfgShow::NumDecimals(void) const
 {
   return m_treeWindow->NumDecimals();
+}
+
+void EfgShow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
+{
+  if (p_infosetsChanged) {
+    while (m_supports.Length()) { 
+      delete m_supports.Remove(1);
+    }
+
+    m_currentSupport = new EFSupport(m_efg);
+    m_supports.Append(m_currentSupport);
+    m_currentSupport->SetName("Full Support");
+  }
+
+  UpdateMenus();
+  if (p_nodesChanged || p_infosetsChanged) {
+    m_treeWindow->ForceRecalc();
+  }
 }
 
 void EfgShow::UpdateMenus(void)

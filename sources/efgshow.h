@@ -28,7 +28,7 @@ typedef SolutionList<BehavSolution> BehavSolutionList;
 
 const int idEFG_SOLUTION_LIST = 900;
 
-class EfgShow : public wxFrame, public EfgNfgInterface {
+class EfgShow : public wxFrame, public EfgNfgInterface, public EfgClient {
 private:
   wxFrame *parent;
   FullEfg &m_efg;
@@ -165,6 +165,9 @@ private:
   void OnProfilesEdit(wxCommandEvent &);
   void OnProfilesDelete(wxCommandEvent &);
 
+  // EfgClient members
+  void OnTreeChanged(bool, bool);
+
 public:
   // CONSTRUCTOR AND DESTRUCTOR
   EfgShow(FullEfg &p_efg, EfgNfgInterface *p_nfg, wxFrame *p_parent);
@@ -188,9 +191,6 @@ public:
   wxFrame *Frame(void);
 
   gNumber ActionProb(const Node *n, int br);
-
-  // Reset the supports.
-  void GameChanged(void);
 
   // Interface for infoset hilighting between the tree and solution display
   void HilightInfoset(int pl, int iset, int who);

@@ -58,9 +58,9 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
-  : TreeRender(p_parent, this), EfgClient(p_efgShow->Game()),
+  : TreeRender(p_parent, this),
     ef(*p_efgShow->Game()), m_parent(p_efgShow),
-    node_list(ef, this), m_zoom(1.0)
+    node_list(ef, this), m_zoom(1.0), m_needsLayout(true)
 {
   // Set the cursor to the root node
   m_cursor = ef.RootNode();
@@ -94,8 +94,6 @@ TreeWindow::TreeWindow(EfgShow *p_efgShow, wxWindow *p_parent)
 				-1, -1, scissor_bits);
 #endif // wx_msw
 #endif   // NOT_PORTED_YET
-
-  OnTreeChanged(true, true);
 
   // Create a popup menu
   MakeMenus();
@@ -330,16 +328,6 @@ void TreeWindow::OnEvent(wxMouseEvent& ev)
 //---------------------------------------------------------------------
 //                   TreeWindow: Drawing functions
 //---------------------------------------------------------------------
-
-void TreeWindow::OnTreeChanged(bool p_nodesChanged, bool p_infosetsChanged)
-{
-  m_needsLayout = p_nodesChanged || p_infosetsChanged;
-}
-
-void TreeWindow::ForceRecalc(void)
-{
-  m_needsLayout = true;
-}
 
 void TreeWindow::FitZoom(void)
 {
