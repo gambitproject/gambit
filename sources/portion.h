@@ -34,6 +34,7 @@ class Portion
 private:
   static int _NumObj;
 
+  Portion* _Original;
   void* _Game;
   bool _GameIsEfg;
 
@@ -67,6 +68,9 @@ public:
 
 
   virtual ~Portion();
+
+  void SetOriginal(const Portion* p);
+  Portion* Original(void) const;
 
   virtual PortionSpec Spec(void) const = 0;
 
