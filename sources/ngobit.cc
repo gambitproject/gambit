@@ -233,19 +233,6 @@ template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 }
 
 #define BIGNUM 1.0e100
-#include <values.h>
-
-int matherr (struct exception *a)
-{
-  if (a->type == SING)
-    if (!strcmp(a->name,"log"))
-      if(a->arg1 == 0.0) {
-	a->retval = LN_MINDOUBLE;
-	return 1;
-      }
-  return 0;
-}
-
 
 #ifdef __GNUG__
 #define TEMPLATE template

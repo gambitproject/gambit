@@ -202,20 +202,6 @@ template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
   return new EFGobitFunc<T>(E, params);
 }
 
-#include <values.h>
-
-int matherr (struct exception *a)
-{
-  if (a->type == SING)
-    if (!strcmp(a->name,"log"))
-      if(a->arg1 == 0.0) {
-	a->retval = LN_MINDOUBLE;
-	return 1;
-      }
-  return 0;
-}
-
-
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
