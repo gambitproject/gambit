@@ -20,9 +20,9 @@ template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given,
   : System(given), 
     TreesOfPartials(given),
     Epsilon((T)0),
-    HasBeenSolved(false), 
-    HasASolution(triUNKNOWN), 
-    Sample(given.Dmnsn()),
+    //    HasBeenSolved(false), 
+    //    HasASolution(triUNKNOWN), 
+    //    Sample(given.Dmnsn()),
     m_status(p_status)
 { }
 
@@ -30,9 +30,9 @@ template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
   : System(qs.System), 
     TreesOfPartials(qs.TreesOfPartials), 
     Epsilon(qs.Epsilon),
-    HasBeenSolved(qs.HasBeenSolved), 
-    HasASolution(qs.HasASolution), 
-    Sample(qs.Sample),
+    //    HasBeenSolved(qs.HasBeenSolved), 
+    //    HasASolution(qs.HasASolution), 
+    //    Sample(qs.Sample),
     m_status(qs.m_status)
 { }
 
@@ -49,9 +49,7 @@ IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
   assert (System == rhs.System);
 
   if (*this != rhs) {
-    HasBeenSolved = rhs.HasBeenSolved;
-    HasASolution  = rhs.HasASolution;
-    Sample        = rhs.Sample;
+    Epsilon = rhs.Epsilon;
   }
   return *this;
 }
@@ -59,10 +57,7 @@ IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
 template<class T>  
 bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
 {
-    if (System        != rhs.System        ||
-	HasBeenSolved != rhs.HasBeenSolved ||
-	HasASolution  != rhs.HasASolution  ||
-	Sample        != rhs.Sample)
+    if (System  != rhs.System || Epsilon != rhs.Epsilon)
          return false;
     else return true;
 }
@@ -134,30 +129,13 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
 template <class T> const bool
 IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
 {
-  if (HasBeenSolved) {
-    if (HasASolution == triTRUE) {
-      sample = Sample;
-      return true;
-    }
-    else
-      return false;
-  }
+     // precedence orders search for everywhere negative poly
+  gArray<int> precedence(System.Length());  
+  for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
 
-  else {
-    HasBeenSolved = true;
-    gArray<int> precedence(System.Length());  
-           // precedence orders search for everywhere negative poly
-    for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
-    bool answer = ASolutionExistsRecursion(r, sample, precedence);
+  bool answer = ASolutionExistsRecursion(r, sample, precedence);
 
-    if (answer) {
-      HasASolution = triTRUE;
-      Sample = sample;
-    }
-    else
-      HasASolution = triFALSE;
-    return answer;
-  }
+  return answer;
 }
 
 //----------------------------------
@@ -167,10 +145,8 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, gVector<T>& sample)
 template <class T> gOutput& operator << (gOutput& output, 
 					 const IneqSolv<T>& x)
 {
-  output << "The system is\n" << x.System;
-  if (x.HasBeenSolved) 
-    output << "It has been solved with sample solution:\n" << x.Sample;
-  else output << "It has not been solved.";
+  output << "The system is\n" << x.System << "\nwith error tolerance " <<
+    x.Epsilon << ".\n";
   return  output;
 }
 

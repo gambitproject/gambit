@@ -42,9 +42,9 @@ template <class T> class IneqSolv {
   const gPolyList<T>                 System;
   const ListOfPartialTrees<T>        TreesOfPartials;
         T                            Epsilon;
-        bool                         HasBeenSolved;
-        gTriState                    HasASolution;
-        gVector<T>                   Sample;
+  //        bool                         HasBeenSolved;
+  //        gTriState                    HasASolution;
+  //        gVector<T>                   Sample;
   gStatus &m_status;
 
   // Routines Doing the Actual Work
@@ -76,10 +76,8 @@ template <class T> class IneqSolv {
      { return System.Dmnsn(); }
    inline const gPolyList<T>             UnderlyingEquations()       const 
      { return System; }
-   inline const bool                     WasSolved()                 const
-     { return HasBeenSolved; }
-   inline const gVector<T>               SampleSolution()            const
-     { return Sample; }
+   inline const T                        ErrorTolerance()            const
+     { return Epsilon; }
 
   // The function that does everything
   const bool ASolutionExists(const gRectangle<T>&, gVector<T>& sample);
