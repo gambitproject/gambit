@@ -931,9 +931,15 @@ static Portion *GSM_Power(Portion** param)
 {
   gNumber base = ((NumberPortion*) param[0])->Value();
   gNumber exponent = ((NumberPortion*) param[1])->Value();
-  // Note, the below should eventually be corrected to do rational exponentiation
-  // correctly
-  return new NumberPortion(pow((double)base, (double)exponent));
+
+  if (base.GetPrecision() == precDOUBLE || 
+      exponent.GetPrecision() == precDOUBLE)
+    return new NumberPortion(pow((double) base, (double) exponent));
+  else if (base.GetPrecision() == precRATIONAL && exponent.IsInteger())
+    return new NumberPortion(pow(base.operator gRational(),
+				 exponent.operator gRational().numerator()));
+  else
+    throw gclRuntimeError("Not implemented for rational base with non-integer exponent");
 }
 
 //-------------
