@@ -13,7 +13,7 @@ AlgParams::~AlgParams()
 { }
 
 FuncMinParams::FuncMinParams(gStatus &s)
-  : AlgParams(), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10) 
+  : AlgParams(s), maxits1(100), maxitsN(20), tol1(2.0e-10), tolN(1.0e-10) 
 { }
 
 FuncMinParams::~FuncMinParams()
