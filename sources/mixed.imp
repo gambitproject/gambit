@@ -63,7 +63,12 @@ MixedProfile<T> &MixedProfile<T>::operator=(const MixedProfile<T> &p)
 
 template <class T> void MixedProfile<T>::SetPayoffs(void)
 {
-   for (int outc = 1; outc <= N->NumOutcomes(); outc++)
+  if((*payoffs).NumRows() != N->NumOutcomes() 
+     || (*payoffs).NumColumns() != N->NumPlayers()) {
+    delete payoffs;
+    payoffs = new gRectArray<T>(Game().NumOutcomes(), Game().NumPlayers());
+  }
+  for (int outc = 1; outc <= N->NumOutcomes(); outc++)
     for (int pl = 1; pl <= N->NumPlayers(); pl++)
       (*payoffs)(outc, pl) = N->Payoff(N->Outcomes()[outc], pl);
 }
