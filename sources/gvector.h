@@ -1,5 +1,5 @@
 //
-// FILE: gvector.h -- Implementation of vector classes
+// FILE: gvector.h -- Implementation of vector class
 //
 // $Id$
 //
@@ -11,15 +11,20 @@
 #include "gstream.h"
 #include "garray.h"
 
-//
-// <category lib=glib sect=Math>
-//
-// In order to use type T, the following operators must be defined:
-//   +, -(binary), *(binary), /, ==, =
-//
-
 template <class T> class gMatrix;
 
+/** 
+ * General purpose vector representation and calculation class.
+ *
+ * This is a general vector class.  In order to instantiate this for a
+ * type, the operators binary +, binary -, binary *, /, ==, and = must
+ * be defined for the type.
+ *
+ * @author The Gambit Project
+ * @version $Id$
+ * @see gArray
+ * @see gMatrix
+ */
 template <class T> class gVector : public gArray<T>   {
   friend class gMatrix<T>;
 public:
@@ -29,23 +34,20 @@ public:
     gText Description(void) const;
   };
 
-  //# CONSTRUCTORS
-  // Create a vector of length len, starting at 1
+  /** Create a vector of length len, starting at 1 */
   gVector(unsigned int len = 0);
-  // Create a vector indexed from low to high
+  /** Create a vector indexed from low to high */
   gVector(int low, int high);
-  // Copy constructor
+  /** Copy constructor */
   gVector(const gVector<T>& V);
-  // Destructor
+  /** Destructor */
   virtual ~gVector();
   
-  //# OPERATORS
-  // = operators
+  /** Assignment operator: requires vectors to be of same length */
   gVector<T>& operator=(const gVector<T>& V);
-  // Assigns the value c to all components of the vector,
+  /** Assigns the value c to all components of the vector */
   gVector<T>& operator=(T c);
   
-  // arithmetic operators
   gVector<T> operator+(const gVector<T>& V) const;
   gVector<T>& operator+=(const gVector<T>& V);
   
@@ -53,17 +55,16 @@ public:
   gVector<T> operator-(const gVector<T>& V) const;
   gVector<T>& operator-=(const gVector<T>& V);
   
-    gVector<T> operator*(T c) const;
+  gVector<T> operator*(T c) const;
   gVector<T>& operator*=(T c);
   T operator*(const gVector<T>& V) const;
   
   gVector<T> operator/(T c) const;
   
-  // comparison operators
   bool operator==(const gVector<T>& V) const;
   bool operator!=(const gVector<T>& V) const;
   
-        // Tests if all components of the vector are equal to a constant c
+  /** Tests if all components of the vector are equal to a constant c */
   bool operator==(T c) const;
   bool operator!=(T c) const;
   
