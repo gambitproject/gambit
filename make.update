@@ -39,9 +39,9 @@ ifeq ($(TARGET),none)
 endif
 ifeq ($(TARGET),all)
 	@$(MAKE)  -f make.update TARGET=gui HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=src HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
-	@$(MAKE)  -f make.update TARGET=gcldoc HOST=$(HOST) GUI=$(GUI) SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=gcl HOST=$(HOST) GUI=none SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=src HOST=sun4 GUI=none SCCS=$(SCCS)
+	@$(MAKE)  -f make.update TARGET=gcldoc HOST=sun4 GUI=none SCCS=$(SCCS)
 endif	
 #Check GUI target options
 ifeq ($(TARGET),gui)
@@ -53,13 +53,13 @@ endif
 #Check which gui platforms to build
 ifeq ($(GUI),all)
 	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=motif SCCS=$(SCCS)
-	@$(MAKE) -f make.update TARGET=gui HOST=$(HOST) GUI=xview SCCS=$(SCCS)	
+	@$(MAKE) -f make.update TARGET=gui HOST=sun4 GUI=xview SCCS=$(SCCS)
 endif
 endif
 #Check which hosts to build on
 ifeq ($(HOST),none)
 	@$(MAKE) -f make.update error \
-		ERRORNAME='Must specify a HOST type [sun4,solaris,rs6000]'
+		ERRORNAME='Must specify a HOST type [sun4,solaris,rs6000,hp]'
 endif
 ifeq ($(HOST),all)
 	@$(MAKE) -f make.update TARGET=$(TARGET) HOST=sun4 GUI=$(GUI) SCCS=$(SCCS)

@@ -10,9 +10,9 @@ all:
 gui:
 	@echo Updating gambit_$(GUI)_$(HOST) on hss
 	$(MAKE) -f Makefile gui GUI=$(GUI) HOST=$(HOST) GET=$(GET)
-	strip gui_$(GUI)_$(HOST)
+	-strip gui_$(GUI)_$(HOST)
 	cp $(WXDIR)/utils/wxhelp/src/wxhelp_$(GUI)_$(HOST) ./wxhelp
-	strip wxhelp
+	-strip wxhelp
 	zip gambit_$(GUI)_$(HOST) gui_$(GUI)_$(HOST) wxhelp gambit.xlp \
 		./efg/*.efg ./nfg/*.nfg
 	ftp_put gambit_$(GUI)_$(HOST).zip
@@ -20,13 +20,13 @@ gui:
 gcl:	
 	@echo Updating gcl_$(HOST) on hss
 	$(MAKE) -f Makefile gcl GUI=$(GUI) HOST=$(HOST) GET=$(GET)
-	strip gcl_$(HOST)
+	-strip gcl_$(HOST)
 	zip gcl_$(HOST) gcl_$(HOST) ./efg/*.efg ./nfg/*.nfg ./gclsamp/*.gcl
 	ftp_put gcl_$(HOST).zip
 	rm gcl_$(HOST).zip
 source:
 	@echo Updating source code on hss
-	# get the BCC specific binary files from my (egrayver's) dir
+# 	get the BCC specific binary files from my (egrayver's) dir
 #	cp /egrayver/job/gambit/*.ide .
 #	cp ~egrayver/job/gambit/*.ico .
 	zip gambsrc *.cc *.h *.imp *.ide *.ico *.xbm *.def *.rc *.y \
