@@ -1417,8 +1417,10 @@ Read[input->INPUT, x<->T] =: INPUT
 SaveEfg[efg<->EFG, file->TEXT] =: EFG
 SaveNfg[nfg<->NFG, file->TEXT] =: NFG
 SaveNfg[support->NFSUPPORT, file->TEXT] =: NFSUPPORT
-SetFormat[{width->INTEGER}, {precis->INTEGER}, 
-          {expmode->BOOL}, {quote->BOOL} ] =: BOOL
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
+                {quote->BOOL}, {listBraces->BOOL},
+                {listCommas->BOOL}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOL
 Write[output->OUTPUT, x->T] =: OUTPUT  
       for T = BEHAV,BOOL,FLOAT,INTEGER,MIXED,RATIONAL,TEXT,LIST(T)
 Write[output->OUTPUT, x<->T] =: OUTPUT 
@@ -3909,17 +3911,33 @@ player.  Returns \verb+infoset+.
 
 \item
 \protect \large \begin{verbatim}
-SetFormat[{width->INTEGER}, {precis->INTEGER}, 
-          {expmode->BOOL}, {quote->BOOL} ] =: BOOL
+SetFormat[ {width->INTEGER}, {precis->INTEGER}, {expmode->BOOL},
+                {quote->BOOL}, {listBraces->BOOL},
+                {listCommas->BOOL}, {listLF->INTEGER},
+                {listIndent->INTEGER} ] := BOOL
 \end{verbatim}\normalsize
 
-\bd 
-Sets the formatting style for output on output streams.
-\verb+width+ sets the width of the field for floating point numbers,
-\verb+precis+ sets the number of decimal places shown for floating
-point numbers, and \verb+expmode+ sets whether output is in
-exponential format or not.  Finally, \verb+quoted+ determines whether
-quotes are printed before and after text strings.
+\bd Sets the formatting style for output on output streams.  The
+parameters have the following effect:
+\bd
+\item[\verb+width+] Sets the width for a numeric field. If the width
+of the data is greater than this width, the width is overridden (default = 0).
+\item[\verb+precis+] Sets the number of decimal places shown for floating
+point numbers.
+\item[\verb+expmode+] Sets whether floating point numbers are in
+exponential format or not.
+\item[\verb+quote+] Determines whether quotes are printed before and
+after text strings.
+\item[\verb+listBraces+] Determines if LISTs are delimited with
+braces.
+\item[\verb+listCommas+] Determines if LIST elements are delimited
+with commas.
+\item[\verb+listLF+] Number of levels of LIST that are displayed with
+a line feed.  
+\item[\verb+listIndent+] Number of spaces to indent each level of a
+LIST. 
+\ed
+
 \item
 [See also:] {\tt Write}.
 \ed
