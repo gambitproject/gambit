@@ -329,6 +329,7 @@ CallFuncObj::CallFuncObj( FuncDescObj* func )
   _Param = new Portion* [ _NumParams ];
   _RunTimeParamInfo = new RunTimeParamInfoType [ _NumParams ];
   _CurrParamIndex = 0;
+  _ErrorOccurred = false;
   
   for( index = 0; index < _NumParams; index++ )
   {
@@ -353,6 +354,12 @@ CallFuncObj::~CallFuncObj()
 }
 
 
+void CallFuncObj::SetErrorOccurred( void )
+{
+  _ErrorOccurred = true;
+}
+
+
 void CallFuncObj::SetCurrParamIndex( const int index )
 {
   _CurrParamIndex = index;
@@ -369,34 +376,48 @@ bool CallFuncObj::SetCurrParam( Portion *param )
 {
   bool result = true;
 
-  if( _CurrParamIndex < _NumParams )
+  if( !_ErrorOccurred )
   {
-    if( !_RunTimeParamInfo[ _CurrParamIndex ].Defined )
+    if( _CurrParamIndex < _NumParams )
     {
-      if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+      if( !_RunTimeParamInfo[ _CurrParamIndex ].Defined )
       {
-	delete _Param[ _CurrParamIndex ];
+	if( _Param[ _CurrParamIndex ] != NO_DEFAULT_VALUE )
+	{
+	  delete _Param[ _CurrParamIndex ];
+	}
+	_Param[ _CurrParamIndex ] = param;
+	_RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
+	_CurrParamIndex++;
       }
-      _Param[ _CurrParamIndex ] = param;
-      _RunTimeParamInfo[ _CurrParamIndex ].Defined = true;
-      _CurrParamIndex++;
+      else
+      {
+	gerr << "CalFuncObj Error: multiple definitions found for parameter ";
+	gerr << "\"" << _ParamInfo[ _CurrParamIndex ].Name;
+	gerr << "\"\n while executing CallFunction() on\n";
+	gerr << "                  function \"" << _FuncName << "\" )\n";
+	result = false;
+      }
     }
-    else
+    else // ( _CurrParamIndex >= _NumParams )
     {
-      gerr << "CalFuncObj Error: multiple definitions found for parameter ";
-      gerr << "\"" << _ParamInfo[ _CurrParamIndex ].Name;
-      gerr << "\"\n while executing CallFunction() on\n";
-      gerr << "                  function \"" << _FuncName << "\" )\n";
+      gerr << "CallFuncObj Error: too many parameters specified for\n";
+      gerr << "                   function \"" << _FuncName << "\"\n";
       result = false;
     }
   }
-  else // ( _CurrParamIndex >= _NumParams )
+  else
   {
-    gerr << "CallFuncObj Error: too many parameters specified for\n";
-    gerr << "                   function \"" << _FuncName << "\"\n";
-    result = false;
+    if( param != 0 )
+    {
+      delete param;
+    }
   }
-  
+
+  if( result == false )
+  {
+    _ErrorOccurred = true;
+  }
   return result;
 }
 
@@ -443,22 +464,35 @@ Portion* CallFuncObj::CallFunction( Portion **param )
   int index;
   Portion* result = 0;
 
-  for( index = 0; index < _NumParams; index++ )
+  if( !_ErrorOccurred )
   {
-    if( ( !_RunTimeParamInfo[ index ].Defined ) && ( _Param[ index ] == 0 ) )
+    for( index = 0; index < _NumParams; index++ )
     {
-      gerr << "GSM Error: required parameter \"" << _ParamInfo[ index ].Name;
-      gerr << "\"" << " not found while executing CallFunction()\n";
-      gerr << "           on function \"" << _FuncName << "\"\n";
-      return 0;
+      if( ( !_RunTimeParamInfo[ index ].Defined ) && ( _Param[ index ] == 0 ) )
+      {
+	gerr << "GSM Error: required parameter \"" << _ParamInfo[ index ].Name;
+	gerr << "\"" << " not found while executing CallFunction()\n";
+	gerr << "           on function \"" << _FuncName << "\"\n";
+	return 0;
+      }
     }
+    result = _FuncPtr( _Param );
+    
+    for( index = 0; index < _NumParams; index++ )
+    {
+      param[ index ] = _Param[ index ];
+    }    
   }
-
-  result = _FuncPtr( _Param );
-
-  for( index = 0; index < _NumParams; index++ )
+  else
   {
-    param[ index ] = _Param[ index ];
+    for( index = 0; index < _NumParams; index++ )
+    {
+      if( _Param[ index ] == 0 )
+      {
+	delete _Param[ index ];
+      }
+    }
+    result = new Error_Portion;
   }
 
   return result;

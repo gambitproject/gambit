@@ -78,6 +78,7 @@ class CallFuncObj : public FuncDescObj
   Portion**             _Param;
   RunTimeParamInfoType* _RunTimeParamInfo;
   int                   _CurrParamIndex;
+  bool                  _ErrorOccurred;
 
  public:
   CallFuncObj( FuncDescObj* func );
@@ -86,6 +87,8 @@ class CallFuncObj : public FuncDescObj
   void        SetCurrParamIndex   ( const int index );
   bool        SetCurrParam        ( Portion *new_param );
   void        SetCurrParamRef ( Reference_Portion* ref );
+
+  void        SetErrorOccurred ( void );
 
   Reference_Portion* GetParamRef ( const int index ) const;
 

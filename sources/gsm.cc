@@ -737,7 +737,7 @@ bool GSM::BindVal( void )
 {
   CallFuncObj*  func;
   PortionType          curr_param_type;
-  Portion*             param;
+  Portion*             param = 0;
   gString              funcname;
   int                  i;
   int                  type_match;
@@ -809,9 +809,11 @@ bool GSM::BindRef( void )
 	  default:
 	    gerr << "GSM Error: attempted to bind the subvariable of a\n";
 	    gerr << "           type that does not support subvariables\n";
+/*
 	    delete param;
 	    param = 0;
 	    result = false;
+*/
 	  }
 	}
       }
@@ -823,6 +825,7 @@ bool GSM::BindRef( void )
     else // ( param->Type() != porREFERENCE )
     {
       gerr << "GSM Error: called BindRef() on a non-Reference type\n";
+      delete param;
       result = false;
     }
   }
@@ -830,10 +833,16 @@ bool GSM::BindRef( void )
   {
     gerr << "GSM Error: called BindRef() on a parameter that is specified\n";
     gerr << "           to be passed by value only\n";
+    delete param;
     result = false;
   }
 
-  if( param != 0 )
+  if( result == false )
+  {
+    func->SetErrorOccurred();
+  }
+  
+  if( result == true && param != 0 )
   {
     result = _FuncParamCheck( func, param->Type() );
   }
@@ -844,9 +853,9 @@ bool GSM::BindRef( void )
   }
   else
   {
-    func->SetCurrParam( new Error_Portion ); 
+    func->SetCurrParam( 0 ); 
   }
-  
+
   _CallFuncStack->Push( func );
   return result;
 }
@@ -956,6 +965,7 @@ bool GSM::CallFunction( void )
 	    default:
 	      gerr << "GSM Error: attempted to assign the subvariable of a\n";
 	      gerr << "           type that does not support subvariables\n";
+	      delete param[ index ];
 	      result = false;
 	    }
 	  }
@@ -963,6 +973,7 @@ bool GSM::CallFunction( void )
 	  {
 	    gerr << "GSM Error: attempted to assign the sub-variable of\n";
 	    gerr << "           an undefined variable\n";
+	    delete param[ index ];
 	    result = false;
 	  }
 	}

@@ -1026,6 +1026,8 @@ int main( void )
   machine->Assign();
   machine->Dump();
 
+
+
   machine->PushRef( "x" );
   machine->Push( (gInteger) 3 );
   machine->Subscript();
@@ -1143,6 +1145,7 @@ int main( void )
   gin >> cont;
 
 
+
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
@@ -1161,6 +1164,7 @@ int main( void )
 
   machine->PushRef( "x" );
   machine->Dump();
+
 
   
   program.Append( new InitCallFunction( "Assign" ) );
@@ -1240,6 +1244,7 @@ int main( void )
 
 
 #ifdef CRASHTEST
+  gout << "fatal error coming up!\n";
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x", "a" );
   machine->Bind();
@@ -1248,6 +1253,8 @@ int main( void )
   machine->CallFunction();
   machine->Dump();
 #endif
+
+
 
 #ifdef CRASHTEST
   machine->InitCallFunction( "Assign" );
@@ -1282,6 +1289,43 @@ int main( void )
   machine->Modulus();
   machine->Dump();
 
+
+#ifdef CRASHTEST
+
+  machine->InitCallFunction( "Assign" );
+  machine->Push( (double) 10 );
+  machine->BindVal();
+  machine->Push( (double) 15 );
+  machine->BindVal();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->Push( (double) 10 );
+  machine->BindRef();
+  machine->Push( (double) 15 );
+  machine->BindVal();
+  machine->CallFunction();
+  machine->Dump();
+
+  machine->InitCallFunction( "Assign" );
+  machine->Push( (double) 10 );
+  machine->BindRef();
+  machine->Push( (double) 15 );
+  machine->BindRef();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->Push( (double) 10 );
+  machine->BindVal();
+  machine->Push( (double) 15 );
+  machine->BindRef();
+  machine->CallFunction();
+  machine->Dump();
+
+#endif
 
 
   gout << "Deleting machine\n";
