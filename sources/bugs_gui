@@ -2,29 +2,6 @@ GUI Bugs:
 
 //------------------------------
 
-Bug D5: Saving files
-
-When you load a file (efg or nfg) in the GUI, it should remember the
-directory you got it from, and next time you try and load a file, start the
-file load menu in that directory, rather than starting in the same location
-as it started the first time.
-
-When saving a file in the GUI, it should remember the current
-name of the file, and use the same name when saving the file. 
-
-When overwriting an existing file, the GUI should always prompt
-for a new label.
-
-There are other instances of the File Selector dialog that should 
-also be looked at to make sure they behave as expected.
-
-RDM 12/29/98: most of the above is fixed now.  The only remaining
-problems are that on unix, it does not prompt with the existing
-filename, and when you exit the GUI after having made changes to the
-game, it does not prompt you to save.
-
-//------------------------------
-
 Bug D7:  Conflict with Netscape
 
 When running the GUI, if netscape is already running, you may or may not
@@ -165,17 +142,6 @@ Gui should display nfg.ico.
 COMMENT (magyar 3/5/98): Apparently a Win95 problem, according to the
 wxWin documentation.
 
-//------------------------------
-
-Bug D29: .efg and .nfg files not recognized in Linux/wxxt port of gambit
-
-When you start up the gambit gui compiled with wxxt and try to load
-either an nfg or an efg, you get an error window that says "Unknown
-file type".  On the other hand, if you load the file from the command
-line ("gui foo.efg") it works.
-
-MCV: The above bug has now gone away.  It's dead, whatever it was.  (2/1/99)
-
 //-------------------------------
 
 Bug D32: Warning message on Linux/wxxt port
@@ -188,14 +154,19 @@ No harm seems to come of this.
 
 //--------------------------------
 
-Bug D34: Elimination by mixed strategies crash
+Bug D35: Field width too narrow on some dialog boxes. 
 
-Use e02.efg.  Do Solve->Custom->Normal form->EnumPure.  Request to
-eliminate by mixed strategies.  We get a failed assertion in the
-tableau code.  
+On File Save, the field for the decimal places is too narrow to see
+the number.  There were other dialogs with similar problems.  Can't
+recall them now.
 
-Also, this generates output via gout, which needs to be corrected.
-Plus, the tableau should not be failing assertions but throwing exceptions.
+//--------------------------------
+
+Bug D36: Formatting of floating point numbers very bad 
+
+On Liap and QRE algorithms, the formatting of the lambda and tolerance
+parameters is bad.  We agreed to change the tolerance to an integer,
+and the lambda parameters to text strings.
 
 -------------  older bugs that still remain ---------------
 
@@ -206,10 +177,12 @@ GUI Bug 5.2
 > 2. Why the solution list window does not vanish from the upper right
 > close button?
 
-RDM: Problem still exists (9/3/98).  Also, the Label->Strats dialog
-box (and perhaps others as well) can not be gotten rid of in any way,
-even after the main Gambit window has been dismissed (on Linux).
-N.B. the "close" button here refers to the window manager close button.
+RDM: 8/20/99 Solution list window is fixed, but the
+Edit->Strats->Label dialog box (and perhaps others as well) can not be
+gotten rid of.  Also, after this window has been created, the main
+Gambit window can be dismissed and the child windows do not get
+dismissed.  (this is on Linux) N.B. the "close" button here refers to
+the window manager close button.
 
 RDM: 12/27/98 This bug is now fixed for most windows, but there are
 still a few with the problem -- especially in the elimdom menu.
@@ -295,32 +268,6 @@ GUI Bug 7.3
 > the solution process in progress).
 
 RDM: Still a problem (9/3/98)
-
-//------------------------------
-
-GUI Bug 7.4
-
-RDM: Seems fixed to me (9/3/98, on Linux)
-
-> 
-> 4. The alt keys don't always drop down the menus.  (Alt-F -> File, for
-> example.)
-
-RDM.  On Linux, Now the first level menus seem to be controlled by the
-Alt-letter key, but then the subsequent ones just require the letters.
-That seems fine to me.
-
-
-//------------------------------
-
-GUI Bug 7.5
-
-> 5. The button at the top right of the screen (to minimize etc.) don't
-> always work.
-
-RDM: Still a problem -- eg on solution display window (Hit Inspect ->
-solution after solving a game, and then try and get rid of it with the
-close button -- top right button on Linux)
 
 //------------------------------
 

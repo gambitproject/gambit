@@ -195,6 +195,40 @@ into the command line.  It would be better if after highlighting text
 in the GCL window, the right mouse button would bring up the context
 menu (as in Notepad) to allow to cut or paste text into the GCL window in the standard MS-windows way. 
 
+//------------------------------
+
+Bug C33:  Orphan variable problem?
+
+Put the following commands in the file test.gcl
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+
+Then 
+
+  Include["test.gcl"] leads to   
+
+GCL1:= << Include["test.gcl"]     
+True
+A segmentation fault has occurred
+
+On the other hand, if P1 is deallocated before each call, as in 
+
+  e:= NewEfg[];
+  P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+  e:= NewEfg[];
+  P1:=;P1 := NewPlayer[e, "P1"];
+
+then it is OK.  Also, if the contents of test.gcl are run from the
+command line, it is OK.
+
+
 //---------------  These are not bugs but suggested improvements ------------
 
 S1: A suggestion to add command line arguments.  Perhaps we should
