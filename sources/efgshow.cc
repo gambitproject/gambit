@@ -44,10 +44,10 @@ public:
 };
 
 EfgShow::EfgShow(Efg &ef_,EfgNfgInterface *nfg,int ,wxFrame *frame,
-									const char *title, int x, int y,int w, int h,int type)
-								: ef(ef_),EfgNfgInterface(gEFG,nfg),
-                           wxFrame(frame,(char *)title, x, y, w, h, type),
-									parent(frame),tw(0),param_sets(ef_.Parameters(),"Efg Params")
+                 const char *title, int x, int y,int w, int h,int type)
+	     : wxFrame(frame,(char *)title, x, y, w, h, type), 
+               EfgNfgInterface(gEFG,nfg), parent(frame), ef(ef_),
+               param_sets(ef_.Parameters(),"Efg Params"), tw(0)
 
 
 {
@@ -269,7 +269,7 @@ OnSelectedMoved(0);	// update the node inspect window if any
 
 BehavSolution EfgShow::CreateSolution(void)
 {
-return BehavSolution(BehavProfile<gNumber>(ef, *cur_sup));
+return BehavSolution(BehavProfile<gNumber>(*cur_sup,param_sets.CurSet()));
 }
 
 #include "efgoutcd.h"
@@ -498,7 +498,7 @@ delete pick;
 
 BehavProfile<gNumber> EfgShow::CreateStartProfile(int how)
 {
-BehavSolution start(BehavProfile<gNumber>(ef, *cur_sup));
+BehavSolution start(BehavProfile<gNumber>(*cur_sup,param_sets.CurSet()));
 if (how==0)	start.Centroid();
 if (how==1 || how==2)
 {
