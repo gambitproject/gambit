@@ -1051,6 +1051,7 @@ nfgOutcomePayoffsDialog::nfgOutcomePayoffsDialog(const Nfg &p_nfg,
   }
 
   m_outcomePayoffs[0]->SetFocus();
+  m_outcomePayoffs[0]->SetSelection(0, strlen(m_outcomePayoffs[0]->GetValue()));
 
   NewLine();
   wxButton *okButton = new wxButton(this, (wxFunction) CallbackOK, "Ok");

@@ -203,7 +203,7 @@ void Nfg::DeleteOutcome(NFOutcome *outcome)
 {
   m_dirty = true;
 
-  for (int i = 1; i <= outcomes.Length(); i++) {
+  for (int i = 1; i <= results.Length(); i++) {
     if (results[i] == outcome)
       results[i] = 0;
   }
