@@ -58,7 +58,8 @@ void DisplayEfgAlgType(gOutput &p_file, EfgAlgType p_algorithm)
 BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_precision(precDOUBLE), m_creator(p_creator),
+    m_precision(precDOUBLE),
+    m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_epsilon(0.0),
     m_qreLambda(-1), m_qreValue(-1),
@@ -84,7 +85,8 @@ BehavSolution::BehavSolution(const BehavProfile<double> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_precision(precRATIONAL), m_creator(p_creator),
+    m_precision(precRATIONAL), 
+    m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
@@ -108,7 +110,8 @@ BehavSolution::BehavSolution(const BehavProfile<gRational> &p_profile,
 BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile, 
 			     EfgAlgType p_creator)
   : m_profile(new BehavProfile<gNumber>(EFSupport(p_profile.Game()))),
-    m_precision(precRATIONAL), m_creator(p_creator),
+    m_precision(precRATIONAL),
+    m_support(p_profile.Support()), m_creator(p_creator),
     m_isNash(triUNKNOWN), m_isSubgamePerfect(triUNKNOWN),
     m_isSequential(triUNKNOWN), m_qreLambda(-1), m_qreValue(-1),
     m_liapValue(-1), m_beliefs(0), m_regret(0), m_id(0)
@@ -132,7 +135,8 @@ BehavSolution::BehavSolution(const BehavProfile<gNumber> &p_profile,
 
 BehavSolution::BehavSolution(const BehavSolution &p_solution)
   : m_profile(new BehavProfile<gNumber>(*p_solution.m_profile)),
-    m_precision(p_solution.m_precision), m_creator(p_solution.m_creator),
+    m_precision(p_solution.m_precision), 
+    m_support(p_solution.m_support), m_creator(p_solution.m_creator),
     m_isNash(p_solution.m_isNash),
     m_isSubgamePerfect(p_solution.m_isSubgamePerfect),
     m_isSequential(p_solution.m_isSequential), m_epsilon(p_solution.m_epsilon),
@@ -159,8 +163,10 @@ BehavSolution::~BehavSolution()
 BehavSolution& BehavSolution::operator=(const BehavSolution &p_solution)
 {
   if (this != &p_solution)   {
-    *m_profile = *p_solution.m_profile;
+    delete m_profile;
+    m_profile = new BehavProfile<gNumber>(*p_solution.m_profile);
     m_precision = p_solution.m_precision;
+    m_support = p_solution.m_support;
     m_creator = p_solution.m_creator;
     m_isNash = p_solution.m_isNash;
     m_isSubgamePerfect = p_solution.m_isSubgamePerfect;
@@ -357,6 +363,7 @@ const gNumber &BehavSolution::LiapValue(void) const
 
 void BehavSolution::Invalidate(void) const
 {
+  m_support = EFSupport(m_profile->Game());
   m_creator = algorithmEfg_USER;
   m_isNash = triUNKNOWN;
   m_isSubgamePerfect = triUNKNOWN;

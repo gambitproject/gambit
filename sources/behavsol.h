@@ -34,6 +34,7 @@ class BehavSolution {
 protected:
   BehavProfile<gNumber> *m_profile;
   gPrecision m_precision;
+  mutable EFSupport m_support;
   mutable EfgAlgType m_creator;
   mutable gTriState m_isNash, m_isSubgamePerfect, m_isSequential;
   mutable gNumber m_epsilon, m_qreLambda, m_qreValue, m_liapValue;
@@ -78,6 +79,7 @@ public:
 
   unsigned int Id(void) const { return m_id; }
   EfgAlgType Creator(void) const { return m_creator; }
+  EFSupport Support(void) const { return m_support; }
   gTriState IsNash(void) const;
   gTriState IsSubgamePerfect(void) const;
   gTriState IsSequential(void) const;
@@ -103,10 +105,6 @@ public:
   // Force the invalidation of cached quantities
   void Invalidate(void) const;
 
-  // FUNCTIONS FOR COMPATIBILITY WITH GUI
-  // these are all obsolescent :)
-
-  EFSupport Support(void) const { return EFSupport(Game()); }
 
 
   // COMPUTATION OF INTERESTING QUANTITIES
