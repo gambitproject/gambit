@@ -35,8 +35,18 @@ class EFLiapFunc : public gFunction<double>  {
 
 EFLiapFunc::EFLiapFunc(const Efg<double> &E,
 		       const BehavProfile<double> &start)
-  : _nevals(0L), _efg(E), _p(start), _cpay(E.Dimensionality())
-{ }
+  : _nevals(0L), _efg(E), _p(E, true), _cpay(E.Dimensionality())
+{
+  for (int pl = 1; pl <= _efg.NumPlayers(); pl++)  {
+    EFPlayer *p = _efg.PlayerList()[pl];
+    for (int iset = 1; iset <= p->NumInfosets(); iset++)  {
+      Infoset *s = p->InfosetList()[iset];
+      for (int act = 1; act < s->NumActions(); act++)  {
+	_p(pl, iset, act) = start(pl, iset, act);
+      }
+    }
+  }
+}
 
 EFLiapFunc::~EFLiapFunc()
 { }
@@ -45,7 +55,7 @@ EFLiapFunc::~EFLiapFunc()
 double EFLiapFunc::Value(const gVector<double> &v)
 {
   static const double BIG1 = 10000.0;
-  static const double BIG2 = 100.0;
+//  static const double BIG2 = 100.0;
 
   _nevals++;
 
@@ -54,8 +64,6 @@ double EFLiapFunc::Value(const gVector<double> &v)
   BehavProfile<double> tmp(_p);
   double x, result = 0.0, avg, sum;
 
-      // Ted -- only reason for this is because you 
-      // got rid of CondPayoff ( . , . )
   gPVector<double> probs(_efg.Dimensionality().Lengths());  
   tmp.CondPayoff(_cpay, probs);
 
@@ -65,20 +73,30 @@ double EFLiapFunc::Value(const gVector<double> &v)
       avg = sum = 0.0;
       Infoset *s = player->InfosetList()[j];
       int k;
-      for (k = 1; k <= s->NumActions(); k++) {
+      for (k = 1; k < s->NumActions(); k++) {
 	x = _p(i, j, k); 
 	avg += x * _cpay(i, j, k);
 	sum += x;
 	if (x > 0.0)  x = 0.0;
 	result += BIG1 * x * x;         // add penalty for neg probabilities
       }
+
+      // last component truncated off....
+      x = 1.0 - sum;
+      avg += x * _cpay(i, j, k);
+      if (x > 0.0)   x = 0.0;
+      result += BIG1 * x * x;
+
       for (k = 1; k <= s->NumActions(); k++) {
 	x = _cpay(i, j, k) - avg;
 	if (x < 0.0) x = 0.0;
 	result += x * x;          // add penalty if not best response
       }
+
+/*  with truncation enforced, this is always zero
       x = sum - 1.0;
       result += BIG2 * x * x;       // add penalty for sum not equal to 1
+      */
     }
   }
 
@@ -103,10 +121,36 @@ static void PickRandomProfile(BehavProfile<double> &p)
 	p(pl, iset, act) = tmp;
 	sum += tmp;
       }
-    
-      p(pl, iset, act) = 1.0 - sum;
+  
+// with truncation, this is unnecessary
+//    p(pl, iset, act) = 1.0 - sum;
     }
   }
+}
+
+
+static void AddSolution(gList<BehavSolution<double> > &solutions,
+			const BehavProfile<double> &profile,
+		        double value)
+{
+  int i;
+  const Efg<double> &E = *profile.BelongsTo();
+
+  BehavProfile<double> bar(E);
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    for (int iset = 1; iset <= E.PlayerList()[pl]->NumInfosets(); iset++)  {
+      double accum = 0.0;
+      int act;
+      for (act = 1; act < E.PlayerList()[pl]->InfosetList()[iset]->NumActions(); act++)  {
+	bar(pl, iset, act) = profile(pl, iset, act);
+	accum += profile(pl, iset, act);
+      }
+      bar(pl, iset, act) = 1.0 - accum;
+    }
+  }
+
+  i = solutions.Append(BehavSolution<double>(bar, EfgAlg_LIAP));
+  solutions[i].SetLiap(value);
 }
 
 
@@ -125,8 +169,19 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
 {
   EFLiapFunc F(E, start);
 
-  BehavProfile<double> p(start);
+  BehavProfile<double> p(E, true);
   
+  // convert from non-truncated to truncated vector for starting point
+  for (int pl = 1; pl <= E.NumPlayers(); pl++)  {
+    EFPlayer *player = E.PlayerList()[pl];
+    for (int iset = 1; iset <= player->NumInfosets(); iset++)  {
+      Infoset *s = player->InfosetList()[iset];
+      for (int act = 1; act < s->NumActions(); act++)  {
+	p(pl, iset, act) = start(pl, iset, act);
+      }
+    }
+  }
+
   gMatrix<double> xi(p.Length(), p.Length());
   xi.MakeIdent();
 
@@ -134,23 +189,21 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
   int iter;
   bool found;
 
-  for (int i = 1; i <= params.nTries && solutions.Length() < params.stopAfter;
-       i++)   {
+  for (int i = 1; !params.status.Get() && i <= params.nTries &&
+       solutions.Length() < params.stopAfter; i++)   {
     if (i > 1)  PickRandomProfile(p);
 
     if (found = Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, params.tolN,
-		       *params.tracefile))  {
-      int index = solutions.Append(BehavSolution<double>(p, EfgAlg_LIAP));
-      solutions[index].SetLiap(value);
-    }
+		       *params.tracefile)) 
+      AddSolution(solutions, p, value);
     
   }
 
   nevals = F.NumEvals();
   niters = 0L;
 
-  return found;
+  return (solutions.Length() > 0);
 }
 
 
