@@ -14,7 +14,7 @@
 
 template <class T>
 NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
-				     int pl, bool strong, gOutput &)
+				     int pl, bool strong, gOutput &tracefile)
 {
   NfgContIter<T> s(&S);
   s.Freeze(pl);
@@ -56,25 +56,22 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
     }
   
     for (k = 1; k <= strats; k++)	{
-      gout << "\n\nA=\n " << A;
-      gout << "\nB= " << B;
-      gout << "\nC= " << C;
       LPSolve<T> Tab(A, B, C, 1);
     
       COpt = Tab.OptimumCost();
-      gout << "\nPlayer = " << pl << " Strat = "<< k;
-      gout << " F = " << Tab.IsFeasible();
-      gout << " Obj = " <<  - COpt;
+      tracefile << "\nPlayer = " << pl << " Strat = "<< k;
+      tracefile << " F = " << Tab.IsFeasible();
+      tracefile << " Obj = " <<  - COpt;
     
       if(Tab.IsFeasible() && COpt>(T)0) { 
-	gout << " Strongly Dominated";
+	tracefile << " Strongly Dominated";
 	ret = true;
 	dom[k] = true;
       }
       if (k<strats)
 	A.SwitchColumn(k,B);
     }
-    gout << "\n";
+    tracefile << "\n";
     
     if (!ret)  {
       delete newS;
@@ -116,31 +113,27 @@ NFStrategySet *ComputeMixedDominated(const Nfg<T> &nfg, const NFSupport &S,
       for(k=2;k<=strats;k++) {
 	s.Set(pl,k);
 	A(n,k-1)=-s.Payoff(pl);
-	gout << n << ' ' << k-1 << ' ' << -s.Payoff(pl) << '\n';
 	C[k-1]+=A(n,k-1);
       }
       s.NextContingency();
     }
 
     for (k = 1; k <= strats; k++)	{
-      gout << A << '\n';
-      gout << B << '\n';
-      gout << C << '\n';
-
       LPSolve<T> Tab(A, B, C, 1);
-      gout << "\nPlayer = " << pl << " Strat = "<< k;
-      gout << " F = " << Tab.IsFeasible();
-      gout << " x = " << Tab.OptimumVector();
+      tracefile << "\nPlayer = " << pl << " Strat = "<< k;
+      tracefile << " F = " << Tab.IsFeasible();
+      tracefile << " x = " << Tab.OptimumVector();
       COpt = Tab.OptimumCost();
-      gout << " Obj = " << COpt;
+      tracefile << " Obj = " << COpt;
       dom[k] = false;
-      if(Tab.IsFeasible() && COpt == C0) gout << " Duplicated strategy?\n\n";
-      else if(Tab.IsFeasible() && COpt > C0) { 
-	gout << " Weakly Dominated\n\n";
+      if (Tab.IsFeasible() && COpt == C0)
+	tracefile << " Duplicated strategy?\n\n";
+      else if (Tab.IsFeasible() && COpt < -C0) { 
+	tracefile << " Weakly Dominated\n\n";
 	ret = true;
 	dom[k] = true;
       }
-      else  gout << "\n\n";
+      else  tracefile << "\n\n";
       if(k<strats) {
 	A.SwitchColumn(k,B);
 	TmpC=C0; C0=-C[k]; C[k]=-TmpC;
