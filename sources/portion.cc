@@ -2531,7 +2531,8 @@ void ListPortion::Output( gOutput& s, long ListLF ) const
     for( c = 0; c < ListLF * _WriteListIndent; c++ )
       s << ' ';
   }
-  s << '}';
+  if( _WriteListBraces )
+    s << '}';
 }
 
 
