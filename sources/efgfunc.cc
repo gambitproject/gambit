@@ -334,10 +334,11 @@ static Portion *GSM_DeleteTree(Portion **param)
 }
 
 
-extern EFSupport *ComputeDominated(EFSupport &S, bool strong, 
-				   const gArray<int> &players,
-				   gOutput &tracefile,
-				   gStatus &status);
+extern EFSupport *DominanceTruncatedSupport(const EFSupport &S, 
+					    const bool strong, 
+					    const bool conditional,
+					          gOutput &tracefile,
+					          gStatus &status);
 
 //--------------
 // ElimDom
@@ -353,11 +354,10 @@ static Portion *GSM_ElimDom_Efg(Portion **param)
     throw gclRuntimeError("Elimination by mixed strategies not implemented");
 
   gWatch watch;
-  gBlock<int> players(S->Game().NumPlayers());
-  int i;
-  for (i = 1; i <= players.Length(); i++)   players[i] = i;
 
-  EFSupport *T = ComputeDominated(*S, strong, players,
+  // The following sets conditional = false.  Could be more general.
+
+  EFSupport *T = DominanceTruncatedSupport(*S, strong, false,
 				  ((OutputPortion *) param[4])->Value(),
 				  gstatus);
 
