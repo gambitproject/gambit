@@ -1,14 +1,14 @@
-//#
-//# FILE: gnarray.h -- Implementation of an N-dimensional array
-//#
-//# @(#)gnarray.h	2.2 01/28/98
-//#
+//
+// FILE: gnarray.h -- Implementation of an N-dimensional array
+//
+// $Id$
+//
 
 #ifndef GNARRAY_H
 #define GNARRAY_H
 
 #include <assert.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "gvector.h"
 
 //

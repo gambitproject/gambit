@@ -7,12 +7,11 @@
 #ifndef NGOBIT_H
 #define NGOBIT_H
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gstatus.h"
 #include "glist.h"
 
 #include "nfg.h"
-#include "mixed.h"
 #include "mixedsol.h"
 
 class NFGobitParams  {

@@ -3,7 +3,7 @@
 /* $Id$ */
 #include <ctype.h>
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "glist.h"
 #include "rational.h"
 #include "nfg.h"

@@ -7,12 +7,11 @@
 #ifndef ELIAP_H
 #define ELIAP_H
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gstatus.h"
 #include "glist.h"
 
 #include "efg.h"
-#include "behav.h"
 #include "behavsol.h"
 
 #include "subsolve.h"

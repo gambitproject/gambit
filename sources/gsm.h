@@ -9,7 +9,7 @@
 #define GSM_H
 
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "gsmincl.h"
 #include "gsminstr.h"

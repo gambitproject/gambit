@@ -1,8 +1,8 @@
-//#
-//# FILE: interval.h -- gInterval class
-//#
-//# @(#)interval.h	1.0  2/7/96
-//#
+//
+// FILE: interval.h -- gInterval class
+//
+// $Id$
+//
 
 #ifndef INTERVAL_H
 #define INTERVAL_H
@@ -10,7 +10,7 @@
 //#include<stream.h>
 //#include<String.h>
 #include "rational.h"
-#include "gambitio.h"
+#include "gstream.h"
 
 /* This file provides the template class
 

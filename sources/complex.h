@@ -1,8 +1,8 @@
-//#
-//# FILE: complex.h -- Declaration of class gComplex
-//#
-//# @(#)complex.h	1.0  5/21/97
-//#
+//
+// FILE: complex.h -- Declaration of class gComplex
+//
+// $Id$
+//
 
 #ifndef _Complex_h
 #ifdef __GNUG__
@@ -10,7 +10,7 @@
 #endif
 #define _Complex_h 1
 
-#include "gambitio.h"
+#include "gstream.h"
 #include <math.h>
 
 class gComplex

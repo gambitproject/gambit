@@ -113,7 +113,7 @@ gText PortionSpecToText(const PortionSpec& spec)
 }
 
 
-#include "gambitio.h"
+#include "gstream.h"
 
 PortionSpec TextToPortionSpec(const gText& text)
 {

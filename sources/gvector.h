@@ -8,7 +8,7 @@
 #define GVECTOR_H
 
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "garray.h"
 
 //

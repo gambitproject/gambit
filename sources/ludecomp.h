@@ -12,7 +12,7 @@
 #include "gmatrix.h"
 #include "gvector.h"
 #include "glist.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "gblock.h"
 
 //---------------------------------------------------------------------------

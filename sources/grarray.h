@@ -8,7 +8,7 @@
 #define GRARRAY_H
 
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 
 template <class T> class gArray;
 

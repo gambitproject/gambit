@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "garray.h"
-#include "gambitio.h"
 
 
 template <class T> gArray<T>::gArray(unsigned int len) 

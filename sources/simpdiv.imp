@@ -14,7 +14,7 @@
 #define TOL 1.0e-10
 #define MAXIT 10000
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "nfg.h"
 #include "grarray.h"
 #include "gwatch.h"

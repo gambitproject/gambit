@@ -22,7 +22,7 @@ class Portion;
 #include "portion.h"
 #include "gsmhash.h"
 
-#include "gambitio.h"
+#include "gstream.h"
 
 #include "gsm.h"
 

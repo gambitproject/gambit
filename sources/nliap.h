@@ -7,7 +7,7 @@
 #ifndef NLIAP_H
 #define NLIAP_H
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gstatus.h"
 #include "glist.h"
 

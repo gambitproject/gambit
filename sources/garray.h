@@ -9,7 +9,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include "gambitio.h"
+#include "gstream.h"
 
 template <class T> class gArray  {
   friend bool operator==(const gArray<T> &, const gArray<T> &);

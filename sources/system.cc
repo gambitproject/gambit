@@ -4,14 +4,9 @@
 // $Id$
 //
 
-
-
-
-
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-
 
 #ifdef __GNUG__
   #include <unistd.h>
@@ -19,17 +14,13 @@
   #include <windows.h>
 #endif   // __GNUG__, __BORLANDC__
 
-
-#include "gambitio.h"
+#include "gstream.h"
 #include "system.h"
-
-
 
 System::System( void )
 {
   assert( 0 );
 }
-
 
 const char* System::GetEnv( const char* name )
 {

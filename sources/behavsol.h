@@ -10,7 +10,7 @@
 
 #include "gmisc.h"
 #include "behav.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "gnumber.h"
 

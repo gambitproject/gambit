@@ -1,11 +1,11 @@
-//#
-//# FILE: hash.imp -- Implementation of hash table member functions
-//#
-//# $Id$
-//#
+//
+// FILE: hash.imp -- Implementation of hash table member functions
+//
+// $Id$
+//
 
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "glist.h"
 #include "hash.h"
 

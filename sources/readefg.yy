@@ -3,7 +3,7 @@
 /* $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "rational.h"
 #include "gnumber.h"

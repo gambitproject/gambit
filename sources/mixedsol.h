@@ -9,7 +9,7 @@
 
 #include "gmisc.h"
 #include "mixed.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "gnumber.h"
 

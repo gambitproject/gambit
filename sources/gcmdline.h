@@ -15,7 +15,7 @@
 // what goes here ?
 #endif   // __GNUG__, __BORLANDC__
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "glist.h"
 #include "gstack.h"

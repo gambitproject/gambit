@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 
 #ifdef USE_EXCEPTIONS

@@ -9,7 +9,7 @@
 #define PREPOLY_H
 
 #include <math.h>
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 #include "garray.h"
 #include "glist.h"

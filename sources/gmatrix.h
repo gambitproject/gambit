@@ -7,11 +7,9 @@
 #ifndef GMATRIX_H
 #define GMATRIX_H
 
-#include "gambitio.h"
 #include "grarray.h"
 #include "gblock.h"
 #include "gvector.h"
-#include "gsmatrix.h"
 
 template <class T> class gMatrix : public gRectArray<T>  {
   public:
@@ -73,9 +71,7 @@ template <class T> class gMatrix : public gRectArray<T>  {
   void Pivot(int, int);
 };
 
-#ifndef __BORLANDC__
 template <class T> gOutput &operator<<(gOutput &, const gMatrix<T> &);
-#endif    // __BORLANDC__
 
 #endif     // GMATRIX_H
 

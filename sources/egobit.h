@@ -7,12 +7,11 @@
 #ifndef EGOBIT_H
 #define EGOBIT_H
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gstatus.h"
 #include "glist.h"
 
 #include "efg.h"
-#include "behav.h"
 #include "behavsol.h"
 
 class EFGobitParams   {

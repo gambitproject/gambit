@@ -9,7 +9,7 @@
 
 #include "gtext.h"
 #include "gblock.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "glist.h"
 #include "efg.h"
 

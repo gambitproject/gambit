@@ -8,7 +8,7 @@
 #define GMAP_H
 
 #include "gmisc.h"
-#include "gambitio.h"
+#include "gstream.h"
 
 template <class K, class T> class gBaseMap  {
   protected:

@@ -13,7 +13,7 @@
 #include <limits.h>
 #include <ctype.h>
 
-#include "gambitio.h"
+#include "gstream.h"
 #include "gtext.h"
 
 //--------------------------------------------------------------------------

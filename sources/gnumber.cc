@@ -7,7 +7,7 @@
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include "gambitio.h"
+#include "gstream.h"
 #include "gnumber.h"
 #include "gmisc.h"
 #include <math.h>

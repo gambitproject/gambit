@@ -2,7 +2,7 @@
 
 #include <assert.h>
 #include "rational.h"
-#include "gambitio.h"
+#include "gstream.h"
 #include "interval.h"
 #include "gvector.h"
 #include "glist.h"

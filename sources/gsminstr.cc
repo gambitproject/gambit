@@ -8,7 +8,7 @@
 
 
 #include "gsminstr.h"
-#include "gambitio.h"
+#include "gstream.h"
 
 #include "glist.imp"
 

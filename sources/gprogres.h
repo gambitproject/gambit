@@ -7,7 +7,7 @@
 #ifndef GPROGRES_H
 #define GPROGRES_H
 
-#include "gambitio.h"
+#include "gstream.h"
 
 // This class is designed to give the use some feedback about the operation of
 // an algorithm.  It implements all of the functions of gOutput, and one extra
