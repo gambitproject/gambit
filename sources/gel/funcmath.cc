@@ -19,13 +19,8 @@ DECLARE_BINARY(gelfuncAnd, gTriState *, gTriState *, gTriState *)
 
 gTriState *gelfuncAnd::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = TriStateAnd(*x1, *x2);
-  delete x2;
   return x1;
 }
 
@@ -37,13 +32,8 @@ DECLARE_BINARY(gelfuncDivide, gNumber *, gNumber *, gNumber *)
 
 gNumber *gelfuncDivide::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = *x1 / *x2;
-  delete x2;
   return x1;
 }
 
@@ -56,45 +46,24 @@ DECLARE_BINARY(gelfuncEqualBoolean, gTriState *, gTriState *, gTriState *)
 
 gTriState *gelfuncEqualBoolean::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncEqualNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncEqualText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 == *x2) ? triTRUE : triFALSE);
 }
 
 //-----------
@@ -105,30 +74,16 @@ DECLARE_BINARY(gelfuncGreaterNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncGreaterNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncGreaterText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncGreaterText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 > *x2) ? triTRUE : triFALSE);
 }
 
 //---------------
@@ -139,30 +94,16 @@ DECLARE_BINARY(gelfuncGreaterEqualNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncGreaterEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncGreaterEqualText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncGreaterEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 >= *x2) ? triTRUE : triFALSE);
 }
 
 //--------
@@ -173,30 +114,16 @@ DECLARE_BINARY(gelfuncLessNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncLessNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncLessText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncLessText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 < *x2) ? triTRUE : triFALSE);
 }
 
 //------------
@@ -207,30 +134,16 @@ DECLARE_BINARY(gelfuncLessEqualNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncLessEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncLessEqualText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncLessEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 <= *x2) ? triTRUE : triFALSE);
 }
 
 //---------
@@ -241,13 +154,8 @@ DECLARE_BINARY(gelfuncMinus, gNumber *, gNumber *, gNumber *)
 
 gNumber *gelfuncMinus::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = *x1 - *x2;
-  delete x2;
   return x1;
 }
 
@@ -281,45 +189,24 @@ DECLARE_BINARY(gelfuncNotEqualBoolean, gTriState *, gTriState *, gTriState *)
 
 gTriState *gelfuncNotEqualBoolean::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncNotEqualNumber, gNumber *, gNumber *, gTriState *)
 
 gTriState *gelfuncNotEqualNumber::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
 }
 
 DECLARE_BINARY(gelfuncNotEqualText, gText *, gText *, gTriState *)
 
 gTriState *gelfuncNotEqualText::EvalItem(gText *x1, gText *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-  gTriState *ret = new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
-  delete x1;
-  delete x2;
-  return ret;
+  if (!x1 || !x2)   return 0;
+  return new gTriState((*x1 != *x2) ? triTRUE : triFALSE);
 }
 
 
@@ -337,18 +224,10 @@ class gelExceptionNonInteger : public gException  {
 
 gText *gelfuncNthElement::EvalItem(gText *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)    {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
-
+  if (!x1 || !x2)   return 0;
   if (!x2->IsInteger())
     throw gelExceptionNonInteger();
-  gText *ret = new gText((*x1)[*x2 - gNumber(1)]);
-  delete x1;
-  delete x2;
-  return ret;
+  return new gText((*x1)[*x2 - gNumber(1)]);
 }
 
 //------------
@@ -360,9 +239,7 @@ DECLARE_UNARY(gelfuncNumChars, gText *, gNumber *)
 gNumber *gelfuncNumChars::EvalItem(gText *s) const
 {
   if (!s)  return 0;
-  gNumber *ret = new gNumber(s->Length());
-  delete s;
-  return ret;
+  return new gNumber(s->Length());
 }
 
 //------
@@ -373,13 +250,8 @@ DECLARE_BINARY(gelfuncOr, gTriState *, gTriState *, gTriState *)
 
 gTriState *gelfuncOr::EvalItem(gTriState *x1, gTriState *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = TriStateOr(*x1, *x2);
-  delete x2;
   return x1;
 }
 
@@ -391,13 +263,8 @@ DECLARE_BINARY(gelfuncPlus, gNumber *, gNumber *, gNumber *)
 
 gNumber *gelfuncPlus::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = *x1 + *x2;
-  delete x2;
   return x1;
 }
 
@@ -410,13 +277,8 @@ DECLARE_BINARY(gelfuncTimes, gNumber *, gNumber *, gNumber *)
 
 gNumber *gelfuncTimes::EvalItem(gNumber *x1, gNumber *x2) const
 {
-  if (!x1 || !x2)   {
-    if (x1)  delete x1;
-    if (x2)  delete x2;
-    return 0;
-  }
+  if (!x1 || !x2)   return 0;
   *x1 = *x1 * *x2;
-  delete x2;
   return x1;
 }
 
