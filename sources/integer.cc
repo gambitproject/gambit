@@ -31,17 +31,25 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "integer.h"
-#include "std.h"
+#include "gnulib.h"
 #include <ctype.h>
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#include "obstack.h"
-#include "allocrin.h"
 #include <new.h>
-#include "builtin.h"
-#include "lg.cc"
 #include <assert.h>
+
+long lg(unsigned long x)
+{
+  long l = 0;
+  while (x > 1)
+  {
+    x = x >> 1;
+    ++l;
+  }
+  return l;
+}
+
 
 #ifndef HUGE_VAL
 #ifdef HUGE
@@ -156,9 +164,6 @@ static inline void scpy(const unsigned short* src, unsigned short* dest,int nb)
 
 static inline void nonnil(const IntRep* rep)
 {
-  /* if (rep == 0)
-    (*lib_error_handler)("Integer", "operation on uninitialized Integer");
-  */
   assert(rep != 0);
 }
 
@@ -171,9 +176,6 @@ inline static IntRep* Inew(int newlen)
   unsigned int allocsiz = MINIntRep_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
-  /* if (allocsiz >= MAXIntRep_SIZE * sizeof(short))
-    (*lib_error_handler)("Integer", "Requested length out of range");
-  */
   assert(allocsiz < MAXIntRep_SIZE * sizeof(short));
     
   IntRep* rep = (IntRep *) new char[allocsiz];

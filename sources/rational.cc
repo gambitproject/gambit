@@ -19,10 +19,9 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma implementation
 #endif
 #include "rational.h"
-#include "std.h"
+#include "gnulib.h"
 #include <math.h>
 #include <values.h>
-#include "builtin.h"
 #include <float.h>
 #include <assert.h>
 

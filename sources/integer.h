@@ -24,8 +24,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #define _Integer_h 1
 
-#include "input.h"
-#include "output.h"
+#include "gambitio.h"
 
 struct IntRep                    // internal Integer representations
 {

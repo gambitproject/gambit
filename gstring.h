@@ -7,10 +7,8 @@
 #ifndef GSTRING_H
 #define GSTRING_H
 
-#include <stdio.h>
 #include <string.h>
-#include "input.h"
-#include "output.h"
+#include "gambitio.h"
 
 class gString   {
   friend input& operator>>(input&, gString&);

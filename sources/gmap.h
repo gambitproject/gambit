@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <string.h>
 #include "basic.h"
-#include "output.h"
+#include "gambitio.h"
 
 #ifdef __GNUC__
 #define INLINE inline

@@ -9,7 +9,7 @@
 
 #include <assert.h>
 #include "basic.h"
-#include "output.h"
+#include "gambitio.h"
 
 template <class T> class gVector  {
   private:

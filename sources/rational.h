@@ -23,9 +23,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #endif
 #define _Rational_h 1
 
+#include "gambitio.h"
 #include "integer.h"
-#include "input.h"
-#include "output.h"
 #include <math.h>
 
 class Rational
