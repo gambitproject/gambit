@@ -1,0 +1,103 @@
+//
+//# FILE: vertenum.imp -- Implementation of Vertex Enumerator
+//#
+//# $Id$ 
+//#
+
+#include "vertenum.h"
+
+template <class T>
+VertEnum<T>::VertEnum(const gMatrix<T> &A, const gVector<T> &b)
+  : A(A), b(b), btemp(b), c(A.MinCol(),A.MaxCol()), npivots(0) 
+{
+      // Check dimensions
+  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
+
+      // Initialize the tableau
+  int i,j,mult_opt=0;
+
+  for(i=b.First();i<=b.Last();i++)
+    if(b[i]==(T)0)
+      mult_opt=1;
+
+  btemp = -(T)1;
+  c = (T)1;
+
+  LPTableau<T> tab(A,b);
+  tab.SetCost(c);
+  
+  // gout << "\nInitial Tableau = \n";
+  // tab.Dump(gout);
+
+  DualSearch(tab);
+}	
+
+template <class T> VertEnum<T>::~VertEnum()
+{ }
+
+
+template <class T> void VertEnum<T>::Search(LPTableau<T> &tab)
+{
+  int i,j;
+
+  // gout << "\nin Search";
+  // gout << " found BFS:\n";
+  // tab.GetBFS1().Dump(gout);
+  if(tab.IsLexMin()) {
+    // gout << " is LexMin";
+    List.Append(tab.GetBFS());
+  }
+  for(j=-b.Last();j<=c.Last();j++)
+    if(j && !tab.Member(j))
+      for(i=b.First();i<=b.Last();i++) 
+	if(tab.IsReversePivot(i,j)) {
+	  LPTableau<T> tab2(tab);
+	  npivots++;
+	  tab2.Pivot(i,j);
+	  Search(tab2);
+	}
+}
+  
+template <class T> void VertEnum<T>::DualSearch(LPTableau<T> &tab)
+{
+  int i,j;
+
+  // gout << "\nin DualSearch";
+  tab.SetConst(b);     // install original constraint vector
+  Search(tab);         // do primal search
+  if(mult_opt) {
+    tab.SetConst(btemp);    // install artifical constraint vector
+    for(i=b.First();i<=b.Last();i++)
+      if(b[i]==0)
+	for(j=-b.Last();j<=c.Last();j++) 
+	  if(j && !tab.Member(j))
+	    if(tab.IsDualReversePivot(i,j)) {
+	      LPTableau<T> tab2(tab);
+	      npivots++;
+	      tab2.Pivot(i,j);
+	      DualSearch(tab2);
+	    }
+  }
+}
+  
+template <class T> BFS_List VertEnum<T>::VertexList() const
+{ 
+  return List;
+}
+
+template <class T> long VertEnum<T>::NumPivots() const
+{
+  return npivots;
+}
+
+template <class T> void VertEnum<T>::Dump(gOutput &to) const
+{
+  // gout << "\nin VertEnum::Dump()";
+  for(int i=List.First();i<=List.Last();i++) {
+    to << "\n";
+    List[i].Dump(to);
+  }
+}
+
+
+
