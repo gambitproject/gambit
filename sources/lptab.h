@@ -58,6 +58,7 @@ public:
 
   // Removes all artificial variables
   void FlushArtificial( void );
+  void BigDump(gOutput &);
 };
 
 #endif     // LPTAB_H

@@ -46,26 +46,49 @@ LPTableau<T>& LPTableau<T>::operator=(const LPTableau<T> &orig)
 
 // cost-based functions
 
-template <class T>
-void LPTableau<T>::SetCost(const gVector<T>& c)
+void LPTableau<gRational>::SetCost(const gVector<gRational>& c)
 {
   int i;
   if(cost.First()==c.First() && cost.Last()==c.Last()) {
-    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i];
-    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (T)0;
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i]*(gRational)Tableau<gRational>::TotDenom();
+    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (gRational)0;
     Refactor();
     SolveDual();
     return;
   }
   assert(c.First()==cost.First());
-  gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
-  gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
-  gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
+  assert(c.Last()==(cost.Last()+unitcost.Length()));
+  for(i=c.First();i<=cost.Last();i++)
+    cost[i]=c[i]*(gRational)Tableau<gRational>::TotDenom();
+  for(i=unitcost.First();i<=unitcost.Last();i++)
+    unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
+  // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
+  // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
+  // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
+  //** added for gRational
+  Refactor();
+  SolveDual();
+}
+
+void LPTableau<double>::SetCost(const gVector<double>& c)
+{
+  int i;
+  if(cost.First()==c.First() && cost.Last()==c.Last()) {
+    for(i=cost.First();i<=cost.Last();i++) cost[i] = c[i];
+    for(i=unitcost.First();i<=unitcost.Last();i++) unitcost[i] = (double)0;
+    Refactor();
+    SolveDual();
+    return;
+  }
+  assert(c.First()==cost.First());
   assert(c.Last()==(cost.Last()+unitcost.Length()));
   for(i=c.First();i<=cost.Last();i++)
     cost[i]=c[i];
   for(i=unitcost.First();i<=unitcost.Last();i++)
     unitcost[i]=c[cost.Length()+i-unitcost.First()+1];
+  // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
+  // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
+  // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
   //** added for gRational
   Refactor();
   SolveDual();
@@ -97,9 +120,8 @@ template <class T>
 gVector<T> LPTableau<T>::GetUnitCost(void) const
 {
   gVector<T> x(unitcost.First(),unitcost.Last());
-  for(int i=x.First();i<=x.Last();i++)x[i]=cost[i];
+  for(int i=x.First();i<=x.Last();i++)x[i]=unitcost[i];
   return x;
-  //  return unitcost; 
 }
 
 
@@ -111,11 +133,16 @@ T LPTableau<T>::TotalCost()
   return tmpcol*solution;
 }
 
-
-template <class T>
-void LPTableau<T>::DualVector(gVector<T> &L) const
+void LPTableau<double>::DualVector(gVector<double> &L) const
 {
   L= dual;
+}
+
+void LPTableau<gRational>::DualVector(gVector<gRational> &out) const
+{
+  out= dual;
+  //   for(int i=out.First();i<=out.Last();i++) 
+  //   if(Label(i)>=0) out[i]*=TotDenom();
 }
 
 template <class T>
@@ -159,6 +186,7 @@ void LPTableau<T>::SolveDual()
 template <class T>
 void LPTableau<T>::Refactor()
 {
+  // gout << "\nIn LPTableau<T>::Refactor()";  
   Tableau<T>::Refactor();
   SolveDual();
 }
@@ -166,6 +194,8 @@ void LPTableau<T>::Refactor()
 template <class T>
 void LPTableau<T>::Pivot(int outrow,int col)
 {
+  // gout << "\noutrow, col: " << outrow << " " << col;
+  // Dump(gout);
   Tableau<T>::Pivot(outrow,col);
   SolveDual();
 }
@@ -181,6 +211,9 @@ void LPTableau<T>::ReversePivots(gList<gArray<int> > &PivotList)
   gList<int> BestSet;
   gArray<int> pivot(2);
   gVector<T> tmpdual(MinRow(),MaxRow());
+
+  gVector<T> solution(tmpcol);  //$$
+  BasisVector(solution);        //$$
 
   // BigDump(gout);
   // gout << "\ncost: " << GetCost();
@@ -344,6 +377,8 @@ bool LPTableau<T>::IsReversePivot(int i, int j)
   
   // gout << "\nin IsReversePivot, i= " << i << " j = "<< j;
   SolveColumn(j,tmpcol);
+  gVector<T> solution(tmpcol);  //$$
+  BasisVector(solution);        //$$
   // gout << "\ncurrentPivCol = " << tmpcol;
   // gout << "\ncurrentSolCol = " << solution;
   if(LeZero(tmpcol[i])) { 
@@ -464,11 +499,18 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   // gout << "\nin IsDualReversePivot, i= " << i << " j = "<< j;
 
   int k;
+
   gVector<T> tmpcol(MinRow(),MaxRow());
   gVector<T> tmpdual(MinRow(),MaxRow());
   tmpcol = (T)0;
   tmpcol[i]=(T)1;
   SolveT(tmpcol,tmpdual);
+
+  gVector<T> solution(tmpcol);  //$$
+  BasisVector(solution);        //$$
+
+  // gout << "\ncurrentPivCol = " << tmpcol;
+  // gout << "\ncurrentSolCol = " << solution;
 
   T a_ij,a_ik,c_j,c_k,ratio;
 
@@ -581,6 +623,7 @@ bool LPTableau<T>::IsDualReversePivot(int i, int j)
   return 1;
 }
 
+/*
 template <class T>
 BFS<T> LPTableau<T>::DualBFS() const
 {
@@ -589,6 +632,22 @@ BFS<T> LPTableau<T>::DualBFS() const
     if(!Member(-i)) 
       cbfs.Define(-i,dual[i]);
   }
+  return cbfs;
+}
+*/
+
+template <class T>
+BFS<T> LPTableau<T>::DualBFS() const
+{
+  BFS<T> cbfs((T) 0);
+  gVector<T> d(MinRow(),MaxRow());
+  DualVector(d);
+
+  for(int i=MinRow();i<=MaxRow();i++) {
+    if(!Member(-i)) 
+      cbfs.Define(-i,d[i]);
+  }
+  // gout << "\ndual: " << d;
   return cbfs;
 }
 
@@ -627,3 +686,11 @@ void LPTableau<T>::FlushArtificial( void )
   basis.FlushArtificial();
 }
   
+template <class T>
+void LPTableau<T>::BigDump(gOutput &out)
+{
+  Tableau<T>::BigDump(out);
+  gout << "\nCost vector: " << GetCost();
+  gout << "\nUnit Cost  : " << GetUnitCost();
+  gout << "\nTotal Cost: " << TotalCost();
+}

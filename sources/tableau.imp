@@ -127,12 +127,6 @@ bool TableauInterface<T>::IsBlocked(int label) const
 }
 
 template <class T>
-void TableauInterface<T>::BasisVector(gVector<T> &out) const
-{
-  out= solution;
-}
-
-template <class T>
 void TableauInterface<T>::GetColumn(int col, gVector<T> &out) const
 {
   basis.GetColumn(col,out);
@@ -147,11 +141,17 @@ void TableauInterface<T>::GetBasis(Basis<T> &out) const
 template <class T>
 BFS<T> TableauInterface<T>::GetBFS()
 {
-  Solve(*b,solution);  // this should not be necessary here
+  // gout << "\nTableauInterface<T>::GetBFS()";
+  gVector<T> sol((*b).First(),(*b).Last());
+  // Solve(*b, solution);
+  BasisVector(sol);
+
+  // gout << "\nBasisVector: " << sol;
+
   BFS<T> cbfs((T) 0);
   for(int i=MinCol();i<=MaxCol();i++) {
     if(Member(i)) 
-      cbfs.Define(i,solution[basis.Find(i)]);
+      cbfs.Define(i,sol[basis.Find(i)]);
   }
   return cbfs;
 }
@@ -159,6 +159,7 @@ BFS<T> TableauInterface<T>::GetBFS()
 template <class T>
 BFS<T> TableauInterface<T>::GetBFS1() const
 {
+  // gout << "\nTableauInterface<T>::GetBFS1()";
   BFS<T> cbfs((T) 0);
 int i;
   for(i=-MaxRow();i<=-MinRow();i++) {
@@ -174,12 +175,18 @@ int i;
 
 template <class T>
 void TableauInterface<T>::Dump(gOutput &to) const
-{ basis.Dump(to);to << "\n";solution.Dump(to);}
+{ 
+  gVector<T> bb(MinRow(), MaxRow());
+  BasisVector(bb);
+  to << "\nBasis:\n";  
+  basis.Dump(to);
+  to << "\n" << bb;
+}
 
 template <class T>
 void TableauInterface<T>::BigDump(gOutput &to)
 { 
-  to << "\nBasis:\n";
+  to << "\nBasis:";
   basis.Dump(to);
   gMatrix<T> AA(MinRow(),MaxRow(),MinCol(),MaxCol()+(*A).NumRows());
   gVector<T> bb(MinRow(), MaxRow());
@@ -308,6 +315,11 @@ void Tableau<double>::SolveColumn(int col, gVector<double> &out)
   gVector<double> tmpcol2(MinRow(),MaxRow());
   basis.GetColumn(col,tmpcol2);
   Solve(tmpcol2,out);
+}
+
+void Tableau<double>::BasisVector(gVector<double> &out) const
+{
+  out= solution;
 }
 
 //

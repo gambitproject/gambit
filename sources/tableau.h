@@ -92,7 +92,7 @@ public:
   void UnMark(int label);   // unmarks label
   bool IsBlocked(int label) const;   // returns true if label is blocked
   
-  void BasisVector(gVector<T> &x) const; // solve M x = (*b)
+  virtual void BasisVector(gVector<T> &x) const = 0; // solve M x = (*b)
   void GetColumn( int , gVector<T> &) const;  // raw column
   void GetBasis( Basis<T> & ) const; // return Basis for current Tableau
 
@@ -146,6 +146,7 @@ public:
   // pivoting
   int CanPivot(int outgoing,int incoming);
   void Pivot(int outrow,int col); // pivot -- outgoing is row, incoming is column
+  void BasisVector(gVector<double> &x) const; // solve M x = (*b)
   void SolveColumn(int, gVector<double> &);  // column in new basis 
   void Solve(const gVector<double> &b, gVector<double> &x);  // solve M x = b
   void SolveT(const gVector<double> &c, gVector<double> &y);  // solve y M = c

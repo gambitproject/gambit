@@ -193,11 +193,11 @@ LPSolve<T>::LPSolve(const gMatrix<T> &A, const gVector<T> &b,
   tab.DualVector(y);
   // gout << "DualVector = " << y << "\n";
   opt_bfs = tab.GetBFS();
-//   gout << "\nopt_bfs:\n";
-//  opt_bfs.Dump(gout);
-//  gout << "\n";
+  // gout << "\nopt_bfs:\n";
+  // opt_bfs.Dump(gout);
+  // gout << "\n";
   dual_bfs = tab.DualBFS();
-//  dual_bfs.Dump(gout);
+  // dual_bfs.Dump(gout);
   for(i=1;i<=neqns;i++)
     if(dual_bfs.IsDefined(-i))
       opt_bfs.Define(-i,dual_bfs(-i));
@@ -284,11 +284,11 @@ template <class T> void LPSolve<T>::Solve(int phase)
     }
   }
   while(in);
-  
 }
   
 template <class T> int LPSolve<T>::Enter()
 { 
+  // gout << "\nIn LPSolve<T>::Enter()";
   int i,in;
   T z;
   gVector<T> tmp(tab.MinRow(), tab.MaxRow());

@@ -19,6 +19,8 @@ private:
 
   gVector<gRational> tmpcol; // temporary column vector, to avoid allocation
 
+  void MySolveColumn(int, gVector<gRational> &);  // column in new basis 
+
 public:
       // constructors and destructors
   Tableau(const gMatrix<gRational> &A, const gVector<gRational> &b); 
@@ -45,6 +47,9 @@ public:
   
   bool IsFeasible();
   bool IsLexMin();
+  void BigDump(gOutput &);
+  void BasisVector(gVector<gRational> &out) const;
+  gInteger TotDenom() const;
 };
 
 #endif     // TABLEAU2_H
