@@ -201,7 +201,6 @@ unassignment: UNASSIGN LBRACK NAME RBRACK
 		emit(new UnAssign);
 	      }
 
-
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));
 		if (!inputs.Peek()->IsValid())   {
@@ -574,6 +573,7 @@ I_dont_believe_Im_doing_this:
     else if (s == "For")    return FOR;
     else if (s == "Quit")   return QUIT;
     else if (s == "NewFunction")   return DEFFUNC;
+    else if (s == "Include")   return INCLUDE;
     else if (s == "Assign")   return ASSIGNFUNC;
     else if (s == "UnAssign")   return UNASSIGN;
     else  { tval = s; return NAME; }
