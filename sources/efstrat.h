@@ -74,13 +74,10 @@ public:
   Action *GetAction(int iset, int index);
 
   // returns the index of the action if it is in the ActionSet
-  int IsActionInActionSet(int iset, Action *);
+  int Contains(Action *);
  
   // returns the index of the action in the original ActionSet
-  int OriNumber (int iset, Action *);
-
-  // Number of Infosets 
-  int NumInfosets(void) const;
+  int GetNumber(Action *);
 
   // Number of Actions in a particular infoset
   int NumActions(int iset) const;
@@ -133,7 +130,7 @@ public:
 
   // Returns the original position of the action before any changes were made
   // in the support.
-  int OriNumber(int pl, int iset, Action *);
+  int GetNumber(Action *);
 
   // Action editing functions
   Action * RemoveAction( int, int, int );

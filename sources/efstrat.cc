@@ -4,7 +4,6 @@
 // $Id$
 //
 
-//#include "efstrat.h"
 #include "efg.h"
 #include "efplayer.h"
 
@@ -12,14 +11,14 @@
 // EFActionArray: Constructors, Destructor, operators
 // ---------------------------------------------------
 
-EFActionArrays::EFActionArrays ( const gArray <Action *> &a )
+EFActionArrays::EFActionArrays(const gArray<Action *> &a)
   : acts(a.Length())
 {
-  for (int j = 1; j <= (a.Length()); j++)
-    acts[j] = a[j];
-}
+  for (int i = 1; i <= acts.Length(); i++)
+    acts[i] = a[i];
+ }
 
-EFActionArrays::EFActionArrays ( const EFActionArrays &a)
+EFActionArrays::EFActionArrays(const EFActionArrays &a)
   : acts(a.acts)
 { }
 
@@ -51,7 +50,7 @@ bool EFActionArrays::operator==(const EFActionArrays &a)
 // EFActionSet: Constructors, Destructor, operators
 //--------------------------------------------------
 
-EFActionSet::EFActionSet( EFPlayer &p )
+EFActionSet::EFActionSet(EFPlayer &p)
   : infosets(p.NumInfosets())
 {
   efp = &p;
@@ -77,26 +76,25 @@ EFActionSet::~EFActionSet()
 
 EFActionSet &EFActionSet::operator=(const EFActionSet &s)
 {
-  if (this != &s) {
-    efp = s.efp;
-    for (int i = 1; i<=s.infosets.Length(); i++)
+  if (this != &s && efp == s.efp) {
+    for (int i = 1; i<= infosets.Length(); i++)  {
+      delete infosets[i];
       infosets[i] = new EFActionArrays(*(s.infosets[i]));
+    }
   }    
-  return (*this);
-  
+  return *this;
 }
 
 bool EFActionSet::operator==(const EFActionSet &s)
 {
-   if (infosets.Length() != s.infosets.Length() ||
-       efp != s.efp) return (false);
-   else {
-     int i;
-     for (i = 1; i <= infosets.Length() && 
-	  *(infosets[i]) == *(s.infosets[i]);  i++);
-     if ( i > infosets.Length()) return (true);
-     else return(false);
-   }
+  if (infosets.Length() != s.infosets.Length() ||
+      efp != s.efp)
+    return false;
+  
+  int i;
+  for (i = 1; i <= infosets.Length() && 
+       *(infosets[i]) == *(s.infosets[i]);  i++);
+  return (i > infosets.Length());
 }
 
 //------------------------------------------
@@ -106,7 +104,6 @@ bool EFActionSet::operator==(const EFActionSet &s)
 // Append an action to a particular infoset;
 void EFActionSet::AddAction(int iset, Action *s) 
 { 
-  
   infosets[iset]->acts.Append(s); 
 }
 
@@ -138,12 +135,6 @@ Action *EFActionSet::GetAction(int iset, int index)
   return (infosets[iset]->acts)[index];
 }
 
-// Number of Infosets
-int EFActionSet::NumInfosets(void) const
-{
-  return (infosets.Length());
-}
-
 // Number of Actions in a particular infoset
 int EFActionSet::NumActions(int iset) const
 {
@@ -157,15 +148,15 @@ EFPlayer &EFActionSet::GetPlayer(void) const
 }
 
 // Returns true if action is in the ActionSet
-int EFActionSet::IsActionInActionSet( int iset, Action *a)
+int EFActionSet::Contains(Action *a)
 {
-  return (infosets[iset]->acts.Find(a));
+  return (infosets[a->BelongsTo()->GetNumber()]->acts.Find(a));
 }
 
-// Returns the number of the action in the original support
-int EFActionSet::OriNumber ( int iset, Action *a)
+// Returns the number of the action in the support
+int EFActionSet::GetNumber(Action *a)
 {
-  int i;
+  int i, iset = a->BelongsTo()->GetNumber();
   for (i = 1; i <= infosets[iset]->acts.Length() && 
        (infosets[iset]->acts)[i] != a; i++);
   if (i > infosets[iset]->acts.Length()) return 0;
@@ -187,15 +178,14 @@ bool EFActionSet::IsValid(void) const
 // EFSupport: Constructors, Destructors, Operators
 //--------------------------------------------------
 
-EFSupport::EFSupport (const BaseEfg &E) : sets(E.NumPlayers())
+EFSupport::EFSupport(const BaseEfg &E) : befg(&E), sets(E.NumPlayers())
 {
-  befg = &E;
   for (int i = 1; i <= sets.Length(); i++)
     sets[i] = new EFActionSet(*(E.PlayerList()[i]));
 }
 
 EFSupport::EFSupport(const EFSupport &s)
-: name(s.name), befg(s.befg), sets(s.sets.Length())
+  : name(s.name), befg(s.befg), sets(s.sets.Length())
 {
   for (int i = 1; i <= sets.Length(); i++)
     sets[i] = new EFActionSet(*(s.sets[i]));
@@ -209,24 +199,22 @@ EFSupport::~EFSupport()
 
 EFSupport &EFSupport::operator=(const EFSupport &s)
 {
-  if (this != &s) {
-    befg = s.befg;
+  if (this != &s && befg == s.befg) {
     name = s.name;
     for (int i = 1; i <= sets.Length(); i++)
       *(sets[i]) = (*(sets[i])); 
   }
-  return (*this);
+  return *this;
 }
 
 bool EFSupport::operator==(const EFSupport &s)
 {
-  if (sets.Length() != s.sets.Length()) return (false);
-  else {
-    int i;
-    for (i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
-    if (i > sets.Length()) return (true);
-    else return (false);
-  }
+  if (sets.Length() != s.sets.Length())
+    return false;
+
+  int i;
+  for (i = 1; i <= sets.Length() && *(sets[i]) == *(s.sets[i]); i++);
+  return (i > sets.Length());
 }
 
 //-----------------------------
@@ -240,7 +228,7 @@ int EFSupport::NumActions(int pl, int iset) const
 
 const BaseEfg &EFSupport::BelongsTo(void) const
 {
-  return (*befg);
+  return *befg;
 }
 
 int EFSupport::Contains(Action *a) const
@@ -248,15 +236,13 @@ int EFSupport::Contains(Action *a) const
   if (a->BelongsTo()->BelongsTo() != befg)   return 0;
 
   int pl = a->BelongsTo()->GetPlayer()->GetNumber();
-  int iset = a->BelongsTo()->GetNumber();
 
-  return sets[pl]->IsActionInActionSet(iset, a);
+  return sets[pl]->Contains(a);
 }
 
-int EFSupport::OriNumber( int pl, int iset, Action *a)
+int EFSupport::GetNumber(Action *a)
 {
-  assert (pl <= sets.Length() && pl >= 1);
-  return sets[pl]->OriNumber(iset ,a);
+  return sets[a->BelongsTo()->GetPlayer()->GetNumber()]->GetNumber(a);
 }
 
 bool EFSupport::IsValid(void) const
