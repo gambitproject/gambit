@@ -200,6 +200,9 @@ return !params.status.Get();
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class gRectArray<double>;
+class gRectArray<gRational>;
+
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
