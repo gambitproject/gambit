@@ -19,7 +19,7 @@ template <class T> NFGobitParams<T>::NFGobitParams(void)
 template <class T>
 class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
   private:
-    T Lambda, tolDFP;
+    T Lambda;
     gPVector<T> p, pp;
     const NormalForm<T> &N;
     gVector<T> **scratch1, **scratch2;
@@ -33,12 +33,12 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
     T GobitDerivValue(int i, int j, const gPVector<T> &v);
 
   public:
-    NFGobitFunc(const NormalForm<T> &NF, const T &tol);
+    NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P);
     virtual ~NFGobitFunc();
 
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
-    void Output(gOutput &f) const;
+    void Output(gOutput &f, int format = 0) const;
 };
 
 
@@ -46,10 +46,11 @@ class NFGobitFunc : public GobitFunc<T>, public gBC2FunctMin<T>  {
 //               NFGobitFunc<T>: Constructor and destructor
 //-------------------------------------------------------------------------
 
-template <class T>
-NFGobitFunc<T>::NFGobitFunc(const NormalForm<T> &NF, const T &tol)
-  : gBC2FunctMin<T>(NF.ProfileLength()), N(NF), p(NF.Dimensionality()),
-    pp(NF.Dimensionality()), tolDFP(tol)
+template <class T>NFGobitFunc<T>
+::NFGobitFunc(const NormalForm<T> &NF, const GobitParams<T> &P)
+  : gBC2FunctMin<T>(NF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		    P.tolBrent,P.maxitsBrent), N(NF), p(NF.Dimensionality()),
+		    pp(NF.Dimensionality())
 {
   // Seems to me like this should be a parameter to the gfunct ctor?
   constrained = 1;
@@ -147,13 +148,19 @@ template <class T> T NFGobitFunc<T>::Value(const gVector<T> &v)
 template <class T> void NFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 {
   Lambda = Lam;
-  DFP(pp, tolDFP, iter, value);
+  DFP(pp, iter, value);
 }
 
 
-template <class T> void NFGobitFunc<T>::Output(gOutput &f) const
+template <class T> void NFGobitFunc<T>::Output(gOutput &f,int format) const
 {
-  f << " p = " << p;
+  if(format) {
+    f<< " ";
+    for (int pl = 1; pl <= N.NumPlayers(); pl++)  
+      for (int strat = 1; strat <= N.NumStrats(pl); strat++)  
+	  f << pp(pl,strat) << " ";
+  }
+  else  f << " pp = " << pp;
 }
 
 
@@ -171,7 +178,7 @@ template <class T> NFGobitModule<T>::~NFGobitModule()
 
 template <class T> GobitFunc<T> *NFGobitModule<T>::CreateFunc(void)
 {
-  return new NFGobitFunc<T>(N, params.tolOpt);
+  return new NFGobitFunc<T>(N, params);
 }
 
 

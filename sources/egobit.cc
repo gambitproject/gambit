@@ -21,7 +21,7 @@ template <class T> EFGobitParams<T>::EFGobitParams(void)
 template <class T>
 class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
   private:
-    T Lambda, tolPOW;
+    T Lambda;
     gPVector<T> probs;
     gDPVector<T> p, pp, cpay;
     gMatrix<T> xi;
@@ -31,12 +31,12 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
     T Value(const gVector<T> &x);
 
   public:
-    EFGobitFunc(const ExtForm<T> &EF, const T &tol);
+    EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P);
     virtual ~EFGobitFunc();
 
     // These two are inherited virtual functions from GobitFunc
     void Optimize(T Lambda, int &iter, T &value);
-    void Output(gOutput &f) const;
+    void Output(gOutput &f,int format) const;
 };
 
 //-------------------------------------------------------------------------
@@ -44,11 +44,12 @@ class EFGobitFunc : public GobitFunc<T>, public gBFunctMin<T>  {
 //-------------------------------------------------------------------------
 
 template <class T>
-EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const T &tol)
-  : gBFunctMin<T>(EF.ProfileLength()), E(EF), p(EF.Dimensionality()),
-    pp(EF.Dimensionality()), cpay(EF.Dimensionality()),
-    probs(EF.Dimensionality().Lengths()),
-    xi(p.Length(), p.Length()), tolPOW(tol)
+EFGobitFunc<T>::EFGobitFunc(const ExtForm<T> &EF, const GobitParams<T> &P)
+  :gBFunctMin<T>(EF.ProfileLength(),P.tolOpt,P.maxitsOpt,
+		 P.tolBrent,P.maxitsBrent), E(EF), p(EF.Dimensionality()),
+		 pp(EF.Dimensionality()), cpay(EF.Dimensionality()),
+		 probs(EF.Dimensionality().Lengths()),
+		 xi(p.Length(), p.Length())
 {
   constrained = 1;
   
@@ -120,12 +121,21 @@ template <class T> T EFGobitFunc<T>::Value(const gVector<T> &v)
 template <class T> void EFGobitFunc<T>::Optimize(T Lam, int &iter, T &value)
 {
   Lambda = Lam;
-  Powell(pp, xi, tolPOW, iter, value);
+  Powell(pp, xi, iter, value);
 }
 
-template <class T> void EFGobitFunc<T>::Output(gOutput &f) const
+template <class T> void EFGobitFunc<T>
+::Output(gOutput &f, int format = 0) const
 {
-  f << " pp = " << pp;
+  if(format) {
+    f<< " ";
+    for (int pl = 1; pl <= E.NumPlayers(); pl++)  
+      for (int iset = 1; iset <= E.NumInfosets(1, pl); iset++)  
+	for(int act = 1;act <= E.NumActions(1,pl,iset);act++)
+	  f << pp(pl,iset,act) << " ";
+  }
+  else  f << " pp = " << pp;
+
 }
 
 //------------------------------------------------------------------------
@@ -142,7 +152,7 @@ template <class T> EFGobitModule<T>::~EFGobitModule()
 
 template <class T> GobitFunc<T> *EFGobitModule<T>::CreateFunc(void)
 {
-  return new EFGobitFunc<T>(E, params.tolOpt);
+  return new EFGobitFunc<T>(E, params);
 }
 
 
