@@ -97,7 +97,7 @@ template <class T> int SeqFormModule<T>::Lemke(int /*dup*/)
   GetProfile(profile,sol,EF.RootNode(),1,1);
 //  gout << "\nprofile = " << profile << "\n";
   solutions.Flush();
-  solutions.Append(BehavSolution<T>(profile, id_SEQFORM));
+  solutions.Append(BehavSolution<T>(profile, EfgAlg_SEQFORM));
   
 //  if(params.trace >= 1)
 //    (*params.tracefile) << "\nN Pivots = " << npivots << "\n";

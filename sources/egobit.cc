@@ -173,7 +173,7 @@ static void AddSolution(gList<BehavSolution<double> > &solutions,
     }
   }
 
-  i = solutions.Append(BehavSolution<double>(bar, id_GOBIT));
+  i = solutions.Append(BehavSolution<double>(bar, EfgAlg_GOBIT));
   solutions[i].SetGobit(lambda, value);
 }
 

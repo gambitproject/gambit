@@ -179,7 +179,7 @@ template <class T> int EnumModule<T>::Enum(void)
 	  add = true;
 	if(add)
 	{
-	  index = solutions.Append(MixedSolution<T>(profile, id_ENUM));
+	  index = solutions.Append(MixedSolution<T>(profile, NfgAlg_ENUM));
 	  if(params.status.Get() != 1)
 	    solutions[index].SetIsNash(T_YES);
 	}

@@ -33,43 +33,9 @@ typedef enum
 
 
 
-#define id_USER 0
-#define id_GOBIT 1
-#define id_LIAP 2
-#define id_LEMKE 3
-#define id_ZSUM 4
-#define id_ENUM 5
-#define id_GOBITGRID 6
-#define id_SIMPDIV 7
-#define id_PURENASH 8
-#define id_LEMKESUB 9
-#define id_SEQFORM 10
-#define id_SIMPDIVSUB 11
-#define id_ZSUMSUB 12
-#define id_PURENASHSUB 13
-#define id_SEQFORMSUB 14
-#define id_ELIAPSUB 15
-#define id_NLIAPSUB 16
-#define id_ENUMSUB 17
-
-
-#define T_DONTKNOW 2
-#define T_YES 1
-#define T_NO 0
-
-#include "gambitio.h"
-gString NameID(int i);
-gString NameTriState(int i);
-void DisplayID(gOutput& o, int i);
-void DisplayTriState(gOutput& o, int i);
-
-
-
 #define rcFAIL     0
 #define rcSUCCESS -1
 #define rcQUIT    -2
-
-
 
 
 

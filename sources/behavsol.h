@@ -8,17 +8,42 @@
 #define BEHAVSOL_H
 
 
-#include "gsmincl.h"
+#include "gmisc.h"
 #include "behav.h"
+#include "gambitio.h"
+#include "gstring.h"
+
+
+typedef enum 
+{
+  EfgAlg_USER,
+  EfgAlg_LIAP,
+  EfgAlg_GOBIT,
+  EfgAlg_PURENASH,
+  EfgAlg_SEQFORM,
+  EfgAlg_LEMKESUB,
+  EfgAlg_SIMPDIVSUB,
+  EfgAlg_ZSUMSUB,
+  EfgAlg_PURENASHSUB,
+  EfgAlg_SEQFORMSUB,
+  EfgAlg_NLIAPSUB,
+  EfgAlg_ELIAPSUB,
+  EfgAlg_ENUMSUB,
+  EfgAlg_CSSEQFORM
+} EfgAlgType;
+
+gString NameEfgAlgType(EfgAlgType i);
+void DisplayEfgAlgType(gOutput& o, EfgAlgType i);
+
 
 
 template <class T> class BehavSolution : public BehavProfile<T>
 {
 protected:
-  int _Creator;
-  int _IsNash;
-  int _IsSubgamePerfect;
-  int _IsSequential;
+  EfgAlgType _Creator;
+  TriState _IsNash;
+  TriState _IsSubgamePerfect;
+  TriState _IsSequential;
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
@@ -29,19 +54,19 @@ public:
   BehavSolution(const Efg<T> &, bool truncated = false);
   BehavSolution(const Efg<T> &, const gDPVector<T> &);
   BehavSolution(const EFSupport &);
-  BehavSolution(const BehavProfile<T> &, int creator = id_USER);
+  BehavSolution(const BehavProfile<T> &, EfgAlgType creator = EfgAlg_USER);
 
   BehavSolution(const BehavSolution<T> &);
   ~BehavSolution();
 
-  void SetCreator(int);
-  int Creator() const; // Who created this object?  (algorithm ID or user)
-  void SetIsNash(int);
-  int IsNash(); // Is it Nash? Y/N/DK
-  void SetIsSubgamePerfect(int);
-  int IsSubgamePerfect(); // Is it Subgame Perfect? Y/N/DK
-  void SetIsSequential(int);
-  int IsSequential(); // Is it Sequential? Y/N/DK
+  void SetCreator(EfgAlgType);
+  EfgAlgType Creator() const; //Who created this object? (algorithm ID or user)
+  void SetIsNash(TriState);
+  TriState IsNash(); // Is it Nash? Y/N/DK
+  void SetIsSubgamePerfect(TriState);
+  TriState IsSubgamePerfect(); // Is it Subgame Perfect? Y/N/DK
+  void SetIsSequential(TriState);
+  TriState IsSequential(); // Is it Sequential? Y/N/DK
 
   void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg

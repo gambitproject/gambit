@@ -5,14 +5,15 @@
 //#
 
 
+#include <assert.h>
 #include "efgutils.h"
 #include "behavsol.h"
-
+#include "gmisc.h"
 
 template <class T> 
 BehavSolution<T>::BehavSolution(const Efg<T>& e, bool truncated)
 : BehavProfile<T>(e, truncated),
-  _Creator(id_USER),
+  _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
@@ -26,7 +27,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, bool truncated)
 template <class T> 
 BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
 : BehavProfile<T>(e, v),
-  _Creator(id_USER),
+  _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
@@ -39,7 +40,7 @@ BehavSolution<T>::BehavSolution(const Efg<T>& e, const gDPVector<T>& v)
 template <class T> 
 BehavSolution<T>::BehavSolution(const EFSupport& s)
 : BehavProfile<T>(s),
-  _Creator(id_USER),
+  _Creator(EfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsSubgamePerfect(T_DONTKNOW),
   _IsSequential(T_DONTKNOW),
@@ -50,7 +51,7 @@ BehavSolution<T>::BehavSolution(const EFSupport& s)
 {}
 
 template <class T> 
-BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, int creator)
+BehavSolution<T>::BehavSolution(const BehavProfile<T>& b, EfgAlgType creator)
 : BehavProfile<T>(b),
   _Creator(creator),
   _IsNash(T_DONTKNOW),
@@ -84,7 +85,7 @@ template <class T> BehavSolution<T>::~BehavSolution()
 
 template <class T> void BehavSolution<T>::EvalEquilibria()
 {
-  if(_Creator == id_LIAP || _Creator == id_GOBIT)
+  if(_Creator == EfgAlg_LIAP || _Creator == EfgAlg_GOBIT)
     _IsSequential = T_YES;
   else
     _IsSequential = T_DONTKNOW;
@@ -102,25 +103,25 @@ template <class T> void BehavSolution<T>::EvalEquilibria()
   }
 }
 
-template <class T> void BehavSolution<T>::SetCreator(int c)
+template <class T> void BehavSolution<T>::SetCreator(EfgAlgType c)
 { _Creator = c; }
 
-template <class T> int BehavSolution<T>::Creator() const
+template <class T> EfgAlgType BehavSolution<T>::Creator() const
 { return _Creator; }
 
-template <class T> void BehavSolution<T>::SetIsNash(int i)
+template <class T> void BehavSolution<T>::SetIsNash(TriState i)
 { _IsNash = i; }
 
-template <class T> int BehavSolution<T>::IsNash()
+template <class T> TriState BehavSolution<T>::IsNash()
 { EvalEquilibria(); return _IsNash; }
 
-template <class T> void BehavSolution<T>::SetIsSubgamePerfect(int i)
+template <class T> void BehavSolution<T>::SetIsSubgamePerfect(TriState i)
 { _IsSubgamePerfect = i; }
 
-template <class T> int BehavSolution<T>::IsSubgamePerfect()
+template <class T> TriState BehavSolution<T>::IsSubgamePerfect()
 {
   EvalEquilibria(); 
-  if((_Creator != id_USER) && (_IsNash == T_YES) && (AllSubgamesMarked(*E)))
+  if((_Creator != EfgAlg_USER) && (_IsNash == T_YES) && (AllSubgamesMarked(*E)))
     _IsSubgamePerfect = T_YES;
   else
     _IsSubgamePerfect = T_DONTKNOW;
@@ -128,10 +129,10 @@ template <class T> int BehavSolution<T>::IsSubgamePerfect()
   return _IsSubgamePerfect; 
 }
 
-template <class T> void BehavSolution<T>::SetIsSequential(int i)
+template <class T> void BehavSolution<T>::SetIsSequential(TriState i)
 { _IsSequential = i; }
 
-template <class T> int BehavSolution<T>::IsSequential()
+template <class T> TriState BehavSolution<T>::IsSequential()
 { EvalEquilibria(); return _IsSequential; }
 
 template <class T> void BehavSolution<T>::SetGobit(T lambda, T value)
@@ -174,7 +175,7 @@ bool BehavSolution<T>::operator==(const BehavSolution<T> & s) const
 template <class T> void BehavSolution<T>::Dump(gOutput& f) const
 {
   BehavProfile<T>::Dump(f);
-  f << " Creator:"; DisplayID(f, _Creator);
+  f << " Creator:"; DisplayEfgAlgType(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsSubgamePerfect:"; DisplayTriState(f, _IsSubgamePerfect);
   f << " IsSequential:"; DisplayTriState(f, _IsSequential);
@@ -191,7 +192,7 @@ template <class T> gOutput &operator<<(gOutput &f, const BehavSolution<T> &s)
 
 template <class T> void BehavSolution<T>::Invalidate()
 {
-  _Creator = id_USER;
+  _Creator = EfgAlg_USER;
   _IsNash = T_DONTKNOW;
   _IsSubgamePerfect = T_DONTKNOW;
   _IsSequential = T_DONTKNOW;

@@ -204,13 +204,10 @@ unassignment: UNASSIGN LBRACK NAME RBRACK
 		emit(new UnAssign);
 	      }
 
-helpstmt:     HELP LBRACK text_or_name RBRACK
-              { emit(new PushRef(tval));
+helpstmt:     HELP LBRACK TEXT RBRACK
+              { emit(new Push<gString>(tval));
 		emit(new Help);
 	      }
-
-text_or_name: TEXT
-         |    NAME
 
 include:      INCLUDE LBRACK TEXT RBRACK
               { inputs.Push(new gFileInput(tval));

@@ -7,11 +7,12 @@
 
 #include "assert.h"
 #include "mixedsol.h"
+#include "gmisc.h"
 
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
 : MixedProfile<T>(n, truncated),
-  _Creator(id_USER),
+  _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
@@ -24,7 +25,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, bool truncated)
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 : MixedProfile<T>(n, s),
-  _Creator(id_USER),
+  _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
@@ -36,7 +37,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const NFSupport& s)
 template <class T> 
 MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
 : MixedProfile<T>(n, v),
-  _Creator(id_USER),
+  _Creator(NfgAlg_USER),
   _IsNash(T_DONTKNOW),
   _IsPerfect(T_DONTKNOW),
   _IsProper(T_DONTKNOW),
@@ -46,7 +47,7 @@ MixedSolution<T>::MixedSolution(const Nfg<T>& n, const gPVector<T>& v)
 {}
 
 template <class T> 
-MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, int creator)
+MixedSolution<T>::MixedSolution(const MixedProfile<T>& m, NfgAlgType creator)
 : MixedProfile<T>(m),
   _Creator(creator),
   _IsNash(T_DONTKNOW),
@@ -87,28 +88,28 @@ template <class T> void MixedSolution<T>::EvalEquilibria()
 }
 
 
-template <class T> void MixedSolution<T>::SetCreator(int c)
+template <class T> void MixedSolution<T>::SetCreator(NfgAlgType c)
 { _Creator = c; }
 
-template <class T> int MixedSolution<T>::Creator() const
+template <class T> NfgAlgType MixedSolution<T>::Creator() const
 { return _Creator; }
 
-template <class T> void MixedSolution<T>::SetIsNash(int i)
+template <class T> void MixedSolution<T>::SetIsNash(TriState i)
 { _IsNash = i; }
 
-template <class T> int MixedSolution<T>::IsNash()
+template <class T> TriState MixedSolution<T>::IsNash()
 { EvalEquilibria(); return _IsNash; }
 
-template <class T> void MixedSolution<T>::SetIsPerfect(int i)
+template <class T> void MixedSolution<T>::SetIsPerfect(TriState i)
 { _IsPerfect = i; }
 
-template <class T> int MixedSolution<T>::IsPerfect()
+template <class T> TriState MixedSolution<T>::IsPerfect()
 { EvalEquilibria(); return _IsPerfect; }
 
-template <class T> void MixedSolution<T>::SetIsProper(int i)
+template <class T> void MixedSolution<T>::SetIsProper(TriState i)
 { _IsProper = i; }
 
-template <class T> int MixedSolution<T>::IsProper()
+template <class T> TriState MixedSolution<T>::IsProper()
 { EvalEquilibria(); return _IsProper; }
 
 
@@ -141,7 +142,7 @@ bool MixedSolution<T>::operator==(const MixedSolution<T> & s) const
 template <class T> void MixedSolution<T>::Dump(gOutput& f) const
 {
   MixedProfile<T>::Dump(f);
-  f << " Creator:"; DisplayID(f, _Creator);
+  f << " Creator:"; DisplayNfgAlgType(f, _Creator);
   f << " IsNash:"; DisplayTriState(f, _IsNash);
   f << " IsPerfect:"; DisplayTriState(f, _IsPerfect);
   f << " IsProper:"; DisplayTriState(f, _IsProper);
@@ -157,7 +158,7 @@ template <class T> gOutput &operator<<(gOutput &f, const MixedSolution<T> &s)
 
 template <class T> void MixedSolution<T>::Invalidate()
 {
-  _Creator = id_USER;
+  _Creator = NfgAlg_USER;
   _IsNash = T_DONTKNOW;
   _IsProper = T_DONTKNOW;
   _GobitLambda = -1;

@@ -33,7 +33,7 @@ template <class T> class SubgameSolver   {
 
     virtual void ViewNormal(const Nfg<T> &, NFSupport *&);
     virtual void SelectSolutions(int, const Efg<T> &, gList<BehavSolution<T> > &);
-    virtual int AlgorithmID() const = 0;
+    virtual EfgAlgType AlgorithmID() const = 0;
 
   public:
     SubgameSolver(const Efg<T> &E, int maxsol = 0);

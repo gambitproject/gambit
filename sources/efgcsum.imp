@@ -237,7 +237,7 @@ void CSSeqFormModule<T>::GetSolutions(gList<BehavSolution<T> > &solutions) const
       else
 	profile(2, j) = (T) 0;
 
-    index = solutions.Append(BehavSolution<T>(profile, id_CSSeqForm));
+    index = solutions.Append(BehavSolution<T>(profile, EfgAlg_CSSeqForm));
     solutions[index].SetIsNash(T_YES);
   }
 */

@@ -70,7 +70,7 @@ template <class T> class CSSeqFormBySubgame : public SubgameSolver<T>  {
     CSSeqFormParams params;
 
     int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
-    int AlgorithmID() const { return id_USER; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_CSSEQFORM; }    
 
   public:
     CSSeqFormBySubgame(const Efg<T> &E, const CSSeqFormParams &, int max = 0);

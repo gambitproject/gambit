@@ -141,7 +141,7 @@ bool Liap(const Efg<double> &E, EFLiapParams &params,
     if (found = Powell(p, xi, F, value, iter,
 		       params.maxits1, params.tol1, params.maxitsN, params.tolN,
 		       *params.tracefile))  {
-      int index = solutions.Append(BehavSolution<double>(p, id_LIAP));
+      int index = solutions.Append(BehavSolution<double>(p, EfgAlg_LIAP));
       solutions[index].SetLiap(value);
     }
     

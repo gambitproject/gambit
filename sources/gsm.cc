@@ -1796,8 +1796,8 @@ void GSM::Clear( void )
 void GSM::Help(void)
 {
   Portion* p = _Pop();
-  assert(p->Type() == porREFERENCE);
-  gString funcname = ((ReferencePortion*) p)->Value();
+  assert(p->Type() == porTEXT);
+  gString funcname = ((TextPortion*) p)->Value();
   int i;
   int j;
   int fk;
@@ -1817,7 +1817,6 @@ void GSM::Help(void)
   }
   else
   {
-    funcname = funcname.dncase();
     for(i=0; i<_FuncTable->NumBuckets(); i++)
       for(j=1; j<=funcs[i].Length(); j++)
 	funclist.Append(funcs[i][j]);

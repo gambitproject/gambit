@@ -126,7 +126,7 @@ void SubgameSolver<T>::FindSubgames(Node *n, gList<BehavSolution<T> > &solns,
 	    solns[solns.Length()](pl, index, act) = sol[solno](pl, iset, act);
 	}
 	
-	solns[solns.Length()].SetCreator(AlgorithmID());
+	solns[solns.Length()].SetCreator( (EfgAlgType) AlgorithmID());
 	if(failed == 0)
 	  solns[solns.Length()].SetIsNash(T_YES);
       }

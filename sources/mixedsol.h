@@ -9,18 +9,37 @@
 #ifndef MIXEDSOL_H
 #define MIXEDSOL_H
 
-
-#include "gsmincl.h"
+#include "gmisc.h"
 #include "mixed.h"
+#include "gambitio.h"
+#include "gstring.h"
+
+typedef enum 
+{
+  NfgAlg_USER,
+  NfgAlg_GOBIT,
+  NfgAlg_LIAP,
+  NfgAlg_LEMKE,
+  NfgAlg_ZSUM,
+  NfgAlg_ENUM,
+  NfgAlg_GOBITGRID,
+  NfgAlg_SIMPDIV,
+  NfgAlg_PURENASH,
+  NfgAlg_SEQFORM,
+} NfgAlgType;
+
+gString NameNfgAlgType(NfgAlgType i);
+void DisplayNfgAlgType(gOutput& o, NfgAlgType i);
+
 
 
 template <class T> class MixedSolution : public MixedProfile<T>
 {
 protected:
-  int _Creator;
-  int _IsNash;
-  int _IsPerfect;
-  int _IsProper;
+  NfgAlgType _Creator;
+  TriState _IsNash;
+  TriState _IsPerfect;
+  TriState _IsProper;
   T _GobitLambda;
   T _GobitValue;
   T _LiapValue;
@@ -31,19 +50,19 @@ public:
   MixedSolution(const Nfg<T> &, bool truncated = false);
   MixedSolution(const Nfg<T> &, const NFSupport &);
   MixedSolution(const Nfg<T> &, const gPVector<T> &);
-  MixedSolution(const MixedProfile<T> &, int creator = id_USER);
+  MixedSolution(const MixedProfile<T> &, NfgAlgType creator = NfgAlg_USER);
 
   MixedSolution(const MixedSolution<T> &);
   ~MixedSolution();
 
-  void SetCreator(int);
-  int Creator() const; // Who created this object? (algorithm ID or user)
-  void SetIsNash(int);
-  int IsNash(); // Is it Nash? Y/N/DK
-  void SetIsPerfect(int);
-  int IsPerfect(); //Is it Perfect? Y/N/DK
-  void SetIsProper(int);
-  int IsProper(); //Is it Proper? Y/N/DK
+  void SetCreator(NfgAlgType);
+  NfgAlgType Creator() const; //Who created this object? (algorithm ID or user)
+  void SetIsNash(TriState);
+  TriState IsNash(); // Is it Nash? Y/N/DK
+  void SetIsPerfect(TriState);
+  TriState IsPerfect(); //Is it Perfect? Y/N/DK
+  void SetIsProper(TriState);
+  TriState IsProper(); //Is it Proper? Y/N/DK
 
   void SetGobit(T lambda, T value);
   T GobitLambda() const; // lambda from gobit alg

@@ -69,7 +69,7 @@ template <class T> class SeqFormBySubgame : public SubgameSolver<T>  {
     SeqFormParams params;
 
     int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
-    int AlgorithmID() const { return id_SEQFORMSUB; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_SEQFORMSUB; }    
 
   public:
     SeqFormBySubgame(const Efg<T> &E, const SeqFormParams &, int max = 0);

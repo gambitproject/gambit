@@ -92,6 +92,12 @@ Portion* GSM_Assign( Portion** param )
 */
 
 
+Portion* GSM_Fake(Portion**)
+{
+  assert(0);
+  return 0;
+}
+
 //-------------------------------------------------------------------
 //                      mathematical operators
 //------------------------------------------------------------------
@@ -2706,11 +2712,34 @@ void Init_gsmoper( GSM* gsm )
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   FuncObj->SetParamInfo( GSM_Read_Undefined, 1, "x", porUNDEFINED, 
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
-
-
-
   gsm->AddFunction( FuncObj );
 
+  
+
+  //---------------- faked functions -----------------//
+
+  FuncObj = new FuncDescObj( (gString) "Help" );
+  FuncObj->SetFuncInfo( GSM_Fake, 1 );
+  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porTEXT );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "Assign" );
+  FuncObj->SetFuncInfo( GSM_Fake, 2 );
+  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porANYTYPE,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo( GSM_Fake, 1, "y", porANYTYPE );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "Include" );
+  FuncObj->SetFuncInfo( GSM_Fake, 1 );
+  FuncObj->SetParamInfo( GSM_Fake, 0, "file", porTEXT );
+  gsm->AddFunction( FuncObj );
+
+  FuncObj = new FuncDescObj( (gString) "UnAssign" );
+  FuncObj->SetFuncInfo( GSM_Fake, 1 );
+  FuncObj->SetParamInfo( GSM_Fake, 0, "x", porANYTYPE,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction( FuncObj );
 
 }
 

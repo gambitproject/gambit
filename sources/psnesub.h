@@ -13,7 +13,7 @@
 template <class T> class PureNashBySubgame : public SubgameSolver<T>  {
   private:
     int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
-    int AlgorithmID() const { return id_PURENASHSUB; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_PURENASHSUB; }    
 
   public:
     PureNashBySubgame(const Efg<T> &E, int max = 0);

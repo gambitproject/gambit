@@ -16,7 +16,7 @@ template <class T> class EnumBySubgame : public SubgameSolver<T>  {
     EnumParams params;
 
     int SolveSubgame(const Efg<T> &, gList<BehavSolution<T> > &);
-    int AlgorithmID() const { return id_ENUMSUB; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_ENUMSUB; }    
 
   public:
     EnumBySubgame(const Efg<T> &E, const EnumParams &, int max = 0);

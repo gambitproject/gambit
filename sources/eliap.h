@@ -40,7 +40,7 @@ class EFLiapBySubgame : public SubgameSolver<double>  {
     BehavProfile<double> start;
     
     int SolveSubgame(const Efg<double> &, gList<BehavSolution<double> > &);
-    int AlgorithmID() const { return id_ELIAPSUB; }    
+    EfgAlgType AlgorithmID() const { return EfgAlg_ELIAPSUB; }    
 
   public:
     EFLiapBySubgame(const Efg<double> &E, const EFLiapParams &,

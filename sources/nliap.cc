@@ -201,7 +201,7 @@ bool Liap(const Nfg<double> &N, NFLiapParams &params,
 	  (params.status.Get() && p.IsNash()))
 	add = true;
       if (add)  {
-	int index = solutions.Append(MixedSolution<double>(p, id_LIAP));
+	int index = solutions.Append(MixedSolution<double>(p, NfgAlg_LIAP));
 	solutions[index].SetLiap(value);
 	if (!params.status.Get())
 	  solutions[index].SetIsNash(T_YES);

@@ -212,7 +212,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
     
     if (params.fullGraph) 
     {
-      i = solutions.Append(MixedSolution<double>(p, id_GOBIT));      
+      i = solutions.Append(MixedSolution<double>(p, NfgAlg_GOBIT));      
       solutions[i].SetGobit(Lambda, value);
     }
 
@@ -223,7 +223,7 @@ void Gobit(const Nfg<double> &N, NFGobitParams &params,
 
   if (!params.fullGraph)
   {
-    i = solutions.Append(MixedSolution<double>(p, id_GOBIT));
+    i = solutions.Append(MixedSolution<double>(p, NfgAlg_GOBIT));
     solutions[i].SetGobit(Lambda, value);
   }
 

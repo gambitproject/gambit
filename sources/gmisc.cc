@@ -241,13 +241,24 @@ double ToDouble(const gString &s)
 { return strtod(s, NULL); }
 
 
+//------------------------ TriState functions -----------------//
 
+gString NameTriState(TriState i)
+{
+  switch(i)
+  {
+  case T_DONTKNOW:
+    return "DK"; 
+  case T_YES:
+    return "Y"; 
+  case T_NO:
+    return "N"; 
+  default:
+    return "ERROR";
+  }
+}
 
-
-
-
-
-
-
-
-
+void DisplayTriState(gOutput& o, TriState i)
+{
+  o << NameTriState(i);
+}

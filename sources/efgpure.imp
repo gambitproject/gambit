@@ -50,7 +50,7 @@ template <class T> int FindPureNash(const Efg<T> &efg,
 	  temp(pl, iset, profile(pl, iset)) = (T) 1;
       }
 
-      index = eqs.Append(BehavSolution<T>(temp, id_PURENASH));
+      index = eqs.Append(BehavSolution<T>(temp, EfgAlg_PURENASH));
       eqs[index].SetIsNash(T_YES);
     }
   }  while (citer.NextContingency());
