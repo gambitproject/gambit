@@ -1631,48 +1631,6 @@ static Portion* GSM_Platform( Portion** )
   return new TextPortion("Unknown");
 #endif
 }
-
-extern gStack<gText> GCL_InputFileNames;
-
-static Portion* GSM_GetPath(Portion** param)
-{
-#ifdef __GNUG__
-  const char SLASH = '/';
-#elif defined __BORLANDC__
-  const char SLASH = '\\';
-#endif   // __GNUG__
-  bool file = ((BoolPortion*) param[0])->Value();
-  bool path = ((BoolPortion*) param[1])->Value();
-  if( GCL_InputFileNames.Depth() > 0 )
-  {
-    gText txt = GCL_InputFileNames.Peek();
-
-    if( file && path )
-    {
-    }
-    else if( file )
-    {
-      if( txt.LastOccur( SLASH ) > 0 )
-	txt = txt.Right( txt.Length() - txt.LastOccur( SLASH ) );
-      else
-	txt = "";
-    }
-    else if( path )
-    {
-      if( txt.LastOccur( SLASH ) > 0 )
-	txt = txt.Left( txt.LastOccur( SLASH ) );
-    }
-    if( !file && !path )
-      txt = "";
-    
-    return new TextPortion( txt );
-  }
-  else
-    return new TextPortion( "" );
-}
-
-
-
 #include <sys/types.h>
 #ifndef __BORLANDC__
 #include <sys/time.h>
@@ -2188,15 +2146,6 @@ void Init_gsmoper(GSM* gsm)
   FuncObj = new FuncDescObj("Platform", 1);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_Platform, porTEXT, 0));
   gsm->AddFunction(FuncObj);
-
-  FuncObj = new FuncDescObj("GetPath", 1);
-  FuncObj->SetFuncInfo(0, gclSignature(GSM_GetPath, porTEXT, 2));
-  FuncObj->SetParamInfo(0, 0, gclParameter("file", porBOOLEAN,
-					    new BoolPortion( true ) ) );
-  FuncObj->SetParamInfo(0, 1, gclParameter("path", porBOOLEAN,
-					    new BoolPortion( true ) ) );
-  gsm->AddFunction(FuncObj);
-
 
   FuncObj = new FuncDescObj("IsList", 2);
   FuncObj->SetFuncInfo(0, gclSignature(GSM_IsList, porBOOLEAN, 1,
