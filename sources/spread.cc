@@ -653,32 +653,32 @@ void SpreadSheetC::ProcessCursor(int ch)
     switch (ch)
     {
     case    WXK_UP:
-        if (cell.row > 1)
-        {
+        if (cell.row > 1) {
+            if (!sheet->GetSelectableRow(cell.row - 1))  return;
             cell.row--;
             how = SpreadMoveUp;
         }
         break;
 
     case    WXK_DOWN:
-        if (cell.row < sheet->GetRows())
-        {
+        if (cell.row < sheet->GetRows()) {
+            if (!sheet->GetSelectableRow(cell.row + 1))  return;
             cell.row++;
             how = SpreadMoveDown;
         }
         break;
 
     case    WXK_RIGHT:
-        if (cell.col < sheet->GetCols())
-        {
+        if (cell.col < sheet->GetCols()) {
+            if (!sheet->GetSelectableCol(cell.col + 1))  return;
             cell.col++;
             how = SpreadMoveRight;
         }
         break;
 
     case WXK_LEFT:
-        if (cell.col > 1)
-        {
+        if (cell.col > 1) {
+            if (!sheet->GetSelectableCol(cell.col - 1))  return;
             cell.col--;
             how = SpreadMoveLeft;
         }

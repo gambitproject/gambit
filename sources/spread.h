@@ -604,6 +604,9 @@ public:
   void SetSelectableRow(int row, Bool sel) { row_selectable[row] = sel; }
   void SetSelectableCol(int col, Bool sel) { col_selectable[col] = sel; }
 
+  Bool GetSelectableRow(int row) const { return row_selectable[row]; }
+  Bool GetSelectableCol(int col) const { return col_selectable[col]; }
+
     // Accessing the currently hilighted cell
     int         CurRow(void)      { return sheet->Row(); }
     int         CurCol(void)      { return sheet->Col(); }
