@@ -39,7 +39,7 @@ template <class T> class gBlock    {
 // Constructs the a block of the given length.  All elements of the block
 // are constructed according to the default constructor for type T.
 //
-    gBlock(int len = 0) : length(len), data((len) ? new T[len] : 0)    { }
+    gBlock(int len = 0);
 //
 // Constructs a block to have the same contents as another block.  This
 // uses copy semantics.
@@ -49,7 +49,7 @@ template <class T> class gBlock    {
 // Deallocates the block of memory, calling the destructors for any
 // elements still within the block.
 //
-    ~gBlock()    { if (data) delete [] data; }
+    ~gBlock();
 
 //
 // Sets the block to have the same contents as another block.
@@ -61,8 +61,7 @@ template <class T> class gBlock    {
 // same length, and the contents of all components are equal.
 //+grp
     int operator==(const gBlock<T> &b) const;
-    int operator!=(const gBlock<T> &b) const
-      { return !(*this == b); }
+    int operator!=(const gBlock<T> &b) const;
 //-grp
 
 //
@@ -77,10 +76,8 @@ template <class T> class gBlock    {
 //
 // Append an element to a gBlock.  Operator overloaded for ease of use.
 //+grp
-    gBlock<T> operator+(const T &e) const
-      { gBlock<T> result(*this); result.Append(e); return result; }
-    gBlock<T>& operator+=(const T &e)
-      { Append(e); return *this; }
+    gBlock<T> operator+(const T &e) const;
+    gBlock<T>& operator+=(const T &e);
 //-grp
 
 //
@@ -88,8 +85,7 @@ template <class T> class gBlock    {
 // while += puts it in the first argument.
 //+grp
     gBlock<T> operator+(const gBlock<T>& b) const;
-    gBlock<T>& operator+=(const gBlock<T>& b)
-      { *this = *this + b; return *this; }
+    gBlock<T>& operator+=(const gBlock<T>& b);
 //-grp
 
 //
@@ -119,16 +115,16 @@ template <class T> class gBlock    {
 //
 // Return true (nonzero) if the element is currently residing in the block.
 //
-    int Contains(const T &t) const    { return Find(t); }
+    int Contains(const T &t) const;
 //
 // Return the number of elements currently in the block.
 //
-    int Length(void) const    { return length; }
+    int Length(void) const;
 
 //
 // Empty the block
 //
-    void Flush(void)   { length = 0;  delete [] data;  data = 0; }
+    void Flush(void);
 
 //
 // Print the contents of the block (for debugging purposes)
@@ -146,6 +142,10 @@ template <class T> class gBlock    {
 #error Unsupported compiler type
 #endif   //# __GNUG__, __BORLANDC__
 
+template <class T> INLINE gBlock<T>::gBlock(int len)
+     : length(len), data((len) ? new T[len] : 0)
+{ }
+
 template <class T> INLINE gBlock<T>::gBlock(const gBlock<T> &b)
  : length(b.length)
 {
@@ -156,6 +156,11 @@ template <class T> INLINE gBlock<T>::gBlock(const gBlock<T> &b)
   }
   else
     data = 0;
+}
+
+template <class T> INLINE gBlock<T>::~gBlock()
+{ 
+  if (data)  delete [] data;
 }
 
 template <class T> INLINE gBlock<T> &gBlock<T>::operator=(const gBlock<T> &b)
@@ -183,6 +188,11 @@ template <class T> INLINE int gBlock<T>::operator==(const gBlock<T> &b) const
   return 1;
 }
 
+template <class T> inline int gBlock<T>::operator!=(const gBlock<T> &b) const
+{
+  return !(*this == b);
+}
+
 template <class T> INLINE const T &gBlock<T>::operator[](int n) const
 {
   assert(n >= 1 && n <= length);
@@ -202,6 +212,28 @@ template <class T> INLINE
   for (int i = 1; i <= b.length; i++)
     result.Append(b[i]);
   return result;
+}
+
+template <class T> INLINE
+gBlock<T> gBlock<T>::operator+(const T &e) const
+{
+  gBlock<T> result(*this);
+  result.Append(e);
+  return result;
+}
+
+template <class T> INLINE
+gBlock<T> &gBlock<T>::operator+=(const T &e)
+{
+  Append(e);
+  return *this;
+}
+
+template <class T> INLINE
+gBlock<T> &gBlock<T>::operator+=(const gBlock<T> &b)
+{
+  *this = *this + b;
+  return *this;
 }
 
 template <class T> INLINE int gBlock<T>::InsertAt(const T &t, int n)
@@ -250,6 +282,15 @@ template <class T> INLINE int gBlock<T>::Find(const T &t) const
   for (int i = 0; i < length && data[i] != t; i++);
   return (i < length) ? ++i : 0;
 }
+
+template <class T> inline int gBlock<T>::Contains(const T &t) const
+{ return Find(t); }
+
+template <class T> inline int gBlock<T>::Length(void) const
+{ return length; }
+
+template <class T> INLINE void gBlock<T>::Flush(void)
+{ length = 0;  delete [] data;  data = 0; }
 
 template <class T> INLINE void gBlock<T>::Dump(gOutput &f) const
 {

@@ -62,7 +62,7 @@ protected:
     Delete(data);
   }
 
-  void CopyData( gVector<T> &V ) {
+  void CopyData( const gVector<T> &V ) {
     min=V.min; max=V.max;
     AllocateData();
     for(int i=min; i<=max; i++)
