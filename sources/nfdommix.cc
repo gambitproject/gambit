@@ -1,7 +1,7 @@
 //
 // FILE: nfdommix.cc -- Elimination of dominated strategies in nfg
 //
-// @(#)nfdommix.cc	2.9 19 Jul 1997
+// $Id$
 //
 
 #include "gambitio.h"
@@ -14,6 +14,7 @@
 
 bool ComputeMixedDominated(const Nfg &nfg,
 			   const NFSupport &S, NFSupport &R,
+         const gArray<gNumber> &values,
 			   int pl, bool strong, gOutput &tracefile,
 			   gStatus &status)
 {
@@ -24,9 +25,6 @@ bool ComputeMixedDominated(const Nfg &nfg,
   double d1,d2;
   d1 = (double)(pl-1)/(double)S.Game().NumPlayers();
   d2 = (double)pl/(double)S.Game().NumPlayers();
-
-  gArray<gNumber> values(S.Game().Parameters()->Dmnsn());
-  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
 
   gArray<bool> dom(S.NumStrats(pl));
   gVector<gRational> dominator(S.NumStrats(pl));
@@ -195,7 +193,8 @@ bool ComputeMixedDominated(const Nfg &nfg,
   }
 }
 
-NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
+NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S,
+         const gArray<gNumber> &values, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status)
 {
@@ -205,7 +204,7 @@ NFSupport *ComputeMixedDominated(const Nfg &N, NFSupport &S, bool strong,
   for (int i = 1; i <= players.Length() && !status.Get(); i++)   {
     int pl = players[i];
 
-    any |= ComputeMixedDominated(N, S, *newS, pl, strong, tracefile, status);
+    any |= ComputeMixedDominated(N, S, *newS, values, pl, strong, tracefile, status);
   }
   tracefile << "\n";
   if (!any || status.Get())  {

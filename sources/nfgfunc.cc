@@ -80,7 +80,8 @@ NFSupport *ComputeDominated(const Nfg &, NFSupport &S,
                             const gArray<gNumber> &params, bool strong,
 			    const gArray<int> &players,
 			    gOutput &tracefile, gStatus &status);
-NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S, bool strong,
+NFSupport *ComputeMixedDominated(const Nfg &, NFSupport &S,
+         const gArray<gNumber> &values, bool strong,
 				 const gArray<int> &players,
 				 gOutput &tracefile, gStatus &status);
 
@@ -103,12 +104,13 @@ static Portion *GSM_ElimDom_Nfg(Portion **param)
   Portion *por;
 
   Nfg *N = (Nfg *) &S->Game();
+  gArray<gNumber> values(N->Parameters()->Dmnsn());
+  for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
+
   if (mixed)
-    T = ComputeMixedDominated(*N, *S, strong, players,
+    T = ComputeMixedDominated(*N, *S, values, strong, players,
 			      ((OutputPortion *) param[4])->Value(), gstatus);
   else   {
-    gArray<gNumber> values(N->Parameters()->Dmnsn());
-    for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
     T = ComputeDominated(*N, *S, values, strong, players,
 			   ((OutputPortion *) param[4])->Value(), gstatus);
   }
