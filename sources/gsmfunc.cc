@@ -454,7 +454,8 @@ FuncDescObj::FuncDescObj(const gString& func_name, int numfuncs)
 
   // Assumes one argument, which has a prototype func_proto
 FuncDescObj::FuncDescObj( const gString& func_proto, 
-                          Portion* (*funcptr)(Portion**) )
+                          Portion* (*funcptr)(Portion**),
+                          FuncFlagType FFT /* = funcLISTABLE */  )
 {
   _NumFuncs = 1;
   _FuncInfo = new FuncInfoType[1];
@@ -472,7 +473,7 @@ FuncDescObj::FuncDescObj( const gString& func_proto,
 
   _FuncName = func_name;
 
-  SetFuncInfo(0,func_proto,funcptr);
+  SetFuncInfo(0,func_proto,funcptr, FFT);
 }
 
 
@@ -530,12 +531,15 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s)
   SetFuncInfo(funcindex, s, 0);
 }
 
+  // In this function, the input string "s" is parsed, and the info contained 
+  // in it is used to determine the function info, and then SetFuncInfo 
+  // is called with all data passed as arguments rather than a string.
+
 void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
                               Portion* (*funcptr)(Portion**), 
                               FuncFlagType FFT /* = funcLISTABLE */  )
 {
 
-    // Here we will parse the gString and call the above SetFuncInfo function.
   char ch = ' ';
   int index=0, length=s.length();
   int numArgs=0;
@@ -544,6 +548,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   gList<gString> specList;
   gList<gString> nameList;
   gList<int>     listList;
+  gList<bool>    refList;
   gList<Portion*>     reqList;
   
     // Move ch to the first variable name
@@ -554,6 +559,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   if (ch == ']') // If there are no parameters
     done = true;
 
+    // Loop through the string, parsing a word-argument pair at a time.
   while (!done)  // ch should always be at beginning of next name here
   {
   
@@ -573,6 +579,16 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
     while (isalpha(ch)) { name += ch; ch = s[index++]; }
     nameList.Append(name);
   
+      // See if it passed by reference
+    if (ch == '<')
+    {
+      refList.Append(BYREF);
+    }
+    else
+    {
+      refList.Append(BYVAL);
+    }
+    
       // Move ch so that it holds the first character of the type;
     while (ch != '>' && ch != ']' && index<=length)  
       ch=s[index++];
@@ -770,6 +786,8 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   /*nameList.Dump(gout);*/
   /*gout << "ListList: \n";*/
   /*listList.Dump(gout);*/
+  /*gout << "RefList: \n";*/
+  /*refList.Dump(gout);*/
   /*int rl = reqList.Length();*/
   /*gout << "ReqL Length: " << rl << "\n";*/
   /*gout << "NumArgs: " << numArgs << "\n";*/
@@ -781,7 +799,7 @@ void FuncDescObj::SetFuncInfo(int funcindex, const gString& s,
   for (int i=1;i<=numArgs;i++)
   {
     PIT[i-1] = ParamInfoType(nameList[i], ToSpec(specList[i], listList[i]),
-                                  reqList[i]);
+                                  reqList[i], refList[i]);
   }
 
   SetFuncInfo(funcindex, 
@@ -794,8 +812,8 @@ PortionSpec ToSpec(gString &str, int num /* =0 */)
   /*gout << "ToSpec called with " << str << " and " << num << ".\n";*/
   if (str == "NUMBER")
     return PortionSpec(porNUMBER, num);
-  else if (str == "BOOLEAN")
-    return PortionSpec(porBOOL, num);
+  else if (str == "BOOLEAN") 
+    return PortionSpec(porBOOL, num); 
   else if (str == "INTEGER")
     return PortionSpec(porINTEGER, num);
   else if (str == "TEXT")
@@ -1306,12 +1324,12 @@ bool CallFuncObj::SetCurrParamIndex(const gString& param_name)
       f_index < _NumFuncs && result != PARAM_AMBIGUOUS;
       f_index++)
   {
-    if(_FuncMatch[f_index])
+    if (_FuncMatch[f_index])
     {
       name_match_found = false;
       for(index = 0; index < _FuncInfo[f_index].NumParams; index++)
       {
-	if(_FuncInfo[f_index].ParamInfo[index].Name == param_name)
+	if (_FuncInfo[f_index].ParamInfo[index].Name == param_name)
 	{
 	  name_match_found = true;
 	  if(result == PARAM_NOT_FOUND)
