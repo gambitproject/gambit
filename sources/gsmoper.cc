@@ -22,8 +22,14 @@ Portion* GSM_Assign_Undefined( Portion** param )
   assert( param[0] == 0 );
   if( param[1]->Type() & (porINPUT|porOUTPUT) )
   {
-    param[0] = param[1];
-    param[1] = param[0]->RefCopy();
+    if( param[1]->Original() == param[1] )
+    {
+      param[0] = param[1];
+      param[1] = param[1]->RefCopy();      
+    }
+    else
+      return 
+	new ErrorPortion( "Cannot assign from an INPUT or OUTPUT variable" );
   }
   else
     param[0] = param[1]->ValCopy();
