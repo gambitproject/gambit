@@ -505,6 +505,41 @@ void guiPagedDialog::SetValue(int p_index, const gText &p_value)
 
 
 //========================================================================
+//                    guiSliderDialog: Member functions
+//========================================================================
+
+guiSliderDialog::guiSliderDialog(wxWindow *p_parent, const gText &p_caption,
+				 int p_min, int p_max, int p_default)
+  : guiAutoDialog(p_parent, p_caption)
+{
+  m_slider = new wxSlider(this, 0, p_caption, p_default, p_min, p_max, 250);
+  m_slider->SetConstraints(new wxLayoutConstraints);
+  m_slider->GetConstraints()->left.SameAs(this, wxLeft, 10);
+  m_slider->GetConstraints()->top.SameAs(this, wxTop, 10);
+  m_slider->GetConstraints()->width.AsIs();
+  m_slider->GetConstraints()->height.AsIs();
+
+  m_okButton->GetConstraints()->right.SameAs(this, wxCentreX, 5);
+  m_okButton->GetConstraints()->top.SameAs(m_slider, wxBottom, 10);
+  m_okButton->GetConstraints()->width.SameAs(m_cancelButton, wxWidth);
+  m_okButton->GetConstraints()->height.AsIs();
+
+  m_cancelButton->GetConstraints()->left.SameAs(m_okButton, wxRight, 10);
+  m_cancelButton->GetConstraints()->centreY.SameAs(m_okButton, wxCentreY);
+  m_cancelButton->GetConstraints()->width.AsIs();
+  m_cancelButton->GetConstraints()->height.AsIs();
+
+  m_helpButton->Show(FALSE);
+  m_helpButton->GetConstraints()->top.SameAs(this, wxTop);
+  m_helpButton->GetConstraints()->left.SameAs(this, wxLeft);
+  m_helpButton->GetConstraints()->width.AsIs();
+  m_helpButton->GetConstraints()->height.AsIs();
+
+  Go();
+}
+
+
+//========================================================================
 //                     FontDialogBox: Member functions
 //========================================================================
 

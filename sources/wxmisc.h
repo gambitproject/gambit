@@ -163,6 +163,23 @@ public:
   void SetValue(int p_index, const gText &p_value);
 };
 
+/**
+ * A dialog box with just a slider, and OK/Cancel buttons
+ */
+
+class guiSliderDialog : public guiAutoDialog {
+private:
+  wxSlider *m_slider;
+
+public:
+  guiSliderDialog(wxWindow *p_parent, const gText &p_caption,
+		  int p_min, int p_max, int p_default);
+  virtual ~guiSliderDialog() { }
+
+  int GetValue(void) const { return m_slider->GetValue(); }
+};
+
+
 class FontDialogBox : public guiAutoDialog {
 private:
   wxChoice *m_nameItem, *m_sizeItem;

@@ -46,8 +46,15 @@
 #define NFG_VIEW_OUTCOMES               350
 #define NFG_VIEW_GAMEINFO               155
 
-#define NFG_DISPLAY_COLORS              200
-#define NFG_DISPLAY_ACCELS              202
+#define NFG_PREFS_DISPLAY               204
+#define NFG_PREFS_DISPLAY_COLUMNS       205
+#define NFG_PREFS_DISPLAY_ROWS          206
+#define NFG_PREFS_DISPLAY_DECIMALS      207
+#define NFG_PREFS_FONTS                 208
+#define NFG_PREFS_FONTS_LABELS          209
+#define NFG_PREFS_FONTS_CELLS           210
+#define NFG_PREFS_COLORS                200
+#define NFG_PREFS_ACCELS                202
 
 #define NFG_ACCL_PAYOFF                 400     // these are not real menus, just accels
 #define NFG_ACCL_NEXT_PAYOFF            410

@@ -206,7 +206,9 @@ public:
     // Data Access, Get* functions
     // These functions control the dimentions of each cell i.e. Width X Height
     int GetRowHeight(void)  { return ((vert_fit) ? (th*5/4+2*TEXT_OFF) : row_height); }
+    int GetRowHeightRaw(void) const { return row_height; }
     int GetColWidth(int col = 0);
+    int GetColWidthRaw(int col) const;
 
     bool GetRowFit(void) { return vert_fit; }
     bool GetColFit(void) { return horiz_fit; }

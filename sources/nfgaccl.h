@@ -7,7 +7,7 @@
 #include "accels.h"
 #include "nfgconst.h"
 
-#define 	NUM_NFG_EVENTS	34
+#define 	NUM_NFG_EVENTS	33
 AccelEvent nfg_events[NUM_NFG_EVENTS]=
 {
 AccelEvent("FileSave",NFG_FILE_SAVE),
@@ -37,9 +37,8 @@ AccelEvent("QREGrid",NFG_SOLVE_CUSTOM_QREGRID),
 AccelEvent("ViewSolutions",NFG_VIEW_SOLUTIONS),
 AccelEvent("ViewGameInfo",NFG_VIEW_GAMEINFO),
 AccelEvent("ViewOutcomes",NFG_VIEW_OUTCOMES),
-AccelEvent("PrefsDisplay",OPTIONS_MENU),
-AccelEvent("PrefsColors",NFG_DISPLAY_COLORS),
-AccelEvent("PrefsAccels",NFG_DISPLAY_ACCELS),
+AccelEvent("PrefsColors",NFG_PREFS_COLORS),
+AccelEvent("PrefsAccels",NFG_PREFS_ACCELS),
 AccelEvent("HelpAbout",HELP_MENU_ABOUT),
 AccelEvent("HelpContents",HELP_MENU_CONTENTS),
 AccelEvent("EditPayoff",NFG_ACCL_PAYOFF),

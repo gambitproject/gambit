@@ -109,7 +109,6 @@ public:
   void SupportEdit(void);
   void SupportDelete(void);
   void SupportSelect(void);
-
   NFSupport *MakeSupport(void);
   
   void OutcomeNew(void);
@@ -122,6 +121,12 @@ public:
     { draw_settings.SetOutcomeDisp(1 - draw_settings.OutcomeDisp());
       UpdateVals();
     }
+
+  void PrefsDisplayRows(void);
+  void PrefsDisplayColumns(void);
+  void PrefsDisplayDecimals(void);
+  void PrefsFontsLabels(void);
+  void PrefsFontsCells(void);
 
   void UpdateVals(void);
   void UpdateSoln(void);

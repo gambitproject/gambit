@@ -465,4 +465,3 @@ void dialogNfgSave::OnBrowse(void)
   }
 }
 
-

@@ -372,6 +372,10 @@ int SpreadSheetDrawSettings::GetColWidth(int col)
         return col_width[col]*COL_WIDTH_UNIT;
 }
 
+int SpreadSheetDrawSettings::GetColWidthRaw(int p_column) const
+{
+  return col_width[p_column];
+}
 
 void SpreadSheetDrawSettings::SetColWidth(int _c, int col)
 {

@@ -1133,7 +1133,58 @@ void NfgShow::SupportSelect(void)
       guiExceptionDialog(E.Description(), spread);
     }
   }
+}
 
+void NfgShow::PrefsDisplayColumns(void)
+{
+  guiSliderDialog dialog(spread, "Column width", 0, 100,
+			 spread->DrawSettings()->GetColWidthRaw(spread->CurCol()));
+
+  if (dialog.Completed() == wxOK) {
+    spread->DrawSettings()->SetColWidth(dialog.GetValue(), spread->CurCol());
+    spread->Repaint();
+  }
+}
+
+void NfgShow::PrefsDisplayRows(void)
+{
+  guiSliderDialog dialog(spread, "Row height", 0, 100, 
+			 spread->DrawSettings()->GetRowHeightRaw());
+
+  if (dialog.Completed() == wxOK) {
+    spread->DrawSettings()->SetRowHeight(dialog.GetValue());
+    spread->Repaint();
+  }
+}
+
+void NfgShow::PrefsDisplayDecimals(void)
+{
+  guiSliderDialog dialog(spread, "Decimal places", 0, 25, ToTextPrecision());
+
+  if (dialog.Completed() == wxOK) {
+    ToTextPrecision(dialog.GetValue());
+    UpdateVals();
+  }
+}
+
+void NfgShow::PrefsFontsLabels(void)
+{
+  FontDialogBox dialog(spread, spread->DrawSettings()->GetLabelFont());
+    
+  if (dialog.Completed() == wxOK) {
+    spread->DrawSettings()->SetLabelFont(dialog.MakeFont());
+    spread->Repaint();
+  }
+}
+
+void NfgShow::PrefsFontsCells(void)
+{
+  FontDialogBox dialog(spread, spread->DrawSettings()->GetDataFont());
+    
+  if (dialog.Completed() == wxOK) {
+    spread->DrawSettings()->SetDataFont(dialog.MakeFont());
+    spread->Repaint();
+  }
 }
 
 void NfgShow::Print(void)
@@ -1147,7 +1198,7 @@ void NfgShow::Print(void)
     }
     else {    // must be dump_ascii
       Bool all_cont = FALSE;
-      MyDialogBox cont_dialog(spread, "Continencies");
+      MyDialogBox cont_dialog(spread, "Contingencies");
       cont_dialog.Add(wxMakeFormBool("All Contingencies", &all_cont));
       cont_dialog.Go();
       DumpAscii(all_cont);
@@ -1658,10 +1709,26 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   viewMenu->Append(NFG_VIEW_GAMEINFO, "Game&Info",
 		   "Display information about the game");
   
-  wxMenu *prefs_menu = new wxMenu;
-  prefs_menu->Append(OPTIONS_MENU,            "&Display",  "Configure display options");
-  prefs_menu->Append(NFG_DISPLAY_COLORS,      "Colors",    "Set Player Colors");
-  prefs_menu->Append(NFG_DISPLAY_ACCELS,      "Accels",    "Edit Accelerators");
+  wxMenu *prefsMenu = new wxMenu;
+  wxMenu *prefsDisplayMenu = new wxMenu;
+  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_COLUMNS, "&Column Width",
+			   "Set column width");
+  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_ROWS, "&Row Height",
+			   "Set row height");
+  prefsDisplayMenu->Append(NFG_PREFS_DISPLAY_DECIMALS, "&Decimal Places",
+			   "Set number of decimal places to display");
+
+  wxMenu *prefsFontsMenu = new wxMenu;
+  prefsFontsMenu->Append(NFG_PREFS_FONTS_LABELS, "&Labels",
+			 "Set font for strategy labels");
+  prefsFontsMenu->Append(NFG_PREFS_FONTS_CELLS, "&Cells",
+			 "Set font for table cells");
+
+  prefsMenu->Append(NFG_PREFS_DISPLAY, "&Display", prefsDisplayMenu,
+		    "Configure display options");
+  prefsMenu->Append(NFG_PREFS_FONTS, "&Fonts", prefsFontsMenu, "Set fonts");
+  prefsMenu->Append(NFG_PREFS_COLORS, "&Colors", "Set player colors");
+  prefsMenu->Append(NFG_PREFS_ACCELS, "&Accels", "Edit accelerators");
 
   wxMenu *help_menu = new wxMenu;
   help_menu->Append(HELP_MENU_ABOUT,    "&About");
@@ -1673,7 +1740,7 @@ wxMenuBar *NormalSpread::MakeMenuBar(long )
   tmp_menubar->Append(supports_menu, "S&upports");
   tmp_menubar->Append(solve_menu,    "&Solve");
   tmp_menubar->Append(viewMenu,  "&View");
-  tmp_menubar->Append(prefs_menu,    "&Prefs");
+  tmp_menubar->Append(prefsMenu,    "&Prefs");
   tmp_menubar->Append(help_menu,     "&Help");
 
   if (parent->getNormalDrawSettings().OutcomeDisp()) {
@@ -1928,14 +1995,6 @@ void NormalSpread::OnMenuCommand(int id)
       parent->Solve(id);
       break;
 
-    case NFG_DISPLAY_COLORS: 
-      parent->SetColors();
-      break;
-
-    case NFG_DISPLAY_ACCELS: 
-      parent->EditAccelerators();
-      break;
-
     case NFG_VIEW_SOLUTIONS:
       parent->InspectSolutions(CREATE_DIALOG);
       break;
@@ -2032,6 +2091,28 @@ void NormalSpread::OnMenuCommand(int id)
       break;
     case NFG_EDIT_OUTCOMES_PAYOFFS:
       parent->OutcomePayoffs(CurRow(), CurCol(), false);
+      break;
+
+    case NFG_PREFS_DISPLAY_COLUMNS:
+      parent->PrefsDisplayColumns();
+      break;
+    case NFG_PREFS_DISPLAY_ROWS:
+      parent->PrefsDisplayRows();
+      break;
+    case NFG_PREFS_DISPLAY_DECIMALS:
+      parent->PrefsDisplayDecimals();
+      break;
+    case NFG_PREFS_FONTS_LABELS:
+      parent->PrefsFontsLabels();
+      break;
+    case NFG_PREFS_FONTS_CELLS:
+      parent->PrefsFontsCells();
+      break;
+    case NFG_PREFS_COLORS: 
+      parent->SetColors();
+      break;
+    case NFG_PREFS_ACCELS: 
+      parent->EditAccelerators();
       break;
 
     case NFG_FILE_SAVE:
