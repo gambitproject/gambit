@@ -76,11 +76,11 @@ template <class T> class gMap  {
     int GetIndex(int i) const;
 
 	// DEBUGGING
-    void Dump(output&) const;
+    void Dump(gOutput&) const;
 };
 
 
-template <class T> inline output &operator<<(output& to, const gMap<T>& A)
+template <class T> inline gOutput &operator<<(gOutput& to, const gMap<T>& A)
 {
   A.Dump(to); return to;
 }
@@ -257,7 +257,7 @@ template <class T> inline int gMap<T>::GetIndex(int i) const
 
 
 
-template <class T> INLINE void gMap<T>::Dump(output& to) const
+template <class T> INLINE void gMap<T>::Dump(gOutput& to) const
 {
   for (uint i = 0; i < length; i++)
     to << "(" << i+1 << ") " << numbers[i] << ": " << contents[i];
@@ -410,7 +410,7 @@ template <class K, class T> class gBaseMap : public gSender {
 //
 // Prints out the contents of a map (for debugging purposes)
 //
-    void Dump(output &) const;
+    void Dump(gOutput &) const;
 };
 
 template <class K, class T> INLINE 
@@ -536,7 +536,7 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
   return ret;
 }
 
-template <class K, class T> INLINE void gBaseMap<K, T>::Dump(output &f) const
+template <class K, class T> INLINE void gBaseMap<K, T>::Dump(gOutput &f) const
 {
   for (int i = 0; i < length; i++)
     f << keys[i] << " --> " << values[i] << '\n';

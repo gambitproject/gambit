@@ -345,7 +345,7 @@ Rational pow(const Rational& x, long y)
 
 #endif
 
-output& operator << (output& s, const Rational& y)
+gOutput& operator << (gOutput& s, const Rational& y)
 {
   if (y.denominator() == 1L)
     s << y.numerator();

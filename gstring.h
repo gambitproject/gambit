@@ -11,8 +11,8 @@
 #include "gambitio.h"
 
 class gString   {
-  friend input& operator>>(input&, gString&);
-  friend output& operator<<(output&, const gString&);
+  friend gInput& operator>>(gInput&, gString&);
+  friend gOutput& operator<<(gOutput&, const gString&);
   protected:
     char *storage;
 
@@ -88,9 +88,9 @@ inline gString operator+(const char *c, const gString &s)
     return gString(c) + s;
 }
 
-input &operator>>(input &from, gString &);
+gInput &operator>>(gInput &from, gString &);
 
-inline output& operator<<(output& to, const gString& A){
+inline gOutput& operator<<(gOutput& to, const gString& A){
   to << A.storage; return to;
 }
 

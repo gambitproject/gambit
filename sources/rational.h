@@ -100,8 +100,8 @@ public:
   friend Integer   trunc(const Rational& x);
   friend Integer   round(const Rational& x);
 
-  friend input&    operator >> (input& s, Rational& y);
-  friend output&   operator << (output& s, const Rational& y);
+  friend gInput&    operator >> (gInput& s, Rational& y);
+  friend gOutput&   operator << (gOutput& s, const Rational& y);
 
   int		   fits_in_float() const;
   int		   fits_in_double() const;

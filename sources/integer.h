@@ -213,8 +213,8 @@ public:
   friend Integer  atoI(const char* s, int base = 10);
 //  void		  printon(ostream& s, int base = 10, int width = 0) const;
   
-  friend input& operator >> (input &s, Integer& y);
-  friend output& operator << (output &s, const Integer& y);
+  friend gInput& operator >> (gInput &s, Integer& y);
+  friend gOutput& operator << (gOutput &s, const Integer& y);
 
 // error detection
 

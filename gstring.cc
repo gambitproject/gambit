@@ -176,7 +176,7 @@ int gString::lastOccur(char c)
 }
 
 
-input& operator>>(input &from, gString &s)
+gInput& operator>>(gInput &from, gString &s)
 {
   char a;
   

@@ -2192,7 +2192,7 @@ ostream& operator << (ostream& s, const Integer& y)
 }
 */
 
-output& operator<<(output &s, const Integer &y)
+gOutput& operator<<(gOutput &s, const Integer &y)
 {
   return s << Itoa(y.rep);
 }
