@@ -203,4 +203,3 @@ template class gPolyBlock<gNumber>;
 #include "glist.imp"
 
 template class gList<gPoly<gNumber> >;
-template class gNode<gPoly<gNumber> >;
