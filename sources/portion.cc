@@ -1,22 +1,16 @@
 //#
-//# FILE: portion.h -- implementation of Portion base and descendent classes
-//#                    companion to GSM
+//# FILE: portion.cc -- implementation of Portion base and descendent classes
+//#                     companion to GSM
 //#
 //# $Id$
 //#
 
 
-
-
 #include <assert.h>
 #include "basic.h"
 
-
 #include "portion.h"
 #include "gsmhash.h"
-
-
-
 
 //---------------------------------------------------------------------
 //                          base class
@@ -657,13 +651,20 @@ Portion* Nfg_Portion::Copy( void ) const
 void Nfg_Portion::MakeCopyOfData( Portion* p )
 {
   Portion::MakeCopyOfData( p );
-  _Value = new BaseNormalForm( ( (Nfg_Portion*) p )->_Value );
+  switch (_Value->Type())   {
+    case DOUBLE:
+      _Value = new NormalForm<double>((NormalForm<double> &) *((Nfg_Portion *) p)->_Value);
+      break;
+    case RATIONAL:
+      _Value = new NormalForm<gRational>((NormalForm<gRational> &) *((Nfg_Portion *) p)->_Value);
+      break;
+  }
 }
 
 
 bool Nfg_Portion::Operation( Portion* p, OperationMode mode )
 {
-  bool  result = true;
+  bool result = true;
   BaseNormalForm&  p_value = *( ( (Nfg_Portion*) p )->_Value );
 
   if( p == 0 )      // unary operations
