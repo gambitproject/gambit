@@ -74,10 +74,6 @@ template <class K, class T> class gBaseMapIter;
 //
 // This is the abstract class from which all Map classes are derived
 //
-// <descriptor>
-// <iterator>
-// </descriptor>
-//
 template <class K, class T> class gBaseMap : public gSender {
   friend class gBaseMapIter<K, T>;
   protected:
@@ -242,8 +238,8 @@ T &gBaseMap<K, T>::Insert(const K &key, int entry, const T &value)
   new_values[entry] = value;
 
   if (length > 0)   {
-    delete keys;
-    delete values;
+    delete [] keys;
+    delete [] values;
   }
 
   keys = new_keys;
@@ -258,8 +254,8 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
 
   if (length == 1)  {
     T ret = values[0];
-    delete keys;
-    delete values;
+    delete [] keys;
+    delete [] values;
     keys = 0;
     values = 0;
     length = 0;
@@ -281,8 +277,8 @@ template <class K, class T> INLINE T gBaseMap<K, T>::Delete(int where)
     new_values[i - 1] = values[i];
   }
 
-  delete keys;
-  delete values;
+  delete [] keys;
+  delete [] values;
     
   keys = new_keys;
   values = new_values;
@@ -306,10 +302,6 @@ template <class K, class T> class gOrdMapIter;
 // are used to sort the map by keys, thus making search-type operations
 // logarithmic instead of linear.  This is a particularly large improvement
 // when using keys which are costly to compare
-//
-// <descriptor>
-// <iterator>
-// </descriptor>
 //
 template <class K, class T> class gOrdMap : public gBaseMap<K, T>  {
   friend class gOrdMapIter<K, T>;
@@ -434,9 +426,6 @@ template <class K, class T> INLINE T gOrdMap<K, T>::Remove(const K &key)
 // <note> This class implements functionality similar to the (now obsolescent)
 //        gMap class
 //
-// <descriptor>
-// <iterator>
-// </descriptor>
 template <class T> class gSparseSet : public gOrdMap<int, T>  {
   public:
 //
@@ -465,10 +454,6 @@ template <class T> class gSparseSet : public gOrdMap<int, T>  {
 // key class.  No uniqueness constraints are imposed on the keys; however,
 // if multiple identical keys exist in the map, the operations will only
 // locate and manipulate the first instance they locate.
-//
-// <descriptor>
-// <iterator>
-// </descriptor>
 //
 template <class K, class T> class gUnordMap : public gBaseMap<K, T>  {
   public:
