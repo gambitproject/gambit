@@ -373,7 +373,7 @@ ActionCursorForSupport::GoToNext()
 {
   if (act != support->NumActions(pl,iset))
     { act++; return true; }
-  else if (iset != support->Game().GetPlayer(pl)->NumInfosets())
+  else if (iset != support->Game().Players()[pl]->NumInfosets())
     { iset++; act = 1; return true; }
   else if (pl != support->Game().NumPlayers())
     { pl++; iset = 1; act = 1; return true; }
@@ -393,7 +393,7 @@ int ActionCursorForSupport::ActionIndex() const
 
 const Infoset *ActionCursorForSupport::GetInfoset() const
 {
-  return support->Game().GetInfosetByIndex(pl,iset);
+  return support->Game().Players()[pl]->Infosets()[iset];
 }
 
 int ActionCursorForSupport::InfosetIndex() const
@@ -403,7 +403,7 @@ int ActionCursorForSupport::InfosetIndex() const
 
 const EFPlayer *ActionCursorForSupport::GetPlayer() const
 {
-  return support->Game().GetPlayer(pl);
+  return support->Game().Players()[pl];
 }
 
 int ActionCursorForSupport::PlayerIndex() const
@@ -415,7 +415,7 @@ bool
 ActionCursorForSupport::IsLast() const
 {
   if (pl == support->Game().NumPlayers())
-    if (iset == support->Game().GetPlayer(pl)->NumInfosets())
+    if (iset == support->Game().Players()[pl]->NumInfosets())
       if (act == support->NumActions(pl,iset))
 	return true;
   return false;

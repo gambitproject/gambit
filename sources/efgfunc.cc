@@ -498,11 +498,10 @@ static Portion *GSM_LoadEfg(Portion **param)
   
   try  {
     gFileInput f(file);
-    FullEfg *E = 0;
-    ReadEfgFile((gInput &) f, E);
+    FullEfg *efg = ReadEfgFile(f);
     
-    if (E)
-      return new EfgPortion(E);
+    if (efg)
+      return new EfgPortion(efg);
     else
       throw gclRuntimeError(file + " is not a valid .efg file");
   }
@@ -530,7 +529,7 @@ static Portion *GSM_MarkSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  return new BoolPortion(n->Game()->DefineSubgame(n));
+  return new BoolPortion(n->Game()->MarkSubgame(n));
 }
 
 //------------------
@@ -1272,7 +1271,7 @@ static Portion *GSM_UnMarkSubgame(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  n->Game()->RemoveSubgame(n);
+  n->Game()->UnmarkSubgame(n);
   
   return new NodePortion(n);
 }

@@ -376,18 +376,19 @@ void EfgFileReader::CreateEfg(void)
     E->NewPlayer()->SetName(players[pl]);
 }	
 
-int ReadEfgFile(gInput &f, FullEfg *& E)
+FullEfg *ReadEfgFile(gInput &p_file)
 {
-  assert(!E);
-
-  EfgFileReader R(f, E);
+  FullEfg *efg = 0; 
+  EfgFileReader reader(p_file, efg);
   
-  if (R.Parse())  {
-    if (E)  {  delete E;  E = 0; }
+  if (reader.Parse())  {
+    if (efg)  {
+      delete efg;
+    }
     return 0;
   }
 
-  return 1;
+  return efg;
 }
 
 

@@ -41,7 +41,6 @@ public:
   virtual long RevisionNumber(void) const = 0;
 
   virtual int NumPlayers(void) const = 0;
-  virtual const EFPlayer *GetPlayer(const int pl) const = 0;
   virtual const gArray<EFPlayer *> &Players(void) const = 0; 
 
   virtual int ProfileLength(void) const = 0;
@@ -50,14 +49,10 @@ public:
   virtual gArray<int> NumInfosets(void) const = 0;
   virtual int NumPlayerInfosets(void) const = 0;
   virtual int NumChanceInfosets(void) const = 0;
-  virtual int NumPlayersInfosets(const int pl) const = 0;
   virtual gPVector<int> NumActions(void) const = 0;
   virtual int NumPlayerActions(void) const = 0;
   virtual int NumChanceActions(void) const = 0;
-  virtual int NumActionsAtInfoset(const int pl, const int iset) const = 0;
-  virtual int NumNodesInInfoset(const int pl, const int iset) const = 0;
   virtual gPVector<int> NumMembers(void) const = 0;
-  virtual Infoset *GetInfosetByIndex(const int&, const int&) const = 0;
 
   virtual gNumber GetChanceProb(Infoset *, int) const = 0;
   virtual gNumber GetChanceProb(const Action *) const = 0;
@@ -67,11 +62,11 @@ public:
   virtual bool IsPredecessor(const Node *n, const Node *of) const = 0;
   virtual gList<const Node*> TerminalNodes(void) const = 0;  
 
-  virtual void UnmarkSubgames(Node *n) = 0;
   virtual bool IsLegalSubgame(Node *n) = 0;
   virtual void MarkSubgames(const gList<Node *> &list) = 0;
-  virtual bool DefineSubgame(Node *n) = 0;
-  virtual void RemoveSubgame(Node *n) = 0;
+  virtual bool MarkSubgame(Node *n) = 0;
+  virtual void UnmarkSubgame(Node *n) = 0;
+  virtual void UnmarkSubgames(Node *n) = 0;
 
   virtual gNumber MinPayoff(int pl = 0) const = 0;
   virtual gNumber MaxPayoff(int pl = 0) const = 0;
@@ -144,10 +139,18 @@ protected:
   void InfosetProbs(Node *n, gNumber, const gPVector<int> &, gPVector<gNumber> &) const;
 
 
-// These are used in identification of subgames
+  // These are used in identification of subgames
   void MarkTree(Node *, Node *);
   bool CheckTree(Node *, Node *);
   void MarkSubgame(Node *, Node *);
+
+  // Recursive calls
+  void DescendantNodes(const Node *, const EFSupport&, 
+		       gList<const Node*> &) const;
+  void NonterminalDescendants(const Node *, const EFSupport&, 
+			      gList<const Node*> &) const;
+  void TerminalDescendants(const Node *, const EFSupport&, 
+			   gList<const Node*> &) const;
 
 public:
   FullEfg(void);
@@ -176,16 +179,6 @@ public:
   bool IsSuccessor(const Node *n, const Node *from) const;
   bool IsPredecessor(const Node *n, const Node *of) const;
   //    const Node* Consequence(const Node&, Action&) const;
-  gList<Node*> Children(const Node&) const;
-  void DescendantNodesRECURSION(const Node*, 
-				const EFSupport&, 
-				gList<const Node*>&) const;
-  void NonterminalDescendantsRECURSION(const Node*, 
-				       const EFSupport&, 
-				       gList<const Node*>&) const;
-  void TerminalDescendantsRECURSION(const Node*, 
-				    const EFSupport&, 
-				    gList<const Node*>&) const;
   gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
   gList<const Node*> NonterminalDescendants(const Node&, 
 					    const EFSupport&) const;
@@ -198,12 +191,10 @@ public:
   int NumPlayers(void) const;
   EFPlayer *GetChance(void) const;
   EFPlayer *NewPlayer(void);
-  const EFPlayer *GetPlayer(const int pl) const { return players[pl]; }
   const gArray<EFPlayer *> &Players(void) const  { return players; }
 
   // DATA ACCESS -- INFOSETS
-  Infoset *GetInfosetByIndex(const int&, const int&) const;
-  gBlock<Infoset *> Infosets() const;
+  gBlock<Infoset *> Infosets(void) const;
 
   // DATA ACCESS -- OUTCOMES
   int NumOutcomes(void) const;
@@ -231,8 +222,8 @@ public:
   Node *MoveTree(Node *src, Node *dest);
   Node *DeleteTree(Node *n);
 
-  const Action *InsertAction(Infoset *s);
-  const Action *InsertAction(Infoset *s, const Action *at);
+  Action *InsertAction(Infoset *s);
+  Action *InsertAction(Infoset *s, const Action *at);
   Infoset *DeleteAction(Infoset *s, const Action *a);
 
   void Reveal(Infoset *, const gArray<EFPlayer *> &);
@@ -248,14 +239,11 @@ public:
 
   void InitPayoffs(void) const;
   
-  // Unmarks all subgames in the subtree rooted at n
-  void UnmarkSubgames(Node *n);
   bool IsLegalSubgame(Node *n);
-
-  // Mark all the (legal) subgames in the list
   void MarkSubgames(const gList<Node *> &list);
-  bool DefineSubgame(Node *n);
-  void RemoveSubgame(Node *n);
+  bool MarkSubgame(Node *n);
+  void UnmarkSubgame(Node *n);
+  void UnmarkSubgames(Node *n);
 
   int ProfileLength(void) const;
   int TotalNumInfosets(void) const;
@@ -263,23 +251,17 @@ public:
   gArray<int>   NumInfosets(void) const;  // Does not include chance infosets
   int           NumPlayerInfosets(void) const;
   int           NumChanceInfosets(void) const;
-  int           NumPlayersInfosets(const int pl) const; // pl ==0 is chance
   gPVector<int> NumActions(void) const;
   int           NumPlayerActions(void) const;
   int           NumChanceActions(void) const;
-  int           NumActionsAtInfoset(const int pl, const int iset) const;
-  int           NumNodesInInfoset(const int pl, const int iset) const;
   gPVector<int> NumMembers(void) const;
   
-  //# COMPUTING VALUES OF PROFILES
+  // COMPUTING VALUES OF PROFILES
   void Payoff(const gPVector<int> &profile, gVector<gNumber> &payoff) const;
   void Payoff(const gArray<gArray<int> *> &profile,
 	      gArray<gNumber> &payoff) const;
 
   void InfosetProbs(const gPVector<int> &profile, gPVector<gNumber> &prob) const;
-
-  // defined in efgutils.cc
-  friend void RandomEfg(FullEfg &);
 
   Nfg *AssociatedNfg(void) const;
   Nfg *AssociatedAfg(void) const;
@@ -296,8 +278,7 @@ public:
 #include "node.h"
 #include "outcome.h"
 
-// These functions are provided in readefg.y/readefg.cc
-int ReadEfgFile(gInput &, FullEfg *&);
+FullEfg *ReadEfgFile(gInput &);
 
 template <class T> class PureBehavProfile   {
   protected:

@@ -658,8 +658,8 @@ BehavSolution::ActionProbsSumToOneIneqs(const gSpace &BehavStratSpace,
 
   int pl;
   for (pl = 1; pl <= Game().NumPlayers(); pl++) 
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
-      Infoset *current_infoset = Game().GetInfosetByIndex(pl,i);
+    for (int i = 1; i <= Game().Players()[pl]->NumInfosets(); i++) {
+      Infoset *current_infoset = Game().Players()[pl]->Infosets()[i];
       if ( !big_supp.HasActiveActionAt(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<gDouble> factor(&BehavStratSpace, (gDouble)1.0, &Lex);
@@ -690,7 +690,7 @@ bool BehavSolution::ANFNodeProbabilityPoly(gPoly<gDouble> & node_prob,
       node_prob *= (gDouble)Game().GetChanceProb(last_action);
     else 
       if (big_supp.HasActiveActionAt(last_infoset)) {
-	if (last_infoset == Game().GetInfosetByIndex(pl,i)) {
+	if (last_infoset == Game().Players()[pl]->Infosets()[i]) {
 	  if (j != last_action->GetNumber()) 
 	    return false;
 	}
@@ -734,8 +734,8 @@ BehavSolution::ANFExpectedPayoffDiffPolys(const gSpace &BehavStratSpace,
   gList<const Node *> terminal_nodes = Game().TerminalNodes();
 
   for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
-      Infoset *infoset = Game().GetInfosetByIndex(pl,i);
+    for (int i = 1; i <= Game().Players()[pl]->NumInfosets(); i++) {
+      Infoset *infoset = Game().Players()[pl]->Infosets()[i];
       if (little_supp.MayReach(infoset)) 
 	for (int j = 1; j <= infoset->NumActions(); j++)
 	  if (!little_supp.ActionIsActive(pl,i,j)) {
@@ -805,10 +805,10 @@ bool BehavSolution::ExtendsToNash(const EFSupport &little_supp,
 
     gList<int> list_for_pl;
 
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+    for (int i = 1; i <= Game().Players()[pl]->NumInfosets(); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
-	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
+      if ( !big_supp.HasActiveActionAt(Game().Players()[pl]->Infosets()[i]) ) {
+	num_vars += Game().Players()[pl]->Infosets()[i]->NumActions() - 1;
       }
     }
     var_index += list_for_pl;
@@ -860,10 +860,10 @@ bool BehavSolution::ExtendsToANFNash(const EFSupport &little_supp,
 
     gList<int> list_for_pl;
 
-    for (int i = 1; i <= Game().NumPlayersInfosets(pl); i++) {
+    for (int i = 1; i <= Game().Players()[pl]->NumInfosets(); i++) {
       list_for_pl += num_vars;
-      if ( !big_supp.HasActiveActionAt(Game().GetInfosetByIndex(pl,i)) ) {
-	num_vars += Game().NumActionsAtInfoset(pl,i) - 1;
+      if ( !big_supp.HasActiveActionAt(Game().Players()[pl]->Infosets()[i]) ) {
+	num_vars += Game().Players()[pl]->Infosets()[i]->NumActions() - 1;
       }
     }
     var_index += list_for_pl;

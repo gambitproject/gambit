@@ -15,20 +15,6 @@ static void NDoChild (Node *n, gList <Node *> &list)
     NDoChild ( n->GetChild(i), list);
 }
 
-static void TNDoChild (Node *n, gList <Node *> &list)
-{
-  if (n->NumChildren() == 0) list.Append(n);
-  for (int i = 1; i <= n->NumChildren(); i++)
-    TNDoChild ( n->GetChild(i), list);
-}
-
-static void NTNDoChild (Node *n, gList <Node *> &list)
-{
-  if (n->NumChildren() != 0) list.Append(n);
-  for (int i = 1; i <= n->NumChildren(); i++)
-    NTNDoChild ( n->GetChild(i), list);
-}
-
 static void MSRDoChild(Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
@@ -72,18 +58,6 @@ void Nodes (const Efg &, Node *n, gList <Node *> &list)
 {
   list.Flush();
   NDoChild(n, list);
-}
-
-void TerminalNodes (const Efg &befg, gList <Node *> &list)
-{
-  list.Flush();
-  TNDoChild(befg.RootNode(), list);
-}
-
-void NonTerminalNodes (const Efg &befg, gList <Node *> &list)
-{
-  list.Flush();
-  NTNDoChild(befg.RootNode(), list);
 }
 
 void MarkedSubgameRoots(const Efg &efg, gList<Node *> &list)
@@ -242,6 +216,6 @@ void RandomEfg(FullEfg &efg)
 {
   for (int i = 1; i <= efg.NumPlayers(); i++)
     for (int j = 1; j <= efg.NumOutcomes(); j++)
-      efg.SetPayoff(efg.outcomes[j], i, gNumber(Uniform()));
+      efg.SetPayoff(efg.Outcomes()[j], i, gNumber(Uniform()));
 }
 

@@ -605,11 +605,6 @@ EFPlayer *FullEfg::NewPlayer(void)
   return ret;
 }
 
-Infoset* FullEfg::GetInfosetByIndex(const int &pl, const int &iset) const
-{
-  return GetInfosetByIndex(Players()[pl],iset);
-}
-
 gBlock<Infoset *> FullEfg::Infosets() const
 {
   gBlock<Infoset *> answer;
@@ -748,32 +743,21 @@ bool FullEfg::IsPredecessor(const Node *n, const Node *of) const
   return (n == of);
 }
 
-gList<Node*> FullEfg::Children(const Node& n) const
-{
-  gList<Node*> answer;
-
-  int i;
-  for (i = 1; i <= n.NumChildren(); i++)
-    answer += n.GetChild(i);
-
-  return answer;
-}
-
-void FullEfg::DescendantNodesRECURSION(const Node* n, 
-				   const EFSupport& supp,
-				   gList<const Node*>& current) const
+void FullEfg::DescendantNodes(const Node* n, 
+			      const EFSupport& supp,
+			      gList<const Node*>& current) const
 {
   current += n;
   if (n->IsNonterminal()) {
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
-      DescendantNodesRECURSION(newn,supp,current);
+      DescendantNodes(newn,supp,current);
     }
   }
 }
 
-void FullEfg::NonterminalDescendantsRECURSION(const Node* n, 
+void FullEfg::NonterminalDescendants(const Node* n, 
 					  const EFSupport& supp,
 					  gList<const Node*>& current) const
 {
@@ -782,12 +766,12 @@ void FullEfg::NonterminalDescendantsRECURSION(const Node* n,
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
-      NonterminalDescendantsRECURSION(newn,supp,current);
+      NonterminalDescendants(newn,supp,current);
     }
   }
 }
 
-void FullEfg::TerminalDescendantsRECURSION(const Node* n, 
+void FullEfg::TerminalDescendants(const Node* n, 
 				       const EFSupport& supp,
 				       gList<const Node*>& current) const
 {
@@ -797,7 +781,7 @@ void FullEfg::TerminalDescendantsRECURSION(const Node* n,
     const gArray<Action *> actions = supp.Actions(n->GetInfoset());
     for (int i = 1; i <= actions.Length(); i++) {
       const Node* newn = n->GetChild(actions[i]);
-      TerminalDescendantsRECURSION(newn,supp,current);
+      TerminalDescendants(newn,supp,current);
     }
   }
 }
@@ -806,7 +790,7 @@ gList<const Node*>
 FullEfg::DescendantNodes(const Node& n, const EFSupport& supp) const
 {
   gList<const Node*> answer;
-  DescendantNodesRECURSION(&n,supp,answer);
+  DescendantNodes(&n,supp,answer);
   return answer;
 }
 
@@ -814,7 +798,7 @@ gList<const Node*>
 FullEfg::NonterminalDescendants(const Node& n, const EFSupport& supp) const
 {
   gList<const Node*> answer;
-  NonterminalDescendantsRECURSION(&n,supp,answer);
+  NonterminalDescendants(&n,supp,answer);
   return answer;
 }
 
@@ -822,7 +806,7 @@ gList<const Node*>
 FullEfg::TerminalDescendants(const Node& n, const EFSupport& supp) const
 {
   gList<const Node*> answer;
-  TerminalDescendantsRECURSION(&n,supp,answer);
+  TerminalDescendants(&n,supp,answer);
   return answer;
 }
 
@@ -1276,20 +1260,20 @@ Node *FullEfg::DeleteTree(Node *n)
   return n;
 }
 
-const Action *FullEfg::InsertAction(Infoset *s)
+Action *FullEfg::InsertAction(Infoset *s)
 {
   if (!s)  throw Exception();
 
   m_revision++;
   m_dirty = true;
-  const Action *action = s->InsertAction(s->NumActions() + 1);
+  Action *action = s->InsertAction(s->NumActions() + 1);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Append(new Node(this, s->members[i]));
   DeleteLexicon();
   return action;
 }
 
-const Action *FullEfg::InsertAction(Infoset *s, const Action *a)
+Action *FullEfg::InsertAction(Infoset *s, const Action *a)
 {
   if (!a || !s)  throw Exception();
 
@@ -1300,7 +1284,7 @@ const Action *FullEfg::InsertAction(Infoset *s, const Action *a)
   for (where = 1; where <= s->actions.Length() && s->actions[where] != a;
        where++);
   if (where > s->actions.Length())   return 0;
-  const Action *action = s->InsertAction(where);
+  Action *action = s->InsertAction(where);
   for (int i = 1; i <= s->members.Length(); i++)
     s->members[i]->children.Insert(new Node(this, s->members[i]), where);
 
@@ -1395,7 +1379,7 @@ bool FullEfg::IsLegalSubgame(Node *n)
   return CheckTree(n, n);
 }
 
-bool FullEfg::DefineSubgame(Node *n)
+bool FullEfg::MarkSubgame(Node *n)
 {
   if(n->gameroot == n) return true;
 
@@ -1408,7 +1392,7 @@ bool FullEfg::DefineSubgame(Node *n)
   return false;
 }
 
-void FullEfg::RemoveSubgame(Node *n)
+void FullEfg::UnmarkSubgame(Node *n)
 {
   if (n->gameroot == n && n->parent)  {
     n->gameroot = 0;
@@ -1454,7 +1438,7 @@ int FullEfg::ProfileLength(void) const
   int sum = 0;
 
   for (int i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= NumPlayersInfosets(i); j++)
+    for (int j = 1; j <= players[i]->infosets.Length(); j++)
       sum += players[i]->infosets[j]->actions.Length();
 
   return sum;
@@ -1464,16 +1448,11 @@ gArray<int> FullEfg::NumInfosets(void) const
 {
   gArray<int> foo(players.Length());
   
-  for (int i = 1; i <= foo.Length(); i++)
-    foo[i] = NumPlayersInfosets(i);
+  for (int i = 1; i <= foo.Length(); i++) {
+    foo[i] = players[i]->NumInfosets();
+  }
 
   return foo;
-}
-
-int FullEfg::NumPlayersInfosets(const int pl) const
-{
-  if (pl == 0) return chance->infosets.Length();
-  else         return players[pl]->infosets.Length();
 }
 
 int FullEfg::NumPlayerInfosets() const
@@ -1500,11 +1479,6 @@ int FullEfg::TotalNumInfosets(void) const
   return foo;
 }
 
-int FullEfg::NumActionsAtInfoset(const int pl, const int iset) const
-{
- return players[pl]->infosets[iset]->actions.Length(); 
-} 
-
 gPVector<int> FullEfg::NumActions(void) const
 {
   gArray<int> foo(players.Length());
@@ -1513,9 +1487,11 @@ gPVector<int> FullEfg::NumActions(void) const
     foo[i] = players[i]->infosets.Length();
 
   gPVector<int> bar(foo);
-  for (i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= players[i]->infosets.Length(); j++)
-      bar(i, j) = NumActionsAtInfoset(i,j);
+  for (i = 1; i <= players.Length(); i++) {
+    for (int j = 1; j <= players[i]->infosets.Length(); j++) {
+      bar(i, j) = players[i]->infosets[j]->NumActions();
+    }
+  }
 
   return bar;
 }  
@@ -1532,34 +1508,29 @@ int FullEfg::NumPlayerActions(void) const
 
 int FullEfg::NumChanceActions(void) const
 {
-  int answer(0);
+  int answer = 0;
 
-  int i;
-  for (i = 1; i <= players[0]->infosets.Length(); i++)
-    answer += NumActionsAtInfoset(0,i);
+  for (int i = 1; i <= players[0]->infosets.Length(); i++) {
+    answer += players[0]->infosets[i]->NumActions();
+  }
 
   return answer;
-}
-
-int FullEfg::NumNodesInInfoset(const int pl, const int iset) const
-{
-  if (pl == 0) 
-    return GetChance()->infosets[iset]->members.Length();
-  else
-    return players[pl]->infosets[iset]->members.Length(); 
 }
 
 gPVector<int> FullEfg::NumMembers(void) const
 {
   gArray<int> foo(players.Length());
-  int i;
-  for (i = 1; i <= players.Length(); i++)
-    foo[i] = NumPlayersInfosets(i);
+
+  for (int i = 1; i <= players.Length(); i++) {
+    foo[i] = players[i]->NumInfosets();
+  }
 
   gPVector<int> bar(foo);
-  for (i = 1; i <= players.Length(); i++)
-    for (int j = 1; j <= NumPlayersInfosets(i); j++)
-      bar(i, j) = NumNodesInInfoset(i,j);
+  for (int i = 1; i <= players.Length(); i++) {
+    for (int j = 1; j <= players[i]->NumInfosets(); j++) {
+      bar(i, j) = players[i]->infosets[j]->NumMembers();
+    }
+  }
 
   return bar;
 }

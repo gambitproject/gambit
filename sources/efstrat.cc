@@ -406,7 +406,7 @@ bool EFSupport::ActionIsActive(const int pl,
 			       const int act) const
 {
   return 
-    ActionIsActive(Game().GetPlayer(pl)->GetInfoset(iset)->GetAction(act));
+    ActionIsActive(Game().Players()[pl]->GetInfoset(iset)->GetAction(act));
 }
 
 bool 
@@ -476,7 +476,7 @@ void EFSupport::AddAction(const Action *s)
 int EFSupport::NumSequences(int j) const
 {
   if (j < m_efg->Players().First() || j > m_efg->Players().Last()) return 1;
-  gList<Infoset *> isets = ReachableInfosets(m_efg->GetPlayer(j));
+  gList<Infoset *> isets = ReachableInfosets(m_efg->Players()[j]);
   int num = 1;
   for(int i = 1; i <= isets.Length(); i++)
     num+=NumActions(isets[i]);
@@ -734,12 +734,11 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllActive()
   for (int pl = 0; pl <= Game().NumPlayers(); pl++) {
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
-    for (int iset = 1; iset <= Game().NumPlayersInfosets(pl); iset++) {
-
+    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
       is_players_infoset_active += true;
 
       gList<bool> is_infosets_node_active;
-      for (int n = 1; n <= Game().NumNodesInInfoset(pl,iset); n++)
+      for (int n = 1; n <= Game().Players()[pl]->Infosets()[iset]->NumMembers(); n++)
 	is_infosets_node_active += true;
       is_players_node_active += is_infosets_node_active;
     }
@@ -754,12 +753,13 @@ void EFSupportWithActiveInfo::InitializeActiveListsToAllInactive()
     gList<bool>         is_players_infoset_active;
     gList<gList<bool> > is_players_node_active;
 
-    for (int iset = 1; iset <= Game().NumPlayersInfosets(pl); iset++) {
+    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
 
       is_players_infoset_active += false;
 
       gList<bool> is_infosets_node_active;
-      for (int n = 1; n <= Game().NumNodesInInfoset(pl,iset); n++)
+      for (int n = 1; n <= Game().Players()[pl]->Infosets()[iset]->NumMembers()
+; n++)
 	is_infosets_node_active += false;
       is_players_node_active += is_infosets_node_active;
     }
@@ -861,7 +861,7 @@ EFSupportWithActiveInfo::ReachableNonterminalNodes() const
 {
   gList<const Node *> answer;
   for (int pl = 1; pl <= Game().NumPlayers(); pl++) {
-    const EFPlayer *p = Game().GetPlayer(pl);
+    const EFPlayer *p = Game().Players()[pl];
     for (int iset = 1; iset <= p->NumInfosets(); iset++)
       answer += ReachableNodesInInfoset(p->GetInfoset(iset));
   }
@@ -946,9 +946,9 @@ bool EFSupportWithActiveInfo::NodeIsActive(const Node *n) const
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int iset = 1; iset <= Game().NumPlayersInfosets(pl); iset++) 
+    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) 
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(Game().GetInfosetByIndex(pl,iset)) == 0 )
+        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) == 0 )
           return false;
   return true;
 }
@@ -956,12 +956,12 @@ bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosets()
 bool EFSupportWithActiveInfo::HasActiveActionsAtActiveInfosetsAndNoOthers()
 {
   for (int pl = 1; pl <= Game().NumPlayers(); pl++)
-    for (int iset = 1; iset <= Game().NumPlayersInfosets(pl); iset++) {
+    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) {
       if (InfosetIsActive(pl,iset))
-        if ( NumActions(Game().GetInfosetByIndex(pl,iset)) == 0 )
+        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) == 0 )
           return false;
       if (!InfosetIsActive(pl,iset))
-        if ( NumActions(Game().GetInfosetByIndex(pl,iset)) > 0 )
+        if ( NumActions(Game().Players()[pl]->Infosets()[iset]) > 0 )
           return false;
       }
   return true;
@@ -980,10 +980,10 @@ void EFSupportWithActiveInfo::Dump(gOutput& s) const
       s << " Chance:  ";
     else 
       s << "Player " << pl << ":";
-    //    s << "(" << Game().NumPlayersInfosets(pl) << ")";
+    //    s << "(" << Game().Players()[pl]->NumInfosets() << ")";
     //    s << "\n";
 
-    for (int iset = 1; iset <= Game().NumPlayersInfosets(pl); iset++) { 
+    for (int iset = 1; iset <= Game().Players()[pl]->NumInfosets(); iset++) { 
 
       s << "  Infoset " << iset << " is ";
       if (InfosetIsActive(pl,iset))

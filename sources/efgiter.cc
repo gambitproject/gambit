@@ -117,7 +117,7 @@ EfgContIter::EfgContIter(const EFSupport &s)
     _num_active_infosets[pl] = 0;
     gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
-      active_for_pl[iset] = s.MayReach(_efg->GetInfosetByIndex(pl,iset));
+      active_for_pl[iset] = s.MayReach(_efg->Players()[pl]->Infosets()[iset]);
       _num_active_infosets[pl]++;
     }
     _is_active += active_for_pl;
@@ -137,7 +137,7 @@ EfgContIter::EfgContIter(const EFSupport &s, const gList<Infoset *>& active)
     _num_active_infosets[pl] = 0;
     gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetInfosetByIndex(pl,iset)) ) {
+      if ( active.Contains(_efg->Players()[pl]->Infosets()[iset]) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }
@@ -283,7 +283,7 @@ EfgConditionalContIter::EfgConditionalContIter(const EFSupport &s,
     _num_active_infosets[pl] = 0;
     gBlock<bool> active_for_pl(_efg->Players()[pl]->NumInfosets());
     for (int iset = 1; iset <= _efg->Players()[pl]->NumInfosets(); iset++) {
-      if ( active.Contains(_efg->GetInfosetByIndex(pl,iset)) ) {
+      if ( active.Contains(_efg->Players()[pl]->Infosets()[iset]) ) {
 	active_for_pl[iset] = true;
 	_num_active_infosets[pl]++;
       }

@@ -17,12 +17,6 @@ void Nodes (const Efg &befg, gList <Node *> &list);
 
 void Nodes (const Efg &befg, Node *n, gList <Node *> &list);
 
-// returns a glist of the Terminal Nodes in the extensive form 
-void TerminalNodes (const Efg &befg, gList <Node *> &list);
-
-// returns a glist of the NonTerminal Nodes in the extensive form
-void NonTerminalNodes (const Efg &befg, gList <Node *> &list);
-
 // returns the number of nodes in the extensive form
 int NumNodes (const Efg &befg);
 
@@ -51,7 +45,7 @@ void ChildSubgames(Node *, gList<Node *> &);
 bool IsPerfectRecall(const Efg &);
 bool IsPerfectRecall(const Efg &, Infoset *&, Infoset *&);
 
-
+void RandomEfg(const FullEfg &);
 FullEfg *CompressEfg(const FullEfg &, const EFSupport &);
 
 #endif // EFGUTILS_H
