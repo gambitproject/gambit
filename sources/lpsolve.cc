@@ -11,3 +11,7 @@
 template class LPSolve<double>;
 template class LPSolve<gRational>;
 
+template gBlock<int> Artificials(const gVector<double> &);
+template gBlock<int> Artificials(const gVector<gRational> &);
+
+
