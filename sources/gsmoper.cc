@@ -16,8 +16,9 @@ Portion* GSM_Assign( Portion** param )
   }
   param[ 0 ] = param[ 1 ]->Copy();
   param[ 0 ]->MakeCopyOfData( param[ 1 ] );
+
   result = param[ 1 ]->Copy();
-  delete param[ 1 ];
+
   return result;
 }
 
@@ -36,27 +37,29 @@ Portion* GSM_Add( Portion** param )
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
-    ( (numerical_Portion<double>*) param[ 0 ] )->Value() +=
-      ( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<double>
+      (
+       ( (numerical_Portion<double>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+       );
     break;
     
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() +=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gInteger>
+      (
+       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       );
     break;
 
   case porRATIONAL:
-    ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +=
-      ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gRational>
+      (
+       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() +
+       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+       );
     break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -71,27 +74,29 @@ Portion* GSM_Subtract( Portion** param )
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
-    ( (numerical_Portion<double>*) param[ 0 ] )->Value() -=
-      ( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<double>
+      (
+       ( (numerical_Portion<double>*) param[ 0 ] )->Value() -
+       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+       );
     break;
     
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() -=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gInteger>
+      (
+       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() -
+       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       );
     break;
 
   case porRATIONAL:
-    ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -=
-      ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gRational>
+      (
+       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() -
+       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+       );
     break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -106,30 +111,31 @@ Portion* GSM_Multiply( Portion** param )
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
-    ( (numerical_Portion<double>*) param[ 0 ] )->Value() *=
-      ( (numerical_Portion<double>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<double>
+      (
+       ( (numerical_Portion<double>*) param[ 0 ] )->Value() *
+       ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+       );
     break;
     
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() *=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gInteger>
+      (
+       ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() *
+       ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+       );
     break;
 
   case porRATIONAL:
-    ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *=
-      ( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+    result = new numerical_Portion<gRational>
+      (
+       ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() *
+       ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+       );
     break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
-
 
 
 Portion* GSM_Divide( Portion** param )
@@ -138,65 +144,57 @@ Portion* GSM_Divide( Portion** param )
 
   if( param[ 0 ]->Type() != param[ 1 ]->Type() )
     return 0;
-
+  
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
     if( ( (numerical_Portion<double>*) param[ 1 ] )->Value() != 0 )
     {
-      ( (numerical_Portion<double>*) param[ 0 ] )->Value() /=
-	( (numerical_Portion<double>*) param[ 1 ] )->Value();
+      result = new numerical_Portion<double>
+	(
+	 ( (numerical_Portion<double>*) param[ 0 ] )->Value() /
+	 ( (numerical_Portion<double>*) param[ 1 ] )->Value()
+	 );
     }
     else
     {
       gerr << "GSM_Divide Error: division by zero\n";
-      delete param[ 0 ];
-      param[ 0 ] = 0;
     }
-    delete param[ 1 ];
-    result = param[ 0 ];
     break;
     
   case porINTEGER:
     if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
     {
-      ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /=
-	( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+      result = new numerical_Portion<gInteger>
+	(
+	 ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() /
+	 ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+	 );
     }
     else
     {
       gerr << "GSM_Divide Error: division by zero\n";
-      delete param[ 0 ];
-      param[ 0 ] = 0;
     }
-    delete param[ 1 ];
-    result = param[ 0 ];
     break;
 
   case porRATIONAL:
     if( ( (numerical_Portion<gRational>*) param[ 1 ] )->Value() != 0 )
     {
-      ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /=
-	( (numerical_Portion<gRational>*) param[ 1 ] )->Value();
+      result = new numerical_Portion<gRational>
+	(
+	 ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() /
+	 ( (numerical_Portion<gRational>*) param[ 1 ] )->Value()
+	 );
     }
     else
     {
       gerr << "GSM_Divide Error: division by zero\n";
-      delete param[ 0 ];
-      param[ 0 ] = 0;
     }
-    delete param[ 1 ];
-    result = param[ 0 ];
     break;
-
-  default:
-    delete param[ 1 ];
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
   return result;
 }
+
 
 
 Portion* GSM_Negate( Portion** param )
@@ -206,26 +204,26 @@ Portion* GSM_Negate( Portion** param )
   switch( param[ 0 ]->Type() )
   {
   case porDOUBLE:
-    ( (numerical_Portion<double>*) param[ 0 ] )->Value() =
-      -( (numerical_Portion<double>*) param[ 0 ] )->Value();
+    result = new numerical_Portion<double>
+      (
+       -( (numerical_Portion<double>*) param[ 0 ] )->Value()
+       );
     break;
     
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() =
-      -( (numerical_Portion<gInteger>*) param[ 0 ] )->Value();
+    result = new numerical_Portion<gInteger>
+      (
+       -( (numerical_Portion<gInteger>*) param[ 0 ] )->Value()
+       );
     break;
 
   case porRATIONAL:
-    ( (numerical_Portion<gRational>*) param[ 0 ] )->Value() =
-      -( (numerical_Portion<gRational>*) param[ 0 ] )->Value();
+    result = new numerical_Portion<gRational>
+      (
+       -( (numerical_Portion<gRational>*) param[ 0 ] )->Value()
+       );
     break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
-  result = param[ 0 ];
   return result;
 }
 
@@ -246,17 +244,20 @@ Portion* GSM_Modulus( Portion** param )
   switch( param[ 0 ]->Type() )
   {
   case porINTEGER:
-    ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %=
-      ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value();
+    if( ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value() != 0 )
+    {
+      result = new numerical_Portion<gInteger>
+	(
+	 ( (numerical_Portion<gInteger>*) param[ 0 ] )->Value() %
+	 ( (numerical_Portion<gInteger>*) param[ 1 ] )->Value()
+	 );
+    }
+    else
+    {
+      gerr << "GSM_Divide Error: division by zero\n";
+    }
     break;
-
-  default:
-    delete param[ 0 ];
-    param[ 0 ] = 0;
   }
-
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -308,8 +309,6 @@ Portion* GSM_EqualTo( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -356,8 +355,6 @@ Portion* GSM_NotEqualTo( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -404,8 +401,6 @@ Portion* GSM_GreaterThan( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -452,8 +447,6 @@ Portion* GSM_LessThan( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -500,8 +493,6 @@ Portion* GSM_GreaterThanOrEqualTo( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -548,8 +539,6 @@ Portion* GSM_LessThanOrEqualTo( Portion** param )
     break;
   }
 
-  delete param[ 1 ];
-  delete param[ 0 ];
   return result;
 }
 
@@ -569,14 +558,11 @@ Portion* GSM_AND( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  ( (bool_Portion*) param[ 0 ] )->Value() =
+  result = new bool_Portion
     (
      ( (bool_Portion*) param[ 0 ] )->Value() &&
      ( (bool_Portion*) param[ 1 ] )->Value()
      );
-
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -588,14 +574,12 @@ Portion* GSM_OR( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  ( (bool_Portion*) param[ 0 ] )->Value() =
+  result = new bool_Portion
     (
      ( (bool_Portion*) param[ 0 ] )->Value() ||
      ( (bool_Portion*) param[ 1 ] )->Value()
      );
 
-  delete param[ 1 ];
-  result = param[ 0 ];
   return result;
 }
 
@@ -607,10 +591,8 @@ Portion* GSM_NOT( Portion** param )
 
   assert( param[ 0 ]->Type() == porBOOL );
   
-  ( (bool_Portion*) param[ 0 ] )->Value() =
-    !( (bool_Portion*) param[ 0 ] )->Value();
+  result = new bool_Portion( !( (bool_Portion*) param[ 0 ] )->Value() );
 
-  result = param[ 0 ];
   return result;
 }
 

@@ -1046,8 +1046,12 @@ bool GSM::CallFunction( void )
       {
 	if( ( refp == 0 ) && ( param[ index ] != 0 ) )
 	  delete param[ index ];
-	else
+	else if( ( refp != 0 ) && ( param[ index ] == 0 ) )
+	{
+	  gerr << "some sort of fatal error; this should not occur\n";
+	  gerr << "index: " << index << ", refp: " << refp << "\n";
 	  assert(0);
+	}
       }
     }
   }

@@ -65,8 +65,8 @@
 // All the header files should #include "gsm.h".  The definitions for 
 // Portion types are already included in "gsm.h".
 //
-// Every function is expected to delete all of its pointer parameters, except
-// in cases when one of the pointers is used as the return value.
+// None of the parameters passed to a function should be deleted, and the
+// return value of each function should be newly allocated in the function.
 //
 // Take a look at gclmath.h and gclmath.cc to see how it works.
 
@@ -480,7 +480,19 @@ Portion* CallFuncObj::CallFunction( Portion **param )
 	return 0;
       }
     }
+
     result = _FuncPtr( _Param );
+
+    for( index = 0; index < _NumParams; index++ )
+    {
+      if( !_ParamInfo[ index ].PassByReference )
+      {
+	delete _Param[ index ];
+	_Param[ index ] = 0;
+	delete _RunTimeParamInfo[ index ].Ref;
+	_RunTimeParamInfo[ index ].Ref = 0;
+      }
+    }
   }
   else
   {

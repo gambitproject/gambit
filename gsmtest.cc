@@ -1167,9 +1167,6 @@ int main( void )
   machine->InitCallFunction( "Assign" );
   machine->PushRef( "x" );
   machine->Bind();
-
-
-
   machine->InitCallFunction( "ReadNfgFile" );
   machine->Push( "2x2.nfg" );
   machine->Bind();
@@ -1196,6 +1193,39 @@ int main( void )
   machine->PushRef( "x", "a" );
   machine->PushRef( "x" );
   machine->Dump();
+
+
+#ifdef CRASHTEST
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x" );
+  machine->Bind();
+  machine->Push( (gRational) 11 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+  gout << "assigned primary ref\n";
+
+
+  machine->InitCallFunction( "Assign" );
+  machine->PushRef( "x", "a" );
+  machine->Bind();
+  machine->Push( (double) 1 );
+  machine->Bind();
+  machine->CallFunction();
+  machine->Dump();
+
+
+  gout << "Assigned subrefs; now display:\n";
+
+  machine->PushRef( "x", "a" );
+  machine->PushRef( "x" );
+  machine->Dump();
+#endif
+
+  gout << "*********************** press return to continue ************";
+  gin >> cont;
+
 
   gout << "Deleting machine\n";
   delete machine;
