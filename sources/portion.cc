@@ -2479,6 +2479,10 @@ bool ListPortion::Contains(Portion* p2) const
   for(i = 1; i <= length; i++)
   {
     p1 = (*_Value)[i];
+    if(PortionEqual(p1, p2, type_found))
+      return true;
+
+    /* uncomment this to do recursive checking
     if(p1->Spec().ListDepth == 0)
     {
       if(PortionEqual(p1, p2, type_found))
@@ -2491,6 +2495,7 @@ bool ListPortion::Contains(Portion* p2) const
       if(((ListPortion*) p1)->Contains(p2))
 	return true;
     }
+    */
   }
   return false;
 }
