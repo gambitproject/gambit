@@ -321,31 +321,26 @@ void GambitFrame::OnMenuCommand(int id)
     switch (id)
     {
     case FILE_QUIT:
-		cout << "FILE::QUIT\n";  // FIXME! Replace with logging commands.
         Close();    
         break;
         
     case FILE_LOAD:
-		cout << "FILE::LOAD\n";
         LoadFile(); 
         break;
         
 #ifndef EFG_ONLY
     case FILE_NEW_NFG: 
-		cout << "FILE::NEW_NFG\n";
         NfgGUI(0, gText(), 0, this);   
         break;
 #endif
         
 #ifndef NFG_ONLY
     case FILE_NEW_EFG: 
-		cout << "FILE::NEW_EFG\n";
         EfgGUI(0, gText(), 0, this); 
         break;
 #endif
         
     case GAMBIT_HELP_ABOUT:
-		// No logging for help system.
         wxHelpAbout(); 
         break;
         
