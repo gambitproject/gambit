@@ -2,7 +2,7 @@
 // FILE: efgsolvd.h -- the main dialog for running ExtensiveForm solution
 //                     efg_algorithms. 
 //
-// $Id$
+// @(#)efgsolvd.h	2.2 3/29/97
 //
 
 // You must add an entry here for each new efg_algorithm.
@@ -192,9 +192,9 @@ protected:
 	wxWriteResource(SOLN_SECT,alg_sect,algorithm,defaults_file);
 	wxWriteResource(PARAMS_SECTION,"Stop-After",stopAfter,defaults_file);
 	wxWriteResource(PARAMS_SECTION,"Max-Solns",max_solns,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",all,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-All",(int)all,defaults_file);
 	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Type",dom_type,defaults_file);
-	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",use_elimdom,defaults_file);
+	wxWriteResource(SOLN_SECT,"Nfg-ElimDom-Use",(int)use_elimdom,defaults_file);
 	wxWriteResource(SOLN_SECT,"Efg-Mark-Subgames",subgames,defaults_file);
 	wxWriteResource(SOLN_SECT,"Efg-Interactive-Solns",pick_solns,defaults_file);
 }
