@@ -544,6 +544,9 @@ Portion *GSM::Execute(gclExpression *expr, bool /*user_func*/)
   try {
     p = expr->Evaluate();
   }
+  catch (gclQuitOccurred &e) {
+    throw;
+  }
   catch (gException &w)  {
     gout << "GCL EXCEPTION: " << w.Description() <<  "; Caught in gsm.cc, GSM::Execute()\n";
   }

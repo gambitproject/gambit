@@ -18,9 +18,7 @@ PortionSpec gclQuitExpression::Type(void) const
 
 Portion *gclQuitExpression::Evaluate(void)
 {
-  gCmdLineInput::RestoreTermAttr();
-  exit(0);
-  return 0;
+  throw gclQuitOccurred();
 }
 
 gclSemiExpr::gclSemiExpr(gclExpression *e1, gclExpression *e2)

@@ -163,9 +163,15 @@ int main( int /*argc*/, char* argv[] )
     //   global static objects are not called, hence this
     gCmdLineInput::RestoreTermAttr();
   }
+
+  catch (gclQuitOccurred &e) {
+    //    gCmdLineInput::RestoreTermAttr();
+    //return 0;
+  }
   // The last line of defense for exceptions:
   catch (gException &w)  {
     gout << "GCL EXCEPTION:" << w.Description() << "; Caught in gcl.cc, main()\n";
+    return 1;
   }
   
   return 0;

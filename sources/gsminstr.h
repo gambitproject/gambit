@@ -25,6 +25,13 @@ class gclExpression     {
 };
 
 
+class gclQuitOccurred : public gException {
+ public:
+  ~gclQuitOccurred() { }
+  gText Description(void) const { return "Quit expression executed"; }
+};
+
+
 class gclQuitExpression : public gclExpression  {
   public:
     gclQuitExpression(void)  { }
