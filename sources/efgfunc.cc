@@ -309,9 +309,13 @@ Portion *GSM_SetChanceProbs(Portion **param)
   Infoset *s = ((InfosetPortion *) param[0])->Value();
   ListPortion *p = (ListPortion *) param[1];
 
-  if (!s->GetPlayer()->IsChance())   return 0;
-  if (p->DataType() != s->BelongsTo()->Type())  return 0;
-  if (p->Length() != s->BelongsTo()->NumPlayers())   return 0;
+  if (!s->GetPlayer()->IsChance())
+    return new ErrorPortion("Information set does not belong to chance player\n");
+  if ((s->BelongsTo()->Type() == DOUBLE && p->DataType() != porFLOAT) ||
+      (s->BelongsTo()->Type() == RATIONAL && p->DataType() != porRATIONAL))
+    return new ErrorPortion("Probability list does not match game type\n");
+  if (p->Length() != s->BelongsTo()->NumPlayers())  
+    return new ErrorPortion("Wrong number of probabilities\n");
 
   int i;
 
