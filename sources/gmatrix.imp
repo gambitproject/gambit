@@ -694,7 +694,7 @@ gMatrix<T>::RotateLeft(int lo, int hi)
   for(int i=MinRow(); i<=MaxRow(); i++)
     {
       T *row= data[i];
-      temp= row[low];
+      temp= row[lo];
       for(int j=lo; j<hi; j++)
 	row[j]= row[j+1];
       row[hi]= temp;
