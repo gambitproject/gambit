@@ -707,6 +707,10 @@ Portion *GSM_Actions(Portion **param)
   return por;
 }
 
+
+
+//----------------------- Centroid ----------------------//
+
 Portion *GSM_CentroidEfgFloat(Portion **param)
 {
   Efg<double> &E = * (Efg<double>*) ((EfgPortion*) param[0])->Value();
@@ -728,6 +732,23 @@ Portion *GSM_CentroidEfgRational(Portion **param)
   por->AddDependency();
   return por;
 }
+
+Portion *GSM_CentroidEFSupport(Portion **param)
+{
+  EFSupport *S = ((EfSupportPortion *) param[0])->Value();
+  BaseBehavProfile *P;
+
+  if (S->BelongsTo().Type() == DOUBLE)
+    P = new BehavProfile<double>( *S );
+  else
+    P = new BehavProfile<gRational>( *S );
+
+  Portion *por = new BehavValPortion(P);
+  por->SetOwner(param[0]->Owner());
+  por->AddDependency();
+  return por;
+}
+
 
 extern Portion *GSM_CentroidNfgFloat(Portion **);
 extern Portion *GSM_CentroidNfgRational(Portion **);
@@ -905,6 +926,20 @@ Portion* GSM_NameStrategy( Portion** param )
   Strategy *s = ( (StrategyPortion*) param[ 0 ] )->Value();
   return new TextValPortion( s->name );
 }
+
+
+//------------------- NewSupport -------------------------//
+
+Portion *GSM_NewEFSupport(Portion **param)
+{
+  BaseEfg &E = * ((EfgPortion *) param[0])->Value();
+  Portion *p = new EfSupportValPortion(new EFSupport(E));
+
+  p->SetOwner( param[ 0 ]->Original() );
+  p->AddDependency();
+  return p;
+}
+
 
 
 
@@ -1674,6 +1709,10 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_CentroidEfgRational, 0, "efg", porEFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
+  FuncObj->SetFuncInfo(GSM_CentroidEFSupport, 1);
+  FuncObj->SetParamInfo(GSM_CentroidEFSupport, 0, "support",
+			porEF_SUPPORT);
+
   FuncObj->SetFuncInfo(GSM_CentroidNfgFloat, 1);
   FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
@@ -1779,6 +1818,13 @@ void Init_efgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
 
+  //---------------------- NewSupport ----------------------//
+
+  FuncObj = new FuncDescObj( "NewSupport" );
+  FuncObj->SetFuncInfo(GSM_NewEFSupport, 1);
+  FuncObj->SetParamInfo(GSM_NewEFSupport, 0, "efg", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+  gsm->AddFunction(FuncObj);
 
 
   FuncObj = new FuncDescObj("NextSibling");

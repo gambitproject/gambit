@@ -24,7 +24,7 @@
 
 #include "nfplayer.h"
 #include "nfstrat.h"
-
+#include "efstrat.h"
 
 //---------------------------------------------------------------------
 //                          base class
@@ -501,6 +501,47 @@ public:
   bool IsReference( void ) const;
 };
 
+
+//---------------------------------------------------------------------
+//                          EfSupport class
+//---------------------------------------------------------------------
+
+
+class EfSupport;
+
+class EfSupportPortion : public Portion
+{
+protected:
+  EFSupport** _Value;
+  EfSupportPortion( void );
+
+public:
+  virtual ~EfSupportPortion();
+
+  EFSupport*& Value( void ) const;
+  PortionType Type( void ) const;
+  void Output( gOutput& s ) const;
+  Portion* ValCopy( void ) const;
+  Portion* RefCopy( void ) const;
+  void AssignFrom( Portion* p );
+  bool operator == ( Portion* p ) const;
+};
+
+class EfSupportValPortion : public EfSupportPortion
+{
+public:
+  EfSupportValPortion( EFSupport* value );
+  virtual ~EfSupportValPortion();
+  bool IsReference( void ) const;
+};
+
+class EfSupportRefPortion : public EfSupportPortion
+{
+public:
+  EfSupportRefPortion( EFSupport*& value );
+  virtual ~EfSupportRefPortion();
+  bool IsReference( void ) const;
+};
 
 
 

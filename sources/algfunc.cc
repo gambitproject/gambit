@@ -483,6 +483,7 @@ Portion *GSM_LiapEfg_BehavFloat(Portion **param)
 
 
 
+//-------------------------------- LcpSolve -------------------------//
 
 #include "seqform.h"
 
@@ -493,7 +494,8 @@ Portion *GSM_LemkeEfgFloat(Portion **param)
   SeqFormParams SP;
   SP.nequilib = ((IntPortion *) param[1])->Value();
 
-  SeqFormModule<double> SM(E, SP);
+  EFSupport SUP(E);
+  SeqFormModule<double> SM(E, SP, SUP);
   SM.Lemke();
 
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
@@ -511,7 +513,8 @@ Portion *GSM_LemkeEfgRational(Portion **param)
 
   SeqFormParams SP;
   SP.nequilib = ((IntPortion *) param[1])->Value();
-  SeqFormModule<gRational> SM(E, SP);
+  EFSupport SUP(E);
+  SeqFormModule<gRational> SM(E, SP, SUP);
   SM.Lemke();
   
   ((IntPortion *) param[2])->Value() = SM.NumPivots();
@@ -522,6 +525,51 @@ Portion *GSM_LemkeEfgRational(Portion **param)
   por->AddDependency();
   return por;
 }
+
+
+Portion *GSM_LemkeEfgSupport(Portion **param)
+{
+  EFSupport& SUP = * ( (EfSupportPortion*) param[ 0 ] )->Value();
+  BaseEfg* E = (BaseEfg*) &( SUP.BelongsTo() );
+  Portion* por = 0;
+
+  SeqFormParams SP;
+  SP.nequilib = ((IntPortion *) param[1])->Value();
+      
+  switch( E->Type() )
+  {
+  case DOUBLE:
+    {
+      SeqFormModule<double> SM( * (Efg<double>*) E, SP, SUP);
+      SM.Lemke();
+      ((IntPortion *) param[2])->Value() = SM.NumPivots();
+      ((FloatPortion *) param[3])->Value() = SM.Time();
+      por = new Behav_ListPortion<double>(SM.GetSolutions());
+    }
+    break;
+  case RATIONAL:
+    {
+      SeqFormModule<gRational> SM( * (Efg<gRational>*) E, SP, SUP);
+      SM.Lemke();
+      ((IntPortion *) param[2])->Value() = SM.NumPivots();
+      ((FloatPortion *) param[3])->Value() = SM.Time();
+      por = new Behav_ListPortion<gRational>(SM.GetSolutions());
+    }
+    break;
+  default:
+    assert( 0 );
+  }
+  assert( por != 0 );
+  por->SetOwner( param[ 0 ]->Owner() );
+  por->AddDependency();
+  return por;
+}
+
+
+
+
+
+
 
 
 Portion *GSM_SetFloatOptions(Portion **param)
@@ -587,7 +635,8 @@ Portion *GSM_ActionValuesFloat(Portion **param)
   gDPVector<double> values(E->Dimensionality());
   gPVector<double> probs(E->Dimensionality().Lengths());
 
-  E->CondPayoff(*bp, values, probs);
+  // E->CondPayoff(*bp, values, probs);
+  bp->CondPayoff(values, probs);
   
   gVector<double> ret(s->NumActions());
   for (int i = 1; i <= s->NumActions(); i++)
@@ -612,7 +661,7 @@ Portion *GSM_ActionValuesRational(Portion **param)
   gDPVector<gRational> values(E->Dimensionality());
   gPVector<gRational> probs(E->Dimensionality().Lengths());
 
-  E->CondPayoff(*bp, values, probs);
+  bp->CondPayoff(values, probs);
   
   gVector<gRational> ret(s->NumActions());
   for (int i = 1; i <= s->NumActions(); i++)
@@ -625,14 +674,14 @@ Portion *GSM_BeliefsFloat(Portion **param)
 {
   BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
 
-  return ArrayToList(bp->BelongsTo()->Beliefs(*bp));
+  return ArrayToList(bp->Beliefs());
 }
 
 Portion *GSM_BeliefsRational(Portion **param)
 {
   BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
 
-  return ArrayToList(bp->BelongsTo()->Beliefs(*bp));
+  return ArrayToList(bp->Beliefs());
 }
 
 Portion *GSM_InfosetProbsFloat(Portion **param)
@@ -644,7 +693,7 @@ Portion *GSM_InfosetProbsFloat(Portion **param)
   gDPVector<double> values(E->Dimensionality());
   gPVector<double> probs(E->Dimensionality().Lengths());
 
-  E->CondPayoff(*bp, values, probs);
+  bp->CondPayoff(values, probs);
 
   ListPortion *ret = new ListValPortion;
 
@@ -663,7 +712,7 @@ Portion *GSM_InfosetProbsRational(Portion **param)
   gDPVector<gRational> values(E->Dimensionality());
   gPVector<gRational> probs(E->Dimensionality().Lengths());
 
-  E->CondPayoff(*bp, values, probs);
+  bp->CondPayoff(values, probs);
 
   ListPortion *ret = new ListValPortion;
 
@@ -681,7 +730,7 @@ Portion *GSM_NodeValuesFloat(Portion **param)
   if (bp->BelongsTo() != p->BelongsTo())
     return new ErrorPortion("Profile and player are from different games");
 
-  return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
+  return ArrayToList(bp->NodeValues(p->GetNumber()));
 }
 
 Portion *GSM_NodeValuesRational(Portion **param)
@@ -692,21 +741,21 @@ Portion *GSM_NodeValuesRational(Portion **param)
   if (bp->BelongsTo() != p->BelongsTo())
     return new ErrorPortion("Profile and player are from different games");
 
-  return ArrayToList(bp->BelongsTo()->NodeValues(p->GetNumber(), *bp));
+  return ArrayToList(bp->NodeValues(p->GetNumber()));
 }
  
 Portion *GSM_RealizProbsFloat(Portion **param)
 {
   BehavProfile<double> *bp = (BehavProfile<double> *) ((BehavPortion *) param[0])->Value();
   
-  return ArrayToList(bp->BelongsTo()->NodeRealizProbs(*bp));
+  return ArrayToList(bp->NodeRealizProbs());
 }  
   
 Portion *GSM_RealizProbsRational(Portion **param)
 {
   BehavProfile<gRational> *bp = (BehavProfile<gRational> *) ((BehavPortion *) param[0])->Value();
   
-  return ArrayToList(bp->BelongsTo()->NodeRealizProbs(*bp));
+  return ArrayToList(bp->NodeRealizProbs());
 }
   
   
@@ -952,6 +1001,15 @@ void Init_algfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 2, "nPivots", porINTEGER,
 			new IntValPortion(0), PASS_BY_REFERENCE);
   FuncObj->SetParamInfo(GSM_LemkeEfgRational, 3, "time", porFLOAT,
+			new FloatValPortion(0.0), PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_LemkeEfgSupport, 4);
+  FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 0, "support", porEF_SUPPORT );
+  FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 1, "stopAfter", porINTEGER,
+			new IntValPortion(0));
+  FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 2, "nPivots", porINTEGER,
+			new IntValPortion(0), PASS_BY_REFERENCE);
+  FuncObj->SetParamInfo(GSM_LemkeEfgSupport, 3, "time", porFLOAT,
 			new FloatValPortion(0.0), PASS_BY_REFERENCE);
 
   FuncObj->SetFuncInfo(GSM_LemkeNfgFloat, 4);

@@ -1200,7 +1200,7 @@ Portion *GSM_RandomNfgSeedRational(Portion **param)
   return param[0]->RefCopy();
 }  
 
-Portion *GSM_NewSupport(Portion **param)
+Portion *GSM_NewNFSupport(Portion **param)
 {
   BaseNfg &N = * ((NfgPortion *) param[0])->Value();
   Portion *p = new NfSupportValPortion(new NFSupport(N));
@@ -1854,8 +1854,8 @@ void Init_nfgfunc(GSM *gsm)
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("NewSupport");
-  FuncObj->SetFuncInfo(GSM_NewSupport, 1);
-  FuncObj->SetParamInfo(GSM_NewSupport, 0, "nfg", porNFG,
+  FuncObj->SetFuncInfo(GSM_NewNFSupport, 1);
+  FuncObj->SetParamInfo(GSM_NewNFSupport, 0, "nfg", porNFG,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
   gsm->AddFunction(FuncObj);
 

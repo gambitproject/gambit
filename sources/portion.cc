@@ -938,6 +938,118 @@ bool NfSupportRefPortion::IsReference( void ) const
 
 
 
+//---------------------------------------------------------------------
+//                          EfSupport class
+//---------------------------------------------------------------------
+
+
+EfSupportPortion::EfSupportPortion( void )
+{ }
+
+EfSupportPortion::~EfSupportPortion()
+{ }
+
+EFSupport*& EfSupportPortion::Value( void ) const
+{ return *_Value; }
+
+PortionType EfSupportPortion::Type( void ) const
+{ return porEF_SUPPORT; }
+
+void EfSupportPortion::Output( gOutput& s ) const
+{ 
+  int numplayers;
+  int i;
+  int j;
+  int k;
+
+  assert( *_Value != 0 );
+  s << "(EfSupport) " << *_Value << " { ";
+  numplayers = (*_Value)->NumPlayers();
+  for( i = 1; i <= numplayers; i++ )
+  {
+    EFPlayer& player = (*_Value)->GetPlayer( i );
+    s << '"' << player.GetName() << "\" { ";
+    for( j = 1; j <= player.NumInfosets(); j++ )
+    {
+      Infoset* infoset = player.InfosetList()[ j ];
+      s << '"' << infoset->GetName() << "\" { ";
+      for( k = 1; k <= infoset->NumActions(); k++ )
+      {
+	Action* action = infoset->GetActionList()[ k ];
+	s << '"' << action->GetName() << "\" ";
+      }
+      s << "} ";
+    }
+    s << "} ";
+  }
+  s << "} ";
+}
+
+Portion* EfSupportPortion::ValCopy( void ) const
+{
+  Portion* p = new EfSupportValPortion( *_Value ); 
+  p->SetOwner( Owner() );
+  p->SetIsValid( IsValid() );
+  p->AddDependency();
+  return p;
+}
+
+Portion* EfSupportPortion::RefCopy( void ) const
+{
+  Portion* p = new EfSupportRefPortion( *_Value ); 
+  p->SetOriginal( Original() );
+  p->SetOwner( Owner() );
+  return p;
+}
+
+void EfSupportPortion::AssignFrom( Portion* p )
+{
+  assert( p->Type() == Type() );
+  RemoveDependency();
+  *_Value = *( ( (EfSupportPortion*) p )->_Value );
+  SetOwner( p->Owner() );
+  SetIsValid( p->IsValid() );
+  AddDependency();
+}
+
+bool EfSupportPortion::operator == ( Portion *p ) const
+{
+  if( p->Type() == Type() )
+  {
+    assert( *_Value != 0 && *( (EfSupportPortion*) p )->_Value != 0 );
+    // this calls the operator == in NFSupport
+    return ( **_Value == **( (EfSupportPortion*) p )->_Value );
+  }
+  else
+    return false;
+}
+
+
+EfSupportValPortion::EfSupportValPortion( EFSupport* value )
+{ _Value = new EFSupport*( value ); }
+
+EfSupportValPortion::~EfSupportValPortion()
+{ 
+  RemoveDependency();
+  delete _Value; 
+}
+
+bool EfSupportValPortion::IsReference( void ) const
+{ return false; }
+
+
+EfSupportRefPortion::EfSupportRefPortion( EFSupport*& value )
+{ _Value = &value; }
+
+EfSupportRefPortion::~EfSupportRefPortion()
+{ }
+
+bool EfSupportRefPortion::IsReference( void ) const
+{ return true; }
+
+
+
+
 
 //---------------------------------------------------------------------
 //                          EfPlayer class
