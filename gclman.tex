@@ -31,7 +31,7 @@ Theodore Turocy\\California Institute of Technology
 
 \tableofcontents
 
-\section{General Overview}
+\section{Introduction}
 
 This document describes the GAMBIT Command Language (GCL).  GAMBIT is
 a computer program that allows one to build, manipulate, and solve
@@ -52,195 +52,453 @@ operations.
 
 \section{Installation}
 
-\subsection{Unix}
+\section{Basic concepts}
 
-\subsection{MS-DOS, Microsoft Windows}
+The design motifs for GCL come from two principal families of programming
+languages.  The first is traditional imperative programming languages
+such as Pascal, C, and Modula-3.  In particular, the GCL's concept of
+types draws heavily from these languages, although the number of
+predefined types in GCL is much larger due to the specialized nature of
+the language.  The second is more specialized programming languages such
+as Mathematica.  
 
 
-\section{Getting Started}
+\subsection{Types}
 
-There are small differences in the versions of the GCL between different
-operating systems and platforms; however, the use and interface is
-essentially the same in the main.  This manual is written for all platforms,
-and any special notes pertaining to some particular platforms will be mentioned
-at the appropriate time.
+Like most high-level languages, GCL has a data typing system which
+permits only one type of data to be returned by a given function.
+However, GCL is a bit unusual in that it has implicit typing of
+functions.  That is, a function's return type is determined by its
+first use in the program.  For a user defined function, this is in the
+NewFunction command that first creates the function.  For a user
+defined variable, this will be in the \verb+Assign+ function that
+first creates the variable.
 
-There are two ``modes'' in which you will use the GCL: interactive and batch.
-First, we discuss batch mode.
+The built-in data types for the GCL are the following:  
 
-Typing 'gcl [CR]' at your shell prompt (either in Unix or MS-DOS) will start
-the GCL in batch mode.  After some preliminaries, you will get the GCL
-prompt:
-\begin{verbatim}
-GCL1:
-\end{verbatim}
+\medskip
 
-which indicates that the program is ready to accept your input.  The prompt
-number labels your input lines for later reference.
+\begin{tabular}{lp{4in}}
+{\tt BOOL} 	& boolean \\
+{\tt INTEGER} 	& integer \\ 
+{\tt FLOAT} 	& floating-point number \\
+{\tt RATIONAL} 	& rational number with arbitrary precision \\
+{\tt TEXT}	& string of arbitrary length \\
+{\tt OUTPUT}	& output stream \\
+{\tt EFG}	& extensive form game \\
+{\tt EFPLAYER}	& a player in an extensive form game \\
+{\tt NODE}	& a node in an extensive form game \\ 
+{\tt INFOSET}	& an information set in an extensive form game \\
+{\tt ACTION}	& an action at an information set \\
+{\tt OUTCOME}	& an outcome in an extensive form game \\
+{\tt BEHAV}	& a behavioral strategy profile for an extensive form game \\
+{\tt NFG}	& normal form game \\
+{\tt NFPLAYER}	& a player in a normal form game \\
+{\tt STRATEGY}	& a strategy in a normal form game \\
+{\tt NFSUPPORT}	& a support of strategies in a normal form game \\
+{\tt MIXED}	& a mixed strategy profile for a normal form game \\
+\end{tabular}
 
-A GCL program consists of a series of statements, each ending in a
-semi-colon or carriage return. A carriage return will not be
-interpreted as the end of a statement, however, if there are unmatched
-parentheses or brackets.  For example, the following two lines are
-interpreted as one statement:
+\medskip
 
-\begin{verbatim}
-Plus[x->1, 
-y->2]
-\end{verbatim}
+The remainder of this section details the rules concerning the types
+{\tt BOOL}, {\tt INTEGER}, {\tt FLOAT}, {\tt RATIONAL}, {\tt TEXT}, and
+{\tt OUTPUT}, as well as general rules for typing.  The extensive form
+and normal form types, and their related types, are detailed later in
+special sections.
 
-If both lines are followed by a carriage return, the statement will
-generate the line of output:
+\subsubsection{Booleans}
 
-\begin{verbatim}
-3
-\end{verbatim}
+The {\tt BOOL} type represents boolean values, that is to say, ``true'' and
+``false''.  The command language predefines two constant values to
+represent these, {\tt True} and {\tt False}.
 
-The function \verb+Plus+ is defined to return the sum of two integers,
-so the command language evaluates the function and returns the value of
-$1 + 2$, which is 3.  A more complete description of functions follows in
-a later section.
+\subsubsection{Integers}
 
-[NOTE: There will be better batch mode support soon.]
+The {\tt INTEGER} type may contain integer values.  It is implemented as
+the machine's long integer type, which is typically 32 bits in modern
+machines.  Thus, there is a danger of overflow or underflow in computations
+involving these numbers.
 
-The user has the option of creating a text file containing a series of
-commands which can then be run together, as a program, by the
-language.  This is referred to as ``batch mode''.
-The output of such a program can be directed either to the
-screen or to a file specified by the user.  A text file can be read by
-the language as a program by placing an input file command {\tt "<"}
-followed by the name of the file, following the command which enters
-the command language.  By using an output file command {\tt ">"}
-followed by the name of a file, the user can direct the output of the
-command language to an external text file.  For example, at the Unix prompt:
+\subsubsection{Floats}
 
-\begin{verbatim}
-> gcl < input.gcl > output.out
-\end{verbatim}
+The {\tt FLOAT} type may contain floating point values.  It is implemented
+as the machine's double-precision floating point type.  These numbers
+are imprecise; for example, operations usually associated with being inverses
+of each other may not be with floating point numbers.  For more precise
+computations, the {\tt RATIONAL} type is available, although these may
+sometimes be bulky and slow.
 
-\section{Language Description}
+\subsubsection{Rationals}
 
-\subsection{Grammar and syntax}
+The {\tt RATIONAL} type is an arbitrary-length ratio of two integers.
+This is capable of precisely representing any rational number.  However,
+they are slow, and output from them may be unreadably large.  Rational
+numbers are formed from two integers using the {\tt /} operator, 
+described below.
 
-The central paradigm of the GCL is that we can think of every legal
-statement as a function call, which operates on some set of parameters and
-returns a value.  Many commonly used functions have a more convenient
-``short form'' format for additional terseness and readability.
+\subsubsection{Text}
 
-Each function is identified by its \verb+FunctionName+, which is a
-unique \verb+Name+.  A \verb+Name+ is any sequence of upper or lower
-case letters or numbers beginning with a letter.  The set of all
-built-in functions is listed in the Function Reference section of this
-manual.
+The {\tt TEXT} type is used to store text strings, typically labels
+for parts of games.  It is generally encouraged to label various elements
+of games in the command language for ease of identification; however it
+is not required.  To specify a {\tt TEXT} constant, surround the
+text with double-quote characters ({\tt "}).  Constants may not span
+more than one input line.
 
-A statement in the GCL has the
-following syntax
-\begin{verbatim}
-FunctionName[ArgumentList]
-\end{verbatim}
-where \verb+FunctionName+ is a unique name, and \verb+ArgumentList+ is
-a sequence of arguments, separated by commas, each of which takes one
-of the following two forms:
-\begin{verbatim}
-ArgumentName->argval
-\end{verbatim}
-or
-\begin{verbatim}
-ArgumentName<->argref
-\end{verbatim}
+\subsubsection{Output}
 
-Each function, when originally created, is given a list of formal
-argument names, and each formal argument is assigned a data type,
-which is one of the allowable data types listed in the section below
-on data types.  For each of the built in functions, the formal
-arguments and their data types are listed in the entry for that
-function in the Function Reference section.  In the above syntax,
-\verb+ArgumentName+, must be one of the list of possible formal
-arguments for the given function, and \verb+argval+ or \verb+argref+
-is any function that evaluates to correct data type for the
-corresponding argument. 
-
-The arguments to a function can be either optional or required.
-Required arguments must be specified in \verb+ArgumentList+ when the
-function is called.  Each optional argument has a default value, which
-is also determined when the function is created.  Optional arguments
-need only be specified when the default is to be changed.
-
-The arguments to a function can be specified in any order, as long as
-the above syntax for the \verb+ArgumentList+ is used.  However, the
-argument list for a function can also be called without specifying the 
-prefix \verb+ArgumentName->+ or \verb+ArgumentName<->+ as long as the 
-arguments are specified in the correct order.  In fact a mixture is 
-allowed in which the prefix is specified for some arguments and not
-specified for others as long as all of the arguments which do not
-include the prefix preceed those that do.  In this case, it is assumed
-that those that do not include a prefix are in the correct order.  
-
-Arguments can be passed in one of two ways, either by value or by
-reference.  To pass an argument by value, the syntax is
-\verb+ArgumentName->argval+.  If an argument is passed by value, then the
-function whose name is specified in \verb+argval+ cannot be called
-or changed by the function \verb+FunctionName+ unless it is in some
-other way made visible to the function (specifically, if it is called
-by reference in a different argument to the same function, or if it is a
-funcion of global scope -- described below).  To pass by reference,
-the syntax is \verb+ArgumentName<->argref+.  If an argument is passed
-by reference, then the function whose name is specified in
-\verb+argref+ can be called and changed by the function
-\verb+FunctionName+.  
-
-Finally, a function with no required arguments can be called by just
-specifying the function name.  That function is then called with
-default values for all optional arguments (if there are any.)
-
-Summarizing, a rough description of the formal grammar of the GCL
-follows:
-
-\begin{verbatim}
-Name: [A-Za-z]([A-Za-z0-9_])
-
-Statement: FunctionName
-        | FunctionName[ArgumentList]
-
-FunctionName: Name
-
-ArgumentList: Argument
-        | Argument, Argumentlist
-
-Argument: ArgumentName -> Statement
-        | ArgumentName <-> Statement
-        | Statement
-
-ArgumentName: Name
-\end{verbatim}
+The {\tt OUTPUT} type is a reference to an output stream, generally a file
+on disk.  Its principal use is as a logging file for formatting output
+from an extended command language job.
 
 \subsection{Variables}
 
-The simplest kind of function is a $variable$.  A variable is a
-constant function with no arguments.  A variable stores one object of
-the corresponding data type, and returns it when called.  To create a
-user defined variable, or to give a new value to an existing variable,
-one can use the built-in function,
-\verb+Assign+, which has the syntax:
+\subsection{Lists}
+
+Additionally, variables of any type can be contained in lists of arbitrary
+length.
+Variables of type LIST are defined similarly to the above variables,
+except that the expression to the right of the {\tt ":="} symbol
+contains a vector of variables of the same type enclosed in curly braces
+and separated by commas.  For example:
+
 \begin{verbatim}
-Assign[x<->T, y->T]
+LIST(BOOL) := { BOOL1, BOOL2, . . . . , BOOLn }
 \end{verbatim}
 
-If the \verb+x+ parameter is a previously undefined variable name, a new
-variable of the type is created and the value of the expression passed
-to \verb+y+ is ``assigned'' to \verb+x+.  If \verb+Assign+ is called with
-an argument \verb+varname+ which is a currently visible function, it results
-in an error if the data type which \verb+y+ evaluates to is different that the
-current data type of \verb+x+.  On the other hand, if the
-data types match, then \verb+varname+ is ``modified:'' \verb+varname+
-is first deleted from the list of visible functions and then
-\verb+Assign+ is executed.  
+The elements of a list are indexed sequentially, with the first element
+defined to have index 1.  The predefined function \verb+Subscript+ is
+provided to extract an element from a list:
 
-The Assign function is used so frequently, it has the following short form
-representation:
 \begin{verbatim}
-name := expression
+Subscript[l->LIST(T), i->INTEGER] =: T
 \end{verbatim}
+
+\noindent which evaluates to a single variable of the same type as the list.
+The shorthand for the \verb+Subscript+ function is \verb+l[[i]]+.
+
+In the same manner, lists of any type may be created and manipulated.
+Lists may be nested to any depth; however, the type of all the elements
+of the list and any sublists must always be the same.  Hence
+
+\begin{verbatim}
+{ 3, { 4, 6 }, 23 }
+\end{verbatim}
+
+is a legal list, since all the elements are of type INTEGER, but
+
+\begin{verbatim}
+{ 3, { 4.2, 5.7 }, 23 }
+\end{verbatim}
+
+is not, since the second element is a LIST(FLOAT).
+
+\subsection{Errors}
+
+\section{Writing simple programs}
+
+\subsection{Statements}
+
+\subsection{Function calls}
+
+A function call consists of the name of a function, and a list of parameters
+upon which the function is to operate.  Functions return a value, which
+may in turn be used as a parameter to another function call, allowing more
+complex computations to be expressed.
+
+A simple example of a function call is
+
+\begin{verbatim}
+Plus[x->1, y->2]
+\end{verbatim}
+
+This calls the function named {\tt Plus}, with parameter \verb+x+ set to
+the value 1 and \verb+y+ set to the value 2.  Since {\tt Plus} is the function
+for addition of two integers, the value returned would be, as you might
+expect, 3.
+
+In the addition example above, we called a function which is listed in
+the function reference as
+
+\begin{verbatim}
+Plus[x->INTEGER, y->INTEGER] =: INTEGER
+\end{verbatim}
+
+\noindent This listing of a function is called its {\it prototype}.  
+It contains the function's name, its list of parameters, and its return
+value.  In this case, the function {\tt Plus} takes two parameters, the
+first named \verb+x+ and taking a value of type {\tt INTEGER} and the
+second named \verb+y+ and taking a value of type {\tt INTEGER}, and
+returns a value of type {\tt INTEGER}.
+
+Because the parameters have explicit names, it is possible to rearrange
+the order in which parameters are listed when a function is called.
+Thus, we could write out sample call equivalently as
+
+\begin{verbatim}
+Plus[y->2, x->1]
+\end{verbatim}
+
+\noindent and achieve the same effect.
+
+Explicitly specifying the formal names for parameters all the time
+will prove tedious and can hinder readability.  For these reasons, it is
+also legal to specify parameters without their associated formal names.
+These are called passing {\it anonymous} parameters.  Our addition
+example could thus also be written
+
+\begin{verbatim}
+Plus[1, 2]
+\end{verbatim}
+
+In not specifying the formal names, however, function calls are restricted
+to specifying parameters in exactly the same order as listed in the function
+prototype.  In our example, the GCL interpreter would have no way of
+distinguishing whether we meant 1 to be the value of \verb+x+ or the
+value of \verb+y+, and vice versa.  While in the case of addition we may
+flip the values of the parameters without having an effect on the result,
+in general this is not the case.
+
+It is permitted to mix the two styles of parameter specification, subject
+to the following rules:
+
+\begin{itemize}
+\item All anonymous parameters must be specified before any named parameters
+\item No parameters may be omitted in the anonymous parameter list.  If
+$k$ parameters are specified anonymously, they must match one-for-one the
+first $k$ parameters in the function's prototype.
+\item Once a named parameter has been specified, all succeeding parameters
+must be named, even if the first named parameter appeared in the same
+place in the parameter list as it does in the prototype.
+\end{itemize}
+
+\noindent Therefore, it would be legal to write
+
+\begin{verbatim}
+Plus[1, y->2]
+\end{verbatim}
+
+\noindent but
+
+\begin{verbatim}
+Plus[x->1, 2]
+\end{verbatim}
+
+\noindent is illegal since it violates the third condition.
+
+To be more precise, the function {\tt Plus} comes in several different
+variations listed in the function reference:
+
+\begin{verbatim}
+Plus[x->INTEGER, y->INTEGER] =: INTEGER
+Plus[x->FLOAT, y->FLOAT] =: FLOAT
+Plus[x->RATIONAL, y->RATIONAL] =: RATIONAL
+Plus[x->TEXT, y->TEXT] =: TEXT
+Plus[x->LIST(T), y->LIST(T) =: LIST(T)
+\end{verbatim}
+
+\noindent In fact, not all the versions of {\tt Plus} implement addition;
+for example, the {\tt TEXT} version concatenates two strings.  This is a
+good example of function {\it overloading}.  This means that one function
+name may have several possible parameter lists, sometimes called
+{\it signatures}.  The GCL interpreter is capable of determining which
+version of the function to use by analyzing the names and types of the
+parameters used.
+
+Since a function may have multiple signatures, it is conceivable that
+a function call might be ambiguous, in the sense that its parameters match
+more than one signature for that function.  However, no function call that
+is complete may be ambiguous from the way that signatures have been
+chosen for the predefined functions.  Any function call flagged by the
+interpreter as ambiguous must be missing at least one parameter.
+
+Some functions have parameters which are optional, in the sense that they
+need not be specified in order to call the function.  These parameters
+are indicated in the function's prototype by being surrounded by curly
+braces.  (Note that these braces should not be included in the function
+call when specifying an optional parameter.)  If an optional parameter
+is left unspecified in a function call, a default value is assumed, as
+given in the function's documentation.
+
+For a function, all required parameters always precede any optional
+parameters.  Optional parameters may also be specified anonymously,
+subject to the above rules on parameter specification.
+
+All parameters so far have been passed by {\it value}, that is, a copy
+of the value of the parameter is given to the function to which it is passed.
+These parameters may not be modified by the function.  It is also possible
+to have parameters to a function passed by {\it reference}.  This means
+that the function does not receive a copy of the value, but rather the
+memory location of the value itself.  Thus, the function may modify
+the value of a parameter passed by reference.
+
+The symbol for passing a parameter by reference, both in a function's
+prototype and in a function call, is {\tt <->}.  Constants may not be
+passed by reference.  Reference parameters may be specified anonymously
+just like a value parameter, subject to the usual rules.  It is a run-time
+error to attempt to pass a value to a reference parameter, or vice versa.
+
+\subsection{Aliases for function calls}
+
+There are several functions which are so commonly used that special
+``short'' forms are defined for them.  Most of these are the
+standard arithmetic and logic operators, for which the usual binary
+infix or unary prefix notations are supported.  Our addition example
+may more familiarly be written
+
+\begin{verbatim}
+1 + 2
+\end{verbatim}
+
+\noindent which expression is converted to the ``long form'' function
+call by the interpreter.  Note that formal names may not be specified
+in a ``short form'' call, and the order of parameters is therefore
+significant.
+
+Here is a list of the functions thus abbreviated, and their ``short form''
+equivalents:
+
+\medskip
+
+{\tt
+\begin{tabular}{lp{4in}}
+And[x, y]		& x \&\& y, x AND y \\
+Assign[x, y]		& x := y \\
+Divide[x, y]		& x / y or x DIV y \\
+Equal[x, y]		& x = y \\
+Greater[x, y]		& x > y \\
+GreaterEqual[x, y]	& x >= y \\
+Less[x, y]		& x < y \\
+LessEqual[x, y]		& x <= y \\
+Minus[x, y]		& x - y \\
+Modulus[x, y]		& x \% y, x MOD y \\
+Not[x]			& NOT x, !x \\
+NotEqual[x, y]		& x != y \\
+NthChar[text, n]	& text[[n]] \\
+NthChild[node, n]	& node\#n \\ 
+NthElement[list, n]	& list[[n]] \\
+Or[x, y]		& x || y, x OR y \\
+Paren[x]		& (x) \\ 
+Plus[x, y]		& x + y \\
+Times[x, y]		& x * y \\
+\end{tabular}
+}
+
+When functions are written in their canonical forms, no ambiguity
+arises in the order of evaluation: In order to evaluate a function,
+all arguments must be evaluated first.  Arguments are evaluated in the
+natural order.  For built in functions, this is the default order
+given in the Function Reference section.  For user defined functions,
+it is the order specified when the function is created.  If another
+function is encountered as an argument to a function, it is evaluated
+at that time.  This leads to a recursive structure of evaluation,
+which stops only when an argument being evaluated is a constant
+function (i. e., a function with no arguments).
+
+When short form forms are used, then ambiguity can arise in the
+intended order of evaluation.  For example, the statement \verb&a + b * c&,
+could be meant as \verb+Plus[a,Times[b,c]]+ or as
+\verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
+functions that have a short form representation are given an order of
+precedence.  When a statement is parsed by the GCL, it is first
+scanned from left to right, replacing each short form expression at the
+top level of precedence with its canonical form.  Then it is scanned
+again replacing each short form expression at the second level of
+precedence with its canonical form, and so on, until all short form
+expressions have been eliminated.  
+
+The order of precedence for built-in functions is as follows:
+\bd
+\item
+\verb+()+
+\item
+\verb+:=+
+\item
+\verb+||+
+\item
+\verb+&&+
+\item
+\verb+NOT+
+\item
+\verb+= != < <= > >=+
+\item
+\verb&+ -&
+\item
+\verb+* / DIV MOD+
+\item
+\verb&(unary) + -&
+\item
+\verb+[[ ]]+
+\ed
+
+Thus, the statement \verb&a + b * c& would become 
+\begin{verbatim}
+Plus[a,b*c]
+Plus[a,Times[b,c]]
+\end{verbatim}
+
+\noindent
+On the other hand, the statement \verb&( a + b ) * c& would become 
+\begin{verbatim}
+Paren[a+b]*c
+Paren[Plus[a,b]]*c
+Times[Paren[Plus[a,b]],c]
+\end{verbatim}
+
+\noindent
+which, since \verb+Paren+ is just the identity mapping, is equivalent to
+\begin{verbatim}
+Times[Plus[a,b],c]
+\end{verbatim}
+
+\medskip
+
+\subsection{Flow control structures}
+
+The GCL contains three functions which allow flow control within a
+program.  Flow control functions differ from other functions in that
+when they are evaluated, the list of visible functions does not
+change.
+
+\medskip
+
+\begin{tabular}{lp{4in}}
+If[BOOL, & \\
+\{series of commands\}] & Evaluates the BOOL expression
+once. If it evaluates to True, the series of commands are performed.
+Each command must be followed by a semi-colon or carriage return.  If
+the BOOL evaluates to FALSE, none of the commands are performed.\\
+If[BOOL, & \\
+\{series of commands\}, & \\
+\{series of commands\}] & Evaluates the BOOL expression
+once. If it evaluates to True, the first series of commands are
+performed.  Each command must be followed by a semi- colon or carriage
+return.  If the BOOL evaluates to FALSE, the second series of
+commands are performed. \\
+While[BOOL, &\\
+\{series of commands\}] & Evaluates the BOOL
+expression or variable.  As long as it evaluates to True, the series
+of commands are performed.  Each command must be followed by a
+semi-colon or carriage return.  If the BOOL evaluates to FALSE, the
+loop ends without performing the commands.\\
+NOTE: & The While command functions as a
+loop.  That is, it continues to perform the series of commands as long
+as the expression evaluates to True.  The If statement, however, only
+performs the series of commands once if the expression evaluates to
+True.\\
+For[\{expressions\}, & \\
+\{expression\}, & \\
+\{expressions\}, & \\
+\{statements\}] & Evaluates the first set of expressions as initialization;
+afterwards, so long as the second parameter (which must evaluate to a 
+BOOL value) remains True, executes the statement body followed by the
+third parameter expressions in a fashion similar to the While command.
+\end{tabular}
+
+\section{Advanced topics}
+
+\subsection{Including files}
 
 \subsection{User defined functions}
 
@@ -323,100 +581,6 @@ parameter \verb+x+, since the value of \verb+i+ inside \verb+FooFunc+ is
 always 13, regardless of the value of \verb+i+ outside of the function.
 
 
-\subsection{Data types}
-
-Like most high-level languages, GCL has a data typing system which
-permits only one type of data to be returned by a given function.
-However, GCL is a bit unusual in that it has implicit typing of
-functions.  That is, a function's return type is determined by its
-first use in the program.  For a user defined function, this is in the
-NewFunction command that first creates the function.  For a user
-defined variable, this will be in the \verb+Assign+ function that
-first creates the variable.
-
-The built-in data types for the GCL are the following:  
-
-\medskip
-
-\begin{tabular}{lp{4in}}
-BOOL & Evaluates to either True or False. \\ 
-
-INTEGER & Evaluates to an integer of arbitrary size \\ 
-
-RATIONAL & Evaluates to a rational number of arbitrary precision\\ 
-
-FLOAT 	& Evaluates to a floating point number \\
-
-TEXT	& String of arbitrary length enclosed in quotation marks\\ 
-
-INPUT & Input stream \\
-
-OUTPUT & Output stream \\
-
-EFG	& Game in extensive form\\
-
-NFG	& Game in normal form\\
-
-NODE	& A node in an extensive form\\
-
-INFOSET & An information set in an extensive form \\
-
-EFPLAYER & A player in an extensive form game \\
-
-ACTION & An action in an extensive form game \\
-
-OUTCOME & An outcome in an extensive form game \\
-
-NFPLAYER & A player in a normal form game \\
-
-STRATEGY & A strategy in a normal form game\\
-
-MIXED	& Profile of mixed strategies\\
-
-BEHAV	& Profile of behavioral strategies\\
-\end{tabular}
-
-\medskip
-
-\noindent
-Additionally, variables of any type can be contained in lists of arbitrary
-length.
-Variables of type LIST are defined similarly to the above variables,
-except that the expression to the right of the {\tt ":="} symbol
-contains a vector of variables of the same type enclosed in curly braces
-and separated by commas.  For example:
-
-\begin{verbatim}
-LIST(BOOL) := { BOOL1, BOOL2, . . . . , BOOLn }
-\end{verbatim}
-
-The elements of a list are indexed sequentially, with the first element
-defined to have index 1.  The predefined function \verb+Subscript+ is
-provided to extract an element from a list:
-
-\begin{verbatim}
-Subscript[l->LIST(T), i->INTEGER] =: T
-\end{verbatim}
-
-\noindent which evaluates to a single variable of the same type as the list.
-The shorthand for the \verb+Subscript+ function is \verb+l[[i]]+.
-
-In the same manner, lists of any type may be created and manipulated.
-Lists may be nested to any depth; however, the type of all the elements
-of the list and any sublists must always be the same.  Hence
-
-\begin{verbatim}
-{ 3, { 4, 6 }, 23 }
-\end{verbatim}
-
-is a legal list, since all the elements are of type INTEGER, but
-
-\begin{verbatim}
-{ 3, { 4.2, 5.7 }, 23 }
-\end{verbatim}
-
-is not, since the second element is a LIST(FLOAT).
-
 \subsection{Extensive forms}
 
 \subsubsection{Creating a new extensive form}
@@ -454,623 +618,187 @@ format.  By convention, files containing a normal form game have the extension
 To write a normal form game to a file, use the function \verb+WriteNfg+.
 To read a normal form game from a file, use \verb+ReadNfg+.
 
-\subsection{Order of precedence}
-
-When functions are written in their canonical forms, no ambiguity
-arises in the order of evaluation: In order to evaluate a function,
-all arguments must be evaluated first.  Arguments are evaluated in the
-natural order.  For built in functions, this is the default order
-given in the Function Reference section.  For user defined functions,
-it is the order specified when the function is created.  If another
-function is encountered as an argument to a function, it is evaluated
-at that time.  This leads to a recursive structure of evaluation,
-which stops only when an argument being evaluated is a constant
-function (i. e., a function with no arguments).
-
-When short form forms are used, then ambiguity can arise in the
-intended order of evaluation.  For example, the statement \verb&a + b * c&,
-could be meant as \verb+Plus[a,Times[b,c]]+ or as
-\verb+Times[Plus[a,b],c]+.  In order to resolve such ambiguities, all
-functions that have a short form representation are given an order of
-precedence.  When a statement is parsed by the GCL, it is first
-scanned from left to right, replacing each short form expression at the
-top level of precedence with its canonical form.  Then it is scanned
-again replacing each short form expression at the second level of
-precedence with its canonical form, and so on, until all short form
-expressions have been eliminated.  
-
-The order of precedence for built-in functions is as follows:
-\bd
-\item
-\verb+()+
-\item
-\verb+:=+
-\item
-\verb+||+
-\item
-\verb+&&+
-\item
-\verb+NOT+
-\item
-\verb+= != < <= > >=+
-\item
-\verb&+ -&
-\item
-\verb+* / DIV MOD+
-\item
-\verb&(unary) + -&
-\item
-\verb+[[ ]]+
-\ed
-
-Thus, the statement \verb&a + b * c& would become 
-\begin{verbatim}
-Plus[a,b*c]
-Plus[a,Times[b,c]]
-\end{verbatim}
-
-\noindent
-On the other hand, the statement \verb&( a + b ) * c& would become 
-\begin{verbatim}
-Paren[a+b]*c
-Paren[Plus[a,b]]*c
-Times[Paren[Plus[a,b]],c]
-\end{verbatim}
-
-\noindent
-which, since \verb+Paren+ is just the identity mapping, is equivalent to
-\begin{verbatim}
-Times[Plus[a,b],c]
-\end{verbatim}
-
-\subsection{Flow Control}
-
-The GCL contains three functions which allow flow control within a
-program.  Flow control functions differ from other functions in that
-when they are evaluated, the list of visible functions does not
-change.
-
-\medskip
-
-\begin{tabular}{lp{4in}}
-If[BOOL, & \\
-\{series of commands\}] & Evaluates the BOOL expression
-once. If it evaluates to True, the series of commands are performed.
-Each command must be followed by a semi-colon or carriage return.  If
-the BOOL evaluates to FALSE, none of the commands are performed.\\
-If[BOOL, & \\
-\{series of commands\}, & \\
-\{series of commands\}] & Evaluates the BOOL expression
-once. If it evaluates to True, the first series of commands are
-performed.  Each command must be followed by a semi- colon or carriage
-return.  If the BOOL evaluates to FALSE, the second series of
-commands are performed. \\
-While[BOOL, &\\
-\{series of commands\}] & Evaluates the BOOL
-expression or variable.  As long as it evaluates to True, the series
-of commands are performed.  Each command must be followed by a
-semi-colon or carriage return.  If the BOOL evaluates to FALSE, the
-loop ends without performing the commands.\\
-NOTE: & The While command functions as a
-loop.  That is, it continues to perform the series of commands as long
-as the expression evaluates to True.  The If statement, however, only
-performs the series of commands once if the expression evaluates to
-True.\\
-For[\{expressions\}, & \\
-\{expression\}, & \\
-\{expressions\}, & \\
-\{statements\}] & Evaluates the first set of expressions as initialization;
-afterwards, so long as the second parameter (which must evaluate to a 
-BOOL value) remains True, executes the statement body followed by the
-third parameter expressions in a fashion similar to the While command.
-\end{tabular}
-
 \section{Function Reference, by Category}
 
 This section contains a list of functions, organized by
 category.  For a description of each function, and the arguments,
 refer to the following, alphabetically organized, section.
 
-\noindent In this section, an asterisk (*) before the function name indicates
-that the function has been implemented in the current binary.
+\begin{verbatim}
+Assign[x<->T, y->T] =: T
+Include[file->TEXT]
+NewFunction[name[argument-list], body]
+Quit
+UnAssign[x<->T] =: T
+\end{verbatim}
 
-\protect \large \begin{verbatim}
-*Assign[x<->T, y->T] =: T
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*Include[file->TEXT]
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NewFunction[name[argument-list], body]
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Quit
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*UnAssign[x<->T] =: T
-\end{verbatim}\normalsize
-
-\medskip
 \subsection{Flow Control}
 
-\protect \large \begin{verbatim}
-*For[start, test, incr, body]
-\end{verbatim}\normalsize
+\begin{verbatim}
+For[start, test, incr, body]
+If[condition, t, f]
+While[test, statements]
+\end{verbatim}
 
-
-\protect \large \begin{verbatim}
-*If[condition, t, f]
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*While[test, statements]
-\end{verbatim} \normalsize
-
-
-\medskip
 \subsection{Lists}
 
-\protect \large \begin{verbatim}
-*Contains[list->LIST(T), x->T] =: BOOL
-\end{verbatim}\normalsize
+\begin{verbatim}
+Contains[list->LIST(T), x->T] =: BOOL
+Length[list->LIST(T)] =: INTEGER
+NthElement[list->LIST(T),n->INTEGER] =: T 
+Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
+Remove[list->LIST(T), n->INTEGER] =: LIST(T)
+\end{verbatim}
 
-\protect \large \begin{verbatim}
-*Length[list->LIST(T)] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NthElement[list->LIST(T),n->INTEGER] =: T 
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Plus[x->LIST(T), y->LIST(T)] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Remove[list->LIST(T), n->INTEGER] =: LIST(T)
-\end{verbatim}\normalsize
-
-
-\medskip
 \subsection{String Functions}
 
-\protect \large \begin{verbatim}
-*Length[text->TEXT] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NthChar[text->TEXT, n->INTEGER] =: TEXT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Plus[x->TEXT, y->TEXT] =: TEXT
-\end{verbatim} \normalsize
+\begin{verbatim}
+Length[text->TEXT] =: INTEGER
+NthChar[text->TEXT, n->INTEGER] =: TEXT
+Plus[x->TEXT, y->TEXT] =: TEXT
+\end{verbatim}
 
 
-
-\medskip
 \subsection{Input and Output}
 
-
-\protect \large \begin{verbatim}
-*Input[file->TEXT] =: INPUT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LoadEfg[file->TEXT] =: EFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LoadNfg[file->TEXT] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Output[file->TEXT] =: OUTPUT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-Read[input->INPUT] =: [FLOAT,INTEGER,RATIONAL,TEXT,LIST]
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*ReadEfg[input->INPUT] =: EFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*ReadNfg[input->INPUT] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*SaveEfg[file->TEXT,overWrite->BOOL] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*SaveNfg[file->TEXT,overWrite->BOOL] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-SetFormat[output->OUTPUT,width->INTEGER, precis->INTEGER] =: OUTPUT
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
+\begin{verbatim}
+LoadEfg[file->TEXT] =: EFG
+LoadNfg[file->TEXT] =: NFG
+Output[file->TEXT] =: OUTPUT
+SaveEfg[file->TEXT] =: BOOL
+SaveNfg[file->TEXT] =: BOOL
+SetFormat[output->OUTPUT, width->INTEGER, precis->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->BOOL] =: OUTPUT 
 Write[output->OUTPUT, x->INTEGER] =: OUTPUT
 Write[output->OUTPUT, x->FLOAT] =: OUTPUT
 Write[output->OUTPUT, x->RATIONAL] =: OUTPUT
 Write[output->OUTPUT, x->TEXT, {quoted->BOOL}] =: OUTPUT
-\end{verbatim}\normalsize
+\end{verbatim}
 
-
-\protect \large \begin{verbatim}
-*WriteEfg[{output->OUTPUT}, {efg->EFG}] =: OUTPUT
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*WriteNfg[{output->OUTPUT}, {nfg->NFG}, {sset->INTEGER}] =: OUTPUT
-\end{verbatim}\normalsize
-
-
-
-\medskip
 \subsection{Logic}
 
-\protect \large \begin{verbatim}
-*And[x->BOOL, y->BOOL] =: BOOL
-\end{verbatim} \normalsize
+\begin{verbatim}
+And[x->BOOL, y->BOOL] =: BOOL
+Equal[x->T, y->T] =: BOOL
+Not[x->BOOL] =: BOOL
+NotEqual[x->T, y->T] =: BOOL
+Or[x->BOOL, y->BOOL] =: BOOL
+\end{verbatim}
 
-
-\protect \large \begin{verbatim}
-*Equal[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*Not[x->BOOL] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*NotEqual[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*Or[x->BOOL, y->BOOL] =: BOOL
-\end{verbatim} \normalsize
-
-
-\medskip
 \subsection{Arithmetic}
 
+\begin{verbatim}
+Divide[x->T, y->T] =: T
+Divide[x->INTEGER, y->INTEGER] =: INTEGER
+Exp[x->FLOAT] =: FLOAT
+Greater[x->T, y->T] =: BOOL
+GreaterEqual[x->T, y->T] =: BOOL
+Less[x->T, y->T] =: BOOL
+LessEqual[x->T, y->T] =: BOOL
+Log[x->FLOAT] =: FLOAT
+Minus[x->T, y->T] =: T
+Modulus[x->INTEGER, y->INTEGER] =: INTEGER
+Paren[x->T] =: T
+Plus[x->T, y->T] =: T
+Times[x->T, y->T] =: T
+\end{verbatim}
 
-\protect \large \begin{verbatim}
-*Divide[x->T, y->T] =: T
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*Divide[x->INTEGER, y->INTEGER] =: INTEGER
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*Exp[x->FLOAT] =: FLOAT
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*Greater[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*GreaterEqual[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*Less[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*LessEqual[x->T, y->T] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*Log[x->FLOAT] =: FLOAT
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*Minus[x->T, y->T] =: T
-\end{verbatim} \normalsize
-
-
-\protect \large \begin{verbatim}
-*Modulus[x->INTEGER, y->INTEGER] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Paren[x->T] =: T
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Plus[x->T, y->T] =: T
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*Times[x->T, y->T] =: T
-\end{verbatim} \normalsize
-
-\medskip
 \subsection{Extensive Form Manipulation}
 
-\protect \large \begin{verbatim}
-*AppendAction[infoset->INFOSET] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*AppendNode[node->NODE, infoset->INFOSET] =: NODE (first child)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*CopyTree[from->NODE, to->NODE] =: NODE (from)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*DeleteAction[infoset->INFOSET, action->ACTION] =: INFOSET  (of action)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*DeleteNode[node->NODE, keep->NODE] =: NODE (parent ?)  
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*DeleteOutcome[outc->OUTCOME] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*DeleteTree[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*DetachOutcome[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*InsertAction[infoset->INFOSET, at->ACTION] =: INFOSET 
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*InsertNode[node->NODE, infoset->INFOSET] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+\begin{verbatim}
+AppendAction[infoset->INFOSET] =: INFOSET
+AppendNode[node->NODE, infoset->INFOSET] =: NODE
+AttachOutcome[node->NODE, outcome->OUTCOME] =: OUTCOME
+CopyTree[from->NODE, to->NODE] =: NODE
+DeleteAction[infoset->INFOSET, action->ACTION] =: ACTION
+DeleteNode[node->NODE, keep->NODE] =: NODE
+DeleteOutcome[outc->OUTCOME] =: BOOL
+DeleteTree[node->NODE] =: NODE
+DetachOutcome[node->NODE] =: NODE
+InsertAction[infoset->INFOSET, at->ACTION] =: INFOSET 
+InsertNode[node->NODE, infoset->INFOSET] =: NODE
 JoinInfoset[node->NODE, infoset->INFOSET] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LeaveInfoset[node->NODE] =: INFOSET
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*MergeInfosets[infoset1->INFOSET,
-               infoset2->INFOSET] =: INFOSET (infoset1)
-MergeInfosets[n->LIST(NODE)] =: INFOSET  (infoset of n[[1]])
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*MoveTree[from->NODE, to->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim} 
-*NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
+LeaveInfoset[node->NODE] =: INFOSET
+MergeInfosets[infoset1->INFOSET,
+               infoset2->INFOSET] =: INFOSET
+MoveTree[from->NODE, to->NODE] =: NODE
+NewEfg[{rational->BOOL}, {players->LIST(TEXT)}] =: EFG
+NewInfoset[player->EFPLAYER, actions->LIST(TEXT),
             {name->TEXT}] =: INFOSET
-*NewInfoset[player->EFPLAYER, actions->INTEGER,
-            {name->TEXT}] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*NewOutcome[{efg->EFG}, {name->TEXT}] =: OUTCOME
-NewOutcome[payoffs->LIST(T), {efg->EFG}, {name->TEXT}] =: OUTCOME
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+NewInfoset[player->EFPLAYER, actions->INTEGER,
+           {name->TEXT}] =: INFOSET
+NewOutcome[efg->EFG, {name->TEXT}] =: OUTCOME
+NewPlayer[efg->EFG, {name->TEXT}] =: EFPLAYER 
+RandomEfg[efg->EFG, {seed->INTEGER}] =: EFG
 Reveal[infoset->INFOSET, who->LIST[EFPLAYER]],
        {what->LIST(ACTIONS)}] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*SetName[x<->ACTION, name->TEXT] =: ACTION
-*SetName[x<->EFG, name->TEXT] =: EFG
-*SetName[x<->INFOSET, name->TEXT] =: INFOSET
-*SetName[x<->NFG, name->TEXT] =: NFG
-*SetName[x<->NODE, name->TEXT] =: NODE
-*SetName[x<->OUTCOME, name->TEXT] =: OUTCOME
-*SetName[x<->PLAYER, name->TEXT] =: PLAYER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+SetChanceProbs[infoset->INFOSET, probs->LIST(T)] =: INFOSET
+SetName[x->ACTION, name->TEXT] =: ACTION
+SetName[x<->EFG, name->TEXT] =: EFG
+SetName[x->INFOSET, name->TEXT] =: INFOSET
+SetName[x->NODE, name->TEXT] =: NODE
+SetName[x->OUTCOME, name->TEXT] =: OUTCOME
+SetName[x->PLAYER, name->TEXT] =: PLAYER
 SetPayoff[outcome->OUTCOME, player->PLAYER, payoff->T] =: OUTCOME
-\end{verbatim}\normalsize
+SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
+\end{verbatim}
 
-\protect \large \begin{verbatim}
-*SetPayoff[outcome->OUTCOME, {payoff->LIST(T)}] =: OUTCOME
-\end{verbatim}\normalsize
-
-\medskip
 \subsection{Normal Form Manipulation}
 
-\protect \large \begin{verbatim}
+\begin{verbatim}
 AddStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
-\end{verbatim}\normalsize
-
-\noindent {\bf Note}: type param not implemented yet...
-\protect \large \begin{verbatim}
-*NewNfg[dim->LIST(INTEGER), {type->DATATYPE}] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-NewSupport[nfg->NFG] =: SUPPORT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 CompressNfg[nfg->NFG,{support->SUPPORT}] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-RandomNfg[nfg->NFG, {random->BOOL}, {seed->INTEGER}] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-RandomEfg[efg->EFG, {random->BOOL}, {seed->INTEGER}] =: EFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-RemoveStrategy[support->SUPPORT,list->LIST(STRATEGY)] =: SUPPORT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+NewNfg[dim->LIST(INTEGER), {rational->BOOL}] =: NFG
+NewSupport[nfg->NFG] =: SUPPORT
+RandomNfg[nfg->NFG, {seed->INTEGER}] =: NFG
+RemoveStrategy[support->SUPPORT, list->LIST(STRATEGY)] =: SUPPORT
+SetName[x<->NFG, name->TEXT] =: NFG
 SetPayoffNfg[list->LIST(STRATEGY), player->PLAYER, 
 	payoff->T] =: LIST(STRATEGY)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 SetPayoffNf[list->LIST(INTEGER), player->PLAYER, 
 	payoff->T] =: LIST(INTEGER)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 SetPayoffNfg[list->LIST(STRATEGY), payoffs->LIST(T)] =: LIST(STRATEGY)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 SetPayoffNfg[list->LIST(INTEGER), payoffs->LIST(T)] =: LIST(INTEGER)
-\end{verbatim}\normalsize
+\end{verbatim}
 
-\medskip
 \subsection{Conversions}
 
-
-\protect \large \begin{verbatim}
-Afg[efg->EFG,{time<->FLOAT}] =: NFG
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
+\begin{verbatim}
 Efg[nfg->NFG,{time<->FLOAT}] =: EFG
-\end{verbatim}\normalsize
+Float[x->INTEGER] =: FLOAT
+Float[x->FLOAT] =: FLOAT
+Float[x->RATIONAL] =: FLOAT
+Nfg[efg->EFG, {time<->FLOAT}] =: NFG
+Rational[x->INTEGER] =: RATIONAL
+Rational[x->FLOAT] =: RATIONAL
+Rational[x->RATIONAL] =: RATIONAL
+Text[x->INTEGER] =: TEXT
+Text[x->FLOAT] =: TEXT
+Text[x->RATIONAL] =: TEXT
+Text[x->TEXT] =: TEXT
+\end{verbatim}
 
+\subsection{Solving and analyzing games}
 
-\protect \large \begin{verbatim}
-*Float[x->INTEGER] =: FLOAT
-*Float[x->FLOAT] =: FLOAT
-*Float[x->RATIONAL] =: FLOAT
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*Nfg[{efg->EFG}, {time<->FLOAT}] =: NFG
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Rational[x->INTEGER] =: RATIONAL
-*Rational[x->FLOAT] =: RATIONAL
-*Rational[x->RATIONAL] =: RATIONAL
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*Text[x->INTEGER] =: TEXT
-*Text[x->FLOAT] =: TEXT
-*Text[x->RATIONAL] =: TEXT
-*Text[x->TEXT] =: TEXT
-\end{verbatim} \normalsize
-
-
-
-\medskip
-\subsection{Solution Modules}
-
-\protect \large \begin{verbatim}
-*Behav[mixed->MIXED] =: BEHAV
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-Behav[mixed->LIST(MIXED)] =: LIST(BEHAV)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
+\begin{verbatim}
+Behav[mixed->MIXED] =: BEHAV
+ElimDom[nfg<->NFG, {start->SUPPORT}, {strong->BOOL}, 
 	{mixed->BOOL}, {players->LIST(NFPLAYERS)}, 
 	{time<->FLOAT}] =: SUPPORT
-ElimAllDom[nfg<->NFG, {maxIter->INTEGER}, {strong->BOOL}, 
-	{mixed->BOOL},	{players->LIST(NFPLAYERS)},
-        {time<->FLOAT}] =: LIST(SUPPORT)
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
+EnumMixedSolve[nfg->NFG, {stopAfter->INTEGER},
       {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
+EnumPureSolve[nfg->NFG, {stopAfter->INTEGER}, 
           {time<->FLOAT}] =: LIST(MIXED) 
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LCPSolve[efg<->EFG, {stopAfter->INTEGER},
+LCPSolve[efg<->EFG, {stopAfter->INTEGER},
           {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(BEHAV)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LCPSolve[nfg->NFG, {stopAfter->INTEGER},
+LCPSolve[nfg->NFG, {stopAfter->INTEGER},
           {nPivots<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LiapSolve[efg->EFG, {time<->FLOAT}, {nEvals<->INTEGER},
+LiapSolve[efg->EFG, {time<->FLOAT}, {nEvals<->INTEGER},
          {stopAfter->INTEGER}, {nTries->INTEGER}] =: LIST(BEHAV)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LiapSolve[nfg->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
+LiapSolve[nfg->NFG, {time<->FLOAT}, {nEvals<->INTEGER},
          {stopAfter->INTEGER}, {nTries->INTEGER}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LPSolve[nfg<->NFG, {nPivots<->INTEGER},
+LPSolve[nfg<->NFG, {nPivots<->INTEGER},
           {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
- 
-\protect \large \begin{verbatim}
 LqreSolve[efg->EFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
@@ -1078,9 +806,6 @@ LqreSolve[efg->EFG(FLOAT),
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->BEHAV}] =: LIST(BEHAV)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 LqreSolve[nfg->NFG(FLOAT),
          {pxifile->OUTPUT}, {time<->FLOAT},
          {nEvals<->INTEGER}, {nIters<->INTEGER},
@@ -1088,205 +813,76 @@ LqreSolve[nfg->NFG(FLOAT),
          {minLam->FLOAT}, {maxLam->FLOAT}, 
          {delLam->FLOAT}, {powLam->INTEGER}, 
          {start->MIXED}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*LqreGridSolve[nfg->NFG, {pxifile->OUTPUT},
+LqreGridSolve[nfg->NFG, {pxifile->OUTPUT},
            {minLam->T}, {maxLam->T}, 
            {delLam->T}, {powLam->INTEGER}, 
            {delp->T}, {tol->T},
            {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 SetOptions[alg->TEXT, param->TEXT, value->T] =: T
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*SimpDivSolve[nfg->NFG,{stopAfter->INTEGER}, 
+SimpDivSolve[nfg->NFG,{stopAfter->INTEGER}, 
          {nRestarts->INTEGER}, {leashLength->INTEGER},
          {nEvals<->INTEGER}, {time<->FLOAT}] =: LIST(MIXED)
-\end{verbatim}\normalsize
+\end{verbatim}
 
-\medskip
 \subsection{Getting Information}
 
-\protect \large \begin{verbatim} 
-*Actions[infoset->INFOSET] =: LIST(ACTION)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*Centroid[efg->EFG] =: BEHAV
-*Centroid[nfg->NFG,support->SUPPORT] =: MIXED
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Chance[efg->EFG] =: EFPLAYER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*ChanceProbs[infoset->INFOSET] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Infoset[node->NODE] =: INFOSET
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+\begin{verbatim}
+Actions[infoset->INFOSET] =: LIST(ACTION)
+Centroid[efg->EFG] =: BEHAV
+Centroid[nfg->NFG,support->SUPPORT] =: MIXED
+Chance[efg->EFG] =: EFPLAYER
+ChanceProbs[infoset->INFOSET] =: LIST(T)
+Infoset[node->NODE] =: INFOSET
 Infosets[player->EFPLAYER] =: LIST(INFOSET)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*IsPredecessor[node->NODE, of->NODE] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*IsRoot[node->NODE] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*IsSuccessor[node->NODE, from->NODE] =: BOOL
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
+IsPredecessor[node->NODE, of->NODE] =: BOOL
+IsRoot[node->NODE] =: BOOL
+IsSuccessor[node->NODE, from->NODE] =: BOOL
 LastAction[node->NODE] =: ACTION
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Name[x->ACTION] =: TEXT
-*Name[x->EFG] =: TEXT
-*Name[x->INFOSET] =: TEXT
-*Name[x->NFG] =: TEXT
-*Name[x->NODE] =: TEXT
-*Name[x->OUTCOME] =: TEXT
-*Name[x->PLAYER] =: TEXT
+Members[infoset->INFOSET] =: LIST(NODE)
+Name[x->ACTION] =: TEXT
+Name[x->EFG] =: TEXT
+Name[x->INFOSET] =: TEXT
+Name[x->NFG] =: TEXT
+Name[x->NODE] =: TEXT
+Name[x->OUTCOME] =: TEXT
+Name[x->PLAYER] =: TEXT
 Name[x->STRATEGY] =: TEXT
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NextSibling[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
+NextSibling[node->NODE] =: NODE
 Nodes[{efg->EFG}] =: LIST(NODE)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
 NonterminalNodes[{efg->EFG}] =: LIST(NODE)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
-*NthChild[node->NODE, n->INTEGER] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NumActions[infoset->INFOSET] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NumChildren[node->NODE] := INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NumInfosets[player->EFPLAYER] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NumMembers[infoset->INFOSET] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+NthChild[node->NODE, n->INTEGER] =: NODE
+NumActions[infoset->INFOSET] =: INTEGER
+NumChildren[node->NODE] := INTEGER
+NumInfosets[player->EFPLAYER] =: INTEGER
+NumMembers[infoset->INFOSET] =: INTEGER
 NumNodes[{efg->EFG}] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*NumOutcomes[{efg->EFG}] =: INTEGER
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*NumPlayers[{efg->EFG}] =: INTEGER
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
+NumOutcomes[{efg->EFG}] =: INTEGER
+NumPlayers[{efg->EFG}] =: INTEGER
 NumStrats[player->NFPLAYER,{support->SUPPORT}] =: INTEGER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Outcome[node->NODE] =: OUTCOME
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Outcomes[{efg->EFG}] =: LIST(OUTCOME)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Parent[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Payoff[outcome->OUTCOME] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+Outcome[node->NODE] =: OUTCOME
+Outcomes[efg->EFG] =: LIST(OUTCOME)
+Parent[node->NODE] =: NODE
+Payoff[outcome->OUTCOME] =: LIST(T)
 Payoff[strategy->BEHAV] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
 Payoff[strategy->MIXED] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Player[infoset->INFOSET] =: EFPLAYER
-*Player[node->NODE] =: EFPLAYER
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*Players[efg->EFG] =: LIST(EFPLAYER)
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*Players[nfg->NFG] =: LIST(NFPLAYER)
-\end{verbatim} \normalsize
-
-\protect \large \begin{verbatim}
-*PriorSibling[node->NODE] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
+Player[infoset->INFOSET] =: EFPLAYER
+Player[node->NODE] =: EFPLAYER
+Players[efg->EFG] =: LIST(EFPLAYER)
+Players[nfg->NFG] =: LIST(NFPLAYER)
+PriorSibling[node->NODE] =: NODE
 RealizProbs[strategy->BEHAV] =: LIST(T)
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim}
-*RootNode[efg->EFG] =: NODE
-\end{verbatim}\normalsize
-
-\protect \large \begin{verbatim} 
+RootNode[efg->EFG] =: NODE
 TerminalNodes[efg->EFG] =: LIST(NODE)
-\end{verbatim}\normalsize
+\end{verbatim}
 
-
-\medskip
 \subsection{Timing}
 
-
-\protect \large \begin{verbatim}
-*ElapsedTime[] =: FLOAT
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*IsWatchRunning[] =: BOOL
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*StartWatch[] =: FLOAT
-\end{verbatim}\normalsize
-
-
-\protect \large \begin{verbatim}
-*StopWatch[] =: FLOAT
-\end{verbatim}\normalsize
+\begin{verbatim}
+ElapsedTime[] =: FLOAT
+IsWatchRunning[] =: BOOL
+StartWatch[] =: FLOAT
+StopWatch[] =: FLOAT
+\end{verbatim}
 
 
 \section{Function Reference, Alphabetical}
