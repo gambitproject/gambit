@@ -94,16 +94,16 @@ void LUdecomp<T>::refactor(
   const gTuple<bool> &unitflag,
   const gTuple<int> &index)
 {
-  assert(mat.Mincol()==index.First() && mat.MaxCol()==index.Last());
-  assert(mat.Mincol()==unitflag.First() && mat.MaxCol()==unitflag.Last());
+  assert(mat.MinCol()==index.First() && mat.MaxCol()==index.Last());
+  assert(mat.MinCol()==unitflag.First() && mat.MaxCol()==unitflag.Last());
 
   gVector<T> column(mat.MinRow(),mat.MaxRow());
-  for(int i=basis.First(); i<=basis.Last(); i++)
+  for(int i=index.First(); i<=index.Last(); i++)
     {
       if(unitflag[i])
 	{ column=(T)0; column[index[i]]=(T)1; }
       else
-	M.GetColumn(basis[i],column);
+	M.GetColumn(index[i],column);
       mat.SetColumn(i,column);
     }
   null_rpp();
@@ -177,7 +177,7 @@ void LUdecomp<T>::Lsolve(const gVector<T> &b, gVector<T> &x) const
 } // end Lsolve
 
 template<class T>
-void LUdecomp<T>::LsolveT(const gVector&c, gvector<T> &y) const
+void LUdecomp<T>::LsolveT(const gVector<T> &c, gVector<T> &y) const
 // solve y L = c
 {
   assert( mat.CheckColumn(y) && mat.CheckColumn(c) );
@@ -238,7 +238,7 @@ void LUdecomp<T>::applyT(gVector<T> &v) const
   for( iter.GoLast(); !iter.PastBeginning(); iter--)
     {
       LUupdate<T> update= iter.GetValue();
-      assert( v.First()<=update.First() && update.Last()=v.Last()-1 );
+      assert( v.First()<=update.First() && update.Last()==v.Last()-1 );
 
       for(int i=update.Last(); i<=update.Last(); i--)
 	{
@@ -340,51 +340,16 @@ void LUdecomp<T>::solveT(const gVector<T> &c, gVector<T> &y) const
 // solve y A  = c
 {
   // &y can be the same as &c...
-  assert( mat.CheckColumn(x) && mat.CheckColumn(b) );
+  assert( mat.CheckColumn(y) && mat.CheckColumn(c) );
   int min= mat.MinCol(), max= mat.MaxCol();
   gVector<T> tmp(min,max);
 
-  UsolveT(b,x);
-  applyT(x);
-  LsolveT(x,tmp);
-  unpermute(tmp);
+  UsolveT(c,y);
+  applyT(y);
+  LsolveT(y,tmp);
+  unpermute(tmp,y);
 }
 
-/* solveT isnt done yet
-template<class T>
-void LUdecomp<T>::solveT(gVector<T> &y, const gVector<T> &c) const
-// solve y A = c
-{
-  assert( mat.CheckRow(y) && mat.CheckRow(c) );
-
-  int min=y.First(), max=y.Last();
-  gVector<T> tmp(min,max);
-  int row,col;
-
-  // solve y U = c
-  T sum;
-  for(col=min; col<=max; col++)
-    {
-      sum= c[col];
-      for(row=min; row<col; row++)
-	sum-= mat[row,col]*y[row];
-      y[col]= sum/mat[col,col];
-    }
-
-  // solve tmp L = y
-  for(col=max; col>=min; col--)
-    {
-      sum= y[col];
-      for(row=max; row>col; row--)
-	sum-= mat[row,col]*tmp[row];
-      tmp[col]= sum;
-    }
-
-  // y <- permute^-1(tmp)
-  for(int i=min; i<=max; i++)
-    y[i]= tmp[rpp[i]];
-}
-*/ // end solveT (commented out)
 
 template<class T>
 void LUdecomp<T>::factor()
