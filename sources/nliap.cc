@@ -1,7 +1,7 @@
 //
 // FILE: nliap.cc -- Implementation of Liapunov algorithm for normal forms
 //
-// $Id$
+//  $Id$
 //
 
 #include "nliap.h"
@@ -166,7 +166,8 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 	  long &nevals, long &niters)
 {
   MixedProfile<double> p(start.Support());
-  for (int i = 1; i <= p.Length(); i++)
+  int i = 0;
+  for ( i = 1; i <= p.Length(); i++)
     p[i] = start[i];
 
   NFLiapFunc F(N, p);
@@ -177,7 +178,7 @@ bool Liap(const Nfg &N, NFLiapParams &params,
 
   solutions.Flush();
 
-  for (int i = 1; !params.status.Get() && 
+  for ( i = 1; !params.status.Get() && 
        (params.nTries == 0 || i <= params.nTries) &&
        (params.stopAfter==0 || solutions.Length() < params.stopAfter);
        i++) { 

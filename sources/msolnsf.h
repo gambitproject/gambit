@@ -1,5 +1,5 @@
 // File: bsolnsf.h -- Behav Solution Sorter and Filter
-// $Id$
+//  $Id$
 #ifndef MSOLNSF_H
 #define MSOLNSF_H
 #include "garray.h"
@@ -45,7 +45,7 @@ private:
 protected:
 	// Overload the comparison functions
 	bool Passes(const MixedSolution &a) const;
-	bool LessThan(const MixedSolution &a,const MixedSolution &b) const;
+	CompareResult Compare(const MixedSolution &a,const MixedSolution &b) const;
 public:
 	MSolnSorterFilter(gSortList<MixedSolution> &solns,MSolnSortFilterOptions &options_);
 };

@@ -1,7 +1,7 @@
 //
 // FILE: efg.imp -- Implementation of templated extensive form members
 //
-// $Id$
+//  $Id$
 //
 
 #include "efg.h"
@@ -22,7 +22,8 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   : E(&efg), profile(efg.NumPlayers()),
     payoffs(new gRectArray<T>(efg.NumOutcomes(), efg.NumPlayers()))
 {
-  for (int pl = 1; pl <= efg.NumPlayers(); pl++)  {
+  int pl = 0;
+  for ( pl = 1; pl <= efg.NumPlayers(); pl++)  {
     EFPlayer *player = efg.Players()[pl];
     profile[pl] = new gArray<Action *>(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++)
@@ -30,15 +31,16 @@ template <class T> PureBehavProfile<T>::PureBehavProfile(const Efg &efg)
   }
 
   gArray<int> dim(efg.GetChance()->NumInfosets());
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  int iset = 0;
+  for ( iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = efg.GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  for ( iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= efg.GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = efg.GetChanceProb(efg.GetChance()->Infosets()[iset], act);
 
   for (int outc = 1; outc <= E->NumOutcomes(); outc++)
-    for (int pl = 1; pl <= E->NumPlayers(); pl++)
+    for ( pl = 1; pl <= E->NumPlayers(); pl++)
       (*payoffs)(outc, pl) = E->Payoff(E->Outcomes()[outc], pl);
 
 }
@@ -55,10 +57,11 @@ PureBehavProfile<T>::PureBehavProfile(const PureBehavProfile<T> &p)
   }
 
   gArray<int> dim(E->GetChance()->NumInfosets());
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  int iset = 0;
+  for ( iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  for ( iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 }
@@ -190,10 +193,11 @@ template <class T> BehavProfile<T>::BehavProfile(const BehavProfile<T> &p)
     support(p.support), payoffs(new gRectArray<T>(*p.payoffs))
 {
   gArray<int> dim(E->GetChance()->NumInfosets());
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  int iset = 0;
+  for ( iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  for ( iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 }
@@ -205,10 +209,11 @@ template <class T> BehavProfile<T>::BehavProfile(const EFSupport &s)
 {
   gArray<int> dim(E->GetChance()->NumInfosets());
   Centroid();
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  int iset = 0;
+  for ( iset = 1; iset <= dim.Length(); iset++)
     dim[iset] = E->GetChance()->Infosets()[iset]->NumActions();
   chanceprobs = new gPVector<T>(dim);
-  for (int iset = 1; iset <= dim.Length(); iset++)
+  for ( iset = 1; iset <= dim.Length(); iset++)
     for (int act = 1; act <= E->GetChance()->Infosets()[iset]->NumActions(); act++)
        (*chanceprobs)(iset, act) = E->GetChanceProb(E->GetChance()->Infosets()[iset], act);
 

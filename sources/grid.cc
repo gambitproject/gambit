@@ -1,7 +1,7 @@
 //
 // File: grid.cc -- Implementation of the GridSolve algorithm
 //
-// $Id$
+//  $Id$
 //
 
 /*
@@ -50,6 +50,10 @@ that this technique is easily extended to n steps.
 #include "gwatch.h"
 
 #define MAX_GRID		1		// only two steps for now (0,1)
+
+#ifdef max
+#undef max
+#endif
 
 static int max(const gArray<int> &a)
 {

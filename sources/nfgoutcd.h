@@ -1,5 +1,5 @@
 // File: nfgoutcd.h -- outcomes dialog for the NFG
-// $Id$
+//  $Id$
 
 #ifndef NFGOUTCD_H
 #define NFGOUTCD_H
@@ -12,7 +12,7 @@ protected:
 public:
 	NfgOutcomeDialog(Nfg &nf,NfgShow *ns);
 	~NfgOutcomeDialog();
-	void SetOutcome(const gText &outc_name);
+	void SetOutcome(const gString &outc_name);
    void UpdateVals(void);
 	void OnOk(void);
 };

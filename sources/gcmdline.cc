@@ -1,4 +1,4 @@
-// $Id$
+//  $Id$
 
 #include <assert.h>
 #include <ctype.h>
@@ -8,7 +8,17 @@
 #endif   // __GNUG__
 
 #ifdef __BORLANDC__
-#include "winio.h"
+// #include "winio.h"
+#include "stdafx.h"
+#include "MainFrm.h"
+#include "WinEditDoc.h"
+#include "WinEditView.h"
+
+char WinGetChar( void )
+{
+  return ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->GetChar();
+}
+
 #endif   __BORLANDC__
 
 #include "gcmdline.h"
@@ -149,7 +159,7 @@ void gCmdLineInput::GetCmdExec( void )
     }
   }
   else
-    strcpy(buf, "");
+    sprintf( buf, "" );
 
 
   gText cmdBuf = buf;
@@ -167,8 +177,9 @@ void gCmdLineInput::GetCmdExec( void )
     assert( curPos <= cmdBuf.Length() );
 
 #ifdef __BORLANDC__
-    winio_setecho( winio_current(), false );
-    c = winio_getchar();
+//    winio_setecho( winio_current(), false );
+//    c = winio_getchar();
+    c = WinGetChar();
 #else
     gin.get( c );
 #endif // __BORLANDC__
@@ -322,8 +333,6 @@ void gCmdLineInput::GetCmdExec( void )
 	for( i = 0; i < cmdBuf.Length() - curPos + 1; ++i )
 	  gout << '\b';
       }
-      else // nothing to delete, beep
-	gout << '\a';
     }
     else if( isprint( c ) )// normal characters
     {
@@ -375,8 +384,9 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   // the second char must be '[' in an escape sequence
   if( !gin.eof() )
 #ifdef __BORLANDC__
-    winio_setecho( winio_current(), false );
-  c1 = winio_getchar();
+//  winio_setecho( winio_current(), false );
+//  c1 = winio_getchar();
+    c1 = WinGetChar();
 #else
   gin.get( c1 );
 #endif // __BORLANDC__
@@ -386,8 +396,9 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
 
   if( !gin.eof() )
 #ifdef __BORLANDC__
-    winio_setecho( winio_current(), false );
-  c2 = winio_getchar();
+//  winio_setecho( winio_current(), false );
+//  c2 = winio_getchar();
+    c2 = WinGetChar();
 #else
   gin.get( c2 );
 #endif // __BORLANDC__
@@ -405,8 +416,9 @@ gCmdLineInput::EscapeCode gCmdLineInput::GetEscapeSequence( void ) const
   case 51: // delete key, if followed by 126
     if( !gin.eof() )
 #ifdef __BORLANDC__
-      winio_setecho( winio_current(), false );
-    c3 = winio_getchar();
+//  winio_setecho( winio_current(), false );
+//  c3 = winio_getchar();
+    c3 = WinGetChar();
 #else
     gin.get( c3 );
 #endif // __BORLANDC__
@@ -446,7 +458,7 @@ gInput& gCmdLineInput::operator >> (int &x)
     assert( m_CmdExec.Length() > 0 );
     
     int num = 0;
-    tokens = sscanf(m_CmdExec, "%d%n", &x, &num );
+    tokens = sscanf( m_CmdExec, "%d%n", &x, &num );
     EatSpace( num );
   }
   return *this; 

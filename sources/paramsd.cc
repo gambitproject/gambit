@@ -1,6 +1,6 @@
 // File: paramsd.cc -- Implements the parameter modification class for normal
 // and extensive forms
-// $Id$
+//  $Id$
 
 #include "wx.h"
 #include "wxmisc.h"
@@ -65,7 +65,7 @@ CanvasFocus();
 
 void ParameterDialogC::UpdateVals(void)
 {
-for (int i=1;i<=space->Dmnsn();i++) SetCell(i,2,ToText(params[cur_set][i]));
+for (int i=1;i<=space->Dmnsn();i++) SetCell(i,2,ToString(params[cur_set][i]));
 Repaint();
 }
 #define UPDATE1_DIALOG	4
@@ -76,7 +76,7 @@ gNumber tmp;
 bool changed=false;
 for (int i=1;i<=space->Dmnsn();i++)
 {
-	tmp=FromText(GetCell(i,2),tmp);
+	tmp=FromString(GetCell(i,2),tmp);
    if (params[cur_set][i]!=tmp) {params[cur_set][i]=tmp;changed=true;}
 }
 if (cur_set!=set_set_item->GetSelection()+1)
@@ -93,7 +93,7 @@ CanvasFocus();
 
 void ParameterDialogC::OnAddSet(void)
 {
-gText new_name="Set "+ToText(params.Length()+1);
+gString new_name="Set "+ToString(params.Length()+1);
 char *s=wxGetTextFromUser("New Parameter Set Name","Parameter Set",new_name,this);
 if (s)
 {
@@ -108,7 +108,7 @@ CanvasFocus();
 
 void ParameterDialogC::OnAddVar(void)
 {
-gText new_name=(char)('a'+('x'-'a'+space->Dmnsn())%('z'-'a'+1));
+gString new_name=(char)('a'+('x'-'a'+space->Dmnsn())%('z'-'a'+1));
 char *s=wxGetTextFromUser("New Variable Name","Variable",new_name,this);
 if (s)
 {
@@ -153,7 +153,7 @@ d=0;
 if (space->Dmnsn()==0)
 {
 	wxMessageBox("The parameter space is empty.\nNo parameters have been defined.\nPlease create the first parameter now.\n");
-	gText new_name='x';
+	gString new_name='x';
 	char *s=wxGetTextFromUser("New Variable Name","Variable",new_name,parent);
 	if (s)
 	{

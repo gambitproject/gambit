@@ -231,6 +231,53 @@ class gNullOutput : public gOutput  {
 };
 
 
+
+#ifdef __BORLANDC__
+
+class gWinOutput : public gOutput  {
+  private:
+    bool valid;
+    int Width,Prec;
+    char Represent;
+    char m_Buffer[4096];
+
+    gWinOutput(const gWinOutput &);
+    gWinOutput &operator=(const gWinOutput &);
+
+  protected:
+    void OutputString( const char* s ) const;
+
+  public:
+    gWinOutput(void);
+    virtual ~gWinOutput();
+
+    int GetWidth(void);
+    gOutput &SetWidth(int w);
+    int GetPrec(void);
+    gOutput &SetPrec(int p);
+    gOutput &SetExpMode(void);
+    gOutput &SetFloatMode(void);
+    char GetRepMode(void);
+
+    gOutput &operator<<(int x);
+    gOutput &operator<<(unsigned int x);
+    gOutput &operator<<(bool x);
+    gOutput &operator<<(long x);
+    gOutput &operator<<(char x);
+    gOutput &operator<<(double x);
+    gOutput &operator<<(float x);
+    gOutput &operator<<(const char *x);
+    gOutput &operator<<(const void *x);
+
+    bool IsValid(void) const;
+
+
+};
+
+#endif //  __BORLANDC__
+
+
+
 extern gInput &gin, &gzero;
 extern gOutput &gout, &gerr, &gnull;
 

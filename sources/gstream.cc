@@ -1,12 +1,23 @@
 //
 // FILE: gstream.cc -- Implementation of I/O streaming functions
 //
-// $Id$
+// @(#)efbasis.cc	1.3 03/09/98 
 //
 
 #ifdef __GNUG__
 #pragma implementation "gstream.h"
 #endif   // __GNUG__
+
+
+#ifdef __BORLANDC__
+
+#include "stdafx.h"
+#include "MainFrm.h"
+#include "WinEditDoc.h"
+#include "WinEditView.h"
+
+#endif   __BORLANDC__
+
 
 #include <assert.h>
 #include "gstream.h"
@@ -445,6 +456,172 @@ bool gFileOutput::IsValid(void) const
 
 
 //--------------------------------------------------------------------------
+//                         gWinOutput member functions
+//--------------------------------------------------------------------------
+
+#ifdef __BORLANDC__
+
+
+
+void gWinOutput::OutputString( const char* s ) const
+{
+  int i = 0;
+  int length = strlen( s );
+  for( i = 0; i < length; ++i )
+    ((CWinEditView*) ((CMainFrame*) AfxGetMainWnd())->GetActiveView())->PutChar( s[i] );
+}
+
+
+
+gWinOutput::gWinOutput(void)
+{
+  valid=0;
+  Width=0;
+  Prec=6;
+  Represent='f';
+}
+
+
+gWinOutput::~gWinOutput()
+{
+  valid=0;
+}
+
+int gWinOutput::GetWidth(void)
+{
+  return Width;
+}
+
+gOutput &gWinOutput::SetWidth(int w) 
+{
+  Width = w;
+  return *this;
+}
+
+int gWinOutput::GetPrec(void)
+{
+  return Prec;
+}
+
+gOutput &gWinOutput::SetPrec(int p) 
+{
+  Prec = p;
+  return *this;
+}
+
+gOutput &gWinOutput::SetExpMode(void) 
+{
+  Represent = 'e';
+  return *this;
+}
+
+gOutput &gWinOutput::SetFloatMode(void)
+{
+  Represent = 'f';
+  return *this;
+}
+
+char gWinOutput::GetRepMode(void)
+{
+  return Represent;
+}
+
+
+gOutput &gWinOutput::operator<<(int x)
+{
+  int c=sprintf(m_Buffer, "%*d", Width,  x);  valid = (c == 1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(unsigned int x)
+{
+  int c=sprintf(m_Buffer, "%*d", Width,  x);valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(bool x)
+{
+  int c=sprintf(m_Buffer, "%c", (x) ? 'T' : 'F');valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(long x)
+{
+  int c=sprintf(m_Buffer, "%*ld", Width, x);valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(char x)
+{
+  int c=sprintf(m_Buffer, "%c", x);valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(double x)
+{
+  int c = 0;
+
+  switch (Represent) {
+    case 'f':
+      c = sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      break;
+    case 'e':
+      c = sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      break;
+    }
+	valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(float x)
+{
+  int c = 0;
+
+  switch (Represent) {
+    case 'f':
+      c=sprintf(m_Buffer, "%*.*f", Width, Prec, x);
+      break;
+    case 'e':
+      c=sprintf(m_Buffer, "%*.*e", Width, Prec, x);
+      break;
+    }
+	valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(const char *x)
+{
+	int c=sprintf(m_Buffer, "%s", x);valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+gOutput &gWinOutput::operator<<(const void *x)
+{
+  int c=sprintf(m_Buffer, "%p", x);valid=(c==1) ? 1 : 0;
+  OutputString( m_Buffer );
+  return *this;
+}
+
+bool gWinOutput::IsValid(void) const
+{
+  return valid;
+}
+
+#endif // __BORLANDC__
+
+
+
+
+
+//--------------------------------------------------------------------------
 //                         gNullOutput member functions
 //--------------------------------------------------------------------------
 
@@ -485,6 +662,9 @@ gOutput &gNullOutput::operator<<(const char *)  { return *this; }
 gOutput &gNullOutput::operator<<(const void *)  { return *this; }
 
 bool gNullOutput::IsValid(void) const   { return true; }
+
+
+
 
 
 gNullInput _gzero;

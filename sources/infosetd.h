@@ -1,7 +1,7 @@
 //
 // FILE: infosetd.h -- Declaration of a class to inspect infosets
 //
-// $Id$
+//  $Id$
 //
 
 #ifndef INFOSETD_H
@@ -45,7 +45,7 @@ public:
 
 //************************************** CONSTRUCTOR **************************
 InfosetDialog::InfosetDialog(Efg &ef_,wxFrame *parent)
-  : MyDialogBox(parent,"Infosets Info",EFG_TREE_HELP), ef(ef_)
+												:ef(ef_),MyDialogBox(parent,"Infosets Info",EFG_TREE_HELP)
 {
 SetLabelPosition(wxVERTICAL);
 player_item = new wxListBox(this, (wxFunction)player_func, "Player", wxSINGLE, 11, 3, 104, 125, 0, NULL, 0, "player_item");
@@ -93,7 +93,7 @@ if (ef.NumPlayers()==0)
 player_item->SetSelection(num);
 EFPlayer *player=ef.Players()[num+1];
 iset_item->Clear();
-for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(ToText(i));
+for (int i=1;i<=player->NumInfosets();i++) iset_item->Append(ToString(i));
 OnIset(0);
 }
 
@@ -111,8 +111,8 @@ if (player->NumInfosets()==0)  // can have players w/ no isets
 iset_item->SetSelection(num);
 Infoset *iset=player->Infosets()[num+1];
 iset_name_item->SetValue(iset->GetName());
-branches_item->SetValue(ToText(iset->NumActions()));
-nodes_item->SetValue(ToText(iset->NumMembers()));
+branches_item->SetValue(ToString(iset->NumActions()));
+nodes_item->SetValue(ToString(iset->NumMembers()));
 prev_iset=iset;
 }
 
@@ -145,7 +145,7 @@ if (new_iset_dialog->Completed()==wxOK)
 	Infoset *iset=ef.CreateInfoset(player,num_branches);
 	iset->SetName(iset_name);
 	game_changed=true;
-	if (pl==player_item->GetSelection()) iset_item->Append(ToText(player->NumInfosets()));
+	if (pl==player_item->GetSelection()) iset_item->Append(ToString(player->NumInfosets()));
 }
 delete new_iset_dialog;
 delete [] iset_name;delete [] player_name;

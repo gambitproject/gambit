@@ -2,7 +2,7 @@
 // command line.  The class gWxGclIo may come in useful anywhere we need to use
 // console IO in a gui enviroment.  Note that you must define NO_GIO when compiling
 // gambitio.cc to avoid duplicate symbols.
-// $Id$
+//  $Id$
 #include "guigclio.h"
 
 
@@ -89,10 +89,21 @@ gOutput &GuiGclIo::operator<<(const void *x)
   return *this;
 }
 
+/*
 GuiGclIo gclio;
 
 gInput &gin=gclio;
 gOutput &gout=gclio;
 gOutput &gerr=gclio;
+  */
+
+gFileInput _gin(stdin);
+gInput &gin = _gin;
+
+gWinOutput _gout;
+gOutput &gout = _gout;
+
+gWinOutput _gerr;
+gOutput &gerr = _gerr;
 
 

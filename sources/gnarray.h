@@ -1,7 +1,7 @@
 //
 // FILE: gnarray.h -- Implementation of an N-dimensional array
 //
-// $Id$
+//  $Id$
 //
 
 #ifndef GNARRAY_H
@@ -9,7 +9,7 @@
 
 #include <assert.h>
 #include "gstream.h"
-#include "garray.h"
+#include "gvector.h"
 
 //
 // Basic n-dimensional array
@@ -20,38 +20,58 @@ template <class T> class gNArray   {
     T *storage;
     gArray<int> dim;
 
-    void DumpFrom(gOutput &, int, gArray<int> &) const;
+    void DumpFrom(gOutput &, int, gVector<int> &) const;
+//    void ReadFrom(gInput &, const gVector<int> &, gVector<int> &, int);
 
   public:
-#ifdef USE_EXCEPTIONS
-    class BadDim : public gException   {
-    public:
-      virtual ~BadDim()  { }
-      gText Description(void) const;
-    };
-
-    class BadIndex : public gException   {
-    public:
-      virtual ~BadIndex()   { }
-      gText Description(void) const;
-    };
-#endif   // USE_EXCEPTIONS
-
+    gNArray(void);
     gNArray(const gArray<int> &d);
     gNArray(const gNArray<T>& a);
     ~gNArray();
 
     gNArray<T> &operator=(const gNArray<T> &);
 
+    /* not used for now
+    T operator[](const gVector<int> &) const;
+    T &operator[](const gVector<int> &);
+    */
+
     T operator[](const gArray<int> &) const;
     T &operator[](const gArray<int> &);
-/*
+
     const T &operator[](long l) const;
-    T &operator[](long l);*/
+    T &operator[](long l);
 
-    const gArray<int> &Dimensions(void) const;
+    const gArray<int> &Dimensionality(void) const;
 
+//    void Input(gInput &, const gVector<int> &, int);
     void Output(gOutput &) const;
 };
 
-#endif   // GNARRAY_H
+#ifdef UNUSED
+template <class T> class gIndexedNArray : private gNArray<T>   {
+  private:
+    gArray<long> *index;
+    
+  public:
+    gIndexedNArray(void);
+    gIndexedNArray(const gVector<int> &d);
+    gIndexedNArray(const gIndexedNArray<T> &);
+	 ~gIndexedNArray();
+
+	 gIndexedNArray<T> &operator=(const gIndexedNArray<T> &);
+
+    T operator[](const gVector<int> &) const;
+	 T &operator[](const gVector<int> &);
+    
+    const gVector<int> &Dimensionality(void) const   { return dim; }
+
+    void Input(gInput &f, const gVector<int> &v, int i)
+      { gNArray<T>::Input(f, v, i); }
+    void Output(gOutput &f) const
+      { gNArray<T>::Output(f); }
+};
+#endif   // UNUSED
+
+#endif    // GNARRAY_H
+

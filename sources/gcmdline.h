@@ -1,11 +1,9 @@
-//
-// FILE: gcmdline.h -- Command line interface for GCL
-//
-// $Id$
-//
 
-#ifndef GCMDLINE_H
-#define GCMDLINE_H
+
+//  $Id$
+
+#ifndef __gcmdline_h__
+#define __gcmdline_h__
 
 
 #include <stdlib.h>
@@ -144,4 +142,4 @@ public:
 
 extern gCmdLineInput &gcmdline;
 
-#endif   // GCMDLINE_H 
+#endif // __gcmdline_h__

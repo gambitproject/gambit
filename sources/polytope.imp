@@ -1,4 +1,5 @@
 /* // polytope.cc // */
+//  $Id$
 
 //#include <stdio.h>
 //#include <iostream.h>
@@ -215,7 +216,7 @@ bool gPolytope<T>::is_face(const gArray<bool>& selection) const
       gVector<gRational> temp(Space->Dmnsn());
       for (int q = 1; q <= Space->Dmnsn(); q++)
 	temp[q] = (gRational)((*this)[keys1[i-n]+1][q]);
-      B[i] = (gRational)1 + temp * e;
+      B[i] = 1 + temp * e;
     }
 
 // * The vector C expresses the objective function 
@@ -251,7 +252,7 @@ bool gPolytope<T>::is_face(const gArray<bool>& selection) const
   gVector<gRational> temp(Space->Dmnsn());
   for (int q = 1; q <= Space->Dmnsn(); q++)
     temp[q] = (gRational)(a1[q]);
-  if ( -T.OptimumCost() > (temp * e + (gRational)1))
+  if ( -T.OptimumCost() > (temp * e + 1))
     return true;
   else
     return false;
@@ -262,7 +263,7 @@ bool gPolytope<T>::is_edge(const index_pair& endpoints) const
 {
   gArray<bool> selection(vertices.Length());
   for (int k = 1; k <= vertices.Length(); k++) selection[k] = false;
-  selection[endpoints[2]] = selection[endpoints[1]] = true;
+  selection[endpoints.tail] = selection[endpoints.head] = true;
 
   return is_face(selection);
 }
@@ -275,7 +276,7 @@ gList<index_pair*> gPolytope<T>::index_pairs_of_edges() const
   for (int i = 1; i <= vertices.Length(); i++) 
     for (int j = i+1; j <= vertices.Length(); j++)
       {
-	index_pair pair(i,j);
+	index_pair pair; pair.tail = i; pair.head = j;
 	if (is_edge(pair)) {
 	  index_pair* ptr = new index_pair(pair); result+=ptr;
 	}
@@ -290,9 +291,9 @@ gList<index_pair*> gPolytope<T>::index_pairs_of_edges() const
 template <class T>
 void gPolytope<T>::print_edge(const index_pair edge) const
 {
-  ((*this)[edge[2]]).Dump(gout);
+  ((*this)[edge.tail]).Dump(gout);
   gout << "->";
-  ((*this)[edge[1]]).Dump(gout);
+  ((*this)[edge.head]).Dump(gout);
 }
 
 template <class T> void 

@@ -1,4 +1,5 @@
 /* // polytope.h // */
+//  $Id$
 
 #include "glist.h"
 #include "glpsolv1.h"
@@ -22,12 +23,10 @@ polytope not satisfying this.
 
 */
 
-/* - Now in gmisc.*
 struct index_pair {  // For recording the endpoints of an edge
     int head;
     int tail;
   };
-*/
 
 template <class T> class gPolytope {
 

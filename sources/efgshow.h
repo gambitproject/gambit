@@ -1,7 +1,7 @@
 //
 // FILE: efgshow.h -- Declarations of classes for extensive form display code
 //
-// @(#)efgshow.h	1.5 02/11/98
+//  $Id$
 //
 
 #ifndef EXTSHOW_H
@@ -38,8 +38,6 @@ class EfgShow: public wxFrame, public EfgNfgInterface, public EfgShowInterface
 private:
 	wxFrame *parent;
 	Efg &ef;
-  wxMenu *edit_menu;
-  
 	// Solution routines
 	BehavSolutionList solns;
 	struct StartingPoints

@@ -1,7 +1,7 @@
 //
 // FILE: extshow.cc -- type dependent extensive form gui stuff
 //
-// $Id$
+//  $Id$
 //
 
 #include "wx.h"
@@ -535,6 +535,7 @@ AddSeparator();
 AddTool(NODE_ADD, ToolbarAddBitmap);
 AddTool(NODE_DELETE, ToolbarDeleteBitmap);
 AddTool(TREE_OUTCOMES, ToolbarPayoffBitmap);
+AddTool(BUILD_PARAMS, ToolbarParamBitmap);
 AddSeparator();
 AddTool(SOLVE_SOLVE, ToolbarSolveBitmap);
 AddTool(INSPECT_SOLUTIONS, ToolbarInspectBitmap);

@@ -1,7 +1,7 @@
 //
 // FILE: vertenum.imp -- Implementation of Vertex Enumerator
 //
-//  $Id$ 
+//   $Id$
 //
 
 #include "vertenum.h"
@@ -377,10 +377,11 @@ Vertices(gList<gVector<T> > &verts, gList<gVector<T> > &verts2) const
     gVector<T> vert(A.NumColumns());
     gVector<T> vert2(A2.NumColumns());
     vert = (T)0;
-    for(int j=1;j<=vert.Length();j++) 
+    int j = 0;
+    for( j=1;j<=vert.Length();j++)
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
     verts.Append(vert);
-    for(int j=1;j<=vert2.Length();j++) 
+    for( j=1;j<=vert2.Length();j++)
       if(List2[i].IsDefined(j)) vert2[j]=-List2[i](j);
     verts2.Append(vert2);
   }

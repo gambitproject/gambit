@@ -1,6 +1,5 @@
-
 %{
-/* $Id$ */
+/*  $Id$ */
 #include <stdlib.h>
 #include <ctype.h>
 #include "gstream.h"

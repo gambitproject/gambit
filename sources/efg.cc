@@ -1,7 +1,7 @@
 //
 // FILE: efg.cc -- Implementation of extensive form data type
 //
-// @(#)efg.cc	2.31 02/21/98
+//  $Id$
 //
 
 class Node;
@@ -227,7 +227,8 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
     chance(new EFPlayer(this, 0)),
     afg(0), lexicon(0)
 {
-  for (int i = 1; i <= players.Length(); i++)  {
+  int i = 0;
+  for ( i = 1; i <= players.Length(); i++)  {
     (players[i] = new EFPlayer(this, i))->name = E.players[i]->name;
     for (int j = 1; j <= E.players[i]->infosets.Length(); j++)   {
       Infoset *s = new Infoset(this, j, players[i],
@@ -239,7 +240,7 @@ Efg::Efg(const Efg &E, Node *n /* = 0 */)
     }
   }
 
-  for (int i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
+  for ( i = 1; i <= E.GetChance()->NumInfosets(); i++)   {
     ChanceInfoset *t = (ChanceInfoset *) E.GetChance()->Infosets()[i];
     ChanceInfoset *s = new ChanceInfoset(this, i, chance,
 					       t->NumActions());

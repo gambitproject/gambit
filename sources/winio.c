@@ -1,7 +1,7 @@
 /*
 The files argcargv.c, winio.c and wmhandlr.c are all needed to simulate a
 console under Windows for the GCL.
- @(#)winio.c	1.1 6/12/96
+  $Id$
 
 	WINIO.C -- Stdio (with extensions) for Windows
 
@@ -18,6 +18,7 @@ console under Windows for the GCL.
 	Microsoft Systems Journal, April 1993
 */
 
+#include <assert.h>
 #include <windows.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -308,6 +309,7 @@ int printf(const char * strFmt, ...)
 	{
 	va_list marker;
 
+   
 	if (! whwndCurr) abort_exit();
 	
 	va_start(marker, strFmt);
@@ -620,7 +622,7 @@ void winio_clear(HWND hwnd)
 #else
 	_fmemset(whWnd->fpBuffer,0,whWnd->bufsize - 1);
 #endif
-	whWnd->fpCurr = whWnd->fpCurrLine =
+	whWnd->fpNextSOI = whWnd->fpCurr = whWnd->fpCurrLine =
 		whWnd->fpTopOfWin = whWnd->fpBuffer;
 	*(whWnd->fpBuffer) = '\0';
 	whWnd->xCurrPos = 0;
@@ -2021,6 +2023,8 @@ int getch(void)
 		whwndCurr->pchKbOut = 0;
 	
 	// Do CR/LF and EOF translation
-	return (c == 0x1a) ? EOF : (c == '\r') ? '\n' : c;
+	// return (c == 0x1a) ? EOF : (c == '\r') ? '\n' : c;
+	// return (c == '\r') ? '\n' : c;
+   return c;
 	}
 

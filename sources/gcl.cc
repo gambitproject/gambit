@@ -1,7 +1,7 @@
 //
 // FILE: gcl.cc -- top level of the Gambit Command Line
 //
-// $Id$
+//  $Id$
 //
 
 #include <signal.h>
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 
 #include "rational.h"
+#include "gtext.h"
 #include "glist.h"
 #include "gsm.h"
 #include "gstack.h"
@@ -89,12 +90,17 @@ int matherr(struct exception *e)
 }
 */
 
+
 GSM* _gsm;
 char* _SourceDir = NULL;
 char* _ExePath = NULL;
 
 
+#ifdef __BORLANDC__
+int gcl_main( int /*argc*/, char* argv[] )
+#else
 int main( int /*argc*/, char* argv[] )
+#endif // __BORLANDC__
 {
   _ExePath = new char[strlen(argv[0]) + 2];
   strcpy(_ExePath, argv[0]);
@@ -117,7 +123,7 @@ int main( int /*argc*/, char* argv[] )
   else   {
     strcpy(_SourceDir, "");
   }
-    
+
   
   // Set up the error handling functions:
 #ifndef __BORLANDC__
@@ -136,22 +142,14 @@ int main( int /*argc*/, char* argv[] )
 
   GCLCompiler C;
   gPreprocessor P(&gcmdline, "Include[\"gclini.gcl\"]");
-  
-  while (!P.eof())   {
-#ifdef USE_EXCEPTIONS
-    try   {
-#endif   // USE_EXCEPTIONS
-      C.Parse(P.GetLine(), P.GetFileName(), P.GetLineNumber(),
-	      P.GetRawLine() );
-#ifdef USE_EXCEPTIONS
-    }
-    catch (gException &e)  {
-      gout << "EXCEPTION: " << e.Description() << '\n';
-    }
-    catch (...)   {
-      gout << "Non-gException exception\n";
-    }
-#endif   // USE_EXCEPTIONS
+
+  while (!P.eof())
+  {
+    gText line = P.GetLine();
+    gText fileName = P.GetFileName();
+    int lineNumber = P.GetLineNumber();
+    gText rawLine = P.GetRawLine();
+    C.Parse(line, fileName, lineNumber, rawLine );
   }
 
   delete[] _SourceDir;

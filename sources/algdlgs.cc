@@ -1,11 +1,10 @@
-//
-// FILE: algdlgs.cc -- Classes that are often used for the algorithm
-//                     parameter dialogs
-//
-// $Id$
+//****************************************************************************
+// Classes that are often used for the algorithm params dialogs.
+//****************************************************************************
+//  $Id$
 //
 
-#include "gstream.h"
+#include "gambitio.h"
 #include "wxio.h"
 #include "algdlgs.h"
 
@@ -195,11 +194,11 @@ if (pxifile && run_pxi && pxi_command && pxiname)
 // first of all, close the pxifile
 	delete pxifile;pxifile=0;
 
-	gText pxi_run(pxi_command);
+	gString pxi_run(pxi_command);
 	pxi_run+=" ";
 // if the filename includes path, use it, if not, append current dir
 	char *fname=copystring(FileNameFromPath(pxiname));
-	gText pxifilename;
+	gString pxifilename;
 	if (strcmp(fname,pxiname)==0)
 	{
 		pxifilename=wxGetWorkingDirectory();

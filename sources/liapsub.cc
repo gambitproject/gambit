@@ -1,7 +1,7 @@
 //
 // FILE: liapsub.cc -- Solve efg by liap on nfg
 //
-// $Id$
+// 
 //
 
 #include "liapsub.h"
@@ -37,7 +37,8 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
   BehavToMixed(E, bp, *N, mp);
 
   MixedProfile<gNumber> st(*S);
-  for (int i = 1; i <= st.Length(); i++)
+  int i = 0;
+  for ( i = 1; i <= st.Length(); i++)
     st[i] = mp[i];
 
   long this_nevals, this_niters;
@@ -47,7 +48,7 @@ int NFLiapBySubgame::SolveSubgame(const Efg &E, const EFSupport &sup,
 
   nevals += this_nevals;
 
-  for (int i = 1; i <= subsolns.Length(); i++)  {
+  for ( i = 1; i <= subsolns.Length(); i++)  {
     BehavProfile<gNumber> bp(start);
     MixedToBehav(*N, subsolns[i], E, bp);
     solns.Append(bp);

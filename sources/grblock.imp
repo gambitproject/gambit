@@ -1,7 +1,7 @@
 //
 // FILE: grblock.imp -- Implementation of resizable 2-D rect array class
 //
-// $Id$
+//  $Id$
 //
 
 #include "grblock.h"
@@ -80,13 +80,14 @@ template <class T> void gRectBlock<T>::AddRow(const gArray<T> &v)
 
   T* p = new T[maxcol - mincol + 1];
   T* newrow = p - mincol;
-  for (int i = mincol; i <= maxcol; i++)
+  int i = 0;
+  for ( i = mincol; i <= maxcol; i++)
     newrow[i]= v[i];
 
   T** pp = new T*[maxrow - minrow + 1];
   T** newidx = pp - minrow;
 
-  for (int i = minrow; i < maxrow; i++)
+  for ( i = minrow; i < maxrow; i++)
     newidx[i]= data[i];
   newidx[maxrow] = newrow;
   if (data)   delete [] (data + minrow);
@@ -251,10 +252,10 @@ template <class T> void gRectBlock<T>::InsertRow(int row, const gArray<T> &v)
   T** pp = new T*[maxrow - minrow + 1];
   T** newidx = pp - minrow;
   
-  for (int i = minrow; i < row; i++)
+  for ( i = minrow; i < row; i++)
     newidx[i] = data[i];
   newidx[row] = newrow;
-  for (int i = row + 1; i <= maxrow; i++)
+  for ( i = row + 1; i <= maxrow; i++)
     newidx[i] = data[i-1];
   delete[] (data + minrow);
   data = newidx;
@@ -317,10 +318,11 @@ void gRectBlock<T>::InsertColumn(int col, const gArray<T> &v)
     T* newrow = p - mincol;
       
     T* oldrow = data[i];
-    for (int j = mincol; j < col; j++)
+    int j = 0;
+    for ( j = mincol; j < col; j++)
       newrow[j] = oldrow[j];
     newrow[col] = v[i];
-    for (int j = col + 1; j <= maxcol; j++)
+    for ( j = col + 1; j <= maxcol; j++)
       newrow[j] = oldrow[j-1];
     delete [] (oldrow + mincol);
     data[i] = newrow;

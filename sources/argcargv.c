@@ -1,7 +1,7 @@
 /*
 The files argcargv.c, winio.c and wmhandlr.c are all needed to simulate a
 console under Windows for the GCL.
- @(#)argcargv.c	1.1 6/12/96
+  $Id$
 
 ARGCARGV.C -- WinMain->main startup for WINIO library
 Changed considerably since the version in MSJ (May 1991)
@@ -29,7 +29,7 @@ Microsoft Systems Journal, April 1993
 
 // oh well, nobody ever uses it!
 #if ( defined(_MSC_VER) && (_MSC_VER >= 700) ) || defined(__SC__) || defined(__BORLANDC__)
-extern int main(int argc, char **argv);
+extern int main(int argc, char* argv[]);
 #else
 extern int main(int argc, char **argv, char **envp);
 #endif
@@ -113,6 +113,7 @@ int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance,
 				return 1;
 				}
 
+
 		if (__hMainWnd = winio_window((LPSTR) NULL, MAIN_BUFFER,
 								WW_HASMENU | WW_EXITALLOWED))
 				{
@@ -121,11 +122,14 @@ int PASCAL WinMain(HANDLE hInstance, HANDLE hPrevInstance,
 
 				winio_setcurrent(__hMainWnd);
 				getargs(lpCmdLine,&argc,&argv);
+
+
 #if ( defined(_MSC_VER) && (_MSC_VER >= 700) ) || defined(__SC__) || defined(__BORLANDC__)
 				ret = main(argc, argv);
 #else
 				ret = main(argc, argv, environ);
 #endif
+
 				printf("\n.....Program Terminated....\n");
 				winio_doexit(__hMainWnd,1);
 

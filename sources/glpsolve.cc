@@ -1,7 +1,7 @@
 //#
 //# FILE: glpsolve.cc -- Instantiation of common LP solvers
 //#
-//# @(#)glpsolve.cc	1.4 5/3/95
+// $Id$
 //#
 
 #include "glpsolve.imp"
@@ -17,10 +17,8 @@
 
 TEMPLATE class gTableau<double>;
 TEMPLATE class gTableau<gRational>;
-TEMPLATE class gTableau<gDouble>;
 
 TEMPLATE class gLPTableau<double>;
 TEMPLATE class gLPTableau<gRational>;
-TEMPLATE class gLPTableau<gDouble>;
 
 

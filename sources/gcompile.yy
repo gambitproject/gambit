@@ -6,7 +6,7 @@
 // Jan L. A. van de Snepscheut, who wrote a program after which
 // this code is modeled.
 //
-// $Id$
+//  $Id$
 //
 
 #include <stdlib.h>

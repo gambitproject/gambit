@@ -2,7 +2,7 @@
 // FILE: efgconst.h -- constants used in extform gui for each menu item, and
 // some extra features.
 //
-// @(#)efgconst.h	2.3 08/26/97
+//  $Id$
 //
 
 #ifndef EFGCONST_H
@@ -12,12 +12,6 @@
 #define FILE_OUTPUT							1040
 #define	FILE_CLOSE							1050
 #define	FILE_LOG								1055
-
-#define EDIT_COPY               1070
-#define EDIT_COPY_INFOSET       1071
-#define EDIT_COPY_OUTCOME       1072
-#define EDIT_COPY_SUBTREE       1073
-#define EDIT_PASTE              1080
 
 #define BUILD_NODE							900
 #define BUILD_ACTIONS						910

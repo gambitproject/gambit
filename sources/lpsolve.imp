@@ -1,7 +1,7 @@
 //
 //# FILE: lpsolve.imp -- Implementation of LP solver
 //#
-//# @(#)lpsolve.imp	2.1 3/24/97 
+//#  $Id$
 //#
 
 #include "lpsolve.h"
@@ -444,27 +444,27 @@ template <class T> const gList<BFS <T> > &LPSolve<T>::GetAll(void)
   AllSolutions.Vertices(verts);
 
   gout << "\nHere are the BFSs: \n";
-  for(int i=1;i<=(*bfs).Length();i++) {
+  for( i=1;i<=(*bfs).Length();i++) {
     gout << "\n" << i << ": ";
     (*bfs)[i].Dump(gout);
   }
   gout << "\nHere are the Dual BFSs: \n";
-  for(int i=1;i<=(*dual_bfs).Length();i++) {
+  for( i=1;i<=(*dual_bfs).Length();i++) {
     gout << "\n" << i << ": ";
     (*dual_bfs)[i].Dump(gout);
   }
   gout << "\nHere are the vertices:\n";
 
-  for(int i=1;i<=verts.Length();i++)
+  for( i=1;i<=verts.Length();i++)
     gout << "\n" << i << ": " << verts[i];
   
-  for(int i=1;i<=(*bfs).Length();i++)
+  for( i=1;i<=(*bfs).Length();i++)
     for(int j=1;j<=neqns;j++)
       if((*dual_bfs)[i].IsDefined(-j))
 	(*bfs)[i].Define(-j,(*dual_bfs)[i](-j));
 
   gout << "\nHere are the BFSs: \n";
-  for(int i=1;i<=(*bfs).Length();i++) {
+  for( i=1;i<=(*bfs).Length();i++) {
     gout << "\n" << i << ": ";
     (*bfs)[i].Dump(gout);
   }
