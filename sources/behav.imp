@@ -53,6 +53,10 @@ template <class T> Efg<T>::Efg(void)
 template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
 {
   n->name = m->name;
+
+  if (m->gameroot == m)
+    n->gameroot = n;
+
   if (m->outcome)
     n->outcome = outcomes[m->outcome->number];
 
@@ -66,8 +70,6 @@ template <class T> void Efg<T>::CopySubtree(Node *n, Node *m)
     Infoset *s = p->infosets[m->infoset->number];
     AppendNode(n, s);
     
-    n->gameroot = (m->gameroot == m) ? n : n->parent->gameroot;
-
     for (int i = 1; i <= n->children.Length(); i++)
       CopySubtree(n->children[i], m->children[i]);
   }
@@ -134,7 +136,7 @@ template <class T> Efg<T>::Efg(const Efg<T> &E, Node *n)
 
   root = new TypedNode<T>(this, 0, E.NumPlayers());
   CopySubtree(root, n);
-  
+
   for (int pl = 1; pl <= players.Length(); pl++)   {
     for (i = 1; i <= players[pl]->infosets.Length(); i++)  {
       if (players[pl]->infosets[i]->members.Length() == 0)
