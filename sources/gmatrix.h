@@ -2,7 +2,7 @@
 //# FILE: gmatrix.h -- Implementation of normal and NonRectangular
 //#                    matrix classes
 //#
-//# $Id$
+//# @(#)gmatrix.h	1.10 9/9/94
 //#
 
 #ifndef GMATRIX_H
@@ -132,9 +132,9 @@ template <class T> class gMatrix: public gBaseMatrix<T>
   void SwitchColumns(int, int);
 
   int NumColumns(void) const
-    { return data[MinCol()].Length(); }
+    { return data[MinIndex()].Length(); }
   int Width(void) const
-    { return data[MinCol()].Last(); }
+    { return data[MinIndex()].Last(); }
   int MinCol(void) const
     { return minimum_col; }
 
@@ -287,7 +287,7 @@ template <class T> void
 gMatrix<T>::SwitchColumn(int col, const gVector<T> &V)
 {
   assert(CheckCol(col));
-//  assert(V.First() == MinCol() && V.Last() == Width()+MinCol());
+  assert(V.First() == MinIndex() && V.Last() == Height());
   for(int i = data.First(); i <= data.Last(); i++)
     data[i][col] = V[i];
 }
