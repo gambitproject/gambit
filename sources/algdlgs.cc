@@ -418,7 +418,7 @@ void PxiParamsDialog::MakePxiFields(void)
                                  new wxList(wxMakeConstraintStrings(type_list), 0)));
 
     Form()->Add(wxMakeFormString("PxiFile", &pxiname, 
-                                 wxFORM_DEFAULT, NULL, NULL, NULL,
+                                 wxFORM_DEFAULT, NULL, NULL, 0,
                                  300));
 
     Add(wxMakeFormString("Next", &name_option_str, wxFORM_RADIOBOX,
@@ -428,7 +428,7 @@ void PxiParamsDialog::MakePxiFields(void)
     Form()->Add(wxMakeFormBool("Run PXI", &run_pxi));
 
     Form()->Add(wxMakeFormString("PXI Command", &pxi_command,
-                                 wxFORM_DEFAULT, NULL, NULL, NULL,
+                                 wxFORM_DEFAULT, NULL, NULL, 0,
                                  300));
 }
 
