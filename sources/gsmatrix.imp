@@ -124,35 +124,38 @@ template <class T> gSquareMatrix<T> gSquareMatrix<T>::Inverse(void) const
 
 template <class T> T gSquareMatrix<T>::Determinant(void) const
 {
+  T factor = (T) 1;
   gSquareMatrix<T> M(*this);
-
+  
   for (int row = minrow; row <= maxrow; row++)  {
 
-    // first, we need to check that the value on the diagonal is nonzero
-    // if not, we swap rows to bring this about
+    // Experience (as of 3/22/99) suggests that, in the interest of
+    // numerical stability, it might be best to do Gaussian
+    // elimination with respect to the row (of those feasible)
+    // whose entry has the largest absolute value.
+    int swap_row = row;
+    for (int i = row+1; i <= maxrow; i++)
+      if (abs(M.data[i][row]) > abs(M.data[swap_row][row]))
+	swap_row = i;
 
-    if (M.data[row][row] == (T) 0)  {
-      int swap_row = row;
-      while (M.data[swap_row][row] == (T) 0) {
-	swap_row++;
-
-	if (swap_row > maxrow)  return (T) 0;   // matrix is singular
-      }
-
+    if (swap_row != row)  {
       M.SwitchRows(row, swap_row);
 	  for (int j = mincol; j <= maxcol; j++)
 	    M.data[row][j] *= (T) -1;
     }
 
+    if (M.data[row][row] == (T)0) return (T)0;
+
     // now do row operations to clear the row'th column
     // below the diagonal
-    for (int row1 = row+1; row1 <= maxrow; row1++) {
-      T factor = -M.data[row1][row]/M.data[row][row];
-      for (int i = mincol; i <= maxcol; i++)
-	M.data[row1][i] += M.data[row][i]*factor;
-    }
+    for (int row1 = row+1; row1 <= maxrow; row1++)
+      {
+	factor = -M.data[row1][row]/M.data[row][row];
+	for (int i = mincol; i <= maxcol; i++)
+	  M.data[row1][i] += M.data[row][i]*factor;
+      }
   }
-  
+
   // finally we multiply the diagonal elements
   T det = (T) 1;
   for (int row = minrow; row <= maxrow; row++)    det *= M.data[row][row];
