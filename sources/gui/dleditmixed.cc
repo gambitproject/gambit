@@ -55,7 +55,7 @@ dialogEditMixed::dialogEditMixed(wxWindow *p_parent,
   wxBoxSizer *nameSizer = new wxBoxSizer(wxHORIZONTAL);
   nameSizer->Add(new wxStaticText(this, wxID_STATIC, "Profile name"),
 		 0, wxALL, 5);
-  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetName());
+  m_profileName = new wxTextCtrl(this, -1, (char *) p_profile.GetLabel());
   nameSizer->Add(m_profileName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(nameSizer, 1, wxALL | wxEXPAND, 5);
 
@@ -115,8 +115,8 @@ void dialogEditMixed::OnSelChanged(wxCommandEvent &p_event)
   gbtNfgPlayer oldPlayer = m_profile.GetGame().GetPlayer(m_selection);
 
   for (int st = 1; st <= oldPlayer.NumStrategies(); st++) {
-    m_profile.Set(oldPlayer.GetStrategy(st),
-		  ToNumber(m_probGrid->GetCellValue(st - 1, 0).c_str()));
+    m_profile.SetStrategyProb(oldPlayer.GetStrategy(st),
+			      ToNumber(m_probGrid->GetCellValue(st - 1, 0).c_str()));
   }
 
   gbtNfgPlayer player = m_profile.GetGame().GetPlayer(p_event.GetSelection() + 1);
@@ -152,8 +152,8 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
   gbtNfgPlayer player = m_profile.GetGame().GetPlayer(m_selection);
 
   for (int st = 1; st <= player.NumStrategies(); st++) {
-    m_profile.Set(player.GetStrategy(st),
-		  ToNumber(m_probGrid->GetCellValue(st - 1, 0).c_str()));
+    m_profile.SetStrategyProb(player.GetStrategy(st),
+			      ToNumber(m_probGrid->GetCellValue(st - 1, 0).c_str()));
   }
 
   p_event.Skip();
@@ -161,6 +161,6 @@ void dialogEditMixed::OnOK(wxCommandEvent &p_event)
 
 const MixedSolution &dialogEditMixed::GetProfile(void) const
 {
-  m_profile.SetName(m_profileName->GetValue().c_str());
+  m_profile.SetLabel(m_profileName->GetLabel().c_str());
   return m_profile;
 }

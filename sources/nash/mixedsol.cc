@@ -219,7 +219,8 @@ bool MixedSolution::Equals(const MixedProfile<double> &p_profile) const
 bool MixedSolution::operator==(const MixedSolution &p_solution) const
 { return (m_profile == p_solution.m_profile); }
 
-void MixedSolution::Set(gbtNfgStrategy p_strategy, const gNumber &p_value)
+void MixedSolution::SetStrategyProb(gbtNfgStrategy p_strategy,
+				    const gNumber &p_value)
 { 
   Invalidate();
   m_profile(p_strategy.GetPlayer().GetId(), p_strategy.GetId()) = p_value;
@@ -308,7 +309,7 @@ const gTriState &MixedSolution::IsProper(void) const
   return m_Proper.Answer();
 }
 
-const gNumber &MixedSolution::LiapValue(void) const 
+const gNumber &MixedSolution::GetLiapValue(void) const 
 { 
   CheckIsValid();
   if(!m_liapValue.Checked())
@@ -333,9 +334,15 @@ void MixedSolution::Invalidate(void) const
 // Payoff computation
 //---------------------
 
-gNumber MixedSolution::Payoff(gbtNfgPlayer p_player, 
-			      gbtNfgStrategy p_strategy) const
-{ return m_profile.Payoff(p_player.GetId(), p_strategy); }
+gNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
+{
+  return m_profile.Payoff(p_player.GetId());
+}
+
+gNumber MixedSolution::GetStrategyValue(gbtNfgStrategy p_strategy) const
+{
+  return m_profile.Payoff(p_strategy.GetPlayer().GetId(), p_strategy); 
+}
 
 
 //----------
@@ -350,11 +357,11 @@ void MixedSolution::Dump(gOutput &p_file) const
 
 void MixedSolution::DumpInfo(gOutput &p_file) const
 {
-  p_file << " Creator:" << Creator();
+  p_file << " Creator:" << GetCreator();
   p_file << " IsNash:" << IsNash();
   p_file << " IsPerfect:" << IsPerfect();
   p_file << " IsProper:" << IsProper();
-  p_file << " LiapValue:" << LiapValue();
+  p_file << " LiapValue:" << GetLiapValue();
   if (m_creator == "Qre[NFG]" || m_creator == "QreGrid[NFG]") {
     p_file << " QreLambda:" << m_qreLambda;
     p_file << " QreValue:" << m_qreValue;

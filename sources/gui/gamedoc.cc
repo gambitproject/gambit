@@ -508,7 +508,7 @@ gText gbtGameDocument::UniqueMixedProfileName(void) const
   while (1) {
     int i;
     for (i = 1; i <= m_mixedProfiles.Length(); i++) {
-      if (m_mixedProfiles[i].GetName() == "Profile" + ToText(number)) {
+      if (m_mixedProfiles[i].GetLabel() == "Profile" + ToText(number)) {
 	break;
       }
     }
@@ -523,9 +523,9 @@ gText gbtGameDocument::UniqueMixedProfileName(void) const
 
 void gbtGameDocument::AddProfile(const MixedSolution &p_profile)
 {
-  if (p_profile.GetName() == "") {
+  if (p_profile.GetLabel() == "") {
     MixedSolution tmp(p_profile);
-    tmp.SetName(UniqueMixedProfileName());
+    tmp.SetLabel(UniqueMixedProfileName());
     m_mixedProfiles.Append(tmp);
   }
   else {

@@ -155,7 +155,7 @@ typedef struct {
 } strategyobject;
 
 extern PyTypeObject Strategytype;
-#define is_strategobject(v)  ((v)->ob_type == &Strategytype)
+#define is_strategyobject(v)  ((v)->ob_type == &Strategytype)
 
 strategyobject *newstrategyobject(void);
 

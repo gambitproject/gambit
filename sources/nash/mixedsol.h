@@ -66,8 +66,10 @@ public:
   bool operator==(const MixedSolution &) const;
   bool operator!=(const MixedSolution &S) const { return !(*this == S); } 
 
-  void Set(gbtNfgStrategy , const gNumber &);
+  void SetStrategyProb(gbtNfgStrategy, const gNumber &);
   const gNumber &operator()(gbtNfgStrategy) const;
+  const gNumber &GetStrategyProb(gbtNfgStrategy p_strategy) const
+    { return (*this)(p_strategy); }
 
   MixedSolution &operator+=(const MixedSolution &);
   MixedSolution &operator-=(const MixedSolution &);
@@ -81,8 +83,10 @@ public:
   // Do probabilities sum to one (within m_epsilon) for each player?)
   bool IsComplete(void) const;
 
-  const gText &GetName(void) const { return m_name; }
-  const gText &Creator(void) const { CheckIsValid(); return m_creator; }
+  const gText &GetLabel(void) const { return m_name; }
+  void SetLabel(const gText &p_name) { m_name = p_name; }
+
+  const gText &GetCreator(void) const { CheckIsValid(); return m_creator; }
   const gbtNfgSupport &Support(void) const { CheckIsValid(); return m_support; }
   const gTriState &IsNash(void) const;
   const gTriState &IsPerfect(void) const;
@@ -90,9 +94,8 @@ public:
   const gNumber &Epsilon(void) const { CheckIsValid(); return m_epsilon; }
   const gNumber &QreLambda(void) const { CheckIsValid(); return m_qreLambda; }
   const gNumber &QreValue(void) const { CheckIsValid(); return m_qreValue; }
-  const gNumber &LiapValue(void) const;
+  const gNumber &GetLiapValue(void) const;
 
-  void SetName(const gText &p_name) { m_name = p_name; }
   void SetEpsilon(const gNumber &p_epsilon) { m_epsilon = p_epsilon; }
   void SetQre(const gNumber &p_qreLambda, const gNumber &p_qreValue)
     { m_qreLambda = p_qreLambda; m_qreValue = p_qreValue; }
@@ -109,7 +112,8 @@ public:
   const gArray<int> &Lengths(void) const { return m_profile.Lengths(); }
   
   // PAYOFF COMPUTATION
-  gNumber Payoff(gbtNfgPlayer, gbtNfgStrategy) const;
+  gNumber GetPayoff(gbtNfgPlayer) const;
+  gNumber GetStrategyValue(gbtNfgStrategy) const;
 
   // OUTPUT
   void Dump(gOutput &) const;

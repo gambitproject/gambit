@@ -177,7 +177,7 @@ static Portion *GSM_Behav(GSM &, Portion **param)
   MixedSolution &mp = *((MixedPortion*) param[0])->Value();
   BehavProfile<gNumber> *bp = new BehavProfile<gNumber>(MixedProfile<gNumber>(*mp.Profile()));
   BehavSolution *bs = new BehavSolution(*bp);
-  bs->SetCreator(mp.Creator());
+  bs->SetCreator(mp.GetCreator());
   bs->SetEpsilon(mp.Epsilon());
     
   return new BehavPortion(bs);

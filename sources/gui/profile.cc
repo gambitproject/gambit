@@ -221,9 +221,9 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
 
   switch (p_col) {
   case 0:
-    return (char *) mixed->GetName();
+    return (char *) mixed->GetLabel();
   case 1:
-    return (char *) mixed->Creator();
+    return (char *) mixed->GetCreator();
   case 2:
     if (behav) {
       return (char *) ToText(behav->IsNash());
@@ -258,7 +258,7 @@ wxString gbtProfileTable::GetValue(int p_row, int p_col)
   case 7:
     return (char *) ToText(mixed->IsPerfect());
   case 8:
-    return (char *) ToText(mixed->LiapValue(),
+    return (char *) ToText(mixed->GetLiapValue(),
 			   m_doc->GetPreferences().NumDecimals());
   default:
     if (p_col < GetInfoColumns() + GetBehavColumns()) {
@@ -607,7 +607,7 @@ wxString gbtProfileGrid::GetReport(void) const
     report += "          ";
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
       report += wxString::Format("%-15s ", 
-				 (const char *) profiles[i+j].GetName());
+				 (const char *) profiles[i+j].GetLabel());
     }
     report += "\n";
 
@@ -620,7 +620,7 @@ wxString gbtProfileGrid::GetReport(void) const
     report += "Creator:  ";
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
       report += wxString::Format("%-15s ",
-				 (const char *) profiles[i+j].Creator());
+				 (const char *) profiles[i+j].GetCreator());
     }
     report += "\n";
 
@@ -641,7 +641,7 @@ wxString gbtProfileGrid::GetReport(void) const
     report += "Liap:     ";
     for (int j = 0; j < 4 && i + j <= profiles.Length(); j++) {
       report += wxString::Format("%-15s ",
-				 (const char *) ToText(profiles[i+j].LiapValue()));
+				 (const char *) ToText(profiles[i+j].GetLiapValue()));
     }
     report += "\n\n";
 

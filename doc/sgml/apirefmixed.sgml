@@ -4,9 +4,19 @@
 <para>
 </para>
 
-<sect2 id="apiref.mixed.creator">
-<title>Creator</title>
-<indexterm><primary>Creator</primary></indexterm>
+<sect2 id="apiref.mixed.getcreator">
+<title>GetCreator</title>
+<indexterm><primary>GetCreator</primary></indexterm>
+<indexterm><primary>Creator (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText MixedSolution::GetCreator(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -18,11 +28,10 @@ Creator[profile->MIXED] =: TEXT
 </formalpara>
 
 <para>
-<function>Creator</function> returns the GCL function name 
-(excluding the <literal>Solve</literal> suffix) of
-the algorithm that was called to create the profile.
-A profile
-created by the user is identified by <literal>User</literal>.  
+<function>GetCreator</function> (<function>Creator</function> in the
+GCL) returns a text string identifying the algorithm used to create
+the profile.  A profile created or modified by the user is identified by
+<literal>User</literal>.
 </para>
 
 </sect2>
@@ -36,7 +45,7 @@ created by the user is identified by <literal>User</literal>.
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-template &lt;class T&gt; gbtNfgGame MixedProfile&lt;T&gt;::GetGame(void) const
+gbtNfgGame MixedSolution::GetGame(void) const
 </synopsis>
 </para>
 </formalpara>
@@ -58,9 +67,214 @@ returns the normal form game to which the profile belongs.
 </sect2>
 
 
+<sect2 id="apiref.mixed.getlabel">
+<title>GetLabel</title>
+<indexterm><primary>GetLabel</primary></indexterm>
+<indexterm><primary>Name (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gText MixedSolution::GetLabel(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+This function is not available in the GCL.
+</para>
+</formalpara>
+
+<para>
+<function>GetLabel</function>
+returns the text label of the profile.  
+The empty string is returned if the profile object is null.
+</para>
+
+</sect2>
+
+
+<sect2 id="apiref.mixed.getliapvalue">
+<title>GetLiapValue</title>
+<indexterm><primary>GetLiapValue</primary></indexterm>
+<indexterm><primary>LiapValue (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber MixedSolution::GetLiapValue(void) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+LiapValue[profile->MIXED] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>LiapValue</function>
+returns the Lyapunov function value for <parameter>profile</parameter>.
+This is a nonnegative value which is zero exactly when the
+profile is a Nash equilibrium.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+
+<sect2 id="apiref.mixed.getpayoff">
+<title>GetPayoff</title>
+<indexterm><primary>GetPayoff</primary></indexterm>
+<indexterm><primary>Payoff (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber MixedSolution::GetPayoff(gbtNfgPlayer p_player) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+Payoff[profile->MIXED, player->NFPLAYER] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetPayoff</function> (<function>Payoff</function> in the
+GCL) returns the expected payoff to player
+<parameter>player</parameter>, when all players play according to
+the profile.  An error occurs if the parameters are
+not from the same game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+
+<sect2 id="apiref.mixed.getstrategyprob">
+<title>GetStrategyProb</title>
+<indexterm><primary>GetStrategyProb</primary></indexterm>
+<indexterm><primary>StrategyProb (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber MixedSolution::GetStrategyProb(gbtNfgStrategy p_strategy) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+StrategyProb[profile->MIXED, strategy->STRATEGY] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetStrategyProb</function>
+(<function>StrategyProb</function> in the GCL) returns the probability
+that <parameter>strategy</parameter> is chosen when all players are
+following <parameter>profile</parameter>.  It is an error if
+<parameter>profile</parameter> and <parameter>strategy</parameter> are
+not from the same normal form game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if the probability specified in the profile is rational.
+</para>
+</note>
+
+</sect2>
+
+<sect2 id="apiref.mixed.getstrategyvalue">
+<title>GetStrategyValue</title>
+<indexterm><primary>GetStrategyValue</primary></indexterm>
+<indexterm><primary>StrategyValue (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gNumber MixedSolution::GetStrategyValue(gbtNfgStrategy) const
+</synopsis>
+</para>
+</formalpara>
+
+<formalpara>
+<title>GCL usage</title>
+<para>
+<synopsis>
+StrategyValue[profile->MIXED, strategy->STRATEGY] =: NUMBER 
+</synopsis>
+</para>
+</formalpara>
+
+<para>
+<function>GetStrategyValue</function>
+(<function>StrategyValue</function> in the GCL) returns the expected
+payoff to a player (who is in control of the strategy set including
+<parameter>strategy</parameter>) of choosing
+<parameter>strategy</parameter> when all players are following
+<parameter>profile</parameter>.  It is an error if
+<parameter>profile</parameter> and <parameter>strategy</parameter> are
+not from the same normal form game.
+</para>
+
+<note>
+<para>
+The Python implementation always returns a floating-point number, even
+if all the data of the game and profile are rational.
+</para>
+</note>
+
+</sect2>
+
+
 <sect2 id="apiref.mixed.isnash">
 <title>IsNash</title>
 <indexterm><primary>IsNash</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState MixedSolution::IsNash(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -88,12 +302,29 @@ all completions of the profile) may be Nash, but is not known by
 Gambit to be Nash.
 </para>
 
+<note>
+<para>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
+</para>
+</note>
+
 </sect2>
 
 
 <sect2 id="apiref.mixed.isperfect">
 <title>IsPerfect</title>
 <indexterm><primary>IsPerfect</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState MixedSolution::IsPerfect(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -116,35 +347,63 @@ will only
 return perfect equilibria, which are marked as such.   
 </para>
 
+<note>
+<para>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
+</para>
+</note>
+
 </sect2>
 
 
-<sect2 id="apiref.mixed.liapvalue">
-<title>LiapValue</title>
-<indexterm><primary>LiapValue</primary></indexterm>
+<sect2 id="apiref.mixed.isproper">
+<title>IsProper</title>
+<indexterm><primary>IsProper</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+gTriState MixedSolution::IsProper(void) const
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
 <para>
 <synopsis>
-LiapValue[profile->MIXED] =: NUMBER 
+IsProper[profile->MIXED] =: BOOLEAN 
 </synopsis>
 </para>
 </formalpara>
 
 <para>
-<function>LiapValue</function>
-returns the Lyapunov function value for <parameter>profile</parameter>.
-This is a nonnegative value which is zero exactly when the
-profile is a Nash equilibrium.
+<function>IsProper</function>
+returns <literal>True</literal> if <parameter>profile</parameter>
+is known by Gambit to be a
+proper Nash equilibrium, <literal>False</literal> if it is known to not be
+proper, and <literal>Unknown</literal> otherwise.  There is currently no
+definitive test in Gambit for whether an arbitrary profile is proper.
+However some algorithms will only
+return proper equilibria, which are marked as such.   
 </para>
+
+<note>
+<para>
+The Python implementation returns a value of <literal>1</literal> for
+<literal>True</literal>, <literal>0</literal> for <literal>False</literal>,
+and <literal>-1</literal> for <literal>Unknown</literal>.
+</para>
+</note>
 
 </sect2>
 
-
 <sect2 id="apiref.mixed.mixed">
-<title>Mixed</title>
-<indexterm><primary>Mixed</primary></indexterm>
+<title>Mixed (GCL only)</title>
+<indexterm><primary>Mixed (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>GCL usage</title>
@@ -158,31 +417,7 @@ Mixed[support->NFSUPPORT] =: MIXED
 <para>
 <function>Mixed</function>
 returns a mixed strategy profile over <parameter>support</parameter> with equal
-probabilites for each strategy in the support.  
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.mixed.payoff">
-<title>Payoff</title>
-<indexterm><primary>Payoff</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-Payoff[profile->MIXED, player->NFPLAYER] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>Payoff</function> returns the expected payoff to player
-<parameter>player</parameter>, when all players play according to
-<parameter>profile</parameter>.
-An error occurs if the parameters are not from the
-same game.
+probabilities for each strategy in the support.  
 </para>
 
 </sect2>
@@ -191,13 +426,12 @@ same game.
 <sect2 id="apiref.mixed.setlabel">
 <title>SetLabel</title>
 <indexterm><primary>SetLabel</primary></indexterm>
-<indexterm><primary>SetName (GCL function)</primary></indexterm>
 
 <formalpara>
 <title>C++/Python usage</title>
 <para>
 <synopsis>
-template &lt;class T&gt; void MixedProfile&lt;T&gt;::SetLabel(const gText &amp;p_label)
+void MixedSolution::SetLabel(const gText &amp;p_label)
 </synopsis>
 </para>
 </formalpara>
@@ -205,14 +439,12 @@ template &lt;class T&gt; void MixedProfile&lt;T&gt;::SetLabel(const gText &amp;p
 <formalpara>
 <title>GCL usage</title>
 <para>
-<synopsis>
-SetName[x->MIXED, name->TEXT] =: BEHAV
-</synopsis>
+This function is not available in the GCL.
 </para>
 </formalpara>
 
 <para>
-<function>SetLabel</function> (<function>SetName</function> in the GCL) 
+<function>SetLabel</function> 
 sets the text label of the profile.  The GCL version returns the profile.
 </para>
 
@@ -222,6 +454,15 @@ sets the text label of the profile.  The GCL version returns the profile.
 <sect2 id="apiref.mixed.setstrategyprob">
 <title>SetStrategyProb</title>
 <indexterm><primary>SetStrategyProb</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+<synopsis>
+void MixedSolution::SetStrategyProb(gbtNfgStrategy, gNumber)
+</synopsis>
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -244,8 +485,16 @@ are not from the same normal form game.  Returns <parameter>profile</parameter>.
 </sect2>
 
 <sect2 id="apiref.mixed.setstrategyprobs">
-<title>SetStrategyProbs</title>
-<indexterm><primary>SetStrategyProbs</primary></indexterm>
+<title>SetStrategyProbs (GCL only)</title>
+<indexterm><primary>SetStrategyProbs (GCL only)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This function is not available in C++ or Python.  Use
+<function>SetStrategyProb</function> instead.
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -258,45 +507,31 @@ SetStrategyProbs[profile<->MIXED, player->NFPLAYER,
 </formalpara>
 
 <para>
-<function>SetStrategyProbs</function>
-sets the components of <parameter>profile</parameter> for 
-<parameter>player</parameter> to be equal
-to <parameter>value</parameter>.
-It is an error if <parameter>profile</parameter> and <parameter>player</parameter>
-are not from the same normal form game, or if the length of <parameter>value</parameter>
-is not the same as the number of strategies for <parameter>player</parameter> in the
-support of <parameter>profile</parameter>.  Returns <parameter>profile</parameter>.
-</para>
-
-</sect2>
-
-
-<sect2 id="apiref.mixed.strategyprob">
-<title>StrategyProb</title>
-<indexterm><primary>StrategyProb</primary></indexterm>
-
-<formalpara>
-<title>GCL usage</title>
-<para>
-<synopsis>
-StrategyProb[profile->MIXED, strategy->STRATEGY] =: NUMBER 
-</synopsis>
-</para>
-</formalpara>
-
-<para>
-<function>StrategyProb</function>
-returns the probability that <parameter>strategy</parameter> is chosen when all
-players are following <parameter>profile</parameter>.  It is an error if <parameter>profile</parameter>
-and <parameter>strategy</parameter> are not from the same normal form game.
+<function>SetStrategyProbs</function> sets the components of
+<parameter>profile</parameter> for <parameter>player</parameter> to be
+equal to <parameter>value</parameter>.  It is an error if
+<parameter>profile</parameter> and <parameter>player</parameter> are
+not from the same normal form game, or if the length of
+<parameter>value</parameter> is not the same as the number of
+strategies for <parameter>player</parameter> in the support of
+<parameter>profile</parameter>.  Returns
+<parameter>profile</parameter>.
 </para>
 
 </sect2>
 
 
 <sect2 id="apiref.mixed.strategyprobs">
-<title>StrategyProbs</title>
-<indexterm><primary>StrategyProbs</primary></indexterm>
+<title>StrategyProbs (GCL only)</title>
+<indexterm><primary>StrategyProbs (GCL function)</primary></indexterm>
+
+<formalpara>
+<title>C++/Python usage</title>
+<para>
+This function is not available in C++ or Python.  Use
+<function>GetStrategyProb</function> instead.
+</para>
+</formalpara>
 
 <formalpara>
 <title>GCL usage</title>
@@ -317,35 +552,17 @@ i adopting strategy j.
 
 </sect2>
 
-<sect2 id="apiref.mixed.strategyvalue">
-<title>StrategyValue</title>
-<indexterm><primary>StrategyValue</primary></indexterm>
+<sect2 id="apiref.mixed.strategyvalues">
+<title>StrategyValues (GCL only)</title>
+<indexterm><primary>StrategyValues (GCL function)</primary></indexterm>
 
 <formalpara>
-<title>GCL usage</title>
+<title>C++/Python usage</title>
 <para>
-<synopsis>
-StrategyValue[profile->MIXED, strategy->STRATEGY] =: NUMBER 
-</synopsis>
+This function is not available in C++ or Python.  Use
+<function>GetStrategyValue</function> instead.
 </para>
 </formalpara>
-
-<para>
-<function>StrategyValue</function>
-returns the expected payoff to a player (who is in control of the
-strategy set including <parameter>strategy</parameter>) of choosing 
-<parameter>strategy</parameter> when
-all players are following <parameter>profile</parameter>.  It is an error if
-<parameter>profile</parameter> and <parameter>strategy</parameter>
-are not from the same normal form
-game.
-</para>
-
-</sect2>
-
-<sect2 id="apiref.mixed.strategyvalues">
-<title>StrategyValues</title>
-<indexterm><primary>StrategyValues</primary></indexterm>
 
 <formalpara>
 <title>GCL usage</title>

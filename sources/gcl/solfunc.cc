@@ -160,7 +160,7 @@ static Portion *GSM_Creator_Behav(GSM &, Portion** param)
 static Portion *GSM_Creator_Mixed(GSM &, Portion** param)
 {
   MixedSolution *ms = ((MixedPortion*) param[0])->Value();
-  return new TextPortion(ms->Creator());
+  return new TextPortion(ms->GetCreator());
 }
 
 //---------------
@@ -179,7 +179,7 @@ static Portion *GSM_QreLambda_Behav(GSM &, Portion** param)
 static Portion *GSM_QreLambda_Mixed(GSM &, Portion** param)
 {
   MixedSolution *bs = ((MixedPortion*) param[0])->Value();
-  if (bs->Creator() != "Qre[NFG]" && bs->Creator() != "QreGrid[NFG]") {
+  if (bs->GetCreator() != "Qre[NFG]" && bs->GetCreator() != "QreGrid[NFG]") {
     return new NullPortion(porNUMBER);
   }
   return new NumberPortion(bs->QreLambda());
@@ -273,6 +273,16 @@ static Portion *GSM_IsPerfect(GSM &, Portion **param)
   return new BoolPortion(P->IsPerfect());
 }
 
+//------------
+// IsProper
+//------------
+
+static Portion *GSM_IsProper(GSM &, Portion **param)
+{
+  MixedSolution *P = ((MixedPortion *) param[0])->Value();
+  return new BoolPortion(P->IsProper());
+}
+
 //---------------
 // IsSequential
 //---------------
@@ -307,7 +317,7 @@ static Portion *GSM_LiapValue_Behav(GSM &, Portion **param)
 static Portion *GSM_LiapValue_Mixed(GSM &, Portion **param)
 {
   MixedSolution *P = ((MixedPortion*) param[0])->Value();
-  return new NumberPortion(P->LiapValue());
+  return new NumberPortion(P->GetLiapValue());
 }
 
 //-------------
@@ -515,7 +525,7 @@ static Portion *GSM_SetStrategyProb(GSM &, Portion **param)
   MixedSolution *P = new MixedSolution(*((MixedPortion *) param[0])->Value());
   gbtNfgStrategy strategy = ((StrategyPortion *) param[1])->Value();
   gNumber value = ((NumberPortion *) param[2])->Value();
-  P->Set(strategy, value);
+  P->SetStrategyProb(strategy, value);
   ((MixedPortion *) param[0])->SetValue(P);
   return param[0]->RefCopy();
 }
@@ -543,7 +553,7 @@ static Portion *GSM_SetStrategyProbs(GSM &, Portion **param)
       throw gclRuntimeError("Mismatching dimensionality");
     }
 
-    P->Set(player.GetStrategy(st), ((NumberPortion*) p2)->Value());
+    P->SetStrategyProb(player.GetStrategy(st), ((NumberPortion*) p2)->Value());
     delete p2;
   }
 
@@ -598,7 +608,7 @@ static Portion *GSM_StrategyValue(GSM &, Portion **param)
   MixedSolution *profile = ((MixedPortion *) param[0])->Value();
   gbtNfgStrategy strategy = ((StrategyPortion*) param[1])->Value();
 
-  return new NumberPortion(profile->Payoff(strategy.GetPlayer(), strategy));
+  return new NumberPortion(profile->GetStrategyValue(strategy));
 }
 
 //---------------
@@ -648,6 +658,7 @@ void Init_solfunc(GSM *gsm)
       { "IsNash[profile->MIXED] =: BOOLEAN", GSM_IsNash_Mixed },
       { "PolishEq[profile->MIXED] =: MIXED", GSM_PolishEq_Mixed },
       { "IsPerfect[profile->MIXED] =: BOOLEAN", GSM_IsPerfect },
+      { "IsProper[profile->MIXED] =: BOOLEAN", GSM_IsProper },
       { "IsSequential[profile->BEHAV] =: BOOLEAN", GSM_IsSequential },
       { "IsSubgamePerfect[profile->BEHAV] =: BOOLEAN", GSM_IsSubgamePerfect },
       { "LiapValue[profile->BEHAV] =: NUMBER", GSM_LiapValue_Behav },
