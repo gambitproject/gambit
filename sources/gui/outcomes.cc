@@ -177,7 +177,6 @@ gbtOutcomeWindow::gbtOutcomeWindow(gbtGameDocument *p_doc,
 
 void gbtOutcomeWindow::OnUpdate(void)
 {
-  printf("Updating outcome window\n");
   SetDefaultCellFont(m_doc->GetPreferences().GetDataFont());
   SetDefaultCellAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   SetLabelFont(m_doc->GetPreferences().GetLabelFont());
@@ -273,7 +272,6 @@ void gbtOutcomeWindow::OnUpdate(void)
       }
     }
   }
-  printf("Done updating outcome window\n");
 }
 
 //
