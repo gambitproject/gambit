@@ -134,7 +134,7 @@ gStack<gText> GCL_InputFileNames(4);
 %token STDIN
 %token STDOUT
 %token gNULL
-%token MACHINEPREC
+%token FLOATPREC
 %token RATIONALPREC
 
 %token CRLF
@@ -302,7 +302,7 @@ constant:        BOOLEAN
           { $$ = new gclConstExpr(new OutputPortion(gout)); }
         |        gNULL
           { $$ = new gclConstExpr(new OutputPortion(gnull)); }
-        |        MACHINEPREC
+        |        FLOATPREC
           { $$ = new gclConstExpr(new PrecisionPortion(precDOUBLE)); }
         |        RATIONALPREC
           { $$ = new gclConstExpr(new PrecisionPortion(precRATIONAL)); }
@@ -502,7 +502,7 @@ int GCLCompiler::yylex(void)
     else if (s == "For")    return FOR;
     else if (s == "NewFunction")   return DEFFUNC;
     else if (s == "DeleteFunction")   return DELFUNC;
-    else if (s == "Machine")   return MACHINEPREC;
+    else if (s == "Float")   return FLOATPREC;
     else if (s == "Rational")  return RATIONALPREC;
     else if (s == "Include")   return INCLUDE;
     else  { tval = s; return NAME; }
