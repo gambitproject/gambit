@@ -41,7 +41,7 @@ template <class T> class gbtMixedProfile;
 
 struct gbt_nfg_game_rep;
 
-class gbtNfgGame  {
+class gbtNfgGame : public gbtGame {
 friend class Lexicon;
 friend class NfgFileReader;
 friend class gbtNfgContingency;
@@ -74,10 +74,10 @@ public:
 
   // GENERAL DATA ACCESS AND MANIPULATION  
   void SetLabel(const gbtText &s);
-  const gbtText &GetLabel(void) const;
+  gbtText GetLabel(void) const;
 
   void SetComment(const gbtText &);
-  const gbtText &GetComment(void) const;
+  gbtText GetComment(void) const;
 
   bool IsConstSum(void) const;
   long RevisionNumber(void) const;

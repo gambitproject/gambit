@@ -37,4 +37,58 @@ public:
     { return "Game object deleted"; }
 };
 
+//
+// A base class for all game object types, providing interfaces common
+// to all.
+//
+class gbtGameObject {
+public:
+  virtual ~gbtGameObject() { }
+
+  virtual gbtText GetLabel(void) const = 0;
+  virtual void SetLabel(const gbtText &) = 0;
+};
+
+//
+// A player in a game
+//
+class gbtGamePlayer : public gbtGameObject {
+public:
+  virtual ~gbtGamePlayer() { }
+
+  virtual int NumInfosets(void) const = 0;
+};
+
+//
+// An outcome in a game
+//
+class gbtGameOutcome : public gbtGameObject {
+public:
+  virtual ~gbtGameOutcome() { }
+};
+
+//
+// This is an abstract base class that represents a game.  It defines
+// all the operations expected to be provided on games.  Some operations
+// may not make sense with some derived classes (e.g., are undefined);
+// in these cases, exceptions are thrown.
+//
+class gbtGame : public gbtGameObject {
+public:
+  virtual ~gbtGame() { }
+
+  // DATA ACCESS -- GENERAL INFORMATION
+  virtual gbtText GetComment(void) const = 0;
+  virtual void SetComment(const gbtText &) = 0;
+  
+  virtual bool IsConstSum(void) const = 0;
+
+  // DATA ACCESS -- PLAYERS
+  virtual int NumPlayers(void) const = 0;
+
+  // DATA ACCESS -- OUTCOMES
+  virtual int NumOutcomes(void) const = 0;
+};
+
+
 #endif   // GAME_H

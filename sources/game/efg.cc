@@ -679,7 +679,7 @@ void gbtEfgGame::SetLabel(const gbtText &p_label)
   rep->m_revision++;
 }
 
-const gbtText &gbtEfgGame::GetLabel(void) const
+gbtText gbtEfgGame::GetLabel(void) const
 { return rep->m_label; }
 
 void gbtEfgGame::SetComment(const gbtText &s)
@@ -688,7 +688,7 @@ void gbtEfgGame::SetComment(const gbtText &s)
   rep->m_revision++;
 }
 
-const gbtText &gbtEfgGame::GetComment(void) const
+gbtText gbtEfgGame::GetComment(void) const
 { return rep->comment; }
   
 

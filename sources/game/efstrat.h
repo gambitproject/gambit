@@ -34,7 +34,16 @@
 
 class gbtEfgActionSet;
 
-class gbtEfgSupport {
+//
+// We are in the process of migrating supports so they act like
+// "views" on a game -- they should support (no pun intended) all the
+// usual members of the underlying game (such as NumPlayers()) as well
+// as extra editing features to show/hide actions
+// 
+// This will eventually derive from gbtEfgGame, providing the usual
+// extensive form operations
+//
+class gbtEfgSupport : public gbtGame {
 protected:
   gbtText m_label;
   gbtEfgGame m_efg;
@@ -51,7 +60,7 @@ public:
 
   gbtEfgGame GetGame(void) const { return m_efg; }
 
-  const gbtText &GetLabel(void) const { return m_label; }
+  gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
 
   int NumActions(int pl, int iset) const;
@@ -101,6 +110,14 @@ public:
 			 gbtOutput &, // tracefile 
 			 gbtStatus &status) const;
 
+
+  // The following are just echoed from the base game.  In the future,
+  // derivation from gbtEfgGame will handle these.
+  gbtText GetComment(void) const { return m_efg.GetComment(); }
+  void SetComment(const gbtText &p_comment) { m_efg.SetComment(p_comment); }
+  bool IsConstSum(void) const { return m_efg.IsConstSum(); }
+  int NumPlayers(void) const { return m_efg.NumPlayers(); }
+  int NumOutcomes(void) const { return m_efg.NumOutcomes(); }
 
   void Dump(gbtOutput &) const;
 };

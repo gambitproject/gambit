@@ -68,7 +68,7 @@ public:
   virtual ~gbtEfgNonterminalNode() { }
 };
 
-class gbtEfgGame {
+class gbtEfgGame : public gbtGame {
 private:
   friend class EfgFileReader;
   friend class EfgFile;
@@ -117,10 +117,10 @@ public:
   
   // TITLE ACCESS AND MANIPULATION
   void SetLabel(const gbtText &s);
-  const gbtText &GetLabel(void) const;
+  gbtText GetLabel(void) const;
   
   void SetComment(const gbtText &);
-  const gbtText &GetComment(void) const;
+  gbtText GetComment(void) const;
 
   // WRITING DATA FILES
   void WriteEfg(gbtOutput &p_file) const;

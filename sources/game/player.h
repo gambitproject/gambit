@@ -27,6 +27,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "game.h"
+
 //
 // The extensive form and normal form player classes are both included
 // in this header file in the hopes of an eventual unification of the
@@ -37,7 +39,7 @@ struct gbt_efg_player_rep;
 class gbtEfgGame;
 class gbtEfgInfoset;
 
-class gbtEfgPlayer {
+class gbtEfgPlayer : public gbtGamePlayer {
 friend class gbtEfgGame;
 friend class gbtEfgInfoset;
 protected:
@@ -74,7 +76,7 @@ struct gbt_nfg_player_rep;
 class gbtNfgGame;
 class gbtNfgStrategy;
 
-class gbtNfgPlayer {
+class gbtNfgPlayer : public gbtGamePlayer {
 friend class gbtNfgGame;
 friend class gbtNfgOutcome;
 protected:
@@ -98,6 +100,8 @@ public:
   gbtText GetLabel(void) const;
   void SetLabel(const gbtText &);
   int GetId(void) const;
+
+  int NumInfosets(void) const { return 1; }
 
   int NumStrategies(void) const;
   gbtNfgStrategy GetStrategy(int) const;

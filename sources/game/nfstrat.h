@@ -66,7 +66,16 @@ public:
   gbtNumber GetPayoff(const gbtNfgPlayer &) const;
 };
 
-class gbtNfgSupport {
+//
+// We are in the process of migrating supports so they act like
+// "views" on a game -- they should support (no pun intended) all the
+// usual members of the underlying game (such as NumPlayers()) as well
+// as extra editing features to show/hide actions
+// 
+// This will eventually derive from gbtNfgGame, providing the usual
+// normal form operations
+//
+class gbtNfgSupport : public gbtGame {
 protected:
   gbtNfgGame m_nfg;
   // This really could be a gbtPVector<bool> probably, but we'll keep
@@ -91,7 +100,7 @@ public:
   // DATA ACCESS: GENERAL
   gbtNfgGame GetGame(void) const { return m_nfg; }
 
-  const gbtText &GetLabel(void) const { return m_label; }
+  gbtText GetLabel(void) const { return m_label; }
   void SetLabel(const gbtText &p_label) { m_label = p_label; }
   
   // DATA ACCESS: STRATEGIES
@@ -125,6 +134,14 @@ public:
 
   // OUTPUT
   void Output(gbtOutput &) const;
+
+  // The following are just echoed from the base game.  In the future,
+  // derivation from gbtNfgGame will handle these.
+  gbtText GetComment(void) const { return m_nfg.GetComment(); }
+  void SetComment(const gbtText &p_comment) { m_nfg.SetComment(p_comment); }
+  bool IsConstSum(void) const { return m_nfg.IsConstSum(); }
+  int NumPlayers(void) const { return m_nfg.NumPlayers(); }
+  int NumOutcomes(void) const { return m_nfg.NumOutcomes(); }
 };
 
 gbtOutput &operator<<(gbtOutput &, const gbtNfgSupport &);

@@ -39,7 +39,7 @@ struct gbt_efg_outcome_rep;
 class gbtEfgGame;
 class gbtEfgPlayer;
 
-class gbtEfgOutcome {
+class gbtEfgOutcome : public gbtGameOutcome {
 friend class gbtEfgGame;
 friend class gbtEfgNode;
 protected:
@@ -78,7 +78,7 @@ struct gbt_nfg_outcome_rep;
 class gbtNfgGame;
 class gbtNfgPlayer;
 
-class gbtNfgOutcome {
+class gbtNfgOutcome : public gbtGameOutcome {
 friend class gbtNfgGame;
 friend class gbtNfgContingency;
 protected:

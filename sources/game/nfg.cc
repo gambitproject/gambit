@@ -423,7 +423,7 @@ void gbtNfgGame::SetLabel(const gbtText &p_label)
   rep->m_revision++;
 }
 
-const gbtText &gbtNfgGame::GetLabel(void) const 
+gbtText gbtNfgGame::GetLabel(void) const 
 { return rep->m_label; }
 
 void gbtNfgGame::SetComment(const gbtText &s)
@@ -432,7 +432,7 @@ void gbtNfgGame::SetComment(const gbtText &s)
   rep->m_revision++;
 }
 
-const gbtText &gbtNfgGame::GetComment(void) const
+gbtText gbtNfgGame::GetComment(void) const
 { return rep->m_comment; }
 
 
