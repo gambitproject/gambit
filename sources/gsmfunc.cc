@@ -1218,7 +1218,7 @@ bool CallFuncObj::_TypeMatch(Portion* p, PortionSpec ExpectedSpec,
   {
     if(CalledSpec.ListDepth == 1 && ExpectedSpec.ListDepth > 0)
     {
-      ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
+      // ((ListPortion*) p)->SetDataType(ExpectedSpec.Type);
       result = true;
     }
   }
