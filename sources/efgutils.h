@@ -32,8 +32,14 @@ int CountNodes (Node *n);
 // returns the action leading up to the node
 Action* LastAction( Node* node );
 
-// returns the list of nodes which are the roots of subgames
-void SubgameRoots(const BaseEfg &efg, gList<Node *> &list);
+// returns the list of nodes which are marked as the roots of subgames
+void MarkedSubgameRoots(const BaseEfg &efg, gList<Node *> &list);
+
+// returns the list of nodes which are valid roots of subgames
+void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list);
+void LegalSubgameRoots(Node *, gList<Node *> &);
+
+bool AllSubgamesMarked(const BaseEfg &efg);
 
 // returns the list of nodes which are roots of child subgames
 void ChildSubgames(Node *, gList<Node *> &);

@@ -1,14 +1,15 @@
-//#
-//# FILE: efg.h -- Declaration of extensive form data type
-//#
-//# $Id$
-//#
+//
+// FILE: efg.h -- Declaration of extensive form data type
+//
+// $Id$
+//
 
 #ifndef EFG_H
 #define EFG_H
 
 #include "gstring.h"
 #include "gblock.h"
+#include "glist.h"
 
 class Outcome;
 class EFPlayer;
@@ -135,11 +136,12 @@ protected:
     friend BaseNfg *AssociatedNfg(BaseEfg *E);
     friend BaseNfg *AssociatedAfg(BaseEfg *E);
 
-    // Find all subgames in the subtree rooted at 'n'
-    void FindSubgames(Node *n);
+    // Unmarks all subgames in the subtree rooted at n
     void UnmarkSubgames(Node *n);
     bool IsLegalSubgame(Node *n);
 
+    // Mark all the (legal) subgames in the list
+    void MarkSubgames(const gList<Node *> &list);
     bool DefineSubgame(Node *n);
     void RemoveSubgame(Node *n);
 };

@@ -29,11 +29,18 @@ void NTNDoChild (Node *n, gList <Node *> &list)
     NTNDoChild ( n->GetChild(i), list);
 }
 
-void SRDoChild(Node *n, gList<Node *> &list)
+void MSRDoChild(Node *n, gList<Node *> &list)
 {
   for (int i = 1; i <= n->NumChildren(); i++)
-    SRDoChild(n->GetChild(i), list);
+    MSRDoChild(n->GetChild(i), list);
   if (n->GetSubgameRoot() == n)  list.Append(n);
+}
+
+void LSRDoChild(Node *n, gList<Node *> &list)
+{
+  for (int i = 1; i <= n->NumChildren(); i++)
+    LSRDoChild(n->GetChild(i), list);
+  if (n->BelongsTo()->IsLegalSubgame(n))   list.Append(n);
 }
 
 void CSDoChild(Node *n, gList<Node *> &list)
@@ -79,11 +86,34 @@ void NonTerminalNodes (const BaseEfg &befg, gList <Node *> &list)
   NTNDoChild(befg.RootNode(), list);
 }
 
-void SubgameRoots(const BaseEfg &efg, gList<Node *> &list)
+void MarkedSubgameRoots(const BaseEfg &efg, gList<Node *> &list)
 {
   list.Flush();
-  SRDoChild(efg.RootNode(), list);
+  MSRDoChild(efg.RootNode(), list);
 }
+
+void LegalSubgameRoots(const BaseEfg &efg, gList<Node *> &list)
+{
+  list.Flush();
+  LSRDoChild(efg.RootNode(), list);
+}
+
+void LegalSubgameRoots(Node *n, gList<Node *> &list)
+{
+  list.Flush();
+  LSRDoChild(n, list);
+}
+
+bool AllSubgamesMarked(const BaseEfg &efg)
+{
+  gList<Node *> marked, valid;
+
+  LegalSubgameRoots(efg, valid);
+  MarkedSubgameRoots(efg, marked);
+
+  return (marked == valid);
+}
+
 
 void ChildSubgames(Node *n, gList<Node *> &list)
 {

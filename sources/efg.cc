@@ -238,6 +238,9 @@ void BaseEfg::SortInfosets(void)
 	   players[pl]->infosets[isets + 1]->members.Length() == 0);
 //    assert(isets == players[pl]->infosets.Length());
   }
+
+  
+
 }
   
 
@@ -808,16 +811,13 @@ void BaseEfg::MarkSubgame(Node *n, Node *base)
     MarkSubgame(n->GetChild(i), base);
 }
 
-void BaseEfg::FindSubgames(Node *n)
+void BaseEfg::MarkSubgames(const gList<Node *> &list)
 {
-  if (n->NumChildren() == 0)   return;
-
-  for (int i = 1; i <= n->NumChildren(); i++)
-    FindSubgames(n->GetChild(i));
-  
-  if (IsLegalSubgame(n)) {
-    n->gameroot = 0;
-    MarkSubgame(n, n);
+  for (int i = 1; i <= list.Length(); i++)  {
+    if (IsLegalSubgame(list[i]))  {
+      list[i]->gameroot = 0;
+      MarkSubgame(list[i], list[i]);
+    }
   }
 }
 

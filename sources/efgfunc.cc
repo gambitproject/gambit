@@ -201,10 +201,12 @@ Portion *GSM_MarkSubgamesEfg(Portion **param)
 {
   BaseEfg &E = *((EfgPortion*) param[0])->Value();
 
-  E.FindSubgames(E.RootNode());
-
   gList<Node *> roots;
-  SubgameRoots(E, roots);
+  LegalSubgameRoots(E, roots);
+
+  E.MarkSubgames(roots);
+
+  MarkedSubgameRoots(E, roots);
 
   Portion *por = ArrayToList(roots);
   por->SetOwner(param[0]->Original());
@@ -216,10 +218,12 @@ Portion *GSM_MarkSubgamesNode(Portion **param)
 {
   Node *n = ((NodePortion *) param[0])->Value();
 
-  n->BelongsTo()->FindSubgames(n);
-  
   gList<Node *> roots;
-  SubgameRoots(*n->BelongsTo(), roots);
+  LegalSubgameRoots(n, roots);
+
+  n->BelongsTo()->MarkSubgames(roots);
+  
+  MarkedSubgameRoots(*n->BelongsTo(), roots);
   
   Portion *por = ArrayToList(roots);
   por->SetOwner(param[0]->Owner());
@@ -234,7 +238,7 @@ Portion *GSM_UnmarkSubgamesEfg(Portion **param)
   E.UnmarkSubgames(E.RootNode());
 
   gList<Node *> roots;
-  SubgameRoots(E, roots);
+  MarkedSubgameRoots(E, roots);
 
   Portion *por = ArrayToList(roots);
   por->SetOwner(param[0]->Original());
@@ -249,7 +253,7 @@ Portion *GSM_UnmarkSubgamesNode(Portion **param)
   n->BelongsTo()->UnmarkSubgames(n);
   
   gList<Node *> roots;
-  SubgameRoots(*n->BelongsTo(), roots);
+  MarkedSubgameRoots(*n->BelongsTo(), roots);
   
   Portion *por = ArrayToList(roots);
   por->SetOwner(param[0]->Owner());
@@ -1307,7 +1311,7 @@ Portion *GSM_SubgameRoots(Portion **param)
 {
   BaseEfg& E = *((EfgPortion*) param[0])->Value();
   gList<Node *> list;
-  SubgameRoots(E, list);
+  MarkedSubgameRoots(E, list);
 
   Portion *por = ArrayToList(list);
   por->SetOwner(param[0]->Original());
