@@ -24,7 +24,7 @@ int main()
   gPoly<gRational> py(&Space,&ReverseDegLex);
   gPoly<gRational> pz(&Space,&ReverseDegLex);
 
-  gString gw; gString gx; gString gy; gString gz;
+  gText gw; gText gx; gText gy; gText gz;
 
 /* simple test of root solving 
   gw = "1 - 2n1"; pw = gw;
