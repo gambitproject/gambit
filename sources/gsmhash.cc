@@ -9,23 +9,27 @@
 
 
 #include "gstring.h"
-#include "portion.h"
-#include "gsmfunc.h"
 
 class NewInstr;
 
 template <class T> class gList;
 template <class T> class gNode;
 
-
-
-
 #ifdef __GNUG__
 #define TEMPLATE template
 #elif defined __BORLANDC__
+class gList<NewInstr *>;
+class gNode<NewInstr *>;
+class gList<int>;
+class gNode<int>;
+class gList<gString>;
+class gNode<gString>;
 #pragma option -Jgd
 #define TEMPLATE
 #endif   // __GNUG__, __BORLANDC__
+
+#include "portion.h"
+#include "gsmfunc.h"
 
 
 #include "glist.imp"
