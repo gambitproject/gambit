@@ -87,7 +87,8 @@ template <class T> class gMap  {
  *Returns: class output                                                      *
  *****************************************************************************/
 
-template <class T> inline operator<<(output& to,gMap<T>& A){
+template <class T> inline output &operator<<(output& to, const gMap<T>& A)
+{
   A.Dump(to); return to;
 }
 
