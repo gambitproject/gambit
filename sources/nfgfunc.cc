@@ -136,6 +136,13 @@ static Portion *GSM_Game_Strategy(Portion **param)
   return new NfgPortion(&N);
 }
 
+static Portion *GSM_Game_Outcome(Portion **param)
+{
+  Nfg *N = ((NfOutcomePortion *) param[0])->Value()->Game();
+
+  return new NfgPortion(N);
+}
+
 
 //--------------
 // IsConstSum
@@ -470,9 +477,9 @@ static Portion* GSM_Payoff_NFOutcome(Portion** param)
   if (param[1]->Spec().Type == porNULL)
     return new NumberPortion(0);
 
-  Nfg *nfg = ((NfgPortion *) param[0])->Value();
-  NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
-  NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
+  NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
+  Nfg *nfg = outcome->Game();
+  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
 
   gArray<gNumber> values(nfg->Parameters()->Dmnsn());
   for (int i = 1; i <= values.Length(); values[i++] = gNumber(0));
@@ -504,28 +511,6 @@ static Portion *GSM_Players_Nfg(Portion **param)
   Nfg *N = ((NfgPortion *) param[0])->Value();
 
   return ArrayToList(N->Players());
-}
-
-//-------------
-// Randomize
-//-------------
-
-static Portion *GSM_Randomize_Nfg(Portion **param)
-{
-  Nfg &N = *((NfgPortion *) param[0])->Value();
-  
-  RandomNfg(N);
-  return param[0]->ValCopy();
-}
-
-static Portion *GSM_Randomize_NfgSeed(Portion **param)
-{
-  Nfg &N = *((NfgPortion *) param[0])->Value();
-  int seed = ((IntPortion *) param[1])->Value();
-
-  SetSeed(seed);
-  RandomNfg(N);
-  return param[0]->ValCopy();
 }
 
 
@@ -626,17 +611,17 @@ static Portion* GSM_SetOutcome_Nfg(Portion** param)
 
 static Portion* GSM_SetPayoff_NFOutcome(Portion** param)
 {
-  Nfg *nfg = ((NfgPortion *) param[0])->Value();
-  NFOutcome *outcome = ((NfOutcomePortion *) param[1])->Value();
-  NFPlayer *player = ((NfPlayerPortion *) param[2])->Value();
-  double value = ((NumberPortion *) param[3])->Value();
+  NFOutcome *outcome = ((NfOutcomePortion *) param[0])->Value();
+  Nfg *nfg = outcome->Game();
+  NFPlayer *player = ((NfPlayerPortion *) param[1])->Value();
+  double value = ((NumberPortion *) param[2])->Value();
 
   nfg->SetPayoff(outcome, player->GetNumber(),
                  gPoly<gNumber>(nfg->Parameters(), gNumber(value), nfg->ParamOrder()));
 
   _gsm->InvalidateGameProfile((Nfg *) nfg, false);
  
-  return param[1]->ValCopy();
+  return param[0]->ValCopy();
 }
 
 
@@ -705,11 +690,13 @@ void Init_nfgfunc(GSM *gsm)
 					    new IntPortion(0)));
   gsm->AddFunction(FuncObj);
 
-  FuncObj = new FuncDescObj("Game", 2);
+  FuncObj = new FuncDescObj("Game", 3);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Game_NfPlayer, porNFG, 1));
   FuncObj->SetParamInfo(0, 0, ParamInfoType("player", porNFPLAYER));
   FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Game_Strategy, porNFG, 1));
   FuncObj->SetParamInfo(1, 0, ParamInfoType("strategy", porSTRATEGY));
+  FuncObj->SetFuncInfo(2, FuncInfoType(GSM_Game_Outcome, porNFG, 1));
+  FuncObj->SetParamInfo(2, 0, ParamInfoType("outcome", porNFOUTCOME));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("IsConstSum", 1);
@@ -787,13 +774,13 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("Payoff", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Payoff_NFOutcome,
-				       porNUMBER, 3,
+				       porNUMBER, 2,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", 
+//  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", 
 					    PortionSpec(porNFOUTCOME,
 							0, porNULLSPEC)));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("player", porNFPLAYER));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
   gsm->AddFunction(FuncObj);
 
 
@@ -810,17 +797,6 @@ void Init_nfgfunc(GSM *gsm)
   FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
   gsm->AddFunction(FuncObj);
   
-
-  FuncObj = new FuncDescObj("Randomize", 2);
-  FuncObj->SetFuncInfo(0, FuncInfoType(GSM_Randomize_Nfg,
-				       porNFG, 1));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("x", porNFG));
-
-  FuncObj->SetFuncInfo(1, FuncInfoType(GSM_Randomize_NfgSeed,
-				       porNFG, 2));
-  FuncObj->SetParamInfo(1, 0, ParamInfoType("x", porNFG));
-  FuncObj->SetParamInfo(1, 1, ParamInfoType("seed", porINTEGER));
-  gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("RemoveStrategy", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_RemoveStrategy, 
@@ -864,12 +840,12 @@ void Init_nfgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("SetPayoff", 1);
   FuncObj->SetFuncInfo(0, FuncInfoType(GSM_SetPayoff_NFOutcome,
-				       porNFOUTCOME, 4,
+				       porNFOUTCOME, 3,
 				       0, funcLISTABLE | funcGAMEMATCH));
-  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
-  FuncObj->SetParamInfo(0, 1, ParamInfoType("outcome", porNFOUTCOME));
-  FuncObj->SetParamInfo(0, 2, ParamInfoType("player", porNFPLAYER));
-  FuncObj->SetParamInfo(0, 3, ParamInfoType("payoff", porNUMBER));
+//  FuncObj->SetParamInfo(0, 0, ParamInfoType("nfg", porNFG));
+  FuncObj->SetParamInfo(0, 0, ParamInfoType("outcome", porNFOUTCOME));
+  FuncObj->SetParamInfo(0, 1, ParamInfoType("player", porNFPLAYER));
+  FuncObj->SetParamInfo(0, 2, ParamInfoType("payoff", porNUMBER));
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Strategies", 1);
