@@ -30,6 +30,21 @@ EFPlayer::~EFPlayer()
 
 
 //----------------------------------------------------------------------
+//                 Action: Member function definitions
+//----------------------------------------------------------------------
+
+bool Action::Precedes(const Node * n) const
+{
+  while ( n != n->Game()->RootNode() ) {
+    if ( n->GetAction() == this )
+      return true;
+    else
+      n = n->GetParent();
+  }
+  return false;
+}
+
+//----------------------------------------------------------------------
 //                 Infoset: Member function definitions
 //----------------------------------------------------------------------
 

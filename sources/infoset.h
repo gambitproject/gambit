@@ -39,6 +39,7 @@ class Action   {
 
     int GetNumber(void) const        { return number; }
     Infoset *BelongsTo(void) const   { return owner; }
+    bool Precedes(const Node *) const;
 };
 
 class Infoset   {
