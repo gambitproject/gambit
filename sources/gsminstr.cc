@@ -230,8 +230,7 @@ Portion *gclFunctionCall::Evaluate(void)
 	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
 	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), AUTO_VAL_OR_REF);
 	else  {
-	  throw gclRuntimeError("Parameter #" + ToText(i) +
-				" undefined in call to " + name);
+	  call->SetCurrParam(val, AUTO_VAL_OR_REF);
 	}
       }
       else  
@@ -245,8 +244,7 @@ Portion *gclFunctionCall::Evaluate(void)
 	if (_gsm.VarIsDefined(((ReferencePortion *) val)->Value()))
 	  call->SetCurrParam(_gsm.VarValue(((ReferencePortion *) val)->Value())->RefCopy(), true);
 	else  {
-	  throw gclRuntimeError("Parameter \"" + params->opt->FormalName(i) +
-				"\" undefined in call to " + name);
+	  call->SetCurrParam(val);
 	}
       }
       else  
