@@ -111,19 +111,35 @@ protected:
     void WriteEfgFile(gOutput &f) const;
 
        //# DATA ACCESS -- GENERAL INFORMATION
-    bool IsConstSum(void) const;
+    bool    IsConstSum(void)      const; 
     gNumber MinPayoff(int pl = 0) const;
     gNumber MaxPayoff(int pl = 0) const;
 
     Node *RootNode(void) const;
     bool IsSuccessor(const Node *n, const Node *from) const;
     bool IsPredecessor(const Node *n, const Node *of) const;
+  //    const Node* Consequence(const Node&, Action&) const;
+    gList<Node*> Children(const Node&) const;
+    void DescendantNodesRECURSION(const Node*, 
+				  const EFSupport&, 
+				  gList<const Node*>&) const;
+    void NonterminalDescendantsRECURSION(const Node*, 
+					 const EFSupport&, 
+					 gList<const Node*>&) const;
+    gList<const Node*> DescendantNodes(const Node&, const EFSupport&) const;
+    gList<const Node*> NonterminalDescendants(const Node&, 
+					      const EFSupport&) const;
+    gList<Infoset*> DescendantInfosets(const Node&, const EFSupport&) const;
 
        //# DATA ACCESS -- PLAYERS
     int NumPlayers(void) const;
     EFPlayer *GetChance(void) const;
     EFPlayer *NewPlayer(void);
     const gArray<EFPlayer *> &Players(void) const  { return players; }
+
+       //# DATA ACCESS -- INFOSETS
+    Infoset *GetInfosetByIndex(const int&, const int&) const;
+    gBlock<Infoset *> Infosets() const;
 
        //# DATA ACCESS -- OUTCOMES
     int NumOutcomes(void) const;
@@ -234,7 +250,8 @@ template <class T> class PureBehavProfile   {
     gPVector<T> *chanceprobs;
     gRectArray<T> *payoffs;
 
-    void Payoff(Node *n, T, gArray<T> &) const;
+  //    void Payoff(const Node *n, const int &pl, const T, T &) const;
+    void Payoff(const Node *n, const T, gArray<T> &) const;
     void InfosetProbs(Node *n, T, gPVector<T> &) const;
 
   public:
@@ -251,6 +268,8 @@ template <class T> class PureBehavProfile   {
     void Set(const EFPlayer *, const gArray<Action *> &);
     Action *Get(Infoset *) const;
 
+  //    T    Payoff(const Node *, const int &pl) const;
+  //    T    Payoff(const int &pl) const;
     void Payoff(gArray<T> &payoff) const;
     void InfosetProbs(gPVector<T> &prob) const;
 };
