@@ -1060,9 +1060,14 @@ Portion *GSM_NewNfg(Portion **param)
 {
   ListPortion *dim = ((ListPortion *) param[0]);
   gArray<int> d(dim->Length());
+  Portion* p;
   
   for (int i = 1; i <= dim->Length(); i++)
-    d[i] = ((IntPortion *) dim->Subscript(i))->Value();
+  {
+    p = dim->Subscript(i);
+    d[i] = ((IntPortion *) p)->Value();
+    delete p;
+  }
 
   Nfg<double> *N = new Nfg<double>(d);
 

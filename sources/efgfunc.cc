@@ -1353,7 +1353,7 @@ void Init_efgfunc(GSM *gsm)
 
   FuncObj = new FuncDescObj("DeleteOutcome");
   FuncObj->SetFuncInfo(GSM_DeleteOutcome, 1);
-  FuncObj->SetParamInfo(GSM_DeleteOutcome, 0, "infoset", porINFOSET);
+  FuncObj->SetParamInfo(GSM_DeleteOutcome, 0, "outcome", porOUTCOME);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("DeleteTree");
@@ -1517,12 +1517,12 @@ void Init_efgfunc(GSM *gsm)
   FuncObj = new FuncDescObj("SetPayoff");
   FuncObj->SetFuncInfo(GSM_SetPayoffFloat, 2);
   FuncObj->SetParamInfo(GSM_SetPayoffFloat, 0, "outcome", porOUTCOME_FLOAT);
-  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 1, "payoffs", porLIST | porFLOAT);
+  FuncObj->SetParamInfo(GSM_SetPayoffFloat, 1, "payoff", porLIST | porFLOAT);
 
   FuncObj->SetFuncInfo(GSM_SetPayoffRational, 2);
   FuncObj->SetParamInfo(GSM_SetPayoffRational, 0, "outcome",
 			porOUTCOME_RATIONAL);
-  FuncObj->SetParamInfo(GSM_SetPayoffRational, 1, "payoffs",
+  FuncObj->SetParamInfo(GSM_SetPayoffRational, 1, "payoff",
 			porLIST | porRATIONAL);
   gsm->AddFunction(FuncObj);
 
@@ -1546,13 +1546,13 @@ void Init_efgfunc(GSM *gsm)
   FuncObj->SetParamInfo(GSM_CentroidNfgFloat, 0, "nfg", porNFG_FLOAT,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
 
-  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
-  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
-			porNF_SUPPORT);
-
   FuncObj->SetFuncInfo(GSM_CentroidNfgRational, 1);
   FuncObj->SetParamInfo(GSM_CentroidNfgRational, 0, "nfg", porNFG_RATIONAL,
 			NO_DEFAULT_VALUE, PASS_BY_REFERENCE);
+
+  FuncObj->SetFuncInfo(GSM_CentroidNFSupport, 1);
+  FuncObj->SetParamInfo(GSM_CentroidNFSupport, 0, "support",
+			porNF_SUPPORT);
   gsm->AddFunction(FuncObj);
 
   FuncObj = new FuncDescObj("Chance");

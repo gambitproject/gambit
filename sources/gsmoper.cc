@@ -1738,10 +1738,12 @@ void Init_gsmoper( GSM* gsm )
   FuncObj->SetParamInfo( GSM_Write_Behav, 1, "x", porBEHAV );
   FuncObj->SetFuncInfo( GSM_Write_Nfg, 2 );
   FuncObj->SetParamInfo( GSM_Write_Nfg, 0, "output", porOUTPUT );
-  FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG );
+  FuncObj->SetParamInfo( GSM_Write_Nfg, 1, "x", porNFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   FuncObj->SetFuncInfo( GSM_Write_Efg, 2 );
   FuncObj->SetParamInfo( GSM_Write_Efg, 0, "output", porOUTPUT );
-  FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG );
+  FuncObj->SetParamInfo( GSM_Write_Efg, 1, "x", porEFG,
+			NO_DEFAULT_VALUE, PASS_BY_REFERENCE );
   gsm->AddFunction( FuncObj );
 
 

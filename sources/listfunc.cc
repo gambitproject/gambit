@@ -157,7 +157,7 @@ void Init_listfunc(GSM *gsm)
   FuncObj = new FuncDescObj("Contains");
   FuncObj->SetFuncInfo(GSM_Contains, 2);
   FuncObj->SetParamInfo(GSM_Contains, 0, "list", porALL | porLIST);
-  FuncObj->SetParamInfo(GSM_Contains, 1, "n", porVALUE);
+  FuncObj->SetParamInfo(GSM_Contains, 1, "x", porVALUE);
   gsm->AddFunction(FuncObj);
 
 
