@@ -7,7 +7,7 @@
 %\documentclass{book}
 %\usepackage{widetext,multicolumn,chicagob}
 
-\documentstyle[widetext,multicolumn,chicagob]{book}
+\documentstyle[widetext,multicol,chicagob]{book}
 %\columnsep .31in
 %\columnseprule .02in
 \renewcommand{\baselinestretch}{.9}
@@ -287,6 +287,7 @@ Type name	& Description \\ \hline
 \tindex{NFG}	& normal form game \\
 \tindex{NFPLAYER}	& a player in a normal form game \\
 \tindex{STRATEGY}	& a strategy in a normal form game \\
+\tindex{NFOUTCOME}      & an outcome in a normal form game \\
 \tindex{NFSUPPORT}	& a support of strategies in a normal form game \\
 \tindex{MIXED}	& a mixed strategy profile for a normal form game \\ 
 \hline
@@ -2113,7 +2114,6 @@ Function Name	& Description \\
 \verb+  AddMove[i,n]+ &Adds a move from infoset \verb+i+ to node \verb+n+ \\
 \verb+# AddMove[i,a]+ &Adds a move from infoset \verb+i+ to action \verb+a+ \\
 \verb+# AttachNewOutcome[n]+ &Attaches a new outcome to node \verb+n+ \\
-\verb+  AttachOutcome[n,o]+ &Creates and attaches outcome \verb+o+ to node \verb+n+ \\
 \verb+  CopyTree[n1,n2]+ &Copies tree rooted at node \verb+n1+ to node \verb+n2+ \\
 \verb+  InsertAction[i]+ &Inserts an action into information set \verb+i+ \\
 \verb+  InsertMove[i,n]+ &Inserts a move from infoset \verb+i+ at node \verb+n+\\
@@ -2128,6 +2128,7 @@ with name \verb+t+\\
 \verb+  Randomize[e,j]+ &Randomizes the payoffs in \verb+e+ with seed \verb+j+\\
 \verb+  Reveal[i,list]+ &Reveals infoset \verb+i+ to players in \verb+list+\\
 \verb+  SetChanceProbs[i,list]+ &Sets chance probs in infoset \verb+i+ to values in \verb+list+\\
+\verb+  SetOutcome[n,o]+ &Attaches outcome \verb+o+ to node \verb+n+ \\
 \verb+  SetPayoff[o,p,v]+ &Sets payoff of outcome \verb+o+ for player \verb+o+ to value \verb+v+\\
 \verb+  SetPayoffs[o,list]+ &Sets payoff of outcome \verb+o+ to values in \verb+list+\\
 \hline
@@ -2295,7 +2296,7 @@ win := SetPayoffs[NewOutcome[e, "Win"],{ante,-ante}];
 winbig := SetPayoffs[NewOutcome[e, "Win Big"],{ante+raise,-ante-raise}];
 lose := SetPayoffs[NewOutcome[e, "Lose"],{-ante,ante}];
 losebig := SetPayoffs[NewOutcome[e, "Lose Big"],{-ante-raise,ante+raise}];
-AttachOutcome[TerminalNodes[e],{winbig,win,win,losebig,win,lose}]
+SetOutcome[TerminalNodes[e],{winbig,win,win,losebig,win,lose}]
 \end{verbatim}
 
 This example has shown how to construct a simple game without any
@@ -3248,7 +3249,6 @@ appreciate getting feedback on this.
   AddMove 
 # AddMove 
 # AttachNewOutcome 
-  AttachOutcome 
   CompressEfg 
   CopyTree 
   DeleteAction 
@@ -3257,7 +3257,6 @@ appreciate getting feedback on this.
   DeleteMove 
   DeleteOutcome 
   DeleteTree 
-  DetachOutcome 
   InsertAction 
   InsertMove 
   MergeInfosets 
@@ -3275,6 +3274,7 @@ appreciate getting feedback on this.
   Reveal 
   SetChanceProbs 
   SetName 
+  SetOutcome 
   SetPayoff 
 # SetPayoffs 
   Support 
@@ -3287,15 +3287,18 @@ appreciate getting feedback on this.
 \begin{verbatim}
   AddStrategy 
   AgentForm 
-  CompressNfg 
+  CompressNfg
+  DeleteOutcome 
 # ListForm 
   NewNfg 
+  NewOutcome
   NewPlayer 
   Nfg 
 # Nfg
   Randomize 
   RemoveStrategy 
   SetName 
+  SetOutcome
   SetPayoff 
 # SetPayoffs
   Support 
@@ -3667,21 +3670,6 @@ required, and the function is not listable.
 \item [See also:] \verb+Clear+, \verb+UnAssign+.
 \ed
 
-\item\lex{AttachOutcome}
-\protect \large \begin{verbatim} 
-AttachOutcome[node->NODE, outcome->OUTCOME*] =: OUTCOME
-\end{verbatim}\normalsize
-
-\bd
-Attaches \verb+outcome+ to \verb+node+.  Returns the outcome attached.
-Note that nonterminal nodes may have outcomes attached; the interpretation
-is that nonterminal outcomes represent incremental payoffs.  Attaching
-the null outcome is equivalent to a call to \verb+DetachOutcome+.  It is
-an error if \verb+node+ and \verb+outcome+ are not from the same
-extensive form game.
-\item [See also:] \verb+DetachOutcome+, \verb+Outcome+.
-\ed
-
 %--B--
 
 \item\lex{Behav}
@@ -3976,11 +3964,21 @@ DeleteOutcome[outcome->OUTCOME] =: LIST(NODE)
 \bd
 Removes \verb+outcome+ from its extensive
 form game.  All nodes with the specified outcome attached are reset to
-having no outcome attached; this is equivalent to an implicit call to
-\verb+DetachOutcome+ on these nodes.  Returns the list of nodes to which
+having no outcome attached.  Returns the list of nodes to which
 the outcome was attached.
 \item [See also:] \verb+NewOutcome+.
 \ed
+
+\item\lex{DeleteOutcome}
+\protect \large \begin{verbatim}
+DeleteOutcome[outcome->NFOUTCOME] =: BOOLEAN
+\end{verbatim}\normalsize
+
+\bd
+Removes \verb+outcome+ from its normal form game.  Return \verb+True+.
+\item [See also:] \verb+NewOutcome+.
+\ed
+
 
 \item\lex{DeleteTree}
 \protect \large \begin{verbatim}
@@ -3991,19 +3989,6 @@ DeleteTree[node->NODE] =: NODE
 Deletes the subtree rooted at \verb+node+.  The
 node then becomes a terminal node, which is returned.
 \item [See also:] \verb+DeleteMove+.
-\ed
-
-\item\lex{DetachOutcome}
-\protect \large \begin{verbatim}
-DetachOutcome[node->NODE] =: OUTCOME
-\end{verbatim}\normalsize
-
-\bd
-Sets the outcome associated with \verb+node+ to be the
-null outcome.  If there is no outcome associated with \verb+node+ this
-function has no effect.  Returns the outcome which was attached to
-\verb+node+, or the null outcome if no outcome was attached.
-\item [See also:] \verb+AttachOutcome+, \verb+Outcome+.
 \ed
 
 \item\lex{Divide} 
@@ -5640,9 +5625,25 @@ NewOutcome[efg->EFG(T)] =: OUTCOME
 Defines a new outcome in the extensive form game \verb+efg+.  The new
 outcome specifies payoffs of zero for all players.  Returns the newly
 created outcome.
-\item [See also:] \verb+AttachOutcome+, \verb+DeleteOutcome+,
-\verb+DetachOutcome+.
+\item [See also:] \verb+DeleteOutcome+, \verb+SetOutcome+.
 \ed
+
+
+\item\lex{NewOutcome}
+\protect \large \begin{verbatim} 
+NewOutcome[nfg->NFG(T)] =: NFOUTCOME
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL} 
+
+\bd 
+Defines a new outcome in the normal form game \verb+nfg+.  The new
+outcome specifies payoffs of zero for all players.  Returns the newly
+created outcome.
+\item [See also:] \verb+DeleteOutcome+, \verb+Outcomes+,
+\verb+SetOutcome+.
+\ed
+
 
 \item\lex{NewPlayer}
 \protect \large \begin{verbatim}
@@ -5830,7 +5831,18 @@ Outcome[node->NODE*] =: OUTCOME
 \bd
 Returns the outcome attached to \verb+node+.  If no outcome is attached
 to \verb+node+, or if \verb+node+ is null, the null outcome is returned.
-\item [See also:] \verb+AttachOutcome+, \verb+DetachOutcome+.
+\item [See also:] \verb+SetOutcome+.
+\ed
+
+\item\lex{Outcome}
+\protect \large \begin{verbatim}
+Outcome[profile->LIST(STRATEGY)] =: NFOUTCOME
+\end{verbatim}\normalsize
+
+\bd
+Returns the outcome associated with the contingency specified by
+\verb+profile+.
+\item [See also:] \verb+SetOutcome+.
 \ed
 
 \item\lex{Outcomes}
@@ -5841,6 +5853,17 @@ Outcomes[efg->EFG(T)] =: LIST(OUTCOME)
 {\it for} {\tt T = FLOAT, RATIONAL}
 \bd
 Returns the list of outcomes defined on \verb+efg+.
+\item [See also:] \verb+DeleteOutcome+, \verb+NewOutcome+.
+\ed
+
+\item\lex{Outcomes}
+\protect \large \begin{verbatim}
+Outcomes[nfg->NFG(T)] =: LIST(OUTCOME)
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL}
+\bd
+Returns the list of outcomes defined on \verb+nfg+.
 \item [See also:] \verb+DeleteOutcome+, \verb+NewOutcome+.
 \ed
 
@@ -5895,31 +5918,17 @@ Returns the payoff to \verb+player+ at \verb+outcome+.  It is an error if
 \item [See also:] \verb+SetPayoff+.
 \ed
 
-%\item\lex{Payoff}
-%\protect \large \begin{verbatim}
-%Payoff[profile->LIST(STRATEGY), player->NFPLAYER] =: T
-%\end{verbatim}\normalsize
+\item\lex{Payoff}
+\protect \large \begin{verbatim}
+Payoff[nfg->NFG(T), outcome->NFOUTCOME, player->NFPLAYER] =: T
+\end{verbatim}\normalsize
 
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Returns the payoff to \verb+player+ in the contingency specified by
-%\verb+profile+.  It is an error if \verb+player+ and the elements of
-%\verb+profile+ are not from the same normal form game.
-%\item [See also:] \verb+SetPayoff+.
-%\ed
-
-%\item\lex{Payoff}
-%\protect \large \begin{verbatim}
-%Payoff[profile->LIST(LIST(ACTION)), player->EFPLAYER] =: T
-%\end{verbatim}\normalsize
-
-%{\it for} {\tt T = FLOAT, RATIONAL}
-%\bd
-%Returns the payoff to \verb+player+ in an extensive form game in the
-%contingency specified by \verb+profile+.  It is an error if
-%\verb+player+ and the elements of \verb+profile+ are not from the
-%same extensive form game.
-%\ed
+{\it for} {\tt T = FLOAT, RATIONAL}
+\bd
+Returns the payoff to \verb+player+ at \verb+outcome+.  It is an error if
+\verb+player+ and \verb+outcome+ are not from \verb+nfg+.
+\item [See also:] \verb+SetPayoff+.
+\ed
 
 \item\lex{Payoff}
 \protect \large \begin{verbatim}
@@ -6416,6 +6425,20 @@ exponential format.
 \verb+SetSolutionFormat+, \verb+Write+.
 \ed
 
+\item\lex{SetOutcome}
+\protect \large \begin{verbatim} 
+SetOutcome[node->NODE, outcome->OUTCOME*] =: OUTCOME
+\end{verbatim}\normalsize
+
+\bd
+Attaches \verb+outcome+ to \verb+node+.  Returns the outcome attached.
+Note that nonterminal nodes may have outcomes attached; the interpretation
+is that nonterminal outcomes represent incremental payoffs.  
+It is an error if \verb+node+ and \verb+outcome+ are not from the same
+extensive form game.
+\item [See also:] \verb+Outcome+.
+\ed
+
 \item\lex{SetPayoff}
 \protect \large \begin{verbatim}
 SetPayoff[outcome->OUTCOME, player->EFPLAYER, payoff->T] =: OUTCOME
@@ -6426,6 +6449,20 @@ SetPayoff[outcome->OUTCOME, player->EFPLAYER, payoff->T] =: OUTCOME
 Sets the payoff of \verb+outcome+ for \verb+player+ to \verb+payoff+.
 It is an error if \verb+outcome+ and \verb+player+ are not from the
 same extensive form game.  Returns \verb+outcome+.
+\item [See also:] \verb+Payoff+.
+\ed
+
+\item\lex{SetPayoff}
+\protect \large \begin{verbatim}
+SetPayoff[nfg->NFG(T), outcome->NFOUTCOME,
+          player->NFPLAYER, payoff->T] =: NFOUTCOME
+\end{verbatim}\normalsize
+
+{\it for} {\tt T = FLOAT, RATIONAL}
+\bd
+Sets the payoff of \verb+outcome+ for \verb+player+ to \verb+payoff+.
+It is an error if \verb+outcome+ and \verb+player+ are not from \verb+nfg+.
+Returns \verb+outcome+.
 \item [See also:] \verb+Payoff+.
 \ed
 
@@ -7095,7 +7132,7 @@ AttachNewOutcome[n->NODE]=:OUTCOME,
 Creates a new outcome and attaches it to \verb+n+, returning the
 outcome attached.  
 \begin{verbatim}
-AttachOutcome[n,NewOutcome[Game[n]]];
+SetOutcome[n,NewOutcome[Game[n]]];
 \end{verbatim} 
 \ed
 
@@ -8391,11 +8428,11 @@ NewFunction[MultiStageHoldout[ efg<->EFG, node->NODE, isets->LIST(INFOSET), \
   AddMove[i2,node#1];
   If[NumActions[i1]>1, AddMove[i2, node#2] ];
     // attach outcomes
-  AttachOutcome[node#1#1, out[[1]] ]; 
-  If[NumActions[i2]>1, AttachOutcome[node#1#2, out[[2]] ] ];
+  SetOutcome[node#1#1, out[[1]] ]; 
+  If[NumActions[i2]>1, SetOutcome[node#1#2, out[[2]] ] ];
   If[NumActions[i1]>1, 
-    AttachOutcome[node#2#1, out[[3]] ];
-    If[NumActions[i2]>1, AttachOutcome[node#2#2, out[[4]] ] ];
+    SetOutcome[node#2#1, out[[3]] ];
+    If[NumActions[i2]>1, SetOutcome[node#2#2, out[[4]] ] ];
     ];
     // recurse to next stage
   If[NumActions[i1]>1 || NumActions[i2]>1,
@@ -9017,9 +9054,9 @@ AddMove[ent_iset, node];
 AddMove[inc_iset, node#1];
 AddMove[NewInfoset[incumbent,{""} ],node#2 ];
 // attach outcomes 
-AttachOutcome[node#1#1,NewOutcome[efg]];
-AttachOutcome[node#1#2,NewOutcome[efg]];
-AttachOutcome[node#2#1,NewOutcome[efg]];
+SetOutcome[node#1#1,NewOutcome[efg]];
+SetOutcome[node#1#2,NewOutcome[efg]];
+SetOutcome[node#2#1,NewOutcome[efg]];
 pay:=Payoffs[Outcome[node#1#1]];
 entnum:=PlayerNumber[efg,entrant];
 incnum:=PlayerNumber[efg,incumbent];
