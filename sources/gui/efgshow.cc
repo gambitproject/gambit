@@ -1285,6 +1285,7 @@ void EfgShow::OnEditGame(wxCommandEvent &)
     }
     m_outcomeWindow->UpdateValues();
     m_supportWindow->UpdateValues();
+    m_treeWindow->RefreshLabels();
   }
 }
 
