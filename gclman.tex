@@ -825,8 +825,8 @@ Length[l->LIST(T)] =: INTEGER
 ----------
 
 Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT}, 
-	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsDFP->RATIONAL},
-	{maxitsBrent->RATIONAL}, {tolDFP->RATIONAL}, {tolBrent->RATIONAL},
+	{ntries->INTEGER}, {nequilib->INTEGER}, {maxitsOpt->RATIONAL},
+	{maxitsBrent->RATIONAL}, {tolOpt->RATIONAL}, {tolBrent->RATIONAL},
 	{time<->RATIONAL}] =: LIST(MIXED)
 
    -	Description:  Searches for equilibria of the specified problem in 
@@ -844,9 +844,9 @@ Liap[N->NFG, {plev->INTEGER}, {output->TEXT}, {errors->TEXT},
 	  *  ntries:  XXXX .
 	  *  nequilib:  Sets the number of equilibria to find.  Has a default 
 		value of XXXX . 
-	  *  maxitsDFP:  XXXX.
+	  *  maxitsOpt:  XXXX.
 	  *  maxitsBrent:  XXXX .
-	  *  tolDFP:  XXXX . 
+	  *  tolOpt:  XXXX . 
 	  *  tolBrent:  XXXX .
 	  *  time:  Returns the elapsed time for the operation.
 
